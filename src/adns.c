@@ -37,7 +37,6 @@
 #define ADNS_MAXFD 2
 
 adns_state dns_state;
-static void dns_cancel_all(void);
 
 /* void report_adns_servers(struct Client *source_p)
  * Input: A client to send a list of DNS servers to.
@@ -121,37 +120,6 @@ void dns_writeable(int fd, void *ptr)
   dns_select();
 }
 
-/*
- * void dns_cancel_all(void)
- *
- * Input: None.
- * Output: None.
- * Side effects: Cancels all pending DNS requests
- */
- 
-static void dns_cancel_all(void)
-{
- adns_query q, r;
- adns_answer *answer;
- struct DNSQuery *query;
- adns_forallqueries_begin(dns_state);
- 
- while((q = adns_forallqueries_next(dns_state, (void **)&r)) != NULL)
- {
-	if(q->state != query_done) 
-	{
-		adns_cancel(q);
-		adns__query_done(q);
- 		adns_check(dns_state, &q, &answer, (void **)&query);
- 	}
- 	if(query->callback != NULL)
-	{
-		MyFree(query->query);
-		query->query = NULL;
-		query->callback(query->ptr, NULL);
- 	}
- }
-}
 
 /* void dns_do_callbacks(void)
  * Input: None.
