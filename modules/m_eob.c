@@ -63,12 +63,22 @@ char *_version = "20001202";
 static void ms_eob(struct Client *cptr, struct Client *sptr,
                   int parc, char *parv[])
 {
+  unsigned long TheirTime;
+  unsigned long DeltaTime;
 
   if (parc > 1)
-    sendto_realops_flags(
+    {
+      TheirTime = (unsigned long)strtoul(parv[1], NULL, 10);
+
+      if (TheirTime > (unsigned long)CurrentTime)
+	DeltaTime = 0;
+      else
+	DeltaTime = CurrentTime - TheirTime;
+
+      sendto_realops_flags(
        FLAGS_ALL,"*** End of burst from %s (%lu seconds)",
-       sptr->name,
-       CurrentTime - (unsigned long)(strtoul(parv[1], NULL, 10))); 
+       sptr->name, DeltaTime );
+    }
   else
     sendto_realops_flags(FLAGS_ALL,"*** End of burst from %s",
 			 sptr->name);
