@@ -834,8 +834,7 @@ int main(int argc, char *argv[])
   init_stats();
   init_tree_parse(msgtab);      /* tree parse code (orabidoo) */
 
-  if(ConfigFileEntry.hub)
-    initServerMask();
+  initServerMask();
 
   fdlist_init();
   init_netio();

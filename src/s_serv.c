@@ -433,21 +433,23 @@ int check_server(struct Client* cptr)
             {
               /* n line with an H line, must be a typo */
               ClearCap(cptr,CAP_LL);
-              sendto_realops("s_serv.c: Clearing CAP_LL" );
+              sendto_realops("n line with H oops lets not do LazyLink" );
             }
-        }
+          else
+            {
+              /* its full folks, 32 leaves? wow. I never thought I'd
+               * see the day. Now this will have to be recoded! -Dianora
+               */
+              cptr->serverMask = nextFreeMask();
 
-      cptr->serverMask = nextFreeMask();
-      /* its full folks, 32 leaves? wow. I never thought I'd
-       * see the day. Now this will have to be recoded! -Dianora
-       */
-      if(!cptr->serverMask)
-	{
-	  sendto_realops("serverMask is full!");
-	  
-	  /* try and negotiate a non LL connect */
-	  ClearCap(cptr,CAP_LL);
-	}
+              if(!cptr->serverMask)
+                {
+                  sendto_realops("serverMask is full!");
+                  /* try and negotiate a non LL connect */
+                  ClearCap(cptr,CAP_LL);
+                }
+            }
+       }
     }
 
 
