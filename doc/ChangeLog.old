@@ -1,3 +1,8 @@
+*** 20001231_23 by toot
+stopped /names showing member lists in a +s channel from outside
+and made it skip +i people in -s chans from outside
+
+
 *** 20001231_22 by wcampbel
 ANONOPS -> AOPS
 
