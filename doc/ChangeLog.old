@@ -1,3 +1,6 @@
+*** 20001228_12 by davidt
+Add nick_changes=yes; to example.conf
+
 *** 20001228_11 by davidt
 Add missing ()'s so /lusers only hides the info for NON-opers
 
