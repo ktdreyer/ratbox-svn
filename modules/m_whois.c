@@ -106,6 +106,7 @@ int     mo_whois(struct Client *cptr,
  *
  * inputs	- pointer to 
  * output	- 
+ * side effects -
  */
 int do_whois(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {

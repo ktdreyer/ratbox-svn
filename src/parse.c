@@ -623,7 +623,6 @@ static  void    remove_unknown(struct Client *cptr,
 
 
 /*
-** DoNumeric (replacement for the old do_numeric)
 **
 **      parc    number of arguments ('sender' counted as one!)
 **      parv[0] pointer to 'sender' (may point to empty string) (not used)
@@ -675,17 +674,6 @@ static int     do_numeric(
     }
   if ((acptr = find_client(parv[1], (struct Client *)NULL)))
     {
-      /*
-      ** Drop to bit bucket if for me...
-      ** ...one might consider sendto_op 
-      ** here... --msa
-      ** And so it was done. -avalon
-      ** And regretted. Dont do it that way. Make sure
-      ** it goes only to non-servers. -avalon
-      ** Check added to make sure servers don't try to loop
-      ** with numerics which can happen with nick collisions.
-      ** - Avalon
-      */
       if (IsMe(acptr)) 
         {
           sendto_realops_flags(FLAGS_ALL,
@@ -702,9 +690,9 @@ static int     do_numeric(
         }
       /* Fake it for server hiding, if its our client */
       if(MyClient(acptr) && !IsOper(acptr))
-	sendto_one(acptr, ":%s %s%s", me.name, numeric, buffer);
+	sendto_one(acptr, ":%s %s %s %s", me.name, numeric, parv[1], buffer);
       else
-        sendto_one(acptr, ":%s %s%s", sptr->name, numeric, buffer);
+        sendto_one(acptr, ":%s %s %s %s", sptr->name, numeric, parv[1], buffer);
         return 0;
       }
       else if ((chptr = hash_find_channel(parv[1], (struct Channel *)NULL)))
