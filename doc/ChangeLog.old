@@ -1,3 +1,8 @@
+*** 20001231_2 by db
+- fixed logic in m_stats.c pertaining to o_lines_oper_only
+
+
+
 *** 20001231_1 by db
 - added check for unknown type in proc_answer in res.c 
   only rudimentary logging added for now.
