@@ -1,3 +1,7 @@
+*** 20010206_1 by androsyn
+Yup..that fix was okay..
+
+
 *** 20010205_14 by db
 - this fixes a stack smash when a socket goes dead, you CANNOT
   ever try to send more stuff at it, or it goes into a nice nasty
