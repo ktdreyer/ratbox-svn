@@ -165,7 +165,7 @@ struct ConfItem
 #define CONF_OPER_DIE           0x0080
 #define CONF_OPER_ADMIN         0x0100
 
-typedef struct config_file_entry
+struct config_file_entry
 {
   char *dpath;          /* DPATH if set from command line */
   char *configfile;
@@ -226,22 +226,25 @@ typedef struct config_file_entry
   int           oper_umodes;
   int           max_targets;
   int           links_delay;
-  int           vchans_oper_only;
-  int           disable_vchans;
   int           quiet_on_ban;
   int           caller_id_wait;
   int           persist_expire;
   int           min_nonwildcard;
   int           default_floodcount;
   int           client_flood;
-  /* XXX Consider moving these into a ConfigChannel struct see s_conf.c */
-  int		use_invex;
-  int           use_except;
-  int           use_knock;
 #ifdef HAVE_LIBCRYPTO
   struct EncPreference *default_cipher_preference;
 #endif
-} ConfigFileEntryType;
+};
+
+struct config_channel_entry
+{
+  int		use_invex;
+  int           use_except;
+  int           use_knock;
+  int           vchans_oper_only;
+  int           disable_vchans;
+};
 
 struct server_info
 {
@@ -284,6 +287,7 @@ extern struct ConfItem* ConfigItemList;        /* GLOBAL - conf list head */
 extern int              specific_ipv4_vhost; /* GLOBAL - used in s_bsd.c */
 extern int		specific_ipv6_vhost;
 extern struct config_file_entry ConfigFileEntry;/* GLOBAL - defined in ircd.c*/
+extern struct config_channel_entry ConfigChannel;/* GLOBAL - defined in channel.c*/
 extern struct server_info ServerInfo;	       /* GLOBAL - defined in ircd.c */
 extern struct admin_info  AdminInfo;           /* GLOBAL - defined in ircd.c */
 

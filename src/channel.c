@@ -33,7 +33,7 @@
 #include "s_user.h"
 #include "send.h"
 #include "whowas.h"
-#include "s_conf.h" /* ConfigFileEntry */
+#include "s_conf.h" /* ConfigFileEntry, ConfigChannel */
 #include "vchannel.h"
 #include "event.h"
 #include "memory.h"
@@ -43,6 +43,8 @@
 #include <stdlib.h>
 
 #include "s_log.h"
+
+struct config_channel_entry ConfigChannel;
 
 struct Channel *GlobalChannelList = NullChn;
 
@@ -352,7 +354,7 @@ static int check_banned(struct Channel *chptr, struct Client *who,
         actualBan = NULL;
     }
 
-  if ((actualBan != NULL) && ConfigFileEntry.use_except)
+  if ((actualBan != NULL) && ConfigChannel.use_except)
     {
       for (except = chptr->exceptlist.head; except; except = except->next)
         {
@@ -668,7 +670,7 @@ int can_join(struct Client *source_p, struct Channel *chptr, char *key)
          break;
       if (!lp)
         {
-          if (!ConfigFileEntry.use_invex)
+          if (!ConfigChannel.use_invex)
             return (ERR_INVITEONLYCHAN);
           for (ptr = chptr->invexlist.head; ptr; ptr = ptr->next)
             {

@@ -101,11 +101,11 @@
 /* /quote set variables */
 struct SetOptions GlobalSetOptions;
 
-/* config.h config file paths etc */
-ConfigFileEntryType ConfigFileEntry; 
-/* server info */
+/* configuration set from ircd.conf */
+struct config_file_entry ConfigFileEntry; 
+/* server info set from ircd.conf */
 struct server_info ServerInfo;
-/* admin info */
+/* admin info set from ircd.conf */
 struct admin_info AdminInfo;
 
 struct  Counter Count;

@@ -43,8 +43,6 @@
 #include "irc_string.h"
 #include "memory.h"
 
-extern ConfigFileEntryType ConfigFileEntry; /* defined in ircd.c */
-
 /*
 ** InitMessageFile
 **

@@ -39,7 +39,7 @@
                 " PREFIX=%s" \
                 " CHANMODES=%s"
                  
-#define FEATURESVALUES ConfigFileEntry.disable_vchans ? "" : " VCHANS", \
+#define FEATURESVALUES ConfigChannel.disable_vchans ? "" : " VCHANS", \
         MAXMODEPARAMS,ConfigFileEntry.max_chans_per_user,MAXBANS, \
         ConfigFileEntry.max_targets,NICKLEN,TOPICLEN,TOPICLEN,"#&","(ohv)@%+", \
         "beI,k,l,imnpsta"

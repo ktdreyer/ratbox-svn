@@ -1946,7 +1946,6 @@ general_item:       general_failed_oper_notice |
                     general_fname_foperlog | general_oper_only_umodes |
                     general_max_targets |
                     general_links_delay | general_oper_umodes |
-                    general_vchans_oper_only | general_disable_vchans |
                     general_caller_id_wait | general_default_floodcount |
                     general_persistant_expire_time | general_min_nonwildcard |
                     general_servlink_path |
@@ -2468,25 +2467,6 @@ umode_item:	T_BOTS
     ConfigFileEntry.oper_only_umodes |= FLAGS_DRONE;
   } ;
 
-general_vchans_oper_only: VCHANS_OPER_ONLY '=' TYES ';'
-  {
-    ConfigFileEntry.vchans_oper_only = 1;
-  }
-    |
-    VCHANS_OPER_ONLY '=' TNO ';'
-  {
-    ConfigFileEntry.vchans_oper_only = 0;
-  };
-
-general_disable_vchans: DISABLE_VCHANS '=' TNO ';'
-  {
-    ConfigFileEntry.disable_vchans = 0;
-  }
-    |
-    DISABLE_VCHANS '=' TYES ';'
-  {
-    ConfigFileEntry.disable_vchans = 1;
-  };  
 
 general_persistant_expire_time:  PERSISTANT_EXPIRE_TIME '=' timespec ';'
   {
@@ -2518,36 +2498,57 @@ channel_items:      channel_items channel_item |
                     channel_item
 
 channel_item:       channel_use_invex |
-                    channel_use_except |
-                    channel_use_knock
+                    channel_use_except|
+                    channel_use_knock |
+		    channel_vchans_oper_only |
+		    channel_disable_vchans
 
 channel_use_invex:   USE_INVEX '=' TYES ';'
   {
-    ConfigFileEntry.use_invex = 1;
+    ConfigChannel.use_invex = 1;
   }
                         |
                      USE_INVEX '=' TNO ';'
   {
-    ConfigFileEntry.use_invex = 0;
+    ConfigChannel.use_invex = 0;
   } ;
 
 channel_use_except:   USE_EXCEPT '=' TYES ';'
   {
-    ConfigFileEntry.use_except = 1;
+    ConfigChannel.use_except = 1;
   }
                         |
                       USE_EXCEPT '=' TNO ';'
   {
-    ConfigFileEntry.use_except = 0;
+    ConfigChannel.use_except = 0;
   } ;
 
 channel_use_knock:   USE_KNOCK '=' TYES ';'
   {
-    ConfigFileEntry.use_knock = 1;
+    ConfigChannel.use_knock = 1;
   }
                         |
-                      USE_KNOCK '=' TNO ';'
+                     USE_KNOCK '=' TNO ';'
   {
-    ConfigFileEntry.use_knock = 0;
+    ConfigChannel.use_knock = 0;
   } ;
 
+channel_vchans_oper_only: VCHANS_OPER_ONLY '=' TYES ';'
+  {
+    ConfigChannel.vchans_oper_only = 1;
+  }
+    |
+    VCHANS_OPER_ONLY '=' TNO ';'
+  {
+    ConfigChannel.vchans_oper_only = 0;
+  };
+
+channel_disable_vchans: DISABLE_VCHANS '=' TNO ';'
+  {
+    ConfigChannel.disable_vchans = 0;
+  }
+    |
+    DISABLE_VCHANS '=' TYES ';'
+  {
+    ConfigChannel.disable_vchans = 1;
+  };  

@@ -93,6 +93,14 @@ static void m_knock(struct Client *client_p,
 {
   struct Channel      *chptr;
 
+  if (ConfigChannel.use_knock == 0)
+    {
+      sendto_one(source_p, ":%s NOTICE %s :*** KNOCK disabled",
+		 me.name, source_p->name);
+      return;
+    }
+	
+
   chptr = parse_knock_args(client_p, source_p, parc, parv);
   
   if (!chptr)

@@ -302,7 +302,7 @@ static struct InfoStruct info_table[] =
   {
     "vchans_oper_only",
     OUTPUT_BOOLEAN_YN,
-    &ConfigFileEntry.vchans_oper_only,
+    &ConfigChannel.vchans_oper_only,
     "Restrict use of /CJOIN to opers"
   },
   {
