@@ -1,3 +1,26 @@
+greg        2002/07/29 20:31:46 EDT	(20020730_0)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  gcc -I../include -I../adns   -I/usr/local/include -O2 -g -ggdb -DNDEBUG -DIRCD_PREFIX=\"/usr/local/ircd\" -c client.c
+  client.c: In function `dead_link':
+  client.c:1170: `to' undeclared (first use in this function)
+  client.c:1170: (Each undeclared identifier is reported only once
+  client.c:1170: for each function it appears in.)
+  *** Error code 1
+  
+  Replaced to with client_p.
+  
+  Submitted by:   Random EFNet (l)user
+  Reviewed by:    make all
+  Approved by:    goats
+  
+  Revision  Changes    Path
+  7.292     +1 -1      ircd-hybrid-7/src/client.c
+
+
+
 androsyn    2002/07/28 21:08:17 EDT	(20020729_2)
 
   Modified files:
