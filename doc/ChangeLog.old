@@ -1,3 +1,13 @@
+*** 20001204_17 by db
+- found the cause of the blalloc bit already cleared error..
+  dlink_node was already been cleared in remove_user_from_channel
+  exit_one_client was trying to also free it.
+- added sendto_cap_serv_butone for sending to capable servers
+  added rudimentary remote kline code to use this. NOT TESTED
+  until I get a remote server up.
+
+
+
 *** 20001204_16 by db
 - removed duplicate function from m_kline.c replaced with function
   already in place but unused in s_conf.c duh. can we say BLOAT?
