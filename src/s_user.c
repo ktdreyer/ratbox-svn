@@ -580,13 +580,14 @@ int
 valid_hostname(const char *hostname)
 {
 	const char *p = hostname;
+	int found_sep = 0;
 
 	s_assert(NULL != p);
 
 	if(hostname == NULL)
 		return NO;
 
-	if('.' == *p || ':" == *P)
+	if('.' == *p || ':' == *p)
 		return NO;
 
 	while (*p)
