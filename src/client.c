@@ -1300,6 +1300,7 @@ static void remove_dependents(struct Client* client_p,
 int
 detach_client(struct Client *cptr, const char *reason)
 {
+#ifdef PERSISTANT_CLIENTS
  if (cptr->user==NULL || !MyConnect(cptr) || !IsPersistant(cptr))
    return exit_client(NULL, cptr, &me, reason);
  if (IsPersisting(cptr))
@@ -1310,8 +1311,8 @@ detach_client(struct Client *cptr, const char *reason)
  cptr->fd = -1;
  dlinkAdd((void*)cptr, make_dlink_node(), &persist_list);
  cptr->user->last_detach_time = CurrentTime;
- /*if (cptr->localClient != NULL)
-   MyFree(cptr->localClient);*/
+ if (cptr->localClient != NULL)
+   MyFree(cptr->localClient);
  cptr->localClient = NULL;
  if (cptr->user->away == NULL)
    {
@@ -1319,6 +1320,9 @@ detach_client(struct Client *cptr, const char *reason)
     cptr->user->last_away = CurrentTime;
    }
  return 0;
+#else
+ return exit_client(NULL, cptr, &me, reason);
+#endif
 }
 
 /*

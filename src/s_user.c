@@ -95,7 +95,9 @@ static struct flag_item user_modes[] =
   {FLAGS_LOCOPS, 'l'},
   {FLAGS_NCHANGE, 'n'},
   {FLAGS_OPER, 'o'},
-  {FLAGS_PERSISTANT, 'p'},  
+#ifdef PERSISTANT_CLIENTS
+  {FLAGS_PERSISTANT, 'p'},
+#endif
   {FLAGS_REJ, 'r'},
   {FLAGS_SERVNOTICE, 's'},
   {FLAGS_UNAUTH, 'u'},
@@ -158,7 +160,11 @@ int user_modes_from_c_to_bitmask[] =
   0,            /* m */
   FLAGS_NCHANGE, /* n */
   FLAGS_OPER,   /* o */
+#ifdef PERSISTANT_CLIENTS
   FLAGS_PERSISTANT,/* p */
+#else
+  0,               /* p */
+#endif
   0,            /* q */
   FLAGS_REJ,    /* r */
   FLAGS_SERVNOTICE, /* s */
