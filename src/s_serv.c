@@ -282,7 +282,7 @@ hunt_server(struct Client *client_p, struct Client *source_p,
 	{
 		if(!wilds)
 		{
-			if(!IsDigit(parv[server][0]))
+			if(MyClient(source_p) || !IsDigit(parv[server][0]))
 				sendto_one_numeric(source_p, ERR_NOSUCHSERVER,
 						   form_str(ERR_NOSUCHSERVER),
 						   parv[server]);

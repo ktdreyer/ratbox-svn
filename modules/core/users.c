@@ -786,7 +786,7 @@ m_version(struct Client *client_p, struct Client *source_p, int parc, const char
 
 	if(parc > 1)
 	{
-		if(IsOper(source_p) || !MyClient(source_p))
+		if(MyClient(source_p) && !IsOper(source_p))
 		{
 			if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
 			{
@@ -805,7 +805,8 @@ m_version(struct Client *client_p, struct Client *source_p, int parc, const char
 
 	sendto_one_numeric(source_p, RPL_VERSION, form_str(RPL_VERSION),
 			   ircd_version, serno,
-			   me.name, confopts(source_p), TS_CURRENT);
+			   me.name, confopts(source_p), TS_CURRENT,
+			   ServerInfo.sid);
 
 	show_isupport(source_p);
 
@@ -1269,14 +1270,19 @@ verify_access(struct Client *client_p, const char *username)
 
 	if(IsGotId(client_p))
 	{
-		aconf = find_address_conf(client_p->host, client_p->username,
-					  (struct sockaddr *)&client_p->localClient->ip,client_p->localClient->ip.ss_family);
+		aconf = find_address_conf(client_p->host, client_p->sockhost,
+					  client_p->username,
+					  (struct sockaddr *)&client_p->localClient->ip,
+					  client_p->localClient->ip.ss_family);
 	}
 	else
 	{
 		strlcpy(non_ident, "~", sizeof(non_ident));
 		strlcat(non_ident, username, sizeof(non_ident));
-		aconf = find_address_conf(client_p->host, non_ident, (struct sockaddr *)&client_p->localClient->ip,client_p->localClient->ip.ss_family);
+		aconf = find_address_conf(client_p->host, client_p->sockhost,
+					  non_ident, 
+					  (struct sockaddr *)&client_p->localClient->ip,
+					  client_p->localClient->ip.ss_family);
 	}
 
 	if(aconf == NULL)
@@ -1910,41 +1916,18 @@ clean_uid(const char *uid)
 static void
 change_local_nick(struct Client *client_p, struct Client *source_p, char *nick)
 {
-	source_p->tsinfo = CurrentTime;
 	int samenick;
+
 	if((source_p->localClient->last_nick_change + ConfigFileEntry.max_nick_time) < CurrentTime)
 		source_p->localClient->number_of_nick_changes = 0;
+
 	source_p->localClient->last_nick_change = CurrentTime;
 	source_p->localClient->number_of_nick_changes++;
 
 	/* check theyre not nick flooding */
-	if((ConfigFileEntry.anti_nick_flood &&
-	    (source_p->localClient->number_of_nick_changes
-	     <= ConfigFileEntry.max_nick_changes)) ||
-	   !ConfigFileEntry.anti_nick_flood || (IsOper(source_p) && ConfigFileEntry.no_oper_flood))
-	{
-		sendto_realops_flags(UMODE_NCHANGE, L_ALL,
-				     "Nick change: From %s to %s [%s@%s]",
-				     source_p->name, nick, source_p->username, source_p->host);
-
-		/* send the nick change to the users channels */
-		sendto_common_channels_local(source_p, ":%s!%s@%s NICK :%s",
-					     source_p->name,
-					     source_p->username, source_p->host, nick);
-
-		/* send the nick change to servers.. */
-		if(source_p->user)
-		{
-			add_history(source_p, 1);
-
-			sendto_server(client_p, NULL, CAP_TS6, NOCAPS, ":%s NICK %s :%ld",
-				      use_id(source_p), nick, (long) source_p->tsinfo);
-			sendto_server(client_p, NULL, NOCAPS, CAP_TS6, ":%s NICK %s :%ld",
-				      source_p->name, nick, (long) source_p->tsinfo);
-		}
-
-	}
-	else
+	if(ConfigFileEntry.anti_nick_flood && !IsOper(source_p) &&
+	   (source_p->localClient->number_of_nick_changes > ConfigFileEntry.max_nick_changes))
+	   
 	{
 		sendto_one(source_p, form_str(ERR_NICKTOOFAST), 
 			   me.name, source_p->name, source_p->name, 
@@ -1953,6 +1936,30 @@ change_local_nick(struct Client *client_p, struct Client *source_p, char *nick)
 	}
 
 	samenick = irccmp(source_p->name, nick) ? 0 : 1;
+
+	/* dont reset TS if theyre just changing case of nick */
+	if(!samenick)
+		source_p->tsinfo = CurrentTime;
+
+	sendto_realops_flags(UMODE_NCHANGE, L_ALL,
+			     "Nick change: From %s to %s [%s@%s]",
+			     source_p->name, nick, source_p->username, source_p->host);
+
+	/* send the nick change to the users channels */
+	sendto_common_channels_local(source_p, ":%s!%s@%s NICK :%s",
+				     source_p->name,
+				     source_p->username, source_p->host, nick);
+
+	/* send the nick change to servers.. */
+	if(source_p->user)
+	{
+		add_history(source_p, 1);
+
+		sendto_server(client_p, NULL, CAP_TS6, NOCAPS, ":%s NICK %s :%ld",
+			      use_id(source_p), nick, (long) source_p->tsinfo);
+		sendto_server(client_p, NULL, NOCAPS, CAP_TS6, ":%s NICK %s :%ld",
+			      source_p->name, nick, (long) source_p->tsinfo);
+	}
 
 	if(!samenick)
 		hash_check_watch(source_p, RPL_LOGOFF);

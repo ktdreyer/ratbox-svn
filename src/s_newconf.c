@@ -638,6 +638,7 @@ static struct oper_flags oper_flagtable[] =
 	{ OPER_OPERWALL,	'L', 'l' },
 	{ OPER_SPY,		'S', 's' },
 	{ OPER_INVIS,		'P', 'p' },
+	{ OPER_REMOTEBAN,	'B', 'b' },
 	{ 0,			'\0', '\0' }
 };
 

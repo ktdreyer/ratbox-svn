@@ -1339,11 +1339,24 @@ chm_key(struct Client *source_p, struct Channel *chptr,
 	}
 	else if(dir == MODE_DEL)
 	{
+		static char splat[] = "*";
+		int i;
+
 		if (parc > *parn)
 			(*parn)++;
 
 		if(!(*chptr->mode.key))
 			return;
+
+		/* hack time.  when we get a +k-k mode, the +k arg is
+		 * chptr->mode.key, which the -k sets to \0, so hunt for a
+		 * +k when we get a -k, and set the arg to splat. --anfl
+		 */
+		for(i = 0; i < mode_count; i++)
+		{
+			if(mode_changes[i].letter == 'k' && mode_changes[i].dir == MODE_ADD)
+				mode_changes[i].arg = splat;
+		}
 
 		*chptr->mode.key = 0;
 
@@ -1452,7 +1465,7 @@ set_channel_mode(struct Client *client_p, struct Client *source_p,
 		 int parc, const char *parv[])
 {
 	static char modebuf[BUFSIZE];
-	static char parabuf[MODEBUFLEN];
+	static char parabuf[BUFSIZE];
 	char *mbuf;
 	char *pbuf;
 	int cur_len, mlen, paralen, paracount, arglen, len;
@@ -1534,10 +1547,12 @@ set_channel_mode(struct Client *client_p, struct Client *source_p,
 			else
 				arglen = 0;
 
+			/* if we're creeping over MAXMODEPARAMSSERV, or over
+			 * bufsize (4 == +/-,modechar,two spaces) send now.
+			 */
 			if(mode_changes[i].arg != NULL &&
-			   ((paracount == MAXMODEPARAMS) ||
-			    ((paralen + arglen + 5) > MODEBUFLEN) ||
-			    ((paralen + arglen + cur_len + 2) > BUFSIZE)))
+			   ((paracount == MAXMODEPARAMSSERV) ||
+			    ((cur_len + paralen + arglen + 4) > (BUFSIZE-3))))
 			{
 				*mbuf = '\0';
 

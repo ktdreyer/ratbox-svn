@@ -27,6 +27,7 @@ mandir		= @mandir@
 moduledir	= @moduledir@
 helpdir		= @helpdir@
 confdir		= @confdir@
+logdir		= @logdir@
 
 # Default CFLAGS
 # CFLAGS = -g -O2 -DNDEBUG

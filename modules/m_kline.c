@@ -129,6 +129,13 @@ mo_kline(struct Client *client_p, struct Client *source_p,
 
 	if(parc >= loc+2 && !irccmp(parv[loc], "ON"))
 	{
+		if(!IsOperRemoteBan(source_p))
+		{
+			sendto_one(source_p, form_str(ERR_NOPRIVS),
+				me.name, source_p->name, "remoteban");
+			return 0;
+		}
+
 		target_server = parv[loc+1];
 		loc += 2;
 	}
@@ -368,6 +375,13 @@ mo_unkline(struct Client *client_p, struct Client *source_p, int parc, const cha
 	/* possible remote kline.. */
 	if((parc > 3) && (irccmp(parv[2], "ON") == 0))
 	{
+		if(!IsOperRemoteBan(source_p))
+		{
+			sendto_one(source_p, form_str(ERR_NOPRIVS),
+				me.name, source_p->name, "remoteban");
+			return 0;
+		}
+
 		propagate_generic(source_p, "UNKLINE", parv[3], CAP_UNKLN,
 				"%s %s", user, host);
 
@@ -668,7 +682,7 @@ already_placed_kline(struct Client *source_p, const char *luser, const char *lho
 		else
 			piphost = NULL;
 
-		if((aconf = find_conf_by_address(lhost, (struct sockaddr *)piphost, CONF_KILL, t, luser)))
+		if((aconf = find_conf_by_address(lhost, NULL, (struct sockaddr *)piphost, CONF_KILL, t, luser)))
 		{
 			/* setting a tkline, or existing one is perm */
 			if(tkline || ((aconf->flags & CONF_FLAGS_TEMPORARY) == 0))

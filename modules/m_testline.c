@@ -117,7 +117,7 @@ mo_testline(struct Client *client_p, struct Client *source_p, int parc, const ch
 	}
 
 	/* now look for a matching I/K/G */
-	if((aconf = find_address_conf(host, username ? username : "dummy",
+	if((aconf = find_address_conf(host, NULL, username ? username : "dummy",
 				(type != HM_HOST) ? (struct sockaddr *)&ip : NULL,
 				(type != HM_HOST) ? (
 #ifdef IPV6

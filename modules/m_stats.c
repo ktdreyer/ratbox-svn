@@ -570,13 +570,13 @@ stats_auth (struct Client *source_p)
 		int port;
 
 		if(MyConnect (source_p))
-			aconf = find_conf_by_address (source_p->host,
+			aconf = find_conf_by_address (source_p->host, source_p->sockhost,
 						      (struct sockaddr *)&source_p->localClient->ip,
 						      CONF_CLIENT,
 						      source_p->localClient->ip.ss_family,
 						      source_p->username);
 		else
-			aconf = find_conf_by_address (source_p->host, NULL, CONF_CLIENT,
+			aconf = find_conf_by_address (source_p->host, NULL, NULL, CONF_CLIENT,
 						      0, source_p->username);
 
 		if(aconf == NULL)
@@ -639,13 +639,13 @@ stats_tklines (struct Client *source_p)
 		char *host, *pass, *user, *oper_reason;
 
 		if(MyConnect (source_p))
-			aconf = find_conf_by_address (source_p->host,
+			aconf = find_conf_by_address (source_p->host, source_p->sockhost,
 						      (struct sockaddr *)&source_p->localClient->ip,
 						      CONF_KILL,
 						      source_p->localClient->ip.ss_family,
 						      source_p->username);
 		else
-			aconf = find_conf_by_address (source_p->host, NULL, CONF_KILL,
+			aconf = find_conf_by_address (source_p->host, NULL, NULL, CONF_KILL,
 						      0, source_p->username);
 
 		if(aconf == NULL)
@@ -704,13 +704,13 @@ stats_klines (struct Client *source_p)
 
 		/* search for a kline */
 		if(MyConnect (source_p))
-			aconf = find_conf_by_address (source_p->host,
+			aconf = find_conf_by_address (source_p->host, source_p->sockhost,
 						      (struct sockaddr *)&source_p->localClient->ip,
 						      CONF_KILL,
 						      source_p->localClient->ip.ss_family,
 						      source_p->username);
 		else
-			aconf = find_conf_by_address (source_p->host, NULL, CONF_KILL,
+			aconf = find_conf_by_address (source_p->host, NULL, NULL, CONF_KILL,
 						      0, source_p->username);
 
 		if(aconf == NULL)

@@ -313,6 +313,7 @@ static struct mode_table umode_table[] = {
 };
 
 static struct mode_table flag_table[] = {
+	{"encrypted",		OPER_ENCRYPTED		},
 	{"local_kill",		OPER_LOCKILL		},
 	{"global_kill",		OPER_GLOBKILL|OPER_LOCKILL	},
 	{"remote",		OPER_REMOTE		},
@@ -328,10 +329,12 @@ static struct mode_table flag_table[] = {
 	{"operwall",		OPER_OPERWALL		},
 	{"oper_spy",		OPER_SPY		},
 	{"hidden_oper",		OPER_INVIS		},
+	{"remoteban",		OPER_REMOTEBAN		},
 	{NULL, 0}
 };
 
 static struct mode_table auth_table[] = {
+	{"encrypted",		CONF_FLAGS_ENCRYPTED	},
 	{"spoof_notice",	CONF_FLAGS_SPOOF_NOTICE	},
 	{"exceed_limit",	CONF_FLAGS_NOLIMIT	},
 	{"kline_exempt",	CONF_FLAGS_EXEMPTKLINE	},
@@ -386,7 +389,7 @@ static struct mode_table shared_table[] =
 /* *INDENT-ON* */
 
 static int
-find_umode(struct mode_table *tab, char *name)
+find_umode(struct mode_table *tab, const char *name)
 {
 	int i;
 
@@ -404,6 +407,8 @@ set_modes_from_table(int *modes, const char *whatis, struct mode_table *tab, con
 {
 	for (; args; args = args->next)
 	{
+		const char *umode;
+		int dir = 1;
 		int mode;
 
 		if((args->type & CF_MTYPE) != CF_STRING)
@@ -412,7 +417,15 @@ set_modes_from_table(int *modes, const char *whatis, struct mode_table *tab, con
 			continue;
 		}
 
-		mode = find_umode(tab, args->v.string);
+		umode = args->v.string;
+
+		if(*umode == '~')
+		{
+			dir = 0;
+			umode++;
+		}
+
+		mode = find_umode(tab, umode);
 
 		if(!mode)
 		{
@@ -420,7 +433,10 @@ set_modes_from_table(int *modes, const char *whatis, struct mode_table *tab, con
 			continue;
 		}
 
-		*modes |= mode;
+		if(dir)
+			*modes |= mode;
+		else
+			*modes &= ~mode;
 	}
 }
 
@@ -443,7 +459,7 @@ conf_begin_oper(struct TopConf *tc)
 	}
 
 	yy_oper = make_oper_conf();
-	yy_oper->flags |= OPER_ENCRYPTED;
+	yy_oper->flags |= OPER_ENCRYPTED|OPER_OPERWALL|OPER_REMOTEBAN;
 
 	return 0;
 }
@@ -598,17 +614,6 @@ conf_set_oper_rsa_public_key_file(void *data)
 #else
 	conf_report_error("Warning -- ignoring rsa_public_key_file (OpenSSL support not available");
 #endif
-}
-
-static void
-conf_set_oper_encrypted(void *data)
-{
-	int yesno = *(unsigned int *) data;
-
-	if(yesno)
-		yy_oper->flags |= OPER_ENCRYPTED;
-	else
-		yy_oper->flags &= ~OPER_ENCRYPTED;
 }
 
 static void
@@ -888,17 +893,6 @@ conf_set_auth_passwd(void *data)
 		memset(yy_aconf->passwd, 0, strlen(yy_aconf->passwd));
 	MyFree(yy_aconf->passwd);
 	DupString(yy_aconf->passwd, data);
-}
-
-static void
-conf_set_auth_encrypted(void *data)
-{
-	int yesno = *(unsigned int *) data;
-
-	if(yesno)
-		yy_aconf->flags |= CONF_FLAGS_ENCRYPTED;
-	else
-		yy_aconf->flags &= ~CONF_FLAGS_ENCRYPTED;
 }
 
 static void
@@ -1665,7 +1659,6 @@ static struct ConfEntry conf_operator_table[] =
 	{ "umodes",	CF_STRING | CF_FLIST, conf_set_oper_umodes,	0, NULL },
 	{ "user",	CF_QSTRING, conf_set_oper_user,		0, NULL },
 	{ "password",	CF_QSTRING, conf_set_oper_password,	0, NULL },
-	{ "encrypted",	CF_YESNO,   conf_set_oper_encrypted,	0, NULL },
 	{ "\0",	0, NULL, 0, NULL }
 };
 
@@ -1688,7 +1681,6 @@ static struct ConfEntry conf_auth_table[] =
 {
 	{ "user",	CF_QSTRING, conf_set_auth_user,		0, NULL },
 	{ "password",	CF_QSTRING, conf_set_auth_passwd,	0, NULL },
-	{ "encrypted",	CF_YESNO,   conf_set_auth_encrypted,	0, NULL },
 	{ "class",	CF_QSTRING, conf_set_auth_class,	0, NULL },
 	{ "spoof",	CF_QSTRING, conf_set_auth_spoof,	0, NULL },
 	{ "redirserv",	CF_QSTRING, conf_set_auth_redir_serv,	0, NULL },
