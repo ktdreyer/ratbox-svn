@@ -381,7 +381,8 @@ handle_encap(struct Client *client_p, struct Client *source_p,
 	ehandler = mptr->handlers[client_p->handler];
 	handler = ehandler.handler;
 
-	if(parc < ehandler.min_para || EmptyString(parv[ehandler.min_para - 1]))
+	if(parc < ehandler.min_para || 
+	   (ehandler.min_para && EmptyString(parv[ehandler.min_para - 1])))
 		return;
 
 	(*handler) (client_p, source_p, parc, parv);
