@@ -369,7 +369,7 @@ handle_command(struct Message *mptr, struct Client *client_p,
 	handler = mptr->handlers[client_p->handler];
 
 	/* check right amount of params is passed... --is */
-	if(i < mptr->parameters)
+	if(i < (int)mptr->parameters)
 	{
 		if(!IsServer(client_p))
 		{

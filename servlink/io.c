@@ -194,7 +194,7 @@ process_recvq(struct ctrl_command *cmd)
 	if(in_state.crypt)
 	{
 		assert(EVP_DecryptUpdate(&in_state.crypt_state.ctx, tmp_buf, &blen, data, datalen));
-		assert(blen == datalen);
+		assert(blen == (int)datalen);
 		buf = tmp_buf;
 	}
 #endif
@@ -364,7 +364,7 @@ read_ctrl(void)
 
 	for (cdef = command_table; cdef->commandid; cdef++)
 	{
-		if(cdef->commandid == cmd.command)
+		if((int)cdef->commandid == cmd.command)
 			break;
 	}
 

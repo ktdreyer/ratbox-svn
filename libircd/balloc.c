@@ -185,7 +185,7 @@ newblock(BlockHeap * bh)
 {
 	MemBlock *newblk;
 	Block *b;
-	int i;
+	unsigned long i;
 	void *offset;
 
 	/* Setup the initial data structure. */

@@ -67,9 +67,9 @@ struct BlockHeap
 {
 	dlink_node hlist;
 	size_t elemSize;	/* Size of each element to be stored */
-	int elemsPerBlock;	/* Number of elements per block */
-	int blocksAllocated;	/* Number of blocks allocated */
-	int freeElems;		/* Number of free elements */
+	unsigned long elemsPerBlock;	/* Number of elements per block */
+	unsigned long blocksAllocated;	/* Number of blocks allocated */
+	unsigned long freeElems;		/* Number of free elements */
 	Block *base;		/* Pointer to first block */
 };
 
