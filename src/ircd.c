@@ -355,7 +355,7 @@ io_loop(void)
 static void initialize_global_set_options(void)
 {
   memset( &GlobalSetOptions, 0, sizeof(GlobalSetOptions));
-  memset( &ConfigFileEntry, 0, sizeof(ConfigFileEntry));
+  /* memset( &ConfigFileEntry, 0, sizeof(ConfigFileEntry)); */
 
   GlobalSetOptions.maxclients = MAX_CLIENTS;
   GlobalSetOptions.autoconn = 1;
@@ -368,7 +368,7 @@ static void initialize_global_set_options(void)
   else
     GlobalSetOptions.floodcount = 10;
 
-  memset( &ConfigChannel, 0, sizeof(ConfigChannel));
+  /* memset( &ConfigChannel, 0, sizeof(ConfigChannel)); */
 
  /* End of global set options */
 
