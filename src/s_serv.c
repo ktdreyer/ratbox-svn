@@ -543,8 +543,7 @@ void sendnick_TS(struct Client *cptr, struct Client *acptr)
           ubuf[1] = '\0';
         }
 
-      sendto_one(cptr, ":%s NICK %s %d %lu %s %s %s %s :%s",
-		 me.name,
+      sendto_one(cptr, "NICK %s %d %lu %s %s %s %s :%s",
 		 acptr->name, 
                  acptr->hopcount + 1, acptr->tsinfo, ubuf,
                  acptr->username, acptr->host,
