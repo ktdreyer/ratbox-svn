@@ -77,12 +77,12 @@ reject_expires(void *unused)
 		pnode = ptr->data;
 		rdata = pnode->data;		
 
-		if(rdata->time + ConfigFileEntry.reject_duration < CurrentTime)
-		{
-			dlinkDelete(ptr, &reject_list);
-			MyFree(rdata);
-			patricia_remove(reject_tree, pnode);
-		}
+		if(rdata->time + ConfigFileEntry.reject_duration > CurrentTime)
+			return;
+
+		dlinkDelete(ptr, &reject_list);
+		MyFree(rdata);
+		patricia_remove(reject_tree, pnode);
 	}
 }
 
@@ -119,7 +119,7 @@ add_reject(struct Client *client_p)
 	{
 		pnode = make_and_lookup_ip(reject_tree, &client_p->localClient->ip, GET_SS_LEN(client_p->localClient->ip));
 		pnode->data = rdata = MyMalloc(sizeof(struct reject_data));
-		dlinkAdd(pnode, &rdata->rnode, &reject_list);
+		dlinkAddTail(pnode, &rdata->rnode, &reject_list);
 		rdata->time = CurrentTime;
 		rdata->count = 1;
 	}
