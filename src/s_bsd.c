@@ -1084,7 +1084,11 @@ int read_message(time_t delay, unsigned char mask)        /* mika */
   		/*
   		 * Complete the connection to the IAuth server
   		 */
-  		CompleteIAuthConnection();
+  		if (!CompleteIAuthConnection())
+  		{
+  			close(iAuth.socket);
+  			iAuth.socket = NOSOCK;
+  		}
   	}
   	else if (FD_ISSET(iAuth.socket, read_set))
     {

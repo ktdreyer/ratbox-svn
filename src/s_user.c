@@ -431,6 +431,124 @@ int clean_nick_name(char* nick)
   return (ch - nick);
 }
 
+/*
+register_remote_user()
+ This function is called when we receive a NICK statement from
+a remote server (GreetUser() handles local clients).
+*/
+
+static int
+register_remote_user(struct Client *cptr, struct Client *sptr,
+                     char *nick, char *username)
+
+{
+  struct Client *acptr;
+  static char ubuf[12];
+  struct User* user;
+
+  assert(sptr != 0);
+  assert(username != sptr->username);
+
+  /* pointed out by Mortiis, never be too careful */
+  if(strlen(username) > USERLEN)
+    username[USERLEN] = '\0';
+
+  strncpy_irc(sptr->username, username, USERLEN);
+
+  SetClient(sptr);
+
+	user = sptr->user;
+
+  sptr->servptr = find_server(user->server);
+  if (!sptr->servptr)
+    {
+      sendto_ops("Ghost killed: %s on invalid server %s",
+                 sptr->name, sptr->user->server);
+      sendto_one(cptr,":%s KILL %s: %s (Ghosted, %s doesn't exist)",
+                 me.name, sptr->name, me.name, user->server);
+      sptr->flags |= FLAGS_KILLED;
+      return exit_client(NULL, sptr, &me, "Ghost");
+    }
+  add_client_to_llist(&(sptr->servptr->serv->users), sptr);
+
+/* Increment our total user count here */
+  if (++Count.total > Count.max_tot)
+    Count.max_tot = Count.total;
+
+  if ((acptr = find_server(user->server)) && acptr->from != sptr->from)
+  {
+    sendto_realops_flags(FLAGS_DEBUG, 
+      "Bad User [%s] :%s USER %s@%s %s, != %s[%s]",
+      cptr->name,
+      nick,
+      sptr->username,
+      sptr->host,
+      user->server,
+      acptr->name,
+      acptr->from->name);
+
+    sendto_one(cptr,
+      ":%s KILL %s :%s (%s != %s[%s] USER from wrong direction)",
+      me.name,
+      sptr->name,
+      me.name,
+      user->server,
+      acptr->from->name,
+      acptr->from->host);
+      sptr->flags |= FLAGS_KILLED;
+
+    return exit_client(sptr, sptr, &me,
+      "USER server wrong direction");
+          
+  }
+
+  /*
+   * Super GhostDetect:
+   *   If we can't find the server the user is supposed to be on,
+   * then simply blow the user away.        -Taner
+   */
+  if (!acptr)
+  {
+    sendto_one(cptr,
+      ":%s KILL %s :%s GHOST (no server %s on the net)",
+      me.name,
+      sptr->name,
+      me.name,
+      user->server);
+
+    sendto_realops("No server %s for user %s[%s@%s] from %s",
+      user->server,
+      sptr->name,
+      sptr->username,
+      sptr->host,
+      sptr->from->name);
+      sptr->flags |= FLAGS_KILLED;
+    return exit_client(sptr, sptr, &me, "Ghosted Client");
+  } /* if (!acptr) */
+
+  send_umode(NULL, sptr, 0, SEND_UMODES, ubuf);
+  if (!*ubuf)
+  {
+    ubuf[0] = '+';
+    ubuf[1] = '\0';
+  }
+  
+  sendto_serv_butone(cptr,
+    "NICK %s %d %lu %s %s %s %s :%s",
+    nick,
+    sptr->hopcount + 1,
+    sptr->tsinfo,
+    ubuf,
+    sptr->username,
+    sptr->host,
+    user->server,
+    sptr->info);
+
+  if (ubuf[1])
+    send_umode_out(cptr, sptr, 0);
+
+  return 0;
+} /* register_remote_user() */
 
 /*
 ** register_user
@@ -1221,7 +1339,10 @@ int nickkilldone(struct Client *cptr, struct Client *sptr, int parc,
           /*
            * Send the client to the iauth module for verification
            */
-          BeginAuthorization(sptr);
+          if (MyConnect(sptr))
+          	BeginAuthorization(sptr);
+          else if (register_remote_user(cptr, sptr, nick, buf) == CLIENT_EXITED)
+            return CLIENT_EXITED;
         #else
 
           if (register_user(cptr, sptr, nick, buf) == CLIENT_EXITED)
@@ -1323,7 +1444,10 @@ int do_user(char* nick, struct Client* cptr, struct Client* sptr,
      * Now that we have both the NICK and USER, send the
      * client to the iauth module for verification
      */
-    BeginAuthorization(sptr);
+    if (MyConnect(sptr))
+    	BeginAuthorization(sptr);
+    else
+    	return register_remote_user(cptr, sptr, sptr->name, username);
  	#else
     return register_user(cptr, sptr, sptr->name, username);
   #endif

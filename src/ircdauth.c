@@ -161,16 +161,30 @@ int
 CompleteIAuthConnection()
 
 {
-	log(L_INFO, "IN COMPLETEIAUTH\n");
+	int errval,
+	    errlen;
+
 	ClearIAuthConnect(iAuth);
 
-#if 0
-	if (send(iAuth.socket, "hello\n", 6, 0) < 0)
+	errval = 0;
+	errlen = sizeof(errval);
+	if (getsockopt(iAuth.socket, SOL_SOCKET, SO_ERROR, &errval, &errlen) < 0)
 	{
-		fprintf(stderr, "Send failed\n");
+		log(L_ERROR,
+			"CompleteIAuthConnection(): getsockopt(SO_ERROR) failed: %s",
+			strerror(errno));
 		return 0;
 	}
-#endif
+
+	if (errval > 0)
+	{
+		log(L_ERROR,
+			"Connect to IAuth server (%s:%d) failed: %s",
+			iAuth.hostname,
+			iAuth.port,
+			strerror(errval));
+		return 0;
+	}
 
 	return 1;
 } /* CompleteIAuthConnection() */
