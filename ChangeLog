@@ -1,3 +1,19 @@
+leeh        2003/02/17 00:53:34 UTC	(20030217_1)
+
+  Modified files:
+    servlink             servlink.c servlink.h 
+    src                  linebuf.c 
+  Log:
+  - back out const fix
+  - linebuf fix
+  
+  Revision  Changes    Path
+  1.28      +2 -2      ircd-ratbox/servlink/servlink.c
+  1.23      +2 -2      ircd-ratbox/servlink/servlink.h
+  7.107     +2 -2      ircd-ratbox/src/linebuf.c
+
+
+
 androsyn    2003/02/17 00:14:05 UTC	(20030217_0)
 
   Modified files:
