@@ -357,7 +357,10 @@ set_default_conf(void)
 	ConfigFileEntry.default_floodcount = 8;
 	ConfigFileEntry.client_flood = CLIENT_FLOOD_DEFAULT;
 	ConfigFileEntry.tkline_expire_notices = 0;
-	ConfigFileEntry.target_change = 1;
+	ConfigFileEntry.target_change = YES;
+	ConfigFileEntry.tgchange_remote = 1800;
+	ConfigFileEntry.tgchange_reconnect = 5;
+	ConfigFileEntry.tgchange_expiry = 900;
 
 #ifdef IPV6
 	ConfigFileEntry.fallback_to_ip6_int = YES;
@@ -408,6 +411,11 @@ validate_conf(void)
 	if((ConfigFileEntry.client_flood < CLIENT_FLOOD_MIN) ||
 	   (ConfigFileEntry.client_flood > CLIENT_FLOOD_MAX))
 		ConfigFileEntry.client_flood = CLIENT_FLOOD_MAX;
+
+	if(ConfigFileEntry.tgchange_reconnect > 10)
+		ConfigFileEntry.tgchange_reconnect = 10;
+	else if(ConfigFileEntry.tgchange_reconnect < 0)
+		ConfigFileEntry.tgchange_reconnect = 0;
 }
 
 /*

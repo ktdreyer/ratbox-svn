@@ -1515,6 +1515,7 @@ register_local_user(struct Client *client_p, struct Client *source_p)
 {
 	struct ConfItem *aconf;
 	struct User *user = source_p->user;
+	tgchange *target;
 	char tmpstr2[IRCD_BUFSIZE];
 	char ipaddr[HOSTIPLEN];
 	char myusername[USERLEN+1];
@@ -1760,6 +1761,12 @@ register_local_user(struct Client *client_p, struct Client *source_p)
 	source_p->localClient->target_last = CurrentTime;
 
 	Count.totalrestartcount++;
+
+	if((target = find_tgchange(&source_p->localClient->ip)))
+	{
+		if(target->expiry > CurrentTime)
+			source_p->localClient->targinfo[1] = ConfigFileEntry.tgchange_reconnect;
+	}
 
 	s_assert(source_p->localClient != NULL);
 

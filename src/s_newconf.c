@@ -60,6 +60,7 @@ dlink_list glines;
 dlink_list pending_glines;
 dlink_list dlines;
 dlink_list exempt_list;
+dlink_list tgchange_list;
 
 dlink_list temp_klines[LAST_TEMP_TYPE];
 dlink_list temp_dlines[LAST_TEMP_TYPE];
@@ -74,6 +75,7 @@ static void reorganise_temp_kd(void *list);
 
 patricia_tree_t *dline_tree;
 patricia_tree_t *exempt_tree;
+patricia_tree_t *tgchange_tree;
 
 void
 init_s_newconf(void)
@@ -100,9 +102,11 @@ init_s_newconf(void)
 #ifdef IPV6
 	dline_tree = New_Patricia(128);
 	exempt_tree = New_Patricia(128);
+	tgchange_tree = New_Patricia(128);
 #else
 	dline_tree = New_Patricia(32);
 	exempt_tree = New_Patricia(32);
+	tgchange_tree = New_Patricia(32);
 #endif
 }
 
@@ -1099,4 +1103,16 @@ expire_nd_entries(void *unused)
 		free_nd_entry(nd);
 	}
 }
+
+tgchange *
+find_tgchange(struct sockaddr *ip)
+{
+	patricia_node_t *pnode;
+
+	if((pnode = match_ip(tgchange_tree, ip)))
+		return pnode->data;
+
+	return NULL;
+}
+
 

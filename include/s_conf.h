@@ -222,6 +222,11 @@ struct config_file_entry
 	int reject_ban_time;
 	int reject_after_count;
 	int reject_duration;
+
+	int tgchange_expiry;
+	int tgchange_remote;
+	int tgchange_reconnect;
+
 #ifdef IPV6
 	int fallback_to_ip6_int;
 #endif

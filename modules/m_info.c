@@ -444,10 +444,28 @@ static struct InfoStruct info_table[] = {
 		"Target change anti-spam protection",
 	},
 	{
+		"tgchange_expiry",
+		OUTPUT_DECIMAL,
+		&ConfigFileEntry.tgchange_expiry,
+		"Expiry time for target change",
+	},
+	{
+		"tgchange_remote",
+		OUTPUT_DECIMAL,
+		&ConfigFileEntry.tgchange_remote,
+		"Time duration between remote tgchange notices",
+	},
+	{
+		"tgchange_reconnect",
+		OUTPUT_DECIMAL,
+		&ConfigFileEntry.tgchange_reconnect,
+		"Number of slots removed from clients on reconnect",
+	},
+	{
 		"tkline_expire_notices",
 		OUTPUT_BOOLEAN,
 		&ConfigFileEntry.tkline_expire_notices,
-		"Notices given to opers when tklines expire"
+		"Notices given to opers when tklines expire",
 	},
 	{
 		"ts_max_delta",

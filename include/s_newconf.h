@@ -268,5 +268,19 @@ extern void add_nd_entry(const char *name);
 extern void free_nd_entry(struct nd_entry *);
 extern unsigned long get_nd_count(void);
 
+typedef struct
+{
+	char *host;
+	time_t expiry;
+	time_t last_global;
+	patricia_node_t *pnode;
+	dlink_node node;
+} tgchange;
+
+patricia_tree_t *tgchange_tree;
+dlink_list tgchange_list;
+
+tgchange *find_tgchange(struct sockaddr *);
+
 #endif
 

@@ -27,8 +27,10 @@
 #include "stdinc.h"
 #include "client.h"
 #include "ircd.h"
+#include "patricia.h"
 #include "numeric.h"
 #include "s_conf.h"
+#include "s_newconf.h"
 #include "s_serv.h"
 #include "msg.h"
 #include "parse.h"
@@ -40,10 +42,27 @@
 #include "msg.h"
 #include "packet.h"
 #include "send.h"
+#include "event.h"
 
 static int m_message(int, const char *, struct Client *, struct Client *, int, const char **);
 static int m_privmsg(struct Client *, struct Client *, int, const char **);
 static int m_notice(struct Client *, struct Client *, int, const char **);
+
+static void expire_tgchange(void *unused);
+
+static int
+modinit(void)
+{
+	eventAddIsh("expire_tgchange", expire_tgchange, NULL, 60);
+	expire_tgchange(NULL);
+	return 0;
+}
+
+static void
+moddeinit(void)
+{
+	eventDelete(expire_tgchange, NULL);
+}
 
 struct Message privmsg_msgtab = {
 	"PRIVMSG", 0, 0, 0, MFLG_SLOW | MFLG_UNREG,
@@ -55,7 +74,7 @@ struct Message notice_msgtab = {
 };
 
 mapi_clist_av1 message_clist[] = { &privmsg_msgtab, &notice_msgtab, NULL };
-DECLARE_MODULE_AV1(message, NULL, NULL, message_clist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV1(message, modinit, moddeinit, message_clist, NULL, NULL, "$Revision$");
 
 struct entity
 {
@@ -477,6 +496,50 @@ msg_channel_flags(int p_or_n, const char *command, struct Client *client_p,
 			     command, c, chptr->chname, text);
 }
 
+static void
+add_tgchange(struct sockaddr *ip, const char *host)
+{
+	patricia_node_t *pnode;
+	tgchange *target;
+
+	target = MyMalloc(sizeof(tgchange));
+#ifdef IPV6
+	pnode = make_and_lookup_ip(tgchange_tree, ip, 128);
+#else
+	pnode = make_and_lookup_ip(tgchange_tree, ip, 32);
+#endif
+
+	pnode->data = target;
+	target->pnode = pnode;
+
+	DupString(target->host, host);
+	target->expiry = CurrentTime + ConfigFileEntry.tgchange_expiry;
+	target->last_global = CurrentTime;
+
+	dlinkAdd(target, &target->node, &tgchange_list);
+}
+
+static void
+expire_tgchange(void *unused)
+{
+	tgchange *target;
+	dlink_node *ptr, *next_ptr;
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, tgchange_list.head)
+	{
+		target = ptr->data;
+
+		if(target->expiry <= CurrentTime &&
+		   target->last_global <= CurrentTime)
+		{
+			dlinkDelete(ptr, &tgchange_list);
+			patricia_remove(tgchange_tree, target->pnode);
+			MyFree(target->host);
+			MyFree(target);
+		}
+	}
+}
+
 #define FREE_TARGET(x) ((x)->localClient->targinfo[0])		/* next free target slot */
 #define USED_TARGETS(x) ((x)->localClient->targinfo[1])		/* number of used targets */
 
@@ -510,7 +573,35 @@ add_target(struct Client *source_p, struct Client *target_p)
 			source_p->localClient->target_last = CurrentTime;
 		}
 		else
+		{
+			tgchange *target;
+			int send_tgchange = 0;
+
+			if((target = find_tgchange(&source_p->localClient->ip)))
+			{
+				target->expiry = CurrentTime + 900;
+
+				if(target->last_global + ConfigFileEntry.tgchange_remote < CurrentTime)
+				{
+					target->last_global = CurrentTime;
+					send_tgchange++;
+				}
+			}
+			else
+			{
+				add_tgchange(&source_p->localClient->ip,
+						source_p->sockhost);
+				send_tgchange++;
+			}
+
+			if(send_tgchange && !IsIPSpoof(source_p) &&
+			   ConfigFileEntry.tgchange_remote)
+				sendto_match_servs(&me, "*", CAP_ENCAP, NOCAPS,
+						"ENCAP * TGCH %s",
+						source_p->sockhost);
+
 			return 0;
+		}
 	}
 
 	source_p->localClient->targets[FREE_TARGET(source_p)] = target_p;
@@ -545,7 +636,8 @@ msg_client(int p_or_n, const char *command,
 		/* target change stuff, only if we're not dealing with a
 		 * ctcp reply (NOTICE)
 		 */
-		if((p_or_n != NOTICE || *text != '\001') && ConfigFileEntry.target_change)
+		if((p_or_n != NOTICE || *text != '\001') && 
+		   ConfigFileEntry.target_change && !IsOper(source_p))
 		{
 			if(!add_target(source_p, target_p))
 			{
@@ -915,3 +1007,5 @@ find_userhost(const char *user, const char *host, int *count)
 	}
 	return (res);
 }
+
+
