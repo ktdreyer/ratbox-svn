@@ -9,8 +9,9 @@ Please read doc/whats-new.txt for information about what is in this release
 
 Known bugs are listed in TODO and at http://bugs.efnow.net
 
-Please fill in the forms at http://bugs.efnow.net if you discover new bugs; include a gdb
-backtrace and a copy of your config.h and ircd.conf.
+Please fill in the forms at http://bugs.efnow.net if you discover new bugs; 
+include a gdb backtrace and a copy of your config.h and ircd.conf (with 
+passwords and other sensitive information masked).
 
 README.FIRST may have more information.
 

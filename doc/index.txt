@@ -5,6 +5,8 @@ Here is the overview of the documents in the doc/ directory.
 CIDR.txt		- Description of CIDR in IPv4
 LazyLinks.as.implemented.txt
 LazyLinks.txt		- The lazylinks leaf concept
+Persistent_Clients.txt  - A global UID and Persistant client (with cookies)
+                          proposal
 README.TSora            - Description of the TS3 protocol
 Tao-of-IRC.940110
 blalloc.txt		- Outline of the block memory allocator

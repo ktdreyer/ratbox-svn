@@ -57,7 +57,7 @@ is a form of old style /kill but it also destroys the uid and cookie pair.
 A channel name if given instead, will result in all members of the channel
 being tossed out, and apparently kicked by themselves. (chanop hiding
 in h7) The channel will then be marked as "juped" for a period of 1 
-minute. First come, first server just like old style efnet.
+minute. First come, first serve just like old style efnet.
 
 5) /setpass uid
 

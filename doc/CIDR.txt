@@ -16,7 +16,7 @@ A.B.C.D
   negative number).
 
   CIDR stands for "classless inter domain routing", details covered
-  in RFC's 1518 1519. It was introduced mainly due to waste within
+  in RFC's 1518 and 1519. It was introduced mainly due to waste within
   A and B classes space. The goal was to make it possible to use
   smaller nets than it would seem from (above) IP classes, for instance
   by dividing one B class into 256 "C like" classes. The other goal was
@@ -316,5 +316,6 @@ country:     GB
   whois.aunic.net for Australia, and whois.6bone.net for IPv6 blocks.
 
 Contributed by Jeremy Chadwick <jdc@best.net>
-Piotr Kucharski <chopin@sgh.waw.pl> and
+Piotr Kucharski <chopin@sgh.waw.pl> 
+Walter Campbell <wcampbel@botbay.net> and
 Ariel Biener <ariel@fireball.tau.ac.il>

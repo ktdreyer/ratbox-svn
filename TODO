@@ -154,18 +154,9 @@ Done things:
 ------------------------------------------------------------------------------
 Little things to be done given enough time and initiative
 
-.  The "ping timeout" message brought back to the old style (DONE)
 .  Bring back CIDR support in operator blocks
    user="wcampbel@144.26.*"; # works - even if the hostname resolves
    user="wcampbel@144.26.0.0/16"; # Does not work
-.  RESTART needs to stop coring (DONE)
-.  CAPAB needs added for half-ops (DONE)
-.  LINKS when server-hide is set ON breaks some clients (DONE)
-.  GETTEXT not being detected without
-   CC='gcc -L/usr/local/lib' ./configure --prefix='...'
-   THEN...it doesn't adjust the #define in setup.h
-   Known to occur on FreeBSD 4.x-STABLE with the gettext port installed
-   to /usr/local (DONE)
 .  The 3 logging path settings are NOOP in the conf (logpath, oper_log, 
    gline_log)
 .  $$*.server.mask and $#*.user.mask do not currently work...
@@ -175,7 +166,7 @@ Little things to be done given enough time and initiative
    Hwy-7!wcampbel@bee-90-245.bee.net (DONE -- except for LL bugs)
 .  Have a few more things /quote SET'table
 .  Have a command (maybe a STATS or in INFO) to show all ircd.conf derived
-   options (Partially done in INFO)
+   options (Partially done in INFO) (In progress)
 .  More documentation on the gettext stuff, enough for a layman to use
 .  Extra \r\n sent to the log file by ts_warn needs to go
 .  Hyb7-ize Riedel's great oper document (Done, Riedel updated it)
@@ -189,6 +180,8 @@ Little things to be done given enough time and initiative
 .  Do we still need start_ircd.c and ircd_start.c?
 .  Look to see what other STATS commands can be made optionally oper-only
 .  Update ircd.8, or get rid of it (move to old?)
+.  2 pass conf parser (grab classes before anything that uses them)
+.  Replacement for the old X:...:2, silent reject
 .  Add scaleable database-based authentication.  Probably part of Iauth.
    Also add support for server-side notify with the list stored in the
    auth database.  This would make ircd an awesome instant messaging

@@ -16,7 +16,7 @@ Usermodes: (* designates that the umode is oper only)
        * +z     - Can see oper wallops.
        * +s     - Can see generic server messages and oper kills.
        * +c     - Can see client connections and exits.
-       * +u     - Show unauthorized client connections.
+       * +u     - Can see unauthorized client connections.
        * +r     - Can see 'rejected' client notices.
        * +k     - Can see server kill messages.
        * +f     - Can see 'I-line is full' notices.
@@ -140,8 +140,14 @@ COMMAND         - USAGE and DESCRIPTION
                   Terminates the IRC server with optional reason 
                   [reason]
 
-+ HASH          - HASH
++ HASH          - HASH <param>
                   Shows some stats about ircd's internal hashes.
+                  V - Verify and report channel hash table stats
+                  v - Verify and report client hash table stats
+                  P - Report channel hash table stats
+                  p - Report client hash table stats
+                  R - Rebuild channel hash table
+                  r - Rebuild client hash table
 
 + KLINE         - KLINE <nick|user@host> :[reason]
                   Adds a KLINE to the ircd.conf or klines.conf file which
@@ -189,10 +195,15 @@ COMMAND         - USAGE and DESCRIPTION
                     SHIDE       - Turn server hiding on or off on the fly
                     FLOODCOUNT  - The number of lines allowed before 
                                   throttling a connection due to flooding
+                                  Note that this variable is used for both
+                                  channels and clients
                     SPAMNUM     - Sets how many join/parts to channels
                                   constitutes a possible spambot.
                     SPAMTIME    - Below this time on a channel
                                   counts as a join/part as above.
+                    MSGLOCALE   - Set the gettext() message locale
+                                  standard - Compiled in defaults
+                                  custom   - Old CUSTOM_ERR messages
 
 + GLINE         - GLINE <user@host> :[reason]
 		   -- if glines are enabled --
@@ -216,7 +227,7 @@ COMMAND         - USAGE and DESCRIPTION
 
 + CJOIN          - CJOIN <channel>
                    -- Creates a new vchan
-                   Note: this command is usable by users as well as opers.
+                   Note: this command is optionally usable by users
 
 + MODLOAD        - MODLOAD <path/module.so>
                    -- Load a module into the ircd
