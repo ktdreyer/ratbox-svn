@@ -1401,7 +1401,7 @@ fork_server(struct Client *server)
 		kid_argv[3] = fd_str[2];
 		kid_argv[4] = fd_str[3];
 		kid_argv[5] = fd_str[4];
-		kid_argv[7] = NULL;
+		kid_argv[6] = NULL;
 
 		/* exec servlink program */
 		execv(ConfigFileEntry.servlink_path, kid_argv);
