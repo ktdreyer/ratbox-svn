@@ -1,3 +1,15 @@
+androsyn    2002/05/20 13:28:43 EDT	(20020520_4)
+
+  Modified files:
+    src                  send.c 
+  Log:
+  Another sanity check
+  
+  Revision  Changes    Path
+  7.193     +3 -1      ircd-hybrid-7/src/send.c
+
+
+
 androsyn    2002/05/20 13:11:24 EDT	(20020520_3)
 
   Modified files:
