@@ -20,12 +20,11 @@
 
 struct HostMaskEntry
 {
-  int type, subtype;
+  int type;
   unsigned long precedence;
   char *hostmask;
-  
   void *data;
-  struct HostMaskEntry *next, *nexthash, *nextiphash;
+  struct HostMaskEntry *next, *nexthash;
 };
 
 void add_hostmask(const char *mask, int type, void *data);
@@ -37,8 +36,4 @@ void clear_conf(void);
 void report_hostmask_conf_links(struct Client*, int);
 
 #define HOST_CONFITEM 1
-#define HOST_DLINE 2
 #define MAXPREFIX HOSTLEN+USERLEN+15
-
-#define HOST_IPCONF 1
-#define HOST_NAMECONF 2

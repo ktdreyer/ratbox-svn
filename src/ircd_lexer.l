@@ -124,13 +124,11 @@ gline_exempt    { return GLINE_EXEMPT; }
 gline_time      { return GLINE_TIME; }
 gline_log       { return GLINE_LOG; }
 global_kill	{ return GLOBAL_KILL; }
-persistant     { return PERSISTANT; }
 have_ident	{ return HAVE_IDENT; }
 hide_server	{ return HIDESERVER; }
 host		{ return HOST; }
 hub		{ return HUB; }
 hub_mask	{ return HUB_MASK; }
-persistant_expire_time { return PERSISTANT_EXPIRE_TIME; }
 idletime        { return IDLETIME; }
 include		{ return INCLUDE; }
 ip		{ return IP; }

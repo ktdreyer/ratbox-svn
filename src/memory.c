@@ -33,8 +33,6 @@
 #include "send.h"
 #include "tools.h"
 #include "s_log.h"
-#include "restart.h"
-
 #ifdef MEMDEBUG
 /* Hopefully this debugger will work better than the existing one...
  * -A1kmm. */
@@ -81,7 +79,7 @@ _MyFree(void *what, char *file, int line)
  MemoryEntry *mme;
  if (!what)
    return;
- mme = (MemoryEntry*)((char *)what - sizeof(MemoryEntry));
+ mme = (MemoryEntry*)(what - sizeof(MemoryEntry));
  if (mme->last)
    mme->last->next = mme->next;
  else
@@ -107,7 +105,7 @@ _MyRealloc(void *what, size_t size, char *file, int line)
     _MyFree(what, file, line);
     return NULL;
    }
- mme = (MemoryEntry*)((char *)what - sizeof(MemoryEntry));
+ mme = (MemoryEntry*)(what - sizeof(MemoryEntry));
  mme = realloc(mme, size+sizeof(MemoryEntry));
  mme->size = size;
  mme->next->last = mme;

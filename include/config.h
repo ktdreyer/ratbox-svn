@@ -23,8 +23,6 @@
 
 #include "setup.h"
 
-#undef PERSISTANT_CLIENTS
-
 /* PLEASE READ SECTION:
  */
 
@@ -43,7 +41,7 @@
 /* VMS NOTE - VMS is basically unlimited with FDs, so just set this
    to any suitable value.. */
 
-#define HARD_FDLIMIT_   2048
+#define HARD_FDLIMIT_   1024
 #define INIT_MAXCLIENTS 800
 
 /*
