@@ -1,3 +1,7 @@
+*** 20001116_5 by toot
+use the topic setters nickname in the !list, if available
+
+
 *** 20001116_4 by davidt
 - Fixed a small bug in m_message.c, where @@<chan>, @+<chan>, +@<chan>,
   and ++<chan> would all be treated as +<chan>.  Now @@ and ++ are treated
