@@ -1,3 +1,19 @@
+leeh        2003/11/26 10:49:27 EST	(20031126_2)
+
+  Modified files:
+    modules              Makefile.in m_wallops.c 
+  Removed files:
+    modules              m_operwall.c 
+  Log:
+  - merge operwall and wallops
+  
+  Revision  Changes    Path
+  1.90      +0 -1      ircd-ratbox/modules/Makefile.in
+  1.52      +0 -91     ircd-ratbox/modules/m_operwall.c (dead)
+  1.51      +15 -4     ircd-ratbox/modules/m_wallops.c
+
+
+
 leeh        2003/11/26 10:36:33 EST	(20031126_1)
 
   Modified files:
