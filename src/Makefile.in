@@ -85,7 +85,6 @@ BASE_SRCS =                     \
   s_newconf.c			\
   s_log.c                       \
   s_serv.c                      \
-  s_stats.c                     \
   s_user.c                      \
   scache.c                      \
   send.c                        \

@@ -31,7 +31,6 @@
 #include "event.h"
 #include "tools.h"
 #include "reject.h"
-#include "s_stats.h"
 #include "msg.h"
 
 static patricia_tree_t *reject_tree;

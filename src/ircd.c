@@ -51,7 +51,6 @@
 #include "s_conf.h"
 #include "s_log.h"
 #include "s_serv.h"		/* try_connections */
-#include "s_stats.h"
 #include "scache.h"
 #include "send.h"
 #include "whowas.h"
@@ -83,6 +82,7 @@ struct server_info ServerInfo;
 struct admin_info AdminInfo;
 
 struct Counter Count;
+struct ServerStatistics ServerStats;
 
 struct timeval SystemTime;
 int ServerRunning;		/* GLOBAL - server execution state */
@@ -515,6 +515,7 @@ main(int argc, char *argv[])
 	memset((void *) &Count, 0, sizeof(Count));
 	memset((void *) &ServerInfo, 0, sizeof(ServerInfo));
 	memset((void *) &AdminInfo, 0, sizeof(AdminInfo));
+	memset(&ServerStats, 0, sizeof(ServerStats));
 
 	/* Initialise the channel capability usage counts... */
 	init_chcap_usage_counts();
@@ -594,7 +595,6 @@ main(int argc, char *argv[])
 	init_channels();
 	initclass();
 	initwhowas();
-	init_stats();
 	init_hooks();
 	init_reject();
 	init_cache();

@@ -48,7 +48,6 @@
 #include "s_conf.h"
 #include "s_newconf.h"
 #include "s_log.h"
-#include "s_stats.h"
 #include "s_user.h"
 #include "scache.h"
 #include "send.h"

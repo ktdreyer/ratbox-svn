@@ -43,7 +43,6 @@
 #include "s_newconf.h"
 #include "s_log.h"
 #include "s_serv.h"
-#include "s_stats.h"
 #include "scache.h"
 #include "send.h"
 #include "supported.h"

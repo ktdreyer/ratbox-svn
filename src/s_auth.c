@@ -49,7 +49,6 @@
 #include "res.h"
 #include "commio.h"
 #include "s_log.h"
-#include "s_stats.h"
 #include "send.h"
 #include "memory.h"
 #include "hook.h"

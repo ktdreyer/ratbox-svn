@@ -44,7 +44,6 @@
 #include "s_newconf.h"
 #include "s_log.h"
 #include "s_serv.h"
-#include "s_stats.h"
 #include "send.h"
 #include "whowas.h"
 #include "s_user.h"

@@ -38,7 +38,6 @@
 #include "s_newconf.h"
 #include "s_log.h"		/* log level defines */
 #include "s_serv.h"		/* server_estab, check_server */
-#include "s_stats.h"		/* ServerStats */
 #include "s_user.h"
 #include "scache.h"		/* find_or_add */
 #include "send.h"		/* sendto_one */

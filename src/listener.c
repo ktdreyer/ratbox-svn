@@ -36,7 +36,6 @@
 #include "commio.h"
 #include "s_conf.h"
 #include "s_newconf.h"
-#include "s_stats.h"
 #include "send.h"
 #include "memory.h"
 #include "s_auth.h"
