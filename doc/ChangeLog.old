@@ -1,3 +1,15 @@
+androsyn    2002/07/10 04:31:15 EDT	(20020710_3)
+
+  Modified files:
+    include              ircd_defs.h 
+  Log:
+  Update comments to note that TOPICLEN isn't set here anymore..
+  
+  Revision  Changes    Path
+  7.30      +1 -1      ircd-hybrid-7/include/ircd_defs.h
+
+
+
 androsyn    2002/07/10 03:06:25 EDT	(20020710_2)
 
   Modified files:
