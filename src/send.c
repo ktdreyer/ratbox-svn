@@ -1616,16 +1616,16 @@ kill_client(struct Client *cptr,
   have_uid = 0;
   if(HasID(diedie))
     {
-      len_nick = ircsprintf(sendbuf_nick,"%s KILL %s :%s",
+      len_uid = ircsprintf(sendbuf_uid,":%s KILL %s :%s",
 			    me.name, diedie->user->id, reason);
-      len_nick = send_trim(sendbuf_nick, len_nick);
+      len_uid = send_trim(sendbuf_uid, len_uid);
       have_uid = 1;
     }		    
   else
     {
-      len_uid  = ircsprintf(sendbuf_uid,":%s KILL %s :%s",
+      len_nick  = ircsprintf(sendbuf_nick,":%s KILL %s :%s",
 			    me.name,diedie->name, reason);
-      len_uid  = send_trim(sendbuf_uid, len_uid);
+      len_nick  = send_trim(sendbuf_nick, len_nick);
     }
 
   if (have_uid && IsCapable(cptr, CAP_UID))

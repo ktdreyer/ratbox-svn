@@ -43,7 +43,7 @@ static char buf[BUFSIZE];
 static int ms_kill(struct Client*, struct Client*, int, char**);
 static int mo_kill(struct Client*, struct Client*, int, char**);
 static void relay_kill(struct Client *, struct Client *, struct Client *,
-                       const char *, const char *);
+                       const char *, const char *, const char *);
 
 struct Message kill_msgtab = {
   "KILL", 0, 2, 0, MFLG_SLOW, 0,
@@ -147,7 +147,7 @@ int mo_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   */
   if (!MyConnect(acptr))
     {
-      relay_kill(cptr, sptr, acptr, inpath, cptr->username );
+      relay_kill(cptr, sptr, acptr, inpath, cptr->username, reason);
       /*
       ** Set FLAGS_KILLED. This prevents exit_one_client from sending
       ** the unnecessary QUIT for this. (This flag should never be
@@ -248,18 +248,18 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   if (IsOper(sptr)) /* send it normally */
     {
       sendto_realops_flags(FLAGS_ALL,
-			   "Received KILL message for %s. From %s Path: %s!%s",
-			   acptr->name, parv[0], inpath, path);
+			   "Received KILL message for %s. From %s Path: %s!%s %s",
+			   acptr->name, parv[0], inpath, path, reason);
     }
   else
     {
       sendto_realops_flags(FLAGS_SKILL,
-			   "Received KILL message for %s. From %s",
-			   acptr->name, parv[0]);
+			   "Received KILL message for %s %s. From %s",
+			   acptr->name, parv[0], reason);
     }
 
-  log(L_INFO,"KILL From %s For %s Path %s!%s",
-      parv[0], acptr->name, inpath, path);
+  log(L_INFO,"KILL From %s For %s Path %s!%s %s",
+      parv[0], acptr->name, inpath, path, reason);
   /*
   ** And pass on the message to other servers. Note, that if KILL
   ** was changed, the message has to be sent to all links, also
@@ -268,10 +268,13 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   */
   if (!MyConnect(acptr) || !MyConnect(sptr) || !IsOper(sptr))
     {
-      relay_kill(cptr, sptr, acptr, inpath, path);
-      if (chasing && IsServer(cptr))
+      relay_kill(cptr, sptr, acptr, inpath, path, reason);
+      if (chasing)
+	kill_client(cptr, acptr, "%s!%s %s", inpath, path, reason);	
+#if 0
         sendto_one(cptr, ":%s KILL %s :%s!%s",
                    me.name, acptr->name, inpath, path);
+#endif
       /*
       ** Set FLAGS_KILLED. This prevents exit_one_client from sending
       ** the unnecessary QUIT for this. (This flag should never be
@@ -286,7 +289,8 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 static void relay_kill(struct Client *one, struct Client *sptr,
                        struct Client *acptr,
                        const char *inpath,
-                       const char *path)
+                       const char *path,
+		       const char *reason)
 {
   dlink_node *ptr;
   struct Client *cptr;
@@ -335,8 +339,11 @@ static void relay_kill(struct Client *one, struct Client *sptr,
 
     client_burst_if_needed(cptr, sptr);
 
+#if 0
     sendto_one(cptr, ":%s KILL %s :%s!%s", sptr->name, acptr->name,
                inpath, path);
+#endif
+    kill_client(cptr, acptr, "%s!%s %s", inpath, path, reason);
   }
 }
 
