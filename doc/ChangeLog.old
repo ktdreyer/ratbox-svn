@@ -1,3 +1,11 @@
+*** 20010107_5 by db
+- this fixes an assert() failure if a client exits before DNS has completed
+  We forgot to delete_resolver_queries() in exit_client() in client.c
+
+- I rewrote res.c to use dlink's instead of home grown link list code.
+
+
+
 *** 20010107_4 by fl_
 - removed unused variable
 
