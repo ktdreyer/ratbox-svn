@@ -733,4 +733,9 @@ void remove_our_modes( int hide_or_not,
 			     modebuf,
 			     para[0], para[1], para[2]);
     }
+
+  /* Move all voice/ops etc. to non opped list */
+  dlinkMoveList(&chptr->chanops, &chptr->peons);
+  dlinkMoveList(&chptr->halfops, &chptr->peons);
+  dlinkMoveList(&chptr->voiced, &chptr->peons);
 }

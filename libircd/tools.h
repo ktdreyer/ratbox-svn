@@ -27,4 +27,19 @@ struct _dlink_list {
     dlink_node *tail;
 };
 
+void
+dlinkAdd(void *data, dlink_node * m, dlink_list * list);
+
+void
+dlinkAddBefore(dlink_node *b, void *data, dlink_node *m, dlink_list *list);
+
+void
+dlinkAddTail(void *data, dlink_node *m, dlink_list *list);
+
+void
+dlinkDelete(dlink_node *m, dlink_list *list);
+
+void
+dlinkMoveList(dlink_list *from, dlink_list *to);
+
 #endif
