@@ -6,7 +6,7 @@
 
 struct client;
 
-typedef void (*scommand_func)(struct client *, char *parv[], int parc);
+typedef void (*scommand_func)(struct client *, const char *parv[], int parc);
 
 struct scommand_handler
 {
@@ -19,7 +19,7 @@ struct scommand_handler
 #define FLAGS_UNKNOWN	0x0001
 
 extern void init_scommand(void);
-extern void handle_scommand(const char *command, char *parv[], int parc);
+extern void handle_scommand(const char *command, const char *parv[], int parc);
 extern void add_scommand_handler(struct scommand_handler *);
 
 extern void add_scommand_hook(scommand_func func, const char *command);

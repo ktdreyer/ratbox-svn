@@ -19,13 +19,13 @@
 
 static dlink_list scommand_table[MAX_SCOMMAND_HASH];
 
-static void c_admin(struct client *, char *parv[], int parc);
-static void c_ping(struct client *, char *parv[], int parc);
-static void c_pong(struct client *, char *parv[], int parc);
-static void c_stats(struct client *, char *parv[], int parc);
-static void c_trace(struct client *, char *parv[], int parc);
-static void c_version(struct client *, char *parv[], int parc);
-static void c_whois(struct client *, char *parv[], int parc);
+static void c_admin(struct client *, const char *parv[], int parc);
+static void c_ping(struct client *, const char *parv[], int parc);
+static void c_pong(struct client *, const char *parv[], int parc);
+static void c_stats(struct client *, const char *parv[], int parc);
+static void c_trace(struct client *, const char *parv[], int parc);
+static void c_version(struct client *, const char *parv[], int parc);
+static void c_whois(struct client *, const char *parv[], int parc);
 
 static struct scommand_handler admin_command = { "ADMIN", c_admin, 0, DLINK_EMPTY };
 static struct scommand_handler ping_command = { "PING", c_ping, 0, DLINK_EMPTY };
@@ -62,7 +62,7 @@ hash_command(const char *p)
 }
 
 static void
-handle_scommand_unknown(const char *command, char *parv[], int parc)
+handle_scommand_unknown(const char *command, const char *parv[], int parc)
 {
 	struct scommand_handler *handler;
 	dlink_node *ptr;
@@ -82,7 +82,7 @@ handle_scommand_unknown(const char *command, char *parv[], int parc)
 
 static void
 handle_scommand_client(struct client *client_p, const char *command, 
-			char *parv[], int parc)
+			const char *parv[], int parc)
 {
 	struct scommand_handler *handler;
 	scommand_func hook;
@@ -109,7 +109,7 @@ handle_scommand_client(struct client *client_p, const char *command,
 }
 
 void
-handle_scommand(const char *command, char *parv[], int parc)
+handle_scommand(const char *command, const char *parv[], int parc)
 {
 	struct client *client_p;
 
@@ -181,7 +181,7 @@ del_scommand_hook(scommand_func hook, const char *command)
 }
 
 static void
-c_admin(struct client *client_p, char *parv[], int parc)
+c_admin(struct client *client_p, const char *parv[], int parc)
 {
 	if(parc < 2 || EmptyString(parv[1]))
 		return;
@@ -204,7 +204,7 @@ c_admin(struct client *client_p, char *parv[], int parc)
 }
 
 static void
-c_ping(struct client *client_p, char *parv[], int parc)
+c_ping(struct client *client_p, const char *parv[], int parc)
 {
 	if(parc < 2 || EmptyString(parv[1]))
 		return;
@@ -213,7 +213,7 @@ c_ping(struct client *client_p, char *parv[], int parc)
 }
 
 static void
-c_pong(struct client *client_p, char *parv[], int parc)
+c_pong(struct client *client_p, const char *parv[], int parc)
 {
         if(parc < 2 || EmptyString(parv[1]))
                 return;
@@ -228,7 +228,7 @@ c_pong(struct client *client_p, char *parv[], int parc)
 }
 
 static void
-c_trace(struct client *client_p, char *parv[], int parc)
+c_trace(struct client *client_p, const char *parv[], int parc)
 {
         struct client *service_p;
         dlink_node *ptr;
@@ -259,7 +259,7 @@ c_trace(struct client *client_p, char *parv[], int parc)
 }
 	
 static void
-c_version(struct client *client_p, char *parv[], int parc)
+c_version(struct client *client_p, const char *parv[], int parc)
 {
 	if(parc < 2 || EmptyString(parv[1]))
 		return;
@@ -271,7 +271,7 @@ c_version(struct client *client_p, char *parv[], int parc)
 }
 
 static void
-c_whois(struct client *client_p, char *parv[], int parc)
+c_whois(struct client *client_p, const char *parv[], int parc)
 {
         struct client *target_p;
 
@@ -323,7 +323,7 @@ c_whois(struct client *client_p, char *parv[], int parc)
 }
 
 static void
-c_stats(struct client *client_p, char *parv[], int parc)
+c_stats(struct client *client_p, const char *parv[], int parc)
 {
 	char statchar;
 

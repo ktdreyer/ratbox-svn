@@ -13,7 +13,7 @@
 #include "scommand.h"
 #include "log.h"
 
-static void c_mode(struct client *, char *parv[], int parc);
+static void c_mode(struct client *, const char *parv[], int parc);
 struct scommand_handler mode_command = { "MODE", c_mode, 0, DLINK_EMPTY };
 
 /* change_chmember_status()
@@ -90,11 +90,11 @@ del_ban(const char *banstr, dlink_list *list)
  *   the MODE handler
  */
 static void
-c_mode(struct client *client_p, char *parv[], int parc)
+c_mode(struct client *client_p, const char *parv[], int parc)
 {
 	struct client *target_p;
 	struct channel *chptr;
-	char *p;
+	const char *p;
 	int args = 0;
 	int dir = 1;
 

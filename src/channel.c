@@ -20,12 +20,12 @@ dlink_list channel_list;
 static BlockHeap *channel_heap;
 static BlockHeap *chmember_heap;
 
-static void c_join(struct client *, char *parv[], int parc);
-static void c_kick(struct client *, char *parv[], int parc);
-static void c_part(struct client *, char *parv[], int parc);
-static void c_sjoin(struct client *, char *parv[], int parc);
-static void c_tb(struct client *, char *parv[], int parc);
-static void c_topic(struct client *, char *parv[], int parc);
+static void c_join(struct client *, const char *parv[], int parc);
+static void c_kick(struct client *, const char *parv[], int parc);
+static void c_part(struct client *, const char *parv[], int parc);
+static void c_sjoin(struct client *, const char *parv[], int parc);
+static void c_tb(struct client *, const char *parv[], int parc);
+static void c_topic(struct client *, const char *parv[], int parc);
 
 static struct scommand_handler join_command = { "JOIN", c_join, 0, DLINK_EMPTY };
 static struct scommand_handler kick_command = { "KICK", c_kick, 0, DLINK_EMPTY };
@@ -237,7 +237,7 @@ count_topics(void)
  *   the JOIN handler
  */
 static void
-c_join(struct client *client_p, char *parv[], int parc)
+c_join(struct client *client_p, const char *parv[], int parc)
 {
 	dlink_node *ptr;
 	dlink_node *next_ptr;
@@ -262,7 +262,7 @@ c_join(struct client *client_p, char *parv[], int parc)
  *   the KICK handler
  */
 static void
-c_kick(struct client *client_p, char *parv[], int parc)
+c_kick(struct client *client_p, const char *parv[], int parc)
 {
 	struct client *target_p;
 	struct channel *chptr;
@@ -287,7 +287,7 @@ c_kick(struct client *client_p, char *parv[], int parc)
  *   the PART handler
  */
 static void
-c_part(struct client *client_p, char *parv[], int parc)
+c_part(struct client *client_p, const char *parv[], int parc)
 {
 	struct chmember *mptr;
 	struct channel *chptr;
@@ -311,7 +311,7 @@ c_part(struct client *client_p, char *parv[], int parc)
  *   the TOPIC handler
  */
 static void
-c_topic(struct client *client_p, char *parv[], int parc)
+c_topic(struct client *client_p, const char *parv[], int parc)
 {
 	struct channel *chptr;
 
@@ -343,7 +343,7 @@ c_topic(struct client *client_p, char *parv[], int parc)
  *   the TB handler
  */
 static void
-c_tb(struct client *client_p, char *parv[], int parc)
+c_tb(struct client *client_p, const char *parv[], int parc)
 {
 	struct channel *chptr;
 
@@ -428,13 +428,14 @@ chmode_to_string(struct channel *chptr)
  *   the SJOIN handler
  */
 static void
-c_sjoin(struct client *client_p, char *parv[], int parc)
+c_sjoin(struct client *client_p, const char *parv[], int parc)
 {
 	struct channel *chptr;
 	struct client *target_p;
 	struct chmode newmode;
 	char *p;
-	char *s;
+	const char *s;
+	char *nicks;
 	time_t newts;
 	int flags = 0;
 	int isnew = 0;
@@ -536,8 +537,10 @@ c_sjoin(struct client *client_p, char *parv[], int parc)
 	if(EmptyString(parv[4+args]))
 		return;
 
+	nicks = LOCAL_COPY(parv[4+args]);
+
         /* now parse the nicklist */
-	for(s = parv[4+args]; !EmptyString(s); s = p)
+	for(s = nicks; !EmptyString(s); s = p)
 	{
 		flags = 0;
 

@@ -837,7 +837,7 @@ parse_server(char *buf, int len)
 
 	parc = string_to_array(ch, parv);
 
-	handle_scommand(command, parv, parc);
+	handle_scommand(command, (const char **) parv, parc);
 }
 
 /* parse_client()

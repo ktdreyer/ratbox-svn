@@ -29,11 +29,11 @@ static BlockHeap *server_heap;
 static BlockHeap *host_heap;
 static BlockHeap *uhost_heap;
 
-static void c_kill(struct client *, char *parv[], int parc);
-static void c_nick(struct client *, char *parv[], int parc);
-static void c_quit(struct client *, char *parv[], int parc);
-static void c_server(struct client *, char *parv[], int parc);
-static void c_squit(struct client *, char *parv[], int parc);
+static void c_kill(struct client *, const char *parv[], int parc);
+static void c_nick(struct client *, const char *parv[], int parc);
+static void c_quit(struct client *, const char *parv[], int parc);
+static void c_server(struct client *, const char *parv[], int parc);
+static void c_squit(struct client *, const char *parv[], int parc);
 
 static struct scommand_handler kill_command = { "KILL", c_kill, 0, DLINK_EMPTY };
 static struct scommand_handler nick_command = { "NICK", c_nick, 0, DLINK_EMPTY };
@@ -497,7 +497,7 @@ umode_to_string(int umode)
  *   the NICK handler
  */
 void
-c_nick(struct client *client_p, char *parv[], int parc)
+c_nick(struct client *client_p, const char *parv[], int parc)
 {
 	struct client *target_p;
 	struct client *uplink_p;
@@ -591,7 +591,7 @@ c_nick(struct client *client_p, char *parv[], int parc)
  *   the QUIT handler
  */
 void
-c_quit(struct client *client_p, char *parv[], int parc)
+c_quit(struct client *client_p, const char *parv[], int parc)
 {
 	if(!IsUser(client_p))
 	{
@@ -606,7 +606,7 @@ c_quit(struct client *client_p, char *parv[], int parc)
  *   the KILL handler
  */
 void
-c_kill(struct client *client_p, char *parv[], int parc)
+c_kill(struct client *client_p, const char *parv[], int parc)
 {
 	static time_t first_kill = 0;
 	static int num_kill = 0;
@@ -659,7 +659,7 @@ c_kill(struct client *client_p, char *parv[], int parc)
  *   the SERVER handler
  */
 void
-c_server(struct client *client_p, char *parv[], int parc)
+c_server(struct client *client_p, const char *parv[], int parc)
 {
 	struct client *target_p;
 	static char default_gecos[] = "(Unknown Location)";
@@ -711,7 +711,7 @@ c_server(struct client *client_p, char *parv[], int parc)
  *   the SQUIT handler
  */
 void
-c_squit(struct client *client_p, char *parv[], int parc)
+c_squit(struct client *client_p, const char *parv[], int parc)
 {
 	struct client *target_p;
 

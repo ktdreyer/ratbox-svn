@@ -49,4 +49,14 @@ extern int errno;
 #include "config.h"
 #include "tools.h"
 
+#ifdef strdupa
+#define LOCAL_COPY(s) strdupa(s) 
+#else
+#if defined(__INTEL_COMPILER) || defined(__GNUC__)
+# define LOCAL_COPY(s) __extension__({ char *_s = alloca(strlen(s) + 1); strcpy(_s, s); _s; })
+#else
+# define LOCAL_COPY(s) strcpy(alloca(strlen(s) + 1), s) /* XXX Is that allowed? */
+#endif /* defined(__INTEL_COMPILER) || defined(__GNUC__) */
+#endif /* strdupa */
+
 #endif

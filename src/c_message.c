@@ -15,22 +15,26 @@
 #include "log.h"
 #include "io.h"
 
-static void c_message(struct client *, char *parv[], int parc);
+static void c_message(struct client *, const char *parv[], int parc);
 
 struct scommand_handler privmsg_command = { "PRIVMSG", c_message, 0, DLINK_EMPTY };
 
 static void
-c_message(struct client *client_p, char *parv[], int parc)
+c_message(struct client *client_p, const char *parv[], int parc)
 {
 	struct client *target_p = NULL;
 	struct client *tmp_p;
+	char *target;
+	char *text;
 	char *p;
 
 	if(parc < 3 || EmptyString(parv[2]))
 		return;
 
+	target = LOCAL_COPY(parv[1]);
+
 	/* username@server messaged? */
-	if((p = strchr(parv[1], '@')) != NULL)
+	if((p = strchr(target, '@')) != NULL)
 	{
 		dlink_node *ptr;
 
@@ -41,7 +45,7 @@ c_message(struct client *client_p, char *parv[], int parc)
 		{
 			tmp_p = ptr->data;
 
-			if(!irccmp(parv[1], tmp_p->service->username))
+			if(!irccmp(target, tmp_p->service->username))
 			{
 				target_p = tmp_p;
 				break;
@@ -50,7 +54,7 @@ c_message(struct client *client_p, char *parv[], int parc)
 	}
 	/* hunt for the nick.. */
 	else
-		target_p = find_service(parv[1]);
+		target_p = find_service(target);
 
 	if(target_p == NULL)
 		return;
@@ -83,7 +87,8 @@ c_message(struct client *client_p, char *parv[], int parc)
 			char *cport;
 			int port;
 
-			p = parv[2]+10;
+			p = LOCAL_COPY(parv[2]);
+			p += 10;
 
 			/* skip the 'chat' */
 			if((host = strchr(p, ' ')) == NULL)
@@ -135,6 +140,7 @@ c_message(struct client *client_p, char *parv[], int parc)
 		return;
 	}
 
-	handle_service(target_p, client_p, parv[2]);
+	text = LOCAL_COPY(parv[2]);
+	handle_service(target_p, client_p, text);
 }
 
