@@ -785,8 +785,24 @@ stats_ports (struct Client *source_p)
 static void
 stats_resv (struct Client *source_p)
 {
-#ifdef XXX_NEED_RESV_CODE
-#endif
+	struct rxconf *resv_p;
+	dlink_node *ptr;
+
+	DLINK_FOREACH(ptr, resv_list.head)
+	{
+		resv_p = ptr->data;
+		sendto_one(source_p, form_str(RPL_STATSQLINE),
+			   me.name, source_p->name, 
+			   resv_p->name, resv_p->reason);
+	}
+
+	DLINK_FOREACH(ptr, resv_hash_list.head)
+	{
+		resv_p = ptr->data;
+		sendto_one(source_p, form_str(RPL_STATSQLINE),
+			   me.name, source_p->name,
+			   resv_p->name, resv_p->reason);
+	}	
 }
 
 static void
