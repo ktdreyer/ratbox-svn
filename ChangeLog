@@ -1,3 +1,15 @@
+androsyn    2002/11/27 03:24:55 UTC	(20021127_2)
+
+  Modified files:
+    src                  channel_mode.c 
+  Log:
+  If its not ours..pass the overflowed ban anyways..
+  
+  Revision  Changes    Path
+  7.89      +3 -3      ircd-ratbox/src/channel_mode.c
+
+
+
 androsyn    2002/11/27 03:23:20 UTC	(20021127_1)
 
   Modified files:
