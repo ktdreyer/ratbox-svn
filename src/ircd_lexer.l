@@ -115,6 +115,7 @@ compression_level { return COMPRESSION_LEVEL; }
 connect		{ return CONNECT; }
 connectfreq     { return CONNECTFREQ; }
 default_floodcount  { return DEFAULT_FLOODCOUNT; }
+default_cipher_preference { return DEFAULT_CIPHER_PREFERENCE; }
 deny		{ return DENY; }
 description	{ return DESCRIPTION; }
 die		{ return DIE; }

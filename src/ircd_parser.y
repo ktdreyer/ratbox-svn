@@ -110,6 +110,7 @@ int   class_redirport_var;
 %token  CONNECT
 %token  CONNECTFREQ
 %token  DEFAULT_FLOODCOUNT
+%token  DEFAULT_CIPHER_PREFERENCE
 %token  DENY
 %token  DESCRIPTION
 %token  DIE
@@ -1361,7 +1362,7 @@ connect_item:   connect_name | connect_host | connect_send_password |
  		connect_fakename | connect_lazylink | connect_hub_mask | 
 		connect_leaf_mask | connect_class | connect_auto | 
 		connect_encrypted | connect_compressed | connect_cryptlink |
-		connect_pubkey |
+		connect_pubkey | connect_cipher_preference |
                 error
 
 connect_name:   NAME '=' QSTRING ';'
@@ -1588,6 +1589,56 @@ connect_class:  CLASS '=' QSTRING ';'
     DupString(yy_aconf->className, yylval.string);
   };
 
+connect_cipher_preference: CIPHER_PREFERENCE '=' QSTRING ';'
+  {
+#ifdef HAVE_LIBCRYPTO
+    struct EncCapability *ecap;
+    char *s, *p;
+    int cipher_count = 0;
+    int found;
+
+    for(ecap = enccaptab; ecap->name; ecap++)
+    {
+      cipher_count++;
+    }
+
+    MyFree(yy_aconf->ciphertab);
+    yy_aconf->ciphertab = MyMalloc(sizeof(struct EncCapability)
+                                   * (cipher_count+1));
+
+    memcpy(yy_aconf->ciphertab, enccaptab, 
+           sizeof(struct EncCapability) * (cipher_count+1));
+
+    for(ecap = yy_aconf->ciphertab; ecap->name; ecap++)
+    {
+      ecap->priority = 0;
+    }
+
+    cipher_count = 0;
+    for (s = strtoken(&p, yylval.string, ", "); s; s = strtoken(&p, NULL, ", "))
+    {
+      found = 0;
+      for(ecap = yy_aconf->ciphertab; ecap->name; ecap++)
+      {
+        if (!strcmp(s, ecap->name))
+        {
+          ecap->priority = ++cipher_count;
+          found = 1;
+        }
+      }
+      if (!found)
+      {
+        sendto_realops_flags(FLAGS_ALL,
+			     "Invalid cipher '%s' ignored",
+			     s);
+      }
+    }
+#else
+    sendto_realops_flags(FLAGS_ALL,
+      "Ignoring 'cipher_preference' line for %s -- no OpenSSL support",
+       yy_aconf->name);
+#endif
+  };
 
 /***************************************************************************
  *  section kill
@@ -1843,7 +1894,8 @@ general_item:       general_failed_oper_notice |
                     general_vchans_oper_only | general_disable_vchans |
                     general_caller_id_wait | general_default_floodcount |
                     general_persistant_expire_time | general_min_nonwildcard |
-                    general_servlink_path | general_cipher_preference |
+                    general_servlink_path |
+                    general_default_cipher_preference |
                     general_compression_level | error
 
 general_failed_oper_notice:   FAILED_OPER_NOTICE '=' TYES ';'
@@ -2103,7 +2155,7 @@ general_servlink_path: SERVLINK_PATH '=' QSTRING ';'
     DupString(ConfigFileEntry.servlink_path, yylval.string);
   } ;
 
-general_cipher_preference: CIPHER_PREFERENCE '=' QSTRING ';'
+general_default_cipher_preference: DEFAULT_CIPHER_PREFERENCE '=' QSTRING ';'
   {
 #ifdef HAVE_LIBCRYPTO
     struct EncCapability *ecap;
@@ -2136,7 +2188,7 @@ general_cipher_preference: CIPHER_PREFERENCE '=' QSTRING ';'
     }
 #else
     sendto_realops_flags(FLAGS_ALL,
-                  "Ignoring 'cipher_preference' line -- no OpenSSL support");
+      "Ignoring 'default_cipher_preference' line -- no OpenSSL support");
 #endif
   } ;
 

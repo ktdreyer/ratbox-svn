@@ -80,9 +80,6 @@ static char *parse_cryptserv_args(struct Client *client_p,
 
 static void mr_cryptserv(struct Client*, struct Client*, int, char **);
 static void mr_cryptauth(struct Client*, struct Client*, int, char **);
-#if 0
-static void m_cryptkey(struct Client*, struct Client*, int, char **);         
-#endif
 
 struct Message cryptserv_msgtab = {
   "CRYPTSERV", 0, 3, 0, MFLG_SLOW | MFLG_UNREG, 0,
@@ -90,16 +87,9 @@ struct Message cryptserv_msgtab = {
 };
 
 struct Message cryptauth_msgtab = {
-  "CRYPTAUTH", 0, 1, 0, MFLG_SLOW | MFLG_UNREG, 0,
+  "CRYPTAUTH", 0, 2, 0, MFLG_SLOW | MFLG_UNREG, 0,
   {mr_cryptauth, m_registered, m_error, m_registered}
 };
-
-#if 0
-struct Message cryptkey_msgtab = {
-  "CRYPTKEY", 0, 1, 0, MFLG_SLOW, 0,
-  {m_unregistered, m_ignore, m_cryptkey, m_ignore}
-};
-#endif
 
 #ifndef STATIC_MODULES
 void 
@@ -107,9 +97,6 @@ _modinit(void)
 {
   mod_add_cmd(&cryptserv_msgtab);
   mod_add_cmd(&cryptauth_msgtab);
-#if 0
-  mod_add_cmd(&cryptkey_msgtab);                                               
-#endif
 }
 
 void
@@ -117,9 +104,6 @@ _moddeinit(void)
 {
   mod_del_cmd(&cryptserv_msgtab);
   mod_del_cmd(&cryptauth_msgtab);
-#if 0
-  mod_del_cmd(&cryptkey_msgtab);
-#endif
 }
 
 char *_version = "20010412";
@@ -137,7 +121,7 @@ static void mr_cryptauth(struct Client *client_p, struct Client *source_p,
   int   len;
   char *enc;
   char *key;
-  
+
   if (parc < 3 || !IsWaitAuth(client_p))
     return;
 
@@ -237,7 +221,6 @@ static void mr_cryptserv(struct Client *client_p, struct Client *source_p,
   struct ConfItem  *aconf;
   char            *encrypted;
   int              enc_len;
-
 
   if ( (name = parse_cryptserv_args(client_p, parv, parc, info, key)) == NULL )
     {
@@ -369,7 +352,7 @@ static void mr_cryptserv(struct Client *client_p, struct Client *source_p,
   strncpy_irc(client_p->info, info[0] ? info : me.name, REALLEN);
   client_p->hopcount = 0;
 
-  if (!(client_p->localClient->out_cipher = select_cipher(client_p)))
+  if (!(client_p->localClient->out_cipher = select_cipher(client_p, aconf)))
     {
       cryptlink_error(client_p,
                 "%s[%s]: CRYPTLINK failed - couldn't find compatable cipher");
@@ -406,71 +389,6 @@ static void mr_cryptserv(struct Client *client_p, struct Client *source_p,
   SetCryptOut(client_p);
   MyFree(b64_key);
 }
-
-#if 0 /* broken */
-/*
- * m_cryptkey - CRYPTKEY message handler
- *      parv[1] = session key
- */
-static void m_cryptkey(struct Client *client_p, struct Client *source_p,
-                       int parc, char *parv[])
-{
-  int decoded_len, len;
-  unsigned char *key, *tmp;
-
-  if (!(parc > 1 && IsCryptOut(client_p) && MyConnect(client_p) &&
-        IsCapable(client_p, CAP_ENC) && IsCapable(client_p, CAP_DK)))
-    return;
-
-  if ( !(decoded_len = unbase64_block((char **)&tmp, parv[1],
-                                      strlen(parv[1]))) )
-  {
-    cryptlink_error(client_p, "%s[%s] Key regen failed - couldn't decode key");
-    return;
-  }
-
-  key = MyMalloc( RSA_size( ServerInfo.rsa_private_key ) );
-
-  len = RSA_private_decrypt( decoded_len, tmp, key,
-                             ServerInfo.rsa_private_key,
-                             RSA_PKCS1_PADDING );
-
-  MyFree(tmp);
-
-  if (len != CIPHERKEYLEN)
-  {
-    cryptlink_error(client_p, "%s[%s] Key regen failed - couldn't decrypt key");
-    MyFree( key );
-    return;
-  }
-
-  memcpy( client_p->localClient->out_key, key, CIPHERKEYLEN );
-
-  MyFree(key);
-
-#if 0
-  {
-    char *in, *out;
-
-    base64_block( &in, client_p->localClient->in_key, CIPHERKEYLEN );
-    in[22] = '\0';
-    base64_block( &out, client_p->localClient->out_key, CIPHERKEYLEN );
-    out[22] = '\0';
-    sendto_realops_flags(FLAGS_ALL,
-          "New decryption key received! Keys are "
-          "Encrypt: %s -- Decrypt: %s for %s", out, in,
-          client_p->name);
-    MyFree(in);
-    MyFree(out);
-  }
-#else
-    sendto_realops_flags(FLAGS_ALL,
-          "New decryption key received for %s!",
-          client_p->name);
-#endif
-}
-
-#endif
 
 /*
  * parse_cryptserv_args

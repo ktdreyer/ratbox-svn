@@ -2336,13 +2336,13 @@ if eval "test \"`echo '$ac_cv_func_'$ac_func`\" = yes"; then
   cat >> confdefs.h <<EOF
 #define $ac_tr_func 1
 EOF
- cf_openssl_ciphers="${cf_openssl_ciphers}BF/128 BF/256 "
+ cf_openssl_ciphers="${cf_openssl_ciphers}BF/256 BF/128 "
 else
   echo "$ac_t""no" 1>&6
 fi
 done
 
-            for ac_func in EVP_cast5_cf
+            for ac_func in EVP_cast5_cfb
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
 echo "configure:2349: checking for $ac_func" >&5
@@ -2397,7 +2397,7 @@ else
 fi
 done
 
-            for ac_func in EVP_des_cfb
+            for ac_func in EVP_idea_cfb
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
 echo "configure:2404: checking for $ac_func" >&5
@@ -2446,13 +2446,13 @@ if eval "test \"`echo '$ac_cv_func_'$ac_func`\" = yes"; then
   cat >> confdefs.h <<EOF
 #define $ac_tr_func 1
 EOF
- cf_openssl_ciphers="${cf_openssl_ciphers}DES/56 "
+ cf_openssl_ciphers="${cf_openssl_ciphers}IDEA/128 "
 else
   echo "$ac_t""no" 1>&6
 fi
 done
 
-            for ac_func in EVP_des_ede3_cfb
+            for ac_func in EVP_rc5_32_12_16_cfb
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
 echo "configure:2459: checking for $ac_func" >&5
@@ -2501,13 +2501,13 @@ if eval "test \"`echo '$ac_cv_func_'$ac_func`\" = yes"; then
   cat >> confdefs.h <<EOF
 #define $ac_tr_func 1
 EOF
- cf_openssl_ciphers="${cf_openssl_ciphers}3DES/168 "
+ cf_openssl_ciphers="${cf_openssl_ciphers}RC5.16/128 RC5.12/128 RC5.8/128 "
 else
   echo "$ac_t""no" 1>&6
 fi
 done
 
-            for ac_func in EVP_idea_cfb
+            for ac_func in EVP_des_ede3_cfb
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
 echo "configure:2514: checking for $ac_func" >&5
@@ -2556,13 +2556,13 @@ if eval "test \"`echo '$ac_cv_func_'$ac_func`\" = yes"; then
   cat >> confdefs.h <<EOF
 #define $ac_tr_func 1
 EOF
- cf_openssl_ciphers="${cf_openssl_ciphers}IDEA/128 "
+ cf_openssl_ciphers="${cf_openssl_ciphers}3DES/168 "
 else
   echo "$ac_t""no" 1>&6
 fi
 done
 
-            for ac_func in EVP_rc5_32_12_16_cfb
+            for ac_func in EVP_des_cfb
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
 echo "configure:2569: checking for $ac_func" >&5
@@ -2611,7 +2611,7 @@ if eval "test \"`echo '$ac_cv_func_'$ac_func`\" = yes"; then
   cat >> confdefs.h <<EOF
 #define $ac_tr_func 1
 EOF
- cf_openssl_ciphers="${cf_openssl_ciphers}RC5.8/128 RC5.12/128 RC5.16/128"
+ cf_openssl_ciphers="${cf_openssl_ciphers}DES/56 "
 else
   echo "$ac_t""no" 1>&6
 fi
@@ -2990,7 +2990,7 @@ EOF
 
 else
 	echo "Checking for shared module support"
-	ODULES_DEFINE=""
+	MODULES_DEFINE=""
 	MODULES_LIBS=""
 	MOD_TARGET="shared_modules"
 	
@@ -3858,6 +3858,7 @@ test "$no_create" = yes || ${CONFIG_SHELL-/bin/sh} $CONFIG_STATUS || exit 1
 if test "X${cf_openssl_ciphers}" != "X"; then
   echo 
   echo "Available cryptlinks ciphers:"
-  echo "    ${cf_openssl_ciphers}"
+  echo
+  echo "${cf_openssl_ciphers}"
   echo
 fi

@@ -258,7 +258,8 @@ extern int         hunt_server(struct Client* client_pt,
                                char* command, int server, 
                                int parc, char** parv);
 extern const char* my_name_for_link(const char* name, struct ConfItem* conf);
-extern void        send_capabilities(struct Client*, int, int);
+extern void        send_capabilities(struct Client*, struct ConfItem* conf,
+                                     int, int);
 extern int         server_estab(struct Client* client_p);
 extern void        set_autoconn(struct Client *,char *,char *,int);
 extern const char* show_capabilities(struct Client* client);
@@ -282,7 +283,8 @@ void add_lazylinkchannel(struct Client *client_p, struct Channel *chptr);
 void add_lazylinkclient(struct Client *client_p, struct Client *source_p);
 void remove_lazylink_flags(unsigned long mask);
 void client_burst_if_needed(struct Client *client_p, struct Client *target_p);
-struct EncCapability *select_cipher(struct Client *client_p);
+struct EncCapability *select_cipher(struct Client *client_p,
+                                    struct ConfItem *aconf);
 
 #endif /* INCLUDED_s_serv_h */
 

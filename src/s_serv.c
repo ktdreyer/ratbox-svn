@@ -233,14 +233,22 @@ void collect_zipstats(void *unused)
 }
 
 #ifdef HAVE_LIBCRYPTO
-struct EncCapability* select_cipher(struct Client *client_p)
+struct EncCapability* select_cipher(struct Client *client_p,
+                                    struct ConfItem *aconf)
 {
   struct EncCapability *cipher = NULL;
   struct EncCapability *ecap;
   int priority = -1;
 
   /* Find the lowest (>0) priority cipher available */
-  for (ecap = enccaptab; ecap->name; ecap++)
+
+  /* use connect{} specific info if available, else use defaults */
+  if (aconf->ciphertab)
+    ecap = aconf->ciphertab;
+  else
+    ecap = enccaptab;
+
+  for (; ecap->name; ecap++)
   {
     if ((ecap->priority > 0) &&         /* enabled */
         IsCapableEnc(client_p, ecap->cap) && /* supported */
@@ -735,8 +743,8 @@ int check_server(struct Client* client_p)
  * side effects	- send the CAPAB line to a server  -orabidoo
  *
  */
-void send_capabilities(struct Client *client_p, int cap_can_send,
-                       int enc_can_send )
+void send_capabilities(struct Client *client_p, struct ConfItem *aconf,
+                       int cap_can_send, int enc_can_send )
 {
   struct Capability *cap;
   char  msgbuf[BUFSIZE];
@@ -767,7 +775,12 @@ void send_capabilities(struct Client *client_p, int cap_can_send,
     strcpy(t, "ENC:");
     t += 4;
 
-    for (ecap = enccaptab; ecap->name; ++ecap)
+    if (aconf->ciphertab)
+      ecap = aconf->ciphertab;
+    else
+      ecap = enccaptab;
+
+    for (; ecap->name; ++ecap)
     {
       if ((ecap->cap & enc_can_send) &&
           (ecap->priority > 0))
@@ -999,7 +1012,7 @@ int server_estab(struct Client *client_p)
        * If this is a HUB, pass on CAP_HUB
        */
 
-      send_capabilities(client_p,CAP_MASK
+      send_capabilities(client_p, aconf, CAP_MASK
              | ((aconf->flags & CONF_FLAGS_LAZY_LINK) ? CAP_LL : 0)
              | (ServerInfo.hub ? CAP_HUB : 0)
              | ((aconf->flags & CONF_FLAGS_NOCOMPRESSED) ? 0:CAP_ZIP_SUPPORTED),
@@ -2112,7 +2125,7 @@ serv_connect_callback(int fd, int status, void *data)
      * If this is a HUB, pass on CAP_HUB
      */
 
-    send_capabilities(client_p,CAP_MASK
+    send_capabilities(client_p, aconf, CAP_MASK
              | ((aconf->flags & CONF_FLAGS_LAZY_LINK) ? CAP_LL : 0)
              | ((aconf->flags & CONF_FLAGS_NOCOMPRESSED) ? 0:CAP_ZIP_SUPPORTED)
              | (ServerInfo.hub ? CAP_HUB : 0),
@@ -2200,7 +2213,7 @@ void cryptlink_init(struct Client *client_p,
     }
 
 
-  send_capabilities(client_p,CAP_MASK
+  send_capabilities(client_p, aconf, CAP_MASK
          | ((aconf->flags & CONF_FLAGS_LAZY_LINK) ? CAP_LL : 0)
          | ((aconf->flags & CONF_FLAGS_NOCOMPRESSED) ? 0:CAP_ZIP_SUPPORTED)
          | (ServerInfo.hub ? CAP_HUB : 0),

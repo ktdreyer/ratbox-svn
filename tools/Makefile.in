@@ -28,7 +28,7 @@ localstatedir	= @localstatedir@
 moduledir	= @prefix@/modules
 automoduledir	= @prefix@/modules/autoload
 
-PROGS		= viconf mkpasswd fixklines convertconf
+PROGS		= viconf mkpasswd fixklines convertconf encspeed
 
 mkpasswd_SOURCES = mkpasswd.c
 mkpasswd_OBJECTS = mkpasswd.o
@@ -38,14 +38,18 @@ fixklines_SOURCES = fixklines.c
 fixklines_OBJECTS = fixklines.o
 convertconf_SOURCES = convertconf.c
 convertconf_OBJECTS = convertconf.o
+encspeed_SOURCES = encspeed.c
+encspeed_OBJECTS = encspeed.o
 
 all_OBJECTS = $(viconf_OBJECTS) $(mkpasswd_OBJECTS) $(fixklines_OBJECTS)\
-	$(convertconf_OBJECTS)
+	$(convertconf_OBJECTS) $(encspeed_OBJECTS)
 
 all: $(PROGS)
 
 build: all
 
+encspeed: $(encspeed_OBJECTS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o encspeed $(encspeed_OBJECTS) $(IRCDLIBS)
 mkpasswd: $(mkpasswd_OBJECTS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o mkpasswd $(mkpasswd_OBJECTS) $(IRCDLIBS)
 
