@@ -1,3 +1,11 @@
+*** 20010105_24 by db
+- removed BLOAT again add_hub_or_leaf was not necessary with
+  new conf format, only with old.
+- aconf->name is NAME of server only not hostname not IP but the
+  actual name of the server on the net. switched them around in HUB/LEAF code
+
+
+
 *** 20010105_23 by toot
 . changed some ugly %lu formating back to %d (caused compile warnings before)
 . use ircd.conf knock_delay instead of hard-coded 30 seconds, for m_knock
