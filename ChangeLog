@@ -1,3 +1,16 @@
+androsyn    2002/12/10 07:33:29 UTC	(20021210_1)
+
+  Modified files:
+    src                  packet.c 
+  Log:
+  Check to see if the client closed on us..Somebody should check the stable
+  tree btw with these fixes..heh
+  
+  Revision  Changes    Path
+  7.103     +3 -0      ircd-ratbox/src/packet.c
+
+
+
 androsyn    2002/12/10 07:24:49 UTC	(20021210_0)
 
   Modified files:
