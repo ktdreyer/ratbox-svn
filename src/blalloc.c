@@ -253,7 +253,7 @@ void * _BlockHeapAlloc (BlockHeap *bh)
                             ( (unit * sizeof(unsigned long) * 8 + ctr)
                               * (unsigned long )bh->elemSize))
                             );
-#ifdef DEBUGMEM
+#ifdef MEMDEBUG
            {
             MemoryEntry *mme = (MemoryEntry*)ret;
             mme->next = first_block_mem_entry;
@@ -265,8 +265,7 @@ void * _BlockHeapAlloc (BlockHeap *bh)
             if (line > 0)
               strncpy_irc(mme->file, file, 50)[49] = 0;
             mme->line = line;
-            mme->size = bh->size;
-            ret += sizeof(MemoryEntry)
+            ret += sizeof(MemoryEntry);
            }
 #endif
 		   return ret;
@@ -313,9 +312,9 @@ int _BlockHeapFree(BlockHeap *bh, void *ptr)
        return 1;
      }
 #ifdef MEMDEBUG
-   bh -= sizeof(MemoryEntry);
+   ptr -= sizeof(MemoryEntry);
    {
-    MemoryEntry *mme = (MemoryEntry*)bh;
+    MemoryEntry *mme = (MemoryEntry*)ptr;
     if (mme->last)
       mme->last->next = mme->next;
     else
