@@ -1,3 +1,8 @@
+*** 20001215_6 by db
+- tiny tweak to send_capabilities to clean it up
+
+
+
 *** 20001215_5 by db
 - I didn't get it right. 
   So for now, just set the eob flag for later use. 
