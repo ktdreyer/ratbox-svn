@@ -41,6 +41,13 @@ struct hook_links_data
 	char *mask;
 };
 
+struct hook_io_data
+{
+        struct Client *connection;
+        char *data;
+        unsigned int len;
+};
+
 int hook_add_event(char *);
 int hook_add_hook(char *, hookfn *);
 int hook_call_event(char *, void *);

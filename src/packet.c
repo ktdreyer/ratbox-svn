@@ -38,7 +38,7 @@
 #include "packet.h"
 #include "irc_string.h"
 #include "memory.h"
-
+#include "hook.h"
 
 static char               readBuf[READBUF_SIZE];
 
@@ -163,6 +163,9 @@ read_ctrl_packet(int fd, void *data)
   unsigned char tmp[2];
   unsigned char *len = tmp;
   struct SlinkRplDef *replydef;
+#ifndef NDEBUG
+  struct hook_io_data hdata;
+#endif
 
   assert(lserver != NULL);
   reply = &lserver->slinkrpl;
@@ -250,6 +253,13 @@ read_ctrl_packet(int fd, void *data)
       return; /* wait for more data */
   }
 
+#ifndef NDEBUG
+  hdata.connection = server;
+  hdata.len = reply->command;
+  hdata.data = NULL;
+  hook_call_event("iorecvctrl", &hdata);
+#endif
+  
   /* we now have the command and any data, pass it off to the handler */
   (*replydef->handler)(reply->command, reply->datalen, reply->data, server);
 
@@ -278,7 +288,9 @@ read_packet(int fd, void *data)
   int length = 0;
   int lbuf_len;
   int fd_r = client_p->fd;
-
+#ifndef NDEBUG
+  struct hook_io_data hdata;
+#endif
   /* if the client is dead, kill it off now -davidt */
   if(IsDead(client_p))
   {
@@ -314,6 +326,13 @@ read_packet(int fd, void *data)
     return;
   }
 
+#ifndef NDEBUG
+  hdata.connection = client_p;
+  hdata.data = readBuf;
+  hdata.len = length;
+  hook_call_event("iorecv", &hdata);
+#endif
+  
   if (client_p->lasttime < CurrentTime)
     client_p->lasttime = CurrentTime;
   if (client_p->lasttime > client_p->since)

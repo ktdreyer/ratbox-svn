@@ -23,6 +23,7 @@
 #include "event.h"
 #include "list.h"
 #include "balloc.h"
+#include "hook.h"
 
 #ifdef STRING_WITH_STRINGS
 # include <string.h>
@@ -588,7 +589,7 @@ linebuf_flush(int fd, buf_head_t *bufhead)
   /* Now, try writing data */
   retval = write(fd, bufline->buf + bufhead->writeofs, bufline->len
 		 - bufhead->writeofs);
-    
+   
   /* Deal with return code */
   if (retval < 0)
     return retval;

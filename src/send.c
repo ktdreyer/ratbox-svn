@@ -53,6 +53,7 @@
 #include "vchannel.h"
 #include "memory.h"
 #include "debug.h"
+#include "hook.h"
 
 #define LOG_BUFSIZE 2048
 
@@ -273,7 +274,10 @@ send_queued_write(int fd, void *data)
 {
   struct Client *to = data;
   int retlen;
-
+#ifndef NDEBUG
+  struct hook_io_data hdata;
+#endif
+  
   /*
    ** Once socket is marked dead, we cannot start writing to it,
    ** even if the error is removed...
@@ -291,6 +295,14 @@ send_queued_write(int fd, void *data)
 #endif
 
   /* Next, lets try to write some data */
+#ifndef NDEBUG
+  hdata.connection = to;
+  if (to->localClient->buf_sendq.list.head)
+    hdata.data =
+      ((buf_line_t *)to->localClient->buf_sendq.list.head->data)->buf +
+      to->localClient->buf_sendq.writeofs;
+#endif
+  
   if (linebuf_len(&to->localClient->buf_sendq)) {
     retlen = linebuf_flush(to->fd, &to->localClient->buf_sendq);
     if ((retlen < 0) && (ignoreErrno(errno))) {
@@ -305,6 +317,10 @@ send_queued_write(int fd, void *data)
       return;
     } else {
       /* We have some data written .. update counters */
+#ifndef NDEBUG
+      hdata.len = retlen;
+      hook_call_event("iosend", &hdata);
+#endif
       to->localClient->sendB += retlen;
       me.localClient->sendB += retlen;
       if (to->localClient->sendB > 1023)

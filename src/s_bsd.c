@@ -109,7 +109,7 @@ void close_all_connections(void)
 #ifndef NDEBUG
   /* fugly hack to reserve fd == 2 */
   (void)close(2);
-  fd = open("stderr.log",O_WRONLY|O_CREAT|O_APPEND,0755);
+  fd = open("stderr.log",O_WRONLY|O_CREAT|O_APPEND,0644);
   if( fd >= 0 )
     {
       dup2(fd, 2);

@@ -3283,15 +3283,11 @@ if test "${enable_assert+set}" = set; then
   case "$enableval" in
   yes)
     echo "Enabling assert() code."
-    IRC_CFLAGS="$IRC_CFLAGS -DNDEBUG"
+    IRC_CFLAGS="$IRC_CFLAGS"
     ;;
   no)
     echo "Disabling assert() code."
-    ##
-    ##  This should be changed to disable asserts for the release
-    ##  IRC_CFLAGS="$IRC_CFLAGS -DNDEBUG"
-    ##
-    IRC_CFLAGS="$IRC_CFLAGS"
+    IRC_CFLAGS="$IRC_CFLAGS -DNDEBUG"
     ;;
   esac
 
@@ -3328,12 +3324,12 @@ else
 	MOD_TARGET="shared_modules"
 	
 	echo $ac_n "checking for dlopen""... $ac_c" 1>&6
-echo "configure:3332: checking for dlopen" >&5
+echo "configure:3328: checking for dlopen" >&5
 if eval "test \"`echo '$''{'ac_cv_func_dlopen'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 3337 "configure"
+#line 3333 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char dlopen(); below.  */
@@ -3356,7 +3352,7 @@ dlopen();
 
 ; return 0; }
 EOF
-if { (eval echo configure:3360: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:3356: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_func_dlopen=yes"
 else
@@ -3374,7 +3370,7 @@ if eval "test \"`echo '$ac_cv_func_'dlopen`\" = yes"; then
 else
   echo "$ac_t""no" 1>&6
 echo $ac_n "checking for dlopen in -ldl""... $ac_c" 1>&6
-echo "configure:3378: checking for dlopen in -ldl" >&5
+echo "configure:3374: checking for dlopen in -ldl" >&5
 ac_lib_var=`echo dl'_'dlopen | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -3382,7 +3378,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-ldl  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 3386 "configure"
+#line 3382 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
@@ -3393,7 +3389,7 @@ int main() {
 dlopen()
 ; return 0; }
 EOF
-if { (eval echo configure:3397: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:3393: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -3429,17 +3425,17 @@ fi
 	# all symbols visible in the dynamic symbol table.
 	hold_ldflags=$LDFLAGS
 	echo $ac_n "checking for the ld -export-dynamic flag""... $ac_c" 1>&6
-echo "configure:3433: checking for the ld -export-dynamic flag" >&5
+echo "configure:3429: checking for the ld -export-dynamic flag" >&5
 	LDFLAGS="${LDFLAGS} -Wl,-export-dynamic"
 	cat > conftest.$ac_ext <<EOF
-#line 3436 "configure"
+#line 3432 "configure"
 #include "confdefs.h"
 
 int main() {
 int i;
 ; return 0; }
 EOF
-if { (eval echo configure:3443: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:3439: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   found=yes
 else
@@ -3456,7 +3452,7 @@ rm -f conftest*
 	fi
 
 	echo $ac_n "checking for compiler option to produce PIC""... $ac_c" 1>&6
-echo "configure:3460: checking for compiler option to produce PIC" >&5
+echo "configure:3456: checking for compiler option to produce PIC" >&5
 	if test "$ac_cv_prog_gcc" = "yes"; then
 		echo "$ac_t""gcc: -fPIC -DPIC -shared" 1>&6
 		PICFLAGS="-fPIC -DPIC -shared"
@@ -3476,12 +3472,12 @@ echo "configure:3460: checking for compiler option to produce PIC" >&5
 
 	nlist_lib=""
 	echo $ac_n "checking for nlist""... $ac_c" 1>&6
-echo "configure:3480: checking for nlist" >&5
+echo "configure:3476: checking for nlist" >&5
 if eval "test \"`echo '$''{'ac_cv_func_nlist'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 3485 "configure"
+#line 3481 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char nlist(); below.  */
@@ -3504,7 +3500,7 @@ nlist();
 
 ; return 0; }
 EOF
-if { (eval echo configure:3508: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:3504: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_func_nlist=yes"
 else
@@ -3522,7 +3518,7 @@ if eval "test \"`echo '$ac_cv_func_'nlist`\" = yes"; then
 else
   echo "$ac_t""no" 1>&6
 echo $ac_n "checking for nlist in -ldl""... $ac_c" 1>&6
-echo "configure:3526: checking for nlist in -ldl" >&5
+echo "configure:3522: checking for nlist in -ldl" >&5
 ac_lib_var=`echo dl'_'nlist | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -3530,7 +3526,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-ldl  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 3534 "configure"
+#line 3530 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
@@ -3541,7 +3537,7 @@ int main() {
 nlist()
 ; return 0; }
 EOF
-if { (eval echo configure:3545: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:3541: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -3560,7 +3556,7 @@ if eval "test \"`echo '$ac_cv_lib_'$ac_lib_var`\" = yes"; then
 else
   echo "$ac_t""no" 1>&6
 echo $ac_n "checking for nlist in -lelf""... $ac_c" 1>&6
-echo "configure:3564: checking for nlist in -lelf" >&5
+echo "configure:3560: checking for nlist in -lelf" >&5
 ac_lib_var=`echo elf'_'nlist | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -3568,7 +3564,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lelf  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 3572 "configure"
+#line 3568 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
@@ -3579,7 +3575,7 @@ int main() {
 nlist()
 ; return 0; }
 EOF
-if { (eval echo configure:3583: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:3579: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -3609,17 +3605,17 @@ fi
 
                         	ac_safe=`echo "libelf/nlist.h" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for libelf/nlist.h""... $ac_c" 1>&6
-echo "configure:3613: checking for libelf/nlist.h" >&5
+echo "configure:3609: checking for libelf/nlist.h" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 3618 "configure"
+#line 3614 "configure"
 #include "confdefs.h"
 #include <libelf/nlist.h>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:3623: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:3619: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -3642,17 +3638,17 @@ fi
 
 	ac_safe=`echo "elf/nlist.h" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for elf/nlist.h""... $ac_c" 1>&6
-echo "configure:3646: checking for elf/nlist.h" >&5
+echo "configure:3642: checking for elf/nlist.h" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 3651 "configure"
+#line 3647 "configure"
 #include "confdefs.h"
 #include <elf/nlist.h>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:3656: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:3652: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -3675,17 +3671,17 @@ fi
 
 	ac_safe=`echo "nlist.h" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for nlist.h""... $ac_c" 1>&6
-echo "configure:3679: checking for nlist.h" >&5
+echo "configure:3675: checking for nlist.h" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 3684 "configure"
+#line 3680 "configure"
 #include "confdefs.h"
 #include <nlist.h>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:3689: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:3685: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -3716,7 +3712,7 @@ EOF
 
 	else
 		echo $ac_n "checking for extra underscores prepended to symbol names""... $ac_c" 1>&6
-echo "configure:3720: checking for extra underscores prepended to symbol names" >&5
+echo "configure:3716: checking for extra underscores prepended to symbol names" >&5
 		if eval "test \"`echo '$''{'symbol_underscores'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else

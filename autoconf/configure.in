@@ -439,15 +439,11 @@ AC_ARG_ENABLE(assert,
   case "$enableval" in
   yes)
     echo "Enabling assert() code."
-    IRC_CFLAGS="$IRC_CFLAGS -DNDEBUG"
+    IRC_CFLAGS="$IRC_CFLAGS"
     ;;
   no)
     echo "Disabling assert() code."
-    ##
-    ##  This should be changed to disable asserts for the release
-    ##  IRC_CFLAGS="$IRC_CFLAGS -DNDEBUG"
-    ##
-    IRC_CFLAGS="$IRC_CFLAGS"
+    IRC_CFLAGS="$IRC_CFLAGS -DNDEBUG"
     ;;
   esac
 ])
