@@ -202,8 +202,8 @@ static int m_message(int p_or_n,
 #endif
 
   if (!IsPerson(sptr) && p_or_n != NOTICE)
-    return 0;
-       
+   return 0;
+      
   if (parc < 2 || *parv[1] == '\0')
     {
       if(p_or_n != NOTICE)
@@ -233,6 +233,7 @@ static int m_message(int p_or_n,
                parv[2]);
     return 0;
   }
+
   for(i = 0; i < ntargets ; i++)
     {
       switch (target_table[i]->type)
@@ -418,10 +419,18 @@ static int build_target_list(int p_or_n,
 	    }
 	}
 
-      if (IsOper(sptr) && (*nick == '$'))
+      if (IsOper(sptr))
 	{
-	  handle_opers(p_or_n, command, cptr,sptr,nick+1,text);
-	  continue;
+          if(*nick == '$')
+            {
+              handle_opers(p_or_n, command, cptr,sptr,nick+1,text);
+              continue;
+            }
+          if(strchr(nick, '@'))
+            {
+              handle_opers(p_or_n, command, cptr,sptr,nick,text);
+              continue;
+            }
 	}
 
       /* At this point, its likely its another client */
@@ -868,7 +877,7 @@ static void handle_opers(int p_or_n,
       (acptr = find_server(server + 1)))
     {
       count = 0;
-      
+
       /*
       ** Not destined for a user on me :-(
       */
@@ -883,13 +892,22 @@ static void handle_opers(int p_or_n,
         
       if ((host = (char *)strchr(nick, '%')))
 	*host++ = '\0';
-      
+
+      /* Check if someones msg'ing opers@our.server */
+      if (!strcmp(nick,"opers"))
+        {
+          sendto_realops_flags(FLAGS_ALL, "To opers: From: %s!%s@%s: %s", 
+                               sptr->name, sptr->username, sptr->host, text);      
+          return;
+        }
+
       /*
       ** Look for users which match the destination host
       ** (no host == wildcard) and if one and one only is
       ** found connected to me, deliver message!
       */
       acptr = find_userhost(nick, host, NULL, &count);
+
       if (server)
 	*server = '@';
       if (host)
