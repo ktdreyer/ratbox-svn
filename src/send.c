@@ -122,7 +122,7 @@ dead_link(struct Client *to, char *notice)
    */
   linebuf_donebuf(&to->localClient->buf_recvq);
   linebuf_donebuf(&to->localClient->buf_sendq);
-  if (!IsPerson(to) && !IsUnknown(to) && !(to->flags & FLAGS_CLOSING))
+  if (!IsPerson(to) && !IsUnknown(to) && !IsClosing(to))
   {
     sendto_realops_flags(FLAGS_ALL, L_ADMIN,
                          notice, get_client_name(to, HIDE_IP));

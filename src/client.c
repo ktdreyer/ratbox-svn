@@ -1364,7 +1364,7 @@ int exit_client(
 	    uplink = NULL;
         }
 
-      source_p->flags |= FLAGS_CLOSING;
+      SetClosing(source_p);
 
       if (IsPerson(source_p))
         sendto_realops_flags(FLAGS_CCONN, L_ALL,

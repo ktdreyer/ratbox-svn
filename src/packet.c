@@ -173,12 +173,8 @@ read_ctrl_packet(int fd, void *data)
   assert(lserver != NULL);
   reply = &lserver->slinkrpl;
 
-  /* if the server died, kill it off now -davidt */
   if(IsDead(server))
   {
-    exit_client(server, server, &me,
-                (server->flags & FLAGS_SENDQEX) ?
-                  "SendQ exceeded" : "Dead socket");
     return;
   }
 
@@ -300,12 +296,7 @@ read_packet(int fd, void *data)
 #endif
   /* if the client is dead, kill it off now -davidt */
   if(IsDead(client_p))
-  {
-    exit_client(client_p, client_p, &me,
-                (client_p->flags & FLAGS_SENDQEX) ?
-                  "SendQ exceeded" : "Dead socket");
     return;
-  }
 
 #ifndef HAVE_SOCKETPAIR
   if (HasServlink(client_p))
