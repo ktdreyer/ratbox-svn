@@ -1,7 +1,3 @@
-#ifndef YYERRCODE
-#define YYERRCODE 256
-#endif
-
 #define ACCEPT 257
 #define ACCEPT_PASSWORD 258
 #define ACTION 259
