@@ -1,3 +1,15 @@
+androsyn    2002/05/16 02:17:43 EDT	(20020516_1)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  Don't do send_queued_write() if the connection is dead.
+  
+  Revision  Changes    Path
+  7.256     +1 -1      ircd-hybrid-7/src/client.c
+
+
+
 androsyn    2002/05/16 01:53:14 EDT	(20020516_0)
 
   Modified files:
