@@ -56,7 +56,7 @@ static void change_channel_membership(struct membership *, unsigned int, unsigne
 
 /* some small utility functions */
 static char *check_string(char *s);
-static char *pretty_mask(char *);
+static char *pretty_mask(const char *);
 static char *fix_key(char *);
 static char *fix_key_old(char *);
 
@@ -367,14 +367,16 @@ channel_modes(struct Channel *chptr, struct Client *client_p, char *mbuf, char *
  * chopped
  */
 static char *
-pretty_mask(char *mask)
+pretty_mask(const char *idmask)
 {
 	int old_mask_pos;
 	char *nick, *user, *host;
 	char splat[] = "*";
 	char *t, *at, *ex;
 	char ne = 0, ue = 0, he = 0;	/* save values at nick[NICKLEN], et all */
+	char *mask;
 
+	mask = LOCAL_COPY(idmask);
 	mask = check_string(mask);
 
 	nick = user = host = splat;
@@ -693,7 +695,7 @@ chm_ban(struct Client *client_p, struct Client *source_p,
 	const char **parv, int *errors, int alev, int dir, char c, void *d, const char *chname)
 {
 	const char *mask;
-	char *raw_mask;
+	const char *raw_mask;
 	dlink_node *ptr;
 	struct Ban *banptr;
 
@@ -726,7 +728,7 @@ chm_ban(struct Client *client_p, struct Client *source_p,
 	if(MyClient(source_p) && (++mode_limit > MAXMODEPARAMS))
 		return;
 
-	raw_mask = LOCAL_COPY(parv[(*parn)]);
+	raw_mask = parv[(*parn)];
 	(*parn)++;
 
 	/* empty ban, ignore it */
@@ -787,7 +789,8 @@ chm_except(struct Client *client_p, struct Client *source_p,
 {
 	dlink_node *ptr;
 	struct Ban *banptr;
-	char *mask, *raw_mask;
+	const char *raw_mask;
+	const char *mask;
 
 	/* if we have +e disabled, allow local clients to do anything but
 	 * set the mode.  This prevents the abuse of +e when just a few
@@ -832,7 +835,7 @@ chm_except(struct Client *client_p, struct Client *source_p,
 	if(MyClient(source_p) && (++mode_limit > MAXMODEPARAMS))
 		return;
 
-	raw_mask = LOCAL_COPY(parv[(*parn)]);
+	raw_mask = parv[(*parn)];
 	(*parn)++;
 
 	/* empty ban, ignore it */
@@ -895,7 +898,8 @@ chm_invex(struct Client *client_p, struct Client *source_p,
 	  struct Channel *chptr, int parc, int *parn,
 	  const char **parv, int *errors, int alev, int dir, char c, void *d, const char *chname)
 {
-	char *mask, *raw_mask;
+	const char *mask;
+	const char *raw_mask;
 	dlink_node *ptr;
 	struct Ban *banptr;
 
@@ -942,7 +946,7 @@ chm_invex(struct Client *client_p, struct Client *source_p,
 	if(MyClient(source_p) && (++mode_limit > MAXMODEPARAMS))
 		return;
 
-	raw_mask = LOCAL_COPY(parv[(*parn)]);
+	raw_mask = parv[(*parn)];
 	(*parn)++;
 
 	/* empty ban, ignore it */
@@ -1010,7 +1014,7 @@ chm_op(struct Client *client_p, struct Client *source_p,
        const char **parv, int *errors, int alev, int dir, char c, void *d, const char *chname)
 {
 	struct membership *msptr;
-	char *opnick;
+	const char *opnick;
 	struct Client *targ_p;
 
 	if(alev < CHACCESS_CHANOP)
@@ -1036,7 +1040,7 @@ chm_op(struct Client *client_p, struct Client *source_p,
 		return;
 	}
 
-	opnick = LOCAL_COPY(parv[(*parn)]);
+	opnick = parv[(*parn)];
 	(*parn)++;
 
 	/* empty nick */
@@ -1103,7 +1107,7 @@ chm_voice(struct Client *client_p, struct Client *source_p,
 	  const char **parv, int *errors, int alev, int dir, char c, void *d, const char *chname)
 {
 	struct membership *msptr;
-	char *opnick;
+	const char *opnick;
 	struct Client *targ_p;
 
 	if(alev < CHACCESS_CHANOP)
@@ -1118,7 +1122,7 @@ chm_voice(struct Client *client_p, struct Client *source_p,
 	if((dir == MODE_QUERY) || parc <= *parn)
 		return;
 
-	opnick = LOCAL_COPY(parv[(*parn)]);
+	opnick = parv[(*parn)];
 	(*parn)++;
 
 	/* empty nick */
@@ -1181,8 +1185,9 @@ chm_limit(struct Client *client_p, struct Client *source_p,
 	  struct Channel *chptr, int parc, int *parn,
 	  const char **parv, int *errors, int alev, int dir, char c, void *d, const char *chname)
 {
+	const char *lstr;
+	static char limitstr[30];
 	int limit;
-	char *lstr;
 
 	if(alev < CHACCESS_CHANOP)
 	{
@@ -1198,13 +1203,13 @@ chm_limit(struct Client *client_p, struct Client *source_p,
 
 	if((dir == MODE_ADD) && parc > *parn)
 	{
-		lstr = LOCAL_COPY(parv[(*parn)]);
+		lstr = parv[(*parn)];
 		(*parn)++;
 
 		if(EmptyString(lstr) || (limit = atoi(lstr)) <= 0)
 			return;
 
-		ircsprintf(lstr, "%d", limit);
+		ircsprintf(limitstr, "%d", limit);
 
 		mode_changes[mode_count].letter = c;
 		mode_changes[mode_count].dir = MODE_ADD;
@@ -1212,7 +1217,7 @@ chm_limit(struct Client *client_p, struct Client *source_p,
 		mode_changes[mode_count].nocaps = 0;
 		mode_changes[mode_count].mems = ALL_MEMBERS;
 		mode_changes[mode_count].id = NULL;
-		mode_changes[mode_count++].arg = lstr;
+		mode_changes[mode_count++].arg = limitstr;
 
 		chptr->mode.limit = limit;
 	}
@@ -1238,7 +1243,7 @@ chm_key(struct Client *client_p, struct Client *source_p,
 	struct Channel *chptr, int parc, int *parn,
 	const char **parv, int *errors, int alev, int dir, char c, void *d, const char *chname)
 {
-	 char *key;
+	char *key;
 
 	if(alev < CHACCESS_CHANOP)
 	{
