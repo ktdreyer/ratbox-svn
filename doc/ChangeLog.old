@@ -1,3 +1,8 @@
+*** 20010104_26 by toot
+-pedantic
+fixed header in m_clearchan to say contrib
+
+
 *** 20010104_25 by toot
 moved clearchan to contrib, and made it admin only
 
