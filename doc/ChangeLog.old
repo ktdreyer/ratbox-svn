@@ -1,3 +1,16 @@
+androsyn    2001/12/20 14:31:52 EST	(20011220_4)
+
+  Modified files:
+    src                  ircd_parser.y 
+  Log:
+  Fixed oper {} so that a block with a key set and no password is counted as
+  valid.
+  
+  Revision  Changes    Path
+  1.226     +1 -1      ircd-hybrid-7/src/ircd_parser.y
+
+
+
 leeh        2001/12/20 13:38:07 EST	(20011220_3)
 
   Modified files:
