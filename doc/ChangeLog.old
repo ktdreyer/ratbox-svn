@@ -1,3 +1,15 @@
+androsyn    2002/07/15 03:26:11 EDT	(20020715_2)
+
+  Modified files:
+    modules              m_cryptlink.c 
+  Log:
+  Fixed a bug where we would attempt to pass a NULL rsa key to RSA_size.
+  
+  Revision  Changes    Path
+  1.33      +7 -2      ircd-hybrid-7/modules/m_cryptlink.c
+
+
+
 db          2002/07/14 20:49:11 EDT	(20020715_1)
 
   Modified files:
