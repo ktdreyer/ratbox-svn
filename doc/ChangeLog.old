@@ -1,3 +1,18 @@
+*** 20001106_16 by db
+- split m_sjoin.c up a bit more, added vchan support for remote clients
+  I want to revisit this code. The problem is, remote servers can have
+  more allocated channels per user, and we have a fixed sized vchan map ;-(
+  So, whats fine locally may be too small for a remote user. Perhaps the
+  vchan map should be a link list? or we suffer with scanning all vchans
+  for remote clients?
+
+- moved vchan map into all clients even remote, section. blech. read
+  comments above.
+
+- cleaned up m_cjoin a bit
+
+
+
 *** 20001106_15 by adrian
 
 
