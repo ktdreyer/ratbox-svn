@@ -781,7 +781,7 @@ static int hash_ip(struct irc_inaddr *addr)
   return(hash);
 #else
   unsigned int hash = 0;
-  char *ip = &PIN_ADDR(addr);
+  char *ip = (char *) &PIN_ADDR(addr);
 
   while (*ip)
     { 
