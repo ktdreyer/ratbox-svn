@@ -2035,8 +2035,6 @@ void WriteKlineOrDline( KlineType type,
       sendto_one(source_p, ":%s NOTICE %s :Added D-Line [%s] to %s",
 		 me.name, source_p->name, host, filename);
 
-      log(L_TRACE, "%s added D-Line for [%s] [%s]", 
-	  source_p->name, host, reason);
     }
   else
     {
@@ -2045,8 +2043,6 @@ void WriteKlineOrDline( KlineType type,
 			   source_p->name, user, host, reason);
       sendto_one(source_p, ":%s NOTICE %s :Added K-Line [%s@%s]",
 		 me.name, source_p->name, user, host);
-      log(L_TRACE, "%s added K-Line for [%s] [%s@%s]", 
-	  source_p->name, user, host, reason);
     }
 
   if ( (out = fbopen(filename, "a")) == NULL )
