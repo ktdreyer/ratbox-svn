@@ -1,3 +1,8 @@
+*** 20001026_3 by db
+- removed checkpings to localize it in ircd.c only
+
+
+
 *** 20001026_2 by db
 - messed up 4am commit. Here is the changes to config.h
 
