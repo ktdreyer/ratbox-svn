@@ -1,3 +1,10 @@
+*** 20010923_1 by a1kmm
+- Got memory debugging going. There seems to be a few leaks already, which
+  I will fix soon. There also seems to be a core somewhere when I link with
+  efence that I need to fix.
+- Added "dmem x" option to command to write memory log to a file.
+
+
 *** 20010922_2 by a1kmm
 - Initialise refcount on linebufs to 0. That should account for the following
   from the profile and hopefully improve performance a bit, as well as
