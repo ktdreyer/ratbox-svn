@@ -287,31 +287,6 @@ my_name_for_link(const char *name, struct ConfItem *aconf)
 }
 
 /*
- * add_server_to_list()
- * input	- pointer to client
- * output	- none
- * side effects - server is added to global_serv_list
- */
-void
-add_server_to_list(struct Client *client_p)
-{
-	dlinkAddAlloc(client_p, &global_serv_list);
-}
-
-/*
- * remove_server_from_list()
- *
- * input	- pointer to client
- * output	- none
- * side effects	- server is removed from GlocalServerList
- */
-void
-remove_server_from_list(struct Client *client_p)
-{
-	dlinkFindDestroy(&global_serv_list, client_p);
-}
-
-/*
  * write_links_file
  */
 void
@@ -1026,8 +1001,8 @@ server_estab(struct Client *client_p)
 
 	dlinkAdd(client_p, &client_p->lnode, &me.serv->servers);
 	dlinkMoveNode(&client_p->localClient->tnode, &unknown_list, &serv_list);
+	dlinkAddAlloc(client_p, &global_serv_list);
 
-	add_server_to_list(client_p);
 	add_to_client_hash(client_p->name, client_p);
 	/* doesnt duplicate client_p->serv if allocated this struct already */
 	make_server(client_p);

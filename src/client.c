@@ -1333,7 +1333,7 @@ exit_remote_server(struct Client *client_p, struct Client *source_p, struct Clie
 	else
 		ts_warn("server %s without servptr!", source_p->name);
 
-	remove_server_from_list(source_p);
+	dlinkFindDestroy(&global_serv_list, source_p);
 	target_p = source_p->from;
 	
 	if(target_p != NULL && IsServer(target_p) && target_p != client_p &&
@@ -1363,7 +1363,7 @@ exit_local_server(struct Client *client_p, struct Client *source_p, struct Clien
 		return -1;
 	
 	dlinkDelete(&source_p->localClient->tnode, &serv_list);
-	remove_server_from_list(source_p);
+	dlinkFindDestroy(&global_serv_list, source_p);
 	
 	unset_chcap_usage_counts(source_p);
 	sendk = source_p->localClient->sendK;

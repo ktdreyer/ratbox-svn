@@ -277,9 +277,6 @@ extern void try_connections(void *unused);
 extern void start_collect_zipstats(void);
 extern void collect_zipstats(void *unused);
 
-extern void add_server_to_list(struct Client *);
-extern void remove_server_from_list(struct Client *);
-
 extern void initServerMask(void);
 extern int serv_connect(struct ConfItem *, struct Client *);
 extern unsigned long nextFreeMask(void);

@@ -746,7 +746,7 @@ main(int argc, char *argv[])
 	me.lasttime = me.since = me.firsttime = CurrentTime;
 	add_to_client_hash(me.name, &me);
 
-	add_server_to_list(&me);	/* add ourselves to global_serv_list */
+	dlinkAddAlloc(&me, &global_serv_list);
 
 	check_class();
 	write_pidfile(pidFileName);
