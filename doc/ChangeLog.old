@@ -1,3 +1,14 @@
+*** 20001114_2 by db
+- m_whowas.c was missing from modules, 'cause it was hiding like a bad
+  little boy inside src/whowas.c... unfortuantely, m_whowas.c has a 
+  dependancy on whowas.c ... carnal knowledge of the hash table etc. but
+  no worse then m_whois.c on client structs etc. blah. Anyway, move
+  stuff from whowas.c into m_whowas.c in modules..
+
+- Added NOTICE fix up mention in TODO list
+
+
+
 *** 20001114_1 by db
 - A long time ago, in an ircd far far away, there was one a function called
   m_message.c which did both m_privmsg and m_notice. When the evil bleep
