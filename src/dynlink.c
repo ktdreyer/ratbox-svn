@@ -162,6 +162,29 @@ void *dlsym(void *myModule, char *mySymbolName)
 #endif
 #endif
 
+
+/*
+ * HPUX dl compat functions
+ */
+#if defined(HAVE_SHL_LOAD) && !defined(HAVE_DLOPEN)
+#define RTLD_LAZY BIND_DEFERRED
+#define #define RTLD_GLOBAL DYNAMIC_PATH
+#define dlopen(file,mode) (void *)shl_load((file), (mode), (long) 0)
+#define dlclose(handle) shl_unload((shl_t)(handle))
+#define dlsym(handle,name) hpux_dlsym(handle,name)
+#define dlerror() strerror(errno)
+
+static void *
+hpux_dlsym(void *handle, char *name)
+{
+     void *sym_addr;
+     if (!shl_findsym((shl_t *)&handle, name, TYPE_UNDEFINED, &sym_addr))
+ 	return sym_addr;
+     return NULL;
+}
+
+#endif
+
 /* unload_one_module()
  *
  * inputs	- name of module to unload
@@ -177,20 +200,6 @@ int unload_one_module (char *name, int warn)
   if ((modindex = findmodule_byname (name)) == -1) 
     return -1;
 
-#if defined(HAVE_SHL_LOAD)
-
-    /* shl_* and friends have a slightly different format than dl*. But it does not
-     * require creation of a totally new modules.c, instead proper usage of
-     * defines solve this case. -TimeMr14C
-     */
-
-    if (shl_findsym(modlist[modindex]->address, "_moddeinit", TYPE_UNDEFINED, &deinitfunc) == 0)
-        deinitfunc();
-    else if (shl_findsym
-             (modlist[modindex]->address, "__moddeinit", TYPE_UNDEFINED, &deinitfunc) == 0)
-        deinitfunc();
-    shl_unload((shl_t) & (modlist[modindex]->address));
-#else
     /*
     ** XXX - The type system in C does not allow direct conversion between
     ** data and function pointers, but as it happens, most C compilers will
@@ -206,7 +215,6 @@ int unload_one_module (char *name, int warn)
         deinitfunc();
     }
     dlclose(modlist[modindex]->address);
-#endif
 
   MyFree(modlist[modindex]->name);
   memcpy( &modlist[modindex], &modlist[modindex+1],
@@ -235,11 +243,7 @@ int unload_one_module (char *name, int warn)
 int
 load_a_module (char *path, int warn, int core)
 {
-#if defined(HAVE_SHL_LOAD)
-  shl_t tmpptr;
-#else
   void *tmpptr = NULL;
-#endif
 
   char *mod_basename;
   void (*initfunc)(void) = NULL;
@@ -248,19 +252,11 @@ load_a_module (char *path, int warn, int core)
 
   mod_basename = irc_basename(path);
 
-#if defined(HAVE_SHL_LOAD)
-  tmpptr = shl_load(path, BIND_IMMEDIATE, NULL);
-#else
   tmpptr = dlopen(path, RTLD_NOW);
-#endif
 
   if (tmpptr == NULL)
   {
-#if defined(HAVE_SHL_LOAD)
-      const char *err = strerror(errno);
-#else
       const char *err = dlerror();
-#endif
 
       sendto_realops_flags(FLAGS_ALL, L_ALL,
                             "Error loading module %s: %s",
@@ -269,27 +265,6 @@ load_a_module (char *path, int warn, int core)
       MyFree (mod_basename);
       return -1;
   }
-
-#if defined(HAVE_SHL_LOAD)
-    if (shl_findsym(&tmpptr, "_modinit", TYPE_UNDEFINED, (void *) &initfunc) == -1) {
-        if (shl_findsym(&tmpptr, "__modinit", TYPE_UNDEFINED, (void *) &initfunc) == -1) {
-	    ilog (L_WARN, "Module %s has no _modinit() function", mod_basename);
-	    sendto_realops_flags(FLAGS_ALL, L_ALL,
-                          "Module %s has no _modinit() function",
-                          mod_basename);
-            shl_unload(tmpptr);
-            MyFree(mod_basename);
-            return -1;
-        }
-    }
-    if (shl_findsym(&tmpptr, "_version", TYPE_UNDEFINED, &verp) == -1) {
-        if (shl_findsym(&tmpptr, "__version", TYPE_UNDEFINED, &verp) == -1)
-            ver = unknown_ver;
-        else
-            ver = *verp;
-    } else
-        ver = *verp;
-#else
 
   initfunc = (void (*)(void))(uintptr_t)dlsym (tmpptr, "_modinit");
   if (initfunc == NULL 
@@ -310,7 +285,6 @@ load_a_module (char *path, int warn, int core)
     ver = unknown_ver;
   else
     ver = *verp;
-#endif
 
   increase_modlist();
 
@@ -359,4 +333,7 @@ static void increase_modlist(void)
   max_mods += MODS_INCREMENT;
 }
 
+/*
+ * find_a_symbol
+ */
 #endif /* STATIC_MODULES */
