@@ -1,4 +1,3 @@
-
 /*
  * Event Processing
  *
@@ -62,14 +61,15 @@
 #include "memdebug.h"
 
 /* The list of event processes */
-struct ev_entry {
-    EVH *func;
-    void *arg;
-    const char *name;
-    time_t when;
-    struct ev_entry *next;
-    int weight;
-    int id;
+struct ev_entry
+{
+  EVH *func;
+  void *arg;
+  const char *name;
+  time_t when;
+  struct ev_entry *next;
+  int weight;
+  int id;
 };
 
 static struct ev_entry *tasks = NULL;
@@ -80,134 +80,140 @@ static BlockHeap *event_bl = NULL;
 void
 eventAdd(const char *name, EVH * func, void *arg, time_t when, int weight)
 {
-    struct ev_entry *event = (struct ev_entry *)BlockHeapAlloc(event_bl);
-    struct ev_entry **E;
-    event->func = func;
-    event->arg = arg;
-    event->name = name;
-    event->when = CurrentTime + when;
-    event->weight = weight;
-    event->id = run_id;
+  struct ev_entry *event = (struct ev_entry *)BlockHeapAlloc(event_bl);
+  struct ev_entry **E;
+  event->func = func;
+  event->arg = arg;
+  event->name = name;
+  event->when = CurrentTime + when;
+  event->weight = weight;
+  event->id = run_id;
 #if SQUID
-    debug(41, 7) ("eventAdd: Adding '%s', in %f seconds\n", name, when);
+  debug(41, 7) ("eventAdd: Adding '%s', in %f seconds\n", name, when);
 #endif
-    /* Insert after the last event with the same or earlier time */
-    for (E = &tasks; *E; E = &(*E)->next) {
-	if ((*E)->when > event->when)
-	    break;
+  /* Insert after the last event with the same or earlier time */
+  for (E = &tasks; *E; E = &(*E)->next)
+    {
+      if ((*E)->when > event->when)
+        break;
     }
-    event->next = *E;
-    *E = event;
+  event->next = *E;
+  *E = event;
 }
 
 /* same as eventAdd but adds a random offset within +-1/3 of delta_ish */
 void
 eventAddIsh(const char *name, EVH * func, void *arg, time_t delta_ish, int weight)
 {
-    if (delta_ish >= 3.0) {
-	const time_t two_third = (2 * delta_ish) / 3;
-	delta_ish = two_third + ((random() % 1000) * two_third) / 1000;
-        /*
-         * XXX I hate the above magic, I don't even know if its right.
-         * Grr. -- adrian
-         */
+  if (delta_ish >= 3.0)
+    {
+      const time_t two_third = (2 * delta_ish) / 3;
+      delta_ish = two_third + ((random() % 1000) * two_third) / 1000;
+      /*
+       * XXX I hate the above magic, I don't even know if its right.
+       * Grr. -- adrian
+       */
     }
-    eventAdd(name, func, arg, delta_ish, weight);
+  eventAdd(name, func, arg, delta_ish, weight);
 }
 
 void
 eventDelete(EVH * func, void *arg)
 {
-    struct ev_entry **E;
-    struct ev_entry *event;
-    for (E = &tasks; (event = *E) != NULL; E = &(*E)->next) {
-	if (event->func != func)
-	    continue;
-	if (event->arg != arg)
-	    continue;
-	*E = event->next;
-        BlockHeapFree(event_bl, event);
-	return;
+  struct ev_entry **E;
+  struct ev_entry *event;
+  for (E = &tasks; (event = *E) != NULL; E = &(*E)->next)
+    {
+      if (event->func != func)
+        continue;
+      if (event->arg != arg)
+        continue;
+      *E = event->next;
+      BlockHeapFree(event_bl, event);
+      return;
     }
 #ifdef SQUID
-    debug_trap("eventDelete: event not found");
+  debug_trap("eventDelete: event not found");
 #endif
 }
 
 void
 eventRun(void)
 {
-    struct ev_entry *event = NULL;
-    EVH *func;
-    void *arg;
-    int weight = 0;
-    if (NULL == tasks)
-	return;
-    if (tasks->when > CurrentTime)
-	return;
-    run_id++;
+  struct ev_entry *event = NULL;
+  EVH *func;
+  void *arg;
+  int weight = 0;
+  if (NULL == tasks)
+    return;
+  if (tasks->when > CurrentTime)
+    return;
+  run_id++;
 #ifdef SQUID
-    debug(41, 5) ("eventRun: RUN ID %d\n", run_id);
+  debug(41, 5) ("eventRun: RUN ID %d\n", run_id);
 #endif
-    while ((event = tasks)) {
-	int valid = 1;
-	if (event->when > CurrentTime)
-	    break;
-	if (event->id == run_id)	/* was added during this run */
-	    break;
-	if (weight)
-	    break;
-	func = event->func;
-	arg = event->arg;
-	event->func = NULL;
-	event->arg = NULL;
-	tasks = event->next;
-	if (valid) {
-	    weight += event->weight;
-	    /* XXX assumes ->name is static memory! */
-	    last_event_ran = event->name;
+  while ((event = tasks))
+    {
+      int valid = 1;
+      if (event->when > CurrentTime)
+        break;
+      if (event->id == run_id)        /* was added during this run */
+        break;
+      if (weight)
+        break;
+      func = event->func;
+      arg = event->arg;
+      event->func = NULL;
+      event->arg = NULL;
+      tasks = event->next;
+      if (valid)
+        {
+          weight += event->weight;
+          /* XXX assumes ->name is static memory! */
+          last_event_ran = event->name;
 #ifdef SQUID
-	    debug(41, 5) ("eventRun: Running '%s', id %d\n",
-		event->name, event->id);
+          debug(41, 5) ("eventRun: Running '%s', id %d\n",
+                event->name, event->id);
 #endif
-	    func(arg);
-	}
-        BlockHeapFree(event_bl, event);
+          func(arg);
+        }
+      BlockHeapFree(event_bl, event);
     }
 }
 
 time_t
 eventNextTime(void)
 {
-    if (!tasks)
-	return (time_t) 100000;
-    return (time_t) (tasks->when - CurrentTime);
+  if (!tasks)
+    return (time_t) 100000;
+  return (time_t) (tasks->when - CurrentTime);
 }
 
 void
 eventInit(void)
 {
-    event_bl = BlockHeapCreate(sizeof(struct ev_entry), EVENT_BLOCK_SIZE);
+  event_bl = BlockHeapCreate(sizeof(struct ev_entry), EVENT_BLOCK_SIZE);
 }
 
 #if SQUID
 static void
 eventDump(StoreEntry * sentry)
 {
-    struct ev_entry *e = tasks;
-    if (last_event_ran)
-	storeAppendPrintf(sentry, "Last event to run: %s\n\n", last_event_ran);
-    storeAppendPrintf(sentry, "%s\t%s\t%s\t%s\n",
-	"Operation",
-	"Next Execution",
-	"Weight",
-	"Callback Valid?");
-    while (e != NULL) {
-	storeAppendPrintf(sentry, "%s\t%f seconds\t%d\t%s\n",
-			  e->name, e->when - CurrentTime, e->weight,
-			  e->arg ? cbdataValid(e->arg) ? "yes" : "no" : "N/A");
+  struct ev_entry *e = tasks;
+  if (last_event_ran)
+    storeAppendPrintf(sentry, "Last event to run: %s\n\n", last_event_ran);
+  storeAppendPrintf(sentry, "%s\t%s\t%s\t%s\n",
+      "Operation",
+      "Next Execution",
+      "Weight",
+      "Callback Valid?");
+  while (e != NULL)
+    {
+      storeAppendPrintf(sentry, "%s\t%f seconds\t%d\t%s\n",
+                        e->name, e->when - CurrentTime, e->weight,
+                        e->arg ? cbdataValid(e->arg) ? "yes" : "no" : "N/A");
 
-	e = e->next;
+      e = e->next;
     }
 }
 #endif
@@ -215,47 +221,49 @@ eventDump(StoreEntry * sentry)
 void
 eventFreeMemory(void)
 {
-    struct ev_entry *event;
-    while ((event = tasks)) {
-	tasks = event->next;
-        BlockHeapFree(event_bl, event);
+  struct ev_entry *event;
+  while ((event = tasks))
+    {
+      tasks = event->next;
+      BlockHeapFree(event_bl, event);
     }
-    tasks = NULL;
+  tasks = NULL;
 }
 
 int
 eventFind(EVH * func, void *arg)
 {
-    struct ev_entry *event;
-    for (event = tasks; event != NULL; event = event->next) {
-	if (event->func == func && event->arg == arg)
-	    return 1;
+  struct ev_entry *event;
+  for (event = tasks; event != NULL; event = event->next)
+    {
+      if (event->func == func && event->arg == arg)
+        return 1;
     }
-    return 0;
+  return 0;
 }
 
 #ifndef SQUID
 int
 show_events(struct Client *sptr)
 {
-    struct ev_entry *e = tasks;
-    if (last_event_ran)
-      sendto_one(sptr,":%s NOTICE %s :*** Last event to run: %s",
-		 me.name,sptr->name,
-		 last_event_ran);
+  struct ev_entry *e = tasks;
+  if (last_event_ran)
+    sendto_one(sptr,":%s NOTICE %s :*** Last event to run: %s",
+               me.name,sptr->name,
+               last_event_ran);
 
-    sendto_one(sptr,
-       ":%s NOTICE %s :*** Operation\tNext Execution\tWeight",
-       me.name,sptr->name);
+  sendto_one(sptr,
+     ":%s NOTICE %s :*** Operation            Next Execution  Weight",
+     me.name,sptr->name);
 
-    while (e != NULL)
-      {
-	sendto_one(sptr,
-		   ":%s NOTICE %s :*** %s\t%d seconds\t%d",
-		   me.name,sptr->name,
-		   e->name, e->when - CurrentTime, e->weight);
-	e = e->next;
-      }
+  while (e != NULL)
+    {
+      sendto_one(sptr,
+                 ":%s NOTICE %s :*** %-20s %-3d seconds     %d",
+                 me.name,sptr->name,
+                 e->name, e->when - CurrentTime, e->weight);
+      e = e->next;
+    }
   sendto_one(sptr,":%s NOTICE %s :*** Finished",me.name,sptr->name);
   return 0;
 }
