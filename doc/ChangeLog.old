@@ -1,3 +1,8 @@
+*** 20010927_1 by wcampbel
+Fix for STATS i/I showing restricted mode auth blocks as 'i' as discussed on
+the ircd-coders list.
+
+
 *** 20010926_3 by leeh
 - unregged clients cant route ping, so they cant get routed pongs..
   (discussed on irc)
