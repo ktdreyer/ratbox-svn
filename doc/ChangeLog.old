@@ -1,3 +1,8 @@
+*** 20000101_2 by db
+- Cleanups to allow DEBUGMODE to compile
+
+
+
 *** 20000101_1 by db
 - cleanup of LITTLE_I_LINES #ifdef
 
