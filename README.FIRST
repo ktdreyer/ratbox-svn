@@ -102,8 +102,7 @@ Feature Specific Requirements:
   Solaris 2.6/7/8
   OpenBSD 2.8
   NetBSD 1.4
-
-- CYGWIN USERS: Unfortunately, cygwin support has been removed
+  Cygwin 1.3+ (static modules, no servlink)
 
 - Please read doc/whats-new.txt for information about what is in this release
 
