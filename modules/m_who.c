@@ -332,7 +332,9 @@ static void who_global(struct Client *source_p,char *mask, int server_oper)
   {
      chptr = lp->data;
      who_common_channel(source_p,chptr->chanops,mask,server_oper,&maxmatches);
+#ifdef REQUIRE_OANDV
      who_common_channel(source_p,chptr->chanops_voiced,mask,server_oper,&maxmatches);
+#endif
      who_common_channel(source_p,chptr->halfops,mask,server_oper,&maxmatches);
      who_common_channel(source_p,chptr->voiced,mask,server_oper,&maxmatches);
      who_common_channel(source_p,chptr->peons,mask,server_oper,&maxmatches);

@@ -98,7 +98,6 @@ struct Channel
 
   int             num_mask;              /* number of bans+exceptions+invite exceptions */
   time_t          channelts;
-  int             ts_winner;
   char            chname[CHANNELLEN+1];
 };
 
