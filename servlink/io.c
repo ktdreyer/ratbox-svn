@@ -121,8 +121,9 @@ void
 send_data_blocking(int fd, void *data, int datalen)
 {
 	int ret;
+	struct pollfd pfd[1];
 	fd_set wfds;
-
+	memset(pfd, 0, sizeof(&pfd);
 	while (1)
 	{
 		ret = write(fd, data, datalen);
@@ -135,22 +136,18 @@ send_data_blocking(int fd, void *data, int datalen)
 			datalen -= ret;
 		}
 
-		ret = check_error(ret, IO_WRITE, fd);
+		check_error(ret, IO_WRITE, fd);
 
-		FD_ZERO(&wfds);
-		FD_SET(fd, &wfds);
+		pfd[0].fd = fd;
+		pfd[0].events = POLLOUT|POLLERR|POLLHUP;
 
 		/* sleep until we can write to the fd */
 		while (1)
 		{
-			ret = select(fd + 1, NULL, &wfds, NULL, NULL);
-
-			if(ret > 0)	/* break out so we can write */
+			if((ret = poll(pfd, 1, -1)) > 0)
 				break;
-
-			if(ret < 0)	/* error ? */
+			else
 				check_error(ret, IO_SELECT, fd);	/* exit on fatal errors */
-
 			/* loop on non-fatal errors */
 		}
 	}
