@@ -148,9 +148,7 @@ static void mo_kline(struct Client *client_p,
 
   tkline_time = valid_tkline(source_p,*parv);
 
-  if (tkline_time == -1)
-   return;
-  else if( tkline_time > 0 )
+  if( tkline_time > 0 )
     {
       parv++;
       parc--;

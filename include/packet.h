@@ -46,8 +46,8 @@
  * just connected.  this allows clients to rejoin multiple channels
  * without being so heavily penalised they excess flood.
  */
-#define MAX_FLOOD 4
-#define MAX_FLOOD_BURST 24
+#define MAX_FLOOD 5
+#define MAX_FLOOD_BURST MAX_FLOOD * 6
 
 extern PF  read_ctrl_packet;
 extern PF  read_packet;

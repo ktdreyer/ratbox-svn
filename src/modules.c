@@ -560,7 +560,9 @@ load_all_modules(int warn)
 	mod_add_cmd(&away_msgtab);
 	mod_add_cmd(&capab_msgtab);
 	mod_add_cmd(&cburst_msgtab);
+#ifdef VCHANS
 	mod_add_cmd(&cjoin_msgtab);
+#endif
 	mod_add_cmd(&client_msgtab);
 	mod_add_cmd(&close_msgtab);
 	mod_add_cmd(&connect_msgtab);

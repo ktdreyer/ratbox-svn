@@ -53,17 +53,23 @@ struct Message cjoin_msgtab = {
   {m_unregistered, m_cjoin, m_ignore, m_cjoin}
 };
 
+#endif
+
 #ifndef STATIC_MODULES
 void
 _modinit(void)
 {
+#ifdef VCHANS
   mod_add_cmd(&cjoin_msgtab);
+#endif
 }
 
 void
 _moddeinit(void)
 {
+#ifdef VCHANS
   mod_del_cmd(&cjoin_msgtab);
+#endif
 }
 
 const char *_version = "$Revision$";
