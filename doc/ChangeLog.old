@@ -1,3 +1,8 @@
+*** 20011120_2 by db
+- This considerably simplifies m_server. No more support for 2.6(?) protocol
+
+
+
 *** 20011120_1 by androsyn
 Modified the supported platforms slightly...
 
