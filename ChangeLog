@@ -1,3 +1,18 @@
+leeh        2005/01/10 15:33:51 EST	(20050110_0)
+
+  Modified files:
+    help/opers           umode 
+    modules/core         m_message.c 
+  Log:
+  - added +C to umode help, removed a tab
+  - added support for TGCH over encap
+  
+  Revision  Changes    Path
+  1.4       +2 -1      ircd-ratbox/help/opers/umode
+  1.157     +44 -16    ircd-ratbox/modules/core/m_message.c
+
+
+
 androsyn    2004/12/29 21:08:41 EST	(20041230_0)
 
   Modified files:
