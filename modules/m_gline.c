@@ -349,7 +349,7 @@ static void ms_gline(struct Client *client_p,
   /* hyb-6 version to the rest */
   sendto_server(client_p, NULL, NULL, NOCAPS, CAP_GLN, NOFLAGS,
                 ":%s GLINE %s %s %s %s %s %s :%s",
-                source_p->name, oper_nick, oper_user, oper_host,
+                oper_server, oper_nick, oper_user, oper_host,
                 oper_server, user, host, reason);
 
   if (ConfigFileEntry.glines)
