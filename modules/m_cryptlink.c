@@ -117,6 +117,7 @@ static void mr_cryptauth(struct Client *client_p, struct Client *source_p,
                          int parc, char *parv[])
 {
   struct EncCapability *ecap;
+  struct ConfItem *aconf;
   int   enc_len;
   int   len;
   char *enc;
@@ -146,7 +147,6 @@ static void mr_cryptauth(struct Client *client_p, struct Client *source_p,
     exit_client(client_p, client_p, &me, "Invalid cipher");
     return;
   }
-
 
   if (!(enc_len = unbase64_block(&enc, parv[2], strlen(parv[2]))))
   {
@@ -199,6 +199,25 @@ static void mr_cryptauth(struct Client *client_p, struct Client *source_p,
     return;
   }
 
+  aconf = find_conf_name(&client_p->localClient->confs,
+                         client_p->name, CONF_SERVER);
+
+  if (!aconf)
+  {
+    sendto_realops_flags(FLAGS_ALL, "Lost C-Line for %s",
+                         get_client_name(client_p, HIDE_IP));
+    exit_client(client_p, client_p, &me, "Lost C-line");
+    return;
+  }
+
+  if (!(client_p->localClient->out_cipher ||
+      (client_p->localClient->out_cipher = select_cipher(client_p, aconf))))
+    {
+      cryptlink_error(client_p,
+                "%s[%s]: CRYPTLINK failed - couldn't find compatable cipher");
+      return;
+    }
+
   SetCryptIn(client_p);
   ClearWaitAuth(client_p);
   server_estab(client_p);
@@ -222,8 +241,10 @@ static void mr_cryptserv(struct Client *client_p, struct Client *source_p,
   char            *encrypted;
   int              enc_len;
 
+  /*
   if (client_p->name[0] != 0)
    return;
+   */
 
   if ( (name = parse_cryptserv_args(client_p, parv, parc, info, key)) == NULL )
     {
@@ -355,7 +376,8 @@ static void mr_cryptserv(struct Client *client_p, struct Client *source_p,
   strncpy_irc(client_p->info, info[0] ? info : me.name, REALLEN);
   client_p->hopcount = 0;
 
-  if (!(client_p->localClient->out_cipher = select_cipher(client_p, aconf)))
+  if (!(client_p->localClient->out_cipher ||
+      (client_p->localClient->out_cipher = select_cipher(client_p, aconf))))
     {
       cryptlink_error(client_p,
                 "%s[%s]: CRYPTLINK failed - couldn't find compatable cipher");
@@ -382,8 +404,8 @@ static void mr_cryptserv(struct Client *client_p, struct Client *source_p,
 
   MyFree(encrypted);
   
-  if (IsUnknown(client_p))
-     cryptlink_init(client_p, aconf, -1);
+  if (!IsWaitAuth(client_p))
+    cryptlink_init(client_p, aconf, -1);
 
   sendto_one(client_p, "CRYPTAUTH %s %s",
              client_p->localClient->out_cipher->name,
