@@ -576,7 +576,7 @@ log_gline_request(
       return;
     }
 
-  tmptr = localtime(&CurrentTime);
+  tmptr = localtime((const time_t*)&CurrentTime);
   strftime(timebuffer, MAX_DATE_STRING, "%Y/%m/%d %H:%M:%S", tmptr);
 
   ircsprintf(buffer,
@@ -629,7 +629,7 @@ log_gline(struct Client *source_p,
       return;
     }
 
-  tmptr = localtime(&CurrentTime);
+  tmptr = localtime((const time_t*)&CurrentTime);
   strftime(timebuffer, MAX_DATE_STRING, "%Y/%m/%d %H:%M:%S", tmptr);
 
   ircsprintf(buffer,"#Gline for %s@%s %s added by the following\n",
