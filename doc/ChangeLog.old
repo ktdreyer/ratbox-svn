@@ -1,3 +1,7 @@
+*** 20001125_3 by toot
+don't need to check if they're an oper in mo_testline
+
+
 *** 20001125_2 by ryan
 
 added RPATH for ircd.rsa (for oper keyfiles)
