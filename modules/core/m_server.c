@@ -77,6 +77,9 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   struct ConfItem* aconf;
   int              hop;
   dlink_node       *ptr;
+  int bogus_server = 0;
+  int dots = 0;
+  char *s;
 
   info[0] = '\0';
   /*  inpath = get_client_name(cptr,FALSE); */
@@ -107,94 +110,43 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
           info[REALLEN] = '\0';
         }
     }
-  /*
-   * July 5, 1997
-   * Rewritten to throw away server cruft from users,
-   * combined the hostname validity test with
-   * cleanup of host name, so a cleaned up hostname
-   * can be returned as an error if necessary. - Dianora
-   *
-   * yes, the if(strlen) below is really needed!! 
-   */
+
   if (strlen(host) > HOSTLEN)
     host[HOSTLEN] = '\0';
 
-  if (IsPerson(sptr)) 
+  for( s = host; *s; s++ )
     {
-      /*       * a USER tries something fishy... ;-)
-       */
-      if (IsServer(cptr))
-        {
-          sendto_realops("SERVER command from remote user %s -- %s is a hacked server",
-                          get_client_name(sptr,SHOW_IP),
-                          get_client_name(cptr,SHOW_IP));
-        }
-      else
-        {          sendto_one(sptr, form_str(ERR_UNKNOWNCOMMAND),
-                     me.name, parv[0], "SERVER");
-        }
-      return 0;
+      if (!IsServChar(*s))
+	{
+	  bogus_server = 1;
+	  break;
+	}
+      if ('.' == *s)
+	++dots;
     }
-  else
+
+  if (!dots || bogus_server )
     {
-      /* Lets check for bogus names and clean them up
-       * we don't bother cleaning up ones from users, becasuse
-       * we will never see them any more - Dianora
-       */
-
-      int bogus_server = 0;
-      int dots = 0;
-      char *s;
-
-      s = host;
-      while (*s)
-        {
-          if (!IsServChar(*s)) {
-            bogus_server = 1;
-            break;
-          }
-          if ('.' == *s)
-            ++dots;
-          ++s;
-        }
-
-      if (!dots || bogus_server )
-        {
-          char clean_host[2 * HOSTLEN + 4];
-          sendto_one(sptr,"ERROR :Bogus server name (%s)", 
-                     clean_string(clean_host, host, 2 * HOSTLEN));
-          return exit_client(cptr, cptr, cptr, "Bogus server name");
-        }
+      char clean_host[2 * HOSTLEN + 4];
+      sendto_one(sptr,"ERROR :Bogus server name (%s)", 
+		 clean_string(clean_host, host, 2 * HOSTLEN));
+      return exit_client(cptr, cptr, cptr, "Bogus server name");
     }
 
   /* 
    * *WHEN* can it be that "cptr != sptr" ????? --msa
    * When SERVER command (like now) has prefix. -avalon
    * 
-   * check to see this host even has an N line before bothering
-   * anyone about it. Its only a quick sanity test to stop
-   * the conference room and win95 ircd dorks. 
-   * Sure, it will be redundantly checked again in m_server_estab()
-   * *sigh* yes there will be wasted CPU as the conf list will
-   * be scanned twice. But how often will this happen?
-   * - Dianora
-   *
-   * This should (will be) be recoded to check the IP is valid as well, 
-   * with a pointer to the valid N line conf kept for later, saving
-   * an extra lookup.. *sigh* - Dianora
    */
-  if (!IsServer(cptr))
+  if (find_conf_by_name(host, CONF_NOCONNECT_SERVER) == NULL)
     {
-      if (find_conf_by_name(host, CONF_NOCONNECT_SERVER) == NULL)
-        {
-          if (ConfigFileEntry.warn_no_nline)
-              sendto_realops("Link %s Server %s dropped, no N: line",
-                             get_client_name(cptr, TRUE), host);
-          return exit_client(cptr, cptr, cptr, "NO N line");
-        }
+      if (ConfigFileEntry.warn_no_nline)
+	sendto_realops("Link %s Server %s dropped, no N: line",
+		       get_client_name(cptr, TRUE), host);
+      return exit_client(cptr, cptr, cptr, "NO N line");
     }
 
-  if (MyConnect(cptr) && (GlobalSetOptions.autoconn == 0))
+  if (GlobalSetOptions.autoconn == 0)
     {
       sendto_realops("WARNING AUTOCONN is 0, Closing %s",
                  get_client_name(cptr, TRUE));
@@ -237,15 +189,7 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       exit_client(bcptr, bcptr, &me, "Server Exists");
     }
 
-  /* The following if statement would be nice to remove
-   * since user nicks never have '.' in them and servers
-   * must always have '.' in them. There should never be a 
-   * server/nick name collision, but it is possible a capricious
-   * server admin could deliberately do something strange.
-   *
-   * -Dianora
-   */
-  if ((acptr = find_client(host, NULL)) && acptr != cptr)
+  if ( strchr(host,'.') == NULL )
     {
       /*
        * Server trying to use the same name as a person. Would
@@ -256,90 +200,6 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       sendto_realops("Link %s cancelled: Server/nick collision on %s",
                  /* inpath */ get_client_name(cptr,FALSE), host);
       return exit_client(cptr, cptr, cptr, "Nick as Server");
-    }
-
-  if (IsServer(cptr))
-    {
-      /*
-       * Server is informing about a new server behind
-       * this link. Create REMOTE server structure,
-       * add it to list and propagate word to my other
-       * server links...
-       */
-      if (parc == 1 || info[0] == '\0')
-        {
-          sendto_one(cptr, "ERROR :No server info specified for %s", host);
-          return 0;
-        }
-
-      /*
-       * See if the newly found server is behind a guaranteed
-       * leaf (L-line). If so, close the link.
-       */
-      if ((aconf = find_conf_host(&cptr->localClient->confs, host, CONF_LEAF)) &&
-          (!aconf->port || (hop > aconf->port)))
-        {
-          sendto_realops("Leaf-only link %s->%s - Closing",
-                     get_client_name(cptr,  TRUE),
-                     aconf->host ? aconf->host : "*");
-          sendto_one(cptr, "ERROR :Leaf-only link, sorry.");
-          return exit_client(cptr, cptr, cptr, "Leaf Only");
-        }
-
-      if (!(aconf = find_conf_host(&cptr->localClient->confs, host, CONF_HUB)) ||
-          (aconf->port && (hop > aconf->port)) )
-        {
-          sendto_realops("Non-Hub link %s introduced %s(%s).",
-                     get_client_name(cptr,  TRUE), host,
-                     aconf ? (aconf->host ? aconf->host : "*") : "!");
-          sendto_one(cptr, "ERROR :%s has no H: line for %s.",
-                     get_client_name(cptr,  TRUE), host);
-          return exit_client(cptr, cptr, cptr, "Too many servers");
-        }
-
-      acptr = make_client(cptr);
-      make_server(acptr);
-      acptr->hopcount = hop;
-      strncpy_irc(acptr->name, host, HOSTLEN);
-      strncpy_irc(acptr->info, info, REALLEN);
-      acptr->serv->up = find_or_add(parv[0]);
-      acptr->servptr = sptr;
-
-      SetServer(acptr);
-
-      Count.server++;
-
-      add_client_to_list(acptr);
-      add_to_client_hash_table(acptr->name, acptr);
-      add_client_to_llist(&(acptr->servptr->serv->servers), acptr);
-
-      /*
-       * Old sendto_serv_but_one() call removed because we now
-       * need to send different names to different servers
-       * (domain name matching)
-       */
-      for (ptr = serv_list.head; ptr; ptr = ptr->next)
-        {
-	  bcptr = ptr->data;
-          if (bcptr == cptr)
-            continue;
-          if (!(aconf = bcptr->serv->nline))
-            {
-              sendto_realops("Lost N-line for %s on %s. Closing",
-                         get_client_name(cptr, TRUE), host);
-              return exit_client(cptr, cptr, cptr, "Lost N line");
-            }
-          if (match(my_name_for_link(me.name, aconf), acptr->name))
-            continue;
-
-          sendto_one(bcptr, ":%s SERVER %s %d :%s",
-                     parv[0], acptr->name, hop + 1, acptr->info);
-                         
-        }
-      
-      sendto_realops_flags(FLAGS_EXTERNAL, "Server %s being introduced by %s",
-                           acptr->name, sptr->name);
-      return 0;
     }
 
   if (!IsUnknown(cptr) && !IsHandshake(cptr))
@@ -424,101 +284,14 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
           info[REALLEN] = '\0';
         }
     }
-  /*
-   * July 5, 1997
-   * Rewritten to throw away server cruft from users,
-   * combined the hostname validity test with
-   * cleanup of host name, so a cleaned up hostname
-   * can be returned as an error if necessary. - Dianora
-   *
-   * yes, the if(strlen) below is really needed!! 
-   */
+
   if (strlen(host) > HOSTLEN)
     host[HOSTLEN] = '\0';
-
-  if (IsPerson(sptr))
-    {
-      /*
-       * a USER tries something fishy... ;-)
-       */
-      if (IsServer(cptr))
-        {
-          sendto_realops("SERVER command from remote user %s -- %s is a hacked server",
-                          get_client_name(sptr,SHOW_IP),
-                          get_client_name(cptr,SHOW_IP));
-        }
-      else
-        {
-          sendto_one(sptr, form_str(ERR_UNKNOWNCOMMAND),
-                     me.name, parv[0], "SERVER");
-        }
-      return 0;
-    }
-  else
-    {
-      /* Lets check for bogus names and clean them up
-       * we don't bother cleaning up ones from users, becasuse
-       * we will never see them any more - Dianora
-       */
-
-      int bogus_server = 0;
-      int dots = 0;
-      char *s;
-
-      s = host;
-      while (*s)
-        {
-          if (!IsServChar(*s)) {
-            bogus_server = 1;
-            break;
-          }
-          if ('.' == *s)
-            ++dots;
-          ++s;
-        }
-
-      if (!dots || bogus_server )
-        {
-          char clean_host[2 * HOSTLEN + 4];
-          sendto_one(sptr,"ERROR :Bogus server name (%s)", 
-                     clean_string(clean_host, host, 2 * HOSTLEN));
-          return exit_client(cptr, cptr, cptr, "Bogus server name");
-        }
-    }
 
   /* 
    * *WHEN* can it be that "cptr != sptr" ????? --msa
    * When SERVER command (like now) has prefix. -avalon
-   * 
-   * check to see this host even has an N line before bothering
-   * anyone about it. Its only a quick sanity test to stop
-   * the conference room and win95 ircd dorks. 
-   * Sure, it will be redundantly checked again in m_server_estab()
-   * *sigh* yes there will be wasted CPU as the conf list will
-   * be scanned twice. But how often will this happen?
-   * - Dianora
-   *
-   * This should (will be) be recoded to check the IP is valid as well, 
-   * with a pointer to the valid N line conf kept for later, saving
-   * an extra lookup.. *sigh* - Dianora
    */
-  if (!IsServer(cptr))
-    {
-      if (find_conf_by_name(host, CONF_NOCONNECT_SERVER) == NULL)
-        {
-          if (ConfigFileEntry.warn_no_nline)
-              sendto_realops("Link %s Server %s dropped, no N: line",
-                             get_client_name(cptr, TRUE), host);
-          return exit_client(cptr, cptr, cptr, "NO N line");
-        }
-    }
-
-  if (MyConnect(cptr) && (GlobalSetOptions.autoconn == 0))
-    {
-      sendto_realops("WARNING AUTOCONN is 0, Closing %s",
-                 get_client_name(cptr, TRUE));
-      return exit_client(cptr, cptr, cptr, "AUTOCONNS off");
-    }
 
   if ((acptr = find_server(host)))
     {
@@ -535,11 +308,11 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       bcptr = (cptr->firsttime > acptr->from->firsttime) ? cptr : acptr->from;
       sendto_one(bcptr,"ERROR :Server %s already exists", host);
       if (bcptr == cptr)
-      {
-        sendto_realops("Link %s cancelled, server %s already exists",
-                   get_client_name(bcptr, TRUE), host);
-        return exit_client(bcptr, bcptr, &me, "Server Exists");
-      }
+	{
+	  sendto_realops("Link %s cancelled, server %s already exists",
+			 get_client_name(bcptr, TRUE), host);
+	  return exit_client(bcptr, bcptr, &me, "Server Exists");
+	}
       /*
        * in this case, we are not dropping the link from
        * which we got the SERVER message.  Thus we canNOT
@@ -556,15 +329,11 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       exit_client(bcptr, bcptr, &me, "Server Exists");
     }
 
-  /* The following if statement would be nice to remove
-   * since user nicks never have '.' in them and servers
-   * must always have '.' in them. There should never be a 
-   * server/nick name collision, but it is possible a capricious
-   * server admin could deliberately do something strange.
-   *
-   * -Dianora
+  /* 
+   * User nicks never have '.' in them and servers
+   * must always have '.' in them.
    */
-  if ((acptr = find_client(host, NULL)) && acptr != cptr)
+  if ( strchr(host,'.') == NULL )
     {
       /*
        * Server trying to use the same name as a person. Would
@@ -577,124 +346,87 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       return exit_client(cptr, cptr, cptr, "Nick as Server");
     }
 
-  if (IsServer(cptr))
+  /*
+   * Server is informing about a new server behind
+   * this link. Create REMOTE server structure,
+   * add it to list and propagate word to my other
+   * server links...
+   */
+  if (parc == 1 || info[0] == '\0')
     {
-      /*
-       * Server is informing about a new server behind
-       * this link. Create REMOTE server structure,
-       * add it to list and propagate word to my other
-       * server links...
-       */
-      if (parc == 1 || info[0] == '\0')
-        {
-          sendto_one(cptr, "ERROR :No server info specified for %s", host);
-          return 0;
-        }
-
-      /*
-       * See if the newly found server is behind a guaranteed
-       * leaf (L-line). If so, close the link.
-       */
-      if ((aconf = find_conf_host(&cptr->localClient->confs, host, CONF_LEAF)) &&
-          (!aconf->port || (hop > aconf->port)))
-        {
-          sendto_realops("Leaf-only link %s->%s - Closing",
-                     get_client_name(cptr,  TRUE),
-                     aconf->host ? aconf->host : "*");
-          sendto_one(cptr, "ERROR :Leaf-only link, sorry.");
-          return exit_client(cptr, cptr, cptr, "Leaf Only");
-        }
-
-      if (!(aconf = find_conf_host(&cptr->localClient->confs, host, CONF_HUB)) ||
-          (aconf->port && (hop > aconf->port)) )
-        {
-          sendto_realops("Non-Hub link %s introduced %s(%s).",
-                     get_client_name(cptr,  TRUE), host,
-                     aconf ? (aconf->host ? aconf->host : "*") : "!");
-          sendto_one(cptr, "ERROR :%s has no H: line for %s.",
-                     get_client_name(cptr,  TRUE), host);
-          return exit_client(cptr, cptr, cptr, "Too many servers");
-        }
-
-      acptr = make_client(cptr);
-      make_server(acptr);
-      acptr->hopcount = hop;
-      strncpy_irc(acptr->name, host, HOSTLEN);
-      strncpy_irc(acptr->info, info, REALLEN);
-      acptr->serv->up = find_or_add(parv[0]);
-      acptr->servptr = sptr;
-
-      SetServer(acptr);
-
-      Count.server++;
-
-      add_client_to_list(acptr);
-      add_to_client_hash_table(acptr->name, acptr);
-      add_client_to_llist(&(acptr->servptr->serv->servers), acptr);
-
-      /*
-       * Old sendto_serv_but_one() call removed because we now
-       * need to send different names to different servers
-       * (domain name matching)
-       */
-      for (ptr = serv_list.head; ptr; ptr = ptr->next)
-        {
-	  bcptr = ptr->data;
-
-          if (bcptr == cptr)
-            continue;
-          if (!(aconf = bcptr->serv->nline))
-            {
-              sendto_realops("Lost N-line for %s on %s. Closing",
-                         get_client_name(cptr, TRUE), host);
-              return exit_client(cptr, cptr, cptr, "Lost N line");
-            }
-          if (match(my_name_for_link(me.name, aconf), acptr->name))
-            continue;
-
-          sendto_one(bcptr, ":%s SERVER %s %d :%s",
-                     parv[0], acptr->name, hop + 1, acptr->info);
-                         
-        }
-      
-      sendto_realops_flags(FLAGS_EXTERNAL, "Server %s being introduced by %s",
-                           acptr->name, sptr->name);
+      sendto_one(cptr, "ERROR :No server info specified for %s", host);
       return 0;
     }
 
-  if (!IsUnknown(cptr) && !IsHandshake(cptr))
-    return 0;
   /*
-   * A local link that is still in undefined state wants
-   * to be a SERVER, or we have gotten here as a result of a connect
-   * Check if this is allowed and change status accordingly...
+   * See if the newly found server is behind a guaranteed
+   * leaf (L-line). If so, close the link.
    */
-
-  /* 
-   * Reject a direct nonTS server connection if we're TS_ONLY -orabidoo
-   */
-  if (!DoesTS(cptr))
+  if ((aconf = find_conf_host(&cptr->localClient->confs, host, CONF_LEAF)) &&
+      (!aconf->port || (hop > aconf->port)))
     {
-      sendto_realops("Link %s dropped, non-TS server",
-                 get_client_name(cptr, TRUE));
-      return exit_client(cptr, cptr, cptr, "Non-TS server");
+      sendto_realops("Leaf-only link %s->%s - Closing",
+                     get_client_name(cptr,  TRUE),
+                     aconf->host ? aconf->host : "*");
+      sendto_one(cptr, "ERROR :Leaf-only link, sorry.");
+      return exit_client(cptr, cptr, cptr, "Leaf Only");
     }
 
+  if (!(aconf = find_conf_host(&cptr->localClient->confs, host, CONF_HUB)) ||
+      (aconf->port && (hop > aconf->port)) )
+    {
+      sendto_realops("Non-Hub link %s introduced %s(%s).",
+                     get_client_name(cptr,  TRUE), host,
+                     aconf ? (aconf->host ? aconf->host : "*") : "!");
+      sendto_one(cptr, "ERROR :%s has no H: line for %s.",
+		 get_client_name(cptr,  TRUE), host);
+      return exit_client(cptr, cptr, cptr, "Too many servers");
+    }
+
+  acptr = make_client(cptr);
+  make_server(acptr);
+  acptr->hopcount = hop;
+  strncpy_irc(acptr->name, host, HOSTLEN);
+  strncpy_irc(acptr->info, info, REALLEN);
+  acptr->serv->up = find_or_add(parv[0]);
+  acptr->servptr = sptr;
+
+  SetServer(acptr);
+
+  Count.server++;
+
+  add_client_to_list(acptr);
+  add_to_client_hash_table(acptr->name, acptr);
+  add_client_to_llist(&(acptr->servptr->serv->servers), acptr);
+
   /*
-   * if we are connecting (Handshake), we already have the name from the
-   * C:line in cptr->name
+   * Old sendto_serv_but_one() call removed because we now
+   * need to send different names to different servers
+   * (domain name matching)
    */
-  strncpy_irc(cptr->name, host, HOSTLEN);
-  strncpy_irc(cptr->info, info[0] ? info : me.name, REALLEN);
-  cptr->hopcount = hop;
+  for (ptr = serv_list.head; ptr; ptr = ptr->next)
+    {
+      bcptr = ptr->data;
 
-  if (check_server(cptr))
-    return server_estab(cptr);
+      if (bcptr == cptr)
+	continue;
+      if (!(aconf = bcptr->serv->nline))
+	{
+	  sendto_realops("Lost N-line for %s on %s. Closing",
+                         get_client_name(cptr, TRUE), host);
+	  return exit_client(cptr, cptr, cptr, "Lost N line");
+	}
+      if (match(my_name_for_link(me.name, aconf), acptr->name))
+	continue;
 
-  ++ServerStats->is_ref;
-  sendto_realops("Received unauthorized connection from %s.",
-		 get_client_host(cptr));
-  return exit_client(cptr, cptr, cptr, "No C/N conf lines");
+      sendto_one(bcptr, ":%s SERVER %s %d :%s",
+		 parv[0], acptr->name, hop + 1, acptr->info);
+                         
+    }
+      
+  sendto_realops_flags(FLAGS_EXTERNAL, "Server %s being introduced by %s",
+		       acptr->name, sptr->name);
+  return 0;
 }
 
 
