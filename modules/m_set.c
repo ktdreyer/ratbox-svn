@@ -306,7 +306,9 @@ int quote_msglocale( struct Client *sptr, char *locale )
 #ifdef USE_GETTEXT
   if(locale)
   {
-    setenv("LANGUAGE", locale, 1);
+    char langenv[BUFSIZE];
+    ircsprintf("LANGUAGE=%s",locale);
+    putenv(langenv);
     { /* XXX ick, this is what gettext.info _recommends_ */
       extern int  _nl_msg_cat_cntr;
       ++_nl_msg_cat_cntr;
