@@ -28,6 +28,9 @@
 #include <sys/types.h>
 #include <string.h>
 
+/* XXX */
+#define  WE_ARE_MEMORY_C
+
 #include "config.h"
 #include "ircd.h"
 #include "tools.h"
@@ -36,8 +39,6 @@
 #include "client.h"	/* for FLAGS_ALL only */
 #include "irc_string.h"
 #include "ircdauth.h"
-/* XXX */
-#define  WE_ARE_MEMORY_C
 #include "memory.h"
 #include "modules.h"
 #include "s_serv.h" /* for CAP_LL / IsCapable */

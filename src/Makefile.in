@@ -44,8 +44,10 @@ default:	all
 y.tab.o:	y.tab.c ircd_parser.y
 	${CC} -g -I ../include -I. -c y.tab.c
 
+# Note GNU bison uses <file>.tab.c not y.tab.c
 y.tab.c:	ircd_parser.y
 	${YACC} -d ircd_parser.y
+	@mv -f ircd_parser.tab.c y.tab.c
 
 lex.yy.o:	lex.yy.c ircd_lexer.l
 	${CC} -g -I ../include -c lex.yy.c

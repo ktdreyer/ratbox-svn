@@ -24,6 +24,10 @@ Necessary Requirements:
 
 - A working getopt() function
 
+- A working lex.  Solaris /usr/ccs/bin/lex
+  appears to be broken, on this system flex
+  should be used.
+
 Feature Specific Requirements:
 
 - For the SSL Challenge controlled OPER feature, a working OpenSSL library
@@ -76,7 +80,7 @@ Feature Specific Requirements:
   is known to run properly.
   FreeBSD 3.x/4.x
   Linux glibc
-  Solaris 2.6/7
+  Solaris 2.6/7/8
   OpenBSD 2.8
 
 - CYGWIN USERS: Unfortunately, cygwin support has been removed
