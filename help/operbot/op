@@ -1,3 +1,4 @@
-OP <#channel>
+OP [#channel]
 Ops you in a channel monitored by the operbot
-  <#channel>: Channel to request ops on.
+  [#channel]: Channel to request ops on, if unspecified all 
+              common channels

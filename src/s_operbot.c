@@ -37,7 +37,7 @@ static struct service_command operbot_command[] =
 	{ "OJOIN",	&s_operbot_ojoin,	1, NULL, 1, 0L, 0, 0, CONF_OPER_OPERBOT_ADMIN },
 	{ "OPART",	&s_operbot_opart,	1, NULL, 1, 0L, 0, 0, CONF_OPER_OPERBOT_ADMIN },
 	{ "INVITE",	&s_operbot_invite,	1, NULL, 1, 0L, 0, 1, 0 },
-	{ "OP",		&s_operbot_op,		1, NULL, 1, 0L, 0, 1, 0 },
+	{ "OP",		&s_operbot_op,		0, NULL, 1, 0L, 0, 1, 0 },
 	{ "\0",		NULL,			0, NULL, 0, 0L, 0, 0, 0 }
 };
 
@@ -174,6 +174,29 @@ s_operbot_op(struct client *client_p, char *parv[], int parc)
 	struct channel *chptr;
 	struct chmember *mptr;
 
+	/* op in all common channels */
+	if(!parc)
+	{
+		dlink_node *ptr;
+
+		DLINK_FOREACH(ptr, operbot_p->service->channels.head)
+		{
+			chptr = ptr->data;
+
+			if((mptr = find_chmember(chptr, client_p)) == NULL)
+				continue;
+
+			if(is_opped(mptr))
+				continue;
+
+			mptr->flags |= MODE_OPPED;
+			sendto_server(":%s MODE %s +o %s",
+					operbot_p->name, chptr->name, client_p->name);
+		}
+
+		return 1;
+	}
+
 	if((chptr = find_channel(parv[0])) == NULL)
 	{
 		service_error(operbot_p, client_p, "Invalid channel");
@@ -187,6 +210,9 @@ s_operbot_op(struct client *client_p, char *parv[], int parc)
 	}
 
 	if((mptr = find_chmember(chptr, client_p)) == NULL)
+		return 1;
+
+	if(is_opped(mptr))
 		return 1;
 
 	mptr->flags |= MODE_OPPED;
