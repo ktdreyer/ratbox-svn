@@ -1,3 +1,10 @@
+*** 20001211_1 by db
+- m_eob.c was not reporting length of burst like it should have been
+- m_squit.c I forgot to send out WALLOPS when squit matched local link
+  NOT fully tested 'cause I need a remote server to split! 
+
+
+
 *** 20001210_13 by db
 - CAP_CHW works again between compatible CAP_CHW servers..
   Thats the /quote privmsg @#channel :message
