@@ -1,3 +1,7 @@
+*** 20010224_4 by toot
+fixed modules="..."; in ircd.conf
+
+
 *** 20010224_3 by toot
 fixed a little typo in ircd_parser.y with client_exit option
 
