@@ -1,3 +1,15 @@
+androsyn    2004/07/30 12:27:26 EDT	(20040730_4)
+
+  Modified files:
+    modules              m_oper.c 
+  Log:
+  nothing uses the return to oper_up() so make it a void
+  
+  Revision  Changes    Path
+  1.85      +4 -4      ircd-ratbox/modules/m_oper.c
+
+
+
 androsyn    2004/07/30 12:25:43 EDT	(20040730_3)
 
   Modified files:
