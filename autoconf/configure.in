@@ -38,7 +38,11 @@ else
     IRC_CFLAGS=""
     CPPFLAGS="$CPPFLAGS -Ylonglong -Yansi -I/usr/include"
   else
-    IRC_CFLAGS="-g"
+    if test "x$ac_cv_prog_cc_g" = "xyes"; then
+      IRC_CFLAGS="-g"
+    else
+      IRC_CFLAGS=""
+    fi
   fi
 fi
 
