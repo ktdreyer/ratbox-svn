@@ -834,7 +834,7 @@ chm_hideops(struct Client *client_p, struct Client *source_p,
     mode_changes_plus[mode_count_plus++].arg = NULL;
 
     resync_ops[resync_count].client_p = NULL;
-    resync_ops[resync_count].dir = dir;
+    resync_ops[resync_count].dir = MODE_DEL;
     resync_ops[resync_count].c = c;
     resync_ops[resync_count].send = 0;
     resync_ops[resync_count].whole_chan = 1;
@@ -843,6 +843,7 @@ chm_hideops(struct Client *client_p, struct Client *source_p,
   else if ((dir == MODE_DEL) && (chptr->mode.mode & MODE_HIDEOPS))
   {
     chptr->mode.mode &= ~MODE_HIDEOPS;
+    
     for (i = 0; i < mode_count_plus; i++)
     {
       if (mode_changes_plus[i].letter == c)
@@ -869,11 +870,13 @@ chm_hideops(struct Client *client_p, struct Client *source_p,
     mode_changes_minus[mode_count_minus++].arg = NULL;
 
     resync_ops[resync_count].client_p = NULL;
-    resync_ops[resync_count].dir = dir;
+    resync_ops[resync_count].dir = MODE_ADD;
     resync_ops[resync_count].c = c;
     resync_ops[resync_count].send = 0;
     resync_ops[resync_count].whole_chan = 1;
     resync_ops[resync_count++].sync = 0;
+
+    sendto_realops_flags(FLAGS_ALL, L_ALL, "%c", c);
   }
 }
 
@@ -2257,8 +2260,11 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
     return;
   
   /* Send any resyncs that we need to send... */
+  /* XXX - setting -a removes hideops, yet still needs a resync.. */
+#if 0
   if (chptr->mode.mode & MODE_HIDEOPS)
   {
+#endif  
     for (i = 0; i < resync_count; i++)
     {
       if (resync_ops[i].client_p == NULL)
@@ -2280,7 +2286,9 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
         sendto_one(resync_ops[i].client_p, ":%s MODE %s -%c %s", me.name,
                    chname, resync_ops[i].c, resync_ops[i].client_p->name);
     }
+#if 0
   }
+#endif  
 
   /* Send all mode changes to the chanops/halfops, and even peons if
    * we are not +a... */
@@ -2711,7 +2719,6 @@ send_oplist(const char *chname, struct Client *client_p,
     mcbuf[cur_modes++] = *prefix;
 
     t += ircsprintf(t, "%s ", target_p->name);
-
     data_to_send = 1;
 
     if (cur_modes == (MAXMODEPARAMS + 1))       /* '+' and modes */
@@ -2743,18 +2750,19 @@ sync_channel_oplists(struct Channel *chptr, int dir)
   dlink_list *list;
   struct Client *target_p;
 
-  list = &chptr->peons;
+  list = &chptr->locpeons;
   for (ptr = list->head; ptr && ptr->data; ptr = ptr->next)
   {
     target_p = ptr->data;
-    if (MyClient(target_p))
-      sync_oplists(chptr, target_p, dir, RootChan(chptr)->chname);
+    
+    sync_oplists(chptr, target_p, dir, RootChan(chptr)->chname);
   }
-  list = &chptr->voiced;
+  
+  list = &chptr->locvoiced;
   for (ptr = list->head; ptr && ptr->data; ptr = ptr->next)
   {
     target_p = ptr->data;
-    if (MyClient(target_p))
-      sync_oplists(chptr, target_p, dir, RootChan(chptr)->chname);
+    
+    sync_oplists(chptr, target_p, dir, RootChan(chptr)->chname);
   }
 }
