@@ -561,7 +561,7 @@ sendto_ll_serv_butone(struct Client *one, struct Client *sptr, int add,
       if (one && (cptr == one->from))
         continue;
       
-      if (IsCapable(cptr,CAP_LL))
+      if (IsCapable(cptr,CAP_LL) && ConfigFileEntry.hub)
 	{
 	  if( ( sptr->lazyLinkClientExists &
 		cptr->localClient->serverMask) == 0)
