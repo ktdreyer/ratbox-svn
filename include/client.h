@@ -121,15 +121,11 @@ struct host_entry
 #define CLIENT_INVIS	0x001
 #define CLIENT_OPER	0x002
 #define CLIENT_ADMIN	0x004
-#define CLIENT_REGISTER	0x008	/* client has registered a username already */
 
 #define ClientInvis(x)	 ((x)->user && (x)->user->umode & CLIENT_INVIS)
 #define ClientOper(x)	 ((x)->user && (x)->user->umode & CLIENT_OPER)
 #define is_oper(x)       ((x)->user && (x)->user->umode & CLIENT_OPER)
 #define ClientAdmin(x)	 ((x)->user && (x)->user->umode & CLIENT_ADMIN)
-#define ClientRegister(x) ((x)->user && (x)->user->umode & CLIENT_REGISTER)
-
-#define SetClientRegister(x) ((x)->user->umode |= CLIENT_REGISTER)
 
 #define SERVICE_OPERED		0x001 /* service is opered */
 #define SERVICE_MSGSELF		0x002 /* messages come from services nick */

@@ -1317,6 +1317,31 @@ s_chan_register(struct client *client_p, char *parv[], int parc)
 			last_count++;
 	}
 
+	/* check per host registration limits */
+	if(config_file.chregister_time && config_file.chregister_amount)
+	{
+		struct host_entry *hent = find_host(client_p->user->host);
+
+		/* this host has gone over the limits.. */
+		if(hent->cregister >= config_file.chregister_amount &&
+		   hent->cregister_expire > CURRENT_TIME)
+		{
+			service_error(chanserv_p, client_p,
+				"%s::REGISTER rate-limited for your host, try again later",
+				chanserv_p->name);
+			return 1;
+		}
+
+		/* its expired.. reset limits */
+		if(hent->cregister_expire <= CURRENT_TIME)
+		{
+			hent->cregister_expire = CURRENT_TIME + config_file.chregister_time;
+			hent->cregister = 0;
+		}
+
+		hent->cregister++;
+	}
+
 	slog(chanserv_p, 2, "%s %s REGISTER %s",
 		client_p->user->mask, client_p->user->user_reg->name, parv[0]);
 

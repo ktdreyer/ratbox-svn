@@ -42,7 +42,9 @@ set_default_conf(void)
 
 	config_file.disable_uregister = 0;
 	config_file.uregister_time = 60;
-	config_file.uregister_amount = 10;
+	config_file.uregister_amount = 5;
+	config_file.uhregister_time = 86400;	/* 1 day */
+	config_file.uhregister_amount = 2;
 	config_file.uregister_email = 0;
 	config_file.uexpire_time = 2419200;	/* 4 weeks */
 	config_file.allow_set_password = 1;
@@ -52,6 +54,8 @@ set_default_conf(void)
 	config_file.disable_cregister = 0;
 	config_file.cregister_time = 60;
 	config_file.cregister_amount = 5;
+	config_file.chregister_time = 86400;	/* 1 day */
+	config_file.chregister_amount = 4;
 	config_file.cexpire_time = 2419200; 	/* 4 weeks */
 	config_file.cmax_bans = 50;
 	config_file.cexpireban_frequency = DEFAULT_EXPIREBAN_FREQUENCY;

@@ -586,12 +586,6 @@ s_user_register(struct client *client_p, char *parv[], int parc)
 		return 1;
 	}
 
-	if(ClientRegister(client_p))
-	{
-		service_error(userserv_p, client_p, "You have already registered a username");
-		return 1;
-	}
-
 	if((reg_p = find_user_reg(NULL, parv[0])) != NULL)
 	{
 		service_error(userserv_p, client_p, "Username %s is already registered",
@@ -644,6 +638,31 @@ s_user_register(struct client *client_p, char *parv[], int parc)
 			last_count++;
 	}
 
+	/* check per host registration limits */
+	if(config_file.uhregister_time && config_file.uhregister_amount)
+	{
+		struct host_entry *hent = find_host(client_p->user->host);
+
+		/* this host has gone over the limits.. */
+		if(hent->uregister >= config_file.uhregister_amount &&
+		   hent->uregister_expire > CURRENT_TIME)
+		{
+			service_error(userserv_p, client_p,
+				"%s::REGISTER rate-limited for your host, try again later",
+				userserv_p->name);
+			return 1;
+		}
+
+		/* its expired.. reset limits */
+		if(hent->uregister_expire <= CURRENT_TIME)
+		{
+			hent->uregister_expire = CURRENT_TIME + config_file.uhregister_time;
+			hent->uregister = 0;
+		}
+
+		hent->uregister++;
+	}
+
 	/* we need to mask the password */
 	sendto_all(UMODE_REGISTER, "#:%s!%s@%s# REGISTER %s %s",
 			client_p->name, client_p->user->username,
@@ -668,8 +687,6 @@ s_user_register(struct client *client_p, char *parv[], int parc)
 	dlink_add_alloc(client_p, &reg_p->users);
 	client_p->user->user_reg = reg_p;
 	add_user_reg(reg_p);
-
-	SetClientRegister(client_p);
 
 	loc_sqlite_exec(NULL, "INSERT INTO users (username, password, email, reg_time, last_time, flags) "
 			"VALUES(%Q, %Q, %Q, %lu, %lu, %u)",

@@ -242,7 +242,7 @@ find_host(const char *name)
 	dlink_node *ptr;
 	unsigned int hashv = hash_host(name);
 
-	DLINK_FOREACH(ptr, name_table[hashv].head)
+	DLINK_FOREACH(ptr, host_table[hashv].head)
 	{
 		hent = ptr->data;
 

@@ -33,8 +33,10 @@ struct _config_file
 	/* userserv */
 	int disable_uregister;
 	char *uregister_url;
-	int uregister_time;
+	int uregister_time;		/* overall registrations */
 	int uregister_amount;
+	int uhregister_time;		/* per host registrations */
+	int uhregister_amount;
 	int uregister_email;
 	int uexpire_time;
 	int allow_set_password;
@@ -43,8 +45,10 @@ struct _config_file
 
 	/* chanserv */
 	int disable_cregister;
-	int cregister_time;
+	int cregister_time;		/* overall registrations */
 	int cregister_amount;
+	int chregister_time;		/* per host registrations */
+	int chregister_amount;
 	int cexpire_time;
 	int cmax_bans;
 	int cexpireban_frequency;
