@@ -158,7 +158,6 @@ int   class_sendq_var;
 %token  NON_REDUNDANT_KLINES
 %token  E_LINES_OPER_ONLY
 %token  F_LINES_OPER_ONLY
-%token  WHOIS_NOTICE
 %token  STATS_NOTICE
 %token  WHOIS_WAIT
 %token  PACE_WAIT
@@ -1196,8 +1195,7 @@ general_item:       general_failed_oper_notice | general_show_failed_oper_id |
 	            general_warn_no_nline |
                     general_non_redundant_klines | general_dots_in_ident |
                     general_e_lines_oper_only | general_f_lines_oper_only |
-	            general_stats_notice |
-                    general_whois_notice | general_pace_wait |
+	            general_stats_notice | general_pace_wait |
 	            general_whois_wait | 
                     general_knock_delay |
                     general_short_motd | general_no_oper_flood |
@@ -1328,17 +1326,6 @@ general_stats_notice: STATS_NOTICE '=' TYES ';'
   {
     ConfigFileEntry.stats_notice = 0;
   } ;
-
-general_whois_notice: WHOIS_NOTICE '=' TYES ';'
-  {
-    ConfigFileEntry.whois_notice = 1;
-  }
-    |
-    WHOIS_NOTICE '=' TNO ';'
-  {
-    ConfigFileEntry.whois_notice = 0;
-  } ;
-
 
 general_pace_wait: PACE_WAIT '=' NUMBER ';'
   {

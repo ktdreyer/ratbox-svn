@@ -279,7 +279,7 @@ struct LocalUser
 #define IsAnyOper(x)		((x)->umodes & (FLAGS_OPER | FLAGS_LOCOP))
 #define IsGlobalOper(x)		((x)->umodes & FLAGS_OPER)
 #define IsLocalOper(x)		((x)->umodes & FLAGS_LOCOP)
-#define IsAdmin(x)		((x)->umodes & FLAGS_ADMIN)
+#define IsAdmin(x)		(IsSetOperAdmin(x))
 
 #define SetConnecting(x)        {(x)->status = STAT_CONNECTING; \
 				 (x)->handler = UNREGISTERED_HANDLER; }

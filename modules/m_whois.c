@@ -373,15 +373,6 @@ void whois_person(struct Client *sptr,struct Client *acptr)
 		   me.name, sptr->name, acptr->name);
     }
 
-  if (ConfigFileEntry.whois_notice && 
-      (MyOper(acptr)) && ((acptr)->umodes & FLAGS_SPY) &&
-      (MyConnect(sptr)) && (IsPerson(sptr)) && (acptr != sptr))
-    sendto_one(acptr,
-	       ":%s NOTICE %s :*** Notice -- %s (%s@%s) is doing a /whois on you.",
-	       me.name, acptr->name, sptr->name, sptr->username,
-	       sptr->host);
-  
-  
   if (!GlobalSetOptions.hide_server && MyConnect(acptr))
     sendto_one(sptr, form_str(RPL_WHOISIDLE),
 	       me.name, sptr->name, acptr->name,

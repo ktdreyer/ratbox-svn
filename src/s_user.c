@@ -859,6 +859,11 @@ int user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         case '\r' :
         case '\t' :
           break;
+	case 'a':
+	  if (MyConnect(sptr)) {
+	    badflag = 1;
+	    break;
+	  }
         default :
           if( (flag = user_modes_from_c_to_bitmask[(unsigned char)*m]))
             {
@@ -885,13 +890,6 @@ int user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       sptr->umodes &= ~FLAGS_NCHANGE; /* only tcm's really need this */
     }
 
-  if ((sptr->umodes & FLAGS_ADMIN) && !IsSetOperAdmin(sptr))
-    {
-      sendto_one(sptr, ":%s NOTICE %s :*** You need oper and A flag for +a",
-		 me.name, parv[0]);
-      sptr->umodes &= ~FLAGS_ADMIN;  /* shouldn't let normal opers set this */
-    }
-  
   if (!(setflags & FLAGS_INVISIBLE) && IsInvisible(sptr))
     ++Count.invisi;
   if ((setflags & FLAGS_INVISIBLE) && !IsInvisible(sptr))
