@@ -46,14 +46,17 @@
 extern char *ip_string;
 
 int yyparse();
+
+#define MAX_CONFS_PER_BLOCK 255
         
 static struct ConfItem *yy_aconf;
+static struct ConfItem *yy_aconfs[MAX_CONFS_PER_BLOCK];
+static int              yy_count = 0;
 static struct ConfItem *yy_hconf;
 static struct ConfItem *yy_lconf;
 
 static struct ConfItem *hub_confs;
 static struct ConfItem *leaf_confs;
-static struct ConfItem *yy_aconf;
 static struct ConfItem *yy_aconf_next;
 
 static dlink_node *node;
@@ -701,40 +704,54 @@ listen_host:	HOST '=' QSTRING ';'
 
 auth_entry:   AUTH
   {
-    if(yy_aconf)
-      {
-        free_conf(yy_aconf);
-        yy_aconf = (struct ConfItem *)NULL;
-      }
-    yy_aconf=make_conf();
-    yy_aconf->status = CONF_CLIENT;
+    yy_count = 0;
+    yy_aconfs[yy_count] = make_conf();
+    yy_aconfs[yy_count]->status = CONF_CLIENT;
   }
  '{' auth_items '}' ';' 
   {
-    if(yy_aconf->name == NULL)
-      DupString(yy_aconf->name,"NOMATCH");
+    int i;
+    /* copy over settings from first struct */
+    for( i = 1; i < yy_count; i++ )
+    {
+      if(yy_aconfs[0]->passwd)
+        DupString(yy_aconfs[i]->passwd, yy_aconfs[0]->passwd);
+      if(yy_aconfs[0]->name)
+        DupString(yy_aconfs[i]->name, yy_aconfs[0]->name);
+      if(yy_aconfs[0]->className)
+        DupString(yy_aconfs[i]->className, yy_aconfs[0]->className);
 
-    conf_add_class_to_conf(yy_aconf);
+      yy_aconfs[i]->flags = yy_aconfs[0]->flags;
+      yy_aconfs[i]->port  = yy_aconfs[0]->port;
+    }
 
-    if(yy_aconf->user == NULL)
-      DupString(yy_aconf->user,"*");
-    else
-      (void)collapse(yy_aconf->user);
+    for( i = 0; i < yy_count; i++ )
+    {
+      if(yy_aconfs[i]->name == NULL)
+        DupString(yy_aconfs[i]->name,"NOMATCH");
 
-    if(yy_aconf->host == NULL)
-      DupString(yy_aconf->host,"*");
-    else
-      (void)collapse(yy_aconf->host);
+      conf_add_class_to_conf(yy_aconfs[i]);
 
-    if(yy_aconf->ip && yy_aconf->ip_mask)
-      {
-        add_ip_Iline(yy_aconf);
-      }
-    else
-      {
-        add_conf(yy_aconf);
-      }
-    yy_aconf = (struct ConfItem *)NULL;
+      if(yy_aconfs[i]->user == NULL)
+        DupString(yy_aconfs[i]->user,"*");
+      else
+        (void)collapse(yy_aconfs[i]->user);
+
+      if(yy_aconfs[i]->host == NULL)
+        DupString(yy_aconfs[i]->host,"*");
+      else
+        (void)collapse(yy_aconfs[i]->host);
+
+      if(yy_aconfs[i]->ip && yy_aconfs[i]->ip_mask)
+        {
+          add_ip_Iline(yy_aconfs[i]);
+        }
+      else
+        {
+          add_conf(yy_aconfs[i]);
+        }
+      yy_aconfs[i] = (struct ConfItem *)NULL;
+    }
   }; 
 
 auth_items:     auth_items auth_item |
@@ -753,33 +770,40 @@ auth_user:   USER '=' QSTRING ';'
     char *new_user;
     char *new_host;
 
+    if ( yy_count > 0 )
+      {
+        yy_aconfs[yy_count] = make_conf();
+        yy_aconfs[yy_count]->status = CONF_CLIENT;
+      }
+
     if((p = strchr(yylval.string,'@')))
       {
 	*p = '\0';
 	DupString(new_user, yylval.string);
-	MyFree(yy_aconf->user);
-	yy_aconf->user = new_user;
+	MyFree(yy_aconfs[yy_count]->user);
+	yy_aconfs[yy_count]->user = new_user;
 	p++;
-	MyFree(yy_aconf->host);
+	MyFree(yy_aconfs[yy_count]->host);
 	DupString(new_host,p);
-	yy_aconf->host = new_host;
+	yy_aconfs[yy_count]->host = new_host;
       }
     else
       {
-	MyFree(yy_aconf->host);
-	DupString(yy_aconf->host, yylval.string);
-	DupString(yy_aconf->user,"*");
+	MyFree(yy_aconfs[yy_count]->host);
+	DupString(yy_aconfs[yy_count]->host, yylval.string);
+	DupString(yy_aconfs[yy_count]->user,"*");
       }
+    yy_count++;
   };
              |
         IP '=' IP_TYPE ';'
   {
     char *p;
 
-    yy_aconf->ip = yylval.ip_entry.ip;
-    yy_aconf->ip_mask = yylval.ip_entry.ip_mask;
-    DupString(yy_aconf->host,ip_string);
-    if((p = strchr(yy_aconf->host, ';')))
+    yy_aconfs[yy_count-1]->ip = yylval.ip_entry.ip;
+    yy_aconfs[yy_count-1]->ip_mask = yylval.ip_entry.ip_mask;
+    DupString(yy_aconfs[yy_count-1]->host,ip_string);
+    if((p = strchr(yy_aconfs[yy_count-1]->host, ';')))
       *p = '\0';
   }
 	     |
@@ -788,126 +812,127 @@ auth_user:   USER '=' QSTRING ';'
     char *p;
 
 #if 0
-    yy_aconf->ip = yylval.ip_entry.ip;
-    yy_aconf->ip_mask = yylval.ip_entry.ip_mask;
+    yy_aconfs[yy_count-1]->ip = yylval.ip_entry.ip;
+    yy_aconfs[yy_count-1]->ip_mask = yylval.ip_entry.ip_mask;
 #endif
-    DupString(yy_aconf->host,ip_string);
-    if((p = strchr(yy_aconf->host, ';')))
+    DupString(yy_aconfs[yy_count-1]->host,ip_string);
+    if((p = strchr(yy_aconfs[yy_count-1]->host, ';')))
       *p = '\0';
   };
 
 auth_passwd:  PASSWORD '=' QSTRING ';' 
   {
-    MyFree(yy_aconf->passwd);
-    DupString(yy_aconf->passwd,yylval.string);
+    MyFree(yy_aconfs[0]->passwd);
+    DupString(yy_aconfs[0]->passwd,yylval.string);
   };
 
 /* TYES/TNO are flipped to change the default value to YES */
 auth_spoof_notice:   SPOOF_NOTICE '=' TNO ';'
   {
-    yy_aconf->flags |= CONF_FLAGS_SPOOF_NOTICE;
+    yy_aconfs[0]->flags |= CONF_FLAGS_SPOOF_NOTICE;
   }
     |
     SPOOF_NOTICE '=' TYES ';'
   {
-    yy_aconf->flags &= ~CONF_FLAGS_SPOOF_NOTICE;
+    yy_aconfs[0]->flags &= ~CONF_FLAGS_SPOOF_NOTICE;
   };
 
 auth_spoof:   SPOOF '=' QSTRING ';' 
   {
-    MyFree(yy_aconf->name);
-    DupString(yy_aconf->name, yylval.string);
-    yy_aconf->flags |= CONF_FLAGS_SPOOF_IP;
+    MyFree(yy_aconfs[0]->name);
+    DupString(yy_aconfs[0]->name, yylval.string);
+    yy_aconfs[0]->flags |= CONF_FLAGS_SPOOF_IP;
   };
 
 auth_exceed_limit:    EXCEED_LIMIT '=' TYES ';'
   {
-    yy_aconf->flags |= CONF_FLAGS_F_LINED;
+    yy_aconfs[0]->flags |= CONF_FLAGS_F_LINED;
   }
                       |
                       EXCEED_LIMIT '=' TNO ';'
   {
-    yy_aconf->flags &= ~CONF_FLAGS_F_LINED;
+    yy_aconfs[0]->flags &= ~CONF_FLAGS_F_LINED;
   };
 
 auth_is_restricted:    RESTRICTED '=' TYES ';'
   {
-    yy_aconf->flags |= CONF_FLAGS_RESTRICTED;
+    yy_aconfs[0]->flags |= CONF_FLAGS_RESTRICTED;
   }
                       |
                       RESTRICTED '=' TNO ';'
   {
-    yy_aconf->flags &= ~CONF_FLAGS_RESTRICTED;
+    yy_aconfs[0]->flags &= ~CONF_FLAGS_RESTRICTED;
   };
 
 auth_kline_exempt:    KLINE_EXEMPT '=' TYES ';'
   {
-    yy_aconf->flags |= CONF_FLAGS_E_LINED;
+    yy_aconfs[0]->flags |= CONF_FLAGS_E_LINED;
   }
                       |
                       KLINE_EXEMPT '=' TNO ';'
   {
-    yy_aconf->flags &= ~CONF_FLAGS_E_LINED;
+    yy_aconfs[0]->flags &= ~CONF_FLAGS_E_LINED;
   };
 
 auth_have_ident:      HAVE_IDENT '=' TYES ';'
   {
-    yy_aconf->flags |= CONF_FLAGS_NEED_IDENTD;
+    yy_aconfs[0]->flags |= CONF_FLAGS_NEED_IDENTD;
   }
                       |
                       HAVE_IDENT '=' TNO ';'
   {
-    yy_aconf->flags &= ~CONF_FLAGS_NEED_IDENTD;
+    yy_aconfs[0]->flags &= ~CONF_FLAGS_NEED_IDENTD;
   };
 
 auth_no_tilde:        NO_TILDE '=' TYES ';' 
   {
-    yy_aconf->flags |= CONF_FLAGS_NO_TILDE;
+    yy_aconfs[0]->flags |= CONF_FLAGS_NO_TILDE;
   }
                       |
                       NO_TILDE '=' TNO ';'
   {
-    yy_aconf->flags &= ~CONF_FLAGS_NO_TILDE;
+    yy_aconfs[0]->flags &= ~CONF_FLAGS_NO_TILDE;
   };
 
 auth_gline_exempt:  GLINE_EXEMPT '=' TYES ';' 
   {
-    yy_aconf->flags |= CONF_FLAGS_EXEMPTGLINE;
+    yy_aconfs[0]->flags |= CONF_FLAGS_EXEMPTGLINE;
   }
                     |
                     GLINE_EXEMPT '=' TNO ';'
   {
-    yy_aconf->flags &= ~CONF_FLAGS_EXEMPTGLINE;
+    yy_aconfs[0]->flags &= ~CONF_FLAGS_EXEMPTGLINE;
   };
 
 
 auth_redir_serv:    REDIRSERV '=' QSTRING ';'
   {
-    yy_aconf->flags |= CONF_FLAGS_REDIR;
-    MyFree(yy_aconf->name);
-    DupString(yy_aconf->name, yylval.string);
+    yy_aconfs[0]->flags |= CONF_FLAGS_REDIR;
+    MyFree(yy_aconfs[0]->name);
+    DupString(yy_aconfs[0]->name, yylval.string);
   };
 
 auth_redir_port:    REDIRPORT '=' NUMBER ';'
   {
-    yy_aconf->flags |= CONF_FLAGS_REDIR;
-    yy_aconf->port = yylval.number;
+    yy_aconfs[0]->flags |= CONF_FLAGS_REDIR;
+    yy_aconfs[0]->port = yylval.number;
   };
 
 auth_class:   CLASS '=' QSTRING ';'
   {
-    if (yy_aconf->className == NULL)
+    if (yy_aconfs[0]->className == NULL)
       {
-	DupString(yy_aconf->className, yylval.string);
+	DupString(yy_aconfs[0]->className, yylval.string);
       }
   };
 
 auth_persistant: PERSISTANT '=' TYES ';'
   {
-   yy_aconf->flags |= CONF_FLAGS_PERSISTANT;
-  } |            PERSISTANT '=' TNO ';'
+   yy_aconfs[0]->flags |= CONF_FLAGS_PERSISTANT;
+  }
+  |            PERSISTANT '=' TNO ';'
   {
-   yy_aconf->flags &= CONF_FLAGS_PERSISTANT;
+   yy_aconfs[0]->flags &= CONF_FLAGS_PERSISTANT;
   };
 
 /***************************************************************************
