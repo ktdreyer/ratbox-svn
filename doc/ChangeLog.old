@@ -1,3 +1,12 @@
+*** 20010606_6 by jdc
+* Round 3 of the OpenSSL madness.  This *SHOULD* take care of everything
+  (isn't that what I said last time?).  Someone might want to examine
+  the Makefile.in's in other directories and see if they need SSL
+  though.  People, ***PLEASE TRY THIS OUT*** to make sure it works for
+  you.
+
+
+
 *** 20010606_5 by androsyn
 Lets see if this fixes the issue with '.' getting all over everything and
 everything else.
