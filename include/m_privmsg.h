@@ -7,6 +7,7 @@ struct entity {
   int flags;
 };
 
-int build_target_list(char *nicks_channels, struct entity target_table[]);
+int build_target_list(struct Client *sptr,
+		      char *nicks_channels, struct entity target_table[]);
 
 #endif

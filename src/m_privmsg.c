@@ -170,7 +170,7 @@ int     m_privmsg(struct Client *cptr,
       return -1;
     }
 
-  ntargets = build_target_list(parv[1],target_table);
+  ntargets = build_target_list(sptr,parv[1],target_table);
 
   for(i = 0; i < ntargets ; i++)
     {
@@ -209,7 +209,8 @@ int     m_privmsg(struct Client *cptr,
  * This function will be also used in m_notice.c
  */
 
-int build_target_list(char *nicks_channels,
+int build_target_list(struct Client *sptr,
+		      char *nicks_channels,
 		      struct entity target_table[])
 {
   int  i = 0;
@@ -258,7 +259,6 @@ int build_target_list(char *nicks_channels,
 	      type = MODE_CHANOP|MODE_VOICE;
 	    }
 
-#if 0
 	  /* suggested by Mortiis */
 	  if(!*nick)        /* if its a '\0' dump it, there is no recipient */
 	    {
@@ -266,7 +266,6 @@ int build_target_list(char *nicks_channels,
 			 me.name, sptr->name, "PRIVMSG");
 	      continue;
 	    }
-#endif
 
 	  /* At this point, nick+1 should be a channel name i.e. #foo or &foo
 	   * if the channel is found, fine, if not report an error
