@@ -127,8 +127,6 @@ void tstats(struct Client *cptr, const char *name)
              sp->is_ckr, sp->is_cbr, sp->is_skr, sp->is_sbr);
   sendto_one(cptr, ":%s %d %s :time connected %u %u",
              me.name, RPL_STATSDEBUG, name, sp->is_cti, sp->is_sti);
-  sendto_one(cptr, ":%s %d %s :CTCP Floods Blocked %u",
-             me.name, RPL_STATSDEBUG, name, sp->is_flud);
 }
 
 

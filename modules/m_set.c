@@ -63,7 +63,6 @@ char *_version = "20001122";
  * KEY:  0 - MAX
  *       1 - AUTOCONN
  *       2 - IDLETIME
- *       3 - FLUDNUM
  *       4 - FLUDTIME
  *       5 - FLUDBLOCK
  *       6 - DRONETIME
@@ -77,24 +76,18 @@ char *_version = "20001122";
 #define TOKEN_MAX 0
 #define TOKEN_AUTOCONN 1
 #define TOKEN_IDLETIME 2
-#define TOKEN_FLUDNUM 3
-#define TOKEN_FLUDTIME 4
-#define TOKEN_FLUDBLOCK 5
-#define TOKEN_DRONETIME 6
-#define TOKEN_DRONECOUNT 7
-#define TOKEN_SPAMNUM 8
-#define TOKEN_SPAMTIME 9
-#define TOKEN_LOG 10
-#define TOKEN_HIDE 11
-#define TOKEN_BAD 12
+#define TOKEN_DRONETIME 3
+#define TOKEN_DRONECOUNT 4
+#define TOKEN_SPAMNUM 5
+#define TOKEN_SPAMTIME 6
+#define TOKEN_LOG 7
+#define TOKEN_HIDE 8
+#define TOKEN_BAD 9
 
 char *set_token_table[] = {
   "MAX",
   "AUTOCONN",
   "IDLETIME",
-  "FLUDNUM",
-  "FLUDTIME",
-  "FLUDBLOCK",
   "DRONETIME",
   "DRONECOUNT",
   "SPAMNUM",
@@ -218,83 +211,6 @@ int mo_set(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 			   GlobalSetOptions.idletime/60);
               }
             return 0;
-            break;
-
-          case TOKEN_FLUDNUM:
-            if(parc > 2)
-              {
-                int newval = atoi(parv[2]);
-
-                if(newval <= 0)
-                  {
-                    sendto_one(sptr, ":%s NOTICE %s :FLUDNUM must be > 0",
-                               me.name, parv[0]);
-                    return 0;
-                  }       
-                GlobalSetOptions.fludnum = newval;
-                sendto_realops("%s has changed FLUDNUM to %i",
-                               parv[0], GlobalSetOptions.fludnum);
-              }
-            else
-              {
-                sendto_one(sptr, ":%s NOTICE %s :FLUDNUM is currently %i",
-                           me.name, parv[0], GlobalSetOptions.fludnum);
-              }
-            return 0;
-            break;
-
-          case TOKEN_FLUDTIME:
-            if(parc > 2)
-              {
-                int newval = atoi(parv[2]);
-
-                if(newval <= 0)
-                  {
-                    sendto_one(sptr, ":%s NOTICE %s :FLUDTIME must be > 0",
-                               me.name, parv[0]);
-                    return 0;
-                  }       
-                GlobalSetOptions.fludtime = newval;
-                sendto_realops("%s has changed FLUDTIME to %i",
-                               parv[0], GlobalSetOptions.fludtime);
-              }
-            else
-              {
-                sendto_one(sptr, ":%s NOTICE %s :FLUDTIME is currently %i",
-                           me.name, parv[0], GlobalSetOptions.fludtime);
-              }
-            return 0;       
-            break;
-
-          case TOKEN_FLUDBLOCK:
-            if(parc > 2)
-              {
-                int newval = atoi(parv[2]);
-
-                if(newval < 0)
-                  {
-                    sendto_one(sptr, ":%s NOTICE %s :FLUDBLOCK must be >= 0",
-                               me.name, parv[0]);
-                    return 0;
-                  }       
-                GlobalSetOptions.fludblock = newval;
-                if(GlobalSetOptions.fludblock == 0)
-                  {
-                    sendto_realops("%s has disabled flud detection/protection",
-                                   parv[0]);
-                  }
-                else
-                  {
-                    sendto_realops("%s has changed FLUDBLOCK to %i",
-                                   parv[0],GlobalSetOptions.fludblock);
-                  }
-              }
-            else
-              {
-                sendto_one(sptr, ":%s NOTICE %s :FLUDBLOCK is currently %i",
-                           me.name, parv[0], GlobalSetOptions.fludblock);
-              }
-            return 0;       
             break;
 
           case TOKEN_DRONETIME:
@@ -465,8 +381,6 @@ int mo_set(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     }
 
   sendto_one(sptr, ":%s NOTICE %s :Options: MAX AUTOCONN",
-             me.name, parv[0]);
-  sendto_one(sptr, ":%s NOTICE %s :Options: FLUDNUM, FLUDTIME, FLUDBLOCK",
              me.name, parv[0]);
   sendto_one(sptr, ":%s NOTICE %s :Options: DRONETIME, DRONECOUNT",
              me.name, parv[0]);

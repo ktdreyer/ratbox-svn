@@ -260,9 +260,6 @@ void count_memory(struct Client *cptr,char *nick)
   u_long links_memory_used = 0;
   u_long links_memory_allocated = 0;
 
-  u_long flud_memory_used = 0;
-  u_long flud_memory_allocated = 0;
-
   u_long tot = 0;
 
   count_whowas_memory(&wwu, &wwm);      /* no more away memory to count */
@@ -441,15 +438,6 @@ void count_memory(struct Client *cptr,char *nick)
              me.name, RPL_STATSDEBUG, nick,
              links_memory_used,
              links_memory_allocated);
-
-  count_flud_memory( (int *)&flud_memory_used,
-                    (int *)&flud_memory_allocated);
-  sendto_one(cptr, ":%s %d %s :FLUD Memory in use: %d FLUD Memory allocated: %d",
-             me.name, RPL_STATSDEBUG, nick,
-             flud_memory_used,
-             flud_memory_allocated);
-
-  tot += flud_memory_allocated;
 
   sendto_one(cptr, 
              ":%s %d %s :TOTAL: %d Available:  Current max RSS: %u",

@@ -398,10 +398,6 @@ static void initialize_global_set_options(void)
   GlobalSetOptions.maxclients = MAX_CLIENTS;
   GlobalSetOptions.autoconn = 1;
 
-  GlobalSetOptions.fludnum = FLUD_NUM;
-  GlobalSetOptions.fludtime = FLUD_TIME;
-  GlobalSetOptions.fludblock = FLUD_BLOCK;
-
   GlobalSetOptions.spam_time = MIN_JOIN_LEAVE_TIME;
   GlobalSetOptions.spam_num = MAX_JOIN_LEAVE_COUNT;
 

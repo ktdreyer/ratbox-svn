@@ -41,10 +41,6 @@ struct SetOptions
 
   int idletime;
 
-  int fludnum;
-  int fludtime;
-  int fludblock;
-
   int dronetime;
   int dronecount;
 

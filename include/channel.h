@@ -77,8 +77,6 @@ struct Channel
   time_t          channelts;
   char            locally_created;  /* used to flag a locally created channel*/
   char            keep_their_modes; /* used only on mode after sjoin */
-  time_t          fludblock;
-  struct fludbot* fluders;
   char            chname[1];
 };
 

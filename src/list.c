@@ -34,7 +34,6 @@
 #include "restart.h"
 #include "s_log.h"
 #include "send.h"
-#include "flud.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -70,12 +69,10 @@ void    outofmemory();
 /* for Wohali's block allocator */
 BlockHeap *free_Links;
 BlockHeap *free_anUsers;
-BlockHeap *free_fludbots;
 
 void initlists()
 {
   init_client_heap();
-  /* Might want to bump up LINK_PREALLOCATE if FLUD is defined */
   free_Links = BlockHeapCreate((size_t)sizeof(struct SLink),LINK_PREALLOCATE);
 
   /* struct User structs are used by both local struct Clients, and remote struct Clients */
@@ -83,8 +80,6 @@ void initlists()
   free_anUsers = BlockHeapCreate(sizeof(struct User),
                                  USERS_PREALLOCATE + MAXCONNECTIONS);
 
-  /* fludbot structs are used to track CTCP Flooders */
-  free_fludbots = BlockHeapCreate(sizeof(struct fludbot), MAXCONNECTIONS);
 }
 
 /*
@@ -239,7 +234,6 @@ void block_garbage_collect()
   BlockHeapGarbageCollect(free_Links);
   BlockHeapGarbageCollect(free_anUsers);
   clean_client_heap();
-  BlockHeapGarbageCollect(free_fludbots);
 }
 
 /*
@@ -260,16 +254,6 @@ void count_links_memory(int *links_memory_used,
   BlockHeapCountMemory( free_Links,
                         links_memory_used,
                         links_memory_allocated);
-}
-
-/*
- */
-void count_flud_memory(int *flud_memory_used,
-                       int *flud_memory_allocated )
-{
-  BlockHeapCountMemory( free_fludbots,
-                        flud_memory_used,
-                        flud_memory_allocated);
 }
 
 

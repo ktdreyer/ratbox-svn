@@ -40,7 +40,6 @@ SRCS =                          \
   event.c                       \
   fdlist.c                      \
   fileio.c                      \
-  flud.c                        \
   hash.c                        \
   irc_string.c                  \
   ircd.c                        \

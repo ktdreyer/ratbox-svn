@@ -24,7 +24,6 @@
  */
 #include "handlers.h"
 #include "client.h"
-#include "flud.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "common.h"
@@ -432,9 +431,6 @@ void msg_channel( int p_or_n, char *command,
 	sptr->user->last = CurrentTime;
     }
 
-  if(check_for_ctcp(text))
-    check_for_flud(sptr, NULL, chptr, 1);
-
   if (can_send(chptr, sptr) == 0)
     sendto_channel_butone(cptr, sptr, chptr,
 			  ":%s %s %s :%s",
@@ -487,9 +483,6 @@ void msg_channel_flags( int p_or_n, char *command,
 	sptr->user->last = CurrentTime;
     }
 
-  if(check_for_ctcp(text))
-    check_for_flud(sptr, NULL, chptr, 1);
-
   if (can_send(chptr, sptr) == 0)
     sendto_channel_type(cptr,
 			sptr,
@@ -527,12 +520,6 @@ void msg_client(int n_or_p, char *command,
       /* reset idle time for message only if its not to self */
       if((sptr != acptr) && sptr->user)
 	sptr->user->last = CurrentTime;
-    }
-
-  if(MyClient(acptr))
-    {
-      if(check_for_ctcp(text))
-	check_for_flud(sptr, acptr, NULL, 1);
     }
 
   if (MyConnect(sptr) &&

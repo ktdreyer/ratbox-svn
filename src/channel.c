@@ -2222,8 +2222,6 @@ static  void    sub1_from_channel(struct Channel *chptr)
       /* free topic_info */
       MyFree(chptr->topic_info);            
 
-      free_fluders(NULL, chptr);
-
       /* Is this the top level channel? 
        * If so, don't remove if it has sub vchans
        * top level chan always has prev_chan == NULL
@@ -2636,8 +2634,6 @@ static void destroy_channel(struct Channel *chptr)
     chptr->nextch->prevch = chptr->prevch;
 
   MyFree(chptr->topic_info);
-
-  free_fluders(NULL, chptr);
 
   del_from_channel_hash_table(chptr->chname, chptr);
   MyFree((char*) chptr);

@@ -143,7 +143,6 @@ struct Client* make_client(struct Client* from)
       cptr->since = cptr->lasttime = cptr->firsttime = CurrentTime;
 
 #ifdef NULL_POINTER_NOT_ZERO
-      cptr->fluders   = NULL;
       cptr->listener  = NULL;
       cptr->confs     = NULL;
 
@@ -188,7 +187,6 @@ struct Client* make_client(struct Client* from)
   cptr->serv    = NULL;
   cptr->servptr = NULL;
   cptr->whowas  = NULL;
-  cptr->fludees = NULL;
 #endif /* NULL_POINTER_NOT_ZERO */
 
   return cptr;
@@ -785,10 +783,6 @@ static void release_client_state(struct Client* cptr)
         free_user(cptr->serv->user, cptr);
       MyFree((char*) cptr->serv);
     }
-
-  if (MyConnect(cptr))
-    free_fluders(cptr, NULL);
-  free_fludees(cptr);
 }
 
 /*

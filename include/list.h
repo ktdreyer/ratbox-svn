@@ -53,7 +53,6 @@ struct SLink
 
 extern void count_user_memory(int *, int *);
 extern void count_links_memory(int *, int *);
-extern void count_flud_memory(int *, int *);
 extern void     outofmemory(void);
 extern  void    _free_link (struct SLink *);
 extern  void    _free_user (struct User *, struct Client *);
