@@ -1,3 +1,20 @@
+androsyn    2003/01/27 18:32:06 UTC	(20030127_5)
+
+  Modified files:
+    include              stdinc.h 
+    src                  listener.c s_bsd.c s_conf.c s_serv.c 
+  Log:
+  Fix the rest of the IPv4 only build.  Also stick netinet/tcp.h into stdinc.h
+  
+  Revision  Changes    Path
+  1.6       +1 -0      ircd-ratbox/include/stdinc.h
+  7.86      +2 -1      ircd-ratbox/src/listener.c
+  7.198     +2 -3      ircd-ratbox/src/s_bsd.c
+  7.394     +2 -1      ircd-ratbox/src/s_conf.c
+  7.319     +1 -1      ircd-ratbox/src/s_serv.c
+
+
+
 androsyn    2003/01/27 18:21:44 UTC	(20030127_4)
 
   Modified files:
