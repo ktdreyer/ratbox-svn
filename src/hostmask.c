@@ -125,34 +125,61 @@ strcchr(const char *a, const char *b)
 struct HostMaskEntry*
 match_hostmask(const char *uhost, int type)
 {
- struct HostMaskEntry *hme, *hmc = NULL;
+ struct HostMaskEntry *hme, *hmk = NULL, *hmc = NULL;
  unsigned long prec = 0;
  unsigned int hash;
  const char *pos;
  for (hme = first_miscmask; hme; hme = hme->nexthash)
    if (hme->type == type && match(hme->hostmask, uhost) &&
        hme->precedence > prec)
-     hmc = hme;
+     {
+       ((hme->type == HOST_CONFITEM) &&
+        ((struct ConfItem*)hme->data)->status & CONF_KILL)
+       ? hmk : hmc = hme;
+       prec = hme->precedence;
+     }
  for (pos = strcchr(uhost, "@!."); pos; pos = strcchr(pos, "@!."))
   {
    hash = hash_text(pos);
    for (hme = hmhash[hash]; hme; hme=hme->nexthash)
      if (hme->type == type && match(hme->hostmask, uhost) &&
          hme->precedence > prec)
-       hmc = hme;
+       {
+        ((hme->type == HOST_CONFITEM) &&
+         ((struct ConfItem*)hme->data)->status & CONF_KILL)
+        ? hmk : hmc = hme;
+        prec = hme->precedence;
+       }
   }
- return hmc;
+ return (hmk && (!hmc || !IsConfElined((struct ConfItem*)hmc->data))) ?
+       hmk : hmc;
 }
 
 struct ConfItem *find_matching_conf(const char *host, const char *user,
                                     struct irc_inaddr *ip)
 {
- char buffer[HOSTLEN+USERLEN+1];
  struct HostMaskEntry *hm;
+ struct ConfItem *aconf = NULL, *aconf_k = NULL;
+ char buffer[HOSTLEN+USERLEN+1];
+ if (!host || !user)
+   return NULL;
  ircsprintf(buffer, "%s@%s", user, host);
  if ((hm = match_hostmask(buffer, HOST_CONFITEM)))
-   return (struct ConfItem*)hm->data;
- return match_ip_Iline(ip,user);
+   aconf = (struct ConfItem*)hm->data;
+ if (aconf->status == CONF_KILL)
+   {
+    aconf_k = aconf;
+    aconf = NULL;
+   }
+ if (!aconf)
+   {
+    aconf = match_ip_Iline(ip, user);
+   }
+ if (!aconf_k)
+   {
+    aconf_k = match_ip_Kline(ip, user);
+   }
+ return (aconf_k && (!aconf || !IsConfElined(aconf))) ? aconf_k : aconf;
 }
 
 void add_conf(struct ConfItem *aconf)
