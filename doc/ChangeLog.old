@@ -1,3 +1,10 @@
+*** 20010102_27 by davidt
+Add (#if 0'd out) code not to introduce new NICK's to lazyleafs
+immediately.  This will also make debugging LazyLeafs easier, since it
+shows up the bugs elsewhere faster, without lots of squitting.
+But after a beta.
+
+
 *** 20010102_26 by db
 - upped channel clean time for non vchans to 30 minutes
   I thought it was 30 before, it was only 15
