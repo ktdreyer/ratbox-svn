@@ -645,10 +645,7 @@ introduce_client(struct Client *client_p, struct Client *source_p,
 		       source_p->info);
 	}
     }
-#if 0  
-  if (ubuf[1])
-    send_umode_out(client_p, source_p, 0);
-#endif
+  
   return 0;
 }
 
