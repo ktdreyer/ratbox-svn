@@ -1,3 +1,18 @@
+a1kmm       2001/12/14 03:49:22 EST	(20011214_3)
+
+  Modified files:
+    .                    .cvsignore 
+    modules              .cvsignore m_oper.c 
+  Log:
+  - Fixed a core in m_oper() when you deoper and then reoper.
+  
+  Revision  Changes    Path
+  1.4       +1 -0      ircd-hybrid-7/.cvsignore
+  1.2       +1 -0      ircd-hybrid-7/modules/.cvsignore
+  1.39      +7 -4      ircd-hybrid-7/modules/m_oper.c
+
+
+
 a1kmm       2001/12/14 02:47:11 EST	(20011214_2)
 
   Modified files:
