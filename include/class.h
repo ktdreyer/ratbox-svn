@@ -26,7 +26,7 @@ struct Client;
 
 struct Class {
   struct Class* next;     /* list node pointer */
-  char*		className;	/* *sigh* */
+  char*		className;
   int           type;
   int           conFreq;
   int           pingFreq;

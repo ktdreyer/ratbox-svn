@@ -68,15 +68,17 @@ const char*     get_client_class(struct Client *acptr)
 {
   dlink_node    *ptr;
   struct Class  *cl;
+  struct ConfItem *aconf;
   const char*   retc = (const char *)NULL;
 
   if (acptr && !IsMe(acptr)  && (acptr->localClient->confs.head))
     for (ptr = acptr->localClient->confs.head; ptr; ptr = ptr->next)
       {
-        if ( !(cl = ptr->data))
-          continue;
-        if (ClassName(cl))
-          retc = ClassName(cl);
+	aconf = ptr->data;
+	if(aconf->className == NULL)
+	  retc = "default";
+	else
+	  retc= aconf->className;
       }
 
   Debug((DEBUG_DEBUG,"Returning Class %s For %s",retc,acptr->name));
