@@ -524,6 +524,10 @@ add_target(struct Client *source_p, struct Client *target_p)
 {
 	int i, j;
 
+	/* messaging themselves, doesnt incur any penalties */
+	if(source_p == target_p)
+		return 1;
+
 	if(USED_TARGETS(source_p))
 	{
 		/* hunt for an existing target */
