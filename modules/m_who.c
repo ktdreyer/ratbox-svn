@@ -107,7 +107,7 @@ static void m_who(struct Client *client_p,
 
   /* See if mask is there, collapse it or return if not there */
 
-  if (mask != (char *)NULL)
+  if (mask != NULL)
     {
       (void)collapse(mask);
 
@@ -250,13 +250,10 @@ static void m_who(struct Client *client_p,
     }
   /* '/who 0' */
   if ((*(mask + 1) == '\0') && (*mask == '0'))
-  {
-    mask = NULL;
-  }
-  /* Wasn't a nick, wasn't a channel, wasn't a '*' so ... */
-  who_global(source_p, mask, server_oper);
-  if(mask == NULL)
-    mask = "*";
+    who_global(source_p, NULL, server_oper);
+  else
+    who_global(source_p, mask, server_oper);
+ /* Wasn't a nick, wasn't a channel, wasn't a '*' so ... */
   sendto_one(source_p, form_str(RPL_ENDOFWHO), me.name, parv[0], mask);
 }
 
