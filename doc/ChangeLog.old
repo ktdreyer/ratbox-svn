@@ -1,3 +1,7 @@
+*** 20010609_3 by toot
+fixed possible overflow in get_oper_name, and removed the assert
+
+
 *** 20010609_2 by a1kmm
 - We probably want to #if 0 this out until 7.1, especially as it isn't finished
   and it needs more stuff to be moved into headers etc... later.
