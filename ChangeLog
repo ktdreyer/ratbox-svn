@@ -1,3 +1,15 @@
+leeh        2002/12/03 21:29:55 UTC	(20021203_4)
+
+  Modified files:
+    src                  s_bsd.c 
+  Log:
+  - unbalanced endif.
+  
+  Revision  Changes    Path
+  7.184     +0 -1      ircd-ratbox/src/s_bsd.c
+
+
+
 androsyn    2002/12/03 21:07:42 UTC	(20021203_3)
 
   Modified files:
