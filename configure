@@ -25,8 +25,8 @@ ac_help="$ac_help
  --enable-jupeserv         Enable Jupe Service
  --disable-jupeserv        Disable Jupe Service"
 ac_help="$ac_help
- --enable-operbot         Enable Operbot Service
- --disable-operbot        Disable Operbot Service"
+ --enable-operbot          Enable Operbot Service
+ --disable-operbot         Disable Operbot Service"
 ac_help="$ac_help
 "
 
@@ -1888,8 +1888,64 @@ else
 	echo "$ac_t""no" 1>&6
 fi
 
+SQLITE_INCLUDES=""
+# Check whether --with-sqlite or --without-sqlite was given.
+if test "${with_sqlite+set}" = set; then
+  withval="$with_sqlite"
+  SQLITE_DIR=$withval
+else
+  SQLITE_DIR="/usr"
+fi
+
+
+ac_safe=`echo "sqlite.h" | sed 'y%./+-%__p_%'`
+echo $ac_n "checking for sqlite.h""... $ac_c" 1>&6
+echo "configure:1904: checking for sqlite.h" >&5
+if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 1909 "configure"
+#include "confdefs.h"
+#include <sqlite.h>
+EOF
+ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
+{ (eval echo configure:1914: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
+if test -z "$ac_err"; then
+  rm -rf conftest*
+  eval "ac_cv_header_$ac_safe=yes"
+else
+  echo "$ac_err" >&5
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  eval "ac_cv_header_$ac_safe=no"
+fi
+rm -f conftest*
+fi
+if eval "test \"`echo '$ac_cv_header_'$ac_safe`\" = yes"; then
+  echo "$ac_t""yes" 1>&6
+  :
+else
+  echo "$ac_t""no" 1>&6
+
+	echo $ac_n "checking for sqlite.h in given path""... $ac_c" 1>&6
+echo "configure:1935: checking for sqlite.h in given path" >&5
+	if test -f "$SQLITE_DIR/include/sqlite.h"; then
+		SQLITE_INCLUDES="-I $SQLITE_DIR/include/"
+		echo "$ac_t""yes" 1>&6
+	else
+		echo "$ac_t""no" 1>&6
+		echo "Cannot find SQLite headers.  Please specify search path --with-sqlite=DIR"
+		exit
+	fi
+
+fi
+
+
 echo $ac_n "checking for main in -lsqlite""... $ac_c" 1>&6
-echo "configure:1893: checking for main in -lsqlite" >&5
+echo "configure:1949: checking for main in -lsqlite" >&5
 ac_lib_var=`echo sqlite'_'main | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -1897,14 +1953,14 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lsqlite  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1901 "configure"
+#line 1957 "configure"
 #include "confdefs.h"
 
 int main() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:1908: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:1964: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -1919,60 +1975,33 @@ LIBS="$ac_save_LIBS"
 fi
 if eval "test \"`echo '$ac_cv_lib_'$ac_lib_var`\" = yes"; then
   echo "$ac_t""yes" 1>&6
-  SQLITE=yes
+    ac_tr_lib=HAVE_LIB`echo sqlite | sed -e 's/[^a-zA-Z0-9_]/_/g' \
+    -e 'y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/'`
+  cat >> confdefs.h <<EOF
+#define $ac_tr_lib 1
+EOF
+
+  LIBS="-lsqlite $LIBS"
+
 else
   echo "$ac_t""no" 1>&6
-SQLITE=no
+
+	echo $ac_n "checking for main in -lsqlite in given path""... $ac_c" 1>&6
+echo "configure:1991: checking for main in -lsqlite in given path" >&5
+
+	if test -e "$SQLITE_DIR/lib/libsqlite.so"; then
+		LDFLAGS="$LDFLAGS -L$SQLITE_DIR/lib/"
+		echo "$ac_t""yes" 1>&6
+	else
+		echo "$ac_t""no" 1>&6
+		echo "Cannot find SQLite library libsqlite.so.  Please specify search path --with-sqlite=DIR"
+		exit
+	fi
+
 fi
 
-# Check whether --with-sqlite or --without-sqlite was given.
-if test "${with_sqlite+set}" = set; then
-  withval="$with_sqlite"
-  SQLITE_DIR=$withval
-else
-  SQLITE_DIR=no
-fi
 
-SQLITE_INCLUDES=no
-
-if test $SQLITE = "no" ; then
-        echo $ac_n "checking for sqlite""... $ac_c" 1>&6
-echo "configure:1941: checking for sqlite" >&5
-        if test $SQLITE_DIR != "no" ; then
-                if test -f "$SQLITE_DIR/lib/libsqlite.so" ; then
-                        SQLITE="$SQLITE_DIR/lib"
-                        echo "$ac_t""$SQLITE" 1>&6
-                fi
-                  
-                if test -f "$SQLITE_DIR/include/sqlite.h" ; then
-                        SQLITE_INCLUDES="$SQLITE_DIR/include"
-                fi
-        else
-                if test -f "/usr/lib/libsqlite.so" ; then
-                        SQLITE="/usr/lib/libsqlite.so"
-                        echo "$ac_t""$SQLITE" 1>&6
-                elif test -f "/usr/local/lib/libsqlite.so" ; then
-                        SQLITE="/usr/local/lib"
-                        echo "$ac_t""$SQLITE" 1>&6
-                fi
-                  
-                if test -f "/usr/include/sqlite.h" ; then
-                        SQLITE_INCLUDES="/usr/include"
-                elif test -f "/usr/local/include/sqlite.h" ; then
-                        SQLITE_INCLUDES="/usr/local/include"
-                fi
-        fi
-fi
-
-if test $SQLITE = "no" || test $SQLITE_INCLUDES = "no" ; then
-        echo "$ac_t""no" 1>&6
-        echo "Cannot find SQLite. Please specify search path with --with-sqlite=DIR"
-        exit
-else
-        LIBS="$LIBS -lsqlite"
-        LDFLAGS="$LDFLAGS -L$SQLITE"
-fi
-
+LIBS="$LIBS -lsqlite"
 
 
 
@@ -2134,7 +2163,6 @@ s%@CP@%$CP%g
 s%@MV@%$MV%g
 s%@AR@%$AR%g
 s%@CPP@%$CPP%g
-s%@SQLITE@%$SQLITE%g
 s%@SQLITE_INCLUDES@%$SQLITE_INCLUDES%g
 s%@S_CHANSERV@%$S_CHANSERV%g
 s%@S_USERSERV@%$S_USERSERV%g

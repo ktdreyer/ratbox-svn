@@ -3,7 +3,7 @@
 RM=@RM@
 INSTALL=@INSTALL@
 PREFIX=@prefix@
-BIN=rserv@EXEEXT@
+BIN=ratbox-services@EXEEXT@
 LIBS=@LIBS@
 LDFLAGS=@LDFLAGS@
 

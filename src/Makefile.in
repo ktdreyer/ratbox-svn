@@ -8,8 +8,8 @@ LEX=@LEX@
 LEXLIB=@LEXLIB@
 YACC=@YACC@
 PREFIX=@prefix@
-BIN=rserv@EXEEXT@
-INCLUDES=-I ../include/ -I @SQLITE_INCLUDES@
+BIN=ratbox-services@EXEEXT@
+INCLUDES=-I ../include/ @SQLITE_INCLUDES@
 LDFLAGS=@LDFLAGS@
 LIBS=@LIBS@
 CFLAGS=-g -O0 -Wall -Werror -Wunused -Wshadow -Wmissing-declarations -Wwrite-strings -DPREFIX=\"$(PREFIX)\"

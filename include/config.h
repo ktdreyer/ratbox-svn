@@ -8,11 +8,11 @@
 
 #define LOG_DIR		PREFIX "/logs/"
 
-#define CONF_PATH	PREFIX "/rserv.conf"
-#define PID_PATH	PREFIX "/rserv.pid"
+#define CONF_PATH	PREFIX "/services.conf"
+#define PID_PATH	PREFIX "/services.pid"
 #define LOG_PATH	LOG_DIR "/services.log"
 #define HELP_PATH       PREFIX "/help/"
-#define DB_PATH		PREFIX "/rserv.db"
+#define DB_PATH		PREFIX "/services.db"
 
 /* SMALL_NETWORK
  * If your network is fairly small, enable this to save some memory.

@@ -94,8 +94,8 @@ fi
 
 AC_MSG_CHECKING(Operbot Service)
 AC_ARG_ENABLE(operbot,
-[ --enable-operbot         Enable Operbot Service
- --disable-operbot        Disable Operbot Service],
+[ --enable-operbot          Enable Operbot Service
+ --disable-operbot         Disable Operbot Service],
  [ cf_enable_operbot=$enableval ],[ cf_enable_operbot=yes ])
 
 if test "X$cf_enable_operbot" = "Xyes"; then
@@ -108,48 +108,36 @@ else
 fi
 
 dnl Try to find SQLite.
-AC_CHECK_LIB([sqlite], [main], [SQLITE=yes], [SQLITE=no])
-AC_ARG_WITH([sqlite], [], [SQLITE_DIR=$withval], [SQLITE_DIR=no])
-SQLITE_INCLUDES=no
+SQLITE_INCLUDES=""
+AC_ARG_WITH([sqlite], [], [SQLITE_DIR=$withval], [SQLITE_DIR="/usr"])
 
-if test $SQLITE = "no" ; then
-        AC_MSG_CHECKING(for sqlite)
-        if test $SQLITE_DIR != "no" ; then
-                if test -f "$SQLITE_DIR/lib/libsqlite.so" ; then
-                        SQLITE="$SQLITE_DIR/lib"
-                        AC_MSG_RESULT($SQLITE)
-                fi
-                  
-                if test -f "$SQLITE_DIR/include/sqlite.h" ; then
-                        SQLITE_INCLUDES="$SQLITE_DIR/include"
-                fi
-        else
-                if test -f "/usr/lib/libsqlite.so" ; then
-                        SQLITE="/usr/lib/libsqlite.so"
-                        AC_MSG_RESULT($SQLITE)
-                elif test -f "/usr/local/lib/libsqlite.so" ; then
-                        SQLITE="/usr/local/lib"
-                        AC_MSG_RESULT($SQLITE)
-                fi
-                  
-                if test -f "/usr/include/sqlite.h" ; then
-                        SQLITE_INCLUDES="/usr/include"
-                elif test -f "/usr/local/include/sqlite.h" ; then
-                        SQLITE_INCLUDES="/usr/local/include"
-                fi
-        fi
-fi
+AC_CHECK_HEADER(sqlite.h, [], [
+	AC_MSG_CHECKING(for sqlite.h in given path)
+	if test -f "$SQLITE_DIR/include/sqlite.h"; then
+		SQLITE_INCLUDES="-I $SQLITE_DIR/include/"
+		AC_MSG_RESULT(yes)
+	else
+		AC_MSG_RESULT(no)
+		echo "Cannot find SQLite headers.  Please specify search path --with-sqlite=DIR"
+		exit
+	fi
+], [])
 
-if test $SQLITE = "no" || test $SQLITE_INCLUDES = "no" ; then
-        AC_MSG_RESULT(no)
-        echo "Cannot find SQLite. Please specify search path with --with-sqlite=DIR"
-        exit
-else
-        LIBS="$LIBS -lsqlite"
-        LDFLAGS="$LDFLAGS -L$SQLITE"
-fi
+AC_CHECK_LIB([sqlite], [main], [], [
+	AC_MSG_CHECKING(for main in -lsqlite in given path)
 
-AC_SUBST(SQLITE)
+	if test -e "$SQLITE_DIR/lib/libsqlite.so"; then
+		LDFLAGS="$LDFLAGS -L$SQLITE_DIR/lib/"
+		AC_MSG_RESULT(yes)
+	else
+		AC_MSG_RESULT(no)
+		echo "Cannot find SQLite library libsqlite.so.  Please specify search path --with-sqlite=DIR"
+		exit
+	fi
+])
+
+LIBS="$LIBS -lsqlite"
+
 AC_SUBST(SQLITE_INCLUDES)
 
 AC_SUBST(S_CHANSERV)
