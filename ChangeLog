@@ -1,3 +1,29 @@
+leeh        2004/11/24 16:24:54 EST	(20041124_2)
+
+  Modified files:
+    help/main            u-flags 
+    include              io.h ucommand.h 
+    src                  s_chanserv.c s_jupeserv.c s_operbot.c 
+                         s_userserv.c service.c u_stats.c 
+                         ucommand.c 
+  Log:
+  - implemented flag 'spy' in dcc to spy on commands issued by admins,
+    param per ucommand entry to disable it for that command (help, flags etc)
+  
+  Revision  Changes    Path
+  1.2       +5 -4      rserv/help/main/u-flags
+  1.15      +3 -2      rserv/include/io.h
+  1.7       +1 -0      rserv/include/ucommand.h
+  1.23      +5 -5      rserv/src/s_chanserv.c
+  1.16      +3 -3      rserv/src/s_jupeserv.c
+  1.17      +3 -3      rserv/src/s_operbot.c
+  1.18      +5 -5      rserv/src/s_userserv.c
+  1.31      +6 -1      rserv/src/service.c
+  1.9       +1 -1      rserv/src/u_stats.c
+  1.18      +18 -10    rserv/src/ucommand.c
+
+
+
 leeh        2004/11/23 20:28:20 EST	(20041124_1)
 
   Modified files:
