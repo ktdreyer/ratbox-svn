@@ -875,6 +875,7 @@ struct mode_table auth_table[] = {
 	{"exceed_limit",	CONF_FLAGS_NOLIMIT},
 	{"kline_exempt",	CONF_FLAGS_EXEMPTKLINE},
 	{"gline_exempt",	CONF_FLAGS_EXEMPTGLINE},
+        {"flood_exempt",        CONF_FLAGS_EXEMPTFLOOD},
 	{"no_tilde",		CONF_FLAGS_NO_TILDE},
 	{"restricted",		CONF_FLAGS_RESTRICTED},
 	{"have_ident",		CONF_FLAGS_NEED_IDENTD},
