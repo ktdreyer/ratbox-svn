@@ -1,3 +1,7 @@
+*** 20010605_4 by kreator
+- err, be more precise: setup limit only if get limit succeeds
+
+
 *** 20010605_3 by leeh
 - get_client_name(client_p, HIDE_IP) -> client_p->name
   showing IPs to opers is bad :P
