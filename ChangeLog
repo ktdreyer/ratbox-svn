@@ -1,3 +1,15 @@
+leeh        2005/02/08 11:37:50 EST	(20050208_2)
+
+  Modified files:
+    src                  s_newconf.c 
+  Log:
+  - fix operator blocks to work on ip spoofs
+  
+  Revision  Changes    Path
+  7.64      +9 -8      ircd-ratbox/src/s_newconf.c
+
+
+
 leeh        2005/02/07 19:23:22 EST	(20050208_1)
 
   Modified files:
