@@ -1,3 +1,7 @@
+*** 20010717_6 by androsyn
+Fixes default compile flags to include -Wall and friends...
+
+
 *** 20010717_5 by leeh
 - minor cleanups
 
