@@ -1,3 +1,15 @@
+androsyn    2002/03/10 20:51:48 EST	(20020311_1)
+
+  Modified files:
+    src                  ircd.c 
+  Log:
+  Make sure irc_sleep returns something useful when using select()
+  
+  Revision  Changes    Path
+  7.226     +1 -1      ircd-hybrid-7/src/ircd.c
+
+
+
 androsyn    2002/03/10 20:46:18 EST	(20020311_0)
 
   Modified files:
