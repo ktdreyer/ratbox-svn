@@ -2011,7 +2011,7 @@ if test "${enable_openssl+set}" = set; then
     ac_cv_func_openssl='yes'
     ;;
   no)
-    ac_cv_func_openssl='yes'
+    ac_cv_func_openssl='no'
     ;;
   esac
 

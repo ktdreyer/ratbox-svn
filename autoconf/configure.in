@@ -60,7 +60,7 @@ AC_ARG_ENABLE(openssl,
     ac_cv_func_openssl='yes'
     ;;
   no)
-    ac_cv_func_openssl='yes'
+    ac_cv_func_openssl='no'
     ;;
   esac
 ])
