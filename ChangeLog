@@ -1,3 +1,15 @@
+androsyn    2005/03/26 22:38:50 UTC	(20050326_1)
+
+  Modified files:
+    adns                 resolver.c 
+  Log:
+  update resolver.c a bit more...
+  
+  Revision  Changes    Path
+  1.4       +13 -167   ircd-ratbox/adns/resolver.c
+
+
+
 androsyn    2005/03/26 19:04:02 UTC	(20050326_0)
 
   Modified files:
