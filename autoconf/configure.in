@@ -753,7 +753,7 @@ ac_cv_maxclients="200"
 
 dnl Nicklen
 AC_ARG_WITH(nicklen,
-[  --with-nicklen=              Set the nick length. ],
+[  --with-nicklen=LENGTH        Set the nick length to LENGTH. ],
 
 [
 	echo $withval
@@ -768,7 +768,7 @@ AC_DEFINE_UNQUOTED(NICKLEN, (${ac_cv_nicklen}+1))
 
 dnl Max support clients
 AC_ARG_WITH(maxclients,
-[  --with-maxclients=           Set the maximum number of clients. ],
+[  --with-maxclients=NUMBER     Set the maximum number of clients to NUMBER. ],
 
 [
   if test "$withval" = "no"; then

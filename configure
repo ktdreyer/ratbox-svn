@@ -58,9 +58,9 @@ ac_help="$ac_help
   --enable-small-net           Enable small network support.
   --disable-small-net          Disable small network support. "
 ac_help="$ac_help
-  --with-nicklen=              Set the nick length. "
+  --with-nicklen=LENGTH        Set the nick length to LENGTH. "
 ac_help="$ac_help
-  --with-maxclients=           Set the maximum number of clients. "
+  --with-maxclients=NUMBER     Set the maximum number of clients to NUMBER. "
 ac_help="$ac_help
   --enable-shared-modules      Enable shared modules.
   --disable-shared-modules     Disable shared modules. "
