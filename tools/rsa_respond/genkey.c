@@ -20,12 +20,12 @@
  *  $Id$
  */
 
-
 #include <openssl/rsa.h>
 #include <openssl/rand.h>
 #include <openssl/md5.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <sys/stat.h>
 
 static void
 binary_to_hex( unsigned char * bin, char * hex, int length )
@@ -50,7 +50,7 @@ main(int argc, char **argv)
  int l;
  FILE *kfile;
  /* genkey publicfile privatefile */
- if (argc < 3)
+ if (argc < 2)
    {
     puts("Usage: genkey publicfile privatefile");
     return -1;
@@ -67,6 +67,7 @@ main(int argc, char **argv)
  for (l = 0; l < 128; l++)
    bndt[l] ^= md5[l%16];
  binary_to_hex((unsigned char*)bndt, bnd, 128);
+ umask(0600);
  if (!(kfile = fopen(argv[2], "w")))
    {
     puts("Could not open the private key file.");
