@@ -1,3 +1,11 @@
+*** 20010202_5 by jdc
+- Attempt #2...  God this stuff is evil!
+- Fixed bug where connect failed when send_password and accept_password
+  were not identical.  strcmp aconf->spasswd, not aconf->passwd.
+- The above fix might also (havent tested) fix encrypted password links.
+
+
+
 *** 20010202_4 by jdc
 - Fixed bug where connect failed when send_password and accept_password
   were not identical.  strcmp aconf->spasswd, not aconf->passwd.
