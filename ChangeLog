@@ -1,3 +1,23 @@
+androsyn    2003/08/22 10:50:36 EDT	(20030822_1)
+
+  Modified files:
+    servlink             io.c io.h servlink.c 
+    src                  s_serv.c 
+  Log:
+  I think I've fixed the random servlink weirdness.  Basically what happens
+  is, when a connecting SERVER sends its info and we already told them we are
+  CAP_ZIP and they are as well.  It'll send the SERVER and then the zip data.
+  Problem with this is, sometimes we'll parse the zip data info the linebufs,
+  but we never flush this data back into servlink.
+  
+  Revision  Changes    Path
+  1.36      +116 -0    ircd-ratbox/servlink/io.c
+  1.11      +2 -0      ircd-ratbox/servlink/io.h
+  1.29      +7 -2      ircd-ratbox/servlink/servlink.c
+  7.355     +32 -13    ircd-ratbox/src/s_serv.c
+
+
+
 androsyn    2003/08/22 08:57:20 EDT	(20030822_0)
 
   Modified files:
