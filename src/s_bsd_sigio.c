@@ -59,17 +59,14 @@
 
 
 
+static struct pollfd *pfds;
+static int used_count = 0;
+static fde_t **index_to_fde;
+
 static int sigio_signal;
 static int sigio_is_screwed = 0;        /* We overflowed our sigio queue */
 static sigset_t our_sigset;
-struct _pollfd_list {
-    struct pollfd pollfds[MAXCONNECTIONS];
-    int maxindex;               /* highest FD number */
-};
 
-typedef struct _pollfd_list pollfd_list_t;
-
-pollfd_list_t pollfd_list;
 static void poll_update_pollfds(int, short, PF *);
 
 /* 
@@ -87,71 +84,52 @@ static void mask_our_signal(int s)
     sigprocmask(SIG_BLOCK, &our_sigset, NULL);
 }
 
-/*
- * find a spare slot in the fd list. We can optimise this out later!
- *   -- adrian
- */
-static inline int poll_findslot(void)
-{
-    int i;
-    for (i = 0; i < MAXCONNECTIONS; i++)
-    {
-        if (pollfd_list.pollfds[i].fd == -1)
-        {
-            /* MATCH!!#$*&$ */
-            return i;
-        }
-    }
-    assert(1 == 0);
-    /* NOTREACHED */
-    return -1;
-}
-
-/*
- * set and clear entries in the pollfds[] array.
- */
-static void poll_update_pollfds(int fd, short event, PF * handler)
-{
+static void
+poll_update_pollfds(int fd, short event, PF * handler)
+{  
     fde_t *F = &fd_table[fd];
-    int comm_index;
-
-    if (F->comm_index < 0)
-    {
-        F->comm_index = poll_findslot();
+    struct pollfd *pf;
+    int comm_index;   
+    
+    if(F->comm_index < 0)
+    {    
+        used_count++;
+        F->comm_index = used_count - 1;
+        index_to_fde[F->comm_index] = F;
     }
     comm_index = F->comm_index;
-
+    
+    pf = &pfds[comm_index];
+    
+    
     /* Update the events */
-    if (handler)
-    {
+    if (handler != NULL)   
+      {
         F->list = FDLIST_IDLECLIENT;
-        pollfd_list.pollfds[comm_index].events |= event;
-        pollfd_list.pollfds[comm_index].fd = fd;
-        /* update maxindex here */
-        if (comm_index > pollfd_list.maxindex)
-            pollfd_list.maxindex = comm_index;
-    } else
-    {
-        if (comm_index >= 0)
-        {
-            pollfd_list.pollfds[comm_index].events &= ~event;
-            if (pollfd_list.pollfds[comm_index].events == 0)
-            {
-                pollfd_list.pollfds[comm_index].fd = -1;
-                pollfd_list.pollfds[comm_index].revents = 0;
+        pf->events |= event;
+        pf->fd = fd;
+      }
+    else
+      { 
+	    if (comm_index >= 0)
+          {
+	        pf->events &= ~event;
+            if (pf->events == 0) 
+              {
+                pf->fd = -1;
+                pf->revents = 0;
+                if(F->comm_index != used_count - 1)
+                {
+                   index_to_fde[used_count - 1]->comm_index = F->comm_index;
+                   pfds[F->comm_index] = pfds[used_count - 1];
+                }
+                pfds[used_count - 1].fd = -1;
                 F->comm_index = -1;
                 F->list = FDLIST_NONE;
-
-                /* update pollfd_list.maxindex here */
-                if (comm_index == pollfd_list.maxindex)
-                { 
-                    while (pollfd_list.maxindex >= 0 &&
-                           pollfd_list.pollfds[pollfd_list.maxindex].fd == -1)
-                        pollfd_list.maxindex--;
-                }
-            }
-        }
-    }
+                used_count--;
+              }
+          }
+      }
 }
 
 
@@ -186,13 +164,10 @@ void setup_sigio_fd(int fd)
  */
 void init_netio(void)
 {
-    int fd;
     sigio_signal = SIGRTMIN;
-    for (fd = 0; fd < MAXCONNECTIONS; fd++)
-    {
-        pollfd_list.pollfds[fd].fd = -1;
-    }
-    pollfd_list.maxindex = 0;
+    pfds = MyMalloc(MAXCONNECTIONS * sizeof(struct pollfd));
+    index_to_fde = MyMalloc(MAXCONNECTIONS * sizeof(fde_t *));
+
     mask_our_signal(sigio_signal);
 }
 
@@ -245,6 +220,7 @@ int comm_select(unsigned long delay)
     int sig;
     int fd;
     int ci;
+    int rused;
     PF *hdl;
     fde_t *F;
     struct siginfo si;
@@ -264,8 +240,8 @@ int comm_select(unsigned long delay)
                     break;
                 }
                 fd = si.si_fd;
-                pollfd_list.pollfds[fd].revents |= si.si_band;
-                revents = pollfd_list.pollfds[fd].revents;
+                pfds[fd].revents |= si.si_band;
+                revents = pfds[fd].revents;
                 num++;
                 F = &fd_table[fd];
                 set_time();
@@ -274,7 +250,6 @@ int comm_select(unsigned long delay)
                     callbacks_called++;
                     hdl = F->read_handler;
                     F->read_handler = NULL;
-                    poll_update_pollfds(fd, POLLIN, NULL);
                     if (hdl)
                         hdl(fd, F->read_data);
                 }
@@ -283,10 +258,15 @@ int comm_select(unsigned long delay)
                     callbacks_called++;
                     hdl = F->write_handler;
                     F->write_handler = NULL;
-                    poll_update_pollfds(fd, POLLOUT, NULL);
                     if (hdl)
                         hdl(fd, F->write_data);
                 }
+                
+                if(F->read_handler == NULL)
+                   poll_update_pollfds(fd, POLLIN, NULL);
+                if(F->write_handler == NULL)
+                   poll_update_pollfds(fd, POLLOUT, NULL);            
+
             } else
                 break;
 
@@ -307,7 +287,7 @@ int comm_select(unsigned long delay)
             signal(sigio_signal, SIG_DFL);
             sigio_is_screwed = 0;
         }
-        num = poll(pollfd_list.pollfds, pollfd_list.maxindex + 1, 0);
+        num = poll(pfds, used_count, 0);
         if (num >= 0)
             break;
         if (ignoreErrno(errno))
@@ -323,20 +303,20 @@ int comm_select(unsigned long delay)
 
     if (num == 0)
         return 0;
+    rused = used_count;
     /* XXX we *could* optimise by falling out after doing num fds ... */
-    for (ci = 0; ci < pollfd_list.maxindex + 1; ci++)
+    for (ci = 0; ci < rused; ci++)
     {
-        if (((revents = pollfd_list.pollfds[ci].revents) == 0) ||
-            (pollfd_list.pollfds[ci].fd) == -1)
+        if (((revents = pfds[ci].revents) == 0) ||
+            (pfds[ci].fd) == -1)
             continue;
-        fd = pollfd_list.pollfds[ci].fd;
+        fd = pfds[ci].fd;
         F = &fd_table[fd];
         if (revents & (POLLRDNORM | POLLIN | POLLHUP | POLLERR))
         {
             callbacks_called++;
             hdl = F->read_handler;
             F->read_handler = NULL;
-            poll_update_pollfds(fd, POLLIN, NULL);
             if (hdl)
                 hdl(fd, F->read_data);
         }
@@ -348,10 +328,15 @@ int comm_select(unsigned long delay)
             callbacks_called++;
             hdl = F->write_handler;
             F->write_handler = NULL;
-            poll_update_pollfds(fd, POLLOUT, NULL);
             if (hdl)
                 hdl(fd, F->write_data);
         }
+        
+        if(F->read_handler == NULL)
+           poll_update_pollfds(fd, POLLIN, NULL);
+        if(F->write_handler == NULL)
+           poll_update_pollfds(fd, POLLOUT, NULL);
+           
     }
     mask_our_signal(sigio_signal);
     return 0;
