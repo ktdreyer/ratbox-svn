@@ -78,7 +78,6 @@ static void m_away(struct Client *client_p,
                   char *parv[])
 {
   char  *away, *awy2 = parv[1];
-  static time_t last_away;
 
   /* make sure the user exists */
   if (!(source_p->user))
@@ -111,14 +110,12 @@ static void m_away(struct Client *client_p,
   /* Marking as away */
   
   if (MyConnect(source_p) && !IsOper(source_p) &&
-      ((CurrentTime-last_away) < 2 ||
-       (CurrentTime-source_p->user->last_away)<ConfigFileEntry.pace_wait))
+     (CurrentTime-source_p->user->last_away)<ConfigFileEntry.pace_wait)
     {
      sendto_one(source_p, form_str(RPL_LOAD2HI), me.name, parv[0]);
      return;
     }
 
-  last_away = CurrentTime;
   source_p->user->last_away = CurrentTime;
 
   if (strlen(awy2) > (size_t) TOPICLEN)
