@@ -82,6 +82,7 @@ extern int remove_dline(const char *host);
 extern void clear_dlines(dlink_list *list);
 extern struct ConfItem *find_dline(struct sockaddr *addr);
 extern struct ConfItem *find_dline_string(const char *host);
+int already_dlined(const char *host);
 
 extern void add_exempt(struct ConfItem *aconf);
 

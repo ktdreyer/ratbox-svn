@@ -302,6 +302,17 @@ find_dline_string(const char *host)
 	return NULL;
 }
 
+int
+already_dlined(const char *host)
+{
+	patricia_node_t *pnode;
+
+	if((pnode = match_exact_string(dline_tree, host)))
+		return 1;
+
+	return 0;
+}
+	
 void
 add_exempt(struct ConfItem *aconf)
 {

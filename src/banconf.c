@@ -202,6 +202,9 @@ read_dline_conf(const char *filename, int perm)
 		if(EmptyString(args[0]) || EmptyString(args[1]))
 			continue;
 
+		if(already_dlined(args[0]))
+			continue;
+
 		aconf = make_conf();
 		aconf->status = CONF_DLINE;
 

@@ -1231,6 +1231,12 @@ conf_set_exempt_ip(void *data)
 {
 	struct ConfItem *yy_tmp;
 
+	if((yy_tmp = find_dline_string(yy_tmp->host)))
+	{
+		if(yy_tmp->status == CONF_EXEMPTDLINE)
+			return;
+	}
+
 	yy_tmp = make_conf();
 	DupString(yy_tmp->host, data);
 	DupString(yy_tmp->passwd, "*");
