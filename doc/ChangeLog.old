@@ -1,3 +1,8 @@
+*** 19990802_4 by db
+- goofed the 216 reply
+
+
+
 *** 19990802_3 by db
 - bug in mtrie_conf.c causing ~ klines not to work
 
