@@ -749,7 +749,7 @@ oper_entry:     OPERATOR
 oper_items:     oper_items oper_item |
                 oper_item;
 
-oper_item:      oper_name  | oper_user | oper_password | oper_flood_exempt |
+oper_item:      oper_name  | oper_user | oper_password |
                 oper_class | oper_global_kill | oper_remote | oper_xline |
                 oper_kline | oper_unkline | oper_gline | oper_nick_changes |
                 oper_die | oper_rehash | oper_admin | oper_rsa_public_key_file | error;
@@ -898,10 +898,6 @@ oper_rehash: REHASH '=' TYES ';' { yy_achead->port |= CONF_OPER_REHASH;}
 oper_admin: ADMIN '=' TYES ';' { yy_achead->port |= CONF_OPER_ADMIN;}
             |
             ADMIN '=' TNO ';' { yy_achead->port &= ~CONF_OPER_ADMIN;} ;
-
-oper_flood_exempt: FLOOD_EXEMPT '=' TYES ';' { yy_achead->port |= CONF_OPER_FLOOD_EXEMPT; }
-                   |
-		   FLOOD_EXEMPT '=' TNO ';' { yy_achead->port &= ~CONF_OPER_FLOOD_EXEMPT; };
 
 /***************************************************************************
  *  section class
@@ -1096,7 +1092,7 @@ auth_items:     auth_items auth_item |
 auth_item:      auth_user | auth_passwd | auth_class |
                 auth_kline_exempt | auth_have_ident | auth_is_restricted |
                 auth_exceed_limit | auth_no_tilde | auth_gline_exempt |
-                auth_spoof | auth_spoof_notice |
+                auth_spoof | auth_spoof_notice | auth_flood_exempt |
                 auth_redir_serv | auth_redir_port |
                 error;
 
@@ -1225,6 +1221,14 @@ auth_gline_exempt:  GLINE_EXEMPT '=' TYES ';'
     yy_achead->flags &= ~CONF_FLAGS_EXEMPTGLINE;
   };
 
+auth_flood_exempt:  FLOOD_EXEMPT '=' TYES ';'
+  {
+    yy_achead->flags |= CONF_FLAGS_EXEMPTFLOOD;
+  }
+    | FLOOD_EXEMPT '=' TNO ';'
+  {
+    yy_achead->flags &= ~CONF_FLAGS_EXEMPTFLOOD;
+  };
 
 auth_redir_serv:    REDIRSERV '=' QSTRING ';'
   {

@@ -109,7 +109,7 @@ parse_client_queued(struct Client *client_p)
   {
 
     if(IsOper(client_p) && (ConfigFileEntry.no_oper_flood ||
-        IsOperFloodExempt(client_p)))
+        IsExemptFlood(client_p)))
       checkflood = 0;
     /*
      * Handle flood protection here - if we exceed our flood limit on
@@ -138,7 +138,7 @@ parse_client_queued(struct Client *client_p)
       }
 
       /* can flood as much as they want until they sendq off. */
-      else if(IsOperFloodExempt(client_p))
+      else if(IsExemptFlood(client_p))
         ;
       
       /* allow opers 4 times the amount of messages as users. why 4?

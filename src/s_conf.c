@@ -567,7 +567,7 @@ verify_access(struct Client* client_p, const char* username)
 	    }
 	  if (ConfigFileEntry.glines)
 	    {
-	      if (!IsConfExemptKline(aconf))
+	      if (!IsConfExemptKline(aconf) && !IsConfExemptGline(aconf))
 		{
 		  if (IsGotId(client_p))
 		    gkill_conf = find_gkill(client_p, client_p->username);
@@ -1962,12 +1962,6 @@ oper_privs_as_string(struct Client *client_p,int port)
     }
   else
     *privs_ptr++ = 'a';
-
-  if(port & CONF_OPER_FLOOD_EXEMPT)
-    {
-      if(client_p)
-        SetOperFloodExempt(client_p);
-    }
 
   *privs_ptr = '\0';
 

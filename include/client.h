@@ -413,6 +413,7 @@ struct LocalUser
 #define FLAGS2_EXEMPTKLINE  0x0002      /* client is exempt from kline */
 #define FLAGS2_NOLIMIT      0x0004      /* client is exempt from limits */
 #define FLAGS2_RESTRICTED   0x0008      /* client cannot op others */
+#define FLAGS2_EXEMPTFLOOD  0x0010
 
 /* oper priv flags */
 #define FLAGS2_OPER_GLOBAL_KILL 0x0020  /* oper can global kill */
@@ -425,7 +426,6 @@ struct LocalUser
 #define FLAGS2_OPER_REHASH      0x1000  /* oper can rehash */
 #define FLAGS2_OPER_ADMIN       0x2000  /* oper can set umode +a */
 #define FLAGS2_OPER_XLINE       0x4000  /* oper can xline */
-#define FLAGS2_OPER_FLOOD_EXEMPT	0x8000	/* oper can flood freely */
 #define FLAGS2_OPER_FLAGS       (FLAGS2_OPER_GLOBAL_KILL | \
                                  FLAGS2_OPER_REMOTE | \
                                  FLAGS2_OPER_UNKLINE | \
@@ -435,7 +435,6 @@ struct LocalUser
                                  FLAGS2_OPER_DIE | \
                                  FLAGS2_OPER_REHASH| \
 				 FLAGS2_OPER_XLINE | \
-				 FLAGS2_OPER_FLOOD_EXEMPT | \
                                  FLAGS2_OPER_ADMIN)
 
 #define FLAGS2_CBURST		0x10000  /* connection burst being sent */
@@ -532,6 +531,8 @@ struct LocalUser
 #define SetExemptLimits(x)      ((x)->flags2 |= FLAGS2_NOLIMIT)
 #define IsExemptGline(x)        ((x)->flags2 & FLAGS2_EXEMPTGLINE)
 #define SetExemptGline(x)       ((x)->flags2 |= FLAGS2_EXEMPTGLINE)
+#define IsExemptFlood(x)        ((x)->flags2 & FLAGS2_EXEMPTFLOOD)
+#define SetExemptFlood(x)       ((x)->flags2 |= FLAGS2_EXEMPTFLOOD)
 #define SetIPSpoof(x)           ((x)->flags2 |= FLAGS2_IP_SPOOFING)
 #define IsIPSpoof(x)            ((x)->flags2 & FLAGS2_IP_SPOOFING)
 
@@ -561,8 +562,6 @@ struct LocalUser
 #define SetOperRehash(x)        ((x)->flags2 |= FLAGS2_OPER_REHASH)
 #define IsOperAdmin(x)          ((x)->flags2 & FLAGS2_OPER_ADMIN)
 #define SetOperAdmin(x)         ((x)->flags2 |= FLAGS2_OPER_ADMIN)
-#define IsOperFloodExempt(x)	((x)->flags2 & FLAGS2_OPER_FLOOD_EXEMPT)
-#define SetOperFloodExempt(x)	((x)->flags2 |= FLAGS2_OPER_FLOOD_EXEMPT)
 
 #define IsFloodDone(x)          ((x)->flags2 & FLAGS2_FLOODDONE)
 #define SetFloodDone(x)         ((x)->flags2 |= FLAGS2_FLOODDONE)

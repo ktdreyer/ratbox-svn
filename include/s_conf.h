@@ -123,13 +123,14 @@ struct ConfItem
 #define CONF_FLAGS_REDIR                0x00000800
 #define CONF_FLAGS_EXEMPTGLINE          0x00001000
 #define CONF_FLAGS_RESTRICTED           0x00002000
+#define CONF_FLAGS_EXEMPTFLOOD          0x00004000
 /* server flags */
-#define CONF_FLAGS_ALLOW_AUTO_CONN      0x00004000
-#define CONF_FLAGS_LAZY_LINK            0x00008000
-#define CONF_FLAGS_ENCRYPTED            0x00010000
-#define CONF_FLAGS_COMPRESSED           0x00020000
-#define CONF_FLAGS_TEMPORARY            0x00040000
-#define CONF_FLAGS_CRYPTLINK            0x00080000
+#define CONF_FLAGS_ALLOW_AUTO_CONN      0x00008000
+#define CONF_FLAGS_LAZY_LINK            0x00010000
+#define CONF_FLAGS_ENCRYPTED            0x00020000
+#define CONF_FLAGS_COMPRESSED           0x00040000
+#define CONF_FLAGS_TEMPORARY            0x00080000
+#define CONF_FLAGS_CRYPTLINK            0x00100000
 /* Macros for struct ConfItem */
 
 #define IsLimitIp(x)            ((x)->flags & CONF_FLAGS_LIMIT_IP)
@@ -140,6 +141,7 @@ struct ConfItem
 #define IsConfExemptKline(x)    ((x)->flags & CONF_FLAGS_EXEMPTKLINE)
 #define IsConfExemptLimits(x)   ((x)->flags & CONF_FLAGS_NOLIMIT)
 #define IsConfExemptGline(x)    ((x)->flags & CONF_FLAGS_EXEMPTGLINE)
+#define IsConfExemptFlood(x)    ((x)->flags & CONF_FLAGS_EXEMPTFLOOD)
 #define IsConfIdlelined(x)      ((x)->flags & CONF_FLAGS_IDLE_LINED)
 #define IsConfDoIdentd(x)       ((x)->flags & CONF_FLAGS_DO_IDENTD)
 #define IsConfDoSpoofIp(x)      ((x)->flags & CONF_FLAGS_SPOOF_IP)
@@ -162,7 +164,6 @@ struct ConfItem
 #define CONF_OPER_DIE           0x0080
 #define CONF_OPER_ADMIN         0x0100
 #define CONF_OPER_XLINE		0x0200
-#define CONF_OPER_FLOOD_EXEMPT	0x0400
 
 struct config_file_entry
 {
