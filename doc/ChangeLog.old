@@ -1,3 +1,15 @@
+db          2001/12/25 01:48:44 EST	(20011225_0)
+
+  Modified files:
+    src                  whowas.c 
+  Log:
+  - bogus $Id
+  
+  Revision  Changes    Path
+  7.13      +1 -1      ircd-hybrid-7/src/whowas.c
+
+
+
 androsyn    2001/12/24 11:15:28 EST	(20011224_1)
 
   Modified files:
