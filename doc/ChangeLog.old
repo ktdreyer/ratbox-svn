@@ -1,3 +1,7 @@
+*** 20010203_4 by wcampbel
+Documented that ::1 is not a supported IP (reported by me and poptix)
+
+
 *** 20010203_3 by db
 - removed unused parameter in do_who() (chptr) 
 - removed duplicate #include "common.h"
