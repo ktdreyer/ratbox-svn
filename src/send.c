@@ -910,7 +910,8 @@ sendto_list_remote(struct Client *one,
     if (MyConnect(target_p))
       continue;
 
-    if (target_p == one) /* must skip the origin! */
+
+    if (target_p->from == one->from) /* must skip the origin! */
       continue;
 
     if (((target_p->from->localClient->caps & caps) != caps) ||
