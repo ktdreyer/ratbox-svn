@@ -34,7 +34,7 @@
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
-
+#include "memdebug.h"
 
 /* internally defined function */
 static void add_whowas_to_clist(struct Whowas **, struct Whowas *);

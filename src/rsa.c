@@ -29,6 +29,7 @@
 #include <openssl/md5.h>
 #include <openssl/bn.h>
 #include <string.h>
+#include "memdebug.h"
 
 void binary_to_hex( unsigned char * bin, char * hex, int length )
 {
@@ -104,10 +105,10 @@ int generate_challenge( char ** r_challenge, char ** r_response, char * key )
   MD5_CTX m;
   RSA * rsa;
 
-  key2 = malloc( strlen( key ) + 1 );
+  key2 = MyMalloc( strlen( key ) + 1 );
   strcpy( key2, key );
   rsa = str_to_RSApublic( key2 );
-  free( key2 );
+  MyFree( key2 );
 
   if( !rsa )
     return -1;
@@ -120,17 +121,17 @@ int generate_challenge( char ** r_challenge, char ** r_response, char * key )
   MD5_Update( &m, session, 16 );
   MD5_Final( response, &m );
 
-  *r_response = malloc( 33 );
+  *r_response = MyMalloc( 33 );
   binary_to_hex( response, *r_response, 16 );
 
   length = RSA_size( rsa );
-  tmp = malloc( length );
+  tmp = MyMalloc( length );
   ret = RSA_public_encrypt( 32, secret, tmp, rsa, RSA_PKCS1_PADDING );
-  *r_challenge = malloc( (length << 1) + 1 );
+  *r_challenge = MyMalloc( (length << 1) + 1 );
   binary_to_hex( tmp, *r_challenge, length );
 
   memset( tmp, 0, length );
-  free( tmp );
+  MyFree( tmp );
   memset( secret, 0, 32 );
   memset( response, 0, 16 );
 

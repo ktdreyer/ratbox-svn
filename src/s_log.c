@@ -38,6 +38,7 @@
 #include <string.h>
 #include <syslog.h>
 #include <unistd.h>
+#include "memdebug.h"
 
 
 #define LOG_BUFSIZE 2048 

@@ -30,6 +30,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "memdebug.h"
 
 static char *getfield(char *newline);
 static  int  oper_privs_from_string(int,char *);

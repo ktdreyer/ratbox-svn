@@ -65,6 +65,7 @@
 #include <sys/resource.h>
 #include <sys/param.h>    /* NOFILE */
 #include <arpa/inet.h>
+#include "memdebug.h"
 
 /*
  * Stuff for poll()

@@ -54,6 +54,7 @@
 #include <sys/socket.h>
 #include <sys/file.h>
 #include <sys/ioctl.h>
+#include "memdebug.h"
 
 /*
  * a bit different approach

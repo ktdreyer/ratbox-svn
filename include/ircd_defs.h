@@ -65,8 +65,9 @@
 /* 
  * Macros everyone uses :/ moved here from sys.h
  */
+/*
 #define MyFree(x)       if ((x)) free((x))
-
+*/
 #define DEBUG_BLOCK_ALLOCATOR
 #ifdef DEBUG_BLOCK_ALLOCATOR
 extern const char* BH_CurrentFile;

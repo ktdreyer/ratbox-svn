@@ -54,6 +54,7 @@
 #include <errno.h>
 #include <time.h>
 #include <netdb.h>
+#include "memdebug.h"
 
 #define MIN_CONN_FREQ 300
 

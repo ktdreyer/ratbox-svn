@@ -41,6 +41,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <sys/stat.h>
+#include "memdebug.h"
 
 /* New hash code */
 /*
@@ -156,8 +157,7 @@ static void clear_client_hash_table()
   clhits = 0;
   clmiss = 0;
   if(!clientTable)
-    clientTable = (struct HashEntry*) MyMalloc(U_MAX * 
-                                               sizeof(struct HashEntry));
+    clientTable = (struct HashEntry*) MyMalloc(U_MAX * sizeof(struct HashEntry));
 #endif
   memset(clientTable, 0, sizeof(struct HashEntry) * U_MAX);
 }

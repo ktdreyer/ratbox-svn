@@ -55,6 +55,7 @@
 #include <netdb.h>
 #include <fcntl.h>
 #include <assert.h>
+#include "memdebug.h"
 
 extern int yyparse(); /* defined in yy.tab.c */
 extern ConfigFileEntryType ConfigFileEntry; /* defined in ircd.c */

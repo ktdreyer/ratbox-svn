@@ -22,7 +22,7 @@
 #include "sprintf_irc.h"
 
 #include <stdio.h>
-
+#include "memdebug.h"
 
 const char atoi_tab[4000] = {
     '0','0','0',0, '0','0','1',0, '0','0','2',0, '0','0','3',0, '0','0','4',0,

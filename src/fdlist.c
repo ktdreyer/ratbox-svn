@@ -16,6 +16,7 @@
 #include <string.h>
 #include <assert.h>
 #include <unistd.h>
+#include "memdebug.h"
 
 fde_t *fd_table = NULL;
 

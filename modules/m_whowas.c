@@ -38,6 +38,7 @@
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
+#include "memdebug.h"
 
 struct Message whowas_msgtab = {
   MSG_WHOWAS, 0, 1, MFLG_SLOW, 0L,

@@ -59,6 +59,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
+#include "memdebug.h"
 
 #define MAXPREFIX (HOSTLEN + USERLEN + 15)
 

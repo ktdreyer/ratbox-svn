@@ -25,6 +25,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
+#include "memdebug.h"
 
 /*
  * myctime - This is like standard ctime()-function, but it zaps away
@@ -68,7 +69,11 @@ char* strncpy_irc(char* s1, const char* s2, size_t n)
 /*
  * MyMalloc - allocate memory, call outofmemory on failure
  */
-void* MyMalloc(size_t x)
+#ifdef DEBUGMEM
+void* _MyMalloc(size_t x, char * file, int line)
+#else
+void* _MyMalloc(size_t x)
+#endif
 {
   void* ret = malloc(x);
 
@@ -76,20 +81,47 @@ void* MyMalloc(size_t x)
     outofmemory();
   else
     bzero(ret, x); 
+#ifdef DEBUGMEM
+  DbgMemAlloc(file, line, x, DBGMEM_MALLOC, ret);
+#endif
   return ret;
 }
 
 /*
  * MyRealloc - reallocate memory, call outofmemory on failure
  */
-void* MyRealloc(void* x, size_t y)
+#ifdef DEBUGMEM
+void* _MyRealloc(void* x, size_t y, char * file, int line)
+#else
+void* _MyRealloc(void* x, size_t y)
+#endif
 {
   char *ret = realloc(x, y);
 
   if (!ret)
     outofmemory();
+#ifdef DEBUGMEM
+  DbgMemRealloc(file, line, DBGMEM_MALLOC, x, y, ret);
+#endif
   return ret;
 }
+
+#ifdef DEBUGMEM
+void _MyFree(void *x, char * file, int line)
+#else
+void _MyFree(void *x)
+#endif
+{
+  free(x);
+#ifdef DEBUGMEM
+  DbgMemFree(file, line, DBGMEM_MALLOC, x);
+#endif
+}
+
+void DupStringNoDbg(char **x, char *y) {
+  (*x) = MyMalloc(strlen(y) + 1);
+  strcpy((*x), y);
+};
 
 /*
  * clean_string - clean up a string possibly containing garbage

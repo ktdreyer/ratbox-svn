@@ -59,6 +59,7 @@
 #include "event.h"
 #include "client.h"
 #include "send.h"
+#include "memdebug.h"
 
 /* The list of event processes */
 struct ev_entry {

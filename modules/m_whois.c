@@ -43,6 +43,7 @@
 #include "modules.h"
 
 #include <string.h>
+#include "memdebug.h"
 
 int do_whois(struct Client *cptr, struct Client *sptr, int parc, char *parv[]);int single_whois(struct Client *sptr, struct Client *acptr, int wilds);
 void whois_person(struct Client *sptr,struct Client *acptr);

@@ -45,6 +45,7 @@
 #include <time.h>
 #include <assert.h>
 #include <sys/errno.h>
+#include "memdebug.h"
 
 #define LOG_BUFSIZE 2048
 

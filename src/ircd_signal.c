@@ -25,6 +25,7 @@
 #include "s_log.h"
 
 #include <signal.h>
+#include "memdebug.h"
 
 /*
  * dummy_handler - don't know if this is really needed but if alarm is still

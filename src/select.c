@@ -66,6 +66,7 @@
 #include <sys/resource.h>
 #include <sys/param.h>    /* NOFILE */
 #include <arpa/inet.h>
+#include "memdebug.h"
 
 #ifndef IN_LOOPBACKNET
 #define IN_LOOPBACKNET        0x7f

@@ -14,6 +14,7 @@
 
 #include <assert.h>
 #include <string.h>
+#include "memdebug.h"
 
 /*
  * ircd used to store full servernames in anUser as well as in the 

@@ -23,6 +23,7 @@
 #include "common.h"     /* NULL cripes */
 
 #include <assert.h>
+#include "memdebug.h"
 
 #include "messages.tab"
 

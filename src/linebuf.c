@@ -18,6 +18,7 @@
 #include "tools.h"
 #include "linebuf.h"
 #include "blalloc.h"
+#include "memdebug.h"
 
 static int linebuf_initialised = 0;
 static BlockHeap *linebuf_bl = NULL;

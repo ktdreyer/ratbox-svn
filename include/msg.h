@@ -134,7 +134,7 @@ struct  Message
 #define MSG_MODLIST  "MODLIST"  /* MODLIST */
 #define MSG_MODLOAD  "MODLOAD"  /* MODLOAD */
 #define MSG_MODUNLOAD  "MODUNLOAD"  /* MODUNLOAD */
-
+#define MSG_DMEM     "DMEM" 
 /*
  * Constants
  */

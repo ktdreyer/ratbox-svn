@@ -32,6 +32,7 @@
 #include "send.h"
 
 #include <string.h>
+#include "memdebug.h"
 
 /*
  * stats stuff

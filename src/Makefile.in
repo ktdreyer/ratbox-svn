@@ -73,6 +73,7 @@ SRCS =                          \
   listener.c                    \
   m_error.c                     \
   match.c                       \
+  memdebug.c                    \
   modules.c                     \
   motd.c                        \
   mtrie_conf.c                  \

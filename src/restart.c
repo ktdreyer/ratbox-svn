@@ -14,6 +14,7 @@
 #include "client.h"	/* for FLAGS_ALL */
 
 #include <unistd.h>
+#include "memdebug.h"
 
 /* external var */
 extern char** myargv;

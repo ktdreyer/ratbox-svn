@@ -30,6 +30,7 @@
 #include "send.h"
 #include "s_debug.h"
 #include "msg.h"
+#include "memdebug.h"
 
 #if 0
 struct Message error_msgtab = {

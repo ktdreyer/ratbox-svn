@@ -38,6 +38,7 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include "memdebug.h"
 
 /*
  * re-written to use Wohali (joant@cadence.com)

@@ -37,6 +37,7 @@
 #include "numeric.h"
 #include "ircd_defs.h"
 #include "irc_string.h"
+#include "memdebug.h"
 
 static char unknown_ver[] = "<unknown>";
 
@@ -51,7 +52,7 @@ static int findmodule_byname (char *name);
 static char *
 basename(char *path)
 {
-  char *mod_basename = malloc (strlen (path) + 1);
+  char *mod_basename = MyMalloc (strlen (path) + 1);
   char *s;
  
   if (!(s = strrchr (path, '/')))
@@ -179,7 +180,7 @@ load_all_modules (void)
 
   (void)closedir (system_module_dir);
   (void)chdir (old_dir);
-  free (old_dir);
+  MyFree (old_dir);
 }
 
 /*
@@ -210,7 +211,7 @@ load_one_module (char *path)
       sendto_realops_flags (FLAGS_ALL,
 			    "Error loading module %s: %s", mod_basename, err);
       log (L_WARN, "Error loading module %s: %s", mod_basename, err);
-      free (mod_basename);
+      MyFree (mod_basename);
       return -1;
     }
 
@@ -221,7 +222,7 @@ load_one_module (char *path)
 		    "Module %s has no _modinit() function", mod_basename);
       log (L_WARN, "Module %s has no _modinit() function", mod_basename);
       (void)dlclose (tmpptr);
-      free (mod_basename);
+      MyFree (mod_basename);
       return -1;
     }
 
@@ -232,7 +233,7 @@ load_one_module (char *path)
 
   increase_modlist();
 
-  modlist [num_mods] = malloc (sizeof (struct module));
+  modlist [num_mods] = MyMalloc (sizeof (struct module));
   modlist [num_mods]->address = tmpptr;
   modlist [num_mods]->version = ver;
   DupString(modlist [num_mods]->name, mod_basename );
@@ -244,7 +245,7 @@ load_one_module (char *path)
 			mod_basename, ver, tmpptr);
   log (L_WARN, "Module %s [version: %s] loaded at 0x%x",
        mod_basename, ver, tmpptr);
-  free (mod_basename);
+  MyFree (mod_basename);
 
   return 0;
 }
@@ -318,7 +319,7 @@ mo_modunload (struct Client *cptr, struct Client *sptr, int parc, char **parv)
     {
       sendto_one (sptr, ":%s NOTICE %s :Module %s is not loaded",
 		  me.name, sptr->name, m_bn);
-      free (m_bn);
+      MyFree (m_bn);
       return 0;
     }
 
@@ -327,7 +328,7 @@ mo_modunload (struct Client *cptr, struct Client *sptr, int parc, char **parv)
       sendto_one (sptr, ":%s NOTICE %s :Module %s is not loaded",
 		  me.name, sptr->name, m_bn);
     }
-  free (m_bn);
+  MyFree (m_bn);
   return 0;
 }
 

@@ -34,6 +34,7 @@
 #include <unistd.h> /* read, write, open, close */
 #include <assert.h> /* assert */
 #include <sys/errno.h>
+#include "memdebug.h"
 
 /*
  * Wrappers around open() / close() for fileio, since a whole bunch of
@@ -119,7 +120,7 @@ FBFILE* fdbopen(int fd, const char* mode)
    * ignore mode, if file descriptor hasn't been opened with the
    * correct mode, the first use will fail
    */
-  FBFILE* fb = (FBFILE*) malloc(sizeof(FBFILE));
+  FBFILE* fb = (FBFILE*) MyMalloc(sizeof(FBFILE));
   if (NULL != fb) {
     fb->ptr = fb->endp = fb->buf;
     fb->fd = fd;
@@ -133,7 +134,7 @@ void fbclose(FBFILE* fb)
 {
   assert(fb);
   file_close(fb->fd);
-  free(fb);
+  MyFree(fb);
 }
 
 static int fbfill(FBFILE* fb)

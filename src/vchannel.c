@@ -36,6 +36,7 @@
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
+#include "memdebug.h"
 
 /* Given base chan pointer and vchan pointer add to
  * translation table cache for this client

@@ -32,6 +32,7 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include "memdebug.h"
 
 #define BAD_CONF_CLASS          -1
 #define BAD_PING                -2

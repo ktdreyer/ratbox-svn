@@ -83,11 +83,11 @@ int m_challenge( struct Client *cptr, struct Client *sptr, int parc, char *parv[
     return 0;
 
   if( sptr->user->RSA_response )
-    free( sptr->user->RSA_response );
+    MyFree( sptr->user->RSA_response );
 
   generate_challenge( &challenge, &(sptr->user->RSA_response), DESRT_IDENTITY );
   sendto_one( sptr, form_str( RPL_RSACHALLENGE ), me.name, parv[0], challenge );
-  free( challenge );
+  MyFree( challenge );
 
   return 0;
 }

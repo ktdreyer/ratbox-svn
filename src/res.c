@@ -38,6 +38,7 @@
 #include <resolv.h>
 #include <netdb.h>
 #include <arpa/inet.h>
+#include "memdebug.h"
 
 #include <limits.h>
 #if (CHAR_BIT != 8)

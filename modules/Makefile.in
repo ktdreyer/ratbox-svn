@@ -33,6 +33,7 @@ SRCS =                          \
   m_close.c \
   m_connect.c \
   m_die.c \
+  m_dmem.c \
   m_drop.c \
   m_eob.c \
   m_error.c \

@@ -13,7 +13,7 @@
 #include <stdlib.h>
 
 #include "tools.h"
-
+#include "memdebug.h"
 
 /* 
  * dlink_ routines are stolen from squid, except for dlinkAddBefore,

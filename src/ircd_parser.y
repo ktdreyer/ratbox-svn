@@ -33,7 +33,7 @@
 #include "client.h"	/* for FLAGS_ALL only */
 #include "irc_string.h"
 #include "ircdauth.h"
-
+#include "memdebug.h"
 extern char *ip_string;
 
 int yyparse();

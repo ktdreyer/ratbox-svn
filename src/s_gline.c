@@ -53,6 +53,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <fcntl.h>
+#include "memdebug.h"
 
 static struct ConfItem *glines=NULL;
 struct gline_pending *pending_glines=NULL;

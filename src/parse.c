@@ -39,6 +39,7 @@
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
+#include "memdebug.h"
 
 /*
  * NOTE: parse() should not be called recursively by other functions!

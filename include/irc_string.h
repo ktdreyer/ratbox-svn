@@ -81,16 +81,32 @@ extern char *strip_tabs(char *dest, const unsigned char *src, size_t len);
 
 extern const char* myctime(time_t);
 extern char*       strtoken(char** save, char* str, char* fs);
-extern void*       MyMalloc(size_t size);
-extern void*       MyRealloc(void* p, size_t size);
+#ifdef DEBUGMEM
+extern void*       _MyMalloc(size_t size, char * file, int line);
+extern void*       _MyRealloc(void* p, size_t size, char * file, int line);
+extern void        _MyFree(void* p, char * file, int line);
+#else
+extern void*       _MyMalloc(size_t size);
+extern void*       _MyRealloc(void* p, size_t size);
 /* MyFree is defined as a macro in ircd_defs.h */
 /* extern void MyFree(void* p); */
+/* Not anymore. */
+extern void _MyFree(void* p);
+#endif
+
 #ifdef IPV6
 extern char* mk6addrstr(struct in6_addr *addr);
 #endif
 
+#ifdef DEBUGMEM
 #define DupString(x,y) \
-  do{ x = (char*) MyMalloc(strlen(y) + 1); strcpy(x, y); } while(0)
+  do{ x = (char*) _MyMalloc(strlen(y) + 1,__FILE__,__LINE__); strcpy(x, y); } while(0)
+#else
+#define DupString(x,y) \
+  do{ x = (char*) _MyMalloc(strlen(y) + 1); strcpy(x, y); } while(0)
+#endif
+
+void DupStringNoDbg(char **x, char *y);
 
 #define EmptyString(x) (!(x) || (*(x) == '\0'))
 

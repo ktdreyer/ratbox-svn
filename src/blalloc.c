@@ -17,6 +17,7 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include "memdebug.h"
 
 #ifdef DEBUG_BLOCK_ALLOCATOR
 #include "send.h"           /* sendto_realops */
@@ -55,7 +56,7 @@ static int newblock(BlockHeap *bh)
 
    if (b->allocMap == NULL)
      {
-       free(b);
+       MyFree(b);
        return 1;
      }
    
@@ -63,8 +64,8 @@ static int newblock(BlockHeap *bh)
    b->elems = (void *) MyMalloc ((bh->elemsPerBlock + 1) * bh->elemSize);
    if (b->elems == NULL)
      {
-       free(b->allocMap);
-       free(b);
+       MyFree(b->allocMap);
+       MyFree(b);
        return 1;
      }
 
@@ -99,7 +100,7 @@ static int newblock(BlockHeap *bh)
 /* Returns:                                                                 */
 /*   Pointer to new BlockHeap, or NULL if unsuccessful                      */
 /* ************************************************************************ */
-BlockHeap * BlockHeapCreate (size_t elemsize,
+BlockHeap * _BlockHeapCreate (size_t elemsize,
                      int elemsperblock)
 {
    BlockHeap *bh;
@@ -130,7 +131,7 @@ BlockHeap * BlockHeapCreate (size_t elemsize,
    /* Be sure our malloc was successful */
    if (newblock(bh))
      {
-       free(bh);
+       MyFree(bh);
        outofmemory(); /* die.. out of memory */
      }
    /* DEBUG */
@@ -154,7 +155,11 @@ BlockHeap * BlockHeapCreate (size_t elemsize,
 /*    Pointer to a structure (void *), or NULL if unsuccessful.             */
 /* ************************************************************************ */
 
-void *BlockHeapAlloc (BlockHeap *bh)
+#ifdef DEBUGMEM
+void * _BlockHeapAlloc (BlockHeap *bh, char * file, int line)
+#else
+void * _BlockHeapAlloc (BlockHeap *bh)
+#endif
 {
    Block *walker;
    int unit;
@@ -179,7 +184,9 @@ void *BlockHeapAlloc (BlockHeap *bh)
            if(bh->base->elems == NULL)
              return((void *)NULL);
          }
-
+#ifdef DEBUGMEM
+       DbgMemAlloc(file, line, bh->elemSize, DBGMEM_BLALLOC, (bh->base)->elems);
+#endif
        return ((bh->base)->elems);      /* ...and take the first elem. */
      }
 
@@ -200,6 +207,7 @@ void *BlockHeapAlloc (BlockHeap *bh)
                /* Check the current element, if free allocate block */
                if (!(mask & walker->allocMap[unit]))
                  {
+		   void * ret;
                    walker->allocMap[unit] |= mask; /* Mark block as used */
                    walker->freeElems--;  bh->freeElems--;
                                                    /* And return the pointer */
@@ -211,12 +219,16 @@ void *BlockHeapAlloc (BlockHeap *bh)
                     * sizeof(unsigned long) at least == sizeof(void *)
                     */
 
-                   return ( (void *) (
+                   ret = ( (void *) (
                             (unsigned long)walker->elems + 
                             ( (unit * sizeof(unsigned long) * 8 + ctr)
                               * (unsigned long )bh->elemSize))
                             );
+#ifdef DEBUGMEM
+		   DbgMemAlloc(file, line, bh->elemSize, DBGMEM_BLALLOC, ret);
+#endif
 
+		   return ret;
                  }
                /* Step up to the next unit */
                mask <<= 1;
@@ -246,12 +258,19 @@ void *BlockHeapAlloc (BlockHeap *bh)
 /* Returns:                                                                 */
 /*    0 if successful, 1 if element not contained within BlockHeap.         */
 /* ************************************************************************ */
-int BlockHeapFree(BlockHeap *bh, void *ptr)
+#ifdef DEBUGMEM
+int _BlockHeapFree(BlockHeap *bh, void *ptr, char * file, int line)
+#else
+int _BlockHeapFree(BlockHeap *bh, void *ptr)
+#endif
 {
    Block *walker;
    unsigned long ctr;
    unsigned long bitmask;
 
+#ifdef DEBUGMEM
+   DbgMemFree(file, line, DBGMEM_BLALLOC, ptr);
+#endif
    if (bh == NULL)
      {
 #if defined(SYSLOG_BLOCK_ALLOCATOR)
@@ -312,7 +331,7 @@ int BlockHeapFree(BlockHeap *bh, void *ptr)
 /* Returns:                                                                 */
 /*   0 if successful, 1 if bh == NULL                                       */
 /* ************************************************************************ */
-int BlockHeapGarbageCollect(BlockHeap *bh)
+int _BlockHeapGarbageCollect(BlockHeap *bh)
 {
    Block *walker, *last;
 
@@ -339,19 +358,19 @@ int BlockHeapGarbageCollect(BlockHeap *bh)
       if (i == bh->numlongs)
         {
           /* This entire block is free.  Remove it. */
-          free(walker->elems);
-          free(walker->allocMap);
+          MyFree(walker->elems);
+          MyFree(walker->allocMap);
 
           if (last)
             {
               last->next = walker->next;
-              free(walker);
+              MyFree(walker);
               walker = last->next;
             }
           else
             {
               bh->base = walker->next;
-              free(walker);
+              MyFree(walker);
               walker = bh->base;
             }
           bh->blocksAllocated--;
@@ -376,7 +395,7 @@ int BlockHeapGarbageCollect(BlockHeap *bh)
 /* Returns:                                                                 */
 /*   0 if successful, 1 if bh == NULL                                       */
 /* ************************************************************************ */
-int BlockHeapDestroy(BlockHeap *bh)
+int _BlockHeapDestroy(BlockHeap *bh)
 {
    Block *walker, *next;
 
@@ -386,12 +405,12 @@ int BlockHeapDestroy(BlockHeap *bh)
    for (walker = bh->base; walker != NULL; walker = next)
      {
        next = walker->next;
-       free(walker->elems);
-       free(walker->allocMap);
-       free(walker);
+       MyFree(walker->elems);
+       MyFree(walker->allocMap);
+       MyFree(walker);
      }
 
-   free (bh);
+   MyFree (bh);
 
    return 0;
 }
@@ -410,7 +429,7 @@ int BlockHeapDestroy(BlockHeap *bh)
 /*   TotalAllocated                                                         */
 /* ************************************************************************ */
 
-void BlockHeapCountMemory(BlockHeap *bh,int *TotalUsed,int *TotalAllocated)
+void _BlockHeapCountMemory(BlockHeap *bh,int *TotalUsed,int *TotalAllocated)
 {
   Block *walker;
 
