@@ -42,6 +42,8 @@
 #include "ircd_defs.h"
 #include "irc_string.h"
 #include "memdebug.h"
+#include "tools.h"
+#include "list.h"
 
 #ifndef RTLD_NOW
 #define RTLD_NOW RTLD_LAZY /* openbsd deficiency */
@@ -56,7 +58,7 @@ int num_mods = 0;
 int max_mods = MODS_INCREMENT;
 static void increase_modlist(void);
 
-static struct module_path *mod_paths = NULL;
+static dlink_list mod_paths;
 
 struct Message modload_msgtab = {
   MSG_MODLOAD, 0, 2, 0, MFLG_SLOW, 0,
@@ -81,9 +83,6 @@ struct Message hash_msgtab = {
 void
 modules_init(void)
 {
-	mod_paths = malloc (sizeof (struct module_path));
-	mod_paths->prev = mod_paths->next = NULL;
-
 	mod_add_cmd(&modload_msgtab);
 	mod_add_cmd(&modunload_msgtab);
 	mod_add_cmd(&modlist_msgtab);
@@ -93,35 +92,36 @@ modules_init(void)
 static struct module_path *
 mod_find_path(char *path)
 {
-  struct module_path *pathst = mod_paths->next;
-
+  dlink_node *pathst = mod_paths.head;
+  struct module_path *mpath;
+  
   if (!pathst)
     return NULL;
 
-  for (; pathst; pathst = pathst->next)
-    if (!strcmp(path, pathst->path))
-      return pathst;
+  for (; pathst; pathst = pathst->next) {
+	  mpath = (struct module_path *)pathst->data;
+	  
+	  if (!strcmp(path, mpath->path))
+		  return mpath;
+  }
+  
   return NULL;
 }
 
 void
 mod_add_path(char *path)
 {
-  struct module_path *pathst = NULL;
-
+  struct module_path *pathst;
+  dlink_node *node;
+  
   if (mod_find_path(path))
     return;
 
-  for (pathst = mod_paths; pathst->next; pathst = pathst->next)
-    ;
-
-  pathst->next = malloc (sizeof (struct module_path));
-  pathst->next->prev = pathst;
-  pathst->next->next = NULL;
-
-  pathst = pathst->next;
+  pathst = malloc (sizeof (struct module_path));
+  node = make_dlink_node();
   
   strcpy(pathst->path, path);
+  dlinkAdd(pathst, node, &mod_paths);
 }
 
 
@@ -234,18 +234,19 @@ int
 load_one_module (char *path)
 {
 	char modpath[MAXPATHLEN];
-	struct module_path *pathst;
+	dlink_node *pathst;
+	struct module_path *mpath;
+	
 	struct stat statbuf;
 
 	if (strchr(path, '/')) /* absolute path, try it */
 		return load_a_module(modpath);
 
-	/* skip the head node */
-	pathst = mod_paths->next;
-	
-	for (; pathst; pathst = pathst->next)
+	for (pathst = mod_paths.head; pathst; pathst = pathst->next)
 	{
-		snprintf(modpath, MAXPATHLEN, "%s/%s", pathst->path, path);
+		mpath = (struct module_path *)pathst->data;
+		
+		snprintf(modpath, MAXPATHLEN, "%s/%s", mpath->path, path);
 		if (stat(modpath, &statbuf) == 0)
 			return load_a_module(modpath);
 	}

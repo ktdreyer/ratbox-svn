@@ -36,8 +36,6 @@ struct module {
 
 struct module_path
 {
-	struct module_path *next;
-	struct module_path *prev;
 	char path[MAXPATHLEN];
 };
 
