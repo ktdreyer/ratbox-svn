@@ -1,3 +1,15 @@
+*** 20001216_4 by db
+- fixed lazy links. I was trying to use the extended "join new nick
+  to network" SJOIN instead of the simpler "join this nick to channel" SJOIN
+  oops. That would collide everyone. Sooo that involved a pile of 
+  fixes and new functions to properly send SJOIN channel. Might be able
+  to simplify reduce recyle functions later...
+
+- Oh documented a few more globals in ircd.c and ircd.h, also removed
+  a couple of references to no longer existing variables.. LRV etc.
+
+
+
 *** 20001216_3 by adrian
 
 
