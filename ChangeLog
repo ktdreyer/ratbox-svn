@@ -1,3 +1,18 @@
+androsyn    2002/10/09 17:03:59 UTC	(20021009_1)
+
+  Modified files:
+    src                  channel.c client.c linebuf.c 
+  Log:
+  BlockHeapAlloc() doesn't really need to have a NULL returned checked as it
+  will never return NULL, but will exit with outofmemory()
+  
+  Revision  Changes    Path
+  7.355     +10 -13    ircd-ratbox/src/channel.c
+  7.325     +0 -2      ircd-ratbox/src/client.c
+  7.97      +0 -3      ircd-ratbox/src/linebuf.c
+
+
+
 androsyn    2002/10/09 16:57:38 UTC	(20021009_0)
 
   Modified files:
