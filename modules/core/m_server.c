@@ -627,7 +627,7 @@ char *parse_server_args(char *parv[], int parc, char *info, int *hop)
     }
 
   if (strlen(name) > HOSTLEN)
-    name[HOSTLEN] = '\0';
+    return NULL;
 
   return(name);
 }
