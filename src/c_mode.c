@@ -16,6 +16,9 @@
 static void c_mode(struct client *, const char *parv[], int parc);
 struct scommand_handler mode_command = { "MODE", c_mode, 0, DLINK_EMPTY };
 
+/* linked list of services that were deopped */
+dlink_list deopped_list;
+
 /* change_chmember_status()
  *   changes a channel members +ov status
  *
@@ -36,7 +39,9 @@ change_chmember_status(struct channel *chptr, const char *nick,
 		if(type != 'o' || dir)
 			return;
 
-		rejoin_service(target_p, chptr);
+		if(dlink_find(&deopped_list, target_p) == NULL)
+			dlink_add_alloc(target_p, &deopped_list);
+
 		return;
 	}
 
@@ -260,5 +265,19 @@ c_mode(struct client *client_p, const char *parv[], int parc)
 		}
 
 		p++;
+	}
+
+	/* some services were deopped.. */
+	if(dlink_list_length(&deopped_list))
+	{
+		dlink_node *ptr;
+		dlink_node *next_ptr;
+
+		DLINK_FOREACH_SAFE(ptr, next_ptr, deopped_list.head)
+		{
+			target_p = ptr->data;
+			rejoin_service(target_p, chptr);
+			dlink_destroy(ptr, &deopped_list);
+		}
 	}
 }
