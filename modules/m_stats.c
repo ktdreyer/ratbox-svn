@@ -253,7 +253,7 @@ m_stats(struct Client *client_p, struct Client *source_p, int parc, const char *
 static void
 stats_adns_servers (struct Client *source_p)
 {
-	report_adns_servers (source_p);
+/*	report_adns_servers (source_p); */
 }
 
 static void
