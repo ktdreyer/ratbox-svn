@@ -1,3 +1,8 @@
+*** 20010301_10 by fl_
+- ok.. did it a different way, we only burst perm channels to those
+  who support CAP_VCHAN, as older servers wont time them out
+
+
 *** 20010301_9 by fl_
 - reverted my patch, im gunna do it a different way
 
