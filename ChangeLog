@@ -1,3 +1,16 @@
+leeh        2004/09/04 06:40:32 EDT	(20040904_5)
+
+  Modified files:
+    .                    configure configure.ac 
+  Log:
+  - port the upper limit on nicklen from 2.0
+  
+  Revision  Changes    Path
+  7.234     +12 -4     ircd-ratbox/configure
+  7.48      +10 -3     ircd-ratbox/configure.ac
+
+
+
 leeh        2004/09/04 06:37:31 EDT	(20040904_4)
 
   Modified files:
