@@ -2153,12 +2153,25 @@ void read_conf_files(int cold)
 {
   FBFILE *file;
   const char *filename, *kfilename, *dfilename; /* kline or conf filename */
+  char *cppcmd;
+  char *cppfilename;
 
   conf_fbfile_in = NULL;
 
   filename = get_conf_name(CONF_TYPE);
 
-  if ((conf_fbfile_in = fbopen(filename,"r")) == NULL)
+#define CPP_CMD "cpp -P"
+
+  cppfilename = MyMalloc(strlen(filename) + strlen(".cpptemp") + 1);
+  sprintf(cppfilename, "%s.cpptemp", filename);
+
+  cppcmd = MyMalloc(strlen(filename) + strlen(cppfilename) + strlen(CPP_CMD) + 5);
+  sprintf(cppcmd, "%s %s >%s", CPP_CMD, filename, cppfilename);
+  unlink(cppfilename); /* XXX? */
+  system(cppcmd); /* XXX? */
+
+  /* run the file through cpp.. */
+  if ((conf_fbfile_in = fbopen(cppfilename,"r")) == NULL)
     {
       if(cold)
         {
@@ -2170,6 +2183,8 @@ void read_conf_files(int cold)
           sendto_realops_flags(FLAGS_ALL,
 			       "Can't open %s file aborting rehash!",
 			       filename );
+          MyFree(cppcmd);
+          MyFree(cppfilename);
           return;
         }
     }
@@ -2217,6 +2232,8 @@ void read_conf_files(int cold)
 	  fbclose(file);
 	}
     }
+  MyFree(cppcmd);
+  MyFree(cppfilename);
 }
 
 /*

@@ -15,9 +15,6 @@
 /* Define if you have the ANSI C header files.  */
 #undef STDC_HEADERS
 
-/* Define if lex declares yytext as a char * by default, not a char[].  */
-#undef YYTEXT_POINTER
-
 /* Define if you have the poll() system call.  */
 #undef USE_POLL
 
@@ -38,6 +35,9 @@
 /* Using select */
 #undef USE_SELECT
 
+/* Using devpoll */
+#undef USE_DEVPOLL
+
 /* Define if we have socklen_t */
 #undef HAVE_SOCKLEN_T
 
@@ -52,8 +52,17 @@
 /* IPv6 support */
 #undef IPV6
 
+/* u_int32_t */
+#undef u_int32_t
+
 /* Define if you have the gettext function.  */
 #undef HAVE_GETTEXT
+
+/* Define if you have the strlcat function.  */
+#undef HAVE_STRLCAT
+
+/* Define if you have the strlcpy function.  */
+#undef HAVE_STRLCPY
 
 /* Define if you have the <errno.h> header file.  */
 #undef HAVE_ERRNO_H

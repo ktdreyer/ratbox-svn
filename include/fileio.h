@@ -91,7 +91,10 @@ extern int     fbputs(const char* str, FBFILE* fb);
  * return the status of the file associated with fb, see fstat(3)
  */
 extern int     fbstat(struct stat* sb, FBFILE* fb);
-
+/*
+ * popen a file.
+ */
+extern FBFILE *fbpopen(const char *, const char *);
 
 /* file_open / file_close -- adrian */
 extern int     file_open(const char *filename, int mode, int fmode);

@@ -38,3 +38,6 @@
 
 /* IPv6 support */
 #undef IPV6
+
+/* u_int32_t */
+#undef u_int32_t
