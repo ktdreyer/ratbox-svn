@@ -1,3 +1,9 @@
+*** 20010103_12 by fl_
+- fixes for whois:
+- all "whois nick" replies look the same, same for "whois nick nick"
+  regardless of where the target is
+
+
 *** 20010103_11 by db
 - ok, added sanity tests in the parser to not try to DupString NULL strings
   it won't work properly but at least it won't core.
