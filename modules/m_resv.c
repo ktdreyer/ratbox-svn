@@ -165,9 +165,7 @@ parse_resv(struct Client *source_p, const char *name,
 	{
 		struct rxconf *resv_p;
 
-		resv_p = make_rxconf(name, reason, 0, CONF_RESV|RESV_CHANNEL);
-
-		if(resv_p == NULL)
+		if(find_channel_resv(name))
 		{
 			if(!cluster)
 				sendto_one(source_p,
@@ -176,6 +174,16 @@ parse_resv(struct Client *source_p, const char *name,
 			return;
 		}
 
+		if(strlen(name) > CHANNELLEN)
+		{
+			if(!cluster)
+				sendto_one(source_p,
+					   ":%s NOTICE %s :Invalid RESV length: %s",
+					   me.name, source_p->name, name);
+			return;
+		}
+
+		resv_p = make_rxconf(name, reason, 0, CONF_RESV|RESV_CHANNEL);
 		add_rxconf(resv_p);
 		write_confitem(RESV_TYPE, source_p, NULL, resv_p->name, resv_p->reason,
 			       NULL, NULL, 0);
@@ -183,6 +191,15 @@ parse_resv(struct Client *source_p, const char *name,
 	else if(clean_resv_nick(name))
 	{
 		struct rxconf *resv_p;
+
+		if(strlen(name) > NICKLEN*2)
+		{
+			if(!cluster)
+				sendto_one(source_p,
+					   ":%s NOTICE %s :Invalid RESV length: %s",
+					   me.name, source_p->name, name);
+			return;
+		}
 
 		if(!valid_wild_card_simple(name))
 		{
@@ -195,9 +212,7 @@ parse_resv(struct Client *source_p, const char *name,
 			return;
 		}
 
-		resv_p = make_rxconf(name, reason, 0, CONF_RESV|RESV_NICK);
-
-		if(resv_p == NULL)
+		if(find_nick_resv(name))
 		{
 			if(!cluster)
 				sendto_one(source_p,
@@ -206,6 +221,7 @@ parse_resv(struct Client *source_p, const char *name,
 			return;
 		}
 
+		resv_p = make_rxconf(name, reason, 0, CONF_RESV|RESV_NICK);
 		add_rxconf(resv_p);
 		write_confitem(RESV_TYPE, source_p, NULL, resv_p->name, resv_p->reason,
 			       NULL, NULL, 0);

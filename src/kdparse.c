@@ -151,8 +151,8 @@ void
 parse_x_file(FBFILE * file)
 {
 	struct rxconf *xconf;
+	char *gecos_field = NULL;
 	char *reason_field = NULL;
-	char *host_field = NULL;
 	char *port_field = NULL;
 	char line[BUFSIZE];
 	char *p;
@@ -165,8 +165,8 @@ parse_x_file(FBFILE * file)
 		if((*line == '\0') || (line[0] == '#'))
 			continue;
 
-		host_field = getfield(line);
-		if(EmptyString(host_field))
+		gecos_field = getfield(line);
+		if(EmptyString(gecos_field))
 			continue;
 
 		port_field = getfield(NULL);
@@ -177,7 +177,12 @@ parse_x_file(FBFILE * file)
 		if(EmptyString(reason_field))
 			continue;
 
-		xconf = make_rxconf(host_field, reason_field, 
+		/* sanity checking */
+		if((find_xline(gecos_field) != NULL) ||
+		   (strchr(reason_field, ':') != NULL))
+			continue;
+
+		xconf = make_rxconf(gecos_field, reason_field, 
 				    atoi(port_field), CONF_XLINE);
 		add_rxconf(xconf);
 	}
@@ -210,12 +215,18 @@ parse_resv_file(FBFILE * file)
 
 		if(IsChannelName(host_field))
 		{
+			if(find_channel_resv(host_field))
+				continue;
+
 			rxptr = make_rxconf(host_field, reason_field, 0,
 					    CONF_RESV|RESV_CHANNEL);
 			add_rxconf(rxptr);
 		}
 		else if(clean_resv_nick(host_field))
 		{
+			if(find_nick_resv(host_field))
+				continue;
+
 			rxptr = make_rxconf(host_field, reason_field, 0,
 					    CONF_RESV|RESV_NICK);
 			add_rxconf(rxptr);

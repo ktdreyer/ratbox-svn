@@ -83,7 +83,7 @@ extern dlink_list resv_list;
 extern dlink_list resv_hash_list;
 
 extern struct rxconf *make_rxconf(const char *, const char *, int, int);
-extern int add_rxconf(struct rxconf *);
+extern void add_rxconf(struct rxconf *);
 extern void free_rxconf(struct rxconf *);
 
 extern struct rxconf *find_xline(const char *);

@@ -110,11 +110,11 @@ make_rxconf(const char *name, const char *reason, int type, int flags)
 
 /* add_rxconf()
  *
- * inputs	- pointer to resv/xline
+ * inputs	- pointer to resv/xline, presumes sanity checking done
  * outputs	-
  * side effects - adds xline/resv to their respective hashes/dlinks
  */
-int
+void
 add_rxconf(struct rxconf *rxptr)
 {
 	/* reasons too long, nuke it */
@@ -128,23 +128,11 @@ add_rxconf(struct rxconf *rxptr)
 	{
 		if(IsResvChannel(rxptr))
 		{
-			if(find_channel_resv(rxptr->name))
-				return 0;
-
-			if(strlen(rxptr->name) > CHANNELLEN)
-				return 0;
-
 			add_to_resv_hash(rxptr->name, rxptr);
 			dlinkAddAlloc(rxptr, &resv_hash_list);
 		}
 		else if(IsResvNick(rxptr))
 		{
-			if(find_nick_resv(rxptr->name))
-				return 0;
-
-			if(strlen(rxptr->name) > NICKLEN*2)
-				return 0;
-
 			if((strchr(rxptr->name, '?') == NULL) &&
 			   (strchr(rxptr->name, '*') == NULL))
 			{
@@ -172,8 +160,6 @@ add_rxconf(struct rxconf *rxptr)
 			dlinkAddAlloc(rxptr, &xline_list);
 		}
 	}
-
-	return 1;
 }
 
 /* free_rxconf()

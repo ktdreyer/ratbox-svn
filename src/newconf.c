@@ -1341,6 +1341,13 @@ conf_set_resv_channel(void *data)
 {
 	if(IsChannelName((char *) data))
 	{
+		if(find_channel_resv((char *) data))
+		{
+			conf_report_error("Warning -- channel '%s' in resv is already resv'd.",
+					  (char *) data);
+			return;
+		}
+
 		yy_rxconf = make_rxconf(data, 
 					EmptyString(resv_reason) ? "No Reason" : resv_reason, 
 					0, CONF_RESV|RESV_CHANNEL);
@@ -1366,6 +1373,13 @@ conf_set_resv_nick(void *data)
 {
 	if(clean_resv_nick(data))
 	{
+		if(find_nick_resv((char *) data))
+		{
+			conf_report_error("Warning -- nick '%s' in resv is already resv'd.",
+					  (char *) data);
+			return;
+		}
+
 		yy_rxconf = make_rxconf(data,
 					EmptyString(resv_reason) ? "No Reason" : resv_reason,
 					0, CONF_RESV|RESV_NICK);
@@ -1995,7 +2009,14 @@ conf_end_gecos(struct TopConf *tc)
 {
 	if(!EmptyString(yy_rxconf->name))
 	{
-		add_rxconf(yy_rxconf);
+		if(find_xline(yy_rxconf->name) != NULL)
+		{
+			conf_report_error("Warning -- name '%s' in gecos is already xlined.",
+					  yy_rxconf->name);
+			free_rxconf(yy_rxconf);
+		}
+		else
+			add_rxconf(yy_rxconf);
 	}
 	else
 	{
@@ -2020,7 +2041,11 @@ static void
 conf_set_gecos_reason(void *data)
 {
 	MyFree(yy_rxconf->reason);
-	DupString(yy_rxconf->reason, data);
+
+	if(strchr((char *) data, ':') == NULL)
+		DupString(yy_rxconf->reason, data);
+	else
+		DupString(yy_rxconf->reason, "No Reason");
 }
 
 static void
