@@ -1,3 +1,10 @@
+*** 20011021_2 by davidt
+- Some misc. fixes for bugs in channel_mode.c
+  (-o+h was sent to clients as -o+h+o, +o on a +v'd client was sent
+   locally as -v+o, but all remote servers converted it to plain +o,
+   minor other things).
+
+
 *** 20011021_1 by davidt
 - Commit of fixed table mode code:
    * Non USE_TABLE_MODE code is gone.  If we commit this patch, we go
