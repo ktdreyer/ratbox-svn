@@ -1,3 +1,15 @@
+leeh        2002/06/24 18:06:13 EDT	(20020624_3)
+
+  Modified files:
+    modules              m_join.c 
+  Log:
+  - the juped channel notices wandered off.
+  
+  Revision  Changes    Path
+  1.87      +4 -1      ircd-hybrid-7/modules/m_join.c
+
+
+
 leeh        2002/06/24 14:12:22 EDT	(20020624_2)
 
   Modified files:
