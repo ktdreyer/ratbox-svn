@@ -1,3 +1,35 @@
+androsyn    2002/05/30 22:21:12 EDT	(20020531_10)
+
+  Modified files:
+    src                  client.c hash.c irc_string.c linebuf.c 
+                         listener.c match.c packet.c parse.c 
+                         s_auth.c s_bsd.c s_conf.c s_gline.c 
+                         s_log.c s_serv.c s_user.c vchannel.c 
+                         whowas.c 
+  Log:
+  The rest of the non-assert failure checks..
+  
+  Revision  Changes    Path
+  7.274     +1 -1      ircd-hybrid-7/src/client.c
+  7.42      +24 -2     ircd-hybrid-7/src/hash.c
+  7.54      +6 -0      ircd-hybrid-7/src/irc_string.c
+  7.82      +3 -0      ircd-hybrid-7/src/linebuf.c
+  7.68      +11 -5     ircd-hybrid-7/src/listener.c
+  7.20      +1 -1      ircd-hybrid-7/src/match.c
+  7.84      +5 -1      ircd-hybrid-7/src/packet.c
+  7.128     +8 -2      ircd-hybrid-7/src/parse.c
+  7.96      +2 -0      ircd-hybrid-7/src/s_auth.c
+  7.170     +2 -1      ircd-hybrid-7/src/s_bsd.c
+  7.304     +11 -2     ircd-hybrid-7/src/s_conf.c
+  1.21      +2 -0      ircd-hybrid-7/src/s_gline.c
+  7.42      +2 -0      ircd-hybrid-7/src/s_log.c
+  7.258     +19 -4     ircd-hybrid-7/src/s_serv.c
+  7.195     +31 -4     ircd-hybrid-7/src/s_user.c
+  7.65      +11 -0     ircd-hybrid-7/src/vchannel.c
+  7.19      +3 -0      ircd-hybrid-7/src/whowas.c
+
+
+
 androsyn    2002/05/30 21:35:41 EDT	(20020531_9)
 
   Modified files:
