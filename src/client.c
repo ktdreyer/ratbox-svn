@@ -157,7 +157,7 @@ make_client(struct Client *from)
 		client_p->localClient->ctrlfd_r = -1;
 #endif
 		/* as good a place as any... */
-		dlinkAddAlloc(client_p, &unknown_list);
+		dlinkAdd(client_p, &client_p->localClient->tnode, &unknown_list);
 	}
 	else
 	{			/* from is not NULL */
@@ -1195,7 +1195,7 @@ exit_unknown_client(struct Client *client_p, struct Client *source_p, struct Cli
 	delete_adns_queries(source_p->localClient->dns_query);
 	delete_identd_queries(source_p);
 	client_flush_input(source_p);
-	dlinkFindDestroy(&unknown_list, source_p);
+	dlinkDelete(&source_p->localClient->tnode, &unknown_list);
 	log_user_exit(source_p);
 	if(source_p->localClient->fd >= 0)
 		sendto_one(source_p, "ERROR :Closing Link: %s (%s)", source_p->host, comment);
@@ -1268,7 +1268,7 @@ exit_local_server(struct Client *client_p, struct Client *source_p, struct Clien
 	static char comment1[(HOSTLEN*2)+2];
 	unsigned int sendk, recvk;
 
-	dlinkFindDestroy(&serv_list, source_p);
+	dlinkDelete(&source_p->localClient->tnode, &serv_list);
 	remove_server_from_list(source_p);
 	
 	Count.myserver--;
@@ -1344,7 +1344,7 @@ exit_local_client(struct Client *client_p, struct Client *source_p, struct Clien
 	assert(IsPerson(source_p));
 	client_flush_input(source_p);
 	Count.local--;
-	dlinkFindDestroy(&lclient_list, source_p);
+	dlinkDelete(&source_p->localClient->tnode, &lclient_list);
 	if(IsOper(source_p))
 		dlinkFindDestroy(&oper_list, source_p);
 	
