@@ -1,3 +1,17 @@
+leeh        2002/04/30 06:46:53 EDT	(20020430_2)
+
+  Modified files:
+    src                  ircd_parser.y 
+  Log:
+  - dont allow vhost="" in the connect {}; not when it sets aftype.
+  - when we handle RSA stuff in oper {};, do it in yy_achead, then copy
+    it to the other confs for multi user="".
+  
+  Revision  Changes    Path
+  1.244     +27 -15    ircd-hybrid-7/src/ircd_parser.y
+
+
+
 leeh        2002/04/29 19:57:26 EDT	(20020430_1)
 
   Modified files:
