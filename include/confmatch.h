@@ -42,6 +42,7 @@ struct ConfItem * find_address_conf (const char *host, const char *user, struct 
 struct ConfItem * find_conf_by_address (const char *hostname, struct irc_inaddr *addr, int type, const char *username);
 struct ConfItem * find_kline(struct Client *client_p);
 struct ConfItem * find_gline(struct Client *client_p);
+char * show_iline_prefix(struct Client *sptr, struct ConfItem *aconf, char *name);
  	              
 int parse_netmask(const char *address, struct irc_inaddr *addr, int *bits);
 

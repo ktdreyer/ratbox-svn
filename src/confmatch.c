@@ -153,16 +153,6 @@ find_conf_by_address (const char *hostname,
 	if(username == NULL)
 		username = "";
 	
-	if(addr != NULL)
-	{
-		aconf = find_generic_line(type, addr);
-		if(aconf != NULL)
-		{
-			if(match(aconf->user, username))
-				return aconf;
-		}
-	}
-	
 	
 	if(hostname != NULL)
 	{
@@ -182,6 +172,17 @@ find_conf_by_address (const char *hostname,
 		}
 	}
 	return NULL;
+
+	if(addr != NULL)
+	{
+		aconf = find_generic_line(type, addr);
+		if(aconf != NULL)
+		{
+			if(match(aconf->user, username))
+				return aconf;
+		}
+	}
+
 }
 
 
@@ -273,4 +274,34 @@ void clear_out_address_conf(void)
 			dlinkDestroy(ptr, list);
 		}
 	}	
+}
+
+char *
+show_iline_prefix(struct Client *sptr, struct ConfItem *aconf, char *name)
+{
+  static char prefix_of_host[USERLEN + 15];
+  char *prefix_ptr;
+
+  prefix_ptr = prefix_of_host;
+  if (IsNoTilde(aconf))
+    *prefix_ptr++ = '-';
+  if (IsLimitIp(aconf)) 
+    *prefix_ptr++ = '!';
+  if (IsNeedIdentd(aconf))
+    *prefix_ptr++ = '+';  
+  if (IsPassIdentd(aconf))
+    *prefix_ptr++ = '$';  
+  if (IsNoMatchIp(aconf)) 
+    *prefix_ptr++ = '%';  
+  if (IsConfDoSpoofIp(aconf))
+    *prefix_ptr++ = '=';
+  if (MyOper(sptr) && IsConfExemptKline(aconf))
+    *prefix_ptr++ = '^';
+  if (MyOper(sptr) && IsConfExemptLimits(aconf))
+    *prefix_ptr++ = '>';
+  if (MyOper(sptr) && IsConfIdlelined(aconf))
+    *prefix_ptr++ = '<';
+  *prefix_ptr = '\0';   
+  strncpy(prefix_ptr, name, USERLEN);
+  return (prefix_of_host);
 }

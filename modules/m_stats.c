@@ -36,7 +36,8 @@
 #include "s_gline.h"
 #include "ircd_handler.h"
 #include "msg.h"		/* Message */
-#include "confmatch.h"		/* report_mtrie_conf_links */
+#include "confmatch.h"		
+#include "iplines.h"
 #include "numeric.h"		/* ERR_xxx */
 #include "scache.h"		/* list_scache */
 #include "send.h"		/* sendto_one */
@@ -364,33 +365,7 @@ stats_tdeny (struct Client *source_p)
 static void
 stats_deny (struct Client *source_p)
 {
-#warning fix stats_deny()
-#ifdef XXX_FIX_ME_XXX
-	char *name, *host, *pass, *user, *classname;
-	struct AddressRec *arec;
-	struct ConfItem *aconf;
-	int i, port;
-
-	for (i = 0; i < ATABLE_SIZE; i++)
-	{
-		for (arec = atable[i]; arec; arec = arec->next)
-		{
-			if(arec->type == CONF_DLINE)
-			{
-				aconf = arec->aconf;
-
-				if(aconf->flags & CONF_FLAGS_TEMPORARY)
-					continue;
-
-				get_printable_conf (aconf, &name, &host, &pass, &user, &port,
-						    &classname);
-
-				sendto_one (source_p, form_str (RPL_STATSDLINE), me.name,
-					    source_p->name, 'D', host, pass);
-			}
-		}
-	}
-#endif
+	report_dlines(source_p);
 }
 
 
@@ -403,29 +378,7 @@ stats_deny (struct Client *source_p)
 static void
 stats_exempt (struct Client *source_p)
 {
-#warning fix stats_exempt()
-#ifdef XXX_FIXME_XXX
-	char *name, *host, *pass, *user, *classname;
-	struct AddressRec *arec;
-	struct ConfItem *aconf;
-	int i, port;
-
-	for (i = 0; i < ATABLE_SIZE; i++)
-	{
-		for (arec = atable[i]; arec; arec = arec->next)
-		{
-			if(arec->type == CONF_EXEMPTDLINE)
-			{
-				aconf = arec->aconf;
-				get_printable_conf (aconf, &name, &host, &pass,
-						    &user, &port, &classname);
-
-				sendto_one (source_p, form_str (RPL_STATSDLINE), me.name,
-					    source_p->name, 'e', host, pass);
-			}
-		}
-	}
-#endif
+	report_elines(source_p);
 }
 
 
@@ -502,6 +455,8 @@ stats_glines (struct Client *source_p)
 		dlink_node *gline_node;
 		struct ConfItem *kill_ptr;
 
+		report_ipGlines(source_p);
+
 		DLINK_FOREACH_PREV (gline_node, glines.tail)
 		{
 			kill_ptr = gline_node->data;
@@ -530,7 +485,6 @@ static void
 stats_auth (struct Client *source_p)
 {
 #warning "fix stats_auth()"
-#ifdef XXX_FIXME_XXX
 	/* Oper only, if unopered, return ERR_NOPRIVS */
 	if((ConfigFileEntry.stats_i_oper_only == 2) && !IsOper (source_p))
 		sendto_one (source_p, form_str (ERR_NOPRIVILEGES), me.name, source_p->name);
@@ -562,9 +516,10 @@ stats_auth (struct Client *source_p)
 	}
 
 	/* Theyre opered, or allowed to see all auth blocks */
-	else
-		report_auth (source_p);
-#endif
+	else {
+		report_ipIlines(source_p);
+		// report_auth (source_p);
+	}
 }
 
 
@@ -673,11 +628,9 @@ stats_klines (struct Client *source_p)
 			    source_p->name, 'K', host, user, pass);
 	}
 	/* Theyre opered, or allowed to see all klines */
-#warning write report_Klines()
-#ifdef XXX_FIXME
-	else
-		report_Klines (source_p);
-#endif
+	else {
+		report_ipKlines(source_p);	
+	}
 }
 
 static void

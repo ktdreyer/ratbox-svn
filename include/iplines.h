@@ -39,6 +39,11 @@ struct ConfItem * find_generic_line (int type, struct irc_inaddr *addr );
 int add_ipline(struct ConfItem *aconf, int type, struct irc_inaddr *addr, int cidr);
 void delete_ipline(struct ConfItem *aconf, int type);
 void clear_iplines(void);
+void report_dlines (struct Client *source_p );
+void report_elines (struct Client *source_p );
+void report_ipKlines (struct Client *source_p );
+void report_ipGlines (struct Client *source_p );
+void report_ipIlines (struct Client *source_p );
 
 
 #endif /* INCLUDE_iplines_h */

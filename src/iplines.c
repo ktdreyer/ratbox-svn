@@ -174,8 +174,9 @@ find_ipdline(struct irc_inaddr *addr)
 	struct ConfItem *aconf;
 	aconf = find_ipline(elines, addr);
 	if(aconf != NULL)
+	{
 		return aconf;
-
+	}
 	return(find_ipline(dlines, addr));
 }
 
@@ -198,3 +199,105 @@ find_ipgline(struct irc_inaddr *addr)
 }
 
 
+void
+report_dlines(struct Client *source_p)
+{
+	patricia_node_t *pnode;
+	struct ConfItem *aconf;
+	char *name, *host, *pass, *user, *classname;
+	int port;
+	PATRICIA_WALK(iplines[dlines]->head, pnode)
+	{
+		aconf = pnode->data;
+		if(aconf->flags & CONF_FLAGS_TEMPORARY)
+			continue;
+		get_printable_conf (aconf, &name, &host, &pass, &user, &port, &classname);
+		sendto_one (source_p, form_str(RPL_STATSDLINE), me.name, source_p->name, 'D', host, pass);
+	}
+	PATRICIA_WALK_END;
+
+}
+
+void
+report_elines(struct Client *source_p)
+{
+	patricia_node_t *pnode;
+	struct ConfItem *aconf;
+	int port;
+	char *name, *host, *pass, *user, *classname;
+	PATRICIA_WALK(iplines[elines]->head, pnode)
+	{
+		aconf = pnode->data;
+		get_printable_conf (aconf, &name, &host, &pass, &user, &port, &classname);
+		sendto_one (source_p, form_str(RPL_STATSDLINE), me.name, source_p->name, 'e', host, pass);
+	}
+	PATRICIA_WALK_END;
+}
+
+void
+report_ipKlines(struct Client *source_p)
+{
+	patricia_node_t *pnode;
+	struct ConfItem *aconf;
+	char *name, *host, *pass, *user, *classname;
+	int port;
+	PATRICIA_WALK(iplines[elines]->head, pnode)
+	{
+		aconf = pnode->data;
+		if(aconf->flags & CONF_FLAGS_TEMPORARY)
+			continue;
+			
+		get_printable_conf (aconf, &name, &host, &pass, &user, &port, &classname);
+		sendto_one(source_p, form_str(RPL_STATSKLINE), me.name,
+			source_p->name, 'K', host, user, pass);
+	}
+	PATRICIA_WALK_END;
+}
+
+
+void
+report_ipGlines(struct Client *source_p)
+{
+	patricia_node_t *pnode;
+	struct ConfItem *aconf;
+	char *name, *host, *pass, *user, *classname;
+	int port;
+	PATRICIA_WALK(iplines[elines]->head, pnode)
+	{
+		aconf = pnode->data;
+		if(aconf->flags & CONF_FLAGS_TEMPORARY)
+			continue;
+			
+		get_printable_conf (aconf, &name, &host, &pass, &user, &port, &classname);
+		sendto_one(source_p, form_str(RPL_STATSKLINE), me.name,
+			source_p->name, 'G', host, user, pass);
+	}
+	PATRICIA_WALK_END;
+}
+
+
+
+void
+report_ipIlines(struct Client *source_p)
+{
+	patricia_node_t *pnode;
+	struct ConfItem *aconf;
+	char *name, *host, *pass, *user, *classname;
+	int port;
+	PATRICIA_WALK(iplines[elines]->head, pnode)
+	{
+		aconf = pnode->data;
+			
+		get_printable_conf (aconf, &name, &host, &pass, &user, &port, &classname);
+		sendto_one(source_p, form_str(RPL_STATSILINE), me.name,
+		           source_p->name, (IsConfRestricted(aconf)) ? 'i' : 'I', name,
+		           show_iline_prefix(source_p, aconf, user),
+#ifdef HIDE_SPOOF_IPS
+		           IsConfDoSpoofIp(aconf) ? "255.255.255.255" :
+#endif
+		           host, port, classname);
+		                                                 
+		           	           
+	}
+	PATRICIA_WALK_END;
+}
