@@ -27,6 +27,8 @@
 #include <dirent.h>
 #include <limits.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #include "modules.h"
 #include "s_log.h"
@@ -181,10 +183,8 @@ struct Message hash_msgtab = {
 void
 load_all_modules (void)
 {
-  char           *system_module_dir_name = MODPATH;
   DIR            *system_module_dir = NULL;
   struct dirent  *ldirent = NULL;
-  char           *old_dir = getcwd (NULL, 0); /* XXX not portable */
   char            module_fq_name[PATH_MAX + 1];
 
   modlist = (struct module **)MyMalloc ( sizeof (struct module) *
@@ -196,17 +196,12 @@ load_all_modules (void)
   mod_add_cmd(&modlist_msgtab);
   mod_add_cmd(&hash_msgtab);
 
-  if (chdir (system_module_dir_name) == -1)
-  {
-    log (L_WARN, "Could not load modules from %s: %s",
-         system_module_dir_name, strerror (errno));
-    return;
-  }
-  system_module_dir = opendir (".");
+  system_module_dir = opendir (MODPATH);
+
   if (system_module_dir == NULL)
   {
     log (L_WARN, "Could not load modules from %s: %s",
-         system_module_dir_name, strerror (errno));
+         MODPATH, strerror (errno));
     return;
   }
 
@@ -217,16 +212,37 @@ load_all_modules (void)
         ldirent->d_name [strlen (ldirent->d_name) - 1] == 'o')
     {
       (void)snprintf (module_fq_name, sizeof (module_fq_name),
-                      "%s/%s",  system_module_dir_name,
+                      "%s/%s",  MODPATH,
                       ldirent->d_name);
-      (void)load_one_module (module_fq_name);
+      (void)load_a_module (module_fq_name);
     }
   }
 
   (void)closedir (system_module_dir);
-  (void)chdir (old_dir);
-  MyFree (old_dir);
 }
+
+int
+load_one_module (char *path)
+{
+	char modpath[MAXPATHLEN];
+	struct module_path *pathst;
+	struct stat statbuf;
+
+	if (strchr(path, '/')) /* absolute path, try it */
+		return load_a_module(modpath);
+	
+	for (pathst = mod_paths; pathst; pathst = pathst->next)
+	{
+		snprintf(modpath, MAXPATHLEN, "%s/%s", pathst->path, path);
+		if (stat(modpath, &statbuf) == 0)
+			return load_a_module(modpath);
+	}
+	
+	sendto_realops_flags (FLAGS_ALL, "Cannot locate module %s", path);
+	log(L_WARN, "Cannot locate module %s", path);
+	return -1;
+}
+		
 
 /*
  * load_one_module
@@ -236,74 +252,28 @@ load_all_modules (void)
  * side effects - loads a module if successful
  */
 int
-load_one_module (char *path)
+load_a_module (char *path)
 {
   void *tmpptr = NULL;
   char *mod_basename;
   void (*initfunc)(void) = NULL;
   char **verp;
   char *ver;
-  char realmodpath[MAXPATHLEN];
-  struct module_path *pathst;
 
   mod_basename = irc_basename(path);
 
-  if (strchr(path, '/')) {
-    /* absolute pathname, try it */
-    errno = 0;
-    tmpptr = dlopen (path, RTLD_NOW);
-
-    if (tmpptr == NULL)
-    {
+  tmpptr = dlopen (path, RTLD_NOW);
+  
+  if (tmpptr == NULL)
+  {
       const char *err = dlerror();
-
+	  
       sendto_realops_flags (FLAGS_ALL,
                             "Error loading module %s: %s",
                             mod_basename, err);
       log (L_WARN, "Error loading module %s: %s", mod_basename, err);
       MyFree (mod_basename);
       return -1;
-    }
-  }
-  else
-  {
-    /* non-absolute path, try all module paths */
-    for (pathst = mod_paths; pathst; pathst = pathst->next)
-    {
-      sprintf(realmodpath, "%s/%s", pathst->path, path);
-      errno = 0;
-      tmpptr = dlopen (realmodpath, RTLD_NOW);
-
-      if (tmpptr == NULL)
-      {
-        const char *err;
-
-        if (errno == ENOENT) /* module not found, try next path */
-          continue;
-
-        err = dlerror();
-
-        sendto_realops_flags (FLAGS_ALL,
-                              "Error loading module %s: %s",
-                              mod_basename, err);
-        log (L_WARN, "Error loading module %s: %s", mod_basename, err);
-        MyFree (mod_basename);
-        return -1;
-      }
-    }
-  }
-
-  if (tmpptr == NULL)
-  {
-    const char *err = dlerror();
-
-    sendto_realops_flags(FLAGS_ALL,
-                         "Error loading module %s: %s",
-                         mod_basename, err);
-    log(L_WARN, "Error loading module %s: %s",
-        mod_basename, err);
-    MyFree(mod_basename);
-    return -1;
   }
 
   initfunc = (void (*)(void))dlsym (tmpptr, SYMBOL_PREFIX "_modinit");

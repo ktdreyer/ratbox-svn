@@ -55,6 +55,7 @@ extern void _moddeinit(void);
 
 extern int unload_one_module (char *);
 extern int load_one_module (char *);
+extern int load_a_module (char *);
 extern int  findmodule_byname (char *);
 
 #endif
