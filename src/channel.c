@@ -2817,88 +2817,77 @@ void channel_member_names( struct Client *source_p,
 			   struct Channel *chptr,
 			   char *name_of_channel )
 {
-  int mlen;
-  int tlen;
-  int cur_len;
-  char lbuf[BUFSIZE];
-  char *t;
-  int reply_to_send = NO;
-  dlink_node *members_ptr[MAX_SUBLISTS];
-  char show_flags[MAX_SUBLISTS][2];
-  struct Client *who;
-  int done=0;		/* flag when done */
-  int is_member;
-  int i;
+ int mlen;
+ int sublists_done = 0;
+ int tlen;
+ int cur_len;
+ char lbuf[BUFSIZE];
+ char *t;
+ int reply_to_send = NO;
+ dlink_node *members_ptr[MAX_SUBLISTS];
+ char show_flags[MAX_SUBLISTS][2];
+ struct Client *who;
+ int is_member;
+ int i;
 
-  /* Find users on same channel (defined by chptr) */
-
-  if (ShowChannel(source_p, chptr))
+ /* Find users on same channel (defined by chptr) */
+ if (ShowChannel(source_p, chptr))
+ {
+  ircsprintf(lbuf, form_str(RPL_NAMREPLY),
+             me.name, source_p->name, channel_pub_or_secret(chptr));
+  mlen = strlen(lbuf);
+  ircsprintf(lbuf + mlen, " %s :", name_of_channel);
+  mlen = strlen(lbuf);
+  cur_len = mlen;
+  t = lbuf + cur_len;
+  set_channel_mode_flags(show_flags, chptr, source_p);
+  members_ptr[0] = chptr->chanops.head;
+  members_ptr[1] = chptr->voiced.head;
+  members_ptr[2] = chptr->halfops.head;
+  members_ptr[3] = chptr->peons.head;
+  is_member = IsMember(source_p, chptr);
+  /* Note: This code will show one chanop followed by one voiced followed
+   *  by one halfop followed by one peon followed by one chanop...
+   * XXX - this is very predictable, randomise it later. */
+  while (sublists_done != (1<<MAX_SUBLISTS)-1)
+  {
+   for (i = 0; i < MAX_SUBLISTS; i++)
+   {
+    if (members_ptr[i] != NULL)
     {
-      ircsprintf(lbuf, form_str(RPL_NAMREPLY),
-                 me.name, source_p->name, channel_pub_or_secret(chptr));
-      mlen = strlen(lbuf);
-      ircsprintf(lbuf + mlen, " %s :", name_of_channel);
-      mlen = strlen(lbuf);
+     who = members_ptr[i]->data;
+     if (IsInvisible(who) && !is_member)
+     {
+      /* We definitely need this code -A1kmm. */
+      members_ptr[i] = members_ptr[i]->next;
+      continue;
+     }
+     reply_to_send = YES;
+     if (who == source_p && is_voiced(chptr, who)
+         && chptr->mode.mode & MODE_HIDEOPS)
+      ircsprintf(t, "+%s ", who->name);
+     else
+      ircsprintf(t, "%s%s ", show_flags[i], who->name);
+     tlen = strlen(t);
+     cur_len += tlen;
+     t += tlen;
+     if ((cur_len + NICKLEN) > (BUFSIZE - 3))
+     {
+      sendto_one(source_p, "%s", lbuf);
+      reply_to_send = NO;
       cur_len = mlen;
-      t = lbuf + cur_len;
-
-      set_channel_mode_flags(show_flags,
-			     chptr,
-			     source_p);
-
-      members_ptr[0] = chptr->chanops.head;
-      members_ptr[1] = chptr->voiced.head;
-      members_ptr[2] = chptr->halfops.head;
-      members_ptr[3] = chptr->peons.head;
-
-      is_member = IsMember(source_p, chptr);
-
-      while(done != MAX_SUBLISTS)
-	{
-	  done = 0;
-	  for(i = 0; i < MAX_SUBLISTS; i++)
-	    {
-	      if(members_ptr[i] != NULL)
-		{
-		  who = members_ptr[i]->data;
-		  if(IsInvisible(who) && !is_member)
-		    continue;
-
-		  reply_to_send = YES;
-
-		  if(who == source_p && is_voiced(chptr, who)
-		     && chptr->mode.mode & MODE_HIDEOPS)
-		    ircsprintf(t, "+%s ", who->name);
-		  else
-		    ircsprintf(t, "%s%s ", show_flags[i], who->name);
-		  
-		  tlen = strlen(t);
-		  cur_len += tlen;
-		  t += tlen;
-
-		  if ((cur_len + NICKLEN) > (BUFSIZE - 3))
-		    {
-		      sendto_one(source_p, "%s", lbuf);
-		      reply_to_send = NO;
-		      cur_len = mlen;
-		      t = lbuf + mlen;
-		    }
-		  members_ptr[i] = members_ptr[i]->next;
-		}
-	      else
-		{
-		  done++;
-		}
-	    }
-	}
-
-
-      if(reply_to_send)
-        sendto_one(source_p, "%s", lbuf);
-    }
-
-  sendto_one(source_p, form_str(RPL_ENDOFNAMES),
-             me.name, source_p->name, name_of_channel);
+      t = lbuf + mlen;
+     }
+     members_ptr[i] = members_ptr[i]->next;
+    } else
+     sublists_done |= 1<<i;
+   }
+  }
+  if (reply_to_send)
+   sendto_one(source_p, "%s", lbuf);
+ }
+ sendto_one(source_p, form_str(RPL_ENDOFNAMES), me.name, source_p->name,
+            name_of_channel);
 }
 
 /*
