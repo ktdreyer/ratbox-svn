@@ -511,7 +511,7 @@ struct Client
 #define SetOperRehash(x)        ((x)->flags2 |= FLAGS2_OPER_REHASH)
 #define IsOperRehash(x)         ((x)->flags2 & FLAGS2_OPER_REHASH)
 #define SetOperAdmin(x)         ((x)->flags2 |= FLAGS2_OPER_ADMIN)
-#define IsSetOperAdmin(x)          ((x)->flags2 & FLAGS2_OPER_ADMIN)
+#define IsSetOperAdmin(x)       ((x)->flags2 & FLAGS2_OPER_ADMIN)
 #define CBurst(x)               ((x)->flags2 & FLAGS2_CBURST)
 
 /*

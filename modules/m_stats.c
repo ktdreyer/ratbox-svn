@@ -397,7 +397,7 @@ void do_priv_stats(struct Client *sptr, char *name, char *target,
       break;
 
     case 'M' : case 'm' :
-      for (mptr = *msgtab; mptr->cmd; mptr++)
+      for (mptr = msgtab; mptr->cmd; mptr++)
           sendto_one(sptr, form_str(RPL_STATSCOMMANDS),
                      me.name, sptr->name, mptr->cmd,
                      mptr->count, mptr->bytes);

@@ -27,6 +27,7 @@
 
 struct module {
   char *name;
+  char *version;
   void *address;
 };
 

@@ -70,7 +70,7 @@ int m_help(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
   for (i = 0; i < num_msgs; i++)
     sendto_one(sptr,":%s NOTICE %s :%s",
-	       me.name, parv[0], msgtab[i]->cmd);
+	       me.name, parv[0], msgtab[i].cmd);
   return 0;
 }
 

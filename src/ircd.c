@@ -622,8 +622,7 @@ int main(int argc, char *argv[])
   initclass();
   initwhowas();
   init_stats();
-
-  do_msg_tree(msgtab);      /* tree parse code (orabidoo) */
+  init_tree_parse(msgtab);      /* tree parse code (orabidoo) */
 
   load_all_modules();
 

@@ -209,7 +209,7 @@ modules_item:    modules_module
 
 modules_module:  MODULE '=' QSTRING
 {
-  load_module (yylval.string);
+  load_one_module (yylval.string);
 };
 
 /***************************************************************************
