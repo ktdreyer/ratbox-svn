@@ -1,3 +1,13 @@
+*** 20001203_1 by db
+- tidied up m_nick.c more in modules
+  removed a nick <-> server test, replaced it with a simpler strchr(nick,'.')
+  test. nicks can NEVER have a dot in them, and servers must ALWAYS
+  have a dot in their name.
+- cleaned up all functions in m_nick.c checking for specific paramater
+  counts as the protocol specifies..
+
+
+
 *** 20001202_13 by db
 - fixed dlinkMoveList, there are three cases to contend with
   1) empty from list 2) empty to list 3) move the spaghetti pointers around
