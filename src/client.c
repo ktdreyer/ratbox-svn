@@ -1197,8 +1197,11 @@ static void exit_one_client(struct Client *cptr, struct Client *sptr, struct Cli
       */
       if (sptr->user)
         {
-          sendto_common_channels_local(sptr, ":%s QUIT :%s",
-				       sptr->name, comment);
+          sendto_common_channels_local(sptr, ":%s!%s@%s QUIT :%s",
+				       sptr->name,
+				       sptr->username,
+				       sptr->host,
+				       comment);
 
           for (lp = sptr->user->channel.head; lp; lp = next_lp)
 	    {

@@ -290,8 +290,16 @@ void send_knock(struct Client *cptr, struct Client *sptr,
                  name, sptr->name, sptr->username, sptr->host);
 
       /* XXX needs vchan support */
-      sendto_channel_type(cptr, cptr, &chptr->chanops, '@', sptr->name,
-			  "NOTICE", message);
+      sendto_channel_local(ONLY_CHANOPS,
+			   chptr,
+			   ":%s!%s@%s NOTICE %s :%s",
+			   sptr->name,
+			   sptr->username,
+			   sptr->host,
+			   chptr->chname,
+			   message);
+
+      /* XXX needs remote send or CAP_KNOCK or something */
     }
 
   return;
