@@ -1,3 +1,9 @@
+*** 19990910_6 by tomh
+types cleanup
+NOTE: the interface in s_zip.c is a little borked, the length field should
+not be used to convey error results
+
+
 *** 19990910_5 by tomh
 type cleanups, remove bogus casts
 
