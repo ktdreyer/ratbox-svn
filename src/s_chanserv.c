@@ -1191,7 +1191,8 @@ s_chanserv_addban(struct client *client_p, char *parv[], int parc)
 		loc++;
 	}
 
-	banreg_p = make_ban_reg(mreg_p->channel_reg, mask, reason, mreg_p->user_reg->name, level, duration);
+	banreg_p = make_ban_reg(mreg_p->channel_reg, mask, reason, 
+			mreg_p->user_reg->name, level, (duration*60));
 	write_ban_db_entry(banreg_p, mreg_p->channel_reg->name);
 
 	service_error(chanserv_p, client_p, "Ban %s on %s added",
