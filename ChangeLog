@@ -1,3 +1,80 @@
+leeh        2005/03/20 03:20:40 UTC	(20050320_5)
+
+  Modified files:
+    adns                 adns.h event.c general.c parse.c query.c 
+                         setup.c types.c 
+    include              res.h 
+    src                  adns.c balloc.c cache.c channel.c class.c 
+                         client.c commio.c epoll.c event.c hash.c 
+                         hostmask.c irc_string.c ircd.c 
+                         ircd_lexer.l ircd_parser.y ircd_signal.c 
+                         kdparse.c kqueue.c linebuf.c listener.c 
+                         match.c memory.c modules.c monitor.c 
+                         newconf.c numeric.c packet.c parse.c 
+                         patricia.c poll.c reject.c restart.c 
+                         s_auth.c s_conf.c s_gline.c s_log.c 
+                         s_newconf.c s_serv.c s_stats.c s_user.c 
+                         scache.c select.c send.c tools.c whowas.c 
+  Log:
+  - fix up adns/ and src/ for the #include mess.
+  
+  Revision  Changes    Path
+                       
+  1.19      +0 -5      ircd-ratbox/adns/adns.h
+  1.29      +1 -0      ircd-ratbox/adns/event.c
+  1.18      +1 -0      ircd-ratbox/adns/general.c
+  1.13      +1 -0      ircd-ratbox/adns/parse.c
+  1.26      +1 -2      ircd-ratbox/adns/query.c
+  1.42      +2 -0      ircd-ratbox/adns/setup.c
+  1.20      +1 -0      ircd-ratbox/adns/types.c
+  7.36      +2 -0      ircd-ratbox/include/res.h
+  7.78      +5 -1      ircd-ratbox/src/adns.c
+  7.88      +2 -0      ircd-ratbox/src/balloc.c
+  1.26      +6 -1      ircd-ratbox/src/cache.c
+  7.438     +1 -0      ircd-ratbox/src/channel.c
+  7.71      +1 -0      ircd-ratbox/src/class.c
+  7.496     +5 -2      ircd-ratbox/src/client.c
+  1.30      +3 -1      ircd-ratbox/src/commio.c
+  1.36      +3 -1      ircd-ratbox/src/epoll.c
+  7.49      +2 -1      ircd-ratbox/src/event.c
+  7.116     +1 -0      ircd-ratbox/src/hash.c
+  7.108     +3 -0      ircd-ratbox/src/hostmask.c
+  7.78      +1 -0      ircd-ratbox/src/irc_string.c
+  7.377     +3 -1      ircd-ratbox/src/ircd.c
+  1.171     +1 -0      ircd-ratbox/src/ircd_lexer.l
+  1.278     +5 -0      ircd-ratbox/src/ircd_parser.y
+  7.28      +2 -0      ircd-ratbox/src/ircd_signal.c
+  7.44      +2 -0      ircd-ratbox/src/kdparse.c
+  1.53      +3 -1      ircd-ratbox/src/kqueue.c
+  7.127     +1 -1      ircd-ratbox/src/linebuf.c
+  7.128     +5 -0      ircd-ratbox/src/listener.c
+  7.44      +2 -0      ircd-ratbox/src/match.c
+  7.49      +2 -1      ircd-ratbox/src/memory.c
+  7.4       +4 -0      ircd-ratbox/src/monitor.c
+  7.205     +6 -1      ircd-ratbox/src/newconf.c
+  7.38      +0 -3      ircd-ratbox/src/numeric.c
+  7.141     +1 -0      ircd-ratbox/src/packet.c
+  7.189     +2 -0      ircd-ratbox/src/parse.c
+  7.33      +2 -0      ircd-ratbox/src/patricia.c
+  7.85      +3 -1      ircd-ratbox/src/poll.c
+  1.35      +6 -0      ircd-ratbox/src/reject.c
+  7.36      +1 -0      ircd-ratbox/src/restart.c
+  7.195     +5 -2      ircd-ratbox/src/s_auth.c
+  7.513     +4 -0      ircd-ratbox/src/s_conf.c
+  7.4       +1 -0      ircd-ratbox/src/s_gline.c
+  7.81      +4 -0      ircd-ratbox/src/s_log.c
+  7.69      +8 -1      ircd-ratbox/src/s_newconf.c
+  7.428     +3 -1      ircd-ratbox/src/s_serv.c
+  7.41      +4 -0      ircd-ratbox/src/s_stats.c
+  7.344     +2 -0      ircd-ratbox/src/s_user.c
+  7.29      +2 -0      ircd-ratbox/src/scache.c
+  7.47      +3 -0      ircd-ratbox/src/select.c
+  7.288     +1 -1      ircd-ratbox/src/send.c
+  7.47      +1 -0      ircd-ratbox/src/tools.c
+  7.34      +2 -1      ircd-ratbox/src/whowas.c
+
+
+
 leeh        2005/03/20 02:41:01 UTC	(20050320_4)
 
   Modified files:
