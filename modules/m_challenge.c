@@ -167,7 +167,7 @@ static void m_challenge( struct Client *client_p, struct Client *source_p,
                                 CONF_OPERATOR)))
     {
       sendto_one (source_p, form_str(ERR_NOOPERHOST), me.name, parv[0]);
-      log_failed_oper(source_p, source_p->user->auth_oper);
+      log_foper(source_p, source_p->user->auth_oper);
       return;
     }
   if (!aconf->rsa_public_key)
