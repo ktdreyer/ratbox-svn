@@ -159,11 +159,21 @@ int mo_connect(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
    * C:line and a valid port in the C:line
    */
   if (serv_connect(aconf, sptr))
-     sendto_one(sptr, ":%s NOTICE %s :*** Connecting to %s[%s].%d",
-                me.name, parv[0], aconf->host, aconf->name, aconf->port);
+    {
+      if (IsAdmin(sptr))
+	sendto_one(sptr, ":%s NOTICE %s :*** Connecting to %s[%s].%d",
+		   me.name, parv[0], aconf->host, aconf->name, aconf->port);
+      else
+	sendto_one(sptr, ":%s NOTICE %s :*** Connecting to %s.%d",
+		   me.name, parv[0], aconf->name, aconf->port);
+
+    }
   else
+    {
       sendto_one(sptr, ":%s NOTICE %s :*** Couldn't connect to %s.%d",
-                 me.name, parv[0], aconf->host,aconf->port);
+		 me.name, parv[0], aconf->name,aconf->port);
+
+    }
   /*
    * client is either connecting with all the data it needs or has been
    * destroyed
@@ -254,11 +264,11 @@ int ms_connect(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
   sendto_all_local_opers( &me, NULL,
 			  "Remote CONNECT %s %s from %s",
 			  parv[1], parv[2] ? parv[2] : "",
-			  get_client_name(sptr, FALSE));
+			  get_client_name(sptr, MASK_IP));
   sendto_serv_butone(cptr,
 		     ":%s WALLOPS :Remote CONNECT %s %s from %s",
 		     me.name, parv[1], parv[2] ? parv[2] : "",
-		     get_client_name(sptr, FALSE));
+		     get_client_name(sptr, MASK_IP));
 
 
   log(L_TRACE, "CONNECT From %s : %s %s", 
@@ -270,11 +280,11 @@ int ms_connect(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
    * C:line and a valid port in the C:line
    */
   if (serv_connect(aconf, sptr))
-     sendto_one(sptr, ":%s NOTICE %s :*** Connecting to %s[%s].%d",
-                me.name, parv[0], aconf->host, aconf->name, aconf->port);
+    sendto_one(sptr, ":%s NOTICE %s :*** Connecting to %s.%d",
+		 me.name, parv[0], aconf->name, aconf->port);
   else
       sendto_one(sptr, ":%s NOTICE %s :*** Couldn't connect to %s.%d",
-                 me.name, parv[0], aconf->host,aconf->port);
+                 me.name, parv[0], aconf->name,aconf->port);
   /*
    * client is either connecting with all the data it needs or has been
    * destroyed
@@ -282,6 +292,5 @@ int ms_connect(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
   aconf->port = tmpport;
   return 0;
 }
-
 
 

@@ -485,9 +485,14 @@ int check_server(struct Client* cptr)
 }
 
 /*
-** send the CAPAB line to a server  -orabidoo
-*
-*/
+ * send_capabilities
+ *
+ * inputs	- Client pointer to send to
+ *		- int flag of capabilities that this server has
+ * output	- NONE
+ * side effects	- send the CAPAB line to a server  -orabidoo
+ *
+ */
 void send_capabilities(struct Client* cptr, int can_send)
 {
   struct Capability* cap;
@@ -1173,12 +1178,14 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
         return 0;
       }
 
-    /* Create a client */
+    /* Create a local client */
     cptr = make_client(NULL);
 
     /* Copy in the server, hostname, fd */
     strncpy_irc(cptr->name, aconf->name, HOSTLEN);
     strncpy_irc(cptr->host, aconf->host, HOSTLEN);
+    strncpy_irc(cptr->localClient->sockhost, inetntoa((char *)&aconf->ipnum),
+						     HOSTIPLEN);
     cptr->fd = fd;
 
     /*
@@ -1186,9 +1193,6 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
      * connect_server(), so don't blame me for it being evil.
      *   -- adrian
      */
-    strncpy_irc(cptr->localClient->sockhost,
-		inetntoa((const char*) &cptr->localClient->ip.s_addr),
-      HOSTIPLEN);
 
     if (!set_non_blocking(cptr->fd))
         report_error(NONB_ERROR_MSG, get_client_name(cptr, TRUE), errno);
@@ -1278,9 +1282,15 @@ serv_connect_callback(int fd, int status, void *data)
     if (status != COMM_OK)
       {
         /* We have an error, so report it and quit */
-        sendto_realops_flags(FLAGS_ALL,
-			     "Error connecting to %s[%s]: %s\n", cptr->name,
+	/* Admins get to see any IP, mere opers don't *sigh*
+	 * N.B. admins see the message twice
+	 */
+        sendto_realops_flags(FLAGS_ADMIN,
+			     "Error connecting to %s[%s]: %s", cptr->name,
 			     cptr->host, comm_errstr(status));
+	sendto_realops_flags(FLAGS_ALL,
+			     "Error connecting to %s: %s",
+			     cptr->name, comm_errstr(status));
         exit_client(cptr, cptr, &me, comm_errstr(status));
         return;
       }
@@ -1322,9 +1332,11 @@ serv_connect_callback(int fd, int status, void *data)
      * here now and save everyone the trouble of us ever existing.
      */
     if (IsDead(cptr)) {
-        sendto_realops_flags(FLAGS_ALL,
+        sendto_realops_flags(FLAGS_ADMIN,
 			     "%s[%s] went dead during handshake", cptr->name,
 			     cptr->host);
+        sendto_realops_flags(FLAGS_ALL,
+			     "%s went dead during handshake", cptr->name);
         exit_client(cptr, cptr, &me, "Went dead during handshake");
         return;
     }

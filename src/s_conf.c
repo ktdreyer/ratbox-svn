@@ -274,8 +274,8 @@ void report_configured_links(struct Client* sptr, int mask)
             if(tmp->flags & CONF_FLAGS_LAZY_LINK)
               c = 'n';
 
-            /* Don't allow non opers to see actual ips */
-            if(IsAnyOper(sptr))
+            /* Allow admins to see actual ips */
+            if(IsAdmin(sptr))
               sendto_one(sptr, form_str(p->rpl_stats), me.name,
                          sptr->name, c,
                          host,

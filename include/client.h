@@ -51,10 +51,12 @@
 #include "linebuf.h"
 
 #define HOSTIPLEN       16      /* Length of dotted quad form of IP        */
-                                /* - Dianora                               */
 #define PASSWDLEN       20
+
+/* XXX IDLEN is/was for TS4's client ID leave for now... */
 #define IDLEN           12      /* this is the maximum length, not the actual
                                    generated length; DO NOT CHANGE! */
+
 #define CLIENT_BUFSIZE 512      /* must be at least 512 bytes */
 
 /*

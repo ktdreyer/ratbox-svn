@@ -106,7 +106,8 @@ int m_svinfo(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     { 
       sendto_realops_flags(FLAGS_ALL,
                  "Link %s notable TS delta (my TS=%d, their TS=%d, delta=%d)",
-                 get_client_name(sptr, TRUE), CurrentTime, theirtime, deltat);
+			   get_client_name(sptr, MASK_IP),
+			   CurrentTime, theirtime, deltat);
     }
 
   return 0;
