@@ -1634,6 +1634,11 @@ int rehash_dump(struct Client *sptr)
   char result_buf[256];
   char timebuffer[MAX_DATE_STRING];
   struct tm *tmptr;
+  char *host;
+  char *pass;
+  char *user;
+  char *name;
+  int  port;
 
   tmptr = localtime(&CurrentTime);
   strftime(timebuffer, MAX_DATE_STRING, "%Y%m%d%H%M", tmptr);
@@ -1653,46 +1658,47 @@ int rehash_dump(struct Client *sptr)
   for(aconf = ConfigItemList; aconf; aconf = aconf->next)
     {
       aClass* class_ptr = ClassPtr(aconf);
+      get_printable_conf(aconf, &name, &host, &pass, &user, & port );
 
       if(aconf->status == CONF_CONNECT_SERVER)
         {
           
           (void)sprintf(result_buf,"C:%s:%s:%s::%d\n",
-                        aconf->host,aconf->passwd,
-                        aconf->name,
+                        host,pass,
+                        name,
                         ClassType(class_ptr));
           fbputs(result_buf, out);
         }
       else if(aconf->status == CONF_NOCONNECT_SERVER)
         {
           (void)sprintf(result_buf,"N:%s:%s:%s::%d\n",
-                        aconf->host,aconf->passwd,
-                        aconf->name,
+                        host,pass,
+                        name,
                         ClassType(class_ptr));
           fbputs(result_buf, out);
         }
       else if(aconf->status == CONF_OPERATOR)
         {
           (void)sprintf(result_buf,"O:%s@%s:%s:%s::%d\n",
-                        aconf->user,aconf->host,
-                        aconf->passwd,
-                        aconf->name,
+                        user,aconf->host,
+                        pass,
+                        name,
                         ClassType(class_ptr));
           fbputs(result_buf, out);
         }
       else if(aconf->status == CONF_LOCOP)
         {
           (void)sprintf(result_buf,"o:%s@%s:%s:%s::%d\n",
-                        aconf->user,aconf->host,
-                        aconf->passwd,
-                        aconf->name,
+                        user,host,
+                        pass,
+                        name,
                         ClassType(class_ptr));
           fbputs(result_buf, out);
         }
       else if(aconf->status == CONF_ADMIN)
         {
           (void)sprintf(result_buf,"A:%s:%s:%s::\n",
-                        aconf->user,aconf->passwd,aconf->name);
+                        host,pass,user);
           fbputs(result_buf, out);
         }
     }
