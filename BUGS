@@ -1,6 +1,6 @@
  Known Bugs worthy of a mention:
 --------------------------------------------------------------------------------
-
+ 
 1.  Issues with server hostmasking.
     - If for example the new servername is blah.blah.blah.nl, the following
       servernames will be checked, in this order: *.blah.blah.nl, *.blah.nl,
