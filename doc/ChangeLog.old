@@ -1,3 +1,7 @@
+*** 20001223_45 by ejb
+- added explanatory comment in parse()
+
+
 *** 20001223_44 by ejb
 - finally fix the broken longarg handling in parse.c
 
