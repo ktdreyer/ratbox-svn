@@ -77,6 +77,8 @@ int main(int argc,char *argv[])
     }
   
   ConvertConf(in,out);
+  puts("Please be sure to manually check and edit your configuration "
+         "file before using it.");
   return 0;
 }
 
@@ -250,12 +252,11 @@ static void oldParseOneLine(FILE *out,char* line)
   conf_letter = *tmp;
 
   restricted = 0;
-
   for (;;) /* Fake loop, that I can use break here --msa */
     {
       /* host field */
       if ((host_field = getfield(NULL)) == NULL)
-	break;
+	return;
       
       /* pass field */
       if ((passwd_field = getfield(NULL)) == NULL)
@@ -276,7 +277,14 @@ static void oldParseOneLine(FILE *out,char* line)
       break;
       /* NOTREACHED */
     }
-
+  if (!passwd_field)
+    passwd_field = "";
+  if (!user_field)
+    user_field = "";
+  if (!port_field)    
+    port_field = "";
+  if (!class_field)
+    class_field = "";
   switch( conf_letter )
     {
     case 'A':case 'a': /* Name, e-mail address of administrator */
