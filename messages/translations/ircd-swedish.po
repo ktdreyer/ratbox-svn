@@ -129,8 +129,8 @@ msgstr	""
 
 #: ../../src/messages.tab:242
 #, c-format
-msgid	":%s 219 %s %c :End of /STATS report"
-msgstr	":%s 219 %s %c :Slut p\345 /STATS rapport"
+msgid	":%s 219 %s %s :End of /STATS report"
+msgstr	":%s 219 %s %s :Slut p\345 /STATS rapport"
 
 #: ../../src/messages.tab:243
 #, c-format

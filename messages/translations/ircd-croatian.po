@@ -125,8 +125,8 @@ msgstr	""
 
 #: ../src/messages.tab:244
 #, c-format
-msgid	":%s 219 %s %c :End of /STATS report"
-msgstr	":%s 219 %s %c :Kraj /STATS izvje¹taja"
+msgid	":%s 219 %s %s :End of /STATS report"
+msgstr	":%s 219 %s %s :Kraj /STATS izvje¹taja"
 
 #: ../src/messages.tab:245
 #, c-format
