@@ -1,3 +1,10 @@
+*** 20010115_1 by ejb
+- added hook support for modules
+  only has one hook so far, doing_whois, which is used for
+  whois_notice.so (in contrib).
+
+
+
 *** 20010114_2 by fl_
 - documented /modrestart
 
