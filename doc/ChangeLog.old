@@ -1,3 +1,7 @@
+*** 20010307_1 by toot
+/trace wasn't showing the correct Client and Server info
+
+
 *** 20010306_2 by toot
 cast eob message to (int), for prettyness :P
 
