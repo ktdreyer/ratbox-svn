@@ -32,6 +32,7 @@
 #include "s_bsd.h"
 #include "s_serv.h"
 #include "s_zip.h"
+#include "s_conf.h"
 #include "sprintf_irc.h"
 
 #include <stdio.h>
