@@ -1,3 +1,15 @@
+leeh        2002/06/14 15:38:12 EDT	(20020614_2)
+
+  Modified files:
+    include              client.h 
+  Log:
+  - unused variable, splat.
+  
+  Revision  Changes    Path
+  7.149     +0 -1      ircd-hybrid-7/include/client.h
+
+
+
 leeh        2002/06/14 15:18:51 EDT	(20020614_1)
 
   Modified files:
