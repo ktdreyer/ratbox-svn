@@ -1,3 +1,21 @@
+leeh        2004/04/08 16:40:01 EDT	(20040408_5)
+
+  Modified files:
+    include              s_conf.h 
+    src                  class.c s_conf.c 
+  Log:
+  - remove unused CONF_SERVER/CONF_SERVER_MASK
+  - remove CONF_CLIENT_MASK, as its just CONF_CLIENT now
+  - remove a couple of checks of CONF_CLIENT, we wont ever attach anything
+    other than an I:.
+  
+  Revision  Changes    Path
+  7.275     +0 -4      ircd-ratbox/include/s_conf.h
+  7.60      +1 -4      ircd-ratbox/src/class.c
+  7.461     +3 -7      ircd-ratbox/src/s_conf.c
+
+
+
 androsyn    2004/04/08 16:21:20 EDT	(20040408_4)
 
   Modified files:
