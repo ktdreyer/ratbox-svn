@@ -1,3 +1,7 @@
+*** 20010530_3 by leeh
+- fix two compile warnings
+
+
 *** 20010530_2 by db
 - this log(L_CRIT is left over from debugging
 
