@@ -32,6 +32,7 @@
 #include "event.h"
 #include "balloc.h"
 #include "hook.h"
+#include "sprintf_irc.h"
 
 #ifdef STRING_WITH_STRINGS
 # include <string.h>
@@ -570,13 +571,13 @@ linebuf_putmsg(buf_head_t * bufhead, const char *format, va_list * va_args,
 	if(prefixfmt != NULL)
 	{
 		va_start(prefix_args, prefixfmt);
-		len = irc_vsprintf(bufline->buf, prefixfmt, prefix_args);
+		len = ircvsprintf(bufline->buf, prefixfmt, prefix_args);
 		va_end(prefix_args);
 	}
 
 	if(va_args != NULL)
 	{
-		len += irc_vsprintf((bufline->buf + len), format, *va_args);
+		len += ircvsprintf((bufline->buf + len), format, *va_args);
 	}
 
 	bufline->terminated = 1;
