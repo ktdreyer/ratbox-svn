@@ -119,7 +119,7 @@ static void mo_clearchan(struct Client *client_p, struct Client *source_p,
      sendto_wallops_flags(UMODE_WALLOP, &me, 
               "CLEARCHAN called for [%s] by %s!%s@%s",
               parv[1], source_p->name, source_p->username, source_p->host);
-     sendto_server(NULL, NOCAPS, NOCAPS, 
+     sendto_server(NULL, NULL, NOCAPS, NOCAPS, 
                    ":%s WALLOPS :CLEARCHAN called for [%s] by %s!%s@%s",
                    me.name, parv[1], source_p->name, source_p->username,
                    source_p->host);
@@ -132,7 +132,7 @@ static void mo_clearchan(struct Client *client_p, struct Client *source_p,
               "CLEARCHAN called for [%s %s] by %s!%s@%s",
               parv[1], parv[2], source_p->name, source_p->username,
               source_p->host);
-     sendto_server(NULL, NOCAPS, NOCAPS, 
+     sendto_server(NULL, NULL, NOCAPS, NOCAPS, 
                    ":%s WALLOPS :CLEARCHAN called for [%s %s] by %s!%s@%s",
                    me.name, parv[1], parv[2], source_p->name,
                    source_p->username, source_p->host);
@@ -145,7 +145,7 @@ static void mo_clearchan(struct Client *client_p, struct Client *source_p,
   
   /* SJOIN the user to give them ops, and lock the channel */
 
-  sendto_server(client_p, NOCAPS, NOCAPS,
+  sendto_server(client_p, chptr, NOCAPS, NOCAPS,
                 ":%s SJOIN %lu %s +ntsi :@%s",
                 me.name, (unsigned long) (chptr->channelts - 1),
                 chptr->chname, source_p->name);
@@ -188,7 +188,7 @@ void kick_list(struct Client *client_p, struct Client *source_p, struct Channel 
       sendto_channel_local(ALL_MEMBERS, chptr,
 			   ":%s KICK %s %s :CLEARCHAN",
 			   source_p->name, chname, who->name);
-      sendto_server(NULL, NOCAPS, NOCAPS, 
+      sendto_server(NULL, chptr, NOCAPS, NOCAPS, 
                     ":%s KICK %s %s :CLEARCHAN", source_p->name,
                     chname, who->name);
       remove_user_from_channel(chptr, who);
