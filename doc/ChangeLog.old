@@ -1,3 +1,9 @@
+*** 20010203_3 by db
+- removed unused parameter in do_who() (chptr) 
+- removed duplicate #include "common.h"
+
+
+
 *** 20010203_2 by wcampbel
 Documented a few more things that were fixed from the TODO file
 Updated index.txt
