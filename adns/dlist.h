@@ -57,5 +57,4 @@
 
 #define LIST_UNLINK(flist,node) LIST_UNLINK_PART(flist,node,unused_arg)
 #define LIST_LINK_TAIL(flist,node) LIST_LINK_TAIL_PART(flist,node, unused_arg)
-#undef unused_arg
 #endif
