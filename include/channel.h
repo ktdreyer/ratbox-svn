@@ -3,6 +3,7 @@
 #define INCLUDED_channel_h
 
 #define CHANNELLEN	200
+#define TOPICLEN	120
 #define KEYLEN		24
 
 #define MAX_CHANNEL_TABLE	16384
@@ -19,6 +20,9 @@ struct chmode
 struct channel
 {
 	char name[CHANNELLEN+1];
+	char topic[TOPICLEN+1];
+	char topicwho[NICKUSERHOSTLEN+1];
+
 	time_t tsinfo;
 
 	dlink_list users;		/* users in this channel */

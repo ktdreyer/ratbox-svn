@@ -4,6 +4,8 @@
 #define HOSTLEN 63
 #define REALLEN 50
 
+#define NICKUSERHOSTLEN	(NICKLEN + USERLEN + HOSTLEN + 2)
+
 #define MAX_NAME_HASH 65536
 
 extern dlink_list user_list;

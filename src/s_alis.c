@@ -21,6 +21,10 @@
 #define DIR_SET		1
 #define DIR_EQUAL	2
 
+#define ERROR_PARAM		0
+#define ERROR_MODE		1
+#define ERROR_UNKNOWNOPTION	2
+
 static void s_alis(struct client *, char *text);
 
 struct service_handler alis_service = {
@@ -38,6 +42,40 @@ static const char *help_list[] =
 	NULL
 };
 
+static void
+alis_error(struct client *client_p, int type)
+{
+	switch(type)
+	{
+		case ERROR_PARAM:
+			sendto_server(":%s NOTICE %s :Missing parameters. "
+					"Please see: HELP LIST",
+					MYNAME, client_p->name);
+			break;
+
+		case ERROR_MODE:
+			sendto_server(":%s NOTICE %s :Error parsing -mode option. "
+					"Please see: HELP LIST",
+					MYNAME, client_p->name);
+			break;
+
+		case ERROR_UNKNOWNOPTION:
+			sendto_server(":%s NOTICE %s :Unknown option. "
+					"Please see: HELP LIST",
+					MYNAME, client_p->name);
+			break;
+
+		default:
+			break;
+	}
+}
+
+/* parse_mode()
+ *   parses a given string into modes
+ *
+ * inputs	- text to parse, pointer to key, pointer to limit
+ * outputs	- mode, or -1 on error.
+ */
 static int
 parse_mode(const char *text, int *key, int *limit)
 {
@@ -114,6 +152,12 @@ parse_alis(char *text, char *parv[])
 	return x;
 }
 
+/* s_alis()
+ *   Handles the listing of channels for ALIS.
+ *
+ * inputs	- client requesting list, params
+ * outputs	-
+ */
 static void
 s_alis(struct client *client_p, char *text)
 {
@@ -173,9 +217,7 @@ s_alis(struct client *client_p, char *text)
 
 		if(EmptyString(mask))
 		{
-			sendto_server(":%s NOTICE %s :Invalid parameters. "
-					"Please see: HELP LIST",
-					MYNAME, client_p->name);
+			alis_error(client_p, ERROR_PARAM);
 			return;
 		}
 
@@ -194,13 +236,21 @@ s_alis(struct client *client_p, char *text)
 				if(!strcasecmp(aparv[x], "-min"))
 				{
 					if(++x >= aparc)
+					{
+						alis_error(client_p, ERROR_PARAM);
 						return;
+					}
+
 					s_min = atoi(aparv[x]);
 				}
 				else if(!strcasecmp(aparv[x], "-max"))
 				{
 					if(++x >= aparc)
+					{
+						alis_error(client_p, ERROR_PARAM);
 						return;
+					}
+
 					s_max = atoi(aparv[x]);
 				}
 				else if(!strcasecmp(aparv[x], "-mode"))
@@ -208,7 +258,10 @@ s_alis(struct client *client_p, char *text)
 					const char *modestring;
 
 					if(++x >= aparc)
+					{
+						alis_error(client_p, ERROR_PARAM);
 						return;
+					}
 
 					modestring = aparv[x];
 
@@ -224,16 +277,23 @@ s_alis(struct client *client_p, char *text)
 						s_mode_dir = DIR_EQUAL;
 						break;
 					default:
+						alis_error(client_p, ERROR_MODE);
 						return;
 					}
 
 					s_mode = parse_mode(modestring+1, &s_mode_key, &s_mode_limit);
 
 					if(s_mode == -1)
+					{
+						alis_error(client_p, ERROR_MODE);
 						return;
+					}
 				}
 				else
+				{
+					alis_error(client_p, ERROR_UNKNOWNOPTION);
 					return;
+				}
 
 				x++;
 			}
