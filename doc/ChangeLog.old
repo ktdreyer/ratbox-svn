@@ -1,3 +1,9 @@
+*** 20010105_47 by ejb
+- fix IDs for parse()
+- added sendto_channel_remote_prefix()
+- make part use it.
+
+
 *** 20010105_46 by davidt
 sptr vs cptr, jeez, that was hard to figure out.
 
