@@ -1,3 +1,9 @@
+*** 20010226_1 by androsyn
+Minor interface change to adns.  Basically we have the callbacks freeing
+memory for the struct DNSQuery in the callbacks.  I should probably modify
+this to use the block allocator.
+
+
 *** 20010225_24 by jdc
 * Here we go again.  ;-) Fixes to make /STATS P not show the same
   listening port twice after a /REHASH, and make things all clean
