@@ -1,3 +1,10 @@
+*** 20010826_4 by kreator
+- misc formatting fixes for example.conf
+- check if ServerInfo.max_clients is bigger than MAX_CLIENTS which would
+  cause fdtable[] initialisation to core
+- update convertconf a bit
+
+
 *** 20010826_3 by habeeb
 Fix for linebuf parsing problem that apparently broke ZIPLINKS.
 
