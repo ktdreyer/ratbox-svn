@@ -1,3 +1,8 @@
+*** 20010524_1 by ejb
+- IRCD.EXE now compiles on VMS.  servlink not working yet,
+  nor openssl etc. it doesn't seem to run after it compiles either.
+
+
 *** 20010523_11 by davidt
 - Add slightly more user-friendly error messages to m_cryptlink.c
 - Fix stupid bug where both fd_note's were set on the same socket.
