@@ -2385,8 +2385,8 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
     for (i = 0; i < mode_count_minus; i++)
     {
       if (mode_changes_minus[i].letter == 0 ||
-          !IsCapable(source_p, mode_changes_minus[i].caps) ||
-	  IsCapable(source_p, mode_changes_minus[i].nocaps))
+          (mode_changes_minus[i].caps && !IsCapable(source_p, mode_changes_minus[i].caps)) ||
+	  (mode_changes_minus[i].nocaps && IsCapable(source_p, mode_changes_minus[i].nocaps)))
 	continue;
 
       nc++;
@@ -2426,8 +2426,8 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
     for (i = 0; i < mode_count_plus; i++)
     {
       if (mode_changes_plus[i].letter == 0 ||
-          !IsCapable(target_p, mode_changes_plus[i].caps) ||
-	  IsCapable(target_p, mode_changes_plus[i].nocaps))
+          (mode_changes_plus[i].caps && !IsCapable(target_p, mode_changes_plus[i].caps)) ||
+	  (mode_changes_plus[i].nocaps && IsCapable(target_p, mode_changes_plus[i].nocaps)))
         continue;
 
       nc++;
