@@ -209,7 +209,7 @@ static void mr_nick(struct Client *client_p, struct Client *source_p,
     if(target_p == source_p)
     {
       /* check the nick isnt exactly the same */
-      if(!strcmp(target_p->name, nick))
+      if(strcmp(target_p->name, nick))
       {
         change_local_nick(client_p, source_p, nick);
 	return;
@@ -349,6 +349,19 @@ static void ms_nick(struct Client *client_p, struct Client *source_p,
     return;
   }
 
+  if(target_p == source_p)
+  {
+    if(strcmp(target_p->name, nick))
+    {
+      /* client changing case of nick */
+      nick_from_server(client_p,source_p,parc,parv,newts,nick);
+      return;
+    }
+    else
+      /* client not changing nicks at all */
+      return;
+  }
+
   perform_nick_collides(source_p, client_p, target_p,
                         parc, parv, newts, nick);
 			
@@ -406,6 +419,7 @@ static void ms_client(struct Client *client_p, struct Client *source_p,
     client_from_server(client_p,source_p,parc,parv,newts,nick);
     return;
   }
+
 
   if(IsUnknown(target_p))
   {
@@ -766,10 +780,16 @@ perform_nick_collides(struct Client *source_p, struct Client *client_p,
      }
    }
 
+   /*
    if(HasID(source_p))
      client_from_server(client_p,source_p,parc,parv,newts,nick);
    else
-     nick_from_server(client_p,source_p,parc,parv,newts,nick);
+   */
+   
+   /* we should only ever call nick_from_server() here, as
+    * this is a client changing nick, not a new client
+    */
+   nick_from_server(client_p,source_p,parc,parv,newts,nick);
 
   return 0;
 }
