@@ -296,7 +296,7 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 				   chptr->topic_info, chptr->topic_time);
 		}
 
-		channel_member_names(source_p, chptr, chptr->chname, 1);
+		channel_member_names(chptr, source_p, 1);
 
 		if(successful_join_count)
 			source_p->localClient->last_join_time = CurrentTime;

@@ -73,6 +73,7 @@ static int
 m_who(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Client *target_p;
+	struct membership *msptr;
 	char *mask;
 	dlink_node *lp;
 	struct Channel *chptr = NULL;
@@ -113,11 +114,11 @@ m_who(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 
 	if((*(mask + 1) == (char) 0) && (*mask == '*'))
 	{
-		if(source_p->user)
-			if((lp = source_p->user->channel.head))
+		if(source_p->user != NULL)
+			if((lp = source_p->user->channel.head) != NULL)
 				mychannel = lp->data;
 
-		if(!mychannel)
+		if(mychannel == NULL)
 		{
 			sendto_one(source_p, form_str(RPL_ENDOFWHO), me.name, parv[0], "*");
 			return 0;
@@ -133,9 +134,7 @@ m_who(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 
 	if(IsChannelName(mask))
 	{
-		/*
-		 * List all users on a given channel
-		 */
+		/* List all users on a given channel */
 		chptr = find_channel(mask);
 		if(chptr != NULL)
 		{
@@ -153,42 +152,31 @@ m_who(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 	if(((target_p = find_client(mask)) != NULL) &&
 	   IsPerson(target_p) && (!server_oper || IsOper(target_p)))
 	{
-		char *chname = NULL;
 		int isinvis = 0;
-
 
 		isinvis = IsInvisible(target_p);
 		DLINK_FOREACH(lp, target_p->user->channel.head)
 		{
-			chptr = lp->data;
-			chname = chptr->chname;
+			msptr = lp->data;
+			chptr = msptr->chptr;
 
 			member = IsMember(source_p, chptr);
+
 			if(isinvis && !member)
-			{
-				chptr = NULL;
 				continue;
-			}
+
 			if(member || (!isinvis && PubChannel(chptr)))
-			{
 				break;
-			}
-			chptr = NULL;	/* Must be NULL if we don't loop again */
 		}
 
-		if(chptr != NULL)
-		{
-			if(is_chan_op(chptr, target_p))
-				do_who(source_p, target_p, chname, channel_flags[0]);
-			else if(is_voiced(chptr, target_p))
-				do_who(source_p, target_p, chname, channel_flags[2]);
-			else
-				do_who(source_p, target_p, chname, "");
-		}
+		/* if we stopped midlist, lp->data is the membership for
+		 * target_p of chptr
+		 */
+		if(lp != NULL)
+			do_who(source_p, target_p, chptr->chname,
+			       find_channel_status(lp->data, 0));
 		else
-		{
 			do_who(source_p, target_p, NULL, "");
-		}
 
 		sendto_one(source_p, form_str(RPL_ENDOFWHO), me.name, parv[0], mask);
 		return 0;
@@ -272,7 +260,6 @@ who_common_channel(struct Client *source_p, struct Channel *chptr,
  * side effects - do a global scan of all clients looking for match
  *		  this is slightly expensive on EFnet ...
  */
-
 static void
 who_global(struct Client *source_p, const char *mask, int server_oper)
 {
@@ -324,7 +311,6 @@ who_global(struct Client *source_p, const char *mask, int server_oper)
 	}
 }
 
-
 /*
  * do_who_on_channel
  *
@@ -336,7 +322,6 @@ who_global(struct Client *source_p, const char *mask, int server_oper)
  * output	- NONE
  * side effects - do a who on given channel
  */
-
 static void
 do_who_on_channel(struct Client *source_p, struct Channel *chptr,
 		  const char *chname, int server_oper, int member)
