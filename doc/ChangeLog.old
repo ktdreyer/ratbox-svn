@@ -1,3 +1,6 @@
+*** 20010102_20 by davidt
+Another go at fixing netjoins on +a channels... *sigh*
+
 *** 20010102_19 by davidt
 Fix .depend for FreeBSD
 
