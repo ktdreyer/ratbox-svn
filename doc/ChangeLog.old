@@ -1,3 +1,8 @@
+*** 20010417_2 by fl_
+- Eline -> ExemptKline
+- Fline -> ExemptLimits
+
+
 *** 20010417_1 by toot
 this fixes the coredump if you did /trace with any "unknown" connections
 
