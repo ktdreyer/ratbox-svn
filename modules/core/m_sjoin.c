@@ -86,12 +86,9 @@ static char    *mbuf;
 static int     pargs;
 
 static void set_final_mode(struct Mode *mode,struct Mode *oldmode);
-static void remove_our_modes(int type,
-		      struct Channel *chptr, struct Channel *top_chptr,
-		      struct Client *source_p);
+static void remove_our_modes(struct Channel *chptr, struct Client *source_p);
 
-static void remove_a_mode(int hide_or_not,
-                          struct Channel *chptr, struct Channel *top_chptr,
+static void remove_a_mode(struct Channel *chptr,
                           struct Client *source_p, dlink_list *list, char flag);
 
 
@@ -119,7 +116,6 @@ static void ms_sjoin(struct Client *client_p,
   static         char buf[2*BUFSIZE]; /* buffer for modes and prefix */
   static         char sjbuf[BUFSIZE];
   char           *p; /* pointer used making sjbuf */
-  int hide_or_not;
   int i;
   dlink_node *m;
 
@@ -269,15 +265,13 @@ static void ms_sjoin(struct Client *client_p,
         strcpy(mode.key, oldmode->key);
     }
 
-  hide_or_not = ALL_MEMBERS;
-
   set_final_mode(&mode,oldmode);
   chptr->mode = mode;
 
   /* Lost the TS, other side wins, so remove modes on this side */
   if (!keep_our_modes)
     {
-      remove_our_modes(hide_or_not, chptr, chptr, source_p);
+      remove_our_modes(chptr, source_p);
       sendto_channel_local(ALL_MEMBERS, chptr,
 	    ":%s NOTICE %s :*** Notice -- TS for %s changed from %lu to %lu",
 	    me.name, chptr->chname, chptr->chname, oldts, newts);
@@ -441,7 +435,7 @@ static void ms_sjoin(struct Client *client_p,
 	    if(pargs >= MAXMODEPARAMS)
 	      {
 	        *mbuf = '\0';
-		sendto_channel_local(hide_or_not, chptr,
+		sendto_channel_local(ALL_MEMBERS, chptr,
 		                     ":%s MODE %s %s %s %s %s %s",
 				     me.name, chptr->chname,
 				     modebuf,
@@ -465,7 +459,7 @@ static void ms_sjoin(struct Client *client_p,
       if (pargs >= MAXMODEPARAMS)
         {
           *mbuf = '\0';
-          sendto_channel_local(hide_or_not, chptr,
+          sendto_channel_local(ALL_MEMBERS, chptr,
                                ":%s MODE %s %s %s %s %s %s",
                                me.name,
                                chptr->chname,
@@ -501,7 +495,7 @@ nextnick:
   *mbuf = '\0';
   if (pargs)
     {
-      sendto_channel_local(hide_or_not, chptr,
+      sendto_channel_local(ALL_MEMBERS, chptr,
                            ":%s MODE %s %s %s %s %s %s",
                            me.name,
                            chptr->chname,
@@ -636,22 +630,17 @@ static void set_final_mode(struct Mode *mode,struct Mode *oldmode)
  *
  * inputs	- hide from ops or not int flag
  *		- pointer to channel to remove modes from
- *		- if vchan basechannel pointer 
  *		- client pointer
  * output	- NONE
  * side effects	- Go through the local members, remove all their
  *		  chanop modes etc., this side lost the TS.
  */
-static void remove_our_modes( int hide_or_not,
-                              struct Channel *chptr, struct Channel *top_chptr,
-                              struct Client *source_p)
+static void remove_our_modes(struct Channel *chptr, struct Client *source_p)
 {
-  remove_a_mode(hide_or_not, chptr, top_chptr, source_p, &chptr->chanops, 'o');
-  remove_a_mode(hide_or_not, chptr, top_chptr, source_p, &chptr->voiced, 'v');
-  remove_a_mode(hide_or_not, chptr, top_chptr, source_p,
-                &chptr->chanops_voiced, 'o');
-  remove_a_mode(hide_or_not, chptr, top_chptr, source_p,
-                &chptr->chanops_voiced, 'v');    
+  remove_a_mode(chptr, source_p, &chptr->chanops, 'o');
+  remove_a_mode(chptr, source_p, &chptr->voiced, 'v');
+  remove_a_mode(chptr, source_p, &chptr->chanops_voiced, 'o');
+  remove_a_mode(chptr, source_p, &chptr->chanops_voiced, 'v');    
 
   /* Move all voice/ops etc. to non opped list */
   dlinkMoveList(&chptr->chanops_voiced, &chptr->peons);
@@ -671,9 +660,8 @@ static void remove_our_modes( int hide_or_not,
  * output	- NONE
  * side effects	- remove ONE mode from a channel
  */
-static void remove_a_mode( int hide_or_not,
-                           struct Channel *chptr, struct Channel *top_chptr,
-                           struct Client *source_p, dlink_list *list, char flag)
+static void remove_a_mode(struct Channel *chptr,
+                          struct Client *source_p, dlink_list *list, char flag)
 {
   dlink_node *ptr;
   struct Client *target_p;
@@ -700,7 +688,7 @@ static void remove_a_mode( int hide_or_not,
       if (count >= MAXMODEPARAMS)
 	{
 	  *mbuf   = '\0';
-	  sendto_channel_local(hide_or_not, chptr,
+	  sendto_channel_local(ALL_MEMBERS, chptr,
 			       ":%s MODE %s %s %s %s %s %s",
 			       me.name,
 			       chptr->chname,
@@ -717,7 +705,7 @@ static void remove_a_mode( int hide_or_not,
   if (count != 0)
     {
       *mbuf   = '\0';
-      sendto_channel_local(hide_or_not, chptr,
+      sendto_channel_local(ALL_MEMBERS, chptr,
 			   ":%s MODE %s %s %s %s %s %s",
 			   me.name,
 			   chptr->chname,
