@@ -78,12 +78,6 @@ struct ConfItem
   int              dns_pending; /* 1 if dns query pending, 0 otherwise */
 };
 
-typedef struct QlineItem {
-  char      *name;
-  struct    ConfItem *confList;
-  struct    QlineItem *next;
-}aQlineItem;
-
 #define CONF_ILLEGAL            0x80000000
 #define CONF_MATCH              0x40000000
 #define CONF_QUARANTINED_NICK   0x0001
