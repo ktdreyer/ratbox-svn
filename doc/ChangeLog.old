@@ -1,3 +1,10 @@
+*** 20010104_1 by db
+- added clearchan
+  The command will kick everyone out of a channel. 
+  It should also lock the channel up...
+
+
+
 *** 20010103_28 by davidt
 Add note about 403 numerics to BUGS
 
