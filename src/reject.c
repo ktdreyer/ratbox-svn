@@ -52,7 +52,13 @@ reject_exit(void *unused)
 	{
 		client_p = ptr->data;
 		dlinkDestroy(ptr, &delay_exit);
-		exit_client(client_p, client_p, &me, "*** Banned (cached)");
+	  	if(IsDead(client_p))
+                	continue;
+		if(client_p->localClient->fd >= 0)
+			sendto_one(client_p, "ERROR :Closing Link: %s (%s)", client_p->host, "*** Banned (cache)");
+ 	  	close_connection(client_p);
+        	SetDead(client_p);
+        	dlinkAddAlloc(client_p, &dead_list);
 	}
 }
 

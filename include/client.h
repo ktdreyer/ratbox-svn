@@ -571,7 +571,7 @@ extern void initUser(void);
 extern void free_user(struct User *, struct Client *);
 extern struct User *make_user(struct Client *);
 extern struct Server *make_server(struct Client *);
-
+extern void close_connection(struct Client *);
 extern void init_uid(void);
 extern char *generate_uid(void);
 

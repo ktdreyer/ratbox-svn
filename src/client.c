@@ -67,7 +67,6 @@ static int exit_remote_server(struct Client *, struct Client *, struct Client *,
 static int exit_local_client(struct Client *, struct Client *, struct Client *,const char *);
 static int exit_unknown_client(struct Client *, struct Client *, struct Client *,const char *);
 static int exit_local_server(struct Client *, struct Client *, struct Client *,const char *);
-static void close_connection(struct Client *);
 
 static int h_local_exit_client;
 static int h_unknown_exit_client;
@@ -1913,7 +1912,7 @@ generate_uid(void)
  *        Close the physical connection. This function must make
  *        MyConnect(client_p) == FALSE, and set client_p->from == NULL.
  */
-static void
+void
 close_connection(struct Client *client_p)
 {
 	struct ConfItem *aconf;
