@@ -1,3 +1,9 @@
+*** 20010109_2 by db
+- fixed backwards confusing if's on fd 
+- make sure CLIENT_EXITED is returned in s_user.c
+
+
+
 *** 20010109_1 by wcampbel
 Sending PING :<any text> should return 
 :<server> PONG <server> :<same text sent in> NOT
