@@ -115,8 +115,10 @@ static void mo_rehash(struct Client *client_p, struct Client *source_p,
       else if(irccmp(parv[1],"HELP") == 0)
         {
           sendto_realops_flags(FLAGS_ALL,
-		       "%s is forcing re-reading of oper help file",parv[0]);
+		       "%s is forcing re-reading of oper and user help files",
+                       parv[0]);
           ReadMessageFile( &ConfigFileEntry.helpfile );
+          ReadMessageFile( &ConfigFileEntry.uhelpfile );
           found = YES;
         }
       if(found)

@@ -28,7 +28,7 @@ automoduledir	= @prefix@/modules/autoload
 mandir          = @prefix@/man8
 MANPAGES        = ircd.8
 
-CONFS		= example.conf opers.txt
+CONFS		= example.conf opers.txt users.txt
 DEFAULTCONFS	= ircd.motd kline.conf
 
 SSL_LIBS	= @SSL_LIBS@

@@ -191,6 +191,7 @@ struct config_file_entry
   char fname_foperlog[MAXPATHLEN];
 
   MessageFile helpfile;
+  MessageFile uhelpfile;
   MessageFile motd;
   MessageFile opermotd;
   MessageFile linksfile;

@@ -78,7 +78,7 @@ static void m_help(struct Client *client_p, struct Client *source_p,
       last_used = CurrentTime;
     }
 
-  report_messages(source_p);
+  SendMessageFile(source_p, &ConfigFileEntry.uhelpfile);
 }
 
 /*
