@@ -1,8 +1,8 @@
 /* src/s_operbot.c
  *   Contains the code for the operbot service.
  *
- * Copyright (C) 2004 Lee Hardy <leeh@leeh.co.uk>
- * Copyright (C) 2004 ircd-ratbox development team
+ * Copyright (C) 2004-2005 Lee Hardy <leeh@leeh.co.uk>
+ * Copyright (C) 2004-2005 ircd-ratbox development team
  *
  * $Id$
  */

@@ -1,8 +1,8 @@
 /* src/s_chanserv.c
  *   Contains code for channel registration service.
  *
- * Copyright (C) 2004 Lee Hardy <lee -at- leeh.co.uk>
- * Copyright (C) 2004 ircd-ratbox development team
+ * Copyright (C) 2004-2005 Lee Hardy <lee -at- leeh.co.uk>
+ * Copyright (C) 2004-2005 ircd-ratbox development team
  *
  * $Id$
  */

@@ -1,8 +1,8 @@
 /* src/io.c
  *   Contains code for handling input and output to sockets.
  *
- * Copyright (C) 2003-2004 Lee Hardy <leeh@leeh.co.uk>
- * Copyright (C) 2003-2004 ircd-ratbox development team
+ * Copyright (C) 2003-2005 Lee Hardy <leeh@leeh.co.uk>
+ * Copyright (C) 2003-2005 ircd-ratbox development team
  *
  * $Id$
  */

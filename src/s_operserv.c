@@ -1,8 +1,8 @@
 /* src/s_operserv.c
  *   Contains the code for oper services.
  *
- * Copyright (C) 2004 Lee Hardy <lee -at- leeh.co.uk>
- * Copyright (C) 2004 ircd-ratbox development team
+ * Copyright (C) 2004-2005 Lee Hardy <lee -at- leeh.co.uk>
+ * Copyright (C) 2004-2005 ircd-ratbox development team
  *
  * $Id$
  */

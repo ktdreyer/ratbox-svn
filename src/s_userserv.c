@@ -1,8 +1,8 @@
 /* s_userserv.c
  *   Contains code for user registration service.
  *
- * Copyright (C) 2004 Lee Hardy
- * Copyright (C) 2004 ircd-ratbox development team
+ * Copyright (C) 2004-2005 Lee Hardy
+ * Copyright (C) 2004-2005 ircd-ratbox development team
  *
  * $Id$
  */

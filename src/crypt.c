@@ -1,8 +1,8 @@
 /* s_u_crypt.c
  *   Contains functions for encrypting a password.
  *
- * Copyright (C) 2004 Lee Hardy
- * Copyright (C) 2004 ircd-ratbox development team
+ * Copyright (C) 2004-2005 Lee Hardy
+ * Copyright (C) 2004-2005 ircd-ratbox development team
  *
  * $Id$
  */
