@@ -1,3 +1,8 @@
+*** 20010226_4 by db
+- don't frob memory if NDEBUG is set
+
+
+
 *** 20010226_3 by androsyn
 memory.h was in the wrong place with MEMDEBUG set.
 
