@@ -470,7 +470,8 @@ int
 main(int argc, char *argv[])
 {
 	static char empty_name[] = "";
-
+	int rfd;
+	unsigned int rnum;
 	/* Check to see if the user is running us as root, which is a nono */
 	if(geteuid() == 0)
 	{
@@ -493,8 +494,20 @@ main(int argc, char *argv[])
 	initialVMTop = get_vm_top();
 
 	ServerRunning = 0;
+
 	/* It ain't random, but it ought to be a little harder to guess */
-	srand(SystemTime.tv_sec ^ (SystemTime.tv_usec | (getpid() << 20)));
+	rnum = SystemTime.tv_sec ^ (SystemTime.tv_usec | (getpid() << 20));
+	
+	/* Let's try /dev/random  */
+	if((rfd = open("/dev/random", O_RDONLY)) >= 0)  
+	{
+		unsigned int xrnum;
+		if(read(rfd, &xrnum, sizeof(xrnum)) == sizeof(xrnum))
+			rnum = xrnum;
+		close(rfd);
+	} 
+	srand(rnum);
+	
 	memset(&me, 0, sizeof(me));
 	memset(&meLocalUser, 0, sizeof(meLocalUser));
 	me.localClient = &meLocalUser;
