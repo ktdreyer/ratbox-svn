@@ -67,6 +67,13 @@ int m_motd(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
   static time_t last_used = 0;
 
+  /* This is safe enough to use during non hidden server mode */
+  if(!GlobalSetOptions.hide_server)
+    {
+      if (hunt_server(cptr, sptr, ":%s MOTD :%s", 1,parc,parv)!=HUNTED_ISME)
+	return 0;
+    }
+
   if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
     {
       /* safe enough to give this on a local connect only */
