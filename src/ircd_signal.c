@@ -116,11 +116,6 @@ void setup_signals()
   act.sa_handler = sigterm_handler;
   sigaddset(&act.sa_mask, SIGTERM);
   sigaction(SIGTERM, &act, 0);
-#ifdef USE_SIGIO
-  act.sa_handler = do_sigio;
-  sigaddset(&act.sa_mask, SIGIO);
-  sigaction(SIGIO, &act, 0);
-#endif
 
 }
 

@@ -83,6 +83,7 @@ static void mask_our_signal(int s)
 {
     sigemptyset(&our_sigset);
     sigaddset(&our_sigset, s);
+    sigaddset(&our_sigset, SIGIO);
     sigprocmask(SIG_BLOCK, &our_sigset, NULL);
 }
 
@@ -157,20 +158,6 @@ static void poll_update_pollfds(int fd, short event, PF * handler)
 /* XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX */
 /* Public functions */
 
-/* 
- * void do_sigio(int s)
- * 
- * Input: Signal number
- * Output: None
- * Side Effects:  Makes a note that sigio was received
- *
- * Note: This signal handler indicates an error condition
- */
-void do_sigio(int s)
-{
-    sigio_is_screwed = 1;
-    ilog(L_WARN, "Kernel RT Signal queue overflowed.  Is /proc/sys/kernel/rtsig-nr too small?");
-}
 
 /*
  * void setup_sigio_fd(int fd)
@@ -182,11 +169,11 @@ void do_sigio(int s)
 void setup_sigio_fd(int fd)
 {
     int flags;
-    fcntl(fd, F_SETOWN, getpid());
-    fcntl(fd, F_SETSIG, sigio_signal);
     flags = fcntl(fd, F_GETFL, 0);
     flags |= O_ASYNC | O_NONBLOCK;
     fcntl(fd, F_SETFL, flags);
+    fcntl(fd, F_SETSIG, sigio_signal);
+    fcntl(fd, F_SETOWN, getpid());
 }
 
 /*
@@ -272,6 +259,7 @@ int comm_select(unsigned long delay)
             {
                 if (sig == SIGIO)
                 {
+                    ilog(L_WARN, "Kernel RT Signal queue overflowed.  Is /proc/sys/kernel/rtsig-max too small?");
                     sigio_is_screwed = 1;
                     break;
                 }
@@ -305,6 +293,7 @@ int comm_select(unsigned long delay)
         } else
             break;
     }
+    
     if (!sigio_is_screwed)      /* We don't need to proceed */
     {
         set_time();
