@@ -15,6 +15,7 @@
 #include "modebuild.h"
 
 static dlink_list kickbuild_list;
+static dlink_list kickbuildr_list;
 
 static char modebuf[BUFSIZE];
 static char parabuf[BUFSIZE];
@@ -84,6 +85,12 @@ modebuild_finish(void)
 		sendto_server("%s %s", modebuf, parabuf);
 }
 
+struct kickbuilder
+{
+	const char *name;
+	const char *reason;
+};
+
 void
 kickbuild_start(void)
 {
@@ -91,29 +98,36 @@ kickbuild_start(void)
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, kickbuild_list.head)
 	{
-		my_free(ptr->data);
 		dlink_destroy(ptr, &kickbuild_list);
+	}
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, kickbuildr_list.head)
+	{
+		dlink_destroy(ptr, &kickbuildr_list);
 	}
 }
 
 void
-kickbuild_add(const char *nick)
+kickbuild_add(const char *nick, const char *reason)
 {
-	dlink_add_alloc(my_strdup(nick), &kickbuild_list);
+	dlink_add_tail_alloc((void *) nick, &kickbuild_list);
+	dlink_add_tail_alloc((void *) reason, &kickbuildr_list);
 }
 
 void
-kickbuild_finish(struct client *service_p, struct channel *chptr,
-		const char *reason)
+kickbuild_finish(struct client *service_p, struct channel *chptr)
 {
 	dlink_node *ptr, *next_ptr;
+	dlink_node *rptr;
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, kickbuild_list.head)
 	{
+		rptr = kickbuildr_list.head;
+
 		sendto_server(":%s KICK %s %s :%s",
 				service_p->name, chptr->name,
-				ptr->data, reason);
-		my_free(ptr->data);
+				ptr->data, rptr->data);
+		dlink_destroy(rptr, &kickbuildr_list);
 		dlink_destroy(ptr, &kickbuild_list);
 	}
 }

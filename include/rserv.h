@@ -8,6 +8,8 @@
 #define MAXPARA	15
 #define MAX_DATE_STRING	32
 
+int current_mark;
+
 extern struct timeval system_time;
 #define CURRENT_TIME system_time.tv_sec
 

@@ -22,6 +22,7 @@
 #include "balloc.h"
 #include "conf.h"
 #include "modebuild.h"
+#include "hook.h"
 
 #define S_C_OWNER	200
 #define S_C_MANAGER	190
@@ -105,6 +106,8 @@ static struct service_handler chanserv_service = {
 static void load_channel_db(void);
 static void free_ban_reg(struct chan_reg *chreg_p, struct ban_reg *banreg_p);
 
+static int h_chanserv_join(void *members, void *unused);
+
 void
 init_s_chanserv(void)
 {
@@ -114,6 +117,8 @@ init_s_chanserv(void)
 
 	chanserv_p = add_service(&chanserv_service);
 	load_channel_db();
+
+	hook_add(h_chanserv_join, HOOK_JOIN_CHANNEL);
 }
 
 void
@@ -409,6 +414,106 @@ write_ban_db_entry(struct ban_reg *reg_p, const char *chname)
 			chname, reg_p->mask, reg_p->reason, reg_p->username,
 			reg_p->level, reg_p->hold);
 }
+
+static int
+h_chanserv_join(void *v_chptr, void *v_members)
+{
+	struct chan_reg *chreg_p;
+	struct ban_reg *banreg_p;
+	struct channel *chptr = v_chptr;
+	struct chmember *member_p;
+	dlink_list *members = v_members;
+	dlink_node *ptr, *next_ptr;
+	dlink_node *bptr;
+
+	/* another hook couldve altered this.. */
+	if(!dlink_list_length(members))
+		return 0;
+
+	/* not registered, cant ban anyone.. */
+	if((chreg_p = find_channel_reg(NULL, chptr->name)) == NULL)
+		return 0;
+
+	/* if its simply one member joining (ie, not a burst) then attempt
+	 * somewhat to shortcut it..
+	 */
+	if(dlink_list_length(members) == 1)
+	{
+		member_p = members->head->data;
+
+		DLINK_FOREACH(bptr, chreg_p->bans.head)
+		{
+			banreg_p = bptr->data;
+
+			if(match(banreg_p->mask, member_p->client_p->user->mask))
+			{
+				if(find_exempt(chptr, member_p->client_p))
+					return 0;
+
+				if(is_opped(member_p))
+					sendto_server(":%s MODE %s -o+b %s %s",
+						chanserv_p->name, chptr->name,
+						member_p->client_p->name, banreg_p->mask);
+				else
+					sendto_server(":%s MODE %s +b %s",
+						chanserv_p->name, chptr->name,
+						banreg_p->mask);
+
+				sendto_server(":%s KICK %s %s :%s",
+						chanserv_p->name, chptr->name,
+						member_p->client_p->name, banreg_p->reason);
+
+				dlink_destroy(members->head, members);
+				del_chmember(member_p);
+				return 0;
+			}
+		}
+
+		return 0;
+	}
+
+	modebuild_start(chanserv_p, chptr);
+	kickbuild_start();
+
+	current_mark++;
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, members->head)
+	{
+		member_p = ptr->data;
+
+		DLINK_FOREACH(bptr, chreg_p->bans.head)
+		{
+			banreg_p = bptr->data;
+
+			if(match(banreg_p->mask, member_p->client_p->user->mask))
+			{
+				if(find_exempt(member_p->chptr, member_p->client_p))
+					break;
+
+				if(is_opped(member_p))
+					modebuild_add(DIR_DEL, "o", member_p->client_p->name);
+
+				if(banreg_p->marked != current_mark)
+				{
+					modebuild_add(DIR_ADD, "b", banreg_p->mask);
+					banreg_p->marked = current_mark;
+				}
+
+				kickbuild_add(member_p->client_p->name, banreg_p->reason);
+
+				dlink_destroy(ptr, members);
+				del_chmember(member_p);
+				break;
+			}
+		}
+	}
+
+	modebuild_finish();
+	kickbuild_finish(chanserv_p, chptr);
+
+	return 0;
+}
+
 
 static void
 u_chanserv_cregister(struct connection_entry *conn_p, char *parv[], int parc)

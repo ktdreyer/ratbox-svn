@@ -773,7 +773,7 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 		}
 	}
 
-	hook_call(HOOK_JOIN_CHANNEL, &joined_members, NULL);
+	hook_call(HOOK_JOIN_CHANNEL, chptr, &joined_members);
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, joined_members.head)
 	{

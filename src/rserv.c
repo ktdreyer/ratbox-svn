@@ -38,6 +38,7 @@ struct sqlite *rserv_db;
 struct timeval system_time;
 
 int have_md5_crypt;
+int current_mark;
 
 static int need_rehash = 0;
 static void sig_hup(int);
@@ -222,6 +223,8 @@ main(int argc, char *argv[])
 
 	signal(SIGTRAP, SIG_IGN); /* Needed on FreeBSD and possibly others */
 	signal(SIGPIPE, SIG_IGN);
+
+	current_mark = 0;
 
 	if((rserv_db = sqlite_open(DB_PATH, 0, errmsg)) == NULL)
 	{

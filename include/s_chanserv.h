@@ -44,6 +44,7 @@ struct ban_reg
 	char *username;
 	int level;
 	time_t hold;
+	int marked;
 
 	dlink_node channode;
 };
