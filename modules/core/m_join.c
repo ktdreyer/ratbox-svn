@@ -188,8 +188,9 @@ m_join(struct Client *client_p,
       /* look for the channel */
       if((chptr = hash_find_channel(name)) != NULL)
 	{
-	  if(IsMember(chptr, source_p))
+	  if(IsMember(source_p, chptr))
             return;
+
 	  if(splitmode && !IsOper(source_p) && (*name != '&') && 
              ConfigChannel.no_join_on_split)
 	  {
