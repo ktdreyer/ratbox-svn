@@ -43,7 +43,9 @@ dlopen could not be found - ircd-hybrid will not compile without it **)))
 AC_CHECK_FUNC(crypt,, AC_CHECK_LIB(descrypt, crypt,,AC_CHECK_LIB(crypt, crypt,,)))
 
 dnl Check for gettext, but it's ok if we don't have it.
-dnl The /usr/local/lib check is pretty ugly but I don't see a better way
+dnl The /usr/local/lib check is pretty ugly but I don't see a better way.
+dnl can't cache this check since we do it twice.
+unset ac_cv_lib_intl_gettext
 AC_CHECK_FUNCS(gettext,, AC_CHECK_LIB(intl, gettext,,))
 if test "$ac_cv_func_gettext" = "no" -a "$ac_cv_lib_intl_gettext" = "no"; then
         AC_MSG_CHECKING(in /usr/local/lib )

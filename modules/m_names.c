@@ -142,7 +142,7 @@ void names_all_visible_channels(struct Client *sptr)
   struct Channel *chptr;
   struct Channel *bchan;
   char buf[BUFSIZE];
-  char *chname;
+  char *chname=NULL;
   char *show_ops_flag;
   char *show_voiced_flag;
   char *show_halfop_flag;
@@ -227,7 +227,7 @@ void names_non_public_non_secret(struct Client *sptr)
   int dont_show = NO;
   dlink_node    *lp;
   struct Client *c2ptr;
-  struct Channel *ch3ptr;
+  struct Channel *ch3ptr=NULL;
   char buf[BUFSIZE];
   char *t;
 

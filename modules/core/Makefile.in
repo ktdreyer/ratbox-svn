@@ -101,7 +101,7 @@ install: all
 .SUFFIXES: .so
 
 .c.so:
-	${CC} -DPIC -fPIC -shared ${CFLAGS} $(CPPFLAGS) $< -o $@
+	${CC} -DPIC -fPIC -shared ${CPPFLAGS} $(CFLAGS) $< -o $@
 
 .PHONY: depend clean distclean
 depend:

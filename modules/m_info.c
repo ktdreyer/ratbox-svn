@@ -138,7 +138,7 @@ int ms_info(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       else
 	m_info(cptr,sptr,parc,parv);
     }
-
+  return 0;
 } /* ms_info() */
 
 

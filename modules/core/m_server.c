@@ -26,6 +26,7 @@
 #include "handlers.h"  /* m_server prototype */
 #include "client.h"      /* client struct */
 #include "common.h"      /* TRUE bleah */
+#include "event.h"
 #include "hash.h"        /* add_to_client_hash_table */
 #include "irc_string.h"  /* strncpy_irc */
 #include "ircd.h"        /* me */
@@ -465,6 +466,7 @@ int write_links_file(void* notused)
 	}
     }
   fbclose(file);
+  return 0;
 }
 
 /*

@@ -304,7 +304,7 @@ int     m_join(struct Client *cptr,
 	{
 	  chptr->channelts = CurrentTime;
 	  sendto_ll_channel_remote(chptr, cptr, sptr,
-				   ":%s SJOIN %lu %s + :\%%s",
+				   ":%s SJOIN %lu %s + :%%%s",
 				   me.name,
 				   chptr->channelts,
 				   chptr->chname,

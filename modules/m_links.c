@@ -107,7 +107,7 @@ int mo_links(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   assert(0 != mask);
 
   if (*mask)       /* only necessary if there is a mask */
-    mask = collapse(clean_string(clean_mask, mask, 2 * HOSTLEN));
+    mask = collapse(clean_string(clean_mask, (const unsigned char*) mask, 2 * HOSTLEN));
 
   if (ConfigFileEntry.links_notice && MyConnect(sptr))
     sendto_realops_flags(FLAGS_SPY,

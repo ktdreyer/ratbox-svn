@@ -162,7 +162,7 @@ int     ms_lljoin(struct Client *cptr,
   else if ((flags == CHFL_HALFOP) && (IsCapable(uplink, CAP_HOPS)))
     {
       sendto_one(uplink,
-		 ":%s SJOIN %lu %s + :\%%s", me.name,
+		 ":%s SJOIN %lu %s + :%%%s", me.name,
 		 chptr->channelts, chname, nick);      
     }
   else

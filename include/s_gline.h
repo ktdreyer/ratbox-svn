@@ -41,6 +41,10 @@ extern void   report_glines(struct Client *);
 extern int    remove_gline_match(const char *user, const char *host);
 extern void   cleanup_glines(void *notused);
 extern void   add_gline(struct ConfItem *);
+extern void   add_new_majority_gline(const char *, const char *, const char *,
+                                     const char *, const char *, const char *,
+                                     const char *);
+
 
 typedef struct gline_pending
 {

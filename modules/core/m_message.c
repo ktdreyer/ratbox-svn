@@ -66,7 +66,9 @@ int flood_attack_channel(struct Client *sptr, struct Channel *chptr,
 struct entity **target_table = NULL;
 int target_table_size = 0;
 
-int duplicate_ptr( void *ptr, struct entity **target_table, int n);
+int duplicate_ptr( void *, struct entity **, int);
+
+int m_message(int, char *, struct Client *, struct Client *, int, char **);
 
 void msg_channel( int p_or_n, char *command,
 		  struct Client *cptr,
@@ -327,7 +329,7 @@ int build_target_list(int p_or_n,
 	{
 	  /* Strip if using DALnet chanop/voice prefix. */
 	  if ((*(nick+1) == '@' && (type & MODE_VOICE)) ||
-              *(nick+1) == '+' && !(type & MODE_VOICE))
+              (*(nick+1) == '+' && !(type & MODE_VOICE)))
             {
               nick++;
               *nick = '+';
@@ -416,16 +418,16 @@ int build_target_list(int p_or_n,
  *		  note, this does the canonize using pointers
  * side effects	- NONE
  */
-int duplicate_ptr( void *ptr, struct entity **target_table, int n)
+int duplicate_ptr( void *ptr, struct entity **ltarget_table, int n)
 {
   int i;
 
-  if (!target_table)
+  if (!ltarget_table)
 	  return NO;
   
   for(i = 0; i < n; i++)
     {
-      if (target_table[i]->ptr == ptr)
+      if (ltarget_table[i]->ptr == ptr)
 	return YES;
     }
   return NO;
