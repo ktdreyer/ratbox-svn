@@ -1,3 +1,7 @@
+*** 20010821_6 by leeh
+- remove modded files before you commit ;)
+
+
 *** 20010821_5 by davidt
 - Oops, fix a couple tiny bugs in the new linebuf_putmsg code that caused
   some major problems truncating various bits of messages.
