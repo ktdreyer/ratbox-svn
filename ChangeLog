@@ -1,3 +1,15 @@
+androsyn    2003/01/20 23:38:29 UTC	(20030120_9)
+
+  Modified files:
+    src                  listener.c 
+  Log:
+  htons() is your friend..especially on port numbers
+  
+  Revision  Changes    Path
+  7.83      +2 -2      ircd-ratbox/src/listener.c
+
+
+
 androsyn    2003/01/20 23:33:35 UTC	(20030120_8)
 
   Modified files:
