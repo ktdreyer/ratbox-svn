@@ -60,7 +60,8 @@ conf_strtype(int type)
 }
 
 int
-add_top_conf(const char *name, int (*sfunc) (struct TopConf *), int (*efunc) (struct TopConf *))
+add_top_conf(const char *name, int (*sfunc) (struct TopConf *),
+		int (*efunc) (struct TopConf *), struct ConfEntry *items)
 {
 	struct TopConf *tc;
 
@@ -69,6 +70,7 @@ add_top_conf(const char *name, int (*sfunc) (struct TopConf *), int (*efunc) (st
 	tc->tc_name = my_strdup(name);
 	tc->tc_sfunc = sfunc;
 	tc->tc_efunc = efunc;
+	tc->tc_entries = items;
 
 	dlink_add_alloc(tc, &conf_items);
 	return 0;
@@ -95,6 +97,17 @@ find_conf_item(const struct TopConf *top, const char *name)
 {
 	dlink_node *d;
 	struct ConfEntry *cf;
+
+	if(top->tc_entries)
+	{
+		int i;
+
+		for(i = 0; top->tc_entries[i].cf_type; i++)
+		{
+			if(!strcasecmp(top->tc_entries[i].cf_name, name))
+				return &top->tc_entries[i];
+		}
+	}
 
 	DLINK_FOREACH(d, top->tc_items.head)
 	{
@@ -192,6 +205,26 @@ conf_end_block(struct TopConf *tc)
 	return 0;
 }
 
+static void
+conf_set_generic_int(void *data, void *location)
+{
+	*((int *) location) = *((unsigned int *) data);
+}
+
+static void
+conf_set_generic_string(void *data, int len, void *location)
+{
+	char **loc = location;
+	char *input = data;
+
+	if(len > 0 && strlen(input) > len)
+		input[len] = '\0';
+
+	my_free(*loc);
+	*loc = my_strdup(input);
+}
+
+
 int
 conf_call_set(struct TopConf *tc, const char *item, conf_parm_t * value, int type)
 {
@@ -261,11 +294,21 @@ conf_call_set(struct TopConf *tc, const char *item, conf_parm_t * value, int typ
 		case CF_INT:
 		case CF_TIME:
 		case CF_YESNO:
-			cf->cf_func(&cp->v.number);
+			if(cf->cf_arg)
+				conf_set_generic_int(&cp->v.number, cf->cf_arg);
+			else
+				cf->cf_func(&cp->v.number);
 			break;
 		case CF_STRING:
 		case CF_QSTRING:
-			cf->cf_func(cp->v.string);
+			if(EmptyString(cp->v.string))
+				conf_report_error("Ignoring %s::%s -- empty string",
+						tc->tc_name, item);
+			else if(cf->cf_arg)
+				conf_set_generic_string(cp->v.string, cf->cf_len, cf->cf_arg);
+			else
+				cf->cf_func(cp->v.string);
+
 			break;
 		}
 	}
@@ -291,6 +334,7 @@ add_conf_item(const char *topconf, const char *name, int type, void (*func) (voi
 	cf->cf_name = my_strdup(name);
 	cf->cf_type = type;
 	cf->cf_func = func;
+	cf->cf_arg = NULL;
 
 	dlink_add_alloc(cf, &tc->tc_items);
 
@@ -325,72 +369,6 @@ conf_set_serverinfo_name(void *data)
 {
 	if(config_file.name == NULL)
 	        config_file.name = my_strdup(data);
-}
-
-static void
-conf_set_serverinfo_description(void *data)
-{
-        my_free(config_file.gecos);
-        config_file.gecos = my_strdup(data);
-}
-
-static void
-conf_set_serverinfo_vhost(void *data)
-{
-        my_free(config_file.vhost);
-        config_file.vhost = my_strdup(data);
-}
-
-static void
-conf_set_serverinfo_dcc_vhost(void *data)
-{
-        my_free(config_file.dcc_vhost);
-        config_file.dcc_vhost = my_strdup(data);
-}
-
-static void
-conf_set_serverinfo_dcc_low_port(void *data)
-{
-	config_file.dcc_low_port = *(unsigned int *) data;
-}
-
-static void
-conf_set_serverinfo_dcc_high_port(void *data)
-{
-	config_file.dcc_high_port = *(unsigned int *) data;
-}
-
-static void
-conf_set_serverinfo_reconnect_time(void *data)
-{
-	config_file.reconnect_time = *(unsigned int *) data;
-}
-
-static void
-conf_set_serverinfo_ping_time(void *data)
-{
-	config_file.ping_time = *(unsigned int *) data;
-}
-
-static void
-conf_set_admin_name(void *data)
-{
-        my_free(config_file.admin1);
-        config_file.admin1 = my_strdup(data);
-}
-
-static void
-conf_set_admin_description(void *data)
-{
-        my_free(config_file.admin2);
-        config_file.admin2 = my_strdup(data);
-}
-
-static void
-conf_set_admin_email(void *data)
-{
-        my_free(config_file.admin3);
-        config_file.admin3 = my_strdup(data);
 }
 
 static int
@@ -610,6 +588,7 @@ conf_begin_service(struct TopConf *tc)
 	{
 		conf_report_error("Ignoring service block, missing service id");
 		yy_service = NULL;
+		return 0;
 	}
 
 	yy_service = find_service_id(conf_cur_block_name);
@@ -676,66 +655,62 @@ conf_set_service_realname(void *data)
 	yy_service->service->reintroduce = 1;
 }
 
+static struct ConfEntry conf_serverinfo_table[] =
+{
+	{ "description",	CF_QSTRING, NULL, 0, &config_file.gecos		},
+	{ "vhost",		CF_QSTRING, NULL, 0, &config_file.vhost		},
+	{ "dcc_vhost",		CF_QSTRING, NULL, 0, &config_file.dcc_vhost	},
+	{ "dcc_low_port",	CF_INT,     NULL, 0, &config_file.dcc_low_port	},
+	{ "dcc_high_port",	CF_INT,     NULL, 0, &config_file.dcc_high_port },
+	{ "reconnect_time",	CF_TIME,    NULL, 0, &config_file.reconnect_time },
+	{ "ping_time",		CF_TIME,    NULL, 0, &config_file.ping_time	},
+	{ "name",		CF_QSTRING, conf_set_serverinfo_name, 0, NULL	},
+	{ "\0", 0, NULL, 0, NULL }
+};
+
+static struct ConfEntry conf_admin_table[] =
+{
+	{ "name",		CF_QSTRING, NULL, 0, &config_file.admin1	},
+	{ "description",	CF_QSTRING, NULL, 0, &config_file.admin2	},
+	{ "email",		CF_QSTRING, NULL, 0, &config_file.admin3	},
+	{ "\0", 0, NULL, 0, NULL }
+};
+
+static struct ConfEntry conf_connect_table[] =
+{
+	{ "host",	CF_QSTRING, conf_set_connect_host,	0, NULL	},
+	{ "password",	CF_QSTRING, conf_set_connect_password,	0, NULL },
+	{ "vhost",	CF_QSTRING, conf_set_connect_vhost,	0, NULL },
+	{ "port",	CF_INT,     conf_set_connect_port,	0, NULL },
+	{ "autoconn",   CF_YESNO,   conf_set_connect_autoconn,	0, NULL },
+	{ "\0", 0, NULL, 0, NULL }
+};
+
+static struct ConfEntry conf_oper_table[] =
+{
+	{ "user",	CF_QSTRING|CF_FLIST, conf_set_oper_user, 0, NULL },
+	{ "password",	CF_QSTRING, conf_set_oper_password,	0, NULL },
+	{ "encrypted",	CF_YESNO,   conf_set_oper_encrypted,	0, NULL },
+	{ "dcc",	CF_YESNO,   conf_set_oper_dcc,		0, NULL },
+	{ "flags",	CF_STRING,  conf_set_oper_flags,	0, NULL },
+	{ "\0", 0, NULL, 0, NULL }
+};
+
+static struct ConfEntry conf_service_table[] =
+{
+	{ "nick",	CF_QSTRING, conf_set_service_nick,	0, NULL },
+	{ "username",	CF_QSTRING, conf_set_service_username,	0, NULL },
+	{ "host",	CF_QSTRING, conf_set_service_host,	0, NULL },
+	{ "realname",	CF_QSTRING, conf_set_service_realname,	0, NULL },
+	{ "\0", 0, NULL, 0, NULL }
+};
+
 void
 newconf_init()
 {
-	add_top_conf("serverinfo", NULL, NULL);
-	add_conf_item("serverinfo", "name", CF_QSTRING,
-			conf_set_serverinfo_name);
-        add_conf_item("serverinfo", "description", CF_QSTRING,
-			conf_set_serverinfo_description);
-        add_conf_item("serverinfo", "vhost", CF_QSTRING,
-			conf_set_serverinfo_vhost);
-        add_conf_item("serverinfo", "dcc_vhost", CF_QSTRING,
-			conf_set_serverinfo_dcc_vhost);
-	add_conf_item("serverinfo", "dcc_low_port", CF_INT,
-			conf_set_serverinfo_dcc_low_port);
-	add_conf_item("serverinfo", "dcc_high_port", CF_INT,
-			conf_set_serverinfo_dcc_high_port);
-	add_conf_item("serverinfo", "reconnect_time", CF_TIME,
-			conf_set_serverinfo_reconnect_time);
-	add_conf_item("serverinfo", "ping_time", CF_TIME,
-			conf_set_serverinfo_ping_time);
-
-        add_top_conf("admin", NULL, NULL);
-        add_conf_item("admin", "name", CF_QSTRING,
-			conf_set_admin_name);
-        add_conf_item("admin", "description", CF_QSTRING,
-			conf_set_admin_description);
-        add_conf_item("admin", "email", CF_QSTRING,
-			conf_set_admin_email);
-
-        add_top_conf("connect", conf_begin_connect, conf_end_connect);
-        add_conf_item("connect", "host", CF_QSTRING,
-			conf_set_connect_host);
-        add_conf_item("connect", "password", CF_QSTRING,
-			conf_set_connect_password);
-        add_conf_item("connect", "vhost", CF_QSTRING,
-			conf_set_connect_vhost);
-        add_conf_item("connect", "port", CF_INT,
-			conf_set_connect_port);
-	add_conf_item("connect", "autoconn", CF_YESNO,
-			conf_set_connect_autoconn);
-
-        add_top_conf("oper", conf_begin_oper, conf_end_oper);
-        add_conf_item("oper", "user", CF_QSTRING | CF_FLIST,
-			conf_set_oper_user);
-        add_conf_item("oper", "password", CF_QSTRING,
-			conf_set_oper_password);
-        add_conf_item("oper", "encrypted", CF_YESNO,
-			conf_set_oper_encrypted);
-        add_conf_item("oper", "dcc", CF_YESNO,
-			conf_set_oper_dcc);
-	add_conf_item("oper", "flags", CF_STRING,
-			conf_set_oper_flags);
-
-	add_top_conf("service", conf_begin_service, conf_end_service);
-	add_conf_item("service", "nick", CF_QSTRING,
-			conf_set_service_nick);
-	add_conf_item("service", "username", CF_QSTRING,
-			conf_set_service_username);
-	add_conf_item("service", "host", CF_QSTRING,
-			conf_set_service_host);
-	add_conf_item("service", "realname", CF_QSTRING,
-			conf_set_service_realname);
+	add_top_conf("serverinfo", NULL, NULL, conf_serverinfo_table);
+        add_top_conf("admin", NULL, NULL, conf_admin_table);
+        add_top_conf("connect", conf_begin_connect, conf_end_connect, conf_connect_table);
+        add_top_conf("oper", conf_begin_oper, conf_end_oper, conf_oper_table);
+	add_top_conf("service", conf_begin_service, conf_end_service, conf_service_table);
 }

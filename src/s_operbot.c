@@ -111,7 +111,7 @@ conf_set_operbot_channel(void *data)
 static void
 add_operbot_conf(void)
 {
-	add_top_conf("operbot", NULL, NULL);
+	add_top_conf("operbot", NULL, NULL, NULL);
 	add_conf_item("operbot", "channel", CF_QSTRING,
 			conf_set_operbot_channel);
 }

@@ -6,7 +6,14 @@
 #ifndef INCLUDED_newconf_h
 #define INCLUDED_newconf_h
 
-struct ConfEntry;
+struct ConfEntry
+{
+	const char *cf_name;
+	int cf_type;
+	void (*cf_func) (void *);
+	int cf_len;
+	void *cf_arg;
+};
 
 struct TopConf
 {
@@ -14,6 +21,7 @@ struct TopConf
 	int (*tc_sfunc) (struct TopConf *);
 	int (*tc_efunc) (struct TopConf *);
 	dlink_list tc_items;
+	struct ConfEntry *tc_entries;
 };
 
 #define CF_QSTRING	0x01
@@ -43,18 +51,11 @@ typedef struct conf_parm_t_stru
 }
 conf_parm_t;
 
-
-struct ConfEntry
-{
-	char *cf_name;
-	int cf_type;
-	void (*cf_func) (void *);
-};
-
 extern struct TopConf *conf_cur_block;
 
 int read_config(char *);
-int add_top_conf(const char *name, int (*sfunc) (struct TopConf *), int (*efunc) (struct TopConf *));
+int add_top_conf(const char *name, int (*sfunc) (struct TopConf *),
+		int (*efunc) (struct TopConf *), struct ConfEntry *);
 int add_conf_item(const char *, const char *, int, void (*)(void *));
 int remove_conf_item(const char *, const char *);
 void conf_report_error(const char *, ...);
