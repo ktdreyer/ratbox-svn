@@ -1,3 +1,9 @@
+*** 20010118_13 by db
+- removed e_line_opers_only f_line_opers_only etc.
+  updated parser
+
+
+
 *** 20010118_12 by wcampbel
 Misc documentation fixes
 
