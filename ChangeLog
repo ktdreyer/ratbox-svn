@@ -1,3 +1,15 @@
+leeh        2004/03/03 09:57:18 EST	(20040303_4)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  - remove local clients from &me.serv->clients
+  
+  Revision  Changes    Path
+  7.431     +1 -0      ircd-ratbox/src/client.c
+
+
+
 androsyn    2004/03/03 09:53:05 EST	(20040303_3)
 
   Modified files:
