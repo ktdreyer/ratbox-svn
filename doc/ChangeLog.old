@@ -1,3 +1,8 @@
+*** 20001118_2 by toot
+End of /NAMES list was missing in one place.
+fixed compile warning in ltrace
+
+
 *** 20001118_1 by davidt
 fix for gcc warnings, and do a fd_note on nickchanges.
 
