@@ -2950,7 +2950,6 @@ int     count_channels(struct Client *sptr)
  * see if that nick can join the given channel. If
  * the nick can join, a LLJOIN message is sent back to leaf
  * stating the nick can join, otherwise a non join message is sent.
- * Eventually, the channel key will also be checked.
  */
 
 int     m_cburst(struct Client *cptr,
@@ -3047,9 +3046,8 @@ int     m_cburst(struct Client *cptr,
                           me.name, name, nick);
           return 0;
         }
-       
-      if (key && 
-        (*chptr->mode.key && (BadPtr(key) || irccmp(chptr->mode.key, key))))
+
+      if((*chptr->mode.key && !key) || irccmp(chptr->mode.key, key))
 
         {
           sendto_one(cptr,":%s LLJOIN %s %s :K",
@@ -3151,6 +3149,11 @@ int     m_lljoin(struct Client *cptr,
 #endif
       return 0;
     }
+
+#ifdef DEBUGLL
+   sendto_realops("parv[0] %s parv[1] %s parv[2] %s parv[3] %s",
+     parv[0], parv[1], parv[2], parv[3]);
+#endif
 
   /* If not a server just ignore it */
   if ( !IsServer(cptr) )
@@ -3272,7 +3275,8 @@ int     m_lljoin(struct Client *cptr,
       
         default:
 #ifdef DEBUGLL
-          sendto_realops("Unknown LLJOIN flag %c", can_join_flag );
+          sendto_realops("Unknown LLJOIN flag %c [%s]", 
+                           can_join_flag, parv[3] );
 #endif
         break;
 	}

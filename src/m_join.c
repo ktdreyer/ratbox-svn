@@ -302,10 +302,10 @@ int     m_join(struct Client *cptr,
                                    key ? key : "" );
 #endif
                    if(key)
-                     sendto_one(serv_cptr_list,":%s CBURST %s :%s %s",
+                     sendto_one(serv_cptr_list,":%s CBURST %s %s %s",
                        me.name,name,sptr->name,key);
                    else
-                     sendto_one(serv_cptr_list,":%s CBURST %s :%s",
+                     sendto_one(serv_cptr_list,":%s CBURST %s %s",
                        me.name,name,sptr->name);
 #ifdef DEBUGLL
                    sendto_realops("Waiting for LLJOIN");
