@@ -1,3 +1,28 @@
+leeh        2002/07/09 20:05:53 EDT	(20020710_0)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+    doc                  Makefile.in example.conf 
+    include              client.h config.h 
+  Added files:
+    doc                  example.efnet.conf 
+  Log:
+  - added a default efnet config submitted by Disciple.
+  - updated various places to reflect this
+  - added back #define TS5_ONLY
+  
+  Revision  Changes    Path
+  7.137     +5 -0      ircd-hybrid-7/autoconf/configure.in
+  7.140     +5 -0      ircd-hybrid-7/configure
+  7.17      +1 -1      ircd-hybrid-7/doc/Makefile.in
+  7.164     +1 -1      ircd-hybrid-7/doc/example.conf
+  7.1       +923 -0    ircd-hybrid-7/doc/example.efnet.conf (new)
+  7.151     +4 -0      ircd-hybrid-7/include/client.h
+  7.140     +11 -0     ircd-hybrid-7/include/config.h
+
+
+
 leeh        2002/07/09 16:49:31 EDT	(20020709_0)
 
   Modified files:
