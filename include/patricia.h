@@ -19,6 +19,8 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <arpa/nameser.h>
+#include <resolv.h>
 #include <assert.h>
 #include "dline_conf.h"
 #include "class.h"

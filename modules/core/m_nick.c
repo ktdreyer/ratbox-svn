@@ -133,6 +133,7 @@ static int mr_nick(struct Client *cptr, struct Client *sptr, int parc,
     }
 
   if ( (acptr = find_client(nick, NULL)) == NULL )
+   {
     if (!ServerInfo.hub && uplink && IsCapable(uplink, CAP_LL))
     {
       /* We don't know anyone called nick, but our hub might */
@@ -161,6 +162,7 @@ static int mr_nick(struct Client *cptr, struct Client *sptr, int parc,
       {
         return(set_initial_nick(cptr, sptr, nick));
       }
+   }
   else
    {
      sendto_one(sptr, form_str(ERR_NICKNAMEINUSE), me.name, "*", nick);
