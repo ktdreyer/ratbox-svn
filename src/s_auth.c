@@ -425,7 +425,7 @@ void start_auth(struct Client* client)
 	/* IAuthQuery(client); */
 #endif /* 0 */
 
-  client->localClient->dns_query = BlockHeapAlloc(dns_blk);
+  client->localClient->dns_query = MyMalloc(sizeof(struct DNSQuery));
   client->localClient->dns_query->ptr = auth;
   client->localClient->dns_query->callback = auth_dns_callback;
   sendheader(client, REPORT_DO_DNS);

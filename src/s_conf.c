@@ -150,7 +150,7 @@ static void conf_dns_callback(void* vptr, adns_answer *reply)
 #endif
 	MyFree(reply);
   } 
-  BlockHeapFree(dns_blk, aconf->dns_query);
+  MyFree(aconf->dns_query);
   aconf->dns_query = NULL;
 }
 
@@ -163,7 +163,7 @@ void conf_dns_lookup(struct ConfItem* aconf)
 {
   if (!aconf->dns_pending)
     {
-      aconf->dns_query = BlockHeapAlloc(dns_blk);
+      aconf->dns_query = MyMalloc(sizeof(struct DNSQuery));
       aconf->dns_query->ptr = aconf;
       aconf->dns_query->callback = conf_dns_callback;
       adns_gethost(aconf->host, aconf->aftype, aconf->dns_query);

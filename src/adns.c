@@ -50,7 +50,6 @@ void restart_resolver(void)
 void init_resolver(void)
 {
 
-	dns_blk = BlockHeapCreate(sizeof(struct DNSQuery), DNS_BLOCK_SIZE);
 	adns_init(&dns_state, adns_if_noautosys, 0);	
 	eventAdd("timeout_adns", timeout_adns, NULL, 1, 0);
 	dns_select();
