@@ -1,3 +1,20 @@
+leeh        2002/05/22 09:52:45 EDT	(20020522_0)
+
+  Modified files:
+    .                    RELNOTES 
+    src                  client.c messages.tab 
+  Log:
+  - relnotes updates
+  - misplaced : in messages.tab
+  - an extern shouldnt really be static.. should it?
+  
+  Revision  Changes    Path
+  1.28      +6 -5      ircd-hybrid-7/RELNOTES
+  7.268     +3 -2      ircd-hybrid-7/src/client.c
+  7.67      +1 -1      ircd-hybrid-7/src/messages.tab
+
+
+
 androsyn    2002/05/20 19:07:42 EDT	(20020521_0)
 
   Modified files:
