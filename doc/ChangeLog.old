@@ -1,3 +1,9 @@
+*** 20010823_2 by davidt
+- Fix string_to_array so that we correctly handle the weirdness of empty
+  params, etc.  I think this is right, but it's hard to test on a network
+  with at least 3 different versions of parse.c running on it..
+
+
 *** 20010823_1 by db
 - I couldn't take it anymore. cleaned up build_list_of_channels slightly
 - started preliminary code for JOIN TS from remote server.
