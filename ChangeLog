@@ -1,3 +1,15 @@
+androsyn    2003/10/15 16:07:57 EDT	(20031015_1)
+
+  Modified files:
+    src                  epoll.c 
+  Log:
+  dynamically allocate the epoll_event structure
+  
+  Revision  Changes    Path
+  1.24      +6 -5      ircd-ratbox/src/epoll.c
+
+
+
 androsyn    2003/10/15 14:30:35 EDT	(20031015_0)
 
   Modified files:
