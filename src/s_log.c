@@ -128,6 +128,8 @@ ilog(ilogfile dest, const char *format, ...)
 		fclose(logfile);
 		*log_table[dest].logfile = NULL;
 	}
+	else
+		fflush(logfile);
 }
 
 void

@@ -1379,6 +1379,8 @@ write_confitem(KlineType type, struct Client *source_p, char *user,
 		fclose(out);
 		return;
 	}
+	else
+		fflush(out);
 
 	fclose(out);
 

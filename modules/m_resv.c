@@ -524,6 +524,8 @@ remove_resv(struct Client *source_p, const char *name)
 
 			break;
 		}
+		else
+			fflush(out);
 
 		strlcpy(buff, buf, sizeof(buff));
 

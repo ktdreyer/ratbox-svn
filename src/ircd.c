@@ -419,6 +419,9 @@ write_pidfile(const char *filename)
 			ilog(L_MAIN, "Error writing %u to pid file %s (%s)",
 			     pid, filename, strerror(errno));
 		}
+		else
+			fflush(fb);
+
 		fclose(fb);
 		return;
 	}

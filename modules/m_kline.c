@@ -830,6 +830,9 @@ flush_write(struct Client *source_p, FILE * out, const char *buf, const char *te
 		if(temppath != NULL)
 			(void) unlink(temppath);
 	}
+	else
+		fflush(out);
+
 	return (error_on_write);
 }
 

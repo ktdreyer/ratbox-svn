@@ -337,6 +337,8 @@ write_xline(struct Client *source_p, struct ConfItem *aconf)
 		fclose(out);
 		return;
 	}
+	else
+		fflush(out);
 
 	fclose(out);
 }
