@@ -423,6 +423,12 @@ change_channel_membership(struct Channel *chptr,
   else
     ok = 0;
 
+  if((ptr = find_user_link(&chptr->deopped, who)))
+  {
+    dlinkDelete(ptr, &chptr->deopped);
+    free_dlink_node(ptr);
+  }
+
   return ok;
 }
 

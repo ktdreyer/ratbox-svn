@@ -482,7 +482,7 @@ static void ms_sjoin(struct Client *client_p,
 
       if (!keep_new_modes)
 	{
-	  if (fl & MODE_CHANOP)
+	  if ((fl & MODE_CHANOP) || (fl & MODE_HALFOP))
 	    {
 	      fl = MODE_DEOPPED;
 	    }

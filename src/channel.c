@@ -144,6 +144,14 @@ add_user_to_channel(struct Channel *chptr, struct Client *who, int flags)
 #endif
     }
 
+    if(flags & MODE_DEOPPED)
+    {
+      dlink_node *dptr;
+      
+      dptr = make_dlink_node();
+      dlinkAdd(who, dptr, &chptr->deopped);
+    }
+
     chptr->users++;
 
     if (MyClient(who))
@@ -195,6 +203,12 @@ remove_user_from_channel(struct Channel *chptr, struct Client *who, int perm)
     return;                     /* oops */
 
   free_dlink_node(ptr);
+
+  if((ptr = find_user_link(&chptr->deopped, who)))
+  {
+    dlinkDelete(ptr, &chptr->deopped);
+    free_dlink_node(ptr);
+  }
 
   if (MyClient(who))
   {

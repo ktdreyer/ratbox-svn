@@ -75,6 +75,7 @@ struct Channel
   dlink_list      halfops;
   dlink_list      voiced;
   dlink_list      peons;                /* non ops, just members */
+  dlink_list	  deopped;              /* users deopped on sjoin */
 
   dlink_list      locchanops;           /* local versions of the above */
 #ifdef REQUIRE_OANDV
