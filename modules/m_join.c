@@ -91,7 +91,7 @@ int     m_join(struct Client *cptr,
   char  *p = NULL, *p2 = NULL, *p3 = NULL;
   int   successful_join_count = 0; /* Number of channels successfully joined */
   
-  if (!(sptr->user))
+  if (!(sptr->user) || IsServer(sptr))
     {
       /* something is *fucked* - bail */
       return 0;
