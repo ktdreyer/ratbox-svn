@@ -169,10 +169,6 @@ int user_modes_from_c_to_bitmask[] =
   /* 0xF0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0  /* 0xFF */
 };
 
-unsigned long my_rand(void);    /* provided by orabidoo */
-
-
-
 /*
  * show_opers - send the client a list of opers
  * inputs       - pointer to client to show opers to
@@ -230,14 +226,25 @@ void show_opers(struct Client *cptr)
  */
 int show_lusers(struct Client *sptr) 
 {
-  sendto_one(sptr,
-	     ":%s %d %s :There are %d users on %d servers", me.name,
-	     RPL_LUSERCLIENT, sptr->name, Count.total, Count.server);
+  if(GlobalSetOptions.hide_server)
+    {
+      sendto_one(sptr,
+		 ":%s %d %s :There are %d users",
+		 me.name, RPL_LUSERCLIENT, sptr->name, Count.total);
+      sendto_one(sptr, form_str(RPL_LUSERCHANNELS),
+		 me.name, sptr->name, Count.chan);
+    }
+  else
+    {
+      sendto_one(sptr,
+		 ":%s %d %s :There are %d users on %d servers", me.name,
+		 RPL_LUSERCLIENT, sptr->name, Count.total, Count.server);
+      sendto_one(sptr, form_str(RPL_LUSERCHANNELS),
+		 me.name, sptr->name, Count.chan);
+      sendto_one(sptr, form_str(RPL_LUSERME),
+		 me.name, sptr->name, Count.local, Count.myserver);
+    }
 
-  sendto_one(sptr, form_str(RPL_LUSERCHANNELS),
-               me.name, sptr->name, Count.chan);
-  sendto_one(sptr, form_str(RPL_LUSERME),
-             me.name, sptr->name, Count.local, Count.myserver);
   sendto_one(sptr, form_str(RPL_LOCALUSERS), me.name, sptr->name,
              Count.local, Count.max_loc);
   sendto_one(sptr, form_str(RPL_GLOBALUSERS), me.name, sptr->name,

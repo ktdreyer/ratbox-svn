@@ -431,9 +431,18 @@ void msg_channel( int p_or_n, char *command,
 	sptr->user->last = CurrentTime;
     }
 
-  sendto_channel_butone(cptr, sptr, chptr,
-			":%s %s %s :%s",
-			sptr->name, command, channel_name, text);
+  if(can_send(chptr,sptr))
+    {
+      sendto_channel_butone(cptr, sptr, chptr,
+			    ":%s %s %s :%s",
+			    sptr->name, command, channel_name, text);
+    }
+  else
+    {
+      if (p_or_n != NOTICE)
+        sendto_one(sptr, form_str(ERR_CANNOTSENDTOCHAN),
+                   me.name, sptr->name, channel_name);
+    }
 }
 
 /*

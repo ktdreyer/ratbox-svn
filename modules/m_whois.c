@@ -390,7 +390,7 @@ int     ms_whois(struct Client *cptr,
    * other wise, ignore it.
    */
 
-  if( ConfigFileEntry.hub )
+  if(ConfigFileEntry.hub)
     {
       if(!IsCapable(cptr->from,CAP_LL))
 	return 0;

@@ -90,6 +90,9 @@ int already_placed_kline( struct Client *sptr, char *user, char *host,
 			  unsigned long ip);
 
 int is_ip_kline(char *host,unsigned long *ip, unsigned long *ip_mask);
+void apply_kline(struct Client *sptr, struct ConfItem *aconf,
+		 char *current_date,
+		 int ip_kline, unsigned long ip, unsigned long ip_mask);
 
 void WriteKline(const char *, struct Client *, struct Client *,
                        const char *, const char *, const char *, 
@@ -115,7 +118,8 @@ char host[HOSTLEN+2];
  * output	-
  * side effects - D line is added
  *
- */int mo_kline(struct Client *cptr,
+ */
+int mo_kline(struct Client *cptr,
                 struct Client *sptr,
                 int parc,
                 char *parv[])
@@ -129,7 +133,7 @@ char host[HOSTLEN+2];
   char *argv;
   unsigned long ip;
   unsigned long ip_mask;
-  const char *kconf; /* kline conf file */
+
 
   if(!IsSetOperK(sptr))
     {
@@ -226,48 +230,15 @@ char host[HOSTLEN+2];
     }
   ClassPtr(aconf) = find_class(0);
 
-  if(ip_kline)
-    {
-      aconf->ip = ip;
-      aconf->ip_mask = ip_mask;
-      add_ip_Kline(aconf);
-    }
-  else
-    add_mtrie_conf_entry(aconf,CONF_KILL);
 
-  /* XXX send KLINE goes here */
+#if 0
+  sendto_cap_servs(chptr, cptr, CAP_KLN,
+		   ":%s KLINE %s %s %s %s",
+		   me.name, sptr->name, user, host, reason);
+#endif
 
-  sendto_realops("%s added K-Line for [%s@%s] [%s]",
-    sptr->name,
-    user,
-    host,
-    reason );
+  apply_kline(sptr, aconf, (char *)current_date, ip_kline, ip, ip_mask);
 
-  log(L_TRACE, "%s added K-Line for [%s@%s] [%s]",
-      sptr->name, user, host, reason );
-
-  kconf = get_conf_name(KLINE_TYPE);
-
-  sendto_one(sptr,
-    ":%s NOTICE %s :Added K-Line [%s@%s] to %s",
-    me.name,
-    sptr->name,
-    user,
-    host,
-    kconf ? kconf : "configuration file");
-
-  /*
-   * Write kline to configuration file
-   */
-  WriteKline(kconf,
-    sptr,
-    (struct Client *) NULL,
-    user,
-    host,
-    reason ? reason : "No reason",
-    current_date);
-
-  check_klines();
   return 0;
 } /* mo_kline() */
 
@@ -284,16 +255,10 @@ int ms_kline(struct Client *cptr,
   char *slave_oper;
   struct Client *rcptr=NULL;
 
-  if(parc < 2)      /* pick up actual oper who placed kline */
+  if(parc < 2)
     return 0;
 
-  slave_oper = parv[1];     /* make it look like normal local kline */
-
-  parc--;
-  parv++;
-
-  if ( parc < 2 )
-    return 0;
+  slave_oper = parv[1];
 
   if ((rcptr = hash_find_client(slave_oper,(struct Client *)NULL)))
     {
@@ -315,6 +280,63 @@ int ms_kline(struct Client *cptr,
 
   return 0;
 } /* ms_kline() */
+
+/*
+ * apply_kline
+ *
+ * inputs	-
+ * output	- NONE
+ * side effects	- kline as given, is added to apropriate tree
+ *		  and conf file
+ */
+void apply_kline(struct Client *sptr, struct ConfItem *aconf,
+		 char *current_date,
+		 int ip_kline, unsigned long ip, unsigned long ip_mask)
+{
+  const char *kconf; /* kline conf file */
+
+  if(ip_kline)
+    {
+      aconf->ip = ip;
+      aconf->ip_mask = ip_mask;
+      add_ip_Kline(aconf);
+    }
+  else
+    add_mtrie_conf_entry(aconf,CONF_KILL);
+
+  sendto_realops("%s added K-Line for [%s@%s] [%s]",
+    sptr->name,
+    aconf->user,
+    aconf->host,
+    aconf->passwd);
+
+  log(L_TRACE, "%s added K-Line for [%s@%s] [%s]",
+      sptr->name, aconf->user, aconf->host, aconf->passwd);
+
+  kconf = get_conf_name(KLINE_TYPE);
+
+  sendto_one(sptr,
+    ":%s NOTICE %s :Added K-Line [%s@%s] to %s",
+    me.name,
+    sptr->name,
+    aconf->user,
+    aconf->host,
+    kconf ? kconf : "configuration file");
+
+  /*
+   * Write kline to configuration file
+   */
+  WriteKline(kconf,
+	     sptr,
+	     (struct Client *) NULL,
+	     aconf->user,
+	     aconf->host,
+	     aconf->passwd,
+	     current_date);
+
+  /* Now, activate kline against current online clients */
+  check_klines();
+}
 
 /*
  * valid_tkline()
