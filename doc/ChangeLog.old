@@ -1,3 +1,9 @@
+*** 20010226_10 by androsyn
+Minor change to the build system so that s_bsd_*.c will always generate
+an .o file, but are empty for the loop type you're not using. Makes for
+slightly cleaner makefiles.
+
+
 *** 20010226_9 by fl_
 - This fixes EOB timing.. we rely on the remote server to calculate
   the time spent, may be some issues with TS deltas which ill fix later
