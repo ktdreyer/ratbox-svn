@@ -53,7 +53,8 @@ extern char *optarg;
 int main(int argc, char *argv[])
 {
   char *plaintext = NULL;
-  int c;
+  char *plaintext2 = NULL;
+  int c, x = 0;
   char *saltpara = NULL;
   char *salt;
   int flag = 0;
@@ -177,10 +178,37 @@ int main(int argc, char *argv[])
   }
   else
   {
-    plaintext = getpass("plaintext: ");
+    while(1)
+    {
+      plaintext2 = getpass("plaintext: ");
+      plaintext = malloc(strlen(plaintext2) + 1);
+      strcpy(plaintext, plaintext2);
+      plaintext2 = getpass("repeat: ");
+      if(strcmp(plaintext, plaintext2))
+      {
+          memset(plaintext, 0, strlen(plaintext)+1);
+          memset(plaintext2, 0, strlen(plaintext)+1);
+          free(plaintext);          
+          if(++x >= 3)
+          {
+              printf("Passwords still don't match - having issues?\n");
+              exit(1);          
+          }
+          printf("Passwords don't match\n");
+          
+      }
+      else
+          break;
+      
+    }
+ 
   }
 
   printf("%s\n", crypt(plaintext, salt));
+  memset(plaintext, 0, strlen(plaintext)+1);
+  memset(plaintext2, 0, strlen(plaintext)+1);
+  free(plaintext);          
+
   return 0;
 }
 
