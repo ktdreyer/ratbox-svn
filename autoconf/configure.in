@@ -736,13 +736,16 @@ AC_ARG_ENABLE(small-net,
   esac
 ])
 
+ac_cv_nicklen="9+1"
+ac_cv_maxclients="200"
 
 dnl Nicklen
 AC_ARG_WITH(nicklen,
 [  --with-nicklen=              Set the nick length. ],
 
 [
-  if test "$enableval" = "no"; then
+	echo $withval
+  if test "$withval" = "no"; then
 	ac_cv_nicklen="9+1"
   else
 	ac_cv_nicklen="$withval+1"
