@@ -135,12 +135,10 @@ int     m_privmsg(struct Client *cptr,
 
   if (MyConnect(sptr))
     {
-#ifdef ANTI_SPAMBOT
 #ifndef ANTI_SPAMBOT_WARN_ONLY
       /* if its a spambot, just ignore it */
       if(sptr->join_leave_count >= MAX_JOIN_LEAVE_COUNT)
         return 0;
-#endif
 #endif
       /* As Mortiis points out, if there is only one target,
        * the call to canonize is silly
@@ -165,15 +163,12 @@ int     m_privmsg(struct Client *cptr,
   if( IsChanPrefix(*nick)
       && (IsPerson(sptr) && (chptr = hash_find_channel(nick, NullChn))))
     {
-#ifdef  IDLE_CHECK
       /* reset idle time for message only if target exists */
       if(MyClient(sptr) && sptr->user)
         sptr->user->last = CurrentTime;
-#endif
-#ifdef FLUD
+
       if(check_for_ctcp(parv[2]))
 	check_for_flud(sptr, NULL, chptr, 1);
-#endif /* FLUD */
 
       if (HasVchans(chptr))
 	{
@@ -187,19 +182,19 @@ int     m_privmsg(struct Client *cptr,
 	      else
 		sendto_one(sptr, form_str(ERR_CANNOTSENDTOCHAN),
 			   me.name, parv[0], nick);
-	      return 0;
 	    }
 	}
-#if 0
-      if (can_send(sptr, chptr) == 0)
-	sendto_channel_butone(cptr, sptr, chptr,
-			      ":%s %s %s :%s",
-			      parv[0], "PRIVMSG", nick,
-			      parv[2]);
       else
-	sendto_one(sptr, form_str(ERR_CANNOTSENDTOCHAN),
-		   me.name, parv[0], nick);
-#endif
+	{
+	  if (can_send(sptr, chptr) == 0)
+	    sendto_channel_butone(cptr, sptr, chptr,
+				      ":%s %s %s :%s",
+				      parv[0], "PRIVMSG", nick,
+				      parv[2]);
+	  else
+	    sendto_one(sptr, form_str(ERR_CANNOTSENDTOCHAN),
+		       me.name, parv[0], nick);
+	}
       return 0;
     }
       
@@ -239,15 +234,12 @@ int     m_privmsg(struct Client *cptr,
 
       if ( (chptr = hash_find_channel(nick+1, NullChn)) )
         {
-#ifdef  IDLE_CHECK
           /* reset idle time for message only if target exists */
           if(MyClient(sptr) && sptr->user)
             sptr->user->last = CurrentTime;
-#endif
-#ifdef FLUD
+
 	  if(check_for_ctcp(parv[2]))
 	    check_for_flud(sptr, NULL, chptr, 1);
-#endif /* FLUD */
 
 	  if (HasVchans(chptr))
 	    {
@@ -264,14 +256,19 @@ int     m_privmsg(struct Client *cptr,
 		  else
 		    sendto_one(sptr, form_str(ERR_CANNOTSENDTOCHAN),
 			       me.name, parv[0], nick);
-		  return -1;
 		}
 	    }
 	  else
 	    {
-	      sendto_one(sptr, form_str(ERR_NOSUCHNICK),
-			 me.name, parv[0], nick);
-	      return -1;
+	      if (can_send(sptr, chptr) == 0)
+		sendto_channel_butone(cptr, sptr, chptr,
+				      ":%s %s %s :%s",
+				      parv[0], "PRIVMSG", nick,
+				      parv[2]);
+	      else
+		sendto_one(sptr, form_str(ERR_CANNOTSENDTOCHAN),
+			   me.name, parv[0], nick);
+	      
 	    }
 	  return 0;
 	}
@@ -293,18 +290,15 @@ int     m_privmsg(struct Client *cptr,
 
   if ((acptr = find_person(nick, NULL)))
     {
-#ifdef  IDLE_CHECK
       /* reset idle time for message only if target exists */
       if(MyClient(sptr) && sptr->user)
         sptr->user->last = CurrentTime;
-#endif
-#ifdef FLUD
+
       if(MyConnect(acptr))
         if(check_for_ctcp(parv[2]))
           if(check_for_flud(sptr, acptr, NULL, 1))
             return 0;
-#endif
-#ifdef ANTI_DRONE_FLOOD
+
       if(MyConnect(acptr) && IsClient(sptr) && !IsAnOper(sptr) &&
 	 GlobalSetOptions.dronetime)
         {
@@ -368,7 +362,7 @@ int     m_privmsg(struct Client *cptr,
                 acptr->received_number_of_privmsgs++;
             }
         }
-#endif
+
       if (MyConnect(sptr) &&
           acptr->user && acptr->user->away)
         sendto_one(sptr, form_str(RPL_AWAY), me.name,
@@ -377,14 +371,13 @@ int     m_privmsg(struct Client *cptr,
       sendto_prefix_one(acptr, sptr, ":%s %s %s :%s",
                         parv[0], "PRIVMSG", nick, parv[2]);
 
-#ifdef  IDLE_CHECK
       /* reset idle time for message only if its not to self */
       if (sptr != acptr)
         {
           if(sptr->user)
             sptr->user->last = CurrentTime;
         }
-#endif
+
       return 0;
     }
   return 0;
@@ -415,12 +408,10 @@ int     mo_privmsg(struct Client *cptr,
 
   if (MyConnect(sptr))
     {
-#ifdef ANTI_SPAMBOT
 #ifndef ANTI_SPAMBOT_WARN_ONLY
       /* if its a spambot, just ignore it */
       if(sptr->join_leave_count >= MAX_JOIN_LEAVE_COUNT)
         return 0;
-#endif
 #endif
       /* As Mortiis points out, if there is only one target,
        * the call to canonize is silly
@@ -445,15 +436,12 @@ int     mo_privmsg(struct Client *cptr,
   if( IsChanPrefix(*nick)
       && (IsPerson(sptr) && (chptr = hash_find_channel(nick, NullChn))))
     {
-#ifdef  IDLE_CHECK
       /* reset idle time for message only if target exists */
       if(MyClient(sptr) && sptr->user)
         sptr->user->last = CurrentTime;
-#endif
-#ifdef FLUD
+
       if(check_for_ctcp(parv[2]))
 	check_for_flud(sptr, NULL, chptr, 1);
-#endif /* FLUD */
 
       if (can_send(sptr, chptr) == 0)
         sendto_channel_butone(cptr, sptr, chptr,
@@ -502,15 +490,12 @@ int     mo_privmsg(struct Client *cptr,
 
       if ( (chptr = hash_find_channel(nick+1, NullChn)) )
         {
-#ifdef  IDLE_CHECK
           /* reset idle time for message only if target exists */
           if(MyClient(sptr) && sptr->user)
             sptr->user->last = CurrentTime;
-#endif
-#ifdef FLUD
+
 	  if(check_for_ctcp(parv[2]))
 	    check_for_flud(sptr, NULL, chptr, 1);
-#endif /* FLUD */
 
           if (!is_chan_op(sptr,chptr))
             {
@@ -554,17 +539,15 @@ int     mo_privmsg(struct Client *cptr,
 
   if ((acptr = find_person(nick, NULL)))
     {
-#ifdef  IDLE_CHECK
       /* reset idle time for message only if target exists */
       if(MyClient(sptr) && sptr->user)
         sptr->user->last = CurrentTime;
-#endif
-#ifdef FLUD
+
       if(MyConnect(acptr))
         if(check_for_ctcp(parv[2]))
           if(check_for_flud(sptr, acptr, NULL, 1))
             return 0;
-#endif
+
       if (MyConnect(sptr) &&
           acptr->user && acptr->user->away)
         sendto_one(sptr, form_str(RPL_AWAY), me.name,
@@ -573,14 +556,12 @@ int     mo_privmsg(struct Client *cptr,
       sendto_prefix_one(acptr, sptr, ":%s %s %s :%s",
                         parv[0], "PRIVMSG", nick, parv[2]);
 
-#ifdef  IDLE_CHECK
       /* reset idle time for message only if its not to self */
       if (sptr != acptr)
         {
           if(sptr->user)
             sptr->user->last = CurrentTime;
         }
-#endif
       return 0;
     }
 
@@ -713,12 +694,10 @@ int     ms_privmsg(struct Client *cptr,
 
   if (MyConnect(sptr))
     {
-#ifdef ANTI_SPAMBOT
 #ifndef ANTI_SPAMBOT_WARN_ONLY
       /* if its a spambot, just ignore it */
       if(sptr->join_leave_count >= MAX_JOIN_LEAVE_COUNT)
         return 0;
-#endif
 #endif
       /* As Mortiis points out, if there is only one target,
        * the call to canonize is silly
@@ -743,15 +722,12 @@ int     ms_privmsg(struct Client *cptr,
   if( IsChanPrefix(*nick)
       && (IsPerson(sptr) && (chptr = hash_find_channel(nick, NullChn))))
     {
-#ifdef  IDLE_CHECK
       /* reset idle time for message only if target exists */
       if(MyClient(sptr) && sptr->user)
         sptr->user->last = CurrentTime;
-#endif
-#ifdef FLUD
+
       if(check_for_ctcp(parv[2]))
 	check_for_flud(sptr, NULL, chptr, 1);
-#endif /* FLUD */
 
       if (can_send(sptr, chptr) == 0)
         sendto_channel_butone(cptr, sptr, chptr,
@@ -800,15 +776,12 @@ int     ms_privmsg(struct Client *cptr,
 
       if ( (chptr = hash_find_channel(nick+1, NullChn)) )
         {
-#ifdef  IDLE_CHECK
           /* reset idle time for message only if target exists */
           if(MyClient(sptr) && sptr->user)
             sptr->user->last = CurrentTime;
-#endif
-#ifdef FLUD
+
 	  if(check_for_ctcp(parv[2]))
 	    check_for_flud(sptr, NULL, chptr, 1);
-#endif /* FLUD */
 
           if (!is_chan_op(sptr,chptr))
             {
@@ -852,18 +825,15 @@ int     ms_privmsg(struct Client *cptr,
 
   if ((acptr = find_person(nick, NULL)))
     {
-#ifdef  IDLE_CHECK
       /* reset idle time for message only if target exists */
       if(MyClient(sptr) && sptr->user)
         sptr->user->last = CurrentTime;
-#endif
-#ifdef FLUD
+
       if(MyConnect(acptr))
         if(check_for_ctcp(parv[2]))
           if(check_for_flud(sptr, acptr, NULL, 1))
             return 0;
-#endif
-#ifdef ANTI_DRONE_FLOOD
+
       if(MyConnect(acptr) && IsClient(sptr) && !IsAnOper(sptr) &&
 	 GlobalSetOptions.dronetime)
         {
@@ -927,7 +897,7 @@ int     ms_privmsg(struct Client *cptr,
                 acptr->received_number_of_privmsgs++;
             }
         }
-#endif
+
       if (MyConnect(sptr) &&
           acptr->user && acptr->user->away)
         sendto_one(sptr, form_str(RPL_AWAY), me.name,
@@ -936,14 +906,12 @@ int     ms_privmsg(struct Client *cptr,
       sendto_prefix_one(acptr, sptr, ":%s %s %s :%s",
                         parv[0], "PRIVMSG", nick, parv[2]);
 
-#ifdef  IDLE_CHECK
       /* reset idle time for message only if its not to self */
       if (sptr != acptr)
         {
           if(sptr->user)
             sptr->user->last = CurrentTime;
         }
-#endif
       return 0;
     }
 

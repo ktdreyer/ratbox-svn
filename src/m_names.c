@@ -147,14 +147,6 @@ int     m_names( struct Client *cptr,
   if(!MyConnect(sptr))
     return 0;
 
-  /*
-   * names is called by m_join() when client joins a channel,
-   * hence I cannot easily rate limit it.. perhaps that won't
-   * be necessary now that remote names is prohibited.
-   *
-   * -Dianora
-   */
-
   if (!BadPtr(para))
     {
       /* Here is the lamer detection code
@@ -358,16 +350,6 @@ int     ms_names( struct Client *cptr,
   /* And throw away non local names requests that do get here -Dianora */
   if(!MyConnect(sptr))
     return 0;
-
-  /*
-   * names is called by m_join() when client joins a channel,
-   * hence I cannot easily rate limit it.. perhaps that won't
-   * be necessary now that remote names is prohibited.
-   *
-   * -Dianora
-   */
-
-
 
   if (!BadPtr(para))
     {
@@ -607,3 +589,9 @@ void names_on_this_channel( struct Client *sptr,
   sendto_one(sptr, form_str(RPL_ENDOFNAMES), me.name, sptr->name,
 	     name_of_channel);
 }
+
+
+
+
+
+
