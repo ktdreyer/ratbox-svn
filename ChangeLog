@@ -1,3 +1,21 @@
+leeh        2002/08/21 19:23:47 EDT	(20020821_22)
+
+  Modified files:
+    include              client.h 
+    modules              m_stats.c 
+    src                  client.c packet.c parse.c 
+  Log:
+  - add IsAnyServer, cleanups to use it.
+  
+  Revision  Changes    Path
+  7.172     +1 -0      ircd-ratbox/include/client.h
+  1.116     +5 -7      ircd-ratbox/modules/m_stats.c
+  7.316     +4 -6      ircd-ratbox/src/client.c
+  7.96      +1 -1      ircd-ratbox/src/packet.c
+  7.141     +1 -3      ircd-ratbox/src/parse.c
+
+
+
 leeh        2002/08/21 16:58:34 EDT	(20020821_21)
 
   Modified files:
