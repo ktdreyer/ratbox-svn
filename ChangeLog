@@ -1,3 +1,15 @@
+androsyn    2003/09/09 12:10:34 EDT	(20030909_1)
+
+  Modified files:
+    src                  s_auth.c 
+  Log:
+  Remove the rather pointless DNS/AUTH timeout
+  
+  Revision  Changes    Path
+  7.160     +0 -1      ircd-ratbox/src/s_auth.c
+
+
+
 androsyn    2003/09/09 12:08:14 EDT	(20030909_0)
 
   Modified files:
