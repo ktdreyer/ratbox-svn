@@ -1,3 +1,16 @@
+leeh        2004/11/23 20:28:20 EST	(20041124_1)
+
+  Modified files:
+    src                  s_chanserv.c 
+  Log:
+  - merge two loc_sqlite_exec()'s
+  - update lastmod on suspend/unsuspend
+  
+  Revision  Changes    Path
+  1.22      +12 -7     rserv/src/s_chanserv.c
+
+
+
 leeh        2004/11/23 20:21:32 EST	(20041124_0)
 
   Modified files:
