@@ -1,3 +1,17 @@
+db          2001/12/30 01:32:18 EST	(20011230_2)
+
+  Modified files:
+    include              s_conf.h 
+    src                  s_conf.c 
+  Log:
+  - removed another uneeded four bytes from struct ConfItem
+  
+  Revision  Changes    Path
+  7.172     +0 -1      ircd-hybrid-7/include/s_conf.h
+  7.288     +2 -3      ircd-hybrid-7/src/s_conf.c
+
+
+
 db          2001/12/30 00:55:12 EST	(20011230_1)
 
   Modified files:
