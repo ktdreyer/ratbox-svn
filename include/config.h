@@ -291,11 +291,6 @@
  */
 #define NICKNAMEHISTORYLENGTH 15000
 
-/* TIMESEC - Time interval to wait and if no messages have been received,
- * then check for PINGFREQUENCY and CONNECTFREQUENCY 
- */
-#define TIMESEC  5              /* Recommended value: 5 */
-
 /* PINGFREQUENCY - ping frequency for idle connections
  * If daemon doesn't receive anything from any of its links within
  * PINGFREQUENCY seconds, then the server will attempt to check for

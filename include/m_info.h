@@ -176,10 +176,6 @@ Info MyInformation[] = {
   { "SPATH", "NONE", 0, "Path to Server Executable" },
 #endif /* SPATH */
 
-  { "TIMESEC", "", TIMESEC, "Time Interval to Wait Before Checking Pings" },
-
-  { "TOPIC_INFO", "ON", 0, "Show Who Set a Topic and When" },
-
   { "TS_MAX_DELTA_DEFAULT", "", TS_MAX_DELTA_DEFAULT, "Maximum Allowed TS Delta from another Server" },
   { "TS_WARN_DELTA_DEFAULT", "", TS_WARN_DELTA_DEFAULT, "Maximum TS Delta before Sending Warning" },
 

@@ -221,6 +221,97 @@ void send_conf_options(struct Client *sptr)
 		   infoptr->strvalue,
 		   infoptr->desc);
     }
+
+   /* now ircd.conf options */
+
+   sendto_one(sptr,
+              ":%s %d %s :%-30s %-5s [%-30s]",
+              me.name,
+              RPL_INFO,
+              sptr->name,
+              "network_name",
+              ConfigFileEntry.network_name ? 
+                ConfigFileEntry.network_name :
+                NETWORK_NAME_DEFAULT,
+              "Name of the Network");
+
+   sendto_one(sptr,
+              ":%s %d %s :%-30s %-5s [%-30s]",
+              me.name,
+              RPL_INFO,
+              sptr->name,
+              "network_desc",
+              ConfigFileEntry.network_desc ?
+                ConfigFileEntry.network_desc :
+                NETWORK_DESC_DEFAULT,
+              "Description of the network");
+
+   sendto_one(sptr,
+              ":%s %d %s :%-30s %-5s [%-30s]",
+              me.name,
+              RPL_INFO,
+              sptr->name,
+              "hub",
+              ConfigFileEntry.hub ? "ON" : "OFF",
+              "Server can connect to more than one server");
+
+   sendto_one(sptr,
+              ":%s %d %s :%-30s %-5s [%-30s]",
+              me.name,
+              RPL_INFO,
+              sptr->name,
+              "failed_oper_notice",
+              ConfigFileEntry.failed_oper_notice ? "ON" : "OFF",
+              "Show opers a notice if someone uses oper with the wrong password");
+
+   sendto_one(sptr,
+              ":%s %d %s :%-30s %-5s [%-30s]",
+              me.name,
+              RPL_INFO,
+              sptr->name,
+              "show_failed_oper_id",
+              ConfigFileEntry.show_failed_oper_id ? "ON" : "OFF",
+              "Also show a notice if the oper has the wrong user@host");
+
+   sendto_one(sptr,
+              ":%s %d %s :%-30s %-5d [%-30s]",
+              me.name,
+              RPL_INFO,
+              sptr->name,
+              "dots_in_ident",
+              ConfigFileEntry.dots_in_ident ?
+                ConfigFileEntry.dots_in_ident : 0,
+              "How many dots are allowed in idents");
+
+   sendto_one(sptr,
+              ":%s %d %s :%-30s %-5s [%-30s]",
+              me.name,
+              RPL_INFO,
+              sptr->name,
+              "anti_nick_flood",
+              ConfigFileEntry.anti_nick_flood ? "ON" : "OFF",
+              "Enable anti nick flood code");
+
+   sendto_one(sptr,
+              ":%s %d %s :%-30s %-5d [%-30s]",
+              me.name,
+              RPL_INFO,
+              sptr->name,
+              "max_nick_time",
+              ConfigFileEntry.max_nick_time ?
+                ConfigFileEntry.max_nick_time : 0,
+              "Anti nick flood time setting");
+
+   sendto_one(sptr,
+              ":%s %d %s :%-30s %-5d [%-30s]",
+              me.name,
+              RPL_INFO,
+              sptr->name,
+              "max_nick_changes",
+              ConfigFileEntry.max_nick_changes ?
+                ConfigFileEntry.max_nick_changes : 0,
+              "How many nick changes to allow");
+
   sendto_one(sptr,
 	     ":%s %d %s :Compiled on [%s]",
 	     me.name, 
