@@ -1,3 +1,15 @@
+leeh        2004/10/29 15:06:56 EDT	(20041029_1)
+
+  Modified files:
+    src                  service.c 
+  Log:
+  - fix include of crypt.h
+  
+  Revision  Changes    Path
+  1.23      +5 -1      rserv/src/service.c
+
+
+
 leeh        2004/10/29 14:57:22 EDT	(20041029_0)
 
   Modified files:
