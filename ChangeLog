@@ -1,3 +1,18 @@
+leeh        2004/03/30 12:41:33 EST	(20040330_11)
+
+  Modified files:
+    modules              m_gline.c 
+    src                  balloc.c 
+  Log:
+  - make the gline log more consistent
+  - s/sizeof(bh->elemSize)/elemSize in balloc memset()
+  
+  Revision  Changes    Path
+  1.140     +4 -3      ircd-ratbox/modules/m_gline.c
+  7.73      +1 -1      ircd-ratbox/src/balloc.c
+
+
+
 androsyn    2004/03/30 12:24:11 EST	(20040330_10)
 
   Modified files:
