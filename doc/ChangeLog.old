@@ -1,3 +1,8 @@
+*** 20001203_12 by db
+- removed DEBUG code from dlink
+
+
+
 *** 20001203_11 by db
 - removed REJECT_HOLD that should be replaced with IP throttling
 - moved safe_write into fileio.c for now, changed to use fbopen() etc.
