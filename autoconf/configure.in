@@ -132,6 +132,8 @@ dnl Checks for the existance of strlcat
 
 AC_CHECK_FUNCS(strlcat strlcpy)
 
+dnl check for strtok_r
+AC_CHECK_FUNCS(strtok_r)
 dnl check for socketpair
 AC_CHECK_FUNCS(socketpair)
 

@@ -130,8 +130,11 @@ char *strip_tabs(char *dest, const unsigned char *src, size_t len);
 unsigned long textip_to_ul(const char *ip);
 #endif
 const char* myctime(time_t);
+#ifndef HAVE_STRTOK_R
 char*       strtoken(char** save, char* str, char* fs);
-
+#else
+#define strtoken(save, str, fs) strtok_r(str, fs, save)
+#endif
 #define EmptyString(x) (!(x) || (*(x) == '\0'))
 
 /*

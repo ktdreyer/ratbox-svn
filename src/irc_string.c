@@ -147,7 +147,7 @@ char *strip_tabs(char *dest, const unsigned char *src, size_t len)
   return dest;
 }
 
-#if !defined( HAVE_STRTOKEN )
+#if !defined( HAVE_STRTOK_R )
 /*
  * strtoken - walk through a string of tokens, using a set of separators
  *   argv 9/90
