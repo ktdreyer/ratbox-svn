@@ -295,6 +295,14 @@ static int ms_sjoin(struct Client *cptr,
   else
     hide_or_not = ALL_MEMBERS;
 
+  if ((MODE_HIDEOPS & mode.mode) && !(MODE_HIDEOPS & oldmode->mode))
+    sync_channel_oplists(chptr, 1);
+
+  /* Don't reveal the ops, only to remove them all */
+  if (keep_our_modes)
+    if (!(MODE_HIDEOPS & mode.mode) && (MODE_HIDEOPS & oldmode->mode))
+      sync_channel_oplists(chptr, 0);
+
   set_final_mode(&mode,oldmode);
   chptr->mode = mode;
 
