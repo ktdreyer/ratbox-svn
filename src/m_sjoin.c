@@ -249,14 +249,8 @@ int     ms_sjoin(struct Client *cptr,
 
   if (isnew)
     chptr->channelts = tstosend = newts;
-#if 0
   else if (newts == 0 || oldts == 0)
     chptr->channelts = tstosend = 0;
-#endif
-  /* if someone introduces a 0 TS, ignore it
-   * don't deop their members, but don't zap
-   * our (possibly) valid non 0 TS
-   */
   else if (!newts)
     chptr->channelts = tstosend = oldts;
   else if (newts == oldts)

@@ -69,7 +69,6 @@ static  int     del_id (struct Channel *, char *, int);
 static  void    free_channel_masks(struct Channel *);
 static  void    sub1_from_channel (struct Channel *);
 
-
 /* static functions used in set_mode */
 static char* pretty_mask(char *);
 static char *fix_key(char *);
@@ -78,7 +77,6 @@ static void collapse_signs(char *);
 static int errsent(int,int *);
 static void change_chan_flag(struct Channel *, struct Client *, int );
 static void set_deopped(struct Client *,struct Channel *,int);
-
 
 /*
  * some buffers for rebuilding channel/nick lists with ,'s
@@ -422,24 +420,6 @@ void    add_user_to_channel(struct Channel *chptr, struct Client *who, int flags
 {
   struct SLink *ptr;
 
-#ifdef PRESERVE_CHANNEL_ON_SPLIT
-  if( chptr->mode.mode & MODE_SPLIT )
-    {
-      /* Unmark the split mode */
-      chptr->mode.mode &= ~MODE_SPLIT;
-
-      /* remove from the empty channel double link list */
-      if (chptr->last_empty_channel)
-        chptr->last_empty_channel->next_empty_channel =
-          chptr->next_empty_channel;
-      else
-        empty_channel_list = chptr->next_empty_channel;
-      if (chptr->next_empty_channel)
-        chptr->next_empty_channel->last_empty_channel =
-          chptr->last_empty_channel;
-    }
-#endif
-
   if (who->user)
     {
       ptr = make_link();
@@ -587,13 +567,6 @@ int     has_voice(struct Client *cptr, struct Channel *chptr)
 int     can_send(struct Client *cptr, struct Channel *chptr)
 {
   struct SLink  *lp;
-
-#ifdef JUPE_CHANNEL
-  if (MyClient(cptr) && (chptr->mode.mode & MODE_JUPED))
-    {
-      return (MODE_JUPED);
-    }
-#endif
 
   lp = find_user_link(chptr->members, cptr);
 
@@ -1096,7 +1069,6 @@ void set_channel_mode(struct Client *cptr,
                   parv++;
                   break;
                 }
-#ifdef LITTLE_I_LINES
               else
                 {
                   if(IsRestricted(sptr) && (whatt == MODE_ADD))
@@ -1114,7 +1086,6 @@ void set_channel_mode(struct Client *cptr,
                       break;
                     }
                 }
-#endif
             }
           if (whatt == MODE_QUERY)
             break;
@@ -1827,29 +1798,6 @@ void set_channel_mode(struct Client *cptr,
             }
           break;
 
-          /* Un documented for now , I have no idea how this got here ;-) */
-#ifdef JUPE_CHANNEL
-        case 'j':
-          if(MyConnect(sptr) && IsAnyOper(sptr))
-            {
-              if (whatt == MODE_ADD)
-                {
-                  chptr->mode.mode |= MODE_JUPED;
-                  sendto_realops("%s!%s@%s locally juping channel %s",
-                                 sptr->name, sptr->username,
-                                 sptr->host, real_name);
-                }
-              else if(whatt == MODE_DEL)
-                {
-                  chptr->mode.mode &= ~MODE_JUPED;
-                  sendto_realops("%s!%s@%s locally unjuping channel %s",
-                                 sptr->name, sptr->username,
-                                 sptr->host, real_name);
-                }
-            }
-          break;
-#endif
-
         case 'm' :
           if (!isok)
             {
@@ -2221,17 +2169,6 @@ int     can_join(struct Client *sptr, struct Channel *chptr, char *key, int *fla
   struct SLink  *lp;
   int ban_or_exception;
 
-#ifdef JUPE_CHANNEL
-  if( chptr->mode.mode & MODE_JUPED )
-    {
-      sendto_ops_flags(FLAGS_SPY,
-             "%s %s (%s@%s) is attempting to join locally juped channel %s",
-                     IsGlobalOper(sptr) ? "Oper" : "User", sptr->name,
-                     sptr->username, sptr->host,chptr->chname);
-      return (ERR_BADCHANNAME);
-    }
-#endif
-
   if ( (ban_or_exception = is_banned(sptr, chptr)) == CHFL_BAN)
     return (ERR_BANNEDFROMCHAN);
   else
@@ -2393,116 +2330,74 @@ static  void    sub1_from_channel(struct Channel *chptr)
                          * It should never happen but...
                          */
 
-#ifdef PRESERVE_CHANNEL_ON_SPLIT
-      if(server_was_split && (chptr->chname[0] != '&'))
-        {
-          /*
-           * Now, find all invite links from channel structure
-           */
-          /* The idea here is, not to "forget" the channel mode
-           * the ban list, exception lists, and not to release
-           * the channel at this time.
-           * The invite list should be forgotten now, as well
-           * as the flooder lists
-           * -db
-           */
+      /*
+       * Now, find all invite links from channel structure
+       */
+      while ((tmp = chptr->invites))
+	del_invite(tmp->value.cptr, chptr);
 
-          while ((tmp = chptr->invites))
-            del_invite(tmp->value.cptr, chptr);
+      /* free all bans/exceptions/denies */
+      free_channel_masks( chptr );
 
-          free_fluders(NULL, chptr);
-          /* flag the channel as split */
-          chptr->mode.mode |= MODE_SPLIT;
+      /* free topic_info */
+      MyFree(chptr->topic_info);            
 
-          /* Add to double linked empty channel list */
-          if(empty_channel_list)
-            empty_channel_list->last_empty_channel = chptr;
-          chptr->last_empty_channel = (struct Channel *)NULL;
-          chptr->next_empty_channel = empty_channel_list;
-          empty_channel_list = chptr;
-        }
-      else
-#endif
-#ifdef JUPE_CHANNEL
-        if( chptr->mode.mode & MODE_JUPED )
-          {
-            while ((tmp = chptr->invites))
-              del_invite(tmp->value.cptr, chptr);
-            
-            free_fluders(NULL, chptr);
-          }
-        else
-#endif
-       {
-          /*
-           * Now, find all invite links from channel structure
-           */
-          while ((tmp = chptr->invites))
-            del_invite(tmp->value.cptr, chptr);
+      free_fluders(NULL, chptr);
 
-	  /* free all bans/exceptions/denies */
-	  free_channel_masks( chptr );
-
-          /* free topic_info */
-          MyFree(chptr->topic_info);            
-
-          free_fluders(NULL, chptr);
-
-          /* Is this the top level channel? 
-	   * If so, don't remove if it has sub vchans
-	   * top level chan always has prev_chan == NULL
-	   */
-          if (!IsVchan(chptr))
-            {
-              if (!HasVchans(chptr))
-		{
-		  if (chptr->prevch)
-		    chptr->prevch->nextch = chptr->nextch;
-		  else
-		    GlobalChannelList = chptr->nextch;
-		  if (chptr->nextch)
-		    chptr->nextch->prevch = chptr->prevch;
-		  del_from_channel_hash_table(chptr->chname, chptr);
-		  MyFree((char*) chptr);
-		  Count.chan--;
-		}
-	    }
-          /* if this is a subchan take it out the linked list */
-          else
-            {
-              /* find it's base chan, incase we can remove that after */
-              root_chptr = find_bchan(chptr);
-	      /* remove from vchan double link list */
-              chptr->prev_vchan->next_vchan = chptr->next_vchan;
-              if (chptr->next_vchan)
-                chptr->next_vchan->prev_vchan = chptr->prev_vchan;
-
-	      /* remove from global chan double link list and hash */
+      /* Is this the top level channel? 
+       * If so, don't remove if it has sub vchans
+       * top level chan always has prev_chan == NULL
+       */
+      if (!IsVchan(chptr))
+	{
+	  if (!HasVchans(chptr))
+	    {
 	      if (chptr->prevch)
 		chptr->prevch->nextch = chptr->nextch;
 	      else
 		GlobalChannelList = chptr->nextch;
 	      if (chptr->nextch)
 		chptr->nextch->prevch = chptr->prevch;
-              del_from_channel_hash_table(chptr->chname, chptr);
-              MyFree((char*) chptr);
-              Count.chan--; /* is this line needed for subchans? yes -db */
+	      del_from_channel_hash_table(chptr->chname, chptr);
+	      MyFree((char*) chptr);
+	      Count.chan--;
+	    }
+	}
+      /* if this is a subchan take it out the linked list */
+      else
+	{
+	  /* find it's base chan, incase we can remove that after */
+	  root_chptr = find_bchan(chptr);
+	  /* remove from vchan double link list */
+	  chptr->prev_vchan->next_vchan = chptr->next_vchan;
+	  if (chptr->next_vchan)
+	    chptr->next_vchan->prev_vchan = chptr->prev_vchan;
+	  
+	  /* remove from global chan double link list and hash */
+	  if (chptr->prevch)
+	    chptr->prevch->nextch = chptr->nextch;
+	  else
+	    GlobalChannelList = chptr->nextch;
+	  if (chptr->nextch)
+	    chptr->nextch->prevch = chptr->prevch;
+	  del_from_channel_hash_table(chptr->chname, chptr);
+	  MyFree((char*) chptr);
+	  Count.chan--; /* is this line needed for subchans? yes -db */
 
-              if (!HasVchans(root_chptr) && (root_chptr->users == 0))
-                {
-                  chptr = root_chptr;
-                  if (chptr->prevch)
-                    chptr->prevch->nextch = chptr->nextch;
-                  else
-                    GlobalChannelList = chptr->nextch;
-                  if (chptr->nextch)
-                    chptr->nextch->prevch = chptr->prevch;
-                  del_from_channel_hash_table(chptr->chname, chptr);
-                  MyFree((char*) chptr);   
-                  Count.chan--;
-                }
-            }
-        }
+	  if (!HasVchans(root_chptr) && (root_chptr->users == 0))
+	    {
+	      chptr = root_chptr;
+	      if (chptr->prevch)
+		chptr->prevch->nextch = chptr->nextch;
+	      else
+		GlobalChannelList = chptr->nextch;
+	      if (chptr->nextch)
+		chptr->nextch->prevch = chptr->prevch;
+	      del_from_channel_hash_table(chptr->chname, chptr);
+	      MyFree((char*) chptr);   
+	      Count.chan--;
+	    }
+	}
     }
 }
 
@@ -2736,121 +2631,6 @@ static void free_channel_masks(struct Channel *chptr)
   chptr->num_bed = 0;
 }
 
-
-#ifdef NEED_SPLITCODE
-
-/*
- * check_still_split()
- *
- * inputs       -NONE
- * output       -NONE
- * side effects -
- * Check to see if the server split timer has expired, if so
- * check to see if there are now a decent number of servers connected
- * and users present, so I can consider this split over.
- *
- * -Dianora
- */
-
-static void check_still_split()
-{
-  if((server_split_time + GlobalSetOptions.server_split_recovery_time)
-     < CurrentTime)
-    {
-      if((Count.server >= GlobalSetOptions.split_smallnet_size) &&
-#ifdef SPLIT_PONG
-         (got_server_pong == YES) &&
-#endif
-         (Count.total >= GlobalSetOptions.split_smallnet_users))
-        {
-          /* server hasn't been split for a while.
-           * -Dianora
-           */
-          server_was_split = NO;
-          sendto_ops("Net Rejoined, split-mode deactivated");
-          cold_start = NO;
-#if defined(PRESERVE_CHANNEL_ON_SPLIT) || defined(NO_JOIN_ON_SPLIT)
-          remove_empty_channels();
-#endif
-        }
-      else
-        {
-          server_split_time = CurrentTime; /* still split */
-          server_was_split = YES;
-        }
-    }
-}
-#endif
-
-#if defined(PRESERVE_CHANNEL_ON_SPLIT) || defined(NO_JOIN_ON_SPLIT)
-/*
- * remove_empty_channels
- *
- * inputs       - none
- * output       - none
- * side effects - remove all channels on empty_channel_list that have
- * 
- * Any channel struct on this link list, is here because it had
- * no members, hence normally would not exist through a split.
- * If after the split is over, there are any channels left in this
- * list, they must be removed. Whenever a channel gains a member
- * whether locally or from a remote SJOIN it is removed from this list.
- */
-
-void remove_empty_channels()
-{
-  struct SLink *tmp;
-  struct Channel *next_empty_channel;
-
-  for(;empty_channel_list;
-      empty_channel_list = next_empty_channel )
-    {
-      next_empty_channel = empty_channel_list->next_empty_channel;
-
-      if(empty_channel_list->users)             /* sanity test */
-        {
-	  /* This is an oddity, rather than an out and out error
-	   * if this happens, a client managed to join the channel
-	   * making it non zero users, and I didn't notice. That means
-	   * strictly speaking its an error. However, if this entry is
-	   * ignored, its a non fatal one.
-	   */
-#if 0
-          sendto_ops("non zero user count in remove_empty_channels");
-          sendto_ops("Please report to the hybrid team! ircd-hybrid@the-project.org");
-#endif
-          empty_channel_list->next_empty_channel = (struct Channel *)NULL;
-          empty_channel_list->last_empty_channel = (struct Channel *)NULL;
-          continue;
-        }
-
-      /*
-       * Now, find all invite links from channel structure
-       */
-      while ((tmp = empty_channel_list->invites))
-        del_invite(tmp->value.cptr, empty_channel_list);
-
-      free_channel_masks(empty_channel_list);      
-
-      if (empty_channel_list->prevch)
-        empty_channel_list->prevch->nextch = empty_channel_list->nextch;
-      else
-        GlobalChannelList = empty_channel_list->nextch;
-      if (empty_channel_list->nextch)
-        empty_channel_list->nextch->prevch = empty_channel_list->prevch;
-
-      MyFree(empty_channel_list->topic_info);
-
-      free_fluders(NULL, empty_channel_list);
-      del_from_channel_hash_table(empty_channel_list->chname, 
-                                        empty_channel_list);
-      MyFree((char*) empty_channel_list);
-      Count.chan--;
-    }
-}
-#endif
-
-
 int     count_channels(struct Client *sptr)
 {
   struct Channel      *chptr;
@@ -2861,7 +2641,10 @@ int     count_channels(struct Client *sptr)
   return (count);
 }
 
-/* Only leaves need to remove channels that have no local members */
+/* Only leaves need to remove channels that have no local members
+ * If a channel has 0 LOCAL users and is NOT the top of a set of
+ * vchans, remove it.
+ */
 
 void cleanup_channels(void *unused)
 {
@@ -2872,16 +2655,6 @@ void cleanup_channels(void *unused)
      eventAdd("cleanup_channels", cleanup_channels, NULL,
        CLEANUP_CHANNELS_TIME, 0 );
 
-   if(!serv_cptr_list)
-     {
-       sendto_ops_flags(FLAGS_DEBUG,
-          "**** Cannot clean channels, waiting to link to my uplink.");
-       return;
-     }
-
-   if(!IsCapable(serv_cptr_list, CAP_LL))
-     return;
-
    sendto_ops_flags(FLAGS_DEBUG, "*** Cleaning up local channels...");
    
    next_chptr = NULL;
@@ -2890,12 +2663,25 @@ void cleanup_channels(void *unused)
      {
        next_chptr = chptr->nextch;
 
-       if((CurrentTime - chptr->locusers_last >= CLEANUP_CHANNELS_TIME) && !chptr->locusers)
+       if( (CurrentTime - chptr->locusers_last >= CLEANUP_CHANNELS_TIME)
+	   && (chptr->locusers == 0) )
          {
-           sendto_one(serv_cptr_list,":%s DROP %s",
-                  me.name, chptr->chname);
-           if(!chptr->locusers)
-             destroy_channel(chptr);
+	   /* If it is a vchan top, ignore the fact it has 0 users */
+
+	   if ( IsVchanTop(chptr) )
+	     {
+	       chptr->locusers_last = CurrentTime;
+	     }
+	   else
+	     {
+	       if(IsCapable(serv_cptr_list, CAP_LL))
+		 {
+		   sendto_one(serv_cptr_list,":%s DROP %s",
+			      me.name, chptr->chname);
+		 }
+	       if(!chptr->locusers)
+		 destroy_channel(chptr);
+	     }
          }
      }
 }    

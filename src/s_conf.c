@@ -3549,44 +3549,6 @@ void conf_add_q_line(struct ConfItem *aconf)
   aconf->name = aconf->host;
   DupString(aconf->host, "*");
 
-#ifdef JUPE_CHANNEL
-  if(aconf->name[0] == '#')
-    {
-      struct Channel *chptr;
-      int len;
-
-      if( (chptr = hash_find_channel(aconf->name, (struct Channel *)NULL)) )
-	chptr->mode.mode |= MODE_JUPED;
-      else
-	{
-	  /* create a zero user channel, marked as MODE_JUPED
-	   * which just place holds the channel down.
-	   */
-
-	  len = strlen(aconf->name);
-	  chptr = (struct Channel*) MyMalloc(sizeof(struct Channel) + len + 1);
-	  memset(chptr, 0, sizeof(struct Channel));
-	  /*
-	   * NOTE: strcpy ok since we already know the length
-	   */
-	  strcpy(chptr->chname, aconf->name);
-	  chptr->mode.mode = MODE_JUPED;
-	  if (GlobalChannelList)
-	    GlobalChannelList->prevch = chptr;
-	  chptr->prevch = NULL;
-	  chptr->nextch = GlobalChannelList;
-	  GlobalChannelList = chptr;
-	  /* JIC */
-	  chptr->channelts = CurrentTime;
-	  (void)add_to_channel_hash_table(aconf->name, chptr);
-	  Count.chan++;
-	}
-
-      if(aconf->passwd)
-	strncpy_irc(chptr->topic, aconf->passwd, TOPICLEN);
-    }
-#endif
-
   /* host, password, name, port, class */
   /* nick, reason, user@host */
           
