@@ -1,3 +1,15 @@
+androsyn    2003/09/17 13:03:55 EDT	(20030917_2)
+
+  Modified files:
+    src                  parse.c 
+  Log:
+  Remove a bogus assert
+  
+  Revision  Changes    Path
+  7.174     +0 -2      ircd-ratbox/src/parse.c
+
+
+
 androsyn    2003/09/17 10:46:22 EDT	(20030917_1)
 
   Modified files:
