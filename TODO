@@ -1,7 +1,7 @@
 NOTE: If a todo matches a bug/enhancement listed on http://bugs.efnow.net
 then the bug number should appear in brackets (ie (#15)) - madmax
 
-- add example *::* and NOMATCH::* I: lines to example.conf
+- add example *::* and NOMATCH::* I: lines to example.conf (no need)
 - add more stderr debugging (ircd -s)... one for every place we syslog()
 - make wrapper function for res_init() to do spare_fd crap
 - ircd -s doesn't work through a restart
@@ -164,36 +164,27 @@ Little things to be done given enough time and initiative -Hwy
 .  Fix tools/fixklines.c and tools/klineParse.c for the new kline.conf
    format.
 .  Update tools/mkconf as well.
-.  Document the OpenSSL CHALLENGE support more. (DONE)
-.  Create some make release or something for rsa_respond
+.  Create some make release or something for rsa_respond 
+   (DONE, make rsa_respond)
 .  Fix convertconf more
 .  Do we still need start_ircd.c and ircd_start.c?
 .  Look to see what other STATS commands can be made optionally oper-only
 .  2 pass conf parser (grab classes before anything that uses them)
 .  Use scrypt or just plain 'crypt' libs on FreeBSD, we support both types
    of passwords without any effort currently, why should we restrict ourselves
-   on some systems?
+   on some systems?  Note:  scrypt only supports MD5, descrypt supports both
 .  m_map.so in contrib
 .  m_mkpasswd.so in contrib
 .  Do we still need ircd_start.c and start_ircd.c?
 .  Re-add the ability to set usermodes from the conf (oldconf field after the
    O: line class)
-.  What does the name field in the listen block do?  (oldconf P:name:ip::port)
-   (Nothing now, it's GONE)
-.  Get rid of the %lu format in m_eob.c, go back to a damn %d (DONE)
-.  Fix the format of TIME, we used to use %t in date()...that seems to be
-   gone now.... Saturday January 20 2001 -- 15:49: 3 - 5: 0
-   That looks like shit...fix it (DONE)
 .  Randomize the order of WHO #channel and NAMES #channel in +a mode.
 .  Add in exemptions to D lines into the conf (old d: lines)
-.  The syntax error in conf line number is 1 less than it actually is.
-   Notice -- 77: syntax error on line:         e_lines_oper_only=yes;
-   When e_lines_oper_only=yes; is on line 78. (fixed...)
 .  <Riedel> walter : have you implemented the motd= thing in the auth block ?
 .  <mopi> still haven't made default chan flags configurable, eh? :/
-.  Finish the OpenSSL challenge/rsa_response stuff (DONE)
 .  Fix topic bursting to LL servers (broke lately for some reason)
 .  Other places that the number formats were replaced with that damn %lu
+.  Fix TRACE on IPv6
 
 
 -- Rodder's list
@@ -207,7 +198,7 @@ Little things to be done given enough time and initiative -Hwy
 *  Re-write m_stats.c to be table-based, similar to m_set.  Also change
    to support funtion exit code values (int), so that STATS output can
    be "successful" or "unsuccessful" (eg. "STATS i requested by <nick>
-   [unsuccessfl]" vs. "STATS i requested by <nick>").
+   [unsuccessful]" vs. "STATS i requested by <nick>").
 *  Clean up m_stats.c regarding it's STATS L and STATS u code.
 *  Come up with a solution to the dual-notice issue with server connects
    and disconnects (re: opers get one notice, admins get two).
