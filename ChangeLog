@@ -1,3 +1,21 @@
+androsyn    2002/12/10 13:37:38 UTC	(20021210_15)
+
+  Modified files:
+    include              confmatch.h 
+    modules              m_stats.c 
+    src                  confmatch.c iplines.c packet.c 
+  Log:
+  Get more of the /stats working again
+  
+  Revision  Changes    Path
+  7.3       +3 -0      ircd-ratbox/include/confmatch.h
+  1.137     +3 -3      ircd-ratbox/modules/m_stats.c
+  7.10      +187 -184  ircd-ratbox/src/confmatch.c
+  7.5       +0 -1      ircd-ratbox/src/iplines.c
+  7.106     +3 -0      ircd-ratbox/src/packet.c
+
+
+
 androsyn    2002/12/10 13:27:37 UTC	(20021210_14)
 
   Modified files:
