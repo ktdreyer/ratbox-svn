@@ -1366,14 +1366,6 @@ fork_server(struct Client *server)
 			if((i == ctrl_fds[1]) || (i == data_fds[1]) || (i == server->localClient->fd)) 
 			{
 				comm_set_nb(i);
-#ifdef USE_SIGIO		/* the servlink process doesn't need O_ASYNC */
-				{
-					int flags;
-					flags = fcntl(i, F_GETFL, 0);
-					flags |= ~O_ASYNC;
-					fcntl(i, F_SETFL, flags);
-				}
-#endif
 			}
 			else
 			{

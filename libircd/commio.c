@@ -180,10 +180,6 @@ comm_set_nb(int fd)
 	int nonb = 0;
 	int res;
 
-#ifdef USE_SIGIO
-	setup_sigio_fd(fd);
-#endif
-
 	nonb |= O_NONBLOCK;
 	res = fcntl(fd, F_GETFL, 0);
 	if(-1 == res || fcntl(fd, F_SETFL, res | nonb) == -1)
@@ -503,7 +499,7 @@ comm_connect_tryconnect(int fd, void *notused)
 {
 	int retval;
 	fde_t *F = &fd_table[fd];
-	/* This check is needed or re-entrant s_bsd_* like sigio break it. */
+
 	if(F->connect.callback == NULL)
 		return;
 	/* Try the connect() */

@@ -852,7 +852,6 @@ Optional Features:
   --enable-kqueue         Force kqueue() usage.
   --enable-devpoll        Force usage of /dev/poll.
   --enable-epoll          Enable sys_epoll support (Linux only)
-  --enable-rtsigio        Enable SIGIO with RT Signals (Linux only)
   --enable-assert         Enable assert(). Choose between soft(warnings) and
                           hard(aborts the daemon)
   --enable-profile        Enable profiling
@@ -7195,16 +7194,6 @@ if test "${enable_epoll+set}" = set; then
   enableval="$enable_epoll"
   SELECT_TYPE_EXPLICIT="epoll"; echo "Forcing Linux sys_epoll support to be enabled"
 fi;
-
-# Check whether --enable-rtsigio or --disable-rtsigio was given.
-if test "${enable_rtsigio+set}" = set; then
-  enableval="$enable_rtsigio"
-  SELECT_TYPE_EXPLICIT="sigio"; echo "Forcing Linux RT Sigio to be enabled"
-fi;
-
-if test ! -z "$SELECT_TYPE_EXPLICIT"; then
-	SELECT_TYPE="$SELECT_TYPE_EXPLICIT"
-else
 
 haveselect=no
 

@@ -216,12 +216,6 @@ extern void mangle_mapped_sockaddr(struct sockaddr_storage *in);
 #define mangle_mapped_sockaddr(x) 
 #endif
 
-#ifdef USE_SIGIO
-void do_sigio(int);
-void setup_sigio_fd(int);
-#endif
-
-
 
 extern FBFILE *fbopen(const char *filename, const char *mode);
 extern FBFILE *fdbopen(int fd, const char *mode);
