@@ -1,3 +1,8 @@
+*** 19991009_1 by db
+- better fix for umode code
+
+
+
 *** 19990925_1 by db
 - simpler mode letter to bit mask table lookup, safer
 
