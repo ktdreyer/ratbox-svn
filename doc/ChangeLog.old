@@ -1,3 +1,11 @@
+*** 20010120_5 by db
+- removed a totally useless function.. 
+  add_listener() is now called directly from the parser.. no need to
+  through gyrations. *BLOAT*
+  This cleans up the parser a bit more as well.
+
+
+
 *** 20010120_4 by db
 - removed CONF_ADMIN dumb dumb dumb, now its just AdminInfo struct
   
