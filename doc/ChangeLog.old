@@ -1,3 +1,7 @@
+*** 20010105_45 by ejb
+- remove hash debugging code
+
+
 *** 20010105_44 by ejb
 - make remote users actually get their ID set..
 
