@@ -1,3 +1,17 @@
+db          2002/06/22 16:27:45 EDT	(20020622_0)
+
+  Modified files:
+    src                  s_serv.c 
+  Log:
+  - add_lazylinkclient had the wrong assert. Its not a client in the
+    first arg, it should always be a locally connected leaf server.
+    Changed comments and parm names to make this clear, changed bogus assert.
+  
+  Revision  Changes    Path
+  7.262     +5 -6      ircd-hybrid-7/src/s_serv.c
+
+
+
 lusky       2002/06/20 22:33:13 EDT	(20020621_0)
 
   Modified files:
