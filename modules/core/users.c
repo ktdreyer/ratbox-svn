@@ -73,7 +73,7 @@ struct Message nick_msgtab = {
 };
 struct Message uid_msgtab = {
 	"UID", 0, 0, 0, MFLG_SLOW,
-	{mg_ignore, mg_ignore, mg_ignore, {ms_uid, 9}, mg_ignore}
+	{mg_ignore, mg_ignore, mg_ignore, {ms_uid, 9}, mg_ignore, mg_ignore}
 };
 struct Message user_msgtab = {
 	"USER", 0, 0, 0, MFLG_SLOW,
