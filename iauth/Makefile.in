@@ -1,0 +1,20 @@
+# IAuth Makefile (C) Patrick Alken 1999
+# $Id$
+
+CC = @CC@
+CFLAGS = @CFLAGS@
+
+# Debugging CFLAGS
+#CFLAGS = -g -Wall
+
+all: source
+	@echo '** Building iauth/source **'
+	@cd source ; $(MAKE) "CC=$(CC)" "CFLAGS=$(CFLAGS)"
+	@echo
+
+build: all
+
+clean:
+	@cd source ; $(MAKE) clean
+
+# End of Makefile
