@@ -1,3 +1,8 @@
+*** 20001220_10 by db
+- added notification to target when put on and taken off accept list
+
+
+
 *** 20001220_9 by db
 - fixed wallops so it doesn't add the "WALLOPS" message, uneeded.
 - updated INSTALL and CIDR docs from Walter Campbell
