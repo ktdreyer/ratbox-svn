@@ -1,3 +1,8 @@
+*** 20010130_4 by fl_
+- added FLAGS_NOTADMIN and removed as many of the double notices as
+  I could.. I might have missed some though :)
+
+
 *** 20010130_3 by fl_
 - changed sendto_realops_flags_opers() -> sendto_wallops_flags()
   it makes much more sense like that :)
