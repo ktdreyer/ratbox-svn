@@ -1333,15 +1333,15 @@ const char* comment         /* Reason for the exit */
 	    {
 	      dlinkDelete(m,&serv_list);
 	      free_dlink_node(m);
+#ifdef USE_TABLE_MODE
+          unset_chcap_usage_counts(source_p);
+#endif
 	    }
 	}
 
       if (IsServer(source_p))
         {
           Count.myserver--;
-#ifdef USE_TABLE_MODE	  
-          unset_chcap_usage_counts(source_p);
-#endif	  
 	  if(ServerInfo.hub)
 	    remove_lazylink_flags(source_p->localClient->serverMask);
 	  else
