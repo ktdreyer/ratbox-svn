@@ -40,7 +40,7 @@
                 " CHANMODES=%s"
                  
 #define FEATURESVALUES MAXMODEPARAMS,MAXCHANNELSPERUSER,MAXBANS, \
-        ConfigFileEntry.max_targets,NICKLEN,TOPICLEN,TOPICLEN,"#&","(ovh)@+%", \
+        ConfigFileEntry.max_targets,NICKLEN,TOPICLEN,TOPICLEN,"#&","(ohv)@%+", \
         "beI,,kl,imnpsta"
 
 /*
