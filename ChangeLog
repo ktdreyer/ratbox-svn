@@ -1,3 +1,16 @@
+androsyn    2004/07/08 20:04:58 EDT	(20040709_0)
+
+  Modified files:
+    src                  balloc.c 
+  Log:
+  Here is the balloc sanity checker thing...#define DEBUG_BALLOC 1 in balloc.h
+  to enable it
+  
+  Revision  Changes    Path
+  7.74      +70 -0     ircd-ratbox/src/balloc.c
+
+
+
 leeh        2004/07/08 13:36:58 EDT	(20040708_1)
 
   Modified files:
