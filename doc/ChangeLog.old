@@ -1,3 +1,31 @@
+*** 20001221_6 by adrian
+
+
+XXX UNTESTED UNTESTED UNTESTED UNTESTED
+
+(Go a broken CVS tree. :-)
+
+* change HANDLED_OK to CLIENT_OK. God knows why the two return values from
+  parse_client_queued() (at least from ircd_defs.h) turned out to be
+  CLIENT_EXITED or HANDLED_OK. Lets hear three cheers for great coding!
+
+* Changed parsed_client_queued() to return CLIENT_OK if everythign went well
+  (it was returning a numerical value..)
+
+* Actually listen to the return values of parse_client_queued() in
+  determining whether to schedule antoher comm_setselect() or
+  reregister the client in the flush list.
+
+A bug was found where a fd was being thrown onto the flush list in
+flood_recalc() which would then trigger an assertion. This won't call
+comm_setflush() if the client has just exited.
+
+What *should* happen in comm_checktimeouts() is there should be an
+assertion that the fd is open (flags.open) before calling the handler..
+just to be anal.
+
+
+
 *** 20001221_5 by db
 - missing m_dmem.c file from einride
 
