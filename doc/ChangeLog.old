@@ -1,3 +1,9 @@
+*** 20010529_8 by davidt
+- This fixes the compile for --enable-ipv6, and IPv6 should work as
+  before... However, iauth certainly wont work for IPv6, but it didn't
+  even compile before this commit.
+
+
 *** 20010529_7 by davidt
 - Revert commit checking client_p->name is "", since i've no idea what
   its trying to do, and it breaks stuff.  (heh. oddly enough 'Break Stuff'
