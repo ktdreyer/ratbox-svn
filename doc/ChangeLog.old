@@ -1,3 +1,28 @@
+ejb         2002/02/04 16:07:55 EST	(20020204_12)
+
+  Modified files:
+    adns                 descrip.mms 
+    include              res.h 
+    modules              descrip.mms 
+    src                  descrip.mms modules.c 
+  Added files:
+    modules/core         descrip.mms 
+  Log:
+  - fixed VMS compile; we generate [.modules]core.olb from
+    [.modules.core]*.c, and link against [.src]ircd.exe along
+    with modules.olb.  NOT tested for runtime yet, also still need
+    to fix config.h paths (so binaries can be distributed).
+  
+  Revision  Changes    Path
+  1.2       +2 -1      ircd-hybrid-7/adns/descrip.mms
+  7.19      +5 -1      ircd-hybrid-7/include/res.h
+  1.1       +18 -0     ircd-hybrid-7/modules/core/descrip.mms (new)
+  1.5       +7 -6      ircd-hybrid-7/modules/descrip.mms
+  7.9       +3 -2      ircd-hybrid-7/src/descrip.mms
+  7.89      +4 -0      ircd-hybrid-7/src/modules.c
+
+
+
 androsyn    2002/02/04 14:14:36 EST	(20020204_11)
 
   Modified files:
