@@ -539,14 +539,11 @@ serverinfo_network_desc: NETWORK_DESC '=' QSTRING ';'
 
 serverinfo_vhost:       VHOST '=' QSTRING ';'
   {
-#ifndef IPV6
-/* XXX: Broken for IPv6 */
-    if (parse_netmask(yylval.string, &ServerInfo.ip, NULL) == HM_HOST)
+    if(inetpton(DEF_FAM, yylval.string, &IN_ADDR(ServerInfo.ip)) <= 0)
     {
      log(L_ERROR, "Invalid netmask for server vhost(%s)", yylval.string);
     }
     ServerInfo.specific_virtual_host = 1;
-#endif
   };
 
 serverinfo_max_clients: T_MAX_CLIENTS '=' expr ';'
