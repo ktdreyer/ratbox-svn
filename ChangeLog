@@ -1,3 +1,15 @@
+androsyn    2002/09/06 00:52:43 UTC	(20020906_1)
+
+  Modified files:
+    .                    ChangeLog 
+  Log:
+  Change the timestamps in the ChangeLog to be UTC, instead of EDT
+  
+  Revision  Changes    Path
+  1.255     +251 -251  ircd-ratbox/ChangeLog
+
+
+
 androsyn    2002/09/06 00:39:31 UTC	(20020906_0)
 
   Modified files:
