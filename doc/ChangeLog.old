@@ -1,3 +1,9 @@
+*** 20010103_25 by db
+- ewwww there were two exit_client()'s on klined banned clients
+  moved up where it should have been done. STILL buggy... but closer.
+
+
+
 *** 20010103_24 by ejb
 - made modules.c use dlink
 
