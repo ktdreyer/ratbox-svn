@@ -1,3 +1,15 @@
+androsyn    2004/03/01 19:28:31 EST	(20040302_2)
+
+  Modified files:
+    src                  newconf.c 
+  Log:
+  Stop parsing for rsa keys for connect {}
+  
+  Revision  Changes    Path
+  7.136     +0 -45     ircd-ratbox/src/newconf.c
+
+
+
 androsyn    2004/03/01 19:08:32 EST	(20040302_1)
 
   Modified files:
