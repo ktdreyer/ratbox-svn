@@ -400,6 +400,12 @@
  */
 #define USE_RCS
 
+/*
+ * this checks for various things that should never happen, but
+ * might do due to bugs.  ircd might be slightly more efficient with 
+ * these disabled, who knows. keep this enabled during development.
+ */
+#define INVARIANTS
 /* ----------------- archaic and/or broken section -------------------- */
 #undef DNS_DEBUG
 
