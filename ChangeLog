@@ -1,3 +1,15 @@
+leeh        2002/08/25 15:09:36 EDT	(20020825_2)
+
+  Modified files:
+    src                  ircd_lexer.l 
+  Log:
+  - added the GPL to ircd_lexer.l, per larnes request.
+  
+  Revision  Changes    Path
+  1.151     +17 -2     ircd-ratbox/src/ircd_lexer.l
+
+
+
 leeh        2002/08/25 15:05:29 EDT	(20020825_1)
 
   Modified files:
