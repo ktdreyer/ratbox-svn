@@ -322,9 +322,6 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
 		}
 	}
 
-#ifdef INTENSIVE_DEBUG
-	do_channel_integrity_check();
-#endif
 }
 
 /*

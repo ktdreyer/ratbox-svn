@@ -29,8 +29,6 @@
 #include "config.h"		/* config settings */
 #include "ircd_defs.h"		/* buffer sizes */
 
-/* #define INTENSIVE_DEBUG */
-
 struct Client;
 
 /* mode structure for channels */
@@ -99,7 +97,6 @@ extern int is_chan_op(struct Channel *chptr, struct Client *who);
 extern int is_voiced(struct Channel *chptr, struct Client *who);
 
 #define find_user_link(list, who)  who != NULL ? dlinkFind(list, who) : NULL
-#define FIND_AND_DELETE(list, who) who != NULL ? dlinkFindDelete(list, who)
 extern void add_user_to_channel(struct Channel *chptr, struct Client *who, int flags);
 extern int remove_user_from_channel(struct Channel *chptr, struct Client *who);
 extern int qs_user_from_channel(struct Channel *, struct Client *);
@@ -144,10 +141,6 @@ struct Ban			/* also used for exceptions -orabidoo */
 };
 
 #define CLEANUP_CHANNELS_TIME (30*60)
-
-#ifdef INTENSIVE_DEBUG
-void do_channel_integrity_check(void);
-#endif
 
 void set_channel_topic(struct Channel *chptr, const char *topic,
 		       const char *topic_info, time_t topicts);
