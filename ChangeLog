@@ -1,3 +1,25 @@
+androsyn    2003/09/30 15:12:54 EDT	(20030930_2)
+
+  Modified files:
+    .                    configure configure.ac 
+    include              modules.h setup.h.in stdinc.h 
+    src                  ircd.c linebuf.c listener.c 
+  Log:
+  More autoconf twiddling..Make sure that we have fallback code if writev()
+  isn't supported.  Same for gettimeofday()
+  
+  Revision  Changes    Path
+  7.189     +12 -16    ircd-ratbox/configure
+  7.3       +11 -12    ircd-ratbox/configure.ac
+  7.57      +0 -1      ircd-ratbox/include/modules.h
+  7.73      +9 -21     ircd-ratbox/include/setup.h.in
+  1.11      +4 -0      ircd-ratbox/include/stdinc.h
+  7.316     +5 -0      ircd-ratbox/src/ircd.c
+  7.119     +32 -3     ircd-ratbox/src/linebuf.c
+  7.100     +5 -0      ircd-ratbox/src/listener.c
+
+
+
 androsyn    2003/09/30 14:11:05 EDT	(20030930_1)
 
   Modified files:
