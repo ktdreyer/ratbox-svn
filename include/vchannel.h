@@ -60,6 +60,10 @@ extern struct Channel* find_vchan(struct Channel *, char *);
 /* See if this client is on a sub chan already */
 extern int on_sub_vchan(struct Channel *chptr, struct Client *sptr);
 
+/* Check for an invite to any of the vchans */
+extern struct Channel* vchan_invites(struct Channel *chptr,
+                                     struct Client *sptr);
+
 /* Valid to verify a channel is a subchan */
 #define IsVchan(chan)	(chan->prev_vchan)
 

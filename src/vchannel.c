@@ -189,3 +189,21 @@ struct Channel* find_vchan(struct Channel *chptr, char *key)
 
   return NullChn;
 }
+
+/* return the first found invite matching a subchannel of chptr
+ * or NULL if no invites are found */
+
+struct Channel* vchan_invites(struct Channel *chptr, struct Client *sptr)
+{
+  struct SLink *lp;
+  struct Channel *cp;
+
+  /* loop is nested this way to prevent preferencing channels higher
+     in the vchan list */
+  for (lp = sptr->user->invited; lp; lp = lp->next)
+    for (cp = chptr; cp; cp = cp->next_vchan)
+      if (lp->value.chptr == cp)
+        return cp;
+
+  return NullChn;
+}
