@@ -1,3 +1,31 @@
+androsyn    2001/12/10 23:33:11 EST	(20011211_7)
+
+  Modified files:
+    .                    configure 
+    adns                 Makefile.in 
+    autoconf             configure.in 
+    contrib              Makefile.in 
+    modules              .depend Makefile.in 
+    servlink             Makefile.in 
+    src                  .depend Makefile.in 
+    tools                Makefile.in 
+  Log:
+  Fixed make depend weirdness. Use cc -xM if on solaris and not using gcc
+  
+  Revision  Changes      Path
+  1.12      +2 -2        ircd-hybrid-7/adns/Makefile.in
+  7.103     +20 -0       ircd-hybrid-7/autoconf/configure.in
+  7.104     +2624 -4992  ircd-hybrid-7/configure
+  1.27      +2 -2        ircd-hybrid-7/contrib/Makefile.in
+  1.40      +42017 -1    ircd-hybrid-7/modules/.depend
+  1.57      +1 -1        ircd-hybrid-7/modules/Makefile.in
+  1.12      +2 -2        ircd-hybrid-7/servlink/Makefile.in
+  7.61      +20235 -1    ircd-hybrid-7/src/.depend
+  7.104     +1 -1        ircd-hybrid-7/src/Makefile.in
+  7.29      +2 -2        ircd-hybrid-7/tools/Makefile.in
+
+
+
 androsyn    2001/12/10 23:09:57 EST	(20011211_6)
 
   Modified files:
