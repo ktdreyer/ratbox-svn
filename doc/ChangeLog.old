@@ -1,3 +1,8 @@
+*** 20010605_8 by db
+- added GlobalSetOptions.use_invex, no parser entry for it yet
+
+
+
 *** 20010605_7 by leeh
 - log() -> ilog()
 
