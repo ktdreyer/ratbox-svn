@@ -1,3 +1,28 @@
+leeh        2004/10/05 10:44:49 EDT	(20041005_0)
+
+  Modified files:
+    doc                  example.conf 
+    include              conf.h ucommand.h 
+    src                  io.c newconf.c u_stats.c ucommand.c 
+  Log:
+  - move "dcc" priv into flags, dont enable it by default
+  - merge "sadmin" priv into "admin"
+  - add "route" priv, for .connect
+  - add back the setting privs via table stuff in conf parser
+  - add minpara to command structure over dcc
+  - fix a parsing bug with get_line()
+  
+  Revision  Changes    Path
+  1.11      +4 -15     rserv/doc/example.conf
+  1.15      +2 -2      rserv/include/conf.h
+  1.5       +1 -0      rserv/include/ucommand.h
+  1.24      +7 -4      rserv/src/io.c
+  1.12      +8 -28     rserv/src/newconf.c
+  1.8       +17 -6     rserv/src/u_stats.c
+  1.15      +14 -19    rserv/src/ucommand.c
+
+
+
 leeh        2004/10/04 15:38:19 EDT	(20041004_2)
 
   Modified files:
