@@ -201,8 +201,6 @@ int show_lusers(struct Client *cptr, struct Client *sptr,
 /*  forced = (parc >= 2); */
   forced = (IsAnOper(sptr) && (parc > 3));
 
-/* (void)collapse(parv[1]); */
-
   Count.unknown = 0;
   m_server = Count.myserver;
   m_client = Count.local;
