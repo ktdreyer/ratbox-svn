@@ -563,7 +563,10 @@ conf_end_oper(struct TopConf *tc)
 		yy_tmpoper = ptr->data;
 
 		DupString(yy_tmpoper->name, yy_oper->name);
-		DupString(yy_tmpoper->passwd, yy_oper->passwd);
+
+		/* could be an rsa key instead.. */
+		if(!EmptyString(yy_oper->passwd))
+			DupString(yy_tmpoper->passwd, yy_oper->passwd);
 
 		yy_tmpoper->flags = yy_oper->flags;
 		yy_tmpoper->umodes = yy_oper->umodes;
