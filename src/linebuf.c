@@ -591,19 +591,21 @@ linebuf_putmsg(buf_head_t *bufhead, const char *format, va_list *va_args,
 	{
 	  len--;
 	}
-      bufline->buf[len++] = '\r';
-      bufline->buf[len++] = '\n';
-      bufline->buf[len++] = '\0'; 
+      bufline->buf[++len] = '\r';
+      bufline->buf[++len] = '\n';
+      bufline->buf[++len] = '\0'; 
 
       bufline->len  = len;
       bufhead->len += len;
     }
-  else
+  elsej
     {
       bufline->buf[0] = '\r';
       bufline->buf[1] = '\n';
       bufline->buf[2] = '\0'; 
-      bufline->len  = 0;
+
+      bufline->len  = 2;
+      bufhead->len += 2;
     }
 
   bufline->terminated = 1;
