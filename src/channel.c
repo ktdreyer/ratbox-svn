@@ -409,7 +409,8 @@ sub1_from_channel(struct Channel *chptr)
                                  * It should never happen but...
                                  */
     /* persistent channel - must be 12h old */
-    if ((chptr->channelts + (60*60*12)) > CurrentTime)
+    if (!ConfigChannel.persist_time ||
+        ((chptr->channelts + (60*60*12)) > CurrentTime))
     {
       destroy_channel(chptr);
       return 1;

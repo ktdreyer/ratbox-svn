@@ -807,8 +807,15 @@ handle_opers(int p_or_n, char *command, struct Client *client_p,
   /*
    * user[%host]@server addressed?
    */
-  if ((server = strchr(nick, '@')) && (target_p = find_server(server + 1)))
+  if ((server = strchr(nick, '@')) != NULL)
   {
+    if((target_p = find_server(server + 1)) == NULL)
+    {
+      sendto_one(source_p, form_str(ERR_NOSUCHSERVER),
+                 me.name, source_p->name, server+1);
+      return;
+    }
+
     count = 0;
 
     /*
@@ -818,7 +825,7 @@ handle_opers(int p_or_n, char *command, struct Client *client_p,
     if (!IsMe(target_p))
     {
       sendto_one(target_p, ":%s %s %s :%s", source_p->name,
-                 "PRIVMSG", nick, text);
+                 command, nick, text);
       return;
     }
 
@@ -850,7 +857,7 @@ handle_opers(int p_or_n, char *command, struct Client *client_p,
 	*--host = '%';
 
       if (count == 1)
-        sendto_anywhere(target_p, source_p, "%s %s :%s", "PRIVMSG",
+        sendto_anywhere(target_p, source_p, "%s %s :%s", command,
 			nick, text);
       else
         sendto_one(source_p, form_str(ERR_TOOMANYTARGETS),

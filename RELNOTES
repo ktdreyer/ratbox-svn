@@ -1,5 +1,13 @@
 -- ircd-ratbox-1.0 RELNOTES 
 
+-- ircd-ratbox-1.0-rc6
+- added clarity in dupe gline notices, will now state either
+  "oper has already voted" or "server has already voted"
+- oper reasons are now shown again in the kline message, but still
+  cant be seen in stats k, this will be fixed in ratbox-1.1
+- mkpasswd has been updated
+- added a note to README.FIRST about the fbsd ipv6-in-ipv4 problem
+
 -- ircd-ratbox-1.0-rc5 
 - Added ISON support for servers.  Disabled for users when shide is on.
 - Added a operator flag to allow or disallow operators from doing /operwall

@@ -72,6 +72,10 @@ Feature Specific Requirements:
   visit http://lists.ratbox.org/cgi-bin/mailman/listinfo/ircd-ratbox
   Note that this list also gets the commit emails from the CVS server.
 
+- FREEBSD USERS: if you are compiling with ipv6 you may experience
+  problems with ipv4 due to the way the socket code is written.  To
+  fix this you must: "sysctl net.inet6.ip6.v6only=0"
+
 - SOLARIS USERS: this code appears to tickle a bug in older gcc and 
   egcs ONLY on 64-bit Solaris7.  gcc-2.95 and SunPro C on 64bit should
   work fine, and any gcc or SunPro compiled on 32bit.
