@@ -64,6 +64,7 @@ static int mr_pong(struct Client *, struct Client *, int, const char **);
 static int ms_pong(struct Client *, struct Client *, int, const char **);
 static int m_ping(struct Client *, struct Client *, int, const char **);
 static int ms_ping(struct Client *, struct Client *, int, const char **);
+static int mr_pass(struct Client *, struct Client *, int, const char **);
 
 struct Message nick_msgtab = {
 	"NICK", 0, 0, 0, MFLG_SLOW,
@@ -89,9 +90,17 @@ struct Message ping_msgtab = {
 	{mg_unreg, {m_ping, 2}, {ms_ping, 2}, {ms_ping, 2}, mg_ignore, {m_ping, 2}}
 };
 
+struct Message pass_msgtab = {
+	"PASS", 0, 0, 0, MFLG_SLOW | MFLG_UNREG,
+	{{mr_pass, 2}, mg_reg, mg_ignore, mg_ignore, mg_ignore, mg_reg}
+};
 
-mapi_clist_av1 registration_clist[] = { &nick_msgtab, &uid_msgtab, &user_msgtab, &pong_msgtab, &ping_msgtab, NULL };
-DECLARE_MODULE_AV1(registration, NULL, NULL, registration_clist, NULL, NULL, "$Revision$");
+
+mapi_clist_av1 users_clist[] = { &nick_msgtab, &uid_msgtab, &user_msgtab, &pong_msgtab, &ping_msgtab, 
+				 &pass_msgtab, 
+				 NULL };
+
+DECLARE_MODULE_AV1(users, NULL, NULL, users_clist, NULL, NULL, "$Revision$");
 
 static int clean_nick(const char *, int loc_client);
 static int clean_username(const char *);
@@ -703,6 +712,59 @@ mr_pong(struct Client *client_p, struct Client *source_p, int parc, const char *
 	return 0;
 }
 
+
+/*
+ * m_pass() - Added Sat, 4 March 1989
+ *
+ *
+ * mr_pass - PASS message handler
+ *      parv[0] = sender prefix
+ *      parv[1] = password
+ *      parv[2] = "TS" if this server supports TS.
+ *      parv[3] = optional TS version field -- needed for TS6
+ */
+static int
+mr_pass(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
+{
+	if(client_p->localClient->passwd)
+	{
+		memset(client_p->localClient->passwd, 0,
+			strlen(client_p->localClient->passwd));
+		MyFree(client_p->localClient->passwd);
+	}
+
+	DupNString(client_p->localClient->passwd, parv[1], PASSWDLEN);
+
+	if(parc > 2)
+	{
+		/* 
+		 * It looks to me as if orabidoo wanted to have more
+		 * than one set of option strings possible here...
+		 * i.e. ":AABBTS" as long as TS was the last two chars
+		 * however, as we are now using CAPAB, I think we can
+		 * safely assume if there is a ":TS" then its a TS server
+		 * -Dianora
+		 */
+		if(irccmp(parv[2], "TS") == 0 && client_p->tsinfo == 0)
+			client_p->tsinfo = TS_DOESTS;
+
+		/* kludge, if we're not using ts6, dont ever mark a server
+		 * as TS6 capable, that way we'll never send them TS6 data.
+		 */
+		if(ServerInfo.use_ts6 && parc == 5 && atoi(parv[3]) >= 6)
+		{
+			/* only mark as TS6 if the SID is valid.. */
+			if(IsDigit(parv[4][0]) && IsIdChar(parv[4][1]) &&
+			   IsIdChar(parv[4][2]) && parv[4][3] == '\0')
+			{
+				client_p->localClient->caps |= CAP_TS6;
+				strcpy(client_p->id, parv[4]);
+			}
+		}
+	}
+
+	return 0;
+}
 
 
 
