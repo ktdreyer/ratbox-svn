@@ -1,3 +1,18 @@
+leeh        2004/03/02 13:30:15 EST	(20040302_6)
+
+  Modified files:
+    modules              m_set.c 
+    src                  ircd.c 
+  Log:
+  - init_netio() needs to be before print_startup()
+  - fix core on /quote set autoconn
+  
+  Revision  Changes    Path
+  1.74      +10 -10    ircd-ratbox/modules/m_set.c
+  7.329     +2 -2      ircd-ratbox/src/ircd.c
+
+
+
 androsyn    2004/03/02 13:26:24 EST	(20040302_5)
 
   Modified files:
