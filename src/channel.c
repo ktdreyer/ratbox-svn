@@ -60,8 +60,6 @@ static void send_mode_list(struct Client *client_p, char *chname,
                            dlink_list *top, char flag, int clear);
 static int check_banned(struct Channel *chptr, struct Client *who,
                                                 char *s, char *s2);
-static void make_nick_user_host(char *s, const char *nick, const char *name,
-                                const char *host);
 
 static char buf[BUFSIZE];
 static char modebuf[MODEBUFLEN], parabuf[MODEBUFLEN];
@@ -908,17 +906,17 @@ channel_chanop_or_voice(struct Channel *chptr, struct Client *target_p)
 int
 is_banned(struct Channel *chptr, struct Client *who)
 {
-  char s[NICKLEN + USERLEN + HOSTLEN + 6];
-  char s2[NICKLEN + USERLEN + HOSTLEN + 6];
+  char s_host[NICKLEN + USERLEN + HOSTLEN + 6];
+  char s_iphost[NICKLEN + USERLEN + HOSTLEN + 6];
 
   if (!IsPerson(who))
     return (0);
 
-  make_nick_user_host(s, who->name, who->username, who->host);
-  make_nick_user_host(s2, who->name, who->username,
-                      who->localClient->sockhost);
+  ircsprintf(s_host,"%s!%s@%s", who->name, who->username, who->host);
+  ircsprintf(s_iphost,"%s!%s@%s", who->name, who->username,
+	     who->localClient->sockhost);
 
-  return (check_banned(chptr, who, s, s2));
+  return (check_banned(chptr, who, s_host, s_iphost));
 }
 
 /*
@@ -970,34 +968,6 @@ check_banned(struct Channel *chptr, struct Client *who, char *s, char *s2)
 }
 
 /* small series of "helper" functions */
-/*
- * make_nick_user_host
- *
- * inputs       - pointer to location to place string
- *              - pointer to nick
- *              - pointer to name
- *              - pointer to host
- * side effects -
- * create a string of form "foo!bar@fubar" given foo, bar and fubar
- * as the parameters.
- */
-static void
-make_nick_user_host(char *s,
-                    const char *nick, const char *name, const char *host)
-{
-  int n;
-  const char *p;
-
-  for (p = nick, n = NICKLEN; *p && n--;)
-    *s++ = *p++;
-  *s++ = '!';
-  for (p = name, n = USERLEN; *p && n--;)
-    *s++ = *p++;
-  *s++ = '@';
-  for (p = host, n = HOSTLEN; *p && n--;)
-    *s++ = *p++;
-  *s = '\0';
-}
 
 /*
  * can_join
@@ -1012,16 +982,17 @@ can_join(struct Client *source_p, struct Channel *chptr, char *key)
   dlink_node *lp;
   dlink_node *ptr;
   struct Ban *invex = NULL;
-  char s[NICKLEN + USERLEN + HOSTLEN + 6];
-  char s2[NICKLEN + USERLEN + HOSTLEN + 6];
+  char s_host[NICKLEN + USERLEN + HOSTLEN + 6];
+  char s_iphost[NICKLEN + USERLEN + HOSTLEN + 6];
 
   assert(source_p->localClient != NULL);
 
-  make_nick_user_host(s, source_p->name, source_p->username, source_p->host);
-  make_nick_user_host(s2, source_p->name, source_p->username,
-                      source_p->localClient->sockhost);
+  ircsprintf(s_host,
+	     "%s!%s@%s", source_p->name, source_p->username, source_p->host);
+  ircsprintf(s_iphost,"%s!%s@%s", source_p->name, source_p->username,
+	     source_p->localClient->sockhost);
 
-  if ((check_banned(chptr, source_p, s, s2)) == CHFL_BAN)
+  if ((check_banned(chptr, source_p, s_host, s_iphost)) == CHFL_BAN)
     return (ERR_BANNEDFROMCHAN);
 
   if (chptr->mode.mode & MODE_INVITEONLY)
@@ -1036,7 +1007,7 @@ can_join(struct Client *source_p, struct Channel *chptr, char *key)
       for (ptr = chptr->invexlist.head; ptr; ptr = ptr->next)
       {
         invex = ptr->data;
-        if (match(invex->banstr, s) || match(invex->banstr, s2))
+        if (match(invex->banstr, s_host) || match(invex->banstr, s_iphost))
           break;
       }
       if (ptr == NULL)
