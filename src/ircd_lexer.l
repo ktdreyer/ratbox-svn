@@ -43,7 +43,7 @@ void hashcomment(void);
 int ieof(void);
 int lineno_stack[MAX_INCLUDE_DEPTH];
 char conffile_stack[MAX_INCLUDE_DEPTH][IRCD_BUFSIZE];
-char conffilebuf[IRCD_BUFSIZE];
+char conffilebuf[IRCD_BUFSIZE+1];
 
 FBFILE *inc_fbfile_in[MAX_INCLUDE_DEPTH];
 
