@@ -1,3 +1,8 @@
+*** 20010422_1 by fl_
+- added back oper accountability for KILL's.. if the client we're killing
+  is opered, we should tell them who sent the kill..
+
+
 *** 20010421_6 by toot
 made stats t and stats z a bit more readable.
 
