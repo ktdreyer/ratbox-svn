@@ -38,6 +38,7 @@
 #include "s_bsd.h"
 #include "s_log.h"
 #include "send.h"
+#include "m_gline.h"
 #include "s_debug.h"
 
 #include <stdio.h>
@@ -110,13 +111,6 @@ struct ConfItem *temporary_klines = NULL;
 static  char *set_conf_flags(struct ConfItem *,char *);
 static  int  oper_privs_from_string(int,char *);
 static  int  oper_flags_from_string(char *);
-
-/* externally defined functions */
-extern  void    outofmemory(void);        /* defined in list.c */
-
-#ifdef GLINES
-extern  struct ConfItem *find_gkill(struct Client *); /* defined in m_gline.c */
-#endif
 
 /* usually, with hash tables, you use a prime number...
  * but in this case I am dealing with ip addresses, not ascii strings.
