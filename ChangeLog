@@ -1,3 +1,15 @@
+androsyn    2004/11/30 16:26:21 EST	(20041130_0)
+
+  Modified files:
+    src                  s_auth.c 
+  Log:
+  fixed the huge memory leak here too
+  
+  Revision  Changes    Path
+  7.188     +2 -0      ircd-ratbox/src/s_auth.c
+
+
+
 androsyn    2004/10/21 12:19:07 EDT	(20041021_0)
 
   Modified files:
