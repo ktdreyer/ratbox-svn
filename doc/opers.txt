@@ -227,12 +227,13 @@ COMMAND         - USAGE and DESCRIPTION
 
 + CJOIN          - CJOIN <channel>
                    -- Creates a new vchan
-                   Note: this command is optionally usable by users
+                   Note: this command is optionally available to users
 
-+ MODLOAD        - MODLOAD <path/module.so>
++ MODLOAD        - MODLOAD <[path/]module.so>
                    -- Load a module into the ircd
-                   the path can be an absolute path from / or from the
-                   IRCD_PREFIX (ie modules/autoload/m_users.so)
+                   the optional path can be an absolute path
+                   from / or from the IRCD_PREFIX 
+                   (ie modules/autoload/m_users.so)
                    NOTE:  Restricted to admins only
 
 + MODLIST        - MODLIST [match string]
@@ -247,4 +248,9 @@ COMMAND         - USAGE and DESCRIPTION
                    Use just the module name, the path is not needed.
                    When a module is unloaded, all commands associated 
                    with it are unloaded as well.
+                   NOTE:  Restricted to admins only
+
++ MODRELOAD      - MODRELOAD <[path/]module.so>
+                   -- Reload a module into the ircd
+                   path is optional
                    NOTE:  Restricted to admins only
