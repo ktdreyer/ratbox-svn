@@ -920,7 +920,6 @@ chm_ban(struct Client *client_p, struct Client *source_p,
     else
 #endif
       DLINK_FOREACH(ptr, chptr->banlist.head)
-      for (ptr = chptr->banlist.head; ptr; ptr = ptr->next)
       {
         banptr = ptr->data;
         sendto_one(client_p, form_str(RPL_BANLIST),
@@ -2445,9 +2444,13 @@ sync_channel_oplists(struct Channel *chptr, int dir)
   dlink_node *ptr;
 
   DLINK_FOREACH(ptr, chptr->locpeons.head)
+  {
     sync_oplists(chptr, ptr->data, MODE_ADD, chptr->chname);
-  DLINK_FOREACH(ptr, chptr->locvoice.head)
+  }
+  DLINK_FOREACH(ptr, chptr->locvoiced.head)
+  {
     sync_oplists(chptr, ptr->data, MODE_ADD, chptr->chname);
+  }
 }
 
 #endif
@@ -2511,7 +2514,6 @@ static void update_channel_info(struct Channel *chptr)
     if(chptr->mode.mode & MODE_HIDEOPS)
     {
       DLINK_FOREACH(ptr, chptr->locpeons.head)
-           ptr = ptr->next)
       {
         mode_get_status(chptr, ptr->data, &t_op, &t_hop, &t_voice, 0);
         if (!t_hop && !t_op)
