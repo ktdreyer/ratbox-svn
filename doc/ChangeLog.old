@@ -1,3 +1,8 @@
+*** 20010301_2 by db
+- mem_frob() is not valid if NDEBUG is defined hence it can't be called here
+
+
+
 *** 20010301_1 by androsyn
 Gets rid of the dns lookup in listener.c it was a dumb idea..if you ask me
 :P
