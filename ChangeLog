@@ -1,3 +1,15 @@
+androsyn    2004/06/14 23:15:03 EDT	(20040615_0)
+
+  Modified files:
+    src                  poll.c 
+  Log:
+  Fix the poll() code for broke poll()s
+  
+  Revision  Changes    Path
+  7.78      +17 -3     ircd-ratbox/src/poll.c
+
+
+
 leeh        2004/06/13 22:10:55 EDT	(20040614_2)
 
   Modified files:
