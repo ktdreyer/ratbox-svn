@@ -79,7 +79,6 @@ SHELL=/bin/sh
 
 SUBDIRS =          \
  zlib              \
- iauth             \
  src               \
  tools
 
