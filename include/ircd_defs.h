@@ -160,4 +160,3 @@ struct sockaddr_storage
 #endif
 
 #endif /* INCLUDED_ircd_defs_h */
-b
