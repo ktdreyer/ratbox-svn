@@ -298,10 +298,6 @@
 /* If we don't have a real socklen_t, unsigned int is good enough. */
 #undef socklen_t
 
-/* Broken glibc implementations use __ss_family instead of ss_family. Define
-   to __ss_family if true. */
-#undef ss_family
-
 /* If system does not define u_int16_t, define a usable substitute. */
 #undef u_int16_t
 

@@ -249,23 +249,6 @@ AC_CHECK_TYPE(socklen_t, ,
 [#include <sys/types.h>
 #include <sys/socket.h>])
 
-dnl Tru64 accepts *both*
-if test -z "$Tru"; then
-
-AC_MSG_CHECKING(for broken glibc with __ss_family)
-AC_COMPILE_IFELSE(
-[AC_LANG_PROGRAM(
-[#include <sys/types.h>
-#include <sys/socket.h>],
-[struct sockaddr_storage s; s.__ss_family = AF_INET;])],
-[
-	AC_MSG_RESULT(yes)
-	AC_DEFINE(ss_family, __ss_family, [Broken glibc implementations use __ss_family instead of ss_family. Define to __ss_family if true.])
-],
-[AC_MSG_RESULT(no)])
-fi
-
-
 AC_ARG_ENABLE(ipv6,
 AC_HELP_STRING([--enable-ipv6],[Enable IPv6 support]),[ipv6=$enableval],[ipv6=no])
 

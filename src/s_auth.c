@@ -193,7 +193,7 @@ auth_dns_callback(void *vptr, adns_answer * reply)
 			struct Client *client = auth->client;
 			auth->ip6_int = 1;
 			MyFree(reply);
-			if(adns_getaddr(&client->localClient->ip, client->localClient->ip.ss_family, &auth->dns_query, 1))
+			if(adns_getaddr((struct sockaddr *)&client->localClient->ip, client->localClient->ip.ss_family, &auth->dns_query, 1))
 			{
 				ClearDNSPending(auth);
 				sendheader(auth->client, REPORT_FAIL_DNS);
@@ -284,7 +284,7 @@ start_auth_query(struct AuthRequest *auth)
 	getsockname(auth->client->localClient->fd,
 		    (struct sockaddr *) &localaddr, &locallen);
 	
-	mangle_mapped_sockaddr(&localaddr);
+	mangle_mapped_sockaddr((struct sockaddr *)&localaddr);
 #ifdef IPV6
 	if(localaddr.ss_family == AF_INET6)
 	{
@@ -392,7 +392,7 @@ start_auth(struct Client *client)
 		{
 			auth->ip6_int = 1;
 			SetDNSPending(auth);
-			if(adns_getaddr(&client->localClient->ip, client->localClient->ip.ss_family, &auth->dns_query, 1))
+			if(adns_getaddr((struct sockaddr *)&client->localClient->ip, client->localClient->ip.ss_family, &auth->dns_query, 1))
 			{
 				ClearDNSPending(auth);
 				sendheader(client, REPORT_FAIL_DNS);

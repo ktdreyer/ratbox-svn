@@ -75,7 +75,7 @@ parse_netmask(const char *text, struct sockaddr  *naddr, int *nb)
 				*b = 128;
 		} else
 			*b = 128;
-		if(inetpton_sock(ip, addr) > 0)
+		if(inetpton_sock(ip, (struct sockaddr *)addr) > 0)
 			return HM_IPV6;
 		else
 			return HM_HOST;
@@ -398,7 +398,7 @@ add_conf_by_address(const char *address, int type, const char *username, struct 
 	{
 		/* We have to do this, since we do not re-hash for every bit -A1kmm. */
 		bits -= bits % 16;
-		arec->next = atable[(hv = hash_ipv6(&arec->Mask.ipa.addr, bits))];
+		arec->next = atable[(hv = hash_ipv6((struct sockaddr *)&arec->Mask.ipa.addr, bits))];
 		atable[hv] = arec;
 	}
 	else
