@@ -1,3 +1,7 @@
+*** 20001224_20 by wcampbel
+Add a little more documentation to is-'s oper_only_umodes
+
+
 *** 20001224_19 by db
 - removed unneeded match()
   and removed quite obsolete comments... 
