@@ -81,6 +81,7 @@ BASE_SRCS =                     \
   memory.c                      \
   modules.c                     \
   motd.c                        \
+  newconf.c			\
   numeric.c                     \
   packet.c                      \
   parse.c                       \

@@ -5,9 +5,10 @@ adns.o: adns.c ../include/stdinc.h ../include/config.h \
  ../include/balloc.h ../include/irc_string.h ../include/sprintf_irc.h \
  ../include/send.h ../include/s_conf.h ../include/motd.h \
  ../include/class.h ../include/client.h ../include/ircd_handler.h \
- ../include/linebuf.h ../include/channel.h ../include/s_bsd.h \
- ../include/fdlist.h ../include/s_log.h ../include/event.h \
- ../include/numeric.h ../adns/internal.h ../adns/dlist.h
+ ../include/linebuf.h ../include/channel.h ../include/common.h \
+ ../include/s_bsd.h ../include/fdlist.h ../include/s_log.h \
+ ../include/event.h ../include/numeric.h ../adns/internal.h \
+ ../adns/dlist.h
 balloc.o: balloc.c ../include/stdinc.h ../include/config.h \
  ../include/setup.h ../include/defaults.h ../include/ircd_defs.h \
  ../include/ircd.h ../include/tools.h ../include/memory.h \
@@ -114,8 +115,8 @@ hostmask.o: hostmask.c ../include/stdinc.h ../include/config.h \
  ../include/class.h ../include/client.h ../include/ircd_handler.h \
  ../include/linebuf.h ../include/channel.h ../include/res.h \
  ../adns/adns.h ../include/ircd.h ../include/irc_string.h \
- ../include/sprintf_irc.h ../include/hostmask.h ../include/numeric.h \
- ../include/send.h
+ ../include/sprintf_irc.h ../include/common.h ../include/hostmask.h \
+ ../include/numeric.h ../include/send.h
 irc_string.o: irc_string.c ../include/stdinc.h ../include/config.h \
  ../include/setup.h ../include/defaults.h ../include/tools.h \
  ../include/irc_string.h ../include/client.h ../include/ircd_defs.h \
@@ -139,7 +140,7 @@ ircd.o: ircd.c ../include/stdinc.h ../include/config.h \
  ../include/s_debug.h ../include/s_log.h ../include/s_misc.h \
  ../include/s_serv.h ../include/s_stats.h ../include/scache.h \
  ../include/send.h ../include/whowas.h ../include/modules.h \
- ../include/hook.h ../include/ircd_getopt.h
+ ../include/hook.h ../include/ircd_getopt.h ../include/newconf.h
 ircd_signal.o: ircd_signal.c ../include/stdinc.h ../include/config.h \
  ../include/setup.h ../include/defaults.h ../include/ircd_signal.h \
  ../include/ircd.h ../include/tools.h ../include/memory.h \
@@ -154,7 +155,7 @@ kdparse.o: kdparse.c ../include/stdinc.h ../include/config.h \
  ../include/client.h ../include/ircd_handler.h ../include/linebuf.h \
  ../include/channel.h ../include/res.h ../adns/adns.h \
  ../include/ircd.h ../include/memory.h ../include/balloc.h \
- ../include/irc_string.h ../include/sprintf_irc.h \
+ ../include/irc_string.h ../include/sprintf_irc.h ../include/common.h \
  ../include/hostmask.h
 linebuf.o: linebuf.c ../include/stdinc.h ../include/config.h \
  ../include/setup.h ../include/defaults.h ../include/tools.h \
@@ -181,7 +182,8 @@ listener.o: listener.c ../include/stdinc.h ../include/config.h \
  ../include/memory.h ../include/balloc.h ../include/irc_string.h \
  ../include/sprintf_irc.h ../include/fdlist.h ../include/numeric.h \
  ../include/s_bsd.h ../include/s_conf.h ../include/motd.h \
- ../include/class.h ../include/s_stats.h ../include/send.h
+ ../include/class.h ../include/common.h ../include/s_stats.h \
+ ../include/send.h
 m_error.o: m_error.c ../include/stdinc.h ../include/config.h \
  ../include/setup.h ../include/defaults.h ../include/handlers.h \
  ../include/client.h ../include/ircd_defs.h ../include/ircd_handler.h \
@@ -221,7 +223,8 @@ modules.o: modules.c ../include/stdinc.h ../include/config.h \
  ../include/res.h ../include/fileio.h ../adns/adns.h \
  ../include/irc_string.h ../include/sprintf_irc.h ../include/send.h \
  ../include/s_conf.h ../include/motd.h ../include/class.h \
- ../include/handlers.h ../include/numeric.h ../include/list.h
+ ../include/common.h ../include/handlers.h ../include/numeric.h \
+ ../include/list.h
 motd.o: motd.c ../include/stdinc.h ../include/config.h \
  ../include/setup.h ../include/defaults.h ../include/tools.h \
  ../include/motd.h ../include/ircd_defs.h ../include/ircd.h \
@@ -230,7 +233,19 @@ motd.o: motd.c ../include/stdinc.h ../include/config.h \
  ../include/irc_string.h ../include/sprintf_irc.h ../include/s_bsd.h \
  ../include/s_conf.h ../include/class.h ../include/client.h \
  ../include/ircd_handler.h ../include/linebuf.h ../include/channel.h \
- ../include/send.h ../include/numeric.h
+ ../include/common.h ../include/send.h ../include/numeric.h
+newconf.o: newconf.c ../include/stdinc.h ../include/config.h \
+ ../include/setup.h ../include/defaults.h ../include/memory.h \
+ ../include/ircd_defs.h ../include/balloc.h ../include/tools.h \
+ ../include/newconf.h ../include/client.h ../include/ircd_handler.h \
+ ../include/linebuf.h ../include/channel.h ../include/res.h \
+ ../include/fileio.h ../adns/adns.h ../include/ircd.h \
+ ../include/irc_string.h ../include/sprintf_irc.h ../include/list.h \
+ ../include/common.h ../include/s_log.h ../include/s_conf.h \
+ ../include/motd.h ../include/class.h ../include/send.h \
+ ../include/modules.h ../include/parse.h ../include/msg.h \
+ ../include/listener.h ../include/hostmask.h ../include/resv.h \
+ ../include/s_serv.h ../include/event.h
 numeric.o: numeric.c ../include/stdinc.h ../include/config.h \
  ../include/setup.h ../include/defaults.h ../include/numeric.h \
  ../include/irc_string.h ../include/common.h ../include/memory.h \
@@ -243,8 +258,8 @@ packet.o: packet.c ../include/stdinc.h ../include/config.h \
  ../include/memory.h ../include/balloc.h ../include/irc_string.h \
  ../include/sprintf_irc.h ../include/s_conf.h ../include/motd.h \
  ../include/class.h ../include/client.h ../include/ircd_handler.h \
- ../include/linebuf.h ../include/channel.h ../include/s_serv.h \
- ../include/common.h ../include/list.h ../include/parse.h \
+ ../include/linebuf.h ../include/channel.h ../include/common.h \
+ ../include/s_serv.h ../include/list.h ../include/parse.h \
  ../include/packet.h ../include/hook.h ../include/send.h
 parse.o: parse.c ../include/stdinc.h ../include/config.h \
  ../include/setup.h ../include/defaults.h ../include/parse.h \
@@ -264,7 +279,8 @@ rsa.o: rsa.c ../include/stdinc.h ../include/config.h \
  ../include/motd.h ../include/class.h ../include/client.h \
  ../include/ircd_handler.h ../include/linebuf.h ../include/channel.h \
  ../include/res.h ../adns/adns.h ../include/ircd.h \
- ../include/irc_string.h ../include/sprintf_irc.h ../include/s_log.h
+ ../include/irc_string.h ../include/sprintf_irc.h ../include/common.h \
+ ../include/s_log.h
 restart.o: restart.c ../include/stdinc.h ../include/config.h \
  ../include/setup.h ../include/defaults.h ../include/tools.h \
  ../include/restart.h ../include/common.h ../include/fdlist.h \
@@ -310,8 +326,6 @@ s_bsd.o: s_bsd.c ../include/stdinc.h ../include/config.h \
  ../include/s_log.h ../include/s_serv.h ../include/s_stats.h \
  ../include/send.h ../include/s_debug.h
 s_bsd_kqueue.o: s_bsd_kqueue.c ../include/config.h ../include/setup.h \
- ../include/defaults.h
-s_bsd_poll.o: s_bsd_poll.c ../include/config.h ../include/setup.h \
  ../include/defaults.h ../include/stdinc.h ../include/fdlist.h \
  ../include/ircd_defs.h ../include/res.h ../include/fileio.h \
  ../adns/adns.h ../include/ircd.h ../include/tools.h \
@@ -324,6 +338,8 @@ s_bsd_poll.o: s_bsd_poll.c ../include/config.h ../include/setup.h \
  ../include/s_conf.h ../include/motd.h ../include/s_log.h \
  ../include/s_serv.h ../include/s_stats.h ../include/send.h \
  ../include/s_debug.h
+s_bsd_poll.o: s_bsd_poll.c ../include/config.h ../include/setup.h \
+ ../include/defaults.h
 s_bsd_select.o: s_bsd_select.c ../include/config.h ../include/setup.h \
  ../include/defaults.h
 s_bsd_devpoll.o: s_bsd_devpoll.c ../include/config.h \
@@ -337,8 +353,8 @@ s_conf.o: s_conf.c ../include/stdinc.h ../include/config.h \
  ../include/ircd_handler.h ../include/linebuf.h ../include/channel.h \
  ../include/res.h ../adns/adns.h ../include/ircd.h ../include/memory.h \
  ../include/balloc.h ../include/irc_string.h ../include/sprintf_irc.h \
- ../include/s_serv.h ../include/resv.h ../include/s_stats.h \
- ../include/common.h ../include/event.h ../include/hash.h \
+ ../include/common.h ../include/s_serv.h ../include/resv.h \
+ ../include/s_stats.h ../include/event.h ../include/hash.h \
  ../include/list.h ../include/listener.h ../include/hostmask.h \
  ../include/modules.h ../include/parse.h ../include/msg.h \
  ../include/numeric.h ../include/fdlist.h ../include/s_bsd.h \
@@ -376,7 +392,7 @@ s_log.o: s_log.c ../include/stdinc.h ../include/config.h \
  ../include/memory.h ../include/balloc.h ../include/irc_string.h \
  ../include/sprintf_irc.h ../include/s_log.h ../include/s_misc.h \
  ../include/event.h ../include/s_conf.h ../include/motd.h \
- ../include/class.h
+ ../include/class.h ../include/common.h
 s_misc.o: s_misc.c ../include/stdinc.h ../include/config.h \
  ../include/setup.h ../include/defaults.h ../include/s_misc.h \
  ../include/client.h ../include/ircd_defs.h ../include/ircd_handler.h \

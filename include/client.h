@@ -50,7 +50,6 @@
 
 #define CLIENT_BUFSIZE 512      /* must be at least 512 bytes */
 
-
 /*
  * pre declare structs
  */

@@ -38,6 +38,8 @@
 #include "motd.h"               /* MessageFile */
 #include "class.h"
 #include "client.h"
+#include "common.h"
+
 struct Client;
 struct DNSReply;
 struct hostent;
@@ -424,6 +426,9 @@ extern char *get_oper_name(struct Client *client_p);
 extern int yylex(void);
 
 extern unsigned long cidr_to_bitmask[];
+
+extern char conffilebuf[IRCD_BUFSIZE];
+extern int lineno;
 
 #define NOT_AUTHORIZED  (-1)
 #define SOCKET_ERROR    (-2)

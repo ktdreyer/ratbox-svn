@@ -71,6 +71,8 @@
 #include "hook.h"
 #include "ircd_getopt.h"
 #include "balloc.h"
+#include "newconf.h"
+
 /*
  * Try and find the correct name to use with getrlimit() for setting the max.
  * number of files allowed to be open by this process.
@@ -634,6 +636,7 @@ int main(int argc, char *argv[])
   init_log(logFileName);
   initBlockHeap();
   init_dlink_nodes();
+  newconf_init();
   initialize_message_files();
   linebuf_init();       /* set up some linebuf stuff to control paging */
   init_hash();
