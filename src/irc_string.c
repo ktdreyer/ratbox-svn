@@ -81,8 +81,8 @@ char *
 clean_string(char *dest, const unsigned char *src, size_t len)
 {
 	char *d = dest;
-	assert(0 != dest);
-	assert(0 != src);
+	s_assert(0 != dest);
+	s_assert(0 != src);
 
 	if(dest == NULL || src == NULL)
 		return NULL;
@@ -123,8 +123,8 @@ strip_tabs(char *dest, const unsigned char *src, size_t len)
 {
 	char *d = dest;
 	/* Sanity check; we don't want anything nasty... */
-	assert(0 != dest);
-	assert(0 != src);
+	s_assert(0 != dest);
+	s_assert(0 != src);
 
 	if(dest == NULL || src == NULL)
 		return NULL;

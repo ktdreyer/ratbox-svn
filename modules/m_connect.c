@@ -111,7 +111,7 @@ mo_connect(struct Client *client_p, struct Client *source_p, int parc, const cha
 			return;
 		}
 	}
-	assert(0 != aconf);
+	s_assert(0 != aconf);
 	/*
 	 * Get port number from user, if given. If not specified,
 	 * use the default form configuration structure. If missing
@@ -218,7 +218,7 @@ ms_connect(struct Client *client_p, struct Client *source_p, int parc, const cha
 			return;
 		}
 	}
-	assert(0 != aconf);
+	s_assert(0 != aconf);
 	/*
 	 * Get port number from user, if given. If not specified,
 	 * use the default form configuration structure. If missing

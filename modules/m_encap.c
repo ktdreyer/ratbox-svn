@@ -1,5 +1,6 @@
 /*  modules/m_encap.c
  *  Copyright (C) 2003 ircd-ratbox development team
+ *  Copyright (C) 2003 Lee Hardy <lee@leeh.co.uk>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are

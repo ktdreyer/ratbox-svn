@@ -226,7 +226,7 @@ remove_user_from_channel(struct Channel *chptr, struct Client *who)
 
 	if(--chptr->users <= 0)
 	{
-		assert(chptr->users >= 0);
+		s_assert(chptr->users >= 0);
 		chptr->users = 0;	/* if chptr->users < 0, make sure it sticks at 0
 					 * It should never happen but...
 					 */
@@ -289,7 +289,7 @@ qs_user_from_channel(struct Channel *chptr, struct Client *who)
 	chptr->users_last = CurrentTime;
 	who->user->joined--;
 
-	assert(chptr->users > 0);
+	s_assert(chptr->users > 0);
 
 	if(--chptr->users <= 0)
 	{
@@ -458,7 +458,7 @@ send_mode_list(struct Client *client_p, char *chname, dlink_list * top, char fla
 int
 check_channel_name(const char *name)
 {
-	assert(name != NULL);
+	s_assert(name != NULL);
 	if(name == NULL)
 		return 0;
 
@@ -866,7 +866,7 @@ can_join(struct Client *source_p, struct Channel *chptr, char *key)
 	char src_host[NICKLEN + USERLEN + HOSTLEN + 6];
 	char src_iphost[NICKLEN + USERLEN + HOSTLEN + 6];
 
-	assert(source_p->localClient != NULL);
+	s_assert(source_p->localClient != NULL);
 
 	ircsprintf(src_host, "%s!%s@%s", source_p->name, source_p->username, source_p->host);
 	ircsprintf(src_iphost, "%s!%s@%s", source_p->name,

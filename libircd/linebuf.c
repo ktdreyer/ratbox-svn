@@ -133,17 +133,17 @@ linebuf_done_line(buf_head_t * bufhead, buf_line_t * bufline, dlink_node * node)
 	/* Update the allocated size */
 	bufhead->alloclen--;
 	bufhead->len -= bufline->len;
-	assert(bufhead->len >= 0);
+	s_assert(bufhead->len >= 0);
 	bufhead->numlines--;
 
 	bufline->refcount--;
-	assert(bufline->refcount >= 0);
+	s_assert(bufline->refcount >= 0);
 
 	if(bufline->refcount == 0)
 	{
 		/* and finally, deallocate the buf */
 		--bufline_count;
-		assert(bufline_count >= 0);
+		s_assert(bufline_count >= 0);
 		linebuf_free(bufline);
 	}
 }
@@ -174,7 +174,7 @@ linebuf_skip_crlf(char *ch, int len)
 		if((*ch != '\r') && (*ch != '\n'))
 			break;
 	}
-	assert(orig_len > len);
+	s_assert(orig_len > len);
 	return (orig_len - len);
 }
 
@@ -258,7 +258,7 @@ linebuf_copy_line(buf_head_t * bufhead, buf_line_t * bufline, char *data, int le
 	/* If its full or terminated, ignore it */
 
 	bufline->raw = 0;
-	assert(bufline->len < BUF_DATA_SIZE);
+	s_assert(bufline->len < BUF_DATA_SIZE);
 	if(bufline->terminated == 1)
 		return 0;
 
@@ -331,7 +331,7 @@ linebuf_copy_raw(buf_head_t * bufhead, buf_line_t * bufline, char *data, int len
 	/* If its full or terminated, ignore it */
 
 	bufline->raw = 1;
-	assert(bufline->len < BUF_DATA_SIZE);
+	s_assert(bufline->len < BUF_DATA_SIZE);
 	if(bufline->terminated == 1)
 		return 0;
 
@@ -401,7 +401,7 @@ linebuf_parse(buf_head_t * bufhead, char *data, int len, int raw)
 	{
 		/* Check we're doing the partial buffer thing */
 		bufline = bufhead->list.tail->data;
-		assert(!bufline->flushing);
+		s_assert(!bufline->flushing);
 		/* just try, the worst it could do is *reject* us .. */
 		if(raw)		/* if we could be dealing with 8-bit data */
 			cpylen = linebuf_copy_raw(bufhead, bufline, data, len);
@@ -417,7 +417,7 @@ linebuf_parse(buf_head_t * bufhead, char *data, int len, int raw)
 
 		/* Skip the data and update len .. */
 		len -= cpylen;
-		assert(len >= 0);
+		s_assert(len >= 0);
 		data += cpylen;
 	}
 
@@ -436,7 +436,7 @@ linebuf_parse(buf_head_t * bufhead, char *data, int len, int raw)
 			return -1;
 
 		len -= cpylen;
-		assert(len >= 0);
+		s_assert(len >= 0);
 		data += cpylen;
 		linecnt++;
 	}
@@ -469,7 +469,7 @@ linebuf_get(buf_head_t * bufhead, char *buf, int buflen, int partial, int raw)
 
 	/* make sure we've got the space, including the NULL */
 	cpylen = bufline->len;
-	assert(cpylen + 1 <= buflen);
+	s_assert(cpylen + 1 <= buflen);
 
 	/* Copy it */
 	start = bufline->buf;
@@ -498,7 +498,7 @@ linebuf_get(buf_head_t * bufhead, char *buf, int buflen, int partial, int raw)
 	/* convert CR/LF to NUL */
 	buf[cpylen] = '\0';
 
-	assert(cpylen >= 0);
+	s_assert(cpylen >= 0);
 
 	/* Deallocate the line */
 	linebuf_done_line(bufhead, bufline, bufhead->list.head);
@@ -556,7 +556,7 @@ linebuf_putmsg(buf_head_t * bufhead, const char *format, va_list * va_args,
 	if(bufhead->list.tail)
 	{
 		bufline = bufhead->list.tail->data;
-		assert(bufline->terminated);
+		s_assert(bufline->terminated);
 	}
 #endif
 	/* Create a new line */
@@ -663,7 +663,7 @@ linebuf_flush(int fd, buf_head_t * bufhead)
 	if(bufhead->writeofs == bufline->len)
 	{
 		bufhead->writeofs = 0;
-		assert(bufhead->len >= 0);
+		s_assert(bufhead->len >= 0);
 		linebuf_done_line(bufhead, bufline, bufhead->list.head);
 	}
 

@@ -135,12 +135,12 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
 
 	Debug((DEBUG_DEBUG, "Parsing %s:", pbuffer));
 
-	assert(MyConnect(client_p));
-	assert(client_p->localClient->fd >= 0);
+	s_assert(MyConnect(client_p));
+	s_assert(client_p->localClient->fd >= 0);
 	if(IsDeadorAborted(client_p))
 		return;
 
-	assert((bufend - pbuffer) < 512);
+	s_assert((bufend - pbuffer) < 512);
 
 	for (ch = pbuffer; *ch == ' '; ch++)	/* skip spaces */
 		/* null statement */ ;
@@ -431,7 +431,7 @@ mod_add_cmd(struct Message *msg)
 	struct MessageHash *new_ptr;
 	int msgindex;
 
-	assert(msg != NULL);
+	s_assert(msg != NULL);
 	if(msg == NULL)
 		return;
 
@@ -473,7 +473,7 @@ mod_del_cmd(struct Message *msg)
 	struct MessageHash *last_ptr = NULL;
 	int msgindex;
 
-	assert(msg != NULL);
+	s_assert(msg != NULL);
 	if(msg == NULL)
 		return;
 
@@ -559,8 +559,8 @@ report_messages(struct Client *source_p)
 	{
 		for (ptr = msg_hash_table[i]; ptr; ptr = ptr->next)
 		{
-			assert(ptr->msg != NULL);
-			assert(ptr->cmd != NULL);
+			s_assert(ptr->msg != NULL);
+			s_assert(ptr->cmd != NULL);
 
 			sendto_one(source_p, form_str(RPL_STATSCOMMANDS),
 				   me.name, source_p->name, ptr->cmd,

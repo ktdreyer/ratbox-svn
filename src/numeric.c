@@ -27,7 +27,7 @@
 #include "stdinc.h"
 #include "setup.h"
 #include "config.h"
-
+#include "s_conf.h"
 #include "numeric.h"
 #include "irc_string.h"
 #include "common.h"		/* NULL cripes */
@@ -47,9 +47,9 @@ form_str(int numeric)
 {
 	const char *num_ptr;
 
-	assert(-1 < numeric);
-	assert(numeric < ERR_LAST_ERR_MSG);
-	assert(0 != replies[numeric]);
+	s_assert(-1 < numeric);
+	s_assert(numeric < ERR_LAST_ERR_MSG);
+	s_assert(0 != replies[numeric]);
 
 	if(numeric > ERR_LAST_ERR_MSG)
 		numeric = ERR_LAST_ERR_MSG;

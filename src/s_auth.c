@@ -403,7 +403,7 @@ void
 start_auth(struct Client *client)
 {
 	struct AuthRequest *auth = 0;
-	assert(0 != client);
+	s_assert(0 != client);
 	if(client == NULL)
 		return;
 	auth = make_auth_request(client);

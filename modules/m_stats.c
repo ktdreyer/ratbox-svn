@@ -83,8 +83,10 @@ const char *Lformat = ":%s %d %s %s %u %u %u %u %u :%u %u %s";
 
 static const char *parse_stats_args (int, const char **, int *, int *);
 
-static void stats_l_list(struct Client *, const char *, int, int, char);
-static void stats_l_client(struct Client *s, const char *, int, int, dlink_list *, char);
+static void stats_l_list(struct Client *s, char *, int, int, dlink_list *, char);
+static void stats_l_client(struct Client *source_p, struct Client *target_p,
+				char statchar);
+
 static void stats_spy(struct Client *, char);
 static void stats_p_spy(struct Client *);
 static void stats_L_spy(struct Client *, char, const char *);

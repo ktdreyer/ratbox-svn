@@ -149,9 +149,9 @@ static CNCB serv_connect_callback;
 void
 slink_error(unsigned int rpl, unsigned int len, unsigned char *data, struct Client *server_p)
 {
-	assert(rpl == SLINKRPL_ERROR);
+	s_assert(rpl == SLINKRPL_ERROR);
 
-	assert(len < 256);
+	s_assert(len < 256);
 	data[len - 1] = '\0';
 
 	sendto_realops_flags(UMODE_ALL, L_ALL, "SlinkError for %s: %s", server_p->name, data);
@@ -165,9 +165,9 @@ slink_zipstats(unsigned int rpl, unsigned int len, unsigned char *data, struct C
 	unsigned long in = 0, in_wire = 0, out = 0, out_wire = 0;
 	int i = 0;
 
-	assert(rpl == SLINKRPL_ZIPSTATS);
-	assert(len == 16);
-	assert(IsCapable(server_p, CAP_ZIP));
+	s_assert(rpl == SLINKRPL_ZIPSTATS);
+	s_assert(len == 16);
+	s_assert(IsCapable(server_p, CAP_ZIP));
 
 	/* Yes, it needs to be done this way, no we cannot let the compiler
 	 * work with the pointer to the structure.  This works around a GCC
@@ -626,7 +626,7 @@ check_server(const char *name, struct Client *client_p, int cryptlink)
 	struct ConfItem *server_aconf = NULL;
 	int error = -1;
 
-	assert(NULL != client_p);
+	s_assert(NULL != client_p);
 
 	if(client_p == NULL)
 		return error;
@@ -904,7 +904,7 @@ server_estab(struct Client *client_p)
 	dlink_node *ptr;
 	dlink_node *cptr;
 
-	assert(NULL != client_p);
+	s_assert(NULL != client_p);
 	if(client_p == NULL)
 		return -1;
 	ClearAccess(client_p);
@@ -1369,7 +1369,7 @@ fork_server(struct Client *server)
 		close(slink_fds[1][0][0]);
 		close(slink_fds[1][0][1]);
 
-		assert(server->localClient);
+		s_assert(server->localClient);
 		server->localClient->ctrlfd = slink_fds[0][1][1];
 		server->localClient->fd = slink_fds[1][1][1];
 
@@ -1679,7 +1679,7 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
 	int fd;
 	char buf[HOSTIPLEN];
 	/* Make sure aconf is useful */
-	assert(aconf != NULL);
+	s_assert(aconf != NULL);
 	if(aconf == NULL)
 		return 0;
 
@@ -1860,8 +1860,8 @@ serv_connect_callback(int fd, int status, void *data)
 	struct ConfItem *aconf;
 
 	/* First, make sure its a real client! */
-	assert(client_p != NULL);
-	assert(client_p->localClient->fd == fd);
+	s_assert(client_p != NULL);
+	s_assert(client_p->localClient->fd == fd);
 
 	if(client_p == NULL)
 		return;

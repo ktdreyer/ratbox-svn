@@ -115,7 +115,7 @@ mo_links(struct Client *client_p, struct Client *source_p, int parc, const char 
 	else if(parc == 2)
 		mask = parv[1];
 
-	assert(0 != mask);
+	s_assert(0 != mask);
 
 	if(*mask)		/* only necessary if there is a mask */
 		mask = collapse(clean_string

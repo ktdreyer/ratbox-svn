@@ -256,7 +256,7 @@ BlockHeap *
 BlockHeapCreate(size_t elemsize, int elemsperblock)
 {
 	BlockHeap *bh;
-	assert(elemsize > 0 && elemsperblock > 0);
+	s_assert(elemsize > 0 && elemsperblock > 0);
 
 	/* Catch idiotic requests up front */
 	if((elemsize <= 0) || (elemsperblock <= 0))
@@ -320,7 +320,7 @@ BlockHeapAlloc(BlockHeap * bh)
 	Block *walker;
 	dlink_node *new_node;
 
-	assert(bh != NULL);
+	s_assert(bh != NULL);
 	if(bh == NULL)
 	{
 		blockheap_fail("Cannot allocate if bh == NULL");
@@ -350,7 +350,7 @@ BlockHeapAlloc(BlockHeap * bh)
 			bh->freeElems--;
 			new_node = walker->free_list.head;
 			dlinkMoveNode(new_node, &walker->free_list, &walker->used_list);
-			assert(new_node->data != NULL);
+			s_assert(new_node->data != NULL);
 			if(new_node->data == NULL)
 				blockheap_fail("new_node->data is NULL and that shouldn't happen!!!");
 			return (new_node->data);
@@ -378,8 +378,8 @@ BlockHeapFree(BlockHeap * bh, void *ptr)
 	Block *block;
 	struct MemBlock *memblock;
 
-	assert(bh != NULL);
-	assert(ptr != NULL);
+	s_assert(bh != NULL);
+	s_assert(ptr != NULL);
 
 	if(bh == NULL)
 	{
@@ -395,14 +395,12 @@ BlockHeapFree(BlockHeap * bh, void *ptr)
 	}
 
 	memblock = (void *) ((size_t) ptr - sizeof(MemBlock));
-	assert(memblock->block != NULL);
+	s_assert(memblock->block != NULL);
 	if(memblock->block == NULL)
 	{
 		blockheap_fail("memblock->block == NULL, not a valid block?");
 		outofmemory();
 	}
-	/* Is this block really on the used list? */
-	assert(dlinkFind(&memblock->block->used_list, memblock) == NULL);
 
 	block = memblock->block;
 	bh->freeElems++;

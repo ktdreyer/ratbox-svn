@@ -139,8 +139,8 @@ comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
 	fde_t *F = &fd_table[fd];
 	int old_flags = F->pflags;
 	int op = 0;
-	assert(fd >= 0);
-	assert(F->flags.open);
+	s_assert(fd >= 0);
+	s_assert(F->flags.open);
 
 	/* Update the list, even though we're not using it .. */
 	F->list = list;

@@ -56,7 +56,7 @@ make_cluster(void)
 void
 free_cluster(struct cluster *clptr)
 {
-	assert(clptr != NULL);
+	s_assert(clptr != NULL);
 	if(clptr == NULL)
 		return;
 

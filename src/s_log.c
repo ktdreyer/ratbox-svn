@@ -119,7 +119,7 @@ ilog(int priority, const char *fmt, ...)
 {
 	char buf[LOG_BUFSIZE];
 	va_list args;
-	assert(-1 < priority);
+	s_assert(-1 < priority);
 	if(fmt == NULL)
 		return;
 

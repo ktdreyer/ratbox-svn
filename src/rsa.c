@@ -138,7 +138,7 @@ verify_private_key(void)
 
 	if(mkey->version != key->version)
 		ilog(L_CRIT,
-		     "Private key corrupted: version %i != version %i",
+		     "Private key corrupted: version %lu != version %lu",
 		     mkey->version, key->version);
 
 	if(BN_cmp(mkey->n, key->n))

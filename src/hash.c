@@ -25,7 +25,7 @@
  */
 
 #include "stdinc.h"
-
+#include "ircd_defs.h"
 #include "tools.h"
 #include "s_conf.h"
 #include "channel.h"
@@ -258,8 +258,8 @@ add_to_client_hash(const char *name, struct Client *client_p)
 {
 	unsigned int hashv;
 
-	assert(name != NULL);
-	assert(client_p != NULL);
+	s_assert(name != NULL);
+	s_assert(client_p != NULL);
 	if(EmptyString(name) || (client_p == NULL))
 		return;
 
@@ -279,8 +279,8 @@ add_to_hostname_hash(const char *hostname, struct Client *client_p)
 {
 	unsigned int hashv;
 
-	assert(hostname != NULL);
-	assert(client_p != NULL);
+	s_assert(hostname != NULL);
+	s_assert(client_p != NULL);
 	if(EmptyString(hostname) || (client_p == NULL))
 		return;
 
@@ -300,8 +300,8 @@ add_to_resv_hash(const char *name, struct ResvEntry *resv_p)
 {
 	unsigned int hashv;
 
-	assert(name != NULL);
-	assert(resv_p != NULL);
+	s_assert(name != NULL);
+	s_assert(resv_p != NULL);
 	if(EmptyString(name) || resv_p == NULL)
 		return;
 
@@ -343,8 +343,8 @@ del_from_id_hash(const char *id, struct Client *client_p)
 	dlink_node *ptr;
 	dlink_node *next_ptr;
 
-	assert(id != NULL);
-	assert(client_p != NULL);
+	s_assert(id != NULL);
+	s_assert(client_p != NULL);
 	if(EmptyString(id) || client_p == NULL)
 		return;
 
@@ -358,7 +358,7 @@ del_from_id_hash(const char *id, struct Client *client_p)
 		{
 			dlinkDestroy(ptr, &idTable[hashv].list);
 
-			assert(idTable[hashv].links > 0);
+			s_assert(idTable[hashv].links > 0);
 			if(idTable[hashv].links > 0)
 				--idTable[hashv].links;
 			return;
@@ -384,7 +384,7 @@ del_from_client_hash(const char *name, struct Client *client_p)
 	dlink_node *ptr;
 	dlink_node *next_ptr;
 
-	/* no asserts, this can happen when removing a client that
+	/* no s_asserts, this can happen when removing a client that
 	 * is unregistered.
 	 */
 	if(EmptyString(name) || client_p == NULL)
@@ -400,7 +400,7 @@ del_from_client_hash(const char *name, struct Client *client_p)
 		{
 			dlinkDestroy(ptr, &clientTable[hashv].list);
 
-			assert(clientTable[hashv].links > 0);
+			s_assert(clientTable[hashv].links > 0);
 			if(clientTable[hashv].links > 0)
 				--clientTable[hashv].links;
 			return;
@@ -426,8 +426,8 @@ del_from_channel_hash(const char *name, struct Channel *chptr)
 	dlink_node *next_ptr;
 	unsigned int hashv;
 
-	assert(name != NULL);
-	assert(chptr != NULL);
+	s_assert(name != NULL);
+	s_assert(chptr != NULL);
 
 	if(EmptyString(name) || chptr == NULL)
 		return;
@@ -442,7 +442,7 @@ del_from_channel_hash(const char *name, struct Channel *chptr)
 		{
 			dlinkDestroy(ptr, &channelTable[hashv].list);
 
-			assert(channelTable[hashv].links > 0);
+			s_assert(channelTable[hashv].links > 0);
 			if(channelTable[hashv].links > 0)
 				--channelTable[hashv].links;
 			return;
@@ -475,7 +475,7 @@ del_from_hostname_hash(const char *hostname, struct Client *client_p)
 		{
 			dlinkDestroy(ptr, &hostTable[hashv].list);
 
-			assert(hostTable[hashv].links > 0);
+			s_assert(hostTable[hashv].links > 0);
 			if(hostTable[hashv].links > 0)
 				--hostTable[hashv].links;
 
@@ -496,8 +496,8 @@ del_from_resv_hash(const char *name, struct ResvEntry *resv_p)
 	dlink_node *next_ptr;
 	unsigned int hashv;
 
-	assert(name != NULL);
-	assert(resv_p != NULL);
+	s_assert(name != NULL);
+	s_assert(resv_p != NULL);
 	if(EmptyString(name) || resv_p == NULL)
 		return;
 
@@ -511,7 +511,7 @@ del_from_resv_hash(const char *name, struct ResvEntry *resv_p)
 		{
 			dlinkDestroy(ptr, &resvTable[hashv].list);
 
-			assert(resvTable[hashv].links > 0);
+			s_assert(resvTable[hashv].links > 0);
 			if(resvTable[hashv].links > 0)
 				--resvTable[hashv].links;
 
@@ -545,7 +545,7 @@ del_from_xline_hash(const char *name, struct xline *xconf)
 		{
 			dlinkDestroy(ptr, &xlineTable[hashv].list);
 
-			assert(xlineTable[hashv].links > 0);
+			s_assert(xlineTable[hashv].links > 0);
 			if(xlineTable[hashv].links > 0)
 				--xlineTable[hashv].links;
 			return;
@@ -591,7 +591,7 @@ find_client(const char *name)
 	dlink_node *ptr;
 	unsigned int hashv;
 
-	assert(name != NULL);
+	s_assert(name != NULL);
 	if(EmptyString(name))
 		return NULL;
 
@@ -713,7 +713,7 @@ find_channel(const char *name)
 	dlink_node *ptr;
 	unsigned int hashv;
 
-	assert(name != NULL);
+	s_assert(name != NULL);
 	if(EmptyString(name))
 		return NULL;
 
@@ -813,7 +813,7 @@ hash_find_resv(const char *name)
 	dlink_node *ptr;
 	unsigned int hashv;
 
-	assert(name != NULL);
+	s_assert(name != NULL);
 	if(EmptyString(name))
 		return NULL;
 

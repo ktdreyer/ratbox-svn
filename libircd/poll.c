@@ -90,7 +90,7 @@ poll_findslot(void)
 			return i;
 		}
 	}
-	assert(1 == 0);
+	s_assert(1 == 0);
 	/* NOTREACHED */
 	return -1;
 }
@@ -176,8 +176,8 @@ comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
 	       void *client_data, time_t timeout)
 {
 	fde_t *F = &fd_table[fd];
-	assert(fd >= 0);
-	assert(F->flags.open);
+	s_assert(fd >= 0);
+	s_assert(F->flags.open);
 
 	if(type & COMM_SELECT_READ)
 	{

@@ -300,9 +300,9 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 	char myusername[USERLEN+1];
 	int status;
 	char *id;
-	assert(NULL != source_p);
-	assert(MyConnect(source_p));
-	assert(source_p->username != username);
+	s_assert(NULL != source_p);
+	s_assert(MyConnect(source_p));
+	s_assert(source_p->username != username);
 
 	if(source_p == NULL)
 		return -1;
@@ -522,7 +522,7 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 	Count.totalrestartcount++;
 
 	dlinkMoveNode(&source_p->localClient->tnode, &unknown_list, &lclient_list);
-	assert(source_p->localClient != NULL);
+	s_assert(source_p->localClient != NULL);
 	user_welcome(source_p);
 
 	return (introduce_client(client_p, source_p, user, nick));
@@ -542,8 +542,8 @@ register_remote_user(struct Client *client_p, struct Client *source_p, const cha
 	struct User *user = source_p->user;
 	struct Client *target_p;
 
-	assert(NULL != source_p);
-	assert(source_p->username != username);
+	s_assert(NULL != source_p);
+	s_assert(source_p->username != username);
 
 	if(source_p == NULL)
 		return -1;
@@ -696,7 +696,7 @@ valid_hostname(const char *hostname)
 {
 	const char *p = hostname;
 
-	assert(NULL != p);
+	s_assert(NULL != p);
 
 	if(hostname == NULL)
 		return NO;
@@ -731,7 +731,7 @@ valid_username(const char *username)
 	int dots = 0;
 	const char *p = username;
 
-	assert(NULL != p);
+	s_assert(NULL != p);
 
 	if(username == NULL)
 		return NO;
@@ -843,8 +843,8 @@ do_local_user(const char *nick, struct Client *client_p, struct Client *source_p
 {
 	struct User *user;
 
-	assert(NULL != source_p);
-	assert(source_p->username != username);
+	s_assert(NULL != source_p);
+	s_assert(source_p->username != username);
 
 	if(source_p == NULL)
 		return 0;
@@ -896,8 +896,8 @@ do_remote_user(const char *nick, struct Client *client_p, struct Client *source_
 	unsigned int oflags;
 	struct User *user;
 
-	assert(NULL != source_p);
-	assert(source_p->username != username);
+	s_assert(NULL != source_p);
+	s_assert(source_p->username != username);
 
 	if(source_p == NULL)
 		return 0;

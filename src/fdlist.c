@@ -33,6 +33,7 @@
 #include "send.h"
 #include "memory.h"
 #include "numeric.h"
+#include "s_log.h"
 
 fde_t *fd_table = NULL;
 
@@ -47,24 +48,24 @@ fdlist_update_biggest(int fd, int opening)
 {
 	if(fd < highest_fd)
 		return;
-	assert(fd < MAXCONNECTIONS);
+	s_assert(fd < MAXCONNECTIONS);
 
 	if(fd > highest_fd)
 	{
 		/*  
-		 * assert that we are not closing a FD bigger than
+		 * s_assert that we are not closing a FD bigger than
 		 * our known biggest FD
 		 */
-		assert(opening);
+		s_assert(opening);
 		highest_fd = fd;
 		return;
 	}
 	/* if we are here, then fd == Biggest_FD */
 	/*
-	 * assert that we are closing the biggest FD; we can't be
+	 * s_assert that we are closing the biggest FD; we can't be
 	 * re-opening it
 	 */
-	assert(!opening);
+	s_assert(!opening);
 	while (highest_fd >= 0 && !fd_table[highest_fd].flags.open)
 		highest_fd--;
 }
@@ -88,7 +89,7 @@ void
 fd_open(int fd, unsigned int type, const char *desc)
 {
 	fde_t *F = &fd_table[fd];
-	assert(fd >= 0);
+	s_assert(fd >= 0);
 
 	if(F->flags.open)
 	{
@@ -97,7 +98,7 @@ fd_open(int fd, unsigned int type, const char *desc)
 #endif
 		fd_close(fd);
 	}
-	assert(!F->flags.open);
+	s_assert(!F->flags.open);
 #ifdef NOTYET
 	debug(51, 3) ("fd_open FD %d %s\n", fd, desc);
 #endif
@@ -123,14 +124,14 @@ void
 fd_close(int fd)
 {
 	fde_t *F = &fd_table[fd];
-	assert(F->flags.open);
+	s_assert(F->flags.open);
 
 	/* All disk fd's MUST go through file_close() ! */
-	assert(F->type != FD_FILE);
+	s_assert(F->type != FD_FILE);
 	if(F->type == FD_FILE)
 	{
-		assert(F->read_handler == NULL);
-		assert(F->write_handler == NULL);
+		s_assert(F->read_handler == NULL);
+		s_assert(F->write_handler == NULL);
 	}
 #ifdef NOTYET
 	debug(51, 3) ("fd_close FD %d %s\n", fd, F->desc);

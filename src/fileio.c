@@ -25,6 +25,7 @@
  */
 #include "stdinc.h"
 #include "config.h"
+#include "ircd_defs.h"
 #include "fileio.h"
 #include "irc_string.h"
 #include "client.h"		/* for FLAGS_ALL */
@@ -67,7 +68,7 @@ file_close(int fd)
 	 * convert all abusers of fd_close() of a FD_FILE fd over
 	 * to file_close() .. mwahaha!
 	 */
-	assert(fd_table[fd].type == FD_FILE);
+	s_assert(fd_table[fd].type == FD_FILE);
 	fd_table[fd].type = FD_FILECLOSE;
 	fd_close(fd);
 }
@@ -79,8 +80,8 @@ fbopen(const char *filename, const char *mode)
 	int pmode = 0;
 	FBFILE *fb = NULL;
 	int fd;
-	assert(filename);
-	assert(mode);
+	s_assert(filename);
+	s_assert(mode);
 
 	if(filename == NULL || mode == NULL)
 	{
@@ -143,7 +144,7 @@ fdbopen(int fd, const char *mode)
 void
 fbclose(FBFILE * fb)
 {
-	assert(fb);
+	s_assert(fb);
 	if(fb != NULL)
 	{
 		file_close(fb->fd);
@@ -158,7 +159,7 @@ static int
 fbfill(FBFILE * fb)
 {
 	int n;
-	assert(fb);
+	s_assert(fb);
 	if(fb == NULL)
 	{
 		errno = EINVAL;
@@ -182,7 +183,7 @@ fbfill(FBFILE * fb)
 int
 fbgetc(FBFILE * fb)
 {
-	assert(fb);
+	s_assert(fb);
 	if(fb == NULL)
 	{
 		errno = EINVAL;
@@ -202,7 +203,7 @@ fbgetc(FBFILE * fb)
 void
 fbungetc(char c, FBFILE * fb)
 {
-	assert(fb);
+	s_assert(fb);
 	if(fb == NULL)
 	{
 		errno = EINVAL;
@@ -224,9 +225,9 @@ char *
 fbgets(char *buf, size_t len, FBFILE * fb)
 {
 	char *p = buf;
-	assert(buf);
-	assert(fb);
-	assert(0 < len);
+	s_assert(buf);
+	s_assert(fb);
+	s_assert(0 < len);
 
 	if(fb == NULL || buf == NULL)
 	{
@@ -276,8 +277,8 @@ int
 fbputs(const char *str, FBFILE * fb)
 {
 	int n = -1;
-	assert(str);
-	assert(fb);
+	s_assert(str);
+	s_assert(fb);
 
 	if(str == NULL || fb == NULL)
 	{
@@ -296,8 +297,8 @@ fbputs(const char *str, FBFILE * fb)
 int
 fbstat(struct stat *sb, FBFILE * fb)
 {
-	assert(sb);
-	assert(fb);
+	s_assert(sb);
+	s_assert(fb);
 	if(sb == NULL || fb == NULL)
 	{
 		errno = EINVAL;

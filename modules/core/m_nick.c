@@ -553,7 +553,7 @@ check_clean_host(struct Client *client_p, const char *nick, const char *host, co
 static int
 clean_nick_name(const char *nick)
 {
-	assert(nick);
+	s_assert(nick);
 	if(nick == NULL)
 		return 0;
 
@@ -579,7 +579,7 @@ clean_nick_name(const char *nick)
 static int
 clean_user_name(const char *user)
 {
-	assert(user);
+	s_assert(user);
 	if(user == NULL)
 		return 0;
 
@@ -601,7 +601,7 @@ clean_user_name(const char *user)
 static int
 clean_host_name(const char *host)
 {
-	assert(host);
+	s_assert(host);
 	if(host == NULL)
 		return 0;
 	for (; *host; host++)

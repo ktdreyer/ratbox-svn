@@ -183,8 +183,8 @@ make_client(struct Client *from)
 static void
 free_local_client(struct Client *client_p)
 {
-	assert(NULL != client_p);
-	assert(&me != client_p);
+	s_assert(NULL != client_p);
+	s_assert(&me != client_p);
 
 	if(!MyConnect(client_p))
 		return;
@@ -194,7 +194,7 @@ free_local_client(struct Client *client_p)
 	 */
 	if(client_p->localClient->listener)
 	{
-		assert(0 < client_p->localClient->listener->ref_count);
+		s_assert(0 < client_p->localClient->listener->ref_count);
 		if(0 == --client_p->localClient->listener->ref_count
 		   && !client_p->localClient->listener->active)
 			free_listener(client_p->localClient->listener);
@@ -211,8 +211,8 @@ free_local_client(struct Client *client_p)
 void
 free_client(struct Client *client_p)
 {
-	assert(NULL != client_p);
-	assert(&me != client_p);
+	s_assert(NULL != client_p);
+	s_assert(&me != client_p);
 	free_local_client(client_p);
 	BlockHeapFree(client_heap, client_p);
 }
@@ -817,7 +817,7 @@ release_client_state(struct Client *client_p)
 static void
 remove_client_from_list(struct Client *client_p)
 {
-	assert(NULL != client_p);
+	s_assert(NULL != client_p);
 
 	if(client_p == NULL)
 		return;
@@ -904,7 +904,7 @@ get_client_name(struct Client *client, int showip)
 {
 	static char nbuf[HOSTLEN * 2 + USERLEN + 5];
 
-	assert(NULL != client);
+	s_assert(NULL != client);
 	if(client == NULL)
 		return NULL;
 
@@ -1000,7 +1000,7 @@ free_exited_clients(void *unused)
 			dlinkDestroy(ptr, &dead_list);
 			continue;
 		}
-		assert(dlinkFind(&abort_list, target_p) == NULL);
+		s_assert(dlinkFind(&abort_list, target_p) == NULL);
 		release_client_state(target_p);
 		free_client(target_p);
 		dlinkDestroy(ptr, &dead_list);
@@ -1173,7 +1173,7 @@ exit_aborted_clients(void *unused)
  	DLINK_FOREACH_SAFE(ptr, next, abort_list.head)
  	{
  	 	abt = ptr->data;
- 		assert(*((unsigned long*)abt->client) != 0xdeadbeef); /* This is lame but its a debug thing */
+ 		s_assert(*((unsigned long*)abt->client) != 0xdeadbeef); /* This is lame but its a debug thing */
  	 	dlinkDelete(ptr, &abort_list);
 
 	 	 	
@@ -1200,7 +1200,7 @@ void
 dead_link(struct Client *client_p)
 {
 	struct abort_client *abt;
-	assert(!IsMe(client_p));
+	s_assert(!IsMe(client_p));
 	if(IsDeadorAborted(client_p) || IsMe(client_p) || !MyConnect(client_p))
 		return;
 
@@ -1213,7 +1213,7 @@ dead_link(struct Client *client_p)
 	}
 
     	abt->client = client_p;
-	assert(dlinkFind(&abort_list, client_p) == NULL);
+	s_assert(dlinkFind(&abort_list, client_p) == NULL);
 	SetAborted(client_p);
 	dlinkAdd(abt, &abt->node, &abort_list);
 }
@@ -1238,7 +1238,7 @@ exit_generic_client(struct Client *client_p, struct Client *source_p, struct Cli
 	}
 
 	/* Should not be in any channels now */
-	assert(source_p->user->channel.head == NULL);
+	s_assert(source_p->user->channel.head == NULL);
 
 	/* Clean up invitefield */
 	DLINK_FOREACH_SAFE(lp, next_lp, source_p->user->invited.head)
@@ -1258,8 +1258,8 @@ exit_generic_client(struct Client *client_p, struct Client *source_p, struct Cli
 	del_from_hostname_hash(source_p->host, source_p);
 	del_from_client_hash(source_p->name, source_p);
 	remove_client_from_list(source_p);
-	assert(dlinkFind(&dead_list, source_p) == NULL);
-	assert(dlinkFind(&abort_list, source_p) == NULL);
+	s_assert(dlinkFind(&dead_list, source_p) == NULL);
+	s_assert(dlinkFind(&abort_list, source_p) == NULL);
 	
 	SetDead(source_p);
 	dlinkAddAlloc(source_p, &dead_list);
@@ -1316,8 +1316,8 @@ exit_unknown_client(struct Client *client_p, struct Client *source_p, struct Cli
 	del_from_hostname_hash(source_p->host, source_p);
 	del_from_client_hash(source_p->name, source_p);
 	remove_client_from_list(source_p);
-	assert(dlinkFind(&dead_list, source_p) == NULL);
-	assert(dlinkFind(&abort_list, source_p) == NULL);
+	s_assert(dlinkFind(&dead_list, source_p) == NULL);
+	s_assert(dlinkFind(&abort_list, source_p) == NULL);
 	SetDead(source_p);
 	dlinkAddAlloc(source_p, &dead_list);
 
@@ -1367,8 +1367,8 @@ exit_remote_server(struct Client *client_p, struct Client *source_p, struct Clie
 	
 	del_from_client_hash(source_p->name, source_p);
 	remove_client_from_list(source_p);  
-	assert(dlinkFind(&dead_list, source_p) == NULL);
-	assert(dlinkFind(&abort_list, source_p) == NULL);
+	s_assert(dlinkFind(&dead_list, source_p) == NULL);
+	s_assert(dlinkFind(&abort_list, source_p) == NULL);
 	
 	SetDead(source_p);
 	dlinkAddAlloc(source_p, &dead_list);	
@@ -1438,13 +1438,14 @@ exit_local_server(struct Client *client_p, struct Client *source_p, struct Clien
 	sendto_realops_flags(UMODE_ALL, L_ALL, "%s was connected for %ld seconds.  %d/%d sendK/recvK.",
 			     source_p->name, CurrentTime - source_p->firsttime, sendk, recvk);
 
-	ilog(L_NOTICE, "%s was connected for %ld seconds.  %d/%d sendK/recvK.", source_p->name, 
-	     CurrentTime - source_p->firsttime, sendk, recvk);
+	ilog(L_NOTICE, "%s was connected for %ld seconds.  %d/%d sendK/recvK.", 
+	     source_p->name, CurrentTime - source_p->firsttime, 
+	     sendk, recvk);
         
 	del_from_client_hash(source_p->name, source_p);
 	remove_client_from_list(source_p);  
-	assert(dlinkFind(&dead_list, source_p) == NULL);
-	assert(dlinkFind(&abort_list, source_p) == NULL);
+	s_assert(dlinkFind(&dead_list, source_p) == NULL);
+	s_assert(dlinkFind(&abort_list, source_p) == NULL);
 	
 	SetDead(source_p);
 	dlinkAddAlloc(source_p, &dead_list);
@@ -1463,7 +1464,7 @@ exit_local_client(struct Client *client_p, struct Client *source_p, struct Clien
 	if(IsDead(source_p))
 		return -1;
 			
-	assert(IsPerson(source_p));
+	s_assert(IsPerson(source_p));
 	client_flush_input(source_p);
 	Count.local--;
 	dlinkDelete(&source_p->localClient->tnode, &lclient_list);
@@ -1994,10 +1995,10 @@ free_user(struct User *user, struct Client *client_p)
 					     head,
 					     (unsigned long) user->channel.
 					     head, user->joined, user->refcnt);
-			assert(!user->joined);
-			assert(!user->refcnt);
-			assert(!user->invited.head);
-			assert(!user->channel.head);
+			s_assert(!user->joined);
+			s_assert(!user->refcnt);
+			s_assert(!user->invited.head);
+			s_assert(!user->channel.head);
 		}
 
 		BlockHeapFree(user_heap, user);

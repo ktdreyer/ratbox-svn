@@ -48,8 +48,8 @@ match(const char *mask, const char *name)
 	int wild = 0;
 	int calls = 0;
 
-	assert(mask != NULL);
-	assert(name != NULL);
+	s_assert(mask != NULL);
+	s_assert(name != NULL);
 
 	if(!mask || !name)
 		return 0;
@@ -126,8 +126,8 @@ match_esc(const char *mask, const char *name)
 	int calls = 0;
 	int quote = 0;
 
-	assert(mask != NULL);
-	assert(name != NULL);
+	s_assert(mask != NULL);
+	s_assert(name != NULL);
 
 	if(!mask || !name)
 		return 0;
@@ -403,8 +403,8 @@ irccmp(const char *s1, const char *s2)
 	const unsigned char *str2 = (const unsigned char *) s2;
 	int res;
 
-	assert(s1 != NULL);
-	assert(s2 != NULL);
+	s_assert(s1 != NULL);
+	s_assert(s2 != NULL);
 
 	while ((res = ToUpper(*str1) - ToUpper(*str2)) == 0)
 	{
@@ -422,8 +422,8 @@ ircncmp(const char *s1, const char *s2, int n)
 	const unsigned char *str1 = (const unsigned char *) s1;
 	const unsigned char *str2 = (const unsigned char *) s2;
 	int res;
-	assert(s1 != NULL);
-	assert(s2 != NULL);
+	s_assert(s1 != NULL);
+	s_assert(s2 != NULL);
 
 	while ((res = ToUpper(*str1) - ToUpper(*str2)) == 0)
 	{

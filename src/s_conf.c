@@ -191,11 +191,11 @@ make_conf()
 void
 free_conf(struct ConfItem *aconf)
 {
-	assert(aconf != NULL);
+	s_assert(aconf != NULL);
 	if(aconf == NULL)
 		return;
 
-	assert(!(aconf->status & CONF_CLIENT) ||
+	s_assert(!(aconf->status & CONF_CLIENT) ||
 	       (aconf->host && strcmp(aconf->host, "NOMATCH")) || (aconf->clients == -1));
 
 	delete_adns_queries(aconf->dns_query);
@@ -589,7 +589,7 @@ add_ip_limit(struct Client *client_p, struct ConfItem *aconf)
 	if(pnode == NULL)
 		pnode = make_and_lookup_ip(ConfIpLimits(aconf), &client_p->localClient->ip, ConfCidrBitlen(aconf));
 
-	assert(pnode != NULL);
+	s_assert(pnode != NULL);
 
 	if(pnode != NULL)
 	{
@@ -805,8 +805,8 @@ attach_connect_block(struct Client *client_p, const char *name, const char *host
 {
 	struct ConfItem *ptr;
 
-	assert(client_p != NULL);
-	assert(host != NULL);
+	s_assert(client_p != NULL);
+	s_assert(host != NULL);
 	if(client_p == NULL || host == NULL)
 		return (0);
 
@@ -896,7 +896,7 @@ struct ConfItem *
 find_conf_by_name(const char *name, int status)
 {
 	struct ConfItem *conf;
-	assert(name != NULL);
+	s_assert(name != NULL);
 	if(name == NULL)
 		return (NULL);
 
@@ -922,7 +922,7 @@ struct ConfItem *
 find_conf_by_host(const char *host, int status)
 {
 	struct ConfItem *conf;
-	assert(host != NULL);
+	s_assert(host != NULL);
 	if(host == NULL)
 		return (NULL);
 	for (conf = ConfigItemList; conf; conf = conf->next)
@@ -1273,7 +1273,7 @@ struct ConfItem *
 find_kill(struct Client *client_p)
 {
 	struct ConfItem *aconf;
-	assert(client_p != NULL);
+	s_assert(client_p != NULL);
 	if(client_p == NULL)
 		return (NULL);
 
@@ -1622,7 +1622,7 @@ get_oper_name(struct Client *client_p)
 			return buffer;
 		}
 
-		assert(0);
+		s_assert(0);
 	}
 
 	ircsprintf(buffer, "%s!%s@%s{%s}",
@@ -1837,7 +1837,7 @@ clear_out_old_conf(void)
 	 * don't delete the class table, rather mark all entries
 	 * for deletion. The table is cleaned up by check_class. - avalon
 	 */
-	assert(ClassList != NULL);
+	s_assert(ClassList != NULL);
 
 	for (cltmp = ClassList->next; cltmp; cltmp = cltmp->next)
 		MaxUsers(cltmp) = -1;

@@ -235,11 +235,11 @@ void
 close_connection(struct Client *client_p)
 {
 	struct ConfItem *aconf;
-	assert(client_p != NULL);
+	s_assert(client_p != NULL);
 	if(client_p == NULL)
 		return;
 
-	assert(MyConnect(client_p));
+	s_assert(MyConnect(client_p));
 	if(!MyConnect(client_p))
 		return;
 	
@@ -347,7 +347,7 @@ void
 add_connection(struct Listener *listener, int fd, struct sockaddr_storage *sai)
 {
 	struct Client *new_client;
-	assert(NULL != listener);
+	s_assert(NULL != listener);
 
 	/* 
 	 * get the client socket name from the socket
@@ -494,8 +494,8 @@ ignoreErrno(int ierrno)
 void
 comm_settimeout(int fd, time_t timeout, PF * callback, void *cbdata)
 {
-	assert(fd > -1);
-	assert(fd_table[fd].flags.open);
+	s_assert(fd > -1);
+	s_assert(fd_table[fd].flags.open);
 
 	fd_table[fd].timeout = CurrentTime + (timeout / 1000);
 	fd_table[fd].timeout_handler = callback;
@@ -516,8 +516,8 @@ comm_settimeout(int fd, time_t timeout, PF * callback, void *cbdata)
 void
 comm_setflush(int fd, time_t timeout, PF * callback, void *cbdata)
 {
-	assert(fd > -1);
-	assert(fd_table[fd].flags.open);
+	s_assert(fd > -1);
+	s_assert(fd_table[fd].flags.open);
 
 	fd_table[fd].flush_timeout = CurrentTime + (timeout / 1000);
 	fd_table[fd].flush_handler = callback;
@@ -589,7 +589,7 @@ comm_connect_tcp(int fd, const char *host, u_short port,
 {
 	void *ipptr = NULL;
 	fd_table[fd].flags.called_connect = 1;
-	assert(callback);
+	s_assert(callback);
 	fd_table[fd].connect.callback = callback;
 	fd_table[fd].connect.data = data;
 

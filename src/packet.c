@@ -69,7 +69,7 @@ parse_client_queued(struct Client *client_p)
 					    buf_recvq, readBuf, READBUF_SIZE,
 					    LINEBUF_COMPLETE, LINEBUF_PARSED);
 
-			if(dolen <= 0)
+			if(dolen <= 0 || IsDead(client_p))
 				break;
 
 			client_dopacket(client_p, readBuf, dolen);
@@ -221,7 +221,7 @@ read_ctrl_packet(int fd, void *data)
 #endif
 
 
-	assert(lserver != NULL);
+	s_assert(lserver != NULL);
 	if(IsDeadorAborted(server))
 		return;
 
@@ -255,7 +255,7 @@ read_ctrl_packet(int fd, void *data)
 
 	/* we should be able to trust a local slink process...
 	 * and if it sends an invalid command, that's a bug.. */
-	assert(replydef->handler);
+	s_assert(replydef->handler);
 
 	if((replydef->flags & SLINKRPL_FLAG_DATA) && (reply->gotdatalen < 2))
 	{
@@ -351,7 +351,7 @@ read_packet(int fd, void *data)
 #ifndef HAVE_SOCKETPAIR
 	if(HasServlink(client_p))
 	{
-		assert(client_p->localClient->fd_r > -1);
+		s_assert(client_p->localClient->fd_r > -1);
 		fd_r = client_p->localClient->fd_r;
 	}
 #endif
@@ -426,7 +426,7 @@ read_packet(int fd, void *data)
 #ifndef HAVE_SOCKETPAIR
 	if(HasServlink(client_p))
 	{
-		assert(client_p->localClient->fd_r > -1);
+		s_assert(client_p->localClient->fd_r > -1);
 		fd_r = client_p->localClient->fd_r;
 	}
 #endif
@@ -463,8 +463,8 @@ read_packet(int fd, void *data)
 void
 client_dopacket(struct Client *client_p, char *buffer, size_t length)
 {
-	assert(client_p != NULL);
-	assert(buffer != NULL);
+	s_assert(client_p != NULL);
+	s_assert(buffer != NULL);
 
 	if(client_p == NULL || buffer == NULL)
 		return;

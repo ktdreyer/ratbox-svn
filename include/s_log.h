@@ -27,6 +27,8 @@
 #ifndef INCLUDED_s_log_h
 #define INCLUDED_s_log_h
 
+#include "ircd_defs.h"
+
 struct Client;
 
 #define L_CRIT    0
@@ -41,7 +43,7 @@ extern void init_log(const char *filename);
 extern void reopen_log(const char *filename);
 extern void set_log_level(int level);
 extern int get_log_level(void);
-extern void ilog(int priority, const char *fmt, ...);
+extern void ilog(int priority, const char *fmt, ...) AFP(2, 3);
 extern const char *get_log_level_as_string(int level);
 
 extern const char *smalldate(void);

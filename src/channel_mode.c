@@ -636,7 +636,7 @@ set_chcap_usage_counts(struct Client *serv_p)
 	}
 
 	/* This should be impossible -A1kmm. */
-	assert(0);
+	s_assert(0);
 }
 
 /* void set_chcap_usage_counts(struct Client *serv_p)
@@ -659,7 +659,7 @@ unset_chcap_usage_counts(struct Client *serv_p)
 		   (serv_p->localClient->caps & chcap_combos[n].cap_no) == 0)
 		{
 			/* Hopefully capabs can't change dynamically or anything... */
-			assert(chcap_combos[n].count > 0);
+			s_assert(chcap_combos[n].count > 0);
 
 			if(chcap_combos[n].count > 0)
 				chcap_combos[n].count--;
@@ -668,7 +668,7 @@ unset_chcap_usage_counts(struct Client *serv_p)
 	}
 
 	/* This should be impossible -A1kmm. */
-	assert(0);
+	s_assert(0);
 }
 
 /* Mode functions handle mode changes for a particular mode... */
@@ -1298,7 +1298,7 @@ chm_key(struct Client *client_p, struct Client *source_p,
 		else
 			fix_key_old(key);
 
-		assert(key[0] != ' ');
+		s_assert(key[0] != ' ');
 		strlcpy(chptr->mode.key, key, sizeof(chptr->mode.key));
 
 		mode_changes[mode_count].letter = c;

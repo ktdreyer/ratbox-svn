@@ -100,7 +100,7 @@ find_or_add(const char *name)
 	}
 
 	ptr = (SCACHE *) MyMalloc(sizeof(SCACHE));
-	assert(0 != ptr);
+	s_assert(0 != ptr);
 
 	strlcpy(ptr->name, name, sizeof(ptr->name));
 

@@ -58,7 +58,7 @@ static struct Listener *
 make_listener(struct sockaddr_storage *addr)
 {
 	struct Listener *listener = (struct Listener *) MyMalloc(sizeof(struct Listener));
-	assert(0 != listener);
+	s_assert(0 != listener);
 
 	listener->name = me.name;
 	listener->fd = -1;
@@ -71,7 +71,7 @@ make_listener(struct sockaddr_storage *addr)
 void
 free_listener(struct Listener *listener)
 {
-	assert(NULL != listener);
+	s_assert(NULL != listener);
 	if(listener == NULL)
 		return;
 	/*
@@ -108,7 +108,7 @@ get_listener_name(const struct Listener *listener)
 	static char buf[HOSTLEN + HOSTLEN + PORTNAMELEN + 4];
 	int port = 0;
 
-	assert(NULL != listener);
+	s_assert(NULL != listener);
 	if(listener == NULL)
 		return NULL;
 
@@ -396,7 +396,7 @@ add_listener(int port, const char *vhost_ip, int family)
 void
 close_listener(struct Listener *listener)
 {
-	assert(listener != NULL);
+	s_assert(listener != NULL);
 	if(listener == NULL)
 		return;
 	if(listener->fd >= 0)
@@ -443,7 +443,7 @@ accept_connection(int pfd, void *data)
 	int pe;
 	struct Listener *listener = data;
 
-	assert(listener != NULL);
+	s_assert(listener != NULL);
 	if(listener == NULL)
 		return;
 	/*

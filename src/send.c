@@ -361,7 +361,7 @@ send_queued_slink_write(int fd, void *data)
 		{
 			to->localClient->slinkq_len -= retlen;
 
-			assert(to->localClient->slinkq_len >= 0);
+			s_assert(to->localClient->slinkq_len >= 0);
 			if(to->localClient->slinkq_len)
 				to->localClient->slinkq_ofs += retlen;
 			else
