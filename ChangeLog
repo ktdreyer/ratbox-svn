@@ -1,3 +1,15 @@
+androsyn    2005/01/14 13:10:41 EST	(20050114_5)
+
+  Modified files:
+    modules              m_watch.c 
+  Log:
+  Make watch throttle, don't accept letter commands stacked
+  
+  Revision  Changes    Path
+  1.5       +126 -122  ircd-ratbox/modules/m_watch.c
+
+
+
 androsyn    2005/01/14 13:06:06 EST	(20050114_4)
 
   Modified files:
