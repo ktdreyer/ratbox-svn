@@ -31,10 +31,10 @@ static int s_userserv_logout(struct client *, char *parv[], int parc);
 
 static struct service_command userserv_command[] =
 {
-	{ "REGISTER",	&s_userserv_register,	2, NULL, 0, 0, 1, 0L },
-	{ "LOGIN",	&s_userserv_login,	2, NULL, 0, 0, 1, 0L },
-	{ "LOGOUT",	&s_userserv_logout,	0, NULL, 0, 1, 1, 0L },
-	{ "\0",		NULL,			0, NULL, 0, 0, 0, 0L }
+	{ "REGISTER",	&s_userserv_register,	2, NULL, 1, 0L, 0, 0, 0 },
+	{ "LOGIN",	&s_userserv_login,	2, NULL, 1, 0L, 0, 0, 0 },
+	{ "LOGOUT",	&s_userserv_logout,	0, NULL, 1, 0L, 1, 0, 0 },
+	{ "\0",		NULL,			0, NULL, 0, 0L, 0, 0, 0 }
 };
 
 static struct service_handler userserv_service = {
@@ -139,6 +139,12 @@ s_userserv_register(struct client *client_p, char *parv[], int parc)
 	if(config_file.disable_uregister)
 	{
 		service_error(userserv_p, client_p, "%s::REGISTER is disabled", userserv_p->name);
+		return 1;
+	}
+
+	if(client_p->user->user_reg != NULL)
+	{
+		service_error(userserv_p, client_p, "You are already logged in");
 		return 1;
 	}
 

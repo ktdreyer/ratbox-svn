@@ -25,6 +25,7 @@ struct server_jupe
 	char *reason;
 	int points;
 	int add;
+	time_t expire;
 	dlink_node node;
 	dlink_list servers;
 };
@@ -34,14 +35,14 @@ static dlink_list active_jupes;
 
 static struct client *jupeserv_p;
 
-static int s_jupeserv_jupe(struct client *, char *parv[], int parc);
-static int s_jupeserv_unjupe(struct client *, char *parv[], int parc);
+static int s_jupeserv_calljupe(struct client *, char *parv[], int parc);
+static int s_jupeserv_callunjupe(struct client *, char *parv[], int parc);
 
 static struct service_command jupeserv_command[] =
 {
-	{ "JUPE",	&s_jupeserv_jupe,	1, NULL, 1, 0, 1, 0L },
-	{ "UNJUPE",	&s_jupeserv_unjupe,	1, NULL, 1, 0, 1, 0L },
-	{ "\0",		NULL,			0, NULL, 0, 0, 0, 0L }
+	{ "CALLJUPE",	&s_jupeserv_calljupe,	1, NULL, 1, 0L, 0, 1, 0 },
+	{ "CALLUNJUPE",	&s_jupeserv_callunjupe,	1, NULL, 1, 0L, 0, 1, 0 },
+	{ "\0",		NULL,			0, NULL, 0, 0L, 0, 1, 0 }
 };
 
 static struct service_handler jupe_service = {
@@ -90,7 +91,7 @@ find_jupe(const char *name, dlink_list *list)
 }
 
 static int
-s_jupeserv_jupe(struct client *client_p, char *parv[], int parc)
+s_jupeserv_calljupe(struct client *client_p, char *parv[], int parc)
 {
 	struct server_jupe *jupe_p;
 	dlink_node *ptr;
@@ -152,7 +153,7 @@ s_jupeserv_jupe(struct client *client_p, char *parv[], int parc)
 }
 
 static int
-s_jupeserv_unjupe(struct client *client_p, char *parv[], int parc)
+s_jupeserv_callunjupe(struct client *client_p, char *parv[], int parc)
 {
 	struct server_jupe *ajupe_p, *jupe_p;
 

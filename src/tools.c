@@ -119,6 +119,25 @@ lcase(const char *text)
         return buf;
 }
 
+const char *
+ucase(const char *text)
+{
+        static char buf[BUFSIZE+1];
+        int i = 0;
+
+        buf[0] = '\0';
+
+        while(text[i] != '\0' && i < BUFSIZE-1)
+        {
+                buf[i] = toupper(text[i]);
+                i++;
+        }
+
+        buf[i] = '\0';
+
+        return buf;
+}
+
 /*
  * strip_tabs(dst, src, length)
  *

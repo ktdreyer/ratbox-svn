@@ -62,25 +62,25 @@ static int s_chanserv_unban(struct client *, char *parv[], int parc);
 
 static struct service_command chanserv_command[] =
 {
-	{ "REGISTER",	&s_chanserv_register,	1, NULL, 0, 1, 1, 0L },
-	{ "ADDUSER",	&s_chanserv_adduser,	3, NULL, 0, 1, 1, 0L },
-	{ "DELUSER",	&s_chanserv_deluser,	2, NULL, 0, 1, 1, 0L },
-	{ "MODUSER",	&s_chanserv_moduser,	3, NULL, 0, 1, 1, 0L },
-	{ "LISTUSERS",	&s_chanserv_listusers,	1, NULL, 0, 1, 1, 0L },
-	{ "SUSPEND",	&s_chanserv_suspend,	3, NULL, 0, 1, 1, 0L },
-	{ "UNSUSPEND",	&s_chanserv_unsuspend,	2, NULL, 0, 1, 1, 0L },
-	{ "CLEARMODES",	&s_chanserv_clearmodes,	1, NULL, 0, 1, 1, 0L },
-	{ "CLEAROPS",	&s_chanserv_clearops,	1, NULL, 0, 1, 1, 0L },
-	{ "CLEARALLOPS",&s_chanserv_clearallops,1, NULL, 0, 1, 1, 0L },
-	{ "CLEARBANS",	&s_chanserv_clearbans,	1, NULL, 0, 1, 1, 0L },
-	{ "INVITE",	&s_chanserv_invite,	1, NULL, 0, 1, 1, 0L },
-	{ "OP",		&s_chanserv_op,		1, NULL, 0, 1, 1, 0L },
-	{ "VOICE",	&s_chanserv_voice,	1, NULL, 0, 1, 1, 0L },
-	{ "ADDBAN",	&s_chanserv_addban,	4, NULL, 0, 1, 1, 0L },
-	{ "DELBAN",	&s_chanserv_delban,	2, NULL, 0, 1, 1, 0L },
-	{ "LISTBANS",	&s_chanserv_listbans,	1, NULL, 0, 1, 1, 0L },
-	{ "UNBAN",	&s_chanserv_unban,	1, NULL, 0, 1, 1, 0L },
-	{ "\0", NULL, 0, NULL, 0, 0, 0, 0L }
+	{ "REGISTER",	&s_chanserv_register,	1, NULL, 1, 0L, 1, 0, 0 },
+	{ "ADDUSER",	&s_chanserv_adduser,	3, NULL, 1, 0L, 1, 0, 0 },
+	{ "DELUSER",	&s_chanserv_deluser,	2, NULL, 1, 0L, 1, 0, 0 },
+	{ "MODUSER",	&s_chanserv_moduser,	3, NULL, 1, 0L, 1, 0, 0 },
+	{ "LISTUSERS",	&s_chanserv_listusers,	1, NULL, 1, 0L, 1, 0, 0 },
+	{ "SUSPEND",	&s_chanserv_suspend,	3, NULL, 1, 0L, 1, 0, 0 },
+	{ "UNSUSPEND",	&s_chanserv_unsuspend,	2, NULL, 1, 0L, 1, 0, 0 },
+	{ "CLEARMODES",	&s_chanserv_clearmodes,	1, NULL, 1, 0L, 1, 0, 0 },
+	{ "CLEAROPS",	&s_chanserv_clearops,	1, NULL, 1, 0L, 1, 0, 0 },
+	{ "CLEARALLOPS",&s_chanserv_clearallops,1, NULL, 1, 0L, 1, 0, 0 },
+	{ "CLEARBANS",	&s_chanserv_clearbans,	1, NULL, 1, 0L, 1, 0, 0 },
+	{ "INVITE",	&s_chanserv_invite,	1, NULL, 1, 0L, 1, 0, 0 },
+	{ "OP",		&s_chanserv_op,		1, NULL, 1, 0L, 1, 0, 0 },
+	{ "VOICE",	&s_chanserv_voice,	1, NULL, 1, 0L, 1, 0, 0 },
+	{ "ADDBAN",	&s_chanserv_addban,	4, NULL, 1, 0L, 1, 0, 0 },
+	{ "DELBAN",	&s_chanserv_delban,	2, NULL, 1, 0L, 1, 0, 0 },
+	{ "LISTBANS",	&s_chanserv_listbans,	1, NULL, 1, 0L, 1, 0, 0 },
+	{ "UNBAN",	&s_chanserv_unban,	1, NULL, 1, 0L, 1, 0, 0 },
+	{ "\0",		NULL,			0, NULL, 0, 0L, 0, 0, 0 }
 };
 
 static struct service_handler chanserv_service = {

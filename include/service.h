@@ -13,10 +13,17 @@ struct service_command
         int (*func)(struct client *, char *parv[], int parc);
 	int minparc;
         struct cachefile *helpfile;
+	/* WAS */
+#if 0
         int operonly;
+	int operflag;
 	int userreg;
+#endif
         int help_penalty;
         unsigned long cmd_use;
+	int userreg;
+	int operonly;
+	int operflags;
 };
 
 struct service_handler

@@ -366,7 +366,7 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
 						client_p->user->servername)) == NULL)
 		{
 			service_error(service_p, client_p, "No access to %s::LOGIN",
-					service_p->name);
+					ucase(service_p->name));
 			service_p->service->flood++;
 			return;
 		}

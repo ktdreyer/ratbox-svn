@@ -36,6 +36,10 @@ static struct mode_table privs_table[] = {
 	{ "admin",	CONF_OPER_ADMIN		},
 	{ "dcc",	CONF_OPER_DCC		},
 	{ "route",	CONF_OPER_ROUTE		},
+	{ "cs_admin",	CONF_OPER_CS_ADMIN	},
+	{ "cs_register",CONF_OPER_CS_REGISTER	},
+	{ "us_admin",	CONF_OPER_US_ADMIN	},
+	{ "us_register",CONF_OPER_US_REGISTER	},
 	{ "\0",		0			}
 };
 

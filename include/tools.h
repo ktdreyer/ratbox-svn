@@ -17,6 +17,7 @@ extern const char *get_duration(time_t seconds);
 extern const char *get_time(time_t when);
 
 extern const char *lcase(const char *);
+extern const char *ucase(const char *);
 
 #ifndef HAVE_STRLCAT
 extern size_t strlcat(char *dst, const char *src, size_t siz);

@@ -76,13 +76,28 @@ struct conf_oper
 #define ConfOperDcc(x)		((x)->flags & CONF_OPER_DCC)
 
 /* set in conf, but are moved to ->privs, x here is a connection */
-#define CONF_OPER_ADMIN		0x0100
-#define CONF_OPER_ROUTE		0x0200
+#define CONF_OPER_ADMIN		0x0000100
+#define CONF_OPER_ROUTE		0x0000200
+
+#define CONF_OPER_CS_ADMIN	0x0001000
+#define CONF_OPER_CS_REGISTER	0x0002000
+
+#define CONF_OPER_US_ADMIN	0x0010000
+#define CONF_OPER_US_REGISTER	0x0020000
 
 #define OperAdmin(x)	((x)->privs & CONF_OPER_ADMIN)
 #define CliOperAdmin(x)	((x)->user->oper && (x)->user->oper->flags & CONF_OPER_ADMIN)
 #define OperRoute(x)	((x)->privs & CONF_OPER_ROUTE)
 
+#define OperCSAdmin(x)		((x)->privs & CONF_OPER_CS_ADMIN)
+#define CliOperCSAdmin(x)	((x)->user->oper && (x)->user->oper->flags & CONF_OPER_CS_ADMIN)
+#define OperCSRegister(x)	((x)->privs & CONF_OPER_CS_REGISTER)
+#define CliOperCSRegister(x)	((x)->user->oper && (x)->user->oper->flags & CONF_OPER_CS_REGISTER)
+
+#define OperUSAdmin(x)		((x)->privs & CONF_OPER_US_ADMIN)
+#define CliOperUSAdmin(x)	((x)->user->oper && (x)->user->oper->flags & CONF_OPER_US_ADMIN)
+#define OperUSRegister(x)	((x)->privs & CONF_OPER_CS_REGISTER)
+#define CliOperUSRegister(x)	((x)->user->oper && (x)->user->oper->flags & CONF_OPER_CS_REGISTER)
 
 #define CONF_SERVER_AUTOCONN	0x0001
 
