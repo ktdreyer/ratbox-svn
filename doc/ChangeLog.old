@@ -1,3 +1,21 @@
+db          2002/03/14 09:23:19 EST	(20020314_0)
+
+  Modified files:
+    src                  parse.c 
+  Log:
+  -approved by db
+  
+  At 10:32 14/03/2002, Lee H wrote:
+  This patch will block remote servers from sending our clients numeric 501
+  (ERR_UMODEUNKNOWNFLAG), this causes us a problem in hyb7 with csircd,
+  which rejects the +a and sends an error back everytime someone opers whos
+  an admin.
+  
+  Revision  Changes    Path
+  7.123     +5 -0      ircd-hybrid-7/src/parse.c
+
+
+
 db          2002/03/13 08:53:09 EST	(20020313_3)
 
   Modified files:
