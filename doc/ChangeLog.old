@@ -1,3 +1,35 @@
+*** 20001025_4 by adrian
+
+
+Move the listener code to use comm_setselect(). 
+
+* accept_connection() has changed to become a PF function for use
+  with comm_setselect()
+* When a listener is created, comm_setselect() is called to make
+  the initial IO on the FD work
+* reworked read_message() in s_bsd_poll.c to deal with no listen sockets
+
+All read_message() does now (!) is handle auth and client/server sockets.
+Here's an excerpt from the code explaining the major real change
+that happened:
+
+   * Since we're going to rip this code out anyway, the current "hack"
+   * will suffice to keep things going. The only two things this loop
+   * services now is the auth and client/server fds (resolver and
+   * listener FDs are done through the new-style interface) . So,
+   * we loop again through the poll_fdarray[] array from scratch again
+   * and fd's that are not -1 are ready for us to do read-type events
+   * with. The pollfd_array[i].fd = -1; in the auth fd loop stops us
+   * from looking at the auth fds as client/server fds which would be
+   * a Bad Thing(tm) right now. :-)    -- adrian
+
+* We have to recheck the incoming connection code to ratelimit the number
+  of incoming connections/sec to stop connection flooders. Uhm, there was
+  some code in read_message() from comstud to do this, I'll move it out
+  into accept_connection() once read_message() has gone away.
+
+
+
 *** 20001025_3 by adrian
 
 
