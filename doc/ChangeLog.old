@@ -1,3 +1,9 @@
+*** 20001126_8 by db
+- .depend included references to in6.h which ltnx didn't have oops.
+- committed bysin's whois fix
+
+
+
 *** 20001126_7 by db
 - Seeing as there is next to nothing left of irc2.8 I'm removing
   it from the patchlevel.
