@@ -1,3 +1,8 @@
+*** 20010702_2 by wcampbel
+- fixed m_error.c grrrr
+
+
+
 *** 20010702_1 by wcampbel
 Remove the last vestiges of USE_RCS from viconf
 Install the two hard links to viconf (vimotd and viklines)
