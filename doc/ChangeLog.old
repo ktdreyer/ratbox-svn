@@ -1,3 +1,7 @@
+*** 20010221_2 by androsyn
+Minor fix replacing close() with fd_close()
+
+
 *** 20010221_1 by db
 - flush queues if client is marked dead.
 
