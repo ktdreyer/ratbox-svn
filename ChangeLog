@@ -1,3 +1,18 @@
+leeh        2005/02/12 18:35:10 EST	(20050212_0)
+
+  Modified files:
+    include              ircd_defs.h 
+    src                  class.c reject.c 
+  Log:
+  - add a PATRICIA_BITS define, make calls to New_Patricia() use it.
+  
+  Revision  Changes    Path
+  7.55      +5 -0      ircd-ratbox/include/ircd_defs.h
+  7.68      +1 -5      ircd-ratbox/src/class.c
+  1.33      +1 -5      ircd-ratbox/src/reject.c
+
+
+
 androsyn    2005/02/11 17:11:57 EST	(20050211_1)
 
   Modified files:
