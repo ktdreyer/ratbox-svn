@@ -842,7 +842,7 @@ void remove_one_ip(unsigned long ip_in)
                     prev_link->next = cur_link->next;
                   else
                     ptr->ptr_clients_on_this_ip = cur_link->next;
-                  free_link(cur_link);
+                  free_dlink_node(cur_link);
                   break;
                 }
               else

@@ -40,7 +40,7 @@ extern void count_user_memory(int *, int *);
 extern void     outofmemory(void);
 extern  void    _free_user (struct User *, struct Client *);
 extern  dlink_node *make_dlink_node (void);
-extern  void   free_dlink_node(dlink_node *lp);
+extern  void   _free_dlink_node(dlink_node *lp);
 extern  struct User     *make_user (struct Client *);
 extern  struct Server   *make_server (struct Client *);
 extern  void    initlists (void);

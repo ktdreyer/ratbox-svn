@@ -1160,6 +1160,7 @@ static void exit_one_client(struct Client *cptr, struct Client *sptr, struct Cli
 {
   struct Client* acptr;
   dlink_node *lp;
+  dlink_node *next_lp;
 
   if (IsServer(sptr))
     {
@@ -1227,12 +1228,20 @@ static void exit_one_client(struct Client *cptr, struct Client *sptr, struct Cli
           sendto_common_channels(sptr, ":%s QUIT :%s",
                                    sptr->name, comment);
 
-          while ((lp = sptr->user->channel.head))
-            remove_user_from_channel(lp->data,sptr);
+          for (lp = sptr->user->channel.head; lp; lp = next_lp)
+	    {
+	      next_lp = lp->next;
+	      remove_user_from_channel(lp->data,sptr);
+	      free_dlink_node(lp);
+	    }
           
           /* Clean up invitefield */
-          while ((lp = sptr->user->invited.head))
-            del_invite(lp->data, sptr);
+          for (lp = sptr->user->invited.head; lp; lp = next_lp)
+	    {
+	      next_lp = lp->next;
+	      del_invite(lp->data, sptr);
+	      free_dlink_node(lp);
+	    }
           /* again, this is all that is needed */
         }
     }

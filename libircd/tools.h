@@ -10,6 +10,8 @@
 #ifndef __TOOLS_H__
 #define __TOOLS_H__
 
+#define DEBUG_DLINK
+
 /*
  * double-linked-list stuff
  */
@@ -20,6 +22,11 @@ struct _dlink_node {
     void *data;
     dlink_node *prev;
     dlink_node *next;
+
+/* XXX Temporary ! relax adrian */
+#ifdef DEBUG_DLINK
+int ref_count;
+#endif
 };
   
 struct _dlink_list {
