@@ -1,3 +1,16 @@
+androsyn    2002/05/18 23:42:25 EDT	(20020519_1)
+
+  Modified files:
+    src                  client.c ircd.c 
+  Log:
+  Put the stupid dead_list back..damnit
+  
+  Revision  Changes    Path
+  7.263     +34 -3     ircd-hybrid-7/src/client.c
+  7.233     +0 -1      ircd-hybrid-7/src/ircd.c
+
+
+
 androsyn    2002/05/18 19:39:01 EDT	(20020519_0)
 
   Modified files:
