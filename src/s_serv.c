@@ -247,7 +247,7 @@ hunt_server(struct Client *client_p, struct Client *source_p,
 	struct Client *target_p;
 	int wilds;
 	dlink_node *ptr;
-	const char *old __unused = parv[server];
+	const char *old;
 	char *new;
 
 	/*
@@ -259,7 +259,6 @@ hunt_server(struct Client *client_p, struct Client *source_p,
 		return (HUNTED_ISME);
 	
 	new = LOCAL_COPY(parv[server]);
-	parv[server] = new;
 
 	/*
 	 * These are to pickup matches that would cause the following
@@ -267,20 +266,20 @@ hunt_server(struct Client *client_p, struct Client *source_p,
 	 * non-matching lookups.
 	 */
 	if(MyClient(source_p))
-		target_p = find_named_client(parv[server]);
+		target_p = find_named_client(new);
 	else
-		target_p = find_client(parv[server]);
+		target_p = find_client(new);
 
 	if(target_p)
 		if(target_p->from == source_p->from && !MyConnect(target_p))
 			target_p = NULL;
 
-	if(target_p == NULL && (target_p = find_server(parv[server])))
+	if(target_p == NULL && (target_p = find_server(new)))
 		if(target_p->from == source_p->from && !MyConnect(target_p))
 			target_p = NULL;
 
 	collapse(new);
-	wilds = (strchr(parv[server], '?') || strchr(parv[server], '*'));
+	wilds = (strchr(new, '?') || strchr(new, '*'));
 
 	/*
 	 * Again, if there are no wild cards involved in the server
@@ -297,11 +296,11 @@ hunt_server(struct Client *client_p, struct Client *source_p,
 		}
 		else
 		{
+			target_p = NULL;
 
 			DLINK_FOREACH(ptr, global_client_list.head)
 			{
-				target_p = NULL;
-				if(match(parv[server], ((struct Client *) (ptr->data))->name))
+				if(match(new, ((struct Client *) (ptr->data))->name))
 				{
 					target_p = ptr->data;
 					break;
@@ -323,11 +322,12 @@ hunt_server(struct Client *client_p, struct Client *source_p,
 		if(IsMe(target_p) || MyClient(target_p))
 			return HUNTED_ISME;
 
-		parv[0] = get_id(source_p, target_p);
+		old = parv[server];
 		parv[server] = get_id(target_p, target_p);
 
-		sendto_one(target_p, command, parv[0],
+		sendto_one(target_p, command, get_id(source_p, target_p),
 			   parv[1], parv[2], parv[3], parv[4], parv[5], parv[6], parv[7], parv[8]);
+		parv[server] = old;
 		return (HUNTED_PASS);
 	}
 
