@@ -31,6 +31,8 @@
 #include "sprintf_irc.h"
 #include "event.h"
 #include "s_log.h"
+#include "tools.h"
+#include "s_conf.h"
 
 
 #define IDTABLE 0xffff
@@ -113,7 +115,7 @@ lookup_ip(const char *addr, int aftype, DNSCB *callback, void *data)
 #ifdef IPV6
 	if(aftype == AF_INET6)
 	{
-		if(ConfigFileEntry.fallback_to_ip6_int))
+		if(ConfigFileEntry.fallback_to_ip6_int)
 			aft = 5;
 		else
 			aft = 6;

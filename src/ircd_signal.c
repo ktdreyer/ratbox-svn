@@ -29,7 +29,7 @@
 #include "memory.h"
 #include "commio.h"
 #include "s_conf.h"
-
+#include "res.h"
 /*
  * dummy_handler - don't know if this is really needed but if alarm is still
  * being used we probably will
