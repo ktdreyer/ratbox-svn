@@ -1283,9 +1283,7 @@ exit_unknown_client(struct Client *client_p, struct Client *source_p, struct Cli
 	delete_auth_queries(source_p);
 	client_flush_input(source_p);
 	dlinkDelete(&source_p->localClient->tnode, &unknown_list);
-#if 0
-	log_user_exit(source_p);
-#endif
+
 	if(source_p->localClient->fd >= 0)
 		sendto_one(source_p, "ERROR :Closing Link: 127.0.0.1 (%s)", comment);
 	call_unknown_exit_hook(source_p, comment);
@@ -1456,6 +1454,8 @@ static int
 exit_local_client(struct Client *client_p, struct Client *source_p, struct Client *from,
 		  const char *comment)
 {
+	unsigned long on_for;
+
 	if(IsDead(source_p))
 		return -1;
 			
@@ -1475,9 +1475,14 @@ exit_local_client(struct Client *client_p, struct Client *source_p, struct Clien
 #endif
 			     source_p->sockhost);
 
-#if 0
-	log_user_exit(source_p);
-#endif
+	on_for = CurrentTime - source_p->firsttime;
+
+	ilog(L_USER, "%s (%3lu:%02lu:%02lu): %s!%s@%s %d/%d",
+		myctime(CurrentTime), on_for / 3600,
+		(on_for % 3600) / 60, on_for % 60,
+		source_p->name, source_p->username, source_p->host,
+		source_p->localClient->sendK, source_p->localClient->receiveK);
+
 	call_local_exit_hook(source_p, comment);	
 	sendto_one(source_p, "ERROR :Closing Link: %s (%s)", source_p->host, comment);
 	close_connection(source_p);

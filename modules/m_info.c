@@ -165,6 +165,20 @@ static struct InfoStruct info_table[] = {
 		"Inform opers if someone /oper's with the wrong password"
 	},
 	{
+		/* fname_userlog is a char [] */
+		"fname_userlog",
+		OUTPUT_STRING_PTR,
+		&ConfigFileEntry.fname_userlog,
+		"User log file"
+	},
+	{
+		"fname_fuserlog",
+		OUTPUT_STRING_PTR,
+		&ConfigFileEntry.fname_fuserlog,
+		"Failed user log file"
+	},
+
+	{
 		/* fname_operlog is a char [] */
 		"fname_operlog",
 		OUTPUT_STRING_PTR,
@@ -179,11 +193,34 @@ static struct InfoStruct info_table[] = {
 		"Failed operator log file"
 	},
 	{
-		/* fname_userlog is a char [] */
-		"fname_userlog",
+		"fname_serverlog",
 		OUTPUT_STRING_PTR,
-		&ConfigFileEntry.fname_userlog,
-		"User log file"
+		&ConfigFileEntry.fname_serverlog,
+		"Server connect/disconnect log file"
+	},
+	{
+		"fname_klinelog",
+		OUTPUT_STRING_PTR,
+		&ConfigFileEntry.fname_klinelog,
+		"KLINE etc log file"
+	},
+	{
+		"fname_glinelog",
+		OUTPUT_STRING_PTR,
+		&ConfigFileEntry.fname_glinelog,
+		"GLINE log file"
+	},
+	{
+		"fname_operspylog",
+		OUTPUT_STRING_PTR,
+		&ConfigFileEntry.fname_operspylog,
+		"Oper spy log file"
+	},
+	{
+		"fname_ioerrorlog",
+		OUTPUT_STRING_PTR,
+		&ConfigFileEntry.fname_ioerrorlog,
+		"IO error log file"
 	},
 	{
 		"glines",
@@ -706,7 +743,7 @@ send_conf_options(struct Client *source_p)
 					   get_id(&me, source_p), RPL_INFO,
 					   get_id(source_p, source_p),
 					   info_table[i].name,
-					   option ? option : "NONE",
+					   EmptyString(option) ? "NONE" : option,
 					   info_table[i].desc ? info_table[i].desc : "<none>");
 
 				break;

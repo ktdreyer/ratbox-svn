@@ -11,7 +11,8 @@ Config File
 - kline_with_connection_closed is gone, replaced with 
   kline_reason = "Connection closed";
 - logging {}; is gone, replaced with more advanced log system - see
-  example.conf log {}; for more info.
+  example.conf log {}; for more info.  Note, by default only very basic
+  information will be logged.
 - kline = yes; etc is no longer supported, please use 
   flags = kline, gline; etc.  As a side effect of this, an oper is not
   given any default flags, including operwall.
