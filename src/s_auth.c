@@ -35,6 +35,7 @@
  *     --Bleep  Thomas Helvey <tomh@inxpress.net>
  */
 #include "stdinc.h"
+#include "config.h"
 #include "tools.h"
 #include "s_auth.h"
 #include "s_conf.h"
@@ -53,7 +54,7 @@
 #include "s_stats.h"
 #include "send.h"
 #include "memory.h"
-#include "config.h"
+#include "hook.h"
 
 /*
  * a bit different approach
@@ -103,7 +104,7 @@ void
 init_auth(void)
 {
 	/* This hook takes a struct Client for its argument */
-	hook_add_event("new_local_client", &h_local_client);
+	hook_add_event("new_local_client", &h_new_local_client);
 	memset(&auth_client_list, 0, sizeof(auth_client_list));
 	memset(&auth_poll_list, 0, sizeof(auth_poll_list));
 	eventAddIsh("timeout_auth_queries_event", timeout_auth_queries_event, NULL, 1);
