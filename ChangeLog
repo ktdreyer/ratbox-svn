@@ -1,3 +1,31 @@
+leeh        2004/02/18 12:08:15 EST	(20040218_0)
+
+  Modified files:
+    doc                  example.conf example.efnet.conf 
+    include              client.h s_conf.h 
+    modules              m_challenge.c m_oper.c m_stats.c 
+    src                  newconf.c s_conf.c s_user.c 
+  Log:
+  - remove class from operator {}; - its not needed at all really.
+  - stop attaching oper confs to opers, rather just allocate their opername
+    and set their flags.
+  - remove the kludge of oper_privs_as_string() setting the oper flags.
+  - remove unused oper_flags_as_string()
+  
+  Revision  Changes    Path
+  7.230     +0 -3      ircd-ratbox/doc/example.conf
+  7.65      +0 -3      ircd-ratbox/doc/example.efnet.conf
+  7.230     +2 -0      ircd-ratbox/include/client.h
+  7.262     +1 -2      ircd-ratbox/include/s_conf.h
+  1.66      +3 -21     ircd-ratbox/modules/m_challenge.c
+  1.79      +1 -22     ircd-ratbox/modules/m_oper.c
+  1.188     +2 -2      ircd-ratbox/modules/m_stats.c
+  7.124     +0 -8      ircd-ratbox/src/newconf.c
+  7.441     +8 -76     ircd-ratbox/src/s_conf.c
+  7.301     +9 -8      ircd-ratbox/src/s_user.c
+
+
+
 androsyn    2004/02/17 11:49:57 EST	(20040217_0)
 
   Modified files:
