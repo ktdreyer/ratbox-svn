@@ -1,3 +1,17 @@
+androsyn    2002/08/10 14:24:15 EDT	(20020810_27)
+
+  Modified files:
+    contrib              m_jupe.c m_ltrace.c m_map.c 
+  Log:
+  Update contrib to use the DLINK_ stuff
+  
+  Revision  Changes    Path
+  1.35      +2 -2      ircd-ratbox/contrib/m_jupe.c
+  1.5       +17 -39    ircd-ratbox/contrib/m_ltrace.c
+  1.13      +9 -11     ircd-ratbox/contrib/m_map.c
+
+
+
 androsyn    2002/08/10 14:00:58 EDT	(20020810_26)
 
   Modified files:
