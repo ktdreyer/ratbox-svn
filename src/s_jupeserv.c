@@ -215,13 +215,27 @@ h_jupeserv_finburst(void *unused, void *unused2)
 	return 0;
 }
 
+static int
+valid_jupe(const char *servername)
+{
+	if(!valid_servername(servername) || strchr(servername, '*') ||
+	   !irccmp(servername, MYNAME))
+		return 0;
+
+	/* cant jupe our uplink */
+	if(server_p && !irccmp(servername, server_p->name))
+		return 0;
+
+	return 1;
+}
+
 static void
 u_jupeserv_jupe(struct connection_entry *conn_p, char *parv[], int parc)
 {
 	struct server_jupe *jupe_p;
 	const char *reason;
 
-	if(!valid_servername(parv[1]) || match(parv[1], MYNAME))
+	if(!valid_jupe(parv[1]))
 	{
 		sendto_one(conn_p, "Servername %s is invalid", parv[1]);
 		return;
@@ -292,7 +306,7 @@ s_jupeserv_jupe(struct client *client_p, char *parv[], int parc)
 	struct server_jupe *jupe_p;
 	const char *reason;
 
-	if(!valid_servername(parv[0]) || match(parv[0], MYNAME))
+	if(!valid_jupe(parv[1]))
 	{
 		service_error(jupeserv_p, client_p, "Servername %s is invalid",
 				parv[0]);
@@ -374,7 +388,7 @@ s_jupeserv_calljupe(struct client *client_p, char *parv[], int parc)
 	struct server_jupe *jupe_p;
 	dlink_node *ptr;
 
-	if(!valid_servername(parv[0]) || match(parv[0], MYNAME))
+	if(!valid_jupe(parv[1]))
 	{
 		service_error(jupeserv_p, client_p, "Servername %s is invalid",
 				parv[0]);
