@@ -1,3 +1,21 @@
+*** 20001219_10 by db
+- cosine...
+	/* XXX THIS IS A STATIC */
+#if 0
+  comm_connect_callback(fd, COMM_OK);
+#endif
+
+in ircdauth.c
+
+  It won't compile like that
+
+- This looks like it works finally .... lazylinks
+
+- removed no longer used option in example.conf
+ 
+
+
+
 *** 20001219_9 by cosine
 iauth is now working again
 
