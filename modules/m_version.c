@@ -108,16 +108,20 @@ static void ms_version(struct Client* client_p, struct Client* source_p,
      {
        if (hunt_server(client_p, source_p, ":%s VERSION :%s", 
                        1, parc, parv) == HUNTED_ISME)
-         sendto_one(source_p, form_str(RPL_VERSION), me.name,
-                    parv[0], version, serno, debugmode,
-                    me.name, confopts(source_p), serveropts);
+         {
+           sendto_one(source_p, form_str(RPL_VERSION), me.name,
+                      parv[0], version, serno, debugmode,
+                      me.name, confopts(source_p), serveropts);
+           show_isupport(source_p);
+         }
      }
    else
-     sendto_one(source_p, form_str(RPL_VERSION), me.name,
-                parv[0], version, serno, debugmode,
-                me.name, confopts(source_p), serveropts);
-
-  show_isupport(source_p);
+     {
+       sendto_one(source_p, form_str(RPL_VERSION), me.name,
+                  parv[0], version, serno, debugmode,
+                  me.name, confopts(source_p), serveropts);
+       show_isupport(source_p);
+     }
 
   return;
 }
