@@ -75,6 +75,7 @@ SRCS =                          \
   scache.c                      \
   send.c                        \
   sprintf_irc.c                 \
+  tools.c                       \
   whowas.c
 
 OBJS = ${SRCS:.c=.o}
