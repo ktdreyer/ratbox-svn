@@ -1,3 +1,15 @@
+androsyn    2003/09/03 16:17:38 EDT	(20030903_7)
+
+  Modified files:
+    src                  linebuf.c 
+  Log:
+  Here is the fix to make servlink work
+  
+  Revision  Changes    Path
+  7.113     +83 -133   ircd-ratbox/src/linebuf.c
+
+
+
 leeh        2003/09/03 14:26:55 EDT	(20030903_6)
 
   Modified files:
