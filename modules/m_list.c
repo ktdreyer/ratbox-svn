@@ -42,10 +42,8 @@
 #include "modules.h"
 #include "linebuf.h"
 
-
 static int m_list(struct Client *, struct Client *, int, const char **);
 static int mo_list(struct Client *, struct Client *, int, const char **);
-static int list_all_channels(struct Client *);
 
 struct Message list_msgtab = {
 	"LIST", 0, 0, 0, 0, MFLG_SLOW, 0,
@@ -55,22 +53,19 @@ struct Message list_msgtab = {
 mapi_clist_av1 list_clist[] = { &list_msgtab, NULL };
 DECLARE_MODULE_AV1(list, NULL, NULL, list_clist, NULL, NULL, "$Revision$");
 
-static int list_all_channels(struct Client *source_p);
-static int list_named_channel(struct Client *source_p, const char *name);
+static void list_all_channels(struct Client *source_p);
+static void list_named_channel(struct Client *source_p, const char *name);
 
-/*
-** m_list
-**      parv[0] = sender prefix
-**      parv[1] = channel
-*/
+/* m_list()
+ *      parv[0] = sender prefix
+ *      parv[1] = channel
+ */
 static int
 m_list(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	static time_t last_used = 0L;
 
-	/* If not a LazyLink connection, see if its still paced */
-	/* If we're forwarding this to uplinks.. it should be paced due to the
-	 * traffic involved in /list.. -- fl_ */
+	/* pace this due to the sheer traffic involved */
 	if(((last_used + ConfigFileEntry.pace_wait) > CurrentTime))
 	{
 		sendto_one(source_p, form_str(RPL_LOAD2HI),
@@ -83,47 +78,36 @@ m_list(struct Client *client_p, struct Client *source_p, int parc, const char *p
 
 	/* If no arg, do all channels *whee*, else just one channel */
 	if(parc < 2 || EmptyString(parv[1]))
-	{
 		list_all_channels(source_p);
-	}
 	else
-	{
 		list_named_channel(source_p, parv[1]);
-	}
 
 	return 0;
 }
 
-
-/*
-** mo_list
-**      parv[0] = sender prefix
-**      parv[1] = channel
-*/
+/* mo_list()
+ *      parv[0] = sender prefix
+ *      parv[1] = channel
+ */
 static int
 mo_list(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	/* If no arg, do all channels *whee*, else just one channel */
 	if(parc < 2 || EmptyString(parv[1]))
-	{
 		list_all_channels(source_p);
-	}
 	else
-	{
 		list_named_channel(source_p, parv[1]);
-	}
 
 	return 0;
 }
 
-
-/*
- * list_all_channels
+/* list_all_channels()
+ *
  * inputs	- pointer to client requesting list
- * output	- 0/1
+ * output	-
  * side effects	- list all channels to source_p
  */
-static int
+static void
 list_all_channels(struct Client *source_p)
 {
 	struct Channel *chptr;
@@ -162,17 +146,16 @@ list_all_channels(struct Client *source_p)
 	return 0;
 }
 
-/*
- * list_named_channel
+/* list_named_channel()
+ * 
  * inputs       - pointer to client requesting list
- * output       - 0/1
- * side effects	- list all channels to source_p
+ * output       -
+ * side effects	- list single channel to source
  */
-static int
+static void
 list_named_channel(struct Client *source_p, const char *name)
 {
 	struct Channel *chptr;
-	char id_and_topic[TOPICLEN + NICKLEN + 6];	/* <!!>, space and null */
 	char *p;
 	char *n = LOCAL_COPY(name);
 
@@ -197,12 +180,11 @@ list_named_channel(struct Client *source_p, const char *name)
 		return 0;
 	}
 
-	ircsprintf(id_and_topic, "%s", chptr->topic == NULL ? "" : chptr->topic);
-
 	if(ShowChannel(source_p, chptr))
 		sendto_one(source_p, form_str(RPL_LIST),
 			   me.name, source_p->name, chptr->chname, 
-			   dlink_list_length(&chptr->members), id_and_topic);
+			   dlink_list_length(&chptr->members),
+			   chptr->topic == NULL ? "" : chptr->topic);
 
 	sendto_one(source_p, form_str(RPL_LISTEND), me.name, source_p->name);
 	return 0;
