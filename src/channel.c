@@ -2504,6 +2504,7 @@ static  void    sub1_from_channel(struct Channel *chptr)
 
               if (!HasVchans(root_chptr))
                 {
+                  chptr = root_chptr;
                   if (chptr->prevch)
                     chptr->prevch->nextch = chptr->nextch;
                   else
