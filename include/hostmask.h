@@ -50,6 +50,7 @@ struct ConfItem* find_address_conf(const char*, const char*,
 struct ConfItem* find_dline(struct irc_inaddr *, int);
 
 void report_dlines(struct Client*);
+void report_exemptlines(struct Client*);
 void report_Klines(struct Client*, int);
 void report_Ilines(struct Client*);
 

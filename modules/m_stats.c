@@ -363,8 +363,13 @@ static void do_priv_stats(struct Client *source_p, char *name, char *target,
       stats_spy(source_p,statchar);
       break;
 
-    case 'E' : case 'e' :
+    case 'E' :
       show_events(source_p);
+      stats_spy(source_p,statchar);
+      break;
+
+    case 'e' :
+      report_exemptlines(source_p);
       stats_spy(source_p,statchar);
       break;
 

@@ -468,7 +468,7 @@ find_address_conf(const char *host, const char *user,
 
 /* struct ConfItem* find_dline(struct irc_inaddr*, int)
  * Input: An address, an address family.
- * Output: The best matching D-line or E-lining I-line.
+ * Output: The best matching D-line or exempt line.
  * Side effects: None.
  */
 struct ConfItem*
@@ -632,6 +632,26 @@ report_dlines(struct Client *client_p)
    }
 }
 
+void
+report_exemptlines(struct Client *client_p)
+{
+  char *name, *host, *pass, *user, *classname;
+  struct AddressRec *arec;
+  struct ConfItem *aconf;
+  int i, port;
+  
+  for (i=0; i<ATABLE_SIZE; i++)
+    for (arec=atable[i]; arec; arec=arec->next)
+      if (arec->type == CONF_EXEMPTDLINE)
+        {
+           aconf = arec->aconf;
+           get_printable_conf(aconf, &name, &host, &pass,
+                              &user, &port, &classname);
+           sendto_one(client_p, form_str(RPL_STATSDLINE), me.name,
+                      client_p->name, 'e', host, pass);
+        }
+}
+ 
 /*
  * show_iline_prefix()
  *
