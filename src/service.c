@@ -136,7 +136,7 @@ find_service_id(const char *name)
 void
 introduce_service(struct client *target_p)
 {
-	sendto_server("NICK %s 1 1 +i%s %s %s %s :%s",
+	sendto_server("NICK %s 1 1 +iD%s %s %s %s :%s",
 		      target_p->name, ServiceOpered(target_p) ? "o" : "",
 		      target_p->service->username,
 		      target_p->service->host, MYNAME, target_p->info);
