@@ -114,4 +114,4 @@ rsa_respond:
 	echo "Creating rsa_respond.tar.gz";\
 	tar cf ../rsa_respond.tar $(RSA_FILES);\
 	cd ..;\
-	gzip rsa_respond.tar;\
+	gzip rsa_respond.tar
