@@ -14,6 +14,7 @@
 #include "s_serv.h"
 #include "s_user.h"
 #include "send.h"
+#include "s_conf.h"
 
 #include <time.h>
 #include <string.h>
@@ -44,7 +45,7 @@ m_info(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       /* reject non local requests */
       if (!MyConnect(sptr))
         return 0;
-      if ((last_used + PACE_WAIT) > CurrentTime)
+      if ((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
       {
         /* safe enough to give this on a local connect only */
         sendto_one(sptr,form_str(RPL_LOAD2HI),me.name,parv[0]);

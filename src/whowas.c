@@ -29,6 +29,7 @@
 #include "s_serv.h"
 #include "s_user.h"
 #include "send.h"
+#include "s_conf.h"
 
 #include <assert.h>
 #include <string.h>
@@ -189,7 +190,7 @@ int     m_whowas(struct Client *cptr,
 
   if(!IsAnOper(sptr) && !MyConnect(sptr)) /* pace non local requests */
     {
-      if((last_used + WHOIS_WAIT) > CurrentTime)
+      if((last_used + ConfigFileEntry.whois_wait) > CurrentTime)
         {
           return 0;
         }

@@ -29,6 +29,7 @@
 #include "s_serv.h"    /* hunt_server */
 #include "s_user.h"    /* show_lusers */
 #include "send.h"
+#include "s_conf.h"
 
 /*
  * m_functions execute protocol messages on this server:
@@ -102,7 +103,7 @@ int m_lusers(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
   if (!IsAnOper(sptr))
     {
-      if ((last_used + PACE_WAIT) > CurrentTime)
+      if ((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
         {
           /* safe enough to give this on a local connect only */
           if (MyClient(sptr))

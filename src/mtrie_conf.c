@@ -1469,28 +1469,20 @@ char *show_iline_prefix(struct Client *sptr,struct ConfItem *aconf,char *name)
   if (IsConfDoSpoofIp(aconf))
     *prefix_ptr++ = '=';
 
-#ifdef E_LINES_OPER_ONLY
-  if(IsAnOper(sptr))
-#endif
+  if((ConfigFileEntry.e_lines_oper_only && IsAnOper(sptr)) || !ConfigFileEntry.e_lines_oper_only)
     if (IsConfElined(aconf))
       *prefix_ptr++ = '^';
 
-#ifdef B_LINES_OPER_ONLY
-  if(IsAnOper(sptr))
-#endif
+  if((ConfigFileEntry.b_lines_oper_only && IsAnOper(sptr)) || !ConfigFileEntry.b_lines_oper_only)
     if (IsConfBlined(aconf))
       *prefix_ptr++ = '&';
 
-#ifdef F_LINES_OPER_ONLY
-  if(IsAnOper(sptr))
-#endif
+  if((ConfigFileEntry.f_lines_oper_only && IsAnOper(sptr)) || !ConfigFileEntry.f_lines_oper_only)
     if (IsConfFlined(aconf))
       *prefix_ptr++ = '>';
 
 #ifdef IDLE_CHECK  
-#ifdef E_LINES_OPER_ONLY
-  if(IsAnOper(sptr))
-#endif
+  if((ConfigFileEntry.f_lines_oper_only && IsAnOper(sptr)) || !ConfigFileEntry.e_lines_oper_only)
     if (IsConfIdlelined(aconf))
       *prefix_ptr++ = '<';
 #endif

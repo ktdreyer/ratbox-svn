@@ -687,8 +687,8 @@ m_kline(struct Client *cptr,
       ip = 0L;
     }
 
-#ifdef NON_REDUNDANT_KLINES
-  if( (aconf = find_matching_mtrie_conf(host,user,(unsigned long)ip)) )
+  if( ConfigFileEntry.non_redundant_klines && 
+      (aconf = find_matching_mtrie_conf(host,user,(unsigned long)ip)) )
      {
        char *reason;
 
@@ -707,7 +707,6 @@ m_kline(struct Client *cptr,
            return 0;
          }
      }
-#endif
 
   current_date = smalldate((time_t) 0);
 
@@ -1160,8 +1159,7 @@ m_dline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         }
     }
 
-#ifdef NON_REDUNDANT_KLINES
-  if( (aconf = match_Dline(ip_host)) )
+  if( ConfigFileEntry.non_redundant_klines && (aconf = match_Dline(ip_host)) )
      {
        char *reason;
        reason = aconf->passwd ? aconf->passwd : "<No Reason>";
@@ -1180,7 +1178,6 @@ m_dline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       return 0;
        
      }
-#endif
 
   current_date = smalldate((time_t) 0);
 

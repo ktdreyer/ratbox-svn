@@ -129,6 +129,33 @@ int   class_sendq_var;
 %token  USER
 %token  VHOST
 %token  WARN
+%token  GENERAL
+%token  QUIET_ON_BAN
+%token  BAN_CIDR
+%token  FAILED_OPER_NOTICE
+%token  SHOW_FAILED_OPER_ID
+%token  SHOW_FAILED_OPER_PASSWD
+%token  ANTI_NICK_FLOOD
+%token  MAX_NICK_TIME
+%token  MAX_NICK_CHANGES
+%token  TS_MAX_DELTA
+%token  TS_WARN_DELTA
+%token  KLINE_WITH_REASON
+%token  KLINE_WITH_CONNECTION_CLOSED
+%token  WARN_NO_NLINE
+%token  NON_REDUNDANT_KLINES
+%token  BOTCHECK
+%token  E_LINES_OPER_ONLY
+%token  B_LINES_OPER_ONLY
+%token  F_LINES_OPER_ONLY
+%token  WHOIS_NOTICE
+%token  STATS_NOTICE
+%token  WHOIS_WAIT
+%token  PACE_WAIT
+%token  KNOCK_DELAY
+%token  PACE_WALLOPS
+%token  WALLOPS_WAIT
+%token  SHORT_MOTD
 
 %%
 conf:   
@@ -146,6 +173,7 @@ conf_item:        admin_entry
                 | connect_entry
                 | kill_entry
                 | deny_entry
+		| general_entry
                 | gecos_entry
                 | error ';'
                 | error '}'
@@ -1025,3 +1053,248 @@ gecos_action:    ACTION '='
   };
 
  ';' 
+
+
+/***************************************************************************
+ *  section general
+ ***************************************************************************/
+
+general_entry:      GENERAL
+  '{' general_items '}' ';'
+
+general_items:      general_items general_item |
+                    general_item
+
+general_item:       general_quiet_on_ban | general_ban_cidr | general_failed_oper_notice |
+                    general_show_failed_oper_id | general_show_failed_oper_passwd |
+                    general_anti_nick_flood | general_max_nick_time | general_max_nick_changes |
+                    general_ts_warn_delta | general_ts_max_delta | general_kline_with_reason |
+                    general_kline_with_connection_closed | general_warn_no_nline |
+                    general_non_redundant_klines | general_botcheck | general_b_lines_oper_only |
+                    general_e_lines_oper_only | general_f_lines_oper_only | general_stats_notice |
+                    general_whois_notice | general_pace_wait | general_whois_wait | 
+                    general_knock_delay | general_pace_wallops | general_wallops_wait |
+                    general_short_motd
+
+general_quiet_on_ban:   QUIET_ON_BAN '=' TYES ';'
+  {
+    ConfigFileEntry.quiet_on_ban = 1;
+  }
+                        |
+                        QUIET_ON_BAN '=' TNO ';'
+  {
+    ConfigFileEntry.quiet_on_ban = 0;
+  } ;
+
+general_ban_cidr:   BAN_CIDR '=' TYES ';'
+  {
+    ConfigFileEntry.ban_cidr = 1;
+  }
+                        |
+                        BAN_CIDR '=' TNO ';'
+  {
+    ConfigFileEntry.ban_cidr = 0;
+  } ;
+
+general_failed_oper_notice:   FAILED_OPER_NOTICE '=' TYES ';'
+  {
+    ConfigFileEntry.failed_oper_notice = 1;
+  }
+                        |
+                        FAILED_OPER_NOTICE '=' TNO ';'
+  {
+    ConfigFileEntry.failed_oper_notice = 0;
+  } ;
+
+general_show_failed_oper_passwd:   SHOW_FAILED_OPER_PASSWD '=' TYES ';'
+  {
+    ConfigFileEntry.show_failed_oper_passwd = 1;
+  }
+                        |
+                        SHOW_FAILED_OPER_PASSWD '=' TNO ';'
+  {
+    ConfigFileEntry.show_failed_oper_passwd = 0;
+  } ;
+
+general_show_failed_oper_id:   SHOW_FAILED_OPER_ID '=' TYES ';'
+  {
+    ConfigFileEntry.show_failed_oper_id = 1;
+  }
+                        |
+                        SHOW_FAILED_OPER_ID '=' TNO ';'
+  {
+    ConfigFileEntry.show_failed_oper_id = 0;
+  } ;
+
+general_anti_nick_flood:   ANTI_NICK_FLOOD '=' TYES ';'
+  {
+    ConfigFileEntry.anti_nick_flood = 1;
+  }
+                        |
+                        ANTI_NICK_FLOOD '=' TNO ';'
+  {
+    ConfigFileEntry.anti_nick_flood = 0;
+  } ;
+
+general_max_nick_time:    MAX_NICK_TIME '=' NUMBER ';'
+  {
+    ConfigFileEntry.max_nick_time = yylval.number;
+  } ;
+
+general_max_nick_changes:  MAX_NICK_CHANGES '=' NUMBER ';'
+  {
+    ConfigFileEntry.max_nick_changes = yylval.number;
+  } ;
+
+general_ts_warn_delta: TS_WARN_DELTA '=' NUMBER ';'
+  {
+    ConfigFileEntry.ts_warn_delta = yylval.number;
+  } ;
+
+general_ts_max_delta: TS_MAX_DELTA '=' NUMBER ';'
+  {
+    ConfigFileEntry.ts_max_delta = yylval.number;
+  } ;
+
+general_kline_with_reason: KLINE_WITH_REASON '=' TYES ';'
+  {
+    ConfigFileEntry.kline_with_reason = 1;
+  }
+    |
+    KLINE_WITH_REASON '=' TNO ';'
+  {
+    ConfigFileEntry.kline_with_reason = 0;
+  } ;
+
+general_kline_with_connection_closed: KLINE_WITH_CONNECTION_CLOSED '=' TYES ';'
+  {
+    ConfigFileEntry.kline_with_connection_closed = 1;
+  }
+    |
+    KLINE_WITH_CONNECTION_CLOSED '=' TNO ';'
+  {
+    ConfigFileEntry.kline_with_connection_closed = 0;
+  } ;
+
+general_warn_no_nline: WARN_NO_NLINE '=' TYES ';'
+  {
+    ConfigFileEntry.warn_no_nline = 1;
+  }
+    |
+    WARN_NO_NLINE '=' TNO ';'
+  {
+    ConfigFileEntry.warn_no_nline = 0;
+  } ;
+
+general_non_redundant_klines: NON_REDUNDANT_KLINES '=' TYES ';'
+  {
+    ConfigFileEntry.non_redundant_klines = 1;
+  }
+    |
+    NON_REDUNDANT_KLINES '=' TNO ';'
+  {
+    ConfigFileEntry.non_redundant_klines = 0;
+  } ;
+
+general_botcheck: BOTCHECK '=' TYES ';'
+  {
+    ConfigFileEntry.botcheck = 1;
+  }
+    |
+    BOTCHECK '=' TNO ';'
+  {
+    ConfigFileEntry.botcheck = 0;
+  } ;
+
+general_b_lines_oper_only: B_LINES_OPER_ONLY '=' TYES ';'
+  {
+    ConfigFileEntry.b_lines_oper_only = 1;
+  }
+    |
+    B_LINES_OPER_ONLY '=' TNO ';'
+  {
+    ConfigFileEntry.b_lines_oper_only = 0;
+  } ;
+
+general_e_lines_oper_only: E_LINES_OPER_ONLY '=' TYES ';'
+  {
+    ConfigFileEntry.e_lines_oper_only = 1;
+  }
+    |
+    E_LINES_OPER_ONLY '=' TNO ';'
+  {
+    ConfigFileEntry.e_lines_oper_only = 0;
+  } ;
+
+general_f_lines_oper_only: F_LINES_OPER_ONLY '=' TYES ';'
+  {
+    ConfigFileEntry.f_lines_oper_only = 1;
+  }
+    |
+    F_LINES_OPER_ONLY '=' TNO ';'
+  {
+    ConfigFileEntry.f_lines_oper_only = 0;
+  } ;
+
+general_stats_notice: STATS_NOTICE '=' TYES ';'
+  {
+    ConfigFileEntry.stats_notice = 1;
+  }
+    |
+    STATS_NOTICE '=' TNO ';'
+  {
+    ConfigFileEntry.stats_notice = 0;
+  } ;
+
+general_whois_notice: WHOIS_NOTICE '=' TYES ';'
+  {
+    ConfigFileEntry.whois_notice = 1;
+  }
+    |
+    WHOIS_NOTICE '=' TNO ';'
+  {
+    ConfigFileEntry.whois_notice = 0;
+  } ;
+
+
+general_pace_wait: PACE_WAIT '=' NUMBER ';'
+  {
+    ConfigFileEntry.pace_wait = yylval.number;
+  } ;
+
+general_whois_wait: WHOIS_WAIT '=' NUMBER ';'
+  {
+    ConfigFileEntry.whois_wait = yylval.number;
+  } ;
+
+general_knock_delay: KNOCK_DELAY '=' NUMBER ';'
+  {
+    ConfigFileEntry.knock_delay = yylval.number;
+  } ;
+
+general_pace_wallops: PACE_WALLOPS '=' TYES ';'
+  {
+    ConfigFileEntry.pace_wallops = 1;
+  }
+    |
+    PACE_WALLOPS '=' TNO ';'
+  {
+    ConfigFileEntry.pace_wallops = 0;
+  } ;
+
+
+general_wallops_wait: WALLOPS_WAIT '=' NUMBER ';'
+  {
+    ConfigFileEntry.wallops_wait = yylval.number;
+  } ;
+
+general_short_motd: SHORT_MOTD '=' TYES ';'
+  {
+    ConfigFileEntry.short_motd = 1;
+  }
+    |
+    SHORT_MOTD '=' TNO ';'
+  {
+    ConfigFileEntry.short_motd = 0;
+  } ;
+  

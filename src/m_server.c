@@ -224,10 +224,9 @@ int m_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     {
       if (find_conf_by_name(host, CONF_NOCONNECT_SERVER) == NULL)
         {
-#ifdef WARN_NO_NLINE
-          sendto_realops("Link %s Server %s dropped, no N: line",
-                         get_client_name(cptr, TRUE), host);
-#endif
+          if (ConfigFileEntry.warn_no_nline)
+              sendto_realops("Link %s Server %s dropped, no N: line",
+                             get_client_name(cptr, TRUE), host);
           return exit_client(cptr, cptr, cptr, "NO N line");
         }
     }

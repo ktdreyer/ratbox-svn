@@ -100,7 +100,7 @@ int m_help(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   if (!IsAnOper(sptr))
     {
       /* HELP is always local */
-      if ((last_used + PACE_WAIT) > CurrentTime)
+      if ((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
         {
           /* safe enough to give this on a local connect only */
           sendto_one(sptr,form_str(RPL_LOAD2HI),me.name,parv[0]);

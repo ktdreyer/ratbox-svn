@@ -31,6 +31,14 @@
  */
 extern int match(const char *mask, const char *name);
 /*
+ * match_cidr - compare name with mask, mask may contain * and ? as wildcards, and
+ *              a network of the form 1.2.3.4/5.
+ * match_cidr - return 1 on successful match, 0 otherwise.
+ */
+#if 0
+extern int match_cidr(const char *ban, const char *ip, struct Client *sptr);
+#endif
+/*
  * collapse - collapse a string in place, converts multiple adjacent *'s 
  * into a single *.
  * collapse - modifies the contents of pattern 

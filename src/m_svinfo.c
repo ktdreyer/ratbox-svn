@@ -29,6 +29,7 @@
 #include "ircd.h"
 #include "numeric.h"
 #include "send.h"
+#include "s_conf.h"
 
 #include <assert.h>
 #include <time.h>
@@ -129,7 +130,7 @@ int m_svinfo(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   theirtime = atol(parv[4]);
   deltat = abs(theirtime - CurrentTime);
 
-  if (deltat > TS_MAX_DELTA)
+  if (deltat > ConfigFileEntry.ts_max_delta)
     {
       sendto_ops(
        "Link %s dropped, excessive TS delta (my TS=%d, their TS=%d, delta=%d)",
@@ -137,7 +138,7 @@ int m_svinfo(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       return exit_client(sptr, sptr, sptr, "Excessive TS delta");
     }
 
-  if (deltat > TS_WARN_DELTA)
+  if (deltat > ConfigFileEntry.ts_warn_delta)
     { 
       sendto_realops(
                  "Link %s notable TS delta (my TS=%d, their TS=%d, delta=%d)",

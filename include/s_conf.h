@@ -24,6 +24,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 7.14  2000/03/31 02:38:27  db
+ * - large resync , folding in a number of changes contributed by is
+ *   This moves some config.h items into the conf file
+ *
  * Revision 7.13  2000/02/01 04:30:01  db
  * - improvements to connect section. allow multiple hub_masks etc.
  *
@@ -297,6 +301,7 @@ typedef struct QlineItem {
 #define CONF_ME                 0x0040
 #define CONF_KILL               0x0080
 #define CONF_ADMIN              0x0100
+#define CONF_GENERAL            0x0200
 /*
  * R_LINES are no more
  * -wnder
@@ -400,13 +405,38 @@ typedef struct
   MessageFile motd;
   MessageFile opermotd;
   int         hub; /* YES or NO */
+  int         quiet_on_ban; /* YES or NO */
+  int         failed_oper_notice;
+  int         show_failed_oper_passwd;
+  int         show_failed_oper_id;
+  int         anti_nick_flood;
+  int         max_nick_time;
+  int         max_nick_changes;
+  int         ts_max_delta;
+  int         ts_warn_delta;
+  int         kline_with_reason;
+  int         kline_with_connection_closed;
+  int         warn_no_nline;
+  int         non_redundant_klines;
+  int         botcheck;
+  int         b_lines_oper_only;
+  int         e_lines_oper_only;
+  int         f_lines_oper_only;
+  int         stats_notice;
+  int         whois_notice;
+  int         pace_wait;
+  int         whois_wait;
+  int         knock_delay;
+  int         wallops_wait;
+  int         pace_wallops;
+  int         short_motd;
 } ConfigFileEntryType;
 
 /* bleh. have to become global. */
 extern int ccount;
 extern int ncount;
 
-/* aConfItems */
+/* struct ConfItems */
 /* conf uline link list root */
 extern struct ConfItem *u_conf;
 /* conf xline link list root */
@@ -516,6 +546,8 @@ extern void conf_add_q_line(struct ConfItem *);
 extern void conf_add_fields(struct ConfItem*, char*, char *, char*, char *,char *);
 extern void conf_add_conf(struct ConfItem *);
 extern void oldParseOneLine(char* ,struct ConfItem*,int*,int*);
+
+extern unsigned long cidr_to_bitmask[];
 
 #endif /* INCLUDED_s_conf_h */
 

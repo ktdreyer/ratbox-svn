@@ -67,7 +67,7 @@ int     m_list(struct Client *cptr,
 
   if(!IsAnOper(sptr))
     {
-      if(((last_used + PACE_WAIT) > CurrentTime) && (!IsDoingList(sptr)))
+      if(((last_used + ConfigFileEntry.pace_wait) > CurrentTime) && (!IsDoingList(sptr)))
         {
           sendto_one(sptr,form_str(RPL_LOAD2HI),me.name,parv[0]);
           return 0;

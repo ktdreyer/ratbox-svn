@@ -86,6 +86,7 @@ description	{ return DESCRIPTION; }
 die		{ return DIE; }
 email		{ return EMAIL; }
 gecos		{ return GECOS; }
+general		{ return GENERAL; }
 gline		{ return GLINE; }
 gline_log       { return GLINE_LOG; }
 global		{ return GLOBAL; }
@@ -97,6 +98,7 @@ hub_mask	{ return HUB_MASK; }
 include		{ return INCLUDE; }
 ip		{ return IP; }
 kill		{ return KILL; }
+kline		{ return KLINE; }
 kline_exempt	{ return KLINE_EXEMPT; }
 l_crit		{ return T_L_CRIT; }
 l_debug		{ return T_L_DEBUG; }
@@ -139,6 +141,32 @@ user		{ return USER;}
 vhost		{ return VHOST; }
 warn		{ return WARN; }
 yes		{ return TYES; }
+quiet_on_ban { return QUIET_ON_BAN; }
+ban_cidr { return BAN_CIDR; }
+failed_oper_notice { return FAILED_OPER_NOTICE; }
+show_failed_oper_passwd { return SHOW_FAILED_OPER_PASSWD; }
+show_failed_oper_id { return SHOW_FAILED_OPER_ID; }
+max_nick_changes { return MAX_NICK_CHANGES; }
+max_nick_time { return MAX_NICK_TIME; }
+anti_nick_flood { return ANTI_NICK_FLOOD; }
+ts_max_delta { return TS_MAX_DELTA; }
+ts_warn_delta { return TS_WARN_DELTA; }
+kline_with_connection_closed { return KLINE_WITH_CONNECTION_CLOSED; }
+kline_with_reason { return KLINE_WITH_REASON; }
+warn_no_nline { return WARN_NO_NLINE; }
+non_redundant_klines { return NON_REDUNDANT_KLINES; }
+botcheck { return BOTCHECK; }
+b_lines_oper_only { return B_LINES_OPER_ONLY; }
+e_lines_oper_only { return E_LINES_OPER_ONLY; }
+f_lines_oper_only { return F_LINES_OPER_ONLY; }
+stats_notice { return STATS_NOTICE; }
+whois_notice { return WHOIS_NOTICE; }
+whois_wait { return WHOIS_WAIT; }
+pace_wait { return PACE_WAIT; }
+knock_delay { return KNOCK_DELAY; }
+wallops_wait { return WALLOPS_WAIT; }
+pace_wallops { return PACE_WALLOPS; }
+short_motd { return SHORT_MOTD; }
 .		{ return yytext[0]; }
 
 %%

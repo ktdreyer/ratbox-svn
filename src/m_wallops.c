@@ -29,6 +29,7 @@
 #include "numeric.h"
 #include "send.h"
 #include "s_user.h"
+#include "s_conf.h"
 
 /*
  * m_functions execute protocol messages on this server:
@@ -121,10 +122,9 @@ int m_wallops(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   if(!IsServer(sptr))   /* If source of message is not a server, i.e. oper */
     {
 
-#ifdef PACE_WALLOPS
-      if( MyClient(sptr) )
+      if( ConfigFileEntry.pace_wallops && MyClient(sptr) )
         {
-          if( (LastUsedWallops + WALLOPS_WAIT) > CurrentTime )
+          if( (LastUsedWallops + ConfigFileEntry.wallops_wait) > CurrentTime )
             { 
           	sendto_one(sptr, ":%s NOTICE %s :Oh, one of those annoying opers who doesn't know how to use a channel",
                      me.name,parv[0]);
@@ -132,7 +132,6 @@ int m_wallops(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
             }
           LastUsedWallops = CurrentTime;
         }
-#endif
 
       send_operwall(sptr, "WALLOPS", message);
       sendto_serv_butone( IsServer(cptr) ? cptr : NULL,

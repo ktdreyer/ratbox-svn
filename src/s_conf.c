@@ -53,6 +53,7 @@
 #include <assert.h>
 
 
+extern int yyparse(); /* defined in yy.tab.c */
 extern ConfigFileEntryType ConfigFileEntry; /* defined in ircd.c */
 extern int lineno;
 extern char linebuf[];
@@ -1835,6 +1836,16 @@ static void initconf(FBFILE* file)
   check_class();
   nextping = nextconnect = time(NULL);
 
+  if( ConfigFileEntry.ts_warn_delta < 60 )
+    {
+      ConfigFileEntry.ts_warn_delta = 60;
+    }
+
+  if( ConfigFileEntry.ts_max_delta < 300 )
+    {
+      ConfigFileEntry.ts_max_delta = 300;
+    }
+
   if(me.name[0] == '\0')
     {
       log(L_CRIT, "Server has no M:/serverinfo line");
@@ -2390,7 +2401,7 @@ char *oper_flags_as_string(int flags)
 }
 
 /* table used for is_address */
-static unsigned long cidr_to_bitmask[]=
+unsigned long cidr_to_bitmask[]=
 {
   /* 00 */ 0x00000000,
   /* 01 */ 0x80000000,

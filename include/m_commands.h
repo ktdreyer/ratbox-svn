@@ -91,7 +91,6 @@ extern int m_userhost(struct Client *,struct Client *,int,char **);
 extern int m_ison(struct Client *,struct Client *,int,char **);
 extern int m_svinfo(struct Client *,struct Client *,int,char **);
 extern int m_sjoin(struct Client *,struct Client *,int,char **);
-extern int m_operwall(struct Client *,struct Client *,int,char **);
 extern int m_rehash(struct Client *,struct Client *,int,char **);
 extern int m_restart(struct Client *,struct Client *,int,char **);
 extern int m_die(struct Client *,struct Client *,int,char **);

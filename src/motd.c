@@ -53,7 +53,7 @@ int m_motd(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
   if(!IsAnOper(sptr))
     {
-      if((last_used + PACE_WAIT) > CurrentTime)
+      if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
         {
           /* safe enough to give this on a local connect only */
           if(MyClient(sptr))

@@ -14,7 +14,7 @@ CPPFLAGS = ${INCLUDES} @CPPFLAGS@
  
 #
 # For developers
-# CFLAGS= -g -O2 -Wall 
+CFLAGS= -g -O2 -Wall 
 #
 
 nparse:	y.tab.o lex.yy.o
@@ -77,7 +77,6 @@ SRCS =                          \
   m_names.c                     \
   m_nick.c			\
   m_notice.c			\
-  m_operwall.c                  \
   m_oper.c                      \
   m_part.c                      \
   m_pass.c                      \

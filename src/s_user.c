@@ -60,9 +60,7 @@
 #include <sys/stat.h>
 
 
-#ifdef PACE_WALLOPS
 time_t LastUsedWallops = 0;
-#endif
 
 static int valid_hostname(const char* hostname);
 static int valid_username(const char* username);
@@ -173,7 +171,6 @@ int user_modes_from_c_to_bitmask[] =
 };
 
 /* internally defined functions */
-#ifdef BOTCHECK
 const char *type_of_bot[]={
   "NONE",
   "eggdrop",
@@ -181,7 +178,6 @@ const char *type_of_bot[]={
   "spambot",
   "annoy/ojnkbot"
 };
-#endif
 
 unsigned long my_rand(void);    /* provided by orabidoo */
 
@@ -640,11 +636,9 @@ int register_user(struct Client *cptr, struct Client *sptr,
        *   -Taner
        */
       /* Except "F:" clients */
-      if ( (
-#ifdef BOTCHECK
+      if ( (ConfigFileEntry.botcheck && (
           !sptr->isbot &&
-#endif /* BOTCHECK */
-          ((Count.local + 1) >= (MAXCLIENTS+MAX_BUFFER))) ||
+          ((Count.local + 1) >= (MAXCLIENTS+MAX_BUFFER)))) ||
             (((Count.local +1) >= (MAXCLIENTS - 5)) && !(IsFlined(sptr))))
         {
           sendto_realops_flags(FLAGS_FULL,
@@ -655,26 +649,26 @@ int register_user(struct Client *cptr, struct Client *sptr,
                              "Sorry, server is full - try later");
         }
       /* botcheck */
-#ifdef BOTCHECK
-      if(sptr->isbot)
-        {
-          if(IsBlined(sptr))
-            {
-              sendto_realops_flags(FLAGS_BOTS,
-                                 "Possible %s: %s (%s@%s) [B-lined]",
-                                 type_of_bot[sptr->isbot],
-                                 sptr->name, sptr->username, sptr->host);
-            }
-          else
-            {
-              sendto_realops_flags(FLAGS_BOTS, "Rejecting %s: %s",
-                                 type_of_bot[sptr->isbot],
-                                 get_client_name(sptr,FALSE));
-              ServerStats->is_ref++;
-              return exit_client(cptr, sptr, sptr, type_of_bot[sptr->isbot] );
-            }
-        }
-#endif
+      if(ConfigFileEntry.botcheck) {
+        if(sptr->isbot)
+          {
+            if(IsBlined(sptr))
+              {
+                sendto_realops_flags(FLAGS_BOTS,
+                                   "Possible %s: %s (%s@%s) [B-lined]",
+                                   type_of_bot[sptr->isbot],
+                                   sptr->name, sptr->username, sptr->host);
+              }
+            else
+              {
+                sendto_realops_flags(FLAGS_BOTS, "Rejecting %s: %s",
+                                   type_of_bot[sptr->isbot],
+                                   get_client_name(sptr,FALSE));
+                ServerStats->is_ref++;
+                return exit_client(cptr, sptr, sptr, type_of_bot[sptr->isbot] );
+              }
+          }
+      }
       /* End of botcheck */
 
       /* valid user name check */
@@ -785,29 +779,28 @@ int register_user(struct Client *cptr, struct Client *sptr,
                  me.name, version);
       show_lusers(sptr, sptr, 1, parv);
 
-#ifdef SHORT_MOTD
-      sendto_one(sptr,"NOTICE %s :*** Notice -- motd was last changed at %s",
-                 sptr->name,
-                 ConfigFileEntry.motd.lastChangedDate);
+      if (ConfigFileEntry.short_motd) {
+        sendto_one(sptr,"NOTICE %s :*** Notice -- motd was last changed at %s",
+                   sptr->name,
+                   ConfigFileEntry.motd.lastChangedDate);
 
-      sendto_one(sptr,
-                 "NOTICE %s :*** Notice -- Please read the motd if you haven't read it",
-                 sptr->name);
+        sendto_one(sptr,
+                   "NOTICE %s :*** Notice -- Please read the motd if you haven't read it",
+                   sptr->name);
       
-      sendto_one(sptr, form_str(RPL_MOTDSTART),
-                 me.name, sptr->name, me.name);
+        sendto_one(sptr, form_str(RPL_MOTDSTART),
+                   me.name, sptr->name, me.name);
       
-      sendto_one(sptr,
-                 form_str(RPL_MOTD),
-                 me.name, sptr->name,
-                 "*** This is the short motd ***"
-                 );
+        sendto_one(sptr,
+                   form_str(RPL_MOTD),
+                   me.name, sptr->name,
+                   "*** This is the short motd ***"
+                   );
 
-      sendto_one(sptr, form_str(RPL_ENDOFMOTD),
-                 me.name, sptr->name);
-#else
-      SendMessageFile(sptr, &ConfigFileEntry.motd);
-#endif
+        sendto_one(sptr, form_str(RPL_ENDOFMOTD),
+                   me.name, sptr->name);
+      } else  
+        SendMessageFile(sptr, &ConfigFileEntry.motd);
       
 #ifdef LITTLE_I_LINES
       if(sptr->confs && sptr->confs->value.aconf &&
@@ -1016,20 +1009,18 @@ tell_user_off(struct Client *cptr, char **preason )
       reject_held_fds++;
 #endif
 
-#ifdef KLINE_WITH_REASON
-      if(*preason)
+      if(ConfigFileEntry.kline_with_reason && *preason)
         {
           if(( p = strchr(*preason, '|')) )
             *p = '\0';
 
           sendto_one(cptr, ":%s NOTICE %s :*** Banned: %s",
                      me.name,cptr->name,*preason);
-            
+           
           if(p)
             *p = '|';
         }
-      else
-#endif
+        else
         sendto_one(cptr, ":%s NOTICE %s :*** Banned: No Reason",
                    me.name,cptr->name);
 #ifdef REJECT_HOLD

@@ -118,7 +118,6 @@ typedef struct MessageTree MESSAGE_TREE;
 #define MSG_DIE      "DIE"      /* DIE */
 #define MSG_HASH     "HASH"     /* HASH */
 #define MSG_DNS      "DNS"      /* DNS  -> DNSS */
-#define MSG_OPERWALL "OPERWALL" /* OPERWALL */
 #define MSG_KLINE    "KLINE"    /* KLINE */
 #define MSG_UNKLINE  "UNKLINE"  /* UNKLINE */
 #define MSG_DLINE    "DLINE"    /* DLINE */
@@ -243,7 +242,6 @@ struct Message msgtab[] = {
   { MSG_SVINFO,  m_svinfo,   0, MAXPARA, 1, 1, 0, 0L },
   { MSG_SJOIN,   m_sjoin,    0, MAXPARA, 1, 0, 0, 0L },
   { MSG_CAPAB,   m_capab,    0, MAXPARA, 1, 1, 0, 0L },
-  { MSG_OPERWALL, m_operwall,0, MAXPARA, 1, 0, 0, 0L },
   { MSG_CLOSE,   m_close,    0, MAXPARA, 1, 0, 0, 0L },
   { MSG_KLINE,   m_kline,    0, MAXPARA, 1, 0, 0, 0L },
   { MSG_UNKLINE, m_unkline,  0, MAXPARA, 1, 0, 0, 0L },

@@ -30,6 +30,7 @@
 #include "ircd.h"
 #include "numeric.h"
 #include "send.h"
+#include "s_conf.h"
 
 #include <string.h>
 /*
@@ -179,7 +180,7 @@ int     m_knock(struct Client *cptr,
 
   if(!IsAnOper(sptr))
     {
-      if((last_used + PACE_WAIT) > CurrentTime)
+      if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
         return 0;
       else
         last_used = CurrentTime;
@@ -193,12 +194,12 @@ int     m_knock(struct Client *cptr,
    */
 
   /* opers are not flow controlled here */
-  if( !IsAnOper(sptr) && (sptr->last_knock + KNOCK_DELAY) > CurrentTime)
+  if( !IsAnOper(sptr) && (sptr->last_knock + ConfigFileEntry.knock_delay) > CurrentTime)
     {
       sendto_one(sptr,":%s NOTICE %s :*** Notice -- Wait %d seconds before another knock",
                  me.name,
                  sptr->name,
-                 KNOCK_DELAY - (CurrentTime - sptr->last_knock));
+                 ConfigFileEntry.knock_delay - (CurrentTime - sptr->last_knock));
       return 0;
     }
 

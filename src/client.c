@@ -327,21 +327,21 @@ time_t check_pings(time_t currenttime)
                                  get_client_name(cptr, FALSE));
 
                       dying_clients[die_index] = cptr;
-/* Wintrhawk */
-#ifdef KLINE_WITH_CONNECTION_CLOSED
-                      /*
-                       * We use a generic non-descript message here on 
-                       * purpose so as to prevent other users seeing the
-                       * client disconnect from harassing the IRCops
-                       */
-                      reason = "Connection closed";
-#else
-#ifdef KLINE_WITH_REASON
-                      reason = aconf->passwd ? aconf->passwd : "D-lined";
-#else
-                      reason = "D-lined";
-#endif /* KLINE_WITH_REASON */
-#endif /* KLINE_WITH_CONNECTION_CLOSED */
+                      /* Wintrhawk */
+                      if(ConfigFileEntry.kline_with_connection_closed) {
+                        /*
+                         * We use a generic non-descript message here on 
+                         * purpose so as to prevent other users seeing the
+                         * client disconnect from harassing the IRCops
+                         */
+                        reason = "Connection closed";
+                      } else {
+                        if (ConfigFileEntry.kline_with_reason) {
+                          reason = aconf->passwd ? aconf->passwd : "D-lined";
+                        } else {
+                          reason = "D-lined";
+                        }
+                      }
 
                       dying_clients_reason[die_index++] = reason;
                       dying_clients[die_index] = (struct Client *)NULL;
@@ -369,21 +369,21 @@ time_t check_pings(time_t currenttime)
                                  get_client_name(cptr, FALSE));
 
                       dying_clients[die_index] = cptr;
-/* Wintrhawk */
-#ifdef KLINE_WITH_CONNECTION_CLOSED
+                      /* Wintrhawk */
+                      if (ConfigFileEntry.kline_with_connection_closed) {
                       /*
                        * We use a generic non-descript message here on 
                        * purpose so as to prevent other users seeing the
                        * client disconnect from harassing the IRCops
                        */
-                      reason = "Connection closed";
-#else
-#ifdef KLINE_WITH_REASON
-                      reason = aconf->passwd ? aconf->passwd : "G-lined";
-#else
-                      reason = "G-lined";
-#endif /* KLINE_WITH_REASON */
-#endif /* KLINE_WITH_CONNECTION_CLOSED */
+                        reason = "Connection closed";
+                      } else {
+                        if (ConfigFileEntry.kline_with_reason) {
+                          reason = aconf->passwd ? aconf->passwd : "G-lined";
+                        } else {
+                          reason = "G-lined";
+                        }
+                      }
 
                       dying_clients_reason[die_index++] = reason;
                       dying_clients[die_index] = (struct Client *)NULL;
@@ -407,21 +407,21 @@ time_t check_pings(time_t currenttime)
                                  get_client_name(cptr, FALSE));
                       dying_clients[die_index] = cptr;
 
-/* Wintrhawk */
-#ifdef KLINE_WITH_CONNECTION_CLOSED
+                      /* Wintrhawk */
+                      if (ConfigFileEntry.kline_with_connection_closed) {
                       /*
                        * We use a generic non-descript message here on 
                        * purpose so as to prevent other users seeing the
                        * client disconnect from harassing the IRCops
                        */
-                      reason = "Connection closed";
-#else
-#ifdef KLINE_WITH_REASON
-                      reason = aconf->passwd ? aconf->passwd : "K-lined";
-#else
-                      reason = "K-lined";
-#endif /* KLINE_WITH_REASON */
-#endif /* KLINE_WITH_CONNECTION_CLOSED */
+                        reason = "Connection closed";
+                      } else {
+                        if (ConfigFileEntry.kline_with_reason) {
+                          reason = aconf->passwd ? aconf->passwd : "K-lined";
+                        } else {
+                          reason = "K-lined";
+                        }
+                      }
 
                       dying_clients_reason[die_index++] = reason;
                       dying_clients[die_index] = (struct Client *)NULL;

@@ -48,6 +48,7 @@
 #include "s_user.h"
 #include "send.h"
 #include "whowas.h"
+#include "s_conf.h" /* ConfigFileEntry */
 
 #include <assert.h>
 #include <string.h>
@@ -529,21 +530,23 @@ int is_banned(struct Client *cptr,struct Channel *chptr)
     return (0);
 
   strcpy(s, make_nick_user_host(cptr->name, cptr->username, cptr->host));
-  s2 = make_nick_user_host(cptr->name, cptr->username,
-                           inetntoa((char*) &cptr->ip));
+  s2 = make_nick_user_host(cptr->name, cptr->username, cptr->sockhost);
 
   for (tmp = chptr->banlist; tmp; tmp = tmp->next)
-    if (match(BANSTR(tmp), s) ||
-        match(BANSTR(tmp), s2))
-      break;
+    {
+      if (match(BANSTR(tmp), s) ||
+	  match(BANSTR(tmp), s2))
+	break;
+    }
 
-  if (!tmp) {  /* check +d list */
-    for (tmp = chptr->denylist; tmp; tmp = tmp->next)
-      {
-        if (match(BANSTR(tmp), cptr->info))
-          break;
-      }
-  }
+  if (!tmp)
+    {  /* check +d list */
+      for (tmp = chptr->denylist; tmp; tmp = tmp->next)
+	{
+	  if (match(BANSTR(tmp), cptr->info))
+	    break;
+	}
+    }
 
   if (tmp)
     {
@@ -739,6 +742,10 @@ int     can_send(struct Client *cptr, struct Channel *chptr)
 #endif
 
   lp = find_user_link(chptr->members, cptr);
+
+  if (ConfigFileEntry.quiet_on_ban)
+    if (is_banned(cptr, chptr))
+      return MODE_BAN;
 
   if (chptr->mode.mode & MODE_MODERATED &&
       (!lp || !(lp->flags & (CHFL_CHANOP|CHFL_VOICE))))

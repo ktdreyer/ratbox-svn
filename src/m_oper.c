@@ -150,15 +150,15 @@ int m_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                                 inetntoa((char *)&cptr->ip), CONF_OPS)))
     {
       sendto_one(sptr, form_str(ERR_NOOPERHOST), me.name, parv[0]);
-#if defined(FAILED_OPER_NOTICE) && defined(SHOW_FAILED_OPER_ID)
-#ifdef SHOW_FAILED_OPER_PASSWD
-      sendto_realops("Failed OPER attempt [%s(%s)] - identity mismatch: %s [%s@%s]",
-        name, password, sptr->name, sptr->username, sptr->host);
-#else
-      sendto_realops("Failed OPER attempt - host mismatch by %s (%s@%s)",
-                     parv[0], sptr->username, sptr->host);
-#endif /* SHOW_FAILED_OPER_PASSWD */
-#endif /* FAILED_OPER_NOTICE && SHOW_FAILED_OPER_ID */
+      if (ConfigFileEntry.failed_oper_notice && ConfigFileEntry.show_failed_oper_id) {
+        if (ConfigFileEntry.show_failed_oper_passwd) {
+          sendto_realops("Failed OPER attempt [%s(%s)] - identity mismatch: %s [%s@%s]",
+            name, password, sptr->name, sptr->username, sptr->host);
+        } else {
+          sendto_realops("Failed OPER attempt - host mismatch by %s (%s@%s)",
+                          parv[0], sptr->username, sptr->host);
+        } /* show_failed_oper_passwd */
+      } /* failed_oper_notice && show_failed_oper_id */
       return 0;
     }
 #ifdef CRYPT_OPER_PASSWORD
@@ -277,15 +277,15 @@ int m_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     {
       detach_conf(sptr, aconf);
       sendto_one(sptr,form_str(ERR_PASSWDMISMATCH),me.name, parv[0]);
-#ifdef FAILED_OPER_NOTICE
-#ifdef SHOW_FAILED_OPER_PASSWD
-      sendto_realops("Failed OPER attempt [%s(%s)] - passwd mismatch: %s [%s@%s]",
-        name, password, sptr->name, sptr->username, sptr->host);
-#else
-      sendto_realops("Failed OPER attempt by %s (%s@%s)",
-                     parv[0], sptr->username, sptr->host);
-#endif /* SHOW_FAILED_OPER_PASSWD */
-#endif
+      if (ConfigFileEntry.failed_oper_notice) {
+        if (ConfigFileEntry.show_failed_oper_passwd) {
+          sendto_realops("Failed OPER attempt [%s(%s)] - passwd mismatch: %s [%s@%s]",
+            name, password, sptr->name, sptr->username, sptr->host);
+        } else {
+          sendto_realops("Failed OPER attempt by %s (%s@%s)",
+                         parv[0], sptr->username, sptr->host);
+        } /* show_failed_oper_passwd */
+      }
     }
   return 0;
 }

@@ -27,8 +27,12 @@
  */
 #include "irc_string.h"
 #include "config.h"      /* RFC1035_ANAL */
+#include "client.h"
 #include <assert.h>
-
+#include <string.h> /* strrchr */
+#include <ctype.h>
+#include <stdlib.h>
+#include "ircd.h"
 /*
 **  Compare if a given string (name) matches the given
 **  mask (which can contain wild cards: '*' - match any
@@ -203,6 +207,27 @@ int ircncmp(const char* s1, const char *s2, int n)
   return (res);
 }
 
+unsigned long textip_to_ul(const char *ip)
+{
+  unsigned long ipr=0;
+  unsigned int octet=0;
+
+  char c;
+  while((c=*ip)) {
+    if(isdigit(c)) {
+      octet *= 10;
+      octet += (*ip & 0xF);
+    } else if(c == '.') {
+      ipr <<= 8;
+      ipr += octet;
+      octet = 0;
+    } else if(c=='/')break;
+    ip++;
+  }
+  ipr <<= 8;
+  ipr += octet;
+  return ipr;
+}
 
 const unsigned char ToLowerTab[] = { 
   0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa,

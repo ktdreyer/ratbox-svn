@@ -29,6 +29,7 @@
 #include "numeric.h"
 #include "s_serv.h"
 #include "send.h"
+#include "s_conf.h"
 
 #include <assert.h>
 #include <string.h>
@@ -125,7 +126,7 @@ int m_links(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       if(!MyClient(sptr))
         return 0;
 
-      if((last_used + PACE_WAIT) > CurrentTime)
+      if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
         {
           /* safe enough to give this on a local connect only */
           sendto_one(sptr,form_str(RPL_LOAD2HI),me.name,parv[0]);

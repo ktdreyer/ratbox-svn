@@ -45,12 +45,6 @@ Info MyInformation[] = {
   { "ANTI_DRONE_FLOOD", "OFF", 0, "Anti Flood for Drones" },
 #endif /* ANTI_DRONE_FLOOD */
 
-#ifdef ANTI_NICK_FLOOD
-  { "ANTI_NICK_FLOOD", "ON", 0, "Nickname Flood Protection" },
-#else
-  { "ANTI_NICK_FLOOD", "OFF", 0, "Nickname Flood Protection" },
-#endif /* ANTI_NICK_FLOOD */
-
 #ifdef ANTI_SPAMBOT
   { "ANTI_SPAMBOT", "ON", 0, "Spam Bot Detection" },
 #else
@@ -74,18 +68,6 @@ Info MyInformation[] = {
 #else
   { "ANTI_SPAM_EXIT_MESSAGE_TIME", "NONE", 0, "Delay before Allowing Spam Bot Exit Messages" },
 #endif /* ANTI_SPAM_EXIT_MESSAGE_TIME */
-
-#ifdef B_LINES_OPER_ONLY
-  { "B_LINES_OPER_ONLY", "ON", 0, "Allow only Operators to use STATS B" },
-#else
-  { "B_LINES_OPER_ONLY", "OFF", 0, "Allow only Operators to use STATS B" },
-#endif /* B_LINES_OPER_ONLY */
-
-#ifdef BOTCHECK
-  { "BOTCHECK", "ON", 0, "Rudimentary Bot Checking" },
-#else
-  { "BOTCHECK", "OFF", 0, "Rudimentary Bot Checking" },
-#endif /* BOTCHECK */
 
   { "BUFFERPOOL", "", BUFFERPOOL, "Maximum size of all SendQs" },
 
@@ -167,18 +149,6 @@ Info MyInformation[] = {
   { "DLPATH", "NONE", 0, "Path to D-line File" },
 #endif /* DLPATH */
 
-#ifdef E_LINES_OPER_ONLY
-  { "E_LINES_OPER_ONLY", "ON", 0, "Allow only Operators to use STATS E" },
-#else
-  { "E_LINES_OPER_ONLY", "OFF", 0, "Allow only Operators to use STATS E" },
-#endif /* E_LINES_OPER_ONLY */
-
-#ifdef FAILED_OPER_NOTICE
-  { "FAILED_OPER_NOTICE", "ON", 0, "Display invalid OPER attempts" },
-#else
-  { "FAILED_OPER_NOTICE", "OFF", 0, "Display invalid OPER attempts" },
-#endif /* FAILED_OPER_NOTICE */
-
 #ifdef FLUD
   { "FLUD", "ON", 0, "CTCP Flood Detection and Protection" },
 #else
@@ -202,12 +172,6 @@ Info MyInformation[] = {
 #else
   { "FLUD_BLOCK", "NONE", 0, "Seconds to Block Fluds" },
 #endif /* FLUD_BLOCK */
-
-#ifdef F_LINES_OPER_ONLY
-  { "F_LINES_OPER_ONLY", "ON", 0, "Allow only Operators to use STATS F" },
-#else
-  { "F_LINES_OPER_ONLY", "OFF", 0, "Allow only Operators to use STATS F" },
-#endif /* F_LINES_OPER_ONLY */
 
 #ifdef GLINE_TIME
   { "GLINE_TIME", "", GLINE_TIME, "Expire Time for Glines" },
@@ -274,20 +238,6 @@ Info MyInformation[] = {
 
   { "KILLCHASETIMELIMIT", "", KILLCHASETIMELIMIT, "Nick Change Tracker for KILL" },
 
-#ifdef KLINE_WITH_CONNECTION_CLOSED
-  { "KLINE_WITH_CONNECTION_CLOSED", "ON", 0, "Signoff reason: Connection closed" },
-#else
-  { "KLINE_WITH_CONNECTION_CLOSED", "OFF", 0, "Signoff reason: Connection closed" },
-#endif /* KLINE_WITH_CONNECTION_CLOSED */
-
-#ifdef KLINE_WITH_REASON
-  { "KLINE_WITH_REASON", "ON", 0, "Show K-line Reason to Client on Exit" },
-#else
-  { "KLINE_WITH_REASON", "OFF", 0, "Show K-line Reason to Client on Exit" },
-#endif /* KLINE_WITH_REASON */
-
-  { "KNOCK_DELAY", "", KNOCK_DELAY, "Delay between KNOCK Attempts" },
-
 #ifdef KPATH
   { "KPATH", KPATH, 0, "Path to K-line File" },
 #else
@@ -330,11 +280,6 @@ Info MyInformation[] = {
   { "MAX_JOIN_LEAVE_COUNT", "", MAX_JOIN_LEAVE_COUNT, "Anti SpamBot Parameter" },
 #endif /* ANTI_SPAMBOT */
 
-#ifdef ANTI_NICK_FLOOD
-  { "MAX_NICK_CHANGES", "", MAX_NICK_CHANGES, "Maximum Nick Changes Allowed" },
-  { "MAX_NICK_TIME", "", MAX_NICK_TIME, "Time Window for MAX_NICK_CHANGES" },
-#endif /* ANTI_NICK_FLOOD */
-
   { "MAXCHANNELSPERUSER", "", MAXCHANNELSPERUSER, "Maximum Channels per User" },
   { "MAXIMUM_LINKS", "", MAXIMUM_LINKS, "Maximum Links for Class 0" },
 
@@ -349,12 +294,6 @@ Info MyInformation[] = {
 #endif /* MPATH */
 
   { "NICKNAMEHISTORYLENGTH", "", NICKNAMEHISTORYLENGTH, "Size of WHOWAS Array" },
-
-#ifdef NON_REDUNDANT_KLINES
-  { "NON_REDUNDANT_KLINES", "ON", 0, "Check for and Disallow Redundant K-lines" },
-#else
-  { "NON_REDUNDANT_KLINES", "OFF", 0, "Check for and Disallow Redundant K-lines" },
-#endif /* NON_REDUNDANT_KLINES */
 
 #ifdef NO_CHANOPS_WHEN_SPLIT
   { "NO_CHANOPS_WHEN_SPLIT", "ON", 0, "Do not Allow Channel Ops During a NetSplit" },
@@ -420,8 +359,6 @@ Info MyInformation[] = {
   { "OPER_SPAM_COUNTDOWN", "", OPER_SPAM_COUNTDOWN, "Anti SpamBot Parameter" },
 #endif /* ANTI_SPAMBOT */
 
-  { "PACE_WAIT", "", PACE_WAIT, "Minimum Delay between uses of certain commands" },
-
 #ifdef PPATH
   { "PPATH", PPATH, 0, "Path to Pid File" },
 #else
@@ -469,24 +406,6 @@ Info MyInformation[] = {
 #else
   { "SEPARATE_QUOTE_KLINES_BY_DATE", "OFF", 0, "Read/Write K-lines According to Date" },
 #endif /* SEPARATE_QUOTE_KLINES_BY_DATE */
-
-#ifdef SHORT_MOTD
-  { "SHORT_MOTD", "ON", 0, "Notice Clients They should Read MOTD" },
-#else
-  { "SHORT_MOTD", "OFF", 0, "Notice Clients They should Read MOTD" },
-#endif /* SHORT_MOTD */
-
-#ifdef SHOW_FAILED_OPER_ID
-  { "SHOW_FAILED_OPER_ID", "ON", 0, "Show Failed OPER Attempts due to Identity Mismatch" },
-#else
-  { "SHOW_FAILED_OPER_ID", "OFF", 0, "Show Failed OPER Attempts due to Identity Mismatch" },
-#endif /* SHOW_FAILED_OPER_ID */
-
-#ifdef SHOW_FAILED_OPER_PASSWD
-  { "SHOW_FAILED_OPER_PASSWD", "ON", 0, "Show the Attempted OPER Password" },
-#else
-  { "SHOW_FAILED_OPER_PASSWD", "OFF", 0, "Show the Attempted OPER Password" },
-#endif /* SHOW_FAILED_OPER_PASSWD */
 
 #ifdef SHOW_INVISIBLE_LUSERS
   { "SHOW_INVISIBLE_LUSERS", "ON", 0, "Show Invisible Clients in LUSERS" },
@@ -551,23 +470,11 @@ Info MyInformation[] = {
   { "USE_SYSLOG", "OFF", 0, "Log Errors to syslog file" },
 #endif /* USE_SYSLOG */
 
-#ifdef WALLOPS_WAIT
-  { "WALLOPS_WAIT", "", WALLOPS_WAIT, "Delay between successive uses of the WALLOPS command" },
-#endif /* WALLOPS_WAIT */
-
-#ifdef WARN_NO_NLINE
-  { "WARN_NO_NLINE", "ON", 0, "Show Operators of Servers without an N: line" },
-#else
-  { "WARN_NO_NLINE", "OFF", 0, "Show Operators of Servers without an N: line" },
-#endif /* WARN_NO_NLINE */
-
 #ifdef WHOIS_NOTICE
   { "WHOIS_NOTICE", "ON", 0, "Show Operators when they are WHOIS'd" },
 #else
   { "WHOIS_NOTICE", "OFF", 0, "Show Operators when they are WHOIS'd" },
 #endif /* WHOIS_NOTICE */
-
-  { "WHOIS_WAIT", "", WHOIS_WAIT, "Delay between Remote uses of WHOIS" },
 
 #ifdef WINTRHAWK
   { "WINTRHAWK", "ON", 0, "Enable Wintrhawk Styling" },

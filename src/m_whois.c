@@ -33,6 +33,7 @@
 #include "send.h"
 #include "list.h"
 #include "irc_string.h"
+#include "s_conf.h"
 
 #include <string.h>
 
@@ -144,7 +145,7 @@ int     m_whois(struct Client *cptr,
 
   if(!IsAnOper(sptr) && !MyConnect(sptr)) /* pace non local requests */
     {
-      if((last_used + WHOIS_WAIT) > CurrentTime)
+      if((last_used + ConfigFileEntry.whois_wait) > CurrentTime)
         {
           /* Unfortunately, returning anything to a non local
            * request =might= increase sendq to be usable in a split hack
@@ -265,15 +266,13 @@ int     m_whois(struct Client *cptr,
           if (IsAnOper(acptr))
             sendto_one(sptr, form_str(RPL_WHOISOPERATOR),
                        me.name, parv[0], name);
-#ifdef WHOIS_NOTICE
-          if ((MyOper(acptr)) && ((acptr)->umodes & FLAGS_SPY) &&
+          if (ConfigFileEntry.whois_notice && 
+              (MyOper(acptr)) && ((acptr)->umodes & FLAGS_SPY) &&
               (MyConnect(sptr)) && (IsPerson(sptr)) && (acptr != sptr))
             sendto_one(acptr,
                        ":%s NOTICE %s :*** Notice -- %s (%s@%s) is doing a /whois on you.",
                        me.name, acptr->name, parv[0], sptr->username,
                        sptr->host);
-#endif /* #ifdef WHOIS_NOTICE */
-
 
           if (acptr->user && MyConnect(acptr))
             sendto_one(sptr, form_str(RPL_WHOISIDLE),
@@ -392,14 +391,13 @@ int     m_whois(struct Client *cptr,
           if (IsAnOper(acptr))
             sendto_one(sptr, form_str(RPL_WHOISOPERATOR),
                        me.name, parv[0], name);
-#ifdef WHOIS_NOTICE
-          if ((MyOper(acptr)) && ((acptr)->flags & FLAGS_SPY) &&
+          if (ConfigFileEntry.whois_notice && 
+              (MyOper(acptr)) && ((acptr)->flags & FLAGS_SPY) &&
               (MyConnect(sptr)) && (IsPerson(sptr)) && (acptr != sptr))
             sendto_one(acptr,
                        ":%s NOTICE %s :*** Notice -- %s (%s@%s) is doing a /whois on you.",
                        me.name, acptr->name, parv[0], sptr->username,
                        sptr->host);
-#endif /* #ifdef WHOIS_NOTICE */
 
 
           if (acptr->user && MyConnect(acptr))

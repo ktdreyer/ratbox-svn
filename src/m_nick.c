@@ -34,6 +34,8 @@
 #include "whowas.h"
 #include "s_serv.h"
 #include "send.h"
+#include "list.h"
+#include "channel.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -231,6 +233,21 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
       return exit_client(cptr, sptr, &me, "quarantined nick");
     }
+
+  /* if quiet_on_ban is set, don't allow nick changes if the user
+   * is banned from a channel.
+   */
+
+  if (ConfigFileEntry.quiet_on_ban && !IsServer(sptr) && sptr->user) {
+    struct SLink *tmp = sptr->user->channel;
+    while (tmp) {
+      if (is_banned(sptr, tmp->value.chptr)) {
+        sendto_one(sptr, form_str(ERR_BANNEDNICK), me.name, BadPtr(parv[0]) ? "*" : parv[0], tmp->value.chptr->chname);
+        return 0; /* NICK message ignored */
+      }
+      tmp = tmp->next;
+    }
+  }
 
   /*
   ** Check against nick name collisions.
@@ -646,16 +663,15 @@ static int nickkilldone(struct Client *cptr, struct Client *sptr, int parc,
 
       if(MyConnect(sptr) && IsRegisteredUser(sptr))
         {     
-#ifdef ANTI_NICK_FLOOD
-
-          if( (sptr->last_nick_change + MAX_NICK_TIME) < CurrentTime)
+          if( (sptr->last_nick_change + ConfigFileEntry.max_nick_time) < CurrentTime)
             sptr->number_of_nick_changes = 0;
           sptr->last_nick_change = CurrentTime;
-            sptr->number_of_nick_changes++;
+          sptr->number_of_nick_changes++;
 
-          if(sptr->number_of_nick_changes <= MAX_NICK_CHANGES)
+          if((ConfigFileEntry.anti_nick_flood && 
+             (sptr->number_of_nick_changes <= ConfigFileEntry.max_nick_changes)) ||
+             !ConfigFileEntry.anti_nick_flood)
             {
-#endif
               sendto_realops_flags(FLAGS_NCHANGE,
                                  "Nick change: From %s to %s [%s@%s]",
                                  parv[0], nick, sptr->username,
@@ -669,7 +685,6 @@ static int nickkilldone(struct Client *cptr, struct Client *sptr, int parc,
                   sendto_serv_butone(cptr, ":%s NICK %s :%lu",
                                      parv[0], nick, sptr->tsinfo);
                 }
-#ifdef ANTI_NICK_FLOOD
             }
           else
             {
@@ -677,10 +692,9 @@ static int nickkilldone(struct Client *cptr, struct Client *sptr, int parc,
                          ":%s NOTICE %s :*** Notice -- Too many nick changes wait %d seconds before trying to change it again.",
                          me.name,
                          sptr->name,
-                         MAX_NICK_TIME);
+                         ConfigFileEntry.max_nick_time);
               return 0;
             }
-#endif
         }
       else
         {
