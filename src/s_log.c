@@ -259,9 +259,6 @@ user_log_resync(void *notused)
       fbclose(user_log_fb);
       user_log_fb = NULL;
     }
-
-  /* XXX Consider not rescheduling this in future */
-  eventAdd("user_log_resync", user_log_resync, NULL, 60, 0 );
 }
 
 /*

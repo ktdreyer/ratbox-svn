@@ -59,7 +59,8 @@ struct squit_parms
   struct Client *acptr;
 };
 
-struct squit_parms *find_squit(struct Client *cptr, struct Client *sptr,
+struct squit_parms *find_squit(struct Client *cptr,
+			       struct Client *sptr,
 			       char *server);
 
 char *_version = "20001122";
@@ -164,7 +165,7 @@ int ms_squit(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
 /*
  * find_squit
- * inputs	- local server connectin
+ * inputs	- local server connection
  *		-
  *		-
  * output	- pointer to struct containing found squit or none if not found
@@ -211,6 +212,9 @@ struct squit_parms *find_squit(struct Client *cptr, struct Client *sptr,
       if (IsServer(acptr) || IsMe(acptr))
 	break;
     }
+
+  found_squit.acptr = acptr;
+  found_squit.server_name = server;
 
   if (acptr && IsMe(acptr))
     {

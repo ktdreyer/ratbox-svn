@@ -412,8 +412,13 @@ void    add_user_to_channel(struct Channel *chptr, struct Client *who,
       ptr->next = chptr->members;
       chptr->members = ptr;
       chptr->users++;
+
+      if(MyClient(who))
+	 chptr->locusers++;
+
       if(flags & MODE_CHANOP)
         chptr->opcount++;
+
       chptr->users_last = CurrentTime;
       ptr = make_link();
       ptr->value.chptr = chptr;
@@ -471,6 +476,11 @@ void    remove_user_from_channel(struct Channel *chptr,struct Client *who,
   if (IsVchan(chptr))
     del_vchan_from_client_cache(who, chptr); 
 
+  if(MyClient(who))
+    {
+      if(chptr > 0)
+	chptr->locusers--;
+    }
   sub1_from_channel(chptr);
 }
 
@@ -2134,76 +2144,10 @@ static  void    sub1_from_channel(struct Channel *chptr)
       chptr->users = 0; /* if chptr->users < 0, make sure it sticks at 0
                          * It should never happen but...
                          */
-
+      /* persistent channel */
 #if 0
-      /*
-       * Now, find all invite links from channel structure
-       */
-      while ((tmp = chptr->invites))
-	del_invite(chptr, tmp->value.cptr);
-
-      /* free all bans/exceptions/denies */
-      free_channel_masks( chptr );
-
-      /* free topic_info */
-      MyFree(chptr->topic_info);            
-
-      /* Is this the top level channel? 
-       * If so, don't remove if it has sub vchans
-       * top level chan always has prev_chan == NULL
-       */
-      if (!IsVchan(chptr))
-	{
-	  if (!HasVchans(chptr))
-	    {
-	      if (chptr->prevch)
-		chptr->prevch->nextch = chptr->nextch;
-	      else
-		GlobalChannelList = chptr->nextch;
-	      if (chptr->nextch)
-		chptr->nextch->prevch = chptr->prevch;
-	      del_from_channel_hash_table(chptr->chname, chptr);
-	      MyFree((char*) chptr);
-	      Count.chan--;
-	    }
-	}
-      /* if this is a subchan take it out of the linked list */
-      else
-	{
-	  /* find it's base chan, incase we can remove that after */
-	  root_chptr = find_bchan(chptr);
-	  /* remove from vchan double link list */
-	  chptr->prev_vchan->next_vchan = chptr->next_vchan;
-	  if (chptr->next_vchan)
-	    chptr->next_vchan->prev_vchan = chptr->prev_vchan;
-	  
-	  /* remove from global chan double link list and hash */
-	  if (chptr->prevch)
-	    chptr->prevch->nextch = chptr->nextch;
-	  else
-	    GlobalChannelList = chptr->nextch;
-	  if (chptr->nextch)
-	    chptr->nextch->prevch = chptr->prevch;
-	  del_from_channel_hash_table(chptr->chname, chptr);
-	  MyFree((char*) chptr);
-	  Count.chan--; /* is this line needed for subchans? yes -db */
-
-	  if (!HasVchans(root_chptr) && (root_chptr->users == 0))
-	    {
-	      chptr = root_chptr;
-	      if (chptr->prevch)
-		chptr->prevch->nextch = chptr->nextch;
-	      else
-		GlobalChannelList = chptr->nextch;
-	      if (chptr->nextch)
-		chptr->nextch->prevch = chptr->prevch;
-	      del_from_channel_hash_table(chptr->chname, chptr);
-	      MyFree((char*) chptr);   
-	      Count.chan--;
-	    }
-	}
+      destroy_channel(chptr);
 #endif
-
     }
 }
 
@@ -2485,16 +2429,23 @@ void cleanup_channels(void *unused)
 	     {
 	       if(chptr->users == 0)
 		 {
-		   if(IsCapable(serv_cptr_list, CAP_LL))
-		     {
-		       sendto_one(serv_cptr_list,":%s DROP %s",
-				  me.name, chptr->chname);
-		     }
+		   destroy_channel(chptr);
+		 }
+	       else if( ! ConfigFileEntry.hub
+			&&
+			IsCapable(serv_cptr_list,CAP_LL)
+			&&
+			(chptr->locusers == 0) )
+		 {
+		   sendto_one(serv_cptr_list,":%s DROP %s",
+			      me.name, chptr->chname);
 		   destroy_channel(chptr);
 		 }
 	       else
 		 chptr->users_last = CurrentTime;
 	     }
+	   else
+	     chptr->users_last = CurrentTime;
 	 }
      }
 }    
@@ -2536,29 +2487,37 @@ static void destroy_channel(struct Channel *chptr)
    * then walk through each client found from each SLink, removing
    * any reference it has to this channel.
    * Finally, free now unused SLink's
+   *
+   * This test allows us to use this code both for LazyLinks and
+   * persistent channels. In the case of a LL the channel need not
+   * be empty, it only has to be empty of local users.
    */
-  for (current = &chptr->members;
-        (tmpCurrent = *current);
-          current = nextCurrent )
+
+  if( chptr->members != NULL )
     {
-      nextCurrent = &tmpCurrent->next;
-      sptr = tmpCurrent->value.cptr;
+      for (current = &chptr->members;
+	   (tmpCurrent = *current);
+	   current = nextCurrent )
+	{
+	  nextCurrent = &tmpCurrent->next;
+	  sptr = tmpCurrent->value.cptr;
 
-      for (currentClient = &sptr->user->channel;
-            (tmpCurrentClient = *currentClient);
-              currentClient = nextCurrentClient )
-        {
-          nextCurrentClient = &tmpCurrentClient->next;
+	  for (currentClient = &sptr->user->channel;
+	       (tmpCurrentClient = *currentClient);
+	       currentClient = nextCurrentClient )
+	    {
+	      nextCurrentClient = &tmpCurrentClient->next;
 
-          if( tmpCurrentClient->value.chptr == chptr)
-            {
-              sptr->user->joined--;
-              *currentClient = tmpCurrentClient->next;
-              free_link(tmpCurrentClient);
-            }
-        }
-      *current = tmpCurrent->next;
-      free_link(tmpCurrent);
+	      if( tmpCurrentClient->value.chptr == chptr)
+		{
+		  sptr->user->joined--;
+		  *currentClient = tmpCurrentClient->next;
+		  free_link(tmpCurrentClient);
+		}
+	    }
+	  *current = tmpCurrent->next;
+	  free_link(tmpCurrent);
+	}
     }
 
   while ((tmp = chptr->invites))
@@ -2746,13 +2705,12 @@ void del_invite(struct Channel *chptr, struct Client *who)
 }
 
 /* 
- * inputs	- pointer to slink list
- * output	- returns the length of list
- * side effects	- return the length (>=0) of a chain of struct SLinks.
- *
- * XXX would an int length for invite length be worth it? -db
+ * list_length
+ * inputs	- pointer to a struct SLink
+ * output	- return the length (>=0) of a chain of links.
+ * side effects	-
  */
-int     list_length(struct SLink *lp)
+static int list_length(struct SLink *lp)
 {
   int   count = 0;
 

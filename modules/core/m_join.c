@@ -214,7 +214,7 @@ int     m_join(struct Client *cptr,
 	    {
 	      /* LazyLinks */
 	      if( (*name != '&') && serv_cptr_list
-		  && IsCapable( serv_cptr_list, CAP_LL) )
+		  && IsCapable(serv_cptr_list, CAP_LL) )
 		{
 		  sendto_one(serv_cptr_list,":%s CBURST %s %s %s",
 			     me.name,name,sptr->name, key ? key: "" );

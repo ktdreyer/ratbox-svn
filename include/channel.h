@@ -58,6 +58,7 @@ struct Channel
   char           *topic_info;
   time_t          topic_time;
   int             users;      /* user count */
+  int             locusers;   /* local user count */
   int             opcount;    /* number of chanops */
   unsigned long   lazyLinkChannelExists;
   time_t          users_last;		/* when last user was in channel */
