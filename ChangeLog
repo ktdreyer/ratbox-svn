@@ -1,3 +1,21 @@
+leeh        2002/09/11 23:08:43 UTC	(20020911_2)
+
+  Modified files:
+    .                    RELNOTES 
+    modules              m_rehash.c 
+    src                  kdparse.c 
+  Log:
+  - fixed rehash tklines to not remove temp dlines
+  - added rehash tdlines
+  - unused var in kdparse.c
+  
+  Revision  Changes    Path
+  1.50      +2 -0      ircd-ratbox/RELNOTES
+  1.47      +32 -30    ircd-ratbox/modules/m_rehash.c
+  7.11      +0 -1      ircd-ratbox/src/kdparse.c
+
+
+
 leeh        2002/09/11 13:29:11 UTC	(20020911_1)
 
   Modified files:
