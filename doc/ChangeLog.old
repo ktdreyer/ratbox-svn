@@ -1,3 +1,11 @@
+*** 20010726_3 by leeh
+- someone had used client_p->host instead of client_p->name in m_squit.c,
+  meaning when a server squit their uplink, their host got broadcast
+  ugh
+
+- made the links file use GlobalServerList
+
+
 *** 20010726_2 by leeh
 - make links use GlobalServerList
 
