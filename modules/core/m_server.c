@@ -439,7 +439,7 @@ ms_server(struct Client *client_p, struct Client *source_p, int parc, const char
 	add_to_client_hash(target_p->name, target_p);
 	dlinkAdd(target_p, &target_p->lnode, &target_p->servptr->serv->servers);
 
-	sendto_server(client_p, NULL, NOCAPS, CAP_TS6,
+	sendto_server(client_p, NULL, NOCAPS, NOCAPS,
 		      ":%s SERVER %s %d :%s%s",
 		      source_p->name, target_p->name, target_p->hopcount + 1,
 		      IsHidden(target_p) ? "(H) " : "", target_p->info);
