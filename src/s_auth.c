@@ -426,6 +426,7 @@ void start_auth(struct Client* client)
 
   client->localClient->dns_query = MyMalloc(sizeof(struct DNSQuery));
   client->localClient->dns_query->ptr = auth;
+  client->localClient->dns_query->callback = auth_dns_callback;
   /* No DNS cache now, remember? -- adrian */
   adns_getaddr(&client->localClient->ip, client->localClient->aftype, client->localClient->dns_query);
   SetDNSPending(auth);
