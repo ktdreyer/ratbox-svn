@@ -1,3 +1,11 @@
+*** 20010105_3 by db
+- in the aop case, it was trying to send an UID for a server
+  missing IsServer(sptr) ? sptr->name :sptr->user->id 
+
+- started adding umode +e code to watch possible drones
+
+
+
 *** 20010105_2 by fl_
 - we should sync oplists after that too..
 
