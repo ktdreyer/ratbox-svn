@@ -1,3 +1,8 @@
+*** 20010404_2 by androsyn
+First half of my attempt to do statically loaded modules.  I suppose that
+either all or none with static/dynamic modules, for the sake of simlicity.
+
+
 *** 20010404_1 by androsyn
 Fixed a particular adns core..i don't think this was the one walter was
 talking about.
