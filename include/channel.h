@@ -68,6 +68,7 @@ struct Channel
 	int flood_noticed;
 
 	int num_mask;		/* number of bans+exceptions+invite exceptions */
+	unsigned long bants;
 	time_t channelts;
 	char chname[CHANNELLEN + 1];
 };
@@ -81,6 +82,8 @@ struct membership
 	struct Channel *chptr;
 	struct Client *client_p;
 	unsigned int flags;
+
+	unsigned long bants;
 };
 
 struct Ban
@@ -128,11 +131,13 @@ struct ChCapCombo
 #define CHFL_BAN        0x0010	/* ban channel flag */
 #define CHFL_EXCEPTION  0x0020	/* exception to ban channel flag */
 #define CHFL_INVEX      0x0040
+#define CHFL_BANNED	0x0080
 
 #define is_chanop(x)	((x) && (x)->flags & CHFL_CHANOP)
 #define is_voiced(x)	((x) && (x)->flags & CHFL_VOICE)
 #define is_chanop_voiced(x) ((x) && (x)->flags & (CHFL_CHANOP|CHFL_VOICE))
 #define is_deop(x)	((x) && (x)->flags & CHFL_DEOPPED)
+#define can_send_banned(x) ((x) && (x)->flags & CHFL_BANNED)
 
 /* channel modes ONLY */
 #define MODE_PRIVATE    0x0001
@@ -166,7 +171,7 @@ void init_channels(void);
 extern int can_send(struct Channel *chptr, struct Client *who, 
 		    struct membership *);
 extern int is_banned(struct Channel *chptr, struct Client *who,
-		     const char *, const char *);
+		     struct membership *msptr, const char *, const char *);
 extern int can_join(struct Client *source_p, struct Channel *chptr, char *key);
 
 extern struct membership *find_channel_membership(struct Channel *, struct Client *);

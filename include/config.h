@@ -117,7 +117,6 @@
 #define LPATH    LOGPATH "/ircd.log"	/* ircd logfile */
 #define PPATH    ETCPATH "/ircd.pid"	/* pid file */
 #define OPATH    ETCPATH "/opers.motd"	/* oper MOTD file */
-#define LIPATH   ETCPATH "/links.txt"	/* cached links file */
 
 #else /* !__vms */
 
@@ -158,7 +157,6 @@
 #define HPATH    ETCPATH "OPERS.TXT"	/* oper help file */
 #define UHPATH   ETCPATH "USERS.TXT"	/* user help file */
 #define OPATH    ETCPATH "OPERS.MOTD"	/* oper MOTD file */
-#define LIPATH   ETCPATH "LINKS.TXT"	/* cached LINKS file */
 
 #endif /* !__vms */
 

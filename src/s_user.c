@@ -37,7 +37,6 @@
 #include "sprintf_irc.h"
 #include "ircd.h"
 #include "listener.h"
-#include "motd.h"
 #include "handlers.h"
 #include "msg.h"
 #include "numeric.h"

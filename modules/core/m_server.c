@@ -40,11 +40,9 @@
 #include "s_stats.h"		/* ServerStats */
 #include "scache.h"		/* find_or_add */
 #include "send.h"		/* sendto_one */
-#include "motd.h"
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
-
 
 static int mr_server(struct Client *, struct Client *, int, const char **);
 static int ms_server(struct Client *, struct Client *, int, const char **);

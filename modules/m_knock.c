@@ -168,7 +168,7 @@ parse_knock(struct Client *client_p, struct Client *source_p,
 	if(MyClient(source_p))
 	{
 		/* don't allow a knock if the user is banned */
-		if(is_banned(chptr, source_p, NULL, NULL))
+		if(is_banned(chptr, source_p, NULL, NULL, NULL))
 		{
 			sendto_one(source_p, form_str(ERR_CANNOTSENDTOCHAN),
 				   me.name, source_p->name, name);

@@ -167,7 +167,7 @@ m_mode(struct Client *client_p, struct Client *source_p, int parc, const char *p
  */
 static int
 add_id(struct Client *source_p, struct Channel *chptr, const char *banid,
-       dlink_list *list)
+       dlink_list *list, long mode_type)
 {
 	struct Ban *actualBan;
 	char *realban = LOCAL_COPY(banid);
@@ -209,6 +209,10 @@ add_id(struct Client *source_p, struct Channel *chptr, const char *banid,
 	dlinkAdd(actualBan, &actualBan->node, list);
 	chptr->num_mask++;
 
+	/* invalidate the can_send() cache */
+	if(mode_type == CHFL_BAN || mode_type == CHFL_EXCEPTION)
+		chptr->bants++;
+
 	return 1;
 }
 
@@ -219,7 +223,8 @@ add_id(struct Client *source_p, struct Channel *chptr, const char *banid,
  * side effects - given id is removed from the appropriate list
  */
 static int
-del_id(struct Channel *chptr, const char *banid, dlink_list *list)
+del_id(struct Channel *chptr, const char *banid, dlink_list *list,
+       long mode_type)
 {
 	dlink_node *ptr;
 	struct Ban *banptr;
@@ -241,6 +246,10 @@ del_id(struct Channel *chptr, const char *banid, dlink_list *list)
 				chptr->num_mask--;
 			else
 				chptr->num_mask = 0;
+
+			/* invalidate the can_send() cache */
+			if(mode_type == CHFL_BAN || mode_type == CHFL_EXCEPTION)
+				chptr->bants++;
 
 			return 1;
 		}
@@ -609,7 +618,7 @@ chm_ban(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
 		 * let servers do redundant +b's, as it wastes bandwidth on
 		 * a netjoin.
 		 */
-		if(!add_id(source_p, chptr, mask, list) &&
+		if(!add_id(source_p, chptr, mask, list, mode_type) &&
 		   (MyClient(source_p) || IsServer(source_p)))
 			return;
 
@@ -623,10 +632,10 @@ chm_ban(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
 	}
 	else if(dir == MODE_DEL)
 	{
-		if(del_id(chptr, mask, list) == 0)
+		if(del_id(chptr, mask, list, mode_type) == 0)
 		{
 			/* mask isn't a valid ban, check raw_mask */
-			if(del_id(chptr, raw_mask, list))
+			if(del_id(chptr, raw_mask, list, mode_type))
 				mask = raw_mask;
 		}
 

@@ -28,6 +28,7 @@
 #include "event.h"
 #include "hash.h"
 #include "cluster.h"
+#include "cache.h"
 
 #define CF_TYPE(x) ((x) & CF_MTYPE)
 
@@ -2496,7 +2497,7 @@ conf_set_serverhide_links_delay(void *data)
 
 	if((val > 0) && ConfigServerHide.links_disabled == 1)
 	{
-		eventAddIsh("write_links_file", write_links_file, NULL, val);
+		eventAddIsh("cache_links", cache_links, NULL, val);
 		ConfigServerHide.links_disabled = 0;
 	}
 

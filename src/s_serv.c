@@ -287,86 +287,6 @@ my_name_for_link(const char *name, struct ConfItem *aconf)
 }
 
 /*
- * write_links_file
- */
-void
-write_links_file(void *notused)
-{
-	MessageFileLine *next_mptr = 0;
-	MessageFileLine *mptr = 0;
-	MessageFileLine *currentMessageLine = 0;
-	MessageFileLine *newMessageLine = 0;
-	MessageFile *MessageFileptr;
-	struct Client *target_p;
-	const char *p;
-	FBFILE *file;
-	char buff[512];
-	dlink_node *ptr;
-
-	refresh_user_links = 0;
-
-	MessageFileptr = &ConfigFileEntry.linksfile;
-
-	if((file = fbopen(MessageFileptr->fileName, "w")) == 0)
-		return;
-
-	for (mptr = MessageFileptr->contentsOfFile; mptr; mptr = next_mptr)
-	{
-		next_mptr = mptr->next;
-		MyFree(mptr);
-	}
-	MessageFileptr->contentsOfFile = NULL;
-	currentMessageLine = NULL;
-
-	DLINK_FOREACH(ptr, global_serv_list.head)
-	{
-		target_p = ptr->data;
-
-		/* skip ourselves, we send ourselves in /links */
-		if(IsMe(target_p))
-			continue;
-
-		/* skip hidden servers */
-		if(IsHidden(target_p) && !ConfigServerHide.disable_hidden)
-			continue;
-
-		if(target_p->info[0])
-			p = target_p->info;
-		else
-			p = "(Unknown Location)";
-
-		newMessageLine = (MessageFileLine *) MyMalloc(sizeof(MessageFileLine));
-
-		/* Attempt to format the file in such a way it follows the usual links output
-		 * ie  "servername uplink :hops info"
-		 * Mostly for aesthetic reasons - makes it look pretty in mIRC ;)
-		 * - madmax
-		 */
-
-		ircsprintf(newMessageLine->line, "%s %s :1 %s", target_p->name, me.name, p);
-		newMessageLine->next = NULL;
-
-		if(MessageFileptr->contentsOfFile)
-		{
-			if(currentMessageLine)
-				currentMessageLine->next = newMessageLine;
-			currentMessageLine = newMessageLine;
-		}
-		else
-		{
-			MessageFileptr->contentsOfFile = newMessageLine;
-			currentMessageLine = newMessageLine;
-		}
-
-		ircsprintf(buff, "%s %s :1 %s\n", target_p->name, me.name, p);
-		fbputs(buff, file);
-	}
-
-	fbclose(file);
-}
-
-
-/*
  * hunt_server - Do the basic thing in delivering the message (command)
  *      across the relays to the specific server (server) for
  *      actions.
@@ -780,7 +700,7 @@ burst_users(struct Client *client_p)
 		target_p = ptr->data;
 
 		if(!IsPerson(target_p))
-			return;
+			continue;
 
 		send_umode(NULL, target_p, 0, SEND_UMODES, ubuf);
 		if(!*ubuf)
@@ -1689,21 +1609,18 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
 		myipnum.ss_family = AF_INET6;
 	}
 #endif
-	else {
+	else
+	{
 		comm_connect_tcp(client_p->localClient->fd, aconf->host,
-			 aconf->port,
-			 NULL,
-			 0,
-			 serv_connect_callback, client_p,
-			 aconf->aftype, ConfigFileEntry.connect_timeout);
-			 return 1;	
+				 aconf->port, NULL, 0, serv_connect_callback, 
+				 client_p, aconf->aftype, 
+				 ConfigFileEntry.connect_timeout);
+		 return 1;
 	}
 
 	comm_connect_tcp(client_p->localClient->fd, aconf->host,
-			 aconf->port,
-			 (struct sockaddr *) &myipnum,
-			 GET_SS_LEN(myipnum),
-			 serv_connect_callback, client_p,
+			 aconf->port, (struct sockaddr *) &myipnum,
+			 GET_SS_LEN(myipnum), serv_connect_callback, client_p,
 			 myipnum.ss_family, ConfigFileEntry.connect_timeout);
 
 	return 1;

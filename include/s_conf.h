@@ -37,7 +37,6 @@
 #include "config.h"		/* defines */
 #include "fileio.h"		/* FBFILE */
 #include "ircd_defs.h"
-#include "motd.h"		/* MessageFile */
 #include "class.h"
 #include "client.h"
 #include "common.h"
@@ -193,8 +192,6 @@ struct config_file_entry
 	char fname_foperlog[MAXPATHLEN];
 	char fname_operspylog[MAXPATHLEN];
 	char fname_operspyremotelog[MAXPATHLEN];
-
-	MessageFile linksfile;
 
 	int hub;
 	unsigned char compression_level;

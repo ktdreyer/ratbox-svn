@@ -28,7 +28,6 @@
 #include "handlers.h"
 #include "client.h"
 #include "ircd.h"
-#include "motd.h"
 #include "msg.h"
 #include "numeric.h"
 #include "send.h"

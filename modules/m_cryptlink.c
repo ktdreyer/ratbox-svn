@@ -60,7 +60,6 @@
 #include "s_serv.h"		/* server_estab, check_server, my_name_for_link */
 #include "s_stats.h"		/* ServerStats */
 #include "scache.h"		/* find_or_add */
-#include "motd.h"
 
 #ifndef HAVE_LIBCRYPTO
 

@@ -80,7 +80,6 @@ BASE_SRCS =                     \
   md5.c                         \
   memory.c                      \
   modules.c                     \
-  motd.c                        \
   newconf.c			\
   numeric.c                     \
   packet.c                      \

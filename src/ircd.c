@@ -41,7 +41,6 @@
 #include "ircd_signal.h"
 #include "sprintf_irc.h"
 #include "s_gline.h"
-#include "motd.h"
 #include "handlers.h"
 #include "md5.h"
 #include "msg.h"		/* msgtab */
@@ -453,20 +452,6 @@ initialize_global_set_options(void)
 }
 
 /*
- * initialize_message_files
- *
- * inputs       - none
- * output       - none
- * side effects - Set up all message files needed, motd etc.
- */
-static void
-initialize_message_files(void)
-{
-	InitMessageFile(USER_LINKS, LIPATH, &ConfigFileEntry.linksfile);
-	ReadMessageFile(&ConfigFileEntry.linksfile);
-}
-
-/*
  * initialize_server_capabs
  *
  * inputs       - none
@@ -683,7 +668,6 @@ main(int argc, char *argv[])
 	init_dlink_nodes();
 	init_patricia();
 	newconf_init();
-	initialize_message_files();
 	linebuf_init();		/* set up some linebuf stuff to control paging */
 	init_hash();
 	id_init();
@@ -767,7 +751,7 @@ main(int argc, char *argv[])
 	eventAddIsh("comm_checktimeouts", comm_checktimeouts, NULL, 1);
 
 	if(ConfigServerHide.links_delay > 0)
-		eventAddIsh("write_links_file", write_links_file, NULL,
+		eventAddIsh("cache_links", cache_links, NULL,
 			    ConfigServerHide.links_delay);
 	else
 		ConfigServerHide.links_disabled = 1;

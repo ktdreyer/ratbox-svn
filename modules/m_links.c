@@ -34,11 +34,10 @@
 #include "send.h"
 #include "s_conf.h"
 #include "msg.h"
-#include "motd.h"
 #include "parse.h"
 #include "modules.h"
 #include "hook.h"
-
+#include "cache.h"
 
 static int m_links(struct Client *, struct Client *, int, const char **);
 static int mo_links(struct Client *, struct Client *, int, const char **);
@@ -59,6 +58,8 @@ mapi_hlist_av1 links_hlist[] = {
 
 DECLARE_MODULE_AV1(links, NULL, NULL, links_clist, NULL, NULL, NULL, "$Revision$");
 
+static void send_links_cache(struct Client *source_p);
+
 /*
  * m_links - LINKS message handler
  *      parv[0] = sender prefix
@@ -71,22 +72,10 @@ DECLARE_MODULE_AV1(links, NULL, NULL, links_clist, NULL, NULL, NULL, "$Revision$
 static int
 m_links(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	if(!ConfigServerHide.flatten_links)
-	{
+	if(ConfigServerHide.flatten_links)
+		send_links_cache(source_p);
+	else
 		mo_links(client_p, source_p, parc, parv);
-		return 0;
-	}
-
-	SendMessageFile(source_p, &ConfigFileEntry.linksfile);
-
-/*
- * Print our own info so at least it looks like a normal links
- * then print out the file (which may or may not be empty)
- */
-
-	sendto_one(source_p, form_str(RPL_LINKS), me.name, parv[0], me.name, me.name, 0, me.info);
-
-	sendto_one(source_p, form_str(RPL_ENDOFLINKS), me.name, parv[0], "*");
 
 	return 0;
 }
@@ -181,3 +170,28 @@ ms_links(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	return 0;
 }
+
+/* send_links_cache()
+ *
+ * inputs	- client to send to
+ * outputs	- the cached links, us, and RPL_ENDOFLINKS
+ * side effects	-
+ */
+static void
+send_links_cache(struct Client *source_p)
+{
+	dlink_node *ptr;
+
+	DLINK_FOREACH(ptr, links_cache_list.head)
+	{
+		sendto_one(source_p, ":%s 364 %s %s",
+			   me.name, source_p->name, (const char *)ptr->data);
+	}
+
+	sendto_one(source_p, form_str(RPL_LINKS), 
+		   me.name, source_p->name, me.name, me.name, 0, me.info);
+
+	sendto_one(source_p, form_str(RPL_ENDOFLINKS),
+		   me.name, source_p->name, "*");
+}
+

@@ -554,7 +554,7 @@ del_invite(struct Channel *chptr, struct Client *who)
  * side effects -
  */
 int
-is_banned(struct Channel *chptr, struct Client *who,
+is_banned(struct Channel *chptr, struct Client *who, struct membership *msptr,
 	  const char *s, const char *s2)
 {
 	char src_host[NICKLEN + USERLEN + HOSTLEN + 6];
@@ -595,12 +595,37 @@ is_banned(struct Channel *chptr, struct Client *who,
 		{
 			actualExcept = ptr->data;
 
+			/* theyre exempted.. */
 			if(match(actualExcept->banstr, s) ||
 			   match(actualExcept->banstr, s2) || 
 			   match_cidr(actualExcept->banstr, s2))
 			{
+				/* cache the fact theyre not banned */
+				if(msptr != NULL)
+				{
+					msptr->bants = chptr->bants;
+					msptr->flags &= ~CHFL_BANNED;
+				}
+
 				return CHFL_EXCEPTION;
 			}
+		}
+	}
+
+	/* cache the banned/not banned status */
+	if(msptr != NULL)
+	{
+		msptr->bants = chptr->bants;
+
+		if(actualBan != NULL)
+		{
+			msptr->flags |= CHFL_BANNED;
+			return CHFL_BAN;
+		}
+		else
+		{
+			msptr->flags &= ~CHFL_BANNED;
+			return 0;
 		}
 	}
 
@@ -630,7 +655,7 @@ can_join(struct Client *source_p, struct Channel *chptr, char *key)
 		   source_p->name, source_p->username,
 		   source_p->localClient->sockhost);
 
-	if((is_banned(chptr, source_p, src_host, src_iphost)) == CHFL_BAN)
+	if((is_banned(chptr, source_p, NULL, src_host, src_iphost)) == CHFL_BAN)
 		return (ERR_BANNEDFROMCHAN);
 
 	if(chptr->mode.mode & MODE_INVITEONLY)
@@ -701,10 +726,16 @@ can_send(struct Channel *chptr, struct Client *source_p,
 	if(chptr->mode.mode & MODE_MODERATED)
 		return CAN_SEND_NO;
 
-	if(ConfigChannel.quiet_on_ban && MyClient(source_p) &&
-	   (is_banned(chptr, source_p, NULL, NULL) == CHFL_BAN))
+	if(ConfigChannel.quiet_on_ban && MyClient(source_p))
 	{
-		return (CAN_SEND_NO);
+		/* cached can_send */
+		if(msptr->bants == chptr->bants)
+		{
+			if(can_send_banned(msptr))
+				return CAN_SEND_NO;
+		}
+		else if(is_banned(chptr, source_p, msptr, NULL, NULL) == CHFL_BAN)
+			return CAN_SEND_NO;
 	}
 
 	return CAN_SEND_NONOP;

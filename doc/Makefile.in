@@ -77,6 +77,10 @@ install: install-mkdirs build
 		fi; \
 	done
 
+	if test -f $(sysconfdir)/links.txt; then \
+		rm $(sysconfdir)/links.txt; \
+	fi
+
 	@for i in $(MANPAGES); do \
 		if test ! -f $(mandir)/$$i; then \
 			echo $(INSTALL_DATA) $$i $(mandir); \
