@@ -234,7 +234,7 @@ dns_select(void)
 int
 adns_gethost(const char *name, int aftype, struct DNSQuery *req)
 {
-	int result
+	int result;
 	assert(dns_state->nservers > 0);
 #ifdef IPV6
 	if(aftype == AF_INET6)
@@ -242,7 +242,7 @@ adns_gethost(const char *name, int aftype, struct DNSQuery *req)
 	else
 #endif
 		result = adns_submit(dns_state, name, adns_r_addr, adns_qf_owner, req, &req->query);
-	return result
+	return result;
 }
 
 /* int adns_getaddr(struct irc_inaddr *addr, int aftype,
@@ -259,7 +259,7 @@ int
 adns_getaddr(struct sockaddr_storage *addr, int aftype, struct DNSQuery *req, int arpa_type)
 {
 	assert(dns_state->nservers > 0);
-	int result
+	int result;
 #ifdef IPV6
 	if(addr->ss_family == AF_INET6)
 	{
