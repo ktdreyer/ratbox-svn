@@ -154,6 +154,7 @@ int   class_redirport_var;
 %token  USER
 %token  VHOST
 %token  WARN
+%token  SILENT
 %token  GENERAL
 %token  FAILED_OPER_NOTICE
 %token  SHOW_FAILED_OPER_ID
@@ -1358,6 +1359,11 @@ gecos_action:    ACTION '=' TREJECT ';'
                  ACTION '=' WARN ';'
   {
     yy_aconf->port = 0;
+  }
+                 |
+                 ACTION '=' SILENT ';'
+  {
+    yy_aconf->port = 2;
   };
 
 
