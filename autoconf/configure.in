@@ -72,7 +72,20 @@ fi
 
 dnl Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS(sys/param.h unistd.h errno.h string.h sys/syslog.h stdlib.h stddef.h getopt.h) 
+AC_CHECK_HEADERS(sys/param.h unistd.h errno.h string.h strings.h sys/syslog.h stdlib.h stddef.h getopt.h) 
+
+dnl See whether we can include both string.h and strings.h.
+AC_DEFUN(GCC_HEADER_STRING,
+[AC_CACHE_CHECK([whether string.h and strings.h may both be included],
+ gcc_cv_header_string,
+[AC_TRY_COMPILE([#include <string.h>
+#include <strings.h>], , gcc_cv_header_string=yes, gcc_cv_header_string=no)])
+if test $gcc_cv_header_string = yes; then
+ AC_DEFINE(STRING_WITH_STRINGS)
+fi
+])
+
+GCC_HEADER_STRING
 
 dnl check for socklen_t
 dnl we can't use ac_check_Type because it doesnt include the required files

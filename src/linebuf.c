@@ -14,12 +14,24 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include "tools.h"
 #include "linebuf.h"
 #include "blalloc.h"
 #include "memdebug.h"
+
+#ifdef STRING_WITH_STRINGS
+# include <string.h>
+# include <strings.h>
+#else
+# ifdef HAVE_STRING_H
+#  include <string.h>
+# else
+#  ifdef HAVE_STRINGS_H
+#   include <strings.h>
+#  endif
+# endif
+#endif
 
 static int linebuf_initialised = 0;
 static BlockHeap *linebuf_bl = NULL;

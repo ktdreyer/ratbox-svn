@@ -1930,7 +1930,7 @@ EOF
 
 fi
 
-for ac_hdr in sys/param.h unistd.h errno.h string.h sys/syslog.h stdlib.h stddef.h getopt.h
+for ac_hdr in sys/param.h unistd.h errno.h string.h strings.h sys/syslog.h stdlib.h stddef.h getopt.h
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
@@ -1973,16 +1973,53 @@ done
 
 
 
+echo $ac_n "checking whether string.h and strings.h may both be included""... $ac_c" 1>&6
+echo "configure:1978: checking whether string.h and strings.h may both be included" >&5
+if eval "test \"`echo '$''{'gcc_cv_header_string'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 1983 "configure"
+#include "confdefs.h"
+#include <string.h>
+#include <strings.h>
+int main() {
+
+; return 0; }
+EOF
+if { (eval echo configure:1991: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  gcc_cv_header_string=yes
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  gcc_cv_header_string=no
+fi
+rm -f conftest*
+fi
+
+echo "$ac_t""$gcc_cv_header_string" 1>&6
+if test $gcc_cv_header_string = yes; then
+ cat >> confdefs.h <<\EOF
+#define STRING_WITH_STRINGS 1
+EOF
+
+fi
+
+
+
+
 
 
 	echo $ac_n "checking for socklen_t""... $ac_c" 1>&6
-echo "configure:1980: checking for socklen_t" >&5
+echo "configure:2017: checking for socklen_t" >&5
 	if eval "test \"`echo '$''{'have_socklen_t'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   
 		cat > conftest.$ac_ext <<EOF
-#line 1986 "configure"
+#line 2023 "configure"
 #include "confdefs.h"
 #include <sys/types.h>
 			#include <sys/socket.h>
@@ -1990,7 +2027,7 @@ int main() {
 socklen_t xxx = 75;
 ; return 0; }
 EOF
-if { (eval echo configure:1994: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:2031: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   have_socklen_t=yes
 else
@@ -2014,17 +2051,17 @@ EOF
 
 ac_safe=`echo "stdarg.h" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for stdarg.h""... $ac_c" 1>&6
-echo "configure:2018: checking for stdarg.h" >&5
+echo "configure:2055: checking for stdarg.h" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 2023 "configure"
+#line 2060 "configure"
 #include "confdefs.h"
 #include <stdarg.h>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:2028: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:2065: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -2120,13 +2157,13 @@ fi
 
 if test $ac_cv_prog_gcc = yes; then
     echo $ac_n "checking whether ${CC-cc} needs -traditional""... $ac_c" 1>&6
-echo "configure:2124: checking whether ${CC-cc} needs -traditional" >&5
+echo "configure:2161: checking whether ${CC-cc} needs -traditional" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_gcc_traditional'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
     ac_pattern="Autoconf.*'x'"
   cat > conftest.$ac_ext <<EOF
-#line 2130 "configure"
+#line 2167 "configure"
 #include "confdefs.h"
 #include <sgtty.h>
 Autoconf TIOCGETP
@@ -2144,7 +2181,7 @@ rm -f conftest*
 
   if test $ac_cv_prog_gcc_traditional = no; then
     cat > conftest.$ac_ext <<EOF
-#line 2148 "configure"
+#line 2185 "configure"
 #include "confdefs.h"
 #include <termio.h>
 Autoconf TCGETA
@@ -2167,12 +2204,12 @@ fi
 
 
 echo $ac_n "checking for openssl""... $ac_c" 1>&6
-echo "configure:2171: checking for openssl" >&5
+echo "configure:2208: checking for openssl" >&5
 if eval "test \"`echo '$''{'ac_cv_func_openssl'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 2176 "configure"
+#line 2213 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char openssl(); below.  */
@@ -2195,7 +2232,7 @@ openssl();
 
 ; return 0; }
 EOF
-if { (eval echo configure:2199: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:2236: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_func_openssl=yes"
 else
@@ -2216,12 +2253,12 @@ fi
 
 
 echo $ac_n "checking for poll""... $ac_c" 1>&6
-echo "configure:2220: checking for poll" >&5
+echo "configure:2257: checking for poll" >&5
 if eval "test \"`echo '$''{'ac_cv_func_poll'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 2225 "configure"
+#line 2262 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char poll(); below.  */
@@ -2244,7 +2281,7 @@ poll();
 
 ; return 0; }
 EOF
-if { (eval echo configure:2248: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:2285: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_func_poll=yes"
 else

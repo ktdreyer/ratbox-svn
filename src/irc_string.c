@@ -23,7 +23,18 @@
 #include "list.h"
 
 #include <assert.h>
-#include <string.h>
+#ifdef STRING_WITH_STRINGS
+# include <string.h>
+# include <strings.h>
+#else
+# ifdef HAVE_STRING_H
+#  include <string.h>
+# else
+#  ifdef HAVE_STRINGS_H
+#   include <strings.h>
+#  endif
+# endif
+#endif
 #include <stdlib.h>
 #include <time.h>
 #include "memdebug.h"
