@@ -1,3 +1,20 @@
+*** 20001207_17 by adrian
+
+
+* add bufhead->numlines and linebuf_numlines() - this implements line count
+  tracking so you can see how many lines are being used (complete/incomplete)
+  in the linebuf. Now people can implement linecount flooding.
+
+* update bufhead->len correctly. It was being done in linebuf_flush() but
+  not linebuf_get() which meant that the recvq would grow, and the flood
+  protection (which used linebuf_line() rather than linebuf_allocline()
+  until about 5 minutes ago) would eventually kick off a user.
+
+  Now the tracking is done in linebuf_done_line() where it should have been
+  all along. Honestly, the crack I must've been smoking then ..
+
+
+
 *** 20001207_16 by db
 - fixed example.conf connect example
 
