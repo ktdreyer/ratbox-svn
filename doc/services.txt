@@ -34,4 +34,9 @@ to ircd:
    preserved on a netsplit, so users will not have to relogin when the
    network merges together.
 
+5. Username given on WHOIS
+
+   When users are logged in, WHOIS will also give numeric 330:
+   :<server> 330 <yournick> <targetnick> <loginname> :is logged in as
+
 # $Id$
