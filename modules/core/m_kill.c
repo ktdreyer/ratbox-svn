@@ -242,7 +242,7 @@ int mo_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   ** set in any other place)
   */
   if (MyConnect(acptr) && MyConnect(sptr) && IsAnyOper(sptr))
-    ircsprintf(buf2, "Local kill by %s (%s)", sptr->name,
+    ircsprintf(buf2, "Killed by %s (%s)", sptr->name,
                      BadPtr(parv[2]) ? sptr->name : parv[2]);
   else
     {
@@ -463,7 +463,7 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   ** set in any other place)
   */
   if (MyConnect(acptr) && MyConnect(sptr) && IsAnyOper(sptr))
-    ircsprintf(buf2, "Local kill by %s (%s)", sptr->name,
+    ircsprintf(buf2, "Killed by %s (%s)", sptr->name,
                      BadPtr(parv[2]) ? sptr->name : parv[2]);
   else
     {

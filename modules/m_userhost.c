@@ -81,39 +81,24 @@ int     m_userhost(struct Client *cptr,
   response[0][0] = response[1][0] = response[2][0] = 
     response[3][0] = response[4][0] = '\0';
 
-  cn = parv[1];
-
-  for(i=0; (i < 5) && cn; i++ )
+  for(cn = strtoken(&p, parv[1], ","), i=0; (i < 5) && cn; 
+      cn = strtoken(&p, (char *)NULL, ","), i++ )
     {
-      if((p = strchr(cn, ' ')))
-        *p = '\0';
-
       if ((acptr = find_person(cn, NULL)))
         {
-          if (acptr == sptr) /* show real IP for USERHOST on yourself */
-            ircsprintf(response[i], "%s%s=%c%s@%s",
-                       acptr->name,
-                       IsAnyOper(acptr) ? "*" : "",
-                       (acptr->user->away) ? '-' : '+',
-                       acptr->username,
-                       acptr->sockhost);
-          else
-            ircsprintf(response[i], "%s%s=%c%s@%s",
-                       acptr->name,
-                       IsAnyOper(acptr) ? "*" : "",
-                       (acptr->user->away) ? '-' : '+',
-                       acptr->username,
-                       acptr->host);
+	  ircsprintf(response[i], "%s%s=%c%s@%s",
+		     acptr->name,
+		     IsAnyOper(acptr) ? "*" : "",
+		     (acptr->user->away) ? '-' : '+',
+		     acptr->username,
+		     acptr->host);
         }
-      if(p)
-        p++;
-      cn = p;
     }
 
   ircsprintf(buf, "%s%s %s %s %s %s",
     form_str(RPL_USERHOST),
     response[0], response[1], response[2], response[3], response[4] );
-  sendto_one(sptr, buf, me.name, parv[0]);
+  sendto_one(sptr, "%s", buf, me.name, parv[0]);
 
   return 0;
 }

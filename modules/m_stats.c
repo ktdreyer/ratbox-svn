@@ -272,7 +272,6 @@ void do_non_priv_stats(struct Client *sptr, char *name, char *target,
       stats_spy(sptr,stat);
       break;
 
-/* ZZZ  should be in run time config */
     case 'I' : case 'i' :
 #ifdef I_LINES_OPER_ONLY
       sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, sptr->name);
@@ -290,13 +289,11 @@ void do_non_priv_stats(struct Client *sptr, char *name, char *target,
       stats_spy(sptr,stat);
       break;
 
-/* ZZZ opers only flag */
     case 'o' : case 'O' :
       report_configured_links(sptr, CONF_OPS);
       stats_spy(sptr,stat);
       break;
 
-/* ZZZ opers only flag */
     case 'P' :
       show_ports(sptr);
       stats_spy(sptr,stat);
@@ -414,11 +411,6 @@ void do_priv_stats(struct Client *sptr, char *name, char *target,
       stats_spy(sptr,stat);
       break;
 
-    case 'p' :
-      show_opers(sptr);
-      stats_spy(sptr,stat);
-      break;
-
     case 'Q' : case 'q' :
       report_qlines(sptr);
       stats_spy(sptr,stat);
@@ -442,6 +434,18 @@ void do_priv_stats(struct Client *sptr, char *name, char *target,
     case 'U' :
       report_specials(sptr,CONF_ULINE,RPL_STATSULINE);
       stats_spy(sptr,stat);
+      break;
+
+    case 'p' :
+      if (ConfigFileEntry.stats_p_notice)
+	{
+	  stats_p_spy(sptr);
+	}
+      else
+	{
+	  show_opers(sptr);
+	  stats_spy(sptr,stat);
+	}
       break;
 
     case 'v' : case 'V' :

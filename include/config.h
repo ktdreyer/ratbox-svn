@@ -149,6 +149,9 @@
 #define FNAME_USERLOG "/usr/local/ircd/users" /* */
 #define FNAME_OPERLOG "/usr/local/ircd/opers" /* */
 
+#define NETWORK_NAME "EFnet"
+#define NETWORK_DESC "Eris Free Network"
+
 /* RFC1035_ANAL
  * Defining this causes ircd to reject hostnames with non-compliant chars.
  * undef'ing it will allow hostnames with _ or / to connect
@@ -176,27 +179,6 @@
  * ircd to do ident lookup even if you define this.
  */
 #define DO_IDENTD
-
-/* WHOIS_NOTICE - Shows a notice to an oper when a user does a
- * /whois on them
- * Why do opers need this at all? Its an invasion of privacy. bah.
- * you don't need this. -Dianora
- */
-#undef WHOIS_NOTICE
-
-/* SHORT_MOTD
- * There are clients ignoring the FORCE_MOTD MOTD numeric, there is
- * no point forcing MOTD on connecting clients IMO. Give them a short
- * NOTICE telling them they should read the motd, and leave it at that.
- */
-#undef SHORT_MOTD
-
-/* SHOW_INVISIBLE_LUSERS - show invisible clients in LUSERS
- * As defined this will show the correct invisible count for anyone who does
- * LUSERS on your server. On a large net this doesnt mean much, but on a
- * small net it might be an advantage to undefine it.
- */
-#define SHOW_INVISIBLE_LUSERS
 
 /* NO_DEFAULT_INVISIBLE - clients not +i by default
  * When defined, your users will not automatically be attributed with user

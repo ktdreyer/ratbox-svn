@@ -77,7 +77,8 @@ _modinit(void)
 #define TOKEN_SPAMNUM 8
 #define TOKEN_SPAMTIME 9
 #define TOKEN_LOG 10
-#define TOKEN_BAD 11
+#define TOKEN_HIDE 11
+#define TOKEN_BAD 12
 
 char *set_token_table[] = {
   "MAX",
@@ -91,6 +92,7 @@ char *set_token_table[] = {
   "SPAMNUM",
   "SPAMTIME",
   "LOG",
+  "HIDE",
   NULL
 };
 
@@ -422,6 +424,28 @@ int mo_set(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
               sendto_one(sptr, ":%s NOTICE %s :LOG level is currently %i (%s)",
                          me.name, parv[0], get_log_level(),
                          get_log_level_as_string(get_log_level()));
+            }
+          return 0;
+          break;
+
+        case TOKEN_HIDE:
+          if(parc > 2)
+            {
+              int newval = atoi(parv[2]);
+
+              if(newval)
+                GlobalSetOptions.hide_server = 1;
+	      else
+		GlobalSetOptions.hide_server = 0;
+
+              sendto_realops("%s has changed HIDE to %i",
+                             parv[0], GlobalSetOptions.hide_server);
+            }
+          else
+            {
+              sendto_one(sptr, ":%s NOTICE %s :HIDE is currently %i",
+                         me.name, parv[0], GlobalSetOptions.hide_server);
+
             }
           return 0;
           break;

@@ -119,9 +119,13 @@ int whowas_do(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                      temp->username,
                      temp->hostname,
                      temp->realname);
-          sendto_one(sptr, form_str(RPL_WHOISSERVER),
-                     me.name, parv[0], temp->name,
-                     temp->servername, myctime(temp->logoff));
+
+	  if(GlobalSetOptions.hide_server && IsAnyOper(sptr))
+	    {
+	      sendto_one(sptr, form_str(RPL_WHOISSERVER),
+			 me.name, parv[0], temp->name,
+			 temp->servername, myctime(temp->logoff));
+	    }
           cur++;
           found++;
         }

@@ -42,7 +42,6 @@ SRCS =                          \
   m_list.c \
   m_lljoin.c \
   m_locops.c \
-  m_ltrace.c \
   m_lusers.c \
   m_mode.c \
   m_motd.c \
@@ -75,6 +74,7 @@ SRCS =                          \
   m_wallops.c \
   m_who.c \
   m_whois.c \
+  m_whowas.c 
 
 OBJS = ${SRCS:.c=.so}
 

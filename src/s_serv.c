@@ -75,6 +75,7 @@ struct Capability captab[] = {
   { "LL",       CAP_LL },
   { "IE",       CAP_IE },
   { "VCHAN",    CAP_VCHAN },
+  { "EOB",      CAP_EOB },
   { 0,   0 }
 };
 
@@ -925,6 +926,10 @@ static void server_burst(struct Client *cptr)
 
   /* Always send a PING after connect burst is done */
   sendto_one(cptr, "PING :%s", me.name);
+
+  /* XXX maybe `EOB %d %d` where we send lenght of burst and time? */
+  if(IsCapable(cptr, CAP_EOB))
+    sendto_one(cptr, "EOB", me.name ); 
 }
 
 /*

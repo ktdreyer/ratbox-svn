@@ -32,6 +32,7 @@
 #include "hash.h"
 #include "ircd.h"
 #include "numeric.h"
+#include "s_conf.h"
 #include "s_serv.h"
 #include "send.h"
 #include "list.h"
@@ -46,7 +47,7 @@ void whois_person(struct Client *sptr,struct Client *acptr);
 int global_whois(struct Client *sptr, char *nick, int wilds);
 
 struct Message whois_msgtab = {
-  MSG_WHOIS, 0, 1, MFLG_SLOW, 0L, {m_unregistered, m_whois, m_whois, m_whois}
+  MSG_WHOIS, 0, 1, MFLG_SLOW, 0L, {m_unregistered, m_whois, ms_whois, mo_whois}
 };
 
 void
@@ -65,13 +66,19 @@ int     m_whois(struct Client *cptr,
                 int parc,
                 char *parv[])
 {
-  static time_t last_used=0L;
-  struct Client *acptr;
-  char  *nick;
-  char  *p = NULL;
-  int   found=NO;
-  int   wilds;
+  return(do_whois(cptr,sptr,parc,parv));
+}
 
+/*
+** mo_whois
+**      parv[0] = sender prefix
+**      parv[1] = nickname masklist
+*/
+int     mo_whois(struct Client *cptr,
+                struct Client *sptr,
+                int parc,
+                char *parv[])
+{
   if(parc > 2)
     {
       if (hunt_server(cptr,sptr,":%s WHOIS %s :%s", 1,parc,parv) !=
@@ -79,48 +86,29 @@ int     m_whois(struct Client *cptr,
         return 0;
       parv[1] = parv[2];
     }
+  return(do_whois(cptr,sptr,parc,parv));
+}
 
-  if(!IsAnyOper(sptr) && !MyConnect(sptr)) /* pace non local requests */
-    {
-      if((last_used + ConfigFileEntry.whois_wait) > CurrentTime)
-        {
-          /* Unfortunately, returning anything to a non local
-           * request =might= increase sendq to be usable in a split hack
-           * Sorry gang ;-( - Dianora
-           */
-          return 0;
-        }
-      else
-        {
-          last_used = CurrentTime;
-        }
-    }
+
+/* do_whois
+ *
+ * inputs	- pointer to 
+ * output	- 
+ */
+int do_whois(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+{
+  struct Client *acptr;
+  char  *nick;
+  char  *p = NULL;
+  int   found=NO;
+  int   wilds;
 
   nick = parv[1];
-  p = strchr(parv[1],',');
-  if(p)
+  if ( (p = strchr(parv[1],',')) )
     *p = '\0';
 
   (void)collapse(nick);
   wilds = (strchr(nick, '?') || strchr(nick, '*'));
-
-  /*
-  ** We're no longer allowing remote users to generate
-  ** requests with wildcards.
-  */
-#ifdef NO_WHOIS_WILDCARDS
-  if (!MyConnect(sptr) && wilds)
-    {
-      sendto_one(sptr, form_str(ERR_NOSUCHNICK),
-		 me.name, parv[0], nick);
-      return 0;
-    }
-#endif
-
-  /* If the nick doesn't have any wild cards in it,
-   * then just pick it up from the hash table
-   * - Dianora 
-   */
 
   if(!wilds)
     {
@@ -157,7 +145,6 @@ int     m_whois(struct Client *cptr,
  * Side Effects	- do a single whois on given client
  * 		  writing results to sptr
  */
-
 int global_whois(struct Client *sptr, char *nick, int wilds)
 {
   struct Client *acptr;
@@ -225,9 +212,18 @@ int single_whois(struct Client *sptr,struct Client *acptr,int wilds)
       sendto_one(sptr, form_str(RPL_WHOISUSER), me.name,
 		 sptr->name, name,
 		 acptr->username, acptr->host, acptr->info);
-      sendto_one(sptr, form_str(RPL_WHOISSERVER),
+      if(GlobalSetOptions.hide_server && !IsAnyOper(sptr))
+	{
+	  sendto_one(sptr, form_str(RPL_WHOISSERVER),
+		 me.name, sptr->name, NETWORK_NAME, "<Unknown>",
+		 "*Not On This Net*");
+	}
+      else
+	{
+	  sendto_one(sptr, form_str(RPL_WHOISSERVER),
 		 me.name, sptr->name, name, "<Unknown>",
 		 "*Not On This Net*");
+	}
       return 0;
     }
 
@@ -270,6 +266,7 @@ void whois_person(struct Client *sptr,struct Client *acptr)
   char buf[BUFSIZE];
   char buf2[2*NICKLEN];
   char *chname;
+  char *server_name;
   struct SLink  *lp;
   struct Client *a2cptr;
   struct Channel *chptr;
@@ -281,11 +278,23 @@ void whois_person(struct Client *sptr,struct Client *acptr)
 
   a2cptr = find_server(acptr->user->server);
           
-  sendto_one(sptr, form_str(RPL_WHOISUSER), me.name,
-	     sptr->name, acptr->name,
-	     acptr->username, acptr->host, acptr->info);
+  if(GlobalSetOptions.hide_server && !IsAnyOper(sptr))
+    {
+      sendto_one(sptr, form_str(RPL_WHOISUSER), me.name,
+		 sptr->name, acptr->name,
+		 acptr->username, NETWORK_NAME, NETWORK_DESC);
+      server_name = NETWORK_NAME;
+    }
+  else
+    {
+      sendto_one(sptr, form_str(RPL_WHOISUSER), me.name,
+		 sptr->name, acptr->name,
+		 acptr->username, acptr->host, acptr->info);
+      server_name = acptr->user->server;
+    }
 
   mlen = strlen(me.name) + strlen(sptr->name) + 6 + strlen(acptr->name);
+
   cur_len = mlen;
   buf[0] = '\0';
 
@@ -328,8 +337,9 @@ void whois_person(struct Client *sptr,struct Client *acptr)
     sendto_one(sptr, form_str(RPL_WHOISCHANNELS),
 	       me.name, sptr->name, acptr->name, buf);
           
-  sendto_one(sptr, form_str(RPL_WHOISSERVER),
-	     me.name, sptr->name, acptr->name, acptr->user->server,
+  if (acptr == sptr)
+    sendto_one(sptr, form_str(RPL_WHOISSERVER),
+	     me.name, sptr->name, acptr->name, server_name,
 	     a2cptr?a2cptr->info:"*Not On This Net*");
 
   if (acptr->user->away)

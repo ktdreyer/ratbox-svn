@@ -24,6 +24,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 7.25  2000/11/21 05:03:06  db
+ * - general cleanups continue, just a few this time
+ * - ltrace removed for now, it can go back in later
+ *
  * Revision 7.24  2000/11/17 18:02:56  toot
  * . made a separate ircd.conf setting to block nickchanges when banned,
  *   and block them in +m chans too, unless opped
@@ -508,6 +512,7 @@ typedef struct
   int         glines;
   int         topic_uh;
   int         gline_time;
+  int	      hide_server;
 } ConfigFileEntryType;
 
 /* bleh. have to become global. */

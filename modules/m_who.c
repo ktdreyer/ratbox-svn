@@ -357,10 +357,20 @@ void    do_who(struct Client *sptr,
 	     IsAnyOper(acptr) ? "*" : "",
 	     channel_chanop_or_voice(flags));
 
-  sendto_one(sptr, form_str(RPL_WHOREPLY), me.name, sptr->name,
+  if(ConfigFileEntry.hide_server)
+    {
+      sendto_one(sptr, form_str(RPL_WHOREPLY), me.name, sptr->name,
              repname, acptr->username,
-             acptr->host, acptr->user->server, acptr->name,
+             acptr->host, IsAnyOper(sptr) ? acptr->user->server : "*", acptr->name,
              status, acptr->hopcount, acptr->info);
+    }
+  else
+    {
+      sendto_one(sptr, form_str(RPL_WHOREPLY), me.name, sptr->name,
+             repname, acptr->username,
+             acptr->host,  acptr->user->server, acptr->name,
+             status, acptr->hopcount, acptr->info);
+    }
 }
 
 /*

@@ -316,6 +316,14 @@ int build_target_list(int p_or_n,
 	      continue;
 	    }
 	}
+
+      /* anything else below needs global oper privs */
+      if (IsGlobalOper(sptr) && (*nick == '$'))
+	{
+	  handle_opers(p_or_n, command, cptr,sptr,nick+1,text);
+	  continue;
+	}
+
       /* At this point, its likely its another client */
 
       if ( (acptr = find_person(nick, NULL)) &&
@@ -331,11 +339,6 @@ int build_target_list(int p_or_n,
 	  continue;
 	}
 
-      /* anything else below needs global oper privs */
-      if (IsGlobalOper(sptr))
-	{
-	  handle_opers(p_or_n, command, cptr,sptr,nick,text);
-	}
     }
   return i;
 }
