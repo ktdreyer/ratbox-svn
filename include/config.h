@@ -51,12 +51,12 @@
 /* dirs */
 #define DPATH   IRCD_PREFIX
 #define BINPATH IRCD_PREFIX "/bin/"
-#define MODPATH MODULE_DIR
-#define AUTOMODPATH MODULE_DIR "/autoload/"
-#define ETCPATH ETC_DIR 
-#define LOGPATH LOG_DIR
-#define UHPATH   HELP_DIR "/users"
-#define HPATH  HELP_DIR "/opers"
+#define MODPATH IRCD_PREFIX "/modules/"
+#define AUTOMODPATH IRCD_PREFIX "/modules/autoload/"
+#define ETCPATH IRCD_PREFIX "/etc"
+#define LOGPATH IRCD_PREFIX "/logs"
+#define UHPATH   IRCD_PREFIX "/help/users"
+#define HPATH  IRCD_PREFIX "/help/opers"
 
 /* files */
 #define SPATH    BINPATH "/ircd"	/* ircd executable */
@@ -69,7 +69,7 @@
 #define RPATH    ETCPATH "/ircd.rsa"	/* ircd rsa private keyfile */
 #define MPATH    ETCPATH "/ircd.motd"	/* MOTD file */
 #define LPATH    LOGPATH "/ircd.log"	/* ircd logfile */
-#define PPATH    LOGPATH "/ircd.pid"	/* pid file */
+#define PPATH    ETCPATH "/ircd.pid"	/* pid file */
 #define OPATH    ETCPATH "/opers.motd"	/* oper MOTD file */
 
 #else /* !__vms */

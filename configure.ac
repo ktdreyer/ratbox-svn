@@ -1082,57 +1082,6 @@ AC_SUBST(PICFLAGS)
 AC_SUBST(IRC_CFLAGS)
 AC_SUBST(SEDOBJ)
 
-if test "$sysconfdir" = "NONE"; then
-	AC_DEFINE_UNQUOTED(ETC_DIR, "$ac_default_prefix/etc", [Prefix where config files are installed.])
-
-else
-
-dnl Don't get bitten by Cygwin's stupidity if the user specified
-dnl a custom sysconf with a trailing slash
-
-	sysconfdir=`echo $sysconfdir | sed 's/\/$//'`
-	AC_DEFINE_UNQUOTED(ETC_DIR, "$sysconfdir", [Prefix where config files are installed.])
-
-fi
-
-if test "$helpdir" = "NONE"; then
-	AC_DEFINE_UNQUOTED(HELP_DIR, "$ac_default_prefix/help", [Prefix where help files are installed.])
-
-else
-
-dnl Don't get bitten by Cygwin's stupidity if the user specified
-dnl a custom helpdir with a trailing slash
-
-	helpdir=`echo $helpdir | sed 's/\/$//'`
-	AC_DEFINE_UNQUOTED(HELP_DIR, "$helpdir", [Prefix where help files are installed.])
-
-fi
-
-if test "$logdir" = "NONE"; then
-	AC_DEFINE_UNQUOTED(LOG_DIR, "$ac_default_prefix/logs", [Prefix where logs are written.])
-
-else
-
-dnl Don't get bitten by Cygwin's stupidity if the user specified
-dnl a custom logfile with a trailing slash
-
-	logdir=`echo $logdir | sed 's/\/$//'`
-	AC_DEFINE_UNQUOTED(LOG_DIR, "$logdir", [Prefix where logs are written.])
-
-fi
-
-if test "$moduledir" = "NONE"; then
-	AC_DEFINE_UNQUOTED(MODULE_DIR, "$ac_default_prefix/modules", [Prefix where modules are installed.])
-
-else
-
-dnl Don't get bitten by Cygwin's stupidity if the user specified
-dnl a custom moduledir with a trailing slash
-
-	moduledir=`echo $moduledir | sed 's/\/$//'`
-	AC_DEFINE_UNQUOTED(MODULE_DIR, "$moduledir", [Prefix where modules are installed.])
-
-fi
 
 if test "$prefix" = "NONE"; then 
 	AC_DEFINE_UNQUOTED(IRCD_PREFIX, "$ac_default_prefix", [Prefix where the ircd is installed.])

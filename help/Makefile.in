@@ -8,9 +8,8 @@ RM=		@RM@
 
 prefix=		@prefix@
 exec_prefix=	@execprefix@
-helpdir=	@helpdir@
-uhelpdir=	${helpdir}/users
-ohelpdir=	${helpdir}/opers
+uhelpdir=	${prefix}/help/users
+ohelpdir=	${prefix}/help/opers
 
 SYMLINKS=	topic accept cmode admin names links away whowas \
 		version kick who invite quit join list nick oper part \
@@ -62,32 +61,32 @@ index:
 	rm -f opers/index.tmp
 
 install:
-	-@if test -d $(DESTDIR)$(helpdir)-old; then \
-		rm -rf $(DESTDIR)$(helpdir)-old; \
+	-@if test -d $(prefix)/help-old; then \
+		rm -rf $(prefix)/help-old; \
 	fi
-	-@if test -d $(DESTDIR)$(helpdir); then \
+	-@if test -d $(prefix)/help; then \
 		echo "ircd: backing up old help files"; \
-		mv $(DESTDIR)$(helpdir) $(DESTDIR)$(helpdir)-old; \
+		mv $(prefix)/help $(prefix)/help-old; \
 	fi
 
 	@echo "ircd: setting up help directory structure"
-	@mkdir -p -m 755 $(DESTDIR)$(helpdir)
-	@mkdir -p -m 755 $(DESTDIR)$(helpdir)/opers
-	@mkdir -p -m 755 $(DESTDIR)$(helpdir)/users
+	@mkdir $(prefix)/help
+	@mkdir $(prefix)/help/opers
+	@mkdir $(prefix)/help/users
 
 	@for help in opers/*; do \
 	if [ -f $$help ]; then \
-		${INSTALL_DATA} $$help $(DESTDIR)$(ohelpdir); \
+		${INSTALL_DATA} $$help $(ohelpdir); \
 	fi \
 	done
 	@for help in users/*; do \
 	if [ -f $$help ]; then \
-		$(INSTALL_DATA) $$help $(DESTDIR)$(uhelpdir); \
+		$(INSTALL_DATA) $$help $(uhelpdir); \
 	fi \
 	done
 	@for link in $(SYMLINKS); do \
-		rm -f $(DESTDIR)$(uhelpdir)/$$link; \
-		ln -s $(ohelpdir)/$$link $(DESTDIR)$(uhelpdir); \
+		rm -f $(uhelpdir)/$$link; \
+		ln -s $(ohelpdir)/$$link $(uhelpdir); \
 	done
 
 
