@@ -1,3 +1,36 @@
+leeh        2002/09/11 13:17:37 UTC	(20020911_0)
+
+  Modified files:
+    .                    RELNOTES 
+    include              config.h hash.h m_info.h patchlevel.h 
+                         resv.h s_conf.h 
+    modules              m_resv.c 
+    modules/core         m_nick.c 
+    src                  hash.c ircd.c kdparse.c newconf.c resv.c 
+                         s_conf.c 
+  Log:
+  - updated patchlevel to rc3
+  - added permanent resvs via resv.conf
+  
+  Revision  Changes    Path
+  1.49      +6 -0      ircd-ratbox/RELNOTES
+  7.149     +59 -54    ircd-ratbox/include/config.h
+  7.22      +4 -4      ircd-ratbox/include/hash.h
+  7.42      +6 -0      ircd-ratbox/include/m_info.h
+  7.39      +1 -1      ircd-ratbox/include/patchlevel.h
+  1.10      +15 -19    ircd-ratbox/include/resv.h
+  7.203     +4 -1      ircd-ratbox/include/s_conf.h
+  1.104     +3 -3      ircd-ratbox/modules/core/m_nick.c
+  1.19      +104 -79   ircd-ratbox/modules/m_resv.c
+  7.60      +11 -11    ircd-ratbox/src/hash.c
+  7.256     +3 -0      ircd-ratbox/src/ircd.c
+  7.10      +31 -0     ircd-ratbox/src/kdparse.c
+  7.38      +4 -4      ircd-ratbox/src/newconf.c
+  7.19      +65 -88    ircd-ratbox/src/resv.c
+  7.351     +42 -1     ircd-ratbox/src/s_conf.c
+
+
+
 androsyn    2002/09/10 19:40:54 UTC	(20020910_5)
 
   Modified files:
