@@ -1253,40 +1253,42 @@ user_welcome(struct Client *source_p)
 static int
 check_X_line(struct Client *client_p, struct Client *source_p)
 {
-  struct ConfItem *aconf;
+  struct xline *xconf;
   char *reason;
 
   if(IsOper(source_p))
     return 0;
 
-  if ((aconf = find_x_conf(source_p->info)))
-    {
-      if(aconf->passwd)
-	reason = aconf->passwd;
-      else
-	reason = "NONE";
-              
-      if(aconf->port)
-	{
-	  if (aconf->port == 1)
-	    {
-	      sendto_realops_flags(UMODE_REJ, L_ALL,
-				   "X-line Rejecting [%s] [%s], user %s",
-				   source_p->info, reason,
-				   get_client_name(client_p, HIDE_IP));
-	    }
-	  ServerStats->is_ref++;      
-	  (void)exit_client(client_p, source_p, &me, "Bad user info");
-	  return (CLIENT_EXITED);
-	}
-      else
-	sendto_realops_flags(UMODE_REJ, L_ALL,
-			     "X-line Warning [%s] [%s], user %s",
-			     source_p->info, reason,
-			     get_client_name(client_p, HIDE_IP));
-    }
+  if ((xconf = find_xline(source_p->info)))
+  {
+    if(!BadPtr(xconf->reason))
+      reason = xconf->reason;
+    else
+      reason = "No Reason";
 
-  return (0);
+    /* 1/2 are reject */
+    if(xconf->type)
+    {
+      /* 1 gives a warning to opers */
+      if(xconf->type == 1)
+        sendto_realops_flags(UMODE_REJ, L_ALL,
+                             "X-line Rejecting [%s] [%s], user %s",
+                             source_p->info, reason,
+                             get_client_name(client_p, HIDE_IP));
+      
+      ServerStats->is_ref++;      
+      exit_client(client_p, source_p, &me, "Bad user info");
+      return (CLIENT_EXITED);
+    }
+    /* 0 is warn */
+    else
+      sendto_realops_flags(UMODE_REJ, L_ALL,
+                           "X-line Warning [%s] [%s], user %s",
+                           source_p->info, reason,
+                           get_client_name(client_p, HIDE_IP));
+  }
+
+  return 0;
 }
 
 /*

@@ -86,6 +86,13 @@ struct ConfItem
 #endif
 };
 
+struct xline
+{
+  char *gecos;
+  char *reason;
+  int type;
+};
+
 #define CONF_ILLEGAL            0x80000000
 #define CONF_QUARANTINED_NICK   0x0001
 #define CONF_CLIENT             0x0002
@@ -101,7 +108,6 @@ struct ConfItem
 #define CONF_NOLIMIT            0x8000
 #define CONF_GLINE             0x10000
 #define CONF_DLINE             0x20000
-#define CONF_XLINE             0x40000
 #define CONF_ULINE             0x80000
 #define CONF_EXEMPTDLINE      0x100000
 
@@ -306,8 +312,6 @@ extern int scount;
 /* struct ConfItems */
 /* conf uline link list root */
 extern struct ConfItem *u_conf;
-/* conf xline link list root */
-extern struct ConfItem *x_conf;
 
 /* All variables are GLOBAL */
 extern struct ConfItem* ConfigItemList;      /* conf list head */
@@ -344,6 +348,11 @@ void remove_one_ip(struct irc_inaddr *ip);
 extern struct ConfItem* make_conf(void);
 extern void             free_conf(struct ConfItem*);
 
+dlink_list xline_list;
+extern struct xline *make_xline(const char *, const char *, int);
+extern void free_xline(struct xline *);
+extern struct xline *find_xline(char *);
+
 extern void             read_conf_files(int cold);
 
 extern int              attach_conf(struct Client*, struct ConfItem *);
@@ -368,7 +377,6 @@ extern char *oper_flags_as_string(int);
 extern char *oper_privs_as_string(struct Client *, int);
 
 extern int find_u_conf(char*, char*, char *, int);
-extern struct ConfItem *find_x_conf(char*);
 
 extern struct ConfItem* find_tkline(const char*, const char*, struct irc_inaddr *);
 extern char* show_iline_prefix(struct Client *,struct ConfItem *,char *);
@@ -385,7 +393,6 @@ typedef enum {
   CONF_TYPE,
   KLINE_TYPE,
   DLINE_TYPE,
-  XLINE_TYPE,
   RESV_TYPE
 } KlineType;
 
@@ -410,7 +417,6 @@ extern void conf_add_class_to_conf(struct ConfItem *);
 extern void conf_add_me(struct ConfItem *);
 extern void conf_add_class(struct ConfItem *,int );
 extern void conf_add_d_conf(struct ConfItem *);
-extern void conf_add_x_conf(struct ConfItem *);
 extern void conf_add_u_conf(struct ConfItem *);
 extern void conf_add_fields(struct ConfItem*, char*, char *, char*, char *,char *);
 extern void conf_add_conf(struct ConfItem *);

@@ -93,7 +93,10 @@ void
 mo_xline(struct Client *client_p, struct Client *source_p,
          int parc, char *parv[])
 {
-  struct ConfItem *aconf;
+  char buffer[BUFSIZE*2];
+  FBFILE *out;
+  struct xline *xconf;
+  const char *filename;
   char *reason;
   int xtype = 1;
 
@@ -120,20 +123,40 @@ mo_xline(struct Client *client_p, struct Client *source_p,
       reason = parv[2];
   }
 
-  aconf = make_conf();
-  aconf->status = CONF_XLINE;
-  DupString(aconf->host, parv[1]);
-  DupString(aconf->passwd, reason);
-  aconf->port = xtype;
+  xconf = make_xline(parv[1], reason, xtype);
+  collapse(xconf->gecos);
 
-  collapse(aconf->host);
+  filename = ConfigFileEntry.xlinefile;
 
-  /* conf_add_x_conf must be done last, due to it messing about
-   * with aconf --fl
-   */
-  write_confitem(XLINE_TYPE, source_p, NULL, aconf->host, reason,
-                 NULL, NULL, aconf->port);
-  conf_add_x_conf(aconf);
+  if ((out = fbopen(filename, "a")) == NULL)
+  {
+    sendto_realops_flags(UMODE_ALL, L_ALL, "*** Problem opening %s ", 
+                         filename);
+    return;
+  }
+
+  ircsprintf(buffer, "\"%s\",\"%d\",\"%s\",\"%s\",%lu\n",
+             xconf->gecos, xconf->type, xconf->reason,
+             get_oper_name(source_p), CurrentTime);
+
+  if (fbputs(buffer, out) == -1)
+  {
+    sendto_realops_flags(UMODE_ALL, L_ALL, "*** Problem writing to %s",
+                         filename);
+    fbclose(out);
+    return;
+  }
+
+  fbclose(out);
+
+  sendto_realops_flags(UMODE_ALL, L_ALL,  "%s added X-line for [%s] [%s]",
+                       get_oper_name(source_p), xconf->gecos, xconf->reason);
+  sendto_one(source_p, ":%s NOTICE %s :Added X-line for [%s] [%s]",
+             me.name, source_p->name, xconf->gecos, xconf->reason);
+  ilog(L_TRACE, "%s added X-line for [%s] [%s]",
+       get_oper_name(source_p), xconf->gecos, xconf->reason);
+
+  dlinkAddAlloc(xconf, &xline_list);
 }
 
 /* mo_unxline()
@@ -169,7 +192,7 @@ mo_unxline(struct Client *client_p, struct Client *source_p,
     return;
   }
 
-  filename = get_conf_name(XLINE_TYPE);
+  filename = ConfigFileEntry.xlinefile;
   ircsprintf(temppath, "%s.tmp", ConfigFileEntry.xlinefile);
 
   if((in = fbopen(filename, "r")) == NULL)

@@ -91,6 +91,7 @@ static  int     verify_access(struct Client *client_p, const char *username);
 static  int     attach_iline(struct Client *, struct ConfItem *);
 
 static void clear_special_conf(struct ConfItem **);
+static void clear_xlines(void);
 
 /* usually, with hash tables, you use a prime number...
  * but in this case I am dealing with ip addresses, not ascii strings.
@@ -118,9 +119,6 @@ static IP_ENTRY *find_or_add_ip(struct irc_inaddr*);
 
 /* general conf items link list root */
 struct ConfItem* ConfigItemList = NULL;
-
-/* conf xline link list root */
-struct ConfItem        *x_conf = ((struct ConfItem *)NULL);
 
 /* conf uline link list root */
 struct ConfItem        *u_conf = ((struct ConfItem *)NULL);
@@ -190,6 +188,94 @@ make_conf()
   aconf->status       = CONF_ILLEGAL;
   aconf->aftype       = AF_INET;
   return(aconf);
+}
+
+/* make_xline()
+ *
+ * inputs       - gecos, reason, type
+ * outputs      -
+ * side effects - creates an xline based on information
+ */
+struct xline *
+make_xline(const char *gecos, const char *reason, int type)
+{
+  struct xline *xconf;
+
+  xconf = (struct xline *) MyMalloc(sizeof(struct xline));
+  memset(xconf, 0, sizeof(struct xline));
+
+  if(!BadPtr(gecos))
+    DupString(xconf->gecos, gecos);
+
+  if(!BadPtr(reason))
+    DupString(xconf->reason, reason);
+
+  xconf->type = type;
+  return xconf;
+}
+
+/* free_xline()
+ *
+ * inputs       - pointer to xline to free
+ * outputs      -
+ * side effects - xline is freed
+ */
+void
+free_xline(struct xline *xconf)
+{
+  assert(xconf != NULL);
+  if(xconf == NULL)
+    return;
+
+  MyFree(xconf->gecos);
+  MyFree(xconf->reason);
+  MyFree((char *) xconf);
+}
+
+/* clear_xlines()
+ *
+ * inputs       -
+ * outputs      -
+ * side effects - nukes list of xlines
+ */
+static void
+clear_xlines(void)
+{
+  struct xline *xconf;
+  dlink_node *ptr;
+  dlink_node *next_ptr;
+
+  DLINK_FOREACH_SAFE(ptr, next_ptr, xline_list.head)
+  {
+    xconf = ptr->data;
+
+    free_xline(xconf);
+    dlinkDestroy(ptr, &xline_list);
+  }
+}
+
+/*
+ * find_xline
+ *
+ * inputs       - pointer to char string to find
+ * output       - NULL or pointer to found xline
+ * side effects - looks for a match on name field
+ */
+struct xline *
+find_xline(char *gecos)
+{
+  struct xline *xconf;
+  dlink_node *ptr;
+
+  DLINK_FOREACH(ptr, xline_list.head)
+  {
+    xconf = ptr->data;
+
+    if(match_esc(xconf->gecos, gecos))
+      return xconf;
+  }
+
+  return NULL;
 }
 
 /*
@@ -1235,29 +1321,6 @@ find_conf_by_host(const char* host, int status)
   return(NULL);
 }
 
-/*
- * find_x_conf
- *
- * inputs       - pointer to char string to find
- * output       - NULL or pointer to found struct ConfItem
- * side effects - looks for a match on name field
- */
-struct ConfItem *
-find_x_conf(char *to_find)
-{
-  struct ConfItem *aconf;
-
-  for (aconf = x_conf; aconf; aconf = aconf->next)
-    {
-      if (BadPtr(aconf->name))
-          continue;
-
-      if(match_esc(aconf->name,to_find))
-        return(aconf);
-
-    }
-  return(NULL);
-}
 
 /*
  * find_u_conf
@@ -2141,7 +2204,8 @@ read_conf_files(int cold)
 	}
     }
 
-  xfilename = get_conf_name(XLINE_TYPE);
+  xfilename = ConfigFileEntry.xlinefile;
+
   if(irccmp(filename, xfilename) && irccmp(kfilename, xfilename) &&
      irccmp(dfilename, xfilename))
   {
@@ -2235,7 +2299,7 @@ void clear_out_old_conf(void)
     MaxUsers(cltmp) = -1;
 
   clear_out_address_conf();
-  clear_special_conf(&x_conf);
+  clear_xlines();
   clear_special_conf(&u_conf);
 
   /* clean out module paths */
@@ -2370,11 +2434,6 @@ write_confitem(KlineType type, struct Client *source_p, char *user, char *host,
                host, reason, oper_reason, current_date,
                get_oper_name(source_p), CurrentTime);
   }
-  else if(type == XLINE_TYPE)
-  {
-    ircsprintf(buffer, "\"%s\",\"%d\",\"%s\",\"%s\",%lu\n",
-               host, xtype, reason, get_oper_name(source_p), CurrentTime);
-  }
   else if(type == RESV_TYPE)
   {
     ircsprintf(buffer, "\"%s\",\"%s\",\"%s\",%lu\n",
@@ -2438,16 +2497,6 @@ write_confitem(KlineType type, struct Client *source_p, char *user, char *host,
 		 me.name, source_p->name, host, filename);
 
     }
-  else if(type == XLINE_TYPE)
-  {
-    sendto_realops_flags(UMODE_ALL, L_ALL,  "%s added X-line for [%s] [%s]",
-                         get_oper_name(source_p), host, reason);
-    ilog(L_TRACE, "%s added X-line for [%s] [%s]",
-         source_p->name, host, reason);
-
-    sendto_one(source_p, ":%s NOTICE %s :Added X-line for [%s] [%s]",
-               me.name, source_p->name, host, reason);
-  }
   else if(type == RESV_TYPE)
   {
     sendto_realops_flags(UMODE_ALL, L_ALL, "%s added RESV for [%s] [%s]",
@@ -2476,10 +2525,6 @@ get_conf_name(KlineType type)
   else if(type == DLINE_TYPE)
   {
     return(ConfigFileEntry.dlinefile);
-  }
-  else if(type == XLINE_TYPE)
-  {
-    return(ConfigFileEntry.xlinefile);
   }
   else if(type == RESV_TYPE)
   {
@@ -2606,23 +2651,6 @@ conf_add_d_conf(struct ConfItem *aconf)
     {
       add_conf_by_address(aconf->host, CONF_DLINE, NULL, aconf);
     }
-}
-
-/*
- * conf_add_x_conf
- * inputs       - pointer to config item
- * output       - NONE
- * side effects - Add a X line
- */
-void 
-conf_add_x_conf(struct ConfItem *aconf)
-{
-  MyFree(aconf->user);
-  aconf->user = NULL;
-  aconf->name = aconf->host;
-  aconf->host = NULL;
-  aconf->next = x_conf;
-  x_conf = aconf;
 }
 
 /* conf_add_u_conf()

@@ -116,7 +116,7 @@ void parse_d_file(FBFILE *file)
 void
 parse_x_file(FBFILE *file)
 {
-  struct ConfItem *aconf;
+  struct xline *xconf;
   char *reason_field = NULL;
   char *host_field = NULL;
   char *port_field = NULL;
@@ -140,10 +140,8 @@ parse_x_file(FBFILE *file)
     if((reason_field = getfield(NULL)) == NULL)
       continue;
 
-    aconf = make_conf();
-    aconf->status = CONF_XLINE;
-    conf_add_fields(aconf, host_field, reason_field, "", port_field, NULL);
-    conf_add_x_conf(aconf);
+    xconf = make_xline(host_field, reason_field, atoi(port_field));
+    dlinkAddAlloc(xconf, &xline_list);
   }
 }
 

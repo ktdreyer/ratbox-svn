@@ -389,6 +389,9 @@ struct ConfItem *leaf_confs;
 struct ConfItem *yy_aconf_next;
 
 struct Class *yy_class = NULL;
+
+static struct xline *yy_xconf = NULL;
+
 char *resv_reason;
 
 char  *class_redirserv_var;
@@ -1765,44 +1768,38 @@ static void	conf_set_exempt_ip(void *data)
 
 static int	conf_begin_gecos(struct TopConf *tc)
 {
-	if(yy_aconf)
-	{
-		free_conf(yy_aconf);
-		yy_aconf = NULL;
-	}
-
-	yy_aconf = make_conf();
-	yy_aconf->status = CONF_XLINE;
-	DupString(yy_aconf->passwd, "No Reason");
+        yy_xconf = make_xline(NULL, "No Reason", 0);
 	return 0;
 }
 
 static int	conf_end_gecos(struct TopConf *tc)
 {
-	if(yy_aconf->host)
-		conf_add_x_conf(yy_aconf);
+	if(!BadPtr(yy_xconf->gecos))
+        {
+		dlinkAddAlloc(yy_xconf, &xline_list);
+        }
 	else
 	{
 		conf_report_error("Ignoring gecos -- invalid gecos::name.");
-		free_conf(yy_aconf);
+                free_xline(yy_xconf);
 	}
 
-	yy_aconf = NULL;
+	yy_xconf = NULL;
 
 	return 0;
 }
 
 static void	conf_set_gecos_name(void *data)
 {
-	MyFree(yy_aconf->host);
-	DupString(yy_aconf->host, data);
-	collapse(yy_aconf->host);
+	MyFree(yy_xconf->gecos);
+	DupString(yy_xconf->gecos, data);
+	collapse(yy_xconf->gecos);
 }
 
 static void	conf_set_gecos_reason(void *data)
 {
-	MyFree(yy_aconf->passwd);
-	DupString(yy_aconf->passwd, data);
+	MyFree(yy_xconf->reason);
+	DupString(yy_xconf->reason, data);
 }
 
 static void	conf_set_gecos_action(void *data)
@@ -1810,11 +1807,11 @@ static void	conf_set_gecos_action(void *data)
 	char *act = data;
 
 	if (strcasecmp(act, "warn") == 0)
-		yy_aconf->port = 0;
+		yy_xconf->type = 0;
 	else if (strcasecmp(act, "reject") == 0)
-		yy_aconf->port = 1;
+		yy_xconf->type = 1;
 	else if (strcasecmp(act, "silent") == 0)
-		yy_aconf->port = 2;
+		yy_xconf->type = 2;
 	else
 		conf_report_error("Warning -- invalid gecos::action.");
 }

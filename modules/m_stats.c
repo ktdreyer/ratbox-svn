@@ -836,20 +836,15 @@ static void stats_servers(struct Client *source_p)
 
 static void stats_gecos(struct Client *source_p)
 {
-  struct ConfItem *aconf;
-  char *name, *host, *pass, *user, *classname;
-  int port;
+  struct xline *xconf;
+  dlink_node *ptr;
 
-  for(aconf = x_conf; aconf != NULL; aconf = aconf->next)
+  DLINK_FOREACH(ptr, xline_list.head)
   {
-    if(aconf->status & CONF_XLINE)
-    {
-      get_printable_conf(aconf, &name, &host, &pass,
-                         &user, &port, &classname);
+    xconf = ptr->data;
 
-      sendto_one(source_p, form_str(RPL_STATSXLINE), me.name,
-                 source_p->name, name, pass);
-    }
+    sendto_one(source_p, form_str(RPL_STATSXLINE),
+               me.name, source_p->name, xconf->gecos, xconf->reason);
   }
 }
 
