@@ -1,3 +1,71 @@
+leeh        2004/11/18 14:37:06 EST	(20041118_3)
+
+  Modified files:
+    doc                  example.conf 
+    help/chanserv        addban adduser cdrop clearallops 
+                         clearbans clearmodes clearops cregister 
+                         delban deluser invite join listbans 
+                         listusers moduser op part register 
+                         suspend unban unsuspend voice 
+    help/jupeserv        jupe unjupe 
+    help/userserv        udrop 
+    include              s_chanserv.h 
+    src                  s_chanserv.c 
+  Added files:
+    help                 genindex.sh 
+    help/alis            index 
+    help/chanserv        csuspend cunsuspend index index-admin 
+    help/jupeserv        index index-admin 
+    help/operbot         index 
+    help/userserv        index index-admin 
+  Log:
+  - added an sh script to generate index files, add added these in.
+  - update helpfiles
+  - added ability to suspend/unsuspend a channel registration
+  
+  Revision  Changes    Path
+  1.14      +6 -0      rserv/doc/example.conf
+  1.1       +1 -0      rserv/help/alis/index (new)
+  1.2       +1 -1      rserv/help/chanserv/addban
+  1.3       +1 -1      rserv/help/chanserv/adduser
+  1.2       +1 -1      rserv/help/chanserv/cdrop
+  1.2       +1 -1      rserv/help/chanserv/clearallops
+  1.2       +1 -1      rserv/help/chanserv/clearbans
+  1.2       +1 -1      rserv/help/chanserv/clearmodes
+  1.2       +1 -1      rserv/help/chanserv/clearops
+  1.2       +1 -1      rserv/help/chanserv/cregister
+  1.1       +3 -0      rserv/help/chanserv/csuspend (new)
+  1.1       +3 -0      rserv/help/chanserv/cunsuspend (new)
+  1.2       +1 -1      rserv/help/chanserv/delban
+  1.3       +1 -1      rserv/help/chanserv/deluser
+  1.1       +20 -0     rserv/help/chanserv/index (new)
+  1.1       +4 -0      rserv/help/chanserv/index-admin (new)
+  1.2       +1 -1      rserv/help/chanserv/invite
+  1.3       +1 -1      rserv/help/chanserv/join
+  1.2       +1 -1      rserv/help/chanserv/listbans
+  1.2       +1 -1      rserv/help/chanserv/listusers
+  1.3       +1 -1      rserv/help/chanserv/moduser
+  1.3       +1 -1      rserv/help/chanserv/op
+  1.3       +1 -1      rserv/help/chanserv/part
+  1.3       +1 -1      rserv/help/chanserv/register
+  1.2       +1 -1      rserv/help/chanserv/suspend
+  1.2       +1 -1      rserv/help/chanserv/unban
+  1.2       +1 -1      rserv/help/chanserv/unsuspend
+  1.3       +1 -1      rserv/help/chanserv/voice
+  1.1       +30 -0     rserv/help/genindex.sh (new)
+  1.1       +3 -0      rserv/help/jupeserv/index (new)
+  1.1       +2 -0      rserv/help/jupeserv/index-admin (new)
+  1.2       +1 -1      rserv/help/jupeserv/jupe
+  1.2       +1 -1      rserv/help/jupeserv/unjupe
+  1.1       +2 -0      rserv/help/operbot/index (new)
+  1.1       +5 -0      rserv/help/userserv/index (new)
+  1.1       +1 -0      rserv/help/userserv/index-admin (new)
+  1.2       +1 -1      rserv/help/userserv/udrop
+  1.13      +2 -0      rserv/include/s_chanserv.h
+  1.15      +104 -0    rserv/src/s_chanserv.c
+
+
+
 leeh        2004/11/18 12:39:55 EST	(20041118_2)
 
   Modified files:
