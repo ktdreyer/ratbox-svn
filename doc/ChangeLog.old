@@ -1,3 +1,7 @@
+*** 20001226_1 by spookey
+ - moved basename() to irc_basename() -- compatability issue with old glibc systems (string.h used to declare basename())
+
+
 *** 20001225_20 by wcampbel
 Updated dependencies
 
