@@ -1,3 +1,7 @@
+*** 20001224_18 by toot
+reworded total recieved connections message.  and fixed it in /stats u
+
+
 *** 20001224_17 by toot
 fixed bug that made the date appear twice when klines where written
 
