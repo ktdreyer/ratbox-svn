@@ -40,7 +40,6 @@
 #include "s_log.h"
 #include "send.h"
 #include "msg.h"
-#include "s_gline.h"
 #include "parse.h"
 #include "modules.h"
 #include "s_serv.h"
@@ -48,43 +47,30 @@
 
 static void mo_unkline(struct Client*, struct Client*, int, char**);
 static void ms_unkline(struct Client*, struct Client*, int, char**);
-static void mo_undline(struct Client*, struct Client*, int, char**);
-static void mo_ungline(struct Client*, struct Client*, int, char**);
 
-struct Message msgtabs[] = {
-  {"UNKLINE", 0, 0, 2, 0, MFLG_SLOW, 0,
-   {m_unregistered, m_not_oper, ms_unkline, mo_unkline}},
-  {"UNDLINE", 0, 0, 2, 0, MFLG_SLOW, 0,
-   {m_unregistered, m_not_oper, m_error, mo_undline}}, 
-  {"UNGLINE", 0, 0, 2, 0, MFLG_SLOW, 0,
-   {m_unregistered, m_not_oper, m_error, mo_ungline}}
+struct Message unkline_msgtab = {
+  "UNKLINE", 0, 0, 2, 0, MFLG_SLOW, 0,
+  {m_unregistered, m_not_oper, ms_unkline, mo_unkline}
 };
 
 #ifndef STATIC_MODULES
 void
 _modinit(void)
 {
-  mod_add_cmd(&msgtabs[0]);
-  mod_add_cmd(&msgtabs[1]);
-  mod_add_cmd(&msgtabs[2]);
+  mod_add_cmd(&unkline_msgtab);
 }
 
 void
 _moddeinit(void)
 {
-  mod_del_cmd(&msgtabs[0]);
-  mod_del_cmd(&msgtabs[1]);
-  mod_del_cmd(&msgtabs[2]);
+  mod_del_cmd(&unkline_msgtab);
 }
 const char *_version = "$Revision$";
 #endif
 
 static void remove_permkline_match(struct Client *, char *, char *, int);
 static int flush_write(struct Client *, FBFILE* , char *, char *);
-
 static int remove_temp_kline(char *, char *);
-static int remove_temp_dline(char *);
-static int remove_temp_gline(char *, char *);
 
 /*
 ** mo_unkline
@@ -460,310 +446,4 @@ remove_temp_kline(char *user, char *host)
 
   return NO;
 }
-
-static dlink_list *tdline_list[] =
-{
-  &tdline_hour,
-  &tdline_day,
-  &tdline_min,
-  &tdline_week,
-  NULL
-};
-
-/* remove_temp_dline()
- *
- * inputs       - hostname to undline
- * outputs      -
- * side effects - tries to undline anything that matches
- */
-static int
-remove_temp_dline(char *host)
-{
-  dlink_list *tdlist;
-  struct ConfItem *aconf;
-  dlink_node *ptr;
-  struct irc_inaddr addr, caddr;
-  int nm_t, cnm_t, bits, cbits;
-  int i;
-
-  nm_t = parse_netmask(host, &addr, &bits);
-
-  for(i = 0; tdline_list[i] != NULL; i++)
-  {
-    tdlist = tdline_list[i];
-
-    DLINK_FOREACH(ptr, tdlist->head)
-    {
-      aconf = ptr->data;
-
-      cnm_t = parse_netmask(aconf->host, &caddr, &cbits);
-
-      if (cnm_t != nm_t)
-	continue;
-
-      if ((nm_t==HM_HOST && !irccmp(aconf->host, host)) ||
-	  (nm_t==HM_IPV4 && bits==cbits && comp_with_mask(&IN_ADDR(addr), &IN_ADDR(caddr), bits))
-#ifdef IPV6
-	  || (nm_t==HM_IPV6 && bits==cbits && comp_with_mask(&IN_ADDR(addr), &IN_ADDR(caddr), bits))
-#endif
-	  )
-	{
-	  dlinkDestroy(ptr, tdlist);
-	  delete_one_address_conf(aconf->host, aconf);
-	  return YES;
-	}
-    }
-  }
-
-  return NO;
-}
-
-/* remove_temp_gline()
- *
- * inputs       - username, hostname to ungline
- * outputs      -
- * side effects - tries to ungline anything that matches
- */
-static int
-remove_temp_gline(char *user, char *host)
-{
-  struct ConfItem *aconf;
-  dlink_node *ptr;
-  struct irc_inaddr addr, caddr;
-  int nm_t, cnm_t, bits, cbits;
-
-  nm_t = parse_netmask(host, &addr, &bits);
-
-  DLINK_FOREACH(ptr, glines.head)
-  {
-    aconf = (struct ConfItem*)ptr->data;
-
-    cnm_t = parse_netmask(aconf->host, &caddr, &cbits);
-
-    if (cnm_t != nm_t || (user && irccmp(user, aconf->user)))
-      continue;
-
-    if ((nm_t==HM_HOST && !irccmp(aconf->host, host)) ||
-	  (nm_t==HM_IPV4 && bits==cbits && comp_with_mask(&IN_ADDR(addr), &IN_ADDR(caddr), bits))
-#ifdef IPV6
-	  || (nm_t==HM_IPV6 && bits==cbits && comp_with_mask(&IN_ADDR(addr), &IN_ADDR(caddr), bits))
-#endif
-	  )
-    {
-      dlinkDestroy(ptr, &glines);
-      delete_one_address_conf(aconf->host, aconf);
-      return YES;
-    }
-  }
-
-  return NO;
-}
-
-/*
-** m_undline
-** added May 28th 2000 by Toby Verrall <toot@melnet.co.uk>
-** based totally on m_unkline
-** added to hybrid-7 7/11/2000 --is
-**
-**      parv[0] = sender nick
-**      parv[1] = dline to remove
-*/
-static void
-mo_undline (struct Client *client_p, struct Client *source_p,
-            int parc,char *parv[])
-{
-  FBFILE* in;
-  FBFILE* out;
-  char  buf[BUFSIZE], buff[BUFSIZE], temppath[BUFSIZE], *p;
-  const char  *filename, *found_cidr;
-  char *cidr;
-  int pairme = NO, error_on_write = NO;
-  mode_t oldumask;
-
-  ircsprintf(temppath, "%s.tmp", ConfigFileEntry.dlinefile);
-
-  if (!IsOperUnkline(source_p))
-    {
-      sendto_one(source_p,":%s NOTICE %s :You need unkline = yes;",me.name,
-		 parv[0]);
-      return;
-    }
-
-  cidr = parv[1];
-
-#if 0
-  if ((type=parse_netmask(cidr,&ip_host,&ip_mask)) == HM_HOST)
-    {
-      sendto_one(source_p, ":%s NOTICE %s :Invalid parameters",
-		 me.name, parv[0]);
-      return;
-    }
-#endif
-
-  if(remove_temp_dline(cidr))
-  {
-    sendto_one(source_p,
-	       ":%s NOTICE %s :Un-dlined [%s] from temporary D-lines",
-	       me.name, parv[0], cidr);
-    sendto_realops_flags(UMODE_ALL, L_ALL,
-                         "%s has removed the temporary D-Line for: [%s]",
-			 get_oper_name(source_p), cidr);
-    ilog(L_NOTICE, "%s removed temporary D-Line for [%s]", parv[0], cidr);
-    return;
-  }
-
-  filename = get_conf_name(DLINE_TYPE);
-
-  if ((in = fbopen(filename, "r")) == 0)
-    {
-      sendto_one(source_p, ":%s NOTICE %s :Cannot open %s",
-		 me.name,parv[0],filename);
-      return;
-    }
-
-  oldumask = umask(0);                  /* ircd is normally too paranoid */
-  if ( (out = fbopen(temppath, "w")) == 0)
-    {
-      sendto_one(source_p, ":%s NOTICE %s :Cannot open %s",
-		 me.name,parv[0],temppath);
-      fbclose(in);
-      umask(oldumask);                  /* Restore the old umask */
-      return;
-    }
-  umask(oldumask);                    /* Restore the old umask */
-
-  while(fbgets(buf, sizeof(buf), in))
-    {
-      strlcpy(buff, buf, sizeof(buff));
-
-      if ((p = strchr(buff,'\n')) != NULL)
-	*p = '\0';
-
-      if ((*buff == '\0') || (*buff == '#'))
-	{
-	  if(!error_on_write)
-	    flush_write(source_p, out, buf, temppath);
-	  continue;
-	}
-
-      if ((found_cidr = getfield(buff)) == NULL)
-	{
-	  if(!error_on_write)
-	    flush_write(source_p, out, buf, temppath);
-	  continue;
-	}
-      
-      if (irccmp(found_cidr,cidr) == 0)
-	{
-	  pairme++;
-	}
-      else
-	{
-	  if(!error_on_write)
-	    flush_write(source_p, out, buf, temppath);
-	  continue;
-	}
-
-    }
-
-  fbclose(in);
-  fbclose(out);
-
-  if (!error_on_write)
-    {
-
-      (void)rename(temppath, filename);
-      rehash(0);
-    }
-  else
-    {
-      sendto_one(source_p,
-		 ":%s NOTICE %s :Couldn't write D-line file, aborted",
-		 me.name, parv[0]);
-      return;
-    }
-
-  if (!pairme)
-    {
-      sendto_one(source_p, ":%s NOTICE %s :No D-Line for %s", me.name,
-		 parv[0],cidr);
-      return;
-    }
-
-  sendto_one(source_p, ":%s NOTICE %s :D-Line for [%s] is removed",
-	     me.name, parv[0], cidr);
-  sendto_realops_flags(UMODE_ALL, L_ALL, "%s has removed the D-Line for: [%s]",
-		       get_oper_name(source_p), cidr);
-  ilog(L_NOTICE, "%s removed D-Line for [%s]", get_oper_name(source_p),
-       cidr);
-}
-
-/* m_ungline()
- *
- * added May 29th 2000 by Toby Verrall <toot@melnet.co.uk>
- * added to hybrid-7 7/11/2000 --is
- *
- *      parv[0] = sender nick
- *      parv[1] = gline to remove
- */
-
-static void mo_ungline(struct Client *client_p, struct Client *source_p,
-                      int parc,char *parv[])
-{
-  char  *user,*host;
-  char splat[] = "*";
-  if (!ConfigFileEntry.glines)
-    {
-      sendto_one(source_p,":%s NOTICE %s :UNGLINE disabled",me.name,parv[0]);
-      return;
-    }
-
-  if (!IsOperUnkline(source_p) || !IsOperGline(source_p))
-    {
-      sendto_one(source_p,":%s NOTICE %s :You need unkline = yes;",
-                 me.name,parv[0]);
-      return;
-    }
-
-  if ( (host = strchr(parv[1], '@')) || *parv[1] == '*' )
-    {
-      /* Explicit user@host mask given */
-
-      if(host)                  /* Found user@host */
-        {
-          user = parv[1];       /* here is user part */
-          *(host++) = '\0';     /* and now here is host */
-        }
-      else
-        {
-          user = splat;           /* no @ found, assume its *@somehost */
-          host = parv[1];
-        }
-    }
-  else
-    {
-      sendto_one(source_p, ":%s NOTICE %s :Invalid parameters",
-                 me.name, parv[0]);
-      return;
-    }
-
-  if(remove_temp_gline(user, host))
-    {
-      sendto_one(source_p, ":%s NOTICE %s :Un-glined [%s@%s]",
-                 me.name, parv[0],user, host);
-      sendto_realops_flags(UMODE_ALL, L_ALL,
-			   "%s has removed the G-Line for: [%s@%s]",
-			   get_oper_name(source_p), user, host );
-      ilog(L_NOTICE, "%s removed G-Line for [%s@%s]",
-          get_oper_name(source_p), user, host);
-      return;
-    }
-  else
-    {
-      sendto_one(source_p, ":%s NOTICE %s :No G-Line for %s@%s",
-                 me.name, parv[0],user,host);
-      return;
-    }
-}
-
 
