@@ -1,3 +1,10 @@
+*** 20001205_6 by db
+- committed Jeremy Chadwicks (best.net) m_set table driven code
+- sprinkled some asserts into linebuf.c
+- fixed typo in m_admin.c
+
+
+
 *** 20001205_5 by db
 - cleaned up class.c adding more comment blocks
 - cleaned up s_conf.c to actually use nice defines instead of cryptic #'s
