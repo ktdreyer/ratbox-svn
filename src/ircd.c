@@ -323,7 +323,7 @@ set_time(void)
 static void
 io_loop(void)
 {
-  int empty_cycles=0, st=0, delay;
+  unsigned long empty_cycles=0, st=0, delay;
   while (ServerRunning)
     {
       /* Run pending events, then get the number of seconds to the next
@@ -335,16 +335,22 @@ io_loop(void)
 	eventRun();
   
       /* Check on the last activity, sleep for up to 1/2s if we are idle... */
+      fprintf(stderr, "Empty cycles: %d callbacks_called: %d\n", empty_cycles, callbacks_called);
+
       if (callbacks_called > 0)
 	empty_cycles = 0;
+      else
+        empty_cycles++;
   
       /* Reset the callback counter... */
       callbacks_called = 0;
+      st = (empty_cycles+1) * 15000;
+      if(st > 250000)
+      	st = 250000;
       
-      if (empty_cycles++ > 10)
-	comm_select((st=((empty_cycles-10)*10)>500 ? 500 : st));
-      else
-	comm_select(0);
+      usleep(st);
+
+      comm_select(0);
   
       /*
        * Check to see whether we have to rehash the configuration ..
