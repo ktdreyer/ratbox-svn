@@ -1,3 +1,15 @@
+androsyn    2002/05/16 06:15:47 EDT	(20020516_2)
+
+  Modified files:
+    src                  channel.c 
+  Log:
+  Go awayy stupid #endif
+  
+  Revision  Changes    Path
+  7.314     +0 -1      ircd-hybrid-7/src/channel.c
+
+
+
 androsyn    2002/05/16 02:17:43 EDT	(20020516_1)
 
   Modified files:
