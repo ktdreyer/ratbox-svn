@@ -100,7 +100,7 @@ slog(struct client *service_p, int loglevel, const char *format, ...)
 	vsnprintf(buf, sizeof(buf), format, args);
 	va_end(args);
 
-	if(ServiceWallopAdm(service_p))
+	if(loglevel == 1 && ServiceWallopAdm(service_p))
 	{
 		sendto_server(":%s WALLOPS :%s: %s\n",
 				MYNAME, service_p->name, buf);
