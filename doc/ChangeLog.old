@@ -1,3 +1,9 @@
+*** 20000111_9 by db
+- changes to bring it into line with Kev's sample conf just a tiny bit
+- removed that dumb ';' at end of sections
+
+
+
 *** 20000111_8 by db
 - tiny cleanup to Makefile
   Copyright notice fixed 
