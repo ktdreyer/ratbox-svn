@@ -1,3 +1,7 @@
+*** 20001220_3 by cosine
+connect timeout problem fixed
+
+
 *** 20001220_2 by db
 - fixed convertconf to bring it in line with current conf file format
   it does a reasonable first pass job, though you still might need to
