@@ -1,3 +1,9 @@
+*** 20000111_8 by db
+- tiny cleanup to Makefile
+  Copyright notice fixed 
+
+
+
 *** 20000111_7 by db
 - added preliminary yacc/lex test parser code
 
