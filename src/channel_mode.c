@@ -808,7 +808,7 @@ chm_ban(struct Client *client_p, struct Client *source_p,
   /* if we're adding a NEW id */
   if (dir == MODE_ADD) 
   {
-    if(!add_id(source_p, chptr, mask, CHFL_BAN))
+    if(!add_id(source_p, chptr, mask, CHFL_BAN) && MyClient(source_p))
        return;
        
     mode_changes[mode_count].letter = c;
@@ -904,7 +904,7 @@ chm_except(struct Client *client_p, struct Client *source_p,
   /* If we're adding a NEW id */
   if (dir == MODE_ADD)
   {
-    if(!add_id(source_p, chptr, mask, CHFL_EXCEPTION))
+    if(!add_id(source_p, chptr, mask, CHFL_EXCEPTION) && MyClient(source_p))
       return;
     mode_changes[mode_count].letter = c;
     mode_changes[mode_count].dir = MODE_ADD;
@@ -1003,7 +1003,7 @@ chm_invex(struct Client *client_p, struct Client *source_p,
 
   if(dir == MODE_ADD)
   {
-    if(!add_id(source_p, chptr, mask, CHFL_INVEX))
+    if(!add_id(source_p, chptr, mask, CHFL_INVEX) && MyClient(source_p))
        return;
 
     mode_changes[mode_count].letter = c;
