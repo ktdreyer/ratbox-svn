@@ -40,7 +40,7 @@
 
 struct Message list_msgtab = {
   MSG_LIST, 0, 0, MFLG_SLOW, 0,
-  {m_unregistered, m_list, m_ignore, m_list}
+  {m_unregistered, m_list, ms_list, m_list}
 };
 
 void

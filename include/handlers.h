@@ -199,6 +199,7 @@ extern int ms_kick(struct Client*, struct Client*, int, char**);
 extern int ms_kill(struct Client*, struct Client*, int, char**);
 extern int ms_kline(struct Client *,struct Client *,int,char **);
 extern int ms_links(struct Client*, struct Client*, int, char**);
+extern int ms_list(struct Client*, struct Client*, int, char**);
 extern int ms_lljoin(struct Client *,struct Client *,int,char **);
 extern int ms_lusers(struct Client*, struct Client*, int, char**);
 extern int ms_mode(struct Client*, struct Client*, int, char**);
