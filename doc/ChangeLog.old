@@ -1,3 +1,9 @@
+*** 20001128_1 by db
+- synced in CIDR.txt doc from hybrid-6 tree
+  gah! I am looking forward to the death of the h6 tree. it sucks.
+
+
+
 *** 20001127_11 by db
 - fixed reference to version in module, its a **char pointer. 
 
