@@ -292,6 +292,8 @@ void	newconf_init()
 	add_conf_item("operator", "admin", CF_YESNO, conf_set_oper_admin);
 	add_conf_item("operator", "rsa_public_key_file", CF_QSTRING,
 			conf_set_oper_rsa_public_key_file);
+	add_conf_item("operator", "flags", CF_STRING | CF_FLIST,
+			conf_set_oper_flags);
 
 	add_top_conf("class", conf_begin_class, conf_end_class);
 	add_conf_item("class", "name", CF_QSTRING, conf_set_class_name);
@@ -776,6 +778,88 @@ char *resv_reason;
 char  *class_redirserv_var;
 int   class_redirport_var;
 
+struct mode_table
+{
+	char *	name;
+	int	mode;
+};
+
+struct mode_table umode_table[] = {
+	{"bots",	FLAGS_BOTS},
+	{"cconn",	FLAGS_CCONN},
+	{"debug",	FLAGS_DEBUG},
+	{"full",	FLAGS_FULL},
+	{"callerid",	FLAGS_CALLERID},
+	{"invisible",	FLAGS_INVISIBLE},
+	{"skill",	FLAGS_SKILL},
+	{"locops",	FLAGS_LOCOPS},
+	{"nchange",	FLAGS_NCHANGE},
+	{"rej",		FLAGS_REJ},
+	{"servnotice",	FLAGS_SERVNOTICE},
+	{"unauth",	FLAGS_UNAUTH},
+	{"wallop",	FLAGS_WALLOP},
+	{"external",	FLAGS_EXTERNAL},
+	{"spy",		FLAGS_SPY},
+	{"operwall",	FLAGS_OPERWALL},
+	{NULL}
+};
+
+struct mode_table flag_table[] = {
+	{"global_kill",		CONF_OPER_GLOBAL_KILL},
+	{"remote",		CONF_OPER_REMOTE},
+	{"kline",		CONF_OPER_K},
+	{"unkline",		CONF_OPER_UNKLINE},
+	{"gline",		CONF_OPER_GLINE},
+	{"nick_changes",	CONF_OPER_N},
+	{"rehash",		CONF_OPER_REHASH},
+	{"die",			CONF_OPER_DIE},
+	{"admin",		CONF_OPER_ADMIN},
+	{"xline",		CONF_OPER_XLINE},
+	{NULL}
+};
+
+
+static
+int	find_umode(struct mode_table* tab, char *name)
+{
+	int i;
+
+	for (i = 0; tab[i].name; i++)
+	{
+		if (strcmp(tab[i].name, name) == 0)
+			return tab[i].mode;
+	}
+
+	return 0;
+}
+
+static
+void	set_modes_from_table(	int *modes, char *whatis,
+				struct mode_table *tab, conf_parm_t *args)
+{
+	for (; args; args = args->next)
+	{
+		int mode; 
+
+		if ((args->type & CF_MTYPE) != CF_STRING)
+		{
+			conf_report_error("Warning -- %s is not a string; ignoring.",
+						whatis);
+			continue;
+		}
+
+		mode = find_umode(tab, args->v.string);
+
+		if (!mode)
+		{
+			conf_report_error("Warning -- unknown %s %s.",
+					whatis, args->v.string);
+			continue;
+		}
+
+		*modes |= mode;
+	}
+}
 
 int	conf_begin_oper(struct TopConf* tc)
 {
@@ -858,6 +942,13 @@ int	conf_end_oper(struct TopConf* tc)
 	yy_acount = 0;
 
 	return 0;
+}
+
+void	conf_set_oper_flags(void *data)
+{
+	conf_parm_t *args = data;
+
+	set_modes_from_table(&yy_achead->port, "flag", flag_table, args);
 }
 
 void	conf_set_oper_name(void *data)
@@ -2336,78 +2427,16 @@ void	conf_set_general_throttle_time(void *data)
 	ConfigFileEntry.throttle_time = *(unsigned int*)data;
 }
 
-static struct
-{
-	char *	name;
-	int	mode;
-} umode_table[] = {
-	{"bots",	FLAGS_BOTS},
-	{"cconn",	FLAGS_CCONN},
-	{"debug",	FLAGS_DEBUG},
-	{"full",	FLAGS_FULL},
-	{"callerid",	FLAGS_CALLERID},
-	{"invisible",	FLAGS_INVISIBLE},
-	{"skill",	FLAGS_SKILL},
-	{"locops",	FLAGS_LOCOPS},
-	{"nchange",	FLAGS_NCHANGE},
-	{"rej",		FLAGS_REJ},
-	{"servnotice",	FLAGS_SERVNOTICE},
-	{"unauth",	FLAGS_UNAUTH},
-	{"wallop",	FLAGS_WALLOP},
-	{"external",	FLAGS_EXTERNAL},
-	{"spy",		FLAGS_SPY},
-	{"operwall",	FLAGS_OPERWALL},
-	{NULL}
-};
-
-static
-int	find_umode(char *name)
-{
-	int i;
-
-	for (i = 0; umode_table[i].name; i++)
-	{
-		if (strcmp(umode_table[i].name, name) == 0)
-			return umode_table[i].mode;
-	}
-
-	return 0;
-}
-
-static
-void	set_modes_from_table(int *modes, conf_parm_t *args)
-{
-	for (; args; args = args->next)
-	{
-		int mode; 
-
-		if ((args->type & CF_MTYPE) != CF_STRING)
-		{
-			conf_report_error("Warning -- umode is not a string; ignoring.");
-			continue;
-		}
-
-		mode = find_umode(args->v.string);
-
-		if (!mode)
-		{
-			conf_report_error("Warning -- unknown umode %s.",
-					args->v.string);
-			continue;
-		}
-
-		*modes |= mode;
-	}
-}
-
 void	conf_set_general_oper_umodes(void *data)
 {
-	set_modes_from_table(&ConfigFileEntry.oper_umodes, data);
+	set_modes_from_table(&ConfigFileEntry.oper_umodes, "umode", 
+				umode_table, data);
 }
 
 void	conf_set_general_oper_only_umodes(void *data)
 {
-	set_modes_from_table(&ConfigFileEntry.oper_only_umodes, data);
+	set_modes_from_table(&ConfigFileEntry.oper_only_umodes, "umode", 
+				umode_table, data);
 }
 
 void	conf_set_general_min_nonwildcard(void *data)
