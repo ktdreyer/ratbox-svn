@@ -98,7 +98,7 @@ static int m_whois(struct Client *cptr,
   if(parc > 2)
     {
       /* seeing as this is going across servers, we should limit it */
-      if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
+      if((last_used + ConfigFileEntry.whois_wait) > CurrentTime)
         {             
           if(MyClient(sptr))
             sendto_one(sptr,form_str(RPL_LOAD2HI),me.name,sptr->name);
