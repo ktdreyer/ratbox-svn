@@ -1,3 +1,7 @@
+*** 20010812_5 by androsyn
+Make sure the garbage collector doesn't remove the root block.
+
+
 *** 20010812_4 by androsyn
 Okay..second attempt at this commit..
 
