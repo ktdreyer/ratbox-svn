@@ -1,3 +1,7 @@
+*** 20010127_10 by davidt
+Prevent local users creating fake vchans...
+
+
 *** 20010127_9 by fl_
 - configfileentry -> servinfo
 
