@@ -1227,24 +1227,13 @@ lookup_confhost(struct ConfItem *aconf)
 	 ** Do name lookup now on hostnames given and store the
 	 ** ip numbers in conf structure.
 	 */
-#ifdef IPV6
-	if(strchr(aconf->host, ':') != NULL)
-	{
-		if(inetpton(AF_INET6, aconf->host, &((struct sockaddr_in6 *)&aconf->ipnum)->sin6_addr) > 0)
-		{
-			return;
-		}
-	}
-#endif
-	if(strchr(aconf->host, '.') != NULL)
-	{
-		if(inetpton(AF_INET, aconf->host, &((struct sockaddr_in *)&aconf->ipnum)->sin_addr) > 0)
-		{
-			return;
-		}
-	}
-	conf_dns_lookup(aconf);
 
+	if(inetpton_sock(aconf->host, &aconf->ipnum) > 0)
+	{
+		return;
+	}
+
+	conf_dns_lookup(aconf);
 }
 
 /*
