@@ -74,7 +74,6 @@ static void ms_pong(struct Client *client_p,
 
   origin = parv[1];
   destination = parv[2];
-  client_p->flags &= ~FLAGS_PINGSENT;
   source_p->flags &= ~FLAGS_PINGSENT;
 
   /* Now attempt to route the PONG, comstud pointed out routable PING
