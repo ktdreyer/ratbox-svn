@@ -91,7 +91,6 @@ struct Capability captab[] = {
 	{ "EX",		CAP_EX },
 	{ "CHW",	CAP_CHW},
 	{ "IE", 	CAP_IE},
-	{ "EOB",	CAP_EOB},
 	{ "KLN",	CAP_KLN},
 	{ "GLN",	CAP_GLN},
 	{ "KNOCK",	CAP_KNOCK},
@@ -1220,9 +1219,6 @@ server_estab(struct Client *client_p)
 	else
 		burst_TS5(client_p);
 		
-	if(IsCapable(client_p, CAP_EOB))
-		sendto_one(client_p, ":%s EOB", get_id(&me, client_p));
-
 	/* Always send a PING after connect burst is done */
 	sendto_one(client_p, "PING :%s", get_id(&me, client_p));
 
