@@ -115,8 +115,7 @@ char host[HOSTLEN+2];
  * output	-
  * side effects - D line is added
  *
- */
-int mo_kline(struct Client *cptr,
+ */int mo_kline(struct Client *cptr,
                 struct Client *sptr,
                 int parc,
                 char *parv[])
@@ -144,11 +143,6 @@ int mo_kline(struct Client *cptr,
 		 me.name, parv[0], "KLINE");
       return 0;
     }
-
-  /* XXX This becomes either a loadble .so option or a Config option */
-#ifdef SLAVE_SERVERS
-  sendto_slaves(NULL,"KLINE",sptr->name,parc,parv);
-#endif
 
   argv = parv[1];
 
@@ -240,6 +234,8 @@ int mo_kline(struct Client *cptr,
     }
   else
     add_mtrie_conf_entry(aconf,CONF_KILL);
+
+  /* XXX send KLINE goes here */
 
   sendto_realops("%s added K-Line for [%s@%s] [%s]",
     sptr->name,
@@ -711,48 +707,36 @@ void WriteKline(const char *filename, struct Client *sptr,
 		const char *when)
 {
   char buffer[1024];
-  int out;
+  FBFILE *out;
 
-  if (!filename)
-    return;
+  if (filename == NULL)
+    {
+      sendto_realops("*** No kline file!");
+      return;
+    }
 
-  if ((out = file_open(filename, O_RDWR|O_APPEND|O_CREAT, 0644)) == (-1))
-  {
-    sendto_realops("Error opening %s: %s",
-      filename,
-      strerror(errno));
-    return;
-  }
+  if ((out = fbopen(filename, "a")) == NULL)
+    {
+      sendto_realops("Error opening %s: %s",
+		     filename,
+		     strerror(errno));
+      return;
+    }
 
-#ifdef SLAVE_SERVERS
-  if (IsServer(sptr))
-  {
-    if (rcptr)
-      ircsprintf(buffer,
-        "#%s!%s@%s from %s K'd: %s@%s:%s\n",
-        rcptr->name,
-        rcptr->username,
-        rcptr->host,
-        sptr->name,
-        user,
-        host,
-        reason);
-  }
-  else
-#endif /* SLAVE_SERVERS */
-  {
-    ircsprintf(buffer,
-      "#%s!%s@%s K'd: %s@%s:%s\n",
-      sptr->name,
-      sptr->username,
-      sptr->host,
-      user,
-      host,
-      reason);
-  }
+  ircsprintf(buffer,
+	     "#%s!%s@%s K'd: %s@%s:%s\n",
+	     sptr->name,
+	     sptr->username,
+	     sptr->host,
+	     user,
+	     host,
+	     reason);
 
-  if (safe_write(sptr, filename, out, buffer) == (-1))
-    return;
+  if (safe_write(sptr, filename, out, buffer) <= 0)
+    {
+      fbclose(out);
+      return;
+    }
 
   ircsprintf(buffer, "K:%s:%s (%s):%s\n",
     host,
@@ -760,10 +744,13 @@ void WriteKline(const char *filename, struct Client *sptr,
     when,
     user);
 
-  if (safe_write(sptr, filename, out, buffer) == (-1))
-    return;
+  if (safe_write(sptr, filename, out, buffer) < 0)
+    {
+      fbclose(out);
+      return;
+    }
 
-  file_close(out);
+  fbclose(out);
 } /* WriteKline() */
 
 /*
@@ -781,40 +768,46 @@ void WriteDline(const char *filename, struct Client *sptr,
 		const char *host, const char *reason, const char *when)
 {
   char buffer[1024];
-  int out;
+  FBFILE *out;
 
-  if (!filename)
-    return;
+  if (filename == NULL)
+    {
+      sendto_realops("*** No kline file!");
+      return;
+    }
 
-  if ((out = file_open(filename, O_RDWR|O_APPEND|O_CREAT, 0644)) == (-1))
-  {
-    sendto_realops("Error opening %s: %s",
-      filename,
-      strerror(errno));
-    return;
-  }
+  if ((out = fbopen(filename, "a")) == NULL)
+    {
+      sendto_realops("Error opening %s: %s",
+		     filename,
+		     strerror(errno));
+      return;
+    }
 
   ircsprintf(buffer,
-    "#%s!%s@%s D'd: %s:%s (%s)\n",
-    sptr->name,
-    sptr->username,
-    sptr->host,
-    host,
-    reason,
-    when);
+	     "#%s!%s@%s D'd: %s:%s (%s)\n",
+	     sptr->name,
+	     sptr->username,
+	     sptr->host,
+	     host,
+	     reason,
+	     when);
 
-  if (safe_write(sptr, filename, out, buffer) == (-1))
+  if (safe_write(sptr, filename, out, buffer) < 0)
     return;
 
   ircsprintf(buffer, "D:%s:%s (%s)\n",
-    host,
-    reason,
-    when);
+	     host,
+	     reason,
+	     when);
 
-  if (safe_write(sptr, filename, out, buffer) == (-1))
-    return;
+  if (safe_write(sptr, filename, out, buffer) < 0)
+    {
+      fbclose(out);
+      return;
+    }
 
-  file_close(out);
+  fbclose(out);
 } /* WriteDline() */
 
 

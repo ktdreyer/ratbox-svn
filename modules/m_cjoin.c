@@ -78,7 +78,8 @@ int     m_cjoin(struct Client *cptr,
   char  *name;
   char  vchan_name[CHANNELLEN];
   char  *p = NULL;
-  
+  dlink_node *m;
+
   if (!(sptr->user))
     {
       /* something is *fucked* - bail */
@@ -163,9 +164,6 @@ int     m_cjoin(struct Client *cptr,
    * Following to be added 
    *
    * 1. detect if channel already exist (remote chance)
-   * 2. detect if new channel name exceeds channel name length
-   *    (for initial debugging don't worry about it )
-   * - Dianora
    */
 
   if (strlen(name) > CHANNELLEN-15)
@@ -192,14 +190,9 @@ int     m_cjoin(struct Client *cptr,
       return 0;
     }
 
-  if (chptr->next_vchan)
-    {
-      vchan_chptr->next_vchan = chptr->next_vchan;
-      chptr->next_vchan->prev_vchan = vchan_chptr;
-    }
-
-  chptr->next_vchan = vchan_chptr;
-  vchan_chptr->prev_vchan = chptr;
+  m = make_dlink_node();
+  m->data = chptr;
+  dlinkAdd(vchan_chptr, m, &chptr->vchan_list);
 
   /*
   **  Complete user entry to the new channel

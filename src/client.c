@@ -321,23 +321,6 @@ check_pings(void *notused)
             }
         }
 
-#ifdef REJECT_HOLD
-      if (IsRejectHeld(cptr))
-        {
-          if( CurrentTime > (cptr->firsttime + REJECT_HOLD_TIME) )
-            {
-              if( reject_held_fds )
-                reject_held_fds--;
-
-              dying_clients[die_index].client = cptr;
-              dying_clients[die_index].fake_kill = 0;
-              dying_clients[die_index++].reason = "reject held client";
-              dying_clients[die_index].client = (struct Client *)NULL;
-              continue;         /* and go examine next fd/cptr */
-            }
-        }
-#endif
-
       if (!IsRegistered(cptr))
         ping = CONNECTTIMEOUT;
       else
@@ -631,23 +614,6 @@ void check_klines(void)
               continue;         /* and go examine next fd/cptr */
             }
         }
-
-#ifdef REJECT_HOLD
-      if (IsRejectHeld(cptr))
-        {
-          if( CurrentTime > (cptr->firsttime + REJECT_HOLD_TIME) )
-            {
-              if( reject_held_fds )
-                reject_held_fds--;
-
-              dying_clients[die_index].client = cptr;
-              dying_clients[die_index].fake_kill = 0;
-              dying_clients[die_index++].reason = "reject held client";
-              dying_clients[die_index].client = (struct Client *)NULL;
-              continue;         /* and go examine next fd/cptr */
-            }
-        }
-#endif
 
     }
 

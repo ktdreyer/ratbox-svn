@@ -23,8 +23,6 @@ struct DBuf;
 extern void send_queued_write(int fd, void *data);
 
 extern  void send_operwall(struct Client *,char *,...);
-extern  int sendto_slaves(struct Client *, char *, char *, int, char **);
-
 extern  void sendto_one(struct Client *, const char *, ...);
 extern  void sendto_channel_butone(struct Client *, struct Client *, 
                                    struct Channel *, const char *, ...);

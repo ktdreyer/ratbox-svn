@@ -43,6 +43,7 @@
 #include "send.h"
 #include "m_gline.h"
 #include "s_debug.h"
+#include "fileio.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -417,40 +418,26 @@ int check_client(struct Client *cptr, struct Client *sptr, char *username)
       break;
 
     case NOT_AUTHORIZED:
-
-#ifdef REJECT_HOLD
-      /* Slow down the reconnectors who are rejected */
-      if( (reject_held_fds != REJECT_HELD_MAX ) )
-	{
-	  SetRejectHold(cptr);
-	  reject_held_fds++;
-	  release_client_dns_reply(cptr);
-	  return 0;
-	}
-      else
-#endif
-	{
-	  ServerStats->is_ref++;
-	  /* jdc - lists server name & port connections are on */
-	  /*       a purely cosmetical change */
-	  sendto_realops_flags(FLAGS_CCONN,
-			       "%s from %s [%s] on [%s/%u].",
-			       "Unauthorized client connection",
-			       get_client_host(sptr),
-			       inetntoa((char *)&sptr->localClient->ip),
-			       sptr->localClient->listener->name,
-			       sptr->localClient->listener->port
-			       );
-	  log(L_INFO,
-	      "Unauthorized client connection from %s on [%s/%u].",
-	      get_client_host(sptr),
-	      sptr->localClient->listener->name,
-	      sptr->localClient->listener->port
-	      );
+      ServerStats->is_ref++;
+      /* jdc - lists server name & port connections are on */
+      /*       a purely cosmetical change */
+      sendto_realops_flags(FLAGS_CCONN,
+			   "%s from %s [%s] on [%s/%u].",
+			   "Unauthorized client connection",
+			   get_client_host(sptr),
+			   inetntoa((char *)&sptr->localClient->ip),
+			   sptr->localClient->listener->name,
+			   sptr->localClient->listener->port
+			   );
+      log(L_INFO,
+	  "Unauthorized client connection from %s on [%s/%u].",
+	  get_client_host(sptr),
+	  sptr->localClient->listener->name,
+	  sptr->localClient->listener->port
+	  );
 	  
-	  return exit_client(cptr, sptr, &me,
-			     "You are not authorized to use this server");
-	}
+      return exit_client(cptr, sptr, &me,
+			 "You are not authorized to use this server");
       break;
 
     case BANNED_CLIENT:
@@ -1055,19 +1042,10 @@ int attach_conf(struct Client *cptr,struct ConfItem *aconf)
       return -1;
     }
 
-  /* If OLD_Y_LIMIT is defined the code goes back to the old way
-   * I lines used to work, i.e. number of clients per I line
-   * not total in Y
-   */
-#ifdef OLD_Y_LIMIT
-  if ((aconf->status & (CONF_LOCOP | CONF_OPERATOR | CONF_CLIENT)) &&
-    aconf->clients >= ConfMaxLinks(aconf) && ConfMaxLinks(aconf) > 0)
-#else
   if ( (aconf->status & (CONF_LOCOP | CONF_OPERATOR ) ) == 0 )
     {
       if ((aconf->status & CONF_CLIENT) &&
           ConfLinks(aconf) >= ConfMaxLinks(aconf) && ConfMaxLinks(aconf) > 0)
-#endif
         {
           if (!IsConfFlined(aconf))
             {
@@ -1082,9 +1060,7 @@ int attach_conf(struct Client *cptr,struct ConfItem *aconf)
             }
 
         }
-#ifndef OLD_Y_LIMIT
     }
-#endif
 
   lp = make_dlink_node();
 
@@ -2677,12 +2653,11 @@ static void flush_deleted_I_P(void)
  *
  * inputs       - kline or dline type flag
  *              - client pointer to report to
- *              - server pointer to relay onto
  *              - user name of target
  *              - host name of target
  *              - reason for target
  *              - current tiny date string
- * output       - -1 if error on write, 0 if ok
+ * output       - NONE
  * side effects - This function takes care of
  *                finding right kline or dline conf file, writing
  *                the right lines to this file, 
@@ -2690,79 +2665,56 @@ static void flush_deleted_I_P(void)
  *                notifying the opers on the server about the k/d line
  *                forwarding the kline onto the next U lined server
  *                
- * Bugs         - This function is still doing too much
  */
-
 void write_kline_or_dline_to_conf_and_notice_opers(
                                                    KlineType type,
                                                    struct Client *sptr,
-                                                   struct Client *rcptr,
                                                    char *user,
                                                    char *host,
                                                    char *reason,
                                                    char *current_date)
   {
   char buffer[1024];
-  int out;
+  FBFILE *out;
   const char *filename;         /* filename to use for kline */
 
   filename = get_conf_name(type);
 
-#ifdef SLAVE_SERVERS
-  if(!IsServer(sptr))
-#endif
+  if(type == DLINE_TYPE)
     {
-      if(type == DLINE_TYPE)
-        {
-          sendto_realops("%s added D-Line for [%s] [%s]",
-                         sptr->name, host, reason);
-          sendto_one(sptr, ":%s NOTICE %s :Added D-Line [%s] to %s",
-                     me.name, sptr->name, host, filename);
-        }
-      else
-        {
-          sendto_realops("%s added K-Line for [%s@%s] [%s]",
-                         sptr->name, user, host, reason);
-          sendto_one(sptr, ":%s NOTICE %s :Added K-Line [%s@%s] to %s",
-                     me.name, sptr->name, user, host, filename);
-        }
+      sendto_realops("%s added D-Line for [%s] [%s]",
+		     sptr->name, host, reason);
+      sendto_one(sptr, ":%s NOTICE %s :Added D-Line [%s] to %s",
+		 me.name, sptr->name, host, filename);
+    }
+  else
+    {
+      sendto_realops("%s added K-Line for [%s@%s] [%s]",
+		     sptr->name, user, host, reason);
+      sendto_one(sptr, ":%s NOTICE %s :Added K-Line [%s@%s] to %s",
+		 me.name, sptr->name, user, host, filename);
     }
 
-  if ((out = file_open(filename, O_RDWR|O_APPEND|O_CREAT,0644))==-1)
+  if ( (out = fbopen(filename, "a")) == NULL )
     {
-      sendto_realops("Problem opening %s ", filename);
+      sendto_realops("*** Problem opening %s ", filename);
       return;
     }
 
-#ifdef SEPARATE_QUOTE_KLINES_BY_DATE
-  fchmod(out, 0660);
-#endif
-
-#ifdef SLAVE_SERVERS
-  if(IsServer(sptr))
-    {
-      if((type==KLINE_TYPE) && rcptr)
-        ircsprintf(buffer, "#%s!%s@%s from %s K'd: %s@%s:%s\n",
-                   rcptr->name, rcptr->username, rcptr->host,
-                   sptr->name,
-                   user, host, reason);
-    }
+  if(type==KLINE_TYPE)
+    ircsprintf(buffer, "#%s!%s@%s K'd: %s@%s:%s\n",
+	       sptr->name, sptr->username, sptr->host,
+	       user, host, reason);
   else
-#endif
-    {
-      if(type==KLINE_TYPE)
-        ircsprintf(buffer, "#%s!%s@%s K'd: %s@%s:%s\n",
-                   sptr->name, sptr->username, sptr->host,
-                   user, host, reason);
-      else
-        ircsprintf(buffer, "#%s!%s@%s D'd: %s:%s\n",
-                   sptr->name, sptr->username, sptr->host,
-                   host, reason);
-    }
+    ircsprintf(buffer, "#%s!%s@%s D'd: %s:%s\n",
+	       sptr->name, sptr->username, sptr->host,
+	       host, reason);
   
-  /* No need to file_close() if this fails, safe_write() does it -- adrian */
-  if (safe_write(sptr,filename,out,buffer))
-    return;
+  if (safe_write(sptr,filename,out,buffer) < 0)
+    {
+      fbclose(out);
+      return;
+    }
 
   if(type==KLINE_TYPE)
     ircsprintf(buffer, "K:%s:%s (%s):%s\n",
@@ -2777,10 +2729,13 @@ void write_kline_or_dline_to_conf_and_notice_opers(
                current_date);
 
 
-  if (safe_write(sptr,filename,out,buffer))
-    return;
+  if (safe_write(sptr,filename,out,buffer) < 0)
+    {
+      fbclose(out);
+      return;
+    }
       
-  file_close(out);
+  fbclose(out);
 
   if(type==KLINE_TYPE)
     log(L_TRACE, "%s added K-Line for [%s@%s] [%s]",
@@ -2790,37 +2745,12 @@ void write_kline_or_dline_to_conf_and_notice_opers(
            sptr->name, host, reason);
 }
 
-/*
- * safe_write - write string to file, if an error occurs close the file
- * and notify opers
- *
- * inputs       - client pointer
- *              - filename to write to
- *              - open fd to write on
- *              - buffer to write
- * output       - -1 if error on write, 0 if ok
- * side effects - function tries to write buffer safely
- *                i.e. checking for disk full errors etc.
- */
-       
-int safe_write(struct Client *sptr, const char *filename, int out, char *buffer)
-{
-  if (write(out, buffer, strlen(buffer)) <= 0)
-    {
-      sendto_realops("*** Problem writing to %s",filename);
-      file_close(out);
-      return -1;
-    }
-  return 0;
-}
-
 /* get_conf_name
  *
  * inputs       - type of conf file to return name of file for
  * output       - pointer to filename for type of conf
  * side effects - none
  */
-
 const char *
 get_conf_name(KlineType type)
 {
@@ -2835,7 +2765,6 @@ get_conf_name(KlineType type)
 
   return(ConfigFileEntry.dlinefile);
 }
-
 
 /*
  * conf_add_hub_or_leaf

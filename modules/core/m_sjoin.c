@@ -106,6 +106,7 @@ int     ms_sjoin(struct Client *cptr,
   char    *t = sjbuf;
   char    *p;
   int hide_or_not;
+  dlink_node *m;
 
   if(GlobalSetOptions.hide_chanops)
     hide_or_not = ONLY_CHANOPS;
@@ -196,25 +197,21 @@ int     ms_sjoin(struct Client *cptr,
 	  /* + 1 skip the extra '#' in the name */
 	  if((top_chptr = hash_find_channel((parv[2] + 1), NULL)))
 	    {
-sendto_realops("Found top_chptr for %s", (parv[2] + 1));
+	      sendto_realops("Found top_chptr for %s", (parv[2] + 1));
 
-	      if (top_chptr->next_vchan)
-		{
-		  chptr->next_vchan = top_chptr->next_vchan;
-		  top_chptr->next_vchan->prev_vchan = chptr;
-		}
-
-	      top_chptr->next_vchan = chptr;
-	      chptr->prev_vchan = top_chptr;
+	      m = make_dlink_node();
+	      m->data = chptr;
+	      dlinkAdd(chptr, m, &top_chptr->vchan_list);
 	    }
 	  else
 	    {
-sendto_realops("Creating top_chptr for %s", (parv[2] + 1));
+	      sendto_realops("Creating top_chptr for %s", (parv[2] + 1));
 
 	      top_chptr = get_channel(sptr, (parv[2] + 1), CREATE);
 
-	      top_chptr->next_vchan = chptr;
-	      chptr->prev_vchan = top_chptr;
+	      m = make_dlink_node();
+	      m->data = chptr;
+	      dlinkAdd(chptr, m, &top_chptr->vchan_list);
 	    }
 
 	  *p = '_';	/* fugly hack, restore '_' */

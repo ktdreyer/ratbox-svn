@@ -66,7 +66,7 @@ char *_version = "20001122";
 
 void names_list( struct Client *sptr, struct Channel *chptr, char *chname,
 		 dlink_list *list, char *flag,
-		 char *buf, int len, int mlen);
+		 char *buf, int mlen);
 
 /************************************************************************
  * m_names() - Added by Jto 27 Apr 1989
@@ -96,33 +96,6 @@ int     m_names( struct Client *cptr,
 
   if (!BadPtr(para))
     {
-      /* Here is the lamer detection code
-       * P.S. meta, GROW UP
-       * -Dianora 
-       */
-      for(s = para; *s; s++)
-        {
-          char_count++;
-          if(*s == ',')
-            comma_count++;
-          if(comma_count > 1)
-            {
-              if(char_count > TRUNCATED_NAMES)
-                para[TRUNCATED_NAMES] = '\0';
-              else
-                {
-                  s++;
-                  *s = '\0';
-                }
-              sendto_realops("POSSIBLE /names abuser %s [%s]",
-                             para,
-                             get_client_name(sptr,FALSE));
-              sendto_one(sptr, form_str(ERR_TOOMANYTARGETS),
-                         me.name, sptr->name, "NAMES", 1);
-              return 0;
-            }
-        }
-
       if( (s = strchr(para, ',')) )
         *s = '\0';
 
@@ -213,22 +186,21 @@ void names_all_visible_channels(struct Client *sptr)
 	      show_halfop_flags = "%";
 	    }
 
-	  ircsprintf(buf,"%s %s :", channel_pub_or_secret(chptr), chname);
+	  ircsprintf(buf,form_str(RPL_NAMREPLY),
+		     me.name, sptr->name);
+	  mlen = strlen(buf);
+	  ircsprintf(buf + mlen,":%s%s ",
+		     channel_pub_or_secret(chptr), chname);
+	  mlen = strlen(buf);
 
-	  len = strlen(buf);
-
 	  names_list(sptr, chptr, chname,
-		     &chptr->chanops,show_op_flags,
-		     buf, len, mlen);
+		     &chptr->chanops, show_op_flags, buf, mlen);
 	  names_list(sptr, chptr, chname,
-		     &chptr->halfops,show_halfop_flags,
-		     buf, len, mlen);
+		     &chptr->halfops, show_halfop_flags, buf, mlen);
 	  names_list(sptr, chptr, chname,
-		     &chptr->voiced,show_voiced_flags,
-		     buf, len, mlen);
+		     &chptr->voiced, show_voiced_flags,buf, mlen);
 	  names_list(sptr, chptr, chname,
-		     &chptr->peons,"",
-		     buf, len, mlen);
+		     &chptr->peons, "", buf, mlen);
 
 	}
     }
@@ -248,17 +220,17 @@ void names_all_visible_channels(struct Client *sptr)
  */
 void names_list( struct Client *sptr, struct Channel *chptr, char *chname,
 		 dlink_list *list, char *flag,
-		 char *buf, int len, int mlen)
+		 char *buf, int mlen)
 {
-  char buf2[2*NICKLEN];
   dlink_node *ptr;
   int cur_len;
+  int llen;
   int reply_to_send = NO;
   struct Client *c2ptr;
+  char *t;
 
-  buf2[0] = '\0';
-
-  cur_len = len + mlen;
+  cur_len = mlen;
+  t = buf + mlen;
 
   for (ptr = list->head; ptr; ptr = ptr->next)
     {
@@ -266,25 +238,24 @@ void names_list( struct Client *sptr, struct Channel *chptr, char *chname,
       if (IsInvisible(c2ptr) && !IsMember(sptr,chptr))
 	continue;
 
-      ircsprintf(buf2,"%s%s ", flag, c2ptr->name);
+      ircsprintf(t,"%s%s ", flag, c2ptr->name);
+      llen = strlen(t);
+      cur_len += llen;
+      t += llen;
 
-      strcat(buf,buf2);
-      cur_len += strlen(buf2);
       reply_to_send = YES;
 
       if ((cur_len + NICKLEN) > (BUFSIZE - 3))
 	{
-	  sendto_one(sptr, form_str(RPL_NAMREPLY),
-		     me.name, sptr->name, buf);
-	  ircsprintf(buf,"%s %s :", pub_or_secret(chptr), chname);
+	  sendto_one(sptr, "%s", buf );
 	  reply_to_send = NO;
-	  cur_len = len + mlen;
+	  cur_len = mlen;
+	  t = buf + mlen;
 	}
     }
 
   if (reply_to_send)
-    sendto_one(sptr, form_str(RPL_NAMREPLY),
-	       me.name, sptr->name, buf);
+    sendto_one(sptr, "s", buf);
 }
 
 /*
@@ -298,7 +269,7 @@ void names_list( struct Client *sptr, struct Channel *chptr, char *chname,
 void names_non_public_non_secret(struct Client *sptr)
 {
   int mlen;
-  int len;
+  int llen;
   int cur_len;
   int reply_to_send = NO;
   int dont_show = NO;
@@ -306,16 +277,19 @@ void names_non_public_non_secret(struct Client *sptr)
   struct Client *c2ptr;
   struct Channel *ch3ptr;
   char buf[BUFSIZE];
-  char buf2[2*NICKLEN];
+  char *t;
 
-  buf2[0] = '\0';
-  mlen = strlen(me.name) + NICKLEN + 7;
+  ircsprintf(buf,form_str(RPL_NAMREPLY),
+	     me.name,sptr->name);
+
+  mlen = strlen(buf);
+  ircsprinf(buf + mlen, " * * :");
+
+  mlen = strlen(buf);
+  cur_len = mlen;
+  t = buf + mlen;
 
   /* Second, do all non-public, non-secret channels in one big sweep */
-
-  strncpy_irc(buf, "* * :", 6);
-  len = strlen(buf);
-  cur_len = len + mlen;
 
   for (c2ptr = GlobalClientList; c2ptr; c2ptr = c2ptr->next)
     {
@@ -343,27 +317,28 @@ void names_non_public_non_secret(struct Client *sptr)
 	continue;
 
       if(GlobalSetOptions.hide_chanops)
-	ircsprintf(buf2," %s ", c2ptr->name);
+	ircsprintf(t," %s ", c2ptr->name);
       else
-	ircsprintf(buf2,"%s%s ", channel_chanop_or_voice(ch3ptr, c2ptr),
+	ircsprintf(t,"%s%s ", channel_chanop_or_voice(ch3ptr, c2ptr),
 		   c2ptr->name);
 
-      strcat(buf,buf2);
-      cur_len += strlen(buf2);
+      llen = strlen(t);
+      cur_len += llen;
+      t += llen;
+
       reply_to_send = YES;
 
       if ( (cur_len + NICKLEN)  > (BUFSIZE - 3))
         {
-          sendto_one(sptr, form_str(RPL_NAMREPLY),
-                     me.name, sptr->name, buf);
+          sendto_one(sptr, "%s", buf);
           reply_to_send = NO;
-	  strncpy_irc(buf, "* * :", 6);
-	  cur_len = len + mlen;
+	  cur_len = mlen;
+	  t = buf + mlen;
         }
     }
 
   if (reply_to_send)
-    sendto_one(sptr, form_str(RPL_NAMREPLY), me.name, sptr->name, buf);
+    sendto_one(sptr, "%s", buf );
 }
 
 int ms_names( struct Client *cptr,

@@ -24,6 +24,13 @@
  * $Id$
  *
  * $Log$
+ * Revision 7.33  2000/12/03 23:11:35  db
+ * - removed REJECT_HOLD that should be replaced with IP throttling
+ * - moved safe_write into fileio.c for now, changed to use fbopen() etc.
+ *   let caller close the FBFILE
+ * - replaced vchan double link list in channel struct with dlink_list
+ * - Still pending bugs in m_names.c, its displaying channels twice
+ *
  * Revision 7.32  2000/12/01 22:17:50  db
  * - massive commit, this removes ALL SLink's ick
  *   NOTE that not everything is working yet, notably server link..
@@ -639,22 +646,19 @@ typedef enum {
 extern void write_kline_or_dline_to_conf_and_notice_opers(
                                                           KlineType,
                                                           struct Client *,
-                                                          struct Client *,
                                                           char *,
                                                           char *,
                                                           char *,
                                                           char *
                                                           );
-extern const char *get_conf_name(KlineType);
-extern int safe_write(struct Client *, const char *, int ,char *);
-extern void add_temp_kline(struct ConfItem *);
+extern  const   char *get_conf_name(KlineType);
+extern  void    add_temp_kline(struct ConfItem *);
 extern  void    flush_temp_klines(void);
 extern  void    report_temp_klines(struct Client *);
 extern  void    show_temp_klines(struct Client *, struct ConfItem *);
 extern  int     is_address(char *,unsigned long *,unsigned long *); 
 extern  int     rehash (struct Client *, struct Client *, int);
 
-/* BLAH, pity I extern'ed all these. later will do better -db */
 extern struct ConfItem* conf_add_server(struct ConfItem *,int ,int );
 extern struct ConfItem* conf_add_o_line(struct ConfItem *);
 extern void conf_add_port(struct ConfItem *);

@@ -189,7 +189,7 @@ struct Channel *parse_knock_args(struct Client *cptr,
       else
         {
           /* No key specified */
- /* XXX */
+ /* XXX FIXME */
 #if 0
           if( (!chptr->members) && (!chptr->next_vchan->next_vchan) )
             {

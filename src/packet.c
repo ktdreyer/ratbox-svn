@@ -100,20 +100,6 @@ read_packet(int fd, void *data)
     return;
   }
 
-#ifdef REJECT_HOLD
-  /*
-   * If client has been marked as rejected i.e. it is a client
-   * that is trying to connect again after a k-line,
-   * pretend to read it but don't actually.
-   * -Dianora
-   *
-   * FLAGS_REJECT_HOLD should NEVER be set for non local client
-   */
-  if (IsRejectHeld(cptr)) {
-    goto finish;
-  }
-#endif
-
   cptr->lasttime = CurrentTime;
   if (cptr->lasttime > cptr->since)
     cptr->since = cptr->lasttime;

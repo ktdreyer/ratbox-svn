@@ -216,6 +216,7 @@ int list_all_channels(struct Client *sptr)
 int list_named_channel(struct Client *sptr,char *name)
 {
   char  vname[CHANNELLEN+NICKLEN+4];
+  dlink_node *ptr;
   struct Channel *chptr;
   struct Channel *root_chptr;
   struct Channel *tmpchptr;
@@ -228,22 +229,27 @@ int list_named_channel(struct Client *sptr,char *name)
     return 0;
 
   chptr = hash_find_channel(name, NullChn);
-  root_chptr = find_bchan(chptr);
-  for (tmpchptr = root_chptr; tmpchptr; tmpchptr = tmpchptr->next_vchan)
-    if (ShowChannel(sptr, tmpchptr) && sptr->user)
-      {
-        if( (IsVchan(tmpchptr) || HasVchans(tmpchptr)) &&
-	    (root_chptr->users || root_chptr->next_vchan->next_vchan) )
-          {
-            ircsprintf(vname, "%s<!%s>", root_chptr->chname,
-                       pick_vchan_id(tmpchptr));
-	  }
-	else
-	  ircsprintf(vname, "%s", root_chptr->chname);
 
-	sendto_one(sptr, form_str(RPL_LIST), me.name, sptr->name,
-		   vname, tmpchptr->users, tmpchptr->topic);
-      }
+  for (ptr = chptr->vchan_list.head; ptr; ptr = ptr->next)
+    {
+      tmpchptr = ptr->data;
+
+      if (ShowChannel(sptr, tmpchptr) && sptr->user)
+	{
+	  if( (IsVchan(tmpchptr) || HasVchans(tmpchptr)) )
+	    {
+	      root_chptr = find_bchan(chptr);
+	      if(root_chptr != NULL)
+		ircsprintf(vname, "%s<!%s>", root_chptr->chname,
+			   pick_vchan_id(tmpchptr));
+	    }
+	  else
+	    ircsprintf(vname, "%s", chptr->chname);
+
+	  sendto_one(sptr, form_str(RPL_LIST), me.name, sptr->name,
+		     vname, tmpchptr->users, tmpchptr->topic);
+	}
+    }
   sendto_one(sptr, form_str(RPL_LISTEND), me.name, sptr->name);
   return 0;
 }
@@ -261,16 +267,15 @@ void list_one_channel(struct Client *sptr,struct Channel *chptr)
   struct Channel *root_chptr;
   char  vname[CHANNELLEN+NICKLEN+4];
 
-  root_chptr = find_bchan(chptr);
-
-  if( (IsVchan(chptr) || HasVchans(chptr)) && 
-      (root_chptr->users || root_chptr->next_vchan->next_vchan) )
+  if( (IsVchan(chptr) || HasVchans(chptr)) )
     {
-      ircsprintf(vname, "%s<!%s>", root_chptr->chname,
-		 pick_vchan_id(chptr));
+      root_chptr = find_bchan(chptr);
+      if(root_chptr != NULL)
+	ircsprintf(vname, "%s<!%s>", root_chptr->chname,
+		   pick_vchan_id(chptr));
     }
   else
-    ircsprintf(vname, "%s", root_chptr->chname);
+    ircsprintf(vname, "%s", chptr->chname);
 
   sendto_one(sptr, form_str(RPL_LIST), me.name, sptr->name,
 	     vname, chptr->users, chptr->topic);

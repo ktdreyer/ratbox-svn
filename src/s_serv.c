@@ -829,6 +829,8 @@ static void server_burst(struct Client *cptr)
   static char   nickissent = 1;
   struct Channel*   chptr;
   struct Channel*   vchan; 
+  dlink_node *ptr;
+
       /*
       ** Send it in the shortened format with the TS, if
       ** it's a TS server; walk the list of channels, sending
@@ -885,9 +887,10 @@ static void server_burst(struct Client *cptr)
 
       if(IsVchanTop(chptr))
 	{
-	  for ( vchan = chptr->next_vchan; vchan;
-		vchan = vchan->next_vchan)
+	  for ( ptr = chptr->vchan_list.head; ptr;
+		ptr = ptr->next)
 	    {
+	      vchan = ptr->data;
 	      burst_members(cptr,&vchan->chanops, nickissent);
 	      burst_members(cptr,&vchan->voiced, nickissent);
 	      burst_members(cptr,&vchan->halfops, nickissent);

@@ -2244,18 +2244,20 @@ static void destroy_channel(struct Channel *chptr)
 {
   struct Client *sptr;
   dlink_node *ptr;
+  struct Channel *root_chptr;
+  dlink_node *m;
 
   /* Don't ever delete the top of a chain of vchans! */
   if (IsVchanTop(chptr))
     return;
 
-  /* XXX This also be a dlink_dlist */
   if (IsVchan(chptr))
     {
+      root_chptr = chptr->root_chptr;
       /* remove from vchan double link list */
-      chptr->prev_vchan->next_vchan = chptr->next_vchan;
-      if (chptr->next_vchan)
-	chptr->next_vchan->prev_vchan = chptr->prev_vchan;
+      m = dlinkFind(&root_chptr->vchan_list,chptr);
+      dlinkDelete(m,&root_chptr->vchan_list);
+      free_dlink_node(m);
     }
 
   /* Walk through all the dlink's pointing to members of this channel,

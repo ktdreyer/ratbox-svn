@@ -113,11 +113,6 @@
 # endif
 #endif
 
-
-#ifdef  REJECT_HOLD
-int reject_held_fds = 0;
-#endif
-
 /* LazyLinks code */
 time_t lastCleanup;
 
@@ -491,10 +486,6 @@ int main(int argc, char *argv[])
   Count.server = 1;     /* us */
 
   initialize_global_set_options();
-
-#ifdef REJECT_HOLD
-  reject_held_fds = 0;
-#endif
 
 /* this code by mika@cs.caltech.edu */
 /* 

@@ -30,6 +30,10 @@
 #define INCLUDED_sys_stat_h
 #endif
 
+
+/* XXX This shouldn't be here */
+struct Client;
+
 /*
  * FileBuf is a mirror of the ANSI FILE struct, but it works for any
  * file descriptor. FileBufs are allocated when a file is opened with
@@ -78,5 +82,7 @@ extern int     fbstat(struct stat* sb, FBFILE* fb);
 /* file_open / file_close -- adrian */
 extern int     file_open(const char *filename, int mode, int fmode);
 extern void    file_close(int fd);
+
+extern int safe_write(struct Client *, const char *, FBFILE * ,char *);
 
 #endif /* INCLUDED_fileio_h */

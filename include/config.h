@@ -486,37 +486,6 @@
 /* 300 is five minutes, seems reasonable */
 #define ANTI_SPAM_EXIT_MESSAGE_TIME 300
 
-/* REJECT_HOLD 
- * clients that reconnect but are k-lined will have their connections
- * "held" for REJECT_HOLD_TIME seconds, they cannot PRIVMSG. The idea
- * is to keep a reconnecting client from forcing the ircd to re-scan
- * mtrie_conf.
- *
- */
-  
-#undef REJECT_HOLD
-#define REJECT_HOLD_TIME 30 
-
-/* maximum number of fd's that will be used for reject holding */
-#define REJECT_HELD_MAX 25
-
-/*
- * OLD_Y_LIMIT
- *
- * #define this if you prefer the old behaviour of I lines
- * the default behaviour is to limit the total number of clients
- * using the max client limit in the corresponding Y line (class)
- * The old behaviour was to limit the client count per I line
- * without regard to the total class limit. Each have advantages
- * and disadvantages. In an open I line server, the default behaviour
- * i.e. #undef OLD_Y_LIMIT makes more sense, because you can limit
- * the total number of clients in a class. In a closed I line server
- * The old behaviour can make more sense.
- *
- * -Dianora
-*/
-#undef OLD_Y_LIMIT
-
 /*
  * If the OS has SOMAXCONN use that value, otherwise
  * Use the value in HYBRID_SOMAXCONN for the listen(); backlog
