@@ -23,7 +23,7 @@
  */
 
 /*
- * NOTE: NICKLEN does not live here anymore. Set it with configure
+ * NOTE: NICKLEN and TOPICLEN do not live here anymore. Set it with configure
  * Otherwise there are no user servicable part here. 
  *
  */
