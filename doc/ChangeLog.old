@@ -1,3 +1,15 @@
+ejb         2002/02/28 14:36:48 EST	(20020228_8)
+
+  Modified files:
+    include              patchlevel.h 
+  Log:
+  - added release names!
+  
+  Revision  Changes    Path
+  7.21      +3 -1      ircd-hybrid-7/include/patchlevel.h
+
+
+
 wcampbel    2002/02/28 11:14:19 EST	(20020228_7)
 
   Modified files:
