@@ -1,3 +1,17 @@
+leeh        2003/05/19 20:09:48 UTC	(20030519_1)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+  Log:
+  - turn soft asserts on
+  
+  Revision  Changes    Path
+  7.173     +1 -1      ircd-ratbox/autoconf/configure.in
+  7.180     +1 -1      ircd-ratbox/configure
+
+
+
 leeh        2003/05/19 15:36:26 UTC	(20030519_0)
 
   Modified files:
