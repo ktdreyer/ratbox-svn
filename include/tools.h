@@ -110,6 +110,7 @@ void mem_frob(void *data, int len);
 #define dlink_move_list(oldlist, newlist, node)
 
 #define dlinkAddAlloc(data, list) dlinkAdd(data, make_dlink_node(), list)
+#define dlinkAddTailAlloc(data, list) dlinkAddTail(data, make_dlink_node(), list)
 #define dlinkDestroy(node, list) do { dlinkDelete(node, list); free_dlink_node(node); } while(0)
 
 

@@ -443,7 +443,7 @@ static void stats_glines(struct Client *source_p)
     dlink_node *gline_node;
     struct ConfItem *kill_ptr;
 
-    DLINK_FOREACH(gline_node, glines.head)
+    DLINK_FOREACH_PREV(gline_node, glines.tail)
     {
       kill_ptr = gline_node->data;
 

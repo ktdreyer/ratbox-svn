@@ -489,6 +489,9 @@ check_majority_gline(struct Client *source_p,
 		     const char *host,
 		     const char *reason)
 {
+  /* to avoid desync.. --fl */
+  cleanup_glines();
+
   /* set the actual gline in majority_gline() so we can pull the
    * initial reason and use that as the trigger reason. --fl
    */

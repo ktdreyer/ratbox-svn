@@ -48,7 +48,6 @@
 #include "event.h"
 #include "memory.h"
 
-
 dlink_list glines;
 
 static void expire_glines(void);
@@ -63,7 +62,7 @@ static void expire_pending_glines(void);
 void
 add_gline(struct ConfItem *aconf)
 {
-  dlinkAddAlloc(aconf, &glines);
+  dlinkAddTailAlloc(aconf, &glines);
   add_conf_by_address(aconf->host, CONF_GLINE, aconf->user, aconf);
 }
 
@@ -128,11 +127,12 @@ expire_glines()
     {
       kill_ptr = gline_node->data;
 
-      if(kill_ptr->hold <= CurrentTime)
-	{
-          dlinkDestroy(gline_node, &glines);
-          delete_one_address_conf(kill_ptr->host, kill_ptr);
-	}
+      /* these are in chronological order */
+      if(kill_ptr->hold > CurrentTime)
+        break;
+
+      dlinkDestroy(gline_node, &glines);
+      delete_one_address_conf(kill_ptr->host, kill_ptr);
     }
 }
 
