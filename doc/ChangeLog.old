@@ -1,3 +1,8 @@
+*** 20010515_3 by jdc
+* Forgot a comma.  Oops.  :-)
+
+
+
 *** 20010515_2 by db
 - missing {0,0} in flags in set_final_mode. How this has worked
   so long without being spotted, is beyond me.
