@@ -1,13 +1,14 @@
-.\" @(#)ircd.8 7b10 25 Oct 2001
+.\" @(#)ircd.8 2.0 22 April 2004
 .\" $Id$
-.TH IRCD 8 "ircd-hybrid-7 25 Oct 2001
+.TH IRCD 8 "ircd-ratbox 22 April 2004
 .SH NAME
 ircd \- The Internet Relay Chat Program Server 
 .SH SYNOPSIS
 .hy 0
 .IP \fBircd\fP
 [-dlinefile filename] [-configfile filename] [-klinefile filename]
-[-logfile filename] [-pidfile filename] [-foreground] [-version] [-debug]
+[-logfile filename] [-pidfile filename] [-resvfile filename]
+[-xlinefile filename] [-conftest] [-foreground] [-version]
 .SH DESCRIPTION
 .LP
 \fIircd\fP is the server (daemon) program for the Internet Relay Chat
@@ -36,15 +37,22 @@ Specifies an alternative logfile to be used than that specified in config.h
 Specifies the ircd.pid used. The option is used to override the default
 ircd.pid given at compile time.
 .TP
+.B \-resvfile filename
+Specifies the resv.conf file to be used for this ircdaemon. The option
+is used to override the default resv.conf given at compile time.
+.TP
+.B \-xlinefile filename
+Specifies the xline.conf file to be used for this ircdaemon. The option
+is used to override the default xline.conf given at compile time.
+.TP
+.B \-conftest
+Makes \fIircd\fP check the ircd.conf for errors
+.TP
 .B \-foreground
 Makes \fIircd\fP run in the foreground
 .TP
 .B \-version
 Makes \fIircd\fP print its version, and exit.
-.TP
-.B \-debug
-Makes \fIircd\fP start in debug mode.  \fIIrcd\fP must be compiled in DEBUGMODE
-for this to work.
 .SH USAGE
 If you plan to connect your \fIircd\fP server to an existing Irc-Network,
 you will need to alter your local IRC configuration file (typically named
