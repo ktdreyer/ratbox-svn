@@ -1,3 +1,10 @@
+*** 20001211_14 by db
+- not sure if I am closing all the fd's that should be closed here..
+  the original code refers to connecting servers as well as unknown_clients
+  perhaps connecting server fd's should be also closed?
+
+
+
 *** 20001211_13 by db
 - a client being made into a server, should be removed from the unknown_list
   this was happening in the new server establish code...
