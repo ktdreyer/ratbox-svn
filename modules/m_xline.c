@@ -203,25 +203,23 @@ handle_remote_xline(struct Client *source_p, int temp_time,
 {
 	struct ConfItem *aconf;
 
-	if(find_shared_conf(source_p->username, source_p->host,
+	if(!find_shared_conf(source_p->username, source_p->host,
 				source_p->user->server, SHARED_XLINE))
+		return;
+
+	if(!valid_xline(source_p, name, reason))
+		return;
+
+	/* already xlined */
+	if((aconf = find_xline(name)) != NULL)
 	{
-		if(!valid_xline(source_p, name, reason))
-			return;
-
-		/* already xlined */
-		if((aconf = find_xline(name)) != NULL)
-		{
-			sendto_one(source_p, ":%s NOTICE %s :[%s] already X-Lined by [%s] - %s",
-				   me.name, source_p->name, name, 
-				   aconf->name, aconf->passwd);
-			return;
-		}
-
-		apply_xline(source_p, name, reason, temp_time);
+		sendto_one(source_p, ":%s NOTICE %s :[%s] already X-Lined by [%s] - %s",
+				me.name, source_p->name, name, 
+				aconf->name, aconf->passwd);
+		return;
 	}
 
-	return;
+	apply_xline(source_p, name, reason, temp_time);
 }
 
 /* valid_xline()
@@ -465,14 +463,14 @@ me_unxline(struct Client *client_p, struct Client *source_p, int parc, const cha
 static void
 handle_remote_unxline(struct Client *source_p, const char *name)
 {
-	if(find_shared_conf(source_p->username, source_p->host,
+	if(!find_shared_conf(source_p->username, source_p->host,
 				source_p->user->server, SHARED_UNXLINE))
-	{
-		if(remove_temp_xline(source_p, name))
-			return;
+		return;
 
-		remove_xline(source_p, name);
-	}
+	if(remove_temp_xline(source_p, name))
+		return;
+
+	remove_xline(source_p, name);
 
 	return;
 }

@@ -416,22 +416,22 @@ me_unresv(struct Client *client_p, struct Client *source_p, int parc, const char
 static void
 handle_remote_unresv(struct Client *source_p, const char *name)
 {
-	if(find_shared_conf(source_p->username, source_p->host,
+	if(!find_shared_conf(source_p->username, source_p->host,
 				source_p->user->server, SHARED_UNRESV))
-	{
-		if(remove_temp_resv(source_p, name))
-		{
-			sendto_one_notice(source_p, ":RESV for [%s] is removed", name);
-			sendto_realops_flags(UMODE_ALL, L_ALL,
-					"%s has removed the RESV for: [%s]", 
-					get_oper_name(source_p), name);
-			ilog(L_KLINE, "%s has removed the RESV for [%s]", 
-					get_oper_name(source_p), name);
-			return;
-		}
+		return;
 
-		remove_resv(source_p, name);
+	if(remove_temp_resv(source_p, name))
+	{
+		sendto_one_notice(source_p, ":RESV for [%s] is removed", name);
+		sendto_realops_flags(UMODE_ALL, L_ALL,
+				"%s has removed the RESV for: [%s]", 
+				get_oper_name(source_p), name);
+		ilog(L_KLINE, "%s has removed the RESV for [%s]", 
+				get_oper_name(source_p), name);
+		return;
 	}
+
+	remove_resv(source_p, name);
 
 	return;
 }

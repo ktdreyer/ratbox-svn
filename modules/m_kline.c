@@ -263,42 +263,42 @@ handle_remote_kline(struct Client *source_p, int tkline_time,
 	struct ConfItem *aconf = NULL;
 	char *oper_reason;
 	
-	if(find_shared_conf(source_p->username, source_p->host,
+	if(!find_shared_conf(source_p->username, source_p->host,
 				source_p->user->server, SHARED_KLINE))
+		return;
+
+	if(!valid_user_host(source_p, user, host) ||
+	   !valid_wild_card(source_p, user, host) ||
+	   !valid_comment(source_p, reason))
+		return;
+
+	if(already_placed_kline(source_p, user, host, tkline_time))
+		return;
+
+	aconf = make_conf();
+
+	aconf->status = CONF_KILL;
+	DupString(aconf->user, user);
+	DupString(aconf->host, host);
+
+	/* Look for an oper reason */
+	if((oper_reason = strchr(reason, '|')) != NULL)
 	{
-		if(!valid_user_host(source_p, user, host) || 
-		   !valid_wild_card(source_p, user, host) ||
-		   !valid_comment(source_p, reason))
-			return;
+		*oper_reason = '\0';
+		oper_reason++;
 
-		if(already_placed_kline(source_p, user, host, tkline_time))
-			return;
-
-		aconf = make_conf();
-
-		aconf->status = CONF_KILL;
-		DupString(aconf->user, user);
-		DupString(aconf->host, host);
-
-		/* Look for an oper reason */
-		if((oper_reason = strchr(reason, '|')) != NULL)
-		{
-			*oper_reason = '\0';
-			oper_reason++;
-
-			if(!EmptyString(oper_reason))
-				DupString(aconf->spasswd, oper_reason);
-		}
-
-		DupString(aconf->passwd, reason);
-		current_date = smalldate();
-
-		if(tkline_time > 0)
-			apply_tkline(source_p, aconf, reason, oper_reason,
-				     current_date, tkline_time);
-		else
-			apply_kline(source_p, aconf, aconf->passwd, oper_reason, current_date);
+		if(!EmptyString(oper_reason))
+			DupString(aconf->spasswd, oper_reason);
 	}
+
+	DupString(aconf->passwd, reason);
+	current_date = smalldate();
+
+	if(tkline_time > 0)
+		apply_tkline(source_p, aconf, reason, oper_reason,
+				current_date, tkline_time);
+	else
+		apply_kline(source_p, aconf, aconf->passwd, oper_reason, current_date);
 
 	if(ConfigFileEntry.kline_delay)
 	{
@@ -425,28 +425,26 @@ me_unkline(struct Client *client_p, struct Client *source_p, int parc, const cha
 static void
 handle_remote_unkline(struct Client *source_p, const char *user, const char *host)
 {
-	if(find_shared_conf(source_p->username, source_p->host,
+	if(!find_shared_conf(source_p->username, source_p->host,
 				source_p->user->server, SHARED_UNKLINE))
+		return;
+
+	if(remove_temp_kline(user, host))
 	{
-		if(remove_temp_kline(user, host))
-		{
-			sendto_one_notice(source_p,
-					  ":Un-klined [%s@%s] from temporary k-lines",
-					  user, host);
+		sendto_one_notice(source_p,
+				":Un-klined [%s@%s] from temporary k-lines",
+				user, host);
 
-			sendto_realops_flags(UMODE_ALL, L_ALL,
-					     "%s has removed the temporary K-Line for: [%s@%s]",
-					     get_oper_name(source_p), user, host);
+		sendto_realops_flags(UMODE_ALL, L_ALL,
+				"%s has removed the temporary K-Line for: [%s@%s]",
+				get_oper_name(source_p), user, host);
 
-			ilog(L_KLINE, "%s removed temporary K-Line for [%s@%s]",
-			     source_p->name, user, host);
-			return;
-		}
-
-		remove_permkline_match(source_p, host, user);
+		ilog(L_KLINE, "%s removed temporary K-Line for [%s@%s]",
+				source_p->name, user, host);
+		return;
 	}
 
-	return;
+	remove_permkline_match(source_p, host, user);
 }
 
 /* apply_kline()
