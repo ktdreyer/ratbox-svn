@@ -1,3 +1,13 @@
+*** 20001225_2 by db
+- ummmm parse isnt' handed a null terminated line, its handed the end of
+  of the buffer as well as the start. The end of the buffer if its 
+  rfc compliant, will be '\r' '\n' but no terminating '\0'
+  so, take bufend look one back that should be a '\n', then blast it
+  then look to see if there is a '\r' before it, if so blast it as well
+  then thats it... end is now the valid end of the buffer 
+
+
+
 *** 20001225_1 by db
 - numeric sent to server should be announced what it is ...
 - nick change while not on channel would not be propogated to a LL server
