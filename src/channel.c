@@ -210,11 +210,12 @@ remove_user_from_channels(struct Client *client_p)
 	struct Channel *chptr;
 	struct membership *msptr;
 	dlink_node *ptr;
+	dlink_node *next_ptr;
 
 	if(client_p == NULL)
 		return;
 
-	DLINK_FOREACH(ptr, client_p->user->channel.head)
+	DLINK_FOREACH_SAFE(ptr, next_ptr, client_p->user->channel.head)
 	{
 		msptr = ptr->data;
 		chptr = msptr->chptr;
