@@ -43,13 +43,12 @@
 /*
  * stats stuff
  */
-static struct ServerStatistics ircst;
-struct ServerStatistics *ServerStats = &ircst;
+struct ServerStatistics ServerStats;
 
 void
 init_stats()
 {
-	memset(&ircst, 0, sizeof(ircst));
+	memset(&ServerStats, 0, sizeof(ServerStats));
 }
 
 /*
@@ -68,7 +67,7 @@ tstats(struct Client *source_p)
 	dlink_node *ptr;
 
 	sp = &tmp;
-	memcpy(sp, ServerStats, sizeof(struct ServerStatistics));
+	memcpy(sp, &ServerStats, sizeof(struct ServerStatistics));
 
 	DLINK_FOREACH(ptr, serv_list.head)
 	{

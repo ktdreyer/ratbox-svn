@@ -261,7 +261,7 @@ mc_nick(struct Client *client_p, struct Client *source_p, int parc, const char *
 	/* if nicks erroneous, or too long, kill */
 	if(!clean_nick(parv[1], 0))
 	{
-		ServerStats->is_kill++;
+		ServerStats.is_kill++;
 		sendto_realops_flags(UMODE_DEBUG, L_ALL,
 				     "Bad Nick: %s From: %s(via %s)",
 				     parv[1], source_p->user->server,
@@ -318,7 +318,7 @@ ms_nick(struct Client *client_p, struct Client *source_p, int parc, const char *
 	/* if nicks empty, erroneous, or too long, kill */
 	if(!clean_nick(parv[1], 0))
 	{
-		ServerStats->is_kill++;
+		ServerStats.is_kill++;
 		sendto_realops_flags(UMODE_DEBUG, L_ALL,
 				     "Bad Nick: %s From: %s(via %s)",
 				     parv[1], parv[7], client_p->name);
@@ -330,7 +330,7 @@ ms_nick(struct Client *client_p, struct Client *source_p, int parc, const char *
 	/* invalid username or host? */
 	if(!clean_username(parv[5]) || !clean_host(parv[6]))
 	{
-		ServerStats->is_kill++;
+		ServerStats.is_kill++;
 		sendto_realops_flags(UMODE_DEBUG, L_ALL,
 				"Bad user@host: %s@%s From: %s(via %s)",
 				parv[5], parv[6], parv[7],
@@ -406,7 +406,7 @@ ms_uid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	/* if nicks erroneous, or too long, kill */
 	if(!clean_nick(parv[1], 0))
 	{
-		ServerStats->is_kill++;
+		ServerStats.is_kill++;
 		sendto_realops_flags(UMODE_DEBUG, L_ALL,
 				     "Bad Nick: %s From: %s(via %s)",
 				     parv[1], source_p->name,
@@ -418,7 +418,7 @@ ms_uid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 
 	if(!clean_username(parv[5]) || !clean_host(parv[6]))
 	{
-		ServerStats->is_kill++;
+		ServerStats.is_kill++;
 		sendto_realops_flags(UMODE_DEBUG, L_ALL,
 				     "Bad user@host: %s@%s From: %s(via %s)",
 				     parv[5], parv[6], source_p->name,
@@ -430,7 +430,7 @@ ms_uid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 
 	if(!clean_uid(parv[8]))
 	{
-		ServerStats->is_kill++;
+		ServerStats.is_kill++;
 		sendto_realops_flags(UMODE_DEBUG, L_ALL,
 					"Bad UID: %s From: %s(via %s)",
 					parv[8], source_p->name,
@@ -725,7 +725,7 @@ perform_nick_collides(struct Client *source_p, struct Client *client_p,
 		/* we then need to KILL the old client everywhere */
 		kill_client_serv_butone(NULL, target_p,
 					"%s (Nick collision (new))", me.name);
-		ServerStats->is_kill++;
+		ServerStats.is_kill++;
 
 		target_p->flags |= FLAGS_KILLED;
 		exit_client(client_p, target_p, &me, "Nick collision (new)");
@@ -763,7 +763,7 @@ perform_nick_collides(struct Client *source_p, struct Client *client_p,
 						     target_p->name, target_p->from->name,
 						     client_p->name);
 
-			ServerStats->is_kill++;
+			ServerStats.is_kill++;
 			sendto_one_numeric(target_p, ERR_NICKCOLLISION,
 					   form_str(ERR_NICKCOLLISION), target_p->name);
 
@@ -798,13 +798,13 @@ perform_nickchange_collides(struct Client *source_p, struct Client *client_p,
 				     source_p->name, target_p->name, target_p->from->name,
 				     client_p->name);
 
-		ServerStats->is_kill++;
+		ServerStats.is_kill++;
 		sendto_one_numeric(target_p, ERR_NICKCOLLISION,
 				   form_str(ERR_NICKCOLLISION), target_p->name);
 
 		kill_client_serv_butone(NULL, source_p, "%s (Nick change collision)", me.name);
 
-		ServerStats->is_kill++;
+		ServerStats.is_kill++;
 
 		kill_client_serv_butone(NULL, target_p, "%s (Nick change collision)", me.name);
 
@@ -833,7 +833,7 @@ perform_nickchange_collides(struct Client *source_p, struct Client *client_p,
 						     source_p->name, target_p->name,
 						     target_p->from->name, client_p->name);
 
-			ServerStats->is_kill++;
+			ServerStats.is_kill++;
 
 			sendto_one_numeric(target_p, ERR_NICKCOLLISION,
 					   form_str(ERR_NICKCOLLISION), target_p->name);
@@ -870,7 +870,7 @@ perform_nickchange_collides(struct Client *source_p, struct Client *client_p,
 			kill_client_serv_butone(client_p, target_p, 
 					"%s (Nick collision)", me.name);
 
-			ServerStats->is_kill++;
+			ServerStats.is_kill++;
 
 			target_p->flags |= FLAGS_KILLED;
 			(void) exit_client(client_p, target_p, &me, "Nick collision");

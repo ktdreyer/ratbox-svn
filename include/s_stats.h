@@ -70,7 +70,7 @@ struct ServerStatistics
 	unsigned int is_rej;	/* rejected from cache */
 };
 
-extern struct ServerStatistics *ServerStats;
+extern struct ServerStatistics ServerStats;
 
 extern void init_stats(void);
 extern void tstats(struct Client *client);

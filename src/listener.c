@@ -534,7 +534,7 @@ accept_connection(int pfd, void *data)
 	 */
 	if((MAXCONNECTIONS - 10) < fd)
 	{
-		++ServerStats->is_ref;
+		++ServerStats.is_ref;
 		/*
 		 * slow down the whining to opers bit
 		 */
@@ -558,7 +558,7 @@ accept_connection(int pfd, void *data)
 	 * from this IP... */
 	if((pe = conf_connect_allowed(&sai, sai.ss_family)) != 0)
 	{
-		ServerStats->is_ref++;
+		ServerStats.is_ref++;
 
 		write(fd, DLINE_WARNING, sizeof(DLINE_WARNING) - 1);
 		fd_close(fd);
@@ -569,7 +569,7 @@ accept_connection(int pfd, void *data)
 		return;
 	}
 
-	ServerStats->is_ac++;
+	ServerStats.is_ac++;
 	add_connection(listener, fd, &sai);
 
 	/* Re-register a new IO request for the next accept .. */

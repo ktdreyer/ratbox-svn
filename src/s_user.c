@@ -358,7 +358,7 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 
 		if(IsNeedIdentd(aconf))
 		{
-			ServerStats->is_ref++;
+			ServerStats.is_ref++;
 			sendto_one(source_p,
 				   ":%s NOTICE %s :*** Notice -- You need to install identd to use this server",
 				   me.name, client_p->name);
@@ -399,7 +399,7 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 
 		if(strcmp(encr, aconf->passwd))
 		{
-			ServerStats->is_ref++;
+			ServerStats.is_ref++;
 			sendto_one(source_p, form_str(ERR_PASSWDMISMATCH), me.name, source_p->name);
 			exit_client(client_p, source_p, &me, "Bad Password");
 			return (CLIENT_EXITED);
@@ -433,7 +433,7 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 		sendto_realops_flags(UMODE_FULL, L_ALL,
 				     "Too many clients, rejecting %s[%s].", nick, source_p->host);
 
-		ServerStats->is_ref++;
+		ServerStats.is_ref++;
 		exit_client(client_p, source_p, &me, "Sorry, server is full - try later");
 		return (CLIENT_EXITED);
 	}
@@ -445,7 +445,7 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 		sendto_realops_flags(UMODE_REJ, L_ALL,
 				     "Invalid username: %s (%s@%s)",
 				     nick, source_p->username, source_p->host);
-		ServerStats->is_ref++;
+		ServerStats.is_ref++;
 		ircsprintf(tmpstr2, "Invalid username [%s]", source_p->username);
 		exit_client(client_p, source_p, &me, tmpstr2);
 		return (CLIENT_EXITED);
@@ -457,7 +457,7 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 	if(!IsExemptKline(source_p) &&
 	   find_xline(source_p->info, 1) != NULL)
 	{
-		ServerStats->is_ref++;
+		ServerStats.is_ref++;
 		add_reject(source_p);
 		exit_client(client_p, source_p, &me, "Bad user info");
 		return CLIENT_EXITED;
