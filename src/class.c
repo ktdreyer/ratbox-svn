@@ -116,10 +116,8 @@ const char*     get_client_class(struct Client *target_p)
 int     get_client_ping(struct Client *target_p)
 {
   int   ping = 0;
-  int   ping2;
   struct ConfItem       *aconf;
   dlink_node		*nlink;
-
 
   if(target_p->localClient->confs.head != NULL)
     {
@@ -128,9 +126,9 @@ int     get_client_ping(struct Client *target_p)
 	  aconf = nlink->data;
 	  if (aconf->status & (CONF_CLIENT|CONF_SERVER))
 	    {
-	      ping2 = get_conf_ping(aconf);
-	      if ((ping2 != BAD_PING) && ((ping > ping2) || !ping))
-		ping = ping2;
+	      ping = get_conf_ping(aconf);
+	      if ((ping == BAD_PING) || (ping <= 0))
+		ping = DEFAULT_PINGFREQUENCY;
 	    }
 	}
     }
@@ -140,8 +138,6 @@ int     get_client_ping(struct Client *target_p)
       Debug((DEBUG_DEBUG,"No Attached Confs"));
     }
 
-  if (ping <= 0)
-    ping = DEFAULT_PINGFREQUENCY;
   Debug((DEBUG_DEBUG,"Client %s Ping %d", target_p->name, ping));
   return (ping);
 }
