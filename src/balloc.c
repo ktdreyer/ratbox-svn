@@ -130,7 +130,7 @@ static int newblock(BlockHeap * bh)
         void *data;
         newblk = (void *)offset;
         newblk->block = b;
-        data = offset + sizeof(MemBlock);
+        data = (void *)((size_t)offset + sizeof(MemBlock));
         newblk->block = b;
         newblk->data = data;
         dlinkAdd(data, &newblk->self, &b->free_list);
@@ -292,7 +292,7 @@ int _BlockHeapFree(BlockHeap * bh, void *ptr)
         return 1;
       }
 
-    memblock = ptr - sizeof(MemBlock);
+    memblock = (void *)((size_t)ptr - sizeof(MemBlock));
     assert(memblock->block != NULL);
     /* XXX: Should check that the block is really our block */
     block = memblock->block;

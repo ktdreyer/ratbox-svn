@@ -33,7 +33,11 @@
 #include "irc_string.h"
 #include "common.h"
 #include "s_conf.h"
-#include "y.tab.h"
+#ifdef VMS
+# include "ircd_parser_tab.h"
+#else
+# include "y.tab.h"
+#endif
 #include "memory.h"
 #include "hostmask.h"
 #include "setup.h"

@@ -203,7 +203,7 @@ print_startup(int pid)
 static void 
 init_sys(void)
 {
-#ifdef RLIMIT_FD_MAX
+#if defined(RLIMIT_FD_MAX) && !defined(VMS)
   struct rlimit limit;
 
   if (!getrlimit(RLIMIT_FD_MAX, &limit))
@@ -493,6 +493,7 @@ static void check_pidfile(const char *filename)
  */
 static void setup_corefile(void)
 {
+#ifndef VMS
   struct rlimit rlim; /* resource limits */
 
   /* Set corefilesize to maximum */
@@ -501,6 +502,7 @@ static void setup_corefile(void)
       rlim.rlim_cur = rlim.rlim_max;
       setrlimit(RLIMIT_CORE, &rlim);
     }
+#endif
 }
 
 /*

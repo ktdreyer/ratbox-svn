@@ -33,10 +33,10 @@
 #include <time.h>
 #include <netdb.h>
 
-#include "rsa.h"
 #include "config.h"
 
 #ifdef HAVE_LIBCRYPTO
+#include "rsa.h"
 #include <openssl/rsa.h>
 #include <openssl/bio.h>
 #include <openssl/evp.h>
