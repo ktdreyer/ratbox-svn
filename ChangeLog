@@ -1,3 +1,20 @@
+leeh        2004/04/03 14:48:38 EST	(20040403_2)
+
+  Modified files:
+    include              s_log.h 
+    src                  s_conf.c s_log.c 
+  Log:
+  - make ilog() handle an error during fbputs()
+  - s/sync_logfiles/open_logfiles, and make rehash/SIGHUP cause all logfiles
+    to be closed and reopened
+  
+  Revision  Changes    Path
+  7.24      +1 -1      ircd-ratbox/include/s_log.h
+  7.460     +1 -1      ircd-ratbox/src/s_conf.c
+  7.68      +19 -17    ircd-ratbox/src/s_log.c
+
+
+
 leeh        2004/04/03 08:12:43 EST	(20040403_1)
 
   Modified files:
