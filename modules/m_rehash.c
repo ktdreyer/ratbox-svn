@@ -126,7 +126,7 @@ static void mo_rehash(struct Client *client_p, struct Client *source_p,
         }
       else
         {
-          sendto_one(source_p,":%s NOTICE %s :rehash one of :CHANNELS DNS GC HELP MOTD OMOTD" ,me.name,source_p->name);
+          sendto_one(source_p,":%s NOTICE %s :rehash one of :CHANNELS DNS HELP MOTD OMOTD" ,me.name,source_p->name);
           return;
         }
     }
