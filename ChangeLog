@@ -1,3 +1,15 @@
+androsyn    2005/03/30 18:02:06 UTC	(20050330_1)
+
+  Modified files:
+    src                  dns.c 
+  Log:
+  more minor things to the resolver to make it a bit more reliable
+  
+  Revision  Changes    Path
+  7.6       +34 -4     ircd-ratbox/src/dns.c
+
+
+
 androsyn    2005/03/30 01:47:27 UTC	(20050330_0)
 
   Modified files:
