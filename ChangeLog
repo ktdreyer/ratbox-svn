@@ -1,3 +1,22 @@
+androsyn    2004/08/04 16:27:45 EDT	(20040804_0)
+
+  Modified files:
+    include              hostmask.h s_conf.h 
+    modules              m_stats.c 
+    src                  hostmask.c s_conf.c 
+  Log:
+  Shuffle off report_Klines, report_auth into m_stats.c and then take
+  get_printable_* with them as well
+  
+  Revision  Changes    Path
+  1.36      +0 -2      ircd-ratbox/include/hostmask.h
+  7.287     +0 -4      ircd-ratbox/include/s_conf.h
+  1.228     +123 -5    ircd-ratbox/modules/m_stats.c
+  7.101     +0 -72     ircd-ratbox/src/hostmask.c
+  7.482     +0 -47     ircd-ratbox/src/s_conf.c
+
+
+
 androsyn    2004/08/03 16:37:56 EDT	(20040803_10)
 
   Modified files:
