@@ -1,3 +1,15 @@
+androsyn    2003/11/25 10:24:36 EST	(20031125_4)
+
+  Modified files:
+    src                  sigio.c 
+  Log:
+  Get the delay code right
+  
+  Revision  Changes    Path
+  7.48      +2 -2      ircd-ratbox/src/sigio.c
+
+
+
 androsyn    2003/11/25 10:22:37 EST	(20031125_3)
 
   Modified files:
