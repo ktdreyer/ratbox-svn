@@ -1,3 +1,9 @@
+*** 20000122_1 by db
+- more cleanup on new conf file parser..
+  using "auth" instead of "client" as per Kev's document..
+
+
+
 *** 20000121_1 by db
 - preliminary serverinfo section done
 
