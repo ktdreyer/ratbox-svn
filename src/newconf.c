@@ -637,7 +637,11 @@ conf_set_oper_encrypted(void *data)
 static void
 conf_set_oper_flags(void *data)
 {
+	int saveflags;
+
+	saveflags = yy_oper->flags & CONF_OPER_ENCRYPTED;
 	set_modes_from_table(&yy_oper->flags, "flag", privs_table, data);
+	yy_oper->flags |= saveflags;
 }
 
 static int
