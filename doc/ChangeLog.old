@@ -1,3 +1,9 @@
+*** 20011129_1 by db
+- KNOCK is now using a numeric at least on local server.
+- numeric.c was not checking all validity
+
+
+
 *** 20011128_7 by db
 -fixed prototype for sento_channel_remote 
 
