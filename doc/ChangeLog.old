@@ -1,3 +1,8 @@
+*** 20010117_12 by fl_
+- removed the last occurences of sendto_local_opers, replaced with
+  sendto_realops_flags_opers().. ta hwy ;)
+
+
 *** 20010117_11 by wcampbel
 1. Updated documentation
 2. Added 'locops' to the oper only umodes in the conf parser
