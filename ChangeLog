@@ -1,3 +1,23 @@
+leeh        2002/11/24 19:42:41 UTC	(20021124_17)
+
+  Modified files:
+    include              s_conf.h 
+    modules              m_stats.c m_xline.c 
+    src                  kdparse.c newconf.c s_conf.c s_user.c 
+  Log:
+  - rewrote xlines to use their own struct
+  
+  Revision  Changes    Path
+  7.210     +12 -6     ircd-ratbox/include/s_conf.h
+  1.129     +7 -12     ircd-ratbox/modules/m_stats.c
+  1.9       +40 -17    ircd-ratbox/modules/m_xline.c
+  7.13      +3 -5      ircd-ratbox/src/kdparse.c
+  7.55      +18 -21    ircd-ratbox/src/newconf.c
+  7.365     +92 -64    ircd-ratbox/src/s_conf.c
+  7.237     +28 -26    ircd-ratbox/src/s_user.c
+
+
+
 leeh        2002/11/24 15:21:17 UTC	(20021124_16)
 
   Modified files:
