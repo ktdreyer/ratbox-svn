@@ -1,3 +1,16 @@
+*** 20010428_4 by jdc
+* A non-opped client in a +a channel should be shown the local server
+  that kicked them, NOT their own nick (eg. me.name  vs.  who->name).
+* Server-based kicks (for things like CLEARCHAN) now show the actual
+  server that did the CLEARCHAN (previously it showed your own nick).
+  The reason for this is somewhat political (sptr->name vs. me.name):
+  in the case of oper abuse, the user should have *some* idea of what
+  server requested the CLEARCHAN, in the case of an oper getting out
+  of control.  This therefore provides some security for the user who's
+  channel just got cleared.
+
+
+
 *** 20010428_3 by fl_
 - you know, I just hate irc clients.
 
