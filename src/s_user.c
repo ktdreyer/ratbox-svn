@@ -1381,10 +1381,13 @@ int oper_up( struct Client *source_p,
   else
     {
       if(ConfigFileEntry.oper_umodes)
-        source_p->umodes |= (ConfigFileEntry.oper_umodes & FLAGS_OPER & ALL_UMODES);
+        {
+          source_p->umodes |= ConfigFileEntry.oper_umodes & ALL_UMODES;
+        }
       else
-        source_p->umodes |= (FLAGS_SERVNOTICE & FLAGS_OPERWALL & FLAGS_WALLOP &
-          FLAGS_OPER & FLAGS_LOCOPS & ALL_UMODES);
+        {
+          source_p->umodes |= (FLAGS_SERVNOTICE & FLAGS_OPERWALL & FLAGS_WALLOP & FLAGS_LOCOPS & ALL_UMODES);
+        }
     }
 	
   SetIPHidden(source_p);
