@@ -483,7 +483,7 @@ oper_gline: GLINE '=' TYES ';' { yy_aconf->port |= CONF_OPER_GLINE;}
 
 oper_nick_changes: NICK_CHANGES '=' TYES ';' { yy_aconf->port |= CONF_OPER_N;}
                    |
-                   NICK_CHANGES '=' TNO ; { yy_aconf->port &= ~CONF_OPER_N;} ;
+                   NICK_CHANGES '=' TNO ';' { yy_aconf->port &= ~CONF_OPER_N;};
 
 oper_die: DIE '=' TYES ';' { yy_aconf->port |= CONF_OPER_DIE; }
           |
