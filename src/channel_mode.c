@@ -1,4 +1,4 @@
-a/*
+/*
  *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
  *  channel_mode.c: Controls modes on channels.
  *

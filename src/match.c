@@ -232,8 +232,13 @@ int
 match_cidr(const char *s1, const char *s2)
 {
   struct irc_inaddr ipaddr, maskaddr;
-  char address[NICKLEN + USERLEN + HOSTLEN + 6], mask[NICKLEN + USERLEN + HOSTLEN + 6], *ipmask, *ip, *len;
+  char mask[BUFSIZE];
+  char address[NICKLEN + USERLEN + HOSTLEN + 6];
+  char *ipmask;
+  char *ip;
+  char *len;
   int cidrlen, aftype;
+
   strcpy(mask, s1);
   strcpy(address, s2);
   

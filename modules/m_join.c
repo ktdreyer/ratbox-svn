@@ -41,10 +41,12 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
+#include "sprintf_irc.h"
 
 
 static void m_join(struct Client*, struct Client*, int, char**);
 static void ms_join(struct Client*, struct Client*, int, char**);
+static void burst_mode_list(char *, dlink_list *, char, int);
 
 struct Message join_msgtab = {
   "JOIN", 0, 0, 2, 0, MFLG_SLOW, 0,
@@ -228,10 +230,7 @@ m_join(struct Client *client_p,
     if (!IsOper(source_p))
      check_spambot_warning(source_p, name);
       
-      /*
-       * can_join checks for +i key, bans.
-       */
-
+      /* can_join checks for +i key, bans etc */
       if ( (i = can_join(source_p, chptr, key)) )
 	{
 	  sendto_one(source_p,
@@ -284,6 +283,15 @@ m_join(struct Client *client_p,
                         ":%s SJOIN %lu %s %s:@%s",
                         me.name, (unsigned long) chptr->channelts, 
                         chptr->chname, mbuf, parv[0]);
+
+          /* burst any +beI modes if we have them */
+          if(chptr->banlist.head != NULL || chptr->exceptlist.head != NULL ||
+             chptr->invexlist.head != NULL)
+          {
+            burst_mode_list(chptr->chname, &chptr->banlist, 'b', 0);
+            burst_mode_list(chptr->chname, &chptr->exceptlist, 'e', CAP_EX);
+            burst_mode_list(chptr->chname, &chptr->invexlist, 'I', CAP_IE);
+          }
 	}
       else
 	{
@@ -402,3 +410,62 @@ static void do_join_0(struct Client *client_p, struct Client *source_p)
       remove_user_from_channel(chptr, source_p);
     }
 }
+
+/* burst_mode_list()
+ *
+ * inputs       - channel name, banlist, flag and capab.
+ * outputs      -
+ * side effects - this little evil thing will send to all servers a +beI
+ *                list to be used to sync up persistent chans with the
+ *                rest of the network.
+ */
+static void
+burst_mode_list(char *chname, dlink_list *banlist, char flag, int cap)
+{
+  struct Ban *banptr;
+  dlink_node *ptr;
+  char buf[BUFSIZE];
+  char mbuf[MAXMODEPARAMS + 1];
+  char pbuf[MODEBUFLEN];
+  int mlen;
+  int tlen;
+  int cur_len = 0;
+  char *mp;
+  char *pp;
+  int count = 0;
+
+  mlen = ircsprintf(buf, ":%s MODE %s +", me.name, chname);
+
+  mp = mbuf;
+  pp = pbuf;
+
+  DLINK_FOREACH(ptr, banlist->head)
+  {
+    banptr = ptr->data;
+
+    tlen = strlen(banptr->banstr) + 1;
+
+    if(tlen > MODEBUFLEN)
+      continue;
+
+    if((count >= MAXMODEPARAMS) || ((mlen + cur_len + tlen) > BUFSIZE))
+    {
+      sendto_server(NULL, NULL, NULL, cap, NOCAPS, "%s%s %s", buf, mbuf, pbuf);
+
+      mp = mbuf;
+      pp = pbuf;
+      cur_len = 0;
+      count = 0;
+    }
+
+    *mp++ = flag;
+    *mp = '\0';
+    pp += ircsprintf(pp, "%s ", banptr->banstr);
+    cur_len += tlen;
+    count++;
+  }
+
+  if(count)
+    sendto_server(NULL, NULL, NULL, cap, NOCAPS, "%s%s %s", buf, mbuf, pbuf);
+}
+
