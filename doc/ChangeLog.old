@@ -1,3 +1,16 @@
+wcampbel    2002/01/10 23:00:04 EST	(20020111_0)
+
+  Modified files:
+    doc                  example.conf 
+  Log:
+  Corrected some of the items that Lee recently changed in the parser.
+  It's still not properly done...this whole doc MUST be rewritten soon.
+  
+  Revision  Changes    Path
+  7.151     +8 -6      ircd-hybrid-7/doc/example.conf
+
+
+
 jmallett    2002/01/10 16:54:20 EST	(20020110_9)
 
   Modified files:
