@@ -138,22 +138,6 @@ void show_ports(struct Client* sptr)
 #define HYBRID_SOMAXCONN SOMAXCONN
 #endif
 
-static void listener_dns_callback(void *ptr, adns_answer *reply)
-{
-  struct Listener *listener;
-  listener = (struct Listener *)ptr;
-  if(reply && (reply->status == adns_s_ok))
-  {
-   	if(strlen(*reply->rrs.str) < HOSTLEN)
-   	{
-   	 	strcpy(listener->vhost, *reply->rrs.str);
-  	 	listener->name = listener->vhost;
-        }	                                 
-  }
-  BlockHeapFree(dns_blk, listener->dns_query);
-  listener->dns_query = NULL;
-}  
-
 static int inetport(struct Listener* listener)
 {
   struct irc_sockaddr lsin;
@@ -165,6 +149,14 @@ static int inetport(struct Listener* listener)
    */
   fd = comm_open(DEF_FAM, SOCK_STREAM, 0, "Listener socket");
 
+#ifdef IPV6
+  if (!IN6_ARE_ADDR_EQUAL((struct in6_addr *)&listener->addr, &in6addr_any)) {
+#else
+  if (INADDR_ANY != listener->addr.sins.sin.s_addr) {
+#endif
+    inetntop(DEF_FAM, &IN_ADDR(listener->addr), listener->vhost, HOSTLEN);
+    listener->name = listener->vhost;
+  }
   if (-1 == fd) {
     report_error("opening listener socket %s:%s", 
                  get_listener_name(listener), errno);
@@ -196,7 +188,7 @@ static int inetport(struct Listener* listener)
   copy_s_addr(S_ADDR(lsin), IN_ADDR(listener->addr));
   S_PORT(lsin) = htons(listener->port);
 
-
+  
   if (bind(fd, (struct sockaddr*) &SOCKADDR(lsin), sizeof(struct irc_sockaddr))) {
     report_error("binding listener socket %s:%s", 
                  get_listener_name(listener), errno);
@@ -225,16 +217,6 @@ static int inetport(struct Listener* listener)
   comm_setselect(fd, FDLIST_SERVICE, COMM_SELECT_READ, accept_connection,
     listener, 0);
 
-#ifdef IPV6
-  if (!IN6_ARE_ADDR_EQUAL((struct in6_addr *)&listener->addr, &in6addr_any)) {
-#else
-  if (INADDR_ANY != listener->addr.sins.sin.s_addr) {
-#endif
-    listener->dns_query = BlockHeapAlloc(dns_blk);	
-    listener->dns_query->callback = listener_dns_callback;
-    listener->dns_query->ptr = listener;
-    adns_getaddr(&listener->addr, DEF_FAM, listener->dns_query);
-  }
   return 1;
 }
 
