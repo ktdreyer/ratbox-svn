@@ -194,10 +194,6 @@ int mo_kline(struct Client *cptr,
     return 0;
 
   ip_kline = is_ip_kline(host,&ip,&ip_mask);
-
-  if ( already_placed_kline(sptr, user, host, tkline_time, ip) )
-    return 0;
-
   current_date = smalldate((time_t) 0);
 
   aconf = make_conf();
@@ -206,6 +202,22 @@ int mo_kline(struct Client *cptr,
   DupString(aconf->user, user);
 
   aconf->port = 0;
+
+  if(target_server != NULL)
+    {
+      sendto_cap_serv_butone(CAP_KLN, &me,
+			   ":%s KLINE %s %s %d %s %s :%s",
+			   me.name, sptr->name,
+			   target_server,
+			   tkline_time, user, host, reason);
+
+      if(*target_server != '*' && target_server[1] != '\0')
+	return 0;
+    }
+
+  /* We check if we've already got the kline, after sending it */
+  if ( already_placed_kline(sptr, user, host, tkline_time, ip) )
+    return 0;
 
   if(tkline_time)
     {
@@ -232,13 +244,6 @@ int mo_kline(struct Client *cptr,
 
       apply_kline(sptr, aconf, reason, current_date, ip_kline, ip, ip_mask);
     }
-
-  if(target_server != NULL)
-    sendto_cap_serv_butone(CAP_KLN, &me,
-			   ":%s KLINE %s %s %d %s %s : %s",
-			   me.name, sptr->name,
-			   target_server,
-			   tkline_time, user, host, reason);
 
   return 0;
 } /* mo_kline() */
@@ -292,7 +297,9 @@ int ms_kline(struct Client *cptr,
   if(find_u_conf(sptr->name,rcptr->username,rcptr->host))
     {
       sendto_realops_flags(FLAGS_ALL,
-			   "*** Received K-Line from %s!%s@%s on %s",
+			   "*** Received K-Line for %s@%s, from %s!%s@%s on %s",
+			   parv[4],
+			   parv[5],
 			   rcptr->name,
 			   rcptr->username,
 			   rcptr->host,
@@ -304,6 +311,7 @@ int ms_kline(struct Client *cptr,
       DupString(aconf->host, parv[5]);
       DupString(aconf->passwd, parv[6]);
       current_date = smalldate((time_t) 0);
+
       if(tkline_time)
 	apply_tkline(rcptr, aconf, current_date, tkline_time, 0, 0, 0);
       else
