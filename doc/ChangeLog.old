@@ -1,3 +1,7 @@
+*** 20000108_1 by wnder
+fixed missing #include "s_conf.h"
+
+
 *** 20000107_4 by db
 - sticky / key
 
