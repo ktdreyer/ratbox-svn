@@ -1,22 +1,75 @@
+Hook documentation - <lee -at- leeh.co.uk>
+------------------------------------------
 
-The actual usage of the hook system needs documented here, I'll wait for
-larne to fix that, but here is the list of supported hooks at current.
+Documentation on how to actually develop code to use hooks is contained in
+contrib/example_module.c, this document simply describes which hooks are
+available.
+
+There are various hook structures available that may be passed to hooks:
+hook_data		- struct Client *client; const void *arg1; 
+			  const void *arg2;
+hook_data_int		- struct Client *client; const void *arg1; int arg2;
+hook_data_client	- struct Client *client; struct Client *target;
+hook_data_channel	- struct Client *client; struct Channel *chptr;
 
 
-This is currently the list of supported hooks in ircd-ratbox
+Spy Hooks
+---------
+The following spy hooks are called only when the request is handled by the
+local server.  They will not be called if the command is being sent remotely
+for another server to handle:
+"doing_admin"		- Passes hook_data:
+			  hdata->client = client requesting ADMIN
 
-"new_local_client" - takes struct Client as an argument and gets called
-		     when a new client is introduced but before we
-		     release the client into read_packet()
-"burst_channel"	   - takes struct hook_burst_channel as an argument
-		     and gets called as channels are getting burst on to
-		     the network.  See contrib/m_tburst.c for an example
+"doing_info"		- Passes hook_data:
+			  hdata->client = client requesting INFO
 
-"exit_local_client" - takes a struct exit_client_hook and gets called
-		      while a local client is exiting.
+"doing_links"		- Passes hook_data:
+			  hdata->client = client doing LINKS
+			  (const char *) hdata->arg1 = optional mask
 
-"exit_unknown_client" - takes a struct exit_client_hook and gets called
-			while an unknown client is exiting.
+"doing_motd"		- Passes hook_data:
+			  hdata->client = client doing MOTD
+
+"doing_stats"		- Passes hook_data_int:
+			  hdata->client = client doing STATS
+			  (const char *) hdata->arg1 = optional stats l target
+			  (char) hdata->arg2 = statchar being requested
+
+"doing_stats_p"		- Passes hook_data:
+			  hdata->client = client doing STATS p
+
+"doing_trace"		- Passes hook_data_client:
+			  hdata->client = client doing TRACE
+			  hdata->target = optional target of TRACE
+
+"doing_whois"		- Passes hook_data_client:
+			  hdata->client = local client doing WHOIS
+			  hdata->target = target of WHOIS
+
+"doing_whois_global"	- Passes hook_data_client:
+			  hdata->client = remote client doing WHOIS
+			  hdata->target = target of WHOIS
+
+
+Netburst Hooks
+--------------
+The following burst hooks are called when we are sending a netburst to a
+server.
+
+"burst_client"		- Sent after we have just burst a user.
+			  Passes hook_data_client:
+			  hdata->client = server we are bursting to
+			  hdata->target = user we have just burst
+
+"burst_channel"		- Sent after we have just burst a channel.
+			  Passes hook_data_channel:
+			  hdata->client = server we are bursting to
+			  hdata->chptr = channel we have just burst
+
+"burst_finished"	- Sent after we have just finished bursting users/chans
+			  Passes hook_data_client:
+			  hdata->client = server we are bursting to
 
 
 The following are for debugging and take struct hook_io_data for arguments. 
@@ -25,20 +78,5 @@ community.
 "iosend"
 "iorecv"
 "iorecvctrl"
-
-Also some modules declare their own hooks, and can be used in other modules. 
-The majority of these are used to implement the spy functions in contrib/. 
-These all take an argument that is struct hook_spy_data
-
-"doing_admin_hook"
-"doing_stats_hook"
-"doing_stats_p_hook"
-"doing_info_hook"
-"doing_stats_L_hook"
-"doing_trace_hook"
-"doing_whois_local_hook"
-"doing_whois_global_hook"
-"doing_motd_hook"
-"doing_links_hook"
 
 $Id$

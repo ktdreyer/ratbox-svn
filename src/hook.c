@@ -55,6 +55,9 @@ int h_iosend_id;
 int h_iorecv_id;
 int h_iorecvctrl_id;
 #endif
+int h_burst_client;
+int h_burst_channel;
+int h_burst_finished;
 
 void
 init_hook(void)
@@ -66,6 +69,10 @@ init_hook(void)
 	h_iorecv_id = register_hook("iorecv");
 	h_iorecvctrl_id = register_hook("iorecvctrl");
 #endif
+
+	h_burst_client = register_hook("burst_client");
+	h_burst_channel = register_hook("burst_channel");
+	h_burst_finished = register_hook("burst_finished");
 }
 
 /* grow_hooktable()

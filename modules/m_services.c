@@ -52,11 +52,11 @@
 static int me_su(struct Client *, struct Client *, int, const char **);
 static int me_login(struct Client *, struct Client *, int, const char **);
 
-static int h_sent_client_burst(struct Client *);
-static int h_server_link(struct Client *);
 #if 0
-static int h_svc_whois(struct hook_mfunc_data *hd);
+static int h_server_link(struct Client *);
 #endif
+static void h_svc_burst_client(hook_data_client *);
+static void h_svc_whois(hook_data_client *);
 
 struct Message su_msgtab = {
 	"SU", 0, 0, 0, MFLG_SLOW,
@@ -68,15 +68,15 @@ struct Message login_msgtab = {
 };
 
 mapi_clist_av1 services_clist[] = { &su_msgtab, &login_msgtab, NULL };
-#if 0
 mapi_hfn_list_av1 services_hfnlist[] = {
-	{ "sent_client_burst",	(hookfn) h_sent_client_burst },
-	{ "server_link",	(hookfn) h_server_link },
 	{ "doing_whois",	(hookfn) h_svc_whois },
 	{ "doing_whois_global",	(hookfn) h_svc_whois },
+	{ "burst_client",	(hookfn) h_svc_burst_client },
+#if 0
+	{ "server_link",	(hookfn) h_server_link },
+#endif
 	{ NULL, NULL }
 };
-#endif
 
 DECLARE_MODULE_AV1(services, NULL, NULL, services_clist, NULL, 
 #if 0
@@ -125,30 +125,21 @@ me_login(struct Client *client_p, struct Client *source_p,
 	return 0;
 }
 
-#if 0
-static int
-h_sent_client_burst(struct Client *target_p)
+static void
+h_svc_burst_client(hook_data_client *hdata)
 {
 	struct Client *client_p;
 	dlink_node *ptr;
 
-	DLINK_FOREACH(ptr, global_client_list.head)
-	{
-		client_p = ptr->data;
+	if(EmptyString(hdata->target->user->suser))
+		return;
 
-		if(!IsPerson(client_p))
-			continue;
-		
-		if(EmptyString(client_p->user->suser))
-			continue;
-
-		sendto_one(target_p, ":%s ENCAP * LOGIN %s",
-				get_id(client_p, target_p), client_p->user->suser);
-	}
-
-	return 0;
+	sendto_one(hdata->client, ":%s ENCAP * LOGIN %s",
+			get_id(hdata->target, hdata->client),
+			hdata->target->user->suser);
 }
 
+#if 0
 static int
 h_server_link(struct Client *target_p)
 {
@@ -165,20 +156,18 @@ h_server_link(struct Client *target_p)
 
 	return 0;
 }
-
-static int
-h_svc_whois(struct hook_mfunc_data *data)
-{
-	if(!EmptyString(data->client_p->user->suser))
-	{
-		sendto_one(data->source_p, form_str(RPL_WHOISLOGGEDIN),
-				me.name, data->source_p->name,
-				data->client_p->name,
-				data->client_p->user->suser);
-	}
-
-	return 0;
-}
 #endif
+
+static void
+h_svc_whois(hook_data_client *data)
+{
+	if(!EmptyString(data->target->user->suser))
+	{
+		sendto_one(data->client, form_str(RPL_WHOISLOGGEDIN),
+				me.name, data->client->name,
+				data->target->name,
+				data->target->user->suser);
+	}
+}
 
 #endif

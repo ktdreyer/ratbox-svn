@@ -694,11 +694,15 @@ burst_TS5(struct Client *client_p)
 	struct Client *target_p;
 	struct Channel *chptr;
 	struct membership *msptr;
+	hook_data_client hclientinfo;
+	hook_data_channel hchaninfo;
 	dlink_node *ptr;
 	dlink_node *uptr;
 	char *t;
 	int tlen, mlen;
 	int cur_len = 0;
+
+	hclientinfo.client = hchaninfo.client = client_p;
 
 	DLINK_FOREACH(ptr, global_client_list.head)
 	{
@@ -723,6 +727,9 @@ burst_TS5(struct Client *client_p)
 		if(ConfigFileEntry.burst_away && !EmptyString(target_p->user->away))
 			sendto_one(client_p, ":%s AWAY :%s",
 				   target_p->name, target_p->user->away);
+
+		hclientinfo.target = target_p;
+		call_hook(h_burst_client, &hclientinfo);
 	}
 
 	DLINK_FOREACH(ptr, global_channel_list.head)
@@ -789,7 +796,13 @@ burst_TS5(struct Client *client_p)
 				   ConfigChannel.burst_topicwho ? chptr->topic_info : "",
 				   ConfigChannel.burst_topicwho ? " " : "",
 				   chptr->topic);
+
+		hchaninfo.chptr = chptr;
+		call_hook(h_burst_channel, &hchaninfo);
 	}
+
+	hclientinfo.target = NULL;
+	call_hook(h_burst_finished, &hclientinfo);
 }
 
 /*
@@ -809,11 +822,15 @@ burst_TS6(struct Client *client_p)
 	struct Client *target_p;
 	struct Channel *chptr;
 	struct membership *msptr;
+	hook_data_client hclientinfo;
+	hook_data_channel hchaninfo;
 	dlink_node *ptr;
 	dlink_node *uptr;
 	char *t;
 	int tlen, mlen;
 	int cur_len = 0;
+
+	hclientinfo.client = hchaninfo.client = client_p;
 
 	DLINK_FOREACH(ptr, global_client_list.head)
 	{
@@ -850,6 +867,9 @@ burst_TS6(struct Client *client_p)
 			sendto_one(client_p, ":%s AWAY :%s",
 				   use_id(target_p),
 				   target_p->user->away);
+
+		hclientinfo.target = target_p;
+		call_hook(h_burst_client, &hclientinfo);
 	}
 
 	DLINK_FOREACH(ptr, global_channel_list.head)
@@ -917,10 +937,14 @@ burst_TS6(struct Client *client_p)
 				   ConfigChannel.burst_topicwho ? chptr->topic_info : "",
 				   ConfigChannel.burst_topicwho ? " " : "",
 				   chptr->topic);
+
+		hchaninfo.chptr = chptr;
+		call_hook(h_burst_channel, &hchaninfo);
 	}
+
+	hclientinfo.target = NULL;
+	call_hook(h_burst_finished, &hclientinfo);
 }
-
-
 
 /*
  * show_capabilities - show current server capabilities

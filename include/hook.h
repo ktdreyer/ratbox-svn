@@ -19,6 +19,10 @@ int h_iosend_id;
 int h_iorecv_id;
 int h_iorecvctrl_id;
 
+int h_burst_client;
+int h_burst_channel;
+int h_burst_finished;
+
 void init_hook(void);
 int register_hook(const char *name);
 void add_hook(const char *name, hookfn fn);
