@@ -488,8 +488,6 @@ static void oldParseOneLine(FILE *out,char* line)
       if ((class_field = getfield(NULL)) == NULL)
 	break;
       
-      break;
-      /* NOTREACHED */
     }
   if (!passwd_field)
     passwd_field = "";

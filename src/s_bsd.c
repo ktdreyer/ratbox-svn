@@ -522,8 +522,6 @@ ignoreErrno(int ierrno)
     default:
         return 0;
     }
-    /* NOTREACHED */
-       return 0;
 }
 
 

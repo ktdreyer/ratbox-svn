@@ -793,3 +793,7 @@ int main (void)
 #endif /* SNPRINTF_TEST */
 
 #endif /* !HAVE_SNPRINTF */
+
+/* Makes aCC (HP-UX) and Forte C (Solaris) stop complaining */
+
+static int shut_up_forte_and_aCC = 0;
