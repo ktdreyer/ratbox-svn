@@ -42,11 +42,11 @@ int main(int argc, char *argv[])
 
 struct timeval tvstart, tvstop;
 
-void starttimer() {
+static void starttimer(void) {
   gettimeofday(&tvstart, 0);
 }
 
-double stoptimer() {
+static double stoptimer(void) {
   gettimeofday(&tvstop, 0);
   return (tvstop.tv_sec - tvstart.tv_sec) + ( (tvstop.tv_usec - tvstart.tv_usec) / 1000000.0);  
 }
