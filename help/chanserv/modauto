@@ -3,3 +3,4 @@ MODAUTO <channel> <username> <OP|VOICE|NONE>
   <channel>: Channel to modify user in
   <username>: Username to modify
   <OP|VOICE|NONE>: Mode to issue on join
+Automatic OP requires access level of 50 to work.

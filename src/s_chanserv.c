@@ -960,7 +960,9 @@ h_chanserv_join(void *v_chptr, void *v_members)
 			if(mreg_p->suspend)
 				return 0;
 
-			if(mreg_p->flags & CS_MEMBER_AUTOOP)
+			if(mreg_p->flags & CS_MEMBER_AUTOOP &&
+			   mreg_p->level >= S_C_OP &&
+			   !(chreg_p->flags & CS_FLAGS_NOOPS))
 			{
 				sendto_server(":%s MODE %s +o %s",
 					chanserv_p->name, chptr->name,
@@ -1059,7 +1061,9 @@ h_chanserv_join(void *v_chptr, void *v_members)
 			if(mreg_p->suspend)
 				continue;
 
-			if(mreg_p->flags & CS_MEMBER_AUTOOP)
+			if(mreg_p->flags & CS_MEMBER_AUTOOP &&
+			   mreg_p->level >= S_C_OP &&
+			   !(chreg_p->flags & CS_FLAGS_NOOPS))
 			{
 				modebuild_add(DIR_ADD, "o", 
 					member_p->client_p->name);
@@ -1092,7 +1096,7 @@ h_chanserv_user_login(void *v_client_p, void *unused)
 	struct user *user;
 	struct user_reg *ureg_p;
 	struct channel *chptr;
-	struct chmember *member;
+	struct chmember *member_p;
 	struct chan_reg *chreg_p;
 	struct member_reg *mreg_p;
 
@@ -1101,8 +1105,8 @@ h_chanserv_user_login(void *v_client_p, void *unused)
 
 	DLINK_FOREACH(ptr, user->channels.head)
 	{
-		member = ptr->data;
-		chptr = member->chptr;
+		member_p = ptr->data;
+		chptr = member_p->chptr;
 
 		if((chreg_p = find_channel_reg(NULL, chptr->name)) == NULL)
 			continue;
@@ -1111,23 +1115,27 @@ h_chanserv_user_login(void *v_client_p, void *unused)
 		if((mreg_p = find_member_reg(ureg_p, chreg_p)) == NULL)
 			continue;
 
-		if(mreg_p->flags & CS_MEMBER_AUTOOP &&
-		   !(member->flags & MODE_OPPED))
+		/* autoop/voice dont work on +o users */
+		if(is_opped(member_p))
+			continue;
+
+		if(mreg_p->flags & CS_MEMBER_AUTOOP && mreg_p->level >= S_C_OP &&
+		   !(chreg_p->flags & CS_FLAGS_NOOPS))
 		{
 			sendto_server(":%s MODE %s +o %s",
 					chanserv_p->name, chptr->name,
-					member->client_p->name);
-			member->flags &= ~MODE_DEOPPED;
-			member->flags |= MODE_OPPED;
+					member_p->client_p->name);
+			member_p->flags &= ~MODE_DEOPPED;
+			member_p->flags |= MODE_OPPED;
 			mreg_p->channel_reg->last_time = CURRENT_TIME;
 		}
 		else if(mreg_p->flags & CS_MEMBER_AUTOVOICE &&
-			!(member->flags & (MODE_OPPED | MODE_VOICED)))
+			!is_voiced(member_p))
 		{
 			sendto_server(":%s MODE %s +v %s",
 					chanserv_p->name, chptr->name,
-					member->client_p->name);
-			member->flags |= MODE_VOICED;
+					member_p->client_p->name);
+			member_p->flags |= MODE_VOICED;
 			mreg_p->channel_reg->last_time = CURRENT_TIME;
 		}
 	}
