@@ -1,3 +1,16 @@
+leeh        2003/09/06 10:47:42 EDT	(20030906_3)
+
+  Modified files:
+    src                  linebuf.c s_conf.c 
+  Log:
+  - fix default compression_level and a couple of linebuf things
+  
+  Revision  Changes    Path
+  7.114     +4 -3      ircd-ratbox/src/linebuf.c
+  7.434     +1 -1      ircd-ratbox/src/s_conf.c
+
+
+
 leeh        2003/09/06 10:23:00 EDT	(20030906_2)
 
   Modified files:
