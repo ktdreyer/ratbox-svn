@@ -1,3 +1,8 @@
+*** 20000103_3 by db
+- removed last vestige of TOPIC_WHO define
+
+
+
 *** 20000103_2 by db
 - fixed a typo in ircd.c
 
