@@ -1,3 +1,8 @@
+*** 20001213_4 by db
+- typo, it should be "server" not "servers" in class
+
+
+
 *** 20001213_3 by db
 - halfops wasn't being propogated by sjoin, so added quick change
   to pass the halfop along
