@@ -12,7 +12,8 @@ Config script.  The Makefile has also been updated to include CFLAGS
 defines for popular modern OSes.
 
 0.  Read the ChangeLog file to find out about the exciting new
-features in this version.
+features in this version.  Other good reads are doc/whats-new.txt, BUGS,
+doc/example.conf, and README.FIRST
 
 1.  Run the configure script.  It will create include/setup.h and the
 Makefiles to match your system.  In hybrid-7, the paths are now handled

@@ -123,12 +123,13 @@ COMMAND         - USAGE and DESCRIPTION
                   ircd.conf file.
 
                   [option] can be one of the following:
-                    DNS     - Re-read the /etc/resolv.conf file
-                    GC      - Performs garbage collecting of excess
+                    DNS      - Re-read the /etc/resolv.conf file
+                    GC       - Performs garbage collecting of excess
                               memory.
-                    MOTD    - Re-reads MOTD file
-                    OMOTD   - Re-reads Oper MOTD file
-                    HELP    - Re-reads this HELP file
+                    MOTD     - Re-reads MOTD file
+                    OMOTD    - Re-reads Oper MOTD file
+                    HELP     - Re-reads this HELP file
+                    CHANNELS - Forces a channel cleanup
 
   RESTART       - RESTART server.name :[reason]
                   Restarts the IRC server.

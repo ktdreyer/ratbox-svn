@@ -10,7 +10,7 @@ now set in the config file.
 Unauthorized connection notices have been moved to the +u user mode.
 
 A new drone warning mode has been added... +e.  Setting +e will show the
-gecos ("Real Name") field in the +c connection notice.
+gecos ("Real Name") field in a notice similar to the +c connection notice.
 
 Server side ignore is included for all users.  Setting user mode +g will
 make you ignore all private messages.  Channel messages are not affected.
@@ -20,13 +20,18 @@ People who you wish to communicate with can be permitted with the
 When a user tries to message you when you are set +g, and they are not
 on the accept list, they will receive a message saying you are on server
 side ignore.  You will also receive a message, but it is paced, so you will
-only receive a notification every 60 seconds.
+only receive a notification every 60 seconds.  When a user changes his or 
+her nick, he or she will be removed from any other user's ACCEPT list.  This
+must be done in order to prevent other users from being able to trace another
+user through NICK changes and the like.  When a user is placed on the ACCEPT
+list, the user will be notified
 
 Channels are also flood controlled.  Sending too many messages to a channel
 when you are not opped or voiced will cause the server to block the flood 
 after a certain amount of lines.  Opers can change the number of lines with 
 /quote SET FLOODCOUNT.  The default is currently 8 lines.  A side effect
-of this is that channel CTCP's will be throttled for non ops.
+of this is that channel CTCP's will be throttled for non ops, but this cannot
+be helped.
 
 Half ops are included.  Setting a user +h in a channel will give them half-op
 privilages.  Half ops can kick regular users but not full ops.
@@ -119,7 +124,8 @@ Classes (Y: lines) can now have names instead of numbers.
 Hybrid now supports IRCnet like redirection.  The redirserv and redirport 
 options in an auth {} block will allow an admin to specify other servers 
 to forward user connections to.  The client must support the 010 numeric
-for this to work (EPIC supports it).
+for this to work (EPIC supports it).  Note that there must always be a class
+field in auth blocks, even ones that will just do redirection.
 
 Local operators are no longer part of ircd.  The oper flags are used to 
 restrict what each operator can do.
@@ -174,7 +180,5 @@ provided in contrib, providing WHOIS notice, STATS notice, and LINKS notice.
 Others will be added as the ircd matures.
 
 Usermode +l is provided in order to see LOCOPS
-
-# complete me
 
 # $Id$

@@ -170,12 +170,8 @@ Little things to be done given enough time and initiative
    hyb-devel.monkie.org[wcampbel@cats.meow.st], Squitting 
    Hwy-7!wcampbel@bee-90-245.bee.net (DONE -- except for LL bugs)
 .  Have a few more things /quote SET'table
-.  Have a command (maybe a STATS or in INFO) to show all ircd.conf derived
-   options (Partially done in INFO) (In progress)
 .  More documentation on the gettext stuff, enough for a layman to use
 .  Extra \r\n sent to the log file by ts_warn needs to go
-.  Hyb7-ize Riedel's great oper document (Done, Riedel updated it)
-.  Get rid of the old useless test stuff, save about 100k untarred
 .  Fix tools/fixklines.c and tools/klineParse.c for the new kline.conf
    format.
 .  Update tools/mkconf as well.
@@ -184,9 +180,7 @@ Little things to be done given enough time and initiative
 .  Fix convertconf more
 .  Do we still need start_ircd.c and ircd_start.c?
 .  Look to see what other STATS commands can be made optionally oper-only
-.  Update ircd.8, or get rid of it (move to old?)
 .  2 pass conf parser (grab classes before anything that uses them)
-.  Replacement for the old X:...:2, silent reject
 .  Add scaleable database-based authentication.  Probably part of Iauth.
    Also add support for server-side notify with the list stored in the
    auth database.  This would make ircd an awesome instant messaging
@@ -197,7 +191,7 @@ Little things to be done given enough time and initiative
 
 * (Isomer promised this)
   break /accept link when target changes nick (I can do that instead if
-  need be )
+  need be ) (DONE, Diane did this)
 
 * add logging to ircd.log of possible channel floods
 
@@ -205,5 +199,3 @@ Little things to be done given enough time and initiative
   flood messages on a channel in t seconds.. This log would be available
   to hand to authorities if requested.
 
-
-  

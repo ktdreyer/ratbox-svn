@@ -2,7 +2,7 @@ $Id$
 Updated for Hybrid 7 (2000/12/28)
 
 When you type /version you will often see something like this:
-*** hybrid-7(20001228_24). irc.vchan HCp TS3ow
+*** hybrid-7(alpha)(20010117_13). irc.vchan GHCiIMp TS3ow
 
 Ever wondered what those funny chars mean after the version number? Well
 here they are:

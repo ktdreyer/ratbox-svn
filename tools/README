@@ -19,3 +19,7 @@ klineParse.c  - cleans out redundant klines
 viconf - edit your conf file without having to chdir su etc. etc.
          also locks the file if file locking is used.
 
+untabify - converts tab characters to a specific number of spaces
+
+rsa_respond - a tool to generate an RSA response to the challenge asked
+              by the server.  This is not completely finished yet.

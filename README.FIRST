@@ -27,7 +27,8 @@ If you don't read this first, we won't help you.
 
 - If you are wondering why config.h is practically empty, its because many 
   things that were once in config.h are now specified in the 'general'
-  block of ircd.conf.
+  block of ircd.conf.  Look at example.conf for more information about
+  these options.
 
 - NEW DEBUGGING MODE: if you run ircd with the -s flag, it will send
   errors that are normally syslogged to stderr.  This is very useful
@@ -46,7 +47,7 @@ If you don't read this first, we won't help you.
   if you find otherwise.  It probably does not compile on AIX, IRIX
   or libc5 Linux.
 
-- CYGWIN USERS: Unfortunately, cygwin support has been removed,
+- CYGWIN USERS: Unfortunately, cygwin support has been removed
   because there is no way to support dynamic modules under cygwin.
 
 - Please read doc/whats-new.txt for information about what is in this release
