@@ -1,3 +1,28 @@
+leeh        2002/08/17 14:28:24 EDT	(20020817_1)
+
+  Modified files:
+    include              client.h 
+    modules              m_close.c m_svinfo.c 
+    modules/core         m_squit.c 
+    src                  client.c s_auth.c s_bsd.c s_conf.c 
+                         s_user.c send.c 
+  Log:
+  - added log_client_name() to counter the kludge in get_client_name.
+  
+  Revision  Changes    Path
+  7.171     +1 -0      ircd-ratbox/include/client.h
+  1.52      +2 -2      ircd-ratbox/modules/core/m_squit.c
+  1.25      +2 -7      ircd-ratbox/modules/m_close.c
+  1.36      +3 -8      ircd-ratbox/modules/m_svinfo.c
+  7.313     +41 -2     ircd-ratbox/src/client.c
+  7.105     +3 -3      ircd-ratbox/src/s_auth.c
+  7.174     +3 -1      ircd-ratbox/src/s_bsd.c
+  7.334     +7 -9      ircd-ratbox/src/s_conf.c
+  7.219     +2 -4      ircd-ratbox/src/s_user.c
+  7.216     +12 -1     ircd-ratbox/src/send.c
+
+
+
 leeh        2002/08/17 04:41:08 EDT	(20020817_0)
 
   Modified files:
