@@ -29,15 +29,10 @@
 #include "struct.h"
 #include "client.h"
 #include "ircd.h"
-#include "irc_string.h"
 #include "numeric.h"
 #include "send.h"
-#include "s_user.h"
-#include "s_conf.h"
 #include "s_newconf.h"
-
 #include "parse.h"
-#include "hook.h"
 #include "modules.h"
 #include "s_serv.h"
 

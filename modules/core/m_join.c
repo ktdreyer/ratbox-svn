@@ -36,10 +36,7 @@
 #include "send.h"
 #include "s_serv.h"
 #include "s_conf.h"
-#include "s_newconf.h"
-
 #include "parse.h"
-#include "hook.h"
 #include "modules.h"
 #include "sprintf_irc.h"
 

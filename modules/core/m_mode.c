@@ -27,7 +27,6 @@
 #include "stdinc.h"
 #include "tools.h"
 #include "struct.h"
-#include "balloc.h"
 #include "channel.h"
 #include "client.h"
 #include "hash.h"
@@ -39,9 +38,7 @@
 #include "s_serv.h"
 #include "s_log.h"
 #include "send.h"
-
 #include "parse.h"
-#include "hook.h"
 #include "modules.h"
 #include "sprintf_irc.h"
 #include "s_newconf.h"

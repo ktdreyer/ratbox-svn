@@ -35,10 +35,7 @@
 #include "numeric.h"
 #include "send.h"
 #include "s_conf.h"
-#include "s_serv.h"
-
 #include "parse.h"
-#include "hook.h"
 #include "modules.h"
 
 static int m_invite(struct Client *, struct Client *, int, const char **);

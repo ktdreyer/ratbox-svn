@@ -33,7 +33,6 @@
 #include "tools.h"
 #include "struct.h"
 #include "send.h"
-#include "hook.h"
 #include "modules.h"
 #include "parse.h"
 #include "hostmask.h"

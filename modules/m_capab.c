@@ -30,10 +30,7 @@
 #include "client.h"
 #include "irc_string.h"
 #include "s_serv.h"
-#include "s_conf.h"
-
 #include "parse.h"
-#include "hook.h"
 #include "modules.h"
 #include "memory.h"
 

@@ -32,14 +32,11 @@
 #include "sprintf_irc.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "s_conf.h"
 #include "s_newconf.h"
 #include "restart.h"
 #include "s_log.h"
 #include "send.h"
-
 #include "parse.h"
-#include "hook.h"
 #include "modules.h"
 
 static int mo_restart(struct Client *, struct Client *, int, const char **);

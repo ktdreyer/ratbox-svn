@@ -31,13 +31,9 @@
 #include "irc_string.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "s_conf.h"
 #include "s_log.h"
-#include "s_serv.h"
 #include "send.h"
-
 #include "parse.h"
-#include "hook.h"
 #include "modules.h"
 #include "hash.h"
 #include "s_newconf.h"

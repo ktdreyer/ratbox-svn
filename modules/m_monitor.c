@@ -35,7 +35,6 @@
 #include "struct.h"
 #include "client.h"
 #include "parse.h"
-#include "hook.h"
 #include "modules.h"
 #include "monitor.h"
 #include "numeric.h"

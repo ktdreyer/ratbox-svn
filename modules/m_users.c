@@ -32,9 +32,7 @@
 #include "s_serv.h"
 #include "s_conf.h"
 #include "send.h"
-
 #include "parse.h"
-#include "hook.h"
 #include "modules.h"
 
 static int m_users(struct Client *, struct Client *, int, const char **);

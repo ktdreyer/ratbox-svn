@@ -34,9 +34,7 @@
 #include "s_serv.h"
 #include "s_user.h"
 #include "send.h"
-
 #include "parse.h"
-#include "hook.h"
 #include "modules.h"
 
 static char *confopts(struct Client *source_p);

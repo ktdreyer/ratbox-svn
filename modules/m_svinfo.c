@@ -29,13 +29,10 @@
 #include "client.h"
 #include "irc_string.h"
 #include "ircd.h"
-#include "numeric.h"
 #include "send.h"
 #include "s_conf.h"
 #include "s_log.h"
-
 #include "parse.h"
-#include "hook.h"
 #include "modules.h"
 
 static int ms_svinfo(struct Client *, struct Client *, int, const char **);

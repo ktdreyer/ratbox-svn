@@ -31,16 +31,11 @@
 #include "ircd.h"
 #include "numeric.h"
 #include "s_conf.h"
-#include "s_serv.h"
-
 #include "parse.h"
-#include "hook.h"
 #include "modules.h"
 #include "channel.h"
 #include "irc_string.h"
 #include "hash.h"
-#include "class.h"
-
 #include "send.h"
 #include "event.h"
 #include "patricia.h"

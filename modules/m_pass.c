@@ -30,14 +30,10 @@
 #include "client.h"		/* client struct */
 #include "irc_string.h"
 #include "send.h"		/* sendto_one */
-#include "numeric.h"		/* ERR_xxx */
 #include "ircd.h"		/* me */
-
 #include "parse.h"
-#include "hook.h"
 #include "modules.h"
 #include "s_serv.h"
-#include "hash.h"
 #include "s_conf.h"
 #include "memory.h"
 

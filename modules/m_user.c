@@ -30,18 +30,12 @@
 #include "client.h"
 #include "irc_string.h"
 #include "ircd.h"
-#include "numeric.h"
 #include "s_user.h"
 #include "send.h"
-#include "s_conf.h"
-
 #include "parse.h"
-#include "hook.h"
 #include "modules.h"
 #include "sprintf_irc.h"
 #include "memory.h"
-
-#define UFLAGS  (FLAGS_INVISIBLE|FLAGS_WALLOP|FLAGS_SERVNOTICE)
 
 static int mr_user(struct Client *, struct Client *, int, const char **);
 

@@ -30,7 +30,6 @@
 #include "client.h"
 #include "hash.h"
 #include "channel.h"
-#include "hash.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "s_conf.h"
@@ -40,7 +39,6 @@
 #include "sprintf_irc.h"
 #include "s_conf.h"
 #include "s_log.h"
-
 #include "parse.h"
 #include "hook.h"
 #include "modules.h"

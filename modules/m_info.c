@@ -28,17 +28,14 @@
 #include "tools.h"
 #include "struct.h"
 #include "m_info.h"
-#include "channel.h"
 #include "client.h"
 #include "irc_string.h"
 #include "ircd.h"
 #include "hook.h"
 #include "numeric.h"
 #include "s_serv.h"
-#include "s_user.h"
 #include "send.h"
 #include "s_conf.h"
-
 #include "parse.h"
 #include "modules.h"
 

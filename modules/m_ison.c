@@ -32,12 +32,8 @@
 #include "ircd.h"
 #include "numeric.h"
 #include "send.h"
-
 #include "parse.h"
-#include "hook.h"
 #include "modules.h"
-#include "s_conf.h"		/* ConfigFileEntry */
-#include "s_serv.h"		/* uplink/IsCapable */
 #include "hash.h"
 
 #include <string.h>

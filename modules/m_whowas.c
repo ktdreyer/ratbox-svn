@@ -29,17 +29,12 @@
 #include "struct.h"
 #include "whowas.h"
 #include "client.h"
-#include "hash.h"
 #include "irc_string.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "s_serv.h"
-#include "s_user.h"
 #include "send.h"
 #include "s_conf.h"
-
 #include "parse.h"
-#include "hook.h"
 #include "modules.h"
 
 static int m_whowas(struct Client *, struct Client *, int, const char **);

@@ -31,16 +31,12 @@
 #include "ircd.h"
 #include "irc_string.h"
 #include "numeric.h"
-#include "commio.h"
-#include "s_conf.h"
 #include "s_newconf.h"
 #include "s_log.h"
 #include "s_serv.h"
 #include "send.h"
-
 #include "parse.h"
 #include "hash.h"
-#include "hook.h"
 #include "modules.h"
 
 static int mo_connect(struct Client *, struct Client *, int, const char **);

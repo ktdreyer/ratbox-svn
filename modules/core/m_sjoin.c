@@ -33,14 +33,10 @@
 #include "irc_string.h"
 #include "sprintf_irc.h"
 #include "ircd.h"
-#include "numeric.h"
 #include "send.h"
-
 #include "parse.h"
-#include "hook.h"
 #include "modules.h"
 #include "s_serv.h"
-#include "s_conf.h"
 
 static int ms_sjoin(struct Client *, struct Client *, int, const char **);
 

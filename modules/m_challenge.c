@@ -41,7 +41,6 @@
 #include "memory.h"
 #include "client.h"
 #include "ircd.h"
-#include "hook.h"
 #include "modules.h"
 #include "numeric.h"
 #include "send.h"

@@ -28,7 +28,6 @@
 #include "tools.h"
 #include "struct.h"
 #include "client.h"
-#include "channel.h"
 #include "irc_string.h"
 #include "ircd.h"
 #include "s_gline.h"
@@ -39,9 +38,7 @@
 #include "s_newconf.h"
 #include "s_log.h"
 #include "send.h"
-
 #include "parse.h"
-#include "hook.h"
 #include "modules.h"
 #include "hostmask.h"
 #include "reject.h"

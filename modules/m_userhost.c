@@ -30,15 +30,11 @@
 #include "client.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "s_serv.h"
 #include "send.h"
 #include "irc_string.h"
 #include "sprintf_irc.h"
-
 #include "parse.h"
-#include "hook.h"
 #include "modules.h"
-#include "s_conf.h"
 
 static char buf[BUFSIZE];
 

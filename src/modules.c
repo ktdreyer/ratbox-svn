@@ -733,7 +733,7 @@ unload_one_module(const char *name, int warn)
 			{
 				mapi_hfn_list_av1 *m;
 				for (m = mheader->mapi_hfn_list; m->hapi_name; ++m)
-					remove_hook(m->hapi_name, m->fn);
+					remove_hook(m->hapi_name, m->hookfn);
 			}
 
 			if(mheader->mapi_unregister)
@@ -855,7 +855,7 @@ load_a_module(const char *path, int warn, int core)
 			{
 				mapi_hfn_list_av1 *m;
 				for (m = mheader->mapi_hfn_list; m->hapi_name; ++m)
-					add_hook(m->hapi_name, m->fn);
+					add_hook(m->hapi_name, m->hookfn);
 			}
 
 			ver = mheader->mapi_module_version;

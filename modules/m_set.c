@@ -32,18 +32,14 @@
 #include "client.h"
 #include "event.h"
 #include "irc_string.h"
-#include "sprintf_irc.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "commio.h"
-#include "s_serv.h"
 #include "send.h"
 #include "channel.h"
 #include "s_conf.h"
 #include "s_newconf.h"
-
 #include "parse.h"
-#include "hook.h"
 #include "modules.h"
 
 static int mo_set(struct Client *, struct Client *, int, const char **);

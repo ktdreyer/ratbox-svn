@@ -30,16 +30,12 @@
 #include "ircd.h"
 #include "s_user.h"
 #include "client.h"
-#include "hash.h"		/* for find_client() */
 #include "numeric.h"
 #include "s_conf.h"
 #include "send.h"
-#include "channel.h"
 #include "irc_string.h"
-
 #include "parse.h"
 #include "hash.h"
-#include "hook.h"
 #include "modules.h"
 
 static int mr_pong(struct Client *, struct Client *, int, const char **);

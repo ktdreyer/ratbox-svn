@@ -26,7 +26,6 @@
 #include "tools.h"
 #include "struct.h"
 #include "client.h"
-#include "hook.h"
 #include "parse.h"
 #include "modules.h"
 #include "numeric.h"

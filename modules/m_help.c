@@ -28,13 +28,10 @@
 #include "tools.h"
 #include "struct.h"
 #include "ircd.h"
-
 #include "numeric.h"
 #include "send.h"
 #include "s_conf.h"
-#include "s_log.h"
 #include "parse.h"
-#include "hook.h"
 #include "modules.h"
 #include "hash.h"
 #include "cache.h"

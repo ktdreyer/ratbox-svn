@@ -33,9 +33,7 @@
 #include "s_user.h"		/* show_lusers */
 #include "send.h"
 #include "s_conf.h"
-
 #include "parse.h"
-#include "hook.h"
 #include "modules.h"
 
 static int m_lusers(struct Client *, struct Client *, int, const char **);

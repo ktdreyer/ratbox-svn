@@ -39,7 +39,6 @@
 #include "s_log.h"
 
 #include "parse.h"
-#include "hook.h"
 #include "modules.h"
 #include "s_newconf.h"
 

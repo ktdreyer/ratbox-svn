@@ -28,19 +28,15 @@
 #include "tools.h"
 #include "struct.h"
 #include "client.h"		/* client struct */
-#include "event.h"
 #include "hash.h"		/* add_to_client_hash */
 #include "irc_string.h"
 #include "ircd.h"		/* me */
-#include "numeric.h"		/* ERR_xxx */
 #include "s_conf.h"		/* struct ConfItem */
 #include "s_newconf.h"
 #include "s_log.h"		/* log level defines */
 #include "s_serv.h"		/* server_estab, check_server */
-#include "s_stats.h"		/* ServerStats */
 #include "scache.h"		/* find_or_add */
 #include "send.h"		/* sendto_one */
-
 #include "parse.h"
 #include "hook.h"
 #include "modules.h"

@@ -33,7 +33,6 @@
 #include "s_conf.h"
 #include "s_serv.h"
 #include "send.h"
-
 #include "parse.h"
 #include "hook.h"
 #include "modules.h"

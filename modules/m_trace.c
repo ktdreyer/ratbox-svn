@@ -31,16 +31,12 @@
 #include "hook.h"
 #include "client.h"
 #include "hash.h"
-#include "hash.h"
 #include "irc_string.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "commio.h"
 #include "s_serv.h"
 #include "s_conf.h"
-#include "s_newconf.h"
 #include "send.h"
-
 #include "parse.h"
 #include "modules.h"
 

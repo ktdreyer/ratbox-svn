@@ -35,19 +35,14 @@
 #include "tools.h"
 #include "struct.h"
 #include "send.h"
-#include "channel.h"
 #include "client.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "memory.h"
 #include "s_conf.h"
-#include "s_serv.h"
 #include "hash.h"
-
 #include "parse.h"
 #include "hook.h"
 #include "modules.h"
-#include "sprintf_irc.h"
 #include "irc_string.h"
 
 static int me_su(struct Client *, struct Client *, int, const char **);

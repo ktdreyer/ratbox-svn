@@ -34,7 +34,6 @@
 #include "s_serv.h"
 #include "send.h"
 #include "s_conf.h"
-
 #include "parse.h"
 #include "hook.h"
 #include "modules.h"

@@ -30,11 +30,8 @@
 #include "client.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "commio.h"
 #include "send.h"
-
 #include "parse.h"
-#include "hook.h"
 #include "modules.h"
 
 static int mo_close(struct Client *, struct Client *, int, const char **);

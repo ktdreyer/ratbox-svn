@@ -26,8 +26,6 @@
 #include "stdinc.h"
 #include "tools.h"
 #include "struct.h"
-#include "sprintf_irc.h"
-#include "tools.h"
 #include "channel.h"
 #include "client.h"
 #include "hash.h"
@@ -36,9 +34,7 @@
 #include "numeric.h"
 #include "send.h"
 #include "s_conf.h"
-
 #include "parse.h"
-#include "hook.h"
 #include "modules.h"
 #include "s_serv.h"
 

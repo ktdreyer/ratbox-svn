@@ -69,7 +69,7 @@ typedef struct
 typedef struct
 {
 	const char * 	hapi_name;
-	hookfn 		fn;
+	void (*hookfn) (void *);
 } mapi_hfn_list_av1;
 
 struct mapi_mheader_av1

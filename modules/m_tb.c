@@ -39,7 +39,6 @@
 #include "ircd.h"
 #include "s_conf.h"
 #include "parse.h"
-#include "hook.h"
 #include "modules.h"
 #include "hash.h"
 #include "s_serv.h"
