@@ -18,7 +18,7 @@ diff -u -r7.36 irc_string.h
   */
  extern int match(const char *mask, const char *name);
  extern int match_esc(const char *mask, const char *name);
-+extern int match(const char *mask, const char *name);
++extern int match_cidr(const char *mask, const char *name);
  
  /*
   * collapse - collapse a string in place, converts multiple adjacent *'s 
