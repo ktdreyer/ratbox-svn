@@ -232,30 +232,6 @@ comm_settimeout(int fd, time_t timeout, PF * callback, void *cbdata)
 
 
 /*
- * comm_setflush() - set a flush function
- *
- * A flush function is simply a function called if found during
- * comm_timeouts(). Its basically a second timeout, except in this case
- * I'm too lazy to implement multiple timeout functions! :-)
- * its kinda nice to have it seperate, since this is designed for
- * flush functions, and when comm_close() is implemented correctly
- * with close functions, we _actually_ don't call comm_close() here ..
- */
-void
-comm_setflush(int fd, time_t timeout, PF * callback, void *cbdata)
-{
-	fde_t *F;
-	s_assert(fd >= 0);
-	F = &fd_table[fd];
-	s_assert(F->flags.open);
-
-	F->flush_timeout = CurrentTime + (timeout / 1000);
-	F->flush_handler = callback;
-	F->flush_data = cbdata;
-}
-
-
-/*
  * comm_checktimeouts() - check the socket timeouts
  *
  * All this routine does is call the given callback/cbdata, without closing

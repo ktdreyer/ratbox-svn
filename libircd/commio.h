@@ -111,9 +111,6 @@ struct _fde
 	PF *timeout_handler;
 	void *timeout_data;
 	time_t timeout;
-	PF *flush_handler;
-	void *flush_data;
-	time_t flush_timeout;
 	struct DNSQuery *dns_query;
 	struct
 	{
