@@ -1,3 +1,19 @@
+leeh        2003/12/26 16:45:24 EST	(20031226_8)
+
+  Modified files:
+    src                  Makefile.in 
+  Added files:
+    src                  .depend 
+  Log:
+  - add a .depend file
+  - add u_flags.c to Makefile
+  
+  Revision  Changes    Path
+  1.1       +73 -0     rserv/src/.depend (new)
+  1.8       +1 -0      rserv/src/Makefile.in
+
+
+
 leeh        2003/12/26 16:43:14 EST	(20031226_7)
 
   Modified files:
