@@ -5,4 +5,4 @@ if WANT_SERVLINK
 	SERVLINK = servlink
 endif
 
-SUBDIRS = adns libltdl modules src $(SERVLINK) tools
+SUBDIRS = adns libltdl modules src $(SERVLINK) tools doc
