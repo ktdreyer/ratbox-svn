@@ -92,7 +92,7 @@ cache_file(const char *filename, const char *shortname, int flags)
 	char line[BUFSIZE];
 	char *p;
 
-	if((in = fbopen(filename, "r")) == NULL)
+	if((in = fopen(filename, "r")) == NULL)
 		return NULL;
 
 	if(strcmp(shortname, "ircd.motd") == 0)

@@ -319,7 +319,7 @@ write_xline(struct Client *source_p, struct ConfItem *aconf)
 
 	filename = ConfigFileEntry.xlinefile;
 
-	if((out = fbopen(filename, "a")) == NULL)
+	if((out = fopen(filename, "a")) == NULL)
 	{
 		sendto_realops_flags(UMODE_ALL, L_ALL, "*** Problem opening %s ", filename);
 		free_conf(aconf);
@@ -535,7 +535,7 @@ remove_xline(struct Client *source_p, const char *huntgecos)
 	ircsnprintf(temppath, sizeof(temppath),
 		 "%s.tmp", ConfigFileEntry.xlinefile);
 
-	if((in = fbopen(filename, "r")) == NULL)
+	if((in = fopen(filename, "r")) == NULL)
 	{
 		sendto_one_notice(source_p, ":Cannot open %s", filename);
 		return;
@@ -543,7 +543,7 @@ remove_xline(struct Client *source_p, const char *huntgecos)
 
 	oldumask = umask(0);
 
-	if((out = fbopen(temppath, "w")) == NULL)
+	if((out = fopen(temppath, "w")) == NULL)
 	{
 		sendto_one_notice(source_p, ":Cannot open %s", temppath);
 		fclose(in);

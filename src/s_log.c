@@ -77,7 +77,7 @@ void
 init_main_logfile(void)
 {
 	if(log_main == NULL)
-		log_main = fbopen(LPATH, "a");
+		log_main = fopen(LPATH, "a");
 }
 
 void
@@ -88,7 +88,7 @@ open_logfiles(void)
 	if(log_main != NULL)
 		fclose(log_main);
 
-	log_main = fbopen(LPATH, "a");
+	log_main = fopen(LPATH, "a");
 
 	/* log_main is handled above, so just do the rest */
 	for(i = 1; i < LAST_LOGFILE; i++)
@@ -102,7 +102,7 @@ open_logfiles(void)
 
 		/* reopen those with paths */
 		if(!EmptyString(log_table[i].name))
-			*log_table[i].logfile = fbopen(log_table[i].name, "a");
+			*log_table[i].logfile = fopen(log_table[i].name, "a");
 	}
 }			
 

@@ -495,7 +495,7 @@ remove_resv(struct Client *source_p, const char *name)
 	ircsprintf(temppath, "%s.tmp", ConfigFileEntry.resvfile);
 	filename = get_conf_name(RESV_TYPE);
 
-	if((in = fbopen(filename, "r")) == NULL)
+	if((in = fopen(filename, "r")) == NULL)
 	{
 		sendto_one_notice(source_p, ":Cannot open %s", filename);
 		return;
@@ -503,7 +503,7 @@ remove_resv(struct Client *source_p, const char *name)
 
 	oldumask = umask(0);
 
-	if((out = fbopen(temppath, "w")) == NULL)
+	if((out = fopen(temppath, "w")) == NULL)
 	{
 		sendto_one_notice(source_p, ":Cannot open %s", temppath);
 		fclose(in);

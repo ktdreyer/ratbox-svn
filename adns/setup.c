@@ -424,7 +424,7 @@ static const char *instrum_getenv(adns_state ads, const char *envvar) {
 static void readconfig(adns_state ads, const char *filename, int warnmissing) {
   getline_ctx gl_ctx;
   
-  gl_ctx.file= fbopen(filename,"r");
+  gl_ctx.file= fopen(filename,"r");
   if (gl_ctx.file == NULL) {
     if (errno == ENOENT) {
       if (warnmissing)

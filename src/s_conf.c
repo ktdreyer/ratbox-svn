@@ -1187,7 +1187,7 @@ read_ircd_conf(int cold)
 	 */
 	strlcpy(conffilebuf, filename, sizeof(conffilebuf));
 
-	if((conf_fbfile_in = fbopen(filename, "r")) == NULL)
+	if((conf_fbfile_in = fopen(filename, "r")) == NULL)
 	{
 		if(cold)
 		{
@@ -1220,7 +1220,7 @@ read_ban_confs(int cold)
 
 	filename = get_conf_name(KLINE_TYPE);
 
-	if((file = fbopen(filename, "r")) == NULL)
+	if((file = fopen(filename, "r")) == NULL)
 	{
 		if(cold)
 			ilog(L_MAIN, "Failed reading kline file %s", filename);
@@ -1237,7 +1237,7 @@ read_ban_confs(int cold)
 
 	filename = get_conf_name(DLINE_TYPE);
 
-	if((file = fbopen(filename, "r")) == NULL)
+	if((file = fopen(filename, "r")) == NULL)
 	{
 		if(cold)
 			ilog(L_MAIN, "Failed reading dline file %s", filename);
@@ -1254,7 +1254,7 @@ read_ban_confs(int cold)
 	
 	filename = ConfigFileEntry.xlinefile;
 
-	if((file = fbopen(filename, "r")) == NULL)
+	if((file = fopen(filename, "r")) == NULL)
 	{
 		if(cold)
 			ilog(L_MAIN, "Failed reading xline file %s", filename);
@@ -1271,7 +1271,7 @@ read_ban_confs(int cold)
 
 	filename = get_conf_name(RESV_TYPE);
 
-	if((file = fbopen(filename, "r")) == NULL)
+	if((file = fopen(filename, "r")) == NULL)
 	{
 		if(cold)
 			ilog(L_MAIN, "Failed reading resv file %s", filename);
@@ -1313,7 +1313,7 @@ write_confitem(KlineType type, struct Client *source_p, char *user,
 	filename = get_conf_name(type);
 
 
-	if((out = fbopen(filename, "a")) == NULL)
+	if((out = fopen(filename, "a")) == NULL)
 	{
 		sendto_realops_flags(UMODE_ALL, L_ALL, "*** Problem opening %s ", filename);
 		return;

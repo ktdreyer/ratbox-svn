@@ -701,14 +701,14 @@ remove_permkline_match(struct Client *source_p, const char *host, const char *us
 
 	filename = get_conf_name(KLINE_TYPE);
 
-	if((in = fbopen(filename, "r")) == 0)
+	if((in = fopen(filename, "r")) == 0)
 	{
 		sendto_one_notice(source_p, ":Cannot open %s", filename);
 		return;
 	}
 
 	oldumask = umask(0);
-	if((out = fbopen(temppath, "w")) == 0)
+	if((out = fopen(temppath, "w")) == 0)
 	{
 		sendto_one_notice(source_p, ":Cannot open %s", temppath);
 		fclose(in);

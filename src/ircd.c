@@ -409,7 +409,7 @@ write_pidfile(const char *filename)
 {
 	FILE *fb;
 	char buff[32];
-	if((fb = fbopen(filename, "w")))
+	if((fb = fopen(filename, "w")))
 	{
 		unsigned int pid = (unsigned int) getpid();
 

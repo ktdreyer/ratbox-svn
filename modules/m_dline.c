@@ -286,14 +286,14 @@ mo_undline(struct Client *client_p, struct Client *source_p, int parc, const cha
 
 	filename = get_conf_name(DLINE_TYPE);
 
-	if((in = fbopen(filename, "r")) == 0)
+	if((in = fopen(filename, "r")) == 0)
 	{
 		sendto_one(source_p, ":%s NOTICE %s :Cannot open %s", me.name, parv[0], filename);
 		return 0;
 	}
 
 	oldumask = umask(0);
-	if((out = fbopen(temppath, "w")) == 0)
+	if((out = fopen(temppath, "w")) == 0)
 	{
 		sendto_one(source_p, ":%s NOTICE %s :Cannot open %s", me.name, parv[0], temppath);
 		fclose(in);
