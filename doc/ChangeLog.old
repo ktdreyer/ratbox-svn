@@ -1,3 +1,8 @@
+*** 20001223_44 by ejb
+- finally fix the broken longarg handling in parse.c
+
+
+
 *** 20001223_43 by ejb
 - fixed fname_* (oops, hi diane)
 
