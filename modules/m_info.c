@@ -419,6 +419,46 @@ static void send_conf_options(struct Client *sptr)
               me.name, RPL_INFO, sptr->name, "o_lines_oper_only",
               ConfigFileEntry.o_lines_oper_only ? "YES" : "NO",
               "Only Allow Operators to see STATS o");
+  sendto_one(sptr,
+              ":%s %d %s :%-30s %-5s [%-30s]",
+              me.name, RPL_INFO, sptr->name, "stats_notice",
+              ConfigFileEntry.stats_notice ? "YES" : "NO",
+              "Show Operators when a Client uses STATS");
+  sendto_one(sptr,
+              ":%s %d %s :%-30s %-5s [%-30s]",
+              me.name, RPL_INFO, sptr->name, "stats_p_notice",
+              ConfigFileEntry.stats_p_notice ? "YES" : "NO",
+              "Show Operators when a Client uses STATS p");
+  sendto_one(sptr,
+              ":%s %d %s :%-30s %-5s [%-30s]",
+              me.name, RPL_INFO, sptr->name, "links_notice",
+              ConfigFileEntry.links_notice ? "YES" : "NO",
+              "Show Operators when a Client uses LINKS");
+  sendto_one(sptr,
+              ":%s %d %s :%-30s %-5s [%-30s]",
+              me.name, RPL_INFO, sptr->name, "glines",
+              ConfigFileEntry.glines ? "YES" : "NO",
+              "Network wide K-lines");
+  sendto_one(sptr,
+              ":%s %d %s :%-30s %-5d [%-30s]",
+              me.name, RPL_INFO, sptr->name, "gline_time",
+              ConfigFileEntry.gline_time,
+              "Expire Time for Glines");
+  sendto_one(sptr,
+              ":%s %d %s :%-30s %-5d [%-30s]",
+              me.name, RPL_INFO, sptr->name, "knock_delay",
+              ConfigFileEntry.knock_delay,
+              "Delay between KNOCK Attempts");
+  sendto_one(sptr,
+              ":%s %d %s :%-30s %-5s [%-30s]",
+              me.name, RPL_INFO, sptr->name, "short_motd",
+              ConfigFileEntry.short_motd ? "YES" : "NO",
+              "Notice Clients They should Read MOTD");
+  sendto_one(sptr,
+              ":%s %d %s :%-30s %-5s [%-30s]",
+              me.name, RPL_INFO, sptr->name, "client_exit",
+              ConfigFileEntry.client_exit ? "YES" : "NO",
+              "Prepend 'Client Exit:' to User QUIT Message");
 
   sendto_one(sptr,
 	     ":%s %d %s :Compiled on [%s]",

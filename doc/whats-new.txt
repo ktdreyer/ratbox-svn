@@ -9,7 +9,8 @@ now set in the config file.
 
 Unauthorized connection notices have been moved to the +u user mode.
 
-A new drone warning mode has been added... +e.
+A new drone warning mode has been added... +e.  Setting +e will show the
+gecos ("Real Name") field in the +c connection notice.
 
 Server side ignore is included for all users.  Setting user mode +g will
 make you ignore all private messages.  Channel messages are not affected.
