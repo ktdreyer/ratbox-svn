@@ -1,3 +1,17 @@
+leeh        2002/04/13 09:18:34 EDT	(20020413_2)
+
+  Modified files:
+    src                  fileio.c 
+    include              fileio.h 
+  Log:
+  - made file_open and file_close extern, theyre needed by other things
+  
+  Revision  Changes    Path
+  7.10      +3 -0      ircd-hybrid-7/include/fileio.h
+  7.21      +2 -2      ircd-hybrid-7/src/fileio.c
+
+
+
 leeh        2002/04/13 07:46:07 EDT	(20020413_1)
 
   Modified files:
