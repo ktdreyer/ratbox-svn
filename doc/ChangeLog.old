@@ -1,3 +1,7 @@
+*** 20001225_15 by toot
+replaced some ConfigFileEntry.hide_server with GlobalSetOptions.hide_server
+
+
 *** 20001225_14 by ejb
 - split out some of parse() into a couple of new functions,
   handle_command() and string_to_array().
