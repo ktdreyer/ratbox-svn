@@ -58,13 +58,11 @@ struct Capability
 #define CAP_QS          0x00000002   /* Can handle quit storm removal */
 #define CAP_EX          0x00000008   /* Can do channel +e exemptions */
 #define CAP_CHW         0x00000010   /* Can do channel wall @# */
-#define CAP_LL          0x00000020   /* Can do lazy links */
 #define CAP_IE          0x00000040   /* Can do invite exceptions */
 #define CAP_EOB	        0x00000100   /* Can do EOB message */
 #define CAP_KLN	        0x00000200   /* Can do KLINE message */
 #define CAP_GLN	        0x00000400   /* Can do GLINE message */
 #define CAP_HOPS        0x00000800   /* can do half ops (+h) */
-#define CAP_HUB         0x00001000   /* This server is a HUB */
 #define CAP_AOPS        0x00002000   /* Can do anon ops (+a) */
 #define CAP_UID         0x00004000   /* Can do UIDs */
 #define CAP_ZIP         0x00008000   /* Can do ZIPlinks */
@@ -285,7 +283,6 @@ extern void	   add_server_to_list(struct Client *);
 extern void	   remove_server_from_list(struct Client *);
 
 extern void        initServerMask(void);
-extern void        burst_channel(struct Client *client_p, struct Channel *chptr);
 extern void	   sendnick_TS(struct Client*, struct Client* );
 extern int         serv_connect(struct ConfItem *, struct Client *);
 extern unsigned long nextFreeMask(void);
