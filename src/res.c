@@ -1617,7 +1617,7 @@ static void rem_cache(aCache* ocp)
    * remove cache entry from hashed name lists
    */
   assert(0 != hp->h_name);
-  if (hp->h_name)
+  if (hp->h_name == 0)
     return;
   hashv = hash_name(hp->h_name);
 
