@@ -564,8 +564,8 @@ static int clean_nick_name(char *nick)
   if(nick == NULL)
     return 0;
 
-  /* nicks cant start with a digit or - */
-  if (*nick == '-' || IsDigit(*nick))
+  /* nicks cant start with a digit or -, and must have a length */
+  if (*nick == '-' || IsDigit(*nick) || !*nick)
     return 0;
 
   for(; *nick; nick++)
