@@ -70,6 +70,21 @@ static BlockHeap *xline_heap = NULL;
 static BlockHeap *shared_heap = NULL;
 static void conf_heap_gc(void *);
 
+dlink_list tkline_min;
+dlink_list tkline_hour;
+dlink_list tkline_day;
+dlink_list tkline_week;
+
+dlink_list tdline_min;
+dlink_list tdline_hour;
+dlink_list tdline_day;
+dlink_list tdline_week;
+
+dlink_list xline_list;
+
+dlink_list shared_list;
+
+
 /* internally defined functions */
 
 static void lookup_confhost(struct ConfItem* aconf);

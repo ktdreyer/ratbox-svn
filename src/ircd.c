@@ -314,6 +314,18 @@ static int htm_mode = 0;
 static float in_curr_bandwidth = 0.0;
 static float out_curr_bandwidth = 0.0;
 
+void get_current_bandwidth(struct Client *source_p, struct Client *target_p)
+{
+  if(ConfigFileEntry.htm_messages == 0)
+  {
+     sendto_one(source_p, ":%s NOTICE %s :HTM mode is disabled", me.name, source_p->name);
+     return;
+  }
+  sendto_one(source_p,":%s NOTICE %s :Current traffic: - In (%.1fk/s) Out (%.1fk/s)", 
+		      me.name, source_p->name, in_curr_bandwidth, out_curr_bandwidth);
+
+}
+
 static void check_htm(void)
 {
   long htm_trigger = (long)ConfigFileEntry.htm_trigger;

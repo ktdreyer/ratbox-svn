@@ -110,6 +110,8 @@ extern dlink_list dead_list;
 extern dlink_list abort_list;
 extern int callbacks_called;
 
+extern void get_current_bandwidth(struct Client *source_p, struct Client *target_p);
+
 extern unsigned long get_maxrss(void);
 extern void set_time(void);
 

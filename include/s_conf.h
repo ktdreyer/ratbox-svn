@@ -334,25 +334,25 @@ extern struct admin_info  AdminInfo;        /* defined in ircd.c */
 #define TEMP_DAY	3
 #define TEMP_WEEK	4
 
-dlink_list tkline_min;
-dlink_list tkline_hour;
-dlink_list tkline_day;
-dlink_list tkline_week;
+extern dlink_list tkline_min;
+extern dlink_list tkline_hour;
+extern dlink_list tkline_day;
+extern dlink_list tkline_week;
 
-dlink_list tdline_min;
-dlink_list tdline_hour;
-dlink_list tdline_day;
-dlink_list tdline_week;
+extern dlink_list tdline_min;
+extern dlink_list tdline_hour;
+extern dlink_list tdline_day;
+extern dlink_list tdline_week;
 
 extern struct ConfItem* make_conf(void);
 extern void             free_conf(struct ConfItem*);
 
-dlink_list xline_list;
+extern dlink_list xline_list;
 extern struct xline *make_xline(const char *, const char *, int);
 extern void free_xline(struct xline *);
 extern struct xline *find_xline(char *);
 
-dlink_list shared_list;
+extern dlink_list shared_list;
 extern struct shared *make_shared(void);
 extern void free_shared(struct shared *);
 extern int find_shared(const char *username, const char *host,
