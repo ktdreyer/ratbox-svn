@@ -1,3 +1,11 @@
+*** 20001229_11 by db
+- fixed bug in m_sjoin.c that cored server. Non local servers being
+  introduced via sjoin and given by sptr, do not have a LocalUser part
+  hence, this field is NULL and will core if you try to refernce the caps
+  field using IS_CAP()
+
+
+
 *** 20001229_10 by fl_
 
 - fixed a bug I made which caused a -o nick when they werent being deopped
