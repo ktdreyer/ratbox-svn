@@ -1,3 +1,9 @@
+*** 20010101_4 by toot
+. finally, you can join +k vchans :)
+. fixed /mode #chan giving weird replies
+. removed some old commented code in channel.c
+
+
 *** 20010101_3 by db
 - just stuck an early draft of this into cvs
 
