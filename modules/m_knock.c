@@ -46,7 +46,7 @@ void send_knock(struct Client *, struct Client *,
                 struct Channel *, char *);
 
 struct Message knock_msgtab = {
-  MSG_KNOCK, 0, 2, 0, MFLG_SLOW, 0,
+  MSG_KNOCK, 0, 1, 0, MFLG_SLOW, 0,
   {m_unregistered, m_knock, m_ignore, m_knock}
 };
 
@@ -234,8 +234,8 @@ struct Channel *parse_knock_args(struct Client *cptr,
       return NullChn;
     }
 
-  /* don't allow a knock if the user is banned, or the channel is secret */
-  if ((chptr->mode.mode & MODE_SECRET) ||
+  /* don't allow a knock if the user is banned, or the channel is paranoid */
+  if ((chptr->mode.mode & MODE_PRIVATE) ||
       (is_banned(chptr,sptr) == CHFL_BAN) )
     {
       sendto_one(sptr, form_str(ERR_CANNOTSENDTOCHAN), me.name, parv[0],
