@@ -1,3 +1,7 @@
+*** 20001118_3 by toot
+removed all those OLD_* defines in set_mode()
+
+
 *** 20001118_2 by toot
 End of /NAMES list was missing in one place.
 fixed compile warning in ltrace
