@@ -1,3 +1,18 @@
+androsyn    2004/03/30 23:16:21 EST	(20040331_1)
+
+  Modified files:
+    .                    configure configure.ac 
+  Log:
+  This *should* fix the time_t printing issues.  Remember that time_t is
+  signed, and using the %l modifier with the PRIdXX macro *should* be okay.
+  At least it works in cases where time_t = 4 bytes
+  
+  Revision  Changes    Path
+  7.216     +118 -192  ircd-ratbox/configure
+  7.29      +12 -10    ircd-ratbox/configure.ac
+
+
+
 leeh        2004/03/30 19:03:03 EST	(20040331_0)
 
   Modified files:
