@@ -83,23 +83,30 @@ static int m_userhost(struct Client *cptr,
     {
       if ((acptr = find_person(parv[i+1], NULL)))
 	{
-	/* show real IP for USERHOST on yourself */
-	/*
+	  /*
+	   * Show real IP for USERHOST on yourself.
+	   * This is needed for things like mIRC, which do a server-based
+	   * lookup (USERHOST) to figure out what the clients' local IP
+	   * is.  Useful for things like NAT, and dynamic dial-up users.
+	   */
 	  if (acptr == sptr)
+	  {
             rl = ircsprintf(response, "%s%s=%c%s@%s ",
 			    acptr->name,
 			    IsOper(acptr) ? "*" : "",
 			    (acptr->user->away) ? '-' : '+',
 			    acptr->username,
 			    acptr->localClient->sockhost);
+	  }
           else
-	*/
+	  {
             rl = ircsprintf(response, "%s%s=%c%s@%s ",
 			    acptr->name,
 			    IsOper(acptr) ? "*" : "",
 			    (acptr->user->away) ? '-' : '+',
 			    acptr->username,
 			    acptr->host);
+	  }
 
 	  if((rl + cur_len) < (BUFSIZE-10))
 	    {
