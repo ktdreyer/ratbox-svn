@@ -42,10 +42,10 @@ static BlockHeap *ban_reg_heap;
 
 static dlink_list chan_reg_table[MAX_CHANNEL_TABLE];
 
-static void u_chan_chanregister(struct lconn *, const char **, int);
-static void u_chan_chandrop(struct lconn *, const char **, int);
-static void u_chan_chansuspend(struct lconn *, const char **, int);
-static void u_chan_chanunsuspend(struct lconn *, const char **, int);
+static void u_chan_chanregister(struct client *, struct lconn *, const char **, int);
+static void u_chan_chandrop(struct client *, struct lconn *, const char **, int);
+static void u_chan_chansuspend(struct client *, struct lconn *, const char **, int);
+static void u_chan_chanunsuspend(struct client *, struct lconn *, const char **, int);
 
 static int s_chan_chanregister(struct client *, const char **, int);
 static int s_chan_chandrop(struct client *, const char **, int);
@@ -1144,7 +1144,7 @@ h_chanserv_user_login(void *v_client_p, void *unused)
 }
 
 static void
-u_chan_chanregister(struct lconn *conn_p, const char *parv[], int parc)
+u_chan_chanregister(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct chan_reg *reg_p;
 	struct user_reg *ureg_p;
@@ -1180,7 +1180,7 @@ u_chan_chanregister(struct lconn *conn_p, const char *parv[], int parc)
 }
 
 static void
-u_chan_chandrop(struct lconn *conn_p, const char *parv[], int parc)
+u_chan_chandrop(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct chan_reg *reg_p;
 
@@ -1198,7 +1198,7 @@ u_chan_chandrop(struct lconn *conn_p, const char *parv[], int parc)
 }
 
 static void
-u_chan_chansuspend(struct lconn *conn_p, const char *parv[], int parc)
+u_chan_chansuspend(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct chan_reg *reg_p;
 
@@ -1226,7 +1226,7 @@ u_chan_chansuspend(struct lconn *conn_p, const char *parv[], int parc)
 }
 
 static void
-u_chan_chanunsuspend(struct lconn *conn_p, const char *parv[], int parc)
+u_chan_chanunsuspend(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct chan_reg *reg_p;
 

@@ -29,10 +29,10 @@ static BlockHeap *user_reg_heap;
 
 dlink_list user_reg_table[MAX_NAME_HASH];
 
-static void u_user_userregister(struct lconn *, const char **, int);
-static void u_user_userdrop(struct lconn *, const char **, int);
-static void u_user_usersuspend(struct lconn *, const char **, int);
-static void u_user_userunsuspend(struct lconn *, const char **, int);
+static void u_user_userregister(struct client *, struct lconn *, const char **, int);
+static void u_user_userdrop(struct client *, struct lconn *, const char **, int);
+static void u_user_usersuspend(struct client *, struct lconn *, const char **, int);
+static void u_user_userunsuspend(struct client *, struct lconn *, const char **, int);
 
 static int s_user_userregister(struct client *, const char **, int);
 static int s_user_userdrop(struct client *, const char **, int);
@@ -286,7 +286,7 @@ e_user_expire(void *unused)
 }
 
 static void
-u_user_userregister(struct lconn *conn_p, const char *parv[], int parc)
+u_user_userregister(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct user_reg *reg_p;
 	const char *password;
@@ -330,7 +330,7 @@ u_user_userregister(struct lconn *conn_p, const char *parv[], int parc)
 }
 
 static void
-u_user_userdrop(struct lconn *conn_p, const char *parv[], int parc)
+u_user_userdrop(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct user_reg *ureg_p;
 
@@ -352,7 +352,7 @@ u_user_userdrop(struct lconn *conn_p, const char *parv[], int parc)
 }
 
 static void
-u_user_usersuspend(struct lconn *conn_p, const char *parv[], int parc)
+u_user_usersuspend(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct user_reg *reg_p;
 
@@ -383,7 +383,7 @@ u_user_usersuspend(struct lconn *conn_p, const char *parv[], int parc)
 }
 
 static void
-u_user_userunsuspend(struct lconn *conn_p, const char *parv[], int parc)
+u_user_userunsuspend(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct user_reg *reg_p;
 

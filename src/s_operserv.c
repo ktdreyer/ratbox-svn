@@ -22,10 +22,10 @@
 
 static struct client *operserv_p;
 
-static void u_oper_takeover(struct lconn *, const char **, int);
-static void u_oper_osjoin(struct lconn *, const char **, int);
-static void u_oper_ospart(struct lconn *, const char **, int);
-static void u_oper_omode(struct lconn *, const char **, int);
+static void u_oper_takeover(struct client *, struct lconn *, const char **, int);
+static void u_oper_osjoin(struct client *, struct lconn *, const char **, int);
+static void u_oper_ospart(struct client *, struct lconn *, const char **, int);
+static void u_oper_omode(struct client *, struct lconn *, const char **, int);
 
 static int s_oper_takeover(struct client *, const char **, int);
 static int s_oper_osjoin(struct client *, const char **, int);
@@ -147,7 +147,7 @@ otakeover_clear(struct channel *chptr, struct client *source_p)
 }
 
 static void
-u_oper_takeover(struct lconn *conn_p, const char *parv[], int parc)
+u_oper_takeover(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct channel *chptr;
 
@@ -244,7 +244,7 @@ s_oper_takeover(struct client *client_p, const char *parv[], int parc)
 }
 
 static void
-u_oper_osjoin(struct lconn *conn_p, const char *parv[], int parc)
+u_oper_osjoin(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct channel *chptr;
 
@@ -266,7 +266,7 @@ u_oper_osjoin(struct lconn *conn_p, const char *parv[], int parc)
 }
 
 static void
-u_oper_ospart(struct lconn *conn_p, const char *parv[], int parc)
+u_oper_ospart(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	if(part_service(operserv_p, parv[0]))
 	{
@@ -329,7 +329,7 @@ s_oper_ospart(struct client *client_p, const char *parv[], int parc)
 }
 
 static void
-u_oper_omode(struct lconn *conn_p, const char *parv[], int parc)
+u_oper_omode(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct channel *chptr;
 

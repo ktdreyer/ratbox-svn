@@ -29,19 +29,19 @@
 static dlink_list ucommand_table[MAX_UCOMMAND_HASH];
 dlink_list ucommand_list;
 
-static void u_login(struct lconn *, const char **, int);
+static void u_login(struct client *, struct lconn *, const char **, int);
 
-static void u_boot(struct lconn *, const char **, int);
-static void u_connect(struct lconn *, const char **, int);
-static void u_die(struct lconn *, const char **, int);
-static void u_events(struct lconn *, const char **, int);
-static void u_flags(struct lconn *conn_p, const char **, int);
-static void u_help(struct lconn *, const char **, int);
-static void u_quit(struct lconn *, const char **, int);
-static void u_rehash(struct lconn *, const char **, int);
-static void u_service(struct lconn *, const char **, int);
-static void u_status(struct lconn *, const char **, int);
-static void u_who(struct lconn *, const char **, int);
+static void u_boot(struct client *, struct lconn *, const char **, int);
+static void u_connect(struct client *, struct lconn *, const char **, int);
+static void u_die(struct client *, struct lconn *, const char **, int);
+static void u_events(struct client *, struct lconn *, const char **, int);
+static void u_flags(struct client *, struct lconn *conn_p, const char **, int);
+static void u_help(struct client *, struct lconn *, const char **, int);
+static void u_quit(struct client *, struct lconn *, const char **, int);
+static void u_rehash(struct client *, struct lconn *, const char **, int);
+static void u_service(struct client *, struct lconn *, const char **, int);
+static void u_status(struct client *, struct lconn *, const char **, int);
+static void u_who(struct client *, struct lconn *, const char **, int);
 
 static struct ucommand_handler ucommands[] =
 {
@@ -112,7 +112,7 @@ handle_ucommand(struct lconn *conn_p, const char *command,
                         return;
                 }
 
-                u_login(conn_p, parv, parc);
+                u_login(NULL, conn_p, parv, parc);
                 return;
         }
 
@@ -127,7 +127,7 @@ handle_ucommand(struct lconn *conn_p, const char *command,
 					conn_p->name, ucase(handler->cmd),
 					rebuild_params((const char **) parv, parc, 1));
 
-			handler->func(conn_p, parv, parc);
+			handler->func(NULL, conn_p, parv, parc);
 		}
 		else
 			sendto_one(conn_p, "Insufficient access");
@@ -179,7 +179,7 @@ add_ucommands(struct client *service_p,
 }
 
 static void
-u_login(struct lconn *conn_p, const char *parv[], int parc)
+u_login(struct client *unused, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct conf_oper *oper_p = conn_p->oper;
 	const char *crpass;
@@ -216,7 +216,7 @@ u_login(struct lconn *conn_p, const char *parv[], int parc)
 }
 
 static void
-u_boot(struct lconn *conn_p, const char *parv[], int parc)
+u_boot(struct client *unused, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct client *target_p;
 	struct lconn *dcc_p;
@@ -257,7 +257,7 @@ u_boot(struct lconn *conn_p, const char *parv[], int parc)
 }	
 
 static void
-u_connect(struct lconn *conn_p, const char *parv[], int parc)
+u_connect(struct client *unused, struct lconn *conn_p, const char *parv[], int parc)
 {
         struct conf_server *conf_p;
         int port = 0;
@@ -300,7 +300,7 @@ u_connect(struct lconn *conn_p, const char *parv[], int parc)
 }
 
 static void
-u_die(struct lconn *conn_p, const char *parv[], int parc)
+u_die(struct client *unused, struct lconn *conn_p, const char *parv[], int parc)
 {
         if(strcasecmp(MYNAME, parv[0]))
         {
@@ -314,20 +314,20 @@ u_die(struct lconn *conn_p, const char *parv[], int parc)
 }
 
 static void
-u_events(struct lconn *conn_p, const char *parv[], int parc)
+u_events(struct client *unused, struct lconn *conn_p, const char *parv[], int parc)
 {
         event_show(conn_p);
 }
 
 static void
-u_quit(struct lconn *conn_p, const char *parv[], int parc)
+u_quit(struct client *unused, struct lconn *conn_p, const char *parv[], int parc)
 {
 	sendto_one(conn_p, "Goodbye.");
 	(conn_p->io_close)(conn_p);
 }
 
 static void
-u_rehash(struct lconn *conn_p, const char *parv[], int parc)
+u_rehash(struct client *unused, struct lconn *conn_p, const char *parv[], int parc)
 {
 	mlog("services rehashing: %s reloading config file", conn_p->name);
 	sendto_all(0, "services rehashing: %s reloading config file", conn_p->name);
@@ -336,7 +336,7 @@ u_rehash(struct lconn *conn_p, const char *parv[], int parc)
 }
 
 static void
-u_service(struct lconn *conn_p, const char *parv[], int parc)
+u_service(struct client *unused, struct lconn *conn_p, const char *parv[], int parc)
 {
         struct client *service_p;
         dlink_node *ptr;
@@ -374,7 +374,7 @@ u_service(struct lconn *conn_p, const char *parv[], int parc)
 }
 
 static void
-u_status(struct lconn *conn_p, const char *parv[], int parc)
+u_status(struct client *unused, struct lconn *conn_p, const char *parv[], int parc)
 {
         sendto_one(conn_p, "%s, version ratbox-services-%s(%s), up %s",
 			MYNAME, RSERV_VERSION, SERIALNUM,
@@ -399,7 +399,7 @@ u_status(struct lconn *conn_p, const char *parv[], int parc)
 }
 
 static void
-u_who(struct lconn *conn_p, const char *parv[], int parc)
+u_who(struct client *unused, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct client *target_p;
 	struct lconn *dcc_p;
@@ -485,7 +485,7 @@ dump_commands(struct lconn *conn_p, struct client *service_p, dlink_list *list)
 }
 
 static void
-u_help(struct lconn *conn_p, const char *parv[], int parc)
+u_help(struct client *unused, struct lconn *conn_p, const char *parv[], int parc)
 {
         struct ucommand_handler *handler;
 	dlink_node *ptr;
@@ -563,7 +563,7 @@ show_flags(struct lconn *conn_p)
 }
 
 static void
-u_flags(struct lconn *conn_p, const char *parv[], int parc)
+u_flags(struct client *unused, struct lconn *conn_p, const char *parv[], int parc)
 {
         const char *param;
         int dir;

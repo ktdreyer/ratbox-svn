@@ -20,7 +20,7 @@
 
 static struct client *global_p;
 
-static void u_global_netmsg(struct lconn *, const char **, int);
+static void u_global_netmsg(struct client *, struct lconn *, const char **, int);
 static int s_global_netmsg(struct client *, const char **, int);
 
 static struct service_command global_command[] =
@@ -52,7 +52,7 @@ init_s_global(void)
 }
 
 static void
-u_global_netmsg(struct lconn *conn_p, const char *parv[], int parc)
+u_global_netmsg(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct client *target_p;
 	dlink_node *ptr;
