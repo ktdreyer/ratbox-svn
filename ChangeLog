@@ -1,3 +1,17 @@
+leeh        2004/07/08 13:36:58 EDT	(20040708_1)
+
+  Modified files:
+    modules              m_info.c m_links.c m_motd.c 
+  Log:
+  - fix the spy notices for info/links/motd
+  
+  Revision  Changes    Path
+  1.109     +1 -1      ircd-ratbox/modules/m_info.c
+  1.64      +1 -1      ircd-ratbox/modules/m_links.c
+  1.55      +1 -1      ircd-ratbox/modules/m_motd.c
+
+
+
 leeh        2004/07/08 13:24:07 EDT	(20040708_0)
 
   Modified files:
