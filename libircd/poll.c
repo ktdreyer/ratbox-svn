@@ -191,6 +191,23 @@ comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
 		F->timeout = CurrentTime + (timeout / 1000);
 }
 
+static void
+irc_sleep(unsigned long useconds)
+{     
+#ifdef HAVE_NANOSLEEP    
+        struct timespec t;
+        t.tv_sec = useconds / (unsigned long) 1000000;
+        t.tv_nsec = (useconds % (unsigned long) 1000000) * 1000;
+        nanosleep(&t, (struct timespec *) NULL);
+#else    
+        struct timeval t;        
+        t.tv_sec = 0;    
+        t.tv_usec = useconds;
+        select(0, NULL, NULL, NULL, &t);
+#endif
+        return;
+}
+
 /* int comm_select_fdlist(unsigned long delay)
  * Input: The maximum time to delay.
  * Output: Returns -1 on error, 0 on success.
@@ -215,7 +232,8 @@ comm_select(unsigned long delay)
 	for (;;)
 	{
 		/* XXX kill that +1 later ! -- adrian */
-		num = poll(pollfd_list.pollfds, pollfd_list.maxindex + 1, delay);
+		irc_sleep(delay * 1000);
+		num = poll(pollfd_list.pollfds, pollfd_list.maxindex + 1, 0);
 		if(num >= 0)
 			break;
 		if(ignoreErrno(errno))

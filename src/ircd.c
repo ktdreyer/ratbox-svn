@@ -302,7 +302,7 @@ io_loop(void)
 			eventRun();
 
 
-		comm_select(500);
+		comm_select(250);
 
 		/*
 		 * Check to see whether we have to rehash the configuration ..

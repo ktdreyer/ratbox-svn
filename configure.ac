@@ -452,6 +452,18 @@ AC_FUNC_ALLOCA
 dnl Specialized functions checks
 dnl ============================
 
+dnl check for nanosleep          
+AC_CHECK_FUNC(nanosleep,,[AC_CHECK_LIB(rt,nanosleep,
+                 LIBS="${LIBS} -lrt",
+                 [AC_CHECK_LIB(posix4,nanosleep, LIBS="${LIBS} -lposix4"
+                 )])])
+if test x$ac_cv_func_nanosleep = xno && test x$ac_cv_lib_posix4_nanosleep = xno  && test x$ac_cv_lib_rt_nanosleep = xno
+then     
+         AC_MSG_RESULT("nanosleep not found..using select for delay")
+else     
+         AC_DEFINE(HAVE_NANOSLEEP)
+fi
+
 dnl OpenSSL support
 AC_MSG_CHECKING(for OpenSSL)
 AC_ARG_ENABLE(openssl,
