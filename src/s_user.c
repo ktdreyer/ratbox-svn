@@ -52,6 +52,7 @@
 #include "packet.h"
 #include "reject.h"
 #include "cache.h"
+#include "hook.h"
 
 static void report_and_set_user_flags(struct Client *, struct ConfItem *);
 void user_welcome(struct Client *source_p);
@@ -460,6 +461,12 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 		exit_client(client_p, source_p, &me, "Bad user info");
 		return CLIENT_EXITED;
 	}
+
+	/* Any hooks using this event *must* check for the client being dead
+	 * when its called.  If the hook wants to terminate the client, it
+	 * can call exit_client(). --fl
+	 */
+	hook_call_event(h_client_auth_id, client_p);
 
 	if(IsAnyDead(client_p))
 		return CLIENT_EXITED;

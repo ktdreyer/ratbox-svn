@@ -84,5 +84,5 @@ extern int h_iosend_id;
 extern int h_iorecv_id;
 extern int h_iorecvctrl_id;
 extern int h_burst_channel_id;
-
+extern int h_client_auth_id;
 #endif

@@ -43,6 +43,7 @@ int h_iorecv_id;
 int h_iorecvctrl_id;
 #endif
 int h_burst_channel_id;
+int h_client_auth_id;
 
 void
 init_hooks(void)
@@ -54,6 +55,7 @@ init_hooks(void)
 	hook_add_event("iorecvctrl", &h_iorecvctrl_id);
 #endif
 	hook_add_event("burst_channel", &h_burst_channel_id);
+	hook_add_event("client_auth", &h_client_auth_id);
 }
 
 static int hook_curid = 0;
