@@ -131,7 +131,7 @@ void
 cmd_set_crypt_in_cipher(struct ctrl_command *cmd)
 {
 #ifdef HAVE_LIBCRYPTO
-	unsigned int cipher = *((unsigned int *) cmd->data);
+	const unsigned int cipher = *((unsigned int *) cmd->data);
 
 	if(in_state.crypt_state.cipher)
 		send_error("can't set decryption cipher - already set!");
@@ -260,7 +260,7 @@ void
 cmd_set_crypt_out_cipher(struct ctrl_command *cmd)
 {
 #ifdef HAVE_LIBCRYPTO
-	unsigned int cipher = *((unsigned int *) cmd->data);
+	const unsigned int cipher = *((unsigned int *) cmd->data);
 
 	if(out_state.crypt_state.cipher)
 		send_error("can't set encryption cipher - already set!");

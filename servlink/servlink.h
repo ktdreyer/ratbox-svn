@@ -107,8 +107,8 @@ struct fd_table
   io_callback   *write_cb;
 };
 
-extern struct slink_state       in_state;
-extern struct slink_state       out_state;
+extern const struct slink_state       in_state;
+extern const struct slink_state       out_state;
 extern struct fd_table          fds[5];
 
 #endif /* INCLUDED_servlink_servlink_h */
