@@ -138,7 +138,7 @@ int user_modes_from_c_to_bitmask[] =
   FLAGS_BOTS,   /* b */
   FLAGS_CCONN,  /* c */
   FLAGS_DEBUG,  /* d */
-  0,            /* e */
+  FLAGS_DRONE,  /* e */
   FLAGS_FULL,   /* f */
   FLAGS_CALLERID,  /* g */
   0,            /* h */
@@ -442,6 +442,12 @@ int register_local_user(struct Client *cptr, struct Client *sptr,
 		       nick, sptr->username, sptr->host,
 		       inetntoa((char *)&sptr->localClient->ip),
 		       get_client_class(sptr));
+  
+  sendto_realops_flags(FLAGS_DRONE,
+		       "Cn: %s (%s@%s) [%s] [%s]",
+		       nick, sptr->username, sptr->host,
+		       inetntoa((char *)&sptr->localClient->ip),
+		       sptr->info);
   
   if ((++Count.local) > Count.max_loc)
     {
