@@ -1,3 +1,22 @@
+leeh        2002/09/15 11:56:30 UTC	(20020915_0)
+
+  Modified files:
+    include              tools.h 
+    modules              m_gline.c m_stats.c 
+    src                  s_gline.c 
+  Log:
+  - expire glines on /gline
+  - use dlinkAddTailAlloc for glines then when walking the list stop when
+    we hit the first one thats not expired..
+  
+  Revision  Changes    Path
+  1.37      +1 -0      ircd-ratbox/include/tools.h
+  1.93      +4 -1      ircd-ratbox/modules/m_gline.c
+  1.123     +2 -2      ircd-ratbox/modules/m_stats.c
+  1.28      +7 -7      ircd-ratbox/src/s_gline.c
+
+
+
 leeh        2002/09/14 13:57:48 UTC	(20020914_2)
 
   Modified files:
