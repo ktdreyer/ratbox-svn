@@ -1,3 +1,10 @@
+*** 20010626_6 by jdc
+- doc/README.openssl
+    * More minor stuff; added a bit to the "SERVER CONFIGURATION" section,
+      with more to be added later in the future.
+
+
+
 *** 20010626_5 by jdc
 - tools/mkkeypair
     * Someone wanted this awhile back.  I think it was you, greg.  ;-)
