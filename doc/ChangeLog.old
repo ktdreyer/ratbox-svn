@@ -1,3 +1,15 @@
+jmallett    2002/02/12 09:27:44 EST	(20020212_4)
+
+  Modified files:
+    src                  modules.c 
+  Log:
+  If we want to use 0-6, then modulo by 7, not by 6.
+  
+  Revision  Changes    Path
+  7.93      +1 -1      ircd-hybrid-7/src/modules.c
+
+
+
 jmallett    2002/02/12 09:13:36 EST	(20020212_3)
 
   Modified files:
