@@ -1,3 +1,7 @@
+*** 20010925_11 by androsyn
+Eliminated a stupid compile warning when ziplinks and cryptlinks are disabled
+
+
 *** 20010925_10 by androsyn
 Please don't use autoconf 2.5x for hybrid.    
 
