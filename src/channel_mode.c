@@ -504,7 +504,7 @@ channel_modes(struct Channel *chptr, struct Client *client_p,
   {
     *mbuf++ = 'k';
     if (IsMember(client_p, chptr) || IsServer(client_p))
-      ircsprintf(pbuf, "%s", chptr->mode.key);
+      ircsprintf(pbuf, "%s ", chptr->mode.key);
   }
 
   *mbuf++ = '\0';
