@@ -57,6 +57,8 @@
 #include "ircd.h"
 #include "blalloc.h"
 #include "event.h"
+#include "client.h"
+#include "send.h"
 
 /* The list of event processes */
 struct ev_entry {
@@ -201,8 +203,9 @@ eventDump(StoreEntry * sentry)
 	"Callback Valid?");
     while (e != NULL) {
 	storeAppendPrintf(sentry, "%s\t%f seconds\t%d\t%s\n",
-	    e->name, e->when - CurrentTime, e->weight,
-	    e->arg ? cbdataValid(e->arg) ? "yes" : "no" : "N/A");
+			  e->name, e->when - CurrentTime, e->weight,
+			  e->arg ? cbdataValid(e->arg) ? "yes" : "no" : "N/A");
+
 	e = e->next;
     }
 }
@@ -230,6 +233,36 @@ eventFind(EVH * func, void *arg)
     return 0;
 }
 
+#ifndef SQUID
+int
+mo_events( struct Client *cptr,
+	   struct Client *sptr,
+	   int parc,
+	   char *parv[])
+{
+    struct ev_entry *e = tasks;
+    if (last_event_ran)
+      sendto_one(sptr,":%s NOTICE %s :*** Last event to run: %s",
+		 me.name,sptr->name,
+		 last_event_ran);
+
+    sendto_one(sptr,
+       ":%s NOTICE %s :*** Operation\tNext Execution\tWeight\tCallback Valid?",
+       me.name,sptr->name);
+
+    while (e != NULL)
+      {
+	sendto_one(sptr,
+		   ":%s NOTICE %s :*** %s\tt%d seconds\t%d\t%s",
+		   me.name,sptr->name,
+		   e->name, e->when - CurrentTime, e->weight,
+		   e->arg ? "yes" : "no" );
+	e = e->next;
+      }
+  sendto_one(sptr,":%s NOTICE %s :*** Finished",me.name,sptr->name);
+  return 0;
+}
+#endif
 
 
 

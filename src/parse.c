@@ -734,6 +734,10 @@ struct Message msgtab[] = {
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_not_oper, m_error, mo_testline }
   },
+  {MSG_EVENTS, 0, 1, MFLG_SLOW, 0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_not_oper, m_error, mo_events }
+  },
   { 0 }
 }; 
 

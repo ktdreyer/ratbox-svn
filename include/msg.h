@@ -134,6 +134,9 @@ typedef struct MessageTree MESSAGE_TREE;
 #define MSG_OPERWALL "OPERWALL" /* OPERWALL */
 #define MSG_ZIP      "ZIP"      /* ZIP */
 
+/* ZZZ */
+#define MSG_EVENTS   "EVENTS"	/* EVENTS */
+
 /*
  * Constants
  */
