@@ -763,7 +763,7 @@ else
 	dnl Without this, include/setup.h will not be set up right.
 	AC_CHECK_LIB(dl, dlsym)
 	AC_CHECK_FUNCS(dlopen)
-	AC_CHECK_HEADERS(mach-o/dyld.h)
+	AC_CHECK_HEADERS(mach-o/dyld.h dlfcn.h)
 
 	# The GNU linker requires the -export-dynamic option to make
 	# all symbols visible in the dynamic symbol table.

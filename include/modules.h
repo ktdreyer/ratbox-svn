@@ -34,7 +34,7 @@
 #if defined(HAVE_SHL_LOAD)
 #include <dl.h>
 #endif
-#if !defined(STATIC_MODULES) && (defined(HAVE_DLOPEN) || defined(HAVE_LIBDL))
+#if !defined(STATIC_MODULES) && defined(HAVE_DLFCN_H)
 #include <dlfcn.h>
 #endif
 
