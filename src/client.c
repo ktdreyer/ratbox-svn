@@ -1762,6 +1762,8 @@ int change_local_nick(struct Client *client_p, struct Client *source_p,
   ** on that channel. Propagate notice to other servers.
   */
 
+  source_p->tsinfo = CurrentTime;
+
   if( (source_p->localClient->last_nick_change +
        ConfigFileEntry.max_nick_time) < CurrentTime)
     source_p->localClient->number_of_nick_changes = 0;
@@ -1800,10 +1802,8 @@ int change_local_nick(struct Client *client_p, struct Client *source_p,
   else
     {
       sendto_one(source_p,
-		 ":%s NOTICE %s :*** Notice -- Too many nick changes wait %d seconds before trying to change it again.",
-		 me.name,
-		 source_p->name,
-		 ConfigFileEntry.max_nick_time);
+                 form_str(ERR_NICKTOOFAST),me.name, source_p->name,
+                 source_p->name, nick, ConfigFileEntry.max_nick_time);
       return 0;
     }
 
