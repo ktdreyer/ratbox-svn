@@ -1,3 +1,10 @@
+*** 20011111_2 by leeh
+- bumped ERR_LASTERRMSG upto 999
+- added 506 -> 999 into messages.tab
+- moved RPL_MODLIST -> 702 (conflicted with other ircds)
+- added RPL_ENDOFMODLIST (703)
+
+
 *** 20011111_1 by leeh
 - fixes for /who (jv)
 
