@@ -1,3 +1,15 @@
+leeh        2002/06/15 09:09:48 EDT	(20020615_6)
+
+  Modified files:
+    modules              m_stats.c 
+  Log:
+  - hwys fix to correctly show oper/admin status on stats p.
+  
+  Revision  Changes    Path
+  1.110     +5 -3      ircd-hybrid-7/modules/m_stats.c
+
+
+
 leeh        2002/06/15 08:54:51 EDT	(20020615_5)
 
   Modified files:
