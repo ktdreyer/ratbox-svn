@@ -1,3 +1,8 @@
+*** 20001215_14 by db
+- fix for gecos blocks submitted by Walter Campbell
+
+
+
 *** 20001215_13 by db
 - added patch contributed by Walter Campbell, it adds connectfreq
   to a class block. Note, it is a synonym for class_number_per_ip
