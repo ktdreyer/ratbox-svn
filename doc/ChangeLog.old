@@ -1,3 +1,7 @@
+*** 20010527_2 by toot
+fixed a few new compile warnings
+
+
 *** 20010527_1 by davidt
 - Fix format string problem if we send ourselves a message
   (debug message was broken)
