@@ -1,6 +1,6 @@
 /* copyright (c) 2000 Edward Brocklesby, Hybrid Development Team
  *
- * $Id:
+ * $Id$
  */
 
 #include "modules.h"
