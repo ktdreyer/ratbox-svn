@@ -45,6 +45,11 @@
 #define INADDR_NONE ((unsigned int) 0xffffffff)
 #endif
 
+#ifdef NO_IN6ADDR_ANY
+const static struct in6_addr in6addr_any =
+{ { { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 } } };
+#endif 
+
 static PF accept_connection;
 
 static struct Listener *ListenerPollList = NULL;

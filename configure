@@ -853,7 +853,8 @@ Optional Features:
   --enable-devpoll        Force usage of /dev/poll.
   --enable-epoll          Enable sys_epoll support (Linux only)
   --enable-rtsigio        Enable SIGIO with RT Signals (Linux only)
-  --enable-assert         Enable assert().
+  --enable-assert         Enable assert(). Choose between soft(warnings) and
+                          hard(aborts the daemon)
   --enable-profile        Enable profiling
   --enable-warnings       Enable all sorts of warnings for debugging.
   --enable-small-net      Enable small network support.
@@ -3864,7 +3865,7 @@ done
 
 
 
-for ac_header in crypt.h sys/resource.h sys/param.h errno.h sys/syslog.h stddef.h libgen.h sys/wait.h wait.h sys/epoll.h
+for ac_header in crypt.h sys/resource.h sys/param.h errno.h sys/syslog.h stddef.h sys/wait.h wait.h sys/epoll.h sys/uio.h
 do
 as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
 if eval "test \"\${$as_ac_Header+set}\" = set"; then
@@ -5649,11 +5650,7 @@ fi
 
 
 
-
-
-
-
-for ac_func in socketpair basename mmap snprintf vsnprintf lrand48 srand48 strtok_r
+for ac_func in socketpair mmap writev gettimeofday
 do
 as_ac_var=`echo "ac_cv_func_$ac_func" | $as_tr_sh`
 echo "$as_me:$LINENO: checking for $ac_func" >&5
@@ -5735,6 +5732,7 @@ _ACEOF
 
 fi
 done
+
 
 # The Ultrix 4.2 mips builtin alloca declared by alloca.h only works
 # for constant arguments.  Useless!
@@ -7778,7 +7776,7 @@ if test "${enable_assert+set}" = set; then
   enableval="$enable_assert"
   assert=$enableval
 else
-  assert=no
+  assert=soft
 fi;
 
 if test "$assert" = no; then
@@ -7787,9 +7785,7 @@ cat >>confdefs.h <<\_ACEOF
 #define NDEBUG 1
 _ACEOF
 
-fi
-
-if test "$assert" = soft; then
+elif test "$assert" = soft; then
 
 cat >>confdefs.h <<\_ACEOF
 #define SOFT_ASSERT 1
@@ -7800,9 +7796,9 @@ cat >>confdefs.h <<\_ACEOF
 #define NDEBUG 1
 _ACEOF
 
+elif test "$assert" = yes; then
+	assert = "hard";
 fi
-
-
 
 echo "$as_me:$LINENO: checking if you want to do a profile build" >&5
 echo $ECHO_N "checking if you want to do a profile build... $ECHO_C" >&6
@@ -10699,7 +10695,7 @@ fi
 echo  "Modules ................. $tmpresult"
 echo  "IPv6 support ............ $have_v6"
 echo  "Net I/O implementation .. $SELECT_TYPE"
-
+echo  "Assert debugging ........ $assert"
 if test "$efnet" = "yes"; then
 	tmpresult="yes (use example.efnet.conf)"
 else

@@ -264,6 +264,7 @@ set_time(void)
 	struct timeval newtime;
 	newtime.tv_sec = 0;
 	newtime.tv_usec = 0;
+#ifndef HAVE_GETTIMEOFDAY
 	if(gettimeofday(&newtime, NULL) == -1)
 	{
 		ilog(L_MAIN, "Clock Failure (%d)", errno);
@@ -272,6 +273,10 @@ set_time(void)
 
 		restart("Clock Failure");
 	}
+#else
+	newtime.tv_sec = time(NULL);
+	
+#endif
 	if(newtime.tv_sec < CurrentTime)
 	{
 		ircsnprintf(to_send, sizeof(to_send), 

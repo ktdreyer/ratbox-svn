@@ -624,15 +624,15 @@ int
 linebuf_flush(int fd, buf_head_t * bufhead)
 {
 	buf_line_t *bufline;
+	int retval;
+#ifdef HAVE_WRITEV
 	dlink_node *ptr;
 	int gather_count = 100; /* This is abitrary */
 	int x, y;
-	int retval, xret;
+	int xret;
 	static struct iovec vec[100];
 
 	/* Check we actually have a first buffer */
-
-
 	if(bufhead->list.head == NULL)
 	{
 		/* nope, so we return none .. */
@@ -689,6 +689,35 @@ linebuf_flush(int fd, buf_head_t * bufhead)
 			break;
 		}
 	} 
+#else /* HAVE_WRITEV */
+	bufline = bufhead->list.head->data;
+	
+	/* Check we're flushing the first buffer */
+	if(!bufline->flushing)
+	{
+	 	bufline->flushing = 1;
+	 	bufhead->writeofs = 0;
+	}
+
+	/* Now, try writing data */
+	retval = write(fd, bufline->buf + bufhead->writeofs, bufline->len - bufhead->writeofs);
+
+	if(retval <= 0)
+	        return retval;
+
+	/* we've got data, so update the write offset */
+	bufhead->writeofs += retval;
+
+	/* if we've written everything *and* the CRLF, deallocate and update
+	   bufhead */
+	if(bufhead->writeofs == bufline->len)
+	{
+	 	bufhead->writeofs = 0;
+	 	s_assert(bufhead->len >= 0);
+	 	linebuf_done_line(bufhead, bufline, bufhead->list.head);
+	}
+
+#endif
 	return(retval);
 }
 

@@ -27,9 +27,6 @@
    */
 #undef HAVE_ALLOCA_H
 
-/* Define to 1 if you have the `basename' function. */
-#undef HAVE_BASENAME
-
 /* Define to 1 if you have the <crypt.h> header file. */
 #undef HAVE_CRYPT_H
 
@@ -72,6 +69,9 @@
 /* Define to 1 if you have the `EVP_rc5_32_12_16_cfb' function. */
 #undef HAVE_EVP_RC5_32_12_16_CFB
 
+/* Define to 1 if you have the `gettimeofday' function. */
+#undef HAVE_GETTIMEOFDAY
+
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
@@ -81,14 +81,8 @@
 /* Define to 1 if you have the `crypto' library (-lcrypto). */
 #undef HAVE_LIBCRYPTO
 
-/* Define to 1 if you have the <libgen.h> header file. */
-#undef HAVE_LIBGEN_H
-
 /* Define to 1 if zlib (-lz) is available. */
 #undef HAVE_LIBZ
-
-/* Define to 1 if you have the `lrand48' function. */
-#undef HAVE_LRAND48
 
 /* Define to 1 if you have the <mach-o/dyld.h> header file. */
 #undef HAVE_MACH_O_DYLD_H
@@ -108,14 +102,8 @@
 /* Define if the shl_load function is available. */
 #undef HAVE_SHL_LOAD
 
-/* Define to 1 if you have the `snprintf' function. */
-#undef HAVE_SNPRINTF
-
 /* Define to 1 if you have the `socketpair' function. */
 #undef HAVE_SOCKETPAIR
-
-/* Define to 1 if you have the `srand48' function. */
-#undef HAVE_SRAND48
 
 /* Define to 1 if you have the <stddef.h> header file. */
 #undef HAVE_STDDEF_H
@@ -137,9 +125,6 @@
 
 /* Define to 1 if you have the `strlcpy' function. */
 #undef HAVE_STRLCPY
-
-/* Define to 1 if you have the `strtok_r' function. */
-#undef HAVE_STRTOK_R
 
 /* Define to 1 if the system has the type `struct sockaddr_storage'. */
 #undef HAVE_STRUCT_SOCKADDR_STORAGE
@@ -165,6 +150,9 @@
 /* Define to 1 if you have the <sys/types.h> header file. */
 #undef HAVE_SYS_TYPES_H
 
+/* Define to 1 if you have the <sys/uio.h> header file. */
+#undef HAVE_SYS_UIO_H
+
 /* Define to 1 if you have the <sys/wait.h> header file. */
 #undef HAVE_SYS_WAIT_H
 
@@ -174,11 +162,11 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
-/* Define to 1 if you have the `vsnprintf' function. */
-#undef HAVE_VSNPRINTF
-
 /* Define to 1 if you have the <wait.h> header file. */
 #undef HAVE_WAIT_H
+
+/* Define to 1 if you have the `writev' function. */
+#undef HAVE_WRITEV
 
 /* Define if IPv6 support is present and available. */
 #undef IPV6

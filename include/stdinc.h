@@ -116,6 +116,10 @@ char *alloca ();
 extern int errno;
 #endif
 
+#ifdef HAVE_SYS_UIO_H
+#include <sys/uio.h>
+#endif
+
 #ifdef __vms
 #include <sys/ioctl.h>
 

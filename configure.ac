@@ -225,7 +225,7 @@ fi
 dnl Checks for header files.
 AC_HEADER_STDC
 
-AC_CHECK_HEADERS([crypt.h sys/resource.h sys/param.h errno.h sys/syslog.h stddef.h libgen.h sys/wait.h wait.h sys/epoll.h])
+AC_CHECK_HEADERS([crypt.h sys/resource.h sys/param.h errno.h sys/syslog.h stddef.h sys/wait.h wait.h sys/epoll.h sys/uio.h])
 
 dnl Networking Functions
 dnl ====================
@@ -439,7 +439,8 @@ AC_CHECK_TYPE([sa_family_t], [],
 AC_CHECK_TYPES([uintptr_t])
 
 dnl check for various functions...
-AC_CHECK_FUNCS([socketpair basename mmap snprintf vsnprintf lrand48 srand48 strtok_r])
+AC_CHECK_FUNCS([socketpair mmap writev gettimeofday])
+
 AC_FUNC_ALLOCA
 
 dnl Specialized functions checks
@@ -704,19 +705,17 @@ dnl Debug-related options
 dnl =====================
 
 AC_ARG_ENABLE(assert,
-AC_HELP_STRING([--enable-assert],[Enable assert().]),
-[assert=$enableval], [assert=no])
+AC_HELP_STRING([--enable-assert],[Enable assert(). Choose between soft(warnings) and hard(aborts the daemon)]),
+[assert=$enableval], [assert=soft])
 
 if test "$assert" = no; then
 	AC_DEFINE(NDEBUG, 1, [Define this to disable debugging support.])
-fi
-
-if test "$assert" = soft; then
+elif test "$assert" = soft; then
 	AC_DEFINE(SOFT_ASSERT, 1, [Define this to enable soft asserts.])
 	AC_DEFINE(NDEBUG, 1, [Define this to disable debugging support.])
+elif test "$assert" = yes; then
+	assert = "hard";
 fi
-
-
 
 AC_MSG_CHECKING(if you want to do a profile build)
 AC_ARG_ENABLE(profile,
@@ -1073,7 +1072,7 @@ fi
 echo  "Modules ................. $tmpresult"
 echo  "IPv6 support ............ $have_v6"
 echo  "Net I/O implementation .. $SELECT_TYPE"
-
+echo  "Assert debugging ........ $assert"
 if test "$efnet" = "yes"; then
 	tmpresult="yes (use example.efnet.conf)"
 else
