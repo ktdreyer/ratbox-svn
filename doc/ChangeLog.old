@@ -1,3 +1,9 @@
+*** 20010223_7 by a1kmm
+- Fixed glines.
+- Fixed parse.c so exit_client it is only called once.
+- Fixed exit_client so we don't set the client dead until we have sent the contents of the sendq.
+
+
 *** 20010223_6 by a1kmm
 - Removed an assert which simply shouldn't be there.
 
