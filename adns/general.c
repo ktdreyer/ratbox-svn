@@ -29,7 +29,6 @@
  */
 
 #include "stdinc.h"
-#include "fdlist.h"
 #include "s_log.h"
 #include "memory.h"
 

@@ -28,7 +28,6 @@
  */
 
 #include "stdinc.h"
-#include "fdlist.h"
 #include "internal.h"
 
 /* This crap is needed to make it compile on OS X 

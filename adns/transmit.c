@@ -29,7 +29,6 @@
  */
 
 #include "stdinc.h"
-#include "fdlist.h"
 #include "internal.h"
 #include "tvarith.h"
 

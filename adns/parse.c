@@ -28,7 +28,6 @@
  */
 
 #include "stdinc.h"
-#include "fdlist.h"
 #include "sprintf_irc.h"
 #include "internal.h"
 
