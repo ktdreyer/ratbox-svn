@@ -1,3 +1,10 @@
+*** 20010925_1 by a1kmm
+- Fixed up a few more things with configure.
+- Made some assumptions which should always be valid to optimise linked
+  lists.
+- Rewrote the block allocator with a better algorithm.
+
+
 *** 20010924_6 by db
 - removed an unnecessary call in m_stats.c, call fd_dump() directly
   instead of confusing things. (for stats f)
