@@ -1,3 +1,15 @@
+androsyn    2002/12/09 21:51:41 UTC	(20021209_3)
+
+  Modified files:
+    src                  s_bsd_sigio.c 
+  Log:
+  I think i tracked down the core dump..
+  
+  Revision  Changes    Path
+  7.32      +3 -2      ircd-ratbox/src/s_bsd_sigio.c
+
+
+
 androsyn    2002/12/09 21:43:52 UTC	(20021209_2)
 
   Modified files:
