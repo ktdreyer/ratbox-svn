@@ -93,6 +93,7 @@
 #define ETCPATH         IRCD_PREFIX ".ETC"
 #define LOGPATH         IRCD_PREFIX ".LOGS"
 #undef  MODPATH
+#undef  AUTOMODPATH
 #undef  MSGPATH
 
 #define SPATH   BINPATH "]IRCD.EXE"              /* server executable */
@@ -125,13 +126,15 @@
  * ETCPATH     = directory for configuration files,
  * LOGPATH     = directory for logfiles,
  * MODPATH     = directory for modules,
+ * AUTOMODPATH = directory for autoloaded modules
  * MSGPATH     = directory for gettext message files.
  */
 
 /* dirs */
 #define DPATH   IRCD_PREFIX                                                     
 #define BINPATH IRCD_PREFIX "/bin/"
-#define MODPATH IRCD_PREFIX "/modules/autoload/"
+#define MODPATH IRCD_PREFIX "/modules/"
+#define AUTOMODPATH IRCD_PREFIX "/modules/autoload/"
 #define MSGPATH IRCD_PREFIX "/messages/"
 #define ETCPATH IRCD_PREFIX "/etc"
 #define LOGPATH IRCD_PREFIX "/logs"

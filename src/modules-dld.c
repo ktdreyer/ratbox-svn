@@ -229,12 +229,12 @@ load_all_modules (int check)
 
   max_mods = MODS_INCREMENT;
 
-  system_module_dir = opendir (MODPATH);
+  system_module_dir = opendir (AUTOMODPATH);
 
   if (system_module_dir == NULL)
   {
     ilog (L_WARN, "Could not load modules from %s: %s",
-         MODPATH, strerror (errno));
+         AUTOMODPATH, strerror (errno));
     return;
   }
 
@@ -244,7 +244,7 @@ load_all_modules (int check)
         ldirent->d_name [strlen (ldirent->d_name) - 2] == 's' &&
         ldirent->d_name [strlen (ldirent->d_name) - 1] == 'o')
     {
-      (void)sprintf (module_fq_name, "%s/%s",  MODPATH,
+      (void)sprintf (module_fq_name, "%s/%s",  AUTOMODPATH,
                       ldirent->d_name);
       (void)load_a_module (module_fq_name, check);
     }
