@@ -1,3 +1,10 @@
+*** 20010410_2 by db
+- RPL_TRACEUNKNOWN third arg should have been a %s, remnant of
+  the class # to class name move. oops. reported by Joao Luis Marques Pinto
+  Lamego@PTlink.net
+
+
+
 *** 20010410_1 by a1kmm
 - Oops, do not delete tklines on rehash!
 - Fixed testline a little to match "user@*" I-lines when an IP address is given.
