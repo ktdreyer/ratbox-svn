@@ -1,3 +1,8 @@
+*** 20010701_3 by db
+- removed USE_RCS from config and m_info.c , it never worked properly anyway!
+
+
+
 *** 20010701_2 by db
 - fixed missing change of local client ts (tsinfo) when client changes nick
 - changed "too many nick" changes notice into a 438 numeric, stolen numeric
