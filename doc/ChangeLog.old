@@ -1,3 +1,9 @@
+*** 20010125_12 by db
+- cleaned up some logging that was just plain wrong
+  and changed references to c/n's to "connect blocks"
+
+
+
 *** 20010125_11 by fl_
 - removed a fixed bug from bugs..
 - till someone decides what the hell we're doing with stats p and shide,
