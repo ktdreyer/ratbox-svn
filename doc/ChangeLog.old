@@ -1,3 +1,9 @@
+*** 20010825_5 by db
+- renamed hash_find_client() to find_client() in hash.c
+  find_client() in client.c was simply calling hash_find_client() anyway.
+
+
+
 *** 20010825_4 by wcampbel
 This is an updated m_mkpasswd.c, allowing you to use a second parameter to
 specify which password hashing algorithm to use, DES or MD5.
