@@ -1,3 +1,7 @@
+*** 20010322_1 by androsyn
+This should fix /trace for the IPv6 case..
+
+
 *** 20010321_3 by ejb
 - turn uint32_t into u_int32_t and make configure check for it.
 
