@@ -573,16 +573,16 @@ sendto_common_channel( dlink_list *list, struct Client *user,
 }
 
 /*
- * sendto_channel_butserv
+ * sendto_channel_local
  *
  * inputs	-
  * output	- NONE
  * side effects - Send a message to all members of a channel that are
- *		  connected to this server.
+ *		  locally connected to this server.
  */
 
 void
-sendto_channel_butserv(int type,
+sendto_channel_local(int type,
 		       struct Channel *chptr, struct Client *from, 
                        const char *pattern, ...)
 
@@ -627,7 +627,7 @@ static void sendto_list(dlink_list *list, struct Client *from,
 	}
     }  
 
-} /* sendto_channel_butserv() */
+} /* sendto_channel_local() */
 
 /*
 ** send a msg to all ppl on servers/hosts that match a specified mask

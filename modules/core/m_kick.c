@@ -1,5 +1,5 @@
 /************************************************************************
- *   IRC - Internet Relay Chat, src/m_kick.c
+ *   IRC - Internet Relay Chat, modules/m_kick.c
  *   Copyright (C) 1990 Jarkko Oikarinen and
  *                      University of Oulu, Computing Center
  *
@@ -176,18 +176,18 @@ int     m_kick(struct Client *cptr,
 
       if(GlobalSetOptions.hide_chanops)
 	{
-	  sendto_channel_butserv(NON_CHANOPS, chptr, sptr,
+	  sendto_channel_local(NON_CHANOPS, chptr, sptr,
 				 ":%s KICK %s %s :%s", 
 				 who->name,
 				 name, who->name, comment);
 
-	  sendto_channel_butserv(ONLY_CHANOPS, chptr, sptr,
+	  sendto_channel_local(ONLY_CHANOPS, chptr, sptr,
 				 ":%s KICK %s %s :%s", parv[0],
 				 name, who->name, comment);
 	}
       else
 	{
-	  sendto_channel_butserv(ONLY_CHANOPS, chptr, sptr,
+	  sendto_channel_local(ONLY_CHANOPS, chptr, sptr,
 				 ":%s KICK %s %s :%s", parv[0],
 				 name, who->name, comment);
 	}

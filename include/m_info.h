@@ -32,11 +32,6 @@ typedef struct Information
   char* desc;        /* short description of item */
 } Info;
 
-/*
- * only define MyInformation if we are compiling m_info.c
- */
-#ifdef DEFINE_M_INFO_DATA
-
 Info MyInformation[] = {
 
   { "ANTI_DRONE_FLOOD", "ON", 0, "Anti Flood for Drones" },
@@ -337,6 +332,5 @@ Info MyInformation[] = {
 };
 
 
-#endif /* DEFINE_M_INFO_DATA */
 #endif /* INCLUDED_m_info_h */
 

@@ -1,5 +1,5 @@
 /************************************************************************
- *   IRC - Internet Relay Chat, src/m_topic.c
+ *   IRC - Internet Relay Chat, modules/m_topic.c
  *   Copyright (C) 1990 Jarkko Oikarinen and
  *                      University of Oulu, Computing Center
  *
@@ -138,14 +138,14 @@ int     m_topic(struct Client *cptr,
 				 chptr->topic);
 	      if(GlobalSetOptions.hide_chanops)
 		{
-		  sendto_channel_butserv(ONLY_CHANOPS,
+		  sendto_channel_local(ONLY_CHANOPS,
 					 chptr, sptr, ":%s TOPIC %s :%s",
 					 parv[0],
 					 name, chptr->topic);
 		}
 	      else
 		{
-		  sendto_channel_butserv(ALL_MEMBERS,
+		  sendto_channel_local(ALL_MEMBERS,
 					 chptr, sptr, ":%s TOPIC %s :%s",
 					 parv[0],
 					 name, chptr->topic);
