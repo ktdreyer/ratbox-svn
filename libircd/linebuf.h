@@ -36,11 +36,13 @@ struct _buf_head {
     int len;			/* length of all the data */
     int alloclen;		/* Actual allocated data length */    
     int writeofs;		/* offset in the first line for the write */
+    int numlines;		/* number of lines */
 };
 
 /* they should be functions, but .. */
 #define linebuf_len(x)		((x)->len)
 #define linebuf_alloclen(x)	((x)->alloclen)
+#define linebuf_numlines(x)	((x)->numlines)
 
 extern void linebuf_init(void);
 extern void linebuf_newbuf(buf_head_t *);

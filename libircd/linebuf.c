@@ -67,6 +67,7 @@ linebuf_new_line(buf_head_t *bufhead)
 
     /* And finally, update the allocated size */
     bufhead->alloclen += BUF_DATA_SIZE;
+    bufhead->numlines ++;
 
     return bufline;
 }
@@ -85,6 +86,9 @@ linebuf_done_line(buf_head_t *bufhead, buf_line_t *bufline)
 
     /* Update the allocated size */
     bufhead->alloclen -= BUF_DATA_SIZE;
+    bufhead->len -= bufline->len;
+    assert(bufhead->len >= 0);
+    bufhead->numlines --;
 
     /* and finally, deallocate the buf */
     BlockHeapFree(linebuf_bl, bufline);
@@ -459,7 +463,6 @@ linebuf_flush(int fd, buf_head_t *bufhead)
        bufhead */
     if (bufhead->writeofs == bufline->len) {
        bufhead->writeofs = 0;
-       bufhead->len -= bufline->len;
        assert(bufhead->len >=0);
        linebuf_done_line(bufhead, bufline);
     }
