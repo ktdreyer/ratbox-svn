@@ -1,3 +1,15 @@
+leeh        2002/09/20 10:38:16 UTC	(20020920_2)
+
+  Modified files:
+    include              patchlevel.h 
+  Log:
+  - revved patchlevel to rc4
+  
+  Revision  Changes    Path
+  7.40      +1 -1      ircd-ratbox/include/patchlevel.h
+
+
+
 leeh        2002/09/20 10:29:51 UTC	(20020920_1)
 
   Modified files:
