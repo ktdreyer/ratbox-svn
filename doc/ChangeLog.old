@@ -1,3 +1,15 @@
+androsyn    2002/07/11 05:17:20 EDT	(20020711_1)
+
+  Modified files:
+    include              memory.h 
+  Log:
+  Remove the inlines from memory.h that were giving forte c problems..
+  
+  Revision  Changes    Path
+  7.33      +0 -32     ircd-hybrid-7/include/memory.h
+
+
+
 lusky       2002/07/10 22:29:03 EDT	(20020711_0)
 
   Modified files:
