@@ -456,7 +456,6 @@ sendto_channel_type(struct Client *one, struct Client *from,
  *
  * Send a message to all connected servers except the client 'one'.
  */
-
 void
 sendto_serv_butone(struct Client *one, const char *pattern, ...)
 
@@ -479,6 +478,35 @@ sendto_serv_butone(struct Client *one, const char *pattern, ...)
 
   va_end(args);
 } /* sendto_serv_butone() */
+
+/*
+ * sendto_cap_serv_butone
+ *
+ * Send a message to all connected servers except the client 'one'.
+ */
+void
+sendto_cap_serv_butone(int cap, struct Client *one, const char *pattern, ...)
+
+{
+  va_list args;
+  register struct Client *cptr;
+  dlink_node *ptr;
+
+  va_start(args, pattern);
+  
+  for(ptr = serv_list.head; ptr; ptr = ptr->next)
+    {
+      cptr = ptr->data;
+
+      if (one && (cptr == one->from))
+        continue;
+      
+      if (IsCapable(cptr,cap))
+	vsendto_one(cptr, pattern, args);
+    }
+
+  va_end(args);
+} /* sendto_cap_serv_butone() */
 
 /*
  * sendto_common_channels()

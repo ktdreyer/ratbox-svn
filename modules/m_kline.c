@@ -41,6 +41,7 @@
 #include "send.h"
 #include "hash.h"
 #include "handlers.h"
+#include "s_serv.h"
 #include "msg.h"
 
 #include <stdlib.h>
@@ -91,7 +92,7 @@ int already_placed_kline( struct Client *sptr, char *user, char *host,
 
 int is_ip_kline(char *host,unsigned long *ip, unsigned long *ip_mask);
 void apply_kline(struct Client *sptr, struct ConfItem *aconf,
-		 char *current_date,
+		 const char *current_date,
 		 int ip_kline, unsigned long ip, unsigned long ip_mask);
 
 char *_version = "20001122";
@@ -222,14 +223,11 @@ int mo_kline(struct Client *cptr,
     }
   ClassPtr(aconf) = find_class(0);
 
+  sendto_cap_serv_butone( CAP_KLN, &me,
+			  ":%s KLINE %s %s %s %s",
+			  me.name, sptr->name, user, host, reason);
 
-#if 0
-  sendto_cap_servs(chptr, cptr, CAP_KLN,
-		   ":%s KLINE %s %s %s %s",
-		   me.name, sptr->name, user, host, reason);
-#endif
-
-  apply_kline(sptr, aconf, (char *)current_date, ip_kline, ip, ip_mask);
+  apply_kline(sptr, aconf, current_date, ip_kline, ip, ip_mask);
 
   return 0;
 } /* mo_kline() */
@@ -245,10 +243,15 @@ int ms_kline(struct Client *cptr,
                 char *parv[])
 {
   char *slave_oper;
+  const char *current_date;
   struct Client *rcptr=NULL;
+  struct ConfItem *aconf;
 
-  if(parc < 2)
+  if(parc < 5)
     return 0;
+
+  sendto_cap_serv_butone (CAP_KLN, cptr, ":%s KLINE %s %s %s %s",
+			  parv[0], parv[1], parv[2], parv[3], parv[4]);
 
   slave_oper = parv[1];
 
@@ -267,7 +270,15 @@ int ms_kline(struct Client *cptr,
   else
     {
       sendto_realops("received kline from %s", sptr->name);
-      mo_kline(cptr,sptr,parc,parv);
+      aconf = make_conf();
+
+      aconf->status = CONF_KILL;
+      DupString(aconf->host, parv[2]);
+      DupString(aconf->user, parv[3]);
+      DupString(aconf->passwd, parv[4]);
+
+      current_date = smalldate((time_t) 0);
+      apply_kline(rcptr, aconf, current_date, 0, 0, 0);
     }
 
   return 0;
@@ -282,7 +293,7 @@ int ms_kline(struct Client *cptr,
  *		  and conf file
  */
 void apply_kline(struct Client *sptr, struct ConfItem *aconf,
-		 char *current_date,
+		 const char *current_date,
 		 int ip_kline, unsigned long ip, unsigned long ip_mask)
 {
   if(ip_kline)

@@ -1199,7 +1199,10 @@ static void exit_one_client(struct Client *cptr, struct Client *sptr, struct Cli
 	    {
 	      next_lp = lp->next;
 	      remove_user_from_channel(lp->data,sptr);
-	      free_dlink_node(lp);
+
+	      /* this dlink_node (lp) is freed
+	       * in remove_user_from_channel already.
+	       */
 	    }
           
           /* Clean up invitefield */

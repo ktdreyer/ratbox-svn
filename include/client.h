@@ -193,7 +193,7 @@ struct LocalUser
   int               drone_noticed;
 
 
-  /* Send and recieve linebuf queues .. */
+  /* Send and receive linebuf queues .. */
   buf_head_t        buf_sendq;
   buf_head_t        buf_recvq;
   /*
@@ -250,6 +250,9 @@ struct LocalUser
   int allow_read;	/* how many we're allowed to read in this second */
   int actually_read;  /* how many we've actually read in this second */
   int sent_parsed;      /* how many messages we've parsed in this second */
+
+  /* caller ID allow list */
+  dlink_list	allow_list;
 };
 
 /*
