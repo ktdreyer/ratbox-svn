@@ -434,12 +434,11 @@ static void whois_person(struct Client *source_p,struct Client *target_p, int gl
   if ( (glob == 1) || (MyConnect(target_p) && (IsOper(source_p) ||
        !ConfigServerHide.hide_servers)) || (target_p == source_p) )
     {
-      if(ConfigFileEntry.use_whois_actually)
+      if(ConfigFileEntry.use_whois_actually && show_ip(source_p, target_p))
         sendto_one(source_p, form_str(RPL_WHOISACTUALLY),
                    me.name, source_p->name, target_p->name,
                    target_p->username, target_p->host, 
-                   show_ip(source_p, target_p) ? 
-                   target_p->localClient->sockhost : "255.255.255.255");
+                   target_p->localClient->sockhost);
                                                  	  		 
       sendto_one(source_p, form_str(RPL_WHOISIDLE),
                  me.name, source_p->name, target_p->name,

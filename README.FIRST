@@ -50,12 +50,12 @@ Feature Specific Requirements:
 - Known bugs are listed in the BUGS file
 
 - See the INSTALL document for info on configuring and compiling
-  ircd-hybrid.
+  ircd-ratbox.
 
 - Please read doc/index.txt to get an overview of the current documentation.
 
 - Old Hybrid 5/6 configuration files are no longer supported.  All conf
-  files will have to be converted to the Hybrid 7 format.  A convertconf
+  files will have to be converted to the new format.  A convertconf
   utility is provided and installed into bin/.
 
 - If you are wondering why config.h is practically empty, its because many 
@@ -80,7 +80,7 @@ Feature Specific Requirements:
   work fine, and any gcc or SunPro compiled on 32bit.
 
 - DARWIN AND MACOS X USERS: You must be using at least the December 2001
-  Development Tools from Apple to build ircd-hybrid with shared modules.
+  Development Tools from Apple to build ircd-ratbox with shared modules.
   Before then you MUST disable shared modules, as we do not have the proper
   flags for cc(1) prior to that point to produce shared modules.
 
