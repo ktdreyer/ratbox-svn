@@ -1,3 +1,7 @@
+*** 20001230_14 by lusky
+- missed another setenv()
+
+
 *** 20001230_13 by lusky
 - eradicated setenv(), it's not portable.  specifically sol2.6 doesn't
   have it.
