@@ -221,23 +221,14 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   **     have changed the target because of the nickname change.
   */
   if(BadPtr(parv[2]))
-    {
       reason = "<No reason given>";
-    }
   else
     {
-      if(IsOper(cptr))
-        {
-          reason = parv[2];
-        }
+      reason = strchr(parv[2], ' ');
+      if(reason)
+        reason++;
       else
-        {
-          reason = strchr(parv[2], ' ');
-	  if(reason)
-	    reason++;
-	  else
-	    reason = parv[2];
-	}
+        reason = parv[2];
     }
 
   if (IsOper(sptr)) /* send it normally */
@@ -265,12 +256,6 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   if (!MyConnect(acptr) || !MyConnect(sptr) || !IsOper(sptr))
     {
       relay_kill(cptr, sptr, acptr, inpath, reason);
-/*      if (chasing) */
-/*	kill_client(cptr, acptr, "%s!%s %s", inpath, path, reason); */
-#if 0
-        sendto_one(cptr, ":%s KILL %s :%s!%s",
-                   me.name, acptr->name, inpath, path);
-#endif
 
       /*
       ** Set FLAGS_KILLED. This prevents exit_one_client from sending
@@ -331,8 +316,8 @@ static void relay_kill(struct Client *one, struct Client *sptr,
         }
       }
     }
-    /* force introduction of killed client *
-     * but check that its not on the server we're bursting too.. */
+    /* force introduction of killed client but check that
+     * its not on the server we're bursting too.. */
     else if(strcmp(acptr->user->server,cptr->name))
       client_burst_if_needed(cptr, acptr);
 
@@ -359,12 +344,5 @@ static void relay_kill(struct Client *one, struct Client *sptr,
                  inpath, reason);
     }
   }
-
-#if 0
-    sendto_one(cptr, ":%s KILL %s :%s!%s", sptr->name, acptr->name,
-               inpath, path);
-    kill_client(cptr, acptr, "%s!%s %s", inpath, path, reason);
-#endif
-
 }
 
