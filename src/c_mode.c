@@ -36,7 +36,7 @@ change_chmember_status(struct channel *chptr, const char *nick,
 		if(type != 'o' || dir)
 			return;
 
-		rejoin_service(target_p, chptr, 1);
+		rejoin_service(target_p, chptr);
 		return;
 	}
 

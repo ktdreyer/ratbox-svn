@@ -155,6 +155,7 @@ add_chmember(struct channel *chptr, struct client *target_p, int flags)
 	struct chmember *mptr;
 
 	mptr = BlockHeapAlloc(chmember_heap);
+
 	mptr->client_p = target_p;
 	mptr->chptr = chptr;
 	mptr->flags = flags;
@@ -269,11 +270,8 @@ part_service(struct client *service_p, struct channel *chptr)
 }
 
 void
-rejoin_service(struct client *service_p, struct channel *chptr, int send_part)
+rejoin_service(struct client *service_p, struct channel *chptr)
 {
-	if(send_part)
-		sendto_server(":%s PART %s", service_p->name, chptr->name);
-
 	sendto_server(":%s SJOIN %lu %s %s :@%s",
 			MYNAME, chptr->tsinfo, chptr->name,
 			chmode_to_string(chptr), service_p->name);
@@ -322,7 +320,7 @@ c_kick(struct client *client_p, const char *parv[], int parc)
 
 	if((target_p = find_service(parv[2])) != NULL)
 	{
-		rejoin_service(target_p, chptr, 0);
+		rejoin_service(target_p, chptr);
 		return;
 	}
 
@@ -608,7 +606,7 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 				mptr = ptr->data;
 				service_p = mptr->client_p;
 
-				rejoin_service(target_p, chptr, 1);
+				rejoin_service(target_p, chptr);
 			}
 		}
 	}

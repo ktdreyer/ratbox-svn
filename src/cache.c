@@ -33,8 +33,9 @@ init_cache(void)
 
 	/* allocate the emptyline */
 	emptyline = BlockHeapAlloc(cacheline_heap);
+	memset(emptyline, 0, sizeof(struct cacheline));
+
 	emptyline->data[0] = ' ';
-	emptyline->data[1] = '\0';
 }
 
 /* cache_file()
@@ -69,6 +70,7 @@ cache_file(const char *filename, const char *shortname)
 		if(!EmptyString(line))
 		{
 			lineptr = BlockHeapAlloc(cacheline_heap);
+
 			strlcpy(lineptr->data, line, sizeof(lineptr->data));
 			dlink_add_tail(lineptr, &lineptr->linenode, &cacheptr->contents);
 		}

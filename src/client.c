@@ -128,6 +128,7 @@ add_host(struct client *target_p)
 	if(!found)
 	{
 		hptr = BlockHeapAlloc(host_heap);
+		memset(hptr, 0, sizeof(struct host_entry));
 
 		hptr->host = target_p->user->host;
 		dlink_add(hptr, &hptr->hashptr, &host_table[hashv]);
@@ -151,6 +152,7 @@ add_host(struct client *target_p)
 	if(!found)
 	{
 		uhost_p = BlockHeapAlloc(uhost_heap);
+		memset(uhost_p, 0, sizeof(struct uhost_entry));
 
 		uhost_p->username = target_p->user->username;
 		dlink_add(uhost_p, &uhost_p->node, &hptr->uhosts);
@@ -193,7 +195,10 @@ del_host(struct client *target_p)
 				uhost_p->username = client_p->user->username;
 			}
 			else
+			{
+				dlink_delete(&uhost_p->node, &hptr->uhosts);
 				BlockHeapFree(uhost_heap, uhost_p);
+			}
 
 			break;
 		}
@@ -208,7 +213,10 @@ del_host(struct client *target_p)
 			hptr->host = client_p->user->host;
 		}
 		else
+		{
+			dlink_delete(&hptr->hashptr, &host_table[hashv]);
 			BlockHeapFree(host_heap, hptr);
+		}
 
 		break;
 	}
@@ -550,7 +558,10 @@ c_nick(struct client *client_p, const char *parv[], int parc)
 		}
 
 		target_p = BlockHeapAlloc(client_heap);
+		memset(target_p, 0, sizeof(struct client));
+
 		target_p->user = BlockHeapAlloc(user_heap);
+		memset(target_p->user, 0, sizeof(struct user));
 
 		target_p->uplink = uplink_p;
 
@@ -684,7 +695,10 @@ c_server(struct client *client_p, const char *parv[], int parc)
         }
 
 	target_p = BlockHeapAlloc(client_heap);
+	memset(target_p, 0, sizeof(struct client));
+
 	target_p->server = BlockHeapAlloc(server_heap);
+	memset(target_p->server, 0, sizeof(struct server));
 
 	strlcpy(target_p->name, parv[1], sizeof(target_p->name));
 	strlcpy(target_p->info, EmptyString(parv[3]) ? default_gecos : parv[3],
