@@ -1,3 +1,24 @@
+androsyn    2002/10/02 04:16:14 UTC	(20021002_0)
+
+  Modified files:
+    doc                  example.conf 
+    include              client.h newconf.h 
+    modules              m_operwall.c 
+    src                  newconf.c s_conf.c 
+  Log:
+  Add a operwall flag to the config file, requested by Disciple.  Basically
+  if the operator doesn't have the flag, no operwall for them.
+  
+  Revision  Changes    Path
+  7.184     +2 -1      ircd-ratbox/doc/example.conf
+  7.177     +3 -2      ircd-ratbox/include/client.h
+  7.18      +1 -0      ircd-ratbox/include/newconf.h
+  1.33      +7 -1      ircd-ratbox/modules/m_operwall.c
+  7.44      +12 -0     ircd-ratbox/src/newconf.c
+  7.357     +5 -0      ircd-ratbox/src/s_conf.c
+
+
+
 leeh        2002/09/21 22:31:37 UTC	(20020921_3)
 
   Modified files:
