@@ -200,12 +200,23 @@ SOLARIS CAVEATS
     http://www.openssl.org/support/faq.html#USER1
 
   In summary, it is recommended that Solaris users install the EGD
-  (Entropy Gathering Daemon).  If this is not an option, the other
-  solution is only available to Solaris 2.6 users: install Sun vendor
-  patc 105710-0 and use the $RANDFILE environment variable to specify
+  (Entropy Gathering Daemon). However, there is an alternative which
+  cannot run out of entropy and is still EGD-interface compatibile -
+  that is PRNGD daemon available from
+  
+    http://www.aet.tu-cottbus.de/personen/jaenicke/postfix_tls/prngd.html
+  
+  If this is not an option, the other solution is only available to
+  Solaris 2.6 users: install Sun vendor patch 105710-0 (known as
+  SUNWski) and use the $RANDFILE environment variable to specify
   /dev/random.  There are caveats to using this method as well (issues
   with blocking vs. non-blocking).
 
+  However, there is another solution for Solaris 2.5.1, 2.6, 7 and 8:
+  ANDIrand package which will more or less successfully emulate those
+  two devices. It is available at:
+
+    http://www.cosy.sbg.ac.at/~andi/
 
 
 END OF DOCUMENT
