@@ -177,12 +177,14 @@ int     m_join(struct Client *cptr,
           continue;
         }
 
+      /* We can't do this for interoperability reasons ;-( */
+#if 0
       if (strlen(name) > CHANNELLEN-15)
         {
           sendto_one(sptr, form_str(ERR_BADCHANNAME),me.name, parv[0], name);
           continue;
         }
-
+#endif
 
 #ifdef NO_JOIN_ON_SPLIT_SIMPLE
       if (server_was_split && MyClient(sptr) && (*name != '&'))
@@ -513,14 +515,12 @@ int     m_join(struct Client *cptr,
 #endif
       /*
       **  Set timestamp if appropriate, and propagate
-      **  XXX and set the chan_id to the nick getting ops
       */
       if (MyClient(sptr) && (flags & CHFL_CHANOP) )
         {
           if (joining_vchan)
             add_vchan_to_client_cache(sptr,root_chptr,chptr);
           chptr->channelts = CurrentTime;
-          strncpy_irc(chptr->chan_id, parv[0], NICKLEN);
 #ifdef NO_CHANOPS_WHEN_SPLIT
           if(allow_op)
             {
@@ -945,12 +945,10 @@ int     ms_join(struct Client *cptr,
 #endif
       /*
       **  Set timestamp if appropriate, and propagate
-      **  XXX and set chan_id to nickname getting ops for now
       */
       if (MyClient(sptr) && (flags & CHFL_CHANOP) )
         {
           chptr->channelts = CurrentTime;
-          strncpy_irc(chptr->chan_id, parv[0], NICKLEN);
 #ifdef NO_CHANOPS_WHEN_SPLIT
           if(allow_op)
             {
@@ -1248,14 +1246,12 @@ int     mo_join(struct Client *cptr,
       add_user_to_channel(chptr, sptr, flags);
       /*
       **  Set timestamp if appropriate, and propagate
-      **  XXX and set chan_id to nickname getting ops for now
       */
       if (MyClient(sptr) && (flags & CHFL_CHANOP) )
         {
           if (joining_vchan)
             add_vchan_to_client_cache(sptr,root_chptr,chptr);
           chptr->channelts = CurrentTime;
-          strncpy_irc(chptr->chan_id, parv[0], NICKLEN);
           sendto_match_servs(chptr, cptr,
                              ":%s SJOIN %lu %s + :@%s", me.name,
                              chptr->channelts, name, parv[0]);
