@@ -53,7 +53,7 @@ lex.yy.o:	lex.yy.c ircd_lexer.l
 lex.yy.c:	ircd_lexer.l
 	${LEX} ircd_lexer.l
 
-SRCS =                          \
+BASE_SRCS =                     \
   blalloc.c                     \
   channel.c                     \
   vchannel.c                    \
@@ -102,6 +102,14 @@ SRCS =                          \
   sprintf_irc.c                 \
   tools.c                       \
   whowas.c
+
+EXTRA_SRCS =	s_bsd_kqueue.c	\
+		s_bsd_poll.c	\
+		s_bsd_select.c
+
+SELECT_SRC = @SELECT_SRC@
+
+SRCS = ${BASE_SRCS} ${SELECT_SRC}
 
 OBJS = ${SRCS:.c=.o}
 
@@ -163,7 +171,7 @@ version.c: version.c.SH
 
 .PHONY: depend clean distclean
 depend:
-	${MKDEP} ${CPPFLAGS} ${SRCS} > .depend
+	@${MKDEP} ${CPPFLAGS} ${BASE_SRCS} ${EXTRA_SRCS} > .depend
 
 clean:
 	${RM} -f *.o *.exe *~ y.tab.* lex.yy.c ircd.core core ircd 

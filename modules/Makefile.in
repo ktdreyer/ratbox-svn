@@ -108,9 +108,9 @@ install: all
 
 .PHONY: depend clean distclean
 depend:
-	${MKDEP} ${CPPFLAGS} ${SRCS} > .depend.tmp
-	${SED} s/\\\.o/\\\.so/ < .depend.tmp > .depend
-	${RM} -f .depend.tmp
+	@${MKDEP} ${CPPFLAGS} ${SRCS} > .depend.tmp
+	@${SED} s/\\\.o/\\\.so/ < .depend.tmp > .depend
+	@${RM} -f .depend.tmp
 
 clean:
 	${RM} -f *.so *~ 
