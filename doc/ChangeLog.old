@@ -1,3 +1,12 @@
+*** 20001129_10 by db
+- fixed m_squit.c
+- account for LazyLink's in channel.c destroy_channel()
+  can be used for both persistent channels and lazy links now
+  removing more BLOAT
+- -O2 in Makefile.in for modules was doing weirdnesses, hard coded to -g for now
+
+
+
 *** 20001129_9 by db
 - fixed persistent channels
 - fixed IsSetCallerId typo
