@@ -48,7 +48,7 @@ struct slink_state       in_state;
 struct slink_state       out_state;
 
 #if SERVLINK_DEBUG & SERVLINK_DEBUG_LOGS
-FILE *logs[5];
+FILE *logs[4];
 #endif
 
 struct fd_table          fds[NUM_FDS] =
@@ -84,9 +84,7 @@ int main(int argc, char *argv[])
 #if SERVLINK_DEBUG & SERVLINK_DEBUG_LOGS
   pid_t pid = getpid();
   char logfile[512] = "";
-  char lognames[5][8] = { "cin", "din", "nin",
-                                 "dout", "nout"
-                        };
+  char lognames[4][8] = { "be", "pe", "bd", "pd" };
 #endif
   
 #if SERVLINK_DEBUG & SERVLINK_DEBUG_GDB
@@ -97,7 +95,7 @@ int main(int argc, char *argv[])
 #endif
 
 #if SERVLINK_DEBUG & SERVLINK_DEBUG_LOGS
-  for(i = 0; i < 5; i++)
+  for(i = 0; i < 4; i++)
   {
     sprintf(logfile, "%s/slink-%u-%s.log",
             "/usr/local/ircd/logs", pid, lognames[i]);

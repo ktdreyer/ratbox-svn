@@ -86,7 +86,6 @@ void process_sendq(unsigned char *data, unsigned int datalen)
    * to any other fds anyway
    */
   send_data_blocking(REMOTE_FD_W, data, datalen);
-  LOG_IO(NOL, data, datalen);
 }
 
 /*
@@ -109,11 +108,13 @@ void process_recvq(unsigned char *data, unsigned int datalen)
 #ifdef HAVE_LIBCRYPTO
   if (in_state.crypt)
   {
+    LOG_IO(BDL,data,datalen);
     assert(EVP_DecryptUpdate(&in_state.crypt_state.ctx,
                              tmp_buf, &blen,
                              data, datalen));
     assert(blen == datalen);
     buf = tmp_buf;
+    LOG_IO(PDL,tmp_buf,blen);
   }
 #endif
 
@@ -127,7 +128,10 @@ void process_recvq(unsigned char *data, unsigned int datalen)
     in_state.zip_state.z_stream.avail_out = BUFLEN;
     if ((ret = inflate(&in_state.zip_state.z_stream,
                        Z_NO_FLUSH)) != Z_OK)
+    {
+      assert(0);
       exit(ret);
+    }
     assert(in_state.zip_state.z_stream.avail_out);
     assert(in_state.zip_state.z_stream.avail_in == 0);
     blen = BUFLEN - in_state.zip_state.z_stream.avail_out;
@@ -143,7 +147,6 @@ void process_recvq(unsigned char *data, unsigned int datalen)
   assert(blen);
   
   send_data_blocking(LOCAL_FD_W, buf, blen);
-  LOG_IO(DOL, buf, blen);
 }
 
 /* read_ctrl
@@ -165,8 +168,6 @@ void read_ctrl(void)
       /* read the command */
       if (!(ret = checkError(read(CONTROL_FD_R, &cmd.command, 1))))
         return;
-
-      LOG_IO(CIL,&cmd.command,1);
     }
 
     /* read datalen for commands including data */
@@ -187,7 +188,6 @@ void read_ctrl(void)
         {
           if (!(ret = checkError(read(CONTROL_FD_R, &tmp, 1))))
             return;
-          LOG_IO(CIL, &tmp, 1);
 
           cmd.datalen = tmp << 8;
           cmd.gotdatalen = 1;
@@ -196,7 +196,6 @@ void read_ctrl(void)
         {
           if (!(ret = checkError(read(CONTROL_FD_R, &tmp, 1))))
             return;
-          LOG_IO(CIL, &tmp, 1);
           
           cmd.datalen |= tmp;
           cmd.gotdatalen = 2;
@@ -235,8 +234,6 @@ void read_ctrl(void)
                                   cmd.datalen - cmd.readdata))))
         return;
 
-      LOG_IO(CIL,(cmd.data+cmd.readdata),ret);
-
       cmd.readdata += ret;
       if (cmd.readdata < cmd.datalen)
         return;
@@ -268,7 +265,6 @@ void read_data(void)
   while ((ret = checkError(read(LOCAL_FD_R, buf, READLEN))))
   {
     blen = ret;
-    LOG_IO(DIL, buf, ret);
 #ifdef HAVE_LIBZ
     if (out_state.zip)
     {
@@ -296,17 +292,18 @@ void read_data(void)
     {
       /* encrypt data */
       ret = blen;
+      LOG_IO(BEL,buf,ret);
       assert( EVP_EncryptUpdate(&out_state.crypt_state.ctx,
                                 out_state.buf, &blen,
                                 buf, ret) );
       assert(blen == ret);
+      LOG_IO(PEL,out_state.buf,blen);
     }
 #endif
     
     assert(blen);
     ret = checkError(write(REMOTE_FD_W, out_state.buf, blen));
 
-    LOG_IO(NOL,out_state.buf,blen);
     if (ret < blen)
     {
       /* write incomplete, register write cb */
@@ -364,7 +361,6 @@ void read_net(void)
   while ((ret = checkError(read(REMOTE_FD_R, buf, READLEN))))
   {
     blen = ret;
-    LOG_IO(NIL,buf,ret);
 #ifdef HAVE_LIBCRYPTO
     if (in_state.crypt)
     {
@@ -374,10 +370,12 @@ void read_net(void)
       if (in_state.zip)
         buf = tmp2_buf;
 #endif
+      LOG_IO(BDL,tmp_buf,ret);
       assert(EVP_DecryptUpdate(&in_state.crypt_state.ctx,
                                buf, &blen,
                                tmp_buf, ret));
       assert(blen == ret);
+      LOG_IO(PDL,buf,blen);
     }
 #endif
     
@@ -391,7 +389,10 @@ void read_net(void)
       in_state.zip_state.z_stream.avail_out = BUFLEN*2;
       if ((ret2 = inflate(&in_state.zip_state.z_stream,
                           Z_NO_FLUSH)) != Z_OK)
+      {
+        assert(0);
         exit(ret2);
+      }
       assert(in_state.zip_state.z_stream.avail_out);
       assert(in_state.zip_state.z_stream.avail_in == 0);
       blen = (BUFLEN*2) - in_state.zip_state.z_stream.avail_out;
@@ -405,7 +406,6 @@ void read_net(void)
     assert(blen);
     
     ret = checkError(write(LOCAL_FD_W, in_state.buf, blen));
-    LOG_IO(DOL,in_state.buf,blen);
 
     if (ret < blen)
     {
