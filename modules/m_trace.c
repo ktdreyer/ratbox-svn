@@ -44,6 +44,7 @@
 #include "modules.h"
 
 static int m_trace(struct Client *, struct Client *, int, const char **);
+static int m_etrace(struct Client *, struct Client *, int, const char **);
 
 static void trace_spy(struct Client *, const char *);
 
@@ -52,14 +53,20 @@ struct Message trace_msgtab = {
 	{mg_unreg, {m_trace, 0}, {m_trace, 0}, mg_ignore, mg_ignore, {m_trace, 0}}
 };
 
+struct Message etrace_msgtab = {
+	"ETRACE", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, mg_ignore, {m_etrace, 0}}
+};
+
 int doing_trace_hook;
 
-mapi_clist_av1 trace_clist[] = { &trace_msgtab, NULL };
+mapi_clist_av1 trace_clist[] = { &trace_msgtab, &etrace_msgtab,  NULL };
 mapi_hlist_av1 trace_hlist[] = {
 	{ "doing_trace",	&doing_trace_hook },
 	{ NULL, NULL }
 };
 DECLARE_MODULE_AV1(trace, NULL, NULL, trace_clist, trace_hlist, NULL, "$Revision$");
+
 
 static int report_this_status(struct Client *source_p, struct Client *target_p, int dow,
 			      int link_u_p, int link_u_s);
@@ -444,3 +451,47 @@ trace_spy(struct Client *source_p, const char *target)
 
 	hook_call_event(doing_trace_hook, &data);
 }
+
+
+/*
+ * m_etrace
+ *      parv[0] = sender prefix
+ *      parv[1] = servername
+ */
+static int
+m_etrace(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
+{
+	struct Client *target_p;
+	dlink_node *ptr;
+	char ip[HOSTIPLEN];
+	const char *ip_ptr;
+
+	/* report all direct connections */
+	DLINK_FOREACH(ptr, lclient_list.head)
+	{
+		target_p = ptr->data;
+
+#ifdef HIDE_SPOOF_IPS
+		if(IsIPSpoof(target_p))
+		{
+			ip_ptr = "255.255.255.255";
+		}
+		else
+#endif
+		{
+			inetntop_sock(&target_p->localClient->ip, ip, sizeof(ip));
+			ip_ptr = ip;
+		}
+
+		sendto_one(source_p, form_str(RPL_ETRACE),
+			   me.name, source_p->name, 
+			   IsOper(target_p) ? "Oper" : "User", 
+			   get_client_class(target_p),
+			   target_p->name, target_p->username, target_p->host,
+			   ip_ptr, target_p->info);
+	}
+
+	sendto_one_numeric(source_p, RPL_ENDOFTRACE, form_str(RPL_ENDOFTRACE), me.name);
+	return 0;
+}
+
