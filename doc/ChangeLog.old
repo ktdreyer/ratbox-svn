@@ -1,3 +1,19 @@
+*** 20001211_5 by db
+- this gets rid of local[] 
+  unknown clients are now placed into unknown_list, moved to
+  serv_list (local servers only) and lclient_list (local client list)
+  as appropriate. check_pings now scans the lclient_list, serv_list
+  and then checks for unknown clients timing them out as appropriate.
+  Now, the proper place to do PING checks is in s_bsd.c in
+  comm_checktimeouts() using a timeout_handler (as pointed out by Adrian)
+  ... Someone will have to check that unknown clients
+  are also on this list, and get rid of that fixed sized fd_table...
+
+- Seems I screwed up the inter-server NICK prefix and message , this
+  caused all sorts of neat nick collides.
+
+
+
 *** 20001211_4 by davidt
 oops, didn't cvs add create_po..
 
