@@ -106,7 +106,7 @@ BASE_SRCS =                     \
   scache.c                      \
   send.c                        \
   sprintf_irc.c                 \
-  snprintf.c			\
+  @SNPRINTF_C@			\
   tools.c                       \
   whowas.c
 #  ircdauth.c                    \
