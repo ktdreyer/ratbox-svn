@@ -4,6 +4,10 @@
 
 
 *** 20001114_5 by spookey
+- configure & autoconf/configure.in & src/Makefile.in updated for -ldl
+  linking with IRC (added DL_DEFINE stuff to IRCDLIBS and defined it if 
+  it's a linux machine)
+- src/s_bsd_poll.c added the glibc compatibility fixes
 
 
 
