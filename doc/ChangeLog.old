@@ -1,3 +1,6 @@
+*** 20001227_17 by davidt
+quick patch to make yes/on == 1 and no/off == 0.
+
 *** 20001227_16 by wcampbel
 Committed flame's remote connect WALLOPS fixes
 
