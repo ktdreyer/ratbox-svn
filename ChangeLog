@@ -1,3 +1,23 @@
+leeh        2004/08/28 11:13:29 EDT	(20040828_0)
+
+  Modified files:
+    src                  client.c s_newconf.c s_serv.c 
+  Log:
+  - fixes via 2.0:
+    - when we get the callback from serv_connect(), check the server doesnt
+      exist as it couldve linked while we were waiting for the callback
+    - add a check to accept_message() that target == source, so users can
+      message themselves
+    - make exit_generic_client() happen before we do the normal exiting of
+      clients.  close_connection() should be the second to last thing we do..
+  
+  Revision  Changes    Path
+  7.479     +9 -5      ircd-ratbox/src/client.c
+  7.53      +1 -1      ircd-ratbox/src/s_newconf.c
+  7.415     +9 -0      ircd-ratbox/src/s_serv.c
+
+
+
 leeh        2004/08/20 13:08:25 EDT	(20040820_1)
 
   Modified files:
