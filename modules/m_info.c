@@ -242,8 +242,8 @@ static void send_conf_options(struct Client *sptr)
               RPL_INFO,
               sptr->name,
               "network_name",
-              ConfigFileEntry.network_name ? 
-                ConfigFileEntry.network_name :
+              ServerInfo.network_name ? 
+                ServerInfo.network_name :
                 NETWORK_NAME_DEFAULT,
               "Name of the Network");
    sendto_one(sptr,
@@ -252,8 +252,8 @@ static void send_conf_options(struct Client *sptr)
               RPL_INFO,
               sptr->name,
               "network_desc",
-              ConfigFileEntry.network_desc ?
-                ConfigFileEntry.network_desc :
+              ServerInfo.network_desc ?
+                ServerInfo.network_desc :
                 NETWORK_DESC_DEFAULT,
               "Description of the network");
    sendto_one(sptr,

@@ -79,7 +79,7 @@ static void delete_members(dlink_list *list);
 static int check_banned(struct Channel *chptr, struct Client *who, 
 			char *s, char *s2);
 
-/* static functions used in set_mode */
+/* static functions used in set_channel_mode */
 static char* pretty_mask(char *);
 static char *fix_key(char *);
 static char *fix_key_old(char *);
@@ -1066,7 +1066,7 @@ static  int     errsent(int err, int *errs)
   return 0;
 }
 
-/* bitmasks for various error returns that set_mode should only return
+/* bitmasks for various error returns that set_channel_mode should only return
  * once per call  -orabidoo
  */
 
@@ -1093,7 +1093,9 @@ void set_channel_mode(struct Client *cptr,
                       char *parv[],
 		      char *chname)
 {
-  int   errors_sent = 0, opcnt = 0, len = 0, tmp, nusers;
+  int   errors_sent = 0, opcnt = 0;
+  int   len = 0;
+  int   tmp, nusers;
   int   keychange = 0, limitset = 0;
   int   whatt = MODE_ADD, the_mode = 0;
   int   done_s = NO, done_p = NO;

@@ -429,8 +429,8 @@ static void whois_person(struct Client *sptr,struct Client *acptr, int glob)
   else
     sendto_one(sptr, form_str(RPL_WHOISSERVER),
 	       me.name, sptr->name, acptr->name,
-               ConfigFileEntry.network_name,
-	       ConfigFileEntry.network_desc);
+               ServerInfo.network_name,
+	       ServerInfo.network_desc);
 
   if (acptr->user->away)
     sendto_one(sptr, form_str(RPL_AWAY), me.name,
