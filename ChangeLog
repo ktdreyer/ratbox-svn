@@ -1,3 +1,15 @@
+androsyn    2004/08/30 15:42:07 EDT	(20040830_4)
+
+  Modified files:
+    include              ircd_defs.h 
+  Log:
+  The same fix for the sockaddr_storage stuff here...
+  
+  Revision  Changes    Path
+  7.52      +4 -25     ircd-ratbox/include/ircd_defs.h
+
+
+
 androsyn    2004/08/30 14:56:49 EDT	(20040830_3)
 
   Modified files:
