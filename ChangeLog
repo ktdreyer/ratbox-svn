@@ -1,3 +1,31 @@
+leeh        2003/06/19 23:18:00 UTC	(20030619_1)
+
+  Modified files:
+    doc                  example.conf example.efnet.conf 
+    include              config.h hash.h s_conf.h 
+    modules              m_help.c m_info.c 
+    src                  Makefile.in hash.c ircd.c newconf.c 
+                         s_conf.c 
+  Log:
+  - first revision of a help cache
+  - removed use_help
+  
+  Revision  Changes    Path
+  7.211     +0 -9      ircd-ratbox/doc/example.conf
+  7.46      +0 -9      ircd-ratbox/doc/example.efnet.conf
+  7.159     +5 -4      ircd-ratbox/include/config.h
+  7.33      +5 -0      ircd-ratbox/include/hash.h
+  7.241     +0 -1      ircd-ratbox/include/s_conf.h
+  1.52      +31 -102   ircd-ratbox/modules/m_help.c
+  1.87      +1 -6      ircd-ratbox/modules/m_info.c
+  7.130     +1 -0      ircd-ratbox/src/Makefile.in
+  7.72      +74 -0     ircd-ratbox/src/hash.c
+  7.294     +3 -0      ircd-ratbox/src/ircd.c
+  7.93      +0 -7      ircd-ratbox/src/newconf.c
+  7.415     +6 -1      ircd-ratbox/src/s_conf.c
+
+
+
 leeh        2003/06/19 17:55:39 UTC	(20030619_0)
 
   Modified files:
