@@ -1,3 +1,15 @@
+androsyn    2003/02/03 23:21:03 UTC	(20030203_6)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  how did that get there?
+  
+  Revision  Changes    Path
+  7.365     +0 -1      ircd-ratbox/src/client.c
+
+
+
 androsyn    2003/02/03 23:17:31 UTC	(20030203_5)
 
   Modified files:
