@@ -558,6 +558,13 @@ read_auth_reply(int fd, void *data)
 
   len = recv(auth->fd, buf, AUTH_BUFSIZ, 0);
   
+  if (len < 0 && ignoreErrno(errno))
+  {
+    comm_setselect(fd, FDLIST_IDLECLIENT, COMM_SELECT_READ,
+                   read_auth_reply, auth, 0);
+    return;
+  }
+
   if (len > 0)
     {
       buf[len] = '\0';

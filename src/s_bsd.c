@@ -772,7 +772,9 @@ static void
 comm_connect_tryconnect(int fd, void *notused)
 {
  int retval;
- assert(fd_table[fd].connect.callback); 
+ /* This check is needed or re-entrant s_bsd_* like sigio break it. */
+ if (fd_table[fd].connect.callback == NULL)
+   return;
  /* Try the connect() */
  retval = connect(fd, (struct sockaddr *) &SOCKADDR(fd_table[fd].connect.hostaddr), sizeof(struct irc_sockaddr));
  /* Error? */
