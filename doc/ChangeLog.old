@@ -1,3 +1,8 @@
+*** 20010525_4 by davidt
+- change servlink to avoid using stdin/stdout/stderr, and start from fd 3,
+  in an attempt to make solaris happy.
+
+
 *** 20010525_3 by davidt
 - Make fd_note take (int fd, char *format, ...), to avoid using sprintf
   every single place we call fd_note.
