@@ -205,7 +205,7 @@ int     m_list(struct Client *cptr,
                 (root_chptr->members || root_chptr->next_vchan->next_vchan) )
               {
                 ircsprintf(vname, "%s<!%s>", root_chptr->chname,
-                           chptr->members->value.cptr->name);
+                           tmpchptr->members->value.cptr->name);
               }
             else
               ircsprintf(vname, "%s", root_chptr->chname);
