@@ -64,7 +64,6 @@ struct Capability
 #define CAP_EOB	        0x00000100   /* Can do EOB message */
 #define CAP_KLN	        0x00000200   /* Can do KLINE message */
 #define CAP_GLN	        0x00000400   /* Can do GLINE message */
-#define CAP_AOPS        0x00002000   /* Can do anon ops (+a) */
 #define CAP_UID         0x00004000   /* Can do UIDs */
 #define CAP_ZIP         0x00008000   /* Can do ZIPlinks */
 #define CAP_ENC         0x00010000   /* Can do ENCrypted links */
@@ -77,7 +76,7 @@ struct Capability
 
 #define CAP_MASK        (CAP_QS  | CAP_EX   | CAP_CHW  | \
                          CAP_IE  | CAP_EOB  | CAP_KLN  | \
-                         CAP_GLN | CAP_AOPS | \
+                         CAP_GLN | \
                          CAP_UID | CAP_ZIP  | CAP_ENC | \
                          CAP_KNOCK  | CAP_PARA | CAP_UNKLN)
 

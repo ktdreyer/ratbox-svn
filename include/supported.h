@@ -56,7 +56,7 @@
 
 #define FEATURES2 "CHANTYPES=%s" \
                   " PREFIX=(ov)@+" \
-		  " CHANMODES=%s%s%s%s" \
+		  " CHANMODES=%s%s%s" \
 		  " NETWORK=%s" \
 		  " CASEMAPPING=%s" \
 		  " CALLERID"
@@ -65,7 +65,6 @@
                         ConfigChannel.use_except ? "e" : "", \
                         ConfigChannel.use_invex ? "I" : "", \
                         "b,k,l,imnpst", \
-                        ConfigChannel.use_anonops ? "a" : "", \
                         ServerInfo.network_name, CASEMAP
 
 /*

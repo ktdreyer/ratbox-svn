@@ -1533,10 +1533,6 @@ validate_conf(void)
       (ConfigFileEntry.client_flood > CLIENT_FLOOD_MAX))
      ConfigFileEntry.client_flood = CLIENT_FLOOD_MAX;
 
-  /* hasnt been set, disable it by default */
-  if(ConfigChannel.use_anonops == -1)
-    ConfigChannel.use_anonops = 0;
-
   if(ConfigFileEntry.use_global_limits == -1)
     ConfigFileEntry.use_global_limits = 1;
 
@@ -2097,7 +2093,6 @@ read_conf_files(int cold)
   if (cold)
   {
     /* set to 'undefined' */
-    ConfigChannel.use_anonops = -1;
     ConfigFileEntry.use_global_limits = -1;
   }
   else

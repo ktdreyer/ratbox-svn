@@ -553,7 +553,6 @@ void	newconf_init()
 	add_conf_item("channel", "use_except", CF_YESNO, conf_set_channel_use_except);
 	add_conf_item("channel", "use_invex", CF_YESNO, conf_set_channel_use_invex);
 	add_conf_item("channel", "use_knock", CF_YESNO, conf_set_channel_use_knock);
-	add_conf_item("channel", "use_anonops", CF_YESNO, conf_set_channel_use_anonops);
 	add_conf_item("channel", "max_bans", CF_INT, conf_set_channel_max_bans);
 	add_conf_item("channel", "knock_delay", CF_TIME, conf_set_channel_knock_delay);
 	add_conf_item("channel", "knock_delay_channel", CF_TIME, 
@@ -2605,18 +2604,6 @@ void	conf_set_general_dot_in_ip6_addr(void *data)
 void	conf_set_channel_use_except(void *data)
 {
 	ConfigChannel.use_except = *(unsigned int*)data;
-}
-
-void	conf_set_channel_use_anonops(void *data)
-{
-	if (ConfigChannel.use_anonops != -1)
-	{
-		ilog(L_ERROR, "Ignoring config file entry general::use_anonops "
-			"-- can only be changed on boot.");
-		return;
-	}
-
-	ConfigChannel.use_anonops = *(unsigned int*)data;
 }
 
 void	conf_set_channel_use_invex(void *data)

@@ -120,7 +120,7 @@ static struct ChModeChange mode_changes[BUFSIZE];
 static int mode_count;
 static int mode_limit;
 
-static int channel_capabs[] = { CAP_AOPS, CAP_EX, CAP_IE, CAP_UID };
+static int channel_capabs[] = { CAP_EX, CAP_IE, CAP_UID };
 
 #define NCHCAPS         (sizeof(channel_capabs)/sizeof(int))
 #define NCHCAP_COMBOS   (1 << NCHCAPS)

@@ -423,9 +423,6 @@ static void initialize_message_files(void)
  */
 static void initialize_server_capabs(void)
 {
-  if(ConfigChannel.use_anonops == 0)
-    default_server_capabs &= ~CAP_AOPS;
-  
   default_server_capabs &= ~CAP_ZIP;
 }
 

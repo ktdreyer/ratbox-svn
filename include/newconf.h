@@ -285,7 +285,6 @@ extern 	char *		conf_cur_block_name;
 	void	conf_set_general_connect_timeout		(void *data);
 	void	conf_set_general_fallback_to_ip6_int		(void *data);
 	void	conf_set_channel_use_except			(void *data);
-	void	conf_set_channel_use_anonops			(void *data);
 	void	conf_set_channel_use_invex			(void *data);
 	void	conf_set_channel_use_knock			(void *data);
 	void	conf_set_channel_knock_delay			(void *data);

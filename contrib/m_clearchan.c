@@ -48,9 +48,8 @@ static void mo_clearchan(struct Client *client_p, struct Client *source_p,
 static void kick_list(struct Client *client_p, struct Client *source_p, struct Channel *chptr,
                       dlink_list *list,char *chname);
 
-static void remove_our_modes(struct Channel *chptr, struct Channel *top_chptr,
-                             struct Client *source_p);
-static void remove_a_mode(struct Channel *chptr, struct Channel *top_chptr,
+static void remove_our_modes(struct Channel *chptr, struct Client *source_p);
+static void remove_a_mode(struct Channel *chptr, 
                           struct Client *source_p, dlink_list *list, char flag);
 
 static char    *mbuf;
@@ -83,7 +82,7 @@ char *_version = "$Revision$";
 static void mo_clearchan(struct Client *client_p, struct Client *source_p,
                         int parc, char *parv[])
 {
-  struct Channel *chptr, *root_chptr;
+  struct Channel *chptr;
   int on_vchan = 0;
 
   /* admins only */
@@ -93,10 +92,7 @@ static void mo_clearchan(struct Client *client_p, struct Client *source_p,
       return;
     }
 
-  /* XXX - we might not have CBURSTed this channel if we are a lazylink
-   * yet. */
   chptr= hash_find_channel(parv[1]);
-  root_chptr = chptr;
 
   if( chptr == NULL )
     {
@@ -139,7 +135,7 @@ static void mo_clearchan(struct Client *client_p, struct Client *source_p,
     }
 
   /* Kill all the modes we have about the channel.. making everyone a peon */  
-  remove_our_modes(chptr, root_chptr, source_p);
+  remove_our_modes(chptr, source_p);
   
   /* SJOIN the user to give them ops, and lock the channel */
 
@@ -151,7 +147,7 @@ static void mo_clearchan(struct Client *client_p, struct Client *source_p,
                        source_p->name,
                        source_p->username,
                        source_p->host,
-                       root_chptr->chname);
+                       chptr->chname);
   sendto_channel_local(ALL_MEMBERS, chptr, ":%s MODE %s +o %s",
                        me.name, chptr->chname, source_p->name);
 
@@ -216,13 +212,12 @@ void kick_list(struct Client *client_p, struct Client *source_p, struct Channel 
  * side effects - Go through the local members, remove all their
  *                chanop modes etc., this side lost the TS.
  */
-static void remove_our_modes(struct Channel *chptr, struct Channel *top_chptr,
-                             struct Client *source_p)
+static void remove_our_modes(struct Channel *chptr, struct Client *source_p)
 {
-  remove_a_mode(chptr, top_chptr, source_p, &chptr->chanops, 'o');
-  remove_a_mode(chptr, top_chptr, source_p, &chptr->chanops_voiced, 'o');
-  remove_a_mode(chptr, top_chptr, source_p, &chptr->voiced, 'v');
-  remove_a_mode(chptr, top_chptr, source_p, &chptr->chanops_voiced, 'v');
+  remove_a_mode(chptr, source_p, &chptr->chanops, 'o');
+  remove_a_mode(chptr, source_p, &chptr->chanops_voiced, 'o');
+  remove_a_mode(chptr, source_p, &chptr->voiced, 'v');
+  remove_a_mode(chptr, source_p, &chptr->chanops_voiced, 'v');
 
   /* Move all voice/ops etc. to non opped list */
   dlinkMoveList(&chptr->chanops, &chptr->peons);
@@ -248,7 +243,7 @@ static void remove_our_modes(struct Channel *chptr, struct Channel *top_chptr,
  * output       - NONE
  * side effects - remove ONE mode from a channel
  */
-static void remove_a_mode(struct Channel *chptr, struct Channel *top_chptr,
+static void remove_a_mode(struct Channel *chptr,
                           struct Client *source_p, dlink_list *list, char flag)
 {
   dlink_node *ptr;
