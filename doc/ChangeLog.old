@@ -1,3 +1,7 @@
+*** 20010105_16 by toot
+updated opers.txt
+
+
 *** 20010105_15 by toot
 . took out -pedantic compile flag
 . put conf_add_hub_or_leaf() back in for now, cause ircd_parser.y needs it
