@@ -1,3 +1,37 @@
+androsyn    2004/06/16 23:12:04 EDT	(20040617_1)
+
+  Modified files:
+    .                    Makefile.in configure configure.ac 
+    contrib              Makefile.in 
+    doc                  Makefile.in 
+    help                 Makefile.in 
+    include              config.h setup.h.in 
+    modules              Makefile.in 
+    servlink             Makefile.in 
+    src                  Makefile.in ircd.c 
+    tools                Makefile.in 
+  Log:
+  Merge in patch the patch to support DESTDIR on install and configure options
+  to support --moduledir --helpdir --logdir and --sysconfdir.  Thanks to
+  Mike Smith <mike - at - ftl.com> for doing this dirty work :)
+  
+  Revision  Changes    Path
+  7.47      +18 -10    ircd-ratbox/Makefile.in
+  7.225     +77 -2     ircd-ratbox/configure
+  7.39      +53 -2     ircd-ratbox/configure.ac
+  1.42      +2 -2      ircd-ratbox/contrib/Makefile.in
+  7.24      +18 -18    ircd-ratbox/doc/Makefile.in
+  1.20      +15 -14    ircd-ratbox/help/Makefile.in
+  7.173     +7 -7      ircd-ratbox/include/config.h
+  7.87      +12 -0     ircd-ratbox/include/setup.h.in
+  1.96      +14 -14    ircd-ratbox/modules/Makefile.in
+  1.19      +3 -3      ircd-ratbox/servlink/Makefile.in
+  7.146     +10 -10    ircd-ratbox/src/Makefile.in
+  7.341     +3 -2      ircd-ratbox/src/ircd.c
+  7.37      +14 -14    ircd-ratbox/tools/Makefile.in
+
+
+
 leeh        2004/06/16 21:24:30 EDT	(20040617_0)
 
   Modified files:
