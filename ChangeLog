@@ -1,3 +1,15 @@
+androsyn    2004/07/19 17:59:01 EDT	(20040719_5)
+
+  Modified files:
+    src                  reject.c 
+  Log:
+  Drop all handlers for a rejected client...
+  
+  Revision  Changes    Path
+  1.25      +1 -0      ircd-ratbox/src/reject.c
+
+
+
 leeh        2004/07/19 17:19:09 EDT	(20040719_4)
 
   Modified files:
