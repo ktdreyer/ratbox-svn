@@ -39,7 +39,6 @@
 #include "fdlist.h"
 #include "s_bsd.h"
 #include "s_conf.h"
-#include "s_misc.h"
 #include "scache.h"
 #include "send.h"
 #include "msg.h"

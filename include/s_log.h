@@ -44,6 +44,8 @@ extern int  get_log_level(void);
 extern void ilog(int priority, const char* fmt, ...);
 extern const char *get_log_level_as_string(int level);
 
+extern const char *smalldate(void);
+
 extern void log_user_exit(struct Client *);
 extern void log_oper(struct Client *, char *name);
 extern void log_foper(struct Client *, char *name);

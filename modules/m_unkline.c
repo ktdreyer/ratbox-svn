@@ -38,7 +38,6 @@
 #include "numeric.h"
 #include "s_conf.h"
 #include "s_log.h"
-#include "s_misc.h"
 #include "send.h"
 #include "msg.h"
 #include "s_gline.h"

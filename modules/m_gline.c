@@ -41,7 +41,6 @@
 #include "fdlist.h"
 #include "s_bsd.h"
 #include "s_conf.h"
-#include "s_misc.h"
 #include "scache.h"
 #include "send.h"
 #include "msg.h"
@@ -50,15 +49,12 @@
 #include "hash.h"
 #include "parse.h"
 #include "modules.h"
+#include "s_log.h"
 
 /* internal functions */
-static void set_local_gline(
-                            const char *oper_nick,
-                            const char *oper_user,
-                            const char *oper_host,
-                            const char *oper_server,
-                            const char *user,
-                            const char *host,
+static void set_local_gline(const char *oper_nick, const char *oper_user,
+                            const char *oper_host, const char *oper_server,
+                            const char *user, const char *host,
                             const char *reason);
 
 static void log_gline_request(const char*,const char*,const char*,
@@ -72,10 +68,8 @@ static void log_gline(struct Client *,struct gline_pending *,
 
 
 static void check_majority_gline(struct Client *source_p,
-                                 const char *oper_nick,
-                                 const char *oper_user,
-                                 const char *oper_host,
-                                 const char *oper_server,
+                                 const char *oper_nick, const char *oper_user,
+                                 const char *oper_host, const char *oper_server,
                                  const char *user, const char *host,
                                  const char *reason);
 
@@ -93,7 +87,9 @@ static void add_new_majority_gline(const char *, const char *, const char *,
 
 static int check_wild_gline(char *, char *);
 static int invalid_gline(struct Client *, char *, char *, char *);
-		       
+
+static char *small_file_date(void);
+
 static void ms_gline(struct Client*, struct Client*, int, char**);
 static void mo_gline(struct Client*, struct Client*, int, char**);
 
@@ -529,7 +525,7 @@ static void set_local_gline(const char *oper_nick,
   struct ConfItem *aconf;
   const char *current_date;
 
-  current_date = smalldate((time_t) 0);
+  current_date = smalldate();
           
   aconf = make_conf();
   aconf->status = CONF_GLINE;
@@ -583,7 +579,7 @@ log_gline_request(
     }
 
   ircsprintf(filenamebuf, "%s.%s", 
-             ConfigFileEntry.glinefile, small_file_date((time_t)0));
+             ConfigFileEntry.glinefile, small_file_date());
   if ( (out = fbopen(filenamebuf, "+a")) == NULL )
     {
       sendto_realops_flags(UMODE_ALL, L_ALL,"*** Problem opening %s: %s",
@@ -636,7 +632,7 @@ log_gline(struct Client *source_p,
     }
 
   ircsprintf(filenamebuf, "%s.%s", 
-                ConfigFileEntry.glinefile, small_file_date((time_t) 0));
+                ConfigFileEntry.glinefile, small_file_date());
 
   if ((out = fbopen(filenamebuf, "a")) == NULL)
     {
@@ -874,4 +870,21 @@ majority_gline(struct Client *source_p,
   return NO;
 }
 
+/* small_file_date()
+ *
+ * Make a small YYYYMMDD formatted string suitable for a
+ * dated file stamp.
+ */
+static char *
+small_file_date(void)
+{
+  static char tbuffer[MAX_DATE_STRING];
+  struct tm *tmptr;
+  time_t lclock;
+
+  lclock = CurrentTime;
+  tmptr = localtime(&lclock);
+  strftime(tbuffer, MAX_DATE_STRING, "%Y%m%d", tmptr);
+  return tbuffer;
+}
 

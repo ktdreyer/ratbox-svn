@@ -29,7 +29,6 @@
 #include "client.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "s_misc.h"
 #include "s_conf.h"
 #include "s_serv.h"
 #include "send.h"
@@ -37,13 +36,28 @@
 #include "parse.h"
 #include "modules.h"
 #include "packet.h"
+#include "sprintf_irc.h"
 
 static void m_time(struct Client*, struct Client*, int, char**);
 static void mo_time(struct Client*, struct Client*, int, char**);
+static char *date(void);
 
 struct Message time_msgtab = {
   "TIME", 0, 0, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_time, mo_time, mo_time}
+};
+
+static char *months[] =
+{
+  "January",   "February", "March",   "April",
+  "May",       "June",     "July",    "August",
+  "September", "October",  "November","December"
+};
+
+static char *weekdays[] =
+{
+  "Sunday",   "Monday", "Tuesday", "Wednesday",
+  "Thursday", "Friday", "Saturday"
 };
 
 #ifndef STATIC_MODULES
@@ -61,6 +75,7 @@ _moddeinit(void)
 
 const char *_version = "$Revision$";
 #endif
+
 /*
  * m_time
  *      parv[0] = sender prefix
@@ -81,7 +96,7 @@ static void m_time(struct Client *client_p, struct Client *source_p,
     }
 
   sendto_one(source_p, form_str(RPL_TIME), me.name,
-             parv[0], me.name, date(0));
+             parv[0], me.name, date());
 }
 
 /*
@@ -94,5 +109,47 @@ static void mo_time(struct Client *client_p, struct Client *source_p,
 {
   if (hunt_server(client_p,source_p,":%s TIME :%s",1,parc,parv) == HUNTED_ISME)
     sendto_one(source_p, form_str(RPL_TIME), me.name,
-               parv[0], me.name, date(0));
+               parv[0], me.name, date());
 }
+
+/* date()
+ *
+ * returns date in human readable form
+ */
+static char *
+date(void)
+{
+  static char buf[80];
+  char plus;
+  struct tm *lt;
+  struct tm *gm;
+  struct tm gmbuf;
+  time_t lclock;
+  int minswest;
+
+  lclock = CurrentTime;
+  gm = gmtime(&lclock);
+  memcpy((void *)&gmbuf, (void *)gm, sizeof(gmbuf));
+  gm = &gmbuf;
+  lt = localtime(&lclock);
+
+  if(lt->tm_yday == gm->tm_yday)
+    minswest = (gm->tm_hour - lt->tm_hour) * 60 + (gm->tm_min - lt->tm_min);
+  else if (lt->tm_yday > gm->tm_yday)
+    minswest = (gm->tm_hour - (lt->tm_hour + 24)) * 60;
+  else
+    minswest = ((gm->tm_hour + 24) - lt->tm_hour) * 60;
+
+  plus = (minswest > 0) ? '-' : '+';
+  
+  if (minswest < 0)
+    minswest = -minswest;
+
+  ircsprintf(buf, "%s %s %d %d -- %02u:%02u:%02u %c%02u:%02u",
+             weekdays[lt->tm_wday], months[lt->tm_mon],lt->tm_mday,
+             lt->tm_year + 1900, lt->tm_hour, lt->tm_min, lt->tm_sec,
+             plus, minswest / 60, minswest % 60);
+
+  return buf;
+}
+

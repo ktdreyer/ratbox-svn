@@ -36,7 +36,6 @@
 #include "irc_string.h"
 #include "sprintf_irc.h"
 #include "ircd.h"
-#include "s_misc.h"
 #include "event.h"	/* Needed for EVH etc. */
 #include "s_conf.h"
 #include "memory.h"
@@ -112,7 +111,7 @@ write_log(const char* message)
   if(logFile == NULL)
     return;
 
-  snprintf(buf, LOG_BUFSIZE, "[%s] %s\n", smalldate(CurrentTime), message);
+  snprintf(buf, LOG_BUFSIZE, "[%s] %s\n", smalldate(), message);
   fbputs(buf, logFile);
 }
 #endif
@@ -351,5 +350,26 @@ log_foper(struct Client *source_p, char *name)
       fbclose(oper_fb);
     }
   }
+}
+
+/* smalldate()
+ *
+ * returns a date in the form YY/MM/DD HH.MM
+ */
+const char *
+smalldate(void)
+{
+  static char buf[MAX_DATE_STRING];
+  struct tm *lt;
+  time_t lclock;
+
+  lclock = CurrentTime;
+  lt = localtime(&lclock);
+
+  ircsprintf(buf, "%d/%d/%d %02d.%02d",
+             lt->tm_year + 1900, lt->tm_mon + 1, lt->tm_mday,
+             lt->tm_hour, lt->tm_min);
+
+  return buf;
 }
 

@@ -99,7 +99,6 @@ BASE_SRCS =                     \
   s_debug.c                     \
   s_gline.c                     \
   s_log.c                       \
-  s_misc.c                      \
   s_serv.c                      \
   s_stats.c                     \
   s_user.c                      \

@@ -61,7 +61,6 @@
 #include "s_conf.h"
 #include "s_debug.h"
 #include "s_log.h"
-#include "s_misc.h"
 #include "s_serv.h"      /* try_connections */
 #include "s_stats.h"
 #include "scache.h"

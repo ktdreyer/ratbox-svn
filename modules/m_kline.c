@@ -40,7 +40,6 @@
 #include "s_bsd.h"
 #include "s_conf.h"
 #include "s_log.h"
-#include "s_misc.h"
 #include "send.h"
 #include "hash.h"
 #include "handlers.h"
@@ -215,7 +214,7 @@ mo_kline(struct Client *client_p, struct Client *source_p,
     return;
 
   set_time();
-  current_date = smalldate(CurrentTime);
+  current_date = smalldate();
   aconf = make_conf();
   aconf->status = CONF_KILL;
   DupString(aconf->host, host);
@@ -338,7 +337,7 @@ ms_kline(struct Client *client_p, struct Client *source_p,
     }
 
     DupString(aconf->passwd, kreason);
-    current_date = smalldate(CurrentTime);
+    current_date = smalldate();
 
     if (tkline_time)
       apply_tkline(source_p, aconf, kreason, oper_reason,
@@ -756,7 +755,7 @@ mo_dline(struct Client *client_p, struct Client *source_p,
     }
 
   set_time();
-  current_date = smalldate(CurrentTime);
+  current_date = smalldate();
 
   aconf = make_conf();
 

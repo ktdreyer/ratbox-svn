@@ -29,6 +29,14 @@
 
 #include "config.h"
 
+#define _1MEG     (1024.0)
+#define _1GIG     (1024.0*1024.0)
+#define _1TER     (1024.0*1024.0*1024.0)
+#define _GMKs(x)  ( (x > _1TER) ? "Terabytes" : ((x > _1GIG) ? "Gigabytes" : \
+                  ((x > _1MEG) ? "Megabytes" : "Kilobytes")))
+#define _GMKv(x)  ( (x > _1TER) ? (float)(x/_1TER) : ((x > _1GIG) ? \
+                  (float)(x/_1GIG) : ((x > _1MEG) ? (float)(x/_1MEG) : (float)x)))
+
 struct Client;
 
 /*
