@@ -207,7 +207,7 @@ int match_esc(const char *mask, const char *name)
   return 0;
 }
 
-static inline int 
+inline int 
 comp_with_mask(void *addr, void *dest, u_int mask)
 {
   if (memcmp(addr, dest, mask / 8) == 0) 

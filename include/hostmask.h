@@ -43,8 +43,6 @@ struct HostMaskEntry
 };
 
 int parse_netmask(const char*, struct irc_inaddr*, int*);
-int match_ipv6(struct irc_inaddr*, struct irc_inaddr*, int);
-int match_ipv4(struct irc_inaddr*, struct irc_inaddr*, int);
 struct ConfItem* find_conf_by_address(const char*, struct irc_inaddr*,
                                       int, int, const char*);
 void add_conf_by_address(const char*, int, const char*, struct ConfItem*);

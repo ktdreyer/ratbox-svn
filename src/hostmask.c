@@ -241,44 +241,6 @@ parse_netmask(const char *text, struct irc_inaddr *addr, int *b)
   return HM_HOST;
 }
 
-/* The address matching stuff... */
-/* int match_ipv6(struct irc_inaddr *, struct irc_inaddr *, int)
- * Input: An IP address, an IP mask, the number of bits in the mask.
- * Output: if match, -1 else 0
- * Side effects: None
- */
-#ifdef IPV6
-int
-match_ipv6(struct irc_inaddr *addr, struct irc_inaddr *mask, int bits)
-{
-  int i, m, n = bits / 8;
-
-  for (i = 0; i < n; i++)
-    if (addr->sins.sin6.s6_addr[i] != mask->sins.sin6.s6_addr[i])
-      return 0;
-  if ((m = bits % 8) == 0)
-    return -1;
-  if ((addr->sins.sin6.s6_addr[n] & ~((1 << (8 - m)) - 1)) ==
-      mask->sins.sin6.s6_addr[n])
-    return -1;
-  return 0;
-}
-#endif
-
-/* int match_ipv4(struct irc_inaddr *, struct irc_inaddr *, int)
- * Input: An IP address, an IP mask, the number of bits in the mask.
- * Output: if match, -1 else 0
- * Side Effects: None
- */
-int
-match_ipv4(struct irc_inaddr *addr, struct irc_inaddr *mask, int bits)
-{
-  if ((ntohl(addr->sins.sin.s_addr) & ~((1 << (32 - bits)) - 1)) !=
-      ntohl(mask->sins.sin.s_addr))
-    return 0;
-  return -1;
-}
-
 /* Hashtable stuff...now external as its used in m_stats.c */
 struct AddressRec *atable[ATABLE_SIZE];
 
@@ -397,8 +359,7 @@ find_conf_by_address(const char *name, struct irc_inaddr *addr, int type,
         for (arec = atable[hash_ipv6(addr, b)]; arec; arec = arec->next)
           if (arec->type == (type & ~0x1) &&
               arec->masktype == HM_IPV6 &&
-              match_ipv6(addr, &arec->Mask.ipa.addr,
-                         arec->Mask.ipa.bits) &&
+              comp_with_mask(&PIN_ADDR(addr), &IN_ADDR(arec->Mask.ipa.addr), arec->Mask.ipa.bits) &&
               (type & 0x1 || match(arec->username, username)) &&
               arec->precedence > hprecv)
           {
@@ -416,8 +377,7 @@ find_conf_by_address(const char *name, struct irc_inaddr *addr, int type,
         for (arec = atable[hash_ipv4(addr, b)]; arec; arec = arec->next)
           if (arec->type == (type & ~0x1) &&
               arec->masktype == HM_IPV4 &&
-              match_ipv4(addr, &arec->Mask.ipa.addr,
-                         arec->Mask.ipa.bits) &&
+              comp_with_mask(&PIN_ADDR(addr), &IN_ADDR(arec->Mask.ipa.addr), arec->Mask.ipa.bits) &&
               (type & 0x1 || match(arec->username, username)) &&
               arec->precedence > hprecv)
           {

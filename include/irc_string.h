@@ -37,6 +37,11 @@ extern int match_esc(const char *mask, const char *name);
 extern int match_cidr(const char *mask, const char *name);
 
 /*
+ * comp_with_mask - compares to IP address
+ */
+int comp_with_mask(void *addr, void *dest, u_int mask);
+
+/*
  * collapse - collapse a string in place, converts multiple adjacent *'s 
  * into a single *.
  * collapse - modifies the contents of pattern 
