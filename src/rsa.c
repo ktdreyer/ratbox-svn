@@ -41,7 +41,7 @@
 #include <openssl/err.h>
 
 void report_crypto_errors(void);
-void verify_private_key(void);
+int verify_private_key(void);
 static void binary_to_hex( unsigned char * bin, char * hex, int length );
 static int absorb( char ** str, char lowest, char highest );
 static RSA * str_to_RSApublic( char * key );
@@ -65,29 +65,36 @@ void report_crypto_errors(void)
 /*
  * verify_private_key - reread private key and verify against inmem key
  */
-void verify_private_key(void)
+int verify_private_key(void)
 {
   BIO * file;
   RSA * key;
   RSA * mkey;
 
-  if (!ServerInfo.rsa_private_key)
+  /* If the rsa_private_key directive isn't found, error out. */
+  if (ServerInfo.rsa_private_key == NULL)
   {
-    return;
+    ilog(L_NOTICE, "rsa_private_key in serverinfo{} is not defined.");
+    return(-1);
   }
 
-  if (!ServerInfo.rsa_private_key_filename)
+  /* If rsa_private_key_filename isn't available, error out. */
+  if (ServerInfo.rsa_private_key_filename == NULL)
   {
-    ilog(L_NOTICE, "Don't know private key filename - can't validate it");
-    return;
+    ilog(L_NOTICE, "Internal error: rsa_private_key_filename isn't defined.");
+    return(-1);
   }
 
   file = BIO_new_file(ServerInfo.rsa_private_key_filename, "r");
 
+  /*
+   * If BIO_new_file returned NULL (according to OpenSSL docs), then
+   * an error occurred.
+   */
   if (file == NULL)
   {
     ilog(L_NOTICE, "Failed to open private key file - can't validate it");
-    return;
+    return(-1);
   }
 
   /*
@@ -95,15 +102,18 @@ void verify_private_key(void)
    *        OpenSSL documentation, you need to METHOD_free(key) before
    *        assigning it.  Don't believe me?  Check out the following
    *        URL:  http://www.openssl.org/docs/crypto/pem.html#BUGS
+   * P.S. -- I have no idea why the key= assignment has to be typecasted.
+   *         For some reason the system thinks PEM_read_bio_RSAPrivateKey
+   *         is returning an int, not a RSA *.
    */
   RSA_free(key);
-  key = PEM_read_bio_RSAPrivateKey(file, NULL, 0, NULL);
+  key = (RSA *) PEM_read_bio_RSAPrivateKey(file, NULL, 0, NULL);
 
   if (key == NULL)
   {
-    ilog(L_NOTICE, "Failed to read private key file - can't validate it");
+    ilog(L_NOTICE, "PEM_read_bio_RSAPrivateKey() failed; possibly not RSA?");
     report_crypto_errors();
-    return;
+    return(-1);
   }
 
   BIO_set_close(file, BIO_CLOSE);
@@ -111,6 +121,11 @@ void verify_private_key(void)
 
   mkey = ServerInfo.rsa_private_key;
 
+  /*
+   * Compare the in-memory key to the key we just loaded above.  If
+   * any of the portions don't match, then logically we have a different
+   * in-memory key vs. the one we just loaded.  This is bad, mmmkay?
+   */
   if (mkey->pad != key->pad)
     ilog(L_CRIT, "Private key corrupted: pad %i != pad %i",
                  mkey->pad, key->pad);
@@ -137,6 +152,7 @@ void verify_private_key(void)
     ilog(L_CRIT, "Private key corrupted: iqmp differs");
 
   RSA_free(key);
+  return(0);
 }
 
 

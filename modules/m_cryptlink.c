@@ -166,7 +166,12 @@ static void mr_cryptauth(struct Client *client_p, struct Client *source_p,
 
   key = MyMalloc(RSA_size(ServerInfo.rsa_private_key));
 
-  verify_private_key();
+  if ( verify_private_key() == -1 )
+  {
+    sendto_realops_flags(FLAGS_SERVADMIN,
+      "verify_private_key() returned -1.  Check log for information.");
+  }
+
   len = RSA_private_decrypt( enc_len, enc, key,
                              ServerInfo.rsa_private_key,
                              RSA_PKCS1_PADDING );
@@ -466,7 +471,12 @@ static char *parse_cryptserv_args(struct Client *client_p,
 
   out = MyMalloc(RSA_size(ServerInfo.rsa_private_key));
 
-  verify_private_key();
+  if ( verify_private_key() == -1 )
+  {
+    sendto_realops_flags(FLAGS_SERVADMIN,
+      "verify_private_key() returned -1.  Check log for information.");
+  }
+
   len = RSA_private_decrypt( decoded_len, tmp, out,
                              ServerInfo.rsa_private_key,
                              RSA_PKCS1_PADDING );

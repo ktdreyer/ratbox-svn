@@ -23,7 +23,7 @@
  */
 
 void report_crypto_errors(void);
-void verify_private_key(void);
+int verify_private_key(void);
 int generate_challenge( char ** r_challenge, char ** r_response, char * key );
 int crypt_data(char **out, char *in, int len, char *key);
 int decrypt_data(char **out, char *in, int len, char *key);
