@@ -159,7 +159,8 @@ static void mo_jupe(struct Client *client_p, struct Client *source_p,
   ajupe->serv->up = me.name;
   ajupe->servptr = &me;
   SetServer(ajupe);
-
+  SetDead(ajupe);
+  
   Count.server++;
   Count.myserver++;
 
