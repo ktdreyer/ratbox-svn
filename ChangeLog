@@ -1,3 +1,16 @@
+leeh        2002/11/22 13:51:30 UTC	(20021122_0)
+
+  Modified files:
+    include              patchlevel.h 
+  Log:
+  - nothing ventured nothing gained I suppose:
+    revved patchlevel to 1.0 final.
+  
+  Revision  Changes    Path
+  7.45      +1 -1      ircd-ratbox/include/patchlevel.h
+
+
+
 leeh        2002/11/21 21:18:30 UTC	(20021121_1)
 
   Modified files:
