@@ -7,6 +7,7 @@
 - removed the unused config option maximum_links
 - added option to general {}; - tkline_expire_notices = [yes|no];
   which controls whether tkline expiration notices are shown
+- iauth has been removed, it didnt work anyway.
 
 -- ircd-ratbox-1.0-rc1
 o) Temp dline support has been added.

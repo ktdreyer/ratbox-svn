@@ -884,8 +884,7 @@ chm_ban(struct Client *client_p, struct Client *source_p,
   /* if we're adding a NEW id */
   if (dir == MODE_ADD) 
   {
-    if((add_id(source_p, chptr, mask, CHFL_BAN) == 0) && MyClient(source_p))
-      return;
+    add_id(source_p, chptr, mask, CHFL_BAN);
 
     mode_changes[mode_count].letter = c;
     mode_changes[mode_count].dir = MODE_ADD;
@@ -897,15 +896,11 @@ chm_ban(struct Client *client_p, struct Client *source_p,
   }
   else if (dir == MODE_DEL)
   {
-    if (del_id(chptr, mask, CHFL_BAN) != 0)
+    if (del_id(chptr, mask, CHFL_BAN) == 0)
     {
       /* mask isn't a valid ban, check raw_mask */
-      if((del_id(chptr, raw_mask, CHFL_BAN) != 0) && MyClient(source_p))
-      {
-        /* nope */
-        return;
-      }
-      mask = raw_mask;
+      if(del_id(chptr, raw_mask, CHFL_BAN))
+        mask = raw_mask;
     }
 
     mode_changes[mode_count].letter = c;
@@ -984,8 +979,7 @@ chm_except(struct Client *client_p, struct Client *source_p,
   /* If we're adding a NEW id */
   if (dir == MODE_ADD)
   {
-    if((add_id(source_p, chptr, mask, CHFL_EXCEPTION) == 0) && MyClient(source_p))
-      return;
+    add_id(source_p, chptr, mask, CHFL_EXCEPTION);
 
     mode_changes[mode_count].letter = c;
     mode_changes[mode_count].dir = MODE_ADD;
@@ -1002,15 +996,11 @@ chm_except(struct Client *client_p, struct Client *source_p,
   }
   else if (dir == MODE_DEL)
   {
-    if (del_id(chptr, mask, CHFL_EXCEPTION) != 0)
+    if (del_id(chptr, mask, CHFL_EXCEPTION) == 0)
     {
       /* mask isn't a valid ban, check raw_mask */
-      if((del_id(chptr, raw_mask, CHFL_EXCEPTION) != 0) && MyClient(source_p))
-      {
-        /* nope */
-        return;
-      }
-      mask = raw_mask;
+      if(del_id(chptr, raw_mask, CHFL_EXCEPTION))
+        mask = raw_mask;
     }
 
     mode_changes[mode_count].letter = c;
@@ -1088,8 +1078,7 @@ chm_invex(struct Client *client_p, struct Client *source_p,
 
   if(dir == MODE_ADD)
   {
-    if((add_id(source_p, chptr, mask, CHFL_INVEX) == 0) && MyClient(source_p))
-      return;
+    add_id(source_p, chptr, mask, CHFL_INVEX);
 
     mode_changes[mode_count].letter = c;
     mode_changes[mode_count].dir = MODE_ADD;
@@ -1106,15 +1095,11 @@ chm_invex(struct Client *client_p, struct Client *source_p,
   }
   else if (dir == MODE_DEL)
   {
-    if (del_id(chptr, mask, CHFL_INVEX) != 0)
+    if (del_id(chptr, mask, CHFL_INVEX) == 0)
     {
       /* mask isn't a valid ban, check raw_mask */
-      if((del_id(chptr, raw_mask, CHFL_INVEX) != 0) && MyClient(source_p))
-      {
-        /* nope */
-        return;
-      }
-      mask = raw_mask;
+      if(del_id(chptr, raw_mask, CHFL_INVEX))
+        mask = raw_mask;
     }
 
     mode_changes[mode_count].letter = c;

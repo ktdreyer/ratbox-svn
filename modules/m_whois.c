@@ -450,8 +450,7 @@ static void whois_person(struct Client *source_p,struct Client *target_p, int gl
 
 /* although we should fill in parc and parv, we don't ..
 	 be careful of this when writing whois hooks */
-  if(MyClient(source_p)) 
-    hook_call_event("doing_whois", &hd);
+  hook_call_event("doing_whois", &hd);
   
   return;
 }
