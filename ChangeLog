@@ -1,3 +1,15 @@
+leeh        2003/07/02 08:11:39 EDT	(20030702_2)
+
+  Modified files:
+    modules              m_invite.c 
+  Log:
+  - move the variable declaration down one function.
+  
+  Revision  Changes    Path
+  1.69      +4 -3      ircd-ratbox/modules/m_invite.c
+
+
+
 leeh        2003/07/02 07:25:24 EDT	(20030702_1)
 
   Modified files:
