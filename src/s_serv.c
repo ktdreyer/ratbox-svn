@@ -666,19 +666,9 @@ int check_server(const char *name, struct Client* client_p, int cryptlink)
   if (server_aconf == NULL)
     return error;
 
+  /* XXX -- is this detach_conf() needed? --fl */
+  detach_conf(client_p);
   attach_conf(client_p, server_aconf);
-
-  /* Now find all leaf or hub config items for this server */
-  for (aconf = ConfigItemList; aconf; aconf = aconf->next)
-    {
-      if ((aconf->status & (CONF_HUB|CONF_LEAF)) == 0)
-	continue;
-
-      if (!match(name, aconf->name))
-	continue;
-
-      attach_conf(client_p, aconf);
-    }
 
 #ifdef HAVE_LIBZ /* otherwise, cleait unconditionally */
   if( !(server_aconf->flags & CONF_FLAGS_COMPRESSED) )
@@ -972,24 +962,12 @@ int server_estab(struct Client *client_p)
       SetServlink(client_p);
     }
 #endif
+
   sendto_one(client_p,"SVINFO %d %d 0 :%lu",
 			TS_CURRENT,
 			TS_MIN,
 			(unsigned long) CurrentTime);
 
-  det_confs_butmask(client_p, CONF_LEAF|CONF_HUB|CONF_SERVER);
-  /*
-  ** *WARNING*
-  **    In the following code in place of plain server's
-  **    name we send what is returned by get_client_name
-  **    which may add the "sockhost" after the name. It's
-  **    *very* *important* that there is a SPACE between
-  **    the name and sockhost (if present). The receiving
-  **    server will start the information field from this
-  **    first blank and thus puts the sockhost into info.
-  **    ...a bit tricky, but you have been warned, besides
-  **    code is more neat this way...  --msa
-  */
   client_p->servptr = &me;
 
   if (IsDead(client_p))
@@ -1758,7 +1736,7 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
         if (by && IsPerson(by) && !MyClient(by))  
             sendto_one(by, ":%s NOTICE %s :Connect to host %s failed.",
               me.name, by->name, client_p->name);
-        det_confs_butmask(client_p, 0);
+        detach_conf(client_p);
         free_client(client_p);
         return 0;
       }

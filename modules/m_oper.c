@@ -44,13 +44,10 @@
 #include "modules.h"
 #include "packet.h"
 
-
 static struct ConfItem *find_password_aconf(char *name, struct Client *source_p);
 static int match_oper_password(char *password, struct ConfItem *aconf);
-int oper_up(struct Client *source_p, struct ConfItem *aconf);
 
 extern char *crypt();
-
 
 static void m_oper(struct Client*, struct Client*, int, char**);
 static void ms_oper(struct Client*, struct Client*, int, char**);
@@ -79,99 +76,87 @@ const char *_version = "$Revision$";
 #endif
 
 /*
-** m_oper
-**      parv[0] = sender prefix
-**      parv[1] = oper name
-**      parv[2] = oper password
-*/
-static void m_oper(struct Client *client_p, struct Client *source_p,
-                  int parc, char *parv[])
+ * m_oper
+ *      parv[0] = sender prefix
+ *      parv[1] = oper name
+ *      parv[2] = oper password
+ */
+static void
+m_oper(struct Client *client_p, struct Client *source_p,
+       int parc, char *parv[])
 {
   struct ConfItem *aconf;
   struct ConfItem *oconf = NULL;
   char  *name;
   char  *password;
-  dlink_node *ptr;
 
   name = parv[1];
   password = parv[2];
 
-  if (EmptyString(password))
-    {
-      sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-                 me.name, source_p->name, "OPER");
-      return;
-    }
+  if(BadPtr(password))
+  {
+    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
+               me.name, source_p->name, "OPER");
+    return;
+  }
 
   /* end the grace period */
   if(!IsFloodDone(source_p))
     flood_endgrace(source_p);
 
-  if( (aconf = find_password_aconf(name,source_p)) == NULL)
-    {
-      sendto_one(source_p, form_str(ERR_NOOPERHOST), me.name, source_p->name);
-      log_foper(source_p, name);
+  if((aconf = find_password_aconf(name,source_p)) == NULL)
+  {
+    sendto_one(source_p, form_str(ERR_NOOPERHOST), me.name, source_p->name);
+    log_foper(source_p, name);
 
-      if (ConfigFileEntry.failed_oper_notice)
-        {
-          sendto_realops_flags(UMODE_ALL, L_ALL,
-                               "Failed OPER attempt - host mismatch by %s (%s@%s)",
-                               source_p->name, source_p->username, source_p->host);
-        }
+    if (ConfigFileEntry.failed_oper_notice)
+    {
+      sendto_realops_flags(UMODE_ALL, L_ALL,
+                           "Failed OPER attempt - host mismatch by %s (%s@%s)",
+                           source_p->name, source_p->username, source_p->host);
+    }
+
+    return;
+  }
+
+  if (match_oper_password(password,aconf))
+  {
+    oconf = source_p->localClient->att_conf;
+
+    detach_conf(source_p);
+
+    if(attach_conf(source_p, aconf) != 0)
+    {
+      sendto_one(source_p, ":%s NOTICE %s :Can't attach conf!",
+                 me.name,source_p->name);
+      sendto_realops_flags(UMODE_ALL, L_ALL,
+                           "Failed OPER attempt by %s (%s@%s) can't attach conf!",
+                           source_p->name, source_p->username, source_p->host);
+
+      log_foper(source_p, name);
+      attach_conf(source_p, oconf);
       return;
     }
 
-  if ( match_oper_password(password,aconf) )
-    {
-      /*
-        20001216:
-        detach old iline
-        -einride
-      */
-      ptr = source_p->localClient->confs.head;
-      if (ptr)
-      {
-       
-        oconf = ptr->data;
-        detach_conf(source_p,oconf);
-      }
-
-      if( attach_conf(source_p, aconf) != 0 )
-        {
-          sendto_one(source_p,":%s NOTICE %s :Can't attach conf!",
-                     me.name,source_p->name);
-          sendto_realops_flags(UMODE_ALL, L_ALL,
-                               "Failed OPER attempt by %s (%s@%s) can't attach conf!",
-                               source_p->name, source_p->username, source_p->host);
-          log_foper(source_p, name);
-          /* 
-             20001216:
-             Reattach old iline
-             -einride
-          */
-          attach_conf(source_p, oconf);
-          return;
-        }
-
-      oper_up( source_p, aconf );
+    oper_up(source_p, aconf);
       
-      ilog(L_TRACE, "OPER %s by %s!%s@%s",
-	   name, source_p->name, source_p->username, source_p->host);
-      log_oper(source_p, name);
-      return;
-    }
+    ilog(L_TRACE, "OPER %s by %s!%s@%s",
+         name, source_p->name, source_p->username, source_p->host);
+    log_oper(source_p, name);
+    return;
+  }
   else
-    {
-      sendto_one(source_p,form_str(ERR_PASSWDMISMATCH),me.name, parv[0]);
-      log_foper(source_p, name);
+  {
+    sendto_one(source_p,form_str(ERR_PASSWDMISMATCH),me.name, parv[0]);
+    log_foper(source_p, name);
 
-      if (ConfigFileEntry.failed_oper_notice)
-        {
-          sendto_realops_flags(UMODE_ALL, L_ALL,
-                               "Failed OPER attempt by %s (%s@%s)",
-                               source_p->name, source_p->username, source_p->host);
-        }
+    if (ConfigFileEntry.failed_oper_notice)
+    {
+      sendto_realops_flags(UMODE_ALL, L_ALL,
+                           "Failed OPER attempt by %s (%s@%s)",
+                           source_p->name, source_p->username, source_p->host);
     }
+  }
 }
 
 /*

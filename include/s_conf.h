@@ -361,15 +361,13 @@ extern int find_shared(const char *username, const char *host,
 extern void             read_conf_files(int cold);
 
 extern int              attach_conf(struct Client*, struct ConfItem *);
-extern int              attach_confs(struct Client* client, 
-                                     const char* name, int statmask);
 extern int              attach_connect_block(struct Client* client, 
 					     const char* name,
 					     const char* host);
 extern int              check_client(struct Client* client_p, struct Client *source_p, char *);
-extern void             det_confs_butmask (struct Client *, int);
-extern int              detach_conf (struct Client *, struct ConfItem *);
-extern struct ConfItem* det_confs_butone (struct Client *, struct ConfItem *);
+
+extern int detach_conf(struct Client *);
+
 extern struct ConfItem* find_conf_exact(const char* name, const char* user, const char* host, int statmask);
 extern struct ConfItem* find_conf_name(dlink_list *list, const char* name, int statmask);
 extern struct ConfItem* find_conf_host(dlink_list *list, const char* host, int statmask);

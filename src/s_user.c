@@ -1289,66 +1289,31 @@ check_X_line(struct Client *client_p, struct Client *source_p)
   return 0;
 }
 
-/*
- * oper_up
+/* oper_up()
  *
  * inputs	- pointer to given client to oper
  *		- pointer to ConfItem to use
  * output	- none
- * side effects	-
- * Blindly opers up given source_p, using aconf info
- * all checks on passwords have already been done.
- * This could also be used by rsa oper routines. 
+ * side effects	- opers up source_p using aconf for reference
  */
-
 int
-oper_up( struct Client *source_p, struct ConfItem *aconf )
+oper_up(struct Client *source_p, struct ConfItem *aconf)
 {
   int old = (source_p->umodes & ALL_UMODES);
-  char *operprivs=NULL;
   dlink_node *ptr;
   struct ConfItem *found_aconf;
 
   SetOper(source_p);
-  if((int)aconf->hold)
-    {
-      source_p->umodes |= ((int)aconf->hold & ALL_UMODES); 
-      if (!IsOperN(source_p))
-	source_p->umodes &= ~UMODE_NCHANGE;
-      
-      sendto_one(source_p, ":%s NOTICE %s :*** Oper flags set from conf",
-		 me.name,source_p->name);
-    }
+  if(ConfigFileEntry.oper_umodes)
+    source_p->umodes |= ConfigFileEntry.oper_umodes & ALL_UMODES;
   else
-    {
-      if(ConfigFileEntry.oper_umodes)
-        {
-          source_p->umodes |= ConfigFileEntry.oper_umodes & ALL_UMODES;
-        }
-      else
-        {
-          source_p->umodes |= (UMODE_SERVNOTICE|UMODE_OPERWALL|UMODE_WALLOP|UMODE_LOCOPS) & ALL_UMODES;
-        }
-    }
-	
+    source_p->umodes |= DEFAULT_OPER_UMODES & ALL_UMODES;
+
   Count.oper++;
 
   SetExemptKline(source_p);
       
-  dlinkAddAlloc(source_p,&oper_list);
-
-  if(source_p->localClient->confs.head)
-    {
-      ptr = source_p->localClient->confs.head;
-      if(ptr)
-	{
-	  found_aconf = ptr->data;
-	  if(found_aconf)
-	    operprivs = oper_privs_as_string(source_p,found_aconf->port);
-	}
-    }
-  else
-    operprivs = "";
+  dlinkAddAlloc(source_p, &oper_list);
 
   if (IsOperAdmin(source_p) && !IsOperHiddenAdmin(source_p))
     source_p->umodes |= UMODE_ADMIN;
@@ -1359,8 +1324,9 @@ oper_up( struct Client *source_p, struct ConfItem *aconf )
   send_umode_out(source_p, source_p, old);
   sendto_one(source_p, form_str(RPL_YOUREOPER), me.name, source_p->name);
   sendto_one(source_p, ":%s NOTICE %s :*** Oper privs are %s", me.name,
-             source_p->name, operprivs);
+             source_p->name, oper_privs_as_string(source_p, aconf->port));
   SendMessageFile(source_p, &ConfigFileEntry.opermotd);
-  
+
   return(1);
 }
+

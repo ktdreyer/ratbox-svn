@@ -89,21 +89,18 @@ static  int     get_conf_ping(struct ConfItem *aconf)
  */
 const char*     get_client_class(struct Client *target_p)
 {
-  dlink_node *ptr;
   struct ConfItem *aconf;
   const char* retc = "unknown";
 
-  if (target_p && !IsMe(target_p)  && (target_p->localClient->confs.head))
-    DLINK_FOREACH(ptr, target_p->localClient->confs.head)
-      {
-	aconf = ptr->data;
-	if(aconf->className == NULL)
-	  retc = "default";
-	else
-	  retc= aconf->className;
-      }
+  if((target_p != NULL) && !IsMe(target_p))
+  {
+    aconf = target_p->localClient->att_conf;
 
-  Debug((DEBUG_DEBUG,"Returning Class %s For %s",retc,target_p->name));
+    if((aconf == NULL) || (aconf->className == NULL))
+      retc = "default";
+    else
+      retc = aconf->className;
+  }
 
   return (retc);
 }
@@ -118,32 +115,23 @@ const char*     get_client_class(struct Client *target_p)
 int     get_client_ping(struct Client *target_p)
 {
   int   ping = 0;
-  int   ping2;
   struct ConfItem       *aconf;
-  dlink_node		*nlink;
 
+  aconf = target_p->localClient->att_conf;
 
-  if(target_p->localClient->confs.head != NULL)
-    {
-      DLINK_FOREACH(nlink, target_p->localClient->confs.head)
-	{
-	  aconf = nlink->data;
-	  if (aconf->status & (CONF_CLIENT|CONF_SERVER))
-	    {
-	      ping2 = get_conf_ping(aconf);
-	      if ((ping2 != BAD_PING) && ((ping > ping2) || !ping))
-		ping = ping2;
-	    }
-	}
-    }
+  if(aconf != NULL)
+  {
+    if (aconf->status & (CONF_CLIENT|CONF_SERVER))
+      ping = get_conf_ping(aconf);
+  }
   else
-    {
-      ping = DEFAULT_PINGFREQUENCY;
-      Debug((DEBUG_DEBUG,"No Attached Confs"));
-    }
+  {
+    ping = DEFAULT_PINGFREQUENCY;
+  }
 
   if (ping <= 0)
     ping = DEFAULT_PINGFREQUENCY;
+
   Debug((DEBUG_DEBUG,"Client %s Ping %d", target_p->name, ping));
   return (ping);
 }
@@ -290,24 +278,17 @@ void    report_classes(struct Client *source_p)
 long    get_sendq(struct Client *client_p)
 {
   int   sendq = DEFAULT_SENDQ;
-  dlink_node      *ptr;
-  struct Class    *cl;
   struct ConfItem *aconf;
 
-  if (client_p && !IsMe(client_p)  && (client_p->localClient->confs.head))
+  if((client_p != NULL) && !IsMe(client_p))
   {
-    DLINK_FOREACH(ptr, client_p->localClient->confs.head)
-      {
-	aconf = ptr->data;
-	if(aconf == NULL)
-	   continue;
+    aconf = client_p->localClient->att_conf;
 
-        if ( !(cl = aconf->c_class))
-          continue;
-
-	if(ClassName(cl))
-          sendq = MaxSendq(cl);
-      }
+    if(aconf != NULL)
+    {
+      if (aconf->status & (CONF_CLIENT|CONF_SERVER))
+        sendq = ConfMaxSendq(aconf);
+    }
   }
 
   return sendq;

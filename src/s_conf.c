@@ -95,7 +95,6 @@ static void     validate_conf(void);
 static void     read_conf(FBFILE*);
 static void     clear_out_old_conf(void);
 static void     flush_deleted_I_P(void);
-static int 	is_attached(struct Client *client_p, struct ConfItem *aconf);
 
 static void expire_tkline(dlink_list *, int);
 static void expire_tdline(dlink_list *, int);
@@ -424,28 +423,6 @@ find_shared(const char *username, const char *host,
   }
 
   return NO;
-}
-
-/*
- * remove all conf entries from the client except those which match
- * the status field mask.
- */
-void
-det_confs_butmask(struct Client *client_p, int mask)
-{
-  dlink_node *dlink;
-  dlink_node *link_next;
-  struct ConfItem *aconf;
-
-  DLINK_FOREACH_SAFE(dlink, link_next, client_p->localClient->confs.head)
-  {
-    aconf = dlink->data;
-
-    if ((aconf->status & mask) == 0)
-    {
-      detach_conf(client_p, aconf);
-    }
-  }
 }
 
 static struct LinkReport {
@@ -828,65 +805,43 @@ int attach_iline(struct Client *client_p, struct ConfItem *aconf)
  * detach_conf
  *
  * inputs	- pointer to client to detach
- * 		- pointer to conf item to detach
  * output	- 0 for success, -1 for failure
  * side effects	- Disassociate configuration from the client.
  *		  Also removes a class from the list if marked for deleting.
  */
-int 
-detach_conf(struct Client* client_p,struct ConfItem* aconf)
+int
+detach_conf(struct Client* client_p)
 {
-  dlink_node *ptr;
+  struct ConfItem *aconf;
 
-  if(aconf == NULL)
-    return(-1);
+  aconf = client_p->localClient->att_conf;
 
-  DLINK_FOREACH(ptr, client_p->localClient->confs.head)
+  if(aconf != NULL)
+  {
+    if(ClassPtr(aconf))
     {
-      if (ptr->data == aconf)
-        {
-          if ((aconf) && (ClassPtr(aconf)))
-            {
-              if (aconf->status & CONF_CLIENT_MASK)
-                {
-                  if (ConfCurrUsers(aconf) > 0)
-                    --ConfCurrUsers(aconf);
-                }
-              if (ConfMaxUsers(aconf) == -1 && ConfCurrUsers(aconf) == 0)
-                {
-                  free_class(ClassPtr(aconf));
-                  ClassPtr(aconf) = NULL;
-                }
-            }
-          if (aconf && !--aconf->clients && IsIllegal(aconf))
-            {
-              free_conf(aconf);
-            }
-	  dlinkDestroy(ptr, &client_p->localClient->confs);
-          return(0);
-        }
+      if (aconf->status & CONF_CLIENT_MASK)
+      {
+        if (ConfCurrUsers(aconf) > 0)
+          --ConfCurrUsers(aconf);
+      }
+
+      if (ConfMaxUsers(aconf) == -1 && ConfCurrUsers(aconf) == 0)
+      {
+        free_class(ClassPtr(aconf));
+        ClassPtr(aconf) = NULL;
+      }
     }
-  return(-1);
-}
 
-/*
- * is_attached
- *
- * inputs	- pointer to client to check
- * 		- pointer to conf item to check
- * output	- 1 if attached, 0 if not
- * side effects	- 
- */
-static int 
-is_attached(struct Client *client_p, struct ConfItem *aconf)
-{
-  dlink_node *ptr;
+    aconf->clients--;
+    if(!aconf->clients && IsIllegal(aconf))
+      free_conf(aconf);
 
-  DLINK_FOREACH(ptr, client_p->localClient->confs.head)
-    if (ptr->data == aconf)
-      break;
-  
-  return((ptr != NULL) ? 1 : 0);
+    client_p->localClient->att_conf = NULL;
+    return 0;
+  }
+
+  return -1;
 }
 
 /*
@@ -903,80 +858,41 @@ is_attached(struct Client *client_p, struct ConfItem *aconf)
 int 
 attach_conf(struct Client *client_p,struct ConfItem *aconf)
 {
-
-  if (is_attached(client_p, aconf))
-    {
-      return(1);
-    }
   if (IsIllegal(aconf))
-    {
-      return(NOT_AUTHORIZED);
-    }
+    return(NOT_AUTHORIZED);
 
   if ((aconf->status & CONF_OPERATOR) == 0)
+  {
+    if ((aconf->status & CONF_CLIENT) &&
+        ConfCurrUsers(aconf) >= ConfMaxUsers(aconf) && ConfMaxUsers(aconf) > 0)
     {
-      if ((aconf->status & CONF_CLIENT) &&
-          ConfCurrUsers(aconf) >= ConfMaxUsers(aconf) && ConfMaxUsers(aconf) > 0)
-        {
-          if (!IsConfExemptLimits(aconf))
-            {
-              return(I_LINE_FULL); 
-            }
-          else
-            {
-              send(client_p->localClient->fd,
-                   "NOTICE FLINE :I: line is full, but you have an >I: line!\n",
-                   56, 0);
-              SetExemptLimits(client_p);
-            }
+      if (!IsConfExemptLimits(aconf))
+      {
+        return(I_LINE_FULL); 
+      }
+      else
+      {
+        send(client_p->localClient->fd,
+             "NOTICE FLINE :I: line is full, but you have an >I: line!\n",
+             56, 0);
+        SetExemptLimits(client_p);
+      }
 
-        }
     }
+  }
 
   if(aconf->status & FLAGS2_RESTRICTED)
     SetRestricted(client_p);
 
+  if(client_p->localClient->att_conf != NULL)
+    detach_conf(client_p);
 
-  dlinkAddAlloc(aconf, &client_p->localClient->confs);
+  client_p->localClient->att_conf = aconf;
 
   aconf->clients++;
   if (aconf->status & CONF_CLIENT_MASK)
     ConfCurrUsers(aconf)++;
   return(0);
-}
-
-/*
- * attach_confs - Attach all possible CONF lines to a client
- * if the name passed matches that for the conf file (for non-C/N lines) 
- * or is an exact match (C/N lines only).  The difference in behaviour 
- * is to stop C:*::* and N:*::*.
- * returns count of conf entries attached if successful, 0 if none are found
- *
- * NOTE: this will allow C:::* and N:::* because the match mask is the
- * conf line and not the name
- */
-int 
-attach_confs(struct Client* client_p, const char* name, int statmask)
-{
-  struct ConfItem* tmp;
-  int              conf_counter = 0;
-  
-  for (tmp = ConfigItemList; tmp; tmp = tmp->next)
-    {
-      if ((tmp->status & statmask) && !IsIllegal(tmp) &&
-          tmp->name && match(tmp->name, name))
-        {
-          if (-1 < attach_conf(client_p, tmp))
-            ++conf_counter;
-        }
-      else if ((tmp->status & statmask) && !IsIllegal(tmp) &&
-               tmp->name && !irccmp(tmp->name, name))
-        {
-          if (-1 < attach_conf(client_p, tmp))
-            ++conf_counter;
-        }
-    }
-  return(conf_counter);
 }
 
 /*
@@ -1794,32 +1710,33 @@ oper_flags_as_string(int flags)
  *         "oper" is server name for remote opers
  * Side effects: None.
  */
-char*
+char *
 get_oper_name(struct Client *client_p)
 {
-  dlink_node *cnode;
+  struct ConfItem *aconf;
 
   /* +5 for !,@,{,} and null */
   static char buffer[NICKLEN+USERLEN+HOSTLEN+HOSTLEN+5];
 
-  if (MyConnect(client_p))
+  if (MyOper(client_p))
+  {
+    aconf = client_p->localClient->att_conf;
+
+    if(aconf->status & CONF_OPERATOR)
     {
-      DLINK_FOREACH(cnode, client_p->localClient->confs.head)
-	if (((struct ConfItem*)cnode->data)->status & CONF_OPERATOR)
-	  {
-	    ircsprintf(buffer, "%s!%s@%s{%s}", client_p->name,
-		       client_p->username, client_p->host,
-		       ((struct ConfItem*)cnode->data)->name);
-	    return(buffer);
-	  }
-      /* Probably should assert here for now. If there is an oper out there 
-       * with no oper{} conf attached, it would be good for us to know...
-       */
-      assert(0); /* Oper without oper conf! */
+      ircsprintf(buffer, "%s!%s@%s{%s}",
+                 client_p->name, client_p->username, client_p->host,
+                 aconf->name);
+      return buffer;
     }
-  ircsprintf(buffer, "%s!%s@%s{%s}", client_p->name,
-	     client_p->username, client_p->host, client_p->servptr->name);
-  return(buffer);
+
+    assert(0);
+  }
+
+  ircsprintf(buffer, "%s!%s@%s{%s}", 
+             client_p->name, client_p->username, client_p->host, 
+             client_p->servptr->name);
+  return buffer;
 }
 
 /*

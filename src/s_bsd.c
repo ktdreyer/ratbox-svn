@@ -333,7 +333,7 @@ void close_connection(struct Client *client_p)
   linebuf_donebuf(&client_p->localClient->buf_sendq);
   linebuf_donebuf(&client_p->localClient->buf_recvq);
   memset(client_p->localClient->passwd, 0, sizeof(client_p->localClient->passwd));
-  det_confs_butmask(client_p, 0);
+  detach_conf(client_p);
   client_p->from = NULL; /* ...this should catch them! >:) --msa */
 }
 

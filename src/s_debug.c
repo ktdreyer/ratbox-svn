@@ -204,7 +204,7 @@ void count_memory(struct Client *source_p)
       target_p = ptr->data;
       if (MyConnect(target_p))
         {
-          local_client_conf_count += dlink_list_length(&target_p->localClient->confs);
+          local_client_conf_count++;
         }
 
       if (target_p->user)

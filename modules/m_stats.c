@@ -686,19 +686,14 @@ static void stats_operedup(struct Client *source_p)
   struct Client *target_p;
   struct ConfItem *aconf;
   dlink_node *oper_ptr;
-  dlink_node *ptr;
-  int j=0;
 
   DLINK_FOREACH(oper_ptr, oper_list.head)
   {
     target_p = oper_ptr->data;
 
-    j++;
-
     if (MyClient(source_p) && IsOper(source_p))
     {
-      ptr = target_p->localClient->confs.head;
-      aconf = ptr->data;
+      aconf = target_p->localClient->att_conf;
 
       sendto_one(source_p, ":%s %d %s :[%c][%s] %s (%s@%s) Idle: %d",
                  me.name, RPL_STATSDEBUG, source_p->name,
@@ -711,14 +706,15 @@ static void stats_operedup(struct Client *source_p)
     {
       sendto_one(source_p, ":%s %d %s :[%c] %s (%s@%s) Idle: %d",
                  me.name, RPL_STATSDEBUG, source_p->name,
-                 IsOperAdmin(target_p) ? 'A' : 'O',
+                 IsAdmin(target_p) ? 'A' : 'O',
 		 target_p->name, target_p->username, target_p->host,
 		 (int)(CurrentTime - target_p->user->last));
     }
   }
 
-  sendto_one(source_p, ":%s %d %s :%d OPER(s)", me.name, RPL_STATSDEBUG,
-             source_p->name, j);
+  sendto_one(source_p, ":%s %d %s :%ld OPER(s)", 
+             me.name, RPL_STATSDEBUG, source_p->name, 
+             dlink_list_length(&oper_list));
 
   stats_p_spy(source_p);
 }

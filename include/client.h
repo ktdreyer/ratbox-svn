@@ -210,7 +210,7 @@ struct LocalUser
   unsigned int      lastrecvM;  /* to check for activity --Mika */
   int               priority;
   struct Listener*  listener;   /* listener accepted from */
-  dlink_list        confs;      /* Configuration record associated */
+  struct ConfItem   *att_conf;  /* attached conf */
 
   struct irc_inaddr ip;
   unsigned short    port;       /* and the remote port# too :-) */
@@ -418,6 +418,8 @@ struct LocalUser
 
 #define SEND_UMODES  (UMODE_INVISIBLE | UMODE_OPER | UMODE_WALLOP | \
                       UMODE_ADMIN)
+#define DEFAULT_OPER_UMODES (UMODE_SERVNOTICE | UMODE_OPERWALL | \
+                             UMODE_WALLOP | UMODE_LOCOPS)
 #define ALL_UMODES   (SEND_UMODES | UMODE_SERVNOTICE | UMODE_CCONN | \
                       UMODE_REJ | UMODE_SKILL | UMODE_FULL | UMODE_SPY | \
                       UMODE_NCHANGE | UMODE_OPERWALL | UMODE_DEBUG | \

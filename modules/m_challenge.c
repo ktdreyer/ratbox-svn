@@ -40,8 +40,6 @@
 #include "irc_string.h"
 #include "s_log.h"
 
-int oper_up( struct Client *source_p, struct ConfItem *aconf );
-
 #ifndef HAVE_LIBCRYPTO
 /* Maybe this should be an error or something?-davidt */
 #ifndef STATIC_MODULES
@@ -112,7 +110,7 @@ static void m_challenge( struct Client *client_p, struct Client *source_p,
     /* Ignore it if we aren't expecting this... -A1kmm */
     if (!source_p->user->response)
       return;
-     
+
     if (irccmp(source_p->user->response, ++parv[1]))
     {
       sendto_one(source_p, form_str(ERR_PASSWDMISMATCH), 
@@ -138,9 +136,8 @@ static void m_challenge( struct Client *client_p, struct Client *source_p,
       return;
     }
 
-    ptr = source_p->localClient->confs.head;
-    oconf = ptr->data;
-    detach_conf(source_p,oconf);
+    oconf = source_p->localClient->att_conf;
+    detach_conf(source_p);
 
     if(attach_conf(source_p, aconf) != 0)
     {
