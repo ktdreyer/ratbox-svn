@@ -1,3 +1,22 @@
+*** 20001217_1 by db
+- moved gline expiration to be an event started from ircd.c at startup
+  right now its run every half hour. That should be sufficient.
+
+- also cleanedup s_gline.c s_gline.h m_gline.c while at it. Removed
+  unnecessary and obsolete extern definitions. Made a couple of functions
+  static. Found a duplicate definition for glines in s_conf.c!
+
+- Fixed LazyLink join to a non existing channel on the hub. The 
+  hub has to actually create the channel but not SJOIN it to anything.
+  Then the hub can mark this channel as a lazy link channel with the leaf
+  being "interested" in knowing about the channel. The timestamp should be
+  set to the highest possible time, so its always overruled. It also
+  should be expired if necessary.i.e. lazy link server dies after doing
+  cburst request but before received LLJOIN.
+  Removed the useless lazylink references in m_join.c duh. 
+
+
+
 *** 20001216_9 by db
 - fixed join 0 grrrr
 - m_lljoin should give member names when joining
