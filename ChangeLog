@@ -1,3 +1,15 @@
+androsyn    2002/11/25 22:27:18 UTC	(20021125_11)
+
+  Modified files:
+    modules              m_challenge.c 
+  Log:
+  Fix some compile time warnings
+  
+  Revision  Changes    Path
+  1.44      +3 -3      ircd-ratbox/modules/m_challenge.c
+
+
+
 leeh        2002/11/25 22:15:59 UTC	(20021125_10)
 
   Modified files:
