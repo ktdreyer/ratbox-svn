@@ -2511,18 +2511,17 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
 #endif
 
   /* bail out if we have nothing to do... */
-  if (!(mode_count_plus || mode_count_minus))
-    return;
-
+  if (!(mode_count_plus || mode_count_minus
 #ifdef HALFOPS
-  if(!bounce_count)
-    return;
+        || bounce_count
 #endif
+#ifdef ANONOPS
+	|| resync_count
+#endif
+     ))
+    return;
 
 #ifdef ANONOPS
-  if(!resync_count)
-    return;
-
   /* Send any resyncs that we need to send... */
   /* XXX - setting -a removes hideops, yet still needs a resync.. */
 
