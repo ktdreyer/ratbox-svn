@@ -1,3 +1,10 @@
+*** 20001016_5 by toot
+. don't allow JOIN to a 'real' subchan name
+. some extra brackets in privmsg/notice to kill a compile warning
+. mpw JOIN #chan !nick will work on any nick in the channel, just need to
+  update show_vchans
+
+
 *** 20001016_4 by db
 - global who should work when its a wild card mask
 
