@@ -1,3 +1,7 @@
+*** 20010524_8 by davidt
+- Fix core in HasID()
+
+
 *** 20010524_7 by db
 - removed the SYSLOG for the debug block allocator, there is no more
   block allocator
