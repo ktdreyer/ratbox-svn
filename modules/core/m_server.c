@@ -58,6 +58,9 @@ _moddeinit(void)
   mod_del_cmd(MSG_SERVER);
 }
 
+char *parse_server_args(char *parv[], int parc, char *info, int *hop);
+int bogus_host(char *host);
+
 char *_version = "20001122";
 
 /*
@@ -77,61 +80,15 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   struct ConfItem* aconf;
   int              hop;
   dlink_node       *ptr;
-  int bogus_server = 0;
-  int dots = 0;
-  char *s;
 
-  info[0] = '\0';
-  /*  inpath = get_client_name(cptr,FALSE); */
-  if (parc < 2 || *parv[1] == '\0')
+  if ( (host = parse_server_args(parv, parc, info, &hop)) == NULL )
     {
       sendto_one(cptr,"ERROR :No servername");
       return 0;
     }
-  hop = 0;
-  host = parv[1];
-  if (parc > 3 && atoi(parv[2]))
-    {
-      hop = atoi(parv[2]);
-      strncpy_irc(info, parv[3], REALLEN);
-      info[REALLEN] = '\0';
-    }
-  else if (parc > 2)
-    {
-      /*
-       * XXX - hmmmm
-       */
-      strncpy_irc(info, parv[2], REALLEN);
-      info[REALLEN] = '\0';
-      if ((parc > 3) && ((i = strlen(info)) < (REALLEN - 2)))
-        {
-          strcat(info, " ");
-          strncat(info, parv[3], REALLEN - i - 2);
-          info[REALLEN] = '\0';
-        }
-    }
 
-  if (strlen(host) > HOSTLEN)
-    host[HOSTLEN] = '\0';
-
-  for( s = host; *s; s++ )
-    {
-      if (!IsServChar(*s))
-	{
-	  bogus_server = 1;
-	  break;
-	}
-      if ('.' == *s)
-	++dots;
-    }
-
-  if (!dots || bogus_server )
-    {
-      char clean_host[2 * HOSTLEN + 4];
-      sendto_one(sptr,"ERROR :Bogus server name (%s)", 
-		 clean_string(clean_host, host, 2 * HOSTLEN));
-      return exit_client(cptr, cptr, cptr, "Bogus server name");
-    }
+  if (bogus_host(host))
+    return exit_client(cptr, cptr, cptr, "Bogus server name");
 
   /* 
    * *WHEN* can it be that "cptr != sptr" ????? --msa
@@ -198,7 +155,7 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
        */
       sendto_one(cptr,"ERROR :Nickname %s already exists!", host);
       sendto_realops("Link %s cancelled: Server/nick collision on %s",
-                 /* inpath */ get_client_name(cptr,FALSE), host);
+		     get_client_name(cptr,FALSE), host);
       return exit_client(cptr, cptr, cptr, "Nick as Server");
     }
 
@@ -255,38 +212,11 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   int              hop;
   dlink_node	   *ptr;
 
-  info[0] = '\0';
-  /*  inpath = get_client_name(cptr,FALSE); */
-  if (parc < 2 || *parv[1] == '\0')
+  if ( (host = parse_server_args(parv, parc, info, &hop)) == NULL )
     {
       sendto_one(cptr,"ERROR :No servername");
       return 0;
     }
-  hop = 0;
-  host = parv[1];
-  if (parc > 3 && atoi(parv[2]))
-    {
-      hop = atoi(parv[2]);
-      strncpy_irc(info, parv[3], REALLEN);
-      info[REALLEN] = '\0';
-    }
-  else if (parc > 2)
-    {
-      /*
-       * XXX - hmmmm
-       */
-      strncpy_irc(info, parv[2], REALLEN);
-      info[REALLEN] = '\0';
-      if ((parc > 3) && ((i = strlen(info)) < (REALLEN - 2)))
-        {
-          strcat(info, " ");
-          strncat(info, parv[3], REALLEN - i - 2);
-          info[REALLEN] = '\0';
-        }
-    }
-
-  if (strlen(host) > HOSTLEN)
-    host[HOSTLEN] = '\0';
 
   /* 
    * *WHEN* can it be that "cptr != sptr" ????? --msa
@@ -429,4 +359,84 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   return 0;
 }
 
+/*
+ * parse_server_args
+ *
+ * inputs	- parv parameters
+ * 		- parc count
+ *		- info string (to be filled in by this routine)
+ *		- hop count (to be filled in by this routine)
+ * output	- NULL if invalid params, hostname otherwise
+ * side effects	- parv[1] is trimmed to HOSTLEN size if needed.
+ */
 
+char *parse_server_args(char *parv[], int parc, char *info, int *hop)
+{
+  int i;
+  char *host;
+
+  info[0] = '\0';
+
+  if (parc < 2 || *parv[1] == '\0')
+    return NULL;
+
+  *hop = 0;
+
+  host = parv[1];
+
+  if (parc > 3 && atoi(parv[2]))
+    {
+      *hop = atoi(parv[2]);
+      strncpy_irc(info, parv[3], REALLEN);
+      info[REALLEN] = '\0';
+    }
+  else if (parc > 2)
+    {
+      /*
+       * XXX - hmmmm
+       */
+      strncpy_irc(info, parv[2], REALLEN);
+      info[REALLEN] = '\0';
+      if ((parc > 3) && ((i = strlen(info)) < (REALLEN - 2)))
+        {
+          strcat(info, " ");
+          strncat(info, parv[3], REALLEN - i - 2);
+          info[REALLEN] = '\0';
+        }
+    }
+
+  if (strlen(host) > HOSTLEN)
+    host[HOSTLEN] = '\0';
+
+  return(host);
+}
+
+/*
+ * bogus_host
+ *
+ * inputs	- hostname
+ * output	- 1 if a bogus hostname input, 0 if its valid
+ * side effects	- none
+ */
+int bogus_host(char *host)
+{
+  int bogus_server = 0;
+  char *s;
+  int dots = 0;
+
+  for( s = host; *s; s++ )
+    {
+      if (!IsServChar(*s))
+	{
+	  bogus_server = 1;
+	  break;
+	}
+      if ('.' == *s)
+	++dots;
+    }
+
+  if (!dots || bogus_server )
+    return 1;
+
+  return 0;
+}
