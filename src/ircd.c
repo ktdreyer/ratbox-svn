@@ -681,7 +681,13 @@ int main(int argc, char *argv[])
   eventAdd("cryptlink_regen_key", cryptlink_regen_key, NULL,
 	   CRYPTLINK_REGEN_TIME);
 #endif
-   
+
+  eventAdd("cleanup_channels", cleanup_channels, NULL, CLEANUP_CHANNELS_TIME);
+
+  eventAdd("cleanup_glines", cleanup_glines, NULL, CLEANUP_GLINES_TIME);
+
+  eventAdd("cleanup_tklines", cleanup_tklines, NULL, CLEANUP_TKLINES_TIME);
+
   /* We want try_connections to be called as soon as possible now! -- adrian */
   /* No, 'cause after a restart it would cause all sorts of nick collides */
   eventAdd("try_connections", try_connections, NULL, STARTUP_CONNECTIONS_TIME);
