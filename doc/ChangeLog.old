@@ -1,3 +1,16 @@
+androsyn    2002/05/30 20:12:36 EDT	(20020531_2)
+
+  Modified files:
+    src                  s_serv.c 
+  Log:
+  Changed "Lost C-Line" to "Lost connect{} block" as we don't have C lines
+  anymore...
+  
+  Revision  Changes    Path
+  7.256     +3 -3      ircd-hybrid-7/src/s_serv.c
+
+
+
 androsyn    2002/05/30 20:08:43 EDT	(20020531_1)
 
   Modified files:
