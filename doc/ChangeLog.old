@@ -1,3 +1,15 @@
+leeh        2002/07/11 11:27:05 EDT	(20020711_6)
+
+  Modified files:
+    modules/core         m_nick.c 
+  Log:
+  - allow unregistered connections to change the case of their nickname
+  
+  Revision  Changes    Path
+  1.92      +8 -3      ircd-hybrid-7/modules/core/m_nick.c
+
+
+
 leeh        2002/07/11 11:01:58 EDT	(20020711_5)
 
   Modified files:
