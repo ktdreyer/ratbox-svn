@@ -149,7 +149,7 @@ mod_clear_paths(void)
   struct module_path *pathst;
   dlink_node *node, *next;
 
-  for(node = mod_paths.head; node; next)
+  for(node = mod_paths.head; node; node = next)
     {
       next = node->next;
       pathst = (struct module_path *)node->data;
