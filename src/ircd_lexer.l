@@ -226,6 +226,7 @@ path                    { return PATH; }
 max_targets             { return MAX_TARGETS; }
 
 oper_only_umodes        { return OPER_ONLY_UMODES; }
+oper_umodes             { return OPER_UMODES; }
 bots                    { return T_BOTS; }
 cconn                   { return T_CCONN; }
 debug                   { return T_DEBUG; }

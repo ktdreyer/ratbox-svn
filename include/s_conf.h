@@ -205,6 +205,7 @@ typedef struct config_file_entry
   int         client_exit;
   int         maximum_links;
   int         oper_only_umodes;
+  int         oper_umodes;
   int         max_targets;
   int         links_delay;
   int         vchans_oper_only;

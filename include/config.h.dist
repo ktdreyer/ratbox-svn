@@ -129,12 +129,6 @@
 #define NETWORK_NAME_DEFAULT "EFnet"
 #define NETWORK_DESC_DEFAULT "Eris Free Network"
 
-/*
- * OPER_UMODES - set these to be the initial umodes when OPER'ing
- * These can be over-ridden in the ircd.conf file.
- */
-#define OPER_UMODES   (FLAGS_OPER|FLAGS_WALLOP|FLAGS_SERVNOTICE|FLAGS_OPERWALL)
-
 /* MAXIMUM LINKS - max links for class 0 if no Y: line configured
  *
  * This define is useful for leaf nodes and gateways. It keeps you from

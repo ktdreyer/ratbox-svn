@@ -417,12 +417,6 @@ struct LocalUser
  		      FLAGS_ADMIN | FLAGS_UNAUTH | FLAGS_CALLERID | \
                       FLAGS_LOCOPS | FLAGS_PERSISTANT)
 
-#ifndef OPER_UMODES
-#define OPER_UMODES  (FLAGS_OPER | FLAGS_WALLOP | FLAGS_SERVNOTICE | \
-                      FLAGS_SPY | FLAGS_OPERWALL | FLAGS_DEBUG | FLAGS_BOTS | \
-	                  FLAGS_ADMIN | FLAGS_DRONE | FLAGS_LOCOPS)
-#endif /* OPER_UMODES */
-
 #define FLAGS_ID     (FLAGS_NEEDID | FLAGS_GOTID)
 
 /*
