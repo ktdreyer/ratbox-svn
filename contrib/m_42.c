@@ -21,7 +21,7 @@ struct Message hgtg_msgtab = {
 mapi_clist_av1 hgtg_clist[] = { &hgtg_msgtab, NULL };
 
 
-DECLARE_MODULE_AV1(42, NULL, NULL, hgtg_clist, NULL, NULL, "$$Revision$$");
+DECLARE_MODULE_AV1(42, NULL, NULL, hgtg_clist, NULL, NULL, "Revision 0.42");
 
 
 static int
