@@ -1,3 +1,10 @@
+*** 20010905_4 by davidt
+- Fix linebuf.c/linebuf_putmsg to correctly "\r\n\0" terminate extra-long
+  lines, instead of "\0\r\n\0" terminating them, which tickles yet another
+  BitchX bug. '\0' bad.
+- Include s_conf.h in m_map.c so it at least compiles.
+
+
 *** 20010905_3 by leeh
 - moved the rest of the FLAGS_SPY stuff to contrib/
 
