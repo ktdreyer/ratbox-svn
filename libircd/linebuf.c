@@ -164,8 +164,6 @@ linebuf_skip_crlf(char *ch, int len)
 			break;
 		else if(*ch == '\n')
 			break;
-		else if(*ch == 0)
-			return -1;
 	}
 
 	/* Then, skip until the last CRLF */
