@@ -1,3 +1,36 @@
+androsyn    2002/08/21 20:02:10 EDT	(20020822_0)
+
+  Modified files:
+    include              tools.h 
+    modules              m_kline.c m_xline.c 
+    src                  balloc.c channel.c channel_mode.c 
+                         client.c hash.c hook.c linebuf.c 
+                         modules.c newconf.c s_auth.c s_conf.c 
+                         s_gline.c s_serv.c s_user.c 
+  Log:
+  Add dlinkAddAlloc and dlinkDestroy and make some things use it
+  
+  Revision  Changes    Path
+  1.33      +5 -0      ircd-ratbox/include/tools.h
+  1.117     +3 -3      ircd-ratbox/modules/m_kline.c
+  1.5       +1 -3      ircd-ratbox/modules/m_xline.c
+  7.42      +2 -4      ircd-ratbox/src/balloc.c
+  7.344     +14 -73    ircd-ratbox/src/channel.c
+  7.72      +11 -26    ircd-ratbox/src/channel_mode.c
+  7.317     +11 -39    ircd-ratbox/src/client.c
+  7.57      +10 -24    ircd-ratbox/src/hash.c
+  7.18      +3 -9      ircd-ratbox/src/hook.c
+  7.94      +1 -2      ircd-ratbox/src/linebuf.c
+  7.112     +2 -5      ircd-ratbox/src/modules.c
+  7.25      +4 -10     ircd-ratbox/src/newconf.c
+  7.106     +5 -16     ircd-ratbox/src/s_auth.c
+  7.343     +10 -21    ircd-ratbox/src/s_conf.c
+  1.26      +3 -7      ircd-ratbox/src/s_gline.c
+  7.291     +2 -14     ircd-ratbox/src/s_serv.c
+  7.223     +3 -7      ircd-ratbox/src/s_user.c
+
+
+
 leeh        2002/08/21 19:23:47 EDT	(20020821_22)
 
   Modified files:
