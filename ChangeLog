@@ -1,3 +1,17 @@
+leeh        2002/12/07 18:20:14 UTC	(20021207_3)
+
+  Modified files:
+    contrib              m_force.c 
+    src                  channel_mode.c 
+  Log:
+  - fix ERR_USERNOTINCHANNEL here too.
+  
+  Revision  Changes    Path
+  1.20      +2 -2      ircd-ratbox/contrib/m_force.c
+  7.92      +2 -2      ircd-ratbox/src/channel_mode.c
+
+
+
 androsyn    2002/12/07 18:12:19 UTC	(20021207_2)
 
   Modified files:
