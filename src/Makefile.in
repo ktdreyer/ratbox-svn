@@ -37,9 +37,11 @@ SRCS =                          \
   m_admin.c                     \
   m_away.c                      \
   m_capab.c                     \
+  m_cburst.c                    \
   m_close.c                     \
   m_connect.c                   \
   m_die.c                       \
+  m_drop.c                      \
   m_error.c                     \
   m_gline.c                     \
   m_htm.c                       \
@@ -54,6 +56,7 @@ SRCS =                          \
   m_knock.c                     \
   m_links.c                     \
   m_list.c                      \
+  m_lljoin.c                    \
   m_locops.c                    \
   m_ltrace.c                    \
   m_lusers.c                    \
@@ -131,10 +134,12 @@ SRCS =                          \
 #	listener.o \
 #	m_admin.o \
 #	m_away.o \
+#	m_cburst.o \
 #	m_capab.o \
 #	m_close.o \
 #	m_connect.o \
 #	m_die.o \
+#	m_drop.o \
 #	m_error.o \
 #	m_gline.o \
 #	m_help.o \
