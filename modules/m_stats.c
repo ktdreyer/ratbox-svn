@@ -343,8 +343,6 @@ void do_non_priv_stats(struct Client *sptr, char *name, char *target,
       break;
 
     case '?':
-      serv_info(sptr);
-      stats_spy(sptr,stat);
       break;
 
 
