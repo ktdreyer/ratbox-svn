@@ -1,3 +1,16 @@
+jmallett    2002/02/12 09:06:09 EST	(20020212_2)
+
+  Modified files:
+    src                  modules.c 
+  Log:
+  Log when a symbol is defined more than once.  Clarify when our first
+  dlopen() is done.  Misc. cleanup of my dl*(3) stuff.
+  
+  Revision  Changes    Path
+  7.91      +16 -11    ircd-hybrid-7/src/modules.c
+
+
+
 jmallett    2002/02/12 08:48:06 EST	(20020212_1)
 
   Modified files:
