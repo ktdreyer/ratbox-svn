@@ -1,3 +1,24 @@
+leeh        2002/02/28 06:46:46 EST	(20020228_2)
+
+  Modified files:
+    include              s_conf.h 
+    modules              m_help.c m_info.c m_whois.c m_whowas.c 
+    src                  ircd_lexer.l ircd_parser.y s_conf.c 
+  Log:
+  - renamed whois_wait to pace_wait_simple, and made it applicable to /help
+  
+  Revision  Changes    Path
+  7.177     +1 -1      ircd-hybrid-7/include/s_conf.h
+  1.30      +2 -2      ircd-hybrid-7/modules/m_help.c
+  1.54      +7 -7      ircd-hybrid-7/modules/m_info.c
+  1.74      +2 -2      ircd-hybrid-7/modules/m_whois.c
+  1.25      +2 -2      ircd-hybrid-7/modules/m_whowas.c
+  1.136     +1 -1      ircd-hybrid-7/src/ircd_lexer.l
+  1.237     +4 -4      ircd-hybrid-7/src/ircd_parser.y
+  7.294     +1 -1      ircd-hybrid-7/src/s_conf.c
+
+
+
 jmallett    2002/02/27 22:02:19 EST	(20020228_1)
 
   Modified files:
