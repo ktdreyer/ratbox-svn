@@ -1,3 +1,15 @@
+androsyn    2004/03/12 11:53:27 EST	(20040312_1)
+
+  Modified files:
+    src                  s_user.c 
+  Log:
+  lets make that actually build
+  
+  Revision  Changes    Path
+  7.309     +3 -6      ircd-ratbox/src/s_user.c
+
+
+
 androsyn    2004/03/12 10:24:22 EST	(20040312_0)
 
   Modified files:
