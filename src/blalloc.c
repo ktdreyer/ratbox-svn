@@ -318,7 +318,7 @@ int _BlockHeapFree(BlockHeap *bh, void *ptr)
     if (mme->last)
       mme->last->next = mme->next;
     else
-      first_block_mem_entry = mme;
+      first_block_mem_entry = mme->next;
     if (mme->next)
       mme->next->last = mme->last;
    }
