@@ -1,3 +1,15 @@
+androsyn    2003/02/12 19:52:32 UTC	(20030212_2)
+
+  Modified files:
+    src                  s_conf.c 
+  Log:
+  Lets try that one again
+  
+  Revision  Changes    Path
+  7.400     +1 -1      ircd-ratbox/src/s_conf.c
+
+
+
 androsyn    2003/02/12 19:50:32 UTC	(20030212_1)
 
   Modified files:
