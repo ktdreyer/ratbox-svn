@@ -68,6 +68,7 @@ extern int yyparse(); /* defined in y.tab.c */
 extern ConfigFileEntryType ConfigFileEntry; /* defined in ircd.c */
 extern int lineno;
 extern char linebuf[];
+int scount = 0;       /* used by yyparse(), etc */
 
 #ifndef INADDR_NONE
 #define INADDR_NONE ((unsigned int) 0xffffffff)
@@ -79,6 +80,8 @@ extern char linebuf[];
 static void lookup_confhost(struct ConfItem* aconf);
 static int  SplitUserHost( struct ConfItem * );
 
+static void     set_default_conf(void);
+static void     check_conf(void);
 static void     read_conf(FBFILE*);
 static void     read_kd_lines(FBFILE*);
 static void     clear_out_old_conf(void);
@@ -220,6 +223,7 @@ void free_conf(struct ConfItem* aconf)
   MyFree(aconf->name);
   MyFree(aconf->className);
   MyFree(aconf->user);
+  MyFree(aconf->cipher_preference);
   MyFree((char*) aconf);
 }
 
@@ -1381,46 +1385,35 @@ int rehash(struct Client *client_p,struct Client *source_p, int sig)
   return 0;
 }
 
+static void set_default_conf(void)
+{
+  class0 = find_class("default");       /* which one is the default class ? */
+  ServerInfo.specific_ipv4_vhost = 0;
+
+  /* XXX - free things _here_, not ircd_parser.y */
+}
+
 /*
-** read_conf() 
-**    Read configuration file.
-**
-*
-* Inputs        - file descriptor pointing to config file to use
-*
-**    returns -1, if file cannot be opened
-**             0, if file opened
-*/
-
-#define MAXCONFLINKS 150
-
-/* bleh. unfortunately, these have to become globals as well */
-
-int              scount = 0;
-
+ * read_conf() 
+ *    Read configuration file.
+ *
+ *
+ * Inputs        - file descriptor pointing to config file to use
+ * Outputs       - None
+ */
 static void read_conf(FBFILE* file)
 {
   scount = lineno = 0;
 
-  class0 = find_class("default");       /* which one is the default class ? */
-  ServerInfo.specific_ipv4_vhost = 0;   /* This is a dumb place to do this got a better idea? */
-
-#ifdef HAVE_LIBCRYPTO
-  /* reset default cipher priority */ 
-  enccaptab[0].default_priority = 2;
-  enccaptab[1].default_priority = 1;
-  enccaptab[2].default_priority = 3;
-  enccaptab[3].default_priority = 9;
-  enccaptab[4].default_priority = 8;
-  enccaptab[5].default_priority = 4;
-  enccaptab[6].default_priority = 7;
-  enccaptab[7].default_priority = 6;
-  enccaptab[8].default_priority = 5;
-#endif
-  
   yyparse(); /* wheee! */
 
-  check_class();
+  check_conf();  /* make sure config items are valid */
+  check_class(); /* make sure classes are valid */
+}
+
+static void check_conf(void)
+{
+  int i;
 
   if(ConfigFileEntry.ts_warn_delta < TS_WARN_DELTA_MIN)
     ConfigFileEntry.ts_warn_delta = TS_WARN_DELTA_DEFAULT;
@@ -1455,11 +1448,30 @@ static void read_conf(FBFILE* file)
   if (!ConfigFileEntry.max_chans_per_user)
      ConfigFileEntry.max_chans_per_user = 15;
 
+  if ((ConfigFileEntry.client_flood < CLIENT_FLOOD_MIN) ||
+      (ConfigFileEntry.client_flood > CLIENT_FLOOD_MAX))
+     ConfigFileEntry.client_flood = CLIENT_FLOOD_MAX;
+
   GlobalSetOptions.idletime = (ConfigFileEntry.idletime * 60);
 
   if (!ConfigFileEntry.links_delay)
         ConfigFileEntry.links_delay = LINKS_DELAY_DEFAULT;
   GlobalSetOptions.hide_server = ConfigFileEntry.hide_server;
+
+#ifdef HAVE_LIBCRYPTO
+  if (!ConfigFileEntry.default_cipher_preference)
+  {
+    ConfigFileEntry.default_cipher_preference
+      = MyMalloc(sizeof(struct EncPreference) * (NUM_CAP_ENC+1));
+
+    for(i = 0; i < NUM_CAP_ENC; i++)
+    {
+      ConfigFileEntry.default_cipher_preference[i].ecap = &enccaptab[i];
+      ConfigFileEntry.default_cipher_preference[i].priority = i+1;
+    }
+    ConfigFileEntry.default_cipher_preference[NUM_CAP_ENC].ecap = NULL;
+  }
+#endif
 }
 
 static void read_kd_lines(FBFILE* file)
@@ -1877,7 +1889,7 @@ void read_conf_files(int cold)
       else
         {
           sendto_realops_flags(FLAGS_ALL,
-			       "Can't open %s file aborting rehash!",
+			       "Can't open file '%s' - aborting rehash!",
 			       filename );
           return;
         }
@@ -2236,6 +2248,8 @@ void conf_delist_old_conf(struct ConfItem *aconf)
       aconf = bconf;
     }
 }
+
+#define MAXCONFLINKS 150                                                        
 
 /*
  * conf_add_server

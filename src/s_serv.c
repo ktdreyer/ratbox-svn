@@ -115,18 +115,18 @@ struct Capability captab[] = {
 };
 
 #ifdef HAVE_LIBCRYPTO
-struct EncCapability enccaptab[] = {
-  {     "BF/128",     CAP_ENC_BF_128, 16,     CIPHER_BF, 2 }, /* ok */
-  {     "BF/256",     CAP_ENC_BF_256, 32,     CIPHER_BF, 1 }, /* ok */
-  {   "CAST/128",   CAP_ENC_CAST_128, 16,   CIPHER_CAST, 3 }, /* ok */
-  {     "DES/56",     CAP_ENC_DES_56,  8,    CIPHER_DES, 9 }, /* XXX */
-  {   "3DES/168",   CAP_ENC_3DES_168, 24,   CIPHER_3DES, 8 }, /* XXX */
-  {   "IDEA/128",   CAP_ENC_IDEA_128, 16,   CIPHER_IDEA, 4 }, /* ok */
-  {  "RC5.8/128",  CAP_ENC_RC5_8_128, 16,  CIPHER_RC5_8, 7 }, /* ok */
-  { "RC5.12/128", CAP_ENC_RC5_12_128, 16, CIPHER_RC5_12, 6 }, /* ok */
-  { "RC5.16/128", CAP_ENC_RC5_16_128, 16, CIPHER_RC5_16, 5 }, /* ok */
+struct EncCapability enccaptab[NUM_CAP_ENC+1] = {
+  {     "BF/128",     CAP_ENC_BF_128, 16,     CIPHER_BF },
+  {     "BF/256",     CAP_ENC_BF_256, 32,     CIPHER_BF },
+  {   "CAST/128",   CAP_ENC_CAST_128, 16,   CIPHER_CAST },
+  {     "DES/56",     CAP_ENC_DES_56,  8,    CIPHER_DES },
+  {   "3DES/168",   CAP_ENC_3DES_168, 24,   CIPHER_3DES },
+  {   "IDEA/128",   CAP_ENC_IDEA_128, 16,   CIPHER_IDEA },
+  {  "RC5.8/128",  CAP_ENC_RC5_8_128, 16,  CIPHER_RC5_8 },
+  { "RC5.12/128", CAP_ENC_RC5_12_128, 16, CIPHER_RC5_12 },
+  { "RC5.16/128", CAP_ENC_RC5_16_128, 16, CIPHER_RC5_16 },
 
-  {            0,                  0,  0,             0, 0 }
+  {            0,                  0,  0,             0 }
 };
 #endif
 
@@ -244,32 +244,20 @@ struct EncCapability* select_cipher(struct Client *client_p,
   /* Find the lowest (>0) priority cipher available */
 
   /* use connect{} specific info if available */
-  if (aconf->ciphertab)
-  {
-    for (epref = aconf->ciphertab; (ecap = epref->ecap); epref++)
-    {
-      if ((epref->priority > 0) &&         /* enabled */
-          IsCapableEnc(client_p, ecap->cap) && /* supported */
-          ((epref->priority < priority) || (priority < 0)))
-      {
-        /* new best match */
-        cipher = ecap;
-        priority = epref->priority;
-      }
-    }
-  }
+  if (aconf->cipher_preference)
+    epref = aconf->cipher_preference;
   else
-  { /* use defaults */
-    for (ecap = enccaptab; ecap->name; ecap++)
+    epref = ConfigFileEntry.default_cipher_preference;
+  
+  for (; (ecap = epref->ecap); epref++)
+  {
+    if ((epref->priority > 0) &&                            /* enabled */
+        IsCapableEnc(client_p, ecap->cap) &&                /* supported */
+          ((epref->priority < priority) || (priority < 0))) /* higher pref */
     {
-      if ((ecap->default_priority > 0) &&         /* enabled */
-          IsCapableEnc(client_p, ecap->cap) && /* supported */
-          ((ecap->default_priority < priority) || (priority < 0)))
-      {
-        /* new best match */
-        cipher = ecap;
-        priority = ecap->default_priority;
-      }
+      /* new best match */
+      cipher = ecap;
+      priority = epref->priority;
     }
   }
 
@@ -789,31 +777,20 @@ void send_capabilities(struct Client *client_p, struct ConfItem *aconf,
     strcpy(t, "ENC:");
     t += 4;
 
-    if (aconf->ciphertab)
-    {
-      /* use connect{} specific info */
-      for (epref = aconf->ciphertab; (ecap = epref->ecap); epref++)
-      {
-        if ((ecap->cap & enc_can_send) &&
-            (epref->priority > 0))
-        {
-          tl = ircsprintf(t, "%s,", ecap->name);
-          t += tl;
-          sent_cipher = 1;
-        }
-      }
-    }
+    /* use connect{} specific info if available */
+    if (aconf->cipher_preference)
+      epref = aconf->cipher_preference;
     else
+      epref = ConfigFileEntry.default_cipher_preference;
+
+    for (; (ecap = epref->ecap); epref++)
     {
-      for (ecap = enccaptab; ecap->name; ++ecap)
+      if ((ecap->cap & enc_can_send) &&
+          (epref->priority > 0))
       {
-        if ((ecap->cap & enc_can_send) &&
-            (ecap->default_priority > 0))
-        {
-          tl = ircsprintf(t, "%s,", ecap->name);
-          t += tl;
-          sent_cipher = 1;
-        }
+        tl = ircsprintf(t, "%s,", ecap->name);
+        t += tl;
+        sent_cipher = 1;
       }
     }
 

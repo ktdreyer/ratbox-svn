@@ -23,173 +23,130 @@
 
 #include "setup.h"
 
-/* PLEASE READ SECTION:
- */
-
-/***************** MAKE SURE THIS IS CORRECT!!!!!!!!! **************/
-/* ONLY EDIT "HARD_FDLIMIT_" and "INIT_MAXCLIENTS" */
-
-/* You may also need to hand edit the Makefile to increase
- * the value of FD_SETSIZE 
- */
-
-/* These ultra low values pretty much guarantee the server will
- * come up initially, then you can increase these values to fit your
- * system limits. If you know what you are doing, increase them now
- */
-
-/* VMS NOTE - VMS is basically unlimited with FDs, so just set this
-   to any suitable value.. */
-
-#define HARD_FDLIMIT_   256
-#define INIT_MAXCLIENTS 200
 
 /*
- * This is how many 'buffer connections' we allow... 
- * Remember, MAX_BUFFER + MAX_CLIENTS can't exceed HARD_FDLIMIT :)
+ * IRCD-HYBRID-7 COMPILE TIME CONFIGURATION OPTIONS
+ *
+ * Most of the items which used to be configurable in here have
+ * been moved into the new improved ircd.conf file.
+ * If you can't find something, look in doc/example.conf
+ *
+ * -davidt
  */
+
+/*
+ * File Descriptor limit
+ *
+ * These limits are ultra-low to guarantee the server will work properly
+ * in as many environments as possible.  They can probably be increased
+ * significantly, if you know what you are doing.
+ *
+ * If you are using select for the IO loop, you may also need to increase
+ * the value of FD_SETSIZE by editting the Makefile.  However, using
+ * --enable-kqueue, --enable-devpoll, or --enable-poll if at all possible,
+ * is highly recommended.
+ *
+ * VMS should be able to use any suitable value here, other operating
+ * systems may require kernel patches, configuration tweaks, or ulimit
+ * adjustments in order to exceed certain limits (e.g. 1024, 4096 fds).
+ */
+#define HARD_FDLIMIT_    256
+
+/*
+ * Maximum number of connections to allow.
+ *
+ * MAX_CLIENTS is the maximum number of clients to allow.
+ * MAX_BUFFER  is the number of fds to reserve for XXX - wtf is this?
+ *
+ * 10 file descriptors are reserved for logging, DNS lookups, etc.,
+ * so MAX_CLIENTS + MAX_BUFFER + 10 must not exceed HARD_FDLIMIT.
+ */
+#define MAX_CLIENTS     200
 #define MAX_BUFFER      60
 
-/* Don't change this... */
-#define HARD_FDLIMIT    (HARD_FDLIMIT_ - 10)
-#define MASTER_MAX      (HARD_FDLIMIT - MAX_BUFFER)
-/*******************************************************************/
-
-/* *PATH - directory and files locations
+#ifdef VMS
+/* *PATH - directory locations and filenames for VMS.
  *
- * Full pathnames and defaults of irc system's support files. Please note that
- * these are only the recommended names and paths. Change as needed.
+ * Non VMS systems see below.
  *
- * DPATH   = root directory of installation,
- * MODPATH = path to module directory,
- * MSGPATH = path to directory containing .mo message files,
- * SPATH   = server executable,
- * CPATH   = conf file,
- * KPATH   = kline conf file,
- * DLPATH  = dline conf file,
- * RPATH   = RSA keyfile,
- * MPATH   = MOTD,
- * PPATH   = pid file,
- * HPATH   = oper help file as seen by /quote help, 
- * OMOTD   = path to MOTD for opers.
- * 
- * For /restart to work, SPATH needs to be a full pathname
- * (unless "." is in your exec path). -Rodder
- *
- * Leave KPATH undefined if you want klines in main conf file.
- *
- * Leave MSGPATH undefined if you don't want to include gettext() support
- * for alternate message files -dt
- *
- * All other *PATHs should be defined.
- * DPATH, MODPATH and MSGPATH must have a trailing /'s
- * Do not use ~'s in any of these paths
- *
+ * IRCD_PREFIX = prefix for all directories,
+ * DPATH       = root directory of installation,
+ * BINPATH     = directory for binary files,
+ * ETCPATH     = directory for configuration files,
+ * LOGPATH     = directory for logfiles,
+ * MODPATH     = directory for autoloaded modules (disabled in VMS),
+ * MSGPATH     = directory for gettext message files (disabled in VMS).
  */
 
-/*
- * Do NOT change these paths!  They wont actually affect where ircd
- * is installed, and itll just error when you try to run it.  -- fl_
- * 
- * Use: ./configure --prefix="/home/dir"
+#define IRCD_PREFIX     "DISK$USER:[EBROCKLESBY.IRCD"
+#define DPATH           IRCD_PREFIX "]"
+#define BINPATH         IRCD_PREFIX ".BIN"
+#define ETCPATH         IRCD_PREFIX ".ETC"
+#define LOGPATH         IRCD_PREFIX ".LOGS"
+#undef  MODPATH
+#undef  MSGPATH
+
+#define SPATH   BINPATH "]IRCD.EXE"              /* server executable */
+#define SLPATH  BINPATH "]SERVLINK.EXE"          /* servlink executable */
+#define CPATH   ETCPATH "]IRCD.CONF"             /* config file */
+#define KPATH   ETCPATH "]KLINE.CONF"            /* kline file */
+#define DLPATH  ETCPATH "]KLINE.CONF"            /* dline file */
+#define GPATH   LOGPATH "]GLINE.LOG"             /* gline logfile */
+#define RPATH   ETCPATH "]IRCD.RSA"              /* RSA private key file */
+#define MPATH   ETCPATH "]IRCD.MOTD"             /* MOTD filename */
+#define LPATH   LOGPATH "]IRCD.LOG"              /* logfile */
+#define PPATH   ETCPATH "]IRCD.PID"              /* pid file */
+#define HPATH   ETCPATH "]OPERS.TXT"             /* oper help file */
+#define OPATH   ETCPATH "]OPERS.MOTD"            /* oper MOTD file */
+#define LIPATH  ETCPATH "]LINKS.TXT"             /* cached LINKS file */
+#else /* VMS */
+/* 
+ * Directory paths and filenames for UNIX systems.
+ * IRCD_PREFIX is set using ./configure --prefix, see INSTALL.
+ * The other defaults should be fine.
+ *
+ * NOTE: CHANGING THESE WILL NOT ALTER THE DIRECTORY THAT FILES WILL
+ *       BE INSTALLED TO.  IF YOU CHANGE THESE, DO NOT USE MAKE INSTALL,
+ *       BUT COPY THE FILES MANUALLY TO WHERE YOU WANT THEM.
+ *
+ * IRCD_PREFIX = prefix for all directories,
+ * DPATH       = root directory of installation,
+ * BINPATH     = directory for binary files,
+ * ETCPATH     = directory for configuration files,
+ * LOGPATH     = directory for logfiles,
+ * MODPATH     = directory for modules,
+ * MSGPATH     = directory for gettext message files.
  */
 
-#ifndef VMS
-#define DPATH   IRCD_PREFIX
+/* dirs */
+#define DPATH   IRCD_PREFIX                                                     
+#define BINPATH IRCD_PREFIX "/bin/"
 #define MODPATH IRCD_PREFIX "/modules/autoload/"
 #define MSGPATH IRCD_PREFIX "/messages/"
-#define SPATH   IRCD_PREFIX "/bin/ircd"
-#define SLPATH  IRCD_PREFIX "/bin/servlink" /* see servlink_path=""; in
-                                               config */
-/* i really don't like the below, but I'll figure the rest out! -- adrian */
-#define ETCPATH	IRCD_PREFIX "/etc"
+#define ETCPATH IRCD_PREFIX "/etc"
 #define LOGPATH IRCD_PREFIX "/logs"
-#define CPATH   ETCPATH "/ircd.conf"
-#define KPATH   ETCPATH "/kline.conf"
-#define DLPATH  ETCPATH "/kline.conf"
-#define GPATH   LOGPATH "/gline.log"
-#define RPATH   ETCPATH "/ircd.rsa"
-#define MPATH   ETCPATH "/ircd.motd"
-#define LPATH   LOGPATH "/ircd.log"
-#define PPATH   ETCPATH "/ircd.pid"
-#define HPATH   ETCPATH "/opers.txt"
-#define OPATH   ETCPATH "/opers.motd"
-#define LIPATH  ETCPATH "/links.txt"
-#else
-#define DPATH   IRCD_PREFIX "]"
-#define MODPATH IRCD_PREFIX ".MODULES.AUTOLOAD]"
-#define MSGPATH IRCD_PREFIX ".MESSAGES]"
-#define SPATH   IRCD_PREFIX ".BIN]IRCD.EXE"
-#define SLPATH  IRCD_PREFIX ".BIN]SERVLINK.EXE"
 
-#define ETCPATH IRCD_PREFIX ".ETC"
-#define LOGPATH IRCD_PREFIX ".LOGS"
-#define CPATH   ETCPATH "]IRCD.CONF"
-#define KPATH   ETCPATH "]KLINE.CONF"
-#define DLPATH  ETCPATH "]KLINE.CONF"
-#define GPATH   ETCPATH "]GLINE.LOG"
-#define RPATH   ETCPATH "]IRCD.RSA"
-#define MPATH   ETCPATH "]IRCD.MOTD"
-#define LPATH   ETCPATH "]IRCD.LOG"
-#define PPATH   ETCPATH "]IRCD.PID"
-#define HPATH   ETCPATH "]OPERS.TXT"
-#define OPATH   ETCPATH "]OPERS.MOTD"
-#define LIPATH  ETCPATH "]LINKS.TXT"
-#endif
+/* files */
+#define SPATH   BINPATH "/ircd"                 /* ircd executable */
+#define SLPATH  BINPATH "/servlink"             /* servlink executable */
+#define CPATH   ETCPATH "/ircd.conf"            /* ircd.conf file */
+#define KPATH   ETCPATH "/kline.conf"           /* kline file */
+#define DLPATH  ETCPATH "/kline.conf"           /* dline file */
+#define GPATH   LOGPATH "/gline.log"            /* gline logfile */
+#define RPATH   ETCPATH "/ircd.rsa"             /* ircd rsa private keyfile */
+#define MPATH   ETCPATH "/ircd.motd"            /* MOTD file */
+#define LPATH   LOGPATH "/ircd.log"             /* ircd logfile */
+#define PPATH   ETCPATH "/ircd.pid"             /* pid file */
+#define HPATH   ETCPATH "/opers.txt"            /* oper help file */
+#define OPATH   ETCPATH "/opers.motd"           /* oper MOTD file */
+#define LIPATH  ETCPATH "/links.txt"            /* cached links file */
+#endif /* !VMS */
 
-/* TS_MAX_DELTA_DEFAULT and TS_WARN_DELTA_DEFAULT -
- * allowed delta for TS when another server connects.
- *
- * If the difference between my clock and the other server's clock is
- * greater than TS_MAX_DELTA, I send out a warning and drop the links.
- * 
- * If the difference is less than TS_MAX_DELTA, I just sends out a warning
- * but don't drop the link.
- *
- * TS_MAX_DELTA_DEFAULT currently set to 30 minutes to deal with older
- * timedelta implementation.  Once pre-hybrid5.2 servers are eradicated, 
- * we can drop this down to 90 seconds or so. --Rodder
+/* WANT_GETTEXT - toggle gettext support.
+ * NOTE: if configure doesn't detect gettext, this won't do anything.
  */
-#define TS_MAX_DELTA_MIN      10
-#define TS_MAX_DELTA_DEFAULT  600
-#define TS_WARN_DELTA_MIN     10
-#define TS_WARN_DELTA_DEFAULT 30
-
-/* NETWORK_NAME_DEFAULT and NETWORK_DESC_DEFAULT - these are used
- * instead of a servers name/description if you enable server hiding.
- */
-#define NETWORK_NAME_DEFAULT "EFnet"
-#define NETWORK_DESC_DEFAULT "Eris Free Network"
-
-/* MAXIMUM LINKS - max links for class 0 if no Y: line configured
- *
- * This define is useful for leaf nodes and gateways. It keeps you from
- * connecting to too many places. It works by keeping you from
- * connecting to more than "n" nodes which you have C:blah::blah:6667
- * lines for.
- *
- * Note that any number of nodes can still connect to you. This only
- * limits the number that you actively reach out to connect to.
- *
- * Leaf nodes are nodes which are on the edge of the tree. If you want
- * to have a backup link, then sometimes you end up connected to both
- * your primary and backup, routing traffic between them. To prevent
- * this, #define MAXIMUM_LINKS 1 and set up both primary and
- * secondary with C:blah::blah:6667 lines. THEY SHOULD NOT TRY TO
- * CONNECT TO YOU, YOU SHOULD CONNECT TO THEM.
- *
- * Gateways such as the server which connects Australia to the US can
- * do a similar thing. Put the American nodes you want to connect to
- * in with C:blah::blah:6667 lines, and the Australian nodes with
- * C:blah::blah lines. Have the Americans put you in with C:blah::blah
- * lines. Then you will only connect to one of the Americans.
- *
- * This value is only used if you don't have server classes defined, and
- * a server is in class 0 (the default class if none is set).
- *
- */
-#define MAXIMUM_LINKS_DEFAULT 1
-
+#define WANT_GETTEXT    1
+ 
 /* CMDLINE_CONFIG - allow conf-file to be specified on command line
  * NOTE: defining CMDLINE_CONFIG and installing ircd SUID or SGID is a MAJOR
  * security problem - they can use the "-f" option to read any files
@@ -244,53 +201,11 @@
  */
 #define CRYPT_OPER_PASSWORD
 
-/* MAXSENDQLENGTH - Max amount of internal send buffering
- * Max amount of internal send buffering when socket is stuck (bytes)
- */
-#define MAXSENDQLENGTH 7050000    /* Recommended value: 7050000 for EFnet */
-
 /* CLIENT_FLOOD - client excess flood threshold(in messages)
  * The number of messages that we can receive before we disconnect the
  * remote client...
  */
 #define CLIENT_FLOOD 20
-
-/*   STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP  */
-
-/* You shouldn't change anything below this line, unless absolutely needed. */
-
-#define MAX_TARGETS_DEFAULT 4
-
-/* INITIAL_DBUFS - how many dbufs to preallocate
- */
-#define INITIAL_DBUFS 1000 /* preallocate 4 megs of dbufs */ 
-
-/* MAXBUFFERS - increase socket buffers
- *
- * Increase send & receive socket buffer up to 64k,
- * keeps clients at 8K and only raises servers to 64K
- */
-#define MAXBUFFERS
-
-/* PORTNUM - default port where ircd resides
- * Port where ircd resides. NOTE: This *MUST* be greater than 1024 if you
- * plan to run ircd under any other UID than root.
- */
-#define PORTNUM 6667
-
-/* MAXCONNECTIONS - don't touch - change the HARD_FDLIMIT_ instead
- * Maximum number of network connections your server will allow.  This should
- * never exceed max. number of open file descriptors and wont increase this.
- * Should remain LOW as possible. Most sites will usually have under 30 or so
- * connections. A busy hub or server may need this to be as high as 50 or 60.
- * Making it over 100 decreases any performance boost gained from it being low.
- * if you have a lot of server connections, it may be worth splitting the load
- * over 2 or more servers.
- * 1 server = 1 connection, 1 user = 1 connection.
- * This should be at *least* 3: 1 listen port, 1 DNS port + 1 client
- */
-/* change the HARD_FDLIMIT_ instead */
-#define MAXCONNECTIONS  HARD_FDLIMIT
 
 /* NICKNAMEHISTORYLENGTH - size of WHOWAS array
  * this defines the length of the nickname history.  each time a user changes
@@ -300,20 +215,6 @@
  *       will be preallocated for the entire whowas array when ircd is started.
  */
 #define NICKNAMEHISTORYLENGTH 15000
-
-/* PINGFREQUENCY - ping frequency for idle connections
- * If daemon doesn't receive anything from any of its links within
- * PINGFREQUENCY seconds, then the server will attempt to check for
- * an active link with a PING message. If no reply is received within
- * (PINGFREQUENCY * 2) seconds, then the connection will be closed.
- */
-#define PINGFREQUENCY    120    /* Recommended value: 120 */
-
-/* CONNECTFREQUENCY - time to wait before auto-reconnecting
- * If the connection to to uphost is down, then attempt to reconnect every 
- * CONNECTFREQUENCY  seconds.
- */
-#define CONNECTFREQUENCY 600    /* Recommended value: 600 */
 
 /* HANGONGOODLINK and HANGONGOODLINK
  * Often net breaks for a short time and it's useful to try to
@@ -343,25 +244,6 @@
  */
 #define KILLCHASETIMELIMIT 90   /* Recommended value: 90 */
 
-/* 
- * anti spambot code
- * The defaults =should= be fine for the initial timers/counters etc.
- * they are all changeable at run time anyway
- *
- * join/leave 25 times and stay on each channel less than 60 seconds
- * opers will get a warning every 5 
- * if a client stays on a channel for at least 2 minutes, their
- * spam JOIN_LEAVE_COUNT goes down by 1
- */
-#define MIN_JOIN_LEAVE_TIME  60
-#define MAX_JOIN_LEAVE_COUNT  25
-#define OPER_SPAM_COUNTDOWN   5 
-#define JOIN_LEAVE_COUNT_EXPIRE_TIME 120
-
-/*
- * Links rehash delay
- */
-#define LINKS_DELAY_DEFAULT 300
 /*
  * If the OS has SOMAXCONN use that value, otherwise
  * Use the value in HYBRID_SOMAXCONN for the listen(); backlog
@@ -387,40 +269,8 @@
  * these disabled, who knows. keep this enabled during development.
  */
 #define INVARIANTS
-/* ----------------- archaic and/or broken section -------------------- */
-#undef DNS_DEBUG
-
-/* ------------------------- END CONFIGURATION SECTION -------------------- */
-#define MAX_CLIENTS INIT_MAXCLIENTS
-
-#if defined(CLIENT_FLOOD) && ((CLIENT_FLOOD > 200) || (CLIENT_FLOOD < 10))
-error CLIENT_FLOOD needs redefining.
-#endif
-
-#if !defined(CLIENT_FLOOD)
-error CLIENT_FLOOD undefined.
-#endif
-
-#if defined(DEBUGMODE) || defined(DNS_DEBUG)
-#  define Debug(x) debug x
-#  define LOGFILE LPATH
-#else
-#  define Debug(x) ;
-#  define LOGFILE "/dev/null"
-#endif
-
-#define MIN_SPAM_NUM 5
-#define MIN_SPAM_TIME 60
-
-/* This may belong elsewhere... -dt */
-#if defined( HAVE_GETTEXT ) && defined( MSGPATH )
-#define USE_GETTEXT 1
-#define _(a)       (gettext(a))
-#else
-#undef USE_GETTEXT
-#define _(a)       (a)
-#endif
 
 #define CONFIG_H_LEVEL_7
 
+#include "defaults.h"
 #endif /* INCLUDED_config_h */

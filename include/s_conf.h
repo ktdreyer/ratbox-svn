@@ -80,7 +80,7 @@ struct ConfItem
   int              dns_pending; /* 1 if dns query pending, 0 otherwise */
 #ifdef HAVE_LIBCRYPTO
   RSA*             rsa_public_key;
-  struct EncPreference *ciphertab; /* cipher_preference storage space */
+  struct EncPreference *cipher_preference;
 #endif
 };
 
@@ -233,6 +233,10 @@ typedef struct config_file_entry
   int           persist_expire;
   int           min_nonwildcard;
   int           default_floodcount;
+  int           client_flood;
+#ifdef HAVE_LIBCRYPTO
+  struct EncPreference *default_cipher_preference;
+#endif
 } ConfigFileEntryType;
 
 struct server_info

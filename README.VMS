@@ -7,12 +7,11 @@ from the top-level ircd directory:
 This should build [.SRC]IRCD.EXE (servlink is not yet supported
 for VMS). 
 
-You'll probably want to edit [.INCLUDE]SETUP.H_VMS before you build,
+You'll probably want to edit [.INCLUDE]CONFIG.H before you build,
 to change the IRCD_PREFIX. NOTE: the ']' is deliberately left off
 the IRCD_PREFIX string - adding one will break it.
 
-You might also want to change some of the paths on [.INCLUDE]CONFIG.H.
-Make sure to change the second set (the first is for Unix systems).
+You might also want to change some of the other paths in [.INCLUDE]CONFIG.H.
 
 After IRCD.EXE is built, you'll have to install it by hand.  Put it
 in a BIN subdirectory of the IRCD_PREFIX directory. IRCD.CONF

@@ -90,7 +90,6 @@ struct EncCapability
   unsigned int  cap;      /* mask value */
   int           keylen;   /* keylength (bytes) */
   int           cipherid; /* cipher id */
-  int           default_priority; /* 0=disabled, 1=highest, n=lowest */
 };
 
 struct EncPreference
@@ -121,6 +120,8 @@ struct EncPreference
 #define CAP_ENC_RC5_16_128      0x00000100
 
 #define CAP_ENC_ALL     0xFFFFFFFF                                              
+
+#define NUM_CAP_ENC     9
 
 /* Blowfish */                        
 #ifdef HAVE_EVP_BF_CFB
@@ -243,7 +244,7 @@ extern struct SlinkRplDef slinkrpltab[];
  */
 extern struct Capability captab[];
 #ifdef HAVE_LIBCRYPTO
-extern struct EncCapability enccaptab[];
+extern struct EncCapability enccaptab[NUM_CAP_ENC+1];
 #endif
 
 extern int MaxClientCount;     /* GLOBAL - highest number of clients */

@@ -90,8 +90,7 @@ Info MyInformation[] = {
   { "HYBRID_SOMAXCONN", "", HYBRID_SOMAXCONN, "Maximum Queue Length of Pending Connections" },
 #endif /* SOMAXCONN */
 
-  { "INIT_MAXCLIENTS", "", INIT_MAXCLIENTS, "Maximum Clients" },
-  { "INITIAL_DBUFS", "", INITIAL_DBUFS, "Number of Dbufs to PreAllocate" },
+  { "MAX_CLIENTS", "", MAX_CLIENTS, "Default maximum Clients" },
 
   { "JOIN_LEAVE_COUNT_EXPIRE_TIME", "", JOIN_LEAVE_COUNT_EXPIRE_TIME, "Anti SpamBot Parameter" },
 

@@ -146,6 +146,7 @@ int   class_redirport_var;
 %token  LOGGING
 %token  T_LOGPATH
 %token  LOG_LEVEL
+%token  T_CLIENT_FLOOD
 %token  MAX_NUMBER
 %token  MAXIMUM_LINKS
 %token  MESSAGE_LOCALE
@@ -1616,32 +1617,25 @@ connect_cipher_preference: CIPHER_PREFERENCE '=' QSTRING ';'
     int found = 0;
     int i = 0;
 
-    for(ecap = enccaptab; ecap->name; ecap++)
-    {
-      cipher_count++;
-    }
-    cipher_count++; /* for blank cap at end */
+    MyFree(yy_aconf->cipher_preference);
+    yy_aconf->cipher_preference = MyMalloc(sizeof(struct EncPreference)
+                                   * (NUM_CAP_ENC+1));
 
-    MyFree(yy_aconf->ciphertab);
-    yy_aconf->ciphertab = MyMalloc(sizeof(struct EncPreference)
-                                   * (cipher_count));
-
-    for(i = 0; i < cipher_count; i++)
+    for(i = 0; i < NUM_CAP_ENC; i++)
     {
-      yy_aconf->ciphertab[i].ecap = &enccaptab[i];
-      yy_aconf->ciphertab[i].priority = 0; /* disabled by default */
+      yy_aconf->cipher_preference[i].ecap = &enccaptab[i];
+      yy_aconf->cipher_preference[i].priority = 0; /* disabled by default */
     }
 
     /* set marker for end of array */
-    yy_aconf->ciphertab[cipher_count-1].ecap = NULL;
+    yy_aconf->cipher_preference[NUM_CAP_ENC].ecap = NULL;
 
-    cipher_count = 0;
     for (s = strtoken(&p, yylval.string, ", "); s; s = strtoken(&p, NULL, ", "))
     {
       found = 0;
-      for(epref = yy_aconf->ciphertab; (ecap = epref->ecap); epref++)
+      for(epref = yy_aconf->cipher_preference; (ecap = epref->ecap); epref++)
       {
-        if (!strcmp(s, ecap->name))
+        if (!strcasecmp(s, ecap->name))
         {
           epref->priority = ++cipher_count;
           found = 1;
@@ -1915,7 +1909,7 @@ general_item:       general_failed_oper_notice |
                     general_persistant_expire_time | general_min_nonwildcard |
                     general_servlink_path |
                     general_default_cipher_preference |
-                    general_compression_level |
+                    general_compression_level | general_client_flood |
                     general_max_chans_per_user | error
 
 general_failed_oper_notice:   FAILED_OPER_NOTICE '=' TYES ';'
@@ -2209,23 +2203,34 @@ general_default_cipher_preference: DEFAULT_CIPHER_PREFERENCE '=' QSTRING ';'
   {
 #ifdef HAVE_LIBCRYPTO
     struct EncCapability *ecap;
+    struct EncPreference *epref;
     char *s, *p;
     int cipher_count = 0;
-    int found;
+    int found = 0;
+    int i = 0;
 
-    for(ecap = enccaptab; ecap->name; ecap++)
+    MyFree(ConfigFileEntry.default_cipher_preference);
+    epref = ConfigFileEntry.default_cipher_preference
+      = MyMalloc(sizeof(struct EncPreference) * (NUM_CAP_ENC+1));
+
+    for(i = 0; i < NUM_CAP_ENC; i++)
     {
-	    ecap->default_priority = 0;
+      epref[i].ecap = &enccaptab[i];
+      epref[i].priority = 0; /* disabled by default */
     }
+
+    /* set marker for end of array */
+    epref[NUM_CAP_ENC].ecap = NULL;
 
     for (s = strtoken(&p, yylval.string, ", "); s; s = strtoken(&p, NULL, ", "))
     {
       found = 0;
-      for(ecap = enccaptab; ecap->name; ecap++)
+      for(epref = ConfigFileEntry.default_cipher_preference;
+          (ecap = epref->ecap); epref++)
       {
-        if (!strcmp(s, ecap->name))
+        if (!strcasecmp(s, ecap->name))
         {
-          ecap->default_priority = ++cipher_count;
+          epref->priority = ++cipher_count;
           found = 1;
         }
       }
@@ -2238,7 +2243,8 @@ general_default_cipher_preference: DEFAULT_CIPHER_PREFERENCE '=' QSTRING ';'
     }
 #else
     sendto_realops_flags(FLAGS_ALL,
-      "Ignoring 'default_cipher_preference' line -- no OpenSSL support");
+      "Ignoring 'default_cipher_preference' -- no OpenSSL support",
+       yy_aconf->name);
 #endif
   } ;
 
@@ -2455,3 +2461,7 @@ general_default_floodcount:    DEFAULT_FLOODCOUNT '=' expr ';'
     ConfigFileEntry.default_floodcount = $3;
   };
 
+general_client_flood: T_CLIENT_FLOOD '=' expr ';'
+  {
+    ConfigFileEntry.client_flood = $3;
+  };

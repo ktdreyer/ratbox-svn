@@ -13,28 +13,28 @@ ac_default_prefix=/usr/local
 # Any additions from configure.in:
 ac_default_prefix=/usr/local/ircd
 ac_help="$ac_help
- --enable-openssl      Enable openssl-dependant crypto functions.
-      --disable-openssl     Disable openssl-dependant crypto functions. "
+  --enable-openssl             Enable openssl-dependant crypto functions.
+  --disable-openssl            Disable openssl-dependant crypto functions. "
 ac_help="$ac_help
- --enable-zlib         Enable zlib compression (used by ziplinks)
-      --disable-zlib        Disable zlib compression (used by ziplinks) "
+  --enable-zlib                Enable zlib compression (used by ziplinks)
+  --disable-zlib               Disable zlib compression (used by ziplinks) "
 ac_help="$ac_help
- --enable-poll             Enable poll() support.
-      --disable-poll		Disable poll() support. "
+  --enable-poll                Enable poll() support.
+  --disable-poll               Disable poll() support. "
 ac_help="$ac_help
- --enable-select	Enable select() support.
-  --disable-select	Disable select() support. "
+  --enable-select              Enable select() support.
+  --disable-select             Disable select() support. "
 ac_help="$ac_help
- --enable-kqueue	Enable kqueue() support.
-  --disable-kqueue	Disable kqueue() support. "
+  --enable-kqueue              Enable kqueue() support.
+  --disable-kqueue             Disable kqueue() support. "
 ac_help="$ac_help
- --enable-devpoll	Enable /dev/poll support.
-  --disable-devpoll	Disable /dev/poll support. "
+  --enable-devpoll             Enable /dev/poll support.
+  --disable-devpoll            Disable /dev/poll support. "
 ac_help="$ac_help
- --enable-ipv6	        Enable IPV6 support.
-      --disable-ipv6            Disable IPV6 support. "
+  --enable-ipv6                Enable IPV6 support.
+  --disable-ipv6               Disable IPV6 support. "
 ac_help="$ac_help
- --enable-shared-modules      Enable shared modules.
+  --enable-shared-modules      Enable shared modules.
   --disable-shared-modules     Disable shared modules. "
 
 # Initialize some variables set by options.

@@ -130,12 +130,12 @@ int     get_client_ping(struct Client *target_p)
     }
   else
     {
-      ping = PINGFREQUENCY;
+      ping = DEFAULT_PINGFREQUENCY;
       Debug((DEBUG_DEBUG,"No Attached Confs"));
     }
 
   if (ping <= 0)
-    ping = PINGFREQUENCY;
+    ping = DEFAULT_PINGFREQUENCY;
   Debug((DEBUG_DEBUG,"Client %s Ping %d", target_p->name, ping));
   return (ping);
 }
@@ -151,7 +151,7 @@ int     get_con_freq(struct Class *clptr)
 {
   if (clptr)
     return (ConFreq(clptr));
-  return (CONNECTFREQUENCY);
+  return (DEFAULT_CONNECTFREQUENCY);
 }
 
 /*
@@ -200,7 +200,7 @@ void    add_class(char *classname,
   ConFreq(p) = confreq;
   PingFreq(p) = ping;
   MaxLinks(p) = maxli;
-  MaxSendq(p) = (sendq > 0) ? sendq : MAXSENDQLENGTH;
+  MaxSendq(p) = (sendq > 0) ? sendq : DEFAULT_SENDQ;
   if (p != t)
     Links(p) = 0;
 }
@@ -270,10 +270,10 @@ void    initclass()
 
   ClassType(ClassList) = 0;
   DupString(ClassName(ClassList),"default");
-  ConFreq(ClassList) = CONNECTFREQUENCY;
-  PingFreq(ClassList) = PINGFREQUENCY;
+  ConFreq(ClassList) = DEFAULT_CONNECTFREQUENCY;
+  PingFreq(ClassList) = DEFAULT_PINGFREQUENCY;
   MaxLinks(ClassList) = ConfigFileEntry.maximum_links;
-  MaxSendq(ClassList) = MAXSENDQLENGTH;
+  MaxSendq(ClassList) = DEFAULT_SENDQ;
   Links(ClassList) = 0;
   ClassList->next = NULL;
 }
@@ -304,7 +304,7 @@ void    report_classes(struct Client *source_p)
  */
 long    get_sendq(struct Client *client_p)
 {
-  int   sendq = MAXSENDQLENGTH, retc = BAD_CLIENT_CLASS;
+  int   sendq = DEFAULT_SENDQ, retc = BAD_CLIENT_CLASS;
   dlink_node      *ptr;
   struct Class    *cl;
   struct ConfItem *aconf;
