@@ -38,7 +38,9 @@ privileges.  Half ops can kick regular users but not full ops.
 
 Channel Op Hiding is included as a channel mode.  By setting a channel +a, 
 the ops are hidden to non-ops.  Once a user receives ops or halfops, they
-may have to issue a NAMES command to resync their userlist.
+will receive a set of server generated modes to synchronize their userlist.
+This may be an inconvenience to some users, but it was decided to be the
+best way to deal with the majority of clients.
 
 Server hiding is also a conf file option.  With this option enabled, only 
 opers can see what server a user is on.  TRACE are disabled for non-opers,
