@@ -417,12 +417,6 @@ static struct InfoStruct info_table[] = {
 	  "Disable channel resvs for operators",
 	},
 	{
-	 "persist_time",
-	 OUTPUT_DECIMAL,
-	 &ConfigChannel.persist_time,
-	 "Delay before persistent channels expire",
-	 },
-	{
 	 "quiet_on_ban",
 	 OUTPUT_BOOLEAN_YN,
 	 &ConfigChannel.quiet_on_ban,
