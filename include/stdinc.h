@@ -41,13 +41,6 @@ char *alloca ();
 # endif
 #endif
 
-#ifdef __vms
-# include <builtins.h>
-# ifdef __vax
-#  define alloca __ALLOCA
-# endif
-#endif
-
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -82,9 +75,6 @@ char *alloca ();
 #include <dirent.h>
 #include <ctype.h>
 
-#ifdef __vms
-#define _XOPEN_SOURCE 1
-#endif
 #include <limits.h>
 
 #ifdef HAVE_UNISTD_H
@@ -118,42 +108,6 @@ extern int errno;
 
 #ifdef HAVE_SYS_UIO_H
 #include <sys/uio.h>
-#endif
-
-#ifdef __vms
-#include <sys/ioctl.h>
-
-#include <sys/ioctl.h>
-#include <builtins.h>
-#include <timers.h>
-
-#include <clidef.h>
-#include <climsgdef.h>
-#include <dvidef.h>
-#include <efndef.h>
-#include <iodef.h>
-#include <jpidef.h>
-#include <lnmdef.h>
-#include <opcdef.h>
-#include <psldef.h>
-#include <rms.h>
-#include <smgdef.h>
-#include <ssdef.h>
-#include <stsdef.h>
-#include <syidef.h>
-#include <timers.h>
-#include <trmdef.h>
-#include <tt2def.h>
-#include <uaidef.h>
-
-#include <descrip.h>
-#include <starlet.h>
-
-#include <cli$routines.h>
-#include <smg$routines.h>
-#include <lib$routines.h>
-
-#include <starlet.h>
 #endif
 
 #if defined(__INTEL_COMPILER) || defined(__GNUC__)
