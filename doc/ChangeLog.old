@@ -1,3 +1,22 @@
+*** 20001212_9 by db
+OH WHAT A BLASTED PITA
+- Ok... a CONNECTING server must put the server its trying to connect to
+  on the serv_list because its going to blindly send its server burst
+  to its new uplink. But the server its connecting to is not strictly
+  a server yet until the handshake is over ... oy
+  SO, the connecting to server is put on the serv_list, so the connect
+  burst will go through, but it might not be a server yet if the connection
+  fails, so... I have to check on the server list as well as the unregisterd
+  list to pull it off (in exit_client/client.c).. ugh ugh ugh...
+- This breaks all the state information in ->state ugh. 
+  A leaf server has a client (the one its connecting to) already in its
+  serv_list (remember?) sooo it can no longer simply check for a non
+  empty serv_list to allow a connection or not. NOOOO it now has to make
+  sure that server in that list is the same one its trying to connect to.
+  (in serv_establish/s_serv.c) UGH UGH UGH
+
+
+
 *** 20001212_8 by adrian
 
 
