@@ -1,3 +1,23 @@
+androsyn    2002/06/15 03:20:00 EDT	(20020615_0)
+
+  Modified files:
+    src                  fdlist.c hook.c hostmask.c list.c 
+                         listener.c s_bsd_kqueue.c s_conf.c 
+  Log:
+  Remove a few unneeded memset()'s as MyMalloc does this for us already.  Also
+  cleaned up a few ugly looking things.
+  
+  Revision  Changes    Path
+  7.31      +0 -1      ircd-hybrid-7/src/fdlist.c
+  7.16      +1 -2      ircd-hybrid-7/src/hook.c
+  7.65      +1 -1      ircd-hybrid-7/src/hostmask.c
+  7.45      +3 -4      ircd-hybrid-7/src/list.c
+  7.69      +0 -1      ircd-hybrid-7/src/listener.c
+  1.27      +1 -1      ircd-hybrid-7/src/s_bsd_kqueue.c
+  7.306     +3 -4      ircd-hybrid-7/src/s_conf.c
+
+
+
 leeh        2002/06/14 15:38:12 EDT	(20020614_2)
 
   Modified files:
