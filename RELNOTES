@@ -1,8 +1,7 @@
 -- ircd-ratbox-1.0 RELNOTES 
 
 -- ircd-ratbox-1.0-rc5
-- Added ISON support for servers.  This is only allowed for irc operators
-  but only if serverhide is disabled.
+- Added ISON support for servers.  Disabled for users when shide is on.
 - Added a operator flag to allow or disallow operators from doing /operwall
 - Fix a bug in WHO that would leak a channel the user was in regardless of
   +s/+p or +i modes.

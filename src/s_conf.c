@@ -1480,6 +1480,10 @@ set_default_conf(void)
   ConfigFileEntry.client_flood = CLIENT_FLOOD_DEFAULT;
   ConfigFileEntry.use_help = 0;
   ConfigFileEntry.tkline_expire_notices = 0;
+
+#ifdef IPV6
+  ConfigFileEntry.fallback_to_ip6_int = YES;
+#endif
 }
 #undef YES
 #undef NO
