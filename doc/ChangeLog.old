@@ -1,3 +1,8 @@
+*** 20010410_1 by a1kmm
+- Oops, do not delete tklines on rehash!
+- Fixed testline a little to match "user@*" I-lines when an IP address is given.
+
+
 *** 20010409_9 by davidt
 Re-adding
 
