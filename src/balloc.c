@@ -1,7 +1,8 @@
 /*
  * balloc.c - Based roughly on Wohali's old block allocator.
  *
- * Mangled by Aaron Sethman <androsyn@ratbox.org>
+ * Copyright 2001 Aaron Sethman <androsyn@ratbox.org>
+ * 
  * Below is the original header found on this file
  *
  * File:   blalloc.c
@@ -10,6 +11,37 @@
  *
  * $Id$
  */
+
+/* 
+ * About the block allocator
+ *
+ * Basically we have three ways of getting memory off of the operating
+ * system. Below are this list of methods and the order of preference.
+ *
+ * 1. mmap() anonymous pages with the MMAP_ANON flag.
+ * 2. mmap() via the /dev/zero trick.
+ * 3. malloc() 
+ *
+ * The advantages of 1 and 2 are this.  We can munmap() the pages which will
+ * return the pages back to the operating system, thus reducing the size 
+ * of the process as the memory is unused.  malloc() on many systems just keeps
+ * a heap of memory to itself, which never gets given back to the OS, except on
+ * exit.  This of course is bad, if say we have an event that causes us to allocate
+ * say, 200MB of memory, while our normal memory consumption would be 15MB.  In the
+ * malloc() case, the amount of memory allocated to our process never goes down, as
+ * malloc() has it locked up in its heap.  With the mmap() method, we can munmap()
+ * the block and return it back to the OS, thus causing our memory consumption to go
+ * down after we no longer need it.
+ * 
+ * Of course it is up to the caller to make sure BlockHeapGarbageCollect() gets
+ * called periodically to do this cleanup, otherwise you'll keep the memory in the
+ * process.
+ *
+ *
+ */
+ 
+ */
+ 
 
 #define WE_ARE_MEMORY_C
 #include "setup.h"
@@ -33,16 +65,35 @@
 #include <stdlib.h>
 static int newblock(BlockHeap * bh);
 
-#ifdef HAVE_MMAP
+#ifdef HAVE_MMAP /* We've got mmap() that is good */
 #include <sys/mman.h>
 
+/*
+ * static inline void free_block(void *ptr, size_t size)
+ *
+ * Inputs: The block and its size
+ * Output: None
+ * Side Effects: Returns memory for the block back to the OS
+ */
 static inline void free_block(void *ptr, size_t size)
 {
   munmap(ptr, size);
 }
 
-#ifndef MAP_ANON
+#ifndef MAP_ANON /* But we cannot mmap() anonymous pages */
+		 /* So we mmap() /dev/zero, which is just as good */
 static int zero_fd = -1;
+
+/*
+ * void initBlockHeap(void)
+ * Note: This is the /dev/zero version of getting pages 
+ * 
+ * Inputs: None
+ * Outputs: None
+ * Side Effects: Opens /dev/zero and saves the file handle for
+ *		 future allocations.
+ */
+ 
 void initBlockHeap(void)
 {
   zero_fd = open("/dev/zero", O_RDWR);
@@ -52,16 +103,41 @@ void initBlockHeap(void)
   fd_open(zero_fd, FD_FILE, "Anonymous mmap()");
 }
 
+/*
+ * static inline void *get_block(size_t size)
+ * 
+ * Note: This is the /dev/zero version
+ * Input: Size of block to allocate
+ * Output: Pointer to new block
+ * Side Effects: None
+ */
 static inline void *get_block(size_t size)
 {
   return (mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE, zero_fd, 0));
 }
-#else /* MAP_ANON */
+#else /* MAP_ANON */ 
 
+/* 
+ * void initBlockHeap(void)
+ *
+ * Note: This is the anonymous pages version: This is a placeholder
+ * Input: None
+ * Output: None
+ */ 
 void initBlockHeap(void)
 {
   return;
 }
+
+/*
+ * static inline void *get_block(size_t size)
+ * 
+ * Note: This is the /dev/zero version
+ * Input: Size of block to allocate
+ * Output: Pointer to new block
+ * Side Effects: None
+ */
+
 static inline void *get_block(size_t size)
 {
   return (mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0));
@@ -71,15 +147,39 @@ static inline void *get_block(size_t size)
 
 #else  /* HAVE_MMAP */
 /* Poor bastards don't even have mmap() */
+
+/* 
+ * static inline void *get_block(size_t size)
+ *
+ * Note: This is the non-mmap() version
+ * Input: Size of block
+ * Output: Pointer to the memory
+ */
 static inline void *get_block(size_t size)
 {
   return(malloc(size));
 }
 
+/*
+ * static inline void free_block(void *ptr, size_t size)
+ *
+ * Inputs: The block and its size
+ * Output: None
+ * Side Effects: Returns memory for the block back to the malloc heap
+ */
+
 static inline void free_block(void *ptr, size_t unused)
 {
   free(ptr);
 }
+
+/* 
+ * void initBlockHeap(void)
+ *
+ * Note: This is the malloc() version: This is a placeholder
+ * Input: None
+ * Output: None
+ */ 
 
 void initBlockHeap()
 {
@@ -93,7 +193,7 @@ void initBlockHeap()
 /* FUNCTION DOCUMENTATION:                                                  */
 /*    newblock                                                              */
 /* Description:                                                             */
-/*    mallocs a new block for addition to a blockheap                       */
+/*    Allocates a new block for addition to a blockheap                     */
 /* Parameters:                                                              */
 /*    bh (IN): Pointer to parent blockheap.                                 */
 /* Returns:                                                                 */
