@@ -1,3 +1,8 @@
+*** 20001222_12 by db
+- removing local oper references, removing bloat...
+
+
+
 *** 20001222_11 by db
 - Ok, ALL the old support for old style confs is gone now, except for K/D lines
   That means IF YOU HAVEN'T CONVERTED FORMAT YET, DO IT NOW,
