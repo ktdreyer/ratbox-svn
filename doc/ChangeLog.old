@@ -1,3 +1,10 @@
+*** 20010519_2 by a1kmm
+- Had second thoughts about my last commit - now we burst the client sending
+  the message if necessary. Also changed all of the functions. Note however
+  that we still need to change more of the functions to use this new functionality
+  by passing the source_p instead of client_p.
+
+
 *** 20010519_1 by a1kmm
 - Don't send modes to lazy link clients for channels when the client doing
   the mode change hasn't been burst. This is a pretty ugly kludge as the
