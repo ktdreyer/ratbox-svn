@@ -1,3 +1,17 @@
+leeh        2005/03/21 22:52:10 UTC	(20050321_9)
+
+  Modified files:
+    include              s_conf.h s_newconf.h 
+  Log:
+  - these two can keep including openssl/rsa.h until I decide what I want to
+    do with it..
+  
+  Revision  Changes    Path
+  7.321     +4 -0      ircd-ratbox/include/s_conf.h
+  7.51      +4 -0      ircd-ratbox/include/s_newconf.h
+
+
+
 leeh        2005/03/21 22:42:11 UTC	(20050321_8)
 
   Modified files:
