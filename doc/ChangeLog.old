@@ -1,3 +1,12 @@
+*** 20010527_3 by davidt
+- Convert MISSING_SOCKPAIR into HAVE_SOCKETPAIR and make configure check for
+  it.
+- Make servlink/ as independant as possible from hybrid's build setup,
+  so it can be used hopefully unchanged (except for the Makefile) in other
+  projects that may want to. (e.g. hybserv).
+  * Add servlink/setup.h
+
+
 *** 20010527_2 by toot
 fixed a few new compile warnings
 
