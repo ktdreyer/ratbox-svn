@@ -88,7 +88,7 @@ extern  struct  Channel *GlobalChannelList;
 void cleanup_channels(void *);
 
 #define CREATE 1        /* whether a channel should be
-                           created or just tested for existance */
+                           created or just tested for existence */
 
 #define MODEBUFLEN      200
 

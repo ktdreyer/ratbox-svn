@@ -377,7 +377,7 @@ struct LocalUser
 
 #define FLAGS2_CBURST       0x10000  /* connection burst being sent */
 
-#define FLAGS2_IDLE_LINED   0x40000
+#define FLAGS2_IDLE_LINED       0x40000
 #define FLAGS2_ALREADY_EXITED   0x80000         /* kludge grrrr */
 #define FLAGS2_IP_SPOOFING      0x100000        /* client IP is spoofed */
 #define FLAGS2_IP_HIDDEN        0x200000        /* client IP should be hidden
