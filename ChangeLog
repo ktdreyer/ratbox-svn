@@ -1,3 +1,28 @@
+leeh        2004/02/26 11:02:11 EST	(20040226_0)
+
+  Modified files:
+    help/opers           resv xline 
+    include              hash.h s_newconf.h 
+    modules              m_resv.c m_stats.c 
+    src                  hash.c ircd.c messages.tab s_newconf.c 
+  Log:
+  - added temp resvs, these only expire every 5 minutes, noted by a 'q' in
+    stats Q.
+  
+  Revision  Changes    Path
+  1.2       +8 -7      ircd-ratbox/help/opers/resv
+  1.3       +2 -7      ircd-ratbox/help/opers/xline
+  7.43      +8 -0      ircd-ratbox/include/hash.h
+  7.22      +4 -1      ircd-ratbox/include/s_newconf.h
+  1.49      +118 -23   ircd-ratbox/modules/m_resv.c
+  1.196     +2 -1      ircd-ratbox/modules/m_stats.c
+  7.93      +16 -19    ircd-ratbox/src/hash.c
+  7.325     +2 -0      ircd-ratbox/src/ircd.c
+  7.107     +1 -1      ircd-ratbox/src/messages.tab
+  7.22      +61 -4     ircd-ratbox/src/s_newconf.c
+
+
+
 leeh        2004/02/25 17:21:42 EST	(20040225_0)
 
   Modified files:
