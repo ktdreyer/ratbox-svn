@@ -1,3 +1,15 @@
+androsyn    2002/12/16 08:58:27 UTC	(20021216_21)
+
+  Modified files:
+    include              modules.h 
+  Log:
+  make htm work in that static build
+  
+  Revision  Changes    Path
+  7.39      +1 -0      ircd-ratbox/include/modules.h
+
+
+
 androsyn    2002/12/16 08:45:25 UTC	(20021216_20)
 
   Modified files:
