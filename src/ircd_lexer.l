@@ -102,7 +102,6 @@ general		{ return GENERAL; }
 gline		{ return GLINE; }
 gline_time      { return GLINE_TIME; }
 gline_log       { return GLINE_LOG; }
-global		{ return GLOBAL; }
 global_kill	{ return GLOBAL_KILL; }
 have_ident	{ return HAVE_IDENT; }
 hide_server	{ return HIDESERVER; }

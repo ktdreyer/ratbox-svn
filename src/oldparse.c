@@ -224,9 +224,9 @@ void oldParseOneLine(char* line,struct ConfItem* aconf,
       conf_add_conf(aconf);
       break;
 
-      /* Local Operator, (limited privs --SRB) */
+      /* Local Operator */
     case 'o':
-      aconf->status = CONF_LOCOP;
+      aconf->status = CONF_OPERATOR;
       conf_add_fields(aconf,host_field,pass_field,user_field,
 		      port_field,class_field);
       aconf->port = CONF_OPER_UNKLINE|CONF_OPER_K;

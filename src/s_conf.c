@@ -240,7 +240,7 @@ static struct LinkReport {
   { CONF_LEAF,             RPL_STATSLLINE, 'L'},
   { CONF_OPERATOR,         RPL_STATSOLINE, 'O'},
   { CONF_HUB,              RPL_STATSHLINE, 'H'},
-  { CONF_LOCOP,            RPL_STATSOLINE, 'o'},
+  { CONF_OPERATOR,            RPL_STATSOLINE, 'o'},
   { 0, 0, '\0' }
 };
 
