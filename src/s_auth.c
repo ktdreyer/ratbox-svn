@@ -352,12 +352,11 @@ start_auth(struct Client *client)
 	sendheader(client, REPORT_DO_DNS);
 
 	SetDNSPending(auth);
+	dlinkAdd(auth, &auth->node, &auth_poll_list);
 	auth->dns_query = lookup_ip(client->sockhost, client->localClient->ip.ss_family, auth_dns_callback, auth);
 
 	if(ConfigFileEntry.disable_auth == 0)
 		start_auth_query(auth);
-	if(IsDNSPending(auth) || IsAuthPending(auth))
-		dlinkAdd(auth, &auth->node, &auth_poll_list);
 }
 
 /*
@@ -395,7 +394,6 @@ timeout_auth_queries_event(void *notused)
 			}
 
 			auth->client->localClient->lasttime = CurrentTime;
-			dlinkDelete(ptr, &auth_poll_list);
 			release_auth_client(auth);
 		}
 	}
