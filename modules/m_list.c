@@ -81,8 +81,19 @@ static void m_list(struct Client *client_p,
 {
   static time_t last_used=0L;
 
-  /* If its a LazyLinks connection, let uplink handle the list */
+  /* If not a LazyLink connection, see if its still paced */
+  /* If we're forwarding this to uplinks.. it should be paced due to the
+   * traffic involved in /list.. -- fl_ */
+  if( ( (last_used + ConfigFileEntry.pace_wait) > CurrentTime) )
+    {
+      sendto_one(source_p,form_str(RPL_LOAD2HI),me.name,parv[0]);
+      return;
+    }
+  else
+    last_used = CurrentTime;
 
+
+  /* If its a LazyLinks connection, let uplink handle the list */
   if( uplink && IsCapable(uplink,CAP_LL) )
     {
       if(parc < 2)
@@ -91,16 +102,6 @@ static void m_list(struct Client *client_p,
 	sendto_one( uplink, ":%s LIST %s", source_p->name, parv[1] );
       return;
     }
-
-  /* If not a LazyLink connection, see if its still paced */
-
-  if( ( (last_used + ConfigFileEntry.pace_wait) > CurrentTime) )
-    {
-      sendto_one(source_p,form_str(RPL_LOAD2HI),me.name,parv[0]);
-      return;
-    }
-  else
-    last_used = CurrentTime;
 
   /* If no arg, do all channels *whee*, else just one channel */
   if (parc < 2 || BadPtr(parv[1]))
@@ -124,7 +125,6 @@ static void mo_list(struct Client *client_p,
                    int parc,
                    char *parv[])
 {
-/* Opers don't get paced */
 
   /* If its a LazyLinks connection, let uplink handle the list
    * even for opers!
