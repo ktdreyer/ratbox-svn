@@ -1,3 +1,8 @@
+*** 20001223_51 by ejb
+- some more paramcount fixes
+- make +h's propagate (oops)
+
+
 *** 20001223_50 by ejb
 - cleanup and fix of parse.c, should fix a couple of bugs.
 
