@@ -1,3 +1,6 @@
+*** 20011130_4 by davidt
+only pass KNOCK to servers which know about chptr (LL fix)
+
 *** 20011130_3 by leeh
 - propagate knock remotely.. 
 
