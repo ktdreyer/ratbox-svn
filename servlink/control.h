@@ -21,19 +21,13 @@
 #ifndef INCLUDED_servlink_control_h
 #define INCLUDED_servlink_control_h
 
-#define CMD_SET_ZIP_OUT_LEVEL           1	/* data */
+#define CMD_SET_ZIP_OUT_LEVEL           1  /* data */
 #define CMD_START_ZIP_OUT               2
 #define CMD_START_ZIP_IN                3
-#define CMD_SET_CRYPT_IN_CIPHER         4	/* data */
-#define CMD_SET_CRYPT_IN_KEY            5	/* data */
-#define CMD_START_CRYPT_IN              6
-#define CMD_SET_CRYPT_OUT_CIPHER        7	/* data */
-#define CMD_SET_CRYPT_OUT_KEY           8	/* data */
-#define CMD_START_CRYPT_OUT             9
-#define CMD_INJECT_RECVQ                10	/* data */
-#define CMD_INJECT_SENDQ                11	/* data */
-#define CMD_INIT                        12
-#define CMD_ZIPSTATS                    13
+#define CMD_INJECT_RECVQ                4  /* data */
+#define CMD_INJECT_SENDQ                5  /* data */ 
+#define CMD_INIT                        6
+#define CMD_ZIPSTATS                    7
 
 #define RPL_ERROR                       1	/* data */
 #define RPL_ZIPSTATS                    2	/* data */
