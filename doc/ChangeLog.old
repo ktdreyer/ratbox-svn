@@ -1,3 +1,7 @@
+*** 20001229_20 by lusky
+updated TODO
+
+
 *** 20001229_19 by lusky
 - added rm config.cache to make autoconf
 - fixed configure to find gettext() in /usr/local/lib/libintl.a
