@@ -315,7 +315,7 @@ static int report_this_status(struct Client *source_p, struct Client *target_p,
 
   /* sanity check - should never happen */
   if(!MyConnect(target_p))
-    return;
+    return 0;
 
   inetntop(target_p->localClient->aftype, &IN_ADDR(target_p->localClient->ip), ip, HOSTIPLEN);
   name = get_client_name(target_p, HIDE_IP);
