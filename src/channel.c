@@ -245,7 +245,7 @@ remove_user_from_channel(struct Channel *chptr, struct Client *who, int perm)
 dlink_node *
 find_user_link(dlink_list * list, struct Client *who)
 {
-  if (who)
+  if (who != NULL)
     return (dlinkFind(list, who));
   return (NULL);
 }
