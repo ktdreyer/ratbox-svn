@@ -897,123 +897,6 @@ h_chanserv_join(void *v_chptr, void *v_members)
 	if(chreg_p->flags & CS_FLAGS_SUSPENDED)
 		return 0;
 
-	/* if its simply one member joining (ie, not a burst) then attempt
-	 * somewhat to shortcut it..
-	 */
-	if(dlink_list_length(members) == 1)
-	{
-		member_p = members->head->data;
-
-		mreg_p = find_member_reg(member_p->client_p->user->user_reg,
-					chreg_p);
-
-		DLINK_FOREACH(bptr, chreg_p->bans.head)
-		{
-			banreg_p = bptr->data;
-
-			if(!match(banreg_p->mask, member_p->client_p->user->mask))
-				continue;
-
-			/* if the banlevel is less than their access level,
-			 * dont place it as they can just do an unban.
-			 */
-			if(mreg_p && mreg_p->level >= banreg_p->level &&
-			   !mreg_p->suspend)
-				continue;
-
-			if(find_exempt(chptr, member_p->client_p))
-				break;
-
-			/* explained in delban */
-			if(mreg_p)
-				mreg_p->bants = chreg_p->bants;
-
-			/* if theyve just created the channel as theyve
-			 * joined.. we need to make sure chanserv is in
-			 * there
-			 */
-			if(dlink_list_length(&chptr->users) == 1 &&
-			   !dlink_find(chanserv_p, &chptr->services))
-			{
-				enable_autojoin(chreg_p);
-			}
-
-			if(is_opped(member_p))
-				sendto_server(":%s MODE %s -o+b %s %s",
-					chanserv_p->name, chptr->name,
-					member_p->client_p->name, 
-					banreg_p->mask);
-			else
-				sendto_server(":%s MODE %s +b %s",
-					chanserv_p->name, chptr->name,
-					banreg_p->mask);
-
-			sendto_server(":%s KICK %s %s :%s",
-					chanserv_p->name, chptr->name,
-					member_p->client_p->name,
-					banreg_p->reason);
-
-			if(!dlink_find_string(banreg_p->mask, &chptr->bans))
-				dlink_add_alloc(my_strdup(banreg_p->mask), &chptr->bans);
-
-			dlink_destroy(members->head, members);
-			del_chmember(member_p);
-			return 0;
-		}
-
-		if(is_opped(member_p))
-		{
-			if((chreg_p->flags & CS_FLAGS_NOOPS) ||
-			   (chreg_p->flags & CS_FLAGS_RESTRICTOPS &&
-			    (!mreg_p || mreg_p->suspend ||
-			     mreg_p->level < S_C_OP)))
-			{
-				/* put services in if we're deopping only user */
-				if(dlink_list_length(&chptr->users) == 1 &&
-				   !dlink_find(chanserv_p, &chptr->services))
-				{
-					enable_autojoin(chreg_p);
-				}
-
-				sendto_server(":%s MODE %s -o %s",
-					chanserv_p->name, chptr->name,
-					member_p->client_p->name);
-				member_p->flags &= ~MODE_OPPED;
-			}
-
-			return 0;
-		}
-
-		if(mreg_p)
-		{
-			if(mreg_p->suspend)
-				return 0;
-
-			if(mreg_p->flags & CS_MEMBER_AUTOOP &&
-			   mreg_p->level >= S_C_OP &&
-			   !(chreg_p->flags & CS_FLAGS_NOOPS))
-			{
-				sendto_server(":%s MODE %s +o %s",
-					chanserv_p->name, chptr->name,
-					member_p->client_p->name);
-				member_p->flags &= ~MODE_DEOPPED;
-				member_p->flags |= MODE_OPPED;
-				mreg_p->channel_reg->last_time = CURRENT_TIME;
-			}
-			else if(mreg_p->flags & CS_MEMBER_AUTOVOICE &&
-				!is_voiced(member_p))
-			{
-				sendto_server(":%s MODE %s +v %s",
-					chanserv_p->name, chptr->name,
-					member_p->client_p->name);
-				member_p->flags |= MODE_VOICED;
-				mreg_p->channel_reg->last_time = CURRENT_TIME;
-			}
-		}
-
-		return 0;
-	}
-
 	modebuild_start(chanserv_p, chptr);
 	kickbuild_start();
 
@@ -1057,6 +940,13 @@ h_chanserv_join(void *v_chptr, void *v_members)
 				banreg_p->marked = current_mark;
 			}
 
+			/* if we're kicking out the last user, enable
+			 * autojoin so that kicking them doesnt destroy the
+			 * channel --fl
+			 */
+			if(dlink_list_length(&chptr->users) == 1)
+				enable_autojoin(chreg_p);
+
 			kickbuild_add(member_p->client_p->name, banreg_p->reason);
 
 			dlink_destroy(ptr, members);
@@ -1070,12 +960,15 @@ h_chanserv_join(void *v_chptr, void *v_members)
 
 		if(is_opped(member_p))
 		{
-
 			if((chreg_p->flags & CS_FLAGS_NOOPS) ||
 			   (chreg_p->flags & CS_FLAGS_RESTRICTOPS &&
 			    (!mreg_p || mreg_p->suspend ||
 			     mreg_p->level < S_C_OP)))
 			{
+				/* stop them cycling for ops */
+				if(dlink_list_length(&chptr->users) == 1)
+					enable_autojoin(chreg_p);
+
 				modebuild_add(DIR_DEL, "o", 
 						member_p->client_p->name);
 				member_p->flags &= ~MODE_OPPED;
