@@ -375,10 +375,10 @@ typedef struct {
  */
 
 int adns_init(adns_state *newstate_r, adns_initflags flags,
-	      FBFILE *diagfile /*0=>stderr*/);
+	      FILE *diagfile /*0=>stderr*/);
 
 int adns_init_strcfg(adns_state *newstate_r, adns_initflags flags,
-		     FBFILE *diagfile /*0=>discard*/, const char *configtext);
+		     FILE *diagfile /*0=>discard*/, const char *configtext);
 
 /* Configuration:
  *  adns_init reads /etc/resolv.conf, which is expected to be (broadly

@@ -100,7 +100,7 @@ cache_file(const char *filename, const char *shortname, int flags)
 		struct stat sb;
 		struct tm *local_tm;
 
-		if(fbstat(&sb, in) < 0)
+		if(fstat(&sb, in) < 0)
 			return NULL;
 
 		local_tm = localtime(&sb.st_mtime);
@@ -119,7 +119,7 @@ cache_file(const char *filename, const char *shortname, int flags)
 	cacheptr->flags = flags;
 
 	/* cache the file... */
-	while(fbgets(line, sizeof(line), in) != NULL)
+	while(fgets(line, sizeof(line), in) != NULL)
 	{
 		if((p = strchr(line, '\n')) != NULL)
 			*p = '\0';
@@ -134,7 +134,7 @@ cache_file(const char *filename, const char *shortname, int flags)
 			dlinkAddTailAlloc(emptyline, &cacheptr->contents);
 	}
 
-	fbclose(in);
+	fclose(in);
 	return cacheptr;
 }
 

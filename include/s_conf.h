@@ -54,7 +54,7 @@ struct ip_value
 	int type;
 };
 
-extern FBFILE *conf_fbfile_in;
+extern FILE *conf_fbfile_in;
 extern char conf_line_in[256];
 extern struct ConfItem *yy_aconf;
 
@@ -344,7 +344,7 @@ extern void get_printable_kline(struct Client *, struct ConfItem *,
 
 extern void yyerror(const char *);
 extern int conf_yy_fatal_error(const char *);
-extern int conf_fbgets(char *, int, FBFILE *);
+extern int conf_fgets(char *, int, FILE *);
 
 typedef enum
 {

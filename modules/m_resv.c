@@ -506,14 +506,14 @@ remove_resv(struct Client *source_p, const char *name)
 	if((out = fbopen(temppath, "w")) == NULL)
 	{
 		sendto_one_notice(source_p, ":Cannot open %s", temppath);
-		fbclose(in);
+		fclose(in);
 		umask(oldumask);
 		return;
 	}
 
 	umask(oldumask);
 
-	while (fbgets(buf, sizeof(buf), in))
+	while (fgets(buf, sizeof(buf), in))
 	{
 		const char *resv_name;
 
@@ -532,13 +532,13 @@ remove_resv(struct Client *source_p, const char *name)
 
 		if((*buff == '\0') || (*buff == '#'))
 		{
-			error_on_write = (fbputs(buf, out) < 0) ? YES : NO;
+			error_on_write = (fputs(buf, out) < 0) ? YES : NO;
 			continue;
 		}
 
 		if((resv_name = getfield(buff)) == NULL)
 		{
-			error_on_write = (fbputs(buf, out) < 0) ? YES : NO;
+			error_on_write = (fputs(buf, out) < 0) ? YES : NO;
 			continue;
 		}
 
@@ -548,12 +548,12 @@ remove_resv(struct Client *source_p, const char *name)
 		}
 		else
 		{
-			error_on_write = (fbputs(buf, out) < 0) ? YES : NO;
+			error_on_write = (fputs(buf, out) < 0) ? YES : NO;
 		}
 	}
 
-	fbclose(in);
-	fbclose(out);
+	fclose(in);
+	fclose(out);
 
 	if(error_on_write)
 	{

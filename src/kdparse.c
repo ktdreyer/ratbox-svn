@@ -74,7 +74,7 @@ parse_k_file(FBFILE * file)
 	char line[BUFSIZE];
 	char *p;
 
-	while (fbgets(line, sizeof(line), file))
+	while (fgets(line, sizeof(line), file))
 	{
 		if((p = strchr(line, '\n')) != NULL)
 			*p = '\0';
@@ -123,7 +123,7 @@ parse_d_file(FBFILE * file)
 	char line[BUFSIZE];
 	char *p;
 
-	while (fbgets(line, sizeof(line), file))
+	while (fgets(line, sizeof(line), file))
 	{
 		if((p = strchr(line, '\n')))
 			*p = '\0';
@@ -157,7 +157,7 @@ parse_x_file(FBFILE * file)
 	char line[BUFSIZE];
 	char *p;
 
-	while (fbgets(line, sizeof(line), file))
+	while (fgets(line, sizeof(line), file))
 	{
 		if((p = strchr(line, '\n')))
 			*p = '\0';
@@ -200,7 +200,7 @@ parse_resv_file(FBFILE * file)
 	char line[BUFSIZE];
 	char *p;
 
-	while (fbgets(line, sizeof(line), file))
+	while (fgets(line, sizeof(line), file))
 	{
 		if((p = strchr(line, '\n')))
 			*p = '\0';

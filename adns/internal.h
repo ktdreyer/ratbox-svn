@@ -289,7 +289,7 @@ struct query_queue { adns_query head, tail; };
 
 struct adns__state {
   adns_initflags iflags;
-  FBFILE *diagfile;
+  FILE *diagfile;
   int configerrno;
   struct query_queue udpw, tcpw, childw, output;
   adns_query forallnext;

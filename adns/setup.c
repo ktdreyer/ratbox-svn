@@ -307,13 +307,13 @@ static const struct configcommandinfo {
 };
 
 typedef union {
-  FBFILE *file;
+  FILE *file;
   const char *text;
 } getline_ctx;
 
 static int gl_file(adns_state ads, getline_ctx *src_io, const char *filename,
 		   int lno, char *buf, int buflen) {
-  FBFILE *file= src_io->file;
+  FILE *file= src_io->file;
   int c, i;
   char *p;
 
@@ -326,7 +326,7 @@ static int gl_file(adns_state ads, getline_ctx *src_io, const char *filename,
       adns__diag(ads,-1,0,"%s:%d: line too long, ignored",filename,lno);
       goto x_badline;
     }
-    c= fbgetc(file);
+    c= fgetc(file);
     if (!c) {
       adns__diag(ads,-1,0,"%s:%d: line contains nul, ignored",filename,lno);
       goto x_badline;
@@ -346,7 +346,7 @@ static int gl_file(adns_state ads, getline_ctx *src_io, const char *filename,
 
  x_badline:
   saveerr(ads,EINVAL);
-  while ((c= fbgetc(file)) != EOF && c != '\n');
+  while ((c= fgetc(file)) != EOF && c != '\n');
   return -2;
 }
 
@@ -439,7 +439,7 @@ static void readconfig(adns_state ads, const char *filename, int warnmissing) {
 
   readconfiggeneric(ads,filename,gl_file,gl_ctx);
   
-  fbclose(gl_ctx.file);
+  fclose(gl_ctx.file);
 }
 
 static void readconfigtext(adns_state ads, const char *text, const char *showname) {
@@ -478,7 +478,7 @@ int adns__setnonblock(adns_state ads, int fd) {
   return 0;
 }
 
-static int init_begin(adns_state *ads_r, adns_initflags flags, FBFILE *diagfile)
+static int init_begin(adns_state *ads_r, adns_initflags flags, FILE *diagfile)
 {
   adns_state ads;
   
@@ -551,7 +551,7 @@ static void init_abort(adns_state ads) {
   MyFree(ads);
 }
 
-int adns_init(adns_state *ads_r, adns_initflags flags, FBFILE *diagfile) {
+int adns_init(adns_state *ads_r, adns_initflags flags, FILE *diagfile) {
   adns_state ads;
   const char *res_options, *adns_res_options;
   int r;
@@ -599,7 +599,7 @@ int adns_init(adns_state *ads_r, adns_initflags flags, FBFILE *diagfile) {
 }
 
 int adns_init_strcfg(adns_state *ads_r, adns_initflags flags,
-		     FBFILE *diagfile, const char *configtext) {
+		     FILE *diagfile, const char *configtext) {
   adns_state ads;
   int r;
 

@@ -87,7 +87,7 @@ char linebuf[512];
 #define YY_FATAL_ERROR(msg) conf_yy_fatal_error(msg)
 
 #define YY_INPUT(buf,result,max_size) \
-  if (!(result = conf_fbgets(buf, max_size, conf_fbfile_in))) \
+  if (!(result = conf_fgets(buf, max_size, conf_fbfile_in))) \
     YY_FATAL_ERROR("input in flex scanner failed"); 
 %}
 
@@ -208,7 +208,7 @@ void cinclude(void)
     conf_report_error("Includes nested too deep (max is %d)", MAX_INCLUDE_DEPTH);
   else
   {
-    FBFILE *tmp_fbfile_in;
+    FILE *tmp_fbfile_in;
     
     tmp_fbfile_in = fbopen(c, "r");
     
@@ -241,7 +241,7 @@ void cinclude(void)
 int ieof(void)
 {
   if (include_stack_ptr)
-    fbclose(conf_fbfile_in);
+    fclose(conf_fbfile_in);
   if (--include_stack_ptr < 0)
   {
     /* We will now exit the lexer - restore init values if we get /rehash

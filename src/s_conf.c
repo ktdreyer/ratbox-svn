@@ -1206,7 +1206,7 @@ read_ircd_conf(int cold)
 		clear_ircd_conf();
 
 	read_conf(conf_fbfile_in);
-	fbclose(conf_fbfile_in);
+	fclose(conf_fbfile_in);
 }
 
 void
@@ -1232,7 +1232,7 @@ read_ban_confs(int cold)
 	else
 	{
 		parse_k_file(file);
-		fbclose(file);
+		fclose(file);
 	}
 
 	filename = get_conf_name(DLINE_TYPE);
@@ -1249,7 +1249,7 @@ read_ban_confs(int cold)
 	else
 	{
 		parse_d_file(file);
-		fbclose(file);
+		fclose(file);
 	}
 	
 	filename = ConfigFileEntry.xlinefile;
@@ -1266,7 +1266,7 @@ read_ban_confs(int cold)
 	else
 	{
 		parse_x_file(file);
-		fbclose(file);
+		fclose(file);
 	}
 
 	filename = get_conf_name(RESV_TYPE);
@@ -1283,7 +1283,7 @@ read_ban_confs(int cold)
 	else
 	{
 		parse_resv_file(file);
-		fbclose(file);
+		fclose(file);
 	}
 }
 
@@ -1341,14 +1341,14 @@ write_confitem(KlineType type, struct Client *source_p, char *user,
 			   host, reason, get_oper_name(source_p), CurrentTime);
 	}
 
-	if(fbputs(buffer, out) == -1)
+	if(fputs(buffer, out) == -1)
 	{
 		sendto_realops_flags(UMODE_ALL, L_ALL, "*** Problem writing to %s", filename);
-		fbclose(out);
+		fclose(out);
 		return;
 	}
 
-	fbclose(out);
+	fclose(out);
 
 	if(type == KLINE_TYPE)
 	{
@@ -1532,11 +1532,11 @@ yyerror(const char *msg)
 }
 
 int
-conf_fbgets(char *lbuf, int max_size, FBFILE * fb)
+conf_fgets(char *lbuf, int max_size, FILE * fb)
 {
 	char *buff;
 
-	if((buff = fbgets(lbuf, max_size, fb)) == NULL)
+	if((buff = fgets(lbuf, max_size, fb)) == NULL)
 		return (0);
 
 	return (strlen(lbuf));

@@ -414,12 +414,12 @@ write_pidfile(const char *filename)
 		unsigned int pid = (unsigned int) getpid();
 
 		ircsnprintf(buff, sizeof(buff), "%u\n", pid);
-		if((fbputs(buff, fb) == -1))
+		if((fputs(buff, fb) == -1))
 		{
 			ilog(L_MAIN, "Error writing %u to pid file %s (%s)",
 			     pid, filename, strerror(errno));
 		}
-		fbclose(fb);
+		fclose(fb);
 		return;
 	}
 	else
