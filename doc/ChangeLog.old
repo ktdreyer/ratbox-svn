@@ -1,3 +1,15 @@
+*** 20001217_8 by db
+- massive change but its really quite simple..
+  mod_add_cmd was taking two params, when only one was really necessary.
+  first was command name, second was the Message entry.. the command
+  is available from msg->cmd, so why duplicate it? lead to errors
+  ditto on mod_del_cmd()
+  sooooo all modules had to be rewritten for this new world order...
+
+- Also cleaned up a lot of missing definitions for functions..
+
+
+
 *** 20001217_7 by cosine
 just to get things compiling again
 
