@@ -1,3 +1,10 @@
+*** 20010211_4 by db
+- reworked adns to not use fgetc, fprintf and friends, but the ircd
+  specific FBFILE library (fileio.h)
+- removed duplicated redundant #include "memory.h"
+
+
+
 *** 20010211_3 by db
 - removed apparent debugging code left in
 
