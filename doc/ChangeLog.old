@@ -1,3 +1,9 @@
+*** 20010207_2 by db
+- one line comments aren't generally useful in fixing bugs.
+  THIS fixes the stack smash observed on dead links
+
+
+
 *** 20010207_1 by androsyn
 This *should* fix the long hostname bug..Untested however
 
