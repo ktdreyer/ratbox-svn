@@ -72,6 +72,14 @@ static int local_client_count=0;
 static BlockHeap *client_heap = NULL;
 static BlockHeap *lclient_heap = NULL;
 
+
+
+enum {
+	D_LINED,
+	K_LINED,
+	G_LINED
+};
+
 dlink_list dead_list;
 
 /*
@@ -368,6 +376,50 @@ check_unknowns_list(dlink_list *list)
     }
 }
 
+static void
+notify_banned_client(struct Client *client_p, struct ConfItem *aconf, int ban)
+{
+  static const char conn_closed[] = "Connection closed";
+  static const char d_lined[] = "D-lined";
+  static const char k_lined[] = "K-lined";
+  static const char g_lined[] = "G-lined";
+
+  const char *reason = conn_closed;
+  const char *exit_reason = conn_closed; 
+
+  if(ConfigFileEntry.kline_with_reason && aconf->passwd != NULL)
+  {
+     reason = aconf->passwd;
+  } else {
+     switch(aconf->status)
+     {
+        case D_LINED:
+             reason = d_lined;
+             break;
+        case K_LINED:
+             reason = k_lined;
+             break;
+        case G_LINED:
+             reason = g_lined;
+             break;
+        default:
+             break;
+     }  
+  }
+
+  if(ban == D_LINED && !IsPerson(client_p))
+     sendto_one(client_p, "NOTICE DLINE :*** You have been D-lined");
+  else
+     sendto_one(client_p, form_str(ERR_YOUREBANNEDCREEP),
+                          me.name, client_p->name, reason);
+
+  if(!ConfigFileEntry.kline_with_connection_closed)
+     exit_reason = reason;
+     
+  exit_client(client_p, client_p, &me, exit_reason);
+
+}
+
 /*
  * check_banned_lines
  * inputs	- NONE
@@ -380,7 +432,6 @@ check_banned_lines(void)
 {               
   struct Client *client_p;          /* current local client_p being examined */
   struct ConfItem     *aconf = (struct ConfItem *)NULL;
-  char          *reason;                /* pointer to reason string */
   dlink_node    *ptr, *next_ptr;
  
   DLINK_FOREACH_SAFE(ptr, next_ptr, lclient_list.head)
@@ -400,35 +451,7 @@ check_banned_lines(void)
 	  sendto_realops_flags(UMODE_ALL, L_ALL,"DLINE active for %s",
 			       get_client_name(client_p, HIDE_IP));
 			       
-	  if (ConfigFileEntry.kline_with_connection_closed &&
-	      ConfigFileEntry.kline_with_reason)
-	  {
-	    reason = "Connection closed";
-
-	    if(IsPerson(client_p))
-  	      sendto_one(client_p, form_str(ERR_YOUREBANNEDCREEP),
-  	                 me.name, client_p->name,
-	 	         aconf->passwd ? aconf->passwd : "D-lined");
-            else
-	      sendto_one(client_p, "NOTICE DLINE :*** You have been D-lined");
-	  }
-	  else
-	  {
-	    if(ConfigFileEntry.kline_with_connection_closed)
-	      reason = "Connection closed";
-	    else if(ConfigFileEntry.kline_with_reason && aconf->passwd)
-	      reason = aconf->passwd;
-	    else
-	      reason = "D-lined";
-
-            if(IsPerson(client_p))
-	      sendto_one(client_p, form_str(ERR_YOUREBANNEDCREEP),
-	                 me.name, client_p->name, reason);
-            else
-	      sendto_one(client_p, "NOTICE DLINE :*** You have been D-lined");
-	  }
-	    
-	  (void)exit_client(client_p, client_p, &me, reason);
+          notify_banned_client(client_p, aconf, D_LINED); 
 	  continue; /* and go examine next fd/client_p */
 	}
 
@@ -458,30 +481,7 @@ check_banned_lines(void)
 	      sendto_realops_flags(UMODE_ALL, L_ALL, "GLINE active for %s",
 				   get_client_name(client_p, HIDE_IP));
 			    
-	      if(ConfigFileEntry.kline_with_connection_closed &&
-	         ConfigFileEntry.kline_with_reason)
- 	      {
-		  reason = "Connection closed";
-
-		  sendto_one(client_p, form_str(ERR_YOUREBANNEDCREEP),
-		             me.name, client_p->name,
-			     aconf->passwd ? aconf->passwd : "G-lined");
-	      } 
-	      else 
-	      {
-	        if(ConfigFileEntry.kline_with_connection_closed)
-		  reason = "Connection closed";
-		else if(ConfigFileEntry.kline_with_reason && aconf->passwd)
-		  reason = aconf->passwd;
-		else
-		  reason = "G-lined";
-
-		sendto_one(client_p, form_str(ERR_YOUREBANNEDCREEP),
-		           me.name, client_p->name, reason);
-	      }
-	
-	      (void)exit_client(client_p, client_p, &me, reason);
-	      /* and go examine next fd/client_p */    
+              notify_banned_client(client_p, aconf, G_LINED); 
 	      continue;
 	    } 
 	  else if(aconf->status & CONF_KILL)
@@ -497,30 +497,7 @@ check_banned_lines(void)
 
 	      sendto_realops_flags(UMODE_ALL, L_ALL, "KLINE active for %s",
 				   get_client_name(client_p, HIDE_IP));
-
-              if(ConfigFileEntry.kline_with_connection_closed &&
-	          ConfigFileEntry.kline_with_reason)
-	      {
-	        reason = "Connection closed";
-
-		sendto_one(client_p, form_str(ERR_YOUREBANNEDCREEP),
-		           me.name, client_p->name, 
-			   aconf->passwd ? aconf->passwd : "K-lined");
-              }
-	      else
-	      {
-	        if(ConfigFileEntry.kline_with_connection_closed)
-		  reason = "Connection closed";
-		else if(ConfigFileEntry.kline_with_reason && aconf->passwd)
-		  reason = aconf->passwd;
-		else
-		  reason = "K-lined";
-
-		sendto_one(client_p, form_str(ERR_YOUREBANNEDCREEP),
-		           me.name, client_p->name, reason);
-              }
-	      
-	      (void)exit_client(client_p, client_p, &me, reason);
+              notify_banned_client(client_p, aconf, K_LINED); 
 	      continue; 
 	    }
 	}
@@ -537,8 +514,7 @@ check_banned_lines(void)
       if(aconf->status & CONF_EXEMPTDLINE)
         continue;
 
-      sendto_one(client_p, "NOTICE DLINE :*** You have been D-lined");
-      exit_client(client_p, client_p, &me, "D-lined");
+      notify_banned_client(client_p, aconf, D_LINED);
     }
   }
 
@@ -555,7 +531,6 @@ check_klines(void)
 {
   struct Client *client_p;
   struct ConfItem *aconf;
-  char *reason;
   dlink_node *ptr;
   dlink_node *next_ptr;
 
@@ -579,28 +554,7 @@ check_klines(void)
       sendto_realops_flags(UMODE_ALL, L_ALL, "KLINE active for %s",
                            get_client_name(client_p, HIDE_IP));
 
-      if(ConfigFileEntry.kline_with_connection_closed &&
-         ConfigFileEntry.kline_with_reason)
-      {
-        reason = "Connection closed";
-        sendto_one(client_p, form_str(ERR_YOUREBANNEDCREEP),
-                   me.name, client_p->name,
-                   aconf->passwd ? aconf->passwd : "K-lined");
-      }
-      else
-      {
-        if(ConfigFileEntry.kline_with_connection_closed)
-          reason = "Connection closed";
-        else if(ConfigFileEntry.kline_with_reason && aconf->passwd)
-          reason = aconf->passwd;
-        else
-          reason = "K-lined";
-
-        sendto_one(client_p, form_str(ERR_YOUREBANNEDCREEP),
-                   me.name, client_p->name, reason);
-      }
-
-      (void)exit_client(client_p, client_p, &me, reason);
+      notify_banned_client(client_p, aconf, K_LINED);
       continue;
     }
   }
@@ -617,7 +571,6 @@ check_glines(void)
 {
   struct Client *client_p;
   struct ConfItem *aconf;
-  char *reason;
   dlink_node *ptr;
   dlink_node *next_ptr;
   
@@ -649,28 +602,7 @@ check_glines(void)
       sendto_realops_flags(UMODE_ALL, L_ALL, "GLINE active for %s",
                            get_client_name(client_p, HIDE_IP));
 
-      if(ConfigFileEntry.kline_with_connection_closed &&
-         ConfigFileEntry.kline_with_reason)
-      {
-        reason = "Connection closed";
-        sendto_one(client_p, form_str(ERR_YOUREBANNEDCREEP),
-                   me.name, client_p->name,
-                   aconf->passwd ? aconf->passwd : "G-lined");
-      }
-      else
-      {
-        if(ConfigFileEntry.kline_with_connection_closed)
-          reason = "Connection closed";
-        else if(ConfigFileEntry.kline_with_reason && aconf->passwd)
-          reason = aconf->passwd;
-        else
-          reason = "K-lined";
-
-        sendto_one(client_p, form_str(ERR_YOUREBANNEDCREEP),
-                   me.name, client_p->name, reason);
-      }
-
-      (void)exit_client(client_p, client_p, &me, reason);
+      notify_banned_client(client_p, aconf, K_LINED);
       continue;
     }
   }
@@ -687,7 +619,6 @@ check_dlines(void)
 {
   struct Client *client_p;
   struct ConfItem *aconf;
-  char *reason;
   dlink_node *ptr;
   dlink_node *next_ptr;
 
@@ -707,35 +638,7 @@ check_dlines(void)
       sendto_realops_flags(UMODE_ALL, L_ALL,"DLINE active for %s",
                            get_client_name(client_p, HIDE_IP));
 
-      if(ConfigFileEntry.kline_with_connection_closed &&
-         ConfigFileEntry.kline_with_reason)
-      {
-        reason = "Connection closed";
-
-        if(IsPerson(client_p))
-          sendto_one(client_p, form_str(ERR_YOUREBANNEDCREEP),
-                     me.name, client_p->name,
-                     aconf->passwd ? aconf->passwd : "D-lined");
-        else
-          sendto_one(client_p, "NOTICE DLINE :*** You have been D-lined");
-      }
-      else
-      {
-        if(ConfigFileEntry.kline_with_connection_closed)
-          reason = "Connection closed";
-        else if(ConfigFileEntry.kline_with_reason && aconf->passwd)
-          reason = aconf->passwd;
-        else
-          reason = "D-lined";
-
-        if(IsPerson(client_p))
-          sendto_one(client_p, form_str(ERR_YOUREBANNEDCREEP),
-                     me.name, client_p->name, reason);
-        else
-          sendto_one(client_p, "NOTICE DLINE :*** You have been D-lined");
-      }
-
-      (void)exit_client(client_p, client_p, &me, reason);
+      notify_banned_client(client_p, aconf, D_LINED);
       continue;
     }
   }
@@ -751,8 +654,7 @@ check_dlines(void)
       if(aconf->status & CONF_EXEMPTDLINE)
         continue;
 
-      sendto_one(client_p, "NOTICE DLINE :*** You have been D-lined");
-      exit_client(client_p, client_p, &me, "D-lined");
+      notify_banned_client(client_p, aconf, D_LINED);
     }
   }
 }
