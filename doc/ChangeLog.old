@@ -1,3 +1,7 @@
+*** 20001231_29 by toot
+removed a cvs tag from ChangeLog, and fixed some of my typos :P
+
+
 *** 20001231_28 by davidt
 parting a vchan should send vchan->chname to remote servers....
 
