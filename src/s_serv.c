@@ -352,59 +352,63 @@ finish:
 
 int check_server(const char *name, struct Client* cptr)
 {
-  struct ConfItem *aconf;
-  int i = -1, hub = 0;
+  struct ConfItem *aconf=NULL;
+  struct ConfItem *server_aconf=NULL;
+  int error = -1;
+
   assert(0 != cptr);
 
   if (!(cptr->localClient->passwd))
     return -2;
 
+  /* loop through looking for all possible connect items that might work */
   for (aconf = ConfigItemList; aconf; aconf = aconf->next)
     {
-     if (!(aconf->status & CONF_SERVER ||
-           aconf->status & CONF_HUB ||
-           aconf->status & CONF_LEAF)
-        )
-       continue;
-     if ((aconf->status == CONF_SERVER) && !match(name, aconf->name))
-       continue;
-     if (aconf->status != CONF_SERVER && !match(name, aconf->user))
-       continue;
-     if (aconf->status & CONF_HUB || aconf->status & CONF_LEAF)
-       {
-        if (aconf->status & CONF_HUB)
-          hub = 1;
-        attach_conf(cptr, aconf);
-        continue;
-       }
+      if ((aconf->status & CONF_SERVER) == 0)
+	continue;
 
-     i = -3;
+     if (!match(name, aconf->name))
+       continue;
 
-/* XXX: Fix me for IPv6 */
-     if (!(match(aconf->host, cptr->host) ||
+     error = -3;
+
+     /* XXX: Fix me for IPv6 */
 #ifdef IPV6
-       !memcmp(&cptr->localClient->ip.sin6_addr.s6_addr, &aconf->ipnum.s6_addr, sizeof(aconf->ipnum.s6_addr))))
+     if ( (match(aconf->host, cptr->host)) || 
+	  memcmp(&cptr->localClient->ip.sin6_addr.s6_addr,
+		 &aconf->ipnum.s6_addr, sizeof(aconf->ipnum.s6_addr)))
 #else
-       cptr->localClient->ip.sin_addr.s_addr == aconf->ipnum.s_addr))
+       if ( (match(aconf->host, cptr->host)) || 
+	    cptr->localClient->ip.sin_addr.s_addr == aconf->ipnum.s_addr)
 #endif
-       continue;
-#ifdef CRYPT_LINK_PASSWORD
-     if (strcmp(aconf->passwd, crypt(cptr->localClient->passwd,
-                aconf->passwd)))
-       return -2;
-#else
-     if (strcmp(aconf->passwd, cptr->localClient->passwd))
-       return -2;
-#endif
-     break;
+	 {
+	   error = -2;
+	   
+	   if (strcmp(aconf->passwd, cptr->localClient->passwd) == 0)
+	     {
+	       server_aconf = aconf;
+	     }
+	 }
     }
 
-  if (!aconf)
-    return i;
+  if (server_aconf == NULL)
+    return error;
 
-  attach_conf(cptr, aconf);
+  attach_conf(cptr, server_aconf);
 
-  if( !(aconf->flags & CONF_FLAGS_LAZY_LINK) )
+  /* Now find all leaf or hub config items for this server */
+  for (aconf = ConfigItemList; aconf; aconf = aconf->next)
+    {
+      if ((aconf->status & (CONF_HUB|CONF_LEAF)) == 0)
+	continue;
+
+      if (!match(name, aconf->name))
+	continue;
+
+      attach_conf(cptr, aconf);
+    }
+
+  if( !(server_aconf->flags & CONF_FLAGS_LAZY_LINK) )
     ClearCap(cptr,CAP_LL);
 
   /*
@@ -415,10 +419,12 @@ int check_server(const char *name, struct Client* cptr)
 
 #ifdef IPV6
   if (IN6_IS_ADDR_UNSPECIFIED(&aconf->ipnum))
-    memcpy(&aconf->ipnum.s6_addr, &cptr->localClient->ip.sin6_addr.s6_addr, sizeof(aconf->ipnum.s6_addr));
+    memcpy(&server_aconf->ipnum.s6_addr, 
+	   &cptr->localClient->ip.sin6_addr.s6_addr,
+	   sizeof(aconf->ipnum.s6_addr));
 #else
-  if (aconf->ipnum.s_addr == INADDR_NONE)
-    aconf->ipnum.s_addr = cptr->localClient->ip.sin_addr.s_addr;
+  if (server_aconf->ipnum.s_addr == INADDR_NONE)
+    server_aconf->ipnum.s_addr = cptr->localClient->ip.sin_addr.s_addr;
 #endif
 
   return 0;
