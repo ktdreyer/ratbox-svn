@@ -144,91 +144,91 @@ void flush_sendq_except(struct DBuf* notThisBuf)
 static int
 send_message(struct Client *to, char *msg, int len)
 {
-        static int SQinK;
+  static int SQinK;
 
-        if (to->from)
-                to = to->from; /* shouldn't be necessary */
+  if (to->from)
+    to = to->from; /* shouldn't be necessary */
 
-        if (IsMe(to))
-        {
-                sendto_realops("Trying to send to myself! [%s]", msg);
-                return 0;
-        }
-
-        if (to->fd < 0)
-                return 0; /* Thou shalt not write to closed descriptors */
-
-        if (IsDead(to))
-                return 0; /* This socket has already been marked as dead */
-
-        if (DBufLength(&to->sendQ) > get_sendq(to))
-        {
-                if (IsServer(to))
-                        sendto_ops("Max SendQ limit exceeded for %s: %d > %d",
-                                get_client_name(to, FALSE),
-                                DBufLength(&to->sendQ), get_sendq(to));
-
-                if (IsDoingList(to)) {
-      /* Pop the sendq for this message */
-      /*if (!IsAnOper(to))
-        sendto_ops("LIST blocked for %s", get_client_name(to, FALSE)); */
-      SetSendqPop(to);
+  if (IsMe(to))
+    {
+      sendto_realops("Trying to send to myself! [%s]", msg);
       return 0;
     }
-                else
+
+  if (to->fd < 0)
+    return 0; /* Thou shalt not write to closed descriptors */
+
+  if (IsDead(to))
+    return 0; /* This socket has already been marked as dead */
+
+  if (DBufLength(&to->sendQ) > get_sendq(to))
+    {
+      if (IsServer(to))
+        sendto_ops("Max SendQ limit exceeded for %s: %d > %d",
+          get_client_name(to, FALSE),
+          DBufLength(&to->sendQ), get_sendq(to));
+
+      if (IsDoingList(to))
+        {
+          /* Pop the sendq for this message */
+          /*if (!IsAnOper(to))
+          sendto_ops("LIST blocked for %s", get_client_name(to, FALSE)); */
+          SetSendqPop(to);
+          return 0;
+        }
+      else
+        {
+          if (IsClient(to))
+            to->flags |= FLAGS_SENDQEX;
+          return dead_link(to, "Max Sendq exceeded");
+        }
+    }
+  else
+    {
+      /*
+      ** data is first stored in to->zip->outbuf until
+      ** it's big enough to be compressed and stored in the sendq.
+      ** send_queued is then responsible to never let the sendQ
+      ** be empty and to->zip->outbuf not empty.
+      */
+      if (to->flags2 & FLAGS2_ZIP)
+        msg = zip_buffer(to, msg, &len, 0);
+
+      if (len && !dbuf_put(&to->sendQ, msg, len))
+        return dead_link(to, "Buffer allocation error for %s");
+    }
+    /*
+    ** Update statistics. The following is slightly incorrect
+    ** because it counts messages even if queued, but bytes
+    ** only really sent. Queued bytes get updated in SendQueued.
+    */
+    to->sendM += 1;
+    me.sendM += 1;
+
+    /*
+    ** This little bit is to stop the sendQ from growing too large when
+    ** there is no need for it to. Thus we call send_queued() every time
+    ** 2k has been added to the queue since the last non-fatal write.
+    ** Also stops us from deliberately building a large sendQ and then
+    ** trying to flood that link with data (possible during the net
+    ** relinking done by servers with a large load).
+    */
+    /*
+     * Well, let's try every 4k for clients, and immediately for servers
+     *  -Taner
+     */
+    SQinK = DBufLength(&to->sendQ)/1024;
+    if (IsServer(to))
       {
-        if (IsClient(to))
-          to->flags |= FLAGS_SENDQEX;
-        return dead_link(to, "Max Sendq exceeded");
+        if (SQinK > to->lastsq)
+          send_queued(to);
       }
-        }
-        else
-        {
-                /*
-                ** data is first stored in to->zip->outbuf until
-                ** it's big enough to be compressed and stored in the sendq.
-                ** send_queued is then responsible to never let the sendQ
-                ** be empty and to->zip->outbuf not empty.
-                */
-                if (to->flags2 & FLAGS2_ZIP)
-                        msg = zip_buffer(to, msg, &len, 0);
-
-                if (len && !dbuf_put(&to->sendQ, msg, len))
-                        return dead_link(to, "Buffer allocation error for %s");
-        }
-
-        /*
-        ** Update statistics. The following is slightly incorrect
-        ** because it counts messages even if queued, but bytes
-        ** only really sent. Queued bytes get updated in SendQueued.
-        */
-        to->sendM += 1;
-        me.sendM += 1;
-
-        /*
-        ** This little bit is to stop the sendQ from growing too large when
-        ** there is no need for it to. Thus we call send_queued() every time
-        ** 2k has been added to the queue since the last non-fatal write.
-        ** Also stops us from deliberately building a large sendQ and then
-        ** trying to flood that link with data (possible during the net
-        ** relinking done by servers with a large load).
-        */
-        /*
-         * Well, let's try every 4k for clients, and immediately for servers
-         *  -Taner
-         */
-        SQinK = DBufLength(&to->sendQ)/1024;
-        if (IsServer(to))
-        {
-                if (SQinK > to->lastsq)
-                        send_queued(to);
-        }
-        else
-        {
-                if (SQinK > (to->lastsq + 4))
-                        send_queued(to);
-        }
-        return 0;
+    else
+      {
+        if (SQinK > (to->lastsq + 4))
+          send_queued(to);
+      }
+    return 0;
 } /* send_message() */
 
 /*
