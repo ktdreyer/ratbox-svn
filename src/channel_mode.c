@@ -733,6 +733,10 @@ chm_simple(struct Client *client_p, struct Client *source_p,
     return;
   }
 
+  /* +ntspmaikl == 9 + MAXMODEPARAMS (4 * +o) */
+  if (MyClient(source_p) && (++mode_limit > (9 + MAXMODEPARAMS))
+    return;
+
   /* setting + */
   if ((dir == MODE_ADD) && !(chptr->mode.mode & mode_type))
   {
