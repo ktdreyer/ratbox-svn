@@ -1,3 +1,17 @@
+leeh        2005/01/24 13:11:30 EST	(20050124_2)
+
+  Modified files:
+    doc                  example.conf 
+    src                  newconf.c 
+  Log:
+  - added stacking of ips in exempt {};
+  
+  Revision  Changes    Path
+  7.253     +4 -0      ircd-ratbox/doc/example.conf
+  7.189     +11 -30    ircd-ratbox/src/newconf.c
+
+
+
 leeh        2005/01/24 12:59:57 EST	(20050124_1)
 
   Modified files:
