@@ -286,7 +286,7 @@ static void m_join(struct Client *client_p,
 	  sendto_ll_channel_remote(chptr, client_p, source_p,
 				   ":%s SJOIN %lu %s + :@%s",
 				   me.name,
-				   chptr->channelts,
+				   (unsigned long) chptr->channelts,
 				   chptr->chname,
 				   parv[0]);
 	}
@@ -308,7 +308,7 @@ static void m_join(struct Client *client_p,
 	  sendto_ll_channel_remote(chptr, client_p, source_p,
 				   ":%s SJOIN %lu %s + :%%%s",
 				   me.name,
-				   chptr->channelts,
+				   (unsigned long) chptr->channelts,
 				   chptr->chname,
 				   parv[0]);
 	}
@@ -318,7 +318,7 @@ static void m_join(struct Client *client_p,
 	  sendto_ll_channel_remote(chptr, client_p, source_p,
 				   ":%s SJOIN %lu %s + :%s",
 				   me.name,
-				   chptr->channelts,
+				   (unsigned long) chptr->channelts,
 				   chptr->chname,
 				   parv[0]);
 	}

@@ -727,19 +727,30 @@ GreetUser(struct Client *client)
 #endif
 
   if (!ServerInfo.hub && uplink && IsCapable(uplink,CAP_LL))
+  {
     sendto_one(uplink, "NICK %s %d %lu %s %s %s %s :%s",
-               client->name, client->hopcount+1, client->tsinfo,
-               ubuf, client->username, client->host, client->user->server,
-               client->info);
+		client->name,
+		client->hopcount+1,
+		(unsigned long) client->tsinfo,
+		ubuf,
+		client->username, client->host,
+		client->user->server, client->info);
+  }
   else
+  {
     sendto_nocap_serv_butone(CAP_LL, NULL,
-                             "NICK %s %d %lu %s %s %s %s :%s",
-                             client->name, client->hopcount+1, client->tsinfo,
-                             ubuf, client->username, client->host,
-                             client->user->server, client->info);
-  
+				"NICK %s %d %lu %s %s %s %s :%s",
+				client->name,
+				client->hopcount+1,
+				(unsigned long) client->tsinfo,
+				ubuf,
+				client->username, client->host,
+				client->user->server, client->info);
+  }
   if (ubuf[1])
+  {
     send_umode_out(client, client, 0);
+  }
 } /* GreetUser() */
 
 /*

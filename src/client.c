@@ -1790,7 +1790,9 @@ int change_local_nick(struct Client *client_p, struct Client *source_p,
 	   * does not know about that client yet.
 	   */
           sendto_ll_serv_butone(client_p, source_p, 0, ":%s NICK %s :%lu",
-                                source_p->name, nick, source_p->tsinfo);
+				source_p->name,
+				nick,
+				(unsigned long) source_p->tsinfo);
 	}
     }
   else

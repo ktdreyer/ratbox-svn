@@ -109,13 +109,18 @@ static void ms_svinfo(struct Client *client_p, struct Client *source_p,
     {
       sendto_realops_flags(FLAGS_ALL,
        "Link %s dropped, excessive TS delta (my TS=%lu, their TS=%lu, delta=%d)",
-                 get_client_name(source_p, SHOW_IP),
-                 CurrentTime, theirtime, (int)deltat);
+		 get_client_name(source_p, SHOW_IP),
+		 (unsigned long) CurrentTime,
+		 (unsigned long) theirtime,
+		 (int) deltat);
 
       log(L_NOTICE,
        "Link %s dropped, excessive TS delta (my TS=%lu, their TS=%lu, delta=%d)",
                  get_client_name(source_p, SHOW_IP),
-                 CurrentTime, theirtime, (int)deltat);
+		 (unsigned long) CurrentTime,
+		 (unsigned long) theirtime,
+		 (int) deltat);
+
       exit_client(source_p, source_p, source_p, "Excessive TS delta");
       return;
     }
@@ -123,9 +128,11 @@ static void ms_svinfo(struct Client *client_p, struct Client *source_p,
   if (deltat > ConfigFileEntry.ts_warn_delta)
     { 
       sendto_realops_flags(FLAGS_ALL,
-                 "Link %s notable TS delta (my TS=%lu, their TS=%lu, delta=%d)",
-			   get_client_name(source_p, MASK_IP),
-			   CurrentTime, theirtime, (int)deltat);
+		"Link %s notable TS delta (my TS=%lu, their TS=%lu, delta=%d)",
+		get_client_name(source_p, MASK_IP),
+		(unsigned long) CurrentTime,
+		(unsigned long) theirtime,
+		(int) deltat);
     }
 }
 

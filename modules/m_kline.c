@@ -216,7 +216,8 @@ static void mo_kline(struct Client *client_p,
 			   ":%s KLINE %s %lu %s %s :%s",
 			   source_p->name,
 			   target_server,
-			   tkline_time, user, host, reason);
+			   (unsigned long) tkline_time,
+			   user, host, reason);
 
       /* If we are sending it somewhere that doesnt include us, we stop
        * else we apply it locally too

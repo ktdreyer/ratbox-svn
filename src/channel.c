@@ -978,7 +978,10 @@ static void send_members(struct Client *client_p,
   char *t;		/* temp char pointer */
 
   ircsprintf(buf, ":%s SJOIN %lu %s %s %s :", me.name,
-	     chptr->channelts, chptr->chname, lmodebuf, lparabuf);
+		(unsigned long) chptr->channelts,
+		chptr->chname,
+		lmodebuf,
+		lparabuf);
 
   cur_len = mlen = strlen(buf);
   t = buf + mlen;

@@ -813,13 +813,18 @@ void sendnick_TS(struct Client *client_p, struct Client *target_p)
  
   if (HasID(target_p) && IsCapable(client_p, CAP_UID))
 	  sendto_one(client_p, "CLIENT %s %d %lu %s %s %s %s %s :%s",
-				 target_p->name, target_p->hopcount + 1, target_p->tsinfo, ubuf,
+				 target_p->name,
+				 target_p->hopcount + 1,
+				 (unsigned long) target_p->tsinfo,
+				 ubuf,
 				 target_p->username, target_p->host,
 				 target_p->user->server, target_p->user->id, target_p->info);
   else
 	  sendto_one(client_p, "NICK %s %d %lu %s %s %s %s :%s",
 				 target_p->name, 
-				 target_p->hopcount + 1, target_p->tsinfo, ubuf,
+				 target_p->hopcount + 1,
+				 (unsigned long) target_p->tsinfo,
+				 ubuf,
 				 target_p->username, target_p->host,
 				 target_p->user->server, target_p->info);
 }
@@ -1028,8 +1033,11 @@ int server_estab(struct Client *client_p)
       SetServlink(client_p);
     }
 #endif
-  sendto_one(client_p,"SVINFO %d %d 0 :%lu", TS_CURRENT, TS_MIN, CurrentTime);
-  
+  sendto_one(client_p,"SVINFO %d %d 0 :%lu",
+			TS_CURRENT,
+			TS_MIN,
+			(unsigned long) CurrentTime);
+
   det_confs_butmask(client_p, CONF_LEAF|CONF_HUB|CONF_SERVER);
   /*
   ** *WARNING*
@@ -1509,7 +1517,7 @@ burst_all(struct Client *client_p)
   */
 
   if(IsCapable(client_p, CAP_EOB))
-    sendto_one(client_p, ":%s EOB %lu", me.name, StartBurst);
+    sendto_one(client_p, ":%s EOB %lu", me.name, (unsigned long) StartBurst);
 }
 
 /*
@@ -1558,8 +1566,10 @@ burst_channel(struct Client *client_p, struct Channel *chptr)
   if(chptr->topic[0])
     {
       sendto_one(client_p, ":%s TOPIC %s %s %lu :%s",
-		 me.name, chptr->chname,
-		 chptr->topic_info,chptr->topic_time,
+		 me.name,
+		 chptr->chname,
+		 chptr->topic_info,
+		 (unsigned long) chptr->topic_time,
 		 chptr->topic);
     }
 
@@ -1578,8 +1588,10 @@ burst_channel(struct Client *client_p, struct Channel *chptr)
 	  if(vchan->topic[0])
 	    {
 	      sendto_one(client_p, ":%s TOPIC %s %s %lu :%s",
-			 me.name, vchan->chname,
-			 vchan->topic_info,vchan->topic_time,
+			 me.name,
+			 vchan->chname,
+			 vchan->topic_info,
+			 (unsigned long) vchan->topic_time,
 			 vchan->topic);
 	    }
 	}

@@ -175,15 +175,16 @@ static void m_cjoin(struct Client *client_p,
   add_user_to_channel(chptr, source_p, CHFL_CHANOP);
 
   sendto_channel_local(ALL_MEMBERS, chptr,
-                       ":%s!%s@%s JOIN :%s",
-                       source_p->name,
-                       source_p->username,
-                       source_p->host,
-                       root_vchan->chname);
+			":%s!%s@%s JOIN :%s",
+			source_p->name,
+			source_p->username,
+			source_p->host,
+			root_vchan->chname);
 
   sendto_channel_remote(chptr, client_p,
-			":%s SJOIN %lu %s + :@%s", me.name,
-			chptr->channelts,
+			":%s SJOIN %lu %s + :@%s",
+			me.name,
+			(unsigned long) chptr->channelts,
 			chptr->chname,
 			source_p->name);
 
@@ -191,8 +192,9 @@ static void m_cjoin(struct Client *client_p,
   vchan_chptr->mode.mode |= MODE_NOPRIVMSGS;
 
   sendto_channel_local(ALL_MEMBERS,chptr,
-                       ":%s MODE %s +nt",
-                       me.name, root_vchan->chname);
+			":%s MODE %s +nt",
+			me.name,
+			root_vchan->chname);
 
   sendto_channel_remote(vchan_chptr, source_p, 
 			":%s MODE %s +nt",
