@@ -131,15 +131,15 @@ static void query_simple(adns_state ads, adns_query qu,
 			 struct timeval now) {
   vbuf vb_new;
   int id;
-  adns_status stat;
+  adns_status xstat;
 
-  stat= adns__mkquery(ads,&qu->vb,&id, owner,ol, typei,flags);
-  if (stat) {
-    if (stat == adns_s_querydomaintoolong && (flags & adns_qf_search)) {
+  xstat= adns__mkquery(ads,&qu->vb,&id, owner,ol, typei,flags);
+  if (xstat) {
+    if (xstat == adns_s_querydomaintoolong && (flags & adns_qf_search)) {
       adns__search_next(ads,qu,now);
       return;
     } else {
-      adns__query_fail(qu,stat);
+      adns__query_fail(qu,xstat);
       return;
     }
   }
@@ -151,7 +151,7 @@ static void query_simple(adns_state ads, adns_query qu,
 
 void adns__search_next(adns_state ads, adns_query qu, struct timeval now) {
   const char *nextentry;
-  adns_status stat;
+  adns_status xstat;
   
   if (qu->search_doneabs<0) {
     nextentry= 0;
@@ -159,7 +159,7 @@ void adns__search_next(adns_state ads, adns_query qu, struct timeval now) {
   } else {
     if (qu->search_pos >= ads->nsearchlist) {
       if (qu->search_doneabs) {
-	stat= adns_s_nxdomain; goto x_fail;
+	xstat= adns_s_nxdomain; goto x_fail;
 	return;
       } else {
 	nextentry= 0;
@@ -174,7 +174,7 @@ void adns__search_next(adns_state ads, adns_query qu, struct timeval now) {
   if (nextentry) {
     if (!adns__vbuf_append(&qu->search_vb,".",1) ||
 	!adns__vbuf_appendstr(&qu->search_vb,nextentry)) {
-      stat= adns_s_nomemory; goto x_fail;
+      xstat= adns_s_nomemory; goto x_fail;
     }
   }
 
@@ -185,7 +185,7 @@ void adns__search_next(adns_state ads, adns_query qu, struct timeval now) {
   return;
   
 x_fail:
-  adns__query_fail(qu,stat);
+  adns__query_fail(qu,xstat);
 }
 
 static int save_owner(adns_query qu, const char *owner, int ol) {
@@ -209,7 +209,7 @@ int adns_submit(adns_state ads,
 		void *context,
 		adns_query *query_r) {
   int r, ol, ndots;
-  adns_status stat;
+  adns_status xstat;
   const typeinfo *typei;
   struct timeval now;
   adns_query qu;
@@ -230,8 +230,8 @@ int adns_submit(adns_state ads,
   *query_r= qu;
 
   ol= strlen(owner);
-  if (!ol) { stat= adns_s_querydomaininvalid; goto x_adnsfail; }
-  if (ol>DNS_MAXDOMAIN+1) { stat= adns_s_querydomaintoolong; goto x_adnsfail; }
+  if (!ol) { xstat= adns_s_querydomaininvalid; goto x_adnsfail; }
+  if (ol>DNS_MAXDOMAIN+1) { xstat= adns_s_querydomaintoolong; goto x_adnsfail; }
 				 
   if (ol>=1 && owner[ol-1]=='.' && (ol<2 || owner[ol-2]!='\\')) {
     flags &= ~adns_qf_search;
@@ -241,7 +241,7 @@ int adns_submit(adns_state ads,
 
   if (flags & adns_qf_search) {
     r= adns__vbuf_append(&qu->search_vb,owner,ol);
-    if (!r) { stat= adns_s_nomemory; goto x_adnsfail; }
+    if (!r) { xstat= adns_s_nomemory; goto x_adnsfail; }
 
     for (ndots=0, p=owner; (p= strchr(p,'.')); p++, ndots++);
     qu->search_doneabs= (ndots >= ads->searchndots) ? -1 : 0;
@@ -249,7 +249,7 @@ int adns_submit(adns_state ads,
     adns__search_next(ads,qu,now);
   } else {
     if (flags & adns_qf_owner) {
-      if (!save_owner(qu,owner,ol)) { stat= adns_s_nomemory; goto x_adnsfail; }
+      if (!save_owner(qu,owner,ol)) { xstat= adns_s_nomemory; goto x_adnsfail; }
     }
     query_simple(ads,qu, owner,ol, typei,flags, now);
   }
@@ -258,7 +258,7 @@ int adns_submit(adns_state ads,
   return 0;
 
  x_adnsfail:
-  adns__query_fail(qu,stat);
+  adns__query_fail(qu,xstat);
   adns__consistency(ads,qu,cc_entex);
   return 0;
 
@@ -592,9 +592,9 @@ void adns__query_done(adns_query qu) {
   }
 }
 
-void adns__query_fail(adns_query qu, adns_status stat) {
+void adns__query_fail(adns_query qu, adns_status xstat) {
   adns__reset_preserved(qu);
-  qu->answer->status= stat;
+  qu->answer->status= xstat;
   adns__query_done(qu);
 }
 

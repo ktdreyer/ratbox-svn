@@ -1119,7 +1119,7 @@ static adns_status cs_soa(vbuf *vb, const void *datap) {
  * _flat   (mf)
  */
 
-static void mf_flat(adns_query qu, void *data) { }
+static void mf_flat(adns_query qu, void *xdata) { }
 
 /*
  * Now the table.

@@ -139,12 +139,12 @@ int adns__vbuf_ensure(vbuf *vb, int want) {
   return 1;
 }
   
-void adns__vbuf_appendq(vbuf *vb, const byte *data, int len) {
-  memcpy(vb->buf+vb->used,data,len);
+void adns__vbuf_appendq(vbuf *vb, const byte *xdata, int len) {
+  memcpy(vb->buf+vb->used,xdata,len);
   vb->used+= len;
 }
 
-int adns__vbuf_append(vbuf *vb, const byte *data, int len) {
+int adns__vbuf_append(vbuf *vb, const byte *xdata, int len) {
   int newlen;
   void *nb;
 
@@ -158,14 +158,14 @@ int adns__vbuf_append(vbuf *vb, const byte *data, int len) {
     vb->buf= nb;
     vb->avail= newlen;
   }
-  adns__vbuf_appendq(vb,data,len);
+  adns__vbuf_appendq(vb,xdata,len);
   return 1;
 }
 
-int adns__vbuf_appendstr(vbuf *vb, const char *data) {
+int adns__vbuf_appendstr(vbuf *vb, const char *xdata) {
   int l;
-  l= strlen(data);
-  return adns__vbuf_append(vb,data,l);
+  l= strlen(xdata);
+  return adns__vbuf_append(vb,xdata,l);
 }
 
 void adns__vbuf_free(vbuf *vb) {
@@ -335,17 +335,17 @@ const char *adns_errtypeabbrev(adns_status st) {
 void adns__isort(void *array, int nobjs, int sz, void *tempbuf,
 		 int (*needswap)(void *context, const void *a, const void *b),
 		 void *context) {
-  byte *data= array;
+  byte *xdata= array;
   int i, place;
 
   for (i=0; i<nobjs; i++) {
     for (place= i;
-	 place>0 && needswap(context, data + (place-1)*sz, data + i*sz);
+	 place>0 && needswap(context, xdata + (place-1)*sz, xdata + i*sz);
 	 place--);
     if (place != i) {
-      memcpy(tempbuf, data + i*sz, sz);
-      memmove(data + (place+1)*sz, data + place*sz, (i-place)*sz);
-      memcpy(data + place*sz, tempbuf, sz);
+      memcpy(tempbuf, xdata + i*sz, sz);
+      memmove(xdata + (place+1)*sz, xdata + place*sz, (i-place)*sz);
+      memcpy(xdata + place*sz, tempbuf, sz);
     }
   }
 }
