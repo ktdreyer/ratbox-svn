@@ -202,8 +202,6 @@ static void delist_conf(struct ConfItem* aconf)
 void free_conf(struct ConfItem* aconf)
 {
   assert(0 != aconf);
-
-  /* XXX Andro, fix this better ok? -db */
   if (aconf->dns_pending && (aconf->dns_query.query != NULL))
     adns_cancel(aconf->dns_query.query);
   MyFree(aconf->host);
