@@ -1,3 +1,8 @@
+*** 20010525_2 by leeh
+- hide ips in stats ? from opers..
+  we also need to do this in trace
+
+
 *** 20010525_1 by ejb
 - fix compile on freebsd.
 
