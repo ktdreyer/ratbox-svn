@@ -65,7 +65,7 @@ _moddeinit(void)
 
 char *parse_server_args(char *parv[], int parc, char *info, int *hop);
 int bogus_host(char *host);
-int write_links_file(void*);
+void write_links_file(void*);
 
 char *_version = "20001122";
 
@@ -397,7 +397,7 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
  *
  * 
  */
-int write_links_file(void* notused)
+void write_links_file(void* notused)
 {
   MessageFileLine *next_mptr = 0;
   MessageFileLine *mptr = 0;
@@ -414,7 +414,7 @@ int write_links_file(void* notused)
   MessageFileptr = &ConfigFileEntry.linksfile;
 
   if ((file = fbopen(MessageFileptr->fileName, "w")) == 0)
-    return(-1);
+    return;
 
   for( mptr = MessageFileptr->contentsOfFile; mptr; mptr = next_mptr)
     {
@@ -466,7 +466,6 @@ int write_links_file(void* notused)
 	}
     }
   fbclose(file);
-  return 0;
 }
 
 /*

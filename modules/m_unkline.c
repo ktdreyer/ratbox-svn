@@ -32,6 +32,7 @@
 #include "fileio.h"
 #include "irc_string.h"
 #include "ircd.h"
+#include "list.h"
 #include "mtrie_conf.h"
 #include "numeric.h"
 #include "s_conf.h"

@@ -280,7 +280,7 @@ void who_global(struct Client *sptr,char *mask, int oper)
   struct Channel *bchan;
   struct Client *acptr;
   dlink_node  *lp;
-  char  *chname;
+  char  *chname=NULL;
   int   showperson;
   int   member;
   int   isinvis;

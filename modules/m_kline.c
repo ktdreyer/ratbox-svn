@@ -548,14 +548,14 @@ char *cluster(char *hostname)
  */
 int mo_dline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
-  char *host, *reason;
+  char *dlhost, *reason;
   char *p;
   struct Client *acptr;
   char cidr_form_host[HOSTLEN + 1];
   unsigned long ip_host;
   unsigned long ip_mask;
   struct ConfItem *aconf;
-  char buffer[1024];
+  char dlbuffer[1024];
   const char* current_date;
 
   if(!IsSetOperK(sptr))
@@ -564,8 +564,8 @@ int mo_dline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       return 0;
     }
 
-  host = parv[1];
-  strncpy_irc(cidr_form_host, host, 32);
+  dlhost = parv[1];
+  strncpy_irc(cidr_form_host, dlhost, 32);
   cidr_form_host[32] = '\0';
 
   if((p = strchr(cidr_form_host,'*')))
@@ -575,10 +575,10 @@ int mo_dline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       *p++ = '2';
       *p++ = '4';
       *p++ = '\0';
-      host = cidr_form_host;
+      dlhost = cidr_form_host;
     }
 
-  if(!is_address(host,&ip_host,&ip_mask))
+  if(!is_address(dlhost,&ip_host,&ip_mask))
     {
       if (!(acptr = find_chasing(sptr, parv[1], NULL)))
         return 0;
@@ -642,7 +642,7 @@ int mo_dline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       *p++ = '2';
       *p++ = '4';
       *p++ = '\0';
-      host = cidr_form_host;
+      dlhost = cidr_form_host;
 
       ip_mask = 0xFFFFFF00L;
       ip_host = ntohl(acptr->localClient->ip.s_addr);
@@ -676,32 +676,32 @@ int mo_dline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
   if( ConfigFileEntry.non_redundant_klines && (aconf = match_Dline(ip_host)) )
      {
-       char *reason;
-       reason = aconf->passwd ? aconf->passwd : "<No Reason>";
+       char *creason;
+       creason = aconf->passwd ? aconf->passwd : "<No Reason>";
        if(IsConfElined(aconf))
          sendto_one(sptr, ":%s NOTICE %s :[%s] is (E)d-lined by [%s] - %s",
                     me.name,
                     parv[0],
-                    host,
-                    aconf->host,reason);
+                    dlhost,
+                    aconf->host,creason);
          else
            sendto_one(sptr, ":%s NOTICE %s :[%s] already D-lined by [%s] - %s",
                       me.name,
                       parv[0],
-                      host,
-                      aconf->host,reason);
+                      dlhost,
+                      aconf->host,creason);
       return 0;
        
      }
 
   current_date = smalldate((time_t) 0);
 
-  ircsprintf(buffer, "%s (%s)",reason,current_date);
+  ircsprintf(dlbuffer, "%s (%s)",reason,current_date);
 
   aconf = make_conf();
   aconf->status = CONF_DLINE;
-  DupString(aconf->host,host);
-  DupString(aconf->passwd,buffer);
+  DupString(aconf->host,dlhost);
+  DupString(aconf->passwd,dlbuffer);
 
   aconf->ip = ip_host;
   aconf->ip_mask = ip_mask;
@@ -714,7 +714,7 @@ int mo_dline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   WriteKlineOrDline(DLINE_TYPE,
 		    sptr,
 		    NULL,
-		    host,
+		    dlhost,
 		    reason,
 		    current_date);
 
@@ -732,7 +732,7 @@ int mo_dline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
  * side effects -
  */
 int find_user_host(struct Client *sptr,
-		   char *user_host_or_nick, char *user, char *host)
+		   char *user_host_or_nick, char *luser, char *lhost)
 {
   struct Client *acptr;
   char *hostp;
@@ -744,14 +744,14 @@ int find_user_host(struct Client *sptr,
       if(hostp)                                    /* I'm a little user@host */
         {
           *(hostp++) = '\0';                       /* short and squat */
-          strncpy(user,user_host_or_nick,USERLEN); /* here is my user */
-          strncpy(host,hostp,HOSTLEN);             /* here is my host */
+          strncpy(luser,user_host_or_nick,USERLEN); /* here is my user */
+          strncpy(lhost,hostp,HOSTLEN);             /* here is my host */
         }
       else
         {
-          user[0] = '*';             /* no @ found, assume its *@somehost */
-          user[1] = '\0';	  
-          strncpy(host,user_host_or_nick,HOSTLEN);
+          luser[0] = '*';             /* no @ found, assume its *@somehost */
+          luser[1] = '\0';	  
+          strncpy(lhost,user_host_or_nick,HOSTLEN);
         }
 
       return 1;
@@ -787,11 +787,11 @@ int find_user_host(struct Client *sptr,
        * if found in original user name (non-idented)
        */
 
-      strncpy_irc(user, acptr->username, USERLEN);
+      strncpy_irc(luser, acptr->username, USERLEN);
       if (*acptr->username == '~')
-        user[0] = '*';
+        luser[0] = '*';
 
-      strncpy_irc(host,cluster(acptr->host),HOSTLEN);
+      strncpy_irc(lhost,cluster(acptr->host),HOSTLEN);
     }
 
   return 1;
@@ -805,20 +805,20 @@ int find_user_host(struct Client *sptr,
  * output	- 0 if not valid user or host, 1 if valid
  * side effects -
  */
-int valid_user_host( struct Client *sptr, char *user, char *host)
+int valid_user_host( struct Client *sptr, char *luser, char *lhost)
 {
   /*
    * Check for # in user@host
    */
 
-  if(strchr(host, '#'))
+  if(strchr(lhost, '#'))
     {
       if(!IsServer(sptr))
         sendto_one(sptr, ":%s NOTICE %s :Invalid character '#' in hostname",
                    me.name, sptr->name);
       return 0;
     }
-  if(strchr(user, '#'))
+  if(strchr(luser, '#'))
     { 
       if(!IsServer(sptr))
         sendto_one(sptr, ":%s NOTICE %s :Invalid character '#' in username",
@@ -837,7 +837,7 @@ int valid_user_host( struct Client *sptr, char *user, char *host)
  * output       - 0 if not valid, 1 if valid
  * side effects -
  */
-int valid_wild_card(struct Client *sptr, char *user, char *host)
+int valid_wild_card(struct Client *sptr, char *luser, char *lhost)
 {
   char *p;
   char tmpch;
@@ -856,7 +856,7 @@ int valid_wild_card(struct Client *sptr, char *user, char *host)
    */
 
   nonwild = 0;
-  p = user;
+  p = luser;
   while ((tmpch = *p++))
   {
     if (!IsKWildChar(tmpch))
@@ -943,7 +943,7 @@ int valid_comment(struct Client *sptr, char *comment)
  * output	- 1 if already placed, 0 if not
  * side effects - NONE
  */
-int already_placed_kline(struct Client *sptr, char *user, char *host,
+int already_placed_kline(struct Client *sptr, char *luser, char *lhost,
                          time_t tkline_time, unsigned long ip)
 {
   char *reason;
@@ -951,23 +951,23 @@ int already_placed_kline(struct Client *sptr, char *user, char *host,
 
   if(ConfigFileEntry.non_redundant_klines) 
     {
-      if ((aconf = find_matching_mtrie_conf(host,user,ip)) && 
+      if ((aconf = find_matching_mtrie_conf(lhost,luser,ip)) && 
          (aconf->status & CONF_KILL) && !IsServer(sptr))
         {
           reason = aconf->passwd ? aconf->passwd : "<No Reason>";
           sendto_one(sptr,
                      ":%s NOTICE %s :[%s@%s] already K-lined by [%s@%s] - %s",
-                     me.name, sptr->name, user, host, aconf->user,
+                     me.name, sptr->name, luser, lhost, aconf->user,
                      aconf->host, reason);
           return 1;
         }
 
-      if (tkline_time && (aconf = find_tkline(host,user,(unsigned long)ip)))
+      if (tkline_time && (aconf = find_tkline(lhost,luser,(unsigned long)ip)))
         {
           reason = aconf->passwd ? aconf->passwd : "<No Reason>";
           sendto_one(sptr,
                     ":%s NOTICE %s :[%s@%s] already temp K-lined by [%s@%s] - %s",
-                     me.name, sptr->name, user, host, aconf->user,
+                     me.name, sptr->name, luser, lhost, aconf->user,
                      aconf->host, reason);
           return 1;
         }
@@ -984,7 +984,7 @@ int already_placed_kline(struct Client *sptr, char *user, char *host,
  * output	- YES if valid ip_kline NO if not
  * side effects	- NONE
  */
-int is_ip_kline(char *host,unsigned long *ip, unsigned long *ip_mask)
+int is_ip_kline(char *lhost,unsigned long *ip, unsigned long *ip_mask)
 {
   char *p;
 
@@ -998,9 +998,9 @@ int is_ip_kline(char *host,unsigned long *ip, unsigned long *ip_mask)
   **
   */
 
-  if((is_address(host, ip, ip_mask)))
+  if((is_address(lhost, ip, ip_mask)))
      {
-       if( (p = strchr(host,'*')) )
+       if( (p = strchr(lhost,'*')) )
          {
            *p++ = '0';
            *p++ = '/';

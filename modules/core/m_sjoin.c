@@ -196,10 +196,10 @@ int     ms_sjoin(struct Client *cptr,
 
   if(parv[2][1] == '#')
     {
-      char *p;
+      char *subp;
 
       /* possible sub vchan being sent along ? */
-      if((p = strchr(parv[2],'_')))
+      if((subp = strchr(parv[2],'_')))
 	{
 	  /* quite possibly now. To confirm I could
 	   * check the encoded timestamp to see if it matches
@@ -207,7 +207,7 @@ int     ms_sjoin(struct Client *cptr,
 	   * that later. - db
 	   */
 
-	  *p = '\0';	/* fugly hack for now ... */
+	  *subp = '\0';	/* fugly hack for now ... */
 
 	  /* + 1 skip the extra '#' in the name */
 	  if((top_chptr = hash_find_channel((parv[2] + 1), NULL)))
@@ -231,7 +231,7 @@ int     ms_sjoin(struct Client *cptr,
 	      chptr->root_chptr=top_chptr;
 	    }
 
-	  *p = '_';	/* fugly hack, restore '_' */
+	  *subp = '_';	/* fugly hack, restore '_' */
 	}
     }
 
@@ -745,15 +745,15 @@ void remove_a_mode( int hide_or_not,
   dlink_node *ptr;
   struct Client *acptr;
   char buf[BUFSIZE];
-  char modebuf[MODEBUFLEN];
-  char *para[MAXMODEPARAMS];
+  char lmodebuf[MODEBUFLEN];
+  char *lpara[MAXMODEPARAMS];
   char *chname;
   int count = 0;
 
-  mbuf = modebuf;
+  mbuf = lmodebuf;
   *mbuf++ = '-';
 
-  para[0] = para[1] = para[2] = para[3] = "";
+  lpara[0] = lpara[1] = lpara[2] = lpara[3] = "";
 
   chname = chptr->chname;
 
@@ -765,7 +765,7 @@ void remove_a_mode( int hide_or_not,
   for (ptr = list->head; ptr && ptr->data; ptr = ptr->next)
     {
       acptr = ptr->data;
-      para[count++] = acptr->name;
+      lpara[count++] = acptr->name;
 
       *mbuf++ = flag;
 
@@ -776,13 +776,13 @@ void remove_a_mode( int hide_or_not,
 			       ":%s MODE %s %s %s %s %s %s",
 			       me.name,
 			       chname,
-			       modebuf,
-			       para[0], para[1], para[2], para[3] );
+			       lmodebuf,
+			       lpara[0], lpara[1], lpara[2], lpara[3] );
 
-	  mbuf = modebuf;
+	  mbuf = lmodebuf;
 	  *mbuf++ = '-';
 	  count = 0;
-	  para[0] = para[1] = para[2] = para[3] = "";
+	  lpara[0] = lpara[1] = lpara[2] = lpara[3] = "";
 	}
     }
 
@@ -793,8 +793,8 @@ void remove_a_mode( int hide_or_not,
 			   ":%s MODE %s %s %s %s %s %s",
 			   me.name,
 			   chname,
-			   modebuf,
-			   para[0], para[1], para[2], para[3] );
+			   lmodebuf,
+			   lpara[0], lpara[1], lpara[2], lpara[3] );
 
     }
 }

@@ -95,24 +95,20 @@ char *_version = "20001228";
 
 const char* Lformat = ":%s %d %s %s %u %u %u %u %u :%u %u %s";
 
-char *parse_stats_args(int parc,char *parv[],int *doall,int *wilds);
+char *parse_stats_args(int, char **, int *, int *);
 
-void stats_L(struct Client *sptr,char *name,int doall, int wilds,char stat);
-void stats_L_list(struct Client *sptr,char *name, int doall, int wilds,
-		  dlink_list *list, char stat);
-void stats_spy(struct Client *sptr,char stat);
-void stats_L_spy(struct Client *sptr, char stat, char *name);
-void stats_p_spy(struct Client *sptr);
-void do_normal_stats(struct Client *sptr, char *name, char *target,
-			    char stat, int doall, int wilds);
-void do_non_priv_stats(struct Client *sptr, char *name, char *target,
-			      char stat, int doall, int wilds);
-void do_priv_stats(struct Client *sptr, char *name, char *target,
-			  char stat, int doall, int wilds);
+void stats_L(struct Client *, char *, int, int, char);
+void stats_L_list(struct Client *s, char *, int, int, dlink_list *, char);
+void stats_spy(struct Client *, char);
+void stats_L_spy(struct Client *, char, char *);
+void stats_p_spy(struct Client *);
+void do_normal_stats(struct Client *, char *, char *, char, int, int);
+void do_non_priv_stats(struct Client *, char *, char *, char, int, int);
+void do_priv_stats(struct Client *, char *, char *, char, int, int);
 
 int m_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
-  char            stat = parc > 1 ? parv[1][0] : '\0';
+  char            statchar = parc > 1 ? parv[1][0] : '\0';
   int             doall = 0;
   int             wilds = 0;
   char            *name=NULL;
@@ -139,9 +135,9 @@ int m_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   if (parc > 3)
     target = parv[3];
 
-  do_normal_stats(sptr, name, target, stat, doall, wilds);
-  do_non_priv_stats(sptr, name, target, stat, doall, wilds);
-  sendto_one(sptr, form_str(RPL_ENDOFSTATS), me.name, parv[0], stat);
+  do_normal_stats(sptr, name, target, statchar, doall, wilds);
+  do_non_priv_stats(sptr, name, target, statchar, doall, wilds);
+  sendto_one(sptr, form_str(RPL_ENDOFSTATS), me.name, parv[0], statchar);
 
   return 0;
 }
@@ -171,7 +167,7 @@ int m_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
 int mo_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
-  char            stat = parc > 1 ? parv[1][0] : '\0';
+  char            statchar = parc > 1 ? parv[1][0] : '\0';
   int             doall = 0;
   int             wilds = 0;
   char            *name=NULL;
@@ -185,9 +181,9 @@ int mo_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   if (parc > 3)
     target = parv[3];
   
-  do_normal_stats(sptr, name, target, stat, doall, wilds);
-  do_priv_stats(sptr, name, target, stat, doall, wilds);
-  sendto_one(sptr, form_str(RPL_ENDOFSTATS), me.name, parv[0], stat);
+  do_normal_stats(sptr, name, target, statchar, doall, wilds);
+  do_priv_stats(sptr, name, target, statchar, doall, wilds);
+  sendto_one(sptr, form_str(RPL_ENDOFSTATS), me.name, parv[0], statchar);
 
   return 0;
 }
@@ -242,13 +238,13 @@ int ms_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
  */
 void do_normal_stats(struct Client *sptr,
 			    char *name, char *target,
-			    char stat, int doall, int wilds)
+			    char statchar, int doall, int wilds)
 {
-  switch (stat)
+  switch (statchar)
     {
     case 'L' : case 'l' :
-      stats_L(sptr,name,doall,wilds,stat);
-      stats_L_spy(sptr,stat,name);
+      stats_L(sptr,name,doall,wilds,statchar);
+      stats_L_spy(sptr,statchar,name);
       break;
 
     case 'u' :
@@ -260,7 +256,7 @@ void do_normal_stats(struct Client *sptr,
                    now/86400, (now/3600)%24, (now/60)%60, now%60);
         sendto_one(sptr, form_str(RPL_STATSCONN), me.name, sptr->name,
                    MaxConnectionCount, MaxClientCount, Count.totalrestartcount);
-	stats_spy(sptr,stat);
+	stats_spy(sptr,statchar);
         break;
       }
     default :
@@ -281,28 +277,28 @@ void do_normal_stats(struct Client *sptr,
  * side effects - only stats that are allowed for non-opers etc. are done here
  */
 void do_non_priv_stats(struct Client *sptr, char *name, char *target,
-			      char stat, int doall, int wilds)
+			      char statchar, int doall, int wilds)
 {
-  switch (stat)
+  switch (statchar)
     {
     case 'K' :
       if(target != (char *)NULL)
         report_matching_host_klines(sptr,target);
       else
 	report_matching_host_klines(sptr,sptr->host);
-      stats_spy(sptr,stat);
+      stats_spy(sptr,statchar);
       break;
 
     case 'o' : case 'O' :
       if (ConfigFileEntry.o_lines_oper_only && IsOper(sptr))
         {
           report_configured_links(sptr, CONF_OPS);
-          stats_spy(sptr,stat);
+          stats_spy(sptr,statchar);
         }
       else
         {
           sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, sptr->name);
-          stats_spy(sptr,stat);
+          stats_spy(sptr,statchar);
         }
       break;
 
@@ -315,7 +311,7 @@ void do_non_priv_stats(struct Client *sptr, char *name, char *target,
       else
 	{
 	  show_opers(sptr);
-	  stats_spy(sptr,stat);
+	  stats_spy(sptr,statchar);
 	}
       break;
 
@@ -338,7 +334,7 @@ void do_non_priv_stats(struct Client *sptr, char *name, char *target,
     case 'T' : case 't' :
     case 'Z' : case 'z' :
       sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, sptr->name);
-      stats_spy(sptr,stat);
+      stats_spy(sptr,statchar);
       break;
     }
 }
@@ -354,35 +350,35 @@ void do_non_priv_stats(struct Client *sptr, char *name, char *target,
  * side effects - only stats that are allowed for opers etc. are done here
  */
 void do_priv_stats(struct Client *sptr, char *name, char *target,
-			    char stat, int doall, int wilds)
+			    char statchar, int doall, int wilds)
 { 
- switch (stat)
+ switch (statchar)
     {
     case 'C' : case 'c' :
       report_configured_links(sptr, CONF_CONNECT_SERVER|CONF_NOCONNECT_SERVER);
-      stats_spy(sptr,stat);
+      stats_spy(sptr,statchar);
       break;
  
     case 'D': case 'd':
       report_dlines(sptr);
-      stats_spy(sptr,stat);
+      stats_spy(sptr,statchar);
       break;
 
     case 'E' : case 'e' :
       show_events(sptr);
-      stats_spy(sptr,stat);
+      stats_spy(sptr,statchar);
       break;
 
     case 'F' : case 'f' :
       fd_dump(sptr);
-      stats_spy(sptr,stat);
+      stats_spy(sptr,statchar);
       break;
 
     case 'G': case 'g' :
       if (ConfigFileEntry.glines)
 	{
 	  report_glines(sptr);
-	  stats_spy(sptr,stat);
+	  stats_spy(sptr,statchar);
 	}
       else
         sendto_one(sptr,":%s NOTICE %s :This server does not support G lines",
@@ -391,62 +387,62 @@ void do_priv_stats(struct Client *sptr, char *name, char *target,
 
     case 'H' : case 'h' :
       report_configured_links(sptr, CONF_HUB|CONF_LEAF);
-      stats_spy(sptr,stat);
+      stats_spy(sptr,statchar);
       break;
 
     case 'I' : case 'i' :
       report_mtrie_conf_links(sptr, CONF_CLIENT);
-      stats_spy(sptr,stat);
+      stats_spy(sptr,statchar);
       break;
 
     case 'K' :
       report_mtrie_conf_links(sptr, CONF_KILL);
-      stats_spy(sptr,stat);
+      stats_spy(sptr,statchar);
       break;
 
     case 'k' :
       report_temp_klines(sptr);
-      stats_spy(sptr,stat);
+      stats_spy(sptr,statchar);
       break;
 
     case 'M' : case 'm' :
       report_messages(sptr);
-      stats_spy(sptr,stat);
+      stats_spy(sptr,statchar);
       break;
 
     case 'o' : case 'O' :
       report_configured_links(sptr, CONF_OPS);
-      stats_spy(sptr,stat);
+      stats_spy(sptr,statchar);
       break;
 
     case 'P' :
       show_ports(sptr);
-      stats_spy(sptr,stat);
+      stats_spy(sptr,statchar);
       break;
 
     case 'Q' : case 'q' :
       report_qlines(sptr);
-      stats_spy(sptr,stat);
+      stats_spy(sptr,statchar);
       break;
 
     case 'R' : case 'r' :
       send_usage(sptr);
-      stats_spy(sptr,stat);
+      stats_spy(sptr,statchar);
       break;
 
     case 'S' : case 's':
       list_scache(sptr);
-      stats_spy(sptr,stat);
+      stats_spy(sptr,statchar);
       break;
 
     case 'T' : case 't' :
       tstats(sptr);
-      stats_spy(sptr,stat);
+      stats_spy(sptr,statchar);
       break;
 
     case 'U' :
       report_specials(sptr,CONF_ULINE,RPL_STATSULINE);
-      stats_spy(sptr,stat);
+      stats_spy(sptr,statchar);
       break;
 
     case 'p' :
@@ -458,33 +454,33 @@ void do_priv_stats(struct Client *sptr, char *name, char *target,
       else
 	{
 	  show_opers(sptr);
-          stats_spy(sptr,stat);
+          stats_spy(sptr,statchar);
 	}
       break;
 
     case 'v' : case 'V' :
       show_servers(sptr);
-      stats_spy(sptr,stat);
+      stats_spy(sptr,statchar);
       break;
 
     case 'X' : case 'x' :
       report_specials(sptr,CONF_XLINE,RPL_STATSXLINE);
-      stats_spy(sptr,stat);
+      stats_spy(sptr,statchar);
       break;
 
     case 'Y' : case 'y' :
       report_classes(sptr);
-      stats_spy(sptr,stat);
+      stats_spy(sptr,statchar);
       break;
 
     case 'Z' : case 'z' :
       count_memory(sptr);
-      stats_spy(sptr,stat);
+      stats_spy(sptr,statchar);
       break;
 
     case '?':
       serv_info(sptr);
-      stats_spy(sptr,stat);
+      stats_spy(sptr,statchar);
       break;
 
     }
@@ -499,15 +495,15 @@ void do_priv_stats(struct Client *sptr, char *name, char *target,
  * output	- NONE
  * side effects	-
  */
-void stats_L(struct Client *sptr,char *name,int doall, int wilds,char stat)
+void stats_L(struct Client *sptr,char *name,int doall, int wilds,char statchar)
 {
-  stats_L_list(sptr, name, doall, wilds, &unknown_list, stat);
-  stats_L_list(sptr, name, doall, wilds, &lclient_list, stat);
-  stats_L_list(sptr, name, doall, wilds, &serv_list, stat);
+  stats_L_list(sptr, name, doall, wilds, &unknown_list, statchar);
+  stats_L_list(sptr, name, doall, wilds, &lclient_list, statchar);
+  stats_L_list(sptr, name, doall, wilds, &serv_list, statchar);
 }
 
 void stats_L_list(struct Client *sptr,char *name, int doall, int wilds,
-		  dlink_list *list,char stat)
+		  dlink_list *list,char statchar)
 {
   dlink_node *ptr;
   struct Client *acptr;
@@ -539,7 +535,7 @@ void stats_L_list(struct Client *sptr,char *name, int doall, int wilds,
 	{
 	  sendto_one(sptr, Lformat, me.name,
                      RPL_STATSLINKINFO, sptr->name,
-                     (IsUpper(stat)) ?
+                     (IsUpper(statchar)) ?
                      get_client_name(acptr, TRUE) :
                      get_client_name(acptr, FALSE),
                      (int)linebuf_len(&acptr->localClient->buf_sendq),
@@ -568,7 +564,7 @@ void stats_L_list(struct Client *sptr,char *name, int doall, int wilds,
 	  else
 	    sendto_one(sptr, Lformat, me.name,
 		       RPL_STATSLINKINFO, sptr->name,
-		       (IsUpper(stat)) ?
+		       (IsUpper(statchar)) ?
 		       get_client_name(acptr, TRUE) :
 		       get_client_name(acptr, FALSE),
 		       (int)linebuf_len(&acptr->localClient->buf_sendq),
@@ -601,13 +597,13 @@ void stats_L_list(struct Client *sptr,char *name, int doall, int wilds,
  *
  * done --is
  */
-void stats_spy(struct Client *sptr,char stat)
+void stats_spy(struct Client *sptr,char statchar)
 {
   if (ConfigFileEntry.stats_notice)
     {
       sendto_realops_flags(FLAGS_SPY,
 			   "STATS %c requested by %s (%s@%s) [%s]",
-			   stat,
+			   statchar,
 			   sptr->name,
 			   sptr->username,
 			   sptr->host,
@@ -625,14 +621,14 @@ void stats_spy(struct Client *sptr,char stat)
  * side effects	- a notice is sent to opers, IF spy mode is configured
  * 		  in the conf file.
  */
-void stats_L_spy(struct Client *sptr, char stat, char *name)
+void stats_L_spy(struct Client *sptr, char statchar, char *name)
 {
   if (ConfigFileEntry.stats_notice)
     {
       if(name != NULL)
 	sendto_realops_flags(FLAGS_SPY,
 			     "STATS %c requested by %s (%s@%s) [%s] on %s",
-			     stat,
+			     statchar,
 			     sptr->name,
 			     sptr->username,
 			     sptr->host,
@@ -641,7 +637,7 @@ void stats_L_spy(struct Client *sptr, char stat, char *name)
       else
 	sendto_realops_flags(FLAGS_SPY,
 			     "STATS %c requested by %s (%s@%s) [%s]",
-			     stat,
+			     statchar,
 			     sptr->name,
 			     sptr->username,
 
