@@ -20,6 +20,11 @@
 #*/
 
 RM=@RM@
+prefix		= @prefix@
+exec_prefix	= @exec_prefix@
+bindir		= @bindir@
+mandir		= @mandir@
+sysconfdir	= @sysconfdir@
 
 # Default CFLAGS
 # CFLAGS = -g -O2 -DNDEBUG
