@@ -190,7 +190,7 @@ void _free_client(struct Client* client_p)
       if (-1 < client_p->fd)
 	fd_close(client_p->fd);
 
-#ifdef MEMDEBUG
+#ifndef NDEBUG
       mem_frob(client_p->localClient, sizeof(struct LocalUser));
 #endif
 
@@ -203,7 +203,7 @@ void _free_client(struct Client* client_p)
       --remote_client_count;
     }
 
-#ifdef MEMDEBUG
+#ifndef NDEBUG
   mem_frob(client_p, sizeof(struct Client));
 #endif
   BlockHeapFree(client_heap, client_p);
