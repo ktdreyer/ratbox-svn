@@ -71,7 +71,6 @@ _moddeinit(void)
 char *_version = "20001122";
 #endif
 
-char *parse_server_args(char *parv[], int parc, char *info, int *hop);
 int bogus_host(char *host);
 struct Client *server_exists(char *);
 
@@ -88,13 +87,20 @@ static void mr_server(struct Client *client_p, struct Client *source_p,
   char             info[REALLEN + 1];
   char             *name;
   struct Client    *target_p;
-  int              hop;
+  int hop;
 
-  if ( (name = parse_server_args(parv, parc, info, &hop)) == NULL )
+  if (parc < 4)
     {
       sendto_one(client_p,"ERROR :No servername");
+      exit_client(client_p, client_p, client_p, "Wrong number of args");
       return;
     }
+
+  name = parv[1];
+  hop = atoi(parv[2]);
+  strncpy_irc(info, parv[3], REALLEN);
+  info[REALLEN] = '\0';
+
   /* 
    * Reject a direct nonTS server connection if we're TS_ONLY -orabidoo
    */
@@ -226,7 +232,6 @@ static void mr_server(struct Client *client_p, struct Client *source_p,
   strncpy_irc(client_p->name, name, HOSTLEN);
   set_server_gecos(client_p, info);
   client_p->hopcount = hop;
-
   server_estab(client_p);
 }
 
@@ -255,11 +260,16 @@ static void ms_server(struct Client *client_p, struct Client *source_p,
   if (!IsServer(source_p))
    return;
 
-  if ( (name = parse_server_args(parv, parc, info, &hop)) == NULL )
+  if (parc < 4)
     {
       sendto_one(client_p,"ERROR :No servername");
       return;
     }
+
+  name = parv[1];
+  hop = atoi(parv[2]);
+  strncpy_irc(info, parv[3], REALLEN);
+  info[REALLEN] = '\0';
 
   if ((target_p = server_exists(name)))
     {
@@ -321,7 +331,7 @@ static void ms_server(struct Client *client_p, struct Client *source_p,
    * User nicks never have '.' in them and server names
    * must always have '.' in them.
    */
-  if ( strchr(name,'.') == NULL )
+  if (strchr(name,'.') == NULL)
     {
       /*
        * Server trying to use the same name as a person. Would
@@ -577,59 +587,6 @@ int set_server_gecos(struct Client *client_p, char *info)
     strncpy_irc(client_p->info, "(Unknown Location)", REALLEN);
 
   return 1;
-}
-
-
-/*
- * parse_server_args
- *
- * inputs	- parv parameters
- * 		- parc count
- *		- info string (to be filled in by this routine)
- *		- hop count (to be filled in by this routine)
- * output	- NULL if invalid params, server name otherwise
- * side effects	- parv[1] is trimmed to HOSTLEN size if needed.
- */
-
-char *parse_server_args(char *parv[], int parc, char *info, int *hop)
-{
-  int i;
-  char *name;
-
-  info[0] = '\0';
-
-  if (parc < 2 || *parv[1] == '\0')
-    return NULL;
-
-  *hop = 0;
-
-  name = parv[1];
-
-  if (parc > 3 && atoi(parv[2]))
-    {
-      *hop = atoi(parv[2]);
-      strncpy_irc(info, parv[3], REALLEN);
-      info[REALLEN] = '\0';
-    }
-  else if (parc > 2)
-    {
-      /*
-       * XXX - hmmmm
-       */
-      strncpy_irc(info, parv[2], REALLEN);
-      info[REALLEN] = '\0';
-      if ((parc > 3) && ((i = strlen(info)) < (REALLEN - 2)))
-        {
-          strcat(info, " ");
-          strncat(info, parv[3], REALLEN - i - 2);
-          info[REALLEN] = '\0';
-        }
-    }
-
-  if (strlen(name) > HOSTLEN)
-    return NULL;
-
-  return(name);
 }
 
 /*
