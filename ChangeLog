@@ -1,3 +1,16 @@
+leeh        2004/08/14 14:24:31 EDT	(20040814_2)
+
+  Modified files:
+    modules/core         channels.c 
+  Log:
+  - parabuf is unused now
+  - move modebuf to ms_sjoin()
+  
+  Revision  Changes    Path
+  1.7       +4 -6      ircd-ratbox/modules/core/channels.c
+
+
+
 leeh        2004/08/13 22:44:26 EDT	(20040814_1)
 
   Modified files:
