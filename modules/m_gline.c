@@ -33,7 +33,7 @@
 #include "irc_string.h"
 #include "ircd.h"
 #include "m_kline.h"
-#include "mtrie_conf.h"
+#include "hostmask.h"
 #include "numeric.h"
 #include "fdlist.h"
 #include "s_bsd.h"

@@ -33,7 +33,7 @@
 #include "irc_string.h"
 #include "ircd.h"
 #include "list.h"
-#include "mtrie_conf.h"
+#include "hostmask.h"
 #include "numeric.h"
 #include "s_conf.h"
 #include "s_log.h"

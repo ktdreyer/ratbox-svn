@@ -708,7 +708,7 @@ auth_entry:   AUTH
       }
     else
       {
-        add_mtrie_conf_entry(yy_aconf,CONF_CLIENT);
+        add_conf(yy_aconf);
       }
     yy_aconf = (struct ConfItem *)NULL;
   }; 

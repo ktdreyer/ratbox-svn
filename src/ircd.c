@@ -64,7 +64,7 @@
 #include "ircd_handler.h"
 #include "md5.h"
 #include "msg.h"         /* msgtab */
-#include "mtrie_conf.h"
+#include "hostmask.h"
 #include "numeric.h"
 #include "parse.h"
 #include "res.h"

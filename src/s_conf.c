@@ -51,7 +51,7 @@
 #include "ircd.h"
 #include "list.h"
 #include "listener.h"
-#include "mtrie_conf.h"
+#include "hostmask.h"
 #include "numeric.h"
 #include "res.h"    /* gethost_byname, gethost_byaddr */
 #include "fdlist.h"
@@ -472,7 +472,7 @@ int attach_Iline(struct Client* cptr, const char* username)
 
   if (IsGotId(cptr))
     {
-      aconf = find_matching_mtrie_conf(cptr->host,cptr->username,
+      aconf = find_matching_conf(cptr->host,cptr->username,
                                        &cptr->localClient->ip);
       if(aconf && !IsConfElined(aconf))
         {
@@ -487,8 +487,8 @@ int attach_Iline(struct Client* cptr, const char* username)
       non_ident[0] = '~';
       strncpy_irc(&non_ident[1],username, USERLEN - 1);
       non_ident[USERLEN] = '\0';
-      aconf = find_matching_mtrie_conf(cptr->host,non_ident,
-                                       &cptr->localClient->ip);
+      aconf = find_matching_conf(cptr->host,non_ident,
+                                 &cptr->localClient->ip);
       if(aconf && !IsConfElined(aconf))
         {
           if((tkline_conf = find_tkline(cptr->host,
@@ -1656,7 +1656,7 @@ struct ConfItem *find_is_klined(const char* host, const char* name,
    * CONF_CLIENT or NULL, i.e. no I line at all.
    */
 
-  found_aconf = find_matching_mtrie_conf(host, name, ip);
+  found_aconf = find_matching_conf(host, name, ip);
   if(found_aconf && (found_aconf->status & (CONF_ELINE|CONF_DLINE|CONF_KILL)))
     return(found_aconf);
 
@@ -2222,8 +2222,9 @@ static void clear_out_old_conf(void)
     for (cltmp = ClassList->next; cltmp; cltmp = cltmp->next)
       MaxLinks(cltmp) = -1;
 
-    clear_mtrie_conf_links();
-
+    /*clear_mtrie_conf_links();*/
+    clear_conf();
+    
     zap_Dlines();
     clear_special_conf(&x_conf);
     clear_special_conf(&u_conf);
@@ -2551,7 +2552,7 @@ void conf_add_k_conf(struct ConfItem *aconf)
 	{
 	  (void)collapse(aconf->host);
 	  (void)collapse(aconf->user);
-	  add_mtrie_conf_entry(aconf,CONF_KILL);
+	  add_conf(aconf);
 	}
     }
 }

@@ -31,7 +31,7 @@
 #include "dline_conf.h"
 #include "irc_string.h"
 #include "ircd.h"
-#include "mtrie_conf.h"
+#include "hostmask.h"
 #include "numeric.h"
 #include "fdlist.h"
 #include "s_bsd.h"
@@ -369,7 +369,7 @@ static void apply_kline(struct Client *sptr, struct ConfItem *aconf,
       add_ip_Kline(aconf);
     }
   else
-    add_mtrie_conf_entry(aconf,CONF_KILL);
+    add_conf(aconf);
 
   WriteKlineOrDline( KLINE_TYPE,
 		     sptr,
@@ -987,7 +987,7 @@ static int already_placed_kline(struct Client *sptr, char *luser, char *lhost,
   struct ConfItem *aconf;
   if(ConfigFileEntry.non_redundant_klines) 
     {
-      if ((aconf = find_matching_mtrie_conf(lhost,luser,ip)) && 
+      if ((aconf = find_matching_conf(lhost,luser,ip)) && 
          (aconf->status & CONF_KILL))
         {
           reason = aconf->passwd ? aconf->passwd : "<No Reason>";

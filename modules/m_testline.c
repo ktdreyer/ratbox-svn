@@ -33,7 +33,7 @@
 #include "s_conf.h"
 #include "send.h"
 #include "msg.h"
-#include "mtrie_conf.h"
+#include "hostmask.h"
 #include "numeric.h"
 #include "parse.h"
 #include "modules.h"
@@ -125,7 +125,7 @@ static int mo_testline(struct Client *cptr, struct Client *sptr,
 #endif
       (void)is_address(given_host,(unsigned long *)&IN_ADDR(ip),&host_mask);
       
-      aconf = find_matching_mtrie_conf(given_host,
+      aconf = find_matching_conf(given_host,
                                        given_name,
                                        &ip);
           

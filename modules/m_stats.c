@@ -33,7 +33,7 @@
 #include "listener.h"    /* show_ports */
 #include "ircd_handler.h"
 #include "msg.h"         /* Message */
-#include "mtrie_conf.h"  /* report_mtrie_conf_links */
+#include "hostmask.h"  /* report_mtrie_conf_links */
 #include "s_gline.h"     /* report_glines */
 #include "numeric.h"     /* ERR_xxx */
 #include "scache.h"      /* list_scache */
@@ -388,12 +388,12 @@ static void do_priv_stats(struct Client *sptr, char *name, char *target,
       break;
 
     case 'I' : case 'i' :
-      report_mtrie_conf_links(sptr, CONF_CLIENT);
+      report_hostmask_conf_links(sptr, CONF_CLIENT);
       stats_spy(sptr,statchar);
       break;
 
     case 'K' :
-      report_mtrie_conf_links(sptr, CONF_KILL);
+      report_hostmask_conf_links(sptr, CONF_KILL);
       stats_spy(sptr,statchar);
       break;
 

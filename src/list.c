@@ -29,7 +29,7 @@
 #include "common.h"
 #include "irc_string.h"
 #include "list.h"
-#include "mtrie_conf.h"
+#include "hostmask.h"
 #include "numeric.h"
 #include "res.h"
 #include "restart.h"
@@ -87,7 +87,7 @@ void outofmemory()
     abort();
 
   was_here = YES;
-  clear_mtrie_conf_links();
+  /* clear_mtrie_conf_links(); */
 
   log(L_CRIT, "Out of memory: restarting server...");
   restart("Out of Memory");

@@ -65,6 +65,7 @@ BASE_SRCS =                     \
   fileio.c                      \
   hash.c                        \
   hook.c                        \
+  hostmask.c                    \
   irc_string.c                  \
   ircd.c                        \
   ircd_signal.c                 \
@@ -77,7 +78,6 @@ BASE_SRCS =                     \
   memory.c                      \
   modules.c                     \
   motd.c                        \
-  mtrie_conf.c                  \
   oldparse.c			\
   numeric.c                     \
   packet.c                      \
