@@ -33,6 +33,7 @@
 #include "hash.h"
 #include "irc_string.h"
 #include "ircd.h"
+#include "ircd_defs.h"
 #include "list.h"
 #include "numeric.h"
 #include "packet.h"
@@ -1086,7 +1087,7 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
 {
     struct Client *cptr;
     int fd;
-    char servname[64]; /* XXX shouldn't this be SERVLEN or something? -- adrian */
+    char servname[HOSTLEN + 1];
 
     /* Make sure aconf is useful */
     assert(aconf != NULL);
@@ -1099,26 +1100,28 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
      * Make sure this server isn't already connected
      * Note: aconf should ALWAYS be a valid C: line
      */
-    if ((cptr = find_server(aconf->name))) { 
+    if ((cptr = find_server(aconf->name)))
+      { 
         sendto_realops("Server %s already present from %s",
-          aconf->name, get_client_name(cptr, TRUE));
+		       aconf->name, get_client_name(cptr, TRUE));
         if (by && IsPerson(by) && !MyClient(by))
-            sendto_one(by, ":%s NOTICE %s :Server %s already present from %s",
-              me.name, by->name, aconf->name,
-              get_client_name(cptr, TRUE));
+	  sendto_one(by, ":%s NOTICE %s :Server %s already present from %s",
+		     me.name, by->name, aconf->name,
+		     get_client_name(cptr, TRUE));
         return 0;
-    }
+      }
 
     /* XXX we should make sure we're not already connected! */
     strcpy(servname, "Server: ");
     strncat(servname, aconf->name, 64 - 9);
 
     /* create a socket for the server connection */ 
-    if ((fd = comm_open(AF_INET, SOCK_STREAM, 0, servname)) < 0) {
+    if ((fd = comm_open(AF_INET, SOCK_STREAM, 0, servname)) < 0)
+      {
         /* Eek, failure to create the socket */
         report_error("opening stream socket to %s: %s", aconf->name, errno);
         return 0;
-    }
+      }
 
     /* Create a client */
     cptr = make_client(NULL);
@@ -1151,7 +1154,8 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
      * Attach config entries to client here rather than in
      * serv_connect_callback(). This to avoid null pointer references.
      */
-    if (!attach_cn_lines(cptr, aconf->host)) {
+    if (!attach_cn_lines(cptr, aconf->host))
+      {
         sendto_realops("Host %s is not enabled for connecting:no C/N-line",
           aconf->host);
         if (by && IsPerson(by) && !MyClient(by))  
@@ -1160,7 +1164,7 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
         det_confs_butmask(cptr, 0);
         free_client(cptr);
         return 0;
-    }
+      }
     /*
      * at this point we have a connection in progress and C/N lines
      * attached to the client, the socket info should be saved in the
@@ -1169,18 +1173,21 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
      * The socket has been connected or connect is in progress.
      */
     make_server(cptr);
-    if (by && IsPerson(by)) {
+    if (by && IsPerson(by))
+      {
         strcpy(cptr->serv->by, by->name);
         if (cptr->serv->user)
             free_user(cptr->serv->user, NULL);
         cptr->serv->user = by->user;
         by->user->refcnt++;
-    } else {
+      }
+    else
+      {
         strcpy(cptr->serv->by, "AutoConn.");
         if (cptr->serv->user)
             free_user(cptr->serv->user, NULL);
         cptr->serv->user = NULL;
-    }
+      }
     cptr->serv->up = me.name;
     local[cptr->fd] = cptr;
     SetConnecting(cptr);

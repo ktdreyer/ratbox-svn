@@ -169,6 +169,13 @@ struct Client
 
   dlink_list      vchan_map;
 
+  /* caller ID allow list */
+  /* This has to be here, since a client on an on_allow_list could
+   * be a remote client. simpler to keep both here.
+   */
+  dlink_list	allow_list;	/* clients I'll allow to talk to me */
+  dlink_list	on_allow_list;	/* clients that have =me= on their allow list*/
+
   struct LocalUser *localClient;
 };
 
@@ -251,9 +258,6 @@ struct LocalUser
   int actually_read;  /* how many we've actually read in this second */
   int sent_parsed;      /* how many messages we've parsed in this second */
 
-  /* caller ID allow list */
-  dlink_list	allow_list;	/* clients I'll allow to talk to me */
-  dlink_list	on_allow_list;	/* clients that have =me= on their allow list*/
 };
 
 /*

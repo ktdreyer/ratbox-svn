@@ -1593,10 +1593,7 @@ int accept_message(struct Client *source, struct Client *target)
   dlink_node *ptr;
   struct Client *acptr;
 
-  assert(source->localClient != NULL);
-  assert(target->localClient != NULL);
-
-  for(ptr = target->localClient->allow_list.head; ptr; ptr = ptr->next )
+  for(ptr = target->allow_list.head; ptr; ptr = ptr->next )
     {
       acptr = ptr->data;
       if(source == acptr)
@@ -1619,11 +1616,8 @@ int add_to_accept(struct Client *source, struct Client *target)
   struct Client *acptr;
   int len;
 
-  assert(source->localClient != NULL);
-  assert(target->localClient != NULL);
-
   /* XXX MAX_ALLOW should be in config file not hard coded */
-  if ( (len = dlink_list_length(&target->localClient->allow_list)) >= 
+  if ( (len = dlink_list_length(&target->allow_list)) >= 
        MAX_ALLOW)
     {
       sendto_one(target,":%s NOTICE %s :Max accept targets reached %d",
@@ -1632,10 +1626,10 @@ int add_to_accept(struct Client *source, struct Client *target)
     }
 
   m = make_dlink_node();
-  dlinkAdd(source, m, &target->localClient->allow_list);
+  dlinkAdd(source, m, &target->allow_list);
 
   m = make_dlink_node();
-  dlinkAdd(target, m, &source->localClient->on_allow_list);
+  dlinkAdd(target, m, &source->on_allow_list);
   return 0;
 }
 
@@ -1658,20 +1652,17 @@ int del_from_accept(struct Client *source, struct Client *target)
   dlink_node *next_ptr2;
   struct Client *acptr;
 
-  assert(source->localClient != NULL);
-  assert(target->localClient != NULL);
-
-  for (ptr = target->localClient->allow_list.head; ptr; ptr = next_ptr)
+  for (ptr = target->allow_list.head; ptr; ptr = next_ptr)
     {
       next_ptr = ptr->next;
 
       acptr = ptr->data;
       if(source == acptr)
 	{
-	  dlinkDelete(ptr, &target->localClient->allow_list);
+	  dlinkDelete(ptr, &target->allow_list);
 	  free_dlink_node(ptr);
 
-	  for (ptr2 = source->localClient->on_allow_list.head; ptr2;
+	  for (ptr2 = source->on_allow_list.head; ptr2;
 	       ptr2 = next_ptr2)
 	    {
 	      next_ptr2 = ptr2->next;
@@ -1679,7 +1670,7 @@ int del_from_accept(struct Client *source, struct Client *target)
 	      acptr = ptr2->data;
 	      if (target == acptr)
 		{
-		  dlinkDelete(ptr2, &source->localClient->on_allow_list);
+		  dlinkDelete(ptr2, &source->on_allow_list);
 		  free_dlink_node(ptr2);
 		}
 	    }
@@ -1704,9 +1695,8 @@ int del_all_accepts(struct Client *dying)
   dlink_node *ptr;
   struct Client *acptr;
 
-  assert(dying->localClient != NULL);
 
-  for (ptr = dying->localClient->on_allow_list.head; ptr; ptr = ptr->next)
+  for (ptr = dying->on_allow_list.head; ptr; ptr = ptr->next)
     {
       acptr = ptr->data;
       del_from_accept(acptr, dying);
@@ -1729,20 +1719,42 @@ int list_all_accepts(struct Client *sptr)
 {
   dlink_node *ptr;
   struct Client *acptr;
+  char *nicks[8];
+  int j=0;
 
-  assert(sptr->localClient != NULL);
+  nicks[0] = nicks[1] = nicks[2] = nicks[3] = nicks[4] = nicks[5]
+    = nicks[6] = nicks[7] = "";
 
   sendto_one(sptr,":%s NOTICE %s :*** Current accept list",
 	     me.name, sptr->name);
 
-  for (ptr = sptr->localClient->allow_list.head; ptr; ptr = ptr->next)
+  for (ptr = sptr->allow_list.head; ptr; ptr = ptr->next)
     {
       acptr = ptr->data;
+
       if(acptr != NULL)
-	sendto_one(sptr,":%s NOTICE %s :%s",
-		   me.name, sptr->name, acptr->name);
+	{
+	  nicks[j++] = acptr->name;
+	}
+
+      if(j > 7)
+	{
+	  sendto_one(sptr,":%s NOTICE %s :%s %s %s %s %s %s %s %s",
+		     me.name, sptr->name,
+		     nicks[0], nicks[1], nicks[2], nicks[3],
+		     nicks[4], nicks[5], nicks[6], nicks[7] );
+	  j = 0;
+	  nicks[0] = nicks[1] = nicks[2] = nicks[3] = nicks[4] = nicks[5]
+	    = nicks[6] = nicks[7] = "";
+	}
+	
     }
 
+  if(j)
+    sendto_one(sptr,":%s NOTICE %s :%s %s %s %s %s %s %s %s",
+	       me.name, sptr->name,
+	       nicks[0], nicks[1], nicks[2], nicks[3],
+	       nicks[4], nicks[5], nicks[6], nicks[7] );
   return 0;
 }
 

@@ -50,29 +50,43 @@ int parse_client_queued(struct Client *cptr)
     struct LocalUser *lcptr = cptr->localClient;
     int checkflood = 1; /* Whether we're checking or not */
 
+#if 0
     if (IsServer(cptr))
-        checkflood = 0;
-    if (ConfigFileEntry.no_oper_flood && IsAnyOper(cptr))
-        checkflood = 0;
+#endif
+      {
+	while ((dolen = linebuf_get(&cptr->localClient->buf_recvq,
+				    readBuf, READBUF_SIZE)) > 0) {
+	  if (CLIENT_EXITED == client_dopacket(cptr, readBuf, dolen))
+	    return CLIENT_EXITED;
+	}
+      }
+#if 0
+    else
+      {
+	checkflood = 0;
+	if (ConfigFileEntry.no_oper_flood && IsAnyOper(cptr))
+	  checkflood = 0;
 
-    /*
-     * Handle flood protection here - if we exceed our flood limit on
-     * messages in this loop, we simply drop out of the loop prematurely.
-     *   -- adrian
-     */
+	/*
+	 * Handle flood protection here - if we exceed our flood limit on
+	 * messages in this loop, we simply drop out of the loop prematurely.
+	 *   -- adrian
+	 */
 
-    for (;;) {
-        if (checkflood && (lcptr->sent_parsed > lcptr->allow_read))
+	for (;;) {
+	  if (checkflood && (lcptr->sent_parsed > lcptr->allow_read))
             break;
-        assert(lcptr->sent_parsed <= lcptr->allow_read);
-        dolen = linebuf_get(&cptr->localClient->buf_recvq, readBuf,
-          READBUF_SIZE);
-        if (!dolen)
+	  assert(lcptr->sent_parsed <= lcptr->allow_read);
+	  dolen = linebuf_get(&cptr->localClient->buf_recvq, readBuf,
+			      READBUF_SIZE);
+	  if (!dolen)
             break;
-        if (CLIENT_EXITED == client_dopacket(cptr, readBuf, dolen))
+	  if (CLIENT_EXITED == client_dopacket(cptr, readBuf, dolen))
             return CLIENT_EXITED;
-        lcptr->sent_parsed++;
-    }
+	  lcptr->sent_parsed++;
+	}
+      }
+#endif
     return 1;
 }
 
