@@ -1955,10 +1955,7 @@ static void initconf(FBFILE* file, int use_include)
 	{
         case 'A':case 'a': /* Name, e-mail address of administrator */
           aconf->status = CONF_ADMIN;
-          if(host_field)
-            DupString(aconf->host, host_field);
-          if(user_field)
-            DupString(aconf->user, user_field);
+          add_host_user_port_fields(aconf,host_field,user_field,port_field);
           break;
 
         case 'C':
@@ -1994,36 +1991,16 @@ static void initconf(FBFILE* file, int use_include)
 
         case 'H': /* Hub server line */
         case 'h':
-          if(host_field)
-            DupString(aconf->host, host_field);
           aconf->status = CONF_HUB;
-          if(user_field)
-            DupString(aconf->user, user_field);
+          add_host_user_port_fields(aconf,host_field,user_field,port_field);
           conf_add_hub_or_leaf(aconf);
 	  break;
 
-#ifdef LITTLE_I_LINES
         case 'i': /* Just plain normal irc client trying  */
                   /* to connect to me */
-          aconf->status = CONF_CLIENT;
+#ifdef LITTLE_I_LINES
           aconf->flags |= CONF_FLAGS_LITTLE_I_LINE;
-
-          if(host_field)
-            {
-              host_field = set_conf_flags(aconf, host_field);
-              DupString(aconf->host, host_field);
-            }
-
-          if(user_field)
-            {
-              user_field = set_conf_flags(aconf, user_field);
-              DupString(aconf->user, user_field);
-	    }
-
-          conf_add_i_line(aconf,class_field);
-          aconf = NULL;
-          break;
-
+#endif
         case 'I': /* Just plain normal irc client trying  */
                   /* to connect to me */
           aconf->status = CONF_CLIENT;
@@ -2043,27 +2020,7 @@ static void initconf(FBFILE* file, int use_include)
           conf_add_i_line(aconf,class_field);
           aconf = NULL;
           break;
-#else
-        case 'i': /* Just plain normal irc client trying  */
-        case 'I': /* to connect to me */
-          aconf->status = CONF_CLIENT;
 
-          if(host_field)
-            {
-              host_field = set_conf_flags(aconf, host_field);
-              DupString(aconf->host, host_field);
-            }
-
-          if(user_field)
-            {
-              user_field = set_conf_flags(aconf, user_field);
-              DupString(aconf->user, user_field);
-	    }
-
-          conf_add_i_line(aconf,class_field);
-          aconf = NULL;
-          break;
-#endif
         case 'K': /* Kill user line on irc.conf           */
         case 'k':
           aconf->status = CONF_KILL;
@@ -2186,7 +2143,7 @@ static void initconf(FBFILE* file, int use_include)
 
   if (aconf)
     free_conf(aconf);
-  aconf = NULL;
+ aconf = NULL;
 
   fbclose(file);
   check_class();
