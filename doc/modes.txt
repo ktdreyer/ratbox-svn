@@ -1,4 +1,4 @@
-irc.monkie.org hybrid-7 oiwszcrkfydnxbaug biklmnopstvedIha bklovedIh
+irc.corefailure.com hybrid-7beta5 oiwszcerkfydnxbaugl biklmnopstveIha bkloveIh
 
 User Modes:
 
@@ -28,7 +28,6 @@ Channel Modes:
 
 +a - hideops    - Anonymous ops, chanops are hidden
 +b - ban        - Channel ban on nick!user@host
-+d - deny       - Ban based on the user's realname field
 +e - exempt     - Exemption from bans
 +h - halfop     - Half op (%), can kick non ops, not full ops
 +I - invex      - Invite exceptions, nick!user@host does not need to be
@@ -50,6 +49,6 @@ Channel Modes:
                   restrictions
 
 The third part of the 004 numeric lists channel modes that require arguments.
-Currently these are bklovedIh.
+Currently these are bkloveIh.
 
 # $Id$

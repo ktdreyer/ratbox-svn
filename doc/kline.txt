@@ -76,14 +76,12 @@ without a KLN capability.
 
   Server to server messages are formatted like this:
 
-
-  ":server.prefix KLINE oper target.server.name N user host :reason"
+  ":oper KLINE target.server.name N user host :reason"
     
   Note the difference between hybrid-6 GLINE which explicitly passed
 the oper user@host and server along. This was originally done to handle
 possible desync conditions, but is now shelved in favor of saving 
 some bandwidth.
-
 
    oper is the nick of the oper placing the kline
 
