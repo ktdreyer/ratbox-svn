@@ -1,6 +1,6 @@
 /*
  * ircd-ratbox: an advanced Internet Relay Chat Daemon(ircd).
- * help.c - code for dealing with conf stuff like k/d/x lines
+ * cache.c - code for caching files
  *
  * Copyright (C) 2003 Lee Hardy <lee@leeh.co.uk>
  * Copyright (C) 2003 ircd-ratbox development team
@@ -42,56 +42,51 @@
 #include "balloc.h"
 #include "event.h"
 #include "hash.h"
-#include "help.h"
+#include "cache.h"
 
-static BlockHeap *helpfile_heap = NULL;
-static BlockHeap *helpline_heap = NULL;
+static BlockHeap *cachefile_heap = NULL;
+static BlockHeap *cacheline_heap = NULL;
 
 const char emptyline[] = " ";
 
+/* init_cache()
+ *
+ * inputs	-
+ * outputs	-
+ * side effects - inits the file/line cache blockheaps
+ */
 void
-init_help(void)
+init_cache(void)
 {
-	helpfile_heap = BlockHeapCreate(sizeof(struct helpfile), HELPFILE_HEAP_SIZE);
-	helpline_heap = BlockHeapCreate(sizeof(struct helpline), HELPLINE_HEAP_SIZE);
+	cachefile_heap = BlockHeapCreate(sizeof(struct cachefile), CACHEFILE_HEAP_SIZE);
+	cacheline_heap = BlockHeapCreate(sizeof(struct cacheline), CACHELINE_HEAP_SIZE);
 }
 
-static void
-load_help_file(const char *hfname, const char *helpname, int flags)
+/* cache_file()
+ *
+ * inputs	- file to cache, files "shortname", flags to set
+ * outputs	- pointer to file cached, else NULL
+ * side effects -
+ */
+struct cachefile *
+cache_file(const char *filename, const char *shortname, int flags)
 {
 	FBFILE *in;
-	struct helpfile *hptr;
-	struct helpline *lineptr;
+	struct cachefile *cacheptr;
+	struct cacheline *lineptr;
 	char line[BUFSIZE];
 	char *p;
 
-	if((in = fbopen(hfname, "r")) == NULL)
-		return;
+	if((in = fbopen(filename, "r")) == NULL)
+		return NULL;
 
-	if(fbgets(line, sizeof(line), in) == NULL)
-		return;
+	cacheptr = BlockHeapAlloc(cachefile_heap);
+	memset(cacheptr, 0, sizeof(struct cachefile));
 
-	if((p = strchr(line, '\n')) != NULL)
-		*p = '\0';
+	strlcpy(cacheptr->name, shortname, sizeof(cacheptr->name));
+	cacheptr->flags = flags;
 
-	/* first line of a help file CANNOT be empty, m_help.c depends on
-	 * this assumption
-	 */
-	if(EmptyString(line))
-		return;
-	
-	hptr = BlockHeapAlloc(helpfile_heap);
-	memset(hptr, 0, sizeof(struct helpfile));
-
-	strlcpy(hptr->helpname, helpname, sizeof(hptr->helpname));
-	hptr->flags = flags;
-
-	/* add first line.. */
-	lineptr = BlockHeapAlloc(helpline_heap);
-	strlcpy(lineptr->data, line, sizeof(lineptr->data));
-	dlinkAdd(lineptr, &lineptr->linenode, &hptr->contents);
-
-	/* now add everything else */
+	/* cache the file... */
 	while(fbgets(line, sizeof(line), in) != NULL)
 	{
 		if((p = strchr(line, '\n')) != NULL)
@@ -99,24 +94,53 @@ load_help_file(const char *hfname, const char *helpname, int flags)
 
 		if(!EmptyString(line))
 		{
-			lineptr = BlockHeapAlloc(helpline_heap);
+			lineptr = BlockHeapAlloc(cacheline_heap);
 			strlcpy(lineptr->data, line, sizeof(lineptr->data));
-			dlinkAddTail(lineptr, &lineptr->linenode, &hptr->contents);
+			dlinkAddTail(lineptr, &lineptr->linenode, &cacheptr->contents);
 		}
 		else
-			dlinkAddTailAlloc((char *) emptyline, &hptr->contents);
+			dlinkAddTailAlloc((char *) emptyline, &cacheptr->contents);
 	}
 
 	fbclose(in);
-	add_to_help_hash(helpname, hptr);
+	return cacheptr;
 }
 
+/* free_cachefile()
+ *
+ * inputs	- cachefile to free
+ * outputs	-
+ * side effects - cachefile and its data is free'd
+ */
+void
+free_cachefile(struct cachefile *cacheptr)
+{
+	dlink_node *ptr;
+	dlink_node *next_ptr;
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, cacheptr->contents.head)
+	{
+		if(ptr->data != emptyline)
+			BlockHeapFree(cacheline_heap, ptr->data);
+	}
+
+	BlockHeapFree(cachefile_heap, cacheptr);
+}
+
+/* load_help()
+ *
+ * inputs	-
+ * outputs	-
+ * side effects - contents of help directories are loaded.
+ */
 void
 load_help(void)
 {
 	DIR *helpfile_dir = NULL;
 	struct dirent *ldirent= NULL;
 	char filename[MAXPATHLEN];
+	struct cachefile *cacheptr;
+
 #if defined(S_ISLNK) && defined(HAVE_LSTAT)
 	struct stat sb;
 #endif
@@ -130,7 +154,8 @@ load_help(void)
 	while((ldirent = readdir(helpfile_dir)) != NULL)
 	{
 		snprintf(filename, sizeof(filename), "%s/%s", HPATH, ldirent->d_name);
-		load_help_file(filename, ldirent->d_name, HELP_OPER);
+		cacheptr = cache_file(filename, ldirent->d_name, HELP_OPER);
+		add_to_help_hash(cacheptr->name, cacheptr);
 	}
 
 	helpfile_dir = opendir(UHPATH);
@@ -151,33 +176,20 @@ load_help(void)
 		 */
 		if(S_ISLNK(sb.st_mode))
 		{
-			struct helpfile *hptr = hash_find_help(ldirent->d_name, HELP_OPER);
+			cacheptr = hash_find_help(ldirent->d_name, HELP_OPER);
 
-			if(hptr != NULL)
+			if(cacheptr != NULL)
 			{
-				hptr->flags |= HELP_USER;
+				cacheptr->flags |= HELP_USER;
 				continue;
 			}
 		}
 #endif
 
-		load_help_file(filename, ldirent->d_name, HELP_USER);
+		cacheptr = cache_file(filename, ldirent->d_name, HELP_USER);
+		add_to_help_hash(cacheptr->name, cacheptr);
 	}
 
 	closedir(helpfile_dir);
 }
 
-void
-free_help(struct helpfile *hptr)
-{
-	dlink_node *ptr;
-	dlink_node *next_ptr;
-
-	DLINK_FOREACH_SAFE(ptr, next_ptr, hptr->contents.head)
-	{
-		if(ptr->data != emptyline)
-			BlockHeapFree(helpline_heap, ptr->data);
-	}
-
-	BlockHeapFree(helpfile_heap, hptr);
-}
