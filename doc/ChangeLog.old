@@ -1,3 +1,7 @@
+*** 20001231_5 by lusky
+- fixed make distclean for gnats
+
+
 *** 20001231_4 by db
 - hard to find typo in ircd_parser.y yyval instead of yylval
   caused it to core parsing message_local="string";
