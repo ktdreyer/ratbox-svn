@@ -323,19 +323,18 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
      if (!(aconf->status == CONF_LEAF || aconf->status == CONF_HUB))
        continue;
 
-     if (match(aconf->name,
-	       (aconf->status == CONF_LEAF) ? parv[0] : cptr->name))
-       continue;
-
-     if (match(aconf->host, host))
+     if (match(aconf->name, cptr->name))
        {
         if (aconf->status == CONF_HUB)
-          hlined++;
-       }
-     else
-       {
-        if (acptr->status == CONF_LEAF)
-          llined++;
+	  {
+	    if(match(aconf->host, host))
+	      hlined++;
+	  }
+        else if (acptr->status == CONF_LEAF)
+	  {
+	    if(match(aconf->host, host))
+	      llined++;
+	  }
        }
     }
   if (llined)
