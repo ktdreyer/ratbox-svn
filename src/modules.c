@@ -26,7 +26,6 @@
 #include <errno.h>
 #include <dirent.h>
 
-#define _XOPEN_SOURCE
 #include <limits.h>
 #include <unistd.h>
 #include <sys/types.h>

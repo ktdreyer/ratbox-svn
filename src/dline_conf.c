@@ -128,3 +128,4 @@ void report_dlines(struct Client *sptr)
 		sendto_one(sptr, form_str(RPL_STATSDLINE), me.name, sptr->name, conftype, host, pass);	
 	} PATRICIA_WALK_END;
 }
+

@@ -9,8 +9,6 @@
 #include "ircd_defs.h"    /* MAX_DATE_STRING */
 #endif
 
-#define _XOPEN_SOURCE
-
 #include <limits.h>       /* PATH_MAX */
 
 /* XXX really, should be mallocing this on the fly but... */
