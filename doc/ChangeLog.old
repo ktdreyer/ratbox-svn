@@ -1,3 +1,7 @@
+*** 20010215_2 by a1kmm
+- Fixed dserv to not core, although blockallocator is temporarily broken, so it isn't used now.
+
+
 *** 20010215_1 by db
 - I think this fixes /msg $ and /msg # stuff
 - also changed /msg opers@ to use local wallops
