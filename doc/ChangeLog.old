@@ -1,3 +1,22 @@
+leeh        2002/07/06 16:14:35 EDT	(20020706_4)
+
+  Modified files:
+    .                    BUGS RELNOTES 
+    contrib              lmh.diff 
+    modules              m_kline.c 
+  Log:
+  - updated RELNOTES and BUGS
+  - fixed a truth val in m_kline.c
+  - updated my patch wrt the m_kline.c updates
+  
+  Revision  Changes    Path
+  7.50      +1 -4      ircd-hybrid-7/BUGS
+  1.33      +11 -11    ircd-hybrid-7/RELNOTES
+  1.7       +53 -54    ircd-hybrid-7/contrib/lmh.diff
+  1.105     +2 -2      ircd-hybrid-7/modules/m_kline.c
+
+
+
 db          2002/07/06 12:58:59 EDT	(20020706_3)
 
   Modified files:
