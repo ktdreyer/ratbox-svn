@@ -1,3 +1,9 @@
+*** 20010918_2 by db
+- some cleanups to s_conf.c, no more attach_Iline vs. attach_iline
+  (happy now jer?) IMO s_conf.c is still a cesspool.
+
+
+
 *** 20010918_1 by jdc
 * src/s_conf.c: Check for lack-of serverinfo {} description field in
   configuration file.  Error out if conf lacks one.
