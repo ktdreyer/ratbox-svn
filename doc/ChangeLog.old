@@ -1,3 +1,7 @@
+*** 20010804_1 by leeh
+- updated jupe to take account of the GloalServerList
+
+
 *** 20010803_2 by leeh
 - undeffed USE_TABLE_MODE, theres a bug in chcap stuff which will core
   when removing jupes
