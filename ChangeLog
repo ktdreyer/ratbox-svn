@@ -1,3 +1,28 @@
+androsyn    2004/07/29 14:07:49 EDT	(20040729_5)
+
+  Modified files:
+    include              s_conf.h 
+    modules              m_dline.c m_kline.c m_resv.c m_xline.c 
+    src                  cache.c ircd.c ircd_lexer.l kdparse.c 
+                         s_conf.c s_log.c 
+  Log:
+  Missed some..
+  
+  Revision  Changes    Path
+  7.281     +4 -4      ircd-ratbox/include/s_conf.h
+  1.38      +3 -3      ircd-ratbox/modules/m_dline.c
+  1.185     +2 -2      ircd-ratbox/modules/m_kline.c
+  1.63      +2 -2      ircd-ratbox/modules/m_resv.c
+  1.54      +3 -3      ircd-ratbox/modules/m_xline.c
+  1.15      +1 -1      ircd-ratbox/src/cache.c
+  7.346     +1 -1      ircd-ratbox/src/ircd.c
+  1.160     +1 -1      ircd-ratbox/src/ircd_lexer.l
+  7.37      +4 -4      ircd-ratbox/src/kdparse.c
+  7.473     +5 -5      ircd-ratbox/src/s_conf.c
+  7.71      +2 -2      ircd-ratbox/src/s_log.c
+
+
+
 androsyn    2004/07/29 14:03:12 EDT	(20040729_4)
 
   Modified files:
