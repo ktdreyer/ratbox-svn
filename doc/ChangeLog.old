@@ -1,3 +1,9 @@
+*** 20010529_3 by jdc
+* Fixed "no previous declaration for start/stoptimer()" warnings by
+  defining functions as static.
+
+
+
 *** 20010529_2 by jdc
 * Added max_chans_per_user to /INFO output.
 
