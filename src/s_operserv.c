@@ -25,16 +25,19 @@ static struct client *operserv_p;
 static void u_oper_takeover(struct connection_entry *, char **, int);
 static void u_oper_osjoin(struct connection_entry *, char **, int);
 static void u_oper_ospart(struct connection_entry *, char **, int);
+static void u_oper_omode(struct connection_entry *, char **, int);
 
 static int s_oper_takeover(struct client *, char *parv[], int parc);
 static int s_oper_osjoin(struct client *, char *parv[], int parc);
 static int s_oper_ospart(struct client *, char *parv[], int parc);
+static int s_oper_omode(struct client *, char *parv[], int parc);
 
 static struct service_command operserv_command[] =
 {
 	{ "OSJOIN",	&s_oper_osjoin,		1, NULL, 1, 0L, 0, 0, CONF_OPER_OPERSERV, 0 },
 	{ "OSPART",	&s_oper_ospart,		1, NULL, 1, 0L, 0, 0, CONF_OPER_OPERSERV, 0 },
 	{ "TAKEOVER",	&s_oper_takeover,	1, NULL, 1, 0L, 0, 0, CONF_OPER_OPERSERV, 0 },
+	{ "OMODE",	&s_oper_omode,		2, NULL, 1, 0L, 0, 0, CONF_OPER_OPERSERV, 0 },
 	{ "\0", NULL, 0, NULL, 0, 0L, 0, 0, 0, 0 }
 };
 
@@ -43,6 +46,7 @@ static struct ucommand_handler operserv_ucommand[] =
 	{ "osjoin",	u_oper_osjoin,	CONF_OPER_OPERSERV, 2, 1, NULL },
 	{ "ospart",	u_oper_ospart,	CONF_OPER_OPERSERV, 2, 1, NULL },
 	{ "takeover",	u_oper_takeover,CONF_OPER_OPERSERV, 2, 1, NULL },
+	{ "omode",	u_oper_omode,	CONF_OPER_OPERSERV, 3, 1, NULL },
 	{ "\0", NULL, 0, 0, 0, NULL }
 };
 
@@ -204,7 +208,8 @@ u_oper_ospart(struct connection_entry *conn_p, char *parv[], int parc)
 				operserv_p->name, parv[1]);
 	}
 	else
-		sendto_one(conn_p, "%s not in channel %s", parv[1]);
+		sendto_one(conn_p, "%s not in channel %s", 
+				operserv_p->name, parv[1]);
 }
 
 static int
@@ -248,8 +253,42 @@ s_oper_ospart(struct client *client_p, char *parv[], int parc)
 	}
 	else
 		service_error(operserv_p, client_p, "%s not in channel %s", 
-				parv[0]);
+				operserv_p, parv[0]);
 
+	return 0;
+}
+
+static void
+u_oper_omode(struct connection_entry *conn_p, char *parv[], int parc)
+{
+	struct channel *chptr;
+
+	if((chptr = find_channel(parv[1])) == NULL)
+	{
+		sendto_one(conn_p, "Channel %s does not exist",	parv[1]);
+		return;
+	}
+
+	parse_full_mode(chptr, operserv_p, (const char **) parv, parc, 2);
+
+	sendto_one(conn_p, "OMODE issued");
+}
+
+static int
+s_oper_omode(struct client *client_p, char *parv[], int parc)
+{
+	struct channel *chptr;
+
+	if((chptr = find_channel(parv[0])) == NULL)
+	{
+		service_error(operserv_p, client_p,
+				"Channel %s does not exist", parv[1]);
+		return 0;
+	}
+
+	parse_full_mode(chptr, operserv_p, (const char **) parv, parc, 1);
+
+	service_error(operserv_p, client_p, "OMODE issued");
 	return 0;
 }
 

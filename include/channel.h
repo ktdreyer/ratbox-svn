@@ -12,6 +12,10 @@
 
 extern dlink_list channel_list;
 
+#define DIR_NONE -1
+#define DIR_ADD  1
+#define DIR_DEL  0
+
 struct chmode
 {
 	unsigned int mode;
@@ -96,5 +100,6 @@ extern void rejoin_service(struct client *service_p, struct channel *chptr, int 
 
 /* c_mode.c */
 int parse_simple_mode(struct chmode *, const char **, int, int);
+void parse_full_mode(struct channel *, struct client *, const char **, int, int);
 
 #endif

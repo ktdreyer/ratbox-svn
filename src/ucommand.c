@@ -24,8 +24,6 @@
 #include <crypt.h>
 #endif
 
-#define DIR_ADD 1
-#define DIR_DEL 2
 #define MAX_HELP_ROW 8
 
 static dlink_list ucommand_table[MAX_UCOMMAND_HASH];

@@ -13,13 +13,14 @@
 #include "scommand.h"
 #include "log.h"
 #include "hook.h"
+#include "modebuild.h"
 
 static void c_mode(struct client *, const char *parv[], int parc);
 struct scommand_handler mode_command = { "MODE", c_mode, 0, DLINK_EMPTY };
 
 /* linked list of services that were deopped */
-dlink_list deopped_list;
-dlink_list opped_list;
+static dlink_list deopped_list;
+static dlink_list opped_list;
 
 /* valid_key()
  *   validates key, and transforms to lower ascii
@@ -50,6 +51,39 @@ valid_key(const char *data)
 
 	return buf;
 }
+
+static void
+add_ban(const char *banstr, dlink_list *list)
+{
+	char *ban;
+	dlink_node *ptr;
+
+	DLINK_FOREACH(ptr, list->head)
+	{
+		if(!irccmp((const char *) ptr->data, banstr))
+			return;
+	}
+
+	ban = my_strdup(banstr);
+	dlink_add_alloc(ban, list);
+}
+
+static void
+del_ban(const char *banstr, dlink_list *list)
+{
+	dlink_node *ptr;
+
+	DLINK_FOREACH(ptr, list->head)
+	{
+		if(!irccmp(banstr, (const char *) ptr->data))
+		{
+			my_free(ptr->data);
+			dlink_destroy(ptr, list);
+			return;
+		}
+	}
+}
+
 
 int
 parse_simple_mode(struct chmode *mode, const char *parv[], int parc, int start)
@@ -160,92 +194,256 @@ parse_simple_mode(struct chmode *mode, const char *parv[], int parc, int start)
 	return 1;
 }
 
-/* change_chmember_status()
- *   changes a channel members +ov status
- *
- * inputs	- channel to change on, nick to change, mode to change,
- *		  direction
- * outputs	-
- */
-static void
-change_chmember_status(struct channel *chptr, const char *nick, 
-			char type, int dir)
+void
+parse_full_mode(struct channel *chptr, struct client *source_p,
+		const char **parv, int parc, int start)
 {
-	struct client *target_p;
-	struct chmember *mptr;
+	const char *p = parv[start];
+	int dir = DIR_ADD;
 
-	if((target_p = find_service(nick)) != NULL)
+	if(parc <= start)
+		return;
+
+	if(source_p)
+		modebuild_start(source_p, chptr);
+
+	start++;
+
+	for(; *p; p++)
 	{
-		/* only care about +/-o */
-		if(type != 'o')
-			return;
-
-		/* handle -o+o */
-		if(dir)
-			dlink_find_destroy(target_p, &deopped_list);
-		/* this is a -o */
-		else if(dlink_find(target_p, &deopped_list) == NULL)
-			dlink_add_alloc(target_p, &deopped_list);
-
-		return;
-	}
-
-	if((target_p = find_user(nick)) == NULL)
-		return;
-
-	if((mptr = find_chmember(chptr, target_p)) == NULL)
-		return;
-
-	if(type == 'o')
-	{
-		if(dir)
+		switch(*p)
 		{
-			mptr->flags &= ~MODE_DEOPPED;
-			mptr->flags |= MODE_OPPED;
-			dlink_add_alloc(mptr, &opped_list);
-		}
-		else
-			mptr->flags &= ~MODE_OPPED;
-	}
-	else if(type == 'v')
-	{
-		if(dir)
-			mptr->flags |= MODE_VOICED;
-		else
-			mptr->flags &= ~MODE_VOICED;
-	}
-}
+		case '+':
+			dir = DIR_ADD;
+			break;
+		case '-':
+			dir = DIR_DEL;
+			break;
 
-static void
-add_ban(const char *banstr, dlink_list *list)
-{
-	char *ban;
-	dlink_node *ptr;
+		case 'i':
+			if(dir)
+				chptr->mode.mode |= MODE_INVITEONLY;
+			else
+				chptr->mode.mode &= ~MODE_INVITEONLY;
 
-	DLINK_FOREACH(ptr, list->head)
-	{
-		if(!irccmp((const char *) ptr->data, banstr))
-			return;
-	}
+			if(source_p)
+				modebuild_add(dir, "i", NULL);
 
-	ban = my_strdup(banstr);
-	dlink_add_alloc(ban, list);
-}
+			break;
+		case 'm':
+			if(dir)
+				chptr->mode.mode |= MODE_MODERATED;
+			else
+				chptr->mode.mode &= ~MODE_MODERATED;
 
-static void
-del_ban(const char *banstr, dlink_list *list)
-{
-	dlink_node *ptr;
+			if(source_p)
+				modebuild_add(dir, "m", NULL);
 
-	DLINK_FOREACH(ptr, list->head)
-	{
-		if(!irccmp(banstr, (const char *) ptr->data))
+			break;
+		case 'n':
+			if(dir)
+				chptr->mode.mode |= MODE_NOEXTERNAL;
+			else
+				chptr->mode.mode &= ~MODE_NOEXTERNAL;
+
+			if(source_p)
+				modebuild_add(dir, "n", NULL);
+
+			break;
+		case 'p':
+			if(dir)
+				chptr->mode.mode |= MODE_PRIVATE;
+			else
+				chptr->mode.mode &= ~MODE_PRIVATE;
+
+			if(source_p)
+				modebuild_add(dir, "p", NULL);
+
+			break;
+		case 's':
+			if(dir)
+				chptr->mode.mode |= MODE_SECRET;
+			else
+				chptr->mode.mode &= ~MODE_SECRET;
+
+			if(source_p)
+				modebuild_add(dir, "s", NULL);
+
+			break;
+		case 't':
+			if(dir)
+				chptr->mode.mode |= MODE_TOPIC;
+			else
+				chptr->mode.mode &= ~MODE_TOPIC;
+
+			if(source_p)
+				modebuild_add(dir, "t", NULL);
+
+			break;
+
+		case 'k':
+			if(EmptyString(parv[start]))
+				return;
+
+			if(dir)
+			{
+				chptr->mode.mode |= MODE_KEY;
+				strlcpy(chptr->mode.key, parv[start],
+					sizeof(chptr->mode.key));
+
+				if(source_p)
+					modebuild_add(dir, "k",	chptr->mode.key);
+			}
+			else
+			{
+				chptr->mode.mode &= ~MODE_KEY;
+				chptr->mode.key[0] = '\0';
+
+				if(source_p)
+					modebuild_add(dir, "k", "*");
+			}
+
+
+			start++;
+			break;
+		case 'l':
+			if(dir)
+			{
+				if(EmptyString(parv[start]))
+					return;
+
+				chptr->mode.mode |= MODE_LIMIT;
+				chptr->mode.limit = atoi(parv[start]);
+
+				/* XXX - modebuild */
+				start++;
+			}
+			else
+			{
+				chptr->mode.mode &= ~MODE_LIMIT;
+				chptr->mode.limit = 0;
+
+				if(source_p)
+					modebuild_add(dir, "l", NULL);
+			}
+
+			break;
+
+		case 'o':
+		case 'v':
 		{
-			my_free(ptr->data);
-			dlink_destroy(ptr, list);
-			return;
+			struct client *target_p;
+			struct chmember *mptr;
+			const char *nick;
+
+			if(EmptyString(parv[start]))
+				return;
+
+			nick = parv[start];
+			start++;
+
+			if((target_p = find_service(nick)) != NULL)
+			{
+				/* dont allow generating modes against
+				 * services.. dont care about anything other
+				 * than +o either.  We lose state of +v on
+				 * services, but it doesnt matter.
+				 */
+				if(source_p || *p != 'o')
+					break;
+
+				/* handle -o+o */
+				if(dir)
+					dlink_find_destroy(target_p, &deopped_list);
+				/* this is a -o */
+				else if(dlink_find(target_p, &deopped_list) == NULL)
+					dlink_add_alloc(target_p, &deopped_list);
+			}
+
+			if((target_p = find_user(nick)) == NULL)
+				break;
+
+			if((mptr = find_chmember(chptr, target_p)) == NULL)
+				break;
+
+			if(*p == 'o')
+			{
+				if(dir)
+				{
+					mptr->flags &= ~MODE_DEOPPED;
+					mptr->flags |= MODE_OPPED;
+					dlink_add_alloc(mptr, &opped_list);
+				}
+				else
+					mptr->flags &= ~MODE_OPPED;
+
+				if(source_p)
+					modebuild_add(dir, "o", nick);
+			}
+			else
+			{
+				if(dir)
+					mptr->flags |= MODE_VOICED;
+				else
+					mptr->flags &= ~MODE_VOICED;
+
+				if(source_p)
+					modebuild_add(dir, "v", nick);
+			}
+
+			break;
+		}
+
+
+		case 'b':
+			if(EmptyString(parv[start]))
+				return;
+
+			if(dir)
+				add_ban(parv[start], &chptr->bans);
+			else
+				del_ban(parv[start], &chptr->bans);
+
+			if(source_p)
+				modebuild_add(dir, "b", parv[start]);
+
+			start++;
+			break;
+
+		case 'e':
+			if(EmptyString(parv[start]))
+				return;
+
+			if(dir)
+				add_ban(parv[start], &chptr->excepts);
+			else
+				del_ban(parv[start], &chptr->excepts);
+
+			if(source_p)
+				modebuild_add(dir, "e", parv[start]);
+
+			start++;
+			break;
+
+		case 'I':
+			if(EmptyString(parv[start]))
+				return;
+
+			if(dir)
+				add_ban(parv[start], &chptr->invites);
+			else
+				del_ban(parv[start], &chptr->invites);
+
+			if(source_p)
+				modebuild_add(dir, "I", parv[start]);
+
+			start++;
+			break;
 		}
 	}
+
+	if(source_p)
+		modebuild_finish();
 }
 
 /* c_mode()
@@ -258,9 +456,6 @@ c_mode(struct client *client_p, const char *parv[], int parc)
 	struct channel *chptr;
 	dlink_node *ptr;
 	dlink_node *next_ptr;
-	const char *p;
-	int args = 0;
-	int dir = 1;
 	int oldmode;
 
 	if(parc < 2 || EmptyString(parv[1]))
@@ -293,140 +488,7 @@ c_mode(struct client *client_p, const char *parv[], int parc)
 
 	oldmode = chptr->mode.mode;
 
-	p = parv[2];
-
-	while(*p)
-	{
-		switch(*p)
-		{
-			case '+':
-				dir = 1;
-				break;
-			case '-':
-				dir = 0;
-				break;
-
-			case 'i':
-				if(dir)
-					chptr->mode.mode |= MODE_INVITEONLY;
-				else
-					chptr->mode.mode &= ~MODE_INVITEONLY;
-				break;
-			case 'm':
-				if(dir)
-					chptr->mode.mode |= MODE_MODERATED;
-				else
-					chptr->mode.mode &= ~MODE_MODERATED;
-				break;
-			case 'n':
-				if(dir)
-					chptr->mode.mode |= MODE_NOEXTERNAL;
-				else
-					chptr->mode.mode &= ~MODE_NOEXTERNAL;
-				break;
-			case 'p':
-				if(dir)
-					chptr->mode.mode |= MODE_PRIVATE;
-				else
-					chptr->mode.mode &= ~MODE_PRIVATE;
-				break;
-			case 's':
-				if(dir)
-					chptr->mode.mode |= MODE_SECRET;
-				else
-					chptr->mode.mode &= ~MODE_SECRET;
-				break;
-			case 't':
-				if(dir)
-					chptr->mode.mode |= MODE_TOPIC;
-				else
-					chptr->mode.mode &= ~MODE_TOPIC;
-				break;
-
-			case 'k':
-				if(EmptyString(parv[3+args]))
-					return;
-
-				if(dir)
-				{
-					chptr->mode.mode |= MODE_KEY;
-					strlcpy(chptr->mode.key, parv[3+args],
-						sizeof(chptr->mode.key));
-				}
-				else
-				{
-					chptr->mode.mode &= ~MODE_KEY;
-					chptr->mode.key[0] = '\0';
-				}
-
-				args++;
-				break;
-			case 'l':
-				if(dir)
-				{
-					if(EmptyString(parv[3+args]))
-						return;
-
-					chptr->mode.mode |= MODE_LIMIT;
-					chptr->mode.limit = atoi(parv[3+args]);
-					args++;
-				}
-				else
-				{
-					chptr->mode.mode &= ~MODE_LIMIT;
-					chptr->mode.limit = 0;
-				}
-
-				break;
-
-			case 'o':
-			case 'v':
-				if(EmptyString(parv[3+args]))
-					return;
-
-				change_chmember_status(chptr, parv[3+args], *p, dir);
-				args++;
-				break;
-
-			case 'b':
-				if(EmptyString(parv[3+args]))
-					return;
-
-				if(dir)
-					add_ban(parv[3+args], &chptr->bans);
-				else
-					del_ban(parv[3+args], &chptr->bans);
-
-				args++;
-				break;
-	
-			case 'e':
-				if(EmptyString(parv[3+args]))
-					return;
-
-				if(dir)
-					add_ban(parv[3+args], &chptr->excepts);
-				else
-					del_ban(parv[3+args], &chptr->excepts);
-
-				args++;
-				break;
-
-			case 'I':
-				if(EmptyString(parv[3+args]))
-					return;
-
-				if(dir)
-					add_ban(parv[3+args], &chptr->invites);
-				else
-					del_ban(parv[3+args], &chptr->invites);
-
-				args++;
-				break;
-		}
-
-		p++;
-	}
+	parse_full_mode(chptr, NULL, (const char **) parv, parc, 2);
 
 	if(dlink_list_length(&opped_list))
 		hook_call(HOOK_MODE_OP, chptr, &opped_list);

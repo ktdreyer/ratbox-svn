@@ -6,15 +6,14 @@
  CLEAROPS    - {140} Clears channel ops without op flags
  DELBAN      - { 10} Deletes the given ban
  DELUSER     - {150} Removes a user from a channels access list
+ GETKEY      - {  1} Requests the key of the given channel
  INVITE      - {  1} Requests an invite to channel
- JOIN        - {190} Makes services sit temporarily in your channel
  LISTBANS    - { 10} Lists bans on a channel
  LISTUSERS   - {100} Lists users with access to a given channel
  MODAUTO     - {150} Modifies a users autolevel on the access list
  MODBAN      - { 10} Modifies a ban level
  MODUSER     - {150} Modifies a users level on the access list
  OP          - { 50} Makes services op yourself
- PART        - {190} Makes services leave your channel
  REGISTER    - {  -} Registers the given channel under your current username
  SUSPEND     - {100} Suspends given user at given level
  UNBAN       - { 10} Unbans yourself from a channel
