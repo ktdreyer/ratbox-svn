@@ -1,3 +1,9 @@
+*** 20001229_7 by davidt
+Fix gettext() for FreeBSD (LDFLAGS="-L/usr/local/lib" ./configure).
+Anyone with autoconf knowledge know how to make it check /usr/local/lib
+automagically?
+
+
 *** 20001229_6 by madmax
 Links are now stored in the file in a format resembling normal links output
 ie "servername uplink(me.name) :hops(1) info"
