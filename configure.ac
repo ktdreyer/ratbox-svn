@@ -614,6 +614,14 @@ AC_ARG_ENABLE(epoll,
 AC_HELP_STRING([--enable-epoll],[Enable sys_epoll support (Linux only)]),
 [SELECT_TYPE_EXPLICIT="epoll"; echo "Forcing Linux sys_epoll support to be enabled"],)
 
+AC_ARG_ENABLE(rtsigio,
+AC_HELP_STRING([--enable-rtsigio],[Enable SIGIO with RT Signals (Linux only)]),
+[SELECT_TYPE_EXPLICIT="sigio"; echo "Forcing Linux RT Sigio to be enabled"],)
+
+if test ! -z "$SELECT_TYPE_EXPLICIT"; then
+	SELECT_TYPE="$SELECT_TYPE_EXPLICIT"
+else
+
 haveselect=no
 AC_CHECK_FUNCS(select, [haveselect=yes], )
 if test "x$haveselect" = "xyes" ; then
@@ -684,6 +692,10 @@ main(int argc, char **argv)
 	fi
 fi
 
+
+
+
+fi
 
 echo "Using $SELECT_TYPE for select loop."
 
