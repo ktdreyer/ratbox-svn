@@ -1,3 +1,35 @@
+leeh        2004/01/20 06:02:28 EST	(20040120_0)
+
+  Modified files:
+    include              client.h conf.h io.h service.h 
+    src                  channel.c conf.c io.c newconf.c rserv.c 
+                         service.c ucommand.c 
+  Added files:
+    .                    CREDITS 
+  Log:
+  - add a CREDITS file
+  - implement reference counting for oper blocks, now deallocate them once
+    a user has logged in
+  - added rehash
+  - split the client/server stuff in sock_close() out into their own
+    functions
+  
+  Revision  Changes    Path
+  1.1       +14 -0     rserv/CREDITS (new)
+  1.16      +2 -0      rserv/include/client.h
+  1.10      +17 -3     rserv/include/conf.h
+  1.13      +7 -6      rserv/include/io.h
+  1.9       +2 -0      rserv/include/service.h
+  1.21      +4 -0      rserv/src/channel.c
+  1.18      +92 -3     rserv/src/conf.c
+  1.22      +45 -18    rserv/src/io.c
+  1.7       +12 -6     rserv/src/newconf.c
+  1.24      +1 -1      rserv/src/rserv.c
+  1.15      +7 -0      rserv/src/service.c
+  1.12      +15 -0     rserv/src/ucommand.c
+
+
+
 leeh        2004/01/19 11:06:10 EST	(20040119_0)
 
   Modified files:
