@@ -1,3 +1,17 @@
+leeh        2002/04/26 08:30:38 EDT	(20020426_3)
+
+  Modified files:
+    src                  m_error.c 
+  Log:
+  - only call exit_client() if MyClient(), else you have the situation where
+    if you get a command from a remote server we dont know, we exit the
+    client, the other server doesnt, and you get a desync.
+  
+  Revision  Changes    Path
+  7.24      +3 -1      ircd-hybrid-7/src/m_error.c
+
+
+
 leeh        2002/04/26 07:51:21 EDT	(20020426_2)
 
   Modified files:
