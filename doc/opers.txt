@@ -52,25 +52,27 @@ COMMAND         - USAGE and DESCRIPTION
                   Queries server [server] (or your own server if no
                   server parameter is given) for info corresponding to
                   <letter>.
+		         (X = Admin only.)
                   LETTER (* = Oper only.)
                   ------ (^ = Can be configured to be oper only.)
-                  * A - Shows the ADNS DNS servers in use
-                  * c - Shows C/N lines
+                  X A - Shows the ADNS DNS servers in use
+                  * c - Shows connect blocks
                   * d - Shows D lines
-                  * e - Shows Events
-                  * f - Shows File Descriptors
+		  * e - Shows exemptions to D lines
+                  X E - Shows Events
+                  X f - Shows File Descriptors
                   * g - Shows G lines
                   * h - Shows H/L lines
-                  * i - Shows I lines
-                    K - Shows K lines (or matched klines)
-                  * k - Shows temporary K lines (or matched temp klines)
-                    L - Shows IP and generic info about [nick]
-                    l - Shows hostname and generic info about [nick]
-                  * m - Shows commands and their usage
+                  ^ i - Shows I lines
+                  ^ K - Shows K lines (or matched klines)
+                  ^ k - Shows temporary K lines (or matched temp klines)
+                  * L - Shows IP and generic info about [nick]
+                  * l - Shows hostname and generic info about [nick]
+                    m - Shows commands and their usage
                   ^ o - Shows O/o lines
                   * P - Shows configured ports
                     p - Shows opers connected and their idle times
-                  * q - Shows quarantined nicks (Old Q: lines)
+                  * q - Shows resv'd nicks and channels
                   * r - Shows resource usage by ircd
                   * s - Shows the server cache
                   * t - Shows generic server stats
@@ -80,6 +82,7 @@ COMMAND         - USAGE and DESCRIPTION
                   * x - Shows gecos bans (Old X: lines)
                   * y - Shows Y lines
                   * z - Shows memory stats
+		  * Z - Show ziplinks stats
                   * ? - Shows connected servers and sendq info about them
 
   CONNECT       - CONNECT <server_A> [port] [server_B]
@@ -248,6 +251,21 @@ COMMAND         - USAGE and DESCRIPTION
                    -- Creates a new vchan
                    Note: this command is optionally available to users
 
++ RESV		 - RESV <channel|nick> :<reason>
+		   -- RESV a channel or nick
+		   Will create a resv for the given channel/nick, stopping
+		   local users from joining the channel, or using the
+		   nick.  Will not affect remote clients.
+
+		   If the oper is an admin, they may create a wildcard
+		   resv, for example: clones*
+
++ UNRESV	 - UNRESV <channel|nick>
+		   -- Remove a RESV on a channel or nick
+		   Will attempt to remove the resv for the given 
+		   channel/nick.  If the resv is conf based, the resv
+		   will not be removed.
+		   
 + MODLOAD        - MODLOAD <[path/]module.so>
                    -- Load a module into the ircd
                    the optional path can be an absolute path
