@@ -1576,7 +1576,7 @@ conf_set_connect_host(void *data)
 static void
 conf_set_connect_vhost(void *data)
 {
-	if(inetntop_sock(&yy_aconf->my_ipnum, (char *)data, HOSTIPLEN))
+	if(inetpton_sock(data, &yy_aconf->my_ipnum))
 	{
 		conf_report_error("Invalid netmask for server vhost (%s)",
 		    		  (char *) data);

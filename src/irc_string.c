@@ -405,6 +405,23 @@ inet_ntop6(const unsigned char *src, char *dst, unsigned int size)
 }
 #endif
 
+int
+inetpton_sock(const char *src, struct sockaddr_storage *dst)
+{
+	if(inetpton(AF_INET, src, &((struct sockaddr_in *)dst)->sin_addr))
+	{
+		((struct sockaddr_in *)dst)->sin_port = 0;
+		((struct sockaddr_in *)dst)->sin_family = AF_INET;
+		return 1;		
+	} 
+#ifdef IPV6
+	else if(inetpton(AF_INET6, src, &((struct sockaddr_in6 *)dst)->sin6_addr))
+	{
+		((struct sockaddr_in6 *)dst)->sin6_port = 0;
+		((struct sockaddr_in6 *)dst)->sin6_family = AF_INET6;
+	}
+#endif
+}
 
 const char *
 inetntop_sock(struct sockaddr_storage *src, char *dst, unsigned int size)
