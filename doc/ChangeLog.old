@@ -1,3 +1,8 @@
+*** 20000109_10 by db
+- bit more fleshing out of convertconf.c
+
+
+
 *** 20000109_9 by db
 - first rough outline of conversion program to convert old style
   to new style conf file format. No Makefile, incomplete still.
