@@ -85,20 +85,28 @@ int     m_userhost(struct Client *cptr,
       cn = strtoken(&p, (char *)NULL, ","), i++ )
     {
       if ((acptr = find_person(cn, NULL)))
-        {
-	  ircsprintf(response[i], "%s%s=%c%s@%s",
-		     acptr->name,
-		     IsAnyOper(acptr) ? "*" : "",
-		     (acptr->user->away) ? '-' : '+',
-		     acptr->username,
-		     acptr->host);
-        }
+	{
+	  if (acptr == sptr) /* show real IP for USERHOST on yourself */
+            ircsprintf(response[i], "%s%s=%c%s@%s",
+		       acptr->name,
+		       IsAnyOper(acptr) ? "*" : "",
+		       (acptr->user->away) ? '-' : '+',
+		       acptr->username,
+		       acptr->sockhost);
+          else
+            ircsprintf(response[i], "%s%s=%c%s@%s",
+		       acptr->name,
+		       IsAnyOper(acptr) ? "*" : "",
+		       (acptr->user->away) ? '-' : '+',
+		       acptr->username,
+		       acptr->host);
+
+	}
     }
 
-  ircsprintf(buf, "%s%s %s %s %s %s",
-    form_str(RPL_USERHOST),
+  ircsprintf(buf, "%s %s %s %s %s",
     response[0], response[1], response[2], response[3], response[4] );
-  sendto_one(sptr, "%s", buf, me.name, parv[0]);
+  sendto_one(sptr, form_str(RPL_USERHOST), me.name, parv[0], buf);
 
   return 0;
 }
