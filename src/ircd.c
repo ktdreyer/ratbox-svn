@@ -464,7 +464,7 @@ static void write_pidfile(const char *filename)
 static void check_pidfile(const char *filename)
 {
   FBFILE* fb;
-  char buff[20];
+  char buff[32];
   pid_t pidfromfile;
 
   /* Don't do logging here, since we don't have log() initialised */
