@@ -209,7 +209,7 @@ static int      proc_answer(ResRQ* request, HEADER* header,
                                     char *, char *);
 static ResRQ*   find_id(int);
 
-/*static struct cache* make_cache(ResRQ* request);*/
+static struct cache* make_cache(ResRQ* request);
 
 static  struct  resinfo {
   int  re_errors;
@@ -1119,7 +1119,7 @@ res_readreply(int fd, void *data)
        * this should never happen, bail here and leave the client unresolved
        */
 
-      assert(!request->sent);
+      assert(0);
 
 #if 0
       (*request->query.callback)(request->query.vptr, 0);

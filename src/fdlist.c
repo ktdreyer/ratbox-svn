@@ -104,6 +104,7 @@ void
 fd_close(int fd)
 {
     fde_t *F = &fd_table[fd];
+    assert(F->flags.open);
     /* All disk fd's MUST go through file_close() ! */
     assert(F->type != FD_FILE);
     if (F->type == FD_FILE) {

@@ -403,13 +403,13 @@ check_pings_list(dlink_list *list)
 static void
 check_unknowns_list(dlink_list *list)
 {
-  dlink_node *ptr;
+  dlink_node *ptr, *next;
   struct Client *cptr;
 
-  for(ptr = list->head; ptr; ptr = ptr->next)
+  for(ptr = list->head; ptr; ptr = next)
     {
       cptr = ptr->data;
-
+      next = ptr->next;
       /*
        * Check UNKNOWN connections - if they have been in this state
        * for > 30s, close them.
@@ -1011,12 +1011,13 @@ const char* get_client_host(struct Client* client)
 
 void free_exited_clients( void )
 {
-  dlink_node *ptr;
+  dlink_node *ptr, *next;
   struct Client *acptr;
   
-  for(ptr = dead_list.head; ptr; ptr = ptr->next)
+  for(ptr = dead_list.head; ptr; ptr = next)
   {
     acptr = ptr->data;
+    next = ptr->next;
     if (ptr->data == NULL)
     {
       sendto_realops_flags(FLAGS_ALL,

@@ -249,7 +249,7 @@ static void auth_dns_callback(void* vptr, struct DNSReply* reply)
 #ifdef USE_IAUTH
       link_auth_request(auth, &auth_client_list);
 #endif
-      /*free_auth_request(auth);*/
+      free_auth_request(auth);
     }
 }
 
