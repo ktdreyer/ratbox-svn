@@ -26,6 +26,7 @@
 #include "common.h"   /* bleah */
 #include "handlers.h"
 #include "client.h"
+#include "common.h"   /* bleah */
 #include "channel.h"
 #include "vchannel.h"
 #include "hash.h"
@@ -261,6 +262,7 @@ static int global_whois(struct Client *sptr, char *nick, int wilds)
 static int single_whois(struct Client *sptr,struct Client *acptr,int wilds)
 {
   char buf[BUFSIZE];
+  char *chname;
   static struct User UnknownUser =
   {
     NULL,       /* next */
@@ -277,6 +279,7 @@ static int single_whois(struct Client *sptr,struct Client *acptr,int wilds)
   struct User   *user;
   struct Client *a2cptr;
   struct Channel *chptr;
+  struct Channel *bchan;
   int   len;
   int   mlen;
   int found_mode;
@@ -320,9 +323,18 @@ static int single_whois(struct Client *sptr,struct Client *acptr,int wilds)
        lp = lp->next)
     {
       chptr = lp->value.chptr;
+      chname = chptr->chname;
+
+      if (IsVchan(chptr))
+	{
+	  bchan = find_bchan (chptr);
+	  if (bchan != NULL)
+	    chname = bchan->chname;
+	}
+
       if (ShowChannel(sptr, chptr))
 	{
-	  if (len + strlen(chptr->chname)
+	  if (len + strlen(chname)
 	      > (size_t) BUFSIZE - 4 - mlen)
 	    {
 	      sendto_one(sptr,
@@ -340,7 +352,7 @@ static int single_whois(struct Client *sptr,struct Client *acptr,int wilds)
 	    *(buf + len++) = '+';
 	  if (len)
 	    *(buf + len) = '\0';
-	  (void)strcpy(buf + len, chptr->chname);
+	  (void)strcpy(buf + len, chname);
 	  len += strlen(chptr->chname);
 	  (void)strcat(buf + len, " ");
 	  len++;
@@ -384,4 +396,28 @@ static int single_whois(struct Client *sptr,struct Client *acptr,int wilds)
 	       acptr->firsttime);
   
   return 1;
+}
+
+/*
+** ms_whois
+**      parv[0] = sender prefix
+**      parv[1] = nickname masklist
+*/
+int     ms_whois(struct Client *cptr,
+                struct Client *sptr,
+                int parc,
+                char *parv[])
+{
+  /* If its running as a hub, and linked with lazy links
+   * then allow leaf to use normal client m_names()
+   * other wise, ignore it.
+   */
+
+  if( ConfigFileEntry.hub )
+    {
+      if(!IsCapable(cptr->from,CAP_LL))
+	return 0;
+    }
+
+  return( m_whois(cptr,sptr,parc,parv) );
 }

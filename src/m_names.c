@@ -416,12 +416,18 @@ int ms_names( struct Client *cptr,
 	      int parc,
 	      char *parv[])
 { 
+  /* If its running as a hub, and linked with lazy links
+   * then allow leaf to use normal client m_names()
+   * other wise, ignore it.
+   */
+
   if( ConfigFileEntry.hub )
     {
       if(!IsCapable(cptr->from,CAP_LL))
 	return 0;
     }
-  return(1);
+
+  return( m_names(cptr,sptr,parc,parv) );
 }
 
 

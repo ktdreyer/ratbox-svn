@@ -586,11 +586,11 @@ struct Message msgtab[] = {
   },
   {MSG_WHOIS, 0, 1, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_whois, m_whois, m_whois }
+    { m_unregistered, m_whois, ms_whois, m_whois }
   },
   {MSG_WHO, 0, 1, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_who, m_ignore, m_who }
+    { m_unregistered, m_who, ms_who, m_who }
   },
   {MSG_WHOWAS, 0, 1, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
@@ -994,8 +994,18 @@ int m_not_oper(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
 
 int m_unregistered(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
 {
-  sendto_one(cptr, ":%s %d * %s :Register first.",
-             me.name, ERR_NOTREGISTERED, parv[0]);
+  /* bit of a hack.
+   * I don't =really= want to waste a bit in a flag
+   * number_of_nick_changes is only really valid after the client
+   * is fully registered..
+   */
+
+  if( cptr->number_of_nick_changes == 0 )
+    {
+      sendto_one(cptr, ":%s %d * %s :Register first.",
+		 me.name, ERR_NOTREGISTERED, parv[0]);
+      cptr->number_of_nick_changes++;
+    }
   return 0;
 }
 

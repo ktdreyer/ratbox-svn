@@ -96,6 +96,10 @@
  *                      non-NULL pointers.
  */
 
+static void part_one_client(struct Client *cptr,
+			    struct Client *sptr,
+			    char *name);
+
 /*
 ** m_part
 **      parv[0] = sender prefix
@@ -106,138 +110,160 @@ int     m_part(struct Client *cptr,
                int parc,
                char *parv[])
 {
-  struct Channel *chptr;
-  struct Channel *vchan;
+  int t_delta;
+  int decrement_count;
   char  *p, *name;
+
+  if (parc < 2 || parv[1][0] == '\0')
+    {
+      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
+                 me.name, parv[0], "PART");
+      return 0;
+    }
 
   name = strtoken( &p, parv[1], ",");
 
-#ifdef ANTI_SPAMBOT     /* Dianora */
-      /* if its my client, and isn't an oper */
+  /* if its my client, and isn't an oper */
 
-      if (name && MyConnect(sptr))
-        {
-          if(GlobalSetOptions.spam_num &&
-	     (sptr->join_leave_count >= GlobalSetOptions.spam_num))
-            {
-              sendto_ops_flags(FLAGS_BOTS,
-                               "User %s (%s@%s) is a possible spambot",
-                               sptr->name,
-                               sptr->username, sptr->host);
-              sptr->oper_warn_count_down = OPER_SPAM_COUNTDOWN;
-            }
-          else
-            {
-              int t_delta;
-
-              if( (t_delta = (CurrentTime - sptr->last_leave_time)) >
-                  JOIN_LEAVE_COUNT_EXPIRE_TIME)
-                {
-                  int decrement_count;
-                  decrement_count = (t_delta/JOIN_LEAVE_COUNT_EXPIRE_TIME);
-
-                  if(decrement_count > sptr->join_leave_count)
-                    sptr->join_leave_count = 0;
-                  else
-                    sptr->join_leave_count -= decrement_count;
-                }
-              else
-                {
-                  if( (CurrentTime - (sptr->last_join_time)) < 
-		      GlobalSetOptions.spam_time)
-                    {
-                      /* oh, its a possible spambot */
-                      sptr->join_leave_count++;
-                    }
-                }
-              sptr->last_leave_time = CurrentTime;
-            }
-        }
-#endif
-
-  while ( name )
+  if (name)
     {
-      chptr = get_channel(sptr, name, 0);
-      if (!chptr)
-        {
-          sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL),
-                     me.name, parv[0], name);
-          name = strtoken(&p, (char *)NULL, ",");
-          continue;
-        }
-
-      if (HasVchans(chptr))
+      if(GlobalSetOptions.spam_num &&
+	 (sptr->join_leave_count >= GlobalSetOptions.spam_num))
 	{
-	  vchan = map_vchan(chptr,sptr);
-	  if(vchan == 0)
+	  sendto_ops_flags(FLAGS_BOTS,
+			   "User %s (%s@%s) is a possible spambot",
+			   sptr->name,
+			   sptr->username, sptr->host);
+	  sptr->oper_warn_count_down = OPER_SPAM_COUNTDOWN;
+	}
+      else
+	{
+	  if( (t_delta = (CurrentTime - sptr->last_leave_time)) >
+	      JOIN_LEAVE_COUNT_EXPIRE_TIME)
 	    {
-	      if (!IsMember(sptr, chptr))
-		{
-		  sendto_one(sptr, form_str(ERR_NOTONCHANNEL),
-			     me.name, parv[0], name);
-		  name = strtoken(&p, (char *)NULL, ",");
-		  continue;
-		}
-	      /*
-	      **  Remove user from the old channel (if any)
-	      */
-            
-	      sendto_match_servs(chptr, cptr, ":%s PART %s", parv[0], name);
-            
-	      sendto_channel_butserv(chptr, sptr, ":%s PART %s", parv[0],
-				     name);
-	      remove_user_from_channel(sptr, chptr, 0);
+	      decrement_count = (t_delta/JOIN_LEAVE_COUNT_EXPIRE_TIME);
+	      
+	      if(decrement_count > sptr->join_leave_count)
+		sptr->join_leave_count = 0;
+	      else
+		sptr->join_leave_count -= decrement_count;
 	    }
 	  else
 	    {
-	      if (!IsMember(sptr, vchan))
+	      if( (CurrentTime - (sptr->last_join_time)) < 
+		  GlobalSetOptions.spam_time)
 		{
-		  sendto_one(sptr, form_str(ERR_NOTONCHANNEL),
-			     me.name, parv[0], name);
-		  name = strtoken(&p, (char *)NULL, ",");
-		  continue;
+		  /* oh, its a possible spambot */
+		  sptr->join_leave_count++;
 		}
-	      /*
-	      **  Remove user from the old channel (if any)
-	      */
-            
-	      sendto_match_servs(chptr, cptr, ":%s PART %s", parv[0], name);
-            
-	      sendto_channel_butserv(vchan, sptr, ":%s PART %s", parv[0],
-				     name);
-	      remove_user_from_channel(sptr, vchan, 0);
 	    }
+	  sptr->last_leave_time = CurrentTime;
 	}
-      else
+     
+      while(name)
+	{
+	  part_one_client(cptr,sptr,name);
+	  name = strtoken(&p, (char *)NULL, ",");
+	}
+      return 1;
+    }
+
+  return 0;
+}
+
+/*
+ * part_one_client
+ *
+ * inputs	- pointer to server
+ * 		- pointer to source client to remove
+ *		- char pointer of name of channel to remove from
+ * output	- none
+ * side effects	- remove ONE client given the channel name 
+ */
+static void part_one_client(struct Client *cptr,
+			   struct Client *sptr,
+			   char *name)
+{
+  struct Channel *chptr;
+  struct Channel *vchan;
+
+  chptr = get_channel(sptr, name, 0);
+  if (!chptr)
+    {
+      sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL),
+		 me.name, sptr->name, name);
+      return;
+    }
+
+  if (HasVchans(chptr))
+    {
+      vchan = map_vchan(chptr,sptr);
+      if(vchan == 0)
 	{
 	  if (!IsMember(sptr, chptr))
 	    {
 	      sendto_one(sptr, form_str(ERR_NOTONCHANNEL),
-			 me.name, parv[0], name);
-	      name = strtoken(&p, (char *)NULL, ",");
-	      continue;
+			 me.name, sptr->name, name);
+	      return;
 	    }
 	  /*
 	  **  Remove user from the old channel (if any)
 	  */
-
-	  sendto_match_servs(chptr, cptr, ":%s PART %s", parv[0], name);
-            
-	  sendto_channel_butserv(chptr, sptr, ":%s PART %s", parv[0], name);
+	  
+	  sendto_match_servs(chptr, cptr, ":%s PART %s", sptr->name, name);
+	  
+	  sendto_channel_butserv(chptr, sptr, ":%s PART %s", sptr->name, name);
 	  remove_user_from_channel(sptr, chptr, 0);
 	}
+      else
+	{
+	  if (!IsMember(sptr, vchan))
+	    {
+	      sendto_one(sptr, form_str(ERR_NOTONCHANNEL),
+			 me.name, sptr->name, name);
+	      return;
+	    }
+	  /*
+	  **  Remove user from the old channel (if any)
+	  */
             
-      name = strtoken(&p, (char *)NULL, ",");
+	  sendto_match_servs(chptr, cptr, ":%s PART %s", sptr->name, name);
+            
+	  sendto_channel_butserv(vchan, sptr, ":%s PART %s", sptr->name, name);
+	  remove_user_from_channel(sptr, vchan, 0);
+	}
     }
-  return 0;
+  else
+    {
+      if (!IsMember(sptr, chptr))
+	{
+	  sendto_one(sptr, form_str(ERR_NOTONCHANNEL),
+		     me.name, sptr->name, name);
+	  return;
+	}
+      /*
+      **  Remove user from the old channel (if any)
+      */
+
+      sendto_match_servs(chptr, cptr, ":%s PART %s", sptr->name, name);
+            
+      sendto_channel_butserv(chptr, sptr, ":%s PART %s", sptr->name, name);
+      remove_user_from_channel(sptr, chptr, 0);
+    }
 }
+
+/*
+ * ms_part
+ *
+ * same as m_part
+ * but no spam checks
+ */
 
 int     ms_part(struct Client *cptr,
                struct Client *sptr,
                int parc,
                char *parv[])
 {
-  struct Channel *chptr;
   char  *p, *name;
 
   if (parc < 2 || parv[1][0] == '\0')
@@ -247,43 +273,27 @@ int     ms_part(struct Client *cptr,
 
   name = strtoken( &p, parv[1], ",");
 
-  while ( name )
+  while(name)
     {
-      chptr = get_channel(sptr, name, 0);
-      if (!chptr)
-        {
-          sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL),
-                     me.name, parv[0], name);
-          name = strtoken(&p, (char *)NULL, ",");
-          continue;
-        }
-
-      if (!IsMember(sptr, chptr))
-        {
-          sendto_one(sptr, form_str(ERR_NOTONCHANNEL),
-                     me.name, parv[0], name);
-          name = strtoken(&p, (char *)NULL, ",");
-          continue;
-        }
-      /*
-      **  Remove user from the old channel (if any)
-      */
-            
-      sendto_match_servs(chptr, cptr, ":%s PART %s", parv[0], name);
-            
-      sendto_channel_butserv(chptr, sptr, ":%s PART %s", parv[0], name);
-      remove_user_from_channel(sptr, chptr, 0);
+      part_one_client(cptr,sptr,name);
       name = strtoken(&p, (char *)NULL, ",");
     }
+
   return 0;
 }
+
+/*
+ * mo_part
+ *
+ * same as m_part
+ * but no spam checks
+ */
 
 int     mo_part(struct Client *cptr,
                struct Client *sptr,
                int parc,
                char *parv[])
 {
-  struct Channel *chptr;
   char  *p, *name;
 
   if (parc < 2 || parv[1][0] == '\0')
@@ -297,30 +307,7 @@ int     mo_part(struct Client *cptr,
 
   while ( name )
     {
-      chptr = get_channel(sptr, name, 0);
-      if (!chptr)
-        {
-          sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL),
-                     me.name, parv[0], name);
-          name = strtoken(&p, (char *)NULL, ",");
-          continue;
-        }
-
-      if (!IsMember(sptr, chptr))
-        {
-          sendto_one(sptr, form_str(ERR_NOTONCHANNEL),
-                     me.name, parv[0], name);
-          name = strtoken(&p, (char *)NULL, ",");
-          continue;
-        }
-      /*
-      **  Remove user from the old channel (if any)
-      */
-            
-      sendto_match_servs(chptr, cptr, ":%s PART %s", parv[0], name);
-            
-      sendto_channel_butserv(chptr, sptr, ":%s PART %s", parv[0], name);
-      remove_user_from_channel(sptr, chptr, 0);
+      part_one_client(cptr,sptr,name);
       name = strtoken(&p, (char *)NULL, ",");
     }
   return 0;
