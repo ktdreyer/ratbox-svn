@@ -35,12 +35,13 @@
  * this ONLY if you KNOW what you're doing!
  */
 #define TRY_CONNECTIONS_TIME	60
+
 /*
  * number of seconds to wait after server starts up, before
  * starting try_connections()
  * TOO SOON and you can nick collide like crazy. 
  */
-#define STARTUP_CONNECTIONS_TIME 300
+#define STARTUP_CONNECTIONS_TIME 60
 
 struct Client;
 struct ConfItem;
