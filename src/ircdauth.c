@@ -749,13 +749,12 @@ static void
 BadAuth(int parc, char **parv)
 
 {
-	struct AuthRequest *auth;
-	long id;
+  struct AuthRequest *auth;
+  long id;
 
-	id = strtol(parv[1], 0, 0);
-	if ((auth = FindAuthClient(id)))
-	{
-		exit_client(auth->client, auth->client, &me,
-			parv[2] + 1);
-	}
+  id = strtol(parv[1], 0, 0);
+  if ((auth = FindAuthClient(id)))
+    {
+      exit_client(auth->client, auth->client, &me, parv[2] + 1);
+    }
 } /* BadAuth() */

@@ -38,8 +38,6 @@
 struct Client;
 
 struct AuthRequest {
-  struct AuthRequest* next;      /* linked list node ptr */
-  struct AuthRequest* prev;      /* linked list node ptr */
   struct Client*      client;    /* pointer to client struct for request */
   unsigned int        flags;     /* current state of request */
   int                 fd;        /* file descriptor for auth queries */

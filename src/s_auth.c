@@ -27,6 +27,8 @@
  *     any messages from it.
  *     --Bleep  Thomas Helvey <tomh@inxpress.net>
  */
+#include "tools.h"
+#include "list.h"
 #include "s_auth.h"
 #include "blalloc.h"
 #include "client.h"
@@ -90,13 +92,10 @@ typedef enum {
 #define sendheader(c, r) \
    send((c)->fd, HeaderMessages[(r)].message, HeaderMessages[(r)].length, 0)
 
-struct AuthRequest* AuthPollList = 0; /* GLOBAL - auth queries pending io */
-
 /*
- * Global - list of clients who have completed their authentication
- *          check, but must still complete their authorization checks
  */
-struct AuthRequest *AuthClientList = NULL;
+dlink_list auth_client_list;
+dlink_list auth_poll_list;
 
 static EVH timeout_auth_queries_event;
 static BlockHeap *auth_bl = NULL;
@@ -112,6 +111,8 @@ static CNCB auth_connect_callback;
 void
 init_auth(void)
 {
+  memset(&auth_client_list, 0, sizeof(auth_client_list));
+  memset(&auth_poll_list, 0, sizeof(auth_poll_list));
   eventAdd("timeout_auth_queries_event", timeout_auth_queries_event, NULL,
     1, 0);
   auth_bl = BlockHeapCreate(sizeof(struct AuthRequest), AUTH_BLOCK_SIZE);
@@ -142,28 +143,35 @@ void free_auth_request(struct AuthRequest* request)
 /*
  * unlink_auth_request - remove auth request from a list
  */
-static void unlink_auth_request(struct AuthRequest* request,
-                                struct AuthRequest** list)
+static void unlink_auth_request(struct AuthRequest* request, dlink_list *list)
 {
-  if (request->next)
-    request->next->prev = request->prev;
-  if (request->prev)
-    request->prev->next = request->next;
-  else
-    *list = request->next;
+  dlink_node *ptr;
+  dlink_node *next_ptr;
+  struct AuthRequest *auth;
+
+  for (ptr = list->head; ptr; ptr = next_ptr )
+    {
+      next_ptr = ptr->next;
+      auth = ptr->data;
+
+      if (auth == request)
+	{
+	  dlinkDelete(ptr, list);
+	  free_dlink_node(ptr);
+	  return;
+	}
+    }
 }
 
 /*
  * link_auth_request - add auth request to a list
  */
-static void link_auth_request(struct AuthRequest* request,
-                              struct AuthRequest** list)
+static void link_auth_request(struct AuthRequest* request, dlink_list *list)
 {
-  request->prev = 0;
-  request->next = *list;
-  if (*list)
-    (*list)->prev = request;
-  *list = request;
+  dlink_node *m;
+
+  m = make_dlink_node();
+  dlinkAdd(request, m, list);
 }
 
 /*
@@ -237,9 +245,9 @@ static void auth_dns_callback(void* vptr, struct DNSReply* reply)
   if (!IsDoingAuth(auth))
     {
       release_auth_client(auth->client);
-      unlink_auth_request(auth, &AuthPollList);
+      unlink_auth_request(auth, &auth_poll_list);
 #ifdef USE_IAUTH
-      link_auth_request(auth, &AuthClientList);
+      link_auth_request(auth, &auth_client_list);
 #endif
       /*free_auth_request(auth);*/
     }
@@ -260,9 +268,9 @@ static void auth_error(struct AuthRequest* auth)
 
   if (!IsDNSPending(auth))
   {
-    unlink_auth_request(auth, &AuthPollList);
+    unlink_auth_request(auth, &auth_poll_list);
     release_auth_client(auth->client);
-    link_auth_request(auth, &AuthClientList);
+    link_auth_request(auth, &auth_client_list);
     /*free_auth_request(auth);*/
   }
 }
@@ -440,7 +448,7 @@ void start_auth(struct Client* client)
   gethost_byaddr((const char*) &client->localClient->ip, &query);
   SetDNSPending(auth);
   start_auth_query(auth);
-  link_auth_request(auth, &AuthPollList);
+  link_auth_request(auth, &auth_poll_list);
 }
 
 /*
@@ -450,12 +458,15 @@ void start_auth(struct Client* client)
 static void
 timeout_auth_queries_event(void *notused)
 {
+  dlink_node *ptr;
+  dlink_node *next_ptr;
   struct AuthRequest* auth;
-  struct AuthRequest* auth_next = 0;
 
-  for (auth = AuthPollList; auth; auth = auth_next)
+  for (ptr = auth_poll_list.head; ptr; ptr = next_ptr)
     {
-      auth_next = auth->next;
+      next_ptr = ptr->next;
+      auth = ptr->data;
+
       if (auth->timeout < CurrentTime)
 	{
 	  if (-1 < auth->fd)
@@ -473,9 +484,10 @@ timeout_auth_queries_event(void *notused)
 
 	  auth->client->since = CurrentTime;
 	  release_auth_client(auth->client);
-	  unlink_auth_request(auth, &AuthPollList);
+	  dlinkDelete(ptr, &auth_poll_list);
+	  free_dlink_node(ptr);
 #ifdef USE_IAUTH
-	  link_auth_request(auth, &AuthClientList);
+	  link_auth_request(auth, &auth_client_list);
 #else
 	  free_auth_request(auth);
 #endif
@@ -574,9 +586,10 @@ read_auth_reply(int fd, void *data)
 	  t = auth->client->username;
 	  for (count = USERLEN; *s && count; s++)
 	    {
-	      if(*s == '@') {
-		break;
-	      }
+	      if(*s == '@')
+		{
+		  break;
+		}
 	      if ( !IsSpace(*s) && *s != ':' )
 		{
 		  *t++ = *s;
@@ -605,13 +618,13 @@ read_auth_reply(int fd, void *data)
 
   if (!IsDNSPending(auth))
     {
-      unlink_auth_request(auth, &AuthPollList);
+      unlink_auth_request(auth, &auth_poll_list);
       release_auth_client(auth->client);
-  #ifdef USE_IAUTH
-      link_auth_request(auth, &AuthClientList);
-  #else
+#ifdef USE_IAUTH
+      link_auth_request(auth, &auth_client_list);
+#else
       free_auth_request(auth);
-  #endif
+#endif
     }
 }
 
@@ -626,7 +639,7 @@ void
 remove_auth_request(struct AuthRequest *auth)
 
 {
-  unlink_auth_request(auth, &AuthClientList);
+  unlink_auth_request(auth, &auth_client_list);
   free_auth_request(auth);
 } /* remove_auth_request() */
 
@@ -637,16 +650,19 @@ remove_auth_request(struct AuthRequest *auth)
  */
 
 struct AuthRequest *
+/* XXX This is just wrong, should be a *void at least */
 FindAuthClient(long id)
-
 {
-	struct AuthRequest *auth;
+  dlink_node *ptr;
+  struct AuthRequest *auth;
 
-	auth = AuthClientList;
-	while (auth && !((void *) auth->client == (void *) id))
-		auth = auth->next;
-
-	return (auth);
+  for (ptr = auth_client_list.head; ptr; ptr = ptr->next)
+    {
+      auth = ptr->data;
+      if( auth->client == (struct Client *)id)
+	return auth;
+    }
+  return (NULL);
 } /* FindAuthClient() */
 
 /*
@@ -656,19 +672,22 @@ FindAuthClient(long id)
 void 
 delete_identd_queries(struct Client *acptr)
 {
+  dlink_node *ptr;
+  dlink_node *next_ptr;
   struct AuthRequest* auth;
-  struct AuthRequest* auth_next = 0;
 
-  for (auth = AuthPollList; auth; auth = auth_next)
+  for (ptr = auth_poll_list.head; ptr; ptr = next_ptr)
     {
-      auth_next = auth->next;
+      auth = ptr->data;
+      next_ptr = ptr->next;
 
       if(auth->client == acptr)
 	{
 	  if (-1 < auth->fd)
 	    fd_close(auth->fd);
-	  unlink_auth_request(auth, &AuthPollList);
+	  dlinkDelete(ptr, &auth_poll_list);
 	  free_auth_request(auth);
+	  free_dlink_node(ptr);
 	  return;
 	}
     }

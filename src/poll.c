@@ -172,27 +172,34 @@ poll_update_pollfds(int fd, fdlist_t list, short event, PF * handler)
     F->list = list;
 
     /* Update the events */
-    if (handler) {
+    if (handler)
+      {
         pf->pollfds[comm_index].events |= event;
         pf->pollfds[comm_index].fd = fd;
         /* update maxindex here */
         if (comm_index > pf->maxindex)
             pf->maxindex = comm_index;
-    } else {
-        pf->pollfds[comm_index].events &= ~event;
-        if (pf->pollfds[comm_index].events == 0) {
-            pf->pollfds[comm_index].fd = -1;
-            pf->pollfds[comm_index].revents = 0;
-            F->comm_index = -1;
-            F->list = FDLIST_NONE;
+      }
+    else
+      {
+	if (comm_index >= 0)
+	  {
+	    pf->pollfds[comm_index].events &= ~event;
+	    if (pf->pollfds[comm_index].events == 0)
+	      {
+		pf->pollfds[comm_index].fd = -1;
+		pf->pollfds[comm_index].revents = 0;
+		F->comm_index = -1;
+		F->list = FDLIST_NONE;
 
-            /* update pf->maxindex here */
-            if (comm_index == pf->maxindex)
-                while( pf->pollfds[pf->maxindex].fd == -1 && 
-                       pf->maxindex >= 0 )
+		/* update pf->maxindex here */
+		if (comm_index == pf->maxindex)
+		  while( pf->pollfds[pf->maxindex].fd == -1 && 
+			 pf->maxindex >= 0 )
                     pf->maxindex--;
-        }
-    }
+	      }
+	  }
+      }
 }
 
 
