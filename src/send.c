@@ -955,14 +955,7 @@ sendto_anywhere(struct Client *to, struct Client *from,
     }
 
   len = ircsprintf(sendbuf,"%s%s", prefix,buf);
-
-  if(len > 510)
-    {
-      sendbuf[IRCD_BUFSIZE-2] = '\r';
-      sendbuf[IRCD_BUFSIZE-1] = '\n';
-      sendbuf[IRCD_BUFSIZE] = '\0';
-      len = IRCD_BUFSIZE;
-    }
+  len = send_trim(sendbuf, len);
       
   if(MyClient(to))
     send_message(to, (char *)sendbuf, len);
