@@ -1,3 +1,8 @@
+*** 20000401_1 by db
+- removal of #define kludge for GlobalSetOptions
+
+
+
 *** 20000330_1 by db
 - large resync , folding in a number of changes contributed by is
   This moves some config.h items into the conf file
