@@ -166,9 +166,9 @@ m_mode(struct Client *client_p, struct Client *source_p, int parc, const char *p
  * side effects - given id is added to the appropriate list
  */
 static int
-add_id(struct Client *source_p, struct Channel *chptr, const char *banid, int type)
+add_id(struct Client *source_p, struct Channel *chptr, const char *banid,
+       dlink_list *list)
 {
-	dlink_list *list;
 	dlink_node *ban;
 	struct Ban *actualBan;
 	char *realban = LOCAL_COPY(banid);
@@ -184,23 +184,6 @@ add_id(struct Client *source_p, struct Channel *chptr, const char *banid, int ty
 		}
 
 		collapse(realban);
-	}
-
-	switch (type)
-	{
-	case CHFL_BAN:
-		list = &chptr->banlist;
-		break;
-	case CHFL_EXCEPTION:
-		list = &chptr->exceptlist;
-		break;
-	case CHFL_INVEX:
-		list = &chptr->invexlist;
-		break;
-	default:
-		sendto_realops_flags(UMODE_ALL, L_ALL,
-				     "add_id() called with unknown ban type %d!", type);
-		return 0;
 	}
 
 	DLINK_FOREACH(ban, list->head)
@@ -234,31 +217,13 @@ add_id(struct Client *source_p, struct Channel *chptr, const char *banid, int ty
  * side effects - given id is removed from the appropriate list
  */
 static int
-del_id(struct Channel *chptr, const char *banid, int type)
+del_id(struct Channel *chptr, const char *banid, dlink_list *list)
 {
-	dlink_list *list;
 	dlink_node *ban;
 	struct Ban *banptr;
 
 	if(EmptyString(banid))
 		return 0;
-
-	switch (type)
-	{
-	case CHFL_BAN:
-		list = &chptr->banlist;
-		break;
-	case CHFL_EXCEPTION:
-		list = &chptr->exceptlist;
-		break;
-	case CHFL_INVEX:
-		list = &chptr->invexlist;
-		break;
-	default:
-		sendto_realops_flags(UMODE_ALL, L_ALL,
-				     "del_id() called with unknown ban type %d!", type);
-		return 0;
-	}
 
 	DLINK_FOREACH(ban, list->head)
 	{
@@ -532,23 +497,83 @@ chm_ban(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
 {
 	const char *mask;
 	const char *raw_mask;
+	dlink_list *list;
 	dlink_node *ptr;
 	struct Ban *banptr;
+	int mode_type;
+	int errorval;
+	int rpl_list;
+	int rpl_endlist;
+	int caps;
+
+	mode_type = (int) d;
+
+	switch(mode_type)
+	{
+		case CHFL_BAN:
+			list = &chptr->banlist;
+			errorval = SM_ERR_RPL_B;
+			rpl_list = RPL_BANLIST;
+			rpl_endlist = RPL_ENDOFBANLIST;
+			caps = 0;
+			break;
+
+		case CHFL_EXCEPTION:
+			/* if +e is disabled, allow all but +e locally */
+			if(!ConfigChannel.use_except && MyClient(source_p) &&
+			   ((dir == MODE_ADD) && (parc > *parn)))
+				return;
+
+			list = &chptr->exceptlist;
+			errorval = SM_ERR_RPL_E;
+			rpl_list = RPL_EXCEPTLIST;
+			rpl_endlist = RPL_ENDOFEXCEPTLIST;
+			caps = CAP_EX;
+			break;
+
+		case CHFL_INVEX:
+			/* if +I is disabled, allow all but +I locally */
+			if(!ConfigChannel.use_invex && MyClient(source_p) &&
+					(dir == MODE_ADD) && (parc > *parn))
+				return;
+
+			list = &chptr->invexlist;
+			errorval = SM_ERR_RPL_I;
+			rpl_list = RPL_INVITELIST;
+			rpl_endlist = RPL_ENDOFINVITELIST;
+			caps = CAP_IE;
+			break;
+
+		default:
+			sendto_realops_flags(UMODE_ALL, L_ALL,
+					     "chm_ban() called with unknown type!");
+			break;
+	}
 
 	if(dir == 0 || parc <= *parn)
 	{
-		if((*errors & SM_ERR_RPL_B) != 0)
+		if((*errors & errorval) != 0)
 			return;
-		*errors |= SM_ERR_RPL_B;
+		*errors |= errorval;
 
-		DLINK_FOREACH(ptr, chptr->banlist.head)
+		/* non-ops cant see +eI lists.. */
+		if(alev < CHACCESS_CHANOP && mode_type != CHFL_BAN)
+		{
+			if(!(*errors & SM_ERR_NOOPS))
+				sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
+					   me.name, source_p->name, chptr->chname);
+			*errors |= SM_ERR_NOOPS;
+			return;
+		}
+
+		DLINK_FOREACH(ptr, list->head)
 		{
 			banptr = ptr->data;
-			sendto_one(source_p, form_str(RPL_BANLIST),
+			sendto_one(source_p, form_str(rpl_list),
 				   me.name, source_p->name, chptr->chname,
 				   banptr->banstr, banptr->who, banptr->when);
 		}
-		sendto_one(source_p, form_str(RPL_ENDOFBANLIST),
+		sendto_one(source_p, form_str(rpl_endlist),
 			   me.name, source_p->name, chptr->chname);
 		return;
 	}
@@ -588,13 +613,13 @@ chm_ban(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
 		 * let servers do redundant +b's, as it wastes bandwidth on
 		 * a netjoin.
 		 */
-		if(!add_id(source_p, chptr, mask, CHFL_BAN) &&
+		if(!add_id(source_p, chptr, mask, list) &&
 		   (MyClient(source_p) || IsServer(source_p)))
 			return;
 
 		mode_changes[mode_count].letter = c;
 		mode_changes[mode_count].dir = MODE_ADD;
-		mode_changes[mode_count].caps = 0;
+		mode_changes[mode_count].caps = caps;
 		mode_changes[mode_count].nocaps = 0;
 		mode_changes[mode_count].mems = ALL_MEMBERS;
 		mode_changes[mode_count].id = NULL;
@@ -602,244 +627,18 @@ chm_ban(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
 	}
 	else if(dir == MODE_DEL)
 	{
-		if(del_id(chptr, mask, CHFL_BAN) == 0)
+		if(del_id(chptr, mask, list) == 0)
 		{
 			/* mask isn't a valid ban, check raw_mask */
-			if(del_id(chptr, raw_mask, CHFL_BAN))
+			if(del_id(chptr, raw_mask, list))
 				mask = raw_mask;
 		}
 
 		mode_changes[mode_count].letter = c;
 		mode_changes[mode_count].dir = MODE_DEL;
-		mode_changes[mode_count].caps = 0;
+		mode_changes[mode_count].caps = caps;
 		mode_changes[mode_count].nocaps = 0;
 		mode_changes[mode_count].mems = ALL_MEMBERS;
-		mode_changes[mode_count].id = NULL;
-		mode_changes[mode_count++].arg = mask;
-	}
-}
-
-static void
-chm_except(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
-	   const char **parv, int *errors, int alev, int dir, char c, void *d)
-{
-	dlink_node *ptr;
-	struct Ban *banptr;
-	const char *raw_mask;
-	const char *mask;
-
-	/* if we have +e disabled, allow local clients to do anything but
-	 * set the mode.  This prevents the abuse of +e when just a few
-	 * servers support it. --fl
-	 */
-	if(!ConfigChannel.use_except && MyClient(source_p) &&
-	   ((dir == MODE_ADD) && (parc > *parn)))
-	{
-		if((*errors & SM_ERR_RPL_E) != 0)
-			return;
-
-		*errors |= SM_ERR_RPL_E;
-		return;
-	}
-
-	if(alev < CHACCESS_CHANOP)
-	{
-		if(!(*errors & SM_ERR_NOOPS))
-			sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
-				   me.name, source_p->name, chptr->chname);
-		*errors |= SM_ERR_NOOPS;
-		return;
-	}
-
-	if((dir == MODE_QUERY) || parc <= *parn)
-	{
-		if((*errors & SM_ERR_RPL_E) != 0)
-			return;
-		*errors |= SM_ERR_RPL_E;
-
-		DLINK_FOREACH(ptr, chptr->exceptlist.head)
-		{
-			banptr = ptr->data;
-			sendto_one(source_p, form_str(RPL_EXCEPTLIST),
-				   me.name, source_p->name, chptr->chname,
-				   banptr->banstr, banptr->who, banptr->when);
-		}
-		sendto_one(source_p, form_str(RPL_ENDOFEXCEPTLIST),
-			   me.name, source_p->name, chptr->chname);
-		return;
-	}
-
-	if(MyClient(source_p) && (++mode_limit > MAXMODEPARAMS))
-		return;
-
-	raw_mask = parv[(*parn)];
-	(*parn)++;
-
-	/* empty ban, ignore it */
-	if(EmptyString(raw_mask))
-		return;
-
-	if(!MyClient(source_p))
-		mask = raw_mask;
-	else
-		mask = pretty_mask(raw_mask);
-
-	if(strlen(mask) > (MODEBUFLEN - 2))
-		return;
-
-	/* If we're adding a NEW id */
-	if(dir == MODE_ADD)
-	{
-		/* dont allow local clients to overflow the banlist, and dont
-		 * let servers do redundant +b's, as it wastes bandwidth on
-		 * a netjoin.
-		 */
-		if(!add_id(source_p, chptr, mask, CHFL_EXCEPTION) &&
-		   (MyClient(source_p) || IsServer(source_p)))
-			return;
-
-		mode_changes[mode_count].letter = c;
-		mode_changes[mode_count].dir = MODE_ADD;
-		mode_changes[mode_count].caps = CAP_EX;
-		mode_changes[mode_count].nocaps = 0;
-
-		if(ConfigChannel.use_except)
-			mode_changes[mode_count].mems = ONLY_CHANOPS;
-		else
-			mode_changes[mode_count].mems = ONLY_SERVERS;
-
-		mode_changes[mode_count].id = NULL;
-		mode_changes[mode_count++].arg = mask;
-	}
-	else if(dir == MODE_DEL)
-	{
-		if(del_id(chptr, mask, CHFL_EXCEPTION) == 0)
-		{
-			/* mask isn't a valid ban, check raw_mask */
-			if(del_id(chptr, raw_mask, CHFL_EXCEPTION))
-				mask = raw_mask;
-		}
-
-		mode_changes[mode_count].letter = c;
-		mode_changes[mode_count].dir = MODE_DEL;
-		mode_changes[mode_count].caps = CAP_EX;
-		mode_changes[mode_count].nocaps = 0;
-		mode_changes[mode_count].mems = ONLY_CHANOPS;
-		mode_changes[mode_count].id = NULL;
-		mode_changes[mode_count++].arg = mask;
-	}
-}
-
-static void
-chm_invex(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
-	  const char **parv, int *errors, int alev, int dir, char c, void *d)
-{
-	const char *mask;
-	const char *raw_mask;
-	dlink_node *ptr;
-	struct Ban *banptr;
-
-	/* if we have +I disabled, allow local clients to do anything but
-	 * set the mode.  This prevents the abuse of +I when just a few
-	 * servers support it --fl
-	 */
-	if(!ConfigChannel.use_invex && MyClient(source_p) &&
-	   (dir == MODE_ADD) && (parc > *parn))
-	{
-		if((*errors & SM_ERR_RPL_I) != 0)
-			return;
-
-		*errors |= SM_ERR_RPL_I;
-		return;
-	}
-
-	if(alev < CHACCESS_CHANOP)
-	{
-		if(!(*errors & SM_ERR_NOOPS))
-			sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
-				   me.name, source_p->name, chptr->chname);
-		*errors |= SM_ERR_NOOPS;
-		return;
-	}
-
-	if((dir == MODE_QUERY) || parc <= *parn)
-	{
-		if((*errors & SM_ERR_RPL_I) != 0)
-			return;
-		*errors |= SM_ERR_RPL_I;
-
-		DLINK_FOREACH(ptr, chptr->invexlist.head)
-		{
-			banptr = ptr->data;
-			sendto_one(source_p, form_str(RPL_INVITELIST),
-				   me.name, source_p->name, chptr->chname,
-				   banptr->banstr, banptr->who, banptr->when);
-		}
-		sendto_one(source_p, form_str(RPL_ENDOFINVITELIST),
-			   me.name, source_p->name, chptr->chname);
-		return;
-	}
-
-	if(MyClient(source_p) && (++mode_limit > MAXMODEPARAMS))
-		return;
-
-	raw_mask = parv[(*parn)];
-	(*parn)++;
-
-	/* empty ban, ignore it */
-	if(EmptyString(raw_mask))
-		return;
-
-	if(!MyClient(source_p))
-		mask = raw_mask;
-	else
-		mask = pretty_mask(raw_mask);
-
-	if(strlen(mask) > (MODEBUFLEN - 2))
-		return;
-
-	if(dir == MODE_ADD)
-	{
-		/* dont allow local clients to overflow the banlist, and dont
-		 * let servers do redundant +b's, as it wastes bandwidth on
-		 * a netjoin.
-		 */
-		if(!add_id(source_p, chptr, mask, CHFL_INVEX) &&
-		   (MyClient(source_p) || IsServer(source_p)))
-			return;
-
-		mode_changes[mode_count].letter = c;
-		mode_changes[mode_count].dir = MODE_ADD;
-		mode_changes[mode_count].caps = CAP_IE;
-		mode_changes[mode_count].nocaps = 0;
-
-		if(ConfigChannel.use_invex)
-			mode_changes[mode_count].mems = ONLY_CHANOPS;
-		else
-			mode_changes[mode_count].mems = ONLY_SERVERS;
-
-		mode_changes[mode_count].id = NULL;
-		mode_changes[mode_count++].arg = mask;
-	}
-	else if(dir == MODE_DEL)
-	{
-		if(del_id(chptr, mask, CHFL_INVEX) == 0)
-		{
-			/* mask isn't a valid ban, check raw_mask */
-			if(del_id(chptr, raw_mask, CHFL_INVEX))
-				mask = raw_mask;
-		}
-
-		mode_changes[mode_count].letter = c;
-		mode_changes[mode_count].dir = MODE_DEL;
-		mode_changes[mode_count].caps = CAP_IE;
-		mode_changes[mode_count].nocaps = 0;
-
-		if(ConfigChannel.use_invex)
-			mode_changes[mode_count].mems = ONLY_CHANOPS;
-		else
-			mode_changes[mode_count].mems = ONLY_SERVERS;
-
 		mode_changes[mode_count].id = NULL;
 		mode_changes[mode_count++].arg = mask;
 	}
@@ -1155,7 +954,7 @@ static struct ChannelMode ModeTable[255] =
   {chm_nosuch, NULL},                             /* F */
   {chm_nosuch, NULL},                             /* G */
   {chm_nosuch, NULL},                             /* H */
-  {chm_invex, NULL},                              /* I */
+  {chm_ban,    (void *) CHFL_INVEX},              /* I */
   {chm_nosuch, NULL},                             /* J */
   {chm_nosuch, NULL},                             /* K */
   {chm_nosuch, NULL},                             /* L */
@@ -1180,10 +979,10 @@ static struct ChannelMode ModeTable[255] =
   {chm_nosuch, NULL},
   {chm_nosuch, NULL},
   {chm_nosuch, NULL},				  /* a */
-  {chm_ban, NULL},                                /* b */
+  {chm_ban,    (void *) CHFL_BAN},                /* b */
   {chm_nosuch, NULL},                             /* c */
   {chm_nosuch, NULL},                             /* d */
-  {chm_except, NULL},                             /* e */
+  {chm_ban,    (void *) CHFL_EXCEPTION},          /* e */
   {chm_nosuch, NULL},                             /* f */
   {chm_nosuch, NULL},                             /* g */
   {chm_nosuch, NULL},				  /* h */
