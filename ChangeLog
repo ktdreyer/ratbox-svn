@@ -1,3 +1,15 @@
+leeh        2004/04/08 07:16:08 EDT	(20040408_1)
+
+  Modified files:
+    modules              m_testline.c 
+  Log:
+  - wrap the testline ipv6 stuff in #ifdef IPV6
+  
+  Revision  Changes    Path
+  1.49      +8 -3      ircd-ratbox/modules/m_testline.c
+
+
+
 leeh        2004/04/07 22:21:46 EDT	(20040408_0)
 
   Modified files:
