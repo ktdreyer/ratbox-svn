@@ -292,11 +292,11 @@ static int report_this_status(struct Client *source_p, struct Client *target_p,
 {
   const char* name;
   const char* class_name;
-  const char* ip;
+  char  ip[HOSTIPLEN];
   int cnt=0;
   static time_t now;
 
-  ip = inetntoa((const char*) &target_p->localClient->ip);
+  inetntop(DEF_FAM, &IN_ADDR(target_p->localClient->ip), ip);
   name = get_client_name(target_p, HIDE_IP);
   class_name = get_client_class(target_p);
 
