@@ -24,7 +24,7 @@
 
 #include "config.h"
 
-#if !defined(STATIC_MODULES) && !defined(HAVE_MACH_O_DYLD_H) && defined(HAVE_DLOPEN)
+#if !defined(STATIC_MODULES) && defined(HAVE_DLOPEN)
 #include <dlfcn.h>
 #endif
 #include <stdlib.h>
