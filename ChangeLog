@@ -1,3 +1,29 @@
+leeh        2003/07/26 13:03:40 EDT	(20030726_0)
+
+  Modified files:
+    .                    RELNOTES 
+    include              channel.h send.h 
+    modules/core         m_mode.c 
+    src                  cache.c s_auth.c 
+  Log:
+  - make relnotes just list major changes from -stable
+  - removed CHACCESS_*, pass the membership entry instead
+  - fix ONLY_CHANOPS sending in set_channel_mode()
+  Submitted by:
+  Reviewed by:
+  Approved by:
+  Obtained from:
+  
+  Revision  Changes    Path
+  1.78      +9 -45     ircd-ratbox/RELNOTES
+  7.148     +13 -14    ircd-ratbox/include/channel.h
+  7.72      +27 -45    ircd-ratbox/include/send.h
+  1.82      +124 -112  ircd-ratbox/modules/core/m_mode.c
+  1.5       +1 -0      ircd-ratbox/src/cache.c
+  7.150     +2 -0      ircd-ratbox/src/s_auth.c
+
+
+
 leeh        2003/07/23 12:10:50 EDT	(20030723_0)
 
   Modified files:
