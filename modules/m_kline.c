@@ -386,7 +386,7 @@ apply_tkline(struct Client *source_p, struct ConfItem *aconf,
 		       get_oper_name(source_p), tkline_time/60,
 		       aconf->user, aconf->host,
 		       aconf->passwd);
-  sendto_one(source_p, ":%s NOTICE %s :Added temporary %d min. K-Line for [%s@%s]",
+  sendto_one(source_p, ":%s NOTICE %s :Added temporary %d min. K-Line [%s@%s]",
 	     me.name, source_p->name, tkline_time/60,
 	     aconf->user, aconf->host);
   ilog(L_TRACE, "%s added temporary %d min. K-Line for [%s@%s] [%s]",
