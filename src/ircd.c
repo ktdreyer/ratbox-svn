@@ -298,10 +298,6 @@ struct lgetopt myopts[] = {
    YESNO, "Run in foreground (don't detach)"},
   {"version",    &printVersion, 
    YESNO, "Print version and exit"},
-#ifdef DEBUGMODE
-  {"debug", NULL, 
-   ENDEBUG, "Enable debugging for a certain value"},
-#endif
   {"help", NULL, USAGE, "Print this text"},
   {NULL, NULL, STRING, NULL},
 };

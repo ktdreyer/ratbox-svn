@@ -101,25 +101,6 @@ parseargs(int *argc, char ***argv, struct lgetopt *opts)
 		  usage(progname);
 		  /*NOTREACHED*/
 
-#ifdef DEBUGMODE
-		case ENDEBUG:
-		  if (*argc < 2)
-		    {
-		      fprintf(stderr, "error: option '%c%s' requires an argument\n",
-			      OPTCHAR, opts[i].opt);
-		      usage(progname);
-		    }
-
-		  if (enable_debug((*argv)[1]) == -1)
-		    {
-		      fprintf(stderr, "error: '%s' unknown for debugging\n",
-			      (*argv)[1]);
-		      fprintf(stderr, "ircd: exiting on error.\n");
-		      exit(EXIT_FAILURE);
-		    }
-		  break;
-#endif
-
 		default:
 		  fprintf(stderr, "Error: internal error in parseargs() at %s:%d\n",
 			  __FILE__, __LINE__);
