@@ -1,3 +1,15 @@
+leeh        2004/10/10 11:13:49 EDT	(20041010_0)
+
+  Modified files:
+    src                  s_chanserv.c 
+  Log:
+  - implemented .cregister and .cdrop over dcc
+  
+  Revision  Changes    Path
+  1.8       +66 -1     rserv/src/s_chanserv.c
+
+
+
 leeh        2004/10/08 19:10:05 EDT	(20041008_0)
 
   Modified files:
