@@ -440,7 +440,7 @@ static  char *  replies[] = {
 /* 413 ERR_NOTOPLEVEL, */       ":%s 413 %s %s :No toplevel domain specified",
 /* 414 ERR_WILDTOPLEVEL, */     ":%s 414 %s %s :Wildcard in toplevel Domain",
 /* 415 */       NULL,
-/* 416 */       NULL,
+/* 416 ERR_TOOMANYMATCHES */    ":%s 416 %s %s :output too large, truncated",
 /* 417 */       NULL,
 /* 418 */       NULL,
 /* 419 */       NULL,

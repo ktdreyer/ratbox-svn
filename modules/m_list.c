@@ -39,6 +39,7 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
+#include "linebuf.h"
 
 
 static void m_list(struct Client*, struct Client*, int, char**);
@@ -138,16 +139,31 @@ static int list_all_channels(struct Client *source_p)
 {
   struct Channel *chptr;
   dlink_node *ptr;
+  int sendq_limit;
+
+  /* give them an output limit of 90% of their sendq. --fl */
+  sendq_limit = (int) get_sendq(source_p);
+  sendq_limit *= (int)0.9;
+
   sendto_one(source_p, form_str(RPL_LISTSTART), me.name, source_p->name);
 
   DLINK_FOREACH(ptr, global_channel_list.head)
+  {
+    chptr = ptr->data;
+
+    /* if theyre overflowing their sendq, stop. --fl */
+    if(linebuf_len(&source_p->localClient->buf_sendq) > sendq_limit)
     {
-      chptr = (struct Channel *)ptr->data;
-      if ( !source_p->user ||
-	   (SecretChannel(chptr) && !IsMember(source_p, chptr)))
-	continue;
-      list_one_channel(source_p,chptr);
+      sendto_one(source_p, form_str(ERR_TOOMANYMATCHES),
+                 me.name, source_p->name, "LIST");
+      break;
     }
+
+    if(SecretChannel(chptr) && !IsMember(source_p, chptr))
+      continue;
+
+    list_one_channel(source_p,chptr);
+  }
 
   sendto_one(source_p, form_str(RPL_LISTEND), me.name, source_p->name);
   return 0;

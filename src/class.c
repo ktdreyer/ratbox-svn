@@ -295,6 +295,7 @@ long    get_sendq(struct Client *client_p)
   struct ConfItem *aconf;
 
   if (client_p && !IsMe(client_p)  && (client_p->localClient->confs.head))
+  {
     DLINK_FOREACH(ptr, client_p->localClient->confs.head)
       {
 	aconf = ptr->data;
@@ -307,6 +308,8 @@ long    get_sendq(struct Client *client_p)
 	if(ClassName(cl))
           sendq = MaxSendq(cl);
       }
+  }
+
   return sendq;
 }
 
