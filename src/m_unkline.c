@@ -86,13 +86,6 @@ int mo_unkline (struct Client *cptr,struct Client *sptr,int parc,char *parv[])
       return -1;
     }
 
-  if (!IsAnyOper(sptr))  
-    {
-      sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, 
-                 parv[0]);
-      return 0;
-    }
-
   if (!IsSetOperUnkline(sptr))
     {
       sendto_one(sptr,":%s NOTICE %s :You have no U flag",me.name,parv[0]);
@@ -434,13 +427,6 @@ int mo_undline (struct Client *cptr, struct Client *sptr,int parc,char *parv[])
   mode_t oldumask;
 
   ircsprintf(temppath, "%s.tmp", ConfigFileEntry.dlinefile);
-
-  if (!IsAnyOper(sptr))
-    {
-      sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name,
-                 parv[0]);
-      return 0;
-    }
 
   if (!IsSetOperUnkline(sptr))
     {

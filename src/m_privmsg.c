@@ -286,8 +286,8 @@ int build_target_list(struct Client *cptr,
 
 	      if( i >= MAX_MULTI_MESSAGES)
 		return(i);
-	      continue;
 	    }
+	  continue;
 	}
       /* At this point, its likely its another client */
 
