@@ -1,3 +1,8 @@
+*** 20010108_12 by fl_
+- guess we werent meant to make that change then, reverted it, it was
+   coring the ircd even worse
+
+
 *** 20010108_11 by wcampbel
 Dependencies updated
 
