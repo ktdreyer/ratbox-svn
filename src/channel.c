@@ -1106,13 +1106,6 @@ void set_channel_mode(struct Client *cptr,
           if (isdeop && (c == 'o') && whatt == MODE_ADD)
             change_channel_membership(chptr,&chptr->peons, who);
 	  
-	  if(GlobalSetOptions.hide_chanops)
-	    {
-	      if(the_mode == MODE_CHANOP && whatt == MODE_DEL)
-		sendto_one(who,":%s MODE %s -o %s",
-			   sptr->name,chptr->chname,who->name);
-	    }
-
           if (!isok)
             {
               if (MyClient(sptr) && !errsent(SM_ERR_NOOPS, &errors_sent))
@@ -1120,6 +1113,13 @@ void set_channel_mode(struct Client *cptr,
                            sptr->name, real_name);
               break;
             }
+
+	  if(GlobalSetOptions.hide_chanops)
+	    {
+	      if(the_mode == MODE_CHANOP && whatt == MODE_DEL)
+		sendto_one(who,":%s MODE %s -o %s",
+			   sptr->name,chptr->chname,who->name);
+	    }
         
           tmp = strlen(arg);
           if (len + tmp + 2 >= MODEBUFLEN)
