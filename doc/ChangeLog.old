@@ -1,3 +1,7 @@
+*** 20010301_12 by lusky
+- revved patchlevel to beta2
+
+
 *** 20010301_11 by fl_
 - removed the extra debug message for the numerics, as it shouldve
   been caught now
