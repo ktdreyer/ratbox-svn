@@ -58,6 +58,8 @@
 static PF CompleteIAuthConnection;
 static PF ParseIAuth;
 
+extern dlink_list auth_client_list;
+
 /*
  * This structure will contain the information for the IAuth
  * server.
@@ -116,8 +118,10 @@ ConnectToIAuth()
   /*
    * bingo - this is blocking :(
    */
+  log(L_ERROR, "looking up: %s\n", iAuth.hostname);
 	if ((hostptr = gethostbyname(iAuth.hostname)) == NULL)
 	{
+    log(L_ERROR, "unsuccessful lookup\n");
 		log(L_ERROR,
 			"Unable to connect to IAuth server: Unknown host");
 
@@ -264,7 +268,7 @@ BeginAuthorization(struct Client *client)
 #ifdef IPV6
 		(unsigned int) client->localClient->ip6.s6_addr,
 #else
-		(unsigned int) client->localClient->ip.s_addr,
+		(unsigned int) client->localClient->ip.sins.sin.s_addr,
 #endif
 		client->localClient->passwd);
 
@@ -523,44 +527,45 @@ GoodAuth(int parc, char **parv)
 {
   struct AuthRequest *auth;
   long id;
+  dlink_node *aptr;
 
 /*	assert(parc == 3); */
 
   id = strtol(parv[1], 0, 0);
 
-#if 0
-  for (auth = AuthClientList; auth; auth = auth->next)
+  for (aptr = auth_client_list.head; aptr; aptr = aptr->next)
+  {
+    auth = (struct AuthRequest *) aptr->data;
+
+    /*
+     * Remember: the client id is the memory address
+     * of auth->client, so if it matches id, we
+     * found our client.
+     */
+    if ((void *) auth->client == (void *) id)
     {
       /*
-       * Remember: the client id is the memory address
-       * of auth->client, so if it matches id, we
-       * found our client.
+       * Use IAuth's username, because it may be different
+       * if ident failed, but the client's I: line specified
+       * no tilde character
        */
-      if ((void *) auth->client == (void *) id)
-	{
-	  /*
-	   * Use IAuth's username, because it may be different
-	   * if ident failed, but the client's I: line specified
-	   * no tilde character
-	   */
-	  strncpy_irc(auth->client->username, parv[2], USERLEN);
+      strncpy_irc(auth->client->username, parv[2], USERLEN);
 
-	  /*
-	   * Also use IAuth's hostname in case of SPOOF_FREEFORM
-	   */
-	  strncpy_irc(auth->client->host, parv[3], HOSTLEN);
+      /*
+       * Also use IAuth's hostname in case of SPOOF_FREEFORM
+       */
+      strncpy_irc(auth->client->host, parv[3], HOSTLEN);
 
-	  /*
-	   * Register them
-	   */
-	  GreetUser(auth->client);
+      /*
+       * Register them
+       */
+      GreetUser(auth->client);
 
-	  remove_auth_request(auth);
+      remove_auth_request(auth);
 	  
-	  break;
-	}
+      break;
     }
-#endif
+  }
 } /* GoodAuth() */
 
 /*

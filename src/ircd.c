@@ -582,10 +582,10 @@ int main(int argc, char *argv[])
  if (iAuth.socket == NOSOCK)
  {
   fprintf(stderr, "Unable to connect to IAuth server\n");
-  log(L_CRIT, "Unable to connect to IAuth server\n");
   exit (EXIT_FAILURE);
  }
 #endif
+
  me.fd = -1;
  me.from = &me;
  me.servptr = &me;

@@ -238,9 +238,11 @@ static void auth_dns_callback(void* vptr, adns_answer* reply)
       release_auth_client(auth->client);
       unlink_auth_request(auth, &auth_poll_list);
 #ifdef USE_IAUTH
+      log(L_ERROR, "Linking to auth client list");
       link_auth_request(auth, &auth_client_list);
-#endif
+#else
       free_auth_request(auth);
+#endif
     }
 }
 
@@ -261,8 +263,12 @@ static void auth_error(struct AuthRequest* auth)
   {
     unlink_auth_request(auth, &auth_poll_list);
     release_auth_client(auth->client);
+#ifdef USE_IAUTH
+    log(L_ERROR, "linking to auth client list 2");
     link_auth_request(auth, &auth_client_list);
-    /*free_auth_request(auth);*/
+#else
+    free_auth_request(auth);
+#endif
   }
 }
 
@@ -395,35 +401,6 @@ void start_auth(struct Client* client)
   assert(0 != client);
   auth = make_auth_request(client);
 
-#if 0
-  link_auth_request(auth, &AuthPollList);
-
-	/*
-	 *  Now we send the client's information to the IAuth
-	 * server. The syntax for an authentication request is:
-	 *
-	 *      DoAuth <id> <ip address>
-	 *        <id>         = unique id for this client so we
-	 *                       can re-locate the client when
-	 *                       the authentication completes.
-	 *
-	 *        <ip address> = client's ip address in long form.
-	 *
-	 *  The client's id will be the memory address of the
-	 * client structure. This is acceptable because as long
-	 * as the client exists, no other client can have the
-	 * same memory address, therefore each client will have
-	 * a unique id.
-	 */
-
-	SendIAuth("%s %p %u\n",
-		IAS_DOAUTH,
-		client,
-		(unsigned int) client->ip.s_addr);
-
-	/* IAuthQuery(client); */
-#endif /* 0 */
-
   client->localClient->dns_query = MyMalloc(sizeof(struct DNSQuery));
   client->localClient->dns_query->ptr = auth;
   client->localClient->dns_query->callback = auth_dns_callback;
@@ -433,10 +410,9 @@ void start_auth(struct Client* client)
   /* No DNS cache now, remember? -- adrian */
   adns_getaddr(&client->localClient->ip, client->localClient->aftype, client->localClient->dns_query);
   SetDNSPending(auth);
-#if 1
+
   start_auth_query(auth);
   link_auth_request(auth, &auth_poll_list);
-#endif
 }
 
 /*
@@ -476,6 +452,7 @@ timeout_auth_queries_event(void *notused)
 	  dlinkDelete(ptr, &auth_poll_list);
 	  free_dlink_node(ptr);
 #ifdef USE_IAUTH
+    log(L_ERROR, "linking to auth client list 3");
 	  link_auth_request(auth, &auth_client_list);
 #else
 	  free_auth_request(auth);
@@ -610,6 +587,7 @@ read_auth_reply(int fd, void *data)
       unlink_auth_request(auth, &auth_poll_list);
       release_auth_client(auth->client);
 #ifdef USE_IAUTH
+    log(L_ERROR, "linking to auth client list 4");
       link_auth_request(auth, &auth_client_list);
 #else
       free_auth_request(auth);
