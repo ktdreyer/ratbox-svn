@@ -1,3 +1,12 @@
+*** 20001103_8 by adrian
+
+
+with REJECT_HOLD, we read() from the fd to flush the buffer, instead of
+ignoring it. This is event-IO friendly, and it will stop triggering unwanted
+read IO events.
+
+
+
 *** 20001103_7 by adrian
 
 
