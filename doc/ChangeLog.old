@@ -1,3 +1,13 @@
+*** 20010922_1 by a1kmm
+- We need to do lots more work on UIDs, but this is a start.
+- I think we will have to leave SJOIN until after the release because
+  it needs a major rewrite. Unfortunately, as it is now, it just forwards
+  UIDs or NICKs to all servers as it receives them, which will break
+  non-UID servers. We can't change it easily though, because if we substitute
+  them it might overflow the buffer unless we are prepared to split 1 SJOIN
+  message into 2. Too risky to do at this stage.
+
+
 *** 20010921_3 by leeh
 - missing U
 
