@@ -42,7 +42,7 @@
 #include "s_conf.h"      /* ConfItem, report_configured_links */
 #include "s_debug.h"     /* send_usage */
 #include "s_misc.h"      /* serv_info */
-#include "s_serv.h"      /* hunt_server, show_servers */
+#include "s_serv.h"      /* hunt_server */
 #include "s_stats.h"     /* tstats */
 #include "s_user.h"      /* show_opers */
 #include "event.h"	 /* events */
@@ -377,6 +377,13 @@ static void stats_fd(struct Client *client_p)
   fd_dump(client_p);
 }
 
+
+/* stats_glines()
+ *
+ * input	- client pointer
+ * output	- none
+ * side effects - client is shown list of glines
+ */
 static void stats_glines(struct Client *client_p)
 {
   if(ConfigFileEntry.glines)
@@ -454,10 +461,12 @@ static void stats_glines(struct Client *client_p)
                me.name, client_p->name); 
 }
 
+
 static void stats_hubleaf(struct Client *client_p)
 {
   report_configured_links(client_p, CONF_HUB|CONF_LEAF);
 }
+
 
 static void stats_auth(struct Client *client_p)
 {
@@ -475,6 +484,7 @@ static void stats_auth(struct Client *client_p)
     report_Ilines(client_p, 0);
 }
 
+
 static void stats_tklines(struct Client *client_p)
 {
   /* Oper only, if unopered, return ERR_NOPRIVS */
@@ -490,6 +500,7 @@ static void stats_tklines(struct Client *client_p)
   else
     report_Klines(client_p, 1, 0);
 }
+
 
 static void stats_klines(struct Client *client_p)
 {
@@ -520,9 +531,49 @@ static void stats_oper(struct Client *client_p)
     report_configured_links(client_p, CONF_OPERATOR);
 }
 
+
+/* stats_operedup()
+ *
+ * input	- client pointer
+ * output	- none
+ * side effects - client is shown a list of active opers
+ */
 static void stats_operedup(struct Client *client_p)
 {
-  show_opers(client_p);
+  struct Client *target_p;
+  struct ConfItem *aconf;
+  dlink_node *oper_ptr;
+  dlink_node *ptr;
+  int j=0;
+
+  for(oper_ptr = oper_list.head; oper_ptr; oper_ptr = oper_ptr->next)
+  {
+    target_p = oper_ptr->data;
+
+    j++;
+
+    if (MyClient(client_p) && IsOper(client_p))
+    {
+      ptr = target_p->localClient->confs.head;
+      aconf = ptr->data;
+
+      sendto_one(client_p, ":%s %d %s :[O][%s] %s (%s@%s) Idle: %d",
+                 me.name, RPL_STATSDEBUG, client_p->name,
+		 oper_privs_as_string(target_p, aconf->port),
+		 target_p->name, target_p->username, target_p->host,
+		 (int)(CurrentTime - target_p->user->last));
+    }
+    else
+    {
+      sendto_one(client_p, ":%s %d %s :[O] %s (%s@%s) Idle: %d",
+                 me.name, RPL_STATSDEBUG, client_p->name,
+		 target_p->name, target_p->username, target_p->host,
+		 (int)(CurrentTime - target_p->user->last));
+    }
+  }
+
+  sendto_one(client_p, ":%s %d %s :%d OPER(s)", me.name, RPL_STATSDEBUG,
+             client_p->name, j);
 }
 
 static void stats_ports(struct Client *client_p)
@@ -562,9 +613,34 @@ static void stats_shared(struct Client *client_p)
   report_specials(client_p, CONF_ULINE, RPL_STATSULINE);
 }
 
+
+/* stats_servers()
+ *
+ * input	- client pointer
+ * output	- none
+ * side effects - client is shown lists of who connected servers
+ */
 static void stats_servers(struct Client *client_p)
 {
-  show_servers(client_p);
+  struct Client *target_p;
+  dlink_node *ptr;
+  int j=0;
+  
+  for(ptr = serv_list.head; ptr; ptr = ptr->next)
+  {
+    target_p = ptr->data;
+
+    j++;
+
+    sendto_one(client_p, ":%s %d %s :%s (%s!%s@%s) Idle: %d",
+               me.name, RPL_STATSDEBUG, client_p->name,
+	       target_p->name,
+	       (target_p->serv->by[0] ? target_p->serv->by : "Remote."),
+	       "*", "*", (int)(CurrentTime - target_p->lasttime));
+  }
+
+  sendto_one(client_p, ":%s %d %s :%d Server(s)", me.name, RPL_STATSDEBUG,
+             client_p->name, j);
 }
 
 static void stats_gecos(struct Client *client_p)
@@ -611,7 +687,57 @@ static void stats_ziplinks(struct Client *client_p)
 
 static void stats_servlinks(struct Client *client_p)
 {
-  serv_info(client_p);
+  static char Sformat[] = ":%s %d %s %s %u %u %u %u %u :%u %u %s";
+  long uptime, sendK, receiveK;
+  struct Client        *target_p;
+  dlink_node *ptr;
+  int j = 0;
+
+  sendK = receiveK = 0;
+
+  for(ptr = serv_list.head; ptr; ptr = ptr->next)
+  {
+    target_p = ptr->data;
+
+    j++;
+    sendK += target_p->localClient->sendK;
+    receiveK += target_p->localClient->receiveK;
+
+    sendto_one(client_p, Sformat, me.name, RPL_STATSLINKINFO,
+               client_p->name, 
+               IsSetOperAdmin(client_p) ? get_client_name(target_p, SHOW_IP)
+	       : get_client_name(target_p, MASK_IP),
+               (int)linebuf_len(&target_p->localClient->buf_sendq),
+               (int)target_p->localClient->sendM,
+               (int)target_p->localClient->sendK,
+               (int)target_p->localClient->receiveM,
+               (int)target_p->localClient->receiveK,
+               CurrentTime - target_p->firsttime,
+               (CurrentTime > target_p->since) ? (CurrentTime - target_p->since): 0,
+               show_capabilities(target_p));
+  }
+  
+  sendto_one(client_p, ":%s %d %s :%u total server(s)",
+             me.name, RPL_STATSDEBUG, client_p->name, j);
+
+  sendto_one(client_p, ":%s %d %s :Sent total : %7.2f %s",
+             me.name, RPL_STATSDEBUG, client_p->name, 
+	     _GMKv(sendK), _GMKs(sendK));
+  sendto_one(client_p, ":%s %d %s :Recv total : %7.2f %s",
+             me.name, RPL_STATSDEBUG, client_p->name,
+	     _GMKv(receiveK), _GMKs(receiveK));
+
+  uptime = (CurrentTime - me.since);
+
+  sendto_one(client_p, ":%s %d %s :Server send: %7.2f %s (%4.1f K/s)",
+             me.name, RPL_STATSDEBUG, client_p->name,
+	     _GMKv(me.localClient->sendK), _GMKs(me.localClient->sendK),
+	     (float)((float)me.localClient->sendK / (float)uptime));
+  sendto_one(client_p, ":%s %d %s :Server recv: %7.2f %s (%4.1f K/s)",
+             me.name, RPL_STATSDEBUG, client_p->name,
+	     _GMKv(me.localClient->receiveK),
+	     _GMKs(me.localClient->receiveK),
+	     (float)((float)me.localClient->receiveK / (float)uptime));
 }
 
 static void stats_ltrace(struct Client *client_p, int parc, char *parv[])

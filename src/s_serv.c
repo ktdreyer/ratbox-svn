@@ -1907,44 +1907,6 @@ void set_autoconn(struct Client *source_p,char *parv0,char *name,int newval)
 }
 
 
-/*
- * show_servers - send server list to client
- *
- * inputs        - struct Client pointer to client to show server list to
- *               - name of client
- * output        - NONE
- * side effects  - NONE
- */
-void show_servers(struct Client *client_p)
-{
-  struct Client *client_p2;
-  dlink_node *ptr;
-  int j=0;                /* used to count servers */
-
-  for(ptr = serv_list.head; ptr; ptr = ptr->next)
-    {
-      client_p2 = ptr->data;
-
-      ++j;
-      sendto_one(client_p, ":%s %d %s :%s (%s!%s@%s) Idle: %d",
-                 me.name, RPL_STATSDEBUG, client_p->name, client_p2->name,
-                 (client_p2->serv->by[0] ? client_p2->serv->by : "Remote."), 
-                 "*", "*", (int)(CurrentTime - client_p2->lasttime));
-
-      /*
-       * NOTE: moving the username and host to the client struct
-       * makes the names in the server->user struct no longer available
-       * IMO this is not a big problem because as soon as the user that
-       * started the connection leaves the user info has to go away
-       * anyhow. Simply showing the nick should be enough here.
-       * --Bleep
-       */ 
-    }
-
-  sendto_one(client_p, ":%s %d %s :%d Server%s", me.name, RPL_STATSDEBUG,
-             client_p->name, j, (j==1) ? "" : "s");
-}
-
 void initServerMask(void)
 {
   freeMask = 0xFFFFFFFFL;

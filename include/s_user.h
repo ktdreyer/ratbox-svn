@@ -41,7 +41,6 @@ extern void  send_umode (struct Client* , struct Client* ,
                          int, int, char* );
 extern void  send_umode_out(struct Client* , struct Client* , int);
 extern int   show_lusers(struct Client* source_p);
-extern void  show_opers(struct Client* client);
 extern int   register_local_user(struct Client* ,struct Client* ,
 				 char* ,char* );
 extern int   register_remote_user(struct Client* ,struct Client* ,

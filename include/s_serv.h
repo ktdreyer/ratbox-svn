@@ -270,7 +270,6 @@ extern void        send_capabilities(struct Client*, struct ConfItem* conf,
 extern int         server_estab(struct Client* client_p);
 extern void        set_autoconn(struct Client *,char *,char *,int);
 extern const char* show_capabilities(struct Client* client);
-extern void        show_servers(struct Client *);
 extern void        try_connections(void *unused);
 extern void        collect_zipstats(void *unused);
 
