@@ -49,7 +49,7 @@ static void m_part(struct Client*, struct Client*, int, char**);
 void check_spambot_warning(struct Client *source_p, const char *name);
 
 struct Message part_msgtab = {
-  "PART", 1, 2, 0, MFLG_SLOW, 0,
+  "PART", 0, 0, 2, 0, MFLG_SLOW, 0,
   {m_unregistered, m_part, m_part, m_part}
 };
 

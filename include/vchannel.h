@@ -49,8 +49,7 @@ extern void	del_vchan_from_client_cache(struct Client *source_p,
 extern struct Channel* map_vchan(struct Channel *chptr, struct Client *source_p);
 extern struct Channel* find_bchan(struct Channel *chptr);
 
-extern void	show_vchans(struct Client *client_p,
-			    struct Client *source_p,
+extern void	show_vchans(struct Client *source_p,
 			    struct Channel *chptr,
                             char *command);
 
@@ -69,7 +68,6 @@ extern struct Channel* vchan_invites(struct Channel *chptr,
 
 /* Select which vchan to use for JOIN */
 extern struct Channel* select_vchan(struct Channel *root,
-                                    struct Client *client_p,
                                     struct Client *source_p,
                                     char *vkey,
                                     char *name);

@@ -166,7 +166,7 @@ static void ms_lljoin(struct Client *client_p,
   {
     if (chptr)
     {
-      vchan_chptr = select_vchan(chptr, client_p, target_p, vkey, chname);
+      vchan_chptr = select_vchan(chptr, target_p, vkey, chname);
     }
     else
     {

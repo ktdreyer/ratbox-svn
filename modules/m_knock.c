@@ -182,7 +182,7 @@ static struct Channel *parse_knock_args(struct Client *client_p,
           /* Make "KNOCK #channel !" work like JOIN */
           if (!key[1])
             {
-              show_vchans(client_p, source_p, chptr, "knock");
+              show_vchans(source_p, chptr, "knock");
               return NULL;
             }
 
@@ -201,7 +201,7 @@ static struct Channel *parse_knock_args(struct Client *client_p,
       else
         {
           /* No key specified */
-          show_vchans(client_p, source_p, chptr, "knock");
+          show_vchans(source_p, chptr, "knock");
           return NULL;
         }
     }

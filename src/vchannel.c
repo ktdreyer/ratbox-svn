@@ -41,6 +41,15 @@
 
 static void vchan_show_ids(struct Client *source_p, struct Channel *chptr);
 
+/*
+ * cjoin_channel()
+ *
+ * input	- root channel
+ *		- client whos joining
+ *		- channel name
+ * output	- none
+ * side effects - vchan is created or client is told otherwise
+ */
 struct Channel *
 cjoin_channel(struct Channel *root, struct Client *source_p, char *name)
 {
@@ -131,9 +140,18 @@ cjoin_channel(struct Channel *root, struct Client *source_p, char *name)
   return vchan_chptr;
 }
 
+/*
+ * select_vchan()
+ * 
+ * inputs	- pointer to root channel
+ *		- pointer to client
+ *		- vchan key
+ *		- channel name
+ * outputs 	- none
+ * side effects	- user is shown vchans, vchan picked, or root returned
+ */
 struct Channel *
 select_vchan(struct Channel *root,
-             struct Client *client_p,
              struct Client *source_p, char *vkey, char *name)
 {
   struct Channel *chptr;
@@ -148,7 +166,7 @@ select_vchan(struct Channel *root,
              (this prevents join-invited-chan voodoo) */
           if (!vkey[1])
             {
-              show_vchans(client_p, source_p, root, "join");
+              show_vchans(source_p, root, "join");
               return NULL;
             }
 
@@ -170,7 +188,7 @@ select_vchan(struct Channel *root,
           /* otherwise, they get a list of channels */
           else
             {
-              show_vchans(client_p, source_p, root, "join");
+              show_vchans(source_p, root, "join");
               return NULL;
             }
         }
@@ -188,12 +206,18 @@ select_vchan(struct Channel *root,
 }
 
 
-/* Given base chan pointer and vchan pointer add to
- * translation table cache for this client
+/*
+ * add_vchan_to_client_cache()
+ *
+ * input	- pointer to client
+ *		- pointer to root channel
+ *		- vchan
+ * output	- none
+ * side effects - add vchan pointer to clients cache
  */
 void
 add_vchan_to_client_cache(struct Client *source_p,
-                          struct Channel *base_chan, struct Channel *vchan)
+                          struct Channel *root_chan, struct Channel *vchan)
 {
   dlink_node *vchanmap_node;
   struct Vchan_map *vchan_info;
@@ -201,18 +225,25 @@ add_vchan_to_client_cache(struct Client *source_p,
   assert(source_p != NULL);
 
   /* oops its the top channel of the subchans */
-  if (base_chan == vchan)
+  if (root_chan == vchan)
     return;
 
   vchan_info = (struct Vchan_map *)MyMalloc(sizeof(struct Vchan_map));
-  vchan_info->base_chan = base_chan;
+  vchan_info->base_chan = root_chan;
   vchan_info->vchan = vchan;
 
   vchanmap_node = make_dlink_node();
   dlinkAdd(vchan_info, vchanmap_node, &source_p->vchan_map);
 }
 
-/* Given vchan pointer remove from translation table cache */
+/*
+ * del_vchan_from_client_cache()
+ *
+ * inputs	- pointer to client
+ * 		- pointer to vchan
+ * output	- none
+ * side effects - remove vchan pointer from clients cache
+ */
 void
 del_vchan_from_client_cache(struct Client *source_p, struct Channel *vchan)
 {
@@ -235,7 +266,14 @@ del_vchan_from_client_cache(struct Client *source_p, struct Channel *vchan)
     }
 }
 
-/* see if this client given by source_p is on a subchan already */
+/*
+ * on_sub_vchan()
+ * 
+ * input	- pointer to channel
+ *		- pointer to client
+ * output	- none
+ * side effects	- return YES if client is on a vchan, else NO
+ */
 int
 on_sub_vchan(struct Channel *chptr, struct Client *source_p)
 {
@@ -260,7 +298,14 @@ on_sub_vchan(struct Channel *chptr, struct Client *source_p)
   return NO;
 }
 
-/* return matching vchan given base chan and source_p */
+/*
+ * map_vchan()
+ *
+ * input	- pointer to channel
+ *		- pointer to client
+ * output	- none
+ * side effects - return matching vchan given base chan and source
+ */
 struct Channel *
 map_vchan(struct Channel *chptr, struct Client *source_p)
 {
@@ -285,17 +330,31 @@ map_vchan(struct Channel *chptr, struct Client *source_p)
   return NULL;
 }
 
-/* return the base chan from a vchan */
+/*
+ * find_bchan()
+ *
+ * input	- pointer to channel
+ * output	- none
+ * side effects - root channel is returned
+ */
 struct Channel *
 find_bchan(struct Channel *chptr)
 {
   return (chptr->root_chptr);
 }
 
-/* show available vchans */
+
+/*
+ * show_vchans()
+ *
+ * input	- pointer to client
+ *		- pointer to channel
+ *		- command given (ie: knock/join)
+ * output	- none
+ * side effects - client is shown list of vchans
+ */
 void
-show_vchans(struct Client *client_p,
-            struct Client *source_p, struct Channel *chptr, char *command)
+show_vchans(struct Client *source_p, struct Channel *chptr, char *command)
 {
   int no_of_vchans = 0;
 
@@ -315,10 +374,9 @@ show_vchans(struct Client *client_p,
  * vchan_show_ids
  *
  * inputs	- pointer to client to report to
- *
- * output	- 
- * side effects - 
- *                
+ *		- pointer to channel
+ * output	- none
+ * side effects - client is sent list of ids for channel
  */
 static void
 vchan_show_ids(struct Client *source_p, struct Channel *chptr)
@@ -436,8 +494,14 @@ pick_vchan_id(struct Channel *chptr)
   return chptr->vchan_id;
 }
 
-/* return matching vchan, from root and !key (nick)
- * or NULL if there isn't one */
+/*
+ * find_vchan()
+ *
+ * input	- pointer to channel
+ * 		- vchan key
+ * output	- none
+ * side effects - matching vchan is returned, else NULL
+ */
 struct Channel *
 find_vchan(struct Channel *chptr, char *key)
 {
@@ -469,8 +533,13 @@ find_vchan(struct Channel *chptr, char *key)
   return NULL;
 }
 
-/* return the first found invite matching a subchannel of chptr
- * or NULL if no invites are found
+/*
+ * vchan_invites()
+ *
+ * input	- pointer to channel
+ * 		- pointer to client
+ * output	- none
+ * side effects - return matching invite for vchans, else NULL
  */
 struct Channel *
 vchan_invites(struct Channel *chptr, struct Client *source_p)

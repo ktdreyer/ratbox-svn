@@ -116,7 +116,7 @@ static void m_names(struct Client *client_p,
 
               if ((vkey && !vkey[1]) || (!vchan && !vkey))
                 {
-                  show_vchans(client_p, source_p, ch2ptr, "names");
+                  show_vchans(source_p, ch2ptr, "names");
                   return;
                 }
               else if (vkey && vkey[1])
