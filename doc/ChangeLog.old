@@ -1,3 +1,10 @@
+*** 20001227_8 by davidt
+Added back /quote set msglocale, which vanished mysteriously when
+the new table-based SET code was comitted.
+Reworked the argument handling for the SET handlers in the process,
+handlers can now take: char; char, int; or int; arguments.
+
+
 *** 20001227_7 by db
 - must use ClearOper() macro to deoper, otherwise handler is still set
   to oper handler. ooops
