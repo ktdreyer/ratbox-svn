@@ -35,7 +35,7 @@
 #include <string.h>
 
 struct Message ison_msgtab = {
-  MSG_ISON, 0, 2, 1, MFLG_SLOW, 0,
+  MSG_ISON, 0, 1, 1, MFLG_SLOW, 0,
   {m_unregistered, m_ison, m_ignore, m_ison}
 };
 

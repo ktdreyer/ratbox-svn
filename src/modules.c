@@ -112,12 +112,12 @@ int unload_one_module (char *name)
 }
 
 struct Message modload_msgtab = {
-  MSG_MODLOAD, 0, 2, 0, MFLG_SLOW, 0,
+  MSG_MODLOAD, 0, 1, 0, MFLG_SLOW, 0,
   {m_unregistered, m_ignore, m_ignore, mo_modload}
 };
 
 struct Message modunload_msgtab = {
-  MSG_MODUNLOAD, 0, 2, 0, MFLG_SLOW, 0,
+  MSG_MODUNLOAD, 0, 1, 0, MFLG_SLOW, 0,
   {m_unregistered, m_ignore, m_ignore, mo_modunload}
 };
 
@@ -127,7 +127,7 @@ struct Message modlist_msgtab = {
 };
 
 struct Message hash_msgtab = {
-  MSG_HASH, 0, 2, 0, MFLG_SLOW, 0,
+  MSG_HASH, 0, 1, 0, MFLG_SLOW, 0,
   {m_unregistered, m_ignore, m_ignore, mo_hash}
 };
 
