@@ -1,3 +1,10 @@
+*** 20001031_7 by db
+- preliminary cleanup of m_whois.c
+  I messed up previous commit. YES I tested, but missed the duplicate
+  in the scroll. *grr* fixed.
+
+
+
 *** 20001031_6 by db
 - slight cleanup to m_part.c
 - major cleanup to m_whois.c
