@@ -1,3 +1,7 @@
+*** 20010529_6 by leeh
+- updated make clean to remove encspeed
+
+
 *** 20010529_5 by davidt
 - Fix connect_cipher_preference code in ircd_parser.y
 - Fix 3 other minor problems in ircd_parser.y found when I compiled it
