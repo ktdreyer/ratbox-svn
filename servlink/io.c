@@ -38,7 +38,7 @@ static struct ctrl_command cmd = {0, 0, 0, 0, NULL};
 #define BUFLEN                  2048
 
 #ifdef HAVE_LIBZ
-#define ZIP_BUFLEN              BUFLEN * 16 /* allow for decompression */
+#define ZIP_BUFLEN              BUFLEN * 8 /* allow for decompression */
 #else
 #define ZIP_BUFLEN              BUFLEN
 #endif
@@ -266,7 +266,7 @@ void read_ctrl(void)
 void read_data(void)
 {
   int ret;
-  char *buf;
+  char *buf = out_buf;
   int  blen;
   
   if (out_len)
@@ -275,9 +275,7 @@ void read_data(void)
 #if defined(HAVE_LIBZ) || defined(HAVE_LIBCRYPTO)
   if (out_state.zip || out_state.crypt)
     buf = tmp_buf;
-  else
 #endif
-    buf = out_buf;
     
   while ((ret = read(LOCAL_FD, buf, BUFLEN)) > 0)
   {
@@ -288,13 +286,12 @@ void read_data(void)
       out_state.zip_state.z_stream.next_in = buf;
       out_state.zip_state.z_stream.avail_in = ret;
 
+      buf = out_buf;
 #ifdef HAVE_LIB_CRYPTO
       if (out_state.crypt)
-        buf = out_state.zip_state.z_stream.next_out = tmp2_buf;
-      else
+        buf = tmp2_buf;
 #endif
-        buf = out_state.zip_state.z_stream.next_out = out_buf;
-
+      out_state.zip_state.z_stream.next_out = buf;
       out_state.zip_state.z_stream.avail_out = ZIP_BUFLEN;
       assert(deflate(&out_state.zip_state.z_stream,
                      Z_PARTIAL_FLUSH) == Z_OK);
@@ -374,7 +371,7 @@ void read_net(void)
 {
   int ret;
   int ret2;
-  char *buf;
+  char *buf = in_buf;
   int  blen;
 
   if (in_len)
@@ -383,9 +380,7 @@ void read_net(void)
 #if defined(HAVE_LIBCRYPTO) || defined(HAVE_LIBZ)
   if (in_state.crypt || in_state.zip)
     buf = tmp_buf;
-  else
 #endif
-    buf = in_buf;
 
   while ((ret = read(REMOTE_FD, buf, BUFLEN)) > 0)
   {
@@ -394,13 +389,11 @@ void read_net(void)
     if (in_state.crypt)
     {
       /* decrypt data */
+      buf = in_buf;
 #ifdef HAVE_LIBZ
       if (in_state.zip)
         buf = tmp2_buf;
-      else
 #endif
-        buf = in_buf;
-
       blen = BUFLEN;
       assert( EVP_DecryptUpdate(&in_state.crypt_state.ctx,
                        buf, &blen,

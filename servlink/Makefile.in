@@ -60,7 +60,6 @@ install: build
 
 .PHONY: depend clean distclean
 depend:
-depend:
 	@${MKDEP} ${CPPFLAGS} ${SOURCES} > .depend.tmp
 	@sed -e '/^# DO NOT DELETE THIS LINE/,$$d' <Makefile >Makefile.depend
 	@echo '# DO NOT DELETE THIS LINE!!!' >>Makefile.depend
