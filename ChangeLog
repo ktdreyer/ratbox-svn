@@ -1,3 +1,21 @@
+androsyn    2002/08/13 10:30:34 EDT	(20020813_4)
+
+  Modified files:
+    contrib              m_map.c 
+    include              client.h 
+    src                  client.c s_user.c 
+  Log:
+  Add usercnt to struct Server for the sake of m_map.so, I'm sure we can find
+  something else useful for this too
+  
+  Revision  Changes    Path
+  1.14      +3 -7      ircd-ratbox/contrib/m_map.c
+  7.162     +1 -0      ircd-ratbox/include/client.h
+  7.306     +1 -0      ircd-ratbox/src/client.c
+  7.212     +2 -2      ircd-ratbox/src/s_user.c
+
+
+
 androsyn    2002/08/12 23:18:35 EDT	(20020813_3)
 
   Modified files:
