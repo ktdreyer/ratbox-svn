@@ -1,3 +1,15 @@
+leeh        2004/05/25 13:06:08 EDT	(20040525_4)
+
+  Added files:
+    doc/technical        cluster.txt 
+  Log:
+  - add my specification of how remote kline and friends are propagated s2s
+  
+  Revision  Changes    Path
+  1.1       +26 -0     ircd-ratbox/doc/technical/cluster.txt (new)
+
+
+
 leeh        2004/05/25 12:53:52 EDT	(20040525_3)
 
   Modified files:
