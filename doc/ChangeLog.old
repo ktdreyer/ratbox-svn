@@ -1,3 +1,10 @@
+*** 20011024_1 by db
+- more wallpaper stripping... get_server() did nothing but call
+  hash_get_server() pointless call.
+- other cleanups
+
+
+
 *** 20011023_4 by db
 - get_channel() was being called with a NULL always. silly. ditto
   with get_resv() second argument always a NULL. 
