@@ -120,7 +120,12 @@ extern int     is_chan_op (struct Client *, struct Channel *);
 extern int     has_voice (struct Client *, struct Channel *);
 extern int     user_channel_mode(struct Client *, struct Channel *);
 extern int     count_channels (struct Client *);
+
 extern int     m_names(struct Client *, struct Client *,int, char **);
+extern void    names_on_this_channel( struct Client *sptr,
+				      struct Channel *chptr,
+				      char *name_of_channel);
+
 extern void    send_channel_modes (struct Client *, struct Channel *);
 extern void    del_invite (struct Client *, struct Channel *);
 extern int     check_channel_name(const char* name);

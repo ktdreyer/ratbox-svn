@@ -264,9 +264,7 @@ int     m_cjoin(struct Client *cptr,
 		     me.name, vchan_chptr->chname);
 
   del_invite(sptr, vchan_chptr);
-  parv[1] = vchan_chptr->chname;
-  parv[2] = chptr->chname;
-  (void)m_names(cptr, sptr, 3, parv);
+  (void)names_on_this_channel(sptr, vchan_chptr, chptr->chname);
 
   return 0;
 }

@@ -116,6 +116,7 @@
 /* maximum names para to show to opers when abuse occurs */
 #define TRUNCATED_NAMES 20
 
+
 int     m_names( struct Client *cptr,
                  struct Client *sptr,
                  int parc,
@@ -125,7 +126,10 @@ int     m_names( struct Client *cptr,
   struct Client *c2ptr;
   struct SLink  *lp;
   struct Channel *ch2ptr = NULL;
-  int   idx, flag = 0, len, mlen;
+  int   idx;
+  int   len;
+  int   mlen;
+  int   reply_to_send = NO;
   char  *s, *para = parc > 1 ? parv[1] : NULL;
   int comma_count=0;
   int char_count=0;
@@ -149,8 +153,6 @@ int     m_names( struct Client *cptr,
    *
    * -Dianora
    */
-
-  mlen = strlen(me.name) + NICKLEN + 7;
 
   if (!BadPtr(para))
     {
@@ -192,8 +194,14 @@ int     m_names( struct Client *cptr,
         }
 
       ch2ptr = hash_find_channel(para, NULL);
+      if( ch2ptr )
+	{
+	  names_on_this_channel( sptr, ch2ptr, ch2ptr->chname );
+	  return 0;
+	}
     }
 
+  mlen = strlen(me.name) + NICKLEN + 7;
   *buf = '\0';
   
   /* 
@@ -203,26 +211,14 @@ int     m_names( struct Client *cptr,
 
   for (chptr = GlobalChannelList; chptr; chptr = chptr->nextch)
     {
-      if ((chptr != ch2ptr) && !BadPtr(para))
-        continue; /* -- wanted a specific channel */
-      if (!MyConnect(sptr) && BadPtr(para))
-        continue;
       if (!ShowChannel(sptr, chptr))
         continue; /* -- users on this are not listed */
       
       /* Find users on same channel (defined by chptr) */
 
       (void)strcpy(buf, "* ");
-      if (parc > 2)
-        {
-          len = strlen(parv[2]);
-          (void)strcpy(buf + 2, parv[2]);
-        }
-      else
-        {
-          len = strlen(chptr->chname);
-          (void)strcpy(buf + 2, chptr->chname);
-        }
+      len = strlen(chptr->chname);
+      (void)strcpy(buf + 2, chptr->chname);
       (void)strcpy(buf + 2 + len, " :");
 
       if (PubChannel(chptr))
@@ -230,7 +226,7 @@ int     m_names( struct Client *cptr,
       else if (SecretChannel(chptr))
         *buf = '@';
       idx = len + 4;
-      flag = 1;
+      reply_to_send = YES;
       for (lp = chptr->members; lp; lp = lp->next)
         {
           c2ptr = lp->value.cptr;
@@ -248,7 +244,7 @@ int     m_names( struct Client *cptr,
             }
           strncat(buf, c2ptr->name, NICKLEN);
           idx += strlen(c2ptr->name) + 1;
-          flag = 1;
+          reply_to_send = YES;
           strcat(buf," ");
           if (mlen + idx + NICKLEN > BUFSIZE - 3)
             {
@@ -265,32 +261,19 @@ int     m_names( struct Client *cptr,
               else if (SecretChannel(chptr))
                 *buf = '@';
               idx = len + 4;
-              flag = 0;
+              reply_to_send = NO;
             }
         }
-      if (flag)
+      if (reply_to_send)
         sendto_one(sptr, form_str(RPL_NAMREPLY),
                    me.name, parv[0], buf);
-    }
-
-  if (parc > 2)
-    {
-      sendto_one(sptr, form_str(RPL_ENDOFNAMES), me.name, parv[0],
-                 parv[2]);
-      return(1);
-    }
-  else if (!BadPtr(para))
-    {
-      sendto_one(sptr, form_str(RPL_ENDOFNAMES), me.name, parv[0],
-                 para);
-      return(1);
     }
 
   /* Second, do all non-public, non-secret channels in one big sweep */
 
   strncpy_irc(buf, "* * :", 6);
   idx = 5;
-  flag = 0;
+  reply_to_send = NO;
   for (c2ptr = GlobalClientList; c2ptr; c2ptr = c2ptr->next)
     {
       struct Channel *ch3ptr;
@@ -320,18 +303,18 @@ int     m_names( struct Client *cptr,
       (void)strncat(buf, c2ptr->name, NICKLEN);
       idx += strlen(c2ptr->name) + 1;
       (void)strcat(buf," ");
-      flag = 1;
+      reply_to_send = YES;
       if (mlen + idx + NICKLEN > BUFSIZE - 3)
         {
           sendto_one(sptr, form_str(RPL_NAMREPLY),
                      me.name, parv[0], buf);
           strncpy_irc(buf, "* * :", 6);
           idx = 5;
-          flag = 0;
+          reply_to_send = NO;
         }
     }
 
-  if (flag)
+  if (reply_to_send)
     sendto_one(sptr, form_str(RPL_NAMREPLY), me.name, parv[0], buf);
 
   sendto_one(sptr, form_str(RPL_ENDOFNAMES), me.name, parv[0], "*");
@@ -372,7 +355,7 @@ int     ms_names( struct Client *cptr,
    * -Dianora
    */
 
-  mlen = strlen(me.name) + NICKLEN + 7;
+
 
   if (!BadPtr(para))
     {
@@ -417,6 +400,8 @@ int     ms_names( struct Client *cptr,
     }
 
   *buf = '\0';
+
+  mlen = strlen(me.name) + NICKLEN + 7;
   
   /* 
    *
@@ -543,3 +528,70 @@ int     ms_names( struct Client *cptr,
 }
 
 
+void names_on_this_channel( struct Client *sptr,
+			    struct Channel *chptr,
+			    char *name_of_channel)
+{
+  int len;
+  int mlen;
+  int idx;
+  int reply_to_send = NO;
+  char buf[BUFSIZE];
+  struct Client *c2ptr;
+  struct SLink  *lp;
+
+  mlen = strlen(me.name) + NICKLEN + 7;
+
+  /* Find users on same channel (defined by chptr) */
+
+  (void)strcpy(buf, "* ");
+  len = strlen(name_of_channel);
+  (void)strcpy(buf + 2, name_of_channel);
+  (void)strcpy(buf + 2 + len, " :");
+
+  if (PubChannel(chptr))
+    *buf = '=';
+  else if (SecretChannel(chptr))
+    *buf = '@';
+  idx = len + 4;
+
+  for (lp = chptr->members; lp; lp = lp->next)
+    {
+      c2ptr = lp->value.cptr;
+      if (lp->flags & CHFL_CHANOP)
+	{
+	  strcat(buf, "@");
+	  idx++;
+	}
+      else if (lp->flags & CHFL_VOICE)
+	{
+	  strcat(buf, "+");
+	  idx++;
+	}
+      strncat(buf, c2ptr->name, NICKLEN);
+      idx += strlen(c2ptr->name) + 1;
+      strcat(buf," ");
+      reply_to_send = YES;
+      if (mlen + idx + NICKLEN > BUFSIZE - 3)
+	{
+	  reply_to_send = NO;
+	  sendto_one(sptr, form_str(RPL_NAMREPLY),
+		     me.name, sptr->name, buf);
+	  strncpy_irc(buf, "* ", 3);
+	  strncpy_irc(buf + 2, name_of_channel, len + 1);
+	  strcat(buf, " :");
+	  if (PubChannel(chptr))
+	    *buf = '=';
+	  else if (SecretChannel(chptr))
+	    *buf = '@';
+	  idx = len + 4;
+	}
+    }
+
+  if(reply_to_send)
+    sendto_one(sptr, form_str(RPL_NAMREPLY),
+	       me.name, sptr->name, buf);
+
+  sendto_one(sptr, form_str(RPL_ENDOFNAMES), me.name, sptr->name,
+	     name_of_channel);
+}

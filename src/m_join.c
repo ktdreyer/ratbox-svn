@@ -569,16 +569,9 @@ int     m_join(struct Client *cptr,
                          chptr->topic_time);
             }
           if (joining_vchan)
-            {
-              parv[1] = chptr->chname;
-              parv[2] = root_chptr->chname;
-              (void)m_names(cptr, sptr, 3, parv);
-            }
+	    (void)names_on_this_channel(sptr, vchan_chptr,root_chptr->chname);
           else
-            {
-              parv[1] = name;
-              (void)m_names(cptr, sptr, 2, parv);
-            }
+            (void)names_on_this_channel(sptr, chptr, name);
         }
     }
 
