@@ -272,20 +272,6 @@ check_cipher(struct Client *client_p, struct ConfItem *aconf)
 #endif /* HAVE_LIBCRYPTO */
 
 /*
- * my_name_for_link - return wildcard name of my server name 
- * according to given config entry --Jto
- * XXX - this is only called with me.name as name
- */
-const char *
-my_name_for_link(const char *name, struct ConfItem *aconf)
-{
-	if(aconf->fakename)
-		return (aconf->fakename);
-	else
-		return (name);
-}
-
-/*
  * hunt_server - Do the basic thing in delivering the message (command)
  *      across the relays to the specific server (server) for
  *      actions.
@@ -1165,7 +1151,7 @@ server_estab(struct Client *client_p)
 		setsockopt(client_p->localClient->fd, IPPROTO_TCP, TCP_NODELAY, &opt, sizeof(opt));
 		
 		sendto_one(client_p, "SERVER %s 1 :%s%s",
-			   my_name_for_link(me.name, aconf),
+			   me.name,
 			   ConfigServerHide.hidden ? "(H) " : "",
 			   (me.info[0]) ? (me.info) : "IRCers United");
 		opt = 0;
@@ -1274,9 +1260,6 @@ server_estab(struct Client *client_p)
 		if(target_p == client_p)
 			continue;
 
-		if((aconf = target_p->serv->sconf) &&
-		   match(my_name_for_link(me.name, aconf), client_p->name))
-			continue;
 		sendto_one(target_p, ":%s SERVER %s 2 :%s%s",
 			   me.name, client_p->name,
 			   IsHidden(client_p) ? "(H) " : "", client_p->info);
@@ -1309,14 +1292,10 @@ server_estab(struct Client *client_p)
 		if(target_p->from == client_p)
 			continue;
 		if(IsServer(target_p))
-		{
-			if(match(my_name_for_link(me.name, aconf), target_p->name))
-				continue;
 			sendto_one(client_p, ":%s SERVER %s %d :%s%s",
 				   target_p->serv->up,
 				   target_p->name, target_p->hopcount + 1,
 				   IsHidden(target_p) ? "(H) " : "", target_p->info);
-		}
 	}
 
 	if(DoesTS6(client_p))
@@ -2030,7 +2009,7 @@ serv_connect_callback(int fd, int status, void *data)
 			  | ((aconf->flags & CONF_FLAGS_COMPRESSED) ? CAP_ZIP_SUPPORTED : 0), 0);
 
 	sendto_one(client_p, "SERVER %s 1 :%s%s",
-		   my_name_for_link(me.name, aconf),
+		   me.name,
 		   ConfigServerHide.hidden ? "(H) " : "", me.info);
 
 	/* 
@@ -2119,7 +2098,7 @@ cryptlink_init(struct Client *client_p, struct ConfItem *aconf, int fd)
 			     CAP_ZIP_SUPPORTED : 0), CAP_ENC_MASK);
 
 	sendto_one(client_p, "CRYPTLINK SERV %s %s :%s%s",
-		   my_name_for_link(me.name, aconf), key_to_send,
+		   me.name, key_to_send,
 		   ConfigServerHide.hidden ? "(H) " : "", me.info);
 
 	SetHandshake(client_p);

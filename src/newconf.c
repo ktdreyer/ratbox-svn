@@ -1515,13 +1515,6 @@ conf_set_connect_aftype(void *data)
 }
 
 static void
-conf_set_connect_fakename(void *data)
-{
-	MyFree(yy_aconf->fakename);
-	DupString(yy_aconf->fakename, data);
-}
-
-static void
 conf_set_connect_encrypted(void *data)
 {
 	int yesno = *(unsigned int *) data;
@@ -2808,7 +2801,6 @@ newconf_init()
 	add_conf_item("connect", "accept_password", CF_QSTRING, conf_set_connect_accept_password);
 	add_conf_item("connect", "port", CF_INT, conf_set_connect_port);
 	add_conf_item("connect", "aftype", CF_STRING, conf_set_connect_aftype);
-	add_conf_item("connect", "fakename", CF_QSTRING, conf_set_connect_fakename);
 	add_conf_item("connect", "hub_mask", CF_QSTRING, conf_set_connect_hub_mask);
 	add_conf_item("connect", "leaf_mask", CF_QSTRING, conf_set_connect_leaf_mask);
 	add_conf_item("connect", "class", CF_QSTRING, conf_set_connect_class);

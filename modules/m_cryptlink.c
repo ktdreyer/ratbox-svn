@@ -56,7 +56,7 @@
 #include "s_conf.h"		/* struct ConfItem */
 
 #include "s_log.h"		/* log level defines */
-#include "s_serv.h"		/* server_estab, check_server, my_name_for_link */
+#include "s_serv.h"		/* server_estab, check_server */
 #include "s_stats.h"		/* ServerStats */
 #include "scache.h"		/* find_or_add */
 

@@ -1092,7 +1092,6 @@ remove_dependents(struct Client *client_p,
 		  struct Client *from, const char *comment, const char *comment1)
 {
 	struct Client *to;
-	struct ConfItem *aconf;
 	static char myname[HOSTLEN + 1];
 	dlink_node *ptr, *next;
 
@@ -1110,10 +1109,7 @@ remove_dependents(struct Client *client_p,
 		 * comstud, since m_squit already does the notification.
 		 */
 
-		if((aconf = to->serv->sconf))
-			strlcpy(myname, my_name_for_link(me.name, aconf), sizeof(myname));
-		else
-			strlcpy(myname, me.name, sizeof(myname));
+		strlcpy(myname, me.name, sizeof(myname));
 		recurse_send_quits(client_p, source_p, to, comment1, myname);
 	}
 

@@ -207,7 +207,6 @@ free_conf(struct ConfItem *aconf)
 	MyFree(aconf->className);
 	MyFree(aconf->user);
 	MyFree(aconf->host);
-	MyFree(aconf->fakename);
 
 #ifdef HAVE_LIBCRYPTO
 	if(aconf->rsa_public_key)
@@ -293,8 +292,6 @@ report_configured_links(struct Client *source_p, int mask)
 						*s++ = 'C';
 					if(tmp->flags & CONF_FLAGS_COMPRESSED)
 						*s++ = 'Z';
-					if(tmp->fakename)
-						*s++ = 'M';
 				}
 
 				if(!buf[0])

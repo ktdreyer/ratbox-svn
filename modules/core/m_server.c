@@ -36,7 +36,7 @@
 #include "numeric.h"		/* ERR_xxx */
 #include "s_conf.h"		/* struct ConfItem */
 #include "s_log.h"		/* log level defines */
-#include "s_serv.h"		/* server_estab, check_server, my_name_for_link */
+#include "s_serv.h"		/* server_estab, check_server */
 #include "s_stats.h"		/* ServerStats */
 #include "scache.h"		/* find_or_add */
 #include "send.h"		/* sendto_one */
@@ -467,8 +467,6 @@ ms_server(struct Client *client_p, struct Client *source_p, int parc, const char
 			exit_client(client_p, client_p, client_p, "Lost N line");
 			return 0;
 		}
-		if(match(my_name_for_link(me.name, aconf), target_p->name))
-			continue;
 
 		sendto_one(bclient_p, ":%s SERVER %s %d :%s%s",
 			   parv[0], target_p->name, hop + 1,

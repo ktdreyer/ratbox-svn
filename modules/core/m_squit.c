@@ -166,30 +166,11 @@ find_squit(struct Client *client_p, struct Client *source_p, const char *server)
 	static struct squit_parms found_squit;
 	struct Client *target_p = NULL;
 	struct Client *p;
-	struct ConfItem *aconf;
 	dlink_node *ptr;
 
 	/* must ALWAYS be reset */
 	found_squit.target_p = NULL;
 	found_squit.server_name = NULL;
-
-	/*
-	 ** To accomodate host masking, a squit for a masked server
-	 ** name is expanded if the incoming mask is the same as
-	 ** the server name for that link to the name of link.
-	 */
-	if((*server == '*') && IsServer(client_p))
-	{
-		aconf = client_p->serv->sconf;
-		if(aconf)
-		{
-			if(!irccmp(server, my_name_for_link(me.name, aconf)))
-			{
-				found_squit.server_name = client_p->name;
-				found_squit.target_p = client_p;
-			}
-		}
-	}
 
 	/*
 	 ** The following allows wild cards in SQUIT. Only useful
@@ -210,7 +191,6 @@ find_squit(struct Client *client_p, struct Client *source_p, const char *server)
 
 	if(target_p == NULL)
 		return NULL;
-
 
 	found_squit.target_p = target_p;
 	found_squit.server_name = server;

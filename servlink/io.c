@@ -122,8 +122,7 @@ send_data_blocking(int fd, void *data, int datalen)
 {
 	int ret;
 	struct pollfd pfd[1];
-	fd_set wfds;
-	memset(pfd, 0, sizeof(&pfd);
+	memset(pfd, 0, sizeof(&pfd));
 	while (1)
 	{
 		ret = write(fd, data, datalen);
