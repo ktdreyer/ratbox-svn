@@ -260,6 +260,8 @@ struct config_server_hide
   int	hide_servers;
   int	disable_remote;
   int	links_delay;
+  int	hidden;
+  int	allow_hidden;
 };
 
 struct server_info

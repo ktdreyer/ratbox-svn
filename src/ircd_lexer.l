@@ -106,6 +106,7 @@ action		{ return ACTION; }
 admin		{ return ADMIN; }
 administrator	{ return ADMIN; }
 aftype		{ return AFTYPE; }
+allow_hidden	{ return ALLOW_HIDDEN; }
 auth		{ return AUTH; }
 autoconn	{ return AUTOCONN; }
 caller_id_wait	{ return CALLER_ID_WAIT; }
@@ -146,6 +147,7 @@ gline_time      { return GLINE_TIME; }
 global_kill	{ return GLOBAL_KILL; }
 have_ident	{ return HAVE_IDENT; }
 havent_read_conf { return HAVENT_READ_CONF; }
+hidden		{ return HIDDEN; }
 hide_servers	{ return HIDE_SERVERS; }
 host		{ return HOST; }
 hub		{ return HUB; }

@@ -1452,7 +1452,9 @@ static void set_default_conf(void)
   ConfigServerHide.flatten_links = 0;
   ConfigServerHide.hide_servers = 0;
   ConfigServerHide.disable_remote = 0;
-  ConfigServerHide.links_delay = 1800;
+  ConfigServerHide.links_delay = 300;
+  ConfigServerHide.hidden = 0;
+  ConfigServerHide.allow_hidden = 1;  
 
   ConfigFileEntry.min_nonwildcard = 4;
   ConfigFileEntry.default_floodcount = 8;

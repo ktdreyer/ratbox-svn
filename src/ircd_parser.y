@@ -100,6 +100,7 @@ int   class_redirport_var;
 %token  ACTION
 %token  ADMIN
 %token  AFTYPE
+%token  ALLOW_HIDDEN
 %token  ANTI_NICK_FLOOD
 %token  ANTI_SPAM_EXIT_MESSAGE_TIME
 %token  AUTH
@@ -144,6 +145,7 @@ int   class_redirport_var;
 %token  GLOBAL_KILL
 %token  HAVE_IDENT
 %token	HAVENT_READ_CONF
+%token  HIDDEN
 %token  HIDE_SERVERS
 %token  HOST
 %token  HUB
@@ -2563,6 +2565,8 @@ serverhide_item:    serverhide_flatten_links |
 		    serverhide_hide_servers |
 		    serverhide_disable_remote_commands |
 		    serverhide_links_delay |
+		    serverhide_allow_hidden |
+		    serverhide_hidden |
                     error
 
 serverhide_flatten_links: FLATTEN_LINKS '=' TYES ';'
@@ -2599,3 +2603,26 @@ serverhide_links_delay: LINKS_DELAY '=' timespec ';'
   {
     ConfigServerHide.links_delay = $3;
   };
+
+serverhide_hidden: HIDDEN '=' TYES ';'
+  {
+    ConfigServerHide.hidden = 1;
+  };
+    |
+    HIDDEN '=' TNO ';'
+  {
+    ConfigServerHide.hidden = 0;
+  };
+
+serverhide_allow_hidden: ALLOW_HIDDEN '=' TYES ';'
+  {
+    ConfigServerHide.allow_hidden = 1;
+  }
+    |
+    ALLOW_HIDDEN '=' TNO ';'
+  {
+    ConfigServerHide.allow_hidden = 0;
+  };
+  
+  
+  
