@@ -1,3 +1,15 @@
+androsyn    2002/09/01 18:19:03 EDT	(20020901_1)
+
+  Modified files:
+    src                  ircd_parser.y 
+  Log:
+  Force update..
+  
+  Revision  Changes    Path
+  1.267     +0 -0      ircd-ratbox/src/ircd_parser.y
+
+
+
 leeh        2002/09/01 13:35:50 EDT	(20020901_0)
 
   Modified files:
