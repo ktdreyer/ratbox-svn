@@ -269,33 +269,6 @@ check_pings_list(dlink_list * list)
 			/* Ignore it, its been exited already */
 			continue;
 		}
-		if(IsPerson(client_p))
-		{
-			if(!IsExemptKline(client_p) &&
-			   GlobalSetOptions.idletime &&
-			   !IsOper(client_p) &&
-			   !IsIdlelined(client_p) &&
-			   ((CurrentTime - client_p->localClient->last) > GlobalSetOptions.idletime))
-			{
-				struct ConfItem *aconf;
-
-				aconf = make_conf();
-				aconf->status = CONF_KILL;
-
-				DupString(aconf->host, client_p->host);
-				DupString(aconf->passwd, "idle exceeder");
-				DupString(aconf->user, client_p->username);
-				aconf->port = 0;
-				aconf->hold = CurrentTime + 60;
-				add_temp_kline(aconf);
-				sendto_realops_flags(UMODE_ALL, L_ALL,
-						     "Idle time limit exceeded for %s - temp k-lining",
-						     get_client_name(client_p, HIDE_IP));
-
-				exit_client(client_p, client_p, &me, aconf->passwd);
-				continue;
-			}
-		}
 
 		if(!IsRegistered(client_p))
 			ping = ConfigFileEntry.connect_timeout;
