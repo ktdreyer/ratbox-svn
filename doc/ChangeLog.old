@@ -1,3 +1,7 @@
+*** 20010609_4 by toot
+fixed some compile warnings
+
+
 *** 20010609_3 by toot
 fixed possible overflow in get_oper_name, and removed the assert
 
