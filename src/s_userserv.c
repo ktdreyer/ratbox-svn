@@ -33,6 +33,7 @@ static int o_user_userregister(struct client *, struct lconn *, const char **, i
 static int o_user_userdrop(struct client *, struct lconn *, const char **, int);
 static int o_user_usersuspend(struct client *, struct lconn *, const char **, int);
 static int o_user_userunsuspend(struct client *, struct lconn *, const char **, int);
+static int o_user_userinfo(struct client *, struct lconn *, const char **, int);
 
 static int s_user_register(struct client *, struct lconn *, const char **, int);
 static int s_user_login(struct client *, struct lconn *, const char **, int);
@@ -46,6 +47,7 @@ static struct service_command userserv_command[] =
 	{ "USERDROP",		&o_user_userdrop,	1, NULL, 1, 0L, 0, 0, CONF_OPER_USERSERV, 0 },
 	{ "USERSUSPEND",	&o_user_usersuspend,	1, NULL, 1, 0L, 0, 0, CONF_OPER_USERSERV, 0 },
 	{ "USERUNSUSPEND",	&o_user_userunsuspend,	1, NULL, 1, 0L, 0, 0, CONF_OPER_USERSERV, 0 },
+	{ "USERINFO",		&o_user_userinfo,	1, NULL, 1, 0L, 0, 0, CONF_OPER_USERSERV, 0 },
 	{ "REGISTER",	&s_user_register,	2, NULL, 1, 0L, 0, 0, 0, 0 },
 	{ "LOGIN",	&s_user_login,		2, NULL, 1, 0L, 0, 0, 0, 0 },
 	{ "LOGOUT",	&s_user_logout,		0, NULL, 1, 0L, 1, 0, 0, 0 },
@@ -59,6 +61,7 @@ static struct ucommand_handler userserv_ucommand[] =
 	{ "userdrop",		o_user_userdrop,	CONF_OPER_USERSERV,	1, 1, NULL },
 	{ "usersuspend",	o_user_usersuspend,	CONF_OPER_USERSERV,	1, 1, NULL },
 	{ "userunsuspend",	o_user_userunsuspend,	CONF_OPER_USERSERV,	1, 1, NULL },
+	{ "userinfo",		o_user_userinfo,	CONF_OPER_USERSERV,	1, 1, NULL },
 	{ "\0",			NULL,			0,			0, 0, NULL }
 };
 
@@ -70,6 +73,8 @@ static struct service_handler userserv_service = {
 static int user_db_callback(void *db, int argc, char **argv, char **colnames);
 static int h_user_burst_login(void *, void *);
 static void e_user_expire(void *unused);
+
+static void dump_user_info(struct client *, struct lconn *, struct user_reg *);
 
 void
 init_s_userserv(void)
@@ -434,6 +439,30 @@ o_user_userunsuspend(struct client *client_p, struct lconn *conn_p, const char *
 }
 
 static int
+o_user_userinfo(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+{
+	struct user_reg *ureg_p;
+
+	if((ureg_p = find_user_reg(NULL, parv[0])) == NULL)
+	{
+		service_send(userserv_p, client_p, conn_p,
+				"Username %s is not registered", parv[0]);
+		return 0;
+	}
+
+	slog(userserv_p, 1, "%s - USERINFO %s",
+			OPER_NAME(client_p, conn_p), ureg_p->name);
+
+	service_send(userserv_p, client_p, conn_p,
+			"[%s] Username registered for %s",
+			ureg_p->name,
+			get_duration((time_t) (CURRENT_TIME - ureg_p->reg_time)));
+
+	dump_user_info(client_p, conn_p, ureg_p);
+	return 0;
+}
+
+static int
 valid_email(const char *email)
 {
 	char *p;
@@ -789,6 +818,56 @@ s_user_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 	return 1;
 }
 
+static void
+dump_user_info(struct client *client_p, struct lconn *conn_p, struct user_reg *ureg_p)
+{
+	char buf[BUFSIZE];
+	struct member_reg *mreg_p;
+	struct client *target_p;
+	dlink_node *ptr;
+	char *p;
+	int buflen = 0;
+	int mlen;
+
+	p = buf;
+
+	DLINK_FOREACH(ptr, ureg_p->channels.head)
+	{
+		mreg_p = ptr->data;
+
+		/* "Access to: " + ":200 " */
+		if((buflen + strlen(mreg_p->channel_reg->name) + 16) >= (BUFSIZE - 3))
+		{
+			service_send(userserv_p, client_p, conn_p,
+					"[%s] Access to: %s", ureg_p->name, buf);
+			p = buf;
+			buflen = 0;
+		}
+
+		mlen = sprintf(p, "%s:%d ",
+				mreg_p->channel_reg->name, mreg_p->level);
+
+		buflen += mlen;
+		p += mlen;
+	}
+
+	/* could have access to no channels.. */
+	if(buflen)
+		service_send(userserv_p, client_p, conn_p,
+				"[%s] Access to: %s", ureg_p->name, buf);
+
+	service_send(userserv_p, client_p, conn_p,
+			"[%s] Currently logged on via:", ureg_p->name);
+
+	DLINK_FOREACH(ptr, ureg_p->users.head)
+	{
+		target_p = ptr->data;
+
+		service_send(userserv_p, client_p, conn_p,
+				"[%s]  %s", ureg_p->name, target_p->user->mask);
+	}
+}
+
 static int
 s_user_info(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
@@ -798,66 +877,12 @@ s_user_info(struct client *client_p, struct lconn *conn_p, const char *parv[], i
 		return 1;
 
 	service_error(userserv_p, client_p, 
-			"[%s] Username %s registered for %s",
-			parv[0], ureg_p->name,
+			"[%s] Username registered for %s",
+			ureg_p->name,
 			get_duration((time_t) (CURRENT_TIME - ureg_p->reg_time)));
 
 	if(ureg_p == client_p->user->user_reg)
-	{
-		char buf[BUFSIZE];
-		struct member_reg *mreg_p;
-		dlink_node *ptr;
-		char *p;
-		int buflen = 0;
-		int mlen;
-
-		p = buf;
-
-		DLINK_FOREACH(ptr, ureg_p->channels.head)
-		{
-			mreg_p = ptr->data;
-
-			/* "Access to: " + ":200 " */
-			if((buflen + strlen(mreg_p->channel_reg->name) + 16) >=
-				(BUFSIZE - 3))
-			{
-				service_error(userserv_p, client_p,
-						"[%s] Access to: %s", 
-						parv[0], buf);
-				p = buf;
-				buflen = 0;
-			}
-
-			mlen = sprintf(p, "%s:%d ",
-					mreg_p->channel_reg->name,
-					mreg_p->level);
-
-			buflen += mlen;
-			p += mlen;
-		}
-
-		/* could have access to no channels.. */
-		if(buflen)
-			service_error(userserv_p, client_p,
-					"[%s] Access to: %s", parv[0], buf);
-	}
-
-	if(ureg_p == client_p->user->user_reg || CliOperUSAdmin(client_p))
-	{
-		struct client *target_p;
-		dlink_node *ptr;
-
-		service_error(userserv_p, client_p,
-				"Currently logged on via:");
-
-		DLINK_FOREACH(ptr, ureg_p->users.head)
-		{
-			target_p = ptr->data;
-
-			service_error(userserv_p, client_p,
-					"  %s", target_p->user->mask);
-		}
-	}
+		dump_user_info(client_p, NULL, ureg_p);
 
 	return 1;
 }
