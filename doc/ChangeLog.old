@@ -1,3 +1,7 @@
+*** 20010202_18 by a1kmm
+- Okay, this is under GPL not LGPL.
+
+
 *** 20010202_17 by a1kmm
 - Reapply Hwys changes I accidentally overwrote before(argc < 3 not argc < 2)
 - umask says what you don't want not the default modes!
