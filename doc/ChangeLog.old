@@ -1,3 +1,7 @@
+*** 20001231_25 by toot
+checking that Revision CVS tag works okay for module version numbers
+
+
 *** 20001231_24 by spookey
  - #define CONNECTTIMEOUT  15      /* Recommended value: 30 */
 
