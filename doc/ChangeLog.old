@@ -1,3 +1,17 @@
+leeh        2002/06/07 19:38:36 EDT	(20020608_2)
+
+  Modified files:
+    src                  s_serv.c 
+  Log:
+  - move the sendto_realops_flags() down till after the server is made
+    so the IO doesnt trigger an exit for a server that doesnt have a
+    cptr->serv yet.
+  
+  Revision  Changes    Path
+  7.260     +10 -10    ircd-hybrid-7/src/s_serv.c
+
+
+
 androsyn    2002/06/07 19:37:39 EDT	(20020608_1)
 
   Modified files:
