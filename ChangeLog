@@ -1,3 +1,18 @@
+leeh        2004/03/18 19:13:34 EST	(20040319_0)
+
+  Modified files:
+    src                  newconf.c 
+  Log:
+  - {compressed|encrypted|topicburst|autoconn} = {yes|no} is gone
+    long live flags = compressed, encrypted, topicburst, autoconn;
+  
+    Yes, this breaks older confs..
+  
+  Revision  Changes    Path
+  7.145     +24 -47    ircd-ratbox/src/newconf.c
+
+
+
 leeh        2004/03/18 18:18:41 EST	(20040318_1)
 
   Modified files:
