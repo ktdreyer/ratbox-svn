@@ -114,6 +114,7 @@ static void mo_opme(struct Client *client_p, struct Client *source_p,
   {
     sendto_one(source_p, ":%s NOTICE %s :%s Channel is not opless",
                me.name, parv[0], parv[1]);
+    return;
   }
 
   if ((ptr = find_user_link(&chptr->peons, source_p)))
@@ -131,6 +132,35 @@ static void mo_opme(struct Client *client_p, struct Client *source_p,
     }
    
   dlinkAdd(source_p, ptr, &chptr->chanops);
+  
+  if (!on_vchan)
+    {
+     sendto_wallops_flags(FLAGS_WALLOP, &me,
+                          "OPME called for [%s] by %s!%s@%s",
+                          parv[1], source_p->name, source_p->username,
+                          source_p->host);
+     sendto_server(NULL, source_p, NULL, NOCAPS, NOCAPS, LL_ICLIENT,
+                   ":%s WALLOPS :OPME called for [%s] by %s!%s@%s",
+                   me.name, parv[1], source_p->name, source_p->username,
+                   source_p->host);
+     ilog(L_NOTICE, "OPME called for [%s] by %s!%s@%s",
+                   parv[1], source_p->name, source_p->username,
+                   source_p->host);
+    }
+  else
+    {
+     sendto_wallops_flags(FLAGS_WALLOP, &me,
+                          "OPME called for [%s %s] by %s!%s@%s",
+                          parv[1], parv[2], source_p->name,
+                          source_p->username, source_p->host);
+     sendto_server(NULL, source_p, NULL, NOCAPS, NOCAPS, LL_ICLIENT,
+                   ":%s WALLOPS :OPME called for [%s %s] by %s!%s@%s",
+                   me.name, parv[1], parv[2], source_p->name,
+                   source_p->username, source_p->host);
+     ilog(L_NOTICE, "OPME called for [%s %s] by %s!%s@%s",
+                   parv[1], parv[2], source_p->name, source_p->username,
+                   source_p->host);
+    }
 
   sendto_server(NULL, source_p, chptr, CAP_UID, NOCAPS, NOFLAGS,
                  ":%s PART %s", ID(source_p), parv[1]);
