@@ -170,6 +170,8 @@ linebuf_skip_crlf(char *ch, int len)
 	break;
       else if(*ch == '\n')
         break;
+      else if (*ch == 0)
+        return -1;
     }
 
   /* Then, skip until the last CRLF */
@@ -268,6 +270,8 @@ linebuf_copy_line(buf_head_t *bufhead, buf_line_t *bufline,
     return 0;
 
   clen = cpylen = linebuf_skip_crlf(ch, len);
+  if (clen == -1)
+    return -1;
 
   /* This is the ~overflow case..This doesn't happen often.. */
   if(cpylen > (BUF_DATA_SIZE - bufline->len - 1))
@@ -344,6 +348,8 @@ linebuf_copy_raw(buf_head_t *bufhead, buf_line_t *bufline,
 
   while (remaining && *ch != '\r' && *ch != '\n')
   {
+    if (*ch == 0)
+      return -1;
     *bufch++ = *ch++;
     clen++;
     remaining--;
@@ -406,43 +412,47 @@ linebuf_parse(buf_head_t *bufhead, char *data, int len, int raw)
 
   /* First, if we have a partial buffer, try to squeze data into it */
   if (bufhead->list.tail != NULL)
-    {
-      /* Check we're doing the partial buffer thing */
-      bufline = bufhead->list.tail->data;
-      assert(!bufline->flushing);
-      /* just try, the worst it could do is *reject* us .. */
-      if (raw) /* if we could be dealing with 8-bit data */
-        cpylen = linebuf_copy_raw(bufhead, bufline, data, len);
-      else
-        cpylen = linebuf_copy_line(bufhead, bufline, data, len);
-      linecnt++;
-      /* If we've copied the same as what we've got, quit now */
-      if (cpylen == len)
-	return linecnt; /* all the data done so soon? */
-
-      /* Skip the data and update len .. */
-      len -= cpylen;
-      assert(len >= 0);
-      data += cpylen;
-    }
-
-    /* Next, the loop */
-    while (len > 0)
-      {
-        /* We obviously need a new buffer, so .. */
-        bufline = linebuf_new_line(bufhead);
-        
-        /* And parse */
-        if (raw) /* if we could be dealing with 8-bit data */
-          cpylen = linebuf_copy_raw(bufhead, bufline, data, len);
-        else
-          cpylen = linebuf_copy_line(bufhead, bufline, data, len);
-        len -= cpylen;
-	assert(len >= 0);
-        data += cpylen;
-        linecnt++;
-      }
-    return linecnt;
+  {
+    /* Check we're doing the partial buffer thing */
+    bufline = bufhead->list.tail->data;
+    assert(!bufline->flushing);
+    /* just try, the worst it could do is *reject* us .. */
+    if (raw) /* if we could be dealing with 8-bit data */
+      cpylen = linebuf_copy_raw(bufhead, bufline, data, len);
+    else
+      cpylen = linebuf_copy_line(bufhead, bufline, data, len);
+    if (cpylen == -1)
+      return -1;
+    linecnt++;
+    /* If we've copied the same as what we've got, quit now */
+    if (cpylen == len)
+      return linecnt; /* all the data done so soon? */
+    
+    /* Skip the data and update len .. */
+    len -= cpylen;
+    assert(len >= 0);
+    data += cpylen;
+  }
+  
+  /* Next, the loop */
+  while (len > 0)
+  {
+    /* We obviously need a new buffer, so .. */
+    bufline = linebuf_new_line(bufhead);
+    
+    /* And parse */
+    if (raw) /* if we could be dealing with 8-bit data */
+      cpylen = linebuf_copy_raw(bufhead, bufline, data, len);
+    else
+      cpylen = linebuf_copy_line(bufhead, bufline, data, len);
+    if (cpylen == -1)
+      return -1;
+    len -= cpylen;
+    assert(len >= 0);
+    data += cpylen;
+    linecnt++;
+  }
+  return linecnt;
 }
 
 

@@ -370,11 +370,16 @@ read_packet(int fd, void *data)
     binary = 1;
 
   lbuf_len = linebuf_parse(&client_p->localClient->buf_recvq,
-      readBuf, length, binary);
+                           readBuf, length, binary);
 
   if (lbuf_len < 0)
   {
-    error_exit_client(client_p, 0);
+    if (IsClient(client_p))
+      sendto_one(client_p, ":%s NOTICE %s :*** - You sent a NULL character in "
+                 "your message. Ignored.",
+                 me.name, client_p->name);
+    else
+      exit_client(client_p, client_p, client_p, "NULL character found in message");
     return;
   }
 
