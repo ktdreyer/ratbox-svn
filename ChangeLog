@@ -1,3 +1,15 @@
+androsyn    2002/12/16 08:45:25 UTC	(20021216_20)
+
+  Modified files:
+    src                  balloc.c 
+  Log:
+  I will compile before I commit
+  
+  Revision  Changes    Path
+  7.55      +0 -1      ircd-ratbox/src/balloc.c
+
+
+
 androsyn    2002/12/16 08:44:53 UTC	(20021216_19)
 
   Modified files:
