@@ -61,8 +61,13 @@ int m_users(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   if (hunt_server(cptr,sptr,":%s USERS :%s",1,parc,parv) == HUNTED_ISME)
     {
       /* No one uses this any more... so lets remap it..   -Taner */
-      sendto_one(sptr, form_str(RPL_LOCALUSERS), me.name, parv[0],
+      
+      if (IsOper(sptr) || !GlobalSetOptions.hide_server)
+        sendto_one(sptr, form_str(RPL_LOCALUSERS), me.name, parv[0],
                  Count.local, Count.max_loc);
+      else
+        sendto_one(sptr, form_str(RPL_LOCALUSERS), me.name, parv[0],
+                 Count.total, Count.max_tot);
       sendto_one(sptr, form_str(RPL_GLOBALUSERS), me.name, parv[0],
                  Count.total, Count.max_tot);
     }
