@@ -1,3 +1,15 @@
+androsyn    2003/08/26 10:31:43 EDT	(20030826_0)
+
+  Modified files:
+    src                  s_auth.c 
+  Log:
+  Calling dlinkDestroy on something we didn't dlinkAddAlloc() is bad
+  
+  Revision  Changes    Path
+  7.157     +1 -1      ircd-ratbox/src/s_auth.c
+
+
+
 leeh        2003/08/24 06:16:29 EDT	(20030824_0)
 
   Modified files:
