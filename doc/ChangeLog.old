@@ -1,3 +1,9 @@
+*** 20001221_15 by wcampbel
+Removed global from example.conf as local opers no longer exist.
+Added a "What's New" document giving a brief overview of the new Hybrid 
+ featues.
+
+
 *** 20001221_14 by wcampbel
 Add some of the new oper commands to opers.txt
 
