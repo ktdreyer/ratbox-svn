@@ -1,3 +1,15 @@
+leeh        2003/06/08 23:08:20 UTC	(20030608_2)
+
+  Modified files:
+    modules              m_gline.c 
+  Log:
+  - const fix.
+  
+  Revision  Changes    Path
+  1.114     +5 -5      ircd-ratbox/modules/m_gline.c
+
+
+
 leeh        2003/06/08 18:56:39 UTC	(20030608_1)
 
   Modified files:
