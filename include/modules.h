@@ -100,6 +100,7 @@ extern struct Message gline_msgtab;
 #ifdef FL_DEBUG
 extern struct Message hash_msgtab;
 #endif
+extern struct Message htm_msgtab;
 extern struct Message help_msgtab;
 extern struct Message info_msgtab;
 extern struct Message invite_msgtab;
