@@ -213,7 +213,7 @@ sendq		{ return SENDQ; }
 serverhide	{ return SERVERHIDE; }
 serverinfo	{ return SERVERINFO; }
 servlink_path   { return SERVLINK_PATH; }
-shared          { return SHARED; }
+shared          { return T_SHARED; }
 short_motd      { return SHORT_MOTD; }
 silent          { return SILENT; }
 spoof		{ return SPOOF; }

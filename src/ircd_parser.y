@@ -216,7 +216,7 @@ int   class_redirport_var;
 %token  SERVERHIDE
 %token  SERVERINFO
 %token  SERVLINK_PATH
-%token  SHARED
+%token  T_SHARED
 %token  SHORT_MOTD
 %token  SILENT
 %token  SPOOF
@@ -1212,7 +1212,7 @@ resv_nick:	NICK '=' QSTRING ';'
  *  section shared, for sharing remote klines etc.
  ***************************************************************************/
 
-shared_entry:		SHARED
+shared_entry:		T_SHARED
   {
     if(yy_aconf != NULL)
       {
