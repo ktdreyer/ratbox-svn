@@ -39,7 +39,6 @@ struct Client;
 
 struct AuthRequest {
   struct Client*      client;    /* pointer to client struct for request */
-  struct DNSQuery     *query;     /* DNS query */
   unsigned int        flags;     /* current state of request */
   int                 fd;        /* file descriptor for auth queries */
   time_t              timeout;   /* time when query expires */

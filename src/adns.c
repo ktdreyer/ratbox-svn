@@ -11,12 +11,13 @@
 #include "s_log.h"
 #include "event.h"
 #include "client.h"
+#include "blalloc.h"
 #include <errno.h>
 #include "../adns/internal.h"
 #define ADNS_MAXFD 2
 
 adns_state dns_state;
-
+BlockHeap *dns_blk;
 
 void delete_adns_queries(struct DNSQuery *q)
 {
@@ -31,10 +32,14 @@ void delete_adns_queries(struct DNSQuery *q)
 
 void restart_resolver(void)
 {
+ 	adns__consistency(dns_state,0,cc_entex);
 	adns__rereadconfig(dns_state);
+ 	adns__consistency(dns_state,0,cc_entex);
 }
 void init_resolver(void)
 {
+
+	dns_blk = BlockHeapCreate(sizeof(struct DNSQuery), DNS_BLOCK_SIZE);
 	adns_init(&dns_state, adns_if_noautosys, 0);	
 	eventAdd("timeout_adns", timeout_adns, NULL, 1, 0);
 	dns_select();

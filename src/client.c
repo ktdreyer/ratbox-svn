@@ -1006,7 +1006,7 @@ const char* get_client_host(struct Client* client)
 
   if (!MyConnect(client))
     return client->name;
-  if (client->localClient->dns_query.answer.status != adns_s_ok)
+  if (client->localClient->dns_query->answer.status != adns_s_ok)
     return get_client_name(client, HIDE_IP);
   else
     {
@@ -1323,7 +1323,7 @@ const char* comment         /* Reason for the exit */
       if (sptr->flags & FLAGS_IPHASH)
         remove_one_ip(&sptr->localClient->ip);
       
-      delete_adns_queries(&sptr->localClient->dns_query);
+      delete_adns_queries(sptr->localClient->dns_query);
       delete_identd_queries(sptr);
 
       client_flush_input(sptr);

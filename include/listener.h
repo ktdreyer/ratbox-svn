@@ -48,6 +48,7 @@ struct Listener {
   struct in_addr    addr;
 */
   struct irc_inaddr addr;              /* virtual address or INADDR_ANY */
+  struct DNSQuery   *dns_query;
   char             vhost[HOSTLEN + 1]; /* virtual name of listener */
 };
 

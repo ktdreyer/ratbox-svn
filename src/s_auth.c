@@ -232,8 +232,8 @@ static void auth_dns_callback(void* vptr, adns_answer* reply)
     }
 
   MyFree(reply);
-  MyFree(auth->query);
-  auth->query = NULL;
+  BlockHeapFree(dns_blk, auth->client->localClient->dns_query);
+  auth->client->localClient->dns_query = NULL;
   if (!IsDoingAuth(auth))
     {
       release_auth_client(auth->client);
@@ -425,7 +425,7 @@ void start_auth(struct Client* client)
 	/* IAuthQuery(client); */
 #endif /* 0 */
 
-  client->localClient->dns_query = MyMalloc(sizeof(struct DNSQuery));
+  client->localClient->dns_query = BlockHeapAlloc(dns_blk);
   client->localClient->dns_query->ptr = auth;
   client->localClient->dns_query->callback = auth_dns_callback;
   sendheader(client, REPORT_DO_DNS);

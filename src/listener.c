@@ -150,6 +150,8 @@ static void listener_dns_callback(void *ptr, adns_answer *reply)
   	 	listener->name = listener->vhost;
         }	                                 
   }
+  BlockHeapFree(dns_blk, listener->dns_query);
+  listener->dns_query = NULL;
 }  
 
 static int inetport(struct Listener* listener)
@@ -228,10 +230,10 @@ static int inetport(struct Listener* listener)
 #else
   if (INADDR_ANY != listener->addr.sins.sin.s_addr) {
 #endif
-    struct DNSQuery *query = MyMalloc(sizeof(struct DNSQuery));	
-    query->callback = listener_dns_callback;
-    query->ptr = listener;
-    adns_getaddr(&listener->addr, DEF_FAM, query);
+    listener->dns_query = BlockHeapAlloc(dns_blk);	
+    listener->dns_query->callback = listener_dns_callback;
+    listener->dns_query->ptr = listener;
+    adns_getaddr(&listener->addr, DEF_FAM, listener->dns_query);
   }
   return 1;
 }

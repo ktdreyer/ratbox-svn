@@ -150,6 +150,8 @@ static void conf_dns_callback(void* vptr, adns_answer *reply)
 #endif
 	MyFree(reply);
   } 
+  BlockHeapFree(dns_blk, aconf->dns_query);
+  aconf->dns_query = NULL;
 }
 
 /*
@@ -161,9 +163,10 @@ void conf_dns_lookup(struct ConfItem* aconf)
 {
   if (!aconf->dns_pending)
     {
-      aconf->dns_query.ptr = aconf;
-      aconf->dns_query.callback = conf_dns_callback;
-      adns_gethost(aconf->host, aconf->aftype, &aconf->dns_query);
+      aconf->dns_query = BlockHeapAlloc(dns_blk);
+      aconf->dns_query->ptr = aconf;
+      aconf->dns_query->callback = conf_dns_callback;
+      adns_gethost(aconf->host, aconf->aftype, aconf->dns_query);
       aconf->dns_pending = 1;
     }
 }
@@ -205,7 +208,7 @@ void free_conf(struct ConfItem* aconf)
   assert(0 != aconf);
   assert(!(aconf->status & CONF_CLIENT) ||
          strcmp(aconf->host, "NOMATCH") || (aconf->clients == -1));
-  delete_adns_queries(&aconf->dns_query);
+  delete_adns_queries(aconf->dns_query);
   MyFree(aconf->host);
   if (aconf->passwd)
     memset(aconf->passwd, 0, strlen(aconf->passwd));
