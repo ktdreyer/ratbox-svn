@@ -513,8 +513,7 @@ connect {
  */
 shared {
 	name = "irc2.some.server";
-	user = "username";
-	host = "hostname";
+	user = "username@hostname";
 };
 
 /* Replacement for K: lines, bans based on user@host */
