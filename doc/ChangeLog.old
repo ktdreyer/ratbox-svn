@@ -1,3 +1,17 @@
+androsyn    2001/12/18 22:09:42 EST	(20011219_0)
+
+  Modified files:
+    src                  channel.c client.c 
+  Log:
+  Change the default allocations for various block heaps...Probably ought to
+  move these into config.h or something..
+  
+  Revision  Changes    Path
+  7.287     +2 -4      ircd-hybrid-7/src/channel.c
+  7.213     +2 -5      ircd-hybrid-7/src/client.c
+
+
+
 leeh        2001/12/18 17:36:00 EST	(20011218_5)
 
   Modified files:
