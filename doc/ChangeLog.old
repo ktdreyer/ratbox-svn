@@ -1,3 +1,8 @@
+*** 20011111_5 by ejb
+- added better /help ..
+  still need to write help files and make them install.
+
+
 *** 20011111_4 by leeh
 - added RPL_HELPSTART, RPL_HELPTXT, RPL_ENDOFHELP, ERR_HELPNOTFOUND
 
