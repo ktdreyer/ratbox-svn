@@ -1,3 +1,7 @@
+*** 20010512_2 by toot
+clearchan was calling remove_user_from_channel with the wrong number of args..
+
+
 *** 20010512_1 by kreator
 - commited fl_'s patch:
   make cjoin take account of disable_vchans=yes;
