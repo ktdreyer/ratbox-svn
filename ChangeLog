@@ -1,3 +1,15 @@
+androsyn    2002/10/30 00:19:52 UTC	(20021030_1)
+
+  Modified files:
+    src                  s_bsd.c 
+  Log:
+  Fix some dumb typos
+  
+  Revision  Changes    Path
+  7.180     +2 -2      ircd-ratbox/src/s_bsd.c
+
+
+
 androsyn    2002/10/30 00:17:01 UTC	(20021030_0)
 
   Modified files:
