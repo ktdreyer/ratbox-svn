@@ -1,3 +1,17 @@
+androsyn    2002/03/09 18:01:28 EST	(20020309_5)
+
+  Modified files:
+    include              s_serv.h 
+    src                  s_serv.c 
+  Log:
+  Changed a few more functions from globals to static
+  
+  Revision  Changes    Path
+  7.63      +0 -2      ircd-hybrid-7/include/s_serv.h
+  7.248     +4 -2      ircd-hybrid-7/src/s_serv.c
+
+
+
 androsyn    2002/03/09 16:59:37 EST	(20020309_4)
 
   Modified files:
