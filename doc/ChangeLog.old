@@ -1,3 +1,16 @@
+leeh        2002/07/07 06:30:19 EDT	(20020707_1)
+
+  Modified files:
+    contrib              m_jupe.c 
+  Log:
+  - make_client() adds the new client to unknown_list, so we must search
+    and remove it
+  
+  Revision  Changes    Path
+  1.34      +9 -1      ircd-hybrid-7/contrib/m_jupe.c
+
+
+
 db          2002/07/07 01:45:09 EDT	(20020707_0)
 
   Modified files:
