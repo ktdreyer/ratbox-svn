@@ -45,11 +45,13 @@
 #include <string.h>
 #include <unistd.h>
 
-struct Message msgtabs[2] = {
+struct Message msgtabs[] = {
   {MSG_UNKLINE, 0, 1, MFLG_SLOW, 0,
    {m_unregistered, m_not_oper, m_error, mo_unkline}},
   {MSG_UNDLINE, 0, 1, MFLG_SLOW, 0,
-   {m_unregistered, m_not_oper, m_error, mo_undline}}
+   {m_unregistered, m_not_oper, m_error, mo_undline}}, 
+  {MSG_UNGLINE, 0, 1, MFLG_SLOW, 0,
+   {m_unregistered, m_not_oper, m_error, mo_ungline}}
 };
 
 void
@@ -57,6 +59,7 @@ _modinit(void)
 {
   mod_add_cmd(MSG_UNKLINE, &msgtabs[0]);
   mod_add_cmd(MSG_UNDLINE, &msgtabs[1]);
+  mod_add_cmd(MSG_UNGLINE, &msgtabs[2]);
 }
 
 void
@@ -64,6 +67,7 @@ _moddeinit(void)
 {
   mod_del_cmd(MSG_UNKLINE);
   mod_del_cmd(MSG_UNDLINE);
+  mod_del_cmd(MSG_UNGLINE);
 }
 
 extern ConfigFileEntryType ConfigFileEntry; /* defined in ircd.c */
@@ -109,13 +113,6 @@ int mo_unkline (struct Client *cptr,struct Client *sptr,int parc,char *parv[])
   if (check_registered(sptr))
     {
       return -1;
-    }
-
-  if (!IsAnyOper(sptr))  
-    {
-      sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, 
-                 parv[0]);
-      return 0;
     }
 
   if (!IsSetOperUnkline(sptr))
@@ -460,13 +457,6 @@ int mo_undline (struct Client *cptr, struct Client *sptr,int parc,char *parv[])
 
   ircsprintf(temppath, "%s.tmp", ConfigFileEntry.dlinefile);
 
-  if (!IsAnyOper(sptr))
-    {
-      sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name,
-                 parv[0]);
-      return 0;
-    }
-
   if (!IsSetOperUnkline(sptr))
     {
       sendto_one(sptr,":%s NOTICE %s :You have no U flag",me.name,
@@ -644,10 +634,11 @@ int mo_ungline (struct Client *cptr, struct Client *sptr,int parc,char *parv[])
 {
   char  *user,*host;
 
-  if (!ConfigFileEntry.glines) {
-    sendto_one(sptr,":%s NOTICE %s :UNGLINE disabled",me.name,parv[0]);
-    return 0;
-  }
+  if (!ConfigFileEntry.glines)
+    {
+      sendto_one(sptr,":%s NOTICE %s :UNGLINE disabled",me.name,parv[0]);
+      return 0;
+    }
 
   if (!IsSetOperUnkline(sptr) || !IsSetOperGline(sptr))
     {

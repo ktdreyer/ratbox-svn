@@ -1021,10 +1021,6 @@ remove_gline_match(const char* user, const char* host)
             {
               if(glines == kill_list_ptr)
                 {
-                  /* Its pointing to first one in link list*/
-                  /* so, bypass this one, remember bad things can happen
-                     if you try to use an already freed pointer.. */
-
                   glines = last_list_ptr = tmp_list_ptr =
                     kill_list_ptr->next;
                 }
