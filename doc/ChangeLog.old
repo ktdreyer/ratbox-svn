@@ -1,3 +1,15 @@
+leeh        2001/12/11 18:09:11 EST	(20011211_9)
+
+  Modified files:
+    .                    configure 
+  Log:
+  - $GCC -> $CC, creating 2.5gig files with make depend isnt fun.
+  
+  Revision  Changes    Path
+  7.105     +1 -1      ircd-hybrid-7/configure
+
+
+
 leeh        2001/12/11 09:44:53 EST	(20011211_8)
 
   Modified files:
