@@ -1,3 +1,7 @@
+*** 20010103_9 by madmax
+made the comment about the old config not working more prominent too
+
+
 *** 20010103_8 by madmax
 I've tried to highlight the fact that you need to read INSTALL,
 and to ./configure --prefix as much as humanly possible.  
