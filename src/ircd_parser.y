@@ -926,40 +926,32 @@ connect_entry:  CONNECT
     else
       {
         free_conf(yy_aconf);
+        yy_aconf = NULL;
       }
-
-    for(yy_hconf=hub_confs;yy_hconf;yy_hconf=yy_aconf_next)
+        
+        for (yy_hconf=hub_confs;yy_hconf;yy_hconf=yy_aconf_next)
+          {
+           yy_aconf_next = yy_hconf->next;
+           if (yy_aconf)
+             {
+              DupString(yy_hconf->host, yy_aconf->name);
+              conf_add_hub_or_leaf(yy_hconf);
+              conf_add_conf(yy_hconf);
+             }
+           else
+             free_conf(yy_hconf);
+          }
+    for (yy_lconf=leaf_confs;yy_lconf;yy_lconf=yy_aconf_next)
       {
-	yy_aconf_next = yy_hconf->next;
-
-	if(yy_aconf->host != NULL)
-	  {
-	    DupString(yy_hconf->user, yy_aconf->host);
- 	   conf_add_hub_or_leaf(yy_hconf);
-	    conf_add_conf(yy_hconf);
-	  }
-	else
-	  {
-	    free_conf(yy_hconf);
- 	  }
+       yy_aconf_next = yy_lconf->next;
+       if (yy_aconf)
+         {
+          DupString(yy_lconf->host, yy_aconf->name);
+          conf_add_conf(yy_lconf);
+         }
+       else
+         free_conf(yy_lconf);
       }
-
-    for(yy_lconf=leaf_confs;yy_lconf;yy_lconf=yy_aconf_next)
-      {
-	yy_aconf_next = yy_lconf->next;
-
-	if(yy_aconf->host != NULL)
-	  {
-	    DupString(yy_lconf->user, yy_aconf->host);
- 	   conf_add_hub_or_leaf(yy_lconf);
-	    conf_add_conf(yy_lconf);
-	  }
-	else
-	  {
-	    free_conf(yy_lconf);
- 	  }
-      }
-
     hub_confs = (struct ConfItem*)NULL;
     leaf_confs = (struct ConfItem*)NULL;
 
@@ -985,7 +977,7 @@ connect_name:   NAME '=' QSTRING ';'
     else
       {
         if(yylval.string != NULL)
-	  DupString(yy_aconf->user,yylval.string);
+        DupString(yy_aconf->user,yylval.string);
       }
 
     MyFree(yylval.string);
@@ -1047,8 +1039,9 @@ connect_hub_mask:       HUB_MASK '=' QSTRING ';'
 	  {
 	    yy_hconf = make_conf();
 	    yy_hconf->status = CONF_HUB;
-	    DupString(yy_hconf->host,yylval.string);
-	    yy_hconf->next = hub_confs;
+	    DupString(yy_hconf->name, yylval.string);
+        DupString(yy_hconf->user, "*");
+        yy_hconf->next = hub_confs;
 	    hub_confs = yy_hconf;
 	  }
       }

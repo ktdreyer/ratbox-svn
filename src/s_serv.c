@@ -359,7 +359,9 @@ int check_server(const char *name, struct Client* cptr)
            aconf->status & CONF_LEAF)
         )
        continue;
-     if (!match(name, aconf->name))
+     if ((aconf->status == CONF_SERVER) && !match(name, aconf->name))
+       continue;
+     if (aconf->status != CONF_SERVER && !match(name, aconf->user))
        continue;
      if (aconf->status & CONF_HUB || aconf->status & CONF_LEAF)
        {
