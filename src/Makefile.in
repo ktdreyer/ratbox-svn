@@ -60,16 +60,17 @@ SRCS =                          \
   m_locops.c                    \
   m_ltrace.c                    \
   m_lusers.c                    \
-  m_message.c                   \
   m_mode.c                      \
   m_names.c                     \
   m_nick.c			\
+  m_notice.c			\
   m_operwall.c                  \
   m_oper.c                      \
   m_part.c                      \
   m_pass.c                      \
   m_ping.c                      \
   m_pong.c                      \
+  m_privmsg.c			\
   m_quit.c                      \
   m_rehash.c                    \
   m_restart.c                   \

@@ -63,7 +63,7 @@ typedef struct MessageTree MESSAGE_TREE;
 #ifdef DBOP
 #define MSG_DBOP     "DBOP"
 #endif
-#define MSG_PRIVATE  "PRIVMSG"  /* PRIV */
+#define MSG_PRIVMSG  "PRIVMSG"  /* PRIV */
 
 #define MSG_CBURST   "CBURST"   /* LazyLink channel burst */
 #define MSG_DROP     "DROP"     /* LazyLink channel drop */
@@ -149,9 +149,9 @@ struct Message msgtab[] = {
 
   /*                                        |-- allow use even when unreg.
                                             v   yes/no                  */
-  { MSG_PRIVATE, m_private,  0, MAXPARA, 1, 0, 0, 0L },
+  { MSG_PRIVMSG, m_privmsg,  0, MAXPARA, 1, 0, 0, 0L },
 #else
-  { MSG_PRIVATE, m_private,  0, MAXPARA, 1, 0, 1, 0L },
+  { MSG_PRIVMSG, m_privmsg,  0, MAXPARA, 1, 0, 1, 0L },
 #endif
 
   /*                                           ^

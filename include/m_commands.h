@@ -38,7 +38,8 @@ extern int m_gline(struct Client *,struct Client *,int,char **);
 
 extern int m_locops(struct Client *,struct Client *,int,char **);
 
-extern int m_private(struct Client *,struct Client *,int,char **);
+extern int m_privmsg(struct Client *,struct Client *,int,char **);
+extern int m_notice(struct Client *,struct Client *,int,char **);
 extern int m_knock(struct Client *,struct Client *,int,char **);
 extern int m_topic(struct Client *,struct Client *,int,char **);
 extern int m_join(struct Client *,struct Client *,int,char **);
@@ -50,10 +51,8 @@ extern int m_wallops(struct Client *,struct Client *,int,char **);
 extern int m_kick(struct Client *,struct Client *,int,char **);
 extern int m_nick(struct Client *,struct Client *,int,char **);
 extern int m_error(struct Client *,struct Client *,int,char **);
-extern int m_notice(struct Client *,struct Client *,int,char **);
 extern int m_invite(struct Client *,struct Client *,int,char **);
 extern int m_quit(struct Client *,struct Client *,int,char **);
-
 extern int m_capab(struct Client *,struct Client *,int,char **);
 extern int m_info(struct Client *,struct Client *,int,char **);
 extern int m_kill(struct Client *,struct Client *,int,char **);
