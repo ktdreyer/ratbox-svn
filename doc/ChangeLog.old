@@ -1,3 +1,10 @@
+*** 20010104_18 by db
+- fixed too many arguments for format in m_gline.c
+- fixed too few arguments for format in s_user.c and the conflict
+- slight cleanup to m_nburst.c looks incomplete (David-T)
+
+
+
 *** 20010104_17 by db
 - split register_user() into register_local_user() and register_remote_user()
   also split do_user() into do_local_user() and do_remote_user()
