@@ -1,3 +1,8 @@
+*** 20010526_5 by cosine
+- fixed memory leak in s_auth.c
+- iauth is now working again (under #define USE_IAUTH)
+
+
 *** 20010526_4 by cosine
 iauth compiles again
 
