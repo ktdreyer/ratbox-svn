@@ -61,7 +61,7 @@ struct module **modlist = NULL;
 
 static const char *core_module_table[] = {
 	"channels",
-	"registration",
+	"users",
 	"m_die",
 	"m_kill",
 	"m_message",

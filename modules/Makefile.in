@@ -37,7 +37,7 @@ CPPFLAGS	= ${INCLUDES} @CPPFLAGS@
 
 CORE_SRCS = \
   core/channels.c \
-  core/registration.c \
+  core/users.c \
   core/m_die.c \
   core/m_error.c \
   core/m_kill.c \
