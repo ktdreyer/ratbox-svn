@@ -1,3 +1,15 @@
+leeh        2004/03/23 20:23:10 EST	(20040324_1)
+
+  Modified files:
+    src                  s_user.c 
+  Log:
+  - fix core on passworded auth when user sends no password
+  
+  Revision  Changes    Path
+  7.313     +4 -7      ircd-ratbox/src/s_user.c
+
+
+
 androsyn    2004/03/23 19:20:22 EST	(20040324_0)
 
   Modified files:
