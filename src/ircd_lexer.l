@@ -72,7 +72,7 @@ qstring		\"[^\"\n]*[\"\n]
           }
 	 }
 
-{qstring}	{ DupString(yylval.string,yytext+1);
+{qstring}	{ yylval.string = yytext+1;
 		  if(yylval.string[yyleng-2] != '"')
 		    fprintf(stderr,"Unterminated character string\n");
 		  else

@@ -198,6 +198,7 @@ void free_conf(struct ConfItem* aconf)
   MyFree(aconf->name);
   MyFree(aconf->className);
   MyFree(aconf->user);
+  MyFree(aconf->spasswd);
   MyFree((char*) aconf);
 }
 
