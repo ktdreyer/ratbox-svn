@@ -1,3 +1,22 @@
+leeh        2004/03/05 10:17:34 EST	(20040305_1)
+
+  Modified files:
+    include              client.h 
+    modules              m_pass.c m_whois.c 
+    src                  s_serv.c send.c 
+  Log:
+  - remove DoesTS6(), if a server has an id, it does TS6 - simple as.
+  - rework the logic for sending global capabs, I forgot we have get_id() :)
+  
+  Revision  Changes    Path
+  7.234     +2 -4      ircd-ratbox/include/client.h
+  1.45      +1 -3      ircd-ratbox/modules/m_pass.c
+  1.135     +6 -4      ircd-ratbox/modules/m_whois.c
+  7.383     +7 -14     ircd-ratbox/src/s_serv.c
+  7.273     +4 -4      ircd-ratbox/src/send.c
+
+
+
 leeh        2004/03/05 09:31:53 EST	(20040305_0)
 
   Modified files:
