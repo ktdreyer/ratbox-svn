@@ -1,3 +1,8 @@
+*** 20010424_5 by jdc
+* Removed kqueue bug; recent cvs seems to have fixed it.
+
+
+
 *** 20010424_4 by db
 - this fixes kqueue. over-ride low water with a NOTE_LOWAT
   setting low water to 1 as in the man page. (thanks to adrian for
