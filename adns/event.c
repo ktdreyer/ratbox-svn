@@ -31,7 +31,7 @@
 
 #include "stdinc.h"
 
-#include "fileio.h"
+#include "fdlist.h"
 #include "s_bsd.h"
 #include "internal.h"
 #include "memory.h"

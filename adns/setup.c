@@ -30,7 +30,7 @@
 
 #include "stdinc.h"
 #include "memory.h"
-#include "fileio.h"
+#include "fdlist.h"
 #include "s_bsd.h"
 #include "internal.h"
 #include "s_log.h"

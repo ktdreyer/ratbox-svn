@@ -31,7 +31,7 @@
 
 #include "stdinc.h"
 #include "memory.h"
-#include "fileio.h"
+#include "fdlist.h"
 #include "internal.h"
 #include "sprintf_irc.h"
 static adns_query query_alloc(adns_state ads, const typeinfo *typei,

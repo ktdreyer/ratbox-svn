@@ -29,7 +29,7 @@
 
 #include "stdinc.h"
 #include "memory.h"
-#include "fileio.h"
+#include "fdlist.h"
 #include "internal.h"
 
 void adns__procdgram(adns_state ads, const byte *dgram, int dglen,

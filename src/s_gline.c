@@ -40,7 +40,7 @@
 #include "scache.h"
 #include "send.h"
 #include "msg.h"
-#include "fileio.h"
+#include "fdlist.h"
 #include "s_serv.h"
 #include "s_gline.h"
 #include "hash.h"

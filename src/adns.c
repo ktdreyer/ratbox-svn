@@ -27,7 +27,6 @@
 #include "stdinc.h"
 #include "setup.h"
 
-#include "fileio.h"
 #include "res.h"
 #include "send.h"
 #include "s_conf.h"

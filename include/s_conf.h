@@ -34,8 +34,7 @@
 #include <openssl/rsa.h>
 #endif
 
-#include "config.h"		/* defines */
-#include "fileio.h"		/* FBFILE */
+#include "fdlist.h"		
 #include "ircd_defs.h"
 #include "class.h"
 #include "client.h"

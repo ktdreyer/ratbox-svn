@@ -28,7 +28,7 @@
  */
 
 #include "stdinc.h"
-#include "fileio.h"
+#include "fdlist.h"
 #include "irc_string.h"
 #include "sprintf_irc.h"
 #include "internal.h"

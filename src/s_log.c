@@ -36,7 +36,7 @@
 #include "s_log.h"
 #include "s_conf.h"
 #include "sprintf_irc.h"
-#include "fileio.h"
+#include "fdlist.h"
 #include "send.h"
 #include "client.h"
 #include "s_serv.h"

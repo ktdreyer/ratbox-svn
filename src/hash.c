@@ -37,7 +37,6 @@
 #include "numeric.h"
 #include "send.h"
 #include "fdlist.h"
-#include "fileio.h"
 #include "memory.h"
 #include "msg.h"
 #include "s_newconf.h"

@@ -29,7 +29,7 @@
  */
 
 #include "stdinc.h"
-#include "fileio.h"
+#include "fdlist.h"
 #include "internal.h"
 #include "tvarith.h"
 

@@ -63,7 +63,6 @@ BASE_SRCS =                     \
   cluster.c			\
   event.c                       \
   fdlist.c                      \
-  fileio.c                      \
   getopt.c                      \
   hash.c                        \
   hook.c                        \

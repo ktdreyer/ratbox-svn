@@ -29,7 +29,6 @@
 
 #include "config.h"
 #include "ircd_defs.h"
-#include "fileio.h"
 #include "adns.h"
 
 #define DNS_BLOCK_SIZE 64

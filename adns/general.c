@@ -29,7 +29,7 @@
  */
 
 #include "stdinc.h"
-#include "fileio.h"
+#include "fdlist.h"
 #include "s_log.h"
 #include "memory.h"
 

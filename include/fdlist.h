@@ -29,7 +29,6 @@
 
 #include "config.h"
 #include "ircd_defs.h"
-#include "res.h"
 #define FD_DESC_SZ 128		/* hostlen + comment */
 
 /*
@@ -151,4 +150,38 @@ extern void fd_note(int fd, const char *format, ...);
 #else
 extern void fd_note(int fd, const char *format, ...) __attribute__ ((format(printf, 2, 3)));
 #endif
+
+#define FB_EOF  0x01
+#define FB_FAIL 0x02
+
+struct FileBuf
+{
+	int fd;			/* file descriptor */
+	char *endp;		/* one past the end */
+	char *ptr;		/* current read pos */
+	char *pbptr;		/* pointer to push back char */
+	int flags;		/* file state */
+	char buf[BUFSIZ];	/* buffer */
+	char pbuf[BUFSIZ + 1];	/* push back buffer */
+};
+
+/*
+ * FileBuf is a mirror of the ANSI FILE struct, but it works for any
+ * file descriptor. FileBufs are allocated when a file is opened with
+ * fbopen, and they are freed when the file is closed using fbclose.
+ */
+typedef struct FileBuf FBFILE;
+
+extern FBFILE *fbopen(const char *filename, const char *mode);
+extern FBFILE *fdbopen(int fd, const char *mode);
+extern void fbclose(FBFILE * fb);
+extern int fbgetc(FBFILE * fb);
+extern char *fbgets(char *buf, size_t len, FBFILE * fb);
+extern void fbungetc(char c, FBFILE * fb);
+extern int fbputs(const char *str, FBFILE * fb);
+extern int fbstat(struct stat *sb, FBFILE * fb);
+extern FBFILE *fbpopen(const char *, const char *);
+
+
+
 #endif /* INCLUDED_fdlist_h */
