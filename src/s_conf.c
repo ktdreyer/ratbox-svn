@@ -849,7 +849,8 @@ void count_ip_hash(int *number_ips_stored,u_long *mem_ips_stored)
  * output        -
  * side effects        -
  */
-void iphash_stats(struct Client *cptr, struct Client *sptr,int parc, char *parv[],int out)
+void iphash_stats(struct Client *cptr, struct Client *sptr,
+		  int parc, char *parv[],int out)
 {
   IP_ENTRY *ip_hash_ptr;
   int i;
@@ -2063,7 +2064,7 @@ struct ConfItem *find_kill(struct Client* cptr)
  * find_tkline
  *
  * inputs        - hostname
- *                - username
+ *               - username
  * output        - matching struct ConfItem or NULL
  * side effects        -
  *
@@ -2083,7 +2084,7 @@ static struct ConfItem* find_tkline(const char* host, const char* user)
 
       while(kill_list_ptr)
         {
-          if(kill_list_ptr->hold <= CurrentTime)        /* a kline has expired */
+          if(kill_list_ptr->hold <= CurrentTime)    /* a kline has expired */
             {
               if(temporary_klines == kill_list_ptr)
                 {
@@ -2165,7 +2166,7 @@ void add_temp_kline(struct ConfItem *aconf)
  *
  * inputs        - NONE
  * output        - NONE
- * side effects        - All temporary klines are flushed out. 
+ * side effects  - All temporary klines are flushed out. 
  *
  */
 void flush_temp_klines()
@@ -2187,7 +2188,7 @@ void flush_temp_klines()
  *
  * inputs        - struct Client pointer, client to report to
  * output        - NONE
- * side effects        - NONE
+ * side effects  - NONE
  *                  
  */
 void report_temp_klines(struct Client *sptr)
@@ -2572,6 +2573,7 @@ char    *parv, *filename;
  *              - parc arg count
  *              - parv actual arguments
  *
+ * output       - always 0
  * side effects - command to test I/K lines on server
  *
  * i.e. /quote testline user@host,ip

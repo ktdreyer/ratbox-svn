@@ -105,8 +105,9 @@ int m_htm(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     }
   sendto_one(sptr,
         ":%s NOTICE %s :HTM is %s(%d), %s. Max rate = %dk/s. Current = %.1fk/s",
-          me.name, parv[0], LIFESUX ? "ON" : "OFF", LIFESUX,
-          NOISYHTM ? "NOISY" : "QUIET",
+          me.name, parv[0], GlobalSetOptions.lifesux ? "ON" : "OFF",
+	     GlobalSetOptions.lifesux,
+          GlobalSetOptions.noisy_htm ? "NOISY" : "QUIET",
           LRV, currlife);
   if (parc > 1)
     {
@@ -136,7 +137,7 @@ int m_htm(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         {
           if (!irccmp(command,"ON"))
             {
-              LIFESUX = 1;
+              GlobalSetOptions.lifesux = 1;
               sendto_one(sptr, ":%s NOTICE %s :HTM is now ON.", me.name, parv[0]);
               sendto_ops("Entering high-traffic mode: Forced by %s!%s@%s",
                          parv[0], sptr->username, sptr->host);
@@ -144,7 +145,7 @@ int m_htm(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
             }
           else if (!irccmp(command,"OFF"))
             {
-              LIFESUX = 0;
+              GlobalSetOptions.lifesux = 0;
               LCF = LOADCFREQ;
               sendto_one(sptr, ":%s NOTICE %s :HTM is now OFF.", me.name, parv[0]);
               sendto_ops("Resuming standard operation: Forced by %s!%s@%s",
@@ -153,12 +154,12 @@ int m_htm(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
           else if (!irccmp(command,"QUIET"))
             {
               sendto_ops("HTM is now QUIET");
-              NOISYHTM = NO;
+              GlobalSetOptions.noisy_htm = NO;
             }
           else if (!irccmp(command,"NOISY"))
             {
               sendto_ops("HTM is now NOISY");
-              NOISYHTM = YES;
+              GlobalSetOptions.noisy_htm = YES;
             }
           else
             sendto_one(sptr,

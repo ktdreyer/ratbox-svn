@@ -227,7 +227,7 @@ int m_trace(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       return 0;
     }
 
-  if (dow && LIFESUX && !IsOper(sptr))
+  if (dow && GlobalSetOptions.lifesux && !IsOper(sptr))
     {
       sendto_one(sptr,form_str(RPL_LOAD2HI),me.name,parv[0]);
       return 0;

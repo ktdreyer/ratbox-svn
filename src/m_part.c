@@ -122,7 +122,8 @@ int     m_part(struct Client *cptr,
 
       if (name && MyConnect(sptr) && !IsAnOper(sptr))
         {
-          if(SPAMNUM && (sptr->join_leave_count >= SPAMNUM))
+          if(GlobalSetOptions.spam_num &&
+	     (sptr->join_leave_count >= GlobalSetOptions.spam_num))
             {
               sendto_ops_flags(FLAGS_BOTS,
                                "User %s (%s@%s) is a possible spambot",
@@ -147,7 +148,8 @@ int     m_part(struct Client *cptr,
                 }
               else
                 {
-                  if( (CurrentTime - (sptr->last_join_time)) < SPAMTIME)
+                  if( (CurrentTime - (sptr->last_join_time)) < 
+		      GlobalSetOptions.spam_time)
                     {
                       /* oh, its a possible spambot */
                       sptr->join_leave_count++;

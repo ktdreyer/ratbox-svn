@@ -161,7 +161,7 @@ int     m_ltrace(struct Client *cptr,
   for (i = 0; i < MAXCONNECTIONS; i++)
     link_s[i] = 0, link_u[i] = 0;
                         
-  if (dow && LIFESUX && !IsOper(sptr))
+  if (dow && GlobalSetOptions.lifesux && !IsOper(sptr))
     {
       sendto_one(sptr,form_str(RPL_LOAD2HI),me.name,parv[0]);
       return 0;

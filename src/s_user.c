@@ -638,8 +638,10 @@ int register_user(struct Client *cptr, struct Client *sptr,
       /* Except "F:" clients */
       if ( (ConfigFileEntry.botcheck && (
           !sptr->isbot &&
-          ((Count.local + 1) >= (MAXCLIENTS+MAX_BUFFER)))) ||
-            (((Count.local +1) >= (MAXCLIENTS - 5)) && !(IsFlined(sptr))))
+          ((Count.local + 1) >= (
+				 GlobalSetOptions.maxclients+MAX_BUFFER)))) ||
+            (((Count.local +1) >= (GlobalSetOptions.maxclients - 5)) &&
+	     !(IsFlined(sptr))))
         {
           sendto_realops_flags(FLAGS_FULL,
                                "Too many clients, rejecting %s[%s].",

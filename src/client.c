@@ -437,12 +437,12 @@ time_t check_pings(time_t currenttime)
       if (IsPerson(cptr))
         {
           if( !IsElined(cptr) &&
-              IDLETIME && 
+              GlobalSetOptions.idletime && 
 #ifdef OPER_IDLE
               !IsAnOper(cptr) &&
 #endif /* OPER_IDLE */
               !IsIdlelined(cptr) && 
-              ((CurrentTime - cptr->user->last) > IDLETIME))
+              ((CurrentTime - cptr->user->last) > GlobalSetOptions.idletime))
             {
               struct ConfItem *aconf;
 
@@ -654,7 +654,8 @@ static void update_client_exit_stats(struct Client* cptr)
       /* Don't bother checking for a split, if split code
        * is deactivated with server_split_recovery_time == 0
        */
-      if(SPLITDELAY && (Count.server < SPLITNUM))
+      if(GlobalSetOptions.server_split_recovery_time &&
+	 (Count.server < GlobalSetOptions.split_smallnet_size))
         {
           if (!server_was_split)
             {

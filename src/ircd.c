@@ -404,11 +404,11 @@ static time_t io_loop(time_t delay)
       currlife = (float)((long)me.receiveK - lastrecvK)/(float)LCF;
       if (((long)me.receiveK - lrv) > lastrecvK )
         {
-          if (!LIFESUX)
+          if (!GlobalSetOptions.lifesux)
             {
-              LIFESUX = 1;
+              GlobalSetOptions.lifesux = 1;
 
-              if (NOISYHTM)
+              if (GlobalSetOptions.noisy_htm)
                 {
                   sprintf(to_send, 
                         "Entering high-traffic mode - (%.1fk/s > %dk/s)",
@@ -418,14 +418,15 @@ static time_t io_loop(time_t delay)
             }
           else
             {
-              LIFESUX++;                /* Ok, life really sucks! */
-              LCF += 2;                 /* Wait even longer */
-              if (NOISYHTM) 
+              GlobalSetOptions.lifesux++; /* Ok, life really sucks! */
+              LCF += 2;                   /* Wait even longer */
+              if (GlobalSetOptions.noisy_htm) 
                 {
                   sprintf(to_send,
                         "Still high-traffic mode %d%s (%d delay): %.1fk/s",
-                                LIFESUX,
-                                (LIFESUX & 0x04) ?  " (TURBO)" : "",
+                                GlobalSetOptions.lifesux,
+                                (GlobalSetOptions.lifesux & 0x04) ?
+			          " (TURBO)" : "",
                                 (int)LCF, (float)currlife);
                   sendto_ops(to_send);
                 }
@@ -434,10 +435,10 @@ static time_t io_loop(time_t delay)
       else
         {
           LCF = LOADCFREQ;
-          if (LIFESUX)
+          if (GlobalSetOptions.lifesux)
             {
-              LIFESUX = 0;
-              if (NOISYHTM)
+              GlobalSetOptions.lifesux = 0;
+              if (GlobalSetOptions.noisy_htm)
                 sendto_ops("Resuming standard operation . . . .");
             }
         }
@@ -488,10 +489,10 @@ static time_t io_loop(time_t delay)
 #ifndef NO_PRIORITY
   read_message(0, FDL_SERVER);
   read_message(1, FDL_BUSY);
-  if (LIFESUX)
+  if (GlobalSetOptions.lifesux)
     {
       read_message(1, FDL_SERVER);
-      if (LIFESUX & 0x4)
+      if (GlobalSetOptions.lifesux & 0x4)
         {       /* life really sucks */
           read_message(1, FDL_BUSY);
           read_message(1, FDL_SERVER);
@@ -512,10 +513,11 @@ static time_t io_loop(time_t delay)
   {
     static time_t lasttime=0;
 #ifdef CLIENT_SERVER
-    if (!LIFESUX || (lasttime + LIFESUX) < CurrentTime)
+    if (!GlobalSetOptions.lifesux ||
+	(lasttime + GlobalSetOptions.lifesux) < CurrentTime)
       {
 #else
-    if ((lasttime + (LIFESUX + 1)) < CurrentTime)
+    if ((lasttime + (GlobalSetOptions.lifesux + 1)) < CurrentTime)
       {
 #endif
         read_message(delay, FDL_ALL); /*  check everything! */
@@ -541,7 +543,7 @@ static time_t io_loop(time_t delay)
     timeout_auth_queries(CurrentTime);
   }
 
-  if (dorehash && !LIFESUX)
+  if (dorehash && !GlobalSetOptions.lifesux)
     {
       rehash(&me, &me, 1);
       dorehash = 0;
@@ -573,34 +575,35 @@ static void initialize_global_set_options(void)
 {
   memset( &GlobalSetOptions, 0, sizeof(GlobalSetOptions));
 
-  MAXCLIENTS = MAX_CLIENTS;
-  NOISYHTM = NOISY_HTM;
+  GlobalSetOptions.maxclients = MAX_CLIENTS;
+  GlobalSetOptions.noisy_htm = NOISY_HTM;
   GlobalSetOptions.autoconn = 1;
 
 #ifdef FLUD
-  FLUDNUM = FLUD_NUM;
-  FLUDTIME = FLUD_TIME;
-  FLUDBLOCK = FLUD_BLOCK;
+  GlobalSetOptions.fludnum = FLUD_NUM;
+  GlobalSetOptions.fludtime = FLUD_TIME;
+  GlobalSetOptions.fludblock = FLUD_BLOCK;
 #endif
 
 #ifdef IDLE_CHECK
-  IDLETIME = MIN_IDLETIME;
+  GlobalSetOptions.idletime = MIN_IDLETIME;
 #endif
 
 #ifdef ANTI_SPAMBOT
-  SPAMTIME = MIN_JOIN_LEAVE_TIME;
-  SPAMNUM = MAX_JOIN_LEAVE_COUNT;
+  GlobalSetOptions.spam_time = MIN_JOIN_LEAVE_TIME;
+  GlobalSetOptions.spam_num = MAX_JOIN_LEAVE_COUNT;
 #endif
 
 #ifdef ANTI_DRONE_FLOOD
-  DRONETIME = DEFAULT_DRONE_TIME;
-  DRONECOUNT = DEFAULT_DRONE_COUNT;
+  GlobalSetOptions.dronetime = DEFAULT_DRONE_TIME;
+  GlobalSetOptions.dronecount = DEFAULT_DRONE_COUNT;
 #endif
 
 #ifdef NEED_SPLITCODE
- SPLITDELAY = (DEFAULT_SERVER_SPLIT_RECOVERY_TIME * 60);
- SPLITNUM = SPLIT_SMALLNET_SIZE;
- SPLITUSERS = SPLIT_SMALLNET_USER_SIZE;
+ GlobalSetOptions.server_split_recovery_time =
+   (DEFAULT_SERVER_SPLIT_RECOVERY_TIME * 60);
+ GlobalSetOptions.split_smallnet_size = SPLIT_SMALLNET_SIZE;
+ GlobalSetOptions.split_smallnet_users = SPLIT_SMALLNET_USER_SIZE;
  server_split_time = CurrentTime;
 #endif
 

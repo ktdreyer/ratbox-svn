@@ -2706,13 +2706,14 @@ static void free_bans_exceptions_denies(struct Channel *chptr)
 
 static void check_still_split()
 {
-  if((server_split_time + SPLITDELAY) < CurrentTime)
+  if((server_split_time + GlobalSetOptions.server_split_recovery_time)
+     < CurrentTime)
     {
-      if((Count.server >= SPLITNUM) &&
+      if((Count.server >= GlobalSetOptions.split_smallnet_size) &&
 #ifdef SPLIT_PONG
          (got_server_pong == YES) &&
 #endif
-         (Count.total >= SPLITUSERS))
+         (Count.total >= GlobalSetOptions.split_smallnet_users))
         {
           /* server hasn't been split for a while.
            * -Dianora

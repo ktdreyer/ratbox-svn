@@ -196,16 +196,20 @@ int m_set(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
               if (new_value < 32)
                 {
                   sendto_one(sptr, ":%s NOTICE %s :You cannot set MAXCLIENTS to < 32 (%d:%d)",
-                             me.name, parv[0], MAXCLIENTS, highest_fd);
+                             me.name, parv[0], 
+			     GlobalSetOptions.maxclients,
+			     highest_fd);
                   return 0;
                 }
-              MAXCLIENTS = new_value;
+              GlobalSetOptions.maxclients = new_value;
               sendto_realops("%s!%s@%s set new MAXCLIENTS to %d (%d current)",
-                             parv[0], sptr->username, sptr->host, MAXCLIENTS, Count.local);
+                             parv[0], sptr->username, sptr->host, 
+			     GlobalSetOptions.maxclients, Count.local);
               return 0;
             }
           sendto_one(sptr, ":%s NOTICE %s :Current Maxclients = %d (%d)",
-                     me.name, parv[0], MAXCLIENTS, Count.local);
+                     me.name, parv[0], GlobalSetOptions.maxclients,
+		     Count.local);
           return 0;
           break;
 
@@ -241,19 +245,20 @@ int m_set(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                   {
                     sendto_realops("%s has disabled IDLE_CHECK",
                                    parv[0]);
-                    IDLETIME = 0;
+                    GlobalSetOptions.idletime = 0;
                   }
                 else
                   {
                     sendto_realops("%s has changed IDLETIME to %i",
                                    parv[0], newval);
-                    IDLETIME = (newval*60);
+                    GlobalSetOptions.idletime = (newval*60);
                   }
               }
             else
               {
                 sendto_one(sptr, ":%s NOTICE %s :IDLETIME is currently %i",
-                           me.name, parv[0], IDLETIME/60);
+                           me.name, parv[0], 
+			   GlobalSetOptions.idletime/60);
               }
             return 0;
             break;
@@ -270,14 +275,14 @@ int m_set(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                                me.name, parv[0]);
                     return 0;
                   }       
-                FLUDNUM = newval;
+                GlobalSetOptions.fludnum = newval;
                 sendto_realops("%s has changed FLUDNUM to %i",
-                               parv[0], FLUDNUM);
+                               parv[0], GlobalSetOptions.fludnum);
               }
             else
               {
                 sendto_one(sptr, ":%s NOTICE %s :FLUDNUM is currently %i",
-                           me.name, parv[0], FLUDNUM);
+                           me.name, parv[0], GlobalSetOptions.fludnum);
               }
             return 0;
             break;
@@ -293,14 +298,14 @@ int m_set(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                                me.name, parv[0]);
                     return 0;
                   }       
-                FLUDTIME = newval;
+                GlobalSetOptions.fludtime = newval;
                 sendto_realops("%s has changed FLUDTIME to %i",
-                               parv[0], FLUDTIME);
+                               parv[0], GlobalSetOptions.fludtime);
               }
             else
               {
                 sendto_one(sptr, ":%s NOTICE %s :FLUDTIME is currently %i",
-                           me.name, parv[0], FLUDTIME);
+                           me.name, parv[0], GlobalSetOptions.fludtime);
               }
             return 0;       
             break;
@@ -316,8 +321,8 @@ int m_set(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                                me.name, parv[0]);
                     return 0;
                   }       
-                FLUDBLOCK = newval;
-                if(FLUDBLOCK == 0)
+                GlobalSetOptions.fludblock = newval;
+                if(GlobalSetOptions.fludblock == 0)
                   {
                     sendto_realops("%s has disabled flud detection/protection",
                                    parv[0]);
@@ -325,13 +330,13 @@ int m_set(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                 else
                   {
                     sendto_realops("%s has changed FLUDBLOCK to %i",
-                                   parv[0],FLUDBLOCK);
+                                   parv[0],GlobalSetOptions.fludblock);
                   }
               }
             else
               {
                 sendto_one(sptr, ":%s NOTICE %s :FLUDBLOCK is currently %i",
-                           me.name, parv[0], FLUDBLOCK);
+                           me.name, parv[0], GlobalSetOptions.fludblock);
               }
             return 0;       
             break;
@@ -348,18 +353,18 @@ int m_set(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                                me.name, parv[0]);
                     return 0;
                   }       
-                DRONETIME = newval;
-                if(DRONETIME == 0)
+                GlobalSetOptions.dronetime = newval;
+                if(GlobalSetOptions.dronetime == 0)
                   sendto_realops("%s has disabled the ANTI_DRONE_FLOOD code",
                                  parv[0]);
                 else
                   sendto_realops("%s has changed DRONETIME to %i",
-                                 parv[0], DRONETIME);
+                                 parv[0], GlobalSetOptions.dronetime);
               }
             else
               {
                 sendto_one(sptr, ":%s NOTICE %s :DRONETIME is currently %i",
-                           me.name, parv[0], DRONETIME);
+                           me.name, parv[0], GlobalSetOptions.dronetime);
               }
             return 0;
             break;
@@ -375,14 +380,14 @@ int m_set(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                              me.name, parv[0]);
                   return 0;
                 }       
-              DRONECOUNT = newval;
+              GlobalSetOptions.dronecount = newval;
               sendto_realops("%s has changed DRONECOUNT to %i",
-                             parv[0], DRONECOUNT);
+                             parv[0], GlobalSetOptions.dronecount);
             }
           else
             {
               sendto_one(sptr, ":%s NOTICE %s :DRONECOUNT is currently %i",
-                         me.name, parv[0], DRONECOUNT);
+                         me.name, parv[0], GlobalSetOptions.dronecount);
             }
           return 0;
           break;
@@ -410,8 +415,8 @@ int m_set(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                     }
                   sendto_realops("%s has changed SPLITDELAY to %i",
                                  parv[0], newval);
-                  SPLITDELAY = (newval*60);
-                  if(SPLITDELAY == 0)
+                  GlobalSetOptions.server_split_recovery_time = (newval*60);
+                  if(GlobalSetOption.server_split_recovery_time == 0)
                     {
                       cold_start = NO;
                       if (server_was_split)
@@ -432,7 +437,7 @@ int m_set(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                   sendto_one(sptr, ":%s NOTICE %s :SPLITDELAY is currently %i",
                              me.name,
                              parv[0],
-                             SPLITDELAY/60);
+                             GlobalSetOptions.server_split_recovery_time/60);
                 }
           return 0;
           break;
@@ -507,16 +512,17 @@ int m_set(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                   }
 
                 if(newval < MIN_SPAM_NUM)
-                  SPAMNUM = MIN_SPAM_NUM;
+                  GlobalSetOptions.spam_num = MIN_SPAM_NUM;
                 else
-                  SPAMNUM = newval;
+                  GlobalSetOptions.spam_num = newval;
                 sendto_realops("%s has changed SPAMNUM to %i",
-                               parv[0], SPAMNUM);
+                               parv[0], GlobalSetOptions.spam_num);
               }
             else
               {
                 sendto_one(sptr, ":%s NOTICE %s :SPAMNUM is currently %i",
-                           me.name, parv[0], SPAMNUM);
+                           me.name, parv[0], 
+			   GlobalSetOptions.spam_num);
               }
 
             return 0;
@@ -534,16 +540,16 @@ int m_set(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                   return 0;
                 }
               if(newval < MIN_SPAM_TIME)
-                SPAMTIME = MIN_SPAM_TIME;
+                GlobalSetOptions.spam_time = MIN_SPAM_TIME;
               else
-                SPAMTIME = newval;
+                GlobalSetOptions.spam_time = newval;
               sendto_realops("%s has changed SPAMTIME to %i",
-                             parv[0], SPAMTIME);
+                             parv[0], GlobalSetOptions.spam_time);
             }
           else
             {
               sendto_one(sptr, ":%s NOTICE %s :SPAMTIME is currently %i",
-                         me.name, parv[0], SPAMTIME);
+                         me.name, parv[0], GlobalSetOptions.spam_time);
             }
           return 0;
           break;

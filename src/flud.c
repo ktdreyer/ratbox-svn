@@ -158,7 +158,7 @@ check_for_flud(struct Client *fluder, /* fluder, client being fluded */
   struct SLink *newfludee;
 
   /* If it's disabled, we don't need to process all of this */
-  if(FLUDBLOCK == 0)
+  if(GlobalSetOptions.fludblock == 0)
     return 0;
 
   /* It's either got to be a client or a channel being fluded */
@@ -174,9 +174,9 @@ check_for_flud(struct Client *fluder, /* fluder, client being fluded */
   /* Are we blocking fluds at this moment? */
   time(&now);
   if(cptr)                
-    blocking = (cptr->fludblock > (now - FLUDBLOCK));
+    blocking = (cptr->fludblock > (now - GlobalSetOptions.fludblock));
   else
-    blocking = (chptr->fludblock > (now - FLUDBLOCK));
+    blocking = (chptr->fludblock > (now - GlobalSetOptions.fludblock));
         
   /* Collect the Garbage */
   if(!blocking)
@@ -189,7 +189,7 @@ check_for_flud(struct Client *fluder, /* fluder, client being fluded */
       while(current)
         {
           next = current->next;
-          if(current->last_msg < (now - FLUDTIME))
+          if(current->last_msg < (now - GlobalSetOptions.fludtime))
             {
               if(cptr)
                 remove_fludee_reference(&current->fluder->fludees,
@@ -227,7 +227,7 @@ check_for_flud(struct Client *fluder, /* fluder, client being fluded */
         current->count++;
         found = 1;
       }
-      if(current->first_msg < (now - FLUDTIME))
+      if(current->first_msg < (now - GlobalSetOptions.fludtime))
         count++;
       else    
         count += current->count;
@@ -284,7 +284,7 @@ check_for_flud(struct Client *fluder, /* fluder, client being fluded */
   /* Okay, if we are not blocking, we need to decide if it's time to
   ** begin doing so.  We already have a count of messages received in
   ** the last flud_time seconds */
-  if(!blocking && (count > FLUDNUM))
+  if(!blocking && (count > GlobalSetOptions.fludnum))
     {
       blocking = 1;   
       ServerStats->is_flud++;
