@@ -44,7 +44,6 @@
 
 #include <string.h>
 #include <time.h>
-#include "memdebug.h"
 
 static int do_whois(struct Client *cptr, struct Client *sptr,
                     int parc, char *parv[]);

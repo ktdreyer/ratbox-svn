@@ -30,6 +30,7 @@
 #include "s_misc.h"
 #include "event.h"	/* Needed for EVH etc. */
 #include "s_conf.h"
+#include "memory.h"
 
 #include <assert.h>
 #include <errno.h>
@@ -39,7 +40,6 @@
 #include <string.h>
 #include <syslog.h>
 #include <unistd.h>
-#include "memdebug.h"
 
 
 #define LOG_BUFSIZE 2048 

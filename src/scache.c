@@ -11,10 +11,10 @@
 #include "numeric.h"
 #include "send.h"
 #include "scache.h"
+#include "memory.h"
 
 #include <assert.h>
 #include <string.h>
-#include "memdebug.h"
 
 /*
  * ircd used to store full servernames in anUser as well as in the 

@@ -38,6 +38,7 @@
 #include "s_debug.h"
 #include "s_log.h"
 #include "vchannel.h"
+#include "memory.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -46,7 +47,6 @@
 #include <time.h>
 #include <assert.h>
 #include <errno.h>
-#include "memdebug.h"
 
 #define LOG_BUFSIZE 2048
 

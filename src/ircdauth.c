@@ -51,7 +51,7 @@
 #include "s_log.h"
 #include "s_user.h"
 #include "send.h"
-#include "memdebug.h"
+#include "memory.h"
 #include "s_serv.h"
 
 static PF CompleteIAuthConnection;

@@ -30,9 +30,9 @@
 #include "fdlist.h"
 #include "s_bsd.h"
 #include "send.h"
+#include "memory.h"
 
 #include <string.h>
-#include "memdebug.h"
 
 /*
  * stats stuff

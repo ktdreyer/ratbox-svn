@@ -35,7 +35,7 @@
 #include "fdlist.h"
 #include "packet.h"
 #include "irc_string.h"
-#include "memdebug.h"
+#include "memory.h"
 
 
 static char               readBuf[READBUF_SIZE];

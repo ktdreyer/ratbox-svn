@@ -38,7 +38,6 @@
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
-#include "memdebug.h"
 
 static int m_whowas(struct Client*, struct Client*, int, char**);
 static int mo_whowas(struct Client*, struct Client*, int, char**);

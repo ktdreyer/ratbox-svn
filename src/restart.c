@@ -12,9 +12,9 @@
 #include "s_debug.h"
 #include "s_log.h"
 #include "client.h"	/* for FLAGS_ALL */
+#include "memory.h"
 
 #include <unistd.h>
-#include "memdebug.h"
 
 /* external var */
 extern char** myargv;

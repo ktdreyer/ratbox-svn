@@ -27,6 +27,7 @@
 #include "common.h"
 #include "irc_string.h"
 #include "ircd.h"
+#include "ircd_defs.h"
 #include "list.h"
 #include "s_gline.h"
 #include "numeric.h"
@@ -59,20 +60,22 @@ _moddeinit(void)
 
 char *_version = "20001221";
 
+#ifdef MEMDEBUG
+void ReportAllocated(struct Client*);
+#endif
+
 /*
  * mo_dmem - DMEM message handler
  *
  */
-static int mo_dmem(struct Client *cptr, struct Client *sptr,
-                   int parc, char *parv[])
+static int
+mo_dmem(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
-#ifdef DEBUGMEM
-  sendto_realops_flags(FLAGS_ALL, "%s is forcing a memory report", parv[0]);
-  sendto_one(sptr, ":%s NOTICE %s :Memory report sent to log", me.name, sptr->name);
-  DoMemoryReport();
+#ifdef MEMDEBUG
+  ReportAllocated(sptr);
 #else
-  sendto_one(sptr, ":%s NOTICE %s :Compiled without memory debugging", me.name, sptr->name);
+  sendto_one(sptr, ":%s NOTICE %s :Compiled without memory debugging",
+    me.name, sptr->name);
 #endif
-  return 0; /* shouldn't ever get here */
+  return 0;
 }
-

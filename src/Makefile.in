@@ -74,7 +74,7 @@ SRCS =                          \
   m_error.c                     \
   match.c                       \
   md5.c                         \
-  memdebug.c                    \
+  memory.c                      \
   modules.c                     \
   motd.c                        \
   mtrie_conf.c                  \

@@ -45,6 +45,7 @@
 #include "s_log.h"
 #include "s_stats.h"
 #include "send.h"
+#include "memory.h"
 
 #include <netdb.h>               /* struct hostent */
 #include <string.h>
@@ -56,7 +57,6 @@
 #include <sys/socket.h>
 #include <sys/file.h>
 #include <sys/ioctl.h>
-#include "memdebug.h"
 
 /*
  * a bit different approach

@@ -35,11 +35,11 @@
 #include "numeric.h"
 #include "client.h"
 #include "irc_string.h"
+#include "memory.h"
 
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
-#include "memdebug.h"
 
 extern ConfigFileEntryType ConfigFileEntry; /* defined in ircd.c */
 

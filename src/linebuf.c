@@ -18,7 +18,7 @@
 #include "tools.h"
 #include "linebuf.h"
 #include "blalloc.h"
-#include "memdebug.h"
+#include "memory.h"
 
 #ifdef STRING_WITH_STRINGS
 # include <string.h>

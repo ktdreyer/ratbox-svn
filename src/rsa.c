@@ -23,7 +23,7 @@
  */
 
 #include <string.h>
-#include "memdebug.h"
+#include "memory.h"
 
 #ifdef OPENSSL
 

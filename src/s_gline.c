@@ -47,6 +47,7 @@
 #include "hash.h"
 #include "event.h"
 #include "list.h"
+#include "memory.h"
 
 #include <assert.h>
 #include <string.h>
@@ -54,7 +55,6 @@
 #include <unistd.h>
 #include <time.h>
 #include <fcntl.h>
-#include "memdebug.h"
 
 dlink_list glines;
 

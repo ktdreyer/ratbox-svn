@@ -35,10 +35,10 @@
 #include "restart.h"
 #include "s_log.h"
 #include "send.h"
+#include "memory.h"
 
 #include <string.h>
 #include <stdlib.h>
-#include "memdebug.h"
 
 /*
  * re-written to use Wohali (joant@cadence.com)

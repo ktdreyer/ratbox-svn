@@ -45,6 +45,7 @@
 #include "s_gline.h"
 #include "s_debug.h"
 #include "fileio.h"
+#include "memory.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -56,7 +57,6 @@
 #include <netdb.h>
 #include <fcntl.h>
 #include <assert.h>
-#include "memdebug.h"
 
 extern int yyparse(); /* defined in yy.tab.c */
 extern ConfigFileEntryType ConfigFileEntry; /* defined in ircd.c */

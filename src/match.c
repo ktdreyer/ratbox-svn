@@ -33,7 +33,6 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include "ircd.h"
-#include "memdebug.h"
 /*
 **  Compare if a given string (name) matches the given
 **  mask (which can contain wild cards: '*' - match any

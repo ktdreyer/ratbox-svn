@@ -36,11 +36,11 @@
 #include "s_conf.h" /* ConfigFileEntry */
 #include "vchannel.h"
 #include "event.h"
+#include "memory.h"
 
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
-#include "memdebug.h"
 
 #include "s_log.h"
 

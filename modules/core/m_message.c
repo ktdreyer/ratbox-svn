@@ -135,9 +135,9 @@ free_target_table(void)
 	int i;
 	
 	for (i = 0; i < target_table_size; i++) 
-		free (target_table[i]);
+		MyFree (target_table[i]);
 	
-	free(target_table);
+	MyFree(target_table);
 	target_table = NULL;
 }
 
@@ -321,8 +321,8 @@ static int build_target_list(int p_or_n,
 	    {
 	      if( !duplicate_ptr(chptr, *targets, i) ) 
 		{
-			*targets = realloc(*targets, sizeof(struct entity *) * (i + 1));
-			(*targets)[i] = malloc (sizeof (struct entity));
+			*targets = MyRealloc(*targets, sizeof(struct entity *) * (i + 1));
+			(*targets)[i] = MyMalloc (sizeof (struct entity));
 			
 		  (*targets)[i]->ptr = (void *)chptr;
 		  (*targets)[i++]->type = ENTITY_CHANNEL;
@@ -379,8 +379,8 @@ static int build_target_list(int p_or_n,
 	    {
 	      if( !duplicate_ptr(chptr, *targets, i) )
 		{
-                  *targets = realloc(*targets, sizeof(struct entity *) * (i + 1));
-                  (*targets)[i] = malloc (sizeof (struct entity));
+                  *targets = MyRealloc(*targets, sizeof(struct entity *) * (i + 1));
+                  (*targets)[i] = MyMalloc (sizeof (struct entity));
 		  (*targets)[i]->ptr = (void *)chptr;
 		  (*targets)[i]->type = ENTITY_CHANOPS_ON_CHANNEL;
 		  (*targets)[i++]->flags = type;
@@ -413,8 +413,8 @@ static int build_target_list(int p_or_n,
 	{
 	  if( !duplicate_ptr(acptr, *targets, i) )
 	    {
-			*targets = realloc(*targets, sizeof(struct entity *) * (i + 1));
-			(*targets)[i] = malloc (sizeof (struct entity));
+			*targets = MyRealloc(*targets, sizeof(struct entity *) * (i + 1));
+			(*targets)[i] = MyMalloc (sizeof (struct entity));
 
 	      (*targets)[i]->ptr = (void *)acptr;
 	      (*targets)[i]->type = ENTITY_CLIENT;

@@ -26,7 +26,7 @@
 
 #include "ircd_handler.h"
 #include "msg.h"
-#include "memdebug.h"
+#include "memory.h"
 
 struct module {
   char *name;

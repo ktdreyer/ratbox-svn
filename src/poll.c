@@ -48,6 +48,7 @@
 #include "send.h"
 #include "s_debug.h"
 #include "s_bsd.h"
+#include "memory.h"
 
 #include <assert.h>
 #include <stdio.h>
@@ -65,7 +66,6 @@
 #include <sys/resource.h>
 #include <sys/param.h>    /* NOFILE */
 #include <arpa/inet.h>
-#include "memdebug.h"
 
 /*
  * Stuff for poll()

@@ -23,9 +23,9 @@
 #include "ircd.h"         /* dorehash */
 #include "restart.h"      /* server_reboot */
 #include "s_log.h"
+#include "memory.h"
 
 #include <signal.h>
-#include "memdebug.h"
 
 /*
  * dummy_handler - don't know if this is really needed but if alarm is still

@@ -41,7 +41,7 @@
 #include "parse.h"
 #include "ircd_defs.h"
 #include "irc_string.h"
-#include "memdebug.h"
+#include "memory.h"
 #include "tools.h"
 #include "list.h"
 

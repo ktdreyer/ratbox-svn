@@ -48,6 +48,7 @@
 #include "send.h"
 #include "client.h"
 #include "s_debug.h"
+#include "memory.h"
 
 #include <assert.h>
 #include <string.h>
@@ -55,7 +56,6 @@
 #include <errno.h>
 #include <time.h>
 #include <netdb.h>
-#include "memdebug.h"
 
 #define MIN_CONN_FREQ 300
 

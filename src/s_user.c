@@ -48,6 +48,7 @@
 #include "supported.h"
 #include "whowas.h"
 #include "md5.h"
+#include "memory.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -56,7 +57,6 @@
 #include <assert.h>
 #include <time.h>
 #include <sys/stat.h>
-#include "memdebug.h"
 
 static int valid_hostname(const char* hostname);
 static int valid_username(const char* username);

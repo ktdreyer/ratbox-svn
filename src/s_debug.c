@@ -38,6 +38,7 @@
 #include "scache.h"
 #include "send.h"
 #include "whowas.h"
+#include "memory.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -48,7 +49,6 @@
 #include <sys/file.h>
 #include <sys/param.h>
 #include <sys/resource.h>
-#include "memdebug.h"
 
 extern  void    count_ip_hash(int *,u_long *);    /* defined in s_conf.c */
 

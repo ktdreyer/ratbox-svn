@@ -24,6 +24,7 @@
 #include "irc_string.h"
 #include "client.h"	/* for FLAGS_ALL */
 #include "send.h"	/* sendto_realops_flags */
+#include "memory.h"
 
 /* The following are to get the fd manipulation routines. eww. */
 #include "fdlist.h"
@@ -34,7 +35,6 @@
 #include <unistd.h> /* read, write, open, close */
 #include <assert.h> /* assert */
 #include <errno.h>
-#include "memdebug.h"
 
 /*
  * Wrappers around open() / close() for fileio, since a whole bunch of

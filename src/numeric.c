@@ -21,9 +21,9 @@
 #include "numeric.h"
 #include "irc_string.h"
 #include "common.h"     /* NULL cripes */
+#include "memory.h"
 
 #include <assert.h>
-#include "memdebug.h"
 
 #include "messages.tab"
 

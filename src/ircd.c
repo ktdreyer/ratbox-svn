@@ -56,6 +56,7 @@
 #include "setup.h"
 #include "whowas.h"
 #include "modules.h"
+#include "memory.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -76,8 +77,6 @@
 #ifdef USE_GETTEXT
 #include <libintl.h>
 #endif
-
-#include "memdebug.h"
 
 
 /*

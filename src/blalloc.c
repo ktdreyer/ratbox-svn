@@ -14,10 +14,10 @@
 #include "tools.h"
 #include "s_log.h"
 #include "client.h"
+#include "memory.h"
 
 #include <string.h>
 #include <stdlib.h>
-#include "memdebug.h"
 
 #ifdef DEBUG_BLOCK_ALLOCATOR
 #include "send.h"           /* sendto_realops */
@@ -155,11 +155,7 @@ BlockHeap * BlockHeapCreate (size_t elemsize,
 /*    Pointer to a structure (void *), or NULL if unsuccessful.             */
 /* ************************************************************************ */
 
-#ifdef DEBUGMEM
-void * _BlockHeapAlloc (BlockHeap *bh, char * file, int line)
-#else
 void * _BlockHeapAlloc (BlockHeap *bh)
-#endif
 {
    Block *walker;
    int unit;

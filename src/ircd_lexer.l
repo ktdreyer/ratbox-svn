@@ -34,7 +34,7 @@
 #include "common.h"
 #include "s_conf.h"
 #include "y.tab.h"
-#include "memdebug.h"
+#include "memory.h"
 
 char *ip_string;
 
@@ -72,7 +72,7 @@ qstring		\"[^\"\n]*[\"\n]
           }
 	 }
 
-{qstring}	{ DupStringNoDbg(&yylval.string,strdup(yytext+1));
+{qstring}	{ DupString(yylval.string,yytext+1);
 		  if(yylval.string[yyleng-2] != '"')
 		    fprintf(stderr,"Unterminated character string\n");
 		  else

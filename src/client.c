@@ -50,6 +50,7 @@
 #include "s_debug.h"
 #include "s_user.h"
 #include "hash.h"
+#include "memory.h"
 
 #include <assert.h>
 #include <fcntl.h>
@@ -58,7 +59,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/stat.h>
-#include "memdebug.h"
 
 
 /* 

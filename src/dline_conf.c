@@ -12,13 +12,13 @@
 #include "numeric.h"
 #include "s_conf.h"
 #include "send.h"
+#include "memory.h"
 
 #include <fcntl.h>
 #include <sys/wait.h>
 #include <signal.h>
 #include <string.h>
 #include <stdlib.h>
-#include "memdebug.h"
 
 typedef struct ip_subtree
 {

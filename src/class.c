@@ -29,10 +29,10 @@
 #include "send.h"
 #include "irc_string.h"
 #include "s_debug.h"
+#include "memory.h"
 
 #include <string.h>
 #include <stdlib.h>
-#include "memdebug.h"
 
 #define BAD_CONF_CLASS          -1
 #define BAD_PING                -2

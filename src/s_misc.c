@@ -34,6 +34,7 @@
 #include "s_conf.h"
 #include "s_serv.h"
 #include "send.h"
+#include "memory.h"
 
 #include <string.h>
 #include <fcntl.h>
@@ -42,7 +43,6 @@
 #include <sys/param.h>
 #include <time.h>
 #include <unistd.h>
-#include "memdebug.h"
 
 
 static char* months[] = {

@@ -31,6 +31,7 @@
 #include "s_debug.h"
 #include "fdlist.h"
 #include "fileio.h"
+#include "memory.h"
 
 #include <errno.h>
 #include <assert.h>
@@ -41,7 +42,6 @@
 #include <unistd.h>
 #include <time.h>
 #include <sys/stat.h>
-#include "memdebug.h"
 
 /* New hash code */
 /*

@@ -55,11 +55,11 @@
 #include "numeric.h"
 #include "s_conf.h"
 #include "send.h"
+#include "memory.h"
 
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
-#include "memdebug.h"
 
 static int stack_pointer;              /* dns piece stack */
 static char *dns_stack[MAX_TLD_STACK];

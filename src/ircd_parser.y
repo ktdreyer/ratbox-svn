@@ -34,7 +34,7 @@
 #include "client.h"	/* for FLAGS_ALL only */
 #include "irc_string.h"
 #include "ircdauth.h"
-#include "memdebug.h"
+#include "memory.h"
 #include "modules.h"
 #include "s_serv.h" /* for CAP_LL / IsCapable */
 

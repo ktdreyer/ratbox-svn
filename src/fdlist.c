@@ -12,11 +12,11 @@
 #include "s_bsd.h"   /* highest_fd */
 #include "config.h"  /* option settings */
 #include "send.h"
+#include "memory.h"
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 #include <unistd.h>
-#include "memdebug.h"
 
 fde_t *fd_table = NULL;
 
