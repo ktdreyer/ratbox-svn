@@ -293,21 +293,21 @@ int     m_join(struct Client *cptr,
       if (flags & CHFL_CHANOP)
 	{
 	  chptr->channelts = CurrentTime;
-	  sendto_channel_remote(chptr, cptr,
-				":%s SJOIN %lu %s + :@%s",
-				me.name,
-				chptr->channelts,
-				chptr->chname,
-				parv[0]);
+	  sendto_ll_channel_remote(chptr, cptr, sptr,
+				   ":%s SJOIN %lu %s + :@%s",
+				   me.name,
+				   chptr->channelts,
+				   chptr->chname,
+				   parv[0]);
 	}
       else 
 	{
-	  sendto_channel_remote(chptr, cptr,
-				":%s SJOIN %lu %s + :%s",
-				me.name,
-				chptr->channelts,
-				chptr->chname,
-				parv[0]);
+	  sendto_ll_channel_remote(chptr, cptr, sptr,
+				   ":%s SJOIN %lu %s + :%s",
+				   me.name,
+				   chptr->channelts,
+				   chptr->chname,
+				   parv[0]);
 	}
 
       /*
@@ -329,10 +329,10 @@ int     m_join(struct Client *cptr,
 			       me.name,
 			       chptr->chname);
 	  
-	  sendto_channel_remote(chptr, sptr, 
-				":%s MODE %s +nt",
-				me.name,
-				chptr->chname);
+	  sendto_ll_channel_remote(chptr, cptr, sptr, 
+				   ":%s MODE %s +nt",
+				   me.name,
+				   chptr->chname);
 	}
 
       del_invite(chptr, sptr);
@@ -461,7 +461,7 @@ void do_join_0(struct Client *cptr, struct Client *sptr)
   struct Channel *chptr=NULL;
   dlink_node   *lp;
 
-  sendto_serv_butone(cptr, ":%s JOIN 0", sptr->name);
+  sendto_ll_serv_butone(cptr, sptr, ":%s JOIN 0", sptr->name);
 
   while ((lp = sptr->user->channel.head))
     {
@@ -533,40 +533,4 @@ void check_spambot_warning( struct Client *sptr, char *name )
       sptr->localClient->last_leave_time = CurrentTime;
     }
 }
-
-
-#ifdef DBOP
-/* ZZZZZZZZZZZZ Q&D debug function */
-int     m_dbop(struct Client *cptr,
-               struct Client *sptr,
-               int parc,
-               char *parv[])
-{
-  int counted_ops=0;
-  dlink_node  *l;
-  char *name;
-  struct Channel *chptr;
-
-  name = parv[1];
-
-  if(!(chptr=hash_find_channel(name, NullChn)))
-    {
-      sendto_one(sptr,
-      ":%s NOTICE %s :*** Notice %s does not exist",
-        me.name, sptr->name,  name );
-      return -1;
-    }
-
-  for (l = chptr->members; l && l->data; l = l->next)
-    if (l->flags & MODE_CHANOP)
-      {
-        counted_ops++;
-      }
-
-  sendto_one(sptr,":%s NOTICE %s :*** Notice %s chptr->opcount %d counted %d",
-    me.name, sptr->name, name, chptr->opcount, counted_ops);
-
-  return 0;
-}
-#endif
 

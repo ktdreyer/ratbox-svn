@@ -52,6 +52,7 @@
  * The maximum needed here is 2 * 512
  */
 static  char sendbuf[IRCD_BUFSIZE*2];
+static  char sendbuf2[IRCD_BUFSIZE*2];
 static  char buf[IRCD_BUFSIZE*2];
 static  char local_prefix[NICKLEN+HOSTLEN+USERLEN+5];
 static  char local_sendbuf[IRCD_BUFSIZE*2];
@@ -559,10 +560,12 @@ sendto_ll_serv_butone(struct Client *one, struct Client *sptr,
       if (one && (cptr == one->from))
         continue;
       
-      if (IsCapable(cptr,CAP_LL) 
-	  &&
-	  (sptr->lazyLinkClientExists & cptr->localClient->serverMask) != 0)
-	send_message(cptr, (char *)sendbuf, len);
+      if (IsCapable(cptr,CAP_LL))
+	{
+	  if( ( sptr->lazyLinkClientExists &
+		cptr->localClient->serverMask) != 0)
+	    send_message(cptr, (char *)sendbuf, len);
+	}
       else
 	send_message(cptr, (char *)sendbuf, len);
     }
@@ -743,6 +746,7 @@ sendto_list_local(dlink_list *list, const char *sendbuf, int len)
  *              - var args pattern
  * output       - NONE
  * side effects - send to all servers the channel given, except for "from"
+ *		  This code is only used in m_join.c
  */
 void
 sendto_channel_remote(struct Channel *chptr,
@@ -773,13 +777,72 @@ sendto_channel_remote(struct Channel *chptr,
       if (cptr == from)
         continue;
 
-      if(ConfigFileEntry.hub && IsCapable(cptr,CAP_LL))
-        {
-          if( !(chptr->lazyLinkChannelExists & cptr->localClient->serverMask) )
-             continue;
-        }
+      if (ConfigFileEntry.hub && IsCapable(cptr,CAP_LL))
+	{
+	  if( !(chptr->lazyLinkChannelExists &
+		cptr->localClient->serverMask) )
+	    continue;
+	}
 
       send_message (cptr, (char *)sendbuf, len);
+    }
+} /* sendto_channel_remote() */
+
+/*
+ * sendto_ll_channel_remote
+ *
+ * inputs	- pointer to channel
+ *              - from pointer
+ *              - var args pattern
+ * output       - NONE
+ * side effects - send to all servers the channel given, except for "from"
+ *		  This code is only used in m_join.c
+ *		  It will introduce the client 'sptr' if it is unknown
+ *		  to the leaf.
+ */
+void
+sendto_ll_channel_remote(struct Channel *chptr,
+			 struct Client *from, struct Client *sptr,
+			 const char *pattern, ...)
+{
+  int len;
+  va_list args;
+  struct Client *cptr;
+  dlink_node *ptr;
+
+  if (chptr != NULL)
+    {
+      if (*chptr->chname == '&')
+        return;
+    }
+  else
+    return;
+
+  va_start(args, pattern);
+  len = send_format(sendbuf2,pattern,args);
+  va_end(args);
+
+  for(ptr = serv_list.head; ptr; ptr = ptr->next)
+    {
+      cptr = ptr->data;
+
+      if (cptr == from)
+        continue;
+
+      if (IsCapable(cptr,CAP_LL))
+	{
+	  if(ConfigFileEntry.hub)
+	    {
+	      if ((sptr->lazyLinkClientExists & cptr->localClient->serverMask)
+		  == 0)
+		{
+		  sendnick_TS(cptr,sptr);
+		  sptr->lazyLinkClientExists |= cptr->localClient->serverMask;
+		}
+	    }
+	}
+
+      send_message (cptr, (char *)sendbuf2, len);
     }
 } /* sendto_channel_remote() */
 

@@ -506,11 +506,12 @@ int register_user(struct Client *cptr, struct Client *sptr,
       dlinkAdd(sptr, m, &lclient_list);
     }
   
-  sendto_serv_butone(cptr, ":%s NICK %s %d %lu %s %s %s %s :%s",
-		     me.name,
-                     nick, sptr->hopcount+1, sptr->tsinfo, ubuf,
-                     sptr->username, sptr->host, user->server,
-                     sptr->info);
+  sendto_ll_serv_butone(cptr, sptr,
+			":%s NICK %s %d %lu %s %s %s %s :%s",
+			me.name,
+			nick, sptr->hopcount+1, sptr->tsinfo, ubuf,
+			sptr->username, sptr->host, user->server,
+			sptr->info);
   if (ubuf[1])
     send_umode_out(cptr, sptr, 0);
   return 0;
@@ -961,9 +962,11 @@ void send_umode(struct Client *cptr, struct Client *sptr, int old,
  * added Sat Jul 25 07:30:42 EST 1992
  */
 /*
- * extra argument evenTS added to send to TS servers or not -orabidoo
+ * send_umode_out
  *
- * extra argument evenTS no longer needed with TS only th+hybrid server
+ * inputs	-
+ * output	- NONE
+ * side effects - Only send ubuf out to servers that know about this client
  */
 void send_umode_out(struct Client *cptr,
 		    struct Client *sptr,
@@ -981,8 +984,17 @@ void send_umode_out(struct Client *cptr,
 
       if((acptr != cptr) && (acptr != sptr) && (*buf))
         {
-          sendto_one(acptr, ":%s MODE %s :%s",
-                   sptr->name, sptr->name, buf);
+	  if (IsCapable(acptr,CAP_LL)) 
+	    {
+	      if( (sptr->lazyLinkClientExists
+		   &
+		   acptr->localClient->serverMask) != 0)
+		sendto_one(acptr, ":%s MODE %s :%s",
+			   sptr->name, sptr->name, buf);
+	    }
+	  else
+	    sendto_one(acptr, ":%s MODE %s :%s",
+		       sptr->name, sptr->name, buf);
         }
     }
 
