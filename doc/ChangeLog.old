@@ -1,3 +1,53 @@
+androsyn    2002/02/25 12:39:22 EST	(20020225_0)
+
+  Modified files:
+    include              client.h irc_string.h ircd_defs.h 
+                         supported.h 
+    modules              m_cryptlink.c m_gline.c m_kline.c 
+                         m_pass.c m_stats.c m_topic.c m_unkline.c 
+    modules/core         m_nick.c m_part.c m_server.c m_sjoin.c 
+    src                  channel_mode.c client.c fileio.c hash.c 
+                         irc_string.c ircd_parser.y ircdauth.c 
+                         list.c motd.c s_conf.c s_serv.c s_user.c 
+                         scache.c whowas.c 
+  Log:
+  Replace strncpy_irc() with strlcpy().  Change NICKLEN == 10, 9 + 1 for the
+  NUL character.  I'm not sure if HOSTLEN and friends will need to be mangled
+  as well, but we can explore that later.
+  
+  Revision  Changes    Path
+  7.141     +2 -2      ircd-hybrid-7/include/client.h
+  7.34      +0 -5      ircd-hybrid-7/include/irc_string.h
+  7.25      +1 -5      ircd-hybrid-7/include/ircd_defs.h
+  1.19      +1 -1      ircd-hybrid-7/include/supported.h
+  1.84      +5 -9      ircd-hybrid-7/modules/core/m_nick.c
+  1.51      +2 -2      ircd-hybrid-7/modules/core/m_part.c
+  1.77      +10 -12    ircd-hybrid-7/modules/core/m_server.c
+  1.127     +2 -2      ircd-hybrid-7/modules/core/m_sjoin.c
+  1.30      +5 -6      ircd-hybrid-7/modules/m_cryptlink.c
+  1.76      +11 -13    ircd-hybrid-7/modules/m_gline.c
+  1.97      +10 -16    ircd-hybrid-7/modules/m_kline.c
+  1.21      +3 -3      ircd-hybrid-7/modules/m_pass.c
+  1.106     +2 -2      ircd-hybrid-7/modules/m_stats.c
+  1.47      +4 -4      ircd-hybrid-7/modules/m_topic.c
+  1.43      +3 -3      ircd-hybrid-7/modules/m_unkline.c
+  7.22      +1 -1      ircd-hybrid-7/src/channel_mode.c
+  7.239     +3 -4      ircd-hybrid-7/src/client.c
+  7.19      +1 -1      ircd-hybrid-7/src/fileio.c
+  7.39      +1 -2      ircd-hybrid-7/src/hash.c
+  7.52      +0 -19     ircd-hybrid-7/src/irc_string.c
+  1.236     +6 -6      ircd-hybrid-7/src/ircd_parser.y
+  7.47      +2 -2      ircd-hybrid-7/src/ircdauth.c
+  7.42      +1 -1      ircd-hybrid-7/src/list.c
+  7.22      +2 -4      ircd-hybrid-7/src/motd.c
+  7.293     +3 -4      ircd-hybrid-7/src/s_conf.c
+  7.246     +2 -2      ircd-hybrid-7/src/s_serv.c
+  7.190     +8 -10     ircd-hybrid-7/src/s_user.c
+  7.13      +1 -2      ircd-hybrid-7/src/scache.c
+  7.16      +1 -2      ircd-hybrid-7/src/whowas.c
+
+
+
 lusky       2002/02/24 15:32:25 EST	(20020224_4)
 
   Modified files:
