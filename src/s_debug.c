@@ -34,7 +34,6 @@
 #include "s_log.h"
 #include "scache.h"
 #include "send.h"
-#include "struct.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -154,7 +153,7 @@ void debug(int level, char *format, ...)
  * different field names for "struct rusage".
  * -avalon
  */
-void send_usage(aClient *cptr, char *nick)
+void send_usage(struct Client *cptr, char *nick)
 {
   struct rusage  rus;
   time_t         secs;
@@ -215,12 +214,12 @@ void send_usage(aClient *cptr, char *nick)
   return;
 }
 
-void count_memory(aClient *cptr,char *nick)
+void count_memory(struct Client *cptr,char *nick)
 {
-  aClient *acptr;
-  Link *link;
+  struct Client *acptr;
+  struct SLink *link;
   aChannel *chptr;
-  aConfItem *aconf;
+  struct ConfItem *aconf;
   aClass *cltmp;
 
   int lc = 0;           /* local clients */
@@ -321,7 +320,7 @@ void count_memory(aClient *cptr,char *nick)
       for (link = chptr->banlist; link; link = link->next)
         {
           chb++;
-          chbm += (strlen(link->value.cp)+1+sizeof(Link));
+          chbm += (strlen(link->value.cp)+1+sizeof(struct SLink));
         #ifdef BAN_INFO
         	if (link->value.banptr->banstr)
         		chbm += strlen(link->value.banptr->banstr);
@@ -337,7 +336,7 @@ void count_memory(aClient *cptr,char *nick)
       com += aconf->host ? strlen(aconf->host)+1 : 0;
       com += aconf->passwd ? strlen(aconf->passwd)+1 : 0;
       com += aconf->name ? strlen(aconf->name)+1 : 0;
-      com += sizeof(aConfItem);
+      com += sizeof(struct ConfItem);
     }
 
   for (cltmp = ClassList; cltmp; cltmp = cltmp->next)
@@ -346,38 +345,38 @@ void count_memory(aClient *cptr,char *nick)
   sendto_one(cptr, ":%s %d %s :Client Local %d(%d) Remote %d(%d)",
              me.name, RPL_STATSDEBUG, nick, lc, lcm, rc, rcm);
   sendto_one(cptr, ":%s %d %s :Users %d(%d) Invites %d(%d)",
-             me.name, RPL_STATSDEBUG, nick, us, us*sizeof(anUser), usi,
-             usi * sizeof(Link));
+             me.name, RPL_STATSDEBUG, nick, us, us*sizeof(struct User), usi,
+             usi * sizeof(struct SLink));
   sendto_one(cptr, ":%s %d %s :User channels %d(%d) Aways %d(%d)",
-             me.name, RPL_STATSDEBUG, nick, usc, usc*sizeof(Link),
+             me.name, RPL_STATSDEBUG, nick, usc, usc*sizeof(struct SLink),
              aw, awm);
   sendto_one(cptr, ":%s %d %s :Attached confs %d(%d)",
-             me.name, RPL_STATSDEBUG, nick, lcc, lcc*sizeof(Link));
+             me.name, RPL_STATSDEBUG, nick, lcc, lcc*sizeof(struct SLink));
 
-  totcl = lcm + rcm + us*sizeof(anUser) + usc*sizeof(Link) + awm;
-  totcl += lcc*sizeof(Link) + usi*sizeof(Link);
+  totcl = lcm + rcm + us*sizeof(struct User) + usc*sizeof(struct SLink) + awm;
+  totcl += lcc*sizeof(struct SLink) + usi*sizeof(struct SLink);
 
   sendto_one(cptr, ":%s %d %s :Conflines %d(%d)",
              me.name, RPL_STATSDEBUG, nick, co, com);
 
   sendto_one(cptr, ":%s %d %s :Classes %d(%d)",
-             me.name, RPL_STATSDEBUG, nick, cl, cl*sizeof(aClass));
+             me.name, RPL_STATSDEBUG, nick, cl, cl*sizeof(struct Class));
 
   sendto_one(cptr, ":%s %d %s :Channels %d(%d) Bans %d(%d)",
              me.name, RPL_STATSDEBUG, nick, ch, chm, chb, chbm);
   sendto_one(cptr, ":%s %d %s :Channel members %d(%d) invite %d(%d)",
-             me.name, RPL_STATSDEBUG, nick, chu, chu*sizeof(Link),
-             chi, chi*sizeof(Link));
+             me.name, RPL_STATSDEBUG, nick, chu, chu*sizeof(struct SLink),
+             chi, chi*sizeof(struct SLink));
 
-  totch = chm + chbm + chu*sizeof(Link) + chi*sizeof(Link);
+  totch = chm + chbm + chu*sizeof(struct SLink) + chi*sizeof(struct SLink);
 
   sendto_one(cptr, ":%s %d %s :Whowas users %d(%d))",
-             me.name, RPL_STATSDEBUG, nick, wwu, wwu*sizeof(anUser));
+             me.name, RPL_STATSDEBUG, nick, wwu, wwu*sizeof(struct User));
 
   sendto_one(cptr, ":%s %d %s :Whowas array %d(%d)",
              me.name, RPL_STATSDEBUG, nick, NICKNAMEHISTORYLENGTH, wwm);
 
-  totww = wwu * sizeof(anUser) + wwm;
+  totww = wwu * sizeof(struct User) + wwm;
 
   client_hash_table_size  = hash_get_client_table_size();
   channel_hash_table_size = hash_get_channel_table_size();

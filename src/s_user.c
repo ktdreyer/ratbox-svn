@@ -44,7 +44,6 @@
 #include "s_stats.h"
 #include "scache.h"
 #include "send.h"
-#include "struct.h"
 #include "whowas.h"
 #include "flud.h"
 
@@ -65,14 +64,14 @@
 time_t LastUsedWallops = 0;
 #endif
 
-static int do_user (char *, aClient *, aClient*, char *, char *, char *,
+static int do_user (char *, struct Client *, struct Client*, char *, char *, char *,
                      char *);
 
-static int nickkilldone(aClient *, aClient *, int, char **, time_t, char *);
+static int nickkilldone(struct Client *, struct Client *, int, char **, time_t, char *);
 static int valid_hostname(const char* hostname);
 static int valid_username(const char* username);
-static void report_and_set_user_flags( aClient *, aConfItem * );
-static int tell_user_off(aClient *,char **);
+static void report_and_set_user_flags( struct Client *, struct ConfItem * );
+static int tell_user_off(struct Client *,char **);
 
 /* table of ascii char letters to corresponding bitmask */
 
@@ -480,13 +479,13 @@ static int clean_nick_name(char* nick)
 **         nick from local user or kill him/her...
 */
 
-static int register_user(aClient *cptr, aClient *sptr, 
+static int register_user(struct Client *cptr, struct Client *sptr, 
                          char *nick, char *username)
 {
-  aConfItem*  aconf;
+  struct ConfItem*  aconf;
   char*       parv[3];
   static char ubuf[12];
-  anUser*     user = sptr->user;
+  struct User*     user = sptr->user;
   char*       reason;
   char        tmpstr2[512];
 
@@ -833,7 +832,7 @@ static int register_user(aClient *cptr, aClient *sptr,
     }
   else if (IsServer(cptr))
     {
-      aClient *acptr;
+      struct Client *acptr;
       if ((acptr = find_server(user->server)) && acptr->from != sptr->from)
         {
           sendto_realops_flags(FLAGS_DEBUG, 
@@ -892,7 +891,7 @@ static int register_user(aClient *cptr, aClient *sptr,
     {
       if(local_cptr_list)
         local_cptr_list->previous_local_client = sptr;
-      sptr->previous_local_client = (aClient *)NULL;
+      sptr->previous_local_client = (struct Client *)NULL;
       sptr->next_local_client = local_cptr_list;
       local_cptr_list = sptr;
     }
@@ -982,7 +981,7 @@ static int valid_username(const char* username)
  */
 
 static int
-tell_user_off(aClient *cptr, char **preason )
+tell_user_off(struct Client *cptr, char **preason )
 {
   char* p = 0;
 
@@ -1037,7 +1036,7 @@ tell_user_off(aClient *cptr, char **preason )
  */
 
 static void 
-report_and_set_user_flags(aClient *sptr,aConfItem *aconf)
+report_and_set_user_flags(struct Client *sptr,struct ConfItem *aconf)
 {
   /* If this user is being spoofed, tell them so */
   if(IsConfDoSpoofIp(aconf))
@@ -1088,7 +1087,7 @@ report_and_set_user_flags(aClient *sptr,aConfItem *aconf)
 /*
  * nickkilldone
  *
- * input        - pointer to physical aClient
+ * input        - pointer to physical struct Client
  *              - pointer to source aClient
  *              - argument count
  *              - arguments
@@ -1098,7 +1097,7 @@ report_and_set_user_flags(aClient *sptr,aConfItem *aconf)
  * side effects -
  */
 
-static int nickkilldone(aClient *cptr, aClient *sptr, int parc,
+static int nickkilldone(struct Client *cptr, struct Client *sptr, int parc,
                  char *parv[], time_t newts,char *nick)
 {
 
@@ -1256,9 +1255,9 @@ static int nickkilldone(aClient *cptr, aClient *sptr, int parc,
 **      parv[7] = optional server
 **      parv[8] = optional ircname
 */
-int m_nick(aClient *cptr, aClient *sptr, int parc, char *parv[])
+int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
-  aClient* acptr;
+  struct Client* acptr;
   char     nick[NICKLEN + 2];
   char*    s;
   time_t   newts = 0;
@@ -1680,7 +1679,7 @@ unsigned long my_rand() {
 **      parv[3] = server host name (used only from other servers)
 **      parv[4] = users real name info
 */
-int m_user(aClient* cptr, aClient* sptr, int parc, char *parv[])
+int m_user(struct Client* cptr, struct Client* sptr, int parc, char *parv[])
 {
 #define UFLAGS  (FLAGS_INVISIBLE|FLAGS_WALLOP|FLAGS_SERVNOTICE)
   char* username;
@@ -1722,7 +1721,7 @@ int m_user(aClient* cptr, aClient* sptr, int parc, char *parv[])
 /*
 ** do_user
 */
-static int do_user(char* nick, aClient* cptr, aClient* sptr,
+static int do_user(char* nick, struct Client* cptr, struct Client* sptr,
                    char* username, char *host, char *server, char *realname)
 {
   unsigned int oflags;
@@ -1795,12 +1794,12 @@ static int do_user(char* nick, aClient* cptr, aClient* sptr,
  * parv[1] - username to change mode for
  * parv[2] - modes to change
  */
-int user_mode(aClient *cptr, aClient *sptr, int parc, char *parv[])
+int user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
   int   flag;
   int   i;
   char  **p, *m;
-  aClient *acptr;
+  struct Client *acptr;
   int   what, setflags;
   int   badflag = NO;   /* Only send one bad flag notice -Dianora */
   char  buf[BUFSIZE];
@@ -1884,8 +1883,8 @@ int user_mode(aClient *cptr, aClient *sptr, int parc, char *parv[])
 
               if (MyConnect(sptr))
                 {
-                  aClient *prev_cptr = (aClient *)NULL;
-                  aClient *cur_cptr = oper_cptr_list;
+                  struct Client *prev_cptr = (struct Client *)NULL;
+                  struct Client *cur_cptr = oper_cptr_list;
 
                   fdlist_delete(sptr->fd, FDL_OPER | FDL_BUSY);
                   
@@ -1903,7 +1902,7 @@ int user_mode(aClient *cptr, aClient *sptr, int parc, char *parv[])
                             prev_cptr->next_oper_client = cur_cptr->next_oper_client;
                           else
                             oper_cptr_list = cur_cptr->next_oper_client;
-                          cur_cptr->next_oper_client = (aClient *)NULL;
+                          cur_cptr->next_oper_client = (struct Client *)NULL;
                           break;
                         }
                       else
@@ -1965,7 +1964,7 @@ int user_mode(aClient *cptr, aClient *sptr, int parc, char *parv[])
  * send the MODE string for user (user) to connection cptr
  * -avalon
  */
-void send_umode(aClient *cptr, aClient *sptr, int old, int sendmask,
+void send_umode(struct Client *cptr, struct Client *sptr, int old, int sendmask,
                 char *umode_buf)
 {
   int   i;
@@ -2024,11 +2023,11 @@ void send_umode(aClient *cptr, aClient *sptr, int old, int sendmask,
  * extra argument evenTS no longer needed with TS only th+hybrid
  * server -Dianora
  */
-void send_umode_out(aClient *cptr,
-                       aClient *sptr,
+void send_umode_out(struct Client *cptr,
+                       struct Client *sptr,
                        int old)
 {
-  aClient *acptr;
+  struct Client *acptr;
   char buf[BUFSIZE];
 
   send_umode(NULL, sptr, old, SEND_UMODES, buf);

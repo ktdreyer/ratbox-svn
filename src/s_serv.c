@@ -34,7 +34,6 @@
 #include "list.h"
 #include "numeric.h"
 #include "res.h"
-#include "struct.h"
 #include "s_bsd.h"
 #include "s_conf.h"
 #include "s_stats.h"
@@ -80,7 +79,7 @@ struct Capability captab[] = {
  * according to given config entry --Jto
  * XXX - this is only called with me.name as name
  */
-const char* my_name_for_link(const char* name, aConfItem* aconf)
+const char* my_name_for_link(const char* name, struct ConfItem* aconf)
 {
   static char          namebuf[HOSTLEN + 1];
   register int         count = aconf->port;

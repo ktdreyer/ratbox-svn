@@ -47,7 +47,6 @@
 #include "s_serv.h"       /* captab */
 #include "s_user.h"
 #include "send.h"
-#include "struct.h"
 #include "whowas.h"
 
 #include <assert.h>
@@ -104,7 +103,7 @@ static  char    parabuf[MODEBUFLEN], parabuf2[MODEBUFLEN];
 /* 
  * return the length (>=0) of a chain of links.
  */
-static  int     list_length(Link *lp)
+static  int     list_length(struct SLink *lp)
 {
   int   count = 0;
 
@@ -169,7 +168,7 @@ static char* make_nick_user_host(const char* nick,
 
 static  int     add_banid(struct Client *cptr, struct Channel *chptr, char *banid)
 {
-  Link  *ban;
+  struct SLink  *ban;
 
   /* dont let local clients overflow the banlist */
   if ((!IsServer(cptr)) && (chptr->num_bed >= MAXBANS))
@@ -189,7 +188,7 @@ static  int     add_banid(struct Client *cptr, struct Channel *chptr, char *bani
 	    return -1;
 
   ban = make_link();
-  memset(ban, 0, sizeof(Link));
+  memset(ban, 0, sizeof(struct SLink));
   ban->flags = CHFL_BAN;
   ban->next = chptr->banlist;
 
@@ -238,7 +237,7 @@ static  int     add_banid(struct Client *cptr, struct Channel *chptr, char *bani
 
 static  int     add_exceptid(struct Client *cptr, struct Channel *chptr, char *eid)
 {
-  Link  *ex, *ban;
+  struct SLink  *ex, *ban;
 
   /* dont let local clients overflow the banlist */
   if ((!IsServer(cptr)) && (chptr->num_bed >= MAXBANS))
@@ -259,7 +258,7 @@ static  int     add_exceptid(struct Client *cptr, struct Channel *chptr, char *e
   
 
   ex = make_link();
-  memset(ex, 0, sizeof(Link));
+  memset(ex, 0, sizeof(struct SLink));
   ex->flags = CHFL_EXCEPTION;
   ex->next = chptr->exceptlist;
 
@@ -310,7 +309,7 @@ static  int     add_exceptid(struct Client *cptr, struct Channel *chptr, char *e
  */  
 static  int     add_denyid(struct Client *cptr, struct Channel *chptr, char *banid)
 {
-  Link  *ban;
+  struct SLink  *ban;
 
   /* truncate to REALLEN */
   banid[REALLEN]='\0';
@@ -332,7 +331,7 @@ static  int     add_denyid(struct Client *cptr, struct Channel *chptr, char *ban
       return -1;
   
   ban = make_link();
-  memset(ban, 0, sizeof(Link));
+  memset(ban, 0, sizeof(struct SLink));
   ban->flags = CHFL_DENY;
   ban->next = chptr->denylist;
 
@@ -386,8 +385,8 @@ static  int     add_denyid(struct Client *cptr, struct Channel *chptr, char *ban
  */
 static  int     del_banid(struct Channel *chptr, char *banid)
 {
-  register Link **ban;
-  register Link *tmp;
+  register struct SLink **ban;
+  register struct SLink *tmp;
 
   if (!banid)
     return -1;
@@ -425,8 +424,8 @@ static  int     del_banid(struct Channel *chptr, char *banid)
  */
 static  int     del_exceptid(struct Channel *chptr, char *eid)
 {
-  register Link **ex;
-  register Link *tmp;
+  register struct SLink **ex;
+  register struct SLink *tmp;
 
   if (!eid)
     return -1;
@@ -462,8 +461,8 @@ static  int     del_exceptid(struct Channel *chptr, char *eid)
  */
 static  int     del_denyid(struct Channel *chptr, char *banid)
 {
-  register Link **ban;
-  register Link *tmp;
+  register struct SLink **ban;
+  register struct SLink *tmp;
 
   if (!banid)
     return -1;
@@ -510,8 +509,8 @@ static  int     del_denyid(struct Channel *chptr, char *banid)
  */
 static void del_matching_exception(struct Client *cptr,struct Channel *chptr)
 {
-  register Link **ex;
-  register Link *tmp;
+  register struct SLink **ex;
+  register struct SLink *tmp;
   char  s[NICKLEN + USERLEN + HOSTLEN+6];
   char  *s2;
 
@@ -581,8 +580,8 @@ static void del_matching_exception(struct Client *cptr,struct Channel *chptr)
 
 static  int is_banned(struct Client *cptr,struct Channel *chptr)
 {
-  register Link *tmp;
-  register Link *t2;
+  register struct SLink *tmp;
+  register struct SLink *t2;
   char  s[NICKLEN+USERLEN+HOSTLEN+6];
   char  *s2;
 
@@ -636,7 +635,7 @@ static  int is_banned(struct Client *cptr,struct Channel *chptr)
  */
 static  void    add_user_to_channel(struct Channel *chptr, struct Client *who, int flags)
 {
-  Link *ptr;
+  struct SLink *ptr;
 
 #if defined(PRESERVE_CHANNEL_ON_SPLIT) || defined(NO_JOIN_ON_SPLIT)
   if( chptr->mode.mode & MODE_SPLIT )
@@ -676,8 +675,8 @@ static  void    add_user_to_channel(struct Channel *chptr, struct Client *who, i
 
 void    remove_user_from_channel(struct Client *sptr,struct Channel *chptr,int was_kicked)
 {
-  Link  **curr;
-  Link  *tmp;
+  struct SLink  **curr;
+  struct SLink  *tmp;
 
   for (curr = &chptr->members; (tmp = *curr); curr = &tmp->next)
     if (tmp->value.cptr == sptr)
@@ -709,7 +708,7 @@ void    remove_user_from_channel(struct Client *sptr,struct Channel *chptr,int w
 
 static  void    change_chan_flag(struct Channel *chptr,struct Client *cptr, int flag)
 {
-  Link *tmp;
+  struct SLink *tmp;
 
   if ((tmp = find_user_link(chptr->members, cptr)))
    {
@@ -728,7 +727,7 @@ static  void    change_chan_flag(struct Channel *chptr,struct Client *cptr, int 
 
 static  void    set_deopped(struct Client *cptr, struct Channel *chptr,int flag)
 {
-  Link  *tmp;
+  struct SLink  *tmp;
 
   if ((tmp = find_user_link(chptr->members, cptr)))
     if ((tmp->flags & flag) == 0)
@@ -737,7 +736,7 @@ static  void    set_deopped(struct Client *cptr, struct Channel *chptr,int flag)
 
 int     is_chan_op(struct Client *cptr, struct Channel *chptr)
 {
-  Link  *lp;
+  struct SLink  *lp;
 
   if (chptr)
     if ((lp = find_user_link(chptr->members, cptr)))
@@ -748,7 +747,7 @@ int     is_chan_op(struct Client *cptr, struct Channel *chptr)
 
 int     is_deopped(struct Client *cptr, struct Channel *chptr)
 {
-  Link  *lp;
+  struct SLink  *lp;
 
   if (chptr)
     if ((lp = find_user_link(chptr->members, cptr)))
@@ -759,7 +758,7 @@ int     is_deopped(struct Client *cptr, struct Channel *chptr)
 
 int     has_voice(struct Client *cptr, struct Channel *chptr)
 {
-  Link  *lp;
+  struct SLink  *lp;
 
   if (chptr)
     if ((lp = find_user_link(chptr->members, cptr)))
@@ -770,7 +769,7 @@ int     has_voice(struct Client *cptr, struct Channel *chptr)
 
 int     can_send(struct Client *cptr, struct Channel *chptr)
 {
-  Link  *lp;
+  struct SLink  *lp;
 
 #ifdef JUPE_CHANNEL
   if (MyClient(cptr) && (chptr->mode.mode & MODE_JUPED))
@@ -793,7 +792,7 @@ int     can_send(struct Client *cptr, struct Channel *chptr)
 
 int     user_channel_mode(struct Client *cptr, struct Channel *chptr)
 {
-  Link  *lp;
+  struct SLink  *lp;
 
   if (chptr)
     if ((lp = find_user_link(chptr->members, cptr)))
@@ -844,11 +843,11 @@ void channel_modes(struct Client *cptr, char *mbuf, char *pbuf, struct Channel *
 
 static  void    send_mode_list(struct Client *cptr,
                                char *chname,
-                               Link *top,
+                               struct SLink *top,
                                int mask,
                                char flag)
 {
-  Link  *lp;
+  struct SLink  *lp;
   char  *cp, *name;
   int   count = 0, send = 0;
   
@@ -897,7 +896,7 @@ static  void    send_mode_list(struct Client *cptr,
  */
 void send_channel_modes(struct Client *cptr, struct Channel *chptr)
 {
-  Link  *l, *anop = NULL, *skip = NULL;
+  struct SLink  *l, *anop = NULL, *skip = NULL;
   int   n = 0;
   char  *t;
 
@@ -1112,7 +1111,7 @@ void set_channel_mode(struct Client *cptr,
 #endif
   int   done_i = NO, done_m = NO, done_n = NO, done_t = NO;
   struct Client *who;
-  Link  *lp;
+  struct SLink  *lp;
   char  *curr = parv[0], c, *arg, plus = '+', *tmpc;
   char  numeric[16];
   /* mbufw gets the param-less mode chars, always with their sign
@@ -2236,7 +2235,7 @@ void set_channel_mode(struct Client *cptr,
 
 static  int     can_join(struct Client *sptr, struct Channel *chptr, char *key, int *flags)
 {
-  Link  *lp;
+  struct SLink  *lp;
   int ban_or_exception;
 
 #ifdef JUPE_CHANNEL
@@ -2344,7 +2343,7 @@ static struct Channel* get_channel(struct Client *cptr, char *chname, int flag)
 
 static  void    add_invite(struct Client *cptr,struct Channel *chptr)
 {
-  Link  *inv, **tmp;
+  struct SLink  *inv, **tmp;
 
   del_invite(cptr, chptr);
   /*
@@ -2383,7 +2382,7 @@ static  void    add_invite(struct Client *cptr,struct Channel *chptr)
  */
 void    del_invite(struct Client *cptr,struct Channel *chptr)
 {
-  Link  **inv, *tmp;
+  struct SLink  **inv, *tmp;
 
   for (inv = &(chptr->invites); (tmp = *inv); inv = &tmp->next)
     if (tmp->value.cptr == cptr)
@@ -2408,7 +2407,7 @@ void    del_invite(struct Client *cptr,struct Channel *chptr)
 */
 static  void    sub1_from_channel(struct Channel *chptr)
 {
-  Link *tmp;
+  struct SLink *tmp;
 
   if (--chptr->users <= 0)
     {
@@ -2499,7 +2498,7 @@ static  void    sub1_from_channel(struct Channel *chptr)
 static void clear_bans_exceptions_denies(struct Client *sptr, struct Channel *chptr)
 {
   static char modebuf[MODEBUFLEN];
-  register Link *ban;
+  register struct SLink *ban;
   char *b1,*b2,*b3,*b4;
   char *mp;
 
@@ -2674,8 +2673,8 @@ static void clear_bans_exceptions_denies(struct Client *sptr, struct Channel *ch
 
 static void free_bans_exceptions_denies(struct Channel *chptr)
 {
-  Link *ban;
-  Link *next_ban;
+  struct SLink *ban;
+  struct SLink *next_ban;
 
   for(ban = chptr->banlist; ban; ban = next_ban)
     {
@@ -2782,8 +2781,8 @@ static void check_still_split()
 
 void remove_empty_channels()
 {
-  Link *tmp;
-  Link  *obtmp;
+  struct SLink *tmp;
+  struct SLink  *obtmp;
   struct Channel *next_empty_channel;
 
   for(;empty_channel_list;
@@ -2875,7 +2874,7 @@ int     m_join(struct Client *cptr,
                char *parv[])
 {
   static char   jbuf[BUFSIZE];
-  Link  *lp;
+  struct SLink  *lp;
   struct Channel *chptr = NULL;
   char  *name, *key = NULL;
   int   i, flags = 0;
@@ -4139,7 +4138,7 @@ int     m_names( struct Client *cptr,
 { 
   struct Channel *chptr;
   struct Client *c2ptr;
-  Link  *lp;
+  struct SLink  *lp;
   struct Channel *ch2ptr = NULL;
   int   idx, flag = 0, len, mlen;
   char  *s, *para = parc > 1 ? parv[1] : NULL;
@@ -4338,7 +4337,7 @@ int     m_names( struct Client *cptr,
 
 void    send_user_joins(struct Client *cptr, struct Client *user)
 {
-  Link  *lp;
+  struct SLink  *lp;
   struct Channel *chptr;
   int   cnt = 0, len = 0, clen;
   char   *mask;
@@ -4417,8 +4416,9 @@ int     m_sjoin(struct Client *cptr,
   time_t        newts;
   time_t        oldts;
   time_t        tstosend;
-  static        Mode mode, *oldmode;
-  Link  *l;
+  static        struct Mode mode;
+  static        struct Mode *oldmode;
+  struct SLink  *l;
   int   args = 0, haveops = 0, keep_our_modes = 1, keep_new_modes = 1;
   int   doesop = 0, what = 0, pargs = 0, fl, people = 0, isnew;
   /* loop unrolled this is now redundant */

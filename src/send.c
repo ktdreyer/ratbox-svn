@@ -24,6 +24,7 @@
 #include "class.h"
 #include "client.h"
 #include "common.h"
+#include "list.h"
 #include "irc_string.h"
 #include "ircd.h"
 #include "m_commands.h"
@@ -32,7 +33,6 @@
 #include "s_serv.h"
 #include "s_zip.h"
 #include "sprintf_irc.h"
-#include "struct.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -43,10 +43,10 @@
 #define NEWLINE "\r\n"
 
 static  char    sendbuf[2048];
-static  int     send_message (aClient *, char *, int);
+static  int     send_message (struct Client *, char *, int);
 
-static  void vsendto_prefix_one(register aClient *, register aClient *, const char *, va_list);
-static  void vsendto_one(aClient *, const char *, va_list);
+static  void vsendto_prefix_one(struct Client *,struct Client *, const char *, va_list);
+static  void vsendto_one(struct Client *, const char *, va_list);
 static  void vsendto_realops(const char *, va_list);
 
 static  unsigned long sentalong[MAXCONNECTIONS];
@@ -69,7 +69,7 @@ static unsigned long current_serial=0L;
 */
 
 static int
-dead_link(aClient *to, char *notice)
+dead_link(struct Client *to, char *notice)
 
 {
   to->flags |= FLAGS_DEADSOCKET;
@@ -125,7 +125,7 @@ void flush_connections(struct Client* cptr)
 **      if msg is a null pointer, we are flushing connection
 */
 static int
-send_message(aClient *to, char *msg, int len)
+send_message(struct Client *to, char *msg, int len)
 
 #ifdef SENDQ_ALWAYS
 
@@ -288,7 +288,7 @@ send_message(aClient *to, char *msg, int len)
 **      attempts to empty the send queue as far as possible...
 */
 int
-send_queued(aClient *to)
+send_queued(struct Client *to)
 
 {
         char *msg;
@@ -386,7 +386,7 @@ send_queued(aClient *to)
 */
 
 void
-sendto_one(aClient *to, const char *pattern, ...)
+sendto_one(struct Client *to, const char *pattern, ...)
 
 {
   va_list       args;
@@ -406,7 +406,7 @@ sendto_one(aClient *to, const char *pattern, ...)
 */
 
 static void
-vsendto_one(aClient *to, const char *pattern, va_list args)
+vsendto_one(struct Client *to, const char *pattern, va_list args)
 
 {
   int len; /* used for the length of the current message */
@@ -474,13 +474,13 @@ vsendto_one(aClient *to, const char *pattern, va_list args)
 } /* vsendto_one() */
 
 void
-sendto_channel_butone(aClient *one, aClient *from, aChannel *chptr, 
+sendto_channel_butone(struct Client *one, struct Client *from, aChannel *chptr, 
                       const char *pattern, ...)
 
 {
   va_list       args;
-  register Link *lp;
-  register aClient *acptr;
+  register struct SLink *lp;
+  register struct Client *acptr;
   register int index; /* index of sentalong[] to flag client as having received message */
 
   va_start(args, pattern);
@@ -518,13 +518,13 @@ sendto_channel_butone(aClient *one, aClient *from, aChannel *chptr,
 } /* sendto_channel_butone() */
 
 void
-sendto_channel_type(aClient *one, aClient *from, aChannel *chptr, 
+sendto_channel_type(struct Client *one, struct Client *from, aChannel *chptr, 
                     int type, const char *pattern, ...)
 
 {
   va_list       args;
-  register Link *lp;
-  register aClient *acptr;
+  register struct SLink *lp;
+  register struct Client *acptr;
   register int i;
 
   va_start(args, pattern);
@@ -608,11 +608,11 @@ sendto_channel_type(aClient *one, aClient *from, aChannel *chptr,
 ** -good
 */
 void
-sendto_channel_type_notice(aClient *from, aChannel *chptr, int type, char *message)
+sendto_channel_type_notice(struct Client *from, aChannel *chptr, int type, char *message)
 
 {
-        register Link *lp;
-        register aClient *acptr;
+        register struct SLink *lp;
+        register struct Client *acptr;
         register int i;
 
         for (lp = chptr->members; lp; lp = lp->next)
@@ -640,11 +640,11 @@ sendto_channel_type_notice(aClient *from, aChannel *chptr, int type, char *messa
  */
 
 void
-sendto_serv_butone(aClient *one, const char *pattern, ...)
+sendto_serv_butone(struct Client *one, const char *pattern, ...)
 
 {
   va_list args;
-  register aClient *cptr;
+  register struct Client *cptr;
 
   /*
    * USE_VARARGS IS BROKEN someone volunteer to fix it :-) -Dianora
@@ -674,13 +674,13 @@ sendto_serv_butone(aClient *one, const char *pattern, ...)
  */
 
 void
-sendto_common_channels(aClient *user, const char *pattern, ...)
+sendto_common_channels(struct Client *user, const char *pattern, ...)
 
 {
   va_list args;
-  register Link *channels;
-  register Link *users;
-  register aClient *cptr;
+  register struct SLink *channels;
+  register struct SLink *users;
+  register struct Client *cptr;
 
   va_start(args, pattern);
   
@@ -717,13 +717,13 @@ sendto_common_channels(aClient *user, const char *pattern, ...)
  */
 
 void
-sendto_channel_butserv(aChannel *chptr, aClient *from, 
+sendto_channel_butserv(aChannel *chptr, struct Client *from, 
                        const char *pattern, ...)
 
 {
   va_list args;
-  register Link *lp;
-  register aClient *acptr;
+  register struct SLink *lp;
+  register struct Client *acptr;
 
   va_start(args, pattern);
 
@@ -742,7 +742,7 @@ sendto_channel_butserv(aChannel *chptr, aClient *from,
 */
 
 static int
-match_it(const aClient *one, const char *mask, int what)
+match_it(const struct Client *one, const char *mask, int what)
 
 {
   if(what == MATCH_HOST)
@@ -759,11 +759,11 @@ match_it(const aClient *one, const char *mask, int what)
  */
 
 void
-sendto_match_servs(aChannel *chptr, aClient *from, const char *pattern, ...)
+sendto_match_servs(aChannel *chptr, struct Client *from, const char *pattern, ...)
 
 {
   va_list args;
-  register aClient *cptr;
+  register struct Client *cptr;
   
   va_start(args, pattern);
 
@@ -792,12 +792,12 @@ sendto_match_servs(aChannel *chptr, aClient *from, const char *pattern, ...)
  */
 
 void
-sendto_match_cap_servs(aChannel *chptr, aClient *from, int cap, 
+sendto_match_cap_servs(aChannel *chptr, struct Client *from, int cap, 
                        const char *pattern, ...)
 
 {
   va_list args;
-  register aClient *cptr;
+  register struct Client *cptr;
 
   va_start(args, pattern);
 
@@ -829,12 +829,12 @@ sendto_match_cap_servs(aChannel *chptr, aClient *from, int cap,
  */
 
 void
-sendto_match_butone(aClient *one, aClient *from, char *mask, 
+sendto_match_butone(struct Client *one, struct Client *from, char *mask, 
                     int what, const char *pattern, ...)
 
 {
   va_list args;
-  register aClient *cptr;
+  register struct Client *cptr;
 
   va_start(args, pattern);
 
@@ -896,7 +896,7 @@ sendto_ops_flags(int flags, const char *pattern, ...)
 
 {
   va_list args;
-  register aClient *cptr;
+  register struct Client *cptr;
   char nbuf[1024];
 
   va_start(args, pattern);
@@ -949,7 +949,7 @@ sendto_ops(const char *pattern, ...)
 
 {
   va_list args;
-  register aClient *cptr;
+  register struct Client *cptr;
   char nbuf[1024];
 
   va_start(args, pattern);
@@ -978,12 +978,12 @@ sendto_ops(const char *pattern, ...)
 */
 
 void
-sendto_ops_butone(aClient *one, aClient *from, const char *pattern, ...)
+sendto_ops_butone(struct Client *one, struct Client *from, const char *pattern, ...)
 
 {
   va_list args;
   register int index;
-  register aClient *cptr;
+  register struct Client *cptr;
 
   va_start(args, pattern);
 
@@ -1023,12 +1023,12 @@ sendto_ops_butone(aClient *one, aClient *from, const char *pattern, ...)
 */
 
 void
-sendto_wallops_butone(aClient *one, aClient *from, const char *pattern, ...)
+sendto_wallops_butone(struct Client *one, struct Client *from, const char *pattern, ...)
 
 {
   va_list args;
   register int index;
-  register aClient *cptr;
+  register struct Client *cptr;
 
   va_start(args, pattern);
 
@@ -1070,12 +1070,12 @@ sendto_wallops_butone(aClient *one, aClient *from, const char *pattern, ...)
 */
 
 void
-send_operwall(aClient *from, char *type_message, char *message)
+send_operwall(struct Client *from, char *type_message, char *message)
 
 {
   char sender[NICKLEN + USERLEN + HOSTLEN + 5];
-  aClient *acptr;
-  anUser *user;
+  struct Client *acptr;
+  struct User *user;
   
   if (!from || !message)
     return;
@@ -1117,7 +1117,7 @@ send_operwall(aClient *from, char *type_message, char *message)
  */
 
 void
-sendto_prefix_one(register aClient *to, register aClient *from, 
+sendto_prefix_one(register struct Client *to, register struct Client *from, 
                   const char *pattern, ...)
 
 {
@@ -1143,7 +1143,7 @@ sendto_prefix_one(register aClient *to, register aClient *from,
  */
 
 static void
-vsendto_prefix_one(register aClient *to, register aClient *from,
+vsendto_prefix_one(register struct Client *to, register struct Client *from,
                    const char *pattern, va_list args)
 
 {
@@ -1254,7 +1254,7 @@ static void
 vsendto_realops(const char *pattern, va_list args)
 
 {
-  register aClient *cptr;
+  register struct Client *cptr;
   char nbuf[1024];
   
   for (cptr = oper_cptr_list; cptr; cptr = cptr->next_oper_client)
@@ -1281,7 +1281,7 @@ sendto_realops_flags(int flags, const char *pattern, ...)
 
 {
   va_list args;
-  register aClient *cptr;
+  register struct Client *cptr;
   char nbuf[1024];
 
   va_start(args, pattern);
@@ -1348,7 +1348,7 @@ ts_warn(const char *pattern, ...)
 void
 flush_server_connections()
 {
-  aClient *cptr;
+  struct Client *cptr;
 
   for(cptr = serv_cptr_list; cptr; cptr = cptr->next_server_client)
     if (DBufLength(&cptr->sendQ) > 0)
@@ -1360,10 +1360,10 @@ flush_server_connections()
 extern aConfItem *u_conf;
 
 int
-sendto_slaves(aClient *one, char *message, char *nick, int parc, char *parv[])
+sendto_slaves(struct Client *one, char *message, char *nick, int parc, char *parv[])
 
 {
-  aClient *acptr;
+  struct Client *acptr;
   aConfItem *aconf;
 
   for(acptr = serv_cptr_list; acptr; acptr = acptr->next_server_client)

@@ -79,11 +79,11 @@ void initlists()
 {
   init_client_heap();
   /* Might want to bump up LINK_PREALLOCATE if FLUD is defined */
-  free_Links = BlockHeapCreate((size_t)sizeof(Link),LINK_PREALLOCATE);
+  free_Links = BlockHeapCreate((size_t)sizeof(struct SLink),LINK_PREALLOCATE);
 
   /* anUser structs are used by both local aClients, and remote aClients */
 
-  free_anUsers = BlockHeapCreate(sizeof(anUser),
+  free_anUsers = BlockHeapCreate(sizeof(struct User),
                                  USERS_PREALLOCATE + MAXCONNECTIONS);
 
 #ifdef FLUD
@@ -124,15 +124,15 @@ void outofmemory()
 ** 'make_user' add's an User information block to a client
 ** if it was not previously allocated.
 */
-anUser* make_user(aClient *cptr)
+struct User* make_user(struct Client *cptr)
 {
-  anUser        *user;
+  struct User  *user;
 
   user = cptr->user;
   if (!user)
     {
-      user = BlockHeapALLOC(free_anUsers,anUser);
-      if( user == (anUser *)NULL)
+      user = BlockHeapALLOC(free_anUsers,struct User);
+      if( user == (struct User *)NULL)
         outofmemory();
       user->away = NULL;
       user->server = (char *)NULL;      /* scache server name */
@@ -146,14 +146,14 @@ anUser* make_user(aClient *cptr)
 }
 
 
-aServer *make_server(aClient *cptr)
+struct Server *make_server(struct Client *cptr)
 {
-  aServer* serv = cptr->serv;
+  struct Server* serv = cptr->serv;
 
   if (!serv)
     {
-      serv = (aServer *)MyMalloc(sizeof(aServer));
-      memset((void *)serv, 0, sizeof(aServer));
+      serv = (struct Server *)MyMalloc(sizeof(struct Server));
+      memset((void *)serv, 0, sizeof(struct Server));
 
       /* The commented out lines before are
        * for documentation purposes only
@@ -175,7 +175,7 @@ aServer *make_server(aClient *cptr)
 **      Decrease user reference count by one and release block,
 **      if count reaches 0
 */
-void _free_user(anUser* user, aClient* cptr)
+void _free_user(struct User* user, struct Client* cptr)
 {
   if (--user->refcnt <= 0)
     {
@@ -208,7 +208,7 @@ void _free_user(anUser* user, aClient* cptr)
 /*
  * Look for ptr in the linked listed pointed to by link.
  */
-Link *find_user_link(Link *lp, aClient *ptr)
+struct SLink *find_user_link(struct SLink *lp, struct Client *ptr)
 {
   if (ptr)
     while (lp)
@@ -217,32 +217,32 @@ Link *find_user_link(Link *lp, aClient *ptr)
           return (lp);
         lp = lp->next;
       }
-  return ((Link *)NULL);
+  return ((struct SLink *)NULL);
 }
 
-Link *find_channel_link(Link *lp, aChannel *chptr)
+struct SLink *find_channel_link(struct SLink *lp, struct Channel *chptr)
 { 
   if (chptr)
     for(;lp;lp=lp->next)
       if (lp->value.chptr == chptr)
         return lp;
-  return ((Link *)NULL);
+  return ((struct SLink *)NULL);
 }
 
-Link *make_link()
+struct SLink *make_link()
 {
-  Link  *lp;
+  struct SLink  *lp;
 
-  lp = BlockHeapALLOC(free_Links,Link);
-  if( lp == (Link *)NULL)
+  lp = BlockHeapALLOC(free_Links,struct SLink);
+  if( lp == (struct SLink *)NULL)
     outofmemory();
 
-  lp->next = (Link *)NULL;              /* just to be paranoid... */
+  lp->next = (struct SLink *)NULL;              /* just to be paranoid... */
 
   return lp;
 }
 
-void _free_link(Link *lp)
+void _free_link(struct SLink *lp)
 {
   if(BlockHeapFree(free_Links,lp))
     {
@@ -255,7 +255,7 @@ aClass *make_class()
 {
   aClass        *tmp;
 
-  tmp = (aClass *)MyMalloc(sizeof(aClass));
+  tmp = (aClass *)MyMalloc(sizeof(struct Class));
   return tmp;
 }
 

@@ -1155,7 +1155,7 @@ static void exit_one_client(struct Client *cptr, struct Client *sptr, struct Cli
                             const char* comment)
 {
   struct Client* acptr;
-  Link*    lp;
+  struct SLink*    lp;
 
   if (IsServer(sptr))
     {

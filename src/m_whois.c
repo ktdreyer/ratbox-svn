@@ -106,7 +106,7 @@ int     m_whois(struct Client *cptr,
                 int parc,
                 char *parv[])
 {
-  static anUser UnknownUser =
+  static struct User UnknownUser =
   {
     NULL,       /* next */
     NULL,       /* channel */
@@ -117,14 +117,15 @@ int     m_whois(struct Client *cptr,
     0,          /* joined */
     "<Unknown>"         /* server */
   };
-  Link  *lp;
-  anUser        *user;
+  struct SLink *lp;
+  struct User *user;
   struct Client *acptr, *a2cptr;
   aChannel *chptr;
-  char  *nick, *name;
-  /* char  *tmp; */
-  char  *p = NULL;
-  int   found, len, mlen;
+  char *nick, *name;
+  char *p = NULL;
+  int found;
+  int len;
+  int mlen;
   static time_t last_used=0L;
   int found_mode;
 
@@ -166,7 +167,6 @@ int     m_whois(struct Client *cptr,
    * -Dianora 
    */
 
-  /*  for (tmp = parv[1]; (nick = strtoken(&p, tmp, ",")); tmp = NULL) */
   nick = parv[1];
   p = strchr(parv[1],',');
   if(p)

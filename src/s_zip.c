@@ -25,7 +25,6 @@
 #include "s_bsd.h"
 #include "s_serv.h"
 #include "send.h"
-#include "struct.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -79,9 +78,9 @@ static  char    zipbuf[ZIP_BUFFER_SIZE];
 **      Initialize compression structures for a server.
 **      If failed, zip_free() has to be called.
 */
-int     zip_init(aClient *cptr)
+int     zip_init(struct Client *cptr)
 {
-  cptr->zip  = (aZdata *) MyMalloc(sizeof(aZdata));
+  cptr->zip  = (struct Zdata *) MyMalloc(sizeof(struct Zdata));
   cptr->zip->incount = 0;
   cptr->zip->outcount = 0;
 
@@ -112,7 +111,7 @@ int     zip_init(aClient *cptr)
 /*
 ** zip_free
 */
-void    zip_free(aClient *cptr)
+void    zip_free(struct Client *cptr)
 {
   cptr->flags2 &= ~FLAGS2_ZIP;
   if (cptr->zip)
@@ -136,7 +135,7 @@ void    zip_free(aClient *cptr)
 **      will return the uncompressed buffer, length will be updated.
 **      if a fatal error occurs, length will be set to -1
 */
-char *unzip_packet(aClient *cptr, char *buffer, int *length)
+char *unzip_packet(struct Client *cptr, char *buffer, int *length)
 {
   z_stream *zin = cptr->zip->in;
   int   r;
@@ -302,7 +301,7 @@ char *unzip_packet(aClient *cptr, char *buffer, int *length)
 **      will return the uncompressed buffer, length will be updated.
 **      if a fatal error occurs, length will be set to -1
 */
-char *zip_buffer(aClient *cptr, char *buffer, int *length, int flush)
+char *zip_buffer(struct Client *cptr, char *buffer, int *length, int flush)
 {
   z_stream *zout = cptr->zip->out;
   int   r;

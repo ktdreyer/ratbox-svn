@@ -29,7 +29,6 @@
 #include "s_serv.h"
 #include "s_user.h"
 #include "send.h"
-#include "struct.h"
 
 #include <assert.h>
 #include <string.h>
@@ -58,7 +57,7 @@ static unsigned int hash_whowas_name(const char* name)
   return(h & (WW_MAX - 1));
 }
 
-void add_history(aClient* cptr, int online)
+void add_history(struct Client* cptr, int online)
 {
   aWhowas* who = &WHOWAS[whowas_next];
 
@@ -107,7 +106,7 @@ void add_history(aClient* cptr, int online)
     whowas_next = 0;
 }
 
-void off_history(aClient *cptr)
+void off_history(struct Client *cptr)
 {
   aWhowas *temp, *next;
 
@@ -119,7 +118,7 @@ void off_history(aClient *cptr)
     }
 }
 
-aClient *get_history(char *nick,time_t timelimit)
+struct Client *get_history(char *nick,time_t timelimit)
 {
   aWhowas *temp;
   int blah;
@@ -164,8 +163,8 @@ void    count_whowas_memory(int *wwu,
 **      parv[0] = sender prefix
 **      parv[1] = nickname queried
 */
-int     m_whowas(aClient *cptr,
-                 aClient *sptr,
+int     m_whowas(struct Client *cptr,
+                 struct Client *sptr,
                  int parc,
                  char *parv[])
 {

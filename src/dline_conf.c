@@ -25,7 +25,7 @@ typedef struct ip_subtree
 {
   unsigned long ip;
   unsigned long ip_mask;
-  aConfItem *conf;
+  struct ConfItem *conf;
   struct ip_subtree *left;    
   struct ip_subtree *right;
 } IP_SUBTREE;
@@ -41,10 +41,10 @@ unsigned long oracle[256];
 unsigned long ike_oracle[256];
 
 /* leftover D/d-lines */
-aConfItem *leftover = NULL;
+struct ConfItem *leftover = NULL;
 
 /* defined in mtrie_conf.c */
-extern char *show_iline_prefix(aClient *,aConfItem *,char *);
+extern char *show_iline_prefix(struct Client *,struct ConfItem *,char *);
 
 
 /*
@@ -52,7 +52,7 @@ extern char *show_iline_prefix(aClient *,aConfItem *,char *);
  */
 struct ip_subtree *new_ip_subtree(unsigned long ip, 
                                   unsigned long mask,
-                                  aConfItem *clist,
+                                  struct ConfItem *clist,
                                   struct ip_subtree *left,
                                   struct ip_subtree *right)
 {
@@ -66,8 +66,8 @@ struct ip_subtree *new_ip_subtree(unsigned long ip,
   return temp;
 }
 
-void walk_the_dlines(aClient *, struct ip_subtree *);
-void walk_the_ip_Klines(aClient *,struct ip_subtree *, char, int);
+void walk_the_dlines(struct Client *, struct ip_subtree *);
+void walk_the_ip_Klines(struct Client *,struct ip_subtree *, char, int);
 /*
  * insert_ip_subtree - insert a node or tree into the specified tree.
  * Make sure that collisions have been removed ahead of time.
@@ -124,9 +124,9 @@ struct ip_subtree *find_ip_subtree(struct ip_subtree *head,
 struct ip_subtree *delete_ip_subtree(struct ip_subtree *head,
                                      unsigned long ip,
                                      unsigned long mask,
-                                     aConfItem **clist)
+                                     struct ConfItem **clist)
 {
-  aConfItem *cur;
+  struct ConfItem *cur;
   struct ip_subtree *temp, *prev;
   
   if (!head) return NULL; /* end of the tree */
@@ -192,9 +192,9 @@ struct ip_subtree *delete_ip_subtree(struct ip_subtree *head,
  * trim_Dlines - removes big D's from a conf list
  * -good
  */
-aConfItem *trim_Dlines(aConfItem *cl)
+struct ConfItem *trim_Dlines(struct ConfItem *cl)
 {
-  aConfItem *temp;
+  struct ConfItem *temp;
   if (!cl) return NULL;
   if (cl->flags & CONF_FLAGS_E_LINED)
     {
@@ -214,9 +214,9 @@ aConfItem *trim_Dlines(aConfItem *cl)
  * only K/I lines that are more specific than mask will be toasted.
  * -good
  */
-aConfItem *trim_ip_Klines(aConfItem *cl, int mask)
+struct ConfItem *trim_ip_Klines(struct ConfItem *cl, int mask)
 {
-  aConfItem *temp;
+  struct ConfItem *temp;
   if (!cl) return NULL;
   if ((cl->flags & CONF_FLAGS_E_LINED))
     /* only leave Elines */
@@ -243,9 +243,9 @@ aConfItem *trim_ip_Klines(aConfItem *cl, int mask)
  * only K/I/E lines that are more specific than mask will be toasted.
  * -good
  */
-aConfItem *trim_ip_Elines(aConfItem *cl, int mask)
+struct ConfItem *trim_ip_Elines(struct ConfItem *cl, int mask)
 {
-  aConfItem *temp;
+  struct ConfItem *temp;
   if (!cl) return NULL;
   /* if this mask more specific, toast it */
   if (cl->ip_mask >= mask)
@@ -267,7 +267,7 @@ aConfItem *trim_ip_Elines(aConfItem *cl, int mask)
  */
 struct ip_subtree *destroy_ip_subtree(struct ip_subtree *head)
 {
-  aConfItem *scan;
+  struct ConfItem *scan;
 
   if (!head) return NULL;
   /* kill children */
@@ -290,9 +290,9 @@ struct ip_subtree *destroy_ip_subtree(struct ip_subtree *head)
  * find_exception - match an IP against all unplaced d-line exceptions 
  * -good
  */
-aConfItem *find_exception(unsigned long ip)
+struct ConfItem *find_exception(unsigned long ip)
 {
-  aConfItem *scan=leftover;
+  struct ConfItem *scan=leftover;
   
   while (scan)
     {
@@ -309,7 +309,7 @@ aConfItem *find_exception(unsigned long ip)
  * of unplaced d-lines, and is rescanned later by add_Dline.
  * -good
  */
-void add_dline(aConfItem *conf_ptr)
+void add_dline(struct ConfItem *conf_ptr)
 {
   unsigned long host_ip;
   unsigned long host_mask;
@@ -344,9 +344,9 @@ void add_dline(aConfItem *conf_ptr)
  * rescan_dlines - attempts to add unplaced dlines to the tree 
  * -good
  */
-aConfItem *rescan_dlines(aConfItem *s)
+struct ConfItem *rescan_dlines(struct ConfItem *s)
 {
-  aConfItem *temp;
+  struct ConfItem *temp;
   if (!s) return NULL;
   s->next=rescan_dlines(s->next);
   if (find_ip_subtree(Dline[s->ip>>24],s->ip))
@@ -369,11 +369,11 @@ aConfItem *rescan_dlines(aConfItem *s)
  * add_Dline also updates the oracle[] value for the appropriate tree.
  * -good
  */
-void add_Dline(aConfItem *conf_ptr)
+void add_Dline(struct ConfItem *conf_ptr)
 {
   unsigned long host_ip;
   unsigned long host_mask;
-  aConfItem *clist = NULL;
+  struct ConfItem *clist = NULL;
   struct ip_subtree *node;
 
   host_ip = conf_ptr->ip;
@@ -419,10 +419,10 @@ void add_Dline(aConfItem *conf_ptr)
  * and returns the matching aConfItem, or NULL if no match was found.
  * -good
  */
-aConfItem *match_Dline(unsigned long ip)
+struct ConfItem *match_Dline(unsigned long ip)
 {
   struct ip_subtree *node;
-  aConfItem *scan;
+  struct ConfItem *scan;
   int head=ip>>24;
   
   if ((oracle[head] & ip) != ip)    /* oracle query failed.. IP is definitely not in */
@@ -451,12 +451,12 @@ aConfItem *match_Dline(unsigned long ip)
  * add_ip_Kline  - modified form of add_Dline
  * -good
  */
-void add_ip_Kline(aConfItem *conf_ptr)
+void add_ip_Kline(struct ConfItem *conf_ptr)
 {
   unsigned long host_ip;
   unsigned long host_mask;
-  aConfItem *clist = NULL;
-  aConfItem *scan = NULL;
+  struct ConfItem *clist = NULL;
+  struct ConfItem *scan = NULL;
   struct ip_subtree *node;
 
   host_ip = conf_ptr->ip;
@@ -525,12 +525,12 @@ void add_ip_Kline(aConfItem *conf_ptr)
  * add_ip_Eline  - modified form of add_Dline
  * -good
  */
-void add_ip_Eline(aConfItem *conf_ptr)
+void add_ip_Eline(struct ConfItem *conf_ptr)
 {
   unsigned long host_ip;
   unsigned long host_mask;
-  aConfItem *clist = NULL;
-  aConfItem *scan = NULL;
+  struct ConfItem *clist = NULL;
+  struct ConfItem *scan = NULL;
   struct ip_subtree *node;
 
   host_ip = conf_ptr->ip;
@@ -600,11 +600,11 @@ void add_ip_Eline(aConfItem *conf_ptr)
  * add_ip_Iline  - modified form of add_Dline
  * -good
  */
-void add_ip_Iline(aConfItem *conf_ptr)
+void add_ip_Iline(struct ConfItem *conf_ptr)
 {
   unsigned long host_ip;
   unsigned long host_mask;
-  aConfItem *clist = NULL;
+  struct ConfItem *clist = NULL;
   struct ip_subtree *node;
 
   host_ip = conf_ptr->ip;
@@ -652,12 +652,12 @@ void add_ip_Iline(aConfItem *conf_ptr)
  * and returns the matching aConfItem, or NULL if no match was found.
  * -good
  */
-aConfItem* match_ip_Kline(unsigned long ip, const char* name)
+struct ConfItem* match_ip_Kline(unsigned long ip, const char* name)
 {
   struct ip_subtree* node;
-  aConfItem*         scan;
+  struct ConfItem*         scan;
   int                head = ip >> 24;
-  aConfItem*         winner;
+  struct ConfItem*         winner;
   char               winnertype;
   if ((ike_oracle[head] & ip) != ip) 
    /* 
@@ -674,7 +674,7 @@ aConfItem* match_ip_Kline(unsigned long ip, const char* name)
   if (!node) return NULL;   /* no match */
   
   if(!name)
-    return((aConfItem *)NULL);
+    return((struct ConfItem *)NULL);
 
   winner=NULL;     /* no matches yet */
   winnertype='I';  /* default to Iline, since they suck */
@@ -728,7 +728,7 @@ void clear_Dline_table()
 void zap_Dlines() 
 {
   int i;
-  aConfItem *s, *ss;
+  struct ConfItem *s, *ss;
   for (i=0; i<256; i++)
     {
       oracle[i]=0;  /* clear the oracle field */
@@ -756,9 +756,9 @@ void zap_Dlines()
  * exceptions.
  * -good
  */
-void walk_the_dlines(aClient *sptr, struct ip_subtree *tree)
+void walk_the_dlines(struct Client *sptr, struct ip_subtree *tree)
 {
-  aConfItem *scan;
+  struct ConfItem *scan;
   char *name, *host, *pass, *user;
   int port;
   char c;               /* D,d or K */
@@ -787,7 +787,7 @@ void walk_the_dlines(aClient *sptr, struct ip_subtree *tree)
   walk_the_dlines(sptr, tree->right);
 }
 
-void report_dlines(aClient *sptr)
+void report_dlines(struct Client *sptr)
 {
   int i;
   for (i=0;i<256;i++) walk_the_dlines(sptr, Dline[i]);
@@ -798,10 +798,10 @@ void report_dlines(aClient *sptr)
  * walk_the_ip_Klines - inorder traversal of a Dline tree, printing K/I/Elines
  * -good
  */
-void walk_the_ip_Klines(aClient *sptr, struct ip_subtree *tree, 
+void walk_the_ip_Klines(struct Client *sptr, struct ip_subtree *tree, 
                         char conftype, int MASK)
 {
-  aConfItem *scan;
+  struct ConfItem *scan;
   char *name, *host, *pass, *user;
   int port;
 
@@ -841,14 +841,14 @@ void walk_the_ip_Klines(aClient *sptr, struct ip_subtree *tree,
   walk_the_ip_Klines(sptr, tree->right, conftype, MASK);
 }
 
-void report_ip_Klines(aClient *sptr)
+void report_ip_Klines(struct Client *sptr)
 {
   int i;
   for (i=0;i<256;i++) walk_the_ip_Klines(sptr, ip_Kline[i],'K', CONF_KILL);
 }
 
 
-void report_ip_Ilines(aClient *sptr)
+void report_ip_Ilines(struct Client *sptr)
 {
   int i;
   for (i=0;i<256;i++) walk_the_ip_Klines(sptr, ip_Kline[i],'I', CONF_CLIENT);

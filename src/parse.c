@@ -44,12 +44,12 @@
  * NOTE: parse() should not be called recursively by other functions!
  */
 static  char    *para[MAXPARA+1];
-static  int     cancel_clients (aClient *, aClient *, char *);
-static  void    remove_unknown (aClient *, char *, char *);
+static  int     cancel_clients (struct Client *, struct Client *, char *);
+static  void    remove_unknown (struct Client *, char *, char *);
 
 static  char    sender[HOSTLEN+1];
-static  int     cancel_clients (aClient *, aClient *, char *);
-static  void    remove_unknown (aClient *, char *, char *);
+static  int     cancel_clients (struct Client *, struct Client *, char *);
+static  void    remove_unknown (struct Client *, char *, char *);
 
 static int do_numeric (char [], struct Client *,
                          struct Client *, int, char **);
@@ -64,9 +64,9 @@ static char buffer[1024];  /* ZZZ must this be so big? must it be here? */
  *
  * NOTE: parse() should not be called recusively by any other functions!
  */
-int parse(aClient *cptr, char *buffer, char *bufend)
+int parse(struct Client *cptr, char *buffer, char *bufend)
 {
-  aClient *from = cptr;
+  struct Client *from = cptr;
   char  *ch;
   char  *s;
   int   i;
@@ -116,7 +116,7 @@ int parse(aClient *cptr, char *buffer, char *bufend)
       */
       if (*sender && IsServer(cptr))
         {
-          from = find_client(sender, (aClient *) NULL);
+          from = find_client(sender, (struct Client *) NULL);
           if (!from || !match(from->name, sender))
             from = find_server(sender);
 
@@ -484,8 +484,8 @@ static struct Message *tree_parse(char *cmd)
   return ((struct Message *)NULL);
 }
 
-static  int     cancel_clients(aClient *cptr,
-                               aClient *sptr,
+static  int     cancel_clients(struct Client *cptr,
+                               struct Client *sptr,
                                char *cmd)
 {
   /*
@@ -576,7 +576,7 @@ static  int     cancel_clients(aClient *cptr,
   return exit_client(cptr, cptr, &me, "Fake prefix");
 }
 
-static  void    remove_unknown(aClient *cptr,
+static  void    remove_unknown(struct Client *cptr,
                                char *sender,
                                char *buffer)
 {
@@ -634,13 +634,13 @@ static  void    remove_unknown(aClient *cptr,
 */
 static int     do_numeric(
                    char numeric[],
-                   aClient *cptr,
-                   aClient *sptr,
+                   struct Client *cptr,
+                   struct Client *sptr,
                    int parc,
                    char *parv[])
 {
-  aClient *acptr;
-  aChannel *chptr;
+  struct Client *acptr;
+  struct Channel *chptr;
   char  *nick, *p;
   int   i;
 
@@ -671,7 +671,7 @@ static int     do_numeric(
     }
   for (; (nick = strtoken(&p, parv[1], ",")); parv[1] = NULL)
     {
-      if ((acptr = find_client(nick, (aClient *)NULL)))
+      if ((acptr = find_client(nick, (struct Client *)NULL)))
         {
           /*
           ** Drop to bit bucket if for me...
@@ -697,7 +697,7 @@ static int     do_numeric(
             sendto_prefix_one(acptr, sptr,":%s %s %s%s",
                               parv[0], numeric, nick, buffer);
         }
-      else if ((chptr = hash_find_channel(nick, (aChannel *)NULL)))
+      else if ((chptr = hash_find_channel(nick, (struct Channel *)NULL)))
         sendto_channel_butone(cptr,sptr,chptr,":%s %s %s%s",
                               parv[0],
                               numeric, chptr->chname, buffer);

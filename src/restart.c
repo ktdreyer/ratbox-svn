@@ -7,7 +7,6 @@
 #include "common.h"
 #include "ircd.h"
 #include "send.h"
-#include "struct.h"
 #include "s_debug.h"
 #include "s_log.h"
 

@@ -40,7 +40,6 @@
 #include "s_stats.h"
 #include "s_zip.h"
 #include "send.h"
-#include "struct.h"
 
 #include <assert.h>
 #include <stdio.h>
@@ -289,7 +288,7 @@ int set_non_blocking(int fd)
  *              work equally well whether blocking or non-blocking
  *              mode is used...
  */
-int deliver_it(aClient *cptr, char *str, int len)
+int deliver_it(struct Client *cptr, char *str, int len)
 {
   int   retval;
 

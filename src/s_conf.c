@@ -38,7 +38,6 @@
 #include "s_bsd.h"
 #include "s_log.h"
 #include "send.h"
-#include "struct.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -74,9 +73,9 @@ static void     clear_out_old_conf(void);
 static void     flush_deleted_I_P(void);
 
 #ifdef LIMIT_UH
-static  int     attach_iline(aClient *, struct ConfItem *,char *);
+static  int     attach_iline(struct Client *, struct ConfItem *,char *);
 #else
-static  int     attach_iline(aClient *, struct ConfItem *);
+static  int     attach_iline(struct Client *, struct ConfItem *);
 #endif
 struct ConfItem *find_special_conf(char *, int );
 
@@ -95,7 +94,7 @@ static  int  oper_flags_from_string(char *);
 extern  void    outofmemory(void);        /* defined in list.c */
 
 #ifdef GLINES
-extern  struct ConfItem *find_gkill(aClient *); /* defined in m_gline.c */
+extern  struct ConfItem *find_gkill(struct Client *); /* defined in m_gline.c */
 #endif
 
 /* usually, with hash tables, you use a prime number...
@@ -110,7 +109,7 @@ typedef struct ip_entry
   int        count;
   struct ip_entry *next;
 #ifdef LIMIT_UH
-  Link  *ptr_clients_on_this_ip;
+  struct SLink  *ptr_clients_on_this_ip;
   int        count_of_idented_users_on_this_ip;
 #endif
 }IP_ENTRY;
@@ -120,25 +119,25 @@ static IP_ENTRY *ip_hash_table[IP_HASH_SIZE];
 static int hash_ip(unsigned long);
 
 #ifdef LIMIT_UH
-static IP_ENTRY *find_or_add_ip(aClient *,char *);
-static int count_users_on_this_ip(IP_ENTRY *,aClient *,char *);
+static IP_ENTRY *find_or_add_ip(struct Client *,char *);
+static int count_users_on_this_ip(IP_ENTRY *,struct Client *,char *);
 #else
-static IP_ENTRY *find_or_add_ip(aClient *);
+static IP_ENTRY *find_or_add_ip(struct Client *);
 #endif
 
-/* general conf items link list root */
+/* general conf items struct SLink list root */
 struct ConfItem* ConfigItemList = NULL;
 
-/* conf xline link list root */
+/* conf xline struct SLink list root */
 struct ConfItem        *x_conf = ((struct ConfItem *)NULL);
 
 
 static void makeQlineEntry(aQlineItem *, struct ConfItem *, char *);
 
-/* conf qline link list root */
+/* conf qline struct SLink list root */
 aQlineItem         *q_conf = ((aQlineItem *)NULL);
 
-/* conf uline link list root */
+/* conf uline struct SLink list root */
 struct ConfItem        *u_conf = ((struct ConfItem *)NULL);
 
 /* keep track of .include files to hash in */
@@ -382,7 +381,7 @@ void report_specials(struct Client* sptr, int flags, int numeric)
  *  Cleaned up again Sept 7 1998 - Dianora
  */
 
-int attach_Iline(aClient* cptr, struct hostent* hp,
+int attach_Iline(struct Client* cptr, struct hostent* hp,
                  const char* sockhost, const char* username, char **preason)
 {
   struct ConfItem* aconf;
@@ -493,9 +492,9 @@ int attach_Iline(aClient* cptr, struct hostent* hp,
  */
 
 #ifdef LIMIT_UH
-static int attach_iline(aClient *cptr, struct ConfItem *aconf,char *username)
+static int attach_iline(struct Client *cptr, struct ConfItem *aconf,char *username)
 #else
-static int attach_iline(aClient *cptr, struct ConfItem *aconf)
+static int attach_iline(struct Client *cptr, struct ConfItem *aconf)
 #endif
 {
   IP_ENTRY *ip_found;
@@ -608,10 +607,10 @@ void clear_ip_hash_table()
 
 #ifdef LIMIT_UH
 static IP_ENTRY *
-find_or_add_ip(aClient *cptr,char *username)
+find_or_add_ip(struct Client *cptr,char *username)
 #else
 static IP_ENTRY *
-find_or_add_ip(aClient *cptr)
+find_or_add_ip(struct Client *cptr)
 #endif
 {
   unsigned long ip_in=cptr->ip.s_addr;        
@@ -690,7 +689,7 @@ find_or_add_ip(aClient *cptr)
 
 #ifdef LIMIT_UH
 static int count_users_on_this_ip(IP_ENTRY *ip_list,
-                           aClient *this_client,char *username)
+                           struct Client *this_client,char *username)
 {
   int count=0;
   Link *ptr;
@@ -730,7 +729,7 @@ static int count_users_on_this_ip(IP_ENTRY *ip_list,
  */
 
 #ifdef LIMIT_UH
-void remove_one_ip(aClient *cptr)
+void remove_one_ip(struct Client *cptr)
 #else
 void remove_one_ip(unsigned long ip_in)
 #endif
@@ -865,7 +864,7 @@ void count_ip_hash(int *number_ips_stored,u_long *mem_ips_stored)
  * output        -
  * side effects        -
  */
-void iphash_stats(aClient *cptr, aClient *sptr,int parc, char *parv[],int out)
+void iphash_stats(struct Client *cptr, struct Client *sptr,int parc, char *parv[],int out)
 {
   IP_ENTRY *ip_hash_ptr;
   int i;
@@ -970,9 +969,9 @@ int detach_conf(struct Client* cptr,struct ConfItem* aconf)
   return -1;
 }
 
-static int is_attached(struct ConfItem *aconf,aClient *cptr)
+static int is_attached(struct ConfItem *aconf,struct Client *cptr)
 {
-  Link* lp;
+  struct SLink* lp;
 
   for (lp = cptr->confs; lp; lp = lp->next)
     if (lp->value.aconf == aconf)
@@ -987,9 +986,9 @@ static int is_attached(struct ConfItem *aconf,aClient *cptr)
  *        connection). Note, that this automatically changes the
  *        attachment if there was an old one...
  */
-int attach_conf(aClient *cptr,struct ConfItem *aconf)
+int attach_conf(struct Client *cptr,struct ConfItem *aconf)
 {
-  Link *lp;
+  struct SLink *lp;
 
   if (is_attached(aconf, cptr))
     {
@@ -1096,7 +1095,7 @@ struct ConfItem *find_me()
  * NOTE: this will allow C:::* and N:::* because the match mask is the
  * conf line and not the name
  */
-int attach_confs(aClient* cptr, const char* name, int statmask)
+int attach_confs(struct Client* cptr, const char* name, int statmask)
 {
   struct ConfItem* tmp;
   int              conf_counter = 0;
@@ -1126,7 +1125,7 @@ int attach_confs(aClient* cptr, const char* name, int statmask)
  * NOTE: this requires an exact match between the name on the C:line and
  * the name on the N:line
  */
-int attach_cn_lines(aClient *cptr, const char* host)
+int attach_cn_lines(struct Client *cptr, const char* host)
 {
   struct ConfItem* tmp;
   int              found_cline = 0;
@@ -1459,7 +1458,7 @@ static void clear_q_lines()
  * side effects - all Q lines are listed to client 
  */
 
-void report_qlines(aClient *sptr)
+void report_qlines(struct Client *sptr)
 {
   aQlineItem *qp;
   struct ConfItem *aconf;
@@ -1627,7 +1626,7 @@ static void clear_special_conf(struct ConfItem **this_conf)
  * -Dianora
  */
 
-int rehash_dump(aClient *sptr)
+int rehash_dump(struct Client *sptr)
 {
   struct ConfItem *aconf;
   FBFILE* out;
@@ -1708,7 +1707,7 @@ int rehash_dump(aClient *sptr)
  * as a result of an operator issuing this command, else assume it has been
  * called as a result of the server receiving a HUP signal.
  */
-int rehash(aClient *cptr,aClient *sptr, int sig)
+int rehash(struct Client *cptr,struct Client *sptr, int sig)
 {
   if (sig)
     sendto_ops("Got signal SIGHUP, reloading ircd conf. file");
@@ -2595,7 +2594,7 @@ int conf_connect_allowed(struct in_addr addr)
  * -Dianora
  *
  */
-struct ConfItem *find_kill(aClient* cptr)
+struct ConfItem *find_kill(struct Client* cptr)
 {
   assert(0 != cptr);
 #if 0
@@ -2750,12 +2749,12 @@ void flush_temp_klines()
 
 /* report_temp_klines
  *
- * inputs        - aClient pointer, client to report to
+ * inputs        - struct Client pointer, client to report to
  * output        - NONE
  * side effects        - NONE
  *                  
  */
-void report_temp_klines(aClient *sptr)
+void report_temp_klines(struct Client *sptr)
 {
   struct ConfItem *kill_list_ptr;
   struct ConfItem *last_list_ptr;
@@ -2891,7 +2890,7 @@ static int oper_privs_from_string(int int_privs,char *privs)
  * also, set the oper privs if given cptr non NULL
  */
 
-char *oper_privs_as_string(aClient *cptr,int port)
+char *oper_privs_as_string(struct Client *cptr,int port)
 {
   static char privs_out[16];
   char *privs_ptr;
@@ -3189,7 +3188,7 @@ int        is_address(char *host,
 ** filename is the file that is to be output to the K lined client
 */
 int     m_killcomment(sptr, parv, filename)
-aClient *sptr;
+struct Client *sptr;
 char    *parv, *filename;
 {
   FBFILE* file;
@@ -3231,7 +3230,7 @@ char    *parv, *filename;
  *
  */
 
-int m_testline(aClient *cptr, aClient *sptr, int parc, char *parv[])
+int m_testline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
   struct ConfItem *aconf;
   unsigned long ip;
@@ -3507,8 +3506,8 @@ static void flush_deleted_I_P(void)
 
 void write_kline_or_dline_to_conf_and_notice_opers(
                                                    KlineType type,
-                                                   aClient *sptr,
-                                                   aClient *rcptr,
+                                                   struct Client *sptr,
+                                                   struct Client *rcptr,
                                                    char *user,
                                                    char *host,
                                                    char *reason,
@@ -3617,7 +3616,7 @@ void write_kline_or_dline_to_conf_and_notice_opers(
  *                i.e. checking for disk full errors etc.
  */
        
-int safe_write(aClient *sptr, const char *filename, int out, char *buffer)
+int safe_write(struct Client *sptr, const char *filename, int out, char *buffer)
 {
   if (write(out, buffer, strlen(buffer)) <= 0)
     {

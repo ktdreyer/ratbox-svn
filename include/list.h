@@ -32,6 +32,26 @@ struct Client;
 struct Class;
 struct User;
 struct Channel;
+struct ConfItem;
+struct Ban;
+
+/* general link structure used for chains */
+
+struct SLink
+{
+  struct        SLink   *next;
+  union
+  {
+    struct Client   *cptr;
+    struct Channel  *chptr;
+    struct ConfItem *aconf;
+#ifdef BAN_INFO
+    struct Ban   *banptr;
+#endif
+    char      *cp;
+  } value;
+  int   flags;
+};
 
 extern void count_user_memory(int *, int *);
 extern void count_links_memory(int *, int *);

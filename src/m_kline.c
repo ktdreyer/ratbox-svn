@@ -68,10 +68,10 @@ static aPendingLine *AddPending();
 static void DelPending(aPendingLine *);
 static int LockedFile(const char *);
 static void WritePendingLines(const char *);
-static void WriteKline(const char *, aClient *, aClient *,
+static void WriteKline(const char *, struct Client *, struct Client *,
                        const char *, const char *, const char *, 
                        const char *);
-static void WriteDline(const char *, aClient *,
+static void WriteDline(const char *, struct Client *,
                        const char *, const char *, const char *);
 
 /*
@@ -229,7 +229,7 @@ WriteKline()
 */
 
 static void
-WriteKline(const char *filename, aClient *sptr, aClient *rcptr,
+WriteKline(const char *filename, struct Client *sptr, struct Client *rcptr,
            const char *user, const char *host, const char *reason, 
            const char *when)
 
@@ -300,7 +300,7 @@ WriteDline()
 */
 
 static void
-WriteDline(const char *filename, aClient *sptr,
+WriteDline(const char *filename, struct Client *sptr,
            const char *host, const char *reason, const char *when)
 
 {
@@ -354,8 +354,8 @@ WriteDline(const char *filename, aClient *sptr,
  */
 
 int
-m_kline(aClient *cptr,
-                aClient *sptr,
+m_kline(struct Client *cptr,
+                struct Client *sptr,
                 int parc,
                 char *parv[])
 {
@@ -366,10 +366,10 @@ m_kline(aClient *cptr,
   char *reason = NULL;
   const char* current_date;
   int  ip_kline = NO;
-  aClient *acptr;
+  struct Client *acptr;
   char tempuser[USERLEN + 2];
   char temphost[HOSTLEN + 1];
-  aConfItem *aconf;
+  struct ConfItem *aconf;
   int temporary_kline_time=0;   /* -Dianora */
   time_t temporary_kline_time_seconds=0;
   char *argv;
@@ -381,7 +381,7 @@ m_kline(aClient *cptr,
 
 #ifdef SLAVE_SERVERS
   char *slave_oper;
-  aClient *rcptr=NULL;
+  struct Client *rcptr=NULL;
 
   if(IsServer(sptr))
     {
@@ -396,7 +396,7 @@ m_kline(aClient *cptr,
       if ( parc < 2 )
         return 0;
 
-      if ((rcptr = hash_find_client(slave_oper,(aClient *)NULL)))
+      if ((rcptr = hash_find_client(slave_oper,(struct Client *)NULL)))
         {
           if(!IsPerson(rcptr))
             return 0;
@@ -772,7 +772,7 @@ m_kline(aClient *cptr,
   #ifdef SLAVE_SERVERS
     pptr->rcptr = rcptr;
   #else
-    pptr->rcptr = (aClient *) NULL;
+    pptr->rcptr = (struct Client *) NULL;
   #endif
 
     sendto_one(sptr,
@@ -809,7 +809,7 @@ m_kline(aClient *cptr,
 #else
   WriteKline(kconf,
     sptr,
-    (aClient *) NULL,
+    (struct Client *) NULL,
     user,
     host,
     reason ? reason : "No reason",
@@ -983,16 +983,16 @@ static char *cluster(char *hostname)
  */
 
 int
-m_dline(aClient *cptr, aClient *sptr, int parc, char *parv[])
+m_dline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
 {
   char *host, *reason;
   char *p;
-  aClient *acptr;
+  struct Client *acptr;
   char cidr_form_host[HOSTLEN + 1];
   unsigned long ip_host;
   unsigned long ip_mask;
-  aConfItem *aconf;
+  struct ConfItem *aconf;
   char buffer[1024];
   const char* current_date;
   const char *dconf;
@@ -1202,7 +1202,7 @@ m_dline(aClient *cptr, aClient *sptr, int parc, char *parv[])
                  */
                 pptr->type = DLINE_TYPE;
                 pptr->sptr = sptr;
-                pptr->rcptr = (aClient *) NULL;
+                pptr->rcptr = (struct Client *) NULL;
                 pptr->user = (char *) NULL;
                 pptr->host = strdup(host);
                 pptr->reason = strdup(reason);

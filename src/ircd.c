@@ -646,7 +646,7 @@ int main(int argc, char *argv[])
   uid_t       uid;
   uid_t       euid;
   time_t      delay = 0;
-  aConfItem*  aconf;
+  struct ConfItem*  aconf;
 
   /*
    * save server boot time right away, so getrusage works correctly

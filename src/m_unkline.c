@@ -46,7 +46,7 @@
 
 extern ConfigFileEntryType ConfigFileEntry; /* defined in ircd.c */
 
-static int flush_write(aClient *, FBFILE* , char *, char *);
+static int flush_write(struct Client *, FBFILE* , char *, char *);
 static int remove_tkline_match(char *,char *);
 
 /*
@@ -64,7 +64,7 @@ static int remove_tkline_match(char *,char *);
 * Added comstuds SEPARATE_QUOTE_KLINES_BY_DATE
 *
 */
-int m_unkline (aClient *cptr,aClient *sptr,int parc,char *parv[])
+int m_unkline (struct Client *cptr,struct Client *sptr,int parc,char *parv[])
 {
   FBFILE* in;
   FBFILE* out;
@@ -355,7 +355,7 @@ Then just ignore the line
  * -Dianora
  */
 
-static int flush_write(aClient *sptr, FBFILE* out, char *buf, char *temppath)
+static int flush_write(struct Client *sptr, FBFILE* out, char *buf, char *temppath)
 {
   int error_on_write = (fbputs(buf, out) < 0) ? YES : NO;
 
@@ -378,8 +378,8 @@ static int flush_write(aClient *sptr, FBFILE* out, char *buf, char *temppath)
 */
 static int remove_tkline_match(char *host,char *user)
 {
-  aConfItem *kill_list_ptr;
-  aConfItem *last_kill_ptr=(aConfItem *)NULL;
+  struct ConfItem *kill_list_ptr;
+  struct ConfItem *last_kill_ptr=(struct ConfItem *)NULL;
 
   if(!temporary_klines)
     return NO;

@@ -53,16 +53,16 @@
 extern ConfigFileEntryType ConfigFileEntry; /* defined in ircd.c */
 
 /* internal variables */
-static  aConfItem *glines = (aConfItem *)NULL;
+static  struct ConfItem *glines = (struct ConfItem *)NULL;
 static GLINE_PENDING *pending_glines;
 
 /* internal functions */
-static void add_gline(aConfItem *);
+static void add_gline(struct ConfItem *);
 static void log_gline_request(const char*,const char*,const char*,
                               const char* oper_server,
                               const char *,const char *,const char *);
 
-static void log_gline(aClient *,const char *,GLINE_PENDING *,
+static void log_gline(struct Client *,const char *,GLINE_PENDING *,
                       const char *, const char *,const char *,
                       const char* oper_server,
                       const char *,const char *,const char *);
@@ -70,7 +70,7 @@ static void log_gline(aClient *,const char *,GLINE_PENDING *,
 
 static void expire_pending_glines();
 
-static int majority_gline(aClient*, const char *,const char *, const char *, 
+static int majority_gline(struct Client*, const char *,const char *, const char *, 
                           const char* serv_name,
                           const char *,const char *,const char *); 
 
@@ -90,8 +90,8 @@ static int majority_gline(aClient*, const char *,const char *, const char *,
  * GLINES is not defined.
  */
 
-int     m_gline(aClient *cptr,
-                aClient *sptr,
+int     m_gline(struct Client *cptr,
+                struct Client *sptr,
                 int parc,
                 char *parv[])
 {
@@ -109,7 +109,7 @@ int     m_gline(aClient *cptr,
   const char *current_date;
   char tempuser[USERLEN + 2];
   char temphost[HOSTLEN + 1];
-  aConfItem *aconf;
+  struct ConfItem *aconf;
 #endif
 
   if(!IsServer(sptr)) /* allow remote opers to apply g lines */
@@ -387,7 +387,7 @@ static void log_gline_request(
  * log_gline()
  *
  */
-static void log_gline(aClient *sptr,
+static void log_gline(struct Client *sptr,
                       const char *parv0,
                       GLINE_PENDING *gline_pending_ptr,
                       const char *oper_nick,
@@ -474,7 +474,7 @@ static void log_gline(aClient *sptr,
  */
 void flush_glines()
 {
-  aConfItem *kill_list_ptr;
+  struct ConfItem *kill_list_ptr;
 
   if((kill_list_ptr = glines))
     {
@@ -485,17 +485,17 @@ void flush_glines()
           kill_list_ptr = glines;
         }
     }
-  glines = (aConfItem *)NULL;
+  glines = (struct ConfItem *)NULL;
 }
 
 /* find_gkill
  *
- * inputs       - aClient pointer to a Client struct
- * output       - aConfItem pointer if a gline was found for this client
+ * inputs       - struct Client pointer to a Client struct
+ * output       - struct ConfItem pointer if a gline was found for this client
  * side effects - none
  */
 
-aConfItem *find_gkill(aClient* cptr)
+struct ConfItem *find_gkill(struct Client* cptr)
 {
   assert(0 != cptr);
   return (IsElined(cptr)) ? 0 : find_is_glined(cptr->host, cptr->username);
@@ -505,7 +505,7 @@ aConfItem *find_gkill(aClient* cptr)
  * find_is_glined
  * inputs       - hostname
  *              - username
- * output       - pointer to aConfItem if user@host glined
+ * output       - pointer to struct ConfItem if user@host glined
  * side effects -
  *  WARNING, no sanity checking on length of name,host etc.
  * thats expected to be done by caller.... *sigh* -Dianora
@@ -513,9 +513,9 @@ aConfItem *find_gkill(aClient* cptr)
 
 struct ConfItem* find_is_glined(const char* host, const char* name)
 {
-  aConfItem *kill_list_ptr;     /* used for the link list only */
-  aConfItem *last_list_ptr;
-  aConfItem *tmp_list_ptr;
+  struct ConfItem *kill_list_ptr;     /* used for the link list only */
+  struct ConfItem *last_list_ptr;
+  struct ConfItem *tmp_list_ptr;
 
   /* gline handling... exactly like temporary klines 
    * I expect this list to be very tiny. (crosses fingers) so CPU
@@ -561,12 +561,12 @@ struct ConfItem* find_is_glined(const char* host, const char* name)
         }
     }
 
-  return((aConfItem *)NULL);
+  return((struct ConfItem *)NULL);
 }
 
 /* report_glines
  *
- * inputs       - aClient pointer
+ * inputs       - struct Client pointer
  * output       - NONE
  * side effects - 
  *
@@ -574,12 +574,12 @@ struct ConfItem* find_is_glined(const char* host, const char* name)
  * 
  * - Dianora              
  */
-void report_glines(aClient *sptr)
+void report_glines(struct Client *sptr)
 {
   GLINE_PENDING *gline_pending_ptr;
-  aConfItem *kill_list_ptr;
-  aConfItem *last_list_ptr;
-  aConfItem *tmp_list_ptr;
+  struct ConfItem *kill_list_ptr;
+  struct ConfItem *last_list_ptr;
+  struct ConfItem *tmp_list_ptr;
   char timebuffer[MAX_DATE_STRING];
   struct tm *tmptr;
   char *host;
@@ -777,7 +777,7 @@ static void add_new_majority_gline(const char* oper_nick,
  *      Expire old entries.
  */
 
-static int majority_gline(aClient *sptr,
+static int majority_gline(struct Client *sptr,
                           const char *oper_nick,
                           const char *oper_user,
                           const char *oper_host,
@@ -861,16 +861,16 @@ static int majority_gline(aClient *sptr,
 
 /* add_gline
  *
- * inputs       - pointer to aConfItem
+ * inputs       - pointer to struct ConfItem
  * output       - none
- * Side effects - links in given aConfItem into gline link list
+ * Side effects - links in given struct ConfItem into gline link list
  *
  * Identical to add_temp_kline code really.
  *
  * -Dianora
  */
 
-static void add_gline(aConfItem *aconf)
+static void add_gline(struct ConfItem *aconf)
 {
   aconf->next = glines;
   glines = aconf;

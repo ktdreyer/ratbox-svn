@@ -33,7 +33,7 @@
 #include "s_log.h"
 #include "s_user.h"
 #include "send.h"
-#include "struct.h"
+#include "list.h"
 
 #include <fcntl.h>
 #include <unistd.h>

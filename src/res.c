@@ -19,7 +19,6 @@
 #include "restart.h"
 #include "s_bsd.h"
 #include "send.h"
-#include "struct.h"
 
 #include <assert.h>
 #include <string.h>
@@ -1631,7 +1630,7 @@ static void rem_cache(aCache* ocp)
 /*
  * m_dns - dns status query
  */
-int m_dns(aClient *cptr, aClient *sptr, int parc, char *parv[])
+int m_dns(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
   aCache* cp;
   int     i;
@@ -1671,7 +1670,7 @@ int m_dns(aClient *cptr, aClient *sptr, int parc, char *parv[])
   return 0;
 }
 
-unsigned long cres_mem(aClient *sptr)
+unsigned long cres_mem(struct Client *sptr)
 {
   aCache*          c = cacheTop;
   struct  hostent* h;

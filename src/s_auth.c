@@ -39,7 +39,6 @@
 #include "s_log.h"
 #include "s_stats.h"
 #include "send.h"
-#include "struct.h"
 
 #include <netdb.h>               /* struct hostent */
 #include <string.h>

@@ -33,7 +33,6 @@
 #include "s_conf.h"
 #include "s_serv.h"
 #include "send.h"
-#include "struct.h"
 
 #include <string.h>
 #include <fcntl.h>
@@ -140,12 +139,12 @@ char* small_file_date(time_t clock)
 #define _GMKv(x)  ( (x > _1TER) ? (float)(x/_1TER) : ((x > _1GIG) ? \
                (float)(x/_1GIG) : ((x > _1MEG) ? (float)(x/_1MEG) : (float)x)))
 
-void serv_info(aClient *cptr,char *name)
+void serv_info(struct Client *cptr,char *name)
 {
   static char Lformat[] = ":%s %d %s %s %u %u %u %u %u :%u %u %s";
   int        j;
   long        sendK, receiveK, uptime;
-  aClient        *acptr;
+  struct Client        *acptr;
 
   sendK = receiveK = 0;
   j = 1;

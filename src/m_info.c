@@ -27,7 +27,7 @@
 */
 
 int
-m_info(aClient *cptr, aClient *sptr, int parc, char *parv[])
+m_info(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
 {
   char **text = infotext;

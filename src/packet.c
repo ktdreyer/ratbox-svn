@@ -49,7 +49,7 @@
 **      with cptr of "local" variation, which contains all the
 **      necessary fields (buffer etc..)
 */
-int     dopacket(aClient *cptr, char *buffer, int length)
+int     dopacket(struct Client *cptr, char *buffer, int length)
 {
   char  *ch1;
   char  *ch2;

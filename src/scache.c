@@ -10,8 +10,6 @@
 #include "ircd.h"
 #include "numeric.h"
 #include "send.h"
-#include "struct.h"
-
 
 #include <assert.h>
 #include <string.h>
@@ -116,7 +114,7 @@ void count_scache(int *number_servers_cached,u_long *mem_servers_cached)
 
 /* list all server names in scache very verbose */
    
-void list_scache(aClient *cptr,aClient *sptr,int parc,char *parv[])
+void list_scache(struct Client *cptr,struct Client *sptr,int parc,char *parv[])
 {
   int hash_index;
   SCACHE *ptr;
