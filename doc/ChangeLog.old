@@ -1,3 +1,238 @@
+androsyn    2002/05/24 19:35:09 EDT	(20020525_0)
+
+  Modified files:
+    adns                 Makefile.in adns.h check.c event.c 
+                         general.c parse.c query.c reply.c setup.c 
+                         transmit.c types.c 
+    include              balloc.h channel.h channel_mode.h 
+                         client.h event.h fdlist.h fileio.h hash.h 
+                         hostmask.h irc_string.h ircd.h 
+                         ircd_defs.h ircd_getopt.h linebuf.h 
+                         listener.h m_info.h memory.h modules.h 
+                         motd.h msg.h numeric.h packet.h res.h 
+                         resv.h rsa.h s_auth.h s_bsd.h s_conf.h 
+                         s_debug.h s_gline.h s_misc.h s_serv.h 
+                         s_stats.h s_user.h s_zip.h send.h 
+                         sprintf_irc.h vchannel.h whowas.h 
+    modules              Makefile.in m_accept.c m_admin.c m_away.c 
+                         m_capab.c m_cburst.c m_challenge.c 
+                         m_cjoin.c m_close.c m_connect.c 
+                         m_cryptlink.c m_dmem.c m_drop.c m_eob.c 
+                         m_gline.c m_help.c m_info.c m_invite.c 
+                         m_ison.c m_join.c m_kline.c m_knock.c 
+                         m_links.c m_list.c m_lljoin.c m_llnick.c 
+                         m_locops.c m_lusers.c m_motd.c m_names.c 
+                         m_nburst.c m_oper.c m_operwall.c m_pass.c 
+                         m_ping.c m_pong.c m_post.c m_rehash.c 
+                         m_restart.c m_resv.c m_set.c m_stats.c 
+                         m_svinfo.c m_testline.c m_time.c 
+                         m_topic.c m_trace.c m_unkline.c m_user.c 
+                         m_userhost.c m_users.c m_version.c 
+                         m_wallops.c m_who.c m_whois.c m_whowas.c 
+    modules/core         m_die.c m_kick.c m_kill.c m_message.c 
+                         m_mode.c m_nick.c m_part.c m_quit.c 
+                         m_server.c m_sjoin.c m_squit.c 
+    src                  Makefile.in adns.c balloc.c channel.c 
+                         channel_mode.c class.c client.c crypt.c 
+                         dynlink.c event.c fdlist.c fileio.c 
+                         getopt.c hash.c hook.c hostmask.c 
+                         irc_string.c ircd.c ircd_lexer.l 
+                         ircd_parser.y ircd_signal.c ircdauth.c 
+                         kdparse.c linebuf.c list.c listener.c 
+                         m_error.c match.c md5.c memory.c 
+                         modules.c motd.c numeric.c packet.c 
+                         parse.c restart.c resv.c rsa.c s_auth.c 
+                         s_bsd.c s_bsd_devpoll.c s_bsd_kqueue.c 
+                         s_bsd_poll.c s_bsd_select.c s_bsd_sigio.c 
+                         s_conf.c s_debug.c s_gline.c s_log.c 
+                         s_misc.c s_serv.c s_stats.c s_user.c 
+                         scache.c send.c snprintf.c sprintf_irc.c 
+                         tools.c vchannel.c whowas.c 
+  Log:
+  Cleaned up the includes a *lot*.  System level includes are(mostly) going
+  in include/stdinc.h
+  
+  Revision  Changes    Path
+  1.13      +1 -1      ircd-hybrid-7/adns/Makefile.in
+  1.7       +1 -8      ircd-hybrid-7/adns/adns.h
+  1.6       +1 -0      ircd-hybrid-7/adns/check.c
+  1.15      +1 -9      ircd-hybrid-7/adns/event.c
+  1.11      +2 -7      ircd-hybrid-7/adns/general.c
+  1.5       +2 -1      ircd-hybrid-7/adns/parse.c
+  1.12      +2 -7      ircd-hybrid-7/adns/query.c
+  1.8       +2 -3      ircd-hybrid-7/adns/reply.c
+  1.26      +1 -13     ircd-hybrid-7/adns/setup.c
+  1.10      +2 -6      ircd-hybrid-7/adns/transmit.c
+  1.6       +2 -8      ircd-hybrid-7/adns/types.c
+  1.9       +7 -14     ircd-hybrid-7/include/balloc.h
+  7.114     +0 -7      ircd-hybrid-7/include/channel.h
+  7.9       +0 -6      ircd-hybrid-7/include/channel_mode.h
+  7.147     +0 -10     ircd-hybrid-7/include/client.h
+  1.12      +3 -3      ircd-hybrid-7/include/event.h
+  7.25      +0 -9      ircd-hybrid-7/include/fdlist.h
+  7.11      +0 -11     ircd-hybrid-7/include/fileio.h
+  7.18      +0 -4      ircd-hybrid-7/include/hash.h
+  1.21      +4 -0      ircd-hybrid-7/include/hostmask.h
+  7.36      +1 -11     ircd-hybrid-7/include/irc_string.h
+  7.50      +0 -3      ircd-hybrid-7/include/ircd.h
+  7.28      +2 -5      ircd-hybrid-7/include/ircd_defs.h
+  1.3       +1 -1      ircd-hybrid-7/include/ircd_getopt.h
+  1.23      +0 -2      ircd-hybrid-7/include/linebuf.h
+  7.10      +2 -11     ircd-hybrid-7/include/listener.h
+  7.40      +1 -2      ircd-hybrid-7/include/m_info.h
+  7.30      +0 -2      ircd-hybrid-7/include/memory.h
+  7.30      +1 -3      ircd-hybrid-7/include/modules.h
+  7.10      +1 -8      ircd-hybrid-7/include/motd.h
+  7.41      +1 -6      ircd-hybrid-7/include/msg.h
+  7.27      +1 -2      ircd-hybrid-7/include/numeric.h
+  7.16      +1 -4      ircd-hybrid-7/include/packet.h
+  7.20      +1 -6      ircd-hybrid-7/include/res.h
+  1.7       +0 -4      ircd-hybrid-7/include/resv.h
+  7.10      +4 -0      ircd-hybrid-7/include/rsa.h
+  7.16      +1 -6      ircd-hybrid-7/include/s_auth.h
+  7.36      +1 -7      ircd-hybrid-7/include/s_bsd.h
+  7.180     +0 -4      ircd-hybrid-7/include/s_conf.h
+  7.4       +0 -4      ircd-hybrid-7/include/s_debug.h
+  7.11      +1 -8      ircd-hybrid-7/include/s_gline.h
+  7.7       +0 -4      ircd-hybrid-7/include/s_misc.h
+  7.66      +1 -6      ircd-hybrid-7/include/s_serv.h
+  7.7       +0 -3      ircd-hybrid-7/include/s_stats.h
+  7.16      +1 -6      ircd-hybrid-7/include/s_user.h
+  7.5       +1 -6      ircd-hybrid-7/include/s_zip.h
+  7.57      +1 -2      ircd-hybrid-7/include/send.h
+  7.8       +0 -1      ircd-hybrid-7/include/sprintf_irc.h
+  7.20      +1 -11     ircd-hybrid-7/include/vchannel.h
+  7.8       +0 -1      ircd-hybrid-7/include/whowas.h
+  1.67      +1 -1      ircd-hybrid-7/modules/Makefile.in
+  1.24      +2 -1      ircd-hybrid-7/modules/core/m_die.c
+  1.44      +2 -2      ircd-hybrid-7/modules/core/m_kick.c
+  1.64      +2 -2      ircd-hybrid-7/modules/core/m_kill.c
+  1.92      +2 -2      ircd-hybrid-7/modules/core/m_message.c
+  1.53      +2 -1      ircd-hybrid-7/modules/core/m_mode.c
+  1.90      +2 -4      ircd-hybrid-7/modules/core/m_nick.c
+  1.56      +3 -6      ircd-hybrid-7/modules/core/m_part.c
+  1.25      +2 -1      ircd-hybrid-7/modules/core/m_quit.c
+  1.83      +2 -3      ircd-hybrid-7/modules/core/m_server.c
+  1.139     +2 -4      ircd-hybrid-7/modules/core/m_sjoin.c
+  1.45      +2 -2      ircd-hybrid-7/modules/core/m_squit.c
+  1.31      +2 -1      ircd-hybrid-7/modules/m_accept.c
+  1.34      +2 -1      ircd-hybrid-7/modules/m_admin.c
+  1.30      +2 -2      ircd-hybrid-7/modules/m_away.c
+  1.28      +2 -1      ircd-hybrid-7/modules/m_capab.c
+  1.41      +2 -3      ircd-hybrid-7/modules/m_cburst.c
+  1.36      +3 -4      ircd-hybrid-7/modules/m_challenge.c
+  1.54      +2 -3      ircd-hybrid-7/modules/m_cjoin.c
+  1.23      +2 -1      ircd-hybrid-7/modules/m_close.c
+  1.37      +2 -3      ircd-hybrid-7/modules/m_connect.c
+  1.32      +3 -6      ircd-hybrid-7/modules/m_cryptlink.c
+  1.15      +2 -1      ircd-hybrid-7/modules/m_dmem.c
+  1.24      +2 -3      ircd-hybrid-7/modules/m_drop.c
+  1.31      +2 -1      ircd-hybrid-7/modules/m_eob.c
+  1.78      +2 -10     ircd-hybrid-7/modules/m_gline.c
+  1.32      +2 -1      ircd-hybrid-7/modules/m_help.c
+  1.57      +2 -5      ircd-hybrid-7/modules/m_info.c
+  1.45      +2 -1      ircd-hybrid-7/modules/m_invite.c
+  1.28      +2 -1      ircd-hybrid-7/modules/m_ison.c
+  1.85      +2 -4      ircd-hybrid-7/modules/m_join.c
+  1.102     +2 -9      ircd-hybrid-7/modules/m_kline.c
+  1.50      +2 -2      ircd-hybrid-7/modules/m_knock.c
+  1.36      +2 -3      ircd-hybrid-7/modules/m_links.c
+  1.42      +2 -4      ircd-hybrid-7/modules/m_list.c
+  1.57      +2 -4      ircd-hybrid-7/modules/m_lljoin.c
+  1.20      +2 -4      ircd-hybrid-7/modules/m_llnick.c
+  1.27      +2 -1      ircd-hybrid-7/modules/m_locops.c
+  1.22      +2 -1      ircd-hybrid-7/modules/m_lusers.c
+  1.29      +2 -4      ircd-hybrid-7/modules/m_motd.c
+  1.42      +2 -4      ircd-hybrid-7/modules/m_names.c
+  1.17      +2 -4      ircd-hybrid-7/modules/m_nburst.c
+  1.46      +2 -3      ircd-hybrid-7/modules/m_oper.c
+  1.29      +2 -1      ircd-hybrid-7/modules/m_operwall.c
+  1.23      +2 -1      ircd-hybrid-7/modules/m_pass.c
+  1.28      +2 -1      ircd-hybrid-7/modules/m_ping.c
+  1.26      +2 -1      ircd-hybrid-7/modules/m_pong.c
+  1.11      +2 -1      ircd-hybrid-7/modules/m_post.c
+  1.40      +2 -1      ircd-hybrid-7/modules/m_rehash.c
+  1.23      +2 -1      ircd-hybrid-7/modules/m_restart.c
+  1.16      +2 -1      ircd-hybrid-7/modules/m_resv.c
+  1.45      +2 -2      ircd-hybrid-7/modules/m_set.c
+  1.109     +3 -3      ircd-hybrid-7/modules/m_stats.c
+  1.34      +2 -5      ircd-hybrid-7/modules/m_svinfo.c
+  1.25      +2 -2      ircd-hybrid-7/modules/m_testline.c
+  1.25      +2 -1      ircd-hybrid-7/modules/m_time.c
+  1.52      +2 -4      ircd-hybrid-7/modules/m_topic.c
+  1.46      +2 -3      ircd-hybrid-7/modules/m_trace.c
+  1.45      +2 -5      ircd-hybrid-7/modules/m_unkline.c
+  1.23      +2 -2      ircd-hybrid-7/modules/m_user.c
+  1.37      +2 -2      ircd-hybrid-7/modules/m_userhost.c
+  1.25      +2 -1      ircd-hybrid-7/modules/m_users.c
+  1.38      +2 -2      ircd-hybrid-7/modules/m_version.c
+  1.29      +2 -1      ircd-hybrid-7/modules/m_wallops.c
+  1.60      +3 -3      ircd-hybrid-7/modules/m_who.c
+  1.77      +3 -6      ircd-hybrid-7/modules/m_whois.c
+  1.27      +2 -4      ircd-hybrid-7/modules/m_whowas.c
+  7.110     +1 -1      ircd-hybrid-7/src/Makefile.in
+  7.41      +3 -1      ircd-hybrid-7/src/adns.c
+  7.31      +14 -16    ircd-hybrid-7/src/balloc.c
+  7.316     +2 -3      ircd-hybrid-7/src/channel.c
+  7.40      +3 -3      ircd-hybrid-7/src/channel_mode.c
+  7.36      +3 -2      ircd-hybrid-7/src/class.c
+  7.270     +2 -8      ircd-hybrid-7/src/client.c
+  7.4       +1 -3      ircd-hybrid-7/src/crypt.c
+  7.3       +1 -16     ircd-hybrid-7/src/dynlink.c
+  7.27      +2 -1      ircd-hybrid-7/src/event.c
+  7.29      +2 -7      ircd-hybrid-7/src/fdlist.c
+  7.22      +2 -8      ircd-hybrid-7/src/fileio.c
+  7.14      +1 -4      ircd-hybrid-7/src/getopt.c
+  7.41      +1 -11     ircd-hybrid-7/src/hash.c
+  7.15      +1 -3      ircd-hybrid-7/src/hook.c
+  7.64      +1 -2      ircd-hybrid-7/src/hostmask.c
+  7.53      +1 -19     ircd-hybrid-7/src/irc_string.c
+  7.234     +1 -28     ircd-hybrid-7/src/ircd.c
+  1.138     +1 -17     ircd-hybrid-7/src/ircd_lexer.l
+  1.250     +1 -6      ircd-hybrid-7/src/ircd_parser.y
+  7.10      +1 -3      ircd-hybrid-7/src/ircd_signal.c
+  7.48      +1 -13     ircd-hybrid-7/src/ircdauth.c
+  7.7       +1 -6      ircd-hybrid-7/src/kdparse.c
+  7.80      +1 -7      ircd-hybrid-7/src/linebuf.c
+  7.44      +1 -3      ircd-hybrid-7/src/list.c
+  7.67      +1 -8      ircd-hybrid-7/src/listener.c
+  7.25      +1 -0      ircd-hybrid-7/src/m_error.c
+  7.19      +2 -5      ircd-hybrid-7/src/match.c
+  1.13      +1 -6      ircd-hybrid-7/src/md5.c
+  7.35      +1 -9      ircd-hybrid-7/src/memory.c
+  7.102     +1 -15     ircd-hybrid-7/src/modules.c
+  7.24      +1 -4      ircd-hybrid-7/src/motd.c
+  7.20      +1 -7      ircd-hybrid-7/src/numeric.c
+  7.81      +1 -5      ircd-hybrid-7/src/packet.c
+  7.127     +1 -5      ircd-hybrid-7/src/parse.c
+  7.21      +1 -2      ircd-hybrid-7/src/restart.c
+  7.16      +1 -3      ircd-hybrid-7/src/resv.c
+  7.25      +1 -3      ircd-hybrid-7/src/rsa.c
+  7.95      +1 -11     ircd-hybrid-7/src/s_auth.c
+  7.169     +1 -18     ircd-hybrid-7/src/s_bsd.c
+  7.14      +4 -19     ircd-hybrid-7/src/s_bsd_devpoll.c
+  1.26      +4 -20     ircd-hybrid-7/src/s_bsd_kqueue.c
+  7.54      +4 -22     ircd-hybrid-7/src/s_bsd_poll.c
+  7.25      +3 -22     ircd-hybrid-7/src/s_bsd_select.c
+  7.21      +3 -22     ircd-hybrid-7/src/s_bsd_sigio.c
+  7.303     +1 -15     ircd-hybrid-7/src/s_conf.c
+  7.67      +1 -17     ircd-hybrid-7/src/s_debug.c
+  1.20      +1 -6      ircd-hybrid-7/src/s_gline.c
+  7.41      +6 -11     ircd-hybrid-7/src/s_log.c
+  7.29      +1 -9      ircd-hybrid-7/src/s_misc.c
+  7.255     +1 -12     ircd-hybrid-7/src/s_serv.c
+  7.20      +1 -4      ircd-hybrid-7/src/s_stats.c
+  7.193     +1 -12     ircd-hybrid-7/src/s_user.c
+  7.15      +1 -2      ircd-hybrid-7/src/scache.c
+  7.196     +1 -11     ircd-hybrid-7/src/send.c
+  1.6       +1 -6      ircd-hybrid-7/src/snprintf.c
+  7.14      +1 -1      ircd-hybrid-7/src/sprintf_irc.c
+  7.20      +1 -4      ircd-hybrid-7/src/tools.c
+  7.64      +1 -3      ircd-hybrid-7/src/vchannel.c
+  7.18      +1 -6      ircd-hybrid-7/src/whowas.c
+
+
+
 db          2002/05/24 07:23:45 EDT	(20020524_3)
 
   Modified files:
