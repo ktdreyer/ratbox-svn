@@ -631,6 +631,12 @@ main(int argc, char *argv[])
 	setup_signals();
 	/* We need this to initialise the fd array before anything else */
 	fdlist_init();
+
+	if(!server_state_foreground)
+	{
+		comm_close_all();
+	}
+
 	init_netio();		/* This needs to be setup early ! -- adrian */
 
 #ifdef __CYGWIN__
@@ -654,10 +660,6 @@ main(int argc, char *argv[])
 	eventInit();
 	init_sys();
 
-	if(!server_state_foreground)
-	{
-		comm_close_all();
-	}
 	init_main_logfile();
 	initBlockHeap();
 	init_dlink_nodes();
