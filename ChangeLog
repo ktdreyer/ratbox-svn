@@ -1,3 +1,15 @@
+leeh        2005/03/23 13:56:28 UTC	(20050323_6)
+
+  Modified files:
+    doc                  Makefile.in 
+  Log:
+  - add an empty 'all' target
+  
+  Revision  Changes    Path
+  7.27      +2 -1      ircd-ratbox/doc/Makefile.in
+
+
+
 androsyn    2005/03/23 13:41:06 UTC	(20050323_5)
 
   Modified files:
