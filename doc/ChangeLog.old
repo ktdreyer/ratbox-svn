@@ -1,3 +1,6 @@
+*** 20010101_32 by davidt
+Prevent non-human 'things' being sjoined to channels....
+
 *** 20010101_31 by davidt
 Don't allow servers to JOIN channels, eugh
 
