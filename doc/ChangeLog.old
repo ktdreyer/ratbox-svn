@@ -1,3 +1,15 @@
+davidt      2001/12/23 16:11:13 EST	(20011223_0)
+
+  Modified files:
+    src                  s_serv.c 
+  Log:
+  - Fix possible division by zero.
+  
+  Revision  Changes    Path
+  7.227     +29 -25    ircd-hybrid-7/src/s_serv.c
+
+
+
 wcampbel    2001/12/22 00:31:04 EST	(20011222_1)
 
   Modified files:
