@@ -1,3 +1,11 @@
+*** 20010126_11 by db
+- added kill_client() for formatting up a KILL to an uid or nick as needed
+  unused function at the moment.
+
+- added send_trim()' sto sendto_one_prefix()
+
+
+
 *** 20010126_10 by androsyn
 Fixed minor issue of #include ordering...
 
