@@ -1,3 +1,17 @@
+leeh        2004/06/15 09:58:30 EDT	(20040615_6)
+
+  Modified files:
+    doc                  example.conf 
+    src                  newconf.c 
+  Log:
+  - rename 'invisible' to 'hidden_oper' to be compatible with 1.x
+  
+  Revision  Changes    Path
+  7.240     +1 -1      ircd-ratbox/doc/example.conf
+  7.152     +1 -1      ircd-ratbox/src/newconf.c
+
+
+
 leeh        2004/06/15 00:42:23 EDT	(20040615_5)
 
   Modified files:
