@@ -4,8 +4,8 @@ This document is an overview of what new features are included
 AWAY is now propogated.  
 
 The conf file format has been vastly improved.  The old conf format is 
-still supported, but is deprecated.  Many options that were defined at
-compile time are now set in the config file.
+no longer supported.  Many options that were defined at compile time are
+now set in the config file.
 
 Unauthorized connection notices have been moved to the +u user mode.
 
