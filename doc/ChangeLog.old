@@ -1,3 +1,9 @@
+*** 20001227_7 by db
+- must use ClearOper() macro to deoper, otherwise handler is still set
+  to oper handler. ooops
+
+
+
 *** 20001227_6 by wcampbel
 DNS and HTM no longer exist, document CJOIN in opers.txt
 
