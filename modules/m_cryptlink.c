@@ -32,9 +32,8 @@
 
 #include <assert.h>
 
-#include "rsa.h"
-
 #ifdef HAVE_LIBCRYPTO
+#include "rsa.h"
 #include <openssl/rsa.h>
 #include <openssl/pem.h>
 #include <openssl/bio.h>

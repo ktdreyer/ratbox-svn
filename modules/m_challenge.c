@@ -31,7 +31,9 @@
 #include "numeric.h"
 #include "send.h"
 #include "s_conf.h"
+#ifdef HAVE_LIBCRYPTO
 #include "rsa.h"
+#endif
 #include "msg.h"
 #include "parse.h"
 #include "irc_string.h"
