@@ -144,6 +144,20 @@ v) Global user@host limits.
     *MUST* use 'connectfreq = <duration>;' in server class blocks, not
     number_per_ip.
 
+vi) ASCII casemapping support (by AndroSyn)
+    IRCs scandinavian origins mean the characters are {}|~ are treated as
+    the lowercase of []\^.  Thus as the nicks "a" and "A" would be the same,
+    the nicks "[" and "{" would be.
+
+    If this is defined they are treated as individual characters, so the
+    nicks [foo] and {foo} would be two seperate clients.  If this is
+    enabled it MUST be done network wide or you will experience problems
+    with non-compatible servers.  Your locale(1) must also be set to "C"
+    or the system itself may treat the characters differently.
+
+    The following option is added to config.h that can be defined:
+       USE_ASCII_CASEMAP
+
 
 If you have any problems, questions or find any bugs, find me on irc 
 (ircnet/efnet) or email me.  Have fun. :)
