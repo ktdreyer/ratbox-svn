@@ -1,3 +1,11 @@
+*** 20010102_2 by davidt
+- Add back (fixed) logic to m_burst.c (otherwise LL cjoin breaks)
+- Fix some more cases in m_join.c that reveal the vchan's true name..
+- Fixed the comment in messages.tab for ERR_UNAVAILRESOURCE
+- Fix cjoin_channel to find a unique vchannel name, or return
+  ERR_UNAVAILRESOURCE
+
+
 *** 20010102_1 by db
 - removed some faulty logic in m_cburst.c, this cored us
   when the nick wasnt' present..
