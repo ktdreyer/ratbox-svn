@@ -1,3 +1,17 @@
+jmallett    2002/01/13 10:02:22 EST	(20020113_6)
+
+  Modified files:
+    modules/core         m_message.c 
+  Log:
+  Move fl_'s check for a server sending a PRIVMSG into m_privmsg, and just
+  return there, instead of going into m_message and _then_ checking for
+  PRIVMSG or NOTICE.
+  
+  Revision  Changes    Path
+  1.87      +7 -7      ircd-hybrid-7/modules/core/m_message.c
+
+
+
 jmallett    2002/01/13 09:58:27 EST	(20020113_5)
 
   Modified files:
