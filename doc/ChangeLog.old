@@ -1,3 +1,19 @@
+leeh        2002/02/23 10:30:55 EST	(20020223_3)
+
+  Modified files:
+    include              config.h config.h.dist 
+    src                  client.c 
+  Log:
+  - added a kludged #define to hide server ips from everyone including admins,
+    I dont like this, but *shrug*
+  
+  Revision  Changes    Path
+  7.129     +20 -7     ircd-hybrid-7/include/config.h
+  7.55      +20 -7     ircd-hybrid-7/include/config.h.dist
+  7.236     +4 -0      ircd-hybrid-7/src/client.c
+
+
+
 leeh        2002/02/23 07:58:32 EST	(20020223_2)
 
   Modified files:
