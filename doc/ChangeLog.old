@@ -1,3 +1,10 @@
+*** 20001202_1 by db
+- change_channel_membership was screwing up, since dlinkDelete does
+  not zero the dlink_list->head pointer in all cases. *sigh* dunno
+  what I did wrong. anyway, this hack fixes it for now.
+
+
+
 *** 20001201_8 by db
 - fixed m_who.c
 - optimized m_sjoin.c a bit
