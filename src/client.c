@@ -183,13 +183,6 @@ void _free_client(struct Client* client_p)
   assert(&me != client_p);
   assert(NULL == client_p->prev);
   assert(NULL == client_p->next);
-#if 0
-  assert(dlinkFind(&unknown_list, client_p) == NULL);
-  assert(dlinkFind(&lclient_list, client_p) == NULL);
-  assert(dlinkFind(&serv_list, client_p) == NULL);
-  assert(dlinkFind(&global_serv_list, client_p) == NULL);
-  assert(dlinkFind(&oper_list, client_p) == NULL);
-#endif
 
   if (MyConnect(client_p))
     {
@@ -289,14 +282,6 @@ check_pings_list(dlink_list *list)
       */
       if (client_p->flags & FLAGS_DEADSOCKET)
         {
-#if 0
-         if (client_p->flags & FLAGS_SENDQEX)
-           {
-            exit_client(client_p, client_p, &me, "SendQ exceeded");
-            continue;
-           }
-          exit_client(client_p, client_p, &me, "Dead socket");
-#endif
 	  /* Ignore it, its been exited already */
           continue; 
         }
@@ -950,11 +935,6 @@ free_exited_clients(void *unused)
           free_dlink_node(ptr);
           continue;
         }
-#if 0 && defined(DUPFREEDEBUG)
-      sendto_realops_flags(FLAGS_ALL, L_ALL,
-        "Freeing client ``%s''; exit_one_client caller called from %s:%ld",
-         target_p->name, target_p->free_file, target_p->free_line);
-#endif
       release_client_state(target_p);
       free_client(target_p);
       dlinkDelete(ptr, &dead_list);

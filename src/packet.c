@@ -142,50 +142,11 @@ flood_recalc(int fd, void *data)
 {
   struct Client *client_p = data;
   struct LocalUser *lclient_p = client_p->localClient;
-#if 0
-  int max_flood_per_sec = MAX_FLOOD;
-#endif
  
   /* This can happen in the event that the client detached. */
   if (!lclient_p)
     return;
 
-#if 0     
-  /* If we're a server, skip to the end. Realising here that this call is
-   * cheap and it means that if a op is downgraded they still get considered
-   * for anti-flood protection ..
-   */
-  if(!IsPrivileged(client_p))
-  {
-    /* Is the grace period still active? */
-    if (client_p->user && !IsFloodDone(client_p))
-      max_flood_per_sec = MAX_FLOOD_BURST;
-
-    /* ok, we have to recalculate the number of messages we can receive
-     * in this second, based upon what happened in the last second.
-     * If we still exceed the flood limit, don't move the parsed limit.
-     * If we are below the flood limit, increase the flood limit.
-     *   -- adrian
-     */
-    /* Set to 1 to start with, let it rise/fall after that... */
-    if (lclient_p->allow_read == 0)
-      lclient_p->allow_read = 1;
-    /* Raise the allowed messages if we flooded under the limit */
-    else if (lclient_p->actually_read < lclient_p->allow_read)
-      lclient_p->allow_read++;
-    /* Drop the limit to avoid flooding .. */
-    else
-      lclient_p->allow_read--;
-
-    /* Enforce floor/ceiling restrictions */
-    if (lclient_p->allow_read < 1)
-      lclient_p->allow_read = 1;
-    else if (lclient_p->allow_read > max_flood_per_sec)
-     lclient_p->allow_read = max_flood_per_sec;
-    lclient_p->allow_read = max_flood_per_sec;
-  }
-#endif
-  
   /* Reset the sent-per-second count */
   if(--lclient_p->sent_parsed < 0)
     lclient_p->sent_parsed = 0;
