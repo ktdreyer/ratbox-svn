@@ -46,9 +46,9 @@
 #include "memdebug.h"
 
 int do_whois(struct Client *cptr, struct Client *sptr, int parc, char *parv[]);
-int single_whois(struct Client *sptr, struct Client *acptr, int wilds);
-void whois_person(struct Client *sptr,struct Client *acptr);
-int global_whois(struct Client *sptr, char *nick, int wilds);
+int single_whois(struct Client *sptr, struct Client *acptr, int wilds, int glob);
+void whois_person(struct Client *sptr,struct Client *acptr,int glob);
+int global_whois(struct Client *sptr, char *nick, int wilds, int glob);
 
 struct Message whois_msgtab = {
   MSG_WHOIS, 0, 0, 0, MFLG_SLOW, 0L,
@@ -79,35 +79,24 @@ int     m_whois(struct Client *cptr,
                 int parc,
                 char *parv[])
 {
-
-/*
- *  struct Client *acptr;
- */  
-
+   struct Client *acptr;
+  
   if (parc < 2)
     {
       sendto_one(sptr, form_str(ERR_NONICKNAMEGIVEN),
                  me.name, parv[0]);
       return 0;
     }
-  /* Don't break old clients... -A1kmm. */
-  /* Okay, after discussion with other coders we have to always route,
-   * and always show idle times... -A1kmm */
-  /* 
-   * The other coders didnt agree :>
-   * This as is breaks /whois of clients on non compatable servers
-   * We will add another way to get idle times later..
-   * 
-   */
 
-/*  if ((acptr = hash_find_client(parv[1], (struct Client*)NULL)) &&
- *     !MyConnect(acptr) && IsClient(acptr))
- *   {
- *    sendto_one(acptr->from, ":%s WHOIS %s %s", parv[0], parv[1],
- *               parv[1]);
- *    return 0;
- *   }
- */
+  /* We need this to keep compatibility with hyb6 */
+  if ((acptr = hash_find_client(parv[1], (struct Client*)NULL)) &&
+      !MyConnect(acptr) && IsClient(acptr) && parc > 2)
+    {
+     sendto_one(acptr->from, ":%s WHOIS %s :%s", parv[0], parv[1],
+                parv[1]);
+     return 0;
+    }
+  
 
  return(do_whois(cptr,sptr,parc,parv));
 }
@@ -121,8 +110,9 @@ int     mo_whois(struct Client *cptr,
                 struct Client *sptr,
                 int parc,
                 char *parv[])
+
 {
-  if (parc < 2)
+  if(parc < 2)
     {
       sendto_one(sptr, form_str(ERR_NONICKNAMEGIVEN),
                  me.name, parv[0]);
@@ -156,6 +146,14 @@ int do_whois(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   char  *p = NULL;
   int   found=NO;
   int   wilds;
+  int   glob=0;
+
+  /* This lets us make all "whois nick" queries look the same, and all
+   * "whois nick nick" queries look the same.  We have to pass it all
+   * the way down to whois_person() though -- fl */
+
+  if(parc > 2)
+    glob = 1;
 
   nick = parv[1];
   if ( (p = strchr(parv[1],',')) )
@@ -173,7 +171,7 @@ int do_whois(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
 	  if(IsPerson(acptr))
 	    {
-	      (void)single_whois(sptr,acptr,wilds);
+	      (void)single_whois(sptr,acptr,wilds,glob);
 	      found = YES;
             }
         }
@@ -181,8 +179,12 @@ int do_whois(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 	{
 	  if (uplink && IsCapable(uplink,CAP_LL))
 	    {
-	      sendto_one(uplink,":%s WHOIS %s",
-			 sptr->name, nick);
+	      if(glob == 1)
+   	        sendto_one(uplink,":%s WHOIS %s :%s",
+		  	   sptr->name, nick, nick);
+	      else
+		sendto_one(uplink,":%s WHOIS %s",
+			   sptr->name, nick);
 	      return 0;
 	    }
 	}
@@ -196,7 +198,7 @@ int do_whois(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 	  return 0;
 	}
       /* Oh-oh wilds is true so have to do it the hard expensive way */
-      found = global_whois(sptr, nick, wilds);
+      found = global_whois(sptr,nick,wilds,glob);
     }
 
   if(found)
@@ -217,7 +219,7 @@ int do_whois(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
  * Side Effects	- do a single whois on given client
  * 		  writing results to sptr
  */
-int global_whois(struct Client *sptr, char *nick, int wilds)
+int global_whois(struct Client *sptr, char *nick, int wilds, int glob)
 {
   struct Client *acptr;
   int found = NO;
@@ -248,7 +250,7 @@ int global_whois(struct Client *sptr, char *nick, int wilds)
       if(!IsRegistered(acptr))
 	continue;
 
-      if(single_whois(sptr, acptr, wilds))
+      if(single_whois(sptr, acptr, wilds, glob))
 	found = 1;
     }
 
@@ -265,7 +267,7 @@ int global_whois(struct Client *sptr, char *nick, int wilds)
  * Side Effects	- do a single whois on given client
  * 		  writing results to sptr
  */
-int single_whois(struct Client *sptr,struct Client *acptr,int wilds)
+int single_whois(struct Client *sptr,struct Client *acptr,int wilds, int glob)
 {
   dlink_node *ptr;
   struct Channel *chptr;
@@ -313,7 +315,7 @@ int single_whois(struct Client *sptr,struct Client *acptr,int wilds)
     }
 
   if(showperson)
-    whois_person(sptr,acptr);
+    whois_person(sptr,acptr,glob);
   return 0;
 }
 
@@ -325,7 +327,7 @@ int single_whois(struct Client *sptr,struct Client *acptr,int wilds)
  * Output	- NONE
  * Side Effects	- 
  */
-void whois_person(struct Client *sptr,struct Client *acptr)
+void whois_person(struct Client *sptr,struct Client *acptr, int glob)
 {
   char buf[BUFSIZE];
   char *chname;
@@ -411,28 +413,20 @@ void whois_person(struct Client *sptr,struct Client *acptr)
 	       sptr->name, acptr->name, acptr->user->away);
 
   if (IsOper(acptr))
-    {
       sendto_one(sptr, form_str(RPL_WHOISOPERATOR),
 		 me.name, sptr->name, acptr->name);
 
-      if (IsAdmin(acptr))
+  if (IsAdmin(acptr) && glob == 1)
 	sendto_one(sptr, form_str(RPL_WHOISADMIN),
 		   me.name, sptr->name, acptr->name);
-    }
 
 
-  /* Always route, always show idle time - A1kmm. */
-/* 
- *  if (MyConnect(acptr))
- * Lets not - broken for now..
- *
- */  
-if ((IsOper(sptr) || !GlobalSetOptions.hide_server) && MyConnect(acptr))
-  sendto_one(sptr, form_str(RPL_WHOISIDLE),
+  if(glob == 1)
+    sendto_one(sptr, form_str(RPL_WHOISIDLE),
 	       me.name, sptr->name, acptr->name,
 	       CurrentTime - acptr->user->last,
 	       acptr->firsttime);
-  
+
   return;
 }
 
@@ -460,8 +454,8 @@ int     ms_whois(struct Client *cptr,
   if( !IsOper(sptr) && GlobalSetOptions.hide_server
       && !IsCapable(cptr->from,CAP_LL) )
     {
-	return 0;
+ 	return 0;
     }
-
+ 
   return( m_whois(cptr,sptr,parc,parv) );
 }
