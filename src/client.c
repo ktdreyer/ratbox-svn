@@ -1059,7 +1059,7 @@ static void exit_one_client(struct Client *cptr, struct
       */
       if ((sptr->flags & FLAGS_KILLED) == 0)
         {
-          sendto_serv_butone(cptr,":%s QUIT :%s",
+          sendto_ll_serv_butone(cptr,sptr,":%s QUIT :%s",0,
                              sptr->name, comment);
         }
       /*
