@@ -1,3 +1,7 @@
+*** 20001223_26 by spookey
+removes extra tab craziness, it drove me INSANE... =P
+
+
 *** 20001223_25 by ejb
 - fix off-by-one error in parse.c
 
