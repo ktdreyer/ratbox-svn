@@ -1,3 +1,10 @@
+*** 20010526_3 by jdc
+* Added support for time_t size checking during configure.  Would be
+  appreciated if someone on a i386 Linux machine checked to see if the
+  configure output returns 'no' or 'yes'...
+
+
+
 *** 20010526_2 by davidt
 - Doh. hopefully fix the endianness issue with the servlink io code,
   which I missed when cleaning up the code (i fixed the code to read
