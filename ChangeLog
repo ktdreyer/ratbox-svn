@@ -1,3 +1,17 @@
+leeh        2002/09/14 13:18:04 UTC	(20020914_1)
+
+  Modified files:
+    modules              m_kline.c m_unkline.c 
+  Log:
+  - cleaned up some logic in remote kline/unkline, dont check_klines()
+    unless we have success, dont parse a kline unless they have access etc.
+  
+  Revision  Changes    Path
+  1.119     +62 -68    ircd-ratbox/modules/m_kline.c
+  1.60      +9 -10     ircd-ratbox/modules/m_unkline.c
+
+
+
 leeh        2002/09/14 12:51:52 UTC	(20020914_0)
 
   Modified files:
