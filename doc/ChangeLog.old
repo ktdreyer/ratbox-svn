@@ -1,3 +1,46 @@
+*** 20001030_6 by adrian
+
+
+Big big write optimisation, taking client and server writes into the
+new network loop:
+
+* flush_sendq_except() is gone. This was called when data was
+  added to a dbuf and a new one needed allocating, probably to
+  increase network throughput and decrease dbuf usage. It should
+  not be needed now.
+
+* send_queued() has been turned into send_queued_write() which is
+  an IO callback now.
+
+* send_message() will now *always* schedule a COMM_SELECT_WRITE
+  regardless of how small the sendq is. This should up the
+  network throughput and reduce the CPU a little.
+
+* send_queued_write() should be rescheduling a COMM_SELECT_WRITE 
+  if the dbuf chain hasn't been drained fully. I'm still 
+  researching this to make sure the variable 'more' is set in
+  the right places.
+
+* fd shutdown code in s_bsd.c called send_queued() to flush dbufs
+  before killing the FD. This obviously can't be done now.
+  As noted in a comment, when close handlers are implemented
+  correctly, the dbuf will be flushed (or attempted to) before
+  the FD closes totally, so we just ignore it here for now.
+
+* Make the old-style poll code not register and check write
+  events for FDs that need data written. So now, the only
+  thing that can trigger a client/server FD write in the old-style
+  poll code is the completion of a connect(). All server/client
+  FD writes are done through comm_select() in the new world order.
+
+send_message() could probably attempt to call send_queued_write()
+rather than waiting for the fd to be ready for writing, but this
+is an optimisation for another time. (And easy too, since the
+original code for send_message() called send_queued() anyway,
+so there shouldn't be any problems there .. :)
+
+
+
 *** 20001030_5 by db
 - added tiny stats parse function (damn you Isomer!)
 
