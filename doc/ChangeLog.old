@@ -1,3 +1,17 @@
+*** 20001209_13 by db
+- ok. in the new world order... prefixes are generated at the top level
+  instead of being grunged out in send.c... This gets rid of incredible
+  idiotic connipations that were happening in send.c... I've only done 
+  this for =LOCAL= sent to server messages so far, hence ALL uses of
+  sendto_channel_local you must work out your own prefix. Its not hard,
+  and is worth the bother. This modified a bunch of modules.
+
+- I have also preformatted the stupid string to be sent to each client
+  in sendto_channel_local AT the top instead of re-formatting it each
+  and every time a message is sent to a client. like *duh*
+
+
+
 *** 20001209_12 by db
 - quick fix to fix prefixes on LOCAL channels only...
   prefix adding was =hidden= in underlying send.c functions. 
