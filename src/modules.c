@@ -60,13 +60,13 @@
 struct module **modlist = NULL;
 
 static const char *core_module_table[] = {
+	"registration",
 	"m_die",
 	"m_join",
 	"m_kick",
 	"m_kill",
 	"m_message",
 	"m_mode",
-	"m_nick",
 	"m_part",
 	"m_quit",
 	"m_server",
