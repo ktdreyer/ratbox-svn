@@ -1,3 +1,16 @@
+leeh        2003/06/30 15:18:58 EDT	(20030630_6)
+
+  Modified files:
+    modules/core         m_mode.c 
+  Log:
+  - casting a bitmask to a void *, so we can pass it to a function, then
+    cast it back to a long is dumb.
+  
+  Revision  Changes    Path
+  1.78      +70 -77    ircd-ratbox/modules/core/m_mode.c
+
+
+
 leeh        2003/06/30 15:00:59 EDT	(20030630_5)
 
   Removed files:
