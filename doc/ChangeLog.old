@@ -1,3 +1,7 @@
+*** 20010615_3 by toot
+/names should say "#channel End of /NAMES list.", even when the channel doesn't exist
+
+
 *** 20010615_2 by a1kmm
 - Fixed IPv6 klines.
 
