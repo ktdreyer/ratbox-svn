@@ -93,8 +93,7 @@ static void m_motd(struct Client *client_p, struct Client *source_p,
   if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
     {
       /* safe enough to give this on a local connect only */
-      if(MyClient(source_p))
-	sendto_one(source_p,form_str(RPL_LOAD2HI),me.name,source_p->name);
+      sendto_one(source_p,form_str(RPL_LOAD2HI),me.name,source_p->name);
       return;
     }
   else

@@ -69,6 +69,26 @@ char *_version = "20001223";
 static void m_version(struct Client* client_p, struct Client* source_p,
                       int parc, char* parv[])
 {
+  static time_t last_used=0L;
+
+  if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
+  {
+    /* safe enough to give this on a local connect only */
+    sendto_one(source_p,form_str(RPL_LOAD2HI),me.name,parv[0]);
+    return;
+  }
+  else
+  {
+    last_used = CurrentTime;
+  }
+ 
+  if (!ConfigServerHide.disable_remote)
+  {
+    if (hunt_server(client_p, source_p, ":%s VERSION :%s",
+                    1, parc, parv) != HUNTED_ISME)
+      return;
+  }
+  
   sendto_one(source_p, form_str(RPL_VERSION), me.name,
                 parv[0], ircd_version, serno, debugmode,
                 me.name, confopts(source_p), serveropts);
@@ -84,6 +104,7 @@ static void m_version(struct Client* client_p, struct Client* source_p,
 static void mo_version(struct Client* client_p, struct Client* source_p,
                       int parc, char* parv[])
 {
+  
   if (hunt_server(client_p, source_p, ":%s VERSION :%s", 
 		  1, parc, parv) != HUNTED_ISME)
     return;
@@ -110,7 +131,6 @@ static void ms_version(struct Client* client_p, struct Client* source_p,
     sendto_one(source_p, form_str(RPL_VERSION), me.name,
                parv[0], ircd_version, serno, debugmode,
                me.name, confopts(source_p), serveropts);
-    show_isupport(source_p);
   }
 
   return;
