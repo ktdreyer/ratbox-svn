@@ -9,6 +9,7 @@
   cant be seen in stats k, this will be fixed in ratbox-1.1
 - mkpasswd has been updated
 - added a note to README.FIRST about the fbsd ipv6-in-ipv4 problem
+- fixed an identd/username bug
 
 -- ircd-ratbox-1.0-rc5 
 - Added ISON support for servers.  Disabled for users when shide is on.
