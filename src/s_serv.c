@@ -1649,14 +1649,13 @@ serv_connect_callback(int fd, int status, void *data)
 		 */
 #ifndef HIDE_SERVERS_IPS
 		sendto_realops_flags(UMODE_ALL, L_ALL,
-				     "Error connecting to %s[%s]: %s (%s)",
+				     "Error connecting to %s[%s]: %s",
 				     client_p->name, client_p->host,
-				     comm_errstr(status), strerror(errno));
+				     comm_errstr(status));
 #else
 		sendto_realops_flags(UMODE_ALL, L_ALL,
-				     "Error connecting to %s: %s (%s)",
-				     client_p->name, comm_errstr(status),
-				     strerror(errno));
+				     "Error connecting to %s: %s",
+				     client_p->name, comm_errstr(status));
 #endif
 		exit_client(client_p, client_p, &me, comm_errstr(status));
 		return;
