@@ -682,7 +682,11 @@ main(int argc, char *argv[])
 
 	/* We want try_connections to be called as soon as possible now! -- adrian */
 	/* No, 'cause after a restart it would cause all sorts of nick collides */
+	/* um.  by waiting even longer, that just means we have even *more*
+	 * nick collisions.  what a stupid idea. set an event for the IO loop --fl
+	 */
 	eventAddIsh("try_connections", try_connections, NULL, STARTUP_CONNECTIONS_TIME);
+	eventAddOnce("try_connections_startup", try_connections, NULL, 0);
 
 	eventAddIsh("collect_zipstats", collect_zipstats, NULL, ZIPSTATS_TIME);
 
@@ -699,6 +703,7 @@ main(int argc, char *argv[])
 		eventAddIsh("check_splitmode", check_splitmode, NULL, 60);
 
 	ServerRunning = 1;
+
 	io_loop();
 	return 0;
 }
