@@ -1,3 +1,7 @@
+*** 20010225_10 by androsyn
+Fixed stupid typo..
+
+
 *** 20010225_9 by androsyn
 Removed inet_aton() calls.  This should be the last things that needs
 libresolv on solaris.
