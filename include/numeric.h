@@ -234,7 +234,7 @@ extern const char* form_str(int);
 
 #define RPL_NOTOPIC          331
 #define RPL_TOPIC            332
-#define RPL_TOPICWHOTIME 333
+#define RPL_TOPICWHOTIME     333
 
 #define RPL_INVITING         341
 #define RPL_SUMMONING        342
