@@ -1,3 +1,17 @@
+leeh        2002/09/10 18:56:30 UTC	(20020910_1)
+
+  Modified files:
+    .                    RELNOTES 
+    src                  hostmask.c 
+  Log:
+  - updated relnotes and ported a fix from hyb
+  
+  Revision  Changes    Path
+  1.48      +1 -0      ircd-ratbox/RELNOTES
+  7.77      +2 -2      ircd-ratbox/src/hostmask.c
+
+
+
 leeh        2002/09/10 17:05:37 UTC	(20020910_0)
 
   Modified files:
