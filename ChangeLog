@@ -1,3 +1,20 @@
+leeh        2004/06/06 20:39:46 EDT	(20040607_0)
+
+  Modified files:
+    include              client.h 
+    src                  client.c reject.c send.c 
+  Log:
+  - cleaned up all the tests for deadness, hopefully this should fix that
+    damned bug.
+  
+  Revision  Changes    Path
+  7.243     +0 -5      ircd-ratbox/include/client.h
+  7.458     +19 -50    ircd-ratbox/src/client.c
+  1.20      +1 -1      ircd-ratbox/src/reject.c
+  7.280     +10 -10    ircd-ratbox/src/send.c
+
+
+
 leeh        2004/06/06 17:05:11 EDT	(20040606_2)
 
   Modified files:
