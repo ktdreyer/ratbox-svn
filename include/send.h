@@ -63,6 +63,7 @@ extern  void sendto_channel_local(int type,
 	    __attribute__((format (printf, 3, 4)));
 extern  void sendto_channel_remote(struct Client *from,
 				   int type,
+				   struct Channel *chptr,
 				   char *message);
 extern void sendto_server(struct Client *one, struct Client *source_p,
                           struct Channel *chptr, unsigned long caps,
@@ -88,6 +89,7 @@ extern  void sendto_channel_local(int type,
 				  const char *, ...);
 extern  void sendto_channel_remote(struct Client *from,
 				   int type,
+				   struct Channel *chptr,
 				   char *message);
 
 extern  void sendto_channel_remote_prefix(struct Channel *,
