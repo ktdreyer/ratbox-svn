@@ -1,3 +1,10 @@
+*** 20010430_5 by jdc
+* RPL_ENDOFSTATS was returning the requested STATS character/word as
+  a %c, while the argument passed in m_stats() was a string.  All
+  fixed (%c --> %s).
+
+
+
 *** 20010430_4 by jdc
 * m_stats() did not check the parc count.  Doing a /STATS without any
   arguments could result in the server just sitting there until some
