@@ -37,6 +37,7 @@
 #include "ircd.h"
 #include "ircdauth.h"
 #include "numeric.h"
+#include "packet.h"
 #include "res.h"
 #include "s_bsd.h"
 #include "s_log.h"

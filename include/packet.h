@@ -32,6 +32,8 @@
 struct Client;
 
 extern int client_dopacket(struct Client* client, char* buf, size_t len);
+extern PF  read_packet;
+extern int parse_client_queued(struct Client *);
 
 #endif /* INCLUDED_packet_h */
 

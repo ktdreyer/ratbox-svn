@@ -20,15 +20,137 @@
  *
  *   $Id$
  */ 
-#include "packet.h"
+
+#include <stdio.h>
+#include <string.h>
+#include <assert.h>
+
+#include "s_bsd.h"
+#include "s_conf.h"
 #include "client.h"
 #include "common.h"
 #include "ircd.h"
 #include "list.h"
 #include "parse.h"
+#include "fdlist.h"
+#include "packet.h"
 #include "irc_string.h"
 
-#include <assert.h>
+
+static char               readBuf[READBUF_SIZE];
+
+
+/*
+ * parse_client_queued - parse client queued messages
+ */
+int parse_client_queued(struct Client* cptr)
+{ 
+  int dolen  = 0;
+
+  while ((dolen = linebuf_get(&cptr->localClient->buf_recvq,
+                              readBuf, READBUF_SIZE)) > 0) {
+    if (CLIENT_EXITED == client_dopacket(cptr, readBuf, dolen))
+      return CLIENT_EXITED;
+  }
+  return 1;
+}
+
+
+/*
+ * read_packet - Read a 'packet' of data from a connection and process it.
+ */
+void
+read_packet(int fd, void *data)
+{
+  struct Client *cptr = data;
+  int length = 0;
+  int done;
+
+  /*
+   * Check for a dead connection here. This is done here for legacy
+   * reasons which to me sound like people didn't check the return
+   * values of functions, and so we can't just free the cptr in
+   * dead_link() :-)
+   *     -- adrian
+   */
+  if (IsDead(cptr)) {
+    /* Shouldn't we just do the following? -- adrian */
+    /* error_exit_client(cptr, length); */
+    exit_client(cptr, cptr, &me, strerror(get_sockerr(cptr->fd)));
+    return;
+  }
+
+  /*
+   * Read some data. We *used to* do anti-flood protection here, but
+   * I personally think it makes the code too hairy to make sane.
+   *     -- adrian
+   */
+  length = recv(cptr->fd, readBuf, READBUF_SIZE, 0);
+  if (length < 0) {
+    /*
+     * This shouldn't give an EWOULDBLOCK since we only call this routine
+     * when we have data. Therefore, any error we get will be fatal.
+     *     -- adrian
+     */
+    error_exit_client(cptr, length);
+    return;
+  } else if (length == 0) {
+    /* EOF from client */
+    error_exit_client(cptr, length);
+    return;
+  }
+
+#ifdef REJECT_HOLD
+  /*
+   * If client has been marked as rejected i.e. it is a client
+   * that is trying to connect again after a k-line,
+   * pretend to read it but don't actually.
+   * -Dianora
+   *
+   * FLAGS_REJECT_HOLD should NEVER be set for non local client
+   */
+  if (IsRejectHeld(cptr)) {
+    goto finish;
+  }
+#endif
+
+  cptr->lasttime = CurrentTime;
+  if (cptr->lasttime > cptr->since)
+    cptr->since = cptr->lasttime;
+  cptr->flags &= ~(FLAGS_PINGSENT | FLAGS_NONL);
+
+  /*
+   * Before we even think of parsing what we just read, stick
+   * it on the end of the receive queue and do it when its
+   * turn comes around.
+   */
+  linebuf_parse(&cptr->localClient->buf_recvq, readBuf, length);
+
+  if (IsPerson(cptr) &&
+      (ConfigFileEntry.no_oper_flood && !IsAnyOper(cptr)) &&
+      linebuf_len(&cptr->localClient->buf_recvq) > CLIENT_FLOOD)
+    {
+      exit_client(cptr, cptr, cptr, "Excess Flood");
+      return;
+    }
+  parse_client_queued(cptr);
+#ifdef REJECT_HOLD
+  /* Silence compiler warnings -- adrian */
+finish:
+#endif
+  /* If we get here, we need to register for another COMM_SELECT_READ */
+  if (cptr->fd > -1) {
+    if (PARSE_AS_SERVER(cptr)) {
+      comm_setselect(cptr->fd, FDLIST_SERVER, COMM_SELECT_READ,
+        read_packet, cptr, 0);
+    } else {
+      comm_setselect(cptr->fd, FDLIST_IDLECLIENT, COMM_SELECT_READ,
+        read_packet, cptr, 0);
+    }
+  }
+}
+
+
 
 
 /*
