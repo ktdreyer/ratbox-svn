@@ -1,3 +1,15 @@
+leeh        2003/06/13 13:15:28 UTC	(20030613_1)
+
+  Modified files:
+    modules              m_whois.c 
+  Log:
+  - removed wildcard whois
+  
+  Revision  Changes    Path
+  1.117     +87 -207   ircd-ratbox/modules/m_whois.c
+
+
+
 leeh        2003/06/13 12:24:00 UTC	(20030613_0)
 
   Modified files:
