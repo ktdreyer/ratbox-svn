@@ -27,10 +27,10 @@
    as appropriate. */
 
 #include "stdinc.h"
+#include "../include/memory.h"
 
 #include "tools.h"
 #include "hook.h"
-#include "memory.h"
 
 dlink_list hooks;
 
