@@ -1,3 +1,44 @@
+*** 20001204_8 by db
+This is a patch which implements client send flood protection.
+This is the type of flood where someone goes
+
+/join #foo
+/exec -o cat bigfile.txt
+
+and they quit with "Excess Flood"  .
+
+Note that if a client floods, its allow_read value will decrease. If they then
+stop flooding, their allow_read value will increase regardless of whether
+there is any pending data .. this flushes the output quicker if and only
+if they stop flooding.
+
+I've managed to cause this thing to go tits up a few ways when having
+a client flooding a channel and it gets killed:
+
+* a blfree bitmap error. Diane, Can you please check out why ? :-)
+  I think this is related to your Slink death ..
+
+* Hrm. the "client connecting" notification seems to panic if I'm an oper and
+  see someone connecting to my local server.
+
+* various strange deaths in the parser.. this one confuses me
+
+* If a client gets killed for flooding, sometimes you'll see one or two
+  lines *from* that client appear immediately after the exit. This is most
+  probably my problem and its going to be a queue flushing issue ..
+
+Can someone please tidy this up over the next week and commit it? I'd
+like to have a hybrid-7 beta out, and i'm now going to be minus some serious
+time until Christmas.
+
+Thanks!
+
+committed for now...
+
+----- Forwarded message from Adrian Chadd <adrian@nympho.cacheboy.net> -----
+
+
+
 *** 20001204_7 by db
 - +m moderated channel logic was missing oops.
 - removed count of servers in server hide mode in /lusers
