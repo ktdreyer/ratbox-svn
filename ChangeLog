@@ -1,3 +1,33 @@
+androsyn    2002/08/22 17:26:05 EDT	(20020822_10)
+
+  Modified files:
+    contrib              m_ltrace.c m_owho.c m_owhois.c 
+    include              client.h ircd.h 
+    modules              m_names.c m_trace.c m_who.c m_whois.c 
+    modules/core         m_message.c m_squit.c 
+    src                  client.c ircd.c s_debug.c s_serv.c 
+  Log:
+  Change GlobalClientList to global_client_list
+  
+  Revision  Changes    Path
+  1.6       +3 -3      ircd-ratbox/contrib/m_ltrace.c
+  1.4       +2 -2      ircd-ratbox/contrib/m_owho.c
+  1.6       +2 -2      ircd-ratbox/contrib/m_owhois.c
+  7.173     +1 -1      ircd-ratbox/include/client.h
+  7.53      +1 -1      ircd-ratbox/include/ircd.h
+  1.107     +2 -2      ircd-ratbox/modules/core/m_message.c
+  1.54      +2 -2      ircd-ratbox/modules/core/m_squit.c
+  1.50      +2 -2      ircd-ratbox/modules/m_names.c
+  1.58      +2 -2      ircd-ratbox/modules/m_trace.c
+  1.68      +2 -2      ircd-ratbox/modules/m_who.c
+  1.90      +2 -2      ircd-ratbox/modules/m_whois.c
+  7.319     +2 -2      ircd-ratbox/src/client.c
+  7.251     +2 -2      ircd-ratbox/src/ircd.c
+  7.75      +1 -1      ircd-ratbox/src/s_debug.c
+  7.292     +3 -3      ircd-ratbox/src/s_serv.c
+
+
+
 androsyn    2002/08/22 16:43:12 EDT	(20020822_9)
 
   Modified files:
