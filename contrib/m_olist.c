@@ -43,8 +43,11 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
+#include "newconf.h"
 
+#define CONF_OPER_SPY 0x0400
 
+static void conf_set_oper_spy(void *);
 static void mo_olist(struct Client*, struct Client*, int, char**);
 static int list_all_channels(struct Client *);
 static void list_one_channel(struct Client *,struct Channel *);
@@ -59,12 +62,14 @@ void
 _modinit(void)
 {
   mod_add_cmd(&list_msgtab);
+  add_conf_item("operator", "oper_spy", CF_YESNO, conf_set_oper_spy);
 }
 
 void
 _moddeinit(void)
 {
   mod_del_cmd(&list_msgtab);
+  remove_conf_item("operator", "oper_spy");
 }
 const char *_version = "$Revision$";
 #endif
@@ -170,4 +175,15 @@ static void list_one_channel(struct Client *source_p, struct Channel *chptr)
 {
   sendto_one(source_p, form_str(RPL_LIST), me.name, source_p->name,
              chptr->chname, chptr->users, chptr->topic == NULL ? "" : chptr->topic );
+}
+
+void
+conf_set_oper_spy(void *data)
+{
+  int yesno = *(int*) data;
+
+  if(yesno)
+    yy_achead->port |= CONF_OPER_SPY;
+  else
+    yy_achead->port &= ~CONF_OPER_SPY;
 }

@@ -183,6 +183,30 @@ int 	add_conf_item(char *topconf, char *name, int type, void (*func)(void*))
 	return 0;
 }
 
+int     remove_conf_item(char *topconf, char *name)
+{
+        struct TopConf *tc;
+        struct ConfEntry *cf;
+        dlink_node *ptr;
+
+        if((tc = find_top_conf(topconf)) == NULL)
+                return -1;
+
+        if((cf = find_conf_item(tc, name)) == NULL)
+                return -1;
+        
+        if((ptr = dlinkFind(&tc->tc_items, cf)) == NULL)
+                return -1;
+
+        dlinkDelete(ptr, &tc->tc_items);
+        free_dlink_node(ptr);
+        MyFree(cf->cf_name);
+        MyFree(cf);
+
+        return 0;
+}
+        
+        
 struct 	ConfEntry *find_conf_item(const struct TopConf *top, const char* name)
 {
 	dlink_node *d;
@@ -221,13 +245,32 @@ int 	add_top_conf	(char *name, int (*sfunc)(struct TopConf*),
   
 	tc = MyMalloc(sizeof(struct TopConf));
   
-	tc->tc_name = name;
+	DupString(tc->tc_name, name);
 	tc->tc_sfunc = sfunc;
 	tc->tc_efunc = efunc;
   
 	d = make_dlink_node();
 	dlinkAdd(tc, d, &conf_items);
 	return 0;
+}
+
+int     remove_top_conf(char *name)
+{
+        struct TopConf *tc;
+        dlink_node *ptr;
+
+        if((tc = find_top_conf(name)) == NULL)
+                return -1;
+
+        if((ptr = dlinkFind(&conf_items, tc)) == NULL)
+                return -1;
+
+        dlinkDelete(ptr, &conf_items);
+        free_dlink_node(ptr);
+        MyFree(tc->tc_name);
+        MyFree(tc);
+
+        return 0;
 }
 
 void	newconf_init()
@@ -761,18 +804,18 @@ void	conf_set_logging_log_level(void *data)
 }
 
 /* XXX This _really_ needs to go away */
-static struct ConfItem *yy_achead = NULL;
-static struct ConfItem *yy_aconf = NULL;
-static struct ConfItem *yy_aprev = NULL;
-static int              yy_acount = 0;
-static struct ConfItem *yy_hconf;
-static struct ConfItem *yy_lconf;
+struct ConfItem *yy_achead = NULL;
+struct ConfItem *yy_aconf = NULL;
+struct ConfItem *yy_aprev = NULL;
+int              yy_acount = 0;
+struct ConfItem *yy_hconf;
+struct ConfItem *yy_lconf;
 
-static struct ConfItem *hub_confs;
-static struct ConfItem *leaf_confs;
-static struct ConfItem *yy_aconf_next;
+struct ConfItem *hub_confs;
+struct ConfItem *leaf_confs;
+struct ConfItem *yy_aconf_next;
 
-static struct Class *yy_class = NULL;
+struct Class *yy_class = NULL;
 char *resv_reason;
 
 char  *class_redirserv_var;

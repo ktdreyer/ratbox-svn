@@ -24,6 +24,19 @@ struct TopConf
   dlink_list	tc_items;
 };
 
+struct ConfItem *yy_achead;
+struct ConfItem *yy_aconf;
+struct ConfItem *yy_aprev;
+int              yy_acount;
+struct ConfItem *yy_hconf;
+struct ConfItem *yy_lconf;
+
+struct ConfItem *hub_confs;
+struct ConfItem *leaf_confs;
+struct ConfItem *yy_aconf_next;
+
+struct Class *yy_class;
+
 #define CF_QSTRING	0x01
 #define CF_INT		0x02
 #define CF_STRING	0x03
@@ -63,7 +76,9 @@ extern 		dlink_list 	conf_items;
 
 	int 	add_top_conf		(char *, int (*)(struct TopConf *),
 		 			 int (*)(struct TopConf *));
+        int     remove_top_conf(char *);
 	int 	add_conf_item		(char *, char *, int, void (*)(void *));
+        int     remove_conf_item(char *, char *);
 struct 	TopConf *find_top_conf		(char *);
 struct 	ConfEntry *find_conf_item	(const struct TopConf*, const char*);
 	int 	conf_start_block	(char *, char *);
