@@ -247,6 +247,10 @@ static void ms_server(struct Client *client_p, struct Client *source_p,
   int              llined = 0;
   dlink_node	   *ptr;
 
+  /* Just to be sure -A1kmm. */
+  if (!IsServer(source_p))
+   return;
+
   if ( (name = parse_server_args(parv, parc, info, &hop)) == NULL )
     {
       sendto_one(client_p,"ERROR :No servername");
