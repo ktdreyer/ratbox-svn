@@ -1,3 +1,7 @@
+*** 20010424_11 by androsyn
+Fixed the ::1 stuff for good :)
+
+
 *** 20010424_10 by db
 - committed Alfred Perlsteins (zb^3) changes to s_bsd_kqueue.c
   tested.. 
