@@ -22,6 +22,7 @@
 #include "client.h"
 #include "irc_string.h"
 #include "packet.h"
+#include "fdlist.h"
 #include "s_bsd.h"
 #include "s_serv.h"
 #include "s_log.h"

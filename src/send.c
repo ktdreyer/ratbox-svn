@@ -28,6 +28,7 @@
 #include "ircd.h"
 #include "handlers.h"
 #include "numeric.h"
+#include "fdlist.h"
 #include "s_bsd.h"
 #include "s_serv.h"
 #include "s_zip.h"

@@ -20,6 +20,7 @@
  */
 #include "listener.h"
 #include "client.h"
+#include "fdlist.h"
 #include "irc_string.h"
 #include "ircd.h"
 #include "ircd_defs.h"
@@ -149,9 +150,11 @@ static int inetport(struct Listener* listener)
   else if ((HARD_FDLIMIT - 10) < fd) {
     report_error("no more connections left for listener %s:%s", 
                  get_listener_name(listener), errno);
+    /* This is ok because we haven't fd_open()ed it yet -- adrian */
     close(fd);
     return 0;
   }
+  fd_open(fd, FD_SOCKET, "Listener socket");
   /* 
    * XXX - we don't want to do all this crap for a listener
    * set_sock_opts(listener);
@@ -159,7 +162,7 @@ static int inetport(struct Listener* listener)
   if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (char*) &opt, sizeof(opt))) {
     report_error("setting SO_REUSEADDR for listener %s:%s", 
                  get_listener_name(listener), errno);
-    close(fd);
+    fd_close(fd);
     return 0;
   }
 
@@ -200,14 +203,14 @@ static int inetport(struct Listener* listener)
 #endif
     report_error("binding listener socket %s:%s", 
                  get_listener_name(listener), errno);
-    close(fd);
+    fd_close(fd);
     return 0;
   }
 
   if (listen(fd, HYBRID_SOMAXCONN)) {
     report_error("listen failed for %s:%s", 
                  get_listener_name(listener), errno);
-    close(fd);
+    fd_close(fd);
     return 0;
   }
 
@@ -302,7 +305,7 @@ void close_listener(struct Listener* listener)
     }
   }
   if (-1 < listener->fd)
-    close(listener->fd);
+    fd_close(listener->fd);
   free_listener(listener);
 }
  
@@ -371,7 +374,7 @@ void accept_connection(struct Listener* listener)
       last_oper_notice = CurrentTime;
     }
     send(fd, "ERROR :All connections in use\r\n", 32, 0);
-    close(fd);
+    fd_close(fd);
     return;
   }
   /*
@@ -380,7 +383,7 @@ void accept_connection(struct Listener* listener)
   if (!listener->active) {
     ++ServerStats->is_ref;
     send(fd, "ERROR :Use another port\r\n", 25, 0);
-    close(fd);
+    fd_close(fd);
     return;
   }
   /*
@@ -391,7 +394,7 @@ void accept_connection(struct Listener* listener)
 #ifdef REPORT_DLINE_TO_USER
      send(fd, "NOTICE DLINE :*** You have been D-lined\r\n", 41, 0);
 #endif
-    close(fd);
+    fd_close(fd);
     return;
   }
   ServerStats->is_ac++;

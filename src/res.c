@@ -17,6 +17,8 @@
 #include "ircd.h"
 #include "numeric.h"
 #include "restart.h"
+#include "fdlist.h"
+#include "fileio.h" /* for file_open / file_close */
 #include "s_bsd.h"
 #include "s_log.h"
 #include "send.h"
@@ -269,14 +271,14 @@ static void start_resolver(void)
    * successfully. Needed on Solaris
    */
   if (spare_fd > -1)
-    close(spare_fd);
+    file_close(spare_fd);
 
   res_init();      /* res_init always returns 0 */
   /*
    * make sure we have a valid file descriptor below 256 so we can
    * do this again. Needed on Solaris
    */
-  spare_fd = open("/dev/null",O_RDONLY,0);
+  spare_fd = file_open("/dev/null",O_RDONLY,0);
   if ((spare_fd < 0) || (spare_fd > 255))
     {
       ircsprintf(sparemsg,"invalid spare_fd %d",spare_fd);
@@ -295,6 +297,7 @@ static void start_resolver(void)
   if (ResolverFileDescriptor < 0)
     {
       ResolverFileDescriptor = socket(AF_INET, SOCK_DGRAM, 0);
+      fd_open(ResolverFileDescriptor, FD_SOCKET, "Resolver");
       set_non_blocking(ResolverFileDescriptor);
     }
 }

@@ -22,6 +22,10 @@
  */
 #include "fileio.h"
 #include "irc_string.h"
+
+/* The following are to get the fd manipulation routines. eww. */
+#include "fdlist.h"
+
 #include <stdio.h>  /* BUFSIZ, EOF */
 #include <stdlib.h> /* malloc, free */
 #include <fcntl.h>  /* O_RDONLY, O_WRONLY, ... */
@@ -40,6 +44,36 @@ struct FileBuf {
   char  buf[BUFSIZ];  /* buffer */
   char  pbuf[BUFSIZ+1]; /* push back buffer */
 };
+
+/*
+ * Wrappers around open() / close() for fileio, since a whole bunch of
+ * code that should be using the fbopen() / fbclose() code isn't.
+ * Grr. -- adrian
+ */
+
+int
+file_open(const char *filename, int mode, int fmode)
+{
+    int fd;
+    fd = open(filename, mode, fmode);
+    if (fd >= 0)
+        fd_open(fd, FD_FILE, filename);
+    return fd;
+}
+
+void
+file_close(int fd)
+{
+    /*
+     * Debug - we set type to FD_FILECLOSE so we can get trapped
+     * in fd_close() with type == FD_FILE. This will allow us to
+     * convert all abusers of fd_close() of a FD_FILE fd over
+     * to file_close() .. mwahaha!
+     */
+    assert(fd_table[fd].type == FD_FILE);
+    fd_table[fd].type = FD_FILECLOSE;
+    fd_close(fd);
+}
 
 FBFILE* fbopen(const char* filename, const char* mode)
 {
@@ -75,12 +109,12 @@ FBFILE* fbopen(const char* filename, const char* mode)
     ++mode;
   }
 
-  if ((fd = open(filename, openmode, pmode)) == -1) {
+  if ((fd = file_open(filename, openmode, pmode)) == -1) {
     return fb;
   }
 
   if (NULL == (fb = fdbopen(fd, NULL)))
-    close(fd);
+    file_close(fd);
   return fb;
 }
 
@@ -103,7 +137,7 @@ FBFILE* fdbopen(int fd, const char* mode)
 void fbclose(FBFILE* fb)
 {
   assert(fb);
-  close(fb->fd);
+  file_close(fb->fd);
   free(fb);
 }
 

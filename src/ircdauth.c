@@ -37,6 +37,7 @@
 #include "class.h"
 #include "client.h"
 #include "common.h"
+#include "fdlist.h"
 #include "irc_string.h"
 #include "ircd_defs.h"
 #include "ircd.h"
@@ -104,13 +105,14 @@ ConnectToIAuth()
 		iAuth.socket = NOSOCK;
 		return(NOSOCK);
 	}
+        fd_open(iAuth.socket, FD_SOCKET, "iAuth socket");
 
 	if ((hostptr = gethostbyname(iAuth.hostname)) == NULL)
 	{
 		log(L_ERROR,
 			"Unable to connect to IAuth server: Unknown host");
 
-		close(iAuth.socket);
+		fd_close(iAuth.socket);
 		iAuth.socket = NOSOCK;
 		return(NOSOCK);
 	}
@@ -127,7 +129,7 @@ ConnectToIAuth()
 	{
 		log(L_ERROR,
 			"ConnectToIAuth(): set_non_blocking() failed");
-		close(iAuth.socket);
+		fd_close(iAuth.socket);
 		iAuth.socket = NOSOCK;
 		return (NOSOCK);
 	}
@@ -139,7 +141,7 @@ ConnectToIAuth()
 			log(L_ERROR,
 				"Unable to connect to IAuth server: %s",
 				strerror(errno));
-			close(iAuth.socket);
+			fd_close(iAuth.socket);
 			iAuth.socket = NOSOCK;
 			return(NOSOCK);
 		}

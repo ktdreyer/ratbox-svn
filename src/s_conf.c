@@ -35,6 +35,7 @@
 #include "mtrie_conf.h"
 #include "numeric.h"
 #include "res.h"    /* gethost_byname, gethost_byaddr */
+#include "fdlist.h"
 #include "s_bsd.h"
 #include "s_log.h"
 #include "send.h"
@@ -2970,7 +2971,7 @@ void write_kline_or_dline_to_conf_and_notice_opers(
         }
     }
 
-  if ((out = open(filename, O_RDWR|O_APPEND|O_CREAT,0644))==-1)
+  if ((out = file_open(filename, O_RDWR|O_APPEND|O_CREAT,0644))==-1)
     {
       sendto_realops("Problem opening %s ", filename);
       return;
@@ -3002,6 +3003,7 @@ void write_kline_or_dline_to_conf_and_notice_opers(
                    host, reason);
     }
   
+  /* No need to file_close() if this fails, safe_write() does it -- adrian */
   if (safe_write(sptr,filename,out,buffer))
     return;
 
@@ -3021,7 +3023,7 @@ void write_kline_or_dline_to_conf_and_notice_opers(
   if (safe_write(sptr,filename,out,buffer))
     return;
       
-  close(out);
+  file_close(out);
 
   if(type==KLINE_TYPE)
     log(L_TRACE, "%s added K-Line for [%s@%s] [%s]",
@@ -3049,7 +3051,7 @@ int safe_write(struct Client *sptr, const char *filename, int out, char *buffer)
   if (write(out, buffer, strlen(buffer)) <= 0)
     {
       sendto_realops("*** Problem writing to %s",filename);
-      close(out);
+      file_close(out);
       return -1;
     }
   return 0;

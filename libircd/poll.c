@@ -25,12 +25,12 @@
  *
  *  $Id$
  */
+#include "fdlist.h"
 #include "s_bsd.h"
 #include "class.h"
 #include "client.h"
 #include "common.h"
 #include "config.h"
-#include "fdlist.h"
 #include "irc_string.h"
 #include "ircdauth.h"
 #include "ircd.h"
@@ -84,11 +84,81 @@
 extern struct sockaddr_in vserv;               /* defined in s_conf.c */
 
 struct Client* local[MAXCONNECTIONS];
+static struct pollfd pollfds[MAXCONNECTIONS];
+static unsigned int npollfds = 0;
+
+static void poll_update_pollfds(int, short, PF *);
+
+/* XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX */
+/* Private functions */
+
+/*
+ * set and clear entries in the pollfds[] array.
+ */ 
+static void
+poll_update_pollfds(int fd, short event, PF * handler)
+{  
+    if (handler) {
+        pollfds[fd].events |= event;
+        pollfds[fd].fd = fd;
+        if ((fd+1) > npollfds)
+            npollfds = fd + 1;
+    } else {
+        pollfds[fd].events &= ~event;
+        if (pollfds[fd].events == 0) {
+            pollfds[fd].fd = -1;
+            pollfds[fd].revents = 0;
+        }
+        while (pollfds[npollfds].fd == -1 && npollfds > 0)
+            npollfds--;
+    }
+}
 
 
+/* XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX */
+/* Public functions */
+
+
+/*
+ * init_netio
+ *
+ * This is a needed exported function which will be called to initialise
+ * the network loop code.
+ */
 void init_netio(void)
 {
   init_resolver();
+}
+
+/*
+ * comm_setselect
+ *
+ * This is a needed exported function which will be called to register
+ * and deregister interest in a pending IO state for a given FD.
+ */
+void
+comm_setselect(int fd, unsigned int type, PF * handler, void *client_data,
+    time_t timeout)
+{  
+    fde_t *F = &fd_table[fd];
+    assert(fd >= 0);
+#ifdef NOTYET
+    assert(F->flags.open);
+    debug(5, 5) ("commSetSelect: FD %d type %d, %s\n", fd, type, handler ? "SET"
+ : "CLEAR");
+#endif
+    if (type & COMM_SELECT_READ) {
+        F->read_handler = handler;
+        F->read_data = client_data;
+        poll_update_pollfds(fd, POLLRDNORM, handler);
+    }
+    if (type & COMM_SELECT_WRITE) {
+        F->write_handler = handler;
+        F->write_data = client_data;
+        poll_update_pollfds(fd, POLLWRNORM, handler);
+    }
+    if (timeout)
+        F->timeout = CurrentTime + timeout;
 }
  
 /*
@@ -227,7 +297,7 @@ int read_message(time_t delay, unsigned char mask)
      * set client descriptors
      */
     for (i = 0; i <= highest_fd; ++i) {
-      if (!(GlobalFDList[i] & mask) || !(cptr = local[i]))
+      if (!(fd_table[i].mask & mask) || !(cptr = local[i]))
         continue;
 
      /*
@@ -368,4 +438,76 @@ int read_message(time_t delay, unsigned char mask)
   return 0;
 }
 
+
+/*
+ * comm_select
+ *
+ * Called to do the new-style IO, courtesy of of squid (like most of this
+ * new IO code). This routine handles the stuff we've hidden in
+ * comm_setselect and fd_table[] and calls callbacks for IO ready
+ * events.
+ */
+
+int
+comm_select(time_t delay)
+{
+    int num;
+    int fd;
+    PF *hdl;
+
+    /* update current time */
+    if ((CurrentTime = time(0)) == -1) {
+        log(L_CRIT, "Clock Failure");
+        restart("Clock failed");
+    }   
+
+    for (;;) {
+        num = poll(pollfds, npollfds, delay * 1000);
+        if (num >= 0)
+            break;
+        if (ignoreErrno(errno))
+            continue;
+        /* error! */
+        return -1;
+        /* NOTREACHED */
+    }
+
+    /* update current time again, eww.. */
+    if ((CurrentTime = time(0)) == -1) {
+        log(L_CRIT, "Clock Failure");
+        restart("Clock failed");
+    }   
+
+    if (num == 0)
+        return 0;
+
+    /* XXX we *could* optimise by falling out after doing num fds ... */
+    for (fd = 0; fd < npollfds; fd++) {
+        fde_t *F;
+	int revents;
+	if (((revents = pollfds[fd].revents) == 0) ||
+	    (pollfds[fd].fd) == -1)
+	    continue;
+        F = &fd_table[fd];
+	if (revents & (POLLRDNORM | POLLIN | POLLHUP | POLLERR)) {
+	    hdl = F->read_handler;
+	    poll_update_pollfds(fd, POLLRDNORM, NULL);
+	    if (!hdl) {
+		/* XXX Eek! This is another bad place! */
+	    } else {
+		hdl(fd, F->read_data);
+            }
+	}
+	if (revents & (POLLWRNORM | POLLOUT | POLLHUP | POLLERR)) {
+	    hdl = F->write_handler;
+	    poll_update_pollfds(fd, POLLWRNORM, NULL);
+	    if (!hdl) {
+		/* XXX Eek! This is another bad place! */
+	    } else {
+		hdl(fd, F->write_data);
+            }
+	}
+    }
+    return 0;
+}
 

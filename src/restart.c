@@ -5,6 +5,7 @@
  */
 #include "restart.h"
 #include "common.h"
+#include "fdlist.h"
 #include "ircd.h"
 #include "send.h"
 #include "s_debug.h"
@@ -39,7 +40,7 @@ void server_reboot(void)
   flush_connections(0);
 
   for (i = 0; i < MAXCONNECTIONS; ++i)
-    close(i);
+    fd_close(i);
   execv(SPATH, myargv);
 
   exit(-1);

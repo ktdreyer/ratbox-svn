@@ -19,12 +19,12 @@
  *
  *  $Id$
  */
+#include "fdlist.h"
 #include "s_bsd.h"
 #include "class.h"
 #include "client.h"
 #include "common.h"
 #include "config.h"
-#include "fdlist.h"
 #include "irc_string.h"
 #include "ircdauth.h"
 #include "ircd.h"
@@ -81,11 +81,16 @@ int            highest_fd = 0;
 static struct sockaddr_in mysk;
 static char               readBuf[READBUF_SIZE];
 
+/* close_all_connections() can be used *before* the system come up! */
+
 void close_all_connections(void)
 {
   int i;
   for (i = 0; i < MAXCONNECTIONS; ++i) {
-    close(i);
+    if (fd_table[i].flags.open)
+        fd_close(i);
+    else
+        close(i);
     local[i] = 0;
   }
 }
@@ -374,7 +379,7 @@ int connect_inet(struct ConfItem *aconf, struct Client *cptr)
       report_error("opening stream socket to server %s:%s", cptr->name, errno);
       return 0;
     }
-
+  fd_open(cptr->fd, FD_SOCKET, "connect to ..");
   if (cptr->fd >= (HARD_FDLIMIT - 10))
     {
       sendto_realops("No more connections allowed (%s)", cptr->name);
@@ -659,7 +664,7 @@ void close_connection(struct Client *cptr)
     flush_connections(cptr);
     local[cptr->fd] = NULL;
     fdlist_delete(cptr->fd, FDL_ALL);
-    close(cptr->fd);
+    fd_close(cptr->fd);
     cptr->fd = -1;
   }
 
@@ -713,7 +718,7 @@ void add_connection(struct Listener* listener, int fd)
       "NOTICE AUTH :*** Ircd Authentication Server is temporarily down, please connect later\r\n",
       87,
       0);
-    close(fd);
+    fd_close(fd);
     return;
   }
 #endif
@@ -726,7 +731,7 @@ void add_connection(struct Listener* listener, int fd)
     report_error("Failed in adding new connection %s :%s", 
                  get_listener_name(listener), errno);
     ServerStats->is_ref++;
-    close(fd);
+    fd_close(fd);
     return;
   }
 
@@ -913,4 +918,26 @@ void error_exit_client(struct Client* cptr, int error)
                current_error, strerror(current_error));
   exit_client(cptr, cptr, &me, errmsg);
 }
+
+int
+ignoreErrno(int ierrno)
+{
+    switch (ierrno) {
+    case EINPROGRESS:
+    case EWOULDBLOCK:
+#if EAGAIN != EWOULDBLOCK
+    case EAGAIN:
+#endif
+    case EALREADY:
+    case EINTR:
+#ifdef ERESTART
+    case ERESTART:
+#endif
+        return 1;
+    default:
+        return 0;
+    }
+    /* NOTREACHED */
+}
+
 

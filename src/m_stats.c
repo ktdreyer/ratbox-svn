@@ -37,6 +37,7 @@
 #include "numeric.h"     /* ERR_xxx */
 #include "scache.h"      /* list_scache */
 #include "send.h"        /* sendto_one */
+#include "fdlist.h"      /* PF and friends */
 #include "s_bsd.h"       /* highest_fd */
 #include "s_conf.h"      /* ConfItem, report_configured_links */
 #include "s_debug.h"     /* send_usage */

@@ -33,6 +33,8 @@
 #include "m_kline.h"
 #include "mtrie_conf.h"
 #include "numeric.h"
+#include "fdlist.h"
+#include "s_bsd.h"
 #include "s_conf.h"
 #include "s_misc.h"
 #include "scache.h"
@@ -618,7 +620,7 @@ static void log_gline_request(
 
   ircsprintf(filenamebuf, "%s.%s", 
              ConfigFileEntry.glinefile, small_file_date((time_t)0));
-  if ((out = open(filenamebuf, O_RDWR|O_APPEND|O_CREAT,0644))==-1)
+  if ((out = file_open(filenamebuf, O_RDWR|O_APPEND|O_CREAT,0644))==-1)
     {
       sendto_realops("*** Problem opening %s",filenamebuf);
       return;
@@ -637,7 +639,7 @@ static void log_gline_request(
     {
       sendto_realops("*** Problem writing to %s",filenamebuf);
     }
-  close(out);
+  file_close(out);
 }
 
 /*
@@ -663,7 +665,7 @@ static void log_gline(struct Client *sptr,
 
   ircsprintf(filenamebuf, "%s.%s", 
                 ConfigFileEntry.glinefile, small_file_date((time_t) 0));
-  if ((out = open(filenamebuf, O_RDWR|O_APPEND|O_CREAT,0644))==-1)
+  if ((out = file_open(filenamebuf, O_RDWR|O_APPEND|O_CREAT,0644))==-1)
     {
       return;
     }
@@ -716,7 +718,7 @@ static void log_gline(struct Client *sptr,
   if (safe_write(sptr,filenamebuf,out,buffer))
     return;
 
-  close(out);
+  file_close(out);
 }
 
 /*

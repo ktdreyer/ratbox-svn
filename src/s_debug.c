@@ -26,6 +26,8 @@
 #include "client.h"
 #include "common.h"
 #include "dbuf.h"
+#include "fdlist.h"
+#include "fileio.h"
 #include "hash.h"
 #include "ircd.h"
 #include "list.h"
@@ -480,10 +482,10 @@ void dump_addresses()
   int fd_rba_dump;
   char buffer[512];
 
-  fd_lc_dump = open("local_client_list.txt",O_WRONLY|O_TRUNC|O_CREAT,0755);
-  fd_rc_dump = open("remote_client_list.txt",O_WRONLY|O_TRUNC|O_CREAT,0755);
-  fd_lba_dump = open("local_block_allocator_client_list.txt",O_WRONLY|O_TRUNC|O_CREAT,0755);
-  fd_rba_dump = open("remote_block_allocator_client_list.txt",O_WRONLY|O_TRUNC|O_CREAT,0755);
+  fd_lc_dump = file_open("local_client_list.txt",O_WRONLY|O_TRUNC|O_CREAT,0644);
+  fd_rc_dump = file_open("remote_client_list.txt",O_WRONLY|O_TRUNC|O_CREAT,0644);
+  fd_lba_dump = file_open("local_block_allocator_client_list.txt",O_WRONLY|O_TRUNC|O_CREAT,0644);
+  fd_rba_dump = file_open("remote_block_allocator_client_list.txt",O_WRONLY|O_TRUNC|O_CREAT,0644);
 
   for (acptr = GlobalClientList; acptr; acptr = acptr->next)
     {
@@ -501,8 +503,8 @@ void dump_addresses()
   BlockHeapDump(localClientFreeList,fd_lba_dump);
   BlockHeapDump(remoteClientFreeList,fd_rba_dump);
 
-  close(fd_rc_dump);
-  close(fd_lc_dump);
-  close(fd_lba_dump);
-  close(fd_rba_dump);
+  file_close(fd_rc_dump);
+  file_close(fd_lc_dump);
+  file_close(fd_lba_dump);
+  file_close(fd_rba_dump);
 }

@@ -24,6 +24,7 @@
  */
 #include "motd.h"
 #include "ircd.h"
+#include "fdlist.h"
 #include "s_bsd.h"
 #include "fileio.h"
 #include "res.h"

@@ -246,10 +246,10 @@ static void init_sys(int boot_daemon)
 #ifdef TIOCNOTTY
       { /* scope */
         int fd;
-        if ((fd = open("/dev/tty", O_RDWR)) >= 0)
+        if ((fd = file_open("/dev/tty", O_RDWR)) >= 0)
           {
             ioctl(fd, TIOCNOTTY, NULL);
-            close(fd);
+            file_close(fd);
           }
       }
 #endif
@@ -372,6 +372,10 @@ static time_t io_loop(time_t delay)
   /* Run pending events, then get the number of seconds to the next event */
   eventRun();
   delay = eventNextTime();
+
+  /* Do new-style pending events */
+  /* Once the crap has been stripped out, we can make this use delay .. */
+  comm_select(0);
 
   /* LazyLinks */
   if(!ConfigFileEntry.hub)
@@ -638,12 +642,12 @@ static void write_pidfile(void)
 {
   int fd;
   char buff[20];
-  if ((fd = open(PPATH, O_CREAT|O_WRONLY, 0600))>=0)
+  if ((fd = file_open(PPATH, O_CREAT|O_WRONLY, 0600))>=0)
     {
       ircsprintf(buff,"%d\n", (int)getpid());
       if (write(fd, buff, strlen(buff)) == -1)
         log(L_ERROR,"Error writing to pid file %s", PPATH);
-      close(fd);
+      file_close(fd);
       return;
     }
   else
@@ -807,6 +811,9 @@ int main(int argc, char *argv[])
 
   setup_signals();
 
+  /* We need this to initialise the fd array before anything else */
+  fdlist_init();
+
   init_sys(bootDaemon);
   init_log(logFileName);
 
@@ -826,7 +833,6 @@ int main(int argc, char *argv[])
 
   initServerMask();
 
-  fdlist_init();
   init_netio();
 
   read_conf_files(YES);         /* cold start init conf files */

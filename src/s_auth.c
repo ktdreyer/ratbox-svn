@@ -223,7 +223,7 @@ static void auth_error(struct AuthRequest* auth)
 {
   ++ServerStats->is_abad;
 
-  close(auth->fd);
+  fd_close(auth->fd);
   auth->fd = -1;
 
   ClearAuth(auth);
@@ -263,18 +263,19 @@ static int start_auth_query(struct AuthRequest* auth)
     ++ServerStats->is_abad;
     return 0;
   }
+  fd_open(fd, FD_SOCKET, "Auth");
   if ((MAXCONNECTIONS - 10) < fd) {
     sendto_realops("Can't allocate fd for auth on %s",
                 get_client_name(auth->client, TRUE));
 
-    close(fd);
+    fd_close(fd);
     return 0;
   }
 
   sendheader(auth->client, REPORT_DO_ID);
   if (!set_non_blocking(fd)) {
     report_error(NONB_ERROR_MSG, get_client_name(auth->client, SHOW_IP), errno);
-    close(fd);
+    fd_close(fd);
     return 0;
   }
 
@@ -292,7 +293,7 @@ static int start_auth_query(struct AuthRequest* auth)
   if (bind(fd, (struct sockaddr*) &localaddr, sizeof(localaddr))) {
     report_error("binding auth stream socket %s:%s", 
                  get_client_name(auth->client, TRUE), errno);
-    close(fd);
+    fd_close(fd);
     return 0;
   }
 
@@ -307,7 +308,7 @@ static int start_auth_query(struct AuthRequest* auth)
       /*
        * No error report from this...
        */
-      close(fd);
+      fd_close(fd);
       sendheader(auth->client, REPORT_FAIL_ID);
       return 0;
     }
@@ -462,7 +463,7 @@ void timeout_auth_queries(time_t now)
     auth_next = auth->next;
     if (auth->timeout < CurrentTime) {
       if (-1 < auth->fd)
-        close(auth->fd);
+        fd_close(auth->fd);
 
       sendheader(auth->client, REPORT_FAIL_ID);
       if (IsDNSPending(auth)) {
@@ -573,7 +574,7 @@ void read_auth_reply(struct AuthRequest* auth)
     }
   }
 
-  close(auth->fd);
+  fd_close(auth->fd);
   auth->fd = -1;
   ClearAuth(auth);
   

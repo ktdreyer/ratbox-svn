@@ -29,6 +29,8 @@
 #include "irc_string.h"
 #include "ircd.h"
 #include "numeric.h"
+#include "fdlist.h"
+#include "s_bsd.h"
 #include "s_conf.h"
 #include "s_log.h"
 #include "s_user.h"
@@ -263,7 +265,7 @@ int m_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
            */
 
           if (IsPerson(sptr) &&
-              (logfile = open(FNAME_OPERLOG, O_WRONLY|O_APPEND)) != -1)
+              (logfile = file_open(FNAME_OPERLOG, O_WRONLY|O_APPEND, 0644)) != -1)
             {
               /* (void)alarm(0); */
               ircsprintf(buf, "%s OPER (%s) by (%s!%s@%s)\n",
@@ -271,7 +273,7 @@ int m_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                                parv[0], sptr->username,
                                sptr->host);
               write(logfile, buf, strlen(buf));
-              close(logfile);
+              file_close(logfile);
             }
         }
 #endif
@@ -460,7 +462,7 @@ int mo_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
            */
 
           if (IsPerson(sptr) &&
-              (logfile = open(FNAME_OPERLOG, O_WRONLY|O_APPEND)) != -1)
+              (logfile = file_open(FNAME_OPERLOG, O_WRONLY|O_APPEND, 0644)) != -1)
             {
               /* (void)alarm(0); */
               ircsprintf(buf, "%s OPER (%s) by (%s!%s@%s)\n",
@@ -468,7 +470,7 @@ int mo_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                                parv[0], sptr->username,
                                sptr->host);
               write(logfile, buf, strlen(buf));
-              close(logfile);
+              file_close(logfile);
             }
         }
 #endif
@@ -657,7 +659,7 @@ int ms_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
            */
 
           if (IsPerson(sptr) &&
-              (logfile = open(FNAME_OPERLOG, O_WRONLY|O_APPEND)) != -1)
+              (logfile = file_open(FNAME_OPERLOG, O_WRONLY|O_APPEND, 0644)) != -1)
             {
               /* (void)alarm(0); */
               ircsprintf(buf, "%s OPER (%s) by (%s!%s@%s)\n",
@@ -665,7 +667,7 @@ int ms_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                                parv[0], sptr->username,
                                sptr->host);
               write(logfile, buf, strlen(buf));
-              close(logfile);
+              file_close(logfile);
             }
         }
 #endif

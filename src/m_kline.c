@@ -32,6 +32,8 @@
 #include "ircd.h"
 #include "mtrie_conf.h"
 #include "numeric.h"
+#include "fdlist.h"
+#include "s_bsd.h"
 #include "s_conf.h"
 #include "s_log.h"
 #include "s_misc.h"
@@ -240,7 +242,7 @@ WriteKline(const char *filename, struct Client *sptr, struct Client *rcptr,
   if (!filename)
     return;
 
-  if ((out = open(filename, O_RDWR|O_APPEND|O_CREAT, 0644)) == (-1))
+  if ((out = file_open(filename, O_RDWR|O_APPEND|O_CREAT, 0644)) == (-1))
   {
     sendto_realops("Error opening %s: %s",
       filename,
@@ -291,7 +293,7 @@ WriteKline(const char *filename, struct Client *sptr, struct Client *rcptr,
   if (safe_write(sptr, filename, out, buffer) == (-1))
     return;
 
-  (void) close(out);
+  file_close(out);
 } /* WriteKline() */
 
 /*
@@ -310,7 +312,7 @@ WriteDline(const char *filename, struct Client *sptr,
   if (!filename)
     return;
 
-  if ((out = open(filename, O_RDWR|O_APPEND|O_CREAT, 0644)) == (-1))
+  if ((out = file_open(filename, O_RDWR|O_APPEND|O_CREAT, 0644)) == (-1))
   {
     sendto_realops("Error opening %s: %s",
       filename,
@@ -342,7 +344,7 @@ WriteDline(const char *filename, struct Client *sptr,
   if (safe_write(sptr, filename, out, buffer) == (-1))
     return;
 
-  (void) close(out);
+  file_close(out);
 } /* WriteDline() */
 
 /*

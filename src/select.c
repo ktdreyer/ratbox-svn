@@ -105,6 +105,10 @@ void init_netio(void)
     }
   printf("Value of FD_SETSIZE is %d\n", FD_SETSIZE);
 
+  printf("AIEE! This code needs to be converted to use the new-style net " \
+         "IO. Go grab adrian.\n");
+  exit(59);
+
   read_set  = &readSet;
   write_set = &writeSet;
   init_resolver();
@@ -165,7 +169,7 @@ int read_message(time_t delay, unsigned char mask)        /* mika */
       }
       for (i = 0; i <= highest_fd; i++)
         {
-          if (!(GlobalFDList[i] & mask) || !(cptr = local[i]))
+          if (!(fd_table[i].mask & mask) || !(cptr = local[i]))
             continue;
 
           /*
@@ -282,7 +286,7 @@ int read_message(time_t delay, unsigned char mask)        /* mika */
 #endif
 
   for (i = 0; i <= highest_fd; i++) {
-    if (!(GlobalFDList[i] & mask) || !(cptr = local[i]))
+    if (!(fd_table[i].mask & mask) || !(cptr = local[i]))
       continue;
 
     /*
