@@ -61,7 +61,6 @@ BASE_SRCS =                     \
   class.c                       \
   client.c                      \
   cluster.c			\
-  dynlink.c			\
   event.c                       \
   fdlist.c                      \
   fileio.c                      \
