@@ -1,3 +1,15 @@
+leeh        2004/03/23 13:24:50 EST	(20040323_2)
+
+  Modified files:
+    src                  newconf.c 
+  Log:
+  - I typo'd, and had "autocon" instead of "autoconn" in conf parser
+  
+  Revision  Changes    Path
+  7.147     +1 -1      ircd-ratbox/src/newconf.c
+
+
+
 androsyn    2004/03/23 11:38:31 EST	(20040323_1)
 
   Modified files:
