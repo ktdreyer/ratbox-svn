@@ -62,19 +62,19 @@ _moddeinit(void)
 
 static void do_who_on_channel(struct Client *sptr,
 			      struct Channel *chptr, char *real_name,
-			      int oper, int member);
+			      int server_oper, int member);
 
 static void do_who_list(struct Client *sptr, struct Channel *chptr,
                         dlink_list *list, char *chname, char *op_flags);
 
-static void who_global(struct Client *sptr, char *mask, int oper);
+static void who_global(struct Client *sptr, char *mask, int server_oper);
 
 static void do_who(struct Client *sptr,
                    struct Client *acptr,
                    char *chname,
                    char *op_flags);
 
-char *_version = "20001122";
+char *_version = "20010210";
 
 /*
 ** m_who
@@ -96,7 +96,7 @@ static void m_who(struct Client *cptr,
   char  *chanop_flag;
   char  *halfop_flag;
   char  *voiced_flag;
-  int   oper = parc > 2 ? (*parv[2] == 'o' ): 0; /* Show OPERS only */
+  int   server_oper = parc > 2 ? (*parv[2] == 'o' ): 0; /* Show OPERS only */
   int   member;
 
   /*
@@ -122,7 +122,7 @@ static void m_who(struct Client *cptr,
     }
   else
     {
-      who_global(sptr, mask, oper);
+      who_global(sptr, mask, server_oper);
       sendto_one(sptr, form_str(RPL_ENDOFWHO), me.name, parv[0], "*" );
       return;
     }
@@ -197,7 +197,7 @@ static void m_who(struct Client *cptr,
   /* '/who nick' */
 
   if (((acptr = find_client(mask, NULL)) != NULL) &&
-      IsPerson(acptr) && (!oper || IsOper(acptr)))
+      IsPerson(acptr) && (!server_oper || IsOper(acptr)))
     {
       struct Channel *bchan;
       char *chname=NULL;
@@ -231,7 +231,9 @@ static void m_who(struct Client *cptr,
 	    }
 
 	  /* XXX globalize this inside m_who.c ? */
-	  if(chptr->mode.mode & MODE_HIDEOPS)
+	  /* jdc -- Check is_any_op() for +o > +h > +v priorities */
+	  if( (chptr->mode.mode & MODE_HIDEOPS) &&
+	      (!is_any_op(chptr,sptr)) )
 	    {
 	      chanop_flag = "";
 	      halfop_flag = "";
@@ -264,7 +266,7 @@ static void m_who(struct Client *cptr,
     }
 
   /* Wasn't a nick, wasn't a channel, wasn't a '*' so ... */
-  who_global(sptr, mask, oper);
+  who_global(sptr, mask, server_oper);
   sendto_one(sptr, form_str(RPL_ENDOFWHO), me.name, parv[0], mask );
 }
 
@@ -273,13 +275,13 @@ static void m_who(struct Client *cptr,
  *
  * inputs	- pointer to client requesting who
  *		- char * mask to match
- *		- int if oper or not
+ *		- int if oper on a server or not
  * output	- NONE
  * side effects - do a global scan of all clients looking for match
  *		  this is slightly expensive on EFnet ...
  */
 
-static void who_global(struct Client *sptr,char *mask, int oper)
+static void who_global(struct Client *sptr,char *mask, int server_oper)
 {
   struct Channel *chptr=NULL;
   struct Channel *bchan;
@@ -298,7 +300,7 @@ static void who_global(struct Client *sptr,char *mask, int oper)
     {
       if (!IsPerson(acptr))
         continue;
-      if (oper && !IsOper(acptr))
+      if (server_oper && !IsOper(acptr))
         continue;
       
       showperson = NO;
@@ -347,7 +349,9 @@ static void who_global(struct Client *sptr,char *mask, int oper)
 		    chname = bchan->chname;
 		}
 
-	      if(chptr->mode.mode & MODE_HIDEOPS)
+	      /* jdc -- Check is_any_op() for +o > +h > +v priorities */
+	      if( (chptr->mode.mode & MODE_HIDEOPS) &&
+	          (!is_any_op(chptr,sptr)) )
 		{
 		  chanop_flag = "";
 		  halfop_flag = "";
@@ -389,7 +393,7 @@ static void who_global(struct Client *sptr,char *mask, int oper)
  * inputs	- pointer to client requesting who
  *		- pointer to channel to do who on
  *		- The "real name" of this channel
- *		- int if sptr is oper or not
+ *		- int if sptr is a server oper or not
  *		- int if client is member or not
  * output	- NONE
  * side effects - do a who on given channel
@@ -398,13 +402,16 @@ static void who_global(struct Client *sptr,char *mask, int oper)
 static void do_who_on_channel(struct Client *sptr,
 			      struct Channel *chptr,
 			      char *chname,
-			      int oper, int member)
+			      int server_oper, int member)
 {
   char *chanop_flag;
   char *halfop_flag;
   char *voiced_flag;
 
-  if(chptr->mode.mode & MODE_HIDEOPS)
+
+  /* jdc -- Check is_any_op() for +o > +h > +v priorities */
+  if( (chptr->mode.mode & MODE_HIDEOPS) &&
+      (!is_any_op(chptr,sptr)) )
     {
       chanop_flag = "";
       halfop_flag = "";
