@@ -1,3 +1,15 @@
+androsyn    2002/07/04 09:32:57 EDT	(20020704_1)
+
+  Modified files:
+    contrib              m_jupe.c 
+  Log:
+  If the length of a servername goes over hostlen, it surely is bogus.
+  
+  Revision  Changes    Path
+  1.31      +2 -2      ircd-hybrid-7/contrib/m_jupe.c
+
+
+
 androsyn    2002/07/04 09:13:48 EDT	(20020704_0)
 
   Modified files:
