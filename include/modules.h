@@ -41,6 +41,7 @@
 #include "ircd_handler.h"
 #include "msg.h"
 #include "memory.h"
+#include "hook.h"
 
 #ifndef STATIC_MODULES
 struct module
@@ -76,7 +77,7 @@ typedef struct
 typedef struct
 {
 	const char * 	hapi_name;
-	hookfn *	fn;
+	hookfn		fn;
 } mapi_hfn_list_av1;
 
 struct mapi_mheader_av1
@@ -87,13 +88,13 @@ struct mapi_mheader_av1
 	void		(*mapi_unregister)	(void);		/* Unregister function.		*/
 	mapi_clist_av1	* mapi_command_list;			/* List of commands to add.	*/
 	mapi_hlist_av1	* mapi_hook_list;			/* List of hooks to add.	*/
-	mapi_hn_list_av1 *mapi_hfn_list;			/* List of hook_add_hook_id's to do */
+	mapi_hfn_list_av1 *mapi_hfn_list;			/* List of hook_add_hook's to do */
 	const char *	  mapi_module_version;			/* Module's version (freeform)	*/
 };
 
 #ifndef STATIC_MODULES
 # define DECLARE_MODULE_AV1(reg,unreg,cl,hl,hfnlist, v) \
-	struct mapi_mheader_av1 _mheader = { MAPI_V1, reg, unreg, cl, hl, v}
+	struct mapi_mheader_av1 _mheader = { MAPI_V1, reg, unreg, cl, hl, hfnlist, v}
 #else
 # define DECLARE_MODULE ERROR MAPI_NOT_AVAILABLE
 #endif
