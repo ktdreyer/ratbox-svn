@@ -511,14 +511,14 @@ sendto_channel_butone(struct Client *one, struct Client *from,
   va_start(args, pattern);
 
   if(IsServer(from))
-    linebuf_putmsg(&local_linebuf, pattern, args, ":%s %s %s",
+    linebuf_putmsg(&local_linebuf, pattern, args, ":%s %s %s ",
                    from->name, command, RootChan(chptr)->chname);
   else
     linebuf_putmsg(&local_linebuf, pattern, args, ":%s!%s@%s %s %s ",
                    from->name, from->username, from->host,
                    command, RootChan(chptr)->chname);
 
-  linebuf_putmsg(&remote_linebuf, pattern, args, ":%s %s %s",
+  linebuf_putmsg(&remote_linebuf, pattern, args, ":%s %s %s ",
                  from->name, command, chptr->chname);
 
   va_end(args);

@@ -457,7 +457,7 @@ linebuf_putmsg(buf_head_t *bufhead, const char *format, va_list va_args,
 
   if (va_args)
   {
-    len = vsnprintf((bufline->buf + len), (BUF_DATA_SIZE - len), format,
+    len += vsnprintf((bufline->buf + len), (BUF_DATA_SIZE - len), format,
                     va_args);
   }
   
