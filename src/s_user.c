@@ -558,7 +558,6 @@ int register_user(struct Client *cptr, struct Client *sptr,
 		  sptr->listener->port
 		  );
 
-              ServerStats->is_ref++;
               return exit_client(cptr, sptr, &me,
                                  "You are not authorized to use this server");
             }
@@ -710,12 +709,14 @@ int register_user(struct Client *cptr, struct Client *sptr,
               
               if(aconf->port)
                 {
-                  ServerStats->is_ref++;
-                  sendto_realops_flags(FLAGS_REJ,
-                                     "X-line Rejecting [%s] [%s], user %s",
-                                     sptr->info,
-                                     reason,
-                                     get_client_name(cptr, FALSE));
+                  if (aconf->port == 1)
+                    {
+                      sendto_realops_flags(FLAGS_REJ,
+                                           "X-line Rejecting [%s] [%s], user %s",
+                                           sptr->info,
+                                           reason,
+                                           get_client_name(cptr, FALSE));
+                    }
                   ServerStats->is_ref++;      
                   return exit_client(cptr, sptr, &me, "Bad user info");
                 }

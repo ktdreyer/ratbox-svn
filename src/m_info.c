@@ -87,6 +87,12 @@ m_info(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
             infoptr->strvalue,
             infoptr->desc);
       }
+      sendto_one(sptr,
+        ":%s %d %s :Compiled on [%s]",
+        me.name, 
+        RPL_INFO,
+        parv[0],
+        platform); 
     } /* if (IsAnOper(sptr)) */
 
     sendto_one(sptr, form_str(RPL_INFO), me.name, parv[0], "");
@@ -179,6 +185,12 @@ mo_info(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
             infoptr->strvalue,
             infoptr->desc);
       }
+      sendto_one(sptr,
+        ":%s %d %s :Compiled on [%s]",
+        me.name, 
+        RPL_INFO,
+        parv[0],
+        platform); 
     } /* if (IsAnOper(sptr)) */
 
     sendto_one(sptr, form_str(RPL_INFO), me.name, parv[0], "");
@@ -271,6 +283,12 @@ ms_info(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
             infoptr->strvalue,
             infoptr->desc);
       }
+      sendto_one(sptr,
+        ":%s %d %s :Compiled on [%s]",
+        me.name, 
+        RPL_INFO,
+        parv[0],
+        platform); 
     } /* if (IsAnOper(sptr)) */
 
     sendto_one(sptr, form_str(RPL_INFO), me.name, parv[0], "");
