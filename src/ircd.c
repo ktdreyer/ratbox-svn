@@ -432,7 +432,7 @@ static void initialize_server_capabs(void)
 static void write_pidfile(const char *filename)
 {
   FBFILE* fb;
-  char buff[sizeof(unsigned int)+1];
+  char buff[32];
   if ((fb = fbopen(filename, "w")))
   {
       unsigned int pid = (unsigned int) getpid();
