@@ -1,3 +1,15 @@
+androsyn    2002/11/22 23:17:32 UTC	(20021122_2)
+
+  Modified files:
+    src                  s_bsd_kqueue.c 
+  Log:
+  Actually use the udata field for something useful.  Like a pointer into the fdtable
+  
+  Revision  Changes    Path
+  1.33      +10 -11    ircd-ratbox/src/s_bsd_kqueue.c
+
+
+
 androsyn    2002/11/22 21:17:49 UTC	(20021122_1)
 
   Modified files:
