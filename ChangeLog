@@ -1,3 +1,15 @@
+androsyn    2003/08/26 13:52:34 EDT	(20030826_4)
+
+  Modified files:
+    src                  match.c 
+  Log:
+  Changed match_esc() to support @ = A-Za-z (note RFC1459) and # = 0-9
+  
+  Revision  Changes    Path
+  7.34      +6 -3      ircd-ratbox/src/match.c
+
+
+
 leeh        2003/08/26 12:57:25 EDT	(20030826_3)
 
   Modified files:
