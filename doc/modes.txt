@@ -13,7 +13,7 @@ User Modes:
                   a channel
 +k - skill      - See server generated KILL messages
 +n - nchange    - See client nick changes
-+o - NONE       - Operator status
++o - oper       - Operator status
 +r - rej        - See rejected client notices
 +s - servnotice - See general server notices
 +u - unauth     - See unauthorized client notices
@@ -24,7 +24,7 @@ User Modes:
 
 Channel Modes:
 
-+a - anonops    - Anonymous ops, chanops are hidden
++a - hideops    - Anonymous ops, chanops are hidden
 +b - ban        - Channel ban on nick!user@host
 +d - deny       - Ban based on the user's realname field
 +e - exempt     - Exemption from bans
