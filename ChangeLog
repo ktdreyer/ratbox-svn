@@ -1,3 +1,16 @@
+androsyn    2003/03/15 07:12:29 UTC	(20030315_0)
+
+  Modified files:
+    src                  client.c s_auth.c 
+  Log:
+  Freeing auth clients twice is bad, very bad
+  
+  Revision  Changes    Path
+  7.374     +5 -4      ircd-ratbox/src/client.c
+  7.138     +19 -11    ircd-ratbox/src/s_auth.c
+
+
+
 leeh        2003/02/19 15:24:37 UTC	(20030219_0)
 
   Modified files:
