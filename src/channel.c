@@ -3399,6 +3399,7 @@ static void destroy_channel(struct Channel *chptr)
 
           if( tmpCurrentClient->value.chptr == chptr)
             {
+              sptr->user->joined--;
               *currentClient = tmpCurrentClient->next;
               free_link(tmpCurrentClient);
             }
