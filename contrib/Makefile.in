@@ -33,7 +33,8 @@ SRCS =                          \
   m_opme.c                      \
   whois_notice.c                \
   stats_notice.c                \
-  links_notice.c
+  links_notice.c		\
+  example_module.c
 
 OBJS = ${SRCS:.c=.so}
 

@@ -16,4 +16,6 @@ m_nickinfo.c   - NICKINFO - provide info on a nick, for debugging purposes.
 stats_notice.c - A Hook to provide the old STATS notice functionality
 whois_notice.c - A Hook to provide the old WHOIS notice functionality
 
+example_module.c - An example module to be used for creating your own.
+                   Adds command: TEST
 vms_*.c        - Misc files needed for VMS support.
