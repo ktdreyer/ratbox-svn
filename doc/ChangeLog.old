@@ -1,3 +1,9 @@
+*** 20000110_3 by db
+- Nearly done. TODO Finish off I lines (I line prefixes)
+  HUB or LEAF control set in old M line
+
+
+
 *** 20000110_2 by db
 - updated Makefile, fleshed out convertconf more
 
