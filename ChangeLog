@@ -1,3 +1,22 @@
+leeh        2003/10/03 13:48:31 EDT	(20031003_1)
+
+  Modified files:
+    .                    configure configure.ac 
+    include              config.h 
+    modules              m_gline.c 
+    servlink             Makefile.in 
+  Log:
+  - fix some configure bugs..
+  
+  Revision  Changes    Path
+  7.190     +46 -4     ircd-ratbox/configure
+  7.4       +5 -2      ircd-ratbox/configure.ac
+  7.170     +0 -13     ircd-ratbox/include/config.h
+  1.133     +5 -5      ircd-ratbox/modules/m_gline.c
+  1.15      +1 -1      ircd-ratbox/servlink/Makefile.in
+
+
+
 androsyn    2003/10/03 07:07:35 EDT	(20031003_0)
 
   Added files:
