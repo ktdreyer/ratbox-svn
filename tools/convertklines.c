@@ -64,7 +64,7 @@ int main(int argc,char *argv[])
   ConvertConf(in,outkline,outdline);
 
   fprintf(stderr, "The kline file has been converted and should be renamed to\n");
-  fprintf(stderr, "the config.h options \(normally kline.conf and dline.conf) and\n");
+  fprintf(stderr, "the config.h options (normally kline.conf and dline.conf) and\n");
   fprintf(stderr, "put in your etc/ dir\n");
   return 0;
 }

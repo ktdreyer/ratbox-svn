@@ -181,12 +181,12 @@ int main(int argc, char * argv[]) {
 
     skipped = 0;
 
-    RAND_pseudo_bytes(key, MAXKEYSIZE);
-    RAND_pseudo_bytes(iv, MAXKEYSIZE);
-    RAND_pseudo_bytes(plaintext, BLOCKSIZE);
-    RAND_pseudo_bytes(ciphertext, BLOCKSIZE);
+    RAND_pseudo_bytes((unsigned char *)key, MAXKEYSIZE);
+    RAND_pseudo_bytes((unsigned char *)iv, MAXKEYSIZE);
+    RAND_pseudo_bytes((unsigned char *)plaintext, BLOCKSIZE);
+    RAND_pseudo_bytes((unsigned char *)ciphertext, BLOCKSIZE);
     
-    EVP_EncryptInit(&ctx, NULL, key, iv);
+    EVP_EncryptInit(&ctx, NULL, (unsigned char *)key, (unsigned char *)iv);
     
     printf("%20.20s encryption: ", cipherstr);
     fflush(stdout);
@@ -198,15 +198,15 @@ int main(int argc, char * argv[]) {
         printf(".");
         fflush(stdout);
       }
-      EVP_EncryptUpdate(&ctx, ciphertext, &bs,
-                        plaintext, BLOCKSIZE);
+      EVP_EncryptUpdate(&ctx, (unsigned char *)ciphertext, &bs,
+                        (unsigned char *)plaintext, BLOCKSIZE);
       bs = BLOCKSIZE;
     }
-    EVP_EncryptFinal(&ctx, ciphertext, &bs);
+    EVP_EncryptFinal(&ctx, (unsigned char *)ciphertext, &bs);
     elapsed=stoptimer();
     printf(" done, %f MB/sec\n", DATASIZE / elapsed);
 
-    EVP_DecryptInit(&ctx, NULL, key, iv);
+    EVP_DecryptInit(&ctx, NULL, (unsigned char *)key, (unsigned char *)iv);
 
     printf("%20.20s decryption: ", cipherstr);
     fflush(stdout);
@@ -218,11 +218,11 @@ int main(int argc, char * argv[]) {
         printf(".");
         fflush(stdout);
       }
-      EVP_DecryptUpdate(&ctx, ciphertext, &bs,
-                        plaintext, BLOCKSIZE);
+      EVP_DecryptUpdate(&ctx, (unsigned char *)ciphertext, &bs,
+                        (unsigned char *)plaintext, BLOCKSIZE);
       bs = BLOCKSIZE;
     }
-    EVP_DecryptFinal(&ctx, ciphertext, &bs);
+    EVP_DecryptFinal(&ctx, (unsigned char *)ciphertext, &bs);
     elapsed=stoptimer();
     printf(" done, %f MB/sec\n", DATASIZE / elapsed);
   }
