@@ -170,7 +170,6 @@ extern int mo_part(struct Client*, struct Client*, int, char**);
 
 /* server */
 extern int ms_admin(struct Client*, struct Client*, int, char**);
-extern int ms_away(struct Client*, struct Client*, int, char**);
 extern int ms_capab(struct Client*, struct Client*, int, char**);
 extern int ms_cburst(struct Client*, struct Client*, int, char**);
 extern int ms_connect(struct Client*, struct Client*, int, char**);

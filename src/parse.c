@@ -570,7 +570,7 @@ struct Message msgtab[] = {
   },
   {MSG_AWAY, 0, 0, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_away, ms_away, m_away }
+    { m_unregistered, m_away, m_away, m_away }
   },
   {MSG_ISON, 0, 1, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
@@ -659,7 +659,7 @@ struct Message msgtab[] = {
   },
   {MSG_ADMIN, 0, 0, MFLG_SLOW | MFLG_UNREG, 0,
     /* UNREG, CLIENT, SERVER, OPER */
-    { m_admin, m_admin, ms_admin, m_admin }
+    { m_unregistered, m_admin, ms_admin, ms_admin }
   },
   {MSG_HELP, 0, 0, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */

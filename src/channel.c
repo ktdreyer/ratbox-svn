@@ -742,7 +742,7 @@ void send_channel_modes(struct Client *cptr, struct Channel *chptr)
     return;
 
   *modebuf = *parabuf = '\0';
-  channel_modes(cptr, modebuf, parabuf, chptr);
+  channel_modes(chptr, cptr, modebuf, parabuf);
 
   if (*parabuf)
     strcat(parabuf, " ");

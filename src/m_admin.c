@@ -87,6 +87,8 @@
  *                      non-NULL pointers.
  */
 
+static void do_admin( struct Client *sptr );
+
 /*
  * m_admin - ADMIN command handler
  *      parv[0] = sender prefix
@@ -94,79 +96,54 @@
  */
 int m_admin(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
-  struct ConfItem *aconf;
   static time_t last_used=0L;
 
-  if(!IsAnyOper(sptr))
+  /* Never an oper here */
+  if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
     {
-      if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
-        {
-          /* safe enough to give this on a local connect only */
-          if(MyClient(sptr))
-            sendto_one(sptr,form_str(RPL_LOAD2HI),me.name,parv[0]);
-          return 0;
-        }
-      else
-        last_used = CurrentTime;
+      /* safe enough to give this on a local connect only */
+      if(MyClient(sptr))
+	sendto_one(sptr,form_str(RPL_LOAD2HI),me.name,parv[0]);
+      return 0;
     }
+  else
+    last_used = CurrentTime;
 
   if (hunt_server(cptr,sptr,":%s ADMIN :%s",1,parc,parv) != HUNTED_ISME)
     return 0;
 
-  if (IsPerson(sptr))
-    sendto_realops_flags(FLAGS_SPY,
-                         "ADMIN requested by %s (%s@%s) [%s]", sptr->name,
-                         sptr->username, sptr->host, sptr->user->server);
-  if ((aconf = find_admin()))
-    {
-      sendto_one(sptr, form_str(RPL_ADMINME),
-                 me.name, parv[0], me.name);
-      sendto_one(sptr, form_str(RPL_ADMINLOC1),
-                 me.name, parv[0], aconf->host);
-      sendto_one(sptr, form_str(RPL_ADMINLOC2),
-                 me.name, parv[0], aconf->passwd);
-      sendto_one(sptr, form_str(RPL_ADMINEMAIL),
-                 me.name, parv[0], aconf->user);
-    }
-  else
-    sendto_one(sptr, form_str(ERR_NOADMININFO),
-               me.name, parv[0], me.name);
-
-  if(ConfigFileEntry.hub)
-    sendto_one(sptr, ":%s NOTICE %s :Server is a HUB",
-                     me.name,parv[0]);
-  else
-    sendto_one(sptr, ":%s NOTICE %s :Server is a LEAF",
-                     me.name,parv[0]);
+  do_admin( sptr );
 
   return 0;
 }
 
 /*
- * ms_admin - ADMIN command handler
+ * ms_admin - ADMIN command handler, used for OPERS as well
  *      parv[0] = sender prefix
  *      parv[1] = servername
  */
 int ms_admin(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
-  struct ConfItem *aconf;
-  static time_t last_used=0L;
-
-  if(!IsAnyOper(sptr))
-    {
-      if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
-        {
-          /* safe enough to give this on a local connect only */
-          if(MyClient(sptr))
-            sendto_one(sptr,form_str(RPL_LOAD2HI),me.name,parv[0]);
-          return 0;
-        }
-      else
-        last_used = CurrentTime;
-    }
-
   if (hunt_server(cptr,sptr,":%s ADMIN :%s",1,parc,parv) != HUNTED_ISME)
     return 0;
+
+  do_admin( sptr );
+
+  return 0;
+}
+
+
+/*
+ * do_admin
+ *
+ * inputs	- pointer to client to report to
+ * output	- none
+ * side effects	- admin info is sent to client given
+ */
+
+static void do_admin( struct Client *sptr )
+{
+  struct ConfItem *aconf;
 
   if (IsPerson(sptr))
     sendto_realops_flags(FLAGS_SPY,
@@ -175,25 +152,22 @@ int ms_admin(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   if ((aconf = find_admin()))
     {
       sendto_one(sptr, form_str(RPL_ADMINME),
-                 me.name, parv[0], me.name);
+                 me.name, sptr->name, me.name);
       sendto_one(sptr, form_str(RPL_ADMINLOC1),
-                 me.name, parv[0], aconf->host);
+                 me.name, sptr->name, aconf->host);
       sendto_one(sptr, form_str(RPL_ADMINLOC2),
-                 me.name, parv[0], aconf->passwd);
+                 me.name, sptr->name, aconf->passwd);
       sendto_one(sptr, form_str(RPL_ADMINEMAIL),
-                 me.name, parv[0], aconf->user);
+                 me.name, sptr->name, aconf->user);
     }
   else
     sendto_one(sptr, form_str(ERR_NOADMININFO),
-               me.name, parv[0], me.name);
+               me.name, sptr->name, me.name);
 
   if(ConfigFileEntry.hub)
     sendto_one(sptr, ":%s NOTICE %s :Server is a HUB",
-                     me.name,parv[0]);
+                     me.name,sptr->name);
   else
     sendto_one(sptr, ":%s NOTICE %s :Server is a LEAF",
-                     me.name,parv[0]);
-
-  return 0;
+                     me.name,sptr->name);
 }
-
