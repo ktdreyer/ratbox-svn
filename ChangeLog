@@ -1,3 +1,18 @@
+leeh        2004/03/29 12:49:42 EST	(20040329_3)
+
+  Modified files:
+    .                    RELNOTES 
+    contrib              m_ojoin.c 
+  Log:
+  - missing ',' in m_ojoin.c
+  - update RELNOTES
+  
+  Revision  Changes    Path
+  1.92      +2 -0      ircd-ratbox/RELNOTES
+  1.22      +2 -2      ircd-ratbox/contrib/m_ojoin.c
+
+
+
 leeh        2004/03/29 08:08:00 EST	(20040329_2)
 
   Modified files:
