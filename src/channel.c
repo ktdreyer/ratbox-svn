@@ -64,10 +64,10 @@ static void channel_member_list(struct Client *sptr,
 				int len);
 
 static void send_members(struct Client *cptr,
-			 char *modebuf, char *t, char *parabuf,
+			 char *modebuf, char *parabuf,
 			 struct Channel *chptr,
 			 dlink_list *list,
-			 char flag );
+			 char *op_flag );
 
 static void delete_members(dlink_list *list);
 
@@ -702,27 +702,16 @@ static  void    send_mode_list(struct Client *cptr,
  */
 void send_channel_modes(struct Client *cptr, struct Channel *chptr)
 {
-  dlink_node *ptr;
-  int len;
-  int llen;
-  char  *t;
-
   if (*chptr->chname != '#')
     return;
 
   *modebuf = *parabuf = '\0';
   channel_modes(chptr, cptr, modebuf, parabuf);
 
-  ircsprintf(buf, ":%s SJOIN %lu %s %s %s:", me.name,
-          chptr->channelts, chptr->chname, modebuf, parabuf);
-
-  len = strlen(buf);
-  t = buf + len;
-
-  send_members(cptr,modebuf,t,parabuf,chptr,&chptr->chanops,'@');
-  send_members(cptr,modebuf,t,parabuf,chptr,&chptr->voiced,'+');
-  send_members(cptr,modebuf,t,parabuf,chptr,&chptr->halfops,'%');
-  send_members(cptr,modebuf,t,parabuf,chptr,&chptr->peons,'@');
+  send_members(cptr,modebuf,parabuf,chptr,&chptr->chanops,"@");
+  send_members(cptr,modebuf,parabuf,chptr,&chptr->halfops,"%");
+  send_members(cptr,modebuf,parabuf,chptr,&chptr->voiced,"+");
+  send_members(cptr,modebuf,parabuf,chptr,&chptr->peons,"");
 
   send_mode_list(cptr, chptr->chname, &chptr->banlist, 'b');
 
@@ -742,33 +731,56 @@ void send_channel_modes(struct Client *cptr, struct Channel *chptr)
   send_mode_list(cptr, chptr->chname, &chptr->invexlist, 'I');
 }
 
+/*
+ * inputs	-
+ * output	- NONE
+ * side effects	-
+ */
 static void send_members(struct Client *cptr,
-			 char *modebuf, char *t,
+			 char *modebuf,
 			 char *parabuf,
 			 struct Channel *chptr,
 			 dlink_list *list,
-			 char flag )
+			 char *op_flag )
 {
   dlink_node *ptr;
   int llen;
   int len;
+  int cur_len=0;
   struct Client *acptr;
+  int  data_to_send=0;
+  char *t;
+
+  ircsprintf(buf, ":%s SJOIN %lu %s %s %s:", me.name,
+	     chptr->channelts, chptr->chname, modebuf, parabuf);
+
+  cur_len = len = strlen(buf);
+  t = buf + len;
 
   for (ptr = list->head; ptr && ptr->data; ptr = ptr->next)
     {
       acptr = ptr->data;
-      ircsprintf(t,"%c%s ",flag, acptr->name);
-      llen = strlen(t);
-      len += llen;
-      t += llen; 
-      if (len > (BUFSIZE-80))
-	{
+      ircsprintf(t,"%s%s ",op_flag, acptr->name);
 
+      llen = strlen(t);
+      cur_len += llen;
+      t += llen; 
+      data_to_send = 1;
+
+      if (cur_len > (BUFSIZE-80))
+	{
+	  data_to_send = 0;
+          sendto_one(cptr, "%s", buf);
 	  ircsprintf(buf, ":%s SJOIN %lu %s %s %s:", me.name,
 		     chptr->channelts, chptr->chname, modebuf, parabuf);
-	  len = strlen(buf);
+	  cur_len = len;
 	  t = buf + len;
 	}
+    }
+
+  if( data_to_send )
+    {
+      sendto_one(cptr, "%s", buf);
     }
 }
 

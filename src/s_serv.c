@@ -878,9 +878,9 @@ static void server_burst(struct Client *cptr)
       burst_members(cptr,&chptr->halfops, nickissent);
       burst_members(cptr,&chptr->peons, nickissent);
       send_channel_modes(cptr, chptr);
+
       if(IsVchanTop(chptr))
 	{
-	  send_channel_modes(cptr, chptr);
 	  for ( vchan = chptr->next_vchan; vchan;
 		vchan = vchan->next_vchan)
 	    {
