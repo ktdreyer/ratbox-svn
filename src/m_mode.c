@@ -142,12 +142,6 @@ int m_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 						  sptr->name, parv[1] );
 			  return 0;
 		  }
-	       else
-		  {
-			  sendto_one(sptr, form_str(ERR_BADCHANNAME),
-						 me.name, parv[0], (unsigned char *)parv[1]);
-			  return 0;
-		  }
 	      }
 	  }
   }
@@ -157,11 +151,13 @@ int m_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 	  return user_mode(cptr, sptr, parc, parv);
   }
 
-  if (parc < 3)
+  if (parc < 3 && chptr)
   {
       *modebuf = *parabuf = '\0';
       modebuf[1] = '\0';
 
+      /* was returning chan modes for empty & MODE_JUPED channels.  -pro */
+      if (!chptr->members) return 0;
       if (HasVchans(chptr))
 	{
 	  vchan = map_vchan(chptr,sptr);
@@ -190,6 +186,9 @@ int m_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 	  sendto_one(sptr, form_str(RPL_CREATIONTIME), me.name, parv[0],
 		     chptr->chname, chptr->channelts);
 	}
+      return 0;
+    } else if (!chptr) {
+      sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL), me.name, parv[0], parv[1]);
       return 0;
     }
 
@@ -259,12 +258,6 @@ int ms_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 			  /* meanwhile, ask for channel mode */
 			  sendto_one( serv_cptr_list, ":%s MODE %s",
 						  sptr->name, parv[1] );
-			  return 0;
-		  }
-	      else
-		  {
-			  sendto_one(sptr, form_str(ERR_BADCHANNAME),
-						 me.name, parv[0], (unsigned char *)parv[1]);
 			  return 0;
 		  }
 	  }
