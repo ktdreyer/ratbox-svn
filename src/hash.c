@@ -228,7 +228,7 @@ clear_channel_hash_table(void)
   memset(channelTable, 0, sizeof(struct HashEntry) * CH_MAX);
 }
 
-static void
+void
 clear_hostname_hash_table(void)
 {
   memset(hostTable, 0, sizeof(struct HashEntry) * HOST_MAX);

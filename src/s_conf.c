@@ -643,10 +643,7 @@ int attach_iline(struct Client *client_p, struct ConfItem *aconf)
     DLINK_FOREACH(ptr, find_hostname(client_p->host))
     {
       target_p = ptr->data;
-#if 0
-    for(target_p = find_hostname(client_p->host); target_p;
-        target_p = target_p->hostnext)
-#endif
+
       if(irccmp(client_p->host, target_p->host) != 0)
         continue;
 

@@ -48,6 +48,8 @@ struct HashEntry
   dlink_list list;
 };
 
+void clear_hostname_hash_table(void);
+
 struct Client *find_id(const char *name);
 extern int add_to_id_hash_table(char *, struct Client *);
 extern struct HashEntry hash_get_channel_block(int i);

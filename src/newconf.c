@@ -26,6 +26,7 @@
 #include "resv.h"
 #include "s_serv.h"
 #include "event.h"
+#include "hash.h"
 
 struct	TopConf *	conf_cur_block;
 	char *		conf_cur_block_name;
@@ -2502,11 +2503,19 @@ void	conf_set_general_disable_auth(void *data)
 
 void	conf_set_general_use_global_limits(void *data)
 {
-	if(ConfigFileEntry.use_global_limits != -1)
-		ilog(L_ERROR, "Ignoring config file entry general::use_global_limits "
-			"-- can only be changed on boot");
-	else
-		ConfigFileEntry.use_global_limits = *(unsigned int*)data;
+        int yesno = *(int*)data;
+
+	if(yesno)
+        {
+                ConfigFileEntry.use_global_limits = *(unsigned int*)data;
+        }
+        else
+        {
+                /* if its being changed from 1 -> 0, wipe the hash. */
+                if(ConfigFileEntry.use_global_limits == 1)
+                        clear_hostname_hash_table();
+                ConfigFileEntry.use_global_limits = *(unsigned int*)data;
+        }
 }
 
 void	conf_set_general_use_help(void *data)

@@ -383,14 +383,12 @@ void count_memory(struct Client *source_p)
 	       me.name, RPL_STATSDEBUG, source_p->name,
 	       HOST_MAX, HOST_MAX * sizeof(struct HashEntry));
   }
-  else
-  {
-    count_ip_hash(&number_ips_stored,&mem_ips_stored);
-    sendto_one(source_p, ":%s %d %s :iphash %u(%d)",
-               me.name, RPL_STATSDEBUG, source_p->name,
-               number_ips_stored,
-               (int)mem_ips_stored);
-  }
+
+  count_ip_hash(&number_ips_stored,&mem_ips_stored);
+  sendto_one(source_p, ":%s %d %s :iphash %u(%d)",
+             me.name, RPL_STATSDEBUG, source_p->name,
+             number_ips_stored,
+             (int)mem_ips_stored);
 
   total_memory = totww + total_channel_memory + conf_memory +
     class_count * sizeof(struct Class);
