@@ -1,3 +1,15 @@
+leeh        2001/12/16 08:05:54 EST	(20011216_17)
+
+  Modified files:
+    modules              m_version.c 
+  Log:
+  - 005 gets mapped to 105, duh. :)
+  
+  Revision  Changes    Path
+  1.34      +1 -0      ircd-hybrid-7/modules/m_version.c
+
+
+
 leeh        2001/12/16 07:04:03 EST	(20011216_16)
 
   Modified files:
