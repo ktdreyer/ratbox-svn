@@ -1,3 +1,15 @@
+androsyn    2002/03/09 18:41:33 EST	(20020309_9)
+
+  Modified files:
+    include              patchlevel.h 
+  Log:
+  Once again we change this.
+  
+  Revision  Changes    Path
+  7.24      +1 -1      ircd-hybrid-7/include/patchlevel.h
+
+
+
 androsyn    2002/03/09 18:40:18 EST	(20020309_8)
 
   Modified files:
