@@ -63,7 +63,7 @@ void send_info_text(struct Client *sptr);
 void send_birthdate_online_time(struct Client *sptr);
 void send_conf_options(struct Client *sptr);
 
-char *_version = "20001122";
+char *_version = "20010101";
 
 /*
 ** m_info
@@ -249,6 +249,36 @@ void send_conf_options(struct Client *sptr)
               me.name,
               RPL_INFO,
               sptr->name,
+              "fname_operlog",
+              ConfigFileEntry.fname_operlog ?
+                ConfigFileEntry.fname_operlog :
+                "NONE",
+              "Oper Log File");
+   sendto_one(sptr,
+              ":%s %d %s :%-30s %-5s [%-30s]",
+              me.name,
+              RPL_INFO,
+              sptr->name,
+              "fname_foperlog",
+              ConfigFileEntry.fname_foperlog ?
+                ConfigFileEntry.fname_foperlog :
+                "NONE",
+              "Failed Oper Log File");
+   sendto_one(sptr,
+              ":%s %d %s :%-30s %-5s [%-30s]",
+              me.name,
+              RPL_INFO,
+              sptr->name,
+              "fname_userlog",
+              ConfigFileEntry.fname_userlog ?
+                ConfigFileEntry.fname_userlog :
+                "NONE",
+              "User Log File");
+   sendto_one(sptr,
+              ":%s %d %s :%-30s %-5s [%-30s]",
+              me.name,
+              RPL_INFO,
+              sptr->name,
               "hub",
               ConfigFileEntry.hub ? "ON" : "OFF",
               "Server can connect to more than one server");
@@ -292,14 +322,6 @@ void send_conf_options(struct Client *sptr)
               "max_nick_time",
               ConfigFileEntry.max_nick_time,
               "Anti nick flood time setting");
-    sendto_one(sptr,
-              ":%s %d %s :%-30s %-5d [%-30s]",
-              me.name,
-              RPL_INFO,
-              sptr->name,
-              "links_delay",
-              ConfigFileEntry.links_delay,
-              "How often the links file is rehashed");
    sendto_one(sptr,
               ":%s %d %s :%-30s %-5d [%-30s]",
               me.name,
@@ -308,7 +330,35 @@ void send_conf_options(struct Client *sptr)
               "max_nick_changes",
               ConfigFileEntry.max_nick_changes,
               "How many nick changes to allow");
-   sendto_one(sptr,
+    sendto_one(sptr,
+              ":%s %d %s :%-30s %-5d [%-30s]",
+              me.name,
+              RPL_INFO,
+              sptr->name,
+              "links_delay",
+              ConfigFileEntry.links_delay,
+              "How often the links file is rehashed");
+  sendto_one(sptr,
+              ":%s %d %s :%-30s %-5d [%-30s]",
+              me.name,
+              RPL_INFO,
+              sptr->name,
+              "ts_max_delta",
+              ConfigFileEntry.ts_max_delta ?
+                ConfigFileEntry.ts_max_delta :
+                TS_MAX_DELTA_DEFAULT,
+              "Maximum Allowed TS Delta from another Server");
+  sendto_one(sptr,
+              ":%s %d %s :%-30s %-5d [%-30s]",
+              me.name,
+              RPL_INFO,
+              sptr->name,
+              "ts_warn_delta",
+              ConfigFileEntry.ts_warn_delta ?
+                ConfigFileEntry.ts_warn_delta :
+                TS_WARN_DELTA_DEFAULT,
+              "Maximum TS Delta before Sending Warning");
+  sendto_one(sptr,
               ":%s %d %s :%-30s %-5s [%-30s]",
               me.name,
               RPL_INFO,
@@ -316,6 +366,22 @@ void send_conf_options(struct Client *sptr)
               "vchans_oper_only",
               ConfigFileEntry.vchans_oper_only ? "YES" : "NO",
               "Restrict use of /CJOIN to opers");
+  sendto_one(sptr,
+              ":%s %d %s :%-30s %-5s [%-30s]",
+              me.name,
+              RPL_INFO,
+              sptr->name,
+              "kline_with_reason",
+              ConfigFileEntry.kline_with_reason ? "YES" : "NO",
+              "Show K-line Reason to Client on Exit");
+  sendto_one(sptr,
+              ":%s %d %s :%-30s %-5s [%-30s]",
+              me.name,
+              RPL_INFO,
+              sptr->name,
+              "kline_with_connection_closed",
+              ConfigFileEntry.kline_with_connection_closed ? "YES" : "NO",
+              "Signoff reason: Connection closed");
 
   sendto_one(sptr,
 	     ":%s %d %s :Compiled on [%s]",
