@@ -326,7 +326,7 @@
  * CONNECTTIMEOUT - 10 seconds for its host to respond to an ident lookup
  * query and for a DNS answer to be retrieved.
  */
-#define CONNECTTIMEOUT  15      /* Recommended value: 30 */
+#define CONNECTTIMEOUT  30      /* Recommended value: 30 */
 
 /* KILLCHASETIMELIMIT -
  * Max time from the nickname change that still causes KILL
