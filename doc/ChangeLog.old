@@ -1,3 +1,7 @@
+*** 20001129_7 by davidt
+Directory /cvsroot/ircd-hybrid-7/messages added to the repository
+
+
 *** 20001129_6 by db
 - renamed misnamed log_user_connect -> log_user_exit
 - move X line check into separate function (LIKE IT SHOULD HAVE BEEN
