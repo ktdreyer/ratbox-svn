@@ -1,3 +1,11 @@
+*** 20010108_3 by db
+- dlinked s_auth.c
+- in doing so found a nasty bug in s_bsd_poll.c where it would "walk"
+  over previous word to pollfds since a negative index was used... oops
+- ircdauth.c will need some re-writes
+
+
+
 *** 20010108_2 by madmax
 added FLAGS_DRONE to OPER_UMODES for +e
 
