@@ -1,3 +1,21 @@
+leeh        2003/08/21 18:31:41 EDT	(20030821_2)
+
+  Modified files:
+    include              supported.h 
+    modules              m_user.c 
+    modules/core         m_sjoin.c 
+  Log:
+  - missing ';' in m_user.c
+  - fix 005 with disable_local_channels
+  - removed shide comment in sjoin
+  
+  Revision  Changes    Path
+  1.34      +3 -5      ircd-ratbox/include/supported.h
+  1.185     +1 -2      ircd-ratbox/modules/core/m_sjoin.c
+  1.40      +3 -2      ircd-ratbox/modules/m_user.c
+
+
+
 leeh        2003/08/21 18:14:07 EDT	(20030821_1)
 
   Modified files:
