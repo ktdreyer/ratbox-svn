@@ -1243,9 +1243,9 @@ set_channel_mode(struct Client *client_p, struct Client *source_p,
 		 int parc, const char *parv[])
 {
 	static char modebuf[BUFSIZE];
-	static char parabuf[BUFSIZE];
+	static char parabuf[MODEBUFLEN];
 	char *mbuf;
-	int cur_len, mlen, paralen, paracount;
+	int cur_len, mlen, paralen, paracount, arglen;
 	int i, j, flags;
 	int dir = MODE_ADD;
 	int parn = 1;
@@ -1313,15 +1313,25 @@ set_channel_mode(struct Client *client_p, struct Client *source_p,
 			   mode_changes[i].mems != flags)
 				continue;
 
+			if(mode_changes[i].arg != NULL)
+			{
+				arglen = strlen(mode_changes[i].arg);
+
+				if(arglen > MODEBUFLEN-5)
+					continue;
+			}
+			else
+				arglen = 0;
+
 			if(mode_changes[i].arg != NULL &&
 			   ((paracount == MAXMODEPARAMS) ||
-			    ((strlen(mode_changes[i].arg) + cur_len + paralen + 2) > BUFSIZE)))
+			    ((paralen + arglen + 5) > MODEBUFLEN) ||
+			    ((paralen + arglen + cur_len + 2) > BUFSIZE)))
 			{
 				*mbuf = '\0';
 
 				if(cur_len > mlen)
 					sendto_channel_local(flags, chptr, "%s %s", modebuf, parabuf);
-				/* a param that wont fit in the buffer? eek */
 				else
 					continue;
 
@@ -1345,9 +1355,7 @@ set_channel_mode(struct Client *client_p, struct Client *source_p,
 			if(mode_changes[i].arg != NULL)
 			{
 				paracount++;
-				paralen = strlen(strcat(parabuf, mode_changes[i].arg));
-				parabuf[paralen++] = ' ';
-				parabuf[paralen] = '\0';
+				paralen += ircsprintf(parabuf, "%s ", mode_changes[i].arg);
 			}
 		}
 

@@ -985,14 +985,15 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
 		      struct Channel *chptr, struct ChModeChange mode_changes[],
 		      int mode_count)
 {
-	static char modebuf[MODEBUFLEN];
+	static char modebuf[BUFSIZE];
 	static char parabuf[MODEBUFLEN];
-	int i, mbl, pbl, nc, mc;
+	int i, mbl, pbl, nc, mc, preflen;
 	const char *arg;
 	int dir;
 	int j;
 	int cap;
 	int nocap;
+	int arglen;
 
 	/* Now send to servers... */
 	for (j = 0; j < NCHCAP_COMBOS; j++)
@@ -1010,12 +1011,12 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
 		nocap = chcap_combos[j].cap_no;
 
 		if(cap & CAP_TS6)
-			mbl = ircsprintf(modebuf, ":%s TMODE " IRCD_TIME_FMT " %s ",
-					 use_id(source_p), chptr->channelts,
-					 chptr->chname);
+			mbl = preflen = ircsprintf(modebuf, ":%s TMODE " IRCD_TIME_FMT " %s ",
+						use_id(source_p), chptr->channelts,
+						chptr->chname);
 		else
-			mbl = ircsprintf(modebuf, ":%s MODE %s ",
-					 source_p->name, chptr->chname);
+			mbl = preflen = ircsprintf(modebuf, ":%s MODE %s ",
+						source_p->name, chptr->chname);
 
 		/* loop the list of - modes we have */
 		for (i = 0; i < mode_count; i++)
@@ -1025,15 +1026,24 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
 			 * the mode
 			 */
 			if((mode_changes[i].letter == 0) ||
-					((cap & mode_changes[i].caps) != mode_changes[i].caps)
-					|| ((nocap & mode_changes[i].nocaps) != mode_changes[i].nocaps))
+				((cap & mode_changes[i].caps) != mode_changes[i].caps)
+				|| ((nocap & mode_changes[i].nocaps) != mode_changes[i].nocaps))
 				continue;
 
-			arg = "";
+			arg = NULL;
 			if((cap & CAP_TS6) && mode_changes[i].id)
 				arg = mode_changes[i].id;
-			if(!*arg)
+			if(!arg)
 				arg = mode_changes[i].arg;
+
+			if(arg)
+			{
+				arglen = strlen(arg);
+
+				/* dont even think about it! --fl */
+				if(arglen > MODEBUFLEN-5)
+					continue;
+			}
 
 			/* if we're creeping past the buf size, we need to send it and make
 			 * another line for the other modes
@@ -1042,8 +1052,9 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
 			 * them as if they were the longest of the nick or uid at all times,
 			 * which even then won't work as we don't always know the uid -A1kmm.
 			 */
-			if((arg != NULL) && ((mc == MAXMODEPARAMS) ||
-						((strlen(arg) + mbl + pbl + 2) > BUFSIZE)))
+			if(arg && ((mc == MAXMODEPARAMS) ||
+				(arglen + pbl + 1) > sizeof(parabuf) ||
+				(arglen + pbl + mbl + 2) > BUFSIZE))
 			{
 				if(nc != 0)
 					sendto_server(client_p, chptr, cap, nocap,
@@ -1051,14 +1062,7 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
 				nc = 0;
 				mc = 0;
 
-				if(cap & CAP_TS6)
-					mbl = ircsprintf(modebuf, ":%s TMODE " IRCD_TIME_FMT " %s ",
-							 use_id(source_p), chptr->channelts,
-							 chptr->chname);
-				else
-					mbl = ircsprintf(modebuf, ":%s MODE %s ",
-							 source_p->name, chptr->chname);
-
+				mbl = preflen;
 				pbl = 0;
 				parabuf[0] = 0;
 				dir = MODE_QUERY;
@@ -1076,9 +1080,7 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
 
 			if(arg != NULL)
 			{
-				pbl = strlcat(parabuf, arg, MODEBUFLEN);
-				parabuf[pbl++] = ' ';
-				parabuf[pbl] = '\0';
+				pbl += ircsprintf(parabuf, "%s ", arg);
 				mc++;
 			}
 		}
