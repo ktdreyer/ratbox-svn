@@ -258,8 +258,8 @@ static void ms_kill(struct Client *client_p, struct Client *source_p,
   if(MyOper(target_p))
       sendto_one(target_p, ":%s KILL %s :%s", parv[0], target_p->name, reason);
 
-  /* Be warned, if this message isnt anything but From %s, epic will moan
-   * like hell.. so dont change it to From: or the case or anything! -- fl */
+  /* Be warned, this message must be From %s, or it confuses clients
+   * so dont change it to From: or the case or anything! -- fl -- db */
   if (IsOper(source_p)) /* send it normally */
     {
       sendto_realops_flags(FLAGS_ALL,
