@@ -1,3 +1,7 @@
+*** 20010429_4 by androsyn
+Added "yet another assert"(tm) to track down fl_'s core.
+
+
 *** 20010429_3 by fl_
 - couple of small bugs in stats
 - replaced unused things in stats Q with "*"
