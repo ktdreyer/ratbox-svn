@@ -1351,9 +1351,9 @@ void set_channel_mode(struct Client *cptr,
             strcpy(pbufw_hops, who->name);
             pbufw_hops += strlen(pbufw_hops);
             *pbufw_hops++ = ' ';
-            strcpy(pbufw_hops_id, who->user->id);
+            strcpy(pbufw_hops_id, HasID(who) ? who->user->id : who->name);
             pbufw_hops_id += strlen(pbufw_hops_id);
-            *pbufw_hops_id = ' ';
+            *pbufw_hops_id++ = ' ';
           }
           else 
           {
@@ -1381,18 +1381,22 @@ void set_channel_mode(struct Client *cptr,
           /* Keep things in sync on +a channels... */
           if ((chptr->mode.mode & MODE_HIDEOPS) && MyClient(who))
           {
+            /* send mass-server-op */
             if ((!target_was_op) && (whatt == MODE_ADD) &&
                 ((to_list == &chptr->chanops) ||
                  (to_list == &chptr->halfops)))
               sync_oplists(chptr, who, 0, chname);
+            /* send mass-sever-deop */
             else if (target_was_op && (whatt == MODE_DEL) &&
                      ((to_list != &chptr->chanops) &&
                       (to_list != &chptr->halfops)))
               sync_oplists(chptr, who, 1, chname);
+            /* send single server voice */
             else if ((!target_was_voice) && (whatt == MODE_ADD) &&
                      (to_list == &chptr->voiced))
               sendto_one(who, ":%s MODE %s +v %s",
                          me.name, chname, who->name);
+            /* send single server devoice */
             else if (target_was_voice && (whatt == MODE_DEL) &&
                      (to_list != &chptr->voiced))
               sendto_one(who, ":%s MODE %s -v %s",
