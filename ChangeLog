@@ -1,3 +1,18 @@
+androsyn    2004/04/02 11:00:03 EST	(20040402_0)
+
+  Modified files:
+    src                  irc_string.c listener.c s_user.c 
+  Log:
+  Have inetntop generate the 0::1 form, and remove hacks elsewhere to deal
+  with it
+  
+  Revision  Changes    Path
+  7.71      +4 -0      ircd-ratbox/src/irc_string.c
+  7.109     +3 -14     ircd-ratbox/src/listener.c
+  7.315     +4 -11     ircd-ratbox/src/s_user.c
+
+
+
 androsyn    2004/04/01 12:44:36 EST	(20040401_2)
 
   Modified files:
