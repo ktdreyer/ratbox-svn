@@ -705,7 +705,6 @@ static  void    change_chan_flag(struct Channel *chptr,struct Client *cptr, int 
    {
     if (flag & MODE_ADD)
       {
-        tmp->flags |= flag & MODE_FLAGS;
         if (flag & MODE_CHANOP)
           {
             tmp->flags &= ~MODE_DEOPPED;
@@ -714,6 +713,7 @@ static  void    change_chan_flag(struct Channel *chptr,struct Client *cptr, int 
                 chptr->opcount++;
               }
           }
+        tmp->flags |= flag & MODE_FLAGS;
       }
     else
       {
