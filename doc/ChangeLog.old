@@ -1,3 +1,8 @@
+*** 20001206_11 by db
+- riedel's patch to keep from adding nicks twice to an accept list
+
+
+
 *** 20001206_10 by db
 - redoing RPL_VCHANLIST so last %s is gone, since I'm building
   up the channel sublist myself
