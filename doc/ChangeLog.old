@@ -1,3 +1,8 @@
+*** 20010502_3 by a1kmm
+- Minor fix on my last commit, for when >1 line is read at the same
+  time...
+
+
 *** 20010502_2 by a1kmm
 - Sanified the flood checking and sendq checking code a little.
 
