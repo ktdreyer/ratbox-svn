@@ -1,3 +1,9 @@
+*** 20010214_8 by androsyn
+The resolver will now actually reread /etc/resolv.conf.  Also note
+that this pretty much does a full restart on the resolver.
+
+
+
 *** 20010214_7 by wcampbel
 Add +l (locops) to the default oper umodes
 Fix a typo in example.conf
