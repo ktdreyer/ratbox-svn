@@ -1,3 +1,15 @@
+leeh        2005/02/01 15:35:23 EST	(20050201_4)
+
+  Modified files:
+    src                  s_chanserv.c 
+  Log:
+  - make CLEAROPS clear all < S_C_OP
+  
+  Revision  Changes    Path
+  1.52      +1 -1      rserv/src/s_chanserv.c
+
+
+
 leeh        2005/02/01 15:32:15 EST	(20050201_3)
 
   Modified files:
