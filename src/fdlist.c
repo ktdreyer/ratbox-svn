@@ -55,8 +55,6 @@ void fdlist_init(void)
     /* XXXX I HATE THIS CHECK. Can someone please fix? */
     if (!fd_table)
         exit(69);
-    /* Setup the timeout check. I'll shift it later :)  -- adrian */
-    eventAdd("comm_checktimeouts", comm_checktimeouts, NULL, 1, 0);
     initialized = 1;
   }
 }
