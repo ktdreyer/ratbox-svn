@@ -1,3 +1,15 @@
+androsyn    2003/09/03 00:03:03 EDT	(20030903_2)
+
+  Removed files:
+    doc                  LazyLinks.txt 
+  Log:
+  How did this get missed?
+  
+  Revision  Changes    Path
+  1.3       +0 -244    ircd-ratbox/doc/LazyLinks.txt (dead)
+
+
+
 leeh        2003/09/02 20:39:28 EDT	(20030903_1)
 
   Modified files:
