@@ -1,3 +1,15 @@
+leeh        2002/04/25 13:57:43 EDT	(20020425_5)
+
+  Modified files:
+    modules              m_info.c 
+  Log:
+  - and /info..
+  
+  Revision  Changes    Path
+  1.56      +7 -1      ircd-hybrid-7/modules/m_info.c
+
+
+
 leeh        2002/04/25 13:55:22 EDT	(20020425_4)
 
   Modified files:
