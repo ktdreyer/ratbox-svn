@@ -1,3 +1,21 @@
+*** 20001212_7 by adrian
+
+
+The very first step in sanifying the make and install process
+
+* move opers.txt into doc like it bloody should have been
+* make install work with each subdir's Makefile rules, rather than
+  install_ircd
+* create placeholders (blank) for ircd.motd and kline.conf
+
+Its all far too complex to explain. Suffice to say, its neater.
+Binaries and some of the config files (not the kline, motd) are
+renamed to .old as a backup.
+
+Now, do the binary ..
+
+
+
 *** 20001212_6 by db
 - folded in Walter Campbell's IPV6 patches
 
