@@ -1,3 +1,7 @@
+*** 20010111_8 by a1kmm
+- Fixed the blockallocator more, it looks like a double free is still there, however.
+
+
 *** 20010111_7 by a1kmm
 - Fixed DNS to work(and leak :( ) again.
 
