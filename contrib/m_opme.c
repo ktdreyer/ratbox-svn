@@ -46,7 +46,7 @@ static void mo_opme(struct Client *client_p, struct Client *source_p,
 static int chan_is_opless(struct Channel *chptr);
 
 struct Message opme_msgtab = {
-  "OPME", 0, 2, 0, MFLG_SLOW, 0,
+  "OPME", 0, 0, 2, 0, MFLG_SLOW, 0,
   {m_unregistered, m_not_oper, m_ignore, mo_opme}
 };
 
@@ -85,7 +85,7 @@ static void mo_opme(struct Client *client_p, struct Client *source_p,
   dlink_node *ptr;
   
   /* admins only */
-  if (!IsSetOperAdmin(source_p))
+  if (!IsAdmin(source_p))
     {
       sendto_one(source_p, ":%s NOTICE %s :You have no A flag", me.name,
                  parv[0]);
@@ -94,7 +94,7 @@ static void mo_opme(struct Client *client_p, struct Client *source_p,
 
   /* XXX - we might not have CBURSTed this channel if we are a lazylink
    * yet. */
-  chptr= hash_find_channel(parv[1], NULL);
+  chptr= hash_find_channel(parv[1]);
   root_chptr = chptr;
   if (chptr && parc > 2 && parv[2][0] == '!')
     {
