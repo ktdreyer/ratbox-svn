@@ -83,6 +83,8 @@ static struct clicap
 	_CLICAP("ircd-ratbox.org/dummy-isareallylongcapabilitynamethatshouldtesthowithandlesbeingreallyreallylong", 0x400, 0, 0),
 };
 
+#define CLICAP_STICKY (0x001|0x008|0x010)
+
 #define CLICAP_LIST_LEN (sizeof(clicap_list) / sizeof(struct clicap))
 
 static int clicap_sort(struct clicap *, struct clicap *);
@@ -315,7 +317,7 @@ cap_clear(struct Client *source_p, const char *arg)
 			source_p->localClient->caps ? source_p->localClient->caps : -1, 1);
 
 	/* XXX - sticky capabs */
-	source_p->localClient->caps = 0;
+	source_p->localClient->caps = source_p->localClient->caps & CLICAP_STICKY;
 }
 
 static void
