@@ -147,7 +147,7 @@ int     ms_lljoin(struct Client *cptr,
           sendto_channel_local(ALL_MEMBERS, chptr,
 			       ":%s!%s@%s JOIN :%s",
 			       acptr->name,
-			       acptr->user,
+			       acptr->username,
 			       acptr->host,
 			       name);
       

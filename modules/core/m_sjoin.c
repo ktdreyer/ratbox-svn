@@ -353,7 +353,7 @@ int     ms_sjoin(struct Client *cptr,
 	      add_vchan_to_client_cache(acptr,top_chptr, chptr);
 	      sendto_channel_local(ALL_MEMBERS,chptr, ":%s!%s@%s JOIN :%s",
 				   acptr->name,
-				   acptr->user,
+				   acptr->username,
 				   acptr->host,
 				   top_chptr->chname);
 	    }
@@ -361,7 +361,7 @@ int     ms_sjoin(struct Client *cptr,
 	    {
 	      sendto_channel_local(ALL_MEMBERS,chptr, ":%s!%s@%s JOIN :%s",
 				   acptr->name,
-				   acptr->user,
+				   acptr->username,
 				   acptr->host,
 				   parv[2]);
 	    }

@@ -64,10 +64,6 @@ vsendto_realops(const char *, va_list);
 unsigned long current_serial=0L;
 
 static void
-sendto_common_channel( dlink_list *list,
-				   struct Client *user,
-				   const char *pattern , va_list args);
-static void
 sendto_list(dlink_list *list, const char *sendbuf, int len);
 
 void
@@ -516,68 +512,58 @@ sendto_cap_serv_butone(int cap, struct Client *one, const char *pattern, ...)
 } /* sendto_cap_serv_butone() */
 
 /*
- * sendto_common_channels()
+ * sendto_common_channels_local()
  *
- * Sends a message to all people (excluding user) on local server who are
- * in same channel with user.
+ * inputs	- pointer to client
+ *		- pattern to send
+ * output	- NONE
+ * side effects	- Sends a message to all people on local server who are
+ * 		  in same channel with user. 
+ *		  used by m_nick.c and exit_one_client.
  */
-
 void
-sendto_common_channels(struct Client *user, const char *pattern, ...)
+sendto_common_channels_local(struct Client *user, const char *pattern, ...)
 
 {
+  static char sendbuf[1024];
+  int len;
   va_list args;
-  dlink_node *channels;
-  dlink_node *users;
-  struct Client *cptr;
+  dlink_node *ptr;
   struct Channel *chptr;
 
   va_start(args, pattern);
+  len = vsprintf_irc(sendbuf, pattern, args);
+  va_end(args);
+
+  if (len > 510)
+    {
+      sendbuf[IRCD_BUFSIZE-2] = '\r';
+      sendbuf[IRCD_BUFSIZE-1] = '\n';
+      sendbuf[IRCD_BUFSIZE] = '\0';
+      len = IRCD_BUFSIZE;
+    }
+  else
+    {
+      sendbuf[len++] = '\r';
+      sendbuf[len++] = '\n';
+      sendbuf[len] = '\0';
+    }
   
   ++current_serial;
 
   if (user->user)
     {
-      for (channels = user->user->channel.head;
-	   channels; channels = channels->next)
+      for (ptr = user->user->channel.head; ptr; ptr = ptr->next)
 	{
-	  chptr = channels->data;
+	  chptr = ptr->data;
 
-	  sendto_common_channel(&chptr->chanops,user,pattern,args);
-	  sendto_common_channel(&chptr->halfops,user,pattern,args);
-	  sendto_common_channel(&chptr->voiced,user,pattern,args);
-	  sendto_common_channel(&chptr->peons,user,pattern,args);
+	  sendto_list(&chptr->chanops, sendbuf, len);
+	  sendto_list(&chptr->halfops, sendbuf, len);
+	  sendto_list(&chptr->voiced, sendbuf, len);
+	  sendto_list(&chptr->peons, sendbuf, len);
 	}
     }
-
-  if (MyConnect(user))
-    vsendto_prefix_one(user, user, pattern, args);
-
-  va_end(args);
 } /* sendto_common_channels() */
-
-static void
-sendto_common_channel( dlink_list *list, struct Client *user,
-		       const char *pattern , va_list args)
-{
-  dlink_node *users;
-  struct Client *cptr;
-
-  for(users = list->head; users; users = users->next)
-    {
-      cptr = users->data;
-
-      if (!MyConnect(cptr) || (cptr->fd < 0) )
-	continue;
-
-      if(cptr->serial == current_serial)
-	continue;
-
-      cptr->serial = current_serial;
-      
-      vsendto_prefix_one(cptr, user, pattern, args);
-    }
-}
 
 /*
  * sendto_channel_local
@@ -614,6 +600,9 @@ sendto_channel_local(int type,
       sendbuf[len] = '\0';
     }
 
+  /* Serial number checking isn't strictly necessary, but won't hurt */
+  ++current_serial;
+
   switch(type)
     {
     default:
@@ -645,10 +634,9 @@ sendto_channel_local(int type,
 /*
  * sendto_list
  *
- * inputs	- pointer to channel list of some channel
- *		- pointer to client message is from
- *		- format pattern
- *		- args for format
+ * inputs	- pointer to all members of this list a send buffer
+ *		- buffer to send
+ *		- length of buffer
  * output	- NONE
  * side effects	- all members of given list are sent
  * 		  given message. Right now, its always a channel list
@@ -663,7 +651,16 @@ sendto_list(dlink_list *list, const char *sendbuf, int len)
 
   for (ptr = list->head; ptr; ptr = ptr->next)
     {
-      acptr = ptr->data;
+      if ( (acptr = ptr->data) == NULL )
+	continue;
+
+      if (!MyConnect(acptr) || (acptr->fd < 0))
+	continue;
+
+      if (acptr->serial == current_serial)
+	continue;
+      
+      acptr->serial = current_serial;
 
       if (acptr && MyConnect(acptr))
 	send_message(acptr, (char *)sendbuf, len);

@@ -179,7 +179,7 @@ static void part_one_client(struct Client *cptr,
 	  sendto_channel_local(ALL_MEMBERS,
 			       chptr, ":%s!%s@%s PART %s",
 			       sptr->name,
-			       sptr->user,
+			       sptr->username,
 			       sptr->host,
 			       name);
 	  remove_user_from_channel(chptr, sptr);
@@ -201,7 +201,7 @@ static void part_one_client(struct Client *cptr,
 	  sendto_channel_local(ALL_MEMBERS,
 			       vchan, ":%s!%s@%s PART %s",
 			       sptr->name,
-			       sptr->user,
+			       sptr->username,
 			       sptr->host,
 			       name);
 	  remove_user_from_channel(vchan, sptr);
@@ -224,7 +224,7 @@ static void part_one_client(struct Client *cptr,
       sendto_channel_local(ALL_MEMBERS,
 			   chptr, ":%s!%s@%s PART %s",
 			   sptr->name,
-			   sptr->user,
+			   sptr->username,
 			   sptr->host,
 			   name);
       remove_user_from_channel(chptr, sptr);

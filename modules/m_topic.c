@@ -141,7 +141,7 @@ int     m_topic(struct Client *cptr,
 		  sendto_channel_local(ONLY_CHANOPS,
 				       chptr, ":%s!%s@%s TOPIC %s :%s",
 				       sptr->name,
-				       sptr->user,
+				       sptr->username,
 				       sptr->host,
 				       name,
 				       chptr->topic);
@@ -152,7 +152,7 @@ int     m_topic(struct Client *cptr,
 		  sendto_channel_local(ALL_MEMBERS,
 				       chptr, ":%s!%s@%s TOPIC %s :%s",
 				       sptr->name,
-				       sptr->user,
+				       sptr->username,
 				       sptr->host,
 				       name, chptr->topic);
 		}

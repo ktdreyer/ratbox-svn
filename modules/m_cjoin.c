@@ -219,7 +219,7 @@ int     m_cjoin(struct Client *cptr,
 		       vchan_chptr,
 		       ":%s!%s@%s JOIN :%s",
 		       sptr->name,
-		       sptr->user,
+		       sptr->username,
 		       sptr->host,
 		       chptr->chname);
 

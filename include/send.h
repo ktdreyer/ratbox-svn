@@ -38,7 +38,7 @@ extern  void sendto_channel_type(struct Client *,
                                  const char *message);
 extern  void sendto_serv_butone(struct Client *, const char *, ...);
 extern  void sendto_cap_serv_butone(int, struct Client *, const char *, ...);
-extern  void sendto_common_channels(struct Client *, const char *, ...);
+extern  void sendto_common_channels_local(struct Client *, const char *, ...);
 extern  void sendto_channel_local(int type,
 				  struct Channel *,
 				  const char *, ...);

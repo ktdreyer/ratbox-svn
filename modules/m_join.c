@@ -317,9 +317,9 @@ int     m_join(struct Client *cptr,
       /*
       ** notify all other users on the new channel
       */
-      sendto_channel_local(ALL_MEMBERS,chptr, ":%s!%s@%s JOIN :%s",
+      sendto_channel_local(ALL_MEMBERS, chptr, ":%s!%s@%s JOIN :%s",
 			   sptr->name,
-			   sptr->user,
+			   sptr->username,
 			   sptr->host,
 			   name);
       
@@ -472,7 +472,7 @@ void do_join_0(struct Client *cptr, struct Client *sptr)
       chptr = lp->data;
       sendto_channel_local(ALL_MEMBERS,chptr, ":%s!%s@%s PART %s",
 			   sptr->name,
-			   sptr->user,
+			   sptr->username,
 			   sptr->host,
 			   chptr->chname);
       remove_user_from_channel(chptr, sptr);
