@@ -198,13 +198,19 @@ static int ms_sjoin(struct Client *cptr,
       char *subp;
 
       /* possible sub vchan being sent along ? */
-      if((subp = strchr(parv[2],'_')))
+      if((subp = strrchr(parv[2],'_')))
 	{
-	  /* quite possibly now. To confirm I could
-	   * check the encoded timestamp to see if it matches
-	   * the given timestamp for this channel. Maybe do 
-	   * that later. - db
-	   */
+	  /* 
+           * XXX - Could be a vchan, but we can't be _sure_
+           *
+           * We now test the timestamp matches below,
+           * but that can still be faked.
+           *
+           * If there was some way to pass an extra bit of
+           * information over non-hybrid-7 servers, through SJOIN,
+           * we could tell other servers that it's a vchan.
+           * That's probably not possible, unfortunately :(
+           */
 
 	  *subp = '\0';	/* fugly hack for now ... */
 
@@ -214,7 +220,7 @@ static int ms_sjoin(struct Client *cptr,
 	      /* If the vchan is already in the vchan_list for this
 	       * root, don't re-add it.
 	       */
-
+              /* Compare timestamps too */
 	      if(dlinkFind(&top_chptr->vchan_list,chptr) == NULL &&
                         (!strcmp(parv[1], subp + 1)))
 		{
@@ -223,6 +229,7 @@ static int ms_sjoin(struct Client *cptr,
 		  chptr->root_chptr=top_chptr;
 		}
 	    }
+          /* check TS before creating a root channel */
 	  else if(!strcmp(parv[1], subp + 1))
 	    {
 	      top_chptr = get_channel(sptr, (parv[2] + 1), CREATE);
@@ -401,12 +408,10 @@ static int ms_sjoin(struct Client *cptr,
       
       people++;
 
-      /* XXX LazyLinks
-       * I think we have to do this, but if we didn't it'd be nice
-       */
+      /* LazyLinks - Introduce unknown clients before sending the sjoin */
       if (ServerInfo.hub)
       {
-        for(m = serv_list.head; m; m = m->next)
+        for (m = serv_list.head; m; m = m->next)
         {
           lcptr = m->data;
 
@@ -473,89 +478,46 @@ static int ms_sjoin(struct Client *cptr,
         {
           *mbuf++ = 'o';
 	  para[pargs++] = s;
-          if (pargs >= MAXMODEPARAMS)
-            {
-              *mbuf = '\0';
-	      if(IsVchan(chptr) && top_chptr)
-		{
-		  sendto_channel_local(hide_or_not, chptr,
-				       ":%s MODE %s %s %s %s %s %s",
-				       me.name,
-				       top_chptr->chname,
-				       modebuf,
-				       para[0],para[1],para[2],para[3]);
-		}
-	      else
-		{
-		  sendto_channel_local(hide_or_not, chptr,
-				       ":%s MODE %s %s %s %s %s %s",
-				       me.name,
-				       chptr->chname,
-				       modebuf,
-				       para[0],para[1],para[2],para[3]);
-		}
-              mbuf = modebuf;
-              *mbuf++ = '+';
-              para[0] = para[1] = para[2] = para[3] = "";
-              pargs = 0;
-            }
         }
       else if (fl & MODE_VOICE)
         {
           *mbuf++ = 'v';
 	  para[pargs++] = s;
-          if (pargs >= MAXMODEPARAMS)
-            {
-              *mbuf = '\0';
-	      if(IsVchan(chptr) && top_chptr)
-		{
-		  sendto_channel_local(hide_or_not, chptr,
-				       ":%s MODE %s %s %s %s %s %s",
-				       me.name,
-				       top_chptr->chname,
-				       modebuf,
-				       para[0],para[1],para[2],para[3]);
-		}
-	      else
-		{
-		  sendto_channel_local(hide_or_not, chptr,
-				       ":%s MODE %s %s %s %s %s %s",
-				       me.name,
-				       chptr->chname,
-				       modebuf,
-				       para[0],para[1],para[2],para[3]);
-		}
-              mbuf = modebuf;
-              *mbuf++ = '+';
-              para[0] = para[1] = para[2] = para[3] = "";
-              pargs = 0;
-            }
+        }
+      else if (fl & MODE_HALFOP)
+        {
+          *mbuf++ = 'h';
+          para[pargs++] = s;
+        }
+
+      if (pargs >= MAXMODEPARAMS)
+        {
+          *mbuf = '\0';
+          sendto_channel_local(hide_or_not, chptr,
+                               ":%s MODE %s %s %s %s %s %s",
+                               me.name,
+                               RootChan(chptr)->chname,
+                               modebuf,
+                               para[0],para[1],para[2],para[3]);
+          mbuf = modebuf;
+          *mbuf++ = '+';
+          para[0] = para[1] = para[2] = para[3] = "";
+          pargs = 0;
         }
     }
   
   *mbuf = '\0';
   if (pargs)
     {
-      if(IsVchan(chptr) && top_chptr)
-	{
-	  sendto_channel_local(hide_or_not, chptr,
-			       ":%s MODE %s %s %s %s %s %s",
-			       me.name,
-			       top_chptr->chname,
-			       modebuf,
-			       para[0], para[1], para[2], para[3]);
-	}
-      else
-	{
-	  sendto_channel_local(hide_or_not, chptr,
-			       ":%s MODE %s %s %s %s %s %s",
-			       me.name,
-			       chptr->chname,
-			       modebuf,
-			       para[0], para[1], para[2], para[3]);
-	}
+      sendto_channel_local(hide_or_not, chptr,
+                           ":%s MODE %s %s %s %s %s %s",
+                           me.name,
+                           RootChan(chptr)->chname,
+                           modebuf,
+                           para[0], para[1], para[2], para[3]);
     }
 
+  /* relay the SJOIN to other servers */
   for(m = serv_list.head; m; m = m->next)
     {
       acptr = m->data;
@@ -563,13 +525,15 @@ static int ms_sjoin(struct Client *cptr,
       if (acptr == cptr->from)
         continue;
 
+      /* skip lazylinks that don't know about this server */
       if (ServerInfo.hub && IsCapable(acptr,CAP_LL))
       {
         if( !(RootChan(chptr)->lazyLinkChannelExists &
               acptr->localClient->serverMask) )
           continue;
-        }
+      }
 
+      /* XXX - ids ? */
       if (IsCapable(acptr,CAP_HOPS))
         sendto_one(acptr, "%s %s", buf, sjbuf);
       else
