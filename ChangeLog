@@ -1,3 +1,20 @@
+leeh        2003/06/30 11:55:25 EDT	(20030630_1)
+
+  Modified files:
+    include              channel_mode.h 
+    modules/core         m_mode.c 
+    src                  client.c 
+  Log:
+  - fix up set_channel_mode
+  - remove the blockheap garbage collect stuff from client.c
+  
+  Revision  Changes    Path
+  7.23      +1 -1      ircd-ratbox/include/channel_mode.h
+  1.74      +3 -3      ircd-ratbox/modules/core/m_mode.c
+  7.388     +0 -17     ircd-ratbox/src/client.c
+
+
+
 leeh        2003/06/30 08:33:53 EDT	(20030630_0)
 
   Modified files:
