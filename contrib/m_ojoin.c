@@ -39,6 +39,7 @@
 #include "modules.h"
 #include "vchannel.h"
 #include "list.h"
+#include "channel_mode.h"
 
 #include <string.h>
 
@@ -77,7 +78,7 @@ static void mo_ojoin(struct Client *client_p, struct Client *source_p,
   int move_me = 0;
 
   /* admins only */
-  if (!IsSetOperAdmin(source_p))
+  if (!IsOperAdmin(source_p))
     {
       sendto_one(source_p, ":%s NOTICE %s :You have no A flag", me.name, parv[0]);
       return;
@@ -91,7 +92,7 @@ static void mo_ojoin(struct Client *client_p, struct Client *source_p,
       move_me = 1;
     }
 
-  chptr= hash_find_channel(parv[1], NullChn);
+  chptr= hash_find_channel(parv[1]);
   root_chptr = chptr;
   if (chptr && parc > 2 && parv[2][0] == '!')
     {
@@ -120,7 +121,7 @@ static void mo_ojoin(struct Client *client_p, struct Client *source_p,
   if (*parv[1] == '@') 
     {
        add_user_to_channel(chptr, source_p, CHFL_CHANOP);
-       sendto_ll_channel_remote(chptr, client_p, source_p,
+       sendto_server(client_p, source_p, chptr, NOCAPS, NOCAPS, LL_ICLIENT, 
                ":%s SJOIN %lu %s + :@%s", me.name, chptr->channelts,
                chptr->chname, source_p->name);
        sendto_channel_local(ALL_MEMBERS, chptr, ":%s!%s@%s JOIN %s",
@@ -135,7 +136,7 @@ static void mo_ojoin(struct Client *client_p, struct Client *source_p,
   else if (*parv[1] == '%')
     {
        add_user_to_channel(chptr, source_p, CHFL_HALFOP);
-       sendto_ll_channel_remote(chptr, client_p, source_p,
+       sendto_server(client_p, source_p, chptr, NOCAPS, NOCAPS, LL_ICLIENT, 
                ":%s SJOIN %lu %s + :%%%s", me.name, chptr->channelts,
                chptr->chname, source_p->name);
        sendto_channel_local(ALL_MEMBERS, chptr, ":%s!%s@%s JOIN %s",
@@ -149,7 +150,7 @@ static void mo_ojoin(struct Client *client_p, struct Client *source_p,
   else if (*parv[1] == '+')
     {
        add_user_to_channel(chptr, source_p, CHFL_VOICE);
-       sendto_ll_channel_remote(chptr, client_p, source_p,
+       sendto_server(client_p, source_p, chptr, NOCAPS, NOCAPS, LL_ICLIENT, 
                ":%s SJOIN %lu %s + :+%s", me.name, chptr->channelts,
                chptr->chname, source_p->name);
        sendto_channel_local(ALL_MEMBERS, chptr, ":%s!%s@%s JOIN %s",
@@ -163,9 +164,10 @@ static void mo_ojoin(struct Client *client_p, struct Client *source_p,
   else
     {
        add_user_to_channel(chptr, source_p, CHFL_PEON);
-       sendto_ll_channel_remote(chptr, client_p, source_p,
-               ":%s SJOIN %lu %s + :%s", me.name, chptr->channelts,
-               chptr->chname, source_p->name);
+       sendto_server(client_p, source_p, chptr, NOCAPS, NOCAPS, LL_ICLIENT, 
+                     ":%s SJOIN %lu %s + :%s",
+		     me.name, chptr->channelts,
+		     chptr->chname, source_p->name);
        sendto_channel_local(ALL_MEMBERS, chptr, ":%s!%s@%s JOIN %s",
                        source_p->name,
                        source_p->username,
@@ -178,6 +180,6 @@ static void mo_ojoin(struct Client *client_p, struct Client *source_p,
   if (on_vchan)
     add_vchan_to_client_cache(source_p,root_chptr,chptr);
 
-  channel_member_names(source_p, chptr, chptr->chname);
+  channel_member_names(source_p, chptr, chptr->chname, 1);
 }
 
