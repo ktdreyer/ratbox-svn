@@ -17,4 +17,5 @@ debug_tab *find_debug_tab(char *);
 void       deprintf(char *, char *, ...);
 void       add_mod_debug(char *);
 
+
 #endif

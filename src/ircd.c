@@ -257,87 +257,56 @@ daemon(int a, int b)
  *      This is called when the commandline is not acceptable.
  *      Give error message and exit without starting anything.
  */
-static void bad_command()
+static void 
+bad_command(char *name)
 {
-  fprintf(stderr, 
-          "Usage: ircd [-d dlinefile] [-f configfile] [-h servername] "
-          "[-k klinefile] [-l logfile] [-n] [-v] [-x debuglevel]\n");
-  fprintf(stderr, "Server not started\n");
-  exit(-2);
+  fprintf(stderr, "Usage: %s [options]\n", name);
+  fprintf(stderr, "Options:\n");
+  fprintf(stderr, "\t-d dlinefile            File to use for dlines.conf\n");
+  fprintf(stderr, "\t-f configfile           File to use for ircd.conf\n");
+  fprintf(stderr, "\t-h servername           Specify server name\n");
+  fprintf(stderr, "\t-k klinefile            File to use for klines.conf\n");
+  fprintf(stderr, "\t-l logfile              File to use for ircd.log\n");
+  fprintf(stderr, "\t-n                      Run in foreground (don't detach)\n");
+  fprintf(stderr, "\t-v                      Printf version and exit\n");
+  fprintf(stderr, "\t-x debuglevel           Specify debug level\n");
+  fprintf(stderr, "\t-D dbg                  Enable debugging for 'dbg'\n");
+ 
+  fprintf(stderr, "\nServer not started\n");
+  exit(EXIT_FAILURE);
 }
 
-/*
- * All command line parameters have the syntax "-f string" or "-fstring"
- * OPTIONS:
- * -d filename - specify d:line file
- * -f filename - specify config file
- * -h hostname - specify server name
- * -k filename - specify k:line file
- * -l filename - specify log file
- * -n          - do not fork, run in foreground
- * -v          - print version and exit
- * -x          - set debug level, if compiled for debug logging
- * -D <thing>  - enable debugging for <thing>
- */
-static void parse_command_line(int argc, char* argv[])
+void
+cmd_enable_debug(char *what)
 {
-  const char* options = "d:f:h:k:l:nvx:D:"; 
-  int         opt;
-
-  while ((opt = getopt(argc, argv, options)) != EOF) {
-    switch (opt) {
-    case 'd': 
-      if (optarg)
-        ConfigFileEntry.dpath = optarg;
-      break;
-    case 'f':
-#ifdef CMDLINE_CONFIG
-      if (optarg)
-        ConfigFileEntry.configfile = optarg;
-#endif
-      break;
-    case 'k':
-#ifdef KPATH
-      if (optarg)
-        ConfigFileEntry.klinefile = optarg;
-#endif
-      break;
-    case 'h':
-      if (optarg)
-        strncpy_irc(me.name, optarg, HOSTLEN);
-      break;
-    case 'l':
-      if (optarg)
-        logFileName = optarg;
-      break;
-    case 'D':
-      if(enable_debug(optarg) == -1)
-	{
-	  fprintf(stderr, "ircd: '%s' is not a valid debug option\n", optarg);
-	  exit(EXIT_FAILURE);
-	}
-      break;
-    case 'n':
-      bootDaemon = 0; 
-      break;
-    case 'v':
-      printf("ircd %s\n\tircd_dir: %s\n", version, ConfigFileEntry.dpath);
-      exit(0);
-      break;   /* NOT REACHED */
-    case 'x':
-#ifdef  DEBUGMODE
-      if (optarg) {
-        debuglevel = atoi(optarg);
-        debugmode = optarg;
-      }
-#endif
-      break;
-    default:
-      bad_command();
-      break;
+#ifdef DEBUGMODE
+  if(enable_debug(what) == -1)
+    {
+      fprintf(stderr, "ircd: '%s' is not a valid debug option\n", optarg);
+      exit(EXIT_FAILURE);
     }
-  }
+  break;
+#else
+  fprintf(stderr, "ircd: not compiled in debug mode.\n");
+  fprintf(stderr, "ircd: exiting on error.\n");
+  exit(EXIT_FAILURE);
+#endif
 }
+
+static int printVersion = 0;
+
+struct lgetopt myopts[] = {
+  {"dlinefile", &ConfigFileEntry.dpath, STRING, "File to use for dlines.conf"},
+  {"configfile", &ConfigFileEntry.configfile, STRING, "File to use for ircd.conf"},
+  {"klinefile", &ConfigFileEntry.klinefile, STRING, "File to use for klines.conf"},
+  {"logfile", &logFileName, STRING, "File to use for ircd.log"},
+  {"foreground", &bootDaemon, YESNO, "Run in foreground (don't detach)"},
+  {"version", &printVersion, YESNO, "Print version and exit"},
+#ifdef DEBUGMODE
+  {"debug", cmd_enable_debug, DEBUG, "Enable debugging for a certain value"},
+#endif
+  {"help", NULL, USAGE, "Print this text"},
+};
 
 static time_t io_loop(time_t delay)
 {
@@ -511,7 +480,13 @@ int main(int argc, char *argv[])
   myargv = argv;
   umask(077);                /* better safe than sorry --SRB */
 
-  parse_command_line(argc, argv); 
+  parseargs(&argc, &argv, myopts);
+
+  if (printVersion) 
+    {
+      printf("\tircd_dir: %s\n", ConfigFileEntry.dpath);
+      exit(EXIT_SUCCESS);
+    }
 
   if (chdir(ConfigFileEntry.dpath))
     {

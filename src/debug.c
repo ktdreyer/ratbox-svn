@@ -8,11 +8,10 @@
 #include "s_log.h"
 
 debug_tab dtab[] = {
-  /* well, there's nothing here to debug right now,
-     but if there was, it'd be added like this:
-  {"startup", 0},
-     The second field is always 0, unless you want
-     this to be enabled by default.. */
+  /* the second field here is always 0, unless you
+     want this to be enabled by default.. */
+  {"send", 0},
+  {"error", 0},
   {NULL, 0}
 };
 
@@ -61,6 +60,7 @@ add_mod_debug(char *what)
  *   supplied is written to stdout.  Otherwise no action is taken.
  */
 
+#ifdef DEBUGMODE
 void 
 deprintf(char *what, char *fmt, ...)
 {
@@ -79,6 +79,14 @@ deprintf(char *what, char *fmt, ...)
   log(L_DEBUG, "%s", buffer);
   fflush(stdout);
 }
+#else
+void
+deprintf(a,b)
+     char *a,*b;
+{
+  return;
+}
+#endif
 
 /*
  * FUNCTION

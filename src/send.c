@@ -50,6 +50,7 @@
 #include "s_log.h"
 #include "vchannel.h"
 #include "memory.h"
+#include "debug.h"
 
 #define LOG_BUFSIZE 2048
 
@@ -127,7 +128,6 @@ dead_link(struct Client *to, char *notice)
                          notice, get_client_name(to, HIDE_IP));
 
   Debug((DEBUG_ERROR, notice, get_client_name(to, HIDE_IP)));
-
   return (-1);
 } /* dead_link() */
 
@@ -252,7 +252,7 @@ send_message_remote(struct Client *to, struct Client *from,
       return;
     } /* if (!MyClient(from) && IsPerson(to) && (to->from == from->from)) */
   
-  Debug((DEBUG_SEND,"Sending [%s] to %s",lsendbuf,to->name));
+  deprintf("send", "Sending [%s] to %s", lsendbuf, to->name);
 
   /* XXX This stuff below should(?) be a common function
    * called by send_message() and send_message_remote()
@@ -402,7 +402,7 @@ sendto_one(struct Client *to, const char *pattern, ...)
   va_end(args);
 
   (void)send_message(to, (char *)sendbuf, len);
-  Debug((DEBUG_SEND,"Sending [%s] to %s",sendbuf,to->name));
+  deprintf("send", "Sending [%s] to %s", sendbuf, to->name);
 } /* sendto_one() */
 
 /*
@@ -463,7 +463,7 @@ sendto_one_prefix(struct Client *to, struct Client *prefix,
   else
     send_message(to_sendto, lbuf, llen);
   
-  Debug((DEBUG_SEND,"Sending [%s] to %s",sendbuf,to->name));
+  deprintf("send", "Sending [%s] to %s", sendbuf, to->name);
 } /* sendto_one() */
 
 /*

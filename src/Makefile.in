@@ -64,6 +64,7 @@ BASE_SRCS =                     \
   event.c                       \
   fdlist.c                      \
   fileio.c                      \
+  getopt.c                      \
   hash.c                        \
   hook.c                        \
   hostmask.c                    \
