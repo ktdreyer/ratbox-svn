@@ -135,21 +135,6 @@ extern char    *channel_chanop_or_voice(struct Channel *, struct Client *);
 extern void    add_invite(struct Channel *chptr, struct Client *who);
 extern void    del_invite(struct Channel *chptr, struct Client *who);
 
-
-extern void    channel_member_list(struct Client *source_p,
-				   struct Channel *chptr,
-				   dlink_list *list_chanops,
-				   dlink_list *list_voiced,
-				   dlink_list *list_halfops,
-				   dlink_list *list_peons,
-				   char *show_ops_flag,
-				   char *show_voiced_flag,
-				   char *show_halfop_flag,
-				   char *buf,
-				   int mlen,
-				   int *cur_len,
-				   int *reply_to_send);
-
 extern void    send_channel_modes (struct Client *, struct Channel *);
 extern void    channel_modes(struct Channel *chptr, struct Client *who,
                              char *, char *);
