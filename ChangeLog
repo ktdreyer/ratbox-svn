@@ -1,3 +1,19 @@
+leeh        2002/08/12 19:13:33 EDT	(20020812_9)
+
+  Modified files:
+    modules              m_knock.c m_list.c m_names.c 
+    src                  irc_string.c 
+  Log:
+  - missing includes
+  
+  Revision  Changes    Path
+  1.60      +2 -1      ircd-ratbox/modules/m_knock.c
+  1.47      +2 -1      ircd-ratbox/modules/m_list.c
+  1.49      +2 -1      ircd-ratbox/modules/m_names.c
+  7.55      +1 -0      ircd-ratbox/src/irc_string.c
+
+
+
 leeh        2002/08/12 17:33:36 EDT	(20020812_8)
 
   Modified files:
