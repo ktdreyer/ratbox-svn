@@ -595,7 +595,7 @@ struct mode_letter flags[] = {
   { MODE_MODERATED,  'm' },
   { MODE_NOPRIVMSGS, 'n' },
   { MODE_TOPICLIMIT, 't' },
-  { MODE_INVITEONLY, 'i' }
+  { MODE_INVITEONLY, 'i' },
   { 0, 0 }
 };
 
