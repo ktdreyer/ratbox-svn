@@ -218,6 +218,7 @@ int   class_redirport_var;
 %token  STATS_I_OPER_ONLY
 %token  STATS_K_OPER_ONLY
 %token  STATS_O_OPER_ONLY
+%token  STATS_P_OPER_ONLY
 %token  TMASKED
 %token  TNO
 %token  TREJECT
@@ -1908,7 +1909,7 @@ general_item:       general_failed_oper_notice |
                     general_non_redundant_klines | general_dots_in_ident |
                     general_stats_o_oper_only | general_stats_k_oper_only |
                     general_pace_wait | general_stats_i_oper_only |
-                    general_whois_wait | 
+                    general_whois_wait | general_stats_P_oper_only |
                     general_short_motd | general_no_oper_flood |
                     general_iauth_server |
                     general_iauth_port |
@@ -2052,6 +2053,16 @@ general_stats_o_oper_only: STATS_O_OPER_ONLY '=' TYES ';'
     ConfigFileEntry.stats_o_oper_only = 0;
   } ;
 
+general_stats_P_oper_only: STATS_P_OPER_ONLY '=' TYES ';'
+  {
+    ConfigFileEntry.stats_P_oper_only = 1;
+  }
+    |
+    STATS_P_OPER_ONLY '=' TNO ';'
+  {
+    ConfigFileEntry.stats_P_oper_only = 0;
+  } ;
+  
 general_stats_k_oper_only: STATS_K_OPER_ONLY '=' TYES ';'
   {
     ConfigFileEntry.stats_k_oper_only = 2;

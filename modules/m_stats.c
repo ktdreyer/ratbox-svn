@@ -159,7 +159,7 @@ static struct StatsStruct stats_cmd_table[] =
   { 'o',	stats_oper,		0,	0,	},
   { 'O',	stats_oper,		0,	0,	},
   { 'p',	stats_operedup,		0,	0,	},
-  { 'P',	stats_ports,		1,	0,	},
+  { 'P',	stats_ports,		0,	0,	},
   { 'q',	stats_resv,		1,	0,	},
   { 'Q',	stats_resv,		1,	0,	},
   { 'r',	stats_usage,		1,	0,	},
@@ -578,7 +578,10 @@ static void stats_operedup(struct Client *client_p)
 
 static void stats_ports(struct Client *client_p)
 {
-  show_ports(client_p);
+  if (!IsOper(client_p) && ConfigFileEntry.stats_o_oper_only)
+    sendto_one(client_p, form_str(ERR_NOPRIVILEGES),me.name,client_p->name);
+  else
+    show_ports(client_p);
 }
 
 static void stats_resv(struct Client *client_p)

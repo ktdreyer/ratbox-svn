@@ -243,6 +243,7 @@ non_redundant_klines    { return NON_REDUNDANT_KLINES; }
 stats_o_oper_only       { return STATS_O_OPER_ONLY; }
 stats_k_oper_only	{ return STATS_K_OPER_ONLY; }
 stats_i_oper_only	{ return STATS_I_OPER_ONLY; }
+stats_P_oper_only	{ return STATS_P_OPER_ONLY; }
 whois_wait              { return WHOIS_WAIT; }
 pace_wait               { return PACE_WAIT; }
 knock_delay             { return KNOCK_DELAY; }

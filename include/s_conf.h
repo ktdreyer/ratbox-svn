@@ -214,6 +214,7 @@ struct config_file_entry
   int           stats_o_oper_only;
   int		stats_k_oper_only;
   int		stats_i_oper_only;
+  int		stats_P_oper_only;
   int           pace_wait;
   int           whois_wait;
   int           short_motd;
