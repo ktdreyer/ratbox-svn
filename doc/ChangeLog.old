@@ -1,3 +1,7 @@
+*** 20010204_16 by androsyn
+Fixed a tyop that prevented s_auth.c from compiling.
+
+
 *** 20010204_15 by db
 - fixed core in hostmask.c add_conf() should check for NULL pointers
 - added initial IPV6 specific code
