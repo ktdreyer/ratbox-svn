@@ -291,7 +291,7 @@ check_pings_list(dlink_list *list)
 
               DupString(aconf->host, client_p->host);
               DupString(aconf->passwd, "idle exceeder");
-              DupString(aconf->name, client_p->username);
+              DupString(aconf->user, client_p->username);
               aconf->port = 0;
               aconf->hold = CurrentTime + 60;
               add_temp_kline(aconf);
