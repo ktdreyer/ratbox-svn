@@ -22,6 +22,7 @@
  *  $Id$
  */
 
+#include "stdinc.h"
 #include "config.h"
 #include "listener.h"
 #include "client.h"
@@ -41,14 +42,6 @@
 #include <openssl/bio.h>
 #endif
 
-#include <assert.h>
-#include <string.h>
-#include <errno.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <netdb.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
 
 #ifndef INADDR_NONE
 #define INADDR_NONE ((unsigned int) 0xffffffff)

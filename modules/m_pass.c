@@ -22,6 +22,7 @@
  *  $Id$
  */
 
+#include "stdinc.h"
 #include "handlers.h"  /* m_pass prototype */
 #include "client.h"      /* client struct */
 #include "irc_string.h" 

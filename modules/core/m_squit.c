@@ -22,6 +22,7 @@
  *  $Id$
  */
 
+#include "stdinc.h"
 #include "handlers.h"
 #include "client.h"
 #include "common.h"      /* FALSE bleah */
@@ -36,7 +37,6 @@
 #include "parse.h"
 #include "modules.h"
 
-#include <assert.h>
 
 static void ms_squit(struct Client*, struct Client*, int, char**);
 static void mo_squit(struct Client*, struct Client*, int, char**);

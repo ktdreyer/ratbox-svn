@@ -22,6 +22,9 @@
  *  $Id$
  */
 
+#include "stdinc.h"
+#include "config.h"
+
 #include "tools.h"
 #include "class.h"
 #include "client.h"
@@ -35,8 +38,6 @@
 #include "s_debug.h"
 #include "memory.h"
 
-#include <string.h>
-#include <stdlib.h>
 
 #define BAD_CONF_CLASS          -1
 #define BAD_PING                -2

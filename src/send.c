@@ -22,17 +22,7 @@
  *  $Id$
  */
 
-#include <sys/types.h>
-
-#include <stdarg.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <time.h>
-#include <assert.h>
-#include <errno.h>
-
+#include "stdinc.h"
 #include "tools.h"
 #include "send.h"
 #include "channel.h"

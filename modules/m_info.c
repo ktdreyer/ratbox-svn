@@ -22,10 +22,7 @@
  *  $Id$
  */
 
-#include <time.h>
-#include <string.h>
-#include <limits.h>
-
+#include "stdinc.h"
 #include "tools.h"
 #include "m_info.h"
 #include "channel.h"

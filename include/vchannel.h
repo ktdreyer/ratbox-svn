@@ -25,18 +25,8 @@
 #ifndef INCLUDED_vchannel_h
 #define INCLUDED_vchannel_h
 
-#ifndef INCLUDED_channel_h
 #include "channel.h"
-#endif
-
-#ifndef INCLUDED_ircd_defs_h
-#include "ircd_defs.h"        /* buffer sizes */
-#endif
-
-#ifndef INCLUDED_sys_types_h
-#include <sys/types.h>        /* time_t */
-#define INCLUDED_sys_types_h
-#endif
+#include "ircd_defs.h"      
 
 struct Client;
 struct Channel;

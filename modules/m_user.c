@@ -22,6 +22,7 @@
  *  $Id$
  */
 
+#include "stdinc.h"
 #include "handlers.h"
 #include "client.h"
 #include "irc_string.h"
@@ -34,7 +35,6 @@
 #include "parse.h"
 #include "modules.h"
 
-#include <string.h>
 
 #define UFLAGS  (FLAGS_INVISIBLE|FLAGS_WALLOP|FLAGS_SERVNOTICE)
 

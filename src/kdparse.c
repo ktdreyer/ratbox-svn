@@ -22,12 +22,7 @@
  *  $Id$
  */
 
-#include <sys/types.h>
-
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-
+#include "stdinc.h"
 #include "tools.h"
 #include "s_log.h"
 #include "s_conf.h"

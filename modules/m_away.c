@@ -22,6 +22,7 @@
  *  $Id$
  */
 
+#include "stdinc.h"
 #include "handlers.h"
 #include "client.h"
 #include "irc_string.h"
@@ -35,7 +36,6 @@
 #include "s_serv.h"
 #include "packet.h"
 
-#include <stdlib.h>
 
 static void m_away(struct Client*, struct Client*, int, char**);
 

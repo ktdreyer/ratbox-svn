@@ -56,27 +56,11 @@
  *
  */
 
+#include "stdinc.h"
+
 #define WE_ARE_MEMORY_C
 #include "setup.h"
-
 #ifndef NOBALLOC
-#include <stdio.h>
-#include <unistd.h>
-#include <assert.h>
-#include <fcntl.h>
-#include "ircd_defs.h"          /* DEBUG_BLOCK_ALLOCATOR */
-#include "ircd.h"
-#include "memory.h"
-#include "balloc.h"
-#include "irc_string.h"
-#include "tools.h"
-#include "s_log.h"
-#include "client.h"
-#include "fdlist.h"
-
-#include <string.h>
-#include <stdlib.h>
-static int newblock(BlockHeap * bh);
 
 #ifdef HAVE_MMAP /* We've got mmap() that is good */
 #include <sys/mman.h>
@@ -87,6 +71,20 @@ static int newblock(BlockHeap * bh);
 #define MAP_ANON MAP_ANONYMOUS
 #endif
 #endif
+
+
+#include "ircd_defs.h"          /* DEBUG_BLOCK_ALLOCATOR */
+#include "ircd.h"
+#include "memory.h"
+#include "balloc.h"
+#include "irc_string.h"
+#include "tools.h"
+#include "s_log.h"
+#include "client.h"
+#include "fdlist.h"
+
+static int newblock(BlockHeap * bh);
+
 
 /*
  * static inline void free_block(void *ptr, size_t size)

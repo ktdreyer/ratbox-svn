@@ -25,16 +25,6 @@
 #ifndef INCLUDED_client_h
 #define INCLUDED_client_h
 
-#include <sys/types.h>       /* time_t */
-#include <netinet/in.h>      /* in_addr */
-
-#if defined(HAVE_STDDEF_H)
-# ifndef INCLUDED_stddef_h
-#  include <stddef.h>        /* offsetof */
-#  define INCLUDED_stddef_h
-# endif
-#endif
-
 #include "config.h"
 
 #if !defined(CONFIG_H_LEVEL_7)

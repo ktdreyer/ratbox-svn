@@ -22,17 +22,11 @@
  *  $Id$
  */
 
-#include <sys/types.h>        /* time_t */
-#include <sys/time.h>
 
 #ifndef INCLUDED_channel_mode_h
 #define INCLUDED_channel_mode_h
-#ifndef INCLUDED_config_h
 #include "config.h"           /* config settings */
-#endif
-#ifndef INCLUDED_ircd_defs_h
 #include "ircd_defs.h"        /* buffer sizes */
-#endif
 
 /* If the below define is enabled, we will bounce halfops as follows:
  * If we receive a halfop for a user, we will check their ->from supports

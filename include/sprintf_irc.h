@@ -25,7 +25,6 @@
 #ifndef SPRINTF_IRC
 #define SPRINTF_IRC
 
-#include <stdarg.h>
 
 /*=============================================================================
  * Proto types

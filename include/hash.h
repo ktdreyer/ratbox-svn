@@ -24,10 +24,6 @@
 
 #ifndef INCLUDED_hash_h
 #define INCLUDED_hash_h
-#ifndef INCLUDED_sys_types_h
-#include <sys/types.h>
-#define INCLUDED_sys_types_h
-#endif
 
 /* 
  * Client hash table size

@@ -22,11 +22,7 @@
  *  $Id$
  */
 
-#include <assert.h>
-#include <string.h>
-#include <strings.h>
-#include <stdlib.h>
-
+#include "stdinc.h"
 #include "parse.h"
 #include "client.h"
 #include "channel.h"

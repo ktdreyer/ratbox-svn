@@ -64,14 +64,9 @@
  *
  **************************************************************/
 
-#include "config.h"
-
+#include "stdinc.h"
 #if !defined(HAVE_SNPRINTF) || !defined(HAVE_VSNPRINTF)
 
-
-#include <string.h>
-# include <ctype.h>
-#include <sys/types.h>
 
 #include "irc_string.h"
 

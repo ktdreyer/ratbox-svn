@@ -22,6 +22,7 @@
  *  $Id$
  */
 
+#include "stdinc.h"
 #include "tools.h"
 #include "handlers.h"
 #include "channel.h"
@@ -37,7 +38,6 @@
 #include "parse.h"
 #include "hash.h"
 
-#include <string.h>
 
 static void m_kick(struct Client*, struct Client*, int, char**);
 static void ms_kick(struct Client*, struct Client*, int, char**);

@@ -22,6 +22,7 @@
  *  $Id$
  */
 
+#include "stdinc.h"
 #include "tools.h"
 #include "handlers.h"
 #include "channel.h"
@@ -42,10 +43,6 @@
 #include "parse.h"
 #include "modules.h"
 
-#include <stdio.h>
-#include <time.h>
-#include <string.h>
-#include <unistd.h>
 
 static void mo_unkline(struct Client*, struct Client*, int, char**);
 static void mo_undline(struct Client*, struct Client*, int, char**);

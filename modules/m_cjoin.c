@@ -22,6 +22,7 @@
  *  $Id$
  */
 
+#include "stdinc.h"
 #include "tools.h"
 #include "handlers.h"
 #include "channel.h"
@@ -41,8 +42,6 @@
 #include "parse.h"
 #include "modules.h"
 
-#include <stdlib.h>
-#include <string.h>
 
 #ifdef VCHANS
 static void m_cjoin(struct Client*, struct Client*, int, char**);

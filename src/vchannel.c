@@ -22,6 +22,7 @@
  *  $Id$
  */
 
+#include "stdinc.h"
 #include "tools.h"
 #include "vchannel.h"
 #include "channel.h"
@@ -37,9 +38,6 @@
 #include "memory.h"
 #include "s_conf.h"             /* ConfigFileEntry */
 
-#include <assert.h>
-#include <string.h>
-#include <stdlib.h>
 
 #ifdef VCHANS
 static void vchan_show_ids(struct Client *source_p, struct Channel *chptr);

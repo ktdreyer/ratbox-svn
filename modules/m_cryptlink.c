@@ -29,10 +29,7 @@
  *
  */
 
-#include <string.h>
-#include <stdlib.h>
-#include <assert.h>
-
+#include "stdinc.h"
 #include "handlers.h"
 #include "client.h"      /* client struct */
 #include "ircd.h"        /* me */

@@ -30,7 +30,7 @@ localstatedir	= @localstatedir@
 moduledir	= @prefix@/modules
 automoduledir	= @prefix@/modules/autoload
 
-INCLUDES	= -I../include
+INCLUDES	= -I../include -I.
 CPPFLAGS	= ${INCLUDES} @CPPFLAGS@
  
 default:	all

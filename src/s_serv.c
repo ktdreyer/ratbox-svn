@@ -22,18 +22,7 @@
  *  $Id$
  */
 
-#include <sys/types.h>
-#include <sys/socket.h>
-
-#include <assert.h>
-#include <string.h>
-#include <stdlib.h>
-#include <errno.h>
-#include <time.h>
-#include <netdb.h>
-#include <fcntl.h> 
-
-#include "config.h"
+#include "stdinc.h"
 
 #ifdef HAVE_LIBCRYPTO
 #include <openssl/rsa.h>

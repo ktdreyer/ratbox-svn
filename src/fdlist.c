@@ -21,20 +21,15 @@
  *
  *  $Id$
  */
-
+#include "stdinc.h"
+#include "config.h"  /* option settings */
 #include "fdlist.h"
 #include "client.h"  /* struct Client */
 #include "event.h"
 #include "ircd.h"    /* GlobalSetOptions */
 #include "s_bsd.h"   /* highest_fd */
-#include "config.h"  /* option settings */
 #include "send.h"
 #include "memory.h"
-#include <stdarg.h>
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-#include <unistd.h>
 
 fde_t *fd_table = NULL;
 

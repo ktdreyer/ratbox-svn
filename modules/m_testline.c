@@ -22,6 +22,7 @@
  *  $Id$
  */
 
+#include "stdinc.h"
 #include "handlers.h"
 #include "client.h"
 #include "common.h"
@@ -37,7 +38,6 @@
 #include "parse.h"
 #include "modules.h"
 
-#include <string.h>
 
 static void mo_testline(struct Client*, struct Client*, int, char**);
 

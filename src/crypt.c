@@ -12,9 +12,7 @@
  *  $Id$
  */
 
-#include <unistd.h>
-#include <stdio.h>
-#include <string.h>
+#include "stdinc.h"
 
 #define MD5_SIZE 16
 

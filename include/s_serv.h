@@ -24,13 +24,8 @@
 
 #ifndef INCLUDED_serv_h
 #define INCLUDED_serv_h
-#ifndef INCLUDED_config_h
+
 #include "config.h"
-#endif
-#ifndef INCLUDED_sys_types_h
-#include <sys/types.h>
-#define INCLUDED_sys_types_h
-#endif
 
 /*
  * The number of seconds between calls to try_connections(). Fiddle with

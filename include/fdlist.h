@@ -24,16 +24,7 @@
 
 #ifndef INCLUDED_fdlist_h
 #define INCLUDED_fdlist_h
-#ifndef INCLUDED_sys_types_h
-#include <sys/types.h>         /* time_t */
-#define INCLUDED_sys_types_h
-#endif
-#ifndef INCLUDED_sys_socket_h
-#define INCLUDED_sys_socket_h
-#include <sys/socket.h>		/* Socket structs */
-#endif
 
-#include <netinet/in.h>
 #include "config.h"
 #include "ircd_defs.h"
 #include "res.h"

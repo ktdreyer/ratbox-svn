@@ -22,6 +22,9 @@
  *  $Id$
  */
 
+#include "stdinc.h"
+#include "setup.h"
+
 #include "tools.h"
 #include "channel.h"
 #include "channel_mode.h"
@@ -42,9 +45,6 @@
 #include "memory.h"
 #include "balloc.h"
 
-#include <assert.h>
-#include <string.h>
-#include <stdlib.h>
 
 #include "s_log.h"
 

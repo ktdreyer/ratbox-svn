@@ -24,17 +24,12 @@
 
 %{
 
-#include <assert.h>
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <string.h>
 
 /* XXX */
 #define  WE_ARE_MEMORY_C
 
 #define YY_NO_UNPUT
+#include "stdinc.h"
 #include "config.h"
 #include "ircd.h"
 #include "tools.h"

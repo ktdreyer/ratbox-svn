@@ -22,6 +22,7 @@
  *  $Id$
  */
 
+#include "stdinc.h"
 #include "tools.h"
 #include "handlers.h"  /* m_server prototype */
 #include "client.h"      /* client struct */
@@ -43,8 +44,6 @@
 #include "parse.h"
 #include "modules.h"
 
-#include <string.h>
-#include <stdlib.h>
 
 static void mr_server(struct Client*, struct Client*, int, char **);
 static void ms_server(struct Client*, struct Client*, int, char **);

@@ -22,12 +22,7 @@
  *  $Id$
  */
 
-#include <sys/types.h>
-#include <sys/time.h>
-#include <sys/stat.h>
-
-#include <fcntl.h>
-#include <unistd.h>
+#include "stdinc.h"
 
 #include "memory.h"
 #include "s_log.h"

@@ -26,9 +26,7 @@
    the code.  modules can also register their own events, and call them
    as appropriate. */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#include "stdinc.h"
 
 #include "tools.h"
 #include "list.h"

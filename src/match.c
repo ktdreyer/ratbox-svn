@@ -19,13 +19,10 @@
  * $Id$
  *
  */
+#include "stdinc.h"
 #include "irc_string.h"
-#include "config.h"      /* RFC1035_ANAL */
+#include "config.h"     
 #include "client.h"
-#include <assert.h>
-#include <string.h> /* strrchr */
-#include <ctype.h>
-#include <stdlib.h>
 #include "ircd.h"
 
 /* match()

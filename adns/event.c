@@ -29,16 +29,8 @@
  * $Id$
  */
 
-#include <errno.h>
-#include <stdlib.h>
-#include <unistd.h>
+#include "stdinc.h"
 
-#include <sys/types.h>
-#include <sys/time.h>
-#include <netdb.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 #include "fileio.h"
 #include "s_bsd.h"
 #include "internal.h"

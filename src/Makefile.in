@@ -35,7 +35,7 @@ SSL_INCLUDES	= @SSL_INCLUDES@
 
 IRCDLIBS	= @MODULES_LIBS@ -L../adns -ladns @LIBS@ $(SSL_LIBS)
 
-INCLUDES	= -I../include $(SSL_INCLUDES)
+INCLUDES	= -I../include -I../adns $(SSL_INCLUDES)
 CPPFLAGS	= ${INCLUDES} @CPPFLAGS@
  
 default:	all

@@ -22,22 +22,8 @@
  *  $Id$
  */
 
-#include "config.h"
+#include "stdinc.h"
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <errno.h>
-#include <dirent.h>
-
-#ifdef VMS
-# define _XOPEN_SOURCE
-#endif
-
-#include <limits.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 
 #include "modules.h"
 #include "s_log.h"

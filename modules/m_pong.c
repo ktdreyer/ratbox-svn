@@ -22,6 +22,7 @@
  *  $Id$
  */
 
+#include "stdinc.h"
 #include "ircd.h"
 #include "handlers.h"
 #include "s_user.h"

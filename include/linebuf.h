@@ -25,8 +25,6 @@
 #ifndef __LINEBUF_H__
 #define __LINEBUF_H__
 
-/* as much as I hate includes in header files .. */
-#include <stdarg.h>
 #include "tools.h"
 
 /* How big we want a buffer - 510 data bytes, plus space for a '\0' */

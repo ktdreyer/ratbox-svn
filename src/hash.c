@@ -22,17 +22,7 @@
  *  $Id$
  */
 
-#include <sys/types.h>
-#include <sys/stat.h>
-
-#include <errno.h>
-#include <assert.h>
-#include <fcntl.h>     /* O_RDWR ... */
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <time.h>
+#include "stdinc.h"
 
 #include "tools.h"
 #include "s_conf.h"

@@ -22,6 +22,7 @@
  *  $Id$
  */
 
+#include "stdinc.h"
 #include "whowas.h"
 #include "handlers.h"
 #include "client.h"
@@ -39,9 +40,6 @@
 #include "parse.h"
 #include "modules.h"
 
-#include <assert.h>
-#include <string.h>
-#include <stdlib.h>
 
 static void m_whowas(struct Client*, struct Client*, int, char**);
 static void mo_whowas(struct Client*, struct Client*, int, char**);

@@ -22,8 +22,8 @@
  *  $Id$
  */
 
-#ifndef __EVENT_H__
-#define __EVENT_H__
+#ifndef INCLUDED_event_h
+#define INCLUDED_event_h
 
 /*
  * How many event entries we need to allocate at a time in the block
@@ -57,4 +57,4 @@ extern void set_back_events(time_t);
 
 extern void show_events( struct Client *source_p);
 
-#endif
+#endif /* INCLUDED_event_h */

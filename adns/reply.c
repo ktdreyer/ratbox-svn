@@ -27,8 +27,7 @@
  * $Id$
  */
 
-#include <stdlib.h>
-
+#include "stdinc.h"
 #include "memory.h"
 #include "fileio.h"
 #include "internal.h"

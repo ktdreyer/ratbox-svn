@@ -22,6 +22,7 @@
  *  $Id$
  */
 
+#include "stdinc.h"
 #include "handlers.h"
 #include "client.h"
 #include "ircd.h"
@@ -33,7 +34,6 @@
 #include "parse.h"
 #include "modules.h"
 #include "s_conf.h"
-#include <string.h>
 
 static char buf[BUFSIZE];
 

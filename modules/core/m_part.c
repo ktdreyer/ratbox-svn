@@ -22,12 +22,13 @@
  *  $Id$
  */
 
+#include "stdinc.h"
 #include "tools.h"
 #include "handlers.h"
 #include "channel.h"
 #include "vchannel.h"
 #include "client.h"
-#include "common.h"   /* bleah */
+#include "common.h"  
 #include "hash.h"
 #include "irc_string.h"
 #include "ircd.h"
@@ -40,10 +41,6 @@
 #include "modules.h"
 #include "s_conf.h"
 #include "packet.h"
-
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
 
 static void m_part(struct Client*, struct Client*, int, char**);
 void check_spambot_warning(struct Client *source_p, const char *name);

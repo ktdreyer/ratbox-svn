@@ -22,6 +22,7 @@
  *  $Id$
  */
 
+#include "stdinc.h"
 #include "tools.h"
 #include "handlers.h"
 #include "channel.h"
@@ -41,9 +42,6 @@
 #include "s_serv.h"
 #include "s_conf.h"
 
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
 
 static void ms_sjoin(struct Client*, struct Client*, int, char**);
 

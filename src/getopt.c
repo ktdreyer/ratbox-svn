@@ -22,12 +22,9 @@
  *  $Id$
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "stdinc.h"
 
 #include "ircd_getopt.h"
-#include "config.h"
 
 #ifndef VMS
 # define OPTCHAR '-'

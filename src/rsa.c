@@ -22,7 +22,7 @@
  *  $Id$
  */
 
-#include "config.h"
+#include "stdinc.h"
 
 #ifdef HAVE_LIBCRYPTO
 #include <openssl/pem.h>
@@ -32,8 +32,6 @@
 #include <openssl/bn.h>
 #include <openssl/evp.h>
 #include <openssl/err.h>
-#include <assert.h>
-#include <string.h>
 #endif
 
 #include "memory.h"

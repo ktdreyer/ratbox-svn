@@ -22,6 +22,7 @@
  *  $Id$
  */
 
+#include "stdinc.h"
 #include "tools.h"
 #include "handlers.h"
 #include "channel.h"
@@ -42,9 +43,6 @@
 #include "parse.h"
 #include "modules.h"
 
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
 
 static void m_join(struct Client*, struct Client*, int, char**);
 static void ms_join(struct Client*, struct Client*, int, char**);

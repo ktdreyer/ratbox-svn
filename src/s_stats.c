@@ -22,10 +22,7 @@
  *  $Id$
  */
 
-#include <sys/types.h>
-
-#include <string.h>
-
+#include "stdinc.h"
 #include "s_stats.h"
 #include "client.h"
 #include "irc_string.h"

@@ -23,13 +23,7 @@
  *  $Id$
  */
 
-#include <errno.h>
-#include <assert.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <string.h>
-
+#include "stdinc.h"
 #include "tools.h"
 #include "client.h"
 #include "linebuf.h"

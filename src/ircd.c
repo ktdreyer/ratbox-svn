@@ -22,36 +22,9 @@
  *  $Id$
  */
 
-#include <sys/types.h>
-#include <sys/file.h>
-#include <sys/stat.h>
-#include <sys/socket.h>
-#include <sys/wait.h>
-
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <errno.h>
-#include <time.h>
-#include <pwd.h>
-#include <fcntl.h>
-#include <signal.h>
-#include <unistd.h>
-
+#include "stdinc.h"
 #include "setup.h"
 #include "config.h"
-
-#ifdef RLIMIT_FD_MAX
-#include <sys/time.h>
-#endif
-
-#ifdef HAVE_SYS_RESOURCE_H
-#include <sys/resource.h>
-#endif
-
-#ifdef USE_GETTEXT
-#include <libintl.h>
-#endif
 
 #ifdef VMS
 # include descrip

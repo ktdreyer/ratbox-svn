@@ -25,9 +25,6 @@
 #ifndef INCLUDED_ircd_h
 #define INCLUDED_ircd_h
 
-#include <sys/types.h>
-#include <sys/time.h>
-
 #include "config.h"
 #include "tools.h"
 #include "memory.h"

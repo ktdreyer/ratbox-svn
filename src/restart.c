@@ -22,6 +22,7 @@
  *  $Id$
  */
 
+#include "stdinc.h"
 #include "tools.h"
 #include "restart.h"
 #include "common.h"
@@ -33,8 +34,6 @@
 #include "client.h"     /* for FLAGS_ALL */
 #include "memory.h"
 
-#include <unistd.h>
-#include <stdlib.h>
 
 
 /* external var */

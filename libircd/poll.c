@@ -24,6 +24,10 @@
  */
 
 #include "config.h"
+#ifdef USE_POLL
+#include "stdinc.h"
+#include <sys/poll.h>
+
 #include "fdlist.h"
 #include "s_bsd.h"
 #include "class.h"
@@ -47,28 +51,6 @@
 #include "s_debug.h"
 #include "s_bsd.h"
 #include "memory.h"
-#ifdef USE_POLL
-
-#include <assert.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <netdb.h>
-#include <unistd.h>
-#include <time.h>
-#include <sys/stat.h>
-#include <sys/socket.h>
-#include <sys/file.h>
-#include <sys/ioctl.h>
-#include <sys/resource.h>
-#ifdef HAVE_SYS_PARAM_H
-#include <sys/param.h>    /* NOFILE */
-#endif
-
-#include <arpa/inet.h>
-#include <sys/poll.h>
 
 /* I hate linux -- adrian */
 #ifndef POLLRDNORM

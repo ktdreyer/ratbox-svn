@@ -24,17 +24,7 @@
 
 #ifndef INCLUDED_irc_string_h
 #define INCLUDED_irc_string_h
-#ifndef INCLUDED_sys_types_h
-#include <sys/types.h>
-#define INCLUDED_sys_types_h
-#endif
-#ifndef INCLUDED_ircd_defs_h
-#include "ircd_defs.h"        /* buffer sizes */
-#endif
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <string.h>
-#include <stdarg.h>
+
 /*
  * match - compare name with mask, mask may contain * and ? as wildcards
  * match - returns 1 on successful match, 0 otherwise

@@ -22,6 +22,7 @@
  *  $Id$
  */
 
+#include "stdinc.h"
 #include "handlers.h"
 #include "client.h"
 #include "irc_string.h"
@@ -36,8 +37,6 @@
 #include "modules.h"
 #include "hook.h"
 
-#include <assert.h>
-#include <string.h>
 
 static void m_links(struct Client*, struct Client*, int, char**);
 static void mo_links(struct Client*, struct Client*, int, char**);

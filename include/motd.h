@@ -24,15 +24,8 @@
 
 #ifndef INCLUDED_motd_h
 #define INCLUDED_motd_h
-#ifndef INCLUDED_ircd_defs_h
-#include "ircd_defs.h"    /* MAX_DATE_STRING */
-#endif
+#include "ircd_defs.h"   
 
-#ifdef VMS
-# define _XOPEN_SOURCE /* needed for PATH_MAX from limits.h */
-#endif
-
-#include <limits.h>       /* PATH_MAX */
 
 /* XXX really, should be mallocing this on the fly but... */
 #define MESSAGELINELEN 256

@@ -22,6 +22,7 @@
  *  $Id$
  */
 
+#include "stdinc.h"
 #include "handlers.h"
 #include "client.h"
 #include "ircd.h"
@@ -38,8 +39,6 @@
 #include "hash.h"
 #include "modules.h"
 
-#include <assert.h>
-#include <stdlib.h>     /* atoi */
 
 static void mo_connect(struct Client*, struct Client*, int, char**);
 static void ms_connect(struct Client*, struct Client*, int, char**);

@@ -26,10 +26,6 @@
 #define INCLUDED_s_conf_h
 #include "setup.h"
 
-#include <sys/socket.h>
-#ifdef HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
 
 #define PACE_CONNECT
 

@@ -37,4 +37,4 @@ extern struct lgetopt myopts[];
 void usage(char *);
 void parseargs(int *, char ***, struct lgetopt *);
 
-#endif
+#endif /* __GETOPT_H_INCLUDED__ */

@@ -32,6 +32,7 @@
  *     any messages from it.
  *     --Bleep  Thomas Helvey <tomh@inxpress.net>
  */
+#include "stdinc.h"
 #include "tools.h"
 #include "list.h"
 #include "s_auth.h"
@@ -52,17 +53,6 @@
 #include "send.h"
 #include "memory.h"
 #include "config.h"
-
-#include <netdb.h>               /* struct hostent */
-#include <string.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <assert.h>
-#include <sys/socket.h>
-#include <sys/file.h>
-#include <sys/ioctl.h>
 
 /*
  * a bit different approach

@@ -21,9 +21,9 @@
  *
  *  $Id$
  */
-
+#include "stdinc.h"
 #include "tools.h"
-#include "common.h"   /* bleah */
+#include "common.h"   
 #include "handlers.h"
 #include "client.h"
 #include "channel.h"

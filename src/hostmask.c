@@ -22,8 +22,7 @@
  *  $Id$
  */
 
-#include <stdlib.h>
-#include <string.h>
+#include "stdinc.h"
 #include "memory.h"
 #include "ircd_defs.h"
 #include "s_conf.h"

@@ -22,6 +22,7 @@
  *  $Id$
  */
 
+#include "stdinc.h"
 #include "handlers.h"
 #include "client.h"
 #include "hash.h"       /* for find_client() */
@@ -37,7 +38,6 @@
 #include "parse.h"
 #include "modules.h"
 
-#include <string.h>
 
 static char buf[BUFSIZE];
 

@@ -24,9 +24,8 @@
 
 #ifndef INCLUDED_m_info_h
 #define INCLUDED_m_info_h
-#ifndef INCLUDED_config_h
+
 #include "config.h"
-#endif
 
 typedef struct Information
 {

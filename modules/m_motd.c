@@ -22,6 +22,7 @@
  *  $Id$
  */
 
+#include "stdinc.h"
 #include "client.h"
 #include "tools.h"
 #include "motd.h"
@@ -36,9 +37,6 @@
 #include "modules.h"
 #include "s_conf.h"
 
-#include <string.h>
-#include <stdlib.h>
-#include <time.h>
 
 static void mr_motd(struct Client *, struct Client *, int, char **);
 static void m_motd(struct Client*, struct Client*, int, char**);

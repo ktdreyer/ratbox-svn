@@ -24,14 +24,9 @@
 
 #ifndef INCLUDED_msg_h
 #define INCLUDED_msg_h
-#ifndef INCLUDED_config_h
-#include "config.h"
-#endif
 
-#ifndef INCLUDED_ircd_handler_h
-#define INCLUDED_ircd_handler_h
+#include "config.h"
 #include "ircd_handler.h"
-#endif
 
 struct Client;
 

@@ -24,10 +24,6 @@
 
 #ifndef INCLUDED_s_misc_h
 #define INCLUDED_s_misc_h
-#ifndef INCLUDED_sys_types_h
-#include <sys/types.h>
-#define INCLUDED_sys_types_h
-#endif
 
 struct Client;
 struct ConfItem;

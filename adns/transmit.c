@@ -28,11 +28,7 @@
  * $Id$
  */
 
-#include <errno.h>
-
-#include <sys/types.h>
-#include <sys/uio.h>
-
+#include "stdinc.h"
 #include "fileio.h"
 #include "internal.h"
 #include "tvarith.h"

@@ -22,6 +22,7 @@
  *  $Id$
  */
 
+#include "stdinc.h"
 #include "handlers.h"
 #include "client.h"
 #include "ircd.h"
@@ -43,7 +44,6 @@
 #include "msg.h"
 #include "packet.h"
 
-#include <string.h>
 
 struct entity
 {

@@ -22,6 +22,7 @@
  *  $Id$
  */
 
+#include "stdinc.h"
 #include "tools.h"
 #include "channel.h"
 #include "client.h"
@@ -39,8 +40,6 @@
 #include "parse.h"
 #include "modules.h"
 
-#include <string.h>
-#include <stdlib.h>
 
 static void ms_cburst(struct Client*, struct Client*, int, char**);
 

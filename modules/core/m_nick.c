@@ -22,6 +22,7 @@
  *  $Id$
  */
 
+#include "stdinc.h"
 #include "handlers.h"
 #include "client.h"
 #include "hash.h"
@@ -46,9 +47,6 @@
 #include "common.h"
 #include "packet.h"
 
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
 
 static void mr_nick(struct Client *, struct Client *, int, char**);
 static void m_nick(struct Client *, struct Client *, int, char**);

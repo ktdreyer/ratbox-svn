@@ -25,10 +25,6 @@
 #ifndef INCLUDED_s_debug_h
 #define INCLUDED_s_debug_h
 
-#ifndef INCLUDED_sys_types_h
-#include <sys/types.h>       /* size_t */
-#define INCLUDED_sys_types_h
-#endif
 
 struct Client;
 

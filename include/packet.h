@@ -24,10 +24,7 @@
 
 #ifndef INCLUDED_packet_h
 #define INCLUDED_packet_h
-#ifndef INCLUDED_sys_types_h
-#include <sys/types.h>
-#define INCLUDED_sys_types_h
-#endif
+
 #include "fdlist.h"
 
 /*

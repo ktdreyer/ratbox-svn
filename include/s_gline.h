@@ -24,16 +24,9 @@
 
 #ifndef INCLUDED_s_gline_h
 #define INCLUDED_s_gline_h
-#ifndef INCLUDED_config_h
+
 #include "config.h"
-#endif
-#ifndef INCLUDED_ircd_defs_h
 #include "ircd_defs.h"
-#endif
-#ifndef INCLUDED_sys_types_h
-#include <sys/types.h>
-#define INCLUDED_sys_types_h
-#endif
 
 struct Client;
 struct ConfItem;

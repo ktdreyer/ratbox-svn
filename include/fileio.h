@@ -25,17 +25,6 @@
 #ifndef INCLUDED_fileio_h
 #define INCLUDED_fileio_h
 
-#ifndef INCLUDED_sys_types_h
-#include <sys/types.h>     /* size_t */
-#define INCLUDED_sys_types_h
-#endif
-#ifndef INCLUDED_sys_stat_h
-#include <sys/stat.h>      /* struct stat */
-#define INCLUDED_sys_stat_h
-#endif
-
-#include <stdio.h>    /* BUFSIZ */
-
 #define FB_EOF  0x01
 #define FB_FAIL 0x02
 

@@ -22,6 +22,7 @@
  *  $Id$
  */
 
+#include "stdinc.h"
 #include "tools.h"
 #include "handlers.h"
 #include "channel.h"
@@ -40,9 +41,6 @@
 #include "parse.h"
 #include "modules.h"
 
-#include <assert.h>
-#include <string.h>
-#include <stdlib.h>
 
 static void m_list(struct Client*, struct Client*, int, char**);
 static void ms_list(struct Client*, struct Client*, int, char**);

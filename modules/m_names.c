@@ -22,6 +22,7 @@
  *  $Id$
  */
 
+#include "stdinc.h"
 #include "tools.h"
 #include "handlers.h"
 #include "channel.h"
@@ -41,9 +42,6 @@
 #include "parse.h"
 #include "modules.h"
 
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
 
 static void names_all_visible_channels(struct Client *source_p);
 static void names_non_public_non_secret(struct Client *source_p);

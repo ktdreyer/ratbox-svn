@@ -22,6 +22,7 @@
  *  $Id$
  */
 
+#include "stdinc.h"
 #include "s_misc.h"
 #include "client.h"
 #include "common.h"
@@ -36,15 +37,6 @@
 #include "send.h"
 #include "memory.h"
 
-#include <string.h>
-#include <fcntl.h>
-#include <netdb.h>
-#include <sys/stat.h>
-#ifdef HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
-#include <time.h>
-#include <unistd.h>
 
 
 static char* months[] = {

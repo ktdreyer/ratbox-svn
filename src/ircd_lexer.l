@@ -30,6 +30,7 @@
 /* XXX - No we aren't but lex calls malloc :(. It is even worse that it
    doesn't call free! */
 #define WE_ARE_MEMORY_C
+#include "stdinc.h"
 #include "tools.h"
 #include "irc_string.h"
 #include "common.h"
@@ -44,23 +45,6 @@
 #include "setup.h"
 #include "config.h"
 #include "s_log.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <string.h>
-#ifdef STRING_WITH_STRINGS
-# include <string.h>
-# include <strings.h>
-#else
-# ifdef HAVE_STRING_H
-#  include <string.h>
-# else
-#  ifdef HAVE_STRINGS_H
-#   include <strings.h>
-#  endif
-# endif
-#endif
-#include <ctype.h>
 
 #undef YY_INPUT
 #define YY_FATAL_ERROR(msg) conf_yy_fatal_error(msg)

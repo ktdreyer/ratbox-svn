@@ -24,6 +24,7 @@
 
 /* rewritten by jdc */
 
+#include "stdinc.h"
 #include "handlers.h"
 #include "client.h"
 #include "event.h"
@@ -42,7 +43,6 @@
 #include "parse.h"
 #include "modules.h"
 
-#include <stdlib.h>  /* atoi */
 
 static void mo_set(struct Client*, struct Client*, int, char**);
 

@@ -22,6 +22,7 @@
  *  $Id$
  */
 
+#include "stdinc.h"
 #include "tools.h"
 #include "restart.h"
 #include "common.h"
@@ -36,9 +37,6 @@
 #include "resv.h"
 #include "hash.h"
 #include "ircd_defs.h"
-
-#include <unistd.h>
-#include <stdlib.h>
 
 struct ResvChannel *ResvChannelList;
 struct ResvNick *ResvNickList;

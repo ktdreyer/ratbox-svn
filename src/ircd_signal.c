@@ -20,9 +20,7 @@
  * $Id$
  */
 
-#include <signal.h>
-#include <stdlib.h>
-
+#include "stdinc.h"
 #include "ircd_signal.h"
 #include "ircd.h"         /* dorehash */
 #include "restart.h"      /* server_reboot */

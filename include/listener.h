@@ -24,17 +24,8 @@
 
 #ifndef INCLUDED_listener_h
 #define INCLUDED_listener_h
-#ifndef INCLUDED_sys_types_h
-#include <sys/types.h>       /* size_t */
-#define INCLUDED_sys_types_h
-#endif
-#ifndef INCLUDED_netinet_in_h
-#include <netinet/in.h>      /* in_addr */
-#define INCLUDED_netinet_in_h
-#endif
-#ifndef INCLUDED_ircd_defs_h
-#include "ircd_defs.h"       /* HOSTLEN */
-#endif
+
+#include "ircd_defs.h"  
 
 struct Client;
 

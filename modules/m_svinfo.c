@@ -21,7 +21,7 @@
  *
  *  $Id$
  */
-
+#include "stdinc.h"
 #include "handlers.h"
 #include "client.h"
 #include "common.h"     /* TRUE bleah */
@@ -35,9 +35,6 @@
 #include "parse.h"
 #include "modules.h"
 
-#include <assert.h>
-#include <time.h>
-#include <stdlib.h>
 
 static void ms_svinfo(struct Client*, struct Client*, int, char**);
 

@@ -22,23 +22,7 @@
  *  $Id$
  */
 
-#include <sys/types.h> 
-#include <sys/time.h>
-#include <sys/resource.h>
-#include <sys/file.h>
-
-#ifdef HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
-
-#include <time.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdarg.h>
-#include <unistd.h>
-#include <errno.h>
-#include <assert.h>
-
+#include "stdinc.h"
 #include "tools.h"
 #include "s_debug.h"
 #include "channel.h"

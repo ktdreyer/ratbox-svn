@@ -22,15 +22,12 @@
  *  $Id$
  */
 
-#include <string.h>
-#include <time.h>
-
+#include "stdinc.h"
 #include "tools.h"
-#include "common.h"   /* bleah */
+#include "common.h"  
 #include "handlers.h"
 #include "client.h"
 #include "hash.h"
-#include "common.h"   /* bleah */
 #include "channel.h"
 #include "channel_mode.h"
 #include "vchannel.h"

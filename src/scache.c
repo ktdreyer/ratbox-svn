@@ -22,6 +22,7 @@
  *  $Id$
  */
 
+#include "stdinc.h"
 #include "client.h"
 #include "common.h"
 #include "irc_string.h"
@@ -31,8 +32,6 @@
 #include "scache.h"
 #include "memory.h"
 
-#include <assert.h>
-#include <string.h>
 
 /*
  * ircd used to store full servernames in anUser as well as in the 

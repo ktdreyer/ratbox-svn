@@ -22,15 +22,9 @@
  *  $Id$
  */
 
-#include <sys/types.h>
-#include <assert.h>
-
+#include "stdinc.h"
 #include "setup.h"
 #include "config.h"
-
-#ifdef USE_GETTEXT
-#include <libintl.h>
-#endif
 
 #include "numeric.h"
 #include "irc_string.h"

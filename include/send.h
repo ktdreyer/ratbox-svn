@@ -24,9 +24,8 @@
 
 #ifndef INCLUDED_send_h
 #define INCLUDED_send_h
-#ifndef INCLUDED_config_h
+
 #include "config.h"       /* HAVE_STDARG_H */
-#endif
 
 /* For those unfamiliar with GNU format attributes, a is the 1 based
  * argument number of the format string, and b is the 1 based argument

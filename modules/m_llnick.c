@@ -22,6 +22,7 @@
  *  $Id$
  */
 
+#include "stdinc.h"
 #include "tools.h"
 #include "client.h"
 #include "hash.h"
@@ -38,9 +39,6 @@
 #include "parse.h"
 #include "modules.h"
 
-#include <assert.h>
-#include <string.h>
-#include <stdlib.h>
 
 static void ms_llnick(struct Client*, struct Client*, int, char**);
 

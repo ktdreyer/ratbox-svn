@@ -22,6 +22,8 @@
  *  $Id$
  */
 
+#ifndef INCLUDE_hostmask_h
+#define INCLUDE_hostmask_h 1
 enum
 {
  HM_HOST,
@@ -97,3 +99,5 @@ struct AddressRec
   struct AddressRec *next;
 };
 
+
+#endif /* INCLUDE_hostmask_h */

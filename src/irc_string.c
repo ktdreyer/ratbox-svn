@@ -22,31 +22,13 @@
  *  $Id$
  */
 
-#include "config.h"
+#include "stdinc.h"
 #include "tools.h"
 #include "irc_string.h"
 #include "client.h"
 #include "list.h"
 #include "memory.h"
 #include "setup.h"
-#include <errno.h>
-#include <stdio.h>
-#include <assert.h>
-#ifdef STRING_WITH_STRINGS
-# include <string.h>
-# include <strings.h>
-#else
-# ifdef HAVE_STRING_H
-#  include <string.h>
-# else
-#  ifdef HAVE_STRINGS_H
-#   include <strings.h>
-#  endif
-# endif
-#endif
-#include <stdlib.h>
-#include <ctype.h>
-#include <time.h>
 
 #ifndef INADDRSZ 
 #define INADDRSZ 4

@@ -27,9 +27,7 @@
 #include "config.h"
 #include "setup.h"
 #include "parse.h"
-#ifdef HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
+
 
 #if defined(HAVE_SHL_LOAD)
 #include <dl.h>

@@ -24,13 +24,8 @@
 
 #ifndef INCLUDED_s_zip_h
 #define INCLUDED_s_zip_h
-#ifndef INCLUDED_config_h
+
 #include "config.h"       /* config settings */
-#endif
-#ifndef INCLUDED_zlib_h
-#include "zlib.h"         /* z_stream */
-#define INCLUDED_zlib_h
-#endif
 
 struct Client;
 

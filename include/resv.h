@@ -24,10 +24,6 @@
 
 #ifndef INCLUDED_resv_h
 #define INCLUDED_resv_h
-#ifndef INCLUDED_sys_types_h
-#include <sys/types.h>
-#define INCLUDED_sys_types_h
-#endif
 
 /* allows resv *nicknick* etc */
 #define RESVNICKLEN NICKLEN*2

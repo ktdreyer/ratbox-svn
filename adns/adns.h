@@ -57,14 +57,7 @@
 #ifndef ADNS_H_INCLUDED
 #define ADNS_H_INCLUDED
 
-#include <stdio.h>
-
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <sys/types.h>
-#include <sys/time.h>
-#include <unistd.h>
-#include "config.h"
+#include "stdinc.h"
 #include "ircd.h"
 #include "ircd_defs.h"
 #include "irc_string.h"

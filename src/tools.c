@@ -22,10 +22,7 @@
  *  $Id$
  */
 
-#include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
-
+#include "stdinc.h"
 #include "tools.h"
 
 

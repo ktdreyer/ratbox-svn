@@ -28,19 +28,7 @@
  * $Id$
  */
 
-#include <stdlib.h>
-#include <errno.h>
-#include <limits.h>
-#include <unistd.h>
-#include <fcntl.h>
-#ifdef VMS
-# include <sys/ioctl.h>
-#endif
-
-#include <netdb.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
+#include "stdinc.h"
 #include "memory.h"
 #include "fileio.h"
 #include "s_bsd.h"

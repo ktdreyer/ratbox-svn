@@ -21,6 +21,8 @@
  *
  *  $Id$
  */
+#ifndef INCLUDED_rsa_h
+#define INCLUDED_rsa_h 1
 
 #ifdef HAVE_LIBCRYPTO
 extern void report_crypto_errors(void);
@@ -30,3 +32,5 @@ extern int crypt_data(char **out, char *in, int len, char *key);
 extern int decrypt_data(char **out, char *in, int len, char *key);
 extern int get_randomness( unsigned char * buf, int length );
 #endif
+
+#endif /* INCLUDED_rsa_h */

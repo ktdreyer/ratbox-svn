@@ -22,15 +22,7 @@
  *  $Id$
  */
 
-#include <assert.h>
-#include <string.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <time.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <limits.h>
-
+#include "stdinc.h"
 #include "tools.h"
 #include "handlers.h"
 #include "s_gline.h"

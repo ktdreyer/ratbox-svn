@@ -24,9 +24,8 @@
 
 #ifndef INCLUDED_numeric_h
 #define INCLUDED_numeric_h
-#ifndef INCLUDED_config_h
+
 #include "config.h"
-#endif
 
 /*
  * form_str - return a format string for a message number

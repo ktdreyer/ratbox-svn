@@ -22,6 +22,7 @@
  *  $Id$
  */
 
+#include "stdinc.h"
 #include "tools.h"
 #include "handlers.h"
 #include "client.h"
@@ -40,8 +41,6 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
-#include <fcntl.h>
-#include <unistd.h>
 
 
 static struct ConfItem *find_password_aconf(char *name, struct Client *source_p);

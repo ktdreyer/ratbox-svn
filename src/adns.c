@@ -23,6 +23,9 @@
  *  $Id$
  */
 
+#include "stdinc.h"
+#include "setup.h"
+
 #include "fileio.h"
 #include "res.h"
 #include "send.h"
@@ -33,7 +36,6 @@
 #include "client.h"
 #include "ircd_defs.h"
 #include "numeric.h"
-#include <errno.h>
 #include "../adns/internal.h"
 #define ADNS_MAXFD 2
 

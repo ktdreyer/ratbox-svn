@@ -22,18 +22,7 @@
  *  $Id$
  */
 
-#include <sys/types.h>
-#include <sys/stat.h>
-
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <assert.h>
-#include <time.h>
-#include <limits.h>
-
+#include "stdinc.h"
 #include "tools.h"
 #include "s_user.h"
 #include "channel.h"

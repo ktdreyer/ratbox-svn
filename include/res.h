@@ -27,13 +27,8 @@
 
 #include "config.h"
 #include "ircd_defs.h"
-/* I hate this *blah* db */
 #include "fileio.h"
-#ifdef VMS
-# include "adns.h"
-#else
-# include "../adns/adns.h"
-#endif
+#include "adns.h"
 
 #define DNS_BLOCK_SIZE 64
 

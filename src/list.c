@@ -22,6 +22,7 @@
  *  $Id$
  */
 
+#include "stdinc.h"
 #include "tools.h"
 #include "channel.h"
 #include "class.h"
@@ -38,9 +39,6 @@
 #include "memory.h"
 #include "balloc.h"
 
-#include <assert.h>
-#include <string.h>
-#include <stdlib.h>
 
 /* XXX assummed 32 bit ints */
 int links_count=0;

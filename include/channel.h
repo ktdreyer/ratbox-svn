@@ -22,17 +22,10 @@
  *  $Id$
  */
 
-#include <sys/types.h>        /* time_t */
-#include <sys/time.h>
-
 #ifndef INCLUDED_channel_h
 #define INCLUDED_channel_h
-#ifndef INCLUDED_config_h
 #include "config.h"           /* config settings */
-#endif
-#ifndef INCLUDED_ircd_defs_h
 #include "ircd_defs.h"        /* buffer sizes */
-#endif
 
 /* Efnet wanted this... Maybe we should do this from configure? */
 #define REQUIRE_OANDV

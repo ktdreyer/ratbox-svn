@@ -28,8 +28,6 @@
 #include "ircd_defs.h"
 #include "setup.h"
 #include "balloc.h"
-#include <stdlib.h>
-#include <string.h>
 
 /* Needed to use uintptr_t for some pointer manipulation. */
 #ifdef __VMS

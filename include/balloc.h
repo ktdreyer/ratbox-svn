@@ -24,17 +24,11 @@
 
 #ifndef INCLUDED_blalloc_h
 #define INCLUDED_blalloc_h
-#ifndef NOBALLOC
-#ifndef INCLUDED_sys_types_h
-#include <sys/types.h>       /* size_t */
-#define INCLUDED_sys_types_h
-#endif
 
-#ifndef INCLUDED_stddef_h
-#include <stddef.h>
-#define INCLUDED_stddef_h
-#endif
-#include <sys/mman.h>
+#include "setup.h"
+
+#ifndef NOBALLOC
+
 #include "tools.h"
 #include "memory.h"
 #include "ircd_defs.h"
@@ -82,19 +76,18 @@ typedef struct BlockHeap BlockHeap;
 extern BlockHeap* BlockHeapCreate(size_t elemsize, int elemsperblock);
 extern int        BlockHeapDestroy(BlockHeap *bh);
 
-#if 0 /* These are in memory.h... */
-extern int        BlockHeapFree(BlockHeap *bh, void *ptr);
-extern void *	  BlockHeapAlloc(BlockHeap *bh);
-#endif
 
 extern int        BlockHeapGarbageCollect(BlockHeap *);
 extern void	  initBlockHeap(void);
 #else /* NOBALLOC */
+
 typedef struct BlockHeap BlockHeap;
 #define initBlockHeap()
 #define BlockHeapGarbageCollect(x)
 /* This is really kludgy, passing ints as pointers is always bad. */
 #define BlockHeapCreate(es, epb) ((BlockHeap*)(es))
 #define BlockHeapDestroy(x)
+
 #endif /* NOBALLOC */
+
 #endif /* INCLUDED_blalloc_h */

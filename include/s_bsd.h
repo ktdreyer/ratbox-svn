@@ -24,14 +24,8 @@
 
 #ifndef INCLUDED_s_bsd_h
 #define INCLUDED_s_bsd_h
-#ifndef INCLUDED_sys_types_h
-#include <sys/types.h>
-#define INCLUDED_sys_types_h
-#endif
-#ifndef INCLUDED_config_h
-#include "config.h"       /* HAVE_SOCKLEN_T */
-#endif
 
+#include "config.h"       
 #include "fdlist.h"
 
 #ifndef HAVE_SOCKLEN_T
