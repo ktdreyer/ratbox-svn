@@ -1,3 +1,12 @@
+*** 20001106_8 by adrian
+
+
+fd limit checking is done in comm_open() now, so remove a superflous check.
+This has the added advantage of killing an incorrect close() which should
+have been an fd_close(), but it doesn't matter much now ..
+
+
+
 *** 20001106_7 by db
 - reworked even more code
   I removed remote m_away entirely for now
