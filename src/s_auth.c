@@ -197,8 +197,8 @@ auth_dns_callback(void *vptr, adns_answer * reply)
 				sendheader(auth->client, REPORT_FAIL_DNS);
 			} else {
 				SetDNSPending(auth);
-				return;
 			}
+			return;
 		} else
 #endif
 		sendheader(auth->client, REPORT_FAIL_DNS);
