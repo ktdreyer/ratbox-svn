@@ -55,7 +55,6 @@
 
 #ifdef NEED_SPLITCODE
 
-static void check_still_split();
 int         server_was_split=YES;
 int         got_server_pong;
 time_t      server_split_time;
@@ -2730,7 +2729,7 @@ static void free_bans_exceptions_denies(struct Channel *chptr)
  * -Dianora
  */
 
-static void check_still_split()
+void check_still_split()
 {
   if((server_split_time + SPLITDELAY) < CurrentTime)
     {
@@ -2780,8 +2779,7 @@ void remove_empty_channels()
   struct SLink  *obtmp;
   struct Channel *next_empty_channel;
 
-  for(;empty_channel_list;
-      empty_channel_list = next_empty_channel )
+  for(;empty_channel_list; empty_channel_list = next_empty_channel )
     {
       next_empty_channel = empty_channel_list->next_empty_channel;
 
@@ -2842,7 +2840,7 @@ void remove_empty_channels()
       if (empty_channel_list->prevch)
         empty_channel_list->prevch->nextch = empty_channel_list->nextch;
       else
-        channel = empty_channel_list->nextch;
+        GlobalChannelList = empty_channel_list->nextch;
       if (empty_channel_list->nextch)
         empty_channel_list->nextch->prevch = empty_channel_list->prevch;
       
@@ -2851,13 +2849,14 @@ void remove_empty_channels()
 #endif
       del_from_channel_hash_table(empty_channel_list->chname, 
                                         empty_channel_list);
-      MyFree((char*) empty_channel_list);
+      MyFree(empty_channel_list);
+      empty_channel_list = 0;
       Count.chan--;
     }
 }
 #endif
 
-int     count_channels(struct Client *sptr)
+int count_channels(struct Client *sptr)
 {
   struct Channel      *chptr;
   int   count = 0;
@@ -2869,11 +2868,13 @@ int     count_channels(struct Client *sptr)
 
 void send_user_joins(struct Client *cptr, struct Client *user)
 {
-  struct SLink  *lp;
-  struct Channel *chptr;
-  int   cnt = 0, len = 0, clen;
-  char   *mask;
-  char   buf[BUFSIZE];
+  struct SLink*   lp;
+  struct Channel* chptr;
+  int             cnt = 0;
+  int             len = 0;
+  int             clen;
+  char*           mask;
+  char            buf[BUFSIZE];
 
   *buf = ':';
   strcpy(buf+1, user->name);

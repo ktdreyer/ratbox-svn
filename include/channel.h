@@ -127,7 +127,8 @@ extern void clear_bans_exceptions_denies(struct Client *sptr,
                                          struct Channel *chptr);
 extern void sjoin_sendit(struct Client *cptr, struct Client *sptr,
                          struct Channel *chptr, char *from);
-int is_banned(struct Client *cptr, struct Channel *chptr);
+extern int is_banned(struct Client *cptr, struct Channel *chptr);
+extern void check_still_split(void);
 
 /* this should eliminate a lot of ifdef's in the main code... -orabidoo */
 #ifdef BAN_INFO
