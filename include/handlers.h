@@ -118,8 +118,4 @@ extern int m_registered(struct Client *, struct Client *, int, const char **);
 extern int m_unregistered(struct Client *, struct Client *, int, const char **);
 extern int m_unsupported(struct Client *, struct Client *, int, const char **);
 
-#ifdef FL_DEBUG
-extern void mo_hash(struct Client *, struct Client *, int, char **);
-#endif
-
 #endif /* INCLUDED_handlers_h */
