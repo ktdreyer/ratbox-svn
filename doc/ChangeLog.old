@@ -1,3 +1,23 @@
+leeh        2001/12/19 12:45:54 EST	(20011219_4)
+
+  Modified files:
+    include              client.h 
+    modules              m_knock.c m_stats.c m_trace.c 
+    src                  s_conf.c s_user.c 
+  Log:
+  - major cleanups on trace
+  - ripped IsIPHidden - its depreciated, we have IsIPSpoof
+  
+  Revision  Changes    Path
+  7.135     +1 -5      ircd-hybrid-7/include/client.h
+  1.44      +1 -1      ircd-hybrid-7/modules/m_knock.c
+  1.99      +1 -1      ircd-hybrid-7/modules/m_stats.c
+  1.40      +49 -47    ircd-hybrid-7/modules/m_trace.c
+  7.286     +0 -1      ircd-hybrid-7/src/s_conf.c
+  7.173     +1 -2      ircd-hybrid-7/src/s_user.c
+
+
+
 leeh        2001/12/19 11:02:49 EST	(20011219_3)
 
   Modified files:
