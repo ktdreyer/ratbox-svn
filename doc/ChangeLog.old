@@ -1,3 +1,8 @@
+*** 20010102_14 by fl_
+- fixes for davidt's patch
+- use hide_or_not instead of ALL_CHANOPS in another case
+
+
 *** 20010102_13 by davidt
 Added back send_noncap_serv_butone
 
