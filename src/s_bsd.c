@@ -142,7 +142,7 @@ int get_sockerr(int fd)
   int err = 0;
   socklen_t len = sizeof(err);
 
-  if (-1 < fd && !getsockopt(fd, SOL_SOCKET, SO_ERROR, (char*) &err, (int *)&len)) {
+  if (-1 < fd && !getsockopt(fd, SOL_SOCKET, SO_ERROR, (char*) &err, (socklen_t *)&len)) {
     if (err)
       errtmp = err;
   }
@@ -381,7 +381,7 @@ void add_connection(struct Listener* listener, int fd)
    * the client has already been checked out in accept_connection
    */
   new_client = make_client(NULL);
-  if (getpeername(fd, (struct sockaddr *)&SOCKADDR(irn), (int *)&len))
+  if (getpeername(fd, (struct sockaddr *)&SOCKADDR(irn), (socklen_t *)&len))
     {
       report_error(L_ALL, "Failed in adding new connection %s :%s", 
 		   get_listener_name(listener), errno);
@@ -875,7 +875,7 @@ comm_accept(int fd, struct irc_sockaddr *pn)
    * reserved fd limit, but we can deal with that when comm_open()
    * also does it. XXX -- adrian
    */
-  newfd = accept(fd, (struct sockaddr *)&PSOCKADDR(pn), (int *)&addrlen);
+  newfd = accept(fd, (struct sockaddr *)&PSOCKADDR(pn), (socklen_t *)&addrlen);
   if (newfd < 0)
     return -1;
 

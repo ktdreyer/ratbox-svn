@@ -331,7 +331,8 @@ int adns__pollfds(adns_state ads, struct adns_pollfd pollfds_buf[MAX_POLLFDS]) {
 }
 
 int adns_processreadable(adns_state ads, int fd, const struct timeval *now) {
-  int want, dgramlen, r, udpaddrlen, serv, old_skip;
+  int want, dgramlen, r, serv, old_skip;
+  size_t udpaddrlen;
   byte udpbuf[DNS_MAXUDP];
   struct sockaddr_in udpaddr;
   
@@ -389,7 +390,7 @@ int adns_processreadable(adns_state ads, int fd, const struct timeval *now) {
     for (;;) {
       udpaddrlen= sizeof(udpaddr);
       r= recvfrom(ads->udpsocket,udpbuf,sizeof(udpbuf),0,
-		  (struct sockaddr*)&udpaddr,(int*)&udpaddrlen);
+		  (struct sockaddr*)&udpaddr,(size_t*)&udpaddrlen);
       if (r<0) {
 	if (errno == EAGAIN || errno == EWOULDBLOCK) { r= 0; goto xit; }
 	if (errno == EINTR) continue;
