@@ -5,6 +5,8 @@ o) An I: -> auth {} converter has been added.
    outputs them in priority order of spoofs, specials (exempt from kline/gline,
    exceed class {}; limits etc), passworded I:'s, normal I:'s, restricted I:'s
    (i: and I: that require identd).
+o) convertconf will now add the blocks that cant be converted from an old
+   config to the new file, such as general {}; and channel {};
 o) The IRCd will once again bounce modes from users who are deopped on an
    sjoin.
 o) A core with the client history has been fixed.
@@ -13,17 +15,8 @@ o) NICKLEN is now set via ./configure --with-nicklen=X
    Defaults to 9.
 o) MAXCLIENTS is now set via ./configure --with-maxclients=X
    Defaults to 200.
-
--- ircd-hybrid-7beta13 RELNOTES
-
-o) Seemed to have fixed our double free exiting clients
-o) Removal of various dead functions
-o) Drop servers that try to introduce servers with names > HOSTLEN
-o) Fixed issue where ircd would crash upon detaching gdb on FreeBSD
-o) Fixed minor issue with /knock
-o) Added --enable-small-net to configure.  This tunes the code to use less
-   memory, which should be fine on small networks, but a performance hit
-   on larger servers.
+o) Some extra modules have been added to contrib/
+o) Fixed a bug with +ov users not appearing in a +a channel oplist sync
 
 --------------------------------------------------------------------------------
 
