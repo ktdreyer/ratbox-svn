@@ -698,6 +698,26 @@ report_Ilines(struct Client *client_p, int mask)
   struct ConfItem *aconf;
   int i, port;
 
+  if (mask)
+  {
+     if (MyConnect(client_p))
+       aconf = find_address_conf(client_p->host, client_p->username,
+                                 &client_p->localClient->ip,
+                                 client_p->localClient->aftype);
+     else
+       aconf = find_address_conf(client_p->host, client_p->username, NULL,
+                                 0);
+     if (!aconf || (aconf->status & CONF_CLIENT) == 0)
+       return;
+     get_printable_conf(aconf, &name, &host, &pass, &user, &port,
+                        &classname);
+     sendto_one(client_p, form_str(RPL_STATSILINE), me.name,
+                client_p->name, (IsConfRestricted(aconf)) ? 'i' : 'I',
+                name, show_iline_prefix(client_p, aconf, user), host,
+                port, classname);
+     return;
+  }
+
   for (i = 0; i < ATABLE_SIZE; i++)
     for (arec = atable[i]; arec; arec = arec->next)
       if (arec->type == CONF_CLIENT)
@@ -713,18 +733,6 @@ report_Ilines(struct Client *client_p, int mask)
 
         /* We are doing a partial list, based on what matches the u@h of the
          * sender, so prepare the strings for comparing --fl_ */
-        if (mask)
-        {
-          char usermask[USERLEN + HOSTLEN + 10],
-            maskmatch[USERLEN + HOSTLEN + 10];
-          ircsprintf(usermask, "%s@%s", user, host);
-          ircsprintf(maskmatch, "%s@%s", client_p->username, client_p->host);
-
-          /* If the strings dont match, continue to the next auth block */
-          if (!match(host, maskmatch))
-            continue;
-
-        }
 
         sendto_one(client_p, form_str(RPL_STATSILINE), me.name,
                    client_p->name, (IsConfRestricted(aconf)) ? 'i' : 'I', name,
@@ -753,6 +761,19 @@ report_Klines(struct Client *client_p, int k_or_K, int mask)
   else
     c = 'K';
 
+  if (mask)
+  {
+     aconf = find_address_conf(client_p->host, client_p->username,
+                               NULL, 0);
+     if (!aconf || (aconf->status & CONF_KILL) == 0)
+       return;
+     get_printable_conf(aconf, &name, &host, &pass, &user, &port,
+                        &classname);
+     sendto_one(client_p, form_str(RPL_STATSKLINE), me.name,
+                client_p->name, c, host, user, pass);
+     return;
+  }
+
   for (i = 0; i < ATABLE_SIZE; i++)
     for (arec = atable[i]; arec; arec = arec->next)
       if (arec->type == CONF_KILL)
@@ -763,22 +784,6 @@ report_Klines(struct Client *client_p, int k_or_K, int mask)
           continue;
         get_printable_conf(aconf, &name, &host, &pass, &user, &port,
                            &classname);
-        /* We are doing a partial list, based on what matches the u@h of the
-         * sender, so prepare the strings for comparing --fl_ */
-        if (mask)
-        {
-          char usermask[USERLEN + HOSTLEN + 10];
-          char maskmatch[USERLEN + HOSTLEN + 10];
-
-          ircsprintf(usermask, "%s@%s", user, host);
-          ircsprintf(maskmatch, "%s@%s", client_p->username, client_p->host);
-
-          /* If the strings dont match, continue to the next auth block */
-          if (!match(host, maskmatch))
-            continue;
-
-        }
-
         sendto_one(client_p, form_str(RPL_STATSKLINE), me.name,
                    client_p->name, c, host, user, pass);
       }
