@@ -6,6 +6,9 @@
 ** Modernization, getopt, etc for the Hybrid IRCD team
 ** by W. Campbell
 **
+** VMS support by Edward Brocklesby, crypt.c implementation
+** phk@login.dknet.dk
+**
 ** $Id$
 */
 #include <stdio.h>
@@ -53,6 +56,7 @@ int main(int argc, char *argv[])
   int flag = 0;
   int length = 8;
 
+  /* Not the best salt, but... */
   srandom(time(NULL));
 
 #ifdef VMS
@@ -68,7 +72,11 @@ int main(int argc, char *argv[])
         flag |= FLAG_MD5;
         break;
       case 'd':
+#ifdef VMS
+        printf("DES is not supported on VMS.  Sorry\n");
+#else
         flag |= FLAG_DES;
+#endif
         break;
       case 'l':
         flag |= FLAG_LENGTH;
@@ -196,7 +204,7 @@ void usage()
 
 static char *
 getpass (prompt)
-	char *prompt;
+        char *prompt;
 {
   static char password[64];
   int result;

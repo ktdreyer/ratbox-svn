@@ -21,7 +21,8 @@ the password (without echo).
 A DES salt is a pair of alphanumeric characters ('.' and '/' are permitted
 as well), such as 'a4' or 'Td'.
 
-An MD5 salt consists of up to 16 alphanumeric characters (plus '.' and '/'),
+An MD5 salt consists of up to 16 (though most implementations limit you to
+8) alphanumeric characters (plus '.' and '/'),
 such as 'tGd' or 'J6d4dfG'.
 
 Known bugs:
@@ -30,6 +31,8 @@ The encryption algorithms supported depend on your system's crypt()
   implementation.
 The maximum length of an MD5 salt is limited to your systems crypt()
   implementation, typically 8.
+crypt.c (MD5 implementation) is included, but not yet compiled into the
+  program for systems that do not support MD5.
 
 Supported Platforms (Known and tested):
 Linux glibc (DES and MD5)
@@ -38,7 +41,12 @@ FreeBSD 4.x (DES and MD5)
 Solaris 2.5-2.6 (DES only)
 Cygwin 1.1.4 (DES only)
 Prior Cygwin with the MD5 libcrypt (MD5 only)
-OpenBSD 2.7 (don't link with -crypt) (DES and MD5, no Blowfish support)
-Mac OS-X (Darwin) (don't link with -crypt) (DES only)
+OpenBSD 2.7 (don't link with -lcrypt) (DES and MD5, no Blowfish support)
+Mac OS-X (Darwin) (don't link with -lcrypt) (DES only)
+
+OpenVMS (MD5 only, with the included crypt.c implementation)
+
+VMS Support works, but it unsupported by me.
+An MMK build script is included, as well as an MD5 crypt() implementation
 
 Other systems probably work, but they haven't been amply tested.
