@@ -1,3 +1,8 @@
+*** 20010208_7 by db
+- argh I always test before committing. right? 
+
+
+
 *** 20010208_6 by db
 - anytime we get a socket connect error, the client should be marked
   with DEAD_SOCKET.. found by vulture.
