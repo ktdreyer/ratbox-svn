@@ -273,7 +273,7 @@ fi
 
 
 AC_ARG_ENABLE(ipv6,
-AC_HELP_STRING([--disable-ipv6],[Disable IPv6 support]),[ipv6=$enableval],[ipv6=yes])
+AC_HELP_STRING([--enable-ipv6],[Enable IPv6 support]),[ipv6=$enableval],[ipv6=no])
 
 if test $ipv6 != yes; then
 	have_v6="no"

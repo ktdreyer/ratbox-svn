@@ -844,7 +844,7 @@ if test -n "$ac_init_help"; then
 Optional Features:
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
-  --disable-ipv6          Disable IPv6 support
+  --enable-ipv6           Enable IPv6 support
   --enable-openssl=DIR  Enable OpenSSL support (DIR optional).
   --disable-openssl       Disable OpenSSL support.
   --disable-zlib          Disable ziplinks support
@@ -4709,7 +4709,7 @@ if test "${enable_ipv6+set}" = set; then
   enableval="$enable_ipv6"
   ipv6=$enableval
 else
-  ipv6=yes
+  ipv6=no
 fi;
 
 if test $ipv6 != yes; then
