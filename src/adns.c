@@ -32,9 +32,7 @@ void delete_adns_queries(struct DNSQuery *q)
 
 void restart_resolver(void)
 {
- 	adns__consistency(dns_state,0,cc_entex);
 	adns__rereadconfig(dns_state);
- 	adns__consistency(dns_state,0,cc_entex);
 }
 void init_resolver(void)
 {
@@ -47,6 +45,9 @@ void init_resolver(void)
 
 void timeout_adns(void *ptr)
 {
+	struct timeval now;
+	gettimeofday(&now, 0);
+	adns_processtimeouts(dns_state, &now); 
 	eventAdd("timeout_adns", timeout_adns, NULL, 1, 0);
 }
 
