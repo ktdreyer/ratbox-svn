@@ -1,3 +1,8 @@
+*** 20001021_4 by bill
+
+/usr/local/ircd/ IS the default, not /usr/ejb/whatever
+
+
 *** 20001021_3 by lusky
 put DPATH and SPATH back to defaults
 
