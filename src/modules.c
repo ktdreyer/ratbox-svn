@@ -620,6 +620,7 @@ load_all_modules(int check)
 	mod_add_cmd(&quit_msgtab);
 	mod_add_cmd(&rehash_msgtab);
 	mod_add_cmd(&restart_msgtab);
+	mod_add_cmd(&resv_msgtab);  
 	mod_add_cmd(&server_msgtab);
 	mod_add_cmd(&set_msgtab);
 	mod_add_cmd(&sjoin_msgtab);
@@ -633,6 +634,7 @@ load_all_modules(int check)
 	mod_add_cmd(&msgtabs[0]);
 	mod_add_cmd(&msgtabs[1]);
 	mod_add_cmd(&msgtabs[2]);
+	mod_add_cmd(&unresv_msgtab);
 	mod_add_cmd(&user_msgtab);
 	mod_add_cmd(&userhost_msgtab);
 	mod_add_cmd(&users_msgtab);
