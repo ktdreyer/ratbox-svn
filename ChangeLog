@@ -1,3 +1,35 @@
+leeh        2003/10/31 20:02:48 EST	(20031101_0)
+
+  Modified files:
+    .                    Makefile.in 
+    doc                  Makefile.in example.conf 
+                         example.efnet.conf 
+    include              s_conf.h 
+    modules              m_gline.c m_info.c m_stats.c 
+    src                  newconf.c s_conf.c 
+  Log:
+  - fix a Makefile bug in doc/
+  - servlink was in the root Makefile twice
+  - add gline_min_cidr6 for ipv6 glines - default is 48.
+  - from -stable:
+    - add cluster stats to stats U
+    - extend the new cluster characters in stats U to shared blocks.
+    - add gline_min_cidr for ipv4 glines - default is 16
+  
+  Revision  Changes    Path
+  7.44      +1 -1      ircd-ratbox/Makefile.in
+  7.23      +2 -2      ircd-ratbox/doc/Makefile.in
+  7.228     +6 -1      ircd-ratbox/doc/example.conf
+  7.63      +6 -1      ircd-ratbox/doc/example.efnet.conf
+  7.260     +2 -0      ircd-ratbox/include/s_conf.h
+  1.135     +62 -1     ircd-ratbox/modules/m_gline.c
+  1.97      +13 -1     ircd-ratbox/modules/m_info.c
+  1.186     +65 -21    ircd-ratbox/modules/m_stats.c
+  7.117     +14 -0     ircd-ratbox/src/newconf.c
+  7.439     +2 -0      ircd-ratbox/src/s_conf.c
+
+
+
 androsyn    2003/10/23 15:28:02 EDT	(20031023_2)
 
   Modified files:
