@@ -1,5 +1,5 @@
 /*
- * IRC - Internet Relay Chat, include/hanDlers.h
+ * IRC - Internet Relay Chat, include/handlers.h
  * Copyright (C) 1990 Jarkko Oikarinen and
  *                    University of Oulu, Computing Center
  *

@@ -201,7 +201,7 @@ char *strip_tabs(char *dest, const unsigned char *src, size_t len)
     ++src;
     --len;
   }
-  *d = '\0';   /* Null terminate, kthxbye */
+  *d = '\0';   /* Null terminate, thanks and goodbye */
   return dest;
 }
 

@@ -62,6 +62,10 @@ const char serveropts[] = {
 #ifdef  DEBUGMODE
   'D',
 #endif
+  'i',  /* SHOW_INVISIBLE_LUSERS (to opers) - always on */
+  'I',  /* NO_DEFAULT_INVISIBLE - always on */
+  'M',  /* IDLE_FROM_MSG - only /msg re-sets idle time
+         * always on */
 #ifdef  CRYPT_OPER_PASSWORD
   'p',
 #endif

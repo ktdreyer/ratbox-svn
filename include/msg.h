@@ -61,11 +61,6 @@ struct  Message
   MessageHandler handlers[LAST_HANDLER_TYPE];
 };
 
-
-#ifdef DBOP
-#define MSG_DBOP     "DBOP"
-#endif
-
 #define MSG_CLIENT   "CLIENT"   /* CLIENT */
 #define MSG_ACCEPT   "ACCEPT"   /* ACCEPT */
 #define MSG_PRIVMSG  "PRIVMSG"  /* PRIV */
@@ -140,6 +135,8 @@ struct  Message
 #define MSG_MODLOAD  "MODLOAD"  /* MODLOAD */
 #define MSG_MODUNLOAD  "MODUNLOAD"  /* MODUNLOAD */
 #define MSG_DMEM     "DMEM" 
+#define MSG_TESTLINE "TESTLINE"
+
 /*
  * Constants
  */
@@ -151,8 +148,4 @@ struct  Message
                                          * unregistered clients */
 #define MAXPARA    15 
 
-#define MSG_TESTLINE "TESTLINE"
-
-
 #endif /* INCLUDED_msg_h */
-

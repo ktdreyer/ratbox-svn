@@ -66,7 +66,7 @@ _moddeinit(void)
 
 static void part_one_client(struct Client *cptr,
 			    struct Client *sptr,
-			    char *name);
+			    char *name, char *reason);
 
 char *_version = "20001122";
 
@@ -74,6 +74,7 @@ char *_version = "20001122";
 ** m_part
 **      parv[0] = sender prefix
 **      parv[1] = channel
+**      parv[2] = reason
 */
 static int m_part(struct Client *cptr,
                   struct Client *sptr,
@@ -83,6 +84,7 @@ static int m_part(struct Client *cptr,
   int t_delta;
   int decrement_count;
   char  *p, *name;
+  char reason[TOPICLEN+1];
 
   if (*parv[1] == '\0')
     {
@@ -90,6 +92,11 @@ static int m_part(struct Client *cptr,
                  me.name, parv[0], "PART");
       return 0;
     }
+
+  reason[0] = '\0';
+
+  if (parc > 2)
+    strncpy_irc(reason, parv[2], TOPICLEN);
 
   name = strtoken( &p, parv[1], ",");
 
@@ -131,7 +138,7 @@ static int m_part(struct Client *cptr,
      
       while(name)
 	{
-	  part_one_client(cptr,sptr,name);
+	  part_one_client(cptr, sptr, name, reason);
 	  name = strtoken(&p, (char *)NULL, ",");
 	}
       return 1;
@@ -151,7 +158,8 @@ static int m_part(struct Client *cptr,
  */
 static void part_one_client(struct Client *cptr,
 			    struct Client *sptr,
-			    char *name)
+			    char *name,
+                            char *reason)
 {
   struct Channel *chptr;
   struct Channel *vchan;
@@ -177,24 +185,39 @@ static void part_one_client(struct Client *cptr,
       if (!IsMember(sptr, vchan))
       {
         sendto_one(sptr, form_str(ERR_NOTONCHANNEL),
-        me.name, sptr->name, name);
+                   me.name, sptr->name, name);
         return;
        }
 
       /*
-       **  Remove user from the old channel (if any)
+       *  Remove user from the old channel (if any)
+       *  only allow /part reasons in -m chans
        */
-
-      sendto_channel_remote(vchan, cptr, ":%s PART %s", sptr->name,
-                            vchan->chname);
-
-      sendto_channel_local(ALL_MEMBERS,
-                           vchan, ":%s!%s@%s PART %s",
-                           sptr->name,
-                           sptr->username,
-                           sptr->host,
-                           chptr->chname);
-
+      if (reason[0] && (can_send(chptr, cptr) > 0))
+        {
+          sendto_channel_remote(vchan, cptr, ":%s PART %s :%s",
+                                sptr->name,
+                                vchan->chname,
+                                reason);
+          sendto_channel_local(ALL_MEMBERS,
+                               vchan, ":%s!%s@%s PART %s :%s",
+                               sptr->name,
+                               sptr->username,
+                               sptr->host,
+                               chptr->chname,
+                               reason);
+        }
+      else
+        {
+          sendto_channel_remote(vchan, cptr, ":%s PART %s", sptr->name,
+                                vchan->chname);
+          sendto_channel_local(ALL_MEMBERS,
+                               vchan, ":%s!%s@%s PART %s",
+                               sptr->name,
+                               sptr->username,
+                               sptr->host,
+                               chptr->chname);
+        }
       remove_user_from_channel(vchan, sptr);
     }
   else
@@ -205,21 +228,39 @@ static void part_one_client(struct Client *cptr,
 		     me.name, sptr->name, name);
 	  return;
 	}
-      /*
-      **  Remove user from the old channel (if any)
-      */
 
-      sendto_channel_remote(chptr, cptr, ":%s PART %s", sptr->name, name);
-            
-      sendto_channel_local(ALL_MEMBERS,
-			   chptr, ":%s!%s@%s PART %s",
-			   sptr->name,
-			   sptr->username,
-			   sptr->host,
-			   name);
+     /*
+       *  Remove user from the old channel (if any)
+       *  only allow /part reasons in -m chans
+       */
+      if (reason[0] && (can_send(chptr, cptr) > 0))
+        {
+          sendto_channel_remote(chptr, cptr, ":%s PART %s :%s",
+                                sptr->name,
+                                name, reason);
+          sendto_channel_local(ALL_MEMBERS,
+                               chptr, ":%s!%s@%s PART %s :%s",
+                               sptr->name,
+                               sptr->username,
+                               sptr->host,
+                               name, reason);
+        }
+      else
+        {
+          sendto_channel_remote(chptr, cptr, ":%s PART %s",
+                                sptr->name,
+                                name);
+          sendto_channel_local(ALL_MEMBERS,
+                               chptr, ":%s!%s@%s PART %s",
+                               sptr->name,
+                               sptr->username,
+                               sptr->host,
+                               name);
+         }
       remove_user_from_channel(chptr, sptr);
     }
 }
+
 
 /*
  * ms_part
@@ -234,17 +275,23 @@ static int ms_part(struct Client *cptr,
                    char *parv[])
 {
   char  *p, *name;
+  char reason[TOPICLEN+1];
 
-  if (parc < 2 || parv[1][0] == '\0')
+  if (*parv[1] == '\0')
     {
       return 0;
     }
+
+  reason[0] = '\0';
+
+  if (parc > 2)
+    strncpy_irc(reason, parv[2], TOPICLEN);
 
   name = strtoken( &p, parv[1], ",");
 
   while(name)
     {
-      part_one_client(cptr,sptr,name);
+      part_one_client(cptr, sptr, name, reason);
       name = strtoken(&p, (char *)NULL, ",");
     }
 
@@ -264,6 +311,7 @@ static int mo_part(struct Client *cptr,
                    char *parv[])
 {
   char  *p, *name;
+  char reason[TOPICLEN+1];
 
   if (*parv[1] == '\0')
     {
@@ -272,11 +320,16 @@ static int mo_part(struct Client *cptr,
       return 0;
     }
 
+  reason[0] = '\0';
+
+  if (parc > 2)
+    strncpy_irc(reason, parv[2], TOPICLEN);
+
   name = strtoken( &p, parv[1], ",");
 
   while ( name )
     {
-      part_one_client(cptr,sptr,name);
+      part_one_client(cptr, sptr, name, reason);
       name = strtoken(&p, (char *)NULL, ",");
     }
   return 0;
