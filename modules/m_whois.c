@@ -90,7 +90,7 @@ static void m_whois(struct Client *client_p,
                    int parc,
                    char *parv[])
 {
-   static time_t last_used = 0;
+  static time_t last_used = 0;
   
   if (parc < 2)
     {
@@ -111,6 +111,13 @@ static void m_whois(struct Client *client_p,
       else
         last_used = CurrentTime;
 
+      /* if we have serverhide enabled, they can either ask the clients
+       * server, or our server.. I dont see why they would need to ask
+       * anything else for info about the client.. --fl_
+       */
+      if(GlobalSetOptions.hide_server)
+        parv[1] = parv[2];
+	
       if (hunt_server(client_p,source_p,":%s WHOIS %s :%s", 1, parc, parv) !=
           HUNTED_ISME)
         {
@@ -187,6 +194,12 @@ static int do_whois(struct Client *client_p, struct Client *source_p,
     {
       if( (target_p = hash_find_client(nick,(struct Client *)NULL)) )
 	{
+	  /* im being asked to reply to a client that isnt mine..
+	   * I cant answer authoritively, so better make it non-detailed
+	   */
+	  if(!MyClient(target_p))
+	    glob=0;
+	    
 	  if (IsServer(client_p))
 	    client_burst_if_needed(client_p,target_p);
 
@@ -471,12 +484,16 @@ static void whois_person(struct Client *source_p,struct Client *target_p, int gl
 **      parv[0] = sender prefix
 **      parv[1] = nickname masklist
 */
+/* Be warned, this is heavily commented, as theres loads of possibilities
+ * that can happen, and as people might not understand the code, I
+ * stuck heavy comments in it.. it looks ugly.. but at least you
+ * know what it does.. --fl_ */
 static void ms_whois(struct Client *client_p,
                     struct Client *source_p,
                     int parc,
                     char *parv[])
 {
-  struct Client *target_p;
+  /* its a misconfigured server */
   if (parc < 2)
     {
       sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN),
@@ -484,15 +501,110 @@ static void ms_whois(struct Client *client_p,
       return;
     }
 
-  /* We need this to keep compatibility with hyb6 */
-  if ((parc > 2) && (target_p = hash_find_client(parv[1], (struct Client*)NULL)) &&
-      !MyConnect(target_p) && IsClient(target_p))
+  /* its a client doing a remote whois:
+   * :parv[0] WHOIS parv[1] :parv[2]
+   *
+   * parv[0] == sender
+   * parv[1] == server to reply to the request
+   * parv[2] == the client we are whois'ing
+   */
+  if(parc > 2)
+  {
+    struct Client *target_p;
+    
+    /* check if parv[1] is a client.. (most common) */
+    if(!(target_p = find_client(parv[1], NULL)))
     {
-      client_burst_if_needed(target_p->from, source_p);
-      sendto_one(target_p->from, ":%s WHOIS %s :%s", parv[0], parv[1],
-                 parv[2]);  
-      return;
+      /* ok, parv[1] isnt a client, is it a server? */
+      if(!(target_p = find_server(parv[1])))
+      {
+        /* its not a server either.. theyve sent a bad whois */
+        sendto_one(source_p, form_str(ERR_NOSUCHSERVER), me.name,
+	           parv[0], parv[1]);
+        return;
+      }
     }
 
-  do_whois(client_p,source_p,parc,parv);
+    /* its been found as a client.. to save extra work later, change
+     * target_p to be the clients uplink.. you cant check if a client
+     * supports being a LL :P
+     */
+    else
+      target_p = target_p->servptr;
+
+    /* if parv[1] isnt my client, or me, someone else is supposed
+     * to be handling the request.. so send it to them 
+     */
+    if(!MyClient(target_p) && !IsMe(target_p))
+    {
+
+      /* we're being asked to forward a whois request to a LL to answer,
+       * if the target isnt on that server.. answer it for them, as the
+       * LL might not know that the target exists..
+       */
+      if(MyConnect(target_p) && ServerInfo.hub && 
+         IsCapable(target_p, CAP_LL))
+      {
+        struct Client *whois_p;
+
+        /* try to find the client */
+	if(whois_p = find_client(parv[2], NULL))
+	{
+	  /* check the server being asked to perform the whois, is that
+	   * clients uplink */
+	  if(whois_p->servptr != target_p)
+	  {
+	    /* they asked the LL for info on a client it didnt know about..
+	     * as we're answering for them, make sure its non-detailed
+	     */
+	    parv[1] = parv[2];
+	    parc = 2;
+	    
+            do_whois(client_p, source_p, parc, parv);
+	    return;
+	  }
+	  
+	  /* the server is that clients uplink, get them to do it */
+	  else
+	  {
+	    client_burst_if_needed(target_p->from, source_p);
+	    sendto_one(target_p->from, ":%s WHOIS %s :%s", parv[0], parv[1],
+	               parv[2]);
+            return;
+          }
+	}
+
+	/* the client doesnt exist.. erk! */
+	else
+	{
+	  /* set parv[1] = parv[2], then let do_whois handle the error */
+	  parv[1] = parv[2];
+	  do_whois(client_p, source_p, parc, parv);
+	  return;
+	}
+      }
+
+      /* its not a lazylink.. forward it as it is */
+      else
+      {
+        /* client_burst_if_needed(target_p->from, source_p); 
+	 * the target isnt a LL.. why would I need to burst? */
+        sendto_one(target_p->from, ":%s WHOIS %s :%s", parv[0], parv[1],
+                   parv[2]);
+        return;	       
+      }
+    }
+
+  /* ok, the target is either us, or a client on our server, so perform the whois
+   * but first, parv[1] == server to perform the whois on, parv[2] == person
+   * to whois, so make parv[1] = parv[2] so do_whois is ok -- fl_
+   */
+    parv[1] = parv[2];
+    do_whois(client_p,source_p,parc,parv);
+    return;
+  }
+
+  /* parc == 2, so its a lazylink client asking us about a nick, so do it */
+  do_whois(client_p, source_p, parc, parv);
+  return;
 }
