@@ -1,3 +1,15 @@
+androsyn    2004/04/14 12:35:12 EDT	(20040414_4)
+
+  Modified files:
+    modules/core         m_kick.c 
+  Log:
+  Lee really likes goats thus I'm reverting his commit.
+  
+  Revision  Changes    Path
+  1.79      +1 -1      ircd-ratbox/modules/core/m_kick.c
+
+
+
 leeh        2004/04/14 12:29:25 EDT	(20040414_3)
 
   Modified files:
