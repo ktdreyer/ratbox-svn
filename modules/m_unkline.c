@@ -193,10 +193,6 @@ ms_unkline(struct Client *client_p, struct Client *source_p, int parc, const cha
 	{
 		if(remove_temp_kline(kuser, khost))
 		{
-			sendto_realops_flags(UMODE_ALL, L_ALL,
-					     "*** Received Un-kline for [%s@%s], from %s",
-					     kuser, khost, get_oper_name(source_p));
-
 			sendto_one(source_p,
 				   ":%s NOTICE %s :Un-klined [%s@%s] from temporary k-lines",
 				   me.name, parv[0], kuser, khost);
@@ -323,11 +319,6 @@ remove_permkline_match(struct Client *source_p, const char *host, const char *us
 
 	if(!cluster)
 	{
-		if(!MyClient(source_p))
-			sendto_realops_flags(UMODE_ALL, L_ALL,
-					     "*** Received Un-kline for [%s@%s], from %s",
-					     user, host, get_oper_name(source_p));
-
 		sendto_one(source_p, ":%s NOTICE %s :K-Line for [%s@%s] is removed",
 			   me.name, source_p->name, user, host);
 	}

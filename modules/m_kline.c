@@ -335,12 +335,6 @@ ms_kline(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 		tkline_time = atoi(parv[2]);
 
-		sendto_realops_flags(UMODE_ALL, L_ALL,
-				     "*** Received K-Line for [%s@%s] [%s], from %s!%s@%s on %s",
-				     kuser, khost, kreason,
-				     source_p->name, source_p->username,
-				     source_p->host, source_p->user->server);
-
 		/* We check if the kline already exists after we've announced its 
 		 * arrived, to avoid confusing opers - fl
 		 */
