@@ -1,3 +1,15 @@
+androsyn    2003/09/15 16:16:56 EDT	(20030915_0)
+
+  Modified files:
+    modules/core         m_sjoin.c 
+  Log:
+  Check for empty parameters
+  
+  Revision  Changes    Path
+  1.188     +2 -2      ircd-ratbox/modules/core/m_sjoin.c
+
+
+
 androsyn    2003/09/10 22:23:22 EDT	(20030911_0)
 
   Modified files:
