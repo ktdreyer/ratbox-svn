@@ -307,18 +307,16 @@ comm_select_fdlist(fdlist_t fdlist, time_t delay)
   if (revents & (POLLRDNORM | POLLIN | POLLHUP | POLLERR))
   {
    hdl = F->read_handler;
+   F->read_handler = NULL;
    poll_update_pollfds(fd, fdlist, POLLRDNORM, NULL);
-   /* This shouldn't happen... */
-   /* assert(hdl); */
    if (hdl)
     hdl(fd, F->read_data);
   }
   if (revents & (POLLWRNORM | POLLOUT | POLLHUP | POLLERR))
   {
    hdl = F->write_handler;
+   F->write_handler = NULL;
    poll_update_pollfds(fd, fdlist, POLLWRNORM, NULL);
-   /* This shouldn't happen... */
-/*   assert(hdl); */
    if (hdl)
     hdl(fd, F->write_data);
   }

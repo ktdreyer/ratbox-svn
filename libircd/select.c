@@ -214,6 +214,7 @@ comm_select(time_t delay)
 
         if (FD_ISSET(fd, &tmpreadfds)) {
             hdl = F->read_handler;
+            F->read_handler = NULL;
             select_update_selectfds(fd, COMM_SELECT_READ, NULL);
             if (!hdl) {
                 /* XXX Eek! This is another bad place! */
@@ -223,6 +224,7 @@ comm_select(time_t delay)
         }
         if (FD_ISSET(fd, &tmpwritefds)) {
             hdl = F->write_handler;
+            F->write_handler = NULL;
             select_update_selectfds(fd, COMM_SELECT_WRITE, NULL);
             if (!hdl) {
                 /* XXX Eek! This is another bad place! */
