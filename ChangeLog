@@ -1,3 +1,15 @@
+androsyn    2003/08/29 11:14:36 EDT	(20030829_1)
+
+  Modified files:
+    src                  ircd.c 
+  Log:
+  Helps if we put the first argument there as well..
+  
+  Revision  Changes    Path
+  7.309     +1 -1      ircd-ratbox/src/ircd.c
+
+
+
 androsyn    2003/08/29 11:13:37 EDT	(20030829_0)
 
   Modified files:
