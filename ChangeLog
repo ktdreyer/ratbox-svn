@@ -1,3 +1,15 @@
+leeh        2004/06/06 17:05:11 EDT	(20040606_2)
+
+  Modified files:
+    contrib              m_olist.c 
+  Log:
+  - dlink_list_length(&chptr->members) rather than just chptr->members..
+  
+  Revision  Changes    Path
+  1.14      +2 -2      ircd-ratbox/contrib/m_olist.c
+
+
+
 leeh        2004/06/06 16:57:11 EDT	(20040606_1)
 
   Modified files:
