@@ -1,3 +1,20 @@
+db          2002/06/16 22:54:51 EDT	(20020617_0)
+
+  Modified files:
+    include              tools.h 
+  Log:
+  in tools.h we had:
+  m->next = NULL;
+  m->next = list->head;
+  
+  That was daft. (spotted by Lee, but we forgot to fix earlier)
+  removing the redundant assign might speed things up slightly.
+  
+  Revision  Changes    Path
+  1.11      +0 -1      ircd-hybrid-7/include/tools.h
+
+
+
 db          2002/06/16 13:23:55 EDT	(20020616_3)
 
   Modified files:
