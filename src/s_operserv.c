@@ -73,13 +73,17 @@ operserv_db_callback(void *db, int argc, char **argv, char **colnames)
 }
 
 static void
-otakeover(struct channel *chptr)
+otakeover(struct channel *chptr, int invite)
 {
 	part_service(operserv_p, chptr->name);
 
 	remove_our_modes(chptr);
 
-	chptr->mode.mode = MODE_TOPIC|MODE_NOEXTERNAL;
+	if(invite)
+		chptr->mode.mode = MODE_TOPIC|MODE_NOEXTERNAL|MODE_INVITEONLY;
+	else
+		chptr->mode.mode = MODE_TOPIC|MODE_NOEXTERNAL;
+
 	chptr->tsinfo--;
 
 	join_service(operserv_p, chptr->name, NULL);
@@ -117,6 +121,33 @@ otakeover_full(struct channel *chptr)
 }
 
 static void
+otakeover_clear(struct channel *chptr, struct client *source_p)
+{
+	struct chmember *msptr;
+	dlink_node *ptr, *next_ptr;
+
+	kickbuild_start();
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, chptr->users.head)
+	{
+		msptr = ptr->data;
+
+		if(source_p)
+		{
+			if(source_p == msptr->client_p)
+				continue;
+		}
+		else if(is_oper(msptr->client_p) || msptr->client_p->user->oper)
+			continue;
+
+		kickbuild_add(msptr->client_p->name, "Takeover Requested");
+		del_chmember(msptr);
+	}
+
+	kickbuild_finish(operserv_p, chptr);
+}
+
+static void
 u_oper_takeover(struct connection_entry *conn_p, char *parv[], int parc)
 {
 	struct channel *chptr;
@@ -135,10 +166,32 @@ u_oper_takeover(struct connection_entry *conn_p, char *parv[], int parc)
 		return;
 	}
 
-	otakeover(chptr);
+	if(parc > 2 && !EmptyString(parv[2]))
+	{
+		if(!irccmp(parv[2], "-clearall"))
+		{
+			otakeover(chptr, 1);
+			otakeover_full(chptr);
 
-	if(parc > 2 && !EmptyString(parv[2]) && !irccmp(parv[2],  "-full"))
-		otakeover_full(chptr);
+			/* we have no associated client pointer here, so
+			 * pass operserv_p as a dummy that wont get matched
+			 */
+			otakeover_clear(chptr, operserv_p);
+		}
+		else if(!irccmp(parv[2], "-clear"))
+		{
+			otakeover(chptr, 1);
+			otakeover_full(chptr);
+			otakeover_clear(chptr, NULL);
+		}
+		else if(!irccmp(parv[2], "-full"))
+		{
+			otakeover(chptr, 0);
+			otakeover_full(chptr);
+		}
+	}
+	else
+		otakeover(chptr, 0);
 
 	sendto_one(conn_p, "Channel %s has been taken over", chptr->name);
 }
@@ -162,11 +215,29 @@ s_oper_takeover(struct client *client_p, char *parv[], int parc)
 				chptr->name);
 		return 0;
 	}
+	if(parc > 1 && !EmptyString(parv[1]))
+	{
+		if(!irccmp(parv[1], "-clearall"))
+		{
+			otakeover(chptr, 1);
+			otakeover_full(chptr);
+			otakeover_clear(chptr, client_p);
+		}
+		else if(!irccmp(parv[1], "-clear"))
+		{
+			otakeover(chptr, 1);
+			otakeover_full(chptr);
+			otakeover_clear(chptr, NULL);
+		}
+		else if(!irccmp(parv[1], "-full"))
+		{
+			otakeover(chptr, 0);
+			otakeover_full(chptr);
+		}
+	}
+	else
+		otakeover(chptr, 0);
 
-	otakeover(chptr);
-
-	if(parc > 1 && !EmptyString(parv[1]) && !irccmp(parv[1], "-full"))
-		otakeover_full(chptr);
 
 	service_error(operserv_p, client_p,
 			"Channel %s has been taken over", chptr->name);
