@@ -474,13 +474,19 @@ struct Channel* find_vchan(struct Channel *chptr, char *key)
 
   /* try and match vchan_id */
   if (*key == '!')
-    for (ptr = chptr->vchan_list.head; ptr; ptr = ptr->next)
-      {
-        chtmp = ptr->data;
-        if (chtmp->vchan_id && (strcmp(chtmp->vchan_id, key) == 0))
-          return chtmp;
-      }
+    {
+      /* first the root */
+      if (chptr->vchan_id && (strcmp(chptr->vchan_id, key) == 0))
+        return chptr;
 
+      /* then it's vchans */
+      for (ptr = chptr->vchan_list.head; ptr; ptr = ptr->next)
+        {
+          chtmp = ptr->data;
+          if (chtmp->vchan_id && (strcmp(chtmp->vchan_id, key) == 0))
+            return chtmp;
+        }
+    }
   return NullChn;
 }
 
