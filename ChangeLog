@@ -1,3 +1,15 @@
+androsyn    2003/02/14 04:08:48 UTC	(20030214_0)
+
+  Modified files:
+    src                  s_auth.c 
+  Log:
+  Add a hook for when new local clients get registered on the server.
+  
+  Revision  Changes    Path
+  7.133     +4 -1      ircd-ratbox/src/s_auth.c
+
+
+
 androsyn    2003/02/13 23:46:07 UTC	(20030213_5)
 
   Modified files:
