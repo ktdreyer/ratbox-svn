@@ -253,7 +253,6 @@ free_conf(struct ConfItem* aconf)
   if (aconf->passwd)
     memset(aconf->passwd, 0, strlen(aconf->passwd));
   MyFree(aconf->passwd);
-  MyFree(aconf->oper_reason);
   if (aconf->spasswd)
     memset(aconf->spasswd, 0, strlen(aconf->spasswd));
   MyFree(aconf->spasswd);

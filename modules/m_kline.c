@@ -129,7 +129,7 @@ static void mo_kline(struct Client *client_p,
                     char **parv)
 {
   char *reason = "No Reason";
-  char *p;
+  char *oper_reason;
   const char* current_date;
   const char* target_server=NULL;
   struct ConfItem *aconf;
@@ -168,9 +168,9 @@ static void mo_kline(struct Client *client_p,
   parc--;
   parv++;
 
-  if(0 != parc)
+  if (parc != 0)
     {
-      if(0 == irccmp(*parv,"ON"))
+      if (irccmp(*parv,"ON") == 0)
 	{
 	  parc--;
 	  parv++;
@@ -186,7 +186,7 @@ static void mo_kline(struct Client *client_p,
 	}
     }
 
-  if(0 != parc)
+  if(parc != 0)
     reason = *parv;
 
   if(valid_user_host(source_p, user,host))
@@ -235,11 +235,10 @@ static void mo_kline(struct Client *client_p,
 
 
   /* Look for an oper reason */
-  if ((p = strchr(reason, '|')) != NULL)
+  if ((oper_reason = strchr(reason, '|')) != NULL)
     {
-      *p = '\0';
-      p++;
-      DupString(aconf->oper_reason, p);
+      *oper_reason = '\0';
+      oper_reason++;
     }
 
   if(tkline_time)
@@ -258,7 +257,7 @@ static void mo_kline(struct Client *client_p,
 		 reason,
 		 current_date);
       DupString(aconf->passwd, buffer);
-      apply_kline(source_p, aconf, reason, aconf->oper_reason,
+      apply_kline(source_p, aconf, reason, oper_reason,
 		  current_date, cur_time);
     }
 } /* mo_kline() */
@@ -578,7 +577,7 @@ static char *cluster(char *hostname)
 static void mo_dline(struct Client *client_p, struct Client *source_p,
                     int parc, char *parv[])
 {
-  char *dlhost, *reason;
+  char *dlhost, *reason, *oper_reason;
 #ifndef IPV6
   char *p;
   struct Client *target_p;
@@ -647,20 +646,17 @@ static void mo_dline(struct Client *client_p, struct Client *source_p,
        */
        strcpy(cidr_form_host, inetntoa((char*) &target_p->localClient->ip));
       
-      p = strchr(cidr_form_host,'.');
-      if(!p)
+       if ((p = strchr(cidr_form_host,'.')) == NULL)
         return;
       /* 192. <- p */
 
       p++;
-      p = strchr(p,'.');
-      if(!p)
+      if ((p = strchr(p,'.')) == NULL)
         return;
       /* 192.168. <- p */
 
       p++;
-      p = strchr(p,'.');
-      if(!p)
+      if ((p = strchr(p,'.')) == NULL)
         return;
       /* 192.168.0. <- p */
 
@@ -738,11 +734,10 @@ static void mo_dline(struct Client *client_p, struct Client *source_p,
   aconf = make_conf();
 
   /* Look for an oper reason */
-  if ((p = strchr(reason, '|')) != NULL)
+  if ((oper_reason = strchr(reason, '|')) != NULL)
     {
-      *p = '\0';
-      p++;
-      DupString(aconf->oper_reason, p);
+      *oper_reason = '\0';
+      oper_reason++;
     }
 
   ircsprintf(dlbuffer, "%s (%s)",reason, current_date);
@@ -756,7 +751,7 @@ static void mo_dline(struct Client *client_p, struct Client *source_p,
    * Write dline to configuration file
    */
   WriteKlineOrDline(DLINE_TYPE, source_p, NULL, dlhost, reason,
-		    aconf->oper_reason, current_date, cur_time);
+		    oper_reason, current_date, cur_time);
   check_klines();
 } /* m_dline() */
 

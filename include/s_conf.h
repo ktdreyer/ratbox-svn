@@ -71,7 +71,6 @@ struct ConfItem
   char *           host;     /* host part of user@host */
   char *           passwd;   /* doubles as kline reason *ugh* */
   char *           spasswd;  /* Password to send. */
-  char *	   oper_reason; /* | portion of kline reason */
   char *           user;     /* user part of user@host */
   int              port;
   char *           fakename;   /* Mask name */
