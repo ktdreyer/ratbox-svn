@@ -406,7 +406,7 @@ channel_db_callback(void *db, int argc, char **argv, char **colnames)
 	char *modev[MAXPARA + 1];
 	int modec;
 
-	if(argc < 8)
+	if(argc < 9)
 		return 0;
 
 	if(EmptyString(argv[0]))
@@ -422,7 +422,7 @@ channel_db_callback(void *db, int argc, char **argv, char **colnames)
 		reg_p->url = my_strdup(argv[2]);
 
 	memset(&mode, 0, sizeof(struct chmode));
-	modec = string_to_array(argv[2], modev);
+	modec = string_to_array(argv[3], modev);
 
 	if(parse_simple_mode(&mode, (const char **) modev, modec, 0))
 	{
@@ -435,7 +435,7 @@ channel_db_callback(void *db, int argc, char **argv, char **colnames)
 	}
 
 	memset(&mode, 0, sizeof(struct chmode));
-	modec = string_to_array(argv[3], modev);
+	modec = string_to_array(argv[4], modev);
 
 	if(parse_simple_mode(&mode, (const char **) modev, modec, 0))
 	{
@@ -447,12 +447,12 @@ channel_db_callback(void *db, int argc, char **argv, char **colnames)
 				sizeof(reg_p->emode.key));
 	}
 
-	reg_p->reg_time = atol(argv[4]);
-	reg_p->last_time = atol(argv[5]);
-	reg_p->flags = atoi(argv[6]);
+	reg_p->reg_time = atol(argv[5]);
+	reg_p->last_time = atol(argv[6]);
+	reg_p->flags = atoi(argv[7]);
 
-	if(!EmptyString(argv[7]))
-		reg_p->suspender = my_strdup(argv[7]);
+	if(!EmptyString(argv[8]))
+		reg_p->suspender = my_strdup(argv[8]);
 
 	add_channel_reg(reg_p);
 
