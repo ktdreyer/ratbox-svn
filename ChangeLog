@@ -1,3 +1,29 @@
+leeh        2004/07/24 21:20:25 EDT	(20040725_0)
+
+  Modified files:
+    doc                  example.conf example.efnet.conf 
+                         whats-new.txt 
+    include              irc_string.h s_conf.h 
+    modules/core         m_join.c 
+    src                  match.c newconf.c s_conf.c 
+  Log:
+  - added a new conf option to general {}; disable_fake_channels = yes|no;
+    to allow admins to disable creation of fake channels with bold, underline,
+    reverse, mirc colour and hard space in..
+  
+  Revision  Changes    Path
+  7.242     +6 -0      ircd-ratbox/doc/example.conf
+  7.75      +6 -0      ircd-ratbox/doc/example.efnet.conf
+  7.49      +5 -2      ircd-ratbox/doc/whats-new.txt
+  7.58      +2 -0      ircd-ratbox/include/irc_string.h
+  7.278     +1 -0      ircd-ratbox/include/s_conf.h
+  1.155     +30 -2     ircd-ratbox/modules/core/m_join.c
+  7.41      +5 -5      ircd-ratbox/src/match.c
+  7.156     +8 -0      ircd-ratbox/src/newconf.c
+  7.469     +1 -0      ircd-ratbox/src/s_conf.c
+
+
+
 leeh        2004/07/24 14:31:40 EDT	(20040724_3)
 
   Modified files:
