@@ -63,6 +63,9 @@ parse_client_queued (struct Client *client_p)
 			if(i >= MAX_FLOOD)
 				break;
 
+			/* Did the client get closed? */
+			if(!MyConnect(client_p))
+				break;
 			dolen = linebuf_get (&client_p->localClient->
 					     buf_recvq, readBuf, READBUF_SIZE,
 					     LINEBUF_COMPLETE, LINEBUF_PARSED);
