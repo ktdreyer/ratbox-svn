@@ -658,7 +658,8 @@ comm_connect_tcp(int fd, const char *host, u_short port,
   fd_table[fd].dns_query->ptr = &fd_table[fd];
   fd_table[fd].dns_query->callback = comm_connect_dns_callback;
   adns_gethost(host, aftype, fd_table[fd].dns_query);
- } else
+ }
+ else
  {
   /* We have a valid IP, so we just call tryconnect */
   /* Make sure we actually set the timeout here .. */

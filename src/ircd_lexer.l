@@ -113,6 +113,7 @@ aftype		{ return AFTYPE; }
 allow_hidden	{ return ALLOW_HIDDEN; }
 auth		{ return AUTH; }
 autoconn	{ return AUTOCONN; }
+bind_address    { return BIND_ADDRESS; }
 caller_id_wait	{ return CALLER_ID_WAIT; }
 channel		{ return CHANNEL; }
 cipher_preference { return CIPHER_PREFERENCE; }

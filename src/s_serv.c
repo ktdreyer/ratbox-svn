@@ -2056,7 +2056,23 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
     client_p->localClient->aftype = aconf->aftype;
     
     /* Now, initiate the connection */
-    if((aconf->aftype == AF_INET) && ServerInfo.specific_ipv4_vhost)
+    /* XXX assume that a non 0 type means a specific bind address 
+     * for this connect.
+     */
+    if((aconf->aftype == AF_INET) && aconf->my_ipnum.sins.sin.s_addr)
+      {
+	struct irc_sockaddr ipn;
+	memset(&ipn, 0, sizeof(struct irc_sockaddr));
+	S_FAM(ipn) = DEF_FAM;
+	S_PORT(ipn) = 0;
+
+	copy_s_addr(S_ADDR(ipn), IN_ADDR(aconf->my_ipnum));
+
+	comm_connect_tcp(client_p->fd, aconf->host, aconf->port,
+			 (struct sockaddr *)&SOCKADDR(ipn), sizeof(struct irc_sockaddr), 
+			 serv_connect_callback, client_p, aconf->aftype, 30);
+      }
+    else if((aconf->aftype == AF_INET) && ServerInfo.specific_ipv4_vhost)
       {
 	struct irc_sockaddr ipn;
 	memset(&ipn, 0, sizeof(struct irc_sockaddr));

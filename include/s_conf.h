@@ -64,7 +64,8 @@ struct ConfItem
   unsigned int     status;   /* If CONF_ILLEGAL, delete when no clients */
   unsigned int     flags;
   int              clients;  /* Number of *LOCAL* clients using this */
-  struct irc_inaddr ipnum;
+  struct irc_inaddr my_ipnum; /* ip to bind to for outgoing connect */
+  struct irc_inaddr ipnum;	/* ip to connect to */
   char *           name;     /* IRC name, nick, server name, or original u@h */
   char *           host;     /* host part of user@host */
   char *           passwd;   /* doubles as kline reason *ugh* */
