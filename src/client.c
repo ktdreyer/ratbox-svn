@@ -17,6 +17,7 @@
 #include "balloc.h"
 #include "event.h"
 #include "hook.h"
+#include "s_userserv.h"
 
 static dlink_list name_table[MAX_NAME_HASH];
 
@@ -193,6 +194,11 @@ exit_user(struct client *target_p)
 		return;
 
 	SetDead(target_p);
+
+#ifdef ENABLE_USERSERV
+	if(target_p->user->user_reg)
+		target_p->user->user_reg->refcount--;
+#endif
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, target_p->user->channels.head)
 	{

@@ -17,6 +17,7 @@ struct user_reg
 	time_t last_time;
 
 	int flags;
+	int refcount;
 
 	dlink_node node;
 	dlink_list channels;

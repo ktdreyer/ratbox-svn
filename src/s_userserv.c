@@ -186,6 +186,31 @@ valid_username(const char *name)
 }
 
 static void
+logout_user_reg(struct user_reg *ureg_p)
+{
+	struct client *target_p;
+	dlink_node *ptr;
+
+	if(!ureg_p->refcount)
+		return;
+
+	/* log out anyone using this nickname */
+	DLINK_FOREACH(ptr, user_list.head)
+	{
+		target_p = ptr->data;
+
+		if(target_p->user->user_reg == ureg_p)
+		{
+			target_p->user->user_reg = NULL;
+			ureg_p->refcount--;
+
+			if(!ureg_p->refcount)
+				return;
+		}
+	}
+}
+
+static void
 u_user_userregister(struct connection_entry *conn_p, char *parv[], int parc)
 {
 	struct user_reg *reg_p;
@@ -249,6 +274,8 @@ u_user_userdrop(struct connection_entry *conn_p, char *parv[], int parc)
 	loc_sqlite_exec(NULL, "DELETE FROM members WHERE username = %Q",
 			ureg_p->name);
 
+	logout_user_reg(ureg_p);
+
 	DLINK_FOREACH_SAFE(ptr, next_ptr, ureg_p->channels.head)
 	{
 		mreg_p = ptr->data;
@@ -273,8 +300,6 @@ static void
 u_user_usersuspend(struct connection_entry *conn_p, char *parv[], int parc)
 {
 	struct user_reg *reg_p;
-	struct client *target_p;
-	dlink_node *ptr;
 
 	if((reg_p = find_user_reg(NULL, parv[1])) == NULL)
 	{
@@ -291,14 +316,7 @@ u_user_usersuspend(struct connection_entry *conn_p, char *parv[], int parc)
 
 	slog(userserv_p, 1, "%s - USERSUSPEND %s", conn_p->name, reg_p->name);
 
-	/* log out anyone using this nickname */
-	DLINK_FOREACH(ptr, user_list.head)
-	{
-		target_p = ptr->data;
-
-		if(target_p->user->user_reg == reg_p)
-			target_p->user->user_reg = NULL;
-	}
+	logout_user_reg(reg_p);
 
 	reg_p->flags |= US_FLAGS_SUSPENDED;
 
@@ -398,6 +416,8 @@ s_user_userdrop(struct client *client_p, char *parv[], int parc)
 	loc_sqlite_exec(NULL, "DELETE FROM members WHERE username = %Q",
 			ureg_p->name);
 
+	logout_user_reg(ureg_p);
+
 	DLINK_FOREACH_SAFE(ptr, next_ptr, ureg_p->channels.head)
 	{
 		mreg_p = ptr->data;
@@ -423,8 +443,6 @@ static int
 s_user_usersuspend(struct client *client_p, char *parv[], int parc)
 {
 	struct user_reg *reg_p;
-	struct client *target_p;
-	dlink_node *ptr;
 
 	if((reg_p = find_user_reg(client_p, parv[0])) == NULL)
 		return 0;
@@ -439,14 +457,7 @@ s_user_usersuspend(struct client *client_p, char *parv[], int parc)
 	slog(userserv_p, 1, "%s - USERSUSPEND %s",
 		client_p->user->oper->name, reg_p->name);
 
-	/* log out anyone using this nickname */
-	DLINK_FOREACH(ptr, user_list.head)
-	{
-		target_p = ptr->data;
-
-		if(target_p->user->user_reg == reg_p)
-			target_p->user->user_reg = NULL;
-	}
+	logout_user_reg(reg_p);
 
 	reg_p->flags |= US_FLAGS_SUSPENDED;
 
@@ -568,6 +579,7 @@ s_user_register(struct client *client_p, char *parv[], int parc)
 		reg_p->email = my_strdup(parv[2]);
 
 	reg_p->reg_time = reg_p->last_time = CURRENT_TIME;
+	reg_p->refcount++;
 
 	client_p->user->user_reg = reg_p;
 	add_user_reg(reg_p);
@@ -611,6 +623,7 @@ s_user_login(struct client *client_p, char *parv[], int parc)
 
 	client_p->user->user_reg = reg_p;
 	reg_p->last_time = CURRENT_TIME;
+	reg_p->refcount++;
 	service_error(userserv_p, client_p, "Login successful");
 
 	return 1;
@@ -619,6 +632,7 @@ s_user_login(struct client *client_p, char *parv[], int parc)
 static int
 s_user_logout(struct client *client_p, char *parv[], int parc)
 {
+	client_p->user->user_reg->refcount--;
 	client_p->user->user_reg = NULL;
 	service_error(userserv_p, client_p, "Logout successful");
 

@@ -632,6 +632,9 @@ u_chan_chansuspend(struct connection_entry *conn_p, char *parv[], int parc)
 
 	reg_p->flags |= CS_FLAGS_SUSPENDED;
 
+	loc_sqlite_exec(NULL, "UPDATE channels SET flags = %d WHERE chname = %Q",
+			reg_p->flags, reg_p->name);
+
 	sendto_one(conn_p, "Channel %s suspended", parv[1]);
 }
 
@@ -655,6 +658,9 @@ u_chan_chanunsuspend(struct connection_entry *conn_p, char *parv[], int parc)
 	slog(chanserv_p, 1, "%s - CHANUNSUSPEND %s", conn_p->name, parv[1]);
 
 	reg_p->flags &= ~CS_FLAGS_SUSPENDED;
+
+	loc_sqlite_exec(NULL, "UPDATE channels SET flags = %d WHERE chname = %Q",
+			reg_p->flags, reg_p->name);
 
 	sendto_one(conn_p, "Channel %s unsuspended", parv[1]);
 }
@@ -734,6 +740,9 @@ s_chan_chansuspend(struct client *client_p, char *parv[], int parc)
 
 	reg_p->flags |= CS_FLAGS_SUSPENDED;
 
+	loc_sqlite_exec(NULL, "UPDATE channels SET flags = %d WHERE chname = %Q",
+			reg_p->flags, reg_p->name);
+
 	service_error(chanserv_p, client_p, "Channel %s suspended", parv[0]);
 	return 0;
 }
@@ -757,6 +766,9 @@ s_chan_chanunsuspend(struct client *client_p, char *parv[], int parc)
 		client_p->user->oper->name, parv[0]);
 
 	reg_p->flags &= ~CS_FLAGS_SUSPENDED;
+
+	loc_sqlite_exec(NULL, "UPDATE channels SET flags = %d WHERE chname = %Q",
+			reg_p->flags, reg_p->name);
 
 	service_error(chanserv_p, client_p, "Channel %s unsuspended", parv[0]);
 	return 0;
