@@ -1,3 +1,15 @@
+androsyn    2003/02/14 04:24:45 UTC	(20030214_1)
+
+  Added files:
+    doc                  hooks.txt 
+  Log:
+  Start documenting some of the existing hooks
+  
+  Revision  Changes    Path
+  1.1       +37 -0     ircd-ratbox/doc/hooks.txt (new)
+
+
+
 androsyn    2003/02/14 04:08:48 UTC	(20030214_0)
 
   Modified files:
