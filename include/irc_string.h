@@ -115,10 +115,6 @@ const char *myctime(time_t);
 
 char *strtoken(char **save, char *str, const char *fs);
 
-/*
- * deprecate
- */
-#define BadPtr(x) (!(x) || (*(x) == '\0'))
 
 
 /*
