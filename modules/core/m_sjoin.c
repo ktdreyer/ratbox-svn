@@ -186,12 +186,6 @@ int     ms_sjoin(struct Client *cptr,
 
   *parabuf = '\0';
 
-  if(mode.mode & MODE_HIDEOPS)
-
-    hide_or_not = ONLY_CHANOPS;
-  else
-    hide_or_not = ALL_MEMBERS;
-
   isnew = ChannelExists(parv[2]) ? 0 : 1;
   chptr = get_channel(sptr, parv[2], CREATE);
 
@@ -295,6 +289,11 @@ int     ms_sjoin(struct Client *cptr,
         strcpy(mode.key, oldmode->key);
     }
 
+  if(mode.mode & MODE_HIDEOPS)
+    hide_or_not = ONLY_CHANOPS;
+  else
+    hide_or_not = ALL_MEMBERS;
+
   set_final_mode(&mode,oldmode);
   chptr->mode = mode;
 
@@ -306,13 +305,15 @@ int     ms_sjoin(struct Client *cptr,
 
   if(*modebuf != '\0')
     {
+      /* This _SHOULD_ be to ALL_MEMBERS
+       * It contains only +aimnstlki, etc */
       if(top_chptr != NULL)
-	sendto_channel_local(hide_or_not,
+	sendto_channel_local(ALL_MEMBERS,
 			     chptr, ":%s MODE %s %s %s",
 			     me.name,
 			     top_chptr->chname, modebuf, parabuf);
       else
-	sendto_channel_local(hide_or_not,
+	sendto_channel_local(ALL_MEMBERS,
 			     chptr, ":%s MODE %s %s %s",
 			     me.name,
 			     chptr->chname, modebuf, parabuf);
