@@ -1,3 +1,11 @@
+*** 20010131_3 by davidt
+- Fix missing space between parabuf and : in channel.c
+- Fix missing if(p_or_n != NOTICE) in m_message.c, allowing an infinite loop
+  of +g messages to DoS the server..
+- Added caller_id_wait to remove 60 second hardcoded time between +g
+  notifications.
+
+
 *** 20010131_2 by jdc
 - Added myself into the TODO list.  Gee, don't I feel special?
 
