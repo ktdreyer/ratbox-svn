@@ -57,6 +57,9 @@ dlink_list server_conf_list;
 dlink_list xline_conf_list;
 dlink_list resv_conf_list;	/* nicks only! */
 static dlink_list nd_list;	/* nick delay */
+dlink_list tgchange_list;
+
+patricia_tree_t *tgchange_tree;
 
 static BlockHeap *nd_heap = NULL;
 
@@ -66,6 +69,7 @@ static void expire_nd_entries(void *unused);
 void
 init_s_newconf(void)
 {
+	tgchange_tree = New_Patricia(PATRICIA_BITS);
 	nd_heap = BlockHeapCreate(sizeof(struct nd_entry), ND_HEAP_SIZE);
 	eventAddIsh("expire_nd_entries", expire_nd_entries, NULL, 30);
 	eventAddIsh("expire_temp_rxlines", expire_temp_rxlines, NULL, 60);
@@ -794,5 +798,37 @@ expire_nd_entries(void *unused)
 
 		free_nd_entry(nd);
 	}
+}
+
+void
+add_tgchange(const char *host)
+{
+	tgchange *target;
+	patricia_node_t *pnode;
+
+	if(find_tgchange(host))
+		return;
+
+	target = MyMalloc(sizeof(tgchange));
+	pnode = make_and_lookup(tgchange_tree, host);
+
+	pnode->data = target;
+	target->pnode = pnode;
+
+	DupString(target->ip, host);
+	target->expiry = CurrentTime + (60*60*12);
+
+	dlinkAdd(target, &target->node, &tgchange_list);
+}
+
+tgchange *
+find_tgchange(const char *host)
+{
+	patricia_node_t *pnode;
+
+	if((pnode = match_exact_string(tgchange_tree, host)))
+		return pnode->data;
+
+	return NULL;
 }
 

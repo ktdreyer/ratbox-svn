@@ -541,6 +541,10 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 					     "New Max Local Clients: %d", Count.max_loc);
 	}
 
+	/* they get a reduced limit */
+	if(find_tgchange(source_p->sockhost))
+		USED_TARGETS(source_p) = 6;
+
 	hash_check_watch(source_p, RPL_LOGON);
 	user_welcome(source_p);
 	return (introduce_client(client_p, source_p, user, source_p->name));

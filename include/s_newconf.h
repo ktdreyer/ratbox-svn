@@ -51,9 +51,26 @@ extern dlink_list hubleaf_conf_list;
 extern dlink_list server_conf_list;
 extern dlink_list xline_conf_list;
 extern dlink_list resv_conf_list;
+dlink_list tgchange_list;
+
+struct _patricia_tree_t *tgchange_tree;
 
 extern void init_s_newconf(void);
 extern void clear_s_newconf(void);
+
+#define FREE_TARGET(x) ((x)->localClient->targinfo[0])
+#define USED_TARGETS(x) ((x)->localClient->targinfo[1])
+
+typedef struct
+{
+	char *ip;
+	time_t expiry;
+	patricia_node_t *pnode;
+	dlink_node node;
+} tgchange;
+
+void add_tgchange(const char *host);
+tgchange *find_tgchange(const char *host);
 
 /* shared/cluster/hub/leaf confs */
 struct remote_conf

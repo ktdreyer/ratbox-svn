@@ -951,7 +951,7 @@ make_and_lookup_ip(patricia_tree_t * tree, struct sockaddr *in, int bitlen)
 
 
 patricia_node_t *
-make_and_lookup(patricia_tree_t * tree, char *string)
+make_and_lookup(patricia_tree_t * tree, const char *string)
 {
 	prefix_t *prefix;
 	patricia_node_t *node;

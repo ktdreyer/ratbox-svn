@@ -41,10 +41,29 @@
 #include "msg.h"
 #include "packet.h"
 #include "send.h"
+#include "event.h"
+#include "patricia.h"
+#include "s_newconf.h"
 
 static int m_message(int, const char *, struct Client *, struct Client *, int, const char **);
 static int m_privmsg(struct Client *, struct Client *, int, const char **);
 static int m_notice(struct Client *, struct Client *, int, const char **);
+
+static void expire_tgchange(void *unused);
+
+static int
+modinit(void)
+{
+	eventAddIsh("expire_tgchange", expire_tgchange, NULL, 300);
+	expire_tgchange(NULL);
+	return 0;
+}
+
+static void
+moddeinit(void)
+{
+	eventDelete(expire_tgchange, NULL);
+}
 
 struct Message privmsg_msgtab = {
 	"PRIVMSG", 0, 0, 0, MFLG_SLOW | MFLG_UNREG,
@@ -56,7 +75,7 @@ struct Message notice_msgtab = {
 };
 
 mapi_clist_av1 message_clist[] = { &privmsg_msgtab, &notice_msgtab, NULL };
-DECLARE_MODULE_AV1(message, NULL, NULL, message_clist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV1(message, modinit, moddeinit, message_clist, NULL, NULL, "$Revision$");
 
 struct entity
 {
@@ -479,12 +498,29 @@ msg_channel_flags(int p_or_n, const char *command, struct Client *client_p,
 			     command, c, chptr->chname, text);
 }
 
-#define FREE_TARGET(x) ((x)->localClient->targinfo[0])
-#define USED_TARGETS(x) ((x)->localClient->targinfo[1])
-
 #define PREV_FREE_TARGET(x) ((FREE_TARGET(x) == 0) ? 9 : FREE_TARGET(x) - 1)
 #define PREV_TARGET(i) ((i == 0) ? i = 9 : --i)
 #define NEXT_TARGET(i) ((i == 9) ? i = 0 : ++i)
+
+static void
+expire_tgchange(void *unused)
+{
+	tgchange *target;
+	dlink_node *ptr, *next_ptr;
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, tgchange_list.head)
+	{
+		target = ptr->data;
+
+		if(target->expiry < CurrentTime)
+		{
+			dlinkDelete(ptr, &tgchange_list);
+			patricia_remove(tgchange_tree, target->pnode);
+			MyFree(target->ip);
+			MyFree(target);
+		}
+	}
+}
 
 static int
 add_target(struct Client *source_p, struct Client *target_p)
@@ -514,7 +550,10 @@ add_target(struct Client *source_p, struct Client *target_p)
 		}
 		/* cant clear any, full target list */
 		else if(USED_TARGETS(source_p) == 10)
+		{
+			add_tgchange(source_p->sockhost);
 			return 0;
+		}
 	}
 	/* no targets in use, reset their target_last so that they cant
 	 * abuse a long idle to get targets back more quickly

@@ -108,7 +108,7 @@ void init_patricia(void);
 #if 0
 prefix_t *ascii2prefix(int family, char *string);
 #endif
-patricia_node_t *make_and_lookup(patricia_tree_t * tree, char *string);
+patricia_node_t *make_and_lookup(patricia_tree_t * tree, const char *string);
 patricia_node_t *make_and_lookup_ip(patricia_tree_t * tree, struct sockaddr *, int bitlen);
 
 
