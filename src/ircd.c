@@ -519,7 +519,10 @@ main(int argc, char *argv[])
 	memset((void *) &ServerInfo, 0, sizeof(ServerInfo));
 	memset((void *) &AdminInfo, 0, sizeof(AdminInfo));
 	memset(&ServerStats, 0, sizeof(ServerStats));
-
+	/* XXX lots of stupid code in the init relies on me.name being there
+	 *  even if its empty *dumb* 
+	 */  
+	me.name = "";
 	/* Initialise the channel capability usage counts... */
 	init_chcap_usage_counts();
 
@@ -629,7 +632,7 @@ main(int argc, char *argv[])
 		ilog(L_MAIN, "No server name specified in serverinfo block.");
 		exit(EXIT_FAILURE);
 	}
-	strlcpy(me.name, ServerInfo.name, sizeof(me.name));
+	me.name = find_or_add(ServerInfo.name);
 
 	if(ServerInfo.sid[0] == '\0')
 	{

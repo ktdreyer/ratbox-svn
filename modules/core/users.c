@@ -174,18 +174,26 @@ mr_nick(struct Client *client_p, struct Client *source_p, int parc, const char *
 		if(!EmptyString(source_p->name))
 			del_from_client_hash(source_p->name, source_p);
 
+		if(source_p->user == NULL)
+		{
+			source_p->user = make_user(source_p);
+			source_p->user->server = me.name;
+		}
 		strcpy(source_p->name, nick);
 		add_to_client_hash(nick, source_p);
 
 		/* fd_desc is long enough */
 		fd_note(client_p->localClient->fd, "Nick: %s", nick);
 
-		if(source_p->user)
+		if(source_p->user->init)
 			register_local_user(client_p, source_p, nick, source_p->username);
 
 	}
 	else if(source_p == target_p)
+	{
+		/* This should be okay as this means we've already got a struct User */
 		strcpy(source_p->name, nick);
+	}
 	else
 		sendto_one(source_p, form_str(ERR_NICKNAMEINUSE), me.name, "*", nick);
 
@@ -541,7 +549,7 @@ mr_user(struct Client *client_p, struct Client *source_p, int parc, const char *
 	 */
 	if(!IsGotId(source_p))
 		strlcpy(source_p->username, parv[1], sizeof(source_p->username));
-
+	source_p->user->init = 1;
 	/* NICK already received, now I have USER... */
 	if(!EmptyString(source_p->name))
 		register_local_user(client_p, source_p, source_p->name, source_p->username);

@@ -68,6 +68,8 @@ struct User
 	char *away;		/* pointer to away message */
 	int refcnt;		/* Number of times this block is referenced */
 	const char *server;	/* pointer to scached server name */
+	char name[NICKLEN];	/* users nickname */
+	char init;		/* Flag if we've been in mr_user yet */
 };
 
 struct Server
@@ -125,8 +127,10 @@ struct Client
 	unsigned char handler;	/* Handler index */
 	unsigned long serial;	/* used to enforce 1 send per nick */
 
-	/* client->name is the unique name for a client nick or host */
-	char name[HOSTLEN + 1];
+	/* client->name is the unique name for a client nick or host 
+	 * this is now a pointer to either User->name or the server scache
+	 */
+	char *name;
 
 	/* 
 	 * client->username is the username from ident or the USER message, 
