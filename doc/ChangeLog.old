@@ -1,3 +1,11 @@
+*** 20010908_1 by androsyn
+Adds a dot_in_ip6_addr option in general {}
+
+Also..only add the . on to sockhost.  Oh..and I just broke ::1 stuff again
+so that it will get fixed in the next 50 years.
+
+
+
 *** 20010906_3 by leeh
 - . is an acceptable ident char
 
