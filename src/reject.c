@@ -97,11 +97,7 @@ reject_expires(void *unused)
 void
 init_reject(void)
 {
-#ifdef IPV6
-	reject_tree = New_Patricia(128);
-#else
-	reject_tree = New_Patricia(32);
-#endif
+	reject_tree = New_Patricia(PATRICIA_BITS);
 	eventAdd("reject_exit", reject_exit, NULL, DELAYED_EXIT_TIME);
 	eventAdd("reject_expires", reject_expires, NULL, 60);
 }

@@ -140,6 +140,11 @@
 #endif
 #endif
 
+#ifdef IPV6
+#define PATRICIA_BITS	128
+#else
+#define PATRICIA_BITS	32
+#endif
 
 #ifdef SOCKADDR_IN_HAS_LEN
 #define SET_SS_LEN(x, y) ((struct irc_sockaddr_storage)(x)).ss_len = y
