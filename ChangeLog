@@ -1,3 +1,17 @@
+androsyn    2003/04/26 05:59:37 UTC	(20030426_0)
+
+  Added files:
+    include              reject.h 
+    src                  reject.c 
+  Log:
+  Add reject.c/reject.h
+  
+  Revision  Changes    Path
+  1.1       +13 -0     ircd-ratbox/include/reject.h (new)
+  1.1       +90 -0     ircd-ratbox/src/reject.c (new)
+
+
+
 leeh        2003/04/25 20:30:46 UTC	(20030425_1)
 
   Modified files:
