@@ -1,3 +1,8 @@
+*** 20001203_6 by db
+- removed zlib
+
+
+
 *** 20001203_5 by db
 - simplified dlinkMoveList code 
 
