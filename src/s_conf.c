@@ -339,7 +339,7 @@ check_client(struct Client *client_p, struct Client *source_p, const char *usern
 
 	if((i = verify_access(source_p, username)))
 	{
-		ilog(L_INFO, "Access denied: %s[%s]", 
+		ilog(L_FUSER, "Access denied: %s[%s]", 
 		     source_p->name, source_p->sockhost);
 	}
 	
@@ -354,7 +354,7 @@ check_client(struct Client *client_p, struct Client *source_p, const char *usern
 				     "Too many local connections for %s",
 				     get_client_name(source_p, SHOW_IP));
 
-		ilog(L_INFO, "Too many local connections from %s",
+		ilog(L_FUSER, "Too many local connections from %s",
 		     log_client_name(source_p, SHOW_IP));
 
 		ServerStats->is_ref++;
@@ -365,7 +365,7 @@ check_client(struct Client *client_p, struct Client *source_p, const char *usern
 		sendto_realops_flags(UMODE_FULL, L_ALL,
 				     "Too many global connections for %s",
 				     get_client_name(source_p, SHOW_IP));
-		ilog(L_INFO, "Too many global connections from %s",
+		ilog(L_FUSER, "Too many global connections from %s",
 		     log_client_name(source_p, SHOW_IP));
 
 		ServerStats->is_ref++;
@@ -376,7 +376,7 @@ check_client(struct Client *client_p, struct Client *source_p, const char *usern
 		sendto_realops_flags(UMODE_FULL, L_ALL,
 				     "Too many user connections for %s",
 				     get_client_name(source_p, SHOW_IP));
-		ilog(L_INFO, "Too many user connections from %s",
+		ilog(L_FUSER, "Too many user connections from %s",
 		     log_client_name(source_p, SHOW_IP));
 
 		ServerStats->is_ref++;
@@ -389,7 +389,7 @@ check_client(struct Client *client_p, struct Client *source_p, const char *usern
 				     get_client_name(source_p, SHOW_IP),
 				     source_p->sockhost);
 
-		ilog(L_INFO, "Too many connections from %s.", log_client_name(source_p, SHOW_IP));
+		ilog(L_FUSER, "Too many connections from %s.", log_client_name(source_p, SHOW_IP));
 
 		ServerStats->is_ref++;
 		exit_client(client_p, source_p, &me,
@@ -419,7 +419,7 @@ check_client(struct Client *client_p, struct Client *source_p, const char *usern
 					     source_p->localClient->
 					     listener->name, port);
 
-			ilog(L_INFO,
+			ilog(L_FUSER,
 			     "Unauthorised client connection from %s on [%s/%u].",
 			     log_client_name(source_p, SHOW_IP),
 			     source_p->localClient->listener->name,
@@ -944,7 +944,7 @@ rehash(int sig)
 
 	flush_deleted_I_P();
 	check_banned_lines();
-	reopen_log(logFileName);
+	sync_logfiles();
 	return (0);
 }
 
@@ -986,8 +986,6 @@ set_default_conf(void)
 	AdminInfo.email = NULL;
 	AdminInfo.description = NULL;
 
-	set_log_level(L_NOTICE);
-
 	strlcpy(ConfigFileEntry.default_operstring, "is an IRC operator",
 		sizeof(ConfigFileEntry.default_operstring));
 	strlcpy(ConfigFileEntry.default_adminstring, "is a Server Administrator",
@@ -1022,10 +1020,14 @@ set_default_conf(void)
 	ConfigFileEntry.short_motd = NO;
 	ConfigFileEntry.no_oper_flood = NO;
 	ConfigFileEntry.fname_userlog[0] = '\0';
-	ConfigFileEntry.fname_foperlog[0] = '\0';
+	ConfigFileEntry.fname_fuserlog[0] = '\0';
 	ConfigFileEntry.fname_operlog[0] = '\0';
+	ConfigFileEntry.fname_foperlog[0] = '\0';
+	ConfigFileEntry.fname_serverlog[0] = '\0';
+	ConfigFileEntry.fname_glinelog[0] = '\0';
+	ConfigFileEntry.fname_klinelog[0] = '\0';
 	ConfigFileEntry.fname_operspylog[0] = '\0';
-	ConfigFileEntry.fname_operspyremotelog[0] = '\0';
+	ConfigFileEntry.fname_ioerrorlog[0] = '\0';
 	ConfigFileEntry.glines = NO;
 	ConfigFileEntry.use_egd = NO;
 	ConfigFileEntry.gline_time = 12 * 3600;
@@ -1187,7 +1189,7 @@ lookup_confhost(struct ConfItem *aconf)
 {
 	if(EmptyString(aconf->host) || EmptyString(aconf->name))
 	{
-		ilog(L_ERROR, "Host/server name error: (%s) (%s)", aconf->host, aconf->name);
+		ilog(L_MAIN, "Host/server name error: (%s) (%s)", aconf->host, aconf->name);
 		return;
 	}
 
@@ -1679,7 +1681,7 @@ read_conf_files(int cold)
 	{
 		if(cold)
 		{
-			ilog(L_CRIT, "Failed in reading configuration file %s", filename);
+			ilog(L_MAIN, "Failed in reading configuration file %s", filename);
 			exit(-1);
 		}
 		else
@@ -1704,7 +1706,7 @@ read_conf_files(int cold)
 		if((file = fbopen(kfilename, "r")) == NULL)
 		{
 			if(cold)
-				ilog(L_ERROR, "Failed reading kline file %s", filename);
+				ilog(L_MAIN, "Failed reading kline file %s", filename);
 			else
 				sendto_realops_flags(UMODE_ALL, L_ALL,
 						     "Can't open %s file klines could be missing!",
@@ -1723,7 +1725,7 @@ read_conf_files(int cold)
 		if((file = fbopen(dfilename, "r")) == NULL)
 		{
 			if(cold)
-				ilog(L_ERROR, "Failed reading dline file %s", dfilename);
+				ilog(L_MAIN, "Failed reading dline file %s", dfilename);
 			else
 				sendto_realops_flags(UMODE_ALL, L_ALL,
 						     "Can't open %s file dlines could be missing!",
@@ -1744,7 +1746,7 @@ read_conf_files(int cold)
 		if((file = fbopen(xfilename, "r")) == NULL)
 		{
 			if(cold)
-				ilog(L_ERROR, "Failed reading xline file %s", xfilename);
+				ilog(L_MAIN, "Failed reading xline file %s", xfilename);
 			else
 				sendto_realops_flags(UMODE_ALL, L_ALL,
 						     "Can't open %s file xlines could be missing!",
@@ -1763,7 +1765,7 @@ read_conf_files(int cold)
 		if((file = fbopen(resvfilename, "r")) == NULL)
 		{
 			if(cold)
-				ilog(L_ERROR, "Failed reading xline file %s", resvfilename);
+				ilog(L_MAIN, "Failed reading resv file %s", resvfilename);
 			else
 				sendto_realops_flags(UMODE_ALL, L_ALL,
 						     "Can't open %s file resvs could be missing!",
@@ -1975,7 +1977,7 @@ write_confitem(KlineType type, struct Client *source_p, char *user,
 			sendto_realops_flags(UMODE_ALL, L_ALL,
 					     "%s added K-Line for [%s@%s] [%s]",
 					     get_oper_name(source_p), user, host, reason);
-			ilog(L_TRACE, "%s added K-Line for [%s@%s] [%s]",
+			ilog(L_KLINE, "%s added K-Line for [%s@%s] [%s]",
 			     source_p->name, user, host, reason);
 		}
 		else
@@ -1984,7 +1986,7 @@ write_confitem(KlineType type, struct Client *source_p, char *user,
 					     "%s added K-Line for [%s@%s] [%s|%s]",
 					     get_oper_name(source_p), user,
 					     host, reason, oper_reason);
-			ilog(L_TRACE, "%s added K-Line for [%s@%s] [%s|%s]",
+			ilog(L_KLINE, "%s added K-Line for [%s@%s] [%s|%s]",
 			     source_p->name, user, host, reason, oper_reason);
 		}
 
@@ -1998,7 +2000,7 @@ write_confitem(KlineType type, struct Client *source_p, char *user,
 			sendto_realops_flags(UMODE_ALL, L_ALL,
 					     "%s added D-Line for [%s] [%s]",
 					     get_oper_name(source_p), host, reason);
-			ilog(L_TRACE, "%s added D-Line for [%s] [%s]",
+			ilog(L_KLINE, "%s added D-Line for [%s] [%s]",
 			     get_oper_name(source_p), host, reason);
 		}
 		else
@@ -2006,7 +2008,7 @@ write_confitem(KlineType type, struct Client *source_p, char *user,
 			sendto_realops_flags(UMODE_ALL, L_ALL,
 					     "%s added D-Line for [%s] [%s|%s]",
 					     get_oper_name(source_p), host, reason, oper_reason);
-			ilog(L_TRACE, "%s added D-Line for [%s] [%s|%s]",
+			ilog(L_KLINE, "%s added D-Line for [%s] [%s|%s]",
 			     get_oper_name(source_p), host, reason, oper_reason);
 		}
 
@@ -2020,7 +2022,7 @@ write_confitem(KlineType type, struct Client *source_p, char *user,
 		sendto_realops_flags(UMODE_ALL, L_ALL,
 				     "%s added RESV for [%s] [%s]",
 				     get_oper_name(source_p), host, reason);
-		ilog(L_TRACE, "%s added RESV for [%s] [%s]", source_p->name, host, reason);
+		ilog(L_KLINE, "%s added RESV for [%s] [%s]", source_p->name, host, reason);
 
 		sendto_one_notice(source_p, ":Added RESV for [%s] [%s]",
 				  host, reason);
@@ -2120,21 +2122,21 @@ conf_add_server(struct ConfItem *aconf, int lcount)
 	if(lcount > MAXCONFLINKS || !aconf->host || !aconf->name)
 	{
 		sendto_realops_flags(UMODE_ALL, L_ALL, "Bad connect block");
-		ilog(L_WARN, "Bad connect block");
+		ilog(L_MAIN, "Bad connect block");
 		return (-1);
 	}
 
 	if(EmptyString(aconf->passwd))
 	{
 		sendto_realops_flags(UMODE_ALL, L_ALL, "Bad connect block, name %s", aconf->name);
-		ilog(L_WARN, "Bad connect block, host %s", aconf->name);
+		ilog(L_MAIN, "Bad connect block, host %s", aconf->name);
 		return (-1);
 	}
 
 	if(SplitUserHost(aconf) < 0)
 	{
 		sendto_realops_flags(UMODE_ALL, L_ALL, "Bad connect block, name %s", aconf->name);
-		ilog(L_WARN, "Bad connect block, name %s", aconf->name);
+		ilog(L_MAIN, "Bad connect block, name %s", aconf->name);
 		return (-1);
 	}
 	lookup_confhost(aconf);
@@ -2161,7 +2163,7 @@ conf_add_d_conf(struct ConfItem *aconf)
 
 	if(parse_netmask(aconf->host, NULL, NULL) == HM_HOST)
 	{
-		ilog(L_WARN, "Invalid Dline %s ignored", aconf->host);
+		ilog(L_MAIN, "Invalid Dline %s ignored", aconf->host);
 		free_conf(aconf);
 	}
 	else
@@ -2188,7 +2190,7 @@ yyerror(const char *msg)
 	sendto_realops_flags(UMODE_ALL, L_ALL, "\"%s\", line %d: %s at '%s'",
 			     conffilebuf, lineno + 1, msg, newlinebuf);
 
-	ilog(L_WARN, "\"%s\", line %d: %s at '%s'", conffilebuf, lineno + 1, msg, newlinebuf);
+	ilog(L_MAIN, "\"%s\", line %d: %s at '%s'", conffilebuf, lineno + 1, msg, newlinebuf);
 }
 
 int

@@ -55,7 +55,7 @@
 #ifdef __GNUC__
 #define s_assert(expr)	do								\
 			if(!(expr)) {							\
-				ilog(L_ERROR, 						\
+				ilog(L_MAIN, 						\
 				"file: %s line: %d (%s): Assertion failed: (%s)",	\
 				__FILE__, __LINE__, __PRETTY_FUNCTION__, #expr); 	\
 				sendto_realops_flags(UMODE_ALL, L_ALL, 			\
@@ -66,7 +66,7 @@
 #else
 #define s_assert(expr)	do								\
 			if(!(expr)) {							\
-				ilog(L_ERROR, 						\
+				ilog(L_MAIN, 						\
 				"file: %s line: %d: Assertion failed: (%s)",		\
 				__FILE__, __LINE__, #expr); 				\
 				sendto_realops_flags(UMODE_ALL, L_ALL,			\

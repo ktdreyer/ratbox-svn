@@ -90,7 +90,9 @@ m_oper(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	if((aconf = find_password_aconf(name, source_p)) == NULL)
 	{
 		sendto_one(source_p, form_str(ERR_NOOPERHOST), me.name, source_p->name);
-		log_foper(source_p, name);
+		ilog(L_FOPER, "FAILED OPER (%s) by (%s!%s@%s)",
+		     name, source_p->name,
+		     source_p->username, source_p->host);
 
 		if(ConfigFileEntry.failed_oper_notice)
 		{
@@ -116,23 +118,27 @@ m_oper(struct Client *client_p, struct Client *source_p, int parc, const char *p
 					     "Failed OPER attempt by %s (%s@%s) can't attach conf!",
 					     source_p->name, source_p->username, source_p->host);
 
-			log_foper(source_p, name);
+			ilog(L_FOPER, "FAILED OPER (%s) by (%s!%s@%s)",
+			     name, source_p->name,
+			     source_p->username, source_p->host);
+
 			attach_conf(source_p, oconf);
 			return 0;
 		}
 
 		oper_up(source_p, aconf);
 
-		ilog(L_TRACE, "OPER %s by %s!%s@%s",
+		ilog(L_OPERED, "OPER %s by %s!%s@%s",
 		     name, source_p->name, source_p->username, source_p->host);
-		log_oper(source_p, name);
 		return 0;
 	}
 	else
 	{
 		sendto_one(source_p, form_str(ERR_PASSWDMISMATCH),
 			   me.name, source_p->name);
-		log_foper(source_p, name);
+
+		ilog(L_FOPER, "FAILED OPER (%s) by (%s!%s@%s)",
+		     name, source_p->name, source_p->username, source_p->host);
 
 		if(ConfigFileEntry.failed_oper_notice)
 		{

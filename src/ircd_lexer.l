@@ -118,7 +118,7 @@ include   \.include{ws}(\<.*\>|\".*\")
                     {
                       strcpy(yylval.string, yytext + 1);
                       if(yylval.string[yyleng-2] != '"')
-                        ilog(L_ERROR, "Unterminated character string");
+                        ilog(L_MAIN, "Unterminated character string");
                       else
                         {
                           int i,j;
@@ -140,7 +140,7 @@ include   \.include{ws}(\<.*\>|\".*\")
                                                                  * happen
                                                                  */
                                     {
-                                      ilog(L_ERROR,
+                                      ilog(L_MAIN,
                                            "Unterminated character string");
                                       break;
                                     }

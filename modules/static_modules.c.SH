@@ -56,7 +56,7 @@ void load_static_modules(void)
 		mapi_version = (int *)mapi_headers[x];
 		if(MAPI_MAGIC(*mapi_version) != MAPI_MAGIC_HDR)
 		{
-			ilog(L_ERROR, "Error: linked in module without a MAPI header..giving up");
+			ilog(L_MAIN, "Error: linked in module without a MAPI header..giving up");
 			exit(70);
 		} 	
 		switch(MAPI_VERSION(*mapi_version))
@@ -66,7 +66,7 @@ void load_static_modules(void)
 				struct mapi_mheader_av1 *mheader = (struct mapi_mheader_av1*)mapi_version;
 				if (mheader->mapi_register && (mheader->mapi_register() == -1))
 				{
-					ilog(L_ERROR, "Error: linked in module failed loading..giving up");
+					ilog(L_MAIN, "Error: linked in module failed loading..giving up");
 					exit(70);
 				}
 				
@@ -97,7 +97,7 @@ void load_static_modules(void)
 			}	
 			default:
 			{
-				ilog(L_ERROR, "Error: Unknown MAPI version in linked in module..giving up");
+				ilog(L_MAIN, "Error: Unknown MAPI version in linked in module..giving up");
 				exit(70);
 			}				
 		}

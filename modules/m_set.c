@@ -39,7 +39,6 @@
 #include "send.h"
 #include "common.h"
 #include "channel.h"
-#include "s_log.h"
 #include "s_conf.h"
 #include "msg.h"
 #include "parse.h"
@@ -74,7 +73,6 @@ static void quote_autoconnall(struct Client *, int);
 static void quote_floodcount(struct Client *, int);
 static void quote_identtimeout(struct Client *, int);
 static void quote_idletime(struct Client *, int);
-static void quote_log(struct Client *, int);
 static void quote_max(struct Client *, int);
 static void quote_operstring(struct Client *, const char *);
 static void quote_spamnum(struct Client *, int);
@@ -103,7 +101,6 @@ static struct SetStruct set_cmd_table[] = {
 	{"FLOODCOUNT", 	quote_floodcount, 	0,	1	},
 	{"IDENTTIMEOUT", quote_identtimeout,	0,	1	},
 	{"IDLETIME", 	quote_idletime, 	0,	1	},
-	{"LOG", 	quote_log, 		0,	1	},
 	{"MAX", 	quote_max, 		0,	1	},
 	{"OPERSTRING",	quote_operstring,	1,	0	},
 	{"SPAMNUM", 	quote_spamnum, 		0,	1	},
@@ -241,39 +238,6 @@ quote_idletime(struct Client *source_p, int newval)
 	{
 		sendto_one(source_p, ":%s NOTICE %s :IDLETIME is currently %i",
 			   me.name, source_p->name, GlobalSetOptions.idletime / 60);
-	}
-}
-
-/* SET LOG */
-static void
-quote_log(struct Client *source_p, int newval)
-{
-	const char *log_level_as_string;
-
-	if(newval >= 0)
-	{
-		if(newval < L_WARN)
-		{
-			sendto_one(source_p, ":%s NOTICE %s :LOG must be > %d (L_WARN)",
-				   me.name, source_p->name, L_WARN);
-			return;
-		}
-
-		if(newval > L_DEBUG)
-		{
-			newval = L_DEBUG;
-		}
-
-		set_log_level(newval);
-		log_level_as_string = get_log_level_as_string(newval);
-		sendto_realops_flags(UMODE_ALL, L_ALL, "%s has changed LOG level to %i (%s)",
-				     source_p->name, newval, log_level_as_string);
-	}
-	else
-	{
-		sendto_one(source_p, ":%s NOTICE %s :LOG level is currently %i (%s)",
-			   me.name, source_p->name, get_log_level(),
-			   get_log_level_as_string(get_log_level()));
 	}
 }
 

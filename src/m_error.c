@@ -57,7 +57,7 @@ m_error(struct Client *client_p, struct Client *source_p, int parc, const char *
 
 	para = (parc > 1 && *parv[1] != '\0') ? parv[1] : "<>";
 
-	ilog(L_ERROR, "Received ERROR message from %s: %s", source_p->name, para);
+	ilog(L_SERVER, "Received ERROR message from %s: %s", source_p->name, para);
 
 	if(client_p == source_p)
 	{
@@ -97,7 +97,7 @@ ms_error(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	para = (parc > 1 && *parv[1] != '\0') ? parv[1] : "<>";
 
-	ilog(L_ERROR, "Received ERROR message from %s: %s", source_p->name, para);
+	ilog(L_SERVER, "Received ERROR message from %s: %s", source_p->name, para);
 
 	if(client_p == source_p)
 		sendto_realops_flags(UMODE_ALL,

@@ -252,10 +252,9 @@ start_auth_query(struct AuthRequest *auth)
 	family = auth->client->localClient->ip.ss_family;
 	if((fd = comm_open(family, SOCK_STREAM, 0, "ident")) == -1)
 	{
-		report_error(L_ALL, "creating auth stream socket %s:%s",
-			     get_client_name(auth->client, SHOW_IP), errno);
-		ilog(L_ERROR, "Unable to create auth socket for %s:%m",
-		     log_client_name(auth->client, SHOW_IP));
+		report_error("creating auth stream socket %s:%s",
+			     get_client_name(auth->client, SHOW_IP), 
+			     log_client_name(auth->client, SHOW_IP), errno);
 		++ServerStats->is_abad;
 		return 0;
 	}
@@ -272,7 +271,8 @@ start_auth_query(struct AuthRequest *auth)
 
 	if(!set_non_blocking(fd))
 	{
-		report_error(L_ALL, NONB_ERROR_MSG, get_client_name(auth->client, SHOW_IP), errno);
+		report_error(NONB_ERROR_MSG, get_client_name(auth->client, SHOW_IP), 
+				log_client_name(auth->client, SHOW_IP), errno);
 		fd_close(fd);
 		return 0;
 	}
@@ -493,7 +493,7 @@ auth_connect_callback(int fd, int error, void *data)
 	   || getpeername(auth->client->localClient->fd,
 			  (struct sockaddr *) &them, (socklen_t *) & tlen))
 	{
-		ilog(L_INFO, "auth get{sock,peer}name error for %s:%m",
+		ilog(L_IOERROR, "auth get{sock,peer}name error for %s:%m",
 		     log_client_name(auth->client, SHOW_IP));
 		auth_error(auth);
 		return;

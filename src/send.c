@@ -84,7 +84,7 @@ _send_linebuf(struct Client *to, buf_head_t *linebuf)
 					     linebuf_len(&to->localClient->buf_sendq), 
 					     get_sendq(to));
 
-			ilog(L_NOTICE, "Max SendQ limit exceeded for %s: %u > %lu",
+			ilog(L_SERVER, "Max SendQ limit exceeded for %s: %u > %lu",
 			     log_client_name(to, SHOW_IP),
 			     linebuf_len(&to->localClient->buf_sendq), 
 			     get_sendq(to));

@@ -252,7 +252,7 @@ load_all_modules(int warn)
 
 	if(system_module_dir == NULL)
 	{
-		ilog(L_WARN, "Could not load modules from %s: %s", AUTOMODPATH, strerror(errno));
+		ilog(L_MAIN, "Could not load modules from %s: %s", AUTOMODPATH, strerror(errno));
 		return;
 	}
 
@@ -298,7 +298,7 @@ load_core_modules(int warn)
 
 		if(load_a_module(module_name, warn, 1) == -1)
 		{
-			ilog(L_CRIT,
+			ilog(L_MAIN,
 			     "Error loading core module %s%c: terminating ircd",
 			     core_module_table[i], hpux ? 'l' : 'o');
 			exit(0);
@@ -344,7 +344,7 @@ load_one_module(const char *path, int coremodule)
 	}
 
 	sendto_realops_flags(UMODE_ALL, L_ALL, "Cannot locate module %s", path);
-	ilog(L_WARN, "Cannot locate module %s", path);
+	ilog(L_MAIN, "Cannot locate module %s", path);
 	return -1;
 }
 
@@ -459,7 +459,7 @@ mo_modreload(struct Client *client_p, struct Client *source_p, int parc, const c
 	{
 		sendto_realops_flags(UMODE_ALL, L_ALL,
 				     "Error reloading core module: %s: terminating ircd", parv[1]);
-		ilog(L_CRIT, "Error loading core module %s: terminating ircd", parv[1]);
+		ilog(L_MAIN, "Error loading core module %s: terminating ircd", parv[1]);
 		exit(0);
 	}
 
@@ -531,7 +531,7 @@ mo_modrestart(struct Client *client_p, struct Client *source_p, int parc, const 
 	sendto_realops_flags(UMODE_ALL, L_ALL,
 			     "Module Restart: %d modules unloaded, %d modules loaded",
 			     modnum, num_mods);
-	ilog(L_WARN, "Module Restart: %d modules unloaded, %d modules loaded", modnum, num_mods);
+	ilog(L_MAIN, "Module Restart: %d modules unloaded, %d modules loaded", modnum, num_mods);
 	return 0;
 }
 
@@ -587,7 +587,7 @@ void
 undefinedErrorHandler(const char *symbolName)
 {
 	sendto_realops_flags(UMODE_ALL, L_ALL, "Undefined symbol: %s", symbolName);
-	ilog(L_WARN, "Undefined symbol: %s", symbolName);
+	ilog(L_MAIN, "Undefined symbol: %s", symbolName);
 	return;
 }
 
@@ -601,7 +601,7 @@ multipleErrorHandler(NSSymbol s, NSModule old, NSModule new)
 	sendto_realops_flags(UMODE_ALL, L_ALL,
 			     "Symbol `%s' found in `%s' and `%s'",
 			     NSNameOfSymbol(s), NSNameOfModule(old), NSNameOfModule(new));
-	ilog(L_WARN, "Symbol `%s' found in `%s' and `%s'",
+	ilog(L_MAIN, "Symbol `%s' found in `%s' and `%s'",
 	     NSNameOfSymbol(s), NSNameOfModule(old), NSNameOfModule(new));
 	/* We return which module should be considered valid, I believe */
 	return new;
@@ -613,7 +613,7 @@ linkEditErrorHandler(NSLinkEditErrors errorClass, int errnum,
 {
 	sendto_realops_flags(UMODE_ALL, L_ALL,
 			     "Link editor error: %s for %s", errorString, fileName);
-	ilog(L_WARN, "Link editor error: %s for %s", errorString, fileName);
+	ilog(L_MAIN, "Link editor error: %s for %s", errorString, fileName);
 	return;
 }
 
@@ -739,7 +739,7 @@ unload_one_module(const char *name, int warn)
 		sendto_realops_flags(UMODE_ALL, L_ALL,
 			"Unknown/unsupported MAPI version %d when unloading %s!",
 			modlist[modindex]->mapi_version, modlist[modindex]->name);
-		ilog(L_CRIT, "Unknown/unsupported MAPI version %d when unloading %s!",
+		ilog(L_MAIN, "Unknown/unsupported MAPI version %d when unloading %s!",
 			modlist[modindex]->mapi_version, modlist[modindex]->name);
 		break;
 	}
@@ -755,7 +755,7 @@ unload_one_module(const char *name, int warn)
 
 	if(warn == 1)
 	{
-		ilog(L_INFO, "Module %s unloaded", name);
+		ilog(L_MAIN, "Module %s unloaded", name);
 		sendto_realops_flags(UMODE_ALL, L_ALL, "Module %s unloaded", name);
 	}
 
@@ -790,7 +790,7 @@ load_a_module(const char *path, int warn, int core)
 
 		sendto_realops_flags(UMODE_ALL, L_ALL,
 				     "Error loading module %s: %s", mod_basename, err);
-		ilog(L_WARN, "Error loading module %s: %s", mod_basename, err);
+		ilog(L_MAIN, "Error loading module %s: %s", mod_basename, err);
 		MyFree(mod_basename);
 		return -1;
 	}
@@ -809,7 +809,7 @@ load_a_module(const char *path, int warn, int core)
 	{
 		sendto_realops_flags(UMODE_ALL, L_ALL,
 				     "Data format error: module %s has no MAPI header.", mod_basename);
-		ilog(L_WARN, "Data format error: module %s has no MAPI header.", mod_basename);
+		ilog(L_MAIN, "Data format error: module %s has no MAPI header.", mod_basename);
 		(void) dlclose(tmpptr);
 		MyFree(mod_basename);
 		return -1;
@@ -822,7 +822,7 @@ load_a_module(const char *path, int warn, int core)
 		struct mapi_mheader_av1* mheader = (struct mapi_mheader_av1*) mapi_version;	/* see above */
 		if (mheader->mapi_register && (mheader->mapi_register() == -1))
 		{
-			ilog(L_WARN, "Module %s indicated failure during load.", mod_basename);
+			ilog(L_MAIN, "Module %s indicated failure during load.", mod_basename);
 			sendto_realops_flags(UMODE_ALL, L_ALL,
 				"Module %s indicated failure during load.", mod_basename);
 			dlclose(tmpptr);
@@ -855,7 +855,7 @@ load_a_module(const char *path, int warn, int core)
 	}
 	
 	default:
-		ilog(L_WARN, "Module %s has unknown/unsupported MAPI version %d.",
+		ilog(L_MAIN, "Module %s has unknown/unsupported MAPI version %d.",
 			mod_basename, MAPI_VERSION(*mapi_version));
 		sendto_realops_flags(UMODE_ALL, L_ALL,
 			"Module %s has unknown/unsupported MAPI version %d.",
@@ -884,7 +884,7 @@ load_a_module(const char *path, int warn, int core)
 		sendto_realops_flags(UMODE_ALL, L_ALL,
 				     "Module %s [version: %s; MAPI version: %d] loaded at 0x%lx",
 				     mod_basename, ver, MAPI_VERSION(*mapi_version), (unsigned long) tmpptr);
-		ilog(L_WARN, "Module %s [version: %s; MAPI version: %d] loaded at 0x%lx", 
+		ilog(L_MAIN, "Module %s [version: %s; MAPI version: %d] loaded at 0x%lx", 
 			mod_basename, ver, MAPI_VERSION(*mapi_version), 
 			(unsigned long) tmpptr);
 	}

@@ -184,11 +184,15 @@ struct config_file_entry
 	char default_operstring[REALLEN];
 	char default_adminstring[REALLEN];
 
-	char fname_operlog[MAXPATHLEN];
 	char fname_userlog[MAXPATHLEN];
+	char fname_fuserlog[MAXPATHLEN];
+	char fname_operlog[MAXPATHLEN];
 	char fname_foperlog[MAXPATHLEN];
+	char fname_serverlog[MAXPATHLEN];
+	char fname_glinelog[MAXPATHLEN];
+	char fname_klinelog[MAXPATHLEN];
 	char fname_operspylog[MAXPATHLEN];
-	char fname_operspyremotelog[MAXPATHLEN];
+	char fname_ioerrorlog[MAXPATHLEN];
 
 	unsigned char compression_level;
 	int dot_in_ip6_addr;

@@ -274,11 +274,11 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
 			{
 				for (; p <= end; p++)
 				{
-					ilog(L_CRIT, "%02x |%c", p[0], p[0]);
+					ilog(L_MAIN, "%02x |%c", p[0], p[0]);
 				}
 			}
 			else
-				ilog(L_CRIT,
+				ilog(L_MAIN,
 				     "%02x %02x %02x %02x %02x %02x %02x %02x |%c%c%c%c%c%c%c%c",
 				     p[0], p[1], p[2], p[3], p[4], p[5],
 				     p[6], p[7], p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7]);
@@ -349,7 +349,7 @@ handle_command(struct Message *mptr, struct Client *client_p,
 				     "Dropping server %s due to (invalid) command '%s'"
 				     "with only %d arguments (expecting %d).",
 				     client_p->name, mptr->cmd, i, ehandler.min_para);
-		ilog(L_CRIT,
+		ilog(L_SERVER,
 		     "Insufficient parameters (%d) for command '%s' from %s.",
 		     i, mptr->cmd, client_p->name);
 

@@ -395,5 +395,5 @@ remove_resv(struct Client *source_p, const char *name, int cluster)
 		sendto_one_notice(source_p, ":RESV for [%s] is removed", name);
 	sendto_realops_flags(UMODE_ALL, L_ALL,
 			     "%s has removed the RESV for: [%s]", get_oper_name(source_p), name);
-	ilog(L_NOTICE, "%s has removed the RESV for [%s]", get_oper_name(source_p), name);
+	ilog(L_KLINE, "%s has removed the RESV for [%s]", get_oper_name(source_p), name);
 }

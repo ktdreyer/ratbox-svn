@@ -372,7 +372,7 @@ mo_ungline(struct Client *client_p, struct Client *source_p, int parc, const cha
 		sendto_realops_flags(UMODE_ALL, L_ALL,
 				     "%s has removed the G-Line for: [%s@%s]",
 				     get_oper_name(source_p), user, host);
-		ilog(L_NOTICE, "%s removed G-Line for [%s@%s]",
+		ilog(L_GLINE, "%s removed G-Line for [%s@%s]",
 		     get_oper_name(source_p), user, host);
 	}
 	else

@@ -87,7 +87,7 @@ devpoll_write_update(int fd, int events)
 	/* Write the thing to our poll fd */
 	retval = write(dpfd, &pollfds[0], sizeof(struct pollfd));
 	if(retval != sizeof(struct pollfd))
-		ilog(L_NOTICE,
+		ilog(L_IOERROR,
 		     "devpoll_write_update: dpfd write failed %d: %s\n", errno, strerror(errno));
 	/* Done! */
 }
@@ -121,7 +121,7 @@ devpoll_update_events(int fd, short filter, PF * handler)
 		break;
 	default:
 #ifdef NOTYET
-		ilog(L_NOTICE, "devpoll_update_events called with unknown filter: %hd\n", filter);
+		ilog(L_IOERROR, "devpoll_update_events called with unknown filter: %hd\n", filter);
 #endif
 		return;
 		break;
@@ -171,7 +171,7 @@ init_netio(void)
 	dpfd = open("/dev/poll", O_RDWR);
 	if(dpfd < 0)
 	{
-		ilog(L_CRIT,
+		ilog(L_MAIN,
 		     "init_netio: Couldn't open /dev/poll - %d: %s\n", errno, strerror(errno));
 		exit(115);	/* Whee! */
 	}
@@ -276,7 +276,7 @@ comm_select(unsigned long delay)
 							      COMM_SELECT_READ, F->read_handler);
 				}
 				else
-					ilog(L_NOTICE,
+					ilog(L_IOERROR,
 					     "comm_select: Unhandled read event: fdmask: %x\n",
 					     fdmask[fd]);
 			}
@@ -297,14 +297,14 @@ comm_select(unsigned long delay)
 							      COMM_SELECT_WRITE, F->write_handler);
 				}
 				else
-					ilog(L_NOTICE,
+					ilog(L_IOERROR,
 					     "comm_select: Unhandled write event: fdmask: %x\n",
 					     fdmask[fd]);
 
 			}
 			if(dopoll.dp_fds[i].revents & POLLNVAL)
 			{
-				ilog(L_NOTICE, "revents was Invalid for %d\n", fd);
+				ilog(L_IOERROR, "revents was Invalid for %d\n", fd);
 			}
 		}
 		return COMM_OK;

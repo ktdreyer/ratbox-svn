@@ -97,6 +97,6 @@ outofmemory()
 
 	was_here = 1;
 
-	ilog(L_CRIT, "Out of memory: restarting server...");
+	ilog(L_MAIN, "Out of memory: restarting server...");
 	restart("Out of Memory");
 }

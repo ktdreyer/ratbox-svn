@@ -101,7 +101,7 @@ init_resolver(void)
 
 	if(dns_state == NULL)
 	{
-		ilog(L_CRIT, "Error opening /etc/resolv.conf: %s; r = %d", strerror(errno), r);
+		ilog(L_MAIN, "Error opening /etc/resolv.conf: %s; r = %d", strerror(errno), r);
 		exit(76);
 	}
 

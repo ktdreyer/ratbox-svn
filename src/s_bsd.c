@@ -159,13 +159,14 @@ get_sockerr(int fd)
  */
 
 void
-report_error(int level, const char *text, const char *who, int error)
+report_error(const char *text, const char *who, const char *wholog, int error)
 {
 	who = (who) ? who : "";
+	wholog = (wholog) ? wholog : "";
 
-	sendto_realops_flags(UMODE_DEBUG, level, text, who, strerror(error));
+	sendto_realops_flags(UMODE_DEBUG, L_ALL, text, who, strerror(error));
 
-	ilog(L_ERROR, text, who, strerror(error));
+	ilog(L_IOERROR, text, wholog, strerror(error));
 }
 
 /*
@@ -377,7 +378,8 @@ add_connection(struct Listener *listener, int fd, struct sockaddr_storage *sai)
 	++listener->ref_count;
 
 	if(!set_non_blocking(new_client->localClient->fd))
-		report_error(L_ALL, NONB_ERROR_MSG, get_client_name(new_client, SHOW_IP), errno);
+		report_error(NONB_ERROR_MSG, get_client_name(new_client, SHOW_IP), 
+			     log_client_name(new_client, SHOW_IP), errno);
 	if(check_reject(new_client))
 		return; 
 	start_auth(new_client);
@@ -415,16 +417,20 @@ error_exit_client(struct Client *client_p, int error)
 					     "Server %s closed the connection",
 					     get_client_name(client_p, MASK_IP));
 
-			ilog(L_NOTICE, "Server %s closed the connection",
+			ilog(L_SERVER, "Server %s closed the connection",
 			     log_client_name(client_p, SHOW_IP));
 		}
 		else
 		{
-			report_error(L_ADMIN, "Lost connection to %s: %d",
-				     get_client_name(client_p, SHOW_IP), current_error);
-			report_error(L_OPER, "Lost connection to %s: %d",
-				     get_client_name(client_p, MASK_IP), current_error);
-			ilog(L_NOTICE, "Lost connection to %s: %d",
+			report_error("Lost connection to %s: %d",
+#ifndef HIDE_SERVERS_IPS
+				     get_client_name(client_p, SHOW_IP),
+#else
+				     get_client_name(client_p, MASK_IP),
+#endif
+				     log_client_name(client_p, SHOW_IP),
+				     current_error);
+			ilog(L_SERVER, "Lost connection to %s: %d",
 			     log_client_name(client_p, SHOW_IP), current_error);
 
 		}
@@ -816,7 +822,7 @@ comm_open(int family, int sock_type, int proto, const char *note)
 		int off = 1;
 		if(setsockopt(fd, IPPROTO_IPV6, IPV6_V6ONLY, &off, sizeof(off)) == -1)
 		{
-			ilog(L_CRIT,
+			ilog(L_IOERROR,
 			     "comm_open: Could not set IPV6_V6ONLY option to 1 on FD %d: %s",
 			     fd, strerror(errno));
 			close(fd);
@@ -828,7 +834,7 @@ comm_open(int family, int sock_type, int proto, const char *note)
 	/* Set the socket non-blocking, and other wonderful bits */
 	if(!set_non_blocking(fd))
 	{
-		ilog(L_CRIT, "comm_open: Couldn't set FD %d non blocking: %s", fd, strerror(errno));
+		ilog(L_IOERROR, "comm_open: Couldn't set FD %d non blocking: %s", fd, strerror(errno));
 		/* if VMS, we might be opening a file (ircd.conf, resolv.conf).
 		   VMS doesn't let us set non-blocking on a file, so it might fail. */
 #ifndef __VMS
@@ -872,7 +878,7 @@ comm_accept(int fd, struct sockaddr_storage *pn)
 	/* Set the socket non-blocking, and other wonderful bits */
 	if(!set_non_blocking(newfd))
 	{
-		ilog(L_CRIT, "comm_accept: Couldn't set FD %d non blocking!", newfd);
+		ilog(L_IOERROR, "comm_accept: Couldn't set FD %d non blocking!", newfd);
 		close(newfd);
 		return -1;
 	}

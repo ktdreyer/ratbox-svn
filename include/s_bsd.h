@@ -56,7 +56,7 @@ extern void close_connection(struct Client *);
 extern void close_all_connections(void);
 extern int connect_server(struct ConfItem *, struct Client *, struct DNSReply *);
 extern void get_my_name(struct Client *, char *, int);
-extern void report_error(int, const char *, const char *, int);
+extern void report_error(const char *, const char *, const char *, int);
 extern int set_non_blocking(int);
 extern int set_sock_buffers(int, int);
 

@@ -267,7 +267,7 @@ set_time(void)
 	newtime.tv_usec = 0;
 	if(gettimeofday(&newtime, NULL) == -1)
 	{
-		ilog(L_ERROR, "Clock Failure (%d)", errno);
+		ilog(L_MAIN, "Clock Failure (%d)", errno);
 		sendto_realops_flags(UMODE_ALL, L_ALL,
 				     "Clock Failure (%d), TS can be corrupted", errno);
 
@@ -278,7 +278,7 @@ set_time(void)
 		ircsnprintf(to_send, sizeof(to_send), 
 			   "System clock is running backwards - (%lu < %lu)",
 			   (unsigned long) newtime.tv_sec, (unsigned long) CurrentTime);
-		report_error(L_ALL, to_send, me.name, 0);
+		report_error(to_send, me.name, me.name, 0);
 		set_back_events(CurrentTime - newtime.tv_sec);
 	}
 	SystemTime.tv_sec = newtime.tv_sec;
@@ -478,7 +478,7 @@ write_pidfile(const char *filename)
 		ircsnprintf(buff, sizeof(buff), "%u\n", pid);
 		if((fbputs(buff, fb) == -1))
 		{
-			ilog(L_ERROR, "Error writing %u to pid file %s (%s)",
+			ilog(L_MAIN, "Error writing %u to pid file %s (%s)",
 			     pid, filename, strerror(errno));
 		}
 		fbclose(fb);
@@ -486,7 +486,7 @@ write_pidfile(const char *filename)
 	}
 	else
 	{
-		ilog(L_ERROR, "Error opening pid file %s", filename);
+		ilog(L_MAIN, "Error opening pid file %s", filename);
 	}
 }
 
@@ -509,28 +509,16 @@ check_pidfile(const char *filename)
 	/* Don't do logging here, since we don't have log() initialised */
 	if((fb = fbopen(filename, "r")))
 	{
-		if(fbgets(buff, 20, fb) == NULL)
-		{
-			/*
-			   log(L_ERROR, "Error reading from pid file %s (%s)", filename,
-			   strerror(errno));
-			 */
-		}
-		else
+		if(fbgets(buff, 20, fb) != NULL)
 		{
 			pidfromfile = atoi(buff);
 			if(!kill(pidfromfile, 0))
 			{
-				/* log(L_ERROR, "Server is already running"); */
 				printf("ircd: daemon is already running\n");
 				exit(-1);
 			}
 		}
 		fbclose(fb);
-	}
-	else if(errno != ENOENT)
-	{
-		/* log(L_ERROR, "Error opening pid file %s", filename); */
 	}
 }
 
@@ -658,7 +646,7 @@ main(int argc, char *argv[])
 	{
 		close_all_connections();
 	}
-	init_log(logFileName);
+	init_main_logfile();
 	initBlockHeap();
 	init_dlink_nodes();
 	init_patricia();
@@ -697,7 +685,7 @@ main(int argc, char *argv[])
 	if(ServerInfo.name == NULL)
 	{
 		fprintf(stderr, "ERROR: No server name specified in serverinfo block.\n");
-		ilog(L_CRIT, "No server name specified in serverinfo block.");
+		ilog(L_MAIN, "No server name specified in serverinfo block.");
 		exit(EXIT_FAILURE);
 	}
 	strlcpy(me.name, ServerInfo.name, sizeof(me.name));
@@ -705,7 +693,7 @@ main(int argc, char *argv[])
 	if(ServerInfo.sid[0] == '\0')
 	{
 		fprintf(stderr, "ERROR: No server sid specified in serverinfo block.\n");
-		ilog(L_CRIT, "No server sid specified in serverinfo block.");
+		ilog(L_MAIN, "No server sid specified in serverinfo block.");
 		exit(EXIT_FAILURE);
 	}
 	strcpy(me.id, ServerInfo.sid);
@@ -715,7 +703,7 @@ main(int argc, char *argv[])
 	if(ServerInfo.description == NULL)
 	{
 		fprintf(stderr, "ERROR: No server description specified in serverinfo block.\n");
-		ilog(L_CRIT, "ERROR: No server description specified in serverinfo block.");
+		ilog(L_MAIN, "ERROR: No server description specified in serverinfo block.");
 		exit(EXIT_FAILURE);
 	}
 	strlcpy(me.info, ServerInfo.description, sizeof(me.info));
@@ -735,7 +723,7 @@ main(int argc, char *argv[])
 	write_pidfile(pidFileName);
 	load_help();
 
-	ilog(L_NOTICE, "Server Ready");
+	ilog(L_MAIN, "Server Ready");
 
 	eventAddIsh("cleanup_glines", cleanup_glines, NULL, CLEANUP_GLINES_TIME);
 

@@ -99,10 +99,9 @@ mo_die(struct Client *client_p __unused, struct Client *source_p, int parc, cons
 	 * for an explanation as to what we should do.
 	 *     -- adrian
 	 */
-	ilog(L_NOTICE, "Server terminated by %s", get_oper_name(source_p));
-	/* 
-	 * this is a normal exit, tell the os it's ok 
-	 */
+	ilog(L_MAIN, "Server terminated by %s", get_oper_name(source_p));
+
+	/* this is a normal exit, tell the os it's ok */
 	unlink(pidFileName);
 	exit(0);
 	/* NOT REACHED */

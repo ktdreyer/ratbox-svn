@@ -1079,7 +1079,9 @@ server_estab(struct Client *client_p)
 	 * XXX - this should be in s_bsd
 	 */
 	if(!set_sock_buffers(client_p->localClient->fd, READBUF_SIZE))
-		report_error(L_ALL, SETBUF_ERROR_MSG, get_client_name(client_p, SHOW_IP), errno);
+		report_error(SETBUF_ERROR_MSG, 
+			     get_client_name(client_p, SHOW_IP), 
+			     log_client_name(client_p, SHOW_IP), errno);
 
 	/* Hand the server off to servlink now */
 
@@ -1146,7 +1148,7 @@ server_estab(struct Client *client_p)
 			     "Link with %s established: (%s) link",
 			     inpath, show_capabilities(client_p));
 
-	ilog(L_NOTICE, "Link with %s established: (%s) link",
+	ilog(L_SERVER, "Link with %s established: (%s) link",
 	     log_client_name(client_p, SHOW_IP), show_capabilities(client_p));
 
 	client_p->serv->sconf = aconf;
@@ -1437,28 +1439,26 @@ fork_server(struct Client *server)
 
 		if(!set_non_blocking(server->localClient->fd))
 		{
-			report_error(L_ADMIN, NONB_ERROR_MSG,
+			report_error(NONB_ERROR_MSG,
 #ifdef HIDE_SERVERS_IPS
 				     get_client_name(server, MASK_IP),
 #else
 				     get_client_name(server, SHOW_IP),
 #endif
+				     log_client_name(server, SHOW_IP),
 				     errno);
-			report_error(L_OPER, NONB_ERROR_MSG,
-				     get_client_name(server, MASK_IP), errno);
 		}
 
 		if(!set_non_blocking(server->localClient->ctrlfd))
 		{
-			report_error(L_ADMIN, NONB_ERROR_MSG,
+			report_error(NONB_ERROR_MSG,
 #ifdef HIDE_SERVERS_IPS
 				     get_client_name(server, MASK_IP),
 #else
 				     get_client_name(server, SHOW_IP),
 #endif
+				     log_client_name(server, SHOW_IP),
 				     errno);
-			report_error(L_OPER, NONB_ERROR_MSG,
-				     get_client_name(server, MASK_IP), errno);
 		}
 
 		fd_open(server->localClient->ctrlfd, FD_SOCKET, NULL);
@@ -1558,7 +1558,7 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
 
 	/* log */
 	inetntop_sock(&aconf->ipnum, buf, sizeof(buf));
-	ilog(L_NOTICE, "Connect to %s[%s] @%s", aconf->user, aconf->host, buf);
+	ilog(L_SERVER, "Connect to %s[%s] @%s", aconf->user, aconf->host, buf);
 
 	/*
 	 * Make sure this server isn't already connected
@@ -1582,7 +1582,8 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
 	if((fd = comm_open(aconf->ipnum.ss_family, SOCK_STREAM, 0, NULL)) < 0)
 	{
 		/* Eek, failure to create the socket */
-		report_error(L_ALL, "opening stream socket to %s: %s", aconf->name, errno);
+		report_error("opening stream socket to %s: %s", 
+			     aconf->name, aconf->name, errno);
 		return 0;
 	}
 
@@ -1606,26 +1607,26 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
 
 	if(!set_non_blocking(client_p->localClient->fd))
 	{
-		report_error(L_ADMIN, NONB_ERROR_MSG,
+		report_error(NONB_ERROR_MSG,
 #ifdef HIDE_SERVERS_IPS
 			     get_client_name(client_p, MASK_IP),
 #else
 			     get_client_name(client_p, SHOW_IP),
 #endif
+			     log_client_name(client_p, SHOW_IP),
 			     errno);
-		report_error(L_OPER, NONB_ERROR_MSG, get_client_name(client_p, MASK_IP), errno);
 	}
 
 	if(!set_sock_buffers(client_p->localClient->fd, READBUF_SIZE))
 	{
-		report_error(L_ADMIN, SETBUF_ERROR_MSG,
+		report_error(SETBUF_ERROR_MSG,
 #ifdef HIDE_SERVERS_IPS
 			     get_client_name(client_p, MASK_IP),
 #else
 			     get_client_name(client_p, SHOW_IP),
 #endif
+			     log_client_name(client_p, SHOW_IP),
 			     errno);
-		report_error(L_OPER, SETBUF_ERROR_MSG, get_client_name(client_p, MASK_IP), errno);
 	}
 
 	/*

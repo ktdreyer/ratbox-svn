@@ -85,7 +85,7 @@ mo_squit(struct Client *client_p, struct Client *source_p, int parc, const char 
 					     "Received SQUIT %s from %s (%s)",
 					     found_squit->target_p->name,
 					     get_client_name(source_p, HIDE_IP), comment);
-			ilog(L_NOTICE, "Received SQUIT %s from %s (%s)",
+			ilog(L_SERVER, "Received SQUIT %s from %s (%s)",
 			     found_squit->target_p->name, log_client_name(source_p, HIDE_IP),
 			     comment);
 		}
@@ -134,7 +134,7 @@ ms_squit(struct Client *client_p, struct Client *source_p, int parc, const char 
 				      ":%s WALLOPS :Remote SQUIT %s from %s (%s)",
 				      me.name, found_squit->server_name, source_p->name, comment);
 
-			ilog(L_TRACE, "SQUIT From %s : %s (%s)", parv[0],
+			ilog(L_SERVER, "SQUIT From %s : %s (%s)", parv[0],
 			     found_squit->server_name, comment);
 
 		}

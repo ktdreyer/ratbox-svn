@@ -239,7 +239,7 @@ comm_select(unsigned long delay)
 			{
 				if(sig == SIGIO)
 				{
-					ilog(L_WARN,
+					ilog(L_MAIN,
 					     "Kernel RT Signal queue overflowed.  Is /proc/sys/kernel/rtsig-max too small?");
 					sigio_is_screwed = 1;
 					break;

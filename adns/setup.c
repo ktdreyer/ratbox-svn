@@ -529,10 +529,10 @@ static int init_finish(adns_state ads) {
   }
 
   ads->udpsocket = comm_open(AF_INET, SOCK_DGRAM, 0, "UDP Resolver socket");
-  if (ads->udpsocket<0) { ilog(L_CRIT, "Failed to open socket"); r= errno; goto x_free; }
+  if (ads->udpsocket<0) { ilog(L_IOERROR, "Failed to open socket"); r= errno; goto x_free; }
 
   r= adns__setnonblock(ads,ads->udpsocket);
-  if (r) { ilog(L_CRIT, "Failed to make socket non-blocking"); r= errno; goto x_closeudp; }
+  if (r) { ilog(L_IOERROR, "Failed to make socket non-blocking"); r= errno; goto x_closeudp; }
   
   return 0;
 
@@ -540,7 +540,7 @@ static int init_finish(adns_state ads) {
   fd_close(ads->udpsocket);
  x_free:
   MyFree(ads);
-  ilog(L_CRIT, "Returning from init_finish: r = %d", r);
+  ilog(L_IOERROR, "Returning from init_finish: r = %d", r);
   return r;
 }
 
@@ -569,7 +569,7 @@ int adns_init(adns_state *ads_r, adns_initflags flags, FBFILE *diagfile) {
   readconfig(ads,"/etc/resolv.conf",0);
   readconfig(ads,"/etc/resolv-adns.conf",0);
 #else
-  ilog(L_CRIT, "Opening IRCD$CONFDIR:RESOLV.CONF (VMS)");
+  ilog(L_MAIN, "Opening IRCD$CONFDIR:RESOLV.CONF (VMS)");
   readconfig(ads,"IRCD$CONFDIR:RESOLV.CONF",0);
 #endif
   readconfigenv(ads,"RES_CONF");
@@ -585,7 +585,7 @@ int adns_init(adns_state *ads_r, adns_initflags flags, FBFILE *diagfile) {
   ccf_search(ads,"ADNS_LOCALDOMAIN",-1,instrum_getenv(ads,"ADNS_LOCALDOMAIN"));
 
   if (ads->configerrno && ads->configerrno != EINVAL) {
-    ilog(L_CRIT, "Failed at 1");
+    ilog(L_IOERROR, "Failed at 1");
     r= ads->configerrno;
     init_abort(ads);
     return r;

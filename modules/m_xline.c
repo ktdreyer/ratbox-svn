@@ -307,7 +307,7 @@ write_xline(struct Client *source_p, const char *gecos,
 			     get_oper_name(source_p), xconf->name, xconf->reason);
 	sendto_one_notice(source_p, ":Added X-Line for [%s] [%s]",
 			  xconf->name, xconf->reason);
-	ilog(L_TRACE, "%s added X-Line for [%s] [%s]",
+	ilog(L_KLINE, "%s added X-Line for [%s] [%s]",
 	     get_oper_name(source_p), xconf->name, xconf->reason);
 
 	add_rxconf(xconf);
@@ -472,5 +472,5 @@ remove_xline(struct Client *source_p, const char *huntgecos, int warn)
 	sendto_realops_flags(UMODE_ALL, L_ALL,
 			     "%s has removed the X-Line for: [%s]",
 			     get_oper_name(source_p), huntgecos);
-	ilog(L_NOTICE, "%s has removed the X-Line for [%s]", get_oper_name(source_p), huntgecos);
+	ilog(L_KLINE, "%s has removed the X-Line for [%s]", get_oper_name(source_p), huntgecos);
 }

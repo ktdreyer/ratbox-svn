@@ -132,7 +132,7 @@ ms_operspy(struct Client *client_p, struct Client *source_p,
 
 	if(parc < 4)
 	{
-		log_operspy(source_p, parv[1],
+		report_operspy(source_p, parv[1],
 			    parc < 3 ? NULL : parv[2]);
 	}
 	/* buffer all remaining into one param */
@@ -154,7 +154,7 @@ ms_operspy(struct Client *client_p, struct Client *source_p,
 			cur_len += len;
 		}
 
-		log_operspy(source_p, parv[1], buffer);
+		report_operspy(source_p, parv[1], buffer);
 	}
 
 	return 0;

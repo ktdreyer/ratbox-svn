@@ -197,14 +197,15 @@ inetport(struct Listener *listener)
 
 	if(fd == -1)
 	{
-		report_error(L_ALL, "opening listener socket %s:%s",
+		report_error("opening listener socket %s:%s",
+			     get_listener_name(listener), 
 			     get_listener_name(listener), errno);
 		return 0;
 	}
 	else if((HARD_FDLIMIT - 10) < fd)
 	{
-		report_error(L_ALL,
-			     "no more connections left for listener %s:%s",
+		report_error("no more connections left for listener %s:%s",
+			     get_listener_name(listener), 
 			     get_listener_name(listener), errno);
 		fd_close(fd);
 		return 0;
@@ -215,8 +216,8 @@ inetport(struct Listener *listener)
 	 */
 	if(setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (char *) &opt, sizeof(opt)))
 	{
-		report_error(L_ALL,
-			     "setting SO_REUSEADDR for listener %s:%s",
+		report_error("setting SO_REUSEADDR for listener %s:%s",
+			     get_listener_name(listener), 
 			     get_listener_name(listener), errno);
 		fd_close(fd);
 		return 0;
@@ -229,7 +230,8 @@ inetport(struct Listener *listener)
 
 	if(bind(fd, (struct sockaddr *) &listener->addr, GET_SS_LEN(listener->addr)))
 	{
-		report_error(L_ALL, "binding listener socket %s:%s",
+		report_error("binding listener socket %s:%s",
+			     get_listener_name(listener), 
 			     get_listener_name(listener), errno);
 		fd_close(fd);
 		return 0;
@@ -237,7 +239,9 @@ inetport(struct Listener *listener)
 
 	if(listen(fd, RATBOX_SOMAXCONN))
 	{
-		report_error(L_ALL, "listen failed for %s:%s", get_listener_name(listener), errno);
+		report_error("listen failed for %s:%s", 
+			     get_listener_name(listener), 
+			     get_listener_name(listener), errno);
 		fd_close(fd);
 		return 0;
 	}
@@ -246,7 +250,9 @@ inetport(struct Listener *listener)
 	 * XXX - this should always work, performance will suck if it doesn't
 	 */
 	if(!set_non_blocking(fd))
-		report_error(L_ALL, NONB_ERROR_MSG, get_listener_name(listener), errno);
+		report_error(NONB_ERROR_MSG, 
+			     get_listener_name(listener), 
+			     get_listener_name(listener), errno);
 
 	listener->fd = fd;
 

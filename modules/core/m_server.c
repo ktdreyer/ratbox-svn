@@ -118,7 +118,7 @@ mr_server(struct Client *client_p, struct Client *source_p, int parc, const char
 					     "servername %s", get_client_name(client_p, MASK_IP),
 					     name);
 
-			ilog(L_NOTICE, "Access denied, No N line for server %s",
+			ilog(L_SERVER, "Access denied, No N line for server %s",
 			     log_client_name(client_p, SHOW_IP));
 		}
 
@@ -136,7 +136,7 @@ mr_server(struct Client *client_p, struct Client *source_p, int parc, const char
 				     "Unauthorised server connection attempt from %s: Bad password "
 				     "for server %s", get_client_name(client_p, MASK_IP), name);
 
-		ilog(L_NOTICE, "Access denied, invalid password for server %s",
+		ilog(L_SERVER, "Access denied, invalid password for server %s",
 		     log_client_name(client_p, SHOW_IP));
 
 		exit_client(client_p, client_p, client_p, "Invalid password.");
@@ -153,7 +153,7 @@ mr_server(struct Client *client_p, struct Client *source_p, int parc, const char
 				     "Unauthorised server connection attempt from %s: Invalid host "
 				     "for server %s", get_client_name(client_p, MASK_IP), name);
 
-		ilog(L_NOTICE, "Access denied, invalid host for server %s",
+		ilog(L_SERVER, "Access denied, invalid host for server %s",
 		     log_client_name(client_p, SHOW_IP));
 
 		exit_client(client_p, client_p, client_p, "Invalid host.");
@@ -169,7 +169,7 @@ mr_server(struct Client *client_p, struct Client *source_p, int parc, const char
 		sendto_realops_flags(UMODE_ALL, L_OPER,
 				     "Invalid servername %s from %s",
 				     name, get_client_name(client_p, MASK_IP));
-		ilog(L_NOTICE, "Access denied, invalid servername from %s",
+		ilog(L_SERVER, "Access denied, invalid servername from %s",
 		     log_client_name(client_p, SHOW_IP));
 
 		exit_client(client_p, client_p, client_p, "Invalid servername.");

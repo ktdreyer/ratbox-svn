@@ -127,7 +127,7 @@ mo_connect(struct Client *client_p, struct Client *source_p, int parc, const cha
 	 * Notify all operators about remote connect requests
 	 */
 
-	ilog(L_TRACE, "CONNECT From %s : %s %s", parv[0], parv[1], parc > 2 ? parv[2] : "");
+	ilog(L_SERVER, "CONNECT From %s : %s %s", parv[0], parv[1], parc > 2 ? parv[2] : "");
 
 	aconf->port = port;
 	/*
@@ -233,7 +233,7 @@ ms_connect(struct Client *client_p, struct Client *source_p, int parc, const cha
 		      ":%s WALLOPS :Remote CONNECT %s %d from %s",
 		      me.name, parv[1], port, source_p->name);
 
-	ilog(L_TRACE, "CONNECT From %s : %s %d", source_p->name, parv[1], port);
+	ilog(L_SERVER, "CONNECT From %s : %s %d", source_p->name, parv[1], port);
 
 	aconf->port = port;
 	/*

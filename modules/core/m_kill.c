@@ -128,7 +128,7 @@ mo_kill(struct Client *client_p, struct Client *source_p, int parc, const char *
 			     "Received KILL message for %s. From %s Path: %s (%s)",
 			     target_p->name, parv[0], me.name, reason);
 
-	ilog(L_INFO, "KILL From %s For %s Path %s (%s)", parv[0], target_p->name, me.name, reason);
+	ilog(L_KLINE, "KILL From %s For %s Path %s (%s)", parv[0], target_p->name, me.name, reason);
 
 
 	/*
@@ -255,7 +255,7 @@ ms_kill(struct Client *client_p, struct Client *source_p, int parc, const char *
 				     target_p->name, parv[0], reason);
 	}
 
-	ilog(L_INFO, "KILL From %s For %s Path %s %s", parv[0], target_p->name, parv[0], reason);
+	ilog(L_KLINE, "KILL From %s For %s Path %s %s", parv[0], target_p->name, parv[0], reason);
 
 	relay_kill(client_p, source_p, target_p, path, reason);
 

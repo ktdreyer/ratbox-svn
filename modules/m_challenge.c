@@ -58,7 +58,7 @@ static int	challenge_load(void)
 #ifndef STATIC_MODULES
 	sendto_realops_flags(UMODE_ALL, L_ALL, 
 		"Challenge module not loaded because OpenSSL is not available.");
-	ilog(L_WARN, "Challenge module not loaded because OpenSSL is not available.");
+	ilog(L_MAIN, "Challenge module not loaded because OpenSSL is not available.");
 	return -1;
 #else
 	return 0;
@@ -110,7 +110,9 @@ m_challenge(struct Client *client_p, struct Client *source_p, int parc, const ch
 		if(irccmp(source_p->user->response, ++parv[1]))
 		{
 			sendto_one(source_p, form_str(ERR_PASSWDMISMATCH), me.name, source_p->name);
-			log_foper(source_p, source_p->user->auth_oper);
+			ilog(L_FOPER, "FAILED OPER (%s) by (%s!%s@%s)",
+			     source_p->user->auth_oper, source_p->name,
+			     source_p->username, source_p->host);
 
 			if(ConfigFileEntry.failed_oper_notice)
 				sendto_realops_flags(UMODE_ALL, L_ALL,
@@ -124,7 +126,9 @@ m_challenge(struct Client *client_p, struct Client *source_p, int parc, const ch
 		{
 			sendto_one(source_p, form_str(ERR_NOOPERHOST), 
 				   me.name, source_p->name);
-			log_foper(source_p, source_p->user->auth_oper);
+			ilog(L_FOPER, "FAILED OPER (%s) by (%s!%s@%s)",
+			     source_p->user->auth_oper, source_p->name,
+			     source_p->username, source_p->host);
 
 			if(ConfigFileEntry.failed_oper_notice)
 				sendto_realops_flags(UMODE_ALL, L_ALL,
@@ -144,7 +148,9 @@ m_challenge(struct Client *client_p, struct Client *source_p, int parc, const ch
 			sendto_realops_flags(UMODE_ALL, L_ALL,
 					     "Failed CHALLENGE attempt by %s (%s@%s) can't attach conf!",
 					     source_p->name, source_p->username, source_p->host);
-			log_foper(source_p, source_p->user->auth_oper);
+			ilog(L_FOPER, "FAILED OPER (%s) by (%s!%s@%s)",
+			     source_p->user->auth_oper, source_p->name,
+			     source_p->username, source_p->host);
 
 			attach_conf(source_p, oconf);
 			return 0;
@@ -152,9 +158,9 @@ m_challenge(struct Client *client_p, struct Client *source_p, int parc, const ch
 
 		oper_up(source_p, aconf);
 
-		ilog(L_TRACE, "OPER %s by %s!%s@%s",
-		     source_p->user->auth_oper, source_p->name, source_p->username, source_p->host);
-		log_oper(source_p, source_p->user->auth_oper);
+		ilog(L_OPERED, "OPER %s by %s!%s@%s",
+		     source_p->user->auth_oper, source_p->name, 
+		     source_p->username, source_p->host);
 
 		MyFree(source_p->user->response);
 		MyFree(source_p->user->auth_oper);
@@ -174,7 +180,10 @@ m_challenge(struct Client *client_p, struct Client *source_p, int parc, const ch
 				     source_p->sockhost, CONF_OPERATOR)))
 	{
 		sendto_one(source_p, form_str(ERR_NOOPERHOST), me.name, source_p->name);
-		log_foper(source_p, parv[1]);
+
+		ilog(L_FOPER, "FAILED OPER (%s) by (%s!%s@%s)",
+		     parv[1], source_p->name,
+		     source_p->username, source_p->host);
 
 		if(ConfigFileEntry.failed_oper_notice)
 			sendto_realops_flags(UMODE_ALL, L_ALL,
@@ -260,7 +269,7 @@ generate_challenge(char **r_challenge, char **r_response, RSA * rsa)
 		ERR_load_crypto_strings();
 		while ((cnt < 100) && (e = ERR_get_error()))
 		{
-			ilog(L_CRIT, "SSL error: %s", ERR_error_string(e, 0));
+			ilog(L_MAIN, "SSL error: %s", ERR_error_string(e, 0));
 			cnt++;
 		}
 

@@ -58,7 +58,6 @@ error HARD_FDLIMIT_ undefined
 #define CLIENT_FLOOD_MIN     10
 #define LINKS_DELAY_DEFAULT  300
 #define MAX_TARGETS_DEFAULT 4	/* default for max_targets */
-#define INIT_LOG_LEVEL L_NOTICE	/* default for log_level */
 #define IDENT_TIMEOUT 10
 #define MIN_JOIN_LEAVE_TIME  60
 #define MAX_JOIN_LEAVE_COUNT  25

@@ -96,7 +96,7 @@ ms_svinfo(struct Client *client_p, struct Client *source_p, int parc, const char
 				     get_client_name(source_p, MASK_IP),
 				     (unsigned long) CurrentTime,
 				     (unsigned long) theirtime, (int) deltat);
-		ilog(L_NOTICE,
+		ilog(L_SERVER,
 		     "Link %s dropped, excessive TS delta (my TS=%lu, their TS=%lu, delta=%d)",
 		     log_client_name(source_p, SHOW_IP), CurrentTime, theirtime, (int) deltat);
 		exit_client(source_p, source_p, source_p, "Excessive TS delta");

@@ -47,7 +47,7 @@ restart(const char *mesg)
 		abort();
 	was_here = YES;
 
-	ilog(L_NOTICE, "Restarting Server because: %s, memory data limit: %ld", mesg, get_maxrss());
+	ilog(L_MAIN, "Restarting Server because: %s, memory data limit: %ld", mesg, get_maxrss());
 
 	server_reboot();
 }
@@ -59,7 +59,7 @@ server_reboot(void)
 
 	sendto_realops_flags(UMODE_ALL, L_ALL, "Restarting server...");
 
-	ilog(L_NOTICE, "Restarting server...");
+	ilog(L_MAIN, "Restarting server...");
 	/*
 	 * XXX we used to call flush_connections() here. But since this routine
 	 * doesn't exist anymore, we won't be flushing. This is ok, since 

@@ -323,94 +323,60 @@ conf_set_admin_description(void *data)
 }
 
 static void
-conf_set_logging_path(void *data)
-{
-	conf_report_error("Warning -- logging::path is not yet implemented.");
-}
-
-static void
-conf_set_logging_oper_log(void *data)
-{
-	conf_report_error("Warning -- logging::oper_log is not yet implemented.");
-}
-
-static void
-conf_set_logging_gline_log(void *data)
-{
-	conf_report_error("Warning -- logging::gline_log is not yet implemented.");
-}
-
-static void
-conf_set_logging_fname_userlog(void *data)
+conf_set_log_fname_userlog(void *data)
 {
 	strlcpy(ConfigFileEntry.fname_userlog, data, sizeof(ConfigFileEntry.fname_userlog));
 }
 
 static void
-conf_set_logging_fname_foperlog(void *data)
+conf_set_log_fname_fuserlog(void *data)
+{
+	strlcpy(ConfigFileEntry.fname_fuserlog, data, sizeof(ConfigFileEntry.fname_fuserlog));
+}
+
+static void
+conf_set_log_fname_foperlog(void *data)
 {
 	strlcpy(ConfigFileEntry.fname_foperlog, data, sizeof(ConfigFileEntry.fname_foperlog));
 }
 
 static void
-conf_set_logging_fname_operlog(void *data)
+conf_set_log_fname_operlog(void *data)
 {
 	strlcpy(ConfigFileEntry.fname_operlog, data, sizeof(ConfigFileEntry.fname_operlog));
 }
 
 static void
-conf_set_logging_fname_operspylog(void *data)
+conf_set_log_fname_serverlog(void *data)
+{
+	strlcpy(ConfigFileEntry.fname_serverlog, data, sizeof(ConfigFileEntry.fname_serverlog));
+}
+
+static void
+conf_set_log_fname_glinelog(void *data)
+{
+	strlcpy(ConfigFileEntry.fname_glinelog, data, sizeof(ConfigFileEntry.fname_glinelog));
+}
+
+static void
+conf_set_log_fname_klinelog(void *data)
+{
+	strlcpy(ConfigFileEntry.fname_klinelog, data, sizeof(ConfigFileEntry.fname_klinelog));
+}
+
+static void
+conf_set_log_fname_operspylog(void *data)
 {
 	strlcpy(ConfigFileEntry.fname_operspylog, data,
 		sizeof(ConfigFileEntry.fname_operspylog));
 }
 
 static void
-conf_set_logging_fname_operspyremotelog(void *data)
+conf_set_log_fname_ioerrorlog(void *data)
 {
-	strlcpy(ConfigFileEntry.fname_operspyremotelog, data,
-		sizeof(ConfigFileEntry.fname_operspyremotelog));
+	strlcpy(ConfigFileEntry.fname_ioerrorlog, data,
+		sizeof(ConfigFileEntry.fname_ioerrorlog));
 }
-
-static struct
-{
-	const char *name;
-	int level;
-}
-
-/* *INDENT-OFF* */
-log_levels[] =
-{
-	{ "l_crit",	L_CRIT	},
-	{ "l_error",	L_ERROR	},
-	{ "l_warn",	L_WARN	},
-	{ "l_notice",	L_NOTICE},
-	{ "l_trace",	L_TRACE	},
-	{ "l_info",	L_INFO	},
-	{ "l_debug",	L_DEBUG	},
-	{ NULL,		0	}
-};
-/* *INDENT-ON* */
-
-static void
-conf_set_logging_log_level(void *data)
-{
-	int i;
-
-	for (i = 0; log_levels[i].name; i++)
-	{
-		if(strcasecmp((char *) data, log_levels[i].name) == 0)
-		{
-			set_log_level(log_levels[i].level);
-			return;
-		}
-	}
-
-	conf_report_error("Warning -- log level '%s' is not defined, "
-			  "using default of L_NOTICE", (char *) data);
-	set_log_level(L_NOTICE);
-}
-
 
 struct mode_table
 {
@@ -2411,7 +2377,7 @@ conf_report_error(const char *fmt, ...)
 	ircvsnprintf(msg, IRCD_BUFSIZE, fmt, ap);
 	va_end(ap);
 
-	ilog(L_ERROR, "\"%s\", line %d: %s", conffilebuf, lineno + 1, msg);
+	ilog(L_MAIN, "\"%s\", line %d: %s", conffilebuf, lineno + 1, msg);
 
 	sendto_realops_flags(UMODE_ALL, L_ALL, "\"%s\", line %d: %s", conffilebuf, lineno + 1, msg);
 }
@@ -2602,17 +2568,16 @@ newconf_init()
 	add_conf_item("admin", "description", CF_QSTRING, conf_set_admin_description);
 	add_conf_item("admin", "email", CF_QSTRING, conf_set_admin_email);
 
-	add_top_conf("logging", NULL, NULL);
-	add_conf_item("logging", "path", CF_QSTRING, conf_set_logging_path);
-	add_conf_item("logging", "oper_log", CF_QSTRING, conf_set_logging_oper_log);
-	add_conf_item("logging", "gline_log", CF_QSTRING, conf_set_logging_gline_log);
-	add_conf_item("logging", "log_level", CF_STRING, conf_set_logging_log_level);
-	add_conf_item("logging", "fname_userlog", CF_QSTRING, conf_set_logging_fname_userlog);
-	add_conf_item("logging", "fname_operlog", CF_QSTRING, conf_set_logging_fname_operlog);
-	add_conf_item("logging", "fname_foperlog", CF_QSTRING, conf_set_logging_fname_foperlog);
-	add_conf_item("logging", "fname_operspylog", CF_QSTRING, conf_set_logging_fname_operspylog);
-	add_conf_item("logging", "fname_operspyremotelog", CF_QSTRING,
-			conf_set_logging_fname_operspyremotelog);
+	add_top_conf("log", NULL, NULL);
+	add_conf_item("log", "fname_userlog", CF_QSTRING, conf_set_log_fname_userlog);
+	add_conf_item("log", "fname_fuserlog", CF_QSTRING, conf_set_log_fname_fuserlog);
+	add_conf_item("log", "fname_operlog", CF_QSTRING, conf_set_log_fname_operlog);
+	add_conf_item("log", "fname_foperlog", CF_QSTRING, conf_set_log_fname_foperlog);
+	add_conf_item("log", "fname_serverlog", CF_QSTRING, conf_set_log_fname_serverlog);
+	add_conf_item("log", "fname_glinelog", CF_QSTRING, conf_set_log_fname_glinelog);
+	add_conf_item("log", "fname_klinelog", CF_QSTRING, conf_set_log_fname_klinelog);
+	add_conf_item("log", "fname_operspylog", CF_QSTRING, conf_set_log_fname_operspylog);
+	add_conf_item("log", "fname_ioerrorlog", CF_QSTRING, conf_set_log_fname_ioerrorlog);
 
 	add_top_conf("operator", conf_begin_oper, conf_end_oper);
 	add_conf_item("operator", "name", CF_QSTRING, conf_set_oper_name);

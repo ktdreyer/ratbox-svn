@@ -217,7 +217,7 @@ mo_rehash(struct Client *client_p, struct Client *source_p, int parc, const char
 				sendto_one(source_p, form_str(RPL_REHASHING), me.name,
 					   source_p->name, rehash_commands[x].cmd);
 				rehash_commands[x].handler(source_p);
-				ilog(L_NOTICE, "REHASH %s From %s[%s]", parv[1],
+				ilog(L_MAIN, "REHASH %s From %s[%s]", parv[1],
 				     get_oper_name(source_p), source_p->sockhost);
 				return 0;
 			}
@@ -240,7 +240,7 @@ mo_rehash(struct Client *client_p, struct Client *source_p, int parc, const char
 			   ConfigFileEntry.configfile);
 		sendto_realops_flags(UMODE_ALL, L_ALL,
 				     "%s is rehashing server config file", get_oper_name(source_p));
-		ilog(L_NOTICE, "REHASH From %s[%s]", get_oper_name(source_p),
+		ilog(L_MAIN, "REHASH From %s[%s]", get_oper_name(source_p),
 		     source_p->sockhost);
 		rehash(0);
 		return 0;

@@ -310,7 +310,7 @@ check_pings_list(dlink_list * list)
 							     L_OPER,
 							     "No response from %s, closing link",
 							     get_client_name(client_p, MASK_IP));
-					ilog(L_NOTICE,
+					ilog(L_SERVER,
 					     "No response from %s, closing link",
 					     log_client_name(client_p, HIDE_IP));
 				}
@@ -1276,7 +1276,9 @@ exit_unknown_client(struct Client *client_p, struct Client *source_p, struct Cli
 	delete_auth_queries(source_p);
 	client_flush_input(source_p);
 	dlinkDelete(&source_p->localClient->tnode, &unknown_list);
+#if 0
 	log_user_exit(source_p);
+#endif
 	if(source_p->localClient->fd >= 0)
 		sendto_one(source_p, "ERROR :Closing Link: %s (%s)", source_p->host, comment);
 	call_unknown_exit_hook(source_p, comment);
@@ -1394,7 +1396,7 @@ exit_local_server(struct Client *client_p, struct Client *source_p, struct Clien
 	sendto_realops_flags(UMODE_ALL, L_ALL, "%s was connected for %ld seconds.  %d/%d sendK/recvK.",
 			     source_p->name, CurrentTime - source_p->firsttime, sendk, recvk);
 
-	ilog(L_NOTICE, "%s was connected for %ld seconds.  %d/%d sendK/recvK.", 
+	ilog(L_SERVER, "%s was connected for %ld seconds.  %d/%d sendK/recvK.", 
 	     source_p->name, CurrentTime - source_p->firsttime, 
 	     sendk, recvk);
         
@@ -1439,7 +1441,9 @@ exit_local_client(struct Client *client_p, struct Client *source_p, struct Clien
 #endif
 			     source_p->sockhost);
 
+#if 0
 	log_user_exit(source_p);
+#endif
 	call_local_exit_hook(source_p, comment);	
 	sendto_one(source_p, "ERROR :Closing Link: %s (%s)", source_p->host, comment);
 	close_connection(source_p);
