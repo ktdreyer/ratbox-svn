@@ -250,7 +250,6 @@ sendto_list_anywhere()
                 - This local function sends a message to all members
                   as given in a dlink_list, whether they are remote or local
                   clients. It is used by sendto_channel_butone()
-                  It also generates prefixes on the fly as necessary.
 
                   It could easily be extended to sendto "groups" of
                   otherwise unrelated users, not just channel groups.

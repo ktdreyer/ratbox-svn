@@ -536,7 +536,6 @@ comm_checktimeouts(void *notused)
     eventAdd("comm_checktimeouts", comm_checktimeouts, NULL, 1, 0);
 }
 
-
 /*
  * comm_connect_tcp() - connect a given socket to a remote address
  *

@@ -1195,7 +1195,6 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
         cptr->serv->user = NULL;
       }
     cptr->serv->up = me.name;
-    local[cptr->fd] = cptr;
     SetConnecting(cptr);
     add_client_to_list(cptr);
 
