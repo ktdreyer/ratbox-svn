@@ -1,3 +1,16 @@
+jmallett    2002/01/09 18:58:08 EST	(20020109_10)
+
+  Modified files:
+    .                    README.FIRST 
+  Log:
+  Add notes about Darwin and Mac OS X and GCC on SPARC and UltraSPARC that
+  I've run into in my portability checks.
+  
+  Revision  Changes    Path
+  7.22      +14 -1     ircd-hybrid-7/README.FIRST
+
+
+
 jmallett    2002/01/09 14:38:46 EST	(20020109_9)
 
   Modified files:
