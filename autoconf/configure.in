@@ -13,6 +13,8 @@ AC_SUBST(VERSION)
 
 if test -z "$MAKE"; then
 	MAKE=make
+	echo WARNING: No make command specified, assuming `which $MAKE`
+	echo WARNING: To specify a different make, use MAKE="<command>" $0
 fi
 
 dnl Checks for programs.
@@ -25,7 +27,6 @@ if test "x$CFLAGS" = "x"; then
 	  CFLAGS="-g"
 	fi
 fi
-
 
 AC_ISC_POSIX
 AC_PROG_MAKE_SET
