@@ -607,15 +607,6 @@ int is_banned(struct Client *cptr, struct Channel *chptr)
         if (match(BANSTR(t2), s) ||
             match(BANSTR(t2), s2))
           {
-#if 0
-            /* I think a message sent to channel
-             * about the ban exception might be in order?
-             */
-            sendto_channel_type(cptr, sptr, chptr, type,
-                                ":%s %s %s :%s",
-                                parv[0], cmd, nick,
-                                "*** Banned but have an ban exception");
-#endif
             return CHFL_EXCEPTION;
           }
     }

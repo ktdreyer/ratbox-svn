@@ -222,15 +222,10 @@ int m_invite(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                              acptr->username,
                              acptr->host);
 
-                  /* Note the horrible kludge here of "PRIVMSG"
-                   * in the arguments, this is to ensure that p4 in 
-                   * sendto_channel_type() in send.c is the message payload
-                   * for non CHW type servers
-                   * -Dianora
-                   */
-                  sendto_channel_type(cptr, sptr, chptr, MODE_CHANOP,
-                                      ":%s %s @%s :%s",
-                                      parv[0], "PRIVMSG", chptr->chname,
+                  sendto_channel_type(cptr, sptr, chptr,
+                                      MODE_CHANOP,
+                                      chptr->chname,
+                                      "PRIVMSG",
                                       message);
                 }
             }
