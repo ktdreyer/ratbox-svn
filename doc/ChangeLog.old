@@ -1,3 +1,7 @@
+*** 20010106_23 by wcampbel
+Numerous documentation cleanups
+
+
 *** 20010106_22 by fl_
 - dont warn about numerics sent to us from servers
   theyre gunna be unavoidable with lazylinks and nick collides..
