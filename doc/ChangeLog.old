@@ -1,3 +1,12 @@
+*** 20010526_1 by leeh
+- PING origin :destination
+  why would the origin ever be anything but a clients nick, or a servers
+  name?  
+
+  the old code is #if 0'd for now.. if we're in agreement, we can probably
+  remove the origin variable altogether, and just use sptr->name..
+
+
 *** 20010525_15 by davidt
 - Fix netjoins for the loc* stuff, move to locpeons, not peons.. ahem..
 
