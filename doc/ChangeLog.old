@@ -1,3 +1,21 @@
+*** 20010531_3 by davidt
+- Pass one of config file cleanup.
+  * config.h[.dist] is now a little cleaner, still some stuff to sort out[1]
+  * defaults for ircd.conf stuff now go in defaults.h
+  * added set_default_conf() and check_conf():
+      set_default_conf() - called before yyparse() to set ConfigFileEntry
+                           stuff to default values.
+      check_conf()       - called after yyparse() to ensure that
+                           ConfigFileEntry stuff is actually sane, and
+                           reset to defaults if not.
+- Lots more to do... But this _works_ (hopefully), so I'm committing it
+  before doing anything insane.
+
+[1] - MAX_BUFFER et all seem to be completely misused by the code, so
+      documenting what they do is impossible, since it seems to do nothing
+      useful.
+
+
 *** 20010531_2 by db
 - finished adding the k_ines_oper_only flag, (leeh can review!)
 
