@@ -1,3 +1,28 @@
+*** 20001210_1 by db
+- sendto_prefix_one is =gone=
+- sendto_one should be used for local clients only, with prefix
+  pre-built at time of use.
+- sendto_anywhere is a somewhat saner replacement for sendto_prefix_one 
+  (I think) it should be used ONLY when target client is unknown whether
+  its local or remote, it will build the appropriate prefix itself in 
+  that case. This makes it less efficient than sendto_one..
+- I kludged send_message_remote() for now... adrian you might want
+  to look at that... maybe we can get away with just always calling
+  send_message() or add a short common function or something...
+  send_message() should be for local clients (not servers(? only(?)
+  perhaps i.e. send_message_local() and send_message_remote()
+  sendto_one should be renamed sendto_local() (sendto_local_client)
+  sendto_remote (sendto_remote_client) sendto_anywhere() sends to either...
+  Too tired right now..
+
+BUGS pending...
+1) the horrid /msg $#host.mask to clients on remote servers is =broken= for now.
+   (it works locally)
+2) sendto @# chanop style messages is =broken= to remote servers for now.
+3) Probably more *yawn* 
+  
+
+
 *** 20001209_17 by db
 - oops, the missing .depend files
 
