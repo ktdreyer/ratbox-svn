@@ -91,9 +91,6 @@ int     m_away(struct Client *cptr,
 
       if (away)
         {
-	  /* some lamers scripts continually do a /away, hence making a lot of
-	     unnecessary traffic. *sigh* so... as comstud has done, I've
-	     commented out this sendto_serv_butone() call -Dianora */
 	  /* we now send this only if they were away before --is */
 	  sendto_serv_butone(cptr, ":%s AWAY", parv[0]);
 	  
@@ -111,15 +108,9 @@ int     m_away(struct Client *cptr,
   if (strlen(awy2) > (size_t) TOPICLEN)
     awy2[TOPICLEN] = '\0';
 
-  /* some lamers scripts continually do a /away, hence making a lot of
-   * unnecessary traffic. *sigh* so... as comstud has done, I've
-   * commented out this sendto_serv_butone() call -Dianora
-   */
   /* we now send this only if they weren't away already --is */
   if (!away)
     sendto_serv_butone(cptr, ":%s AWAY :%s", parv[0], awy2); 
-
-  /* don't use realloc() -Dianora */
 
   if (away)
     MyFree(away);

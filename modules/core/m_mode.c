@@ -50,7 +50,7 @@ _modinit(void)
 void
 _moddeinit(void)
 {
-  mod_del_cmd(MSG_WHOIS);
+  mod_del_cmd(MSG_MODE);
 }
 
 
