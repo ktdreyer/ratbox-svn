@@ -4,13 +4,14 @@ If you don't read this first, we won't help you.
 ******************************* IMPORTANT *************************************
 
   *********** Note for those who dont bother reading docs *****************
-  * Reading INSTALL is now a must, as the old DPATH is now specified when *
-  * configure is run.                                                     *
-  * - You now need to ./configure --prefix="/path/to/install/it"          *
-  * The old config format WILL NOT WORK.  Please see doc/example.conf (!) *
-  *									  *
-  * The old kline format WILL NOT WORK.  Please use convertklines which   *
-  * will be installed with your ircd!					  *
+  * - Reading INSTALL is now a must, as the old DPATH is now specified    *
+  *   when configure is run.                                              *
+  *   You now need to ./configure --prefix="/path/to/install/it"          *
+  * - The old config format WILL NOT WORK.  Please see doc/example.conf ! *
+  * - The old kline format WILL NOT WORK.  Please use convertklines which *
+  *   will be installed with your ircd!					  *
+  * - If you get errors compiling custom.mo, check if you are using the   *
+  *   most recent version of gettext.  Tested with GNU gettext 0.10.35.   *
   *************************************************************************
 
   ALSO, IF YOU ARE UPGRADING YOUR CURRENT SOURCE TREE, AND YOU TRY TO BUILD
