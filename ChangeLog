@@ -1,3 +1,21 @@
+leeh        2005/01/04 13:32:51 EST	(20050104_0)
+
+  Modified files:
+    include              stdinc.h 
+    src                  io.c rserv.c s_chanserv.c s_userserv.c 
+  Log:
+  - fix a compile error when we dont have getaddrinfo()
+  - an ifdef to make compilation work on my laptop..
+  
+  Revision  Changes    Path
+  1.9       +2 -0      rserv/include/stdinc.h
+  1.29      +1 -1      rserv/src/io.c
+  1.39      +12 -0     rserv/src/rserv.c
+  1.25      +0 -1      rserv/src/s_chanserv.c
+  1.21      +0 -1      rserv/src/s_userserv.c
+
+
+
 leeh        2004/11/29 06:15:28 EST	(20041129_1)
 
   Modified files:
