@@ -772,6 +772,7 @@ void channel_modes(struct Channel *chptr, struct Client *cptr,
 		   char *mbuf, char *pbuf)
 {
   *mbuf++ = '+';
+  *pbuf = '\0';
 
   if (chptr->mode.mode & MODE_SECRET)
     *mbuf++ = 's';
@@ -887,30 +888,28 @@ void send_channel_modes(struct Client *cptr, struct Channel *chptr)
   channel_modes(chptr, cptr, modebuf, parabuf);
 
   send_members(cptr,modebuf,parabuf,chptr,&chptr->chanops,"@");
+
   if (IsCapable(cptr, CAP_HOPS))
-	  send_members(cptr,modebuf,parabuf,chptr,&chptr->halfops,"%");
+    send_members(cptr,modebuf,parabuf,chptr,&chptr->halfops,"%");
   else
-  /* Ok, halfops can still generate a kick, they'll just looked opped */
-  send_members(cptr,modebuf,parabuf,chptr,&chptr->halfops,"@");
+    {
+      /* Ok, halfops can still generate a kick, they'll just looked opped */
+      send_members(cptr,modebuf,parabuf,chptr,&chptr->halfops,"@");
+    }
+
   send_members(cptr,modebuf,parabuf,chptr,&chptr->voiced,"+");
   send_members(cptr,modebuf,parabuf,chptr,&chptr->peons,"");
 
   send_mode_list(cptr, chptr->chname, &chptr->banlist, 'b', 0);
 
-  if(!IsCapable(cptr,CAP_EX))
-    return;
+  if(IsCapable(cptr, CAP_EX))
+    send_mode_list(cptr, chptr->chname, &chptr->exceptlist, 'e', 0);
 
-  send_mode_list(cptr, chptr->chname, &chptr->exceptlist, 'e', 0);
-
-  if(!IsCapable(cptr,CAP_DE))
-      return;
-
-  send_mode_list(cptr, chptr->chname, &chptr->denylist, 'd', 0);
+  if(IsCapable(cptr, CAP_DE))
+    send_mode_list(cptr, chptr->chname, &chptr->denylist, 'd', 0);
   
-  if (!IsCapable(cptr,CAP_IE))
-    return;
-  
-  send_mode_list(cptr, chptr->chname, &chptr->invexlist, 'I', 0);
+  if (IsCapable(cptr, CAP_IE))
+    send_mode_list(cptr, chptr->chname, &chptr->invexlist, 'I', 0);
 }
 
 /*
@@ -1093,7 +1092,7 @@ static  int     errsent(int err, int *errs)
 #define SM_ERR_RPL_E            0x00000020
 #define SM_ERR_NOTONCHANNEL     0x00000040      /* Not on channel */
 #define SM_ERR_RESTRICTED       0x00000080      /* Restricted chanop */
-#define SM_ERR_RPL_I						0x00000100
+#define SM_ERR_RPL_I            0x00000100
 #define SM_ERR_RPL_D            0x00000200
 
 /*
@@ -1443,9 +1442,7 @@ void set_channel_mode(struct Client *cptr,
 
           if (keychange++)
             break;
-          /*      if (MyClient(sptr) && opcnt >= MAXMODEPARAMS)
-            break;
-            */
+
           if (!*arg)
             break;
 
@@ -1542,17 +1539,12 @@ void set_channel_mode(struct Client *cptr,
           pbufw += strlen(pbufw);
           *pbufw++ = ' ';
           len += tmp + 1;
-          /*      opcnt++; */
 
           if (whatt == MODE_DEL)
-            {
-              *chptr->mode.key = '\0';
-            }
+            *chptr->mode.key = '\0';
           else
             {
-              /*
-               * chptr was zeroed
-               */
+              /* chptr was zeroed */
               strncpy_irc(chptr->mode.key, arg, KEYLEN);
             }
 
@@ -1930,15 +1922,13 @@ void set_channel_mode(struct Client *cptr,
                 }
               
               arg = check_string(*parv++);
-              /*              if (MyClient(sptr) && opcnt >= MAXMODEPARAMS)
-                break; */
               if ((nusers = atoi(arg)) <= 0)
                 break;
+
               ircsprintf(numeric, "%d", nusers);
               if ((tmpc = strchr(numeric, ' ')))
                 *tmpc = '\0';
               arg = numeric;
-
               tmp = strlen(arg);
               if (len + tmp + 2 >= MODEBUFLEN)
                 break;
@@ -1952,7 +1942,6 @@ void set_channel_mode(struct Client *cptr,
               pbufw += strlen(pbufw);
               *pbufw++ = ' ';
               len += tmp + 1;
-              /*              opcnt++;*/
             }
           else
             {
@@ -1988,9 +1977,6 @@ void set_channel_mode(struct Client *cptr,
                 break;
               else
                 done_i = YES;
-
-              /*              if ( opcnt >= MAXMODEPARAMS)
-                break; */
             }
 
           if(whatt == MODE_ADD)
@@ -2071,9 +2057,6 @@ void set_channel_mode(struct Client *cptr,
                 break;
               else
                 done_n = YES;
-
-              /*              if ( opcnt >= MAXMODEPARAMS)
-                              break; */
             }
 
           if(whatt == MODE_ADD)
@@ -2104,7 +2087,6 @@ void set_channel_mode(struct Client *cptr,
 		sendto_one(sptr, form_str(ERR_CHANOPRIVSNEEDED), me.name,
 			   sptr->name, chname);
 	      break;
-	      
 	    }
 
 	  if(MyClient(sptr))
@@ -2113,9 +2095,6 @@ void set_channel_mode(struct Client *cptr,
 		break;
 	      else
 		done_z = YES;
-	      
-	      /*              if ( opcnt >= MAXMODEPARAMS)
-			      break; */
 	    }
 	  
 	  if(whatt == MODE_ADD)
@@ -2235,9 +2214,6 @@ void set_channel_mode(struct Client *cptr,
                 break;
               else
                 done_t = YES;
-
-              /*              if ( opcnt >= MAXMODEPARAMS)
-                              break; */
             }
 
           if(whatt == MODE_ADD)

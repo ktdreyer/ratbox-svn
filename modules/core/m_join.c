@@ -72,7 +72,8 @@ char *_version = "20001122";
 ** m_join
 **      parv[0] = sender prefix
 **      parv[1] = channel
-**      parv[2] = channel password (key)
+**      parv[2] = channel password (key) (or vkey for vchans)
+**      parv[3] = vkey
 */
 int     m_join(struct Client *cptr,
                struct Client *sptr,
@@ -85,6 +86,7 @@ int     m_join(struct Client *cptr,
   struct Channel *root_chptr = NULL;
   int joining_vchan = 0;
   char  *name, *key = NULL;
+  char *vkey = NULL; /* !key for vchans */
   int   i, flags = 0;
   char  *p = NULL, *p2 = NULL;
   int   successful_join_count = 0; /* Number of channels successfully joined */
@@ -105,8 +107,17 @@ int     m_join(struct Client *cptr,
   build_list_of_channels( sptr, jbuf , parv[1] );
 
   p = NULL;
-  if (parv[2])
-    key = strtoken(&p2, parv[2], ",");
+
+  if (parc > 3)
+    {
+      key = strtoken(&p2, parv[3], ",");
+      vkey = parv[2];
+    }
+  else if (parc > 2)
+    {
+      key = strtoken(&p2, parv[2], ",");
+      vkey = parv[2];
+    }
 
   for (name = strtoken(&p, jbuf, ","); name;
        key = (key) ? strtoken(&p2, NULL, ",") : NULL,
@@ -115,10 +126,10 @@ int     m_join(struct Client *cptr,
       /*
       ** JOIN 0 sends out a part for all channels a user
       ** has joined.
-	  **
-	  ** this should be either disabled or selectable in
-	  ** config file .. it's abused a lot more than it's
-	  ** used these days :/ --is
+      **
+      ** this should be either disabled or selectable in
+      ** config file .. it's abused a lot more than it's
+      ** used these days :/ --is
       */
       if (*name == '0' && !atoi(name))
         {
@@ -134,23 +145,22 @@ int     m_join(struct Client *cptr,
 	  /* there's subchans so check those
 	   * but not if it was a subchan's realname they specified
 	   */
-
 	  if (IsVchanTop(chptr))
 	    {
-	      if( on_sub_vchan(chptr,sptr) )
+	      if (on_sub_vchan(chptr,sptr))
 		continue;
-	      if (key && key[0] == '!')
+	      if (vkey && vkey[0] == '!')
 		{
 		  /* user joined with key "!".  force listing.
 		     (this prevents join-invited-chan voodoo) */
-		  if (!key[1])
+		  if (!vkey[1])
 		    {
 		      show_vchans(cptr, sptr, chptr, "join");
 		      continue;
 		    }
 
 		  /* found a matching vchan? let them join it */
-		  if ((vchan_chptr = find_vchan(chptr, key)))
+		  if ((vchan_chptr = find_vchan(chptr, vkey)))
 		    {
 		      root_chptr = chptr;
 		      chptr = vchan_chptr;
@@ -165,39 +175,19 @@ int     m_join(struct Client *cptr,
 		}
 	      else
 		{
-		  /* one special case here i think..
-		   * if there's only one vchan, and the root is empty
-		   * let them join that vchan
-		   *
-		   * This has to be amended with persistent channels
-		   * a vchan will have to be given an unique id
-		   * when its empty... so it can be joined with that id
-		   */
-/* XXX FIXME */
-#if 0
-		  if( (!chptr->users) && (!chptr->next_vchan->next_vchan) )
-		    {
-		      root_chptr = chptr;
-		      chptr = chptr->next_vchan;
-		      joining_vchan = 1;
-		    }
-		  else
-#endif
-		    {
-		      /* voodoo to auto-join channel invited to */
-		      if ((vchan_chptr=vchan_invites(chptr, sptr)))
-			{
-			  root_chptr = chptr;
-			  chptr = vchan_chptr;
-			  joining_vchan = 1;
-			}
-		      /* otherwise, they get a list of channels */
-		      else
-			{
-			  show_vchans(cptr, sptr, chptr, "join");
-			  continue;
-			}
-		    }
+                  /* voodoo to auto-join channel invited to */
+                  if ((vchan_chptr=vchan_invites(chptr, sptr)))
+                    {
+                      root_chptr = chptr;
+                      chptr = vchan_chptr;
+                      joining_vchan = 1;
+                    }
+                  /* otherwise, they get a list of channels */
+                  else
+                    {
+                      show_vchans(cptr, sptr, chptr, "join");
+                      continue;
+                    }
 		}
 	    }
 	  /* trying to join a sub chans 'real' name
@@ -209,6 +199,7 @@ int     m_join(struct Client *cptr,
 			 me.name, parv[0], (unsigned char*) name);
 	      continue;
 	    }
+
 	  if (chptr->users == 0)
 	    flags = CHFL_CHANOP;
 	  else
