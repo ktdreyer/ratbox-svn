@@ -58,7 +58,7 @@
 static void check_pings_list(dlink_list *list);
 static void check_unknowns_list(dlink_list *list);
 static void free_exited_clients(void *unused);
-static void exit_remote_pending(void *unused);
+
 static EVH check_pings;
 
 static int remote_client_count=0;
@@ -66,15 +66,6 @@ static int local_client_count=0;
 
 static BlockHeap *client_heap = NULL;
 static BlockHeap *lclient_heap = NULL;
-
-struct remote_exited 
-{
-  dlink_node m;
-  struct Client *client_p;
-  char comment[TOPICLEN+1];
-};
-
-static dlink_list remote_exit_pending;
 
 dlink_list dead_list;
 dlink_list abort_list;
@@ -114,7 +105,6 @@ void init_client(void)
   eventAddIsh("check_pings", check_pings, NULL, 30);
   eventAddIsh("free_exited_clients", &free_exited_clients, NULL, 4);
   eventAddIsh("client_heap_gc", client_heap_gc, NULL, 30);
-  eventAddIsh("exit_remote_pending", exit_remote_pending, NULL, 1);
 }
 
 /*
@@ -1133,33 +1123,6 @@ static void recurse_send_quits(struct Client *client_p, struct Client *source_p,
     }
 }
 
-
-static void
-exit_remote_pending(void *unused)
-{
-  struct remote_exited *rexit;
-  dlink_node *ptr, *next;
-  int count = 0;
-
-  for(ptr = remote_exit_pending.head; ptr != NULL && count <= PENDING_COUNT; ptr = next)
-  {
-    rexit = ptr->data;
-    next = ptr->next;
-    assert(ptr->data != NULL);
-    if(ptr->data == NULL)
-    {
-       sendto_realops_flags(FLAGS_ALL, L_ALL,
-                            "Warning: null client on remote_exit_pending list!");
-       dlinkDelete(ptr, &remote_exit_pending); 
-       continue;
-    }                        
-    exit_one_client(NULL, rexit->client_p, &me, rexit->comment);
-    dlinkDelete(&rexit->m, &remote_exit_pending);
-    MyFree(rexit);
-    count++;
-  }
-}
-
 /* 
 ** Remove all clients that depend on source_p; assumes all (S)QUITs have
 ** already been sent.  we make sure to exit a server's dependent clients 
@@ -1171,39 +1134,31 @@ exit_remote_pending(void *unused)
  */
 static void recurse_remove_clients(struct Client* source_p, const char* comment)
 {
-  struct Client *target_p, *client_p;
-  struct remote_exited *rexit;
-  if(source_p == NULL)
-    return;
+  struct Client *target_p;
+
   if (IsMe(source_p))
     return;
 
   if (source_p->serv == NULL)     /* oooops. uh this is actually a major bug */
     return;
 
-  if(source_p->serv->users != NULL)
-    {
-      for(client_p = source_p->serv->users; client_p != NULL; client_p = client_p->lnext)
-        {
-          client_p->flags |= FLAGS_KILLED;
-          rexit = MyMalloc(sizeof(struct remote_exited));
-          strcpy(rexit->comment, comment);
-          rexit->client_p = client_p;
-          dlinkAddTail(rexit, &rexit->m, &remote_exit_pending);
-        }
-    }
-  
-  
-  for (target_p = source_p->serv->servers; target_p; target_p = target_p->lnext)
+  while ((target_p = source_p->serv->users))
     {
       target_p->flags |= FLAGS_KILLED;
-      rexit = MyMalloc(sizeof(struct remote_exited));
-      strcpy(rexit->comment, me.name);
-      rexit->client_p = target_p;
-      dlinkAddTail(rexit, &rexit->m, &remote_exit_pending);
-      recurse_remove_clients(target_p, comment);
+      exit_one_client(NULL, target_p, &me, comment);
     }
-} 
+
+  while ((target_p = source_p->serv->servers))
+    {
+      recurse_remove_clients(target_p, comment);
+      /*
+      ** a server marked as "KILLED" won't send a SQUIT 
+      ** in exit_one_client()   -orabidoo
+      */
+      target_p->flags |= FLAGS_KILLED;
+      exit_one_client(NULL, target_p, &me, me.name);
+    }
+}
 
 /*
 ** Remove *everything* that depends on source_p, from all lists, and sending
