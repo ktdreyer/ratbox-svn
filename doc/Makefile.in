@@ -84,6 +84,7 @@ install: install-mkdirs build
 		fi; \
 	done
 
+all:
 build:
 
 clean:
