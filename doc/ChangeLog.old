@@ -1,3 +1,6 @@
+*** 20010106_17 by davidt
+Fix m_whois for lazyleafs -- hubs were asking leafs about unknown people
+
 *** 20010106_16 by davidt
 Oops, sorry, discovered the lazylinks code moved to m_server.c, but
 slightly broken. Fixed it, and removed my duplicate code...
