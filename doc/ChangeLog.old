@@ -1,3 +1,8 @@
+*** 20001218_2 by bill
+
+- forgot to remove a conflict
+
+
 *** 20001218_1 by bill
 
 - changed all file_open() and file_close() calls to fbopen() and fbclose()
