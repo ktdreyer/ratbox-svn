@@ -47,7 +47,6 @@ void init_stats()
 void tstats(struct Client *cptr, const char *name)
 {
   struct Client*           acptr;
-  int                      i;
   struct ServerStatistics* sp;
   struct ServerStatistics  tmp;
   dlink_node *ptr;

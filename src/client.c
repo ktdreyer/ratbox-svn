@@ -1116,7 +1116,6 @@ static void exit_one_client(struct Client *cptr, struct
   struct Client* acptr;
   dlink_node *lp;
   dlink_node *next_lp;
-  dlink_node *m;
 
   if (IsServer(sptr))
     {
@@ -1310,7 +1309,6 @@ static void remove_dependents(struct Client* cptr,
                                const char* comment1)
 {
   struct Client *to;
-  int i;
   struct ConfItem *aconf;
   static char myname[HOSTLEN+1];
   dlink_node *ptr;
