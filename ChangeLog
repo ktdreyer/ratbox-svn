@@ -1,3 +1,15 @@
+androsyn    2004/08/11 10:29:38 EDT	(20040811_0)
+
+  Modified files:
+    modules/core         channels.c 
+  Log:
+  Rename a shadowed variable
+  
+  Revision  Changes    Path
+  1.2       +3 -3      ircd-ratbox/modules/core/channels.c
+
+
+
 androsyn    2004/08/10 15:49:30 EDT	(20040810_7)
 
   Modified files:
