@@ -150,21 +150,11 @@ static void free_auth_request(struct AuthRequest* request)
 static void unlink_auth_request(struct AuthRequest* request, dlink_list *list)
 {
   dlink_node *ptr;
-  dlink_node *next_ptr;
-  struct AuthRequest *auth;
-
-  for (ptr = list->head; ptr; ptr = next_ptr )
-    {
-      next_ptr = ptr->next;
-      auth = ptr->data;
-
-      if (auth == request)
-	{
-	  dlinkDelete(ptr, list);
-	  free_dlink_node(ptr);
-	  return;
-	}
-    }
+  if((ptr = dlinkFind(list, request)) != NULL)
+  {
+    dlinkDelete(ptr, list);
+    free_dlink_node(ptr);
+  }
 }
 
 /*
