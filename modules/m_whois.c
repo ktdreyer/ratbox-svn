@@ -228,7 +228,7 @@ single_whois(struct Client *source_p, struct Client *target_p, int operspy)
 	char quest[] = "?";
 	int visible;
 
-	if(target_p->name[0] == '\0')
+	if(EmptyString(target_p->name))
 		name = quest;
 	else
 		name = target_p->name;

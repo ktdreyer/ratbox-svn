@@ -627,7 +627,7 @@ do_local_user(struct Client *client_p, struct Client *source_p,
 		strlcpy(source_p->username, username, sizeof(source_p->username));
 	}
 
-	if(source_p->name[0])
+	if(!EmptyString(source_p->name))
 	{
 		/* NICK already received, now I have USER... */
 		return register_local_user(client_p, source_p, source_p->name, username);
@@ -1134,7 +1134,7 @@ set_initial_nick(struct Client *client_p, struct Client *source_p, char *nick)
 
 	/* This had to be copied here to avoid problems.. */
 	source_p->tsinfo = CurrentTime;
-	if(source_p->name[0])
+	if(!EmptyString(source_p->name))
 		del_from_client_hash(source_p->name, source_p);
 
 	strcpy(source_p->name, nick);
@@ -1679,7 +1679,7 @@ mr_pong(struct Client *client_p, struct Client *source_p, int parc, const char *
 {
 	if(parc == 2 && !EmptyString(parv[1]))
 	{
-		if(ConfigFileEntry.ping_cookie && source_p->user && source_p->name[0])
+		if(ConfigFileEntry.ping_cookie && source_p->user && !EmptyString(source_p->name))
 		{
 			unsigned long incoming_ping = strtoul(parv[1], NULL, 16);
 			if(incoming_ping)
