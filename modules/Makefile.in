@@ -88,7 +88,6 @@ SRCS =                          \
   m_topic.c \
   m_trace.c \
   m_userhost.c \
-  m_users.c \
   m_version.c \
   m_wallops.c \
   m_who.c \
