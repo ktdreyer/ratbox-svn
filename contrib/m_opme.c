@@ -82,12 +82,6 @@ int mo_opme(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   int on_vchan = 0;
   dlink_node *ptr;
   
-  if (parc < 2)
-    {
-
-      return 0;
-    }
-
   /* admins only */
   if (!IsSetOperAdmin(sptr))
     {
