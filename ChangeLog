@@ -1,3 +1,16 @@
+leeh        2005/02/02 16:55:04 EST	(20050202_3)
+
+  Modified files:
+    modules              m_etrace.c 
+  Log:
+  - tidy up etrace slightly, stop showing fullcaps for spoofed users as mirc
+    can put its external ip address in there..
+  
+  Revision  Changes    Path
+  1.14      +31 -41    ircd-ratbox/modules/m_etrace.c
+
+
+
 leeh        2005/02/02 16:41:06 EST	(20050202_2)
 
   Modified files:
