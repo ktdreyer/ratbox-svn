@@ -212,7 +212,7 @@ int     m_names( struct Client *cptr,
       /* Find users on same channel (defined by chptr) */
 
       (void)strcpy(buf, "* ");
-      if (parv[2])
+      if (parc > 2)
         {
           len = strlen(parv[2]);
           (void)strcpy(buf + 2, parv[2]);
@@ -254,7 +254,7 @@ int     m_names( struct Client *cptr,
               sendto_one(sptr, form_str(RPL_NAMREPLY),
                          me.name, parv[0], buf);
               strncpy_irc(buf, "* ", 3);
-              if (parv[2])
+              if (parc > 2)
                 strncpy_irc(buf + 2, parv[2], len + 1);
               else
                 strncpy_irc(buf + 2, chptr->chname, len + 1);
@@ -272,7 +272,7 @@ int     m_names( struct Client *cptr,
                    me.name, parv[0], buf);
     }
 
-  if (parv[2])
+  if (parc > 2)
     {
       sendto_one(sptr, form_str(RPL_ENDOFNAMES), me.name, parv[0],
                  parv[2]);
