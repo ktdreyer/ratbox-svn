@@ -257,6 +257,7 @@ static void ms_sjoin(struct Client *client_p,
 
   oldmode = &chptr->mode;
 
+#ifdef IGNORE_BOGUS_TS
   if (newts < 800000000)
     {
       sendto_realops_flags(FLAGS_DEBUG, L_ALL,
@@ -267,6 +268,7 @@ static void ms_sjoin(struct Client *client_p,
 
       newts = (oldts==0) ? oldts : 800000000;
     }
+#endif
 
   /*
    * XXX - this no doubt destroys vchans

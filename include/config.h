@@ -66,6 +66,13 @@
 #define MAX_CLIENTS     200
 #define MAX_BUFFER      60
 
+/* Ignore bogus timestamps from other servers. Yes this will desync
+ * the network, but it will allow chanops to resync with a valid non TS 0
+ *
+ * This should be enabled network wide, or not at all.
+ */
+#undef  IGNORE_BOGUS_TS
+
 #ifdef VMS
 /* *PATH - directory locations and filenames for VMS.
  *
