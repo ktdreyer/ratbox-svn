@@ -1,3 +1,12 @@
+*** 20001016_8 by toot
+. this should remove the basechan after deleting its last vchan, but didn't
+. don't bother to show possible vchans if they're already
+  in one of them.
+. there's one case where the root is empty, and there's only one
+  vchan.. just have them join that vchan.
+. displays the last nick to join each vchannel for now, and won't show empty vchans
+
+
 *** 20001016_7 by toot
 map_vchan checks root channel too
 
