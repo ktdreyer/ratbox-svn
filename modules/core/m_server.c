@@ -93,7 +93,7 @@ mr_server(struct Client *client_p, struct Client *source_p, int parc, const char
 	hop = atoi(parv[2]);
 	strlcpy(info, parv[3], sizeof(info));
 
-	client_p->name = name; /* This is a bit of a hack */
+	client_p->name = LOCAL_COPY(name); /* This is a bit of a hack */
 	/* 
 	 * Reject a direct nonTS server connection if we're TS_ONLY -orabidoo
 	 */
