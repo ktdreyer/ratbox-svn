@@ -1,3 +1,15 @@
+leeh        2002/09/14 13:57:48 UTC	(20020914_2)
+
+  Modified files:
+    src                  newconf.c 
+  Log:
+  - fixed stats_i_oper_only and stats_k_oper_only
+  
+  Revision  Changes    Path
+  7.41      +29 -11    ircd-ratbox/src/newconf.c
+
+
+
 leeh        2002/09/14 13:18:04 UTC	(20020914_1)
 
   Modified files:
