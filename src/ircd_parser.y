@@ -181,6 +181,7 @@ int   class_redirport_var;
 %token  T_BOTS
 %token  T_CCONN
 %token  T_DEBUG
+%token  T_DRONE
 %token  T_FULL
 %token  T_SKILL
 %token  T_NCHANGE
@@ -1627,6 +1628,10 @@ umode_item:	T_BOTS
               | T_CALLERID
   {
     ConfigFileEntry.oper_only_umodes |= FLAGS_CALLERID;
+  }
+              | T_DRONE
+  {
+    ConfigFileEntry.oper_only_umodes |= FLAGS_DRONE;
   } ;
 
 general_links_notice: LINKS_NOTICE '=' TYES ';'

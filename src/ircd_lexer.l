@@ -215,6 +215,7 @@ servnotice              { return T_SERVNOTICE; }
 invisible               { return T_INVISIBLE; }
 wallop                  { return T_WALLOP; }
 callerid                { return T_CALLERID; }
+drone                   { return T_DRONE; }
 .		        { return yytext[0]; }
 
 %%
