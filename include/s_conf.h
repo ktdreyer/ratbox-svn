@@ -24,6 +24,17 @@
  * $Id$
  *
  * $Log$
+ * Revision 7.18  2000/11/05 07:51:51  db
+ * - fixed stupid in m_oper.c, it wouldn't have honoured O from other servers..
+ *
+ * - removed show oper password on fail... The reason is nasty.. When
+ *   Europeans got hackered recently, irc.hemmet etc.... The kiddies were
+ *   opered up with hacked O lines.. A few opers accidentally used the
+ *   O line passwords for other servers on the hacked server... showing the
+ *   kiddies their O line passwords for yet more servers... This is a
+ *   bad idea completely. *sigh* Yes, maybe it should be up to the admins,
+ *   but it is just a bad idea I think. Sorry is-
+ *
  * Revision 7.17  2000/10/30 04:56:28  db
  * - finally moved check_client from s_bsd.c, where it really never seemed
  *   to me to belong, moved into s_conf.c
@@ -437,7 +448,6 @@ typedef struct
   int         hub; /* YES or NO */
   int         quiet_on_ban; /* YES or NO */
   int         failed_oper_notice;
-  int         show_failed_oper_passwd;
   int         show_failed_oper_id;
   int         anti_nick_flood;
   int         max_nick_time;

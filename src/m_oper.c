@@ -125,23 +125,38 @@ int m_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   if ((EmptyString(name) || EmptyString(password)))
     {
       sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
-                 me.name, parv[0], "OPER");
+		 me.name, sptr->name, "OPER");
       return 0;
     }
 
-  aconf = find_password_aconf(name,sptr);
-
-  if(aconf == NULL)
-    return 0;
+  if( (aconf = find_password_aconf(name,sptr)) == NULL)
+    {
+      sendto_one(sptr, form_str(ERR_NOOPERHOST), me.name, sptr->name);
+      if (ConfigFileEntry.failed_oper_notice && ConfigFileEntry.show_failed_oper_id)
+	{
+	  sendto_realops("Failed OPER attempt - host mismatch by %s (%s@%s)",
+			 sptr->name, sptr->username, sptr->host);
+	}
+      return 0;
+    }
 
   if ( match_oper_password(password,aconf) )
     {
-      (void)attach_conf(sptr, aconf);
+      if( attach_conf(sptr, aconf) != 0 )
+	{
+	  sendto_one(sptr,":%s NOTICE %s :Can't attach conf!",
+		     me.name,sptr->name);
+	  sendto_realops("Failed OPER attempt by %s (%s@%s) can't attach conf!",
+			 sptr->name, sptr->username, sptr->host);
+	  return 0;
+	}
+
       (void)oper_up( sptr, aconf );
 
       log(L_TRACE, "OPER %s by %s!%s@%s",
-	  name, parv[0], sptr->username, sptr->host);
+	  name, sptr->name, sptr->username, sptr->host);
       log_fname(sptr, name);
+      return 1;
     }
   else
     {
@@ -149,7 +164,7 @@ int m_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       if (ConfigFileEntry.failed_oper_notice)
 	{
 	  sendto_realops("Failed OPER attempt by %s (%s@%s)",
-			 parv[0], sptr->username, sptr->host);
+			 sptr->name, sptr->username, sptr->host);
 	}
     }
   return 0;
@@ -163,8 +178,7 @@ int m_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 */
 int mo_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
-  sendto_one(sptr, form_str(RPL_YOUREOPER),
-	     me.name, parv[0]);
+  sendto_one(sptr, form_str(RPL_YOUREOPER), me.name, parv[0]);
   SendMessageFile(sptr, &ConfigFileEntry.opermotd);
   return 1;
 }
@@ -177,10 +191,9 @@ int mo_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 */
 int ms_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
-        
   /* if message arrived from server, trust it, and set to oper */
   
-  if (IsMe(cptr) && !IsGlobalOper(sptr))
+  if (!IsGlobalOper(sptr))
     {
       if (sptr->status == STAT_CLIENT)
 	sptr->handler = OPER_HANDLER;
@@ -188,12 +201,9 @@ int ms_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       sptr->flags |= FLAGS_OPER;
       Count.oper++;
       sendto_serv_butone(cptr, ":%s MODE %s :+o", parv[0], parv[0]);
-      if (IsMe(cptr))
-        sendto_one(sptr, form_str(RPL_YOUREOPER),
-                   me.name, parv[0]);
     }
 
-  return 0;
+  return 1;
 }
 
 /*
@@ -246,12 +256,6 @@ static struct ConfItem *find_password_aconf(char *name, struct Client *sptr)
       !(aconf = find_conf_exact(name, sptr->username,
                                 inetntoa((char *)&sptr->ip), CONF_OPS)))
     {
-      sendto_one(sptr, form_str(ERR_NOOPERHOST), me.name, sptr->name);
-      if (ConfigFileEntry.failed_oper_notice && ConfigFileEntry.show_failed_oper_id)
-	{
-	  sendto_realops("Failed OPER attempt - host mismatch by %s (%s@%s)",
-			 sptr->name, sptr->username, sptr->host);
-	} /* failed_oper_notice && show_failed_oper_id */
       return 0;
     }
   return(aconf);
@@ -260,6 +264,10 @@ static struct ConfItem *find_password_aconf(char *name, struct Client *sptr)
 /*
  * match_oper_password
  *
+ * inputs	- pointer to given password
+ * 		- pointer to Conf 
+ * output	- YES or NO if match
+ * side effects	- none
  */
 
 static int match_oper_password(char *password, struct ConfItem *aconf)

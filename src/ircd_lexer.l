@@ -150,7 +150,6 @@ yes		{ return TYES; }
 
 quiet_on_ban            { return QUIET_ON_BAN; }
 failed_oper_notice      { return FAILED_OPER_NOTICE; }
-show_failed_oper_passwd { return SHOW_FAILED_OPER_PASSWD; }
 show_failed_oper_id     { return SHOW_FAILED_OPER_ID; }
 max_nick_changes        { return MAX_NICK_CHANGES; }
 max_nick_time           { return MAX_NICK_TIME; }

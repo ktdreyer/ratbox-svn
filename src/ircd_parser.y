@@ -140,7 +140,6 @@ int   class_sendq_var;
 %token  QUIET_ON_BAN
 %token  FAILED_OPER_NOTICE
 %token  SHOW_FAILED_OPER_ID
-%token  SHOW_FAILED_OPER_PASSWD
 %token  ANTI_NICK_FLOOD
 %token  MAX_NICK_TIME
 %token  MAX_NICK_CHANGES
@@ -1153,7 +1152,7 @@ general_items:      general_items general_item |
                     general_item
 
 general_item:       general_quiet_on_ban | general_failed_oper_notice |
-                    general_show_failed_oper_id | general_show_failed_oper_passwd |
+                    general_show_failed_oper_id |
                     general_anti_nick_flood | general_max_nick_time | general_max_nick_changes |
                     general_ts_warn_delta | general_ts_max_delta | general_kline_with_reason |
                     general_kline_with_connection_closed | general_warn_no_nline |
@@ -1183,16 +1182,6 @@ general_failed_oper_notice:   FAILED_OPER_NOTICE '=' TYES ';'
                         FAILED_OPER_NOTICE '=' TNO ';'
   {
     ConfigFileEntry.failed_oper_notice = 0;
-  } ;
-
-general_show_failed_oper_passwd:   SHOW_FAILED_OPER_PASSWD '=' TYES ';'
-  {
-    ConfigFileEntry.show_failed_oper_passwd = 1;
-  }
-                        |
-                        SHOW_FAILED_OPER_PASSWD '=' TNO ';'
-  {
-    ConfigFileEntry.show_failed_oper_passwd = 0;
   } ;
 
 general_show_failed_oper_id:   SHOW_FAILED_OPER_ID '=' TYES ';'
