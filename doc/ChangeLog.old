@@ -1,3 +1,9 @@
+*** 20011202_8 by leeh
+- make MODRESTART cause a rehash, to reload modules from the conf
+- rehash() was taking source_p and client_p, yet doing nothing with them,
+  so dont bother passing them
+
+
 *** 20011202_7 by leeh
 - $server -> $$server
 - #host.mask -> $#host.mask
