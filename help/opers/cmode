@@ -11,30 +11,30 @@ NO PARAMETERS:
 --------------
 
      +n     - 'No external messages'.  This will prevent any user who
-              isnt in the channel from sending messages to the channel.
+              isn't in the channel from sending messages to the channel.
 
-     +t     - 'Ops Topic'.  This will prevent any user who isnt opped,
-              or halfopped (+o/+h) from setting a channel topic.
+     +t     - 'Ops Topic'.  This will prevent any user who isn't opped,
+              or half-opped (+o/+h) from setting a channel topic.
 
      +s     - 'Secret'.  This will prevent the channel from being shown
               in a /whois, and in the channel list.
 
      +p     - 'Private'.
 
-     +m     - 'Moderated'.  This will prevent any user who isnt opped,
-              halfopped or voiced (+o/+h/+v) from talking in the channel.
+     +m     - 'Moderated'.  This will prevent any user who isn't opped,
+              half-opped or voiced (+o/+h/+v) from talking in the channel.
 
      +a     - 'Anonymous ops'.  This will stop people who join from
               seeing who has ops.  Any modes set in the channel will
               be shown as if a server set them.
 
-              When a user becomes opped or halfopped (+o/+h) they will
+              When a user becomes opped or half-opped (+o/+h) they will
               receive an op sync, where the server will op every user
               that is opped.  They will then see modes normally, and
-              have the true list of who has ops/halfops/voices
+              have the true list of who has ops/half-ops/voices
 
      +i     - 'Invite only'.  This will stop anyone from joining your
-              channel who hasnt received an /invite or whos host isnt in
+              channel who hasn't received an /invite or whose host isn't in
               the +I list.
 
 
@@ -56,7 +56,7 @@ WITH PARAMETERS:
 
               PARAMS: /mode #channel +vvvv nick1 nick2 nick3 nick4
 
-     +h     - 'Halfop'.  This will allow a user to set all of the above
+     +h     - 'Half-op'.  This will allow a user to set all of the above
               modes, (and some more below..), whilst stopping the user
               from doing harm to the channel.  Users who are +h CANNOT
               kick opped (+o) users, or set modes +h/-h/+o/-o.

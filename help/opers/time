@@ -2,5 +2,5 @@ TIME [server]
 
 The TIME command will return the server's local date and time.
 
-If an argument is supplied, the time for the server specificed
+If an argument is supplied, the time for the server specified
 will be returned.
