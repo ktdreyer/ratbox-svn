@@ -271,11 +271,16 @@ void list_one_channel(struct Client *sptr,struct Channel *chptr)
     {
       root_chptr = find_bchan(chptr);
       if(root_chptr != NULL)
-	ircsprintf(vname, "%s<!%s>", root_chptr->chname,
-		   pick_vchan_id(chptr));
+	{
+	  ircsprintf(vname, "%s<!%s>", root_chptr->chname,
+		     pick_vchan_id(chptr));
+	}
+      else
+	ircsprintf(vname, "%s<!%s>", chptr->chname, pick_vchan_id(chptr));
     }
   else
     ircsprintf(vname, "%s", chptr->chname);
+
 
   sendto_one(sptr, form_str(RPL_LIST), me.name, sptr->name,
 	     vname, chptr->users, chptr->topic);

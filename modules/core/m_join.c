@@ -168,6 +168,10 @@ int     m_join(struct Client *cptr,
 		  /* one special case here i think..
 		   * if there's only one vchan, and the root is empty
 		   * let them join that vchan
+		   *
+		   * This has to be amended with persistent channels
+		   * a vchan will have to be given an unique id
+		   * when its empty... so it can be joined with that id
 		   */
 /* XXX FIXME */
 #if 0

@@ -69,8 +69,7 @@ extern struct Channel* vchan_invites(struct Channel *chptr,
                                      struct Client *sptr);
 
 /* Valid to verify a channel is a subchan */
-#define IsVchan(chan)	(chan->vchan_list.head && \
-			 (chan->vchan_list.head->prev))
+#define IsVchan(chan)	(chan->root_chptr != 0)
 
 /* Only valid for top chan, i.e. only valid to determine if there are vchans
  * under hash table lookup of top level channel
@@ -78,8 +77,7 @@ extern struct Channel* vchan_invites(struct Channel *chptr,
 #define HasVchans(chan)	(chan->vchan_list.head)
 
 /* Valid to determine if this is the top of a set of vchans */
-#define IsVchanTop(chan) ((chan->vchan_list.head) && \
-                          (chan->vchan_list.head->prev == 0))
+#define IsVchanTop(chan) ((chan->root_chptr == 0) && (chan->vchan_list.head))
 
 #endif  /* INCLUDED_vchannel_h */
 

@@ -191,8 +191,8 @@ int     m_cjoin(struct Client *cptr,
     }
 
   m = make_dlink_node();
-  m->data = chptr;
   dlinkAdd(vchan_chptr, m, &chptr->vchan_list);
+  vchan_chptr->root_chptr = chptr;
 
   /*
   **  Complete user entry to the new channel

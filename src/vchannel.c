@@ -161,18 +161,7 @@ struct Channel* map_bchan(struct Channel *chptr, struct Client *sptr)
  */
 struct Channel* find_bchan(struct Channel *chptr)
 {
-  dlink_node *vptr;
-  struct Channel *chtmp;
-
-  for(vptr = chptr->vchan_list.head; vptr; vptr = vptr->prev)
-    {
-      chtmp = vptr->data;
-
-      if (!IsVchan(chtmp))
-	return chtmp;
-    }
-
-  return NullChn;
+  return ( chptr->root_chptr );
 }
 
 /* show available vchans */
@@ -183,7 +172,8 @@ void show_vchans(struct Client *cptr,
 {
    int no_of_vchans = 0;
 
-   no_of_vchans = dlink_list_length(&chptr->vchan_list);
+   /* include the root itself in the count */
+   no_of_vchans = dlink_list_length(&chptr->vchan_list) + 1;
 
    sendto_one(sptr, form_str(RPL_VCHANEXIST),
               me.name, sptr->name, chptr->chname, no_of_vchans);
@@ -213,7 +203,16 @@ vchan_show_ids(struct Client *sptr, struct Channel *chptr)
   cur_len = mlen;
   t = buf + mlen;
 
-  for (ptr = chptr->vchan_list.head; ptr; ptr = ptr->next )
+  if((chptr->users != 0) && !SecretChannel(chptr))
+     {
+       ircsprintf(t,"!%s ",pick_vchan_id(chptr));
+       tlen = strlen(t);
+       cur_len += tlen;
+       t += tlen;
+       reply_to_send = 1;
+     }
+
+  for (ptr = chptr->vchan_list.head; ptr; ptr = ptr->next)
      {
        chtmp = ptr->data;
 
@@ -260,6 +259,11 @@ char* pick_vchan_id(struct Channel *chptr)
   char *p;
 
   /* see if we can use the nick of who set the topic */
+
+  /* Can't since it has to be unique, this same nick may
+   * have moved to another subchannel
+   */
+#if 0
   if (chptr->topic_info)
     {
       /* XXX */
@@ -275,6 +279,7 @@ char* pick_vchan_id(struct Channel *chptr)
           return topic_nick;
         }
     }
+#endif
 
   for (lp = chptr->chanops.head; lp; lp = lp->next)
     if (!lp->next)
