@@ -1,3 +1,8 @@
+*** 20011025_1 by db
+- needed #include "hash.h"
+
+
+
 *** 20011024_8 by wcampbel
 Massive documentation update:
 Corrected some missed items in the CHALLENGE changes
