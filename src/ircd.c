@@ -529,11 +529,7 @@ static void cleanup_zombies(void *unused)
 
 int main(int argc, char *argv[])
 {
-  char buf[2048];
   /* Check to see if the user is running us as root, which is a nono */
-  ircsprintf(buf, "%d*foobar*", 0);
-  fprintf(stderr, "%s\n", buf);
-  
   if(geteuid() == 0)
   {
     fprintf(stderr, "Don't run ircd as root!!!\n");
