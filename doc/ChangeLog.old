@@ -1,3 +1,11 @@
+*** 20000116_7 by db
+- bunch of changes in order to have class names not numbers. *sigh*
+  I toyed with the idea of keeping class #'s and having class_names
+  to class #' mapping somewhere, but thats just getting silly.. sooo....
+  Here we are...
+
+
+
 *** 20000116_6 by db
 - make_class should return a 0'ed class to be safe
 
