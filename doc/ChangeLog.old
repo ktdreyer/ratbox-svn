@@ -1,3 +1,9 @@
+*** 20010426_1 by kreator
+- no need to ask for getopt() in README.FIRST, since we provide one (ejb-s
+  fix)
+- added NetBSD in tested platforms (I run hyb6&7 there)
+
+
 *** 20010425_6 by fl_
 - ifdef 0 -> if 0
 
