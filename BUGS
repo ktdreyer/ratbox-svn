@@ -29,6 +29,9 @@
       - to be fixed in beta2
 
 6.  Problem with msgfmt command building custom msgs using gettext
+    - Please ensure you are using GNU gettext version 0.10.35.
+      Other versions are untested, and some are known to be
+      incompatable.
 
 For more information see http://bugs.efnow.net
 
