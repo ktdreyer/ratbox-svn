@@ -40,24 +40,24 @@ COMMAND         - USAGE and DESCRIPTION
   SQUIT         - SQUIT <server> [reason]
                   Splits <server> away from your side of the net with
                   [reason].
-		- Requires Oper Priv: R for servers not connected to you
+                  - Requires Oper Priv: R for servers not connected to you
 
   KILL          - KILL <nick> <reason>
                   Disconnects user <nick> from the IRC server he/she
                   is connected to with reason <reason>.
-		- Requires Oper Priv: O for users not on your IRC server
+                  - Requires Oper Priv: O for users not on your IRC server
 
   STATS         - STATS <letter> [server|nick]
                   Queries server [server] (or your own server if no
                   server parameter is given) for info corresponding to
                   <letter>.
-		         (X = Admin only.)
+                         (X = Admin only.)
                   LETTER (* = Oper only.)
                   ------ (^ = Can be configured to be oper only.)
                   X A - Shows the ADNS DNS servers in use
                   * c - Shows connect blocks
                   * d - Shows D lines
-		  * e - Shows exemptions to D lines
+                  * e - Shows exemptions to D lines
                   X E - Shows Events
                   X f - Shows File Descriptors
                   * g - Shows G lines
@@ -81,15 +81,16 @@ COMMAND         - USAGE and DESCRIPTION
                   * x - Shows gecos bans (Old X: lines)
                   * y - Shows Y lines
                   * z - Shows memory stats
-		  * Z - Show ziplinks stats
+                  * Z - Show ziplinks stats
                   * ? - Shows connected servers and sendq info about them
 
   CONNECT       - CONNECT <server_A> [port] [server_B]
                   When [server_B] is used, CONNECT asks [server_B] to
                   connect to <server_A>.  Requires Oper Priv: R
-		
-		  The [port] must be specified with [server_B], this is	
-		  usually 6667.
+
+                  The [port] must be specified with [server_B], this is
+                  usually 6667.  To use the default port in the connect
+                  block, you can use 0 as the port.
 
                   When [server_B] is not used, CONNECT tries to connect
                   your server to <server_A>.
@@ -103,7 +104,7 @@ COMMAND         - USAGE and DESCRIPTION
                   Sends a WALLOPS message of <message> to all opers
                   who are umode +z.
 
-		  Server sent WALLOPS go to all opers who are umode +w.
+                  Server sent WALLOPS go to all opers who are umode +w.
 
 + OPERWALL      - OPERWALL :<message>
                   Sends an OPERWALL message of <message> to all
@@ -137,12 +138,12 @@ COMMAND         - USAGE and DESCRIPTION
                     HELP     - Re-reads this HELP file
                     CHANNELS - Forces a channel cleanup
 
-		- Requires Oper Priv: H
+                  - Requires Oper Priv: H
 
   RESTART       - RESTART server.name :[reason]
                   Restarts the IRC server.
 
-		- Requires Oper Priv: D
+                  - Requires Oper Priv: D
 
 + CLOSE         - CLOSE
                   Close any connections from clients who have not fully
@@ -152,7 +153,7 @@ COMMAND         - USAGE and DESCRIPTION
                   Terminates the IRC server with optional reason 
                   [reason]
 
-		- Requires Oper Priv: D
+                  - Requires Oper Priv: D
 
 + KLINE         - KLINE <nick|user@host> :[reason]
                   Adds a KLINE to the ircd.conf or klines.conf file which
@@ -169,17 +170,17 @@ COMMAND         - USAGE and DESCRIPTION
                   minutes as the first parameter i.e.
                   KLINE 10 <nick|user@host> :cool off for 10 minutes
 
-		  KLINE <user@host ON irc.server :[reason]
-		  will kline the user on irc.server if irc.server accepts
-		  remote klines.
+                  KLINE <user@host ON irc.server :[reason]
+                  will kline the user on irc.server if irc.server accepts
+                  remote klines.
 
-		- Requires Oper Priv: K
+                  - Requires Oper Priv: K
 
 + UNKLINE       - UNKLINE <user@host>
                   Will attempt to unkline the given <user@host>
                   Will unkline a temporary kline.
 
-		- Requires Oper Priv: U
+                  - Requires Oper Priv: U
 
 + DLINE         - DLINE <nick|ip> :[reason]
                   Adds a DLINE to the ircd.conf or klines.conf file
@@ -190,12 +191,12 @@ COMMAND         - USAGE and DESCRIPTION
                   In order to use <nick> rather than <ip>, <nick> must
                   be on your server.
 
-		- Requires Oper Priv: K
+                  - Requires Oper Priv: K
 
 + UNDLINE       - UNDLINE <ip>
                   Will attempt to undline the given <ip>
 
-		- Requires Oper Priv: U
+                  - Requires Oper Priv: U
 
 + SET           - SET <option> <value>
                   <option> can be one of the following:
@@ -223,7 +224,7 @@ COMMAND         - USAGE and DESCRIPTION
                                   custom   - Old CUSTOM_ERR messages
 
 + GLINE         - GLINE <user@host> :[reason]
-		   -- if glines are enabled --
+                   -- if glines are enabled --
                    Attempts to add a global IRC-network wide ban on
                    <user@host> for the reason [reason].
 
@@ -231,7 +232,7 @@ COMMAND         - USAGE and DESCRIPTION
                    servers to do the same GLINE within a short interval,
                    to have a GLINE triggered for a compiled time of hours.
 
-		 - Requires Oper Priv: G
+                   - Requires Oper Priv: G
 
 + UNGLINE        - UNGLINE <user@host>
                    -- if glines are enabled --
@@ -239,7 +240,7 @@ COMMAND         - USAGE and DESCRIPTION
                    This will only remove the gline from YOUR server, it
                    does not try to remove it globally.
 
-		 - Requires Oper Privs: G and U
+                   - Requires Oper Privs: G and U
 
 + TESTLINE       - TESTLINE <user@host>|ip
                    -- Looks up given user@host or user@ip 
@@ -250,21 +251,22 @@ COMMAND         - USAGE and DESCRIPTION
                    -- Creates a new vchan
                    Note: this command is optionally available to users
 
-+ RESV		 - RESV <channel|nick> :<reason>
-		   -- RESV a channel or nick
-		   Will create a resv for the given channel/nick, stopping
-		   local users from joining the channel, or using the
-		   nick.  Will not affect remote clients.
++ RESV           - RESV <channel|nick> :<reason>
+                   -- RESV a channel or nick
+                   Will create a resv for the given channel/nick, stopping
+                   local users from joining the channel, or using the
+                   nick.  Will not affect remote clients.
 
-		   If the oper is an admin, they may create a wildcard
-		   resv, for example: clones*
+                   If the oper is an admin, they may create a wildcard
+                   resv, for example: clones*
 
-+ UNRESV	 - UNRESV <channel|nick>
-		   -- Remove a RESV on a channel or nick
-		   Will attempt to remove the resv for the given 
-		   channel/nick.  If the resv is conf based, the resv
-		   will not be removed.
-		   
++ UNRESV         - UNRESV <channel|nick>
+                   -- Remove a RESV on a channel or nick
+                   Will attempt to remove the resv for the given 
+                   channel/nick.  If the resv is conf based, the resv
+                   will not be removed.
+
+
 + MODLOAD        - MODLOAD <[path/]module.so>
                    -- Load a module into the ircd
                    the optional path can be an absolute path
