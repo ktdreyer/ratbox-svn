@@ -1,3 +1,17 @@
+androsyn    2002/09/04 22:24:12 EDT	(20020905_2)
+
+  Modified files:
+    modules              m_stats.c 
+  Log:
+  Split stats G/g.
+  stats G = Glines
+  stats g = Pending glines
+  
+  Revision  Changes    Path
+  1.121     +24 -11    ircd-ratbox/modules/m_stats.c
+
+
+
 androsyn    2002/09/04 22:13:32 EDT	(20020905_1)
 
   Modified files:
