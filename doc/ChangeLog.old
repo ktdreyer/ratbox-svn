@@ -1,3 +1,8 @@
+*** 20001006_4 by db
+Make virtual channels doubly linked.
+
+
+
 *** 20001006_3 by lusky
 updated autoconf and Makefile.in to support flex when available
 
