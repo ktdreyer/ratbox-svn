@@ -1,3 +1,15 @@
+leeh        2002/07/31 18:52:59 EDT	(20020731_5)
+
+  Modified files:
+    contrib              m_ltrace.c 
+  Log:
+  - fixed ltrace wrt HIDE_SPOOF_IPS
+  
+  Revision  Changes    Path
+  1.4       +9 -2      ircd-hybrid-7/contrib/m_ltrace.c
+
+
+
 db          2002/07/31 18:52:14 EDT	(20020731_4)
 
   Modified files:
