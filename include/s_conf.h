@@ -238,7 +238,6 @@ struct config_file_entry
 	int use_egd;
 	int ping_cookie;
 	int tkline_expire_notices;
-	int use_help;
 	int use_whois_actually;
 	int disable_auth;
 	int connect_timeout;

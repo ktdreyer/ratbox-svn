@@ -42,6 +42,7 @@
 struct Client;
 struct Channel;
 struct rxconf;
+struct helpfile;
 
 struct HashEntry
 {
@@ -84,5 +85,9 @@ extern struct rxconf *hash_find_xline(const char *name);
 extern void add_to_nd_hash(const char *name);
 extern void del_from_nd_hash(const char *name);
 extern int find_nd(const char *name);
+
+extern void add_to_help_hash(const char *name, struct helpfile *hptr);
+extern void clear_help_hash(void);
+extern struct helpfile *hash_find_help(const char *name, int flags);
 
 #endif /* INCLUDED_hash_h */

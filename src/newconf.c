@@ -2456,12 +2456,6 @@ conf_set_general_disable_auth(void *data)
 }
 
 static void
-conf_set_general_use_help(void *data)
-{
-	ConfigFileEntry.use_help = *(unsigned int *) data;
-}
-
-static void
 conf_set_general_use_whois_actually(void *data)
 {
 	ConfigFileEntry.use_whois_actually = *(unsigned int *) data;
@@ -3075,7 +3069,6 @@ newconf_init()
 	add_conf_item("general", "servlink_path", CF_QSTRING, conf_set_general_servlink_path);
 	add_conf_item("general", "tkline_expire_notices", CF_YESNO,
 		      conf_set_general_tkline_expire_notices);
-	add_conf_item("general", "use_help", CF_YESNO, conf_set_general_use_help);
 	add_conf_item("general", "use_whois_actually", CF_YESNO,
 		      conf_set_general_use_whois_actually);
 	add_conf_item("general", "default_cipher_preference", CF_QSTRING,

@@ -71,6 +71,7 @@
 #include "s_newconf.h"
 #include "reject.h"
 #include "s_conf.h"
+#include "help.h"
 
 /*
  * Try and find the correct name to use with getrlimit() for setting the max.
@@ -705,6 +706,7 @@ main(int argc, char *argv[])
 	init_stats();
 	init_hooks();
 	init_reject();
+	init_help();
 	load_all_modules(1);
 #ifndef STATIC_MODULES
 	load_core_modules(1);
@@ -751,6 +753,7 @@ main(int argc, char *argv[])
 
 	check_class();
 	write_pidfile(pidFileName);
+	load_help();
 
 	ilog(L_NOTICE, "Server Ready");
 

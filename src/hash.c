@@ -43,6 +43,7 @@
 #include "msg.h"
 #include "handlers.h"
 #include "s_newconf.h"
+#include "help.h"
 
 /* New hash code */
 /*
@@ -55,6 +56,7 @@ static struct HashEntry idTable[U_MAX];
 static struct HashEntry resvTable[R_MAX];
 static struct HashEntry hostTable[HOST_MAX];
 static struct HashEntry xlineTable[R_MAX];
+static struct HashEntry helpTable[HELP_MAX];
 
 /* XXX move channel hash into channel.c or hash channel stuff in channel.c
  * into here eventually -db
@@ -122,6 +124,7 @@ init_hash(void)
 	memset(hostTable, 0, sizeof(struct HashEntry) * HOST_MAX);
 	memset(resvTable, 0, sizeof(struct HashEntry) * R_MAX);
 	memset(xlineTable, 0, sizeof(struct HashEntry) * R_MAX);
+	memset(helpTable, 0, sizeof(struct HashEntry) * HELP_MAX);
 }
 
 /* hash_nick()
@@ -229,6 +232,19 @@ hash_xline(const char *name)
 	return (h & (R_MAX - 1));
 }
 
+static unsigned int
+hash_help(const char *name)
+{
+	unsigned int h = 0;
+
+	while(*name)
+	{
+		h = (h << 4) - (h + (unsigned char) ToLower(*name++));
+	}
+
+	return (h & (HELP_MAX -1));
+}
+
 /* add_to_id_hash()
  *
  * adds an entry to the id hash table
@@ -329,6 +345,21 @@ add_to_xline_hash(const char *name, struct rxconf *xconf)
 	++xlineTable[hashv].links;
 	++xlineTable[hashv].hits;
 };
+
+void
+add_to_help_hash(const char *name, struct helpfile *hptr)
+{
+	unsigned int hashv;
+
+	if(EmptyString(name) || hptr == NULL)
+		return;
+
+	hashv = hash_help(name);
+	dlinkAddAlloc(hptr, &helpTable[hashv].list);
+
+	++helpTable[hashv].links;
+	++helpTable[hashv].hits;
+}
 
 /* del_from_id_hash()
  *
@@ -549,6 +580,26 @@ del_from_xline_hash(const char *name, struct rxconf *xconf)
 				--xlineTable[hashv].links;
 			return;
 		}
+	}
+}
+
+void
+clear_help_hash(void)
+{
+	dlink_node *ptr;
+	dlink_node *next_ptr;
+	int i;
+
+	for(i = 0; i < HELP_MAX; i++)
+	{
+		DLINK_FOREACH_SAFE(ptr, next_ptr, helpTable[i].list.head)
+		{
+			free_help(ptr->data);
+			free_dlink_node(ptr);
+		}
+
+		helpTable[i].list.head = helpTable[i].list.tail = NULL;
+		helpTable[i].list.length = 0;
 	}
 }
 
@@ -856,3 +907,26 @@ hash_find_xline(const char *name)
 	return NULL;
 }
 
+struct helpfile *
+hash_find_help(const char *name, int flags)
+{
+	struct helpfile *hptr;
+	dlink_node *ptr;
+	unsigned int hashv;
+
+	if(EmptyString(name))
+		return NULL;
+
+	hashv = hash_help(name);
+
+	DLINK_FOREACH(ptr, helpTable[hashv].list.head)
+	{
+		hptr = ptr->data;
+
+		if((irccmp(name, hptr->helpname) == 0) &&
+		   (hptr->flags & flags))
+			return hptr;
+	}
+
+	return NULL;
+}

@@ -36,12 +36,13 @@
 #include "s_log.h"
 #include "parse.h"
 #include "modules.h"
+#include "hash.h"
+#include "help.h"
 
 static int m_help(struct Client *, struct Client *, int, const char **);
 static int mo_help(struct Client *, struct Client *, int, const char **);
 static int mo_uhelp(struct Client *, struct Client *, int, const char **);
-static void dohelp(struct Client *, const char *, const char *, const char *);
-static void sendhelpfile(struct Client *, const char *, const char *, const char *);
+static void dohelp(struct Client *, int, const char *);
 
 struct Message help_msgtab = {
 	"HELP", 0, 0, 0, 0, MFLG_SLOW, 0,
@@ -67,29 +68,19 @@ m_help(struct Client *client_p, struct Client *source_p, int parc, const char *p
 {
 	static time_t last_used = 0;
 
-	if(ConfigFileEntry.use_help)
+	/* HELP is always local */
+	if((last_used + ConfigFileEntry.pace_wait_simple) > CurrentTime)
 	{
-		/* HELP is always local */
-		if((last_used + ConfigFileEntry.pace_wait_simple) > CurrentTime)
-		{
-			/* safe enough to give this on a local connect only */
-			sendto_one(source_p, form_str(RPL_LOAD2HI), me.name, parv[0]);
-			return 0;
-		}
-		else
-		{
-			last_used = CurrentTime;
-		}
-
-		if(parc > 1)
-			dohelp(source_p, UHPATH, parv[1], parv[0]);
-		else
-			dohelp(source_p, UHPATH, NULL, parv[0]);
+		/* safe enough to give this on a local connect only */
+		sendto_one(source_p, form_str(RPL_LOAD2HI), me.name, parv[0]);
+		return 0;
 	}
 	else
 	{
-		list_commands(source_p);
+		last_used = CurrentTime;
 	}
+
+	dohelp(source_p, HELP_USER, parc > 1 ? parv[1] : NULL);
 
 	return 0;
 }
@@ -101,11 +92,7 @@ m_help(struct Client *client_p, struct Client *source_p, int parc, const char *p
 static int
 mo_help(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	if(parc > 1)
-		dohelp(source_p, HPATH, parv[1], parv[0]);
-	else
-		dohelp(source_p, HPATH, NULL, parv[0]);
-
+	dohelp(source_p, HELP_OPER, parc > 1 ? parv[1] : NULL);
 	return 0;
 }
 
@@ -117,97 +104,39 @@ mo_help(struct Client *client_p, struct Client *source_p, int parc, const char *
 static int
 mo_uhelp(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	if(parc > 1)
-		dohelp(source_p, UHPATH, parv[1], parv[0]);
-	else
-		dohelp(source_p, UHPATH, NULL, parv[0]);
-
+	dohelp(source_p, HELP_USER, parc > 1 ? parv[1] : NULL);
 	return 0;
 }
 
 static void
-dohelp(struct Client *source_p, const char *hpath, const char *topic, const char *nick)
+dohelp(struct Client *source_p, int flags, const char *topic)
 {
-	char path[MAXPATHLEN + 1];
-	char ntopic[25];
-	char *p;
-	struct stat sb;
-	unsigned int i;
+	static const char ntopic[] = "index";
+	struct helpfile *hptr;
+	dlink_node *ptr;
 
-	p = ntopic;
+	if(EmptyString(topic))
+		topic = ntopic;
 
-	if(!EmptyString(topic))
+	hptr = hash_find_help(topic, flags);
+
+	if(hptr == NULL)
 	{
-		/* convert to lower case */
-		for (i = 0; topic[i] != '\0' && i < sizeof(ntopic) - 1; i++)
-		{
-			*p++ = ToLower(topic[i]);
-		}
-
-		*p = '\0';
-		
-	}
-	else
-		strcpy(ntopic, "index");	/* list available help topics */
-
-	if(strchr(ntopic, '/'))
-	{
-		sendto_one(source_p, form_str(ERR_HELPNOTFOUND), me.name, nick, ntopic);
+		sendto_one(source_p, form_str(ERR_HELPNOTFOUND),
+			   me.name, source_p->name, topic);
 		return;
 	}
 
-	if(strlen(hpath) + strlen(ntopic) + 1 > MAXPATHLEN)
+	sendto_one(source_p, form_str(RPL_HELPSTART),
+		   me.name, source_p->name, topic, hptr->firstline);
+
+	DLINK_FOREACH(ptr, hptr->contents.head)
 	{
-		sendto_one(source_p, form_str(ERR_HELPNOTFOUND), me.name, nick, ntopic);
-		return;
+		sendto_one(source_p, form_str(RPL_HELPTXT),
+			   me.name, source_p->name, topic, (const char *) ptr->data);
 	}
 
-	sprintf(path, "%s/%s", hpath, ntopic);
-
-	if(stat(path, &sb) < 0)
-	{
-		ilog(L_NOTICE, "help file %s not found", path);
-		sendto_one(source_p, form_str(ERR_HELPNOTFOUND), me.name, nick, ntopic);
-		return;
-	}
-
-	if(!S_ISREG(sb.st_mode))
-	{
-		ilog(L_NOTICE, "help file %s not found", path);
-		sendto_one(source_p, form_str(ERR_HELPNOTFOUND), me.name, nick, ntopic);
-		return;
-	}
-
-	sendhelpfile(source_p, path, ntopic, nick);
-	return;
-}
-
-static void
-sendhelpfile(struct Client *source_p, const char *path, const char *topic, const char *nick)
-{
-	FBFILE *file;
-	char line[HELPLEN];
-
-	if((file = fbopen(path, "r")) == NULL)
-	{
-		sendto_one(source_p, form_str(ERR_HELPNOTFOUND), me.name, nick, topic);
-		return;
-	}
-
-	if(fbgets(line, sizeof(line), file) == NULL)
-	{
-		sendto_one(source_p, form_str(ERR_HELPNOTFOUND), me.name, nick, topic);
-		return;
-	}
-
-	sendto_one(source_p, form_str(RPL_HELPSTART), me.name, nick, topic, line);
-
-	while (fbgets(line, sizeof(line), file))
-	{
-		sendto_one(source_p, form_str(RPL_HELPTXT), me.name, nick, topic, line);
-	}
-
-	fbclose(file);
-	sendto_one(source_p, form_str(RPL_ENDOFHELP), me.name, nick, topic);
+	sendto_one(source_p, form_str(RPL_ENDOFHELP),
+		   me.name, source_p->name, topic);
 	return;
 }

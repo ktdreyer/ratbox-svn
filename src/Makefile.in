@@ -67,6 +67,7 @@ BASE_SRCS =                     \
   fileio.c                      \
   getopt.c                      \
   hash.c                        \
+  help.c			\
   hook.c                        \
   hostmask.c			\
   irc_string.c                  \

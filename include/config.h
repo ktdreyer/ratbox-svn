@@ -299,8 +299,6 @@
 #define	USER_HEAP_SIZE		1024
 #define	DNODE_HEAP_SIZE		2048
 #define TOPIC_HEAP_SIZE		1024
-#define RXCONF_HEAP_SIZE         20
-#define SHARED_HEAP_SIZE        10
 #else /* Small Net */
 #define CHANNEL_HEAP_SIZE	256
 #define BAN_HEAP_SIZE		128
@@ -310,9 +308,12 @@
 #define	USER_HEAP_SIZE		128
 #define	DNODE_HEAP_SIZE		256
 #define TOPIC_HEAP_SIZE		256
-#define RXCONF_HEAP_SIZE         20
-#define SHARED_HEAP_SIZE        10
 #endif
+
+#define RXCONF_HEAP_SIZE        20
+#define SHARED_HEAP_SIZE        10
+#define HELPFILE_HEAP_SIZE	20
+#define HELPLINE_HEAP_SIZE	50
 
 /* DEBUGMODE is used mostly for internal development, it is likely
  * to make your client server very sluggish.

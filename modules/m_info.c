@@ -359,11 +359,6 @@ static struct InfoStruct info_table[] = {
 	 &ConfigFileEntry.ts_warn_delta,
 	 "Maximum permitted TS delta before displaying a warning"},
 	{
-	 "use_help",
-	 OUTPUT_BOOLEAN_YN,
-	 &ConfigFileEntry.use_help,
-	 "HELP is only allowed for opers"},
-	{
 	 "warn_no_nline",
 	 OUTPUT_BOOLEAN,
 	 &ConfigFileEntry.warn_no_nline,

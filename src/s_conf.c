@@ -56,6 +56,7 @@
 #include "patricia.h"
 #include "cluster.h"
 #include "reject.h"
+#include "help.h"
 
 struct config_server_hide ConfigServerHide;
 
@@ -1104,7 +1105,6 @@ set_default_conf(void)
 	ConfigFileEntry.min_nonwildcard_simple = 3;
 	ConfigFileEntry.default_floodcount = 8;
 	ConfigFileEntry.client_flood = CLIENT_FLOOD_DEFAULT;
-	ConfigFileEntry.use_help = 0;
 	ConfigFileEntry.tkline_expire_notices = 0;
 
 #ifdef IPV6
@@ -1721,7 +1721,12 @@ read_conf_files(int cold)
 	}
 
 	if(!cold)
+	{
 		clear_out_old_conf();
+		clear_help_hash();
+	}
+
+	load_help();
 
 	read_conf(conf_fbfile_in);
 	fbclose(conf_fbfile_in);
