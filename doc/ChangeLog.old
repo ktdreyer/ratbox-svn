@@ -1,3 +1,10 @@
+*** 20010128_7 by jdc
+Grumble grumble.  Put the code back in; apparently mIRC and
+others use the "feature" to obtain the clients' local IP.
+This is needed for backwards compatibility.
+
+
+
 *** 20010128_6 by fl_
 - dont burst users to the server that the user is on
 - removed useless IsOper() check
