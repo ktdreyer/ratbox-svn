@@ -1,3 +1,16 @@
+androsyn    2002/02/28 09:12:33 EST	(20020228_4)
+
+  Modified files:
+    modules              m_cjoin.c m_kline.c 
+  Log:
+  Removed a few strncpy()'s for strlcpy()
+  
+  Revision  Changes    Path
+  1.48      +2 -2      ircd-hybrid-7/modules/m_cjoin.c
+  1.98      +4 -4      ircd-hybrid-7/modules/m_kline.c
+
+
+
 androsyn    2002/02/28 09:03:51 EST	(20020228_3)
 
   Modified files:
