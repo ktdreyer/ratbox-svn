@@ -1,3 +1,12 @@
+*** 20001223_8 by toot
+. added undline/ungline to opers.txt
+. log temp klines, and check for redundancy too
+. fixed some weird stuff with tkline_time, it's always in minutes..
+. added a bit more logging for server disconnections
+. always show the full quit reason in +c
+. check "if ((x))" in MyFree
+
+
 *** 20001223_7 by adrian
 
 
