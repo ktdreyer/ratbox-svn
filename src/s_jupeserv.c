@@ -20,6 +20,7 @@
 #include "ucommand.h"
 #include "newconf.h"
 #include "hook.h"
+#include "event.h"
 
 struct server_jupe
 {
@@ -70,13 +71,17 @@ static struct service_handler jupe_service = {
 static int jupe_db_callback(void *db, int argc, char **argv, char **colnames);
 static int h_jupeserv_squit(void *name, void *unused);
 static int h_jupeserv_finburst(void *unused, void *unused2);
+static void e_jupeserv_expire(void *unused);
 
 void
 init_s_jupeserv(void)
 {
 	jupeserv_p = add_service(&jupe_service);
+
 	hook_add(h_jupeserv_squit, HOOK_SQUIT_UNKNOWN);
 	hook_add(h_jupeserv_finburst, HOOK_FINISHED_BURSTING);
+	eventAdd("e_jupeserv_expire", e_jupeserv_expire, NULL, 60);
+
 	loc_sqlite_exec(jupe_db_callback, "SELECT * FROM jupes");
 }
 
@@ -138,6 +143,25 @@ find_jupe(const char *name, dlink_list *list)
 
 	return NULL;
 }
+
+static void
+e_jupeserv_expire(void *unused)
+{
+	struct server_jupe *jupe_p;
+	dlink_node *ptr, *next_ptr;
+
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, pending_jupes.head)
+	{
+		jupe_p = ptr->data;
+
+		if(jupe_p->expire <= CURRENT_TIME)
+		{
+			dlink_delete(&jupe_p->node, &pending_jupes);
+			free_jupe(jupe_p);
+		}
+	}
+}	
 
 static int
 jupe_db_callback(void *db, int argc, char **argv, char **colnames)
@@ -374,6 +398,7 @@ s_jupeserv_calljupe(struct client *client_p, char *parv[], int parc)
 		}
 	}
 
+	jupe_p->expire = CURRENT_TIME + config_file.pending_time;
 	jupe_p->points += config_file.oper_score;
 	dlink_add_alloc(my_strdup(client_p->user->servername), &jupe_p->servers);
 
@@ -412,6 +437,7 @@ s_jupeserv_callunjupe(struct client *client_p, char *parv[], int parc)
 		jupe_p->points = config_file.unjupe_score;
 	}
 
+	jupe_p->expire = CURRENT_TIME + config_file.pending_time;
 	jupe_p->points -= config_file.oper_score;
 
 	if(jupe_p->points <= 0)

@@ -40,6 +40,7 @@ struct _config_file
 	int oper_score;
 	int jupe_score;
 	int unjupe_score;
+	int pending_time;
 };
 
 struct conf_server
