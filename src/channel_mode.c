@@ -773,7 +773,8 @@ chm_ban(struct Client *client_p, struct Client *source_p,
 	if(MyClient(source_p) && (++mode_limit > MAXMODEPARAMS))
 		return;
 
-	raw_mask = LOCAL_COPY(parv[(*parn)++]);
+	raw_mask = LOCAL_COPY(parv[(*parn)]);
+	(*parn)++;
 
 	if(IsServer(client_p))
 		mask = raw_mask;
@@ -869,7 +870,9 @@ chm_except(struct Client *client_p, struct Client *source_p,
 	if(MyClient(source_p) && (++mode_limit > MAXMODEPARAMS))
 		return;
 
-	raw_mask = LOCAL_COPY(parv[(*parn)++]);
+	raw_mask = LOCAL_COPY(parv[(*parn)]);
+	(*parn)++;
+
 	if(IsServer(client_p))
 		mask = raw_mask;
 	else
@@ -967,7 +970,9 @@ chm_invex(struct Client *client_p, struct Client *source_p,
 	if(MyClient(source_p) && (++mode_limit > MAXMODEPARAMS))
 		return;
 
-	raw_mask = LOCAL_COPY(parv[(*parn)++]);
+	raw_mask = LOCAL_COPY(parv[(*parn)]);
+	(*parn)++;
+
 	if(IsServer(client_p))
 		mask = raw_mask;
 	else
@@ -1049,7 +1054,8 @@ chm_op(struct Client *client_p, struct Client *source_p,
 		return;
 	}
 
-	opnick = LOCAL_COPY(parv[(*parn)++]);
+	opnick = LOCAL_COPY(parv[(*parn)]);
+	(*parn)++;
 
 	if((targ_p = find_chasing(source_p, opnick, NULL)) == NULL)
 	{
@@ -1115,7 +1121,8 @@ chm_voice(struct Client *client_p, struct Client *source_p,
 	if((dir == MODE_QUERY) || parc <= *parn)
 		return;
 
-	opnick = LOCAL_COPY(parv[(*parn)++]);
+	opnick = LOCAL_COPY(parv[(*parn)]);
+	(*parn)++;
 
 	if((targ_p = find_chasing(source_p, opnick, NULL)) == NULL)
 	{
@@ -1180,7 +1187,8 @@ chm_limit(struct Client *client_p, struct Client *source_p,
 
 	if((dir == MODE_ADD) && parc > *parn)
 	{
-		lstr = LOCAL_COPY(parv[(*parn)++]);
+		lstr = LOCAL_COPY(parv[(*parn)]);
+		(*parn)++;
 
 		if((limit = strtoul(lstr, NULL, 10)) <= 0)
 			return;
@@ -1235,7 +1243,8 @@ chm_key(struct Client *client_p, struct Client *source_p,
 
 	if((dir == MODE_ADD) && parc > *parn)
 	{
-		key = LOCAL_COPY(parv[(*parn)++]);
+		key = LOCAL_COPY(parv[(*parn)]);
+		(*parn)++;
 
 		if(MyClient(source_p))
 			fix_key(key);
