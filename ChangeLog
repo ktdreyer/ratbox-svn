@@ -1,3 +1,23 @@
+leeh        2004/11/19 09:08:20 EST	(20041119_4)
+
+  Modified files:
+    doc                  example.conf 
+    include              client.h 
+    src                  newconf.c service.c 
+  Log:
+  - read in the index/index-admin files to each service
+  - add a short_help flag to services, which will use the old help method of
+    simply outputting a list of commands, otherwise we output index and
+    index-admin if theyre an admin.
+  
+  Revision  Changes    Path
+  1.17      +6 -4      rserv/doc/example.conf
+  1.27      +5 -0      rserv/include/client.h
+  1.26      +1 -0      rserv/src/newconf.c
+  1.29      +77 -21    rserv/src/service.c
+
+
+
 leeh        2004/11/19 08:45:19 EST	(20041119_3)
 
   Modified files:
