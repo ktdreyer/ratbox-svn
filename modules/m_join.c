@@ -389,6 +389,11 @@ static void do_join_0(struct Client *client_p, struct Client *source_p)
   struct Channel *chptr=NULL;
   dlink_node   *lp;
 
+  /* Finish the flood grace period... */
+  if(MyClient(source_p) && !IsFloodDone(source_p))
+      flood_endgrace(source_p);
+          
+          
   sendto_server(client_p, NULL, NOCAPS, NOCAPS, 
                 ":%s JOIN 0", source_p->name);
 
