@@ -46,6 +46,7 @@ static struct server_conf *yy_server = NULL;
 
 static dlink_list yy_aconf_list;
 static dlink_list yy_oper_list;
+static dlink_list yy_shared_list;
 static struct oper_conf *yy_oper = NULL;
 
 static char *resv_reason;
@@ -1088,31 +1089,26 @@ conf_set_resv_nick(void *data)
 	yy_aconf = NULL;
 }
 
-
+/* ok, shared_oper handles the stacking, shared_flags handles adding
+ * things.. so all we need to do when we start and end a shared block, is
+ * clean up anything thats been left over.
+ */
 static int
-conf_begin_shared(struct TopConf *tc)
+conf_cleanup_shared(struct TopConf *tc)
 {
+	dlink_node *ptr, *next_ptr;
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, yy_shared_list.head)
+	{
+		free_remote_conf(ptr->data);
+		dlinkDestroy(ptr, &yy_shared_list);
+	}
+
 	if(yy_shared != NULL)
+	{
 		free_remote_conf(yy_shared);
-
-	yy_shared = make_remote_conf();
-	return 0;
-}
-
-static int
-conf_end_shared(struct TopConf *tc)
-{
-	if(EmptyString(yy_shared->server))
-		DupString(yy_shared->server, "*");
-
-	if(EmptyString(yy_shared->username))
-		DupString(yy_shared->username, "*");
-
-	if(EmptyString(yy_shared->host))
-		DupString(yy_shared->host, "*");
-
-	dlinkAddTail(yy_shared, &yy_shared->node, &shared_conf_list);
-	yy_shared = NULL;
+		yy_shared = NULL;
+	}
 
 	return 0;
 }
@@ -1120,11 +1116,14 @@ conf_end_shared(struct TopConf *tc)
 static void
 conf_set_shared_oper(void *data)
 {
-	static char splat[] = "*";
 	conf_parm_t *args = data;
 	const char *username;
-	const char *host;
 	char *p;
+
+	if(yy_shared != NULL)
+		free_remote_conf(yy_shared);
+
+	yy_shared = make_remote_conf();
 
 	if(args->next != NULL)
 	{
@@ -1134,10 +1133,11 @@ conf_set_shared_oper(void *data)
 			return;
 		}
 
-		MyFree(yy_shared->server);
 		DupString(yy_shared->server, args->v.string);
 		args = args->next;
 	}
+	else
+		DupString(yy_shared->server, "*");
 
 	if((args->type & CF_MTYPE) != CF_QSTRING)
 	{
@@ -1153,28 +1153,43 @@ conf_set_shared_oper(void *data)
 
 	username = args->v.string;
 	*p++ = '\0';
-	host = p;
 
-	if(EmptyString(host))
-		host = splat;
+	if(EmptyString(p))
+		DupString(yy_shared->host, "*");
+	else
+		DupString(yy_shared->host, p);
 
 	if(EmptyString(username))
-		username = splat;
+		DupString(yy_shared->username, "*");
+	else
+		DupString(yy_shared->username, username);
 
-	MyFree(yy_shared->username);
-	MyFree(yy_shared->host);
-	DupString(yy_shared->username, username);
-	DupString(yy_shared->host, host);
+	dlinkAddAlloc(yy_shared, &yy_shared_list);
+	yy_shared = NULL;
 }
 
 static void
 conf_set_shared_flags(void *data)
 {
 	conf_parm_t *args = data;
+	int flags;
+	dlink_node *ptr, *next_ptr;
 
-	/* if theyre setting a type, remove the 'kline' default */
-	yy_shared->flags = 0;
-	set_modes_from_table(&yy_shared->flags, "flag", shared_table, args);
+	if(yy_shared != NULL)
+		free_remote_conf(yy_shared);
+
+	set_modes_from_table(&flags, "flag", shared_table, args);
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, yy_shared_list.head)
+	{
+		yy_shared = ptr->data;
+
+		yy_shared->flags = flags;
+		dlinkDestroy(ptr, &yy_shared_list);
+		dlinkAddTail(yy_shared, &yy_shared->node, &shared_conf_list);
+	}
+
+	yy_shared = NULL;
 }
 
 static int
@@ -2138,7 +2153,7 @@ newconf_init()
 	add_conf_item("resv", "channel", CF_QSTRING, conf_set_resv_channel);
 	add_conf_item("resv", "nick", CF_QSTRING, conf_set_resv_nick);
 
-	add_top_conf("shared", conf_begin_shared, conf_end_shared, NULL);
+	add_top_conf("shared", conf_cleanup_shared, conf_cleanup_shared, NULL);
 	add_conf_item("shared", "oper", CF_QSTRING|CF_FLIST, conf_set_shared_oper);
 	add_conf_item("shared", "flags", CF_STRING | CF_FLIST, conf_set_shared_flags);
 
