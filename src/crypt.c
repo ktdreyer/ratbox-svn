@@ -1,5 +1,5 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-ratbox: an advanced Internet Relay Chat Daemon(ircd).
  *  crypt.c: Provides MD5 password crypt() functions.
  *
  *  ----------------------------------------------------------------------------

@@ -1,8 +1,12 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-ratbox: an advanced Internet Relay Chat Daemon(ircd).
  *  snprintf.c: Functions for printing to a length-limited string.
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (C) 1996-2002 Hybrid Development Team
+ *  Copyright (C) 2002 ircd-ratbox development team
+ *
+ *  Also one should have a look at the original header from mutt.  99%
+ *  of the code is original from there...
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by

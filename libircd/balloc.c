@@ -1,9 +1,10 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-ratbox: an advanced Internet Relay Chat Daemon(ircd).
  *  balloc.c: A block allocator.
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
- *  Original credit lines follow:
+ * Copyright (C) 1990 Jarkko Oikarinen and University of Oulu, Co Center
+ * Copyright (C) 1996-2002 Hybrid Development Team
+ * Copyright (C) 2002 ircd-ratbox development team
  *
  *  File:   blalloc.c
  *  Owner:  Wohali (Joan Touzet)

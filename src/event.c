@@ -1,9 +1,10 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-ratbox: an advanced Internet Relay Chat Daemon(ircd).
  *  event.c: Event functions.
  *
  *  Copyright (C) 1998-2000 Regents of the University of California
  *  Copyright (C) 2001-2002 Hybrid Development Team
+ *  Copyright (C) 2002 ircd-ratbox development team
  *
  *  Code borrowed from the squid web cache by Adrian Chadd.
  *  Original header:

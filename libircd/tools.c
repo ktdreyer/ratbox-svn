@@ -1,8 +1,9 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-ratbox: an advanced Internet Relay Chat Daemon(ircd).
  *  tools.c: Various functions needed here and there.
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (C) 1996-2002 Hybrid Development Team
+ *  Copyright (C) 2002 ircd-ratbox development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,6 +21,11 @@
  *  USA
  *
  *  $Id$
+ *
+ *  Here is the original header:
+ *
+ *  Useful stuff, ripped from places ..
+ *  adrian chadd <adrian@creative.net.au>
  *
  * When you update these functions make sure you update the ones in tools.h
  * as well!!!
