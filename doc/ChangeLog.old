@@ -1,3 +1,10 @@
+*** 20010528_6 by davidt
+- Fix autoconf to properly disable openssl on detecting a broken version
+  of OpenSSL.
+- Make autoconf print out the detected ciphers on completion, in a style
+  that matches the cipher_preference=''; line.
+
+
 *** 20010528_5 by jdc
 * Updated the _version definitions in m_clearchan, m_nickinfo, and m_opme.
 
