@@ -1,3 +1,7 @@
+*** 20010428_2 by fl_
+- shouldnt really send our name, then the path, then the reason ;P
+
+
 *** 20010428_1 by habeeb
 Modified NAMES to work with vchans.  "NAMES <channel> [vkey]".  If no
 vkey is specified it will check if you are on <channel> or one of its
