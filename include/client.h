@@ -441,7 +441,7 @@ struct exit_client_hook
 				 if (MyClient((x))) (x)->handler = OPER_HANDLER;}
 
 #define ClearOper(x)            {(x)->umodes &= ~(UMODE_OPER|UMODE_ADMIN); \
-				 if (!IsOper((x)) && !IsServer((x))) \
+				 if (MyClient((x)) && !IsOper((x)) && !IsServer((x))) \
 				  (x)->handler = CLIENT_HANDLER; }
 
 #define IsPrivileged(x)         (IsOper(x) || IsServer(x))
