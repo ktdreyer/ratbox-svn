@@ -194,3 +194,12 @@ are of the form:
 
     Q:dcc*:Dcc bots not allowed
     Q:GoodOper:GoodOper may use this nick:goodoper@oper.irc.server.com
+
+3.4 P-lines (Ports)
+
+  P-lines specify ports on which the IAuth server will listen for
+incoming Ircd server connections. They are of the form:
+
+    P:<portnum>
+
+      <portnum>   - Port number
