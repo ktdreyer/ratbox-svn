@@ -49,6 +49,8 @@ _modinit(void)
   mod_add_cmd(MSG_SET, &set_msgtab);
 }
 
+char *_version = "20001122";
+
 /*
  * set_parser - find the correct int. to return 
  * so we can switch() it.

@@ -61,6 +61,8 @@ _modinit(void)
   mod_add_cmd(MSG_STATS, &stats_msgtab);
 }
 
+char *_version = "20001122";
+
 /*
  * m_stats - STATS message handler
  *      parv[0] = sender prefix

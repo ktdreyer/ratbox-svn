@@ -42,6 +42,8 @@ _modinit(void)
   mod_add_cmd(MSG_ERROR, &error_msgtab);
 }
 
+char *_version = "20001122";
+
 /*
  * Note: At least at protocol level ERROR has only one parameter,
  * although this is called internally from other functions

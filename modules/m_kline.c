@@ -95,6 +95,8 @@ void WriteDline(const char *, struct Client *,
                 const char *, const char *, const char *);
 
 
+char *_version = "20001122";
+
 /*
  * mo_kline()
  *

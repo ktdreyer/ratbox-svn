@@ -51,6 +51,8 @@ _modinit(void)
   mod_add_cmd(MSG_SERVER, &server_msgtab);
 }
 
+char *_version = "20001122";
+
 /*
  * mr_server - SERVER message handler
  *      parv[0] = sender prefix

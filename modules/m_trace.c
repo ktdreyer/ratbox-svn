@@ -53,6 +53,8 @@ _modinit(void)
 int report_this_status(struct Client *sptr, struct Client *acptr,int dow,
 		       int link_u_p, int link_u_s);
 
+char *_version = "20001122";
+
 /*
 ** mo_trace
 **      parv[0] = sender prefix

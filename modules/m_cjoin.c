@@ -53,6 +53,8 @@ _modinit(void)
   mod_add_cmd(MSG_CJOIN, &cjoin_msgtab);
 }
 
+char *_version = "20001122";
+
 /*
 ** m_cjoin
 **      parv[0] = sender prefix

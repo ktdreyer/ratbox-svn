@@ -47,6 +47,8 @@ _modinit(void)
   mod_add_cmd(MSG_SQUIT, &squit_msgtab);
 }
 
+char *_version = "20001122";
+
 /*
  * ms_squit - SQUIT message handler
  *      parv[0] = sender prefix

@@ -41,6 +41,7 @@ _modinit(void)
   mod_add_cmd(MSG_PASS, &pass_msgtab);
 }
 
+char *_version = "20001122";
 
 /*
  * m_pass() - Added Sat, 4 March 1989

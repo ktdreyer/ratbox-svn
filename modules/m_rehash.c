@@ -47,6 +47,7 @@ _modinit(void)
   mod_add_cmd(MSG_REHASH, &rehash_msgtab);
 }
 
+char *_version = "20001122";
 
 /*
  * mo_rehash - REHASH message handler

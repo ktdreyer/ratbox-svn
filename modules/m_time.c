@@ -43,6 +43,8 @@ _modinit(void)
   mod_add_cmd(MSG_TIME, &time_msgtab);
 }
 
+char *_version = "20001122";
+
 /*
  * m_time
  *      parv[0] = sender prefix

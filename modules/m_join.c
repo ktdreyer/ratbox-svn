@@ -59,6 +59,8 @@ void do_join_0(struct Client *cptr, struct Client *sptr);
 void check_spambot_warning( struct Client *sptr, char *name );
 int can_join (struct Client *, struct Channel *, char *,int *);
 
+char *_version = "20001122";
+
 /*
 ** m_join
 **      parv[0] = sender prefix
