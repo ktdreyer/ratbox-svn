@@ -346,16 +346,31 @@ client_class:	CLASS '=' QSTRING ';'  { sendto_realops("client.name [%s]",yylval.
  *  section quarantine
  ***************************************************************************/
 
-quarantine_entry:	QUARANTINE '{' quarantine_items '}' ';'
+quarantine_entry:	QUARANTINE
+  {
+    if(yy_aconf)
+      {
+	free_conf(yy_aconf);
+	yy_aconf = NULL;
+      }
+    yy_aconf=make_conf();
+    yy_aconf->status = CONF_QUARANTINED_NICK;
+  };
+ '{' quarantine_items '}' ';' {
+  conf_add_q_line(yy_aconf);
+  yy_aconf = NULL;
+ };
 
 quarantine_items:	quarantine_items quarantine_item |
 		quarantine_item
 
 quarantine_item:	quarantine_name | quarantine_reason
 
-quarantine_name:	NAME '=' QSTRING ';'  { sendto_realops("quarantine.name [%s]",yylval.string); };
+quarantine_name:	NAME '=' QSTRING ';'  {
+  DupString(yy_aconf->host,yylval.string); };
 
-quarantine_reason:	REASON '=' QSTRING ';'  { sendto_realops("quarantine.reason [%s]",yylval.string); };
+quarantine_reason:	REASON '=' QSTRING ';'  {
+  DupString(yy_aconf->passwd,yylval.string); };
 
 /***************************************************************************
  *  section connect
