@@ -104,7 +104,7 @@ fd_set*  write_set = &writeSet;
 void close_all_connections(void)
 {
   int i;
-  for (i = 3; i < MAXCONNECTIONS; ++i) {
+  for (i = 0; i < MAXCONNECTIONS; ++i) {
     close(i);
     local[i] = 0;
   }
