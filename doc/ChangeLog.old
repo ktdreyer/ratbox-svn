@@ -1,3 +1,21 @@
+jmallett    2002/01/12 13:45:42 EST	(20020112_1)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+  Log:
+  Portability fixing
+  - if the autoconf check for working '-g' failed, don't shove '-g' down the
+    IRC_CFLAGS of an unknown compiler, if it does work, add it by default.
+    Checks for specific compilers ala TenDRA should be done if it is known
+    to produce bad code :)
+  
+  Revision  Changes    Path
+  7.112     +5 -1      ircd-hybrid-7/autoconf/configure.in
+  7.115     +184 -180  ircd-hybrid-7/configure
+
+
+
 jmallett    2002/01/12 13:38:45 EST	(20020112_0)
 
   Modified files:
