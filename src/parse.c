@@ -351,9 +351,9 @@ handle_command(struct Message *mptr, struct Client *client_p,
 	}
 
       sendto_realops_flags(FLAGS_ALL, L_ALL, 
-			   "Not enough parameters for command %s from server %s! "
-			   "(%d < %d, saw: '%s').  Disconnecting this server due to fatal error.",
-			   mptr->cmd, client_p->name, i, mptr->parameters, tbuf);
+			"Dropping server %s due to (invalid) command '%s' with only "
+			"%d arguments (expecting %d).  (Buf: '%s')",
+				client_p->name, mptr->cmd, i, mptr->parameters, tbuf);
 
       exit_client(client_p, client_p, client_p, "Not enough arguments to server command.");
       return;
