@@ -193,19 +193,8 @@ static struct Channel *parse_knock_args(struct Client *cptr,
       else
         {
           /* No key specified */
- /* XXX FIXME */
-#if 0
-          if( (!chptr->members) && (!chptr->next_vchan->next_vchan) )
-            {
-              chptr = chptr->next_vchan;
-            }
-          else
-            {
-              /* There's more than one channel, so give them a list */
-              show_vchans(cptr, sptr, chptr, "knock");
-              return NullChn;
-            }
-#endif
+          show_vchans(cptr, sptr, chptr, "knock");
+          return NullChn;
         }
     }
   else if (IsVchan(chptr))
@@ -287,19 +276,17 @@ static void send_knock(struct Client *cptr, struct Client *sptr,
       ircsprintf(message,"KNOCK: %s (%s [%s@%s] has asked for an invite)",
                  name, sptr->name, sptr->username, sptr->host);
 
-      /* XXX needs vchan support */
       sendto_channel_local(ONLY_CHANOPS,
-			   chptr,
-			   ":%s!%s@%s NOTICE %s :%s",
-			   sptr->name,
-			   sptr->username,
-			   sptr->host,
-			   chptr->chname,
-			   message);
+                          chptr,
+                          ":%s!%s@%s NOTICE %s :%s",
+                          sptr->name,
+                          sptr->username,
+                          sptr->host,
+                          name,
+                          message);
 
       /* XXX needs remote send or CAP_KNOCK or something */
     }
 
   return;
 }
-
