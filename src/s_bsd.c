@@ -871,7 +871,8 @@ read_packet(int fd, void *data)
 finish:
 #endif
   /* If we get here, we need to register for another COMM_SELECT_READ */
-  comm_setselect(cptr->fd, COMM_SELECT_READ, read_packet, cptr, 0);
+  if (cptr->fd > -1)
+      comm_setselect(cptr->fd, COMM_SELECT_READ, read_packet, cptr, 0);
 }
 
 void error_exit_client(struct Client* cptr, int error)
