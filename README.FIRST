@@ -94,7 +94,6 @@ Feature Specific Requirements:
   OpenBSD 2.8
   NetBSD 1.4
   Cygwin 1.3+ (static modules, no servlink)
-  OpenVMS/Alpha 7.2 (static modules, no servlink)
 
 - Please read doc/whats-new.txt for information about what is in this release
 

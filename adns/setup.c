@@ -564,13 +564,8 @@ int adns_init(adns_state *ads_r, adns_initflags flags, FILE *diagfile) {
   ccf_options(ads,"RES_OPTIONS",-1,res_options);
   ccf_options(ads,"ADNS_RES_OPTIONS",-1,adns_res_options);
 
-#ifndef __VMS
   readconfig(ads,"/etc/resolv.conf",0);
   readconfig(ads,"/etc/resolv-adns.conf",0);
-#else
-  ilog(L_MAIN, "Opening IRCD$CONFDIR:RESOLV.CONF (VMS)");
-  readconfig(ads,"IRCD$CONFDIR:RESOLV.CONF",0);
-#endif
   readconfigenv(ads,"RES_CONF");
   readconfigenv(ads,"ADNS_RES_CONF");
 
@@ -681,11 +676,7 @@ int adns__rereadconfig(adns_state ads)
   struct in_addr ia;
   adns__consistency(ads,0,cc_entex);
   ads->nservers = 0;	
-#ifndef __VMS
   readconfig(ads,"/etc/resolv.conf",0);
-#else
-  readconfig(ads,"[]resolv.conf",0);
-#endif
   if (!ads->nservers)
   {
       ia.s_addr= htonl(INADDR_LOOPBACK);

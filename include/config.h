@@ -29,7 +29,6 @@
 
 #include "setup.h"
 
-#ifndef __vms
 /* 
  * Directory paths and filenames for UNIX systems.
  * IRCD_PREFIX is set using ./configure --prefix, see INSTALL.
@@ -71,47 +70,6 @@
 #define LPATH    LOGPATH "/ircd.log"	/* ircd logfile */
 #define PPATH    ETCPATH "/ircd.pid"	/* pid file */
 #define OPATH    ETCPATH "/opers.motd"	/* oper MOTD file */
-
-#else /* !__vms */
-
-/* *PATH - directory locations and filenames for VMS.
- *
- * Non VMS systems see below.
- *
- * IRCD_PREFIX = prefix for all directories,
- * DPATH       = root directory of installation,
- * BINPATH     = directory for binary files,
- * ETCPATH     = directory for configuration files,
- * LOGPATH     = directory for logfiles,
- * MODPATH     = directory for autoloaded modules (disabled in VMS),
- */
-
-/* IRCD_PREFIX not needed in VMS -larne */
-/*#define IRCD_PREFIX     "IRCD$BASEDIR:"*/
-#define DPATH           "IRCD$BASEDIR:"
-#define BINPATH         "IRCD$BINDIR:"
-#define ETCPATH         "IRCD$CONFDIR:"
-#define LOGPATH         "IRCD$LOGDIR:"
-
-#undef  MODPATH
-#undef  AUTOMODPATH
-
-#define SPATH    BINPATH "IRCD.EXE"	/* server executable */
-#define SLPATH   BINPATH "SERVLINK.EXE"	/* servlink executable */
-#define CPATH    ETCPATH "IRCD.CONF"	/* config file */
-#define KPATH    ETCPATH "KLINE.CONF"	/* kline file */
-#define DLPATH   ETCPATH "DLINE.CONF"	/* dline file */
-#define XPATH	 ETCPATH "XLINE.CONF"	/* xline file */
-#define RESVPATH ETCPATH "RESV.CONF"	/* resv file */
-#define RPATH    ETCPATH "IRCD.RSA"	/* RSA private key file */
-#define MPATH    ETCPATH "IRCD.MOTD"	/* MOTD filename */
-#define LPATH    LOGPATH "IRCD.LOG"	/* logfile */
-#define PPATH    ETCPATH "IRCD.PID"	/* pid file */
-#define HPATH    ETCPATH "OPERS.TXT"	/* oper help file */
-#define UHPATH   ETCPATH "USERS.TXT"	/* user help file */
-#define OPATH    ETCPATH "OPERS.MOTD"	/* oper MOTD file */
-
-#endif /* !__vms */
 
 /* IGNORE_BOGUS_TS
  * Ignore bogus timestamps from other servers. Yes this will desync
