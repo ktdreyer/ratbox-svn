@@ -1,3 +1,11 @@
+*** 20010124_3 by db
+- partially added in "restricted=yes/no" in auth blocks
+  this is the old little i line support. Needs code in channel.c in set_mode()
+- added code to use crypt() in server passwords depending on
+  encrypted=yes/no flag in connect block
+
+
+
 *** 20010124_2 by db
 - This code will need to be revisted for IPv6, but it at least works now.
 
