@@ -1,3 +1,8 @@
+*** 20010419_10 by db
+- rewrote channel_member_names finally. first cut
+
+
+
 *** 20010419_9 by jdc
 * Added kqueue bug.
 * Added LL server channel existence bug.
