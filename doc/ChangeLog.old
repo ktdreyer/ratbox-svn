@@ -1,3 +1,8 @@
+*** 20001208_4 by db
+- UNGLINE was missing from init for m_unkline.c
+
+
+
 *** 20001208_3 by db
 - cleaned up m_gline.c module considerably, but still untested.
   Need to enable it locally =AND= have three servers at least to 
