@@ -97,33 +97,35 @@ string_to_array(char *string, int mpara, int paramcount,
   if (paramcount > MAXPARA)
     paramcount = MAXPARA;
 	
-/*  while((ap = strsep(&string, " ")) != NULL)  */
   for(ap = strtoken(&p,string," "); ap; ap = strtoken(&p, NULL, " "))
-    if(*ap != '\0') 
-      {
-	parv[(*parc)] = ap;
+    {
+      if(*ap != '\0') 
+	{
+	  parv[(*parc)] = ap;
 	
-	if (ap[0] == ':' || (mpara && (*parc >= mpara))) {
-	  char *tendp = ap;
+	  if (ap[0] == ':' || (mpara && (*parc >= mpara)))
+	    {
+	      char *tendp = ap;
 				
-	  while (*tendp++)
-	    ;
+	      while (*tendp++)
+		;
 	  
-	  if ( tendp < end ) /* more tokens to follow */
-	    ap [ strlen (ap) ] = ' '; 
-	  
-	  if (ap[0] == ':')
-	    ap++;
+	      if ( tendp <= end ) /* more tokens to follow */
+		ap [ strlen (ap) ] = ' '; 
+	      
+	      if (ap[0] == ':')
+		ap++;
 				
-	  parv[(*parc)++] = ap;
-	  break;
-	}
+	      parv[(*parc)++] = ap;
+	      break;
+	    }
 			
-	if(*parc < MAXPARA)
-	  ++(*parc);
-	else
-	  break;
-      }
+	  if(*parc < MAXPARA)
+	    ++(*parc);
+	  else
+	    break;
+	}
+    }
 	
   parv[(*parc)] = NULL;
 }
@@ -297,10 +299,10 @@ void parse(struct Client *client_p, char *pbuffer, char *bufend)
     string_to_array(s, mpara, paramcount, end, &i, para);
    
   if (mptr == (struct Message *)NULL)
-  {
-    do_numeric(numeric, client_p, from, i, para);
-    return;
-  }
+    {
+      do_numeric(numeric, client_p, from, i, para);
+      return;
+    }
 
   handle_command(mptr, client_p, from, i, para);
   /* handle_command may have called exit_client, which sets the socket
