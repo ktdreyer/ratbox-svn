@@ -1,3 +1,15 @@
+leeh        2004/03/07 20:02:45 EST	(20040308_0)
+
+  Modified files:
+    modules              m_stats.c 
+  Log:
+  - fix a core in stats L
+  
+  Revision  Changes    Path
+  1.206     +2 -2      ircd-ratbox/modules/m_stats.c
+
+
+
 leeh        2004/03/07 18:53:11 EST	(20040307_10)
 
   Modified files:
