@@ -204,14 +204,35 @@ int m_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   ** Note: "acptr->name" is used instead of "user" because we may
   **     have changed the target because of the nickname change.
   */
+
   if (IsLocOp(sptr) && !MyConnect(acptr))
     {
       sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
       return 0;
     }
+
+  if(BadPtr(parv[2]))
+    {
+      reason = sptr->name;
+    }
+  else
+    {
+      reason = strchr(parv[2],' ');
+      if(reason)
+        reason++;
+      else
+        reason = parv[2];
+    }
+
   if (IsAnOper(sptr)) /* send it normally */
-    sendto_realops("Received KILL message for %s. From %s Path: %s!%s",
-               acptr->name, parv[0], inpath, path);
+    {
+      sendto_realops("Received KILL message for %s. From %s!%s@%s Path: %s!%s",
+                 acptr->name, parv[0], sptr->name, sptr->username, sptr->host,
+                 inpath, path);
+      sendto_ops("Received KILL message for %s. From %s!%s@%s:%s",
+                 acptr->name, sptr->name, sptr->username, sptr->host,
+                 parv[0], reason);
+    }
   else
     sendto_realops_flags(FLAGS_SKILL,
                      "Received KILL message for %s. From %s",
@@ -244,19 +265,6 @@ int m_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   ** notification chasing the above kill, it won't get far
   ** anyway (as this user don't exist there any more either)
   */
-  if(BadPtr(parv[2]))
-    {
-      reason = sptr->name;
-    }
-  else
-    {
-      reason = strchr(parv[2],' ');
-      if(reason)
-        reason++;
-      else
-        reason = parv[2];
-    }
-
   if (MyConnect(acptr))
     sendto_prefix_one(acptr, sptr,":%s KILL %s :%s",
                       parv[0], acptr->name, reason);

@@ -1360,14 +1360,14 @@ flush_server_connections()
 
 #ifdef SLAVE_SERVERS
 
-extern aConfItem *u_conf;
+extern struct ConfItem *u_conf;
 
 int
 sendto_slaves(struct Client *one, char *message, char *nick, int parc, char *parv[])
 
 {
   struct Client *acptr;
-  aConfItem *aconf;
+  struct ConfItem *aconf;
 
   for(acptr = serv_cptr_list; acptr; acptr = acptr->next_server_client)
     {
@@ -1376,7 +1376,7 @@ sendto_slaves(struct Client *one, char *message, char *nick, int parc, char *par
       
       for (aconf = u_conf; aconf; aconf = aconf->next)
         {
-          if (match(acptr->name,aconf->name))
+          if (match(acptr->name,aconf->user))
             { 
               if(parc > 3)
                 sendto_one(acptr,":%s %s %s %s %s :%s",

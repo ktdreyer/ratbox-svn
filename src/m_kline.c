@@ -57,10 +57,6 @@ static char *cluster(char *);
  */
 aPendingLine *PendingLines = (aPendingLine *) NULL;
 
-#ifdef SLAVE_SERVERS
-extern aConfItem *find_special_conf(char *,int); /* defined in s_conf.c */
-#endif
-
 /*
  * LockFile routines
  */
