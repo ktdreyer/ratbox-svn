@@ -1,3 +1,30 @@
+leeh        2002/11/25 21:03:34 UTC	(20021125_7)
+
+  Modified files:
+    include              client.h s_conf.h s_user.h 
+    modules              m_challenge.c m_oper.c m_stats.c 
+    src                  class.c s_bsd.c s_conf.c s_debug.c 
+                         s_serv.c s_user.c 
+  Log:
+  - first half of my cleanup with attached confs
+    as its not finished, ircd doesnt compile yet.. :P
+  
+  Revision  Changes    Path
+  7.182     +3 -1      ircd-ratbox/include/client.h
+  7.216     +3 -5      ircd-ratbox/include/s_conf.h
+  7.20      +2 -0      ircd-ratbox/include/s_user.h
+  1.43      +5 -8      ircd-ratbox/modules/m_challenge.c
+  1.58      +58 -73    ircd-ratbox/modules/m_oper.c
+  1.133     +6 -10     ircd-ratbox/modules/m_stats.c
+  7.42      +26 -45    ircd-ratbox/src/class.c
+  7.182     +1 -1      ircd-ratbox/src/s_bsd.c
+  7.372     +65 -148   ircd-ratbox/src/s_conf.c
+  7.82      +1 -1      ircd-ratbox/src/s_debug.c
+  7.301     +4 -26     ircd-ratbox/src/s_serv.c
+  7.239     +11 -45    ircd-ratbox/src/s_user.c
+
+
+
 androsyn    2002/11/25 03:56:50 UTC	(20021125_6)
 
   Modified files:
