@@ -1,3 +1,8 @@
+*** 20000719_1 by db
+- redid to use handlers. untested, but it copmiles at least
+
+
+
 *** 20000525_1 by wnder
 a strncpy --> strncpy_irc
 fix for a potential dereference of bad ptr in vsendto_prefix_one (db)
