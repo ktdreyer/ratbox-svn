@@ -1,3 +1,22 @@
+lusky       2002/02/24 15:32:25 EST	(20020224_4)
+
+  Modified files:
+    include              config.h config.h.dist patchlevel.h 
+    src                  s_log.c 
+  Log:
+  - revved patchlevel to -7b11
+  - fixed compile warning for SYSLOG_USERS
+  - cleanup to config.h
+  - sync config.h.dist to config.h
+  
+  Revision  Changes    Path
+  7.130     +4 -4      ircd-hybrid-7/include/config.h
+  7.56      +28 -27    ircd-hybrid-7/include/config.h.dist
+  7.20      +1 -1      ircd-hybrid-7/include/patchlevel.h
+  7.38      +1 -1      ircd-hybrid-7/src/s_log.c
+
+
+
 leeh        2002/02/24 12:37:42 EST	(20020224_3)
 
   Modified files:
