@@ -34,9 +34,10 @@
 #include "stdinc.h"
 #include "handlers.h"
 #include "client.h"
-#include "common.h"     /* FALSE bleah */
+#include "common.h"     
 #include "ircd.h"
 #include "irc_string.h"
+#include "sprintf_irc.h"
 #include "numeric.h"
 #include "fdlist.h"
 #include "s_bsd.h"

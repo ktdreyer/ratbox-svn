@@ -25,6 +25,7 @@
 #include "stdinc.h"
 #include "tools.h"
 #include "irc_string.h"
+#include "sprintf_irc.h"
 #include "handlers.h"
 #include "channel.h"
 #include "client.h"
