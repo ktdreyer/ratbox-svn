@@ -1,3 +1,15 @@
+androsyn    2004/07/20 10:18:40 EDT	(20040720_0)
+
+  Modified files:
+    modules/core         m_mode.c 
+  Log:
+  This should be using DLINK_FOREACH_SAFE for removals...
+  
+  Revision  Changes    Path
+  1.110     +3 -3      ircd-ratbox/modules/core/m_mode.c
+
+
+
 leeh        2004/07/19 18:04:36 EDT	(20040719_6)
 
   Modified files:
