@@ -1,3 +1,9 @@
+*** 20001204_10 by db
+- lost a 433 (nickname in use error) somewhere in the way,
+  put it back in.. m_nick.c
+
+
+
 *** 20001204_9 by db
 - had logic wrong in can_send
 
