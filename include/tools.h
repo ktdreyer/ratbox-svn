@@ -118,7 +118,7 @@ int dlink_find_destroy(void *data, dlink_list *list);
 #ifdef __GNUC__
 #define s_assert(expr)	do						\
 	if(!(expr)) {							\
-		slog("file: %s line: %d (%s): Assertion failed: (%s)",	\
+		mlog("file: %s line: %d (%s): Assertion failed: (%s)",	\
 			__FILE__, __LINE__, __PRETTY_FUNCTION__, #expr); \
 		sendto_all(0, "file: %s line: %d (%s): Assertion failed: (%s)",\
 			__FILE__, __LINE__, __PRETTY_FUNCTION__, #expr); \
@@ -127,7 +127,7 @@ int dlink_find_destroy(void *data, dlink_list *list);
 #else
 #define s_assert(expr)	do						\
 	if(!(expr)) {							\
-		slog("file: %s line: %d: Assertion failed: (%s)",	\
+		mlog("file: %s line: %d: Assertion failed: (%s)",	\
 			__FILE__, __LINE__, #expr);                     \
 		sendto_all(0, "file: %s line: %d: Assertion failed: (%s)",\
 			__FILE__, __LINE__, #expr);                     \

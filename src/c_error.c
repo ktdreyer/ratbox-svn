@@ -22,7 +22,7 @@ c_error(struct client *client_p, const char *parv[], int parc)
         if(parc < 2 || EmptyString(parv[1]))
                 return;
 
-        slog("Connection to server %s error: (%s)",
+        mlog("Connection to server %s error: (%s)",
              server_p->name, parv[1]);
         sendto_all(UMODE_SERVER, "Connection to server %s error: (%s)",
                    server_p->name, parv[1]);

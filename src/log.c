@@ -10,14 +10,10 @@
 #include "rserv.h"
 #include "log.h"
 #include "io.h"
+#include "client.h"
+#include "service.h"
 
 static FILE *logfile;
-
-void
-init_log(void)
-{
-	open_logfile();
-}
 
 void
 open_logfile(void)
@@ -26,10 +22,35 @@ open_logfile(void)
 }
 
 void
-close_logfile(void)
+open_service_logfile(struct client *service_p)
 {
+	char buf[PATH_MAX];
+
+	snprintf(buf, sizeof(buf), "%s%s.log", LOG_DIR, lcase(service_p->service->id));
+
+	service_p->service->logfile = fopen(buf, "a");
+}
+
+void
+reopen_logfiles(void)
+{
+	struct client *service_p;
+	dlink_node *ptr;
+
 	if(logfile != NULL)
 		fclose(logfile);
+
+	open_logfile();
+
+	DLINK_FOREACH(ptr, service_list.head)
+	{
+		service_p = ptr->data;
+
+		if(service_p->service->logfile != NULL)
+			fclose(service_p->service->logfile);
+
+		open_service_logfile(service_p);
+	}
 }
 
 static const char *
@@ -49,7 +70,7 @@ smalldate(void)
 }
 
 void
-slog(const char *format, ...)
+mlog(const char *format, ...)
 {
 	char buf[BUFSIZE];
 	char buf2[BUFSIZE];
@@ -65,4 +86,23 @@ slog(const char *format, ...)
 	snprintf(buf2, sizeof(buf2), "%s %s\n", smalldate(), buf);
 	fputs(buf2, logfile);
 	fflush(logfile);
+}
+
+void
+slog(struct client *service_p, const char *format, ...)
+{
+	char buf[BUFSIZE];
+	char buf2[BUFSIZE];
+	va_list args;
+
+	if(service_p->service->logfile == NULL)
+		return;
+
+	va_start(args, format);
+	vsnprintf(buf, sizeof(buf), format, args);
+	va_end(args);
+
+	snprintf(buf2, sizeof(buf2), "%s %s\n", smalldate(), buf);
+	fputs(buf2, service_p->service->logfile);
+	fflush(service_p->service->logfile);
 }

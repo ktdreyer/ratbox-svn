@@ -32,7 +32,7 @@ add_service(struct service_handler *service)
 
 	if(strchr(service->name, '.') != NULL)
 	{
-		slog("ERR: Invalid service name %s", client_p->name);
+		mlog("ERR: Invalid service name %s", client_p->name);
 		return NULL;
 	}
 
@@ -40,12 +40,12 @@ add_service(struct service_handler *service)
 	{
 		if(IsService(client_p))
 		{
-			slog("ERR: Tried to add duplicate service %s", service->name);
+			mlog("ERR: Tried to add duplicate service %s", service->name);
 			return NULL;
 		}
 		else if(IsServer(client_p))
 		{
-			slog("ERR: A server exists with service name %s?!", service->name);
+			mlog("ERR: A server exists with service name %s?!", service->name);
 			return NULL;
 		}
 		else if(IsUser(client_p))
@@ -77,6 +77,8 @@ add_service(struct service_handler *service)
 
 	dlink_add(client_p, &client_p->listnode, &service_list);
 	add_client(client_p);
+
+	open_service_logfile(client_p);
 
         /* try and cache any help stuff */
         if(service->command != NULL)

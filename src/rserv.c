@@ -52,7 +52,7 @@ die(const char *reason)
 		sqlite_close(rserv_db);
 
 	sendto_all(0, "Services terminated: (%s)", reason);
-	slog("ratbox-services terminated: (%s)", reason);
+	mlog("ratbox-services terminated: (%s)", reason);
 	exit(1);
 }
 
@@ -116,13 +116,13 @@ write_pidfile(void)
 		snprintf(buf, sizeof(buf), "%u\n", (unsigned int) getpid());
 
 		if(fputs(buf, fb) == -1)
-			slog("ERR: Error writing to pid file %s (%s)",
+			mlog("ERR: Error writing to pid file %s (%s)",
 			     PID_PATH, strerror(errno));
 		fflush(fb);
 		fclose(fb);
 	}
 	else
-		slog("ERR: Error opening pid file %s", PID_PATH);
+		mlog("ERR: Error opening pid file %s", PID_PATH);
 }
 
 static void
@@ -176,9 +176,6 @@ main(int argc, char *argv[])
 
 	set_time();
 
-	/* log requires time is set */
-	init_log();
-
 #ifdef __CYGWIN__
         nofork = 1;
 #endif
@@ -216,7 +213,10 @@ main(int argc, char *argv[])
         if(!nofork)
         	write_pidfile();
 
-	slog("ratbox-services started");
+	/* log requires time is set */
+	open_logfile();
+
+	mlog("ratbox-services started");
 
 	signal(SIGHUP, sig_hup);
 	signal(SIGTERM, sig_term);
@@ -228,7 +228,7 @@ main(int argc, char *argv[])
 
 	if((rserv_db = sqlite_open(DB_PATH, 0, errmsg)) == NULL)
 	{
-		slog("ERR: Failed to open db file: %s", *errmsg);
+		mlog("ERR: Failed to open db file: %s", *errmsg);
 		exit(-1);
 	}
 
@@ -320,7 +320,7 @@ loc_sqlite_exec(db_callback cb, const char *format, ...)
 	va_start(args, format);
 	if((i = sqlite_exec_vprintf(rserv_db, format, cb, NULL, &errmsg, args)))
 	{
-		slog("fatal error: problem with db file: %s", errmsg);
+		mlog("fatal error: problem with db file: %s", errmsg);
 		die("problem with db file");
 	}
 	va_end(args);

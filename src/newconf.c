@@ -212,7 +212,7 @@ conf_report_error(const char *fmt, ...)
 	vsnprintf(msg, BUFSIZE, fmt, ap);
 	va_end(ap);
 
-	slog("conf error: \"%s\", line %d: %s", current_file, lineno + 1, msg);
+	mlog("conf error: \"%s\", line %d: %s", current_file, lineno + 1, msg);
 }
 
 int

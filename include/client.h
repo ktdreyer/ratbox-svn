@@ -78,6 +78,8 @@ struct service
 
 	dlink_list channels;		/* the channels this service is in */
 
+	FILE *logfile;
+
 	int flood;
         int flood_max;
         int flood_max_ignore;

@@ -238,7 +238,7 @@ u_connect(struct connection_entry *conn_p, char *parv[], int parc)
                 sendto_all(UMODE_SERVER, "Connection to server %s "
                            "disconnected by %s: (reroute to %s)",
                            server_p->name, conn_p->name, conf_p->name);
-                slog("Connection to server %s disconnected by %s: "
+                mlog("Connection to server %s disconnected by %s: "
                      "(reroute to %s)",
                      server_p->name, conn_p->name, conf_p->name);
         }
@@ -259,7 +259,7 @@ u_die(struct connection_entry *conn_p, char *parv[], int parc)
         }
 
         sendto_all(0, "Services terminated by %s", conn_p->name);
-        slog("ratbox-services terminated by %s", conn_p->name);
+        mlog("ratbox-services terminated by %s", conn_p->name);
         die("Services terminated");
 }
 
@@ -279,7 +279,7 @@ u_quit(struct connection_entry *conn_p, char *parv[], int parc)
 static void
 u_rehash(struct connection_entry *conn_p, char *parv[], int parc)
 {
-	slog("services rehashing: %s reloading config file", conn_p->name);
+	mlog("services rehashing: %s reloading config file", conn_p->name);
 	sendto_all(0, "services rehashing: %s reloading config file", conn_p->name);
 
 	rehash(0);

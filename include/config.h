@@ -6,9 +6,11 @@
  *            you must create those paths yourself.
  */
 
+#define LOG_DIR		PREFIX "/logs/"
+
 #define CONF_PATH	PREFIX "/rserv.conf"
 #define PID_PATH	PREFIX "/rserv.pid"
-#define LOG_PATH	PREFIX "/zlogfile"
+#define LOG_PATH	LOG_DIR "/services.log"
 #define HELP_PATH       PREFIX "/help/"
 #define DB_PATH		PREFIX "/rserv.db"
 

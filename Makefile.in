@@ -27,6 +27,7 @@ build:
 
 install: build
 	$(INSTALL) -m 750 -d $(PREFIX)
+	$(INSTALL) -m 750 -d $(PREFIX)/logs
 	$(INSTALL) -m 750 src/$(BIN) $(PREFIX)
 	$(INSTALL) -m 640 doc/example.conf $(PREFIX)
 	@for i in $(SUBDIRS); do \

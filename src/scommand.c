@@ -126,7 +126,7 @@ handle_scommand(const char *command, const char *parv[], int parc)
 		handle_scommand_unknown(command, parv, parc);
 
         else
-                slog("unknown prefix %s for command %s", parv[0], command);
+                mlog("unknown prefix %s for command %s", parv[0], command);
 }
 
 void
@@ -221,7 +221,7 @@ c_pong(struct client *client_p, const char *parv[], int parc)
 
         if(!(server_p->flags & FLAGS_EOB))
         {
-                slog("Connection to server %s completed", server_p->name);
+                mlog("Connection to server %s completed", server_p->name);
                 sendto_all(UMODE_SERVER, "Connection to server %s completed",
                            server_p->name);
                 server_p->flags |= FLAGS_EOB;

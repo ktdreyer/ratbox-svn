@@ -400,7 +400,7 @@ c_nick(struct client *client_p, const char *parv[], int parc)
                                 /* our uplink shouldve dealt with this. */
 				if(target_p->user->tsinfo < newts)
 				{
-					slog("PROTO: NICK %s with higher TS introduced causing collision.",
+					mlog("PROTO: NICK %s with higher TS introduced causing collision.",
 					     target_p->name);
 					return;
 				}
@@ -471,7 +471,7 @@ c_quit(struct client *client_p, const char *parv[], int parc)
 {
 	if(!IsUser(client_p))
 	{
-		slog("PROTO: QUIT received from server %s", client_p->name);
+		mlog("PROTO: QUIT received from server %s", client_p->name);
 		return;
 	}
 
@@ -496,7 +496,7 @@ c_kill(struct client *client_p, const char *parv[], int parc)
 
 	if(IsServer(target_p))
 	{
-		slog("PROTO: KILL received for server %s", target_p->name);
+		mlog("PROTO: KILL received for server %s", target_p->name);
 		return;
 	}
 
@@ -504,12 +504,12 @@ c_kill(struct client *client_p, const char *parv[], int parc)
 	if(IsService(target_p))
 	{
 		if(IsUser(client_p))
-			slog("service %s killed by %s!%s@%s{%s}",
+			mlog("service %s killed by %s!%s@%s{%s}",
 				target_p->name, client_p->name, 
 				client_p->user->username, client_p->user->host,
 				client_p->user->servername);
 		else
-			slog("service %s killed by %s",
+			mlog("service %s killed by %s",
 				target_p->name, client_p->name);
 
 		/* no kill in the last 20 seconds, reset. */
@@ -549,7 +549,7 @@ c_server(struct client *client_p, const char *parv[], int parc)
         {
                 if(irccmp(server_p->name, parv[1]))
                 {
-                        slog("Connection to server %s failed: "
+                        mlog("Connection to server %s failed: "
                              "(Servername mismatch)",
                              server_p->name);
                         (server_p->io_close)(server_p);
@@ -605,7 +605,7 @@ c_squit(struct client *client_p, const char *parv[], int parc)
 	{
 		/* returns -1 if it handled it */
 		if(hook_call(HOOK_SQUIT_UNKNOWN, (void *) parv[1], NULL) == 0)
-			slog("PROTO: SQUIT for unknown server %s", parv[1]);
+			mlog("PROTO: SQUIT for unknown server %s", parv[1]);
 
 		return;
 	}

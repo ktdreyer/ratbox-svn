@@ -172,7 +172,7 @@ read_io(void)
 			if(server_p->client_p != NULL && 
 				IsDead(server_p->client_p))
 			{
-				slog("Connection to server %s lost: "
+				mlog("Connection to server %s lost: "
 					"(Server exited)",
 					server_p->name);
 				sendto_all(UMODE_SERVER,
@@ -186,7 +186,7 @@ read_io(void)
 			else if(ConnConnecting(server_p) &&
 					((server_p->first_time + 30) <= CURRENT_TIME))
 			{
-				slog("Connection to server %s timed out",
+				mlog("Connection to server %s timed out",
 					server_p->name);
 				sendto_all(UMODE_SERVER,
 					"Connection to server %s timed out",
@@ -199,7 +199,7 @@ read_io(void)
 					((server_p->first_time + 60) <=
 					 CURRENT_TIME))
 			{
-				slog("Connection to server %s timed out",
+				mlog("Connection to server %s timed out",
 					server_p->name);
 				sendto_all(UMODE_SERVER,
 					"Connection to server %s timed out",
@@ -212,7 +212,7 @@ read_io(void)
 				((server_p->last_time + config_file.ping_time*2)
 				<= CURRENT_TIME))
 			{
-				slog("Connection to server %s "
+				mlog("Connection to server %s "
 					"lost: (Ping timeout)",
 					server_p->name);
 				sendto_all(UMODE_SERVER,
@@ -425,7 +425,7 @@ connect_to_server(void *target_server)
         else
                 conf_p = target_server;
 
-	slog("Connection to server %s/%d activated", 
+	mlog("Connection to server %s/%d activated", 
              conf_p->name, conf_p->port);
 	sendto_all(UMODE_SERVER, "Connection to server %s/%d activated",
                    conf_p->name, conf_p->port);
@@ -581,7 +581,7 @@ signon_server(struct connection_entry *conn_p)
 	if(ConnDead(conn_p))
 		return -1;
 
-	slog("Connection to server %s established", conn_p->name);
+	mlog("Connection to server %s established", conn_p->name);
 	sendto_all(UMODE_SERVER, "Connection to server %s established",
                    conn_p->name);
 
@@ -720,14 +720,14 @@ read_server(struct connection_entry *conn_p)
 	{
                 if(ignore_errno(errno))
                 {
-                        slog("Connection to server %s lost", conn_p->name);
+                        mlog("Connection to server %s lost", conn_p->name);
                         sendto_all(UMODE_SERVER,
                                    "Connection to server %s lost", 
                                    conn_p->name);
                 }
                 else
                 {
-                        slog("Connection to server %s lost: (Read error: %s)",
+                        mlog("Connection to server %s lost: (Read error: %s)",
                              conn_p->name, strerror(errno));
                         sendto_all(UMODE_SERVER,
                                    "Connection to server %s lost: "
@@ -987,7 +987,7 @@ sendto_server(const char *format, ...)
 
 	if(sock_write(server_p, buf, strlen(buf)) < 0)
 	{
-		slog("Connection to server %s lost: (Write error: %s)",
+		mlog("Connection to server %s lost: (Write error: %s)",
 		     server_p->name, strerror(errno));
 		sendto_all(UMODE_SERVER,
                            "Connection to server %s lost: (Write error: %s)",
@@ -1222,7 +1222,7 @@ sock_open(const char *host, int port, const char *vhost, int type)
 			fd = sock_create(bindres->ai_family);
 			if(fd < 0)
 			{
-				slog("Connection to %s/%d failed: (socket()/fcntl(): %s)",
+				mlog("Connection to %s/%d failed: (socket()/fcntl(): %s)",
 				     host, port, strerror(errno));
 				sendto_all(UMODE_SERVER,
 					   "Connection to %s/%d failed: (socket()/fcntl(): %s)",
@@ -1232,7 +1232,7 @@ sock_open(const char *host, int port, const char *vhost, int type)
 
 			if((bind(fd, bindres->ai_addr, bindres->ai_addrlen)) < 0)
 			{
-				slog("Connection to %s/%d failed: "
+				mlog("Connection to %s/%d failed: "
                                      "(unable to bind to %s: %s)",
 				     host, port, vhost, strerror(errno));
 				sendto_all(UMODE_SERVER,
@@ -1249,7 +1249,7 @@ sock_open(const char *host, int port, const char *vhost, int type)
 	{
 		if((hostres = gethostinfo(host, port)) == NULL)
 		{
-			slog("Connection to %s/%d failed: "
+			mlog("Connection to %s/%d failed: "
                              "(unable to resolve: %s)",
 			     host, port, host);
 			sendto_all(UMODE_SERVER,
@@ -1262,7 +1262,7 @@ sock_open(const char *host, int port, const char *vhost, int type)
 			fd = sock_create(hostres->ai_family);
 		if(fd < 0)
 		{
-			slog("Connection to %s/%d failed: (socket()/fcntl(): %s)",
+			mlog("Connection to %s/%d failed: (socket()/fcntl(): %s)",
 			     host, port, strerror(errno));
 			sendto_all(UMODE_SERVER,
 				   "Connection to %s/%d failed: (socket()/fcntl(): %s)",
@@ -1282,7 +1282,7 @@ sock_open(const char *host, int port, const char *vhost, int type)
 			fd = sock_create(AF_INET);
 		if(fd < 0)
 		{
-			slog("Connection to %s/%d failed: (socket()/fcntl(): %s)",
+			mlog("Connection to %s/%d failed: (socket()/fcntl(): %s)",
 			     host, port, strerror(errno));
 			sendto_all(UMODE_SERVER,
 				   "Connection to %s/%d failed: (socket()/fcntl(): %s)",
@@ -1317,7 +1317,7 @@ sock_open(const char *host, int port, const char *vhost, int type)
 
 	if(fd < 0)
 	{
-		slog("Connection to %s/%d failed: (socket()/fcntl(): %s)",
+		mlog("Connection to %s/%d failed: (socket()/fcntl(): %s)",
 		     host, port, strerror(errno));
 		sendto_all(UMODE_SERVER,
                            "Connection to %s/%d failed: (socket()/fcntl(): %s)",
@@ -1343,7 +1343,7 @@ sock_open(const char *host, int port, const char *vhost, int type)
 
 			if(bind(fd, (struct sockaddr *)&addr, sizeof(struct sockaddr_in)) < 0)
 			{
-				slog("Connection to %s/%d failed: "
+				mlog("Connection to %s/%d failed: "
                                      "(unable to bind to %s: %s)",
 				     host, port, vhost, strerror(errno));
 				sendto_all(UMODE_SERVER,
@@ -1363,7 +1363,7 @@ sock_open(const char *host, int port, const char *vhost, int type)
 	{
 		if((host_addr = gethostbyname(host)) == NULL)
 		{
-			slog("Connection to %s/%d failed: "
+			mlog("Connection to %s/%d failed: "
                              "(unable to resolve: %s)",
 			     host, port, host);
 			sendto_all(UMODE_SERVER,
@@ -1455,7 +1455,7 @@ static struct addrinfo *gethostinfo(char const *host, int port)
 	error = getaddrinfo(host, portbuf, &hints, &res);
 	if (error)
 	{
-		slog("gethostinfo error: %s: %s", host, gai_strerror(error));
+		mlog("gethostinfo error: %s: %s", host, gai_strerror(error));
 		return (NULL);
 	}
 	return (res);
