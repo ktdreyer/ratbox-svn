@@ -1,3 +1,8 @@
+*** 20011128_7 by db
+-fixed prototype for sento_channel_remote 
+
+
+
 *** 20011128_6 by jdc
 * include/rsa.h:
   - Remove #include <openssl/rsa.h>.  #include in include files == yuck.
