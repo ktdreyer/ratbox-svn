@@ -23,6 +23,8 @@
 
 %{
 
+#include <assert.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -47,11 +49,10 @@ extern char *ip_string;
 
 int yyparse();
 
-#define MAX_CONFS_PER_BLOCK 255
-        
-static struct ConfItem *yy_aconf;
-static struct ConfItem *yy_aconfs[MAX_CONFS_PER_BLOCK];
-static int              yy_count = 0;
+static struct ConfItem *yy_achead = NULL;
+static struct ConfItem *yy_aconf = NULL;
+static struct ConfItem *yy_aprev = NULL;
+static int              yy_acount = 0;
 static struct ConfItem *yy_hconf;
 static struct ConfItem *yy_lconf;
 
@@ -481,26 +482,57 @@ logging_log_level:     LOG_LEVEL '=' T_L_CRIT ';'
 
 oper_entry:     OPERATOR 
   {
-    if(yy_aconf)
+    struct ConfItem *yy_tmp;
+
+    yy_tmp = yy_achead;
+    while(yy_tmp)
       {
+        yy_aconf = yy_tmp;
+        yy_tmp = yy_tmp->next;
+        yy_aconf->next = NULL;
         free_conf(yy_aconf);
-        yy_aconf = (struct ConfItem *)NULL;
       }
-    yy_aconf=make_conf();
+    yy_acount = 0;
+
+    yy_achead = yy_aconf = make_conf();
     yy_aconf->status = CONF_OPERATOR;
   }
  '{' oper_items '}' ';'
   {
-    if(yy_aconf->name && yy_aconf->passwd && yy_aconf->host)
+    struct ConfItem *yy_tmp;
+    struct ConfItem *yy_next;
+
+    /* copy over settings from first struct */
+    for( yy_tmp = yy_achead->next; yy_tmp; yy_tmp = yy_tmp->next )
+    {
+      if (yy_achead->className)
+        DupString(yy_tmp->className, yy_achead->className);
+      if (yy_achead->name)
+        DupString(yy_tmp->name, yy_achead->name);
+      if (yy_achead->passwd)
+        DupString(yy_tmp->passwd, yy_achead->passwd);
+      yy_tmp->port = yy_achead->port;
+    }
+
+    for( yy_tmp = yy_achead; yy_tmp; yy_tmp = yy_next )
       {
-        conf_add_class_to_conf(yy_aconf);
-        conf_add_conf(yy_aconf);
+        yy_next = yy_tmp->next;
+        yy_tmp->next = NULL;
+
+        if(yy_tmp->name && yy_tmp->passwd && yy_tmp->host)
+          {
+            conf_add_class_to_conf(yy_tmp);
+            conf_add_conf(yy_tmp);
+          }
+        else
+          {
+            free_conf(yy_tmp);
+          }
       }
-    else
-      {
-        free_conf(yy_aconf);
-      }
-    yy_aconf = (struct ConfItem *)NULL;
+    yy_achead = NULL;
+    yy_aconf = NULL;
+    yy_aprev = NULL;
+    yy_acount = 0;
   }; 
 
 oper_items:     oper_items oper_item |
@@ -513,8 +545,8 @@ oper_item:      oper_name  | oper_user | oper_password |
 
 oper_name:      NAME '=' QSTRING ';'
   {
-    MyFree(yy_aconf->name);
-    DupString(yy_aconf->name, yylval.string);
+    MyFree(yy_achead->name);
+    DupString(yy_achead->name, yylval.string);
   };
 
 oper_user:      USER '='  QSTRING ';'
@@ -522,6 +554,13 @@ oper_user:      USER '='  QSTRING ';'
     char *p;
     char *new_user;
     char *new_host;
+
+    /* The first user= line doesn't allocate a new struct */
+    if ( yy_acount++ )
+    {
+      yy_aconf = (yy_aconf->next = make_conf());
+      yy_aconf->status = CONF_OPERATOR;
+    }
 
     if((p = strchr(yylval.string,'@')))
       {
@@ -544,57 +583,57 @@ oper_user:      USER '='  QSTRING ';'
 
 oper_password:  PASSWORD '=' QSTRING ';'
   {
-    MyFree(yy_aconf->passwd);
-    DupString(yy_aconf->passwd, yylval.string);
+    MyFree(yy_achead->passwd);
+    DupString(yy_achead->passwd, yylval.string);
   };
 
 oper_class:     CLASS '=' QSTRING ';'
   {
-    MyFree(yy_aconf->className);
-    DupString(yy_aconf->className, yylval.string);
+    MyFree(yy_achead->className);
+    DupString(yy_achead->className, yylval.string);
   };
 
 oper_global_kill: GLOBAL_KILL '=' TYES ';'
   {
-    yy_aconf->port |= CONF_OPER_GLOBAL_KILL;
+    yy_achead->port |= CONF_OPER_GLOBAL_KILL;
   }
                   |
                   GLOBAL_KILL '=' TNO ';'
   {
-    yy_aconf->port &= ~CONF_OPER_GLOBAL_KILL;
+    yy_achead->port &= ~CONF_OPER_GLOBAL_KILL;
   };
 
-oper_remote: REMOTE '=' TYES ';' { yy_aconf->port |= CONF_OPER_REMOTE;}
+oper_remote: REMOTE '=' TYES ';' { yy_achead->port |= CONF_OPER_REMOTE;}
              |
-             REMOTE '=' TNO ';' { yy_aconf->port &= ~CONF_OPER_REMOTE; } ;
+             REMOTE '=' TNO ';' { yy_achead->port &= ~CONF_OPER_REMOTE; } ;
 
-oper_kline: KLINE '=' TYES ';' { yy_aconf->port |= CONF_OPER_K;}
+oper_kline: KLINE '=' TYES ';' { yy_achead->port |= CONF_OPER_K;}
             |
-            KLINE '=' TNO ';' { yy_aconf->port &= ~CONF_OPER_K; } ;
+            KLINE '=' TNO ';' { yy_achead->port &= ~CONF_OPER_K; } ;
 
-oper_unkline: UNKLINE '=' TYES ';' { yy_aconf->port |= CONF_OPER_UNKLINE;}
+oper_unkline: UNKLINE '=' TYES ';' { yy_achead->port |= CONF_OPER_UNKLINE;}
               |
-              UNKLINE '=' TNO ';' { yy_aconf->port &= ~CONF_OPER_UNKLINE; } ;
+              UNKLINE '=' TNO ';' { yy_achead->port &= ~CONF_OPER_UNKLINE; } ;
 
-oper_gline: GLINE '=' TYES ';' { yy_aconf->port |= CONF_OPER_GLINE;}
+oper_gline: GLINE '=' TYES ';' { yy_achead->port |= CONF_OPER_GLINE;}
             |
-            GLINE '=' TNO ';' { yy_aconf->port &= ~CONF_OPER_GLINE; };
+            GLINE '=' TNO ';' { yy_achead->port &= ~CONF_OPER_GLINE; };
 
-oper_nick_changes: NICK_CHANGES '=' TYES ';' { yy_aconf->port |= CONF_OPER_N;}
+oper_nick_changes: NICK_CHANGES '=' TYES ';' { yy_achead->port |= CONF_OPER_N;}
                    |
-                   NICK_CHANGES '=' TNO ';' { yy_aconf->port &= ~CONF_OPER_N;};
+                   NICK_CHANGES '=' TNO ';' { yy_achead->port &= ~CONF_OPER_N;};
 
-oper_die: DIE '=' TYES ';' { yy_aconf->port |= CONF_OPER_DIE; }
+oper_die: DIE '=' TYES ';' { yy_achead->port |= CONF_OPER_DIE; }
           |
-          DIE '=' TNO ';' { yy_aconf->port &= ~CONF_OPER_DIE; } ;
+          DIE '=' TNO ';' { yy_achead->port &= ~CONF_OPER_DIE; } ;
 
-oper_rehash: REHASH '=' TYES ';' { yy_aconf->port |= CONF_OPER_REHASH;}
+oper_rehash: REHASH '=' TYES ';' { yy_achead->port |= CONF_OPER_REHASH;}
              |
-             REHASH '=' TNO ';' { yy_aconf->port &= ~CONF_OPER_REHASH; } ;
+             REHASH '=' TNO ';' { yy_achead->port &= ~CONF_OPER_REHASH; } ;
 
-oper_admin: ADMIN '=' TYES ';' { yy_aconf->port |= CONF_OPER_ADMIN;}
+oper_admin: ADMIN '=' TYES ';' { yy_achead->port |= CONF_OPER_ADMIN;}
             |
-            ADMIN '=' TNO ';' { yy_aconf->port &= ~CONF_OPER_ADMIN;} ;
+            ADMIN '=' TNO ';' { yy_achead->port &= ~CONF_OPER_ADMIN;} ;
 
 /***************************************************************************
  *  section class
@@ -705,54 +744,76 @@ listen_host:	HOST '=' QSTRING ';'
 
 auth_entry:   AUTH
   {
-    yy_count = 0;
-    yy_aconfs[yy_count] = make_conf();
-    yy_aconfs[yy_count]->status = CONF_CLIENT;
+    struct ConfItem *yy_tmp;
+
+    yy_tmp = yy_achead;
+    while(yy_tmp)
+      {
+        yy_aconf = yy_tmp;
+        yy_tmp = yy_tmp->next;
+        yy_aconf->next = NULL;
+        free_conf(yy_aconf);
+      }
+    yy_achead = NULL;
+    yy_aconf = NULL;
+    yy_aprev = NULL;
+
+    yy_achead = yy_aprev = yy_aconf = make_conf();
+    yy_aconf->status = CONF_CLIENT;
+    yy_acount = 0;
   }
  '{' auth_items '}' ';' 
   {
-    int i;
+    struct ConfItem *yy_tmp;
+    struct ConfItem *yy_next;
+
     /* copy over settings from first struct */
-    for( i = 1; i < yy_count; i++ )
+    for( yy_tmp = yy_achead->next; yy_tmp; yy_tmp = yy_tmp->next )
     {
-      if(yy_aconfs[0]->passwd)
-        DupString(yy_aconfs[i]->passwd, yy_aconfs[0]->passwd);
-      if(yy_aconfs[0]->name)
-        DupString(yy_aconfs[i]->name, yy_aconfs[0]->name);
-      if(yy_aconfs[0]->className)
-        DupString(yy_aconfs[i]->className, yy_aconfs[0]->className);
+      if(yy_achead->passwd)
+        DupString(yy_tmp->passwd, yy_achead->passwd);
+      if(yy_achead->name)
+        DupString(yy_tmp->name, yy_achead->name);
+      if(yy_achead->className)
+        DupString(yy_tmp->className, yy_achead->className);
 
-      yy_aconfs[i]->flags = yy_aconfs[0]->flags;
-      yy_aconfs[i]->port  = yy_aconfs[0]->port;
+      yy_tmp->flags = yy_achead->flags;
+      yy_tmp->port  = yy_achead->port;
     }
 
-    for( i = 0; i < yy_count; i++ )
+    for( yy_tmp = yy_achead; yy_tmp; yy_tmp = yy_next )
     {
-      if(yy_aconfs[i]->name == NULL)
-        DupString(yy_aconfs[i]->name,"NOMATCH");
+      yy_next = yy_tmp->next; /* yy_tmp->next is used by conf_add_conf */
+      yy_tmp->next = NULL;
 
-      conf_add_class_to_conf(yy_aconfs[i]);
+      if(yy_tmp->name == NULL)
+        DupString(yy_tmp->name,"NOMATCH");
 
-      if(yy_aconfs[i]->user == NULL)
-        DupString(yy_aconfs[i]->user,"*");
+      conf_add_class_to_conf(yy_tmp);
+
+      if(yy_tmp->user == NULL)
+        DupString(yy_tmp->user,"*");
       else
-        (void)collapse(yy_aconfs[i]->user);
+        (void)collapse(yy_tmp->user);
 
-      if(yy_aconfs[i]->host == NULL)
-        DupString(yy_aconfs[i]->host,"*");
+      if(yy_tmp->host == NULL)
+        DupString(yy_tmp->host,"*");
       else
-        (void)collapse(yy_aconfs[i]->host);
+        (void)collapse(yy_tmp->host);
 
-      if(yy_aconfs[i]->ip && yy_aconfs[i]->ip_mask)
+      if(yy_tmp->ip && yy_tmp->ip_mask)
         {
-          add_ip_Iline(yy_aconfs[i]);
+          add_ip_Iline(yy_tmp);
         }
       else
         {
-          add_conf(yy_aconfs[i]);
+          add_conf(yy_tmp);
         }
-      yy_aconfs[i] = (struct ConfItem *)NULL;
     }
+    yy_achead = NULL;
+    yy_aconf = NULL;
+    yy_aprev = NULL;
+    yy_acount = 0;
   }; 
 
 auth_items:     auth_items auth_item |
@@ -771,40 +832,41 @@ auth_user:   USER '=' QSTRING ';'
     char *new_user;
     char *new_host;
 
-    if ( yy_count > 0 )
-      {
-        yy_aconfs[yy_count] = make_conf();
-        yy_aconfs[yy_count]->status = CONF_CLIENT;
-      }
+    /* The first user= line doesn't allocate a new struct */
+    if ( yy_acount++ )
+    {
+      yy_aprev = yy_aconf;
+      yy_aconf = (yy_aconf->next = make_conf());
+      yy_aconf->status = CONF_CLIENT;
+    }
 
     if((p = strchr(yylval.string,'@')))
       {
 	*p = '\0';
 	DupString(new_user, yylval.string);
-	MyFree(yy_aconfs[yy_count]->user);
-	yy_aconfs[yy_count]->user = new_user;
+	MyFree(yy_aconf->user);
+	yy_aconf->user = new_user;
 	p++;
-	MyFree(yy_aconfs[yy_count]->host);
+	MyFree(yy_aconf->host);
 	DupString(new_host,p);
-	yy_aconfs[yy_count]->host = new_host;
+	yy_aconf->host = new_host;
       }
     else
       {
-	MyFree(yy_aconfs[yy_count]->host);
-	DupString(yy_aconfs[yy_count]->host, yylval.string);
-	DupString(yy_aconfs[yy_count]->user,"*");
+	MyFree(yy_aconf->host);
+	DupString(yy_aconf->host, yylval.string);
+	DupString(yy_aconf->user,"*");
       }
-    yy_count++;
   };
              |
         IP '=' IP_TYPE ';'
   {
     char *p;
 
-    yy_aconfs[yy_count-1]->ip = yylval.ip_entry.ip;
-    yy_aconfs[yy_count-1]->ip_mask = yylval.ip_entry.ip_mask;
-    DupString(yy_aconfs[yy_count-1]->host,ip_string);
-    if((p = strchr(yy_aconfs[yy_count-1]->host, ';')))
+    yy_aprev->ip = yylval.ip_entry.ip;
+    yy_aprev->ip_mask = yylval.ip_entry.ip_mask;
+    DupString(yy_aprev->host,ip_string);
+    if((p = strchr(yy_aprev->host, ';')))
       *p = '\0';
   }
 	     |
@@ -816,124 +878,124 @@ auth_user:   USER '=' QSTRING ';'
     yy_aconfs[yy_count-1]->ip = yylval.ip_entry.ip;
     yy_aconfs[yy_count-1]->ip_mask = yylval.ip_entry.ip_mask;
 #endif
-    DupString(yy_aconfs[yy_count-1]->host,ip_string);
-    if((p = strchr(yy_aconfs[yy_count-1]->host, ';')))
+    DupString(yy_aprev->host,ip_string);
+    if((p = strchr(yy_aprev->host, ';')))
       *p = '\0';
   };
 
 auth_passwd:  PASSWORD '=' QSTRING ';' 
   {
-    MyFree(yy_aconfs[0]->passwd);
-    DupString(yy_aconfs[0]->passwd,yylval.string);
+    MyFree(yy_achead->passwd);
+    DupString(yy_achead->passwd,yylval.string);
   };
 
 /* TYES/TNO are flipped to change the default value to YES */
 auth_spoof_notice:   SPOOF_NOTICE '=' TNO ';'
   {
-    yy_aconfs[0]->flags |= CONF_FLAGS_SPOOF_NOTICE;
+    yy_achead->flags |= CONF_FLAGS_SPOOF_NOTICE;
   }
     |
     SPOOF_NOTICE '=' TYES ';'
   {
-    yy_aconfs[0]->flags &= ~CONF_FLAGS_SPOOF_NOTICE;
+    yy_achead->flags &= ~CONF_FLAGS_SPOOF_NOTICE;
   };
 
 auth_spoof:   SPOOF '=' QSTRING ';' 
   {
-    MyFree(yy_aconfs[0]->name);
-    DupString(yy_aconfs[0]->name, yylval.string);
-    yy_aconfs[0]->flags |= CONF_FLAGS_SPOOF_IP;
+    MyFree(yy_achead->name);
+    DupString(yy_achead->name, yylval.string);
+    yy_achead->flags |= CONF_FLAGS_SPOOF_IP;
   };
 
 auth_exceed_limit:    EXCEED_LIMIT '=' TYES ';'
   {
-    yy_aconfs[0]->flags |= CONF_FLAGS_F_LINED;
+    yy_achead->flags |= CONF_FLAGS_F_LINED;
   }
                       |
                       EXCEED_LIMIT '=' TNO ';'
   {
-    yy_aconfs[0]->flags &= ~CONF_FLAGS_F_LINED;
+    yy_achead->flags &= ~CONF_FLAGS_F_LINED;
   };
 
 auth_is_restricted:    RESTRICTED '=' TYES ';'
   {
-    yy_aconfs[0]->flags |= CONF_FLAGS_RESTRICTED;
+    yy_achead->flags |= CONF_FLAGS_RESTRICTED;
   }
                       |
                       RESTRICTED '=' TNO ';'
   {
-    yy_aconfs[0]->flags &= ~CONF_FLAGS_RESTRICTED;
+    yy_achead->flags &= ~CONF_FLAGS_RESTRICTED;
   };
 
 auth_kline_exempt:    KLINE_EXEMPT '=' TYES ';'
   {
-    yy_aconfs[0]->flags |= CONF_FLAGS_E_LINED;
+    yy_achead->flags |= CONF_FLAGS_E_LINED;
   }
                       |
                       KLINE_EXEMPT '=' TNO ';'
   {
-    yy_aconfs[0]->flags &= ~CONF_FLAGS_E_LINED;
+    yy_achead->flags &= ~CONF_FLAGS_E_LINED;
   };
 
 auth_have_ident:      HAVE_IDENT '=' TYES ';'
   {
-    yy_aconfs[0]->flags |= CONF_FLAGS_NEED_IDENTD;
+    yy_achead->flags |= CONF_FLAGS_NEED_IDENTD;
   }
                       |
                       HAVE_IDENT '=' TNO ';'
   {
-    yy_aconfs[0]->flags &= ~CONF_FLAGS_NEED_IDENTD;
+    yy_achead->flags &= ~CONF_FLAGS_NEED_IDENTD;
   };
 
 auth_no_tilde:        NO_TILDE '=' TYES ';' 
   {
-    yy_aconfs[0]->flags |= CONF_FLAGS_NO_TILDE;
+    yy_achead->flags |= CONF_FLAGS_NO_TILDE;
   }
                       |
                       NO_TILDE '=' TNO ';'
   {
-    yy_aconfs[0]->flags &= ~CONF_FLAGS_NO_TILDE;
+    yy_achead->flags &= ~CONF_FLAGS_NO_TILDE;
   };
 
 auth_gline_exempt:  GLINE_EXEMPT '=' TYES ';' 
   {
-    yy_aconfs[0]->flags |= CONF_FLAGS_EXEMPTGLINE;
+    yy_achead->flags |= CONF_FLAGS_EXEMPTGLINE;
   }
                     |
                     GLINE_EXEMPT '=' TNO ';'
   {
-    yy_aconfs[0]->flags &= ~CONF_FLAGS_EXEMPTGLINE;
+    yy_achead->flags &= ~CONF_FLAGS_EXEMPTGLINE;
   };
 
 
 auth_redir_serv:    REDIRSERV '=' QSTRING ';'
   {
-    yy_aconfs[0]->flags |= CONF_FLAGS_REDIR;
-    MyFree(yy_aconfs[0]->name);
-    DupString(yy_aconfs[0]->name, yylval.string);
+    yy_achead->flags |= CONF_FLAGS_REDIR;
+    MyFree(yy_achead->name);
+    DupString(yy_achead->name, yylval.string);
   };
 
 auth_redir_port:    REDIRPORT '=' NUMBER ';'
   {
-    yy_aconfs[0]->flags |= CONF_FLAGS_REDIR;
-    yy_aconfs[0]->port = yylval.number;
+    yy_achead->flags |= CONF_FLAGS_REDIR;
+    yy_achead->port = yylval.number;
   };
 
 auth_class:   CLASS '=' QSTRING ';'
   {
-    if (yy_aconfs[0]->className == NULL)
+    if (yy_achead->className == NULL)
       {
-	DupString(yy_aconfs[0]->className, yylval.string);
+	DupString(yy_achead->className, yylval.string);
       }
   };
 
 auth_persistant: PERSISTANT '=' TYES ';'
   {
-   yy_aconfs[0]->flags |= CONF_FLAGS_PERSISTANT;
+   yy_achead->flags |= CONF_FLAGS_PERSISTANT;
   }
   |            PERSISTANT '=' TNO ';'
   {
-   yy_aconfs[0]->flags &= CONF_FLAGS_PERSISTANT;
+   yy_achead->flags &= CONF_FLAGS_PERSISTANT;
   };
 
 /***************************************************************************
