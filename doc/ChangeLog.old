@@ -1,3 +1,9 @@
+*** 20010117_7 by fl_
+- added +l for locops
+- removed sendto_local_opers, replaced it with sendto_realops_flags_opers
+- therell be summat else.. I should really document it too..
+
+
 *** 20010117_6 by davidt
 Fixed format bug found by bysin in ts_warn.
 
