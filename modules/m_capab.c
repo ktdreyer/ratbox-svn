@@ -33,7 +33,7 @@
 
 struct Message capab_msgtab = {
   MSG_CAPAB, 0, 0, MFLG_SLOW, 0,
-  {mr_capab, m_error, m_error, m_error}
+  {mr_capab, m_error, mr_capab, m_error}
 };
 
 void
@@ -62,8 +62,10 @@ int mr_capab(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   char* p;
   char* s;
 
+#if 0
   if ((!IsUnknown(cptr) && !IsHandshake(cptr)) || parc < 2)
     return 0;
+#endif
 
   if (cptr->localClient->caps)
     return exit_client(cptr, cptr, cptr, "CAPAB received twice");
