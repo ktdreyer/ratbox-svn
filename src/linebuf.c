@@ -626,80 +626,6 @@ linebuf_flush(int fd, buf_head_t * bufhead)
 {
 	buf_line_t *bufline;
 	int retval;
-#ifdef HAVE_WRITEV
-	dlink_node *ptr;
-	int x = 0, y;
-	int xret;
-#ifndef UIO_MAXIOV
-#define UIO_MAXIOV 16
-#endif
-	static struct iovec vec[UIO_MAXIOV];
-	
-        /* Check we actually have a first buffer */
-	if(bufhead->list.head == NULL)
-	{
-			/* nope, so we return none .. */
-	        errno = EWOULDBLOCK;
-		return -1;
-        }
- 	
-        ptr = bufhead->list.head;   
-
-        do
-        {
-		if(ptr == NULL)
-			break;
-		bufline = ptr->data;
-	
-		if(!bufline->terminated)
-			break;
-	        if(bufline->flushing)
-                {
-	                vec[x].iov_base = bufline->buf + bufhead->writeofs;
-			vec[x].iov_len = bufline->len - bufhead->writeofs;
-	        }
-	 	else {
-	 	        vec[x].iov_base = bufline->buf;
-                        vec[x].iov_len = bufline->len;
-		}
-		ptr = ptr->next;
-        } while(++x < UIO_MAXIOV);
-
-        if(x == 0)
-	{
-	 	errno = EWOULDBLOCK;
-		return -1;
-	}
-	 
-	xret = retval = writev(fd, vec, x);
-	if(retval <= 0)
-	        return retval;
-
-	ptr = bufhead->list.head;
-
-	for(y = 0; y < x; y++)   
-	{
-	 	bufline = ptr->data;
-		if((bufline->flushing == 0 && xret >= bufline->len) || (bufline->flushing == 1 && xret >= bufline->len - bufhead->writeofs))
-		{
-         		bufhead->writeofs = 0;
-         	 	if(bufline->flushing == 0)
-	         	 	xret -= bufline->len;
-	 	 	else
-	 	 		xret -= bufhead->writeofs;
-	 	 		
-	 	 	ptr = ptr->next;
-	 	 	s_assert(bufhead->len >= 0);
-	 	 	linebuf_done_line(bufhead, bufline, bufhead->list.head);
-	 	} else {
-         	        bufline->flushing = 1;
-		 	bufhead->writeofs += xret;
-	 	        break;
-	 	}
-	}
-	 
-	
-#else /* HAVE_WRITEV */	
 	/* Check we actually have a first buffer */
 	if(bufhead->list.head == NULL)
 	{
@@ -743,7 +669,6 @@ linebuf_flush(int fd, buf_head_t * bufhead)
 	}
 
 	/* Return line length */
-#endif /* HAVE_WRITEV */
 	return retval;
 }
 
