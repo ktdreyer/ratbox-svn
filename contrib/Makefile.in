@@ -20,9 +20,9 @@ AUTOMODULEDIR	= @prefix@/modules
 SSL_LIBS	= @SSL_LIBS@
 SSL_INCLUDES	= @SSL_INCLUDES@
 
-IRCDLIBS	= @LIBS@ @SSL_LIBS@
+IRCDLIBS	= @LIBS@ $(SSL_LIBS)
 
-INCLUDES	= -I../include @SSL_INCLUDES@
+INCLUDES	= -I../include $(SSL_INCLUDES)
 CPPFLAGS	= ${INCLUDES} @CPPFLAGS@
 
 SRCS =                          \

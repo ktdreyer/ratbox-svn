@@ -31,9 +31,12 @@ MANPAGES        = ircd.8
 CONFS		= example.conf opers.txt
 DEFAULTCONFS	= ircd.motd kline.conf
 
-IRCDLIBS	= @LIBS@
+SSL_LIBS	= @SSL_LIBS@
+SSL_INCLUDES	= @SSL_INCLUDES@
 
-INCLUDES	= -I../include
+IRCDLIBS	= @LIBS@ $(SSL_LIBS)
+
+INCLUDES	= -I../include $(SSL_INCLUDES)
 CPPFLAGS	= ${INCLUDES} @CPPFLAGS@
  
 install-mkdirs:
