@@ -90,8 +90,4 @@ extern void add_to_help_hash(const char *name, struct helpfile *hptr);
 extern void clear_help_hash(void);
 extern struct helpfile *hash_find_help(const char *name, int flags);
 
-#ifdef IMFLMYISPSUCKS
-extern void help_hash_stats(struct Client *);
-#endif
-
 #endif /* INCLUDED_hash_h */

@@ -206,7 +206,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	/* Remote is sending users to a permanent channel.. we need to drop our
 	 * version and use theirs, to keep compatibility -- fl */
-	else if(chptr->users == 0 && parv[4 + args][0])
+	else if(dlink_list_length(&chptr->members) == 0 && parv[4 + args][0])
 	{
 		keep_our_modes = NO;
 		chptr->channelts = tstosend = newts;
@@ -220,7 +220,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 	}
 
 	/* remote is bursting a persistent channel to us, ignore it */
-	else if(chptr->users == 0 && !parv[4 + args][0])
+	else if(dlink_list_length(&chptr->members) == 0 && !parv[4 + args][0])
 		return 0;
 
 	/* It isnt a perm channel, do normal timestamp rules */

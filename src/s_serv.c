@@ -1490,7 +1490,7 @@ server_burst(struct Client *client_p)
 	DLINK_FOREACH(ptr, global_channel_list.head)
 	{
 		chptr = ptr->data;
-		if(chptr->users > 0)
+		if(dlink_list_length(&chptr->members) > 0)
 		{
 			send_channel_modes(client_p, chptr);
 			hinfo.chptr = chptr;

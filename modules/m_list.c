@@ -47,7 +47,6 @@
 static int m_list(struct Client *, struct Client *, int, const char **);
 static int mo_list(struct Client *, struct Client *, int, const char **);
 static int list_all_channels(struct Client *);
-static void list_one_channel(struct Client *, struct Channel *);
 
 struct Message list_msgtab = {
 	"LIST", 0, 0, 0, 0, MFLG_SLOW, 0,
@@ -154,7 +153,10 @@ list_all_channels(struct Client *source_p)
 		if(SecretChannel(chptr) && !IsMember(source_p, chptr))
 			continue;
 
-		list_one_channel(source_p, chptr);
+		sendto_one(source_p, form_str(RPL_LIST), 
+			   me.name, source_p->name, chptr->chname, 
+			   dlink_list_length(&chptr->members), 
+			   chptr->topic == NULL ? "" : chptr->topic);
 	}
 
 	sendto_one(source_p, form_str(RPL_LISTEND), me.name, source_p->name);
@@ -199,24 +201,10 @@ list_named_channel(struct Client *source_p, const char *name)
 	ircsprintf(id_and_topic, "%s", chptr->topic == NULL ? "" : chptr->topic);
 
 	if(ShowChannel(source_p, chptr))
-		sendto_one(source_p, form_str(RPL_LIST), me.name, source_p->name,
-			   chptr->chname, chptr->users, id_and_topic);
+		sendto_one(source_p, form_str(RPL_LIST),
+			   me.name, source_p->name, chptr->chname, 
+			   dlink_list_length(&chptr->members), id_and_topic);
 
 	sendto_one(source_p, form_str(RPL_LISTEND), me.name, source_p->name);
 	return 0;
-}
-
-/*
- * list_one_channel
- *
- * inputs       - client pointer to return result to
- *              - pointer to channel to list
- * ouput	- none
- * side effects -
- */
-static void
-list_one_channel(struct Client *source_p, struct Channel *chptr)
-{
-	sendto_one(source_p, form_str(RPL_LIST), me.name, source_p->name,
-		   chptr->chname, chptr->users, chptr->topic == NULL ? "" : chptr->topic);
 }

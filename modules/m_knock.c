@@ -163,8 +163,9 @@ parse_knock_local(struct Client *client_p,
 		return;
 	}
 
-	if(!((chptr->mode.mode & MODE_INVITEONLY) ||
-	     (*chptr->mode.key) || (chptr->mode.limit && chptr->users >= chptr->mode.limit)))
+	if(!((chptr->mode.mode & MODE_INVITEONLY) || (*chptr->mode.key) || 
+	     (chptr->mode.limit && 
+	      dlink_list_length(&chptr->members) >= chptr->mode.limit)))
 	{
 		sendto_one(source_p, form_str(ERR_CHANOPEN), me.name, source_p->name, name);
 		return;
@@ -232,7 +233,8 @@ parse_knock_remote(struct Client *client_p, struct Client *source_p, int parc, c
 		return;
 
 	if(!((chptr->mode.mode & MODE_INVITEONLY) ||
-	     (*chptr->mode.key) || (chptr->mode.limit && chptr->users >= chptr->mode.limit)))
+	     (*chptr->mode.key) || (chptr->mode.limit && 
+	      dlink_list_length(&chptr->members) >= chptr->mode.limit)))
 		return;
 
 	if(chptr)

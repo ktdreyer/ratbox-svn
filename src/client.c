@@ -1981,21 +1981,20 @@ free_user(struct User *user, struct Client *client_p)
 		/*
 		 * sanity check
 		 */
-		if(user->joined || user->refcnt < 0 || user->invited.head || user->channel.head)
+		if(user->refcnt < 0 || user->invited.head || user->channel.head)
 		{
 			sendto_realops_flags(UMODE_ALL, L_ALL,
-					     "* %#lx user (%s!%s@%s) %#lx %#lx %#lx %d %d *",
+					     "* %#lx user (%s!%s@%s) %#lx %#lx %#lx %lu %d *",
 					     (unsigned long) client_p,
 					     client_p ? client_p->
 					     name : "<noname>",
 					     client_p->username,
 					     client_p->host,
 					     (unsigned long) user,
-					     (unsigned long) user->invited.
-					     head,
-					     (unsigned long) user->channel.
-					     head, user->joined, user->refcnt);
-			s_assert(!user->joined);
+					     (unsigned long) user->invited.head,
+					     (unsigned long) user->channel.head, 
+					     dlink_list_length(&user->channel),
+					     user->refcnt);
 			s_assert(!user->refcnt);
 			s_assert(!user->invited.head);
 			s_assert(!user->channel.head);

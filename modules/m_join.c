@@ -169,7 +169,7 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 			if(IsMember(source_p, chptr))
 				continue;
 		
-			if(chptr->users == 0)
+			if(dlink_list_length(&chptr->members) == 0)
 				flags = CHFL_CHANOP;
 			else
 				flags = 0;
@@ -187,9 +187,11 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 			flags = CHFL_CHANOP;
 		}
 
-		if((source_p->user->joined >= ConfigChannel.max_chans_per_user) &&
-		   (!IsOper(source_p) || (source_p->user->joined >=
-					  ConfigChannel.max_chans_per_user * 3)))
+		if((dlink_list_length(&source_p->user->channel) >= 
+					ConfigChannel.max_chans_per_user) &&
+		   (!IsOper(source_p) || 
+		    (dlink_list_length(&source_p->user->channel) >=
+				 ConfigChannel.max_chans_per_user * 3)))
 		{
 			sendto_one(source_p, form_str(ERR_TOOMANYCHANNELS), me.name, parv[0], name);
 			if(successful_join_count)

@@ -139,9 +139,6 @@ add_user_to_channel(struct Channel *chptr, struct Client *client_p, int flags)
 
 	if(MyClient(client_p))
 		dlinkAdd(msptr, &msptr->locchannode, &chptr->locmembers);
-		
-	chptr->users++;
-	client_p->user->joined++;
 }
 
 int
@@ -163,14 +160,9 @@ remove_user_from_channel(struct membership *msptr)
 		dlinkDelete(&msptr->locchannode, &chptr->locmembers);
 
 	chptr->users_last = CurrentTime;
-	client_p->user->joined--;
 
-	if(--chptr->users <= 0)
+	if(dlink_list_length(&chptr->members) <= 0)
 	{
-		s_assert(chptr->users >= 0);
-		chptr->users = 0;	/* if chptr->users < 0, make sure it sticks at 0
-					 * It should never happen but...
-					 */
 		destroy_channel(chptr);
 		return 1;
 	}
@@ -194,13 +186,9 @@ qs_user_from_channel(struct Channel *chptr, struct Client *client_p)
 	dlinkDelete(&msptr->channode, &chptr->members);
 
 	chptr->users_last = CurrentTime;
-	client_p->user->joined--;
 
-	if(--chptr->users <= 0)
+	if(dlink_list_length(&chptr->members) <= 0)
 	{
-		s_assert(chptr->users >= 0);
-		chptr->users = 0;
-
 		/* persistent channel - must be 12h old */
 		if(!ConfigChannel.persist_time ||
 		   ((chptr->channelts + (60 * 60 * 12)) > CurrentTime))
@@ -408,8 +396,8 @@ cleanup_channels(void *unused)
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, global_channel_list.head)
 	{
-		chptr = (struct Channel *) ptr->data;
-		if(chptr->users == 0)
+		chptr = ptr->data;
+		if(dlink_list_length(&chptr->members) <= 0)
 		{
 			if((chptr->users_last + ConfigChannel.persist_time) < CurrentTime)
 			{
@@ -425,7 +413,6 @@ cleanup_channels(void *unused)
  * output       - none
  * side effects - walk through this channel, and destroy it.
  */
-
 static void
 destroy_channel(struct Channel *chptr)
 {
@@ -723,7 +710,8 @@ can_join(struct Client *source_p, struct Channel *chptr, char *key)
 	if(*chptr->mode.key && (EmptyString(key) || irccmp(chptr->mode.key, key)))
 		return (ERR_BADCHANNELKEY);
 
-	if(chptr->mode.limit && chptr->users >= chptr->mode.limit)
+	if(chptr->mode.limit && 
+	   dlink_list_length(&chptr->members) >= chptr->mode.limit)
 		return (ERR_CHANNELISFULL);
 
 	return 0;
