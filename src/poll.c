@@ -281,9 +281,7 @@ int read_message(time_t delay, unsigned char mask)
       if (DBufLength(&cptr->recvQ) < 4088)
         PFD_SETR(i);
       
-      if (DBufLength(&cptr->sendQ) || IsConnecting(cptr)
-          || ((cptr->flags2 & FLAGS2_ZIP) && (cptr->zip->outcount > 0))
-          )
+      if (IsConnecting(cptr))
         PFD_SETW(i);
     }
 
@@ -363,22 +361,13 @@ int read_message(time_t delay, unsigned char mask)
               exit_client(cptr, cptr, &me, "Lost C/N Line");
               continue;
             }
-            send_queued(cptr);
-            if (!IsDead(cptr))
-              continue;
           }
           else {
             /*
              * ...room for writing, empty some queue then...
              */
-            send_queued(cptr);
-            if (!IsDead(cptr))
-              continue;
+            exit(111); /* XXX we shouldn't get here now! -- adrian */
           }
-          exit_client(cptr, cptr, &me, 
-                     (cptr->flags & FLAGS_SENDQEX) ? 
-                     "SendQ Exceeded" : strerror(get_sockerr(cptr->fd)));
-          continue;
         }
       length = 1;     /* for fall through case */
       if (rr)

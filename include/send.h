@@ -61,8 +61,6 @@ extern  void ts_warn(const char *, ...);
 extern  void sendto_prefix_one(struct Client *, struct Client *, 
                                const char *, ...);
 
-extern void flush_sendq_except(struct DBuf*);
-
 /* used when sending to #mask or $mask */
 
 #define MATCH_SERVER  1

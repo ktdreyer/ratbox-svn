@@ -54,6 +54,7 @@ static  int     send_message (struct Client *, char *, int);
 static  void vsendto_prefix_one(register struct Client *, register struct Client *, const char *, va_list);
 static  void vsendto_one(struct Client *, const char *, va_list);
 static  void vsendto_realops(const char *, va_list);
+static PF send_queued_write;
 
 static  unsigned long sentalong[MAXCONNECTIONS];
 static unsigned long current_serial=0L;
@@ -106,8 +107,6 @@ dead_link(struct Client *to, char *notice)
 static int
 send_message(struct Client *to, char *msg, int len)
 {
-  static int SQinK;
-
   if (to->from)
     to = to->from; /* shouldn't be necessary */
 
@@ -168,39 +167,25 @@ send_message(struct Client *to, char *msg, int len)
     me.sendM += 1;
 
     /*
-    ** This little bit is to stop the sendQ from growing too large when
-    ** there is no need for it to. Thus we call send_queued() every time
-    ** 2k has been added to the queue since the last non-fatal write.
-    ** Also stops us from deliberately building a large sendQ and then
-    ** trying to flood that link with data (possible during the net
-    ** relinking done by servers with a large load).
-    */
-    /*
-     * Well, let's try every 4k for clients, and immediately for servers
-     *  -Taner
+     * Now we register a write callback. We *could* try to write some
+     * data to the FD, it'd be an optimisation, and we can deal with it
+     * later.
+     *     -- adrian
      */
-    SQinK = DBufLength(&to->sendQ)/1024;
-    if (IsServer(to))
-      {
-        if (SQinK > to->lastsq)
-          send_queued(to);
-      }
-    else
-      {
-        if (SQinK > (to->lastsq + 4))
-          send_queued(to);
-      }
+    comm_setselect(to->fd, COMM_SELECT_WRITE, send_queued_write, to, 0);
     return 0;
 } /* send_message() */
 
 /*
-** send_queued
-**      This function is called from the main select-loop (or whatever)
-**      when there is a chance the some output would be possible. This
-**      attempts to empty the send queue as far as possible...
+** send_queued_write
+**      This is called when there is a chance the some output would
+**      be possible. This attempts to empty the send queue as far as
+**      possible, and then if any data is left, a write is rescheduled.
 */
-int send_queued(struct Client *to)
+static void
+send_queued_write(int fd, void *data)
 {
+  struct Client *to = data;
   const char *msg;
   int len, rlen;
   int more = NO;
@@ -215,7 +200,7 @@ int send_queued(struct Client *to)
      * not working correct if send_queued is called for a
      * dead socket... --msa
      */
-    return -1;
+    return;
   } /* if (IsDead(to)) */
 
   /*
@@ -228,11 +213,15 @@ int send_queued(struct Client *to)
     else {
       msg = zip_buffer(to, NULL, &len, 1);
 
-      if (len == -1)
-        return dead_link(to, "fatal error in zip_buffer()");
+      if (len == -1) {
+        dead_link(to, "fatal error in zip_buffer()");
+        return;
+      }
 
-      if (!dbuf_put(&to->sendQ, msg, len))
-        return dead_link(to, "Buffer allocation error for %s");
+      if (!dbuf_put(&to->sendQ, msg, len)) {
+        dead_link(to, "Buffer allocation error for %s");
+        return;
+      }
     }
   } /* if ((to->flags2 & FLAGS2_ZIP) && to->zip->outcount) */
 
@@ -240,8 +229,10 @@ int send_queued(struct Client *to)
     msg = dbuf_map(&to->sendQ, &len);
 
     /* Returns always len > 0 */
-    if ((rlen = deliver_it(to, msg, len)) < 0)
-      return dead_link(to,"Write error to %s, closing link");
+    if ((rlen = deliver_it(to, msg, len)) < 0) {
+      dead_link(to,"Write error to %s, closing link");
+      return;
+    }
 
     dbuf_delete(&to->sendQ, rlen);
     to->lastsq = DBufLength(&to->sendQ) / 1024;
@@ -271,16 +262,23 @@ int send_queued(struct Client *to)
       more = 0;
       msg = zip_buffer(to, NULL, &len, 1);
 
-      if (len == -1)
-        return dead_link(to, "fatal error in zip_buffer()");
+      if (len == -1) {
+        dead_link(to, "fatal error in zip_buffer()");
+        return;
+      }
 
-      if (!dbuf_put(&to->sendQ, msg, len))
-        return dead_link(to, "Buffer allocation error for %s");
+      if (!dbuf_put(&to->sendQ, msg, len)) {
+        dead_link(to, "Buffer allocation error for %s");
+        return;
+      }
     } /* if (DBufLength(&to->sendQ) == 0 && more) */
   } /* while (DBufLength(&to->sendQ) > 0) */
 
-  return (IsDead(to)) ? -1 : 0;
-} /* send_queued() */
+  /* return (IsDead(to)) ? -1 : 0; */
+  /* If we have any more data, reschedule a write */
+  if (more)
+      comm_setselect(fd, COMM_SELECT_WRITE, send_queued_write, to, 0);
+} /* send_queued_write() */
 
 /*
 ** send message to single client

@@ -52,7 +52,6 @@ extern void  get_my_name(struct Client *, char *, int);
 extern void  report_error(const char*, const char*, int);
 extern int   set_non_blocking(int);
 extern int   set_sock_buffers(int, int);
-extern int   send_queued(struct Client*);
 extern int   deliver_it(struct Client*, const char*, int);
 
 extern int   completed_connection(struct Client*);
