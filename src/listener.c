@@ -109,10 +109,10 @@ get_listener_name(const struct Listener *listener)
 	int port = 0;
 #ifdef IPV6
 	if(listener->addr.ss_family == AF_INET6)
-		port = ((struct sockaddr_in6 *)&listener->addr)->sin6_port;
+		port = ntohs(((struct sockaddr_in6 *)&listener->addr)->sin6_port);
 	else
 #else
-		port = ((struct sockaddr_in *)&listener->addr)->sin_port;	
+		port = ntohs(((struct sockaddr_in *)&listener->addr)->sin_port);	
 #endif	
 	assert(NULL != listener);
 	if(listener == NULL)
@@ -139,10 +139,10 @@ show_ports(struct Client *source_p)
 			   source_p->name,
 			   'P',
 #ifdef IPV6
-			   listener->addr.ss_family == AF_INET ? ((struct sockaddr_in *)&listener->addr)->sin_port :
-			   	 ((struct sockaddr_in6 *)&listener->addr)->sin6_port,
+			   ntohs(listener->addr.ss_family == AF_INET ? ((struct sockaddr_in *)&listener->addr)->sin_port :
+			   	 ((struct sockaddr_in6 *)&listener->addr)->sin6_port),
 #else
-			   ((struct sockaddr_in *)&listener->addr)->sin_port,
+			   ntohs(((struct sockaddr_in *)&listener->addr)->sin_port),
 #endif
 			   IsOperAdmin(source_p) ? listener->name : me.name,
 			   listener->ref_count, (listener->active) ? "active" : "disabled");

@@ -848,11 +848,11 @@ comm_open(int family, int sock_type, int proto, const char *note)
 	 */
 	if(family == AF_INET6)
 	{
-		int off = 0;
+		int off = 1;
 		if(setsockopt(fd, IPPROTO_IPV6, IPV6_V6ONLY, &off, sizeof(off)) == -1)
 		{
 			ilog(L_CRIT,
-			     "comm_open: Could not set IPV6_V6ONLY option to 0 on FD %d: %s",
+			     "comm_open: Could not set IPV6_V6ONLY option to 1 on FD %d: %s",
 			     fd, strerror(errno));
 			close(fd);
 			return -1;
