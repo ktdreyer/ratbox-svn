@@ -1,3 +1,23 @@
+leeh        2002/01/06 13:12:19 EST	(20020106_2)
+
+  Modified files:
+    help/opers           set 
+    include              ircd.h 
+    modules              m_set.c 
+    src                  channel.c client.c ircd.c 
+  Log:
+  - fixed up splitmode
+  
+  Revision  Changes    Path
+  1.2       +9 -1      ircd-hybrid-7/help/opers/set
+  7.44      +1 -0      ircd-hybrid-7/include/ircd.h
+  1.41      +69 -18    ircd-hybrid-7/modules/m_set.c
+  7.292     +16 -16    ircd-hybrid-7/src/channel.c
+  7.217     +1 -2      ircd-hybrid-7/src/client.c
+  7.213     +6 -1      ircd-hybrid-7/src/ircd.c
+
+
+
 a1kmm       2002/01/06 01:26:30 EST	(20020106_1)
 
   Modified files:
