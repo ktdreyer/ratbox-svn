@@ -223,8 +223,8 @@ int     m_who(struct Client *cptr,
 
 	  do_who_list(sptr, chptr, &chptr->chanops, chname, "@");
 	  do_who_list(sptr, chptr, &chptr->halfops, chname, "%");
-	  do_who_list(sptr, chptr, &chptr->chanops, chname, "+");
-	  do_who_list(sptr, chptr, &chptr->chanops, chname, "");
+	  do_who_list(sptr, chptr, &chptr->voiced,  chname, "+");
+	  do_who_list(sptr, chptr, &chptr->peons,   chname, "");
 	}
       sendto_one(sptr, form_str(RPL_ENDOFWHO), me.name, parv[0], mask );
       return 0;
