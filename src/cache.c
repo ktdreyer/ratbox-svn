@@ -34,9 +34,9 @@
 
 #include "stdinc.h"
 #include "ircd_defs.h"
+#include "tools.h"
 #include "common.h"
 #include "s_conf.h"
-#include "tools.h"
 #include "client.h"
 #include "memory.h"
 #include "balloc.h"
@@ -44,6 +44,7 @@
 #include "hash.h"
 #include "cache.h"
 #include "sprintf_irc.h"
+#include "numeric.h"
 
 static BlockHeap *cachefile_heap = NULL;
 static BlockHeap *cacheline_heap = NULL;

@@ -25,11 +25,11 @@
 
 #include "stdinc.h"
 #include "config.h"
+#include "tools.h"
 #include "patricia.h"
 #include "client.h"
 #include "s_conf.h"
 #include "event.h"
-#include "tools.h"
 #include "reject.h"
 #include "msg.h"
 

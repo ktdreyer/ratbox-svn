@@ -25,6 +25,7 @@
  */
 
 #include "stdinc.h"
+#include "tools.h"
 #include "class.h"
 #include "hook.h"
 #include "client.h"

@@ -27,8 +27,6 @@
 #ifndef INCLUDED_hash_h
 #define INCLUDED_hash_h
 
-#include "tools.h"
-
 extern dlink_list *resvTable;
 extern dlink_list *ndTable;
 

@@ -24,14 +24,8 @@
  *  $Id$
  */
 
-#include "stdinc.h"
-#include "setup.h"
-#include "config.h"
-#include "s_conf.h"
-#include "numeric.h"
-#include "irc_string.h"
 #include "common.h"		/* NULL cripes */
-#include "memory.h"
+#include "numeric.h"
 
 const char *  numeric_replies[] = {
 /* 000 */       NULL,

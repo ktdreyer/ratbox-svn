@@ -29,7 +29,7 @@
 #include "config.h"
 #include "stdinc.h"
 #include <sys/epoll.h>
-
+#include "tools.h"
 #include "commio.h"
 #include "class.h"
 #include "client.h"

@@ -29,7 +29,7 @@
 
 #include "stdinc.h"
 #include <sys/devpoll.h>
-
+#include "tools.h"
 #include "config.h"
 #include "commio.h"
 #include "class.h"

@@ -28,7 +28,7 @@
 #include "config.h"
 #include "stdinc.h"
 #include <sys/poll.h>
-
+#include "tools.h"
 #include "commio.h"
 #include "class.h"
 #include "client.h"

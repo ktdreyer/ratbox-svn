@@ -14,31 +14,7 @@
 
 #ifndef _PATRICIA_H
 #define _PATRICIA_H
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <assert.h>
-#ifndef TESTING
-#include "class.h"
-#include "client.h"
-#include "common.h"
-#include "irc_string.h"
-#include "ircd.h"
-#include "numeric.h"
-#include "send.h"
-#include "memory.h"
-#include "config.h"
-#endif
 
-
-#ifndef FALSE
-#define FALSE 0
-#endif
-#ifndef TRUE
-#define TRUE !(FALSE)
-#endif
 #ifndef INET6_ADDRSTRLEN
 #define INET6_ADDRSTRLEN 46
 #endif
