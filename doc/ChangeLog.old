@@ -1,3 +1,9 @@
+*** 20001206_6 by db
+- m_capab.c was missing an MFLG_UNREG hence was never being called
+  in some cases. oops
+
+
+
 *** 20001206_5 by db
 - cleaned up m_server.c, removed some redundant code
 
