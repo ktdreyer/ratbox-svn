@@ -672,6 +672,8 @@ int can_join(struct Client *source_p, struct Channel *chptr, char *key)
          break;
       if (!lp)
         {
+	  if (!ConfigFileEntry.use_invex)
+	    return (ERR_INVITEONLYCHAN);
 	  for (ptr = chptr->invexlist.head; ptr; ptr = ptr->next)
 	    {
 	      invex = ptr->data;
