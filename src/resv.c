@@ -52,7 +52,8 @@ create_resv(const char *name, const char *reason, int flags)
     if(find_channel_resv(name))
       return NULL;
 
-    return NULL;
+    if(strlen(name) > CHANNELLEN)
+      return NULL;
   }
   else
   {
@@ -66,13 +67,14 @@ create_resv(const char *name, const char *reason, int flags)
       flags |= RESV_NICKWILD;
   }
 
-  if(strlen(reason) > TOPICLEN)
-    return NULL;
-
   resv_p = (struct ResvEntry *) MyMalloc(sizeof(struct ResvEntry));
-
   DupString(resv_p->name, name);
-  DupString(resv_p->reason, reason);
+
+  if(strlen(reason) > TOPICLEN)
+    DupString(resv_p->reason, "No Reason");
+  else
+    DupString(resv_p->reason, reason);
+
   resv_p->flags = flags;
 
   if(flags & RESV_CHANNEL)

@@ -91,7 +91,7 @@ static void m_quit(struct Client *client_p,
      (source_p->firsttime + ConfigFileEntry.anti_spam_exit_message_time)
      > CurrentTime)
     {
-      exit_client(client_p, source_p, source_p, "Quit");
+      exit_client(client_p, source_p, source_p, "Client Quit");
     }
 
   exit_client(client_p, source_p, source_p, comment);
