@@ -1,3 +1,9 @@
+*** 20000107_3 by db
+- don't core if chptr == NULL in sendto_match_servs()
+  shouldn't normally ever happen, but does in LL 
+
+
+
 *** 20000107_2 by db
 - closer version of LazyLinks version 2
 
