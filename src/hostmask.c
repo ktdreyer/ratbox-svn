@@ -215,7 +215,7 @@ find_matching_conf(const char *host, const char *user,
    {
     aconf = match_ip_Iline(ip, user);
    }
- if (!aconf_k)
+ if (!aconf_k && ip)
    {
     aconf_k = match_ip_Kline(ip, user);
    }

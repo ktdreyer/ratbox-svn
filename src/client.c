@@ -1316,7 +1316,7 @@ const char* comment         /* Reason for the exit */
   char comment1[HOSTLEN + HOSTLEN + 2];
   dlink_node *m;
 
-  sptr->flags |= FLAGS_DEADSOCKET;
+  /* sptr->flags |= FLAGS_DEADSOCKET; */
 
   if (MyConnect(sptr))
     {
