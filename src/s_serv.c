@@ -511,6 +511,13 @@ int hunt_server(struct Client *client_p, struct Client *source_p, char *command,
 
   if (target_p)
     {
+      if(!IsRegistered(target_p))
+      {
+        sendto_one(source_p, form_str(ERR_NOSUCHSERVER), me.name,
+	           parv[0], parv[server]);
+        return HUNTED_NOSUCH;
+      }
+	
       if (IsMe(target_p) || MyClient(target_p))
         return HUNTED_ISME;
 	
@@ -531,6 +538,7 @@ int hunt_server(struct Client *client_p, struct Client *source_p, char *command,
                  parv[5], parv[6], parv[7], parv[8]);
       return(HUNTED_PASS);
     } 
+    
   sendto_one(source_p, form_str(ERR_NOSUCHSERVER), me.name,
              parv[0], parv[server]);
   return(HUNTED_NOSUCH);
