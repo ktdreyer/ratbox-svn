@@ -1,3 +1,8 @@
+*** 20000107_2 by db
+- closer version of LazyLinks version 2
+
+
+
 *** 20000107_1 by db
 - split out m_user.c m_nick.c, modified s_user.c s_user.h Makefile.in
   LazyLinks is in unworkable state in this version.
