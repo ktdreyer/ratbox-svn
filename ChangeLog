@@ -1,3 +1,18 @@
+alz         2005/01/25 12:48:54 EST	(20050125_2)
+
+  Modified files:
+    include              s_conf.h 
+    src                  listener.c s_conf.c 
+  Log:
+  Added dline reasons, connecting/banned clients now see ban reason.
+  
+  Revision  Changes    Path
+  7.307     +1 -1      ircd-ratbox/include/s_conf.h
+  7.123     +17 -4     ircd-ratbox/src/listener.c
+  7.499     +5 -5      ircd-ratbox/src/s_conf.c
+
+
+
 leeh        2005/01/25 07:44:37 EST	(20050125_1)
 
   Modified files:
