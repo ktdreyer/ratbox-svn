@@ -623,7 +623,11 @@ static  void    remove_unknown(struct Client *cptr,
    * user on the other server which needs to be removed. -avalon
    * Tell opers about this. -Taner
    */
-  if (!strchr(lsender, '.'))
+  /* '.something'      is an ID      (KILL)
+   * 'nodots'          is a nickname (KILL)
+   * 'no.dot.at.start' is a server   (SQUIT)
+   */
+  if ((lsender[0] == '.') || !strchr(lsender, '.'))
     sendto_one(cptr, ":%s KILL %s :%s (%s(?) <- %s)",
                me.name, lsender, me.name, lsender,
                get_client_name(cptr, FALSE));
