@@ -110,7 +110,10 @@ string_to_array(char *string, char *parv[MAXPARA])
     if(*buf == '\0')
       return x;
   } while(x < MAXPARA - 1);
-  
+
+  if(*p == ':')
+    p++;
+
   parv[x++] = p;
   parv[x] = NULL;
   return x;
