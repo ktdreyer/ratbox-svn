@@ -1,3 +1,7 @@
+*** 20010817_3 by jdc
+- Flipped order of CFLAGS addition (at the end, not at the beginning).
+
+
 *** 20010817_2 by jdc
 - Many fixes for CFLAGS variable support.
 - Fixed  --enable-assert and  --disable-assert.
