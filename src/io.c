@@ -30,7 +30,7 @@ time_t current_time;
 fd_set readfds;
 fd_set writefds;
 
-static void signon_server(struct connection_entry *conn_p);
+static int signon_server(struct connection_entry *conn_p);
 static void read_server(struct connection_entry *conn_p);
 static int write_sendq(struct connection_entry *conn_p);
 static void parse_server(char *buf, int len);
@@ -186,9 +186,16 @@ read_io(void)
 
 		if(server_p != NULL)
 		{
-			if(dlink_list_length(&server_p->sendq) > 0)
+			if(server_p->flags & CONN_CONNECTING)
+			{
 				FD_SET(server_p->fd, &writefds);
-			FD_SET(server_p->fd, &readfds);
+			}
+			else
+			{
+				if(dlink_list_length(&server_p->sendq) > 0)
+					FD_SET(server_p->fd, &writefds);
+				FD_SET(server_p->fd, &readfds);
+			}
 		}
 
 		set_time();
@@ -255,26 +262,34 @@ connect_to_server(void *unused)
 	conn_p->flags = CONN_CONNECTING;
 	conn_p->first_time = conn_p->last_time = CURRENT_TIME;
 
-	conn_p->io_read = signon_server;
-	conn_p->io_write = write_sendq;
+	conn_p->io_read = NULL;
+	conn_p->io_write = signon_server;
 	conn_p->io_close = sock_close;
 
 	server_p = conn_p;
 }
 
-static void
+static int
 signon_server(struct connection_entry *conn_p)
 {
 	conn_p->flags &= ~CONN_CONNECTING;
 	conn_p->io_read = read_server;
+	conn_p->io_write = write_sendq;
+
+	/* ok, if connect() failed, this will cause an error.. */
+	sendto_server("PASS test TS");
+
+	/* ..so we need to return. */
+	if(conn_p->flags & CONN_DEAD)
+		return -1;
 
 	slog("Connection to server %s completed", conn_p->name);
 
-	sendto_server("PASS test TS");
 	sendto_server("CAPAB :QS TB");
 	sendto_server("SERVER %s 1 :%s", MYNAME, config_file.my_gecos);
 
 	introduce_services();
+	return 1;
 }
 
 static void
