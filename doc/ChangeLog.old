@@ -1,3 +1,7 @@
+*** 20001006_3 by lusky
+updated autoconf and Makefile.in to support flex when available
+
+
 *** 20001006_2 by lusky
 deleted ChangeLog.old and include/defs.h
 
