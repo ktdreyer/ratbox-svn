@@ -1,3 +1,8 @@
+*** 20001225_5 by toot
+. made glines and pending_glines into dlink_lists
+. couple of minor cleanups/cosmetic changes to m_nick
+
+
 *** 20001225_4 by db
 - motd of non local servers should not be shown to users
 
