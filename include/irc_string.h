@@ -111,6 +111,12 @@ const char* myctime(time_t);
 
 #define EmptyString(x) (!(x) || (*(x) == '\0'))
 
+#ifndef HAVE_STRTOK_R
+char*       strtoken(char** save, char* str, char* fs);
+#else
+#define strtoken(save, str, fs) (char *)strtok_r(str, fs, save)
+#endif
+
 /*
  * deprecate
  */
