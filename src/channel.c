@@ -227,10 +227,7 @@ remove_user_from_channel(struct membership *msptr)
 	chptr->users_last = CurrentTime;
 
 	if(dlink_list_length(&chptr->members) <= 0)
-	{
 		destroy_channel(chptr);
-		return;
-	}
 
 	BlockHeapFree(member_heap, msptr);
 
