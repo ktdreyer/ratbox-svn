@@ -261,6 +261,13 @@ struct ChModeChange
  int caps, nocaps, mems;
 };
 
+struct ChResyncOp
+{
+ struct Client *client_p;
+ int dir, sync;
+ char c;
+};
+
 #define CHACCESS_CHANOP 3
 #define CHACCESS_HALFOP 2
 #define CHACCESS_VOICED 1

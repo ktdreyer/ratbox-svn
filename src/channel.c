@@ -1207,7 +1207,8 @@ errsent(int err, int *errs)
 /* This is an unfinished attempt to clean up set_channel_mode... */
 #ifdef USE_TABLE_MODE
 struct ChModeChange mode_changes_plus[BUFSIZE], mode_changes_minus[BUFSIZE];
-int mode_count_plus, mode_count_minus;
+struct ChResyncOp resync_ops[BUFSIZE];
+int mode_count_plus, mode_count_minus, resync_count;
 int mode_limit;
 static void chm_nosuch(struct Client *, struct Client *,
                        struct Channel *, int, int *, char **, int *, int,
@@ -1638,7 +1639,7 @@ chm_op(struct Client *client_p, struct Client *source_p,
    * -A1kmm.
    */
   int was_opped = 0, was_hopped = 0, was_voiced = 0, wasnt_opped = 0,
-    wasnt_hopped = 0, t_op, t_voice, t_hop;
+    wasnt_hopped = 0, t_op = 0, t_voice = 0, t_hop = 0;
   char *opnick;
   struct Client *targ_p;
 
@@ -1675,12 +1676,9 @@ chm_op(struct Client *client_p, struct Client *source_p,
     }
 
   if ((t_op = is_chan_op(chptr, targ_p)) != 0)
-    {
-      t_voice = 0;
-      t_hop = 0;
-    }
+    ;
   else if ((t_hop = is_half_op(chptr, targ_p)) != 0)
-    t_voice = 0;
+    ;
   else
     t_voice = is_voiced(chptr, targ_p);
 
@@ -1699,7 +1697,7 @@ chm_op(struct Client *client_p, struct Client *source_p,
       {
         if (mode_changes_plus[i].letter == 'o')
           wasnt_opped = -1;
-        else if (mode_changes_plus[i].letter == 'o')
+        else if (mode_changes_plus[i].letter == 'h')
           wasnt_hopped = -1;
         mode_changes_plus[i].letter = 0;
       }
@@ -1716,6 +1714,7 @@ chm_op(struct Client *client_p, struct Client *source_p,
           was_voiced = -1;
         else if (mode_changes_minus[i].letter == 'h')
           was_hopped = -1;
+        mode_changes_minus[i].letter = 0;
       }
 
   if (dir < 0)
@@ -1750,13 +1749,22 @@ chm_op(struct Client *client_p, struct Client *source_p,
         }
 
       if (MyConnect(targ_p) && chptr->mode.mode & MODE_HIDEOPS)
-        sync_oplists(chptr, targ_p, 0, chname);
+      {
+        for (i = 0; i < resync_count; i++)
+         if (resync_ops[i].client_p == targ_p)
+           resync_ops[i].client_p = NULL;
+        resync_ops[resync_count].client_p = targ_p;
+        resync_ops[resync_count].dir = dir;
+        resync_ops[resync_count].c = 'o';
+        resync_ops[resync_count++].sync = -1;
+      }
     }
   else
     {
       /* Converting -o to -h... */
       if (t_hop)
         {
+          c = 'h';
           if (IsServer(source_p) || !MyConnect(source_p))
             return;
 
@@ -1784,17 +1792,27 @@ chm_op(struct Client *client_p, struct Client *source_p,
                 ONLY_CHANOPS_HALFOPS;
               mode_changes_minus[mode_count_minus++].arg = targ_p->name;
             }
-
+          
           change_channel_membership(chptr, &chptr->peons,
                                     &chptr->locpeons, targ_p);
         }
-
-      if (MyConnect(targ_p) && chptr->mode.mode & MODE_HIDEOPS)
-        {
-          sendto_one(targ_p, ":%s MODE %s -o %s", me.name, chname,
-                     targ_p->name);
-          sync_oplists(chptr, targ_p, 1, chname);
-        }
+      if (((t_hop != 0 && wasnt_hopped == 0) ||
+          (t_op != 0 && wasnt_opped == 0)) && MyConnect(targ_p) &&
+          chptr->mode.mode & MODE_HIDEOPS)
+      {
+        for (i = 0; i < resync_count; i++)
+          if (resync_ops[i].client_p == targ_p)
+          {
+            if (resync_ops[i].dir == dir || resync_ops[i].c == c)
+              resync_ops[i].client_p = NULL;
+            else
+              resync_ops[i].sync = 0;
+          }
+        resync_ops[resync_count].client_p = targ_p;
+        resync_ops[resync_count].dir = dir;
+        resync_ops[resync_count].c = c;
+        resync_ops[resync_count++].sync = -1;
+      }
     }
 }
 
@@ -1805,7 +1823,7 @@ chm_halfop(struct Client *client_p, struct Client *source_p,
            const char *chname)
 {
   int i, was_opped = 0, was_hopped = 0, was_voiced = 0, wasnt_hopped = 0;
-  int t_voice, t_op, t_hop;
+  int t_voice = 0, t_op = 0, t_hop = 0;
   char *opnick;
   struct Client *targ_p;
 
@@ -1837,12 +1855,9 @@ chm_halfop(struct Client *client_p, struct Client *source_p,
     }
 
   if ((t_op = is_chan_op(chptr, targ_p)) != 0)
-    {
-      t_voice = 0;
-      t_hop = 0;
-    }
+    t_op = -1;
   else if ((t_hop = is_half_op(chptr, targ_p)) != 0)
-    t_voice = 0;
+    t_hop = -1;
   else
     t_voice = is_voiced(chptr, targ_p);
 
@@ -1859,7 +1874,7 @@ chm_halfop(struct Client *client_p, struct Client *source_p,
       return;
     }
 
-  if ((dir < 0 && t_hop) || (dir > 0 && !t_hop))
+  if ((dir < 0 && (t_hop || t_op)) || (dir > 0 && !t_hop))
     return;
 
   /* Cancel out all other mode changes... */
@@ -1893,18 +1908,13 @@ chm_halfop(struct Client *client_p, struct Client *source_p,
     {
       if (was_voiced || t_voice)
         {
-          change_channel_membership(chptr, &chptr->halfops,
-                                    &chptr->lochalfops, targ_p);
-          if (MyConnect(targ_p) && chptr->mode.mode & MODE_HIDEOPS)
-            sync_oplists(chptr, targ_p, 0, chname);
-
           mode_changes_minus[mode_count_minus].letter = 'v';
           mode_changes_minus[mode_count_minus].caps = 0;
           mode_changes_minus[mode_count_minus].nocaps = 0;
           mode_changes_minus[mode_count_minus].mems = ONLY_CHANOPS_HALFOPS;
           mode_changes_minus[mode_count_minus++].arg = targ_p->name;
         }
-      else if (was_opped || t_op)
+      else if (was_opped)
         {
           mode_changes_minus[mode_count_minus].letter = 'o';
           mode_changes_minus[mode_count_minus].caps = 0;
@@ -1912,14 +1922,25 @@ chm_halfop(struct Client *client_p, struct Client *source_p,
           mode_changes_minus[mode_count_minus].mems = ONLY_CHANOPS_HALFOPS;
           mode_changes_minus[mode_count_minus++].arg = targ_p->name;
         }
-
-      if (was_hopped == 0)
+      if (was_hopped == 0 && t_hop == 0)
         {
           mode_changes_plus[mode_count_plus].letter = c;
           mode_changes_plus[mode_count_plus].caps = CAP_HOPS;
           mode_changes_plus[mode_count_plus].nocaps = 0;
           mode_changes_plus[mode_count_plus].mems = ONLY_CHANOPS_HALFOPS;
           mode_changes_plus[mode_count_plus++].arg = targ_p->name;
+          change_channel_membership(chptr, &chptr->halfops,
+                                    &chptr->lochalfops, targ_p);
+          if (MyConnect(targ_p) && chptr->mode.mode & MODE_HIDEOPS)
+          {
+           for (i = 0; i < resync_count; i++)
+             if (resync_ops[i].client_p == targ_p)
+               resync_ops[i].client_p = NULL;
+           resync_ops[resync_count].client_p = targ_p;
+           resync_ops[resync_count].dir = dir;
+           resync_ops[resync_count].c = 'h';
+           resync_ops[resync_count++].sync = -1;
+          }
         }
     }
   else
@@ -1935,9 +1956,22 @@ chm_halfop(struct Client *client_p, struct Client *source_p,
 
       change_channel_membership(chptr, &chptr->peons, &chptr->locpeons,
                                 targ_p);
-
-      if (MyConnect(targ_p) && chptr->mode.mode & MODE_HIDEOPS)
-        sync_oplists(chptr, targ_p, 1, chname);
+      if (wasnt_hopped == 0 && MyConnect(targ_p) &&
+          chptr->mode.mode & MODE_HIDEOPS)
+      {
+        for (i = 0; i < resync_count; i++)
+          if (resync_ops[i].client_p == targ_p)
+          {
+            if (resync_ops[i].dir == dir || resync_ops[i].c == 'h')
+              resync_ops[i].client_p = NULL;
+            else
+              resync_ops[i].sync = 0;
+          }
+        resync_ops[resync_count].client_p = targ_p;
+        resync_ops[resync_count].dir = 1;
+        resync_ops[resync_count].sync = -1;
+        resync_ops[resync_count++].c = 'h';
+      }
     }
 }
 
@@ -1948,7 +1982,7 @@ chm_voice(struct Client *client_p, struct Client *source_p,
           const char *chname)
 {
   int i, was_hopped = 0, was_opped = 0, was_voiced = 0, wasnt_voiced = 0;
-  int t_op, t_voice, t_hop;
+  int t_op = 0, t_voice = 0, t_hop = 0;
   char *opnick;
   struct Client *targ_p;
 
@@ -1985,12 +2019,9 @@ chm_voice(struct Client *client_p, struct Client *source_p,
     }
 
   if ((t_op = is_chan_op(chptr, targ_p)) != 0)
-    {
-      t_voice = 0;
-      t_hop = 0;
-    }
+    t_op = -1;
   else if ((t_hop = is_half_op(chptr, targ_p)) != 0)
-    t_voice = 0;
+    t_hop = -1;
   else
     t_voice = is_voiced(chptr, targ_p);
 
@@ -2002,7 +2033,7 @@ chm_voice(struct Client *client_p, struct Client *source_p,
   if (!IsServer(source_p) && !MyConnect(source_p) && mode_limit++ > 4)
     return;
 
-  if ((dir < 0 && t_voice) || (dir > 0 && !t_voice))
+  if (t_op || t_hop | (dir < 0 && t_voice) || (dir > 0 && !t_voice))
     return;
 
   /* Remove other changes... */
@@ -2034,35 +2065,36 @@ chm_voice(struct Client *client_p, struct Client *source_p,
 
   if (dir < 0)
     {
-      if (was_hopped || t_hop)
+      if (was_hopped)
         {
           change_channel_membership(chptr, &chptr->voiced, &chptr->locvoiced,
                                     targ_p);
-          if (MyConnect(targ_p) && chptr->mode.mode & MODE_HIDEOPS)
-            sendto_one(targ_p, ":%s MODE %s -h+v %s %s", me.name,
-                       chname, targ_p->name, targ_p->name);
           mode_changes_minus[mode_count_minus].letter = 'h';
           mode_changes_minus[mode_count_minus].caps = CAP_HOPS;
           mode_changes_minus[mode_count_minus].nocaps = 0;
           mode_changes_minus[mode_count_minus].mems = ONLY_CHANOPS_HALFOPS;
           mode_changes_minus[mode_count_minus++].arg = targ_p->name;
         }
-      else if (was_opped || t_op)
+      else if (was_opped)
         {
           change_channel_membership(chptr, &chptr->voiced, &chptr->locvoiced,
                                     targ_p);
-          if (MyConnect(targ_p) && chptr->mode.mode & MODE_HIDEOPS)
-            sendto_one(targ_p, ":%s MODE %s -o+v %s %s", me.name,
-                       chname, targ_p->name, targ_p->name);
           mode_changes_minus[mode_count_minus].letter = 'o';
           mode_changes_minus[mode_count_minus].caps = 0;
           mode_changes_minus[mode_count_minus].nocaps = 0;
           mode_changes_minus[mode_count_minus].mems = ONLY_CHANOPS_HALFOPS;
           mode_changes_minus[mode_count_minus++].arg = targ_p->name;
         }
-      else if (MyConnect(targ_p) && chptr->mode.mode & MODE_HIDEOPS)
-        sendto_one(targ_p, ":%s MODE %s +v %s", me.name, chname,
-                   targ_p->name);
+      if (MyConnect(targ_p) && chptr->mode.mode & MODE_HIDEOPS)
+      {
+        for (i=0; i<resync_count; i++)
+          if (resync_ops[i].client_p == targ_p)
+            resync_ops[i].client_p = NULL;
+        resync_ops[resync_count].client_p = targ_p;
+        resync_ops[resync_count].c = 'v';
+        resync_ops[resync_count].sync = 0;
+        resync_ops[resync_count++].dir = dir;
+      }
       change_channel_membership(chptr, &chptr->voiced, &chptr->locvoiced,
                                 targ_p);
 
@@ -2082,7 +2114,21 @@ chm_voice(struct Client *client_p, struct Client *source_p,
       if (MyConnect(targ_p) && chptr->mode.mode & MODE_HIDEOPS)
         sendto_one(targ_p, ":%s MODE %s -v %s", me.name, chname,
                    targ_p->name);
-
+      if (MyConnect(targ_p) && chptr->mode.mode & MODE_HIDEOPS)
+      {
+        for (i=0; i<resync_count; i++)
+          if (resync_ops[i].client_p == targ_p)
+          {
+            if (resync_ops[i].dir == dir || resync_ops[i].c == 'v')
+              resync_ops[i].client_p = NULL;
+            else
+              resync_ops[i].sync = 0;
+          }
+        resync_ops[resync_count].client_p = targ_p;
+        resync_ops[resync_count].c = 'v';
+        resync_ops[resync_count].sync = 0;
+        resync_ops[resync_count++].dir = dir;
+      }
       /* Don't send redundant modes on +v-v nick nick */
       if (wasnt_voiced == 0)
         {
@@ -2447,7 +2493,29 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
 
   if (mode_count_plus == 0 && mode_count_minus == 0)
     return;
-
+  /* Send any resyncs that we need to send... */
+  if (chptr->mode.mode & MODE_HIDEOPS)
+  {
+    for (i=0; i<resync_count; i++)
+    {
+      if (resync_ops[i].client_p == NULL)
+        continue;
+      if (resync_ops[i].sync != 0)
+      {
+       if (resync_ops[i].dir == -1)
+        sync_oplists(chptr, resync_ops[i].client_p, 0, chname);
+       else
+        sync_oplists(chptr, resync_ops[i].client_p, 1, chname);
+      }
+      if (resync_ops[i].dir == -1 && resync_ops[i].c == 'v')
+        sendto_one(resync_ops[i].client_p, ":%s MODE %s +v %s", me.name,
+                   chname, client_p->name);
+      else if (resync_ops[i].dir == 1)
+        sendto_one(resync_ops[i].client_p, ":%s MODE %s -%c %s", me.name,
+                   chname, resync_ops[i].c, resync_ops[i].client_p->name);
+    }
+  }
+    
   /* Send all mode changes to the chanops/halfops, and even peons if
    * we are not +a... */
   st = (chptr->mode.mode & MODE_HIDEOPS) ? ONLY_CHANOPS_HALFOPS : ALL_MEMBERS;
@@ -2697,6 +2765,7 @@ set_channel_mode(struct Client *client_p, struct Client *source_p,
   alevel = get_channel_access(source_p, chptr);
   mode_count_plus = 0;
   mode_count_minus = 0;
+  resync_count = 0;
   mode_limit = 0;
 
   for (; (c = *ml) != 0; ml++)
