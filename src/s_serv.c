@@ -179,7 +179,6 @@ void slink_zipstats(unsigned int rpl, unsigned int len, unsigned char *data,
                     struct Client *server_p)
 {
   unsigned long in = 0, in_wire = 0, out = 0, out_wire = 0;
-  double in_ratio = 0, out_ratio = 0;
   int i = 0;
 
   assert(rpl == SLINKRPL_ZIPSTATS);
@@ -206,15 +205,35 @@ void slink_zipstats(unsigned int rpl, unsigned int len, unsigned char *data,
   out_wire |= (data[i++] <<  8);
   out_wire |= (data[i++]      );
 
-  in_ratio = (((double)in_wire / (double)in) * 100.00);
-  out_ratio = (((double)out_wire/(double)out) * 100.00);
+  if (!(((in + server_p->localClient->zipstats.in) >=
+       server_p->localClient->zipstats.in) &&
+      ((out + server_p->localClient->zipstats.out) >=
+       server_p->localClient->zipstats.out) &&
+      ((in_wire + server_p->localClient->zipstats.in_wire) >=
+       server_p->localClient->zipstats.in_wire) &&
+      ((out_wire + server_p->localClient->zipstats.out_wire) >=
+       server_p->localClient->zipstats.out_wire)))
+  {
+    /* overflow, so start again */
+    server_p->localClient->zipstats.in = 0;
+    server_p->localClient->zipstats.out = 0;
+    server_p->localClient->zipstats.in_wire = 0;
+    server_p->localClient->zipstats.out_wire = 0;
+  }
 
-  server_p->localClient->zipstats.in = in;
-  server_p->localClient->zipstats.out = out;
-  server_p->localClient->zipstats.in_wire = in_wire;
-  server_p->localClient->zipstats.out_wire = out_wire;
-  server_p->localClient->zipstats.in_ratio = in_ratio;
-  server_p->localClient->zipstats.out_ratio = out_ratio;
+  server_p->localClient->zipstats.in += in;
+  server_p->localClient->zipstats.out += out;
+  server_p->localClient->zipstats.in_wire += in_wire;
+  server_p->localClient->zipstats.out_wire += out_wire;
+
+  server_p->localClient->zipstats.in_ratio =
+    (((double)(server_p->localClient->zipstats.in -
+               server_p->localClient->zipstats.in_wire) /
+      (double)server_p->localClient->zipstats.in) * 100.00);
+  server_p->localClient->zipstats.out_ratio =
+    (((double)(server_p->localClient->zipstats.out -
+               server_p->localClient->zipstats.out_wire) /
+      (double)server_p->localClient->zipstats.out) * 100.00);
 }
 
 void collect_zipstats(void *unused)
@@ -242,7 +261,7 @@ void collect_zipstats(void *unused)
       }
     }
   }
-  eventAdd("collect_zipstats", collect_zipstats, NULL,
+  eventAddIsh("collect_zipstats", collect_zipstats, NULL,
       ZIPSTATS_TIME, 0);
 }
 
