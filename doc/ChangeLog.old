@@ -1,3 +1,10 @@
+*** 19990830_2 by db
+- left over aconf->user gets freed twice, causing some malloc packages
+  to leave their lunch all over the disk.... NULL things after every
+  free silly... -db 
+
+
+
 *** 19990830_1 by lusky
 jk's umode +O fix
 
