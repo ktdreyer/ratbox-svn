@@ -56,6 +56,11 @@ $ touch logs/foperlog
 Note that if you use different names in ircd.conf, you must 'touch' those 
 specific names.
 
+6.  If you are upgrading from hybrid6/5, the config file has changed
+drastically.. convertconf can transform most of it, but this will still
+need to be checked, and a little look in example.conf for new options
+that havent quite been updated.
+
 
 HOW TO GET HELP:
 ----------------
