@@ -1137,8 +1137,8 @@ static void exit_one_client(struct Client *cptr, struct
           /* Clean up allow lists */
           del_all_accepts(sptr);
 
-		  if (HasID(sptr))
-			  del_from_id_hash_table(sptr->user->id, sptr);
+	  if (HasID(sptr))
+	    del_from_id_hash_table(sptr->user->id, sptr);
   
           /* again, this is all that is needed */
         }
@@ -1567,7 +1567,7 @@ int accept_message(struct Client *source, struct Client *target)
  * output	- 
  * side effects - Add's source pointer to targets allow list
  */
-int add_to_accept(struct Client *source, struct Client *target)
+void add_to_accept(struct Client *source, struct Client *target)
 {
   dlink_node *m;
   int len;
@@ -1586,7 +1586,6 @@ int add_to_accept(struct Client *source, struct Client *target)
 
   m = make_dlink_node();
   dlinkAdd(target, m, &source->on_allow_list);
-  return 0;
 }
 
 /*
@@ -1594,13 +1593,13 @@ int add_to_accept(struct Client *source, struct Client *target)
  *
  * inputs	- pointer to source client
  * 		- pointer to target client
- * output	- 
+ * output	- NONE
  * side effects - Delete's source pointer to targets allow list
  *
  * Walk through the target's accept list, remove if source is found,
  * Then walk through the source's on_accept_list remove target if found.
  */
-int del_from_accept(struct Client *source, struct Client *target)
+void del_from_accept(struct Client *source, struct Client *target)
 {
   dlink_node *ptr;
   dlink_node *ptr2;
@@ -1632,20 +1631,18 @@ int del_from_accept(struct Client *source, struct Client *target)
 	    }
 	}
     }
-
-  return 0;
 }
 
 /*
  * del_all_accepts
  *
  * inputs	- pointer to exiting client
- * output	- 0
+ * output	- NONE
  * side effects - Walk through given clients on_allow_list remove all
  *                references to this client from the clients in each of their
  *                on_allow_list
  */
-int del_all_accepts(struct Client *cptr)
+void del_all_accepts(struct Client *cptr)
 {
   dlink_node *ptr;
   dlink_node *next_ptr;
@@ -1658,18 +1655,16 @@ int del_all_accepts(struct Client *cptr)
       if(acptr != NULL)
 	del_from_accept(cptr, acptr);
     }
-
-  return 0;
 }
 
 /*
  * list_all_accepts
  *
  * inputs	- pointer to exiting client
- * output	- 
+ * output	- NONE
  * side effects - list allow list
  */
-int list_all_accepts(struct Client *sptr)
+void list_all_accepts(struct Client *sptr)
 {
   dlink_node *ptr;
   struct Client *acptr;
@@ -1709,7 +1704,6 @@ int list_all_accepts(struct Client *sptr)
 	       me.name, sptr->name,
 	       nicks[0], nicks[1], nicks[2], nicks[3],
 	       nicks[4], nicks[5], nicks[6], nicks[7] );
-  return 0;
 }
 
 /*

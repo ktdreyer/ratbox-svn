@@ -544,10 +544,10 @@ extern struct Client* next_client_double(struct Client* next,
 #define MAX_ALLOW 20
 
 extern int accept_message(struct Client *source, struct Client *target);
-extern int add_to_accept(struct Client *source, struct Client *target);
-extern int del_from_accept(struct Client *source, struct Client *target);
-extern int del_all_accepts(struct Client *cptr);
-extern int list_all_accepts(struct Client *sptr);
+extern void add_to_accept(struct Client *source, struct Client *target);
+extern void del_from_accept(struct Client *source, struct Client *target);
+extern void del_all_accepts(struct Client *cptr);
+extern void list_all_accepts(struct Client *sptr);
 
 extern void free_exited_clients(void);
 extern int set_initial_nick(struct Client *cptr, struct Client *sptr,
