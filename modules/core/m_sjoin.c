@@ -408,7 +408,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 		sendto_channel_local(ALL_MEMBERS, chptr,
 				     ":%s MODE %s %s %s %s %s %s",
 				     source_p->name, chptr->chname, modebuf,
-				     para[0], para[1], para[2], para[3]);
+				     para[0], CheckEmpty(para[1]), CheckEmpty(para[2]), CheckEmpty(para[3]));
 	}
 
 	if(!joins)
