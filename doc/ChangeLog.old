@@ -1,3 +1,9 @@
+*** 20001214_15 by db
+- redid parse.c do_numeric, thats where our remote stats bug was..
+  I was adding an extra ':' where I shouldn't have been. duh.
+
+
+
 *** 20001214_14 by db
 - don't count opers again in /stats L
 
