@@ -152,7 +152,7 @@ struct ConfItem
 #define IsConfSpoofNotice(x)    (!((x)->flags & CONF_FLAGS_SPOOF_NOTICE))
 #define IsConfRestricted(x)     ((x)->flags & CONF_FLAGS_RESTRICTED)
 #define IsConfEncrypted(x)      ((x)->flags & CONF_FLAGS_ENCRYPTED)
-#define IsConfCompressed(x)	((x)->flags & CONF_FLAGS_COMPRESSED)
+#define IsConfCompressed(x)     ((x)->flags & CONF_FLAGS_COMPRESSED)
 #define IsConfCryptLink(x)      ((x)->flags & CONF_FLAGS_CRYPTLINK)
 
 /* port definitions for Opers */
@@ -281,7 +281,7 @@ struct server_info
   int         max_clients;
   int         max_buffer;
   int         no_hack_ops;
-  int	      specific_ipv4_vhost;
+  int         specific_ipv4_vhost;
   int         specific_ipv6_vhost;
 };
 
@@ -301,14 +301,16 @@ extern struct ConfItem *u_conf;
 /* conf xline link list root */
 extern struct ConfItem *x_conf;
 
-extern struct ConfItem* ConfigItemList;        /* GLOBAL - conf list head */
-extern int              specific_ipv4_vhost; /* GLOBAL - used in s_bsd.c */
-extern int		specific_ipv6_vhost;
-extern struct config_file_entry ConfigFileEntry;/* GLOBAL - defined in ircd.c*/
-extern struct config_channel_entry ConfigChannel;/* GLOBAL - defined in channel.c*/
-extern struct config_server_hide ConfigServerHide; /* GLOBAL - s_conf.c */
-extern struct server_info ServerInfo;	       /* GLOBAL - defined in ircd.c */
-extern struct admin_info  AdminInfo;           /* GLOBAL - defined in ircd.c */
+/* All variables are GLOBAL */
+extern struct ConfItem* ConfigItemList;      /* conf list head */
+extern int              specific_ipv4_vhost; /* used in s_bsd.c */
+extern int              specific_ipv6_vhost;
+extern struct config_file_entry ConfigFileEntry;/* defined in ircd.c*/
+extern struct config_channel_entry ConfigChannel;/* defined in channel.c*/
+extern struct config_server_hide ConfigServerHide; /* defined in s_conf.c */
+extern struct server_info ServerInfo;       /* defined in ircd.c */
+extern struct admin_info  AdminInfo;        /* defined in ircd.c */
+/* End GLOBAL section */
 
 dlink_list temporary_klines;
 dlink_list temporary_ip_klines;
@@ -330,22 +332,16 @@ extern int              attach_confs(struct Client* client,
                                      const char* name, int statmask);
 extern int              attach_cn_lines(struct Client* client, 
                                         const char* name, const char* host);
-extern int              check_client(struct Client* client_p, struct Client *source_p,
-				     char *);
-extern int              attach_Iline(struct Client* client,
-				     const char* username);
+extern int              check_client(struct Client* client_p, struct Client *source_p, char *);
+extern int              attach_Iline(struct Client* client, const char* username);
 extern void             det_confs_butmask (struct Client *, int);
 extern int              detach_conf (struct Client *, struct ConfItem *);
 extern struct ConfItem* det_confs_butone (struct Client *, struct ConfItem *);
 extern struct ConfItem *find_conf_entry(struct ConfItem *, int);
-extern struct ConfItem* find_conf_exact(const char* name, const char* user, 
-                                        const char* host, int statmask);
-extern struct ConfItem* find_conf_name(dlink_list *list, const char* name, 
-                                       int statmask);
-extern struct ConfItem* find_conf_host(dlink_list *list, const char* host, 
-                                       int statmask);
-extern struct ConfItem* find_conf_ip(dlink_list *list, char* ip, char* name, 
-                                     int);
+extern struct ConfItem* find_conf_exact(const char* name, const char* user, const char* host, int statmask);
+extern struct ConfItem* find_conf_name(dlink_list *list, const char* name, int statmask);
+extern struct ConfItem* find_conf_host(dlink_list *list, const char* host, int statmask);
+extern struct ConfItem* find_conf_ip(dlink_list *list, char* ip, char* name, int);
 extern struct ConfItem* find_conf_by_name(const char* name, int status);
 extern struct ConfItem* find_conf_by_host(const char* host, int status);
 extern struct ConfItem* find_kill (struct Client *);
@@ -356,7 +352,7 @@ extern char *oper_privs_as_string(struct Client *, int);
 extern int find_u_conf(char*, char*, char *);
 extern struct ConfItem *find_x_conf(char*);
 
-extern struct ConfItem* find_tkline(const char*, const char*, struct irc_inaddr *); 
+extern struct ConfItem* find_tkline(const char*, const char*, struct irc_inaddr *);
 extern char* show_iline_prefix(struct Client *,struct ConfItem *,char *);
 extern void get_printable_conf(struct ConfItem *,
                                     char **, char **, char **,

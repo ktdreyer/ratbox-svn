@@ -119,7 +119,7 @@ typedef struct ip_entry
   time_t last_attempt;
 #endif
   struct ip_entry *next;
-}IP_ENTRY;
+} IP_ENTRY;
 
 static IP_ENTRY *ip_hash_table[IP_HASH_SIZE];
 
@@ -145,15 +145,17 @@ struct ConfItem        *u_conf = ((struct ConfItem *)NULL);
 static void conf_dns_callback(void* vptr, adns_answer *reply)
 {
   struct ConfItem *aconf = (struct ConfItem *) vptr;
-  if(reply->status == adns_s_ok)
+  if (reply->status == adns_s_ok)
   {
 #ifdef IPV6
-	copy_s_addr(IN_ADDR(aconf->ipnum), reply->rrs.addr->addr.inet6.sin6_addr.s6_addr);
+    copy_s_addr(IN_ADDR(aconf->ipnum),
+                reply->rrs.addr->addr.inet6.sin6_addr.s6_addr);
 #else
-	copy_s_addr(IN_ADDR(aconf->ipnum), reply->rrs.addr->addr.inet.sin_addr.s_addr);
+    copy_s_addr(IN_ADDR(aconf->ipnum),
+                reply->rrs.addr->addr.inet.sin_addr.s_addr);
 #endif
-	MyFree(reply);
-  } 
+    MyFree(reply);
+  }
 
   MyFree(aconf->dns_query);
   aconf->dns_query = NULL;
@@ -185,7 +187,7 @@ struct ConfItem* make_conf()
 
   aconf = (struct ConfItem*) MyMalloc(sizeof(struct ConfItem));
   aconf->status       = CONF_ILLEGAL;
-  aconf->aftype	      = AF_INET;
+  aconf->aftype       = AF_INET;
   return (aconf);
 }
 
@@ -195,13 +197,19 @@ struct ConfItem* make_conf()
 static void delist_conf(struct ConfItem* aconf)
 {
   if (aconf == ConfigItemList)
+  {
     ConfigItemList = ConfigItemList->next;
+  }
   else
     {
       struct ConfItem* bconf;
 
-      for (bconf = ConfigItemList; aconf != bconf->next; bconf = bconf->next)
-        ;
+      /* jdc -- "for ();" is evil; Semicolon-o-Death.  Use while(). */
+      bconf = ConfigItemList;
+      while (aconf != bconf->next)
+      {
+        bconf = bconf->next;
+      }
       bconf->next = aconf->next;
     }
   aconf->next = NULL;
@@ -242,13 +250,15 @@ void det_confs_butmask(struct Client* client_p, int mask)
   struct ConfItem *aconf;
 
   for (dlink = client_p->localClient->confs.head; dlink; dlink = link_next)
-    {
-      link_next = dlink->next;
-      aconf = dlink->data;
+  {
+    link_next = dlink->next;
+    aconf = dlink->data;
 
-      if ((aconf->status & mask) == 0)
-        detach_conf(client_p, aconf);
+    if ((aconf->status & mask) == 0)
+    {
+      detach_conf(client_p, aconf);
     }
+  }
 }
 
 static struct LinkReport {
@@ -395,7 +405,8 @@ void report_specials(struct Client* source_p, int flags, int numeric)
   for (aconf = this_conf; aconf; aconf = aconf->next)
     if (aconf->status & flags)
       {
-        get_printable_conf(aconf, &name, &host, &pass, &user, &port, &classname);
+        get_printable_conf(aconf, &name, &host, &pass,
+                           &user, &port, &classname);
 
         sendto_one(source_p, form_str(numeric),
                    me.name,
@@ -1363,12 +1374,12 @@ static void set_default_conf(void)
   ServerInfo.description = NULL;
   DupString(ServerInfo.network_name, NETWORK_NAME_DEFAULT);
   DupString(ServerInfo.network_desc, NETWORK_DESC_DEFAULT);
-  
+
   memset(&ServerInfo.ip, 0, sizeof(ServerInfo.ip));
   ServerInfo.specific_ipv4_vhost = 0;
   memset(&ServerInfo.ip6, 0, sizeof(ServerInfo.ip6));
   ServerInfo.specific_ipv6_vhost = 0;
-  
+
   ServerInfo.max_clients = MAX_CLIENTS;  /* XXX - these don't seem to */
   ServerInfo.max_buffer = MAX_BUFFER;    /*       actually do anything! */
   /* Don't reset hub, as that will break lazylinks */
@@ -2079,7 +2090,7 @@ static void clear_out_old_conf(void)
 
   /* clean out old resvs from the conf */
   clear_conf_resv();
-  
+
   /* clean out AdminInfo */
   MyFree(AdminInfo.name);
   AdminInfo.name = NULL;

@@ -500,18 +500,18 @@ int main(int argc, char *argv[])
    * Setup corefile size immediately after boot -kre
    */
   setup_corefile();
- 
-  /* 
+
+  /*
    * set initialVMTop before we allocate any memory
    */
   initialVMTop = get_vm_top();
- 
+
   ServerRunning = 0;
- 
+
   memset(&me, 0, sizeof(me));
   memset(&meLocalUser, 0, sizeof(meLocalUser));
   me.localClient = &meLocalUser;
- 
+
   /* Make sure all lists are zeroed */
   memset(&unknown_list, 0, sizeof(unknown_list));
   memset(&lclient_list, 0, sizeof(lclient_list));
@@ -520,12 +520,12 @@ int main(int argc, char *argv[])
   memset(&oper_list, 0, sizeof(oper_list));
   memset(&lazylink_channels, 0, sizeof(lazylink_channels));
   memset(&lazylink_nicks, 0, sizeof(lazylink_nicks));
- 
+
   lclient_list.head = lclient_list.tail = NULL;
   oper_list.head = oper_list.tail = NULL;
   serv_list.head = serv_list.tail = NULL;
   global_serv_list.head = global_serv_list.tail = NULL;
- 
+
   GlobalClientList = &me;       /* Pointer to beginning of Client list */
 
   memset((void *)&Count, 0, sizeof(Count));
@@ -534,11 +534,11 @@ int main(int argc, char *argv[])
   Count.server = 1;     /* us */
   memset((void *)&ServerInfo, 0, sizeof(ServerInfo));
   memset((void *)&AdminInfo, 0, sizeof(AdminInfo));
-  
+
 #ifdef USE_TABLE_MODE
   /* Initialise the channel capability usage counts... */
   init_chcap_usage_counts();
-#endif 
+#endif
 
   ConfigFileEntry.dpath = DPATH;
   ConfigFileEntry.configfile = CPATH;   /* Server configuration file */
@@ -548,25 +548,30 @@ int main(int argc, char *argv[])
 
   myargv = argv;
   umask(077);                /* better safe than sorry --SRB */
- 
+
   parseargs(&argc, &argv, myopts);
-  
-  if (printVersion) 
-    {
-      printf("ircd: version %s\n", ircd_version);
-      exit(EXIT_SUCCESS);
-    }
-  
+
+  if (printVersion)
+  {
+    printf("ircd: version %s\n", ircd_version);
+    exit(EXIT_SUCCESS);
+  }
+
   if (chdir(ConfigFileEntry.dpath))
-    {
-      perror("chdir");
-      exit(EXIT_FAILURE);
-    }
- 
+  {
+    perror("chdir");
+    exit(EXIT_FAILURE);
+  }
+
   if (!server_state.foreground)
+  {
     make_daemon();
+  }
   else
+  {
     print_startup(getpid());
+  }
+
   setup_signals();
   /* We need this to initialise the fd array before anything else */
   fdlist_init();
@@ -576,14 +581,16 @@ int main(int argc, char *argv[])
   eventInit();
   init_sys();
   if (!server_state.foreground)
+  {
     close_all_connections();
+  }
   init_log(logFileName);
   initBlockHeap();
   init_dlink_nodes();
-  init_netio();		/* This needs to be setup early ! -- adrian */
-  init_resolver();	/* Needs to be setup before the io loop */
+  init_netio();         /* This needs to be setup early ! -- adrian */
+  init_resolver();      /* Needs to be setup before the io loop */
   initialize_message_files();
-  linebuf_init();	/* set up some linebuf stuff to control paging */
+  linebuf_init();       /* set up some linebuf stuff to control paging */
   init_hash();
   id_init();
   clear_scache_hash_table();    /* server cache name table */
@@ -599,22 +606,32 @@ int main(int argc, char *argv[])
   init_hooks();
   load_all_modules(1);
   initServerMask();
-  init_auth();			/* Initialise the auth code */
+  init_auth();                  /* Initialise the auth code */
   read_conf_files(YES);         /* cold start init conf files */
   initialize_global_set_options();
-  if (ServerInfo.name == NULL)
-    {
-      fprintf(stderr, "Error: No server name specified\n");
-      ilog(L_CRIT,"You need a server name to run.");
-      exit(EXIT_FAILURE);
-    }
 
+  if (ServerInfo.name == NULL)
+  {
+    fprintf(stderr,
+      "ERROR: No server name specified in serverinfo block.\n");
+    ilog(L_CRIT,
+      "No server name specified in serverinfo block.");
+    exit(EXIT_FAILURE);
+  }
   /* Can't use strncpy_irc here because we didn't malloc enough... -A1kmm */
   strncpy(me.name, ServerInfo.name, HOSTLEN);
 
-  if (ServerInfo.description != NULL)
-    strncpy(me.info, ServerInfo.description, REALLEN);
- 
+  /* serverinfo{} description must exist.  If not, error out.*/
+  if (ServerInfo.description == NULL)
+  {
+    fprintf(stderr,
+      "ERROR: No server description specified in serverinfo block.\n");
+    ilog(L_CRIT,
+      "ERROR: No server description specified in serverinfo block.");
+    exit(EXIT_FAILURE);
+  }
+  strncpy(me.info, ServerInfo.description, REALLEN);
+
 #ifdef USE_GETTEXT
   /*
    * For 'locale' try (in this order):
@@ -622,21 +639,21 @@ int main(int argc, char *argv[])
    *    Env variable "LANGUAGE"
    *    Default of "" (so don't overwrite LANGUAGE here)
    */
- 
+
   if (!getenv("LANGUAGE"))
-    { 
-      putenv("LANGUAGE=");
-    }
-  
+  {
+    putenv("LANGUAGE=");
+  }
+
   textdomain("ircd-hybrid");
   bindtextdomain("ircd-hybrid" , MSGPATH);
 #endif
-  
+
 #ifdef USE_IAUTH
   iAuth.flags = 0;
- 
+
   ConnectToIAuth();
- 
+
   if (iAuth.socket == NOSOCK)
     {
       fprintf(stderr, "Unable to connect to IAuth server\n");
