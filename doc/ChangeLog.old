@@ -1,3 +1,22 @@
+a1kmm       2001/12/31 06:04:38 EST	(20011231_0)
+
+  Modified files:
+    include              channel.h 
+    src                  channel_mode.c ircd_parser.y parse.c 
+  Log:
+  - Commited some integrity checks for the channels. These are very CPU
+    intensive, and they are checked for every command, but I left them on
+    for now so we can catch anything wrong with the channel code for the
+    soonest possible release time.
+  
+  Revision  Changes    Path
+  7.99      +6 -0      ircd-hybrid-7/include/channel.h
+  7.14      +81 -1     ircd-hybrid-7/src/channel_mode.c
+  1.231     +1 -0      ircd-hybrid-7/src/ircd_parser.y
+  7.118     +3 -0      ircd-hybrid-7/src/parse.c
+
+
+
 db          2001/12/30 17:11:44 EST	(20011230_6)
 
   Modified files:
