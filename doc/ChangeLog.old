@@ -1,3 +1,9 @@
+*** 20010525_6 by davidt
+- Erp, we now set fds 3..LAST_SLINK_FD non blocking, not 0..LAST_SLINK_FD,
+  somehow FreeBSD-CURRENT doesn't care, but FreeBSD-STABLE really really
+  does...
+
+
 *** 20010525_5 by davidt
 - Add missing #include and #ifdef.. argh.
 
