@@ -1,3 +1,15 @@
+leeh        2004/02/26 11:12:21 EST	(20040226_1)
+
+  Modified files:
+    modules              m_kline.c 
+  Log:
+  - fixed unkline
+  
+  Revision  Changes    Path
+  1.172     +3 -3      ircd-ratbox/modules/m_kline.c
+
+
+
 leeh        2004/02/26 11:02:11 EST	(20040226_0)
 
   Modified files:
