@@ -348,7 +348,7 @@ static int start_auth_query(struct AuthRequest* auth)
    * and machines with multiple IP addresses are common now
    */
   memset(&localaddr, 0, locallen);
-  getsockname(auth->client->localClient->fd, (struct sockaddr*)&SOCKADDR(localaddr), (size_t*)&locallen);
+  getsockname(auth->client->localClient->fd, (struct sockaddr*)&SOCKADDR(localaddr), &locallen);
   S_PORT(localaddr) = htons(0);
 
   auth->fd = fd;
