@@ -1,3 +1,7 @@
+*** 20010205_13 by wcampbel
+connect { aftype = ipv4|ipv6; }; documented
+
+
 *** 20010205_12 by db
 - temporary fix for adns /rehash cores
 
