@@ -96,6 +96,7 @@ struct StatsStructLetter
   void (*handler)();
   int need_oper;
   int need_admin;
+  char *description;
 };
 
 struct StatsStructWord
@@ -140,53 +141,53 @@ static void stats_ltrace(struct Client *, int, char**);
  * so make stats commands wisely! -- fl_ */
 static struct StatsStructLetter stats_let_table[] =
 {
-  /* name		function	need_oper need_admin */
-  { 'A',		stats_adns_servers,	1,	1,	},
-  { 'a',		stats_adns_servers,	1,	1,	},
-  { 'C',		stats_connect,		1,	0,	},
-  { 'c',		stats_connect,		1,	0,	},
-  { 'D',		stats_deny,		1,	0,	},
-  { 'd',		stats_deny,		1,	0,	},
-  { 'e',		stats_exempt,		1,	0,	},
-  { 'E',		stats_events,		1,	1,	},
-  { 'f',		stats_fd,		1,	1,	},
-  { 'F',		stats_fd,		1,	1,	},
-  { 'g',		stats_glines,		1,	0,	},
-  { 'G',		stats_glines,		1,	0,	},
-  { 'h',		stats_hubleaf,		1,	0,	},
-  { 'H',		stats_hubleaf,		1,	0,	},
-  { 'i',		stats_auth,		1,	0,	},
-  { 'I',		stats_auth,		1,	0,	},
-  { 'k',		stats_tklines,		1,	0,	},
-  { 'K',		stats_klines,		1,	0,	},
-  { 'l',		stats_ltrace,		0,	0,	},
-  { 'L',		stats_ltrace,		0,	0,	},
-  { 'm',		stats_messages,		1,	0,	},
-  { 'M',		stats_messages,		1,	0,	},
-  { 'o',		stats_oper,		0,	0,	},
-  { 'O',		stats_oper,		0,	0,	},
-  { 'p',		stats_operedup,		0,	0,	},
-  { 'P',		stats_ports,		1,	0,	},
-  { 'q',		stats_quarantine,	1,	0,	},
-  { 'Q',		stats_quarantine,	1,	0,	},
-  { 'R',		stats_usage,		1,	0,	},
-  { 'r',		stats_usage,		1,	0,	},
-  { 's',		stats_scache,		1,	1,	},
-  { 'S',		stats_scache,		1,	1,	},
-  { 't',		stats_tstats,		1,	0,	},
-  { 'T',		stats_tstats,		1,	0,	},
-  { 'u',		stats_uptime,		0,	0,	},
-  { 'U',		stats_shared,		1,	0,	},
-  { 'v',		stats_servers,		1,	0,	},
-  { 'V',		stats_servers,		1,	0,	},
-  { 'x',		stats_gecos,		1,	0,	},
-  { 'X',		stats_gecos,		1,	0,	},
-  { 'y',		stats_class,		1,	0,	},
-  { 'Y',		stats_class,		1,	0,	},
-  { 'z',		stats_memory,		1,	0,	},
-  { 'Z',		stats_memory,		1,	0,	},
-  { '?',		stats_servlinks,	1,	0,	},
-  { (char) 0,		(void (*)()) 0, 	0,	0,	}
+  /* name function	need_oper need_admin	description */
+  { 'A',  stats_adns_servers,	1,	1,	"ADNS DNS servers in use", },
+  { 'a',  stats_adns_servers,	1,	1,	"ADNS DNS servers in use", },
+  { 'C',  stats_connect,	1,	0,	"Show C/N.lines", },
+  { 'c',  stats_connect,	1,	0,	"Show C/N lines", },
+  { 'D',  stats_deny,		1,	0,	"Show D lines", },
+  { 'd',  stats_deny,		1,	0,	"Show D lines", },
+  { 'e',  stats_exempt,		1,	0,	"Show exempt lines", },
+  { 'E',  stats_events,		1,	1,	"Show Events", },
+  { 'f',  stats_fd,		1,	1,	"Show used file descriptors", },
+  { 'F',  stats_fd,		1,	1,	"Show used file descriptors", },
+  { 'g',  stats_glines,		1,	0,	"Show G lines", },
+  { 'G',  stats_glines,		1,	0,	"Show G lines", },
+  { 'h',  stats_hubleaf,	1,	0,	"Show H/L lines", },
+  { 'H',  stats_hubleaf,	1,	0,	"Show H/L lines", },
+  { 'i',  stats_auth,		1,	0,	"Show I lines", },
+  { 'I',  stats_auth,		1,	0,	"Show I lines", },
+  { 'k',  stats_tklines,	1,	0,	"Show temporary K lines", },
+  { 'K',  stats_klines,		1,	0,	"Show K lines", },
+  { 'l',  stats_ltrace,		0,	0,	"Show info about <nick>", },
+  { 'L',  stats_ltrace,		0,	0,	"Show info about <nick>", },
+  { 'm',  stats_messages,	1,	0,	"Show command usage stats", },
+  { 'M',  stats_messages,	1,	0,	"Show command usage stats", },
+  { 'o',  stats_oper,		0,	0,	"Show O lines", },
+  { 'O',  stats_oper,		0,	0,	"Show O lines", },
+  { 'p',  stats_operedup,	0,	0,	"Show 'active' opers", },
+  { 'P',  stats_ports,		1,	0,	"Show listening ports", },
+  { 'q',  stats_quarantine,	1,	0,	"Show quarantines (Q lines)", },
+  { 'Q',  stats_quarantine,	1,	0,	"Show quarantines (Q lines)", },
+  { 'R',  stats_usage,		1,	0,	"Show daemon resource usage", },
+  { 'r',  stats_usage,		1,	0,	"Show daemon resource usage", },
+  { 's',  stats_scache,		1,	1,	"Show server cache", },
+  { 'S',  stats_scache,		1,	1,	"Show server cache", },
+  { 't',  stats_tstats,		1,	0,	"Show generic server stats", },
+  { 'T',  stats_tstats,		1,	0,	"Show generic server stats", },
+  { 'u',  stats_uptime,		0,	0,	"Show server uptime", },
+  { 'U',  stats_shared,		1,	0,	"Show shared blocks (U lines)", },
+  { 'v',  stats_servers,	1,	0,	"Show connected servers + idle times", },
+  { 'V',  stats_servers,	1,	0,	"Show connected servers + idle times", },
+  { 'x',  stats_gecos,		1,	0,	"Show gecos bans (X lines)", },
+  { 'X',  stats_gecos,		1,	0,	"Show gecos bans (X lines)", },
+  { 'y',  stats_class,		1,	0,	"Show classes (Y lines)", },
+  { 'Y',  stats_class,		1,	0,	"Show classes (Y lines)", },
+  { 'z',  stats_memory,		1,	0,	"Show daemon memory stats", },
+  { 'Z',  stats_memory,		1,	0,	"Show daemon memory stats", },
+  { '?',  stats_servlinks,	1,	0,	"Show connected servers + SendQ counts", },
+  { (char) 0, (void (*)()) 0,	0,	0,	(char *) 0, }
 };
 
 
@@ -218,8 +219,17 @@ static void m_stats(struct Client *client_p, struct Client *source_p,
                    int parc, char *parv[])
 {
   int i;
-  static time_t  last_used = 0;
+  static time_t last_used = 0;
   char statchar;
+
+  /* jdc -- Check argument count.  Zero arguments is impossible, but 1
+   * argument means someone just did "/STATS" without a character or word
+   * specifier.  This needs to be checked.  :-)
+   */
+  if (parc < 2)
+  {
+    return;
+  }
 
   /* Check the user is actually allowed to do /stats, and isnt flooding */
   if(!IsOper(source_p) && (last_used + ConfigFileEntry.pace_wait) > CurrentTime)
