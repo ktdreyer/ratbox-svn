@@ -1,3 +1,8 @@
+*** 20010608_12 by kreator
+- add EGD support; setup via use_egd=yes; and egdpool_path="path";
+- rewrite some repeating RAND_bytes calls
+
+
 *** 20010608_11 by db
 - fixed header, it read convertconf still
 - fixed spelling mistake seperate -> separate a very common one..
