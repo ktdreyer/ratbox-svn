@@ -1,3 +1,38 @@
+leeh        2004/09/25 11:40:55 EDT	(20040925_11)
+
+  Modified files:
+    .                    LICENSE 
+    doc                  schema.txt 
+    include              client.h config.h s_chanserv.h 
+                         s_userserv.h 
+    src                  Makefile.in balloc.c cache.c channel.c 
+                         client.c rserv.c s_userserv.c 
+  Added files:
+    src                  s_chanserv.c 
+  Log:
+  - clean up includes of user service, making some things static
+  - make BlockHeapAlloc() memset
+  - initial work on channel service, registration of channels,
+    adding/deleting/modifying users, invites
+  
+  Revision  Changes    Path
+  1.4       +1 -1      rserv/LICENSE
+  1.5       +21 -17    rserv/doc/schema.txt
+  1.19      +1 -1      rserv/include/client.h
+  1.18      +1 -1      rserv/include/config.h
+  1.9       +3 -7      rserv/include/s_chanserv.h
+  1.9       +0 -7      rserv/include/s_userserv.h
+  1.24      +1 -1      rserv/src/Makefile.in
+  1.5       +1 -0      rserv/src/balloc.c
+  1.4       +0 -4      rserv/src/cache.c
+  1.24      +0 -2      rserv/src/channel.c
+  1.20      +0 -6      rserv/src/client.c
+  1.29      +0 -2      rserv/src/rserv.c
+  1.1       +481 -0    rserv/src/s_chanserv.c (new)
+  1.2       +11 -27    rserv/src/s_userserv.c
+
+
+
 leeh        2004/09/25 11:37:13 EDT	(20040925_10)
 
   Removed files:
