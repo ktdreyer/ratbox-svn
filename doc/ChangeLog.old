@@ -1,3 +1,10 @@
+*** 20001207_15 by db
+- removed botcheck which is obsolete, this gets rid of the one rule
+  never reduced error in the parser...
+- updated the example.conf to include server links, important that..
+
+
+
 *** 20001207_14 by adrian
 
 
