@@ -1268,7 +1268,7 @@ chm_simple(struct Client *client_p, struct Client *source_p,
            char **parv, int *errors, int alev, int dir, char c, void *d,
            const char *chname)
 {
-  int mode_type;
+  long mode_type;
   int i;
 
   if (alev < CHACCESS_CHANOP)
@@ -1280,9 +1280,7 @@ chm_simple(struct Client *client_p, struct Client *source_p,
     return;
   }
 
-  /* XXX this causes warnings on a 64bit compiler 
-   * sizeof(void *) > sizeof(int) */
-  mode_type = (int)d;
+  mode_type = (long)d;
 
   /* setting + */
   if (dir < 0 && !(chptr->mode.mode & mode_type))
