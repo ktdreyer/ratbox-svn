@@ -427,6 +427,7 @@ int _BlockHeapFree(BlockHeap * bh, void *ptr)
     block = memblock->block;
     bh->freeElems++;
     block->freeElems++;
+    mem_frob(memblock->data, bh->elemSize);
     dlinkDelete(&memblock->self, &block->used_list);
     dlinkAdd(memblock->data, &memblock->self, &block->free_list);
     return 0;
