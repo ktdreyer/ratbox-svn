@@ -14,7 +14,9 @@ is-'s TODO list
 - umode +R for registered nick
 - TBURST
 - change nick instead of kill on nick collide
-
+- PART_REASON
+- dynamically extensible parser for modules
+- modularise channel, network code etc (not just commands)
 
 ------------------------------------------------------------------------------
 
