@@ -1,3 +1,17 @@
+leeh        2003/02/16 16:56:21 UTC	(20030216_1)
+
+  Modified files:
+    servlink             control.c servlink.c servlink.h 
+  Log:
+  - const fixes
+  
+  Revision  Changes    Path
+  1.9       +2 -2      ircd-ratbox/servlink/control.c
+  1.27      +2 -2      ircd-ratbox/servlink/servlink.c
+  1.22      +2 -2      ircd-ratbox/servlink/servlink.h
+
+
+
 leeh        2003/02/16 16:53:30 UTC	(20030216_0)
 
   Modified files:
