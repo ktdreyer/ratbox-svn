@@ -1,3 +1,11 @@
+*** 20001213_8 by adrian
+
+
+How'd I forget to pre-initialise linebuf_initialised to 0? Its implied
+due to it being a global variable, but _still_ ..
+
+
+
 *** 20001213_7 by db
 - removed an obsolete line from the example.conf 
 - added s_gline.c that I forgot
