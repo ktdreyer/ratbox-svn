@@ -1,3 +1,16 @@
+leeh        2002/06/23 19:02:44 EDT	(20020624_0)
+
+  Modified files:
+    src                  send.c 
+  Log:
+  - removed a spurious IsClosing() that broke sending error messages et al
+    to the client.
+  
+  Revision  Changes    Path
+  7.199     +1 -1      ircd-hybrid-7/src/send.c
+
+
+
 leeh        2002/06/23 05:22:02 EDT	(20020623_0)
 
   Modified files:
