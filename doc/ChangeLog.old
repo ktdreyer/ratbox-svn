@@ -1,3 +1,10 @@
+*** 20011113_5 by leeh
+- added proper comments to vchannel.c
+- removed a couple of places we passed client_p and source_p, but never used
+  client_p
+- fixed a few places I forgot to add the rcount param
+
+
 *** 20011113_4 by leeh
 - extended stats m (a la ircnet).
   now: COMMAND TOTALCOUNT TOTALBYTES REMOTECOUNT
