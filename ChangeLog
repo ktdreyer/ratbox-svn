@@ -1,3 +1,17 @@
+leeh        2002/08/18 07:22:53 EDT	(20020818_4)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+  Log:
+  - bumped maxclients by default to 3000
+  
+  Revision  Changes    Path
+  7.148     +2 -2      ircd-ratbox/autoconf/configure.in
+  7.152     +4 -4      ircd-ratbox/configure
+
+
+
 leeh        2002/08/18 07:11:48 EDT	(20020818_3)
 
   Modified files:
