@@ -27,6 +27,7 @@ CREATE TABLE members (
 	username TEXT,
 	lastmod TEXT,
 	level INTEGER,
+	flags INTEGER,
 	suspend INTEGER,
 	FOREIGN KEY(chname) REFERENCES channels (chname) MATCH FULL,
 	FOREIGN KEY(username) REFERENCES users (username) MATCH FULL	

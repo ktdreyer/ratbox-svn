@@ -54,6 +54,7 @@ static int s_chan_register(struct client *, char *parv[], int parc);
 static int s_chan_adduser(struct client *, char *parv[], int parc);
 static int s_chan_deluser(struct client *, char *parv[], int parc);
 static int s_chan_moduser(struct client *, char *parv[], int parc);
+static int s_chan_modauto(struct client *, char *parv[], int parc);
 static int s_chan_listusers(struct client *, char *parv[], int parc);
 static int s_chan_suspend(struct client *, char *parv[], int parc);
 static int s_chan_unsuspend(struct client *, char *parv[], int parc);
@@ -80,6 +81,7 @@ static struct service_command chanserv_command[] =
 	{ "ADDUSER",	&s_chan_adduser,	3, NULL, 1, 0L, 1, 0, 0, 0 },
 	{ "DELUSER",	&s_chan_deluser,	2, NULL, 1, 0L, 1, 0, 0, 0 },
 	{ "MODUSER",	&s_chan_moduser,	3, NULL, 1, 0L, 1, 0, 0, 0 },
+	{ "MODAUTO",	&s_chan_modauto,	3, NULL, 1, 0L, 1, 0, 0, 0 },
 	{ "LISTUSERS",	&s_chan_listusers,	1, NULL, 1, 0L, 1, 0, 0, 0 },
 	{ "SUSPEND",	&s_chan_suspend,	3, NULL, 1, 0L, 1, 0, 0, 0 },
 	{ "UNSUSPEND",	&s_chan_unsuspend,	2, NULL, 1, 0L, 1, 0, 0, 0 },
@@ -281,6 +283,9 @@ find_member_reg(struct user_reg *ureg_p, struct chan_reg *chreg_p)
 	struct member_reg *mreg_p;
 	dlink_node *ptr;
 
+	if(ureg_p == NULL)
+		return NULL;
+
 	DLINK_FOREACH(ptr, ureg_p->channels.head)
 	{
 		mreg_p = ptr->data;
@@ -385,7 +390,7 @@ member_db_callback(void *db, int argc, char **argv, char **colnames)
 	struct user_reg *ureg_p;
 	struct member_reg *mreg_p;
 
-	if(argc < 5)
+	if(argc < 6)
 		return 0;
 
 	if(EmptyString(argv[0]) || EmptyString(argv[1]))
@@ -396,7 +401,8 @@ member_db_callback(void *db, int argc, char **argv, char **colnames)
 		return 0;
 
 	mreg_p = make_member_reg(ureg_p, chreg_p, argv[2], atoi(argv[3]));
-	mreg_p->suspend = atoi(argv[4]);
+	mreg_p->flags  = (atoi(argv[4]) & CS_MEMBER_ALL);
+	mreg_p->suspend = atoi(argv[5]);
 	return 0;
 }
 
@@ -471,7 +477,7 @@ write_channel_db_entry(struct chan_reg *reg_p)
 static void
 write_member_db_entry(struct member_reg *reg_p)
 {
-	loc_sqlite_exec(NULL, "INSERT INTO members VALUES(%Q, %Q, %Q, %u, 0)",
+	loc_sqlite_exec(NULL, "INSERT INTO members VALUES(%Q, %Q, %Q, %u, 0, 0)",
 			reg_p->channel_reg->name,
 			reg_p->user_reg->name, reg_p->lastmod, reg_p->level);
 }
@@ -512,12 +518,14 @@ static int
 h_chanserv_join(void *v_chptr, void *v_members)
 {
 	struct chan_reg *chreg_p;
+	struct member_reg *mreg_p;
 	struct ban_reg *banreg_p;
 	struct channel *chptr = v_chptr;
 	struct chmember *member_p;
 	dlink_list *members = v_members;
 	dlink_node *ptr, *next_ptr;
 	dlink_node *bptr;
+	int hit;
 
 	/* another hook couldve altered this.. */
 	if(!dlink_list_length(members))
@@ -544,7 +552,7 @@ h_chanserv_join(void *v_chptr, void *v_members)
 			if(match(banreg_p->mask, member_p->client_p->user->mask))
 			{
 				if(find_exempt(chptr, member_p->client_p))
-					return 0;
+					break;
 
 				if(is_opped(member_p))
 					sendto_server(":%s MODE %s -o+b %s %s",
@@ -565,6 +573,32 @@ h_chanserv_join(void *v_chptr, void *v_members)
 			}
 		}
 
+		if(is_opped(member_p))
+			return 0;
+
+		if((mreg_p = find_member_reg(member_p->client_p->user->user_reg,
+					chreg_p)))
+		{
+			if(mreg_p->suspend)
+				return 0;
+
+			if(mreg_p->flags & CS_MEMBER_AUTOOP)
+			{
+				sendto_server(":%s MODE %s +o %s",
+					chanserv_p->name, chptr->name,
+					member_p->client_p->name);
+				member_p->flags |= MODE_OPPED;
+			}
+			else if(mreg_p->flags & CS_MEMBER_AUTOVOICE &&
+				!is_voiced(member_p))
+			{
+				sendto_server(":%s MODE %s +v %s",
+					chanserv_p->name, chptr->name,
+					member_p->client_p->name);
+				member_p->flags |= MODE_VOICED;
+			}
+		}
+
 		return 0;
 	}
 
@@ -576,6 +610,7 @@ h_chanserv_join(void *v_chptr, void *v_members)
 	DLINK_FOREACH_SAFE(ptr, next_ptr, members->head)
 	{
 		member_p = ptr->data;
+		hit = 0;
 
 		DLINK_FOREACH(bptr, chreg_p->bans.head)
 		{
@@ -599,7 +634,32 @@ h_chanserv_join(void *v_chptr, void *v_members)
 
 				dlink_destroy(ptr, members);
 				del_chmember(member_p);
+				hit++;
 				break;
+			}
+		}
+
+		if(hit || is_opped(member_p))
+			continue;
+
+		if((mreg_p = find_member_reg(member_p->client_p->user->user_reg,
+					chreg_p)))
+		{
+			if(mreg_p->suspend)
+				continue;
+
+			if(mreg_p->flags & CS_MEMBER_AUTOOP)
+			{
+				modebuild_add(DIR_ADD, "o", 
+					member_p->client_p->name);
+				member_p->flags |= MODE_OPPED;
+			}
+			else if(mreg_p->flags & CS_MEMBER_AUTOVOICE &&
+				!is_voiced(member_p))
+			{
+				modebuild_add(DIR_ADD, "v",
+					member_p->client_p->name);
+				member_p->flags |= MODE_VOICED;
 			}
 		}
 	}
@@ -609,7 +669,6 @@ h_chanserv_join(void *v_chptr, void *v_members)
 
 	return 0;
 }
-
 
 static void
 u_chan_chanregister(struct connection_entry *conn_p, char *parv[], int parc)
@@ -1048,6 +1107,74 @@ s_chan_moduser(struct client *client_p, char *parv[], int parc)
 			"UPDATE members SET level = %d, lastmod = %Q "
 			"WHERE chname = %Q AND username = %Q",
 			level, mreg_p->user_reg->name, 
+			mreg_tp->channel_reg->name, mreg_tp->user_reg->name);
+
+	return 1;
+}
+
+static int
+s_chan_modauto(struct client *client_p, char *parv[], int parc)
+{
+	struct user_reg *ureg_p;
+	struct member_reg *mreg_p;
+	struct member_reg *mreg_tp;
+
+	if((mreg_p = verify_member_reg_name(client_p, NULL, parv[0], S_C_USERLIST)) == NULL)
+		return 1;
+
+	if((ureg_p = find_user_reg_nick(client_p, parv[1])) == NULL)
+		return 1;
+
+	if((mreg_tp = find_member_reg(ureg_p, mreg_p->channel_reg)) == NULL)
+	{
+		service_error(chanserv_p, client_p, "User %s on %s does not have access",
+				ureg_p->name, mreg_p->channel_reg->name);
+		return 1;
+	}
+
+	if(mreg_p->level <= mreg_tp->level && mreg_p != mreg_tp)
+	{
+		service_error(chanserv_p, client_p, "User %s on %s access level equal or higher",
+				ureg_p->name, mreg_p->channel_reg->name);
+		return 1;
+	}
+
+	if(!strcasecmp(parv[2], "OP"))
+	{
+		mreg_tp->flags &= ~CS_MEMBER_AUTOVOICE;
+		mreg_tp->flags |= CS_MEMBER_AUTOOP;
+	}
+	else if(!strcasecmp(parv[2], "VOICE"))
+	{
+		mreg_tp->flags &= ~CS_MEMBER_AUTOOP;
+		mreg_tp->flags |= CS_MEMBER_AUTOVOICE;
+	}
+	else if(!strcasecmp(parv[2], "NONE"))
+	{
+		mreg_tp->flags &= ~(CS_MEMBER_AUTOVOICE|CS_MEMBER_AUTOOP);
+	}
+	else
+	{
+		service_error(chanserv_p, client_p, "Auto level %s invalid",
+				parv[2]);
+		return 1;
+	}
+
+	slog(chanserv_p, 5, "%s %s MODAUTO %s %s %s",
+		client_p->user->mask, client_p->user->user_reg->name,
+		parv[0], mreg_tp->user_reg->name, parv[2]);
+
+	my_free(mreg_tp->lastmod);
+	mreg_tp->lastmod = my_strdup(mreg_p->user_reg->name);
+
+	service_error(chanserv_p, client_p, "User %s on %s autolevel %s set",
+			mreg_tp->user_reg->name, mreg_tp->channel_reg->name, 
+			parv[2]);
+
+	loc_sqlite_exec(NULL, 
+			"UPDATE members SET flags = %d, lastmod = %Q "
+			"WHERE chname = %Q AND username = %Q",
+			mreg_tp->flags, mreg_p->user_reg->name, 
 			mreg_tp->channel_reg->name, mreg_tp->user_reg->name);
 
 	return 1;

@@ -7,6 +7,12 @@ struct chmode;
 
 #define CS_FLAGS_SUSPENDED	0x001
 
+#define CS_MEMBER_AUTOOP	0x001
+#define CS_MEMBER_AUTOVOICE	0x002
+
+/* used to validate flags on db load.. */
+#define CS_MEMBER_ALL		(CS_MEMBER_AUTOOP|CS_MEMBER_AUTOVOICE)
+
 struct chan_reg
 {
 	char *name;
@@ -32,6 +38,7 @@ struct member_reg
 	struct chan_reg *channel_reg;
 
 	int level;
+	int flags;
 	int suspend;
 
 	char *lastmod;			/* last user to modify this membership */
