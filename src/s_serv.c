@@ -770,15 +770,12 @@ void send_capabilities(struct Client *client_p, struct ConfItem *aconf,
  * input	- server to burst to client to burst
  * output	- none
  * side effects - burst away message if client is away
- * XXX: always assumes server is server...you've been warned
+ * XXX: always assumes server is server and user is away.
  */
 
 static void
 burst_away(struct Client *server_p, struct Client *client_p)
 {
-   if(client_p->user->away == NULL) /* Not away..skip */
-     return;
-   
     sendto_server(server_p, NULL, CAP_UID, NOCAPS,
                    ":%s AWAY :%s", ID(client_p), client_p->user->away);
     sendto_server(server_p, NULL, NOCAPS, CAP_UID,
@@ -825,8 +822,9 @@ void sendnick_TS(struct Client *client_p, struct Client *target_p)
 				 ubuf,
 				 target_p->username, target_p->host,
 				 target_p->user->server, target_p->info);
-  if(ConfigFileEntry.burst_away)
-     burst_away(client_p, target_p);
+
+  if(ConfigFileEntry.burst_away && !BadPtr(client_p->user->away))
+    burst_away(client_p, target_p);
 }
 
 /*
