@@ -24,6 +24,7 @@
  */
 #include "handlers.h"
 #include "client.h"
+#include "fdlist.h"
 #include "irc_string.h"
 #include "ircd.h"
 #include "numeric.h"
@@ -749,6 +750,18 @@ static int nickkilldone(struct Client *cptr, struct Client *sptr, int parc,
     del_from_client_hash_table(sptr->name, sptr);
   strcpy(sptr->name, nick);
   add_to_client_hash_table(nick, sptr);
+
+  /*
+   * .. and update the new nick in the fd note.
+   * XXX should use IsLocal() ! -- adrian
+   */
+  if (cptr->fd > -1) {
+    char nickbuf[NICKLEN + 10];
+    strcpy(nickbuf, "Nick: ");
+    /* XXX nick better be the right length! -- adrian */
+    strncat(nickbuf, nick, NICKLEN);
+    fd_note(cptr->fd, nickbuf);
+  }
 
   return 0;
 }

@@ -59,6 +59,8 @@ typedef void CNCB(int, int, void *);
 extern int highest_fd;
 extern int number_fd;
 
+struct Client;
+
 struct _fde {
     /* New-school stuff, again pretty much ripped from squid */
     /*
@@ -103,6 +105,8 @@ void fdlist_init(void);
 
 extern void  fd_open(int, unsigned int, const char *);
 extern void  fd_close(int);
+extern void  fd_dump(struct Client *sptr);
+extern void  fd_note(int fd, const char *desc);
 
 
 #endif /* INCLUDED_fdlist_h */

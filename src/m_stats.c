@@ -409,6 +409,11 @@ static void do_priv_stats(struct Client *sptr, char *name, char *target,
       stats_spy(sptr,stat);
       break;
 
+    case 'F' : case 'f' :
+      fd_dump(sptr);
+      stats_spy(sptr,stat);
+      break;
+
     case 'G': case 'g' :
       if (ConfigFileEntry.glines)
 	{

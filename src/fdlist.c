@@ -11,6 +11,7 @@
 #include "ircd.h"    /* GlobalSetOptions */
 #include "s_bsd.h"   /* highest_fd */
 #include "config.h"  /* option settings */
+#include "send.h"
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
@@ -117,5 +118,37 @@ fd_close(int fd)
     F->timeout = 0;
     /* Unlike squid, we're actually closing the FD here! -- adrian */
     close(fd);
+}
+
+
+/*
+ * fd_dump() - dump the list of active filedescriptors
+ */
+void
+fd_dump(struct Client *sptr)
+{
+    int i;
+
+    for (i = 0; i <= highest_fd; i++) {
+        if (!fd_table[i].flags.open)
+            continue;
+
+        sendto_one(sptr, ":%s NOTICE %s :*** fd %d, desc '%s'", me.name,
+          sptr->name, i, fd_table[i].desc);
+    }
+    sendto_one(sptr, ":%s NOTICE %s :*** Finished", me.name, sptr->name);
+}
+
+
+/*
+ * fd_note() - set the fd note
+ */
+void
+fd_note(int fd, const char *desc)
+{
+    if (desc)
+        strncpy(fd_table[fd].desc, desc, FD_DESC_SZ);
+    else
+        fd_table[fd].desc[0] = '\0';
 }
 
