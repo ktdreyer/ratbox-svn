@@ -1,3 +1,11 @@
+*** 20000115_2 by db
+- first very rough working lex/yacc under ircd-hybrid..
+  parser doesn't actually do anything.... yet...
+  Tom, we could use a fileio pushback, to push back a line thats
+  "not for us"
+
+
+
 *** 20000115_1 by db
 - more cleanups to parse code
 
