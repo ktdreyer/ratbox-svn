@@ -1,3 +1,23 @@
+leeh        2003/02/13 21:44:02 UTC	(20030213_2)
+
+  Modified files:
+    help/opers           unxline xline 
+    modules              m_challenge.c m_cryptlink.c 
+    src                  s_auth.c 
+  Log:
+  - add a != NULL check to delete_identd_queries()
+  - fix unxline/xline docs
+  - fix some non-ssl code
+  
+  Revision  Changes    Path
+  1.2       +3 -3      ircd-ratbox/help/opers/unxline
+  1.2       +0 -2      ircd-ratbox/help/opers/xline
+  1.52      +3 -3      ircd-ratbox/modules/m_challenge.c
+  1.50      +2 -2      ircd-ratbox/modules/m_cryptlink.c
+  7.132     +4 -1      ircd-ratbox/src/s_auth.c
+
+
+
 androsyn    2003/02/13 21:17:39 UTC	(20030213_1)
 
   Modified files:
