@@ -1,3 +1,15 @@
+leeh        2004/03/07 18:36:17 EST	(20040307_8)
+
+  Modified files:
+    modules/core         m_message.c 
+  Log:
+  - fix PRIVMSG/NOTICE to not bounce back to source on fake direction
+  
+  Revision  Changes    Path
+  1.144     +9 -1      ircd-ratbox/modules/core/m_message.c
+
+
+
 leeh        2004/03/07 18:08:38 EST	(20040307_7)
 
   Modified files:
