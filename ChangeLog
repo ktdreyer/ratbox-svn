@@ -1,3 +1,16 @@
+leeh        2005/03/23 00:30:54 UTC	(20050323_0)
+
+  Modified files:
+    .                    configure configure.ac 
+  Log:
+  - remove some extra spaces sh doesnt like
+  
+  Revision  Changes    Path
+  7.255     +3 -3      ircd-ratbox/configure
+  7.67      +3 -3      ircd-ratbox/configure.ac
+
+
+
 leeh        2005/03/22 22:29:07 UTC	(20050322_6)
 
   Added files:
