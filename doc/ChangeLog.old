@@ -1,3 +1,6 @@
+*** 20010103_18 by davidt
+Eeek, client_burst_if_needed should only check capabilities of local connections
+
 *** 20010103_17 by davidt
 Fix whois for LazyLinks
 
