@@ -1,3 +1,8 @@
+*** 20001213_12 by db
+- tiny update to send.txt, sendto_common_channels 
+
+
+
 *** 20001213_11 by db
 - Ok the mystery of the missing NICK has been solved. (hwy/toot?)
   If you weren't on a channel and you did a nick change, you never got
