@@ -85,7 +85,7 @@ int mo_jupe(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
   struct Client *acptr;
   struct Client *ajupe;
-
+  dlink_node *m;
 
   if( parc < 3 )
     {
@@ -104,11 +104,11 @@ int mo_jupe(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       return 0;
     }
 
-  sendto_all_local_opers(&me, NULL, "JUPE for %s requested by %s: %s",
+  sendto_all_local_opers(sptr, NULL, "JUPE for %s requested by %s: %s",
 			 parv[1], sptr->name, parv[2]);
   sendto_ll_serv_butone(NULL, sptr, 1,
 			":%s WALLOPS :JUPE for %s requested by %s: %s",
-			&me, parv[1], sptr->name, parv[2]);
+			parv[0], parv[1], sptr->name, parv[2]);
 
   acptr= find_server(parv[1]);
 
@@ -129,7 +129,16 @@ int mo_jupe(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 		       parv[1]);
 
   ajupe = make_client(NULL);
+
+  m = dlinkFind(&unknown_list, ajupe);
+  if(m != NULL)
+    {
+      dlinkDelete(m, &unknown_list);
+    }
+  free_dlink_node(m);
+
   make_server(ajupe);
+
   ajupe->hopcount = 1;
   strncpy_irc(ajupe->name,parv[1],HOSTLEN);
   strncpy_irc(ajupe->info, "(JUPED)", REALLEN);
@@ -142,8 +151,8 @@ int mo_jupe(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
   /* Some day, all these lists will be consolidated *sigh* */
   add_client_to_list(ajupe);
-  add_client_to_llist(&(me.serv->servers), ajupe);
   add_to_client_hash_table(ajupe->name, ajupe);
+  add_client_to_llist(&(ajupe->servptr->serv->servers), ajupe);
 
   return 0;
 }

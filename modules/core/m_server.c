@@ -354,6 +354,7 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   add_to_client_hash_table(acptr->name, acptr);
   add_client_to_llist(&(acptr->servptr->serv->servers), acptr);
 
+
   /*
    * Old sendto_serv_but_one() call removed because we now
    * need to send different names to different servers

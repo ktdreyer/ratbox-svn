@@ -610,18 +610,16 @@ remove_client_from_list(struct Client* cptr)
 {
   assert(0 != cptr);
   
-#if 0
-  /* HACK somehow this client has already exited
-   * but has come back to haunt us.. looks like a bug
-   * XXX isn't this bug fixed now? -is
+  /* A client made with make_client()
+   * is on the unknown_list until removed.
+   * If it =does= happen to exit before its removed from that list
+   * and its =not= on the GlobalClientList, it will core here.
+   * short circuit that case now -db
    */
   if (!cptr->prev && !cptr->next)
     {
-      log(L_CRIT, "already exited client %X [%s]",
-	  cptr, cptr->name?cptr->name:"NULL");
       return;
     }
-#endif
 
   if (cptr->prev)
     cptr->prev->next = cptr->next;
