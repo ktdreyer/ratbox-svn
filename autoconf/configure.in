@@ -188,13 +188,15 @@ fi
 AC_SUBST(SSL_DEFINE)
 AC_SUBST(SSL_LIBS)
 
-if test "$ac_cv_func_gettext" = "yes" ; then
+if test "$ac_cv_func_gettext" = "yes" -o "$ac_cv_lib_intl_gettext" = "yes"; then
 	echo "Building with gettext."
 	MSGFMT="msgfmt -o"
 else
 	MSGFMT="echo"
 fi
 
+LDFLAGS_EXTRA=$LDFLAGS
+AC_SUBST(LDFLAGS_EXTRA)
 AC_SUBST(MSGFMT)
 
 AC_OUTPUT(                   \

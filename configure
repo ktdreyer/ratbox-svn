@@ -2208,12 +2208,14 @@ fi
 
 
 
-if test "$ac_cv_func_gettext" = "yes" ; then
+if test "$ac_cv_func_gettext" = "yes" -o "$ac_cv_lib_intl_gettext" = "yes"; then
 	echo "Building with gettext."
 	MSGFMT="msgfmt -o"
 else
 	MSGFMT="echo"
 fi
+
+LDFLAGS_EXTRA=$LDFLAGS
 
 
 
@@ -2379,6 +2381,7 @@ s%@CPP@%$CPP%g
 s%@SELECT_SRC@%$SELECT_SRC%g
 s%@SSL_DEFINE@%$SSL_DEFINE%g
 s%@SSL_LIBS@%$SSL_LIBS%g
+s%@LDFLAGS_EXTRA@%$LDFLAGS_EXTRA%g
 s%@MSGFMT@%$MSGFMT%g
 
 CEOF
