@@ -1,3 +1,15 @@
+androsyn    2003/01/27 18:15:21 UTC	(20030127_2)
+
+  Modified files:
+    src                  s_bsd.c 
+  Log:
+  disable_sock_options seemed kinda pointless to me..
+  
+  Revision  Changes    Path
+  7.197     +0 -21     ircd-ratbox/src/s_bsd.c
+
+
+
 androsyn    2003/01/27 18:10:35 UTC	(20030127_1)
 
   Modified files:
