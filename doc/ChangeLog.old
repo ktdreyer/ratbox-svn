@@ -1,3 +1,20 @@
+leeh        2002/01/28 15:58:20 EST	(20020128_0)
+
+  Modified files:
+    contrib              example_module.c m_flags.c m_jupe.c 
+                         m_map.c m_mkpasswd.c 
+  Log:
+  - commited hwys patch for contrib/
+  
+  Revision  Changes    Path
+  1.4       +3 -1      ircd-hybrid-7/contrib/example_module.c
+  1.6       +3 -1      ircd-hybrid-7/contrib/m_flags.c
+  1.25      +3 -1      ircd-hybrid-7/contrib/m_jupe.c
+  1.10      +4 -1      ircd-hybrid-7/contrib/m_map.c
+  1.6       +3 -1      ircd-hybrid-7/contrib/m_mkpasswd.c
+
+
+
 leeh        2002/01/27 14:05:07 EST	(20020127_0)
 
   Modified files:
