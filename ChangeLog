@@ -1,3 +1,15 @@
+leeh        2005/02/03 11:17:54 EST	(20050203_4)
+
+  Modified files:
+    src                  s_chanserv.c 
+  Log:
+  - remove the special case of one user joining in h_chanserv_join().
+  
+  Revision  Changes    Path
+  1.59      +11 -118   rserv/src/s_chanserv.c
+
+
+
 leeh        2005/02/03 11:10:25 EST	(20050203_3)
 
   Modified files:
