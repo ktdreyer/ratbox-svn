@@ -154,6 +154,7 @@ remote		{ return REMOTE; }
 send_password	{ return SEND_PASSWORD; }
 sendq		{ return SENDQ; }
 serverinfo	{ return SERVERINFO; }
+shared          { return SHARED; }
 short_motd      { return SHORT_MOTD; }
 spoof		{ return SPOOF; }
 unkline		{ return UNKLINE; }

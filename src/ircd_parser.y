@@ -125,12 +125,13 @@ int   class_sendq_var;
 %token  QUARANTINE
 %token  REASON
 %token  REHASH
-%token  TREJECT
 %token  REMOTE
 %token  SENDQ
 %token  SEND_PASSWORD
 %token  SERVERINFO
+%token  SHARED
 %token  SPOOF
+%token  TREJECT
 %token  TNO
 %token  TYES
 %token  T_L_CRIT
@@ -190,6 +191,7 @@ conf_item:        admin_entry
                 | auth_entry
                 | serverinfo_entry
                 | quarantine_entry
+                | shared_entry
                 | connect_entry
                 | kill_entry
                 | deny_entry
@@ -761,7 +763,7 @@ quarantine_entry:       QUARANTINE
   }; 
 
 quarantine_items:       quarantine_items quarantine_item |
-                quarantine_item
+			quarantine_item
 
 quarantine_item:        quarantine_name | quarantine_reason
 
@@ -774,6 +776,37 @@ quarantine_name:        NAME '=' QSTRING ';'
 quarantine_reason:      REASON '=' QSTRING ';' 
   {
     yy_aconf->passwd = yylval.string;
+    yylval.string = (char *)NULL;
+  };
+
+/***************************************************************************
+ *  section shared, for sharing remote klines etc.
+ ***************************************************************************/
+
+shared_entry:		SHARED
+  {
+    if(yy_aconf)
+      {
+        free_conf(yy_aconf);
+        yy_aconf = (struct ConfItem *)NULL;
+      }
+    yy_aconf=make_conf();
+    yy_aconf->status = CONF_ULINE;
+  };
+  '{' shared_items '}' ';'
+  {
+    conf_add_u_line(yy_aconf);
+    yy_aconf = (struct ConfItem *)NULL;
+  };
+
+shared_items:		shared_items shared_item |
+			shared_item
+
+shared_item:		shared_name
+
+shared_name:		NAME '=' QSTRING ';'
+  {
+    yy_aconf->host = yylval.string;
     yylval.string = (char *)NULL;
   };
 

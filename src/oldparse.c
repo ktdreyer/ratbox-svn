@@ -255,8 +255,8 @@ void oldParseOneLine(char* line,struct ConfItem* aconf,
       conf_add_q_line(aconf);
       break;
 
-    case 'U': /* Uphost, ie. host where client reading */
-    case 'u': /* this should connect.                  */
+    case 'U': /* shared klines etc. */
+    case 'u': 
       aconf->status = CONF_ULINE;
       conf_add_fields(aconf,host_field,pass_field,user_field,
 		      port_field,class_field);
