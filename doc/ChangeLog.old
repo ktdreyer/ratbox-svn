@@ -1,3 +1,25 @@
+*** 20001030_7 by adrian
+
+
+Optimise the read code. When a connection graduates from the auth state
+and is upgraded to a client, its added via comm_setselect() to start
+reading data.
+
+* read_packet() has been turned into a PF, so it can be called when a
+  FD is ready for reading.
+
+* read_packet() has been stripped quite a bit - we *assume* that there
+  will be data returned from the read. If not, thats a socket error
+
+* error handling has been moved into read_packet() instead of its return
+  value
+
+* note that the data is put into the dbuf as fast as possible, rather than
+  being evil and waiting. I'll fix the DoSability of this code at a later
+  date, and without ignoring reads. :-P
+
+
+
 *** 20001030_6 by adrian
 
 
