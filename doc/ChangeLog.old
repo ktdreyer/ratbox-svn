@@ -1,3 +1,8 @@
+*** 20001221_3 by db
+- added missing memdebug.h passed on by einride
+
+
+
 *** 20001221_2 by db
 - added einride's memory debugging
 
