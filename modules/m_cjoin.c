@@ -151,7 +151,9 @@ static void m_cjoin(struct Client *client_p,
            * the uplink will have to SJOIN all of those.
            */
           sendto_one(uplink, ":%s CBURST %s !%s",
-                     me.name, parv[1], source_p->name);
+                     me.name, parv[1],
+                     IsCapable(uplink, CAP_UID)?ID(source_p) :
+                                                source_p->name);
 
           return;
         }
@@ -181,7 +183,13 @@ static void m_cjoin(struct Client *client_p,
 			source_p->host,
 			root_vchan->chname);
 
-  sendto_server(client_p, NULL, chptr, NOCAPS, NOCAPS, NOFLAGS,
+  sendto_server(client_p, NULL, chptr, CAP_UID, NOCAPS, NOFLAGS,
+                ":%s SJOIN %lu %s + :@%s",
+                me.name,
+                (unsigned long) chptr->channelts,
+                chptr->chname,
+                ID(source_p));
+  sendto_server(client_p, NULL, chptr, CAP_UID, NOCAPS, NOFLAGS,
                 ":%s SJOIN %lu %s + :@%s",
                 me.name,
                 (unsigned long) chptr->channelts,

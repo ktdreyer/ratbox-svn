@@ -32,6 +32,7 @@
 #include "parse.h"
 #include "modules.h"
 #include "s_conf.h"
+#include "s_serv.h"
 
 #include <stdlib.h>
 
@@ -95,9 +96,10 @@ static void m_away(struct Client *client_p,
       if (away)
         {
           /* we now send this only if they were away before --is */
-          sendto_server(client_p, source_p, NULL, NOCAPS, NOCAPS,
-                        NOFLAGS, ":%s AWAY", parv[0]);
-
+          sendto_server(client_p, source_p, NULL, CAP_UID, NOCAPS,
+                        NOFLAGS, ":%s AWAY", ID(source_p));
+          sendto_server(client_p, source_p, NULL, NOCAPS, CAP_UID,
+                        NOFLAGS, ":%s AWAY", source_p->name);
           MyFree(away);
           source_p->user->away = NULL;
         }
@@ -123,8 +125,12 @@ static void m_away(struct Client *client_p,
 
   /* we now send this only if they weren't away already --is */
   if (!away)
-    sendto_server(client_p, source_p, NULL, NOCAPS, NOCAPS,
-                  NOFLAGS, ":%s AWAY :%s", parv[0], awy2); 
+  {
+    sendto_server(client_p, source_p, NULL, CAP_UID, NOCAPS,
+                  NOFLAGS, ":%s AWAY :%s", ID(source_p), awy2);
+    sendto_server(client_p, source_p, NULL, NOCAPS, CAP_UID,
+                  NOFLAGS, ":%s AWAY :%s", source_p->name, awy2);
+  }
   else
     MyFree(away);
 

@@ -277,21 +277,3 @@ static void list_accepts(struct Client *source_p)
              me.name, source_p->name);
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      

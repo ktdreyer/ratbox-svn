@@ -233,7 +233,15 @@ static void mo_gline(struct Client *client_p,
 			   reason);
 
       /* 4 param version for hyb-7 servers */
-      sendto_server(NULL, source_p, NULL, CAP_GLN, NOCAPS, LL_ICLIENT,
+      sendto_server(NULL, source_p, NULL, CAP_GLN|CAP_UID, NOCAPS,
+                    LL_ICLIENT,
+                    ":%s GLINE %s %s :%s",
+                    ID(source_p),
+                    user,
+                    host,
+                    reason);
+      sendto_server(NULL, source_p, NULL, CAP_GLN, CAP_UID,
+                    LL_ICLIENT,
                     ":%s GLINE %s %s :%s",
                     source_p->name,
                     user,
@@ -241,11 +249,17 @@ static void mo_gline(struct Client *client_p,
                     reason);
 
       /* 8 param for hyb-6 */
-      sendto_server(NULL, NULL, NULL, NOCAPS, CAP_GLN, NOFLAGS,
+      sendto_server(NULL, NULL, NULL, CAP_UID, CAP_GLN, NOFLAGS,
+                    ":%s GLINE %s %s %s %s %s %s :%s",
+                    me.name, ID(source_p), source_p->username,
+                    source_p->host, source_p->user->server, user, host,
+                    reason);
+      sendto_server(NULL, NULL, NULL, NOCAPS, CAP_GLN|CAP_UID, NOFLAGS,
                     ":%s GLINE %s %s %s %s %s %s :%s",
                     me.name, source_p->name, source_p->username,
                     source_p->host, source_p->user->server, user, host,
                     reason);
+
 
       sendto_realops_flags(FLAGS_ALL, L_ALL,
 			"%s!%s@%s on %s is requesting gline for [%s@%s] [%s]",

@@ -514,6 +514,9 @@ int hunt_server(struct Client *client_p, struct Client *source_p, char *command,
 
       /* Deal with lazylinks */
       client_burst_if_needed(target_p, source_p);
+      /* This is a little kludgy but should work... */
+      if (IsClient(source_p) && IsCapable(target_p, CAP_UID))
+        parv[0] = ID(source_p);
       sendto_one(target_p, command, parv[0],
                  parv[1], parv[2], parv[3], parv[4],
                  parv[5], parv[6], parv[7], parv[8]);
