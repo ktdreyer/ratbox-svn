@@ -321,7 +321,7 @@ static void ms_sjoin(struct Client *client_p,
     }
 
   mbuf = modebuf;
-  para[0] = para[1] = para[2] = para[3] = '\0';
+  para[0] = para[1] = para[2] = para[3] = NULL;
   pargs = 0;
 
   *mbuf++ = '+';
@@ -442,7 +442,7 @@ static void ms_sjoin(struct Client *client_p,
 				     para[0], para[1], para[2], para[3]);
                 mbuf = modebuf;
 		*mbuf++ = '+';
-		para[0] = para[1] = para[2] = para[3] = '\0';
+		para[0] = para[1] = para[2] = para[3] = NULL;
 		pargs = 0;
 	      }
 
@@ -467,7 +467,7 @@ static void ms_sjoin(struct Client *client_p,
                                para[0],para[1],para[2],para[3]);
           mbuf = modebuf;
           *mbuf++ = '+';
-          para[0] = para[1] = para[2] = para[3] = '\0';
+          para[0] = para[1] = para[2] = para[3] = NULL;
           pargs = 0;
         }
 
@@ -497,10 +497,11 @@ nextnick:
     {
       sendto_channel_local(ALL_MEMBERS, chptr,
                            ":%s MODE %s %s %s %s %s %s",
-                           me.name,
-                           chptr->chname,
-                           modebuf,
-                           para[0], para[1], para[2], para[3]);
+                           me.name, chptr->chname, modebuf,
+                           BadPtr(para[0]) ? "" : para[0], 
+                           BadPtr(para[1]) ? "" : para[1], 
+                           BadPtr(para[2]) ? "" : para[2], 
+                           BadPtr(para[3]) ? "" : para[3]);
     }
 
   if (!people)
@@ -673,7 +674,7 @@ static void remove_a_mode(struct Channel *chptr,
   mbuf = lmodebuf;
   *mbuf++ = '-';
 
-  lpara[0] = lpara[1] = lpara[2] = lpara[3] = '\0';
+  lpara[0] = lpara[1] = lpara[2] = lpara[3] = NULL;
 
 
   ircsprintf(buf,":%s MODE %s ", me.name, chptr->chname);
@@ -693,12 +694,12 @@ static void remove_a_mode(struct Channel *chptr,
 			       me.name,
 			       chptr->chname,
 			       lmodebuf,
-			       lpara[0], lpara[1], lpara[2], lpara[3] );
+			       lpara[0], lpara[1], lpara[2], lpara[3]);
 
 	  mbuf = lmodebuf;
 	  *mbuf++ = '-';
 	  count = 0;
-	  lpara[0] = lpara[1] = lpara[2] = lpara[3] = '\0';
+	  lpara[0] = lpara[1] = lpara[2] = lpara[3] = NULL;
 	}
     }
 
@@ -707,10 +708,11 @@ static void remove_a_mode(struct Channel *chptr,
       *mbuf   = '\0';
       sendto_channel_local(ALL_MEMBERS, chptr,
 			   ":%s MODE %s %s %s %s %s %s",
-			   me.name,
-			   chptr->chname,
-			   lmodebuf,
-			   lpara[0], lpara[1], lpara[2], lpara[3] );
+			   me.name, chptr->chname, lmodebuf,
+			   BadPtr(lpara[0]) ? "" : lpara[0], 
+                           BadPtr(lpara[1]) ? "" : lpara[1],
+                           BadPtr(lpara[2]) ? "" : lpara[2], 
+                           BadPtr(lpara[3]) ? "" : lpara[3]);
 
     }
 }
