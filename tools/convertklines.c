@@ -25,14 +25,11 @@
 
 #define BUFSIZE 512
 
-#define IS_LEAF 0
-#define IS_HUB 1
-
 static void ConvertConf(FILE* file,FILE *outkline, FILE *outdline);
 static void usage(void);
 static char *getfield(char *);
 static void ReplaceQuotes(char *out, char *in);
-static void oldParseOneLine(FILE *outkline, FILE *outdline, char *in);
+static void parse(FILE *outkline, FILE *outdline, char *in);
 
 int main(int argc,char *argv[])
 {
@@ -43,29 +40,29 @@ int main(int argc,char *argv[])
   if(argc < 4)
     usage();
 
-  if (( in = fopen(argv[1],"r")) == (FILE *)NULL )
+  if (( in = fopen(argv[1],"r")) == NULL )
     {
       fprintf(stderr,"Can't open %s for reading\n", argv[1]);
       usage();
     }
 
-  if (( outkline = fopen(argv[2],"w")) == (FILE *)NULL )
+  if (( outkline = fopen(argv[2],"w")) == NULL )
     {
       fprintf(stderr,"Can't open %s for writing\n", argv[2]);
       usage();
     }
   
-  if(( outdline = fopen(argv[3], "w")) == (FILE *)NULL )
+  if(( outdline = fopen(argv[3], "w")) == NULL )
     {
       fprintf(stderr, "Can't open %s for writing\n", argv[3]);
       usage();
     }
     
-  ConvertConf(in,outkline,outdline);
+  ConvertConf(in, outkline, outdline);
 
   fprintf(stderr, "The kline file has been converted and should be renamed to\n");
   fprintf(stderr, "the config.h options (normally kline.conf and dline.conf) and\n");
-  fprintf(stderr, "put in your etc/ dir\n");
+  fprintf(stderr, "placed in your etc/ dir\n");
   return 0;
 }
 
@@ -78,20 +75,18 @@ static void usage()
 
 
 /*
-** ConvertConf() 
-**    Read configuration file.
-**
-*
-* Inputs        - FILE* to config file to convert
-*		- FILE* to output for new style conf
-*
-**    returns -1, if file cannot be opened
-**             0, if file opened
-*/
+ * ConvertConf() 
+ *    Read configuration file.
+ *
+ *
+ * inputs	- FILE* to config file to convert
+ *		- FILE* to output for new klines
+ *		- FILE* to output for new dlines
+ * outputs	- -1 if the file cannot be opened
+ *		- 0 otherwise
+ */
 
-#define MAXCONFLINKS 150
-
-static void ConvertConf(FILE* file,FILE *outkline, FILE *outdline)
+static void ConvertConf(FILE* file, FILE *outkline, FILE *outdline)
 {
   char             line[BUFSIZE];
   char             quotedLine[BUFSIZE];
@@ -110,8 +105,9 @@ static void ConvertConf(FILE* file,FILE *outkline, FILE *outdline)
 
       /* Could we test if it's conf line at all?        -Vesa */
       if (quotedLine[1] == ':')
-        oldParseOneLine(outkline, outdline, quotedLine);
-
+      {
+        parse(outkline, outdline, quotedLine);
+      }
     }
 
   fclose(file);
@@ -187,67 +183,89 @@ static void ReplaceQuotes(char* quotedLine,char *inputLine)
 }
 
 /*
- * oldParseOneLine
+ * parse()
  * Inputs       - pointer to line to parse
  *		- pointer to output to write
  * Output       - 
  * Side Effects - Parse one old style conf line.
  */
 
-static void oldParseOneLine(FILE *outkline, FILE *outdline, char* line)
+static void parse(FILE *outkline, FILE *outdline, char* line)
 {
   char conf_letter;
-  char* tmp;
-  char* user_field=(char *)NULL;
-  char* passwd_field=(char *)NULL;
-  char* host_field=(char *)NULL;
+  char *tmp;
+  char *user_field = NULL;
+  char *passwd_field = NULL;
+  char *host_field = NULL;
+  char *operpasswd_field = NULL;
 
   tmp = getfield(line);
 
   conf_letter = *tmp;
 
   for (;;) /* Fake loop, that I can use break here --msa */
-    {
-      /* host field */
-      if ((host_field = getfield(NULL)) == NULL)
-	return;
+  {
+    /* host field */
+    if ((host_field = getfield(NULL)) == NULL)
+      return;
       
-      /* pass field */
-      if ((passwd_field = getfield(NULL)) == NULL)
-	break;
+    /* pass field */
+    if ((passwd_field = getfield(NULL)) == NULL) 
+      break;
+    else
+    {
+      /* if theres a password, try splitting the operreason out */
+      char *p;
 
-      /* user field */
-      if ((user_field = getfield(NULL)) == NULL)
-	break;
-
+      if((p = strchr(passwd_field, '|')))
+      {
+        *p++ = '\0';
+        operpasswd_field = p;
+      }
+      else
+        operpasswd_field = "";
     }
+
+    /* user field */
+    if ((user_field = getfield(NULL)) == NULL)
+      break;
+
+    /* what could possibly be after a userfield? */
+    break;
+  }
+
   if (!passwd_field)
+  {
     passwd_field = "";
+    operpasswd_field = "";
+  }
+   
   if (!user_field)
     user_field = "";
+    
   switch( conf_letter )
-    {
+  {
     case 'd':
       fprintf(stderr, "exempt in old file, ignoring.\n");
       break;
 
     case 'D': /* Deny lines (immediate refusal) */
       if(host_field && passwd_field)
-        fprintf(outdline, "\"%s\",\"%s\",\"Unknown\",900000000\n",
-	        host_field, passwd_field);
+        fprintf(outdline, "\"%s\",\"%s\",\"%s\",\"\",\"Unknown\",0\n",
+	        host_field, passwd_field, operpasswd_field);
       break;
 
     case 'K': /* Kill user line on irc.conf           */
     case 'k':
       if(host_field && passwd_field && user_field)
-        fprintf(outkline, "\"%s\",\"%s\",\"%s\",\"Unknown\",900000000\n",
-	        user_field, host_field, passwd_field);
+        fprintf(outkline, "\"%s\",\"%s\",\"%s\",\"%s\",\"\",\"Unknown\",0\n",
+	        user_field, host_field, passwd_field, operpasswd_field);
       break;
 
     default:
       fprintf(stderr, "Error in config file: %s", line);
       break;
-    }
+  }
 }
 
 
@@ -256,26 +274,32 @@ static void oldParseOneLine(FILE *outkline, FILE *outdline, char* line)
  */
 static char *getfield(char *newline)
 {
-  static char *line = (char *)NULL;
+  static char *line = NULL;
   char  *end, *field;
         
   if (newline)
     line = newline;
-
-  if (line == (char *)NULL)
-    return((char *)NULL);
-
+  
+  if (line == NULL)
+  {
+    fprintf(stderr, "returned null!\n");
+    return NULL;
+  }
+  
   field = line;
+  
   if ((end = strchr(line,':')) == NULL)
     {
       line = (char *)NULL;
-      if ((end = strchr(field,'\n')) == (char *)NULL)
+      if ((end = strchr(field,'\n')) == NULL)
         end = field + strlen(field);
     }
   else
     line = end + 1;
+    
   *end = '\0';
-  return(field);
+  
+  return field;
 }
 
 
