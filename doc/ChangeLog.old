@@ -1,3 +1,8 @@
+*** 20001015_5 by db
+- m_who.c what a MESS
+
+
+
 *** 20001015_4 by db
 - the m_mode changes needed
   this allows you to mode +o etc. on sub chans. wheeeeeee
