@@ -1,3 +1,20 @@
+leeh        2004/04/04 14:41:31 EDT	(20040404_3)
+
+  Modified files:
+    modules              m_stats.c 
+    src                  newconf.c s_serv.c 
+  Log:
+  - we shouldnt be outputting encrypted password status in stats c
+  - the no libz and compression check was testing the wrong flag
+  - stop directly using the server flags, use macros instead.
+  
+  Revision  Changes    Path
+  1.214     +4 -6      ircd-ratbox/modules/m_stats.c
+  7.148     +1 -1      ircd-ratbox/src/newconf.c
+  7.397     +4 -4      ircd-ratbox/src/s_serv.c
+
+
+
 leeh        2004/04/04 08:27:31 EDT	(20040404_2)
 
   Modified files:
