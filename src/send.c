@@ -500,6 +500,8 @@ sendto_channel_local(int type, struct Channel *chptr, const char *pattern, ...)
 	dlink_node *ptr;
 	dlink_node *next_ptr;
 	
+	linebuf_newbuf(&linebuf); 
+	
 	va_start(args, pattern);
 	linebuf_putmsg(&linebuf, pattern, &args, NULL);
 	va_end(args);
