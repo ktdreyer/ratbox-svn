@@ -1,3 +1,16 @@
+leeh        2002/07/28 19:43:10 EDT	(20020729_0)
+
+  Modified files:
+    src                  channel_mode.c client.c 
+  Log:
+  - replaced find_client() calls with find_chasing()
+  
+  Revision  Changes    Path
+  7.48      +3 -15     ircd-hybrid-7/src/channel_mode.c
+  7.291     +1 -1      ircd-hybrid-7/src/client.c
+
+
+
 leeh        2002/07/28 17:37:22 EDT	(20020728_1)
 
   Modified files:
