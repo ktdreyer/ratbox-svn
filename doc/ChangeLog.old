@@ -1,3 +1,18 @@
+db          2002/04/06 12:31:04 EST	(20020406_4)
+
+  Modified files:
+    .                    INSTALL 
+  Log:
+    Modified files:
+      Hyb7                 INSTALL.sgml
+    Log:
+    Updated SGML source of INSTALL with Andro's changes
+  
+  Revision  Changes    Path
+  7.28      +20 -17    ircd-hybrid-7/INSTALL
+
+
+
 db          2002/04/06 10:37:42 EST	(20020406_3)
 
   Modified files:
