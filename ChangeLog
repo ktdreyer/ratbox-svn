@@ -1,3 +1,20 @@
+leeh        2004/04/12 09:45:00 EDT	(20040412_4)
+
+  Modified files:
+    modules              .depend 
+    src                  .depend channel.c 
+  Log:
+  - make channel_modes() test !MyClient() rather than IsServer(), and make it
+    test that *before* IsMember()
+  - update .depend
+  
+  Revision  Changes    Path
+  1.39      +38 -38    ircd-ratbox/modules/.depend
+  7.41      +11 -11    ircd-ratbox/src/.depend
+  7.414     +2 -2      ircd-ratbox/src/channel.c
+
+
+
 leeh        2004/04/11 22:26:48 EDT	(20040412_3)
 
   Modified files:
