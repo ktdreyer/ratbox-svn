@@ -1,3 +1,37 @@
+leeh        2003/04/27 14:51:40 UTC	(20030427_1)
+
+  Modified files:
+    include              cluster.h supported.h 
+    modules              m_stats.c m_xline.c 
+    src                  cluster.c event.c fdlist.c kdparse.c 
+                         newconf.c s_debug.c s_stats.c send.c 
+  Log:
+  - more ports from stable
+    - fixed the kline parser to accept commas in reasons.
+    - fixes for errors in sendto_match_servs()
+    - we were allowing spoofs that didnt contain a '.' which breaks older
+      servers
+    - added support for sending XLINE/UNXLINE remotely
+    - added support for clustering XLINE/UNXLINE
+    - added a list option to shared {};, type = kline, unkline, xline; etc.
+    - prefix everything using RPL_STATSDEBUG with its stats letter.
+  
+  Revision  Changes    Path
+  7.6       +9 -0      ircd-ratbox/include/cluster.h
+  1.31      +2 -1      ircd-ratbox/include/supported.h
+  1.152     +19 -14    ircd-ratbox/modules/m_stats.c
+  1.24      +251 -46   ircd-ratbox/modules/m_xline.c
+  7.6       +38 -2     ircd-ratbox/src/cluster.c
+  7.36      +3 -3      ircd-ratbox/src/event.c
+  7.38      +1 -1      ircd-ratbox/src/fdlist.c
+  7.24      +34 -18    ircd-ratbox/src/kdparse.c
+  7.79      +32 -5     ircd-ratbox/src/newconf.c
+  7.88      +26 -26    ircd-ratbox/src/s_debug.c
+  7.27      +11 -12    ircd-ratbox/src/s_stats.c
+  7.241     +22 -5     ircd-ratbox/src/send.c
+
+
+
 leeh        2003/04/27 11:17:30 UTC	(20030427_0)
 
   Modified files:
