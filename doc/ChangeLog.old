@@ -1,3 +1,7 @@
+*** 20010418_3 by fl_
+- framework for exempt blocks 
+
+
 *** 20010418_2 by jdc
 * example.conf incorrect in regards to vhost="" syntax.  Fixed.
 
