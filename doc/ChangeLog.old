@@ -1,3 +1,16 @@
+a1kmm       2001/12/14 23:04:58 EST	(20011215_3)
+
+  Modified files:
+    src                  hostmask.c 
+  Log:
+  - stats K & stats Irequested by users is now much more efficiently handled,
+    and it actually works.
+  
+  Revision  Changes    Path
+  7.59      +33 -28    ircd-hybrid-7/src/hostmask.c
+
+
+
 db          2001/12/14 21:31:31 EST	(20011215_2)
 
   Modified files:
