@@ -1,3 +1,23 @@
+leeh        2001/12/13 14:27:25 EST	(20011213_6)
+
+  Modified files:
+    include              ircd.h 
+    modules              m_join.c m_set.c 
+    src                  channel.c ircd.c s_conf.c 
+  Log:
+  - more splitcode stuff, added it all to /set and made no_*_on_split work
+  - needto add user/server tracking later..
+  
+  Revision  Changes    Path
+  7.42      +5 -1      ircd-hybrid-7/include/ircd.h
+  1.79      +15 -0     ircd-hybrid-7/modules/m_join.c
+  1.37      +67 -1     ircd-hybrid-7/modules/m_set.c
+  7.285     +9 -0      ircd-hybrid-7/src/channel.c
+  7.204     +9 -0      ircd-hybrid-7/src/ircd.c
+  7.280     +5 -0      ircd-hybrid-7/src/s_conf.c
+
+
+
 davidt      2001/12/13 13:31:52 EST	(20011213_5)
 
   Modified files:
