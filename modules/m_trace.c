@@ -36,21 +36,19 @@
 #include "fdlist.h"
 #include "s_bsd.h"
 #include "s_serv.h"
+#include "s_conf.h"
 #include "send.h"
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
 
-
-static void m_trace(struct Client *, struct Client *, int, char **);
-static void ms_trace(struct Client*, struct Client*, int, char**);
-static void mo_trace(struct Client*, struct Client*, int, char**);
+static void m_trace(struct Client*, struct Client*, int, char**);
 
 static void trace_spy(struct Client *);
 
 struct Message trace_msgtab = {
   "TRACE", 0, 0, 0, 0, MFLG_SLOW, 0,
-  {m_unregistered, m_trace, ms_trace, mo_trace}
+  {m_unregistered, m_trace, m_trace, m_trace}
 };
 
 #ifndef STATIC_MODULES
@@ -69,35 +67,17 @@ _moddeinit(void)
 }
 const char *_version = "$Revision$";
 #endif
+
 static int report_this_status(struct Client *source_p, struct Client *target_p,int dow,
                               int link_u_p, int link_u_s);
 
 
 /*
- * m_trace()
- *
- *	parv[0] = sender prefix
- *	parv[1] = target client/server to trace
+ * m_trace
+ *      parv[0] = sender prefix
+ *      parv[1] = servername
  */
 static void m_trace(struct Client *client_p, struct Client *source_p,
-                    int parc, char *parv[])
-{
-  char *tname;
-
-  if (parc > 1)
-    tname = parv[1];
-  else
-    tname = me.name;
-  sendto_one(source_p, form_str(RPL_ENDOFTRACE), me.name, parv[0], tname);
-}
-
-
-/*
-** mo_trace
-**      parv[0] = sender prefix
-**      parv[1] = servername
-*/
-static void mo_trace(struct Client *client_p, struct Client *source_p,
                     int parc, char *parv[])
 {
   struct Client       *target_p = NULL;
@@ -110,15 +90,29 @@ static void mo_trace(struct Client *client_p, struct Client *source_p,
 
   if(!IsClient(source_p))
     return;
-    
-  if (parc > 2)
-    if (hunt_server(client_p, source_p, ":%s TRACE %s :%s", 2, parc, parv))
-      return;
-  
+
   if (parc > 1)
     tname = parv[1];
   else
     tname = me.name;
+
+  /* during shide, allow a non-oper to trace themselves only */
+  if(!IsOper(source_p) && ConfigServerHide.hide_servers)
+  {
+    if(MyClient(source_p) && irccmp(tname, source_p->name) == 0)
+      report_this_status(source_p, source_p, 0, 0, 0);
+
+    sendto_one(source_p, form_str(RPL_ENDOFTRACE), 
+               me.name, parv[0], tname);
+    return;
+  }
+
+  if (parc > 2)
+  {
+    if (hunt_server(client_p, source_p, ":%s TRACE %s :%s", 2, parc, parv) != HUNTED_ISME)
+      return;
+  }
+  
 
   switch (hunt_server(client_p, source_p, ":%s TRACE :%s", 1, parc, parv))
     {
@@ -146,8 +140,10 @@ static void mo_trace(struct Client *client_p, struct Client *source_p,
                      ircd_version, debugmode, tname, "ac2ptr_is_NULL!!");
         return;
       }
+
     case HUNTED_ISME:
       break;
+
     default:
       return;
     }
@@ -159,8 +155,9 @@ static void mo_trace(struct Client *client_p, struct Client *source_p,
   dow = wilds || doall;
   
   set_time();
-  if(!IsOper(source_p) || !dow) /* non-oper traces must be full nicks */
-                              /* lets also do this for opers tracing nicks */
+
+  /* specific trace */
+  if(dow == 0)
     {
       const char* name;
       const char* class_name;
@@ -169,31 +166,7 @@ static void mo_trace(struct Client *client_p, struct Client *source_p,
       target_p = find_client(tname);
       
       if(target_p && IsPerson(target_p)) 
-      {
-        name = get_client_name(target_p, HIDE_IP);
-        inetntop(target_p->localClient->aftype, &IN_ADDR(target_p->localClient->ip), ipaddr, HOSTIPLEN);
-
-        class_name = get_client_class(target_p);
-
-        if (IsOper(target_p))
-        {
-          sendto_one(source_p, form_str(RPL_TRACEOPERATOR),
-                     me.name, parv[0], class_name, name, 
-                     MyOper(source_p) ? ipaddr :
-		     (IsIPSpoof(target_p) ? "255.255.255.255" : ipaddr),
-                     CurrentTime - target_p->lasttime,
-                     (target_p->user) ? (CurrentTime - target_p->user->last) : 0);
-        }
-        else
-        {
-          sendto_one(source_p,form_str(RPL_TRACEUSER),
-                     me.name, parv[0], class_name, name, 
-                     MyOper(source_p) ? ipaddr : 
-		     (IsIPSpoof(target_p) ? "255.255.255.255" : ipaddr),
-                     CurrentTime - target_p->lasttime,
-                     (target_p->user)?(CurrentTime - target_p->user->last):0);
-        }
-      }
+        report_this_status(source_p, target_p, 0, 0, 0);
       
       sendto_one(source_p, form_str(RPL_ENDOFTRACE),me.name,
                  parv[0], tname);
@@ -203,13 +176,13 @@ static void mo_trace(struct Client *client_p, struct Client *source_p,
   memset((void *)link_s,0,sizeof(link_s));
   memset((void *)link_u,0,sizeof(link_u));
 
-  /*
-   * Count up all the servers and clients in a downlink.
+  /* count up the servers behind the server links only if were going
+   * to be using them --fl
    */
-  if (doall)
-   {
+  if (doall && (IsOper(source_p) || !ConfigServerHide.hide_servers))
+  {
     DLINK_FOREACH(cptr, GlobalClientList.head)
-     {
+    {
       target_p = (struct Client *)cptr->data;
       if (IsPerson(target_p))
         {
@@ -219,52 +192,86 @@ static void mo_trace(struct Client *client_p, struct Client *source_p,
 	{
 	  link_s[target_p->from->localClient->fd]++;
 	}
-     }
-   }
-   
+    }
+  }
+
+  /* give non-opers a limited trace output of themselves, opers and
+   * servers (if no shide) --fl
+   */
+  if(!IsOper(source_p))
+  {
+    report_this_status(source_p, source_p, 0, 0, 0);
+
+    DLINK_FOREACH(ptr, oper_list.head)
+    {
+      target_p = ptr->data;
+
+      if(!doall && wilds && (match(tname, target_p->name) == 0))
+        continue;
+
+      report_this_status(source_p, target_p, 0, 0, 0);
+    }
+
+    if(!ConfigServerHide.hide_servers)
+    {
+      DLINK_FOREACH(ptr, serv_list.head)
+      {
+        target_p = ptr->data;
+
+        if(!doall && wilds && !match(tname, target_p->name))
+          continue;
+
+        report_this_status(source_p, target_p, 0, 
+                           link_u[target_p->localClient->fd],
+                           link_s[target_p->localClient->fd]);
+      }
+    }
+
+    sendto_one(source_p, form_str(RPL_ENDOFTRACE), me.name, parv[0], tname);
+    return;
+  }
+
+  /* source_p is opered */
+  
   /* report all direct connections */
-  for (ptr = lclient_list.head; ptr; ptr = ptr->next)
-    {
-      target_p = ptr->data;
+  DLINK_FOREACH(ptr, lclient_list.head)
+  {
+    target_p = ptr->data;
 
-      if (IsInvisible(target_p) && dow &&
-          !(MyConnect(source_p) && IsOper(source_p)) &&
-          !IsOper(target_p) && (target_p != source_p))
-        continue;
-      if (!doall && wilds && !match(tname, target_p->name))
-        continue;
-      if (!dow && irccmp(tname, target_p->name))
-        continue;
+    /* dont show invisible users to remote opers */
+    if(IsInvisible(target_p) && dow && !MyConnect(source_p) && 
+       !IsOper(target_p))
+      continue;
 
-      cnt = report_this_status(source_p,target_p,dow,0,0);
-    }
+    if(!doall && wilds && !match(tname, target_p->name))
+      continue;
 
-  for (ptr = serv_list.head; ptr; ptr = ptr->next)
-    {
-      target_p = ptr->data;
+    cnt = report_this_status(source_p, target_p, dow, 0, 0);
+  }
 
-      if (!doall && wilds && !match(tname, target_p->name))
-        continue;
-      if (!dow && irccmp(tname, target_p->name))
-        continue;
+  DLINK_FOREACH(ptr, serv_list.head)
+  {
+    target_p = ptr->data;
 
-      cnt = report_this_status(source_p, target_p, dow,
-                               link_u[target_p->localClient->fd],
-                               link_s[target_p->localClient->fd]);
-    }
+    if (!doall && wilds && !match(tname, target_p->name))
+      continue;
+
+    cnt = report_this_status(source_p, target_p, dow,
+                             link_u[target_p->localClient->fd],
+                             link_s[target_p->localClient->fd]);
+  }
 
   /* This section is to report the unknowns */
-  for (ptr = unknown_list.head; ptr; ptr = ptr->next)
-    {
-      target_p = ptr->data;
+  /* should this be done to remote opers? --fl */
+  DLINK_FOREACH(ptr, unknown_list.head)
+  {
+    target_p = ptr->data;
 
-      if (!doall && wilds && !match(tname, target_p->name))
-        continue;
-      if (!dow && irccmp(tname, target_p->name))
-        continue;
+    if (!doall && wilds && !match(tname, target_p->name))
+      continue;
 
-      cnt = report_this_status(source_p,target_p,dow,0,0);
-    }
+    cnt = report_this_status(source_p,target_p,dow,0,0);
+  }
 
   /*
    * Add these lines to summarize the above which can get rather long
@@ -289,30 +296,14 @@ static void mo_trace(struct Client *client_p, struct Client *source_p,
     }
     
   for (cltmp = ClassList; doall && cltmp; cltmp = cltmp->next)
+  {
     if (CurrUsers(cltmp) > 0)
       sendto_one(source_p, form_str(RPL_TRACECLASS), me.name,
                  parv[0], ClassName(cltmp), CurrUsers(cltmp));
+  }
 		 
   sendto_one(source_p, form_str(RPL_ENDOFTRACE),me.name, parv[0],tname);
 }
-
-
-/*
-** ms_trace
-**      parv[0] = sender prefix
-**      parv[1] = servername
-*/
-static void ms_trace(struct Client *client_p, struct Client *source_p,
-                    int parc, char *parv[])
-{
-  if (hunt_server(client_p, source_p, ":%s TRACE %s :%s", 2, parc, parv))
-    return;
-
-  if( IsOper(source_p) )
-    mo_trace(client_p,source_p,parc,parv);
-  return;
-}
-
 
 /*
  * report_this_status
@@ -341,19 +332,28 @@ static int report_this_status(struct Client *source_p, struct Client *target_p,
     case STAT_CONNECTING:
       sendto_one(source_p, form_str(RPL_TRACECONNECTING), me.name,
                  source_p->name, class_name, 
-		 IsOperAdmin(source_p) ? name : target_p->name);
+#ifndef HIDE_SERVERS_IPS
+		 IsOperAdmin(source_p) ? name :
+#endif
+                 target_p->name);
 		   
       cnt++;
       break;
+
     case STAT_HANDSHAKE:
       sendto_one(source_p, form_str(RPL_TRACEHANDSHAKE), me.name,
                  source_p->name, class_name, 
-                 IsOperAdmin(source_p) ? name : target_p->name);
+#ifndef HIDE_SERVERS_IPS
+                 IsOperAdmin(source_p) ? name :
+#endif
+                 target_p->name);
 		   
       cnt++;
       break;
+
     case STAT_ME:
       break;
+
     case STAT_UNKNOWN:
       /* added time -Taner */
       sendto_one(source_p, form_str(RPL_TRACEUNKNOWN),
@@ -367,7 +367,7 @@ static int report_this_status(struct Client *source_p, struct Client *target_p,
        */
       if ((IsOper(source_p) &&
 	   (MyClient(source_p) || !(dow && IsInvisible(target_p))))
-	  || !dow || IsOper(target_p))
+	  || !dow || IsOper(target_p) || (source_p == target_p))
 	{
 #ifndef HIDE_SPOOF_IPS
           if (IsAdmin(target_p))
@@ -382,37 +382,35 @@ static int report_this_status(struct Client *source_p, struct Client *target_p,
           if (IsOper(target_p))
 	    sendto_one(source_p, form_str(RPL_TRACEOPERATOR),
 		       me.name, source_p->name, class_name, name, 
-#ifdef HIDE_SPOOF_IPS
-		       IsIPSpoof(target_p) ? "255.255.255.255" : ip,
-#else
+#ifndef HIDE_SPOOF_IPS
                        MyOper(source_p) ? ip :
-		       (IsIPSpoof(target_p) ? "255.255.255.255" : ip),
 #endif
+		       (IsIPSpoof(target_p) ? "255.255.255.255" : ip),
 		       CurrentTime - target_p->lasttime,
 		       (target_p->user)?(CurrentTime - target_p->user->last):0);
 		       
 	  else
 	    sendto_one(source_p, form_str(RPL_TRACEUSER),
 		       me.name, source_p->name, class_name, name,
-#ifdef HIDE_SPOOF_IPS
-                       IsIPSpoof(target_p) ? "255.255.255.255" : ip,
-#else
+#ifndef HIDE_SPOOF_IPS
 		       MyOper(source_p) ? ip : 
-		       (IsIPSpoof(target_p) ? "255.255.255.255" : ip),
 #endif
+		       (IsIPSpoof(target_p) ? "255.255.255.255" : ip),
 		       CurrentTime - target_p->lasttime,
 		       (target_p->user)?(CurrentTime - target_p->user->last):0);
 	  cnt++;
 	}
       break;
-    case STAT_SERVER:
-      if(!IsOperAdmin(source_p))
-        name = get_client_name(target_p, MASK_IP);
 
+    case STAT_SERVER:
       sendto_one(source_p, form_str(RPL_TRACESERVER),
 		 me.name, source_p->name, class_name, link_s_p,
-		 link_u_p, name, *(target_p->serv->by) ?
-		 target_p->serv->by : "*", "*",
+		 link_u_p, 
+#ifndef HIDE_SERVERS_IPS
+                 IsOperAdmin(source_p) ? name :
+#endif
+                 target_p->name,
+                 *(target_p->serv->by) ? target_p->serv->by : "*", "*",
 		 me.name, CurrentTime - target_p->lasttime);
       cnt++;
       break;

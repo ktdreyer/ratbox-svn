@@ -386,10 +386,10 @@ del_from_client_hash_table(const char* name, struct Client* client_p)
   dlink_node *ptr;
   dlink_node *tempptr;
 
-  assert(name != NULL);
-  assert(client_p != NULL);
-  
-  if(name == NULL || client_p == NULL)
+  /* this can happen when exiting a client who hasnt properly established
+   * yet --fl
+   */
+  if(name == NULL || *name == '\0' || client_p == NULL)
     return;
 
   hashv = hash_nick_name(name);
