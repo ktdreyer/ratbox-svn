@@ -70,64 +70,48 @@ static char buffer[1024];
 /* turn a string into a parc/parv pair
  */
 
-static void
+static inline void
 string_to_array(char *string, int mpara, int paramcount,
                 char *end, int *parc, char *parv[MAXPARA])
 {
-  char *ap;
-  char *p=NULL;
-	
-  /*
-  ** Must the following loop really be so devious? On
-  ** surface it splits the message to parameters from
-  ** blank spaces. But, if paramcount has been reached,
-  ** the rest of the message goes into this last parameter
-  ** (about same effect as ":" has...) --msa
-  **
-  ** changed how this works - now paramcount is simply the
-  ** required number of arguments for a command.  imo the
-  ** previous behavior isn't needed --is
-  ** ok, now we do support it, for ISON brokenness among
-  ** other things. --is
-  */
-	
-  /* Note initially true: s==NULL || *(s-1) == '\0' !! */
-
-  /* redone by is, aug 2000 */
-  if (paramcount > MAXPARA)
-    paramcount = MAXPARA;
-	
-  for(ap = strtoken(&p,string," "); ap; ap = strtoken(&p, NULL, " "))
-    {
-      if(*ap != '\0') 
+	char *p, *buf = string;
+	int x = 1, y;
+	if((y = strspn(buf, " ")) > 0)
+		buf += y;
+	do 
 	{
-	  parv[(*parc)] = ap;
-	
-	  if (ap[0] == ':' || (mpara && (*parc >= mpara)))
-	    {
-	      char *tendp = ap;
-				
-	      while (*tendp++)
-		;
-	  
-	      if ( tendp <= end ) /* more tokens to follow */
-		ap [ strlen (ap) ] = ' '; 
-	      
-	      if (ap[0] == ':')
-		ap++;
-				
-	      parv[(*parc)++] = ap;
-	      break;
-	    }
-			
-	  if(*parc < MAXPARA)
-	    ++(*parc);
-	  else
-	    break;
-	}
-    }
-	
-  parv[(*parc)] = NULL;
+		if((p = strchr(buf, ' ')) != NULL)
+		{
+			if(*buf == ':') /* Last parameter */
+			{
+			        parv[x] = buf+1;
+		 		x++;
+		    		parv[x+1] = NULL;
+	  			(*parc) = x;
+	                        return;
+	                }
+	                parv[x] = buf;
+	    		*p++ = '\0';
+	         	buf = p;
+ 		} else {
+          		if(*buf == ':')
+          			buf++;
+          		parv[x] = buf;
+	                if(strlen(buf) < 1)
+	                	x--;
+	                parv[x+1] = NULL;
+			(*parc) = x+1;
+			return;
+	        }       
+	        buf += strspn(buf, " ");
+	        x++;
+	} while(x < MAXPARA - 1);
+	parv[x] = p;
+	parv[x+1] = NULL;
+	x++;
+
+	(*parc) += x+1;
+	return;
 }
 
 /*
@@ -294,11 +278,17 @@ void parse(struct Client *client_p, char *pbuffer, char *bufend)
   if(*end == '\n') *end-- = '\0';
   if(*end == '\r') *end = '\0';
 
-  i = 1;
+  i = 0;
   
   if (s)
     string_to_array(s, mpara, paramcount, end, &i, para);
-   
+#if 0
+  {
+  	int q;
+  	for(q = 1; q < i; q++)
+  		fprintf(stderr, "para[%d]: %s\n", q, para[q]);
+  }
+#endif
   if (mptr == (struct Message *)NULL)
     {
       do_numeric(numeric, client_p, from, i, para);
