@@ -929,21 +929,6 @@ int check_registered(struct Client* client)
 }
 
 /*
- * release_client_dns_reply - remove client dns_reply references
- *
- */
-#if 0
-void release_client_dns_reply(struct Client* client)
-{
-  assert(0 != client);
-  if (client->localClient->dns_reply)
-    {
-      --client->localClient->dns_reply->ref_count;
-      client->localClient->dns_reply = 0;
-    }
-}
-#endif
-/*
  * get_client_name -  Return the name of the client
  *    for various tracking and
  *      admin purposes. The main purpose of this function is to

@@ -522,7 +522,6 @@ struct LocalUser
 extern void           check_klines(void);
 extern const char*    get_client_name(struct Client* client, int show_ip);
 extern const char*    get_client_host(struct Client* client);
-extern void           release_client_dns_reply(struct Client* client);
 extern void           init_client_heap(void);
 extern void           clean_client_heap(void);
 extern struct Client* make_client(struct Client* from);
