@@ -75,7 +75,9 @@ static void m_kick(struct Client *client_p,
 {
   struct Client *who;
   struct Channel *chptr;
+#ifdef VCHANS
   struct Channel *vchan;
+#endif
   int   chasing = 0;
   char  *comment;
   char  *name;

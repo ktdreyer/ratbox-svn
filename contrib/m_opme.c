@@ -92,12 +92,15 @@ static void mo_opme(struct Client *client_p, struct Client *source_p,
    * yet. */
   chptr= hash_find_channel(parv[1]);
   root_chptr = chptr;
+
+#ifdef VCHANS
   if (chptr && parc > 2 && parv[2][0] == '!')
     {
       chptr = find_vchan(chptr, parv[2]);
       if (root_chptr != chptr)
 		  on_vchan++;
     }
+#endif
   
   if( chptr == NULL )
     {
@@ -117,8 +120,10 @@ static void mo_opme(struct Client *client_p, struct Client *source_p,
 	  dlinkDelete(ptr, &chptr->peons);
   else if ((ptr = find_user_link(&chptr->voiced, source_p)))
 	  dlinkDelete(ptr, &chptr->voiced);
+#ifdef HALFOPS
   else if ((ptr = find_user_link(&chptr->halfops, source_p)))
 	  dlinkDelete(ptr, &chptr->halfops);
+#endif
   else if ((ptr = find_user_link(&chptr->chanops, source_p)))
 	  dlinkDelete(ptr, &chptr->chanops);
 #ifdef REQUIRE_OANDV
@@ -135,8 +140,10 @@ static void mo_opme(struct Client *client_p, struct Client *source_p,
     dlinkDelete(ptr, &chptr->locpeons);
   else if((locptr = find_user_link(&chptr->locvoiced, source_p)))
     dlinkDelete(ptr, &chptr->locvoiced);
+#ifdef HALFOPS
   else if((locptr = find_user_link(&chptr->lochalfops, source_p)))
     dlinkDelete(ptr, &chptr->lochalfops);
+#endif
   else if((locptr = find_user_link(&chptr->locchanops, source_p)))
     dlinkDelete(ptr, &chptr->locchanops);
   

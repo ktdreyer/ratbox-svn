@@ -69,8 +69,10 @@ static void mo_ojoin(struct Client *client_p, struct Client *source_p,
                         int parc, char *parv[])
 {
   struct Channel *chptr, *root_chptr;
-  int on_vchan = 0;
   int move_me = 0;
+#ifdef VCHANS
+  int on_vchan = 0;
+#endif
 
   /* admins only */
   if (!IsOperAdmin(source_p))
@@ -89,12 +91,15 @@ static void mo_ojoin(struct Client *client_p, struct Client *source_p,
 
   chptr= hash_find_channel(parv[1]);
   root_chptr = chptr;
+
+#ifdef VCHANS
   if (chptr && parc > 2 && parv[2][0] == '!')
     {
       chptr = find_vchan(chptr, parv[2]);
       if (root_chptr != chptr)
         on_vchan++;
     }
+#endif
 
   if( chptr == NULL )
     {
@@ -128,6 +133,7 @@ static void mo_ojoin(struct Client *client_p, struct Client *source_p,
                        me.name, chptr->chname, source_p->name);
 
     }
+#ifdef HALFOPS
   else if (*parv[1] == '%')
     {
        add_user_to_channel(chptr, source_p, CHFL_HALFOP);
@@ -142,6 +148,7 @@ static void mo_ojoin(struct Client *client_p, struct Client *source_p,
        sendto_channel_local(ALL_MEMBERS, chptr, ":%s MODE %s +h %s",
                        me.name, chptr->chname, source_p->name);
     }
+#endif
   else if (*parv[1] == '+')
     {
        add_user_to_channel(chptr, source_p, CHFL_VOICE);
@@ -172,8 +179,10 @@ static void mo_ojoin(struct Client *client_p, struct Client *source_p,
 
 
   /* XXX - check this isn't too big above... */
+#ifdef VCHANS
   if (on_vchan)
     add_vchan_to_client_cache(source_p,root_chptr,chptr);
+#endif
 
   channel_member_names(source_p, chptr, chptr->chname, 1);
 }

@@ -353,7 +353,7 @@ change_channel_membership(struct Channel *chptr,
   {
     if ((ptr = find_user_link(&chptr->locpeons, who)))
     {
-      if (to_list != &chptr->locpeons)
+      if (loc_to_list != &chptr->locpeons)
       {
         dlinkDelete(ptr, &chptr->locpeons);
         dlinkAdd(who, ptr, loc_to_list);
@@ -361,7 +361,7 @@ change_channel_membership(struct Channel *chptr,
     }
     else if ((ptr = find_user_link(&chptr->locvoiced, who)))
     {
-      if (to_list != &chptr->locvoiced)
+      if (loc_to_list != &chptr->locvoiced)
       {
         dlinkDelete(ptr, &chptr->locvoiced);
         dlinkAdd(who, ptr, loc_to_list);
@@ -370,7 +370,7 @@ change_channel_membership(struct Channel *chptr,
 #ifdef HALFOPS
     else if ((ptr = find_user_link(&chptr->lochalfops, who)))
     {
-      if (to_list != &chptr->lochalfops)
+      if (loc_to_list != &chptr->lochalfops)
       {
         dlinkDelete(ptr, &chptr->lochalfops);
         dlinkAdd(who, ptr, loc_to_list);
@@ -379,7 +379,7 @@ change_channel_membership(struct Channel *chptr,
 #endif
     else if ((ptr = find_user_link(&chptr->locchanops, who)))
     {
-      if (to_list != &chptr->locchanops)
+      if (loc_to_list != &chptr->locchanops)
       {
         dlinkDelete(ptr, &chptr->locchanops);
         dlinkAdd(who, ptr, loc_to_list);
@@ -388,7 +388,7 @@ change_channel_membership(struct Channel *chptr,
 #ifdef REQUIRE_OANDV
     else if ((ptr = find_user_link(&chptr->locchanops_voiced, who)))
     {
-      if (to_list != &chptr->locchanops_voiced)
+      if (loc_to_list != &chptr->locchanops_voiced)
       {
         dlinkDelete(ptr, &chptr->locchanops_voiced);
         dlinkAdd(who, ptr, loc_to_list);
