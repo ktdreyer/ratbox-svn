@@ -213,6 +213,8 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
   char             info[REALLEN + 1];
+  char             nbuf[HOSTLEN * 2 + USERLEN + 5];
+                   /* same size as in s_misc.c */
   char*            host;
   struct Client*   acptr;
   struct Client*   bcptr;
@@ -241,7 +243,14 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
        * Rather than KILL the link which introduced it, KILL the
        * youngest of the two links. -avalon
        */
-      char nbuf[HOSTLEN * 2 + USERLEN + 5]; /* same size as in s_misc.c */
+
+      if (acptr->from == NULL)
+	{
+	  sendto_realops_flags(FLAGS_ALL,
+			       "Link %s cancelled, server %s already exists",
+			       get_client_name(cptr, TRUE), host);
+	  return exit_client(cptr, cptr, &me, "Server Exists");
+	}
 
       bcptr = (cptr->firsttime > acptr->from->firsttime) ? cptr : acptr->from;
       sendto_one(bcptr,"ERROR :Server %s already exists", host);
