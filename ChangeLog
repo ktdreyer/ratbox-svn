@@ -1,3 +1,21 @@
+leeh        2005/01/22 08:47:51 EST	(20050122_0)
+
+  Modified files:
+    .                    CREDITS 
+    src                  rserv.c s_chanserv.c 
+  Log:
+  - via jilles:
+    - fix nick in CREDITS
+    - fix channel_db_callback() for new db schema
+    - fix rebuild_params() to account for not being able to rebuild anything..
+  
+  Revision  Changes    Path
+  1.4       +1 -1      rserv/CREDITS
+  1.46      +10 -7     rserv/src/rserv.c
+  1.44      +8 -8      rserv/src/s_chanserv.c
+
+
+
 leeh        2005/01/19 18:12:57 EST	(20050119_2)
 
   Modified files:
