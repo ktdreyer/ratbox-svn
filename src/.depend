@@ -131,8 +131,8 @@ iplines.o: iplines.c ../include/stdinc.h ../include/config.h \
  ../include/channel.h ../include/res.h ../include/fileio.h \
  ../adns/adns.h ../include/ircd.h ../include/memory.h \
  ../include/balloc.h ../include/irc_string.h ../include/common.h \
- ../include/numeric.h ../include/s_conf.h ../include/motd.h \
- ../include/send.h ../include/iplines.h
+ ../include/numeric.h ../include/send.h ../include/s_conf.h \
+ ../include/motd.h ../include/iplines.h
 irc_string.o: irc_string.c ../include/stdinc.h ../include/config.h \
  ../include/setup.h ../include/defaults.h ../include/sprintf_irc.h \
  ../include/client.h ../include/ircd_defs.h ../include/ircd_handler.h \
@@ -284,8 +284,7 @@ patricia.o: patricia.c ../include/stdinc.h ../include/config.h \
  ../include/channel.h ../include/res.h ../include/fileio.h \
  ../adns/adns.h ../include/ircd.h ../include/memory.h \
  ../include/balloc.h ../include/irc_string.h ../include/common.h \
- ../include/numeric.h ../include/s_conf.h ../include/motd.h \
- ../include/send.h
+ ../include/numeric.h ../include/send.h
 rsa.o: rsa.c ../include/stdinc.h ../include/config.h \
  ../include/setup.h ../include/defaults.h ../include/memory.h \
  ../include/ircd_defs.h ../include/balloc.h ../include/tools.h \
@@ -368,7 +367,7 @@ s_conf.o: s_conf.c ../include/stdinc.h ../include/config.h \
  ../include/patricia.h ../include/numeric.h ../include/send.h \
  ../include/s_serv.h ../include/resv.h ../include/s_stats.h \
  ../include/event.h ../include/hash.h ../include/sprintf_irc.h \
- ../include/listener.h ../include/hostmask.h ../include/modules.h \
+ ../include/listener.h ../include/confmatch.h ../include/modules.h \
  ../include/parse.h ../include/msg.h ../include/fdlist.h \
  ../include/s_bsd.h ../include/s_log.h ../include/s_gline.h \
  ../include/s_debug.h ../include/cluster.h
