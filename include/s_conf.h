@@ -299,21 +299,6 @@ extern struct server_info ServerInfo;	/* defined in ircd.c */
 extern struct admin_info AdminInfo;	/* defined in ircd.c */
 /* End GLOBAL section */
 
-#define TEMP_MIN	1
-#define TEMP_HOUR	2
-#define TEMP_DAY	3
-#define TEMP_WEEK	4
-
-extern dlink_list tkline_min;
-extern dlink_list tkline_hour;
-extern dlink_list tkline_day;
-extern dlink_list tkline_week;
-
-extern dlink_list tdline_min;
-extern dlink_list tdline_hour;
-extern dlink_list tdline_day;
-extern dlink_list tdline_week;
-
 extern void init_s_conf();
 
 extern struct ConfItem *make_conf(void);
@@ -351,16 +336,6 @@ KlineType;
 
 extern void write_confitem(KlineType, struct Client *, char *, char *,
 			   const char *, const char *, const char *, int);
-extern void add_temp_kline(struct ConfItem *);
-extern void add_temp_dline(struct ConfItem *);
-extern void report_temp_klines(struct Client *);
-extern void show_temp_klines(struct Client *, dlink_list *);
-
-extern void cleanup_temps_min(void *);
-extern void cleanup_temps_hour(void *);
-extern void cleanup_temps_day(void *);
-extern void cleanup_temps_week(void *);
-
 
 extern const char *get_conf_name(KlineType);
 extern int rehash(int);
