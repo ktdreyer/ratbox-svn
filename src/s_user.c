@@ -454,7 +454,7 @@ int register_local_user(struct Client *cptr, struct Client *sptr,
       add_to_id_hash_table(sptr->user->id, sptr);
     }
 
-  inetntop(sptr->localClient->aftype, IN_ADDR(sptr->localClient->ip), 
+  inetntop(sptr->localClient->aftype, &IN_ADDR(sptr->localClient->ip), 
   				ipaddr, HOSTIPLEN);
   sendto_realops_flags(FLAGS_CCONN,
 		       "Client connecting: %s (%s@%s) [%s] {%s}",

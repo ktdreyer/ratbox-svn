@@ -425,14 +425,17 @@ int check_client(struct Client *cptr, struct Client *sptr, char *username)
       break;
 
     case NOT_AUTHORIZED:
+    {
+      static char ipaddr[HOSTIPLEN];
       ServerStats->is_ref++;
       /* jdc - lists server name & port connections are on */
       /*       a purely cosmetical change */
+      inetntop(sptr->localClient->aftype, &IN_ADDR(sptr->localClient->ip), ipaddr, HOSTIPLEN);
       sendto_realops_flags(FLAGS_UNAUTH,
 			   "%s from %s [%s] on [%s/%u].",
 			   "Unauthorized client connection",
 			   get_client_host(sptr),
-			   inetntoa((char *)&sptr->localClient->ip),
+			   ipaddr,
 			   sptr->localClient->listener->name,
 			   sptr->localClient->listener->port
 			   );
@@ -446,7 +449,7 @@ int check_client(struct Client *cptr, struct Client *sptr, char *username)
       (void)exit_client(cptr, sptr, &me,
 			"You are not authorized to use this server");
       break;
-
+    }
     case BANNED_CLIENT:
       (void)exit_client(cptr,cptr, &me, "*** Banned ");
       ServerStats->is_ref++;
