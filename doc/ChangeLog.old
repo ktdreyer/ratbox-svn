@@ -1,3 +1,8 @@
+*** 20010105_20 by wcampbel
+Removed references to HASH in opers.txt, and added README.HASH containing
+the old HASH documentation
+
+
 *** 20010105_19 by toot
 don't show the local user count if it's just lies, cause of shide
 skip it instead
