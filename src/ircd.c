@@ -377,16 +377,6 @@ static time_t io_loop(time_t delay)
   /* Once the crap has been stripped out, we can make this use delay .. */
   comm_select(0);
 
-  /* LazyLinks */
-  if(!ConfigFileEntry.hub)
-    {
-      if(CurrentTime - lastCleanup >= CLEANUP_CHANNELS_TIME)
-        {
-          lastCleanup = CurrentTime;
-          cleanup_channels();
-        }
-    }
-
   /*
    * This chunk of code determines whether or not
    * "life sucks", that is to say if the traffic
@@ -874,6 +864,10 @@ int main(int argc, char *argv[])
   write_pidfile();
 
   log(L_NOTICE, "Server Ready");
+
+/* LazyLinks */
+  if(!ConfigFileEntry.hub)
+    eventAdd("cchan",(EVH *)cleanup_channels, 0, CLEANUP_CHANNELS_TIME, 0 );
 
   ServerRunning = 1;
   while (ServerRunning)

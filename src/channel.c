@@ -50,6 +50,7 @@
 #include "whowas.h"
 #include "s_conf.h" /* ConfigFileEntry */
 #include "vchannel.h"
+#include "event.h"
 
 #include <assert.h>
 #include <string.h>
@@ -2885,6 +2886,9 @@ void cleanup_channels(void)
    struct Channel *chptr;
    struct Channel *next_chptr;
  
+   if(!ConfigFileEntry.hub)
+     eventAdd("cchan", (EVH *)cleanup_channels, 0, CLEANUP_CHANNELS_TIME, 0 );
+
    if(!serv_cptr_list)
      {
        sendto_ops_flags(FLAGS_DEBUG,
