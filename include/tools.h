@@ -95,12 +95,13 @@ void mem_frob(void *data, int len);
 #define DLINK_FOREACH_SAFE(pos, n, head) for (pos = (head), n = pos ? pos->next : NULL; pos != NULL; pos = n, n = pos ? pos->next : NULL)
 	        
 #define DLINK_FOREACH_PREV(pos, head) for (pos = (head); pos != NULL; pos = pos->prev)
+
               		                  	
 
 /* Returns the list length */
 #define dlink_list_length(list) (list)->length
-#define dlink_move_list(oldlist, newlist, node)
 
+#define dlinkDestroyNode(list, data) do { dlink_node *ptr = dlinkFindDelete(list, data); if(ptr != NULL) free_dlink_node(ptr); } while(0);
 /*
  * The functions below are included for the sake of inlining
  * hopefully this will speed up things just a bit
@@ -245,6 +246,8 @@ dlinkFindDelete(dlink_list *list, void *data)
 
   return NULL;
 }  
+
+
 
 /*
  * dlinkFind
