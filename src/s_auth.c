@@ -450,7 +450,6 @@ timeout_auth_queries_event(void *notused)
 				auth->dns_query.query = NULL;
 				sendheader(auth->client, REPORT_FAIL_DNS);
 			}
-			ilog(L_INFO, "DNS/AUTH timeout %s", log_client_name(auth->client, SHOW_IP));
 
 			auth->client->since = CurrentTime;
 			dlinkDelete(ptr, &auth_poll_list);
