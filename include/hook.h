@@ -83,6 +83,14 @@ struct hook_burst_channel
 	struct Channel *chptr;
 };
 
+/* Needed to use uintptr_t for hooks. */
+#ifdef HAVE_INTTYPES_H
+#include <inttypes.h>
+#else
+#ifndef HAVE_UINTPTR_T
+typedef unsigned long uintptr_t;
+#endif
+#endif
 
 int hook_add_event(char *);
 int hook_add_hook(char *, hookfn *);
