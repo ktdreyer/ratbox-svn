@@ -1,3 +1,7 @@
+*** 20001223_22 by ejb
+- fix a stupid core in parse.c.
+
+
 *** 20001223_21 by ejb
 - slightly neater fix for ISON, still has a bug:
   ISON a b :is-
