@@ -236,6 +236,7 @@ int   class_redirport_var;
 %token  LINKS_DELAY
 %token  VCHANS_OPER_ONLY
 %token  MIN_NONWILDCARD
+%token  DISABLE_VCHANS
 
 %type   <ip_value> IP_TYPE
 %type   <string>   QSTRING
@@ -1543,7 +1544,7 @@ general_item:       general_failed_oper_notice | general_show_failed_oper_id |
                     general_fname_foperlog | general_oper_only_umodes |
                     general_max_targets |
                     general_links_delay | general_oper_umodes |
-                    general_vchans_oper_only |
+                    general_vchans_oper_only | general_disable_vchans |
                     general_caller_id_wait | general_default_floodcount |
                     general_persistant_expire_time | general_min_nonwildcard |
                     error
@@ -1963,6 +1964,17 @@ general_vchans_oper_only: VCHANS_OPER_ONLY '=' TYES ';'
   {
     ConfigFileEntry.vchans_oper_only = 0;
   };
+
+general_disable_vchans: DISABLE_VCHANS '=' TNO ';'
+  {
+    ConfigFileEntry.disable_vchans = 0;
+  }
+    |
+    DISABLE_VCHANS '=' TYES ';'
+  {
+    ConfigFileEntry.disable_vchans = 1;
+  };  
+
 general_persistant_expire_time:  PERSISTANT_EXPIRE_TIME '=' NUMBER ';'
   {
     ConfigFileEntry.persist_expire = yylval.number;  

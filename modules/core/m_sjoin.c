@@ -195,7 +195,7 @@ static void ms_sjoin(struct Client *client_p,
   /* XXX vchan cruft */
   /* vchans are encoded as "##mainchanname_timestamp" */
 
-  if(parv[2][1] == '#')
+  if(parv[2][1] == '#' && !ConfigFileEntry.disable_vchans)
     {
       char *subp;
 

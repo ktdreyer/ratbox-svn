@@ -209,6 +209,7 @@ typedef struct config_file_entry
   int         max_targets;
   int         links_delay;
   int         vchans_oper_only;
+  int         disable_vchans;
   int         quiet_on_ban;
   int         caller_id_wait;
   int         persist_expire;

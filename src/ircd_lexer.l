@@ -195,6 +195,7 @@ spoof_notice	{ return SPOOF_NOTICE; }
 unkline		{ return UNKLINE; }
 user		{ return USER;} 
 vchans_oper_only { return VCHANS_OPER_ONLY; }
+disable_vchans  { return DISABLE_VCHANS; }
 vhost		{ return VHOST; }
 warn		{ return WARN; }
 yes		{ return TYES; }
