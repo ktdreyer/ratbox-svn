@@ -1006,6 +1006,9 @@ const char* get_client_name(struct Client* client, int showip)
  */
 const char* get_client_host(struct Client* client)
 {
+  assert(0 != client);
+  return get_client_name(client, HIDE_IP);
+#if 0
   static char nbuf[HOSTLEN * 2 + USERLEN + 5];
   
   assert(0 != client);
@@ -1021,6 +1024,7 @@ const char* get_client_host(struct Client* client)
                  HOSTLEN, client->host);
     }
   return nbuf;
+#endif
 }
 
 void free_exited_clients( void )
