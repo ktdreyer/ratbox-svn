@@ -173,16 +173,16 @@ static void part_one_client(struct Client *cptr,
   if (IsVchan(chptr) || HasVchans(chptr))
     {
       if(HasVchans(chptr))
-      {
-        /* Set chptr to actual channel, bchan to the base channel */
-        bchan = chptr;
-        chptr = map_vchan(bchan,sptr);
-      }
+        {
+          /* Set chptr to actual channel, bchan to the base channel */
+          bchan = chptr;
+          chptr = map_vchan(bchan,sptr);
+        }
       else
-      {
-        /* chptr = chptr; */
-        bchan = map_bchan(chptr,sptr);
-      }
+        {
+          /* chptr = chptr; */
+          bchan = find_bchan(chptr);
+        }
     }
   else
     bchan = chptr; /* not a vchan */

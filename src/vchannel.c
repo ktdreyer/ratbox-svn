@@ -17,10 +17,9 @@
  *   along with this program; if not, write to the Free Software
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- *
- *
  * $Id$
  */
+
 #include "tools.h"
 #include "vchannel.h"
 #include "channel.h"
@@ -38,10 +37,6 @@
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
-
-/* Given base chan pointer and vchan pointer add to
- * translation table cache for this client
- */
 
 static void
 vchan_show_ids(struct Client *sptr, struct Channel *chptr);
@@ -192,7 +187,9 @@ struct Channel* select_vchan(struct Channel *root,
 }
 
 
-
+/* Given base chan pointer and vchan pointer add to
+ * translation table cache for this client
+ */
 void    add_vchan_to_client_cache(struct Client *sptr,
                                   struct Channel *base_chan,
                                   struct Channel *vchan)
@@ -215,7 +212,6 @@ void    add_vchan_to_client_cache(struct Client *sptr,
 }
 
 /* Given vchan pointer remove from translation table cache */
-
 void del_vchan_from_client_cache(struct Client *sptr, struct Channel *vchan)
 {
   dlink_node *vchanmap_node;
@@ -280,25 +276,6 @@ struct Channel* map_vchan(struct Channel *chptr, struct Client *sptr)
       vchan_info = vchanmap_node->data;
       if (vchan_info->base_chan == chptr)
 	return (vchan_info->vchan);
-    }
-
-  return NullChn;
-}
-
-/* return matching bchan given vchan and sptr */
-struct Channel* map_bchan(struct Channel *chptr, struct Client *sptr)
-{
-  dlink_node *vchanmap_node;
-  struct Vchan_map *vchan_info;
-
-  assert(sptr != NULL);
-
-  for (vchanmap_node = sptr->vchan_map.head; vchanmap_node;
-       vchanmap_node = vchanmap_node->next)
-    {
-      vchan_info = vchanmap_node->data;
-      if (vchan_info->vchan == chptr)
-	return (vchan_info->base_chan);
     }
 
   return NullChn;
@@ -493,7 +470,6 @@ struct Channel* find_vchan(struct Channel *chptr, char *key)
 /* return the first found invite matching a subchannel of chptr
  * or NULL if no invites are found
  */
-
 struct Channel* vchan_invites(struct Channel *chptr, struct Client *sptr)
 {
   dlink_node *lp;
