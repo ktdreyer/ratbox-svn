@@ -1,3 +1,9 @@
+*** 20010702_5 by jdc
+- modules/m_resv.c
+    * Missing include for "hash.h" -- warnings...
+
+
+
 *** 20010702_4 by jdc
 - messages/*.po
   messages/translations/*.po
