@@ -34,6 +34,7 @@
 #include "tools.h"
 #include "s_log.h"
 #include "restart.h"
+#include <assert.h>
 #ifdef MEMDEBUG
 #include <fcntl.h>
 #include <unistd.h>
