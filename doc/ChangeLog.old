@@ -1,3 +1,21 @@
+*** 20001104_3 by adrian
+
+
+* add fd_note() which changes the FD description
+* add fd_dump() which dumps the current opened FD list to the given
+  client
+* add /stats F / /stats f support from opers to dump the current
+  open sockets. This could do with more info being dumped, but its fun
+  for debugging right now.
+* add Server: and Nick: in front of the server and nick connections
+  so /stats F looks useful
+* .. and finally, use fd_note() in src/m_nick.c to set the nickname
+  description whenever the client sets its nick.
+
+IsLocal() isn't functional. Grr.
+
+
+
 *** 20001104_2 by adrian
 
 
