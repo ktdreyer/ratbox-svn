@@ -1,0 +1,36 @@
+# Generated automatically from Makefile.in by configure.
+# $Id$
+
+RM=@RM@
+INSTALL=@INSTALL@
+INSTALL_DATA=@INSTALL_DATA@
+PREFIX=@prefix@
+
+SUBDIRS=alis main
+
+install: 
+	$(INSTALL) -m 750 -d $(PREFIX)/help
+
+	@for i in $(SUBDIRS); do \
+		$(INSTALL) -m 750 -d $(PREFIX)/help/$$i; \
+	done
+
+	@for help in alis/*; do \
+	if [ -f $$help ] ; then \
+		$(INSTALL_DATA) $$help $(PREFIX)/help/alis/$$i; \
+	fi \
+	done
+
+	@for help in main/*; do \
+	if [ -f $$help ] ; then \
+		$(INSTALL_DATA) $$help $(PREFIX)/help/main/$$i; \
+	fi \
+	done
+
+build:
+clean:
+depend:
+
+distclean:
+	$(RM) -f Makefile
+
