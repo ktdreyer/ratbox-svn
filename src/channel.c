@@ -540,6 +540,8 @@ chmode_to_string(struct chmode *mode)
 		*p++ = 's';
 	if(mode->mode & MODE_TOPIC)
 		*p++ = 't';
+	if(mode->mode & MODE_REGONLY)
+		*p++ = 'r';
 
 	if(mode->limit && mode->key[0])
 	{
@@ -587,6 +589,8 @@ chmode_to_string_simple(struct chmode *mode)
 		*p++ = 's';
 	if(mode->mode & MODE_TOPIC)
 		*p++ = 't';
+	if(mode->mode & MODE_REGONLY)
+		*p++ = 'r';
 	if(mode->limit)
 		*p++ = 'l';
 	if(mode->key[0])
@@ -678,6 +682,9 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 			break;
 		case 't':
 			newmode.mode |= MODE_TOPIC;
+			break;
+		case 'r':
+			newmode.mode |= MODE_REGONLY;
 			break;
 		case 'k':
 			strlcpy(newmode.key, parv[4+args], sizeof(newmode.key));

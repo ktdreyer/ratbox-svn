@@ -143,6 +143,12 @@ parse_simple_mode(struct chmode *mode, const char *parv[], int parc, int start)
 				else
 					mode->mode &= ~MODE_TOPIC;
 				break;
+			case 'r':
+				if(dir)
+					mode->mode |= MODE_REGONLY;
+				else
+					mode->mode &= ~MODE_REGONLY;
+				break;
 
 			case 'k':
 				if(EmptyString(parv[start]))
@@ -278,6 +284,16 @@ parse_full_mode(struct channel *chptr, struct client *source_p,
 
 			if(source_p)
 				modebuild_add(dir, "t", NULL);
+
+			break;
+		case 'r':
+			if(dir)
+				chptr->mode.mode |= MODE_REGONLY;
+			else
+				chptr->mode.mode &= ~MODE_REGONLY;
+
+			if(source_p)
+				modebuild_add(dir, "r", NULL);
 
 			break;
 

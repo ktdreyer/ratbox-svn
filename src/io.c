@@ -591,7 +591,7 @@ signon_server(struct connection_entry *conn_p)
 	sendto_all(UMODE_SERVER, "Connection to server %s established",
                    conn_p->name);
 
-	sendto_server("CAPAB :QS TB EX IE");
+	sendto_server("CAPAB :QS TB EX IE SERVICES");
 	sendto_server("SERVER %s 1 :%s", MYNAME, config_file.gecos);
 
 	introduce_services();
