@@ -1483,29 +1483,23 @@ void conf_add_conf(struct ConfItem *aconf)
 static int SplitUserHost(struct ConfItem *aconf)
 {
   char *p;
+  char *new_user;
+  char *new_host;
 
   if ( (p = strchr(aconf->host, '@')) )
     {
       *p = '\0';
+      DupString(new_user, aconf->host);
+      MyFree(aconf->user);
+      aconf->user = new_user;
       p++;
-      if(aconf->user)
-        {
-          aconf->name = aconf->user;
-          DupString(aconf->user, aconf->host);
-          strcpy(aconf->host, p);
-        }
-      else
-        {
-          return(-1);
-        }
+      DupString(new_host,p);
+      MyFree(aconf->host);
+      aconf->host = new_host;
     }
   else
     {
-      if(aconf->user)
-        {
-          aconf->name = aconf->user;
-          DupString(aconf->user, "*");
-        }
+      DupString(aconf->user, "*");
     }
   return(1);
 }

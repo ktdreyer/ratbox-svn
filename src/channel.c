@@ -1236,6 +1236,18 @@ void set_channel_mode(struct Client *cptr,
                   parv++;
                   break;
                 }
+	      else
+		{
+		  if(IsRestricted(sptr) && (whatt == MODE_ADD))
+		    {
+		      sendto_one(sptr,":%s NOTICE %s :*** NOTICE -- You are restricted and cannot chanop others",
+				 me.name,
+				 sptr->name);
+		      parc--;
+		      parv++;
+		      break;
+		    }
+		}
             }
           if (whatt == MODE_QUERY)
             break;
