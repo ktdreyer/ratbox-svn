@@ -21,8 +21,10 @@ else
 fi
 
 dnl jdc -- If CFLAGS is defined, best use it everywhere...
+dnl NOTE: jv says it must be added to the *END*, because things like
+dnl "gcc -O9 -O2" will result in -O2 getting preference.  How stupid.
 if test "x$CFLAGS" != "x"; then
-  IRC_CFLAGS="$CFLAGS $IRC_CFLAGS"
+  IRC_CFLAGS="$IRC_CFLAGS $CFLAGS"
 fi
 
 AC_ISC_POSIX

@@ -807,7 +807,7 @@ else
 fi
 
 if test "x$CFLAGS" != "x"; then
-  IRC_CFLAGS="$CFLAGS $IRC_CFLAGS"
+  IRC_CFLAGS="$IRC_CFLAGS $CFLAGS"
 fi
 
 echo $ac_n "checking for POSIXized ISC""... $ac_c" 1>&6
