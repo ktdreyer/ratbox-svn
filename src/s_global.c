@@ -20,8 +20,8 @@
 
 static struct client *global_p;
 
-static void u_global_netmsg(struct connection_entry *, char *parv[], int parc);
-static int s_global_netmsg(struct client *, char *parv[], int parc);
+static void u_global_netmsg(struct connection_entry *, const char **, int);
+static int s_global_netmsg(struct client *, const char **, int);
 
 static struct service_command global_command[] =
 {
@@ -52,13 +52,13 @@ init_s_global(void)
 }
 
 static void
-u_global_netmsg(struct connection_entry *conn_p, char *parv[], int parc)
+u_global_netmsg(struct connection_entry *conn_p, const char *parv[], int parc)
 {
 	struct client *target_p;
 	dlink_node *ptr;
 	const char *data;
 
-	data = rebuild_params((const char **) parv, parc, 0);
+	data = rebuild_params(parv, parc, 0);
 
 	DLINK_FOREACH(ptr, server_list.head)
 	{
@@ -72,13 +72,13 @@ u_global_netmsg(struct connection_entry *conn_p, char *parv[], int parc)
 }
 
 static int
-s_global_netmsg(struct client *client_p, char *parv[], int parc)
+s_global_netmsg(struct client *client_p, const char *parv[], int parc)
 {
 	struct client *target_p;
 	dlink_node *ptr;
 	const char *data;
 
-	data = rebuild_params((const char **) parv, parc, 0);
+	data = rebuild_params(parv, parc, 0);
 
 	DLINK_FOREACH(ptr, server_list.head)
 	{

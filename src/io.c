@@ -978,7 +978,7 @@ parse_client(struct connection_entry *conn_p, char *buf, int len)
 	parc = io_to_array(ch, parv);
 
         /* pass it off to the handler */
-	handle_ucommand(conn_p, command, parv, parc);
+	handle_ucommand(conn_p, command, (const char **) parv, parc);
 }
 
 /* sendto_server()

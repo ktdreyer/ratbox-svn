@@ -38,14 +38,14 @@ static dlink_list active_jupes;
 
 static struct client *jupeserv_p;
 
-static void u_jupeserv_jupe(struct connection_entry *conn_p, char *parv[], int parc);
-static void u_jupeserv_unjupe(struct connection_entry *conn_p, char *parv[], int parc);
+static void u_jupeserv_jupe(struct connection_entry *conn_p, const char **, int);
+static void u_jupeserv_unjupe(struct connection_entry *conn_p, const char **, int);
 
-static int s_jupeserv_jupe(struct client *, char *parv[], int parc);
-static int s_jupeserv_unjupe(struct client *, char *parv[], int parc);
-static int s_jupeserv_calljupe(struct client *, char *parv[], int parc);
-static int s_jupeserv_callunjupe(struct client *, char *parv[], int parc);
-static int s_jupeserv_pending(struct client *, char *parv[], int parc);
+static int s_jupeserv_jupe(struct client *, const char **, int);
+static int s_jupeserv_unjupe(struct client *, const char **, int);
+static int s_jupeserv_calljupe(struct client *, const char **, int);
+static int s_jupeserv_callunjupe(struct client *, const char **, int);
+static int s_jupeserv_pending(struct client *, const char **, int);
 
 static struct service_command jupeserv_command[] =
 {
@@ -229,7 +229,7 @@ valid_jupe(const char *servername)
 }
 
 static void
-u_jupeserv_jupe(struct connection_entry *conn_p, char *parv[], int parc)
+u_jupeserv_jupe(struct connection_entry *conn_p, const char *parv[], int parc)
 {
 	struct server_jupe *jupe_p;
 	char *reason;
@@ -256,7 +256,7 @@ u_jupeserv_jupe(struct connection_entry *conn_p, char *parv[], int parc)
 	}
 
 	jupe_p = make_jupe(parv[0]);
-	reason = rebuild_params((const char **) parv, parc, 1);
+	reason = rebuild_params(parv, parc, 1);
 
 	if(strlen(reason) > REASONLEN)
 		reason[REASONLEN] = '\0';
@@ -277,7 +277,7 @@ u_jupeserv_jupe(struct connection_entry *conn_p, char *parv[], int parc)
 }
 
 static void
-u_jupeserv_unjupe(struct connection_entry *conn_p, char *parv[], int parc)
+u_jupeserv_unjupe(struct connection_entry *conn_p, const char *parv[], int parc)
 {
 	struct server_jupe *ajupe_p, *jupe_p;
 
@@ -307,7 +307,7 @@ u_jupeserv_unjupe(struct connection_entry *conn_p, char *parv[], int parc)
 }
 
 static int
-s_jupeserv_jupe(struct client *client_p, char *parv[], int parc)
+s_jupeserv_jupe(struct client *client_p, const char *parv[], int parc)
 {
 	struct server_jupe *jupe_p;
 	char *reason;
@@ -336,7 +336,7 @@ s_jupeserv_jupe(struct client *client_p, char *parv[], int parc)
 	}
 
 	jupe_p = make_jupe(parv[0]);
-	reason = rebuild_params((const char **) parv, parc, 1);
+	reason = rebuild_params(parv, parc, 1);
 
 	if(strlen(reason) > REASONLEN)
 		reason[REASONLEN] = '\0';
@@ -363,7 +363,7 @@ s_jupeserv_jupe(struct client *client_p, char *parv[], int parc)
 }
 
 static int
-s_jupeserv_unjupe(struct client *client_p, char *parv[], int parc)
+s_jupeserv_unjupe(struct client *client_p, const char *parv[], int parc)
 {
 	struct server_jupe *ajupe_p, *jupe_p;
 
@@ -398,7 +398,7 @@ s_jupeserv_unjupe(struct client *client_p, char *parv[], int parc)
 }
 
 static int
-s_jupeserv_calljupe(struct client *client_p, char *parv[], int parc)
+s_jupeserv_calljupe(struct client *client_p, const char *parv[], int parc)
 {
 	struct server_jupe *jupe_p;
 	dlink_node *ptr;
@@ -430,7 +430,7 @@ s_jupeserv_calljupe(struct client *client_p, char *parv[], int parc)
 		jupe_p = make_jupe(parv[0]);
 		jupe_p->add = 1;
 
-		reason = rebuild_params((const char **) parv, parc, 1);
+		reason = rebuild_params(parv, parc, 1);
 
 		if(strlen(reason) > REASONLEN)
 			reason[REASONLEN] = '\0';
@@ -484,7 +484,7 @@ s_jupeserv_calljupe(struct client *client_p, char *parv[], int parc)
 }
 
 static int
-s_jupeserv_callunjupe(struct client *client_p, char *parv[], int parc)
+s_jupeserv_callunjupe(struct client *client_p, const char *parv[], int parc)
 {
 	struct server_jupe *ajupe_p, *jupe_p;
 
@@ -542,7 +542,7 @@ s_jupeserv_callunjupe(struct client *client_p, char *parv[], int parc)
 }
 
 static int
-s_jupeserv_pending(struct client *client_p, char *parv[], int parc)
+s_jupeserv_pending(struct client *client_p, const char *parv[], int parc)
 {
 	struct server_jupe *jupe_p;
 	dlink_node *ptr;

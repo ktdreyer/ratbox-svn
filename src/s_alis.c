@@ -25,7 +25,7 @@
 
 static struct client *alis_p;
 
-static int s_alis_list(struct client *, char *parv[], int parc);
+static int s_alis_list(struct client *, const char **, int);
 
 static struct service_command alis_command[] =
 {
@@ -109,7 +109,7 @@ struct alis_query
 
 static int
 parse_alis(struct client *client_p, struct alis_query *query,
-	   char *parv[], int parc)
+	   const char *parv[], int parc)
 {
 	int i = 1;
 	int param = 2;
@@ -298,7 +298,7 @@ show_channel(struct channel *chptr, struct alis_query *query)
  * outputs	-
  */
 static int
-s_alis_list(struct client *client_p, char *parv[], int parc)
+s_alis_list(struct client *client_p, const char *parv[], int parc)
 {
 	struct channel *chptr;
 	struct alis_query query;

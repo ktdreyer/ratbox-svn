@@ -29,19 +29,19 @@
 static dlink_list ucommand_table[MAX_UCOMMAND_HASH];
 dlink_list ucommand_list;
 
-static void u_login(struct connection_entry *, char *parv[], int parc);
+static void u_login(struct connection_entry *, const char **, int);
 
-static void u_boot(struct connection_entry *, char *parv[], int parc);
-static void u_connect(struct connection_entry *, char *parv[], int parc);
-static void u_die(struct connection_entry *, char *parv[], int parc);
-static void u_events(struct connection_entry *, char *parv[], int parc);
-static void u_flags(struct connection_entry *conn_p, char *parv[], int parc);
-static void u_help(struct connection_entry *, char *parv[], int parc);
-static void u_quit(struct connection_entry *, char *parv[], int parc);
-static void u_rehash(struct connection_entry *, char *parv[], int parc);
-static void u_service(struct connection_entry *, char *parv[], int parc);
-static void u_status(struct connection_entry *, char *parv[], int parc);
-static void u_who(struct connection_entry *, char *parv[], int parc);
+static void u_boot(struct connection_entry *, const char **, int);
+static void u_connect(struct connection_entry *, const char **, int);
+static void u_die(struct connection_entry *, const char **, int);
+static void u_events(struct connection_entry *, const char **, int);
+static void u_flags(struct connection_entry *conn_p, const char **, int);
+static void u_help(struct connection_entry *, const char **, int);
+static void u_quit(struct connection_entry *, const char **, int);
+static void u_rehash(struct connection_entry *, const char **, int);
+static void u_service(struct connection_entry *, const char **, int);
+static void u_status(struct connection_entry *, const char **, int);
+static void u_who(struct connection_entry *, const char **, int);
 
 static struct ucommand_handler ucommands[] =
 {
@@ -99,7 +99,7 @@ find_ucommand(const char *command)
 
 void
 handle_ucommand(struct connection_entry *conn_p, const char *command, 
-		char *parv[], int parc)
+		const char *parv[], int parc)
 {
 	struct ucommand_handler *handler;
 
@@ -179,10 +179,10 @@ add_ucommands(struct client *service_p,
 }
 
 static void
-u_login(struct connection_entry *conn_p, char *parv[], int parc)
+u_login(struct connection_entry *conn_p, const char *parv[], int parc)
 {
 	struct conf_oper *oper_p = conn_p->oper;
-        char *crpass;
+	const char *crpass;
 
         if(parc < 2 || EmptyString(parv[1]))
         {
@@ -216,7 +216,7 @@ u_login(struct connection_entry *conn_p, char *parv[], int parc)
 }
 
 static void
-u_boot(struct connection_entry *conn_p, char *parv[], int parc)
+u_boot(struct connection_entry *conn_p, const char *parv[], int parc)
 {
 	struct client *target_p;
 	struct connection_entry *dcc_p;
@@ -257,7 +257,7 @@ u_boot(struct connection_entry *conn_p, char *parv[], int parc)
 }	
 
 static void
-u_connect(struct connection_entry *conn_p, char *parv[], int parc)
+u_connect(struct connection_entry *conn_p, const char *parv[], int parc)
 {
         struct conf_server *conf_p;
         int port = 0;
@@ -300,7 +300,7 @@ u_connect(struct connection_entry *conn_p, char *parv[], int parc)
 }
 
 static void
-u_die(struct connection_entry *conn_p, char *parv[], int parc)
+u_die(struct connection_entry *conn_p, const char *parv[], int parc)
 {
         if(strcasecmp(MYNAME, parv[0]))
         {
@@ -314,20 +314,20 @@ u_die(struct connection_entry *conn_p, char *parv[], int parc)
 }
 
 static void
-u_events(struct connection_entry *conn_p, char *parv[], int parc)
+u_events(struct connection_entry *conn_p, const char *parv[], int parc)
 {
         event_show(conn_p);
 }
 
 static void
-u_quit(struct connection_entry *conn_p, char *parv[], int parc)
+u_quit(struct connection_entry *conn_p, const char *parv[], int parc)
 {
 	sendto_one(conn_p, "Goodbye.");
 	(conn_p->io_close)(conn_p);
 }
 
 static void
-u_rehash(struct connection_entry *conn_p, char *parv[], int parc)
+u_rehash(struct connection_entry *conn_p, const char *parv[], int parc)
 {
 	mlog("services rehashing: %s reloading config file", conn_p->name);
 	sendto_all(0, "services rehashing: %s reloading config file", conn_p->name);
@@ -336,7 +336,7 @@ u_rehash(struct connection_entry *conn_p, char *parv[], int parc)
 }
 
 static void
-u_service(struct connection_entry *conn_p, char *parv[], int parc)
+u_service(struct connection_entry *conn_p, const char *parv[], int parc)
 {
         struct client *service_p;
         dlink_node *ptr;
@@ -374,7 +374,7 @@ u_service(struct connection_entry *conn_p, char *parv[], int parc)
 }
 
 static void
-u_status(struct connection_entry *conn_p, char *parv[], int parc)
+u_status(struct connection_entry *conn_p, const char *parv[], int parc)
 {
         sendto_one(conn_p, "%s, version ratbox-services-%s(%s), up %s",
 			MYNAME, RSERV_VERSION, SERIALNUM,
@@ -399,7 +399,7 @@ u_status(struct connection_entry *conn_p, char *parv[], int parc)
 }
 
 static void
-u_who(struct connection_entry *conn_p, char *parv[], int parc)
+u_who(struct connection_entry *conn_p, const char *parv[], int parc)
 {
 	struct client *target_p;
 	struct connection_entry *dcc_p;
@@ -485,7 +485,7 @@ dump_commands(struct connection_entry *conn_p, struct client *service_p, dlink_l
 }
 
 static void
-u_help(struct connection_entry *conn_p, char *parv[], int parc)
+u_help(struct connection_entry *conn_p, const char *parv[], int parc)
 {
         struct ucommand_handler *handler;
 	dlink_node *ptr;
@@ -563,7 +563,7 @@ show_flags(struct connection_entry *conn_p)
 }
 
 static void
-u_flags(struct connection_entry *conn_p, char *parv[], int parc)
+u_flags(struct connection_entry *conn_p, const char *parv[], int parc)
 {
         const char *param;
         int dir;

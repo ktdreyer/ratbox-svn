@@ -14,7 +14,7 @@ struct cachefile;
 struct service_command
 {
         const char *cmd;
-        int (*func)(struct client *, char *parv[], int parc);
+        int (*func)(struct client *, const char **, int);
 	int minparc;
         struct cachefile *helpfile;
         int help_penalty;
@@ -40,7 +40,7 @@ struct service_handler
 	unsigned long command_size;
         struct ucommand_handler *ucommand;
 
-        void (*stats)(struct connection_entry *, char *parv[], int parc);
+        void (*stats)(struct connection_entry *, const char **, int);
 };
 
 extern dlink_list service_list;

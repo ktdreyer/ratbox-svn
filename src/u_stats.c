@@ -13,7 +13,7 @@
 #include "ucommand.h"
 #include "io.h"
 
-static void u_stats(struct connection_entry *, char *parv[], int parc);
+static void u_stats(struct connection_entry *, const char **, int);
 struct ucommand_handler stats_ucommand = { "stats", u_stats, 0, 0, 1, NULL };
 
 struct _stats_table
@@ -87,7 +87,7 @@ static struct _stats_table stats_table[] =
 };
 
 static void
-u_stats(struct connection_entry *conn_p, char *parv[], int parc)
+u_stats(struct connection_entry *conn_p, const char *parv[], int parc)
 {
         int i;
 

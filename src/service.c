@@ -542,7 +542,7 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
 					client_p->user->host, cmd_entry->cmd,
 					rebuild_params((const char **) parv, parc, 0));
 
-		retval = (cmd_entry->func)(client_p, parv, parc);
+		retval = (cmd_entry->func)(client_p, (const char **) parv, parc);
 
 		service_p->service->flood += retval;
 		cmd_entry->cmd_use++;

@@ -95,7 +95,7 @@ struct service
 
 	struct cachefile *help;
 	struct cachefile *helpadmin;
-        void (*stats)(struct connection_entry *, char *parv[], int parc);
+        void (*stats)(struct connection_entry *, const char **, int);
 };
 
 struct host_entry

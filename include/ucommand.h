@@ -13,7 +13,7 @@ extern dlink_list ucommand_list;
 struct ucommand_handler
 {
 	const char *cmd;
-	void (*func)(struct connection_entry *, char *parv[], int parc);
+	void (*func)(struct connection_entry *, const char **, int);
 	int flags;
 	int minpara;
 	int spy;
@@ -22,7 +22,7 @@ struct ucommand_handler
 
 extern void init_ucommand(void);
 extern void handle_ucommand(struct connection_entry *, const char *command, 
-				char *parv[], int parc);
+				const char *parv[], int parc);
 extern void add_ucommand_handler(struct client *, struct ucommand_handler *, const char *);
 extern void add_ucommands(struct client *, struct ucommand_handler *, const char *);
 
