@@ -203,6 +203,7 @@ AC_PATH_PROG(SED, sed)
 AC_PATH_PROG(AR, ar)
 AC_PATH_PROG(LD, ld)
 AC_PATH_PROG(RANLIB, ranlib)
+AC_PATH_PROG(TOUCH, touch)
 AC_PROG_YACC
 
 dnl AC_PROG_YACC defaults to yacc unconditionally if nothing can be found
