@@ -1,3 +1,9 @@
+*** 19990803_2 by db
+- updated .depend
+- added m_set for LOG
+
+
+
 *** 19990803_1 by db
 - oops. USE_ALLOW_OP was never defined. use NO_CHANOPS_WHEN_SPLIT instead
   This one has to go into the -6 tree before release as well.
