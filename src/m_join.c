@@ -299,13 +299,7 @@ int     m_join(struct Client *cptr,
                if (IsVchanTop(chptr))
                  {
                    if( on_sub_vchan(chptr,sptr) )
-                     {
-                       sendto_one(sptr,":%s NOTICE %s :*** You are on a sub chan of %s already",
-                                  me.name, sptr->name, name);
-                       sendto_one(sptr, form_str(ERR_BADCHANNAME),
-                               me.name, parv[0], (unsigned char*) name);
-                       return 0;
-                     }
+                     continue;
                    if (key && key[0] == '!')
                      {
                        /* found a matching vchan? let them join it */
@@ -1131,13 +1125,7 @@ int     mo_join(struct Client *cptr,
                if (IsVchanTop(chptr))
                  {
                    if( on_sub_vchan(chptr,sptr) )    
-                     {   
-                       sendto_one(sptr,":%s NOTICE %s :*** You are on a sub chan of %s already",  
-                                  me.name, sptr->name, name);  
-                       sendto_one(sptr, form_str(ERR_BADCHANNAME),  
-                               me.name, parv[0], (unsigned char*) name);  
-                       return 0;  
-                     }   
+                     continue;
                    if (key && key[0] == '!')
                      {
                        /* found a matching vchan? let them join it */

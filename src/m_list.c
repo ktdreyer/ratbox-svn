@@ -29,6 +29,8 @@
 #include "s_conf.h"
 #include "s_serv.h"
 #include "send.h"
+#include "vchannel.h"
+#include "list.h"
 
 #include <assert.h>
 #include <string.h>
@@ -45,7 +47,10 @@ int     m_list(struct Client *cptr,
                char *parv[])
 {
   struct Channel *chptr;
+  struct Channel *root_chptr;
+  struct Channel *tmpchptr;
   char  *name, *p = NULL;
+  char  vname[CHANNELLEN+NICKLEN+3];
   static time_t last_used=0L;
   int i,j;
 
@@ -87,13 +92,30 @@ int     m_list(struct Client *cptr,
         for (j=0, chptr=(struct Channel*)(hash_get_channel_block(i).list);
              (chptr) && (j<hash_get_channel_block(i).links); chptr=chptr->hnextch, j++) {
           if (j<progress2) continue;  /* wind up to listprogress2 */
-          if (!sptr->user ||
+          if (!chptr->members || !sptr->user ||
               (SecretChannel(chptr) && !IsMember(sptr, chptr)))
             continue;
-          sendto_one(sptr, form_str(RPL_LIST), me.name, parv[0],
-                     ShowChannel(sptr, chptr)?chptr->chname:"*",
-                     chptr->users,
-                     ShowChannel(sptr, chptr)?chptr->topic:"");
+          if (ShowChannel(sptr, chptr))
+            {
+              root_chptr = find_bchan(chptr);
+
+              if( (IsVchan(chptr) || HasVchans(chptr)) && 
+                (root_chptr->members || root_chptr->next_vchan->next_vchan) )
+                {
+                  strcpy(vname, root_chptr->chname);
+                  strcat(vname, "<!");
+                  strcat(vname, chptr->members->value.cptr->name);
+                  strcat(vname, ">");
+                }
+              else
+                strcpy(vname, root_chptr->chname);
+
+              sendto_one(sptr, form_str(RPL_LIST), me.name, parv[0],
+                         vname, chptr->users, chptr->topic);
+            }
+          else
+            sendto_one(sptr, form_str(RPL_LIST), me.name, parv[0],
+                       "*", chptr->users, "");
           if (IsSendqPopped(sptr)) {
             /* we popped again! : P */
             sptr->listprogress=i;
@@ -124,16 +146,33 @@ int     m_list(struct Client *cptr,
       for (i=0; i<CH_MAX; i++) {
         for (j=0, chptr = (struct Channel*)(hash_get_channel_block(i).list);
              (chptr) && (j<hash_get_channel_block(i).links); chptr = chptr->hnextch, j++) {
-          if (!sptr->user ||
+          if (!chptr->members || !sptr->user ||
               (SecretChannel(chptr) && !IsMember(sptr, chptr)))
             continue;
           /* EVIL!  sendto_one doesnt return status of any kind!  Forcing us
              to make up yet another stupid client flag (we could just
              negate the DOING_LIST flag, but that might confuse people) -good*/
-          sendto_one(sptr, form_str(RPL_LIST), me.name, parv[0],
-                     ShowChannel(sptr, chptr)?chptr->chname:"*",
-                     chptr->users,
-                     ShowChannel(sptr, chptr)?chptr->topic:"");
+          if (ShowChannel(sptr, chptr))
+            {
+              root_chptr = find_bchan(chptr);
+ 
+              if( (IsVchan(chptr) || HasVchans(chptr)) && 
+                (root_chptr->members || root_chptr->next_vchan->next_vchan) )
+                {
+                  strcpy(vname, root_chptr->chname);
+                  strcat(vname, "<!");
+                  strcat(vname, chptr->members->value.cptr->name);
+                  strcat(vname, ">");
+                }   
+              else 
+                strcpy(vname, root_chptr->chname);
+
+              sendto_one(sptr, form_str(RPL_LIST), me.name, parv[0],
+                         vname, chptr->users, chptr->topic);
+            }
+          else
+            sendto_one(sptr, form_str(RPL_LIST), me.name, parv[0],
+                       "*", chptr->users, "");
           if (IsSendqPopped(sptr)) {
             /* GAAH!  We popped our sendq.  Mark our location in the /list */
             sptr->listprogress=i;
@@ -162,10 +201,24 @@ int     m_list(struct Client *cptr,
   if(name)
     {
       chptr = hash_find_channel(name, NullChn);
-      if (chptr && ShowChannel(sptr, chptr) && sptr->user)
-        sendto_one(sptr, form_str(RPL_LIST), me.name, parv[0],
-                   ShowChannel(sptr,chptr) ? name : "*",
-                   chptr->users, chptr->topic);
+      root_chptr = find_bchan(chptr);
+      for (tmpchptr = root_chptr; tmpchptr; tmpchptr = tmpchptr->next_vchan)
+        if (ShowChannel(sptr, tmpchptr) && tmpchptr->members && sptr->user)
+          {
+            if( (IsVchan(tmpchptr) || HasVchans(tmpchptr)) &&
+              (root_chptr->members || root_chptr->next_vchan->next_vchan) )
+              {
+                strcpy(vname, root_chptr->chname);
+                strcat(vname, "<!");
+                strcat(vname, tmpchptr->members->value.cptr->name);
+                strcat(vname, ">");
+              }
+            else
+              strcpy(vname, root_chptr->chname);
+
+            sendto_one(sptr, form_str(RPL_LIST), me.name, parv[0],
+                       vname, tmpchptr->users, tmpchptr->topic);
+          }
       /*      name = strtoken(&p, (char *)NULL, ","); */
     }
   sendto_one(sptr, form_str(RPL_LISTEND), me.name, parv[0]);
