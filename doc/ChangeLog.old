@@ -1,3 +1,8 @@
+*** 20010603_2 by davidt
+- Remove some #if 0'd code from m_join.c which is broken and unneeded.
+- Fix stupid bug in ircd_parser.y from my mass-cleanup..
+
+
 *** 20010603_1 by db
 From jason@sabruno.wiz.cx  Sat Jun  2 23:59:06 2001
 
