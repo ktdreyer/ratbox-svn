@@ -295,6 +295,7 @@ static void cryptlink_serv(struct Client *client_p, struct Client *source_p,
   char            *b64_key;
   struct ConfItem *aconf;
   char            *encrypted;
+  char 		  *p;
   int              enc_len;
 
   /*
@@ -419,7 +420,24 @@ static void cryptlink_serv(struct Client *client_p, struct Client *source_p,
    * C:line in client_p->name
    */
   strncpy_irc(client_p->name, name, HOSTLEN);
-  strncpy_irc(client_p->info, info[0] ? info : me.name, REALLEN);
+
+  p = info;
+  
+  if(!strncmp(info, "(H)", 3))
+  {
+    client_p->hidden_server = 1;
+
+    if((p = strchr(info, ' ')))
+    {
+      p++;
+      if(*p == '\0')
+        p = "(Unknown Location)";
+    }
+    else
+      p = "(Unknown Location)";
+  } 
+  
+  strncpy_irc(client_p->info, p, REALLEN);
   client_p->hopcount = 0;
 
   if (!(client_p->localClient->out_cipher ||
