@@ -1,3 +1,17 @@
+leeh        2002/02/04 11:57:01 EST	(20020204_10)
+
+  Modified files:
+    .                    Hybrid-team 
+    modules              .depend 
+  Log:
+  - added jmallet^3 to hybteam
+  
+  Revision  Changes    Path
+  7.44      +1 -0      ircd-hybrid-7/Hybrid-team
+  1.5       +121 -121  ircd-hybrid-7/modules/.depend
+
+
+
 jmallett    2002/02/04 11:31:54 EST	(20020204_9)
 
   Modified files:
