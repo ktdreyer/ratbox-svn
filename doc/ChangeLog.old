@@ -1,3 +1,8 @@
+*** 20010425_3 by lusky
+- revved patchlevel to beta3
+- moved dserv out of the tree
+
+
 *** 20010425_2 by db
 - optimized kqueue a bit
 
