@@ -1,3 +1,7 @@
+*** 20010118_5 by ejb
+- oops, better make it compile on unix too..
+
+
 *** 20010118_4 by ejb
 - fix typoes in README.VMS
 - now, src/* should compile fine on VMS with DECC compiler (with the exception
