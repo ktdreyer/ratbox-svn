@@ -334,7 +334,7 @@ handle_command(struct Message *mptr, struct Client *cptr, struct Client *from, i
   /* check right amount of params is passed... --is */
   if (i < mptr->parameters)
     {
-		sendto_realops_flags(FLAGS_ALL, "Not enough parameters for command %s from servers %s! (%d < %d)", mptr->cmd, i, mptr->parameters);
+		sendto_realops_flags(FLAGS_ALL, "Not enough parameters for command %s from servers %s! (%d < %d)", mptr->cmd, cptr->name, i, mptr->parameters);
 		sendto_one(cptr, form_str(ERR_NEEDMOREPARAMS),
 				   me.name, BadPtr(hpara[0]) ? "*" : hpara[0],
 				   mptr->cmd);
