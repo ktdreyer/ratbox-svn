@@ -104,11 +104,8 @@ m_admin(struct Client *client_p, struct Client *source_p, int parc, const char *
 	else
 		last_used = CurrentTime;
 
-	if(!ConfigServerHide.disable_remote)
-	{
-		if(hunt_server(client_p, source_p, ":%s ADMIN :%s", 1, parc, parv) != HUNTED_ISME)
-			return 0;
-	}
+	if(hunt_server(client_p, source_p, ":%s ADMIN :%s", 1, parc, parv) != HUNTED_ISME)
+		return 0;
 
 	do_admin(source_p);
 

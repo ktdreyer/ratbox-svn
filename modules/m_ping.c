@@ -70,13 +70,6 @@ m_ping(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	origin = parv[1];
 	destination = parv[2];	/* Will get NULL or pointer (parc >= 2!!) */
 
-	if(ConfigServerHide.disable_remote && !IsOper(source_p))
-	{
-		sendto_one(source_p, ":%s PONG %s :%s", me.name,
-			   (destination) ? destination : me.name, origin);
-		return 0;
-	}
-
 	if(!EmptyString(destination) && irccmp(destination, me.name))
 	{
 		/* We're sending it across servers.. origin == client_p->name --fl_ */

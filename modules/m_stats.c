@@ -215,12 +215,9 @@ m_stats(struct Client *client_p, struct Client *source_p, int parc, const char *
 		last_used = CurrentTime;
 
 	/* Is the stats meant for us? */
-	if(!ConfigServerHide.disable_remote)
-	{
-		if(hunt_server (client_p, source_p, ":%s STATS %s :%s", 2, parc, parv) !=
-		   HUNTED_ISME)
-			return 0;
-	}
+	if(hunt_server (client_p, source_p, ":%s STATS %s :%s", 2, parc, parv) !=
+	   HUNTED_ISME)
+		return 0;
 
 	statchar = parv[1][0];
 
@@ -892,11 +889,10 @@ stats_uptime (struct Client *source_p)
 			   form_str (RPL_STATSUPTIME),
 			   now / 86400, (now / 3600) % 24, 
 			   (now / 60) % 60, now % 60);
-	if(!ConfigServerHide.disable_remote || IsOper (source_p))
-		sendto_one_numeric(source_p, RPL_STATSCONN,
-				   form_str (RPL_STATSCONN),
-				   MaxConnectionCount, MaxClientCount, 
-				   Count.totalrestartcount);
+	sendto_one_numeric(source_p, RPL_STATSCONN,
+			   form_str (RPL_STATSCONN),
+			   MaxConnectionCount, MaxClientCount, 
+			   Count.totalrestartcount);
 }
 
 static void
@@ -1169,10 +1165,6 @@ stats_ltrace(struct Client *source_p, int parc, const char *parv[])
 		 */
 		if(!MyOper(source_p))
 		{
-			/* if we're in shide, give the users nothing. */
-			if(ConfigServerHide.hide_servers)
-				return;
-
 			stats_l_list(source_p, name, doall, wilds, &serv_list, statchar);
 			stats_l_list(source_p, name, doall, wilds, &oper_list, statchar);
 

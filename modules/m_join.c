@@ -117,8 +117,7 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		}
 
 		/* check it begins with # or &, and local chans are disabled */
-		else if(!IsChannelName(name) ||
-			(ConfigServerHide.disable_local_channels && (*name == '&')))
+		else if(!IsChannelName(name))
 		{
 			sendto_one_numeric(source_p, ERR_NOSUCHCHANNEL,
 					   form_str(ERR_NOSUCHCHANNEL), name);
@@ -464,8 +463,7 @@ ms_join(struct Client *client_p, struct Client *source_p, int parc, const char *
 
 	if(*modebuf != '\0')
 		sendto_channel_local(ALL_MEMBERS, chptr, ":%s MODE %s %s %s",
-				     ConfigServerHide.hide_servers ? me.name :
-				      source_p->user->server,
+				     source_p->user->server,
 				     chptr->chname, modebuf, parabuf);
 
 	*modebuf = *parabuf = '\0';

@@ -61,7 +61,7 @@ m_version(struct Client *client_p, struct Client *source_p, int parc, const char
 {
 	static time_t last_used = 0L;
 
-	if(parc > 1 && !ConfigServerHide.disable_remote)
+	if(parc > 1)
 	{
 		if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
 		{
@@ -149,10 +149,8 @@ confopts(struct Client *source_p)
 	*p++ = 'G';
 
 	/* might wanna hide this :P */
-	if(ServerInfo.hub && (!ConfigServerHide.disable_remote || IsOper(source_p)))
-	{
+	if(ServerInfo.hub)
 		*p++ = 'H';
-	}
 
 	if(ConfigChannel.use_invex)
 		*p++ = 'I';

@@ -93,12 +93,9 @@ mo_links(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	if(parc > 2)
 	{
-		if(!ConfigServerHide.disable_remote || IsOper(source_p))
-		{
-			if(hunt_server(client_p, source_p, ":%s LINKS %s :%s", 1, parc, parv)
-			   != HUNTED_ISME)
-				return 0;
-		}
+		if(hunt_server(client_p, source_p, ":%s LINKS %s :%s", 1, parc, parv)
+		   != HUNTED_ISME)
+			return 0;
 
 		mask = parv[2];
 	}

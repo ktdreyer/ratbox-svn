@@ -254,9 +254,7 @@ who_common_channel(struct Client *source_p, struct Channel *chptr,
 
 		if((mask == NULL) ||
 		   match(mask, target_p->name) || match(mask, target_p->username) ||
-		   match(mask, target_p->host) ||
-		   (match(mask, target_p->user->server) &&
-		    (IsOper(source_p) || !ConfigServerHide.hide_servers)) ||
+		   match(mask, target_p->host) || match(mask, target_p->user->server) ||
 		   match(mask, target_p->info))
 		{
 

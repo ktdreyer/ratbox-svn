@@ -2495,24 +2495,6 @@ conf_set_serverhide_flatten_links(void *data)
 }
 
 static void
-conf_set_serverhide_hide_servers(void *data)
-{
-	ConfigServerHide.hide_servers = *(unsigned int *) data;
-}
-
-static void
-conf_set_serverhide_disable_remote_commands(void *data)
-{
-	ConfigServerHide.disable_remote = *(unsigned int *) data;
-}
-
-static void
-conf_set_serverhide_disable_local_channels(void *data)
-{
-	ConfigServerHide.disable_local_channels = *(unsigned int *) data;
-}
-
-static void
 conf_set_serverhide_links_delay(void *data)
 {
 	int val = *(unsigned int *) data;
@@ -2949,12 +2931,7 @@ newconf_init()
 
 	add_top_conf("serverhide", NULL, NULL);
 	add_conf_item("serverhide", "flatten_links", CF_YESNO, conf_set_serverhide_flatten_links);
-	add_conf_item("serverhide", "hide_servers", CF_YESNO, conf_set_serverhide_hide_servers);
-	add_conf_item("serverhide", "disable_remote_commands", CF_YESNO,
-		      conf_set_serverhide_disable_remote_commands);
 	add_conf_item("serverhide", "links_delay", CF_TIME, conf_set_serverhide_links_delay);
 	add_conf_item("serverhide", "disable_hidden", CF_YESNO, conf_set_serverhide_disable_hidden);
 	add_conf_item("serverhide", "hidden", CF_YESNO, conf_set_serverhide_hidden);
-	add_conf_item("serverhide", "disable_local_channels", CF_YESNO,
-		      conf_set_serverhide_disable_local_channels);
 }

@@ -89,18 +89,6 @@ m_trace(struct Client *client_p, struct Client *source_p, int parc, const char *
 	else
 		tname = me.name;
 
-	/* during shide, allow a non-oper to trace themselves only */
-	/* if this check is ever removed, fix trace for non-opers below */
-	if(!IsOper(source_p) && ConfigServerHide.hide_servers)
-	{
-		if(MyClient(source_p) && irccmp(tname, source_p->name) == 0)
-			report_this_status(source_p, source_p, 0, 0, 0);
-
-		sendto_one_numeric(source_p, RPL_ENDOFTRACE,
-				   form_str(RPL_ENDOFTRACE), tname);
-		return 0;
-	}
-
 	if(parc > 2)
 	{
 		if(hunt_server(client_p, source_p, ":%s TRACE %s :%s", 2, parc, parv) !=

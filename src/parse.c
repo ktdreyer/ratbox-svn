@@ -732,12 +732,9 @@ do_numeric(char numeric[], struct Client *client_p, struct Client *source_p, int
 			return;
 
 		/* Fake it for server hiding, if its our client */
-		if(ConfigServerHide.hide_servers && MyClient(target_p) && !IsOper(target_p))
-			sendto_one(target_p, ":%s %s %s%s", me.name, numeric, parv[1], buffer);
-		else
-			sendto_one(target_p, ":%s %s %s%s", 
-				   get_id(source_p, target_p), numeric, 
-				   get_id(target_p, target_p), buffer);
+		sendto_one(target_p, ":%s %s %s%s", 
+			   get_id(source_p, target_p), numeric, 
+			   get_id(target_p, target_p), buffer);
 		return;
 	}
 	else if((chptr = find_channel(parv[1])) != NULL)

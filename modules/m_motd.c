@@ -94,12 +94,8 @@ m_motd(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	else
 		last_used = CurrentTime;
 
-	/* This is safe enough to use during non hidden server mode */
-	if(!ConfigServerHide.disable_remote && !ConfigServerHide.hide_servers)
-	{
-		if(hunt_server(client_p, source_p, ":%s MOTD :%s", 1, parc, parv) != HUNTED_ISME)
-			return 0;
-	}
+	if(hunt_server(client_p, source_p, ":%s MOTD :%s", 1, parc, parv) != HUNTED_ISME)
+		return 0;
 
 	motd_spy(source_p);
 	send_user_motd(source_p);

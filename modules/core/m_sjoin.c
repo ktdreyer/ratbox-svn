@@ -101,7 +101,6 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 	char *p;
 	int i;
 	dlink_node *m;
-	const char *server_name = ConfigServerHide.hide_servers ? me.name : source_p->name;
 	static char empty[] = "";
 
 	if(IsClient(source_p) || EmptyString(parv[4]))
@@ -223,7 +222,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	if(*modebuf != '\0')
 		sendto_channel_local(ALL_MEMBERS, chptr, ":%s MODE %s %s %s",
-				     server_name, chptr->chname, 
+				     source_p->name, chptr->chname, 
 				     modebuf, parabuf);
 
 	*modebuf = *parabuf = '\0';
@@ -348,7 +347,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 					*mbuf = '\0';
 					sendto_channel_local(ALL_MEMBERS, chptr,
 							     ":%s MODE %s %s %s %s %s %s",
-							     server_name, chptr->chname,
+							     source_p->name, chptr->chname,
 							     modebuf,
 							     para[0], para[1], para[2], para[3]);
 					mbuf = modebuf;
@@ -372,7 +371,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 			*mbuf = '\0';
 			sendto_channel_local(ALL_MEMBERS, chptr,
 					     ":%s MODE %s %s %s %s %s %s",
-					     server_name,
+					     source_p->name,
 					     chptr->chname,
 					     modebuf, para[0], para[1], para[2], para[3]);
 			mbuf = modebuf;
@@ -407,7 +406,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 	{
 		sendto_channel_local(ALL_MEMBERS, chptr,
 				     ":%s MODE %s %s %s %s %s %s",
-				     server_name, chptr->chname, modebuf,
+				     source_p->name, chptr->chname, modebuf,
 				     para[0], para[1], para[2], para[3]);
 	}
 

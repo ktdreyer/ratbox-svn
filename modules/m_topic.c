@@ -189,21 +189,9 @@ ms_topic(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 		set_channel_topic(chptr, parv[4], parv[2], atoi(parv[3]));
 
-		if(ConfigServerHide.hide_servers)
-		{
-			sendto_channel_local(ALL_MEMBERS,
-					     chptr, ":%s TOPIC %s :%s",
-					     me.name,
-					     parv[1], chptr->topic == NULL ? "" : chptr->topic);
-
-		}
-		else
-		{
-			sendto_channel_local(ALL_MEMBERS,
-					     chptr, ":%s TOPIC %s :%s",
-					     source_p->name,
-					     parv[1], chptr->topic == NULL ? "" : chptr->topic);
-		}
+		sendto_channel_local(ALL_MEMBERS, chptr, ":%s TOPIC %s :%s",
+				     source_p->name, parv[1], 
+				     chptr->topic == NULL ? "" : chptr->topic);
 	}
 
 	return 0;

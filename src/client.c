@@ -1294,11 +1294,6 @@ exit_remote_server(struct Client *client_p, struct Client *source_p, struct Clie
 	if(IsDead(source_p))
 		return -1;
 
-	if(ConfigServerHide.hide_servers)
-	{
-		ircsprintf(comment1, "%s *.split", me.name);
-	}
-	
 	if((source_p->serv) && (source_p->serv->up))
 		 strcpy(comment1, source_p->serv->up);
 	else
@@ -1380,11 +1375,6 @@ exit_local_server(struct Client *client_p, struct Client *source_p, struct Clien
 
 
 	close_connection(source_p);
-	
-	if(ConfigServerHide.hide_servers)
-	{
-		ircsprintf(comment1, "%s *.split", me.name);
-	}
 	
 	if((source_p->serv) && (source_p->serv->up))
 		 strcpy(comment1, source_p->serv->up);

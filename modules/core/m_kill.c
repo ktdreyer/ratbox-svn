@@ -228,13 +228,8 @@ ms_kill(struct Client *client_p, struct Client *source_p, int parc, const char *
 	{
 		if(IsServer(source_p))
 		{
-			/* dont send clients kills from a hidden server */
-			if(ConfigServerHide.hide_servers && !IsOper(target_p))
-				sendto_one(target_p, ":%s KILL %s :%s",
-					   me.name, target_p->name, reason);
-			else
-				sendto_one(target_p, ":%s KILL %s :%s",
-					   source_p->name, target_p->name, reason);
+			sendto_one(target_p, ":%s KILL %s :%s",
+				   source_p->name, target_p->name, reason);
 		}
 		else
 			sendto_one(target_p, ":%s!%s@%s KILL %s :%s",
@@ -268,11 +263,7 @@ ms_kill(struct Client *client_p, struct Client *source_p, int parc, const char *
 	/* FLAGS_KILLED prevents a quit being sent out */
 	target_p->flags |= FLAGS_KILLED;
 
-	/* reason comes supplied with its own ()'s */
-	if(ConfigServerHide.hide_servers && IsServer(source_p))
-		ircsprintf(buf, "Killed (%s %s)", me.name, reason);
-	else
-		ircsprintf(buf, "Killed (%s %s)", source_p->name, reason);
+	ircsprintf(buf, "Killed (%s %s)", source_p->name, reason);
 
 	exit_client(client_p, target_p, source_p, buf);
 

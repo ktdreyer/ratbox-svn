@@ -62,7 +62,7 @@ m_lusers(struct Client *client_p, struct Client *source_p, int parc, const char 
 {
 	static time_t last_used = 0;
 
-	if (parc > 2 && !ConfigServerHide.disable_remote)
+	if (parc > 2)
 	{
 		if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
 		{

@@ -176,16 +176,10 @@ int user_modes_from_c_to_bitmask[] = {
 int
 show_lusers(struct Client *source_p)
 {
-	if(!ConfigServerHide.hide_servers || IsOper(source_p))
-		sendto_one_numeric(source_p, RPL_LUSERCLIENT,
-				   form_str(RPL_LUSERCLIENT),
-				   (Count.total - Count.invisi),
-				   Count.invisi, 
-				   dlink_list_length(&global_serv_list));
-	else
-		sendto_one_numeric(source_p, RPL_LUSERCLIENT,
-				   form_str(RPL_LUSERCLIENT),
-				   (Count.total - Count.invisi), Count.invisi, 1);
+	sendto_one_numeric(source_p, RPL_LUSERCLIENT, form_str(RPL_LUSERCLIENT),
+			   (Count.total - Count.invisi),
+			   Count.invisi, dlink_list_length(&global_serv_list));
+
 	if(Count.oper > 0)
 		sendto_one_numeric(source_p, RPL_LUSEROP, 
 				   form_str(RPL_LUSEROP), Count.oper);
@@ -200,33 +194,22 @@ show_lusers(struct Client *source_p)
 				   form_str(RPL_LUSERCHANNELS),
 				   dlink_list_length(&global_channel_list));
 
-	if(!ConfigServerHide.hide_servers || IsOper(source_p))
-	{
-		sendto_one_numeric(source_p, RPL_LUSERME, form_str(RPL_LUSERME),
-				   dlink_list_length(&lclient_list),
-				   dlink_list_length(&serv_list));
-		sendto_one_numeric(source_p, RPL_LOCALUSERS, 
-				   form_str(RPL_LOCALUSERS),
-				   dlink_list_length(&lclient_list),
-				   Count.max_loc);
-	}
-	else
-	{
-		sendto_one_numeric(source_p, RPL_LUSERME, form_str(RPL_LUSERME),
-				   Count.total, 0);
-		sendto_one_numeric(source_p, RPL_LOCALUSERS,
-				   form_str(RPL_LOCALUSERS),
-				   Count.total, Count.max_tot);
-	}
+	sendto_one_numeric(source_p, RPL_LUSERME, form_str(RPL_LUSERME),
+			   dlink_list_length(&lclient_list),
+			   dlink_list_length(&serv_list));
+
+	sendto_one_numeric(source_p, RPL_LOCALUSERS, 
+			   form_str(RPL_LOCALUSERS),
+			   dlink_list_length(&lclient_list),
+			   Count.max_loc);
 
 	sendto_one_numeric(source_p, RPL_GLOBALUSERS, form_str(RPL_GLOBALUSERS),
 			   Count.total, Count.max_tot);
 
-	if(!ConfigServerHide.hide_servers || IsOper(source_p))
-		sendto_one_numeric(source_p, RPL_STATSCONN,
-				   form_str(RPL_STATSCONN),
-				   MaxConnectionCount, MaxClientCount, 
-				   Count.totalrestartcount);
+	sendto_one_numeric(source_p, RPL_STATSCONN,
+			   form_str(RPL_STATSCONN),
+			   MaxConnectionCount, MaxClientCount, 
+			   Count.totalrestartcount);
 
 	if(dlink_list_length(&lclient_list) > MaxClientCount)
 		MaxClientCount = dlink_list_length(&lclient_list);

@@ -452,18 +452,6 @@ static struct InfoStruct info_table[] = {
 	 "Prevent servers from hiding themselves from a flattened /links",
 	 },
 	{
-	 "disable_local_channels",
-	 OUTPUT_BOOLEAN_YN,
-	 &ConfigServerHide.disable_local_channels,
-	 "Prevent users joining &channels",
-	 },
-	{
-	 "disable_remote_commands",
-	 OUTPUT_BOOLEAN_YN,
-	 &ConfigServerHide.disable_remote,
-	 "Prevent users issuing commands on remote servers",
-	 },
-	{
 	 "flatten_links",
 	 OUTPUT_BOOLEAN_YN,
 	 &ConfigServerHide.flatten_links,
@@ -474,12 +462,6 @@ static struct InfoStruct info_table[] = {
 	 OUTPUT_BOOLEAN_YN,
 	 &ConfigServerHide.hidden,
 	 "Hide this server from a flattened /links on remote servers",
-	 },
-	{
-	 "hide_servers",
-	 OUTPUT_BOOLEAN_YN,
-	 &ConfigServerHide.hide_servers,
-	 "Hide servernames from users",
 	 },
 	{
 	 "links_delay",
@@ -519,13 +501,8 @@ m_info(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		last_used = CurrentTime;
 	}
 
-	if(!ConfigServerHide.disable_remote)
-	{
-		if(hunt_server(client_p, source_p, ":%s INFO :%s", 1, parc, parv) != HUNTED_ISME)
-		{
-			return 0;
-		}
-	}
+	if(hunt_server(client_p, source_p, ":%s INFO :%s", 1, parc, parv) != HUNTED_ISME)
+		return 0;
 
 	info_spy(source_p);
 

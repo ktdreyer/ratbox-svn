@@ -106,21 +106,11 @@ m_invite(struct Client *client_p, struct Client *source_p, int parc, const char 
 	/* Do not send local channel invites to users if they are not on the
 	 * same server as the person sending the INVITE message. 
 	 */
-	if(parv[2][0] == '&')
+	if(parv[2][0] == '&' && !MyConnect(target_p))
 	{
-		if(ConfigServerHide.disable_local_channels)
-			return 0;
-
-		/* if we're in shide, we're buggered anyway, because they
-		 * could just test for RPL_INVITED to determine whether a
-		 * user is local or not.  rely on disable_local_channels --fl
-		 */
-		if(!MyConnect(target_p))
-		{
-			sendto_one(source_p, form_str(ERR_USERNOTONSERV),
-				   me.name, source_p->name, parv[1]);
-			return 0;
-		}
+		sendto_one(source_p, form_str(ERR_USERNOTONSERV),
+			   me.name, source_p->name, parv[1]);
+		return 0;
 	}
 
 	if((chptr = find_channel(parv[2])) == NULL)

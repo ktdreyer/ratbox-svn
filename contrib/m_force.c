@@ -195,20 +195,6 @@ static void mo_forcejoin(struct Client *client_p, struct Client *source_p,
         return;
       }
 
-     /* it would be interesting here to allow an oper
-      * to force target_p into a channel that doesn't exist
-      * even more so, into a local channel when we disable
-      * local channels... but...
-      * I don't want to break anything - scuzzy
-      */
-      if (ConfigServerHide.disable_local_channels &&
-	  (*newch == '&'))
-      {
-        sendto_one(source_p, ":%s NOTICE %s :No such channel (%s)", me.name,
-		   source_p->name, newch);
-        return;
-      }
-
       /* newch can't be longer than CHANNELLEN */
       if (strlen(newch) > CHANNELLEN)
       {

@@ -92,10 +92,8 @@ m_ison(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		{
 			target_p = find_person(nick);
 
-			if(target_p == NULL && (IsOper(source_p) || !ConfigServerHide.hide_servers))
-			{
+			if(target_p == NULL)
 				target_p = find_server(nick);
-			}
 
 			if(target_p != NULL)
 			{

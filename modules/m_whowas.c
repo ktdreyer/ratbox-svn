@@ -139,18 +139,10 @@ whowas_do(struct Client *client_p, struct Client *source_p, int parc, const char
 				   me.name, source_p->name, temp->name,
 				   temp->username, temp->hostname, temp->realname);
 
-			if(ConfigServerHide.hide_servers && !IsOper(source_p))
-				sendto_one_numeric(source_p, RPL_WHOISSERVER,
-						   form_str(RPL_WHOISSERVER),
-						   temp->name,
-						   ServerInfo.network_name, 
-						   myctime(temp->logoff));
-			else
-				sendto_one_numeric(source_p, RPL_WHOISSERVER,
-						   form_str(RPL_WHOISSERVER),
-						   temp->name,
-						   temp->servername,
-						   myctime(temp->logoff));
+			sendto_one_numeric(source_p, RPL_WHOISSERVER,
+					   form_str(RPL_WHOISSERVER),
+					   temp->name, temp->servername,
+					   myctime(temp->logoff));
 			cur++;
 			found++;
 		}

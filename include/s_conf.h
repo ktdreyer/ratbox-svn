@@ -273,9 +273,6 @@ struct config_channel_entry
 struct config_server_hide
 {
 	int flatten_links;
-	int hide_servers;
-	int disable_remote;
-	int disable_local_channels;
 	int links_delay;
 	int links_disabled;
 	int hidden;

@@ -46,7 +46,7 @@
 #include "hook.h"
 
 static void do_whois(struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
-static void single_whois(struct Client *source_p, struct Client *target_p, int glob);
+static void single_whois(struct Client *source_p, struct Client *target_p);
 
 static int m_whois(struct Client *, struct Client *, int, const char **);
 static int ms_whois(struct Client *, struct Client *, int, const char **);
@@ -96,13 +96,6 @@ m_whois(struct Client *client_p, struct Client *source_p, int parc, const char *
 		}
 		else
 			last_used = CurrentTime;
-
-		/* if we have serverhide enabled, they can either ask the clients
-		 * server, or our server.. I dont see why they would need to ask
-		 * anything else for info about the client.. --fl_
-		 */
-		if(ConfigServerHide.disable_remote)
-			parv[1] = parv[2];
 
 		if(hunt_server(client_p, source_p, ":%s WHOIS %s :%s", 1, parc, parv) !=
 		   HUNTED_ISME)
@@ -208,29 +201,13 @@ do_whois(struct Client *client_p, struct Client *source_p, int parc, const char 
 	struct Client *target_p;
 	char *nick;
 	char *p = NULL;
-	int glob = 0;
-
-	/* This lets us make all "whois nick" queries look the same, and all
-	 * "whois nick nick" queries look the same.  We have to pass it all
-	 * the way down to whois_person() though -- fl
-	 */
-	if(parc > 2)
-		glob = 1;
 
 	nick = LOCAL_COPY(parv[1]);
 	if((p = strchr(parv[1], ',')))
 		*p = '\0';
 
 	if((target_p = find_client(nick)) != NULL && IsPerson(target_p))
-	{
-		/* im being asked to reply to a client that isnt mine..
-		 * I cant answer authoritively, so better make it non-detailed
-		 */
-		if(!MyClient(target_p))
-			glob = 0;
-
-		single_whois(source_p, target_p, glob);
-	}
+		single_whois(source_p, target_p);
 	else
 		sendto_one_numeric(source_p, ERR_NOSUCHNICK,
 				   form_str(ERR_NOSUCHNICK), nick);
@@ -250,7 +227,7 @@ do_whois(struct Client *client_p, struct Client *source_p, int parc, const char 
  * 		  writing results to source_p
  */
 static void
-single_whois(struct Client *source_p, struct Client *target_p, int glob)
+single_whois(struct Client *source_p, struct Client *target_p)
 {
 	char buf[BUFSIZE];
 	dlink_node *ptr;
@@ -313,14 +290,9 @@ single_whois(struct Client *source_p, struct Client *target_p, int glob)
 	if(cur_len > mlen)
 		sendto_one(source_p, "%s", buf);
 
-	if((IsOper(source_p) || !ConfigServerHide.hide_servers) || target_p == source_p)
-		sendto_one_numeric(source_p, RPL_WHOISSERVER, form_str(RPL_WHOISSERVER),
-				   target_p->name, target_p->user->server,
-				   a2client_p ? a2client_p->info : "*Not On This Net*");
-	else
-		sendto_one_numeric(source_p, RPL_WHOISSERVER, form_str(RPL_WHOISSERVER),
-				   target_p->name,
-				   ServerInfo.network_name, ServerInfo.network_desc);
+	sendto_one_numeric(source_p, RPL_WHOISSERVER, form_str(RPL_WHOISSERVER),
+			   target_p->name, target_p->user->server,
+			   a2client_p ? a2client_p->info : "*Not On This Net*");
 
 	if(target_p->user->away)
 		sendto_one_numeric(source_p, RPL_AWAY, form_str(RPL_AWAY),
@@ -336,24 +308,15 @@ single_whois(struct Client *source_p, struct Client *target_p, int glob)
 
 	if(MyClient(target_p))
 	{
-		/* send idle if its global, source == target, or source and target
-		 * are both local and theres no serverhiding or source is opered
-		 */
-		if((glob == 1) || (MyClient(source_p) &&
-		   (IsOper(source_p) || !ConfigServerHide.hide_servers)) ||
-		   (source_p == target_p))
-		{
-			if(ConfigFileEntry.use_whois_actually && show_ip(source_p, target_p))
-				sendto_one_numeric(source_p, RPL_WHOISACTUALLY,
-						   form_str(RPL_WHOISACTUALLY),
-						   target_p->name, target_p->sockhost);
+		if(ConfigFileEntry.use_whois_actually && show_ip(source_p, target_p))
+			sendto_one_numeric(source_p, RPL_WHOISACTUALLY,
+					   form_str(RPL_WHOISACTUALLY),
+					   target_p->name, target_p->sockhost);
 
-			sendto_one_numeric(source_p, RPL_WHOISIDLE, 
-					   form_str(RPL_WHOISIDLE),
-					   target_p->name, 
-					   CurrentTime - target_p->user->last, 
-					   target_p->firsttime);
-		}
+		sendto_one_numeric(source_p, RPL_WHOISIDLE, form_str(RPL_WHOISIDLE),
+				   target_p->name, 
+				   CurrentTime - target_p->user->last, 
+				   target_p->firsttime);
 	}
 
 	hd.client_p = target_p;

@@ -73,12 +73,8 @@ m_time(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	if(MyClient(source_p) && !IsFloodDone(source_p))
 		flood_endgrace(source_p);
 
-	/* This is safe enough to use during non hidden server mode */
-	if(!ConfigServerHide.disable_remote)
-	{
-		if(hunt_server(client_p, source_p, ":%s TIME :%s", 1, parc, parv) != HUNTED_ISME)
-			return 0;
-	}
+	if(hunt_server(client_p, source_p, ":%s TIME :%s", 1, parc, parv) != HUNTED_ISME)
+		return 0;
 
 	sendto_one_numeric(source_p, RPL_TIME, form_str(RPL_TIME), 
 			   me.name, date());

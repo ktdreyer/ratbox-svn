@@ -95,14 +95,6 @@ static void m_ltrace(struct Client *client_p, struct Client *source_p,
   else
     tname = me.name;
 
-  if(!IsOper(source_p) && ConfigServerHide.hide_servers)
-  {
-    if(MyClient(source_p) && (irccmp(tname, source_p->name) == 0))
-      report_this_status(source_p, source_p, 0, 0, 0);
-
-    sendto_one(source_p, form_str(RPL_ENDOFTRACE),
-              me.name, parv[0], tname);
-  }
   if (parc > 2)
   {
     if (hunt_server(client_p, source_p, ":%s LTRACE %s :%s", 2, parc, parv))
@@ -191,8 +183,6 @@ static void m_ltrace(struct Client *client_p, struct Client *source_p,
   }
 
   /* report all servers */
-  if(!ConfigServerHide.hide_servers)
-  {
     DLINK_FOREACH(ptr, serv_list.head)
     {
       target_p = ptr->data;
@@ -204,7 +194,6 @@ static void m_ltrace(struct Client *client_p, struct Client *source_p,
                          link_u[target_p->localClient->fd],
                          link_s[target_p->localClient->fd]);
     }
-  }
 
   if(IsOper(source_p))
   {
