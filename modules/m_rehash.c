@@ -38,7 +38,6 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
-#include "event.h"
 
 static void mo_rehash(struct Client*, struct Client*, int, char**);
 

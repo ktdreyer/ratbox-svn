@@ -70,6 +70,7 @@ eventAdd(const char *name, EVH *func, void *arg, time_t when)
   event_table[event_max].arg = arg;
   event_table[event_max].when = CurrentTime + when;
   event_table[event_max].frequency = when; 
+  event_table[event_max].active = 1;
   ++event_max;
 }
 
