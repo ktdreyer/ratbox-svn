@@ -1,3 +1,9 @@
+*** 20001130_4 by db
+- fixed kick so nonops see user kicking themselves in chanop hide mode
+- don't show uplink on links and hopcount if in server hide mode
+
+
+
 *** 20001130_3 by db
 - committed the chanop hiding code. wheeee
   still needs testing
