@@ -1,3 +1,15 @@
+androsyn    2002/05/30 21:35:41 EDT	(20020531_9)
+
+  Modified files:
+    src                  fileio.c 
+  Log:
+  More non assert failure cleanups..
+  
+  Revision  Changes    Path
+  7.23      +45 -6     ircd-hybrid-7/src/fileio.c
+
+
+
 androsyn    2002/05/30 21:29:04 EDT	(20020531_8)
 
   Modified files:
