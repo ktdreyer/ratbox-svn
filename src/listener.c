@@ -374,51 +374,57 @@ static void accept_connection(int pfd, void *data)
    * point, just assume that connections cannot
    * be accepted until some old is closed first.
    */
-  do {
-    fd = comm_accept(listener->fd, (struct sockaddr *)&addr, &addrlen);
-    if (fd < 0) {
+
+  fd = comm_accept(listener->fd, (struct sockaddr *)&addr, &addrlen);
+  if (fd < 0)
+    {
+#if 0
       if (EAGAIN == errno)
-         break;
+	return;
+#endif
       /*
        * slow down the whining to opers bit
        */
-      if((last_oper_notice + 20) <= CurrentTime) {
-        report_error("Error accepting connection %s:%s", 
-                   listener->name, errno);
-        last_oper_notice = CurrentTime;
-      }
-      break;
+      if((last_oper_notice + 20) <= CurrentTime)
+	{
+	  report_error("Error accepting connection %s:%s", 
+		       listener->name, errno);
+	  last_oper_notice = CurrentTime;
+	}
+      return;
     }
-    /*
-     * check for connection limit
-     */
-    if ((MAXCONNECTIONS - 10) < fd) {
+  /*
+   * check for connection limit
+   */
+  if ((MAXCONNECTIONS - 10) < fd)
+    {
       ++ServerStats->is_ref;
       /* 
        * slow down the whining to opers bit 
        */
-      if((last_oper_notice + 20) <= CurrentTime) {
-        sendto_realops_flags(FLAGS_ALL,"All connections in use. (%s)", 
-			     get_listener_name(listener));
-        last_oper_notice = CurrentTime;
-      }
+      if((last_oper_notice + 20) <= CurrentTime)
+	{
+	  sendto_realops_flags(FLAGS_ALL,"All connections in use. (%s)", 
+			       get_listener_name(listener));
+	  last_oper_notice = CurrentTime;
+	}
       send(fd, "ERROR :All connections in use\r\n", 32, 0);
       fd_close(fd);
-      break;
+      return;
     }
-    /*
-     * check conf for ip address access
-     */
-    if (!conf_connect_allowed(&addr)) {
+  /*
+   * check conf for ip address access
+   */
+  if (!conf_connect_allowed(&addr))
+    {
       ServerStats->is_ref++;
       send(fd, "NOTICE DLINE :*** You have been D-lined\r\n", 41, 0);
       fd_close(fd);
-      break;
+      return;
     }
-    ServerStats->is_ac++;
+  ServerStats->is_ac++;
 
-    add_connection(listener, fd);
-  } while (0);
+  add_connection(listener, fd);
 
   /* Re-register a new IO request for the next accept .. */
   comm_setselect(listener->fd, FDLIST_SERVICE, COMM_SELECT_READ,
