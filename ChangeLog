@@ -1,3 +1,45 @@
+androsyn    2003/01/18 19:07:41 UTC	(20030118_0)
+
+  Modified files:
+    include              s_conf.h 
+    modules              .depend m_dline.c m_gline.c m_kline.c 
+                         m_rehash.c m_stats.c m_testline.c 
+                         m_undline.c m_ungline.c m_unkline.c 
+    src                  .depend Makefile.in client.c ircd.c 
+                         kdparse.c listener.c newconf.c s_conf.c 
+                         s_gline.c 
+  Removed files:
+    include              confmatch.h 
+    src                  confmatch.c 
+  Log:
+  Remove confmatch.c return hostmask.c back..
+  
+  Revision  Changes    Path
+  7.6       +0 -54     ircd-ratbox/include/confmatch.h (dead)
+  7.226     +1 -1      ircd-ratbox/include/s_conf.h
+  1.21      +31 -29    ircd-ratbox/modules/.depend
+  1.7       +11 -4     ircd-ratbox/modules/m_dline.c
+  1.105     +2 -2      ircd-ratbox/modules/m_gline.c
+  1.145     +14 -5     ircd-ratbox/modules/m_kline.c
+  1.56      +3 -3      ircd-ratbox/modules/m_rehash.c
+  1.142     +10 -15    ircd-ratbox/modules/m_stats.c
+  1.31      +19 -11    ircd-ratbox/modules/m_testline.c
+  1.6       +3 -3      ircd-ratbox/modules/m_undline.c
+  1.6       +3 -3      ircd-ratbox/modules/m_ungline.c
+  1.78      +3 -3      ircd-ratbox/modules/m_unkline.c
+  7.22      +36 -36    ircd-ratbox/src/.depend
+  7.125     +1 -1      ircd-ratbox/src/Makefile.in
+  7.360     +5 -5      ircd-ratbox/src/client.c
+  7.16      +0 -498    ircd-ratbox/src/confmatch.c (dead)
+  7.274     +2 -3      ircd-ratbox/src/ircd.c
+  7.22      +1 -1      ircd-ratbox/src/kdparse.c
+  7.80      +1 -1      ircd-ratbox/src/listener.c
+  7.70      +1 -1      ircd-ratbox/src/newconf.c
+  7.390     +8 -8      ircd-ratbox/src/s_conf.c
+  1.37      +2 -2      ircd-ratbox/src/s_gline.c
+
+
+
 androsyn    2003/01/05 14:19:57 UTC	(20030105_0)
 
   Added files:
