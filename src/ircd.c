@@ -351,8 +351,7 @@ static time_t io_loop(time_t delay)
   eventRun();
   delay = eventNextTime();
 
-  /* Do new-style pending events */
-  /* Once the crap has been stripped out, we can make this use delay .. */
+  /* Do IO events */
   comm_select(delay);
 
   /*
