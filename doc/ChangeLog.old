@@ -1,3 +1,29 @@
+androsyn    2002/04/02 23:02:35 EST	(20020403_0)
+
+  Modified files:
+    .                    RELNOTES configure 
+    autoconf             configure.in 
+    include              config.h setup.h.in 
+    src                  channel.c client.c linebuf.c list.c 
+  Removed files:
+    .                    README.small_nets 
+  Log:
+  Added configure --enable-small-net and removed README.small_nets.
+  
+  Revision  Changes    Path
+  7.7       +0 -13     ircd-hybrid-7/README.small_nets (dead)
+  1.18      +3 -1      ircd-hybrid-7/RELNOTES
+  7.127     +17 -0     ircd-hybrid-7/autoconf/configure.in
+  7.130     +244 -223  ircd-hybrid-7/configure
+  7.131     +25 -1     ircd-hybrid-7/include/config.h
+  7.50      +4 -4      ircd-hybrid-7/include/setup.h.in
+  7.302     +2 -2      ircd-hybrid-7/src/channel.c
+  7.245     +2 -2      ircd-hybrid-7/src/client.c
+  7.78      +1 -1      ircd-hybrid-7/src/linebuf.c
+  7.43      +2 -2      ircd-hybrid-7/src/list.c
+
+
+
 androsyn    2002/04/02 11:48:02 EST	(20020402_0)
 
   Modified files:
