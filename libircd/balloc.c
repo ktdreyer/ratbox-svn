@@ -461,22 +461,22 @@ int BlockHeapGarbageCollect(BlockHeap * bh)
     last = NULL;
     walker = bh->base;
 
-    while (walker)
+    while (walker != NULL)
       {
-        if (walker->freeElems == bh->elemsPerBlock)
+        if ((walker->freeElems == bh->elemsPerBlock) != 0)
 	  {
             free_block(walker->elems, walker->alloc_size);
-            if (last)
+            if (last != NULL)
 	      {
                 last->next = walker->next;
-                if(free)
+                if(walker != NULL)
                  free(walker);
                 walker = last->next;
 	      }
 	    else
 	      {
                 bh->base = walker->next;
-                if(free)
+                if(walker != NULL)
                  free(walker);
                 walker = bh->base;
 	      }
