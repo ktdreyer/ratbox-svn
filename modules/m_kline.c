@@ -841,11 +841,11 @@ find_user_host(struct Client *source_p,
        * if found in original user name (non-idented)
        */
 
-      strlcpy(luser, target_p->username, USERLEN);
+      strlcpy(luser, target_p->username, USERLEN+1);
       if (*target_p->username == '~')
         luser[0] = '*';
 
-      strlcpy(lhost,cluster(target_p->host),HOSTLEN);
+      strlcpy(lhost,cluster(target_p->host),HOSTLEN+1);
     }
 
   return 1;
