@@ -1,3 +1,15 @@
+leeh        2003/08/27 19:52:19 EDT	(20030827_3)
+
+  Modified files:
+    src                  tools.c 
+  Log:
+  - remove an extra ';'
+  
+  Revision  Changes    Path
+  7.40      +1 -1      ircd-ratbox/src/tools.c
+
+
+
 androsyn    2003/08/27 15:57:48 EDT	(20030827_2)
 
   Modified files:
