@@ -1,5 +1,5 @@
 /*
- *  ircd-ratbox: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-ratbox: A slightly useful ircd.
  *  ircd_defs.h: A header for ircd global definitions.
  *
  *  Copyright (C) 1990 Jarkko Oikarinen and University of Oulu, Co Center

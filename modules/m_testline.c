@@ -1,5 +1,5 @@
 /*
- *  ircd-ratbox: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-ratbox: A slightly useful ircd.
  *  m_testline.c: Tests a hostmask to see what will happen to it.
  *
  *  Copyright (C) 1990 Jarkko Oikarinen and University of Oulu, Co Center

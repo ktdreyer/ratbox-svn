@@ -1,5 +1,5 @@
 /*
- *  ircd-ratbox: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-ratbox: A slightly useful ircd.
  *  m_ltrace.c: Traces a path to a client/server.
  *
  *  Copyright (C) 2002 Hybrid Development Team

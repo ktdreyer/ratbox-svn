@@ -1,5 +1,5 @@
 /*
- *  ircd-ratbox: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-ratbox: A slightly useful ircd.
  *  hook.c: Provides a generic event hooking interface.
  *
  *  Copyright (C) 2000-2002 Edward Brocklesby, Hybrid Development Team

@@ -1,5 +1,5 @@
 /*
- *  ircd-ratbox: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-ratbox: A slightly useful ircd.
  *  m_away.c: Negotiates capabilities with a remote server.
  *
  *  Copyright (C) 1990 Jarkko Oikarinen and University of Oulu, Co Center

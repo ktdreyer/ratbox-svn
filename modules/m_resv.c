@@ -1,5 +1,5 @@
 /*
- *  ircd-ratbox: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-ratbox: A slightly useful ircd.
  *  m_resv.c: Reserves(jupes) a nickname or channel.
  *
  *  Copyright (C) 2001-2002 Hybrid Development Team

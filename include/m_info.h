@@ -1,5 +1,5 @@
 /*
- *  ircd-ratbox: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-ratbox: A slightly useful ircd.
  *  m_info.h: A header for the information sent by /info
  *
  *  Copyright (C) 1990 Jarkko Oikarinen and University of Oulu, Co Center

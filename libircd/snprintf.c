@@ -1,5 +1,5 @@
 /*
- *  ircd-ratbox: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-ratbox: A slightly useful ircd.
  *  snprintf.c: Functions for printing to a length-limited string.
  *
  *  Copyright (C) 1996-2002 Hybrid Development Team

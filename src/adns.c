@@ -1,5 +1,5 @@
 /*
- *  ircd-ratbox: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-ratbox: A slightly useful ircd.
  *  adns.c: Interfaces to the adns DNS library.
  *
  *  Copyright (C) 2001-2002 Aaron Sethman <androsyn@ratbox.org> 

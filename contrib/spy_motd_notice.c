@@ -1,5 +1,5 @@
 /*
- *  ircd-ratbox: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-ratbox: A slightly useful ircd.
  *  spy_motd_notice.c: Sends a notice when someone uses MOTD.
  *
  *  Copyright (C) 2002 by the past and present ircd coders, and others.

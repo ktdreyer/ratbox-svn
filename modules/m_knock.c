@@ -1,5 +1,5 @@
 /*
- *  ircd-ratbox: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-ratbox: A slightly useful ircd.
  *  m_knock.c: Requests to be invited to a channel.
  *
  *  Copyright (C) 1996-2002 Hybrid Development Team

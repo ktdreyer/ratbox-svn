@@ -1,5 +1,5 @@
 /*
- *  ircd-ratbox: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-ratbox: A slightly useful ircd.
  *  modules.h: A header for the modules functions.
  *
  *  Copyright (C) 1990 Jarkko Oikarinen and University of Oulu, Co Center

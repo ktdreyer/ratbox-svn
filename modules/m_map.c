@@ -1,5 +1,5 @@
 /*
- *  ircd-ratbox: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-ratbox: A slightly useful ircd.
  *  m_map.c: Sends an Undernet compatible map to a user.
  *
  *  Copyright (C) 2002 by the past and present ircd coders, and others.

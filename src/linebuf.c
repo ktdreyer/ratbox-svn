@@ -1,5 +1,5 @@
 /*
- *  ircd-ratbox: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-ratbox: A slightly useful ircd.
  *  linebuf.c: Maintains linebuffers.
  *
  *  Copyright (C) 2001-2002 Adrian Chadd <adrian@creative.net.au>

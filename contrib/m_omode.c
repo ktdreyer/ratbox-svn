@@ -1,5 +1,5 @@
 /*
- *  ircd-ratbox: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-ratbox: A slightly useful ircd.
  *  m_omode.c: Sets a user or channel mode without regard to access
  *            This basically sets it as a server..
  *

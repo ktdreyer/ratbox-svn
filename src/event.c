@@ -1,5 +1,5 @@
 /*
- *  ircd-ratbox: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-ratbox: A slightly useful ircd.
  *  event.c: Event functions.
  *
  *  Copyright (C) 1998-2000 Regents of the University of California

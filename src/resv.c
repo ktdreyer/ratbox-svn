@@ -1,5 +1,5 @@
 /*
- *  ircd-ratbox: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-ratbox: A slightly useful ircd.
  *  resv.c: Functions to reserve(jupe) a nick/channel.
  *
  *  Copyright (C) 2001-2002 Hybrid Development Team

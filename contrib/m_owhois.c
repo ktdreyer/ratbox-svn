@@ -1,5 +1,5 @@
 /*
- *  ircd-ratbox: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-ratbox: A slightly useful ircd.
  *  m_owhois.c: Shows who a user is to an operator.  This is rather
  *              evil as it shows *all* the channels the user is in,
  *              regardless of modes. 

@@ -1,5 +1,5 @@
 /*
- *  ircd-ratbox: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-ratbox: A slightly useful ircd.
  *  m_post.c: Exits the user if unregistered, it is a web form.
  *
  *  Copyright (C) 1990 Jarkko Oikarinen and University of Oulu, Co Center

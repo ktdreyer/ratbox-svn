@@ -1,5 +1,5 @@
 /*
- *  ircd-ratbox: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-ratbox: A slightly useful ircd.
  *  crypt.c: Provides MD5 password crypt() functions.
  *
  *  ----------------------------------------------------------------------------
