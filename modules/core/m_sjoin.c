@@ -100,7 +100,7 @@ int     ms_sjoin(struct Client *cptr,
 {
   struct Channel *chptr;
   struct Channel *top_chptr=NULL;	/* XXX vchans */
-  struct Client  *acptr;
+  struct Client  *acptr, *lcptr;
   time_t         newts;
   time_t         oldts;
   time_t         tstosend;
@@ -392,6 +392,37 @@ int     ms_sjoin(struct Client *cptr,
         continue;
       
       people++;
+
+      /* XXX LazyLinks
+       * I think we have to do this, but if we didn't it'd be nice
+       */
+      if (ConfigFileEntry.hub)
+      {
+        for(m = serv_list.head; m; m = m->next)
+        {
+          lcptr = m->data;
+
+          /* Ignore non lazylinks */
+          if (!IsCapable(lcptr,CAP_LL))
+            continue;
+
+          /* Ignore servers we won't tell anyway */
+          if( !(RootChan(chptr)->lazyLinkChannelExists &
+                lcptr->localClient->serverMask) )
+            continue;
+
+          /* Ignore servers that already know acptr */
+          if( !(cptr->lazyLinkClientExists &
+                lcptr->localClient->serverMask) )
+          {
+            /* Tell LazyLink Leaf about cptr,
+             * as the leaf is about to get a SJOIN */
+            sendnick_TS( lcptr, acptr );
+            add_lazylinkclient(lcptr,acptr);
+          }
+        }
+      }
+      
       if (!IsMember(acptr, chptr))
         {
           add_user_to_channel(chptr, acptr, fl);
