@@ -223,7 +223,12 @@ void free_conf(struct ConfItem* aconf)
   MyFree(aconf->name);
   MyFree(aconf->className);
   MyFree(aconf->user);
-  MyFree(aconf->cipher_preference);
+#ifdef HAVE_LIBCRYPTO
+  if (aconf->rsa_public_key)
+    RSA_free(aconf->rsa_public_key);
+  if (aconf->cipher_preference)
+    MyFree(aconf->cipher_preference);
+#endif
   MyFree((char*) aconf);
 }
 
@@ -1371,8 +1376,8 @@ int rehash(struct Client *client_p,struct Client *source_p, int sig)
     sendto_realops_flags(FLAGS_ALL,"Got signal SIGHUP, reloading ircd conf. file");
   }
 
-  close_listeners();
   restart_resolver();
+  /* don't close listeners until we know we can go ahead with the rehash */
   read_conf_files(NO);
 
   if (ServerInfo.description != NULL)
@@ -1385,13 +1390,93 @@ int rehash(struct Client *client_p,struct Client *source_p, int sig)
   return 0;
 }
 
+#define YES     1
+#define NO      0
 static void set_default_conf(void)
 {
   class0 = find_class("default");       /* which one is the default class ? */
+  
+#ifdef HAVE_LIBCRYPTO
+  ServerInfo.rsa_private_key = NULL;
+#endif
+  ServerInfo.no_hack_ops = YES;
+  /* ServerInfo.name is not rehashable */
+  /* ServerInfo.name = ServerInfo.name; */
+  ServerInfo.description = NULL;
+  DupString(ServerInfo.network_name, NETWORK_NAME_DEFAULT);
+  DupString(ServerInfo.network_desc, NETWORK_DESC_DEFAULT);
+  memset(&ServerInfo.ip, 0, sizeof(ServerInfo.ip));
   ServerInfo.specific_ipv4_vhost = 0;
+  memset(&ServerInfo.ip6, 0, sizeof(ServerInfo.ip6));
+  ServerInfo.specific_ipv6_vhost = 0;
+  ServerInfo.max_clients = MAX_CLIENTS;  /* XXX - these don't seem to
+  ServerInfo.max_buffer = MAX_BUFFER;     *       actually do anything! */
+  /* Don't reset hub, as that will break lazylinks */
+  /* ServerInfo.hub = NO; */
+  
+  AdminInfo.name = NULL;
+  AdminInfo.email = NULL;
+  AdminInfo.description = NULL;
+  
+  set_log_level(L_NOTICE);
 
-  /* XXX - free things _here_, not ircd_parser.y */
+  ConfigFileEntry.failed_oper_notice = YES;
+  ConfigFileEntry.anti_nick_flood = NO;
+  ConfigFileEntry.max_nick_time = 20;
+  ConfigFileEntry.max_nick_changes = 5;
+  ConfigFileEntry.max_accept = 20;
+  ConfigFileEntry.anti_spam_exit_message_time = 0;
+  ConfigFileEntry.ts_warn_delta = TS_WARN_DELTA_DEFAULT;
+  ConfigFileEntry.ts_max_delta = TS_MAX_DELTA_DEFAULT;
+  ConfigFileEntry.links_delay = LINKS_DELAY_DEFAULT;
+  ConfigFileEntry.kline_with_reason = YES;
+  ConfigFileEntry.client_exit = YES;
+  ConfigFileEntry.kline_with_connection_closed = NO;
+  ConfigFileEntry.warn_no_nline = YES;
+  ConfigFileEntry.non_redundant_klines = YES;
+  ConfigFileEntry.o_lines_oper_only = NO;
+  ConfigFileEntry.k_lines_oper_only = 1; /* masked */
+  ConfigFileEntry.i_lines_oper_only = 1; /* masked */
+  ConfigFileEntry.pace_wait = 10;
+  ConfigFileEntry.caller_id_wait = 60;
+  ConfigFileEntry.whois_wait = 0;
+  ConfigFileEntry.knock_delay = 30;
+  ConfigFileEntry.short_motd = NO;
+  ConfigFileEntry.no_oper_flood = NO;
+  ConfigFileEntry.fname_userlog[0] = '\0';
+  ConfigFileEntry.fname_foperlog[0] = '\0';
+  ConfigFileEntry.fname_operlog[0] = '\0';
+  ConfigFileEntry.glines = NO;
+  /* don't reset msglocale setting -- we'd overwrite then env string */
+  ConfigFileEntry.gline_time = 12 * 3600;
+  ConfigFileEntry.idletime = 0;
+  ConfigFileEntry.dots_in_ident = 0;
+  ConfigFileEntry.maximum_links = MAXIMUM_LINKS_DEFAULT;
+  ConfigFileEntry.hide_server = 0;
+  ConfigFileEntry.max_targets = MAX_TARGETS_DEFAULT;
+  DupString(ConfigFileEntry.servlink_path, SLPATH);
+#ifdef HAVE_LIBCRYPTO
+  ConfigFileEntry.default_cipher_preference = NULL;
+#endif
+#ifdef HAVE_LIBZ
+  ConfigFileEntry.compression_level = 0;
+#endif
+  ConfigFileEntry.max_chans_per_user = 10;
+  ConfigFileEntry.oper_umodes = FLAGS_LOCOPS | FLAGS_SERVNOTICE |
+    FLAGS_OPERWALL | FLAGS_WALLOP;
+  ConfigFileEntry.oper_only_umodes = FLAGS_BOTS | FLAGS_CCONN |
+    FLAGS_DEBUG | FLAGS_FULL | FLAGS_SKILL | FLAGS_NCHANGE |
+    FLAGS_REJ | FLAGS_SPY | FLAGS_EXTERNAL | FLAGS_OPERWALL |
+    FLAGS_DRONE | FLAGS_LOCOPS | FLAGS_UNAUTH;
+  ConfigFileEntry.vchans_oper_only = NO;
+  ConfigFileEntry.disable_vchans = NO;
+  ConfigFileEntry.persist_expire = 30 * 60;
+  ConfigFileEntry.min_nonwildcard = 4;
+  ConfigFileEntry.default_floodcount = 8;
+  ConfigFileEntry.client_flood = CLIENT_FLOOD_DEFAULT;
 }
+#undef YES
+#undef NO
 
 /*
  * read_conf() 
@@ -1456,6 +1541,7 @@ static void check_conf(void)
 
   if (!ConfigFileEntry.links_delay)
         ConfigFileEntry.links_delay = LINKS_DELAY_DEFAULT;
+
   GlobalSetOptions.hide_server = ConfigFileEntry.hide_server;
 
 #ifdef HAVE_LIBCRYPTO
@@ -1896,7 +1982,9 @@ void read_conf_files(int cold)
     }
 
   if (!cold)
+  {
     clear_out_old_conf();
+  }
 
   read_conf(conf_fbfile_in);
   fbclose(conf_fbfile_in);
@@ -1953,44 +2041,92 @@ static void clear_out_old_conf(void)
   struct ConfItem *tmp2;
   struct Class    *cltmp;
 
-    while ((tmp2 = *tmp))
+  /*
+   * We only need to free anything allocated by yyparse() here.
+   * Reseting structs, etc, is taken care of by set_default_conf().
+   */
+  while ((tmp2 = *tmp))
+  {
+    if (tmp2->clients)
+    {
+      /*
+       ** Configuration entry is still in use by some
+       ** local clients, cannot delete it--mark it so
+       ** that it will be deleted when the last client
+       ** exits...
+       */
+      if (!(tmp2->status & CONF_CLIENT))
       {
-        if (tmp2->clients)
-          {
-            /*
-            ** Configuration entry is still in use by some
-            ** local clients, cannot delete it--mark it so
-            ** that it will be deleted when the last client
-            ** exits...
-            */
-            if (!(tmp2->status & CONF_CLIENT))
-              {
-                *tmp = tmp2->next;
-                tmp2->next = NULL;
-              }
-            else
-              tmp = &tmp2->next;
-            tmp2->status |= CONF_ILLEGAL;
-          }
-        else
-          {
-            *tmp = tmp2->next;
-            free_conf(tmp2);
-          }
+        *tmp = tmp2->next;
+        tmp2->next = NULL;
       }
+      else
+        tmp = &tmp2->next;
+      tmp2->status |= CONF_ILLEGAL;
+    }
+    else
+    {
+      *tmp = tmp2->next;
+      free_conf(tmp2);
+    }
+  }
 
-    /*
-     * We don't delete the class table, rather mark all entries
-     * for deletion. The table is cleaned up by check_class. - avalon
-     */
-    assert(0 != ClassList);
-    for (cltmp = ClassList->next; cltmp; cltmp = cltmp->next)
-      MaxLinks(cltmp) = -1;
+  /*
+   * We don't delete the class table, rather mark all entries
+   * for deletion. The table is cleaned up by check_class. - avalon
+   */
+  assert(0 != ClassList);
+  for (cltmp = ClassList->next; cltmp; cltmp = cltmp->next)
+    MaxLinks(cltmp) = -1;
 
-    clear_out_address_conf();
-    clear_special_conf(&x_conf);
-    clear_special_conf(&u_conf);
-    clear_special_conf(&q_conf);
+  clear_out_address_conf();
+  clear_special_conf(&x_conf);
+  clear_special_conf(&u_conf);
+  clear_special_conf(&q_conf);
+
+  /* clean out module paths */
+  mod_clear_paths();
+
+  /* clean out ServerInfo */
+#ifdef HAVE_LIBCRYPTO
+  if (ServerInfo.rsa_private_key)
+  {
+    RSA_free(ServerInfo.rsa_private_key);
+    ServerInfo.rsa_private_key = NULL;
+  }
+#endif
+  MyFree(ServerInfo.description);
+  ServerInfo.description = NULL;
+  MyFree(ServerInfo.network_name);
+  ServerInfo.network_name = NULL;
+  MyFree(ServerInfo.network_desc);
+  ServerInfo.network_desc = NULL;
+
+  /* clean out AdminInfo */
+  MyFree(AdminInfo.name);
+  AdminInfo.name = NULL;
+  MyFree(AdminInfo.email);
+  AdminInfo.email = NULL;
+  MyFree(AdminInfo.description);
+  AdminInfo.description = NULL;
+
+  /* operator{} and class{} blocks are freed above */
+  /* clean out listeners */
+  close_listeners();
+
+  /* auth{}, quarantine{}, shared{}, connect{}, kill{}, deny{}, exempt{}
+   * and gecos{} blocks are freed above too
+   */
+
+  /* clean out general */
+  MyFree(ConfigFileEntry.servlink_path);
+  ConfigFileEntry.servlink_path = NULL;
+#ifdef HAVE_LIBCRYPTO
+  MyFree(ConfigFileEntry.default_cipher_preference);
+  ConfigFileEntry.default_cipher_preference = NULL;
+#endif
+
+  /* OK, that should be everything... */
 }
 
 /*

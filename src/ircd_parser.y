@@ -253,6 +253,7 @@ int   class_redirport_var;
 %token  PERSISTANT_EXPIRE_TIME
 %token  MAX_TARGETS
 %token  T_MAX_CLIENTS
+%token  T_MAX_BUFFER
 %token  LINKS_DELAY
 %token  VCHANS_OPER_ONLY
 %token  MIN_NONWILDCARD
@@ -432,6 +433,7 @@ modules_module:  MODULE '=' QSTRING ';'
   if (findmodule_byname(m_bn) != -1)
     break;
 
+  /* XXX - should we unload this module on /rehash, if it isn't listed? */
   load_one_module (yylval.string);
 
   MyFree(m_bn);
@@ -461,12 +463,19 @@ serverinfo_item:        serverinfo_name | serverinfo_vhost |
                         serverinfo_network_name | serverinfo_network_desc |
                         serverinfo_max_clients | serverinfo_no_hack_ops |
                         serverinfo_rsa_private_key | serverinfo_vhost6 |
+                        serverinfo_max_buffer |
 			error
 
 serverinfo_rsa_private_key: RSA_PRIVATE_KEY '=' QSTRING ';'
   {
 #ifdef HAVE_LIBCRYPTO
   BIO *file;
+
+  if (ServerInfo.rsa_private_key)
+  {
+    RSA_free(ServerInfo.rsa_private_key);
+    ServerInfo.rsa_private_key = NULL;
+  }
 
   file = BIO_new_file( yylval.string, "r" );
 
@@ -523,6 +532,7 @@ serverinfo_no_hack_ops: NO_HACK_OPS '=' TYES ';'
 
 serverinfo_name:        NAME '=' QSTRING ';' 
   {
+    /* this isn't rehashable */
     if(ServerInfo.name == NULL)
       DupString(ServerInfo.name,yylval.string);
   };
@@ -568,6 +578,11 @@ serverinfo_vhost6:	VHOST6 '=' QSTRING ';'
 serverinfo_max_clients: T_MAX_CLIENTS '=' expr ';'
   {
     ServerInfo.max_clients = $3;
+  };
+
+serverinfo_max_buffer: T_MAX_BUFFER '=' expr ';'
+  {
+    ServerInfo.max_buffer = $3;
   };
 
 serverinfo_hub:         HUB '=' TYES ';' 
@@ -760,7 +775,7 @@ oper_user:      USER '='  QSTRING ';'
     char *new_user;
     char *new_host;
 
-    /* The first user= line doesn't allocate a new struct */
+    /* The first user= line doesn't allocate a new conf */
     if ( yy_acount++ )
     {
       yy_aconf = (yy_aconf->next = make_conf());
@@ -788,6 +803,8 @@ oper_user:      USER '='  QSTRING ';'
 
 oper_password:  PASSWORD '=' QSTRING ';'
   {
+    if (yy_achead->passwd)
+      memset(yy_achead->passwd, 0, strlen(yy_achead->passwd));
     MyFree(yy_achead->passwd);
     DupString(yy_achead->passwd, yylval.string);
   };
@@ -1031,7 +1048,7 @@ auth_user:   USER '=' QSTRING ';'
     char *new_user;
     char *new_host;
 
-    /* The first user= line doesn't allocate a new struct */
+    /* The first user= line doesn't allocate a new conf */
     if ( yy_acount++ )
     {
       yy_aprev = yy_aconf;
@@ -1061,6 +1078,9 @@ auth_user:   USER '=' QSTRING ';'
 
 auth_passwd:  PASSWORD '=' QSTRING ';' 
   {
+    /* be paranoid */
+    if (yy_achead->passwd)
+      memset(yy_achead->passwd, 0, strlen(yy_achead->passwd));
     MyFree(yy_achead->passwd);
     DupString(yy_achead->passwd,yylval.string);
   };
@@ -1163,10 +1183,8 @@ auth_redir_port:    REDIRPORT '=' expr ';'
 
 auth_class:   CLASS '=' QSTRING ';'
   {
-    if (yy_achead->className == NULL)
-      {
-	DupString(yy_achead->className, yylval.string);
-      }
+    MyFree(yy_achead->className);
+    DupString(yy_achead->className, yylval.string);
   };
 
 auth_persistant: PERSISTANT '=' TYES ';'
@@ -1291,6 +1309,10 @@ connect_entry:  CONNECT
     yy_aconf->passwd = NULL;
     /* Finally we can do this -A1kmm. */
     yy_aconf->status = CONF_SERVER;
+
+    /* defaults */
+    yy_aconf->flags |= CONF_FLAGS_COMPRESSED;
+    yy_aconf->port = PORTNUM;
   }
   '{' connect_items '}' ';'
   {
@@ -1403,12 +1425,16 @@ connect_host:   HOST '=' QSTRING ';'
  
 connect_send_password:  SEND_PASSWORD '=' QSTRING ';'
   {
+    if (yy_aconf->passwd)
+      memset(yy_aconf->passwd, 0, strlen(yy_aconf->passwd));
     MyFree(yy_aconf->spasswd);
     DupString(yy_aconf->spasswd, yylval.string);
   };
 
 connect_accept_password: ACCEPT_PASSWORD '=' QSTRING ';'
   {
+    if (yy_aconf->passwd)
+      memset(yy_aconf->passwd, 0, strlen(yy_aconf->passwd));
     MyFree(yy_aconf->passwd);
     DupString(yy_aconf->passwd, yylval.string);
   };
@@ -1419,11 +1445,11 @@ connect_port:   PORT '=' expr ';' { yy_aconf->port = $3; };
 connect_aftype: 	AFTYPE '=' T_IPV4 ';'
   {
     yy_aconf->aftype = AF_INET;
-#ifdef IPV6
   }
 			|
 			AFTYPE '=' T_IPV6 ';'
   {
+#ifdef IPV6
     yy_aconf->aftype = AF_INET6;
 #endif
   };
@@ -1477,6 +1503,12 @@ connect_pubkey:
       break;
     }
 
+    if (yy_aconf->rsa_public_key)
+    {
+      RSA_free(yy_aconf->rsa_public_key);
+      yy_aconf->rsa_public_key = NULL;
+    }
+
     yy_aconf->rsa_public_key = PEM_read_bio_RSA_PUBKEY( mem, NULL, NULL, NULL );
 
     if (!yy_aconf->rsa_public_key)
@@ -1528,26 +1560,23 @@ connect_cryptlink:	CRYPTLINK '=' TYES ';'
     yy_aconf->flags &= ~CONF_FLAGS_CRYPTLINK;
   };
 
-/* note, this is backwards to make the default
- * to activate compression on links which support it.
- */
-connect_compressed:       COMPRESSED '=' TNO ';'
+connect_compressed:       COMPRESSED '=' TYES ';'
   {
 #ifndef HAVE_LIBZ
     sendto_realops_flags(FLAGS_ALL,
       "Ignoring compressed = no; -- no zlib support");
 #else
-    yy_aconf->flags |= CONF_FLAGS_NOCOMPRESSED;
+    yy_aconf->flags |= CONF_FLAGS_COMPRESSED;
 #endif
   }
                         |
-                        COMPRESSED '=' TYES ';'
+                        COMPRESSED '=' TNO ';'
   {
 #ifndef HAVE_LIBZ
     sendto_realops_flags(FLAGS_ALL,
       "Ignoring compressed = yes; -- no zlib support");
 #else
-    yy_aconf->flags &= ~CONF_FLAGS_NOCOMPRESSED;
+    yy_aconf->flags &= ~CONF_FLAGS_COMPRESSED;
 #endif
   };
 
@@ -1732,22 +1761,21 @@ deny_entry:     DENY
       }
     yy_aconf=make_conf();
     yy_aconf->status = CONF_DLINE;
+    /* default reason */
+    DupString(yy_aconf->passwd,"NO REASON");
   }
 '{' deny_items '}' ';'
   {
-   if (yy_aconf->host &&
-      parse_netmask(yy_aconf->host, NULL, NULL) != HM_HOST)
-   {
-    if (yy_aconf->passwd == NULL)
-	{
-	 DupString(yy_aconf->passwd,"NO REASON");
-	}
-    add_conf_by_address(yy_aconf->host, CONF_DLINE, NULL, yy_aconf);
-   } else
-   {
-    free_conf(yy_aconf);
-   }
-   yy_aconf = (struct ConfItem *)NULL;
+    if (yy_aconf->host &&
+        parse_netmask(yy_aconf->host, NULL, NULL) != HM_HOST)
+    {
+      add_conf_by_address(yy_aconf->host, CONF_DLINE, NULL, yy_aconf);
+    }
+    else
+    {
+      free_conf(yy_aconf);
+    }
+    yy_aconf = (struct ConfItem *)NULL;
   }; 
 
 deny_items:     deny_items deny_item |
@@ -1758,6 +1786,7 @@ deny_item:      deny_ip | deny_reason | error
 
 deny_ip:        IP '=' QSTRING ';'
   {
+    MyFree(yy_aconf->host);
     DupString(yy_aconf->host, yylval.string);
   };
 
@@ -1802,6 +1831,7 @@ exempt_item:      exempt_ip | error
 
 exempt_ip:        IP '=' QSTRING ';'
   {
+    MyFree(yy_aconf->host);
     DupString(yy_aconf->host, yylval.string);
   };
 
@@ -1819,21 +1849,15 @@ gecos_entry:     GECOS
       }
     yy_aconf=make_conf();
     yy_aconf->status = CONF_XLINE;
+    /* default reason */
+    DupString(yy_aconf->passwd,"Something about your name");
   }
  '{' gecos_items '}' ';'
   {
     if(yy_aconf->host)
-      {
-	if(yy_aconf->passwd == NULL)
-	  {
-	    DupString(yy_aconf->passwd,"Something about your name");
-	  }
-        conf_add_x_conf(yy_aconf);
-      }
+      conf_add_x_conf(yy_aconf);
     else
-      {
-        free_conf(yy_aconf);
-      }
+      free_conf(yy_aconf);
     yy_aconf = (struct ConfItem *)NULL;
   }; 
 
@@ -1845,6 +1869,7 @@ gecos_item:      gecos_name | gecos_reason | gecos_action | error
 
 gecos_name:    NAME '=' QSTRING ';' 
   {
+    MyFree(yy_aconf->host);
     DupString(yy_aconf->host, yylval.string);
   };
 
@@ -1854,14 +1879,14 @@ gecos_reason:    REASON '=' QSTRING ';'
     DupString(yy_aconf->passwd, yylval.string);
   };
 
-gecos_action:    ACTION '=' TREJECT ';'
-  {
-    yy_aconf->port = 1;
-  }
-                 |
-                 ACTION '=' WARN ';'
+gecos_action:    ACTION '=' WARN ';'
   {
     yy_aconf->port = 0;
+  }
+                 |
+                 ACTION '=' TREJECT ';'
+  {
+    yy_aconf->port = 1;
   }
                  |
                  ACTION '=' SILENT ';'
@@ -2194,8 +2219,7 @@ general_max_targets: MAX_TARGETS '=' expr ';'
 
 general_servlink_path: SERVLINK_PATH '=' QSTRING ';'
   {
-    if (ConfigFileEntry.servlink_path)
-      MyFree(ConfigFileEntry.servlink_path);
+    MyFree(ConfigFileEntry.servlink_path);
     DupString(ConfigFileEntry.servlink_path, yylval.string);
   } ;
 
@@ -2243,8 +2267,7 @@ general_default_cipher_preference: DEFAULT_CIPHER_PREFERENCE '=' QSTRING ';'
     }
 #else
     sendto_realops_flags(FLAGS_ALL,
-      "Ignoring 'default_cipher_preference' -- no OpenSSL support",
-       yy_aconf->name);
+      "Ignoring 'default_cipher_preference' -- no OpenSSL support");
 #endif
   } ;
 

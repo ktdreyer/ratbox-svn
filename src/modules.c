@@ -143,6 +143,22 @@ mod_add_path(char *path)
   dlinkAdd(pathst, node, &mod_paths);
 }
 
+void
+mod_clear_paths(void)
+{
+  struct module_path *pathst;
+  dlink_node *node, *next;
+
+  next = mod_paths.head->next;
+  while(node = next)
+  {
+    next = node->next;
+    pathst = (struct module_path *)node->data;
+    dlinkDelete(node, &mod_paths);
+    MyFree(pathst);
+    MyFree(node);
+  }
+}
 
 char *
 irc_basename(char *path)

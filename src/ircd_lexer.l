@@ -165,6 +165,7 @@ logging         { return LOGGING; }
 logpath         { return T_LOGPATH; }
 masked		{ return TMASKED; }
 max_clients     { return T_MAX_CLIENTS; }
+max_buffer	{ return T_MAX_BUFFER; }
 client_flood	{ return T_CLIENT_FLOOD; }
 max_number	{ return MAX_NUMBER; }
 maximum_links   { return MAXIMUM_LINKS; }

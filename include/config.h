@@ -52,11 +52,13 @@
  */
 #define HARD_FDLIMIT_    256
 
+/* XXX - MAX_BUFFER is mostly ignored. */
 /*
  * Maximum number of connections to allow.
  *
  * MAX_CLIENTS is the maximum number of clients to allow.
- * MAX_BUFFER  is the number of fds to reserve for XXX - wtf is this?
+ * MAX_BUFFER  is the number of fds to reserve, e.g. for clients
+ *             exempt from limit.
  *
  * 10 file descriptors are reserved for logging, DNS lookups, etc.,
  * so MAX_CLIENTS + MAX_BUFFER + 10 must not exceed HARD_FDLIMIT.
@@ -153,12 +155,6 @@
  * that the 'new' access lets them.
  */
 #define CMDLINE_CONFIG
-
-/* INIT_LOG_LEVEL - what level of information is logged to ircd.log
- * options are:
- *   L_CRIT, L_ERROR, L_WARN, L_NOTICE, L_TRACE, L_INFO, L_DEBUG
- */
-#define INIT_LOG_LEVEL L_NOTICE
 
 /* USE_LOGFILE - log errors and such to LPATH
  * If you wish to have the server send 'vital' messages about server

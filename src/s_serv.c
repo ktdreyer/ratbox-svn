@@ -562,8 +562,8 @@ int check_server(const char *name, struct Client* client_p, int cryptlink)
 
   if( !(server_aconf->flags & CONF_FLAGS_LAZY_LINK) )
     ClearCap(client_p,CAP_LL);
-#ifdef HAVE_LIBZ /* otherwise, clear it unconditionally */
-  if( server_aconf->flags & CONF_FLAGS_NOCOMPRESSED )
+#ifdef HAVE_LIBZ /* otherwise, cleait unconditionally */
+  if( !(server_aconf->flags & CONF_FLAGS_COMPRESSED) )
 #endif
     ClearCap(client_p,CAP_ZIP);
   if( !(server_aconf->flags & CONF_FLAGS_CRYPTLINK) )
@@ -1018,7 +1018,7 @@ int server_estab(struct Client *client_p)
       send_capabilities(client_p, aconf, CAP_MASK
              | ((aconf->flags & CONF_FLAGS_LAZY_LINK) ? CAP_LL : 0)
              | (ServerInfo.hub ? CAP_HUB : 0)
-             | ((aconf->flags & CONF_FLAGS_NOCOMPRESSED) ? 0:CAP_ZIP_SUPPORTED),
+             | ((aconf->flags & CONF_FLAGS_COMPRESSED) ? CAP_ZIP_SUPPORTED : 0),
              0);
 
       sendto_one(client_p, "SERVER %s 1 :%s",
@@ -2131,7 +2131,7 @@ serv_connect_callback(int fd, int status, void *data)
 
     send_capabilities(client_p, aconf, CAP_MASK
              | ((aconf->flags & CONF_FLAGS_LAZY_LINK) ? CAP_LL : 0)
-             | ((aconf->flags & CONF_FLAGS_NOCOMPRESSED) ? 0:CAP_ZIP_SUPPORTED)
+             | ((aconf->flags & CONF_FLAGS_COMPRESSED) ? CAP_ZIP_SUPPORTED : 0)
              | (ServerInfo.hub ? CAP_HUB : 0),
              0);
 
@@ -2219,7 +2219,7 @@ void cryptlink_init(struct Client *client_p,
 
   send_capabilities(client_p, aconf, CAP_MASK
          | ((aconf->flags & CONF_FLAGS_LAZY_LINK) ? CAP_LL : 0)
-         | ((aconf->flags & CONF_FLAGS_NOCOMPRESSED) ? 0:CAP_ZIP_SUPPORTED)
+         | ((aconf->flags & CONF_FLAGS_COMPRESSED) ? CAP_ZIP_SUPPORTED : 0)
          | (ServerInfo.hub ? CAP_HUB : 0),
          CAP_ENC_MASK);
 
