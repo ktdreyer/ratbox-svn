@@ -80,7 +80,7 @@ static void     read_conf(FBFILE*);
 static void     read_kd_lines(FBFILE*);
 static void     clear_out_old_conf(void);
 static void     flush_deleted_I_P(void);
-static void     expire_tklines(void);
+static void     expire_tklines(dlink_list *);
 
 FBFILE* conf_fbfile_in;
 char    conf_line_in[256];
@@ -96,9 +96,6 @@ struct ConfItem *find_special_conf(char *, int );
 static void add_q_line(struct ConfItem *);
 static void clear_q_lines(void);
 static void clear_special_conf(struct ConfItem **);
-
-struct ConfItem *temporary_klines = NULL;
-struct ConfItem *temporary_ip_klines = NULL;
 
 /* usually, with hash tables, you use a prime number...
  * but in this case I am dealing with ip addresses, not ascii strings.
@@ -1890,39 +1887,26 @@ struct ConfItem *find_kill(struct Client* cptr)
 
 struct ConfItem* find_tkline(const char* host, const char* user, unsigned long ip)
 {
-  struct ConfItem *kill_list_ptr;        /* used for the link list only */
+  dlink_node *kill_node;
+  struct ConfItem *kill_ptr;
 
-  if (temporary_klines)
+  for (kill_node = temporary_klines.head; kill_node; kill_node = kill_node->next)
     {
-      kill_list_ptr = temporary_klines;
-
-      while(kill_list_ptr)
+      kill_ptr = kill_node->data;
+      if ((kill_ptr->user && (!user || match(kill_ptr->user, user)))
+          && (kill_ptr->host && (!host || match(kill_ptr->host, host))))
         {
-          if ((kill_list_ptr->user
-               && (!user || match(kill_list_ptr->user, user)))
-             && (kill_list_ptr->host
-                 && (!host || match(kill_list_ptr->host, host))))
-            {
-              return(kill_list_ptr);
-            }
-          kill_list_ptr = kill_list_ptr->next;
+          return(kill_ptr);
         }
     }
 
-  if (temporary_ip_klines)
+  for (kill_node = temporary_ip_klines.head; kill_node; kill_node = kill_node->next)
     {
-      kill_list_ptr = temporary_ip_klines;
-
-      while(kill_list_ptr)
+      kill_ptr = kill_node->data;
+      if ((kill_ptr->user && (!user || match(kill_ptr->user, user)))
+           && (kill_ptr->ip && ((ip & kill_ptr->ip_mask) == kill_ptr->ip)))
         {
-          if ((kill_list_ptr->user
-               && (!user || match(kill_list_ptr->user, user)))
-             && (kill_list_ptr->ip
-                 && ((ip & kill_list_ptr->ip_mask) == kill_list_ptr->ip)))
-            {
-              return(kill_list_ptr);
-            }
-          kill_list_ptr = kill_list_ptr->next;
+          return(kill_ptr);
         }
     }
 
@@ -1970,16 +1954,14 @@ struct ConfItem *find_is_klined(const char* host, const char* name,
 
 void add_temp_kline(struct ConfItem *aconf)
 {
+  dlink_node *kill_node;
+
+  kill_node = make_dlink_node();
+
   if (aconf->ip == 0)
-    {
-      aconf->next = temporary_klines;
-      temporary_klines = aconf;
-    } 
+    dlinkAdd(aconf, kill_node, &temporary_klines);
   else 
-    {
-      aconf->next = temporary_ip_klines;
-      temporary_ip_klines = aconf;
-    }
+    dlinkAdd(aconf, kill_node, &temporary_ip_klines);
 }
 
 /* report_temp_klines
@@ -1991,31 +1973,30 @@ void add_temp_kline(struct ConfItem *aconf)
  */
 void report_temp_klines(struct Client *sptr)
 {
-  if (temporary_klines)
-    show_temp_klines(sptr, temporary_klines);
-  if (temporary_ip_klines)
-    show_temp_klines(sptr, temporary_ip_klines);
+  show_temp_klines(sptr, &temporary_klines);
+  show_temp_klines(sptr, &temporary_ip_klines);
 }
 
 /* show_temp_klines
  *
  * inputs         - struct Client pointer, client to report to
- *                - ConfItem pointer, the tkline list to show
+ *                - dlink_list pointer, the tkline list to show
  * outputs        - NONE
  * side effects   - NONE
  */
 void
-show_temp_klines(struct Client *sptr, struct ConfItem *tklist)
+show_temp_klines(struct Client *sptr, dlink_list *tklist)
 {
+  dlink_node *kill_node;
   struct ConfItem *kill_list_ptr;
   char *host;
   char *user;
   char *reason;
 
-  kill_list_ptr = tklist;
-
-  while(kill_list_ptr)
+  for (kill_node = tklist->head; kill_node; kill_node = kill_node = kill_node->next)
     {
+      kill_list_ptr = kill_node->data;
+
       if (kill_list_ptr->host)
         host = kill_list_ptr->host;
       else
@@ -2033,8 +2014,6 @@ show_temp_klines(struct Client *sptr, struct ConfItem *tklist)
 
       sendto_one(sptr, form_str(RPL_STATSKLINE), me.name,
                  sptr->name, 'k', host, user, reason);
-
-      kill_list_ptr = kill_list_ptr->next;
     }
 }
 
@@ -2049,7 +2028,8 @@ show_temp_klines(struct Client *sptr, struct ConfItem *tklist)
 void
 cleanup_tklines(void *notused)
 {
-  expire_tklines();
+  expire_tklines(&temporary_klines);
+  expire_tklines(&temporary_ip_klines);
 
   eventAdd("cleanup_tklines", cleanup_tklines, NULL,
            CLEANUP_TKLINES_TIME, 0);
@@ -2058,51 +2038,26 @@ cleanup_tklines(void *notused)
 /*
  * expire_tklines
  *
- * inputs       - NONE 
+ * inputs       - tkline list pointer
  * output       - NONE
  * side effects - expire tklines
  */
 static void
-expire_tklines()
+expire_tklines(dlink_list *tklist)
 {
+  dlink_node *kill_node;
   struct ConfItem *kill_ptr;
-  struct ConfItem *last_ptr = NULL;
-  struct ConfItem *next_ptr;
 
-  for (kill_ptr = temporary_klines; kill_ptr; kill_ptr = next_ptr)
+  for (kill_node = tklist->head; kill_node; kill_node = kill_node->next)
     {
-      next_ptr = kill_ptr->next;
+      kill_ptr = kill_node->data;
 
       if (kill_ptr->hold <= CurrentTime)
         {
-          if (last_ptr != NULL)
-            last_ptr->next = next_ptr;
-          else
-            temporary_klines->next = next_ptr;
- 
           free_conf(kill_ptr);
+          dlinkDelete(kill_node, tklist);
+          free_dlink_node(kill_node);
         }
-      else
-        last_ptr = kill_ptr;
-    }
-
-  last_ptr = NULL;
-
-  for (kill_ptr = temporary_ip_klines; kill_ptr; kill_ptr = next_ptr)
-    {
-      next_ptr = kill_ptr->next;
-
-      if (kill_ptr->hold <= CurrentTime)
-        {
-          if (last_ptr != NULL)
-            last_ptr->next = next_ptr;
-          else
-            temporary_ip_klines->next = next_ptr;
-
-          free_conf(kill_ptr);
-        }
-      else
-        last_ptr = kill_ptr;
     }
 }
 

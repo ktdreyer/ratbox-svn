@@ -390,53 +390,34 @@ static int flush_write(struct Client *sptr, FBFILE* out, char *buf, char *temppa
 * un-kline a temporary k-line. 
 *
 */
-static int remove_tkline_match(char *host,char *user)
+static int remove_tkline_match(char *host, char *user)
 {
+  dlink_node *kill_node;
   struct ConfItem *kill_list_ptr;
-  struct ConfItem *last_kill_ptr=(struct ConfItem *)NULL;
 
-  if(!temporary_klines)
-    return NO;
-
-  kill_list_ptr = temporary_klines;
-
-  while(kill_list_ptr)
+  for (kill_node = temporary_klines.head; kill_node; kill_node = kill_node->next)
     {
+      kill_list_ptr = kill_node->data;
       if( !irccmp(kill_list_ptr->host,host)
           && !irccmp(kill_list_ptr->user,user)) /* match */
         {
-          if(last_kill_ptr)
-            last_kill_ptr->next = kill_list_ptr->next;
-          else
-            temporary_klines = kill_list_ptr->next;
           free_conf(kill_list_ptr);
+          dlinkDelete(kill_node, &temporary_klines);
+          free_dlink_node(kill_node);
           return YES;
-        }
-      else
-        {
-          last_kill_ptr = kill_list_ptr;
-          kill_list_ptr = kill_list_ptr->next;
         }
     }
 
-  kill_list_ptr = temporary_ip_klines;
-
-  while(kill_list_ptr)
+  for (kill_node = temporary_ip_klines.head; kill_node; kill_node = kill_node->next)
     {
+      kill_list_ptr = kill_node->data;
       if( !irccmp(kill_list_ptr->host,host)
           && !irccmp(kill_list_ptr->user,user)) /* match */
         {
-          if(last_kill_ptr)
-            last_kill_ptr->next = kill_list_ptr->next;
-          else
-            temporary_ip_klines = kill_list_ptr->next;
           free_conf(kill_list_ptr);
+          dlinkDelete(kill_node, &temporary_ip_klines);
+          free_dlink_node(kill_node);
           return YES;
-        }
-      else
-        {
-          last_kill_ptr = kill_list_ptr;
-          kill_list_ptr = kill_list_ptr->next;
         }
     }
 

@@ -235,9 +235,10 @@ extern struct QlineItem *q_conf;
 
 extern struct ConfItem* ConfigItemList;        /* GLOBAL - conf list head */
 extern int              specific_virtual_host; /* GLOBAL - used in s_bsd.c */
-extern struct ConfItem *temporary_klines;
-extern struct ConfItem *temporary_ip_klines;
 extern ConfigFileEntryType ConfigFileEntry;    /* GLOBAL - defined in ircd.c */
+
+dlink_list temporary_klines;
+dlink_list temporary_ip_klines;
 
 extern void clear_ip_hash_table(void);
 extern void iphash_stats(struct Client *,struct Client *,int,char **,FBFILE*);
@@ -306,7 +307,7 @@ extern void WriteKlineOrDline( KlineType, struct Client *,
 			       const char *current_date );
 extern  void    add_temp_kline(struct ConfItem *);
 extern  void    report_temp_klines(struct Client *);
-extern  void    show_temp_klines(struct Client *, struct ConfItem *);
+extern  void    show_temp_klines(struct Client *, dlink_list *);
 extern  void    cleanup_tklines(void *notused);
 
 extern  const   char *get_conf_name(KlineType);
