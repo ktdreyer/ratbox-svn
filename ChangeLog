@@ -1,3 +1,16 @@
+leeh        2003/09/02 20:39:28 EDT	(20030903_1)
+
+  Modified files:
+    src                  parse.c 
+  Log:
+  - added an EmptyString() for parv[min_para-1]
+  - choose the handler on source_p, rather than client_p
+  
+  Revision  Changes    Path
+  7.170     +3 -3      ircd-ratbox/src/parse.c
+
+
+
 leeh        2003/09/02 20:32:41 EDT	(20030903_0)
 
   Modified files:
