@@ -1,3 +1,12 @@
+*** 20010716_7 by leeh
+- /connect new.server 0 hub.server
+
+  make hub.server connect to new.server on the port it has in its config,
+  providing it has one..
+
+  (requested by jv, and I quite like it :) )
+
+
 *** 20010716_6 by leeh
 - change two irccmp() -> !match() to take account of masking
   (reported by jv)
