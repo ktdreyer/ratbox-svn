@@ -1,3 +1,16 @@
+androsyn    2004/04/14 21:45:33 EDT	(20040415_0)
+
+  Modified files:
+    src                  select.c 
+  Log:
+  I guess nobody really does care about select() support seeing that it
+  probably hasn't compiled in oh, i don't know 6 months or so
+  
+  Revision  Changes    Path
+  7.41      +0 -2      ircd-ratbox/src/select.c
+
+
+
 androsyn    2004/04/14 14:24:24 EDT	(20040414_5)
 
   Modified files:
