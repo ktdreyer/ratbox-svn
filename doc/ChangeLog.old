@@ -1,3 +1,7 @@
+*** 20010202_16 by a1kmm
+- We now call umask before writing the key-files from genkey so they aren't world readable.
+
+
 *** 20010202_15 by a1kmm
 - More secure encryption of private keys that genkey/respond uses.
 
