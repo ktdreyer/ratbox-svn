@@ -151,8 +151,6 @@ extern void try_connections(void *unused);
 extern void start_collect_zipstats(void);
 extern void collect_zipstats(void *unused);
 
-extern int check_server(const char *name, struct Client *server);
-
 extern int serv_connect(struct server_conf *, struct Client *);
 
 #endif /* INCLUDED_s_serv_h */
