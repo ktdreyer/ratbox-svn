@@ -1,3 +1,7 @@
+*** 20011006_4 by androsyn
+Added a change to allow strtok_r() to work without warnings..
+
+
 *** 20011006_3 by androsyn
 Added change to the make depend rule so that IRCD_PREFIX is defined.
 
