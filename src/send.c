@@ -904,6 +904,13 @@ sendto_match_cap_servs(struct Channel *chptr, struct Client *from, int cap,
       
       if(!IsCapable(cptr, cap))
         continue;
+
+      if (ConfigFileEntry.hub && IsCapable(cptr,CAP_LL))
+        {
+          if( !(chptr->lazyLinkChannelExists &
+                cptr->localClient->serverMask) )
+            continue;
+        }
       
       send_message (cptr, (char *)sendbuf, len);
     }

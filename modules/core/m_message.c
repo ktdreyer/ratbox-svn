@@ -515,8 +515,14 @@ void msg_channel_flags( int p_or_n, char *command,
 {
   struct Channel *vchan;
   char *chname=NULL;
+  int type;
 
   chname = chptr->chname;
+
+  if (flags & MODE_VOICE)
+    type = ONLY_CHANOPS_VOICED;
+  else
+    type = ONLY_CHANOPS;
 
   if (HasVchans(chptr) && (vchan = map_vchan(chptr,sptr)))
     {
@@ -529,13 +535,14 @@ void msg_channel_flags( int p_or_n, char *command,
 	sptr->user->last = CurrentTime;
     }
 
-  sendto_channel_local(ONLY_CHANOPS_VOICED,
+  sendto_channel_local(type,
 		       chptr,
-		       ":%s!%s@%s %s @%s :%s",
+		       ":%s!%s@%s %s %c%s :%s",
 		       sptr->name,
 		       sptr->username,
 		       sptr->host,
 		       command,
+                       ((type == ONLY_CHANOPS) ? '@' : '+'),
 		       chname,
 		       text);
 
@@ -543,7 +550,7 @@ void msg_channel_flags( int p_or_n, char *command,
 			 ":%s %s %c%s :%s",
 			 sptr->name,
 			 command,
-			 '@',
+			 ((type == ONLY_CHANOPS) ? '@' : '+'),
 			 chname,
 			 text);
 }
