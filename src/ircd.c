@@ -130,7 +130,7 @@ struct Client me;                     /* That's me */
 
 struct Client* GlobalClientList = 0; /* Pointer to beginning of Client list */
 /* client pointer lists -Dianora */ 
-struct Client *local_cptr_list = NULL;
+struct Client *LocalClientList = NULL;
 struct Client *oper_cptr_list  = NULL;
 struct Client *serv_cptr_list  = NULL;
 

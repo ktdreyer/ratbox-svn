@@ -1428,9 +1428,9 @@ const char* comment        /* Reason for the exit */
                   sptr->next_local_client;
               else
                 {
-                  if(local_cptr_list == sptr)
+                  if(LocalClientList == sptr)
                     {
-                      local_cptr_list = sptr->next_local_client;
+                      LocalClientList = sptr->next_local_client;
                     }
                 }
 
