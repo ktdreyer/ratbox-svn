@@ -1317,6 +1317,7 @@ void set_autoconn(struct Client *sptr,char *parv0,char *name,int newval)
 void show_servers(struct Client *cptr)
 {
   struct Client *cptr2;
+  dlink_node *ptr;
   int j=0;                /* used to count servers */
 
   for(ptr = serv_list.head; ptr; ptr = ptr->next)
