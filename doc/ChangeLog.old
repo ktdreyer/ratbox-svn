@@ -1,3 +1,10 @@
+*** 20001218_3 by db
+- still more cleanups
+- removed superflous sjoin code, it was already done by send_channel_modes
+  duh.
+
+
+
 *** 20001218_2 by bill
 
 - forgot to remove a conflict
