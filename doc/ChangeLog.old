@@ -1,3 +1,36 @@
+*** 20001023_3 by adrian
+
+
+
+
+
+first split of the network code into per-commloop modules. The autoconf
+magic came from the squid commloops work by Adrian Chadd (me) and
+Benno Rice (benno@holocaine.net).
+
+the poll and select specific stuff was moved into s_bsd_poll.c and
+s_bsd_select.c . The chosen file is done through some autoconf magic
+and variable substitution in src/Makefile.in. I haven't changed any
+code itself, simply un-staticized things and shifted things into
+seperate files. This is done to preserve some form of CVS sanity.
+
+A noteable here is that I"ve moved the FD_SETSIZE detection for
+select() into s_bsd_select.c rather than ircd.c, since this is a more
+logical place to check (and die) if FD_SETSIZE < MAXCONNECTIONS.
+
+The autoconf configuration is done using the following options to
+configure:
+
+--enable-poll / --disable-poll : Enable or disable the use of poll()
+--enable-select / --disable-select : ENable or disable the use of select()
+
+Note that the current autoconf magic checks if poll() exists - since
+we aren't using USE_POLL now, we define ac_cv_func_poll/select/whatever
+and this is used further into the autoconf magic to decide the
+substitutions to do.
+
+
+
 *** 20001023_2 by adrian
 
 
