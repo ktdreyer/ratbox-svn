@@ -54,7 +54,8 @@
 
 
 extern ConfigFileEntryType ConfigFileEntry; /* defined in ircd.c */
-extern int yylineno;
+extern int lineno;
+extern char linebuf[];
 
 #ifndef INADDR_NONE
 #define INADDR_NONE ((unsigned int) 0xffffffff)
@@ -82,7 +83,6 @@ FBFILE* conf_fbfile_in;
 char    conf_line_in[256];
 struct ConfItem* yy_aconf;
 extern char yytext[];
-int yylineno;
 
 /* address of class 0 conf */
 static struct   Class* class0;
@@ -1841,7 +1841,7 @@ static void initconf(FBFILE* file)
 static void initnewconf(FBFILE* file)
 {
   yy_aconf = NULL;
-  yylineno = 0;
+  lineno = 1;
   yyparse(); /* wheee! */
   fbclose(file);
 }
@@ -3553,7 +3553,8 @@ void conf_add_fields(struct ConfItem *aconf,
 
 void yyerror(char *msg)
 {
-  sendto_realops("Parser error %s %s line %d", msg, yytext, yylineno);
+  sendto_realops("%d: %s at %s in this line %s",
+		 lineno, msg, yytext, linebuf);
 }
 
 int conf_fbgets(char *buf,int max_size, FBFILE *fb)
@@ -3569,6 +3570,8 @@ int conf_fbgets(char *buf,int max_size, FBFILE *fb)
 
 int conf_yy_fatal_error(char *msg)
 {
+#if 0
   sendto_realops("lexer barfed. lets leave it at that for now");
+#endif
   return 0;
 }

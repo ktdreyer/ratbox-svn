@@ -104,7 +104,7 @@ int     m_gline(struct Client *cptr,
   register char tmpch;
   register int nonwild;
 #ifdef GLINES
-  char buffer[512];
+  char buffer[IRCD_BUFSIZE];
   const char *current_date;
   char tempuser[USERLEN + 2];
   char temphost[HOSTLEN + 1];

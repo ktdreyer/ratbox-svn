@@ -54,8 +54,8 @@ int   class_sendq_var;
 %token  INCLUDE
 %token  NUMBER
 %token  QSTRING
-%token  YES
-%token  NO
+%token  TYES
+%token  TNO
 %token  SERVERINFO
 %token  DESCRIPTION
 %token  ADMIN
@@ -63,6 +63,7 @@ int   class_sendq_var;
 %token  AUTH
 %token  KLINE_EXEMPT
 %token  ALLOW_BOTS
+%token  AUTOCONN
 %token  NO_TILDE
 %token  HAVE_IDENT
 %token  OPERATOR
@@ -109,20 +110,22 @@ int   class_sendq_var;
 %token  VHOST
 
 %%
-conf:
+conf:   
         | conf conf_item
         ;
 
-conf_item:      admin_entry  |
-                oper_entry   |
-                class_entry  |
-                listen_entry |
-                auth_entry |
-                serverinfo_entry |
-                quarantine_entry |
-                connect_entry |
-                kill_entry |
-                deny_entry 
+conf_item:        admin_entry
+                | oper_entry
+                | class_entry 
+                | listen_entry
+                | auth_entry
+                | serverinfo_entry
+                | quarantine_entry
+                | connect_entry
+                | kill_entry
+                | deny_entry
+                | error ';'
+                | error '}'
         ;
 
 /***************************************************************************
@@ -173,12 +176,12 @@ serverinfo_vhost:       VHOST '=' IP_TYPE ';'
     yy_aconf->ip = yylval.ip_entry.ip;
   };
 
-serverinfo_hub:         HUB '=' YES ';' 
+serverinfo_hub:         HUB '=' TYES ';' 
   {
     ConfigFileEntry.hub = 1;
   }
                         |
-                        HUB '=' NO ';'
+                        HUB '=' TNO ';'
   {
     ConfigFileEntry.hub = 0;
   } ;
@@ -285,46 +288,46 @@ oper_class:     CLASS '=' QSTRING ';'
     DupString(yy_aconf->className,yylval.string);
   };
 
-oper_global:    GLOBAL '=' YES ';' {yy_aconf->status = CONF_OPERATOR;} |
-                GLOBAL '=' NO ';' {yy_aconf->status = CONF_LOCOP;} ;
+oper_global:    GLOBAL '=' TYES ';' {yy_aconf->status = CONF_OPERATOR;} |
+                GLOBAL '=' TNO ';' {yy_aconf->status = CONF_LOCOP;} ;
 
-oper_global_kill: GLOBAL_KILL '=' YES ';'
+oper_global_kill: GLOBAL_KILL '=' TYES ';'
   {
     yy_aconf->port |= CONF_OPER_GLOBAL_KILL;
   }
                   |
-                  GLOBAL_KILL '=' NO ';'
+                  GLOBAL_KILL '=' TNO ';'
   {
     yy_aconf->port &= ~CONF_OPER_GLOBAL_KILL;
   };
 
-oper_remote: REMOTE '=' YES ';' { yy_aconf->port |= CONF_OPER_REMOTE;}
+oper_remote: REMOTE '=' TYES ';' { yy_aconf->port |= CONF_OPER_REMOTE;}
              |
-             REMOTE '=' NO ';' { yy_aconf->port &= ~CONF_OPER_REMOTE; } ;
+             REMOTE '=' TNO ';' { yy_aconf->port &= ~CONF_OPER_REMOTE; } ;
 
-oper_kline: KLINE '=' YES ';' { yy_aconf->port |= CONF_OPER_K;}
+oper_kline: KLINE '=' TYES ';' { yy_aconf->port |= CONF_OPER_K;}
             |
-            KLINE '=' NO ';' { yy_aconf->port &= ~CONF_OPER_K; } ;
+            KLINE '=' TNO ';' { yy_aconf->port &= ~CONF_OPER_K; } ;
 
-oper_unkline: UNKLINE '=' YES ';' { yy_aconf->port |= CONF_OPER_UNKLINE;}
+oper_unkline: UNKLINE '=' TYES ';' { yy_aconf->port |= CONF_OPER_UNKLINE;}
               |
-              UNKLINE '=' NO ';' { yy_aconf->port &= ~CONF_OPER_UNKLINE; } ;
+              UNKLINE '=' TNO ';' { yy_aconf->port &= ~CONF_OPER_UNKLINE; } ;
 
-oper_gline: GLINE '=' YES ';' { yy_aconf->port |= CONF_OPER_GLINE;}
+oper_gline: GLINE '=' TYES ';' { yy_aconf->port |= CONF_OPER_GLINE;}
             |
-            GLINE '=' NO ';' { yy_aconf->port &= ~CONF_OPER_GLINE; };
+            GLINE '=' TNO ';' { yy_aconf->port &= ~CONF_OPER_GLINE; };
 
-oper_nick_changes: NICK_CHANGES '=' YES ';' { yy_aconf->port |= CONF_OPER_N;}
+oper_nick_changes: NICK_CHANGES '=' TYES ';' { yy_aconf->port |= CONF_OPER_N;}
                    |
-                   NICK_CHANGES '=' NO ; { yy_aconf->port &= ~CONF_OPER_N;} ;
+                   NICK_CHANGES '=' TNO ; { yy_aconf->port &= ~CONF_OPER_N;} ;
 
-oper_die: DIE '=' YES ';' { yy_aconf->port |= CONF_OPER_DIE; }
+oper_die: DIE '=' TYES ';' { yy_aconf->port |= CONF_OPER_DIE; }
           |
-          DIE '=' NO ';' { yy_aconf->port &= ~CONF_OPER_DIE; } ;
+          DIE '=' TNO ';' { yy_aconf->port &= ~CONF_OPER_DIE; } ;
 
-oper_rehash: REHASH '=' YES ';' { yy_aconf->port |= CONF_OPER_REHASH;}
+oper_rehash: REHASH '=' TYES ';' { yy_aconf->port |= CONF_OPER_REHASH;}
              |
-             REHASH '=' NO ';' { yy_aconf->port &= ~CONF_OPER_REHASH; } ;
+             REHASH '=' TNO ';' { yy_aconf->port &= ~CONF_OPER_REHASH; } ;
 
 /***************************************************************************
  *  section class
@@ -505,22 +508,22 @@ auth_spoof:   SPOOF '=' QSTRING ';'
     yy_aconf->flags |= CONF_FLAGS_SPOOF_IP;
   };
 
-auth_kline_exempt:    KLINE_EXEMPT '=' YES ';'
+auth_kline_exempt:    KLINE_EXEMPT '=' TYES ';'
   {
     yy_aconf->flags |= CONF_FLAGS_E_LINED;
   };
                       |
-                      KLINE_EXEMPT '=' NO ';'
+                      KLINE_EXEMPT '=' TNO ';'
   {
     yy_aconf->flags &= ~CONF_FLAGS_E_LINED;
   };
 
-auth_allow_bots:      ALLOW_BOTS '=' YES ';'
+auth_allow_bots:      ALLOW_BOTS '=' TYES ';'
   {
     yy_aconf->flags |= CONF_FLAGS_B_LINED;
   };
                       |
-                      ALLOW_BOTS '=' NO ';'
+                      ALLOW_BOTS '=' TNO ';'
   {
     yy_aconf->flags &= ~CONF_FLAGS_B_LINED;
   };
@@ -652,21 +655,21 @@ connect_items:  connect_items connect_item |
 connect_item:   connect_name | connect_host | connect_send_password |
                 connect_accept_password | connect_port |
                 connect_compressed | connect_lazylink |
-                connect_hub_mask | connect_class
+                connect_hub_mask | connect_class | connect_auto
 
 connect_name:   NAME '=' QSTRING ';'
   {
-    DupString(yy_cconf->host,yylval.string);
-    DupString(yy_nconf->host,yylval.string);
+    DupString(yy_cconf->user,yylval.string);
+    DupString(yy_nconf->user,yylval.string); 
     DupString(yy_hconf->user,yylval.string);
   };
 
 connect_host:   HOST '=' QSTRING ';' 
   {
-    DupString(yy_cconf->user,yylval.string);
-    DupString(yy_nconf->user,yylval.string); 
+    DupString(yy_cconf->host,yylval.string);
+    DupString(yy_nconf->host,yylval.string);
   };
-
+ 
 connect_send_password:  SEND_PASSWORD '=' QSTRING ';'
   {
     DupString(yy_cconf->passwd,yylval.string);
@@ -679,25 +682,35 @@ connect_accept_password: ACCEPT_PASSWORD '=' QSTRING ';'
 
 connect_port:   PORT '=' NUMBER ';' { yy_cconf->port = yylval.number; };
 
-connect_compressed:     COMPRESSED '=' YES ';'
+connect_compressed:     COMPRESSED '=' TYES ';'
   {
-    yy_cconf->flags |= CONF_FLAGS_ZIP_LINK; }
+    yy_cconf->flags |= CONF_FLAGS_ZIP_LINK;
+  }
                         |
-                        COMPRESSED '=' NO ';'
+                        COMPRESSED '=' TNO ';'
   {
     yy_cconf->flags &= ~CONF_FLAGS_ZIP_LINK;
   };
 
-connect_lazylink:       LAZYLINK '=' YES ';'
+connect_lazylink:       LAZYLINK '=' TYES ';'
   {
-    yy_nconf->flags |= CONF_FLAGS_LAZY_LINK; }
+    yy_nconf->flags |= CONF_FLAGS_LAZY_LINK;
+  }
                         |
-                        LAZYLINK '=' NO ';'
+                        LAZYLINK '=' TNO ';'
   {
     yy_nconf->flags &= ~CONF_FLAGS_LAZY_LINK;
   };
 
-/* connect_hub.masks:   HUB_MASKS  '{' QSTRING ';' '}' */
+connect_auto:           AUTOCONN '=' TYES ';'
+  {
+    yy_cconf->flags |= CONF_FLAGS_ALLOW_AUTO_CONN;
+  }
+                        |
+                        AUTOCONN '=' TNO ';'
+  {
+    yy_cconf->flags &= ~CONF_FLAGS_ALLOW_AUTO_CONN;
+  };
 
 connect_hub_mask:       HUB_MASK '=' QSTRING ';' 
   {
@@ -763,7 +776,32 @@ kill_reason:    REASON '=' QSTRING ';'
  *  section deny
  ***************************************************************************/
 
-deny_entry:     DENY '{' deny_items '}' ';'
+deny_entry:     DENY 
+  {
+    if(yy_aconf)
+      {
+        free_conf(yy_aconf);
+        yy_aconf = NULL;
+      }
+    yy_aconf=make_conf();
+    yy_aconf->status = CONF_DLINE;
+  };
+'{' deny_items '}' ';'
+  {
+    if(yy_aconf->ip)
+      {
+	if(!yy_aconf->passwd)
+	  {
+	    DupString(yy_aconf->passwd,"NO REASON");
+	  }
+        add_Dline(yy_aconf);
+      }
+    else
+      {
+        free_conf(yy_aconf);
+      }
+    yy_aconf = NULL;
+  }; 
 
 deny_items:     deny_items deny_item |
                 deny_item
@@ -773,12 +811,13 @@ deny_item:      deny_ip | deny_reason
 
 deny_ip:        IP '=' IP_TYPE ';'
   {
-    sendto_realops("deny.ip IP_TYPE [%X] [%X]",yylval.ip_entry.ip, yylval.ip_entry.ip_mask);
+    yy_aconf->ip=yylval.ip_entry.ip;
+    yy_aconf->ip_mask=yylval.ip_entry.ip_mask;
   };
 
 deny_reason:    REASON '=' QSTRING ';' 
   {
-    sendto_realops("deny.reason [%s]",yylval.string);
+    DupString(yy_aconf->passwd,yylval.string);
   };
 
 

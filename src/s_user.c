@@ -487,7 +487,7 @@ int register_user(struct Client *cptr, struct Client *sptr,
   static char ubuf[12];
   struct User*     user = sptr->user;
   char*       reason;
-  char        tmpstr2[512];
+  char        tmpstr2[IRCD_BUFSIZE];
 
   assert(0 != sptr);
   assert(sptr->username != username);

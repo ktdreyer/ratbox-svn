@@ -473,8 +473,9 @@ vsendto_one(struct Client *to, const char *pattern, va_list args)
    *
    * IRC messages are always lines of characters terminated with a CR-LF
    * (Carriage Return - Line Feed) pair, and these messages shall not
-   * exceed 512 characters in length, counting all characters including
-   * the trailing CR-LF. Thus, there are 510 characters maximum allowed
+   * exceed 512 characters in length,  counting all characters 
+   * including the trailing CR-LF.
+   * Thus, there are 510 characters maximum allowed
    * for the command and its parameters.  There is no provision for
    * continuation message lines.  See section 7 for more details about
    * current implementations.
@@ -496,10 +497,10 @@ vsendto_one(struct Client *to, const char *pattern, va_list args)
    */
         if (len > 510)
         {
-                sendbuf[510] = '\r';
-                sendbuf[511] = '\n';
-                sendbuf[512] = '\0';
-                len = 512;
+                sendbuf[IRCD_BUFSIZE-2] = '\r';
+                sendbuf[IRCD_BUFSIZE-1] = '\n';
+                sendbuf[IRCD_BUFSIZE] = '\0';
+                len = IRCD_BUFSIZE;
         }
         else
         {

@@ -38,14 +38,8 @@
  * The observant will note that err_str and rpl_str
  * could be replaced by one function now. 
  * -Dianora
- * ok. ;-)
+ * ok. done. ;-)
  */
-
-#if 0
-static char numbuff[512];  /* ZZZ There is no reason this has to
-                            * be so large
-                            */
-#endif
 
 const char* form_str(int numeric)
 {
@@ -55,24 +49,6 @@ const char* form_str(int numeric)
   assert(0 != replies[numeric]);
   
   return replies[numeric];
-#if 0
-  char *nptr;
-  if ((numeric < 0) || (numeric > ERR_LAST_ERR_MSG))
-    {
-      ircsprintf(numbuff, ":%%s %d %%s :INTERNAL ERROR: BAD NUMERIC! %d",
-                 numeric, numeric);
-      return numbuff;
-    }
-
-  if (!(nptr = replies[numeric]))
-    {
-      ircsprintf(numbuff, ":%%s %d %%s :NO ERROR FOR NUMERIC ERROR %d",
-                 numeric, numeric);
-      return numbuff;
-    }
-  else
-    return nptr;
-#endif
 }
 
 

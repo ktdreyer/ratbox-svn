@@ -359,7 +359,7 @@ m_kline(struct Client *cptr,
                 int parc,
                 char *parv[])
 {
-  char buffer[512];
+  char buffer[IRCD_BUFSIZE];
   char *p;
   char cidr_form_host[HOSTLEN + 1];
   char *user, *host;

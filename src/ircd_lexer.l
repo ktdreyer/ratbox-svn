@@ -27,6 +27,7 @@
 #include <sys/types.h>
 #include <string.h>
 #include <ctype.h>
+#include "common.h"
 #include "s_conf.h"
 #include "y.tab.h"
 
@@ -37,7 +38,8 @@
 		YY_FATAL_ERROR( "input in flex scanner failed" ); 
 
 
-
+int  lineno;
+char linebuf[IRCD_BUFSIZE];
 %}
 
 ws		[ \t]*
@@ -45,7 +47,11 @@ comment		#.*
 qstring		\"[^\"\n]*[\"\n]
 
 %%
-\n		{ yylineno++; }
+\n.*		{ 
+		  strcpy(linebuf, yytext+1); 
+		  lineno++;
+                  yyless(1);
+                }
 {ws}		;
 {comment}	;
 
@@ -65,12 +71,13 @@ qstring		\"[^\"\n]*[\"\n]
 		}
 
 include		{ return INCLUDE; }
-yes		{ return YES; }
-no		{ return NO; }
+yes		{ return TYES; }
+no		{ return TNO; }
 serverinfo	{ return SERVERINFO; }
 description	{ return DESCRIPTION; }
 administrator	{ return ADMIN; }
 admin		{ return ADMIN; }
+autoconn	{ return AUTOCONN; }
 class		{ return CLASS; }
 auth		{ return AUTH; }
 operator	{ return OPERATOR; }
