@@ -1,3 +1,7 @@
+*** 19990831_1 by wnder
+New macro: IsEol() which looks for \r or \n characters
+
+
 *** 19990830_2 by db
 - left over aconf->user gets freed twice, causing some malloc packages
   to leave their lunch all over the disk.... NULL things after every
