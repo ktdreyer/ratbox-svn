@@ -73,7 +73,6 @@ int MaxClientCount = 1;
 int refresh_user_links = 0;
 
 static void start_io(struct Client *server);
-static void burst_members(struct Client *client_p, dlink_list * list);
 
 static SlinkRplHnd slink_error;
 static SlinkRplHnd slink_zipstats;
@@ -141,7 +140,6 @@ static void server_burst(struct Client *client_p);
 #ifndef VMS
 static int fork_server(struct Client *client_p);
 #endif
-static void burst_all(struct Client *client_p);
 
 static CNCB serv_connect_callback;
 
@@ -1474,53 +1472,26 @@ fork_server(struct Client *server)
 static void
 server_burst(struct Client *client_p)
 {
-
-	/*
-	 ** Send it in the shortened format with the TS, if
-	 ** it's a TS server; walk the list of channels, sending
-	 ** all the nicks that haven't been sent yet for each
-	 ** channel, then send the channel itself -- it's less
-	 ** obvious than sending all nicks first, but on the
-	 ** receiving side memory will be allocated more nicely
-	 ** saving a few seconds in the handling of a split
-	 ** -orabidoo
-	 */
-
-	burst_all(client_p);
-
-	/* EOB stuff is now in burst_all */
-
-	/* Always send a PING after connect burst is done */
-	sendto_one(client_p, "PING :%s", me.name);
-
-}
-
-/*
- * burst_all
- *
- * inputs	- pointer to server to send burst to 
- * output	- NONE
- * side effects - complete burst of channels/nicks is sent to client_p
- */
-static void
-burst_all(struct Client *client_p)
-{
 	struct Client *target_p;
 	struct Channel *chptr;
 	struct hook_burst_channel hinfo;
 	dlink_node *ptr;
-	/* serial counter borrowed from send.c */
-	current_serial++;
+
+	/* first loop nicks then channels, it saves the remote server
+	 * introducing users to channels, then colliding them out of it
+	 */
+	DLINK_FOREACH(ptr, global_client_list.head)
+	{
+		target_p = ptr->data;
+
+		sendnick_TS(client_p, target_p);
+	}
 
 	DLINK_FOREACH(ptr, global_channel_list.head)
 	{
-		chptr = (struct Channel *) ptr->data;
-		if(chptr->users != 0)
+		chptr = ptr->data;
+		if(chptr->users > 0)
 		{
-			burst_members(client_p, &chptr->chanops);
-			burst_members(client_p, &chptr->chanops_voiced);
-			burst_members(client_p, &chptr->voiced);
-			burst_members(client_p, &chptr->peons);
 			send_channel_modes(client_p, chptr);
 			hinfo.chptr = chptr;
 			hinfo.client = client_p;
@@ -1528,53 +1499,12 @@ burst_all(struct Client *client_p)
 		}
 	}
 
-	/*
-	 ** also send out those that are not on any channel
-	 */
-	DLINK_FOREACH(ptr, global_client_list.head)
-	{
-		target_p = (struct Client *) ptr->data;
-		if(target_p->serial != current_serial)
-		{
-			target_p->serial = current_serial;
-			if(target_p->from != client_p)
-				sendnick_TS(client_p, target_p);
-		}
-	}
-
-	/* We send the time we started the burst, and let the remote host determine an EOB time,
-	 ** as otherwise we end up sending a EOB of 0   Sending here means it gets sent last -- fl
-	 */
-	/* Its simpler to just send EOB and use the time its been connected.. --fl_ */
-
 	if(IsCapable(client_p, CAP_EOB))
 		sendto_one(client_p, ":%s EOB", me.name);
-}
 
-/*
- * burst_members
- *
- * inputs	- pointer to server to send members to
- * 		- dlink_list pointer to membership list to send
- * output	- NONE
- * side effects	-
- */
-static void
-burst_members(struct Client *client_p, dlink_list * list)
-{
-	struct Client *target_p;
-	dlink_node *ptr;
+	/* Always send a PING after connect burst is done */
+	sendto_one(client_p, "PING :%s", me.name);
 
-	DLINK_FOREACH(ptr, list->head)
-	{
-		target_p = ptr->data;
-		if(target_p->serial != current_serial)
-		{
-			target_p->serial = current_serial;
-			if(target_p->from != client_p)
-				sendnick_TS(client_p, target_p);
-		}
-	}
 }
 
 /*

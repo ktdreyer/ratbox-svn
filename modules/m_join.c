@@ -145,10 +145,11 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		i += strlen(name)+1;
 	}
 
-	mykey = LOCAL_COPY(parv[2]);
-
 	if(parc > 2)
+	{
+		mykey = LOCAL_COPY(parv[2]);
 		key = strtoken(&p2, mykey, ",");
+	}
 
 	for(name = strtoken(&p, jbuf, ","); name;
 	    key = (key) ? strtoken(&p2, NULL, ",") : NULL, name = strtoken(&p, NULL, ","))

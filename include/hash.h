@@ -82,4 +82,8 @@ extern void add_to_xline_hash(const char *name, struct xline *xconf);
 extern void del_from_xline_hash(const char *name, struct xline *xconf);
 extern struct xline *hash_find_xline(const char *name);
 
+extern void add_to_nd_hash(const char *name);
+extern void del_from_nd_hash(const char *name);
+extern int find_nd(const char *name);
+
 #endif /* INCLUDED_hash_h */
