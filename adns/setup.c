@@ -677,12 +677,8 @@ adns_query adns_forallqueries_next(adns_state ads, void **context_r) {
 
 int adns__rereadconfig(adns_state ads)
 {
-  int r;
   ads->nservers = 0;	
   readconfig(ads,"/etc/resolv.conf",0);
-  r= init_finish(ads);
-  if (r) 
-    return r;
   adns__consistency(ads,0,cc_entex);
   return 0;
 }
