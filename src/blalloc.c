@@ -171,7 +171,7 @@ void *BlockHeapAlloc (BlockHeap *bh)
        else
          {
            walker = bh->base;
-           walker->allocMap[0] = 0x1L;
+           walker->allocMap[0] = 1;
            walker->freeElems--;  bh->freeElems--;
            if(bh->base->elems == NULL)
              return((void *)NULL);
@@ -184,10 +184,10 @@ void *BlockHeapAlloc (BlockHeap *bh)
      {
        if (walker->freeElems > 0)
          {
-           mask = 0x1L; ctr = 0; unit = 0;
+           mask = 1; ctr = 0; unit = 0;
            while (unit < bh->numlongs)
              {
-               if ((mask == 0x1L) && (walker->allocMap[unit] == ~0))
+               if ((mask == 1) && (walker->allocMap[unit] == ~0))
                  {
                    /* Entire subunit is used, skip to next one. */
                    unit++; 
@@ -221,7 +221,7 @@ void *BlockHeapAlloc (BlockHeap *bh)
                ctr++;
                if (!mask)
                  {
-                   mask = 0x1L;
+                   mask = 1;
                    unit++;
                    ctr = 0;
                  }
@@ -229,7 +229,8 @@ void *BlockHeapAlloc (BlockHeap *bh)
          }     /* if */
      }        /* for */
 
-    return((void *) NULL);   /* If you get here, something bad happened ! */
+    /* return((void *) NULL);   If you get here, something bad happened ! */
+    return NULL;   /* If you have to cast NULL, you're doing something wrong */
 }
 
 
