@@ -1,3 +1,6 @@
+*** 20010121_1 by davidt
+Send KILL for unknown IDs, not an SQUIT
+
 *** 20010120_17 by wcampbel
 Updated TODO a little
 
