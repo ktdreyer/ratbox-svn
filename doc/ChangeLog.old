@@ -1,3 +1,8 @@
+*** 20000907_1 by ejb
+initial stab at IPv6 .. it doesn't compile with IPV6 defined yet..
+
+
+
 *** 20000813_1 by ejb
 Large commit, folding in a number of changes i made over the weekend.
 - add n!u@h for topic_info ala ircnet.
