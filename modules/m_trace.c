@@ -74,7 +74,6 @@ char *_version = "20010109";
 static void mo_trace(struct Client *client_p, struct Client *source_p,
                     int parc, char *parv[])
 {
-  int   i;
   struct Client       *target_p = NULL;
   struct Class        *cltmp;
   char  *tname;
@@ -190,7 +189,7 @@ static void mo_trace(struct Client *client_p, struct Client *source_p,
      }
    }
   /* report all direct connections */
-  for ( i = 0, ptr = lclient_list.head; ptr; ptr = ptr->next)
+  for (ptr = lclient_list.head; ptr; ptr = ptr->next)
     {
       target_p = ptr->data;
 
@@ -203,10 +202,10 @@ static void mo_trace(struct Client *client_p, struct Client *source_p,
       if (!dow && irccmp(tname, target_p->name))
         continue;
 
-      cnt = report_this_status(source_p,target_p,dow,link_u[i],link_s[i]);
+      cnt = report_this_status(source_p,target_p,dow,0,0);
     }
 
-  for ( i = 0, ptr = serv_list.head; ptr; ptr = ptr->next)
+  for (ptr = serv_list.head; ptr; ptr = ptr->next)
     {
       target_p = ptr->data;
 
@@ -219,11 +218,13 @@ static void mo_trace(struct Client *client_p, struct Client *source_p,
       if (!dow && irccmp(tname, target_p->name))
         continue;
 
-      cnt = report_this_status(source_p,target_p,dow,link_u[i],link_s[i]);
+      cnt = report_this_status(source_p, target_p, dow,
+                               link_u[target_p->fd],
+                               link_s[target_p->fd]);
     }
 
   /* This section is to report the unknowns */
-  for ( i = 0, ptr = unknown_list.head; ptr; ptr = ptr->next)
+  for (ptr = unknown_list.head; ptr; ptr = ptr->next)
     {
       target_p = ptr->data;
 
@@ -236,7 +237,7 @@ static void mo_trace(struct Client *client_p, struct Client *source_p,
       if (!dow && irccmp(tname, target_p->name))
         continue;
 
-      cnt = report_this_status(source_p,target_p,dow,link_u[i],link_s[i]);
+      cnt = report_this_status(source_p,target_p,dow,0,0);
     }
 
   /*
