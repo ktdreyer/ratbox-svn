@@ -551,6 +551,13 @@ static int change_channel_membership(struct Channel *chptr,
 int can_join(struct Client *sptr, struct Channel *chptr, char *key)
 {
   dlink_node  *lp;
+  dlink_node *tmp;
+  struct Ban *invex = NULL;
+  char  s[NICKLEN+USERLEN+HOSTLEN+6];
+  char  *s2;
+
+  strcpy(s, make_nick_user_host(sptr->name, sptr->username, sptr->host));
+  s2 = make_nick_user_host(sptr->name, sptr->username, sptr->localClient->sockhost);
 
   if ((is_banned(chptr,sptr)) == CHFL_BAN)
     return (ERR_BANNEDFROMCHAN);
@@ -561,9 +568,20 @@ int can_join(struct Client *sptr, struct Channel *chptr, char *key)
         if (lp->data == chptr)
           break;
       if (!lp)
-        return (ERR_INVITEONLYCHAN);
+        {
+			for (tmp = chptr->invexlist.head; tmp; tmp = tmp->next) {
+				invex = tmp->data;
+				if (match(invex->banstr, s) ||
+					match(invex->banstr, s2))
+					/* yes, i hate goto, if you can find a better way
+					 * please tell me -is */
+					goto invexdone;
+			}
+			return (ERR_INVITEONLYCHAN);
+		}
     }
 
+  invexdone:
   if (*chptr->mode.key && (BadPtr(key) || irccmp(chptr->mode.key, key)))
     return (ERR_BADCHANNELKEY);
 
