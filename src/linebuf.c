@@ -259,10 +259,11 @@ linebuf_copy_line(buf_head_t *bufhead, buf_line_t *bufline,
   register char *ch = data;	/* Pointer to where we are in the read data */
   register char *bufch = &bufline->buf[bufline->len];
   int clen = 0;
+  int tclen;
   /* If its full or terminated, ignore it */
   if ((bufline->len == BUF_DATA_SIZE) || (bufline->terminated == 1))
     return 0;
-  clen = cpylen = linebuf_skip_crlf(ch, len);
+  clen = tclen = cpylen = linebuf_skip_crlf(ch, len);
 
   /* This is the ~overflow case..This doesn't happen often.. */
   if(cpylen > BUF_DATA_SIZE - bufline->len) {
@@ -287,11 +288,16 @@ linebuf_copy_line(buf_head_t *bufhead, buf_line_t *bufline,
   }
 
   /* Yank the CRLF off this, replace with a \0 */
-  while(*bufch == '\r' || *bufch == '\n')
+  /* I know this code is a bit odd, but it is how it must be for it to work I hope... :) --Habeeb */
+  while(tclen > 1 && (*bufch == '\r' || *bufch == '\n'))
   {
-  	*bufch = '\0';
-  	cpylen--;
-  	bufch--;
+    if (*(bufch-1) == '\r' && *bufch == '\n')
+    {
+      *(bufch-1) = '\0';
+      cpylen -= 2;
+    }
+    --tclen;
+    --bufch;
   }
   bufline->terminated = 1;
   bufhead->len += bufline->len += cpylen;
