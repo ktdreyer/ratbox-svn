@@ -101,7 +101,7 @@
 /* Define if you have the socket library (-lsocket).  */
 #undef HAVE_LIBSOCKET
 
-#ifdef VMS
+#ifdef __vms
 typedef unsigned long time_t;
 typedef unsigned int u_int;
 typedef unsigned long u_long;
@@ -109,8 +109,8 @@ typedef unsigned long u_long;
 #define MAXPATHLEN PATH_MAX
 
 #define STATIC_MODULES
-#define SELECT_TYPE "select"
-#define USE_SELECT
+#define SELECT_TYPE "qio"
+#define USE_QIO
 
 #define NICKLEN 9
 #define MAX_CLIENTS 1536

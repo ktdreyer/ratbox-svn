@@ -65,6 +65,53 @@ static const char *last_event_ran = NULL;
 struct ev_entry event_table[MAX_EVENTS];
 static time_t event_time_min = -1;
 
+/*
+ * ircd$schdast() - schedule an ast to be called <msec> msecs in the future.
+ */
+#ifdef __vms
+void
+ircd$schdast(unsigned int msec, int tid, void (*astadr)(__unknown_params))
+{
+	char asctim[15];
+	$DESCRIPTOR(asctim_desc, asctim);
+	double delay_secs;
+	int delay_mins;
+	double delay = msec;
+	int tim[2];
+
+	delay_mins = (delay/1000) / 60;
+	delay_secs = (delay/1000) - (60 * delay_mins);
+
+	sprintf(asctim, "0 :%d:%2.2f", delay_mins, delay_secs);
+	asctim_desc.dsc$w_length = strlen(asctim);
+	sys$bintim(&asctim_desc, tim);
+	sys$setimr(0, tim, astadr, tid, 0);
+}
+
+/*
+ * ircd$runevt() - AST service routine to run an event.
+ */
+void
+ircd$runevt(int evtn)
+{
+	event_table[evtn].func(event_table[evtn].arg);
+
+	/*
+	 * If it's not a repeating event, remove it from
+	 * the event table.
+	 */
+	if (!event_table[evtn].frequency)
+	{
+		event_table[evtn].name = NULL;
+		event_table[evtn].func = NULL;
+		event_table[evtn].arg = NULL;
+		event_table[evtn].active = 0;
+	} else {
+		/* Otherwise, schedule it to run again. */
+		ircd$schdast(event_table[evtn].frequency * 1000, evtn, ircd$runevt);
+	}
+}
+#endif
 
 /*
  * void eventAdd(const char *name, EVH *func, void *arg, time_t when)
@@ -94,6 +141,9 @@ eventAdd(const char *name, EVH * func, void *arg, time_t when)
 			if((event_table[i].when < event_time_min) || (event_time_min == -1))
 				event_time_min = event_table[i].when;
 
+#ifdef __vms
+			ircd$schdast(when * 1000, i, ircd$runevt);
+#endif
 			return;
 		}
 	}
@@ -123,6 +173,9 @@ eventAddOnce(const char *name, EVH *func, void *arg, time_t when)
 			if ((event_table[i].when < event_time_min) || (event_time_min == -1))
 				event_time_min = event_table[i].when;
 
+#ifdef __vms
+			ircd$schdast(when * 1000, i, ircd$runevt);
+#endif
 			return;
 		}
 	}

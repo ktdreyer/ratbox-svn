@@ -28,11 +28,6 @@
 #include "setup.h"
 #include "config.h"
 
-#ifdef __VMS
-# include descrip
-# include starlet
-#endif
-
 #include "tools.h"
 #include "ircd.h"
 #include "channel.h"
@@ -75,6 +70,8 @@
 #include "patricia.h"
 #include "s_newconf.h"
 #include "reject.h"
+#include "s_conf.h"
+
 /*
  * Try and find the correct name to use with getrlimit() for setting the max.
  * number of files allowed to be open by this process.
@@ -366,6 +363,7 @@ io_loop(void)
 {
 	unsigned long empty_cycles = 0, st = 0;
 	time_t delay;
+#ifndef __vms
 	while (ServerRunning)
 
 	{
@@ -398,6 +396,9 @@ io_loop(void)
 			doremotd = 0;
 		}
 	}
+#else
+	comm_select(0);
+#endif
 }
 
 /*
@@ -666,7 +667,9 @@ main(int argc, char *argv[])
 	fdlist_init();
 	init_netio();		/* This needs to be setup early ! -- adrian */
 	/* Check if there is pidfile and daemon already running */
+#ifndef __vms
 	check_pidfile(pidFileName);
+#endif
 	/* Init the event subsystem */
 	eventInit();
 	init_sys();

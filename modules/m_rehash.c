@@ -58,7 +58,6 @@ struct hash_commands
 	void (*handler) (struct Client * source_p);
 };
 
-
 static void
 clear_temps(dlink_list * tlist)
 {

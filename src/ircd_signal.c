@@ -27,6 +27,10 @@
 #include "s_log.h"
 #include "memory.h"
 #include "s_bsd.h"
+#include "s_conf.h"
+#include "client.h"
+#include "send.h"
+
 /*
  * dummy_handler - don't know if this is really needed but if alarm is still
  * being used we probably will
@@ -58,13 +62,33 @@ sigterm_handler(int sig)
 	exit(-1);
 }
 
+#ifdef __vms
+static void
+ircd$rehash_conf(void)
+{
+	rehash(1);
+}
+
+static void
+ircd$rehash_motd(void)
+{
+	ReadMessageFile(&ConfigFileEntry.motd);
+	sendto_realops_flags(UMODE_ALL, L_ALL,
+		"Got signal SIGUSR1, reloading ircd motd file");
+}
+#endif
+
 /* 
  * sighup_handler - reread the server configuration
  */
 static void
 sighup_handler(int sig)
 {
+#ifndef __vms
 	dorehash = 1;
+#else
+	eventAdd("rehash motd", ircd$rehash_conf, NULL, 0);
+#endif
 }
 
 /*
@@ -73,7 +97,11 @@ sighup_handler(int sig)
 static void
 sigusr1_handler(int sig)
 {
+#ifndef __vms
 	doremotd = 1;
+#else
+	eventAdd("rehash motd", ircd$rehash_motd, NULL, 0);
+#endif
 }
 
 /*

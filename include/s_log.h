@@ -52,4 +52,8 @@ extern void log_user_exit(struct Client *);
 extern void log_oper(struct Client *, const char *name);
 extern void log_foper(struct Client *, const char *name);
 
+#ifdef __vms
+const char * ircd$format_error(int);
+#endif
+
 #endif /* INCLUDED_s_log_h */

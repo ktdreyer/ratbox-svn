@@ -74,7 +74,7 @@
  */
 #define MAX_BUFFER      60
 
-#ifndef VMS
+#ifndef __vms
 /* 
  * Directory paths and filenames for UNIX systems.
  * IRCD_PREFIX is set using ./configure --prefix, see INSTALL.
@@ -119,7 +119,7 @@
 #define OPATH    ETCPATH "/opers.motd"	/* oper MOTD file */
 #define LIPATH   ETCPATH "/links.txt"	/* cached links file */
 
-#else /* !VMS */
+#else /* !__vms */
 
 /* *PATH - directory locations and filenames for VMS.
  *
@@ -160,7 +160,7 @@
 #define OPATH    ETCPATH "OPERS.MOTD"	/* oper MOTD file */
 #define LIPATH   ETCPATH "LINKS.TXT"	/* cached LINKS file */
 
-#endif /* !VMS */
+#endif /* !__vms */
 
 /* Ignore bogus timestamps from other servers. Yes this will desync
  * the network, but it will allow chanops to resync with a valid non TS 0
