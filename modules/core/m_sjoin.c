@@ -411,7 +411,12 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 	}
 
 	if(!joins)
+	{
+		if(isnew)
+			destroy_channel(chptr);
+
 		return 0;
+	}
 
 	*(ptr_nick - 1) = '\0';
 	*(ptr_uid - 1) = '\0';
