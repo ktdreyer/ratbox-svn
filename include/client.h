@@ -357,9 +357,10 @@ struct LocalUser
 #define FLAGS_EXTERNAL     0x1000 /* show servers introduced and splitting */
 #define FLAGS_CALLERID     0x4000 /* block unless caller id's */
 #define FLAGS_UNAUTH       0x8000 /* show unauth connects here */
+#define FLAGS_DRONE        0x10000 /* show drone connects */
 
 /* user information flags, only settable by remote mode or local oper */
-#define FLAGS_OPER         0x10000 /* Operator */
+#define FLAGS_OPER         0x20000 /* Operator */
 #define FLAGS_ADMIN        0x40000 /* Admin on server */
 
 
