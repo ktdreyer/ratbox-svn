@@ -20,6 +20,10 @@
 
 #ifndef INCLUDED_class_h
 #define INCLUDED_class_h
+#ifndef INCLUDED_sys_types_h
+#include <sys/types.h>
+#define INCLUDED_sys_types_h
+#endif
 
 struct ConfItem;
 struct Client;
@@ -53,18 +57,18 @@ typedef struct Class aClass;
 
 extern struct Class* ClassList;  /* GLOBAL - class list */
 
-extern  long    get_sendq(struct Client *);
-extern  int     get_con_freq(struct Class* );
-extern  aClass  *find_class(int);
-extern  int     get_conf_class (struct ConfItem *);
-extern  int     get_client_class (struct Client *);
-extern  int     get_client_ping (struct Client *);
-extern  void    add_class(int, int, int, int, long);
-extern  void    check_class(void);
-extern  void    initclass(void);
-extern  void    free_class(struct Class* );
-extern  void    add_class (int, int, int, int, long);
-extern  void    fix_class (struct ConfItem *, struct ConfItem *);
-extern  void    report_classes (struct Client *);
+extern size_t        get_sendq(struct Client *);
+extern int           get_con_freq(struct Class* );
+extern struct Class* find_class(int);
+extern int           get_conf_class (struct ConfItem *);
+extern int           get_client_class (struct Client *);
+extern int           get_client_ping (struct Client *);
+extern void          add_class(int, int, int, int, long);
+extern void          check_class(void);
+extern void          initclass(void);
+extern void          free_class(struct Class* );
+extern void          add_class (int, int, int, int, long);
+extern void          fix_class (struct ConfItem *, struct ConfItem *);
+extern void          report_classes (struct Client *);
 
 #endif /* INCLUDED_class_h */
