@@ -772,14 +772,14 @@ static int find_user_host(struct Client *source_p,
       if(hostp)                                    /* I'm a little user@host */
         {
           *(hostp++) = '\0';                       /* short and squat */
-          strncpy(luser,user_host_or_nick,USERLEN); /* here is my user */
-          strncpy(lhost,hostp,HOSTLEN);             /* here is my host */
+          strlcpy(luser,user_host_or_nick,USERLEN); /* here is my user */
+          strlcpy(lhost,hostp,HOSTLEN);             /* here is my host */
         }
       else
         {
           luser[0] = '*';             /* no @ found, assume its *@somehost */
           luser[1] = '\0';	  
-          strncpy(lhost,user_host_or_nick,HOSTLEN);
+          strlcpy(lhost,user_host_or_nick,HOSTLEN);
         }
 
       return 1;

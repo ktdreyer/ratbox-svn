@@ -143,7 +143,7 @@ static void m_cjoin(struct Client *client_p,
       return;
     }
 
-  (void)strncpy(jbuf, name, sizeof(jbuf) - 1);
+  strlcpy(jbuf, name, sizeof(jbuf));
 
   if ((chptr = hash_find_channel(name)) == NULL)
     {
