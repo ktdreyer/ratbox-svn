@@ -1,3 +1,15 @@
+androsyn    2002/07/04 09:13:48 EDT	(20020704_0)
+
+  Modified files:
+    contrib              m_jupe.c 
+  Log:
+  This seems to fix the jupe issue..
+  
+  Revision  Changes    Path
+  1.30      +3 -2      ircd-hybrid-7/contrib/m_jupe.c
+
+
+
 leeh        2002/07/03 11:03:10 EDT	(20020703_3)
 
   Modified files:
