@@ -1,3 +1,28 @@
+leeh        2003/07/07 10:26:28 EDT	(20030707_0)
+
+  Modified files:
+    doc                  example.conf example.efnet.conf 
+    include              s_conf.h 
+    modules              m_knock.c 
+    src                  newconf.c s_conf.c version.c.SH 
+  Log:
+  - fixed the spoof notice stuff.  no_spoof_notice has gone back to being
+    spoof_notice, which defaults to off.  If its set, the notice will be
+    sent always, but if we're in HIDE_SPOOF_IPS, itll not give the real host
+  - allow opers to override the knock-per-user limits
+  - fixed some indenting in newconf.c
+  
+  Revision  Changes    Path
+  7.212     +10 -11    ircd-ratbox/doc/example.conf
+  7.47      +13 -11    ircd-ratbox/doc/example.efnet.conf
+  7.243     +2 -2      ircd-ratbox/include/s_conf.h
+  1.80      +3 -2      ircd-ratbox/modules/m_knock.c
+  7.95      +43 -42    ircd-ratbox/src/newconf.c
+  7.418     +9 -6      ircd-ratbox/src/s_conf.c
+  7.26      +2 -2      ircd-ratbox/src/version.c.SH
+
+
+
 leeh        2003/07/03 08:51:42 EDT	(20030703_0)
 
   Modified files:
