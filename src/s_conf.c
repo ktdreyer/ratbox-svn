@@ -130,9 +130,6 @@ struct ConfItem* ConfigItemList = NULL;
 /* conf xline link list root */
 struct ConfItem        *x_conf = ((struct ConfItem *)NULL);
 
-/* conf qline link list root */
-struct ConfItem        *q_conf = ((struct ConfItem*)NULL);
-
 /* conf uline link list root */
 struct ConfItem        *u_conf = ((struct ConfItem *)NULL);
 
@@ -1267,31 +1264,6 @@ int find_u_conf(char *server,char *user,char *host)
   return NO;
 }
 
-/*
- * find_q_conf
- *
- * inputs       - nick to find
- *              - user to match
- *              - host to mask
- * output       - YES if found, NO if not found
- * side effects - looks for matches on Q lined nick
- */
-int find_q_conf(char *nickToFind,char *user,char *host)
-{
-  struct ConfItem *aconf;
-
-  for (aconf = q_conf; aconf; aconf = aconf->next)
-    {
-      if (BadPtr(aconf->name))
-          continue;
-
-      if(match(aconf->name,nickToFind))
-        {
-          return YES;
-        }
-    }
-  return NO;
-}
 
 /*
  * clear_special_conf
@@ -2049,7 +2021,6 @@ static void clear_out_old_conf(void)
   clear_out_address_conf();
   clear_special_conf(&x_conf);
   clear_special_conf(&u_conf);
-  clear_special_conf(&q_conf);
 
   /* clean out module paths */
 #ifndef STATIC_MODULES
@@ -2444,21 +2415,6 @@ void conf_add_u_conf(struct ConfItem *aconf)
   u_conf = aconf;
 }
 
-/*
- * conf_add_q_conf
- * inputs       - pointer to config item
- * output       - NONE
- * side effects - Add a Q line
- */
-
-void conf_add_q_conf(struct ConfItem *aconf)
-{
-  if(aconf->user == NULL)
-    DupString(aconf->user, "-");
-
-  aconf->next = q_conf;
-  q_conf = aconf;
-}
 
 /*
  * conf_add_fields
