@@ -1,3 +1,8 @@
+*** 20010129_5 by db
+- simplified sendto_realops_flags(FLAGS_ALL... case
+
+
+
 *** 20010129_4 by wcampbel
 Removed CAPAB DE from the docs
 
