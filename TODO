@@ -13,3 +13,83 @@
 - SSL support
 - new conf format
 - finish RFC'ing m_message.c
+
+------------------------------------------------------------------------------
+
+Adrian's TODO list
+
+* MAKE SURE DIANE KILLS THE REFCOUNT IN THE DLINK CODE!!!!
+
+* PLEASE redo all dlink_list management with the stuff in src/tools.c
+
+* In the server outbound connection code, make the sendto_realops()
+  logging more sane. Ie, if there's an error, also log the errno string.
+
+* check out what the hell safe_write() is, why its in s_conf.c but being
+  used in other places, and why its closing the fd for people. It should
+  be moved out of there, and *not* close fds (forcing its users to instead!)
+
+* look at timeout_resolver() and the actual work function, remove needing
+  to track the time for the next dns timeout, see if we can make them
+  simpler.
+    -- Nah, don't worry about this one. leave the DNS resolver alone..
+
+* look at the old Listener code in s_bsd.c before I chopped it. Notice
+  the anti-flood code in there. Make sure the same load-checking stuff
+  is in listener.c
+
+* look at mo_die() - find the restart function, break out the shutdown code,
+  and tidy shit up!
+
+* get send_message(), replace comm_setselect() with send_queued_write(), see
+  if the optimisation works
+
+* search for FLAGS_DEADSOCKET and IsDead() tests, figure out how to get
+  rid of them. Remember that you can't just call exit_client() from
+  dead_link() as I *bet* that cptr going away would be *bad*. So, this
+  basically means going through the code and checking return values of
+  things. :-)
+
+* remove aconf->ipnum, since we're doing a DNS lookup each time we
+  connect. If people don't like this, they can (should!) be running
+  a namecache locally!
+
+* make the reserved FD limit run-time tuneable, esp from comm_open()
+
+* make sure we've fd_note()d on all the fd's as they change state
+  eg a listen socket becoming a client or server, etc ...
+
+* KILL THE ZIPLINKS CODE! DIE! Reimplement as an external process later.
+
+* What the _FUCK_ is IsLocal() and FLAGS_LOCAL and why the *smeg* is it
+  not defined ?
+
+* find what causes this
+
+[cacheboy]  Link with irc.vchan[unknown@255.255.255.255] established: (TS )
+            link
+
+thats INADDR_NONE. Find, fix.
+
+* Add the ircnet(?) split logic for nick collisions - on a nick collision,
+  change to "%d-%s", random, nick
+
+* ok, this sucks. search for cptr->since, and esp in src/parse.c .
+  All this flood protection has to come out and reappear in *one* place!
+
+
+Done things:
+
+* in read_packet(), there is a bit where a rejected client is being
+  "fake" read. Make sure you read() all the data first, or we'll end up
+  CPU-hogging the box. (check REJECT_HOLD)
+
+* kill fdlist_add() and associated mask stuff. We'll revisit the fdset
+  stuff through comm_setselect() magic later.
+
+* Find what uses the res.c routines. Since there's no caching anymore,
+  rip out the code that deals with cached replies.
+
+
+------------------------------------------------------------------------------
+
