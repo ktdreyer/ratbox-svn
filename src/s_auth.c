@@ -469,7 +469,7 @@ timeout_auth_queries_event(void *notused)
 
       if (auth->timeout < CurrentTime)
 	{
-	  if (-1 < auth->fd)
+	  if (0 > auth->fd)
 	    fd_close(auth->fd);
 
 	  if (IsDoingAuth(auth))
@@ -683,12 +683,26 @@ delete_identd_queries(struct Client *acptr)
 
       if(auth->client == acptr)
 	{
-	  if (-1 < auth->fd)
+	  if (0 > auth->fd)
 	    fd_close(auth->fd);
 	  dlinkDelete(ptr, &auth_poll_list);
 	  free_auth_request(auth);
 	  free_dlink_node(ptr);
-	  return;
+	}
+    }
+
+  for (ptr = auth_client_list.head; ptr; ptr = next_ptr)
+    {
+      auth = ptr->data;
+      next_ptr = ptr->next;
+
+      if(auth->client == acptr)
+	{
+	  if (0 > auth->fd)
+	    fd_close(auth->fd);
+	  dlinkDelete(ptr, &auth_client_list);
+	  free_auth_request(auth);
+	  free_dlink_node(ptr);
 	}
     }
 }
