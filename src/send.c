@@ -537,7 +537,6 @@ sendto_channel_type(struct Client *one, struct Client *from, struct Channel *chp
         }
       } /* for (lp = chptr->members; lp; lp = lp->next) */
 
-      va_end(args);
 } /* sendto_channel_type() */
 
 
