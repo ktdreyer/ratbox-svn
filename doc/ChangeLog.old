@@ -1,3 +1,16 @@
+*** 20001224_22 by wcampbel
+1. Forgot to change the formatting in oper_only_umodes
+2. Add 'rej' '+r' to oper_only_umodes
+3. Created a new simple.conf
+
+--snip--
+# NOTE TO DEVELOPERS:  Do we set defaults for the variables in the general
+#                      block?  If so, then I can leave out most of the things
+#                      in here and make it simpler to configure.  If not,
+#                      please let me know so I can document things clearly
+--end--
+
+
 *** 20001224_21 by db
 - bufend was already there, so use it...
 
