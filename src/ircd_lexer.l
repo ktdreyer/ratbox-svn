@@ -264,10 +264,8 @@ use_halfops     { return USE_HALFOPS; }
 use_help        { return USE_HELP; }
 use_invex	{ return USE_INVEX; }
 use_knock	{ return USE_KNOCK; }
-use_vchans      { return USE_VCHANS; }
 throttle_time { return THROTTLE_TIME; }
 user		{ return USER;} 
-vchans_oper_only { return VCHANS_OPER_ONLY; }
 vhost	{ return VHOST; }
 vhost6	{ return VHOST6; }
 warn		{ return WARN; }

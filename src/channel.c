@@ -189,12 +189,6 @@ remove_user_from_channel(struct Channel *chptr, struct Client *who)
   dlink_node *ptr;
   dlink_node *next_ptr;
 
-  /* last user in the channel.. set a vchan_id incase we need it */
-#ifdef VCHANS
-  if (chptr->users == 1)
-    ircsprintf(chptr->vchan_id, "!%s", who->name);
-#endif
-
   if ((ptr = find_user_link(&chptr->peons, who)))
     dlinkDelete(ptr, &chptr->peons);
   else if ((ptr = find_user_link(&chptr->chanops, who)))
@@ -258,11 +252,6 @@ remove_user_from_channel(struct Channel *chptr, struct Client *who)
   }
 
   who->user->joined--;
-
-#ifdef VCHANS
-  if (IsVchan(chptr))
-    del_vchan_from_client_cache(who, chptr);
-#endif
 
   if (MyClient(who))
   {
@@ -550,52 +539,23 @@ cleanup_channels(void *unused)
   {
     next_chptr = chptr->nextch;
 
-#ifdef VCHANS
-    if (IsVchan(chptr))
+    if(chptr->users == 0)
     {
-      if (IsVchanTop(chptr))
+      if((chptr->users_last + ConfigChannel.persist_time) < CurrentTime)
       {
-        chptr->users_last = CurrentTime;
-      }
-      else
-      {
-        if ((CurrentTime - chptr->users_last >= MAX_VCHAN_TIME))
-        {
-          if (chptr->users == 0)
-          {
-            if (uplink && IsCapable(uplink, CAP_LL))
-            {
-              sendto_one(uplink, ":%s DROP %s", me.name, chptr->chname);
-            }
-            destroy_channel(chptr);
-          }
-          else
-            chptr->users_last = CurrentTime;
-        }
+	if(uplink && IsCapable(uplink, CAP_LL))
+	   sendto_one(uplink, ":%s DROP %s", me.name, chptr->chname);
+	destroy_channel(chptr);
       }
     }
     else
-#endif
     {
-      if(chptr->users == 0)
+      if ((CurrentTime - chptr->users_last >= CLEANUP_CHANNELS_TIME))
       {
-        if((chptr->users_last + ConfigChannel.persist_time) < CurrentTime)
-	{
-	  if(uplink && IsCapable(uplink, CAP_LL))
-	    sendto_one(uplink, ":%s DROP %s", me.name, chptr->chname);
-	  destroy_channel(chptr);
-	}
-      }
-      else
-      {
-        if ((CurrentTime - chptr->users_last >= CLEANUP_CHANNELS_TIME))
+        if (uplink != NULL && IsCapable(uplink, CAP_LL) && (chptr->locusers == 0))
         {
-          if (uplink
-                 && IsCapable(uplink, CAP_LL) && (chptr->locusers == 0))
-          {
-            sendto_one(uplink, ":%s DROP %s", me.name, chptr->chname);
-            destroy_channel(chptr);
-          }
+          sendto_one(uplink, ":%s DROP %s", me.name, chptr->chname);
+          destroy_channel(chptr);
         }
       }
     }
@@ -614,24 +574,6 @@ destroy_channel(struct Channel *chptr)
 {
   dlink_node *ptr;
   dlink_node *m;
-#ifdef VCHANS
-  struct Channel *root_chptr;
-#endif
-
-  /* Don't ever delete the top of a chain of vchans! */
-#ifdef VCHANS
-  if (IsVchanTop(chptr))
-    return;
-
-  if (IsVchan(chptr))
-  {
-    root_chptr = chptr->root_chptr;
-    /* remove from vchan double link list */
-    m = dlinkFind(&root_chptr->vchan_list, chptr);
-    dlinkDelete(m, &root_chptr->vchan_list);
-    free_dlink_node(m);
-  }
-#endif
 
   /* Walk through all the dlink's pointing to members of this channel,
    * then walk through each client found from each dlink, removing
@@ -738,11 +680,6 @@ delete_members(struct Channel *chptr, dlink_list * list)
     }
 
     who->user->joined--;
-
-#ifdef VCHANS
-    if (IsVchan(chptr))
-      del_vchan_from_client_cache(who, chptr);
-#endif
 
     /* remove reference to who from chptr */
     dlinkDelete(ptr, list);

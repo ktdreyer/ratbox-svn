@@ -275,8 +275,6 @@ int   class_redirport_var;
 %token  USE_HELP
 %token  USE_INVEX
 %token  USE_KNOCK
-%token  USE_VCHANS
-%token  VCHANS_OPER_ONLY
 %token  VHOST
 %token  VHOST6
 %token  WARN
@@ -2573,9 +2571,7 @@ channel_item:       channel_use_except |
                     channel_use_halfops |
                     channel_use_invex |
                     channel_use_knock |
-                    channel_use_vchans |
 		    channel_use_anonops |
-		    channel_vchans_oper_only |
                     channel_max_bans |
                     channel_knock_delay |
 		    channel_knock_delay_channel |
@@ -2675,24 +2671,6 @@ channel_use_knock:   USE_KNOCK '=' TYES ';'
   {
     ConfigChannel.use_knock = 0;
   } ;
-
-
-channel_use_vchans: USE_VCHANS '=' TYES ';'
-  { 
-#ifdef VCHANS
-    ConfigChannel.use_vchans = 1;
-#endif
-  }
-    |
-    USE_VCHANS '=' TNO ';'
-  { ConfigChannel.use_vchans = 0; };
-
-
-channel_vchans_oper_only: VCHANS_OPER_ONLY '=' TYES ';'
-  { ConfigChannel.vchans_oper_only = 1; }
-    |
-    VCHANS_OPER_ONLY '=' TNO ';'
-  { ConfigChannel.vchans_oper_only = 0; };
 
 
 channel_knock_delay: KNOCK_DELAY '=' timespec ';'

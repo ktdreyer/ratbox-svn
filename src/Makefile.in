@@ -58,7 +58,6 @@ BASE_SRCS =                     \
   balloc.c			\
   channel.c                     \
   channel_mode.c		\
-  vchannel.c                    \
   class.c                       \
   client.c                      \
   dynlink.c			\
