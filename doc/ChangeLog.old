@@ -1,3 +1,12 @@
+*** 20001116_7 by toot
+(quiet_on_ban stuff)
+  +o/+v should be able to speak even if banned
+  only check local connections, to save CPU, and avoid "desync" messages on mixed nets
+  take account of +e's
+
+it's safe to send more than 3 +b/e/d/I modes on a netjoin, so use upto MAXMODEPARAMS
+
+
 *** 20001116_6 by toot
 removed mo_knock, m_knock is fine for opers.
 
