@@ -22,6 +22,7 @@
  *
  *   $Id$
  */
+#include "tools.h"
 #include "handlers.h"
 #include "client.h"
 #include "ircd.h"
@@ -58,7 +59,7 @@ char *_version = "20001122";
 int mo_die(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
   struct Client* acptr;
-  int      i;
+  dlink_node *ptr;
 
   if (!IsOperDie(sptr))
     {
@@ -82,29 +83,36 @@ int mo_die(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         }
     }
 
-  for (i = 0; i <= highest_fd; i++)
+  for(ptr = lclient_list.head; ptr; ptr = ptr->next)
     {
-      if (!(acptr = local[i]))
-        continue;
-      if (IsClient(acptr))
-        {
-          if(IsAnyOper(acptr))
-            sendto_one(acptr,
-                       ":%s NOTICE %s :Server Terminating. %s",
-                       me.name, acptr->name,
-                       get_client_name(sptr, HIDE_IP));
-          else
-            sendto_one(acptr,
-                       ":%s NOTICE %s :Server Terminating. %s",
-                       me.name, acptr->name,
-                       get_client_name(sptr, MASK_IP));
-        }
-      else if (IsServer(acptr))
-        sendto_one(acptr, ":%s ERROR :Terminated by %s",
-                   me.name, get_client_name(sptr, MASK_IP));
+      acptr = ptr->data;
+
+      sendto_one(acptr,
+		 ":%s NOTICE %s :Server Terminating. %s",
+		 me.name, acptr->name,
+		 get_client_name(sptr, MASK_IP));
     }
+
+  for(ptr = lclient_list.head; ptr; ptr = ptr->next)
+    {
+      acptr = ptr->data;
+
+      sendto_one(acptr,
+		 ":%s NOTICE %s :Server Terminating. %s",
+		 me.name, acptr->name,
+		 get_client_name(sptr, HIDE_IP));
+    }
+
+  for(ptr = serv_list.head; ptr; ptr = ptr->next)
+    {
+      acptr = ptr->data;
+
+      sendto_one(acptr, ":%s ERROR :Terminated by %s",
+		 me.name, get_client_name(sptr, MASK_IP));
+    }
+
   /*
-   * XXX we called flush_connections() here. Read server_rebot()
+   * XXX we called flush_connections() here. Read server_reboot()
    * for an explanation as to what we should do.
    *     -- adrian
    */
