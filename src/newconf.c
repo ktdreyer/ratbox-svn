@@ -545,6 +545,8 @@ void	newconf_init()
 			conf_set_general_disable_auth);
 	add_conf_item("general", "connect_timeout", CF_TIME,
 			conf_set_general_connect_timeout);
+        add_conf_item("general", "burst_away", CF_YESNO,
+        		conf_set_general_burst_away);
 #ifdef IPV6
 	add_conf_item("general", "fallback_to_ip6_int", CF_YESNO,
 			conf_set_general_fallback_to_ip6_int);
@@ -2560,6 +2562,11 @@ void	conf_set_general_throttle_time(void *data)
 void	conf_set_general_connect_timeout(void *data)
 {
 	ConfigFileEntry.connect_timeout = *(unsigned int*)data;
+}
+
+void	conf_set_general_burst_away(void *data)
+{
+	ConfigFileEntry.burst_away = *(unsigned int*)data;
 }
 
 #ifdef IPV6

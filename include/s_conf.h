@@ -233,6 +233,7 @@ struct config_file_entry
   int           use_whois_actually;
   int		disable_auth;
   int		connect_timeout;
+  int		burst_away;
 #ifdef IPV6
   int		fallback_to_ip6_int;
 #endif
