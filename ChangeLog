@@ -1,3 +1,18 @@
+androsyn    2003/09/17 10:46:22 EDT	(20030917_1)
+
+  Modified files:
+    modules              m_join.c 
+    modules/core         m_sjoin.c 
+  Log:
+  Make the flags struct static as they clash on static builds..the question is
+  though, should these be in the main ircd somewhere?
+  
+  Revision  Changes    Path
+  1.189     +2 -2      ircd-ratbox/modules/core/m_sjoin.c
+  1.140     +2 -2      ircd-ratbox/modules/m_join.c
+
+
+
 androsyn    2003/09/17 10:40:37 EDT	(20030917_0)
 
   Modified files:
