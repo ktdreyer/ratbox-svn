@@ -1,3 +1,18 @@
+androsyn    2002/12/16 08:14:13 UTC	(20021216_14)
+
+  Modified files:
+    src                  balloc.c send.c 
+  Log:
+  Don't let the block heap garbage collection run too long at one shot..it can
+  be kinda greedy with cpu.  Also add a check in sendto_server() to see if
+  there is anybody to actually send to if not just return
+  
+  Revision  Changes    Path
+  7.51      +3 -2      ircd-ratbox/src/balloc.c
+  7.232     +7 -0      ircd-ratbox/src/send.c
+
+
+
 androsyn    2002/12/16 08:09:06 UTC	(20021216_13)
 
   Modified files:
