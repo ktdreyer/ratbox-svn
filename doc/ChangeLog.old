@@ -1,3 +1,7 @@
+*** 20010420_2 by androsyn
+Added TODO for static modules
+
+
 *** 20010420_1 by db
 - removed function in m_names recoded m_names a bit
 - made set_channel_mode_flags global
