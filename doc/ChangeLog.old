@@ -1,3 +1,18 @@
+*** 20001201_1 by adrian
+
+
+add a flush list, which looks precisely like a socket timeout as it is
+right now, but its designed to be used if we want to flush data out
+at a certain time rather than immedidately.
+
+Think "flood protection".
+
+Note that this is implemented inside the comm_checktimeouts() loop.
+This is done because we want to eventually only have exactly *one*
+walk of the entire fd list/clients once a second, rather than multiple.
+
+
+
 *** 20001130_22 by db
 - majorly reworked m_sjoin.c remove_our_ops and channel.c send_mode_list
   because of the original RFC that started this stupidity off, trying to
