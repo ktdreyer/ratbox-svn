@@ -1,3 +1,9 @@
+*** 20010220_6 by wcampbel
+Revised custom.po, Added the README for the translations.  I'll create
+a Makefile (might need help) to install a specific language, and to do 
+maintainance on each .po file.  Any contributions will be appreciated
+
+
 *** 20010220_5 by wcampbel
 Directory /cvsroot/ircd-hybrid-7/messages/translations added to the repository
 
