@@ -1836,10 +1836,10 @@ remove_ban_list(struct Channel *chptr, struct Client *source_p,
 			/* remove trailing space */
 			*(pbuf - 1) = '\0';
 
-			sendto_channel_local(ALL_MEMBERS, chptr, "%s%s",
+			sendto_channel_local(ALL_MEMBERS, chptr, "%s %s",
 					     lmodebuf, lparabuf);
 			sendto_server(source_p, chptr, cap, CAP_TS6,
-				      "%s%s", lmodebuf, lparabuf);
+				      "%s %s", lmodebuf, lparabuf);
 
 			cur_len = mlen;
 			mbuf = lmodebuf + mlen;
@@ -1855,7 +1855,7 @@ remove_ban_list(struct Channel *chptr, struct Client *source_p,
 	}
 
 	*(pbuf - 1) = '\0';
-	sendto_channel_local(ALL_MEMBERS, chptr, "%s%s", lmodebuf, lparabuf);
+	sendto_channel_local(ALL_MEMBERS, chptr, "%s %s", lmodebuf, lparabuf);
 	sendto_server(source_p, chptr, cap, CAP_TS6,
 		      "%s%s", lmodebuf, lparabuf);
 
