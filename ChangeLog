@@ -1,3 +1,32 @@
+leeh        2004/01/15 16:38:35 EST	(20040115_16)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+    include              config.h s_userserv.h 
+    src                  Makefile.in 
+  Added files:
+    include              s_chanserv.h 
+    src/s_chanserv       .cvsignore .depend Makefile.in s_c_db.c 
+                         s_chanserv.c 
+  Log:
+  - added the beginnings of chanserv
+  
+  Revision  Changes    Path
+  1.9       +1 -0      rserv/autoconf/configure.in
+  1.9       +2 -0      rserv/configure
+  1.15      +3 -1      rserv/include/config.h
+  1.1       +42 -0     rserv/include/s_chanserv.h (new)
+  1.4       +1 -0      rserv/include/s_userserv.h
+  1.16      +2 -2      rserv/src/Makefile.in
+  1.1       +1 -0      rserv/src/s_chanserv/.cvsignore (new)
+  1.1       +8 -0      rserv/src/s_chanserv/.depend (new)
+  1.1       +44 -0     rserv/src/s_chanserv/Makefile.in (new)
+  1.1       +70 -0     rserv/src/s_chanserv/s_c_db.c (new)
+  1.1       +125 -0    rserv/src/s_chanserv/s_chanserv.c (new)
+
+
+
 leeh        2004/01/15 15:56:57 EST	(20040115_15)
 
   Modified files:
