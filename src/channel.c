@@ -4384,7 +4384,7 @@ free_channel_list(dlink_list * list)
     actualBan = ptr->data;
     MyFree(actualBan->banstr);
     MyFree(actualBan->who);
-    MyFree(actualBan);
+    BlockHeapFree(ban_heap, actualBan);
 
     free_dlink_node(ptr);
   }

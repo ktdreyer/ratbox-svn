@@ -636,9 +636,9 @@ nick_from_server(struct Client *client_p, struct Client *source_p, int parc,
        while (*m)
        {
          flag = user_modes_from_c_to_bitmask[(unsigned char)*m];
-	 if(flag & FLAGS_INVISIBLE)
+	 if(!(source_p->umodes & FLAGS_INVISIBLE) && (flag & FLAGS_INVISIBLE))
 	   Count.invisi++;
-	 if(flag & FLAGS_OPER)
+	 if(!(source_p->umodes & FLAGS_OPER) && (flag & FLAGS_OPER))
 	   Count.oper++;
 
 	 source_p->umodes |= flag & SEND_UMODES;
