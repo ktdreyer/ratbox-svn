@@ -49,6 +49,42 @@ int max_mods = MODS_INCREMENT;
 static void increase_modlist(void);
 static int findmodule_byname (char *name);
 
+static struct module_path *mod_paths = NULL;
+
+static struct module_path *
+mod_find_path(char *path)
+{
+	struct module_path *pathst = mod_paths;
+	
+	if (!pathst)
+		return NULL;
+	
+	for (pathst = mod_paths; pathst; pathst = pathst->next)
+		if (!strcmp(path, pathst->path))
+			return pathst;
+}
+			  
+void
+mod_add_path(char *path)
+{
+	struct module_path *pathst = NULL;
+	
+	if (mod_find_path(path))
+		return;
+	
+	if (!mod_paths) {
+		mod_paths = malloc (sizeof (struct module_path));
+		mod_paths->prev = NULL;
+		mod_paths->next = NULL;
+	}
+	
+	for (pathst = mod_paths; pathst->next; pathst = pathst->next)
+		;
+	
+	strcpy(pathst->path, path);
+}
+
+	
 static char *
 basename(char *path)
 {
@@ -65,7 +101,8 @@ basename(char *path)
 }
 
 
-static int findmodule_byname (char *name)
+static int 
+findmodule_byname (char *name)
 {
   int i;
 
@@ -198,23 +235,51 @@ load_one_module (char *path)
   void (*initfunc)(void) = NULL;
   char **verp;
   char *ver;
+  char realpath[MAXPATHLEN];
+  struct module_path *pathst;
 
   mod_basename = basename(path);
-
-  errno = 0;
-  tmpptr = dlopen (path, RTLD_NOW);
-
-  if (tmpptr == NULL)
-    {
-      const char *err = dlerror();
-
-      sendto_realops_flags (FLAGS_ALL,
-			    "Error loading module %s: %s", mod_basename, err);
-      log (L_WARN, "Error loading module %s: %s", mod_basename, err);
-      MyFree (mod_basename);
-      return -1;
-    }
-
+  
+  if (strchr(path, '/')) {
+	  /* absolute pathname, try it */
+	  errno = 0;
+	  tmpptr = dlopen (path, RTLD_NOW);
+	  
+	  if (tmpptr == NULL)
+	  {
+		  const char *err = dlerror();
+		  
+		  sendto_realops_flags (FLAGS_ALL,
+								"Error loading module %s: %s", mod_basename, err);
+		  log (L_WARN, "Error loading module %s: %s", mod_basename, err);
+		  MyFree (mod_basename);
+		  return -1;
+	  }
+  }
+  else
+  {
+	  /* non-absolute path, try all module paths */
+	  for (pathst = mod_paths; pathst; pathst = pathst->next) {
+		  sprintf(realpath, "%s/%s", pathst->path, path);
+		  errno = 0;
+		  tmpptr = dlopen (realpath, RTLD_NOW);
+		  
+		  if (tmpptr == NULL)
+		  {
+			  const char *err = dlerror();
+			  
+			  if (errno == ENOENT) /* module not found, try next path */
+				  continue;
+			  
+			  sendto_realops_flags (FLAGS_ALL,
+									"Error loading module %s: %s", mod_basename, err);
+			  log (L_WARN, "Error loading module %s: %s", mod_basename, err);
+			  MyFree (mod_basename);
+			  return -1;
+		  }
+	  }
+  }
+  
   initfunc = (void (*)(void))dlsym (tmpptr, "_modinit");
   if (!initfunc)
     {

@@ -22,6 +22,8 @@
 #ifndef INCLUDED_modules_h
 #define INCLUDED_modules_h
 
+#include <sys/param.h>
+
 #include "ircd_handler.h"
 #include "msg.h"
 #include "memdebug.h"
@@ -31,6 +33,16 @@ struct module {
   char *version;
   void *address;
 };
+
+struct module_path
+{
+	struct module_path *next;
+	struct module_pathx *prev;
+	char path[MAXPATHLEN];
+};
+
+/* add a path */
+void mod_add_path(char *path);
 
 /* load a module */
 extern void load_module(char *path);

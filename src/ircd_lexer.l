@@ -192,6 +192,7 @@ stats_p_notice	        { return STATS_P_NOTICE; }
 glines                  { return GLINES; }
 modules                 { return MODULES; }
 module                  { return MODULE; }
+path                    { return PATH; }
 
 oper_only_umodes        { return OPER_ONLY_UMODES; }
 bots                    { return T_BOTS; }

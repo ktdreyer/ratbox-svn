@@ -198,6 +198,7 @@ int   class_redirport_var;
 %token  T_CALLERID
 %token  T_WALLOP
 %token  OPER_ONLY_UMODES
+%token  PATH
 
 %%
 conf:   
@@ -233,12 +234,18 @@ modules_entry:          MODULES
 modules_items:   modules_items modules_item |
                     modules_item
 
-modules_item:    modules_module
+modules_item:    modules_module | modules_path
 
 modules_module:  MODULE '=' QSTRING ';'
 {
   load_one_module (yylval.string);
 };
+
+modules_path: PATH '=' QSTRING ';'
+{
+	mod_add_path(yylval.string);
+};
+
 
 /***************************************************************************
  *  section serverinfo
