@@ -101,4 +101,6 @@ extern struct cachefile *hash_find_help(const char *name, int flags);
 extern void add_to_nd_hash(const char *name, struct nd_entry *nd);
 extern struct nd_entry *hash_find_nd(const char *name);
 
+extern void hash_stats(struct Client *);
+
 #endif /* INCLUDED_hash_h */

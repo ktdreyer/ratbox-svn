@@ -879,3 +879,72 @@ hash_find_nd(const char *name)
 	return NULL;
 }
 
+static void
+output_hash(struct Client *source_p, const char *name, int length, int *counts, int deepest)
+{
+	unsigned long total = 0;
+	int i;
+
+	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+			"B :%s Hash Statistics", name);
+
+	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+			"B :Size: %d Empty: %d (%.3f%%)",
+			length, counts[0], 
+			(float) ((counts[0]*100) / (float) length));
+
+	for(i = 1; i < 11; i++)
+	{
+		total += (counts[i] * i);
+	}
+
+	/* dont want to divide by 0! --fl */
+	if(counts[0] != length)
+		sendto_one_numeric(source_p, RPL_STATSDEBUG,
+				"B :Average depth: %.3f/%.3f Highest depth: %d",
+				(float) (total / (length - counts[0])),
+				(float) (total / length), deepest);
+
+	for(i = 0; i < 11; i++)
+	{
+		sendto_one_numeric(source_p, RPL_STATSDEBUG,
+				"B :Nodes with %d entries: %d",
+				i, counts[i]);
+	}
+}
+	
+
+static void
+count_hash(struct Client *source_p, dlink_list *table, int length, const char *name)
+{
+	int counts[11];
+	int deepest = 0;
+	int i;
+
+	memset(counts, 0, sizeof(counts));
+	
+	for(i = 0; i < length; i++)
+	{
+		if(dlink_list_length(&table[i]) >= 10)
+			counts[10]++;
+		else
+			counts[dlink_list_length(&table[i])]++;
+
+		if(dlink_list_length(&table[i]) > deepest)
+			deepest = dlink_list_length(&table[i]);
+	}
+
+	output_hash(source_p, name, length, counts, deepest);
+}
+
+void
+hash_stats(struct Client *source_p)
+{
+	count_hash(source_p, channelTable, CH_MAX, "Channel");
+	sendto_one_numeric(source_p, RPL_STATSDEBUG, "B :--");
+	count_hash(source_p, clientTable, U_MAX, "Client");
+	sendto_one_numeric(source_p, RPL_STATSDEBUG, "B :--");
+	count_hash(source_p, idTable, U_MAX, "ID");
+	sendto_one_numeric(source_p, RPL_STATSDEBUG, "B :--");
+	count_hash(source_p, hostTable, HOST_MAX, "Hostname");
+}	

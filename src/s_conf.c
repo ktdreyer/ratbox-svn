@@ -418,7 +418,8 @@ add_ip_limit(struct Client *client_p, struct ConfItem *aconf)
 			}
 			return (0);
 		}
-		((unsigned long) pnode->data)++;
+
+		pnode->data++;
 	}
 	return 1;
 }
@@ -436,7 +437,7 @@ remove_ip_limit(struct Client *client_p, struct ConfItem *aconf)
 	if(pnode == NULL)
 		return;
 
-	((unsigned long) pnode->data)--;
+	pnode->data--;
 	if(((unsigned long) pnode->data) == 0)
 	{
 		patricia_remove(ConfIpLimits(aconf), pnode);
