@@ -131,6 +131,14 @@ int m_admin(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   else
     sendto_one(sptr, form_str(ERR_NOADMININFO),
                me.name, parv[0], me.name);
+
+  if(ConfigFileEntry.hub)
+    sendto_one(sptr, ":%s NOTICE %s :Server is a HUB",
+                     me.name,parv[0]);
+  else
+    sendto_one(sptr, ":%s NOTICE %s :Server is a LEAF",
+                     me.name,parv[0]);
+
   return 0;
 }
 

@@ -2115,6 +2115,12 @@ static struct ConfItem* oldParseOneLine(char* line,struct ConfItem* aconf,
       aconf->status = CONF_ME;
       add_host_user_port_fields(aconf,host_field,user_field,port_field);
       conf_add_me(aconf);
+      ConfigFileEntry.hub = 0;
+      if(port_field)
+        {
+          if(*port_field == '1')
+            ConfigFileEntry.hub = 1;
+	}
       break;
 
     case 'n': /* connect in case of lp failures     */
