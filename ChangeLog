@@ -1,3 +1,16 @@
+androsyn    2003/07/22 10:50:28 EDT	(20030722_0)
+
+  Modified files:
+    src                  s_bsd_epoll.c 
+  Log:
+  Seems bleeding edge glibc's have sys/epoll.h now.  Remove our little hack
+  for it.  Still needs linux > 2.5.49 obviously.
+  
+  Revision  Changes    Path
+  1.12      +1 -49     ircd-ratbox/src/s_bsd_epoll.c
+
+
+
 leeh        2003/07/21 12:33:21 EDT	(20030721_0)
 
   Modified files:
