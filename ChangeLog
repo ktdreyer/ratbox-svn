@@ -1,3 +1,26 @@
+leeh        2003/08/13 12:35:41 EDT	(20030813_1)
+
+  Modified files:
+    include              client.h 
+    modules              m_pass.c m_svinfo.c 
+    modules/core         m_server.c m_sjoin.c 
+    src                  client.c s_serv.c s_user.c send.c 
+  Log:
+  - some more TS6 cleanups..
+  
+  Revision  Changes    Path
+  7.214     +8 -11     ircd-ratbox/include/client.h
+  1.120     +33 -9     ircd-ratbox/modules/core/m_server.c
+  1.181     +2 -2      ircd-ratbox/modules/core/m_sjoin.c
+  1.39      +13 -4     ircd-ratbox/modules/m_pass.c
+  1.53      +3 -41     ircd-ratbox/modules/m_svinfo.c
+  7.400     +7 -3      ircd-ratbox/src/client.c
+  7.348     +33 -15    ircd-ratbox/src/s_serv.c
+  7.284     +1 -1      ircd-ratbox/src/s_user.c
+  7.251     +4 -4      ircd-ratbox/src/send.c
+
+
+
 leeh        2003/08/12 21:02:32 EDT	(20030813_0)
 
   Modified files:
