@@ -1,3 +1,7 @@
+*** 20001229_13 by wcampbel
+Minor correction to send.txt
+
+
 *** 20001229_12 by fl_
 
 - Added sendto_match_noncap_servs to send.c, and documented it
