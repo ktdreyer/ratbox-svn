@@ -385,8 +385,7 @@ static void ms_sjoin(struct Client *client_p,
    */
   if ((p = strchr(s, ' ')) != NULL)
   {
-    *p = '\0';
-    p++;
+    *p++ = '\0';
   }
 
   while (s)
@@ -548,8 +547,7 @@ nextnick:
        */
       if (s && ((p = strchr(s, ' ')) != NULL))
 	{
-	  *p = '\0';
-	  p++;
+	  *p++ = '\0';
 	}
 	/* nah, the while will exit if theres nothing left.. and its
 	 * possible we still need to parse one final nick which doesnthave a
