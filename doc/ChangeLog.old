@@ -1,3 +1,15 @@
+a1kmm       2002/01/01 00:08:38 EST	(20020101_0)
+
+  Modified files:
+    modules              m_capab.c 
+  Log:
+  - Handle CAPAB x y z the same as CAPAB :x y z
+  
+  Revision  Changes    Path
+  1.25      +39 -35    ircd-hybrid-7/modules/m_capab.c
+
+
+
 db          2001/12/31 10:22:54 EST	(20011231_4)
 
   Modified files:
