@@ -1,3 +1,20 @@
+androsyn    2002/08/10 17:08:56 EDT	(20020810_34)
+
+  Modified files:
+    contrib              m_opme.c 
+    include              client.h 
+    src                  ircd.c s_serv.c 
+  Log:
+  Fixed server bursts.  We now add things to the list backwards..
+  
+  Revision  Changes    Path
+  1.30      +5 -5      ircd-ratbox/contrib/m_opme.c
+  7.161     +1 -1      ircd-ratbox/include/client.h
+  7.245     +1 -1      ircd-ratbox/src/ircd.c
+  7.278     +1 -1      ircd-ratbox/src/s_serv.c
+
+
+
 androsyn    2002/08/10 16:24:18 EDT	(20020810_33)
 
   Modified files:
