@@ -1,3 +1,14 @@
+*** 20000201_1 by db
+- converted separate user/host forms to user="user@host.part"; forms
+  it looks nicer, and easier for admins to work with I think. Plus recommended
+  by the #coder-com crew. ok.
+- fixed stupid in initconf where it missed # commented out lines and
+  tried to parse old format as new...
+- folded in the old -5 nick collide code already folded into the -6 tree.
+  its #ifdef'ed for future fixes...
+
+
+
 *** 20000131_1 by db
 - improvements to connect section. allow multiple hub_masks etc.
 
