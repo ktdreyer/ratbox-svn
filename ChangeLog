@@ -1,3 +1,18 @@
+leeh        2002/08/15 02:39:59 EDT	(20020815_5)
+
+  Modified files:
+    modules              m_trace.c 
+    modules/core         m_server.c 
+  Log:
+  - speed improvements for trace, use the usercnt
+  - SetHidden -> IsHidden
+  
+  Revision  Changes    Path
+  1.93      +2 -2      ircd-ratbox/modules/core/m_server.c
+  1.56      +16 -11    ircd-ratbox/modules/m_trace.c
+
+
+
 androsyn    2002/08/15 01:04:57 EDT	(20020815_4)
 
   Modified files:
