@@ -1,3 +1,15 @@
+androsyn    2003/09/10 22:23:22 EDT	(20030911_0)
+
+  Modified files:
+    src                  commio.c 
+  Log:
+  Update description
+  
+  Revision  Changes    Path
+  1.2       +1 -2      ircd-ratbox/src/commio.c
+
+
+
 androsyn    2003/09/10 13:44:09 EDT	(20030910_6)
 
   Added files:
