@@ -30,12 +30,6 @@
 #include "config.h"
 
 /*
- * form_str - return a format string for a message number
- * messages are defined below
- */
-extern const char *form_str(int);
-
-/*
  * Reserve numerics 000-099 for server-client connections where the client
  * is local to the server. If any server is passed a numeric in this range
  * from another server then it is remapped to 100-199. -avalon
@@ -321,5 +315,9 @@ extern const char *form_str(int);
 #define RPL_NOTESTLINE		726
 
 #define ERR_LAST_ERR_MSG     999
+
+extern const char *numeric_replies[];
+#define form_str(x) numeric_replies[x] == NULL ? numeric_replies[ERR_LAST_ERR_MSG] : numeric_replies[x]
+
 
 #endif /* INCLUDED_numeric_h */
