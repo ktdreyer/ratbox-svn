@@ -1,3 +1,16 @@
+androsyn    2002/11/13 04:49:03 UTC	(20021113_4)
+
+  Modified files:
+    src                  s_bsd_epoll.c s_bsd_kqueue.c 
+  Log:
+  Make both of these use ilog() instead of perror()
+  
+  Revision  Changes    Path
+  1.3       +1 -1      ircd-ratbox/src/s_bsd_epoll.c
+  1.31      +1 -1      ircd-ratbox/src/s_bsd_kqueue.c
+
+
+
 androsyn    2002/11/13 04:34:00 UTC	(20021113_3)
 
   Modified files:
