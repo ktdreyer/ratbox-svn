@@ -150,7 +150,7 @@ mod_clear_paths(void)
   dlink_node *node, *next;
 
   next = mod_paths.head->next;
-  while(node = next)
+  while((node = next))
   {
     next = node->next;
     pathst = (struct module_path *)node->data;

@@ -321,7 +321,7 @@ static void ms_gline(struct Client *client_p,
 
       /* Its plausible that the server and/or client dont actually exist, and its
        * faked, as the oper isnt sending the gline.. check theyre real --fl_ */
-      if(acptr = find_server(oper_server))
+      if((acptr = find_server(oper_server)))
         {
           if(!(acptr = find_client(oper_user, NULL)))
             return;
