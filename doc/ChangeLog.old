@@ -1,3 +1,9 @@
+*** 20010106_32 by db
+- forgot a ':' in the notice telling chanops about an attempted kick
+  by a halfop. oops
+
+
+
 *** 20010106_31 by ejb
 - initial start on INVARIANTS support.
 
