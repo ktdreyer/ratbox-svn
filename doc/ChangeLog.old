@@ -1,3 +1,7 @@
+*** 20010420_7 by a1kmm
+- Removed wrong log message that was in with the real one.
+
+
 *** 20010420_6 by a1kmm
 - Fixed some compiler warnings.
 
