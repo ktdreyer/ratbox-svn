@@ -1,3 +1,16 @@
+a1kmm       2001/12/14 02:47:11 EST	(20011214_2)
+
+  Modified files:
+    src                  channel_mode.c 
+  Log:
+  - Don't add ' ' to channel parambuffers unless we just added a parameter
+    mode.
+  
+  Revision  Changes    Path
+  7.10      +30 -22    ircd-hybrid-7/src/channel_mode.c
+
+
+
 bill        2001/12/13 23:20:55 EST	(20011214_1)
 
   Modified files:
