@@ -1131,13 +1131,13 @@ static int nickkilldone(struct Client *cptr, struct Client *sptr, int parc,
           while (*m)
             {
               flag = user_modes_from_c_to_bitmask[(int)(*m & 0x1F)];
-              if( flag == FLAGS_INVISIBLE )
+              if ((flag & FLAGS_INVISIBLE))
                 {
-                  Count.invisi++;
+                  ++Count.invisi;
                 }
-              if( flag == FLAGS_OPER )
+              if ((flag & FLAGS_OPER))
                 {
-                  Count.oper++;
+                  ++Count.oper;
                 }
               sptr->umodes |= flag & SEND_UMODES;
               m++;
@@ -1762,7 +1762,7 @@ static int do_user(char* nick, struct Client* cptr, struct Client* sptr,
 #endif
 
       if (!(oflags & FLAGS_INVISIBLE) && IsInvisible(sptr))
-        Count.invisi++;
+        ++Count.invisi;
       /*
        * don't take the clients word for it, ever
        *  strncpy_irc(user->host, host, HOSTLEN); 
@@ -1869,7 +1869,7 @@ int user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
             {
               if(IsServer(cptr))
                 {
-                  Count.oper--;
+                  ++Count.oper;
 
                   SetOper(sptr);
                   sptr->umodes |= FLAGS_OPER;
@@ -1879,7 +1879,7 @@ int user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
             {
               sptr->umodes &= ~(FLAGS_OPER|FLAGS_LOCOP);
 
-              Count.oper--;
+              --Count.oper;
 
               if (MyConnect(sptr))
                 {
@@ -1948,9 +1948,9 @@ int user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     }
 
   if (!(setflags & FLAGS_INVISIBLE) && IsInvisible(sptr))
-    Count.invisi++;
+    ++Count.invisi;
   if ((setflags & FLAGS_INVISIBLE) && !IsInvisible(sptr))
-    Count.invisi--;
+    --Count.invisi;
   /*
    * compare new flags with old flags and send string which
    * will cause servers to update correctly.
