@@ -108,13 +108,6 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       return exit_client(cptr, cptr, cptr, "NO N line");
     }
 
-  if (GlobalSetOptions.autoconn == 0)
-    {
-      sendto_realops_flags(FLAGS_ALL,"WARNING AUTOCONN is 0, Closing %s",
-			   get_client_name(cptr, TRUE));
-      return exit_client(cptr, cptr, cptr, "AUTOCONNS off");
-    }
-
   if ((acptr = find_server(host)))
     {
       /*
