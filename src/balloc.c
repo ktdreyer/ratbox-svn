@@ -118,6 +118,73 @@ free_block(void *ptr, size_t size)
 #endif
 }
 
+#ifdef DEBUG_BALLOC
+/* Check the list length the very slow way */
+static unsigned long
+slow_list_length(dlink_list *list)
+{
+	dlink_node *ptr;
+	unsigned long count = 0;
+    
+	for (ptr = list->head; ptr; ptr = ptr->next)
+		count++;
+	return count;
+}
+
+/* See how confused we are */
+static void
+bh_sanity_check(BlockHeap *bh)
+{
+	Block *walker;
+	unsigned long real_alloc = 0;
+	unsigned long s_used, s_free;
+	unsigned long blockcount = 0;
+	unsigned long allocated;
+	if(bh == NULL)
+		blockheap_fail("Trying to sanity check a NULL block");		
+	
+	allocated = bh->blocksAllocated * bh->elemsPerBlock;
+	
+	for(walker = bh->base; walker != NULL; walker = walker->next)
+	{
+		blockcount++;
+		s_used = slow_list_length(&walker->used_list);
+		s_free = slow_list_length(&walker->free_list);
+		
+		if(s_used != dlink_list_length(&walker->used_list))
+			blockheap_fail("used link count doesn't match head count");
+		if(s_free != dlink_list_length(&walker->free_list))
+			blockheap_fail("free link count doesn't match head count");
+		
+		if(dlink_list_length(&walker->used_list) + dlink_list_length(&walker->free_list) != bh->elemsPerBlock)
+			blockheap_fail("used_list + free_list != elemsPerBlock");
+
+		real_alloc += dlink_list_length(&walker->used_list);
+		real_alloc += dlink_list_length(&walker->free_list);
+	}
+
+	if(allocated != real_alloc)
+		blockheap_fail("block allocations don't match heap");
+
+	if(bh->blocksAllocated != blockcount)
+		blockheap_fail("blocksAllocated don't match blockcount");
+
+	 
+}
+
+static void
+bh_sanity_check_all(void *unused)
+{
+        dlink_node *ptr;
+	DLINK_FOREACH(ptr, heap_lists.head)
+	{
+		bh_sanity_check(ptr->data);
+	}				
+}
+
+#endif
+
+
 
 /*
  * void initBlockHeap(void)
@@ -136,6 +203,9 @@ initBlockHeap(void)
 	if(zero_fd < 0)
 		blockheap_fail("Failed opening /dev/zero");
 	fd_open(zero_fd, FD_FILE, "Anonymous mmap()");
+#endif
+#ifdef DEBUG_BALLOC
+	eventAdd("bh_sanity_check_all", bh_sanity_check_all, NULL, 45);
 #endif
 	eventAddIsh("block_heap_gc", block_heap_gc, NULL, 30);
 }
