@@ -1,3 +1,7 @@
+*** 20010626_13 by androsyn
+Its seems inlining MyMalloc() doesn't help much...
+
+
 *** 20010626_12 by leeh
 - moved the is_resv() check down to accomodate #x,#y
 
