@@ -35,6 +35,10 @@
 #ifndef INCLUDED_s_newconf_h
 #define INCLUDED_s_newconf_h
 
+#ifdef HAVE_LIBCRYPTO
+#include <openssl/rsa.h>
+#endif
+
 struct ConfItem;
 
 extern dlink_list cluster_conf_list;
