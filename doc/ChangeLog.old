@@ -1,3 +1,8 @@
+*** 20010314_5 by androsyn
+Adds strlcat and strlcpy for systems that don't have them.  configure now
+checks for the existance of such functions on the system. 
+
+
 *** 20010314_4 by davidt
 - Fix multiple user=""; lines per auth{} block slightly.
 - Allow multiple user=""; lines per operator{} block.
