@@ -1,3 +1,15 @@
+leeh        2002/09/18 22:26:21 UTC	(20020918_1)
+
+  Modified files:
+    modules/core         m_message.c 
+  Log:
+  - only call _butone() if source_p is ours..
+  
+  Revision  Changes    Path
+  1.110     +14 -5     ircd-ratbox/modules/core/m_message.c
+
+
+
 leeh        2002/09/18 22:24:10 UTC	(20020918_0)
 
   Modified files:
