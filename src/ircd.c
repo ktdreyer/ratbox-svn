@@ -356,7 +356,6 @@ static void initialize_message_files(void)
  * output       - none
  * side effects - write the pid of the ircd to PPATH
  */
-
 static void write_pidfile(void)
 {
   FBFILE* fd;
@@ -374,6 +373,48 @@ static void write_pidfile(void)
     log(L_ERROR, "Error opening pid file %s", PPATH);
 }
 
+/*
+ * check_pidfile
+ *
+ * inputs       - none
+ * output       - none
+ * side effects - reads pid from pidfile and checks if ircd is in process
+ *                list. if it is, gracefully exits
+ * -kre
+ */
+static void check_pidfile(void)
+{
+  FBFILE* fd;
+  char buff[20];
+  pid_t pidfromfile;
+
+  /* Don't do logging here, since we don't have log() initialised */
+  if ((fd = fbopen(PPATH, "r")))
+  {
+    if (fbgets(buff, 20, fd) == NULL)
+    {
+      /*
+      log(L_ERROR, "Error reading from pid file %s (%s)", PPATH,
+          strerror(errno));
+       */
+    }
+    else
+    {
+      pidfromfile = atoi(buff);
+      if (!kill(pidfromfile, 0))
+      {
+        /* log(L_ERROR, "Server is already running"); */
+        printf("ircd: daemon is already running\n");
+        exit(-1);
+      }
+    }
+    fbclose(fd);
+  }
+  else
+  {
+    /* log(L_ERROR, "Error opening pid file %s", PPATH); */
+  }
+}
 
 int main(int argc, char *argv[])
 {
@@ -458,6 +499,9 @@ int main(int argc, char *argv[])
 
   /* We need this to initialise the fd array before anything else */
   fdlist_init();
+
+  /* Check if there is pidfile and daemon already running */
+  check_pidfile();
 
   /* Init the event subsystem */
   eventInit();
