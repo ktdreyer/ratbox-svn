@@ -116,6 +116,9 @@ static void mo_forcejoin(struct Client *client_p, struct Client *source_p,
     return;
   }
 
+  if(!IsClient(target_p))
+    return;
+
   /* select our modes from parv[2] if they exist... (chanop)*/
   if(*parv[2] == '@')
   {
@@ -274,6 +277,9 @@ static void mo_forcepart(struct Client *client_p, struct Client *source_p,
                source_p->name, parv[1]);
     return;
   }
+
+  if(!IsClient(target_p))
+    return;
 
   if((chptr = hash_find_channel(parv[2])) == NULL)
   {

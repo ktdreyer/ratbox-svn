@@ -20,11 +20,11 @@ Lee H <lee@leeh.co.uk>
 Index: include/s_conf.h
 ===================================================================
 RCS file: /cvsroot/ircd-hybrid-7/include/s_conf.h,v
-retrieving revision 7.179
-diff -u -r7.179 s_conf.h
---- include/s_conf.h	25 Apr 2002 17:53:18 -0000	7.179
-+++ include/s_conf.h	8 May 2002 12:06:50 -0000
-@@ -322,6 +322,7 @@
+retrieving revision 7.180
+diff -u -r7.180 s_conf.h
+--- include/s_conf.h	24 May 2002 23:34:08 -0000	7.180
++++ include/s_conf.h	3 Jun 2002 15:53:52 -0000
+@@ -318,6 +318,7 @@
  /* End GLOBAL section */
  
  dlink_list temporary_klines;
@@ -32,7 +32,7 @@ diff -u -r7.179 s_conf.h
  dlink_list temporary_ip_klines;
  
  extern void clear_ip_hash_table(void);
-@@ -382,6 +383,7 @@
+@@ -378,6 +379,7 @@
  			       const char *oper_reason,
  			       const char *current_date, time_t cur_time );
  extern  void    add_temp_kline(struct ConfItem *);
@@ -43,11 +43,11 @@ diff -u -r7.179 s_conf.h
 Index: modules/m_kline.c
 ===================================================================
 RCS file: /cvsroot/ircd-hybrid-7/modules/m_kline.c,v
-retrieving revision 1.100
-diff -u -r1.100 m_kline.c
---- modules/m_kline.c	26 Apr 2002 11:51:19 -0000	1.100
-+++ modules/m_kline.c	8 May 2002 12:06:52 -0000
-@@ -97,12 +97,17 @@
+retrieving revision 1.102
+diff -u -r1.102 m_kline.c
+--- modules/m_kline.c	24 May 2002 23:34:20 -0000	1.102
++++ modules/m_kline.c	3 Jun 2002 15:53:54 -0000
+@@ -90,12 +90,17 @@
  static int valid_user_host(struct Client *source_p, char *user, char *host);
  static int valid_wild_card(char *user, char *host);
  static int already_placed_kline(struct Client*, char*, char*);
@@ -66,7 +66,7 @@ diff -u -r1.100 m_kline.c
  
  
  char buffer[IRCD_BUFSIZE];
-@@ -406,6 +411,43 @@
+@@ -397,6 +402,43 @@
   check_klines();
  }
  
@@ -110,7 +110,7 @@ diff -u -r1.100 m_kline.c
  /*
   * valid_tkline()
   * 
-@@ -439,8 +481,8 @@
+@@ -430,8 +472,8 @@
    if(result == 0)
      result = 1;
  
@@ -121,7 +121,7 @@ diff -u -r1.100 m_kline.c
  
    result = (time_t)result * (time_t)60;  /* turn it into seconds */
  
-@@ -583,6 +625,8 @@
+@@ -574,6 +616,8 @@
    char dlbuffer[1024];
    const char* current_date;
    time_t cur_time;
@@ -130,7 +130,7 @@ diff -u -r1.100 m_kline.c
  
    if(!IsOperK(source_p))
      {
-@@ -590,7 +634,23 @@
+@@ -581,7 +625,23 @@
        return;
      }
  
@@ -155,7 +155,7 @@ diff -u -r1.100 m_kline.c
    strlcpy(cidr_form_host, dlhost, HOSTLEN);
    cidr_form_host[HOSTLEN] = '\0';
  
-@@ -601,7 +661,7 @@
+@@ -592,7 +652,7 @@
                me.name, parv[0]);
     return;
  #else
@@ -164,7 +164,7 @@ diff -u -r1.100 m_kline.c
          return;
  
        if(!target_p->user)
-@@ -667,14 +727,15 @@
+@@ -658,14 +718,15 @@
  #endif
      }
  
@@ -184,7 +184,7 @@ diff -u -r1.100 m_kline.c
        else
          reason = "No reason";
      }
-@@ -735,18 +796,23 @@
+@@ -726,18 +787,23 @@
        oper_reason++;
      }
  
@@ -220,11 +220,11 @@ diff -u -r1.100 m_kline.c
 Index: modules/m_unkline.c
 ===================================================================
 RCS file: /cvsroot/ircd-hybrid-7/modules/m_unkline.c,v
-retrieving revision 1.44
-diff -u -r1.44 m_unkline.c
---- modules/m_unkline.c	7 Mar 2002 06:21:48 -0000	1.44
-+++ modules/m_unkline.c	8 May 2002 12:06:52 -0000
-@@ -81,6 +81,7 @@
+retrieving revision 1.45
+diff -u -r1.45 m_unkline.c
+--- modules/m_unkline.c	24 May 2002 23:34:23 -0000	1.45
++++ modules/m_unkline.c	3 Jun 2002 15:53:54 -0000
+@@ -78,6 +78,7 @@
  
  static int flush_write(struct Client *, FBFILE* , char *, char *);
  static int remove_tkline_match(char *,char *);
@@ -232,7 +232,7 @@ diff -u -r1.44 m_unkline.c
  
  
  /*
-@@ -321,6 +322,42 @@
+@@ -318,6 +319,42 @@
  }
  
  /*
@@ -275,7 +275,7 @@ diff -u -r1.44 m_unkline.c
  ** m_undline
  ** added May 28th 2000 by Toby Verrall <toot@melnet.co.uk>
  ** based totally on m_unkline
-@@ -359,6 +396,18 @@
+@@ -356,6 +393,18 @@
        return;
      }
  #endif
@@ -297,11 +297,11 @@ diff -u -r1.44 m_unkline.c
 Index: src/s_conf.c
 ===================================================================
 RCS file: /cvsroot/ircd-hybrid-7/src/s_conf.c,v
-retrieving revision 7.301
-diff -u -r7.301 s_conf.c
---- src/s_conf.c	1 May 2002 17:24:03 -0000	7.301
-+++ src/s_conf.c	8 May 2002 12:06:55 -0000
-@@ -1664,6 +1664,22 @@
+retrieving revision 7.304
+diff -u -r7.304 s_conf.c
+--- src/s_conf.c	31 May 2002 02:21:05 -0000	7.304
++++ src/s_conf.c	3 Jun 2002 15:53:57 -0000
+@@ -1662,6 +1662,22 @@
    add_conf_by_address(aconf->host, CONF_KILL, aconf->user, aconf);
  }
  
@@ -324,7 +324,7 @@ diff -u -r7.301 s_conf.c
  /*
   * cleanup_tklines
   *
-@@ -1676,6 +1692,7 @@
+@@ -1674,6 +1690,7 @@
  cleanup_tklines(void *notused)
  {
    expire_tklines(&temporary_klines);
@@ -332,7 +332,7 @@ diff -u -r7.301 s_conf.c
  }
  
  /*
-@@ -1699,10 +1716,17 @@
+@@ -1697,10 +1714,17 @@
        if (kill_ptr->hold <= CurrentTime)
  	{
            /* Alert opers that a TKline expired - Hwy */
