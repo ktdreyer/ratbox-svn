@@ -162,7 +162,7 @@ void serv_info(struct Client *client_p)
        * been removed. Also, do not allow non opers to see the IP's of servers
        * on stats ?
        */
-      if(IsOper(client_p))
+      if(IsSetOperAdmin(client_p))
         sendto_one(client_p, Lformat, me.name, RPL_STATSLINKINFO,
                    client_p->name, get_client_name(target_p, SHOW_IP),
                    (int)linebuf_len(&target_p->localClient->buf_sendq),
