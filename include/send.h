@@ -52,9 +52,10 @@ extern  void sendto_common_channels_local(struct Client *, const char *,
 extern  void sendto_channel_local(int type, struct Channel *,
                                   const char *, ...) AFP(3, 4);
 
-extern void sendto_channel_remote(struct Client *from, int type,
+extern void sendto_channel_remote(struct Client *one,
+		   struct Client *from, int type,
                    int caps, int nocaps, struct Channel *chptr,
-                   char *pattern, ...) AFP(6, 7);
+                   char *pattern, ...) AFP(7, 8);
 
 extern void sendto_server(struct Client *one, struct Client *source_p,
                           struct Channel *chptr, unsigned long caps,

@@ -209,7 +209,8 @@ m_invite(struct Client *client_p,
                source_p->username, source_p->host, target_p->name,
                chptr->chname);
   }
-  sendto_channel_remote(source_p, ONLY_CHANOPS_HALFOPS, NOCAPS, NOCAPS,
+  sendto_channel_remote(source_p, client_p,
+			ONLY_CHANOPS_HALFOPS, NOCAPS, NOCAPS,
                         chptr, ":%s INVITE %s :%s", parv[0], 
                         target_p->name, vchan->chname);
 
