@@ -1,3 +1,8 @@
+*** 20010714_1 by leeh
+- call m_ignore instead of m_error when issued by client/oper
+  (noticed by jv)
+
+
 *** 20010713_1 by leeh
 - there was a *@* on the end of RPL_STATSQLINE.. quite what its intention
   was I dont know..
