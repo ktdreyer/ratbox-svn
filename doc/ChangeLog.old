@@ -1,3 +1,15 @@
+lusky       2002/04/03 00:35:25 EST	(20020403_1)
+
+  Modified files:
+    include              patchlevel.h 
+  Log:
+  - revved patchlevel to beta13
+  
+  Revision  Changes    Path
+  7.26      +1 -1      ircd-hybrid-7/include/patchlevel.h
+
+
+
 androsyn    2002/04/02 23:02:35 EST	(20020403_0)
 
   Modified files:
