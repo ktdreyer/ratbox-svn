@@ -99,8 +99,6 @@ m_mode(struct Client *client_p, struct Client *source_p, int parc, const char *p
 {
 	struct Channel *chptr = NULL;
 	struct membership *msptr;
-	static char modebuf[BUFSIZE];
-	static char parabuf[BUFSIZE];
 	int n = 2;
 	const char *dest;
 	int operspy = 0;
