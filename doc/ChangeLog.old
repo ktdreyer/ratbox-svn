@@ -1,3 +1,8 @@
+*** 20001230_8 by lusky
+- use errno.h instead of sys/errno.h.  freebsd and redhat don't care, but
+  solaris does.
+
+
 *** 20001230_7 by toot
 moved the code that set vchan_id up
 
