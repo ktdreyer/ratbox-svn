@@ -1,3 +1,17 @@
+androsyn    2001/12/14 11:47:56 EST	(20011214_10)
+
+  Modified files:
+    .                    configure 
+    include              setup.h.in 
+  Log:
+  Last of the sigio changes..
+  
+  Revision  Changes    Path
+  7.107     +218 -203  ircd-hybrid-7/configure
+  7.40      +69 -85    ircd-hybrid-7/include/setup.h.in
+
+
+
 androsyn    2001/12/14 10:48:22 EST	(20011214_9)
 
   Modified files:
