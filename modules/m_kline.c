@@ -157,7 +157,7 @@ mo_kline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	}
 
 	if(parc != 0)
-		reason = *parv;
+		reason = LOCAL_COPY(*parv);
 
 	if(!valid_user_host(user, host))
 	{
@@ -260,7 +260,7 @@ ms_kline(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	const char *kuser;
 	const char *khost;
-	const char *kreason;
+	char *kreason;
 	char *oper_reason;
 
 	if(parc != 6)
@@ -279,7 +279,7 @@ ms_kline(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	kuser = parv[3];
 	khost = parv[4];
-	kreason = parv[5];
+	kreason = LOCAL_COPY(parv[5]);
 
 	if(find_cluster(source_p->user->server, CLUSTER_KLINE))
 	{

@@ -171,17 +171,12 @@ mo_dline(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	if(parc >= loc + 1)	/* host :reason */
 	{
-		if(!valid_comment(parv[loc]))
+		if(!EmptyString(parv[loc]))
+			reason = LOCAL_COPY(parv[loc]);
+
+		if(!valid_comment(reason))
 			return 0;
-
-		if(*parv[loc])
-			reason = parv[loc];
-		else
-			reason = "No reason";
 	}
-	else
-		reason = "No reason";
-
 
 	if(IsOperAdmin(source_p))
 	{
