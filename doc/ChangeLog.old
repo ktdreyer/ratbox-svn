@@ -1,3 +1,8 @@
+*** 20001116_1 by davidt
+Removed uneeded malloc in modules.c (and the corresponding bogus free,
+which caused ircd to core when loading modules)
+
+
 *** 20001115_5 by lusky
 backed down to previous configure script
 
