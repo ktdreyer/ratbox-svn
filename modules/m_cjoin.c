@@ -228,8 +228,8 @@ int     m_cjoin(struct Client *cptr,
   vchan_chptr->mode.mode |= MODE_NOPRIVMSGS;
 
   sendto_channel_local(ONLY_CHANOPS,vchan_chptr,
-			 ":%s MODE %s +nt",
-			 me.name, chptr->chname);
+		       ":%s MODE %s +nt",
+		       me.name, chptr->chname);
 
   sendto_channel_remote(vchan_chptr, sptr, 
 			":%s MODE %s +nt",

@@ -43,8 +43,9 @@ extern  void sendto_channel_local(int type,
 				  struct Channel *,
 				  const char *, ...);
 #define ALL_MEMBERS  0
-#define ONLY_CHANOPS 1
-#define NON_CHANOPS  2
+#define NON_CHANOPS  1
+#define ONLY_CHANOPS_VOICED 2
+#define ONLY_CHANOPS 3
 
 extern  void sendto_channel_remote(struct Channel *, struct Client *, 
 				   const char *, ...);

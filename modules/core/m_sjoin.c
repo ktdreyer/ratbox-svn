@@ -351,13 +351,19 @@ int     ms_sjoin(struct Client *cptr,
 	  if( top_chptr )
 	    {
 	      add_vchan_to_client_cache(acptr,top_chptr, chptr);
-	      sendto_channel_local(ALL_MEMBERS,chptr, ":%s JOIN :%s",
-				   s, top_chptr->chname);
+	      sendto_channel_local(ALL_MEMBERS,chptr, ":%s!%s@%s JOIN :%s",
+				   acptr->name,
+				   acptr->user,
+				   acptr->host,
+				   top_chptr->chname);
 	    }
 	  else
 	    {
-	      sendto_channel_local(ALL_MEMBERS,chptr, ":%s JOIN :%s",
-				   s, parv[2]);
+	      sendto_channel_local(ALL_MEMBERS,chptr, ":%s!%s@%s JOIN :%s",
+				   acptr->name,
+				   acptr->user,
+				   acptr->host,
+				   parv[2]);
 	    }
         }
 
@@ -382,7 +388,7 @@ int     ms_sjoin(struct Client *cptr,
 		{
 		  sendto_channel_local(hide_or_not, chptr,
 				       ":%s MODE %s %s %s %s %s %s",
-				       parv[0],
+				       sptr->name,
 				       top_chptr->chname,
 				       modebuf,
 				       para[0],para[1],para[2],para[3]);
@@ -391,7 +397,7 @@ int     ms_sjoin(struct Client *cptr,
 		{
 		  sendto_channel_local(hide_or_not, chptr,
 				       ":%s MODE %s %s %s %s %s %s",
-				       parv[0],
+				       sptr->name,
 				       chptr->chname,
 				       modebuf,
 				       para[0],para[1],para[2],para[3]);
@@ -413,7 +419,7 @@ int     ms_sjoin(struct Client *cptr,
 		{
 		  sendto_channel_local(hide_or_not, chptr,
 				       ":%s MODE %s %s %s %s %s %s",
-				       parv[0],
+				       sptr->name,
 				       top_chptr->chname,
 				       modebuf,
 				       para[0],para[1],para[2],para[3]);
@@ -422,7 +428,7 @@ int     ms_sjoin(struct Client *cptr,
 		{
 		  sendto_channel_local(hide_or_not, chptr,
 				       ":%s MODE %s %s %s %s %s %s",
-				       parv[0],
+				       sptr->name,
 				       chptr->chname,
 				       modebuf,
 				       para[0],para[1],para[2],para[3]);
@@ -442,7 +448,7 @@ int     ms_sjoin(struct Client *cptr,
 	{
 	  sendto_channel_local(hide_or_not, chptr,
 			       ":%s MODE %s %s %s %s %s %s",
-			       parv[0],
+			       sptr->name,
 			       top_chptr->chname,
 			       modebuf,
 			       para[0], para[1], para[2], para[3]);
@@ -451,7 +457,7 @@ int     ms_sjoin(struct Client *cptr,
 	{
 	  sendto_channel_local(hide_or_not, chptr,
 			       ":%s MODE %s %s %s %s %s %s",
-			       parv[0],
+			       sptr->name,
 			       chptr->chname,
 			       modebuf,
 			       para[0], para[1], para[2], para[3]);

@@ -55,17 +55,21 @@ static  int     send_message (struct Client *, char *, int);
 static  void vsendto_prefix_one(register struct Client *,
 				register struct Client *,
 				const char *, va_list);
-static  void vsendto_one(struct Client *, const char *, va_list);
-static  void vsendto_realops(const char *, va_list);
+static  void
+vsendto_one(struct Client *, const char *, va_list);
+static  void
+vsendto_realops(const char *, va_list);
 
 /* global for now *sigh* */
 unsigned long current_serial=0L;
 
-static void sendto_common_channel( dlink_list *list,
+static void
+sendto_common_channel( dlink_list *list,
 				   struct Client *user,
 				   const char *pattern , va_list args);
-static void sendto_list(dlink_list *list,
-			const char *pattern, va_list args);
+static void
+sendto_list(dlink_list *list, const char *sendbuf, int len);
+
 void
 send_channel_members(struct Client *one, struct Client *from,
 		     dlink_list *list,
@@ -588,26 +592,53 @@ sendto_channel_local(int type,
 		     struct Channel *chptr,
 		     const char *pattern, ...)
 {
+  static char sendbuf[1024];
+  int len;
   va_list args;
 
   va_start(args, pattern);
+  len = vsprintf_irc(sendbuf, pattern, args);
+  va_end(args);
+
+  if (len > 510)
+    {
+      sendbuf[IRCD_BUFSIZE-2] = '\r';
+      sendbuf[IRCD_BUFSIZE-1] = '\n';
+      sendbuf[IRCD_BUFSIZE] = '\0';
+      len = IRCD_BUFSIZE;
+    }
+  else
+    {
+      sendbuf[len++] = '\r';
+      sendbuf[len++] = '\n';
+      sendbuf[len] = '\0';
+    }
 
   switch(type)
     {
     default:
     case ALL_MEMBERS:
-      sendto_list(&chptr->peons, pattern, args);
-      sendto_list(&chptr->voiced, pattern, args);
-    case ONLY_CHANOPS:
-      sendto_list(&chptr->chanops, pattern, args);
-      sendto_list(&chptr->halfops, pattern, args);
+      sendto_list(&chptr->chanops, sendbuf, len);
+      sendto_list(&chptr->halfops, sendbuf, len);
+      sendto_list(&chptr->voiced, sendbuf, len);
+      sendto_list(&chptr->peons, sendbuf, len);
       break;
+
     case NON_CHANOPS:
-      sendto_list(&chptr->peons, pattern, args);
+      sendto_list(&chptr->peons, sendbuf, len);
+      break;
+
+    case ONLY_CHANOPS_VOICED:
+      sendto_list(&chptr->chanops, sendbuf, len);
+      sendto_list(&chptr->halfops, sendbuf, len);
+      sendto_list(&chptr->voiced, sendbuf, len);
+      break;
+
+    case ONLY_CHANOPS:
+      sendto_list(&chptr->chanops, sendbuf, len);
+      sendto_list(&chptr->halfops, sendbuf, len);
       break;
     }
-
-  va_end(args);
 
 } /* sendto_channel_local() */
 
@@ -625,37 +656,17 @@ sendto_channel_local(int type,
  *		  list to send a message to a group of people.
  */
 static void
-sendto_list(dlink_list *list, const char *pattern, va_list args)
+sendto_list(dlink_list *list, const char *sendbuf, int len)
 {
   dlink_node *ptr;
   struct Client *acptr;
-  static char sendbuf[1024];
-  int len;
 
   for (ptr = list->head; ptr; ptr = ptr->next)
     {
       acptr = ptr->data;
 
       if (acptr && MyConnect(acptr))
-	{
-          len = vsprintf_irc(sendbuf, pattern, args);
-
-	  if (len > 510)
-	    {
-	      sendbuf[IRCD_BUFSIZE-2] = '\r';
-	      sendbuf[IRCD_BUFSIZE-1] = '\n';
-	      sendbuf[IRCD_BUFSIZE] = '\0';
-	      len = IRCD_BUFSIZE;
-	    }
-	  else
-	    {
-	      sendbuf[len++] = '\r';
-	      sendbuf[len++] = '\n';
-	      sendbuf[len] = '\0';
-	    }
-
-	  send_message(acptr, sendbuf, len);
-	}
+	send_message(acptr, (char *)sendbuf, len);
     }  
 
 } /* sendto_list() */

@@ -330,7 +330,8 @@ int     m_join(struct Client *cptr,
 
 	  sendto_channel_local(ONLY_CHANOPS,chptr,
 			       ":%s MODE %s +nt",
-			       me.name, chptr->chname);
+			       me.name,
+			       chptr->chname);
 	  
 	  sendto_channel_remote(chptr, sptr, 
 				":%s MODE %s +nt",

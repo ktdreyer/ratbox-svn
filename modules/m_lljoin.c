@@ -144,8 +144,12 @@ int     ms_lljoin(struct Client *cptr,
 
           add_user_to_channel(chptr, acptr, flags);
  
-          sendto_channel_local(ALL_MEMBERS, chptr, ":%s JOIN :%s",
-                                 nick, name);
+          sendto_channel_local(ALL_MEMBERS, chptr,
+			       ":%s!%s@%s JOIN :%s",
+			       acptr->name,
+			       acptr->user,
+			       acptr->host,
+			       name);
       
           if( flags & CHFL_CHANOP )
             {
@@ -155,14 +159,14 @@ int     ms_lljoin(struct Client *cptr,
 	      if(GlobalSetOptions.hide_chanops)
 		{
 		  sendto_channel_local(ONLY_CHANOPS,chptr,
-					 ":%s MODE %s +nt",
-					 me.name, chptr->chname);
+				       ":%s MODE %s +nt",
+				       me.name, chptr->chname);
 		}
 	      else
 		{
 		  sendto_channel_local(ALL_MEMBERS,chptr,
-					 ":%s MODE %s +nt",
-					 me.name, chptr->chname);
+				       ":%s MODE %s +nt",
+				       me.name, chptr->chname);
 		}
 
               sendto_one(uplink, 

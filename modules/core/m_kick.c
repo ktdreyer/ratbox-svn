@@ -182,13 +182,20 @@ int     m_kick(struct Client *cptr,
 			       name, who->name, comment);
 
 	  sendto_channel_local(ONLY_CHANOPS, chptr,
-			       ":%s KICK %s %s :%s", parv[0],
-			       name, who->name, comment);
+			       ":%s!%s@%s KICK %s %s :%s",
+			       sptr->name,
+			       sptr->user,
+			       sptr->host,
+			       name,
+			       who->name, comment);
 	}
       else
 	{
-	  sendto_channel_local(ONLY_CHANOPS, chptr,
-			       ":%s KICK %s %s :%s", parv[0],
+	  sendto_channel_local(ALL_MEMBERS, chptr,
+			       ":%s!%s@%s KICK %s %s :%s",
+			       sptr->name,
+			       sptr->user,
+			       sptr->host,
 			       name, who->name, comment);
 	}
 
