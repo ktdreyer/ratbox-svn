@@ -74,6 +74,7 @@ static int m_mode(struct Client *cptr, struct Client *sptr,
   struct Channel* root;
   static char     modebuf[MODEBUFLEN];
   static char     parabuf[MODEBUFLEN];
+  int n = 2;
 
   /* Now, try to find the channel in question */
   if( !IsChanPrefix(parv[1][0]) )
@@ -130,7 +131,24 @@ static int m_mode(struct Client *cptr, struct Client *sptr,
 
   root = chptr;
 
-  if (HasVchans(chptr) || IsVchan(chptr))
+  if ((parc > 2) && parv[2][0] == '!')
+    {
+     struct Client *acptr;
+     if (!(acptr = find_client(++parv[2], NULL)))
+       {
+        sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL), me.name,
+                   parv[0], root->chname);
+        return 0;
+       }
+     if (!(chptr = map_vchan(root, acptr)))
+       {
+        sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL), me.name,
+                   parv[0], root->chname);
+        return 0;
+       }
+     n++;
+    }
+  else if (HasVchans(chptr) || IsVchan(chptr))
   {
     if(HasVchans(chptr))
     {
@@ -154,7 +172,7 @@ static int m_mode(struct Client *cptr, struct Client *sptr,
     }
   }
 
-  if(parc < 3)
+  if(parc < n+1)
     {
       channel_modes(chptr, sptr, modebuf, parabuf);
       sendto_one(sptr, form_str(RPL_CHANNELMODEIS),
@@ -174,7 +192,7 @@ static int m_mode(struct Client *cptr, struct Client *sptr,
 		   parv[1], chptr->channelts);
     }
   else
-    set_channel_mode(cptr, sptr, chptr, parc - 2, parv + 2, 
+    set_channel_mode(cptr, sptr, chptr, parc - n, parv + n, 
                      root->chname);
   
   return 0;

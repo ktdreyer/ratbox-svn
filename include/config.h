@@ -244,8 +244,8 @@
  * Define this to enable IPv6 support.  IPv6 is currently still being
  * developed, and is not guaranteed to work properly..
  */
-
-#define IPV6
+/* We probably don't want this on by default -A1kmm. */
+/* #define IPV6 */
 
 /*   STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP  */
 
