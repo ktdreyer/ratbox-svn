@@ -344,8 +344,8 @@ mo_unkline(struct Client *client_p, struct Client *source_p, int parc, const cha
 
 		if(host)	/* Found user@host */
 		{
-			user = parv[1];	/* here is user part */
-			*(host++) = '\0';	/* and now here is host */
+			user = h;	/* here is user part */
+			*host++ = '\0';	/* and now here is host */
 		}
 		else
 		{
