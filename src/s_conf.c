@@ -97,30 +97,6 @@ static  int     attach_iline(struct Client *, struct ConfItem *);
 static void clear_xlines(void);
 static void clear_shared(void);
 
-/* usually, with hash tables, you use a prime number...
- * but in this case I am dealing with ip addresses, not ascii strings.
- */
-
-#define IP_HASH_SIZE 0x1000
-
-typedef struct ip_entry
-{
-#ifndef IPV6
-  u_int32_t ip;
-#else
-  struct irc_inaddr ip;
-#endif
-  int        count;
-  time_t last_attempt;
-  struct ip_entry *next;
-} IP_ENTRY;
-
-static IP_ENTRY *ip_hash_table[IP_HASH_SIZE];
-
-static int hash_ip(struct irc_inaddr *);
-
-static IP_ENTRY *find_or_add_ip(struct irc_inaddr*);
-
 /* general conf items link list root */
 struct ConfItem* ConfigItemList = NULL;
 
@@ -788,339 +764,49 @@ verify_access(struct Client* client_p, const char* username)
 static 
 int attach_iline(struct Client *client_p, struct ConfItem *aconf)
 {
-  IP_ENTRY *ip_found;
-  ip_found = find_or_add_ip(&client_p->localClient->ip);
+  struct Client *target_p;
+  dlink_node *ptr;
+  int local_count = 0;
+  int global_count = 0;
+  int ident_count = 0;
+  int unidented = 0;
 
-  SetIpHash(client_p);
-  ip_found->count++;
+  if(IsConfExemptLimits(aconf))
+    return(attach_conf(client_p, aconf));
 
-  if(ConfigFileEntry.use_global_limits)
+  if(*client_p->username == '~')
+    unidented = 1;
+
+  /* find_hostname() returns the head of the list to search */
+  DLINK_FOREACH(ptr, find_hostname(client_p->host))
   {
-    struct Client *target_p;
-    dlink_node *ptr;
-    int local_count = 0;
-    int global_count = 0;
-    int ident_count = 0;
-    int unidented = 0;
+    target_p = ptr->data;
 
-    if(IsConfExemptLimits(aconf))
-      return(attach_conf(client_p, aconf));
+    if(irccmp(client_p->host, target_p->host) != 0)
+      continue;
 
-    if(*client_p->username == '~')
-      unidented = 1;
+    if(MyConnect(target_p))
+      local_count++;
 
-    /* find_hostname() returns the head of the list to search */
-    DLINK_FOREACH(ptr, find_hostname(client_p->host))
+    global_count++;
+
+    if(unidented)
     {
-      target_p = ptr->data;
-
-      if(irccmp(client_p->host, target_p->host) != 0)
-        continue;
-
-      if(MyConnect(target_p))
-        local_count++;
-
-      global_count++;
-
-      if(unidented)
-      {
-	if(*target_p->username == '~')
-          ident_count++;
-      }
-      else if(irccmp(target_p->username, client_p->username) == 0)
+      if(*target_p->username == '~')
         ident_count++;
+    }
+    else if(irccmp(target_p->username, client_p->username) == 0)
+      ident_count++;
 
-      if(ConfMaxLocal(aconf) && local_count >= ConfMaxLocal(aconf))
-        return(TOO_MANY_LOCAL);
-      else if(ConfMaxGlobal(aconf) && global_count >= ConfMaxGlobal(aconf))
-        return(TOO_MANY_GLOBAL);
-      else if(ConfMaxIdent(aconf) && ident_count >= ConfMaxIdent(aconf))
-        return(TOO_MANY_IDENT);
-    }
-  }
-  else
-  {
-    /* only check it if its non zero */
-    if(aconf->c_class &&
-       ConfMaxLocal(aconf) && ip_found->count > ConfMaxLocal(aconf))
-    {
-      if(!IsConfExemptLimits(aconf))
-        return(TOO_MANY_LOCAL); /* Already at maximum allowed ip#'s */
-      else
-        {
-          sendto_one(client_p,
-       ":%s NOTICE %s :*** :I: line is full, but you have an >I: line!",
-                     me.name,client_p->name);
-        }
-    }
+    if(ConfMaxLocal(aconf) && local_count >= ConfMaxLocal(aconf))
+      return(TOO_MANY_LOCAL);
+    else if(ConfMaxGlobal(aconf) && global_count >= ConfMaxGlobal(aconf))
+      return(TOO_MANY_GLOBAL);
+    else if(ConfMaxIdent(aconf) && ident_count >= ConfMaxIdent(aconf))
+      return(TOO_MANY_IDENT);
   }
 
   return(attach_conf(client_p, aconf));
-}
-
-/* link list of free IP_ENTRY's */
-
-static IP_ENTRY *free_ip_entries;
-
-/*
- * clear_ip_hash_table()
- *
- * input                - NONE
- * output               - NONE
- * side effects         - clear the ip hash table
- *
- */
-
-void 
-clear_ip_hash_table()
-{
-  void *block_IP_ENTRIES;        /* block of IP_ENTRY's */
-  IP_ENTRY *new_IP_ENTRY;        /* new IP_ENTRY being made */
-  IP_ENTRY *last_IP_ENTRY;        /* last IP_ENTRY in chain */
-  int size;
-  int n_left_to_allocate = MAXCONNECTIONS;
-
-  size = sizeof(IP_ENTRY) + (sizeof(IP_ENTRY) & (sizeof(void*) - 1) );
-
-  block_IP_ENTRIES = (void *)MyMalloc((size * n_left_to_allocate));  
-
-  free_ip_entries = (IP_ENTRY *)block_IP_ENTRIES;
-  last_IP_ENTRY = free_ip_entries;
-
-  /* *shudder* pointer arithmetic */
-  while(--n_left_to_allocate)
-    {
-      block_IP_ENTRIES = (void *)((unsigned long)block_IP_ENTRIES + 
-                        (unsigned long) size);
-      new_IP_ENTRY = (IP_ENTRY *)block_IP_ENTRIES;
-      last_IP_ENTRY->next = new_IP_ENTRY;
-      new_IP_ENTRY->next = (IP_ENTRY *)NULL;
-      last_IP_ENTRY = new_IP_ENTRY;
-    }
-  memset((void *)ip_hash_table, 0, sizeof(ip_hash_table));
-}
-
-/* 
- * find_or_add_ip()
- *
- * inputs       - client_p
- *              - name
- *
- * output       - pointer to an IP_ENTRY element
- * side effects -
- *
- * If the ip # was not found, a new IP_ENTRY is created, and the ip
- * count set to 0.
- * XXX: Broken for IPv6
- */
-
-static IP_ENTRY *
-find_or_add_ip(struct irc_inaddr *ip_in)
-{
-  int hash_index;
-  IP_ENTRY *ptr, *newptr;
-
-  for(ptr = ip_hash_table[hash_index = hash_ip(ip_in)]; ptr;
-      ptr = ptr->next)
-  {
-    if(memcmp(&ptr->ip, ip_in, sizeof(struct irc_inaddr)) == 0)
-    {
-      return(ptr);
-    }
-  }
-
-  if ((ptr = ip_hash_table[hash_index]) != NULL)
-    {
-      if(free_ip_entries == NULL)
-	outofmemory();
-
-      newptr = ip_hash_table[hash_index] = free_ip_entries;
-      free_ip_entries = newptr->next;
-
-      memcpy(&newptr->ip, ip_in, sizeof(struct irc_inaddr));
-      newptr->count = 0;
-      newptr->last_attempt = 0;
-      newptr->next = ptr;
-      return(newptr);
-    }
-
-  if (free_ip_entries == (IP_ENTRY *)NULL)
-    outofmemory();
-
-  ptr = ip_hash_table[hash_index] = free_ip_entries;
-  free_ip_entries = ptr->next;
-  memcpy(&ptr->ip, ip_in, sizeof(struct irc_inaddr));
-  ptr->count = 0;
-  ptr->next = (IP_ENTRY *)NULL;
-  return(ptr);
-}
-
-/* 
- * remove_one_ip
- *
- * inputs        - unsigned long IP address value
- * output        - NONE
- * side effects  - ip address listed, is looked up in ip hash table
- *                 and number of ip#'s for that ip decremented.
- *                 if ip # count reaches 0, the IP_ENTRY is returned
- *                 to the free_ip_enties link list.
- * XXX: Broken for IPV6
- */
-
-void 
-remove_one_ip(struct irc_inaddr *ip_in)
-{
-  IP_ENTRY *ptr, **lptr;
-  int hash_index = hash_ip(ip_in);
-  for (lptr = ip_hash_table+hash_index, ptr = *lptr;
-       ptr;
-       lptr=&ptr->next, ptr=*lptr)
-  {
-#ifndef IPV6
-   if (ptr->ip != PIN_ADDR(ip_in))
-    continue;
-#else
-   if (memcmp(&IN_ADDR(ptr->ip), &PIN_ADDR(ip_in),
-              sizeof(struct irc_inaddr)))
-    continue;
-#endif
-  if (ptr->count != 0)
-   ptr->count--;
-  if (ptr->count != 0 ||
-      (CurrentTime-ptr->last_attempt)<=ConfigFileEntry.throttle_time)
-   continue;
-  *lptr = ptr->next;
-  ptr->next = free_ip_entries;
-  free_ip_entries = ptr;
-  return;
- }
-}
-
-/*
- * hash_ip()
- * 
- * input        - pointer to an irc_inaddr
- * output       - integer value used as index into hash table
- * side effects - hopefully, none
- */
-
-#ifndef IPV6
-static int 
-hash_ip(struct irc_inaddr *addr)
-{
-  int hash;
-  u_int32_t ip;
-
-  ip = ntohl(PIN_ADDR(addr));
-  hash = ((ip >> 12) + ip) & (IP_HASH_SIZE-1);
-  return(hash);
-}
-#else /* IPV6 */
-static int
-hash_ip(struct irc_inaddr *addr)
-{
-  int hash;
-  u_int32_t *ip = (u_int32_t *)&PIN_ADDR(addr); 
-
-  if(IN6_IS_ADDR_V4MAPPED((struct in6_addr *)ip))
-  {
-     hash = ((ip[3] >> 12) + ip[3]) & (IP_HASH_SIZE-1);
-     return(hash);
-  } 
-  
-  hash = ip[0] ^ ip[3];
-  hash ^= hash >> 16;
-  hash ^= hash >> 8;
-  hash = hash & (IP_HASH_SIZE - 1);
-  return(hash);
-}
-#endif /* IPV6 */
-
-/*
- * count_ip_hash
- *
- * inputs        - pointer to counter of number of ips hashed 
- *               - pointer to memory used for ip hash
- * output        - returned via pointers input
- * side effects  - NONE
- *
- * number of hashed ip #'s is counted up, plus the amount of memory
- * used in the hash.
- */
-
-void 
-count_ip_hash(int *number_ips_stored,u_long *mem_ips_stored)
-{
-  IP_ENTRY *ip_hash_ptr;
-  int i;
-
-  *number_ips_stored = 0;
-  *mem_ips_stored = 0;
-
-  for (i = 0; i < IP_HASH_SIZE ;i++)
-    {
-      ip_hash_ptr = ip_hash_table[i];
-      while(ip_hash_ptr)
-        {
-          *number_ips_stored = *number_ips_stored + 1;
-          *mem_ips_stored = *mem_ips_stored +
-             sizeof(IP_ENTRY);
-
-          ip_hash_ptr = ip_hash_ptr->next;
-        }
-    }
-}
-
-/*
- * iphash_stats()
- *
- * input	- 
- * output	-
- * side effects	-
- */
-void 
-iphash_stats(struct Client *client_p, struct Client *source_p,
-		  int parc, char *parv[],FBFILE* out)
-{
-  IP_ENTRY *ip_hash_ptr;
-  int i;
-  int collision_count;
-  char result_buf[256];
-
-  if(out == NULL)
-    sendto_one(source_p,":%s NOTICE %s :*** hash stats for iphash",
-               me.name,client_p->name);
-  else
-    {
-      (void)sprintf(result_buf,"*** hash stats for iphash\n");
-      (void)fbputs(result_buf,out);
-    }
-
-  for(i = 0; i < IP_HASH_SIZE ;i++)
-    {
-      ip_hash_ptr = ip_hash_table[i];
-
-      collision_count = 0;
-      while(ip_hash_ptr)
-        {
-          collision_count++;
-          ip_hash_ptr = ip_hash_ptr->next;
-        }
-      if(collision_count)
-        {
-          if(out == NULL)
-            {
-              sendto_one(source_p,":%s NOTICE %s :Entry %d (0x%X) Collisions %d",
-                         me.name,client_p->name,i,i,collision_count);
-            }
-          else
-            {
-              (void)sprintf(result_buf,"Entry %d (0x%X) Collisions %d\n",
-                            i,i,collision_count);
-              (void)fbputs(result_buf,out);
-            }
-        }
-    }
 }
 
 /*
@@ -1572,7 +1258,6 @@ set_default_conf(void)
   ConfigFileEntry.oper_umodes = UMODE_LOCOPS | UMODE_SERVNOTICE |
     UMODE_OPERWALL | UMODE_WALLOP;
   ConfigFileEntry.oper_only_umodes = UMODE_DEBUG;
-  ConfigFileEntry.throttle_time = 10;
 
   ConfigChannel.use_except  = YES;
   ConfigChannel.use_invex   = YES;
@@ -1652,9 +1337,6 @@ validate_conf(void)
   if ((ConfigFileEntry.client_flood < CLIENT_FLOOD_MIN) ||
       (ConfigFileEntry.client_flood > CLIENT_FLOOD_MAX))
      ConfigFileEntry.client_flood = CLIENT_FLOOD_MAX;
-
-  if(ConfigFileEntry.use_global_limits == -1)
-    ConfigFileEntry.use_global_limits = 1;
 
   GlobalSetOptions.idletime = (ConfigFileEntry.idletime * 60);
 }
@@ -1746,7 +1428,6 @@ lookup_confhost(struct ConfItem* aconf)
 int 
 conf_connect_allowed(struct irc_inaddr *addr, int aftype)
 {
-  IP_ENTRY *ip_found;
   struct ConfItem *aconf = find_dline(addr, aftype);
  
   /* DLINE exempt also gets you out of static limits/pacing... */
@@ -1756,16 +1437,7 @@ conf_connect_allowed(struct irc_inaddr *addr, int aftype)
   if (aconf != NULL)
     return(BANNED_CLIENT);
 
-  ip_found = find_or_add_ip(addr);
-  if ((CurrentTime - ip_found->last_attempt) <
-      ConfigFileEntry.throttle_time)
-    {
-      ip_found->last_attempt = CurrentTime;
-      ip_found->count--;
-      return(TOO_FAST);
-    }
-  ip_found->last_attempt = CurrentTime;
-  return(0);
+  return 0;
 }
 
 /*
@@ -2210,15 +1882,8 @@ read_conf_files(int cold)
         }
     }
 
-  if (cold)
-  {
-    /* set to 'undefined' */
-    ConfigFileEntry.use_global_limits = -1;
-  }
-  else
-  {
+  if (!cold)
     clear_out_old_conf();
-  }
 
   read_conf(conf_fbfile_in);
   fbclose(conf_fbfile_in);
@@ -2780,33 +2445,3 @@ conf_yy_fatal_error(char *msg)
   return(0);
 }
 
-
-/* void flush_expired_ips(void *unused)
- *
- * inputs	- none.
- * output	- none.
- * side effects	- Deletes all IP address entries which should have expired.
- */
-void
-flush_expired_ips(void *unused)
-{
-  int i;
-  time_t expire_before = CurrentTime - ConfigFileEntry.throttle_time;
-  IP_ENTRY *ie, **iee;
-
-  for (i=0; i<IP_HASH_SIZE; i++)
-    {
-      for (iee=ip_hash_table+i, ie=*iee; ie; ie=*iee)
-	{
-	  if (ie->count == 0 && ie->last_attempt <= expire_before)
-	    {
-	      *iee=ie->next;
-	      ie->next = free_ip_entries;
-	      free_ip_entries = ie;
-	    }
-	  else
-	    iee = &ie->next;
-	}
-      *iee = NULL;
-    }
-}

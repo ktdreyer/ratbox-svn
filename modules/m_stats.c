@@ -820,7 +820,7 @@ static void stats_servers(struct Client *source_p)
     seconds %= 60;
     
     sendto_one(source_p, ":%s %d %s :%s (%s!%s@%s) Idle: %d SendQ: %d "
-                         "Connected: %d day%s, %d:%02d:%02ld",
+                         "Connected: %d day%s, %d:%02d:%02d",
                me.name, RPL_STATSDEBUG, source_p->name,
 	       target_p->name,
 	       (target_p->serv->by[0] ? target_p->serv->by : "Remote."),

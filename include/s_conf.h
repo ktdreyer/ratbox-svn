@@ -236,12 +236,9 @@ struct config_file_entry
   int           min_nonwildcard;
   int           default_floodcount;
   int           client_flood;
-  /* 0 == don't use throttle... */
-  int           throttle_time;
   int           use_egd;
   int		ping_cookie;
   int           tkline_expire_notices;
-  int           use_global_limits;
   int           use_help;
   int           use_whois_actually;
   int		disable_auth;
@@ -347,12 +344,6 @@ dlink_list tdline_hour;
 dlink_list tdline_day;
 dlink_list tdline_week;
 
-extern void clear_ip_hash_table(void);
-extern void iphash_stats(struct Client *,struct Client *,int,char **,FBFILE*);
-extern void count_ip_hash(int *, u_long *);
-
-void remove_one_ip(struct irc_inaddr *ip);
-
 extern struct ConfItem* make_conf(void);
 extern void             free_conf(struct ConfItem*);
 
@@ -453,7 +444,6 @@ extern int lineno;
 #define SOCKET_ERROR    (-2)
 #define I_LINE_FULL     (-3)
 #define BANNED_CLIENT   (-4)
-#define TOO_FAST        (-5)
 #define TOO_MANY_LOCAL	(-6)
 #define TOO_MANY_GLOBAL (-7)
 #define TOO_MANY_IDENT	(-8)

@@ -696,7 +696,6 @@ int main(int argc, char *argv[])
   init_hash();
   id_init();
   clear_scache_hash_table();    /* server cache name table */
-  clear_ip_hash_table();        /* client host ip hash table */
   init_host_hash();             /* Host-hashtable. */
   clear_hash_parse();
   init_client();
@@ -779,18 +778,12 @@ int main(int argc, char *argv[])
   /* Setup the timeout check. I'll shift it later :)  -- adrian */
   eventAddIsh("comm_checktimeouts", comm_checktimeouts, NULL, 1);
   eventAddIsh("cleanup_zombies", cleanup_zombies, NULL, 30); 
- if (ConfigFileEntry.throttle_time > 0)
-   eventAddIsh("flush_expired_ips", flush_expired_ips, NULL, ConfigFileEntry.throttle_time);
- else
-   eventAddIsh("flush_expired_ips", flush_expired_ips, NULL, 300);
-
   
   if(ConfigServerHide.links_delay > 0)
     eventAddIsh("write_links_file", write_links_file, NULL, ConfigServerHide.links_delay);
   else
     ConfigServerHide.links_disabled = 1;
 
-  
   if(splitmode)
     eventAddIsh("check_splitmode", check_splitmode, NULL, 60);
 

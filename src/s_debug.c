@@ -169,7 +169,6 @@ void count_memory(struct Client *source_p)
   int users_invited_count = 0;  /* users invited */
   int user_channels = 0;        /* users in channels */
   int aways_counted = 0;   
-  int number_ips_stored;        /* number of ip addresses hashed */
   int number_servers_cached;    /* number of servers cached by scache */
 
   u_long channel_memory = 0;
@@ -181,7 +180,6 @@ void count_memory(struct Client *source_p)
   u_long wwm = 0;               /* whowas array memory used */
   u_long conf_memory = 0;       /* memory used by conf lines */
   u_long mem_servers_cached;    /* memory used by scache */
-  u_long mem_ips_stored;        /* memory used by ip address hash */
 
   int linebuf_count =0;
   u_long linebuf_memory_used = 0;
@@ -370,18 +368,9 @@ void count_memory(struct Client *source_p)
              number_servers_cached,
              (int)mem_servers_cached);
 
-  if(ConfigFileEntry.use_global_limits)
-  {
-    sendto_one(source_p, ":%s %d %s :hostname hash %d(%u)",
-	       me.name, RPL_STATSDEBUG, source_p->name,
-	       HOST_MAX, HOST_MAX * sizeof(struct HashEntry));
-  }
-
-  count_ip_hash(&number_ips_stored,&mem_ips_stored);
-  sendto_one(source_p, ":%s %d %s :iphash %u(%d)",
+  sendto_one(source_p, ":%s %d %s :hostname hash %d(%u)",
              me.name, RPL_STATSDEBUG, source_p->name,
-             number_ips_stored,
-             (int)mem_ips_stored);
+             HOST_MAX, HOST_MAX * sizeof(struct HashEntry));
 
   total_memory = totww + total_channel_memory + conf_memory +
     class_count * sizeof(struct Class);

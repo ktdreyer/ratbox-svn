@@ -2057,23 +2057,6 @@ static void	conf_set_general_disable_auth(void *data)
 	ConfigFileEntry.disable_auth = *(unsigned int*)data;
 }
 
-static void	conf_set_general_use_global_limits(void *data)
-{
-        int yesno = *(int*)data;
-
-	if(yesno)
-        {
-                ConfigFileEntry.use_global_limits = *(unsigned int*)data;
-        }
-        else
-        {
-                /* if its being changed from 1 -> 0, wipe the hash. */
-                if(ConfigFileEntry.use_global_limits == 1)
-                        clear_hostname_hash_table();
-                ConfigFileEntry.use_global_limits = *(unsigned int*)data;
-        }
-}
-
 static void	conf_set_general_use_help(void *data)
 {
 	ConfigFileEntry.use_help = *(unsigned int*)data;
@@ -2087,11 +2070,6 @@ static void    conf_set_general_use_whois_actually(void *data)
 static void    conf_set_general_tkline_expire_notices(void *data)
 {
         ConfigFileEntry.tkline_expire_notices = *(unsigned int*)data;
-}
-
-static void	conf_set_general_throttle_time(void *data)
-{
-	ConfigFileEntry.throttle_time = *(unsigned int*)data;
 }
 
 static void	conf_set_general_connect_timeout(void *data)
@@ -2665,8 +2643,6 @@ void	newconf_init()
 			conf_set_general_servlink_path);
         add_conf_item("general", "tkline_expire_notices", CF_YESNO,
                         conf_set_general_tkline_expire_notices);
-	add_conf_item("general", "use_global_limits", CF_YESNO,
-			conf_set_general_use_global_limits);
 	add_conf_item("general", "use_help", CF_YESNO,
 			conf_set_general_use_help);
         add_conf_item("general", "use_whois_actually", CF_YESNO,
@@ -2677,8 +2653,6 @@ void	newconf_init()
 			conf_set_general_compression_level);
 	add_conf_item("general", "client_flood", CF_INT,
 			conf_set_general_client_flood);
-	add_conf_item("general", "throttle_time", CF_TIME,
-			conf_set_general_throttle_time);
 	add_conf_item("general", "havent_read_conf", CF_YESNO,
 			conf_set_general_havent_read_conf);
 	add_conf_item("general", "dot_in_ip6_addr", CF_YESNO,

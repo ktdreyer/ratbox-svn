@@ -39,7 +39,6 @@ struct Listener {
   int              ref_count;          /* number of connection references */
   int              active;             /* current state of listener */
   int              index;              /* index into poll array */
-  time_t           last_accept;        /* last time listener accepted */
 /* jdc -- this seems to be incorrect in comparison to src/listener.c */
 /*
   struct in_addr    addr;

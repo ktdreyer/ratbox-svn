@@ -357,7 +357,6 @@ close_listeners()
   }
 }
 
-#define TOOFAST_WARNING "ERROR :Trying to reconnect too fast.\r\n"
 #define DLINE_WARNING "ERROR :You have been D-lined.\r\n"
 
 static void 
@@ -374,7 +373,6 @@ accept_connection(int pfd, void *data)
   assert(listener != NULL);
   if(listener == NULL)
     return;
-  listener->last_accept = CurrentTime;
   /*
    * There may be many reasons for error return, but
    * in otherwise correctly working environment the
@@ -395,10 +393,10 @@ accept_connection(int pfd, void *data)
   if((IN6_IS_ADDR_V4MAPPED(&IN_ADDR2(addr))) ||
   	(IN6_IS_ADDR_V4COMPAT(&IN_ADDR2(addr))))
   {
-   memmove(&addr.sins.sin.s_addr, addr.sins.sin6.s6_addr+12,
-           sizeof(struct in_addr));
+    memmove(&addr.sins.sin.s_addr, addr.sins.sin6.s6_addr+12,
+            sizeof(struct in_addr));
 
-   sai.sins.sin.sin_family = AF_INET;
+    sai.sins.sin.sin_family = AF_INET;
   }
 #endif
 
@@ -424,6 +422,7 @@ accept_connection(int pfd, void *data)
 			       get_listener_name(listener));
 	  last_oper_notice = CurrentTime;
 	}
+
       send(fd, "ERROR :All connections in use\r\n", 32, 0);
       fd_close(fd);
       /* Re-register a new IO request for the next accept .. */
@@ -436,22 +435,24 @@ accept_connection(int pfd, void *data)
    * from this IP... */
   if ((pe = conf_connect_allowed(&addr, sai.sins.sin.sin_family)) != 0)
   {
-   ServerStats->is_ref++;
-   switch (pe)
-   {
-    case BANNED_CLIENT:
-     send(fd, DLINE_WARNING, sizeof(DLINE_WARNING)-1, 0);
-     break;
-    case TOO_FAST:
-     send(fd, TOOFAST_WARNING, sizeof(TOOFAST_WARNING)-1, 0);
-     break;
-   }
-   fd_close(fd);
-   /* Re-register a new IO request for the next accept .. */
-   comm_setselect(listener->fd, FDLIST_SERVICE, COMM_SELECT_READ,
-                  accept_connection, listener, 0);
-   return;
+    ServerStats->is_ref++;
+
+    /* XXX - this can only be BANNED_CLIENT? */
+    switch (pe)
+    {
+      case BANNED_CLIENT:
+        send(fd, DLINE_WARNING, sizeof(DLINE_WARNING)-1, 0);
+        break;
+    }
+
+    fd_close(fd);
+
+    /* Re-register a new IO request for the next accept .. */
+    comm_setselect(listener->fd, FDLIST_SERVICE, COMM_SELECT_READ,
+                   accept_connection, listener, 0);
+    return;
   }
+
   ServerStats->is_ac++;
 
   add_connection(listener, fd);

@@ -1129,8 +1129,7 @@ static void exit_one_client(struct Client *client_p,
 	if (HasID(source_p))
 	  del_from_id_hash_table(source_p->user->id, source_p);
 
-	if(ConfigFileEntry.use_global_limits)
-	  del_from_hostname_hash_table(source_p->host, source_p);
+        del_from_hostname_hash_table(source_p->host, source_p);
   
         /* again, this is all that is needed */
     }
@@ -1285,9 +1284,7 @@ qs_client(struct Client *source_p, const char *comment)
   if (HasID(source_p))
     del_from_id_hash_table(source_p->user->id, source_p);
 
-  if(ConfigFileEntry.use_global_limits)
-    del_from_hostname_hash_table(source_p->host, source_p);
-
+  del_from_hostname_hash_table(source_p->host, source_p);
   del_from_client_hash_table(source_p->name, source_p);
 
   /* remove from global client list */
@@ -1444,8 +1441,6 @@ int exit_client(
         return 0;
 
       SetClosing(source_p);
-      if (source_p->flags & FLAGS_IPHASH)
-        remove_one_ip(&source_p->localClient->ip);
 
       delete_adns_queries(source_p->localClient->dns_query);
       delete_identd_queries(source_p);

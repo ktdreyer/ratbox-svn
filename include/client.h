@@ -353,7 +353,6 @@ struct LocalUser
 #define FLAGS_NEEDID       0x0100 /* I-lines say must use ident return */
 #define FLAGS_NORMALEX     0x0400 /* Client exited normally */
 #define FLAGS_SENDQEX      0x0800 /* Sendq exceeded */
-#define FLAGS_IPHASH       0x1000 /* iphashed this client */
 #define FLAGS_CRYPTIN      0x2000 /* incoming data must be decrypted */
 #define FLAGS_CRYPTOUT     0x4000 /* outgoing data must be encrypted */
 #define FLAGS_WAITAUTH     0x8000 /* waiting for CRYPTLINK AUTH command */
@@ -491,10 +490,6 @@ struct LocalUser
 #define SetWallops(x)           ((x)->umodes |= UMODE_WALLOP)
 #define SetCallerId(x)		((x)->umodes |= UMODE_CALLERID)
 #define IsSetCallerId(x)	((x)->umodes & UMODE_CALLERID)
-
-#define SetIpHash(x)            ((x)->flags |= FLAGS_IPHASH)
-#define ClearIpHash(x)          ((x)->flags &= ~FLAGS_IPHASH)
-#define IsIpHash(x)             ((x)->flags & FLAGS_IPHASH)
 
 #define SetNeedId(x)            ((x)->flags |= FLAGS_NEEDID)
 #define IsNeedId(x)             (((x)->flags & FLAGS_NEEDID) != 0)

@@ -321,12 +321,6 @@ static struct InfoStruct info_table[] =
     "STATS P is only shown to operators",
   },
   {
-    "throttle_time",
-    OUTPUT_DECIMAL,
-    &ConfigFileEntry.throttle_time,
-    "Minimum time between client reconnects",
-  },
-  {
     "tkline_expire_notices",
     OUTPUT_BOOLEAN,
     &ConfigFileEntry.tkline_expire_notices,
@@ -343,12 +337,6 @@ static struct InfoStruct info_table[] =
     OUTPUT_DECIMAL,
     &ConfigFileEntry.ts_warn_delta,
     "Maximum permitted TS delta before displaying a warning"
-  },
-  {
-    "use_global_limits",
-    OUTPUT_BOOLEAN_YN,
-    &ConfigFileEntry.use_global_limits,
-    "Global user@host limits applied to connections"
   },
   {
     "use_help",

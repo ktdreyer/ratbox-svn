@@ -779,7 +779,7 @@ mo_dline(struct Client *client_p, struct Client *source_p,
     if(BadPtr(oper_reason))
     {
       sendto_realops_flags(UMODE_ALL, L_ALL,
-		           "%s added temporary %ld min. D-Line for [%s] [%s]",
+		           "%s added temporary %d min. D-Line for [%s] [%s]",
 		           source_p->name, tdline_time/60, 
 		           aconf->host, reason);
       ilog(L_TRACE, "%s added temporary %d min. D-Line for [%s] [%s]",
@@ -788,14 +788,14 @@ mo_dline(struct Client *client_p, struct Client *source_p,
     else
     {
       sendto_realops_flags(UMODE_ALL, L_ALL,
-                           "%s added temporary %ld min. D-Line for [%s] [%s|%s]",
+                           "%s added temporary %d min. D-Line for [%s] [%s|%s]",
                            source_p->name, tdline_time/60,
                            aconf->host, reason, oper_reason);
       ilog(L_TRACE, "%s added temporary %d min. D-Line for [%s] [%s|%s]",
            source_p->name, tdline_time/60, aconf->host, reason, oper_reason);
     }
 
-    sendto_one(source_p, ":%s NOTICE %s :Added temporary %ld min. D-Line for [%s]",
+    sendto_one(source_p, ":%s NOTICE %s :Added temporary %d min. D-Line for [%s]",
                me.name, source_p->name, tdline_time/60, aconf->host);
   }
   else
