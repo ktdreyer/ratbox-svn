@@ -1,0 +1,37 @@
+# $Id$
+
+CREATE TABLE channels (
+	chname text,
+	topic text,
+	flags int4,
+	reg_time unixtime,
+	last_used unixtime,
+	PRIMARY KEY(name)
+);
+
+CREATE TABLE users (
+	nickname text,
+	password text,
+	reg_time unixtime,
+	last_used unixtime,
+);
+
+CREATE TABLE chan_bans (
+	ban_mask text,
+	ban_reason text,
+	level int4,
+	hold unixtime
+	chname text,
+	FOREIGN KEY(chname) REFERENCES channels (chname) MATCH FULL
+);
+
+CREATE TABLE chan_members (
+	chname text,
+	nickname text,
+	level int4,
+	suspend int4,
+	FOREIGN KEY(chname) REFERENCES channels (chname) MATCH FULL,
+	FOREIGN KEY(nickname) REFERENCES users (nickname) MATCH FULL	
+);
+
+	
