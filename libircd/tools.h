@@ -178,6 +178,29 @@ dlinkAddBefore(dlink_node * b, void *data, dlink_node * m, dlink_list * list)
 }
 
 static inline void
+dlinkMoveTail(dlink_node *m, dlink_list *list)
+{
+	if(list->tail == m)
+		return;
+	
+	/* From here assume that m->next != NULL as that can only 
+	 * be at the tail and assume that the node is on the list
+	 */
+	
+	m->next->prev = m->prev;
+
+	if(m->prev != NULL)
+		m->prev->next = m->next;
+	else
+		list->head = m->next;
+
+	list->tail->next = m;
+	m->prev = list->tail;
+	m->next = NULL;
+	list->tail = m;
+}
+
+static inline void
 dlinkAddTail(void *data, dlink_node * m, dlink_list * list)
 {
 	assert(m != NULL);

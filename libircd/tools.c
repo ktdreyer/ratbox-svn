@@ -78,13 +78,7 @@ init_dlink_nodes(void)
 dlink_node *
 make_dlink_node(void)
 {
-	dlink_node *lp;
-
-	lp = (dlink_node *) BlockHeapAlloc(dnode_heap);
-
-	lp->next = NULL;
-	lp->prev = NULL;
-	return lp;
+	return(BlockHeapAlloc(dnode_heap));
 }
 
 /*
