@@ -256,7 +256,7 @@ int BlockHeapGarbageCollect(BlockHeap * bh)
 	if (bh == NULL)
 		return 1;
 
-	if (bh->freeElems < bh->elemsPerBlock)
+	if (bh->freeElems < bh->elemsPerBlock || bh->blocksAllocated == 1)
 	{
 		/* There couldn't possibly be an entire free block.  Return. */
 		return 0;
