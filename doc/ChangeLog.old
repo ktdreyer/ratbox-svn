@@ -1,3 +1,7 @@
+*** 20010521_3 by a1kmm
+- Removed efserv from the ircd tree, it is imported into its own tree.
+
+
 *** 20010521_2 by a1kmm
 - Added the yucky buggy efserv code I have so far. At least it is a start.
 
