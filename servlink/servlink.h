@@ -18,6 +18,8 @@
  *   $Id$
  */
 
+#include <stdio.h>
+
 #define CONTROL_FD_R            0
 #define LOCAL_FD_R              1
 #define REMOTE_FD_R             2

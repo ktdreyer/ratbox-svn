@@ -80,7 +80,7 @@ void send_data_blocking(int fd, unsigned char *data, int datalen)
  * used before CMD_INIT to pass contents of SendQ from ircd
  * to servlink.  This data must _not_ be encrypted/compressed.
  */
-void process_sendq(unsigned char *data, int datalen)
+void process_sendq(unsigned char *data, unsigned int datalen)
 {
   /* we can 'block' here, as we don't have to listen
    * to any other fds anyway
@@ -96,24 +96,23 @@ void process_sendq(unsigned char *data, int datalen)
  * to servlink.  This data must be decrypted/decopmressed before
  * sending back to the ircd.
  */
-void process_recvq(unsigned char *data, int datalen)
+void process_recvq(unsigned char *data, unsigned int datalen)
 {
   int ret;
   unsigned char *buf;
-  int  blen;
+  unsigned int  blen;
 
   buf = data;
   blen = datalen;
 
-  assert(datalen <= READLEN);
+  assert((datalen > 0) && (datalen <= READLEN));
 #ifdef HAVE_LIBCRYPTO
   if (in_state.crypt)
   {
-    blen = READLEN;
     assert(EVP_DecryptUpdate(&in_state.crypt_state.ctx,
                              tmp_buf, &blen,
                              data, datalen));
-    assert(blen);
+    assert(blen == datalen);
     buf = tmp_buf;
   }
 #endif
@@ -134,6 +133,10 @@ void process_recvq(unsigned char *data, int datalen)
     blen = BUFLEN - in_state.zip_state.z_stream.avail_out;
 
     buf = tmp2_buf;
+
+    /* did that generate any decompressed input? */
+    if (!blen)
+      return;
   }
 #endif
 
@@ -293,10 +296,10 @@ void read_data(void)
     {
       /* encrypt data */
       ret = blen;
-      blen = BUFLEN*2;
       assert( EVP_EncryptUpdate(&out_state.crypt_state.ctx,
                                 out_state.buf, &blen,
                                 buf, ret) );
+      assert(blen == ret);
     }
 #endif
     
@@ -330,8 +333,6 @@ void write_net(void)
     return; /* no data waiting */
 
   out_state.len -= ret;
-
-  assert(out_state.len >= 0);
 
   if (!out_state.len)
   {
@@ -373,11 +374,10 @@ void read_net(void)
       if (in_state.zip)
         buf = tmp2_buf;
 #endif
-      blen = READLEN*2;
       assert(EVP_DecryptUpdate(&in_state.crypt_state.ctx,
                                buf, &blen,
                                tmp_buf, ret));
-      assert(blen);
+      assert(blen == ret);
     }
 #endif
     
@@ -395,6 +395,10 @@ void read_net(void)
       assert(in_state.zip_state.z_stream.avail_out);
       assert(in_state.zip_state.z_stream.avail_in == 0);
       blen = (BUFLEN*2) - in_state.zip_state.z_stream.avail_out;
+
+      assert(blen >= 0);
+      if (!blen)
+        return; /* that didn't generate any decompressed input.. */
     }
 #endif
 
@@ -429,7 +433,6 @@ void write_data(void)
     return;
 
   in_state.len -= ret;
-  assert(in_state.len >= 0);
 
   if (!in_state.len)
   {

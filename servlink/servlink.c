@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
 #if SERVLINK_DEBUG & SERVLINK_DEBUG_LOGS
   for(i = 0; i < 5; i++)
   {
-    sprintf(logfile, "%s/slink-%lu-%s.log",
+    sprintf(logfile, "%s/slink-%u-%s.log",
             "/usr/local/ircd/logs", pid, lognames[i]);
     assert(logs[i] = fopen(logfile, "w"));
   }
