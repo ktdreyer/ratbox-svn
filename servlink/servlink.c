@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
 #endif
 
   /* Make sure we are running under hybrid.. */
-  if (isatty(0) || argc != 1 || strcmp(argv[0], "-slink"))
+  if (argc != 1 || strcmp(argv[0], "-slink"))
     usage(); /* exits */
   
   for (i = 0; i < 3; i++)
