@@ -76,7 +76,8 @@ static void mr_pass(struct Client *client_p, struct Client *source_p,
       return;
     }
 
-  strlcpy(client_p->localClient->passwd, password, PASSWDLEN);
+  strlcpy(client_p->localClient->passwd, password, 
+          sizeof(client_p->localClient->passwd));
 
   if (parc > 2)
     {

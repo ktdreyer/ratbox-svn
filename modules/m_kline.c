@@ -512,11 +512,11 @@ cluster(char *hostname)
 
   if(strchr(hostname,'@'))      
     {
-      strlcpy(result, hostname, HOSTLEN);
+      strlcpy(result, hostname, sizeof(result));
       return(result);
     }
 
-  strlcpy(temphost, hostname, HOSTLEN);
+  strlcpy(temphost, hostname, sizeof(temphost));
 
   is_ip_number = YES;   /* assume its an IP# */
   ipp = temphost;
@@ -545,7 +545,7 @@ cluster(char *hostname)
       zap_point++;
       *zap_point++ = '*';               /* turn 111.222.333.444 into */
       *zap_point = '\0';                /*      111.222.333.*        */
-      strlcpy(result, temphost, HOSTLEN);
+      strlcpy(result, temphost, sizeof(result));
       return(result);
     }
   else
@@ -572,18 +572,18 @@ cluster(char *hostname)
                 number_of_dots--;
               if(number_of_dots == 0)
                 {
-                  result[0] = '*';
-                  strlcpy(result + 1, host_mask, HOSTLEN);
+                  strlcpy(result, "*", sizeof(result));
+                  strlcat(result, host_mask, sizeof(result));
                   return(result);
                 }
               host_mask--;
             }
-          result[0] = '*';                      /* foo.com => *foo.com */
-          strlcpy(result + 1, temphost, HOSTLEN);
+          strlcpy(result, "*", sizeof(result));
+          strlcat(result, temphost, sizeof(result));
         }
       else      /* no tld found oops. just return it as is */
         {
-          strlcpy(result, temphost, HOSTLEN);
+          strlcpy(result, temphost, sizeof(result));
           return(result);
         }
     }
@@ -645,8 +645,7 @@ mo_dline(struct Client *client_p, struct Client *source_p,
   }
   
   dlhost = parv[loc];
-  strlcpy(cidr_form_host, dlhost, HOSTLEN);
-  cidr_form_host[HOSTLEN] = '\0';
+  strlcpy(cidr_form_host, dlhost, sizeof(cidr_form_host));
 
   if ((t=parse_netmask(dlhost, NULL, &bits)) == HM_HOST)
   {

@@ -174,7 +174,7 @@ static void ms_sjoin(struct Client *client_p,
         break;
 #endif
       case 'k':
-        strlcpy(mode.key, parv[4 + args], KEYLEN);
+        strlcpy(mode.key, parv[4 + args], sizeof(mode.key));
         args++;
         if (parc < 5+args)
           return;

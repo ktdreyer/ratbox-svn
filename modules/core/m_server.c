@@ -97,7 +97,7 @@ static void mr_server(struct Client *client_p, struct Client *source_p,
 
   name = parv[1];
   hop = atoi(parv[2]);
-  strlcpy(info, parv[3], REALLEN);
+  strlcpy(info, parv[3], sizeof(info));
 
   /* 
    * Reject a direct nonTS server connection if we're TS_ONLY -orabidoo
@@ -213,7 +213,7 @@ static void mr_server(struct Client *client_p, struct Client *source_p,
    * C:line in client_p->name
    */
 
-  strlcpy(client_p->name, name, HOSTLEN+1);
+  strlcpy(client_p->name, name, sizeof(client_p->name));
   set_server_gecos(client_p, info);
   client_p->hopcount = hop;
   server_estab(client_p);
@@ -252,7 +252,7 @@ static void ms_server(struct Client *client_p, struct Client *source_p,
 
   name = parv[1];
   hop = atoi(parv[2]);
-  strlcpy(info, parv[3], REALLEN);
+  strlcpy(info, parv[3], sizeof(info));
 
   if ((target_p = server_exists(name)))
     {
@@ -444,7 +444,7 @@ static void ms_server(struct Client *client_p, struct Client *source_p,
     return;
   }
 
-  strlcpy(target_p->name, name, HOSTLEN+1);
+  strlcpy(target_p->name, name, sizeof(target_p->name));
   
   set_server_gecos(target_p, info);
 
@@ -556,15 +556,14 @@ static int set_server_gecos(struct Client *client_p, char *info)
       
       /* if there was a trailing space, s could point to \0, so check */
       if(s && (*s != '\0'))
-        strlcpy(client_p->info, s, REALLEN);
-      else
-        strlcpy(client_p->info, "(Unknown Location)", REALLEN);
+      {  
+         strlcpy(client_p->info, s, sizeof(client_p->info));
+         return 1;
+      }
     }
-    else
-      strlcpy(client_p->info, "(Unknown Location)", REALLEN);
   }
-  else
-    strlcpy(client_p->info, "(Unknown Location)", REALLEN);
+  
+  strlcpy(client_p->info, "(Unknown Location)", sizeof(client_p->info));
 
   return 1;
 }

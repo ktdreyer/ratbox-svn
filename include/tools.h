@@ -56,6 +56,9 @@ dlinkAddTail(void *data, dlink_node *m, dlink_list *list);
 void
 dlinkDelete(dlink_node *m, dlink_list *list);
 
+int
+dlinkFindDelete(void *data, dlink_list *list);
+
 void
 dlinkMoveList(dlink_list *from, dlink_list *to);
 
@@ -171,6 +174,26 @@ dlinkDelete(dlink_node *m, dlink_list *list)
  m->next = m->prev = NULL;
 }
 
+extern inline int 
+dlinkFindDelete(void *data, dlink_list *list)
+{
+  dlink_node *m;
+  DLINK_FOREACH(m, list->head)
+  { 
+     if (m->next)
+         m->next->prev = m->prev;
+     else
+         list->tail = m->prev;
+     if (m->prev)
+         m->prev->next = m->next;
+     else
+         list->head = m->next;
+     m->next = m->prev = NULL;
+     return 1;
+  }
+  return 0;
+}  
+
 
 /* 
  * dlink_list_length
@@ -183,7 +206,7 @@ extern inline int dlink_list_length(dlink_list *list)
   dlink_node *ptr;
   int   count = 0;
 
-  for (ptr = list->head; ptr; ptr = ptr->next)
+  DLINK_FOREACH(ptr, list->head)
     count++;
   return count;
 }
@@ -199,7 +222,7 @@ extern inline dlink_node *dlinkFind(dlink_list *list, void * data )
 {
   dlink_node *ptr;
 
-  for (ptr = list->head; ptr; ptr = ptr->next)
+  DLINK_FOREACH(ptr, list->head)
     {
       if (ptr->data == data)
 	return (ptr);

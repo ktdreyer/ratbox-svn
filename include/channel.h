@@ -100,7 +100,8 @@ extern int     can_join(struct Client *source_p, struct Channel *chptr,
 extern int     is_chan_op (struct Channel *chptr,struct Client *who);
 extern int     is_voiced (struct Channel *chptr,struct Client *who);
 
-extern dlink_node *find_user_link (dlink_list *, struct Client *);
+#define find_user_link(list, who)  who != NULL ? dlinkFind(list, who) : NULL 
+      
 extern void    add_user_to_channel(struct Channel *chptr,
 				   struct Client *who, int flags);
 extern int     remove_user_from_channel(struct Channel *chptr,

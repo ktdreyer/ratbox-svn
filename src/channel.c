@@ -245,21 +245,6 @@ remove_user_from_channel(struct Channel *chptr, struct Client *who)
 }
 
 /*
- * find_user_link
- * inputs       -
- *              - client pointer to find
- * output       - pointer to link or NULL if not found
- * side effects - Look for ptr in the linked listed pointed to by link.
- */
-dlink_node *
-find_user_link(dlink_list * list, struct Client *who)
-{
-  if (who != NULL)
-    return (dlinkFind(list, who));
-  return (NULL);
-}
-
-/*
  * inputs       -
  * output       - NONE
  * side effects -
@@ -1284,8 +1269,8 @@ void set_channel_topic(struct Channel *chptr, const char *topic, const char *top
   {
     if(chptr->topic == NULL)
       allocate_topic(chptr);
-    strlcpy(chptr->topic, topic, TOPICLEN);
-    strlcpy(chptr->topic_info, topic_info,  USERHOST_REPLYLEN);
+    strlcpy(chptr->topic, topic, sizeof(chptr->topic));
+    strlcpy(chptr->topic_info, topic_info,  sizeof(chptr->topic_info));
     chptr->topic_time = topicts; 
   } else
   {

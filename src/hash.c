@@ -631,7 +631,7 @@ hash_find_masked_server(const char* name)
   /*
    * copy the damn thing and be done with it
    */
-  strlcpy(buf, name, HOSTLEN);
+  strlcpy(buf, name, sizeof(buf));
 
   while ((s = strchr(p, '.')) != 0)
     {
@@ -770,7 +770,7 @@ get_or_create_channel(struct Client *client_p, char *chname, int *isnew)
 
   chptr = BlockHeapAlloc(channel_heap);
   memset(chptr, 0, sizeof(struct Channel));
-  strlcpy(chptr->chname, chname, CHANNELLEN+1);
+  strlcpy(chptr->chname, chname, sizeof(chptr->chname));
 
   dlinkAdd(chptr, &chptr->node, &GlobalChannelList);
 

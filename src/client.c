@@ -1022,9 +1022,9 @@ static void remove_dependents(struct Client* client_p,
        */
 
       if ((aconf = to->serv->sconf))
-        strlcpy(myname, my_name_for_link(me.name, aconf), HOSTLEN);
+        strlcpy(myname, my_name_for_link(me.name, aconf), sizeof(myname));
       else
-        strlcpy(myname, me.name, HOSTLEN);
+        strlcpy(myname, me.name, sizeof(myname));
       recurse_send_quits(client_p, source_p, to, comment1, myname);
     }
 
@@ -1422,7 +1422,7 @@ set_initial_nick(struct Client *client_p, struct Client *source_p,
 
  if (source_p->user)
  {
-  strlcpy(buf, source_p->username, USERLEN);
+  strlcpy(buf, source_p->username, sizeof(buf));
   /*
    * USER already received, now we have NICK.
    * *NOTE* For servers "NICK" *must* precede the

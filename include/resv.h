@@ -45,7 +45,7 @@ struct ResvNick
   struct ResvNick *next;
   struct ResvNick *prev;
 
-  char	name[RESVNICKLEN];
+  char	name[RESVNICKLEN+1];
   char	*reason;
   int	conf;
 };

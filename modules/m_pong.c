@@ -123,7 +123,7 @@ static void mr_pong(struct Client *client_p,
 	  if(source_p->localClient->random_ping == incoming_ping)
 	  {
 		char buf[USERLEN+1];
-		strlcpy(buf, source_p->username, USERLEN);
+		strlcpy(buf, source_p->username, sizeof(buf));
 		source_p->flags2 |= FLAGS2_PING_COOKIE;
 		register_local_user(client_p, source_p, source_p->name, buf);
 	  } else

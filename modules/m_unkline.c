@@ -267,7 +267,7 @@ static void remove_permkline_match(struct Client *source_p,
     {
       char *found_host, *found_user;
 
-      strlcpy(buff, buf, BUFSIZE);
+      strlcpy(buff, buf, sizeof(buff));
 
       if ((p = strchr(buff,'\n')) != NULL)
 	*p = '\0';
@@ -510,7 +510,7 @@ mo_undline (struct Client *client_p, struct Client *source_p,
 
   while(fbgets(buf, sizeof(buf), in))
     {
-      strlcpy(buff, buf, BUFSIZE);
+      strlcpy(buff, buf, sizeof(buff));
 
       if ((p = strchr(buff,'\n')) != NULL)
 	*p = '\0';

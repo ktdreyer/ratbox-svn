@@ -57,7 +57,7 @@ struct config_server_hide ConfigServerHide;
 extern int yyparse(); /* defined in y.tab.c */
 extern int lineno;
 extern char linebuf[];
-extern char conffilebuf[IRCD_BUFSIZE];
+extern char conffilebuf[IRCD_BUFSIZE+1];
 int scount = 0;       /* used by yyparse(), etc */
 
 #ifndef INADDR_NONE
@@ -546,8 +546,8 @@ verify_access(struct Client* client_p, const char* username)
     }
   else
     {
-      non_ident[0] = '~';
-      strlcpy(&non_ident[1],username, USERLEN);
+      strlcpy(non_ident, "~", sizeof(non_ident));
+      strlcat(&non_ident[1],username, sizeof(non_ident));
       aconf = find_address_conf(client_p->host,non_ident,
 				&client_p->localClient->ip,
 				client_p->localClient->aftype);
@@ -580,7 +580,7 @@ verify_access(struct Client* client_p, const char* username)
 				       client_p->host, aconf->name);
 		}
 #endif
-	      strlcpy(client_p->host, aconf->name, HOSTLEN);
+	      strlcpy(client_p->host, aconf->name, sizeof(client_p->host));
 	      SetIPSpoof(client_p);
 	    }
 	  return(attach_iline(client_p, aconf));
@@ -1372,7 +1372,7 @@ rehash(int sig)
 
   if (ServerInfo.description != NULL)
     {
-      strlcpy(me.info, ServerInfo.description, REALLEN);
+      strlcpy(me.info, ServerInfo.description, sizeof(me.info));
     }
 
   flush_deleted_I_P();
@@ -2068,7 +2068,7 @@ read_conf_files(int cold)
 
      - Gozem 2002-07-21 
   */
-  strlcpy(conffilebuf, filename, IRCD_BUFSIZE);
+  strlcpy(conffilebuf, filename, sizeof(conffilebuf));
 
   if ((conf_fbfile_in = fbopen(filename,"r")) == NULL)
     {

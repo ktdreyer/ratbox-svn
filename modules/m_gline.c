@@ -173,8 +173,8 @@ static void mo_gline(struct Client *client_p,
 	  if (!*host)           /* duh. no host found, assume its '*' host */
 	    host = "*";
 	      
-	  strlcpy(tempuser, user, USERLEN);     /* allow for '*' */
-	  strlcpy(temphost, host, HOSTLEN);
+	  strlcpy(tempuser, user, sizeof(tempuser));     /* allow for '*' */
+	  strlcpy(temphost, host, sizeof(temphost));
 	  user = tempuser;
 	  host = temphost;
 	}
@@ -748,14 +748,14 @@ add_new_majority_gline(const char* oper_nick,
   struct gline_pending *pending = (struct gline_pending*)
     MyMalloc(sizeof(struct gline_pending));
 
-  strlcpy(pending->oper_nick1, oper_nick, NICKLEN);
-  strlcpy(pending->oper_user1, oper_user, USERLEN);
-  strlcpy(pending->oper_host1, oper_host, HOSTLEN);
+  strlcpy(pending->oper_nick1, oper_nick, sizeof(pending->oper_nick1));
+  strlcpy(pending->oper_user1, oper_user, sizeof(pending->oper_user1));
+  strlcpy(pending->oper_host1, oper_host, sizeof(pending->oper_host1));
 
   pending->oper_server1 = find_or_add(oper_server);
 
-  strlcpy(pending->user, user, USERLEN);
-  strlcpy(pending->host, host, HOSTLEN);
+  strlcpy(pending->user, user, sizeof(pending->user));
+  strlcpy(pending->host, host, sizeof(pending->host));
   DupString(pending->reason1, reason);
   pending->reason2 = NULL;
 
@@ -847,9 +847,9 @@ majority_gline(struct Client *source_p,
             }
           else
             {
-              strlcpy(gline_pending_ptr->oper_nick2, oper_nick, NICKLEN);
-              strlcpy(gline_pending_ptr->oper_user2, oper_user, USERLEN);
-              strlcpy(gline_pending_ptr->oper_host2, oper_host, HOSTLEN);
+              strlcpy(gline_pending_ptr->oper_nick2, oper_nick, sizeof(gline_pending_ptr->oper_nick2));
+              strlcpy(gline_pending_ptr->oper_user2, oper_user, sizeof(gline_pending_ptr->oper_user2));
+              strlcpy(gline_pending_ptr->oper_host2, oper_host, sizeof(gline_pending_ptr->oper_host2));
               DupString(gline_pending_ptr->reason2, reason);
               gline_pending_ptr->oper_server2 = find_or_add(oper_server);
               gline_pending_ptr->last_gline_time = CurrentTime;

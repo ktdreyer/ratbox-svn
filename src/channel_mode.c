@@ -1475,7 +1475,7 @@ chm_key(struct Client *client_p, struct Client *source_p,
       fix_key_old(key);
 
     assert(key[0] != ' ');
-    strlcpy(chptr->mode.key, key, KEYLEN);
+    strlcpy(chptr->mode.key, key, sizeof(chptr->mode.key));
 
     /* if somebody does MODE #channel +kk a b, accept latter --fl */
     for (i = 0; i < mode_count; i++)

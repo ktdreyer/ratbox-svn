@@ -182,3 +182,22 @@ dlinkMoveList(dlink_list *from, dlink_list *to)
   /* I think I got that right */
 }
 
+int 
+dlinkFindDelete(void *data, dlink_list *list)
+{
+  dlink_node *m;
+  DLINK_FOREACH(m, list->head)
+  { 
+     if (m->next)
+         m->next->prev = m->prev;
+     else
+         list->tail = m->prev;
+     if (m->prev)
+         m->prev->next = m->next;
+     else
+         list->head = m->next;
+     m->next = m->prev = NULL;
+     return 1;
+  }
+  return 0;
+}  

@@ -306,7 +306,7 @@ register_local_user(struct Client *client_p, struct Client *source_p,
            source_p->localClient->random_ping = (unsigned long)rand();
            sendto_one(source_p, "PING :%lu", (unsigned long)source_p->localClient->random_ping);
            source_p->flags |= FLAGS_PINGSENT;
-	   strlcpy(source_p->username, username, USERLEN);
+	   strlcpy(source_p->username, username, sizeof(source_p->username));
   	   return -1;
   	} 
   	if(!(source_p->flags2 & FLAGS2_PING_COOKIE))
@@ -523,7 +523,7 @@ register_remote_user(struct Client *client_p, struct Client *source_p,
 
   user->last = CurrentTime;
 
-  strlcpy(source_p->username, username, USERLEN);
+  strlcpy(source_p->username, username, sizeof(source_p->username));
 
   SetClient(source_p);
 
@@ -838,7 +838,7 @@ do_local_user(char* nick, struct Client* client_p, struct Client* source_p,
    */
   user->server = me.name;
 
-  strlcpy(source_p->info, realname, REALLEN);
+  strlcpy(source_p->info, realname, sizeof(source_p->info));
  
   if (source_p->name[0])
   { 
@@ -852,7 +852,7 @@ do_local_user(char* nick, struct Client* client_p, struct Client* source_p,
           /*
            * save the username in the client
            */
-          strlcpy(source_p->username, username, USERLEN);
+          strlcpy(source_p->username, username, sizeof(source_p->username));
         }
     }
   return 0;
@@ -886,10 +886,10 @@ do_remote_user(char* nick, struct Client* client_p, struct Client* source_p,
    * coming from another server, take the servers word for it
    */
   user->server = find_or_add(server);
-  strlcpy(source_p->host, host, HOSTLEN); 
-  strlcpy(source_p->info, realname, REALLEN);
+  strlcpy(source_p->host, host, sizeof(source_p->host)); 
+  strlcpy(source_p->info, realname, sizeof(source_p->info));
   if (id)
-	  strcpy(source_p->user->id, id);
+	  strlcpy(source_p->user->id, id, sizeof(source_p->user->id));
   
   return register_remote_user(client_p, source_p, source_p->name, username);
 }

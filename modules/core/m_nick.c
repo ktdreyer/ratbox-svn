@@ -125,7 +125,7 @@ static void mr_nick(struct Client *client_p, struct Client *source_p,
     *s = '\0';
 
   /* copy the nick and terminate it */
-  strlcpy(nick, parv[1], NICKLEN);
+  strlcpy(nick, parv[1], sizeof(nick));
 
   /* check the nickname is ok */
   if(!clean_nick_name(nick))
@@ -183,7 +183,7 @@ static void mr_nick(struct Client *client_p, struct Client *source_p,
     flood_endgrace(source_p);
 
   /* terminate nick to NICKLEN */
-  strlcpy(nick, parv[1], NICKLEN);
+  strlcpy(nick, parv[1], sizeof(nick));
 
   /* check the nickname is ok */
   if(!clean_nick_name(nick))
@@ -306,7 +306,7 @@ static void ms_nick(struct Client *client_p, struct Client *source_p,
   }
 
   /* fix the length of the nick */
-  strlcpy(nick, parv[1], NICKLEN);
+  strlcpy(nick, parv[1], sizeof(nick));
 
   if(check_clean_nick(client_p, source_p, nick, parv[1], parv[7]))
     return;
@@ -384,7 +384,7 @@ static void ms_client(struct Client *client_p, struct Client *source_p,
   name = parv[9];
 
   /* parse the nickname */
-  strlcpy(nick, parv[1], NICKLEN);
+  strlcpy(nick, parv[1], sizeof(nick));
 
   /* check the nicknames, usernames and hostnames are ok */
   if(check_clean_nick(client_p, source_p, nick, parv[1], parv[7]) ||

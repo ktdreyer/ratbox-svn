@@ -198,7 +198,7 @@ static void auth_dns_callback(void* vptr, adns_answer* reply)
     {
       if(strlen(*reply->rrs.str) <= HOSTLEN)
         {
-          strlcpy(str, *reply->rrs.str, HOSTLEN+1);
+          strlcpy(str, *reply->rrs.str, sizeof(auth->client->host));
           sendheader(auth->client, REPORT_FIN_DNS);
         }
       else
