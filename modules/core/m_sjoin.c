@@ -671,7 +671,6 @@ struct mode_letter flags[] = {
 static void set_final_mode(struct Mode *mode,struct Mode *oldmode)
 {
   int what = 0;
-  char *s;
   char *pbuf=parabuf;
   int  len;
   int  i;
