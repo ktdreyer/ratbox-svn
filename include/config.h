@@ -390,25 +390,10 @@
  */
 #undef LIMIT_UH
 
-/* IDLE_CHECK
- * If this is defined, each client is checked for excessive idleness
- * This adds some CPU... you might not want to use this on a large server.
- * However, if defined, and a client is discovered idling more than
- * IDLE_TIME minutes, it is t-klined for 1 minute to discourage
- * reconnects. The idle time is settable via /quote set
- * /quote set idletime
- *
- * -Dianora
- *
- * IDLE_IGNORE will prevent the server from idle'ing clients connected from
- * the listed IP#s.  This should probably be moved into a .conf file entry
- * at some point in the future.
- * It has been. add '<' to I line prefix
- *
+/*
  * OPER_IDLE allows operators to remain idle when they idle
  * beyond the idle limit
  */
-#undef  IDLE_CHECK
 #define IDLE_TIME 60
 #define OPER_IDLE
 
@@ -622,11 +607,9 @@
 /* 300 is five minutes, seems reasonable */
 #define ANTI_SPAM_EXIT_MESSAGE_TIME 300
 
-#ifdef FLUD
 #define FLUD_NUM        4       /* Number of flud messages to trip alarm */
 #define FLUD_TIME       3       /* Seconds in which FLUD_NUM msgs must occur */
 #define FLUD_BLOCK      15      /* Seconds to block fluds */
-#endif
 
 /* REJECT_HOLD 
  * clients that reconnect but are k-lined will have their connections
@@ -726,19 +709,15 @@ error CLIENT_FLOOD undefined.
 
 #define REPORT_DLINE_TO_USER
 
-#ifdef FLUD
 void    free_fluders();
 void    free_fludees();
-#endif /* FLUD */
 
 #ifdef ANTI_SPAMBOT
 #define MIN_SPAM_NUM 5
 #define MIN_SPAM_TIME 60
 #endif
 
-#ifdef IDLE_CHECK
 #define MIN_IDLETIME 1800
-#endif
 
 /* tuck this here for now, it will go away eventually...
  * but meanwhile, at least it will compile a server that works -db

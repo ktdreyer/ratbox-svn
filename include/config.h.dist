@@ -97,8 +97,8 @@
  *
  */
 
-#define DPATH   "/usr/ejb/ircd/"
-#define SPATH   "/usr/ejb/ircd/ircd"
+#define DPATH   "/usr/local/ircd/"
+#define SPATH   "/usr/local/ircd/ircd"
 #define CPATH   "ircd.conf"
 #define KPATH   "kline.conf"
 #define DLPATH  "kline.conf"
@@ -153,8 +153,8 @@
  *
  * These need to be defined if you want to use SYSLOG logging, too.
  */
-#define FNAME_USERLOG "/usr/ejb/ircd/users" /* */
-#define FNAME_OPERLOG "/usr/ejb/ircd/opers" /* */
+#define FNAME_USERLOG "/usr/local/ircd/users" /* */
+#define FNAME_OPERLOG "/usr/local/ircd/opers" /* */
 
 /* RFC1035_ANAL
  * Defining this causes ircd to reject hostnames with non-compliant chars.
@@ -379,80 +379,6 @@
  */
 #define LITTLE_I_LINES
 
-/*
- * define ONE of NO_CHANOPS_ON_SPLIT, NO_JOIN_ON_SPLIT
- * PRESERVE_CHANNEL_ON_SPLIT, NO_JOIN_ON_SPLIT_SIMPLE
- *
- * choose =one= only
- */
-
-/* NO_CHANOPS_WHEN_SPLIT
- * When this is defined, users will not be chanopped on empty channels
- * if there are no servers presently connected to this server
- * opers are not affected. 
- */
-#undef NO_CHANOPS_WHEN_SPLIT
-
-/* 
- * NO_JOIN_ON_SPLIT_SIMPLE
- * 
- * When this is defined, users will not be allowed to join channels
- * while the server is split.
- */
-#undef NO_JOIN_ON_SPLIT_SIMPLE
-
-/*
- * NO_JOIN_ON_SPLIT
- *
- * When this is defined, users will not be allowed to join channels
- * that were present before a split. THIS IS BROKEN - DO NOT USE
- * ON A PRODUCTION SERVER --Rodder
- */
-#undef NO_JOIN_ON_SPLIT
-
-/*
- * PRESERVE_CHANNEL_ON_SPLIT
- *
- * When this is defined, channel modes are preserved when this
- * server is split from net until rejoin. i.e. if the channel
- * was +i before this server split, it remains +i during the split
- * THIS IS BROKEN - DO NOT USE ON PRODUCTION SERVER --Rodder
- */
-#undef PRESERVE_CHANNEL_ON_SPLIT
-
-/*
- * SPLIT_SMALLNET_SIZE defines what constitutes a split from 
- * the net. for a leaf, 2 is fine. If the number of servers seen
- * on the net gets less than 2, a split is deemed to have happened.
- */
-#define SPLIT_SMALLNET_SIZE 2
-
-/*
- * SPLIT_SMALLNET_USER_SIZE defines how many global users on the
- * net constitute a "normal" net size. It's used in conjunction
- * with SPLIT_SMALLNET_SIZE to help determine the end of a split.
- * if number of server seen on net > SPLIT_SMALLNET_SIZE &&
- * number of users seen on net > SPLIT_SMALLNET_USER_SIZE start
- * counting down the SERVER_SPLIT_RECOVERY_TIME
- */
-#define SPLIT_SMALLNET_USER_SIZE 10000
-
-/*
- * SPLIT_PONG will send a PING to a server after the connect burst.
- * It will stay in "split" mode until it receives a PONG in addition
- * to meeting the other conditions.  This is very useful for true
- * leafs, less useful for "clustered" servers.  If this is enabled,
- * you should be able to crank DEFAULT_SERVER_SPLIT_RECOVERY_TIME
- * down to 1.
- */
-#define SPLIT_PONG
-
-/*
- * DEFAULT_SERVER_SPLIT_RECOVERY_TIME - determines how long to delay split
- * status after resyncing
- */
-#define DEFAULT_SERVER_SPLIT_RECOVERY_TIME 1
-
 /* LIMIT_UH
  * If this is defined, Y line limit is made against the actual
  * username not the ip. i.e. if you limit the connect frequency line
@@ -464,25 +390,10 @@
  */
 #undef LIMIT_UH
 
-/* IDLE_CHECK
- * If this is defined, each client is checked for excessive idleness
- * This adds some CPU... you might not want to use this on a large server.
- * However, if defined, and a client is discovered idling more than
- * IDLE_TIME minutes, it is t-klined for 1 minute to discourage
- * reconnects. The idle time is settable via /quote set
- * /quote set idletime
- *
- * -Dianora
- *
- * IDLE_IGNORE will prevent the server from idle'ing clients connected from
- * the listed IP#s.  This should probably be moved into a .conf file entry
- * at some point in the future.
- * It has been. add '<' to I line prefix
- *
+/*
  * OPER_IDLE allows operators to remain idle when they idle
  * beyond the idle limit
  */
-#undef  IDLE_CHECK
 #define IDLE_TIME 60
 #define OPER_IDLE
 
@@ -499,29 +410,10 @@
 #define SEND_FAKE_KILL_TO_CLIENT
 
 /*
- * LWALLOPS - Like wallops but only local.
- *
- * This is actually a compatibility command which really calls m_locops().
- */
-#define LWALLOPS
-
-/*
  * Define this to enable WintrHawk "styling"
  */
 #define WINTRHAWK
 
-/*
- * comstud and I have both noted that solaris 2.5 at least, takes a hissy
- * fit if you don't read a fd that becomes ready right away. Unfortunately
- * the dog3 priority code relies upon not having to read a ready fd right away.
- * If you have HTM mode set low as it is normally, the server will
- * eventually grind to a halt.
- * Don't complain if Solaris lags if you don't define this. I warned you.
- *
- * -Dianora
- */
-
-#undef NO_PRIORITY
 
 /*
  * Define this to enable IPv6 support.  IPv6 is currently still being
@@ -618,7 +510,7 @@
  * CONNECTTIMEOUT - 10 seconds for its host to respond to an ident lookup
  * query and for a DNS answer to be retrieved.
  */
-#define CONNECTTIMEOUT  30      /* Recommended value: 30 */
+#define CONNECTTIMEOUT  15      /* Recommended value: 30 */
 
 /* KILLCHASETIMELIMIT -
  * Max time from the nickname change that still causes KILL
@@ -715,11 +607,9 @@
 /* 300 is five minutes, seems reasonable */
 #define ANTI_SPAM_EXIT_MESSAGE_TIME 300
 
-#ifdef FLUD
 #define FLUD_NUM        4       /* Number of flud messages to trip alarm */
 #define FLUD_TIME       3       /* Seconds in which FLUD_NUM msgs must occur */
 #define FLUD_BLOCK      15      /* Seconds to block fluds */
-#endif
 
 /* REJECT_HOLD 
  * clients that reconnect but are k-lined will have their connections
@@ -819,24 +709,15 @@ error CLIENT_FLOOD undefined.
 
 #define REPORT_DLINE_TO_USER
 
-#if defined(NO_CHANOPS_WHEN_SPLIT) || defined(PRESERVE_CHANNEL_ON_SPLIT) || \
-        defined(NO_JOIN_ON_SPLIT) || defined(NO_JOIN_ON_SPLIT_SIMPLE)
-#define NEED_SPLITCODE
-#endif
-
-#ifdef FLUD
 void    free_fluders();
 void    free_fludees();
-#endif /* FLUD */
 
 #ifdef ANTI_SPAMBOT
 #define MIN_SPAM_NUM 5
 #define MIN_SPAM_TIME 60
 #endif
 
-#ifdef IDLE_CHECK
 #define MIN_IDLETIME 1800
-#endif
 
 /* tuck this here for now, it will go away eventually...
  * but meanwhile, at least it will compile a server that works -db
