@@ -203,7 +203,8 @@ do_whois(struct Client *client_p, struct Client *source_p, int parc, const char 
 	{
 
 		/* Oh-oh wilds is true so have to do it the hard expensive way */
-		found = global_whois(source_p, nick, wilds, glob);
+		if(MyClient(source_p))
+			found = global_whois(source_p, nick, wilds, glob);
 	}
 
 	if(!found)
@@ -229,16 +230,20 @@ global_whois(struct Client *source_p, char *nick, int wilds, int glob)
 {
 	struct Client *target_p;
 	dlink_node *ptr;
-	int found = NO;
+	int found = 0;
 
 	DLINK_FOREACH(ptr, global_client_list.head)
 	{
 		target_p = (struct Client *) ptr->data;
+
+		if(found >= 50)
+			return found;
+
 		if(!match(nick, target_p->name))
 		{
 			continue;
 		}
-		if(IsServer(target_p))
+		if(IsServer(target_p) || IsInvisible(target_p))
 			continue;
 		/*
 		 * 'Rules' established for sending a WHOIS reply:
@@ -257,7 +262,7 @@ global_whois(struct Client *source_p, char *nick, int wilds, int glob)
 			continue;
 
 		if(single_whois(source_p, target_p, wilds, glob))
-			found = 1;
+			found++;
 	}
 
 	return (found);
