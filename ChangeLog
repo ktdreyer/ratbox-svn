@@ -1,3 +1,16 @@
+androsyn    2003/05/21 15:18:18 UTC	(20030521_0)
+
+  Modified files:
+    src                  s_debug.c 
+  Log:
+  Make the formatting play nice on 64bit bit systems where long and int are
+  not the same thing
+  
+  Revision  Changes    Path
+  7.90      +21 -21    ircd-ratbox/src/s_debug.c
+
+
+
 leeh        2003/05/20 12:43:23 UTC	(20030520_1)
 
   Modified files:
