@@ -45,12 +45,12 @@
 #include <time.h>
 
 #ifndef INADDRSZ 
-#define INADDRSZ sizeof(struct in_addr)
+#define INADDRSZ 4
 #endif
 
 #ifdef IPV6
 #ifndef IN6ADDRSZ
-#define IN6ADDRSZ sizeof(struct in6_addr)
+#define IN6ADDRSZ 16
 #endif
 #endif
 
