@@ -90,12 +90,18 @@ int m_accept(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       add_to_accept(source,sptr);
       sendto_one(sptr, ":%s NOTICE %s :Now allowing %s", 
 		 me.name, parv[0], source->name);
+      sendto_anywhere(source, sptr,
+		      "NOTICE %s :*** I've put you on my accept list.",
+		      source->name);
     }
   else if(add == -1)
     {
       del_from_accept(source,sptr);
       sendto_one(sptr, ":%s NOTICE %s :Now removed %s from allow list", 
 		 me.name, parv[0], source->name);
+      sendto_anywhere(source, sptr,
+		      "NOTICE %s :*** I've taken you off my accept list.",
+		      source->name);
     }
 
   return 0;
