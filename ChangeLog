@@ -1,3 +1,18 @@
+leeh        2005/02/07 19:23:22 EST	(20050208_1)
+
+  Modified files:
+    doc                  example.conf example.efnet.conf 
+    src                  newconf.c 
+  Log:
+  - removed ability to set klines/dlines/xlines/resvs in ircd.conf
+  
+  Revision  Changes    Path
+  7.258     +0 -39     ircd-ratbox/doc/example.conf
+  7.86      +0 -42     ircd-ratbox/doc/example.efnet.conf
+  7.198     +0 -272    ircd-ratbox/src/newconf.c
+
+
+
 leeh        2005/02/07 19:19:32 EST	(20050208_0)
 
   Modified files:
