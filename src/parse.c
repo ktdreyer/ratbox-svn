@@ -302,7 +302,7 @@ static int
 handle_command(struct Message *mptr, struct Client *client_p,
 	       struct Client *from, int i, const char* hpara[MAXPARA])
 {
-	struct MessageEntry entry_handler;
+	struct MessageEntry ehandler;
 	MessageHandler handler = 0;
 
 	if(IsDeadorAborted(client_p))
@@ -326,11 +326,12 @@ handle_command(struct Message *mptr, struct Client *client_p,
 			return (1);
 	}
 
-	entry_handler = mptr->handlers[from->handler];
-	handler = entry_handler.handler;
+	ehandler = mptr->handlers[from->handler];
+	handler = ehandler.handler;
 
 	/* check right amount of params is passed... --is */
-	if(i < entry_handler.min_para || EmptyString(hpara[entry_handler.min_para - 1]))
+	if(i < ehandler.min_para || 
+	   (ehandler.min_para && EmptyString(hpara[ehandler.min_para - 1])))
 	{
 		if(!IsServer(client_p))
 		{
@@ -347,7 +348,7 @@ handle_command(struct Message *mptr, struct Client *client_p,
 		sendto_realops_flags(UMODE_ALL, L_ALL,
 				     "Dropping server %s due to (invalid) command '%s'"
 				     "with only %d arguments (expecting %d).",
-				     client_p->name, mptr->cmd, i, entry_handler.min_para);
+				     client_p->name, mptr->cmd, i, ehandler.min_para);
 		ilog(L_CRIT,
 		     "Insufficient parameters (%d) for command '%s' from %s.",
 		     i, mptr->cmd, client_p->name);
