@@ -69,7 +69,7 @@ initwatch(void)
 }
 
 
-int
+void
 hash_check_watch(struct Client *client_p, int reply)
 {
 	int hashv;
@@ -79,14 +79,14 @@ hash_check_watch(struct Client *client_p, int reply)
 
 	hashv = watch_hash_nick(client_p->name);
 	if(hashv <= 0)
-		return 0;
+		return;
 
 	if((awptr = (struct Watch *) watchTable[hashv]))
 		while(awptr && irccmp(awptr->watchnick, client_p->name))
 			awptr = awptr->hnext;
 
 	if(!awptr)
-		return 0;	/* This nick isn't on watch */
+		return;	/* This nick isn't on watch */
 
 	awptr->lasttime = CurrentTime;
 
@@ -98,22 +98,20 @@ hash_check_watch(struct Client *client_p, int reply)
 				(IsPerson(client_p) ? client_p->host : "<N/A>"),
 				awptr->lasttime, client_p->info);
 	}
-	return 0;
 }
 
 
-int
+void
 add_to_watch_hash_table(const char *nick, struct Client *client_p)
 {
 	int hashv;
 	struct Watch *awptr;
-	dlink_node *lp = NULL;
 
-	if(strlen(nick) > NICKLEN)
-		return 0;
+	if(strlen(nick)+1 >  NICKLEN)
+		return;
 	hashv = watch_hash_nick(nick);
 	if(hashv <= 0)
-		return 0;
+		return;
 	if((awptr = (struct Watch *) watchTable[hashv]))
 		while(awptr && irccmp(awptr->watchnick, nick))
 			awptr = awptr->hnext;
@@ -129,16 +127,13 @@ add_to_watch_hash_table(const char *nick, struct Client *client_p)
 	}
 	else
 	{
-		lp = dlinkFind(&awptr->watched_by, client_p);
+		dlink_node *lp;
+		if((lp = dlinkFind(&awptr->watched_by, client_p)) == NULL)
+		{
+			dlinkAddAlloc(client_p, &awptr->watched_by);
+			dlinkAddAlloc(awptr, &client_p->localClient->watchlist);
+		}
 	}
-
-	if(!lp)
-	{
-		dlinkAddAlloc(client_p, &awptr->watched_by);
-		dlinkAddAlloc(awptr, &client_p->localClient->watchlist);
-	}
-
-	return 0;
 }
 
 struct Watch *
@@ -157,7 +152,7 @@ hash_get_watch(const char *name)
 	return awptr;
 }
 
-int
+void
 del_from_watch_hash_table(const char *nick, struct Client *client_p)
 {
 	int hashv;
@@ -165,7 +160,7 @@ del_from_watch_hash_table(const char *nick, struct Client *client_p)
 
 	hashv = watch_hash_nick(nick);
 	if(hashv <= 0)
-		return 0;
+		return;
 	if((awptr = (struct Watch *) watchTable[hashv]))
 		while(awptr && irccmp(awptr->watchnick, nick))
 		{
@@ -174,10 +169,10 @@ del_from_watch_hash_table(const char *nick, struct Client *client_p)
 		}
 
 	if(!awptr)
-		return 0;	/* No such watch */
+		return;	/* No such watch */
 
 	if(!dlinkFindDestroy(&awptr->watched_by, client_p))
-		return 0;
+		return;
 
 	dlinkFindDestroy(&client_p->localClient->watchlist, awptr);
 
@@ -192,11 +187,9 @@ del_from_watch_hash_table(const char *nick, struct Client *client_p)
 			nlast->hnext = awptr->hnext;
 		BlockHeapFree(watch_heap, awptr);
 	}
-
-	return 0;
 }
 
-int
+void
 hash_del_watch_list(struct Client *client_p)
 {
 	int hashv;
@@ -204,7 +197,7 @@ hash_del_watch_list(struct Client *client_p)
 	dlink_node *ptr, *next_ptr;
 
 	if(!(client_p->localClient->watchlist.head))
-		return 0;	/* Nothing to do */
+		return;	/* Nothing to do */
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, client_p->localClient->watchlist.head)
 	{
@@ -236,6 +229,4 @@ hash_del_watch_list(struct Client *client_p)
 		}
 		dlinkDestroy(ptr, &client_p->localClient->watchlist);
 	}
-
-	return 0;
 }
