@@ -1,3 +1,8 @@
+*** 20001111_5 by db
+- more clean ups on m_kline.c, I'll make this sane yet!
+
+
+
 *** 20001111_4 by ejb
 - fix up Makefiles a bit so they actually work
 - finally remove src/m_*.c
