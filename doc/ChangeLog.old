@@ -1,3 +1,21 @@
+leeh        2002/04/27 05:30:52 EDT	(20020427_0)
+
+  Modified files:
+    contrib              m_jupe.c 
+    doc                  whats-new.txt 
+    include              supported.h 
+  Log:
+  - added the 'CALLERID' token to 005, for +g, as agreed with austhex
+    developers
+  - idiot proofing, dont allow people to jupe their own server.
+  
+  Revision  Changes    Path
+  1.28      +9 -2      ircd-hybrid-7/contrib/m_jupe.c
+  7.35      +1 -0      ircd-hybrid-7/doc/whats-new.txt
+  1.21      +2 -1      ircd-hybrid-7/include/supported.h
+
+
+
 leeh        2002/04/26 11:27:34 EDT	(20020426_5)
 
   Modified files:
