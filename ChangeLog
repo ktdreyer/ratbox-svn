@@ -1,3 +1,27 @@
+leeh        2002/08/25 15:05:29 EDT	(20020825_1)
+
+  Modified files:
+    doc                  example.conf example.efnet.conf 
+    include              defaults.h m_info.h newconf.h s_conf.h 
+    modules              m_info.c 
+    src                  newconf.c s_conf.c 
+  Log:
+  - removed maximum_links, its not used anymore and is hardcoded to 1.
+    people shouldnt leave stuff in the default class :)
+  
+  Revision  Changes    Path
+  7.177     +0 -5      ircd-ratbox/doc/example.conf
+  7.12      +0 -5      ircd-ratbox/doc/example.efnet.conf
+  7.7       +0 -2      ircd-ratbox/include/defaults.h
+  7.41      +0 -2      ircd-ratbox/include/m_info.h
+  7.12      +0 -1      ircd-ratbox/include/newconf.h
+  7.198     +0 -1      ircd-ratbox/include/s_conf.h
+  1.64      +1 -7      ircd-ratbox/modules/m_info.c
+  7.28      +0 -7      ircd-ratbox/src/newconf.c
+  7.346     +0 -1      ircd-ratbox/src/s_conf.c
+
+
+
 androsyn    2002/08/25 12:17:17 EDT	(20020825_0)
 
   Modified files:
