@@ -35,6 +35,7 @@
 #include "parse.h"
 #include "modules.h"
 #include "s_serv.h"
+#include "hash.h"
 
 static int mr_pass(struct Client *, struct Client *, int, const char **);
 
@@ -83,11 +84,19 @@ mr_pass(struct Client *client_p, struct Client *source_p, int parc, const char *
 		if(0 == irccmp(parv[2], "TS") && client_p->tsinfo == 0)
 			client_p->tsinfo = TS_DOESTS;
 
-		if(parc > 3 && (atoi(parv[3]) >= 6))
+		if(parc == 5 && atoi(parv[3]) >= 6)
 		{
-			client_p->localClient->caps |= CAP_TS6;
-			client_p->tsinfo |= TS_DOESTS6;
+			/* only mark as TS6 if the SID is valid.. */
+			if(IsDigit(parv[4][0]) && IsIdChar(parv[4][1]) &&
+			   IsIdChar(parv[4][2]) && parv[4][3] == '\0')
+			{
+				client_p->localClient->caps |= CAP_TS6;
+				client_p->tsinfo |= TS_DOESTS6;
+
+				strcpy(client_p->id, parv[4]);
+			}
 		}
+
 	}
 
 	return 0;

@@ -79,11 +79,11 @@ struct Server
 {
 	struct User *user;	/* who activated this connection */
 	const char *up;		/* Pointer to scache name */
+	const char *upid;
 	char by[NICKLEN];
 	struct ConfItem *sconf;	/* connect{} pointer for this server */
 	dlink_list servers;
 	dlink_list users;
-	int tsver;
 };
 
 struct SlinkRpl
@@ -277,16 +277,6 @@ struct exit_client_hook
 #define STAT_SERVER             0x10
 #define STAT_CLIENT             0x20
 
-#define IsTS6(x)	((x)->serv->tsver == 6)
-
-/* use the id if it has one */
-#define has_id(source)	((source)->id[0] != '\0')
-#define use_id(source)	((source)->id[0] != '\0' ? (source)->id : (source)->name)
-
-/* if target is TS6, use id if it has one, else name */
-#define get_id(source, target) ((IsServer(target) && IsTS6(target)) ? \
-				use_id(source) : (source)->name)
-
 
 #define IsRegisteredUser(x)     ((x)->status == STAT_CLIENT)
 #define IsRegistered(x)         ((x)->status  > STAT_UNKNOWN)
@@ -350,6 +340,13 @@ struct exit_client_hook
 #define TS_DOESTS6	0x20000000
 #define DoesTS(x)       ((x)->tsinfo & (TS_DOESTS|TS_DOESTS6))
 #define DoesTS6(x)	((x)->tsinfo & TS_DOESTS6)
+
+#define has_id(source)	((source)->id[0] != '\0')
+#define use_id(source)	((source)->id[0] != '\0' ? (source)->id : (source)->name)
+
+/* if target is TS6, use id if it has one, else name */
+#define get_id(source, target) ((IsServer(target) && DoesTS6(target)) ? \
+				use_id(source) : (source)->name)
 
 /* housekeeping flags */
 

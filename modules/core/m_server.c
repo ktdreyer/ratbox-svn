@@ -53,7 +53,7 @@ struct Message server_msgtab = {
 	{mr_server, m_registered, ms_server, m_registered}
 };
 struct Message sid_msgtab = {
-	"SID", 0, 0, 6, 0, MFLG_SLOW, 0,
+	"SID", 0, 0, 5, 0, MFLG_SLOW, 0,
 	{m_ignore, m_registered, ms_sid, m_registered}
 };
 
@@ -209,6 +209,22 @@ mr_server(struct Client *client_p, struct Client *source_p, int parc, const char
 
 		sendto_one(client_p, "ERROR :Server already exists.");
 		exit_client(client_p, client_p, client_p, "Server Exists");
+		return 0;
+	}
+
+	if(has_id(client_p) && (target_p = find_id(client_p->id)) != NULL)
+	{
+		sendto_realops_flags(UMODE_ALL, L_ADMIN,
+				     "Attempt to re-introduce SID %s from %s%s",
+				     client_p->id, name,
+				     get_client_name(client_p, HIDE_IP));
+		sendto_realops_flags(UMODE_ALL, L_OPER,
+				     "Attempt to re-introduce SID %s from %s%s",
+				     client_p->id, name,
+				     get_client_name(client_p, MASK_IP));
+
+		sendto_one(client_p, "ERROR :SID already exists.");
+		exit_client(client_p, client_p, client_p, "SID Exists");
 		return 0;
 	}
 
@@ -435,12 +451,16 @@ ms_server(struct Client *client_p, struct Client *source_p, int parc, const char
 	set_server_gecos(target_p, info);
 
 	target_p->serv->up = find_or_add(parv[0]);
+
+	if(has_id(source_p))
+		target_p->serv->upid = source_p->id;
+
 	target_p->servptr = source_p;
 
 	SetServer(target_p);
 
 	dlinkAddTail(target_p, &target_p->node, &global_client_list);
-	dlinkAddAlloc(target_p, &global_serv_list);
+	dlinkAddTailAlloc(target_p, &global_serv_list);
 	add_to_client_hash(target_p->name, target_p);
 	dlinkAdd(target_p, &target_p->lnode, &target_p->servptr->serv->servers);
 
@@ -545,7 +565,7 @@ ms_sid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		return 0;
 	}
 
-	if(EmptyString(parv[5]))
+	if(EmptyString(parv[4]))
 	{
 		sendto_one(client_p, "ERROR :No server info specified for %s", 
 			   parv[1]);
@@ -615,22 +635,26 @@ ms_sid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	strlcpy(target_p->name, parv[1], sizeof(target_p->name));
 	target_p->hopcount = atoi(parv[2]) + 1;
 	strcpy(target_p->id, parv[3]);
-	target_p->serv->tsver = atoi(parv[4]);
-	set_server_gecos(target_p, parv[5]);
+	set_server_gecos(target_p, parv[4]);
+
+	target_p->serv->up = find_or_add(source_p->name);
+
+	if(has_id(source_p))
+		target_p->serv->upid = source_p->id;
 
 	target_p->servptr = source_p;
 	SetServer(target_p);
 
 	dlinkAddTail(target_p, &target_p->node, &global_client_list);
-	dlinkAddAlloc(target_p, &global_serv_list);
+	dlinkAddTailAlloc(target_p, &global_serv_list);
 	add_to_client_hash(target_p->name, target_p);
 	add_to_id_hash(target_p->id, target_p);
 	dlinkAdd(target_p, &target_p->lnode, &target_p->servptr->serv->servers);
 
 	sendto_server(client_p, NULL, CAP_TS6, NOCAPS,
-		      ":%s SID %s %d %s %d :%s%s",
+		      ":%s SID %s %d %s :%s%s",
 		      source_p->id, target_p->name, target_p->hopcount,
-		      target_p->id, target_p->serv->tsver, 
+		      target_p->id,
 		      IsHidden(target_p) ? "(H) " : "", target_p->info);
 	sendto_server(client_p, NULL, NOCAPS, CAP_TS6,
 		      ":%s SERVER %s %d :%s%s",

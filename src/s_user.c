@@ -563,7 +563,7 @@ introduce_client(struct Client *client_p, struct Client *source_p, struct User *
 		if(server == client_p)
 			continue;
 
-		if(IsTS6(server) && has_id(source_p))
+		if(DoesTS6(server) && has_id(source_p))
 			sendto_one(server, 
 				   ":%s UID %s %d %lu %s %s %s %s %s :%s",
 				   source_p->servptr->id, nick, 

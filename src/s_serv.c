@@ -373,7 +373,7 @@ hunt_server(struct Client *client_p, struct Client *source_p,
 
 /* BROKEN_TS6 */
 		/* This is a little kludgy but should work... */
-		if(IsTS6(target_p->from))
+		if(DoesTS6(target_p->from))
 			parv[0] = use_id(source_p);
 
 		sendto_one(target_p, command, parv[0],
@@ -1132,8 +1132,8 @@ server_estab(struct Client *client_p)
 		 */
 		if(!EmptyString(aconf->spasswd))
 		{
-			sendto_one(client_p, "PASS %s TS :%d", 
-				   aconf->spasswd, TS_CURRENT);
+			sendto_one(client_p, "PASS %s TS %d :%s", 
+				   aconf->spasswd, TS_CURRENT, me.id);
 		}
 
 		/*
@@ -1189,8 +1189,8 @@ server_estab(struct Client *client_p)
 	}
 #endif
 
-	sendto_one(client_p, "SVINFO %d %d %s :%lu",
-		   TS_CURRENT, TS_MIN, me.id, (unsigned long) CurrentTime);
+	sendto_one(client_p, "SVINFO %d %d 0 :%lu",
+		   TS_CURRENT, TS_MIN, (unsigned long) CurrentTime);
 
 	client_p->servptr = &me;
 
@@ -1204,12 +1204,16 @@ server_estab(struct Client *client_p)
 
 	dlinkAdd(client_p, &client_p->lnode, &me.serv->servers);
 	dlinkMoveNode(&client_p->localClient->tnode, &unknown_list, &serv_list);
-	dlinkAddAlloc(client_p, &global_serv_list);
+	dlinkAddTailAlloc(client_p, &global_serv_list);
+
+	if(has_id(client_p))
+		add_to_id_hash(client_p->id, client_p);
 
 	add_to_client_hash(client_p->name, client_p);
 	/* doesnt duplicate client_p->serv if allocated this struct already */
 	make_server(client_p);
 	client_p->serv->up = me.name;
+	client_p->serv->upid = me.id;
 	/* add it to scache */
 	find_or_add(client_p->name);
 	client_p->firsttime = CurrentTime;
@@ -1260,9 +1264,14 @@ server_estab(struct Client *client_p)
 		if(target_p == client_p)
 			continue;
 
-		sendto_one(target_p, ":%s SERVER %s 2 :%s%s",
-			   me.name, client_p->name,
-			   IsHidden(client_p) ? "(H) " : "", client_p->info);
+		if(DoesTS6(target_p) && has_id(client_p))
+			sendto_one(target_p, ":%s SID %s 2 %s :%s%s",
+				   me.id, client_p->name, client_p->id,
+				   IsHidden(client_p) ? "(H) " : "", client_p->info);
+		else
+			sendto_one(target_p, ":%s SERVER %s 2 :%s%s",
+				   me.name, client_p->name,
+				   IsHidden(client_p) ? "(H) " : "", client_p->info);
 	}
 
 	/*
@@ -1284,14 +1293,21 @@ server_estab(struct Client *client_p)
 	 **    is destroyed...)
 	 */
 
-	aconf = client_p->serv->sconf;
-	DLINK_FOREACH(ptr, global_client_list.head)
+	DLINK_FOREACH(ptr, global_serv_list.head)
 	{
 		target_p = ptr->data;
+
 		/* target_p->from == target_p for target_p == client_p */
-		if(target_p->from == client_p)
+		if(IsMe(target_p) || target_p->from == client_p)
 			continue;
-		if(IsServer(target_p))
+
+		/* presumption, if target has an id, so does its uplink */
+		if(DoesTS6(client_p) && has_id(target_p))
+			sendto_one(client_p, ":%s SID %s %d %s :%s%s",
+				   target_p->serv->upid, target_p->name,
+				   target_p->hopcount + 1, target_p->id,
+				   IsHidden(client_p) ? "(H) " : "", client_p->info);
+		else
 			sendto_one(client_p, ":%s SERVER %s %d :%s%s",
 				   target_p->serv->up,
 				   target_p->name, target_p->hopcount + 1,
@@ -1304,7 +1320,7 @@ server_estab(struct Client *client_p)
 		burst_TS5(client_p);
 		
 	if(IsCapable(client_p, CAP_EOB))
-		sendto_one(client_p, ":%s EOB", me.name);
+		sendto_one(client_p, ":%s EOB", get_id(&me, client_p));
 
 	/* Always send a PING after connect burst is done */
 	sendto_one(client_p, "PING :%s", me.name);
@@ -1862,6 +1878,7 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
 		client_p->serv->user = NULL;
 	}
 	client_p->serv->up = me.name;
+	client_p->serv->upid = me.id;
 	SetConnecting(client_p);
 	dlinkAddTail(client_p, &client_p->node, &global_client_list);
 
@@ -1997,7 +2014,8 @@ serv_connect_callback(int fd, int status, void *data)
 	 */
 	if(!EmptyString(aconf->spasswd))
 	{
-		sendto_one(client_p, "PASS %s :TS", aconf->spasswd);
+		sendto_one(client_p, "PASS %s TS %d :%s", 
+			   aconf->spasswd, TS_CURRENT, me.id);
 	}
 
 	/*

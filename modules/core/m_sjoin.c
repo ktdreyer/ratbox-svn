@@ -427,7 +427,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 		if(target_p == client_p->from)
 			continue;
 
-		if(IsTS6(target_p))
+		if(DoesTS6(target_p))
 			sendto_one(target_p, "%s", buf_uid);
 		else
 			sendto_one(target_p, "%s", buf_nick);
