@@ -122,6 +122,16 @@ install-mkdirs:
                 echo "mkdir $(prefix)"; \
                 mkdir $(prefix); \
         fi
+	
+	-@if test -d $(moduledir)-old; then \
+		echo "rm -rf $(moduledir)-old"; \
+		rm -rf $(moduledir)-old; \
+	fi
+	-@if test -d $(moduledir); then \
+		echo "mv $(moduledir) $(moduledir)-old"; \
+		mv $(moduledir) $(moduledir)-old; \
+	fi
+
 	-@if test ! -d $(moduledir); then \
                 echo "mkdir $(moduledir)"; \
                 mkdir $(moduledir); \
@@ -129,10 +139,6 @@ install-mkdirs:
 	-@if test ! -d $(automoduledir); then \
                 echo "mkdir $(automoduledir)"; \
                 mkdir $(automoduledir); \
-        fi
-	-@if test -f $(automoduledir)/m_client.so; then \
-	        echo "rm $(automoduledir)/m_client.so"; \
-		rm $(automoduledir)/m_client.so; \
         fi
 
 install: install_@MOD_TARGET@
