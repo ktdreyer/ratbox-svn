@@ -64,7 +64,7 @@ extern struct shared *make_shared(void);
 extern void free_shared(struct shared *);
 extern void clear_shared(void);
 extern int find_shared(const char *username, const char *host, 
-												const char *servername, int type);
+			const char *servername, int type);
 
 #endif
 

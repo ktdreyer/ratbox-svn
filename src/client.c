@@ -1103,10 +1103,12 @@ static dlink_list abort_list;
 void
 exit_aborted_clients(void *unused)
 {
+	struct abort_client *abt;
  	dlink_node *ptr, *next;
  	DLINK_FOREACH_SAFE(ptr, next, abort_list.head)
  	{
- 	 	struct abort_client *abt = ptr->data;
+ 	 	abt = ptr->data;
+
  	 	dlinkDelete(ptr, &abort_list);
  	 	if(!IsPerson(abt->client) && !IsUnknown(abt->client))
  	 	{
@@ -1134,6 +1136,7 @@ dead_link(struct Client *client_p)
 	if(!MyConnect(client_p) || IsMe(client_p))
 		return;
 
+	abt = (struct abort_client *) MyMalloc(sizeof(struct abort_client));
 	if(client_p->flags & FLAGS_SENDQEX)
 		strcpy(abt->notice, "Max SendQ exceeded");
 	else
