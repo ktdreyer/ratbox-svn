@@ -20,21 +20,21 @@ the password (without echo).
 A DES salt is a pair of alphanumeric characters ('.' and '/' are permitted
 as well), such as 'a4' or 'Td'.
 
-An MD5 salt consists of 3 alphanumeric characters (plus '.' and '/'), such 
-as 'tGd' or 'J6d'.
+An MD5 salt consists of up to 16 alphanumeric characters (plus '.' and '/'),
+such as 'tGd' or 'J6d4dfG'.
 
 Known bugs:
-Currently there's no sanity checking on the salt passed in
 Blowfish (on OpenBSD) is not yet supported
 The encryption algorithms supported depend on your system's crypt()
   implementation.
 
 Supported Platforms (Known and tested):
 Linux glibc (DES and MD5)
-FreeBSD 3.x (DES)
+FreeBSD 3.x (DES (MD5 maybe))
 FreeBSD 4.x (DES and MD5)
 Solaris 2.5-2.6 (DES only)
 Cygwin 1.1.4 (DES only)
 Prior Cygwin with the MD5 libcrypt (MD5 only)
+OpenBSD 2.7 (don't link with -crypt) (DES and MD5, no Blowfish support)
 
 Other systems probably work, but they haven't been amply tested.
