@@ -78,7 +78,7 @@ static void stats_l_list(struct Client *s, const char *, int, int, dlink_list *,
 static void stats_l_client(struct Client *source_p, struct Client *target_p,
 				char statchar);
 
-static void stats_spy(struct Client *, char);
+static void stats_spy(struct Client *, char, const char *);
 static void stats_p_spy(struct Client *);
 
 /* Heres our struct for the stats table */
