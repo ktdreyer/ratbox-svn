@@ -1,3 +1,9 @@
+*** 20001202_13 by db
+- fixed dlinkMoveList, there are three cases to contend with
+  1) empty from list 2) empty to list 3) move the spaghetti pointers around
+
+
+
 *** 20001202_12 by db
 - fixed DEBUG_BLOCK_ALLOCATOR for free_dlink_node case so it will
   no longer core in sprintf.. all the free calls are "wrapped" 
