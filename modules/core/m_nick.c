@@ -624,7 +624,7 @@ nick_from_server(struct Client *client_p, struct Client *source_p, int parc,
 	{
 		/* A server introducing a new client, change source */
 		source_p = make_client(client_p);
-		add_client_to_list(source_p);
+		dlinkAddTail(source_p, &source_p->node, &global_client_list);
 
 		if(parc > 2)
 			source_p->hopcount = atoi(parv[2]);
@@ -713,7 +713,7 @@ client_from_server(struct Client *client_p, struct Client *source_p, int parc,
 	name = parv[9];
 
 	source_p = make_client(client_p);
-	add_client_to_list(source_p);
+	dlinkAddTail(source_p, &source_p->node, &global_client_list);
 
 	source_p->hopcount = atoi(parv[2]);
 	source_p->tsinfo = newts;
