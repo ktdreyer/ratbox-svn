@@ -1,3 +1,15 @@
+androsyn    2002/06/11 21:40:23 EDT	(20020612_1)
+
+  Modified files:
+    src                  s_user.c 
+  Log:
+  Revert that last change..i'm not thinking :P
+  
+  Revision  Changes    Path
+  7.201     +10 -6     ircd-hybrid-7/src/s_user.c
+
+
+
 androsyn    2002/06/11 20:53:38 EDT	(20020612_0)
 
   Modified files:
