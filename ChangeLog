@@ -1,3 +1,17 @@
+leeh        2005/01/28 15:26:28 EST	(20050128_0)
+
+  Modified files:
+    modules/core         m_mode.c m_sjoin.c 
+  Log:
+  - patch via jilles to fix +eI lists being shown to lusers when handling
+    protocol stuff over TS6
+  
+  Revision  Changes    Path
+  1.120     +7 -3      ircd-ratbox/modules/core/m_mode.c
+  1.205     +8 -8      ircd-ratbox/modules/core/m_sjoin.c
+
+
+
 leeh        2005/01/25 19:47:38 EST	(20050126_0)
 
   Modified files:
