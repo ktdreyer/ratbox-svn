@@ -1,3 +1,17 @@
+leeh        2002/10/25 14:39:39 UTC	(20021025_0)
+
+  Modified files:
+    modules              m_gline.c 
+  Log:
+  - oper or server already voted ->
+    oper already voted
+    server already voted
+  
+  Revision  Changes    Path
+  1.95      +25 -18    ircd-ratbox/modules/m_gline.c
+
+
+
 leeh        2002/10/23 22:24:37 UTC	(20021023_1)
 
   Modified files:
