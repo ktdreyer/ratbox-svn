@@ -1,3 +1,23 @@
+leeh        2002/10/08 14:51:39 UTC	(20021008_1)
+
+  Modified files:
+    include              client.h newconf.h 
+    modules              m_resv.c m_stats.c 
+    src                  newconf.c s_user.c 
+  Log:
+  - first revision of hidden_admin=yes; in operator {};, allows an oper
+    full admin privs without the vanity..
+  
+  Revision  Changes    Path
+  7.178     +15 -11    ircd-ratbox/include/client.h
+  7.19      +1 -0      ircd-ratbox/include/newconf.h
+  1.22      +2 -2      ircd-ratbox/modules/m_resv.c
+  1.124     +2 -2      ircd-ratbox/modules/m_stats.c
+  7.45      +13 -0     ircd-ratbox/src/newconf.c
+  7.228     +3 -2      ircd-ratbox/src/s_user.c
+
+
+
 androsyn    2002/10/08 02:13:42 UTC	(20021008_0)
 
   Modified files:
