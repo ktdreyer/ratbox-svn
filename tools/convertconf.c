@@ -607,10 +607,10 @@ static void PrintOutServers(FILE* out)
 	  fprintf(out,"\t\tport=\"%d\";\n", p->port );
 
 	  if(p->compressed)
-	    fprintf(out,"\t\tcompressed;\n");
+	    fprintf(out,"\t\tcompressed=yes;\n");
 
 	  if(p->lazylink)
-	    fprintf(out,"\t\tlazylink;\n");
+	    fprintf(out,"\t\tlazylink=yes;\n");
 
 	  if(p->hub_mask)
 	    {
