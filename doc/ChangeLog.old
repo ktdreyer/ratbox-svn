@@ -1,3 +1,8 @@
+*** 20000103_6 by db
+- it all works now (LL). channel cleanup etc. 
+
+
+
 *** 20000103_5 by db
 - this version doesn't core as often. *sigh*
   cleanup channels code needs to be gone over again, its stable
