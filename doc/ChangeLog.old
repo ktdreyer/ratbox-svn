@@ -1,3 +1,8 @@
+*** 20001212_6 by db
+- folded in Walter Campbell's IPV6 patches
+
+
+
 *** 20001212_5 by db
 - verified the generated prefixes on a number of files
 - umm the big bug was in serv_connect_callback() the newly connected =to=
