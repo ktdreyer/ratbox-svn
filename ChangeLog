@@ -1,3 +1,15 @@
+leeh        2003/08/19 17:57:59 EDT	(20030819_0)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  - I wish id stop typing get_uid() instead of get_id()...
+  
+  Revision  Changes    Path
+  7.404     +1 -1      ircd-ratbox/src/client.c
+
+
+
 leeh        2003/08/18 17:51:04 EDT	(20030818_1)
 
   Modified files:
