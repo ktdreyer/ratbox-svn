@@ -10,7 +10,7 @@
 #include "tools.h"
 
 /* How many buffers to allocate in a single run */
-#define BUF_BLOCK_SIZE		128
+#define BUF_BLOCK_SIZE		2048
 
 /* How big we want a buffer - we ignore the CRLF at the end */
 /* XXX Hrm. Should do magic with another #define ! -- adrian */
