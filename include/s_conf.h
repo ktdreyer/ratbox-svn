@@ -24,6 +24,12 @@
  * $Id$
  *
  * $Log$
+ * Revision 7.49  2000/12/22 23:22:28  db
+ * - Ok, ALL the old support for old style confs is gone now, except for K/D lines
+ *   That means IF YOU HAVEN'T CONVERTED FORMAT YET, DO IT NOW,
+ *   OR IT WILL NOT RUN. capiche?
+ *   I'll be able to simplify the parser in a bit a little more.
+ *
  * Revision 7.48  2000/12/22 22:59:21  db
  * - ok. attach_cn_lines() was just plain wrong.
  *   The code was matching on hostname(ip) instead of servername
@@ -743,11 +749,9 @@ extern  int     is_address(char *,unsigned long *,unsigned long *);
 extern  int     rehash (struct Client *, struct Client *, int);
 
 extern struct ConfItem* conf_add_server(struct ConfItem *,int ,int );
-extern struct ConfItem* conf_add_o_line(struct ConfItem *);
 extern void conf_add_port(struct ConfItem *);
 extern void conf_add_class_to_conf(struct ConfItem *);
 extern void conf_delist_old_conf(struct ConfItem *);
-extern void conf_add_i_line(struct ConfItem *);
 extern void conf_add_me(struct ConfItem *);
 extern void conf_add_hub_or_leaf(struct ConfItem *);
 extern void conf_add_class(struct ConfItem *,int );

@@ -1795,9 +1795,13 @@ static void ReplaceQuotes(char* quotedLine,char *inputLine)
 }
 
 /*
- * commonly used function to split user@host part into user and host fields
+ * SplitUserHost
+ *
+ * inputs	- struct ConfItem pointer
+ * output	- return 1/0 true false or -1 for error
+ * side effects - splits user@host found in a name field of conf given
+ *		  stuff the user into ->user and the host into ->host
  */
-
 static int SplitUserHost(struct ConfItem *aconf)
 {
   char *p;
@@ -1871,6 +1875,7 @@ int conf_connect_allowed(struct in_addr addr)
 
 /*
  * find_kill
+ *
  * inputs	- pointer to client structure
  * output	- pointer to struct ConfItem if found
  * side effects	- See if this user is klined already,
@@ -1955,8 +1960,8 @@ struct ConfItem* find_tkline(const char* host, const char* user, unsigned long i
  * WARNING, no sanity checking on length of name,host etc.
  * thats expected to be done by caller.... 
  */
-
-struct ConfItem *find_is_klined(const char* host, const char* name, unsigned long ip)
+struct ConfItem *find_is_klined(const char* host, const char* name,
+				unsigned long ip)
 {
   struct ConfItem *found_aconf;
 
@@ -1978,7 +1983,8 @@ struct ConfItem *find_is_klined(const char* host, const char* name, unsigned lon
  *
  * inputs        - pointer to struct ConfItem
  * output        - none
- * Side effects        - links in given struct ConfItem into temporary kline link list
+ * Side effects  - links in given struct ConfItem into 
+ *                 temporary kline link list
  */
 
 void add_temp_kline(struct ConfItem *aconf)
@@ -2913,99 +2919,11 @@ void conf_delist_old_conf(struct ConfItem *aconf)
 }
 
 /*
- * conf_add_i_line
- * inputs       - pointer to config item
- * output       - NONE
- * side effects - Add an I line
- */
-
-void conf_add_i_line(struct ConfItem *aconf)
-{
-  conf_add_class_to_conf(aconf);
-  conf_delist_old_conf(aconf);
-
-  if (aconf->host)
-    {
-      char *p;
-      unsigned long ip_host;
-      unsigned long ip_mask;
-          
-      if(!aconf->host)
-	DupString(aconf->host,"*");
-      else
-	(void)collapse(aconf->host);
-
-      if(!aconf->user)
-	DupString(aconf->user,"*");
-      else
-	(void)collapse(aconf->user);
-
-      /* The idea here is, to separate a name@host part
-       * into aconf->host part and aconf->user part
-       * If the user@host part is found in the aconf->host field
-       * from conf file, then it has to be an IP I line.
-       */
-
-      MyFree(aconf->name); /* should be already NULL here */
-
-      /* Keep a copy of the original host part in "name" */
-      DupString(aconf->name,aconf->host);
-
-      /* see if the user@host part is on the 'left side'
-       * in the aconf->host field. If it is, then it should be
-       * an IP I line only, but I won't enforce it here. 
-       */
-
-      if( (p = strchr(aconf->host,'@')))
-	{
-	  char* x;
-	  aconf->flags |= CONF_FLAGS_DO_IDENTD;
-	  *p++ = '\0';
-	  MyFree(aconf->user);
-	  DupString(aconf->user, aconf->host);
-	  DupString(x, p);
-	  MyFree(aconf->host);
-	  aconf->host = x;
-	}
-
-      if( is_address(aconf->host,&ip_host,&ip_mask) )
-	{
-	  aconf->ip = ip_host & ip_mask;
-	  aconf->ip_mask = ip_mask;
-	  add_ip_Iline( aconf );
-	}
-      else
-	{
-	  /* See if there is a name@host part on the 'right side'
-	   * in the aconf->name field.
-	   */
-
-	  if( ( p = strchr(aconf->user,'@')) )
-	    {
-	      aconf->flags |= CONF_FLAGS_DO_IDENTD;
-	      *p = '\0';
-	      p++;
-	      MyFree(aconf->host);
-	      DupString(aconf->host,p);
-	    }
-	  else
-	    {
-	      MyFree(aconf->host);
-	      aconf->host = aconf->user;
-	      DupString(aconf->user,"*");
-	    }
-	  add_mtrie_conf_entry(aconf,CONF_CLIENT);
-	}
-    }
-}
-
-/*
  * conf_add_server
  * inputs       - pointer to config item
  * output       - NONE
  * side effects - Add a C or N line
  */
-
 struct ConfItem *conf_add_server(struct ConfItem *aconf,
                                         int ncount, int ccount )
 {
@@ -3033,26 +2951,6 @@ struct ConfItem *conf_add_server(struct ConfItem *aconf,
       return NULL;
     }
   lookup_confhost(aconf);
-  return aconf;
-}
-
-/*
- * conf_add_o_line
- * inputs       - pointer to config item
- * output       - NONE
- * side effects - Add an o/O line
- */
-
-struct ConfItem *conf_add_o_line(struct ConfItem *aconf)
-{
-  conf_add_class_to_conf(aconf);
-
-  if(SplitUserHost(aconf) < 0)
-    {
-      sendto_realops_flags(FLAGS_ALL,"Bad O/o line host %s", aconf->host);
-      free_conf(aconf);
-      return NULL;
-    }
   return aconf;
 }
 

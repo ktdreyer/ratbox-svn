@@ -35,7 +35,6 @@
 static char *getfield(char *newline);
 static  int  oper_privs_from_string(int,char *);
 static  int  oper_flags_from_string(char *);
-static  char *set_conf_flags(struct ConfItem *,char *);
 
 /*
  * oldParseOneLine
@@ -44,6 +43,15 @@ static  char *set_conf_flags(struct ConfItem *,char *);
  * Output       - pointer to aconf if aconf to be added
  *                to link list or NULL if not
  * Side Effects - Parse one old style conf line.
+ *
+ * Ok, a bit of justification here:
+ * There were some of us on the h7 project who felt K/D lines
+ * should be in a new format... However... the parser to handle that
+ * is expensive CPU wise for something that is rarely read or needs
+ * to be handled by humans. So... h7 will support and write K/D lines
+ * out in "old style" but will not understand any ircd.conf written in
+ * old style.
+ *
  */
 
 void oldParseOneLine(char* line,struct ConfItem* aconf,
@@ -94,24 +102,6 @@ void oldParseOneLine(char* line,struct ConfItem* aconf,
 
   switch( conf_letter )
     {
-    case 'A':case 'a': /* Name, e-mail address of administrator */
-      aconf->status = CONF_ADMIN;
-      conf_add_fields(aconf,host_field,pass_field,user_field,
-		      port_field,class_field);
-      conf_add_conf(aconf);
-      break;
-
-    case 'C':
-    case 'c':
-      aconf->status = CONF_CONNECT_SERVER;
-      ++*pccount;
-      aconf->flags |= CONF_FLAGS_ALLOW_AUTO_CONN;
-      conf_add_fields(aconf,host_field,pass_field,user_field,
-		      port_field,class_field);
-      aconf = conf_add_server(aconf,*pncount,*pccount);
-      conf_add_conf(aconf);
-      break;
-
     case 'd':
       aconf->status = CONF_DLINE;
       aconf->flags = CONF_FLAGS_E_LINED;
@@ -127,161 +117,12 @@ void oldParseOneLine(char* line,struct ConfItem* aconf,
       conf_add_d_line(aconf);
       break;
 
-    case 'H': /* Hub server line */
-    case 'h':
-      aconf->status = CONF_HUB;
-      conf_add_fields(aconf,host_field,pass_field,user_field,
-		      port_field,class_field);
-      conf_add_hub_or_leaf(aconf);
-      conf_add_conf(aconf);
-      break;
-
-    case 'I': /* Just plain normal irc client trying  */
-      /* to connect to me */
-      aconf->status = CONF_CLIENT;
-      
-      if(host_field)
-	{
-	  host_field = set_conf_flags(aconf, host_field);
-	  DupString(aconf->host, host_field);
-	}
-      
-      if(user_field)
-	{
-	  user_field = set_conf_flags(aconf, user_field);
-	  DupString(aconf->user, user_field);
-	}
-
-      if(class_field)
-	DupString(aconf->className, class_field);
-
-      conf_add_i_line(aconf);
-      break;
-      
     case 'K': /* Kill user line on irc.conf           */
     case 'k':
       aconf->status = CONF_KILL;
       conf_add_fields(aconf,host_field,pass_field,user_field,
 		      port_field,class_field);
       conf_add_k_line(aconf);
-      break;
-
-    case 'L': /* guaranteed leaf server */
-    case 'l':
-      aconf->status = CONF_LEAF;
-      conf_add_fields(aconf,host_field,pass_field,user_field,
-		      port_field,class_field);
-      conf_add_hub_or_leaf(aconf);
-      conf_add_conf(aconf);
-      break;
-
-      /* Me. Host field is name used for this host */
-      /* and port number is the number of the port */
-    case 'M':
-    case 'm':
-      aconf->status = CONF_ME;
-      conf_add_fields(aconf,host_field,pass_field,user_field,
-		      port_field,class_field);
-      conf_add_me(aconf);
-      ConfigFileEntry.hub = 0;
-      if(port_field)
-        {
-          if(*port_field == '1')
-            ConfigFileEntry.hub = 1;
-	}
-      conf_add_conf(aconf);
-      break;
-
-    case 'n': /* connect in case of lp failures     */
-      aconf->flags |= CONF_FLAGS_LAZY_LINK;
-      /* drop into normal N line code */
-
-    case 'N': /* Server where I should NOT try to     */
-      /* but which tries to connect ME        */
-      aconf->status = CONF_NOCONNECT_SERVER;
-      ++*pncount;
-      conf_add_fields(aconf,host_field,pass_field,user_field,
-		      port_field,class_field);
-      aconf = conf_add_server(aconf,*pncount,*pccount);
-      conf_add_conf(aconf);
-      break;
-
-      /* Operator. Line should contain at least */
-      /* password and host where connection is  */
-    case 'O':
-      aconf->status = CONF_OPERATOR;
-      conf_add_fields(aconf,host_field,pass_field,user_field,
-		      port_field,class_field);
-      /* defaults */
-      aconf->port = 
-	CONF_OPER_GLOBAL_KILL|CONF_OPER_REMOTE|CONF_OPER_UNKLINE|
-	CONF_OPER_K|CONF_OPER_GLINE|CONF_OPER_REHASH;
-      if(port_field)
-	aconf->port = oper_privs_from_string(aconf->port,port_field);
-      if ((tmp = getfield(NULL)) != NULL)
-	aconf->hold = oper_flags_from_string(tmp);
-      aconf = conf_add_o_line(aconf);
-      conf_add_conf(aconf);
-      break;
-
-      /* Local Operator */
-    case 'o':
-      aconf->status = CONF_OPERATOR;
-      conf_add_fields(aconf,host_field,pass_field,user_field,
-		      port_field,class_field);
-      aconf->port = CONF_OPER_UNKLINE|CONF_OPER_K;
-      if(port_field)
-	aconf->port = oper_privs_from_string(aconf->port,port_field);
-      if ((tmp = getfield(NULL)) != NULL)
-	aconf->hold = oper_flags_from_string(tmp);
-      aconf = conf_add_o_line(aconf);
-      conf_add_conf(aconf);
-      break;
-
-    case 'P': /* listen port line */
-    case 'p':
-      aconf->status = CONF_LISTEN_PORT;
-      conf_add_fields(aconf,host_field,pass_field,user_field,
-		      port_field,class_field);
-      conf_add_port(aconf);
-      free_conf(aconf);
-      aconf=NULL;
-      break;
-
-    case 'Q': /* reserved nicks */
-    case 'q': 
-      aconf->status = CONF_QUARANTINED_NICK;
-      conf_add_fields(aconf,host_field,pass_field,user_field,
-		      port_field,class_field);
-      conf_add_q_line(aconf);
-      break;
-
-    case 'U': /* shared klines etc. */
-    case 'u': 
-      aconf->status = CONF_ULINE;
-      conf_add_fields(aconf,host_field,pass_field,user_field,
-		      port_field,class_field);
-      conf_add_u_line(aconf);
-      break;
-
-    case 'X': /* rejected gecos */
-    case 'x': 
-      aconf->status = CONF_XLINE;
-      conf_add_fields(aconf,host_field,pass_field,user_field,
-		      port_field,class_field);
-      conf_add_x_line(aconf);
-      break;
-
-    case 'Y':
-    case 'y':
-      aconf->status = CONF_CLASS;
-      conf_add_fields(aconf,host_field,pass_field,user_field,
-		      port_field,class_field);
-      if(class_field)
-	sendq = atoi(class_field);
-      conf_add_class(aconf,sendq);
-      free_conf(aconf);
-      aconf = NULL;
       break;
       
     default:
@@ -411,50 +252,3 @@ static int oper_flags_from_string(char *flags)
   return(int_flags);
 }
 
-/*
-** from comstud
-*/
-
-static char *set_conf_flags(struct ConfItem *aconf,char *tmp)
-{
-  for(;*tmp;tmp++)
-    {
-      switch(*tmp)
-        {
-        case '=':
-          aconf->flags |= CONF_FLAGS_SPOOF_IP;
-          break;
-        case '!':
-          aconf->flags |= CONF_FLAGS_LIMIT_IP;
-          break;
-        case '-':
-          aconf->flags |= CONF_FLAGS_NO_TILDE;
-          break;
-        case '+':
-          aconf->flags |= CONF_FLAGS_NEED_IDENTD;
-          break;
-        case '$':
-          aconf->flags |= CONF_FLAGS_PASS_IDENTD;
-          break;
-        case '%':
-          aconf->flags |= CONF_FLAGS_NOMATCH_IP;
-          break;
-        case '^':        /* is exempt from k/g lines */
-          aconf->flags |= CONF_FLAGS_E_LINED;
-          break;
-        case '&':        /* ignore obsolete flag */
-          break;
-        case '>':        /* can exceed max connects */
-          aconf->flags |= CONF_FLAGS_F_LINED;
-          break;
-#ifdef IDLE_CHECK
-        case '<':        /* can idle */
-          aconf->flags |= CONF_FLAGS_IDLE_LINED;
-          break;
-#endif
-        default:
-          return tmp;
-        }
-    }
-  return tmp;
-}
