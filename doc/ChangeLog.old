@@ -1,3 +1,9 @@
+*** 20010531_1 by db
+- fixed bug with single space in privmsg not being seen. <= instead of <
+- reformatted to be consistent
+
+
+
 *** 20010530_11 by leeh
 - added the i_lines_oper_only to config..
 
