@@ -1,3 +1,11 @@
+*** 20011128_5 by db
+- This re-adds remote KNOCK capability in the same way it was done in h6.
+  Its not a good way of doing it. There should be a KNOCK CAPAB for h7 servers
+  to lessen the traffic sent for a KNOCK. There should also be some NUMERICS
+  here instead of notices.
+
+
+
 *** 20011128_4 by db
 tiny format change in parse.c
 
