@@ -1,3 +1,15 @@
+leeh        2002/08/12 20:15:38 EDT	(20020813_0)
+
+  Modified files:
+    src                  hash.c 
+  Log:
+  - added back the *isnew stuff I accidentally removed
+  
+  Revision  Changes    Path
+  7.53      +5 -0      ircd-ratbox/src/hash.c
+
+
+
 leeh        2002/08/12 19:13:33 EDT	(20020812_9)
 
   Modified files:
