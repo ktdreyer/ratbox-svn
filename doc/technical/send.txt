@@ -115,7 +115,8 @@ sendto_common_channels_local()
                   its used to propogate nick changes to all channels user
                   is in, and QUIT messages to all channels user is in.
                   As it only sends to local clients, prefix generation
-                  is left to the user.
+                  is left to the user. It also sends the message to the
+                  user if the user isn't on any channels.
 
                   usage - sendto_common_channels_local(struct Client *user,
                                                        const char *pattern,
