@@ -345,7 +345,7 @@ io_loop(void)
        */
       if (dorehash)
 	{
-	  rehash(&me, &me, 1);
+	  rehash(1);
 	  dorehash = 0;
 	}
     }

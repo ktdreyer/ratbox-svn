@@ -221,7 +221,7 @@ static void mo_unkline (struct Client *client_p,struct Client *source_p,
   if(!error_on_write)
     {
       (void)rename(temppath, filename);
-      rehash(client_p,source_p,0);
+      rehash(0);
     }
   else
     {
@@ -422,7 +422,7 @@ mo_undline (struct Client *client_p, struct Client *source_p,
     {
 
       (void)rename(temppath, filename);
-      rehash(client_p,source_p,0);
+      rehash(0);
     }
   else
     {

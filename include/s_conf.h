@@ -383,7 +383,7 @@ extern  void    show_temp_klines(struct Client *, dlink_list *);
 extern  void    cleanup_tklines(void *notused);
 
 extern  const   char *get_conf_name(KlineType);
-extern  int     rehash (struct Client *, struct Client *, int);
+extern  int     rehash (int);
 
 extern int  conf_add_server(struct ConfItem *,int);
 extern void conf_add_class_to_conf(struct ConfItem *);

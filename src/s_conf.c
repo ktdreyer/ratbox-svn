@@ -1426,8 +1426,7 @@ clear_special_conf(struct ConfItem **this_conf)
  * as a result of an operator issuing this command, else assume it has been
  * called as a result of the server receiving a HUP signal.
  */
-int 
-rehash (struct Client *client_p,struct Client *source_p, int sig)
+int rehash(int sig)
 {
   if (sig)
     {

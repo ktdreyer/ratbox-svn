@@ -139,7 +139,7 @@ static void mo_rehash(struct Client *client_p, struct Client *source_p,
 			   get_oper_name(source_p));
       ilog(L_NOTICE, "REHASH From %s[%s]", get_oper_name(source_p),
            source_p->localClient->sockhost);
-      rehash(client_p, source_p, 0);
+      rehash(0);
       return;
     }
 }

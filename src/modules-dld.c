@@ -533,6 +533,7 @@ mo_modrestart (struct Client *client_p, struct Client *source_p, int parc, char 
      unload_one_module(modlist[0]->name, 0);
 
   load_all_modules(0);
+  rehash(0);
 
   sendto_realops_flags (FLAGS_ALL, "Module Restart: %d modules unloaded, %d modules loaded",
 			modnum, num_mods);
