@@ -1,3 +1,9 @@
+*** 20010505_5 by androsyn
+Added support for statically linked modules within autoconf.  Use
+./configure --disable-shared-modules to get statically linked ones...
+
+
+
 *** 20010505_4 by fl_
 - tidy up the IsOper() checks
 
