@@ -35,6 +35,7 @@
 #include <stdarg.h>
 #include <unistd.h>
 #include <errno.h>
+#include <assert.h>
 
 #include "tools.h"
 #include "s_debug.h"
@@ -179,8 +180,8 @@ void count_memory(struct Client *source_p)
   dlink_node *dlink;
 
   int channel_count = 0; 
-  int lcc = 0;          /* local client conf links */
-  int us = 0;           /* user structs */
+  int local_client_conf_count = 0;      /* local client conf links */
+  int users_counted = 0;                /* user structs */
 
   int channel_users = 0;
   int channel_invites = 0;
@@ -191,9 +192,9 @@ void count_memory(struct Client *source_p)
   int wwu = 0;                  /* whowas users */
   int class_count = 0;          /* classes */
   int conf_count = 0;           /* conf lines */
-  int usi = 0;                  /* users invited */
+  int users_invited_count = 0;  /* users invited */
   int user_channels = 0;        /* users in channels */
-  int aw = 0;                   /* aways set */
+  int aways_counted = 0;   
   int number_ips_stored;        /* number of ip addresses hashed */
   int number_servers_cached;    /* number of servers cached by scache */
 
@@ -202,7 +203,7 @@ void count_memory(struct Client *source_p)
   u_long channel_except_memory = 0;
   u_long channel_invex_memory = 0;
 
-  u_long awm = 0;               /* memory used by aways */
+  u_long away_memory = 0;       /* memory used by aways */
   u_long wwm = 0;               /* whowas array memory used */
   u_long conf_memory = 0;       /* memory used by conf lines */
   u_long mem_servers_cached;    /* memory used by scache */
@@ -213,8 +214,7 @@ void count_memory(struct Client *source_p)
 
   size_t client_hash_table_size = 0;
   size_t channel_hash_table_size = 0;
-  u_long totcl = 0;
-  u_long totch = 0;
+  u_long total_channel_memory = 0;
   u_long totww = 0;
 
   int local_client_count = 0;
@@ -229,7 +229,7 @@ void count_memory(struct Client *source_p)
   int    links_count = 0;
   u_long links_memory_used = 0;
 
-  u_long tot = 0;
+  u_long total_memory = 0;
 
   count_whowas_memory(&wwu, &wwm);
 
@@ -239,22 +239,22 @@ void count_memory(struct Client *source_p)
         {
           for (dlink = target_p->localClient->confs.head;
 	       dlink; dlink = dlink->next)
-            lcc++;
+            local_client_conf_count++;
         }
 
       if (target_p->user)
         {
-          us++;
+          users_counted++;
           for (dlink = target_p->user->invited.head; dlink;
                dlink = dlink->next)
-            usi++;
+            users_invited_count++;
           for (dlink = target_p->user->channel.head; dlink;
                dlink = dlink->next)
             user_channels++;
           if (target_p->user->away)
             {
-              aw++;
-              awm += (strlen(target_p->user->away)+1);
+              aways_counted++;
+              away_memory += (strlen(target_p->user->away)+1);
             }
         }
     }
@@ -338,15 +338,18 @@ void count_memory(struct Client *source_p)
 
   sendto_one(source_p, ":%s %d %s :Users %u(%u) Invites %u(%u)",
              me.name, RPL_STATSDEBUG, source_p->name,
-	     us, us*sizeof(struct User), usi,
-             usi * sizeof(dlink_node));
+	     users_counted, users_counted * sizeof(struct User),
+	     users_invited_count, users_invited_count * sizeof(dlink_node));
+
   sendto_one(source_p, ":%s %d %s :User channels %u(%u) Aways %u(%d)",
              me.name, RPL_STATSDEBUG, source_p->name,
 	     user_channels, user_channels*sizeof(dlink_node),
-             aw, (int)awm);
+             aways_counted, (int)away_memory);
+
   sendto_one(source_p, ":%s %d %s :Attached confs %u(%u)",
              me.name, RPL_STATSDEBUG, source_p->name,
-	     lcc, lcc*sizeof(dlink_node));
+	     local_client_conf_count,
+	     local_client_conf_count * sizeof(dlink_node));
 
   sendto_one(source_p, ":%s %d %s :Conflines %u(%d)",
              me.name, RPL_STATSDEBUG, source_p->name,
@@ -376,8 +379,9 @@ void count_memory(struct Client *source_p)
              me.name, RPL_STATSDEBUG, source_p->name, channel_users,
 	     channel_users*sizeof(dlink_node),
              channel_invites, channel_invites*sizeof(dlink_node));
-
-  totch = channel_memory + channel_ban_memory +
+ 
+  total_channel_memory = channel_memory +
+    channel_ban_memory +
     channel_users*sizeof(dlink_node) + 
     channel_invites*sizeof(dlink_node);
 
@@ -415,18 +419,21 @@ void count_memory(struct Client *source_p)
              number_ips_stored,
              (int)mem_ips_stored);
 
-  tot = totww + totch + conf_memory + class_count * sizeof(struct Class);
-  tot += client_hash_table_size;
-  tot += channel_hash_table_size;
+  total_memory = totww + total_channel_memory + conf_memory +
+    class_count * sizeof(struct Class);
+  total_memory += client_hash_table_size;
+  total_memory += channel_hash_table_size;
 
-  tot += mem_servers_cached;
-  sendto_one(source_p, ":%s %d %s :Total: ww %d ch %d cl %d co %d",
-             me.name, RPL_STATSDEBUG, source_p->name, (int)totww, (int)totch,
-             (int)totcl, (int)conf_memory);
+  total_memory += mem_servers_cached;
+  sendto_one(source_p, ":%s %d %s :Total: ww %d ch %d co %d",
+             me.name, RPL_STATSDEBUG, source_p->name,
+	     (int)totww,
+	     (int)total_channel_memory,
+             (int)conf_memory);
 
   count_local_client_memory( &local_client_count,
 			     (int *)&local_client_memory_used );
-  tot += local_client_memory_used;
+  total_memory += local_client_memory_used;
   sendto_one(source_p, ":%s %d %s :Local client Memory in use: %d(%d)",
              me.name, RPL_STATSDEBUG, source_p->name,
 	     local_client_count,
@@ -435,22 +442,26 @@ void count_memory(struct Client *source_p)
 
   count_remote_client_memory( &remote_client_count,
 			      (int *)&remote_client_memory_used);
-  tot += remote_client_memory_used;
+  total_memory += remote_client_memory_used;
   sendto_one(source_p, ":%s %d %s :Remote client Memory in use: %d(%d)",
              me.name, RPL_STATSDEBUG, source_p->name,
 	     remote_client_count,
              (int)remote_client_memory_used);
 
-
   count_user_memory( &user_count, (int *)&user_memory_used );
-  tot += user_memory_used;
+
+  assert (users_counted == user_count);
+
+#if 0
+  total_memory += user_memory_used;
   sendto_one(source_p, ":%s %d %s :struct User Memory in use: %d(%d)",
              me.name, RPL_STATSDEBUG, source_p->name,
 	     user_count,
              (int)user_memory_used);
+#endif
 
   count_links_memory( &links_count, (int *)&links_memory_used );
-  tot += links_memory_used;
+  total_memory += links_memory_used;
   sendto_one(source_p, ":%s %d %s :Links Memory in use: %d(%d)",
              me.name, RPL_STATSDEBUG, source_p->name,
 	     (int)links_count,
@@ -458,6 +469,7 @@ void count_memory(struct Client *source_p)
 
   sendto_one(source_p, 
              ":%s %d %s :TOTAL: %d Available:  Current max RSS: %u",
-             me.name, RPL_STATSDEBUG, source_p->name, (int)tot, get_maxrss());
+             me.name, RPL_STATSDEBUG, source_p->name,
+	     (int)total_memory, get_maxrss());
 }
 
