@@ -164,8 +164,7 @@ static int inetport(struct Listener* listener)
   else if ((HARD_FDLIMIT - 10) < fd) {
     report_error("no more connections left for listener %s:%s", 
                  get_listener_name(listener), errno);
-    /* This is ok because we haven't fd_open()ed it yet -- adrian */
-    close(fd);
+    fd_close(fd);
     return 0;
   }
   /* 
