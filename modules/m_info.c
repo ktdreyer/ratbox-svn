@@ -272,7 +272,7 @@ static struct InfoStruct info_table[] = {
 	},
 	{
 		"kline_reason",
-		OUTPUT_STRING,
+		OUTPUT_STRING_PTR,
 		&ConfigFileEntry.kline_reason,
 		"K-lined clients sign off with this reason"
 	},
