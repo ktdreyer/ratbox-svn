@@ -1,3 +1,10 @@
+*** 19990901_4 by wnder
+IAuth source files : as of right now IAuth accepts authentication
+queries of the form: DoAuth <ID> <ip address> and returns an
+answer of the form: DoneAuth <ID> <username> <hostname>.
+Ident/DNS have not been completed yet.
+
+
 *** 19990901_3 by wnder
 Directory /usr/hybrid/ircd-hybrid-7/iauth/source added to the repository
 
