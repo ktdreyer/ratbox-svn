@@ -1,3 +1,7 @@
+*** 20001230_5 by lusky
+- more compile warning fixes, /modules compiles cleanly on freebsd3.4 now
+
+
 *** 20001230_4 by lusky
 - more cleanups
 - fixes /usr/local/include/rsa.h snafu from last commit
