@@ -1,3 +1,10 @@
+*** 20010130_8 by jdc
+- Fixed valid_comment() usage (didn't see line 691).  Now #ifndef IPV6 is
+  used to get rid of the -Wunused warning.  Someone should fix this
+  kludge properly before a final release.
+
+
+
 *** 20010130_7 by jdc
 - Removed aconf->ip = IN_ADDR(ip); warnings (force unsigned long).
 - Commented out valid_comment function (unused so far?).
