@@ -1,3 +1,32 @@
+leeh        2003/06/20 12:11:21 UTC	(20030620_3)
+
+  Modified files:
+    include              channel.h channel_mode.h hash.h 
+    modules              m_help.c m_invite.c m_topic.c 
+    modules/core         m_kick.c m_message.c m_mode.c m_part.c 
+                         m_sjoin.c 
+    src                  channel.c channel_mode.c hash.c 
+  Log:
+  - more cleanups wrt struct membership
+  
+  Revision  Changes    Path
+  7.138     +5 -6      ircd-ratbox/include/channel.h
+  7.22      +4 -1      ircd-ratbox/include/channel_mode.h
+  7.35      +3 -0      ircd-ratbox/include/hash.h
+  1.67      +21 -14    ircd-ratbox/modules/core/m_kick.c
+  1.131     +7 -3      ircd-ratbox/modules/core/m_message.c
+  1.73      +6 -4      ircd-ratbox/modules/core/m_mode.c
+  1.79      +8 -4      ircd-ratbox/modules/core/m_part.c
+  1.173     +1 -2      ircd-ratbox/modules/core/m_sjoin.c
+  1.54      +12 -2     ircd-ratbox/modules/m_help.c
+  1.66      +5 -3      ircd-ratbox/modules/m_invite.c
+  1.77      +7 -3      ircd-ratbox/modules/m_topic.c
+  7.378     +18 -18    ircd-ratbox/src/channel.c
+  7.104     +10 -9     ircd-ratbox/src/channel_mode.c
+  7.74      +2 -0      ircd-ratbox/src/hash.c
+
+
+
 leeh        2003/06/20 11:24:24 UTC	(20030620_2)
 
   Modified files:
