@@ -7,18 +7,13 @@ When you type /version you will often see something like this:
 Ever wondered what those funny chars mean after the version number? Well
 here they are:
 
-'A'	SENDQ_ALWAYS
 'C'	CMDLINE_CONFIG
 'D'	DEBUGMODE
 'G'	GLINES
 'H'	HUB
-'i'	SHOW_INVISIBLE_LUSERS
-'I'	NO_DEFAULT_INVISIBLE
-'M'	IDLE_FROM_MSG
 'p'	CRYPT_OPER_PASSWORD
 'P'	CRYPT_LINK_PASSWORD
 'Y'	USE_SYSLOG
-'Z'	ZIP_LINKS
 
 'TS'    Supports TS
 '3'     TS Version 3
