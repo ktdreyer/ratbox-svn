@@ -1,3 +1,8 @@
+*** 20001030_2 by db
+- reworked m_stats.c some more. no need for valid_stats flag. ick
+
+
+
 *** 20001030_1 by db
 - cleaned up m_stats.c just a little
   I like Isomers idea of renaming things a bit more, but this is
