@@ -1,3 +1,16 @@
+leeh        2002/06/03 11:42:53 EDT	(20020603_2)
+
+  Modified files:
+    contrib              m_force.c m_ojoin.c 
+  Log:
+  - updates.
+  
+  Revision  Changes    Path
+  1.10      +79 -103   ircd-hybrid-7/contrib/m_force.c
+  1.10      +24 -20    ircd-hybrid-7/contrib/m_ojoin.c
+
+
+
 leeh        2002/06/03 08:15:14 EDT	(20020603_1)
 
   Modified files:
