@@ -1,3 +1,10 @@
+*** 20010719_3 by wcampbel
+Removed an include (arpa/nameser.h)
+This breaks Cygwin compiles, and appears to not be needed.
+
+Someone want to check on this for me?
+
+
 *** 20010719_2 by androsyn
 Fix for the broken fix of the compile warnings that I fixed yesterday on
 64bit platforms, but ended up needing to refix on 32bit platforms.
