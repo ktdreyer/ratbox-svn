@@ -1,3 +1,15 @@
+leeh        2002/09/02 16:40:06 EDT	(20020902_0)
+
+  Modified files:
+    src                  channel_mode.c 
+  Log:
+  - added some limiting code to simple modes..
+  
+  Revision  Changes    Path
+  7.78      +4 -0      ircd-ratbox/src/channel_mode.c
+
+
+
 leeh        2002/09/01 18:28:38 EDT	(20020901_2)
 
   Modified files:
