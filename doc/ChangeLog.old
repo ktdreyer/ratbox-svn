@@ -1,3 +1,19 @@
+jmallett    2002/01/10 16:37:02 EST	(20020110_8)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+  Log:
+  Add proper TenDRA support to our configure script. Not only can we detect
+  if someone is trying to use TenDRA, we can also set up the necessary string
+  of IRC_CFLAGS to work on most platforms, and we can produce shared modules!
+  
+  Revision  Changes    Path
+  7.110     +26 -4     ircd-hybrid-7/autoconf/configure.in
+  7.113     +206 -183  ircd-hybrid-7/configure
+
+
+
 jmallett    2002/01/10 15:45:17 EST	(20020110_7)
 
   Modified files:
