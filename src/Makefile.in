@@ -21,8 +21,6 @@ prefix		= @prefix@
 exec_prefix	= @exec_prefix@
 bindir		= @bindir@
 libexecdir	= @libexecdir@
-sysconfdir	= @sysconfdir@
-localstatedir	= @localstatedir@
 
 DOLLAR = $$
 
@@ -111,33 +109,25 @@ ircd: $(OBJS) y.tab.o lex.yy.o version.o
 
 install-mkdirs:
 	-@if test ! -d $(prefix); then \
-		echo "mkdir $(prefix)"; \
+		echo "ircd: setting up ircd directory structure"; \
 		mkdir $(prefix); \
 	fi
 	-@if test ! -d $(exec_prefix); then \
-		echo "mkdir $(exec_prefix)"; \
 		mkdir $(exec_prefix); \
 	fi
 	-@if test ! -d $(bindir); then \
-		echo "mkdir $(bindir)"; \
 		mkdir $(bindir); \
-	fi
-	-@if test ! -d $(sysconfdir); then \
-		echo "mkdir $(sysconfdir)"; \
-		mkdir $(sysconfdir); \
-	fi
-	-@if test ! -d $(localstatedir)/logs; then \
-		echo "mkdir $(localstatedir)/logs"; \
-		mkdir $(localstatedir)/logs; \
 	fi
 
 install: install-mkdirs build
+	-@if test -f $(bindir)/ircd; then \
+		echo "ircd: backing up ircd"; \
+	fi
+	@echo "ircd: installing ircd ($(PROGS))"
 	@for i in $(PROGS); do \
 		if test -f $(bindir)/$$i; then \
-			echo $(MV) $(bindir)/$$i $(bindir)/$$i.old; \
 			$(MV) $(bindir)/$$i $(bindir)/$$i.old; \
 		fi; \
-		echo $(INSTALL_BIN) $$i $(bindir); \
 		$(INSTALL_BIN) $$i $(bindir); \
 	done
 

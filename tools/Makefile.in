@@ -28,51 +28,32 @@ bindir		= @bindir@
 libexecdir	= @libexecdir@
 sysconfdir	= @sysconfdir@
 localstatedir	= @localstatedir@
-# Change this later! -- adrian
-moduledir	= @prefix@/modules
-automoduledir	= @prefix@/modules/autoload
 
 PROGS		= viconf mkpasswd convertconf convertilines convertklines encspeed
-
-mkpasswd_SOURCES = mkpasswd.c
-mkpasswd_OBJECTS = mkpasswd.o
-viconf_SOURCES = viconf.c
-viconf_OBJECTS = viconf.o
-convertconf_SOURCES = convertconf.c
-convertconf_OBJECTS = convertconf.o
-convertklines_SOURCES = convertklines.c
-convertklines_OBJECTS = convertklines.o
-convertilines_SOURCES = convertilines.c
-convertilines_OBJECTS = convertilines.o
-encspeed_SOURCES = encspeed.c
-encspeed_OBJECTS = encspeed.o
-
-all_OBJECTS = $(viconf_OBJECTS) $(mkpasswd_OBJECTS) $(convertconf_OBJECTS)\
-        $(convertklines_OBJECTS) $(encspeed_OBJECTS) $(convertilines_OBJECTS)
 
 all: $(PROGS)
 
 build: all
 
-encspeed: $(encspeed_OBJECTS)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o encspeed $(encspeed_OBJECTS) $(IRCDLIBS)
-mkpasswd: $(mkpasswd_OBJECTS)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o mkpasswd $(mkpasswd_OBJECTS) $(IRCDLIBS)
+encspeed:
+	$(CC) $(CFLAGS) $(LDFLAGS) $(INCLUDES) encspeed.c -o encspeed $(IRCDLIBS)
+mkpasswd:
+	$(CC) $(CFLAGS) $(LDFLAGS) $(INCLUDES) mkpasswd.c -o mkpasswd $(IRCDLIBS)
 
-viconf: $(viconf_OBJECTS)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o viconf $(viconf_OBJECTS) $(IRCDLIBS)
+viconf:
+	$(CC) $(CFLAGS) $(LDFLAGS) $(INCLUDES) viconf.c -o viconf $(IRCDLIBS)
 
-convertilines: convertilines.o
-	$(CC) $(CFLAGS) $(LDFLAGS) -o convertilines $(convertilines_OBJECTS) $(IRCDLIBS)
+convertilines:
+	$(CC) $(CFLAGS) $(LDFLAGS) $(INCLUDES) convertilines.c -o convertilines $(IRCDLIBS)
 
-convertklines: convertklines.o
-	$(CC) $(CFLAGS) $(LDFLAGS) -o convertklines $(convertklines_OBJECTS) $(IRCDLIBS)
+convertklines:
+	$(CC) $(CFLAGS) $(LDFLAGS) $(INCLUDES) convertklines.c -o convertklines $(IRCDLIBS)
 
-convertconf: convertconf.o
-	$(CC) $(CFLAGS) $(LDFLAGS) -o convertconf $(convertconf_OBJECTS) $(IRCDLIBS)
+convertconf:
+	$(CC) $(CFLAGS) $(LDFLAGS) $(INCLUDES) convertconf.c -o convertconf $(IRCDLIBS)
 
 clean:
-	$(RM) -f $(all_OBJECTS) convertconf encspeed viconf chkconf mkpasswd *~ core *.exe convertklines convertilines
+	$(RM) -f convertconf encspeed viconf chkconf mkpasswd *~ core *.exe convertklines convertilines
 
 distclean: clean
 	$(RM) -f Makefile
@@ -106,44 +87,25 @@ automoduledir	= @prefix@/modules/autoload
  
 install-mkdirs:
 	-@if test ! -d $(prefix); then \
-		echo "mkdir $(prefix)"; \
+		echo "ircd: setting up tools directory structure"; \
 		mkdir $(prefix); \
 	fi
 	-@if test ! -d $(exec_prefix); then \
-		echo "mkdir $(exec_prefix)"; \
 		mkdir $(exec_prefix); \
 	fi
 	-@if test ! -d $(bindir); then \
-		echo "mkdir $(bindir)"; \
 		mkdir $(bindir); \
-	fi
-	-@if test ! -d $(moduledir); then \
-		echo "mkdir $(moduledir)"; \
-		mkdir $(moduledir); \
-	fi
-	-@if test ! -d $(automoduledir); then \
-		echo "mkdir $(automoduledir)"; \
-		mkdir $(automoduledir); \
-	fi
-	-@if test ! -d $(sysconfdir); then \
-		echo "mkdir $(sysconfdir)"; \
-		mkdir $(sysconfdir); \
-	fi
-	-@if test ! -d $(localstatedir)/logs; then \
-		echo "mkdir $(localstatedir)/logs"; \
-		mkdir $(localstatedir)/logs; \
 	fi
 
 install: install-mkdirs build
+	@echo "ircd: installing tools ($(PROGS))"
 	@for i in $(PROGS); do \
 		if test -f $(bindir)/$$i; then \
-			echo $(MV) $(bindir)/$$i $(bindir)/$$i.old; \
 			$(MV) $(bindir)/$$i $(bindir)/$$i.old; \
 		fi; \
-		echo $(INSTALL_BIN) $$i $(bindir); \
 		$(INSTALL_BIN) $$i $(bindir); \
 	done; \
-        $(RM) -f $(bindir)/vimotd $(bindir)/viklines; \
-        $(LN) $(bindir)/viconf $(bindir)/vimotd; \
-        $(LN) $(bindir)/viconf $(bindir)/viklines
+	$(RM) -f $(bindir)/vimotd $(bindir)/viklines
+	$(LN) $(bindir)/viconf $(bindir)/vimotd
+	$(LN) $(bindir)/viconf $(bindir)/viklines
 

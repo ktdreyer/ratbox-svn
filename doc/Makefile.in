@@ -32,7 +32,6 @@ MANPAGES        = ircd.8
 
 CONFS		= example.conf example.efnet.conf
 DEFAULTCONFS	= kline.conf dline.conf xline.conf resv.conf
-DEFAULTCONFSCP  = ircd.motd
 
 SSL_LIBS	= @SSL_LIBS@
 SSL_INCLUDES	= @SSL_INCLUDES@
@@ -54,36 +53,33 @@ install-mkdirs:
 	fi
 
 install: install-mkdirs build
+	@echo "ircd: installing example config files ($(CONFS))"
 	@for i in $(CONFS); do \
 		if test -f $(sysconfdir)/$$i; then \
-			echo $(MV) $(sysconfdir)/$$i $(sysconfdir)/$$i.old; \
 			$(MV) $(sysconfdir)/$$i $(sysconfdir)/$$i.old; \
 		fi; \
-		echo $(INSTALL_DATA) $$i $(sysconfdir); \
 		$(INSTALL_DATA) $$i $(sysconfdir); \
 	done
 
 	@for i in $(DEFAULTCONFS); do \
 		if test ! -f $(sysconfdir)/$$i; then \
-			echo ${TOUCH} $(sysconfdir)/$$i; \
+			echo "ircd: creating config file ($$i)"
 			${TOUCH} $(sysconfdir)/$$i; \
 		fi; \
 	done
 
-	@ for i in $(DEFAULTCONFSCP); do \
-		if test ! -f $(sysconfdir)/$$i; then \
-			echo $(INSTALL_DATA) $$i $(sysconfdir); \
-			$(INSTALL_DATA) $$i $(sysconfdir); \
-		fi; \
-	done
-
-	if test -f $(sysconfdir)/links.txt; then \
-		rm $(sysconfdir)/links.txt; \
+	-@if test ! -f $(sysconfdir)/ircd.motd; then \
+		echo "ircd: installing motd file (ircd.motd)
+		$(INSTALL_DATA) ircd.motd $(sysconfdir); \
 	fi
 
+	-@if test -f $(sysconfdir)/links.txt; then \
+		$(RM) $(sysconfdir)/links.txt; \
+	fi
+
+	@echo "ircd: installing manpage"
 	@for i in $(MANPAGES); do \
 		if test ! -f $(mandir)/$$i; then \
-			echo $(INSTALL_DATA) $$i $(mandir); \
 			$(INSTALL_DATA) $$i $(mandir); \
 		fi; \
 	done

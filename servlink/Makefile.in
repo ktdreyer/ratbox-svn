@@ -51,12 +51,11 @@ servlink: ${OBJECTS}
 	${CC} ${CFLAGS} ${LDFLAGS} -o $@ ${OBJECTS} ${IRCDLIBS}
 
 install: build
+	@echo "ircd: installing servlink ($(PROGS))"
 	@for i in $(PROGS); do \
                 if test -f $(bindir)/$$i; then \
-                        echo $(MV) $(bindir)/$$i $(bindir)/$$i.old; \
                         $(MV) $(bindir)/$$i $(bindir)/$$i.old; \
                 fi; \
-                echo $(INSTALL_BIN) $$i $(bindir); \
                 $(INSTALL_BIN) $$i $(bindir); \
         done
 

@@ -61,26 +61,18 @@ index:
 	rm -f opers/index.tmp
 
 install:
-	@echo installing help files...
 	-@if test -d $(prefix)/help-old; then \
 		rm -rf $(prefix)/help-old; \
 	fi
-
 	-@if test -d $(prefix)/help; then \
+		echo "ircd: backing up old help files"; \
 		mv $(prefix)/help $(prefix)/help-old; \
 	fi
 
-	-@if test ! -d $(prefix)/help; then \
-		mkdir $(prefix)/help; \
-	fi
-
-	-@if test ! -d $(prefix)/help/opers; then \
-		mkdir $(prefix)/help/opers; \
-	fi
-
-	-@if test ! -d $(prefix)/help/users; then \
-		mkdir $(prefix)/help/users; \
-	fi
+	@echo "ircd: setting up help directory structure"
+	@mkdir $(prefix)/help
+	@mkdir $(prefix)/help/opers
+	@mkdir $(prefix)/help/users
 
 	@for help in opers/*; do \
 	if [ -f $$help ]; then \

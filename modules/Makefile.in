@@ -138,28 +138,20 @@ libmodules.a: $(S_OBJS) static_modules.o
 
 
 install-mkdirs:
+	@echo "ircd: setting up modular directory structure"
 	-@if test ! -d $(prefix); then \
-                echo "mkdir $(prefix)"; \
                 mkdir $(prefix); \
         fi
-	
 	-@if test -d $(moduledir)-old; then \
-		echo "rm -rf $(moduledir)-old"; \
 		rm -rf $(moduledir)-old; \
 	fi
 	-@if test -d $(moduledir); then \
-		echo "mv $(moduledir) $(moduledir)-old"; \
+		echo "ircd: backing up modules"; \
 		mv $(moduledir) $(moduledir)-old; \
 	fi
 
-	-@if test ! -d $(moduledir); then \
-                echo "mkdir $(moduledir)"; \
-                mkdir $(moduledir); \
-        fi
-	-@if test ! -d $(automoduledir); then \
-                echo "mkdir $(automoduledir)"; \
-                mkdir $(automoduledir); \
-        fi
+	@mkdir $(moduledir)
+	@mkdir $(automoduledir)
 
 install: install_@MOD_TARGET@
 
@@ -167,21 +159,19 @@ install_libmodules.a: libmodules.a
 # Ye olde noop here.	
 
 install_shared_modules: install-mkdirs
-	@echo "Installing core modules into $(moduledir) .."
+	@echo "ircd: installing modules"
 	@for file in $(SH_CORE_OBJS); do \
 		$(INSTALL_DATA) $$file $(moduledir); \
 	done
-	@echo "Installing modules into $(automoduledir) .."
 	@for file in $(SH_OBJS); do \
 		$(INSTALL_DATA) $$file $(automoduledir); \
 	done
 
 install_hpux_shared: install-mkdirs
-	@echo "Installing core modules into $(moduledir) .."
+	@echo "ircd: installing modules"
 	@for file in $(HPUX_CORE_OBJS); do \
 		$(INSTALL_DATA) $$file $(moduledir); \
 	done
-	@echo "Installing modules into $(automoduledir) .."
 	@for file in $(HPUX_OBJS); do \
 		$(INSTALL_DATA) $$file $(automoduledir); \
 	done
