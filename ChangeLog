@@ -1,3 +1,18 @@
+leeh        2004/07/19 18:04:36 EDT	(20040719_6)
+
+  Modified files:
+    include              client.h 
+    src                  hash.c 
+  Log:
+  - remove some unused vars in hash.c
+  - add IsReject() macro
+  
+  Revision  Changes    Path
+  7.246     +2 -0      ircd-ratbox/include/client.h
+  7.107     +0 -6      ircd-ratbox/src/hash.c
+
+
+
 androsyn    2004/07/19 17:59:01 EDT	(20040719_5)
 
   Modified files:
