@@ -739,15 +739,15 @@ void add_connection(struct Listener* listener, int fd)
 
   assert(0 != listener);
 
-	if (iAuth.socket == NOSOCK)
-	{
-		send(fd,
-			"NOTICE AUTH :*** Ircd Authentication Server is temporarily down, please connect later\r\n",
-			87,
-			0);
-		close(fd);
-		return;
-	}
+  if (iAuth.socket == NOSOCK)
+  {
+    send(fd,
+      "NOTICE AUTH :*** Ircd Authentication Server is temporarily down, please connect later\r\n",
+      87,
+      0);
+    close(fd);
+    return;
+  }
 
   /* 
    * get the client socket name from the socket
@@ -809,7 +809,7 @@ static int parse_client_queued(struct Client* cptr)
         break;
       return dopacket(cptr, readBuf, dolen);
     }
-    dolen = dbuf_getmsg(&cptr->recvQ, readBuf, READBUF_SIZE);
+    dolen = dbuf_getmsg(&cptr->recvQ, cptr->buffer, BUFSIZE);
     /*
      * Devious looking...whats it do ? well..if a client
      * sends a *long* message without any CR or LF, then
@@ -819,14 +819,13 @@ static int parse_client_queued(struct Client* cptr)
      * -avalon
      */
     if (0 == dolen) {
-      if (DBufLength(&cptr->recvQ) < 510) {
+      if (DBufLength(&cptr->recvQ) < 510)
         cptr->flags |= FLAGS_NONL;
-        break;
-      }
-      DBufClear(&cptr->recvQ);
+      else
+        DBufClear(&cptr->recvQ);
       break;
     }
-    else if (CLIENT_EXITED == client_dopacket(cptr, readBuf, dolen))
+    else if (CLIENT_EXITED == client_dopacket(cptr, dolen))
       return CLIENT_EXITED;
   }
   return 1;
@@ -894,10 +893,7 @@ static int read_packet(struct Client *cptr)
     if (!dbuf_put(&cptr->recvQ, readBuf, length))
       return exit_client(cptr, cptr, cptr, "dbuf_put fail");
     
-    if (IsPerson(cptr) &&
-#ifdef NO_OPER_FLOOD
-        !IsAnOper(cptr) &&
-#endif
+    if (IsPerson(cptr) && !IsAnOper(cptr) &&
         DBufLength(&cptr->recvQ) > CLIENT_FLOOD) {
       return exit_client(cptr, cptr, cptr, "Excess Flood");
     }
@@ -979,10 +975,10 @@ int read_message(time_t delay, unsigned char mask)        /* mika */
       FD_ZERO(read_set);
       FD_ZERO(write_set);
 
-			if (iAuth.socket != NOSOCK)
-				FD_SET(iAuth.socket, read_set);
+      if (iAuth.socket != NOSOCK)
+        FD_SET(iAuth.socket, read_set);
 
-		#ifdef bingo
+#ifdef bingo
       for (auth = AuthPollList; auth; auth = auth->next) {
         assert(-1 < auth->fd);
         if (IsAuthConnect(auth))
@@ -990,7 +986,7 @@ int read_message(time_t delay, unsigned char mask)        /* mika */
         else /* if(IsAuthPending(auth)) */
           FD_SET(auth->fd, read_set);
       }
-    #endif /* bingo */
+#endif /* bingo */
 
       for (listener = ListenerPollList; listener; listener = listener->next) {
         assert(-1 < listener->fd);
@@ -1084,21 +1080,21 @@ int read_message(time_t delay, unsigned char mask)        /* mika */
       accept_connection(listener);
   }
 
-	/*
-	 * Check IAuth
-	 */
-	if (iAuth.socket != NOSOCK)
-		if (FD_ISSET(iAuth.socket, read_set))
-		{
-			if (!ParseIAuth())
-			{
-				/*
-				 * IAuth server closed the connection
-				 */
-				close(iAuth.socket);
-				iAuth.socket = NOSOCK;
-			}
-		}
+  /*
+   * Check IAuth
+   */
+  if (iAuth.socket != NOSOCK)
+    if (FD_ISSET(iAuth.socket, read_set))
+    {
+      if (!ParseIAuth())
+      {
+        /*
+         * IAuth server closed the connection
+         */
+        close(iAuth.socket);
+        iAuth.socket = NOSOCK;
+      }
+    }
 
   for (i = 0; i <= highest_fd; i++) {
     if (!(GlobalFDList[i] & mask) || !(cptr = local[i]))
