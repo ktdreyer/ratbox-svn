@@ -1,3 +1,15 @@
+leeh        2002/08/24 05:44:16 EDT	(20020824_2)
+
+  Modified files:
+    src                  s_debug.c 
+  Log:
+  - two unused variables
+  
+  Revision  Changes    Path
+  7.78      +0 -3      ircd-ratbox/src/s_debug.c
+
+
+
 leeh        2002/08/24 05:42:08 EDT	(20020824_1)
 
   Modified files:
