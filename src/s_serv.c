@@ -2187,10 +2187,10 @@ serv_connect_callback(int fd, int status, void *data)
     if (!aconf)
       {
         sendto_realops_flags(FLAGS_ALL, L_ADMIN,
-	             "Lost C-Line for %s", get_client_name(client_p, HIDE_IP));
+	             "Lost connect{} block for %s", get_client_name(client_p, HIDE_IP));
         sendto_realops_flags(FLAGS_ALL, L_OPER,
-		     "Lost C-Line for %s", get_client_name(client_p, MASK_IP));
-        exit_client(client_p, client_p, &me, "Lost C-line");
+		     "Lost connect{} block for %s", get_client_name(client_p, MASK_IP));
+        exit_client(client_p, client_p, &me, "Lost connect{} block");
         return;
       }
     /* Next, send the initial handshake */
