@@ -1,3 +1,6 @@
+*** 20010102_11 by davidt
+Send halfops as @ not % in SJOIN to a non-CAP_HOPS server
+
 *** 20010102_10 by madmax
 Just some notes about it being an alpha release and suchlike.
 
