@@ -1,3 +1,9 @@
+*** 20010605_15 by toot
+moved knock_delay, max_chans_per_user, and quiet_on_ban to
+the channel block in ircd.conf
+and added maxbans to it
+
+
 *** 20010605_14 by toot
 fixed some little compile errors
 
