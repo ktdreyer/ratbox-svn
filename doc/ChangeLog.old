@@ -1,3 +1,7 @@
+*** 20010401_5 by toot
+fixes a couple of compile warnings in ircd.c..
+
+
 *** 20010401_4 by ejb
 - make an error be printed for unknown arguments.
 - add 'ayb' to message-customisation.txt.
