@@ -1,3 +1,15 @@
+androsyn    2005/03/25 19:42:05 UTC	(20050325_5)
+
+  Modified files:
+    adns                 resolver.c 
+  Log:
+  change the resolver command to be I and H, just a little faster
+  
+  Revision  Changes    Path
+  1.2       +11 -8     ircd-ratbox/adns/resolver.c
+
+
+
 androsyn    2005/03/25 19:29:51 UTC	(20050325_4)
 
   Added files:
