@@ -50,6 +50,7 @@ all:	build
 autoconf: autoconf/configure.in
 	autoconf autoconf/configure.in >configure
 	autoheader -l autoconf autoconf/configure.in > include/setup.h.in
+	${RM} config.cache
 
 build:
 	-@if [ ! -f include/setup.h ] ; then \

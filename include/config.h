@@ -424,6 +424,9 @@ error CLIENT_FLOOD undefined.
 #define MIN_SPAM_TIME 60
 
 /* This may belong elsewhere... -dt */
+#if defined( HAVE_LIBINTL ) && !defined ( HAVE_GETTEXT )
+#define HAVE_GETTEXT 1
+#endif
 #if defined( HAVE_GETTEXT ) && defined( MSGPATH )
 #define USE_GETTEXT 1
 #define _(a)       (gettext(a))

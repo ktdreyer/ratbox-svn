@@ -54,12 +54,10 @@ install: build install-mkdirs
 
 depend:
 
-clean:
-
-distclean:
+distclean: clean
 	${RM} -f Makefile
 
-mrclean:
+clean:
 	${RM} -f *.mo
 
 mrupdate:
