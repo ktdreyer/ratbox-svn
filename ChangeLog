@@ -1,3 +1,33 @@
+leeh        2004/12/14 13:55:58 EST	(20041214_0)
+
+  Modified files:
+    help/opers           index 
+    include              numeric.h 
+    modules              m_gline.c m_trace.c 
+    modules/core         m_message.c 
+    src                  numeric.c 
+  Added files:
+    help/opers           etrace 
+  Log:
+  - 2.0 sync:
+    - added "Failed to deliver: [%.20s]" to the ERR_NOSUCHNICK we send out
+      when relaying a privmsg to a UID
+    - two ungline fixes
+    - added etrace -v4, etrace -v6 and etrace -full
+    - added etrace help
+  - switched ERR_TARGCHANGE to 707
+  
+  Revision  Changes    Path
+  1.2       +10 -0     ircd-ratbox/help/opers/etrace (new)
+  1.9       +17 -17    ircd-ratbox/help/opers/index
+  7.52      +2 -1      ircd-ratbox/include/numeric.h
+  1.156     +5 -4      ircd-ratbox/modules/core/m_message.c
+  1.147     +28 -17    ircd-ratbox/modules/m_gline.c
+  1.105     +58 -17    ircd-ratbox/modules/m_trace.c
+  7.34      +2 -2      ircd-ratbox/src/numeric.c
+
+
+
 leeh        2004/12/10 16:28:22 EST	(20041210_0)
 
   Modified files:
