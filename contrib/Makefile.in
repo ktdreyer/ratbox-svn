@@ -15,7 +15,7 @@ INSTALL_PROGRAM	= @INSTALL_PROGRAM@
 INSTALL_DATA	= @INSTALL_DATA@
 INSTALL_SUID    = @INSTALL_PROGRAM@ -o root -m 4755
 SHELL		= /bin/sh
-AUTOMODULEDIR	= @prefix@/modules/autoload
+AUTOMODULEDIR	= @prefix@/modules
 
 IRCDLIBS	= @LIBS@ @SSL_LIBS@
 
@@ -23,7 +23,8 @@ INCLUDES	= -I../include
 CPPFLAGS	= ${INCLUDES} @SSL_DEFINE@ @CPPFLAGS@
 
 SRCS =                          \
-  m_clearchan.c
+  m_clearchan.c          \
+  m_jupe.c
 
 OBJS = ${SRCS:.c=.so}
 
