@@ -1,3 +1,33 @@
+leeh        2004/02/23 09:18:19 EST	(20040223_0)
+
+  Modified files:
+    include              client.h s_conf.h s_newconf.h s_serv.h 
+    modules              m_connect.c m_set.c m_stats.c 
+    modules/core         m_server.c 
+    src                  class.c client.c newconf.c s_conf.c 
+                         s_newconf.c s_serv.c s_stats.c 
+  Log:
+  - split connect {}; out of ConfItem into server_conf
+  
+  Revision  Changes    Path
+  7.232     +1 -1      ircd-ratbox/include/client.h
+  7.265     +0 -10     ircd-ratbox/include/s_conf.h
+  7.19      +56 -5     ircd-ratbox/include/s_newconf.h
+  7.89      +3 -4      ircd-ratbox/include/s_serv.h
+  1.128     +8 -34     ircd-ratbox/modules/core/m_server.c
+  1.66      +22 -21    ircd-ratbox/modules/m_connect.c
+  1.72      +2 -2      ircd-ratbox/modules/m_set.c
+  1.192     +44 -6     ircd-ratbox/modules/m_stats.c
+  7.56      +41 -23    ircd-ratbox/src/class.c
+  7.422     +15 -10    ircd-ratbox/src/client.c
+  7.128     +67 -79    ircd-ratbox/src/newconf.c
+  7.445     +2 -443    ircd-ratbox/src/s_conf.c
+  7.19      +200 -0    ircd-ratbox/src/s_newconf.c
+  7.375     +136 -220  ircd-ratbox/src/s_serv.c
+  7.32      +0 -12     ircd-ratbox/src/s_stats.c
+
+
+
 leeh        2004/02/22 13:13:16 EST	(20040222_0)
 
   Modified files:
