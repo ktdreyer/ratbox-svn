@@ -1,3 +1,7 @@
+*** 19990819_4 by tomh
+Directory /usr/hybrid/ircd-hybrid-7/src/conf added to the repository
+
+
 *** 19990819_3 by db
 - cosmetic change, U lines without a password appear with * instead of <NULL>
 
