@@ -1,3 +1,8 @@
+*** 20001208_9 by db
+- on /mode #channel show the root channel's TS if on a vchan
+
+
+
 *** 20001208_8 by db
 - fixed remote join bug, it was joining the root channel instead of the
   vchan on remote servers due to the wrong name being passed to the SJOIN
