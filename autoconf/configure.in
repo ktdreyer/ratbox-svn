@@ -17,11 +17,17 @@ AC_PROG_CC
 dnl Make sure autoconf doesnt interfere with cflags -jmallett
 CFLAGS="$OLD_CFLAGS"
 
-AC_MSG_CHECKING(if we are using TenDRA)
+dnl Portable non-GCC compiler checks. Widely ported commercial
+dnl toolchains should be checked for here, too. -jmallett
+AC_MSG_CHECKING(if we are using TenDRA or MIPSpro)
 case `$CC -version 2>&1` in
   *TenDRA*)
-    AC_MSG_RESULT(success! Your compiler is not GNU.)
+    AC_MSG_RESULT(success! We will be using TenDRA.)
     TenDRA=yes
+    ;;
+  *MIPSpro*)
+    AC_MSG_RESULT(success! We will be using MIPSpro.)
+    MIPSpro=yes
     ;;
   *)
     AC_MSG_RESULT(no)
@@ -29,6 +35,9 @@ case `$CC -version 2>&1` in
     ;;
 esac
 
+dnl XXX This could be consecutive 'if' statements, and then check
+dnl for a zero "$IRC_CFLAGS" (but what should we use for TenDRA??)
+dnl and then do the check for whether -g works... Hrrm. -jmallett
 if test "x$GCC" = "xyes"; then
   IRC_CFLAGS="-O2 -g -ggdb -Wunused -Wall -Wshadow -Wmissing-declarations"
 else
@@ -38,10 +47,14 @@ else
     IRC_CFLAGS=""
     CPPFLAGS="$CPPFLAGS -Ylonglong -Yansi -I/usr/include"
   else
-    if test "x$ac_cv_prog_cc_g" = "xyes"; then
+    if test "x$MIPSpro" = "xyes"; then
       IRC_CFLAGS="-g"
     else
-      IRC_CFLAGS=""
+      if test "x$ac_cv_prog_cc_g" = "xyes"; then
+        IRC_CFLAGS="-g"
+      else
+        IRC_CFLAGS=""
+      fi
     fi
   fi
 fi
@@ -675,6 +688,13 @@ else
 	fi
 	if test "$TenDRA" = "yes"; then
 		AC_MSG_RESULT(TenDRA: -KPIC -DPIC -G)
+		PICFLAGS="-KPIC -DPIC -G"
+	fi
+	dnl This is what the ABI compiler manpage dictates on IRIX 6.5
+	dnl however MIPSpro itself is smart and will play nice with
+	dnl -shared... Which is more correct I do not know. -jmallett
+	if test "$MIPSpro" = "yes"; then
+		AC_MSG_RESULT(MIPSpro: -KPIC -DPIC -G)
 		PICFLAGS="-KPIC -DPIC -G"
 	fi
 	case `uname -s` in
