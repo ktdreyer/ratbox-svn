@@ -345,6 +345,13 @@ load_a_module(char *path, int warn, int core)
 				hook_add_event(m->hapi_name, m->hapi_id);
 		}
 		
+		if (mheader->mapi_hfn_list)
+		{
+			mapi_hfn_list_av1 *m;
+			for (m = mheader->mapi_hfn_list; m->hapi_name; ++m)
+				hook_add_hook(m->hapi_name, m->fn);
+		}
+		
 		ver = mheader->mapi_module_version;
 		break;
 	}
