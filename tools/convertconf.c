@@ -19,7 +19,7 @@
  */
 
 #include <stdio.h>
-#include <stddef.h>
+#include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
 
@@ -31,7 +31,7 @@ static char *getfield(char *);
 static void ReplaceQuotes(char *out, char *in);
 static void oldParseOneLine(FILE *out, char *in);
 
-main(int argc,char *argv[])
+int main(int argc,char *argv[])
 {
   FILE *in;
   FILE *out;
@@ -52,6 +52,7 @@ main(int argc,char *argv[])
     }
   
   ConvertConf(in,out);
+  return 0;
 }
 
 static void usage()
@@ -258,7 +259,7 @@ static void oldParseOneLine(FILE *out,char* line)
       fprintf(out,"\t\tname=\"%s\";\n", user_field);
       fprintf(out,"\t\thost=\"%s\";\n", host_field);
       fprintf(out,"\t\tpassword=\"%s\";\n", passwd_field);
-      fprintf(out,"\t\tcompressed;\n", passwd_field);
+      fprintf(out,"\t\tcompressed;\n");
       fprintf(out,"\t};\n\n");
       break;
 
@@ -352,7 +353,7 @@ static void oldParseOneLine(FILE *out,char* line)
       fprintf(out,"\t\tname=\"%s\";\n", user_field);
       fprintf(out,"\t\thost=\"%s\";\n", host_field);
       fprintf(out,"\t\tpassword=\"%s\";\n", passwd_field);
-      fprintf(out,"\t\tlazylink;\n", passwd_field);
+      fprintf(out,"\t\tlazylink;\n");
       fprintf(out,"\t};\n\n");
       break;
 
