@@ -1,3 +1,15 @@
+leeh        2002/05/09 06:06:35 EDT	(20020509_0)
+
+  Modified files:
+    contrib              m_opme.c 
+  Log:
+  - reusing ptrs is bad.  silly fl_
+  
+  Revision  Changes    Path
+  1.22      +9 -8      ircd-hybrid-7/contrib/m_opme.c
+
+
+
 leeh        2002/05/08 10:40:30 EDT	(20020508_2)
 
   Modified files:
