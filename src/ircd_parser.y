@@ -1521,7 +1521,7 @@ deny_item:      deny_ip | deny_reason | error
 deny_ip:        IP '=' QSTRING ';'
   {
     char *p;
-    yy_aconf->host = yylval.string;
+    DupString(yy_aconf->host, yylval.string);
   };
 
 deny_reason:    REASON '=' QSTRING ';' 
