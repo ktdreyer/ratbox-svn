@@ -24,6 +24,6 @@
 
 #ifndef PATCHLEVEL
 #define VERSION      "hybrid-7beta13"
-#define RELNAME      "-next-one-is-the-rc"
+#define RELNAME      "-upcoming-BETA-14"
 #define PATCHLEVEL   VERSION RELNAME
 #endif
