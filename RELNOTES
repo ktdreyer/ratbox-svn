@@ -11,7 +11,7 @@ o) the use_anonops/halfops/invex/except options will actually disable users
 o) a core with clearchan was fixed
 o) more double free fixes
 o) a flaw in serverhide relating to /who was fixed
-
+o) protection against users flooding has been re-enabled.
 
 --------------------------------------------------------------------------------
 
