@@ -24,7 +24,7 @@
 
 #include "config.h"
 
-#ifndef STATIC_MODULES
+#if !defined(STATIC_MODULES) && !defined(HAVE_MACH_O_DYLD_H) && defined(HAVE_DLOPEN)
 #include <dlfcn.h>
 #endif
 #include <stdlib.h>
@@ -62,7 +62,11 @@
 #ifndef STATIC_MODULES
 
 #ifndef RTLD_NOW
+#ifdef RTLD_LAZY
 #define RTLD_NOW RTLD_LAZY /* openbsd deficiency */
+#else
+#define RTLD_NOW 0 /* built-in dl*(3) don't care */
+#endif
 #endif
 
 static char unknown_ver[] = "<unknown>";
@@ -125,6 +129,107 @@ struct Message modrestart_msgtab = {
 
 extern struct Message error_msgtab;
 
+#ifdef HAVE_MACH_O_DYLD_H
+/*
+** jmallett's dl*(3) shims for NSModule(3) systems.
+*/
+#include <mach-o/dyld.h>
+
+#ifndef HAVE_DLOPEN
+void undefinedErrorHandler(const char *);
+NSModule multipleErrorHandler(NSSymbol, NSModule, NSModule);
+void linkEditErrorHandler(NSLinkEditErrors, int,const char *, const char *);
+char *dlerror(void);
+void *dlopen(char *, int);
+void dlclose(void *);
+void *dlsym(void *, char *);
+
+static int firstLoad;
+static int myDlError;
+static char *myErrorTable[] =
+{ "Loading file as object failed\n",
+  "Loading file as object succeeded\n",
+  "Not a valid shared object\n",
+  "Architecture of object invalid on this architecture\n",
+  "Invalid or corrupt image\n",
+  "Could not access object\n",
+  "NSCreateObjectFileImageFromFile failed\n",
+  NULL
+};
+
+void undefinedErrorHandler(const char *symbolName)
+{
+  sendto_realops_flags(FLAGS_ALL, L_ALL, "Undefined symbol: %s", symbolName);
+  ilog(L_WARN, "Undefined symbol: %s", symbolName);
+  return;
+}
+
+NSModule multipleErrorHandler(NSSymbol s, NSModule old, NSModule new)
+{
+  /* XXX
+  ** This results in substantial leaking of memory... Should free one
+  ** module, maybe?
+  */
+  /* We return which module should be considered valid, I believe */
+  return new;
+}
+
+void linkEditErrorHandler(NSLinkEditErrors errorClass, int errnum,
+                          const char *fileName, const char *errorString)
+{
+  sendto_realops_flags(FLAGS_ALL, L_ALL, "Link editor error: %s for %s",
+                       errorString, fileName);
+  ilog(L_WARN, "Link editor error: %s for %s", errorString, fileName);
+  return;
+}
+
+char *dlerror(void)
+{
+  return myErrorTable[myDlError % 6];
+}
+
+void *dlopen(char *filename, int unused)
+{
+  NSObjectFileImage myImage;
+  NSModule myModule;
+  int rv;
+  if (firstLoad)
+    {
+      /*
+      ** If we are loading our first symbol (huzzah!) we should go ahead
+      ** and install link editor error handling!
+      */
+      NSLinkEditErrorHandlers linkEditorErrorHandlers;
+      linkEditorErrorHandlers.undefined = undefinedErrorHandler;
+      linkEditorErrorHandlers.multiple = multipleErrorHandler;
+      linkEditorErrorHandlers.linkEdit = linkEditErrorHandler;
+      NSInstallLinkEditErrorHandlers(&linkEditorErrorHandlers);
+      firstLoad = FALSE;
+    }
+  rv = NSCreateObjectFileImageFromFile(filename, &myImage);
+  if (rv != NSObjectFileImageSuccess)
+    {
+      myDlError = rv;
+      return NULL;
+    }
+  myModule = NSLinkModule(myImage, filename, NSLINKMODULE_OPTION_PRIVATE);
+  return (void *)myModule;
+}
+
+void dlclose(void *myModule)
+{
+  NSUnLinkModule(myModule, FALSE);
+}
+
+void *dlsym(void *myModule, char *mySymbolName)
+{
+  NSSymbol mySymbol;
+  mySymbol = NSLookupSymbolInModule((NSModule)myModule, mySymbolName);
+  return NSAddressOfSymbol(mySymbol);
+}
+#endif
+#endif
+
 void
 modules_init(void)
 {
@@ -151,11 +256,12 @@ mod_find_path(char *path)
   if (!pathst)
     return NULL;
 
-  for (; pathst; pathst = pathst->next) {
-	  mpath = (struct module_path *)pathst->data;
-	  
-	  if (!strcmp(path, mpath->path))
-		  return mpath;
+  for (; pathst; pathst = pathst->next)
+  {
+    mpath = (struct module_path *)pathst->data;
+
+    if (!strcmp(path, mpath->path))
+      return mpath;
   }
   
   return NULL;

@@ -141,6 +141,9 @@
 /* Define if you have the <strings.h> header file.  */
 #undef HAVE_STRINGS_H
 
+/* Define if you have the <mach-o/dyld.h> header file.  */
+#undef HAVE_MACH_O_DYLD_H
+
 /* Define if you have the <sys/param.h> header file.  */
 #undef HAVE_SYS_PARAM_H
 
@@ -158,6 +161,9 @@
 
 /* Define if you have the descrypt library (-ldescrypt).  */
 #undef HAVE_LIBDESCRYPT
+
+/* Define if you have dlopen.  */
+#undef HAVE_DLOPEN
 
 /* Define if you have the dl library (-ldl).  */
 #undef HAVE_LIBDL
