@@ -145,7 +145,7 @@ static void conf_dns_callback(void* vptr, adns_answer *reply)
   {
 #ifdef IPV6
 	copy_s_addr(IN_ADDR(aconf->ipnum), reply->rrs.addr->addr.inet6.sin6_addr.s6_addr);
-#endif
+#else
 	copy_s_addr(IN_ADDR(aconf->ipnum), reply->rrs.addr->addr.inet.sin_addr.s_addr);
 #endif
 	MyFree(reply);
