@@ -1,3 +1,7 @@
+*** 20011002_3 by androsyn
+Changed SHARED to T_SHARED as SHARED clashed with a #define from sys/mman.h on solaris
+
+
 *** 20011002_2 by db
 - After online discussion on IRC, I took the plunge. no more stupid NullChn
   all replaced with NULL, hence all the touched files here.
