@@ -1,3 +1,12 @@
+*** 20010210_4 by jdc
+- Fixed bug where /WHO *, /WHO NICK, and /WHO #chan would not show
+  +o or +v clients when opped or +h'd; bug was due to lack-of 
+  is_any_op() check alongside MODE_HIDEOPS.
+- Changed variable name reference 'oper' to 'server_oper' to avoid
+  confusion with chanops.
+
+
+
 *** 20010210_3 by db
 - the hash table better be cleared as well
 
