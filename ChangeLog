@@ -1,3 +1,21 @@
+leeh        2004/09/25 11:36:57 EDT	(20040925_9)
+
+  Modified files:
+    src                  Makefile.in rserv.c 
+  Added files:
+    src                  s_userserv.c 
+  Log:
+  - add flags to the user registration storage
+  - move away from building libs to simply having one file like the other
+    services
+  
+  Revision  Changes    Path
+  1.23      +5 -21     rserv/src/Makefile.in
+  1.28      +2 -0      rserv/src/rserv.c
+  1.1       +249 -0    rserv/src/s_userserv.c (new)
+
+
+
 leeh        2004/09/25 11:36:42 EDT	(20040925_8)
 
   Modified files:
