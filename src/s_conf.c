@@ -503,7 +503,7 @@ verify_access(struct Client* client_p, const char* username)
   else
     {
       strlcpy(non_ident, "~", sizeof(non_ident));
-      strlcat(&non_ident[1],username, sizeof(non_ident));
+      strlcat(non_ident,username, sizeof(non_ident));
       aconf = find_address_conf(client_p->host,non_ident,
 				&client_p->localClient->ip,
 				client_p->localClient->aftype);
