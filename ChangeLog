@@ -1,3 +1,15 @@
+androsyn    2003/02/14 08:25:51 UTC	(20030214_10)
+
+  Modified files:
+    src                  s_auth.c 
+  Log:
+  You were supposed to have been reverted
+  
+  Revision  Changes    Path
+  7.136     +0 -1      ircd-ratbox/src/s_auth.c
+
+
+
 androsyn    2003/02/14 08:22:19 UTC	(20030214_9)
 
   Modified files:
