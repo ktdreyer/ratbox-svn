@@ -1,3 +1,15 @@
+androsyn    2004/03/03 09:53:05 EST	(20040303_3)
+
+  Modified files:
+    src                  hash.c 
+  Log:
+  Fix a dumb warning
+  
+  Revision  Changes    Path
+  7.98      +1 -1      ircd-ratbox/src/hash.c
+
+
+
 leeh        2004/03/03 08:16:50 EST	(20040303_2)
 
   Modified files:
