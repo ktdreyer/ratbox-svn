@@ -973,9 +973,9 @@ sendto_channel_remote_prefix(struct Channel *chptr,
 	    continue;
 	}
 	  if (IsCapable(cptr, CAP_UID)) 
-		  sendto_one (cptr, ibuf, ilen);
+	    send_message (cptr, ibuf, ilen);
 	  else
-		  sendto_one (cptr, lbuf, llen);
+	    send_message (cptr, lbuf, llen);
 	  
     }
 } /* sendto_channel_remote() */
