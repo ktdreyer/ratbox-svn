@@ -126,14 +126,15 @@ struct Client* make_client(struct Client* from)
   dlink_node *m;
 
   client_p = BlockHeapAlloc(client_heap);
+  memset(client_p, 0, sizeof(struct Client)); 
   if (from == NULL)
     {
       client_p->from  = client_p; /* 'from' of local client is self! */
       client_p->since = client_p->lasttime = client_p->firsttime = CurrentTime;
 
       localClient = (struct LocalUser *)BlockHeapAlloc(lclient_heap);
-      client_p->localClient = localClient;
 
+      client_p->localClient = localClient;
       client_p->localClient->ctrlfd = -1;
 #ifndef HAVE_SOCKETPAIR
       client_p->localClient->ctrlfd_r = -1;
@@ -145,6 +146,7 @@ struct Client* make_client(struct Client* from)
     }
   else
     { /* from is not NULL */
+      client_p->localClient = NULL;
       client_p->from = from; /* 'from' of local client is self! */
       ++remote_client_count;
     }
@@ -155,6 +157,9 @@ struct Client* make_client(struct Client* from)
   client_p->fd_r = -1;
 #endif
   strcpy(client_p->username, "unknown");
+#if 0
+  client_p->name[0] = '\0';
+  client_p->flags   = 0;
   client_p->next    = NULL;
   client_p->prev    = NULL;
   client_p->hnext   = NULL;
@@ -166,6 +171,11 @@ struct Client* make_client(struct Client* from)
   client_p->whowas  = NULL;
   client_p->servnext = NULL;
   client_p->servprev = NULL;
+  client_p->allow_list.head = NULL;
+  client_p->allow_list.tail = NULL;
+  client_p->on_allow_list.head = NULL;
+  client_p->on_allow_list.tail = NULL;
+#endif
   return client_p;
 }
 
@@ -186,9 +196,6 @@ void _free_client(struct Client* client_p)
       mem_frob(client_p->localClient, sizeof(struct LocalUser));
 #endif
 
-#if 0
-      MyFree(client_p->localClient);
-#endif
       BlockHeapFree(lclient_heap, client_p->localClient);
       --local_client_count;
       assert(local_client_count >= 0);
@@ -202,9 +209,6 @@ void _free_client(struct Client* client_p)
   mem_frob(client_p, sizeof(struct Client));
 #endif
   BlockHeapFree(client_heap, client_p);
-#if 0
-  MyFree(client_p);
-#endif
 }
 
 /*
