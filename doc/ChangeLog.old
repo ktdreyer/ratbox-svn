@@ -1,3 +1,7 @@
+*** 20001223_10 by madmax
+Changed split reason when hidden to : "<servername> net.split" 
+
+
 *** 20001223_9 by db
 - show a fake name in the second field on links, this makes scripts
   and bx work better
