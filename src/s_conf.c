@@ -1618,7 +1618,10 @@ struct ConfItem* find_tkline(const char* host, const char* user, struct irc_inad
   dlink_node *kill_node;
   struct ConfItem *kill_ptr;
   struct irc_inaddr ip;
-  copy_s_addr(IN_ADDR(ip), PIN_ADDR(ipn));  
+
+  if ( ipn != NULL )
+    copy_s_addr(IN_ADDR(ip), PIN_ADDR(ipn));  
+
   for (kill_node = temporary_klines.head; kill_node; kill_node = kill_node->next)
     {
       kill_ptr = kill_node->data;
@@ -1629,14 +1632,21 @@ struct ConfItem* find_tkline(const char* host, const char* user, struct irc_inad
         }
     }
 
-  for (kill_node = temporary_ip_klines.head; kill_node; kill_node = kill_node->next)
+  if ( ipn == NULL )
+    return NULL;
+
+  for (kill_node = temporary_ip_klines.head; 
+       kill_node; kill_node = kill_node->next)
     {
       kill_ptr = kill_node->data;
+
       if ((kill_ptr->user && (!user || match(kill_ptr->user, user)))
-           && (kill_ptr->ip && (((unsigned long)IN_ADDR(&ip) & kill_ptr->ip_mask) == (unsigned long)IN_ADDR(&ip))))
-        {
-          return(kill_ptr);
-        }
+	  && (kill_ptr->ip && (((unsigned long)IN_ADDR(&ip) &
+				kill_ptr->ip_mask) ==
+			       (unsigned long)IN_ADDR(&ip))))
+	{
+	  return(kill_ptr);
+	}
     }
 
   return NULL;
