@@ -84,6 +84,7 @@
  * MPATH = MOTD
  * KPATH = kline conf file
  * DLPATH = dline conf file
+ * RPATH = RSA keyfile
  *
  * OMOTD = path to MOTD for opers
  * 
@@ -104,6 +105,7 @@
 #define CPATH   "ircd.conf"
 #define KPATH   "kline.conf"
 #define DLPATH  "kline.conf"
+#define RPATH   "ircd.rsa"
 #define MPATH   "ircd.motd"
 #define LPATH   "ircd.log"
 #define PPATH   "ircd.pid"
