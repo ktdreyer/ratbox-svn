@@ -25,6 +25,7 @@
 #include "handlers.h"
 #include "common.h"
 #include "channel.h"
+#include "vchannel.h"
 #include "client.h"
 #include "hash.h"
 #include "irc_string.h"
@@ -104,6 +105,7 @@ int     m_invite(struct Client *cptr,
 {
   struct Client *acptr;
   struct Channel *chptr;
+  struct Channel *vchan;
   int need_invite=NO;
 
   /* A little sanity test here */
@@ -153,6 +155,19 @@ int     m_invite(struct Client *cptr,
     }
 
   /* By this point, chptr is non NULL */  
+
+  if (HasVchans(chptr))
+    {
+      if ((vchan = map_vchan(chptr,sptr)))
+	chptr = vchan;
+      if (map_vchan(chptr,acptr))
+	{
+	  if (MyClient(sptr))
+	    sendto_one(sptr, form_str(ERR_USERONCHANNEL),
+		       me.name, parv[0], parv[1], parv[2]);
+	  return 0;
+	}
+    }
 
   if (!IsMember(sptr, chptr))
     {
@@ -259,6 +274,7 @@ int     ms_invite(struct Client *cptr,
 {
   struct Client *acptr;
   struct Channel *chptr;
+  struct Channel *vchan;
   int need_invite=NO;
 
   if (parc < 3 || *parv[1] == '\0')
@@ -310,6 +326,19 @@ int     ms_invite(struct Client *cptr,
     }
 
   /* By this point, chptr is non NULL */  
+
+  if (HasVchans(chptr))
+    {
+      if ((vchan = map_vchan(chptr,sptr)))
+	chptr = vchan;
+      if (map_vchan(chptr,acptr))
+	{
+	  if (MyClient(sptr))
+	    sendto_one(sptr, form_str(ERR_USERONCHANNEL),
+		       me.name, parv[0], parv[1], parv[2]);
+	  return 0;
+	}
+    }
 
   if (!IsMember(sptr, chptr))
     {
