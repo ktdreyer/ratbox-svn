@@ -97,7 +97,6 @@ void adns__tcp_tryconnect(adns_state ads, struct timeval now) {
     default:
       abort();
     }
-    
     assert(!ads->tcpsend.used);
     assert(!ads->tcprecv.used);
     assert(!ads->tcprecv_skip);
@@ -215,7 +214,7 @@ static void tcp_events(adns_state ads, int act,
 		       struct timeval **tv_io, struct timeval *tvbuf,
 		       struct timeval now) {
   adns_query qu, nqu;
-  
+
   for (;;) {
     switch (ads->tcpstate) {
     case server_broken:
@@ -232,6 +231,15 @@ static void tcp_events(adns_state ads, int act,
     case server_disconnected: /* fall through */
       if (!ads->tcpw.head) return;
       if (!act) { inter_immed(tv_io,tvbuf); return; }
+      for (qu= ads->tcpw.head; qu; qu= nqu) {
+	nqu= qu->next;
+	assert(qu->state == query_tcpw);
+	if (qu->retries > ads->nservers) {
+	  LIST_UNLINK(ads->tcpw,qu);
+	  adns__query_fail(qu,adns_s_allservfail);
+	}
+      }
+
       adns__tcp_tryconnect(ads,now);
       break;
     case server_ok:
