@@ -1,3 +1,10 @@
+*** 20010630_1 by androsyn
+Added flags to adns_submit_reverse to make CNAME's in PTRs work a bit
+better. Patch submitted by EO.
+
+
+
+
 *** 20010629_2 by leeh
 - fixed the compile warnings..
 
