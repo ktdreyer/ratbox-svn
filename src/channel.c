@@ -1499,15 +1499,32 @@ void set_channel_mode(struct Client *cptr,
 
               if (errsent(SM_ERR_RPL_B, &errors_sent))
                 break;
-              for (ptr = chptr->banlist.head; ptr; ptr = ptr->next)
+
+	      if(!GlobalSetOptions.hide_chanops || isok_c)
 		{
-		  banptr = ptr->data;
-		  sendto_one(cptr, form_str(RPL_BANLIST),
-			     me.name, cptr->name,
-			     real_name,
-			     banptr->banstr,
-			     banptr->who,
-			     banptr->when);
+		  for (ptr = chptr->banlist.head; ptr; ptr = ptr->next)
+		    {
+		      banptr = ptr->data;
+		      sendto_one(cptr, form_str(RPL_BANLIST),
+				 me.name, cptr->name,
+				 real_name,
+				 banptr->banstr,
+				 banptr->who,
+				 banptr->when);
+		    }
+		}
+	      else
+		{
+		  for (ptr = chptr->banlist.head; ptr; ptr = ptr->next)
+		    {
+		      banptr = ptr->data;
+		      sendto_one(cptr, form_str(RPL_BANLIST),
+				 me.name, cptr->name,
+				 real_name,
+				 banptr->banstr,
+				 "<hidden>",
+				 banptr->when);
+		    }
 		}
 
               sendto_one(sptr, form_str(RPL_ENDOFBANLIST),
