@@ -1,3 +1,9 @@
+*** 20010102_26 by db
+- upped channel clean time for non vchans to 30 minutes
+  I thought it was 30 before, it was only 15
+
+
+
 *** 20010102_25 by davidt
 Updated dependencies
 
