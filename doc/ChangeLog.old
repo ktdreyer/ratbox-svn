@@ -1,3 +1,11 @@
+*** 20010330_3 by db
+- removed the /rehash GC from opers.txt
+- cleaned up s_debug.c a tad more, added in stats for bans, invex, except
+- renamed cryptic variable names into more self documenting ones in
+  s_debug.c
+
+
+
 *** 20010330_2 by ejb
 - added kre's /* */ comment code to the lexer
 - properly fixed /rehash gc core (what's the point
