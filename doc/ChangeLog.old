@@ -1,3 +1,17 @@
+a1kmm       2002/02/17 03:34:22 EST	(20020217_17)
+
+  Modified files:
+    src                  client.c send.c 
+  Log:
+  - Do not call exit_client() again if a send error occurs while
+    sending the queues for exit_client()
+  
+  Revision  Changes    Path
+  7.230     +1 -2      ircd-hybrid-7/src/client.c
+  7.179     +2 -1      ircd-hybrid-7/src/send.c
+
+
+
 a1kmm       2002/02/17 03:02:21 EST	(20020217_16)
 
   Modified files:
