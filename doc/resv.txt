@@ -20,10 +20,12 @@
   It was coded to replace the method in hybrid-6 of blocking channels and
   nicks, and was implemented in a much cleaner way to make it faster.
 
+  The hybrid-6 method used to have to physically create channels, and
+  suffered flaws, resv does not.
 
 - How can I create a resv?
 
-  There are two types of resv.  'Permanent' and 'temporary'.  Temporary
+  There are two types of resv.  'permanent' and 'temporary'.  Temporary
   resv's will be erased when a server restarts (they will stay through a
   rehash).  Permanent resv's will stay through a restart.
 
@@ -48,16 +50,23 @@
   So to resv #warez:
     /quote resv #warez :No warez on this network.
 
+  To resv kiddie01:
+    /quote resv kiddie01 :Abuse
+
+  To resv clone*:
+    /quote resv clone* :clones
+
+    If a non admin does this, he will see:
+      -irc.leeh.co.uk- You must be an admin to perform a wildcard RESV
 
 - How do I remove a resv?
 
   If the resv is permanent, then the resv must be removed from ircd.conf,
-  then /rehash.
+  then a /rehash.
 
   If the resv is temporary, then use the unresv command:
     
     Syntax:  /quote unresv <#channel|nick>
-
 
 - Can I make a resv on all servers?
 
@@ -94,6 +103,12 @@
   dont see why anyone needs it.
 
 
+- Can I resv a local channel?
+
+  Yes. It takes the same format as creating a resv on a normal channel:
+    /resv &clones :no clonebots!
+
+    
 - Do you support wildcard channel resv's?
 
   No.  This is mainly for speed reasons.  When we are searching nicks, we
