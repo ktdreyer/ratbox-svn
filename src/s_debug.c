@@ -214,60 +214,61 @@ void count_memory(struct Client* cptr, char* nick)
 {
   struct Client*   acptr;
   struct SLink*    link;
-  aChannel*        chptr;
+  struct Channel*  chptr;
   struct ConfItem* aconf;
-  aClass*          cltmp;
+  struct Class*    cltmp;
 
-  int local_client_count      = 0;      /* local clients */
-  int channel_count           = 0;      /* channels */
-  int local_client_conf_count = 0;      /* local client conf links */
-  int remote_client_count     = 0;      /* remote clients */
-  int user_count              = 0;      /* user structs */
-  int server_count            = 0;      /* server structs */
-  int channel_user_count      = 0;      /* channel users */
-  int channel_invite_count    = 0;      /* channel invites */
+  int away_count              = 0;      /* aways set */
   int channel_ban_count       = 0;      /* channel bans */
+  int channel_count           = 0;      /* channels */
+  int channel_invite_count    = 0;      /* channel invites */
+  int channel_user_count      = 0;      /* channel users */
   int class_count             = 0;      /* classes */
   int conf_count              = 0;      /* conf lines */
-  int slink_count             = 0;      /* slinks */
   int invite_count            = 0;      /* users invited */
+  int listener_count          = 0;      /* listeners */
+  int local_client_conf_count = 0;      /* local client conf links */
+  int local_client_count      = 0;      /* local clients */
+  int ip_hash_count           = 0;      /* number of ip addresses hashed */
+  int scache_count            = 0;      /* number of servers cached by scache */
+  int remote_client_count     = 0;      /* remote clients */
+  int server_count            = 0;      /* server structs */
+  int slink_count             = 0;      /* slinks */
   int user_channel_count      = 0;      /* users in channels */
-  int away_count              = 0;      /* aways set */
-  int number_ips_stored       = 0;      /* number of ip addresses hashed */
-  int number_servers_cached   = 0;      /* number of servers cached by scache */
+  int user_count              = 0;      /* user structs */
 
-  size_t channel_mem          = 0;      /* memory used by channels */
-  size_t channel_ban_mem      = 0;      /* memory used by channel bans */
-  size_t local_client_mem     = 0;      /* memory used by local clients */
-  size_t remote_client_mem    = 0;      /* memory used by remote clients */
-  size_t user_mem             = 0;      /* memory used by users */
-  size_t server_mem           = 0;      /* memory used by servers */
   size_t away_mem             = 0;      /* memory used by aways */
+  size_t channel_ban_mem      = 0;      /* memory used by channel bans */
+  size_t channel_mem          = 0;      /* memory used by channels */
   size_t conf_mem             = 0;      /* memory used by conf lines */
   size_t dbuf_mem             = 0;      /* memory used by dbufs */
+  size_t listener_mem         = 0;      /* memory used by listeners */
+  size_t local_client_mem     = 0;      /* memory used by local clients */
+  size_t ip_hash_mem          = 0;      /* memory used by ip address hash */
+  size_t scache_mem           = 0;      /* memory used by scache */
+  size_t mtrie_conf_mem       = 0;      /* memory used by mtrie */
+  size_t parser_mem           = 0;      /* memory used by the parser */
+  size_t remote_client_mem    = 0;      /* memory used by remote clients */
   size_t resolver_mem         = 0;      /* memory used by resolver */
-  size_t mem_servers_cached   = 0;      /* memory used by scache */
-  size_t mem_ips_stored       = 0;      /* memory used by ip address hash */
+  size_t server_mem           = 0;      /* memory used by servers */
   size_t slink_mem            = 0;      /* memory used by slinks */
+  size_t user_mem             = 0;      /* memory used by users */
 
   size_t client_mem_total     = 0;
   size_t channel_mem_total    = 0;
 
-  size_t local_client_memory_used = 0;
-  size_t local_client_memory_allocated = 0;
-
-  size_t remote_client_memory_used = 0;
-  size_t remote_client_memory_allocated = 0;
-
-  size_t user_memory_used = 0;
-  size_t user_memory_allocated = 0;
-
-  size_t links_memory_used = 0;
-  size_t links_memory_allocated = 0;
+  size_t local_client_allocated  = 0;
+  size_t local_client_used       = 0;
+  size_t remote_client_allocated = 0;
+  size_t remote_client_used      = 0;
+  size_t slink_allocated         = 0;
+  size_t slink_used              = 0;
+  size_t user_allocated          = 0;
+  size_t user_used               = 0;
 
 #ifdef FLUD
-  size_t flud_memory_used = 0;
-  size_t flud_memory_allocated = 0;
+  size_t flud_allocated          = 0;
+  size_t flud_used               = 0;
 #endif
 
   size_t mem_total = 0;
@@ -303,7 +304,7 @@ void count_memory(struct Client* cptr, char* nick)
   for (chptr = channel; chptr; chptr = chptr->nextch)
     {
       ++channel_count;
-      channel_mem += (strlen(chptr->chname) + 1 + sizeof(aChannel));
+      channel_mem += (strlen(chptr->chname) + 1 + sizeof(struct Channel));
       for (link = chptr->members; link; link = link->next)
         ++channel_user_count;
       for (link = chptr->invites; link; link = link->next)
@@ -385,66 +386,66 @@ void count_memory(struct Client* cptr, char* nick)
 
   resolver_mem = cres_mem(cptr);
 
-  count_scache(&number_servers_cached, &mem_servers_cached);
+  count_scache(&scache_count, &scache_mem);
 
   sendto_one(cptr, ":%s %d %s :scache %d(%d)",
              me.name, RPL_STATSDEBUG, nick,
-             number_servers_cached, mem_servers_cached);
+             scache_count, scache_mem);
 
-  count_ip_hash(&number_ips_stored, &mem_ips_stored);
+  count_ip_hash(&ip_hash_count, &ip_hash_mem);
   sendto_one(cptr, ":%s %d %s :iphash %d(%d)",
              me.name, RPL_STATSDEBUG, nick,
-             number_ips_stored, mem_ips_stored);
+             ip_hash_count, ip_hash_mem);
 
   mem_total = channel_mem_total + client_mem_total + 
-              conf_mem + class_count * sizeof(aClass) + 
-              dbuf_mem + resolver_mem + mem_servers_cached;
+              conf_mem + class_count * sizeof(struct Class) + 
+              dbuf_mem + resolver_mem + ip_hash_mem + scache_mem;
 
   sendto_one(cptr, ":%s %d %s :Total: ch %d cl %d co %d db %d",
              me.name, RPL_STATSDEBUG, nick, channel_mem_total, 
              client_mem_total, conf_mem, dbuf_mem);
 
 
-  count_local_client_memory(&local_client_memory_used, 
-                            &local_client_memory_allocated);
-  mem_total += local_client_memory_allocated - local_client_mem;
+  count_local_client_memory(&local_client_allocated, 
+                            &local_client_used);
+  mem_total += local_client_allocated - local_client_mem;
 
   sendto_one(cptr, ":%s %d %s :Local client memory allocated: %d used: %d",
              me.name, RPL_STATSDEBUG, nick,
-             local_client_memory_used, local_client_memory_allocated);
+             local_client_allocated, local_client_used);
 
 
-  count_remote_client_memory(&remote_client_memory_used, 
-                             &remote_client_memory_allocated);
-  mem_total += remote_client_memory_allocated - remote_client_mem;
+  count_remote_client_memory(&remote_client_allocated, 
+                             &remote_client_used);
+  mem_total += remote_client_allocated - remote_client_mem;
 
   sendto_one(cptr, ":%s %d %s :Remote client memory allocated: %d used: %d",
              me.name, RPL_STATSDEBUG, nick,
-             remote_client_memory_used, remote_client_memory_allocated);
+             remote_client_allocated, remote_client_used);
 
 
-  count_user_memory(&user_memory_used, &user_memory_allocated);
-  mem_total += user_memory_allocated - user_mem;
+  count_user_memory(&user_allocated, &user_used);
+  mem_total += user_allocated - user_mem;
 
   sendto_one(cptr, ":%s %d %s :User memory allocated: %d used: %d",
              me.name, RPL_STATSDEBUG, nick,
-             user_memory_used, user_memory_allocated);
+             user_allocated, user_used);
 
 
-  count_links_memory(&links_memory_used, &links_memory_allocated);
-  mem_total += links_memory_allocated - slink_mem;
+  count_links_memory(&slink_allocated, &slink_used);
+  mem_total += slink_allocated - slink_mem;
 
   sendto_one(cptr, ":%s %d %s :Links memory allocated: %d used: %d",
              me.name, RPL_STATSDEBUG, nick,
-             links_memory_used, links_memory_allocated);
+             slink_allocated, slink_used);
 
 #ifdef FLUD
-  count_flud_memory(&flud_memory_used, &flud_memory_allocated);
-  mem_total += flud_memory_allocated;
+  count_flud_memory(&flud_allocated, &flud_used);
+  mem_total += flud_allocated;
 
   sendto_one(cptr, ":%s %d %s :FLUD memory allocated: %d used: %d",
              me.name, RPL_STATSDEBUG, nick,
-             flud_memory_used, flud_memory_allocated);
+             flud_allocated, flud_used);
 
 #endif
   sendto_one(cptr, 
