@@ -1,3 +1,7 @@
+*** 20010107_8 by toot
+expire_gline/tklines wasn't removing more than 1 entry at a time
+
+
 *** 20010107_7 by db
 - auth poll list did not need to be global... 
   ircdauth.c references it atm, #if 0 for now... we'll have to rethink
