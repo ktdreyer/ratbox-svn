@@ -1041,7 +1041,7 @@ set_default_conf(void)
 	ConfigFileEntry.htm_interval = 5;
 
 #ifdef HAVE_LIBZ
-	ConfigFileEntry.compression_level = 0;
+	ConfigFileEntry.compression_level = 6;
 #endif
 
 	ConfigFileEntry.oper_umodes = UMODE_LOCOPS | UMODE_SERVNOTICE |

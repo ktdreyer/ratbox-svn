@@ -445,8 +445,9 @@ linebuf_get(buf_head_t * bufhead, char *buf, int buflen, int partial, int raw)
 	}
 	memcpy(buf, start, cpylen + 1);
 
-	/* convert CR/LF to NUL */
-	buf[cpylen] = '\0';
+	/* convert CR/LF to NULL */
+	if(bufline->raw && !raw)
+		buf[cpylen] = '\0';
 
 	s_assert(cpylen >= 0);
 
@@ -472,7 +473,7 @@ linebuf_attach(buf_head_t * bufhead, buf_head_t * new)
 	DLINK_FOREACH(ptr, new->list.head)
 	{
 		line = ptr->data;
-		dlinkAddAlloc(line, &bufhead->list);
+		dlinkAddTailAlloc(line, &bufhead->list);
 
 		/* Update the allocated size */
 		bufhead->alloclen++;
