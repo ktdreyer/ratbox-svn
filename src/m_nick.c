@@ -339,6 +339,19 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                    acptr->name, acptr->from->name, parv[1], parv[5], parv[6],
                    cptr->name);
 
+#ifndef LOCAL_NICK_COLLIDE
+	    sendto_serv_butone(NULL, /* all servers */
+		       ":%s KILL %s :%s (%s(NOUSER) <- %s!%s@%s)(TS:%s)",
+			       me.name,
+			       acptr->name,
+			       me.name,
+			       acptr->from->name,
+			       parv[1],
+			       parv[5],
+			       parv[6],
+			       cptr->name);
+#endif
+
             acptr->flags |= FLAGS_KILLED;
             /* Having no USER struct should be ok... */
             return exit_client(cptr, acptr, &me,
@@ -385,12 +398,15 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
        *
        * I think I got this right.
        * -Dianora
+       * There are problems with this, due to lag it looks like.
+       * backed out for now...
        */
 
+#ifdef LOCAL_NICK_COLLIDE
       /* just propogate it through */
       sendto_serv_butone(cptr, ":%s NICK %s :%lu",
                          parv[0], nick, sptr->tsinfo);
-
+#endif
       /*
       ** A new NICK being introduced by a neighbouring
       ** server (e.g. message type "NICK new" received)
@@ -402,17 +418,17 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                      acptr->name, acptr->from->name,
                      get_client_name(cptr, HIDE_IP));
 
-#ifndef LLVER1
-          /* LazyLinks */
-          if(ConfigFileEntry.hub && IsCapable(cptr,CAP_LL) )
-	    {
-	      sendto_one(cptr, ":%s KILL %s :%s (%s <- %s)",
-			 me.name, acptr->name, me.name,
-			 acptr->from->name,
-			 get_client_name(cptr, HIDE_IP));
-	    }
+#ifndef LOCAL_NICK_COLLIDE
+	  sendto_serv_butone(NULL, /* all servers */
+			     ":%s KILL %s :%s (%s <- %s)",
+			     me.name, acptr->name, me.name,
+			     acptr->from->name,
+			     /* NOTE: Cannot use get_client_name twice
+			     ** here, it returns static string pointer:
+			     ** the other info would be lost
+			     */
+			     get_client_name(cptr, HIDE_IP));
 #endif
-
           ServerStats->is_kill++;
           sendto_one(acptr, form_str(ERR_NICKCOLLISION),
                      me.name, acptr->name, acptr->name);
@@ -443,15 +459,12 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
               sendto_one(acptr, form_str(ERR_NICKCOLLISION),
                          me.name, acptr->name, acptr->name);
 
-#ifndef LLVER1
-              /* LazyLinks */
-	      if(ConfigFileEntry.hub && IsCapable(cptr,CAP_LL))
-		{
-		  sendto_one(cptr, ":%s KILL %s :%s (%s <- %s)",
-			     me.name, acptr->name, me.name,
-			     acptr->from->name,
-			     get_client_name(cptr, HIDE_IP));
-		} 
+#ifndef LOCAL_NICK_COLLIDE
+	      sendto_serv_butone(sptr, /* all servers but sptr */
+				 ":%s KILL %s :%s (%s <- %s)",
+				 me.name, acptr->name, me.name,
+				 acptr->from->name,
+				 get_client_name(cptr, HIDE_IP));
 #endif
 
               acptr->flags |= FLAGS_KILLED;
@@ -477,25 +490,22 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       sendto_one(acptr, form_str(ERR_NICKCOLLISION),
                  me.name, acptr->name, acptr->name);
 
-#ifndef LLVER1
-          /* LazyLinks */
-          /* On a lazy link, should only need to send one KILL */
-
-          if(ConfigFileEntry.hub && IsCapable(cptr,CAP_LL))
-	    {
-	      sendto_one(cptr, ":%s KILL %s :%s (%s <- %s)",
-			 me.name, sptr->name, me.name,
-			 sptr->from->name,
-			 get_client_name(cptr, HIDE_IP));
-
-	      sendto_one(cptr, ":%s KILL %s :%s (%s <- %s)",
-			 me.name, acptr->name, me.name,
-			 acptr->from->name,
-			 get_client_name(cptr, HIDE_IP));
-	    }
+#ifndef LOCAL_NICK_COLLIDE
+      sendto_serv_butone(NULL, /* KILL old from outgoing servers */
+			 ":%s KILL %s :%s (%s(%s) <- %s)",
+			 me.name, sptr->name, me.name, acptr->from->name,
+			 acptr->name, get_client_name(cptr, HIDE_IP));
 #endif
 
       ServerStats->is_kill++;
+
+#ifndef LOCAL_NICK_COLLIDE
+      sendto_serv_butone(NULL, /* Kill new from incoming link */
+			 ":%s KILL %s :%s (%s <- %s(%s))",
+			 me.name, acptr->name, me.name, acptr->from->name,
+			 get_client_name(cptr, HIDE_IP), sptr->name);
+#endif
+
       acptr->flags |= FLAGS_KILLED;
       (void)exit_client(NULL, acptr, &me, "Nick collision(new)");
       sptr->flags |= FLAGS_KILLED;
@@ -517,17 +527,15 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                        sptr->name, acptr->name, acptr->from->name,
                        get_client_name(cptr, HIDE_IP));
 
-#ifndef LLVER1
-          /* LazyLinks */
-          if(ConfigFileEntry.hub && IsCapable(cptr,CAP_LL))
-	    {
-	      sendto_one(cptr, ":%s KILL %s :%s (%s <- %s)",
-			 me.name, sptr->name, me.name,
-			 sptr->from->name,
-			 get_client_name(cptr, HIDE_IP));
-	    }
-#endif
           ServerStats->is_kill++;
+
+#ifndef LOCAL_NICK_COLLIDE
+	  sendto_serv_butone(cptr, /* KILL old from outgoing servers */
+			     ":%s KILL %s :%s (%s(%s) <- %s)",
+			     me.name, sptr->name, me.name, acptr->from->name,
+			     acptr->name, get_client_name(cptr, HIDE_IP));
+#endif
+
           sptr->flags |= FLAGS_KILLED;
           if (sameuser)
             return exit_client(cptr, sptr, &me, "Nick collision(old)");
@@ -545,16 +553,14 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                        acptr->name, acptr->from->name,
                        get_client_name(cptr, HIDE_IP));
           
-#ifndef LLVER1
-          /* LazyLinks */
-          if(ConfigFileEntry.hub && IsCapable(cptr,CAP_LL))
-	    {
-	      sendto_one(cptr, ":%s KILL %s :%s (%s <- %s)",
-			 me.name, acptr->name, me.name,
-			 acptr->from->name,
-			 get_client_name(cptr, HIDE_IP));
-	    }
+#ifndef LOCAL_NICK_COLLIDE
+	  sendto_serv_butone(sptr, /* all servers but sptr */
+			     ":%s KILL %s :%s (%s <- %s)",
+			     me.name, acptr->name, me.name,
+			     acptr->from->name,
+			     get_client_name(cptr, HIDE_IP));
 #endif
+
           ServerStats->is_kill++;
           sendto_one(acptr, form_str(ERR_NICKCOLLISION),
                      me.name, acptr->name, acptr->name);

@@ -1766,6 +1766,9 @@ static void initconf(FBFILE* file)
       if(!p)
         p = strchr(line, '\0');
 
+      if (!*line || line[0] == '#')
+        continue;
+
       if(line[1] != ':')
 	{
 	  while (p != line)
@@ -1783,9 +1786,6 @@ static void initconf(FBFILE* file)
 	}
 
       ReplaceQuotes(quotedLine,line);
-
-      if (!*quotedLine || quotedLine[0] == '#')
-        continue;
 
       if(quotedLine[0] == '.')
         {

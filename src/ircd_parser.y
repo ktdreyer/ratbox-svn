@@ -298,7 +298,7 @@ oper_entry:     OPERATOR
 oper_items:     oper_items oper_item |
                 oper_item
 
-oper_item:      oper_name  | oper_user | oper_host | oper_password |
+oper_item:      oper_name  | oper_user | oper_password |
                 oper_class | oper_global | oper_global_kill | oper_remote |
                 oper_kline | oper_unkline | oper_gline | oper_nick_changes |
                 oper_die | oper_rehash 
@@ -310,12 +310,20 @@ oper_name:      NAME '=' QSTRING ';'
 
 oper_user:      USER '='  QSTRING ';'
   {
-    DupString(yy_aconf->user,yylval.string);
-  };
+    char *p;
 
-oper_host:      HOST '=' QSTRING ';'
-  {
-    DupString(yy_aconf->host,yylval.string);
+    if((p = strchr(yylval.string,'@')))
+      {
+	*p = '\0';
+	DupString(yy_aconf->user,yylval.string);
+	p++;
+	DupString(yy_aconf->host,p);
+      }
+    else
+      {
+	DupString(yy_aconf->host,yylval.string);
+	DupString(yy_aconf->user,"*");
+      }
   };
 
 oper_password:  PASSWORD '=' QSTRING ';'
@@ -517,18 +525,26 @@ auth_entry:   AUTH
 auth_items:     auth_items auth_item |
                 auth_item
 
-auth_item:      auth_user | auth_host | auth_passwd | auth_class |
+auth_item:      auth_user | auth_passwd | auth_class |
                 auth_kline_exempt | auth_allow_bots | auth_have_ident |
                 auth_no_tilde | auth_spoof
 
 auth_user:   USER '=' QSTRING ';'
   {
-    DupString(yy_aconf->user,yylval.string);
-  };
+    char *p;
 
-auth_host:   HOST '=' QSTRING ';'
-  {
-    DupString(yy_aconf->host,yylval.string);
+    if((p = strchr(yylval.string,'@')))
+      {
+	*p = '\0';
+	DupString(yy_aconf->user,yylval.string);
+	p++;
+	DupString(yy_aconf->host,p);
+      }
+    else
+      {
+	DupString(yy_aconf->host,yylval.string);
+	DupString(yy_aconf->user,"*");
+      }
   };
              |
              HOST '=' IP_TYPE ';'
@@ -689,9 +705,6 @@ connect_entry:  CONNECT
 	if(yy_cconf->host)
 	  {
 	    DupString(yy_aconf->user,yy_cconf->name);
-	    if(yy_cconf->className)
-	      DupString(yy_aconf->className,yy_cconf->className);
-	    conf_add_class_to_conf(yy_aconf);
  	    conf_add_hub_or_leaf(yy_aconf);
 	    conf_add_conf(yy_aconf);
 	  }
@@ -708,9 +721,6 @@ connect_entry:  CONNECT
 	if(yy_cconf->host)
 	  {
 	    DupString(yy_aconf->user,yy_cconf->name);
-	    if(yy_cconf->className)
-	      DupString(yy_aconf->className,yy_cconf->className);
-	    conf_add_class_to_conf(yy_aconf);
  	    conf_add_hub_or_leaf(yy_aconf);
 	    conf_add_conf(yy_aconf);
 	  }
@@ -875,17 +885,25 @@ kill_entry:     KILL
 kill_items:     kill_items kill_item |
                 kill_item
 
-kill_item:      kill_user | kill_host | kill_reason
+kill_item:      kill_user | kill_reason
 
 
 kill_user:      USER '=' QSTRING ';'
   {
-    DupString(yy_aconf->user,yylval.string);
-  };
+    char *p;
 
-kill_host:      HOST '=' QSTRING ';'
-  {
-    DupString(yy_aconf->host,yylval.string);
+    if((p = strchr(yylval.string,'@')))
+      {
+	*p = '\0';
+	DupString(yy_aconf->user,yylval.string);
+	p++;
+	DupString(yy_aconf->host,p);
+      }
+    else
+      {
+	DupString(yy_aconf->host,yylval.string);
+	DupString(yy_aconf->user,"*");
+      }
   };
 
 kill_reason:    REASON '=' QSTRING ';' 
