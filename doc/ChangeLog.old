@@ -1,3 +1,13 @@
+*** 20001101_4 by adrian
+
+
+Add a 'local' parameter to comm_connect_tcp() to specify what to bind()
+to locally. Currently if NULL is passed no bind() is performed, but later
+on this will change to bind() to the virtual server IP if one is
+configured.
+
+
+
 *** 20001101_3 by adrian
 
 
