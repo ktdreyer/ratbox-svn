@@ -759,7 +759,7 @@ get_or_create_channel(struct Client *client_p, char *chname, int *isnew)
   memset(chptr, 0, sizeof(struct Channel));
   strlcpy(chptr->chname, chname, sizeof(chptr->chname));
 
-  dlinkAdd(chptr, &chptr->node, &GlobalChannelList);
+  dlinkAdd(chptr, &chptr->node, &global_channel_list);
 
   chptr->channelts = CurrentTime;     /* doesn't hurt to set it here */
 

@@ -141,7 +141,7 @@ static int list_all_channels(struct Client *source_p)
   dlink_node *ptr;
   sendto_one(source_p, form_str(RPL_LISTSTART), me.name, source_p->name);
 
-  DLINK_FOREACH(ptr, GlobalChannelList.head)
+  DLINK_FOREACH(ptr, global_channel_list.head)
     {
       chptr = (struct Channel *)ptr->data;
       if ( !source_p->user ||

@@ -86,7 +86,7 @@ struct Channel
   char            chname[CHANNELLEN+1];
 };
 
-extern  dlink_list GlobalChannelList;
+extern  dlink_list global_channel_list;
 void init_channels(void);
 void cleanup_channels(void *);
 

@@ -1497,7 +1497,7 @@ burst_all(struct Client *client_p)
   /* serial counter borrowed from send.c */
   current_serial++;
 
-  DLINK_FOREACH(ptr, GlobalChannelList.head)
+  DLINK_FOREACH(ptr, global_channel_list.head)
     {
       chptr = (struct Channel *)ptr->data;
       if(chptr->users != 0)

@@ -49,7 +49,7 @@
 #include "s_log.h"
 
 struct config_channel_entry ConfigChannel;
-dlink_list GlobalChannelList;
+dlink_list global_channel_list;
 BlockHeap *channel_heap;
 BlockHeap *ban_heap;
 BlockHeap *topic_heap;
@@ -472,7 +472,7 @@ cleanup_channels(void *unused)
   struct Channel *chptr;
   dlink_node *ptr, *next_ptr;
 
-  DLINK_FOREACH_SAFE(ptr, next_ptr, GlobalChannelList.head)
+  DLINK_FOREACH_SAFE(ptr, next_ptr, global_channel_list.head)
   {
     chptr = (struct Channel *)ptr->data;
     if(chptr->users == 0)
@@ -537,7 +537,7 @@ destroy_channel(struct Channel *chptr)
 
   chptr->banlist.tail = chptr->exceptlist.tail = chptr->invexlist.tail = NULL;
 
-  dlinkDelete(&chptr->node, &GlobalChannelList);
+  dlinkDelete(&chptr->node, &global_channel_list);
 
   del_from_channel_hash_table(chptr->chname, chptr);
   BlockHeapFree(channel_heap, chptr);

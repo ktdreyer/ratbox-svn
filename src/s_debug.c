@@ -225,7 +225,7 @@ void count_memory(struct Client *source_p)
     }
 
   /* Count up all channels, ban lists, except lists, Invex lists */
-  DLINK_FOREACH(ptr, GlobalChannelList.head)
+  DLINK_FOREACH(ptr, global_channel_list.head)
     {
       chptr = (struct Channel *)ptr->data;
       channel_count++;
