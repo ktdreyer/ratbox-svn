@@ -1554,7 +1554,7 @@ static void lookup_confhost(struct ConfItem* aconf)
   ** Do name lookup now on hostnames given and store the
   ** ip numbers in conf structure.
   */
-  if (inetpton(DEF_FAM, aconf->host, &IN_ADDR(aconf->ipnum)) == 0)
+  if (inetpton(DEF_FAM, aconf->host, &IN_ADDR(aconf->ipnum)) <= 0)
     {
       conf_dns_lookup(aconf);
     }
