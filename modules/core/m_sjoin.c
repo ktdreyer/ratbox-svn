@@ -122,7 +122,7 @@ static void ms_sjoin(struct Client *client_p,
   static         char buf[2*BUFSIZE]; /* buffer for modes and prefix */
 #ifdef HALFOPS
   static         char sjbuf_hops[BUFSIZE]; /* buffer with halfops as % */
-  register       *hops;
+  register char  *hops;
 #endif
   static         char sjbuf_nhops[BUFSIZE]; /* buffer with halfops as @ */
   char           *p; /* pointer used making sjbuf */
