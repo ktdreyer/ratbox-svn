@@ -560,14 +560,7 @@ accept_connection(int pfd, void *data)
 	{
 		ServerStats->is_ref++;
 
-		/* XXX - this can only be BANNED_CLIENT? */
-		switch (pe)
-		{
-		case BANNED_CLIENT:
-			write(fd, DLINE_WARNING, sizeof(DLINE_WARNING) - 1);
-			break;
-		}
-
+		write(fd, DLINE_WARNING, sizeof(DLINE_WARNING) - 1);
 		fd_close(fd);
 
 		/* Re-register a new IO request for the next accept .. */
