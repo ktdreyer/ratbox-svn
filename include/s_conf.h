@@ -64,8 +64,6 @@ struct ConfItem
 	unsigned int status;	/* If CONF_ILLEGAL, delete when no clients */
 	unsigned int flags;
 	int clients;		/* Number of *LOCAL* clients using this */
-	struct sockaddr_storage my_ipnum;	/* ip to bind to for outgoing connect */
-	struct sockaddr_storage ipnum;	/* ip to connect to */
 	char *name;		/* IRC name, nick, server name, or original u@h */
 	char *host;		/* host part of user@host */
 	char *passwd;		/* doubles as kline reason *ugh* */
@@ -75,13 +73,7 @@ struct ConfItem
 	time_t hold;		/* Hold action until this time (calendar time) */
 	char *className;	/* Name of class */
 	struct Class *c_class;	/* Class of connection */
-	struct DNSQuery *dns_query;
-	int aftype;
 	patricia_node_t *pnode;	/* Our patricia node */
-#ifdef HAVE_LIBCRYPTO
-	char *rsa_public_key_file;
-	RSA *rsa_public_key;
-#endif
 };
 
 #define CONF_ILLEGAL            0x80000000

@@ -103,7 +103,6 @@ make_conf()
 
 	aconf = (struct ConfItem *) MyMalloc(sizeof(struct ConfItem));
 	aconf->status = CONF_ILLEGAL;
-	aconf->aftype = AF_INET;
 	return (aconf);
 }
 
@@ -124,8 +123,6 @@ free_conf(struct ConfItem *aconf)
 	s_assert(!(aconf->status & CONF_CLIENT) ||
 	       (aconf->host && strcmp(aconf->host, "NOMATCH")) || (aconf->clients == -1));
 
-	delete_adns_queries(aconf->dns_query);
-
 	/* security.. */
 	if(aconf->passwd)
 		memset(aconf->passwd, 0, strlen(aconf->passwd));
@@ -139,12 +136,6 @@ free_conf(struct ConfItem *aconf)
 	MyFree(aconf->user);
 	MyFree(aconf->host);
 
-#ifdef HAVE_LIBCRYPTO
-	if(aconf->rsa_public_key)
-		RSA_free(aconf->rsa_public_key);
-
-	MyFree(aconf->rsa_public_key_file);
-#endif
 	MyFree((char *) aconf);
 }
 
