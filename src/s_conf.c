@@ -80,8 +80,6 @@ static void     initconf(FBFILE*);
 static void     clear_out_old_conf(void);
 static void     flush_deleted_I_P(void);
 
-/* ick.. yacc/lex likes globals don't it? */
-
 FBFILE* conf_fbfile_in;
 char    conf_line_in[256];
 struct ConfItem* yy_aconf;

@@ -652,14 +652,6 @@ int do_user(char* nick, struct Client* cptr, struct Client* sptr,
       sptr->flags |= FLAGS_INVISIBLE;
 #endif
 
-#if 0
-      /* Undocumented lame extension to the protocol
-       * if user provides a number, the bits set are
-       * used to set the umode flags. arghhhhh -db
-       */
-      sptr->flags |= (UFLAGS & atoi(host));
-#endif
-
       if (!(oflags & FLAGS_INVISIBLE) && IsInvisible(sptr))
         Count.invisi++;
       /*

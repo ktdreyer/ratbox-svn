@@ -459,7 +459,7 @@ struct Client
 #define SendNickChange(x)       ((x)->umodes & FLAGS_NCHANGE)
 #define SetWallops(x)           ((x)->umodes |= FLAGS_WALLOP)
 #define SetCallerId(x)		((x)->umodes |= FLAGS_CALLERID)
-#define IsSetCallerId(x)	((x)->umodes |= FLAGS_CALLERID)
+#define IsSetCallerId(x)	((x)->umodes & FLAGS_CALLERID)
 
 #define IsRejectHeld(x)         ((x)->flags & FLAGS_REJECT_HOLD)
 #define SetRejectHold(x)        ((x)->flags |= FLAGS_REJECT_HOLD)
