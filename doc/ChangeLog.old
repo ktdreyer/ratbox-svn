@@ -1,3 +1,8 @@
+*** 20010424_12 by androsyn
+Really fix the ::1 stuff. It seems that the COMPAT macro doesn't see ::1 as
+a ipv4 compatible address.
+
+
 *** 20010424_11 by androsyn
 Fixed the ::1 stuff for good :)
 
