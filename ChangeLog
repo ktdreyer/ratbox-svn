@@ -1,3 +1,16 @@
+leeh        2004/03/06 14:35:19 EST	(20040306_3)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  - merged parts of exit_local_server() and exit_remote_server() and
+    qs_server() (which is now gone) into exit_generic_server()
+  
+  Revision  Changes    Path
+  7.435     +8 -18     ircd-ratbox/src/client.c
+
+
+
 leeh        2004/03/06 14:21:46 EST	(20040306_2)
 
   Modified files:
