@@ -1,3 +1,9 @@
+*** 20001026_1 by db
+- cleaned up kline code in client.c
+- missing check_klines in m_kline.c
+
+
+
 *** 20001025_10 by db
 - split check_pings into two (like it should have been all along)
   check_pings checks for ping timeouts
