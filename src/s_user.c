@@ -1249,10 +1249,7 @@ void user_welcome(struct Client *source_p)
   sendto_one(source_p, form_str(RPL_CREATED),me.name,source_p->name,creation);
   sendto_one(source_p, form_str(RPL_MYINFO), me.name, source_p->name,
 	     me.name, version);
-#ifdef PERSISTANT_CLIENTS
-  sendto_one(source_p, form_str(RPL_YOURID), me.name, source_p->name,
-             source_p->user->id, source_p->user->id_key);
-#endif
+  
   show_isupport(source_p);
   
   show_lusers(source_p);

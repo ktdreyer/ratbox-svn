@@ -51,23 +51,13 @@ static int nick_from_server(struct Client *, struct Client *, int, char **,
                             time_t, char *);
 
 int clean_nick_name(char* nick);
-void read_packet(int fd, void *data);
-void user_welcome(struct Client *source_p);
 static void ms_client(struct Client*, struct Client*, int, char**);
 
-#ifdef PERSISTANT_CLIENTS
-static void m_client(struct Client*, struct Client*, int, char**);
-
-struct Message client_msgtab = {
-  "CLIENT", 0, 3, 0, MFLG_SLOW, 0,
-  {m_client, m_ignore, ms_client, m_ignore}
-};
-#else
 struct Message client_msgtab = {
   "CLIENT", 0, 10, 0, MFLG_SLOW, 0,
-  {m_unregistered, m_ignore, ms_client, m_ignore}
+  {m_ignore, m_ignore, ms_client, m_ignore}
 };
-#endif
+
 #ifndef STATIC_MODULES
 void
 _modinit(void)
@@ -109,10 +99,6 @@ static void ms_client(struct Client *client_p, struct Client *source_p,
   char    *id;
   char    *name;
   
-#ifdef PERSISTANT_CLIENTS
-  if (parc < 10)
-    return;
-#endif
   id = parv[8];
   name = parv[9];
   
