@@ -1,3 +1,7 @@
+*** 20010502_4 by a1kmm
+- added hostmask docs.
+
+
 *** 20010502_3 by a1kmm
 - Minor fix on my last commit, for when >1 line is read at the same
   time...
