@@ -1,3 +1,7 @@
+*** 20011006_3 by androsyn
+Added change to the make depend rule so that IRCD_PREFIX is defined.
+
+
 *** 20011006_2 by androsyn
 
 
