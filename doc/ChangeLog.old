@@ -1,3 +1,23 @@
+leeh        2001/12/14 10:46:25 EST	(20011214_8)
+
+  Modified files:
+    .                    INSTALL 
+    doc                  example.conf 
+    src                  s_conf.c 
+  Added files:
+    doc                  example.conf.efnet 
+  Log:
+  - added example.conf.efnet, which allows us to make exmaple.conf more
+    userfriendly with features..
+  
+  Revision  Changes    Path
+  7.18      +5 -2      ircd-hybrid-7/INSTALL
+  7.144     +6 -6      ircd-hybrid-7/doc/example.conf
+  7.1       +1035 -0   ircd-hybrid-7/doc/example.conf.efnet (new)
+  7.282     +1 -1      ircd-hybrid-7/src/s_conf.c
+
+
+
 leeh        2001/12/14 10:36:24 EST	(20011214_7)
 
   Modified files:
