@@ -11,8 +11,8 @@
  * $Id$
  */
 #ifndef INCLUDED_blalloc_h
-#ifndef NOBALLOC
 #define INCLUDED_blalloc_h
+#ifndef NOBALLOC
 #ifndef INCLUDED_sys_types_h
 #include <sys/types.h>       /* size_t */
 #define INCLUDED_sys_types_h
