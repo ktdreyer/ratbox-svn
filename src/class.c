@@ -38,7 +38,7 @@
 #include "irc_string.h"
 #include "s_debug.h"
 #include "memory.h"
-
+#include "patricia.h"
 
 #define BAD_CONF_CLASS          -1
 #define BAD_PING                -2
@@ -63,7 +63,7 @@ make_class(void)
 
 void free_class(struct Class *tmp)
 {
-  Destroy_Patricia(tmp->ip_limits);
+  Destroy_Patricia(tmp->ip_limits, NULL);
   MyFree(tmp->class_name);
   MyFree((char *)tmp);
   

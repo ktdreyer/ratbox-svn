@@ -165,7 +165,7 @@ m_challenge.o: m_challenge.c ../include/stdinc.h ../include/config.h \
  ../include/modules.h ../include/parse.h ../include/msg.h \
  ../include/numeric.h ../include/send.h ../include/s_conf.h \
  ../include/motd.h ../include/class.h ../include/common.h \
- ../include/s_log.h ../include/s_user.h
+ ../include/rsa.h ../include/s_log.h ../include/s_user.h
 m_close.o: m_close.c ../include/stdinc.h ../include/config.h \
  ../include/setup.h ../include/defaults.h ../include/tools.h \
  ../include/handlers.h ../include/client.h ../include/ircd_defs.h \
@@ -193,11 +193,11 @@ m_cryptlink.o: m_cryptlink.c ../include/stdinc.h ../include/config.h \
  ../include/res.h ../include/fileio.h ../adns/adns.h ../include/ircd.h \
  ../include/memory.h ../include/balloc.h ../include/irc_string.h \
  ../include/modules.h ../include/parse.h ../include/msg.h \
- ../include/numeric.h ../include/send.h ../include/common.h \
- ../include/event.h ../include/hash.h ../include/md5.h \
- ../include/s_conf.h ../include/motd.h ../include/class.h \
- ../include/s_log.h ../include/s_serv.h ../include/s_stats.h \
- ../include/scache.h
+ ../include/numeric.h ../include/send.h ../include/rsa.h \
+ ../include/common.h ../include/event.h ../include/hash.h \
+ ../include/md5.h ../include/s_conf.h ../include/motd.h \
+ ../include/class.h ../include/s_log.h ../include/s_serv.h \
+ ../include/s_stats.h ../include/scache.h
 m_eob.o: m_eob.c ../include/stdinc.h ../include/config.h \
  ../include/setup.h ../include/defaults.h ../include/handlers.h \
  ../include/client.h ../include/ircd_defs.h ../include/ircd_handler.h \
@@ -296,7 +296,7 @@ m_kline.o: m_kline.c ../include/stdinc.h ../include/config.h \
  ../include/s_conf.h ../include/motd.h ../include/s_log.h \
  ../include/send.h ../include/hash.h ../include/handlers.h \
  ../include/s_serv.h ../include/msg.h ../include/parse.h \
- ../include/modules.h
+ ../include/modules.h ../include/cluster.h
 m_knock.o: m_knock.c ../include/stdinc.h ../include/config.h \
  ../include/setup.h ../include/defaults.h ../include/sprintf_irc.h \
  ../include/client.h ../include/ircd_defs.h ../include/ircd_handler.h \
@@ -558,7 +558,7 @@ m_unkline.o: m_unkline.c ../include/stdinc.h ../include/config.h \
  ../include/numeric.h ../include/s_conf.h ../include/motd.h \
  ../include/class.h ../include/s_log.h ../include/send.h \
  ../include/msg.h ../include/s_gline.h ../include/parse.h \
- ../include/modules.h ../include/s_serv.h
+ ../include/modules.h ../include/s_serv.h ../include/cluster.h
 m_user.o: m_user.c ../include/stdinc.h ../include/config.h \
  ../include/setup.h ../include/defaults.h ../include/handlers.h \
  ../include/client.h ../include/ircd_defs.h ../include/ircd_handler.h \
