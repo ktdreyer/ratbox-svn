@@ -77,7 +77,7 @@ add_service(struct service_handler *service)
         if(service->command != NULL)
         {
                 struct service_command *scommand = service->command;
-                char filename[MAXPATHLEN];
+                char filename[PATH_MAX];
                 int i;
 
                 for(i = 0; scommand[i].cmd[0] != '\0'; i++)

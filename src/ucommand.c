@@ -122,7 +122,7 @@ void
 add_ucommand_handler(struct ucommand_handler *chandler, const char *servicename)
 {
         static char def_servicename[] = "main";
-        char filename[MAXPATHLEN];
+        char filename[PATH_MAX];
 	unsigned int hashv;
 
 	if(chandler == NULL || EmptyString(chandler->cmd))
