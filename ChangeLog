@@ -1,3 +1,20 @@
+androsyn    2004/06/16 23:26:33 EDT	(20040617_3)
+
+  Modified files:
+    src                  packet.c 
+  Log:
+  Fix issue with unregistered clients being able to exhaust system memory.
+  Unregistered clients weren't subject to flood limits like they should have
+  been.  Thanks to einride for finding this one.
+  
+  - Force this commit again to get the changelog info as the cvs script broke
+  on me...
+  
+  Revision  Changes    Path
+  7.130     +0 -0      ircd-ratbox/src/packet.c
+
+
+
 androsyn    2004/06/16 23:12:04 EDT	(20040617_1)
 
   Modified files:
