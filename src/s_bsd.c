@@ -396,7 +396,8 @@ void add_connection(struct Listener* listener, int fd)
 	memmove(&new_client->localClient->ip.sins.sin.s_addr,&IN_ADDR(new_client->localClient->ip)[12], sizeof(struct in_addr));
 	new_client->localClient->aftype = AF_INET;  	
   }
-  strcat(new_client->localClient->sockhost, ".");
+  if(new_client->localClient->aftype == AF_INET6)
+  	strcat(new_client->localClient->sockhost, ".");
 #else
   new_client->localClient->aftype = AF_INET;
 #endif
