@@ -1,3 +1,27 @@
+ejb         2003/05/26 14:45:33 UTC	(20030526_1)
+
+  Modified files:
+    include              ircd.h 
+    src                  ircd.c s_bsd_devpoll.c s_bsd_epoll.c 
+                         s_bsd_kqueue.c s_bsd_poll.c 
+                         s_bsd_select.c s_bsd_sigio.c 
+  Log:
+  - remove the callbacks_called / load calculation and just calll comm_select
+    with 250ms delay instead of irc_sleep, which will cause artificial lag
+    to client connections.
+  
+  Revision  Changes    Path
+  7.66      +0 -1      ircd-ratbox/include/ircd.h
+  7.286     +1 -16     ircd-ratbox/src/ircd.c
+  7.25      +0 -1      ircd-ratbox/src/s_bsd_devpoll.c
+  1.11      +0 -2      ircd-ratbox/src/s_bsd_epoll.c
+  1.38      +0 -1      ircd-ratbox/src/s_bsd_kqueue.c
+  7.69      +0 -1      ircd-ratbox/src/s_bsd_poll.c
+  7.36      +0 -1      ircd-ratbox/src/s_bsd_select.c
+  7.38      +0 -4      ircd-ratbox/src/s_bsd_sigio.c
+
+
+
 ejb         2003/05/26 12:17:25 UTC	(20030526_0)
 
   Modified files:
