@@ -441,6 +441,7 @@ void error_exit_client(struct Client* cptr, int error)
                current_error, strerror(current_error));
   }
 
+  cptr->flags |= FLAGS_DEADSOCKET;
   exit_client(cptr, cptr, &me, errmsg);
 }
 
