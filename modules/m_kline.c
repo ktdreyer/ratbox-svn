@@ -88,7 +88,13 @@ static char *cluster(char *);
 static int find_user_host(struct Client *sptr,
                           char *user_host_or_nick, char *user, char *host);
 
+/*
+ * jdc -- unused?
+ */
+/*
 static int valid_comment(struct Client *sptr, char *comment);
+*/
+
 static int valid_user_host(struct Client *sptr, char *user, char *host);
 static int valid_wild_card(struct Client *sptr, char *user, char *host);
 static int already_placed_kline(struct Client *sptr, char *user, char *host,
@@ -228,7 +234,7 @@ static int mo_kline(struct Client *cptr,
 
   if (ip_kline)
    { 
-     aconf->ip = IN_ADDR(ip);
+     aconf->ip = (unsigned long) IN_ADDR(ip);
      aconf->ip_mask = ip_mask;
    }
 
@@ -332,7 +338,7 @@ static int ms_kline(struct Client *cptr,
 
       if(ip_kline)
         {
-          aconf->ip = IN_ADDR(ip);
+          aconf->ip = (unsigned long) IN_ADDR(ip);
           aconf->ip_mask = ip_mask;
         }
 
@@ -361,7 +367,7 @@ static void apply_kline(struct Client *sptr, struct ConfItem *aconf,
 {
   if(ip_kline)
     {
-      aconf->ip = PIN_ADDR(ip);
+      aconf->ip = (unsigned long) PIN_ADDR(ip);
       aconf->ip_mask = ip_mask;
       add_ip_Kline(aconf);
     }
@@ -943,6 +949,10 @@ static int valid_wild_card(struct Client *sptr, char *luser, char *lhost)
  * output       - 0 if no valid comment, 1 if valid
  * side effects - NONE
  */
+/*
+ * jdc -- unused?
+ */
+/*
 static int valid_comment(struct Client *sptr, char *comment)
 {
   if(strchr(comment, ':'))
@@ -964,6 +974,7 @@ static int valid_comment(struct Client *sptr, char *comment)
     }
   return 1;
 }
+*/
 
 /*
  * already_placed_kline
