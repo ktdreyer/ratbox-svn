@@ -133,8 +133,11 @@
 #define FNAME_USERLOG "/usr/local/ircd/users" /* */
 #define FNAME_OPERLOG "/usr/local/ircd/opers" /* */
 
-#define NETWORK_NAME "EFnet"
-#define NETWORK_DESC "Eris Free Network"
+/* NETWORK_NAME_DEFAULT and NETWORK_DESC_DEFAULT - these are used
+ * instead of a servers name/description if you enable server hiding.
+ */
+#define NETWORK_NAME_DEFAULT "EFnet"
+#define NETWORK_DESC_DEFAULT "Eris Free Network"
 
 /* RFC1035_ANAL
  * Defining this causes ircd to reject hostnames with non-compliant chars.

@@ -1640,15 +1640,21 @@ static void initconf(FBFILE* file)
 
   check_class();
 
-  if( ConfigFileEntry.ts_warn_delta < TS_WARN_DELTA_MIN )
-    {
-      ConfigFileEntry.ts_warn_delta = TS_WARN_DELTA_DEFAULT;
-    }
+  if(ConfigFileEntry.ts_warn_delta < TS_WARN_DELTA_MIN)
+    ConfigFileEntry.ts_warn_delta = TS_WARN_DELTA_DEFAULT;
 
-  if( ConfigFileEntry.ts_max_delta < TS_MAX_DELTA_MIN )
-    {
-      ConfigFileEntry.ts_max_delta = TS_MAX_DELTA_DEFAULT;
-    }
+  if(ConfigFileEntry.ts_max_delta < TS_MAX_DELTA_MIN)
+    ConfigFileEntry.ts_max_delta = TS_MAX_DELTA_DEFAULT;
+
+  if(!ConfigFileEntry.network_name)
+    ConfigFileEntry.network_name = NETWORK_NAME_DEFAULT;
+
+  if(!ConfigFileEntry.network_desc)
+    ConfigFileEntry.network_desc = NETWORK_DESC_DEFAULT;
+
+  GlobalSetOptions.idletime = (ConfigFileEntry.idletime * 60);
+  GlobalSetOptions.hide_server = ConfigFileEntry.hide_server;
+  GlobalSetOptions.hide_chanops = ConfigFileEntry.hide_chanops;
 
   if(me.name[0] == '\0')
     {

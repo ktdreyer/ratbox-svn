@@ -123,6 +123,8 @@ logpath         { return LOGPATH; }
 max_number	{ return MAX_NUMBER; }
 message_locale	{ return MESSAGE_LOCALE; }
 name		{ return NAME; }
+network_name    { return NETWORK_NAME; }
+network_desc    { return NETWORK_DESC; }
 nick_changes	{ return NICK_CHANGES; }
 no		{ return TNO; }
 no_tilde	{ return NO_TILDE; }

@@ -193,7 +193,7 @@ int quote_idletime( struct Client *sptr, int newval )
     {
       if (newval == 0)
 	{
-	  sendto_realops("%s has disabled IDLE_CHECK", sptr->name);
+	  sendto_realops("%s has disabled idletime checking", sptr->name);
 	  GlobalSetOptions.idletime = 0;
 	}
       else 

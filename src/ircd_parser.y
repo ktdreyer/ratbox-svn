@@ -104,6 +104,8 @@ int   class_sendq_var;
 %token  MAX_NUMBER
 %token  MESSAGE_LOCALE
 %token  NAME
+%token  NETWORK_NAME
+%token  NETWORK_DESC
 %token  NICK_CHANGES
 %token  NO_TILDE
 %token  NUMBER
@@ -245,7 +247,8 @@ serverinfo_items:       serverinfo_items serverinfo_item |
                         serverinfo_item 
 
 serverinfo_item:        serverinfo_name | serverinfo_vhost |
-                        serverinfo_hub | serverinfo_description 
+                        serverinfo_hub | serverinfo_description |
+                        serverinfo_network_name | serverinfo_network_desc 
 
 serverinfo_name:        NAME '=' QSTRING ';' 
   {
@@ -256,6 +259,16 @@ serverinfo_name:        NAME '=' QSTRING ';'
 serverinfo_description: DESCRIPTION '=' QSTRING ';'
   {
     yy_aconf->user = yylval.string;
+  };
+
+serverinfo_network_name: NETWORK_NAME '=' QSTRING ';'
+  {
+    ConfigFileEntry.network_name = yylval.string;
+  };
+
+serverinfo_network_desc: NETWORK_DESC '=' QSTRING ';'
+  {
+    ConfigFileEntry.network_desc = yylval.string;
   };
 
 serverinfo_vhost:       VHOST '=' IP_TYPE ';'

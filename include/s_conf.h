@@ -24,6 +24,11 @@
  * $Id$
  *
  * $Log$
+ * Revision 7.37  2000/12/08 15:58:13  toot
+ * . added 'h' to MYINFO mode list
+ * . made network_name/desc an ircd.conf option.
+ * . fixed the reading of idletime, hide_chanops and hide_server from ircd.conf
+ *
  * Revision 7.36  2000/12/05 17:41:21  db
  * - cleaned up class.c adding more comment blocks
  * - cleaned up s_conf.c to actually use nice defines instead of cryptic #'s
@@ -541,9 +546,13 @@ typedef struct
   char *operlog;
   char *glinelog;
 
+  char* network_name;
+  char* network_desc;
+
   MessageFile helpfile;
   MessageFile motd;
   MessageFile opermotd;
+
   int         hub; /* YES or NO */
   int         quiet_on_ban; /* YES or NO */
   int         moderate_nickchange; /* YES or NO */
