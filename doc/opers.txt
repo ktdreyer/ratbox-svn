@@ -51,6 +51,7 @@ COMMAND         - USAGE and DESCRIPTION
                   <letter>.
                   LETTER (* = Oper only.)
                   ------ (^ = Can be configured to be oper only.)
+                  * A - Shows the ADNS DNS servers in use
                   * c - Shows C/N lines
                   * d - Shows D lines
                   * e - Shows Events
