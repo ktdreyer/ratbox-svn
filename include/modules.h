@@ -54,6 +54,9 @@ extern void load_module(char *path);
 /* load all modules */
 extern void load_all_modules(int check);
 
+/* load core modules */
+extern void load_core_modules(int check);
+
 extern void _modinit(void);
 extern void _moddeinit(void);
 

@@ -34,7 +34,7 @@ automoduledir   = @prefix@/modules/autoload
 INCLUDES	= -I../include $(SSL_INCLUDES)
 CPPFLAGS	= ${INCLUDES} @CPPFLAGS@
 
-SRCS =                          \
+CORE_SRCS = \
   core/m_die.c \
   core/m_kick.c \
   core/m_kill.c \
@@ -43,7 +43,9 @@ SRCS =                          \
   core/m_part.c \
   core/m_server.c \
   core/m_sjoin.c \
-  core/m_squit.c \
+  core/m_squit.c
+
+SRCS =                          \
   m_accept.c \
   m_admin.c \
   m_away.c \
@@ -102,9 +104,13 @@ SRCS =                          \
   m_whois.c \
   m_whowas.c 
 
-SH_OBJS = ${SRCS:.c=.so}
+ALL_SRCS = $(CORE_SRCS) \
+           $(SRCS)
 
-S_OBJS = ${SRCS:.c=.o}
+SH_OBJS = ${SRCS:.c=.so}
+SH_CORE_OBJS = ${CORE_SRCS:.c=.so}
+
+S_OBJS = ${ALL_SRCS:.c=.o}
 
 DOLLAR = $$
 
@@ -112,7 +118,7 @@ default:	build
 build: all
 all: @MOD_TARGET@
 
-shared_modules: $(SH_OBJS)
+shared_modules: $(SH_CORE_OBJS) $(SH_OBJS)
 	
 
 libmodules.a: $(S_OBJS)
@@ -151,6 +157,10 @@ install_libmodules.a: libmodules.a
 # Ye olde noop here.	
 
 install_shared_modules: install-mkdirs
+	@echo "Installing core modules into $(moduledir) .."
+	@for file in $(SH_CORE_OBJS); do \
+		$(INSTALL_DATA) $$file $(moduledir); \
+	done
 	@echo "Installing modules into $(automoduledir) .."
 	@for file in $(SH_OBJS); do \
 		$(INSTALL_DATA) $$file $(automoduledir); \
@@ -172,6 +182,7 @@ depend:
 
 clean:
 	${RM} -f *.so *~ *.o *.a
+	${RM} -f core/*.so core/*~ core/*.o
 
 lint:
 	lint -aacgprxhH ${CFLAGS} $(SRCS) >../lint.out

@@ -61,6 +61,20 @@ static char unknown_ver[] = "<unknown>";
 
 struct module **modlist = NULL;
 
+static char *core_module_table[] =
+{
+  "m_die.so",
+  "m_kick.so",
+  "m_kill.so",
+  "m_mode.so",
+  "m_nick.so",
+  "m_part.so",
+  "m_server.so",
+  "m_sjoin.so",
+  "m_squit.so",
+  NULL
+};
+
 #define MODS_INCREMENT 10
 int num_mods = 0;
 int max_mods = MODS_INCREMENT;
@@ -275,6 +289,26 @@ load_all_modules (int check)
     }
 
   (void)closedir (system_module_dir);
+}
+
+void
+load_core_modules(int check)
+{
+  char module_name[MAXPATHLEN];
+  int i;
+
+  for(i = 0; core_module_table[i]; i++)
+  {
+    sprintf(module_name, "%s/%s",
+            MODPATH, core_module_table[i]);
+	    
+    if(load_a_module(module_name, check) == -1)
+    {
+      ilog(L_CRIT, "Error loading core module %s: terminating ircd", 
+           core_module_table[i]);
+      exit(0);
+    }
+  }
 }
 
 int
@@ -554,6 +588,7 @@ mo_modrestart (struct Client *client_p, struct Client *source_p, int parc, char 
      unload_one_module(modlist[0]->name, 0);
 
   load_all_modules(0);
+  load_core_modules(0);
   rehash(0);
   
   sendto_realops_flags(FLAGS_ALL, L_ALL,
