@@ -1,3 +1,7 @@
+*** 20010106_10 by toot
+put quiet_on_ban in example.conf
+
+
 *** 20010106_9 by db
 - full prefix is needed for JOIN
 
