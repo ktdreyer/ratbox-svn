@@ -534,9 +534,8 @@ int register_remote_user(struct Client *client_p, struct Client *source_p,
    */
   if (!target_p)
     {
-      kill_client(client_p, source_p,
-		  "%s GHOST (no server found)",		  
-		  me.name, user->server);
+      kill_client(client_p, source_p, "%s GHOST (no server found)",
+                  me.name);
 #if 0
       sendto_one(client_p,
 		 ":%s KILL %s :%s GHOST (no server %s on the net)",
