@@ -178,8 +178,6 @@ static void	add_cur_list(int type, char *str, int number)
 %type <number> number timespec 
 %type <conf_parm> oneitem single itemlist
 
-%expect 1
-
 %start conf
 
 %%
