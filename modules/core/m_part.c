@@ -175,7 +175,8 @@ static void part_one_client(struct Client *cptr,
 	  **  Remove user from the old channel (if any)
 	  */
 	  
-	  sendto_channel_remote(chptr, cptr, ":%s PART %s", sptr->name, name);
+	  sendto_channel_remote(chptr, cptr, ":%s PART %s", sptr->name,
+                                vchan->chname);
 	  
 	  sendto_channel_local(ALL_MEMBERS,
 			       chptr, ":%s!%s@%s PART %s",
