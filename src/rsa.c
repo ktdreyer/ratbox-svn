@@ -68,7 +68,8 @@ void report_crypto_errors(void)
 void verify_private_key(void)
 {
   BIO * file;
-  RSA * key = 0, *mkey = 0;
+  RSA * key;
+  RSA * mkey;
 
   if (!ServerInfo.rsa_private_key)
   {
@@ -83,23 +84,30 @@ void verify_private_key(void)
 
   file = BIO_new_file(ServerInfo.rsa_private_key_filename, "r");
 
-  if (!file)
+  if (file == NULL)
   {
     ilog(L_NOTICE, "Failed to open private key file - can't validate it");
     return;
   }
 
-  PEM_read_bio_RSAPrivateKey( file, &key, NULL, NULL );
+  /*
+   * jdc -- Let's do this a little differently.  According to the
+   *        OpenSSL documentation, you need to METHOD_free(key) before
+   *        assigning it.  Don't believe me?  Check out the following
+   *        URL:  http://www.openssl.org/docs/crypto/pem.html#BUGS
+   */
+  RSA_free(key);
+  key = PEM_read_bio_RSAPrivateKey(file, NULL, 0, NULL);
 
-  BIO_set_close(file, BIO_CLOSE);
-  BIO_free(file);
-
-  if (!key)
+  if (key == NULL)
   {
     ilog(L_NOTICE, "Failed to read private key file - can't validate it");
     report_crypto_errors();
     return;
   }
+
+  BIO_set_close(file, BIO_CLOSE);
+  BIO_free(file);
 
   mkey = ServerInfo.rsa_private_key;
 
