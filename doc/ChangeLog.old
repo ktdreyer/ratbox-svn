@@ -1,3 +1,17 @@
+leeh        2001/12/20 05:05:33 EST	(20011220_0)
+
+  Modified files:
+    modules              m_stats.c 
+  Log:
+  - we used client_p in half, source_p in half, changed to source_p
+  - dont pace remote clients
+  - cleanups
+  
+  Revision  Changes    Path
+  1.100     +131 -130  ircd-hybrid-7/modules/m_stats.c
+
+
+
 leeh        2001/12/19 12:45:54 EST	(20011219_4)
 
   Modified files:
