@@ -111,6 +111,7 @@ poll_update_pollfds(int fd, short event, PF * handler)
         }
         while (pollfds[npollfds].fd == -1 && npollfds > 0)
             npollfds--;
+        npollfds++; /* array start at 0, not 1, remember? */
     }
 }
 
