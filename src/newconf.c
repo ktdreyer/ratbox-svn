@@ -350,6 +350,7 @@ void	newconf_init()
 	add_conf_item("operator", "xline", CF_YESNO, conf_set_oper_xline);
 	add_conf_item("operator", "unkline", CF_YESNO, conf_set_oper_unkline);
 	add_conf_item("operator", "gline", CF_YESNO, conf_set_oper_gline);
+	add_conf_item("operator", "operwall", CF_YESNO, conf_set_oper_operwall);
 	add_conf_item("operator", "nick_changes", CF_YESNO,
 			conf_set_oper_nick_changes);
 	add_conf_item("operator", "die", CF_YESNO, conf_set_oper_die);
@@ -891,6 +892,7 @@ struct mode_table flag_table[] = {
 	{"die",			OPER_DIE},
 	{"admin",		OPER_ADMIN},
 	{"xline",		OPER_XLINE},
+	{"operwall",		OPER_OPERWALL},
 	{NULL}
 };
 
@@ -1212,6 +1214,16 @@ void	conf_set_oper_gline(void *data)
 		yy_achead->port |= OPER_GLINE;
 	else
 		yy_achead->port &= ~OPER_GLINE;
+}
+
+void	conf_set_oper_operwall(void *data)
+{
+	int yesno = *(int*) data;
+
+	if (yesno)
+		yy_achead->port |= OPER_OPERWALL;
+	else
+		yy_achead->port &= ~OPER_OPERWALL;
 }
 
 void	conf_set_oper_nick_changes(void *data)

@@ -1873,6 +1873,11 @@ oper_privs_as_string(struct Client *client_p,int port)
   else
     *privs_ptr++ = 'n';
 
+  if(port & OPER_OPERWALL)
+    *privs_ptr++ = 'L';
+  else
+    *privs_ptr++ = 'l';
+  
   *privs_ptr = '\0';
 
   return(privs_out);

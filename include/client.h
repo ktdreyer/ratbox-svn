@@ -398,10 +398,10 @@ struct LocalUser
 #define OPER_XLINE              0x000200
 /*      OPER_SPY                0x000400 */
 /*                              0x000800 */
-
+#define OPER_OPERWALL		0x001000
 #define OPER_FLAGS      (OPER_GLOBAL_KILL | OPER_REMOTE | OPER_UNKLINE |\
                          OPER_GLINE | OPER_N | OPER_K | OPER_DIE |\
-                         OPER_REHASH | OPER_ADMIN | OPER_XLINE | 0x000400)
+                         OPER_REHASH | OPER_ADMIN | OPER_XLINE | OPER_OPERWALL|0x000400)
                                         
 #define FLAGS2_EXEMPTGLINE      0x001000
 #define FLAGS2_EXEMPTKLINE      0x002000
@@ -528,6 +528,7 @@ struct LocalUser
 #define IsOperDie(x)            ((x)->flags2 & OPER_DIE)
 #define IsOperRehash(x)         ((x)->flags2 & OPER_REHASH)
 #define IsOperAdmin(x)          ((x)->flags2 & OPER_ADMIN)
+#define IsOperOperWall(x)	((x)->flags2 & OPER_OPERWALL)
 
 #define IsFloodDone(x)          ((x)->flags2 & FLAGS2_FLOODDONE)
 #define SetFloodDone(x)         ((x)->flags2 |= FLAGS2_FLOODDONE)

@@ -131,6 +131,7 @@ extern 	char *		conf_cur_block_name;
 	void    conf_set_oper_unkline				(void *data);
 	void    conf_set_oper_xline				(void *data);
 	void    conf_set_oper_gline				(void *data);
+	void	conf_set_oper_operwall				(void *data);
 	void    conf_set_oper_nick_changes			(void *data);
 	void    conf_set_oper_die				(void *data);
 	void    conf_set_oper_rehash				(void *data);
