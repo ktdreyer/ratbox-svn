@@ -395,14 +395,11 @@ void build_list_of_channels( struct Client *sptr,
           continue;
         }
 
-      /* We can't do this for interoperability reasons ;-( */
-#if 0
-      if (strlen(name) > CHANNELLEN-15)
+      if (strlen(name) > CHANNELLEN)
         {
-          sendto_one(sptr, form_str(ERR_BADCHANNAME),me.name, parv[0], name);
+          sendto_one(sptr, form_str(ERR_BADCHANNAME),me.name,sptr->name,name);
           continue;
         }
-#endif
 
       if (*jbuf)
         (void)strcat(jbuf, ",");
