@@ -692,7 +692,8 @@ sendto_common_channels(struct Client *user, const char *pattern, ...)
         for(users = channels->value.chptr->members; users; users = users->next)
           {
             cptr = users->value.cptr;
-            if (!MyConnect(cptr) || (sentalong[cptr->fd] == current_serial))
+            if (!MyConnect(cptr) || (cptr->fd < 0) ||
+                (sentalong[cptr->fd] == current_serial))
               continue;
             
             sentalong[cptr->fd] = current_serial;
