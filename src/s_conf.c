@@ -1399,6 +1399,7 @@ int rehash(struct Client *cptr,struct Client *sptr, int sig)
   }
 
   flush_deleted_I_P();
+  check_klines();
   return 0;
 }
 
