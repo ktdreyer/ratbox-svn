@@ -32,14 +32,6 @@ Necessary Requirements:
   appears to be broken, on this system flex
   should be used.
 
-- A working bison or byacc.  FreeBSD and BSD/OS
-  byacc are broken in some releases, and will
-  dump core when building the ircd_parser.y. The
-  solution to this is to upgrade to the most
-  recent release, or to simply obtain a current
-  copy of byacc (such as building source from
-  FreeBSD CVS/CVSup). This is fixed in FreeBSD
-  4.4-STABLE and later.
 
 Feature Specific Requirements:
 
@@ -53,7 +45,7 @@ Feature Specific Requirements:
 
 *******************************************************************************
 
-- To report bugs in hybrid, send the bug report to ircd-hybrid@the-project.org
+- To report bugs in ircd-ratbox, send the bug report to ircd-ratbox@lists.ratbox.org
 
 - Known bugs are listed in the BUGS file
 
@@ -76,9 +68,9 @@ Feature Specific Requirements:
   Errors from adns causing the ircd to refuse to start up are often related
   to permission problems on these files.
 
-- There is now a mailing list for general discussion of Hybrid.  To subscribe
-  to the Hybrid List, send email to listmanager@the-project.org with
-  the subject "subscribe hybrid".
+- There is a mailing list for ircd-ratbox.  To subscribe to this list
+  visit http://lists.ratbox.org/cgi-bin/mailman/listinfo/ircd-ratbox
+  Note that this list also gets the commit emails from the CVS server.
 
 - If you run in to a problem you think may be specific to your platform,
   check README.PLATFORMS for some hints.
