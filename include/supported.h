@@ -34,12 +34,9 @@
                 " TOPICLEN=%i" \
                 " KICKLEN=%i" \
                 " CHANTYPES=%s" \
-                " PART_REASON" \
                 " PREFIX=%s"
                  
-#define FEATURESVALUES MAXMODEPARAMS,MAXCHANNELSPERUSER,MAXBANS,ConfigFileEntry.max_targets, \
-        NICKLEN,TOPICLEN,TOPICLEN,"#&","@+%"
-
-extern char isupportbuffer[512];
+#define FEATURESVALUES MAXMODEPARAMS,MAXCHANNELSPERUSER,MAXBANS, \
+        ConfigFileEntry.max_targets,NICKLEN,TOPICLEN,TOPICLEN,"#&","@+%"
 
 #endif /* INCLUDED_supported_h */

@@ -53,7 +53,6 @@
 #include "scache.h"
 #include "send.h"
 #include "setup.h"
-#include "supported.h"
 #include "whowas.h"
 #include "modules.h"
 
@@ -123,9 +122,6 @@ struct SetOptions GlobalSetOptions;
 
 /* config.h config file paths etc */
 ConfigFileEntryType ConfigFileEntry; 
-
-/* ISUPPORT buffer */
-char isupportbuffer[512];
 
 struct  Counter Count;
 

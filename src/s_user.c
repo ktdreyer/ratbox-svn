@@ -268,6 +268,25 @@ int show_lusers(struct Client *sptr)
 }
 
 /*
+ * show_isupport
+ *
+ * inputs	- pointer to client
+ * output	- 
+ * side effects	- display to client what we support (for them)
+ */
+int show_isupport(struct Client *sptr) 
+{
+  char isupportbuffer[512];
+  
+  ircsprintf(isupportbuffer,FEATURES,FEATURESVALUES);
+  sendto_one(sptr, form_str(RPL_ISUPPORT), me.name, sptr->name, 
+  	     isupportbuffer);
+  	     
+  return 0;	     
+}
+
+
+/*
 ** register_user
 **      This function is called when both NICK and USER messages
 **      have been accepted for the client, in whatever order. Only
@@ -1032,9 +1051,8 @@ static void user_welcome(struct Client *sptr)
   sendto_one(sptr, form_str(RPL_MYINFO), me.name, sptr->name,
 	     me.name, version);
 
-  ircsprintf(isupportbuffer,FEATURES,FEATURESVALUES);
-  sendto_one(sptr, form_str(RPL_ISUPPORT), me.name, sptr->name, 
-  	     isupportbuffer);
+  show_isupport(sptr);
+  
   show_lusers(sptr);
 
   if (ConfigFileEntry.short_motd)
