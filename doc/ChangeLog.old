@@ -1,3 +1,38 @@
+jmallett    2002/02/27 22:02:19 EST	(20020228_1)
+
+  Modified files:
+    adns                 event.c 
+    src                  dynlink.c s_auth.c s_bsd.c 
+  Log:
+  Bring back my uintptr_t casts to the code which converts dlsym(3)'s return
+  value to something we can make into a function pointer within the bounds
+  of the C standard.  This is a hack as such, but it is far more "correct"
+  than trying to convert two pointers to eachother, one being a data pointer
+  (void*) and one being a function pointer.  Document this as such, as it is
+  important to compilers like TenDRA, and also mention that I _do_ have
+  something which is correct, but that for POLA sake, and since this will
+  work pretty much everywhere, I am choosing not to put it in at this time.
+  
+  Also, convert casts of socklen_t pointers from 'int*' to 'socklen_t*'.
+  Originally these were 'unsigned int*', which is correct on BSDish systems,
+  but may not be if for some reason socklen_t is signed (it isn't with BSD
+  networking), and really 'size_t foo; use(&foo)' doesn't need to be
+  'use((socklen_t *)&foo)', but it doesn't hurt anyway.  If this is causing
+  problems on some system, if it does not have socklen_t, we should make
+  socklen_t a signed integer on that system using our typedef'd version, as
+  it is infinitely more common for these parameters to be 'socklen_t*' which
+  is not the same as 'int*'.
+  
+  The current source tree will now build happily on TenDRA systems again.
+  
+  Revision  Changes    Path
+  1.13      +3 -2      ircd-hybrid-7/adns/event.c
+  7.2       +12 -2     ircd-hybrid-7/src/dynlink.c
+  7.86      +3 -3      ircd-hybrid-7/src/s_auth.c
+  7.165     +3 -3      ircd-hybrid-7/src/s_bsd.c
+
+
+
 jmallett    2002/02/27 21:13:18 EST	(20020228_0)
 
   Modified files:
