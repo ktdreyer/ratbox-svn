@@ -1,3 +1,15 @@
+db          2002/07/21 13:11:21 EDT	(20020721_3)
+
+  Modified files:
+    src                  s_conf.c 
+  Log:
+  - pure and simple style fixes
+  
+  Revision  Changes    Path
+  7.313     +25 -19    ircd-hybrid-7/src/s_conf.c
+
+
+
 leeh        2002/07/21 12:17:47 EDT	(20020721_2)
 
   Modified files:
