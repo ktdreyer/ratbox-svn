@@ -664,9 +664,7 @@ int do_user(char* nick, struct Client* cptr, struct Client* sptr,
           sendto_one(sptr, form_str(ERR_ALREADYREGISTRED), me.name, nick);
           return 0;
         }
-#ifndef NO_DEFAULT_INVISIBLE
       sptr->flags |= FLAGS_INVISIBLE;
-#endif
 
       if (!(oflags & FLAGS_INVISIBLE) && IsInvisible(sptr))
         Count.invisi++;

@@ -1384,16 +1384,11 @@ const char* comment         /* Reason for the exit */
 
   if (MyConnect(sptr))
     {
-#ifdef LIMIT_UH
-      if(sptr->flags & FLAGS_IPHASH)
-        remove_one_ip(sptr);
-#else
       if(sptr->flags & FLAGS_IPHASH)
 #ifdef IPV6
         remove_one_ip(sptr->localClient->ip6.s6_addr);
 #else
         remove_one_ip(sptr->localClient->ip.s_addr);
-#endif
 #endif
       if (IsAnyOper(sptr))
         {

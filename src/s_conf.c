@@ -90,11 +90,7 @@ extern char yytext[];
 /* address of class 0 conf */
 static struct   Class* class0;
 
-#ifdef LIMIT_UH
-static  int     attach_iline(struct Client *, struct ConfItem *,const char *);
-#else
 static  int     attach_iline(struct Client *, struct ConfItem *);
-#endif
 struct ConfItem *find_special_conf(char *, int );
 
 static void add_q_line(struct ConfItem *);
@@ -115,22 +111,13 @@ typedef struct ip_entry
   unsigned long ip;
   int        count;
   struct ip_entry *next;
-#ifdef LIMIT_UH
-  dlink_node *ptr_clients_on_this_ip;
-  int        count_of_idented_users_on_this_ip;
-#endif
 }IP_ENTRY;
 
 static IP_ENTRY *ip_hash_table[IP_HASH_SIZE];
 
 static int hash_ip(unsigned long);
 
-#ifdef LIMIT_UH
-static IP_ENTRY *find_or_add_ip(struct Client *,const char *);
-static int count_users_on_this_ip(IP_ENTRY *,struct Client *,const char *);
-#else
 static IP_ENTRY *find_or_add_ip(struct Client *);
-#endif
 
 /* general conf items link list root */
 struct ConfItem* ConfigItemList = NULL;
@@ -527,12 +514,7 @@ int attach_Iline(struct Client* cptr, const char* username)
 	      SetIPHidden(cptr);
 	    }
 
-#ifdef LIMIT_UH
-	return(attach_iline(cptr, aconf, username));
-#else
-	return(attach_iline(cptr, aconf));
-#endif
-
+	  return(attach_iline(cptr, aconf));
         }
       else if(aconf->status & CONF_KILL)
         {
@@ -553,39 +535,15 @@ int attach_Iline(struct Client* cptr, const char* username)
   return -1;        /* -1 on no match *bleh* */
 }
 
-#ifdef LIMIT_UH
-static int attach_iline(struct Client *cptr, struct ConfItem *aconf, const char *username)
-#else
 static int attach_iline(struct Client *cptr, struct ConfItem *aconf)
-#endif
 {
   IP_ENTRY *ip_found;
 
-  /* if LIMIT_UH is set, limit clients by idented usernames not by ip */
-
-#ifdef LIMIT_UH
-  ip_found = find_or_add_ip(cptr,username);
-#else
   ip_found = find_or_add_ip(cptr);
-#endif
 
   SetIpHash(cptr);
   ip_found->count++;
 
-#ifdef LIMIT_UH
-  if (ConfConFreq(aconf) && (ip_found->count_of_idented_users_on_this_ip
-                                  > ConfConFreq(aconf)))
-    {
-      if(!IsConfFlined(aconf))
-        return -4; /* Already at maximum allowed ip#'s */
-      else
-        {
-          sendto_one(cptr,
-       ":%s NOTICE %s :*** :I: line is full, but you have an >I: line!",
-                     me.name,cptr->name);
-        }
-    }
-#else
   /* only check it if its non zero */
   if (ConfConFreq(aconf) && ip_found->count > ConfConFreq(aconf))
     {
@@ -598,7 +556,6 @@ static int attach_iline(struct Client *cptr, struct ConfItem *aconf)
                      me.name,cptr->name);
         }
     }
-#endif
 
   return (attach_conf(cptr, aconf) );
 }
@@ -658,18 +615,10 @@ void clear_ip_hash_table()
  * count set to 0.
  */
 
-#ifdef LIMIT_UH
-static IP_ENTRY *
-find_or_add_ip(struct Client *cptr,const char *username)
-#else
 static IP_ENTRY *
 find_or_add_ip(struct Client *cptr)
-#endif
 {
   unsigned long ip_in=cptr->localClient->ip.s_addr;
-#ifdef LIMIT_UH
-  dlink_node *new_link;
-#endif
 
   int hash_index;
   IP_ENTRY *ptr, *newptr;
@@ -679,14 +628,6 @@ find_or_add_ip(struct Client *cptr)
     {
       if(ptr->ip == ip_in)
         {
-#ifdef LIMIT_UH
-          new_link = make_link();
-          new_link->value.cptr = cptr;
-          new_link->next = ptr->ptr_clients_on_this_ip;
-          ptr->ptr_clients_on_this_ip = new_link;
-          ptr->count_of_idented_users_on_this_ip =
-            count_users_on_this_ip(ptr,cptr,username);
-#endif
           return(ptr);
         }
     }
@@ -706,17 +647,6 @@ find_or_add_ip(struct Client *cptr)
       newptr->ip = ip_in;
       newptr->count = 0;
       newptr->next = ptr;
-#ifdef LIMIT_UH
-      /* XXX */
-      newptr->count_of_idented_users_on_this_ip = 0;
-
-      new_link = make_dlink_node();
-
-      new_link->data = cptr;
-      new_link->next = NULL;
-
-      newptr->ptr_clients_on_this_ip = new_link;
-#endif
       return(newptr);
     }
   else
@@ -733,48 +663,9 @@ find_or_add_ip(struct Client *cptr)
       ptr->ip = ip_in;
       ptr->count = 0;
       ptr->next = (IP_ENTRY *)NULL;
-#ifdef LIMIT_UH
-      ptr->count_of_idented_users_on_this_ip = 0;
-
-      new_link = make_dlink_node();
-      new_link->data = cptr;
-      new_link->next = NULL;
-
-      ptr->ptr_clients_on_this_ip->next = new_link;
-#endif
-     return (ptr);
+      return (ptr);
     }
 }
-
-#ifdef LIMIT_UH
-static int count_users_on_this_ip(IP_ENTRY *ip_list,
-                           struct Client *this_client,const char *username)
-{
-  int count=0;
-  dlink_node *ptr;
-  
-  for( ptr = ip_list->ptr_clients_on_this_ip->next; ptr; ptr = ptr->next )
-    {
-      if(ptr->data->user)
-        {
-          if (IsGotId(this_client))
-            {
-              if(!irccmp(ptr->data->username,username))
-                  count++;
-            }
-          else
-            {
-              if(this_client == ptr->data)
-                count++;
-              else
-                if(ptr->data->username[0] == '~')
-                  count++;
-            }
-        }
-    }
-  return(count);
-}
-#endif
 
 /* 
  * remove_one_ip
@@ -787,25 +678,16 @@ static int count_users_on_this_ip(IP_ENTRY *ip_list,
  *                 to the free_ip_enties link list.
  */
 
-#ifdef LIMIT_UH
-void remove_one_ip(struct Client *cptr)
-#else
 #ifdef IPV6
 void remove_one_ip(struct in6_addr *ip_in)
 #else
 void remove_one_ip(unsigned long ip_in)
-#endif
 #endif
 {
   int hash_index;
   IP_ENTRY *last_ptr;
   IP_ENTRY *ptr;
   IP_ENTRY *old_free_ip_entries;
-#ifdef LIMIT_UH
-  unsigned long ip_in=cptr->ip.s_addr;
-  dlink_node *prev_link;
-  dlink_node *cur_link;
-#endif
 
   last_ptr = ptr = ip_hash_table[hash_index = hash_ip(ip_in)];
   while(ptr)
@@ -814,29 +696,7 @@ void remove_one_ip(unsigned long ip_in)
         {
           if(ptr->count != 0)
             ptr->count--;
-#ifdef LIMIT_UH
-	  /* XXX */
 
-          /* remove the corresponding pointer to this cptr as well */
-          prev_link = NULL;
-          cur_link = ptr->ptr_clients_on_this_ip;
-
-          while(cur_link)
-            {
-              if(cur_link->value.cptr == cptr)
-                {
-                  if(prev_link)
-                    prev_link->next = cur_link->next;
-                  else
-                    ptr->ptr_clients_on_this_ip = cur_link->next;
-                  free_dlink_node(cur_link);
-                  break;
-                }
-              else
-                prev_link = cur_link;
-              cur_link = cur_link->next;
-            }
-#endif
           if(ptr->count == 0)
             {
               if(ip_hash_table[hash_index] == ptr)
