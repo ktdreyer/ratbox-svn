@@ -189,7 +189,7 @@ install_hpux_shared: install-mkdirs
 .SUFFIXES: .sl .so .o
 
 .c.o:
-	${CC} ${CPPFLAGS} ${CFLAGS} -DMODNAME=`basename $< .c` -c $< -o $@
+	${CC} ${CPPFLAGS} ${CFLAGS} -DMODNAME=`basename $< .c`_mheader -c $< -o $@
 
 .c.so:
 	${CC} ${PICFLAGS} ${CPPFLAGS} ${CFLAGS} $< -o $@
