@@ -1,3 +1,9 @@
+*** 20010210_13 by androsyn
+Fixed adns/ to use MyMalloc() instead of malloc()
+
+
+
+
 *** 20010210_12 by a1kmm
 - Some general tidyups to help catch memory leaks and other problems, like changing calls to calloc and malloc
   and strdup to MyMalloc, + a few memory leak fixes. Still some more to go, however.
