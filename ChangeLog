@@ -1,3 +1,32 @@
+leeh        2003/06/10 15:55:23 UTC	(20030610_3)
+
+  Modified files:
+    include              client.h handlers.h modules.h msg.h 
+                         s_newconf.h 
+    modules              .depend m_help.c m_stats.c 
+    src                  .depend ircd.c parse.c s_user.c 
+  Removed files:
+    include              ircd_handler.h 
+  Log:
+  - merged ircd_handler.h into handlers.h
+  
+  Revision  Changes    Path
+  7.204     +1 -1      ircd-ratbox/include/client.h
+  7.46      +23 -2     ircd-ratbox/include/handlers.h
+  7.11      +0 -56     ircd-ratbox/include/ircd_handler.h (dead)
+  7.54      +1 -1      ircd-ratbox/include/modules.h
+  7.46      +1 -1      ircd-ratbox/include/msg.h
+  7.10      +1 -1      ircd-ratbox/include/s_newconf.h
+  1.24      +719 -648  ircd-ratbox/modules/.depend
+  1.51      +1 -2      ircd-ratbox/modules/m_help.c
+  1.161     +1 -2      ircd-ratbox/modules/m_stats.c
+  7.25      +466 -434  ircd-ratbox/src/.depend
+  7.290     +1 -1      ircd-ratbox/src/ircd.c
+  7.159     +0 -1      ircd-ratbox/src/parse.c
+  7.264     +1 -1      ircd-ratbox/src/s_user.c
+
+
+
 leeh        2003/06/10 13:01:22 UTC	(20030610_2)
 
   Modified files:
