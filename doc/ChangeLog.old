@@ -1,3 +1,8 @@
+*** 20011022_2 by db
+- We renamed IsSetOperN to IsOperN, correcting this contrib module to match
+
+
+
 *** 20011022_1 by androsyn
 Fixed a problem where we were not attaching the conf when using challenge,
 like we do with /oper. 
