@@ -1,3 +1,19 @@
+leeh        2002/08/25 21:16:33 EDT	(20020826_0)
+
+  Modified files:
+    modules              m_join.c m_stats.c 
+    src                  channel.c 
+  Log:
+  - limit mode bursts to BUFSIZE-3
+  - made stats v formatting similar to stats u, n days, h:mm:ss
+  
+  Revision  Changes    Path
+  1.103     +2 -2      ircd-ratbox/modules/m_join.c
+  1.117     +3 -5      ircd-ratbox/modules/m_stats.c
+  7.351     +1 -1      ircd-ratbox/src/channel.c
+
+
+
 leeh        2002/08/25 19:12:03 EDT	(20020825_3)
 
   Modified files:
