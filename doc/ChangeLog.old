@@ -1,3 +1,8 @@
+*** 19990805_4 by db
+- fixed rehash dump, would core on bad admin line
+
+
+
 *** 19990805_3 by db
 - user_mode allowed decrement of oper count even if client was not opered to begin with
 
