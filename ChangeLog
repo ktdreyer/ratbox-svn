@@ -1,3 +1,22 @@
+leeh        2004/07/30 13:12:02 EDT	(20040730_6)
+
+  Modified files:
+    modules              m_dline.c m_kline.c m_resv.c m_xline.c 
+    src                  ircd.c s_conf.c s_log.c 
+  Log:
+  - we need to fflush() after fputs()
+  
+  Revision  Changes    Path
+  1.40      +4 -1      ircd-ratbox/modules/m_dline.c
+  1.187     +4 -1      ircd-ratbox/modules/m_kline.c
+  1.65      +3 -1      ircd-ratbox/modules/m_resv.c
+  1.56      +3 -1      ircd-ratbox/modules/m_xline.c
+  7.348     +3 -0      ircd-ratbox/src/ircd.c
+  7.476     +2 -0      ircd-ratbox/src/s_conf.c
+  7.74      +2 -0      ircd-ratbox/src/s_log.c
+
+
+
 leeh        2004/07/30 13:03:58 EDT	(20040730_5)
 
   Modified files:
