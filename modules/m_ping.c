@@ -34,6 +34,7 @@
 #include "modules.h"
 #include "hash.h"
 #include "s_conf.h"
+#include "s_serv.h"
 
 static void m_ping(struct Client*, struct Client*, int, char**);
 static void ms_ping(struct Client*, struct Client*, int, char**);
@@ -88,23 +89,26 @@ static void m_ping(struct Client *client_p,
    return;
   }
 
-/* Screw this, origin == clients nick if remote, what they sent if local --fl_  */
-#if 0
-  target_p = find_client(origin, NULL);
-  if (!target_p)
-    target_p = find_server(origin);
-
-  if (target_p && target_p != source_p)
-    origin = client_p->name;
-#endif
-
   if (!EmptyString(destination) && !match(destination, me.name))
   {
     /* We're sending it across servers.. origin == client_p->name --fl_ */
     origin = client_p->name;
+
+    /* XXX - sendto_server() ? --fl_ */
     if ((target_p = find_server(destination)))
+    {
+      /* use the direct link for LL checking */
+      target_p = target_p->from;
+
+      if(ServerInfo.hub && IsCapable(target_p, CAP_LL))
+      {
+        if((source_p->lazyLinkClientExists & target_p->localClient->serverMask) == 0)
+          client_burst_if_needed(target_p, source_p);
+      }
+
       sendto_one(target_p,":%s PING %s :%s", parv[0],
                  origin, destination);
+    }
     else
     {
       sendto_one(source_p, form_str(ERR_NOSUCHSERVER),
