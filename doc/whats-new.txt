@@ -139,6 +139,23 @@ User modes can be specified oper only.  This is yet another start time
 configurable option in ircd.conf.  See the comments in example.conf for
 more details.
 
+Hybrid now has the ISUPPORT/005 numeric now.  It can be seen when the client 
+connects and in VERSION.  The fields are as follows:
+KNOCK          - Support KNOCK
+VCHANS         - Support Virtual Channels
+MODES=%i       - The number of channel modes accepted per MODE command
+MAXCHANNELS=%i - The compiled in maximum channels per user (Note that this
+                 may become controlled in class {} in the future)
+MAXBANS=%i     - The compiled in limit on the number of bans per channel
+MAXTARGETS=%i  - The number of users that may be chained together in a 
+                 PRIVMSG or NOTICE (user1,user2,user3...)
+NICKLEN=%i     - The maximum nickname length
+TOPICLEN=%i    - The compiled in topic length
+KICKLEN=%i     - The length of a KICK message
+CHANTYPES=%s   - The types of channels supported (currently '#&')
+PREFIX=%s      - The allowed PRIVMSG/NOTICE channel prefixes (server based
+                 /onotice, NOTICE @%#channel :message)
+
 # complete me
 
 # $Id$
