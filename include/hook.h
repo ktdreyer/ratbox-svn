@@ -46,5 +46,6 @@ int hook_add_hook(char *, hookfn *);
 int hook_call_event(char *, void *);
 int hook_del_event(char *);
 int hook_del_hook(char *event, hookfn *fn);
+void init_hooks(void);
 
 #endif
