@@ -1,3 +1,20 @@
+androsyn    2002/07/11 20:51:11 EDT	(20020712_4)
+
+  Modified files:
+    include              s_conf.h 
+    src                  ircd.c listener.c s_conf.c 
+  Log:
+  Remove the #ifdef for PACE_CONNECT, we define it unconditionally anyways
+  so...
+  
+  Revision  Changes    Path
+  7.182     +0 -3      ircd-hybrid-7/include/s_conf.h
+  7.238     +0 -2      ircd-hybrid-7/src/ircd.c
+  7.70      +0 -2      ircd-hybrid-7/src/listener.c
+  7.310     +0 -15     ircd-hybrid-7/src/s_conf.c
+
+
+
 androsyn    2002/07/11 20:43:26 EDT	(20020712_3)
 
   Modified files:
