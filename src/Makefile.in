@@ -35,6 +35,7 @@ SRCS =                          \
   client.c                      \
   dbuf.c                        \
   dline_conf.c                  \
+  event.c                       \
   fdlist.c                      \
   fileio.c                      \
   flud.c                        \

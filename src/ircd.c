@@ -25,6 +25,7 @@
 #include "client.h"
 #include "common.h"
 #include "dline_conf.h"
+#include "event.h"
 #include "fdlist.h"
 #include "hash.h"
 #include "irc_string.h"
@@ -368,6 +369,10 @@ static time_t io_loop(time_t delay)
       restart("Clock Failure");
     }
 
+  /* Run pending events, then get the number of seconds to the next event */
+  eventRun();
+  delay = eventNextTime();
+
   /* LazyLinks */
   if(!ConfigFileEntry.hub)
     {
@@ -447,15 +452,15 @@ static time_t io_loop(time_t delay)
   /*
    * DNS checks, use smaller of resolver delay or next ping
    */
-  delay = IRCD_MIN(timeout_resolver(CurrentTime), nextping);
+  delay = IRCD_MIN(delay, (timeout_resolver(CurrentTime) - CurrentTime));
+  delay = IRCD_MIN(delay, (nextping - CurrentTime));
   /*
   ** take the smaller of the two 'timed' event times as
   ** the time of next event (stops us being late :) - avalon
   ** WARNING - nextconnect can return 0!
   */
-  if (nextconnect)
-    delay = IRCD_MIN(nextping, nextconnect);
-  delay -= CurrentTime;
+  if (nextconnect) 
+    delay = IRCD_MIN(delay, (nextconnect - CurrentTime));
   /*
   ** Adjust delay to something reasonable [ad hoc values]
   ** (one might think something more clever here... --msa)
