@@ -1,3 +1,10 @@
+*** 20010502_10 by androsyn
+I think I really found the source of fl_'s cores.  Basically what was
+happening was we were not resetting the callback to NULL like we do 
+for s_bsd_kqueue/s_bsd_devpoll so I *think* we were calling the callback
+multiple times.
+
+
 *** 20010502_9 by toot
 added WALLCHOPS to 005 numeric, as we support /notice @#channel
 
