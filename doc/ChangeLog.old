@@ -1,3 +1,15 @@
+db          2002/07/14 20:49:11 EDT	(20020715_1)
+
+  Modified files:
+    src                  linebuf.c 
+  Log:
+  - This does things right, but has an icky goto...
+  
+  Revision  Changes    Path
+  7.86      +18 -23    ircd-hybrid-7/src/linebuf.c
+
+
+
 db          2002/07/14 19:41:01 EDT	(20020715_0)
 
   Modified files:
