@@ -380,10 +380,11 @@ void ReportBlockHeap(struct Client *cptr)
  sendto_one(cptr, ":%s NOTICE %s :*** -- Block memory Allocation Report",
    me.name, cptr->name);
  for (mme = first_block_mem_entry; mme; mme=mme->next)
-   sendto_one(cptr,
-     ":%s NOTICE %s :*** -- %u bytes allocated for %lus at %s:%d",
-     me.name, cptr->name, mme->size, CurrentTime-mme->ts, mme->file,
-     mme->line);
+   if ((CurrentTime-mme->ts))
+     sendto_one(cptr,
+       ":%s NOTICE %s :*** -- %u bytes allocated for %lus at %s:%d",
+       me.name, cptr->name, mme->size, CurrentTime-mme->ts, mme->file,
+       mme->line);
  sendto_one(cptr, ":%s NOTICE %s :*** -- End Block memory Allocation Report",
    me.name, cptr->name);
 }
