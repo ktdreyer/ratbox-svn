@@ -1,3 +1,33 @@
+leeh        2003/12/08 19:23:57 EST	(20031209_0)
+
+  Modified files:
+    include              c_init.h client.h 
+    src                  Makefile c_mode.c client.c command.c io.c 
+                         rserv.c 
+  Added files:
+    include              service.h 
+    src                  c_message.c s_alis.c service.c 
+  Log:
+  - finished off the service handlers
+  - added support for PRIVMSG/NOTICE, and tied it into service handlers
+  - added framework for the alis service
+  
+  Revision  Changes    Path
+  1.3       +7 -0      rserv/include/c_init.h
+  1.3       +2 -1      rserv/include/client.h
+  1.1       +22 -0     rserv/include/service.h (new)
+  1.2       +4 -0      rserv/src/Makefile
+  1.1       +55 -0     rserv/src/c_message.c (new)
+  1.3       +1 -1      rserv/src/c_mode.c
+  1.3       +14 -3     rserv/src/client.c
+  1.3       +1 -1      rserv/src/command.c
+  1.2       +3 -0      rserv/src/io.c
+  1.2       +6 -0      rserv/src/rserv.c
+  1.1       +24 -0     rserv/src/s_alis.c (new)
+  1.1       +81 -0     rserv/src/service.c (new)
+
+
+
 leeh        2003/12/08 18:02:02 EST	(20031208_3)
 
   Modified files:
