@@ -255,10 +255,6 @@ void names_non_public_non_secret(struct Client *sptr)
         {
           ch3ptr = lp->data;
 
-sendto_realops("PubChannel(ch3ptr) %d", PubChannel(ch3ptr));
-sendto_realops("SecretChannel(ch3ptr) %d", SecretChannel(ch3ptr));
-sendto_realops("IsMember(sptr,ch3ptr) %d", IsMember(sptr,ch3ptr));
-
           if ( (!PubChannel(ch3ptr) || IsMember(sptr, ch3ptr)) ||
 	       (SecretChannel(ch3ptr)))
 	  {

@@ -567,6 +567,7 @@ int server_estab(struct Client *cptr)
   struct ConfItem*  c_conf;
   const char*       inpath;
   static char       inpath_ip[HOSTLEN * 2 + USERLEN + 5];
+  char 		    serv_desc[HOSTLEN + 15];
   char*             host;
   char*             encr;
   int               split;
@@ -717,6 +718,10 @@ int server_estab(struct Client *cptr)
   cptr->serv->nline = n_conf;
   cptr->flags2 |= FLAGS2_CBURST;
 
+  ircsprintf(serv_desc, "Server: %s", cptr->name);
+  serv_desc[FD_DESC_SZ-1] = '\0';
+  fd_note (cptr->fd, serv_desc);
+
   /*
   ** Old sendto_serv_but_one() call removed because we now
   ** need to send different names to different servers
@@ -819,16 +824,16 @@ static void server_burst(struct Client *cptr)
   struct Channel*   vchan; 
   dlink_node *ptr;
 
-      /*
-      ** Send it in the shortened format with the TS, if
-      ** it's a TS server; walk the list of channels, sending
-      ** all the nicks that haven't been sent yet for each
-      ** channel, then send the channel itself -- it's less
-      ** obvious than sending all nicks first, but on the
-      ** receiving side memory will be allocated more nicely
-      ** saving a few seconds in the handling of a split
-      ** -orabidoo
-      */
+  /*
+  ** Send it in the shortened format with the TS, if
+  ** it's a TS server; walk the list of channels, sending
+  ** all the nicks that haven't been sent yet for each
+  ** channel, then send the channel itself -- it's less
+  ** obvious than sending all nicks first, but on the
+  ** receiving side memory will be allocated more nicely
+  ** saving a few seconds in the handling of a split
+  ** -orabidoo
+  */
 
   /* On a "lazy link" (version 1 at least) only send the nicks
    * Leafs always have to send nicks plus channels
@@ -906,7 +911,7 @@ static void server_burst(struct Client *cptr)
   /* Always send a PING after connect burst is done */
   sendto_one(cptr, "PING :%s", me.name);
 
-  /* XXX maybe `EOB %d %d` where we send lenght of burst and time? */
+  /* XXX maybe `EOB %d %d` where we send length of burst and time? */
   if(IsCapable(cptr, CAP_EOB))
     sendto_one(cptr, "EOB", me.name ); 
 }
@@ -1075,6 +1080,7 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
     struct Client *cptr;
     int fd;
     char servname[HOSTLEN + 1];
+    char serv_desc[HOSTLEN + 15];
 
     /* Make sure aconf is useful */
     assert(aconf != NULL);
@@ -1099,8 +1105,9 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
       }
 
     /* XXX we should make sure we're not already connected! */
-    strcpy(servname, "Server: ");
-    strncat(servname, aconf->name, 64 - 9);
+    /* servernames are always guaranteed under HOSTLEN chars */
+    ircsprintf(serv_desc, "Server: %s", aconf->name);
+    serv_desc[FD_DESC_SZ-1] = '\0';
 
     /* create a socket for the server connection */ 
     if ((fd = comm_open(AF_INET, SOCK_STREAM, 0, servname)) < 0)
