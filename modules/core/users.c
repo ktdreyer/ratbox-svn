@@ -101,7 +101,7 @@ static int clean_uid(const char *uid);
 static void change_local_nick(struct Client *client_p, struct Client *source_p, char *nick);
 static int change_remote_nick(struct Client *, struct Client *, int, const char **, time_t, const char *);
 
-static int register_local_user(struct Client *client_p, struct Client *source_p, const char *nick, const char *username);
+static int register_local_user(struct Client *client_p, struct Client *source_p);
 static int register_client(struct Client *client_p, struct Client *server, 
 			   const char *nick, time_t newts, int parc, const char *parv[]);
 
@@ -186,7 +186,7 @@ mr_nick(struct Client *client_p, struct Client *source_p, int parc, const char *
 		fd_note(client_p->localClient->fd, "Nick: %s", nick);
 
 		if(HasSentUser(source_p))
-			register_local_user(client_p, source_p, nick, source_p->username);
+			register_local_user(client_p, source_p);
 
 	}
 	else if(source_p == target_p)
@@ -552,7 +552,7 @@ mr_user(struct Client *client_p, struct Client *source_p, int parc, const char *
 	SetSentUser(source_p);
 	/* NICK already received, now I have USER... */
 	if(!EmptyString(source_p->name))
-		register_local_user(client_p, source_p, source_p->name, source_p->username);
+		register_local_user(client_p, source_p);
 
 	return 0;
 }
@@ -682,8 +682,7 @@ mr_pong(struct Client *client_p, struct Client *source_p, int parc, const char *
 				if(source_p->localClient->random_ping == incoming_ping)
 				{
 					source_p->flags2 |= FLAGS2_PING_COOKIE;
-					register_local_user(client_p, source_p, source_p->name,
-							    source_p->username);
+					register_local_user(client_p, source_p);
 				}
 				else
 				{
@@ -1317,19 +1316,22 @@ check_client(struct Client *client_p, struct Client *source_p, const char *usern
 */
 
 static int
-register_local_user(struct Client *client_p, struct Client *source_p, const char *nick, const char *username)
+register_local_user(struct Client *client_p, struct Client *source_p)
 {
 	struct ConfItem *aconf;
 	struct User *user = source_p->user;
 	char tmpstr2[IRCD_BUFSIZE];
 	char ipaddr[HOSTIPLEN];
 	char myusername[USERLEN+1];
+	char tempuser[USERLEN+1];
+	const char *nick;
+	const char *username;
 	int status;
 
 	s_assert(NULL != source_p);
 	s_assert(MyConnect(source_p));
-	s_assert(source_p->username != username);
 
+	
 	if(source_p == NULL)
 		return -1;
 
@@ -1356,6 +1358,10 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 	client_p->localClient->last = CurrentTime;
 	/* Straight up the maximum rate of flooding... */
 	source_p->localClient->allow_read = MAX_FLOOD_BURST;
+
+	strlcpy(tempuser, source_p->username, sizeof(tempuser));	
+	username = tempuser;
+	nick = source_p->name;
 
 	/* XXX - fixme. we shouldnt have to build a users buffer twice.. */
 	if(!IsGotId(source_p) && (strchr(username, '[') != NULL))
