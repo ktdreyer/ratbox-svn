@@ -1,3 +1,20 @@
+db          2002/02/24 12:23:32 EST	(20020224_2)
+
+  Modified files:
+    src                  s_user.c send.c 
+  Log:
+  - Don't bother giving exit_client the socket name in dead_link
+    it does not understand the %s convention dead_link() does and just prints
+    a '%s' instead. thats dumb.
+  - We had one place where we printed "Ghost" instead of "Ghosted client"
+    like everywhere else. fixed.
+  
+  Revision  Changes    Path
+  7.189     +1 -1      ircd-hybrid-7/src/s_user.c
+  7.180     +1 -1      ircd-hybrid-7/src/send.c
+
+
+
 wcampbel    2002/02/23 23:45:04 EST	(20020224_1)
 
   Modified files:
