@@ -1,3 +1,10 @@
+*** 20010704_3 by leeh
+- stats m doesnt need to be oper only.. we send it to a user on /help
+  anyway
+
+- updated the conf to reflect resv {};
+
+
 *** 20010704_2 by leeh
 - fixed a couple of compile warnings
 
