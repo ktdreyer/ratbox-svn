@@ -1,3 +1,16 @@
+androsyn    2002/02/04 01:12:01 EST	(20020204_4)
+
+  Modified files:
+    src                  s_bsd_sigio.c 
+  Log:
+  Back out the changes Andrew made that tried to call the handler in
+  comm_setselect() as these are not needed now.
+  
+  Revision  Changes    Path
+  7.17      +0 -7      ircd-hybrid-7/src/s_bsd_sigio.c
+
+
+
 androsyn    2002/02/04 01:07:59 EST	(20020204_3)
 
   Modified files:
