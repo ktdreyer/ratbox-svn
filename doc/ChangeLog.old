@@ -1,3 +1,7 @@
+*** 20010107_1 by fl_
+- documented issues with modunload, that we cant realistically fix..
+
+
 *** 20010106_32 by db
 - forgot a ':' in the notice telling chanops about an attempted kick
   by a halfop. oops
