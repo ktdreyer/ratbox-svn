@@ -188,8 +188,11 @@ static void clear_client_hash_table()
 static void clear_id_hash_table()
 {
 #ifdef        DEBUGMODE
-  idhits = 0;
-  idmiss = 0;
+  /* XXX -
+   * idhits = 0;
+   * idmiss = 0;
+   * -cosine
+   */
   if(!idTable)
     idTable = (struct HashEntry*) MyMalloc(U_MAX * sizeof(struct HashEntry));
 #endif
