@@ -1,3 +1,16 @@
+leeh        2004/11/12 10:27:25 EST	(20041112_0)
+
+  Modified files:
+    src                  s_chanserv.c 
+  Log:
+  - chain -o's and kicks together when we do CHANSERV::ADDBAN
+  - fix rebuilding of ban reason on CHANSERV::ADDBAN
+  
+  Revision  Changes    Path
+  1.14      +16 -12    rserv/src/s_chanserv.c
+
+
+
 leeh        2004/11/05 18:15:59 EST	(20041105_0)
 
   Modified files:
