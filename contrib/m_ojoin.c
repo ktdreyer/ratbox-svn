@@ -178,6 +178,15 @@ static void mo_ojoin(struct Client *client_p, struct Client *source_p,
                        root_chptr->chname);
     }
 
+  /* send the topic... */
+  if (chptr->topic[0] != '\0')
+  {
+    sendto_one(source_p, form_str(RPL_TOPIC), me.name,
+	       source_p->name, chptr->chname, chptr->topic);
+    sendto_one(source_p, form_str(RPL_TOPICWHOTIME), me.name,
+	       source_p->name, chptr->chname, chptr->topic_info,
+	       chptr->topic_time);
+  }
 
   /* XXX - check this isn't too big above... */
 #ifdef VCHANS
