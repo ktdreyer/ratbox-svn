@@ -587,18 +587,29 @@ void
 clear_out_address_conf(void)
 {
  int i;
+ struct AddressRec **store_next;
  struct AddressRec *arec, *arecn;
  for (i=0; i<ATABLE_SIZE; i++)
  {
+  store_next = &atable[i];
   for (arec=atable[i]; arec; arec=arecn)
   {
    arecn = arec->next;
-   arec->aconf->flags |= CONF_ILLEGAL;
-   if (!arec->aconf->clients)
-    free_conf(arec->aconf);
-   MyFree(arec);
+   /* We keep the temporary K-lines and destroy the
+    * permanent ones, just to be confusing :) -A1kmm */
+   if (arec->aconf->flags & CONF_FLAGS_TEMPORARY)
+   {
+    *store_next = arec;
+    store_next = &arec->next;
+   } else
+   {
+    arec->aconf->flags |= CONF_ILLEGAL;
+    if (!arec->aconf->clients)
+     free_conf(arec->aconf);
+    MyFree(arec);
+   }
   }
-  atable[i] = NULL;
+  *store_next = NULL;
  }
 }
 
@@ -686,20 +697,23 @@ report_Ilines(struct Client *client_p)
 
 
 void
-report_Klines(struct Client *client_p)
+report_Klines(struct Client *client_p, int t)
 {
  char *name, *host, *pass, *user, *classname, c;
  struct AddressRec *arec;
  struct ConfItem *aconf;
  int i, port;
+ if (t)
+  c = 'k';
+ else
+  c = 'K';
  for (i=0; i<ATABLE_SIZE; i++)
   for (arec=atable[i]; arec; arec=arec->next)
    if (arec->type == CONF_KILL)
    {
-    if ((aconf=arec->aconf)->flags & CONF_FLAGS_TEMPORARY)
-     c = 'k';
-    else
-     c = 'K';
+    if ((t && !((aconf=arec->aconf)->flags & CONF_FLAGS_TEMPORARY))
+        || (!t && ((aconf=arec->aconf)->flags & CONF_FLAGS_TEMPORARY)))
+     continue;
     get_printable_conf(aconf, &name, &host, &pass, &user, &port,
                        &classname);
     sendto_one(client_p, form_str(RPL_STATSKLINE), me.name,

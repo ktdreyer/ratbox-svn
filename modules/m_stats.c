@@ -395,12 +395,12 @@ static void do_priv_stats(struct Client *source_p, char *name, char *target,
       break;
 
     case 'K' :
-      report_Klines(source_p);
+      report_Klines(source_p, 0);
       stats_spy(source_p,statchar);
       break;
 
     case 'k' :
-      /* report_temp_klines(source_p); */
+      report_Klines(source_p, -1);
       stats_spy(source_p,statchar);
       break;
 

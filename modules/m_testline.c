@@ -119,7 +119,7 @@ static void mo_testline(struct Client *client_p, struct Client *source_p,
       p++;
       given_host = p;
       if ((t=parse_netmask(given_host, &ip, &host_mask)) != HM_HOST)
-       aconf = find_address_conf(NULL, given_name, &ip,
+       aconf = find_address_conf(given_host, given_name, &ip,
 #ifdef IPV6
           (t==HM_IPV6)?AF_INET6 : AF_INET
 #else
