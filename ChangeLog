@@ -1,3 +1,17 @@
+androsyn    2005/03/23 02:49:02 UTC	(20050323_2)
+
+  Removed files:
+    modules              .depend 
+    src                  .depend 
+  Log:
+  remove .depend as we no longer need them
+  
+  Revision  Changes    Path
+  1.49      +0 -664    ircd-ratbox/modules/.depend (dead)
+  7.52      +0 -364    ircd-ratbox/src/.depend (dead)
+
+
+
 leeh        2005/03/23 00:37:42 UTC	(20050323_1)
 
   Modified files:
