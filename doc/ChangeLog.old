@@ -1,3 +1,18 @@
+*** 20001021_1 by lusky
+fix for duplicate 401's for kick #validchan invalnick
+ServerStats->is_ref is incremented twice on an X-line
+  which is set to 1 (jdc)
+STATS P notifications were not sent to opers (jdc)
+stats l/L target to FLAGS_SPY (if STATS_NOTICE) (jdc)
+uname info only displayed to opers
+If X-line port field is 2, reject client but do not send
+  a notification to opers
+STATS y/Y now oper-only
+did NOT add any of the other conf line display restrictions, I think
+  we should integrate control of those on a per-line basis in the new
+  conf format.
+
+
 *** 20001020_1 by toot
 msg nick with no text made it core..
 privmsg/notice give different errors depending what args are missing, so
