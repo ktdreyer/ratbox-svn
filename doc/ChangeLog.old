@@ -1,3 +1,9 @@
+*** 20001227_30 by davidt
+Fix rather confusing message to opers when a server sends a numeric
+directed at a server.
+Fix exit_one_client so that we take LLs into account when a client quits.
+
+
 *** 20001227_29 by ejb
 Directory /cvsroot/ircd-hybrid-7/contrib added to the repository
 
