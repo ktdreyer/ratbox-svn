@@ -259,7 +259,7 @@ void do_normal_stats(struct Client *sptr,
         sendto_one(sptr, form_str(RPL_STATSUPTIME), me.name, sptr->name,
                    now/86400, (now/3600)%24, (now/60)%60, now%60);
         sendto_one(sptr, form_str(RPL_STATSCONN), me.name, sptr->name,
-                   MaxConnectionCount, MaxClientCount);
+                   MaxConnectionCount, MaxClientCount, Count.totalrestartcount);
 	stats_spy(sptr,stat);
         break;
       }
