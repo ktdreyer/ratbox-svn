@@ -375,6 +375,15 @@ comm_select_fdlist(fdlist_t fdlist, time_t delay)
     return 0;
 }
 
+/*
+ * Note that I haven't really implemented the multiple FD list code in
+ * hyb-7 yet, because I haven't got a server doing some decent traffic
+ * to profile. I'll get around to it.
+ *
+ * If you run a big server, you should be running freebsd-stable + kqueue!
+ *
+ *   -- adrian
+ */
 int
 comm_select(time_t delay)
 {
