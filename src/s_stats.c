@@ -119,12 +119,10 @@ void tstats(struct Client *source_p)
              me.name, RPL_STATSDEBUG, source_p->name, sp->is_kill, sp->is_ni);
   sendto_one(source_p, ":%s %d %s :wrong direction %u empty %u",
              me.name, RPL_STATSDEBUG, source_p->name, sp->is_wrdi, sp->is_empt);
-  sendto_one(source_p, ":%s %d %s :numerics seen %u mode fakes %u",
-             me.name, RPL_STATSDEBUG, source_p->name, sp->is_num, sp->is_fake);
+  sendto_one(source_p, ":%s %d %s :numerics seen %u",
+             me.name, RPL_STATSDEBUG, source_p->name, sp->is_num);
   sendto_one(source_p, ":%s %d %s :auth successes %u fails %u",
              me.name, RPL_STATSDEBUG, source_p->name, sp->is_asuc, sp->is_abad);
-  sendto_one(source_p, ":%s %d %s :local connections %u udp packets %u",
-             me.name, RPL_STATSDEBUG, source_p->name, sp->is_loc, sp->is_udp);
   sendto_one(source_p, ":%s %d %s :Client Server",
              me.name, RPL_STATSDEBUG, source_p->name);
   sendto_one(source_p, ":%s %d %s :connected %u %u",

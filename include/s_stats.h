@@ -54,11 +54,8 @@ struct  ServerStatistics {
   unsigned int    is_empt; /* empty message */
   unsigned int    is_num; /* numeric message */
   unsigned int    is_kill; /* number of kills generated on collisions */
-  unsigned int    is_fake; /* MODE 'fakes' */
   unsigned int    is_asuc; /* successful auth requests */
   unsigned int    is_abad; /* bad auth requests */
-  unsigned int    is_udp; /* packets recv'd on udp port */
-  unsigned int    is_loc; /* local connections made */
 };
 
 extern struct ServerStatistics* ServerStats;
