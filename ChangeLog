@@ -1,3 +1,17 @@
+androsyn    2004/08/14 20:48:52 EDT	(20040815_0)
+
+  Modified files:
+    include              sprintf_irc.h 
+    src                  snprintf.c 
+  Log:
+  Add ircsprintf_append and friends
+  
+  Revision  Changes    Path
+  7.16      +7 -0      ircd-ratbox/include/sprintf_irc.h
+  1.14      +58 -0     ircd-ratbox/src/snprintf.c
+
+
+
 leeh        2004/08/14 14:24:31 EDT	(20040814_2)
 
   Modified files:
