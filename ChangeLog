@@ -1,3 +1,16 @@
+androsyn    2004/03/29 21:02:13 EST	(20040330_4)
+
+  Modified files:
+    src                  reject.c 
+  Log:
+  PATRICIA_WALK isn't safe for doing removals.  Use a linked list to track and
+  removal rejects
+  
+  Revision  Changes    Path
+  1.13      +13 -6     ircd-ratbox/src/reject.c
+
+
+
 leeh        2004/03/29 19:58:38 EST	(20040330_3)
 
   Modified files:
