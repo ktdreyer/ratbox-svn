@@ -31,9 +31,32 @@
 #define CF_TYPE(x) ((x) & CF_MTYPE)
 
 struct TopConf *conf_cur_block;
-char *conf_cur_block_name;
+static char *conf_cur_block_name;
 
-dlink_list conf_items;
+static dlink_list conf_items;
+
+/* XXX This _really_ needs to go away */
+static struct ConfItem *yy_achead = NULL;
+static struct ConfItem *yy_aconf = NULL;
+static struct ConfItem *yy_aprev = NULL;
+static int yy_acount = 0;
+static struct ConfItem *yy_hconf;
+static struct ConfItem *yy_lconf;
+
+static struct ConfItem *hub_confs;
+static struct ConfItem *leaf_confs;
+static struct ConfItem *yy_aconf_next;
+
+static struct Class *yy_class = NULL;
+
+static struct rxconf *yy_rxconf = NULL;
+static struct shared *yy_uconf = NULL;
+static struct cluster *yy_cconf = NULL;
+
+static char *resv_reason;
+
+static char *class_redirserv_var;
+static int class_redirport_var;
 
 
 static const char *
@@ -419,28 +442,6 @@ conf_set_logging_log_level(void *data)
 	set_log_level(L_NOTICE);
 }
 
-/* XXX This _really_ needs to go away */
-struct ConfItem *yy_achead = NULL;
-struct ConfItem *yy_aconf = NULL;
-struct ConfItem *yy_aprev = NULL;
-int yy_acount = 0;
-struct ConfItem *yy_hconf;
-struct ConfItem *yy_lconf;
-
-struct ConfItem *hub_confs;
-struct ConfItem *leaf_confs;
-struct ConfItem *yy_aconf_next;
-
-struct Class *yy_class = NULL;
-
-static struct rxconf *yy_rxconf = NULL;
-static struct shared *yy_uconf = NULL;
-static struct cluster *yy_cconf = NULL;
-
-char *resv_reason;
-
-char *class_redirserv_var;
-int class_redirport_var;
 
 struct mode_table
 {

@@ -22,18 +22,6 @@ struct TopConf
 	dlink_list tc_items;
 };
 
-extern struct ConfItem *yy_achead;
-extern struct ConfItem *yy_aconf;
-extern struct ConfItem *yy_aprev;
-extern int yy_acount;
-extern struct ConfItem *yy_hconf;
-extern struct ConfItem *yy_lconf;
-
-extern struct ConfItem *hub_confs;
-extern struct ConfItem *leaf_confs;
-extern struct ConfItem *yy_aconf_next;
-
-extern struct Class *yy_class;
 
 #define CF_QSTRING	0x01
 #define CF_INT		0x02
@@ -70,6 +58,7 @@ struct ConfEntry
 	void (*cf_func) (void *);
 };
 
+extern struct TopConf *conf_cur_block;
 
 int read_config(char *);
 int conf_start_block(char *, char *);
