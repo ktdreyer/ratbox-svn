@@ -1,3 +1,7 @@
+*** 20010923_6 by a1kmm
+- Changing a #ifdef to a #undef is not a smart way to disable something.
+
+
 *** 20010923_5 by a1kmm
 - Fixed a possible NULL deref I did ages ago in the debug version of
   MyRealloc
