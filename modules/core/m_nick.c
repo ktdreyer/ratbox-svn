@@ -262,8 +262,7 @@ mc_nick(struct Client *client_p, struct Client *source_p, int parc, const char *
 		ServerStats->is_kill++;
 		sendto_realops_flags(UMODE_DEBUG, L_ALL,
 				     "Bad Nick: %s From: %s(via %s)",
-				     parv[1], parc == 9 ? parv[7] : 
-				      source_p->user->server,
+				     parv[1], source_p->user->server,
 				     client_p->name);
 		sendto_one(client_p, ":%s KILL %s :%s (Bad Nickname)",
 			   me.name, parv[1], me.name);
@@ -317,9 +316,7 @@ ms_nick(struct Client *client_p, struct Client *source_p, int parc, const char *
 		ServerStats->is_kill++;
 		sendto_realops_flags(UMODE_DEBUG, L_ALL,
 				     "Bad Nick: %s From: %s(via %s)",
-				     parv[1], parc == 9 ? parv[7] : 
-				      source_p->user->server,
-				     client_p->name);
+				     parv[1], parv[7], client_p->name);
 		sendto_one(client_p, ":%s KILL %s :%s (Bad Nickname)",
 			   me.name, parv[1], me.name);
 		return 0;
