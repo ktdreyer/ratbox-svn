@@ -972,7 +972,9 @@ static void exit_one_client(struct Client *client_p,
         remove_server_from_list(source_p);
     }
   else if (source_p->servptr && source_p->servptr->serv)
+    {
       del_client_from_llist(&(source_p->servptr->serv->users), source_p);
+    }
   /* there are clients w/o a servptr: unregistered ones */
 
   /*
@@ -1018,12 +1020,6 @@ static void exit_one_client(struct Client *client_p,
           (source_p->flags & FLAGS_KILLED) == 0)
         sendto_one(target_p, ":%s SQUIT %s :%s", from->name, source_p->name, comment);
     }
-  else if (!(IsPerson(source_p)))
-      /* ...this test is *dubious*, would need
-      ** some thought.. but for now it plugs a
-      ** nasty hole in the server... --msa
-      */
-      ; /* Nothing */
   else if (source_p->name[0]) /* ...just clean all others with QUIT... */
     {
       /*
