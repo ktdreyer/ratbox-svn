@@ -639,7 +639,7 @@ static void msg_client(int p_or_n, char *command,
   if(MyClient(sptr))
     {
       /* reset idle time for message only if its not to self */
-      if((sptr != acptr) && sptr->user)
+      if((p_or_n != NOTICE) && (sptr != acptr) && sptr->user)
 	sptr->user->last = CurrentTime;
     }
 
