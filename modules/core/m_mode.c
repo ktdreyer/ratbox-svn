@@ -110,7 +110,7 @@ m_mode(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	else if(IsServer(source_p))
 	{
 		set_channel_mode(client_p, source_p, chptr, NULL,
-				 parc - n, parv + n, chptr->chname);
+				 parc - n, parv + n);
 	}
 	else
 	{
@@ -127,7 +127,7 @@ m_mode(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		}
 
 		set_channel_mode(client_p, source_p, chptr, msptr, 
-			         parc - n, parv + n, chptr->chname);
+			         parc - n, parv + n);
 	}
 
 	return 0;

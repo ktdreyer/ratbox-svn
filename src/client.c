@@ -89,22 +89,6 @@ enum
 dlink_list dead_list;
 
 /*
- * client_heap_gc
- *
- * inputs	- NONE
- * output	- NONE
- * side effect  - Does garbage collection of client heaps
- */
-
-static void
-client_heap_gc(void *unused)
-{
-	BlockHeapGarbageCollect(client_heap);
-	BlockHeapGarbageCollect(lclient_heap);
-}
-
-
-/*
  * init_client
  *
  * inputs	- NONE
@@ -122,7 +106,6 @@ init_client(void)
 	lclient_heap = BlockHeapCreate(sizeof(struct LocalUser), LCLIENT_HEAP_SIZE);
 	eventAddIsh("check_pings", check_pings, NULL, 30);
 	eventAddIsh("free_exited_clients", &free_exited_clients, NULL, 4);
-	eventAddIsh("client_heap_gc", client_heap_gc, NULL, 30);
 	eventAddIsh("exit_aborted_clients", exit_aborted_clients, NULL, 1);
 	hook_add_event("local_exit_client", &h_local_exit_client);
 	hook_add_event("unknown_exit_client", &h_unknown_exit_client);
