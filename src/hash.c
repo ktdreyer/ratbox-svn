@@ -329,15 +329,7 @@ del_from_id_hash(const char *id, struct Client *client_p)
 		return;
 
 	hashv = hash_id(id);
-
-	DLINK_FOREACH_SAFE(ptr, next_ptr, idTable[hashv].head)
-	{
-		if(client_p == ptr->data)
-		{
-			dlinkDestroy(ptr, &idTable[hashv]);
-			return;
-		}
-	}
+	dlinkFindDestroy(&idTable[hashv], client_p);
 }
 
 /* del_from_client_hash()
@@ -358,16 +350,7 @@ del_from_client_hash(const char *name, struct Client *client_p)
 		return;
 
 	hashv = hash_nick(name);
-
-	DLINK_FOREACH_SAFE(ptr, next_ptr, clientTable[hashv].head)
-	{
-		if(client_p == ptr->data)
-		{
-			dlinkDestroy(ptr, &clientTable[hashv]);
-
-			return;
-		}
-	}
+	dlinkFindDestroy(&clientTable[hashv], client_p);
 }
 
 /* del_from_channel_hash()
@@ -388,15 +371,7 @@ del_from_channel_hash(const char *name, struct Channel *chptr)
 		return;
 
 	hashv = hash_channel(name);
-
-	DLINK_FOREACH_SAFE(ptr, next_ptr, channelTable[hashv].head)
-	{
-		if(chptr == ptr->data)
-		{
-			dlinkDestroy(ptr, &channelTable[hashv]);
-			return;
-		}
-	}
+	dlinkFindDestroy(&channelTable[hashv], chptr);
 }
 
 /* del_from_hostname_hash()

@@ -340,7 +340,7 @@ static struct oper_flags oper_flagtable[] =
 const char *
 get_oper_privs(int flags)
 {
-	static char buf[14];
+	static char buf[20];
 	char *p;
 	int i;
 

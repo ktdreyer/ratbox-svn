@@ -626,6 +626,7 @@ conf_end_oper(struct TopConf *tc)
 		dlinkMoveNode(ptr, &yy_oper_list, &oper_conf_list);
 	}
 
+	free_oper_conf(yy_oper);
 	yy_oper = NULL;
 
 	return 0;
