@@ -65,7 +65,6 @@ int                specific_virtual_host = 0;
 /* internally defined functions */
 
 static void lookup_confhost(struct ConfItem* aconf);
-static void do_include_conf(void);
 static int  SplitUserHost( struct ConfItem * );
 static char *getfield(char *newline);
 static struct ConfItem* oldParseOneLine(char* ,struct ConfItem*,int*,int*);
@@ -87,7 +86,7 @@ static void conf_add_q_line(struct ConfItem *);
 static void add_host_user_port_fields(struct ConfItem*, char*, char*, char *);
 
 static FBFILE*  openconf(const char* filename);
-static void     initconf(FBFILE*, int);
+static void     initconf(FBFILE*);
 static void     clear_out_old_conf(void);
 static void     flush_deleted_I_P(void);
 
@@ -154,9 +153,6 @@ aQlineItem         *q_conf = ((aQlineItem *)NULL);
 
 /* conf uline link list root */
 struct ConfItem        *u_conf = ((struct ConfItem *)NULL);
-
-/* keep track of .include files to hash in */
-struct ConfItem        *include_list = ((struct ConfItem *)NULL);
 
 /*
  * conf_dns_callback - called when resolver query finishes
@@ -1799,7 +1795,7 @@ static char *set_conf_flags(struct ConfItem *aconf,char *tmp)
 
 #define MAXCONFLINKS 150
 
-static void initconf(FBFILE* file, int use_include)
+static void initconf(FBFILE* file)
 {
   char             line[BUFSIZE];
   char             quotedLine[BUFSIZE];
@@ -1807,7 +1803,6 @@ static void initconf(FBFILE* file, int use_include)
   int              ccount = 0;
   int              ncount = 0;
   struct ConfItem* aconf = NULL;
-  struct ConfItem* include_conf = NULL;
 
   class0 = find_class(0);       /* which one is class 0 ? */
 
@@ -1822,12 +1817,11 @@ static void initconf(FBFILE* file, int use_include)
           quotedLine[0] == ' ' || quotedLine[0] == '\t')
         continue;
 
-      /* Horrible kludge to do .include "filename" */
-
-      if(use_include && (quotedLine[0] == '.'))
+      if(quotedLine[0] == '.')
         {
           char *filename;
           char *back;
+	  FBFILE* includeFile;
 
           if(!ircncmp(quotedLine+1,"include ",8))
             {
@@ -1846,19 +1840,16 @@ static void initconf(FBFILE* file, int use_include)
                   log(L_ERROR, "Bad config line: %s", quotedLine);
                   continue;
                 }
-              include_conf = make_conf();
-              DupString(include_conf->name,filename);
-              include_conf->next = include_list;
-              include_list = include_conf;
-            }
-          /* 
-           * A line consisting of the first char '.' will now
-           * be treated as a comment line.
-           * a line `.include "file"' will result in an included
-           * portion of the conf file.
-           */
-          continue;
-        }
+
+	      if( (includeFile = openconf(filename)) == 0 )
+		{
+                  log(L_ERROR, "Can't open: %s", filename);
+                  continue;
+		}
+	      else
+		initconf(includeFile);
+	    }
+	}
 
       aconf = make_conf();
 
@@ -2246,35 +2237,6 @@ static int SplitUserHost(struct ConfItem *aconf)
         }
     }
   return(1);
-}
-
-/*
- * do_include_conf()
- *
- * inputs        - NONE
- * output        - NONE
- * side effect        -
- * hash in any .include conf files listed in the conf file
- * -Dianora
- */
-
-static void do_include_conf(void)
-{
-  FBFILE* file=0;
-  struct ConfItem *nextinclude;
-
-  for( ; include_list; include_list = nextinclude )
-    {
-      nextinclude = include_list->next;
-      if ((file = openconf(include_list->name)) == 0)
-        sendto_ops("Can't open %s include file",include_list->name);
-      else
-        {
-          sendto_ops("Hashing in %s include file",include_list->name);
-          initconf(file, NO);
-        }
-      free_conf(include_list);
-    }
 }
 
 /*
@@ -3124,14 +3086,7 @@ void read_conf_files(int cold)
   if(!cold)
     clear_out_old_conf();
 
-  initconf(file, YES);
-
-  do_include_conf();
-
-  /* ZZZ have to deal with single ircd.conf situations */
-  /* It would be better to check for NULL return from filename 
-   * or *filename == '\0'; and then just ignoring it 
-   */
+  initconf(file);
 
 #ifdef KPATH
   filename = get_conf_name(KLINE_TYPE);
@@ -3149,7 +3104,7 @@ void read_conf_files(int cold)
         }
     }
   else
-    initconf(file, NO);
+    initconf(file);
 #endif
 }
 

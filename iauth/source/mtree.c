@@ -676,7 +676,7 @@ SearchSubTree(struct Level **level, int hostc, char **hostv)
            * in the Iline and determine we have made a match.
            * However, the piece containing the "*" is not
            * the final piece of the Iline, and so it will not
-           * contiain a pointer to an Iline. Therefore we must
+           * contain a pointer to an Iline. Therefore we must
            * ensure that tmpnode contains at least 1 typeptr.
            */
           if (!tmpnode->numptrs)
