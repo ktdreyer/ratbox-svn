@@ -1,3 +1,18 @@
+leeh        2002/11/19 23:25:07 UTC	(20021119_1)
+
+  Modified files:
+    .                    RELNOTES 
+    contrib              m_owhois.c 
+  Log:
+  - s/doing_whois/doing_whois_local in owhois
+  - updated relnotes
+  
+  Revision  Changes    Path
+  1.67      +6 -0      ircd-ratbox/RELNOTES
+  1.10      +2 -2      ircd-ratbox/contrib/m_owhois.c
+
+
+
 leeh        2002/11/19 23:02:52 UTC	(20021119_0)
 
   Modified files:
