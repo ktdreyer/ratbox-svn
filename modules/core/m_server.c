@@ -132,6 +132,9 @@ static void mr_server(struct Client *client_p, struct Client *source_p,
         sendto_realops_flags(UMODE_ALL, L_OPER,
            "Unauthorized server connection attempt from %s: No entry for "
            "servername %s", get_client_name(client_p, MASK_IP), name);
+
+        ilog(L_NOTICE, "Access denied, No N line for server %s",
+             log_client_name(client_p, SHOW_IP));
       }
       
       exit_client(client_p, client_p, client_p, "Invalid servername.");
@@ -148,6 +151,9 @@ static void mr_server(struct Client *client_p, struct Client *source_p,
            "Unauthorized server connection attempt from %s: Bad password "
            "for server %s", get_client_name(client_p, MASK_IP), name);
 
+      ilog(L_NOTICE, "Access denied, invalid password for server %s",
+           log_client_name(client_p, SHOW_IP));
+
       exit_client(client_p, client_p, client_p, "Invalid password.");
       return;
       /* NOT REACHED */
@@ -162,6 +168,9 @@ static void mr_server(struct Client *client_p, struct Client *source_p,
            "Unauthorized server connection attempt from %s: Invalid host "
            "for server %s", get_client_name(client_p, MASK_IP), name);
 
+      ilog(L_NOTICE, "Access denied, invalid host for server %s",
+           log_client_name(client_p, SHOW_IP));
+
       exit_client(client_p, client_p, client_p, "Invalid host.");
       return;
       /* NOT REACHED */
@@ -175,6 +184,8 @@ static void mr_server(struct Client *client_p, struct Client *source_p,
       sendto_realops_flags(UMODE_ALL, L_OPER,
 		           "Invalid servername %s from %s",
 			   name, get_client_name(client_p, MASK_IP));
+      ilog(L_NOTICE, "Access denied, invalid servername from %s",
+           log_client_name(client_p, SHOW_IP));
 
       exit_client(client_p, client_p, client_p, "Invalid servername.");
       return;
@@ -381,11 +392,11 @@ static void ms_server(struct Client *client_p, struct Client *source_p,
     {
       /* OOOPs nope can't HUB */
       sendto_realops_flags(UMODE_ALL, L_ADMIN, "Non-Hub link %s introduced %s.",
-                get_client_name(client_p, HIDE_IP), name);
+                           get_client_name(client_p, HIDE_IP), name);
 
       sendto_realops_flags(UMODE_ALL, L_OPER,
-          "Non-Hub link %s introduced %s.",
-	  get_client_name(client_p, MASK_IP), name);
+                           "Non-Hub link %s introduced %s.",
+   	                   get_client_name(client_p, MASK_IP), name);
 
       exit_client(NULL, source_p, &me, "No matching hub_mask.");
       return;
@@ -396,31 +407,11 @@ static void ms_server(struct Client *client_p, struct Client *source_p,
     {
       /* OOOPs nope can't HUB this leaf */
       sendto_realops_flags(UMODE_ALL, L_ADMIN,
-            "Link %s introduced leafed server %s.",
-	    get_client_name(client_p, HIDE_IP), name);
+                           "Link %s introduced leafed server %s.",
+ 	                   get_client_name(client_p, HIDE_IP), name);
       sendto_realops_flags(UMODE_ALL, L_OPER, 
-            "Link %s introduced leafed server %s.",
-            client_p->name, name);
-      /* If it is new, we are probably misconfigured, so split the
-       * non-hub server introducing this. Otherwise, split the new
-       * server. -A1kmm.
-       */
-      /* wastes too much bandwidth, generates too many errors on
-       * larger networks, dont bother. --fl_
-       */
-#if 0
-      if ((CurrentTime - source_p->firsttime) < 20)
-        {
-          exit_client(NULL, source_p, &me, "Leafed Server.");
-          return;
-        }
-      else
-        {
-          sendto_one(source_p, ":%s SQUIT %s :Sorry, Leafed server.",
-                     me.name, name);
-          return;
-        }
-#endif
+                           "Link %s introduced leafed server %s.",
+                           client_p->name, name);
 
       exit_client(NULL, client_p, &me, "Leafed Server.");
       return;
@@ -475,11 +466,11 @@ static void ms_server(struct Client *client_p, struct Client *source_p,
       if (!(aconf = bclient_p->serv->sconf))
 	{
 	  sendto_realops_flags(UMODE_ALL, L_ADMIN, 
-	        "Lost N-line for %s on %s. Closing",
-		get_client_name(client_p, HIDE_IP), name);
+	                       "Lost N-line for %s on %s. Closing",
+	                       get_client_name(client_p, HIDE_IP), name);
 	  sendto_realops_flags(UMODE_ALL, L_OPER, 
-	        "Lost N-line for %s on %s. Closing",
-		get_client_name(client_p, MASK_IP), name);
+	                       "Lost N-line for %s on %s. Closing",
+                               get_client_name(client_p, MASK_IP), name);
 	  exit_client(client_p, client_p, client_p, "Lost N line");
           return;
 	}

@@ -753,7 +753,7 @@ log_client_name(struct Client *target_p, int showip)
   if(MyConnect(target_p))
   {
     if(irccmp(target_p->name, target_p->host) == 0)
-      return client_p->name;
+      return target_p->name;
 
     switch(showip)
     {
@@ -774,7 +774,7 @@ log_client_name(struct Client *target_p, int showip)
     return nbuf;
   }
 
-  return client_p->name;
+  return target_p->name;
 }
                   
 static void

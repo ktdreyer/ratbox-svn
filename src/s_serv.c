@@ -1044,7 +1044,7 @@ int server_estab(struct Client *client_p)
 			inpath,show_capabilities(client_p));
 
   ilog(L_NOTICE, "Link with %s established: (%s) link",
-      inpath_ip, show_capabilities(client_p));
+       log_client_name(client_p, SHOW_IP), show_capabilities(client_p));
 
   client_p->serv->sconf = aconf;
 
@@ -1379,28 +1379,51 @@ static int fork_server(struct Client *server)
 
     if (!set_non_blocking(server->localClient->fd))
     {
-      report_error(L_ADMIN, NONB_ERROR_MSG, get_client_name(server, SHOW_IP), errno);
+      report_error(L_ADMIN, NONB_ERROR_MSG, 
+#ifdef HIDE_SERVERS_IPS
+                   get_client_name(server, MASK_IP),
+#else
+                   get_client_name(server, SHOW_IP),
+#endif
+                   errno);
       report_error(L_OPER, NONB_ERROR_MSG, get_client_name(server, MASK_IP), errno);
     }
+
     if (!set_non_blocking(server->localClient->ctrlfd))
     {
       report_error(L_ADMIN, NONB_ERROR_MSG, 
-                   get_client_name(server, SHOW_IP), errno);
+#ifdef HIDE_SERVERS_IPS
+                   get_client_name(server, MASK_IP),
+#else
+                   get_client_name(server, SHOW_IP),
+#endif
+                   errno);
       report_error(L_OPER, NONB_ERROR_MSG, 
                    get_client_name(server, MASK_IP), errno);
     }
+
 #ifndef HAVE_SOCKETPAIR
     if (!set_non_blocking(server->localClient->fd_r))
     {
       report_error(L_ADMIN, NONB_ERROR_MSG, 
-                   get_client_name(server, SHOW_IP), errno);
+#ifdef HIDE_SERVERS_IPS
+                   get_client_name(server, MASK_IP),
+#else
+                   get_client_name(server, SHOW_IP),
+#endif
+                   errno);
       report_error(L_OPER, NONB_ERROR_MSG,
                    get_client_name(server, MASK_IP), errno);
     }
     if (!set_non_blocking(server->localClient->ctrlfd_r))
     {
       report_error(L_ADMIN, NONB_ERROR_MSG, 
-                   get_client_name(server, SHOW_IP), errno);
+#ifdef HIDE_SERVERS_IPS
+                   get_client_name(server, MASK_IP),
+#else
+                   get_client_name(server, SHOW_IP),
+#endif
+                   errno);
       report_error(L_OPER, NONB_ERROR_MSG,
                    get_client_name(server, MASK_IP), errno);
     }
@@ -1670,8 +1693,8 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
     if ((client_p = find_server(aconf->name)))
       { 
         sendto_realops_flags(UMODE_ALL, L_ADMIN,
-	      "Server %s already present from %s",
-	      aconf->name, get_client_name(client_p, SHOW_IP));
+	                     "Server %s already present from %s",
+	                     aconf->name, get_client_name(client_p, SHOW_IP));
         sendto_realops_flags(UMODE_ALL, L_OPER,
 			     "Server %s already present from %s",
 			     aconf->name, get_client_name(client_p, MASK_IP));
@@ -1710,13 +1733,25 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
 
     if (!set_non_blocking(client_p->localClient->fd))
     {
-      report_error(L_ADMIN, NONB_ERROR_MSG, get_client_name(client_p, SHOW_IP), errno);
+      report_error(L_ADMIN, NONB_ERROR_MSG, 
+#ifdef HIDE_SPOOF_IPS
+                   get_client_name(client_p, MASK_IP),
+#else
+                   get_client_name(client_p, SHOW_IP),
+#endif
+                   errno);
       report_error(L_OPER, NONB_ERROR_MSG, get_client_name(client_p, MASK_IP), errno);
     }
 
     if (!set_sock_buffers(client_p->localClient->fd, READBUF_SIZE))
     {
-      report_error(L_ADMIN, SETBUF_ERROR_MSG, get_client_name(client_p, SHOW_IP), errno);
+      report_error(L_ADMIN, SETBUF_ERROR_MSG, 
+#ifdef HIDE_SPOOF_IPS
+                   get_client_name(client_p, MASK_IP),
+#else
+                   get_client_name(client_p, SHOW_IP),
+#endif
+                   errno);
       report_error(L_OPER, SETBUF_ERROR_MSG, get_client_name(client_p, MASK_IP), errno);
     }
 
@@ -1866,9 +1901,15 @@ serv_connect_callback(int fd, int status, void *data)
     if (!aconf)
       {
         sendto_realops_flags(UMODE_ALL, L_ADMIN,
-	             "Lost connect{} block for %s", get_client_name(client_p, HIDE_IP));
+                             "Lost connect{} block for %s",
+#ifdef HIDE_SPOOF_IPS
+                             get_client_name(client_p, MASK_IP));
+#else
+                             get_client_name(client_p, HIDE_IP));
+#endif
         sendto_realops_flags(UMODE_ALL, L_OPER,
-		     "Lost connect{} block for %s", get_client_name(client_p, MASK_IP));
+		             "Lost connect{} block for %s",
+                             get_client_name(client_p, MASK_IP));
         exit_client(client_p, client_p, &me, "Lost connect{} block");
         return;
       }
@@ -2030,11 +2071,16 @@ void cryptlink_error(struct Client *client_p, char *type,
                      char *reason, char *client_reason)
 {
   sendto_realops_flags(UMODE_ALL, L_ADMIN, "%s: CRYPTLINK %s error - %s",
-                       get_client_name(client_p, SHOW_IP), type, reason);
+#ifdef HIDE_SERVERS_IPS
+                       get_client_name(client_p, MASK_IP),
+#else
+                       get_client_name(client_p, SHOW_IP),
+#endif
+                       type, reason);
   sendto_realops_flags(UMODE_ALL, L_OPER, "%s: CRYPTLINK %s error - %s",
                        get_client_name(client_p, MASK_IP), type, reason);
   ilog(L_ERROR, "%s: CRYPTLINK %s error - %s",
-                get_client_name(client_p, SHOW_IP), type, reason);
+       log_client_name(client_p, SHOW_IP), type, reason);
   /*
    * If client_reason isn't NULL, then exit the client with the message
    * defined in the call.
