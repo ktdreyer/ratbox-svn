@@ -1,3 +1,20 @@
+androsyn    2002/03/01 09:55:59 EST	(20020301_5)
+
+  Modified files:
+    .                    configure 
+    autoconf             acconfig.h configure.in 
+    include              setup.h.in 
+  Log:
+  Here are some better autoconf checks for nanosleep()
+  
+  Revision  Changes    Path
+  7.20      +3 -0      ircd-hybrid-7/autoconf/acconfig.h
+  7.124     +10 -1     ircd-hybrid-7/autoconf/configure.in
+  7.127     +211 -128  ircd-hybrid-7/configure
+  7.48      +4 -4      ircd-hybrid-7/include/setup.h.in
+
+
+
 androsyn    2002/03/01 09:30:25 EST	(20020301_4)
 
   Modified files:
