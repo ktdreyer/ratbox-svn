@@ -351,12 +351,21 @@ start_auth(struct Client *client)
 
 	sendheader(client, REPORT_DO_DNS);
 
-	SetDNSPending(auth);
 	dlinkAdd(auth, &auth->node, &auth_poll_list);
-	auth->dns_query = lookup_ip(client->sockhost, client->localClient->ip.ss_family, auth_dns_callback, auth);
+
+	/* Note that the order of things here are done for a good reason
+	 * if you try to do start_auth_query before lookup_ip there is a 
+	 * good chance that you'll end up with a double free on the auth
+	 * and that is bad.  But you still must keep the SetDNSPending 
+	 * before the call to start_auth_query, otherwise you'll have
+	 * the same thing.  So think before you hack 
+	 */
+	SetDNSPending(auth);
 
 	if(ConfigFileEntry.disable_auth == 0)
 		start_auth_query(auth);
+
+	auth->dns_query = lookup_ip(client->sockhost, client->localClient->ip.ss_family, auth_dns_callback, auth);
 }
 
 /*
