@@ -1,3 +1,27 @@
+leeh        2004/10/04 15:36:22 EDT	(20041004_0)
+
+  Modified files:
+    doc                  example.conf 
+    include              c_init.h client.h rserv.h 
+    src                  Makefile.in rserv.c 
+  Added files:
+    src                  crypt.c s_jupeserv.c 
+  Log:
+  - add missing crypt.c
+  - initial work on jupeserv
+  
+  Revision  Changes    Path
+  1.10      +1 -1      rserv/doc/example.conf
+  1.15      +2 -3      rserv/include/c_init.h
+  1.21      +1 -0      rserv/include/client.h
+  1.9       +2 -0      rserv/include/rserv.h
+  1.26      +1 -1      rserv/src/Makefile.in
+  1.1       +117 -0    rserv/src/crypt.c (new)
+  1.31      +24 -3     rserv/src/rserv.c
+  1.1       +185 -0    rserv/src/s_jupeserv.c (new)
+
+
+
 leeh        2004/09/25 11:59:30 EDT	(20040925_14)
 
   Removed files:
