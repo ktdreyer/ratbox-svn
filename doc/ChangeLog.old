@@ -1,3 +1,7 @@
+*** 20001227_29 by ejb
+Directory /cvsroot/ircd-hybrid-7/contrib added to the repository
+
+
 *** 20001227_28 by davidt
 Fix ping to prevent servers throwing 402 nosuchserver numerics at each other
 
