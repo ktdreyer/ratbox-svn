@@ -422,7 +422,7 @@ static int build_target_list(int p_or_n,
 	{
           if(*nick == '$')
             {
-              handle_opers(p_or_n, command, cptr,sptr,nick+1,text);
+              handle_opers(p_or_n, command, cptr,sptr,nick,text);
               continue;
             }
           if(strchr(nick, '@'))
@@ -827,8 +827,7 @@ static int flood_attack_channel(struct Client *sptr,struct Channel *chptr,
  *		  However, syntax has been changed.
  *		  previous syntax "/msg #some.host.mask"
  *		  now becomes     "/msg $#some.host.mask"
- *		  previous syntax "/msg $some.server.mask"
- *		  now becomes	  "/msg $$some.server.mask"
+ *		  previous syntax of: "/msg $some.server.mask" remains
  *		  This disambiguates the syntax.
  */
 static void handle_opers(int p_or_n,
