@@ -427,9 +427,8 @@ find_conf_by_address(const char *name, struct irc_inaddr *addr, int type,
   if (name != NULL)
   {
     const char *p;
-    for (p = name; p != NULL; p = strchr(p, '.'))
+    for (p = name; ; )
     {
-      p++;
       for (arec = atable[hash_text(p)]; arec; arec = arec->next)
         if ((arec->type == (type & ~0x1)) &&
             (arec->masktype == HM_HOST) &&
@@ -440,6 +439,11 @@ find_conf_by_address(const char *name, struct irc_inaddr *addr, int type,
           hprecv = arec->precedence;
           hprec = arec->aconf;
         }
+        p = strchr(p, '.');
+        if (p != NULL)
+          p++;
+        else
+          break;
     }
     for (arec = atable[0]; arec; arec = arec->next)
       if (arec->type == (type & ~0x1) &&
