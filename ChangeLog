@@ -1,3 +1,16 @@
+androsyn    2003/02/14 08:40:53 UTC	(20030214_11)
+
+  Modified files:
+    src                  client.c s_auth.c 
+  Log:
+  Revert those again
+  
+  Revision  Changes    Path
+  7.373     +0 -0      ircd-ratbox/src/client.c
+  7.137     +1 -0      ircd-ratbox/src/s_auth.c
+
+
+
 androsyn    2003/02/14 08:25:51 UTC	(20030214_10)
 
   Modified files:
