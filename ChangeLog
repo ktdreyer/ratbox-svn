@@ -1,3 +1,17 @@
+leeh        2005/02/02 16:41:06 EST	(20050202_2)
+
+  Modified files:
+    modules              m_etrace.c 
+  Log:
+  - patch via nenolod, allows ETRACE <nick>, gets sent remotely over ENCAP
+    if its a non-local client.  These will just get "lost" if the remote
+    server doesnt support this..
+  
+  Revision  Changes    Path
+  1.13      +66 -4     ircd-ratbox/modules/m_etrace.c
+
+
+
 leeh        2005/02/02 16:12:12 EST	(20050202_1)
 
   Modified files:
