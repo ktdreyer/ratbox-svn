@@ -48,20 +48,10 @@ struct Message user_msgtab = {
 };
 
 #ifndef STATIC_MODULES
-void
-_modinit(void)
-{
-	mod_add_cmd(&user_msgtab);
-}
-
-void
-_moddeinit(void)
-{
-	mod_del_cmd(&user_msgtab);
-}
-
-const char *_version = "$Revision$";
+mapi_clist_av1 user_clist[] = { &user_msgtab, NULL };
+DECLARE_MODULE_AV1(NULL, NULL, user_clist, NULL, "$Revision$");
 #endif
+
 /*
 ** mr_user
 **      parv[0] = sender prefix

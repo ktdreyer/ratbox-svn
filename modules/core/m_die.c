@@ -46,21 +46,12 @@ struct Message die_msgtab = {
 	"DIE", 0, 0, 1, 0, MFLG_SLOW, 0,
 	{m_unregistered, m_not_oper, m_ignore, mo_die}
 };
+
 #ifndef STATIC_MODULES
-void
-_modinit(void)
-{
-	mod_add_cmd(&die_msgtab);
-}
-
-void
-_moddeinit(void)
-{
-	mod_del_cmd(&die_msgtab);
-}
-
-const char *_version = "$Revision$";
+mapi_clist_av1 die_clist[] = { &die_msgtab, NULL };
+DECLARE_MODULE_AV1(NULL, NULL, die_clist, NULL, "$Revision$");
 #endif
+
 /*
  * mo_die - DIE command handler
  */

@@ -46,15 +46,51 @@
 struct module
 {
 	char *name;
-	char *version;
+	const char *version;
 	void *address;
 	int core;
+	int mapi_version;
+	void * mapi_header; /* actually struct mapi_mheader_av<mapi_version>	*/
 };
 
 struct module_path
 {
 	char path[MAXPATHLEN];
 };
+
+#define MAPI_MAGIC_HDR	0x4D410000
+
+#define MAPI_V1		(MAPI_MAGIC_HDR | 0x1)
+
+#define MAPI_MAGIC(x)	((x) & 0xffff0000)
+#define MAPI_VERSION(x)	((x) & 0x0000ffff)
+
+typedef struct Message* mapi_clist_av1;
+
+typedef struct
+{
+	/* XXX */
+} mapi_hlist_av1;
+
+struct mapi_mheader_av1
+{
+	int		  mapi_version;				/* Module API version		*/
+	int		(*mapi_register)	(void);		/* Register function;
+								   ret -1 = failure (unload)	*/
+	void		(*mapi_unregister)	(void);		/* Unregister function.		*/
+	mapi_clist_av1	* mapi_command_list;			/* List of commands to add.	*/
+	mapi_hlist_av1	* mapi_hook_list;			/* List of hooks to add.	*/
+	const char *	  mapi_module_version;			/* Module's version (freeform)	*/
+};
+
+#ifndef STATIC_MODULES
+# define DECLARE_MODULE_AV1(reg,unreg,cl,hl,v) \
+	struct mapi_mheader_av1 _mheader = { MAPI_V1, reg, unreg, cl, hl, v}
+#else
+# define DECLARE_MODULE ERROR MAPI_NOT_AVAILABLE
+#endif
+
+#define _modinit ERROR DO_NOT_USE_MODINIT_WITH_NEW_MAPI_IT_WILL_NOT_WORK
 
 /* add a path */
 void mod_add_path(const char *path);
@@ -68,9 +104,6 @@ extern void load_all_modules(int warn);
 
 /* load core modules */
 extern void load_core_modules(int);
-
-extern void _modinit(void);
-extern void _moddeinit(void);
 
 extern int unload_one_module(char *, int);
 extern int load_one_module(char *, int);

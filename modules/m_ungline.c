@@ -54,18 +54,8 @@ struct Message gline_msgtab = {
 };
 
 #ifndef STATIC_MODULES
-void
-_modinit(void)
-{
-	mod_add_cmd(&gline_msgtab);
-}
-
-void
-_moddeinit(void)
-{
-	mod_del_cmd(&gline_msgtab);
-}
-const char *_version = "$Revision$";
+mapi_clist_av1 gline_clist[] = { &gline_msgtab, NULL };
+DECLARE_MODULE_AV1(NULL, NULL, gline_clist, NULL, "$Revision$");
 #endif
 
 /* m_ungline()

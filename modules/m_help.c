@@ -54,23 +54,12 @@ struct Message uhelp_msgtab = {
 	{m_unregistered, m_help, m_ignore, mo_uhelp}
 };
 #ifndef STATIC_MODULES
-
-void
-_modinit(void)
-{
-	mod_add_cmd(&help_msgtab);
-	mod_add_cmd(&uhelp_msgtab);
-}
-
-void
-_moddeinit(void)
-{
-	mod_del_cmd(&help_msgtab);
-	mod_del_cmd(&uhelp_msgtab);
-}
-
-const char *_version = "$Revision$";
+mapi_clist_av1 help_clist[] = { 
+	&help_msgtab, &uhelp_msgtab, NULL 
+};
+DECLARE_MODULE_AV1(NULL, NULL, help_clist, NULL, "$Revision$");
 #endif
+
 /*
  * m_help - HELP message handler
  *      parv[0] = sender prefix

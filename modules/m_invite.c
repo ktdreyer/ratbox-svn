@@ -50,20 +50,8 @@ struct Message invite_msgtab = {
 	{m_unregistered, m_invite, m_invite, m_invite}
 };
 #ifndef STATIC_MODULES
-
-void
-_modinit(void)
-{
-	mod_add_cmd(&invite_msgtab);
-}
-
-void
-_moddeinit(void)
-{
-	mod_del_cmd(&invite_msgtab);
-}
-
-const char *_version = "$Revision$";
+mapi_clist_av1 invite_clist[] = { &invite_msgtab, NULL };
+DECLARE_MODULE_AV1(NULL, NULL, invite_clist, NULL, "$Revision$");
 #endif
 
 /*

@@ -47,20 +47,10 @@ struct Message ping_msgtab = {
 };
 
 #ifndef STATIC_MODULES
-void
-_modinit(void)
-{
-	mod_add_cmd(&ping_msgtab);
-}
-
-void
-_moddeinit(void)
-{
-	mod_del_cmd(&ping_msgtab);
-}
-
-const char *_version = "$Revision$";
+mapi_clist_av1 ping_clist[] = { &ping_msgtab, NULL };
+DECLARE_MODULE_AV1(NULL, NULL, ping_clist, NULL, "$Revision$");
 #endif
+
 /*
 ** m_ping
 **      parv[0] = sender prefix

@@ -50,19 +50,8 @@ struct Message rehash_msgtab = {
 };
 
 #ifndef STATIC_MODULES
-void
-_modinit(void)
-{
-	mod_add_cmd(&rehash_msgtab);
-}
-
-void
-_moddeinit(void)
-{
-	mod_del_cmd(&rehash_msgtab);
-}
-
-const char *_version = "$Revision$";
+mapi_clist_av1 rehash_clist[] = { &rehash_msgtab, NULL };
+DECLARE_MODULE_AV1(NULL, NULL, rehash_clist, NULL, "$Revision$");
 #endif
 
 struct hash_commands

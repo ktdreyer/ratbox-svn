@@ -48,24 +48,12 @@ struct Message links_msgtab = {
 	"LINKS", 0, 0, 0, 0, MFLG_SLOW, 0,
 	{m_unregistered, m_links, ms_links, mo_links}
 };
+
 #ifndef STATIC_MODULES
-
-void
-_modinit(void)
-{
-	hook_add_event("doing_links");
-	mod_add_cmd(&links_msgtab);
-}
-
-void
-_moddeinit(void)
-{
-	hook_del_event("doing_links");
-	mod_del_cmd(&links_msgtab);
-}
-
-const char *_version = "$Revision$";
+mapi_clist_av1 links_clist[] = { &links_msgtab, NULL };
+DECLARE_MODULE_AV1(NULL, NULL, links_clist, NULL, "$Revision$");
 #endif
+
 /*
  * m_links - LINKS message handler
  *      parv[0] = sender prefix

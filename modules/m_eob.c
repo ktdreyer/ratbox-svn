@@ -44,20 +44,10 @@ struct Message eob_msgtab = {
 	{m_unregistered, m_ignore, ms_eob, m_ignore}
 };
 #ifndef STATIC_MODULES
-void
-_modinit(void)
-{
-	mod_add_cmd(&eob_msgtab);
-}
-
-void
-_moddeinit(void)
-{
-	mod_del_cmd(&eob_msgtab);
-}
-
-const char *_version = "$Revision$";
+mapi_clist_av1 eob_clist[] = { &eob_msgtab, NULL };
+DECLARE_MODULE_AV1(NULL, NULL, eob_clist, NULL, "$Revision$");
 #endif
+
 /*
  * ms_eob - EOB command handler
  *      parv[0] = sender prefix   

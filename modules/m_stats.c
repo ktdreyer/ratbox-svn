@@ -65,23 +65,8 @@ struct Message stats_msgtab = {
 };
 
 #ifndef STATIC_MODULES
-void
-_modinit (void)
-{
-	hook_add_event ("doing_stats");
-	hook_add_event ("doing_stats_p");
-	mod_add_cmd (&stats_msgtab);
-}
-
-void
-_moddeinit (void)
-{
-	hook_del_event ("doing_stats_p");
-	hook_del_event ("doing_stats");
-	mod_del_cmd (&stats_msgtab);
-}
-
-const char *_version = "$Revision$";
+mapi_clist_av1 stats_clist[] = { &stats_msgtab, NULL };
+DECLARE_MODULE_AV1(NULL, NULL, stats_clist, NULL, "$Revision$");
 #endif
 
 const char *Lformat = ":%s %d %s %s %u %u %u %u %u :%u %u %s";

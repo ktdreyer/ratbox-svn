@@ -45,20 +45,10 @@ struct Message operwall_msgtab = {
 };
 
 #ifndef STATIC_MODULES
-void
-_modinit(void)
-{
-	mod_add_cmd(&operwall_msgtab);
-}
-
-void
-_moddeinit(void)
-{
-	mod_del_cmd(&operwall_msgtab);
-}
-
-const char *_version = "$Revision$";
+mapi_clist_av1 operwall_clist[] = { &operwall_msgtab, NULL };
+DECLARE_MODULE_AV1(NULL, NULL, operwall_clist, NULL, "$Revision$");
 #endif
+
 /*
  * mo_operwall - OPERWALL message handler
  *  (write to *all* local opers currently online)

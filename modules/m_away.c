@@ -45,20 +45,12 @@ struct Message away_msgtab = {
 	"AWAY", 0, 0, 0, 0, MFLG_SLOW, 0,
 	{m_unregistered, m_away, m_away, m_away}
 };
-#ifndef STATIC_MODULES
-void
-_modinit(void)
-{
-	mod_add_cmd(&away_msgtab);
-}
 
-void
-_moddeinit(void)
-{
-	mod_del_cmd(&away_msgtab);
-}
-const char *_version = "$Revision$";
+#ifndef STATIC_MODULES
+mapi_clist_av1 away_clist[] = { &away_msgtab, NULL };
+DECLARE_MODULE_AV1(NULL, NULL, away_clist, NULL, "$Revision$");
 #endif
+
 /***********************************************************************
  * m_away() - Added 14 Dec 1988 by jto. 
  *            Not currently really working, I don't like this

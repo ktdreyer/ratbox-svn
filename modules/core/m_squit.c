@@ -48,19 +48,10 @@ struct Message squit_msgtab = {
 };
 
 #ifndef STATIC_MODULES
-void
-_modinit(void)
-{
-	mod_add_cmd(&squit_msgtab);
-}
-
-void
-_moddeinit(void)
-{
-	mod_del_cmd(&squit_msgtab);
-}
-const char *_version = "$Revision$";
+mapi_clist_av1 squit_clist[] = { &squit_msgtab, NULL };
+DECLARE_MODULE_AV1(NULL, NULL, squit_clist, NULL, "$Revision$");
 #endif
+
 struct squit_parms
 {
 	char *server_name;

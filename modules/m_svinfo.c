@@ -46,20 +46,10 @@ struct Message svinfo_msgtab = {
 };
 
 #ifndef STATIC_MODULES
-void
-_modinit(void)
-{
-	mod_add_cmd(&svinfo_msgtab);
-}
-
-void
-_moddeinit(void)
-{
-	mod_del_cmd(&svinfo_msgtab);
-}
-
-const char *_version = "$Revision$";
+mapi_clist_av1 svinfo_clist[] = { &svinfo_msgtab, NULL };
+DECLARE_MODULE_AV1(NULL, NULL, svinfo_clist, NULL, "$Revision$");
 #endif
+
 /*
  * ms_svinfo - SVINFO message handler
  *      parv[0] = sender prefix

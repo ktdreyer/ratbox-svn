@@ -48,20 +48,10 @@ struct Message restart_msgtab = {
 };
 
 #ifndef STATIC_MODULES
-void
-_modinit(void)
-{
-	mod_add_cmd(&restart_msgtab);
-}
-
-void
-_moddeinit(void)
-{
-	mod_del_cmd(&restart_msgtab);
-}
-
-const char *_version = "$Revision$";
+mapi_clist_av1 restart_clist[] = { &restart_msgtab, NULL };
+DECLARE_MODULE_AV1(NULL, NULL, restart_clist, NULL, "$Revision$");
 #endif
+
 /*
  * mo_restart
  *

@@ -52,19 +52,10 @@ struct Message whowas_msgtab = {
 };
 
 #ifndef STATIC_MODULES
-void
-_modinit(void)
-{
-	mod_add_cmd(&whowas_msgtab);
-}
-
-void
-_moddeinit(void)
-{
-	mod_del_cmd(&whowas_msgtab);
-}
-const char *_version = "$Revision$";
+mapi_clist_av1 whowas_clist[] = { &whowas_msgtab, NULL };
+DECLARE_MODULE_AV1(NULL, NULL, whowas_clist, NULL, "$Revision$");
 #endif
+
 static int whowas_do(struct Client *client_p, struct Client *source_p, int parc, char *parv[]);
 
 

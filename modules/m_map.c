@@ -42,19 +42,8 @@ struct Message map_msgtab = {
 };
 
 #ifndef STATIC_MODULES
-void
-_modinit(void)
-{
-	mod_add_cmd(&map_msgtab);
-}
-
-void
-_moddeinit(void)
-{
-	mod_del_cmd(&map_msgtab);
-}
-
-const char *_version = "$Revision$";
+mapi_clist_av1 map_clist[] = { &map_msgtab, NULL };
+DECLARE_MODULE_AV1(NULL, NULL, map_clist, NULL, "$Revision$");
 #endif
 
 static char buf[BUFSIZE];

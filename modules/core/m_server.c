@@ -57,18 +57,8 @@ struct Message server_msgtab = {
 };
 
 #ifndef STATIC_MODULES
-void
-_modinit(void)
-{
-	mod_add_cmd(&server_msgtab);
-}
-
-void
-_moddeinit(void)
-{
-	mod_del_cmd(&server_msgtab);
-}
-const char *_version = "$Revision$";
+mapi_clist_av1 server_clist[] = { &server_msgtab, NULL };
+DECLARE_MODULE_AV1(NULL, NULL, server_clist, NULL, "$Revision$");
 #endif
 
 int bogus_host(char *host);

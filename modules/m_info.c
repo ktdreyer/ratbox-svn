@@ -56,22 +56,10 @@ struct Message info_msgtab = {
 	"INFO", 0, 0, 0, 0, MFLG_SLOW, 0,
 	{m_unregistered, m_info, ms_info, mo_info}
 };
+
 #ifndef STATIC_MODULES
-
-void
-_modinit(void)
-{
-	hook_add_event("doing_info");
-	mod_add_cmd(&info_msgtab);
-}
-
-void
-_moddeinit(void)
-{
-	hook_del_event("doing_info");
-	mod_del_cmd(&info_msgtab);
-}
-const char *_version = "$Revision$";
+mapi_clist_av1 info_clist[] = { &info_msgtab, NULL };
+DECLARE_MODULE_AV1(NULL, NULL, info_clist, NULL, "$Revision$");
 #endif
 
 /*

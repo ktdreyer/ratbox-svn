@@ -53,18 +53,8 @@ struct Message undline_msgtab = {
 };
 
 #ifndef STATIC_MODULES
-void
-_modinit(void)
-{
-	mod_add_cmd(&undline_msgtab);
-}
-
-void
-_moddeinit(void)
-{
-	mod_del_cmd(&undline_msgtab);
-}
-const char *_version = "$Revision$";
+mapi_clist_av1 undline_clist[] = { &undline_msgtab, NULL };
+DECLARE_MODULE_AV1(NULL, NULL, undline_clist, NULL, "$Revision$");
 #endif
 
 static int flush_write(struct Client *, FBFILE *, char *, char *);

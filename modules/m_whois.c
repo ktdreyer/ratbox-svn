@@ -61,24 +61,16 @@ struct Message whois_msgtab = {
 };
 
 #ifndef STATIC_MODULES
-void
-_modinit(void)
-{
+mapi_clist_av1 whois_clist[] = { &whois_msgtab, NULL };
+DECLARE_MODULE_AV1(NULL, NULL, whois_clist, NULL, "$Revision$");
+/* XXX MAPI need hooks 
 	hook_add_event("doing_whois_local");
 	hook_add_event("doing_whois_global");
-	mod_add_cmd(&whois_msgtab);
-}
-
-void
-_moddeinit(void)
-{
 	hook_del_event("doing_whois_local");
 	hook_del_event("doing_whois_global");
-	mod_del_cmd(&whois_msgtab);
-}
-
-const char *_version = "$Revision$";
+*/
 #endif
+
 /*
 ** m_whois
 **      parv[0] = sender prefix

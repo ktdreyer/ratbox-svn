@@ -52,20 +52,10 @@ struct Message topic_msgtab = {
 };
 
 #ifndef STATIC_MODULES
-void
-_modinit(void)
-{
-	mod_add_cmd(&topic_msgtab);
-}
-
-void
-_moddeinit(void)
-{
-	mod_del_cmd(&topic_msgtab);
-}
-
-const char *_version = "$Revision$";
+mapi_clist_av1 topic_clist[] = { &topic_msgtab, NULL };
+DECLARE_MODULE_AV1(NULL, NULL, topic_clist, NULL, "$Revision$");
 #endif
+
 /*
  * m_topic
  *      parv[0] = sender prefix

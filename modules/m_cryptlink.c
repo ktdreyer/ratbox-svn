@@ -65,18 +65,7 @@
 #ifndef HAVE_LIBCRYPTO
 
 #ifndef STATIC_MODULES
-/* XXX - print error? */
-void
-_modinit(void)
-{
-}
-
-void
-_moddeinit(void)
-{
-}
-
-const char *_version = "$Revision$";
+DECLARE_MODULE(NULL, NULL, NULL, NULL, "$Revision$");
 #endif
 #else
 
@@ -108,19 +97,8 @@ static struct CryptLinkStruct cryptlink_cmd_table[] = {
 };
 
 #ifndef STATIC_MODULES
-void
-_modinit(void)
-{
-	mod_add_cmd(&cryptlink_msgtab);
-}
-
-void
-_moddeinit(void)
-{
-	mod_del_cmd(&cryptlink_msgtab);
-}
-
-const char *_version = "$Revision$";
+mapi_clist_av1 cryptlink_clist[] = { &cryptlink_msgtab, NULL };
+DECLARE_MODULE_AV1(NULL, NULL, cryptlink_clist, NULL, "$Revision$");
 #endif
 
 

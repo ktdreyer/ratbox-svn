@@ -53,22 +53,12 @@ struct Message kill_msgtab = {
 	"KILL", 0, 0, 2, 0, MFLG_SLOW, 0,
 	{m_unregistered, m_not_oper, ms_kill, mo_kill}
 };
+
 #ifndef STATIC_MODULES
-
-void
-_modinit(void)
-{
-	mod_add_cmd(&kill_msgtab);
-}
-
-void
-_moddeinit(void)
-{
-	mod_del_cmd(&kill_msgtab);
-}
-
-const char *_version = "$Revision$";
+mapi_clist_av1 kill_clist[] = { &kill_msgtab, NULL };
+DECLARE_MODULE_AV1(NULL, NULL, kill_clist, NULL, "$Revision$");
 #endif
+
 /*
 ** mo_kill
 **      parv[0] = sender prefix

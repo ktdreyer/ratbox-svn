@@ -43,20 +43,10 @@ struct Message pass_msgtab = {
 };
 
 #ifndef STATIC_MODULES
-void
-_modinit(void)
-{
-	mod_add_cmd(&pass_msgtab);
-}
-
-void
-_moddeinit(void)
-{
-	mod_del_cmd(&pass_msgtab);
-}
-
-const char *_version = "$Revision$";
+mapi_clist_av1 pass_clist[] = { &pass_msgtab, NULL };
+DECLARE_MODULE_AV1(NULL, NULL, pass_clist, NULL, "$Revision$");
 #endif
+
 /*
  * m_pass() - Added Sat, 4 March 1989
  *

@@ -43,21 +43,12 @@ struct Message close_msgtab = {
 	"CLOSE", 0, 0, 0, 0, MFLG_SLOW, 0,
 	{m_unregistered, m_not_oper, m_ignore, mo_close}
 };
+
 #ifndef STATIC_MODULES
-void
-_modinit(void)
-{
-	mod_add_cmd(&close_msgtab);
-}
-
-void
-_moddeinit(void)
-{
-	mod_del_cmd(&close_msgtab);
-}
-
-const char *_version = "$Revision$";
+mapi_clist_av1 close_clist[] = { &close_msgtab, NULL };
+DECLARE_MODULE_AV1(NULL, NULL, close_clist, NULL, "$Revision$");
 #endif
+
 /*
  * mo_close - CLOSE message handler
  *  - added by Darren Reed Jul 13 1992.

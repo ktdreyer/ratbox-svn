@@ -49,19 +49,8 @@ struct Message ison_msgtab = {
 };
 
 #ifndef STATIC_MODULES
-
-void
-_modinit(void)
-{
-	mod_add_cmd(&ison_msgtab);
-}
-
-void
-_moddeinit(void)
-{
-	mod_del_cmd(&ison_msgtab);
-}
-const char *_version = "$Revision$";
+mapi_clist_av1 ison_clist[] = { &ison_msgtab, NULL };
+DECLARE_MODULE_AV1(NULL, NULL, ison_clist, NULL, "$Revision$");
 #endif
 
 static char buf[BUFSIZE];

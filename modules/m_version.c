@@ -49,20 +49,10 @@ struct Message version_msgtab = {
 };
 
 #ifndef STATIC_MODULES
-void
-_modinit(void)
-{
-	mod_add_cmd(&version_msgtab);
-}
-
-void
-_moddeinit(void)
-{
-	mod_del_cmd(&version_msgtab);
-}
-
-const char *_version = "$Revision$";
+mapi_clist_av1 version_clist[] = { &version_msgtab, NULL };
+DECLARE_MODULE_AV1(NULL, NULL, version_clist, NULL, "$Revision$");
 #endif
+
 /*
  * m_version - VERSION command handler
  *      parv[0] = sender prefix

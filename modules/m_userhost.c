@@ -48,20 +48,10 @@ struct Message userhost_msgtab = {
 };
 
 #ifndef STATIC_MODULES
-void
-_modinit(void)
-{
-	mod_add_cmd(&userhost_msgtab);
-}
-
-void
-_moddeinit(void)
-{
-	mod_del_cmd(&userhost_msgtab);
-}
-
-const char *_version = "$Revision$";
+mapi_clist_av1 userhost_clist[] = { &userhost_msgtab, NULL };
+DECLARE_MODULE_AV1(NULL, NULL, userhost_clist, NULL, "$Revision$");
 #endif
+
 /*
  * m_userhost added by Darren Reed 13/8/91 to aid clients and reduce
  * the need for complicated requests like WHOIS. It returns user/host

@@ -44,21 +44,10 @@ struct Message lusers_msgtab = {
 	"LUSERS", 0, 0, 0, 0, MFLG_SLOW, 0,
 	{m_unregistered, m_lusers, ms_lusers, ms_lusers}
 };
+
 #ifndef STATIC_MODULES
-
-void
-_modinit(void)
-{
-	mod_add_cmd(&lusers_msgtab);
-}
-
-void
-_moddeinit(void)
-{
-	mod_del_cmd(&lusers_msgtab);
-}
-
-const char *_version = "$Revision$";
+mapi_clist_av1 lusers_clist[] = { &lusers_msgtab, NULL };
+DECLARE_MODULE_AV1(NULL, NULL, lusers_clist, NULL, "$Revision$");
 #endif
 
 /*

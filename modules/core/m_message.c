@@ -103,22 +103,10 @@ struct Message notice_msgtab = {
 };
 
 #ifndef STATIC_MODULES
-
-void
-_modinit(void)
-{
-	mod_add_cmd(&privmsg_msgtab);
-	mod_add_cmd(&notice_msgtab);
-}
-
-void
-_moddeinit(void)
-{
-	mod_del_cmd(&privmsg_msgtab);
-	mod_del_cmd(&notice_msgtab);
-}
-
-const char *_version = "$Revision$";
+mapi_clist_av1 message_clist[] = {
+	&privmsg_msgtab, &notice_msgtab, NULL
+};
+DECLARE_MODULE_AV1(NULL, NULL, message_clist, NULL, "$Revision$");
 #endif
 
 /*

@@ -50,19 +50,10 @@ struct Message who_msgtab = {
 };
 
 #ifndef STATIC_MODULES
-void
-_modinit(void)
-{
-	mod_add_cmd(&who_msgtab);
-}
-
-void
-_moddeinit(void)
-{
-	mod_del_cmd(&who_msgtab);
-}
-const char *_version = "$Revision$";
+mapi_clist_av1 who_clist[] = { &who_msgtab, NULL };
+DECLARE_MODULE_AV1(NULL, NULL, who_clist, NULL, "$Revision$");
 #endif
+
 static void do_who_on_channel(struct Client *source_p,
 			      struct Channel *chptr, const char *real_name,
 			      int server_oper, int member);

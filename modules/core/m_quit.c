@@ -45,20 +45,10 @@ struct Message quit_msgtab = {
 };
 
 #ifndef STATIC_MODULES
-void
-_modinit(void)
-{
-	mod_add_cmd(&quit_msgtab);
-}
-
-void
-_moddeinit(void)
-{
-	mod_del_cmd(&quit_msgtab);
-}
-
-const char *_version = "$Revision$";
+mapi_clist_av1 quit_clist[] = { &quit_msgtab, NULL };
+DECLARE_MODULE_AV1(NULL, NULL, quit_clist, NULL, "$Revision$");
 #endif
+
 /*
 ** m_quit
 **      parv[0] = sender prefix

@@ -54,20 +54,12 @@ struct Message trace_msgtab = {
 };
 
 #ifndef STATIC_MODULES
-void
-_modinit(void)
-{
+mapi_clist_av1 trace_clist[] = { &trace_msgtab, NULL };
+DECLARE_MODULE_AV1(NULL, NULL, trace_clist, NULL, "$Revision$");
+/* XXX MAPI need hooks
 	hook_add_event("doing_trace");
-	mod_add_cmd(&trace_msgtab);
-}
-
-void
-_moddeinit(void)
-{
 	hook_del_event("doing_trace");
-	mod_del_cmd(&trace_msgtab);
-}
-const char *_version = "$Revision$";
+*/
 #endif
 
 static int report_this_status(struct Client *source_p, struct Client *target_p, int dow,

@@ -49,23 +49,12 @@ struct Message mode_msgtab = {
 	"MODE", 0, 0, 2, 0, MFLG_SLOW, 0,
 	{m_unregistered, m_mode, m_mode, m_mode}
 };
+
 #ifndef STATIC_MODULES
-
-void
-_modinit(void)
-{
-	mod_add_cmd(&mode_msgtab);
-}
-
-void
-_moddeinit(void)
-{
-	mod_del_cmd(&mode_msgtab);
-}
-
-
-const char *_version = "$Revision$";
+mapi_clist_av1 mode_clist[] = { &mode_msgtab, NULL };
+DECLARE_MODULE_AV1(NULL, NULL, mode_clist, NULL, "$Revision$");
 #endif
+
 /*
  * m_mode - MODE command handler
  * parv[0] - sender

@@ -49,20 +49,10 @@ struct Message testline_msgtab = {
 };
 
 #ifndef STATIC_MODULES
-void
-_modinit(void)
-{
-	mod_add_cmd(&testline_msgtab);
-}
-
-void
-_moddeinit(void)
-{
-	mod_del_cmd(&testline_msgtab);
-}
-
-const char *_version = "$Revision$";
+mapi_clist_av1 testline_clist[] = { &testline_msgtab, NULL };
+DECLARE_MODULE_AV1(NULL, NULL, testline_clist, NULL, "$Revision$");
 #endif
+
 /*
  * mo_testline
  *

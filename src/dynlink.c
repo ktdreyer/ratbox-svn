@@ -205,7 +205,6 @@ int
 unload_one_module(char *name, int warn)
 {
 	int modindex;
-	void (*deinitfunc) (void) = NULL;
 
 	if((modindex = findmodule_byname(name)) == -1)
 		return -1;
@@ -220,14 +219,25 @@ unload_one_module(char *name, int warn)
 	 ** to and from an integer value here will break some compilers.
 	 **          -jmallett
 	 */
-	if((deinitfunc =
-	    (void (*)(void)) (uintptr_t) dlsym(modlist[modindex]->address,
-					       "_moddeinit"))
-	   || (deinitfunc =
-	       (void (*)(void)) (uintptr_t) dlsym(modlist[modindex]->address, "__moddeinit")))
+	/* Left the comment in but the code isn't here any more		-larne */
+	switch (modlist[modindex]->mapi_version)
 	{
-		deinitfunc();
+	case 1:
+	{
+		struct mapi_mheader_av1* mheader = modlist[modindex]->mapi_header;
+		if (mheader->mapi_unregister)
+			mheader->mapi_unregister();
+		break;
 	}
+	default:
+		sendto_realops_flags(UMODE_ALL, L_ALL,
+			"Unknown/unsupported MAPI version %d when unloading %s!",
+			modlist[modindex]->mapi_version, modlist[modindex]->name);
+		ilog(L_CRIT, "Unknown/unsupported MAPI version %d when unloading %s!",
+			modlist[modindex]->mapi_version, modlist[modindex]->name);
+		break;
+	}
+
 	dlclose(modlist[modindex]->address);
 
 	MyFree(modlist[modindex]->name);
@@ -261,8 +271,9 @@ load_a_module(char *path, int warn, int core)
 
 	char *mod_basename;
 	void (*initfunc) (void) = NULL;
-	char **verp;
-	char *ver;
+	const char *ver;
+
+	int *mapi_version;
 
 	mod_basename = irc_basename(path);
 
@@ -279,23 +290,65 @@ load_a_module(char *path, int warn, int core)
 		return -1;
 	}
 
-	initfunc = (void (*)(void)) (uintptr_t) dlsym(tmpptr, "_modinit");
-	if(initfunc == NULL
-	   && (initfunc = (void (*)(void)) (uintptr_t) dlsym(tmpptr, "__modinit")) == NULL)
+	
+	/*
+	 * _mheader is actually a struct mapi_mheader_*, but mapi_version
+	 * is always the first member of this structure, so we treate it
+	 * as a single int in order to determine the API version.
+	 *	-larne.
+	 */
+	mapi_version = (int*) (uintptr_t) dlsym(tmpptr, "_mheader");
+	if((mapi_version == NULL
+	   && (mapi_version = (int*) (uintptr_t) dlsym(tmpptr, "__mheader")) == NULL)
+	  || MAPI_MAGIC(*mapi_version) != MAPI_MAGIC_HDR)
 	{
 		sendto_realops_flags(UMODE_ALL, L_ALL,
-				     "Module %s has no _modinit() function", mod_basename);
-		ilog(L_WARN, "Module %s has no _modinit() function", mod_basename);
+				     "Data format error: module %s has no MAPI header.", mod_basename);
+		ilog(L_WARN, "Data format error: module %s has no MAPI header.", mod_basename);
 		(void) dlclose(tmpptr);
 		MyFree(mod_basename);
 		return -1;
 	}
 
-	verp = (char **) dlsym(tmpptr, "_version");
-	if(verp == NULL && (verp = (char **) dlsym(tmpptr, "__version")) == NULL)
+	switch (MAPI_VERSION(*mapi_version))
+	{
+	case 1:
+	{
+		struct mapi_mheader_av1* mheader = (struct mapi_mheader_av1*) mapi_version;	/* see above */
+		if (mheader->mapi_register && (mheader->mapi_register() == -1))
+		{
+			ilog(L_WARN, "Module %s indicated failure during load.", mod_basename);
+			sendto_realops_flags(UMODE_ALL, L_ALL,
+				"Module %s indicated failure during load.", mod_basename);
+			dlclose(tmpptr);
+			MyFree(mod_basename);
+			return -1;
+		}
+		if (mheader->mapi_command_list)
+		{
+			struct Message **m;
+			for (m = mheader->mapi_command_list; *m; ++m)
+				mod_add_cmd(*m);
+		}
+		/* XXX implement hook_list		-larne */
+		
+		ver = mheader->mapi_module_version;
+		break;
+	}
+	
+	default:
+		ilog(L_WARN, "Module %s has unknown/unsupported MAPI version %d.",
+			mod_basename, MAPI_VERSION(*mapi_version));
+		sendto_realops_flags(UMODE_ALL, L_ALL,
+			"Module %s has unknown/unsupported MAPI version %d.",
+			mod_basename, *mapi_version);
+		dlclose(tmpptr);
+		MyFree(mod_basename);
+		return -1;
+	}
+
+	if(ver == NULL)
 		ver = unknown_ver;
-	else
-		ver = *verp;
 
 	increase_modlist();
 
@@ -304,16 +357,19 @@ load_a_module(char *path, int warn, int core)
 	modlist[num_mods]->version = ver;
 	modlist[num_mods]->core = core;
 	DupString(modlist[num_mods]->name, mod_basename);
+	modlist[num_mods]->mapi_header = mapi_version;
 	num_mods++;
 
-	initfunc();
+	if (initfunc)
+		initfunc();
 
 	if(warn == 1)
 	{
 		sendto_realops_flags(UMODE_ALL, L_ALL,
-				     "Module %s [version: %s] loaded at 0x%lx",
-				     mod_basename, ver, (unsigned long) tmpptr);
-		ilog(L_WARN, "Module %s [version: %s] loaded at 0x%x", mod_basename, ver, tmpptr);
+				     "Module %s [version: %s; MAPI version: %d] loaded at 0x%lx",
+				     mod_basename, ver, MAPI_VERSION(*mapi_version), (unsigned long) tmpptr);
+		ilog(L_WARN, "Module %s [version: %s; MAPI version: %d] loaded at 0x%x", 
+			mod_basename, ver, MAPI_VERSION(*mapi_version), tmpptr);
 	}
 	MyFree(mod_basename);
 	return 0;

@@ -47,21 +47,10 @@ struct Message locops_msgtab = {
 	"LOCOPS", 0, 0, 2, 0, MFLG_SLOW, 0,
 	{m_unregistered, m_not_oper, ms_locops, m_locops}
 };
+
 #ifndef STATIC_MODULES
-
-void
-_modinit(void)
-{
-	mod_add_cmd(&locops_msgtab);
-}
-
-void
-_moddeinit(void)
-{
-	mod_del_cmd(&locops_msgtab);
-}
-
-const char *_version = "$Revision$";
+mapi_clist_av1 locops_clist[] = { &locops_msgtab, NULL };
+DECLARE_MODULE_AV1(NULL, NULL, locops_clist, NULL, "$Revision$");
 #endif
 
 /*

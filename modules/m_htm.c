@@ -46,18 +46,8 @@ struct Message htm_msgtab = {
 	{m_unregistered, m_ignore, m_ignore, m_htm}
 };
 #ifndef STATIC_MODULES
-void
-_modinit(void)
-{
-	mod_add_cmd(&htm_msgtab);
-}
-
-void
-_moddeinit(void)
-{
-	mod_del_cmd(&htm_msgtab);
-}
-const char *_version = "$Revision$";
+mapi_clist_av1 htm_clist[] = { &htm_msgtab, NULL };
+DECLARE_MODULE_AV1(NULL, NULL, htm_clist, NULL, "$Revision$");
 #endif
 
 /*

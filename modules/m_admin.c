@@ -49,21 +49,17 @@ struct Message admin_msgtab = {
 	{mr_admin, m_admin, ms_admin, ms_admin}
 };
 #ifndef STATIC_MODULES
-void
-_modinit(void)
-{
-	hook_add_event("doing_admin");
-	mod_add_cmd(&admin_msgtab);
-}
+mapi_clist_av1 admin_clist[] = { &admin_msgtab, NULL };
+DECLARE_MODULE_AV1(NULL, NULL, admin_clist, NULL, "$Revision$");
 
-void
-_moddeinit(void)
-{
+/* XXX MAPI need hook list */
+
+/*
+	hook_add_event("doing_admin");
 	hook_del_event("doing_admin");
-	mod_del_cmd(&admin_msgtab);
-}
-const char *_version = "$Revision$";
+*/
 #endif
+
 /*
  * mr_admin - ADMIN command handler
  *      parv[0] = sender prefix   

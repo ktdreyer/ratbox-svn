@@ -55,19 +55,8 @@ struct Message dline_msgtab = {
 };
 
 #ifndef STATIC_MODULES
-
-void
-_modinit(void)
-{
-	mod_add_cmd(&dline_msgtab);
-}
-
-void
-_moddeinit(void)
-{
-	mod_del_cmd(&dline_msgtab);
-}
-const char *_version = "$Revision$";
+mapi_clist_av1 dline_clist[] = { &dline_msgtab, NULL };
+DECLARE_MODULE_AV1(NULL, NULL, dline_clist, NULL, "$Revision$");
 #endif
 
 /* Local function prototypes */

@@ -55,20 +55,10 @@ struct Message set_msgtab = {
 };
 
 #ifndef STATIC_MODULES
-void
-_modinit(void)
-{
-	mod_add_cmd(&set_msgtab);
-}
-
-void
-_moddeinit(void)
-{
-	mod_del_cmd(&set_msgtab);
-}
-
-const char *_version = "$Revision$";
+mapi_clist_av1 set_clist[] = { &set_msgtab, NULL };
+DECLARE_MODULE_AV1(NULL, NULL, set_clist, NULL, "$Revision$");
 #endif
+
 /* Structure used for the SET table itself */
 struct SetStruct
 {

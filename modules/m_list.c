@@ -53,24 +53,14 @@ struct Message list_msgtab = {
 	"LIST", 0, 0, 0, 0, MFLG_SLOW, 0,
 	{m_unregistered, m_list, m_ignore, mo_list}
 };
+
 #ifndef STATIC_MODULES
-
-void
-_modinit(void)
-{
-	mod_add_cmd(&list_msgtab);
-}
-
-void
-_moddeinit(void)
-{
-	mod_del_cmd(&list_msgtab);
-}
-const char *_version = "$Revision$";
+mapi_clist_av1 list_clist[] = { &list_msgtab, NULL };
+DECLARE_MODULE_AV1(NULL, NULL, list_clist, NULL, "$Revision$");
 #endif
+
 static int list_all_channels(struct Client *source_p);
 static int list_named_channel(struct Client *source_p, char *name);
-
 
 /*
 ** m_list

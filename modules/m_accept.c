@@ -50,19 +50,10 @@ struct Message accept_msgtab = {
 };
 
 #ifndef STATIC_MODULES
-void
-_modinit(void)
-{
-	mod_add_cmd(&accept_msgtab);
-}
-
-void
-_moddeinit(void)
-{
-	mod_del_cmd(&accept_msgtab);
-}
-
-const char *_version = "$Revision$";
+mapi_clist_av1 accept_clist[] = {
+	&accept_msgtab, NULL
+};
+DECLARE_MODULE_AV1(NULL, NULL, accept_clist, NULL, "$Revision$");
 #endif
 /*
  * m_accept - ACCEPT command handler

@@ -54,21 +54,10 @@ struct Message join_msgtab = {
 };
 
 #ifndef STATIC_MODULES
-
-void
-_modinit(void)
-{
-	mod_add_cmd(&join_msgtab);
-}
-
-void
-_moddeinit(void)
-{
-	mod_del_cmd(&join_msgtab);
-}
-const char *_version = "$Revision$";
-
+mapi_clist_av1 join_clist[] = { &join_msgtab, NULL };
+DECLARE_MODULE_AV1(NULL, NULL, join_clist, NULL, "$Revision$");
 #endif
+
 static void do_join_0(struct Client *client_p, struct Client *source_p);
 void check_spambot_warning(struct Client *source_p, const char *name);
 

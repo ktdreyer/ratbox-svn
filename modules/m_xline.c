@@ -67,22 +67,12 @@ struct Message unxline_msgtab = {
 };
 
 #ifndef STATIC_MODULES
-void
-_modinit(void)
-{
-	mod_add_cmd(&xline_msgtab);
-	mod_add_cmd(&unxline_msgtab);
-}
-
-void
-_moddeinit(void)
-{
-	mod_del_cmd(&xline_msgtab);
-	mod_del_cmd(&unxline_msgtab);
-}
-
-const char *_version = "$Revision$";
+mapi_clist_av1 xline_clist[] =  {
+	&xline_msgtab, &unxline_msgtab, NULL
+};
+DECLARE_MODULE_AV1(NULL, NULL, xline_clist, NULL, "$Revision$");
 #endif
+
 /* m_xline()
  *
  * parv[1] - thing to xline

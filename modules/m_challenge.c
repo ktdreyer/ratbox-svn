@@ -43,20 +43,17 @@
 
 #ifndef HAVE_LIBCRYPTO
 /* Maybe this should be an error or something?-davidt */
+/* now it is	-larne	*/
 #ifndef STATIC_MODULES
-void
-_modinit(void)
+int	challenge_load
 {
-	return;
+	sendto_realops_flags(UMODE_ALL, L_ALL, 
+		"Challenge module not loaded because OpenSSL is not available.");
+	ilog(L_WARN, "Challenge module not loaded because OpenSSL is not available.");
+	return -1;
 }
 
-void
-_moddeinit(void)
-{
-	return;
-}
-
-const char *_version = "$Revision$";
+DECLARE_MODULE_AV1(challenge_load, NULL, NULL, NULL, "$Revision$");
 #endif
 #else
 
@@ -68,21 +65,12 @@ struct Message challenge_msgtab = {
 	"CHALLENGE", 0, 0, 2, 0, MFLG_SLOW, 0,
 	{m_unregistered, m_challenge, m_ignore, m_challenge}
 };
+
 #ifndef STATIC_MODULES
-void
-_modinit(void)
-{
-	mod_add_cmd(&challenge_msgtab);
-}
-
-void
-_moddeinit(void)
-{
-	mod_del_cmd(&challenge_msgtab);
-}
-
-const char *_version = "$Revision$";
+mapi_clist_av1 challenge_clist[] = { &challenge_msgtab, NULL };
+DECLARE_MODULE_AV1(NULL, NULL, challenge_clist, NULL, "$Revision$");
 #endif
+
 /*
  * m_challenge - generate RSA challenge for wouldbe oper
  * parv[0] = sender prefix

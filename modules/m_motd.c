@@ -50,22 +50,10 @@ struct Message motd_msgtab = {
 	"MOTD", 0, 0, 0, 1, MFLG_SLOW, 0,
 	{mr_motd, m_motd, mo_motd, mo_motd}
 };
+
 #ifndef STATIC_MODULES
-void
-_modinit(void)
-{
-	hook_add_event("doing_motd");
-	mod_add_cmd(&motd_msgtab);
-}
-
-void
-_moddeinit(void)
-{
-	hook_del_event("doing_motd");
-	mod_del_cmd(&motd_msgtab);
-}
-
-const char *_version = "$Revision$";
+mapi_clist_av1 motd_clist[] = { &motd_msgtab, NULL };
+DECLARE_MODULE_AV1(NULL, NULL, motd_clist, NULL, "$Revision$");
 #endif
 
 /* mr_motd()

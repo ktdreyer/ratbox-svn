@@ -48,21 +48,12 @@ struct Message kick_msgtab = {
 	"KICK", 0, 0, 3, 0, MFLG_SLOW, 0,
 	{m_unregistered, m_kick, ms_kick, m_kick}
 };
+
 #ifndef STATIC_MODULES
-void
-_modinit(void)
-{
-	mod_add_cmd(&kick_msgtab);
-}
-
-void
-_moddeinit(void)
-{
-	mod_del_cmd(&kick_msgtab);
-}
-
-const char *_version = "$Revision$";
+mapi_clist_av1 kick_clist[] = { &kick_msgtab, NULL };
+DECLARE_MODULE_AV1(NULL, NULL, kick_clist, NULL, "$Revision$");
 #endif
+
 /*
 ** m_kick
 **      parv[0] = sender prefix
