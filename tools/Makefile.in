@@ -71,6 +71,8 @@ clean:
 distclean: clean
 	$(RM) -f Makefile
 
+depend:
+
 .c.o:
 	$(CC) $(CFLAGS) $(INCLUDES) $(CPPFLAGS) -c $<
 
