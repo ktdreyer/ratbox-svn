@@ -103,6 +103,7 @@ struct Message test_msgtab = {
 };
 /* Thats the msgtab finished */
 
+#ifndef STATIC_MODULES
 /* Here we tell it what to do when the module is loaded */
 void
 _modinit(void)
@@ -122,6 +123,7 @@ _moddeinit(void)
 /* When we last modified the file (shown in /modlist), this is usually:
  */
 char *_version = "$Revision$";
+#endif
 
 /*
  * mr_test

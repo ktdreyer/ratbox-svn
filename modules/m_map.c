@@ -45,6 +45,7 @@ struct Message map_msgtab = {
   {m_unregistered, m_map, m_ignore, mo_map}
 };
 
+#ifndef STATIC_MODULES
 void _modinit(void)
 {
   mod_add_cmd(&map_msgtab);
@@ -56,6 +57,8 @@ void _moddeinit(void)
 }
 
 char *_version = "$Revision$";
+#endif
+
 static char buf[BUFSIZE];
 
 /* m_map

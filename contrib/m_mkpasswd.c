@@ -57,6 +57,7 @@ struct Message test_msgtab = {
   {m_unregistered, m_mkpasswd, m_ignore, mo_mkpasswd}
 };
 
+#ifndef STATIC_MODULES
 void _modinit(void)
 {
   mod_add_cmd(&test_msgtab);
@@ -68,6 +69,7 @@ void _moddeinit(void)
 }
 
 char *_version = "$Revision$";
+#endif
 
 static void m_mkpasswd(struct Client *client_p, struct Client *source_p,
                    int parc, char *parv[])

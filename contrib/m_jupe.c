@@ -58,6 +58,7 @@ struct Message jupe_msgtab = {
   {m_unregistered, m_not_oper, mo_jupe, mo_jupe}
 };
 
+#ifndef STATIC_MODULES
 void
 _modinit(void)
 {
@@ -71,6 +72,7 @@ _moddeinit(void)
 }
 
 char *_version = "$Revision$";
+#endif
 
 /*
 ** mo_jupe

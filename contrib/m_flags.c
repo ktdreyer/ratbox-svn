@@ -58,6 +58,7 @@ struct Message test_msgtab = {
   {m_unregistered, m_flags, m_ignore, mo_flags}
 };
 
+#ifndef STATIC_MODULES
 void
 _modinit(void)
 {
@@ -71,6 +72,7 @@ _moddeinit(void)
 }
 
 char *_version = "$Revision$";
+#endif
 
 /* FLAGS requires it's own mini parser, since the last parameter in it can
 ** contain a number of FLAGS.  CS handles FLAGS mode1 mode2 OR
