@@ -1,3 +1,10 @@
+*** 20010529_5 by davidt
+- Fix connect_cipher_preference code in ircd_parser.y
+- Fix 3 other minor problems in ircd_parser.y found when I compiled it
+  with warnings enabled
+- Fix problem in servlink where EOF error messages weren't being displayed.
+
+
 *** 20010529_4 by jdc
 * Only send kernel compile information to admins on an /INFO.
 
