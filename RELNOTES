@@ -1,22 +1,8 @@
--- ircd-hybrid-7beta14 RELNOTES
+-- ircd-hybrid-7beta15 RELNOTES
 
-o) An I: -> auth {} converter has been added.
-   The converter groups similar I: together under the same auth {}; and
-   outputs them in priority order of spoofs, specials (exempt from kline/gline,
-   exceed class {}; limits etc), passworded I:'s, normal I:'s, restricted I:'s
-   (i: and I: that require identd).
-o) convertconf will now add the blocks that cant be converted from an old
-   config to the new file, such as general {}; and channel {};
-o) The IRCd will once again bounce modes from users who are deopped on an
-   sjoin.
-o) A core with the client history has been fixed.
-o) Persistant channels have been fixed so they will expire.
-o) NICKLEN is now set via ./configure --with-nicklen=X
-   Defaults to 9.
-o) MAXCLIENTS is now set via ./configure --with-maxclients=X
-   Defaults to 200.
-o) Some extra modules have been added to contrib/
-o) Fixed a bug with +ov users not appearing in a +a channel oplist sync
+o) fixed a core in the servlink code
+o) fixed gettext/message locale code
+o) fixed the prefix on a KILL message
 
 --------------------------------------------------------------------------------
 
