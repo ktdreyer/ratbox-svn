@@ -335,7 +335,7 @@ register_local_user(struct Client *client_p, struct Client *source_p,
 
   if (aconf == NULL)
   {
-    (void) exit_client(client_p, source_p, &me, "*** Not Authorized");
+    exit_client(client_p, source_p, &me, "*** Not Authorized");
     return(CLIENT_EXITED);
   }
 
@@ -350,7 +350,7 @@ register_local_user(struct Client *client_p, struct Client *source_p,
 	  sendto_one(source_p,
 		     ":%s NOTICE %s :*** Notice -- You need to install identd to use this server",
 		     me.name, client_p->name);
-	  (void)exit_client(client_p, source_p, &me, "Install identd");
+	  exit_client(client_p, source_p, &me, "Install identd");
 	  return(CLIENT_EXITED);
 	}
 
@@ -389,7 +389,7 @@ register_local_user(struct Client *client_p, struct Client *source_p,
         ServerStats->is_ref++;
         sendto_one(source_p, form_str(ERR_PASSWDMISMATCH),
 		   me.name, source_p->name);
-        (void)exit_client(client_p, source_p, &me, "Bad Password");
+        exit_client(client_p, source_p, &me, "Bad Password");
         return(CLIENT_EXITED);
     }
   }
@@ -419,8 +419,8 @@ register_local_user(struct Client *client_p, struct Client *source_p,
 			   nick, source_p->host);
 			   
       ServerStats->is_ref++;
-      (void)exit_client(client_p, source_p, &me,
-			"Sorry, server is full - try later");
+      exit_client(client_p, source_p, &me,
+		  "Sorry, server is full - try later");
       return(CLIENT_EXITED);
     }
 
@@ -433,7 +433,7 @@ register_local_user(struct Client *client_p, struct Client *source_p,
 			   nick, source_p->username, source_p->host);
       ServerStats->is_ref++;
       ircsprintf(tmpstr2, "Invalid username [%s]", source_p->username);
-      (void)exit_client(client_p, source_p, &me, tmpstr2);
+      exit_client(client_p, source_p, &me, tmpstr2);
       return(CLIENT_EXITED);
     }
 

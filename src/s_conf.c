@@ -573,7 +573,7 @@ check_client(struct Client *client_p, struct Client *source_p, char *username)
   switch( i )
     {
     case SOCKET_ERROR:
-      (void)exit_client(client_p, source_p, &me, "Socket Error");
+      exit_client(client_p, source_p, &me, "Socket Error");
       break;
 
     case TOO_MANY_LOCAL:
@@ -622,7 +622,7 @@ check_client(struct Client *client_p, struct Client *source_p, char *username)
 	   log_client_name(source_p, SHOW_IP));
       
       ServerStats->is_ref++;
-      (void)exit_client(client_p, source_p, &me, 
+      exit_client(client_p, source_p, &me, 
 		"No more connections allowed in your connection class" );
       break;
 
@@ -644,12 +644,12 @@ check_client(struct Client *client_p, struct Client *source_p, char *username)
 	  source_p->localClient->listener->name,
 	  source_p->localClient->listener->port);
 	  
-      (void)exit_client(client_p, source_p, &me,
+      exit_client(client_p, source_p, &me,
 			"You are not authorised to use this server");
       break;
     }
     case BANNED_CLIENT:
-      (void)exit_client(client_p,client_p, &me, "*** Banned ");
+      exit_client(client_p,client_p, &me, "*** Banned ");
       ServerStats->is_ref++;
       break;
 

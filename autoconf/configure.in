@@ -81,7 +81,7 @@ dnl for a zero "$IRC_CFLAGS" (but what should we use for TenDRA??)
 dnl and then do the check for whether -g works... Hrrm. -jmallett
 if test "x$GCC" = "xyes"; then
 #  Use this for development..
-  IRC_CFLAGS="-O2 -g -Wunused -Wall -Wshadow -Wmissing-declarations"
+  IRC_CFLAGS="-O2 -g -Wunused -Wall -Wwrite-strings -Wshadow -Wmissing-declarations"
 # IRC_CFLAGS="-O2 -g "
 else
   if test "x$TenDRA" = "xyes"; then

@@ -292,7 +292,7 @@ check_pings_list(dlink_list *list)
 			   "Idle time limit exceeded for %s - temp k-lining",
 				   get_client_name(client_p, HIDE_IP));
 
-	      (void)exit_client(client_p, client_p, &me, aconf->passwd);
+	      exit_client(client_p, client_p, &me, aconf->passwd);
               continue;
             }
         }
@@ -326,7 +326,7 @@ check_pings_list(dlink_list *list)
 			       "Ping timeout: %d seconds",
 			       (int)(CurrentTime - client_p->lasttime));
 	      
-	      (void)exit_client(client_p, client_p, &me, scratch);
+	      exit_client(client_p, client_p, &me, scratch);
               continue;
             }
           else if ((client_p->flags & FLAGS_PINGSENT) == 0)
@@ -371,7 +371,7 @@ check_unknowns_list(dlink_list *list)
 
       if (client_p->firsttime ? ((CurrentTime - client_p->firsttime) > 30) : 0)
 	{
-	  (void)exit_client(client_p, client_p, &me, "Connection timed out");
+	  exit_client(client_p, client_p, &me, "Connection timed out");
 	}
     }
 }
