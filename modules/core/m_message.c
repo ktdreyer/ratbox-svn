@@ -461,7 +461,7 @@ static int build_target_list(int p_or_n,
 	      (*targets)[i]->type = ENTITY_CLIENT;
 	      (*targets)[i++]->flags = 0;
 	      
-	      if( i >= ConfigFileEntry.max_targets)
+	      if(i >= ConfigFileEntry.max_targets)
 		return(i);
 	      continue;
 	    }

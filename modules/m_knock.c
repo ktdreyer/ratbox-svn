@@ -104,7 +104,7 @@ static void m_knock(struct Client *client_p,
 
   chptr = parse_knock_args(client_p, source_p, parc, parv);
   
-  if (!chptr)
+  if (chptr == NULL)
     return;
 
   /* 
@@ -234,9 +234,9 @@ static struct Channel *parse_knock_args(struct Client *client_p,
       return NULL;
     }
 
-  /* don't allow a knock if the user is banned, or the channel is paranoid */
-  if ((chptr->mode.mode & MODE_PRIVATE) ||
-      (is_banned(chptr,source_p) == CHFL_BAN) )
+  /* don't allow a knock if the user is banned, or the channel is secret */
+  if ((chptr->mode.mode & MODE_SECRET) ||
+      (is_banned(chptr,source_p) == CHFL_BAN))
     {
       sendto_one(source_p, form_str(ERR_CANNOTSENDTOCHAN), me.name, parv[0],
                  name);
@@ -293,7 +293,15 @@ static void send_knock(struct Client *client_p, struct Client *source_p,
                           name,
                           message);
 
-      /* XXX needs remote send or CAP_KNOCK or something */
+      /* XXX for future enhancement. 
+       * negotiate a KNOCK CAPAB, send a KNOCK to remote servers
+       * instead of individual privmsgs if a server can "understand" it.
+       */
+
+      sendto_channel_remote(source_p,
+			    ONLY_CHANOPS_HALFOPS,
+			    chptr,
+			    message);
     }
 
   return;

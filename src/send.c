@@ -73,6 +73,9 @@ static void
 sendto_list_local(dlink_list *list, buf_head_t *linebuf);
 
 static void
+sendto_list_remote(struct Client *from, dlink_list *list, char *message);
+
+static void
 sendto_list_anywhere(struct Client *one, struct Client *from,
                      dlink_list *list, buf_head_t *local_linebuf,
                      buf_head_t *remote_linebuf);
@@ -811,6 +814,57 @@ sendto_channel_local(int type,
 } /* sendto_channel_local() */
 
 /*
+ * sendto_channel_remote
+ *
+ * inputs	- int type, i.e. ALL_MEMBERS, NON_CHANOPS,
+ *                ONLY_CHANOPS_VOICED, ONLY_CHANOPS
+ *              - pointer to channel to send to
+ *              - var args pattern
+ * output	- NONE
+ * side effects - Send a message to all members of a channel that are
+ *		  remote to this server.
+ */
+void
+sendto_channel_remote(struct Client *from,
+		      int type,
+		      struct Channel *chptr,
+		      char *message)
+{
+  /* Serial number checking isn't strictly necessary, but won't hurt */
+  ++current_serial;
+
+  switch(type)
+  {
+    default:
+    case ALL_MEMBERS:
+      sendto_list_remote(from, &chptr->chanops, message);
+      sendto_list_remote(from, &chptr->halfops, message);
+      sendto_list_remote(from, &chptr->voiced,  message);
+      sendto_list_remote(from, &chptr->peons,   message);
+      break;
+
+    case NON_CHANOPS:
+      sendto_list_remote(from, &chptr->voiced,  message);
+      sendto_list_remote(from, &chptr->peons,   message);
+      break;
+
+    case ONLY_CHANOPS_HALFOPS_VOICED:
+      sendto_list_remote(from, &chptr->chanops, message);
+      sendto_list_remote(from, &chptr->halfops, message);
+      sendto_list_remote(from, &chptr->voiced,  message);
+      break;
+
+    case ONLY_CHANOPS_HALFOPS:
+      sendto_list_remote(from, &chptr->chanops, message);
+      sendto_list_remote(from, &chptr->halfops, message);
+      break;
+
+    case ONLY_CHANOPS:
+      sendto_list_remote(from, &chptr->chanops, message);
+  }
+} /* sendto_channel_remote() */
+
+/*
  * sendto_list_local
  *
  * inputs	- pointer to all members of this list
@@ -830,7 +884,7 @@ sendto_list_local(dlink_list *list, buf_head_t *linebuf_ptr)
 
   for (ptr = list->head; ptr; ptr = ptr->next)
   {
-    if ( (target_p = ptr->data) == NULL )
+    if ((target_p = ptr->data) == NULL)
       continue;
 
     if (!MyConnect(target_p) || (target_p->fd < 0))
@@ -840,11 +894,44 @@ sendto_list_local(dlink_list *list, buf_head_t *linebuf_ptr)
       continue;
 
     target_p->serial = current_serial;
-
-    if (target_p && MyConnect(target_p))
-      send_linebuf(target_p, linebuf_ptr);
+    send_linebuf(target_p, linebuf_ptr);
   } 
 } /* sendto_list_local() */
+
+/*
+ * sendto_list_remote
+ *
+ * inputs	- pointer to all members of this list
+ *		- buffer to send
+ *		- length of buffer
+ * output	- NONE
+ * side effects	- all members who are remote to this server on given list
+ *		  are sent given message. Right now, its always a channel list
+ *		  but there is no reason one could not use another dlink
+ *		  list to send a message to a group of people.
+ */
+static void
+sendto_list_remote(struct Client *from, 
+		   dlink_list *list, char *message)
+{
+  dlink_node *ptr;
+  struct Client *target_p;
+
+  for (ptr = list->head; ptr; ptr = ptr->next)
+  {
+    if ((target_p = ptr->data) == NULL)
+      continue;
+
+    if (MyConnect(target_p))
+      continue;
+
+    if (target_p->serial == current_serial)
+      continue;
+
+    target_p->serial = current_serial;
+    sendto_anywhere(target_p, from, "NOTICE %s :%s", target_p->name, message);
+  } 
+} /* sendto_list_remote() */
 
 /*
  ** match_it() and sendto_match_butone() ARE only used
