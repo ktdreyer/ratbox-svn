@@ -39,7 +39,12 @@
 static char unknown_ver[] = "<unknown>";
 
 struct module **modlist = NULL;
+
+#define MODS_INCREMENT 10
 int num_mods = 0;
+int max_mods = MODS_INCREMENT;
+static void increase_modlist(void);
+static int findmodule_byname (char *name);
 
 static char *
 basename(char *path)
@@ -56,17 +61,17 @@ basename(char *path)
   return mod_basename;
 }
 
-struct module *
-findmodule_byname (char *name)
+
+static int findmodule_byname (char *name)
 {
   int i;
 
   for (i = 0; i < num_mods; i++) 
     {
       if (!irccmp (modlist[i]->name, name))
-	return modlist[i];
+	return i;
     }
-  return NULL;
+  return -1;
 }
 
 /*
@@ -79,18 +84,16 @@ findmodule_byname (char *name)
 int
 unload_one_module (char *name)
 {
-  struct module *mod;
+  int index;
 
-  if ((mod = findmodule_byname (name)) == NULL) 
+  if ((index = findmodule_byname (name)) == -1) 
     return -1;
 
-  MyFree (mod->name);
-  mod->name = modlist [num_mods - 1]->name;
-  mod->version = modlist [num_mods - 1]->version;
-  mod->address = modlist [num_mods - 1]->address;
+  MyFree(modlist[index]->name);
+  MyFree(modlist[index]);
+  memcpy( &modlist[index], &modlist[index+1],
+	  sizeof(struct module) * ((num_mods-1) - index) );
 
-  modlist = (struct module **)realloc (modlist, sizeof (struct module) * (num_mods - 1));
-  
   mod_del_cmd(name);
 
   log (L_INFO, "Module %s unloaded", name);
@@ -117,6 +120,10 @@ load_all_modules (void)
   struct dirent  *ldirent = NULL;
   char           *old_dir = getcwd (NULL, 0); /* XXX not portable */
   char            module_fq_name[PATH_MAX + 1];
+
+  modlist = (struct module **)MyMalloc ( sizeof (struct module) *
+					     (MODS_INCREMENT));
+  max_mods = MODS_INCREMENT;
 
   mod_add_cmd(MSG_MODLOAD,&modload_msgtab);
   mod_add_cmd(MSG_MODUNLOAD,&modunload_msgtab);
@@ -154,6 +161,13 @@ load_all_modules (void)
   free (old_dir);
 }
 
+/*
+ * load_one_module
+ *
+ * inputs	- path name of module
+ * output	- -1 if error 0 if success
+ * side effects - loads a module if successful
+ */
 int
 load_one_module (char *path)
 {
@@ -187,10 +201,11 @@ load_one_module (char *path)
       return -1;
     }
 
-  if (!(ver = (char *)dlsym (tmpptr, "_modver")));
+  if (!(ver = (char *)dlsym (tmpptr, "_modver")))
     ver = unknown_ver;
 
-  modlist = (struct module **)realloc (modlist, sizeof (struct module) * (num_mods + 1));
+  increase_modlist();
+
   modlist [num_mods] = malloc (sizeof (struct module));
   modlist [num_mods]->address = tmpptr;
   modlist [num_mods]->version = ver;
@@ -207,6 +222,30 @@ load_one_module (char *path)
   free (mod_basename);
 
   return 0;
+}
+
+/*
+ * increase_modlist
+ *
+ * inputs	- NONE
+ * output	- NONE
+ * side effects	- expand the size of modlist if necessary
+ */
+static void increase_modlist(void)
+{
+  struct module **new_modlist = NULL;
+
+  if(num_mods < max_mods)
+    return;
+
+  new_modlist = (struct module **)MyMalloc ( sizeof (struct module) *
+					     (num_mods + MODS_INCREMENT));
+  memcpy((void *)new_modlist,
+	 (void *)modlist, sizeof(struct module) * num_mods);
+
+  MyFree(modlist);
+  modlist = new_modlist;
+  max_mods += MODS_INCREMENT;
 }
 
 /* load a module .. */
@@ -230,10 +269,10 @@ mo_modload (struct Client *cptr, struct Client *sptr, int parc, char **parv)
 
   m_bn = basename (parv[1]);
 
-  if (findmodule_byname (m_bn))
+  if (findmodule_byname (m_bn) != -1)
     {
       sendto_one (sptr, ":%s NOTICE %s :Module %s is already loaded",
-		  me.name, m_bn);
+		  me.name, sptr->name, m_bn);
       return 0;
     }
 
@@ -272,10 +311,10 @@ mo_modunload (struct Client *cptr, struct Client *sptr, int parc, char **parv)
     return 0;
   
 
-  if (!findmodule_byname (m_bn))
+  if (findmodule_byname (m_bn) == -1)
     {
       sendto_one (sptr, ":%s NOTICE %s :Module %s is not loaded",
-		  me.name, m_bn);
+		  me.name, sptr->name, m_bn);
       free (m_bn);
       return 0;
     }

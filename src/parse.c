@@ -65,9 +65,9 @@ int max_msgs=0;
 
 /* allow room for 10 messages at a time */
 #define MESSAGES_INCREMENT 10
-void update_msgtab();
-void clear_msg_tree();
-void clear_sub_msg_tree(struct MessageTree *mtree);
+static void increase_msgtab();
+static void clear_msg_tree();
+static void clear_sub_msg_tree(struct MessageTree *mtree);
 
 static char buffer[1024];  /* ZZZ must this be so big? must it be here? */
 
@@ -522,7 +522,7 @@ mod_add_cmd(char *cmd, struct Message *msg)
 	}
     }
 
-  update_msgtab();
+  increase_msgtab();
   memcpy(&msgtab[num_msgs], msg, sizeof(struct Message));
   num_msgs++;
   qsort((void *)msgtab, num_msgs, sizeof(struct Message), 
@@ -556,27 +556,28 @@ mod_del_cmd(char *cmd)
 }
 
 /*
- * update_msgtab
+ * increase_msgtab
  *
  * inputs	- NONE
  * output	- NONE
  * side effects	- expand the size of msgtab if necessary
  */
-void update_msgtab()
+static void increase_msgtab()
 {
-  struct Message *nmsgtab;
+  struct Message *new_msgtab;
 
   if( num_msgs < max_msgs )
     return;
 
-  nmsgtab = (struct Message *)MyMalloc(
-				      sizeof(struct Message) * 
-				      (max_msgs + MESSAGES_INCREMENT));
+  new_msgtab = (struct Message *)MyMalloc(
+					  sizeof(struct Message) * 
+					  (max_msgs + MESSAGES_INCREMENT));
 
-  memcpy((void *)nmsgtab, (void *)msgtab, sizeof(struct Message) * num_msgs);
+  memcpy((void *)new_msgtab,
+	 (void *)msgtab, sizeof(struct Message) * num_msgs);
 
   MyFree(msgtab);
-  msgtab = nmsgtab;
+  msgtab = new_msgtab;
   max_msgs += MESSAGES_INCREMENT;
 }
 
@@ -587,7 +588,7 @@ void update_msgtab()
  * output	- NONE
  * side effects	- msg_tree is cleared out, all memory allocated is freed
  */
-void clear_msg_tree()
+static void clear_msg_tree()
 {
   struct MessageTree *mtree = msg_tree_root;
   int c;
@@ -613,7 +614,7 @@ void clear_msg_tree()
  * output	- NONE
  * side effects	- msg_tree is cleared out, all memory allocated is freed
  */
-void clear_sub_msg_tree(struct MessageTree *mtree)
+static void clear_sub_msg_tree(struct MessageTree *mtree)
 {
   int c;
 
