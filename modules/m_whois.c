@@ -424,9 +424,9 @@ int     ms_whois(struct Client *cptr,
    * then allow leaf to use normal client m_whois()
    * other wise, ignore it.
    */
-  if(!IsOper(sptr) && ConfigFileEntry.hide_server)
-    {
-      if(!IsCapable(cptr->from,CAP_LL))
+  if( !IsOper(sptr) && GlobalSetOptions.hide_server
+      && !IsCapable(cptr->from,CAP_LL) )
+    }
 	return 0;
     }
 
