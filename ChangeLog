@@ -1,3 +1,24 @@
+androsyn    2002/12/16 00:44:12 UTC	(20021216_0)
+
+  Modified files:
+    src                  client.c packet.c parse.c s_bsd.c 
+                         s_conf.c s_serv.c s_user.c send.c 
+  Log:
+  Start of changing SetDead/IsDead/SetClosing/IsClosing to simply use
+  !MyConnect()
+  
+  Revision  Changes    Path
+  7.347     +1 -13     ircd-ratbox/src/client.c
+  7.109     +31 -67    ircd-ratbox/src/packet.c
+  7.151     +2 -2      ircd-ratbox/src/parse.c
+  7.188     +7 -3      ircd-ratbox/src/s_bsd.c
+  7.388     +0 -1      ircd-ratbox/src/s_conf.c
+  7.311     +3 -3      ircd-ratbox/src/s_serv.c
+  7.247     +2 -2      ircd-ratbox/src/s_user.c
+  7.231     +12 -12    ircd-ratbox/src/send.c
+
+
+
 leeh        2002/12/15 13:48:25 UTC	(20021215_0)
 
   Modified files:
