@@ -114,6 +114,7 @@ static struct AuthRequest *
 make_auth_request(struct Client *client)
 {
 	struct AuthRequest *request = BlockHeapAlloc(auth_heap);
+	memset(request, 0, sizeof(struct AuthRequest));
 	client->localClient->auth_request = request;
 	request->fd = -1;
 	request->client = client;
