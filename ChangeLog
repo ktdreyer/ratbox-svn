@@ -1,3 +1,15 @@
+leeh        2004/11/15 19:06:49 EST	(20041116_0)
+
+  Modified files:
+    src                  s_jupeserv.c 
+  Log:
+  - added "PENDING" command to jupeserv to list pending jupes/unjupes
+  
+  Revision  Changes    Path
+  1.11      +38 -0     rserv/src/s_jupeserv.c
+
+
+
 leeh        2004/11/12 10:27:25 EST	(20041112_0)
 
   Modified files:
