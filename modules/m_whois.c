@@ -56,7 +56,7 @@ _modinit(void)
   mod_add_cmd(MSG_WHOIS, &whois_msgtab);
 }
 
-char *_version = "20001122";
+char *_version = "20001126";
 
 /*
 ** m_whois
@@ -214,18 +214,9 @@ int single_whois(struct Client *sptr,struct Client *acptr,int wilds)
       sendto_one(sptr, form_str(RPL_WHOISUSER), me.name,
 		 sptr->name, name,
 		 acptr->username, acptr->host, acptr->info);
-      if(GlobalSetOptions.hide_server && !IsAnyOper(sptr))
-	{
-	  sendto_one(sptr, form_str(RPL_WHOISSERVER),
-		 me.name, sptr->name, NETWORK_NAME, "<Unknown>",
-		 "*Not On This Net*");
-	}
-      else
-	{
 	  sendto_one(sptr, form_str(RPL_WHOISSERVER),
 		 me.name, sptr->name, name, "<Unknown>",
 		 "*Not On This Net*");
-	}
       return 0;
     }
 
@@ -280,20 +271,10 @@ void whois_person(struct Client *sptr,struct Client *acptr)
 
   a2cptr = find_server(acptr->user->server);
           
-  if(GlobalSetOptions.hide_server && !IsAnyOper(sptr))
-    {
-      sendto_one(sptr, form_str(RPL_WHOISUSER), me.name,
-		 sptr->name, acptr->name,
-		 acptr->username, NETWORK_NAME, NETWORK_DESC);
-      server_name = NETWORK_NAME;
-    }
-  else
-    {
-      sendto_one(sptr, form_str(RPL_WHOISUSER), me.name,
-		 sptr->name, acptr->name,
-		 acptr->username, acptr->host, acptr->info);
-      server_name = acptr->user->server;
-    }
+  sendto_one(sptr, form_str(RPL_WHOISUSER), me.name,
+	 sptr->name, acptr->name,
+	 acptr->username, acptr->host, acptr->info);
+  server_name = acptr->user->server;
 
   mlen = strlen(me.name) + strlen(sptr->name) + 6 + strlen(acptr->name);
 
@@ -339,10 +320,14 @@ void whois_person(struct Client *sptr,struct Client *acptr)
     sendto_one(sptr, form_str(RPL_WHOISCHANNELS),
 	       me.name, sptr->name, acptr->name, buf);
           
-  if (acptr == sptr)
+  if (!GlobalSetOptions.hide_server || acptr == sptr)
     sendto_one(sptr, form_str(RPL_WHOISSERVER),
 	     me.name, sptr->name, acptr->name, server_name,
 	     a2cptr?a2cptr->info:"*Not On This Net*");
+  else
+    sendto_one(sptr, form_str(RPL_WHOISSERVER),
+	     me.name, sptr->name, acptr->name, NETWORK_NAME,
+	     NETWORK_DESC);
 
   if (acptr->user->away)
     sendto_one(sptr, form_str(RPL_AWAY), me.name,
