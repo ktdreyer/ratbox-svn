@@ -1,3 +1,9 @@
+*** 20011024_6 by db
+- removed a pile of extra parameters that were not really used
+  in find_client()
+
+
+
 *** 20011024_5 by androsyn
 Don't need this either
 
