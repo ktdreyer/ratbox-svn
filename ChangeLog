@@ -1,3 +1,15 @@
+androsyn    2003/02/03 21:53:31 UTC	(20030203_3)
+
+  Modified files:
+    modules              m_xline.c 
+  Log:
+  Fix for static builds
+  
+  Revision  Changes    Path
+  1.16      +3 -2      ircd-ratbox/modules/m_xline.c
+
+
+
 androsyn    2003/02/03 21:52:08 UTC	(20030203_2)
 
   Modified files:
