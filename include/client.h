@@ -135,7 +135,6 @@ struct exit_client_hook
 #define FLAGS_DEAD	   0x0002	/* Local socket is dead--Exiting soon */
 #define FLAGS_KILLED       0x0004	/* Prevents "QUIT" from being sent for this */
 #define FLAGS_CLOSING      0x0020	/* set when closing to suppress errors */
-#define FLAGS_CHKACCESS    0x0040	/* ok to check clients access if set */
 #define FLAGS_GOTID        0x0080	/* successful ident lookup achieved */
 #define FLAGS_NEEDID       0x0100	/* I-lines say must use ident return */
 #define FLAGS_NORMALEX     0x0400	/* Client exited normally */
@@ -204,17 +203,12 @@ struct exit_client_hook
 		      UMODE_OPERSPY | UMODE_CCONNEXT | UMODE_SERVICE | \
 		      UMODE_DEAF)
 
-#define FLAGS_ID     (FLAGS_NEEDID | FLAGS_GOTID)
-
 #define CLICAP_MULTI_PREFIX	0x0001
 
 /*
  * flags macros.
  */
 #define IsPerson(x)             (IsClient(x) && (x)->user)
-#define DoAccess(x)             ((x)->flags & FLAGS_CHKACCESS)
-#define SetAccess(x)            ((x)->flags |= FLAGS_CHKACCESS)
-#define ClearAccess(x)          ((x)->flags &= ~FLAGS_CHKACCESS)
 #define HasServlink(x)          ((x)->flags &  FLAGS_SERVLINK)
 #define SetServlink(x)          ((x)->flags |= FLAGS_SERVLINK)
 #define MyConnect(x)		((x)->flags & FLAGS_MYCONNECT)

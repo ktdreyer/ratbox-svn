@@ -177,8 +177,6 @@ check_client(struct Client *client_p, struct Client *source_p, const char *usern
 {
 	int i;
 
-	ClearAccess(source_p);
-
 	if((i = verify_access(source_p, username)))
 	{
 		ilog(L_FUSER, "Access denied: %s[%s]", 
@@ -339,10 +337,6 @@ verify_access(struct Client *client_p, const char *username)
 					aconf->name ? aconf->name : "", aconf->port);
 			return (NOT_AUTHORISED);
 		}
-
-
-		if(IsConfDoIdentd(aconf))
-			SetNeedId(client_p);
 
 		/* Thanks for spoof idea amm */
 		if(IsConfDoSpoofIp(aconf))
