@@ -278,7 +278,7 @@ static int ms_kline(struct Client *cptr,
 
   /* parv[0] parv[1] parv[2]       parv[3]     parv[4] parv[5] parv[6] */
   /* server  oper    target_server tkline_time user    host    reason */
-  sendto_cap_serv_butone (CAP_KLN, cptr, ":%s KLINE %s %s %s %s %s: %s",
+  sendto_cap_serv_butone (CAP_KLN, cptr, ":%s KLINE %s %s %s %s %s :%s",
 			  parv[0], parv[1],
 			  parv[2], parv[3],
 			  parv[4], parv[5],parv[6]);
