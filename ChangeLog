@@ -1,3 +1,15 @@
+androsyn    2002/10/30 01:44:04 UTC	(20021030_7)
+
+  Modified files:
+    adns                 query.c 
+  Log:
+  Okay..try that again
+  
+  Revision  Changes    Path
+  1.16      +2 -2      ircd-ratbox/adns/query.c
+
+
+
 androsyn    2002/10/30 01:34:15 UTC	(20021030_6)
 
   Modified files:
