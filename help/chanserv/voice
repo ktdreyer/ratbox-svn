@@ -1,0 +1,5 @@
+VOICE <#channel> [nicks]
+ACCESS:20 Makes services voice yourself/users
+  <#channel>: Registered channel to perform voices in
+  [nicks]   : Nicknames of people to voice.  If this is not specified it
+              will voice yourself.
