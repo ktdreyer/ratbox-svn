@@ -36,14 +36,14 @@ static struct HostMaskEntry *hmhash[TH_MAX-1];
 static unsigned long precedence = 0xFFFFFFF;
 
 static unsigned int
-hash_text(const char* start, const char *end, unsigned long *iv)
+hash_text(const char* start)
 {
+  register const char *p = start;
   register unsigned long h = 0;
-  while (end >= start)
+  while (*p)
     {
-      h = (h << 4) - (h + (unsigned char)ToLower(*end--));
+      h = (h << 4) - (h + (unsigned char)ToLower(*p++));
     }
-  *iv = h;
   return(h & (TH_MAX - 1));
 }
 
@@ -54,8 +54,7 @@ hash_text(const char* start, const char *end, unsigned long *iv)
 static unsigned int
 get_uhosthash(const char *uhost)
 {
- const char *end, *lastdot = NULL, *p;
- unsigned long iv = 0;
+ const char *end, *lastdot = NULL;
  int sig = 1;
  char c = 0;
  if (!*uhost)
@@ -75,8 +74,7 @@ get_uhosthash(const char *uhost)
      }
  if ((c == '?' || c == '*') && (!lastdot || *lastdot == 0))
    return 0;
- p = lastdot ? lastdot : uhost;
- return hash_text(p, p + strlen(p) - 1, &iv);
+ return hash_text(lastdot ? lastdot : uhost);
 }
 
 void
@@ -110,42 +108,34 @@ add_hostmask(const char *mask, int type, void *data)
 }
 
 static const char*
-strcchr(const char *s, const char *a, const char *b)
+strcchr(const char *a, const char *b)
 {
  const char *p = a, *q;
  char c, d;
- if (a <= s)
-   return NULL;
- while (p >= s)
+ while ((c = *p++))
    {
-     c = *p--;
      q = b;
      while ((d = *q++))
        if (c == d)
-         return p+2;
+         return p;
    }
- return s;
+ return NULL;
 }
 
 struct HostMaskEntry*
 match_hostmask(const char *uhost, int type)
 {
  struct HostMaskEntry *hme, *hmc = NULL;
- unsigned long prec = 0, iv = 0;
+ unsigned long prec = 0;
  unsigned int hash;
- const char *pos, *lastpos = NULL;
+ const char *pos;
  for (hme = first_miscmask; hme; hme = hme->nexthash)
    if (hme->type == type && match(hme->hostmask, uhost) &&
        hme->precedence > prec)
      hmc = hme;
- for (pos = strcchr(uhost, uhost+strlen(uhost), "@!."); pos;
-      pos = strcchr(uhost, pos, "@!."))
+ for (pos = strcchr(uhost, "@!."); pos; pos = strcchr(pos, "@!."))
   {
-   hash = hash_text(pos, lastpos ? lastpos-1 : pos+strlen(pos)-1, &iv);
-   pos--;
-   lastpos = pos;
-   if (*pos)
-     pos--;
+   hash = hash_text(pos);
    for (hme = hmhash[hash]; hme; hme=hme->nexthash)
      if (hme->type == type && match(hme->hostmask, uhost) &&
          hme->precedence > prec)
