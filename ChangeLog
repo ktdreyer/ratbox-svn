@@ -1,3 +1,15 @@
+androsyn    2002/12/10 10:10:18 UTC	(20021210_7)
+
+  Modified files:
+    src                  confmatch.c 
+  Log:
+  *p not p
+  
+  Revision  Changes    Path
+  7.3       +1 -1      ircd-ratbox/src/confmatch.c
+
+
+
 androsyn    2002/12/10 10:08:52 UTC	(20021210_6)
 
   Modified files:
