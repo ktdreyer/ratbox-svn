@@ -222,7 +222,7 @@ static  int     add_id(struct Client *cptr, struct Channel *chptr,
  * modified 8/9/00 by is: now we handle add ban types here
  * (invex/excemp/deny/etc)
  */
-static  int     del_id(struct Channel *chptr, char *banid, int type)
+static int del_id(struct Channel *chptr, char *banid, int type)
 {
   dlink_list *list;
   dlink_node *ban;
@@ -276,15 +276,18 @@ static  int     del_id(struct Channel *chptr, char *banid, int type)
 }
 
 /*
- * is_banned -  returns an int 0 if not banned,
- *              CHFL_BAN if banned (or +d'd)
+ * is_banned 
+ * 
+ * inputs	- pointer to channel block
+ * 		- pointer to client to check access fo
+ * output	- returns an int 0 if not banned,
+ *                CHFL_BAN if banned (or +d'd)
  *
  * IP_BAN_ALL from comstud
  * always on...
  *
  * +e code from orabidoo
  */
-
 int is_banned(struct Channel *chptr, struct Client *who)
 {
   dlink_node *ban;
@@ -354,8 +357,7 @@ int is_banned(struct Channel *chptr, struct Client *who)
  * side effects - adds a user to a channel by adding another link to the
  *		  channels member chain.
  */
-void    add_user_to_channel(struct Channel *chptr, struct Client *who,
-			    int flags)
+void add_user_to_channel(struct Channel *chptr, struct Client *who, int flags)
 {
   dlink_node *ptr;
 
@@ -406,7 +408,7 @@ void    add_user_to_channel(struct Channel *chptr, struct Client *who,
  * side effects - deletes an user from a channel by removing a link in the
  *		  channels member chain.
  */
-void    remove_user_from_channel(struct Channel *chptr,struct Client *who)
+void remove_user_from_channel(struct Channel *chptr,struct Client *who)
 {
   dlink_node *ptr;
 
@@ -607,11 +609,11 @@ int is_voiced(struct Channel *chptr, struct Client *who)
  *
  * inputs	- pointer to channel
  *		- pointer to client 
- * outputs	- CHFL_CHANOP if op on channel
- *		- CHFL_VOICE if can send to channel
- *		  N.B. does not mean they are voiced,
+ * outputs	- CAN_SEND_OPV if op or voiced on channel
+ *		- CAN_SEND_NONOP if can send to channel but is not an op
+ *		  CAN_SEND_NO if they cannot send to channel
  *		  Just means they can send to channel.
- * side effects	-
+ * side effects	- NONE
  */
 int can_send(struct Channel *chptr, struct Client *sptr)
 {
@@ -681,10 +683,10 @@ void channel_modes(struct Channel *chptr, struct Client *cptr,
  * side effects - only used to send +b and +e now, +d/+a/+I too.
  *		  
  */
-static  void    send_mode_list(struct Client *cptr,
-                               char *chname,
-                               dlink_list *top,
-                               char flag)
+static void send_mode_list(struct Client *cptr,
+			   char *chname,
+			   dlink_list *top,
+			   char flag)
 {
   dlink_node *lp;
   struct Ban *banptr;
@@ -695,17 +697,13 @@ static  void    send_mode_list(struct Client *cptr,
   char  *pp;
   int   count;
 
+  ircsprintf(buf, ":%s MODE %s ", me.name, chname);
+  cur_len = mlen = (strlen(buf) + 2);
+  count = 0;
   mp = modebuf;
   *mp++ = '+';
   *mp   = '\0';
-
   pp = parabuf;
-
-  ircsprintf(buf, ":%s MODE %s ", me.name, chname);
-  mlen = strlen(buf);
-  mlen += 4;		/* account for + plus two spaces plus '\0' */
-  cur_len = mlen;
-  count = 0;
 
   for (lp = top->head; lp; lp = lp->next)
     {
@@ -713,9 +711,9 @@ static  void    send_mode_list(struct Client *cptr,
       tlen = strlen(banptr->banstr);
       tlen++;
 
-      if ((count >= MAXMODEPARAMS) || ((cur_len + tlen) > BUFSIZE))
+      if ((count >= MAXMODEPARAMS) || ((cur_len + tlen + 2) > BUFSIZE))
         {
-          sendto_one(cptr, "%s %s %s", buf, modebuf, parabuf);
+          sendto_one(cptr, "%s%s %s", buf, modebuf, parabuf);
           mp = modebuf;
           *mp++ = '+';
           *mp = '\0';
@@ -733,7 +731,7 @@ static  void    send_mode_list(struct Client *cptr,
     }
 
   if(count != 0)
-    sendto_one(cptr, "%s %s %s", buf, modebuf, parabuf);
+    sendto_one(cptr, "%s%s %s", buf, modebuf, parabuf);
 }
 
 /*
@@ -788,37 +786,35 @@ static void send_members(struct Client *cptr,
 			 char *op_flag )
 {
   dlink_node *ptr;
-  int llen;
-  int len;
-  int cur_len=0;
+  int tlen;		/* length of t (temp pointer) */
+  int mlen;		/* minimum length */
+  int cur_len=0;	/* current length */
   struct Client *acptr;
   int  data_to_send=0;
-  char *t;
+  char *t;		/* temp char pointer */
 
   ircsprintf(buf, ":%s SJOIN %lu %s %s %s:", me.name,
 	     chptr->channelts, chptr->chname, modebuf, parabuf);
 
-  cur_len = len = strlen(buf);
-  t = buf + len;
+  cur_len = mlen = strlen(buf);
+  t = buf + mlen;
 
   for (ptr = list->head; ptr && ptr->data; ptr = ptr->next)
     {
       acptr = ptr->data;
       ircsprintf(t,"%s%s ",op_flag, acptr->name);
 
-      llen = strlen(t);
-      cur_len += llen;
-      t += llen; 
+      tlen = strlen(t);
+      cur_len += tlen;
+      t += tlen; 
       data_to_send = 1;
 
       if (cur_len > (BUFSIZE-80))
 	{
 	  data_to_send = 0;
           sendto_one(cptr, "%s", buf);
-	  ircsprintf(buf, ":%s SJOIN %lu %s %s %s:", me.name,
-		     chptr->channelts, chptr->chname, modebuf, parabuf);
-	  cur_len = len;
-	  t = buf + len;
+	  cur_len = mlen;
+	  t = buf + mlen;
 	}
     }
 
@@ -833,7 +829,7 @@ static void send_members(struct Client *cptr,
  * 
  * inputs	- pointer string
  * output	- pointer to cleaned up mask
- * side effects	- 
+ * side effects	- NONE
  *
  * stolen from Undernet's ircd  -orabidoo
  */
@@ -862,7 +858,7 @@ static char* pretty_mask(char* mask)
  * 
  * inputs	- pointer to key to clean up
  * output	- pointer to cleaned up key
- * side effects	- 
+ * side effects	- input string is modified
  *
  * stolen from Undernet's ircd  -orabidoo
  */
@@ -885,7 +881,8 @@ static  char *fix_key(char *arg)
  * 
  * inputs	- pointer to key to clean up
  * output	- pointer to cleaned up key
- * side effects	- 
+ * side effects	- input string is modifed 
+ *
  * Here we attempt to be compatible with older non-hybrid servers.
  * We can't back down from the ':' issue however.  --Rodder
  */
@@ -974,23 +971,23 @@ void set_channel_mode(struct Client *cptr,
    * pbuf2w gets the params, no ID's
    */
 
+  char  modebuf_ex[MODEBUFLEN];
+  char  parabuf_ex[MODEBUFLEN];
+
+  char  modebuf_de[MODEBUFLEN];
+  char  parabuf_de[MODEBUFLEN];
+
   char  modebuf_invex[MODEBUFLEN];
   char  parabuf_invex[MODEBUFLEN];
-
-  char  modebuf_newer[MODEBUFLEN];
-  char  parabuf_newer[MODEBUFLEN];
-
-  char  modebuf_new[MODEBUFLEN];
-  char  parabuf_new[MODEBUFLEN];
 
   char  *mbufw = modebuf, *mbuf2w = modebuf2;
   char  *pbufw = parabuf, *pbuf2w = parabuf2;
 
-  char  *mbufw_new = modebuf_new;
-  char  *pbufw_new = parabuf_new;
+  char  *mbufw_ex = modebuf_ex;
+  char  *pbufw_ex = parabuf_ex;
 
-  char  *mbufw_newer = modebuf_newer;
-  char  *pbufw_newer = parabuf_newer;
+  char  *mbufw_de = modebuf_de;
+  char  *pbufw_de = parabuf_de;
 
   char  *mbufw_invex = modebuf_invex;
   char  *pbufw_invex = parabuf_invex;
@@ -1355,7 +1352,7 @@ void set_channel_mode(struct Client *cptr,
             break;
 
           /* This stuff can go back in when all servers understand +e 
-           * with the pbufw_new nonsense removed
+           * with the pbufw_ex nonsense removed
            */
 
           len += tmp + 1;
@@ -1439,17 +1436,17 @@ void set_channel_mode(struct Client *cptr,
             break;
 
           /* This stuff can go back in when all servers understand +e 
-           * with the pbufw_new nonsense removed 
+           * with the pbufw_ex nonsense removed 
            */
 
           len += tmp + 1;
           opcnt++;
 
-          *mbufw_new++ = plus;
-          *mbufw_new++ = 'e';
-          strcpy(pbufw_new, arg);
-          pbufw_new += strlen(pbufw_new);
-          *pbufw_new++ = ' ';
+          *mbufw_ex++ = plus;
+          *mbufw_ex++ = 'e';
+          strcpy(pbufw_ex, arg);
+          pbufw_ex += strlen(pbufw_ex);
+          *pbufw_ex++ = ' ';
 
           break;
 
@@ -1507,11 +1504,11 @@ void set_channel_mode(struct Client *cptr,
           len += tmp + 1;
           opcnt++;
 
-          *mbufw_newer++ = plus;
-          *mbufw_newer++ = 'd';
-          strcpy(pbufw_newer, arg);
-          pbufw_newer += strlen(pbufw_newer);
-          *pbufw_newer++ = ' ';
+          *mbufw_de++ = plus;
+          *mbufw_de++ = 'd';
+          strcpy(pbufw_de, arg);
+          pbufw_de += strlen(pbufw_de);
+          *pbufw_de++ = ' ';
 
           break;
 
@@ -1944,12 +1941,12 @@ void set_channel_mode(struct Client *cptr,
   ** together and send it along.
   */
 
-  *mbufw = *mbuf2w = *pbufw = *pbuf2w = *mbufw_new = *pbufw_new = 
-  *mbufw_newer = *pbufw_newer = *mbufw_invex = *pbufw_invex = '\0';
+  *mbufw = *mbuf2w = *pbufw = *pbuf2w = *mbufw_ex = *pbufw_ex = 
+  *mbufw_de = *pbufw_de = *mbufw_invex = *pbufw_invex = '\0';
 
   collapse_signs(modebuf);
-  collapse_signs(modebuf_new);
-  collapse_signs(modebuf_newer);
+  collapse_signs(modebuf_ex);
+  collapse_signs(modebuf_de);
 
   if(GlobalSetOptions.hide_chanops)
     type = ONLY_CHANOPS;
@@ -1967,25 +1964,25 @@ void set_channel_mode(struct Client *cptr,
                          modebuf, parabuf);
     }
 
-  if(*modebuf_new)
+  if(*modebuf_ex)
     {
       sendto_channel_butserv(type,
 			     chptr, sptr, ":%s MODE %s %s %s", 
                              sptr->name, real_name,
-                             modebuf_new, parabuf_new);
+                             modebuf_ex, parabuf_ex);
 
       sendto_match_cap_servs(chptr, cptr, CAP_EX, ":%s MODE %s %s %s",
                              sptr->name, chptr->chname,
-                             modebuf_new, parabuf_new);
+                             modebuf_ex, parabuf_ex);
     }
-  if(*modebuf_newer)
+  if(*modebuf_de)
     {
       sendto_channel_butserv(type, chptr, sptr, ":%s MODE %s %s %s",
                              sptr->name, real_name,
-                             modebuf_newer, parabuf_newer);
+                             modebuf_de, parabuf_de);
       sendto_match_cap_servs(chptr, cptr, CAP_DE, ":%s MODE %s %s %s",
                              sptr->name, chptr->chname,
-                             modebuf_newer, parabuf_newer);
+                             modebuf_de, parabuf_de);
     }
   if(*modebuf_invex)
     {
@@ -2077,9 +2074,13 @@ static  void    sub1_from_channel(struct Channel *chptr)
                          * It should never happen but...
                          */
       /* persistent channel */
-#if 0
-      destroy_channel(chptr);
-#endif
+
+      /* XXX hard coded 30 minute limit here for now */
+      /* channel has to exist for at least 30 minutes before 
+       * being made persistent 
+       */
+      if((chptr->channelts + (30*60)) > CurrentTime)
+        destroy_channel(chptr);
     }
 }
 
@@ -2105,6 +2106,7 @@ void clear_bans_exceptions_denies(struct Client *sptr, struct Channel *chptr)
   *mp++ = '-';
   *mp = '\0';
 
+  /* clear bans/e/d/I as seen by user */
   clear_channel_list(type, chptr, sptr, &chptr->banlist, 'b');
   clear_channel_list(type, chptr, sptr, &chptr->exceptlist, 'e');
   clear_channel_list(type, chptr, sptr, &chptr->denylist, 'd');
@@ -2154,7 +2156,7 @@ static void clear_channel_list(int type, struct Channel *chptr,
 
   ircsprintf(buf, ":%s MODE %s ", sptr->name, chptr->chname);
   mlen = strlen(buf);
-  mlen += 4;		/* account for + plus two spaces plus '\0' */
+  mlen += 3;		/* account for '+ ' */
   cur_len = mlen;
   count = 0;
 
@@ -2167,7 +2169,10 @@ static void clear_channel_list(int type, struct Channel *chptr,
       if ((count >= MAXMODEPARAMS) || ((cur_len + tlen) > BUFSIZE))
         {
 	  sendto_channel_butserv(type, chptr, &me,
-				 "%s %s %s", buf, modebuf, parabuf);
+				 ":%s MODE %s %s %s",
+				 sptr->name,
+				 chptr->chname,
+				 modebuf,parabuf);
           mp = modebuf;
           *mp++ = '-';
           *mp = '\0';
@@ -2185,8 +2190,13 @@ static void clear_channel_list(int type, struct Channel *chptr,
     }
 
   if(count != 0)
-    sendto_channel_butserv(type, chptr, &me,
-			   "%s %s %s", buf, modebuf, parabuf);
+    {
+      sendto_channel_butserv(type, chptr, &me,
+			     ":%s MODE %s %s %s",
+			     sptr->name,
+			     chptr->chname,
+			     modebuf,parabuf);
+    }
 }
 
 /*
@@ -2387,6 +2397,13 @@ static void destroy_channel(struct Channel *chptr)
   Count.chan--;
 }
 
+/*
+ * delete_members
+ *
+ * inputs	- pointer to list (on channel)
+ * output	- none
+ * side effects	- delete members of this list
+ */
 static void delete_members(dlink_list *list)
 {
   dlink_node *ptr;
@@ -2404,6 +2421,8 @@ static void delete_members(dlink_list *list)
  * channel_member_names
  *
  * inputs	- pointer to client struct requesting names
+ *		- pointer to channel block
+ *		- pointer to name of channel
  * output	- none
  * side effects	- lists all names on given channel
  */
@@ -2464,6 +2483,21 @@ void channel_member_names( struct Client *sptr,
              me.name, sptr->name, name_of_channel);
 }
 
+/*
+ * channel_member_list
+ *
+ * inputs	- pointer to client struct requesting names
+ *		- pointer to list on channel
+ *		- pointer to channel block
+ *		- pointer to name of channel
+ *		- pointer to show flag, i.e. what to show '@' etc.
+ *		- buffer to use
+ *		- minimum length
+ *		- pointer to current length
+ *		- pointer to flag denoting whether reply to send or not
+ * output	- none
+ * side effects	- lists all names on given list of channel
+ */
 void channel_member_list(struct Client *sptr,
 			 dlink_list *list,
 			 struct Channel *chptr,
@@ -2505,9 +2539,8 @@ void channel_member_list(struct Client *sptr,
  *
  * inputs	- pointer to channel
  * output	- string pointer "=" if public, "@" if secret else "*"
- * side effects	-
+ * side effects	- NONE
  */
-
 char *channel_pub_or_secret(struct Channel *chptr)
 {
   if(PubChannel(chptr))
@@ -2524,7 +2557,7 @@ char *channel_pub_or_secret(struct Channel *chptr)
  * inputs	- pointer to channel block
  * 		- pointer to client to add invite to
  * output	- none
- * side effects	- 
+ * side effects	- adds client to invite list
  *
  * This one is ONLY used by m_invite.c
  */

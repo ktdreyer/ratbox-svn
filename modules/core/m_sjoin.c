@@ -93,7 +93,7 @@ int     ms_sjoin(struct Client *cptr,
                 char *parv[])
 {
   struct Channel *chptr;
-  struct Channel *top_chptr;	/* ZZZ vchans */
+  struct Channel *top_chptr;	/* XXX vchans */
   struct Client       *acptr;
   time_t        newts;
   time_t        oldts;
@@ -174,7 +174,7 @@ int     ms_sjoin(struct Client *cptr,
   isnew = ChannelExists(parv[2]) ? 0 : 1;
   chptr = get_channel(sptr, parv[2], CREATE);
 
-  /* ZZZ vchan cruft */
+  /* XXX vchan cruft */
   /* vchans are encoded as "##mainchanname_timestamp" */
 
   top_chptr = NULL;
@@ -341,7 +341,7 @@ int     ms_sjoin(struct Client *cptr,
       if (!IsMember(acptr, chptr))
         {
           add_user_to_channel(chptr, acptr, fl);
-	  /* XXX ZZZ vchan stuff */
+	  /* XXX vchan stuff */
 
 	  if( top_chptr )
 	    {
