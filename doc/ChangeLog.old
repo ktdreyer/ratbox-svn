@@ -1,3 +1,7 @@
+*** 20010528_2 by a1kmm
+- Ignore server commands from other servers with a user prefix.
+
+
 *** 20010528_1 by jdc
 * Added autoconf support for RLIMIT_* definitions; prior, all this work
   was done in ircd.c.  Someone running Linux should test this and pay
