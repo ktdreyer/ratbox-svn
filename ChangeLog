@@ -1,3 +1,22 @@
+leeh        2004/01/15 09:50:52 EST	(20040115_2)
+
+  Modified files:
+    src                  .cvsignore 
+  Added files:
+    .                    .cvsignore 
+    help                 .cvsignore 
+    include              .cvsignore 
+  Log:
+  - added/updated .cvsignore files
+  
+  Revision  Changes    Path
+  1.1       +4 -0      rserv/.cvsignore (new)
+  1.1       +1 -0      rserv/help/.cvsignore (new)
+  1.1       +1 -0      rserv/include/.cvsignore (new)
+  1.2       +3 -3      rserv/src/.cvsignore
+
+
+
 leeh        2004/01/15 09:48:10 EST	(20040115_1)
 
   Modified files:
