@@ -234,7 +234,6 @@ static void oldParseOneLine(FILE *out,char* line)
 {
   char conf_letter;
   char* tmp;
-  char* p;
   char* user_field=(char *)NULL;
   char* passwd_field=(char *)NULL;
   char* host_field=(char *)NULL;
@@ -414,9 +413,11 @@ static void oldParseOneLine(FILE *out,char* line)
     case 'm':
       fprintf(out,"\tserverinfo {\n");
       if(host_field)
-	fprintf(out,"\t\tname=\"%s\";\n", host_field);
+	fprintf(out,"\t\tname=%s;\n", host_field);
+      if(passwd_field)
+	fprintf(out,"\t\tvhost=\"%s\";\n", passwd_field);
       if(user_field)
-	fprintf(out,"\t\temail=\"%s\";\n", user_field);
+	fprintf(out,"\t\tdescription=\"%s\";\n", user_field);
       if(port_field)
 	fprintf(out,"\t\thub=yes;\n");
       else
@@ -466,15 +467,7 @@ static void oldParseOneLine(FILE *out,char* line)
 	fprintf(out,"\t\tname=\"%s\";\n", user_field);
       if(host_field)
 	{
-	  p = strchr(host_field,'@');
-	  if(p)
-	    *p = '\0';
 	  fprintf(out,"\t\tuser=\"%s\";\n", host_field);
-	  if(p)
-	    {
-	      p++;
-	      fprintf(out,"\t\thost=\"%s\";\n", p);
-	    }
 	}
       if(passwd_field)
 	fprintf(out,"\t\tpassword=\"%s\";\n", passwd_field);
@@ -643,7 +636,7 @@ static void PairUpServers(struct ConnectPair* pair)
 		p->n_passwd = strdup(pair->n_passwd);
 
 	      if(!p->c_passwd && pair->c_passwd)
-		p->n_passwd = strdup(pair->n_passwd);
+		p->c_passwd = strdup(pair->c_passwd);
 
 	      p->compressed |= pair->compressed;
 	      p->lazylink |= pair->lazylink;

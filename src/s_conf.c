@@ -3360,7 +3360,7 @@ void conf_add_me(struct ConfItem *aconf)
 	{
 	  memset(&vserv,0, sizeof(vserv));
 	  vserv.sin_family = AF_INET;
-	  vserv.sin_addr.s_addr = aconf->ip;
+	  vserv.sin_addr.s_addr = htonl(aconf->ip);
 	  specific_virtual_host = 1;
 	}
       else if (aconf->passwd && 

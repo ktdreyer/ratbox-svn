@@ -72,6 +72,7 @@ int   class_sendq_var;
 %token  DESCRIPTION
 %token  DIE
 %token  EMAIL
+%token  EXCEED_LIMIT
 %token  GECOS
 %token  GLINE
 %token  GLINE_LOG
@@ -194,7 +195,7 @@ serverinfo_entry:       SERVERINFO
   }
   '{' serverinfo_items '}' ';'
   {
-    if(yy_aconf->user)
+    if(yy_aconf->host && yy_aconf->user)
       {
         conf_add_me(yy_aconf);
         conf_add_conf(yy_aconf);
@@ -561,7 +562,7 @@ auth_items:     auth_items auth_item |
 
 auth_item:      auth_user | auth_passwd | auth_class |
                 auth_kline_exempt | auth_allow_bots | auth_have_ident |
-                auth_no_tilde | auth_spoof
+                auth_exceed_limit | auth_no_tilde | auth_spoof
 
 auth_user:   USER '=' QSTRING ';'
   {
@@ -596,6 +597,16 @@ auth_spoof:   SPOOF '=' QSTRING ';'
   {
     DupString(yy_aconf->name, yylval.string);
     yy_aconf->flags |= CONF_FLAGS_SPOOF_IP;
+  };
+
+auth_exceed_limit:    EXCEED_LIMIT '=' TYES ';'
+  {
+    yy_aconf->flags |= CONF_FLAGS_F_LINED;
+  };
+                      |
+                      EXCEED_LIMIT '=' TNO ';'
+  {
+    yy_aconf->flags &= ~CONF_FLAGS_F_LINED;
   };
 
 auth_kline_exempt:    KLINE_EXEMPT '=' TYES ';'
@@ -1064,7 +1075,7 @@ general_entry:      GENERAL
 general_items:      general_items general_item |
                     general_item
 
-general_item:       general_quiet_on_ban | general_ban_cidr | general_failed_oper_notice |
+general_item:       general_quiet_on_ban | general_failed_oper_notice |
                     general_show_failed_oper_id | general_show_failed_oper_passwd |
                     general_anti_nick_flood | general_max_nick_time | general_max_nick_changes |
                     general_ts_warn_delta | general_ts_max_delta | general_kline_with_reason |
