@@ -1,3 +1,8 @@
+*** 20011117_1 by androsyn
+Updated function documentation for comm_select()
+
+
+
 *** 20011116_1 by wcampbel
 Updated our manpage to be correct with our current implementation.
 Corrected a few minor formatting issues with the manpage.
