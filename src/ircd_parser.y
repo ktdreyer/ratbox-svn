@@ -665,7 +665,7 @@ listen_entry:   LISTEN
 listen_items:   listen_items listen_item |
                 listen_item
 
-listen_item:    listen_port | listen_address | error
+listen_item:    listen_port | listen_address | listen_host | error
 
 listen_port:    PORT '=' NUMBER ';'
   {
@@ -673,6 +673,11 @@ listen_port:    PORT '=' NUMBER ';'
   };
 
 listen_address: IP '=' QSTRING ';'
+  {
+    DupString(listener_address, yylval.string);
+  };
+
+listen_host:	HOST '=' QSTRING ';'
   {
     DupString(listener_address, yylval.string);
   };
