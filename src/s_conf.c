@@ -574,7 +574,8 @@ attach_conf(struct Client *client_p, struct ConfItem *aconf)
 		}
 		else
 		{
-			sendto_one(client_p, "NOTICE FLINE :I: line is full, but you have an >I: line!");
+			sendto_one(client_p, ":%s NOTICE %s :*** I: line is full, but you have an >I: line!", 
+			                      me.name, client_p->name);
 			SetExemptLimits(client_p);
 		}
 
