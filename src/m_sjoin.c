@@ -136,16 +136,6 @@ int     m_sjoin(struct Client *cptr,
   isnew = ChannelExists(parv[2]) ? 0 : 1;
   chptr = get_channel(sptr, parv[2], CREATE);
 
-#ifdef HUB
-  if(IsCapable(cptr,CAP_LL) &&
-     ! (chptr->lazyLinkChannelExists & cptr->serverMask) )
-    {
-#ifdef DEBUGLL
-      sendto_realops("m_sjoin: remote server doesn't know about us yet");
-#endif
-    }
-#endif
-
   /*
    * bogus ban removal code.
    * If I see that this SJOIN will mean I keep my ops, but lose
