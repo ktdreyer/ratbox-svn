@@ -1,3 +1,15 @@
+leeh        2002/10/17 17:36:49 UTC	(20021017_0)
+
+  Modified files:
+    modules              m_oper.c 
+  Log:
+  - fixed an foperlog code bug
+  
+  Revision  Changes    Path
+  1.54      +2 -2      ircd-ratbox/modules/m_oper.c
+
+
+
 leeh        2002/10/16 20:09:20 UTC	(20021016_0)
 
   Modified files:
