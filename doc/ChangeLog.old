@@ -1,3 +1,8 @@
+*** 20010319_1 by toot
+. moved anti_spam_exit_message_time to ircd.conf
+. don't add "Client Exit: " if the quit message was blank anyway.
+
+
 *** 20010318_1 by madmax
 RPL_WELCOME now says:
 Welcome to the NETWORK_NAME Internet Relay Chat Network 
