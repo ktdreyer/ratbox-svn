@@ -127,10 +127,11 @@ void ReportAllocated(struct Client*);
 void
 ReportAllocated(struct Client *client_p)
 {
+  int i = 2000;
   MemoryEntry *mme;
   sendto_one(client_p, ":%s NOTICE %s :*** -- Memory Allocation Report",
 	     me.name, client_p->name);
-  for (mme = first_mem_entry; mme; mme=mme->next)
+  for (i=0, mme = first_mem_entry; i < 1000 && mme; mme=mme->next,i++)
     sendto_one(client_p,
 	       ":%s NOTICE %s :*** -- %u bytes allocated for %lus at %s:%d",
 	       me.name, client_p->name, mme->size, CurrentTime-mme->ts, mme->file,

@@ -101,19 +101,22 @@ find_hook(char *name)
 int 
 hook_del_hook(char *event, hookfn *fn)
 {
-	hook *h;
-	dlink_node *node;
-	
-	h = find_hook(event);
-	if (!h)
-		return -1;
-	
-	for (node = h->hooks.head; node; node = node->next)
-	{
-		if (fn == node->data)
-			dlinkDelete(node, &h->hooks);
-	}
-	return 0;
+ hook *h;
+ dlink_node *node, *nnode;
+ h = find_hook(event);
+ if (!h)
+  return -1;
+   
+ for (node = h->hooks.head; node; node = node->next)
+ {
+  nnode = node->next;
+  if (fn == node->data)
+  {
+   dlinkDelete(node, &h->hooks);
+   free_dlink_node(node);
+  } 
+ }
+ return 0;
 }
 
 int

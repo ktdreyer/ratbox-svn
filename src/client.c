@@ -955,6 +955,7 @@ free_exited_clients(void *unused)
   dlinkDelete(ptr, &dead_list);
   free_dlink_node(ptr);
  }
+ eventAdd("free_exited_clients()", &free_exited_clients, NULL, 4, 0);
 }
 
 /*

@@ -30,6 +30,7 @@
 
 #include "config.h"
 #include "tools.h"
+#include "memory.h"
 
 struct Client;
 struct dlink_list;

@@ -445,16 +445,22 @@ void remove_user_from_channel(struct Channel *chptr,struct Client *who, int perm
     ircsprintf(chptr->vchan_id, "!%s", who->name);
 
   if( (ptr = find_user_link(&chptr->peons,who)) )
-    dlinkDelete(ptr,&chptr->peons);
+  {
+   dlinkDelete(ptr,&chptr->peons);
+  }
   else if( (ptr = find_user_link(&chptr->chanops,who)) )
     {
       chptr->opcount--;
       dlinkDelete(ptr,&chptr->chanops);
     }
   else if ((ptr = find_user_link(&chptr->voiced,who)) )
+  {
     dlinkDelete(ptr,&chptr->voiced);
+  }
   else if ((ptr = find_user_link(&chptr->halfops,who)) )
+  {
     dlinkDelete(ptr,&chptr->halfops);
+  }
   else 
     return;	/* oops */
 
