@@ -1,3 +1,7 @@
+*** 20011206_2 by androsyn
+Remove two stupid comments from adns.c
+
+
 *** 20011206_1 by androsyn
 Fix a coredump in adns.c on rehash.  Basically if there were any pending
 events, adns would dump core upon the timeout of that event.  We now timeout
