@@ -537,6 +537,6 @@ extern int add_to_accept(struct Client *source, struct Client *target);
 extern int del_from_accept(struct Client *source, struct Client *target);
 extern int del_all_accepts(struct Client *dying);
 extern int list_all_accepts(struct Client *sptr);
-
+extern void free_exited_clients(void);
 #endif /* INCLUDED_client_h */
 

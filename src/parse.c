@@ -293,12 +293,18 @@ int parse(struct Client *cptr, char *pbuffer, char *bufend)
   i = 1;
   
   if (s)
-	  string_to_array(s, mpara, paramcount, end, &i, para);
+    string_to_array(s, mpara, paramcount, end, &i, para);
    
   if (mptr == (struct Message *)NULL)
-	  return do_numeric(numeric, cptr, from, i, para);
+    return do_numeric(numeric, cptr, from, i, para);
   else
-	  return handle_command(mptr, cptr, from, i, para);
+  {
+    handle_command(mptr, cptr, from, i, para);
+    if (cptr->fd < 0)
+      return(CLIENT_EXITED);
+    else
+      return 0;
+  }
 }
 
 static int

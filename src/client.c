@@ -633,12 +633,7 @@ remove_client_from_list(struct Client* cptr)
     cptr->next->prev = cptr->prev;
   cptr->next = cptr->prev = NULL;
 
-  /*
-   * XXX - this code should be elsewhere
-   */
   update_client_exit_stats(cptr);
-  release_client_state(cptr);
-  free_client(cptr);
 }
 
 /*
@@ -1002,6 +997,30 @@ const char* get_client_host(struct Client* client)
   return nbuf;
 }
 
+void free_exited_clients( void )
+{
+  dlink_node *ptr;
+  struct Client *acptr;
+  
+  for(ptr = dead_list.head; ptr; ptr = ptr->next)
+  {
+    acptr = ptr->data;
+    if (ptr->data == NULL)
+    {
+      sendto_realops_flags(FLAGS_ALL,
+                           "Warning: null client on dead_list!");
+      dlinkDelete(ptr, &dead_list);
+      free_dlink_node(ptr);
+      continue;
+    }
+
+    release_client_state(acptr);
+    free_client(acptr);
+    dlinkDelete(ptr, &dead_list);
+    free_dlink_node(ptr);
+  }
+}
+
 /*
 ** Exit one client, local or remote. Assuming all dependents have
 ** been already removed, and socket closed for local client.
@@ -1108,7 +1127,13 @@ static void exit_one_client(struct Client *cptr, struct
    * Remove sptr from the client lists
    */
   del_from_client_hash_table(sptr->name, sptr);
+
+  /* remove from global client list */
   remove_client_from_list(sptr);
+
+  /* add to dead client dlist */
+  lp = make_dlink_node();
+  dlinkAdd(sptr, lp, &dead_list);
 }
 
 /*
