@@ -1,3 +1,7 @@
+*** 20010101_36 by fl_
+- sending "JOIN #channel" on its own would core the uplink: fixed
+
+
 *** 20010101_35 by a1kmm
 okay, now the cvs 'conflict' over m_whois.c should be completely resolved and madmax's comment out version
 should stay...
