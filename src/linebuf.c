@@ -67,6 +67,7 @@ linebuf_allocate(void)
 {
   buf_line_t *t;
   t = BlockHeapAlloc(linebuf_heap);
+  t->refcount = 0;
   assert(t != NULL);
   return(t);
 }
