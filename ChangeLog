@@ -1,3 +1,18 @@
+androsyn    2003/06/24 20:50:18 UTC	(20030624_4)
+
+  Modified files:
+    include              hash.h 
+    src                  hash.c 
+  Log:
+  Remove two pointless variables that caused our memory usage to increase by
+  nearly 1.5MB on 32bit platforms.
+  
+  Revision  Changes    Path
+  7.37      +0 -7      ircd-ratbox/include/hash.h
+  7.76      +48 -87    ircd-ratbox/src/hash.c
+
+
+
 androsyn    2003/06/24 20:23:32 UTC	(20030624_3)
 
   Modified files:
