@@ -327,19 +327,26 @@ load_one_module (char *path)
   struct module_path *mpath;
 	
   struct stat statbuf;
-
-  if (strchr(path, '/')) /* absolute path, try it */
-    return load_a_module(path, 1, 0);
-
+  
   for (pathst = mod_paths.head; pathst; pathst = pathst->next)
     {
       mpath = (struct module_path *)pathst->data;
       
       sprintf(modpath, "%s/%s", mpath->path, path);
-      if (stat(modpath, &statbuf) == 0)
-	return load_a_module(modpath, 1, 0);
+      if((strstr(modpath, "../") == NULL) && (strstr(modpath, "/..") == NULL)) 
+	 {
+	    if (stat(modpath, &statbuf) == 0)
+	      {
+		 if(S_ISREG(statbuf.st_mode))
+		    {
+		       /* Regular files only please */
+		       return load_a_module(modpath, 1, 0);
+		    }
+	      }
+	    
+	 }
     }
-	
+   
   sendto_realops_flags(FLAGS_ALL, L_ALL,
                        "Cannot locate module %s", path);
   ilog(L_WARN, "Cannot locate module %s", path);
