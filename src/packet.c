@@ -217,7 +217,7 @@ read_packet(int fd, void *data)
     return;
   }
 
-  lclient_p->actually_read++;
+  lclient_p->actually_read += lbuf_len;
   
   /* Check to make sure we're not flooding */
   if (IsPerson(client_p) &&
