@@ -32,7 +32,6 @@
 #include "common.h"
 #include "s_conf.h"
 #include "s_serv.h"
-#include "send.h"
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
@@ -42,6 +41,7 @@
 #include "class.h"
 #include "msg.h"
 #include "packet.h"
+#include "send.h"
 
 
 struct entity
@@ -431,7 +431,7 @@ msg_channel(int p_or_n, const char *command,
 		if(result == CAN_SEND_OPV ||
 		   !flood_attack_channel(p_or_n, source_p, chptr, chptr->chname))
 		{
-			sendto_channel_butone(client_p, source_p, chptr, 
+			sendto_channel_flags(client_p, ALL_MEMBERS, source_p, chptr, 
 					      "%s %s :%s",
 					      command, chptr->chname, text);
 		}
