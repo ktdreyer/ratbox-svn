@@ -425,6 +425,42 @@ find_conf_by_address(const char *name, struct irc_inaddr *addr, int type,
   return hprec;
 }
 
+/* find_kline()
+ *
+ * input        - pointer to client
+ * output       -
+ * side effects - matching kline is returned, if found
+ */
+struct ConfItem *
+find_kline(struct Client *client_p)
+{
+  struct ConfItem *aconf;
+
+  aconf = find_conf_by_address(client_p->host, &client_p->localClient->ip,
+                               CONF_KILL, client_p->localClient->aftype,
+                               client_p->username);
+
+  return aconf;
+}
+
+/* find_gline()
+ *
+ * input        - pointer to client
+ * output       -
+ * side effects - matching dline is returned, if found
+ */
+struct ConfItem *
+find_gline(struct Client *client_p)
+{
+  struct ConfItem *aconf;
+
+  aconf = find_conf_by_address(client_p->host, &client_p->localClient->ip,
+                               CONF_GLINE, client_p->localClient->aftype,
+                               client_p->username);
+
+  return aconf;
+}                              
+
 /* struct ConfItem* find_address_conf(const char*, const char*,
  * 	                               struct irc_inaddr*, int);
  * Input: The hostname, username, address, address family.
@@ -683,9 +719,6 @@ report_auth(struct Client *client_p)
 
         get_printable_conf(aconf, &name, &host, &pass, &user, &port,
                            &classname);
-
-        /* We are doing a partial list, based on what matches the u@h of the
-         * sender, so prepare the strings for comparing --fl_ */
 
         sendto_one(client_p, form_str(RPL_STATSILINE), me.name,
                    client_p->name, (IsConfRestricted(aconf)) ? 'i' : 'I', name,

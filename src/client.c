@@ -369,14 +369,14 @@ check_unknowns_list(dlink_list *list)
 }
 
 /*
- * check_klines
+ * check_banned_lines
  * inputs	- NONE
  * output	- NONE
- * side effects - Check all connections for a pending kline against the
- * 		  client, exit the client if a kline matches.
+ * side effects - Check all connections for a pending k/d/gline against the
+ * 		  client, exit the client if found.
  */
 void 
-check_klines(void)
+check_banned_lines(void)
 {               
   struct Client *client_p;          /* current local client_p being examined */
   struct ConfItem     *aconf = (struct ConfItem *)NULL;
@@ -542,6 +542,219 @@ check_klines(void)
     }
   }
 
+}
+
+/* check_klines
+ *
+ * inputs       -
+ * outputs      -
+ * side effects - all clients will be checked for klines
+ */
+void
+check_klines(void)
+{
+  struct Client *client_p;
+  struct ConfItem *aconf;
+  char *reason;
+  dlink_node *ptr;
+  dlink_node *next_ptr;
+
+  DLINK_FOREACH_SAFE(ptr, next_ptr, lclient_list.head)
+  {
+    client_p = ptr->data;
+
+    if(IsMe(client_p) || !IsPerson(client_p))
+      continue;
+
+    if((aconf = find_kline(client_p)) != NULL)
+    {
+      if(IsExemptKline(client_p))
+      {
+        sendto_realops_flags(UMODE_ALL, L_ALL,
+                             "KLINE over-ruled for %s, client is kline_exempt",
+                             get_client_name(client_p, HIDE_IP));
+        continue;
+      }
+
+      sendto_realops_flags(UMODE_ALL, L_ALL, "KLINE active for %s",
+                           get_client_name(client_p, HIDE_IP));
+
+      if(ConfigFileEntry.kline_with_connection_closed &&
+         ConfigFileEntry.kline_with_reason)
+      {
+        reason = "Connection closed";
+        sendto_one(client_p, form_str(ERR_YOUREBANNEDCREEP),
+                   me.name, client_p->name,
+                   aconf->passwd ? aconf->passwd : "K-lined");
+      }
+      else
+      {
+        if(ConfigFileEntry.kline_with_connection_closed)
+          reason = "Connection closed";
+        else if(ConfigFileEntry.kline_with_reason && aconf->passwd)
+          reason = aconf->passwd;
+        else
+          reason = "K-lined";
+
+        sendto_one(client_p, form_str(ERR_YOUREBANNEDCREEP),
+                   me.name, client_p->name, reason);
+      }
+
+      (void)exit_client(client_p, client_p, &me, reason);
+      continue;
+    }
+  }
+}
+
+/* check_glines()
+ *
+ * inputs       -
+ * outputs      -
+ * side effects - all clients will be checked for glines
+ */
+void
+check_glines(void)
+{
+  struct Client *client_p;
+  struct ConfItem *aconf;
+  char *reason;
+  dlink_node *ptr;
+  dlink_node *next_ptr;
+  
+  DLINK_FOREACH_SAFE(ptr, next_ptr, lclient_list.head)
+  {
+    client_p = ptr->data;
+
+    if(IsMe(client_p) || !IsPerson(client_p))
+      continue;
+
+    if((aconf = find_gline(client_p)) != NULL)
+    {
+      if(IsExemptKline(client_p))
+      {
+        sendto_realops_flags(UMODE_ALL, L_ALL,
+                             "GLINE over-ruled for %s, client is kline_exempt",
+                             get_client_name(client_p, HIDE_IP));
+        continue;
+      }
+
+      if(IsExemptGline(client_p))
+      {
+        sendto_realops_flags(UMODE_ALL, L_ALL,
+                             "GLINE over-ruled for %s, client is gline_exempt",
+                             get_client_name(client_p, HIDE_IP));
+        continue;
+      }
+
+      sendto_realops_flags(UMODE_ALL, L_ALL, "GLINE active for %s",
+                           get_client_name(client_p, HIDE_IP));
+
+      if(ConfigFileEntry.kline_with_connection_closed &&
+         ConfigFileEntry.kline_with_reason)
+      {
+        reason = "Connection closed";
+        sendto_one(client_p, form_str(ERR_YOUREBANNEDCREEP),
+                   me.name, client_p->name,
+                   aconf->passwd ? aconf->passwd : "G-lined");
+      }
+      else
+      {
+        if(ConfigFileEntry.kline_with_connection_closed)
+          reason = "Connection closed";
+        else if(ConfigFileEntry.kline_with_reason && aconf->passwd)
+          reason = aconf->passwd;
+        else
+          reason = "K-lined";
+
+        sendto_one(client_p, form_str(ERR_YOUREBANNEDCREEP),
+                   me.name, client_p->name, reason);
+      }
+
+      (void)exit_client(client_p, client_p, &me, reason);
+      continue;
+    }
+  }
+}
+
+/* check_dlines()
+ *
+ * inputs       -
+ * outputs      -
+ * side effects - all clients will be checked for dlines
+ */
+void
+check_dlines(void)
+{
+  struct Client *client_p;
+  struct ConfItem *aconf;
+  char *reason;
+  dlink_node *ptr;
+  dlink_node *next_ptr;
+
+  DLINK_FOREACH_SAFE(ptr, next_ptr, lclient_list.head)
+  {
+    client_p = ptr->data;
+
+    if(IsMe(client_p))
+      continue;
+
+    if((aconf = find_dline(&client_p->localClient->ip,
+                           client_p->localClient->aftype)) != NULL)
+    {
+      if(aconf->status & CONF_EXEMPTDLINE)
+        continue;
+
+      sendto_realops_flags(UMODE_ALL, L_ALL,"DLINE active for %s",
+                           get_client_name(client_p, HIDE_IP));
+
+      if(ConfigFileEntry.kline_with_connection_closed &&
+         ConfigFileEntry.kline_with_reason)
+      {
+        reason = "Connection closed";
+
+        if(IsPerson(client_p))
+          sendto_one(client_p, form_str(ERR_YOUREBANNEDCREEP),
+                     me.name, client_p->name,
+                     aconf->passwd ? aconf->passwd : "D-lined");
+        else
+          sendto_one(client_p, "NOTICE DLINE :*** You have been D-lined");
+      }
+      else
+      {
+        if(ConfigFileEntry.kline_with_connection_closed)
+          reason = "Connection closed";
+        else if(ConfigFileEntry.kline_with_reason && aconf->passwd)
+          reason = aconf->passwd;
+        else
+          reason = "D-lined";
+
+        if(IsPerson(client_p))
+          sendto_one(client_p, form_str(ERR_YOUREBANNEDCREEP),
+                     me.name, client_p->name, reason);
+        else
+          sendto_one(client_p, "NOTICE DLINE :*** You have been D-lined");
+      }
+
+      (void)exit_client(client_p, client_p, &me, reason);
+      continue;
+    }
+  }
+
+  /* dlines need to be checked against unknowns too */
+  DLINK_FOREACH_SAFE(ptr, next_ptr, unknown_list.head)
+  {
+    client_p = ptr->data;
+
+    if((aconf = find_dline(&client_p->localClient->ip,
+                           client_p->localClient->aftype)) != NULL)
+    {
+      if(aconf->status & CONF_EXEMPTDLINE)
+        continue;
+
+      sendto_one(client_p, "NOTICE DLINE :*** You have been D-lined");
+      exit_client(client_p, client_p, &me, "D-lined");
+    }
+  }
 }
 
 /*

@@ -550,7 +550,7 @@ static void set_local_gline(const char *oper_nick,
 		       user,
 		       host,
 		       reason);
-  check_klines();
+  check_glines();
 }
 
 

@@ -766,7 +766,7 @@ mo_dline(struct Client *client_p, struct Client *source_p,
                    oper_reason, current_date, 0);
   }
 
-  check_klines();
+  check_dlines();
 }
 
 /*

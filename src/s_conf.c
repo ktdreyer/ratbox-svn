@@ -1343,7 +1343,7 @@ rehash(int sig)
     }
 
   flush_deleted_I_P();
-  check_klines();
+  check_banned_lines();
   reopen_log(logFileName);
   return(0);
 }

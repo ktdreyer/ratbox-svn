@@ -329,9 +329,10 @@ static void remove_permkline_match(struct Client *source_p,
       return;
     }
 
-  sendto_realops_flags(UMODE_ALL, L_ALL,
-    	               "*** Received Un-kline for [%s@%s], from %s",
-	               user, host, get_oper_name(source_p));
+  if(!MyClient(source_p))
+    sendto_realops_flags(UMODE_ALL, L_ALL,
+       	                 "*** Received Un-kline for [%s@%s], from %s",
+	                 user, host, get_oper_name(source_p));
 
   sendto_one(source_p, ":%s NOTICE %s :K-Line for [%s@%s] is removed", 
              me.name, source_p->name, user,host);

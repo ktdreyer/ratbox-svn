@@ -52,6 +52,8 @@ void init_host_hash(void);
 struct ConfItem* find_address_conf(const char*, const char*,
                                    struct irc_inaddr*, int);
 struct ConfItem* find_dline(struct irc_inaddr *, int);
+struct ConfItem *find_kline(struct Client *);
+struct ConfItem *find_gline(struct Client *);
 
 void report_Klines(struct Client *);
 void report_auth(struct Client*);
