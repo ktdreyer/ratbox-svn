@@ -1,3 +1,8 @@
+*** 20010307_2 by toot
+removed a couple of pointless checks; IsInvisible() on a server
+or unknown :P
+
+
 *** 20010307_1 by toot
 /trace wasn't showing the correct Client and Server info
 
