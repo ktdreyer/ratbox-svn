@@ -48,6 +48,12 @@ _modinit(void)
   mod_add_cmd(MSG_LIST, &list_msgtab);
 }
 
+void
+_moddeinit(void)
+{
+  mod_del_cmd(MSG_LIST);
+}
+
 int list_all_channels(struct Client *sptr);
 int list_named_channel(struct Client *sptr,char *name);
 

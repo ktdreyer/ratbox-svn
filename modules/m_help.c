@@ -45,6 +45,12 @@ _modinit(void)
   mod_add_cmd(MSG_HELP, &help_msgtab);
 }
 
+void
+_moddeinit(void)
+{
+  mod_del_cmd(MSG_HELP);
+}
+
 char *_version = "20001122";
 
 /*
