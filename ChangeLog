@@ -1,3 +1,18 @@
+leeh        2004/07/19 17:19:09 EDT	(20040719_4)
+
+  Modified files:
+    src                  client.c reject.c 
+  Log:
+  - dont allow exit_client() to handle IsReject()
+  - SetClosing() when we mark a client as rejected, because we dont want
+    anything else handling it while we delay the exit
+  
+  Revision  Changes    Path
+  7.459     +1 -1      ircd-ratbox/src/client.c
+  1.24      +3 -2      ircd-ratbox/src/reject.c
+
+
+
 androsyn    2004/07/19 17:16:37 EDT	(20040719_3)
 
   Modified files:
