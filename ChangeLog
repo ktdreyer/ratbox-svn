@@ -1,3 +1,15 @@
+leeh        2002/08/21 16:58:34 EDT	(20020821_21)
+
+  Modified files:
+    src                  newconf.c 
+  Log:
+  - add flood_exempt to the table
+  
+  Revision  Changes    Path
+  7.24      +1 -0      ircd-ratbox/src/newconf.c
+
+
+
 leeh        2002/08/21 15:22:48 EDT	(20020821_20)
 
   Modified files:
