@@ -1,3 +1,7 @@
+*** 19990909_7 by tomh
+fix bug in dopacket return values
+
+
 *** 19990909_6 by tomh
 incorrect type usage
 
