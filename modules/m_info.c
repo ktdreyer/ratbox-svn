@@ -492,12 +492,16 @@ static void send_conf_options(struct Client *source_p)
   ** in order for it to show up properly to opers who issue INFO
   */
 
-  sendto_one(source_p,
-	     ":%s %d %s :Compiled on [%s]",
-	     me.name, 
-	     RPL_INFO,
-	     source_p->name,
-	     platform); 
+  /* jdc -- Only send compile information to admins. */
+  if (IsSetOperAdmin(source_p))
+  {
+    sendto_one(source_p,
+	":%s %d %s :Compiled on [%s]",
+	me.name, 
+	RPL_INFO,
+	source_p->name,
+	platform); 
+  }
 
   sendto_one(source_p, form_str(RPL_INFO), me.name, source_p->name, "");
 }
