@@ -1,3 +1,18 @@
+leeh        2005/01/07 11:50:27 EST	(20050107_0)
+
+  Modified files:
+    include              stdinc.h 
+    src                  s_chanserv.c 
+  Log:
+  - as noted by jilles, dont define ANFL_LAPTOP and sync channel_db_callback()
+    with the schema
+  
+  Revision  Changes    Path
+  1.10      +0 -2      rserv/include/stdinc.h
+  1.38      +20 -8     rserv/src/s_chanserv.c
+
+
+
 leeh        2005/01/04 20:42:21 EST	(20050105_3)
 
   Modified files:
