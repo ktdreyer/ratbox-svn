@@ -1,3 +1,21 @@
+leeh        2002/11/28 20:47:15 UTC	(20021128_2)
+
+  Modified files:
+    include              channel.h channel_mode.h 
+    modules              m_who.c 
+    src                  channel.c channel_mode.c 
+  Log:
+  - made the channel flags thing sensible
+  
+  Revision  Changes    Path
+  7.131     +5 -3      ircd-ratbox/include/channel.h
+  7.16      +0 -3      ircd-ratbox/include/channel_mode.h
+  1.75      +13 -54    ircd-ratbox/modules/m_who.c
+  7.363     +4 -4      ircd-ratbox/src/channel.c
+  7.90      +0 -25     ircd-ratbox/src/channel_mode.c
+
+
+
 leeh        2002/11/28 19:50:08 UTC	(20021128_1)
 
   Modified files:
