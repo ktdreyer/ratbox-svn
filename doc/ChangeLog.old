@@ -1,3 +1,8 @@
+*** 19991013_10 by tomh
+Removed CONNECTFAST garbage, it was causing production boxes to load up on
+SYNs on the primary port and killing poll performance.
+
+
 *** 19991013_9 by lusky
 fixed m_ison to put trailing space on 303 responses
 CONNECTFAST is always defined for USE_POLL now, was causing very poor
