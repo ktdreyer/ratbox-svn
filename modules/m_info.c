@@ -777,6 +777,7 @@ static void send_conf_options(struct Client *source_p)
   ** in order for it to show up properly to opers who issue INFO
   */
 
+#ifndef EFNET
   /* jdc -- Only send compile information to admins. */
   if (IsOperAdmin(source_p))
   {
@@ -787,6 +788,7 @@ static void send_conf_options(struct Client *source_p)
 	source_p->name,
 	platform); 
   }
+#endif
 
   sendto_one(source_p, form_str(RPL_INFO), me.name, source_p->name, "");
 }
