@@ -1,3 +1,15 @@
+androsyn    2002/06/04 00:33:04 EDT	(20020604_0)
+
+  Modified files:
+    include              hostmask.h 
+  Log:
+  Add a newline to the end of the file to make recent versions of gcc shut up.
+  
+  Revision  Changes    Path
+  1.22      +2 -1      ircd-hybrid-7/include/hostmask.h
+
+
+
 androsyn    2002/06/03 15:24:16 EDT	(20020603_5)
 
   Modified files:
