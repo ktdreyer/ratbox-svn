@@ -96,7 +96,7 @@ static void apply_kline(struct Client *source_p, struct ConfItem *aconf,
                         const char *reason, const char *oper_reason,
 			const char *current_date);
 static void apply_tkline(struct Client *source_p, struct ConfItem *aconf,
-                         const char *current_date, int temporary_kline_time);
+                         const char *, const char *, const char *, int);
 
 char buffer[IRCD_BUFSIZE];
 char user[USERLEN+2];
@@ -233,7 +233,8 @@ mo_kline(struct Client *client_p, struct Client *source_p,
 		 "Temporary K-line %d min. - %s (%s)",
 		 (int)(tkline_time/60), reason, current_date);
       DupString(aconf->passwd, buffer);
-      apply_tkline(source_p, aconf, current_date, tkline_time);
+      apply_tkline(source_p, aconf, reason, oper_reason,
+                   current_date, tkline_time);
     }
   else
     {
@@ -261,6 +262,7 @@ ms_kline(struct Client *client_p, struct Client *source_p,
   char *kuser;
   char *khost;
   char *kreason;
+  char *oper_reason;
 
   if (parc != 6)
     return;
@@ -325,13 +327,22 @@ ms_kline(struct Client *client_p, struct Client *source_p,
     aconf->status = CONF_KILL;
     DupString(aconf->user, kuser);
     DupString(aconf->host, khost);
+
+    /* Look for an oper reason */
+    if ((oper_reason = strchr(kreason, '|')) != NULL)
+    {
+      *oper_reason = '\0';
+      oper_reason++;
+    }
+
     DupString(aconf->passwd, kreason);
     current_date = smalldate(CurrentTime);
 
     if (tkline_time)
-      apply_tkline(source_p, aconf, current_date, tkline_time);
+      apply_tkline(source_p, aconf, kreason, oper_reason,
+                   current_date, tkline_time);
     else
-      apply_kline(source_p, aconf, aconf->passwd, NULL, current_date);
+      apply_kline(source_p, aconf, aconf->passwd, oper_reason, current_date);
 
     check_klines();
   }
@@ -364,21 +375,38 @@ apply_kline(struct Client *source_p, struct ConfItem *aconf,
  */
 static void
 apply_tkline(struct Client *source_p, struct ConfItem *aconf,
-                         const char *current_date, int tkline_time)
+             const char *reason, const char *oper_reason,
+             const char *current_date, int tkline_time)
 {
   aconf->hold = CurrentTime + tkline_time;
   add_temp_kline(aconf);
-  sendto_realops_flags(UMODE_ALL, L_ALL,
-		       "%s added temporary %d min. K-Line for [%s@%s] [%s]",
-		       get_oper_name(source_p), tkline_time/60,
-		       aconf->user, aconf->host,
-		       aconf->passwd);
+
+  /* no oper reason.. */
+  if(BadPtr(oper_reason))
+  {
+    sendto_realops_flags(UMODE_ALL, L_ALL,
+  		         "%s added temporary %d min. K-Line for [%s@%s] [%s]",
+		         get_oper_name(source_p), tkline_time/60,
+		         aconf->user, aconf->host, reason);
+    ilog(L_TRACE, "%s added temporary %d min. K-Line for [%s@%s] [%s]",
+         source_p->name, tkline_time/60,
+         aconf->user, aconf->host, reason);
+  }
+  else
+  {
+    sendto_realops_flags(UMODE_ALL, L_ALL,
+                         "%s added temporary %d min. K-Line for [%s@%s] [%s|%s]",
+                         get_oper_name(source_p), tkline_time/60,
+                         aconf->user, aconf->host,
+                         reason, oper_reason);
+    ilog(L_TRACE, "%s added temporary %d min. K-Line for [%s@%s] [%s|%s]",
+         source_p->name, tkline_time/60,
+         aconf->user, aconf->host, reason, oper_reason);
+  }
+
   sendto_one(source_p, ":%s NOTICE %s :Added temporary %d min. K-Line [%s@%s]",
 	     me.name, source_p->name, tkline_time/60,
 	     aconf->user, aconf->host);
-  ilog(L_TRACE, "%s added temporary %d min. K-Line for [%s@%s] [%s]",
-       source_p->name, tkline_time/60,
-       aconf->user, aconf->host, aconf->passwd);
 }
 
 /*
@@ -747,15 +775,28 @@ mo_dline(struct Client *client_p, struct Client *source_p,
     DupString(aconf->passwd, dlbuffer);
     aconf->hold = CurrentTime + tdline_time;
     add_temp_dline(aconf);
-    sendto_realops_flags(UMODE_ALL, L_ALL,
-		         "%s added temporary %ld min. D-Line for [%s] [%s]",
-		         source_p->name, tdline_time/60, 
-		         aconf->host, aconf->passwd);
+
+    if(BadPtr(oper_reason))
+    {
+      sendto_realops_flags(UMODE_ALL, L_ALL,
+		           "%s added temporary %ld min. D-Line for [%s] [%s]",
+		           source_p->name, tdline_time/60, 
+		           aconf->host, reason);
+      ilog(L_TRACE, "%s added temporary %d min. D-Line for [%s] [%s]",
+           source_p->name, tdline_time/60, aconf->host, reason);
+    }
+    else
+    {
+      sendto_realops_flags(UMODE_ALL, L_ALL,
+                           "%s added temporary %ld min. D-Line for [%s] [%s|%s]",
+                           source_p->name, tdline_time/60,
+                           aconf->host, reason, oper_reason);
+      ilog(L_TRACE, "%s added temporary %d min. D-Line for [%s] [%s|%s]",
+           source_p->name, tdline_time/60, aconf->host, reason, oper_reason);
+    }
 
     sendto_one(source_p, ":%s NOTICE %s :Added temporary %ld min. D-Line for [%s]",
                me.name, source_p->name, tdline_time/60, aconf->host);
-    ilog(L_TRACE, "%s added temporary %d min. D-Line for [%s] [%s]",
-         source_p->name, tdline_time/60, aconf->host, aconf->passwd);
   }
   else
   {
