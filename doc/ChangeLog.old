@@ -1,3 +1,8 @@
+*** 20010604_5 by db
+- committed my side of the great log() to ilog() change
+
+
+
 *** 20010604_4 by ejb
 - change src/ to use ilog() rather than log().
   this is needed for systems which put the math library
