@@ -53,7 +53,7 @@ struct ConfItem* find_address_conf(const char*, const char*,
                                    struct irc_inaddr*, int);
 struct ConfItem* find_dline(struct irc_inaddr *, int);
 
-void report_Klines(struct Client*, int temp);
+void report_Klines(struct Client *);
 void report_auth(struct Client*);
 #ifdef IPV6
 int match_ipv6(struct irc_inaddr*, struct irc_inaddr*, int);

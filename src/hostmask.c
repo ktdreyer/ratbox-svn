@@ -698,36 +698,36 @@ report_auth(struct Client *client_p)
 }
 
 /* report_Klines()
- * Inputs: Client to report to,
- *	   type(==0 for perm, !=0 for temporary)
- *	   mask 
- * Output: None
- * Side effects: Reports configured K(or k)-lines to client_p.
+ * 
+ * inputs       - Client to report to, mask 
+ * outputs      -
+ * side effects - Reports configured K-lines to client_p.
  */
 void
-report_Klines(struct Client *client_p, int tkline)
+report_Klines(struct Client *client_p)
 {
-  char *name, *host, *pass, *user, *classname, c;
+  char *name, *host, *pass, *user, *classname;
   struct AddressRec *arec;
   struct ConfItem *aconf = NULL;
   int i, port;
 
-  if (tkline)
-    c = 'k';
-  else
-    c = 'K';
-
   for (i = 0; i < ATABLE_SIZE; i++)
+  {
     for (arec = atable[i]; arec; arec = arec->next)
+    {
       if (arec->type == CONF_KILL)
       {
-        if ((tkline && !((aconf = arec->aconf)->flags & CONF_FLAGS_TEMPORARY))
-            || (!tkline
-                && ((aconf = arec->aconf)->flags & CONF_FLAGS_TEMPORARY)))
+        aconf = arec->aconf;
+
+        /* its a tempkline, theyre reported elsewhere */
+        if(aconf->flags & CONF_FLAGS_TEMPORARY)
           continue;
+
         get_printable_conf(aconf, &name, &host, &pass, &user, &port,
                            &classname);
         sendto_one(client_p, form_str(RPL_STATSKLINE), me.name,
-                   client_p->name, c, host, user, pass);
+                   client_p->name, 'K', host, user, pass);
       }
+    }
+  }
 }

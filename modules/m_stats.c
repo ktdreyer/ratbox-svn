@@ -606,7 +606,7 @@ static void stats_klines(struct Client *source_p)
   }
   /* Theyre opered, or allowed to see all klines */
   else
-    report_Klines(source_p, 0);
+    report_Klines(source_p);
 }
 
 static void stats_messages(struct Client *source_p)
