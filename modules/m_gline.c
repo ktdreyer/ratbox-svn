@@ -743,8 +743,6 @@ add_new_majority_gline(const char* oper_nick,
 		       const char* host,
 		       const char* reason)
 {
-  dlink_node *pending_node;
-
   struct gline_pending *pending = (struct gline_pending*)
     MyMalloc(sizeof(struct gline_pending));
 
@@ -762,8 +760,7 @@ add_new_majority_gline(const char* oper_nick,
   pending->last_gline_time = CurrentTime;
   pending->time_request1 = CurrentTime;
 
-  pending_node = make_dlink_node();
-  dlinkAdd(pending, pending_node, &pending_glines);
+  dlinkAddAlloc(pending, &pending_glines);
 }
 
 /*

@@ -426,8 +426,7 @@ remove_temp_match_list(char *host, char *user, dlink_list *temp_list)
 #endif
 	  )
 	{
-	  dlinkDelete(ptr, temp_list);
-	  free_dlink_node(ptr);
+	  dlinkDestroy(ptr, temp_list);
 	  delete_one_address_conf(aconf->host, aconf);
 	  return YES;
 	}

@@ -219,13 +219,8 @@ static void build_nicklist(struct Client *source_p, char *addbuf,
 static void add_accept(struct Client *source_p, 
                        struct Client *target_p)
 {
-  dlink_node *m;
-
-  m = make_dlink_node();
-  dlinkAdd(target_p, m, &source_p->allow_list);
-
-  m = make_dlink_node();
-  dlinkAdd(source_p, m, &target_p->on_allow_list);
+  dlinkAddAlloc(target_p, &source_p->allow_list);
+  dlinkAddAlloc(source_p, &target_p->on_allow_list);
 }
   
 

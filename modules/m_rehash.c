@@ -173,7 +173,6 @@ clear_temps(dlink_list *tlist)
     aconf = ptr->data;
 
     delete_one_address_conf(aconf->host, aconf);
-    dlinkDelete(ptr, tlist);
-    free_dlink_node(ptr);
+    dlinkDestroy(ptr, tlist);
   }
 }
