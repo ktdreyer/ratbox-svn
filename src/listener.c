@@ -381,10 +381,6 @@ static void accept_connection(int pfd, void *data)
 
   if (fd < 0)
     {
-#if 0
-      if (EAGAIN == errno)
-	return;
-#endif
       /*
        * slow down the whining to opers bit
        */

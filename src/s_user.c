@@ -502,10 +502,6 @@ int register_remote_user(struct Client *client_p, struct Client *source_p,
       kill_client(client_p, source_p, "%s (Server doesn't exist)",
 		  me.name);
 
-#if 0
-      sendto_one(client_p,":%s KILL %s :%s (Ghosted, %s doesn't exist)",
-                 me.name, source_p->name, me.name, user->server);
-#endif
       source_p->flags |= FLAGS_KILLED;
       return exit_client(NULL, source_p, &me, "Ghost");
     }
@@ -539,12 +535,6 @@ int register_remote_user(struct Client *client_p, struct Client *source_p,
     {
       kill_client(client_p, source_p, "%s GHOST (no server found)",
                   me.name);
-#if 0
-      sendto_one(client_p,
-		 ":%s KILL %s :%s GHOST (no server %s on the net)",
-		 me.name,
-		 source_p->name, me.name, user->server);
-#endif
       sendto_realops_flags(FLAGS_ALL, L_ALL, "No server %s for user %s[%s@%s] from %s",
 			   user->server, source_p->name, source_p->username,
 			   source_p->host, source_p->from->name);
@@ -862,13 +852,6 @@ int do_remote_user(char* nick, struct Client* client_p, struct Client* source_p,
   if (id)
 	  strcpy(source_p->user->id, id);
   
-#if 0
-  /* XXX dont do this (talk to is-) */
-  /* if it has no ID, set the ID to the nick just in case */
-  if (!id)
-	  strcpy(source_p->user->id, nick);
-#endif
-
   return register_remote_user(client_p, source_p, source_p->name, username);
 }
 

@@ -295,17 +295,6 @@ void parse(struct Client *client_p, char *pbuffer, char *bufend)
     }
 
   handle_command(mptr, client_p, from, i, para);
-  /* handle_command may have called exit_client, which sets the socket
-   * as dead. We _CANNOT_ call exit_client twice! We should never set
-   * a socket as dead without calling exit_client, so this check is
-   * silly. -A1kmm */
-#if 0 
-  if(IsDead(from))
-    exit_client(from, from, &me,
-		(from->flags & FLAGS_SENDQEX) ?
-		"SendQ exceeded" : "Dead socket");
-#endif
-
 }
 
 static void 

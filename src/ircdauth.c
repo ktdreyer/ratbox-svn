@@ -323,9 +323,6 @@ ParseIAuth(int fd, void *notused)
 
 	if ((length == (-1)) && ((errno == EWOULDBLOCK) || (errno == EAGAIN)))
     return; /* no error - there's just nothing to read */
-  #if 0
-    return 2; /* no error - there's just nothing to read */
-  #endif
 
 	if (length <= 0)
 	{

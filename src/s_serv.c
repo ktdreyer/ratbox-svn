@@ -742,154 +742,6 @@ int check_server(const char *name, struct Client* client_p, int cryptlink)
 }
 
 /*
- * check_server - check access for a server given its name 
- * (passed in client_p struct). Must check for all C/N lines which have a 
- * name which matches the name given and a host which matches. A host 
- * alias which is the same as the server name is also acceptable in the 
- * host field of a C/N line.
- *  
- *  0 = Access denied
- *  1 = Success
- */
-#if 0
-int check_server(struct Client* client_p)
-{
-  dlink_list *lp;
-  struct ConfItem* c_conf = 0;
-  struct ConfItem* n_conf = 0;
-
-  assert(0 != client_p);
-
-  if (attach_confs(client_p, client_p->name, 
-                   CONF_CONNECT_SERVER | CONF_NOCONNECT_SERVER ) < 2)
-    {
-      Debug((DEBUG_DNS,"No C/N lines for %s", client_p->name));
-      return 0;
-    }
-  lp = &client_p->localClient->confs;
-  /*
-   * This code is from the old world order. It should eventually be
-   * duplicated somewhere else later!
-   *   -- adrian
-   */
-#if 0
-  if (client_p->dns_reply)
-    {
-      int             i;
-      struct hostent* hp   = client_p->dns_reply->hp;
-      char*           name = hp->h_name;
-      /*
-       * if we are missing a C or N line from above, search for
-       * it under all known hostnames we have for this ip#.
-       */
-      for (i = 0, name = hp->h_name; name; name = hp->h_aliases[i++])
-        {
-          if (!c_conf)
-            c_conf = find_conf_host(lp, name, CONF_CONNECT_SERVER );
-          if (!n_conf)
-            n_conf = find_conf_host(lp, name, CONF_NOCONNECT_SERVER );
-          if (c_conf && n_conf)
-            {
-              strncpy_irc(client_p->host, name, HOSTLEN);
-              break;
-            }
-        }
-      for (i = 0; hp->h_addr_list[i]; ++i)
-        {
-          if (!c_conf)
-            c_conf = find_conf_ip(lp, hp->h_addr_list[i],
-                                  client_p->username, CONF_CONNECT_SERVER);
-          if (!n_conf)
-            n_conf = find_conf_ip(lp, hp->h_addr_list[i],
-                                  client_p->username, CONF_NOCONNECT_SERVER);
-        }
-    }
-#endif
-  /*
-   * Check for C and N lines with the hostname portion the ip number
-   * of the host the server runs on. This also checks the case where
-   * there is a server connecting from 'localhost'.
-   */
-  if (!c_conf)
-    c_conf = find_conf_host(lp, client_p->host, CONF_CONNECT_SERVER);
-  if (!n_conf)
-    n_conf = find_conf_host(lp, client_p->host, CONF_NOCONNECT_SERVER);
-  /*
-   * Attach by IP# only if all other checks have failed.
-   * It is quite possible to get here with the strange things that can
-   * happen when using DNS in the way the irc server does. -avalon
-   */
-  if (!c_conf)
-    c_conf = find_conf_ip(lp, (char*)& client_p->localClient->ip,
-                          client_p->username, CONF_CONNECT_SERVER);
-  if (!n_conf)
-    n_conf = find_conf_ip(lp, (char*)& client_p->localClient->ip,
-                          client_p->username, CONF_NOCONNECT_SERVER);
-  /*
-   * detach all conf lines that got attached by attach_confs()
-   */
-  det_confs_butmask(client_p, 0);
-  /*
-   * if no C or no N lines, then deny access
-   */
-  if (!c_conf || !n_conf)
-    {
-      Debug((DEBUG_DNS, "sv_cl: access denied: [%s@%s] c %x n %x",
-             client_p->name, client_p->host, c_conf, n_conf));
-      return 0;
-    }
-  /*
-   * attach the C and N lines to the client structure for later use.
-   */
-  attach_conf(client_p, n_conf);
-  attach_conf(client_p, c_conf);
-  attach_confs(client_p, client_p->name, CONF_HUB | CONF_LEAF);
-
-  
-  if( !(n_conf->flags & CONF_FLAGS_LAZY_LINK) )
-    ClearCap(client_p,CAP_LL);
-
-  if(ServerInfo.hub)
-    {
-      if( n_conf->flags & CONF_FLAGS_LAZY_LINK )
-        {
-          if(find_conf_by_name(n_conf->name, CONF_HUB) 
-	     ||
-	     IsCapable(client_p,CAP_HUB))
-            {
-              ClearCap(client_p,CAP_LL);
-              sendto_realops_flags(FLAGS_ALL, L_ALL,
-		   "*** LazyLinks to a hub from a hub, thats a no-no.");
-            }
-          else
-            {
-              client_p->localClient->serverMask = nextFreeMask();
-
-              if(!client_p->localClient->serverMask)
-                {
-                  sendto_realops_flags(FLAGS_ALL, L_ALL,
-				       "serverMask is full!");
-                  /* try and negotiate a non LL connect */
-                  ClearCap(client_p,CAP_LL);
-                }
-            }
-       }
-    }
-
-
-  /*
-   * if the C:line doesn't have an IP address assigned put the one from
-   * the client socket there
-   */ 
-  if (INADDR_NONE == c_conf->ipnum.s_addr)
-    c_conf->ipnum.s_addr = client_p->localClient->ip.s_addr;
-
-  Debug((DEBUG_DNS,"sv_cl: access ok: [%s]", client_p->host));
-  return 1;
-}
-#endif
-
-/*
  * send_capabilities
  *
  * inputs	- Client pointer to send to
@@ -1101,33 +953,8 @@ int server_estab(struct Client *client_p)
      return exit_client(client_p, client_p, client_p, "Lost connect{} block!");
     }
   /* We shouldn't have to check this, it should already done before
-   * server_estab is called. -A1kmm */
-#if 0
-#ifdef CRYPT_LINK_PASSWORD
-  /* use first two chars of the password they send in as salt */
-
-  /* passwd may be NULL. Head it off at the pass... */
-  if(*client_p->localClient->passwd && *n_conf->passwd)
-    {
-      extern  char *crypt();
-      encr = crypt(client_p->localClient->passwd, n_conf->passwd);
-    }
-  else
-    encr = "";
-#else
-  encr = client_p->localClient->passwd;
-#endif  /* CRYPT_LINK_PASSWORD */
-  if (*n_conf->passwd && 0 != strcmp(n_conf->passwd, encr))
-    {
-      ServerStats->is_ref++;
-      sendto_one(client_p, "ERROR :No Access (passwd mismatch) %s",
-                 inpath);
-      sendto_realops_flags(FLAGS_ALL, L_ALL,
-			   "Access denied (passwd mismatch) %s", inpath);
-      ilog(L_NOTICE, "Access denied (passwd mismatch) %s", inpath_ip);
-      return exit_client(client_p, client_p, client_p, "Bad Password");
-    }
-#endif
+   * server_estab is called. -A1kmm
+   */
   memset((void *)client_p->localClient->passwd, 0,sizeof(client_p->localClient->passwd));
 
   /* Its got identd , since its a server */
@@ -1459,11 +1286,6 @@ static void start_io(struct Client *server)
  
   /* schedule a write */ 
   send_queued_slink_write(server->localClient->ctrlfd, server);
-#if 0  
-  comm_setselect(server->localClient->ctrlfd, FDLIST_IDLECLIENT,
-                 COMM_SELECT_WRITE, send_queued_slink_write,
-                 server, 0);
-#endif
 }
 
 #ifndef VMS

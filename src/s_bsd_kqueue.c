@@ -104,10 +104,6 @@ kq_update_events(int fd, short filter, PF * handler)
   PF *cur_handler;
   int kep_flags;
 
-#if 0
-  int retval;
-#endif
-
   switch (filter)
     {
     case EVFILT_READ:
@@ -161,14 +157,6 @@ kq_update_events(int fd, short filter, PF * handler)
 	{
 	  kqoff++;
 	}
-#if 0
-      if (retval < 0)
-	/* Error! */
-	if (ke.flags & EV_ERROR)
-	  {
-	    errno = ke.data;
-	  }
-#endif
     }
 }
 

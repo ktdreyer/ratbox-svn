@@ -444,14 +444,6 @@ void count_memory(struct Client *source_p)
                            users_counted, user_count);
   
 
-#if 0
-  total_memory += user_memory_used;
-  sendto_one(source_p, ":%s %d %s :struct User Memory in use: %d(%d)",
-             me.name, RPL_STATSDEBUG, source_p->name,
-	     user_count,
-             (int)user_memory_used);
-#endif
-
   count_links_memory( &links_count, (int *)&links_memory_used );
   total_memory += links_memory_used;
   sendto_one(source_p, ":%s %d %s :Links Memory in use: %d(%d)",

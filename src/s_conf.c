@@ -1269,9 +1269,6 @@ find_conf_by_name(const char* name, int status)
     {
       if (conf->status == status && conf->name &&
           match(name, conf->name))
-#if 0
-          (match(name, conf->name) || match(conf->name, name)))
-#endif
         return conf;
     }
   return NULL;
@@ -1297,9 +1294,6 @@ find_conf_by_host(const char* host, int status)
     {
       if (conf->status == status && conf->host &&
           match(host, conf->host))
-#if 0
-          (match(host, conf->host) || match(conf->host, host)))
-#endif
         return conf;
     }
   return NULL;
@@ -2685,10 +2679,6 @@ conf_fbgets(char *lbuf,int max_size, FBFILE *fb)
 int 
 conf_yy_fatal_error(char *msg)
 {
-#if 0
-  sendto_realops_flags(FLAGS_ALL, L_ALL,
-		       "lexer barfed. lets leave it at that for now");
-#endif
   return 0;
 }
 

@@ -39,19 +39,6 @@ struct Message error_msgtab = {
   {m_error, m_ignore, ms_error, m_ignore}
 };
 
-#if 0
-void
-_modinit(void)
-{
-  mod_add_cmd(&error_msgtab);
-}
-
-void
-_moddeinit(void)
-{
-  mod_del_cmd(&error_msgtab);
-}
-#endif
 
 /*
  * Note: At least at protocol level ERROR has only one parameter,
