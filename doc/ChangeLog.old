@@ -1,3 +1,9 @@
+*** 20010212_7 by db
+- this fixes the IP showing on /connect for =now= AndroSyn will have
+  to tidy this up...
+
+
+
 *** 20010212_6 by jdc
 - Logic for spoof_notice was backwards.  Oops.
 
