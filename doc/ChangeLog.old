@@ -1,3 +1,10 @@
+*** 20010205_9 by androsyn
+Fixed a bug with TCP sockets for adns..this would have broken things if
+the TCP code every got used :)
+
+
+
+
 *** 20010205_8 by davidt
 m_* functions no longer need a return value.. and everything was using it in different ways (returning 0/1/-1 on various different conditions), so it was just a mess..  If we do decide to actually use the return value for something useful, it'd need to change everything anyway, so since that probably won't happen (soon anyway)....
 
