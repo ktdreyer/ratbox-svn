@@ -83,6 +83,7 @@ BASE_SRCS =                     \
   parse.c                       \
   rsa.c                         \
   restart.c                     \
+  resv.c			\
   s_auth.c                      \
   s_bsd.c                       \
   s_bsd_kqueue.c                \

@@ -80,6 +80,7 @@ SRCS =                          \
   m_quit.c \
   m_rehash.c \
   m_restart.c \
+  m_resv.c \
   m_server.c \
   m_set.c \
   m_sjoin.c \
