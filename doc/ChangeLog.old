@@ -1,3 +1,13 @@
+*** 20000926_1 by ejb
+- added myself to core team list in version.c.SH
+- added ircnet's +I invite exceptions
+- remove {add,del}_*id(), replaced with a single function
+  add_id and del_id, removes code duplication.
+- added seperate error_sents for +I and +d in channel.c.
+- removed some false BAN_INFO ifdefs
+
+
+
 *** 20000907_1 by ejb
 initial stab at IPv6 .. it doesn't compile with IPV6 defined yet..
 
