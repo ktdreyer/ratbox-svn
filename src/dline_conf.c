@@ -42,7 +42,7 @@ struct ConfItem *match_Dline(struct irc_inaddr *ip)
 	patricia_node_t *node;
 	node = match_ip(eline, ip);
 	if(node != NULL)
-		return(NULL); // Well we are an exception..
+		return(NULL); /* Well we are an exception.. */
 		
 	node = match_ip(dline, ip);
 	if(node != NULL)

@@ -43,7 +43,7 @@ hash_text(const char* start, const char *end, unsigned long *iv)
     {
       h = (h << 4) - (h + (unsigned char)ToLower(*end--));
     }
-  //*iv = h;
+/*  *iv = h; */
   return(h & (TH_MAX - 1));
 }
 
