@@ -196,7 +196,7 @@ static void m_stats(struct Client *client_p, struct Client *source_p,
   static time_t last_used = 0;
 
   /* Check the user is actually allowed to do /stats, and isnt flooding */
-  if(!IsOper(source_p) && (last_used + ConfigFileEntry.pace_wait) > CurrentTime)
+  if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
     {
       /* safe enough to give this on a local connect only */
       if(MyClient(source_p))
@@ -209,14 +209,12 @@ static void m_stats(struct Client *client_p, struct Client *source_p,
     }
 
   /* Is the stats meant for us? */
-  if (IsOper(source_p) || !GlobalSetOptions.hide_server)
+  if (!GlobalSetOptions.hide_server)
     {
       if (hunt_server(client_p,source_p,":%s STATS %s :%s",2,parc,parv) != HUNTED_ISME)
         return;
     }
 
-  /* If theyre doing a stats ?, then we search the letter column.. else we search
-   * the name column.. letter is case SENSITIVE, name is case INSENSITIVE -- fl_ */
   if(strlen(parv[1]) == 1)
   {
     char statchar;
@@ -227,8 +225,7 @@ static void m_stats(struct Client *client_p, struct Client *source_p,
         if (stats_cmd_table[i].letter == statchar)
           {
             /* The stats table says what privs are needed, so check --fl_ */
-            if((stats_cmd_table[i].need_oper && !IsOper(source_p)) ||
-                (stats_cmd_table[i].need_admin && !IsAdmin(source_p)))
+            if(stats_cmd_table[i].need_oper || stats_cmd_table[i].need_admin)
               {
                 sendto_one(source_p, form_str(ERR_NOPRIVILEGES),me.name,source_p->name);
                 break;
@@ -467,7 +464,10 @@ static void ms_stats(struct Client *client_p, struct Client *source_p,
   if (hunt_server(client_p,source_p,":%s STATS %s :%s",2,parc,parv)!=HUNTED_ISME)
     return;
 
-  m_stats(client_p,source_p,parc,parv);
+  if(IsOper(source_p))
+    mo_stats(client_p, source_p, parc, parv);
+  else
+    m_stats(client_p,source_p,parc,parv);
 }
 
 
