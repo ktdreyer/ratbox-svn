@@ -110,15 +110,6 @@ static void mo_rehash(struct Client *client_p, struct Client *source_p,
           ReadMessageFile( &ConfigFileEntry.opermotd );
           found = YES;
         }
-      else if(irccmp(parv[1],"HELP") == 0)
-        {
-          sendto_realops_flags(FLAGS_ALL, L_ALL,
-		       "%s is forcing re-reading of oper and user help files",
-                       parv[0]);
-          ReadMessageFile( &ConfigFileEntry.helpfile );
-          ReadMessageFile( &ConfigFileEntry.uhelpfile );
-          found = YES;
-        }
       if(found)
         {
           ilog(L_NOTICE, "REHASH %s From %s\n", parv[1], 
@@ -127,7 +118,7 @@ static void mo_rehash(struct Client *client_p, struct Client *source_p,
         }
       else
         {
-          sendto_one(source_p,":%s NOTICE %s :rehash one of :CHANNELS DNS HELP MOTD OMOTD" ,me.name,source_p->name);
+          sendto_one(source_p,":%s NOTICE %s :rehash one of :CHANNELS DNS MOTD OMOTD" ,me.name,source_p->name);
           return;
         }
     }

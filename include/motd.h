@@ -40,9 +40,7 @@
 typedef enum {
   USER_MOTD,
   USER_LINKS,
-  OPER_MOTD,
-  HELP_MOTD,
-  UHELP_MOTD
+  OPER_MOTD
 } MotdType;
 
 struct MessageFileLine

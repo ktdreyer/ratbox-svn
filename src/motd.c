@@ -122,12 +122,6 @@ int SendMessageFile(struct Client *source_p, MessageFile *motdToPrint)
       sendto_one(source_p,":%s NOTICE %s :Start of OPER MOTD",me.name,source_p->name);
       break;
 
-    case HELP_MOTD:
-      break;
-
-    case UHELP_MOTD:
-      break;
-
     default:
       return 0;
       /* NOT REACHED */
