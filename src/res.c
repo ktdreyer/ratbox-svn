@@ -18,9 +18,11 @@
 #include "numeric.h"
 #include "restart.h"
 #include "s_bsd.h"
+#include "s_log.h"
 #include "send.h"
 
 #include <assert.h>
+#include <errno.h>
 #include <string.h>
 #include <stdlib.h>
 #include <sys/time.h>

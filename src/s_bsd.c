@@ -733,6 +733,17 @@ void add_connection(struct Listener* listener, int fd)
 
   assert(0 != listener);
 
+#ifdef USE_IAUTH
+  if (iAuth.socket == NOSOCK)
+    {
+      send(fd,
+        "NOTICE AUTH :*** Ircd AUthentication Server is temporarily down, please connect later\r\n",
+        87,
+        0);
+      close(fd);
+      return;
+    }
+
   /* 
    * get the client socket name from the socket
    * the client has already been checked out in accept_connection
@@ -963,6 +974,11 @@ int read_message(time_t delay, unsigned char mask)        /* mika */
     {
       FD_ZERO(read_set);
       FD_ZERO(write_set);
+
+#ifdef USE_IAUTH
+  if (iAuth.socket != NOSOCK)
+    FD_SET(iAuth.socket, read_set);
+#endif
 
       for (auth = AuthPollList; auth; auth = auth->next) {
         assert(-1 < auth->fd);
