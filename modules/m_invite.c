@@ -150,7 +150,7 @@ m_invite(struct Client *client_p,
 
   if ((vchan2 = map_vchan(chptr, target_p)))
   {
-    if (MyClient(source_p) && (vchan2->mode.mode & MODE_SECRET)==0)
+    if (MyClient(source_p) && ((vchan2->mode.mode & MODE_SECRET) == 0))
       sendto_one(source_p, form_str(ERR_USERONCHANNEL), me.name, parv[0],
                  parv[1], parv[2]);
     return;
@@ -209,29 +209,30 @@ m_invite(struct Client *client_p,
                source_p->username, source_p->host, target_p->name,
                chptr->chname);
   }
-#if 1
-  else
+
+  /* if the channel is +p, broadcast everywhere thats CAP_PARA, send to
+   * target if target isnt CAP_PARA capable, else just send to target
+   */
+  if(vchan->mode.mode & MODE_PRIVATE)
   {
-    if(target_p->from != client_p)
+    sendto_channel_remote(source_p, client_p,
+  		  	  ONLY_CHANOPS_HALFOPS, CAP_PARA, NOCAPS,
+                          chptr, ":%s INVITE %s :%s", parv[0], 
+                          target_p->name, vchan->chname);
+			  
+    if(!MyConnect(target_p) && (target_p->from != client_p) &&
+       !IsCapable(target_p->from, CAP_PARA))
       sendto_one(target_p->from, ":%s INVITE %s :%s", parv[0],
                  target_p->name, vchan->chname);
+
+    sendto_channel_local(ONLY_CHANOPS_HALFOPS, vchan,
+                         ":%s NOTICE %s :%s is inviting %s to %s.",
+			 me.name, chptr->chname, source_p->name,
+			 target_p->name, chptr->chname);
   }
-
-  /* breaks hyb6, need a proper solution */
-#else
-  sendto_channel_remote(source_p, client_p,
-			ONLY_CHANOPS_HALFOPS, NOCAPS, NOCAPS,
-                        chptr, ":%s INVITE %s :%s", parv[0], 
-                        target_p->name, vchan->chname);
-
-  if (!MyConnect(target_p) && target_p->from->serial != current_serial &&
-      target_p->from != client_p)
+  else if(!MyConnect(target_p) && (target_p->from != client_p))
+  {
     sendto_one(target_p->from, ":%s INVITE %s :%s", parv[0],
                target_p->name, vchan->chname);
-#endif
-
-  if (vchan->mode.mode & MODE_PRIVATE)
-    sendto_channel_local(ONLY_CHANOPS_HALFOPS, vchan,
-        ":%s NOTICE %s :%s is inviting %s to %s.", me.name, chptr->chname,
-        source_p->name, target_p->name, chptr->chname);
+  }
 }
