@@ -133,6 +133,7 @@ dlinkMoveNode(dlink_node *m, dlink_list *oldlist, dlink_list *newlist)
   else
     oldlist->head = m->next;
   
+  m->prev = NULL;
   m->next = newlist->head;
   if (newlist->head != NULL)
      newlist->head->prev = m; 
