@@ -1,3 +1,14 @@
+*** 20001102_5 by adrian
+
+
+fd_close() is meant to close() the fd, rather than squid's which doesn't
+(this is because its got more sane file_open/close and comm_open/close
+code ..)
+
+This fixes the fd leak and non-closing fd problems.
+
+
+
 *** 20001102_4 by adrian
 
 
