@@ -1,3 +1,18 @@
+leeh        2005/02/01 15:32:15 EST	(20050201_3)
+
+  Modified files:
+    help/chanserv        modauto 
+    src                  s_chanserv.c 
+  Log:
+  - dont autoop when NOOPS is set
+  - dont autoop unless their access >= S_C_OP
+  
+  Revision  Changes    Path
+  1.5       +1 -0      rserv/help/chanserv/modauto
+  1.51      +21 -13    rserv/src/s_chanserv.c
+
+
+
 leeh        2005/02/01 11:20:03 EST	(20050201_2)
 
   Modified files:
