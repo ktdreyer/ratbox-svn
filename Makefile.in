@@ -23,13 +23,14 @@ RM=@RM@
 
 # Default CFLAGS
 # CFLAGS = -g -O2 -DNDEBUG
+CFLAGS		= @CFLAGS@
 
 # Default make flags - you may want to uncomment this on a multicpu machine
 #MFLAGS = -j 4
 
 #
 # For developers
-CFLAGS= -g -O2 -Wall
+#CFLAGS= -g -O2 -Wall
 
 # You may need to define the FD_SETSIZE in order to overrule
 # the system one.

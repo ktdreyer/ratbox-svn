@@ -3,17 +3,18 @@
 #
 # $Id$
 #
-CC = @CC@
-RM = @RM@
-LEX = @LEX@
-LEXLIB = @LEXLIB@
+CC		= @CC@
+RM		= @RM@
+LEX		= @LEX@
+LEXLIB		= @LEXLIB@
+CFLAGS		= @CFLAGS@
 
-MKDEP = ${CC} -MM
+MKDEP		= ${CC} -MM
 
-IRCDLIBS = @LIBS@ @SSL_LIBS@
+IRCDLIBS	= @LIBS@ @SSL_LIBS@
 
-INCLUDES = -I../include
-CPPFLAGS = ${INCLUDES} @SSL_DEFINE@ @CPPFLAGS@
+INCLUDES	= -I../include
+CPPFLAGS	= ${INCLUDES} @SSL_DEFINE@ @CPPFLAGS@
  
 default:	all
 
