@@ -87,6 +87,16 @@ add_service(struct service_handler *service)
                 char filename[PATH_MAX];
                 int i;
 
+		snprintf(filename, sizeof(filename), "%s%s/index",
+				HELP_PATH, lcase(service->id));
+
+		client_p->service->help = cache_file(filename, "index");
+
+		snprintf(filename, sizeof(filename), "%s%s/index-admin",
+				HELP_PATH, lcase(service->id));
+
+		client_p->service->helpadmin = cache_file(filename, "index-admin");
+
                 for(i = 0; scommand[i].cmd[0] != '\0'; i++)
                 {
                         snprintf(filename, sizeof(filename), "%s%s/",
@@ -301,35 +311,81 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
 
                 if(parc < 1 || EmptyString(parv[0]))
                 {
-                        char buf[BUFSIZE];
+			struct cachefile *fileptr;
+			struct cacheline *lineptr;
+			dlink_node *ptr;
 
-                        buf[0] = '\0';
+			/* if this service has short help enabled, or there
+			 * is no index file and theyre either unopered (so
+			 * cant see admin file), or theres no admin file.
+			 */
+			if(ServiceShortHelp(service_p) ||
+			   (!service_p->service->help &&
+			    (!client_p->user->oper || !service_p->service->helpadmin)))
+			{	
+	                        char buf[BUFSIZE];
 
-                        for(i = 0; cmd_table[i].cmd[0] != '\0'; i++)
-                        {
+	                        buf[0] = '\0';
 
-                        	if((cmd_table[i].operonly && !is_oper(client_p)) ||
-				   (cmd_table[i].operflags && 
-				    (!client_p->user->oper || 
-				     (client_p->user->oper->flags & cmd_table[i].operflags) == 0)))
-                                        continue;
+        	                for(i = 0; cmd_table[i].cmd[0] != '\0'; i++)
+                	        {
 
-                                strlcat(buf, cmd_table[i].cmd, sizeof(buf));
-                                strlcat(buf, " ", sizeof(buf));
-                        }
+	                        	if((cmd_table[i].operonly && !is_oper(client_p)) ||
+					   (cmd_table[i].operflags && 
+					    (!client_p->user->oper || 
+					     (client_p->user->oper->flags & cmd_table[i].operflags) == 0)))
+                                	        continue;
 
-			if(buf[0] != '\0')
-			{
-				service_error(service_p, client_p, "%s Help Index. "
-						"Use HELP <command> for more information",
-						service_p->name);
-				service_error(service_p, client_p, "Topics: %s", buf);
+	                                strlcat(buf, cmd_table[i].cmd, sizeof(buf));
+        	                        strlcat(buf, " ", sizeof(buf));
+                	        }
+
+				if(buf[0] != '\0')
+				{
+					service_error(service_p, client_p, "%s Help Index. "
+							"Use HELP <command> for more information",
+							service_p->name);
+					service_error(service_p, client_p, "Topics: %s", buf);
+				}
+				else
+					service_error(service_p, client_p, "No help is available for this service.");
+
+	                        service_p->service->help_count++;
+        	                return;
 			}
-			else
-				service_error(service_p, client_p, "No help is available for this service.");
 
-                        service_p->service->help_count++;
-                        return;
+	                service_p->service->flood++;
+
+			fileptr = service_p->service->help;
+
+			if(fileptr)
+			{
+				/* dump them the index file */
+				service_error(service_p, client_p, "Available commands:");
+
+				DLINK_FOREACH(ptr, fileptr->contents.head)
+				{
+					lineptr = ptr->data;
+					service_error(service_p, client_p, "%s",
+							lineptr->data);
+				}
+			}
+
+			fileptr = service_p->service->helpadmin;
+
+			if(client_p->user->oper && fileptr)
+			{
+				service_error(service_p, client_p, "Administrator commands:");
+
+				DLINK_FOREACH(ptr, fileptr->contents.head)
+				{
+					lineptr = ptr->data;
+					service_error(service_p, client_p, "%s",
+							lineptr->data);
+				}
+			}
+
+			return;
                 }
 
                 for(i = 0; cmd_table[i].cmd[0] != '\0'; i++)

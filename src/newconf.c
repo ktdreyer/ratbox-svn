@@ -49,6 +49,7 @@ static struct mode_table service_flags_table[] = {
 	{ "opered",	SERVICE_OPERED		},
 	{ "msg_self",	SERVICE_MSGSELF		},
 	{ "disabled",	SERVICE_DISABLED	},
+	{ "short_help",	SERVICE_SHORTHELP	},
 	{ "\0",		0			}
 };
 

@@ -24,6 +24,7 @@ extern dlink_list exited_list;
 struct connection_entry;
 struct service_command;
 struct ucommand_handler;
+struct cachefile;
 
 struct client
 {
@@ -94,6 +95,8 @@ struct service
 
 	dlink_list ucommand_list;
 
+	struct cachefile *help;
+	struct cachefile *helpadmin;
         void (*stats)(struct connection_entry *, char *parv[], int parc);
 };
 
@@ -120,12 +123,14 @@ struct service
 #define SERVICE_DISABLED	0x004 /* should this service be disabled? */
 #define SERVICE_INTRODUCED	0x008 /* service has been introduced */
 #define SERVICE_REINTRODUCE	0x010 /* service needs reintroducing */
+#define SERVICE_SHORTHELP	0x020 /* service gives short help */
 
 #define ServiceOpered(x)	((x)->service->flags & SERVICE_OPERED)
 #define ServiceMsgSelf(x)	((x)->service->flags & SERVICE_MSGSELF)
 #define ServiceDisabled(x)	((x)->service->flags & SERVICE_DISABLED)
 #define ServiceIntroduced(x)	((x)->service->flags & SERVICE_INTRODUCED)
 #define ServiceReintroduce(x)	((x)->service->flags & SERVICE_REINTRODUCE)
+#define ServiceShortHelp(x)	((x)->service->flags & SERVICE_SHORTHELP)
 
 #define SetServiceIntroduced(x)	((x)->service->flags |= SERVICE_INTRODUCED)
 #define SetServiceReintroduce(x) ((x)->service->flags |= SERVICE_REINTRODUCE)
