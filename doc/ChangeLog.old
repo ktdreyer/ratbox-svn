@@ -1,3 +1,7 @@
+*** 20010104_33 by toot
+added s_user.h in cleint.c to kill the compile warning
+
+
 *** 20010104_32 by davidt
 Fix ison for lazylinks
 
