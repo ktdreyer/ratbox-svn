@@ -1,3 +1,17 @@
+leeh        2001/12/16 17:22:48 EST	(20011216_19)
+
+  Modified files:
+    include              channel_mode.h 
+    src                  channel_mode.c 
+  Log:
+  - removed MODE_KEY and MODE_LIMIT (ahahahha!)
+  
+  Revision  Changes    Path
+  7.3       +2 -4      ircd-hybrid-7/include/channel_mode.h
+  7.11      +2 -6      ircd-hybrid-7/src/channel_mode.c
+
+
+
 leeh        2001/12/16 13:09:43 EST	(20011216_18)
 
   Modified files:
