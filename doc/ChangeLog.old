@@ -1,3 +1,13 @@
+*** 20011128_4 by db
+tiny format change in parse.c
+
+The guts of it is here. When using sendto_match_butone() which is =only=
+used to do the "oper magic" messages. i.e. /msg $server.mask and /msg #hostmask
+The prefix sent to remote servers is only the nick, not the nick!user@host.
+The prefix sent to local users is nick!user@host
+
+
+
 *** 20011128_3 by leeh
 - dont allow halfops to kick halfops, or set +/-h
 - allowing +h to set bans, but not see a real banlist is daft
