@@ -1,3 +1,11 @@
+*** 20001130_1 by db
+- squished bug in m_names.c which caused the module to suddenly
+  throw up when names without a paramter was given. I forgot
+  the case where a client had no channels it was on, trying to 
+  indirect through a NULL struct Link is bad for the modules health.
+
+
+
 *** 20001129_10 by db
 - fixed m_squit.c
 - account for LazyLink's in channel.c destroy_channel()
