@@ -1084,7 +1084,7 @@ void set_channel_mode(struct Client *client_p,
   int   whatt = MODE_ADD, the_mode = 0;
   int   done_s = NO, done_p = NO;
   int   done_i = NO, done_m = NO, done_n = NO, done_t = NO;
-  int   done_z = NO;
+  int   done_a = NO;
   
   struct Client *who;
   char  *curr = parv[0], c, *arg, plus = '+', *tmpc;
@@ -2037,10 +2037,10 @@ void set_channel_mode(struct Client *client_p,
 
 	  if(MyClient(source_p))
 	    {
-	      if(done_z)
+	      if(done_a)
 		break;
 	      else
-		done_z = YES;
+		done_a = YES;
 	    }
 	  
 	  if(whatt == MODE_ADD)

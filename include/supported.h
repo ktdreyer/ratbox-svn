@@ -42,7 +42,7 @@
 #define FEATURESVALUES ConfigFileEntry.disable_vchans ? "" : " VCHANS", \
         MAXMODEPARAMS,MAXCHANNELSPERUSER,MAXBANS, \
         ConfigFileEntry.max_targets,NICKLEN,TOPICLEN,TOPICLEN,"#&","(ohv)@%+", \
-        "beI,,kl,imnpsta"
+        "beI,k,l,imnpsta"
 
 /*
  * - from mirc's versions.txt
