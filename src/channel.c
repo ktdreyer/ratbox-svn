@@ -148,7 +148,10 @@ add_user_to_channel(struct Channel *chptr, struct Client *who, int flags)
 
     if(flags & MODE_DEOPPED)
     {
-      dlinkAddAlloc(who, &chptr->deopped);
+      dlink_node *dptr;
+      
+      dptr = make_dlink_node();
+      dlinkAdd(who, dptr, &chptr->deopped);
     }
 
     chptr->users++;
@@ -156,7 +159,8 @@ add_user_to_channel(struct Channel *chptr, struct Client *who, int flags)
     if (MyClient(who))
       chptr->locusers++;
 
-    dlinkAddAlloc(chptr, &who->user->channel);
+    ptr = make_dlink_node();
+    dlinkAdd(chptr, ptr, &who->user->channel);
     who->user->joined++;
   }
 }

@@ -95,20 +95,11 @@ void mem_frob(void *data, int len);
 #define DLINK_FOREACH_SAFE(pos, n, head) for (pos = (head), n = pos ? pos->next : NULL; pos != NULL; pos = n, n = pos ? pos->next : NULL)
 	        
 #define DLINK_FOREACH_PREV(pos, head) for (pos = (head); pos != NULL; pos = pos->prev)
-
               		                  	
 
 /* Returns the list length */
 #define dlink_list_length(list) (list)->length
-
-/* Find the dlink_node and destroy it */
-#define dlinkFindDestroy(list, data) do { dlink_node *ptr = dlinkFindDelete(list, data); if(ptr != NULL) free_dlink_node(ptr); } while(0);
-
-/* Destroy a dlink_node that was allocated with make_dlink_node() */
-#define dlinkDestroy(m, list) do { dlinkDelete(m, list); free_dlink_node(m); } while(0);
-
-/* Allocate and add the dlink_node to the list */
-#define dlinkAddAlloc(data, list) dlinkAdd(data, make_dlink_node(), list)
+#define dlink_move_list(oldlist, newlist, node)
 
 /*
  * The functions below are included for the sake of inlining
@@ -254,8 +245,6 @@ dlinkFindDelete(dlink_list *list, void *data)
 
   return NULL;
 }  
-
-
 
 /*
  * dlinkFind

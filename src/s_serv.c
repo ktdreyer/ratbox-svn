@@ -296,7 +296,11 @@ const char* my_name_for_link(const char* name, struct ConfItem* aconf)
  */
 void add_server_to_list(struct Client *client_p)
 {
-  dlinkAdd(client_p, make_dlink_node(), &global_serv_list);
+  dlink_node *ptr;
+  ptr = make_dlink_node();
+  dlinkAdd(client_p, ptr, &global_serv_list);
+
+  return;
 }
 
 /*
@@ -308,7 +312,15 @@ void add_server_to_list(struct Client *client_p)
  */
 void remove_server_from_list(struct Client *client_p)
 {
-  dlinkFindDestroy(&global_serv_list, client_p);
+  dlink_node *ptr;
+
+  ptr = dlinkFind(&global_serv_list, client_p);
+
+  if(ptr != NULL)
+  {
+    dlinkDelete(ptr, &global_serv_list);
+    free_dlink_node(ptr);
+  }
 }
 
 /*
@@ -997,10 +1009,11 @@ int server_estab(struct Client *client_p)
 
   dlinkAdd(client_p, &client_p->lnode, &me.serv->servers);
 
-  m = dlinkFindDelete(&unknown_list, client_p);
+  m = dlinkFind(&unknown_list, client_p);
   assert(m != NULL);
   if(m != NULL)
     {
+      dlinkDelete(m, &unknown_list);
       dlinkAddTail(client_p, m, &serv_list);
     } else {
       sendto_realops_flags(UMODE_ALL, L_ADMIN, "Tried to register (%s) server but it was already registered!?!", host);
