@@ -1,3 +1,9 @@
+*** 20010524_2 by leeh
+- %u -> %lu
+- %d -> %ld
+- This broke more stuff than it fixed.. theyre fine like this ;p
+
+
 *** 20010524_1 by ejb
 - IRCD.EXE now compiles on VMS.  servlink not working yet,
   nor openssl etc. it doesn't seem to run after it compiles either.
