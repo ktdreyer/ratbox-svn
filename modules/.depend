@@ -17,6 +17,17 @@ m_error.so: core/m_error.c ../include/stdinc.h ../include/config.h \
   ../include/common.h ../include/numeric.h ../include/msg.h \
   ../include/modules.h ../include/parse.h ../include/hook.h \
   ../include/s_conf.h ../include/class.h ../include/patricia.h
+m_join.so: core/m_join.c ../include/stdinc.h ../include/config.h \
+  ../include/setup.h ../include/defaults.h ../include/tools.h \
+  ../include/channel.h ../include/ircd_defs.h ../include/s_log.h \
+  ../include/send.h ../include/client.h ../include/linebuf.h \
+  ../include/res.h ../adns/adns.h ../include/commio.h ../include/ircd.h \
+  ../include/memory.h ../include/balloc.h ../include/irc_string.h \
+  ../include/common.h ../include/hash.h ../include/numeric.h \
+  ../include/s_serv.h ../include/s_conf.h ../include/class.h \
+  ../include/patricia.h ../include/s_newconf.h ../include/msg.h \
+  ../include/parse.h ../include/modules.h ../include/hook.h \
+  ../include/sprintf_irc.h ../include/packet.h
 core/m_kick.so: core/m_kick.c ../include/stdinc.h ../include/config.h \
   ../include/setup.h ../include/defaults.h ../include/tools.h \
   ../include/channel.h ../include/ircd_defs.h ../include/s_log.h \
@@ -57,7 +68,8 @@ core/m_mode.so: core/m_mode.c ../include/stdinc.h ../include/config.h \
   ../include/s_user.h ../include/s_conf.h ../include/class.h \
   ../include/common.h ../include/patricia.h ../include/s_serv.h \
   ../include/msg.h ../include/parse.h ../include/modules.h \
-  ../include/hook.h ../include/packet.h ../include/sprintf_irc.h
+  ../include/hook.h ../include/packet.h ../include/sprintf_irc.h \
+  ../include/s_newconf.h
 core/m_nick.so: core/m_nick.c ../include/stdinc.h ../include/config.h \
   ../include/setup.h ../include/defaults.h ../include/client.h \
   ../include/ircd_defs.h ../include/s_log.h ../include/send.h \
@@ -210,16 +222,6 @@ m_encap.so: m_encap.c ../include/stdinc.h ../include/config.h \
   ../include/common.h ../include/numeric.h ../include/s_serv.h \
   ../include/hash.h ../include/msg.h ../include/parse.h \
   ../include/modules.h ../include/hook.h ../include/sprintf_irc.h
-m_eob.so: m_eob.c ../include/stdinc.h ../include/config.h \
-  ../include/setup.h ../include/defaults.h ../include/client.h \
-  ../include/ircd_defs.h ../include/s_log.h ../include/send.h \
-  ../include/linebuf.h ../include/tools.h ../include/channel.h \
-  ../include/res.h ../adns/adns.h ../include/commio.h ../include/ircd.h \
-  ../include/memory.h ../include/balloc.h ../include/irc_string.h \
-  ../include/numeric.h ../include/s_conf.h ../include/class.h \
-  ../include/common.h ../include/patricia.h ../include/s_serv.h \
-  ../include/msg.h ../include/parse.h ../include/modules.h \
-  ../include/hook.h
 m_etrace.so: m_etrace.c ../include/stdinc.h ../include/config.h \
   ../include/setup.h ../include/defaults.h ../include/class.h \
   ../include/tools.h ../include/hook.h ../include/client.h \
@@ -252,16 +254,6 @@ m_help.so: m_help.c ../include/stdinc.h ../include/config.h \
   ../include/class.h ../include/common.h ../include/patricia.h \
   ../include/parse.h ../include/modules.h ../include/hook.h \
   ../include/hash.h ../include/cache.h
-m_htm.so: m_htm.c ../include/stdinc.h ../include/config.h \
-  ../include/setup.h ../include/defaults.h ../include/client.h \
-  ../include/ircd_defs.h ../include/s_log.h ../include/send.h \
-  ../include/linebuf.h ../include/tools.h ../include/channel.h \
-  ../include/res.h ../adns/adns.h ../include/commio.h ../include/ircd.h \
-  ../include/memory.h ../include/balloc.h ../include/irc_string.h \
-  ../include/numeric.h ../include/msg.h ../include/parse.h \
-  ../include/modules.h ../include/hook.h ../include/s_conf.h \
-  ../include/class.h ../include/common.h ../include/patricia.h \
-  ../include/s_serv.h ../include/packet.h
 m_info.so: m_info.c ../include/stdinc.h ../include/config.h \
   ../include/setup.h ../include/defaults.h ../include/tools.h \
   ../include/m_info.h ../include/channel.h ../include/ircd_defs.h \
@@ -294,17 +286,6 @@ m_ison.so: m_ison.c ../include/stdinc.h ../include/config.h \
   ../include/parse.h ../include/modules.h ../include/hook.h \
   ../include/s_conf.h ../include/class.h ../include/common.h \
   ../include/patricia.h ../include/s_serv.h ../include/hash.h
-m_join.so: m_join.c ../include/stdinc.h ../include/config.h \
-  ../include/setup.h ../include/defaults.h ../include/tools.h \
-  ../include/channel.h ../include/ircd_defs.h ../include/s_log.h \
-  ../include/send.h ../include/client.h ../include/linebuf.h \
-  ../include/res.h ../adns/adns.h ../include/commio.h ../include/ircd.h \
-  ../include/memory.h ../include/balloc.h ../include/irc_string.h \
-  ../include/common.h ../include/hash.h ../include/numeric.h \
-  ../include/s_serv.h ../include/s_conf.h ../include/class.h \
-  ../include/patricia.h ../include/s_newconf.h ../include/msg.h \
-  ../include/parse.h ../include/modules.h ../include/hook.h \
-  ../include/sprintf_irc.h ../include/packet.h
 m_kline.so: m_kline.c ../include/stdinc.h ../include/config.h \
   ../include/setup.h ../include/defaults.h ../include/tools.h \
   ../include/channel.h ../include/ircd_defs.h ../include/s_log.h \
@@ -411,6 +392,15 @@ m_oper.so: m_oper.c ../include/stdinc.h ../include/config.h \
   ../include/s_user.h ../include/msg.h ../include/parse.h \
   ../include/modules.h ../include/hook.h ../include/packet.h \
   ../include/cache.h
+m_operspy.so: m_operspy.c ../include/stdinc.h ../include/config.h \
+  ../include/setup.h ../include/defaults.h ../include/tools.h \
+  ../include/send.h ../include/ircd_defs.h ../include/s_log.h \
+  ../include/channel.h ../include/client.h ../include/linebuf.h \
+  ../include/res.h ../adns/adns.h ../include/commio.h ../include/ircd.h \
+  ../include/memory.h ../include/balloc.h ../include/irc_string.h \
+  ../include/common.h ../include/numeric.h ../include/s_serv.h \
+  ../include/hash.h ../include/msg.h ../include/parse.h \
+  ../include/modules.h ../include/hook.h ../include/sprintf_irc.h
 m_pass.so: m_pass.c ../include/stdinc.h ../include/config.h \
   ../include/setup.h ../include/defaults.h ../include/client.h \
   ../include/ircd_defs.h ../include/s_log.h ../include/send.h \
@@ -527,15 +517,25 @@ m_tb.so: m_tb.c ../include/stdinc.h ../include/config.h ../include/setup.h \
   ../include/modules.h ../include/parse.h ../include/hook.h \
   ../include/hash.h ../include/s_serv.h
 m_testline.so: m_testline.c ../include/stdinc.h ../include/config.h \
+  ../include/setup.h ../include/defaults.h ../include/tools.h \
+  ../include/send.h ../include/ircd_defs.h ../include/s_log.h \
+  ../include/client.h ../include/linebuf.h ../include/channel.h \
+  ../include/res.h ../adns/adns.h ../include/commio.h ../include/ircd.h \
+  ../include/memory.h ../include/balloc.h ../include/irc_string.h \
+  ../include/modules.h ../include/parse.h ../include/msg.h \
+  ../include/hook.h ../include/hostmask.h ../include/numeric.h \
+  ../include/s_conf.h ../include/class.h ../include/common.h \
+  ../include/patricia.h ../include/s_newconf.h ../include/sprintf_irc.h
+m_testmask.so: m_testmask.c ../include/stdinc.h ../include/config.h \
   ../include/setup.h ../include/defaults.h ../include/client.h \
   ../include/ircd_defs.h ../include/s_log.h ../include/send.h \
   ../include/linebuf.h ../include/tools.h ../include/channel.h \
   ../include/res.h ../adns/adns.h ../include/commio.h ../include/ircd.h \
   ../include/memory.h ../include/balloc.h ../include/irc_string.h \
-  ../include/common.h ../include/restart.h ../include/s_conf.h \
-  ../include/class.h ../include/patricia.h ../include/numeric.h \
-  ../include/msg.h ../include/hostmask.h ../include/parse.h \
-  ../include/modules.h ../include/hook.h
+  ../include/common.h ../include/numeric.h ../include/s_conf.h \
+  ../include/class.h ../include/patricia.h ../include/s_serv.h \
+  ../include/msg.h ../include/parse.h ../include/modules.h \
+  ../include/hook.h
 m_time.so: m_time.c ../include/stdinc.h ../include/config.h \
   ../include/setup.h ../include/defaults.h ../include/client.h \
   ../include/ircd_defs.h ../include/s_log.h ../include/send.h \
@@ -628,7 +628,7 @@ m_who.so: m_who.c ../include/stdinc.h ../include/config.h \
   ../include/numeric.h ../include/s_serv.h ../include/sprintf_irc.h \
   ../include/s_conf.h ../include/class.h ../include/patricia.h \
   ../include/msg.h ../include/parse.h ../include/modules.h \
-  ../include/hook.h ../include/packet.h
+  ../include/hook.h ../include/packet.h ../include/s_newconf.h
 m_whois.so: m_whois.c ../include/stdinc.h ../include/config.h \
   ../include/setup.h ../include/defaults.h ../include/tools.h \
   ../include/common.h ../include/client.h ../include/ircd_defs.h \
@@ -639,7 +639,7 @@ m_whois.so: m_whois.c ../include/stdinc.h ../include/config.h \
   ../include/numeric.h ../include/s_conf.h ../include/class.h \
   ../include/patricia.h ../include/s_serv.h ../include/sprintf_irc.h \
   ../include/msg.h ../include/parse.h ../include/modules.h \
-  ../include/hook.h
+  ../include/hook.h ../include/s_newconf.h
 m_whowas.so: m_whowas.c ../include/stdinc.h ../include/config.h \
   ../include/setup.h ../include/defaults.h ../include/whowas.h \
   ../include/ircd_defs.h ../include/s_log.h ../include/send.h \

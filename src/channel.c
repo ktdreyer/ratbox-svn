@@ -859,7 +859,7 @@ channel_modes(struct Channel *chptr, struct Client *client_p, char *mbuf, char *
 	if(chptr->mode.limit)
 	{
 		*mbuf++ = 'l';
-		if(IsMember(client_p, chptr) || IsServer(client_p))
+		if(!MyClient(client_p) || IsMember(client_p, chptr))
 		{
 			len = ircsprintf(pbuf, "%d ", chptr->mode.limit);
 			pbuf += len;
@@ -868,7 +868,7 @@ channel_modes(struct Channel *chptr, struct Client *client_p, char *mbuf, char *
 	if(*chptr->mode.key)
 	{
 		*mbuf++ = 'k';
-		if(IsMember(client_p, chptr) || IsServer(client_p))
+		if(!MyClient(client_p) || IsMember(client_p, chptr))
 			ircsprintf(pbuf, "%s ", chptr->mode.key);
 	}
 
