@@ -1,3 +1,7 @@
+*** 20011202_10 by ejb
+- Added documention for debug API.
+
+
 *** 20011202_9 by leeh
 - we only support one cipher both ways:
   ENC:BF/256,BF/256 -> ENC:BF/256
