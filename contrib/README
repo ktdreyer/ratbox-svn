@@ -78,35 +78,3 @@ spy_whois_notice.c   - Spy on local clients who WHOIS you.
 Note: if you have both spy_stats_notice.c and spy_stats_p_notice.c loaded
 you will get two messages.
 
-
-VMS Files
----------
-
-vms_*.c        - Misc files needed for VMS support.
-
-
-Patches
--------
-
-The following are the patches contained in contrib.  A short description
-of the patch is contained here, along with any notes.
-
-To apply a patch, first change to the ircd-hybrid-7 root directory, 
-the directory one level above contrib/.  If you have already compiled 
-the ircd, run 'make clean'.  Then for example to patch 
-remote-unkline.diff type:
-    patch -p0 < contrib/remote-unkline.diff
-
-You must then run 'make' and 'make install' again, and restart your ircd.
-The following patches are included:
-
-lmh.diff 	- This patch adds remote unkline support, temp dline support,
-                  better temp klines, /quote xline and global user@host
-		  limits.
-
-		  Please read README.LMH for more information as this patch
-		  requires different methods to be applied and adds multiple
-		  config options.
-
-disable_identd.diff - This patch adds support for disabling identd queries.
-                      See README.disable_identd for more information.

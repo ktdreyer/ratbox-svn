@@ -1719,11 +1719,11 @@ cleanup_temps_week(void *notused)
 static void
 add_temp_line(struct ConfItem *aconf)
 {
-  if(aconf->hold > CurrentTime + (10080*60))
+  if(aconf->hold >= CurrentTime + (10080*60))
     dlinkAddAlloc(aconf, &temporary_week);
-  else if(aconf->hold > CurrentTime + (1440*60))
+  else if(aconf->hold >= CurrentTime + (1440*60))
     dlinkAddAlloc(aconf, &temporary_day);
-  else if(aconf->hold > CurrentTime + (60*60))
+  else if(aconf->hold >= CurrentTime + (60*60))
     dlinkAddAlloc(aconf, &temporary_hour);
   else
     dlinkAddAlloc(aconf, &temporary_min);
@@ -1740,54 +1740,54 @@ add_temp_line(struct ConfItem *aconf)
 static void
 expire_temps(dlink_list *tklist, int type)
 {
-  dlink_node *kill_node;
-  dlink_node *next_node;
-  struct ConfItem *kill_ptr;
+  dlink_node *ptr;
+  dlink_node *next_ptr;
+  struct ConfItem *aconf;
 
-  DLINK_FOREACH_SAFE(kill_node, next_node, tklist->head)
+  DLINK_FOREACH_SAFE(ptr, next_ptr, tklist->head)
     {
-      kill_ptr = kill_node->data;
+      aconf = ptr->data;
 
-      if (kill_ptr->hold <= CurrentTime)
+      if (aconf->hold <= CurrentTime)
 	{
           /* Alert opers that a TKline expired - Hwy */
           if(ConfigFileEntry.tkline_expire_notices)
           {
-            if(kill_ptr->status & CONF_KILL)
+            if(aconf->status & CONF_KILL)
               sendto_realops_flags(UMODE_ALL, L_ALL,
 			           "Temporary K-line for [%s@%s] expired",
-			           (kill_ptr->user) ? kill_ptr->user : "*",
-			           (kill_ptr->host) ? kill_ptr->host : "*");
+			           (aconf->user) ? aconf->user : "*",
+			           (aconf->host) ? aconf->host : "*");
   	    else
               sendto_realops_flags(UMODE_ALL, L_ALL,
 			           "Temporary D-line for [%s] expired",
-			           kill_ptr->host);
+			           aconf->host);
           }
 
-	  delete_one_address_conf(kill_ptr->host, kill_ptr);
-	  dlinkDestroy(kill_node, tklist);
+	  delete_one_address_conf(aconf->host, aconf);
+	  dlinkDestroy(ptr, tklist);
 	}
       
-      else if((type == TEMP_WEEK && kill_ptr->hold < CurrentTime + 10080) ||
-              (type == TEMP_DAY && kill_ptr->hold < CurrentTime + 1440) ||
-	      (type == TEMP_HOUR && kill_ptr->hold < CurrentTime + 60))
+      else if((type == TEMP_WEEK && aconf->hold < (CurrentTime + (10080*60))) ||
+              (type == TEMP_DAY && aconf->hold < (CurrentTime + (1440*60))) ||
+	      (type == TEMP_HOUR && aconf->hold < (CurrentTime + (60*60))))
       {
         /* expires within the hour.. */
-        if(kill_ptr->hold < CurrentTime + (60*60))
+        if(aconf->hold < CurrentTime + (60*60))
 	{
-          dlinkMoveNode(kill_node, tklist, &temporary_min);
+          dlinkMoveNode(ptr, tklist, &temporary_min);
 	}
 
 	/* expires within the day */
-	else if(kill_ptr->hold < CurrentTime + (1440*60))
+	else if(aconf->hold < CurrentTime + (1440*60))
 	{
-          dlinkMoveNode(kill_node, tklist, &temporary_hour);
+          dlinkMoveNode(ptr, tklist, &temporary_hour);
 	}
 
 	/* expires within the week */
-	else if(kill_ptr->hold < CurrentTime + (10080*60))
+	else if(aconf->hold < CurrentTime + (10080*60))
 	{
-          dlinkMoveNode(kill_node, tklist, &temporary_day);
+          dlinkMoveNode(ptr, tklist, &temporary_day);
 	}
       }
     }
