@@ -1,4 +1,4 @@
- CDROP       - Drops registration of the given channel
- CREGISTER   - Registers the given channel to the given username
- CUNSUSPEND  - Unsuspends the given channels registration
- CSUSPEND    - Suspends the given channels registration
+ CHANDROP    - Drops registration of the given channel
+ CHANREGISTER - Registers the given channel to the given username
+ CHANUNSUSPEND - Unsuspends the given channels registration
+ CHANSUSPEND - Suspends the given channels registration

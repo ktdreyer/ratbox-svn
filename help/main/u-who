@@ -1,0 +1,10 @@
+Usage: .who
+       Lists connected opers.  Possible flags:
+          D - DCC
+	  A - Admin
+	  C - Chanserv Admin
+	  c - Chanserv Register Admin
+	  U - Userserv Admin
+	  u - Userserv Register Admin
+	  O - Operbot Admin
+	  J - Jupeserv Admin
