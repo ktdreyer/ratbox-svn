@@ -1,3 +1,7 @@
+*** 20010420_11 by fl_
+- missing ;
+
+
 *** 20010420_10 by a1kmm
 - Fixed a deadlock when non-opped users request names on a +a channel. Fixed
   the code to work correctly too.
