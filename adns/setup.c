@@ -123,7 +123,7 @@ static int nextword(const char **bufp_io, const char **word_r, int *l_r) {
 static void ccf_nameserver(adns_state ads, const char *fn, int lno, const char *buf) {
   struct in_addr ia;
   
-  if (inetpton(AF_INET, buf,&ia) <=) {
+  if (inetpton(AF_INET, buf,&ia) <=0) {
     configparseerr(ads,fn,lno,"invalid nameserver address `%s'",buf);
     return;
   }
