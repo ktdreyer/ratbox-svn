@@ -1,3 +1,15 @@
+androsyn    2001/12/18 10:36:52 EST	(20011218_3)
+
+  Modified files:
+    src                  s_bsd_sigio.c 
+  Log:
+  Move the #ifdef for USE_SIGIO a bit further up in the code..
+  
+  Revision  Changes    Path
+  7.12      +3 -1      ircd-hybrid-7/src/s_bsd_sigio.c
+
+
+
 androsyn    2001/12/18 10:33:55 EST	(20011218_2)
 
   Modified files:
