@@ -983,6 +983,9 @@ void restoreUnusedServerMask(unsigned long mask)
   sendto_realops("restoreUnusedServerMask: Returning mask %X", mask);
 #endif
 
+  if(!mask) /* On 0 mask, don't do anything */
+    return;
+
   freeMask |= mask;
 
   clear_mask = ~mask;
