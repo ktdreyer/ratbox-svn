@@ -1,3 +1,17 @@
+androsyn    2004/03/02 16:26:54 EST	(20040302_16)
+
+  Modified files:
+    servlink             README servlink.c 
+  Log:
+  Update servlink README for current incarnation of it and change the servlink
+  version
+  
+  Revision  Changes    Path
+  1.5       +4 -46     ircd-ratbox/servlink/README
+  1.33      +2 -2      ircd-ratbox/servlink/servlink.c
+
+
+
 androsyn    2004/03/02 16:21:36 EST	(20040302_15)
 
   Modified files:
