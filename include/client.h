@@ -32,10 +32,6 @@
 # endif
 #endif
 
-#ifdef OPENSSL
-#include <openssl/rsa.h>
-#endif
-
 #include "config.h"
 
 #if !defined(CONFIG_H_LEVEL_7)
@@ -53,7 +49,7 @@
 #define HOSTIPLEN       16      /* Length of dotted quad form of IP        */
 #endif
 #define PASSWDLEN       20
-#define CIPHERKEYLEN    16      /* 128bit */
+#define CIPHERKEYLEN    64      /* 512bit */
 
 #define IDLEN           12      /* this is the maximum length, not the actual
                                    generated length; DO NOT CHANGE! */
@@ -137,10 +133,7 @@ struct Client
   unsigned int      flags;      /* client flags */
   unsigned int      flags2;     /* ugh. overflow */
   int               fd;         /* >= 0, for local clients */
-  int 		    zipfd;	/* For ZipLinks. This is actually the network fd, rather than the fd to the zip
-  				 * process. This way all of the code just reads and writes from the ziplink process.
-  				 * Kinda sick but it works.
-  				 */
+  int               slink_pid;  /* pid of servlink process if any */
   int               hopcount;   /* number of servers to this 0 = local */
   unsigned short    status;     /* Client type */
   unsigned char     handler;    /* Handler index */
@@ -150,7 +143,6 @@ struct Client
 					   * bit mapped lazylink servers 
 					   * mapped here
 					   */
-
   /*
    * client->name is the unique name for a client nick or host
    */
@@ -261,13 +253,22 @@ struct LocalUser
    */
   char              passwd[PASSWDLEN + 1];
   int               caps;       /* capabilities bit-field */
+  int               enc_caps;   /* cipher capabilities bit-field */
 
-#ifdef OPENSSL
-  /* int            ciphertype; */
-  unsigned char     in_key[CIPHERKEYLEN];
-  unsigned char     out_key[CIPHERKEYLEN];
-  unsigned char     auth_secret[CIPHERKEYLEN];                                  
+#ifdef HAVE_LIBCRYPTO
+  struct EncCapability *in_cipher;
+  struct EncCapability *out_cipher;
+
+  char              in_key[CIPHERKEYLEN];
+  char              out_key[CIPHERKEYLEN];
 #endif
+
+  int               ctrlfd;     /* For servers:
+                                   control fd used for sending commands
+                                   to servlink */
+  unsigned char    *slinkq;     /* sendq for control data */
+  int              slinkq_ofs;  /* ofset into slinkq */
+  int              slinkq_len;  /* length remaining after slinkq_ofs */
 
   /*
    * Anti-flood stuff. We track how many messages were parsed and how

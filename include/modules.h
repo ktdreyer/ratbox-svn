@@ -70,7 +70,7 @@ extern struct Message admin_msgtab;
 extern struct Message away_msgtab;
 extern struct Message capab_msgtab;
 extern struct Message cburst_msgtab;
-#ifdef OPENSSL
+#ifdef HAVE_LIBCRYPTO
 extern struct Message challenge_msgtab;
 #endif
 extern struct Message cjoin_msgtab;

@@ -22,7 +22,6 @@ RANLIB		= @RANLIB@
 
 prefix		= @prefix@
 exec_prefix	= @exec_prefix@
-exec_suffix	= @exec_suffix@
 bindir		= @bindir@
 libexecdir	= @libexecdir@
 sysconfdir	= @sysconfdir@
@@ -32,7 +31,7 @@ moduledir	= @prefix@/modules
 automoduledir	= @prefix@/modules/autoload
 
 INCLUDES	= -I../include
-CPPFLAGS	= ${INCLUDES} @SSL_DEFINE@ @CPPFLAGS@
+CPPFLAGS	= ${INCLUDES} @CPPFLAGS@
  
 default:	all
 

@@ -140,11 +140,11 @@ Info MyInformation[] = {
 
   { "OPER_SPAM_COUNTDOWN", "", OPER_SPAM_COUNTDOWN, "Anti SpamBot Parameter" },
 
-#ifdef OPENSSL
-  { "OPENSSL", "ON", 0, "Enable OpenSSL CHALLENGE Support" },
+#ifdef HAVE_LIBCRYPTO
+  { "HAVE_LIBCRYPTO", "ON", 0, "Enable OpenSSL CHALLENGE Support" },
 #else
-  { "OPENSSL", "OFF", 0, "Enable OpenSSL CHALLENGE Support" },
-#endif /* OPENSSL */
+  { "HAVE_LIBCRYPTO", "OFF", 0, "Enable OpenSSL CHALLENGE Support" },
+#endif /* HAVE_LIBCRYPTO */
 
 #ifdef PPATH
   { "PPATH", PPATH, 0, "Path to Pid File" },

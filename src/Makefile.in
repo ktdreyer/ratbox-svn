@@ -19,7 +19,6 @@ RM		= @RM@
 YACC		= @YACC@
 prefix		= @prefix@
 exec_prefix	= @exec_prefix@
-exec_suffix	= @exec_suffix@
 bindir		= @bindir@
 libexecdir	= @libexecdir@
 sysconfdir	= @sysconfdir@
@@ -33,10 +32,10 @@ IRCD_EXE	= ircd
 
 PROGS		= $(IRCD_EXE)
 
-IRCDLIBS	= @LIBS@ @SSL_LIBS@ @MODULES_LIBS@ -L../adns -ladns
+IRCDLIBS	= @LIBS@ @MODULES_LIBS@ -L../adns -ladns
 
 INCLUDES	= -I../include
-CPPFLAGS	= ${INCLUDES} @SSL_DEFINE@ @CPPFLAGS@
+CPPFLAGS	= ${INCLUDES} @CPPFLAGS@
  
 default:	all
 

@@ -280,6 +280,10 @@ int base64_block(char **output, char *data, int len)
   return count;
 }
 
+/*
+ * unbase64_block will allocate and return a new block of memory
+ * using MyMalloc().  It should be freed after use.
+ */
 int unbase64_block(char **output, char *data, int len)
 {
   unsigned char *out;

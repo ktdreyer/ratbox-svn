@@ -24,6 +24,7 @@
 #include <sys/file.h>
 #include <sys/stat.h>
 #include <sys/socket.h>
+#include <sys/wait.h>
 
 #include <stdlib.h>
 #include <string.h>
@@ -278,6 +279,7 @@ set_time(void)
 {
  static char to_send[200];
  time_t newtime = time(NULL);
+ 
  if (newtime == -1)
  {
   log(L_ERROR, "Clock Failure (%d)", errno);
@@ -298,7 +300,7 @@ set_time(void)
 static void
 io_loop(time_t delay)
 {
- int empty_cycles=0, st;
+ int empty_cycles=0, st, status;
  while (ServerRunning)
  {
   /* Run pending events, then get the number of seconds to the next
@@ -318,7 +320,10 @@ io_loop(time_t delay)
    empty_cycles = 0;
   else if (empty_cycles++ > 10)
    usleep((st=(empty_cycles-10)*1000)>500000 ? 500000 : st);
-   
+ 
+  /* clean up any zombies lying around... */
+  waitpid(-1, &status, WNOHANG);
+  
   /*
    * Check to see whether we have to rehash the configuration ..
    */
@@ -601,7 +606,7 @@ int main(int argc, char *argv[])
  eventAdd("cleanup_tklines", cleanup_tklines, NULL, CLEANUP_TKLINES_TIME,
           0);
   
-#ifdef OPENSSL
+#if 0 && defined(HAVE_LIBCRYPTO)
  eventAdd("cryptlink_regen_key", cryptlink_regen_key, NULL,
           CRYPTLINK_REGEN_TIME, 0);
 #endif

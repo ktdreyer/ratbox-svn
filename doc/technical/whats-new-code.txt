@@ -31,3 +31,12 @@ First, please note one thing - a *LOT* has changed in hybrid-7.
   "lines" which allows flood prevention and limiting to be performed before
   sending the code to the main parser.
 
+* Server to server links are now handled by the 'servlink' program
+  (located in the servlink/ directory).  After negotiating a server<->server
+  link, (CAPAB/SERVER/PASS or CAPAB/CRYPTSERV/CRYPTAUTH) hybrid-7 will
+  fork, then exec a servlink process.  ircd-hybrid communicates with the
+  program using a control socket (turn on/off crypto/zip, etc), and
+  a data socket (which looks to the rest of the code like a network socket
+  connected to the remote server).  The servlink process handles encryption
+  and compression of server links, but is still compatable with ziplinks
+  used in hybrid-6, and the hybrid-6 cryptlinks patch.

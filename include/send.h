@@ -24,7 +24,8 @@ unsigned long current_serial;
 /* send.c prototypes */
 
 extern void send_queued_write(int fd, void *data);
-
+extern void send_queued_slink_write(int fd, void *data);
+  
 #ifndef __GNUC__
 extern  void sendto_all_local_opers(struct Client *, char *message_type,
 				    const char *pattern,...);

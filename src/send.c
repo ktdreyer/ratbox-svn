@@ -145,9 +145,6 @@ dead_link(struct Client *to, char *notice)
 static int
 _send_message(struct Client *to, char *msg, int len)
 {
-  int linebuf_flags = 0;
-  char *linebuf_key = NULL;
-  
 #ifdef INVARIANTS
   if (IsMe(to))
     {
@@ -176,16 +173,8 @@ _send_message(struct Client *to, char *msg, int len)
     }
   else
     {
-#ifdef OPENSSL
-      if (IsCryptOut(to))
-      {
-        linebuf_flags |= LINEBUF_CRYPT;
-        linebuf_key = (char *)to->localClient->out_key;
-      }
-#endif
       if (len)
-          linebuf_put(&to->localClient->buf_sendq, msg, len,
-                      linebuf_flags, linebuf_key);
+          linebuf_put(&to->localClient->buf_sendq, msg, len);
     }
     /*
     ** Update statistics. The following is slightly incorrect
@@ -318,10 +307,12 @@ send_queued_write(int fd, void *data)
       /* We have some data written .. update counters */
       to->localClient->sendB += retlen;
       me.localClient->sendB += retlen;
-      if (to->localClient->sendB > 1023) { 
+      if (to->localClient->sendB > 1023)
+      { 
         to->localClient->sendK += (to->localClient->sendB >> 10);
         to->localClient->sendB &= 0x03ff;        /* 2^10 = 1024, 3ff = 1023 */
-      } else if (me.localClient->sendB > 1023) { 
+      } else if (me.localClient->sendB > 1023)
+      { 
         me.localClient->sendK += (me.localClient->sendB >> 10);
         me.localClient->sendB &= 0x03ff;
       }
@@ -333,6 +324,70 @@ send_queued_write(int fd, void *data)
       comm_setselect(fd, FDLIST_IDLECLIENT, COMM_SELECT_WRITE,
         send_queued_write, to, 0);
 } /* send_queued_write() */
+
+/*
+** send_queued_slink_write
+**      This is called when there is a chance the some output would
+**      be possible. This attempts to empty the send queue as far as
+**      possible, and then if any data is left, a write is rescheduled.
+*/
+void
+send_queued_slink_write(int fd, void *data)
+{
+  struct Client *to = data;
+  int retlen;
+
+  /*
+  ** Once socket is marked dead, we cannot start writing to it,
+  ** even if the error is removed...
+  */
+#ifdef INVARIANTS
+  if (IsDead(to)) {
+    /*
+     * Actually, we should *NEVER* get here--something is
+     * not working correct if send_queued is called for a
+     * dead socket... --msa
+     */
+    return;
+  } /* if (IsDead(to)) */
+#endif
+
+  /* Next, lets try to write some data */
+  if (to->localClient->slinkq) {
+    retlen = write(to->localClient->ctrlfd,
+                   to->localClient->slinkq + to->localClient->slinkq_ofs,
+                   to->localClient->slinkq_len);
+    if ((retlen < 0) && (ignoreErrno(errno))) {
+      /* we have a non-fatal error, so just continue */
+    } else if (retlen < 0) {
+      /* We have a fatal error */
+      dead_link(to, "Write error to %s, closing link");
+      return;
+    } else if (retlen == 0) {
+      /* 0 bytes is an EOF .. */
+      dead_link(to, "EOF during write to %s, closing link");
+      return;
+    } else {
+      to->localClient->slinkq_len -= retlen;
+
+      assert(to->localClient->slinkq_len >= 0);
+      if (to->localClient->slinkq_len)
+        to->localClient->slinkq_ofs += retlen;
+      else
+      {
+        to->localClient->slinkq_ofs = 0;
+        MyFree(to->localClient->slinkq);
+        to->localClient->slinkq = NULL;
+      }
+    }
+  }
+
+  /* Finally, if we have any more data, reschedule a write */
+  if (to->localClient->slinkq_len)
+      comm_setselect(to->localClient->ctrlfd, FDLIST_IDLECLIENT,
+                     COMM_SELECT_WRITE, send_queued_slink_write,
+                     to, 0);
+} /* send_queued_slink_write() */
 
 /*
  * sendto_one

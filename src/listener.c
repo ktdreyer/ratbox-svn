@@ -32,7 +32,7 @@
 #include "send.h"
 #include "memory.h"
 
-#ifdef OPENSSL
+#ifdef HAVE_LIBCRYPTO
 #include <openssl/bio.h>
 #endif
 

@@ -30,12 +30,6 @@
 #include <sys/types.h>
 #include <string.h>
 
-#ifdef OPENSSL
-#include <openssl/rsa.h>
-#include <openssl/bio.h>
-#include <openssl/pem.h>
-#endif
-
 /* XXX */
 #define  WE_ARE_MEMORY_C
 
@@ -51,6 +45,12 @@
 #include "modules.h"
 #include "s_serv.h" /* for CAP_LL / IsCapable */
 #include "hostmask.h"
+
+#ifdef HAVE_LIBCRYPTO
+#include <openssl/rsa.h>
+#include <openssl/bio.h>
+#include <openssl/pem.h>
+#endif
 
 extern char *ip_string;
 
@@ -75,7 +75,7 @@ int   class_number_per_ip_var;
 int   class_max_number_var;
 int   class_sendq_var;
 
-#ifdef OPENSSL
+#ifdef HAVE_LIBCRYPTO
 int   rsa_keylen = 0;
 char* rsa_pub_ascii = NULL;
 #endif
@@ -99,8 +99,10 @@ int   class_redirport_var;
 %token  AFTYPE
 %token  AUTH
 %token  AUTOCONN
+%token  CIPHER_PREFERENCE
 %token  CLASS
 %token  COMPRESSED
+%token  COMPRESSION_LEVEL
 %token  CONNECT
 %token  CONNECTFREQ
 %token  DEFAULT_FLOODCOUNT
@@ -171,6 +173,7 @@ int   class_redirport_var;
 %token  SENDQ
 %token  SEND_PASSWORD
 %token  SERVERINFO
+%token  SERVLINK_PATH
 %token  SHARED
 %token  SPOOF
 %token  SPOOF_NOTICE
@@ -450,7 +453,7 @@ serverinfo_item:        serverinfo_name | serverinfo_vhost |
 
 serverinfo_rsa_private_key: RSA_PRIVATE_KEY '=' QSTRING ';'
   {
-#ifdef OPENSSL
+#ifdef HAVE_LIBCRYPTO
   BIO *file;
 
   file = BIO_new_file( yylval.string, "r" );
@@ -476,6 +479,14 @@ serverinfo_rsa_private_key: RSA_PRIVATE_KEY '=' QSTRING ';'
   {
     sendto_realops_flags(FLAGS_ALL,
       "Ignoring config file entry rsa_private_key -- invalid key");
+    break;
+  }
+
+  /* require 2048 bit (256 byte) key */
+  if (RSA_size( ServerInfo.rsa_private_key ) != 256)
+  {
+    sendto_realops_flags(FLAGS_ALL,
+      "Ignoring config file entry rsa_private_key -- not 2048 bit");
     break;
   }
 
@@ -1263,14 +1274,14 @@ connect_entry:  CONNECT
   }
   '{' connect_items '}' ';'
   {
-#ifdef OPENSSL
+#ifdef HAVE_LIBCRYPTO
     if(yy_aconf->host &&
        ((yy_aconf->passwd && yy_aconf->spasswd) ||
         (yy_aconf->rsa_public_key && IsConfCryptLink(yy_aconf))))
-#else /* !OPENSSL */
+#else /* !HAVE_LIBCRYPTO */
     if(yy_aconf->host && !IsConfCryptLink(yy_aconf) && 
        yy_aconf->passwd && yy_aconf->spasswd)
-#endif /* !OPENSSL */
+#endif /* !HAVE_LIBCRYPTO */
       {
         if( conf_add_server(yy_aconf, scount) >= 0 )
 	  {
@@ -1285,12 +1296,12 @@ connect_entry:  CONNECT
       }
     else
       {
-#ifndef OPENSSL
+#ifndef HAVE_LIBCRYPTO
         if (IsConfCryptLink(yy_aconf) && yy_aconf->name)
           sendto_realops_flags(FLAGS_ALL,
             "Ignoring connect block for %s -- no OpenSSL support",
             yy_aconf->name);
- #endif        
+#endif        
         free_conf(yy_aconf);
         yy_aconf = NULL;
       }
@@ -1425,7 +1436,7 @@ connect_encrypted:       ENCRYPTED '=' TYES ';'
 
 connect_pubkey:
   {
-#ifdef OPENSSL
+#ifdef HAVE_LIBCRYPTO
     rsa_keylen = 0;
     if (rsa_pub_ascii)
       MyFree(rsa_pub_ascii);
@@ -1434,7 +1445,7 @@ connect_pubkey:
   }
 		RSA_PUBLIC_KEY '=' '{' connect_pubkey_lines '}' ';'
   {
-#ifdef OPENSSL
+#ifdef HAVE_LIBCRYPTO
     BIO *mem;
 
     mem = BIO_new_mem_buf( rsa_pub_ascii, rsa_keylen +5 );
@@ -1461,7 +1472,7 @@ connect_pubkey:
     rsa_keylen = 0;
     MyFree(rsa_pub_ascii);
     rsa_pub_ascii = 0;
-#endif /* OPENSSL */
+#endif /* HAVE_LIBCRYPTO */
   };
 
 connect_pubkey_lines:	connect_pubkey_line connect_pubkey_lines |
@@ -1469,7 +1480,7 @@ connect_pubkey_lines:	connect_pubkey_line connect_pubkey_lines |
 
 connect_pubkey_line:	QSTRING
   {
-#ifdef OPENSSL
+#ifdef HAVE_LIBCRYPTO
     if (rsa_keylen == 0)
     {
       rsa_keylen += strlen(yylval.string) + 2; /* '\0' */
@@ -1497,14 +1508,27 @@ connect_cryptlink:	CRYPTLINK '=' TYES ';'
     yy_aconf->flags &= ~CONF_FLAGS_CRYPTLINK;
   };
 
-connect_compressed:       COMPRESSED '=' TYES ';'
+/* note, this is backwards to make the default
+ * to activate compression on links which support it.
+ */
+connect_compressed:       COMPRESSED '=' TNO ';'
   {
-    yy_aconf->flags |= CONF_FLAGS_COMPRESSED;
+#ifndef HAVE_LIBZ
+    sendto_realops_flags(FLAGS_ALL,
+      "Ignoring compressed = no; -- no zlib support");
+#else
+    yy_aconf->flags |= CONF_FLAGS_NOCOMPRESSED;
+#endif
   }
                         |
-                        COMPRESSED '=' TNO ';'
+                        COMPRESSED '=' TYES ';'
   {
-    yy_aconf->flags &= ~CONF_FLAGS_COMPRESSED;
+#ifndef HAVE_LIBZ
+    sendto_realops_flags(FLAGS_ALL,
+      "Ignoring compressed = yes; -- no zlib support");
+#else
+    yy_aconf->flags &= ~CONF_FLAGS_NOCOMPRESSED;
+#endif
   };
 
 connect_auto:           AUTOCONN '=' TYES ';'
@@ -1818,7 +1842,8 @@ general_item:       general_failed_oper_notice |
                     general_vchans_oper_only | general_disable_vchans |
                     general_caller_id_wait | general_default_floodcount |
                     general_persistant_expire_time | general_min_nonwildcard |
-                    error
+                    general_servlink_path | general_cipher_preference |
+                    general_compression_level | error
 
 general_failed_oper_notice:   FAILED_OPER_NOTICE '=' TYES ';'
   {
@@ -2069,6 +2094,69 @@ general_max_targets: MAX_TARGETS '=' expr ';'
   {
     ConfigFileEntry.max_targets = $3;
   } ;
+
+general_servlink_path: SERVLINK_PATH '=' QSTRING ';'
+  {
+    if (ConfigFileEntry.servlink_path)
+      MyFree(ConfigFileEntry.servlink_path);
+    DupString(ConfigFileEntry.servlink_path, yylval.string);
+  } ;
+
+general_cipher_preference: CIPHER_PREFERENCE '=' QSTRING ';'
+  {
+#ifdef HAVE_LIBCRYPTO
+    struct EncCapability *ecap;
+    char *s, *p;
+    int cipher_count = 0;
+    int found;
+
+    for(ecap = enccaptab; ecap->name; ecap++)
+    {
+	    ecap->priority = 0;
+    }
+
+    for (s = strtoken(&p, yylval.string, ", "); s; s = strtoken(&p, NULL, ", "))
+    {
+      found = 0;
+      for(ecap = enccaptab; ecap->name; ecap++)
+      {
+        if (!strcmp(s, ecap->name))
+        {
+          ecap->priority = ++cipher_count;
+          found = 1;
+        }
+      }
+      if (!found)
+      {
+        sendto_realops_flags(FLAGS_ALL,
+			     "Invalid cipher '%s' ignored",
+			     s);
+      }
+    }
+#else
+    sendto_realops_flags(FLAGS_ALL,
+                  "Ignoring 'cipher_preference' line -- no OpenSSL support");
+#endif
+  } ;
+
+general_compression_level: COMPRESSION_LEVEL '=' expr ';'
+  {
+    ConfigFileEntry.compression_level = $3;                                     
+#ifndef HAVE_LIBZ
+    sendto_realops_flags(FLAGS_ALL,
+      "Ignoring compression_level = %d; -- no zlib support",
+       ConfigFileEntry.compression_level);
+#else
+    if ((ConfigFileEntry.compression_level < 1) ||
+        (ConfigFileEntry.compression_level > 9))
+    {
+      sendto_realops_flags(FLAGS_ALL,
+        "Ignoring invalid compression level '%d', using default",
+        ConfigFileEntry.compression_level);
+      ConfigFileEntry.compression_level = 0;
+    }
+#endif
+  }
 
 general_oper_umodes: OPER_UMODES
   {

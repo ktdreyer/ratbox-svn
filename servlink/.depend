@@ -1,0 +1,2 @@
+servlink.o: servlink.c ../include/setup.h servlink.h io.h control.h
+io.o: io.c ../include/setup.h servlink.h io.h control.h

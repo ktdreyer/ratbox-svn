@@ -15,51 +15,32 @@
 /* Define if you have the ANSI C header files.  */
 #undef STDC_HEADERS
 
-/* Define if you have the poll() system call.  */
-#undef USE_POLL
+/* Define if you have zlib available. */
+#undef HAVE_LIBZ
 
-/* Define with our select type */
-#undef SELECT_TYPE
+/* Define if you have openssl available. */
+#undef HAVE_LIBCRYPTO
 
-/* Define if we are going to use /dev/poll for network IO */
-#undef HAVE_DEVPOLL
+/* Define if you have the BF_cfb64_encrypt function.  */
+#undef HAVE_BF_CFB64_ENCRYPT
 
-#undef USE_DEVPOLL
+/* Define if you have the CAST_cfb64_encrypt function.  */
+#undef HAVE_CAST_CFB64_ENCRYPT
 
-/* Using kqueue */
-#undef USE_KQUEUE
+/* Define if you have the RC5_32_cfb64_encrypt function.  */
+#undef HAVE_RC5_32_CFB64_ENCRYPT
 
-/* Using poll */
-#undef USE_POLL
+/* Define if you have the des_cfb64_encrypt function.  */
+#undef HAVE_DES_CFB64_ENCRYPT
 
-/* Using select */
-#undef USE_SELECT
-
-/* Using devpoll */
-#undef USE_DEVPOLL
-
-/* Define if we have socklen_t */
-#undef HAVE_SOCKLEN_T
-
-/* Define if we can include both string.h and strings.h */
-#undef STRING_WITH_STRINGS
-
-/* This is a string containing any extra underscores that must be prepended
- * to symbols loaded from modules.
- */
-#undef SYMBOL_PREFIX
-
-/* IPv6 support */
-#undef IPV6
-
-/* u_int32_t */
-#undef u_int32_t
-
-/* static modules */
-#undef STATIC_MODULES
+/* Define if you have the des_ede3_cfb64_encrypt function.  */
+#undef HAVE_DES_EDE3_CFB64_ENCRYPT
 
 /* Define if you have the gettext function.  */
 #undef HAVE_GETTEXT
+
+/* Define if you have the idea_cfb64_encrypt function.  */
+#undef HAVE_IDEA_CFB64_ENCRYPT
 
 /* Define if you have the strlcat function.  */
 #undef HAVE_STRLCAT
@@ -105,3 +86,45 @@
 
 /* Define if you have the socket library (-lsocket).  */
 #undef HAVE_LIBSOCKET
+
+/* Define if you have the poll() system call.  */
+#undef USE_POLL
+
+/* Define with our select type */
+#undef SELECT_TYPE
+
+/* Define if we are going to use /dev/poll for network IO */
+#undef HAVE_DEVPOLL
+#undef USE_DEVPOLL
+
+/* Using kqueue */
+#undef USE_KQUEUE
+
+/* Using poll */
+#undef USE_POLL
+
+/* Using select */
+#undef USE_SELECT
+
+/* Using devpoll */
+#undef USE_DEVPOLL
+
+/* Define if we have socklen_t */
+#undef HAVE_SOCKLEN_T
+
+/* Define if we can include both string.h and strings.h */
+#undef STRING_WITH_STRINGS
+
+/* This is a string containing any extra underscores that must be prepended
+ * to symbols loaded from modules.
+ */
+#undef SYMBOL_PREFIX
+
+/* IPv6 support */
+#undef IPV6
+
+/* u_int32_t */
+#undef u_int32_t
+
+/* static modules */
+#undef STATIC_MODULES

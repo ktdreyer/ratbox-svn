@@ -50,7 +50,6 @@ fi
 dnl Checks for libraries.
 AC_CHECK_LIB(socket, socket)
 
-
 AC_CHECK_FUNC(crypt,, AC_CHECK_LIB(descrypt, crypt,,AC_CHECK_LIB(crypt, crypt,,)))
 
 dnl Check for gettext, but it's ok if we don't have it.
@@ -67,7 +66,6 @@ if test "$ac_cv_func_gettext" = "no" -a "$ac_cv_lib_intl_gettext" = "no"; then
 	CPPFLAGS="$CPPFLAGS -I/usr/local/include"
 	AC_CHECK_LIB(intl, gettext,,LDFLAGS=$SAVEDLDFLAGS; CFLAG=$SAVEDCFLAGS)
 fi
-
 
 dnl Checks for header files.
 AC_HEADER_STDC
@@ -126,14 +124,47 @@ AC_ARG_ENABLE(openssl,
 
 [
   case "$enableval" in
-  yes)
-    ac_cv_func_openssl='yes'
-    ;;
   no)
     ac_cv_func_openssl='no'
     ;;
+  yes)
+    dnl Check for ciphers supported by OpenSSL crypto lib
+    AC_CHECK_FUNCS(RSA_free,, AC_CHECK_LIB(crypto, RSA_free,))
+    AC_CHECK_FUNCS(BF_cfb64_encrypt,, AC_CHECK_LIB(crypto, RSA_free,))
+    AC_CHECK_FUNCS(idea_cfb64_encrypt,, AC_CHECK_LIB(crypto, RSA_free,))
+    AC_CHECK_FUNCS(CAST_cfb64_encrypt,, AC_CHECK_LIB(crypto, RSA_free,))
+    AC_CHECK_FUNCS(RC5_32_cfb64_encrypt,, AC_CHECK_LIB(crypto, RSA_free,))
+    AC_CHECK_FUNCS(des_cfb64_encrypt,, AC_CHECK_LIB(crypto, RSA_free,))
+    AC_CHECK_FUNCS(des_ede3_cfb64_encrypt,, AC_CHECK_LIB(crypto, RSA_free,))
+    ;;
   esac
+],
+[
+    dnl Check for ciphers supported by OpenSSL crypto lib
+    AC_CHECK_FUNCS(RSA_free,, AC_CHECK_LIB(crypto, RSA_free,))
+    AC_CHECK_FUNCS(BF_cfb64_encrypt,, AC_CHECK_LIB(crypto, RSA_free,))
+    AC_CHECK_FUNCS(idea_cfb64_encrypt,, AC_CHECK_LIB(crypto, RSA_free,))
+    AC_CHECK_FUNCS(CAST_cfb64_encrypt,, AC_CHECK_LIB(crypto, RSA_free,))
+    AC_CHECK_FUNCS(RC5_32_cfb64_encrypt,, AC_CHECK_LIB(crypto, RSA_free,))
+    AC_CHECK_FUNCS(des_cfb64_encrypt,, AC_CHECK_LIB(crypto, RSA_free,))
+    AC_CHECK_FUNCS(des_ede3_cfb64_encrypt,, AC_CHECK_LIB(crypto, RSA_free,))
 ])
+
+dnl zlib?
+AC_ARG_ENABLE(zlib,
+[ --enable-zlib         Enable zlib compression (used by ziplinks)
+  --disable-zlib        Disable zlib compression (used by ziplinks) ],
+
+[
+  case "$enableval" in
+  no)
+    ac_cv_lib_z_deflate='no'
+    ;;
+  yes)
+    AC_CHECK_LIB(z, deflate,,)
+    ;;
+  esac
+], AC_CHECK_LIB(z, deflate,,) )
 
 dnl check for netio plugin stuff
 dnl Enable poll()
@@ -211,9 +242,6 @@ esac
 dnl Checks for library functions.
 AC_PROG_GCC_TRADITIONAL
 
-dnl checl for openssl
-AC_CHECK_FUNC(openssl, ac_cv_func_openssl='yes',)
-
 AC_MSG_CHECKING(for how to include files in Makefile)
 cat >conftest <<__EOF__
 mytest:
@@ -268,18 +296,6 @@ fi
 echo "Using ${SELECT_TYPE} for select loop."
 AC_DEFINE_UNQUOTED(SELECT_TYPE, "$SELECT_TYPE")
 AC_SUBST(SELECT_SRC)
-
-dnl set a define for openssl if we are doing that
-if test "$ac_cv_func_openssl" = "yes" ; then
-        echo "Building with openssl."
-        SSL_DEFINE="-DOPENSSL"
-        SSL_LIBS="-lcrypto"
-else
-        SSL_DEFINE=""
-        SSL_LIBS=""
-fi
-AC_SUBST(SSL_DEFINE)
-AC_SUBST(SSL_LIBS)
 
 if test "$ac_cv_func_gettext" = "yes" -o "$ac_cv_lib_intl_gettext" = "yes"; then
 	echo "Building with gettext."
@@ -450,6 +466,7 @@ AC_OUTPUT(                   \
  Makefile                    \
  iauth/Makefile              \
  iauth/source/Makefile       \
+ servlink/Makefile           \
  contrib/Makefile            \
  src/Makefile                \
  adns/Makefile		     \

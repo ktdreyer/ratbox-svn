@@ -19,10 +19,10 @@ INSTALL_DATA	= @INSTALL_DATA@
 INSTALL_SUID    = @INSTALL_PROGRAM@ -o root -m 4755
 SHELL		= /bin/sh
 AUTOMODULEDIR	= @prefix@/modules/autoload
-IRCDLIBS	= @LIBS@ @SSL_LIBS@
+IRCDLIBS	= @LIBS@ 
 
 INCLUDES	= -I../include
-CPPFLAGS	= ${INCLUDES} @SSL_DEFINE@ @CPPFLAGS@
+CPPFLAGS	= ${INCLUDES} @CPPFLAGS@
 
 SRCS =                          \
   m_accept.c \

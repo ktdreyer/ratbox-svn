@@ -32,7 +32,7 @@
 
 #include <assert.h>
 
-#ifdef OPENSSL
+#ifdef HAVE_LIBCRYPTO
 #include <openssl/rsa.h>
 #include <openssl/pem.h>
 #include <openssl/bio.h>
@@ -64,7 +64,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#ifndef OPENSSL
+#ifndef HAVE_LIBCRYPTO
 #ifndef STATIC_MODULES
 /* XXX - print error? */
 void _modinit(void) {}
@@ -75,7 +75,7 @@ char *_version = "20010409";
 
 static int bogus_host(char *host);
 static char *parse_cryptserv_args(char *parv[], int parc, char *info,
-                                  char *key1, char *key2);
+                                  char *key);
 
 static void mr_cryptserv(struct Client*, struct Client*, int, char **);
 static void mr_cryptauth(struct Client*, struct Client*, int, char **);
@@ -91,10 +91,12 @@ struct Message cryptauth_msgtab = {
   {mr_cryptauth, m_registered, m_error, m_registered}
 };
 
+#if 0
 struct Message cryptkey_msgtab = {
   "CRYPTKEY", 0, 1, 0, MFLG_SLOW, 0,
   {m_unregistered, m_ignore, m_cryptkey, m_ignore}
 };
+#endif
 
 #ifndef STATIC_MODULES
 void 
@@ -102,7 +104,9 @@ _modinit(void)
 {
   mod_add_cmd(&cryptserv_msgtab);
   mod_add_cmd(&cryptauth_msgtab);
+#if 0
   mod_add_cmd(&cryptkey_msgtab);                                               
+#endif
 }
 
 void
@@ -110,7 +114,9 @@ _moddeinit(void)
 {
   mod_del_cmd(&cryptserv_msgtab);
   mod_del_cmd(&cryptauth_msgtab);
-  mod_del_cmd(&cryptkey_msgtab);                                               
+#if 0
+  mod_del_cmd(&cryptkey_msgtab);
+#endif
 }
 
 char *_version = "20010412";
@@ -123,12 +129,39 @@ char *_version = "20010412";
 static void mr_cryptauth(struct Client *client_p, struct Client *source_p,
                          int parc, char *parv[])
 {
+  struct EncCapability *ecap;
+  int   enc_len;
+  int   len;
+  char *enc;
   char *key;
   
-  if (parc < 2 || !IsWaitAuth(client_p))
+  if (parc < 3 || !IsWaitAuth(client_p))
     return;
 
-  if (!(unbase64_block(&key, parv[1], strlen(parv[1])) == CIPHERKEYLEN))
+  for (ecap = enccaptab; ecap->name; ecap++)
+  {
+    if (0 == strcmp(ecap->name, parv[1]) &&
+        IsCapableEnc(client_p, ecap->cap))
+    {
+      client_p->localClient->in_cipher = ecap;
+      break;
+    }
+  }
+
+  if (!client_p->localClient->in_cipher)
+  {
+    sendto_realops_flags(FLAGS_ADMIN,
+          "Unauthorized server connection attempt from %s: invalid cipher ",
+          get_client_name(client_p, HIDE_IP), client_p->name);
+    sendto_realops_flags(FLAGS_NOTADMIN,
+          "Unauthorized server connection attempt from %s: invalid cipher ",
+          get_client_name(client_p, MASK_IP), client_p->name);
+    exit_client(client_p, client_p, &me, "Invalid cipher");
+    return;
+  }
+
+
+  if (!(enc_len = unbase64_block(&enc, parv[2], strlen(parv[2]))))
   {
     sendto_realops_flags(FLAGS_ADMIN,
           "Unauthorized server connection attempt from %s: malformed CRYPTAUTH "
@@ -142,7 +175,27 @@ static void mr_cryptauth(struct Client *client_p, struct Client *source_p,
     return;
   }
 
-  if (memcmp(key, client_p->localClient->auth_secret, CIPHERKEYLEN) != 0)
+  if ((key = MyMalloc( RSA_size( ServerInfo.rsa_private_key ) )) == NULL)
+  {
+    exit_client(client_p, client_p, &me, "Malformed CRYPTAUTH reply");
+    MyFree(enc);
+    return;
+  }
+
+  len = RSA_private_decrypt( enc_len, enc, key,
+                             ServerInfo.rsa_private_key,
+                             RSA_PKCS1_PADDING );
+
+  if ( len < client_p->localClient->in_cipher->keylen )
+  {
+    exit_client(client_p, client_p, &me, "Malformed CRYPTAUTH reply");
+    MyFree(enc);
+    MyFree(key);
+    return;
+  }
+
+  if (memcmp(key, client_p->localClient->in_key,
+             client_p->localClient->in_cipher->keylen) != 0)
   {
     sendto_realops_flags(FLAGS_ADMIN,
           "Unauthorized server connection attempt from %s: invalid CRYPTAUTH "
@@ -159,23 +212,6 @@ static void mr_cryptauth(struct Client *client_p, struct Client *source_p,
   SetCryptIn(client_p);
   ClearWaitAuth(client_p);
   server_estab(client_p);
-
-#if 0
-  {
-    char *in, *out;
-
-    base64_block( &in, client_p->localClient->in_key, CIPHERKEYLEN );
-    in[22] = '\0';
-    base64_block( &out, client_p->localClient->out_key, CIPHERKEYLEN );
-    out[22] = '\0';
-    sendto_realops_flags(FLAGS_ALL,
-          "Encrypted server link established! Keys are "
-          "Encrypt: %s -- Decrypt: %s for %s", out, in,
-          client_p->name);
-    MyFree(in);
-    MyFree(out);
-  }
-#endif
 }
 
 /*
@@ -190,20 +226,20 @@ static void mr_cryptserv(struct Client *client_p, struct Client *source_p,
   char             info[REALLEN + 1];
   char             *name;
   struct Client    *target_p;
-  char             key1[CIPHERKEYLEN];
-  char             key2[CIPHERKEYLEN];
+  char             *key = client_p->localClient->out_key;
   char            *b64_key;
   struct ConfItem  *aconf;
+  char            *encrypted;
+  int              enc_len;
 
-  if ( (name = parse_cryptserv_args(parv, parc, info, key1, key2)) == NULL )
+
+  if ( (name = parse_cryptserv_args(parv, parc, info, key)) == NULL )
     {
       sendto_one(client_p,"ERROR :Invalid parameters");
       return;
     }
 
-  memcpy( client_p->localClient->in_key, key2, CIPHERKEYLEN );
-
-  /* CRYPTSERV support -> TS support */
+  /* CRYPTSERV support => TS support */
   client_p->tsinfo = TS_DOESTS;
 
   if (bogus_host(name))
@@ -326,17 +362,45 @@ static void mr_cryptserv(struct Client *client_p, struct Client *source_p,
   strncpy_irc(client_p->info, info[0] ? info : me.name, REALLEN);
   client_p->hopcount = 0;
 
+  if (!(client_p->localClient->out_cipher = select_cipher(client_p)))
+    {
+      cryptlink_error(client_p,
+                "%s[%s]: CRYPTLINK failed - couldn't find compatable cipher");
+      return;
+    }
+
+  encrypted = MyMalloc(RSA_size(ServerInfo.rsa_private_key));
+
+  enc_len = RSA_public_encrypt(client_p->localClient->out_cipher->keylen,
+                               key,
+                               encrypted,
+                               aconf->rsa_public_key,
+                               RSA_PKCS1_PADDING);
+
+  if (enc_len <= 0)
+    {
+      MyFree(encrypted);
+      cryptlink_error(client_p,
+                      "%s[%s]: CRYPTLINK failed - couldn't encrypt data");
+      return;
+    }
  
-  base64_block(&b64_key, key1, CIPHERKEYLEN);
+  base64_block(&b64_key, encrypted, enc_len);
+
+  MyFree(encrypted);
   
   if (IsUnknown(client_p))
      cryptlink_init(client_p, aconf, -1);
 
-  sendto_one(client_p, "CRYPTAUTH %s", b64_key);
+  sendto_one(client_p, "CRYPTAUTH %s %s",
+             client_p->localClient->out_cipher->name,
+             b64_key);
+
   SetCryptOut(client_p);
   MyFree(b64_key);
 }
 
+#if 0 /* broken */
 /*
  * m_cryptkey - CRYPTKEY message handler
  *      parv[1] = session key
@@ -348,7 +412,7 @@ static void m_cryptkey(struct Client *client_p, struct Client *source_p,
   unsigned char *key, *tmp;
 
   if (!(parc > 1 && IsCryptOut(client_p) && MyConnect(client_p) &&
-        IsCapable(client_p, CAP_CRYPT)))
+        IsCapable(client_p, CAP_ENC) && IsCapable(client_p, CAP_DK)))
     return;
 
   if ( !(decoded_len = unbase64_block((char **)&tmp, parv[1],
@@ -362,7 +426,7 @@ static void m_cryptkey(struct Client *client_p, struct Client *source_p,
 
   len = RSA_private_decrypt( decoded_len, tmp, key,
                              ServerInfo.rsa_private_key,
-                             RSA_PKCS1_OAEP_PADDING );
+                             RSA_PKCS1_PADDING );
 
   MyFree(tmp);
 
@@ -373,7 +437,7 @@ static void m_cryptkey(struct Client *client_p, struct Client *source_p,
     return;
   }
 
-  memcpy( client_p->localClient->in_key, key, CIPHERKEYLEN );
+  memcpy( client_p->localClient->out_key, key, CIPHERKEYLEN );
 
   MyFree(key);
 
@@ -399,6 +463,8 @@ static void m_cryptkey(struct Client *client_p, struct Client *source_p,
 #endif
 }
 
+#endif
+
 /*
  * parse_cryptserv_args
  *
@@ -410,7 +476,7 @@ static void m_cryptkey(struct Client *client_p, struct Client *source_p,
  * side effects	- parv[1] is trimmed to HOSTLEN size if needed.
  */
 static char *parse_cryptserv_args(char *parv[], int parc, char *info,
-                                  char *key1, char *key2)
+                                  char *key)
 {
   char *name;
   unsigned char *tmp, *out;
@@ -437,24 +503,17 @@ static char *parse_cryptserv_args(char *parv[], int parc, char *info,
 
   len = RSA_private_decrypt( decoded_len, tmp, out,
                              ServerInfo.rsa_private_key,
-                             RSA_PKCS1_OAEP_PADDING );
+                             RSA_PKCS1_PADDING );
  
   MyFree(tmp);
 
-  if ( len < 1 )
+  if ( len < CIPHERKEYLEN )
   {
     MyFree( out );
     return NULL;
   }
 
-  if ( len != (2 * CIPHERKEYLEN) )
-  {
-    MyFree( out );
-    return NULL;
-  }
-
-  memcpy( key1, out, CIPHERKEYLEN );
-  memcpy( key2, out + CIPHERKEYLEN, CIPHERKEYLEN );
+  memcpy( key, out, CIPHERKEYLEN );
   MyFree( out );
 
   strncpy_irc(info, parv[3], REALLEN);

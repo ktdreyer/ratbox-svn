@@ -106,7 +106,7 @@ struct Message privmsg_msgtab = {
 };
 
 struct Message notice_msgtab = {
-  "NOTICE", 0, 1, 0, MFLG_SLOW | MFLG_UNREG, 0L,
+  "NOTICE", 0, 1, 0, MFLG_SLOW, 0L,
   {m_unregistered, m_notice, m_notice, m_notice}
 };
 
@@ -126,7 +126,7 @@ _moddeinit(void)
   mod_del_cmd(&notice_msgtab);
 }
 
-char *_version = "20001122";
+char *_version = "20010519";
 #endif
 /* 
  * free_target_table -

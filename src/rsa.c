@@ -27,7 +27,7 @@
 #include "memory.h"
 #include "rsa.h"
 #include "client.h" /* CIPHERKEYLEN .. eww */
-#ifdef OPENSSL
+#ifdef HAVE_LIBCRYPTO
 
 #include <openssl/rand.h>
 #include <openssl/rsa.h>
@@ -213,4 +213,4 @@ fail:
   return -1;
 }
 
-#endif /* OPENSSL */
+#endif /* HAVE_LIBCRYPTO */

@@ -555,7 +555,7 @@ load_all_modules(int check)
 	mod_add_cmd(&away_msgtab);
 	mod_add_cmd(&capab_msgtab);
 	mod_add_cmd(&cburst_msgtab);
-#ifdef OPENSSL
+#ifdef HAVE_LIBCRYPTO
 	mod_add_cmd(&challenge_msgtab);
 #endif
 	mod_add_cmd(&cjoin_msgtab);

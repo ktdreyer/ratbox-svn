@@ -40,6 +40,7 @@
 #include "ircd_defs.h"
 #include "tools.h"
 #include "s_conf.h"
+#include "s_serv.h"
 #include "s_stats.h"
 #include "channel.h"
 #include "class.h"
@@ -1403,6 +1404,20 @@ static void read_conf(FBFILE* file)
 
   class0 = find_class("default");       /* which one is the default class ? */
   ServerInfo.specific_virtual_host = 0;   /* This is a dumb place to do this got a better idea? */
+
+#ifdef HAVE_LIBCRYPTO
+  /* reset default cipher priority */ 
+  enccaptab[0].priority = 2;
+  enccaptab[1].priority = 1;
+  enccaptab[2].priority = 3;
+  enccaptab[3].priority = 9;
+  enccaptab[4].priority = 8;
+  enccaptab[5].priority = 4;
+  enccaptab[6].priority = 7;
+  enccaptab[7].priority = 6;
+  enccaptab[8].priority = 5;
+#endif
+  
   yyparse(); /* wheee! */
 
   check_class();
@@ -1413,6 +1428,9 @@ static void read_conf(FBFILE* file)
   if(ConfigFileEntry.ts_max_delta < TS_MAX_DELTA_MIN)
     ConfigFileEntry.ts_max_delta = TS_MAX_DELTA_DEFAULT;
 
+  if(ConfigFileEntry.servlink_path == NULL)
+    DupString(ConfigFileEntry.servlink_path, SLPATH);
+  
   if(ServerInfo.network_name == NULL)
     DupString(ServerInfo.network_name,NETWORK_NAME_DEFAULT);
 
@@ -2233,7 +2251,7 @@ int conf_add_server(struct ConfItem *aconf, int lcount)
       return -1;
     }
 
-  if (BadPtr(aconf->passwd))
+  if (BadPtr(aconf->passwd) && !(aconf->flags & CONF_FLAGS_CRYPTLINK))
     {
       sendto_realops_flags(FLAGS_ALL,"Bad connect block, name %s",
 			   aconf->name);

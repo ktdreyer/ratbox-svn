@@ -14,13 +14,12 @@ MKDEP		= ${CC} -MM
 MV		= @MV@
 RM		= @RM@
 
-IRCDLIBS	= @LIBS@ @SSL_LIBS@
+IRCDLIBS	= @LIBS@
 INCLUDES	= -I../include
-CPPFLAGS	= ${INCLUDES} @SSL_DEFINE@ @CPPFLAGS@
+CPPFLAGS	= ${INCLUDES} @CPPFLAGS@
 
 prefix		= @prefix@
 exec_prefix	= @exec_prefix@
-exec_suffix	= @exec_suffix@
 bindir		= @bindir@
 libexecdir	= @libexecdir@
 sysconfdir	= @sysconfdir@

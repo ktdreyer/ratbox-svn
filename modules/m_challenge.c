@@ -39,7 +39,7 @@
 
 int oper_up( struct Client *source_p, struct ConfItem *aconf );
 
-#ifndef OPENSSL
+#ifndef HAVE_LIBCRYPTO
 /* Maybe this should be an error or something?-davidt */
 #ifndef STATIC_MODULES
 void
@@ -158,4 +158,4 @@ static void m_challenge( struct Client *client_p, struct Client *source_p,
   return;
 }
 
-#endif /* OPENSSL */
+#endif /* HAVE_LIBCRYPTO */

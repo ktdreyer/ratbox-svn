@@ -50,6 +50,7 @@ struct Client;
 struct ConfItem;
 struct Channel;
 
+/* Capabilities */
 struct Capability
 {
   char*        name;      /* name of capability */
@@ -70,12 +71,113 @@ struct Capability
 #define CAP_AOPS        0x00002000      /* Can do anon ops (+a) */
 #define CAP_UID         0x00004000      /* Can do UIDs */
 #define CAP_ZIP		0x00008000	/* Can do ZIPlinks */
-#define CAP_CRYPT       0x00010000      /* Can do CRYPTlinks */
+#define CAP_ENC         0x00010000      /* Can do ENCrypted links */
 
-#define CAP_MASK        CAP_QS|CAP_EX|CAP_CHW|\
+#define CAP_MASK        (CAP_QS|CAP_EX|CAP_CHW|\
                         CAP_IE|CAP_EOB|CAP_KLN|CAP_GLN|\
-                        CAP_HOPS|CAP_AOPS|CAP_UID
+                        CAP_HOPS|CAP_AOPS|CAP_UID)
 
+#ifdef HAVE_LIBZ
+#define CAP_ZIP_SUPPORTED       CAP_ZIP
+#else
+#define CAP_ZIP_SUPPORTED       0
+#endif
+
+#ifdef HAVE_LIBCRYPTO
+struct EncCapability
+{
+  char*         name;     /* name of capability */
+  unsigned int  cap;      /* mask value */
+  int           keylen;   /* keylength (bytes) */
+  int           cipherid; /* cipher id */
+  int           priority; /* 0=disabled, 1=highest, n=lowest */
+};
+
+/* Ciphers */
+#define CIPHER_BF       1
+#define CIPHER_CAST     2
+#define CIPHER_DES      3
+#define CIPHER_3DES     4
+#define CIPHER_IDEA     5
+#define CIPHER_RC5_8    6
+#define CIPHER_RC5_12   7
+#define CIPHER_RC5_16   8
+
+/* Cipher Capabilities */
+#define CAP_ENC_BF_128          0x00000001
+#define CAP_ENC_BF_256          0x00000002
+#define CAP_ENC_CAST_128        0x00000004
+#define CAP_ENC_DES_56          0x00000008
+#define CAP_ENC_3DES_168        0x00000010
+#define CAP_ENC_IDEA_128        0x00000020
+#define CAP_ENC_RC5_8_128       0x00000040
+#define CAP_ENC_RC5_12_128      0x00000080
+#define CAP_ENC_RC5_16_128      0x00000100
+
+#define CAP_ENC_ALL     0xFFFFFFFF                                              
+
+/* Blowfish */                        
+#ifdef HAVE_BF_CFB64_ENCRYPT
+#define USE_CIPHER_BF       1
+/* Check for bug handling variable length blowfish keys */
+#if OPENSSL_VERSION_NUMBER >= 0x00000000L
+#define USE_CIPHER_BF_V     1
+#else
+#define USE_CIPHER_BF_V     0
+#endif
+#else
+#define USE_CIPHER_BF_V     0
+#define USE_CIPHER_BF       0
+#endif
+/* Cast */
+#ifdef HAVE_CAST_CFB64_ENCRYPT
+#define USE_CIPHER_CAST     1
+#else
+#define USE_CIPHER_CAST     0
+#endif
+/* DES */
+#ifdef HAVE_DES_CFB64_ENCRYPT
+#define USE_CIPHER_DES      1
+#else
+#define USE_CIPHER_DES      0
+#endif
+/* 3DES */
+#ifdef HAVE_DES_EDE3_CFB64_ENCRYPT
+#define USE_CIPHER_3DES     1
+#else
+#define USE_CIPHER_3DES     0
+#endif
+/* IDEA */
+#ifdef HAVE_IDEA_CFB64_ENCRYPT
+#define USE_CIPHER_IDEA     1
+#else
+#define USE_CIPHER_IDEA     0
+#endif
+/* RC5 */
+#ifdef HAVE_RC5_32_CFB64_ENCRYPT
+#define USE_CIPHER_RC5      1
+#else
+#define USE_CIPHER_RC5      0
+#endif
+
+/* Only enable ciphers supported by available version of OpenSSL */
+#define CAP_ENC_MASK    \
+             (((USE_CIPHER_BF   * CAP_ENC_ALL) & CAP_ENC_BF_128)         | \
+              ((USE_CIPHER_BF_V * CAP_ENC_ALL) & CAP_ENC_BF_256)         | \
+              ((USE_CIPHER_CAST * CAP_ENC_ALL) & CAP_ENC_CAST_128)       | \
+              ((USE_CIPHER_DES  * CAP_ENC_ALL) & CAP_ENC_DES_56)         | \
+              ((USE_CIPHER_3DES * CAP_ENC_ALL) & CAP_ENC_3DES_168)       | \
+              ((USE_CIPHER_IDEA * CAP_ENC_ALL) & CAP_ENC_IDEA_128)       | \
+              ((USE_CIPHER_RC5  * CAP_ENC_ALL) & CAP_ENC_RC5_8_128)      | \
+              ((USE_CIPHER_RC5  * CAP_ENC_ALL) & CAP_ENC_RC5_12_128)     | \
+              ((USE_CIPHER_RC5  * CAP_ENC_ALL) & CAP_ENC_RC5_16_128))
+
+#define IsCapableEnc(x, cap)    ((x)->localClient->enc_caps &   (cap))
+#define SetCapableEnc(x, cap)   ((x)->localClient->enc_caps |=  (cap))
+#define ClearCapEnc(x, cap)     ((x)->localClient->enc_caps &= ~(cap))
+  
+#endif /* HAVE_LIBCRYPTO */
+  
 #define DoesCAP(x)      ((x)->caps)
 
 #define CHECK_SERVER_CRYPTLINK    1
@@ -84,9 +186,26 @@ struct Capability
 /*
  * Capability macros.
  */
-#define IsCapable(x, cap)       ((x)->localClient->caps & (cap))
-#define SetCapable(x, cap)      ((x)->localClient->caps |= (cap))
+#define IsCapable(x, cap)       ((x)->localClient->caps &   (cap))
+#define SetCapable(x, cap)      ((x)->localClient->caps |=  (cap))
 #define ClearCap(x, cap)        ((x)->localClient->caps &= ~(cap))
+
+#define SLINKCMD_SET_ZIP_OUT_LEVEL           1
+#define SLINKCMD_START_ZIP_OUT               2
+/*#define SLINKCMD_END_ZIP_OUT                 3*/
+#define SLINKCMD_START_ZIP_IN                4
+/*#define SLINKCMD_END_ZIP_IN                  5*/
+#define SLINKCMD_SET_CRYPT_IN_CIPHER         6       /* data */
+#define SLINKCMD_SET_CRYPT_IN_KEY            7       /* data */
+#define SLINKCMD_START_CRYPT_IN              8
+/*#define SLINKCMD_END_CRYPT_IN                9*/
+#define SLINKCMD_SET_CRYPT_OUT_CIPHER        10      /* data */
+#define SLINKCMD_SET_CRYPT_OUT_KEY           11      /* data */
+#define SLINKCMD_START_CRYPT_OUT             12
+/*#define SLINKCMD_END_CRYPT_OUT               13*/
+#define SLINKCMD_INJECT_RECVQ                14
+#define SLINKCMD_INJECT_SENDQ                15
+#define SLINKCMD_INIT                        16
 
 /*
  * Globals
@@ -97,6 +216,9 @@ struct Capability
  * extra argument to "PASS" takes care of checking that.  -orabidoo
  */
 extern struct Capability captab[];
+#ifdef HAVE_LIBCRYPTO
+extern struct EncCapability enccaptab[];
+#endif
 
 extern int MaxClientCount;     /* GLOBAL - highest number of clients */
 extern int MaxConnectionCount; /* GLOBAL - highest number of connections */
@@ -116,7 +238,7 @@ extern int         hunt_server(struct Client* client_pt,
                                char* command, int server, 
                                int parc, char** parv);
 extern const char* my_name_for_link(const char* name, struct ConfItem* conf);
-extern void        send_capabilities(struct Client*, int);
+extern void        send_capabilities(struct Client*, int, int);
 extern int         server_estab(struct Client* client_p);
 extern void        set_autoconn(struct Client *,char *,char *,int);
 extern const char* show_capabilities(struct Client* client);
@@ -139,6 +261,7 @@ void add_lazylinkchannel(struct Client *client_p, struct Channel *chptr);
 void add_lazylinkclient(struct Client *client_p, struct Client *source_p);
 void remove_lazylink_flags(unsigned long mask);
 void client_burst_if_needed(struct Client *client_p, struct Client *target_p);
+struct EncCapability *select_cipher(struct Client *client_p);
 
 #endif /* INCLUDED_s_serv_h */
 

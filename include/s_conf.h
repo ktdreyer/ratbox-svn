@@ -29,7 +29,7 @@
 #include <sys/param.h>
 #endif
 
-#ifdef OPENSSL
+#ifdef HAVE_LIBCRYPTO
 #include <openssl/rsa.h>
 #endif
 
@@ -78,7 +78,7 @@ struct ConfItem
   struct DNSQuery  *dns_query;
   int		   aftype;
   int              dns_pending; /* 1 if dns query pending, 0 otherwise */
-#ifdef OPENSSL
+#ifdef HAVE_LIBCRYPTO
   RSA*             rsa_public_key;
 #endif
 };
@@ -128,7 +128,7 @@ struct ConfItem
 #define CONF_FLAGS_ALLOW_AUTO_CONN      0x00004000
 #define CONF_FLAGS_LAZY_LINK            0x00008000
 #define CONF_FLAGS_ENCRYPTED            0x00010000
-#define CONF_FLAGS_COMPRESSED           0x00020000
+#define CONF_FLAGS_NOCOMPRESSED         0x00020000
 #define CONF_FLAGS_PERSISTANT           0x00040000
 #define CONF_FLAGS_TEMPORARY            0x00080000
 #define CONF_FLAGS_CRYPTLINK            0x00100000
@@ -177,6 +177,8 @@ typedef struct config_file_entry
   char *operlog;
   char *glinelog;
 
+  char *servlink_path;
+
   char* network_name;
   char* network_desc;
 
@@ -189,43 +191,44 @@ typedef struct config_file_entry
   MessageFile opermotd;
   MessageFile linksfile;
 
-  int         hub;
-  int         dots_in_ident;
-  int         failed_oper_notice;
-  int         anti_nick_flood;
-  int         anti_spam_exit_message_time;
-  int         max_accept;
-  int         max_nick_time;
-  int         max_nick_changes;
-  int         ts_max_delta;
-  int         ts_warn_delta;
-  int         kline_with_reason;
-  int         kline_with_connection_closed;
-  int         warn_no_nline;
-  int         non_redundant_klines;
-  int         o_lines_oper_only;
-  int         pace_wait;
-  int         whois_wait;
-  int         knock_delay;
-  int         short_motd;
-  int         no_oper_flood;
-  int         glines;
-  int         gline_time;
-  int         idletime;
-  int	      hide_server;
-  int         client_exit;
-  int         maximum_links;
-  int         oper_only_umodes;
-  int         oper_umodes;
-  int         max_targets;
-  int         links_delay;
-  int         vchans_oper_only;
-  int         disable_vchans;
-  int         quiet_on_ban;
-  int         caller_id_wait;
-  int         persist_expire;
-  int         min_nonwildcard;
-  int         default_floodcount;
+  int           hub;
+  unsigned char compression_level;
+  int           dots_in_ident;
+  int           failed_oper_notice;
+  int           anti_nick_flood;
+  int           anti_spam_exit_message_time;
+  int           max_accept;
+  int           max_nick_time;
+  int           max_nick_changes;
+  int           ts_max_delta;
+  int           ts_warn_delta;
+  int           kline_with_reason;
+  int           kline_with_connection_closed;
+  int           warn_no_nline;
+  int           non_redundant_klines;
+  int           o_lines_oper_only;
+  int           pace_wait;
+  int           whois_wait;
+  int           knock_delay;
+  int           short_motd;
+  int           no_oper_flood;
+  int           glines;
+  int           gline_time;
+  int           idletime;
+  int	        hide_server;
+  int           client_exit;
+  int           maximum_links;
+  int           oper_only_umodes;
+  int           oper_umodes;
+  int           max_targets;
+  int           links_delay;
+  int           vchans_oper_only;
+  int           disable_vchans;
+  int           quiet_on_ban;
+  int           caller_id_wait;
+  int           persist_expire;
+  int           min_nonwildcard;
+  int           default_floodcount;
 } ConfigFileEntryType;
 
 struct server_info
@@ -234,7 +237,7 @@ struct server_info
   char        *description;
   char        *network_name;
   char        *network_desc;
-#ifdef OPENSSL
+#ifdef HAVE_LIBCRYPTO
   RSA         *rsa_private_key;
 #endif
   int         hub;

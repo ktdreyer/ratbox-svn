@@ -97,6 +97,8 @@
 #define MODPATH IRCD_PREFIX "/modules/autoload/"
 #define MSGPATH IRCD_PREFIX "/messages/"
 #define SPATH   IRCD_PREFIX "/bin/ircd"
+#define SLPATH  IRCD_PREFIX "/bin/servlink" /* see servlink_path=""; in
+                                               config */
 /* i really don't like the below, but I'll figure the rest out! -- adrian */
 #define ETCPATH	IRCD_PREFIX "/etc"
 #define LOGPATH IRCD_PREFIX "/logs"
@@ -110,7 +112,7 @@
 #define PPATH   ETCPATH "/ircd.pid"
 #define HPATH   ETCPATH "/opers.txt"
 #define OPATH   ETCPATH "/opers.motd"
-#define LIPATH   ETCPATH "/links.txt"
+#define LIPATH  ETCPATH "/links.txt"
 
 /* TS_MAX_DELTA_DEFAULT and TS_WARN_DELTA_DEFAULT -
  * allowed delta for TS when another server connects.

@@ -53,7 +53,7 @@ parse_client_queued(struct Client *client_p)
  if (IsServer(client_p))
  {
   while ((dolen = linebuf_get(&client_p->localClient->buf_recvq,
-                              readBuf, READBUF_SIZE)) > 0)
+                              readBuf, READBUF_SIZE, 0)) > 0)
   {
    if (!IsDead(client_p))
     client_dopacket(client_p, readBuf, dolen);
@@ -81,7 +81,7 @@ parse_client_queued(struct Client *client_p)
    if (checkflood && (lclient_p->sent_parsed > lclient_p->allow_read))
     break;
    dolen = linebuf_get(&client_p->localClient->buf_recvq, readBuf,
-                       READBUF_SIZE);
+                       READBUF_SIZE, 0);
    if (!dolen)
     break;
    client_dopacket(client_p, readBuf, dolen);
@@ -158,24 +158,15 @@ read_packet(int fd, void *data)
   struct LocalUser *lclient_p = client_p->localClient;
   int length = 0;
   int lbuf_len;
-  int linebuf_flags = 0;
-  char *linebuf_key = NULL;
   
   assert(lclient_p != NULL);
-#ifdef OPENSSL
-  if (IsCryptIn(client_p))
-  {
-    linebuf_flags |= LINEBUF_CRYPT;
-    linebuf_key = lclient_p->in_key;
-  }
-#endif
 
   /*
    * Read some data. We *used to* do anti-flood protection here, but
    * I personally think it makes the code too hairy to make sane.
    *     -- adrian
    */
-  length = recv(client_p->fd, readBuf, READBUF_SIZE, 0);
+  length = read(client_p->fd, readBuf, READBUF_SIZE);
 
   /* XXX If the client is actually dead, read the buffer but throw it out
    * a suggested more optimum fix will be to mark the fd as -1 and close it in 
@@ -207,7 +198,7 @@ read_packet(int fd, void *data)
    * turn comes around.
    */
   lbuf_len = linebuf_parse(&client_p->localClient->buf_recvq,
-      readBuf, length, linebuf_flags, linebuf_key);
+      readBuf, length, (IsRegistered(client_p) ? 0 : 1));
 
   if (lbuf_len < 0)
   {

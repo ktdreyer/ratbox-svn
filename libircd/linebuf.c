@@ -15,15 +15,11 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errno.h>
 
 #include "tools.h"
 #include "client.h"
 #include "linebuf.h"
 #include "memory.h"
-#include "s_bsd.h"
-#include "rsa.h"
-#include "send.h"
 
 #ifdef STRING_WITH_STRINGS
 # include <string.h>
@@ -40,8 +36,6 @@
 
 static int linebuf_initialised = 0;
 static int bufline_count = 0;
-
-static int linebuf_write(int fd, buf_head_t *bufhead, buf_line_t *bufline);
 
 /*
  * linebuf_init
@@ -229,153 +223,33 @@ linebuf_donebuf(buf_head_t *bufhead)
  *
  * This routine probably isn't as optimal as it could be, but hey .. :)
  *   -- adrian
+ *
+ * if binary is non-zero assume the data may be compressed,
+ * so simply split up (keeping as many [\r\n]*'s in the first buffer)
  */
 static int
 linebuf_copy_line(buf_head_t *bufhead, buf_line_t *bufline,
-  char *data, int len, int flags, char *key)
+  char *data, int len, int binary)
 {
   int cpylen = 0;	/* how many bytes we've copied */
   char *ch = data;	/* Pointer to where we are in the read data */
   char *bufch = &bufline->buf[bufline->len];
-  char *data_to_read;
-/*  char *zip_buf; */
-#ifdef OPENSSL
-  char *crypt_buf;
-#endif
-  int   read_len;
-  int   proclen = 0;
-
   /* Start of where to put new data */
 
   /* If its full or terminated, ignore it */
   if ((bufline->len == BUF_DATA_SIZE) || (bufline->terminated == 1))
     return 0;
 
-  if (!len)
-    return 0;
- 
-  if (flags)
-  {
-    fprintf(stderr, "copying... with %d bytes\n", len);
-    if (bufline->flen_written < 2)
-    {
-      if (bufline->flen_written == 1)
-      {
-        fprintf(stderr, "reading 2nd len byte\n");
-        bufline->proclen |= (*(unsigned char *)ch);
-        bufline->flen_written++;
-        ch++;
-        len--;
-        proclen++;
-        fprintf(stderr, "FRAME LENGTH: %d\n", bufline->proclen);
-      }
-      else if (bufline->flen_written == 0)
-      {
-        fprintf(stderr, "reading both len bytes\n");
-        bufline->proclen |= ((*(unsigned char *)ch) << 8);
-        bufline->flen_written++;
-        ch++;
-        len--;
-        proclen++;
-        if (!len)
-          return cpylen;
-        fprintf(stderr, "(still here)\n");
-        bufline->proclen |= (*(unsigned char *)ch);
-        bufline->flen_written++;
-        ch++;
-        len--;
-        proclen++;
-        fprintf(stderr, "FRAME LENGTH: %d\n", bufline->proclen);                
-      }
-    }
-
-    /* default to reading directly from the incoming buffer */
-    data_to_read = ch;
-    read_len = len;
-
-    if (!len)
-      return proclen;
-
-    fprintf(stderr, "STATUS: len=%d, bl->plen=%d, bl->len=%d\n",
-            len, bufline->proclen, bufline->len);
-    if ((bufline->len != 0) || (bufline->proclen < len))
-    {
-      if ( len >= bufline->proclen )
-      {
-        fprintf(stderr, "completing from pl=%d\n", proclen);
-        /* OK, complete the partial frame,
-         * and read from the linebuf buffer */
-        memcpy(bufline->buf + bufhead->writeofs, ch,
-               bufline->proclen - bufline->len);
-        data_to_read = bufline->buf;
-        read_len = bufline->proclen;
-        proclen += bufline->proclen - bufline->len;
-        fprintf(stderr, "now: pl=%d\n", proclen);
-      }
-      else
-      {
-        /* we can't complete the frame,
-         * just stick it in the buffer */
-        memcpy(bufline->buf + bufhead->writeofs, ch, len);
-        bufline->len += len;
-        proclen += len;
-        return 0;
-      }
-    }
-    else
-    {
-      proclen += bufline->proclen;
-      fprintf(stderr, "inplace decode: pl = %d\n", proclen);
-    }
-
-    bufline->terminated = 1;
-    bufline->len = 0;
-
-    /* decode the data */
-    if (flags & LINEBUF_ZIP)
-    {
-/*      read_len = unzip_data(&zip_buf, data_to_read, bufline->proclen);
-*/
-      if (read_len < 1)
-      {
-        sendto_realops_flags(FLAGS_ALL,
-                             "Unable to unzip data - dropping link!");
-        return -1;
-      }
-
-/*      data_to_read = zip_buf;
-*/
-    }
-#ifdef OPENSSL
-    if (flags & LINEBUF_CRYPT)
-    {
-      read_len = decrypt_data(&crypt_buf, data_to_read,
-                              bufline->proclen, key);
-
-      if (read_len < 1)
-      {
-/*
-        if (flags & LINEBUF_ZIP)
-          MyFree(zip_buf);
-*/
-        sendto_realops_flags(FLAGS_ALL,
-                             "Unable to decrypt data - dropping link!");
-        return -1;
-      }
-
-      data_to_read = crypt_buf;
-    }
-#endif
-    ch = data_to_read;
-    len = read_len;
-  }
-
   /* Next, lets enter the copy loop */
   for(;;)
     {
       /* Are we out of data? */
-      if (len == 0) /* leave it unterminated, and return */
-        break;
+      if (len == 0)
+	{
+	  /* Yes, so we mark this buffer as unterminated, and return */
+	  bufline->terminated = 0; /* XXX it should be anyway :) */
+	  break;
+        }
 
       /* Are we out of space to PUT this ? */
       if (bufline->len == BUF_DATA_SIZE)
@@ -385,27 +259,43 @@ linebuf_copy_line(buf_head_t *bufhead, buf_line_t *bufline,
 	   * next CRLF. We then skip that, and return.
 	   */
 	  bufline->overflow = 1;
-          if (!flags)
-          {
-            cpylen += linebuf_skip_crlf(ch, len);
-            linebuf_terminate_crlf(bufhead, bufline);
-          }
+	  cpylen += linebuf_skip_crlf(ch, len);
+	  linebuf_terminate_crlf(bufhead, bufline);
 	  /* NOTE: We're finishing, so ignore updating len */
 	  bufline->terminated = 1;
+          assert(!binary); /* XXX - what do we do here!? */
 	  break;
 	}
 
       /* Is this a CR or LF? */
       if ((*ch == '\r') || (*ch == '\n'))
 	{
-	  /* Skip */
-	  cpylen += linebuf_skip_crlf(ch, len);
-	  /* Terminate the line */
-	  linebuf_terminate_crlf(bufhead, bufline);
-	  /* NOTE: We're finishing, so ignore updating len */
-	  bufline->terminated = 1;
-	  break;
-	}
+          if (!binary)
+            {
+              /* Skip */
+              cpylen += linebuf_skip_crlf(ch, len);
+              /* Terminate the line */
+              linebuf_terminate_crlf(bufhead, bufline);
+              /* NOTE: We're finishing, so ignore updating len */
+              bufline->terminated = 1;
+            }
+          else
+            {
+              while ((len > 0) && ((*ch == '\r') || (*ch == '\n')))
+                {
+                  *bufch = *ch;
+                  bufch++;
+                  ch++;
+                  cpylen++;
+                  assert(len > 0);
+                  len--;
+                  bufline->len++;
+                  bufhead->len++;
+                }
+              bufline->terminated =1;
+            }
+          break;
+        }
 
       /*
        * phew! we can copy a byte. Do it, and update the counters.
@@ -422,18 +312,7 @@ linebuf_copy_line(buf_head_t *bufhead, buf_line_t *bufline,
       bufhead->len++;
     }
 
-/*  if (bufline->flags & LINEBUF_ZIP)
-     MyFree(zip_buf);
-*/
-#ifdef OPENSSL
-  if (flags & LINEBUF_CRYPT)
-     MyFree(crypt_buf);
-#endif
-
   *bufch = '\0';
-
-  if (flags)
-    return proclen;
   return cpylen;
 }
 
@@ -456,8 +335,7 @@ linebuf_copy_line(buf_head_t *bufhead, buf_line_t *bufline,
  *   to dodge copious copies.
  */
 int
-linebuf_parse(buf_head_t *bufhead, char *data, int len,
-              int flags, char *key)
+linebuf_parse(buf_head_t *bufhead, char *data, int len, int binary)
 {
   buf_line_t *bufline;
   int cpylen;
@@ -470,10 +348,7 @@ linebuf_parse(buf_head_t *bufhead, char *data, int len,
       bufline = bufhead->list.tail->data;
       assert(!bufline->flushing);
       /* just try, the worst it could do is *reject* us .. */
-      cpylen = linebuf_copy_line(bufhead, bufline, data, len,
-                                 flags, key);
-      if (cpylen < 0)
-        return -1;
+      cpylen = linebuf_copy_line(bufhead, bufline, data, len, binary);
       linecnt++;
       /* If we've copied the same as what we've got, quit now */
       if (cpylen == len)
@@ -492,10 +367,7 @@ linebuf_parse(buf_head_t *bufhead, char *data, int len,
         bufline = linebuf_new_line(bufhead);
         
         /* And parse */
-        cpylen = linebuf_copy_line(bufhead, bufline, data, len,
-                                   flags, key);
-        if (cpylen < 0)
-          return -1;
+        cpylen = linebuf_copy_line(bufhead, bufline, data, len, binary);
         len -= cpylen;
 	assert(len >= 0);
         data += cpylen;
@@ -512,7 +384,7 @@ linebuf_parse(buf_head_t *bufhead, char *data, int len,
  * data into the given buffer and free the underlying linebuf.
  */
 int
-linebuf_get(buf_head_t *bufhead, char *buf, int buflen)
+linebuf_get(buf_head_t *bufhead, char *buf, int buflen, int partial)
 {
   buf_line_t *bufline;
   int cpylen;
@@ -523,8 +395,8 @@ linebuf_get(buf_head_t *bufhead, char *buf, int buflen)
 
   bufline = bufhead->list.head->data; 
 
-  /* make sure that the buffer was actually terminated */
-  if (!bufline->terminated)
+  /* make sure that the buffer was actually *terminated */
+  if (!(partial || bufline->terminated))
     return 0;  /* Wait for more data! */
 
   /* make sure we've got the space, including the NULL */
@@ -541,6 +413,7 @@ linebuf_get(buf_head_t *bufhead, char *buf, int buflen)
   return cpylen;
 }
 
+
 /*
  * linebuf_put
  *
@@ -550,8 +423,7 @@ linebuf_get(buf_head_t *bufhead, char *buf, int buflen)
  * DO know you are getting a single line.
  */
 void
-linebuf_put(buf_head_t *bufhead, char *buf, int buflen,
-            int flags, char *key)
+linebuf_put(buf_head_t *bufhead, char *buf, int buflen)
 {
   buf_line_t *bufline;
 
@@ -592,11 +464,6 @@ linebuf_put(buf_head_t *bufhead, char *buf, int buflen,
   bufline->len = buflen;
   bufline->terminated = 1;
 
-  bufline->flags = flags;
-  if (key)
-    memcpy(bufline->key, key, CIPHERKEYLEN);
-    
-
   /* update the line length */
   bufhead->len += buflen;
 
@@ -617,7 +484,8 @@ linebuf_put(buf_head_t *bufhead, char *buf, int buflen,
  *        and tag it so that we don't re-schedule another write until
  *        we have a CRLF.
  */
-int linebuf_flush(int fd, buf_head_t *bufhead)
+int
+linebuf_flush(int fd, buf_head_t *bufhead)
 {
   buf_line_t *bufline;
   int retval;
@@ -647,8 +515,9 @@ int linebuf_flush(int fd, buf_head_t *bufhead)
     }
 
   /* Now, try writing data */
-  retval = linebuf_write(fd, bufhead, bufline);
-
+  retval = write(fd, bufline->buf + bufhead->writeofs, bufline->len
+		 - bufhead->writeofs);
+    
   /* Deal with return code */
   if (retval < 0)
     return retval;
@@ -657,176 +526,18 @@ int linebuf_flush(int fd, buf_head_t *bufhead)
 
   /* we've got data, so update the write offset */
   bufhead->writeofs += retval;
-  
+
   /* if we've written everything *and* the CRLF, deallocate and update
      bufhead */
   if (bufhead->writeofs == bufline->len)
     {
       bufhead->writeofs = 0;
       assert(bufhead->len >=0);
-     linebuf_done_line(bufhead, bufline);
+      linebuf_done_line(bufhead, bufline);
     }
 
   /* Return line length */
   return retval;
-}
-
-static int linebuf_write(int fd, buf_head_t *bufhead, buf_line_t *bufline)
-{
-  char *data_to_write;
-  char frame_len[2];
-  int   write_len;
-  int   buffered = 1;
-  int   retval = 0;
-  int   try_write = 1;
-#ifdef OPENSSL
-  char *crypt_buf;
-#endif
-  /*  char *zip_buf;*/
-
-  if (!((bufline->flags & LINEBUF_ZIP) ||
-#ifdef OPENSSL
-        (bufline->flags & LINEBUF_CRYPT) ||
-#endif
-        0))
-  {
-    return write(fd, bufline->buf + bufhead->writeofs, bufline->len
-                 - bufhead->writeofs);
-  }
-
-  data_to_write = bufline->buf + bufhead->writeofs;
-  write_len = bufline->len - bufhead->writeofs;
-
-  if (!bufline->proclen)
-    {
-      buffered = 0;
-      /* insert any other processing here.... */
-
-      if (bufline->flags & LINEBUF_ZIP)
-      {
-/*        write_len = zip_data(&zip_buf, data_to_write, write_len);
-*/
-
-        if (write_len < 1)
-        {
-          sendto_realops_flags(FLAGS_ALL,
-                         "Unable to zip data - dropping link!");
-          errno = 0; /* make sure we fail */
-          return -1;
-        }
-
-/*        data_to_write = zip_buf;
-*/
-      }
-      
-#ifdef OPENSSL
-      if (bufline->flags & LINEBUF_CRYPT)
-      {
-        write_len = crypt_data(&crypt_buf, data_to_write, write_len,
-                               bufline->key);
-
-        if (write_len < 1)
-        {
-          if (bufline->flags & LINEBUF_CRYPT)
-             MyFree(crypt_buf);
-          sendto_realops_flags(FLAGS_ALL,
-                         "Unable to encrypt data - dropping link!");
-          errno = 0; /* make sure we fail */
-          return -1;
-        }
-
-        data_to_write = crypt_buf;
-      }
-#endif
-      bufline->proclen = write_len;
-    }
-
-  
-  if (bufline->flen_written < 2)
-  {
-    if (bufline->flen_written == 1)
-    {
-      frame_len[0] = (write_len     ) & 0xff;
-
-      retval = write(fd, frame_len, 1);
-
-      /* we couldn't write that byte, so leave it for next time */
-      if ( retval < 1)
-        try_write = 0;
-    }
-    else
-    {
-      frame_len[0] = (write_len >> 8) & 0xff;
-      frame_len[1] = (write_len     ) & 0xff;
-
-      retval = write(fd, frame_len, 2);
-      
-      if ( retval < 2 )
-      {
-        /* guh guh guh, we couldn't write the length */
-        try_write = 0;
-        if ( retval == 1 ) /* eww, we wrote half of it */
-          bufline->flen_written = 1;
-      }
-      else
-      {
-        bufline->flen_written = 2;
-      }
-    }
-  }
-
-  /* flush as much data as possible */
-  if (try_write)
-    retval = write(fd, data_to_write, bufline->proclen);
-
-  if (retval < 0)
-  {
-    if (ignoreErrno( errno ))
-      retval = 0;
-    else
-    {
-/*      if (bufline->flags & LINEBUF_ZIP)
-        MyFree(zip_buf);
-*/
-#ifdef OPENSSL
-     if (bufline->flags & LINEBUF_CRYPT)
-        MyFree(crypt_buf);
-#endif
-    }
-    return -1;
-  }
-  
-
-  bufhead->procofs += retval;
-
-  if (bufhead->procofs == bufline->proclen)
-  {
-    bufhead->procofs = 0;
-    /* We wrote it all! return the correct length so the
-       buffer is deallocated */
-    return (bufline->len - bufhead->writeofs);
-  }
-
-  if (!buffered)
-  {
-    assert((bufline->proclen - bufhead->procofs)
-           < BUF_DATA_SIZE+64);
-    memcpy(bufline->buf, data_to_write + bufhead->procofs,
-           bufline->proclen - bufhead->procofs);
-    bufline->proclen -= bufhead->procofs;
-    bufhead->procofs = 0;
-    
-/*    if (bufline->flags & LINEBUF_ZIP)
-      MyFree(zip_buf);
-*/
-#ifdef OPENSSL
-    if (bufline->flags & LINEBUF_CRYPT)
-      MyFree(crypt_buf);
-#endif
-  }
-  
-  /* don't deallocate it yet... */
-  return 0;
 }
 
 /*
