@@ -113,7 +113,7 @@ mo_gline(struct Client *client_p, struct Client *source_p, int parc, const char 
 {
 	const char *user = NULL;
 	char *host = NULL;	/* user and host of GLINE "victim" */
-	const char *reason = NULL;	/* reason for "victims" demise */
+	char *reason = NULL;	/* reason for "victims" demise */
 	char splat[] = "*";
 	char tempuser[USERLEN + 2];
 	char temphost[HOSTLEN + 1];
@@ -168,7 +168,9 @@ mo_gline(struct Client *client_p, struct Client *source_p, int parc, const char 
 			return 0;
 		}
 
-		if(invalid_gline(source_p, user, host, parv[2]))
+		reason = LOCAL_COPY(parv[2]);
+
+		if(invalid_gline(source_p, user, host, reason))
 			return 0;
 
 		/* Not enough non-wild characters were found, assume they are trying to gline *@*. */
@@ -180,8 +182,6 @@ mo_gline(struct Client *client_p, struct Client *source_p, int parc, const char 
 					   me.name, parv[0], ConfigFileEntry.min_nonwildcard);
 			return 0;
 		}
-
-		reason = parv[2];
 
 		/* inform users about the gline before we call check_majority_gline()
 		 * so already voted comes below gline request --fl
