@@ -1,3 +1,35 @@
+leeh        2002/07/11 19:40:29 EDT	(20020712_1)
+
+  Modified files:
+    .                    RELNOTES 
+    doc                  example.conf example.efnet.conf 
+    include              parse.h s_conf.h 
+    modules              m_help.c 
+    src                  ircd_lexer.l ircd_parser.y parse.c 
+                         s_conf.c 
+    tools                Makefile.in convertconf.c 
+  Log:
+  - updated RELNOTES with whatever it is ive done
+  - added ConfigFileEntry.use_help
+  - ripped remnants of fixklines from tools/Makefile.in
+  - some convertconf cleanups
+  
+  Revision  Changes    Path
+  1.36      +2 -1      ircd-hybrid-7/RELNOTES
+  7.166     +9 -0      ircd-hybrid-7/doc/example.conf
+  7.3       +9 -0      ircd-hybrid-7/doc/example.efnet.conf
+  7.15      +1 -0      ircd-hybrid-7/include/parse.h
+  7.181     +1 -0      ircd-hybrid-7/include/s_conf.h
+  1.33      +19 -12    ircd-hybrid-7/modules/m_help.c
+  1.140     +1 -0      ircd-hybrid-7/src/ircd_lexer.l
+  1.253     +12 -1     ircd-hybrid-7/src/ircd_parser.y
+  7.130     +24 -3     ircd-hybrid-7/src/parse.c
+  7.309     +6 -0      ircd-hybrid-7/src/s_conf.c
+  7.32      +4 -9      ircd-hybrid-7/tools/Makefile.in
+  1.34      +6 -1      ircd-hybrid-7/tools/convertconf.c
+
+
+
 androsyn    2002/07/11 19:32:32 EDT	(20020712_0)
 
   Modified files:
