@@ -24,6 +24,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 7.40  2000/12/14 21:55:34  toot
+ * removed some unused things (quiet_on_ban, and moderate_nick_change left overs)
+ *
  * Revision 7.39  2000/12/14 19:59:11  db
  * - removed a bunch of useless B line stuff
  * - put sanity test into m_gline.c so it wont' core on a NULL glinefile
@@ -572,8 +575,6 @@ typedef struct
   MessageFile opermotd;
 
   int         hub; /* YES or NO */
-  int         quiet_on_ban; /* YES or NO */
-  int         moderate_nickchange; /* YES or NO */
   int         failed_oper_notice;
   int         show_failed_oper_id;
   int         anti_nick_flood;

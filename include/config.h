@@ -254,7 +254,7 @@
  * define this if you want to use crypted passwords for operators in your
  * ircd.conf file.
  */
-#define CRYPT_OPER_PASSWORD
+#undef CRYPT_OPER_PASSWORD
 
 /* CRYPT_LINK_PASSWORD - use crypted N-line passwords in the ircd.conf
  * If you want to store encrypted passwords in N-lines for server links,
