@@ -1,3 +1,16 @@
+androsyn    2004/09/29 14:25:11 EDT	(20040929_1)
+
+  Modified files:
+    src                  listener.c 
+  Log:
+  change the ifdef for the in6addr_any definition to only define if ipv6 is
+  enabled
+  
+  Revision  Changes    Path
+  7.121     +1 -1      ircd-ratbox/src/listener.c
+
+
+
 androsyn    2004/09/29 10:32:57 EDT	(20040929_0)
 
   Modified files:
