@@ -1,4 +1,4 @@
-# $Id$
+/* $Id$ */
 
 CREATE TABLE users (
 	username TEXT,

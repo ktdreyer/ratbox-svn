@@ -1,3 +1,5 @@
  LOGIN       - Logs in to the given username.
  LOGOUT      - Logs out of services.
  REGISTER    - Registers given username.
+ SETEMAIL    - Changes your email address.
+ SETPASS     - Changes password of current username.

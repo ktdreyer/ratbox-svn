@@ -1,3 +1,0 @@
-JOIN <channel>
-{190} Makes services sit temporarily in your channel
-  <channel>: Registered channel for services to join

@@ -237,8 +237,8 @@ print_channel(struct client *client_p, struct channel *chptr,
 static int
 show_channel(struct channel *chptr, struct alis_query *query)
 {
-        /* skip +p/+s channels */
-        if(chptr->mode.mode & MODE_SECRET || chptr->mode.mode & MODE_PRIVATE)
+        /* skip +s channels */
+        if(chptr->mode.mode & MODE_SECRET)
                 return 0;
 
         if(dlink_list_length(&chptr->users) < query->min ||

@@ -6,7 +6,6 @@
  CLEAROPS    - {140} Clears channel ops without op flags
  DELBAN      - { 10} Deletes the given ban
  DELUSER     - {150} Removes a user from a channels access list
- GETKEY      - {  1} Requests the key of the given channel
  INVITE      - {  1} Requests an invite to channel
  LISTBANS    - { 10} Lists bans on a channel
  LISTUSERS   - {100} Lists users with access to a given channel

@@ -20,7 +20,7 @@ ratbox-services installation guide
    To install from RPM:
       1. Download sqlite-devel-2.8.x.i386.rpm
                   sqlite-2.8.x.i386.rpm
-      2. rpm -?? sqlite-devel-2.8.x.i386.rpm sqlite-2.8.x.i386.rpm
+      2. rpm -i sqlite-devel-2.8.x.i386.rpm sqlite-2.8.x.i386.rpm
 
    To install from source:
       1. Download sqlite-2.8.x.tar.gz
@@ -66,7 +66,12 @@ ratbox-services installation guide
 
 6. Run make install
 
-7. Change to the directory it installed to, edit example.conf and save it
-   as services.conf.
+7. Change to the directory it installed to.
 
-8. Run ./ratbox-services
+8. Edit example.conf and save it as services.conf.
+
+9. Build the initial services database by:
+	sqlite services.db < schema.txt
+
+10. Run ./ratbox-services
+

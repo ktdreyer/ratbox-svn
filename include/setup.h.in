@@ -1,4 +1,4 @@
-/* include/setup.h.in.  Generated automatically from configure.in by autoheader 2.13.  */
+/* include/setup.h.in.  Generated automatically from autoconf/configure.in by autoheader 2.13.  */
 
 /* Define if you have the strftime function.  */
 #undef HAVE_STRFTIME
@@ -57,6 +57,9 @@
 /* Define if you have the crypt library (-lcrypt).  */
 #undef HAVE_LIBCRYPT
 
+/* Define if you have the sqlite library (-lsqlite).  */
+#undef HAVE_LIBSQLITE
+
 /* Channel Service */
 #undef ENABLE_CHANSERV
 
@@ -77,3 +80,4 @@
 
 /* Global Messaging Service */
 #undef ENABLE_GLOBAL
+
