@@ -369,7 +369,7 @@ static void ms_server(struct Client *client_p, struct Client *source_p,
 
   for (aconf = ConfigItemList; aconf; aconf=aconf->next)
     {
-     if (!(aconf->status == CONF_LEAF || aconf->status == CONF_HUB))
+     if ((aconf->status & (CONF_LEAF|CONF_HUB)) == 0)
        continue;
 
      if (match(aconf->name, client_p->name))
@@ -394,7 +394,7 @@ static void ms_server(struct Client *client_p, struct Client *source_p,
    *
    * connect {
    *            name = "irc.bighub.net";
-   *            host_mask="*";
+   *            hub_mask="*";
    *            ...
    * 
    * That would allow "irc.bighub.net" to introduce anything it wanted..
@@ -403,7 +403,7 @@ static void ms_server(struct Client *client_p, struct Client *source_p,
    *
    * connect {
    *            name = "irc.somehub.fi";
-   *		host_mask="*";
+   *		hub_mask="*";
    *		leaf_mask="*.edu";
    *...
    * Would allow this server in finland to hub anything but
@@ -425,12 +425,12 @@ static void ms_server(struct Client *client_p, struct Client *source_p,
        * server. -A1kmm. */
       if ((CurrentTime - source_p->firsttime) < 20)
         {
-          exit_client(NULL, source_p, &me, "No H-line.");
+          exit_client(NULL, source_p, &me, "No matching hub_mask.");
           return;
         }
       else
         {
-          sendto_one(source_p, ":%s SQUIT %s :Sorry, no H-line.",
+          sendto_one(source_p, ":%s SQUIT %s :Sorry, no matching hub_mask.",
                      me.name, name);
           return;
         }
@@ -448,7 +448,8 @@ static void ms_server(struct Client *client_p, struct Client *source_p,
             get_client_name(client_p, MASK_IP), name);
       /* If it is new, we are probably misconfigured, so split the
        * non-hub server introducing this. Otherwise, split the new
-       * server. -A1kmm. */
+       * server. -A1kmm.
+       */
       if ((CurrentTime - source_p->firsttime) < 20)
         {
           exit_client(NULL, source_p, &me, "Leafed Server.");
