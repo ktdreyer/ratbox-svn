@@ -89,7 +89,8 @@ static void mo_jupe(struct Client *client_p, struct Client *source_p,
   struct Client *target_p;
   struct Client *ajupe;
   dlink_node *m;
-  char reason[REALLEN];
+  /* This should be reallen but ircsprintf cores if its too long.. */
+  char reason[TOPICLEN];
 
   if(!ServerInfo.hub)
     return;
@@ -121,13 +122,7 @@ static void mo_jupe(struct Client *client_p, struct Client *source_p,
   target_p= find_server(parv[1]);
 
   if(target_p)
-    {
-      if(MyConnect(target_p))
-	exit_client(client_p, target_p, &me, parv[2]);
-      else
-	sendto_serv_butone(&me, ":%s SQUIT %s :Juped: %s",
-			   me.name, parv[1], parv[2]);          
-    }
+    exit_client(client_p, target_p, &me, parv[2]);
 
   sendto_serv_butone(&me, ":%s SERVER %s 1 :Juped: %s",
 		     me.name, parv[1], parv[2]);
