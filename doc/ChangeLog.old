@@ -1,3 +1,15 @@
+jmallett    2002/01/13 02:26:14 EST	(20020113_4)
+
+  Modified files:
+    .                    ChangeLog 
+  Log:
+  Cut down on expansion of unintentional #Id# tagging in ChangeLog
+  
+  Revision  Changes    Path
+  7.3332    +2 -2      ircd-hybrid-7/ChangeLog
+
+
+
 jmallett    2002/01/13 02:19:27 EST	(20020113_3)
 
   Modified files:
