@@ -88,11 +88,12 @@ struct Channel
 
   int             num_mask;              /* number of bans+exceptions+invite exceptions */
   time_t          channelts;
-  char            chname[1];
+  char            chname[CHANNELLEN+1];
 };
 
 extern  struct  Channel *GlobalChannelList;
 
+void init_channels(void);
 void cleanup_channels(void *);
 
 #define CREATE 1        /* whether a channel should be

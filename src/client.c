@@ -102,7 +102,7 @@ void init_client(void)
   * start off the check ping event ..  -- adrian
   * Every 30 seconds is plenty -- db
   */
- client_heap = BlockHeapCreate(sizeof(struct Client), 1024);
+ client_heap = BlockHeapCreate(sizeof(struct Client), 10000);
  lclient_heap = BlockHeapCreate(sizeof(struct LocalUser), 512); 
  eventAdd("check_pings", check_pings, NULL, 30, 0);
  eventAdd("free_exited_clients()", &free_exited_clients, NULL, 4, 0);

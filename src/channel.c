@@ -36,6 +36,7 @@
 #include "s_conf.h"             /* ConfigFileEntry, ConfigChannel */
 #include "event.h"
 #include "memory.h"
+#include "balloc.h"
 
 #include <assert.h>
 #include <string.h>
@@ -100,6 +101,23 @@ static int mask_pos;
 #endif
 void check_spambot_warning(struct Client *source_p, const char *name);
 
+/* 
+ * init_channels
+ *
+ * Initializes the channel blockheap
+ */
+static BlockHeap *channel_heap;
+static void channelheap_garbage_collect(void *unused)
+{
+	BlockHeapGarbageCollect(channel_heap);
+	eventAdd("channelheap_garbage_collect", channelheap_garbage_collect, NULL, 45, 0);
+	
+}
+void init_channels(void)
+{
+	channel_heap = BlockHeapCreate(sizeof(struct Channel), 2048);
+	eventAdd("channelheap_garbage_collect", channelheap_garbage_collect, NULL, 45, 0);
+}
 
 /*
  * check_string
@@ -4300,8 +4318,10 @@ get_channel(struct Client *client_p, char *chname, int flag)
 
   if (flag == CREATE)
   {
+#if 0    
     chptr = (struct Channel *)MyMalloc(sizeof(struct Channel) + len + 1);
-
+#endif
+    chptr = BlockHeapAlloc(channel_heap);
     /*
      * NOTE: strcpy ok here, we have allocated strlen + 1
      */
@@ -4532,7 +4552,10 @@ destroy_channel(struct Channel *chptr)
       break;
     }
   }
+#if 0
   MyFree((char *)chptr);
+#endif
+  BlockHeapFree(channel_heap, chptr);
   Count.chan--;
 }
 

@@ -591,6 +591,7 @@ int main(int argc, char *argv[])
  clear_hash_parse();
  init_client();
  initUser();
+ init_channels();
  initclass();
  initwhowas();
  init_stats();
