@@ -1,3 +1,24 @@
+leeh        2004/10/16 20:11:02 EDT	(20041017_0)
+
+  Modified files:
+    doc                  schema.txt 
+    include              hook.h 
+    src                  client.c hook.c s_jupeserv.c 
+  Log:
+  - reworked hooks to use integer returning funcs
+  - added hook for squit of unknown servers, for jupeserv, it now reintroduces
+    squit jupes
+  - storage of jupes in db
+  
+  Revision  Changes    Path
+  1.8       +5 -0      rserv/doc/schema.txt
+  1.3       +4 -3      rserv/include/hook.h
+  1.22      +5 -1      rserv/src/client.c
+  1.3       +6 -3      rserv/src/hook.c
+  1.5       +66 -16    rserv/src/s_jupeserv.c
+
+
+
 leeh        2004/10/16 19:36:30 EDT	(20041016_3)
 
   Modified files:
