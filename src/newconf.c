@@ -1116,7 +1116,7 @@ conf_set_resv_channel(void *data)
 		return;
 	}
 
-	if(find_channel_resv(name))
+	if(hash_find_resv(name))
 	{
 		conf_report_error("Ignoring channel resv %s -- already resvd.",
 					name);

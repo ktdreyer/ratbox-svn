@@ -189,7 +189,7 @@ parse_resv(struct Client *source_p, const char *name,
 
 	if(IsChannelName(name))
 	{
-		if(find_channel_resv(name))
+		if(hash_find_resv(name))
 		{
 			sendto_one_notice(source_p,
 					":A RESV has already been placed on channel: %s",

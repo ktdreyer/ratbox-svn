@@ -565,15 +565,6 @@ find_xline(const char *gecos, int counter)
 	return NULL;
 }
 
-int
-find_channel_resv(const char *name)
-{
-	if(hash_find_resv(name) != NULL)
-		return 1;
-
-	return 0;
-}
-
 struct ConfItem *
 find_nick_resv(const char *name)
 {

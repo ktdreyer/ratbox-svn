@@ -218,7 +218,7 @@ parse_resv_file(FBFILE * file)
 
 		if(IsChannelName(host_field))
 		{
-			if(find_channel_resv(host_field))
+			if(hash_find_resv(host_field))
 				continue;
 
 			aconf = make_conf();

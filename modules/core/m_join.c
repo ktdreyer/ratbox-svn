@@ -74,6 +74,7 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 {
 	static char jbuf[BUFSIZE];
 	struct Channel *chptr = NULL;
+	struct ConfItem *aconf;
 	char *name;
 	char *key = NULL;
 	int i, flags = 0;
@@ -116,14 +117,14 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		}
 
 		/* see if its resv'd */
-		if(find_channel_resv(name) && (!IsOper(source_p) || !ConfigChannel.no_oper_resvs))
+		if((aconf = hash_find_resv(name)) && (!IsOper(source_p) || !ConfigChannel.no_oper_resvs))
 		{
 			sendto_one_numeric(source_p, ERR_BADCHANNAME,
 					form_str(ERR_BADCHANNAME), name);
 			sendto_realops_flags(UMODE_SPY, L_ALL,
-					     "User %s (%s@%s) is attempting to join locally juped channel %s",
+					     "User %s (%s@%s) is attempting to join locally juped channel %s (%s)",
 					     source_p->name, source_p->username, source_p->host,
-					     name);
+					     name, aconf->passwd);
 			continue;
 		}
 
