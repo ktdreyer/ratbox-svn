@@ -1,3 +1,21 @@
+leeh        2004/01/15 14:10:43 EST	(20040115_9)
+
+  Modified files:
+    include              c_init.h client.h config.h 
+  Log:
+  - added checks for ranlib/ar to configure
+  - added the initial user registration service, just stored in memory atm
+  - added the Makefile stuff for the service directories
+  - hash_nick() -> global hash_name()
+  - I need to stop just doing "*buf++;" :P
+  
+  Revision  Changes    Path
+  1.13      +3 -0      rserv/include/c_init.h
+  1.14      +11 -0     rserv/include/client.h
+  1.14      +21 -0     rserv/include/config.h
+
+
+
 leeh        2004/01/15 14:10:39 EST	(20040115_8)
 
   Modified files:
