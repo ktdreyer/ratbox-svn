@@ -63,8 +63,8 @@ parseargs(int *argc, char ***argv, struct lgetopt *opts)
 		      usage(progname);
 		    }
 		  
-		  opts[i].argloc = malloc(strlen((*argv)[1]) + 1);
-		  strcpy((char *)opts[i].argloc, (*argv)[1]);
+		  *((char**)opts[i].argloc) = malloc(strlen((*argv)[1]) + 1);
+		  strcpy(*((char**)opts[i].argloc), (*argv)[1]);
 		  break;
 
 		case USAGE:
