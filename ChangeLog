@@ -1,3 +1,18 @@
+androsyn    2002/08/07 19:32:11 EDT	(20020807_7)
+
+  Modified files:
+    include              irc_string.h 
+    src                  channel.c match.c 
+  Log:
+  Add cidr bans..
+  
+  Revision  Changes    Path
+  7.38      +2 -0      ircd-ratbox/include/irc_string.h
+  7.326     +8 -3      ircd-ratbox/src/channel.c
+  7.21      +67 -0     ircd-ratbox/src/match.c
+
+
+
 androsyn    2002/08/07 19:30:48 EDT	(20020807_6)
 
   Modified files:
