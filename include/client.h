@@ -273,6 +273,13 @@ struct LocalUser
 	struct AuthRequest	*auth_request;
 };
 
+struct exit_client_hook
+{
+	struct Client *client_p;
+	char exit_message[TOPICLEN];
+};
+
+
 /*
  * status macros.
  */

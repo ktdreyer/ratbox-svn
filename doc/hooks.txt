@@ -12,6 +12,13 @@ This is currently the list of supported hooks in ircd-ratbox
 		     and gets called as channels are getting burst on to
 		     the network.  See contrib/m_tburst.c for an example
 
+"exit_local_client" - takes a struct exit_client_hook and gets called
+		      while a local client is exiting.
+
+"exit_unknown_client" - takes a struct exit_client_hook and gets called
+			while an unknown client is exiting.
+
+
 The following are for debugging and take struct hook_io_data for arguments. 
 These can be used for a variety of purposes, but are aimed at the developer
 community.
