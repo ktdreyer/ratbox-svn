@@ -1,3 +1,10 @@
+*** 20010616_9 by db
+- same fix needed in hybrid-7 in attach_cn_lines
+  both the servers irc name has to match and the host/ip
+  match is used to allow hostmasking (ugh)
+
+
+
 *** 20010616_8 by toot
 more formating fixes in channel.c
 
