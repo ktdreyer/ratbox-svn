@@ -489,7 +489,7 @@ BlockHeapGarbageCollect(BlockHeap * bh)
 	last = NULL;
 	walker = bh->base;
 
-	while (walker != NULL && freed_count < 5)
+	while (walker != NULL && freed_count < 10)
 	{
 		if((dlink_list_length(&walker->free_list) == bh->elemsPerBlock) != 0)
 		{
