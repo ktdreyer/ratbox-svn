@@ -392,10 +392,11 @@ expr:		NUMBER
 		= { 
 			$$ = $1 / $3;
 		}
+/* leave this out until we find why it makes BSD yacc dump core -larne
 		| '-' expr  %prec NEG
 		= {
 			$$ = -$2;
-		}
+		} */
 		| '(' expr ')'
 		= {
 			$$ = $2;
