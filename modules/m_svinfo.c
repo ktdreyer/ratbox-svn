@@ -114,8 +114,8 @@ static void ms_svinfo(struct Client *client_p, struct Client *source_p,
 		 (unsigned long) theirtime,
 		 (int) deltat);
 
-      log(L_NOTICE,
-       "Link %s dropped, excessive TS delta (my TS=%lu, their TS=%lu, delta=%d)",
+      ilog(L_NOTICE,
+   "Link %s dropped, excessive TS delta (my TS=%lu, their TS=%lu, delta=%d)",
                  get_client_name(source_p, SHOW_IP),
 		 (unsigned long) CurrentTime,
 		 (unsigned long) theirtime,

@@ -140,8 +140,8 @@ static void mo_kill(struct Client *client_p, struct Client *source_p,
 		       "Received KILL message for %s. From %s Path: %s (%s)", 
 		       target_p->name, parv[0], me.name, reason);
 
-  log(L_INFO,"KILL From %s For %s Path %s (%s)",
-      parv[0], target_p->name, me.name, reason);
+  ilog(L_INFO,"KILL From %s For %s Path %s (%s)",
+       parv[0], target_p->name, me.name, reason);
 
 
   /*
@@ -266,8 +266,8 @@ static void ms_kill(struct Client *client_p, struct Client *source_p,
 			   target_p->name, parv[0], reason);
     }
 
-  log(L_INFO,"KILL From %s For %s Path %s %s",
-          parv[0], target_p->name, parv[0], reason);
+  ilog(L_INFO,"KILL From %s For %s Path %s %s",
+       parv[0], target_p->name, parv[0], reason);
 
   /*
   ** And pass on the message to other servers. Note, that if KILL

@@ -151,8 +151,8 @@ static void mo_connect(struct Client* client_p, struct Client* source_p,
    * Notify all operators about remote connect requests
    */
 
-  log(L_TRACE, "CONNECT From %s : %s %s", 
-      parv[0], parv[1], parv[2] ? parv[2] : "");
+  ilog(L_TRACE, "CONNECT From %s : %s %s", 
+       parv[0], parv[1], parv[2] ? parv[2] : "");
 
   aconf->port = port;
   /*
@@ -268,8 +268,8 @@ static void ms_connect(struct Client* client_p, struct Client* source_p,
                 get_client_name(source_p, MASK_IP));
 
 
-  log(L_TRACE, "CONNECT From %s : %s %s", 
-      parv[0], parv[1], parv[2] ? parv[2] : "");
+  ilog(L_TRACE, "CONNECT From %s : %s %s", 
+       parv[0], parv[1], parv[2] ? parv[2] : "");
 
   aconf->port = port;
   /*

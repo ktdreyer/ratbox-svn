@@ -142,8 +142,8 @@ static void m_oper(struct Client *client_p, struct Client *source_p,
 
       oper_up( source_p, aconf );
       
-      log(L_TRACE, "OPER %s by %s!%s@%s",
-          name, source_p->name, source_p->username, source_p->host);
+      ilog(L_TRACE, "OPER %s by %s!%s@%s",
+	   name, source_p->name, source_p->username, source_p->host);
       log_oper(source_p, name);
       return;
     }

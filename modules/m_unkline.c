@@ -133,8 +133,8 @@ static void mo_unkline (struct Client *client_p,struct Client *source_p,
   sendto_realops_flags(FLAGS_ALL,
                        "%s has removed the temporary K-Line for: [%s@%s]",
                        parv[0], user, host);
-  log(L_NOTICE, "%s removed temporary K-Line for [%s@%s]", parv[0], user,
-      host);
+  ilog(L_NOTICE, "%s removed temporary K-Line for [%s@%s]", parv[0], user,
+       host);
   return;
  }
  type = parse_netmask(host, &hostip, &bits);
@@ -178,7 +178,7 @@ K:bar:No reason (1997/08/30 14.56):foo
                parv[0]);
     sendto_one(source_p, ":%s NOTICE %s :Couldn't find host", me.name,
                parv[0]);
-    log(L_ERROR, "K-Line file corrupted (couldn't find host)");
+    ilog(L_ERROR, "K-Line file corrupted (couldn't find host)");
     if (!error_on_write)
      error_on_write = flush_write(source_p, out, buf, temppath);
     /* This K line is corrupted ignore */      
@@ -194,7 +194,7 @@ K:bar:No reason (1997/08/30 14.56):foo
                parv[0]);
     sendto_one(source_p, ":%s NOTICE %s :Couldn't find comment", me.name,
                parv[0]);
-    log(L_ERROR, "K-Line file corrupted (couldn't find comment)");
+    ilog(L_ERROR, "K-Line file corrupted (couldn't find comment)");
     if (!error_on_write)
      error_on_write = flush_write(source_p, out, buf, temppath);
     /* This K line is corrupted ignore */
@@ -308,7 +308,7 @@ Then just ignore the line
             me.name, parv[0], user,host);
  sendto_realops_flags(FLAGS_ALL, "%s has removed the K-Line for: [%s@%s]",
 		              parv[0], user, host);
- log(L_NOTICE, "%s removed K-Line for [%s@%s]", parv[0], user, host);
+ ilog(L_NOTICE, "%s removed K-Line for [%s@%s]", parv[0], user, host);
  return;
 }
 
@@ -532,7 +532,7 @@ Then just ignore the line
             me.name, parv[0], cidr);
  sendto_realops_flags(FLAGS_ALL, "%s has removed the D-Line for: [%s]",
 		              parv[0], cidr);
- log(L_NOTICE, "%s removed D-Line for [%s]", parv[0], cidr);
+ ilog(L_NOTICE, "%s removed D-Line for [%s]", parv[0], cidr);
 }
 
 /*
@@ -591,7 +591,7 @@ static void mo_ungline(struct Client *client_p, struct Client *source_p,
       sendto_realops_flags(FLAGS_ALL,
 			   "%s has removed the G-Line for: [%s@%s]",
 			   parv[0], user, host );
-      log(L_NOTICE, "%s removed G-Line for [%s@%s]",
+      ilog(L_NOTICE, "%s removed G-Line for [%s@%s]",
           parv[0], user, host);
       return;
     }

@@ -116,8 +116,8 @@ static void m_challenge( struct Client *client_p, struct Client *source_p,
      
      /* Now make them an oper and tell the realops... */
      oper_up(source_p, aconf);
-     log(L_TRACE, "OPER %s by %s!%s@%s",
-	     source_p->user->auth_oper, source_p->name, source_p->username, source_p->host);
+     ilog(L_TRACE, "OPER %s by %s!%s@%s",
+	  source_p->user->auth_oper, source_p->name, source_p->username, source_p->host);
      log_oper(source_p, source_p->user->auth_oper);
      MyFree(source_p->user->response);
      MyFree(source_p->user->auth_oper);

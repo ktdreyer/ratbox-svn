@@ -121,7 +121,7 @@ static void mo_die(struct Client *client_p, struct Client *source_p,
    * for an explanation as to what we should do.
    *     -- adrian
    */
-  log(L_NOTICE, "Server terminated by %s", get_client_name(source_p, HIDE_IP));
+  ilog(L_NOTICE, "Server terminated by %s", get_client_name(source_p, HIDE_IP));
   /* 
    * this is a normal exit, tell the os it's ok 
    */
