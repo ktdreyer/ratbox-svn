@@ -1,3 +1,9 @@
+*** 20010108_7 by wcampbel
+Removed my md5mkpasswd and added in a replacement mkpasswd that can (if
+the system supports it) generate both MD5 and DES based passwords, more docs
+will be coming...use ./mkpasswd -h to see the usage
+
+
 *** 20010108_6 by db
 - don't show real ip's of any hosts to non admins in m_server
 
