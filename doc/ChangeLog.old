@@ -1,3 +1,8 @@
+*** 20010204_13 by db
+- changed code to use a patricia trie for the IP I lines
+
+
+
 *** 20010204_12 by ejb
 - fixed s_bsd.c for BSD ..
 
