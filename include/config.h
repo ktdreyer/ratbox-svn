@@ -284,14 +284,6 @@
 #define HANGONRETRYDELAY 60     /* Recommended value: 30-60 seconds */
 #define HANGONGOODLINK 3600     /* Recommended value: 30-60 minutes */
 
-/* CONNECTTIMEOUT -
- * Number of seconds to wait for a connect(2) call to complete.
- * NOTE: this must be at *LEAST* 10.  When a client connects, it has
- * CONNECTTIMEOUT - 10 seconds for its host to respond to an ident lookup
- * query and for a DNS answer to be retrieved.
- */
-#define CONNECTTIMEOUT  30      /* Recommended value: 30 */
-
 /* KILLCHASETIMELIMIT -
  * Max time from the nickname change that still causes KILL
  * automatically to switch for the current nick of that user. (seconds)

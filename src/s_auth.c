@@ -123,7 +123,7 @@ static struct AuthRequest* make_auth_request(struct Client* client)
     (struct AuthRequest *)MyMalloc(sizeof(struct AuthRequest));
   request->fd      = -1;
   request->client  = client;
-  request->timeout = CurrentTime + CONNECTTIMEOUT;
+  request->timeout = CurrentTime + ConfigFileEntry.connect_timeout;
   return request;
 }
 

@@ -1786,7 +1786,7 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
 
 	comm_connect_tcp(client_p->localClient->fd, aconf->host, aconf->port,
 			 (struct sockaddr *)&SOCKADDR(ipn), sizeof(struct irc_sockaddr), 
-			 serv_connect_callback, client_p, aconf->aftype, 30);
+			 serv_connect_callback, client_p, aconf->aftype, ConfigFileEntry.connect_timeout);
       }
     else if((aconf->aftype == AF_INET) && ServerInfo.specific_ipv4_vhost)
       {
@@ -1799,7 +1799,7 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
 
 	comm_connect_tcp(client_p->localClient->fd, aconf->host, aconf->port,
 			 (struct sockaddr *)&SOCKADDR(ipn), sizeof(struct irc_sockaddr), 
-			 serv_connect_callback, client_p, aconf->aftype, 30);
+			 serv_connect_callback, client_p, aconf->aftype, ConfigFileEntry.connect_timeout);
       }
 #ifdef IPV6
     else if((aconf->aftype == AF_INET6) && ServerInfo.specific_ipv6_vhost)
@@ -1813,13 +1813,13 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
 
 	comm_connect_tcp(client_p->localClient->fd, aconf->host, aconf->port,
 			 (struct sockaddr *)&SOCKADDR(ipn), sizeof(struct irc_sockaddr),
-			 serv_connect_callback, client_p, aconf->aftype, 30);
+			 serv_connect_callback, client_p, aconf->aftype, ConfigFileEntry.connect_timeout);
       }
 #endif
     else
       {
 	comm_connect_tcp(client_p->localClient->fd, aconf->host, aconf->port, NULL, 0, 
-			 serv_connect_callback, client_p, aconf->aftype, 30);
+			 serv_connect_callback, client_p, aconf->aftype, ConfigFileEntry.connect_timeout);
       }
 
     return 1;

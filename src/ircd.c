@@ -582,7 +582,7 @@ int main(int argc, char *argv[])
   ConfigFileEntry.dlinefile = DLPATH;   /* dline file */
   ConfigFileEntry.glinefile = GPATH;    /* gline log file */
   ConfigFileEntry.xlinefile = XPATH;
-
+  ConfigFileEntry.connect_timeout = 30; /* Default to 30 */
   myargv = argv;
   umask(077);                /* better safe than sorry --SRB */
 

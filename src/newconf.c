@@ -530,7 +530,9 @@ void	newconf_init()
 			conf_set_general_ping_cookie);
 	add_conf_item("general", "disable_auth", CF_YESNO,
 			conf_set_general_disable_auth);
-			
+	add_conf_item("general", "connect_timeout", CF_TIME,
+			conf_set_general_connect_timeout);
+					
 	add_top_conf("channel", NULL, NULL);
 	add_conf_item("channel", "use_except", CF_YESNO, conf_set_channel_use_except);
 	add_conf_item("channel", "use_invex", CF_YESNO, conf_set_channel_use_invex);
@@ -2513,6 +2515,11 @@ void	conf_set_general_use_help(void *data)
 void	conf_set_general_throttle_time(void *data)
 {
 	ConfigFileEntry.throttle_time = *(unsigned int*)data;
+}
+
+void	conf_set_general_connect_timeout(void *data)
+{
+	ConfigFileEntry.connect_timeout = *(unsigned int*)data;
 }
 
 void	conf_set_general_oper_umodes(void *data)

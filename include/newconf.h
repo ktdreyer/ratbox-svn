@@ -280,6 +280,7 @@ extern 	char *		conf_cur_block_name;
 	void	conf_set_general_default_floodcount		(void *data);
 	void	conf_set_general_client_flood			(void *data);
 	void	conf_set_general_dot_in_ip6_addr		(void *data);
+	void	conf_set_general_connect_timeout		(void *data);
 	void	conf_set_channel_use_except			(void *data);
 	void	conf_set_channel_use_anonops			(void *data);
 	void	conf_set_channel_use_invex			(void *data);
@@ -301,5 +302,5 @@ extern 	char *		conf_cur_block_name;
 	void	conf_set_serverhide_links_delay			(void *data);
 	void	conf_set_serverhide_hidden			(void *data);
 	void	conf_set_serverhide_disable_hidden		(void *data);
-	
+		
 #endif

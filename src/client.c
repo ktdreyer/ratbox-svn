@@ -292,7 +292,7 @@ check_pings_list(dlink_list *list)
         }
 
       if (!IsRegistered(client_p))
-        ping = CONNECTTIMEOUT;
+        ping = ConfigFileEntry.connect_timeout;
       else
         ping = get_client_ping(client_p);
 

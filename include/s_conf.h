@@ -229,6 +229,7 @@ struct config_file_entry
   int           use_global_limits;
   int           use_help;
   int		disable_auth;
+  int		connect_timeout;
 #ifdef HAVE_LIBCRYPTO
   struct EncCapability *default_cipher_preference;
 #endif
