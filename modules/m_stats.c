@@ -385,31 +385,20 @@ stats_tdeny(struct Client *source_p)
 static void
 stats_deny (struct Client *source_p)
 {
-	char *host, *pass, *user, *oper_reason;
-	struct AddressRec *arec;
 	struct ConfItem *aconf;
-	int i;
+	dlink_node *ptr;
+	char *host, *pass, *user, *oper_reason;
 
-	for (i = 0; i < ATABLE_SIZE; i++)
+	DLINK_FOREACH(ptr, dlines.head)
 	{
-		for (arec = atable[i]; arec; arec = arec->next)
-		{
-			if(arec->type == CONF_DLINE)
-			{
-				aconf = arec->aconf;
+		aconf = ptr->data;
 
-				if(aconf->flags & CONF_FLAGS_TEMPORARY)
-					continue;
+		get_printable_kline(source_p, aconf, &host, &pass, &user, &oper_reason);
 
-				get_printable_kline(source_p, aconf, &host, &pass, &user, &oper_reason);
-
-				sendto_one_numeric(source_p, RPL_STATSDLINE, 
-						   form_str (RPL_STATSDLINE),
-						   'D', host, pass,
-						   oper_reason ? "|" : "",
-						   oper_reason ? oper_reason : "");
-			}
-		}
+		sendto_one_numeric(source_p, RPL_STATSDLINE, 
+				form_str (RPL_STATSDLINE),
+				'D', host, pass, oper_reason ? "|" : "",
+				oper_reason ? oper_reason : "");
 	}
 }
 
@@ -423,35 +412,27 @@ stats_deny (struct Client *source_p)
 static void
 stats_exempt(struct Client *source_p)
 {
-	char *name, *host, *pass, *user, *classname;
-	struct AddressRec *arec;
 	struct ConfItem *aconf;
-	int i, port;
+	dlink_node *ptr;
 
 	if(ConfigFileEntry.stats_e_disabled)
 	{
 		sendto_one_numeric(source_p, ERR_NOPRIVILEGES,
-				   form_str (ERR_NOPRIVILEGES));
+				form_str(ERR_NOPRIVILEGES));
 		return;
 	}
 
-	for (i = 0; i < ATABLE_SIZE; i++)
+
+	DLINK_FOREACH(ptr, exempt_list.head)
 	{
-		for (arec = atable[i]; arec; arec = arec->next)
-		{
-			if(arec->type == CONF_EXEMPTDLINE)
-			{
-				aconf = arec->aconf;
-				get_printable_conf (aconf, &name, &host, &pass,
-						    &user, &port, &classname);
+		aconf = ptr->data;
 
-				sendto_one_numeric(source_p, RPL_STATSDLINE, 
-						   form_str(RPL_STATSDLINE),
-						   'e', host, pass, "", "");
-			}
-		}
-	}}
-
+		sendto_one_numeric(source_p, RPL_STATSDLINE,
+				form_str(RPL_STATSDLINE),
+				'e', EmptyString(aconf->host) ? "<NULL>" : aconf->host,
+				"*", "", "");
+	}
+}
 
 static void
 stats_events (struct Client *source_p)

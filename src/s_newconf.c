@@ -59,7 +59,7 @@ static dlink_list nd_list;	/* nick delay */
 dlink_list glines;
 dlink_list pending_glines;
 dlink_list dlines;
-static dlink_list exempt_list;
+dlink_list exempt_list;
 
 dlink_list temp_klines[LAST_TEMP_TYPE];
 dlink_list temp_dlines[LAST_TEMP_TYPE];
