@@ -1112,6 +1112,85 @@ sendto_match_cap_servs(struct Channel *chptr, struct Client *from, int cap,
       send_message (client_p, (char *)sendbuf, len);
     }
 } /* sendto_match_cap_servs() */
+
+#define MAX_CAPS 12
+
+/* eww. */
+void
+sendto_match_vacap_servs(struct Channel *chptr, struct Client *from, ...)
+{
+	va_list args;
+	int len;
+	char sendbuf[IRCD_BUFSIZE*2];
+	struct Client *client_p;
+	dlink_node *ptr;
+	char *pattern;
+	int caps[MAX_CAPS];
+	int ncaps;
+	int cap;
+	
+	if (chptr)
+	{
+		if (*chptr->chname == '&')
+			return;
+	}
+	
+	va_start(args, from);
+	
+	/* at this point, we have a list of CAPs followed by a terminating 0 */
+	for (ncaps = 0; cap = va_arg(args, int); ncaps++)
+	{
+		/* for each cap, add it to the caps list */
+		if (ncaps > MAX_CAPS)
+		{
+			sendto_realops_flags(FLAGS_ALL, "Warning: too many caps passed to sendto_match_vacap_servs!");
+			return;
+		}
+		
+		caps[ncaps] = cap;
+	}
+	
+	/* now, we should be pointer to the format pointer */
+	pattern = va_arg(args, char *);
+	len = send_format(sendbuf, pattern, args);
+	va_end(args);
+
+	/* whew.. now we have a list of caps in caps[],
+	   and sendbuf contains the data to send.. */
+
+	for (ptr = serv_list.head; ptr; ptr = ptr->next)
+	{
+		int i, hascaps = 1;
+		
+		client_p = ptr->data;
+		
+		if (client_p == from)
+			continue;
+		
+		/* check it supports *all* the caps.. */
+		for (i = 0; i < ncaps && hascaps; i++)
+		{
+			if (!IsCapable(client_p, caps[i])) {
+				hascaps = 0;
+				break;
+			}
+		}
+		
+		if (!hascaps)
+			continue;
+		
+		if (ServerInfo.hub && IsCapable(client_p, CAP_LL))
+		{
+			if (!(RootChan(chptr)->lazyLinkChannelExists &
+				  client_p->localClient->serverMask))
+				continue;
+		}
+		
+		send_message(client_p, sendbuf, len);
+	}
+}
+
+			
 /*
  * sendto_match_cap_servs
  *

@@ -2351,7 +2351,7 @@ void set_channel_mode(struct Client *client_p,
 				   source_p->name, chptr->chname,
 				   modebuf_ex, parabuf_ex);
 
-      sendto_match_cap_servs(chptr, client_p, CAP_EX | CAP_UID,
+      sendto_match_vacap_servs(chptr, client_p, CAP_EX, CAP_UID, 0,
 			     ":%s MODE %s %s %s",
 			     HasID(source_p) ? source_p->user->id : source_p->name,
 			     chptr->chname,
@@ -2385,7 +2385,7 @@ void set_channel_mode(struct Client *client_p,
 				   ":%s MODE %s %s %s",
 				   source_p->name, chptr->chname,
 				   modebuf_invex, parabuf_invex);
-      sendto_match_cap_servs(chptr, client_p, CAP_IE | CAP_UID,
+      sendto_match_vacap_servs(chptr, client_p, CAP_IE, CAP_UID, 0,
 			     ":%s MODE %s %s %s",
 			     HasID(source_p) ? source_p->user->id : source_p->name,
 			     chptr->chname,
@@ -2420,7 +2420,7 @@ void set_channel_mode(struct Client *client_p,
 				   source_p->name, chptr->chname,
 				   modebuf_hops, parabuf_hops);
 	  
-      sendto_match_cap_servs(chptr, client_p, CAP_HOPS | CAP_UID,
+      sendto_match_vacap_servs(chptr, client_p, CAP_HOPS, CAP_UID, 0,
 			     ":%s MODE %s %s %s",
 			     HasID(source_p) ? source_p->user->id : source_p->name,
 			     chptr->chname,
@@ -2465,7 +2465,7 @@ void set_channel_mode(struct Client *client_p,
 				   source_p->name, chptr->chname,
 				   modebuf_aops);
 
-      sendto_match_cap_servs(chptr, client_p, CAP_AOPS | CAP_UID,
+      sendto_match_vacap_servs(chptr, client_p, CAP_AOPS, CAP_UID, 0,
                              ":%s MODE %s %s",
                              HasID(source_p) ? source_p->user->id : source_p->name,
 			     chptr->chname,
