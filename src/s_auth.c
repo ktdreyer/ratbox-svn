@@ -183,19 +183,19 @@ static void auth_dns_callback(void* vptr, adns_answer* reply)
 {
   
   struct AuthRequest* auth = (struct AuthRequest*) vptr;
-  char *str = auth->client->host;
   ClearDNSPending(auth);
   if(reply && (reply->status == adns_s_ok))
     {
       if(strlen(*reply->rrs.str) <= HOSTLEN)
         {
-          strlcpy(str, *reply->rrs.str, sizeof(auth->client->host));
+          strlcpy(auth->client->host, *reply->rrs.str, sizeof(auth->client->host));
           sendheader(auth->client, REPORT_FIN_DNS);
         } else
-        sendheader(auth->client, REPORT_HOST_TOOLONG);
+          sendheader(auth->client, REPORT_HOST_TOOLONG);
     }
   else
     {
+#ifdef IPV6
       if(auth->client->localClient->aftype == AF_INET6 && ConfigFileEntry.fallback_to_ip6_int == 1 && auth->ip6_int == 0)
       {
         struct Client *client = auth->client;
@@ -204,9 +204,9 @@ static void auth_dns_callback(void* vptr, adns_answer* reply)
         adns_getaddr(&client->localClient->ip, client->localClient->aftype, client->localClient->dns_query, 1);
 	SetDNSPending(auth);
         return;
-      } else {
-        sendheader(auth->client, REPORT_FAIL_DNS);
-      }
+      } 
+#endif
+      sendheader(auth->client, REPORT_FAIL_DNS);
     }
 
   MyFree(reply);
