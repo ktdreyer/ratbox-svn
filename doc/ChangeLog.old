@@ -1,3 +1,17 @@
+androsyn    2002/03/09 18:14:13 EST	(20020309_6)
+
+  Modified files:
+    include              s_serv.h 
+    src                  s_serv.c 
+  Log:
+  Okay..so I was a little aggressive with that last one.
+  
+  Revision  Changes    Path
+  7.64      +1 -0      ircd-hybrid-7/include/s_serv.h
+  7.249     +2 -4      ircd-hybrid-7/src/s_serv.c
+
+
+
 androsyn    2002/03/09 18:01:28 EST	(20020309_5)
 
   Modified files:
