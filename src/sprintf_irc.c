@@ -20,6 +20,7 @@
  *   $Id$
  */
 #include "sprintf_irc.h"
+#include "irc_string.h"
 
 #include <stdio.h>
 
@@ -265,13 +266,20 @@ vsprintf_irc(register char *str, register const char *format,
 {
   register char c;
   register int bytes = 0;
-
+  int field_width;
   while ((c = *format++))
     {
+      field_width = 0;
       if (c == '%')
 	{
 	  c = *format++; /* May never be '\0' ! */
-
+      if (c == '0')
+        c = *format++;
+      if (IsDigit(c))
+        {
+         field_width = c - '0';
+         c = *format++;
+        }
 	  if (c == 's')
 	    {
 	      register const char *p1 = va_arg(args, const char *);
@@ -292,7 +300,9 @@ vsprintf_irc(register char *str, register const char *format,
 
 	      continue;
 	    }
-
+#if 0
+/* We don't really want all this stuff, it is better for it to be like
+ * sprintf... -A1kmm */
 	  /*
 	   * Prints time_t value in interval
 	   * [ 100000000 , 4294967295 ]
@@ -347,6 +357,7 @@ vsprintf_irc(register char *str, register const char *format,
 
 	      continue;
 	    }
+#endif
 
 	  if (c == 'd')
 	    {
@@ -389,17 +400,22 @@ vsprintf_irc(register char *str, register const char *format,
 	      continue;
 	    }
 
-	  if (c == 'u')
+      if (c == 'u' || (c == 'l' && *format == 'u'))
 	    {
 	      register unsigned int v1, v2;
 	      register const char *ap;
 	      register char *s = &scratch_buffer[sizeof(scratch_buffer) - 2];
-	      
+
+          if (c == 'l')
+            format++;
 	      v1 = va_arg(args, unsigned int);
 	      if (v1 == 0)
 		{
 		  *str++ = '0';
-		  ++bytes;
+		  bytes++;
+		  if (field_width)
+  		  for (--field_width; field_width; bytes++, field_width--)
+		      *str++ = '0';
 		  continue;
 		}
 
@@ -414,13 +430,24 @@ vsprintf_irc(register char *str, register const char *format,
 	      while ((v1 = v2) > 0);
 	      
 	      while ('0' == *++s);
-
+	      /* Anyone see a better way of finding the number of 0s to add?
+	       * -A1kmm. */
+          v1 = sizeof(scratch_buffer) + scratch_buffer - 1 - s;
+          if (v1 < field_width)
+            v1 = field_width - v1;
+          else
+            v1 = 0;
+          while (v1--)
+            {
+              *str++ = '0';
+              bytes++;
+            }
 	      *str = *s;
 	      ++bytes;
-
 	      while ((*++str = *++s))
-		++bytes;
-
+	         {
+     		  ++bytes;
+     		}
 	      continue;
 	    }
 
