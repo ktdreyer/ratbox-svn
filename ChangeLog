@@ -1,3 +1,15 @@
+androsyn    2003/01/27 19:47:42 UTC	(20030127_6)
+
+  Modified files:
+    src                  version.c.SH 
+  Log:
+  Update the copyright years
+  
+  Revision  Changes    Path
+  7.25      +2 -2      ircd-ratbox/src/version.c.SH
+
+
+
 androsyn    2003/01/27 18:32:06 UTC	(20030127_5)
 
   Modified files:
