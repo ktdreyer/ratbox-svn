@@ -1,3 +1,7 @@
+*** 20010305_5 by androsyn
+Fixed vhost= to function properly when modifying it on rehash..
+
+
 *** 20010305_4 by toot
 removed a couple of redundant if's
 
