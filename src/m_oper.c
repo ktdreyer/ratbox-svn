@@ -111,8 +111,8 @@ int m_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   char*            operprivs;
   static char      buf[BUFSIZE];
 
-  name = parc > 1 ? parv[1] : (char *)NULL;
-  password = parc > 2 ? parv[2] : (char *)NULL;
+  name = parc > 1 ? parv[1] : NULL;
+  password = parc > 2 ? parv[2] : NULL;
 
   if (!IsServer(cptr) && (EmptyString(name) || EmptyString(password)))
     {
