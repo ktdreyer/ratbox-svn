@@ -1,3 +1,6 @@
+*** 20010103_28 by davidt
+Add note about 403 numerics to BUGS
+
 *** 20010103_27 by davidt
 Fix problems found by adrian where we were referencing free'd client data.
 
