@@ -1,3 +1,8 @@
+*** 20010504_3 by db
+- major major stupid buffer overflow in send.c MEA CULPA fixed.
+
+
+
 *** 20010504_2 by androsyn
 Added a check for spoofs to prevent moron server admins from doing stupid
 things like having spoofs in excess of HOSTLEN.
