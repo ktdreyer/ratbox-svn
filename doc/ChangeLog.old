@@ -1,3 +1,7 @@
+*** 20010204_8 by androsyn
+Fixed some clashes with freebsd system headers.
+
+
 *** 20010204_7 by androsyn
 Default aconf->aftype to AF_INET
 
