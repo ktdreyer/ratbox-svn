@@ -55,11 +55,10 @@
 
 static void m_stats(struct Client*, struct Client*, int, char**);
 static void ms_stats(struct Client*, struct Client*, int, char**);
-static void mo_stats(struct Client*, struct Client*, int, char**);
 
 struct Message stats_msgtab = {
   "STATS", 0, 1, 0, MFLG_SLOW, 0,
-  {m_unregistered, m_stats, ms_stats, mo_stats}
+  {m_unregistered, m_stats, ms_stats, m_stats}
 };
 
 #ifndef STATIC_MODULES
@@ -77,29 +76,8 @@ _moddeinit(void)
   mod_del_cmd(&stats_msgtab);
 }
 
-char *_version = "20010127";
+char *_version = "20010128";
 #endif
-/*
- * m_stats - STATS message handler
- *      parv[0] = sender prefix
- *      parv[1] = statistics selector (defaults to Message frequency)
- *      parv[2] = server name (current server defaulted, if omitted)
- *
- *      Currently supported are:
- *              M = Message frequency (the old stat behaviour)
- *              L = Local Link statistics
- *              C = Report C and N configuration lines
- *
- *
- * m_stats/stats_conf
- *    Report N/C-configuration lines from this server. This could
- *    report other configuration lines too, but converting the
- *    status back to "char" is a bit akward--not worth the code
- *    it needs...
- *
- *    Note:   The info is reported in the order the server uses
- *            it--not reversed as in ircd.conf!
- */
 
 const char* Lformat = ":%s %d %s %s %u %u %u %u %u :%u %u %s";
 
@@ -108,23 +86,142 @@ static char *parse_stats_args(int, char **, int *, int *);
 static void stats_L(struct Client *, char *, int, int, char);
 static void stats_L_list(struct Client *s, char *, int, int,
                          dlink_list *, char);
-static void stats_spy(struct Client *, char);
-static void stats_L_spy(struct Client *, char, char *);
-static void do_normal_stats(struct Client *, char *, char *, char, int, int);
-static void do_non_priv_stats(struct Client *, char *, char *, char, int, int);
-static void do_priv_stats(struct Client *, char *, char *, char, int, int);
+static void stats_spy(struct Client *, char *);
+static void stats_L_spy(struct Client *, char *, char *);
+
+/* One is a char, one is a string, thats why theyre seperate.. -- fl_ */
+struct StatsStructLetter
+{
+  char name;
+  void (*handler)();
+  int need_oper;
+  int need_admin;
+};
+
+struct StatsStructWord
+{
+  char *name;
+  void (*handler)();
+  int need_oper;
+  int need_admin;
+};
+
+static void stats_adns_servers(struct Client *);
+static void stats_connect(struct Client *);
+static void stats_deny(struct Client *);
+static void stats_exempt(struct Client *);
+static void stats_events(struct Client *);
+static void stats_fd(struct Client *);
+static void stats_glines(struct Client *);
+static void stats_hubleaf(struct Client *);
+static void stats_auth(struct Client *);
+static void stats_tklines(struct Client *);
+static void stats_klines(struct Client *);
+static void stats_messages(struct Client *);
+static void stats_oper(struct Client *);
+static void stats_operedup(struct Client *);
+static void stats_ports(struct Client *);
+static void stats_quarantine(struct Client *);
+static void stats_usage(struct Client *);
+static void stats_scache(struct Client *);
+static void stats_tstats(struct Client *);
+static void stats_uptime(struct Client *);
+static void stats_shared(struct Client *);
+static void stats_servers(struct Client *);
+static void stats_gecos(struct Client *);
+static void stats_class(struct Client *);
+static void stats_memory(struct Client *);
+static void stats_servlinks(struct Client *);
+static void stats_ltrace(struct Client *, int, char**);
+
+/* This table is for stats LETTERS, and will only allow single chars..
+ * The format is (letter) (function to call) (oper only?) (admin only?)
+ * operonly/adminonly in here will override anything in the config..
+ * so make stats commands wisely! -- fl_ */
+static struct StatsStructLetter stats_let_table[] =
+{
+  /* name		function	need_oper need_admin */
+  { 'A',		stats_adns_servers,	1,	1,	},
+  { 'a',		stats_adns_servers,	1,	1,	},
+  { 'C',		stats_connect,		1,	0,	},
+  { 'c',		stats_connect,		1,	0,	},
+  { 'D',		stats_deny,		1,	0,	},
+  { 'd',		stats_deny,		1,	0,	},
+  { 'e',		stats_exempt,		1,	0,	},
+  { 'E',		stats_events,		1,	1,	},
+  { 'f',		stats_fd,		1,	1,	},
+  { 'F',		stats_fd,		1,	1,	},
+  { 'g',		stats_glines,		1,	0,	},
+  { 'G',		stats_glines,		1,	0,	},
+  { 'h',		stats_hubleaf,		1,	0,	},
+  { 'H',		stats_hubleaf,		1,	0,	},
+  { 'i',		stats_auth,		1,	0,	},
+  { 'I',		stats_auth,		1,	0,	},
+  { 'k',		stats_tklines,		1,	0,	},
+  { 'K',		stats_klines,		1,	0,	},
+  { 'l',		stats_ltrace,		0,	0,	},
+  { 'L',		stats_ltrace,		0,	0,	},
+  { 'm',		stats_messages,		1,	0,	},
+  { 'M',		stats_messages,		1,	0,	},
+  { 'o',		stats_oper,		0,	0,	},
+  { 'O',		stats_oper,		0,	0,	},
+  { 'p',		stats_operedup,		0,	0,	},
+  { 'P',		stats_ports,		1,	0,	},
+  { 'q',		stats_quarantine,	1,	0,	},
+  { 'Q',		stats_quarantine,	1,	0,	},
+  { 'q',		stats_quarantine,	1,	0,	},
+  { 'R',		stats_usage,		1,	0,	},
+  { 'r',		stats_usage,		1,	0,	},
+  { 's',		stats_scache,		1,	1,	},
+  { 'S',		stats_scache,		1,	1,	},
+  { 't',		stats_tstats,		1,	0,	},
+  { 'T',		stats_tstats,		1,	0,	},
+  { 'u',		stats_uptime,		0,	0,	},
+  { 'U',		stats_shared,		1,	0,	},
+  { 'v',		stats_servers,		1,	0,	},
+  { 'V',		stats_servers,		1,	0,	},
+  { 'x',		stats_gecos,		1,	0,	},
+  { 'X',		stats_gecos,		1,	0,	},
+  { 'y',		stats_class,		1,	0,	},
+  { 'Y',		stats_class,		1,	0,	},
+  { 'z',		stats_memory,		1,	0,	},
+  { 'Z',		stats_memory,		1,	0,	},
+  { '?',		stats_servlinks,	1,	0,	},
+  { (char) 0,		(void (*)()) 0, 	0,	0,	}
+};
+
+
+/* This table is for stats words, such as /stats auth..
+ * Format is same as above.  This table is checked case insensitively,
+ * so "auth" and "AUTH" are the same, and if we have full words.. there
+ * should be no stats the same.. -- fl_ */
+static struct StatsStructWord stats_cmd_table[] =
+{
+  /* name		function	*/
+  { "AUTH",		stats_auth,	},
+  { (char *) 0, 	(void (*)()) 0, }
+};
+
+/*
+ * m_stats by fl_
+ *      parv[0] = sender prefix
+ *      parv[1] = stat letter/command
+ *      parv[2] = (if present) server/mask in stats L
+ * 
+ * This will search the tables for the appropriate stats letter/command,
+ * if found execute it.  One function, for opers and users, although it 
+ * could possibly be split up..
+ */
 
 static void m_stats(struct Client *client_p, struct Client *source_p,
                    int parc, char *parv[])
 {
-  char            statchar = parc > 1 ? parv[1][0] : '\0';
-  int             doall = 0;
-  int             wilds = 0;
-  char            *name=NULL;
-  char            *target=NULL;
-  static time_t   last_used = 0;
+  int i, n;
+  static time_t  last_used = 0;
+  char statchar;
 
-  if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
+  /* Check the user is actually allowed to do /stats, and isnt flooding */
+  if(!IsOper(source_p) && (last_used + ConfigFileEntry.pace_wait) > CurrentTime)
     {
       /* safe enough to give this on a local connect only */
       if(MyClient(source_p))
@@ -136,64 +233,224 @@ static void m_stats(struct Client *client_p, struct Client *source_p,
       last_used = CurrentTime;
     }
 
-  if (!GlobalSetOptions.hide_server)
+  /* Is the stats meant for us? */
+  if (IsOper(source_p) || !GlobalSetOptions.hide_server)
     {
       if (hunt_server(client_p,source_p,":%s STATS %s :%s",2,parc,parv) != HUNTED_ISME)
         return;
     }
 
-  name = parse_stats_args(parc,parv,&doall,&wilds);
+  /* There are two different tables, one for letters, one for strings,
+   * we need to know which we have to search, so check the length -- fl_ */
+  if(strlen(parv[1]) > 1)
+  {
+ /* I actually need to add them before I enable this ;) */
+#if 0
+      for (i=0; stats_cmd_table[i].handler; i++)
+      {
+        if (!irccmp(stats_cmd_table[i].name, parv[1]))
+      }
+#endif
+    return;
+  }
+  else
+  {
+    statchar=parv[1][0];
+    for (i=0; stats_let_table[i].handler; i++)
+      {
+        if (stats_let_table[i].name == statchar)
+          {
+            /* The stats table says whether its oper only or not, so check --fl_ */
+            if(stats_let_table[i].need_oper && !IsOper(source_p))
+              {
+                sendto_one(source_p, form_str(ERR_NOPRIVILEGES),me.name,source_p->name);
+                break;
+              }
 
-  if (parc > 3)
-    target = parv[3];
+            /* The stats table says whether its admin only or not, so check --fl_ */
+            if(stats_let_table[i].need_admin && !IsAdmin(source_p))
+              {
+                sendto_one(source_p, form_str(ERR_NOPRIVILEGES),me.name,source_p->name);
+                break;
+              }
+            
+            /* Theyre allowed to do the stats, so execute it */
 
-  do_normal_stats(source_p, name, target, statchar, doall, wilds);
-  do_non_priv_stats(source_p, name, target, statchar, doall, wilds);
-  sendto_one(source_p, form_str(RPL_ENDOFSTATS), me.name, parv[0], statchar);
+            /* Blah, stats L needs the parameters, none of the others do.. */
+            /* XXXX - this should be fixed :P */
+            if(statchar == 'L' || statchar == 'l')
+              stats_let_table[i].handler(source_p, parc, parv);
+            else
+              stats_let_table[i].handler(source_p);
+          }
+       }
+   }
+
+  /* Send the end of stats notice, and the stats_spy */
+  sendto_one(source_p, form_str(RPL_ENDOFSTATS), me.name, parv[0], parv[1]);
+  stats_spy(source_p, parv[1]);
 }
 
-/*
- * mo_stats - STATS message handler
- *      parv[0] = sender prefix
- *      parv[1] = statistics selector (defaults to Message frequency)
- *      parv[2] = server name (current server defaulted, if omitted)
- *
- *      Currently supported are:
- *              M = Message frequency (the old stat behaviour)
- *              L = Local Link statistics
- *              C = Report C and N configuration lines
- *
- *
- * m_stats/stats_conf
- *    Report N/C-configuration lines from this server. This could
- *    report other configuration lines too, but converting the
- *    status back to "char" is a bit akward--not worth the code
- *    it needs...
- *
- *    Note:   The info is reported in the order the server uses
- *            it--not reversed as in ircd.conf!
- */
-
-static void mo_stats(struct Client *client_p, struct Client *source_p,
-                    int parc, char *parv[])
+static void stats_adns_servers(struct Client *client_p)
 {
-  char            statchar = parc > 1 ? parv[1][0] : '\0';
+  report_adns_servers(client_p);
+}
+
+static void stats_connect(struct Client *client_p)
+{
+  report_configured_links(client_p, CONF_SERVER);
+}
+
+static void stats_deny(struct Client *client_p)
+{
+  report_dlines(client_p);
+}
+
+static void stats_exempt(struct Client *client_p)
+{
+  report_exemptlines(client_p);
+}
+
+static void stats_events(struct Client *client_p)
+{
+  show_events(client_p);
+}
+
+static void stats_fd(struct Client *client_p)
+{
+  fd_dump(client_p);
+}
+
+static void stats_glines(struct Client *client_p)
+{
+  if(ConfigFileEntry.glines)
+    report_glines(client_p);
+  else
+    sendto_one(client_p, ":%s NOTICE %s :This server does not support G-Lines",
+               me.name, client_p->name); 
+}
+
+static void stats_hubleaf(struct Client *client_p)
+{
+  report_configured_links(client_p, CONF_HUB|CONF_LEAF);
+}
+
+static void stats_auth(struct Client *client_p)
+{
+  report_Ilines(client_p);
+}
+
+static void stats_tklines(struct Client *client_p)
+{
+  report_Klines(client_p, -1);
+}
+
+static void stats_klines(struct Client *client_p)
+{
+  report_Klines(client_p, 0);
+}
+
+static void stats_messages(struct Client *client_p)
+{
+  report_messages(client_p);
+}
+
+static void stats_oper(struct Client *client_p)
+{
+  if (ConfigFileEntry.o_lines_oper_only)
+    sendto_one(client_p, form_str(ERR_NOPRIVILEGES),me.name,client_p->name);
+  else
+    report_configured_links(client_p, CONF_OPERATOR);
+}
+
+static void stats_operedup(struct Client *client_p)
+{
+  show_opers(client_p);
+}
+
+static void stats_ports(struct Client *client_p)
+{
+  show_ports(client_p);
+}
+
+static void stats_quarantine(struct Client *client_p)
+{
+  report_qlines(client_p);
+}
+
+static void stats_usage(struct Client *client_p)
+{
+  send_usage(client_p);
+}
+
+static void stats_scache(struct Client *client_p)
+{
+  list_scache(client_p);
+}
+
+static void stats_tstats(struct Client *client_p)
+{
+  tstats(client_p);
+}
+
+static void stats_uptime(struct Client *client_p)
+{
+  time_t now;
+
+   now = CurrentTime - me.since;
+   sendto_one(client_p, form_str(RPL_STATSUPTIME), me.name, client_p->name,
+              now/86400, (now/3600)%24, (now/60)%60, now%60);
+   if(!GlobalSetOptions.hide_server || IsOper(client_p))
+      sendto_one(client_p, form_str(RPL_STATSCONN), me.name, client_p->name,
+                 MaxConnectionCount, MaxClientCount, Count.totalrestartcount);
+}
+
+static void stats_shared(struct Client *client_p)
+{
+  report_specials(client_p, CONF_ULINE, RPL_STATSULINE);
+}
+
+static void stats_servers(struct Client *client_p)
+{
+  show_servers(client_p);
+}
+
+static void stats_gecos(struct Client *client_p)
+{
+  report_specials(client_p, CONF_XLINE, RPL_STATSXLINE);
+}
+
+static void stats_class(struct Client *client_p)
+{
+  report_classes(client_p);
+}
+
+static void stats_memory(struct Client *client_p)
+{
+  count_memory(client_p);
+}
+
+static void stats_servlinks(struct Client *client_p)
+{
+  serv_info(client_p);
+}
+
+static void stats_ltrace(struct Client *client_p, int parc, char *parv[])
+{
   int             doall = 0;
   int             wilds = 0;
   char            *name=NULL;
   char            *target=NULL;
 
-  if (hunt_server(client_p,source_p,":%s STATS %s :%s",2,parc,parv)!=HUNTED_ISME)
-    return;
-
   name = parse_stats_args(parc,parv,&doall,&wilds);
 
   if (parc > 3)
     target = parv[3];
-  
-  do_normal_stats(source_p, name, target, statchar, doall, wilds);
-  do_priv_stats(source_p, name, target, statchar, doall, wilds);
-  sendto_one(source_p, form_str(RPL_ENDOFSTATS), me.name, parv[0], statchar);
+
+  stats_L(client_p,name,doall,wilds,'L');
+  stats_L_spy(client_p, name, parv[1]);
+
+  return;
 }
 
 /*
@@ -201,21 +458,6 @@ static void mo_stats(struct Client *client_p, struct Client *source_p,
  *      parv[0] = sender prefix
  *      parv[1] = statistics selector (defaults to Message frequency)
  *      parv[2] = server name (current server defaulted, if omitted)
- *
- *      Currently supported are:
- *              M = Message frequency (the old stat behaviour)
- *              L = Local Link statistics
- *              C = Report C and N configuration lines
- *
- *
- * m_stats/stats_conf
- *    Report N/C-configuration lines from this server. This could
- *    report other configuration lines too, but converting the
- *    status back to "char" is a bit akward--not worth the code
- *    it needs...
- *
- *    Note:   The info is reported in the order the server uses
- *            it--not reversed as in ircd.conf!
  */
 
 static void ms_stats(struct Client *client_p, struct Client *source_p,
@@ -224,263 +466,9 @@ static void ms_stats(struct Client *client_p, struct Client *source_p,
   if (hunt_server(client_p,source_p,":%s STATS %s :%s",2,parc,parv)!=HUNTED_ISME)
     return;
 
-  if (IsOper(source_p))
-    mo_stats(client_p,source_p,parc,parv);
-  else
-    m_stats(client_p,source_p,parc,parv);
+  m_stats(client_p,source_p,parc,parv);
 }
 
-/*
- * do_normal_stats
- *
- * inputs	- source pointer to client
- *		- name for stats L
- *		- target pointer
- *		- stat char
- *		- doall
- *		- wilds or not
- * output	- NONE
- * side effects - stats that either opers or non opers can see
- */
-static void do_normal_stats(struct Client *source_p,
-			    char *name, char *target,
-			    char statchar, int doall, int wilds)
-{
-  switch (statchar)
-    {
-    case 'L' : case 'l' :
-      stats_L(source_p,name,doall,wilds,statchar);
-      stats_L_spy(source_p,statchar,name);
-      break;
-
-    case 'u' :
-      {
-        time_t now;
-        
-        now = CurrentTime - me.since;
-        sendto_one(source_p, form_str(RPL_STATSUPTIME), me.name, source_p->name,
-                   now/86400, (now/3600)%24, (now/60)%60, now%60);
-        if(!GlobalSetOptions.hide_server || IsOper(source_p))
-          sendto_one(source_p, form_str(RPL_STATSCONN), me.name, source_p->name,
-                     MaxConnectionCount, MaxClientCount, Count.totalrestartcount);
-	stats_spy(source_p,statchar);
-        break;
-      }
-    default :
-      break;
-    }
-}
-
-/*
- * do_non_priv_stats
- *
- * inputs	- source pointer to client
- *		- name for stats L
- *		- target pointer
- *		- stat char
- *		- doall
- *		- wilds or not
- * output	- NONE
- * side effects - only stats that are allowed for non-opers etc. are done here
- */
-static void do_non_priv_stats(struct Client *source_p, char *name, char *target,
-			      char statchar, int doall, int wilds)
-{
-  switch (statchar)
-    {
-    case 'K' :
-      stats_spy(source_p,statchar);
-      break;
-
-    case 'o' : case 'O' :
-      if (ConfigFileEntry.o_lines_oper_only)
-	      sendto_one(source_p, form_str(ERR_NOPRIVILEGES),me.name,source_p->name);
-      else
-	  report_configured_links(source_p, CONF_OPERATOR);
-      stats_spy(source_p,statchar);
-      break;
-
-    case 'p' :
-      /* showing users the oper list cant hurt.. its better
-       * than the alternatives of noticing the opers which could
-       * get really annoying --fl
-       */
-      stats_spy(source_p,statchar);
-      show_opers(source_p);
-      break;
-
-    case 'U' :
-    case 'Q' : case 'q' :
-    case 'C' : case 'c' :
-    case 'H' : case 'h' :
-    case 'E' : case 'e' :
-    case 'F' : case 'f' :
-    case 'I' : case 'i' :
-    case 'M' : case 'm' :
-    case 'R' : case 'r' :
-    case 'X' : case 'x' :
-    case 'Y' : case 'y' :
-    case 'V' : case 'v' :
-    case 'P' : case '?' :
-    case 'G' : case 'g' :
-    case 'D' : case 'd' :
-    case 'S' : case 's' :
-    case 'T' : case 't' :
-    case 'Z' : case 'z' :
-      sendto_one(source_p, form_str(ERR_NOPRIVILEGES), me.name, source_p->name);
-      stats_spy(source_p,statchar);
-      break;
-    }
-}
-
-/*
- * do_priv_stats
- *
- * inputs	- source pointer to client
- *		- name for stats L
- *		- target pointer
- *		- stat char
- * output	- NONE
- * side effects - only stats that are allowed for opers etc. are done here
- */
-static void do_priv_stats(struct Client *source_p, char *name, char *target,
-			    char statchar, int doall, int wilds)
-{ 
- switch (statchar)
-    {
-    case 'A' : case 'a' :
-      report_adns_servers(source_p);
-      stats_spy(source_p,statchar);
-      break;
-
-    case 'C' : case 'c' :
-      report_configured_links(source_p, CONF_SERVER);
-      stats_spy(source_p,statchar);
-      break;
- 
-    case 'D': case 'd':
-      report_dlines(source_p);
-      stats_spy(source_p,statchar);
-      break;
-
-    case 'E' :
-      show_events(source_p);
-      stats_spy(source_p,statchar);
-      break;
-
-    case 'e' :
-      report_exemptlines(source_p);
-      stats_spy(source_p,statchar);
-      break;
-
-    case 'F' : case 'f' :
-      fd_dump(source_p);
-      stats_spy(source_p,statchar);
-      break;
-
-    case 'G': case 'g' :
-      if (ConfigFileEntry.glines)
-	{
-	  report_glines(source_p);
-	  stats_spy(source_p,statchar);
-	}
-      else
-        sendto_one(source_p,":%s NOTICE %s :This server does not support G lines",
-                   me.name, source_p->name);
-      break;
-
-    case 'H' : case 'h' :
-      report_configured_links(source_p, CONF_HUB|CONF_LEAF);
-      stats_spy(source_p,statchar);
-      break;
-
-    case 'I' : case 'i' :
-      report_Ilines(source_p);
-      stats_spy(source_p,statchar);
-      break;
-
-    case 'K' :
-      report_Klines(source_p, 0);
-      stats_spy(source_p,statchar);
-      break;
-
-    case 'k' :
-      report_Klines(source_p, -1);
-      stats_spy(source_p,statchar);
-      break;
-
-    case 'M' : case 'm' :
-      report_messages(source_p);
-      stats_spy(source_p,statchar);
-      break;
-
-    case 'o' : case 'O' :
-      report_configured_links(source_p, CONF_OPERATOR);
-      stats_spy(source_p,statchar);
-      break;
-
-    case 'P' :
-      show_ports(source_p);
-      stats_spy(source_p,statchar);
-      break;
-
-    case 'Q' : case 'q' :
-      report_qlines(source_p);
-      stats_spy(source_p,statchar);
-      break;
-
-    case 'R' : case 'r' :
-      send_usage(source_p);
-      stats_spy(source_p,statchar);
-      break;
-
-    case 'S' : case 's':
-      list_scache(source_p);
-      stats_spy(source_p,statchar);
-      break;
-
-    case 'T' : case 't' :
-      tstats(source_p);
-      stats_spy(source_p,statchar);
-      break;
-
-    case 'U' :
-      report_specials(source_p,CONF_ULINE,RPL_STATSULINE);
-      stats_spy(source_p,statchar);
-      break;
-
-    case 'p' :
-      stats_spy(source_p,statchar);
-      show_opers(source_p);
-      break;
-
-    case 'v' : case 'V' :
-      show_servers(source_p);
-      stats_spy(source_p,statchar);
-      break;
-
-    case 'X' : case 'x' :
-      report_specials(source_p,CONF_XLINE,RPL_STATSXLINE);
-      stats_spy(source_p,statchar);
-      break;
-
-    case 'Y' : case 'y' :
-      report_classes(source_p);
-      stats_spy(source_p,statchar);
-      break;
-
-    case 'Z' : case 'z' :
-      count_memory(source_p);
-      stats_spy(source_p,statchar);
-      break;
-
-    case '?':
-      serv_info(source_p);
-      stats_spy(source_p,statchar);
-      break;
-
-    }
-}
 
 /*
  * stats_L
@@ -590,7 +578,7 @@ static void stats_L_list(struct Client *source_p,char *name, int doall, int wild
  *
  * done --is
  */
-static void stats_spy(struct Client *source_p,char statchar)
+static void stats_spy(struct Client *source_p,char *statchar)
 {
   struct hook_stats_data data;
 
@@ -611,7 +599,7 @@ static void stats_spy(struct Client *source_p,char statchar)
  * side effects	- a notice is sent to opers, IF spy mode is configured
  * 		  in the conf file.
  */
-static void stats_L_spy(struct Client *source_p, char statchar, char *name)
+static void stats_L_spy(struct Client *source_p, char *statchar, char *name)
 {
   struct hook_stats_data data;
 

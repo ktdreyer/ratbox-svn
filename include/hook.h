@@ -27,7 +27,7 @@ struct hook_mfunc_data
 struct hook_stats_data 
 {
 	struct Client *source_p;
-	char statchar;
+	char *statchar;
 	char *name;
 };
 
