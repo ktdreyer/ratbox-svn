@@ -150,6 +150,7 @@ dns_do_callbacks(void)
 	void *xr = &r;
 	struct DNSQuery *query;
 	void *xq = &query;
+	int failure = 0;
 	adns_forallqueries_begin(dns_state);
 
 	while ((q = adns_forallqueries_next(dns_state, xr)) != NULL)
@@ -178,10 +179,17 @@ dns_do_callbacks(void)
 				query->query = NULL;
 				query->callback(query->ptr, NULL);
 			}
+			if(answer != NULL && answer->status == adns_s_systemfail)
+				failure = 1;
+			
 			break;
 		}
 	}
-	dns_select();
+        if(failure == 1)
+        {       
+	        sendto_realops_flags(UMODE_ALL, L_ALL, "adns got a global system failure..attempting to restart resolver");
+                init_resolver();
+        }
 }
 
 /* void dns_readable(int fd, void *ptr)
@@ -220,11 +228,6 @@ dns_select(void)
 			comm_setselect(fd, FDLIST_SERVICE, COMM_SELECT_WRITE,
 				       dns_writeable, NULL, 0);
 	}
-	/* Call our callbacks, now that they may have some relevant data...
-	 */
-/*
- *dns_do_callbacks();
- */
 }
 
 /* int adns_gethost(const char *name, int aftype, struct DNSQuery *req);
