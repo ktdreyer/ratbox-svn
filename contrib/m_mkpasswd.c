@@ -50,7 +50,7 @@ static char *make_md5_salt(void);
 static char saltChars[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789./";
 
 struct Message test_msgtab = {
-  "MKPASSWD", 0, 1, 2, MFLG_SLOW, 0,
+  "MKPASSWD", 0, 0, 1, 2, MFLG_SLOW, 0,
   {m_unregistered, m_mkpasswd, m_ignore, mo_mkpasswd}
 };
 
