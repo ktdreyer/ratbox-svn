@@ -22,7 +22,9 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
+#include "../include/config.h"
 
+#define CONFPATH ETCPATH "/.convertconf-example.conf"
 #define BUFSIZE 512
 
 #define IS_LEAF 0
@@ -46,7 +48,6 @@ struct ConnectPair
 static struct ConnectPair* base_ptr=NULL;
 
 static void ConvertConf(FILE* file,FILE *out);
-static void AddLoggingBlock(FILE* out);
 static void usage(void);
 static char *getfield(char *);
 static void ReplaceQuotes(char *out, char *in);
@@ -60,6 +61,7 @@ int main(int argc,char *argv[])
 {
   FILE *in;
   FILE *out;
+  char line[BUFSIZE];
 
   if(argc < 3)
     usage();
@@ -78,16 +80,26 @@ int main(int argc,char *argv[])
   
   ConvertConf(in,out);
 
-  puts("Adding the logging/general/modules blocks to your config..\n");
-  AddLoggingBlock(out);
+  if((in = fopen(CONFPATH, "r")) == NULL)
+  {
+    fprintf(stderr, "Can't open %s for reading\n", CONFPATH);
+    puts("You must use the example.conf in the ircd-hybrid-7 source to get the\n"
+	 "general {}; logging {}; channel {}; serverhide {}; modules {}; blocks.\n");
+  }
+  else
+  {
+    while (fgets(line, sizeof(line), in))
+      fprintf(out, line);
 
-  puts("The config file has been converted however you MUST rearrange the config:\n"
+    puts("Adding the remaining missing blocks to your config..\n");
+  }
+
+  puts("The config file has been converted however you MUST rearrange and check the config:\n"
        "   o class blocks (Y:) must be before anything that uses then\n"
        "   o auth blocks (I:) have NOT been converted, please use convertilines\n"
        "     to convert them\n"
-       "   o the general/logging/modules parts will need to be edited\n"
-       "   o the config file needs to be checked manually.. as this\n"
-       "     doesnt have human brains ;P\n");
+       "   o the general/channel/serverhide parts will need to be edited\n");
+
   return 0;
 }
 
@@ -95,19 +107,6 @@ static void usage()
 {
   fprintf(stderr,"convertconf ircd.conf.old ircd.conf.new\n");
   exit(-1);
-}
-
-static void AddLoggingBlock(FILE *out)
-{
-  fprintf(out, "logging {\n");
-  fprintf(out, "\t/* These three paths are not *CURRENTLY* used.  They are still\n");
-  fprintf(out, "\t * compiled into the ircd with config.h\n");
-  fprintf(out, "\t */\n\tlogpath = \"/var/log/ircd/\";\n\toper_log = \"oper.log\";\n");
-  fprintf(out, "\tgline_log = \"gline.log\";\n\n\t/* This option is used, however.\n");
-  fprintf(out, "\t * The following settings are valid (This can also be changed\n");
-  fprintf(out, "\t * by /quote SET LOG in the ircd)\n");
-  fprintf(out, "\t * L_CRIT, L_ERROR, L_WARN, L_NOTICE, L_TRACE, L_INFO, L_DEBUG\n");
-  fprintf(out, "\t */\n\tlog_level = L_INFO;\n};\n\n");
 }
 
 /*

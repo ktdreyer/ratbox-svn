@@ -1,4 +1,4 @@
-
+# $Id$
 CC		= @CC@
 INSTALL		= @INSTALL@
 INSTALL_BIN	= @INSTALL_PROGRAM@
@@ -12,6 +12,7 @@ LDFLAGS		= @LDFLAGS@
 MKDEP		= ${CC} -MM
 MV		= @MV@
 RM		= @RM@
+CP		= @CP@
 
 prefix		= @prefix@
 exec_prefix	= @exec_prefix@
@@ -73,6 +74,8 @@ install: install-mkdirs build
 			$(INSTALL_DATA) $$i $(mandir); \
 		fi; \
 	done
+
+	$(CP) convertconf-example.conf $(sysconfdir)/.convertconf-example.conf
 
 build:
 
