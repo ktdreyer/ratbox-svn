@@ -1,3 +1,15 @@
+androsyn    2004/03/01 15:20:56 EST	(20040301_13)
+
+  Modified files:
+    src                  ircd.c 
+  Log:
+  Fix kqueue issues...
+  
+  Revision  Changes    Path
+  7.328     +8 -8      ircd-ratbox/src/ircd.c
+
+
+
 androsyn    2004/03/01 15:11:18 EST	(20040301_12)
 
   Modified files:
