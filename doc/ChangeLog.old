@@ -1,3 +1,8 @@
+*** 20001113_5 by db
+- fixed mistake found by David-T an = should have been an |=
+
+
+
 *** 20001113_4 by db
 - buffer size was incorrect and incorrectly commented
 
