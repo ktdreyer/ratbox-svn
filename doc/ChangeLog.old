@@ -1,3 +1,7 @@
+*** 20010505_4 by fl_
+- tidy up the IsOper() checks
+
+
 *** 20010505_3 by fl_
 - removed cap_vchan, as we dont actually use it anywhere..
 - added mo_stats()
