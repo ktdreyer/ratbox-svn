@@ -1,3 +1,7 @@
+*** 20010806_1 by ejb
+- fixed VMS support; appears to work (compile + link)
+
+
 *** 20010805_5 by ejb
 - well, it seems BSD yacc no longer dump core when we uncomment
   negative number support in the parser, so enable it.
