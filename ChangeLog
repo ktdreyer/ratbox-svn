@@ -1,3 +1,41 @@
+androsyn    2003/10/08 11:20:10 EDT	(20031008_2)
+
+  Modified files:
+    include              newconf.h 
+    modules              m_admin.c m_challenge.c m_gline.c 
+                         m_info.c m_invite.c m_join.c m_knock.c 
+                         m_links.c m_motd.c m_stats.c m_trace.c 
+                         m_whois.c 
+    modules/core         m_mode.c m_part.c 
+    src                  channel.c ircd_parser.y newconf.c 
+                         s_conf.c s_user.c 
+  Log:
+  Minor warning fixes etc..
+  
+  Revision  Changes    Path
+  7.29      +0 -1      ircd-ratbox/include/newconf.h
+  1.94      +3 -3      ircd-ratbox/modules/core/m_mode.c
+  1.87      +1 -2      ircd-ratbox/modules/core/m_part.c
+  1.55      +2 -2      ircd-ratbox/modules/m_admin.c
+  1.65      +4 -3      ircd-ratbox/modules/m_challenge.c
+  1.134     +9 -9      ircd-ratbox/modules/m_gline.c
+  1.96      +2 -2      ircd-ratbox/modules/m_info.c
+  1.78      +2 -2      ircd-ratbox/modules/m_invite.c
+  1.141     +3 -4      ircd-ratbox/modules/m_join.c
+  1.86      +2 -2      ircd-ratbox/modules/m_knock.c
+  1.59      +2 -2      ircd-ratbox/modules/m_links.c
+  1.50      +2 -2      ircd-ratbox/modules/m_motd.c
+  1.185     +2 -2      ircd-ratbox/modules/m_stats.c
+  1.90      +2 -2      ircd-ratbox/modules/m_trace.c
+  1.131     +2 -2      ircd-ratbox/modules/m_whois.c
+  7.397     +3 -3      ircd-ratbox/src/channel.c
+  1.273     +1 -1      ircd-ratbox/src/ircd_parser.y
+  7.116     +5 -5      ircd-ratbox/src/newconf.c
+  7.438     +0 -2      ircd-ratbox/src/s_conf.c
+  7.296     +5 -6      ircd-ratbox/src/s_user.c
+
+
+
 androsyn    2003/10/08 10:28:56 EDT	(20031008_1)
 
   Modified files:
