@@ -134,6 +134,14 @@ add_user_to_channel(struct Channel *chptr, struct Client *who, int flags)
         if (MyClient(who))
           dlinkAdd(who, lptr, &chptr->locvoiced);
         break;
+
+#ifdef REQUIRE_OANDV
+      case MODE_CHANOP|MODE_VOICE:
+        dlinkAdd(who, ptr, &chptr->chanops_voiced);
+	if (MyClient(who))
+	  dlinkAdd(who, lptr, &chptr->locchanops_voiced);
+        break;
+#endif
     }
 
     chptr->users++;

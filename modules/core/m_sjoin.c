@@ -561,6 +561,30 @@ static void ms_sjoin(struct Client *client_p,
         {
           *mbuf++ = 'o';
 	  para[pargs++] = s;
+
+          /* a +ov user.. bleh */
+	  if(fl & MODE_VOICE)
+	  {
+	    /* its possible the +o has filled up MAXMODEPARAMS, if so, start
+	     * a new buffer
+	     */
+	    if(pargs >= MAXMODEPARAMS)
+	      {
+	        *mbuf = '\0';
+		sendto_channel_local(hide_or_not, chptr,
+		                     ":%s MODE %s %s %s %s %s %s",
+				     me.name, RootChan(chptr)->chname,
+				     modebuf,
+				     para[0], para[1], para[2], para[3]);
+                mbuf = modebuf;
+		*mbuf++ = '+';
+		para[0] = para[1] = para[2] = para[3] = "";
+		pargs = 0;
+	      }
+
+	    *mbuf++ = 'v';
+	    para[pargs++] = s;
+	  }
         }
       else if (fl & MODE_VOICE)
         {
