@@ -1,3 +1,10 @@
+*** 20001213_9 by db
+- ripped out the trie (tree parse) code that Roger wrote. Too hard to
+  debug for now. Replaced with a simplistic (very) hash table. The hash
+  function is =horrid= for now.
+
+
+
 *** 20001213_8 by adrian
 
 
