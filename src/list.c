@@ -155,7 +155,7 @@ void _free_user(struct User* user, struct Client* client_p)
 			     (unsigned long)user->channel.head, user->joined,
 			     user->refcnt);
         assert(!user->joined);
-        assert(!user->refcount);
+        assert(!user->refcnt);
         assert(!user->invited.head);
         assert(!user->channel.head);
       }
