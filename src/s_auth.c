@@ -228,7 +228,9 @@ static void auth_dns_callback(void* vptr, struct DNSReply* reply)
   if (!IsDoingAuth(auth)) {
     release_auth_client(auth->client);
     unlink_auth_request(auth, &AuthPollList);
+#ifdef USE_IAUTH
     link_auth_request(auth, &AuthClientList);
+#endif
     /*free_auth_request(auth);*/
   }
 }
@@ -423,19 +425,8 @@ void start_auth(struct Client* client)
   /* No DNS cache now, remember? -- adrian */
   gethost_byaddr((const char*) &client->ip, &query);
   SetDNSPending(auth);
-
-  if (start_auth_query(auth) || IsDNSPending(auth))
-  {
-    link_auth_request(auth, &AuthPollList);
-  }
-  else {
-  #ifdef USE_IAUTH
-  	link_auth_request(auth, &AuthClientList);
-  #else
-    free_auth_request(auth);
-  #endif
-    release_auth_client(client);
-  }
+  start_auth_query(auth);
+  link_auth_request(auth, &AuthPollList);
 }
 
 /*
