@@ -47,7 +47,7 @@ all: servlink
 build: all
 
 servlink: ${OBJECTS}
-	${CC} ${LDFLAGS} -o $@ ${OBJECTS} ${IRCDLIBS}
+	${CC} ${CFLAGS} ${LDFLAGS} -o $@ ${OBJECTS} ${IRCDLIBS}
 
 install: build
 	@for i in $(PROGS); do \
