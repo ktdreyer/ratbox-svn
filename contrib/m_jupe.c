@@ -23,10 +23,6 @@
  *   $Id$
  */
 
-/*
- * WARNING: This is unfinished, and not likely to work :P
- */
-
 #include "tools.h"
 #include "irc_string.h"
 #include "handlers.h"
@@ -89,8 +85,7 @@ static void mo_jupe(struct Client *client_p, struct Client *source_p,
   struct Client *target_p;
   struct Client *ajupe;
   dlink_node *m;
-  /* This should be reallen but ircsprintf cores if its too long.. */
-  char reason[TOPICLEN];
+  char reason[REALLEN+2];
 
   if(!ServerInfo.hub)
     return;
@@ -147,7 +142,12 @@ static void mo_jupe(struct Client *client_p, struct Client *source_p,
 
   ajupe->hopcount = 1;
   strncpy_irc(ajupe->name,parv[1],HOSTLEN);
+
+  /* we need to give 7 chars to prepend "Juped: " */
+  if(strlen(parv[2]) > (REALLEN-7))
+    parv[2][REALLEN-7] = '\0';
   ircsprintf(reason, "%s %s", "Juped:", parv[2]);
+  
   strncpy_irc(ajupe->info,reason,REALLEN);
   ajupe->serv->up = me.name;
   ajupe->servptr = &me;
