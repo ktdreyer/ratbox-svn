@@ -1,3 +1,8 @@
+*** 20001125_1 by toot
+. moved mo_testline into a module
+. added idletime setting for use in ircd.conf
+
+
 *** 20001124_5 by bill
 
  - changed DPATH and the like from "/usr/ejb/ircd/" to "/usr/local/ircd/"
