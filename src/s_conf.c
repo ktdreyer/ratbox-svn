@@ -1063,6 +1063,8 @@ set_default_conf(void)
 	ConfigFileEntry.fname_userlog[0] = '\0';
 	ConfigFileEntry.fname_foperlog[0] = '\0';
 	ConfigFileEntry.fname_operlog[0] = '\0';
+	ConfigFileEntry.fname_operspylog[0] = '\0';
+	ConfigFileEntry.fname_operspyremotelog[0] = '\0';
 	ConfigFileEntry.glines = NO;
 	ConfigFileEntry.use_egd = NO;
 	ConfigFileEntry.gline_time = 12 * 3600;
@@ -1094,7 +1096,7 @@ set_default_conf(void)
 
 	ConfigFileEntry.oper_umodes = UMODE_LOCOPS | UMODE_SERVNOTICE |
 		UMODE_OPERWALL | UMODE_WALLOP;
-	ConfigFileEntry.oper_only_umodes = UMODE_DEBUG;
+	ConfigFileEntry.oper_only_umodes = UMODE_DEBUG|UMODE_OPERSPY;
 
 	ConfigChannel.use_except = YES;
 	ConfigChannel.use_invex = YES;
@@ -1570,7 +1572,7 @@ char *
 oper_flags_as_string(int flags)
 {
 	/* This MUST be extended if we add any more modes... -Hwy */
-	static char flags_out[18];
+	static char flags_out[20];
 	char *flags_ptr;
 
 	flags_ptr = flags_out;
@@ -1608,6 +1610,8 @@ oper_flags_as_string(int flags)
 		*flags_ptr++ = 'l';
 	if(flags & UMODE_CALLERID)
 		*flags_ptr++ = 'g';
+	if(flags & UMODE_OPERSPY)
+		*flags_ptr++ = 'Z';
 	*flags_ptr = '\0';
 
 	return (flags_out);

@@ -38,9 +38,8 @@
 #include "ircd.h"
 #include "event.h"		/* Needed for EVH etc. */
 #include "s_conf.h"
+#include "s_serv.h"
 #include "memory.h"
-
-
 
 /* some older syslogs would overflow at 2024 */
 #define LOG_BUFSIZE 2000
@@ -386,6 +385,56 @@ log_foper(struct Client *source_p, const char *name)
 			fbputs(linebuf, oper_fb);
 			fbclose(oper_fb);
 		}
+	}
+}
+
+/* log_operspy()
+ *
+ * inputs	- pointer to client
+ * output	- 
+ * side effects - FNAME_OPERSPYLOG/FNAME_OPERSPYREMOTELOG is written to
+ */
+void
+log_operspy(struct Client *source_p, const char *token, const char *arg)
+{
+	FBFILE *operspy_fb;
+	char linebuf[BUFSIZE];
+	char *filename_ptr;
+
+	/* if its not my client its already propagated */
+	if(MyClient(source_p))
+	{
+		sendto_match_servs(source_p, "*", CAP_ENCAP,
+				   "ENCAP * OPERSPY %s %s",
+				   token, arg ? arg : "");
+		filename_ptr = ConfigFileEntry.fname_operspylog;
+	}
+	else
+		filename_ptr = ConfigFileEntry.fname_operspyremotelog;
+
+	sendto_realops_flags(UMODE_OPERSPY,
+			     ConfigFileEntry.operspy_admin_only ? L_ADMIN : L_ALL,
+			     "OPERSPY %s %s %s",
+			     get_oper_name(source_p), token,
+			     arg ? arg : "");
+
+	if(EmptyString(filename_ptr))
+		return;
+
+	if((operspy_fb = fbopen(filename_ptr, "r")) != NULL)
+	{
+		fbclose(operspy_fb);
+		operspy_fb = fbopen(filename_ptr, "a");
+	}
+
+	if(operspy_fb != NULL)
+	{
+		snprintf(linebuf, sizeof(linebuf),
+			 "%s OPERSPY %s %s %s\n",
+			 smalldate(CurrentTime), get_oper_name(source_p),
+			 token, arg ? arg : "");
+		fbputs(linebuf, operspy_fb);
+		fbclose(operspy_fb);
 	}
 }
 

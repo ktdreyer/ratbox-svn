@@ -383,6 +383,7 @@ struct exit_client_hook
 #define UMODE_CALLERID     0x2000	/* block unless caller id's */
 #define UMODE_UNAUTH       0x4000	/* show unauth connects here */
 #define UMODE_LOCOPS       0x8000	/* show locops */
+#define UMODE_OPERSPY	   0x10000
 
 /* user information flags, only settable by remote mode or local oper */
 #define UMODE_OPER         0x20000	/* Operator */
@@ -402,14 +403,14 @@ struct exit_client_hook
 #define OPER_REHASH             0x000080
 #define OPER_ADMIN              0x000100
 #define OPER_XLINE              0x000200
-/*      OPER_SPY                0x000400 */
+#define OPER_SPY		0x000400
 #define OPER_RESV		0x000800 /* XXX - only here for shared {}; */
 #define OPER_OPERWALL		0x001000
 #define OPER_HIDDENADMIN        0x002000
 #define OPER_FLAGS      (OPER_GLOBAL_KILL | OPER_REMOTE | OPER_UNKLINE |\
                          OPER_GLINE | OPER_N | OPER_K | OPER_DIE |\
                          OPER_REHASH | OPER_ADMIN | OPER_XLINE | OPER_OPERWALL|\
-                         0x000400 | OPER_HIDDENADMIN)
+                         OPER_SPY | OPER_HIDDENADMIN)
 
 #define FLAGS2_EXEMPTGLINE      0x004000
 #define FLAGS2_EXEMPTKLINE      0x008000
@@ -429,7 +430,8 @@ struct exit_client_hook
                       UMODE_REJ | UMODE_SKILL | UMODE_FULL | UMODE_SPY | \
                       UMODE_NCHANGE | UMODE_OPERWALL | UMODE_DEBUG | \
                       UMODE_BOTS | UMODE_EXTERNAL | UMODE_LOCOPS | \
- 		      UMODE_ADMIN | UMODE_UNAUTH | UMODE_CALLERID)
+ 		      UMODE_ADMIN | UMODE_UNAUTH | UMODE_CALLERID | \
+		      UMODE_OPERSPY)
 
 #define FLAGS_ID     (FLAGS_NEEDID | FLAGS_GOTID)
 
@@ -540,6 +542,7 @@ struct exit_client_hook
 #define IsOperAdmin(x)          (((x)->flags2 & OPER_ADMIN) || \
                                  ((x)->flags2 & OPER_HIDDENADMIN))
 #define IsOperOperwall(x)	((x)->flags2 & OPER_OPERWALL)
+#define IsOperSpy(x)		((x)->flags2 & OPER_SPY)
 
 #define IsFloodDone(x)          ((x)->flags2 & FLAGS2_FLOODDONE)
 #define SetFloodDone(x)         ((x)->flags2 |= FLAGS2_FLOODDONE)

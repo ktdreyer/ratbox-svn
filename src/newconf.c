@@ -388,37 +388,39 @@ conf_set_logging_fname_operlog(void *data)
 	strlcpy(ConfigFileEntry.fname_operlog, data, sizeof(ConfigFileEntry.fname_operlog));
 }
 
+static void
+conf_set_logging_fname_operspylog(void *data)
+{
+	strlcpy(ConfigFileEntry.fname_operspylog, data,
+		sizeof(ConfigFileEntry.fname_operspylog));
+}
+
+static void
+conf_set_logging_fname_operspyremotelog(void *data)
+{
+	strlcpy(ConfigFileEntry.fname_operspyremotelog, data,
+		sizeof(ConfigFileEntry.fname_operspyremotelog));
+}
+
 static struct
 {
 	const char *name;
 	int level;
 }
+
+/* *INDENT-OFF* */
 log_levels[] =
 {
-	{
-	"l_crit", L_CRIT}
-	,
-	{
-	"l_error", L_ERROR}
-	,
-	{
-	"l_warn", L_WARN}
-	,
-	{
-	"l_notice", L_NOTICE}
-	,
-	{
-	"l_trace", L_TRACE}
-	,
-	{
-	"l_info", L_INFO}
-	,
-	{
-	"l_debug", L_DEBUG}
-	,
-	{
-	NULL, 0}
+	{ "l_crit",	L_CRIT	},
+	{ "l_error",	L_ERROR	},
+	{ "l_warn",	L_WARN	},
+	{ "l_notice",	L_NOTICE},
+	{ "l_trace",	L_TRACE	},
+	{ "l_info",	L_INFO	},
+	{ "l_debug",	L_DEBUG	},
+	{ NULL,		0	}
 };
+/* *INDENT-ON* */
 
 static void
 conf_set_logging_log_level(void *data)
@@ -464,6 +466,7 @@ static struct mode_table umode_table[] = {
 	{"external",	UMODE_EXTERNAL	},
 	{"spy",		UMODE_SPY	},
 	{"operwall",	UMODE_OPERWALL	},
+	{"operspy",	UMODE_OPERSPY	},
 	{NULL}
 };
 
@@ -480,6 +483,7 @@ static struct mode_table flag_table[] = {
 	{"hidden_admin",	OPER_HIDDENADMIN	},
 	{"xline",		OPER_XLINE		},
 	{"operwall",		OPER_OPERWALL		},
+	{"oper_spy",		OPER_SPY		},
 	{NULL}
 };
 
@@ -2136,6 +2140,12 @@ conf_set_general_map_oper_only(void *data)
 }
 
 static void
+conf_set_general_operspy_admin_only(void *data)
+{
+	ConfigFileEntry.operspy_admin_only = *(unsigned int *) data;
+}
+
+static void
 conf_set_general_pace_wait(void *data)
 {
 	ConfigFileEntry.pace_wait = *(unsigned int *) data;
@@ -2729,6 +2739,9 @@ newconf_init()
 	add_conf_item("logging", "fname_userlog", CF_QSTRING, conf_set_logging_fname_userlog);
 	add_conf_item("logging", "fname_operlog", CF_QSTRING, conf_set_logging_fname_operlog);
 	add_conf_item("logging", "fname_foperlog", CF_QSTRING, conf_set_logging_fname_foperlog);
+	add_conf_item("logging", "fname_operspylog", CF_QSTRING, conf_set_logging_fname_operspylog);
+	add_conf_item("logging", "fname_operspyremotelog", CF_QSTRING,
+			conf_set_logging_fname_operspyremotelog);
 
 	add_top_conf("operator", conf_begin_oper, conf_end_oper);
 	add_conf_item("operator", "name", CF_QSTRING, conf_set_oper_name);
@@ -2875,6 +2888,7 @@ newconf_init()
 	add_conf_item("general", "stats_i_oper_only", CF_STRING,
 		      conf_set_general_stats_i_oper_only);
 	add_conf_item("general", "map_oper_only", CF_YESNO, conf_set_general_map_oper_only);
+	add_conf_item("general", "operspy_admin_only", CF_YESNO, conf_set_general_operspy_admin_only);
 	add_conf_item("general", "pace_wait", CF_TIME, conf_set_general_pace_wait);
 	add_conf_item("general", "pace_wait_simple", CF_TIME, conf_set_general_pace_wait_simple);
 	add_conf_item("general", "short_motd", CF_YESNO, conf_set_general_short_motd);

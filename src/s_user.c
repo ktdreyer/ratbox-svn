@@ -73,39 +73,35 @@ struct flag_item
 	char letter;
 };
 
+/* *INDENT-OFF* */
 static struct flag_item user_modes[] = {
-	{UMODE_ADMIN, 'a'},
-	{UMODE_BOTS, 'b'},
-	{UMODE_CCONN, 'c'},
-	{UMODE_DEBUG, 'd'},
-	{UMODE_FULL, 'f'},
-	{UMODE_CALLERID, 'g'},
-	{UMODE_INVISIBLE, 'i'},
-	{UMODE_SKILL, 'k'},
-	{UMODE_LOCOPS, 'l'},
-	{UMODE_NCHANGE, 'n'},
-	{UMODE_OPER, 'o'},
-	{UMODE_REJ, 'r'},
-	{UMODE_SERVNOTICE, 's'},
-	{UMODE_UNAUTH, 'u'},
-	{UMODE_WALLOP, 'w'},
-	{UMODE_EXTERNAL, 'x'},
-	{UMODE_SPY, 'y'},
-	{UMODE_OPERWALL, 'z'},
+	{UMODE_ADMIN,		'a'},
+	{UMODE_BOTS,		'b'},
+	{UMODE_CCONN,		'c'},
+	{UMODE_DEBUG,		'd'},
+	{UMODE_FULL,		'f'},
+	{UMODE_CALLERID,	'g'},
+	{UMODE_INVISIBLE,	'i'},
+	{UMODE_SKILL,		'k'},
+	{UMODE_LOCOPS,		'l'},
+	{UMODE_NCHANGE,		'n'},
+	{UMODE_OPER,		'o'},
+	{UMODE_REJ,		'r'},
+	{UMODE_SERVNOTICE,	's'},
+	{UMODE_UNAUTH,		'u'},
+	{UMODE_WALLOP,		'w'},
+	{UMODE_EXTERNAL,	'x'},
+	{UMODE_SPY,		'y'},
+	{UMODE_OPERWALL,	'z'},
 	{0, 0}
 };
 
 /* memory is cheap. map 0-255 to equivalent mode */
-
 int user_modes_from_c_to_bitmask[] = {
-	/* 0x00 */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	/* 0x0F */
-	/* 0x10 */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	/* 0x1F */
-	/* 0x20 */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	/* 0x2F */
-	/* 0x30 */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	/* 0x3F */
+	/* 0x00 */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* 0x0F */
+	/* 0x10 */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* 0x1F */
+	/* 0x20 */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* 0x2F */
+	/* 0x30 */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* 0x3F */
 	0,			/* @ */
 	0,			/* A */
 	0,			/* B */
@@ -132,9 +128,8 @@ int user_modes_from_c_to_bitmask[] = {
 	0,			/* W */
 	0,			/* X */
 	0,			/* Y */
-	0,			/* Z 0x5A */
-	0, 0, 0, 0, 0,		/* 0x5F */
-	/* 0x60 */ 0,
+	UMODE_OPERSPY,		/* Z */
+	/* 0x5B */ 0, 0, 0, 0, 0, 0, /* 0x60 */
 	UMODE_ADMIN,		/* a */
 	UMODE_BOTS,		/* b */
 	UMODE_CCONN,		/* c */
@@ -160,26 +155,18 @@ int user_modes_from_c_to_bitmask[] = {
 	UMODE_WALLOP,		/* w */
 	UMODE_EXTERNAL,		/* x */
 	UMODE_SPY,		/* y */
-	UMODE_OPERWALL,		/* z 0x7A */
-	0, 0, 0, 0, 0,		/* 0x7B - 0x7F */
-
-	/* 0x80 */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	/* 0x9F */
-	/* 0x90 */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	/* 0x9F */
-	/* 0xA0 */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	/* 0xAF */
-	/* 0xB0 */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	/* 0xBF */
-	/* 0xC0 */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	/* 0xCF */
-	/* 0xD0 */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	/* 0xDF */
-	/* 0xE0 */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	/* 0xEF */
-	/* 0xF0 */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-		/* 0xFF */
+	UMODE_OPERWALL,		/* z */
+	/* 0x7B */ 0, 0, 0, 0, 0, /* 0x7F */
+	/* 0x80 */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* 0x9F */
+	/* 0x90 */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* 0x9F */
+	/* 0xA0 */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* 0xAF */
+	/* 0xB0 */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* 0xBF */
+	/* 0xC0 */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* 0xCF */
+	/* 0xD0 */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* 0xDF */
+	/* 0xE0 */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* 0xEF */
+	/* 0xF0 */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  /* 0xFF */
 };
+/* *INDENT-ON* */
 
 /*
  * show_lusers -

@@ -188,6 +188,8 @@ struct config_file_entry
 	char fname_operlog[MAXPATHLEN];
 	char fname_userlog[MAXPATHLEN];
 	char fname_foperlog[MAXPATHLEN];
+	char fname_operspylog[MAXPATHLEN];
+	char fname_operspyremotelog[MAXPATHLEN];
 
 	MessageFile motd;
 	MessageFile opermotd;
@@ -218,6 +220,7 @@ struct config_file_entry
 	int stats_i_oper_only;
 	int stats_P_oper_only;
 	int map_oper_only;
+	int operspy_admin_only;
 	int pace_wait;
 	int pace_wait_simple;
 	int short_motd;

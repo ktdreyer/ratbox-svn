@@ -51,6 +51,7 @@ extern const char *smalldate(void);
 extern void log_user_exit(struct Client *);
 extern void log_oper(struct Client *, const char *name);
 extern void log_foper(struct Client *, const char *name);
+extern void log_operspy(struct Client *, const char *, const char *);
 
 #ifdef __vms
 const char * ircd$format_error(int);
