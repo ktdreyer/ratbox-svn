@@ -1,3 +1,7 @@
+*** 20010101_39 by a1kmm
+Added a sanity test of user and hostname length from other servers.
+
+
 *** 20010101_38 by wcampbel
 Added some more conf variables to INFO
 
