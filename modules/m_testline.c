@@ -59,7 +59,7 @@ _moddeinit(void)
   mod_del_cmd(&testline_msgtab);
 }
  
-char *_version = "20001124";
+char *_version = "$Revision$";
 #endif
 /*
  * mo_testline
