@@ -1769,7 +1769,8 @@ add_lazylinkchannel(struct Client *client_p, struct Channel *chptr)
 /*
  * add_lazylinkclient
  *
- * inputs       - pointer to server being introduced to this hub
+ * inputs       - pointer to directly connected leaf server
+ *		  being introduced to this hub
  *              - pointer to client being introduced
  * output       - NONE
  * side effects - The client pointed to by source_p is now known
@@ -1779,12 +1780,10 @@ add_lazylinkchannel(struct Client *client_p, struct Channel *chptr)
  *                server is squit off.
  */
 void
-add_lazylinkclient(struct Client *client_p, struct Client *source_p)
+add_lazylinkclient(struct Client *local_server_p, struct Client *client_p)
 {
- assert(MyClient(client_p));
- if(!MyClient(client_p))
-   return;
- source_p->lazyLinkClientExists |= client_p->localClient->serverMask;
+ assert(MyConnect(local_server_p));
+ client_p->lazyLinkClientExists |= local_server_p->localClient->serverMask;
 }
 
 /*
