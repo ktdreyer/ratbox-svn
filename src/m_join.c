@@ -328,11 +328,14 @@ int     m_join(struct Client *cptr,
                        return 0;
                      }
                  }
-               /* we'll need to check here if they are trying to join a
-                * sub-chans 'real' name when they're already in
-                * one. or maybe we'll want to stop people
-                * joining 'real' names totally? */
-
+               /* trying to join a sub chans 'real' name
+                * don't allow that */
+               else if (IsVchan(chptr))
+                 {
+                   sendto_one(sptr, form_str(ERR_BADCHANNAME),
+                              me.name, parv[0], (unsigned char*) name);
+                   return 0;
+                 }
                flags = 0;
              }
            else
@@ -1143,6 +1146,14 @@ int     mo_join(struct Client *cptr,
                        show_vchans(cptr, sptr, chptr);
                        return 0;
                      }
+                 }
+               /* trying to join a sub chans 'real' name               
+                * don't allow that */
+               else if (IsVchan(chptr))
+                 {
+                   sendto_one(sptr, form_str(ERR_BADCHANNAME),      
+                              me.name, parv[0], (unsigned char*) name);   
+                   return 0;      
                  }
                flags = 0;
              }

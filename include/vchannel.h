@@ -52,8 +52,8 @@ extern void	show_vchans(struct Client *cptr,
 			    struct Client *sptr,
 			    struct Channel *chptr);
 
-
-extern struct Channel* find_vchan(struct Channel *chptr, char *key);
+/* find a matching vchan with a !key (nick) */ 
+extern struct Channel* find_vchan(struct Channel *, char *);
 
 /* See if this client is on a sub chan already */
 extern int on_sub_vchan(struct Channel *chptr, struct Client *sptr);

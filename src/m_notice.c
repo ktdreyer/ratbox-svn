@@ -177,7 +177,7 @@ int     m_notice(struct Client *cptr,
 
       if (HasVchans(chptr))
 	{
-	  if( vchan = map_vchan(chptr,sptr) )
+	  if( (vchan = map_vchan(chptr,sptr)) )
 	    {
 	      if (can_send(sptr, vchan) == 0)
 		sendto_channel_butone(cptr, sptr, vchan,
