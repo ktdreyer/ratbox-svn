@@ -76,7 +76,6 @@ int mo_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   const char* inpath = cptr->name;
   char*       user;
   char*       path;
-  char*       killer;
   char*       reason;
   int         chasing = 0;
 
@@ -227,7 +226,6 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   const char* inpath = cptr->name;
   char*       user;
   char*       path;
-  char*       killer;
   char*       reason;
   int         chasing = 0;
 
