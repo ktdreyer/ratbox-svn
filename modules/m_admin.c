@@ -37,6 +37,7 @@ static void m_admin(struct Client*, struct Client*, int, char**);
 static void mr_admin(struct Client*, struct Client*, int, char**);
 static void ms_admin(struct Client*, struct Client*, int, char**);
 static void do_admin( struct Client *source_p );
+static void do_admin_unregged(struct Client *source_p);
 
 struct Message admin_msgtab = {
   "ADMIN", 0, 0, 0, MFLG_SLOW | MFLG_UNREG, 0, 
@@ -74,7 +75,7 @@ static void mr_admin(struct Client *client_p, struct Client *source_p,
   else
     last_used = CurrentTime;
 
-  do_admin(source_p);
+  do_admin_unregged(source_p);
 }
 
 /*
@@ -129,6 +130,7 @@ static void ms_admin(struct Client *client_p, struct Client *source_p,
  */
 static void do_admin( struct Client *source_p )
 {
+
   if (IsPerson(source_p))
     sendto_realops_flags(FLAGS_SPY,
                          "ADMIN requested by %s (%s@%s) [%s]", source_p->name,
@@ -147,4 +149,30 @@ static void do_admin( struct Client *source_p )
   if (AdminInfo.email != NULL)
     sendto_one(source_p, form_str(RPL_ADMINEMAIL),
 	       me.name, source_p->name, AdminInfo.email);
+}
+
+/*
+ * do_admin_unregged
+ *
+ * inputs      - pointer to unregistered client to report to
+ * outputs     - none
+ * side effect - admin info is sent to source
+ */
+static void do_admin_unregged(struct Client *source_p)
+{
+
+  sendto_one(source_p, form_str(RPL_ADMINME),
+             me.name, "*", me.name);
+
+ if (AdminInfo.name != NULL)
+    sendto_one(source_p, form_str(RPL_ADMINLOC1),
+               me.name, "*", AdminInfo.name);
+
+  if (AdminInfo.description != NULL)
+    sendto_one(source_p, form_str(RPL_ADMINLOC2),
+               me.name, "*", AdminInfo.description);
+
+  if (AdminInfo.email != NULL)
+    sendto_one(source_p, form_str(RPL_ADMINEMAIL),
+               me.name, "*", AdminInfo.email);
 }
