@@ -1,3 +1,10 @@
+*** 20010116_1 by db
+- fix to check_pings, this probably explains some of the odd cores...
+  ptr->next is corrupt at times after an exit_client
+- tidied up the comm_open() comm_accep() error handling
+
+
+
 *** 20010115_11 by ejb
 - added links_notice.so
 
