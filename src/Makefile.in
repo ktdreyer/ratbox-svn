@@ -79,6 +79,7 @@ SRCS = \
 	m_trace.c \
 	m_topic.c \
 	m_unkline.c \
+	m_user.c \
 	m_userhost.c \
 	m_users.c \
 	m_version.c \
@@ -173,6 +174,8 @@ SRCS = \
 #	m_topic.o \
 #	m_trace.o \
 #	m_unkline.o \
+#	m_user.o \
+#	m_userhost.o \
 #	m_users.o \
 #	m_version.o \
 #	m_wallops.o \

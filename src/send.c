@@ -472,7 +472,7 @@ vsendto_one(struct Client *to, const char *pattern, va_list args)
 
         Debug((DEBUG_SEND,"Sending [%s] to %s",sendbuf,to->name));
 
-        (void)send_message(to, sendbuf, len);
+        send_message(to, sendbuf, len);
 } /* vsendto_one() */
 
 void
@@ -928,10 +928,10 @@ sendto_ops_flags(int flags, const char *pattern, ...)
         {
           if(cptr->umodes & flags)
             {
-              (void)ircsprintf(nbuf, ":%s NOTICE %s :*** Notice -- ",
+              ircsprintf(nbuf, ":%s NOTICE %s :*** Notice -- ",
                                me.name, cptr->name);
               
-              (void)strncat(nbuf, pattern, sizeof(nbuf) - strlen(nbuf));
+              strncat(nbuf, pattern, sizeof(nbuf) - strlen(nbuf));
               
               vsendto_one(cptr, nbuf, args);
             }

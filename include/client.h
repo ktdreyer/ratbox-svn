@@ -139,10 +139,10 @@ struct Client
   unsigned int      flags2;     /* ugh. overflow */
   int               hopcount;   /* number of servers to this 0 = local */
   unsigned short    status;     /* Client type */
-  char              nicksent;
+  char              nicksent;   /* set if nick sent for burst */
   unsigned char     local_flag; /* if this is 1 this client is local */
-  short    listprogress;        /* where were we when the /list blocked? */
   int      listprogress2;       /* where in the current bucket were we? */
+  short    listprogress;        /* where were we when the /list blocked? */
 
   /*
    * client->name is the unique name for a client nick or host

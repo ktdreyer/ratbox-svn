@@ -189,13 +189,16 @@ int m_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
             {
               sptr->umodes |= (LOCOP_UMODES);
             }
-
-          /* A local oper can't global kill ever, or do remote re-routes
+#if 0
+          /*
+           * XXX - BUG this trashes the clients port
+           *
+           * A local oper can't global kill ever, or do remote re-routes
            * or glines. Make sure thats enforced here.
            */
-
           sptr->port &= 
-            ~(CONF_OPER_GLOBAL_KILL|CONF_OPER_REMOTE|CONF_OPER_GLINE);
+            ~(CONF_OPER_GLOBAL_KILL | CONF_OPER_REMOTE | CONF_OPER_GLINE);
+#endif
         }
       else
         {

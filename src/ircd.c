@@ -19,8 +19,6 @@
  *
  * $Id$
  */
-
-
 #include "ircd.h"
 #include "channel.h"
 #include "class.h"
@@ -67,7 +65,6 @@
 
 #ifdef SETUID_ROOT
 #include <sys/lock.h>
-#include <unistd.h>
 #endif /* SETUID_ROOT */
 
 /*

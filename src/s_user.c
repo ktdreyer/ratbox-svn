@@ -64,9 +64,6 @@
 time_t LastUsedWallops = 0;
 #endif
 
-static int do_user (char *, struct Client *, struct Client*, char *, char *, char *,
-                     char *);
-
 static int nickkilldone(struct Client *, struct Client *, int, char **, time_t, char *);
 static int valid_hostname(const char* hostname);
 static int valid_username(const char* username);
@@ -126,20 +123,6 @@ static int user_modes_from_c_to_bitmask[] =
   FLAGS_OPERWALL, /* z */
   0, 0, 0, 0, 0, 0      /* pad out to 0x1F */
 };
-
-/* internally defined functions */
-#ifdef BOTCHECK
-static int bot_check(char *);
-
-const char *type_of_bot[]={
-  "NONE",
-  "eggdrop",
-  "vald/com/joh bot",
-  "spambot",
-  "annoy/ojnkbot"
-};
-
-#endif
 
 unsigned long my_rand(void);    /* provided by orabidoo */
 
@@ -483,6 +466,15 @@ static int register_user(struct Client *cptr, struct Client *sptr,
   char*       reason;
   char        tmpstr2[512];
 
+#ifdef BOTCHECK
+  static const char* type_of_bot[]={
+    "NONE",
+    "eggdrop",
+    "vald/com/joh bot",
+    "spambot",
+    "annoy/ojnkbot"
+  };
+#endif
   assert(0 != sptr);
   assert(sptr->username != username);
 
@@ -1666,57 +1658,10 @@ unsigned long my_rand() {
 
 
 /*
-** m_user
-**      parv[0] = sender prefix
-**      parv[1] = username (login name, account)
-**      parv[2] = client host name (used only from other servers)
-**      parv[3] = server host name (used only from other servers)
-**      parv[4] = users real name info
-*/
-int m_user(struct Client* cptr, struct Client* sptr, int parc, char *parv[])
-{
-#define UFLAGS  (FLAGS_INVISIBLE|FLAGS_WALLOP|FLAGS_SERVNOTICE)
-  char* username;
-  char* host;
-  char* server;
-  char* realname;
- 
-  if (parc > 2 && (username = strchr(parv[1],'@')))
-    *username = '\0'; 
-  if (parc < 5 || *parv[1] == '\0' || *parv[2] == '\0' ||
-      *parv[3] == '\0' || *parv[4] == '\0')
-    {
-      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
-                 me.name, parv[0], "USER");
-      if (IsServer(cptr))
-        sendto_realops("bad USER param count for %s from %s",
-                       parv[0], get_client_name(cptr, FALSE));
-      else
-        return 0;
-    }
-
-  /* Copy parameters into better documenting variables */
-
-  username = (parc < 2 || BadPtr(parv[1])) ? "<bad-boy>" : parv[1];
-  host     = (parc < 3 || BadPtr(parv[2])) ? "<nohost>" : parv[2];
-  server   = (parc < 4 || BadPtr(parv[3])) ? "<noserver>" : parv[3];
-  realname = (parc < 5 || BadPtr(parv[4])) ? "<bad-realname>" : parv[4];
-  
-#ifdef BOTCHECK
-  /* Only do bot checks on local connecting clients */
-      if(MyClient(cptr))
-        cptr->isbot = bot_check(host);
-#endif
-
-  return do_user(parv[0], cptr, sptr, username, host, server, realname);
-}
-
-
-/*
-** do_user
-*/
-static int do_user(char* nick, struct Client* cptr, struct Client* sptr,
-                   char* username, char *host, char *server, char *realname)
+ * do_user - add user
+ */
+int do_user(char* nick, struct Client* cptr, struct Client* sptr,
+            char* username, char *host, char *server, char *realname)
 {
   unsigned int oflags;
   struct User* user;
@@ -2046,12 +1991,13 @@ void send_umode_out(struct Client *cptr,
 
 
 #ifdef BOTCHECK
+
 /**
  ** bot_check(host)
  **   Reject a bot based on a fake hostname...
  **           -Taner
  **/
-static int bot_check(char *host)
+int bot_check(const char *host)
 {
 /*
  * Eggdrop Bots:        "USER foo 1 1 :foo"
@@ -2059,9 +2005,9 @@ static int bot_check(char *host)
  * Annoy/OJNKbots:      "user foo . . :foo"   (disabled)
  * Spambots that are based on OJNK: "user foo x x :foo"
  */
-  if (!strcmp(host,"1")) return 1;
-  if (!strcmp(host,"null")) return 2;
-  if (!strcmp(host, "x")) return 3;
+  if (!strcmp(host, "1"))    return 1;
+  if (!strcmp(host, "null")) return 2;
+  if (!strcmp(host, "x"))    return 3;
 
   return 0;
 }
