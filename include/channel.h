@@ -65,11 +65,13 @@ struct Channel
   dlink_list	  vchan_list;	        /* vchan sublist */
 
   dlink_list      chanops;		/* lists of chanops etc. */
+  dlink_list	  chanops_voiced;	/* UGH I'm sorry */
   dlink_list      halfops;
   dlink_list      voiced;
   dlink_list      peons;                /* non ops, just members */
 
   dlink_list      locchanops;           /* local versions of the above */
+  dlink_list	  locchanops_voiced;	/* UGH I'm sorry */
   dlink_list      lochalfops;
   dlink_list      locvoiced;
   dlink_list      locpeons;             /* ... */
