@@ -262,32 +262,19 @@ adns_gethost(const char *name, int aftype, struct DNSQuery *req)
  *               resolve an IP address to a domain name.
  */
 int
-adns_getaddr(struct sockaddr *addr, int aftype, struct DNSQuery *req, int arpa_type)
+adns_getaddr(struct sockaddr *addr, int aftype, struct DNSQuery *req)
 {
 	int result;
 	assert(dns_state->nservers > 0);
 #ifdef IPV6
 	if(addr->sa_family == AF_INET6)
 	{
-		if(!arpa_type)
-		{
 			result = adns_submit_reverse(dns_state,
 					    (struct sockaddr *) addr,
 					    adns_r_ptr_ip6,
 					    adns_qf_owner |
 					    adns_qf_cname_loose |
 					    adns_qf_quoteok_anshost, req, &req->query);
-		}
-		else
-		{
-			result = adns_submit_reverse(dns_state,
-					    (struct sockaddr *) addr,
-					    adns_r_ptr_ip6_old,
-					    adns_qf_owner |
-					    adns_qf_cname_loose |
-					    adns_qf_quoteok_anshost, req, &req->query);
-
-		}
 	}
 	else
 #endif

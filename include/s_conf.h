@@ -226,10 +226,6 @@ struct config_file_entry
 	int tgchange_expiry;
 	int tgchange_remote;
 	int tgchange_reconnect;
-
-#ifdef IPV6
-	int fallback_to_ip6_int;
-#endif
 };
 
 struct config_channel_entry

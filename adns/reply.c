@@ -24,13 +24,13 @@
  *  along with this program; if not, write to the Free Software Foundation,
  *  Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. 
  *
- * $Id$
+ *  $Id$
  */
 
-#include "stdinc.h"
-#include "memory.h"
-#include "internal.h"
+#include <stdlib.h>
 
+#include "internal.h"
+    
 void adns__procdgram(adns_state ads, const byte *dgram, int dglen,
 		     int serv, int viatcp, struct timeval now) {
   int cbyte, rrstart, wantedrrs, rri, foundsoa, foundns, cname_here;
@@ -187,7 +187,7 @@ void adns__procdgram(adns_state ads, const byte *dgram, int dglen,
       if (qu->flags & adns_qf_cname_forbid) {
 	adns__query_fail(qu,adns_s_prohibitedcname);
 	return;
-      } else if (qu->cname_dgram && ++qu->cname_count >= 2) { 
+      } else if (qu->cname_dgram) { /* Ignore second and subsequent CNAME(s) */
 	adns__debug(ads,serv,qu,"allegedly canonical name %s is actually alias for %s",
 		    qu->answer->cname,
 		    adns__diag_domain(ads,serv,qu, &qu->vb, dgram,dglen,rdstart));
@@ -204,7 +204,7 @@ void adns__procdgram(adns_state ads, const byte *dgram, int dglen,
 			       dgram,dglen, &rdstart,rdstart+rdlength);
 	if (!qu->vb.used) goto x_truncated;
 	if (st) { adns__query_fail(qu,st); return; }
-	l= strlen((char*)qu->vb.buf)+1;
+	l= strlen(qu->vb.buf)+1;
 	qu->answer->cname= adns__alloc_preserved(qu,l);
 	if (!qu->answer->cname) { adns__query_fail(qu,adns_s_nomemory); return; }
 
@@ -220,7 +220,7 @@ void adns__procdgram(adns_state ads, const byte *dgram, int dglen,
 	 * it contains the relevant info.
 	 */
       }
-    } else if (rrtype == (int)(qu->typei->type & adns__rrt_typemask)) {
+    } else if (rrtype == (qu->typei->type & adns__rrt_typemask)) {
       wantedrrs++;
     } else {
       adns__debug(ads,serv,qu,"ignoring answer RR with irrelevant type %d",rrtype);
@@ -320,7 +320,7 @@ void adns__procdgram(adns_state ads, const byte *dgram, int dglen,
 		     &ownermatched);
     assert(!st); assert(rrtype != -1);
     if (rrclass != DNS_CLASS_IN ||
-	rrtype != (int)(qu->typei->type & adns__rrt_typemask) ||
+	rrtype != (qu->typei->type & adns__rrt_typemask) ||
 	!ownermatched)
       continue;
     adns__update_expires(qu,ttl,now);
@@ -357,7 +357,7 @@ void adns__procdgram(adns_state ads, const byte *dgram, int dglen,
 			      qu->typei->type, qu->flags);
     if (st) { adns__query_fail(qu,st); return; }
     
-    newquery= MyRealloc(qu->query_dgram,qu->vb.used);
+    newquery= realloc(qu->query_dgram,qu->vb.used);
     if (!newquery) { adns__query_fail(qu,adns_s_nomemory); return; }
     
     qu->query_dgram= newquery;

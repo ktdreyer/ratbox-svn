@@ -24,17 +24,12 @@
  *  along with this program; if not, write to the Free Software Foundation,
  *  Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. 
  *
- * $Id$
+ *  $Id$
  */
 
-#include "stdinc.h"
 #include "internal.h"
 
-/* This crap is needed to make it compile on OS X 
- * Leave it to apple to take a perfectly good preprocessor and fuck it
- * up.
- */
-#define unused_arg /**/
+#include <stdlib.h>	/* abort() */
 
 void adns_checkconsistency(adns_state ads, adns_query qu) {
   adns__consistency(ads,qu,cc_user);
@@ -51,17 +46,6 @@ void adns_checkconsistency(adns_state ads, adns_query qu) {
     }										\
   }
 
-#define DLIST_CHECK_PARTLESS(list, nodevar, body)                               \
-  if ((list).head) {                                                            \
-    assert(! (list).head->back);                                                \
-    for ((nodevar)= (list).head; (nodevar); (nodevar)= (nodevar)->next) {       \
-      assert((nodevar)->next                                                    \
-             ? (nodevar) == (nodevar)->next->back                               \
-             : (nodevar) == (list).tail);                                       \
-      body                                                                      \
-    }                                                                           \
-  }
-
 #define DLIST_ASSERTON(node, nodevar, list, part)				\
   do {										\
     for ((nodevar)= (list).head;						\
@@ -74,7 +58,7 @@ void adns_checkconsistency(adns_state ads, adns_query qu) {
 static void checkc_query_alloc(adns_state ads, adns_query qu) {
   allocnode *an;
 
-  DLIST_CHECK_PARTLESS(qu->allocations, an, {
+  DLIST_CHECK(qu->allocations, an, , {
   });
 }
 
@@ -127,7 +111,7 @@ static void checkc_global(adns_state ads) {
 static void checkc_queue_udpw(adns_state ads) {
   adns_query qu;
   
-  DLIST_CHECK_PARTLESS(ads->udpw, qu, {
+  DLIST_CHECK(ads->udpw, qu, , {
     assert(qu->state==query_tosend);
     assert(qu->retries <= UDPMAXRETRIES);
     assert(qu->udpsent);
@@ -140,7 +124,7 @@ static void checkc_queue_udpw(adns_state ads) {
 static void checkc_queue_tcpw(adns_state ads) {
   adns_query qu;
   
-  DLIST_CHECK_PARTLESS(ads->tcpw, qu, {
+  DLIST_CHECK(ads->tcpw, qu, , {
     assert(qu->state==query_tcpw);
     assert(!qu->children.head && !qu->children.tail);
     assert(qu->retries <= ads->nservers+1);
@@ -152,7 +136,7 @@ static void checkc_queue_tcpw(adns_state ads) {
 static void checkc_queue_childw(adns_state ads) {
   adns_query parent, child;
 
-  DLIST_CHECK_PARTLESS(ads->childw, parent, {
+  DLIST_CHECK(ads->childw, parent, , {
     assert(parent->state == query_childw);
     assert(parent->children.head);
     DLIST_CHECK(parent->children, child, siblings., {
@@ -167,7 +151,7 @@ static void checkc_queue_childw(adns_state ads) {
 static void checkc_queue_output(adns_state ads) {
   adns_query qu;
   
-  DLIST_CHECK_PARTLESS(ads->output, qu, {
+  DLIST_CHECK(ads->output, qu, , {
     assert(qu->state == query_done);
     assert(!qu->children.head && !qu->children.tail);
     assert(!qu->parent);
@@ -201,16 +185,16 @@ void adns__consistency(adns_state ads, adns_query qu, consistency_checks cc) {
   if (qu) {
     switch (qu->state) {
     case query_tosend:
-      DLIST_ASSERTON(qu, search, ads->udpw, unused_arg);
+      DLIST_ASSERTON(qu, search, ads->udpw, );
       break;
     case query_tcpw:
-      DLIST_ASSERTON(qu, search, ads->tcpw, unused_arg);
+      DLIST_ASSERTON(qu, search, ads->tcpw, );
       break;
     case query_childw:
-      DLIST_ASSERTON(qu, search, ads->childw, unused_arg);
+      DLIST_ASSERTON(qu, search, ads->childw, );
       break;
     case query_done:
-      DLIST_ASSERTON(qu, search, ads->output, unused_arg);
+      DLIST_ASSERTON(qu, search, ads->output, );
       break;
     default:
       assert(!"specific query state");

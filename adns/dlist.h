@@ -24,37 +24,32 @@
  *  along with this program; if not, write to the Free Software Foundation,
  *  Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. 
  *
- * $Id$
+ *  $Id$
  */
 
 #ifndef ADNS_DLIST_H_INCLUDED
 #define ADNS_DLIST_H_INCLUDED
 
-/* More strange shit for OS X and its b0rked C compiler */
+#define ADNS_LIST_INIT(list) ((list).head= (list).tail= 0)
+#define LINK_INIT(link) ((link).next= (link).back= 0)
 
-#define unused_arg /**/
-
-#define ADNS_LIST_INIT(flist) ((flist).head= (flist).tail= 0)
-#define LINK_INIT(flink) ((flink).next= (flink).back= 0)
-
-
-
-#define LIST_UNLINK_PART(flist,node,part) \
+#define LIST_UNLINK_PART(list,node,part) \
   do { \
     if ((node)->part back) (node)->part back->part next= (node)->part next; \
-      else                                  (flist).head= (node)->part next; \
+      else                                  (list).head= (node)->part next; \
     if ((node)->part next) (node)->part next->part back= (node)->part back; \
-      else                                  (flist).tail= (node)->part back; \
+      else                                  (list).tail= (node)->part back; \
   } while(0)
 
-#define LIST_LINK_TAIL_PART(flist,node,part) \
+#define LIST_LINK_TAIL_PART(list,node,part) \
   do { \
     (node)->part next= 0; \
-    (node)->part back= (flist).tail; \
-    if ((flist).tail) (flist).tail->part next= (node); else (flist).head= (node); \
-    (flist).tail= (node); \
+    (node)->part back= (list).tail; \
+    if ((list).tail) (list).tail->part next= (node); else (list).head= (node); \
+    (list).tail= (node); \
   } while(0)
 
-#define LIST_UNLINK(flist,node) LIST_UNLINK_PART(flist,node,unused_arg)
-#define LIST_LINK_TAIL(flist,node) LIST_LINK_TAIL_PART(flist,node, unused_arg)
+#define LIST_UNLINK(list,node) LIST_UNLINK_PART(list,node,)
+#define LIST_LINK_TAIL(list,node) LIST_LINK_TAIL_PART(list,node,)
+
 #endif

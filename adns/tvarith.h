@@ -24,13 +24,13 @@
  *  along with this program; if not, write to the Free Software Foundation,
  *  Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id$
+ *  $Id$
  */
 
 #ifndef ADNS_TVARITH_H_INCLUDED
 #define ADNS_TVARITH_H_INCLUDED
 
-static INLINE void timevaladd(struct timeval *tv_io, long ms) {
+static inline void timevaladd(struct timeval *tv_io, long ms) {
   struct timeval tmp;
   assert(ms>=0);
   tmp= *tv_io;

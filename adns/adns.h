@@ -62,11 +62,14 @@
 #include "ircd.h"
 #include "ircd_defs.h"
 #include "irc_string.h"
+#include "sprintf_irc.h"
 #define MAXFD_POLL 2
 struct adns_pollfd { int fd; short events; short revents; };
 #define ADNS_POLLIN  1
 #define ADNS_POLLPRI 2
 #define ADNS_POLLOUT 4
+#define sprintf ircsprintf
+#define vsnprintf ircvsnprintf
 
 #ifndef timercmp
 #define timercmp(tvp, uvp, cmp)                                 \
@@ -115,7 +118,6 @@ typedef enum {
   adns__qtf_deref=     0x10000, /* dereference domains and perhaps produce extra data */
   adns__qtf_mail822=   0x20000, /* make mailboxes be in RFC822 rcpt field format */
   adns__qtf_in6=       0x40000, /* ptr is IPv6 -- This is a hack but it works damnit. If you don't like it fix it yourself */  
-  adns__qtf_in6_old=   0x80000, /* ptr is IPv6 -- This is a hack but it works damnit. If you don't like it fix it yourself */  
 
   adns_r_none=               0,
   
@@ -132,7 +134,6 @@ typedef enum {
   adns_r_ptr_raw=           12,
   adns_r_ptr=                   adns_r_ptr_raw|adns__qtf_deref,
   adns_r_ptr_ip6=		adns_r_ptr_raw|adns__qtf_deref|adns__qtf_in6,
-  adns_r_ptr_ip6_old=		adns_r_ptr_raw|adns__qtf_deref|adns__qtf_in6_old, 
   adns_r_hinfo=             13,  
   
   adns_r_mx_raw=            15,

@@ -60,8 +60,8 @@ typedef unsigned char byte;
 
 #define MAXSERVERS 5
 #define MAXSORTLIST 15
-#define UDPMAXRETRIES 5
-#define UDPRETRYMS 1500
+#define UDPMAXRETRIES 15
+#define UDPRETRYMS 2000
 #define TCPWAITMS 30000
 #define TCPCONNMS 14000
 #define TCPIDLEMS 30000
@@ -76,8 +76,7 @@ typedef unsigned char byte;
 #define DNS_CLASS_IN 1
 #define IP6STRLEN 47
 #define DNS_INADDR_ARPA "in-addr", "arpa"
-#define DNS_IP6_INT	"ip6",	"int"
-#define DNS_IP6_ARPA	"ip6",	"arpa"
+#define DNS_IP6_INT	"ip6",	"arpa"
 
 #define MAX_POLLFDS  ADNS_POLLFDS_RECOMMENDED
 
@@ -127,12 +126,12 @@ typedef struct {
   const char *fmtname;
   int rrsz;
 
-  void (*makefinal)(adns_query qu, void *);
+  void (*makefinal)(adns_query qu, void *data);
   /* Change memory management of *data.
    * Previously, used alloc_interim, now use alloc_final.
    */
 
-  adns_status (*convstring)(vbuf *vb, const void *);
+  adns_status (*convstring)(vbuf *vb, const void *data);
   /* Converts the RR data to a string representation in vbuf.
    * vbuf will be appended to (it must have been initialised),
    * and will not be null-terminated by convstring.
@@ -187,6 +186,7 @@ struct adns__query {
   struct { allocnode *head, *tail; } allocations;
   int interim_allocd, preserved_allocd;
   void *final_allocspace;
+
   const typeinfo *typei;
   byte *query_dgram;
   int query_dglen;
@@ -211,7 +211,7 @@ struct adns__query {
   byte *cname_dgram;
   int cname_dglen, cname_begin;
   /* If non-0, has been allocated using . */
-  int cname_count;
+
   vbuf search_vb;
   int search_origlen, search_pos, search_doneabs;
   /* Used by the searching algorithm.  The query domain in textual form
@@ -306,11 +306,13 @@ struct adns__state {
    * we are idle (ie, tcpw queue is empty), in which case it is the
    * absolute time when we will close the connection.
    */
+  struct sigaction stdsigpipe;
+  sigset_t stdsigmask;
   struct adns_pollfd pollfds_buf[MAX_POLLFDS];
   struct server {
     struct in_addr addr;
   } servers[MAXSERVERS];
-  struct sortlist  {
+  struct sortlist {
     struct in_addr base, mask;
   } sortlist[MAXSORTLIST];
   char **searchlist;
@@ -333,10 +335,10 @@ void adns__diag(adns_state ads, int serv, adns_query qu,
 		const char *fmt, ...);
 
 int adns__vbuf_ensure(vbuf *vb, int want);
-int adns__vbuf_appendstr(vbuf *vb, const char *); /* does not include nul */
-int adns__vbuf_append(vbuf *vb, const byte *, int len);
+int adns__vbuf_appendstr(vbuf *vb, const char *data); /* does not include nul */
+int adns__vbuf_append(vbuf *vb, const byte *data, int len);
 /* 1=>success, 0=>realloc failed */
-void adns__vbuf_appendq(vbuf *vb, const byte *, int len);
+void adns__vbuf_appendq(vbuf *vb, const byte *data, int len);
 void adns__vbuf_init(vbuf *vb);
 void adns__vbuf_free(vbuf *vb);
 
@@ -502,7 +504,7 @@ void adns__reset_preserved(adns_query qu);
  */
 
 void adns__query_done(adns_query qu);
-void adns__query_fail(adns_query qu, adns_status);
+void adns__query_fail(adns_query qu, adns_status stat);
 
 /* From reply.c: */
 
@@ -572,7 +574,9 @@ typedef enum {
   pdf_quoteok= 0x001
 } parsedomain_flags;
 
-adns_status adns__parse_domain(adns_state ads, int serv, adns_query qu, vbuf *vb, parsedomain_flags flags, const byte *dgram, int dglen, int *cbyte_io, int max);
+adns_status adns__parse_domain(adns_state ads, int serv, adns_query qu,
+			       vbuf *vb, parsedomain_flags flags,
+			       const byte *dgram, int dglen, int *cbyte_io, int max);
 /* vb must already have been initialised; it will be reset if necessary.
  * If there is truncation, vb->used will be set to 0; otherwise
  * (if there is no error) vb will be null-terminated.
@@ -686,17 +690,17 @@ void adns__consistency(adns_state ads, adns_query qu, consistency_checks cc);
 
 /* Useful static inline functions: */
 
-static INLINE int ctype_whitespace(int c) { return c==' ' || c=='\n' || c=='\t'; }
-static INLINE int ctype_digit(int c) { return c>='0' && c<='9'; }
-static INLINE int ctype_alpha(int c) {
+static inline int ctype_whitespace(int c) { return c==' ' || c=='\n' || c=='\t'; }
+static inline int ctype_digit(int c) { return c>='0' && c<='9'; }
+static inline int ctype_alpha(int c) {
   return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
 }
-static INLINE int ctype_822special(int c) { return strchr("()<>@,;:\\\".[]",c) != 0; }
-static INLINE int ctype_domainunquoted(int c) {
+static inline int ctype_822special(int c) { return strchr("()<>@,;:\\\".[]",c) != 0; }
+static inline int ctype_domainunquoted(int c) {
   return ctype_alpha(c) || ctype_digit(c) || (strchr("-_/+",c) != 0);
 }
 
-static INLINE int errno_resources(int e) { return e==ENOMEM || e==ENOBUFS; }
+static inline int errno_resources(int e) { return e==ENOMEM || e==ENOBUFS; }
 
 /* Useful macros */
 

@@ -25,10 +25,14 @@
  *  along with this program; if not, write to the Free Software Foundation,
  *  Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. 
  *
- * $Id$
+ *  $Id$
  */
 
-#include "stdinc.h"
+#include <errno.h>
+
+#include <sys/types.h>
+#include <sys/uio.h>
+
 #include "internal.h"
 #include "tvarith.h"
 
@@ -162,10 +166,8 @@ adns_status adns__mkquery_frdgram(adns_state ads, vbuf *vb, int *id_r,
 
 void adns__querysend_tcp(adns_query qu, struct timeval now) {
   byte length[2];
-#if 0
   struct iovec iov[2];
-#endif
-  int wr, wr2 = 0, r;
+  int wr, r;
   adns_state ads;
 
   if (qu->ads->tcpstate != server_ok) return;
@@ -186,18 +188,14 @@ void adns__querysend_tcp(adns_query qu, struct timeval now) {
   if (ads->tcpsend.used) {
     wr= 0;
   } else {
-#if 0
-    iov[0].iov_base= (char *)length;
+    iov[0].iov_base= length;
     iov[0].iov_len= 2;
-    iov[1].iov_base= (char *)qu->query_dgram;
+    iov[1].iov_base= qu->query_dgram;
     iov[1].iov_len= qu->query_dglen;
+    adns__sigpipe_protect(qu->ads);
     wr= writev(qu->ads->tcpsocket,iov,2);
-#endif
-    wr = write(qu->ads->tcpsocket, (char *)length, 2);
-    if (wr > 0)
-        wr2 = write(qu->ads->tcpsocket, (char *)qu->query_dgram, qu->query_dglen);
-
-    if (wr < 0 || wr2 < 0) {
+    adns__sigpipe_unprotect(qu->ads);
+    if (wr < 0) {
       if (!(errno == EAGAIN || errno == EINTR || errno == ENOSPC ||
 	    errno == ENOBUFS || errno == ENOMEM)) {
 	adns__tcp_broken(ads,"write",strerror(errno));
@@ -232,19 +230,12 @@ void adns__query_send(adns_query qu, struct timeval now) {
   int serv, r;
   adns_state ads;
 
-  assert(qu->ads->nservers > 0);
   assert(qu->state == query_tosend);
-
   if ((qu->flags & adns_qf_usevc) || (qu->query_dglen > DNS_MAXUDP)) {
     query_usetcp(qu,now);
     return;
   }
 
-   if(qu->query_dglen > DNS_MAXUDP) {
-    adns__query_fail(qu, adns_s_systemfail);
-    return;
-  }
- 
   if (qu->retries >= UDPMAXRETRIES) {
     adns__query_fail(qu,adns_s_timeout);
     return;

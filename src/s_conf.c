@@ -364,10 +364,6 @@ set_default_conf(void)
         ConfigFileEntry.reject_after_count = 5;
 	ConfigFileEntry.reject_ban_time = 300;  
 	ConfigFileEntry.reject_duration = 120;
-                        
-#ifdef IPV6
-	ConfigFileEntry.fallback_to_ip6_int = YES;
-#endif
 }
 
 #undef YES

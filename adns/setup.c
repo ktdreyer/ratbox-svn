@@ -24,80 +24,70 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software Foundation,
  *  Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. 
- *
- * $Id$
+ * 
+ *  $Id$
  */
 
-#include "stdinc.h"
-#include "memory.h"
-#include "commio.h"
+#include <stdlib.h>
+#include <errno.h>
+#include <limits.h>
+#include <unistd.h>
+#include <fcntl.h>
+
+#include <netdb.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
 #include "internal.h"
-#include "s_log.h"
-
-/* For some reason BSD/OS doesn't define INADDR_LOOPBACK */
-#ifndef INADDR_LOOPBACK
-#define INADDR_LOOPBACK 0x7f000001
-#endif
-
 
 static void readconfig(adns_state ads, const char *filename, int warnmissing);
 
-static void addserver(adns_state ads, struct in_addr addr)
-{
+static void addserver(adns_state ads, struct in_addr addr) {
   int i;
   struct server *ss;
   
   if(addr.s_addr == 0)
   	addr.s_addr = htonl(INADDR_LOOPBACK);
-  for (i=0; i<ads->nservers; i++)
-    {
-      if (ads->servers[i].addr.s_addr == addr.s_addr)
-	{
-	  adns__debug(ads,-1,0,
-		      "duplicate nameserver %s ignored",inetntoa((char *)&addr));
-	  return;
-	}
-    }
-  
-  if (ads->nservers>=MAXSERVERS)
-    {
-      adns__diag(ads,-1,0,"too many nameservers, ignoring %s",inetntoa((char *)&addr));
+  for (i=0; i<ads->nservers; i++) {
+    if (ads->servers[i].addr.s_addr == addr.s_addr) {
+      adns__debug(ads,-1,0,"duplicate nameserver %s ignored",inet_ntoa(addr));
       return;
     }
+  }
+  
+  if (ads->nservers>=MAXSERVERS) {
+    adns__diag(ads,-1,0,"too many nameservers, ignoring %s",inet_ntoa(addr));
+    return;
+  }
 
   ss= ads->servers+ads->nservers;
   ss->addr= addr;
   ads->nservers++;
 }
 
-static void freesearchlist(adns_state ads)
-{
-  if (ads->nsearchlist) MyFree(*ads->searchlist);
-  MyFree(ads->searchlist);
+static void freesearchlist(adns_state ads) {
+  if (ads->nsearchlist) free(*ads->searchlist);
+  free(ads->searchlist);
 }
 
-static void saveerr(adns_state ads, int en)
-{
+static void saveerr(adns_state ads, int en) {
   if (!ads->configerrno) ads->configerrno= en;
 }
 
 static void configparseerr(adns_state ads, const char *fn, int lno,
-			   const char *fmt, ...)
-{
-#if 0
+			   const char *fmt, ...) {
   va_list al;
-#endif
+
   saveerr(ads,EINVAL);
   if (!ads->diagfile || (ads->iflags & adns_if_noerrprint)) return;
 
-#if 0
   if (lno==-1) fprintf(ads->diagfile,"adns: %s: ",fn);
   else fprintf(ads->diagfile,"adns: %s:%d: ",fn,lno);
   va_start(al,fmt);
   vfprintf(ads->diagfile,fmt,al);
   va_end(al);
   fputc('\n',ads->diagfile);
-#endif
 }
 
 static int nextword(const char **bufp_io, const char **word_r, int *l_r) {
@@ -120,11 +110,11 @@ static int nextword(const char **bufp_io, const char **word_r, int *l_r) {
 static void ccf_nameserver(adns_state ads, const char *fn, int lno, const char *buf) {
   struct in_addr ia;
   
-  if (inetpton(AF_INET, buf,&ia) <=0) {
+  if (!inet_pton(AF_INET, buf,&ia)) {
     configparseerr(ads,fn,lno,"invalid nameserver address `%s'",buf);
     return;
   }
-  adns__debug(ads,-1,0,"using nameserver %s",inetntoa((char *)&ia));
+  adns__debug(ads,-1,0,"using nameserver %s",inet_ntoa(ia));
   addserver(ads,ia);
 }
 
@@ -140,19 +130,8 @@ static void ccf_search(adns_state ads, const char *fn, int lno, const char *buf)
   tl= 0;
   while (nextword(&bufp,&word,&l)) { count++; tl += l+1; }
 
-  newptrs = MyMalloc(sizeof(char*)*count); 
-  if (!newptrs)
-    {
-      saveerr(ads,errno);
-      return;
-    }
-  newchars= MyMalloc(tl); 
-  if (!newchars)
-    {
-     saveerr(ads,errno);
-     MyFree(newptrs);
-     return;
-    }
+  newptrs= malloc(sizeof(char*)*count);  if (!newptrs) { saveerr(ads,errno); return; }
+  newchars= malloc(tl);  if (!newchars) { saveerr(ads,errno); free(newptrs); return; }
 
   bufp= buf;
   pp= newptrs;
@@ -193,14 +172,14 @@ static void ccf_sortlist(adns_state ads, const char *fn, int lno, const char *bu
     slash= strchr(tbuf,'/');
     if (slash) *slash++= 0;
     
-    if (inetpton(AF_INET, tbuf,&base) <= 0) {
+    if (!inet_pton(AF_INET, tbuf,&base)) {
       configparseerr(ads,fn,lno,"invalid address `%s' in sortlist",tbuf);
       continue;
     }
 
     if (slash) {
       if (strchr(slash,'.')) {
-	if (inetpton(AF_INET, slash,&mask) <= 0) {
+	if (!inet_pton(AF_INET, slash,&mask)) {
 	  configparseerr(ads,fn,lno,"invalid mask `%s' in sortlist",slash);
 	  continue;
 	}
@@ -326,13 +305,18 @@ static int gl_file(adns_state ads, getline_ctx *src_io, const char *filename,
       adns__diag(ads,-1,0,"%s:%d: line too long, ignored",filename,lno);
       goto x_badline;
     }
-    c= fgetc(file);
+    c= getc(file);
     if (!c) {
       adns__diag(ads,-1,0,"%s:%d: line contains nul, ignored",filename,lno);
       goto x_badline;
     } else if (c == '\n') {
       break;
     } else if (c == EOF) {
+      if (ferror(file)) {
+	saveerr(ads,errno);
+	adns__diag(ads,-1,0,"%s:%d: read error: %s",filename,lno,strerror(errno));
+	return -1;
+      }
       if (!i) return -1;
       break;
     } else {
@@ -346,13 +330,12 @@ static int gl_file(adns_state ads, getline_ctx *src_io, const char *filename,
 
  x_badline:
   saveerr(ads,EINVAL);
-  while ((c= fgetc(file)) != EOF && c != '\n');
+  while ((c= getc(file)) != EOF && c != '\n');
   return -2;
 }
 
 static int gl_text(adns_state ads, getline_ctx *src_io, const char *filename,
-		   int lno, char *buf, int buflen)
-{
+		   int lno, char *buf, int buflen) {
   const char *cp= src_io->text;
   int l;
 
@@ -374,21 +357,20 @@ static int gl_text(adns_state ads, getline_ctx *src_io, const char *filename,
 }
 
 static void readconfiggeneric(adns_state ads, const char *filename,
-			      int (*xgetline)(adns_state ads, getline_ctx*,
+			      int (*getline)(adns_state ads, getline_ctx*,
 					     const char *filename, int lno,
 					     char *buf, int buflen),
 			      /* Returns >=0 for success, -1 for EOF or error
 			       * (error will have been reported), or -2 for
 			       * bad line was encountered, try again.
 			       */
-			      getline_ctx gl_ctx)
-{
+			      getline_ctx gl_ctx) {
   char linebuf[2000], *p, *q;
   int lno, l, dirl;
   const struct configcommandinfo *ccip;
 
   for (lno=1;
-       (l= xgetline(ads,&gl_ctx, filename,lno, linebuf,sizeof(linebuf))) != -1;
+       (l= getline(ads,&gl_ctx, filename,lno, linebuf,sizeof(linebuf))) != -1;
        lno++) {
     if (l == -2) continue;
     while (l>0 && ctype_whitespace(linebuf[l-1])) l--;
@@ -400,7 +382,7 @@ static void readconfiggeneric(adns_state ads, const char *filename,
     while (*q && !ctype_whitespace(*q)) q++;
     dirl= q-p;
     for (ccip=configcommandinfos;
-	 ccip->name && !(strlen(ccip->name)==(size_t)dirl && !memcmp(ccip->name,p,q-p));
+	 ccip->name && !(strlen(ccip->name)==dirl && !memcmp(ccip->name,p,q-p));
 	 ccip++);
     if (!ccip->name) {
       adns__diag(ads,-1,0,"%s:%d: unknown configuration directive `%.*s'",
@@ -425,7 +407,7 @@ static void readconfig(adns_state ads, const char *filename, int warnmissing) {
   getline_ctx gl_ctx;
   
   gl_ctx.file= fopen(filename,"r");
-  if (gl_ctx.file == NULL) {
+  if (!gl_ctx.file) {
     if (errno == ENOENT) {
       if (warnmissing)
 	adns__debug(ads,-1,0,"configuration file `%s' does not exist",filename);
@@ -473,22 +455,18 @@ static void readconfigenvtext(adns_state ads, const char *envvar) {
 
 
 int adns__setnonblock(adns_state ads, int fd) {
-  if(!comm_set_nb(fd))
-    return errno;
+  int r;
+  
+  r= fcntl(fd,F_GETFL,0); if (r<0) return errno;
+  r |= O_NONBLOCK;
+  r= fcntl(fd,F_SETFL,r); if (r<0) return errno;
   return 0;
 }
 
-static int init_begin(adns_state *ads_r, adns_initflags flags, FILE *diagfile)
-{
+static int init_begin(adns_state *ads_r, adns_initflags flags, FILE *diagfile) {
   adns_state ads;
   
-
-  ads = MyMalloc(sizeof(*ads));
-
-  /* Under hybrid, MyMalloc would have aborted already */
-#if 0
- if (!ads) return errno;
-#endif
+  ads= malloc(sizeof(*ads)); if (!ads) return errno;
 
   ads->iflags= flags;
   ads->diagfile= diagfile;
@@ -515,40 +493,44 @@ static int init_begin(adns_state *ads_r, adns_initflags flags, FILE *diagfile)
 
 static int init_finish(adns_state ads) {
   struct in_addr ia;
+#if 0
+  struct protoent *proto;
+#endif
   int r;
   
-  if (!ads->nservers)
-    {
-#if 0
-      if (ads->diagfile && ads->iflags & adns_if_debug)
-	fprintf(ads->diagfile,"adns: no nameservers, using localhost\n");
-#endif
-      ia.s_addr= htonl(INADDR_LOOPBACK);
-      addserver(ads,ia);
+  if (!ads->nservers) {
+    if (ads->diagfile && ads->iflags & adns_if_debug)
+      fprintf(ads->diagfile,"adns: no nameservers, using localhost\n");
+    ia.s_addr= htonl(INADDR_LOOPBACK);
+    addserver(ads,ia);
   }
 
-  ads->udpsocket = comm_socket(AF_INET, SOCK_DGRAM, 0, "UDP Resolver socket");
-  if (ads->udpsocket<0) { ilog(L_IOERROR, "Failed to open socket"); r= errno; goto x_free; }
+#if 0
+  proto= getprotobyname("udp"); if (!proto) { r= ENOPROTOOPT; goto x_free; }
+  ads->udpsocket= socket(AF_INET,SOCK_DGRAM,proto->p_proto);
+#endif
+  ads->udpsocket= comm_socket(AF_INET, SOCK_DGRAM, 0, "UDP Resolver socket");
+  
+  if (ads->udpsocket<0) { r= errno; goto x_free; }
 
   r= adns__setnonblock(ads,ads->udpsocket);
-  if (r) { ilog(L_IOERROR, "Failed to make socket non-blocking"); r= errno; goto x_closeudp; }
+  if (r) { r= errno; goto x_closeudp; }
   
   return 0;
 
  x_closeudp:
-  comm_close(ads->udpsocket);
+  close(ads->udpsocket);
  x_free:
-  MyFree(ads);
-  ilog(L_IOERROR, "Returning from init_finish: r = %d", r);
+  free(ads);
   return r;
 }
 
 static void init_abort(adns_state ads) {
   if (ads->nsearchlist) {
-    MyFree(ads->searchlist[0]);
-    MyFree(ads->searchlist);
+    free(ads->searchlist[0]);
+    free(ads->searchlist);
   }
-  MyFree(ads);
+  free(ads);
 }
 
 int adns_init(adns_state *ads_r, adns_initflags flags, FILE *diagfile) {
@@ -556,7 +538,7 @@ int adns_init(adns_state *ads_r, adns_initflags flags, FILE *diagfile) {
   const char *res_options, *adns_res_options;
   int r;
   
-  r= init_begin(&ads, flags, diagfile);
+  r= init_begin(&ads, flags, diagfile ? diagfile : stderr);
   if (r) return r;
   
   res_options= instrum_getenv(ads,"RES_OPTIONS");
@@ -564,8 +546,10 @@ int adns_init(adns_state *ads_r, adns_initflags flags, FILE *diagfile) {
   ccf_options(ads,"RES_OPTIONS",-1,res_options);
   ccf_options(ads,"ADNS_RES_OPTIONS",-1,adns_res_options);
 
-  readconfig(ads,"/etc/resolv.conf",0);
+  readconfig(ads,"/etc/resolv.conf",1);
   readconfig(ads,"/etc/resolv-adns.conf",0);
+  /* checking in the current dir for cygwin */
+  readconfig(ads,"resolv.conf",0);
   readconfigenv(ads,"RES_CONF");
   readconfigenv(ads,"ADNS_RES_CONF");
 
@@ -579,7 +563,6 @@ int adns_init(adns_state *ads_r, adns_initflags flags, FILE *diagfile) {
   ccf_search(ads,"ADNS_LOCALDOMAIN",-1,instrum_getenv(ads,"ADNS_LOCALDOMAIN"));
 
   if (ads->configerrno && ads->configerrno != EINVAL) {
-    ilog(L_IOERROR, "Failed at 1");
     r= ads->configerrno;
     init_abort(ads);
     return r;
@@ -623,12 +606,12 @@ void adns_finish(adns_state ads) {
     else if (ads->output.head) adns_cancel(ads->output.head);
     else break;
   }
-  comm_close(ads->udpsocket);
-  if (ads->tcpsocket >= 0) comm_close(ads->tcpsocket);
+  close(ads->udpsocket);
+  if (ads->tcpsocket >= 0) close(ads->tcpsocket);
   adns__vbuf_free(&ads->tcpsend);
   adns__vbuf_free(&ads->tcprecv);
   freesearchlist(ads);
-  MyFree(ads);
+  free(ads);
 }
 
 void adns_forallqueries_begin(adns_state ads) {
@@ -675,7 +658,7 @@ int adns__rereadconfig(adns_state ads)
 {
   struct in_addr ia;
   adns__consistency(ads,0,cc_entex);
-  ads->nservers = 0;	
+  ads->nservers = 0;
   readconfig(ads,"/etc/resolv.conf",0);
   if (!ads->nservers)
   {

@@ -8520,47 +8520,47 @@ _ACEOF
 
 
 cat >>confdefs.h <<\_ACEOF
-#define CHANNEL_HEAP_SIZE 1024
+#define CHANNEL_HEAP_SIZE 8192
 _ACEOF
 
 
 cat >>confdefs.h <<\_ACEOF
-#define BAN_HEAP_SIZE 1024
+#define BAN_HEAP_SIZE 4096
 _ACEOF
 
 
 cat >>confdefs.h <<\_ACEOF
-#define CLIENT_HEAP_SIZE 1024
+#define CLIENT_HEAP_SIZE 8192
 _ACEOF
 
 
 cat >>confdefs.h <<\_ACEOF
-#define LCLIENT_HEAP_SIZE 512
+#define LCLIENT_HEAP_SIZE 1024
 _ACEOF
 
 
 cat >>confdefs.h <<\_ACEOF
-#define USER_HEAP_SIZE 1024
+#define USER_HEAP_SIZE 8192
 _ACEOF
 
 
 cat >>confdefs.h <<\_ACEOF
-#define DNODE_HEAP_SIZE 2048
+#define DNODE_HEAP_SIZE 8192
 _ACEOF
 
 
 cat >>confdefs.h <<\_ACEOF
-#define TOPIC_HEAP_SIZE 1024
+#define TOPIC_HEAP_SIZE 4096
 _ACEOF
 
 
 cat >>confdefs.h <<\_ACEOF
-#define LINEBUF_HEAP_SIZE 1024
+#define LINEBUF_HEAP_SIZE 2048
 _ACEOF
 
 
 cat >>confdefs.h <<\_ACEOF
-#define MEMBER_HEAP_SIZE 1024
+#define MEMBER_HEAP_SIZE 32768
 _ACEOF
 
 
