@@ -90,6 +90,7 @@
 #define REALLEN         50
 #define KILLLEN         90
 #define CHANNELLEN      200
+#define LOC_CHANNELLEN	50
 
 #define REASONLEN	120
 

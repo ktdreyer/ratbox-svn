@@ -91,9 +91,8 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	for(i = 0, name = strtoken(&p, chanlist, ","); name;
 	    name = strtoken(&p, NULL, ","))
 	{
-
 		/* check the length and name of channel is ok */
-		if(!check_channel_name(name) || (strlen(name) > CHANNELLEN))
+		if(!check_channel_name(name) || (strlen(name) > LOC_CHANNELLEN))
 		{
 			sendto_one_numeric(source_p, ERR_BADCHANNAME,
 					   form_str(ERR_BADCHANNAME),
