@@ -65,6 +65,7 @@ struct Channel
   int             locusers;
   time_t          locusers_last;
 #endif
+  struct SLink*   channels;         /* Link list of sub channels */
   struct SLink*   members;
   struct SLink*   invites;
   struct SLink*   banlist;
