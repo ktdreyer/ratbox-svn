@@ -1,3 +1,8 @@
+*** 20011126_1 by a1kmm
+- Fixed a bug to stop carriage returns or linefeeds making their way into
+  messages under some cases.
+
+
 *** 20011124_2 by wcampbel
 With the new help system, opers.txt and users.txt are no longer needed
 
