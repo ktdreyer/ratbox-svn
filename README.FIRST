@@ -72,9 +72,6 @@ Feature Specific Requirements:
   visit http://lists.ratbox.org/cgi-bin/mailman/listinfo/ircd-ratbox
   Note that this list also gets the commit emails from the CVS server.
 
-- If you run in to a problem you think may be specific to your platform,
-  check README.PLATFORMS for some hints.
-
 - SOLARIS USERS: this code appears to tickle a bug in older gcc and 
   egcs ONLY on 64-bit Solaris7.  gcc-2.95 and SunPro C on 64bit should
   work fine, and any gcc or SunPro compiled on 32bit.

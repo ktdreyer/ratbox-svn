@@ -229,14 +229,14 @@ static void mo_gline(struct Client *client_p,
 			   reason);
 
       /* 4 param version for hyb-7 servers */
-      sendto_server(NULL, source_p, NULL, CAP_GLN|CAP_UID, NOCAPS,
+      sendto_server(NULL, CAP_GLN|CAP_UID, NOCAPS,
                     
                     ":%s GLINE %s %s :%s",
                     ID(source_p),
                     user,
                     host,
                     reason);
-      sendto_server(NULL, source_p, NULL, CAP_GLN, CAP_UID,
+      sendto_server(NULL, CAP_GLN, CAP_UID,
                     
                     ":%s GLINE %s %s :%s",
                     source_p->name,
@@ -245,12 +245,12 @@ static void mo_gline(struct Client *client_p,
                     reason);
 
       /* 8 param for hyb-6 */
-      sendto_server(NULL, NULL, NULL, CAP_UID, CAP_GLN, 
+      sendto_server(NULL, CAP_UID, CAP_GLN, 
                     ":%s GLINE %s %s %s %s %s %s :%s",
                     me.name, ID(source_p), source_p->username,
                     source_p->host, source_p->user->server, user, host,
                     reason);
-      sendto_server(NULL, NULL, NULL, NOCAPS, CAP_GLN|CAP_UID, 
+      sendto_server(NULL, NOCAPS, CAP_GLN|CAP_UID, 
                     ":%s GLINE %s %s %s %s %s %s :%s",
                     me.name, source_p->name, source_p->username,
                     source_p->host, source_p->user->server, user, host,
@@ -335,14 +335,14 @@ static void ms_gline(struct Client *client_p,
     return;
     
   /* send in hyb-7 to compatable servers */
-  sendto_server(client_p, acptr, NULL, CAP_GLN, NOCAPS, 
+  sendto_server(client_p, CAP_GLN, NOCAPS, 
                 ":%s GLINE %s %s :%s",
                 oper_nick,
                 user,
                 host,
                 reason);
   /* hyb-6 version to the rest */
-  sendto_server(client_p, NULL, NULL, NOCAPS, CAP_GLN, 
+  sendto_server(client_p, NOCAPS, CAP_GLN, 
                 ":%s GLINE %s %s %s %s %s %s :%s",
                 oper_server, oper_nick, oper_user, oper_host,
                 oper_server, user, host, reason);

@@ -148,7 +148,7 @@ static void ms_squit(struct Client *client_p, struct Client *source_p,
 				 found_squit->server_name,
 				 source_p->name, comment);
 
-          sendto_server(NULL, NULL, NULL, NOCAPS, NOCAPS, 
+          sendto_server(NULL, NOCAPS, NOCAPS, 
                         ":%s WALLOPS :Remote SQUIT %s from %s (%s)",
                         me.name, found_squit->server_name,
                         source_p->name, comment);

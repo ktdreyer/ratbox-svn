@@ -109,7 +109,7 @@ static void mo_ojoin(struct Client *client_p, struct Client *source_p,
     {
        add_user_to_channel(chptr, source_p, CHFL_CHANOP);
        if (chptr->chname[0] != '&')
-         sendto_server(client_p, source_p, chptr, NOCAPS, NOCAPS,  
+         sendto_server(client_p, NOCAPS, NOCAPS,  
                  ":%s SJOIN %lu %s + :@%s", me.name, chptr->channelts,
                  chptr->chname, source_p->name);
        sendto_channel_local(ALL_MEMBERS, chptr, ":%s!%s@%s JOIN %s",
@@ -125,7 +125,7 @@ static void mo_ojoin(struct Client *client_p, struct Client *source_p,
     {
        add_user_to_channel(chptr, source_p, CHFL_VOICE);
        if (chptr->chname[0] != '&')
-         sendto_server(client_p, source_p, chptr, NOCAPS, NOCAPS,  
+         sendto_server(client_p, NOCAPS, NOCAPS,  
                  ":%s SJOIN %lu %s + :+%s", me.name, chptr->channelts,
                  chptr->chname, source_p->name);
        sendto_channel_local(ALL_MEMBERS, chptr, ":%s!%s@%s JOIN %s",
@@ -140,7 +140,7 @@ static void mo_ojoin(struct Client *client_p, struct Client *source_p,
     {
        add_user_to_channel(chptr, source_p, CHFL_PEON);
        if (chptr->chname[0] != '&')
-         sendto_server(client_p, source_p, chptr, NOCAPS, NOCAPS,  
+         sendto_server(client_p, NOCAPS, NOCAPS,  
                        ":%s SJOIN %lu %s + :%s",
                        me.name, chptr->channelts,
 		       chptr->chname, source_p->name);

@@ -279,7 +279,7 @@ m_join(struct Client *client_p,
            * and channel_modes() will leave a trailing space on pbuf if
            * its used --fl
            */
-	  sendto_server(client_p, source_p, chptr, NOCAPS, NOCAPS,
+	  sendto_server(client_p, NOCAPS, NOCAPS,
                         ":%s SJOIN %lu %s %s:@%s",
                         me.name, (unsigned long) chptr->channelts, 
                         chptr->chname, mbuf, parv[0]);
@@ -295,7 +295,7 @@ m_join(struct Client *client_p,
 	}
       else
 	{
-	  sendto_server(client_p, source_p, chptr, NOCAPS, NOCAPS,
+	  sendto_server(client_p, NOCAPS, NOCAPS,
                         ":%s SJOIN %lu %s + :%s",
                         me.name, (unsigned long) chptr->channelts,
                         chptr->chname, parv[0]);
@@ -392,7 +392,7 @@ static void do_join_0(struct Client *client_p, struct Client *source_p)
   struct Channel *chptr=NULL;
   dlink_node   *lp;
 
-  sendto_server(client_p, source_p, NULL, NOCAPS, NOCAPS, 
+  sendto_server(client_p, NOCAPS, NOCAPS, 
                 ":%s JOIN 0", source_p->name);
 
   if (source_p->user->channel.head &&
@@ -450,7 +450,7 @@ burst_mode_list(char *chname, dlink_list *banlist, char flag, int cap)
 
     if((count >= MAXMODEPARAMS) || ((mlen + cur_len + tlen) > BUFSIZE))
     {
-      sendto_server(NULL, NULL, NULL, cap, NOCAPS, "%s%s %s", buf, mbuf, pbuf);
+      sendto_server(NULL, cap, NOCAPS, "%s%s %s", buf, mbuf, pbuf);
 
       mp = mbuf;
       pp = pbuf;
@@ -466,6 +466,6 @@ burst_mode_list(char *chname, dlink_list *banlist, char flag, int cap)
   }
 
   if(count)
-    sendto_server(NULL, NULL, NULL, cap, NOCAPS, "%s%s %s", buf, mbuf, pbuf);
+    sendto_server(NULL, cap, NOCAPS, "%s%s %s", buf, mbuf, pbuf);
 }
 

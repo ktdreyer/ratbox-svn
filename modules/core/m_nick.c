@@ -682,7 +682,7 @@ nick_from_server(struct Client *client_p, struct Client *source_p, int parc,
     if (source_p->user)
     {
       add_history(source_p,1);
-      sendto_server(client_p, source_p, NULL, NOCAPS, NOCAPS,
+      sendto_server(client_p, NOCAPS, NOCAPS,
                     ":%s NICK %s :%lu",
 		      parv[0], nick, (unsigned long) source_p->tsinfo);
     }

@@ -213,7 +213,7 @@ mo_kline(struct Client *client_p, struct Client *source_p,
 
   if (target_server != NULL)
     {
-      sendto_server(NULL, source_p, NULL, CAP_KLN, NOCAPS, 
+      sendto_server(NULL, CAP_KLN, NOCAPS, 
                     ":%s KLINE %s %lu %s %s :%s",
                     source_p->name,
                     target_server,
@@ -282,7 +282,7 @@ ms_kline(struct Client *client_p, struct Client *source_p,
 
   /* parv[0]  parv[1]        parv[2]      parv[3]  parv[4]  parv[5] */
   /* oper     target_server  tkline_time  user     host     reason */
-  sendto_server(client_p, source_p, NULL, CAP_KLN, NOCAPS, 
+  sendto_server(client_p, CAP_KLN, NOCAPS, 
                 ":%s KLINE %s %s %s %s :%s",
                 parv[0], parv[1], parv[2], parv[3], parv[4], parv[5]);
 

@@ -131,7 +131,7 @@ static void set_topic(struct Client *source_p, struct Channel *chptr,
 		       chptr->chname, chptr->topic == NULL ? "" : chptr->topic);
 
 #ifdef TBURST_PROPAGATE
-  sendto_server(source_p, NULL, chptr, CAP_TBURST, NOCAPS,
+  sendto_server(source_p, CAP_TBURST, NOCAPS,
 		":%s TBURST %ld %s %ld %s :%s",
 		source_p->name, chptr->channelts, chptr->chname,
 		chptr->topic_time, 

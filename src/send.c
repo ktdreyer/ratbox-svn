@@ -228,7 +228,7 @@ send_linebuf_remote(struct Client *to, struct Client *from,
                          from->name, from->username, from->host,
                          to->from->name);
 
-    sendto_server(NULL, to, NULL, NOCAPS, NOCAPS,
+    sendto_server(NULL, NOCAPS, NOCAPS,
                   ":%s KILL %s :%s (%s[%s@%s] Ghosted %s)",
                   me.name, to->name, me.name, to->name,
                   to->username, to->host, to->from->name);
@@ -584,8 +584,6 @@ sendto_list_anywhere(struct Client *one, struct Client *from,
  * sendto_server
  * 
  * inputs       - pointer to client to NOT send to
- *              - pointer to source client required by LL (if any)
- *              - pointer to channel required by LL (if any)
  *              - caps or'd together which must ALL be present
  *              - caps or'd together which must ALL NOT be present
  *              - printf style format string
@@ -596,24 +594,18 @@ sendto_list_anywhere(struct Client *one, struct Client *from,
  *                support ALL capabs in 'caps', and NO capabs in 'nocaps'.
  *            
  * This function was written in an attempt to merge together the other
- * billion sendto_*serv*() functions, which sprung up with capabs,
- * lazylinks, uids, etc.
+ * billion sendto_*serv*() functions, which sprung up with capabs, uids etc
  * -davidt
  */
 void 
-sendto_server(struct Client *one, struct Client *source_p,
-                   struct Channel *chptr, unsigned long caps,
-                   unsigned long nocaps, const char *format, ...)
+sendto_server(struct Client *one, unsigned long caps,
+              unsigned long nocaps, const char *format, ...)
 {
   va_list args;
   struct Client *client_p;
   dlink_node *ptr;
   dlink_node *ptr_next;
   buf_head_t linebuf;
-
-  if (chptr != NULL)
-    if (*chptr->chname == '&')
-      return;
 
   linebuf_newbuf(&linebuf);
   va_start(args, format);
