@@ -1,3 +1,8 @@
+*** 20010226_6 by androsyn
+Fixed things so that they compile without warning with Sun's CC.
+BTW, Sun's CC sucks. 
+
+
 *** 20010226_5 by ejb
 - fix to make ircd_parser.y work
 - notes on Solaris compile.
