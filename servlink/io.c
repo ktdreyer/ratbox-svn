@@ -57,8 +57,6 @@ fd_name(int fd)
 
 #if defined( HAVE_LIBZ )
 static unsigned char tmp_buf[BUFLEN];
-#endif
-#if defined( HAVE_LIBZ ) 
 static unsigned char tmp2_buf[BUFLEN];
 #endif
 
