@@ -1,3 +1,9 @@
+*** 20010515_2 by db
+- missing {0,0} in flags in set_final_mode. How this has worked
+  so long without being spotted, is beyond me.
+
+
+
 *** 20010515_1 by toot
 removed a fixed bug from BUGS
 
