@@ -68,7 +68,6 @@ int   class_sendq_var;
 %token  ACCEPT_PASSWORD
 %token  ACTION
 %token  ADMIN
-%token  ALLOW_BOTS
 %token  AUTH
 %token  AUTOCONN
 %token  CLASS
@@ -152,7 +151,6 @@ int   class_sendq_var;
 %token  KLINE_WITH_CONNECTION_CLOSED
 %token  WARN_NO_NLINE
 %token  NON_REDUNDANT_KLINES
-%token  BOTCHECK
 %token  E_LINES_OPER_ONLY
 %token  B_LINES_OPER_ONLY
 %token  F_LINES_OPER_ONLY
@@ -626,7 +624,7 @@ auth_items:     auth_items auth_item |
                 auth_item
 
 auth_item:      auth_user | auth_passwd | auth_class |
-                auth_kline_exempt | auth_allow_bots | auth_have_ident |
+                auth_kline_exempt | auth_have_ident |
                 auth_exceed_limit | auth_no_tilde | auth_spoof
 
 auth_user:   USER '=' QSTRING ';'
@@ -689,12 +687,6 @@ auth_kline_exempt:    KLINE_EXEMPT '=' TYES ';'
     yy_aconf->flags &= ~CONF_FLAGS_E_LINED;
   };
 
-auth_allow_bots:      ALLOW_BOTS '=' TYES ';'
-  {
-    yy_aconf->flags |= CONF_FLAGS_B_LINED;
-  };
-                      |
-                      ALLOW_BOTS '=' TNO ';'
   {
     yy_aconf->flags &= ~CONF_FLAGS_B_LINED;
   };
