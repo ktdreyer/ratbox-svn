@@ -1,6 +1,8 @@
 /*
  * A slightly nicer version of dline_conf.c
  * Written by Aaron Sethman <androsyn@ratbox.org>
+ *
+ * $Id$
  */
 
 #include "config.h"
