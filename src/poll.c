@@ -70,6 +70,7 @@
 /*
  * Stuff for poll()
  */
+#define __USE_XOPEN    /* XXXX had to add this define to make it compile -toby */
 #include <sys/poll.h>
 #define CONNECTFAST
 

@@ -275,7 +275,7 @@ int     m_join(struct Client *cptr,
                           (this prevents join-invited-chan voodoo) */
                        if (!key[1])
                          {
-                           show_vchans(cptr, sptr, chptr);
+                           show_vchans(cptr, sptr, chptr, "join");
                            return 0;
                          }
 
@@ -316,7 +316,7 @@ int     m_join(struct Client *cptr,
                           /* otherwise, they get a list of channels */
                           else
                             {
-                              show_vchans(cptr, sptr, chptr);
+                              show_vchans(cptr, sptr, chptr, "join");
                               return 0;
                             }
                         }

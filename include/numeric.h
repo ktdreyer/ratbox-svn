@@ -202,6 +202,10 @@ extern const char* form_str(int);
 #define RPL_LOCALUSERS       265
 #define RPL_GLOBALUSERS      266
 
+#define RPL_VCHANEXIST       276
+#define RPL_VCHANLIST        277
+#define RPL_VCHANHELP        278
+
 /* numeric_replies */
 
 #define RPL_NONE             300

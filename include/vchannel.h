@@ -52,7 +52,8 @@ extern struct Channel* find_bchan(struct Channel *chptr);
 
 extern void	show_vchans(struct Client *cptr,
 			    struct Client *sptr,
-			    struct Channel *chptr);
+			    struct Channel *chptr,
+                            char *command);
 
 /* find a matching vchan with a !key (nick) */ 
 extern struct Channel* find_vchan(struct Channel *, char *);

@@ -30,6 +30,7 @@
 #include "ircd.h"
 #include "list.h"
 #include "send.h"
+#include "numeric.h"
 
 #include <assert.h>
 #include <string.h>
@@ -148,30 +149,51 @@ struct Channel* find_bchan(struct Channel *chptr)
   return NullChn;
 }
 
-/* show info on vchans, XXXX this needs to be improved! */
+/* show available vchans */
 void show_vchans(struct Client *cptr,
                         struct Client *sptr,
-                        struct Channel *chptr)
+                        struct Channel *chptr,
+                        char *command)
 {
-   int no_of_vchans = 0;
    struct Channel *chtmp;
+   int no_of_vchans = 0;
+   int reply_to_send = 1;
+   char key_list[BUFSIZE];
+
+   *key_list = '\0';
 
    for (chtmp = chptr; chtmp; chtmp = chtmp->next_vchan)
      if (chtmp->members)
        no_of_vchans++;
 
-   sendto_one(sptr,
-              ":%s NOTICE %s *** %d channels are available for %s",
-              me.name, sptr->name, no_of_vchans, chptr->chname);
-   sendto_one(sptr,
-              ":%s NOTICE %s *** Type /join %s <key> to join the one you wish to join",
-               me.name, sptr->name, chptr->chname);
-
+   sendto_one(sptr, form_str(RPL_VCHANEXIST),
+              me.name, sptr->name, chptr->chname, no_of_vchans);
+       
    for (chtmp = chptr; chtmp; chtmp = chtmp->next_vchan)
      if (chtmp->members)
-       sendto_one(sptr,
-                 ":%s NOTICE %s *** !%s",
-                  me.name, sptr->name, chtmp->members->value.cptr->name);
+       {
+         strcat(key_list, "!");
+         strcat(key_list, chtmp->members->value.cptr->name);
+         strcat(key_list, " ");
+
+         if (strlen(key_list) > (BUFSIZE - NICKLEN - 3))
+           {
+             sendto_one(sptr, form_str(RPL_VCHANLIST),
+                        me.name, sptr->name, chptr->chname, key_list);
+             key_list[0] = '\0';
+
+             /* last one in the list, we won't be sending any more */
+             if (!chtmp->next_vchan)
+               reply_to_send = 0;
+           }
+       }
+
+   if (reply_to_send)
+     sendto_one(sptr, form_str(RPL_VCHANLIST),
+                me.name, sptr->name, chptr->chname, key_list);
+
+   sendto_one(sptr, form_str(RPL_VCHANHELP),
+              me.name, sptr->name, command, chptr->chname);
 }
 
 /* return matching vchan, from root and !key (nick)
