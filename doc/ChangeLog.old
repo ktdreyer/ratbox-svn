@@ -1,3 +1,7 @@
+*** 20010101_46 by ejb
+- fix s_serv.c
+
+
 *** 20010101_45 by davidt
 Remove extra variable i forgot about
 
