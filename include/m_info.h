@@ -166,12 +166,6 @@ Info MyInformation[] = {
 #else
   { "USE_GETTEXT", "OFF", 0, "Use gettext() for message customisation at runtime" },
 #endif /* USE_GETTEXT */
-  
-#ifdef USE_RCS
-  { "USE_RCS", "ON", 0, "Use \"ci\" to Keep RCS Control" },
-#else
-  { "USE_RCS", "OFF", 0, "Use \"ci\" to Keep RCS Control" },
-#endif /* USE_RCS */
 
 #ifdef USE_SYSLOG
   { "USE_SYSLOG", "ON", 0, "Log Errors to syslog file" },
