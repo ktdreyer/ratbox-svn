@@ -1,3 +1,14 @@
+*** 20001103_2 by adrian
+
+
+Tidy up the logging during a connection attempt - print a connect message
+*before* calling serv_connect(), because it can generate an error itself,
+sending the error to the client *before* sending the activated line.
+(This is a side-effect of callbacks, btw. We could get around it, but this
+just seems clearer to me.)
+
+
+
 *** 20001103_1 by db
 - reworked m_names.c
 - added fix by rodder from hybrid-6 for log botch
