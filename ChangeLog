@@ -1,3 +1,15 @@
+androsyn    2004/09/13 09:54:04 EDT	(20040913_0)
+
+  Modified files:
+    include              ircd_defs.h 
+  Log:
+  Fix socklen stuff in devel..
+  
+  Revision  Changes    Path
+  7.53      +5 -1      ircd-ratbox/include/ircd_defs.h
+
+
+
 androsyn    2004/09/08 22:14:35 EDT	(20040909_3)
 
   Modified files:
