@@ -1,3 +1,7 @@
+*** 20010517_7 by toot
+simplifies things in ms_gline a little more
+
+
 *** 20010517_6 by jdc
 * Admins permitted to do Dlines with bitmasks as small as /8.
 
