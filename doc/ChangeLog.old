@@ -1,3 +1,7 @@
+*** 20010228_2 by androsyn
+Makes yacc/bison detection work right.
+
+
 *** 20010228_1 by androsyn
 Well..this fixes that core dump..The problem is now that I lines don't seem
 to be working right :/
