@@ -857,6 +857,13 @@ general {
 	 */
 	short_motd = no;
 
+	/* Enable PING cookies, clients must respond to a random string
+	 * sent to them in a PING command before being accepted by the server.
+	 * This is used to help block certain types of drones and FTP PASV
+	 * mode "spoofing".  The default is 'no'
+	 */
+	ping_cookie = no;
+
 	/* Set to "yes" to disable flood control for opers. */
 	no_oper_flood = yes;
 
