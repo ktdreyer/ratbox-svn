@@ -143,7 +143,7 @@ static void m_mode(struct Client *client_p, struct Client *source_p,
   if ((parc > 2) && parv[2][0] == '!')
     {
      struct Client *target_p;
-     if (!(target_p = find_client(++parv[2], NULL)))
+     if (!(target_p = find_client(++parv[2])))
        {
         sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL), me.name,
                    parv[0], root->chname);

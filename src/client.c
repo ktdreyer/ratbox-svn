@@ -714,12 +714,17 @@ next_client(struct Client *next,     /* First client to check */
 {
   struct Client *tmp = next;
 
-  next = find_client(ch, tmp);
+  next = find_client(ch);
+
+  if (next == NULL)
+    next = tmp;
+
   if (tmp && tmp->prev == next)
-    return ((struct Client *) NULL);
+    return (NULL);
 
   if (next != tmp)
     return next;
+
   for ( ; next; next = next->next)
     {
       if (match(ch,next->name)) break;
@@ -745,7 +750,11 @@ next_client_double(struct Client *next, /* First client to check */
 {
   struct Client *tmp = next;
 
-  next = find_client(ch, tmp);
+  next = find_client(ch);
+
+  if (next == NULL)
+    next = tmp;
+
   if (tmp && tmp->prev == next)
     return NULL;
   if (next != tmp)
@@ -761,19 +770,18 @@ next_client_double(struct Client *next, /* First client to check */
 /*
  * find_person - find person by (nick)name.
  * inputs	- pointer to name
- *		- pointer to client
  * output	- return client pointer
  * side effects -
  */
-struct Client *find_person(char *name, struct Client *client_p)
+struct Client *find_person(char *name)
 {
-  struct Client       *c2ptr = client_p;
+  struct Client       *c2ptr;
 
-  c2ptr = find_client(name, c2ptr);
+  c2ptr = find_client(name);
 
-  if (c2ptr && IsClient(c2ptr) && c2ptr->user)
-    return c2ptr;
-  return client_p;
+  if (c2ptr && IsPerson(c2ptr))
+    return (c2ptr);
+  return (NULL);
 }
 
 /*
@@ -785,7 +793,7 @@ struct Client *find_person(char *name, struct Client *client_p)
 struct Client *
 find_chasing(struct Client *source_p, char *user, int *chasing)
 {
-  struct Client *who = find_client(user, NULL);
+  struct Client *who = find_client(user);
   
   if (chasing)
     *chasing = 0;

@@ -109,7 +109,7 @@ static void ms_nburst(struct Client *client_p,
 #endif
 
   status = 'N';
-  if ( (target_p = find_client(nick, NULL)) != NULL )
+  if ((target_p = find_client(nick)) != NULL)
   {
     /* nick exists.  burst nick back to leaf */
     status = 'Y';

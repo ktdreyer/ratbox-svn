@@ -450,7 +450,7 @@ static int build_target_list(int p_or_n,
 
       /* At this point, its likely its another client */
 
-      if ( (target_p = find_person(nick, NULL)) )
+      if ((target_p = find_person(nick)) != NULL)
 	{
 	  if( !duplicate_ptr(target_p, *targets, i) )
 	    {

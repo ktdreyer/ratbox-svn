@@ -164,12 +164,13 @@ void parse(struct Client *client_p, char *pbuffer, char *bufend)
 
       if (*sender && IsServer(client_p))
         {
-          from = find_client(sender, (struct Client *) NULL);
+          from = find_client(sender);
           if (from == NULL)
-            from = find_server(sender);
-
-          if(from == NULL)
-	    from = hash_find_id(sender, (struct Client *)NULL);
+          {
+	    from = find_server(sender);
+	    if(from == NULL)
+	      from = find_id(sender);
+	  }
 
           /* Hmm! If the client corresponding to the
            * prefix is not found--what is the correct
@@ -713,7 +714,7 @@ static void do_numeric(char numeric[],
     ircsprintf(t," :%s", parv[parc-1]);
   }
 
-  if ((target_p = find_client(parv[1], (struct Client *)NULL)))
+  if ((target_p = find_client(parv[1])) != NULL)
   {
     if (IsMe(target_p)) 
     {

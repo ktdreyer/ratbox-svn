@@ -129,7 +129,7 @@ static int do_ison(struct Client *up, struct Client *source_p,
     for (nick = strtoken(&p, parv[i], " "); nick;
          nick = strtoken(&p, NULL, " "))
     {
-      if ((target_p = find_person(nick, NULL)))
+      if ((target_p = find_person(nick)))
       {
         len = strlen(target_p->name);
         if( (current_insert_point + (len + 5)) < (buf + sizeof(buf)) )

@@ -26,7 +26,7 @@
 #include "class.h"
 #include "hook.h"
 #include "client.h"
-#include "hash.h"       /* for find_client() */
+#include "hash.h"
 #include "common.h"
 #include "hash.h"
 #include "irc_string.h"
@@ -137,7 +137,7 @@ static void mo_trace(struct Client *client_p, struct Client *source_p,
       const char* class_name;
       char ipaddr[HOSTIPLEN];
 
-      target_p = find_client(tname,(struct Client *)NULL);
+      target_p = find_client(tname);
       if(!target_p || !IsPerson(target_p)) 
         {
           /* this should only be reached if the matching

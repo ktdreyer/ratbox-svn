@@ -7,7 +7,7 @@
 
 #include "handlers.h"
 #include "client.h"
-#include "hash.h"       /* for find_client() */
+#include "hash.h"
 #include "fdlist.h"
 #include "irc_string.h"
 #include "ircd.h"
@@ -130,7 +130,7 @@ static void mr_nick(struct Client *client_p, struct Client *source_p,
     return;
   }
 
-  if (!(target_p = find_client(nick, NULL)))
+  if (!(target_p = find_client(nick)))
   {
     if(!ServerInfo.hub && uplink && IsCapable(uplink, CAP_LL))
     {
@@ -210,7 +210,7 @@ static void mr_nick(struct Client *client_p, struct Client *source_p,
     return;
   }
 
-  if ((target_p = find_client(nick, NULL)))
+  if ((target_p = find_client(nick)))
   {
     /* If(target_p == source_p) the client is changing nicks between
      * equivalent nicknames ie: [nick] -> {nick}
@@ -338,7 +338,7 @@ static void ms_nick(struct Client *client_p, struct Client *source_p,
     }
 
   /* if the nick doesnt exist, allow it and process like normal */
-  if (!(target_p = find_client(nick, NULL)))
+  if (!(target_p = find_client(nick)))
   {
     nick_from_server(client_p,source_p,parc,parv,newts,nick);
     return;
@@ -406,7 +406,7 @@ static void ms_client(struct Client *client_p, struct Client *source_p,
 
   newts = atol(parv[3]);
   
-  if (!(target_p = find_client(nick, NULL)))
+  if (!(target_p = find_client(nick)))
   {
     client_from_server(client_p,source_p,parc,parv,newts,nick);
     return;

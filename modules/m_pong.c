@@ -33,6 +33,7 @@
 #include "s_debug.h"
 #include "msg.h"
 #include "parse.h"
+#include "hash.h"
 #include "modules.h"
 
 static void mr_pong(struct Client*, struct Client*, int, char**);
@@ -84,7 +85,7 @@ static void ms_pong(struct Client *client_p,
    */
   if (!EmptyString(destination) && !match(destination, me.name))
     {
-      if ((target_p = find_client(destination, NULL)) ||
+      if ((target_p = find_client(destination)) ||
           (target_p = find_server(destination)))
         sendto_one(target_p,":%s PONG %s %s",
                    parv[0], origin, destination);

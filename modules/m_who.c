@@ -199,7 +199,7 @@ static void m_who(struct Client *client_p,
 
   /* '/who nick' */
 
-  if (((target_p = find_client(mask, NULL)) != NULL) &&
+  if (((target_p = find_client(mask)) != NULL) &&
       IsPerson(target_p) && (!server_oper || IsOper(target_p)))
     {
       struct Channel *bchan;

@@ -598,7 +598,7 @@ extern  int     check_registered (struct Client *);
 extern  int     check_registered_user (struct Client *);
 
 extern struct Client* find_chasing (struct Client *, char *, int *);
-extern struct Client* find_person (char *, struct Client *);
+extern struct Client* find_person (char *);
 extern struct Client* find_userhost (char *, char *, struct Client *, int *);
 extern struct Client* next_client(struct Client* next, const char* name);
 extern struct Client* next_client_double(struct Client* next, 

@@ -21,7 +21,7 @@
  */
 #include "tools.h"
 #include "client.h"
-#include "hash.h"       /* for find_client() */
+#include "hash.h"
 #include "common.h"
 #include "hash.h"
 #include "irc_string.h"
@@ -120,13 +120,13 @@ static void ms_llnick(struct Client *client_p,
   else
   {
     /* Existing user changing nickname */
-    target_p = find_client(nick_old,(struct Client *)NULL);
+    target_p = find_client(nick_old);
   
     if (!target_p) /* Can't find them -- maybe they got a different nick */
       return;
   }
   
-  if(find_client(nick,(struct Client *)NULL) || exists)
+  if(find_client(nick) || exists)
   {
     /* The nick they want is in use. complain */
     sendto_one(target_p, form_str(ERR_NICKNAMEINUSE), me.name,

@@ -447,8 +447,8 @@ find_vchan(struct Channel *chptr, char *key)
 
   key++;                        /* go past the '!' */
 
-  if ((target_p = find_client(key, (struct Client *)NULL)))
-    if ((chtmp = map_vchan(chptr, target_p)))
+  if ((target_p = find_client(key)) != NULL)
+    if ((chtmp = map_vchan(chptr, target_p)) != NULL)
       return chtmp;
 
   /* try and match vchan_id */

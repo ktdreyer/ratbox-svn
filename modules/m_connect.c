@@ -24,7 +24,6 @@
  */
 #include "handlers.h"
 #include "client.h"
-#include "common.h"     /* FALSE bleah */
 #include "ircd.h"
 #include "irc_string.h"
 #include "numeric.h"
@@ -36,6 +35,7 @@
 #include "send.h"
 #include "msg.h"
 #include "parse.h"
+#include "hash.h"
 #include "modules.h"
 
 #include <assert.h>

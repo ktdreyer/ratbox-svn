@@ -85,7 +85,7 @@ static void m_userhost(struct Client *client_p,
       if (parv[i+1] == NULL)
         break;
 
-      if ((target_p = find_person(parv[i+1], NULL)))
+      if ((target_p = find_person(parv[i+1])) != NULL)
 	{
 	  /*
 	   * Show real IP for USERHOST on yourself.

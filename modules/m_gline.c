@@ -344,7 +344,7 @@ static void ms_gline(struct Client *client_p,
   /* we need acptr for LL introduction anyway -davidt */
   if((acptr = find_server(oper_server)))
   {
-    if(!(acptr = find_client(oper_nick, NULL)))
+    if((acptr = find_client(oper_nick)) == NULL)
       return;
   }
   else

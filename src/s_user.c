@@ -403,7 +403,7 @@ int register_local_user(struct Client *client_p, struct Client *source_p,
 
   if (source_p->user->id[0] == '\0') 
     {
-      for (id = id_get(); hash_find_id(id, NULL); id = id_get())
+      for (id = id_get(); find_id(id); id = id_get())
         ;
       strcpy(source_p->user->id, id);
       add_to_id_hash_table(id, source_p);
@@ -897,7 +897,7 @@ int user_mode(struct Client *client_p, struct Client *source_p, int parc, char *
       return 0;
     }
 
-  if (!(target_p = find_person(parv[1], NULL)))
+  if ((target_p = find_person(parv[1])) != NULL)
     {
       if (MyConnect(source_p))
         sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
@@ -905,7 +905,10 @@ int user_mode(struct Client *client_p, struct Client *source_p, int parc, char *
       return 0;
     }
 
-  /* Dont know why these were commented out.. put them back using new sendto() funcs */
+  /* Dont know why these were commented out..
+   * put them back using new sendto() funcs
+   */
+
   if (IsServer(source_p))
     {
        sendto_realops_flags(FLAGS_ALL, L_ADMIN, "*** Mode for User %s from %s",

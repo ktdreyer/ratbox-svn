@@ -89,7 +89,7 @@ static void m_accept(struct Client *client_p, struct Client *source_p,
       nick = strtoken(&p, NULL, ","))
   {
     /* shouldnt happen, but lets be paranoid */
-    if(((target_p = find_client(nick, NULL)) == NULL) || !IsPerson(target_p))
+    if(((target_p = find_client(nick)) == NULL) || !IsPerson(target_p))
     {
       sendto_one(source_p, form_str(ERR_NOSUCHNICK),
                  me.name, source_p->name, nick);
@@ -115,7 +115,7 @@ static void m_accept(struct Client *client_p, struct Client *source_p,
       nick = strtoken(&p, NULL, ","), accept_num++)
   {
     /* shouldnt happen, but lets be paranoid */
-    if(((target_p = find_client(nick, NULL)) == NULL) || !IsPerson(target_p)) 
+    if(((target_p = find_client(nick)) == NULL) || !IsPerson(target_p)) 
     {
       sendto_one(source_p, form_str(ERR_NOSUCHNICK),
                  me.name, source_p->name, nick);
@@ -178,7 +178,7 @@ static void build_nicklist(struct Client *source_p, char *addbuf,
       name++;
     }
 
-    if(((target_p = find_client(name, NULL)) == NULL) || !IsPerson(target_p))
+    if(((target_p = find_client(name)) == NULL) || !IsPerson(target_p))
     {
       sendto_one(source_p, form_str(ERR_NOSUCHNICK),
                  me.name, source_p->name, name);
