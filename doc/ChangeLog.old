@@ -1,3 +1,17 @@
+androsyn    2002/03/09 18:54:14 EST	(20020309_10)
+
+  Modified files:
+    include              client.h 
+    src                  client.c 
+  Log:
+  Made a couple more functions local.
+  
+  Revision  Changes    Path
+  7.142     +0 -2      ircd-hybrid-7/include/client.h
+  7.243     +2 -2      ircd-hybrid-7/src/client.c
+
+
+
 androsyn    2002/03/09 18:41:33 EST	(20020309_9)
 
   Modified files:
