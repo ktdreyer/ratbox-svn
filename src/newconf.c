@@ -1445,7 +1445,7 @@ void	conf_set_auth_flags(void *data)
 {
 	conf_parm_t *args = data;
 
-	set_modes_from_table(&yy_achead->flags, "flag", auth_table, args);
+	set_modes_from_table((int *)&yy_achead->flags, "flag", auth_table, args);
 }
 
 void	conf_set_auth_exceed_limit(void *data)
