@@ -467,11 +467,11 @@ timeout_auth_queries_event(void *notused)
       auth->client->since = CurrentTime;
       release_auth_client(auth->client);
       unlink_auth_request(auth, &AuthPollList);
-  #ifdef USE_IAUTH
-  	link_auth_request(auth, &AuthClientList);
-  #else
-    free_auth_request(auth);
-  #endif
+#ifdef USE_IAUTH
+      link_auth_request(auth, &AuthClientList);
+#else
+      free_auth_request(auth);
+#endif
     }
   }
 
