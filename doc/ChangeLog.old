@@ -1,3 +1,9 @@
+*** 20010817_2 by jdc
+- Many fixes for CFLAGS variable support.
+- Fixed  --enable-assert and  --disable-assert.
+- Cosmetical changes all over (formatting issues).
+
+
 *** 20010817_1 by davidt
 - Instead of polling SERVICES,SERVERS,/*BUSYCLIENTS*/,IDLECLIENTS, and
   delaying on IDLECLIENTS (which means we _should_ always delay for the full
