@@ -32,7 +32,8 @@
 #include "ircd_defs.h"        /* buffer sizes */
 #endif
 
-#define USE_TABLE_MODE
+/* XXX until debugged and verified thoroughly */
+#undef USE_TABLE_MODE
 
 struct Client;
 

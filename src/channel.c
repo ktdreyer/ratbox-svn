@@ -1235,7 +1235,7 @@ static void chm_hideops(struct Client *, struct Client *, struct Channel *,
 static void send_cap_mode_changes(struct Client *, struct Client *,
                                   struct Channel *, int, int);
 static void send_mode_changes(struct Client *, struct Client *,
-                              struct Channel *);
+                              struct Channel *, char *chname);
 static int get_channel_access(struct Client *, struct Channel *);
 
 
@@ -2418,7 +2418,7 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
  */
 static void
 send_mode_changes(struct Client *client_p, struct Client *source_p,
-                  struct Channel *chptr)
+                  struct Channel *chptr, char *chname)
 {
   int pbl, mbl, nc;
   int i, st;
@@ -2434,17 +2434,17 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
     ircsprintf(modebuf, ":%s MODE %s ", me.name, chptr->chname);
   else
     ircsprintf(modebuf, ":%s!%s@%s MODE %s ", source_p->name,
-               source_p->username, source_p->host, chptr->chname);
+               source_p->username, source_p->host, chname);
 
   mbl = strlen(modebuf);
   pbl = 0;
-  parabuf[0] = 0;
+  parabuf[0] = '\0';
   nc = 0;
 
   if (mode_count_minus > 0)
     {
       modebuf[mbl++] = '-';
-      modebuf[mbl] = 0;
+      modebuf[mbl] = '\0';
     }
 
   for (i = 0; i < mode_count_minus; i++)
@@ -2459,7 +2459,7 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
           strlen(mode_changes_minus[i].arg) + mbl + pbl + 2 > BUFSIZE)
         {
           if (pbl && parabuf[pbl - 1] == '+')
-            parabuf[pbl - 1] = 0;
+            parabuf[pbl - 1] = '\0';
 
           if (nc != 0)
             sendto_channel_local(st, chptr, "%s %s", modebuf, parabuf);
@@ -2470,21 +2470,21 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
             ircsprintf(modebuf, ":%s MODE %s -", me.name, chptr->chname);
           else
             ircsprintf(modebuf, ":%s!%s@%s MODE %s -", source_p->name,
-                       source_p->username, source_p->host, chptr->chname);
+                       source_p->username, source_p->host, chname);
 
           mbl = strlen(modebuf);
           pbl = 0;
-          parabuf[0] = 0;
+          parabuf[0] = '\0';
         }
 
       modebuf[mbl++] = mode_changes_minus[i].letter;
-      modebuf[mbl] = 0;
+      modebuf[mbl] = '\0';
 
       if (mode_changes_minus[i].arg != NULL)
         pbl = strlen(strcat(parabuf, mode_changes_minus[i].arg));
 
       parabuf[pbl++] = ' ';
-      parabuf[pbl] = 0;
+      parabuf[pbl] = '\0';
     }
 
   if (mode_count_plus > 0)
@@ -2494,7 +2494,7 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
       else
         modebuf[mbl++] = '+';
 
-      modebuf[mbl] = 0;
+      modebuf[mbl] = '\0';
     }
 
   for (i = 0; i < mode_count_plus; i++)
@@ -2509,7 +2509,7 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
           strlen(mode_changes_plus[i].arg) + mbl + pbl + 2 > BUFSIZE)
         {
           if (pbl && parabuf[pbl - 1] == '+')
-            parabuf[pbl - 1] = 0;
+            parabuf[pbl - 1] = '\0';
 
           if (nc != 0)
             sendto_channel_local(st, chptr, "%s %s", modebuf, parabuf);
@@ -2520,25 +2520,25 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
             ircsprintf(modebuf, ":%s MODE %s +", me.name, chptr->chname);
           else
             ircsprintf(modebuf, ":%s!%s@%s MODE %s +", source_p->name,
-                       source_p->username, source_p->host, chptr->chname);
+                       source_p->username, source_p->host, chname);
 
           mbl = strlen(modebuf);
           pbl = 0;
-          parabuf[0] = 0;
+          parabuf[0] = '\0';
         }
 
       modebuf[mbl++] = mode_changes_plus[i].letter;
-      modebuf[mbl] = 0;
+      modebuf[mbl] = '\0';
 
       if (mode_changes_plus[i].arg != NULL)
         pbl = strlen(strcat(parabuf, mode_changes_plus[i].arg));
 
       parabuf[pbl++] = ' ';
-      parabuf[pbl] = 0;
+      parabuf[pbl] = '\0';
     }
 
   if (pbl && parabuf[pbl - 1] == '+')
-    parabuf[pbl - 1] = 0;
+    parabuf[pbl - 1] = '\0';
 
   if (nc != 0)
     sendto_channel_local(st, chptr, "%s %s", modebuf, parabuf);
@@ -2549,15 +2549,15 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
   if (chptr->mode.mode & MODE_HIDEOPS)
     {
       st = NON_CHANOPS;
-      ircsprintf(modebuf, ":%s MODE %s ", me.name, chptr->chname);
+      ircsprintf(modebuf, ":%s MODE %s ", me.name, chname);
       mbl = strlen(modebuf);
       pbl = 0;
-      parabuf[0] = 0;
+      parabuf[0] = '\0';
 
       if (mode_count_minus > 0)
         {
           modebuf[mbl++] = '-';
-          modebuf[mbl] = 0;
+          modebuf[mbl] = '\0';
         }
 
       for (i = 0; i < mode_count_minus; i++)
@@ -2572,26 +2572,26 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
               strlen(mode_changes_minus[i].arg) + mbl + pbl + 2 > BUFSIZE)
             {
               if (pbl && parabuf[pbl - 1] == '+')
-                parabuf[pbl - 1] = 0;
+                parabuf[pbl - 1] = '\0';
 
               if (nc != 0)
                 sendto_channel_local(st, chptr, "%s %s", modebuf, parabuf);
 
               nc = 0;
-              ircsprintf(modebuf, ":%s MODE %s -", me.name, chptr->chname);
+              ircsprintf(modebuf, ":%s MODE %s -", me.name, chname);
               mbl = strlen(modebuf);
               pbl = 0;
-              parabuf[0] = 0;
+              parabuf[0] = '\0';
             }
 
           modebuf[mbl++] = mode_changes_minus[i].letter;
-          modebuf[mbl] = 0;
+          modebuf[mbl] = '\0';
 
           if (mode_changes_minus[i].arg != NULL)
             pbl = strlen(strcat(parabuf, mode_changes_minus[i].arg));
 
           parabuf[pbl++] = ' ';
-          parabuf[pbl] = 0;
+          parabuf[pbl] = '\0';
         }
 
       if (mode_count_plus > 0)
@@ -2601,7 +2601,7 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
           else
             modebuf[mbl++] = '+';
 
-          modebuf[mbl] = 0;
+          modebuf[mbl] = '\0';
         }
 
       for (i = 0; i < mode_count_plus; i++)
@@ -2616,30 +2616,30 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
               strlen(mode_changes_plus[i].arg) + mbl + pbl + 2 > BUFSIZE)
             {
               if (pbl && parabuf[pbl - 1] == '+')
-                parabuf[pbl - 1] = 0;
+                parabuf[pbl - 1] = '\0';
 
               if (nc != 0)
                 sendto_channel_local(st, chptr, "%s %s", modebuf, parabuf);
 
               nc = 0;
-              ircsprintf(modebuf, ":%s MODE %s +", me.name, chptr->chname);
+              ircsprintf(modebuf, ":%s MODE %s +", me.name, >chname);
               mbl = strlen(modebuf);
               pbl = 0;
-              parabuf[0] = 0;
+              parabuf[0] = '\0';
             }
 
           modebuf[mbl++] = mode_changes_plus[i].letter;
-          modebuf[mbl] = 0;
+          modebuf[mbl] = '\0';
 
           if (mode_changes_plus[i].arg != NULL)
             pbl = strlen(strcat(parabuf, mode_changes_plus[i].arg));
 
           parabuf[pbl++] = ' ';
-          parabuf[pbl] = 0;
+          parabuf[pbl] = '\0';
         }
 
       if (pbl && parabuf[pbl - 1] == '+')
-        parabuf[pbl - 1] = 0;
+        parabuf[pbl - 1] = '\0';
 
       if (nc != 0)
         sendto_channel_local(st, chptr, "%s %s", modebuf, parabuf);
@@ -2701,7 +2701,7 @@ set_channel_mode(struct Client *client_p, struct Client *source_p,
         break;
       }
 
-  send_mode_changes(client_p, source_p, chptr);
+  send_mode_changes(client_p, source_p, chptr, chname);
 }
 #else
 /*
