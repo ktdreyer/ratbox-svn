@@ -1,3 +1,15 @@
+leeh        2001/12/18 17:36:00 EST	(20011218_5)
+
+  Modified files:
+    contrib              m_jupe.c 
+  Log:
+  - changed a couple of %s!%s@%s -> get_oper_name()
+  
+  Revision  Changes    Path
+  1.22      +5 -6      ircd-hybrid-7/contrib/m_jupe.c
+
+
+
 wcampbel    2001/12/18 10:38:13 EST	(20011218_4)
 
   Modified files:
