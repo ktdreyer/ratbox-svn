@@ -1,3 +1,16 @@
+*** 20001218_5 by db
+- ok. redid the way the bitmaps were cleared for lazylinks.
+  the old code walked all the global channels, clearing the
+  lazyLinkChannelExists bitmap of the leaf servers bit.. Now the code
+  keeps track of which channels/clients have these bits set, and only
+  walks those lists when a lazy link server quits.
+  This adds new lists to ircd.c, new bitmap to client struct, new call
+  in m_cburst.c .. client.c modded to call remove_lazyLink_flags()
+  new code added in s_serv.c to add remove_lazylink_flags() and to add
+  add_lazylinkchannel() and add_lazylinkclient() functions to s_serv.c
+
+
+
 *** 20001218_4 by bill
 
 - removed compile-time warnings caused by fbputs()
