@@ -136,10 +136,7 @@ static void ms_sjoin(struct Client *client_p,
   if (!check_channel_name(parv[2]))
     return;
 
-  /* comstud server did this, SJOIN's for
-   * local channels can't happen.
-   */
-
+  /* SJOIN's for local channels can't happen. */
   if(*parv[2] == '&')
     return;
 
