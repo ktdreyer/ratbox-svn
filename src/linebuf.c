@@ -51,8 +51,6 @@ linebuf_new_line(buf_head_t *bufhead)
 
     bufline = BlockHeapAlloc(linebuf_bl);
 
-    /* XXX Zero data, I'm being paranoid! -- adrian */
-    bzero(bufline, sizeof(buf_line_t));
 #if 0
     bufline->len = 0;
     bufline->terminated = 0;
@@ -136,8 +134,7 @@ linebuf_terminate_crlf(buf_head_t *bufhead, buf_line_t *bufline)
 void
 linebuf_newbuf(buf_head_t *bufhead)
 {
-    /* not much to do :) */
-    bzero(bufhead, sizeof(buf_head_t));
+    /* not much to do right now :) */
 }
 
 
