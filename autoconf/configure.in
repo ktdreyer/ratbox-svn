@@ -94,7 +94,11 @@ else
       if test "x$ac_cv_prog_cc_g" = "xyes"; then
         IRC_CFLAGS="-g"
       else
-        IRC_CFLAGS=""
+        if test "x$SunWorkShop" = "xyes"; then
+          IRC_CFLAGS="-fast -g -xinline=dlinkAdd,dlinkAddBefore,dlinkAddTail,dlinkDelete,dlink_list_length,dlink_node,dlinkMoveList,_MyMalloc,_MyRealloc,_MyFree,_DupString"
+        else
+          IRC_CFLAGS=""
+        fi
       fi
     fi
   fi
