@@ -1,3 +1,9 @@
+*** 20001220_14 by db
+- patched m_gline.c from fl_
+- patched ircd_parser from Walter Campbell
+
+
+
 *** 20001220_13 by ejb
 - added note about using `send-pr' to report bugs
 - added note that cygwin is no longer support.
