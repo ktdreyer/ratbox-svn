@@ -549,6 +549,9 @@ static void ms_sjoin(struct Client *cptr,
           continue;
       }
 
+      if (chptr->users == 0 && !IsCapable(acptr, CAP_VCHAN))
+        continue;
+
       /* XXX - ids ? */
       if (IsCapable(acptr,CAP_HOPS))
         sendto_one(acptr, "%s %s", buf, sjbuf);
