@@ -776,30 +776,47 @@ int parse_client_queued(struct Client* cptr)
 
 /*
  * read_packet - Read a 'packet' of data from a connection and process it.
- * Do some tricky stuff for client connections to make sure they don't do
- * any flooding >:-) -avalon
  */
-#define SBSD_MAX_CLIENT 6090
-
-int read_packet(struct Client *cptr)
+void
+read_packet(int fd, void *data)
 {
+  struct Client *cptr = data;
   int length = 0;
   int done;
 
-  if (!(IsPerson(cptr) && DBufLength(&cptr->recvQ) > SBSD_MAX_CLIENT)) {
-    errno = 0;
-    length = recv(cptr->fd, readBuf, READBUF_SIZE, 0);
-    /*
-     * If not ready, fake it so it isnt closed
-     */
-    if (length == -1) {
-      if (EWOULDBLOCK == errno || EAGAIN == errno)
-        length = 1;
-      return length;
-    }
+  /*
+   * Check for a dead connection here. This is done here for legacy
+   * reasons which to me sound like people didn't check the return
+   * values of functions, and so we can't just free the cptr in
+   * dead_link() :-)
+   *     -- adrian
+   */
+  if (IsDead(cptr)) {
+    /* Shouldn't we just do the following? -- adrian */
+    /* error_exit_client(cptr, length); */
+    exit_client(cptr, cptr, &me, strerror(get_sockerr(cptr->fd)));
+    return;
   }
-  if (length == 0)
-    return length;
+
+  /*
+   * Read some data. We *used to* do anti-flood protection here, but
+   * I personally think it makes the code too hairy to make sane.
+   *     -- adrian
+   */
+  length = recv(cptr->fd, readBuf, READBUF_SIZE, 0);
+  if (length < 0) {
+    /*
+     * This shouldn't give an EWOULDBLOCK since we only call this routine
+     * when we have data. Therefore, any error we get will be fatal.
+     *     -- adrian
+     */
+    error_exit_client(cptr, length);
+    return;
+  } else if (length == 0) {
+    /* EOF from client */
+    error_exit_client(cptr, length); 
+    return;
+  }
 
 #ifdef REJECT_HOLD
   /* 
@@ -810,8 +827,13 @@ int read_packet(struct Client *cptr)
    *
    * FLAGS_REJECT_HOLD should NEVER be set for non local client 
    */
-  if (IsRejectHeld(cptr))
-    return 1;
+  if (IsRejectHeld(cptr)) {
+    /*
+     * XXX I don't like this! We should probably read to flush the
+     * socket buffer .. -- adrian */
+     */
+    goto finish;
+  }
 #endif
 
   cptr->lasttime = CurrentTime;
@@ -824,28 +846,32 @@ int read_packet(struct Client *cptr)
    * worrying about the time of day or anything :)
    */
   if (PARSE_AS_SERVER(cptr)) {
-    if (length > 0) {
-      if ((done = dopacket(cptr, readBuf, length)))
-        return done;
-    }
-  }
-  else {
+    done = dopacket(cptr, readBuf, length);
+  } else {
     /*
      * Before we even think of parsing what we just read, stick
      * it on the end of the receive queue and do it when its
      * turn comes around.
      */
-    if (!dbuf_put(&cptr->recvQ, readBuf, length))
-      return exit_client(cptr, cptr, cptr, "dbuf_put fail");
+    if (!dbuf_put(&cptr->recvQ, readBuf, length)) {
+      exit_client(cptr, cptr, cptr, "dbuf_put fail");
+      return;
+    }
     
     if (IsPerson(cptr) &&
         (ConfigFileEntry.no_oper_flood && !IsAnOper(cptr)) &&
         DBufLength(&cptr->recvQ) > CLIENT_FLOOD) {
-      return exit_client(cptr, cptr, cptr, "Excess Flood");
+      exit_client(cptr, cptr, cptr, "Excess Flood");
+      return;
     }
-    return parse_client_queued(cptr);
+    parse_client_queued(cptr);
   }
-  return 1;
+#ifdef REJECT_HOLD
+  /* Silence compiler warnings -- adrian */
+finish:
+#endif
+  /* If we get here, we need to register for another COMM_SELECT_READ */
+  comm_setselect(cptr->fd, COMM_SELECT_READ, read_packet, cptr, 0);
 }
 
 void error_exit_client(struct Client* cptr, int error)

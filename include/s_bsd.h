@@ -53,9 +53,9 @@ extern void  report_error(const char*, const char*, int);
 extern int   set_non_blocking(int);
 extern int   set_sock_buffers(int, int);
 extern int   deliver_it(struct Client*, const char*, int);
+extern PF    read_packet;
 
 extern int   completed_connection(struct Client*);
-extern int   read_packet(struct Client*);
 extern void  error_exit_client(struct Client*, int);
 extern int   get_sockerr(int);
 extern int   parse_client_queued(struct Client*);

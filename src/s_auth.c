@@ -178,6 +178,12 @@ static void release_auth_client(struct Client* client)
   local[client->fd] = client;
 
   fdlist_add(client->fd, FDL_DEFAULT);
+  /*
+   * When a client has auth'ed, we want to start reading what it sends
+   * us. This is what read_packet() does.
+   *     -- adrian
+   */
+  comm_setselect(client->fd, COMM_SELECT_WRITE, read_packet, client, 0);
   add_client_to_list(client);
 }
  

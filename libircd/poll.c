@@ -278,9 +278,6 @@ int read_message(time_t delay, unsigned char mask)
       if (DBufLength(&cptr->recvQ) && delay2 > 2)
         delay2 = 1;
 
-      if (DBufLength(&cptr->recvQ) < 4088)
-        PFD_SETR(i);
-      
       if (IsConnecting(cptr))
         PFD_SETW(i);
     }
@@ -370,20 +367,6 @@ int read_message(time_t delay, unsigned char mask)
           }
         }
       length = 1;     /* for fall through case */
-      if (rr)
-        length = read_packet(cptr);
-      else if (PARSE_AS_CLIENT(cptr) && !NoNewLine(cptr))
-        length = parse_client_queued(cptr);
-
-      if (length > 0 || length == CLIENT_EXITED)
-        continue;
-      if (IsDead(cptr)) {
-         exit_client(cptr, cptr, &me,
-                      strerror(get_sockerr(cptr->fd)));
-         continue;
-      }
-      error_exit_client(cptr, length);
-      errno = 0;
     }
   return 0;
 }
