@@ -1,3 +1,58 @@
+leeh        2004/12/03 20:05:47 EST	(20041204_0)
+
+  Modified files:
+    doc                  example.conf example.efnet.conf 
+    include              client.h numeric.h s_conf.h 
+    modules              m_kline.c m_lusers.c m_xline.c 
+    modules/core         channels.c m_server.c m_squit.c users.c 
+    src                  adns.c client.c newconf.c numeric.c 
+                         s_conf.c s_user.c watch.c 
+  Log:
+  - remove unused var in watch
+  - via 2.0:
+    - add ':' to reason before remote klines
+    - better checking for user@host on unkline
+    - add length tracking to the buffers we build when propagating SJOIN,
+      as we cant trust an SJOIN of uids will fit when its converted to nicks
+      and vice versa
+    - added umode +C, an extended version of +c thats machine parsable
+    - make check_pings_list() test IsAnyDead()
+    - SetClosing() when we dead_link(), unset it in exit_aborted_clients()
+      which should stop us potentially exiting a client twice
+    - remove a pointless check in xline
+    - as agreed with ircnet, change the format of RPL_LOCALUSERS and
+      RPL_GLOBALUSERS (265/266)
+    - swap a return for a continue in the channel burst code, which was
+      screwing us and allowing for not ending up sending our full burst.
+    - allow local opers without 'remote' flag to squit locally connected
+      servers
+    - add new conf option to general {}; default_invisible.  controls whether
+      we set clients +i on connect or not, default is no
+    - move stats a (dns servers) to RPL_STATSDEBUG, remove RPL_STATSALINE
+  
+  Revision  Changes    Path
+  7.250     +4 -0      ircd-ratbox/doc/example.conf
+  7.81      +4 -0      ircd-ratbox/doc/example.efnet.conf
+  7.258     +4 -3      ircd-ratbox/include/client.h
+  7.51      +0 -1      ircd-ratbox/include/numeric.h
+  7.303     +1 -0      ircd-ratbox/include/s_conf.h
+  1.13      +36 -3     ircd-ratbox/modules/core/channels.c
+  1.149     +3 -3      ircd-ratbox/modules/core/m_server.c
+  1.81      +8 -8      ircd-ratbox/modules/core/m_squit.c
+  1.24      +21 -4     ircd-ratbox/modules/core/users.c
+  1.194     +28 -14    ircd-ratbox/modules/m_kline.c
+  1.45      +5 -2      ircd-ratbox/modules/m_lusers.c
+  1.63      +8 -15     ircd-ratbox/modules/m_xline.c
+  7.74      +1 -2      ircd-ratbox/src/adns.c
+  7.483     +14 -5     ircd-ratbox/src/client.c
+  7.185     +2 -0      ircd-ratbox/src/newconf.c
+  7.32      +4 -4      ircd-ratbox/src/numeric.c
+  7.496     +1 -0      ircd-ratbox/src/s_conf.c
+  7.333     +5 -1      ircd-ratbox/src/s_user.c
+  1.2       +1 -2      ircd-ratbox/src/watch.c
+
+
+
 androsyn    2004/12/03 08:41:17 EST	(20041203_0)
 
   Modified files:
