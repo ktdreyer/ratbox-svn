@@ -189,9 +189,6 @@
 /* Define if you have the <sys/resource.h> header file.  */
 #undef HAVE_SYS_RESOURCE_H
 
-/* Define if you have the <sys/syslog.h> header file.  */
-#undef HAVE_SYS_SYSLOG_H
-
 /* Define if you have the <unistd.h> header file.  */
 #undef HAVE_UNISTD_H
 

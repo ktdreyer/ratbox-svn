@@ -153,35 +153,6 @@
  */
 #define USE_LOGFILE
 
-/* USE_SYSLOG - log errors and such to syslog()
- * If you wish to have the server send 'vital' messages about server
- * through syslog, define USE_SYSLOG. Only system errors and events critical
- * to the server are logged although if this is defined with FNAME_USERLOG,
- * syslog() is used instead of the above file. It is not recommended that
- * this option is used unless you tell the system administrator beforehand
- * and obtain their permission to send messages to the system log files.
- */
-#undef  USE_SYSLOG
-
-#ifdef  USE_SYSLOG
-/* SYSLOG_KILL SYSLOG_SQUIT SYSLOG_CONNECT SYSLOG_USERS SYSLOG_OPER
- * If you use syslog above, you may want to turn some (none) of the
- * spurious log messages for KILL,SQUIT,etc off.
- */
-#undef  SYSLOG_KILL		/* log all operator kills to syslog */
-#undef  SYSLOG_SQUIT		/* log all remote squits for all servers to syslog */
-#undef  SYSLOG_CONNECT		/* log remote connect messages for other all servs */
-#undef  SYSLOG_USERS		/* send userlog stuff to syslog */
-#undef  SYSLOG_OPER		/* log all users who successfully become an Op */
-
-/* LOG_FACILITY - facility to use for syslog()
- * Define the facility you want to use for syslog().  Ask your
- * sysadmin which one you should use.
- */
-#define LOG_FACILITY LOG_LOCAL4
-
-#endif /* USE_SYSLOG */
-
 /* CLIENT_FLOOD - client excess flood threshold(in messages)
  * The number of messages that we can receive before we disconnect the
  * remote client...

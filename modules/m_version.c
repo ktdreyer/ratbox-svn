@@ -141,10 +141,6 @@ confopts(struct Client *source_p)
 	*p++ = 'T';
 #endif
 
-#ifdef USE_SYSLOG
-	*p++ = 'Y';
-#endif
-
 #ifdef HAVE_LIBZ
 	*p++ = 'Z';
 #endif
