@@ -42,8 +42,7 @@ SUBDIRS=modules adns src tools doc @SUBDIR_MESSAGES@ include servlink
 CLEANDIRS = ${SUBDIRS} contrib iauth
 # XXX removed `iauth' from the build since it doesn't compile currently
 # SUBDIRS=src tools iauth
-RSA_FILES=rsa_respond/README rsa_respond/genkey.c rsa_respond/respond.c \
-          rsa_respond/Makefile
+RSA_FILES=rsa_respond/README rsa_respond/respond.c rsa_respond/Makefile
 
 MAKE = make ${MFLAGS} 
 

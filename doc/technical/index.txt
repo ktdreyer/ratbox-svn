@@ -5,7 +5,6 @@ Persistent_Clients.txt    - A global UID and Persistent client (with cookies)
 README.TSora              - Description of the TS3 protocol
 README.openssl            - Information for users who have problems with
                             Hybrid, OpenSSL, and their operating system
-cookies.txt               - ircd Cookie proposal
 cryptlink.txt             - Outline of CRYPTLINK protocol
 event.txt                 - Outline of the event system
 fd-management.txt         - Outline of the file descriptor management system

@@ -19,7 +19,8 @@ m_challenge.so must be loaded.
 Process:
 
 Each oper should have a private key file and a public key file.  The keys
-can be generated with the genkey utility provided in tools/rsa_respond.
+can be generated with the mkkeypair utility provided in tools/.  The keys
+are compatible with cryptlink keys.
 
 The oper keeps their private key file in a safe place, and gives their
 public key file to their admin(s).
@@ -44,6 +45,8 @@ openssl genrsa -des3 -out rsa.key 1024
 openssl rsa -in rsa.key -pubout -out rsa.pub
 
 It is *highly recommended* that you set a password on your secret key.
+
+A key can also be generated with the tools/mkkeypair utility.
 
 There is also a tool distributed called respond in tools/rsa_respond in the
 hybrid source tree.  This program can be easily distributed to each oper.
