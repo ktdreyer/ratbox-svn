@@ -1,3 +1,16 @@
+leeh        2005/02/04 07:04:17 EST	(20050204_0)
+
+  Modified files:
+    src                  c_mode.c 
+  Log:
+  - add an IsUser() check on MODE, fixing a core when hunting for the
+    membership of a server
+  
+  Revision  Changes    Path
+  1.28      +1 -1      rserv/src/c_mode.c
+
+
+
 leeh        2005/02/03 17:09:38 EST	(20050203_5)
 
   Modified files:
