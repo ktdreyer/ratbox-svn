@@ -1,3 +1,23 @@
+leeh        2004/08/02 21:25:38 EDT	(20040803_2)
+
+  Modified files:
+    include              client.h 
+    modules              m_stats.c 
+    src                  client.c ircd.c packet.c s_auth.c 
+  Log:
+  - remove ->since from struct Client, its exactly the same as ->lasttime, so
+    just make everything use that instead.
+  
+  Revision  Changes    Path
+  7.250     +0 -1      ircd-ratbox/include/client.h
+  1.226     +8 -8      ircd-ratbox/modules/m_stats.c
+  7.469     +2 -2      ircd-ratbox/src/client.c
+  7.355     +1 -1      ircd-ratbox/src/ircd.c
+  7.132     +0 -2      ircd-ratbox/src/packet.c
+  7.170     +1 -1      ircd-ratbox/src/s_auth.c
+
+
+
 leeh        2004/08/02 21:05:23 EDT	(20040803_1)
 
   Modified files:
