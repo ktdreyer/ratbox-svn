@@ -1,3 +1,15 @@
+androsyn    2004/02/17 11:49:57 EST	(20040217_0)
+
+  Modified files:
+    modules              m_accept.c 
+  Log:
+  Replace one ircsprint with ircsnprintf
+  
+  Revision  Changes    Path
+  1.55      +2 -4      ircd-ratbox/modules/m_accept.c
+
+
+
 androsyn    2004/02/12 13:49:58 EST	(20040212_0)
 
   Modified files:
