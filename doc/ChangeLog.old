@@ -1,3 +1,11 @@
+*** 20001215_4 by db
+- I think I got this right.
+  EOB message now sets flag in server struct saying its sent EOB,
+  if EOB is set in struct in sjoin, warning message is sent out
+  about HACK
+
+
+
 *** 20001215_3 by toot
 fixed some bent logic in whowas
 
