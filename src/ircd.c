@@ -576,6 +576,7 @@ int main(int argc, char *argv[])
    close_all_connections();
  init_log(logFileName);
  initBlockHeap();
+ init_dlink_nodes();
  init_netio();		/* This needs to be setup early ! -- adrian */
  init_resolver();	/* Needs to be setup before the io loop */
  initialize_message_files();

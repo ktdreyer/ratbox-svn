@@ -21,6 +21,7 @@
 #include "linebuf.h"
 #include "memory.h"
 #include "event.h"
+#include "list.h"
 #include "balloc.h"
 
 #ifdef STRING_WITH_STRINGS
@@ -91,7 +92,7 @@ linebuf_new_line(buf_head_t *bufhead)
   bufline = linebuf_allocate();
   ++bufline_count;
 
-  node = MyMalloc(sizeof(dlink_node));
+  node = make_dlink_node();
   
   bufline->len = 0;
   bufline->terminated = 0;
@@ -121,7 +122,7 @@ linebuf_done_line(buf_head_t *bufhead, buf_line_t *bufline,
 {
   /* Remove it from the linked list */
   dlinkDelete(node, &bufhead->list);
-  MyFree(node);
+  free_dlink_node(node);
 
   /* Update the allocated size */
   bufhead->alloclen--;
@@ -462,7 +463,7 @@ linebuf_attach(buf_head_t *bufhead, buf_head_t *new)
   for (node = new->list.head; node; node = node->next)
   {
     line = (buf_line_t *)node->data;
-    new_node = MyMalloc(sizeof(dlink_node));
+    new_node = make_dlink_node();
     dlinkAddTail(line, new_node, &bufhead->list);
 
     /* Update the allocated size */
