@@ -1,3 +1,17 @@
+androsyn    2003/10/23 14:45:30 EDT	(20031023_0)
+
+  Modified files:
+    modules              m_whois.c 
+  Log:
+  If the target of a whois is from a TS6 server and we have whois actually
+  defined and the value of IP isn't 0, let whois actually show the users IP
+  address without having to do a remote whois
+  
+  Revision  Changes    Path
+  1.132     +11 -1     ircd-ratbox/modules/m_whois.c
+
+
+
 leeh        2003/10/19 12:17:59 EDT	(20031019_0)
 
   Modified files:
