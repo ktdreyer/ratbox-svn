@@ -75,8 +75,6 @@ int                specific_virtual_host = 0;
 static void lookup_confhost(struct ConfItem* aconf);
 static int  SplitUserHost( struct ConfItem * );
 
-static void ReplaceQuotes(char* quotedLine,char* line);
-
 static void     read_conf(FBFILE*);
 static void     read_kd_lines(FBFILE*);
 static void     clear_out_old_conf(void);
@@ -1441,7 +1439,6 @@ static void read_conf(FBFILE* file)
 static void read_kd_lines(FBFILE* file)
 {
   char             line[BUFSIZE];
-  char             quotedLine[BUFSIZE];
   char*            p;
   struct ConfItem* aconf;
 
@@ -1458,13 +1455,11 @@ static void read_kd_lines(FBFILE* file)
       if (!*line || line[0] == '#')
         continue;
 
-      ReplaceQuotes(quotedLine,line);
-
       aconf = make_conf();
 
       /* Could we test if it's conf line at all?        -Vesa */
-      if (quotedLine[1] == ':')
-        oldParseOneLine(quotedLine,aconf);
+      if (line[1] == ':')
+        oldParseOneLine(line,aconf);
     }
 
 }
@@ -1491,75 +1486,6 @@ void conf_add_conf(struct ConfItem *aconf)
 
   aconf->next = ConfigItemList;
    ConfigItemList = aconf;
-}
-
-/*
- * ReplaceQuotes
- * Inputs       - input line to quote
- * Output       - quoted line
- * Side Effects - All quoted chars in input are replaced
- *                with quoted values in output, # chars replaced with '\0'
- *                otherwise input is copied to output.
- */
-static void ReplaceQuotes(char* quotedLine,char *inputLine)
-{
-  char *in;
-  char *out;
-  static char  quotes[] = {
-    0,    /*  */
-    0,    /* a */
-    '\b', /* b */
-    0,    /* c */
-    0,    /* d */
-    0,    /* e */
-    '\f', /* f */
-    0,    /* g */
-    0,    /* h */
-    0,    /* i */
-    0,    /* j */
-    0,    /* k */
-    0,    /* l */
-    0,    /* m */
-    '\n', /* n */
-    0,    /* o */
-    0,    /* p */
-    0,    /* q */
-    '\r', /* r */
-    0,    /* s */
-    '\t', /* t */
-    0,    /* u */
-    '\v', /* v */
-    0,    /* w */
-    0,    /* x */
-    0,    /* y */
-    0,    /* z */
-    0,0,0,0,0,0 
-    };
-
-  /*
-   * Do quoting of characters and # detection.
-   */
-  for (out = quotedLine,in = inputLine; *in; out++, in++)
-    {
-      if (*in == '\\')
-	{
-          in++;
-          if(*in == '\\')
-            *out = '\\';
-          else if(*in == '#')
-            *out = '#';
-	  else
-	    *out = quotes[ (unsigned int) (*in & 0x1F) ];
-	}
-      else if (*in == '#')
-        {
-	  *out = '\0';
-          return;
-	}
-      else
-        *out = *in;
-    }
-  *out = '\0';
 }
 
 /*
