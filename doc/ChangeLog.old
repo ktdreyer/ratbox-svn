@@ -1,3 +1,31 @@
+androsyn    2002/07/11 20:43:26 EDT	(20020712_3)
+
+  Modified files:
+    .                    configure 
+    autoconf             acconfig.h configure.in 
+    include              balloc.h client.h ircd_defs.h list.h 
+                         memory.h setup.h.in 
+    src                  balloc.c client.c list.c memory.c 
+  Log:
+  Rip out the very, very ugly memdebug code..
+  
+  Revision  Changes    Path
+  7.24      +0 -3      ircd-hybrid-7/autoconf/acconfig.h
+  7.143     +0 -18     ircd-hybrid-7/autoconf/configure.in
+  7.146     +222 -249  ircd-hybrid-7/configure
+  1.11      +8 -0      ircd-hybrid-7/include/balloc.h
+  7.152     +1 -1      ircd-hybrid-7/include/client.h
+  7.31      +0 -13     ircd-hybrid-7/include/ircd_defs.h
+  7.15      +3 -9      ircd-hybrid-7/include/list.h
+  7.35      +7 -59     ircd-hybrid-7/include/memory.h
+  7.56      +0 -3      ircd-hybrid-7/include/setup.h.in
+  7.37      +2 -5      ircd-hybrid-7/src/balloc.c
+  7.289     +1 -1      ircd-hybrid-7/src/client.c
+  7.46      +4 -30     ircd-hybrid-7/src/list.c
+  7.38      +3 -133    ircd-hybrid-7/src/memory.c
+
+
+
 androsyn    2002/07/11 19:42:01 EDT	(20020712_2)
 
   Modified files:
