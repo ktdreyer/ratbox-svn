@@ -71,6 +71,24 @@ AC_ARG_ENABLE(select,
   esac
 ])
 
+dnl Enable kqueue()
+AC_ARG_ENABLE(kqueue,
+[ --enable-kqueue	Enable kqueue() support.
+  --disable-kqueue	Disable kqueue() support. ],
+
+[
+  case "$enableval" in
+  yes)
+    echo "Forcing kqueue() to be enabled"
+    ac_cv_func_kqueue='yes'
+    ;;
+  no)
+    echo "Forcing kqueue() to be disabled"
+    ac_cv_func_kqueue='no'
+  ;;
+esac
+])
+
 
 dnl Checks for library functions.
 AC_PROG_GCC_TRADITIONAL
