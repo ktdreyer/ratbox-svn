@@ -286,7 +286,9 @@ void report_configured_links(struct Client* source_p, int mask)
         for (p = &report_array[0]; p->conf_type; p++)
           if (p->conf_type == tmp->status)
             break;
-        if(p->conf_type == 0)return;
+	    
+        if(p->conf_type == 0)
+	  return;
 
         get_printable_conf(tmp, &name, &host, &pass, &user, &port,&classname);
 
@@ -301,6 +303,8 @@ void report_configured_links(struct Client* source_p, int mask)
 	    
 	    if (tmp->flags & CONF_FLAGS_ALLOW_AUTO_CONN)
 	      *s++ = 'A';
+	    if (tmp->flags & CONF_FLAGS_CRYPTLINK)
+	      *s++ = 'C';
 	    if (tmp->flags & CONF_FLAGS_LAZY_LINK)
 	      *s++ = 'L';
 	    if (tmp->flags & CONF_FLAGS_COMPRESSED)
