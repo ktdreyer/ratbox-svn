@@ -282,7 +282,7 @@ static void mo_stats(struct Client *client_p, struct Client *source_p,
 
             /* Blah, stats L needs the parameters, none of the others do.. */
             if(statchar == 'L' || statchar == 'l')
-              stats_cmd_table[i].handler(source_p, parc, parv);
+              stats_cmd_table[i].handler(source_p, parc, parv, statchar);
             else
               stats_cmd_table[i].handler(source_p);
           }
@@ -469,13 +469,16 @@ static void stats_ltrace(struct Client *client_p, int parc, char *parv[])
   int             wilds = 0;
   char            *name=NULL;
   char            *target=NULL;
-
+  /* We could possibly pass this on.. but we can take it from parv[1] */
+  char            statchar;
   name = parse_stats_args(parc,parv,&doall,&wilds);
 
   if (parc > 3)
     target = parv[3];
 
-  stats_L(client_p,name,doall,wilds,'L');
+  statchar=parv[1][0];
+ 
+  stats_L(client_p,name,doall,wilds,statchar);
   stats_L_spy(client_p, name, parv[1]);
 
   return;
@@ -543,7 +546,10 @@ static void stats_L_list(struct Client *source_p,char *name, int doall, int wild
       if (!(doall || wilds) && irccmp(name, target_p->name))
 	continue;
 
-      if(MyClient(source_p) && IsOper(source_p))
+      /* This basically shows ips for our opers if its not a server/admin, or
+       * its one of our admins.  */
+      if(MyClient(source_p) && IsOper(source_p) && 
+        (IsSetOperAdmin(source_p) || (!IsServer(target_p) && !IsAdmin(target_p))))
 	{
 	  sendto_one(source_p, Lformat, me.name,
                      RPL_STATSLINKINFO, source_p->name,
@@ -561,7 +567,8 @@ static void stats_L_list(struct Client *source_p,char *name, int doall, int wild
 	}
       else
 	{
-	  if(IsIPHidden(target_p) || IsServer(target_p))
+          /* If its a hidden ip, an admin, or a server, mask the real IP */
+	  if(IsIPHidden(target_p) || IsServer(target_p) || IsAdmin(target_p))
 	    sendto_one(source_p, Lformat, me.name,
 		       RPL_STATSLINKINFO, source_p->name,
 		       get_client_name(target_p, MASK_IP),
@@ -573,7 +580,7 @@ static void stats_L_list(struct Client *source_p,char *name, int doall, int wild
 		       CurrentTime - target_p->firsttime,
 		       (CurrentTime > target_p->since) ? (CurrentTime - target_p->since):0,
 		       IsServer(target_p) ? show_capabilities(target_p) : "-");
-	  else
+	  else /* show the real IP */
 	    sendto_one(source_p, Lformat, me.name,
 		       RPL_STATSLINKINFO, source_p->name,
 		       (IsUpper(statchar)) ?
