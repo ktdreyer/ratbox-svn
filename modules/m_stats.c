@@ -274,7 +274,7 @@ static void mo_stats(struct Client *client_p, struct Client *source_p,
         if (stats_cmd_table[i].letter == statchar)
           {
             /* The stats table says what privs are needed, so check --fl_ */
-            if(stats_cmd_table[i].need_admin && !IsAdmin(source_p))
+            if(stats_cmd_table[i].need_admin && !IsSetOperAdmin(source_p))
               {
                 sendto_one(source_p, form_str(ERR_NOPRIVILEGES),me.name,source_p->name);
                 break;
