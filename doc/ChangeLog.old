@@ -1,3 +1,7 @@
+*** 20010331_6 by ejb
+- added debug.c for debugging. not used yet..
+
+
 *** 20010331_5 by db
 -more cleanups to s_debug.c
 
