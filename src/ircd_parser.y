@@ -102,7 +102,6 @@ int   class_redirport_var;
 %token  ACTION
 %token  ADMIN
 %token  AFTYPE
-%token  ALLOW_HIDDEN
 %token  ANTI_NICK_FLOOD
 %token  ANTI_SPAM_EXIT_MESSAGE_TIME
 %token  AUTH
@@ -120,9 +119,12 @@ int   class_redirport_var;
 %token  CRYPTLINK
 %token  DEFAULT_CIPHER_PREFERENCE
 %token  DEFAULT_FLOODCOUNT
+%token  DEFAULT_SPLIT_SERVER_COUNT
+%token  DEFAULT_SPLIT_USER_COUNT
 %token  DENY
 %token  DESCRIPTION
 %token  DIE
+%token  DISABLE_HIDDEN
 %token  DISABLE_LOCAL_CHANNELS
 %token  DISABLE_REMOTE_COMMANDS
 %token  DOT_IN_IP6_ADDR
@@ -170,9 +172,9 @@ int   class_redirport_var;
 %token  LISTEN
 %token  LOGGING
 %token  LOG_LEVEL
-%token  MAXBANS
 %token  MAXIMUM_LINKS
 %token  MAX_ACCEPT
+%token  MAX_BANS
 %token  MAX_CHANS_PER_USER
 %token  MAX_NICK_CHANGES
 %token  MAX_NICK_TIME
@@ -225,8 +227,6 @@ int   class_redirport_var;
 %token  T_SHARED
 %token  SHORT_MOTD
 %token  SILENT
-%token  SPLIT_SERVER_COUNT
-%token  SPLIT_USER_COUNT
 %token  SPOOF
 %token  SPOOF_NOTICE
 %token  STATS_I_OPER_ONLY
@@ -2491,13 +2491,14 @@ channel_item:       channel_use_except |
                     channel_use_knock |
                     channel_use_vchans |
 		    channel_vchans_oper_only |
-                    channel_maxbans |
+                    channel_max_bans |
                     channel_knock_delay |
 		    channel_knock_delay_channel |
                     channel_max_chans_per_user |
                     channel_quiet_on_ban |
 		    channel_persist_time |
-		    channel_split_user_count | channel_split_server_count |
+		    channel_default_split_user_count | 
+		    channel_default_split_server_count |
 		    channel_no_create_on_split | 
 		    channel_no_join_on_split |
                     error
@@ -2603,9 +2604,9 @@ channel_quiet_on_ban : QUIET_ON_BAN '=' TYES ';'
      ConfigChannel.quiet_on_ban = 0;
    } ;
 
-channel_maxbans: MAXBANS '=' NUMBER ';'
+channel_max_bans: MAX_BANS '=' NUMBER ';'
    {
-      ConfigChannel.maxbans = $3;
+      ConfigChannel.max_bans = $3;
    } ;
 
 channel_persist_time: PERSIST_TIME '=' timespec ';'
@@ -2613,14 +2614,14 @@ channel_persist_time: PERSIST_TIME '=' timespec ';'
     ConfigChannel.persist_time = $3;
   } ;
 
-channel_split_user_count: SPLIT_USER_COUNT '=' NUMBER ';'
+channel_default_split_user_count: DEFAULT_SPLIT_USER_COUNT '=' NUMBER ';'
   {
-    ConfigChannel.split_user_count = $3;
+    ConfigChannel.default_split_user_count = $3;
   } ;
 
-channel_split_server_count: SPLIT_SERVER_COUNT '=' NUMBER ';'
+channel_default_split_server_count: DEFAULT_SPLIT_SERVER_COUNT '=' NUMBER ';'
   {
-    ConfigChannel.split_server_count = $3;
+    ConfigChannel.default_split_server_count = $3;
   } ;
 
 channel_no_create_on_split: NO_CREATE_ON_SPLIT '=' TYES ';'
@@ -2658,7 +2659,7 @@ serverhide_item:    serverhide_flatten_links |
 		    serverhide_hide_servers |
 		    serverhide_disable_remote_commands |
 		    serverhide_links_delay |
-		    serverhide_allow_hidden |
+		    serverhide_disable_hidden |
 		    serverhide_hidden |
 		    serverhide_disable_local_channels |
                     error
@@ -2725,14 +2726,14 @@ serverhide_hidden: HIDDEN '=' TYES ';'
     ConfigServerHide.hidden = 0;
   };
 
-serverhide_allow_hidden: ALLOW_HIDDEN '=' TYES ';'
+serverhide_disable_hidden: DISABLE_HIDDEN '=' TYES ';'
   {
-    ConfigServerHide.allow_hidden = 1;
+    ConfigServerHide.disable_hidden = 1;
   }
     |
-    ALLOW_HIDDEN '=' TNO ';'
+    DISABLE_HIDDEN '=' TNO ';'
   {
-    ConfigServerHide.allow_hidden = 0;
+    ConfigServerHide.disable_hidden = 0;
   };
   
   

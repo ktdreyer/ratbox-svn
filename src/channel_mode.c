@@ -184,7 +184,7 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, int type)
   struct Ban *actualBan;
 
   /* dont let local clients overflow the banlist */
-  if ((!IsServer(client_p)) && (chptr->num_mask >= ConfigChannel.maxbans))
+  if ((!IsServer(client_p)) && (chptr->num_mask >= ConfigChannel.max_bans))
   {
     if (MyClient(client_p))
     {

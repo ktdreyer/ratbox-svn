@@ -252,14 +252,14 @@ struct config_channel_entry
   int   knock_delay;
   int	knock_delay_channel;
   int   vchans_oper_only;
-  int   maxbans;
+  int   max_bans;
   int   max_chans_per_user;
-  int   quiet_on_ban;
-  int	persist_time;
-  int   split_server_count;
-  int   split_user_count;
   int   no_create_on_split;
   int   no_join_on_split;
+  int	persist_time;
+  int   quiet_on_ban;
+  int   default_split_server_count;
+  int   default_split_user_count;
 };
 
 struct config_server_hide
@@ -271,7 +271,7 @@ struct config_server_hide
   int	links_delay;
   int   links_disabled;
   int	hidden;
-  int	allow_hidden;
+  int	disable_hidden;
 };
 
 struct server_info

@@ -111,7 +111,6 @@ action		{ return ACTION; }
 admin		{ return ADMIN; }
 administrator	{ return ADMIN; }
 aftype		{ return AFTYPE; }
-allow_hidden	{ return ALLOW_HIDDEN; }
 auth		{ return AUTH; }
 autoconn	{ return AUTOCONN; }
 caller_id_wait	{ return CALLER_ID_WAIT; }
@@ -127,9 +126,12 @@ connectfreq     { return CONNECTFREQ; }
 cryptlink	{ return CRYPTLINK; }
 default_cipher_preference { return DEFAULT_CIPHER_PREFERENCE; }
 default_floodcount  { return DEFAULT_FLOODCOUNT; }
+default_split_server_count { return DEFAULT_SPLIT_SERVER_COUNT; }
+default_split_user_count   { return DEFAULT_SPLIT_USER_COUNT; }
 deny		{ return DENY; }
 description	{ return DESCRIPTION; }
 die		{ return DIE; }
+disable_hidden	{ return DISABLE_HIDDEN; }
 disable_local_channels { return DISABLE_LOCAL_CHANNELS; }
 disable_remote_commands	{ return DISABLE_REMOTE_COMMANDS; }
 dot_in_ip6_addr { return DOT_IN_IP6_ADDR; }
@@ -224,8 +226,6 @@ servlink_path   { return SERVLINK_PATH; }
 shared          { return T_SHARED; }
 short_motd      { return SHORT_MOTD; }
 silent          { return SILENT; }
-split_server_count { return SPLIT_SERVER_COUNT; }
-split_user_count   { return SPLIT_USER_COUNT; }
 spoof		{ return SPOOF; }
 spoof_notice	{ return SPOOF_NOTICE; }
 unkline		{ return UNKLINE; }
@@ -269,7 +269,7 @@ knock_delay_channel	{ return KNOCK_DELAY_CHANNEL; }
 iauth_server            { return IAUTH_SERVER; }
 iauth_port		{ return IAUTH_PORT; }
 glines                  { return GLINES; }
-maxbans                 { return MAXBANS; }
+max_bans                { return MAX_BANS; }
 modules                 { return MODULES; }
 module                  { return MODULE; }
 path                    { return PATH; }

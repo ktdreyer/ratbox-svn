@@ -127,9 +127,21 @@ static struct InfoStruct info_table[] =
   },
   {
     "client_flood",
-    OUTPUT_BOOLEAN,
+    OUTPUT_DECIMAL,
     &ConfigFileEntry.client_flood,
     "Number of lines before a client Excess Flood's",
+  },
+  {
+    "default_floodcount",
+    OUTPUT_DECIMAL,
+    &ConfigFileEntry.default_floodcount,
+    "Startup value of FLOODCOUNT",
+  },
+  {
+    "dot_in_ip6_addr",
+    OUTPUT_BOOLEAN,
+    &ConfigFileEntry.dot_in_ip6_addr,
+    "Suffix a . to ip6 addresses",
   },
   {
     "dots_in_ident",
@@ -201,28 +213,10 @@ static struct InfoStruct info_table[] =
     "Display K-line reason to client on disconnect"
   },
   {
-    "knock_delay",
-    OUTPUT_DECIMAL,
-    &ConfigChannel.knock_delay,
-    "Delay between KNOCK attempts"
-  },
-  {
-    "links_delay",
-    OUTPUT_DECIMAL,
-    &ConfigServerHide.links_delay,
-    "Links rehash delay"
-  },
-  {
     "max_accept",
     OUTPUT_DECIMAL,
     &ConfigFileEntry.max_accept,
     "Maximum nicknames on accept list",
-  },
-  {
-    "max_chans_per_user",
-    OUTPUT_DECIMAL,
-    &ConfigChannel.max_chans_per_user,
-    "Maximum number of channels a user can join"
   },
   {
     "max_nick_changes",
@@ -241,12 +235,6 @@ static struct InfoStruct info_table[] =
     OUTPUT_DECIMAL,
     &ConfigFileEntry.max_targets,
     "The maximum number of PRIVMSG/NOTICE targets"
-  },
-  {
-    "maxbans",
-    OUTPUT_DECIMAL,
-    &ConfigChannel.maxbans,
-    "Total +b/e/I modes allowed in a channel",
   },
   {
     "maximum_links",
@@ -291,10 +279,10 @@ static struct InfoStruct info_table[] =
     "Minimum delay between uses of certain commands"
   },
   {
-    "quiet_on_ban",
-    OUTPUT_BOOLEAN_YN,
-    &ConfigChannel.quiet_on_ban,
-    "Banned users may not send text to a channel"
+    "ping_cookie",
+    OUTPUT_BOOLEAN,
+    &ConfigFileEntry.ping_cookie,
+    "Require ping cookies to connect",
   },
   {
     "short_motd",
@@ -318,13 +306,103 @@ static struct InfoStruct info_table[] =
     "stats_o_oper_only",
     OUTPUT_BOOLEAN_YN,
     &ConfigFileEntry.stats_o_oper_only,
-    "STATS O output is only shown to operators"
+    "STATS O output is only shown to operators",
+  },
+  {
+    "stats_P_oper_only",
+    OUTPUT_BOOLEAN_YN,
+    &ConfigFileEntry.stats_P_oper_only,
+    "STATS P is only shown to operators",
+  },
+  {
+    "throttle_time",
+    OUTPUT_DECIMAL,
+    &ConfigFileEntry.throttle_time,
+    "Minimum time between client reconnects",
   },
   {
     "ts_max_delta",
     OUTPUT_DECIMAL,
     &ConfigFileEntry.ts_max_delta,
     "Maximum permitted TS delta from another server"
+  },
+  {
+    "ts_warn_delta",
+    OUTPUT_DECIMAL,
+    &ConfigFileEntry.ts_warn_delta,
+    "Maximum permitted TS delta before displaying a warning"
+  },
+  {
+    "warn_no_nline",
+    OUTPUT_BOOLEAN,
+    &ConfigFileEntry.warn_no_nline,
+    "Display warning if connecting server lacks N-line"
+  },
+  {
+    "whois_wait",
+    OUTPUT_DECIMAL,
+    &ConfigFileEntry.whois_wait,
+    "Delay (in seconds) between remote WHOIS requests"
+  },
+  {
+    "default_split_server_count",
+    OUTPUT_DECIMAL,
+    &ConfigChannel.default_split_server_count,
+    "Startup value of SPLITNUM",
+  },
+  {
+    "default_split_user_count",
+    OUTPUT_DECIMAL,
+    &ConfigChannel.default_split_user_count,
+    "Startup value of SPLITUSERS",
+  },
+  {
+    "knock_delay",
+    OUTPUT_DECIMAL,
+    &ConfigChannel.knock_delay,
+    "Delay between a users KNOCK attempts"
+  },
+  {
+    "knock_delay_channel",
+    OUTPUT_DECIMAL,
+    &ConfigChannel.knock_delay_channel,
+    "Delay between KNOCK attempts to a channel",
+  },
+  {
+    "max_bans",
+    OUTPUT_DECIMAL,
+    &ConfigChannel.max_bans,
+    "Total +b/e/I modes allowed in a channel",
+  },
+  {
+    "max_chans_per_user",
+    OUTPUT_DECIMAL,
+    &ConfigChannel.max_chans_per_user,
+    "Maximum number of channels a user can join",
+  },
+  {
+    "no_create_on_split",
+    OUTPUT_BOOLEAN_YN,
+    &ConfigChannel.no_create_on_split,
+    "Disallow creation of channels when split",
+  },
+  {
+    "no_join_on_split",
+    OUTPUT_BOOLEAN_YN,
+    &ConfigChannel.no_join_on_split,
+    "Disallow joining channels when split",
+  },
+  {
+    "persist_time",
+    OUTPUT_DECIMAL,
+    &ConfigChannel.persist_time,
+    "Delay before persistent channels expire",
+  },
+  {
+    "quiet_on_ban",
+    OUTPUT_BOOLEAN_YN,
+    &ConfigChannel.quiet_on_ban,
+    "Banned users may not send text to a channel"
   },
   {
     "use_except",
@@ -351,10 +429,10 @@ static struct InfoStruct info_table[] =
     "Enable /KNOCK",
   },
   {
-    "ts_warn_delta",
-    OUTPUT_DECIMAL,
-    &ConfigFileEntry.ts_warn_delta,
-    "Maximum permitted TS delta before displaying a warning"
+    "use_vchans",
+    OUTPUT_BOOLEAN_YN,
+    &ConfigChannel.use_vchans,
+    "Enabled vchans",
   },
   {
     "vchans_oper_only",
@@ -363,16 +441,46 @@ static struct InfoStruct info_table[] =
     "Restrict use of /CJOIN to opers"
   },
   {
-    "warn_no_nline",
-    OUTPUT_BOOLEAN,
-    &ConfigFileEntry.warn_no_nline,
-    "Display warning if connecting server lacks N-line"
+    "disable_hidden",
+    OUTPUT_BOOLEAN_YN,
+    &ConfigServerHide.disable_hidden,
+    "Prevent servers from hiding themselves from a flattened /links",
   },
   {
-    "whois_wait",
+    "disable_local_channels",
+    OUTPUT_BOOLEAN_YN,
+    &ConfigServerHide.disable_local_channels,
+    "Prevent users joining &channels",
+  },
+  {
+    "disable_remote_commands",
+    OUTPUT_BOOLEAN_YN,
+    &ConfigServerHide.disable_remote,
+    "Prevent users issuing commands on remote servers",
+  },
+  {
+    "flatten_links",
+    OUTPUT_BOOLEAN_YN,
+    &ConfigServerHide.flatten_links,
+    "Flatten /links list",
+  },
+  {
+    "hidden",
+    OUTPUT_BOOLEAN_YN,
+    &ConfigServerHide.hidden,
+    "Hide this server from a flattened /links on remote servers",
+  },
+  {
+    "hide_servers",
+    OUTPUT_BOOLEAN_YN,
+    &ConfigServerHide.hide_servers,
+    "Hide servernames from users",
+  },
+  {
+    "links_delay",
     OUTPUT_DECIMAL,
-    &ConfigFileEntry.whois_wait,
-    "Delay (in seconds) between remote WHOIS requests"
+    &ConfigServerHide.links_delay,
+    "Links rehash delay"
   },
   /* --[  END OF TABLE  ]---------------------------------------------- */
   {
