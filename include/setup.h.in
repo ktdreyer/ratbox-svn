@@ -1,5 +1,5 @@
-/* include/setup.h.in.  Generated automatically from configure.in by autoheader 2.13.  */
-
+/* include/setup.h.in.  Generated automatically from autoconf/configure.in by autoheader 2.13.  */
+/* $Id$ */
 /* Define as __inline if that's what the C compiler calls it.  */
 #undef inline
 
