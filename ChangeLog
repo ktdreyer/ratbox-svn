@@ -1,3 +1,19 @@
+androsyn    2002/10/08 02:13:42 UTC	(20021008_0)
+
+  Modified files:
+    modules              m_motd.c 
+  Log:
+  Ported over from hybrid...
+  
+        With hide_servers=yes and disable_remote=no, the servername is removed
+    from the 312 numeric when you /whois nick, but you can just do /motd nick
+    and see the server they are on. This patch fixes that vulnerability...
+  
+  Revision  Changes    Path
+  1.31      +2 -2      ircd-ratbox/modules/m_motd.c
+
+
+
 androsyn    2002/10/06 00:12:23 UTC	(20021006_0)
 
   Modified files:
