@@ -1422,24 +1422,6 @@ exit_client (struct Client *client_p,	/* The local client originating the
 					    "ERROR :Closing Link: %s (%s)",
 					    source_p->host, comment);
 		}
-		/*
-		 ** Currently only server connections can have
-		 ** depending remote clients here, but it does no
-		 ** harm to check for all local clients. In
-		 ** future some other clients than servers might
-		 ** have remotes too...
-		 **
-		 ** Close the Client connection first and mark it
-		 ** so that no messages are attempted to send to it.
-		 ** (The following *must* make MyConnect(source_p) == FALSE!).
-		 ** It also makes source_p->from == NULL, thus it's unnecessary
-		 ** to test whether "source_p != target_p" in the following loops.
-		 **
-		 ** Okay..close_connection() doesn't set MyConnect(source_p) == FALSE
-		 ** But free_local_client does
-		 */
-		close_connection (source_p);
-		free_local_client (source_p);
 	}
 
 	if(IsServer (source_p))
@@ -1481,6 +1463,12 @@ exit_client (struct Client *client_p,	/* The local client originating the
 			      source_p->localClient->sendK, source_p->localClient->receiveK);
 		}
 	}
+
+	if(MyConnect(source_p))
+	{
+		close_connection (source_p);
+		free_local_client (source_p);
+	} 
 	/* The client *better* be off all of the lists */
 	assert (dlinkFind (&unknown_list, source_p) == NULL);
 	assert (dlinkFind (&lclient_list, source_p) == NULL);

@@ -102,7 +102,7 @@ poll_update_pollfds (int fd, short event, PF * handler)
 
 	pf = &pfds[comm_index];
 
-
+	
 	/* Update the events */
 	if(handler != NULL)
 	{
@@ -112,13 +112,14 @@ poll_update_pollfds (int fd, short event, PF * handler)
 	}
 	else
 	{
-		if(comm_index >= 0)
+		if(comm_index >= 0 && used_count > 0)
 		{
 			pf->events &= ~event;
 			if(pf->events == 0)
 			{
 				pf->fd = -1;
 				pf->revents = 0;
+				assert(used_count > 0);
 				if(F->comm_index != used_count - 1)
 				{
 					index_to_fde[used_count - 1]->comm_index = F->comm_index;
