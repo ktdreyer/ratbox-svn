@@ -1,3 +1,15 @@
+androsyn    2004/03/01 22:08:06 EST	(20040302_3)
+
+  Modified files:
+    src                  s_newconf.c 
+  Log:
+  Missed one
+  
+  Revision  Changes    Path
+  7.29      +0 -5      ircd-ratbox/src/s_newconf.c
+
+
+
 androsyn    2004/03/01 19:28:31 EST	(20040302_2)
 
   Modified files:
