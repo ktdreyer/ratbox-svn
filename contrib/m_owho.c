@@ -40,7 +40,13 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
+#include "newconf.h"
 
+#ifndef CONF_OPER_SPY
+#define CONF_OPER_SPY 0x0400
+#endif
+
+static void conf_set_oper_spy(void *);
 static void m_owho(struct Client*, struct Client*, int, char**);
 
 struct Message who_msgtab = {
@@ -53,15 +59,19 @@ void
 _modinit(void)
 {
   mod_add_cmd(&who_msgtab);
+  add_conf_item("operator", "oper_spy", CF_YESNO, conf_set_oper_spy);
 }
 
 void
 _moddeinit(void)
 {
   mod_del_cmd(&who_msgtab);
+  remove_conf_item("operator", "oper_spy");
 }
+
 const char *_version = "$Revision$";
 #endif
+
 static void do_who_on_channel(struct Client *source_p,
 			      struct Channel *chptr, char *real_name,
 			      int server_oper, int member);
@@ -511,3 +521,13 @@ static void do_who(struct Client *source_p,
     }
 }
 
+void
+conf_set_oper_spy(void *data)
+{
+  int yesno = *(int*) data;
+
+  if(yesno)
+    yy_achead->port |= CONF_OPER_SPY;
+  else
+    yy_achead->port &= ~CONF_OPER_SPY;
+}

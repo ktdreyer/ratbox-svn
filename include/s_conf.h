@@ -167,6 +167,7 @@ struct ConfItem
 #define CONF_OPER_DIE           0x0080
 #define CONF_OPER_ADMIN         0x0100
 #define CONF_OPER_XLINE		0x0200
+/*      CONF_OPER_SPY           0x0400 */
 
 struct config_file_entry
 {

@@ -168,14 +168,22 @@ int 	add_conf_item(char *topconf, char *name, int type, void (*func)(void*))
 	struct TopConf *tc;
 	struct ConfEntry *cf;
 	dlink_node *n;
+
 	if ((tc = find_top_conf(topconf)) == NULL)
 		return -1;
+
+        if((cf = find_conf_item(tc, name)) != NULL)
+        {
+                cf->cf_count++;
+                return 0;
+        }
 
 	cf = MyMalloc(sizeof(struct ConfEntry));
 
 	DupString(cf->cf_name, name);
 	cf->cf_type = type;
 	cf->cf_func = func;
+        cf->cf_count = 1;
 
 	n = make_dlink_node();
 	dlinkAdd(cf, n, &tc->tc_items);
@@ -195,6 +203,12 @@ int     remove_conf_item(char *topconf, char *name)
         if((cf = find_conf_item(tc, name)) == NULL)
                 return -1;
         
+        if(cf->cf_count > 1)
+        {
+                cf->cf_count--;
+                return 0;
+        }
+
         if((ptr = dlinkFind(&tc->tc_items, cf)) == NULL)
                 return -1;
 

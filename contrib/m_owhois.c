@@ -46,7 +46,13 @@
 #include "parse.h"
 #include "modules.h"
 #include "hook.h"
+#include "newconf.h"
 
+#ifndef CONF_OPER_SPY
+#define CONF_OPER_SPY 0x0400
+#endif
+
+static void conf_set_oper_spy(void *);
 static int do_whois(struct Client *client_p, struct Client *source_p,
                     int parc, char *parv[]);
 static int single_whois(struct Client *source_p, struct Client *target_p,
@@ -67,6 +73,7 @@ _modinit(void)
 {
   hook_add_event("doing_whois");
   mod_add_cmd(&whois_msgtab);
+  add_conf_item("operator", "oper_spy", CF_YESNO, conf_set_oper_spy);
 }
 
 void
@@ -74,6 +81,7 @@ _moddeinit(void)
 {
   hook_del_event("doing_whois");
   mod_del_cmd(&whois_msgtab);
+  remove_conf_item("operator", "oper_spy");
 }
 
 const char *_version = "$Revision$";
@@ -371,3 +379,13 @@ static void whois_person(struct Client *source_p,struct Client *target_p, int gl
   return;
 }
 
+void
+conf_set_oper_spy(void *data)
+{
+  int yesno = *(int*) data;
+
+  if(yesno)
+    yy_achead->port |= CONF_OPER_SPY;
+  else
+    yy_achead->port &= ~CONF_OPER_SPY;
+}

@@ -67,6 +67,7 @@ struct ConfEntry
 {
   char *	cf_name;
   int		cf_type;
+  int           cf_count;
   void 		(*cf_func) (void *);
 };
 
