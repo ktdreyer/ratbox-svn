@@ -1,3 +1,19 @@
+leeh        2005/03/20 12:18:15 UTC	(20050320_6)
+
+  Modified files:
+    adns                 types.c 
+    src                  devpoll.c epoll.c kqueue.c 
+  Log:
+  - fix some more include warnings
+  
+  Revision  Changes    Path
+  1.21      +1 -0      ircd-ratbox/adns/types.c
+  7.39      +2 -1      ircd-ratbox/src/devpoll.c
+  1.37      +1 -2      ircd-ratbox/src/epoll.c
+  1.54      +1 -1      ircd-ratbox/src/kqueue.c
+
+
+
 leeh        2005/03/20 03:20:40 UTC	(20050320_5)
 
   Modified files:
