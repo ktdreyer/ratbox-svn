@@ -118,7 +118,7 @@ char**  myargv;
 int     dorehash   = 0;
 int     doremotd   = 0;
 int     debuglevel = -1;        /* Server debug level */
-char*   debugmode  = "";        /*  -"-    -"-   -"-  */
+const char*   debugmode  = "";        /*  -"-    -"-   -"-  */
 time_t  nextconnect = 1;        /* time for next try_connections call */
 
 /* Set to zero because it should be initialized later using

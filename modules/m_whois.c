@@ -289,12 +289,13 @@ static int single_whois(struct Client *source_p,struct Client *target_p,
   dlink_node *ptr;
   struct Channel *chptr;
   char *name;
+  char quest[] = "?";
   int invis;
   int member;
   int showperson;
   
   if (target_p->name[0] == '\0')
-    name = "?";
+    name = quest;
   else
     name = target_p->name;
 

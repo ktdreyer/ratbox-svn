@@ -113,7 +113,7 @@ const char* myctime(time_t);
 
 #define EmptyString(x) (!(x) || (*(x) == '\0'))
 
-char*       strtoken(char** save, char* str, char* fs);
+char*       strtoken(char** save, char* str, const char* fs);
 
 /*
  * deprecate

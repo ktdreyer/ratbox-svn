@@ -41,8 +41,8 @@
 static void m_help(struct Client*, struct Client*, int, char**);
 static void mo_help(struct Client*, struct Client*, int, char**);
 static void mo_uhelp(struct Client*, struct Client*, int, char**);
-static void dohelp(struct Client *, char *, char *, char *);
-static void sendhelpfile(struct Client *, char *, char *, char *);
+static void dohelp(struct Client *, const char *, const char *, const char *);
+static void sendhelpfile(struct Client *, const char *, const char *, const char *);
 
 struct Message help_msgtab = {
   "HELP", 0, 0, 0, 0, MFLG_SLOW, 0,
@@ -137,59 +137,60 @@ mo_uhelp(struct Client *client_p, struct Client *source_p,
 }
 
 static void
-dohelp(struct Client *source_p, char *hpath,
-                   char *topic, char *nick)
+dohelp(struct Client *source_p, const char *hpath,
+                   const char *topic, const char *nick)
 {
   char path[MAXPATHLEN + 1];
+  char ntopic[25];
   struct stat sb;
   int i;
 
   if (topic != NULL)
   {
     /* convert to lower case */
-    for (i = 0; topic[i] != '\0'; i++)
+    for (i = 0; topic[i] != '\0' && i < sizeof(ntopic) - 1; i++)
     {
-      topic[i] = ToLower(topic[i]);
+      ntopic[i] = ToLower(topic[i]);
     }
   }
   else
-    topic = "index"; /* list available help topics */
+    strcpy(ntopic,"index"); /* list available help topics */
 
   if (strchr(topic, '/'))
   {
-    sendto_one(source_p, form_str(ERR_HELPNOTFOUND), me.name, nick, topic);
+    sendto_one(source_p, form_str(ERR_HELPNOTFOUND), me.name, nick, ntopic);
     return;
   }
 
   if (strlen(hpath) + strlen(topic) + 1 > MAXPATHLEN)
   {
-    sendto_one(source_p, form_str(ERR_HELPNOTFOUND), me.name, nick, topic);
+    sendto_one(source_p, form_str(ERR_HELPNOTFOUND), me.name, nick, ntopic);
     return;
   }
 
-  sprintf(path, "%s/%s", hpath, topic);
+  sprintf(path, "%s/%s", hpath, ntopic);
 
   if (stat(path, &sb) < 0)
   {
     ilog(L_NOTICE, "help file %s not found", path);
-    sendto_one(source_p, form_str(ERR_HELPNOTFOUND), me.name, nick, topic);
+    sendto_one(source_p, form_str(ERR_HELPNOTFOUND), me.name, nick, ntopic);
     return;
   }
 
   if (!S_ISREG(sb.st_mode))
   {
     ilog(L_NOTICE, "help file %s not found", path);
-    sendto_one(source_p, form_str(ERR_HELPNOTFOUND), me.name, nick, topic);
+    sendto_one(source_p, form_str(ERR_HELPNOTFOUND), me.name, nick, ntopic);
     return;
   }
 
-  sendhelpfile(source_p, path, topic, nick);
+  sendhelpfile(source_p, path, ntopic, nick);
   return;
 }
 
 static void 
-sendhelpfile(struct Client *source_p, char *path,
-                         char *topic, char *nick)
+sendhelpfile(struct Client *source_p, const char *path,
+                         const char *topic, const char *nick)
 {
   FBFILE *file;
   char line[HELPLEN];

@@ -2294,11 +2294,11 @@ conf_add_d_conf(struct ConfItem *aconf)
 
 void 
 conf_add_fields(struct ConfItem *aconf,
-		char *host_field,
-		char *pass_field,
-		char *user_field,
-		char *port_field,
-		char *class_field)
+		const char *host_field,
+		const char *pass_field,
+		const char *user_field,
+		const char *port_field,
+		const char *class_field)
 {
   if (host_field != NULL)
     DupString(aconf->host, host_field);
@@ -2320,7 +2320,7 @@ conf_add_fields(struct ConfItem *aconf,
  * side effects	- message to opers and log file entry is made
  */
 void 
-yyerror(char *msg)
+yyerror(const char *msg)
 {
   char newlinebuf[BUFSIZE];
 
@@ -2345,7 +2345,7 @@ conf_fbgets(char *lbuf,int max_size, FBFILE *fb)
 }
 
 int 
-conf_yy_fatal_error(char *msg)
+conf_yy_fatal_error(const char *msg)
 {
   return(0);
 }

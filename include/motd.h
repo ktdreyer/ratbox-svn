@@ -58,7 +58,7 @@ typedef struct MessageFile MessageFile;
 
 struct Client;
 
-void InitMessageFile(MotdType, char *, struct MessageFile *);
+void InitMessageFile(MotdType, const char *, struct MessageFile *);
 int SendMessageFile(struct Client *, struct MessageFile *);
 int ReadMessageFile(MessageFile *);
 

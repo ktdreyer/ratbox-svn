@@ -53,7 +53,7 @@ struct Message error_msgtab = {
 void m_error(struct Client *client_p, struct Client *source_p,
              int parc, char *parv[])
 {
-  char* para;
+  const char* para;
 
   para = (parc > 1 && *parv[1] != '\0') ? parv[1] : "<>";
   
@@ -86,7 +86,7 @@ void m_error(struct Client *client_p, struct Client *source_p,
 void ms_error(struct Client *client_p, struct Client *source_p,
               int parc, char *parv[])
 {
-  char* para;
+  const char* para;
 
   para = (parc > 1 && *parv[1] != '\0') ? parv[1] : "<>";
   

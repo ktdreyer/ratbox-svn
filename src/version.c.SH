@@ -52,11 +52,11 @@ $spitshell >version.c <<!SUB!THIS!
 #include "patchlevel.h"
 #include "serno.h"
 
-char *generation = "$generation";
-char *creation = "$creation";
-char *platform = "$uname";
-char *ircd_version = PATCHLEVEL;
-char *serno = SERIALNUM;
+const char *generation = "$generation";
+const char *creation = "$creation";
+const char *platform = "$uname";
+const char *ircd_version = PATCHLEVEL;
+const char *serno = SERIALNUM;
 
 char *infotext[] =
 {

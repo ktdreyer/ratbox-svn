@@ -72,7 +72,7 @@ const char *_version = "$Revision$";
 /* Structure used for the SET table itself */
 struct SetStruct
 {
-  char  *name;
+  const char  *name;
   void  (*handler)();
   int   wants_char; /* 1 if it expects (char *, [int]) */
   int   wants_int;  /* 1 if it expects ([char *], int) */
@@ -134,7 +134,7 @@ static void list_quote_commands(struct Client *source_p)
 {
   int i;
   int j=0;
-  char *names[4];
+  const char *names[4];
 
   sendto_one(source_p, ":%s NOTICE %s :Available QUOTE SET commands:",
              me.name, source_p->name);
@@ -379,7 +379,7 @@ static void quote_spamtime( struct Client *source_p, int newval )
 }
 
 /* this table is what splitmode may be set to */
-static char *splitmode_values[] =
+static const char *splitmode_values[] =
 {
   "OFF",
   "ON",
@@ -388,7 +388,7 @@ static char *splitmode_values[] =
 };
 
 /* this table is what splitmode may be */
-static char *splitmode_status[] =
+static const char *splitmode_status[] =
 {
   "OFF",
   "AUTO (OFF)",

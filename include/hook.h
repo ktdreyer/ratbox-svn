@@ -63,8 +63,8 @@ struct hook_links_data
 	struct Client *source_p;
 	int parc;
 	char **parv;
-	char statchar;
-	char *mask;
+	const char statchar;
+	const char *mask;
 };
 
 struct hook_spy_data
@@ -86,11 +86,11 @@ struct hook_burst_channel
 };
 
 
-int hook_add_event(char *);
-int hook_add_hook(char *, hookfn *);
-int hook_call_event(char *, void *);
-int hook_del_event(char *);
-int hook_del_hook(char *event, hookfn *fn);
+int hook_add_event(const char *);
+int hook_add_hook(const char *, hookfn *);
+int hook_call_event(const char *, void *);
+int hook_del_event(const char *);
+int hook_del_hook(const char *event, hookfn *fn);
 void init_hooks(void);
 
 #endif

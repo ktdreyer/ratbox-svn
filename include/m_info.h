@@ -31,10 +31,10 @@
 
 typedef struct Information
 {
-  char* name;        /* name of item */
-  char* strvalue;    /* value of item if it's a boolean */
+  const char* name;        /* name of item */
+  const char* strvalue;    /* value of item if it's a boolean */
   int   intvalue;    /* value of item if it's an integer */
-  char* desc;        /* short description of item */
+  const char* desc;        /* short description of item */
 } Info;
 
 Info MyInformation[] = {

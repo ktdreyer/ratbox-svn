@@ -87,10 +87,10 @@ static int find_user_host(struct Client *source_p,
                           char *user_host_or_nick, char *user, char *host);
 
 /* needed to remove unused definition warning */
-static int valid_comment(struct Client *source_p, char *comment);
-static int valid_user_host(struct Client *source_p, char *user, char *host);
-static int valid_wild_card(char *user, char *host);
-static int already_placed_kline(struct Client*, char*, char*, int);
+static int valid_comment(struct Client *source_p, const char *comment);
+static int valid_user_host(struct Client *source_p, const char *user, const char *host);
+static int valid_wild_card(const char *user, const char *host);
+static int already_placed_kline(struct Client*, const char*, const char*, int);
 
 static void apply_kline(struct Client *source_p, struct ConfItem *aconf,
                         const char *reason, const char *oper_reason,
@@ -120,7 +120,7 @@ static void
 mo_kline(struct Client *client_p, struct Client *source_p,
 	 int parc, char **parv)
 {
-  char *reason = "No Reason";
+  const char *reason = "No Reason";
   char *oper_reason;
   const char* current_date;
   const char* target_server=NULL;
@@ -577,7 +577,8 @@ static void
 mo_dline(struct Client *client_p, struct Client *source_p,
 	 int parc, char *parv[])
 {
-  char *dlhost, *reason, *oper_reason;
+  char *dlhost, *oper_reason;
+  const char *reason = "<No Reason>";
 #ifndef IPV6
   char *p;
   struct Client *target_p;
@@ -735,7 +736,7 @@ mo_dline(struct Client *client_p, struct Client *source_p,
   t = AF_INET;
   if (ConfigFileEntry.non_redundant_klines)
     {
-      char *creason;
+      const char *creason;
       (void)parse_netmask(dlhost, &daddr, NULL);
 
       if((aconf = find_dline(&daddr, t)) != NULL)
@@ -901,7 +902,7 @@ find_user_host(struct Client *source_p,
  * side effects -
  */
 static int
-valid_user_host(struct Client *source_p, char *luser, char *lhost)
+valid_user_host(struct Client *source_p, const char *luser, const char *lhost)
 {
   /*
    * Check for # in user@host
@@ -934,9 +935,9 @@ valid_user_host(struct Client *source_p, char *luser, char *lhost)
  * side effects -
  */
 static int
-valid_wild_card(char *luser, char *lhost)
+valid_wild_card(const char *luser, const char *lhost)
 {
-  char *p;
+  const char *p;
   char tmpch;
   int nonwild;
 
@@ -996,7 +997,7 @@ valid_wild_card(char *luser, char *lhost)
  * side effects - NONE
  */
 static int
-valid_comment(struct Client *source_p, char *comment)
+valid_comment(struct Client *source_p, const char *comment)
 {
   if(strchr(comment, '"'))
     {
@@ -1021,10 +1022,10 @@ valid_comment(struct Client *source_p, char *comment)
  *       have to walk the hash and check every existing K-line. -A1kmm.
  */
 static int
-already_placed_kline(struct Client *source_p, char *luser,
-                     char *lhost, int tkline)
+already_placed_kline(struct Client *source_p, const char *luser,
+                     const char *lhost, int tkline)
 {
-  char *reason;
+  const char *reason;
   struct irc_inaddr iphost, *piphost;
   struct ConfItem *aconf;
   int t;

@@ -47,7 +47,7 @@
 **
 */
 void
-InitMessageFile(MotdType motdType, char *fileName, MessageFile *motd)
+InitMessageFile(MotdType motdType, const char *fileName, MessageFile *motd)
   {
     strlcpy(motd->fileName, fileName, sizeof(motd->fileName));
     motd->motdType = motdType;
@@ -67,7 +67,7 @@ SendMessageFile(struct Client *source_p, MessageFile *motdToPrint)
 {
   MessageFileLine *linePointer;
   MotdType motdType;
-  char *nick;
+  const char *nick;
 
   if(motdToPrint != NULL)
     motdType = motdToPrint->motdType;

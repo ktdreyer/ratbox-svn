@@ -47,14 +47,14 @@ struct Message time_msgtab = {
   {m_unregistered, m_time, mo_time, mo_time}
 };
 
-static char *months[] =
+static const char *months[] =
 {
   "January",   "February", "March",   "April",
   "May",       "June",     "July",    "August",
   "September", "October",  "November","December"
 };
 
-static char *weekdays[] =
+static const char *weekdays[] =
 {
   "Sunday",   "Monday", "Tuesday", "Wednesday",
   "Thursday", "Friday", "Saturday"

@@ -47,7 +47,7 @@ init_hooks(void)
 }
 
 static hook *
-new_hook(char *name)
+new_hook(const char *name)
 {
 	hook *h;
 	
@@ -57,7 +57,7 @@ new_hook(char *name)
 }
 
 int
-hook_add_event(char *name)
+hook_add_event(const char *name)
 {
 	hook *newhook;
 	
@@ -68,7 +68,7 @@ hook_add_event(char *name)
 }
 
 int
-hook_del_event(char *name)
+hook_del_event(const char *name)
 {
 	dlink_node *node;
 	hook *h;
@@ -87,7 +87,7 @@ hook_del_event(char *name)
 }
 
 static hook *
-find_hook(char *name)
+find_hook(const char *name)
 {
 	dlink_node *node;
 	hook *h;
@@ -103,7 +103,7 @@ find_hook(char *name)
 }
 
 int 
-hook_del_hook(char *event, hookfn *fn)
+hook_del_hook(const char *event, hookfn *fn)
 {
  hook *h;
  dlink_node *node, *nnode;
@@ -122,7 +122,7 @@ hook_del_hook(char *event, hookfn *fn)
 }
 
 int
-hook_add_hook(char *event, hookfn *fn)
+hook_add_hook(const char *event, hookfn *fn)
 {
 	hook *h;
 	
@@ -135,7 +135,7 @@ hook_add_hook(char *event, hookfn *fn)
 }
 
 int
-hook_call_event(char *event, void *data)
+hook_call_event(const char *event, void *data)
 {
 	hook *h;
 	dlink_node *node;

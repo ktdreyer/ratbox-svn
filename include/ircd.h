@@ -70,15 +70,15 @@ struct ServerState_t {
 
 extern struct ServerState_t server_state;
 
-extern char*          debugmode;
+extern const char*          debugmode;
 extern int            debuglevel;
 extern int            debugtty;
-extern char*          creation;
-extern char*          generation;
-extern char*          platform;
-extern char*          infotext[];
-extern char*          serno;
-extern char*          ircd_version;
+extern const char*          creation;
+extern const char*          generation;
+extern const char*          platform;
+extern const char*          infotext[];
+extern const char*          serno;
+extern const char*          ircd_version;
 extern const char*    logFileName;
 extern const char     serveropts[];
 extern int            cold_start;

@@ -149,7 +149,7 @@ char *strip_tabs(char *dest, const unsigned char *src, size_t len)
  *   argv 9/90
  *
  */
-char* strtoken(char** save, char* str, char* fs)
+char* strtoken(char** save, char* str, const char* fs)
 {
   char* pos = *save;  /* keep last position across calls */
   char* tmp;

@@ -81,10 +81,9 @@ static void mo_kill(struct Client *client_p, struct Client *source_p,
   struct Client*    target_p;
   const char* inpath = client_p->name;
   char*       user;
-  char*       reason;
+  const char*       reason;
 
   user = parv[1];
-  reason = parv[2]; /* Either defined or NULL (parc >= 2!!) */
 
   if (!IsOperK(source_p))
     {
@@ -92,10 +91,11 @@ static void mo_kill(struct Client *client_p, struct Client *source_p,
       return;
     }
 
-  if (!BadPtr(reason))
+  if (!BadPtr(parv[2]))
     {
-      if(strlen(reason) > (size_t) KILLLEN)
-	reason[KILLLEN] = '\0';
+      if(strlen(parv[2]) > (size_t) KILLLEN)
+	parv[2][KILLLEN] = '\0';
+      reason = parv[2];
     }
   else
     reason = "<No reason given>";
@@ -179,6 +179,7 @@ static void ms_kill(struct Client *client_p, struct Client *source_p,
   struct Client *target_p;
   char *user;
   char *reason;
+  char default_reason[] = "<No reason given>";
   char *path;
   int chasing = 0;
 
@@ -195,7 +196,7 @@ static void ms_kill(struct Client *client_p, struct Client *source_p,
 
   if(BadPtr(parv[2]))
   {
-    reason = "<No reason given>";
+    reason = default_reason;
 
     /* hyb6 takes the nick of the killer from the path *sigh* --fl_ */
     path = source_p->name;
@@ -210,7 +211,7 @@ static void ms_kill(struct Client *client_p, struct Client *source_p,
       reason++;
     }
     else
-      reason = "<No reason given>";
+      reason = default_reason;
 
     path = parv[2];
   }

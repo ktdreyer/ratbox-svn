@@ -73,6 +73,7 @@ static void m_quit(struct Client *client_p,
   char reason [TOPICLEN + 1];
 
   source_p->flags |= FLAGS_NORMALEX;
+
   if (strlen(comment) > (size_t) TOPICLEN)
     comment[TOPICLEN] = '\0';
 
@@ -90,7 +91,7 @@ static void m_quit(struct Client *client_p,
      (source_p->firsttime + ConfigFileEntry.anti_spam_exit_message_time)
      > CurrentTime)
     {
-      comment = "Client Quit";
+      exit_client(client_p, source_p, source_p, "Quit");
     }
 
   exit_client(client_p, source_p, source_p, comment);

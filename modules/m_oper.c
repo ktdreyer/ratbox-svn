@@ -45,7 +45,7 @@
 #include "packet.h"
 
 static struct ConfItem *find_password_aconf(char *name, struct Client *source_p);
-static int match_oper_password(char *password, struct ConfItem *aconf);
+static int match_oper_password(const char *password, struct ConfItem *aconf);
 
 extern char *crypt();
 
@@ -226,10 +226,10 @@ static struct ConfItem *find_password_aconf(char *name, struct Client *source_p)
  * side effects - none
  */
 
-static int match_oper_password(char *password,
+static int match_oper_password(const char *password,
                                struct ConfItem *aconf)
 {
-  char *encr;
+  const char *encr;
 
   if (!aconf->status & CONF_OPERATOR)
     return NO;

@@ -60,7 +60,7 @@ static  void    do_numeric (char [], struct Client *,
 static  int    handle_command(struct Message *, struct Client *,
 			      struct Client *, int, char **);
 
-static int hash(char *p);
+static int hash(const char *p);
 static struct Message *hash_parse(char *);
 
 struct MessageHash *msg_hash_table[MAX_MSG_HASH];
@@ -525,7 +525,7 @@ hash_parse(char *cmd)
  * BUGS		- This a HORRIBLE hash function
  */
 static int
-hash(char *p)
+hash(const char *p)
 {
   int hash_val=0;
 

@@ -100,7 +100,7 @@ static void mo_unkline (struct Client *client_p,struct Client *source_p,
                        int parc,char *parv[])
 {
   char *user, *host;
-
+  char splat[] = "*";
   if (!IsOperUnkline(source_p))
     {
       sendto_one(source_p,":%s NOTICE %s :You need unkline = yes;",me.name,parv[0]);
@@ -125,7 +125,7 @@ static void mo_unkline (struct Client *client_p,struct Client *source_p,
         }
       else
         {
-          user = "*";           /* no @ found, assume its *@somehost */
+          user = splat;           /* no @ found, assume its *@somehost */
           host = parv[1];
         }
     }
@@ -692,7 +692,7 @@ static void mo_ungline(struct Client *client_p, struct Client *source_p,
                       int parc,char *parv[])
 {
   char  *user,*host;
-
+  char splat[] = "*";
   if (!ConfigFileEntry.glines)
     {
       sendto_one(source_p,":%s NOTICE %s :UNGLINE disabled",me.name,parv[0]);
@@ -717,7 +717,7 @@ static void mo_ungline(struct Client *client_p, struct Client *source_p,
         }
       else
         {
-          user = "*";           /* no @ found, assume its *@somehost */
+          user = splat;           /* no @ found, assume its *@somehost */
           host = parv[1];
         }
     }

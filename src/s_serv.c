@@ -322,7 +322,7 @@ void write_links_file(void* notused)
   MessageFileLine *newMessageLine = 0;
   MessageFile *MessageFileptr;
   struct Client *target_p;
-  char *p;
+  const char *p;
   FBFILE* file;
   char buff[512];
   dlink_node *ptr;
@@ -410,7 +410,7 @@ void write_links_file(void* notused)
  *
  *      returns: (see #defines)
  */
-int hunt_server(struct Client *client_p, struct Client *source_p, char *command,
+int hunt_server(struct Client *client_p, struct Client *source_p, const char *command,
                 int server, int parc, char *parv[])
 {
   struct Client *target_p;
@@ -1238,7 +1238,7 @@ static int fork_server(struct Client *server)
                          */
   char  fd_str[5][6];   /* store 5x '6' '5' '5' '3' '5' '\0' */
   char *kid_argv[7];
-  
+  char slink[] = "-slink";
 #ifdef HAVE_SOCKETPAIR
   /* ctrl */
   if (socketpair(AF_UNIX, SOCK_STREAM, 0, fd_temp) < 0)
@@ -1322,7 +1322,7 @@ static int fork_server(struct Client *server)
     sprintf(fd_str[3], "%d", slink_fds[1][0][1]); /* data write */
     sprintf(fd_str[4], "%d", server->localClient->fd);         /* network read/write */
     
-    kid_argv[0] = "-slink";
+    kid_argv[0] = slink;
     kid_argv[1] = fd_str[0];
     kid_argv[2] = fd_str[1];
     kid_argv[3] = fd_str[2];
@@ -2046,8 +2046,8 @@ void cryptlink_init(struct Client *client_p,
   }
 }
 
-void cryptlink_error(struct Client *client_p, char *type,
-                     char *reason, char *client_reason)
+void cryptlink_error(struct Client *client_p, const char *type,
+                     const char *reason, const char *client_reason)
 {
   sendto_realops_flags(UMODE_ALL, L_ADMIN, "%s: CRYPTLINK %s error - %s",
 #ifdef HIDE_SERVERS_IPS

@@ -102,10 +102,10 @@ static void m_links(struct Client *client_p, struct Client *source_p,
 static void mo_links(struct Client *client_p, struct Client *source_p,
                     int parc, char *parv[])
 {
-  char*    mask = "";
+  const char*    mask = "";
   struct Client* target_p;
   char           clean_mask[2 * HOSTLEN + 4];
-  char*          p;
+  const char*          p;
   struct hook_links_data hd;
   
   dlink_node *ptr;

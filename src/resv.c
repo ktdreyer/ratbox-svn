@@ -43,7 +43,7 @@ dlink_list resv_channel_list;
 dlink_list resv_nick_list;
 
 struct ResvEntry *
-create_resv(char *name, char *reason, int flags)
+create_resv(const char *name, const char *reason, int flags)
 {
   struct ResvEntry *resv_p;
 
@@ -52,8 +52,7 @@ create_resv(char *name, char *reason, int flags)
     if(find_channel_resv(name))
       return NULL;
 
-    if(strlen(name) > CHANNELLEN)
-      name[CHANNELLEN] = '\0';
+    return NULL;
   }
   else
   {
@@ -61,14 +60,14 @@ create_resv(char *name, char *reason, int flags)
       return NULL;
 
     if(strlen(name) > NICKLEN*2)
-      name[NICKLEN*2] = '\0';
+      return NULL;
 
     if((strchr(name, '*') != NULL) || (strchr(name, '?') != NULL))
       flags |= RESV_NICKWILD;
   }
 
   if(strlen(reason) > TOPICLEN)
-    reason[TOPICLEN] = '\0';
+    return NULL;
 
   resv_p = (struct ResvEntry *) MyMalloc(sizeof(struct ResvEntry));
 
@@ -136,7 +135,7 @@ delete_resv(struct ResvEntry *resv_p)
 }
 
 int
-find_channel_resv(char *name)
+find_channel_resv(const char *name)
 {
   struct ResvEntry *resv_p;
 
@@ -149,7 +148,7 @@ find_channel_resv(char *name)
 }
 
 struct ResvEntry *
-get_nick_resv(char *name)
+get_nick_resv(const char *name)
 {
   struct ResvEntry *resv_p;
   dlink_node *ptr;
@@ -166,7 +165,7 @@ get_nick_resv(char *name)
 }
 
 int
-find_nick_resv(char *name)
+find_nick_resv(const char *name)
 {
   struct ResvEntry *resv_p;
   dlink_node *ptr;

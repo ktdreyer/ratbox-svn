@@ -58,7 +58,7 @@ extern  void sendto_one(struct Client *, const char *, ...) AFP(2, 3);
 
 extern  void sendto_channel_butone(struct Client *one,
                                    struct Client *from,
-                                   struct Channel *chptr, char *command,
+                                   struct Channel *chptr, const char *command,
                                    const char *pattern, ...) AFP(5, 6);
 
 extern  void sendto_one_prefix(struct Client *, struct Client *,

@@ -104,8 +104,8 @@ extern void unset_chcap_usage_counts(struct Client *serv_p);
 struct ChModeChange
 {
   char letter;
-  char *arg;
-  char *id;
+  const char *arg;
+  const char *id;
   int dir;
   int caps;
   int nocaps;

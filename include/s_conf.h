@@ -173,14 +173,14 @@ struct shared
 
 struct config_file_entry
 {
-  char *dpath;          /* DPATH if set from command line */
-  char *configfile;
-  char *klinefile;
-  char *dlinefile;
-  char *xlinefile;
-  char *resvfile;
+  const char *dpath;          /* DPATH if set from command line */
+  const char *configfile;
+  const char *klinefile;
+  const char *dlinefile;
+  const char *xlinefile;
+  const char *resvfile;
 
-  char *glinefile;
+  const char *glinefile;
 
   char *logpath;
   char *operlog;
@@ -383,8 +383,8 @@ extern void get_printable_conf(struct ConfItem *,
                                     char **, int *,char **);
 extern void report_configured_links(struct Client* client_p, int mask);
 
-extern void yyerror(char *);
-extern int conf_yy_fatal_error(char *);
+extern void yyerror(const char *);
+extern int conf_yy_fatal_error(const char *);
 extern int conf_fbgets(char *, int, FBFILE *);
 
 typedef enum {
@@ -415,7 +415,7 @@ extern void conf_add_class_to_conf(struct ConfItem *);
 extern void conf_add_me(struct ConfItem *);
 extern void conf_add_class(struct ConfItem *,int );
 extern void conf_add_d_conf(struct ConfItem *);
-extern void conf_add_fields(struct ConfItem*, char*, char *, char*, char *,char *);
+extern void conf_add_fields(struct ConfItem*, const char*, const char *, const char*, const char *, const char *);
 extern void conf_add_conf(struct ConfItem *);
 extern void flush_expired_ips(void *);
 

@@ -321,7 +321,7 @@ static void ms_sjoin(struct Client *client_p,
     }
 
   mbuf = modebuf;
-  para[0] = para[1] = para[2] = para[3] = "";
+  para[0] = para[1] = para[2] = para[3] = '\0';
   pargs = 0;
 
   *mbuf++ = '+';
@@ -442,7 +442,7 @@ static void ms_sjoin(struct Client *client_p,
 				     para[0], para[1], para[2], para[3]);
                 mbuf = modebuf;
 		*mbuf++ = '+';
-		para[0] = para[1] = para[2] = para[3] = "";
+		para[0] = para[1] = para[2] = para[3] = '\0';
 		pargs = 0;
 	      }
 
@@ -467,7 +467,7 @@ static void ms_sjoin(struct Client *client_p,
                                para[0],para[1],para[2],para[3]);
           mbuf = modebuf;
           *mbuf++ = '+';
-          para[0] = para[1] = para[2] = para[3] = "";
+          para[0] = para[1] = para[2] = para[3] = '\0';
           pargs = 0;
         }
 
@@ -673,7 +673,7 @@ static void remove_a_mode(struct Channel *chptr,
   mbuf = lmodebuf;
   *mbuf++ = '-';
 
-  lpara[0] = lpara[1] = lpara[2] = lpara[3] = "";
+  lpara[0] = lpara[1] = lpara[2] = lpara[3] = '\0';
 
 
   ircsprintf(buf,":%s MODE %s ", me.name, chptr->chname);
@@ -698,7 +698,7 @@ static void remove_a_mode(struct Channel *chptr,
 	  mbuf = lmodebuf;
 	  *mbuf++ = '-';
 	  count = 0;
-	  lpara[0] = lpara[1] = lpara[2] = lpara[3] = "";
+	  lpara[0] = lpara[1] = lpara[2] = lpara[3] = '\0';
 	}
     }
 

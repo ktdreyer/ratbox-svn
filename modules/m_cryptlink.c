@@ -89,7 +89,7 @@ struct Message cryptlink_msgtab = {
 
 struct CryptLinkStruct
 {
-  char *cmd;		/* CRYPTLINK <command> to match */
+  const char *cmd;		/* CRYPTLINK <command> to match */
   void (*handler)();	/* Function to call */
 };
 
@@ -292,7 +292,7 @@ static void cryptlink_serv(struct Client *client_p, struct Client *source_p,
   char            *b64_key;
   struct ConfItem *aconf;
   char            *encrypted;
-  char            *p;
+  const char            *p;
   int              enc_len;
 
   /*

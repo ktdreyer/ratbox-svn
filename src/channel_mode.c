@@ -143,9 +143,9 @@ static char *
 check_string(char *s)
 {
   char *str = s;
-
+  static char splat[] = "*";
   if (!(s && *s))
-    return "*";
+    return splat;
 
   for (; *s; ++s)
   {
@@ -435,11 +435,15 @@ static char *
 pretty_mask(char *mask)
 {
   int old_mask_pos;
-  char *nick = "*", *user = "*", *host = "*";
+  char *nick, *user, *host;
+  char splat[] = "*";
   char *t, *at, *ex;
   char ne = 0, ue = 0, he = 0; /* save values at nick[NICKLEN], et all */
+
   mask = check_string(mask);
 
+  nick = user = host = splat;
+  
   if (BUFSIZE - mask_pos < strlen(mask) + 5)
     return NULL;
 
@@ -1403,7 +1407,7 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
                       struct Channel *chptr, int cap, int nocap)
 {
   int i, mbl, pbl, nc, mc;
-  char *arg;
+  const char *arg;
   int dir;
 
   mc = 0;

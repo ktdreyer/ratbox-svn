@@ -56,7 +56,7 @@
 
 struct module **modlist = NULL;
 
-static char *core_module_table[] =
+static const char *core_module_table[] =
 {
   "m_die.s",
   "m_kick.s",
@@ -136,7 +136,7 @@ modules_init(void)
  * side effects - returns a module path from path
  */
 static struct module_path *
-mod_find_path(char *path)
+mod_find_path(const char *path)
 {
   dlink_node *pathst;
   struct module_path *mpath;
@@ -159,7 +159,7 @@ mod_find_path(char *path)
  * side effects - adds path to list
  */
 void
-mod_add_path(char *path)
+mod_add_path(const char *path)
 {
   struct module_path *pathst;
   

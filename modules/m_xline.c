@@ -81,7 +81,7 @@ _moddeinit(void)
   mod_del_cmd(&unxline_msgtab);
 }
 
-char *_version = "$Revision$";
+const char *_version = "$Revision$";
 
 /* m_xline()
  *
@@ -97,7 +97,7 @@ mo_xline(struct Client *client_p, struct Client *source_p,
   FBFILE *out;
   struct xline *xconf;
   const char *filename;
-  char *reason;
+  const char *reason;
   int xtype = 1;
 
   if(!IsOperXline(source_p))

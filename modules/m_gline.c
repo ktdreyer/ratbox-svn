@@ -136,6 +136,7 @@ static void mo_gline(struct Client *client_p,
   char *user = NULL;
   char *host = NULL;	              /* user and host of GLINE "victim" */
   const char *reason = NULL;          /* reason for "victims" demise */
+  char splat[] = "*";
   char tempuser[USERLEN + 2];
   char temphost[HOSTLEN + 1];
 
@@ -158,16 +159,16 @@ static void mo_gline(struct Client *client_p,
 
               /* gline for "@host", use *@host */
               if(*user == '\0')
-                user = "*";
+                user = splat;
 	    }
 	  else
 	    {
-	      user = "*";               /* no @ found, assume its *@somehost */
+	      user = splat;               /* no @ found, assume its *@somehost */
 	      host = parv[1];
 	    }
 	      
 	  if (!*host)           /* duh. no host found, assume its '*' host */
-	    host = "*";
+	    host = splat;
 	      
 	  strlcpy(tempuser, user, sizeof(tempuser));     /* allow for '*' */
 	  strlcpy(temphost, host, sizeof(temphost));

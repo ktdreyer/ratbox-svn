@@ -41,7 +41,7 @@
 /* external var */
 extern char** myargv;
 
-void restart(char *mesg)
+void restart(const char *mesg)
 {
   static int was_here = NO; /* redundant due to restarting flag below */
 

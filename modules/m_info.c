@@ -79,10 +79,10 @@ const char *_version = "$Revision$";
  */
 struct InfoStruct
 {
-  char *         name;              /* Displayed variable name */
+  const char *         name;              /* Displayed variable name */
   unsigned int   output_type;       /* See below #defines */
   void *         option;            /* Pointer reference to the value */
-  char *         desc;              /* ASCII description of the variable */
+  const char *         desc;              /* ASCII description of the variable */
 };
 /* Types for output_type in InfoStruct */
 #define OUTPUT_STRING      0x0001   /* Output option as %s w/ dereference */

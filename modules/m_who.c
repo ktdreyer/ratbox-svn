@@ -64,23 +64,23 @@ _moddeinit(void)
 const char *_version = "$Revision$";
 #endif
 static void do_who_on_channel(struct Client *source_p,
-			      struct Channel *chptr, char *real_name,
+			      struct Channel *chptr, const char *real_name,
 			      int server_oper, int member);
 
 static void do_who_list(struct Client *source_p, struct Channel *chptr,
                         dlink_list *peons_list, dlink_list *chanops_list,
                         dlink_list *chanops_voiced_list,
 			dlink_list *voiced_list,
-                        char *chanop_flag,
-			char *voiced_flag,
-                        char *chname, int member);
+                        const char *chanop_flag,
+			const char *voiced_flag,
+                        const char *chname, int member);
 
-static void who_global(struct Client *source_p, char *mask, int server_oper);
+static void who_global(struct Client *source_p, const char *mask, int server_oper);
 
 static void do_who(struct Client *source_p,
                    struct Client *target_p,
-                   char *chname,
-                   char *op_flags);
+                   const char *chname,
+                   const char *op_flags);
 
 
 /*
@@ -235,7 +235,7 @@ static void m_who(struct Client *client_p,
  *
  */
 static void who_common_channel(struct Client *source_p,dlink_list chain,
-		char *mask,int server_oper, int *maxmatches)
+		const char *mask,int server_oper, int *maxmatches)
 {
   dlink_node *clp;
  struct Client *target_p;
@@ -284,7 +284,7 @@ static void who_common_channel(struct Client *source_p,dlink_list chain,
  *		  this is slightly expensive on EFnet ...
  */
 
-static void who_global(struct Client *source_p,char *mask, int server_oper)
+static void who_global(struct Client *source_p,const char *mask, int server_oper)
 {
   struct Channel *chptr=NULL;
   struct Client *target_p;
@@ -352,7 +352,7 @@ static void who_global(struct Client *source_p,char *mask, int server_oper)
 
 static void do_who_on_channel(struct Client *source_p,
 			      struct Channel *chptr,
-			      char *chname,
+			      const char *chname,
 			      int server_oper, int member)
 {
   char flags[NUMLISTS][2];
@@ -376,9 +376,9 @@ static void do_who_list(struct Client *source_p, struct Channel *chptr,
                         dlink_list *chanops_list,
                         dlink_list *chanops_voiced_list,
 			dlink_list *voiced_list,
-			char *chanop_flag,
-			char *voiced_flag,
-			char *chname, int member)
+			const char *chanop_flag,
+			const char *voiced_flag,
+			const char *chname, int member)
 {
   struct Client *target_p;
 
@@ -430,8 +430,8 @@ static void do_who_list(struct Client *source_p, struct Channel *chptr,
 
 static void do_who(struct Client *source_p,
                    struct Client *target_p,
-                   char *chname,
-                   char *op_flags)
+                   const char *chname,
+                   const char *op_flags)
 {
   char  status[5];
 

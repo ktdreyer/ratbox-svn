@@ -74,7 +74,7 @@ struct Class *make_class(void);
 
 extern  long    get_sendq(struct Client *);
 extern  int     get_con_freq(struct Class* );
-extern  struct Class  *find_class(char* );
+extern  struct Class  *find_class(const char* );
 extern  const   char* get_client_class (struct Client *);
 extern  int     get_client_ping (struct Client *);
 extern  void    check_class(void);

@@ -35,7 +35,7 @@ struct	TopConf *	conf_cur_block;
 	dlink_list	conf_items;
 
 
-static char*	conf_strtype(int type)
+static const char*	conf_strtype(int type)
 {
 	switch(type & CF_MTYPE)
 	{
@@ -56,7 +56,7 @@ static char*	conf_strtype(int type)
 
 			
   
-static int 	add_top_conf	(char *name, int (*sfunc)(struct TopConf*), 
+static int 	add_top_conf	(const char *name, int (*sfunc)(struct TopConf*), 
 			 int (*efunc)(struct TopConf*))
 {
 	struct TopConf *tc;
@@ -71,7 +71,7 @@ static int 	add_top_conf	(char *name, int (*sfunc)(struct TopConf*),
 	return 0;
 }
 
-static struct 	TopConf *find_top_conf(char *name)
+static struct 	TopConf *find_top_conf(const char *name)
 {
 	dlink_node *d;
 	struct TopConf* tc;
@@ -345,7 +345,7 @@ static void	conf_set_logging_fname_operlog(void *data)
 
 static struct
 {
-	char *name;
+	const char *name;
 	int level;
 } log_levels[] = {
 	{"l_crit",	L_CRIT},
@@ -400,7 +400,7 @@ int   class_redirport_var;
 
 struct mode_table
 {
-	char *	name;
+	const char *	name;
 	int	mode;
 };
 
@@ -468,7 +468,7 @@ int	find_umode(struct mode_table* tab, char *name)
 }
 
 static
-void	set_modes_from_table(	int *modes, char *whatis,
+void	set_modes_from_table(	int *modes, const char *whatis,
 				struct mode_table *tab, conf_parm_t *args)
 {
 	for (; args; args = args->next)
@@ -2237,7 +2237,7 @@ static void	conf_set_serverhide_disable_hidden(void *data)
 /* public functions */
 
 
-void	conf_report_error(char *fmt, ...)
+void	conf_report_error(const char *fmt, ...)
 {
 	va_list ap;
 	char msg[IRCD_BUFSIZE + 1] = {0};
@@ -2364,7 +2364,7 @@ int 	conf_call_set(struct TopConf *tc, char *item, conf_parm_t *value, int type)
 	return 0;
 }
 
-int 	add_conf_item(char *topconf, char *name, int type, void (*func)(void*))
+int 	add_conf_item(const char *topconf, const char *name, int type, void (*func)(void*))
 {
 	struct TopConf *tc;
 	struct ConfEntry *cf;
@@ -2386,7 +2386,7 @@ int 	add_conf_item(char *topconf, char *name, int type, void (*func)(void*))
 	return 0;
 }
 
-int     remove_conf_item(char *topconf, char *name)
+int     remove_conf_item(const char *topconf, const char *name)
 {
         struct TopConf *tc;
         struct ConfEntry *cf;

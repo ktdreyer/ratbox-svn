@@ -324,7 +324,7 @@ static void
 send_members(struct Client *client_p,
              char *lmodebuf,
              char *lparabuf,
-             struct Channel *chptr, dlink_list * list, char *op_flag)
+             struct Channel *chptr, dlink_list * list, const char *op_flag)
 {
   dlink_node *ptr;
   int tlen;                     /* length of t (temp pointer) */
@@ -706,7 +706,7 @@ channel_member_names(struct Client *source_p,
  * output       - string pointer "=" if public, "@" if secret else "*"
  * side effects - NONE
  */
-char *
+const char *
 channel_pub_or_secret(struct Channel *chptr)
 {
   if (PubChannel(chptr))
@@ -775,7 +775,7 @@ del_invite(struct Channel *chptr, struct Client *who)
  *                chanop, voiced or user
  * side effects -
  */
-char *
+const char *
 channel_chanop_or_voice(struct Channel *chptr, struct Client *target_p)
 {
   if (find_user_link(&chptr->chanops, target_p))

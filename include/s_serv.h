@@ -52,7 +52,7 @@ struct Channel;
 /* Capabilities */
 struct Capability
 {
-  char*        name;      /* name of capability */
+  const char*        name;      /* name of capability */
   unsigned int cap;       /* mask value */
 };
 
@@ -89,7 +89,7 @@ struct Capability
 #ifdef HAVE_LIBCRYPTO
 struct EncCapability
 {
-  char *        name;     /* name of capability (cipher name) */
+  const char *        name;     /* name of capability (cipher name) */
   unsigned int  cap;      /* mask value */
   int           keylen;   /* keylength (bytes) */
   int           cipherid; /* ID number of cipher type (BF, IDEA, etc.) */
@@ -266,7 +266,7 @@ extern int         check_server(const char* name, struct Client* server,
                                 int cryptlink);
 extern int         hunt_server(struct Client* client_pt,
                                struct Client* source_pt,
-                               char* command, int server, 
+                               const char* command, int server, 
                                int parc, char** parv);
 extern const char* my_name_for_link(const char* name, struct ConfItem* conf);
 extern void        send_capabilities(struct Client*, struct ConfItem* conf,
@@ -289,8 +289,8 @@ extern unsigned long nextFreeMask(void);
 extern void        cryptlink_init(struct Client *client_p,
                                   struct ConfItem *aconf, int fd);
 extern void cryptlink_regen_key(void *);
-extern void cryptlink_error(struct Client *client_p, char *type,
-                            char *reason, char *client_reason);
+extern void cryptlink_error(struct Client *client_p, const char *type,
+                            const char *reason, const char *client_reason);
 
 struct EncCapability *check_cipher(struct Client *client_p,
                                    struct ConfItem *aconf);

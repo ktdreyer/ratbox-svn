@@ -56,7 +56,7 @@ struct module_path
 };
 
 /* add a path */
-void mod_add_path(char *path);
+void mod_add_path(const char *path);
 void mod_clear_paths(void);
 
 /* load a module */

@@ -476,7 +476,7 @@ sendto_one_prefix(struct Client *to, struct Client *prefix,
  */
 void
 sendto_channel_butone(struct Client *one, struct Client *from,
-                      struct Channel *chptr, char *command,
+                      struct Channel *chptr, const char *command,
                       const char *pattern, ...)
 {
   va_list    args;

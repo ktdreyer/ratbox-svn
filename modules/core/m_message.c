@@ -53,7 +53,7 @@ struct entity
   int flags;
 };
 
-static int build_target_list(int p_or_n, char *command,
+static int build_target_list(int p_or_n, const char *command,
                              struct Client *client_p,
                              struct Client *source_p,
                              char *nicks_channels, char *text);
@@ -74,27 +74,27 @@ static int ntargets = 0;
 
 static int duplicate_ptr(void *);
 
-static void m_message(int, char *, struct Client *,
+static void m_message(int, const char *, struct Client *,
                       struct Client *, int, char **);
 
 static void m_privmsg(struct Client *, struct Client *, int, char **);
 static void m_notice(struct Client *, struct Client *, int, char **);
 
-static void msg_channel(int p_or_n, char *command,
+static void msg_channel(int p_or_n, const char *command,
                         struct Client *client_p,
                         struct Client *source_p,
                         struct Channel *chptr, char *text);
 
-static void msg_channel_flags(int p_or_n, char *command,
+static void msg_channel_flags(int p_or_n, const char *command,
                               struct Client *client_p,
                               struct Client *source_p,
                               struct Channel *chptr, int flags, char *text);
 
-static void msg_client(int p_or_n, char *command,
+static void msg_client(int p_or_n, const char *command,
                        struct Client *source_p, struct Client *target_p,
                        char *text);
 
-static void handle_opers(int p_or_n, char *command,
+static void handle_opers(int p_or_n, const char *command,
                          struct Client *client_p,
                          struct Client *source_p, char *nick, char *text);
 
@@ -178,7 +178,7 @@ m_notice(struct Client *client_p,
  */
 static void
 m_message(int p_or_n,
-          char *command,
+          const char *command,
           struct Client *client_p,
           struct Client *source_p, int parc, char *parv[])
 {
@@ -252,7 +252,7 @@ m_message(int p_or_n,
  */
 
 static int
-build_target_list(int p_or_n, char *command, struct Client *client_p,
+build_target_list(int p_or_n, const char *command, struct Client *client_p,
                   struct Client *source_p, char *nicks_channels,
                   char *text)
 {
@@ -433,7 +433,7 @@ duplicate_ptr(void *ptr)
  * side effects	- message given channel
  */
 static void
-msg_channel(int p_or_n, char *command,
+msg_channel(int p_or_n, const char *command,
             struct Client *client_p,
             struct Client *source_p, struct Channel *chptr, char *text)
 {
@@ -478,7 +478,7 @@ msg_channel(int p_or_n, char *command,
  * side effects	- message given channel either chanop or voice
  */
 static void
-msg_channel_flags(int p_or_n, char *command, struct Client *client_p,
+msg_channel_flags(int p_or_n, const char *command, struct Client *client_p,
                   struct Client *source_p, struct Channel *chptr,
                   int flags, char *text)
 {
@@ -543,7 +543,7 @@ msg_channel_flags(int p_or_n, char *command, struct Client *client_p,
  * side effects	- message given channel either chanop or voice
  */
 static void
-msg_client(int p_or_n, char *command,
+msg_client(int p_or_n, const char *command,
            struct Client *source_p, struct Client *target_p, char *text)
 {
   if (MyClient(source_p))
@@ -756,7 +756,7 @@ flood_attack_channel(int p_or_n, struct Client *source_p,
  *		  This disambiguates the syntax.
  */
 static void
-handle_opers(int p_or_n, char *command, struct Client *client_p,
+handle_opers(int p_or_n, const char *command, struct Client *client_p,
              struct Client *source_p, char *nick, char *text)
 {
   struct Client *target_p;

@@ -372,7 +372,7 @@ register_local_user(struct Client *client_p, struct Client *source_p,
   /* password check */
   if (!BadPtr(aconf->passwd))
   {
-    char *encr;
+    const char *encr;
 
     if(IsConfEncrypted(aconf))
     {
@@ -1250,7 +1250,7 @@ static int
 check_X_line(struct Client *client_p, struct Client *source_p)
 {
   struct xline *xconf;
-  char *reason;
+  const char *reason;
 
   if(IsOper(source_p))
     return 0;

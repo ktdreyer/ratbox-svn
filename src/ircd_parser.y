@@ -32,8 +32,8 @@ int yylex();
 static time_t conf_find_time(char*);
 
 static struct {
-	char *	name;
-	char *	plural;
+	const char *	name;
+	const char *	plural;
 	time_t 	val;
 } times[] = {
 	{"second",     "seconds",    1},
@@ -72,7 +72,7 @@ time_t conf_find_time(char *name)
 
 static struct
 {
-	char *word;
+	const char *word;
 	int yesno;
 } yesno[] = {
 	{"yes",		1},

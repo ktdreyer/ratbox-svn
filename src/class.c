@@ -191,7 +191,7 @@ add_class(struct Class *classptr)
  * output	- corresponding class pointer
  * side effects	- NONE
  */
-struct Class  *find_class(char* classname)
+struct Class  *find_class(const char* classname)
 {
   struct Class *cltmp;
 
