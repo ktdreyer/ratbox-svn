@@ -1,3 +1,11 @@
+*** 20010408_3 by davidt
+- Tidied up kserver.txt a little.
+
+  Mainly formatting changes, but I also adjusted some grammar that took
+  me 5 minutes to parse :)
+
+
+
 *** 20010408_2 by fl_
 - moved the bogus TS message to FLAGS_DEBUG
 - updated opers.txt
