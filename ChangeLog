@@ -1,3 +1,16 @@
+leeh        2004/04/21 10:16:09 EDT	(20040421_1)
+
+  Modified files:
+    modules              m_version.c 
+  Log:
+  - allow servers to issue VERSION requests, other ircds allow it and some
+    services want it
+  
+  Revision  Changes    Path
+  1.65      +2 -2      ircd-ratbox/modules/m_version.c
+
+
+
 leeh        2004/04/21 10:11:59 EDT	(20040421_0)
 
   Modified files:
