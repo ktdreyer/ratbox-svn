@@ -140,7 +140,7 @@ static void ms_admin(struct Client *client_p, struct Client *source_p,
 static void do_admin( struct Client *source_p )
 {
 
-  char *nick;
+  const char *nick;
 
   if (IsPerson(source_p))
     admin_spy(source_p);

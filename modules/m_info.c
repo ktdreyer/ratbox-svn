@@ -581,7 +581,7 @@ static void ms_info(struct Client *client_p, struct Client *source_p,
  */
 static void send_info_text(struct Client *source_p)
 {
-  char **text = infotext;
+  const char **text = infotext;
 
   while (*text)
   {
