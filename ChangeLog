@@ -1,3 +1,19 @@
+androsyn    2002/09/10 19:35:23 UTC	(20020910_4)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+    include              setup.h.in 
+  Log:
+  Update -xinline arguments for forte c
+  
+  Revision  Changes    Path
+  7.151     +3 -3      ircd-ratbox/autoconf/configure.in
+  7.157     +5 -5      ircd-ratbox/configure
+  7.59      +1 -1      ircd-ratbox/include/setup.h.in
+
+
+
 androsyn    2002/09/10 19:21:10 UTC	(20020910_3)
 
   Modified files:
