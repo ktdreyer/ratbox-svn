@@ -707,6 +707,13 @@ check_spambot_warning(struct Client *source_p, const char *name)
 static void
 finish_splitmode(void *unused)
 {
+	/* dropped back into a netsplit during split_delay --fl */
+	if(Count.server < split_servers || Count.total < split_users)
+	{
+		eventAddIsh("check_splitmode", check_splitmode, NULL, 10);
+		return;
+	}
+
 	splitmode = 0;
 
 	sendto_realops_flags(UMODE_ALL, L_ALL,
