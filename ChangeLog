@@ -1,3 +1,26 @@
+leeh        2004/11/18 17:33:26 EST	(20041118_4)
+
+  Modified files:
+    help                 Makefile.in 
+    help/operbot         op 
+    include              client.h ucommand.h 
+    src                  rserv.c service.c ucommand.c 
+  Log:
+  - fix Makefile.in in help/ to correctly install all help files
+  - store list of ucommands in each service for .help
+  - reworked .help to list commands available in each service
+  
+  Revision  Changes    Path
+  1.4       +6 -13     rserv/help/Makefile.in
+  1.4       +1 -2      rserv/help/operbot/op
+  1.24      +2 -0      rserv/include/client.h
+  1.6       +3 -2      rserv/include/ucommand.h
+  1.36      +1 -1      rserv/src/rserv.c
+  1.25      +1 -1      rserv/src/service.c
+  1.17      +69 -44    rserv/src/ucommand.c
+
+
+
 leeh        2004/11/18 14:37:06 EST	(20041118_3)
 
   Modified files:
