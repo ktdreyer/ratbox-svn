@@ -1,3 +1,9 @@
+*** 20010825_1 by a1kmm
+- Hopefully this will fix most of the hostmask.c problems we have been
+  experiencing. I am not entirely sure the IPv6 code is right but it is
+  better than it was.
+
+
 *** 20010824_7 by wcampbel
 Added a basic m_mkpasswd module to contrib, this generates DES passwords
 only, and you cannot specify a salt.  This is also at present available
