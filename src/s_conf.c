@@ -1643,7 +1643,6 @@ get_oper_name(struct Client *client_p)
  * of name, host, pass, user to values either
  * in aconf, or "<NULL>" port is set to aconf->port in all cases.
  */
-
 void
 get_printable_conf(struct ConfItem *aconf, char **name, char **host,
 		   char **pass, char **user, int *port, char **classname)
@@ -1657,6 +1656,23 @@ get_printable_conf(struct ConfItem *aconf, char **name, char **host,
 	*user = EmptyString(aconf->user) ? null : aconf->user;
 	*classname = EmptyString(aconf->className) ? zero : aconf->className;
 	*port = (int) aconf->port;
+}
+
+void
+get_printable_kline(struct Client *source_p, struct ConfItem *aconf, 
+		    char **host, char **reason,
+		    char **user, char **oper_reason)
+{
+	static char null[] = "<NULL>";
+
+	*host = EmptyString(aconf->host) ? null : aconf->host;
+	*reason = EmptyString(aconf->passwd) ? null : aconf->passwd;
+	*user = EmptyString(aconf->user) ? null : aconf->user;
+
+	if(EmptyString(aconf->spasswd) || !IsOper(source_p))
+		*oper_reason = NULL;
+	else
+		*oper_reason = aconf->spasswd;
 }
 
 /*
@@ -2216,7 +2232,8 @@ void
 conf_add_fields(struct ConfItem *aconf,
 		const char *host_field,
 		const char *pass_field,
-		const char *user_field, const char *port_field, const char *class_field)
+		const char *user_field, 
+		const char *operreason_field)
 {
 	if(host_field != NULL)
 		DupString(aconf->host, host_field);
@@ -2224,10 +2241,8 @@ conf_add_fields(struct ConfItem *aconf,
 		DupString(aconf->passwd, pass_field);
 	if(user_field != NULL)
 		DupString(aconf->user, user_field);
-	if(port_field != NULL)
-		aconf->port = atoi(port_field);
-	if(class_field != NULL)
-		DupString(aconf->className, class_field);
+	if(operreason_field != NULL)
+		DupString(aconf->spasswd, operreason_field);
 }
 
 /*

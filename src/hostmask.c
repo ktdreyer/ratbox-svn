@@ -606,12 +606,12 @@ report_auth(struct Client *client_p)
  * side effects - Reports configured K-lines to client_p.
  */
 void
-report_Klines(struct Client *client_p)
+report_Klines(struct Client *source_p)
 {
-	char *name, *host, *pass, *user, *classname;
+	char *host, *pass, *user, *oper_reason;
 	struct AddressRec *arec;
 	struct ConfItem *aconf = NULL;
-	int i, port;
+	int i;
 
 	for (i = 0; i < ATABLE_SIZE; i++)
 	{
@@ -625,10 +625,11 @@ report_Klines(struct Client *client_p)
 				if(aconf->flags & CONF_FLAGS_TEMPORARY)
 					continue;
 
-				get_printable_conf(aconf, &name, &host, &pass, &user, &port,
-						   &classname);
-				sendto_one(client_p, form_str(RPL_STATSKLINE), me.name,
-					   client_p->name, 'K', host, user, pass);
+				get_printable_kline(source_p, aconf, &host, &pass, &user, &oper_reason);
+				sendto_one(source_p, form_str(RPL_STATSKLINE), me.name,
+					   source_p->name, 'K', host, user, pass,
+					   oper_reason ? "|" : "",
+					   oper_reason ? oper_reason : "");
 			}
 		}
 	}

@@ -214,6 +214,9 @@ mo_kline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	{
 		*oper_reason = '\0';
 		oper_reason++;
+
+		if(!EmptyString(oper_reason))
+			DupString(aconf->spasswd, oper_reason);
 	}
 
 	if(tkline_time)
@@ -300,6 +303,9 @@ ms_kline(struct Client *client_p, struct Client *source_p, int parc, const char 
 		{
 			*oper_reason = '\0';
 			oper_reason++;
+
+			if(!EmptyString(oper_reason))
+				DupString(aconf->spasswd, oper_reason);
 		}
 
 		DupString(aconf->passwd, kreason);

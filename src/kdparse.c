@@ -48,6 +48,7 @@ parse_k_file(FBFILE * file)
 	struct ConfItem *aconf;
 	char *user_field = NULL;
 	char *reason_field = NULL;
+	char *operreason_field = NULL;
 	char *host_field = NULL;
 	char line[BUFSIZE];
 	char *p;
@@ -72,9 +73,12 @@ parse_k_file(FBFILE * file)
 		if(EmptyString(reason_field))
 			continue;
 
+		operreason_field = getfield(NULL);
+
 		aconf = make_conf();
 		aconf->status = CONF_KILL;
-		conf_add_fields(aconf, host_field, reason_field, user_field, 0, NULL);
+		conf_add_fields(aconf, host_field, reason_field,
+				user_field, operreason_field);
 
 		if(aconf->host != NULL)
 			add_conf_by_address(aconf->host, CONF_KILL, aconf->user, aconf);
@@ -94,6 +98,7 @@ parse_d_file(FBFILE * file)
 	struct ConfItem *aconf;
 	char *reason_field = NULL;
 	char *host_field = NULL;
+	char *operreason_field = NULL;
 	char line[BUFSIZE];
 	char *p;
 
@@ -113,9 +118,11 @@ parse_d_file(FBFILE * file)
 		if(EmptyString(reason_field))
 			continue;
 
+		operreason_field = getfield(NULL);
+
 		aconf = make_conf();
 		aconf->status = CONF_DLINE;
-		conf_add_fields(aconf, host_field, reason_field, "", 0, NULL);
+		conf_add_fields(aconf, host_field, reason_field, "", operreason_field);
 		conf_add_d_conf(aconf);
 	}
 }

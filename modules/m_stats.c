@@ -361,10 +361,10 @@ stats_connect (struct Client *source_p)
 static void
 stats_tdeny (struct Client *source_p)
 {
-	char *name, *host, *pass, *user, *classname;
+	char *host, *pass, *user, *oper_reason;
 	struct AddressRec *arec;
 	struct ConfItem *aconf;
-	int i, port;
+	int i;
 
 	for (i = 0; i < ATABLE_SIZE; i++)
 	{
@@ -377,11 +377,12 @@ stats_tdeny (struct Client *source_p)
 				if(!(aconf->flags & CONF_FLAGS_TEMPORARY))
 					continue;
 
-				get_printable_conf (aconf, &name, &host, &pass, &user, &port,
-						    &classname);
+				get_printable_kline(source_p, aconf, &host, &pass, &user, &oper_reason);
 
-				sendto_one (source_p, form_str (RPL_STATSDLINE), me.name,
-					    source_p->name, 'D', host, pass);
+				sendto_one(source_p, form_str (RPL_STATSDLINE), me.name,
+					   source_p->name, 'D', host, pass,
+					   oper_reason ? "|" : "",
+					   oper_reason ? oper_reason : "");
 			}
 		}
 	}
@@ -396,10 +397,10 @@ stats_tdeny (struct Client *source_p)
 static void
 stats_deny (struct Client *source_p)
 {
-	char *name, *host, *pass, *user, *classname;
+	char *host, *pass, *user, *oper_reason;
 	struct AddressRec *arec;
 	struct ConfItem *aconf;
-	int i, port;
+	int i;
 
 	for (i = 0; i < ATABLE_SIZE; i++)
 	{
@@ -412,11 +413,12 @@ stats_deny (struct Client *source_p)
 				if(aconf->flags & CONF_FLAGS_TEMPORARY)
 					continue;
 
-				get_printable_conf (aconf, &name, &host, &pass, &user, &port,
-						    &classname);
+				get_printable_kline(source_p, aconf, &host, &pass, &user, &oper_reason);
 
-				sendto_one (source_p, form_str (RPL_STATSDLINE), me.name,
-					    source_p->name, 'D', host, pass);
+				sendto_one(source_p, form_str (RPL_STATSDLINE), me.name,
+					   source_p->name, 'd', host, pass,
+					   oper_reason ? "|" : "",
+					   oper_reason ? oper_reason : "");
 			}
 		}
 	}
@@ -448,7 +450,7 @@ stats_exempt (struct Client *source_p)
 						    &user, &port, &classname);
 
 				sendto_one (source_p, form_str (RPL_STATSDLINE), me.name,
-					    source_p->name, 'e', host, pass);
+					    source_p->name, 'e', host, pass, "", "");
 			}
 		}
 	}
@@ -608,8 +610,7 @@ stats_tklines (struct Client *source_p)
 	else if((ConfigFileEntry.stats_k_oper_only == 1) && !IsOper (source_p))
 	{
 		struct ConfItem *aconf;
-		char *name, *host, *pass, *user, *classname;
-		int port;
+		char *host, *pass, *user, *oper_reason;
 
 		if(MyConnect (source_p))
 			aconf = find_conf_by_address (source_p->host,
@@ -628,10 +629,12 @@ stats_tklines (struct Client *source_p)
 		if((aconf->flags & CONF_FLAGS_TEMPORARY) == 0)
 			return;
 
-		get_printable_conf (aconf, &name, &host, &pass, &user, &port, &classname);
+		get_printable_kline(source_p, aconf, &host, &pass, &user, &oper_reason);
 
 		sendto_one (source_p, form_str (RPL_STATSKLINE), me.name,
-			    source_p->name, 'k', host, user, pass);
+			    source_p->name, 'k', host, user, pass,
+			    oper_reason ? "|" : "",
+			    oper_reason ? oper_reason : "");
 	}
 	/* Theyre opered, or allowed to see all klines */
 	else
@@ -648,21 +651,21 @@ report_tklines (struct Client *source_p, dlink_list * tkline_list)
 {
 	struct ConfItem *aconf;
 	dlink_node *ptr;
-	char *name;
 	char *host;
 	char *pass;
 	char *user;
-	char *classname;
-	int port;
+	char *oper_reason;
 
 	DLINK_FOREACH (ptr, tkline_list->head)
 	{
 		aconf = ptr->data;
 
-		get_printable_conf (aconf, &name, &host, &pass, &user, &port, &classname);
+		get_printable_kline(source_p, aconf, &host, &pass, &user, &oper_reason);
 
 		sendto_one (source_p, form_str (RPL_STATSKLINE), me.name, source_p->name,
-			    'k', host, user, pass);
+			    'k', host, user, pass,
+			    oper_reason ? "|" : "",
+			    oper_reason ? oper_reason : "");
 	}
 }
 
@@ -677,8 +680,7 @@ stats_klines (struct Client *source_p)
 	else if((ConfigFileEntry.stats_k_oper_only == 1) && !IsOper (source_p))
 	{
 		struct ConfItem *aconf;
-		char *name, *host, *pass, *user, *classname;
-		int port;
+		char *host, *pass, *user, *oper_reason;
 
 		/* search for a kline */
 		if(MyConnect (source_p))
@@ -698,10 +700,12 @@ stats_klines (struct Client *source_p)
 		if(aconf->flags & CONF_FLAGS_TEMPORARY)
 			return;
 
-		get_printable_conf (aconf, &name, &host, &pass, &user, &port, &classname);
+		get_printable_kline(source_p, aconf, &host, &pass, &user, &oper_reason);
 
 		sendto_one (source_p, form_str (RPL_STATSKLINE), me.name,
-			    source_p->name, 'K', host, user, pass);
+			    source_p->name, 'K', host, user, pass,
+			    oper_reason ? "|" : "",
+			    oper_reason ? oper_reason : "");
 	}
 	/* Theyre opered, or allowed to see all klines */
 	else
