@@ -45,6 +45,7 @@ static int s_jupeserv_jupe(struct client *, char *parv[], int parc);
 static int s_jupeserv_unjupe(struct client *, char *parv[], int parc);
 static int s_jupeserv_calljupe(struct client *, char *parv[], int parc);
 static int s_jupeserv_callunjupe(struct client *, char *parv[], int parc);
+static int s_jupeserv_pending(struct client *, char *parv[], int parc);
 
 static struct service_command jupeserv_command[] =
 {
@@ -52,6 +53,7 @@ static struct service_command jupeserv_command[] =
 	{ "UNJUPE",	&s_jupeserv_unjupe,	1, NULL, 1, 0L, 0, 0, CONF_OPER_JUPE_ADMIN },
 	{ "CALLJUPE",	&s_jupeserv_calljupe,	1, NULL, 1, 0L, 0, 1, 0 },
 	{ "CALLUNJUPE",	&s_jupeserv_callunjupe,	1, NULL, 1, 0L, 0, 1, 0 },
+	{ "PENDING",	&s_jupeserv_pending,	0, NULL, 1, 0L, 0, 1, 0 },
 	{ "\0",		NULL,			0, NULL, 0, 0L, 0, 1, 0 }
 };
 
@@ -471,6 +473,42 @@ s_jupeserv_callunjupe(struct client *client_p, char *parv[], int parc)
 				MYNAME, jupe_p->name, client_p->name,
 				client_p->user->username, client_p->user->host, 
 				client_p->user->servername);
+
+	return 0;
+}
+
+static int
+s_jupeserv_pending(struct client *client_p, char *parv[], int parc)
+{
+	struct server_jupe *jupe_p;
+	dlink_node *ptr;
+
+	if(!config_file.oper_score)
+	{
+		service_error(jupeserv_p, client_p, "Oper jupes are disabled");
+		return 0;
+	}
+
+	if(!dlink_list_length(&pending_jupes))
+	{
+		service_error(jupeserv_p, client_p, "No pending jupes");
+		return 0;
+	}
+
+	service_error(jupeserv_p, client_p, "Pending jupes:");
+
+	DLINK_FOREACH(ptr, pending_jupes.head)
+	{
+		jupe_p = ptr->data;
+
+		service_error(jupeserv_p, client_p, "  %s %s %d/%d points (%s)",
+				jupe_p->add ? "JUPE" : "UNJUPE",
+				jupe_p->name, jupe_p->points,
+				jupe_p->add ? config_file.jupe_score : config_file.unjupe_score,
+				jupe_p->reason);
+	}
+
+	service_error(jupeserv_p, client_p, "End of pending jupes");
 
 	return 0;
 }
