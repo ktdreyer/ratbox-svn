@@ -1,3 +1,15 @@
+androsyn    2004/09/13 10:40:56 EDT	(20040913_3)
+
+  Modified files:
+    src                  kqueue.c 
+  Log:
+  that would be kq not ep
+  
+  Revision  Changes    Path
+  1.50      +1 -1      ircd-ratbox/src/kqueue.c
+
+
+
 androsyn    2004/09/13 10:40:24 EDT	(20040913_2)
 
   Modified files:
