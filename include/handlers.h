@@ -188,6 +188,7 @@ extern int ms_capab(struct Client*, struct Client*, int, char**);
 extern int ms_cburst(struct Client*, struct Client*, int, char**);
 extern int ms_connect(struct Client*, struct Client*, int, char**);
 extern int ms_drop(struct Client *,struct Client *,int,char **);
+extern int ms_eob(struct Client*, struct Client*, int, char**);
 extern int ms_error(struct Client*, struct Client*, int, char**);
 extern int ms_gline(struct Client*, struct Client*, int, char**);
 extern int ms_info(struct Client*, struct Client*, int, char**);

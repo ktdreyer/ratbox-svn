@@ -66,6 +66,7 @@ struct  Message
 #define MSG_PRIVMSG  "PRIVMSG"  /* PRIV */
 #define MSG_CBURST   "CBURST"   /* LazyLink channel burst */
 #define MSG_DROP     "DROP"     /* LazyLink channel drop */
+#define MSG_EOB      "EOB"      /* End of burst */
 #define MSG_LLJOIN   "LLJOIN"   /* LazyLink join */
 #define MSG_WHO      "WHO"      /* WHO  -> WHOC */
 #define MSG_WHOIS    "WHOIS"    /* WHOI */
