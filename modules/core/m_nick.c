@@ -583,6 +583,8 @@ static int check_clean_host(struct Client *client_p, char *nick,
 static int clean_nick_name(char *nick)
 {
   assert(nick);
+  if(nick == NULL)
+    return 0;
 
   /* nicks cant start with a digit or - */
   if (*nick == '-' || IsDigit(*nick))
@@ -606,11 +608,14 @@ static int clean_nick_name(char *nick)
 static int clean_user_name(char *user)
 {
   assert(user);
-
+  if(user == NULL)
+    return 0;
+    
   for(; *user; user++)
   {
     if(!IsUserChar(*user))
       return 0;
+    
   }
 
   return 1;
@@ -624,7 +629,8 @@ static int clean_user_name(char *user)
 static int clean_host_name(char *host)
 {
   assert(host);
-
+  if(host == NULL)
+    return 0;
   for(; *host; host++)
   {
     if(!IsHostChar(*host))
