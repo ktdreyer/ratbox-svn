@@ -2463,7 +2463,7 @@ static  void    sub1_from_channel(struct Channel *chptr)
           free_fluders(NULL, chptr);
 #endif
           /* If channel has subchannels don't delete this channel */
-          if ( chptr->vchans == NULL )	  
+          if ( chptr->vchan_flag == NULL )	  
             {
               del_from_channel_hash_table(chptr->chname, chptr);
               MyFree((char*) chptr);

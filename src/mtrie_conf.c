@@ -841,6 +841,7 @@ static struct ConfItem *find_sub_mtrie(DOMAIN_LEVEL *cur_level,
   DOMAIN_PIECE *cur_piece;
   char *cur_dns_piece;
   struct ConfItem *aconf=(struct ConfItem *)NULL;
+  struct ConfItem *aconf_user=(struct ConfItem *)NULL;
 
   cur_dns_piece = dns_stack[--stack_pointer];
 
@@ -883,7 +884,8 @@ static struct ConfItem *find_sub_mtrie(DOMAIN_LEVEL *cur_level,
 
   if(stack_pointer == 0)
     {
-      return(find_user_piece(cur_piece,flags,cur_dns_piece,user));
+      aconf_user=find_user_piece(cur_piece,flags,cur_dns_piece,user);
+      return(aconf_user ? aconf_user : last_found_iline_aconf);
     }
 
   if(cur_piece->next_level)
