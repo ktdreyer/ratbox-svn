@@ -461,7 +461,7 @@ if test x$ac_cv_func_nanosleep = xno && test x$ac_cv_lib_posix4_nanosleep = xno 
 then     
          AC_MSG_RESULT("nanosleep not found..using select for delay")
 else     
-         AC_DEFINE(HAVE_NANOSLEEP)
+	 AC_DEFINE([HAVE_NANOSLEEP], 1, [Define if nanosleep exists])
 fi
 
 dnl OpenSSL support
