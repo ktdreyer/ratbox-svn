@@ -1,3 +1,15 @@
+leeh        2003/12/07 21:19:27 EST	(20031208_0)
+
+  Added files:
+    include              serno.h 
+  Log:
+  - add serno.h..
+  
+  Revision  Changes    Path
+  1.1       +1 -0      rserv/include/serno.h (new)
+
+
+
 leeh        2003/12/07 21:09:02 EST
 
   Added files:
