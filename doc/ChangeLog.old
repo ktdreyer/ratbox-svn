@@ -1,3 +1,7 @@
+*** 20010821_2 by davidt
+- Clean up m_sjoin.c slightly.
+
+
 *** 20010821_1 by androsyn
 Diane's optimizations of the SJOIN code and some of the linebuf code.
 
