@@ -1,3 +1,7 @@
+*** 20011115_2 by leeh
+- err - if servernameis too long, you need to reject it - not chop it..
+
+
 *** 20011115_1 by androsyn
 Fixed buglet where timeout_adns would get readded to the event list on each
 /rehash
