@@ -51,7 +51,7 @@ static void ms_server(struct Client*, struct Client*, int, char **);
 static int set_server_gecos(struct Client *, char *);
 
 struct Message server_msgtab = {
-  "SERVER", 0, 0, 3, 0, MFLG_SLOW | MFLG_UNREG, 0,
+  "SERVER", 0, 0, 4, 0, MFLG_SLOW | MFLG_UNREG, 0,
   {mr_server, m_registered, ms_server, m_registered}
 };
 

@@ -334,13 +334,29 @@ handle_command(struct Message *mptr, struct Client *client_p,
   /* check right amount of params is passed... --is */
   if (i < mptr->parameters)
     {
-      if(IsServer(client_p))
-         sendto_realops_flags(FLAGS_ALL, L_ALL, 
-                "Not enough parameters for command %s from server %s! (%d < %d)",
-                mptr->cmd, client_p->name, i, mptr->parameters);
-       sendto_one(client_p, form_str(ERR_NEEDMOREPARAMS),
-                  me.name, BadPtr(hpara[0]) ? "*" : hpara[0], mptr->cmd);
-       return;
+      char tbuf[512] = { 0 };
+      int j;
+
+      if (!IsServer(client_p))
+	{
+	  sendto_one(client_p, form_str(ERR_NEEDMOREPARAMS),
+		     me.name, BadPtr(hpara[0]) ? "*" : hpara[0], mptr->cmd);
+	  return;
+	}
+
+      for (j = 1; j < i; j++)
+	{
+	  strcat(tbuf, hpara[j]);
+	  strcat(tbuf, " ");
+	}
+
+      sendto_realops_flags(FLAGS_ALL, L_ALL, 
+			   "Not enough parameters for command %s from server %s! "
+			   "(%d < %d, saw: '%s').  Disconnecting this server due to fatal error.",
+			   mptr->cmd, client_p->name, i, mptr->parameters, tbuf);
+
+      exit_client(client_p, client_p, client_p, "Not enough arguments to server command.");
+      return;
     }
 
   (*handler)(client_p, from, i, hpara);
