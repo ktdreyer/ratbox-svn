@@ -486,18 +486,25 @@ void msg_channel_flags( int p_or_n, char *command,
     {
       if(sptr->user)
 	sptr->user->last = CurrentTime;
-
-      sendto_channel_local(ONLY_CHANOPS_VOICED,
-			   chptr,
-			   ":%s!%s@%s %s @%s :%s",
-			   sptr->name,
-			   sptr->username,
-			   sptr->host,
-			   command,
-			   chname,
-			   text);
     }
-  /* XXX Will need code to remotely send... */
+
+  sendto_channel_local(ONLY_CHANOPS_VOICED,
+		       chptr,
+		       ":%s!%s@%s %s @%s :%s",
+		       sptr->name,
+		       sptr->username,
+		       sptr->host,
+		       command,
+		       chname,
+		       text);
+
+  sendto_match_cap_servs(chptr, cptr, CAP_CHW,
+			 ":%s %s %c%s :%s",
+			 sptr->name,
+			 command,
+			 '@',
+			 chname,
+			 text);
 }
 
 /*
