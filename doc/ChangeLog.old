@@ -1,3 +1,7 @@
+*** 20010208_1 by toot
+wasn't checking vchan_id for root channels..
+
+
 *** 20010207_8 by a1kmm
 - That "bogus //" that Hwy changed to /*  shouldn't be there at all - the code is needed for klines to work.
 
