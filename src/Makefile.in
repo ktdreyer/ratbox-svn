@@ -47,6 +47,7 @@ SRCS =                          \
   ircd.c                        \
   ircdauth.c                    \
   ircd_signal.c                 \
+  linebuf.c                     \
   list.c                        \
   listener.c                    \
   m_error.c                     \
