@@ -56,6 +56,12 @@ reject_exit(void *unused)
 		client_p = ptr->data;
 	  	if(IsDead(client_p))
                 	continue;
+
+		/* this MUST be here, to prevent the possibility
+		 * sendto_one() generates a write error, and then a client
+		 * ends up on the dead_list and the abort_list --fl
+		 */
+		SetClosing(client_p);
 		if(client_p->localClient->fd >= 0)
 			sendto_one(client_p, "ERROR :Closing Link: %s (%s)", client_p->host, "*** Banned (cache)");
  	  	close_connection(client_p);
