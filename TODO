@@ -103,4 +103,20 @@ Done things:
   eg a listen socket becoming a client or server, etc ...
 
 ------------------------------------------------------------------------------
+Little things to be done given enough time and initiative
+
+.  The "ping timeout" message brought back to the old style
+.  Bring back CIDR support in operator blocks
+   user="wcampbel@144.26.*"; # works - even if the hostname resolves
+   user="wcampbel@144.26.0.0/16"; # Does not work
+.  RESTART needs to stop coring
+.  CAPAB needs added for half-ops
+.  LINKS when server-hide is set ON breaks some clients
+.  GETTEXT not being detected without
+   CC='gcc -L/usr/local/lib' ./configure --prefix='...'
+   THEN...it doesn't adjust the #define in setup.h
+   Known to occur on FreeBSD 4.x-STABLE with the gettext port installed
+   to /usr/local
+.  The 3 logging path settings are NOOP in the conf (logpath, oper_log, 
+   gline_log)
 
