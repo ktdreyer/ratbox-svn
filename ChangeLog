@@ -1,3 +1,16 @@
+leeh        2004/02/28 15:37:19 EST	(20040228_1)
+
+  Modified files:
+    .                    configure configure.ac 
+  Log:
+  - add a check for us not finding any suitable io interfaces
+  
+  Revision  Changes    Path
+  7.199     +8 -2      ircd-ratbox/configure
+  7.13      +6 -2      ircd-ratbox/configure.ac
+
+
+
 leeh        2004/02/28 15:11:12 EST	(20040228_0)
 
   Modified files:
