@@ -1,3 +1,9 @@
+*** 20010104_21 by toot
+. corrected a couple of comments/headers
+. added /part reasons to m_part.c.. only work if the chan is -m (or you're opped)
+. put back some old /version letters
+
+
 *** 20010104_20 by wcampbel
 Remove the Apache style conf file test code
 
