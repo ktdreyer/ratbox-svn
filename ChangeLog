@@ -1,3 +1,19 @@
+leeh        2003/07/01 11:36:52 EDT	(20030701_3)
+
+  Modified files:
+    include              ircd.h 
+    src                  ircd.c ircd_signal.c 
+  Log:
+  - remove struct ServerState - it only had one int in, which can be
+    left alone with the cookie jar.
+  
+  Revision  Changes    Path
+  7.70      +1 -7      ircd-ratbox/include/ircd.h
+  7.298     +7 -8      ircd-ratbox/src/ircd.c
+  7.19      +1 -1      ircd-ratbox/src/ircd_signal.c
+
+
+
 leeh        2003/07/01 11:29:36 EDT	(20030701_2)
 
   Modified files:
