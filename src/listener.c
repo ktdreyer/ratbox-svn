@@ -139,9 +139,9 @@ static int inetport(struct Listener* listener)
    * At first, open a new socket
    */
 #ifdef IPV6
-  fd = socket(AF_INET6, SOCK_STREAM, 0);
+  fd = comm_open(AF_INET6, SOCK_STREAM, 0, "IPv6 Listener socket");
 #else
-  fd = socket(AF_INET, SOCK_STREAM, 0);
+  fd = comm_open(AF_INET, SOCK_STREAM, 0, "Listener socket");
 #endif
 
   if (-1 == fd) {
@@ -156,7 +156,6 @@ static int inetport(struct Listener* listener)
     close(fd);
     return 0;
   }
-  fd_open(fd, FD_SOCKET, "Listener socket");
   /* 
    * XXX - we don't want to do all this crap for a listener
    * set_sock_opts(listener);

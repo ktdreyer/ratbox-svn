@@ -273,7 +273,7 @@ static int start_auth_query(struct AuthRequest* auth)
   size_t             locallen = sizeof(struct sockaddr_in);
   int                fd;
 
-  if ((fd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+  if ((fd = comm_open(AF_INET, SOCK_STREAM, 0, "ident")) == -1) {
     report_error("creating auth stream socket %s:%s", 
                  get_client_name(auth->client, TRUE), errno);
     log(L_ERROR, "Unable to create auth socket for %s:%m",
@@ -281,7 +281,6 @@ static int start_auth_query(struct AuthRequest* auth)
     ++ServerStats->is_abad;
     return 0;
   }
-  fd_open(fd, FD_SOCKET, "Auth");
   if ((MAXCONNECTIONS - 10) < fd) {
     sendto_realops("Can't allocate fd for auth on %s",
                 get_client_name(auth->client, TRUE));

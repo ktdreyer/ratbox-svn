@@ -97,7 +97,8 @@ ConnectToIAuth()
 	register struct hostent *hostptr;
 	struct in_addr *ptr;
 
-	if ((iAuth.socket = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+	iAuth.socket = comm_open(AF_INET, SOCK_STREAM, 0, "iAuth socket");
+	if (iAuth.socket < 0)
 	{
 		log(L_ERROR,
 			"ConnectToIAuth(): Unable to open stream socket: %s",
@@ -105,7 +106,6 @@ ConnectToIAuth()
 		iAuth.socket = NOSOCK;
 		return(NOSOCK);
 	}
-        fd_open(iAuth.socket, FD_SOCKET, "iAuth socket");
 
 	if ((hostptr = gethostbyname(iAuth.hostname)) == NULL)
 	{
