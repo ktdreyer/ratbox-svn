@@ -1,3 +1,15 @@
+androsyn    2003/04/06 21:01:18 UTC	(20030406_1)
+
+  Modified files:
+    src                  adns.c 
+  Log:
+  Fix a minor typo or two
+  
+  Revision  Changes    Path
+  7.57      +3 -3      ircd-ratbox/src/adns.c
+
+
+
 androsyn    2003/04/06 20:56:51 UTC	(20030406_0)
 
   Modified files:
