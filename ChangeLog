@@ -1,3 +1,15 @@
+leeh        2002/08/15 02:53:32 EDT	(20020815_7)
+
+  Modified files:
+    src                  s_serv.c 
+  Log:
+  - make remove_server_from_list() use dlinkFind
+  
+  Revision  Changes    Path
+  7.286     +6 -12     ircd-ratbox/src/s_serv.c
+
+
+
 leeh        2002/08/15 02:51:25 EDT	(20020815_6)
 
   Modified files:
