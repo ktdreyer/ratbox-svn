@@ -489,6 +489,7 @@ accept_connection(int pfd, void *data)
 	static time_t last_oper_notice = 0;
 
 	struct irc_sockaddr_storage sai;
+	socklen_t addrlen = sizeof(sai);
 	int fd;
 	int pe;
 	struct Listener *listener = data;
@@ -508,7 +509,7 @@ accept_connection(int pfd, void *data)
 	 * be accepted until some old is closed first.
 	 */
 
-	fd = comm_accept(listener->fd, (struct sockaddr *)&sai);
+	fd = comm_accept(listener->fd, (struct sockaddr *)&sai, &addrlen);
 
 	/* This needs to be done here, otherwise we break dlines */
 	mangle_mapped_sockaddr((struct sockaddr *)&sai);

@@ -585,10 +585,9 @@ comm_socket(int family, int sock_type, int proto, const char *note)
  * comm_socket() does.
  */
 int
-comm_accept(int fd, struct sockaddr *pn)
+comm_accept(int fd, struct sockaddr *pn, socklen_t *addrlen)
 {
 	int newfd;
-	socklen_t addrlen = sizeof(struct irc_sockaddr_storage);
 	if(number_fd >= MASTER_MAX)
 	{
 		errno = ENFILE;
@@ -600,7 +599,7 @@ comm_accept(int fd, struct sockaddr *pn)
 	 * reserved fd limit, but we can deal with that when comm_socket()
 	 * also does it. XXX -- adrian
 	 */
-	newfd = accept(fd, (struct sockaddr *) pn, (socklen_t *) & addrlen);
+	newfd = accept(fd, (struct sockaddr *) pn, addrlen);
 	comm_fd_hack(&newfd);
 	if(newfd < 0)
 		return -1;

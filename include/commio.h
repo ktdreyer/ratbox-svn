@@ -177,7 +177,7 @@ extern void comm_connect_tcp(int fd, const char *, u_short,
 			     struct sockaddr *, int, CNCB *, void *, int, int);
 extern const char *comm_errstr(int status);
 extern int comm_socket(int family, int sock_type, int proto, const char *note);
-extern int comm_accept(int fd, struct sockaddr *pn);
+extern int comm_accept(int fd, struct sockaddr *pn, socklen_t *len);
 
 /* These must be defined in the network IO loop code of your choice */
 extern void comm_setselect(int fd, fdlist_t list, unsigned int type,
