@@ -123,6 +123,14 @@ static void mr_nick(struct Client *client_p, struct Client *source_p,
   if ((s = strchr(parv[1], '~')))
     *s = '\0';
 
+  /* and if the first ~ was the first letter.. */
+  if(BadPtr(parv[1]))
+  {
+    sendto_one(source_p, form_str(ERR_ERRONEUSNICKNAME),
+               me.name, BadPtr(parv[0]) ? "*" : parv[0], parv[1]);
+    return;
+  }
+
   /* copy the nick and terminate it */
   strlcpy(nick, parv[1], sizeof(nick));
 
