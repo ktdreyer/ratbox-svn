@@ -1,3 +1,11 @@
+*** 20001207_10 by db
+- fixed stupid in channel.c with ban sending... used banptr forgot
+  the ->banstr oops.
+- removed totally unused variable in s_user.c LastWallopsTime...
+  wallops is no longer paced. rah rah.
+
+
+
 *** 20001207_9 by db
 - first cut at cleaning up m_gline.c its still fugly... but cleaner
 - added CAP_GLN for capable of gline servers. I didn't realize this
