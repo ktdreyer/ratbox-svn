@@ -1,3 +1,6 @@
+*** 20011130_5 by davidt
+- oops, also introduce unknown clients to LL servers when propigating KNOCK
+
 *** 20011130_4 by davidt
 only pass KNOCK to servers which know about chptr (LL fix)
 
