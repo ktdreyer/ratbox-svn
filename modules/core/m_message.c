@@ -586,7 +586,7 @@ void msg_client(int p_or_n, char *command,
 
   if(MyClient(acptr))
     {
-      if(IsSetCallerId(acptr))
+      if(!IsServer(sptr) && IsSetCallerId(acptr))
 	{
 	  /* Here is the anti-flood bot/spambot code -db */
 	  if(accept_message(sptr,acptr))
