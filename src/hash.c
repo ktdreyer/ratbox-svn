@@ -56,11 +56,6 @@ static dlink_list *hostTable;
 static dlink_list *xlineTable;
 static dlink_list *helpTable;
 
-/* XXX move channel hash into channel.c or hash channel stuff in channel.c
- * into here eventually -db
- */
-extern BlockHeap *channel_heap;
-
 /*
  * look in whowas.c for the missing ...[WW_MAX]; entry
  */
@@ -805,8 +800,7 @@ get_or_create_channel(struct Client *client_p, const char *chname, int *isnew)
 	if(isnew != NULL)
 		*isnew = 1;
 
-	chptr = BlockHeapAlloc(channel_heap);
-	memset(chptr, 0, sizeof(struct Channel));
+	chptr = allocate_channel();
 	strlcpy(chptr->chname, s, sizeof(chptr->chname));
 
 	dlinkAdd(chptr, &chptr->node, &global_channel_list);

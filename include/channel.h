@@ -167,6 +167,14 @@ struct ChCapCombo
 extern dlink_list global_channel_list;
 void init_channels(void);
 
+struct Channel *allocate_channel(void);
+void free_channel(struct Channel *chptr);
+struct Ban *allocate_ban(void);
+void free_ban(struct Ban *bptr);
+
+
+
+
 extern int can_send(struct Channel *chptr, struct Client *who, 
 		    struct membership *);
 extern int is_banned(struct Channel *chptr, struct Client *who,
@@ -202,5 +210,6 @@ extern void set_chcap_usage_counts(struct Client *serv_p);
 extern void unset_chcap_usage_counts(struct Client *serv_p);
 extern void send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
 				  struct Channel *chptr, struct ChModeChange foo[], int);
+
 
 #endif /* INCLUDED_channel_h */

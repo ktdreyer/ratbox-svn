@@ -88,9 +88,6 @@ static int mode_count;
 static int mode_limit;
 static int mask_pos;
 
-/* channel.c */
-extern BlockHeap *ban_heap;
-
 /*
  * m_mode - MODE command handler
  * parv[0] - sender
@@ -389,8 +386,7 @@ add_id(struct Client *source_p, struct Channel *chptr, const char *banid,
 	}
 
 
-	actualBan = (struct Ban *) BlockHeapAlloc(ban_heap);
-	memset(actualBan, 0, sizeof(struct Ban));
+	actualBan = allocate_ban();
 
 	strlcpy(actualBan->banstr, realban, sizeof(actualBan->banstr));
 	actualBan->when = CurrentTime;
@@ -434,7 +430,7 @@ del_id(struct Channel *chptr, const char *banid, dlink_list *list,
 		if(irccmp(banid, banptr->banstr) == 0)
 		{
 			dlinkDelete(&banptr->node, list);
-			BlockHeapFree(ban_heap, banptr);
+			free_ban(banptr);
 
 			/* num_mask should never be < 0 */
 			if(chptr->num_mask > 0)

@@ -48,9 +48,9 @@
 
 struct config_channel_entry ConfigChannel;
 dlink_list global_channel_list;
-BlockHeap *channel_heap;
-BlockHeap *ban_heap;
-BlockHeap *topic_heap;
+static BlockHeap *channel_heap;
+static BlockHeap *ban_heap;
+static BlockHeap *topic_heap;
 static BlockHeap *member_heap;
 
 static int channel_capabs[] = { CAP_EX, CAP_IE, CAP_TS6 };
@@ -76,6 +76,40 @@ init_channels(void)
 	topic_heap = BlockHeapCreate(TOPICLEN + 1 + USERHOST_REPLYLEN, TOPIC_HEAP_SIZE);
 	member_heap = BlockHeapCreate(sizeof(struct membership), MEMBER_HEAP_SIZE);
 }
+
+/*
+ * allocate_channel - Allocates a channel
+ */
+struct Channel *
+allocate_channel(void)
+{
+	struct Channel *chptr;
+	chptr = BlockHeapAlloc(channel_heap);
+	memset(chptr, 0, sizeof(struct Channel));
+	return(chptr);
+}
+
+void
+free_channel(struct Channel *chptr)
+{
+	BlockHeapFree(channel_heap, chptr);
+}
+
+struct Ban *
+allocate_ban(void)
+{
+	struct Ban *bptr;
+	bptr = BlockHeapAlloc(ban_heap);
+	memset(bptr, 0, sizeof(struct Ban));
+	return(bptr);
+}
+
+void
+free_ban(struct Ban *bptr)
+{
+	BlockHeapFree(ban_heap, bptr);
+}
+
 
 /* find_channel_membership()
  *
@@ -273,7 +307,7 @@ free_channel_list(dlink_list *list)
 	DLINK_FOREACH_SAFE(ptr, next_ptr, list->head)
 	{
 		actualBan = ptr->data;
-		BlockHeapFree(ban_heap, actualBan);
+		free_ban(actualBan);
 	}
 
 	list->head = list->tail = NULL;
@@ -306,7 +340,7 @@ destroy_channel(struct Channel *chptr)
 
 	dlinkDelete(&chptr->node, &global_channel_list);
 	del_from_channel_hash(chptr->chname, chptr);
-	BlockHeapFree(channel_heap, chptr);
+	free_channel(chptr);
 }
 
 /* channel_pub_or_secret()

@@ -64,7 +64,6 @@ DECLARE_MODULE_AV1(sjoin, NULL, NULL, sjoin_clist, NULL, NULL, "$Revision$");
  * all the specified users while sending JOIN/MODEs to local clients
  */
 
-extern BlockHeap *ban_heap;
 
 static char modebuf[MODEBUFLEN];
 static char parabuf[MODEBUFLEN];
@@ -699,7 +698,7 @@ remove_ban_list(struct Channel *chptr, struct Client *source_p,
 		pbuf += ircsprintf(pbuf, "%s ", banptr->banstr);
 		count++;
 
-		BlockHeapFree(ban_heap, banptr);
+		free_ban(banptr);
 	}
 
 	*(pbuf - 1) = '\0';
