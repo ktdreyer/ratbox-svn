@@ -12,6 +12,7 @@
 #include "io.h"
 #include "client.h"
 #include "service.h"
+#include "conf.h"
 
 static FILE *logfile;
 
@@ -95,15 +96,21 @@ slog(struct client *service_p, int loglevel, const char *format, ...)
 	char buf2[BUFSIZE];
 	va_list args;
 
+	va_start(args, format);
+	vsnprintf(buf, sizeof(buf), format, args);
+	va_end(args);
+
+	if(ServiceWallopAdm(service_p))
+	{
+		sendto_server(":%s WALLOPS :%s: %s\n",
+				MYNAME, service_p->name, buf);
+	}
+
 	if(service_p->service->logfile == NULL)
 		return;
 
 	if(service_p->service->loglevel < loglevel)
 		return;
-
-	va_start(args, format);
-	vsnprintf(buf, sizeof(buf), format, args);
-	va_end(args);
 
 	snprintf(buf2, sizeof(buf2), "%s %s\n", smalldate(), buf);
 	fputs(buf2, service_p->service->logfile);
