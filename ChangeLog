@@ -1,3 +1,15 @@
+androsyn    2003/09/15 16:21:00 EDT	(20030915_2)
+
+  Modified files:
+    src                  messages.tab 
+  Log:
+  Fix a bug with version..
+  
+  Revision  Changes    Path
+  7.98      +1 -1      ircd-ratbox/src/messages.tab
+
+
+
 androsyn    2003/09/15 16:17:58 EDT	(20030915_1)
 
   Modified files:
