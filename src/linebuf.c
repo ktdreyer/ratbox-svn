@@ -62,9 +62,12 @@ static buf_line_t *
 linebuf_new_line(buf_head_t *bufhead)
 {
   buf_line_t *bufline;
+  dlink_node *node;
 
   bufline = (buf_line_t *)MyMalloc(sizeof(buf_line_t));
   ++bufline_count;
+
+  node = MyMalloc(sizeof(dlink_node));
 
   /* XXX Zero data, I'm being paranoid! -- adrian */
   memset(bufline, 0, sizeof(buf_line_t));
@@ -77,7 +80,8 @@ linebuf_new_line(buf_head_t *bufhead)
 #endif
 
   /* Stick it at the end of the buf list */
-  dlinkAddTail(bufline, &bufline->node, &bufhead->list);
+  dlinkAddTail(bufline, node, &bufhead->list);
+  bufline->refcount++;
 
   /* And finally, update the allocated size */
   bufhead->alloclen++;
@@ -93,10 +97,12 @@ linebuf_new_line(buf_head_t *bufhead)
  * We've finished with the given line, so deallocate it
  */
 static void
-linebuf_done_line(buf_head_t *bufhead, buf_line_t *bufline)
+linebuf_done_line(buf_head_t *bufhead, buf_line_t *bufline,
+                  dlink_node *node)
 {
   /* Remove it from the linked list */
-  dlinkDelete(&bufline->node, &bufhead->list);
+  dlinkDelete(node, &bufhead->list);
+  MyFree(node);
 
   /* Update the allocated size */
   bufhead->alloclen--;
@@ -104,11 +110,16 @@ linebuf_done_line(buf_head_t *bufhead, buf_line_t *bufline)
   assert(bufhead->len >= 0);
   bufhead->numlines--;
 
-  /* and finally, deallocate the buf */
+  bufline->refcount--;
+  assert(bufline->refcount >= 0);
 
-  --bufline_count;
-  assert(bufline_count >= 0);
-  MyFree(bufline);
+  if (bufline->refcount == 0)
+  {
+    /* and finally, deallocate the buf */
+    --bufline_count;
+    assert(bufline_count >= 0);
+    MyFree(bufline);
+  }
 }
 
 
@@ -196,7 +207,8 @@ linebuf_donebuf(buf_head_t *bufhead)
 {
     while (bufhead->list.head != NULL)
       {
-       linebuf_done_line(bufhead, (buf_line_t *)bufhead->list.head->data);
+       linebuf_done_line(bufhead, (buf_line_t *)bufhead->list.head->data,
+                         bufhead->list.head);
       }
 }
 
@@ -409,12 +421,40 @@ linebuf_get(buf_head_t *bufhead, char *buf, int buflen, int partial)
   memcpy(buf, bufline->buf, cpylen);
 
   /* Deallocate the line */
-  linebuf_done_line(bufhead, bufline);
+  linebuf_done_line(bufhead, bufline, bufhead->list.head);
 
   /* return how much we copied */
   return cpylen;
 }
 
+/*
+ * linebuf_attach
+ *
+ * attach the lines in a buf_head_t to another buf_head_t
+ * without copying the data (using refcounts).
+ */
+void
+linebuf_attach(buf_head_t *bufhead, buf_head_t *new)
+{
+  dlink_node *new_node;
+  dlink_node *node;
+  buf_line_t *line;
+  
+  for (node = new->list.head; node; node = node->next)
+  {
+    line = (buf_line_t *)node->data;
+    new_node = MyMalloc(sizeof(dlink_node));
+    
+    dlinkAddTail(line, new_node, &bufhead->list);
+
+    /* Update the allocated size */
+    bufhead->alloclen++;
+    bufhead->len += line->len;
+    bufhead->numlines++;
+
+    line->refcount++;
+  }
+}
 
 /*
  * linebuf_put
@@ -535,7 +575,7 @@ linebuf_flush(int fd, buf_head_t *bufhead)
     {
       bufhead->writeofs = 0;
       assert(bufhead->len >=0);
-      linebuf_done_line(bufhead, bufline);
+      linebuf_done_line(bufhead, bufline, bufhead->list.head);
     }
 
   /* Return line length */

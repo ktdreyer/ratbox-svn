@@ -704,6 +704,10 @@ static void remove_our_modes( int hide_or_not,
   dlinkMoveList(&chptr->halfops, &chptr->peons);
   dlinkMoveList(&chptr->voiced, &chptr->peons);
 
+  dlinkMoveList(&chptr->locchanops, &chptr->peons);
+  dlinkMoveList(&chptr->lochalfops, &chptr->peons);
+  dlinkMoveList(&chptr->locvoiced, &chptr->peons);
+
   chptr->opcount = 0;
 }
 

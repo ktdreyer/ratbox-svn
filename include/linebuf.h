@@ -20,13 +20,12 @@ typedef struct _buf_line buf_line_t;
 typedef struct _buf_head buf_head_t;
 
 struct _buf_line {
-    dlink_node node;		/* We're part of a linked list! */
-    char buf[BUF_DATA_SIZE + 64]; /* we need space for the CR/LF/NUL..
-                                     plus any padding */
+    char buf[BUF_DATA_SIZE+3];  /* we need space for the CR/LF/NUL.. */
     int  terminated;		/* Whether we've terminated the buffer */
     int  flushing;		/* Whether we're flushing .. */
     int  overflow;
     int  len;			/* How much data we've got */
+    int  refcount;              /* how many linked lists are we in? */
 };
 
 struct _buf_head {
@@ -50,6 +49,6 @@ extern int linebuf_parse(buf_head_t *, char *, int, int);
 extern int linebuf_get(buf_head_t *, char *, int, int);
 extern void linebuf_put(buf_head_t *, char *, int);
 extern int linebuf_flush(int, buf_head_t *);
-
+extern void linebuf_attach(buf_head_t *, buf_head_t *);
 extern void count_linebuf_memory( int *count, u_long *memory_used);
 #endif

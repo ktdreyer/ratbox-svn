@@ -63,11 +63,17 @@ struct Channel
   time_t          last_knock;           /* don't allow knock to flood */
   struct Channel  *root_chptr;		/* pointer back to root if vchan */
   dlink_list	  vchan_list;	        /* vchan sublist */
+
   dlink_list      chanops;		/* lists of chanops etc. */
   dlink_list      halfops;
   dlink_list      voiced;
   dlink_list      peons;                /* non ops, just members */
 
+  dlink_list      locchanops;           /* local versions of the above */
+  dlink_list      lochalfops;
+  dlink_list      locvoiced;
+  dlink_list      locpeons;             /* ... */
+  
   dlink_list      invites;
   dlink_list      banlist;
   dlink_list      exceptlist;
