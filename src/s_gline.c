@@ -150,7 +150,7 @@ remove_gline_match(const char* user, const char* host)
  *                This is an event started off in ircd.c
  */
 void
-cleanup_glines(void *notused)
+cleanup_glines()
 {
   expire_glines();
   expire_pending_glines();
@@ -208,7 +208,9 @@ expire_pending_glines()
       glp_ptr = pending_node->data;
       next_node = pending_node->next;
 
-      if( (glp_ptr->last_gline_time + GLINE_PENDING_EXPIRE) <= CurrentTime )
+      if(((glp_ptr->last_gline_time + GLINE_PENDING_EXPIRE) <= CurrentTime)
+        || find_is_glined(glp_ptr->host, glp_ptr->user))
+      
         {
           MyFree(glp_ptr->reason1);
           MyFree(glp_ptr->reason2);

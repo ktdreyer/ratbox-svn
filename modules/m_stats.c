@@ -397,6 +397,7 @@ static void stats_glines(struct Client *client_p)
         pending_node = pending_node->next)
     {
       glp_ptr = pending_node->data;
+      
       tmptr = localtime(&glp_ptr->time_request1);
       strftime(timebuffer, MAX_DATE_STRING, "%Y/%m/%d %H:%M:%S", tmptr);
 
