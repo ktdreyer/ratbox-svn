@@ -1,3 +1,10 @@
+*** 20001221_1 by db
+- the modes not propagating on sjoin was my fault. 
+  channel_modes() set the +ntz in modebuf, which I then promptly
+  walked over... one has to leave those modes in then add the +o and +v
+
+
+
 *** 20001220_28 by db
 - cleanups
 
