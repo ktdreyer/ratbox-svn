@@ -1,3 +1,15 @@
+leeh        2001/12/11 09:44:53 EST	(20011211_8)
+
+  Modified files:
+    include              supported.h 
+  Log:
+  - if &channels are disabled, dont send it in 005
+  
+  Revision  Changes    Path
+  1.15      +3 -2      ircd-hybrid-7/include/supported.h
+
+
+
 androsyn    2001/12/10 23:33:11 EST	(20011211_7)
 
   Modified files:
