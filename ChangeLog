@@ -1,3 +1,15 @@
+androsyn    2003/10/14 11:24:29 EDT	(20031014_0)
+
+  Modified files:
+    src                  send.c 
+  Log:
+  Remove a useless call
+  
+  Revision  Changes    Path
+  7.268     +0 -2      ircd-ratbox/src/send.c
+
+
+
 leeh        2003/10/12 08:33:59 EDT	(20031012_0)
 
   Modified files:
