@@ -1334,12 +1334,6 @@ int	conf_end_auth(struct TopConf *tc)
 	struct ConfItem *yy_tmp;
 	struct ConfItem *yy_next;
 
-	/* reverse the meaning of spoof_notice */
-	if (yy_achead->flags & CONF_FLAGS_NO_SPOOF_NOTICE)
-		yy_achead->flags &= ~CONF_FLAGS_NO_SPOOF_NOTICE;
-	else
-		yy_achead->flags |= CONF_FLAGS_NO_SPOOF_NOTICE;
-
 	/* copy over settings from first struct */
 	for( yy_tmp = yy_achead->next; yy_tmp; yy_tmp = yy_tmp->next )
 	{
@@ -1425,16 +1419,14 @@ void	conf_set_auth_passwd(void *data)
 	DupString(yy_achead->passwd, data);
 }
 
-void	conf_set_auth_spoof_notice(void *data)
+void	conf_set_auth_no_spoof_notice(void *data)
 {
 	int yesno = *(unsigned int *)data;
 
-	/* reverse the meaning here -- it's reversed again in
-	   conf_end_auth */
 	if (yesno)
-		yy_achead->flags &= ~CONF_FLAGS_NO_SPOOF_NOTICE;
-	else
 		yy_achead->flags |= CONF_FLAGS_NO_SPOOF_NOTICE;
+	else
+		yy_achead->flags &= ~CONF_FLAGS_NO_SPOOF_NOTICE;
 }
 
 void	conf_set_auth_spoof(void *data)

@@ -529,7 +529,7 @@ verify_access(struct Client* client_p, const char* username)
 	  if (IsConfDoSpoofIp(aconf))
 	    {
 #ifndef HIDE_SPOOF_IPS
-	      if (IsConfSpoofNotice(aconf))
+	      if (!IsConfNoSpoofNotice(aconf))
 		{
 		  sendto_realops_flags(UMODE_ALL, L_ADMIN,
 				       "%s spoofing: %s as %s", client_p->name,

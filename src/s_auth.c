@@ -594,27 +594,6 @@ remove_auth_request(struct AuthRequest *auth)
   free_auth_request(auth);
 } /* remove_auth_request() */
 
-/*
- * FindAuthClient()
- * Find the client matching 'id' in the AuthClientList. The
- * id will match the memory address of the client structure.
- */
-
-struct AuthRequest *
-/* XXX This is just wrong, should be a *void at least */
-FindAuthClient(long id)
-{
-  dlink_node *ptr;
-  struct AuthRequest *auth;
-
-  DLINK_FOREACH(ptr, auth_client_list.head)
-    {
-      auth = ptr->data;
-      if( auth->client == (struct Client *)id)
-	return auth;
-    }
-  return (NULL);
-} /* FindAuthClient() */
 
 /*
  * delete_identd_queries()
