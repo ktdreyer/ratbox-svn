@@ -1,3 +1,15 @@
+wcampbel    2002/01/09 21:17:15 EST	(20020110_3)
+
+  Modified files:
+    .                    README.PLATFORMS 
+  Log:
+  I guess I'll take the punish^H^H^H^H^Hleasure of handling Cygwin issues :)
+  
+  Revision  Changes    Path
+  7.4       +1 -0      ircd-hybrid-7/README.PLATFORMS
+
+
+
 jmallett    2002/01/09 19:51:29 EST	(20020110_2)
 
   Modified files:
