@@ -11,7 +11,13 @@
 - foperlog code has been fixed
 - the directives fname_userlog, fname_operlog and fname_foperlog
   have been moved from general {}; to logging {};
-- stats U will now show the user@host and privs
+- stats U will now show the user@host and privs of a shared {};
+- stats_i_oper_only and stats_k_oper_only have been fixed
+- a pending gline desync issue has been fixed
+- encrypted passwords in oper {}; are now specified per oper block.
+  They will default to being encrypted, any unencrypted passwords
+  in oper {}; must also have "encrypted = no;"
+
 
 -- ircd-ratbox-1.0-rc3
 - PRIVMSG was not giving ERR_NOSUCHNICK for non-existant chans/users

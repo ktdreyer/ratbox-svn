@@ -55,12 +55,6 @@ Info MyInformation[] = {
   { "CPATH", "NONE", 0, "Path to Main Configuration File" },
 #endif /* CPATH */
 
-#ifdef CRYPT_OPER_PASSWORD
-  { "CRYPT_OPER_PASSWORD", "ON", 0, "Encrypt Operator Passwords" },
-#else
-  { "CRYPT_OPER_PASSWORD", "OFF", 0, "Encrypt Operator Passwords" },
-#endif /* CRYPT_OPER_PASSWORD */
-
 #ifdef DEBUGMODE
   { "DEBUGMODE", "ON", 0, "Support for debugging mode" },
 #else

@@ -45,10 +45,10 @@
 
 static struct ConfItem *find_password_aconf(char *name, struct Client *source_p);
 static int match_oper_password(char *password, struct ConfItem *aconf);
-int oper_up( struct Client *source_p, struct ConfItem *aconf );
-#ifdef CRYPT_OPER_PASSWORD
-extern        char *crypt();
-#endif /* CRYPT_OPER_PASSWORD */
+int oper_up(struct Client *source_p, struct ConfItem *aconf);
+
+extern char *crypt();
+
 
 static void m_oper(struct Client*, struct Client*, int, char**);
 static void ms_oper(struct Client*, struct Client*, int, char**);
@@ -247,27 +247,28 @@ static int match_oper_password(char *password,
   if (!aconf->status & CONF_OPERATOR)
     return NO;
 
-  /* XXX another #ifdef that should go */
-#ifdef CRYPT_OPER_PASSWORD
-  /* use first two chars of the password they send in as salt */
-  /* If the password in the conf is MD5, and ircd is linked   
-  ** to scrypt on FreeBSD, or the standard crypt library on
-  ** glibc Linux, then this code will work fine on generating
-  ** the proper encrypted hash for comparison.
-  */
-
   /* passwd may be NULL pointer. Head it off at the pass... */
   if (aconf->passwd == NULL)
     return NO;
 
-  if (password && *aconf->passwd)
-    encr = crypt(password, aconf->passwd);
+  if(IsConfEncrypted(aconf))
+  {
+    /* use first two chars of the password they send in as salt */
+    /* If the password in the conf is MD5, and ircd is linked   
+     * to scrypt on FreeBSD, or the standard crypt library on
+     * glibc Linux, then this code will work fine on generating
+     * the proper encrypted hash for comparison.
+     */
+    if (password && *aconf->passwd)
+      encr = crypt(password, aconf->passwd);
+    else
+      encr = "";
+  }
   else
-    encr = "";
-#else
-  encr = password;
-#endif  /* CRYPT_OPER_PASSWORD */
-
+  {
+    encr = password;
+  }
+  
   if (strcmp(encr, aconf->passwd) == 0)
     return YES;
   else

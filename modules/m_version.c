@@ -175,10 +175,7 @@ static char* confopts(struct Client *source_p)
     *p++ = 'K';
     
   *p++ = 'M';
-
-#ifdef CRYPT_OPER_PASSWORD
   *p++ = 'p';
-#endif
 
 #ifdef IGNORE_BOGUS_TS
   *p++ = 'T';

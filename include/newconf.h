@@ -123,6 +123,7 @@ extern 	char *		conf_cur_block_name;
 	void    conf_set_oper_user				(void *data);
 	void    conf_set_oper_password				(void *data);	
 	void    conf_set_oper_rsa_public_key_file		(void *data);
+        void    conf_set_oper_encrypted                         (void *data);
 	void    conf_set_oper_class				(void *data);
 	void    conf_set_oper_global_kill			(void *data);
 	void    conf_set_oper_remote				(void *data);

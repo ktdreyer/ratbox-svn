@@ -355,6 +355,7 @@ void	newconf_init()
 	add_conf_item("operator", "die", CF_YESNO, conf_set_oper_die);
 	add_conf_item("operator", "rehash", CF_YESNO, conf_set_oper_rehash);
 	add_conf_item("operator", "admin", CF_YESNO, conf_set_oper_admin);
+	add_conf_item("operator", "encrypted", CF_YESNO, conf_set_oper_encrypted);
 	add_conf_item("operator", "rsa_public_key_file", CF_QSTRING,
 			conf_set_oper_rsa_public_key_file);
 	add_conf_item("operator", "flags", CF_STRING | CF_FLIST,
@@ -962,6 +963,7 @@ int	conf_begin_oper(struct TopConf* tc)
 	yy_acount = 0;
 	yy_achead = yy_aconf = make_conf();
 	yy_aconf->status = CONF_OPERATOR;
+        yy_aconf->flags |= CONF_FLAGS_ENCRYPTED;
 	return 0;
 }
 
@@ -1133,6 +1135,16 @@ void	conf_set_oper_rsa_public_key_file(void *data)
 #else
 	conf_report_error("Warning -- ignoring rsa_public_key_file (OpenSSL support not available");
 #endif
+}
+
+void	conf_set_oper_encrypted(void *data)
+{
+	int yesno = *(unsigned int*) data;
+
+	if (yesno)
+		yy_achead->flags |= CONF_FLAGS_ENCRYPTED;
+	else
+		yy_achead->flags &= ~CONF_FLAGS_ENCRYPTED;
 }
 
 void	conf_set_oper_class(void *data)

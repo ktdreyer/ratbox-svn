@@ -247,12 +247,6 @@
 
 #endif /* USE_SYSLOG */
 
-/* CRYPT_OPER_PASSWORD - use crypted oper passwords in the ircd.conf
- * define this if you want to use crypted passwords for operators in your
- * ircd.conf file.
- */
-#define CRYPT_OPER_PASSWORD
-
 /* CLIENT_FLOOD - client excess flood threshold(in messages)
  * The number of messages that we can receive before we disconnect the
  * remote client...
