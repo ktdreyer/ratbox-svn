@@ -114,6 +114,7 @@ const char* myctime(time_t);
 #ifndef HAVE_STRTOK_R
 char*       strtoken(char** save, char* str, char* fs);
 #else
+char *strtok_r(char *s, const char *, char **);
 #define strtoken(save, str, fs) (char *)strtok_r(str, fs, save)
 #endif
 
