@@ -1,3 +1,16 @@
+androsyn    2002/08/08 15:47:41 EDT	(20020808_18)
+
+  Modified files:
+    doc                  example.conf example.efnet.conf 
+  Log:
+  Update the example configs to reflect the removal of vchans and lazylinks
+  
+  Revision  Changes    Path
+  7.167     +0 -15     ircd-ratbox/doc/example.conf
+  7.4       +0 -26     ircd-ratbox/doc/example.efnet.conf
+
+
+
 androsyn    2002/08/08 15:41:36 EDT	(20020808_17)
 
   Modified files:
