@@ -58,6 +58,9 @@ libadns.a: ${OBJS}
 	${CC} ${CPPFLAGS} ${CFLAGS} -c $<
 
 .PHONY: depend clean distclean
+
+install: 
+
 depend:
 	@${MKDEP} ${CPPFLAGS} ${BASE_SRCS} ${EXTRA_SRCS} > .depend
 
