@@ -1,3 +1,19 @@
+leeh        2004/04/29 08:40:52 EDT	(20040429_2)
+
+  Modified files:
+    .                    RELNOTES 
+    src                  client.c 
+  Log:
+  - remove bogus asserts of checking a client is on the abort_list.  the
+    actual client pointer is within a struct abort_client, so we cant
+    dlinkFind() it anyway.
+  
+  Revision  Changes    Path
+  1.101     +6 -0      ircd-ratbox/RELNOTES
+  7.456     +0 -7      ircd-ratbox/src/client.c
+
+
+
 leeh        2004/04/29 07:56:22 EDT	(20040429_1)
 
   Modified files:
