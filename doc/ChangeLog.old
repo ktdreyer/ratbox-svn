@@ -1,3 +1,8 @@
+*** 20001229_22 by wcampbel
+Document problem with old openssl installed in /usr/local/lib failing
+to link the RSA stuff used in Hybrid
+
+
 *** 20001229_21 by davidt
 Ignore errors installing message files.. hrm.. maybe leaving the .mo in the repo wasn't such a bad idea.. *sigh*
 
