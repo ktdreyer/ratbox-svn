@@ -1,3 +1,15 @@
+androsyn    2004/10/13 12:48:12 EDT	(20041013_0)
+
+  Modified files:
+    src                  kqueue.c 
+  Log:
+  Use old kqueue implementation
+  
+  Revision  Changes    Path
+  1.51      +67 -56    ircd-ratbox/src/kqueue.c
+
+
+
 androsyn    2004/10/08 10:50:24 EDT	(20041008_1)
 
   Modified files:
