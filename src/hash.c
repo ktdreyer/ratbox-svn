@@ -239,10 +239,10 @@ hash_help(const char *name)
 
 	while(*name)
 	{
-		h = (h << 4) - (h + (unsigned char) ToLower(*name++));
+		h += (unsigned int) (ToLower(*name++) & 0xDF);
 	}
 
-	return (h & (HELP_MAX -1));
+	return (h % HELP_MAX);
 }
 
 /* add_to_id_hash()
@@ -929,4 +929,34 @@ hash_find_help(const char *name, int flags)
 	}
 
 	return NULL;
+}
+
+void
+help_hash_stats(struct Client *source_p)
+{
+	struct helpfile *hptr;
+	char buffer[BUFSIZE];
+	char *bufptr;
+	dlink_node *ptr;
+	int i;
+
+
+	for(i = 0; i < HELP_MAX; i++)
+	{
+		bufptr = buffer;
+
+		DLINK_FOREACH(ptr, helpTable[i].list.head)
+		{
+			hptr = ptr->data;
+
+			ircsprintf(bufptr, "%s ", hptr->helpname);
+			bufptr += strlen(hptr->helpname) + 1;
+		}
+
+		*bufptr = '\0';
+
+		sendto_one(source_p, ":%s %d %s :%d %d %s",
+			   me.name, RPL_STATSDEBUG, source_p->name,
+			   i, helpTable[i].hits, buffer);
+	}
 }

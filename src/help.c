@@ -63,6 +63,7 @@ load_help_file(const char *hfname, const char *helpname, int flags)
 	struct helpfile *hptr;
 	char line[BUFSIZE];
 	char *lineptr;
+	char *p;
 
 	if((in = fbopen(hfname, "r")) == NULL)
 		return;
@@ -79,6 +80,9 @@ load_help_file(const char *hfname, const char *helpname, int flags)
 
 	while(fbgets(line, sizeof(line), in) != NULL)
 	{
+		if((p = strchr(line, '\n')))
+			*p = '\0';
+
 		if(!EmptyString(line))
 		{
 			lineptr = BlockHeapAlloc(helpline_heap);

@@ -42,6 +42,8 @@
 #include "modules.h"
 #include "hostmask.h"
 #include "reject.h"
+#include "hash.h"
+#include "help.h"
 
 static int mo_rehash(struct Client *, struct Client *, int, const char **);
 
@@ -167,18 +169,29 @@ rehash_rejectcache(struct Client *source_p)
 	flush_reject(source_p);
 
 }
-                                                                                                             		                
+
+static void
+rehash_help(struct Client *source_p)
+{
+	sendto_realops_flags(UMODE_ALL, L_ALL,
+			     "%s is forcing re-reading of HELP files", 
+			     get_oper_name(source_p));
+	clear_help_hash();
+	load_help();
+}
+	
 static struct hash_commands rehash_commands[] = {
-	{"CHANNELS", rehash_channels},
-	{"DNS", rehash_dns},
-	{"MOTD", rehash_motd},
-	{"OMOTD", rehash_omotd},
-	{"GLINES", rehash_glines},
-	{"PGLINES", rehash_pglines},
-	{"TKLINES", rehash_tklines},
-	{"TDLINES", rehash_tdlines},
-	{"REJECTCACHE", rehash_rejectcache},
-	{NULL, NULL}
+	{"CHANNELS", 	rehash_channels },
+	{"DNS", 	rehash_dns },
+	{"MOTD", 	rehash_motd },
+	{"OMOTD", 	rehash_omotd	},
+	{"GLINES", 	rehash_glines },
+	{"PGLINES", 	rehash_pglines },
+	{"TKLINES", 	rehash_tklines },
+	{"TDLINES", 	rehash_tdlines },
+	{"REJECTCACHE",	rehash_rejectcache },
+	{"HELP", 	rehash_help },
+	{NULL, 		NULL }
 };
 
 /*

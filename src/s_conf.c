@@ -1723,10 +1723,7 @@ read_conf_files(int cold)
 	if(!cold)
 	{
 		clear_out_old_conf();
-		clear_help_hash();
 	}
-
-	load_help();
 
 	read_conf(conf_fbfile_in);
 	fbclose(conf_fbfile_in);

@@ -42,6 +42,7 @@
 static int m_help(struct Client *, struct Client *, int, const char **);
 static int mo_help(struct Client *, struct Client *, int, const char **);
 static int mo_uhelp(struct Client *, struct Client *, int, const char **);
+static int mo_helpstat(struct Client *, struct Client *, int, const char **);
 static void dohelp(struct Client *, int, const char *);
 
 struct Message help_msgtab = {
@@ -54,10 +55,22 @@ struct Message uhelp_msgtab = {
 	{m_unregistered, m_help, m_ignore, mo_uhelp}
 };
 
+struct Message helpstat_msgtab = {
+	"HELPSTAT", 0, 0, 0, 0, MFLG_SLOW, 0,
+	{m_unregistered, m_ignore, m_ignore, mo_helpstat}
+};
+
 mapi_clist_av1 help_clist[] = { 
-	&help_msgtab, &uhelp_msgtab, NULL 
+	&help_msgtab, &uhelp_msgtab, &helpstat_msgtab, NULL 
 };
 DECLARE_MODULE_AV1(help, NULL, NULL, help_clist, NULL, NULL, NULL, "$Revision$");
+
+static int
+mo_helpstat(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
+{
+	help_hash_stats(source_p);
+	return 0;
+}
 
 /*
  * m_help - HELP message handler
