@@ -1,3 +1,7 @@
+*** 20010116_2 by wcampbel
+Updated .depend's
+
+
 *** 20010116_1 by db
 - fix to check_pings, this probably explains some of the odd cores...
   ptr->next is corrupt at times after an exit_client
