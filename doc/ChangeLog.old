@@ -1,3 +1,12 @@
+*** 20001209_2 by db
+- renamed confusing sendto_channel_butserv to sendto_channel_local
+  it reflects better what the stupid function does
+- changed all references to src/m_xxx.c file names in modules to
+  read modules/m_xxx.c
+- removed yet another #ifdef this time one in m_info.h
+
+
+
 *** 20001209_1 by db
 - added server greet message (# since restart)
 - fixed stupid in m_sjoin, you can have more than 4 ops/nicks per sjoin *oops*
