@@ -79,7 +79,7 @@ _moddeinit(void)
   mod_del_cmd(&clearchan_msgtab);
 }
 
-char *_version = "20010104";
+char *_version = "20010528";
 
 /*
 ** mo_clearchan
