@@ -1555,9 +1555,10 @@ burst_all(struct Client *client_p)
   /* We send the time we started the burst, and let the remote host determine an EOB time,
   ** as otherwise we end up sending a EOB of 0   Sending here means it gets sent last -- fl
   */
+  /* Its simpler to just send EOB and use the time its been connected.. --fl_ */
 
   if(IsCapable(client_p, CAP_EOB))
-    sendto_one(client_p, ":%s EOB %lu", me.name, (unsigned long) StartBurst);
+    sendto_one(client_p, ":%s EOB", me.name);
 }
 
 /*
