@@ -120,7 +120,11 @@ void initBlockHeap(void)
  */
 static inline void *get_block(size_t size)
 {
-  return (mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE, zero_fd, 0));
+  void *ptr;
+  ptr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE, zero_fd, 0);
+  if(ptr == MAP_FAILED
+  	ptr = NULL;
+  return(ptr);
 }
 #else /* MAP_ANON */ 
 
@@ -147,7 +151,11 @@ void initBlockHeap(void)
 
 static inline void *get_block(size_t size)
 {
-  return (mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0));
+  void *ptr;
+  ptr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
+  if(ptr == MAP_FAILED)
+  	ptr = NULL;
+  return(ptr);
 }
 
 #endif /* MAP_ANON */
