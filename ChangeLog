@@ -1,3 +1,15 @@
+leeh        2002/12/08 14:52:06 UTC	(20021208_5)
+
+  Modified files:
+    modules/core         m_message.c 
+  Log:
+  - since when does messaging yourself not reset your idle?
+  
+  Revision  Changes    Path
+  1.115     +2 -2      ircd-ratbox/modules/core/m_message.c
+
+
+
 leeh        2002/12/08 13:12:43 UTC	(20021208_4)
 
   Modified files:
