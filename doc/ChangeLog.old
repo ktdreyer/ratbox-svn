@@ -1,3 +1,8 @@
+*** 20010502_8 by toot
+updated PREFIX format in 005 numeric, and added CHANMODES=A,B,C,D
+see supported.h
+
+
 *** 20010502_7 by androsyn
 $5 says this fixes fl_'s cores...I don't think this is the right fix
 though..
