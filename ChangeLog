@@ -1,3 +1,20 @@
+leeh        2003/06/28 11:11:12 EDT	(20030628_1)
+
+  Modified files:
+    modules              m_dline.c m_gline.c m_kline.c 
+  Log:
+  - removed two unused variables in m_dline.c
+  - moved two global variables -> mo_kline()
+  - cleaned glines up, instead of passing four strings, just find the
+    damned client pointer and pass that.
+  
+  Revision  Changes    Path
+  1.21      +1 -4      ircd-ratbox/modules/m_dline.c
+  1.121     +151 -184  ircd-ratbox/modules/m_gline.c
+  1.160     +4 -6      ircd-ratbox/modules/m_kline.c
+
+
+
 leeh        2003/06/28 09:39:20 EDT	(20030628_0)
 
   Modified files:
