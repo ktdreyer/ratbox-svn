@@ -250,7 +250,6 @@ join_service(struct client *service_p, const char *chname)
 	if((chptr = find_channel(chname)) == NULL)
 	{
 		chptr = BlockHeapAlloc(channel_heap);
-		memset(chptr, 0, sizeof(struct channel));
 
 		strlcpy(chptr->name, chname, sizeof(chptr->name));
 		chptr->tsinfo = CURRENT_TIME;
@@ -576,7 +575,6 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 	if((chptr = find_channel(parv[2])) == NULL)
 	{
 		chptr = BlockHeapAlloc(channel_heap);
-		memset(chptr, 0, sizeof(struct channel));
 
 		strlcpy(chptr->name, parv[2], sizeof(chptr->name));
 		chptr->tsinfo = atol(parv[1]);

@@ -368,6 +368,7 @@ BlockHeapAlloc(BlockHeap * bh)
 			s_assert(new_node->data != NULL);
 			if(new_node->data == NULL)
 				blockheap_fail("new_node->data is NULL and that shouldn't happen!!!");
+			memset(new_node->data, 0, bh->elemSize);
 			return (new_node->data);
 		}
 	}

@@ -73,7 +73,7 @@
 #define HEAP_CACHEFILE  16
 #define HEAP_CACHELINE  128
 #define HEAP_USER_REG	256
-#define HEAP_CHAN_REG	128
+#define HEAP_CHANNEL_REG	128
 #define HEAP_MEMBER_REG	256
 
 #if defined(CHANNEL_SERVICE) && !defined(USER_SERVICE)

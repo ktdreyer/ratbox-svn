@@ -36,7 +36,7 @@ static struct service_command userserv_command[] =
 	{ "REGISTER",	&s_userserv_register,	2, NULL, 0, 0, 1, 0L },
 	{ "LOGIN",	&s_userserv_login,	2, NULL, 0, 0, 1, 0L },
 	{ "LOGOUT",	&s_userserv_logout,	0, NULL, 0, 1, 1, 0L },
-	{ "\0",		NULL,			0, NULL, 0, 0, 0L }
+	{ "\0",		NULL,			0, NULL, 0, 0, 0, 0L }
 };
 
 static struct service_handler userserv_service = {
@@ -53,6 +53,14 @@ init_s_userserv(void)
 	load_user_db();
 }
 
+static void
+add_user_reg(struct user_reg *reg_p)
+{
+	unsigned int hashv = hash_name(reg_p->name);
+	dlink_add(reg_p, &reg_p->node, &user_reg_table[hashv]);
+}
+
+
 static int
 user_db_callback(void *db, int argc, char **argv, char **colnames)
 {
@@ -64,7 +72,7 @@ user_db_callback(void *db, int argc, char **argv, char **colnames)
 	if(EmptyString(argv[0]))
 		return 0;
 
-	reg_p = make_user_reg();
+	reg_p = BlockHeapAlloc(user_reg_heap);
 	strlcpy(reg_p->name, argv[0], sizeof(reg_p->name));
 	reg_p->password = my_strdup(argv[1]);
 
@@ -102,30 +110,6 @@ write_user_db_entry(struct user_reg *reg_p)
 		slog("ERR: Problem writing to db file");
 		die("Problem writing to db file");
 	}
-}
-
-struct user_reg *
-make_user_reg(void)
-{
-	struct user_reg *reg_p;
-
-	reg_p = BlockHeapAlloc(user_reg_heap);
-	memset(reg_p, 0, sizeof(struct user_reg));
-
-	return reg_p;
-}
-
-void
-free_user_reg(struct user_reg *reg_p)
-{
-	BlockHeapFree(user_reg_heap, reg_p);
-}
-
-void
-add_user_reg(struct user_reg *reg_p)
-{
-	unsigned int hashv = hash_name(reg_p->name);
-	dlink_add(reg_p, &reg_p->node, &user_reg_table[hashv]);
 }
 
 struct user_reg *
@@ -190,7 +174,7 @@ s_userserv_register(struct client *client_p, char *parv[], int parc)
 		return 1;
 	}
 
-	reg_p = make_user_reg();
+	reg_p = BlockHeapAlloc(user_reg_heap);
 	strcpy(reg_p->name, parv[0]);
 
 	password = get_crypt(parv[1], NULL);

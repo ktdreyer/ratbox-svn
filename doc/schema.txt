@@ -4,18 +4,31 @@ CREATE TABLE users (
 	username TEXT,
 	password TEXT,
 	reg_time TIMESTAMP,
-	last_used TIMESTAMP,
-	flags INTEGER
+	last_time TIMESTAMP,
+	flags INTEGER,
+	PRIMARY KEY(username)
 );
 
 CREATE TABLE channels (
-	chname text,
-	topic text,
-	flags int4,
-	reg_time unixtime,
-	last_used unixtime,
+	chname TEXT,
+	topic TEXT,
+	modes TEXT,
+	reg_time TIMESTAMP,
+	last_time TIMESTAMP,
+	flags INTEGER,
 	PRIMARY KEY(chname)
 );
+
+CREATE TABLE members (
+	chname TEXT,
+	username TEXT,
+	lastmod TEXT,
+	level INTEGER,
+	suspend INTEGER,
+	FOREIGN KEY(chname) REFERENCES channels (chname) MATCH FULL,
+	FOREIGN KEY(username) REFERENCES users (username) MATCH FULL	
+);
+
 
 CREATE TABLE chan_bans (
 	chname text,
@@ -23,16 +36,7 @@ CREATE TABLE chan_bans (
 	ban_reason text,
 	level int4,
 	hold unixtime,
-	FOREIGN KEY(chname) REFERENCES channels 
-);
-
-CREATE TABLE chan_members (
-	chname text,
-	nickname text,
-	level int4,
-	suspend int4,
-	FOREIGN KEY(chname) REFERENCES channels (chname) MATCH FULL,
-	FOREIGN KEY(nickname) REFERENCES users (nickname) MATCH FULL	
+	FOREIGN KEY(chname) REFERENCES channels (chname) MATCH FULL
 );
 
 	

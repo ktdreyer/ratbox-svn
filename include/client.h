@@ -49,7 +49,7 @@ struct user
 	int umode;			/* usermodes this client has */
 	time_t tsinfo;
 
-	void *user_reg;
+	struct user_reg *user_reg;
 
 	dlink_list channels;
 

@@ -32,8 +32,6 @@ init_cache(void)
 
 	/* allocate the emptyline */
 	emptyline = BlockHeapAlloc(cacheline_heap);
-	memset(emptyline, 0, sizeof(struct cacheline));
-
 	emptyline->data[0] = ' ';
 }
 
@@ -56,8 +54,6 @@ cache_file(const char *filename, const char *shortname)
 		return NULL;
 
 	cacheptr = BlockHeapAlloc(cachefile_heap);
-	memset(cacheptr, 0, sizeof(struct cachefile));
-
 	strlcpy(cacheptr->name, shortname, sizeof(cacheptr->name));
 
 	/* cache the file... */

@@ -5,18 +5,15 @@
 struct user_reg;
 struct chmode;
 
-#define MAX_CHAN_REG_HASH	16384
-
 struct chan_reg
 {
 	char *name;
 	char *topic;
-	struct chmode *mode;
+	struct chmode mode;
 	int flags;
-	time_t tsinfo;
 
 	time_t reg_time;
-	time_t last_used;
+	time_t last_time;
 
 	dlink_node node;
 
@@ -27,11 +24,10 @@ struct chan_reg
 struct member_reg
 {
 	struct user_reg *user_reg;
-	struct chan_reg *chan_reg;
+	struct chan_reg *channel_reg;
 
 	int level;
 	int suspend;
-	int flags;
 
 	char *lastmod;			/* last user to modify this membership */
 

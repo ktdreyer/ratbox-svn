@@ -21,13 +21,6 @@ struct user_reg
 	dlink_list channels;
 };
 
-extern dlink_list user_reg_table[MAX_USER_REG_HASH];
-
-extern struct user_reg *make_user_reg(void);
-extern void free_user_reg(struct user_reg *);
-
-extern void add_user_reg(struct user_reg *);
-
 extern struct user_reg *find_user_reg(struct client *, const char *name);
 extern struct user_reg *find_user_reg_nick(struct client *, const char *name);
 
