@@ -49,7 +49,6 @@
 #include "modules.h"
 #include "hook.h"
 #include "s_newconf.h"
-#include "s_oldnewconf.h"
 #include "hash.h"
 
 static int m_stats (struct Client *, struct Client *, int, const char **);
@@ -778,26 +777,20 @@ stats_ports (struct Client *source_p)
 }
 
 static void
-stats_resv (struct Client *source_p)
+stats_resv(struct Client *source_p)
 {
-	struct rxconf *resv_p;
+	struct ConfItem *aconf;
 	dlink_node *ptr;
 
-	DLINK_FOREACH(ptr, resv_list.head)
+	DLINK_FOREACH(ptr, resv_conf_list.head)
 	{
-		resv_p = ptr->data;
+		aconf = ptr->data;
 		sendto_one_numeric(source_p, RPL_STATSQLINE,
 				   form_str(RPL_STATSQLINE),
-				   resv_p->name, resv_p->reason);
+				   aconf->name, aconf->passwd);
 	}
 
-	DLINK_FOREACH(ptr, resv_hash_list.head)
-	{
-		resv_p = ptr->data;
-		sendto_one_numeric(source_p, RPL_STATSQLINE,
-				   form_str(RPL_STATSQLINE),
-				   resv_p->name, resv_p->reason);
-	}	
+	print_resv_hash(source_p);
 }
 
 static void
@@ -1016,27 +1009,18 @@ stats_servers (struct Client *source_p)
 }
 
 static void
-stats_gecos (struct Client *source_p)
+stats_gecos(struct Client *source_p)
 {
-	struct rxconf *xconf;
+	struct ConfItem *aconf;
 	dlink_node *ptr;
 
-	DLINK_FOREACH (ptr, xline_list.head)
+	DLINK_FOREACH(ptr, xline_conf_list.head)
 	{
-		xconf = ptr->data;
+		aconf = ptr->data;
 
 		sendto_one_numeric(source_p, RPL_STATSXLINE,
-				   form_str (RPL_STATSXLINE),
-				   xconf->type, xconf->name, xconf->reason);
-	}
-
-	DLINK_FOREACH(ptr, xline_hash_list.head)
-	{
-		xconf = ptr->data;
-
-		sendto_one_numeric(source_p, RPL_STATSXLINE,
-				   form_str (RPL_STATSXLINE),
-				   xconf->type, xconf->name, xconf->reason);
+				form_str(RPL_STATSXLINE),
+				aconf->port, aconf->name, aconf->passwd);
 	}
 }
 

@@ -44,7 +44,6 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
-#include "s_oldnewconf.h"
 #include "sprintf_irc.h"
 
 static int ms_encap(struct Client *client_p, struct Client *source_p,

@@ -52,7 +52,6 @@
 #include "modules.h"
 #include "s_conf.h"
 #include "s_newconf.h"
-#include "s_oldnewconf.h"
 
 static int mo_xline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
 static int ms_xline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
@@ -86,7 +85,7 @@ static void remove_xline(struct Client *source_p, const char *gecos);
 static int
 mo_xline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	struct rxconf *xconf;
+	struct ConfItem *aconf;
 	const char *reason;
 	const char *target_server = NULL;
 	int xtype = 1;
@@ -98,10 +97,10 @@ mo_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 		return 0;
 	}
 
-	if((xconf = find_xline(parv[1])) != NULL)
+	if((aconf = find_xline(parv[1])) != NULL)
 	{
 		sendto_one(source_p, ":%s NOTICE %s :[%s] already X-Lined by [%s] - %s",
-			   me.name, source_p->name, parv[1], xconf->name, xconf->reason);
+			   me.name, source_p->name, parv[1], aconf->name, aconf->passwd);
 		return 0;
 	}
 
@@ -173,7 +172,7 @@ mo_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 static int
 ms_xline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	struct rxconf *xconf;
+	struct ConfItem *aconf;
 
 	/* parv[0]  parv[1]      parv[2]  parv[3]  parv[4]
 	 * oper     target serv  xline    type     reason
@@ -196,11 +195,11 @@ ms_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 			return 0;
 
 		/* already xlined */
-		if((xconf = find_xline(parv[2])) != NULL)
+		if((aconf = find_xline(parv[2])) != NULL)
 		{
 			sendto_one(source_p, ":%s NOTICE %s :[%s] already X-Lined by [%s] - %s",
 				   me.name, source_p->name, parv[1], 
-				   xconf->name, xconf->reason);
+				   aconf->name, aconf->passwd);
 			return 0;
 		}
 
@@ -259,28 +258,34 @@ write_xline(struct Client *source_p, const char *gecos,
 {
 	char buffer[BUFSIZE * 2];
 	FBFILE *out;
-	struct rxconf *xconf;
+	struct ConfItem *aconf;
 	const char *filename;
 
-	xconf = make_rxconf(gecos, reason, xtype, CONF_XLINE);
-	collapse(xconf->name);
+	aconf = make_conf();
+	aconf->status = CONF_XLINE;
+	aconf->port = xtype;
+
+	DupString(aconf->name, gecos);
+	DupString(aconf->passwd, reason);
+	collapse(aconf->name);
 
 	filename = ConfigFileEntry.xlinefile;
 
 	if((out = fbopen(filename, "a")) == NULL)
 	{
 		sendto_realops_flags(UMODE_ALL, L_ALL, "*** Problem opening %s ", filename);
-		free_rxconf(xconf);
+		free_conf(aconf);
 		return;
 	}
 
 	ircsprintf(buffer, "\"%s\",\"%d\",\"%s\",\"%s\",%lu\n",
-		   xconf->name, xconf->type, xconf->reason, get_oper_name(source_p), CurrentTime);
+		   aconf->name, aconf->port, aconf->passwd,
+		   get_oper_name(source_p), CurrentTime);
 
 	if(fbputs(buffer, out) == -1)
 	{
 		sendto_realops_flags(UMODE_ALL, L_ALL, "*** Problem writing to %s", filename);
-		free_rxconf(xconf);
+		free_conf(aconf);
 		fbclose(out);
 		return;
 	}
@@ -288,13 +293,13 @@ write_xline(struct Client *source_p, const char *gecos,
 	fbclose(out);
 
 	sendto_realops_flags(UMODE_ALL, L_ALL, "%s added X-Line for [%s] [%s]",
-			     get_oper_name(source_p), xconf->name, xconf->reason);
+			     get_oper_name(source_p), aconf->name, aconf->passwd);
 	sendto_one_notice(source_p, ":Added X-Line for [%s] [%s]",
-			  xconf->name, xconf->reason);
+			  aconf->name, aconf->passwd);
 	ilog(L_KLINE, "%s added X-Line for [%s] [%s]",
-	     get_oper_name(source_p), xconf->name, xconf->reason);
+	     get_oper_name(source_p), aconf->name, aconf->passwd);
 
-	add_rxconf(xconf);
+	dlinkAddAlloc(aconf, &xline_conf_list);
 	check_xlines();
 }
 

@@ -81,6 +81,10 @@ struct ConfItem
 #define CONF_CLIENT             0x0002
 #define CONF_SERVER             0x0004
 #define CONF_KILL               0x0040
+#define CONF_XLINE		0x0080
+#define CONF_RESV_CHANNEL	0x0100
+#define CONF_RESV_NICK		0x0200
+#define CONF_RESV		(CONF_RESV_CHANNEL | CONF_RESV_NICK)
 
 #define CONF_CLASS              0x0400
 #define CONF_LISTEN_PORT        0x1000

@@ -83,7 +83,6 @@ BASE_SRCS =                     \
   s_auth.c                      \
   s_conf.c                      \
   s_newconf.c			\
-  s_oldnewconf.c                \
   s_gline.c                     \
   s_log.c                       \
   s_serv.c                      \

@@ -42,11 +42,17 @@
 #include <openssl/rsa.h>
 #endif
 
+struct ConfItem;
+
 extern dlink_list cluster_conf_list;
 extern dlink_list shared_conf_list;
 extern dlink_list oper_conf_list;
 extern dlink_list hubleaf_conf_list;
 extern dlink_list server_conf_list;
+extern dlink_list xline_conf_list;
+extern dlink_list resv_conf_list;
+
+extern void clear_s_newconf(void);
 
 /* shared/cluster/hub/leaf confs */
 struct remote_conf
@@ -138,7 +144,6 @@ struct oper_conf
 
 extern struct remote_conf *make_remote_conf(void);
 extern void free_remote_conf(struct remote_conf *);
-extern void clear_remote_conf(void);
 
 extern int find_shared_conf(const char *username, const char *host,
 			const char *server, int flags);
@@ -202,5 +207,14 @@ extern void attach_server_conf(struct Client *, struct server_conf *);
 extern void detach_server_conf(struct Client *);
 extern void set_server_conf_autoconn(struct Client *source_p, char *name, 
 					int newval);
+
+
+extern struct ConfItem *find_xline(const char *);
+extern int find_channel_resv(const char *name);
+extern int find_nick_resv(const char *name);
+
+extern int valid_wild_card_simple(const char *);
+extern int clean_resv_nick(const char *);
+
 #endif
 

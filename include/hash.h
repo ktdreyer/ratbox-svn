@@ -41,7 +41,7 @@
 
 struct Client;
 struct Channel;
-struct rxconf;
+struct ConfItem;
 struct cachefile;
 
 extern void init_hash(void);
@@ -65,17 +65,11 @@ extern void add_to_hostname_hash(const char *, struct Client *);
 extern void del_from_hostname_hash(const char *, struct Client *);
 extern dlink_node *find_hostname(const char *);
 
-extern void add_to_resv_hash(const char *name, struct rxconf *rconf);
-extern void del_from_resv_hash(const char *name, struct rxconf *rconf);
-extern struct rxconf *hash_find_resv(const char *name);
-
-extern void add_to_xline_hash(const char *name, struct rxconf *xconf);
-extern void del_from_xline_hash(const char *name, struct rxconf *xconf);
-extern struct rxconf *hash_find_xline(const char *name);
-
-extern void add_to_nd_hash(const char *name);
-extern void del_from_nd_hash(const char *name);
-extern int find_nd(const char *name);
+extern void add_to_resv_hash(const char *name, struct ConfItem *aconf);
+extern void del_from_resv_hash(const char *name, struct ConfItem *aconf);
+extern struct ConfItem *hash_find_resv(const char *name);
+extern void print_resv_hash(struct Client *source_p);
+extern void clear_resv_hash(void);
 
 extern void add_to_help_hash(const char *name, struct cachefile *hptr);
 extern void clear_help_hash(void);

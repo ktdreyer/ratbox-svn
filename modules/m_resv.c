@@ -35,7 +35,6 @@
 #include "modules.h"
 #include "s_conf.h"
 #include "s_newconf.h"
-#include "s_oldnewconf.h"
 #include "hash.h"
 #include "s_log.h"
 #include "sprintf_irc.h"
@@ -152,10 +151,10 @@ static void
 parse_resv(struct Client *source_p, const char *name, 
 	   const char *reason)
 {
+	struct ConfItem *aconf;
+
 	if(IsChannelName(name))
 	{
-		struct rxconf *resv_p;
-
 		if(find_channel_resv(name))
 		{
 			sendto_one_notice(source_p,
@@ -171,15 +170,18 @@ parse_resv(struct Client *source_p, const char *name,
 			return;
 		}
 
-		resv_p = make_rxconf(name, reason, 0, CONF_RESV|RESV_CHANNEL);
-		add_rxconf(resv_p);
-		write_confitem(RESV_TYPE, source_p, NULL, resv_p->name, resv_p->reason,
-			       NULL, NULL, 0);
+		aconf = make_conf();
+		aconf->status = CONF_RESV_CHANNEL;
+
+		DupString(aconf->name, name);
+		DupString(aconf->passwd, reason);
+		add_to_resv_hash(aconf->name, aconf);
+
+		write_confitem(RESV_TYPE, source_p, NULL, aconf->name, 
+				aconf->passwd, NULL, NULL, 0);
 	}
 	else if(clean_resv_nick(name))
 	{
-		struct rxconf *resv_p;
-
 		if(strlen(name) > NICKLEN*2)
 		{
 			sendto_one_notice(source_p, ":Invalid RESV length: %s",
@@ -204,10 +206,15 @@ parse_resv(struct Client *source_p, const char *name,
 			return;
 		}
 
-		resv_p = make_rxconf(name, reason, 0, CONF_RESV|RESV_NICK);
-		add_rxconf(resv_p);
-		write_confitem(RESV_TYPE, source_p, NULL, resv_p->name, resv_p->reason,
-			       NULL, NULL, 0);
+		aconf = make_conf();
+		aconf->status = CONF_RESV_NICK;
+
+		DupString(aconf->name, name);
+		DupString(aconf->passwd, reason);
+		dlinkAddAlloc(aconf, &resv_conf_list);
+
+		write_confitem(RESV_TYPE, source_p, NULL, aconf->name, 
+				aconf->passwd, NULL, NULL, 0);
 	}
 	else
 		sendto_one_notice(source_p,

@@ -19,7 +19,6 @@
 #include "s_conf.h"
 #include "s_user.h"
 #include "s_newconf.h"
-#include "s_oldnewconf.h"
 #include "send.h"
 #include "setup.h"
 #include "modules.h"
@@ -45,8 +44,6 @@ static struct ConfItem *yy_aprev = NULL;
 static int yy_acount = 0;
 
 static struct Class *yy_class = NULL;
-
-static struct rxconf *yy_rxconf = NULL;
 
 static struct remote_conf *yy_shared = NULL;
 static struct server_conf *yy_server = NULL;
@@ -1076,7 +1073,16 @@ conf_set_auth_class(void *data)
 static int
 conf_begin_resv(struct TopConf *tc)
 {
-	resv_reason = NULL;
+	if(yy_aconf)
+	{
+		free_conf(yy_aconf);
+		yy_aconf = NULL;
+	}
+
+	if(resv_reason)
+		MyFree(resv_reason);
+
+	DupString(resv_reason, "No Reason");
 	return 0;
 }
 
@@ -1089,61 +1095,74 @@ conf_end_resv(struct TopConf *tc)
 }
 
 static void
-conf_set_resv_channel(void *data)
+conf_set_resv_reason(void *data)
 {
-	if(IsChannelName((char *) data))
+	if(!EmptyString((char *) data))
 	{
-		if(find_channel_resv((char *) data))
-		{
-			conf_report_error("Warning -- channel '%s' in resv is already resv'd.",
-					  (char *) data);
-			return;
-		}
-
-		yy_rxconf = make_rxconf(data, 
-					EmptyString(resv_reason) ? "No Reason" : resv_reason, 
-					0, CONF_RESV|RESV_CHANNEL);
-		add_rxconf(yy_rxconf);
-	}
-	else
-	{
-		conf_report_error
-			("Warning -- channel '%s' in resv is not a valid channel name.",
-			 (char *) data);
+		MyFree(resv_reason);
+		DupString(resv_reason, data);
 	}
 }
 
 static void
-conf_set_resv_reason(void *data)
+conf_set_resv_channel(void *data)
 {
-	MyFree(resv_reason);
-	DupString(resv_reason, data);
+	char *name = data;
+
+	if(!IsChannelName(name))
+	{
+		conf_report_error("Ignoring channel resv %s -- invalid channel name.",
+					name);
+		return;
+	}
+
+	if(find_channel_resv(name))
+	{
+		conf_report_error("Ignoring channel resv %s -- already resvd.",
+					name);
+		return;
+	}
+
+	yy_aconf = make_conf();
+	yy_aconf->status = CONF_RESV_CHANNEL;
+
+	DupString(yy_aconf->name, name);
+	DupString(yy_aconf->passwd, EmptyString(resv_reason) ? "No Reason" : resv_reason);
+
+	add_to_resv_hash(yy_aconf->name, yy_aconf);
+
+	yy_aconf = NULL;
 }
 
 static void
 conf_set_resv_nick(void *data)
 {
-	if(clean_resv_nick(data))
-	{
-		if(find_nick_resv((char *) data))
-		{
-			conf_report_error("Warning -- nick '%s' in resv is already resv'd.",
-					  (char *) data);
-			return;
-		}
+	char *name = data;
 
-		yy_rxconf = make_rxconf(data,
-					EmptyString(resv_reason) ? "No Reason" : resv_reason,
-					0, CONF_RESV|RESV_NICK);
-		add_rxconf(yy_rxconf);
-	}
-	else
+	if(!clean_resv_nick(name))
 	{
-		conf_report_error
-			("Warning -- nickname '%s' in resv is not a valid nickname.",
-			 (char *) data);
+		conf_report_error("Ignoring nick resv %s -- invalid nick.",
+					name);
+		return;
 	}
+	
+	if(find_nick_resv(name))
+	{
+		conf_report_error("Ignoring nick resv %s -- already resvd.",
+					name);
+		return;
+	}
+
+	yy_aconf = make_conf();
+	yy_aconf->status = CONF_RESV_NICK;
+
+	DupString(yy_aconf->name, name);
+	DupString(yy_aconf->passwd, resv_reason);
+
+	dlinkAddAlloc(yy_aconf, &resv_conf_list);
+	yy_aconf = NULL;
 }
+
 
 static int
 conf_begin_shared(struct TopConf *tc)
@@ -1602,31 +1621,37 @@ conf_set_exempt_ip(void *data)
 static int
 conf_begin_gecos(struct TopConf *tc)
 {
-	yy_rxconf = make_rxconf(NULL, "No Reason", 0, CONF_XLINE);
+	if(yy_aconf)
+		free_conf(yy_aconf);
+
+	yy_aconf = make_conf();
+	yy_aconf->status = CONF_XLINE;
+
 	return 0;
 }
 
 static int
 conf_end_gecos(struct TopConf *tc)
 {
-	if(!EmptyString(yy_rxconf->name))
+	if(EmptyString(yy_aconf->name))
 	{
-		if(find_xline(yy_rxconf->name) != NULL)
-		{
-			conf_report_error("Warning -- name '%s' in gecos is already xlined.",
-					  yy_rxconf->name);
-			free_rxconf(yy_rxconf);
-		}
-		else
-			add_rxconf(yy_rxconf);
-	}
-	else
-	{
-		conf_report_error("Ignoring gecos -- invalid gecos::name.");
-		free_rxconf(yy_rxconf);
+		conf_report_error("Ignoring gecos block -- missing name.");
+		free_conf(yy_aconf);
+		yy_aconf = NULL;
+		return 0;
 	}
 
-	yy_rxconf = NULL;
+	if(find_xline(yy_aconf->name) != NULL)
+	{
+		conf_report_error("Ignoring gecos block %s -- already xlined.",
+					yy_aconf->name);
+		free_conf(yy_aconf);
+		yy_aconf = NULL;
+		return 0;
+	}
+
+	dlinkAddAlloc(yy_aconf, &xline_conf_list);
+	yy_aconf = NULL;
 
 	return 0;
 }
@@ -1634,20 +1659,20 @@ conf_end_gecos(struct TopConf *tc)
 static void
 conf_set_gecos_name(void *data)
 {
-	MyFree(yy_rxconf->name);
-	DupString(yy_rxconf->name, data);
-	collapse(yy_rxconf->name);
+	MyFree(yy_aconf->name);
+	DupString(yy_aconf->name, data);
+	collapse(yy_aconf->name);
 }
 
 static void
 conf_set_gecos_reason(void *data)
 {
-	MyFree(yy_rxconf->reason);
+	MyFree(yy_aconf->passwd);
 
 	if(strchr((char *) data, ':') == NULL)
-		DupString(yy_rxconf->reason, data);
+		DupString(yy_aconf->passwd, data);
 	else
-		DupString(yy_rxconf->reason, "No Reason");
+		DupString(yy_aconf->passwd, "No Reason");
 }
 
 static void
@@ -1656,11 +1681,11 @@ conf_set_gecos_action(void *data)
 	char *act = data;
 
 	if(strcasecmp(act, "warn") == 0)
-		yy_rxconf->type = 0;
+		yy_aconf->port = 0;
 	else if(strcasecmp(act, "reject") == 0)
-		yy_rxconf->type = 1;
+		yy_aconf->port = 1;
 	else if(strcasecmp(act, "silent") == 0)
-		yy_rxconf->type = 2;
+		yy_aconf->port = 2;
 	else
 		conf_report_error("Warning -- invalid gecos::action.");
 }

@@ -69,7 +69,7 @@ core/m_nick.so: core/m_nick.c ../include/stdinc.h ../include/config.h \
   ../include/s_stats.h ../include/s_user.h ../include/whowas.h \
   ../include/s_serv.h ../include/msg.h ../include/parse.h \
   ../include/modules.h ../include/hook.h ../include/packet.h \
-  ../include/scache.h ../include/s_oldnewconf.h
+  ../include/scache.h ../include/s_newconf.h
 core/m_part.so: core/m_part.c ../include/stdinc.h ../include/config.h \
   ../include/setup.h ../include/defaults.h ../include/tools.h \
   ../include/channel.h ../include/ircd_defs.h ../include/s_log.h \
@@ -98,9 +98,9 @@ core/m_server.so: core/m_server.c ../include/stdinc.h ../include/config.h \
   ../include/memory.h ../include/balloc.h ../include/irc_string.h \
   ../include/common.h ../include/event.h ../include/hash.h \
   ../include/numeric.h ../include/s_conf.h ../include/class.h \
-  ../include/patricia.h ../include/s_serv.h ../include/s_stats.h \
-  ../include/scache.h ../include/msg.h ../include/parse.h \
-  ../include/modules.h ../include/hook.h
+  ../include/patricia.h ../include/s_newconf.h ../include/s_serv.h \
+  ../include/s_stats.h ../include/scache.h ../include/msg.h \
+  ../include/parse.h ../include/modules.h ../include/hook.h
 core/m_sjoin.so: core/m_sjoin.c ../include/stdinc.h ../include/config.h \
   ../include/setup.h ../include/defaults.h ../include/tools.h \
   ../include/channel.h ../include/ircd_defs.h ../include/s_log.h \
@@ -209,8 +209,7 @@ m_encap.so: m_encap.c ../include/stdinc.h ../include/config.h \
   ../include/memory.h ../include/balloc.h ../include/irc_string.h \
   ../include/common.h ../include/numeric.h ../include/s_serv.h \
   ../include/hash.h ../include/msg.h ../include/parse.h \
-  ../include/modules.h ../include/hook.h ../include/s_oldnewconf.h \
-  ../include/sprintf_irc.h
+  ../include/modules.h ../include/hook.h ../include/sprintf_irc.h
 m_eob.so: m_eob.c ../include/stdinc.h ../include/config.h \
   ../include/setup.h ../include/defaults.h ../include/client.h \
   ../include/ircd_defs.h ../include/s_log.h ../include/send.h \
@@ -303,9 +302,9 @@ m_join.so: m_join.c ../include/stdinc.h ../include/config.h \
   ../include/memory.h ../include/balloc.h ../include/irc_string.h \
   ../include/common.h ../include/hash.h ../include/numeric.h \
   ../include/s_serv.h ../include/s_conf.h ../include/class.h \
-  ../include/patricia.h ../include/msg.h ../include/parse.h \
-  ../include/modules.h ../include/hook.h ../include/sprintf_irc.h \
-  ../include/packet.h ../include/s_oldnewconf.h
+  ../include/patricia.h ../include/s_newconf.h ../include/msg.h \
+  ../include/parse.h ../include/modules.h ../include/hook.h \
+  ../include/sprintf_irc.h ../include/packet.h
 m_kline.so: m_kline.c ../include/stdinc.h ../include/config.h \
   ../include/setup.h ../include/defaults.h ../include/tools.h \
   ../include/channel.h ../include/ircd_defs.h ../include/s_log.h \
@@ -482,8 +481,8 @@ m_resv.so: m_resv.c ../include/stdinc.h ../include/config.h \
   ../include/numeric.h ../include/s_serv.h ../include/msg.h \
   ../include/parse.h ../include/modules.h ../include/hook.h \
   ../include/s_conf.h ../include/class.h ../include/common.h \
-  ../include/patricia.h ../include/s_newconf.h ../include/s_oldnewconf.h \
-  ../include/hash.h ../include/sprintf_irc.h
+  ../include/patricia.h ../include/s_newconf.h ../include/hash.h \
+  ../include/sprintf_irc.h
 m_set.so: m_set.c ../include/stdinc.h ../include/config.h \
   ../include/setup.h ../include/defaults.h ../include/client.h \
   ../include/ircd_defs.h ../include/s_log.h ../include/send.h \
@@ -507,7 +506,7 @@ m_stats.so: m_stats.c ../include/stdinc.h ../include/config.h \
   ../include/s_conf.h ../include/patricia.h ../include/s_serv.h \
   ../include/s_stats.h ../include/s_user.h ../include/event.h \
   ../include/parse.h ../include/modules.h ../include/hook.h \
-  ../include/s_newconf.h ../include/s_oldnewconf.h ../include/hash.h
+  ../include/s_newconf.h ../include/hash.h
 m_svinfo.so: m_svinfo.c ../include/stdinc.h ../include/config.h \
   ../include/setup.h ../include/defaults.h ../include/client.h \
   ../include/ircd_defs.h ../include/s_log.h ../include/send.h \
@@ -662,4 +661,4 @@ m_xline.so: m_xline.c ../include/stdinc.h ../include/config.h \
   ../include/s_serv.h ../include/whowas.h ../include/sprintf_irc.h \
   ../include/hash.h ../include/msg.h ../include/parse.h \
   ../include/modules.h ../include/hook.h ../include/s_conf.h \
-  ../include/patricia.h ../include/s_newconf.h ../include/s_oldnewconf.h
+  ../include/patricia.h ../include/s_newconf.h

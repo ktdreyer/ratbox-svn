@@ -29,7 +29,6 @@
 #include "tools.h"
 #include "s_conf.h"
 #include "s_newconf.h"
-#include "s_oldnewconf.h"
 #include "s_serv.h"
 #include "s_stats.h"
 #include "channel.h"
@@ -1261,11 +1260,7 @@ clear_out_old_conf(void)
 	}
 
 	clear_out_address_conf();
-	clear_resvs();
-	clear_xlines();
-	clear_remote_conf();
-	clear_oper_conf();
-	clear_server_conf();
+	clear_s_newconf();
 
 	/* clean out module paths */
 #ifndef STATIC_MODULES

@@ -28,11 +28,12 @@
 #include "tools.h"
 #include "s_log.h"
 #include "s_conf.h"
-#include "s_oldnewconf.h"
+#include "s_newconf.h"
 #include "hostmask.h"
 #include "client.h"
 #include "irc_string.h"
 #include "memory.h"
+#include "hash.h"
 
 /* conf_add_fields()
  * 
@@ -150,7 +151,7 @@ parse_d_file(FBFILE * file)
 void
 parse_x_file(FBFILE * file)
 {
-	struct rxconf *xconf;
+	struct ConfItem *aconf;
 	char *gecos_field = NULL;
 	char *reason_field = NULL;
 	char *port_field = NULL;
@@ -182,16 +183,21 @@ parse_x_file(FBFILE * file)
 		   (strchr(reason_field, ':') != NULL))
 			continue;
 
-		xconf = make_rxconf(gecos_field, reason_field, 
-				    atoi(port_field), CONF_XLINE);
-		add_rxconf(xconf);
+		aconf = make_conf();
+		aconf->status = CONF_XLINE;
+		aconf->port = atoi(port_field);
+
+		DupString(aconf->name, gecos_field);
+		DupString(aconf->passwd, reason_field);
+
+		dlinkAddAlloc(aconf, &xline_conf_list);
 	}
 }
 
 void
 parse_resv_file(FBFILE * file)
 {
-	struct rxconf *rxptr;
+	struct ConfItem *aconf;
 	char *reason_field;
 	char *host_field;
 	char line[BUFSIZE];
@@ -218,18 +224,24 @@ parse_resv_file(FBFILE * file)
 			if(find_channel_resv(host_field))
 				continue;
 
-			rxptr = make_rxconf(host_field, reason_field, 0,
-					    CONF_RESV|RESV_CHANNEL);
-			add_rxconf(rxptr);
+			aconf = make_conf();
+			aconf->status = CONF_RESV_CHANNEL;
+
+			DupString(aconf->name, host_field);
+			DupString(aconf->passwd, reason_field);
+			add_to_resv_hash(aconf->name, aconf);
 		}
 		else if(clean_resv_nick(host_field))
 		{
 			if(find_nick_resv(host_field))
 				continue;
 
-			rxptr = make_rxconf(host_field, reason_field, 0,
-					    CONF_RESV|RESV_NICK);
-			add_rxconf(rxptr);
+			aconf = make_conf();
+			aconf->status = CONF_RESV_NICK;
+
+			DupString(aconf->name, host_field);
+			DupString(aconf->passwd, reason_field);
+			dlinkAddAlloc(aconf, &resv_conf_list);
 		}
 	}
 }

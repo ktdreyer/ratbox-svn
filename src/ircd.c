@@ -62,7 +62,6 @@
 #include "balloc.h"
 #include "newconf.h"
 #include "patricia.h"
-#include "s_oldnewconf.h"
 #include "reject.h"
 #include "s_conf.h"
 #include "cache.h"
@@ -669,7 +668,6 @@ main(int argc, char *argv[])
 	init_host_hash();
 	clear_hash_parse();
 	init_client();
-	init_conf();
 	initUser();
 	init_channels();
 	initclass();

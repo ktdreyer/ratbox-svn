@@ -55,7 +55,6 @@
 #include "balloc.h"
 #include "listener.h"
 #include "hook.h"
-#include "s_oldnewconf.h"
 #include "msg.h"
 
 static void check_pings_list(dlink_list * list);
@@ -427,7 +426,6 @@ check_banned_lines(void)
 {
 	struct Client *client_p;	/* current local client_p being examined */
 	struct ConfItem *aconf = NULL;
-	struct rxconf *xconf;
 	dlink_node *ptr, *next_ptr;
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, lclient_list.head)
@@ -500,8 +498,8 @@ check_banned_lines(void)
 					continue;
 				}
 			}
-			else if(((xconf = find_xline(client_p->info)) != NULL) &&
-				(xconf->type != 0))
+			else if(((aconf = find_xline(client_p->info)) != NULL) &&
+				(aconf->port))
 			{
 				if(IsExemptKline(client_p))
 				{
@@ -701,7 +699,7 @@ void
 check_xlines(void)
 {
 	struct Client *client_p;
-	struct rxconf *xconf;
+	struct ConfItem *aconf;
 	dlink_node *ptr;
 	dlink_node *next_ptr;
 
@@ -712,10 +710,10 @@ check_xlines(void)
 		if(IsMe(client_p) || !IsPerson(client_p))
 			continue;
 
-		if((xconf = find_xline(client_p->info)) != NULL)
+		if((aconf = find_xline(client_p->info)) != NULL)
 		{
 			/* xline that just warns, ignore it */
-			if(xconf->type == 0)
+			if(aconf->port == 0)
 				continue;
 
 			if(IsExemptKline(client_p))

@@ -41,7 +41,6 @@
 #include "commio.h"
 #include "s_conf.h"
 #include "s_newconf.h"
-#include "s_oldnewconf.h"
 #include "s_log.h"
 #include "s_serv.h"
 #include "s_stats.h"
@@ -1068,24 +1067,24 @@ user_welcome(struct Client *source_p)
 static int
 check_X_line(struct Client *client_p, struct Client *source_p)
 {
-	struct rxconf *xconf;
+	struct ConfItem *aconf;
 	const char *reason;
 
 	if(IsOper(source_p))
 		return 0;
 
-	if((xconf = find_xline(source_p->info)))
+	if((aconf = find_xline(source_p->info)))
 	{
-		if(!EmptyString(xconf->reason))
-			reason = xconf->reason;
+		if(!EmptyString(aconf->passwd))
+			reason = aconf->passwd;
 		else
 			reason = "No Reason";
 
 		/* 1/2 are reject */
-		if(xconf->type)
+		if(aconf->port)
 		{
 			/* 1 gives a warning to opers */
-			if(xconf->type == 1)
+			if(aconf->port == 1)
 				sendto_realops_flags(UMODE_REJ, L_ALL,
 						     "X-line Rejecting [%s] [%s], user %s",
 						     source_p->info, reason,

@@ -38,7 +38,6 @@
 #include "send.h"
 #include "memory.h"
 #include "msg.h"
-#include "s_oldnewconf.h"
 #include "cache.h"
 
 /* New hash code */
@@ -51,7 +50,6 @@ static dlink_list *channelTable;
 static dlink_list *idTable;
 static dlink_list *resvTable;
 static dlink_list *hostTable;
-static dlink_list *xlineTable;
 static dlink_list *helpTable;
 
 /*
@@ -96,7 +94,6 @@ init_hash(void)
 	channelTable = MyMalloc(sizeof(dlink_list) * CH_MAX);
 	hostTable = MyMalloc(sizeof(dlink_list) * HOST_MAX);
 	resvTable = MyMalloc(sizeof(dlink_list) * R_MAX);
-	xlineTable = MyMalloc(sizeof(dlink_list) * R_MAX);
 	helpTable = MyMalloc(sizeof(dlink_list) * HELP_MAX);
 }
 
@@ -187,24 +184,6 @@ hash_resv(const char *name)
 	return (h & (R_MAX - 1));
 }
 
-/* hash_xline()
- *
- * hashes an xline, first converting to lowercase as xlines are
- * case insensitive
- */
-static unsigned int
-hash_xline(const char *name)
-{
-	unsigned int h = 0;
-
-	while(*name)
-	{
-		h = (h << 4) - (h + (unsigned char) ToLower(*name++));
-	}
-
-	return (h & (R_MAX - 1));
-}
-
 static unsigned int
 hash_help(const char *name)
 {
@@ -275,34 +254,18 @@ add_to_hostname_hash(const char *hostname, struct Client *client_p)
  * adds a resv channel entry to the resv hash table
  */
 void
-add_to_resv_hash(const char *name, struct rxconf *resv_p)
+add_to_resv_hash(const char *name, struct ConfItem *aconf)
 {
 	unsigned int hashv;
 
 	s_assert(!EmptyString(name));
-	s_assert(resv_p != NULL);
-	if(EmptyString(name) || resv_p == NULL)
+	s_assert(aconf != NULL);
+	if(EmptyString(name) || aconf == NULL)
 		return;
 
 	hashv = hash_resv(name);
-	dlinkAddAlloc(resv_p, &resvTable[hashv]);
+	dlinkAddAlloc(aconf, &resvTable[hashv]);
 }
-
-/* add_to_xline_hash()
- *
- * adds an xline to the xline hash table
- */
-void
-add_to_xline_hash(const char *name, struct rxconf *xconf)
-{
-	unsigned int hashv;
-
-	if(EmptyString(name) || xconf == NULL)
-		return;
-
-	hashv = hash_xline(name);
-	dlinkAddAlloc(xconf, &xlineTable[hashv]);
-};
 
 void
 add_to_help_hash(const char *name, struct cachefile *hptr)
@@ -410,8 +373,6 @@ del_from_channel_hash(const char *name, struct Channel *chptr)
 void
 del_from_hostname_hash(const char *hostname, struct Client *client_p)
 {
-	dlink_node *ptr;
-	dlink_node *next_ptr;
 	unsigned int hashv;
 
 	if(hostname == NULL || client_p == NULL)
@@ -419,14 +380,7 @@ del_from_hostname_hash(const char *hostname, struct Client *client_p)
 
 	hashv = hash_hostname(hostname);
 
-	DLINK_FOREACH_SAFE(ptr, next_ptr, hostTable[hashv].head)
-	{
-		if(client_p == ptr->data)
-		{
-			dlinkDestroy(ptr, &hostTable[hashv]);
-			return;
-		}
-	}
+	dlinkFindDestroy(&hostTable[hashv], client_p);
 }
 
 /* del_from_resv_hash()
@@ -434,56 +388,18 @@ del_from_hostname_hash(const char *hostname, struct Client *client_p)
  * removes a resv entry from the resv hash table
  */
 void
-del_from_resv_hash(const char *name, struct rxconf *rxptr)
+del_from_resv_hash(const char *name, struct ConfItem *aconf)
 {
-	dlink_node *ptr;
-	dlink_node *next_ptr;
 	unsigned int hashv;
 
 	s_assert(name != NULL);
-	s_assert(rxptr != NULL);
-	if(EmptyString(name) || rxptr == NULL)
+	s_assert(aconf != NULL);
+	if(EmptyString(name) || aconf == NULL)
 		return;
 
 	hashv = hash_resv(name);
 
-	DLINK_FOREACH_SAFE(ptr, next_ptr, resvTable[hashv].head)
-	{
-		if(rxptr == ptr->data)
-		{
-			dlinkDestroy(ptr, &resvTable[hashv]);
-			return;
-		}
-	}
-}
-
-/* del_from_xline_hash()
- *
- * removes an xline from the xline hash table
- */
-void
-del_from_xline_hash(const char *name, struct rxconf *xconf)
-{
-	struct rxconf *acptr;
-	dlink_node *ptr;
-	dlink_node *next_ptr;
-	unsigned int hashv;
-
-	if(EmptyString(name) || (xconf == NULL))
-		return;
-
-	hashv = hash_xline(name);
-
-	DLINK_FOREACH_SAFE(ptr, next_ptr, xlineTable[hashv].head)
-	{
-		acptr = ptr->data;
-
-		if(xconf == acptr)
-		{
-			dlinkDestroy(ptr, &xlineTable[hashv]);
-			return;
-		}
-	}
+	dlinkFindDestroy(&resvTable[hashv], aconf);
 }
 
 void
@@ -820,10 +736,10 @@ get_or_create_channel(struct Client *client_p, const char *chname, int *isnew)
  *
  * hunts for a resv entry in the resv hash table
  */
-struct rxconf *
+struct ConfItem *
 hash_find_resv(const char *name)
 {
-	struct rxconf *resv_p;
+	struct ConfItem *aconf;
 	dlink_node *ptr;
 	unsigned int hashv;
 
@@ -835,37 +751,10 @@ hash_find_resv(const char *name)
 
 	DLINK_FOREACH(ptr, resvTable[hashv].head)
 	{
-		resv_p = ptr->data;
+		aconf = ptr->data;
 
-		if(irccmp(name, resv_p->name) == 0)
-			return resv_p;
-	}
-
-	return NULL;
-}
-
-/* hash_find_xline()
- *
- * hunts for an xline entry in the xline hash table
- */
-struct rxconf *
-hash_find_xline(const char *name)
-{
-	struct rxconf *xconf;
-	dlink_node *ptr;
-	unsigned int hashv;
-
-	if(EmptyString(name))
-		return NULL;
-
-	hashv = hash_xline(name);
-
-	DLINK_FOREACH(ptr, xlineTable[hashv].head)
-	{
-		xconf = ptr->data;
-
-		if(irccmp(name, xconf->name) == 0)
-			return xconf;
+		if(!irccmp(name, aconf->name))
+			return aconf;
 	}
 
 	return NULL;
@@ -894,4 +783,45 @@ hash_find_help(const char *name, int flags)
 
 	return NULL;
 }
+
+void
+print_resv_hash(struct Client *source_p)
+{
+	struct ConfItem *aconf;
+	dlink_node *ptr;
+	int i;
+
+	for(i = 0; i < R_MAX; i++)
+	{
+		DLINK_FOREACH(ptr, resvTable[i].head)
+		{
+			aconf = ptr->data;
+
+			sendto_one_numeric(source_p, RPL_STATSQLINE,
+					form_str(RPL_STATSQLINE),
+					aconf->name, aconf->passwd);
+		}
+	}
+}
+
+void
+clear_resv_hash(void)
+{
+	dlink_node *ptr;
+	dlink_node *next_ptr;
+	int i;
+
+	for(i = 0; i < R_MAX; i++)
+	{
+		DLINK_FOREACH_SAFE(ptr, next_ptr, resvTable[i].head)
+		{
+			free_conf(ptr->data);
+			free_dlink_node(ptr);
+		}
+
+		resvTable[i].head = resvTable[i].tail = NULL;
+		resvTable[i].length = 0;
+	}
+}
+
 

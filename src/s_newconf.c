@@ -44,36 +44,20 @@
 #include "send.h"
 #include "hostmask.h"
 #include "newconf.h"
+#include "hash.h"
 
 dlink_list shared_conf_list;
 dlink_list cluster_conf_list;
 dlink_list oper_conf_list;
 dlink_list hubleaf_conf_list;
 dlink_list server_conf_list;
-
-struct remote_conf *
-make_remote_conf(void)
-{
-	struct remote_conf *remote_p = MyMalloc(sizeof(struct remote_conf));
-	return remote_p;
-}
+dlink_list xline_conf_list;
+dlink_list resv_conf_list;	/* nicks only! */
 
 void
-free_remote_conf(struct remote_conf *remote_p)
+clear_s_newconf(void)
 {
-	s_assert(remote_p != NULL);
-	if(remote_p == NULL)
-		return;
-
-	MyFree(remote_p->username);
-	MyFree(remote_p->host);
-	MyFree(remote_p->server);
-	MyFree(remote_p);
-}
-
-void
-clear_remote_conf(void)
-{
+	struct server_conf *server_p;
 	dlink_node *ptr;
 	dlink_node *next_ptr;
 
@@ -95,6 +79,59 @@ clear_remote_conf(void)
 		dlinkDelete(ptr, &hubleaf_conf_list);
 		free_remote_conf(ptr->data);
 	}
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, oper_conf_list.head)
+	{
+		free_oper_conf(ptr->data);
+		dlinkDestroy(ptr, &oper_conf_list);
+	}
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, server_conf_list.head)
+	{
+		server_p = ptr->data;
+
+		if(!server_p->servers)
+		{
+			dlinkDelete(ptr, &server_conf_list);
+			free_server_conf(ptr->data);
+		}
+		else
+			server_p->flags |= SERVER_ILLEGAL;
+	}
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, xline_conf_list.head)
+	{
+		free_conf(ptr->data);
+		dlinkDestroy(ptr, &xline_conf_list);
+	}
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, resv_conf_list.head)
+	{
+		free_conf(ptr->data);
+		dlinkDestroy(ptr, &resv_conf_list);
+	}
+
+	clear_resv_hash();
+}
+
+struct remote_conf *
+make_remote_conf(void)
+{
+	struct remote_conf *remote_p = MyMalloc(sizeof(struct remote_conf));
+	return remote_p;
+}
+
+void
+free_remote_conf(struct remote_conf *remote_p)
+{
+	s_assert(remote_p != NULL);
+	if(remote_p == NULL)
+		return;
+
+	MyFree(remote_p->username);
+	MyFree(remote_p->host);
+	MyFree(remote_p->server);
+	MyFree(remote_p);
 }
 
 int
@@ -158,19 +195,6 @@ free_oper_conf(struct oper_conf *oper_p)
 #endif
 
 	MyFree(oper_p);
-}
-
-void
-clear_oper_conf(void)
-{
-	dlink_node *ptr;
-	dlink_node *next_ptr;
-
-	DLINK_FOREACH_SAFE(ptr, next_ptr, oper_conf_list.head)
-	{
-		free_oper_conf(ptr->data);
-		dlinkDestroy(ptr, &oper_conf_list);
-	}
 }
 
 struct oper_conf *
@@ -294,27 +318,6 @@ free_server_conf(struct server_conf *server_p)
 	MyFree(server_p->host);
 	MyFree(server_p->class_name);
 	MyFree(server_p);
-}
-
-void
-clear_server_conf(void)
-{
-	struct server_conf *server_p;
-	dlink_node *ptr;
-	dlink_node *next_ptr;
-
-	DLINK_FOREACH_SAFE(ptr, next_ptr, server_conf_list.head)
-	{
-		server_p = ptr->data;
-
-		if(!server_p->servers)
-		{
-			dlinkDelete(ptr, &server_conf_list);
-			free_server_conf(ptr->data);
-		}
-		else
-			server_p->flags |= SERVER_ILLEGAL;
-	}
 }
 
 /*
@@ -455,3 +458,116 @@ set_server_conf_autoconn(struct Client *source_p, char *name, int newval)
 				me.name, source_p->name, name);
 }
 
+struct ConfItem *
+find_xline(const char *gecos)
+{
+	struct ConfItem *aconf;
+	dlink_node *ptr;
+
+	DLINK_FOREACH(ptr, xline_conf_list.head)
+	{
+		aconf = ptr->data;
+
+		if(match_esc(aconf->name, gecos))
+			return aconf;
+	}
+
+	return NULL;
+}
+
+int
+find_channel_resv(const char *name)
+{
+	if(hash_find_resv(name) != NULL)
+		return 1;
+
+	return 0;
+}
+
+int
+find_nick_resv(const char *name)
+{
+	struct ConfItem *aconf;
+	dlink_node *ptr;
+
+	DLINK_FOREACH(ptr, resv_conf_list.head)
+	{
+		aconf = ptr->data;
+
+		if(match(aconf->name, name))
+			return 1;
+	}
+
+	return 0;
+}
+
+/* clean_resv_nick()
+ *
+ * inputs	- nick
+ * outputs	- 1 if nick is vaild resv, 0 otherwise
+ * side effects -
+ */
+int
+clean_resv_nick(const char *nick)
+{
+	char tmpch;
+	int as = 0;
+	int q = 0;
+	int ch = 0;
+
+	if(*nick == '-' || IsDigit(*nick))
+		return 0;
+
+	while ((tmpch = *nick++))
+	{
+		if(tmpch == '?')
+			q++;
+		else if(tmpch == '*')
+			as++;
+		else if(IsNickChar(tmpch))
+			ch++;
+		else
+			return 0;
+	}
+
+	if(!ch && as)
+		return 0;
+
+	return 1;
+}
+
+/* valid_wild_card_simple()
+ *
+ * inputs	- "thing" to test
+ * outputs	- 1 if enough wildcards, else 0
+ * side effects -
+ */
+int
+valid_wild_card_simple(const char *data)
+{
+	const char *p;
+	char tmpch;
+	int nonwild = 0;
+
+	/* check the string for minimum number of nonwildcard chars */
+	p = data;
+
+	while((tmpch = *p++))
+	{
+		/* found an escape, p points to the char after it, so skip
+		 * that and move on.
+		 */
+		if(tmpch == '\\')
+		{
+			p++;
+		}
+		else if(!IsMWildChar(tmpch))
+		{
+			/* if we have enough nonwildchars, return */
+			if(++nonwild >= ConfigFileEntry.min_nonwildcard_simple)
+				return 1;
+		}
+	}
+
+	return 0;
+}
