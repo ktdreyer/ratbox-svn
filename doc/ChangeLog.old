@@ -1,3 +1,8 @@
+*** 20001225_13 by toot
+. don't want it to say its listing pending_glines if there aren't any
+. param counts should al be correct now
+
+
 *** 20001225_12 by toot
 . fixed soem paramcounts in modules
 . make GLINE_CLEANUP_TIME a bit more frequent
