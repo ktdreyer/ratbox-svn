@@ -373,22 +373,18 @@ int check_server(const char *name, struct Client* cptr)
      error = -3;
 
      /* XXX: Fix me for IPv6 */
-#ifdef IPV6
-     if ( (match(aconf->host, cptr->host)) || 
-	  memcmp(&cptr->localClient->ip.sin6_addr.s6_addr,
-		 &aconf->ipnum.s6_addr, sizeof(aconf->ipnum.s6_addr)))
-#else
-       if ( (match(aconf->host, cptr->host)) || 
-	    cptr->localClient->ip.sin_addr.s_addr == aconf->ipnum.s_addr)
-#endif
-	 {
-	   error = -2;
+     /* XXX sockhost is the IPv4 ip as a string */
+
+     if ( match(aconf->host, cptr->host) || 
+	  match(aconf->host, cptr->localClient->sockhost) )
+       {
+	 error = -2;
 	   
-	   if (strcmp(aconf->passwd, cptr->localClient->passwd) == 0)
-	     {
-	       server_aconf = aconf;
-	     }
-	 }
+	 if (strcmp(aconf->passwd, cptr->localClient->passwd) == 0)
+	   {
+	     server_aconf = aconf;
+	   }
+       }
     }
 
   if (server_aconf == NULL)
