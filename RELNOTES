@@ -1,12 +1,12 @@
 -- ircd-hybrid-7beta16 RELNOTES
-
+  
 o) added optional defines for VCHANS, HALFOPS and ANONOPS which if undefined
    will compile the ircd without the code for the options.
 o) added configure option --enable-efnet to compile the ircd with the three
    options above undef'd.
 o) fixed a bug with opme causing channel member lists to be corrupted
 o) Fixed the issue where we would attempt to exit an already exited
-   client
+   client   
 
 --------------------------------------------------------------------------------
 
