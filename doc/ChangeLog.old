@@ -1,3 +1,7 @@
+*** 20010401_3 by ejb
+- some fixes to the getopt stuff.
+
+
 *** 20010401_2 by ejb
 - added first stab at new command line arguments system..
   not yet tested well, seems to work ok though.
