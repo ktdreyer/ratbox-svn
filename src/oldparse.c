@@ -137,11 +137,8 @@ void oldParseOneLine(char* line,struct ConfItem* aconf,
     case 'i': /* Just plain normal irc client trying  */
                   /* to connect to me */
 
-      /* drop into normal I line code */
-
-#ifdef LITTLE_I_LINES
       aconf->flags |= CONF_FLAGS_LITTLE_I_LINE;
-#endif
+
     case 'I': /* Just plain normal irc client trying  */
       /* to connect to me */
       aconf->status = CONF_CLIENT;

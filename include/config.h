@@ -299,13 +299,6 @@
  */
 #define CLIENT_FLOOD    2560
 
-/*
- * LITTLE_I_LINE support
- * clients with a little i instead of an I in their I line
- * can be chanopped, but cannot chanop anyone else.
- */
-#define LITTLE_I_LINES
-
 /* LIMIT_UH
  * If this is defined, Y line limit is made against the actual
  * username not the ip. i.e. if you limit the connect frequency line

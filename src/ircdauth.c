@@ -531,6 +531,8 @@ GreetUser(struct Client *client)
 
 {
   static char ubuf[12];
+  struct ConfItem *found_aconf;
+  dlink_node *ptr;
 
   sendto_realops_flags(FLAGS_CCONN,
 		       "Client connecting: %s (%s@%s) [%s] {%d}",
@@ -636,20 +638,19 @@ GreetUser(struct Client *client)
   else
     SendMessageFile(client, &ConfigFileEntry.motd);
 
-#if 0
-  if (client->localClient->confs.head &&  client->localClient->confs->data)
+  if ( (ptr = client->localClient->confs.head) )
     {
-
-      (client->localClient->confs->value.aconf->flags & CONF_FLAGS_LITTLE_I_LINE))
-    {
-      SetRestricted(client);
-      sendto_one(client,"NOTICE %s :*** Notice -- You are in a restricted access mode",
-		 client->name);
-      
-      sendto_one(client,"NOTICE %s :*** Notice -- You can not chanop others",
-		 client->name);
+      if ( (found_aconf = ptr->data) )
+	if(found_aconf->flags & CONF_FLAGS_LITTLE_I_LINE)
+	  {
+	    SetRestricted(client);
+	    sendto_one(client,"NOTICE %s :*** Notice -- You are in a restricted access mode",
+		       client->name);
+	    
+	    sendto_one(client,"NOTICE %s :*** Notice -- You can not chanop others",
+		       client->name);
+	  }
     }
-#endif
 
   send_umode(NULL, client, 0, SEND_UMODES, ubuf);
   if (!*ubuf)
