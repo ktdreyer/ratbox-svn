@@ -1,3 +1,16 @@
+leeh        2002/06/05 09:49:56 EDT	(20020605_0)
+
+  Modified files:
+    doc                  example.conf example.conf.efnet 
+  Log:
+  - doc update, compressed is disabled by default.
+  
+  Revision  Changes    Path
+  7.161     +2 -2      ircd-hybrid-7/doc/example.conf
+  7.16      +2 -2      ircd-hybrid-7/doc/example.conf.efnet
+
+
+
 androsyn    2002/06/04 01:30:18 EDT	(20020604_1)
 
   Modified files:
