@@ -80,14 +80,7 @@ struct User* make_user(struct Client *client_p)
 
       ++user_count;
 
-      user->away = NULL;
-      user->server = (char *)NULL;      /* scache server name */
-      user->joined = 0;
-      user->channel.head = NULL;
-      user->channel.tail = NULL;
-      user->invited.head = NULL;
-      user->invited.tail = NULL;
-      user->id[0] = '\0';
+      memset(user, 0, sizeof(*user));
       user->refcnt = 1;
       client_p->user = user;
     }

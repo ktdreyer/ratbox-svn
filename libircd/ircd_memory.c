@@ -93,6 +93,7 @@ void *_MyMalloc(size_t size, char *file, int line)
     void *what = malloc(size + sizeof(MemoryEntry));
     if (what == NULL)
 	outofmemory();
+    memfrob(what, sizeof(MemoryEntry) + size);
     return memlog(what, size, file, line);
 }
 

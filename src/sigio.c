@@ -32,8 +32,6 @@
 #endif
 
 #include "config.h"
-#ifdef USE_SIGIO
-
 
 #include "fdlist.h"
 #include "s_bsd.h"
@@ -58,6 +56,8 @@
 #include "s_debug.h"
 #include "s_bsd.h"
 #include "memory.h"
+#ifdef USE_SIGIO
+
 
 #include <assert.h>
 #include <stdio.h>
@@ -121,6 +121,8 @@ static void clear_sigio(int fd)
     int flags;
     fcntl(fd, F_GETFL, &flags);
     flags &= ~O_ASYNC;
+    /* This _is_ needed... */
+    flags |= O_NONBLOCK;
     fcntl(fd, F_SETFL, flags);
 }
 
@@ -345,6 +347,7 @@ int comm_select(unsigned long delay)
                 revents = pollfd_list.pollfds[fd].revents;
                 num++;
                 F = &fd_table[fd];
+                set_time();
                 if (revents & (POLLRDNORM | POLLIN | POLLHUP | POLLERR))
                 {
                     callbacks_called++;
@@ -376,7 +379,10 @@ int comm_select(unsigned long delay)
             break;
     }
     if (!sigio_is_screwed)      /* We don't need to proceed */
+    {
+        set_time();
         return 0;
+    }
     for (;;)
     {
         if (sigio_is_screwed)

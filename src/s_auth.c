@@ -188,11 +188,11 @@ static void release_auth_client(struct Client* client)
    * us. This is what read_packet() does.
    *     -- adrian
    */
-  comm_setselect(client->fd, FDLIST_IDLECLIENT, COMM_SELECT_READ, read_packet,
-    client, 0);
   client->localClient->allow_read = MAX_FLOOD_PER_SEC;
   comm_setflush(client->fd, 1000, flood_recalc, client);
   add_client_to_list(client);
+  comm_setselect(client->fd, FDLIST_IDLECLIENT, COMM_SELECT_READ, read_packet,
+    client, 0);
 }
  
 /*
@@ -257,8 +257,8 @@ static void auth_dns_callback(void* vptr, adns_answer* reply)
   auth->client->localClient->dns_query = NULL;
   if (!IsDoingAuth(auth))
     {
-      release_auth_client(auth->client);
       unlink_auth_request(auth, &auth_poll_list);
+      release_auth_client(auth->client);
 #ifdef USE_IAUTH
       ilog(L_ERROR, "Linking to auth client list");
       link_auth_request(auth, &auth_client_list);
