@@ -1,3 +1,7 @@
+*** 20010101_5 by toot
+only hide remote numeric origins if shide is on
+
+
 *** 20010101_4 by toot
 . finally, you can join +k vchans :)
 . fixed /mode #chan giving weird replies
