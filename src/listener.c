@@ -339,12 +339,15 @@ add_listener(int port, const char *vhost_ip, int family)
 		{
 			if(inetpton(family, vhost_ip, &((struct sockaddr_in *)&vaddr)->sin_addr) <= 0)
 				return;
-		} else
+		} 
+#ifdef IPV6
+		else
 		{
 			if(inetpton(family, vhost_ip, &((struct sockaddr_in6 *)&vaddr)->sin6_addr) <= 0)
 				return;
 		
 		}
+#endif
 	} else
 	{
 		switch(family)
@@ -366,9 +369,11 @@ add_listener(int port, const char *vhost_ip, int family)
 		case AF_INET:
 			((struct sockaddr_in *)&vaddr)->sin_port = htons(port);
 			break;
+#ifdef IPV6
 		case AF_INET6:
 			((struct sockaddr_in6 *)&vaddr)->sin6_port = htons(port);
 			break;
+#endif
 		default:
 			break;
 	}

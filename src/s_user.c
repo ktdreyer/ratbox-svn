@@ -54,7 +54,6 @@
 #include "cache.h"
 
 static void report_and_set_user_flags(struct Client *, struct ConfItem *);
-static int check_X_line(struct Client *client_p, struct Client *source_p);
 void user_welcome(struct Client *source_p);
 
 extern char *crypt();
@@ -443,8 +442,13 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 
 	/* kline exemption extends to xline too */
 	if(!IsExemptKline(source_p) &&
-	   ((status = check_X_line(client_p, source_p)) < 0))
-		return status;
+	   find_xline(source_p->info) != NULL)
+	{
+		ServerStats->is_ref++;
+		add_reject(source_p);
+		exit_client(client_p, source_p, &me, "Bad user info");
+		return CLIENT_EXITED;
+	}
 
 	if(IsDeadorAborted(client_p))
 		return CLIENT_EXITED;
@@ -1056,54 +1060,6 @@ user_welcome(struct Client *source_p)
 	{
 		sendto_one(source_p, form_str(ERR_RESTRICTED), me.name, source_p->name);
 	}
-}
-
-/*
- * check_X_line
- * inputs	- pointer to client to test
- * outupt	- -1 if exiting 0 if ok
- * side effects	-
- */
-static int
-check_X_line(struct Client *client_p, struct Client *source_p)
-{
-	struct ConfItem *aconf;
-	const char *reason;
-
-	if(IsOper(source_p))
-		return 0;
-
-	if((aconf = find_xline(source_p->info)))
-	{
-		if(!EmptyString(aconf->passwd))
-			reason = aconf->passwd;
-		else
-			reason = "No Reason";
-
-		/* 1/2 are reject */
-		if(aconf->port)
-		{
-			/* 1 gives a warning to opers */
-			if(aconf->port == 1)
-				sendto_realops_flags(UMODE_REJ, L_ALL,
-						     "X-line Rejecting [%s] [%s], user %s",
-						     source_p->info, reason,
-						     get_client_name(client_p, HIDE_IP));
-
-			ServerStats->is_ref++;
-			add_reject(source_p);
-			exit_client(client_p, source_p, &me, "Bad user info");
-			return (CLIENT_EXITED);
-		}
-		/* 0 is warn */
-		else
-			sendto_realops_flags(UMODE_REJ, L_ALL,
-					     "X-line Warning [%s] [%s], user %s",
-					     source_p->info, reason,
-					     get_client_name(client_p, HIDE_IP));
-	}
-
-	return 0;
 }
 
 /* oper_up()

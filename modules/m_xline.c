@@ -72,7 +72,7 @@ DECLARE_MODULE_AV1(xline, NULL, NULL, xline_clist, NULL, NULL, "$Revision$");
 
 static int valid_xline(struct Client *, const char *, const char *);
 static void write_xline(struct Client *source_p, const char *gecos, 
-			const char *reason, int xtype);
+			const char *reason);
 static void remove_xline(struct Client *source_p, const char *gecos);
 
 
@@ -104,14 +104,13 @@ mo_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 		return 0;
 	}
 
-	/* XLINE <gecos> <type> ON <server> :<reason> */
-	if(parc == 6)
+	/* XLINE <gecos> ON <server> :<reason> */
+	if(parc == 5)
 	{
-		if(irccmp(parv[3], "ON") == 0)
+		if(irccmp(parv[2], "ON") == 0)
 		{
-			target_server = parv[4];
-			reason = parv[5];
-			xtype = atoi(parv[2]);
+			target_server = parv[3];
+			reason = parv[4];
 		}
 		else
 		{
@@ -121,27 +120,8 @@ mo_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 			return 0;
 		}
 	}
-	
-	/* XLINE <gecos> <type> :<reason> */
-	else if(parc == 4)
-	{
-		reason = parv[3];
-		xtype = atoi(parv[2]);
-	}
-
-	/* XLINE <gecos> :<reason> */
-	else if(parc == 3)
-	{
-		reason = parv[2];
-	}
-
-	/* XLINE <something I cant be bothered to parse> */
 	else
-	{
-		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-			   me.name, source_p->name, "XLINE");
-		return 0;
-	}
+		reason = parv[2];
 
 	if(target_server != NULL)
 	{
@@ -160,7 +140,7 @@ mo_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	if(!valid_xline(source_p, parv[1], reason))
 		return 0;
 	
-	write_xline(source_p, parv[1], reason, xtype);
+	write_xline(source_p, parv[1], reason);
 
 	return 0;
 }
@@ -177,6 +157,7 @@ ms_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	/* parv[0]  parv[1]      parv[2]  parv[3]  parv[4]
 	 * oper     target serv  xline    type     reason
 	 */
+	/* XXXLEEH - type no longer exists */
 	sendto_match_servs(source_p, parv[1], CAP_CLUSTER,
 			   "XLINE %s %s %s :%s",
 			   parv[1], parv[2], parv[3], parv[4]);
@@ -203,7 +184,7 @@ ms_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 			return 0;
 		}
 
-		write_xline(source_p, parv[2], parv[4], atoi(parv[3]));
+		write_xline(source_p, parv[2], parv[4]);
 	}
 
 	return 0;
@@ -254,7 +235,7 @@ valid_xline(struct Client *source_p, const char *gecos,
  */
 static void
 write_xline(struct Client *source_p, const char *gecos, 
-	    const char *reason, int xtype)
+	    const char *reason)
 {
 	char buffer[BUFSIZE * 2];
 	FBFILE *out;
@@ -263,7 +244,6 @@ write_xline(struct Client *source_p, const char *gecos,
 
 	aconf = make_conf();
 	aconf->status = CONF_XLINE;
-	aconf->port = xtype;
 
 	DupString(aconf->name, gecos);
 	DupString(aconf->passwd, reason);
@@ -278,8 +258,8 @@ write_xline(struct Client *source_p, const char *gecos,
 		return;
 	}
 
-	ircsprintf(buffer, "\"%s\",\"%d\",\"%s\",\"%s\",%lu\n",
-		   aconf->name, aconf->port, aconf->passwd,
+	ircsprintf(buffer, "\"%s\",\"0\",\"%s\",\"%s\",%lu\n",
+		   aconf->name, aconf->passwd,
 		   get_oper_name(source_p), CurrentTime);
 
 	if(fbputs(buffer, out) == -1)

@@ -27,7 +27,9 @@
 #ifndef INCLUDED_commio_h
 #define INCLUDED_commio_h
 
+#include "setup.h"
 #include "config.h"
+#include "ircd_defs.h"
 
 /* Callback for completed IO events */
 typedef void PF(int fd, void *);

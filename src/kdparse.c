@@ -154,7 +154,6 @@ parse_x_file(FBFILE * file)
 	struct ConfItem *aconf;
 	char *gecos_field = NULL;
 	char *reason_field = NULL;
-	char *port_field = NULL;
 	char line[BUFSIZE];
 	char *p;
 
@@ -170,9 +169,8 @@ parse_x_file(FBFILE * file)
 		if(EmptyString(gecos_field))
 			continue;
 
-		port_field = getfield(NULL);
-		if(EmptyString(port_field))
-			continue;
+		/* field for xline types, which no longer exist */
+		getfield(NULL);
 
 		reason_field = getfield(NULL);
 		if(EmptyString(reason_field))
@@ -185,7 +183,6 @@ parse_x_file(FBFILE * file)
 
 		aconf = make_conf();
 		aconf->status = CONF_XLINE;
-		aconf->port = atoi(port_field);
 
 		DupString(aconf->name, gecos_field);
 		DupString(aconf->passwd, reason_field);

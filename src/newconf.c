@@ -1252,8 +1252,12 @@ conf_end_connect(struct TopConf *tc)
 		return 0;
 	}
 
+#ifdef HAVE_LIBCRYPTO
 	if((EmptyString(yy_server->passwd) || EmptyString(yy_server->spasswd)) &&
 		!yy_server->rsa_pubkey)
+#else
+	if(EmptyString(yy_server->passwd) || EmptyString(yy_server->spasswd))
+#endif
 	{
 		conf_report_error("Ignoring connect block for %s -- missing password.",
 					yy_server->name);
@@ -1673,21 +1677,6 @@ conf_set_gecos_reason(void *data)
 		DupString(yy_aconf->passwd, data);
 	else
 		DupString(yy_aconf->passwd, "No Reason");
-}
-
-static void
-conf_set_gecos_action(void *data)
-{
-	char *act = data;
-
-	if(strcasecmp(act, "warn") == 0)
-		yy_aconf->port = 0;
-	else if(strcasecmp(act, "reject") == 0)
-		yy_aconf->port = 1;
-	else if(strcasecmp(act, "silent") == 0)
-		yy_aconf->port = 2;
-	else
-		conf_report_error("Warning -- invalid gecos::action.");
 }
 
 static int
@@ -2602,7 +2591,6 @@ newconf_init()
 	add_top_conf("gecos", conf_begin_gecos, conf_end_gecos);
 	add_conf_item("gecos", "name", CF_QSTRING, conf_set_gecos_name);
 	add_conf_item("gecos", "reason", CF_QSTRING, conf_set_gecos_reason);
-	add_conf_item("gecos", "action", CF_STRING, conf_set_gecos_action);
 
 	add_top_conf("cluster", conf_begin_cluster, conf_end_cluster);
 	add_conf_item("cluster", "name", CF_QSTRING, conf_set_cluster_name);

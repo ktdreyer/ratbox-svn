@@ -19,8 +19,6 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <arpa/nameser.h>
-#include <resolv.h>
 #include <assert.h>
 #ifndef TESTING
 #include "class.h"

@@ -498,8 +498,7 @@ check_banned_lines(void)
 					continue;
 				}
 			}
-			else if(((aconf = find_xline(client_p->info)) != NULL) &&
-				(aconf->port))
+			else if((aconf = find_xline(client_p->info)) != NULL)
 			{
 				if(IsExemptKline(client_p))
 				{
@@ -712,10 +711,6 @@ check_xlines(void)
 
 		if((aconf = find_xline(client_p->info)) != NULL)
 		{
-			/* xline that just warns, ignore it */
-			if(aconf->port == 0)
-				continue;
-
 			if(IsExemptKline(client_p))
 			{
 				sendto_realops_flags(UMODE_ALL, L_ALL,
