@@ -1262,6 +1262,7 @@ chm_simple(struct Client *client_p,struct Client *source_p,
   *errors |= SM_ERR_NOOPS;
   return;
  }
+ /* XXX this causes warnings on a 64bit compiler sizeof(void *) > sizeof(int) */
  chf = (int)d;
  if (dir < 0 && !(chptr->mode.mode & chf))
  {

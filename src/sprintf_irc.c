@@ -451,7 +451,7 @@ int
 ircsprintf(register char *str, const char *format, ...)
 
 {
-  register va_list args;
+  va_list args;
   register int bytes;
 
   va_start(args, format);

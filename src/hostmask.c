@@ -759,7 +759,7 @@ report_Klines(struct Client *client_p, int temp, int mask)
 {
  char *name, *host, *pass, *user, *classname, c;
  struct AddressRec *arec;
- struct ConfItem *aconf;
+ struct ConfItem *aconf = NULL;
  int i, port;
 
  if (temp)

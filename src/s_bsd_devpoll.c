@@ -272,7 +272,7 @@ comm_select(unsigned long delay)
 			int fd = dopoll.dp_fds[i].fd;
 			PF *hdl = NULL;
 			fde_t *F = &fd_table[fd];
-			if ((dopoll.dp_fds[i].revents & (POLLRDNORM | POLLIN | POLLHUP | POLLERR)) && (dopoll.dp_fds[i].events & POLLRDNORM|POLLIN)) 
+			if ((dopoll.dp_fds[i].revents & (POLLRDNORM | POLLIN | POLLHUP | POLLERR)) && (dopoll.dp_fds[i].events & (POLLRDNORM|POLLIN))) 
 			{
 				if ((hdl = F->read_handler) != NULL) 
 				{
@@ -288,7 +288,7 @@ comm_select(unsigned long delay)
 				} else
 					ilog(L_NOTICE, "comm_select: Unhandled read event: fdmask: %x\n", fdmask[fd]);
 			}
-			if ((dopoll.dp_fds[i].revents & (POLLWRNORM | POLLOUT | POLLHUP | POLLERR)) && (dopoll.dp_fds[i].events & POLLWRNORM|POLLOUT)) 
+			if ((dopoll.dp_fds[i].revents & (POLLWRNORM | POLLOUT | POLLHUP | POLLERR)) && (dopoll.dp_fds[i].events & (POLLWRNORM|POLLOUT))) 
 			{
 				if ((hdl = F->write_handler) != NULL) 
 				{

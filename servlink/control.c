@@ -25,7 +25,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <unistd.h>
-
+#include <string.h>
 #ifdef HAVE_LIBCRYPTO
 #include <openssl/evp.h>
 #include <openssl/err.h>
