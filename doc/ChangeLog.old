@@ -1,3 +1,10 @@
+*** 20010916_2 by jdc
+* src/listener.c: Fix for Hwy101's problems relating to IPv6 and FreeBSD.
+  This _WILL_ break IPv6 support for Linux.  Linux-ers, please look around
+  line 379.
+
+
+
 *** 20010916_1 by davidt
 - Tidy up m_map.c slightly, and add missing RPL_MAPEND.
 
