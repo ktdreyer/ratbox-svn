@@ -44,10 +44,10 @@ static int s_user_setemail(struct client *, char *parv[], int parc);
 
 static struct service_command userserv_command[] =
 {
-	{ "USERREGISTER",	&s_user_userregister,	2, NULL, 1, 0L, 0, 0, CONF_OPER_US_REGISTER, 0 },
-	{ "USERDROP",		&s_user_userdrop,	1, NULL, 1, 0L, 0, 0, CONF_OPER_US_ADMIN, 0 },
-	{ "USERSUSPEND",	&s_user_usersuspend,	1, NULL, 1, 0L, 0, 0, CONF_OPER_US_ADMIN, 0 },
-	{ "USERUNSUSPEND",	&s_user_userunsuspend,	1, NULL, 1, 0L, 0, 0, CONF_OPER_US_ADMIN, 0 },
+	{ "USERREGISTER",	&s_user_userregister,	2, NULL, 1, 0L, 0, 0, CONF_OPER_UREGISTER, 0 },
+	{ "USERDROP",		&s_user_userdrop,	1, NULL, 1, 0L, 0, 0, CONF_OPER_USERSERV, 0 },
+	{ "USERSUSPEND",	&s_user_usersuspend,	1, NULL, 1, 0L, 0, 0, CONF_OPER_USERSERV, 0 },
+	{ "USERUNSUSPEND",	&s_user_userunsuspend,	1, NULL, 1, 0L, 0, 0, CONF_OPER_USERSERV, 0 },
 	{ "REGISTER",	&s_user_register,	2, NULL, 1, 0L, 0, 0, 0, 0 },
 	{ "LOGIN",	&s_user_login,		2, NULL, 1, 0L, 0, 0, 0, 0 },
 	{ "LOGOUT",	&s_user_logout,		0, NULL, 1, 0L, 1, 0, 0, 0 },
@@ -58,10 +58,10 @@ static struct service_command userserv_command[] =
 
 static struct ucommand_handler userserv_ucommand[] =
 {
-	{ "userregister",	u_user_userregister,	CONF_OPER_US_REGISTER,	3, 1, NULL },
-	{ "userdrop",		u_user_userdrop,	CONF_OPER_US_ADMIN,	2, 1, NULL },
-	{ "usersuspend",	u_user_usersuspend,	CONF_OPER_US_ADMIN,	2, 1, NULL },
-	{ "userunsuspend",	u_user_userunsuspend,	CONF_OPER_US_ADMIN,	2, 1, NULL },
+	{ "userregister",	u_user_userregister,	CONF_OPER_UREGISTER,	3, 1, NULL },
+	{ "userdrop",		u_user_userdrop,	CONF_OPER_USERSERV,	2, 1, NULL },
+	{ "usersuspend",	u_user_usersuspend,	CONF_OPER_USERSERV,	2, 1, NULL },
+	{ "userunsuspend",	u_user_userunsuspend,	CONF_OPER_USERSERV,	2, 1, NULL },
 	{ "\0",			NULL,			0,			0, 0, NULL }
 };
 

@@ -37,12 +37,12 @@ static struct mode_table privs_table[] = {
 	{ "admin",	CONF_OPER_ADMIN		},
 	{ "dcc",	CONF_OPER_DCC		},
 	{ "route",	CONF_OPER_ROUTE		},
-	{ "cs_admin",	CONF_OPER_CS_ADMIN	},
-	{ "cs_register",CONF_OPER_CS_REGISTER	},
-	{ "us_admin",	CONF_OPER_US_ADMIN	},
-	{ "us_register",CONF_OPER_US_REGISTER	},
-	{ "operbot_admin", CONF_OPER_OPERBOT_ADMIN },
-	{ "jupe_admin", CONF_OPER_JUPE_ADMIN	},
+	{ "chanserv",	CONF_OPER_CHANSERV	},
+	{ "cregister",	CONF_OPER_CREGISTER	},
+	{ "userserv",	CONF_OPER_USERSERV	},
+	{ "uregister",	CONF_OPER_UREGISTER	},
+	{ "operbot",	CONF_OPER_OPERBOT	},
+	{ "jupeserv",	CONF_OPER_JUPESERV	},
 	{ "global",	CONF_OPER_GLOBAL	},
 	{ "\0",		0			}
 };
@@ -514,7 +514,7 @@ conf_set_connect_autoconn(void *data)
 }
 
 static int
-conf_begin_oper(struct TopConf *tc)
+conf_begin_operator(struct TopConf *tc)
 {
         dlink_node *ptr;
         dlink_node *next_ptr;
@@ -538,7 +538,7 @@ conf_begin_oper(struct TopConf *tc)
 }
 
 static int
-conf_end_oper(struct TopConf *tc)
+conf_end_operator(struct TopConf *tc)
 {
 	dlink_node *ptr;
 	dlink_node *next_ptr;
@@ -825,7 +825,8 @@ newconf_init()
 	add_top_conf("serverinfo", NULL, NULL, conf_serverinfo_table);
         add_top_conf("admin", NULL, NULL, conf_admin_table);
         add_top_conf("connect", conf_begin_connect, conf_end_connect, conf_connect_table);
-        add_top_conf("oper", conf_begin_oper, conf_end_oper, conf_oper_table);
+        add_top_conf("operator", conf_begin_operator, conf_end_operator, 
+			conf_oper_table);
 	add_top_conf("service", conf_begin_service, conf_end_service, conf_service_table);
 
 	add_conf_extension("service", "userserv", conf_userserv_table);

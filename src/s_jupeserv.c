@@ -49,8 +49,8 @@ static int s_jupeserv_pending(struct client *, char *parv[], int parc);
 
 static struct service_command jupeserv_command[] =
 {
-	{ "JUPE",	&s_jupeserv_jupe,	2, NULL, 1, 0L, 0, 0, CONF_OPER_JUPE_ADMIN, 0 },
-	{ "UNJUPE",	&s_jupeserv_unjupe,	1, NULL, 1, 0L, 0, 0, CONF_OPER_JUPE_ADMIN, 0 },
+	{ "JUPE",	&s_jupeserv_jupe,	2, NULL, 1, 0L, 0, 0, CONF_OPER_JUPESERV, 0 },
+	{ "UNJUPE",	&s_jupeserv_unjupe,	1, NULL, 1, 0L, 0, 0, CONF_OPER_JUPESERV, 0 },
 	{ "CALLJUPE",	&s_jupeserv_calljupe,	1, NULL, 1, 0L, 0, 1, 0, UMODE_JUPES },
 	{ "CALLUNJUPE",	&s_jupeserv_callunjupe,	1, NULL, 1, 0L, 0, 1, 0, UMODE_JUPES },
 	{ "PENDING",	&s_jupeserv_pending,	0, NULL, 1, 0L, 0, 1, 0, UMODE_JUPES },
@@ -59,8 +59,8 @@ static struct service_command jupeserv_command[] =
 
 static struct ucommand_handler jupeserv_ucommand[] =
 {
-	{ "jupe",	u_jupeserv_jupe,	CONF_OPER_JUPE_ADMIN,	3, 1, NULL },
-	{ "unjupe",	u_jupeserv_unjupe,	CONF_OPER_JUPE_ADMIN,	2, 1, NULL },
+	{ "jupe",	u_jupeserv_jupe,	CONF_OPER_JUPESERV, 3, 1, NULL },
+	{ "unjupe",	u_jupeserv_unjupe,	CONF_OPER_JUPESERV, 2, 1, NULL },
 	{ "\0",		NULL,			0,			0, 0, NULL }
 };
 
@@ -233,7 +233,7 @@ static void
 u_jupeserv_jupe(struct connection_entry *conn_p, char *parv[], int parc)
 {
 	struct server_jupe *jupe_p;
-	const char *reason;
+	char *reason;
 
 	if(!valid_jupe(parv[1]))
 	{
@@ -258,6 +258,9 @@ u_jupeserv_jupe(struct connection_entry *conn_p, char *parv[], int parc)
 
 	jupe_p = make_jupe(parv[1]);
 	reason = rebuild_params((const char **) parv, parc, 2);
+
+	if(strlen(reason) > REASONLEN)
+		reason[REASONLEN] = '\0';
 
 	slog(jupeserv_p, 1, "%s - JUPE %s %s", conn_p->oper, parv[1], reason);
 
@@ -308,7 +311,7 @@ static int
 s_jupeserv_jupe(struct client *client_p, char *parv[], int parc)
 {
 	struct server_jupe *jupe_p;
-	const char *reason;
+	char *reason;
 
 	if(!valid_jupe(parv[0]))
 	{
@@ -335,6 +338,9 @@ s_jupeserv_jupe(struct client *client_p, char *parv[], int parc)
 
 	jupe_p = make_jupe(parv[0]);
 	reason = rebuild_params((const char **) parv, parc, 1);
+
+	if(strlen(reason) > REASONLEN)
+		reason[REASONLEN] = '\0';
 
 	slog(jupeserv_p, 1, "%s - JUPE %s %s",
 		client_p->user->oper->name, parv[0], reason);
@@ -420,12 +426,15 @@ s_jupeserv_calljupe(struct client *client_p, char *parv[], int parc)
 
 	if((jupe_p = find_jupe(parv[0], &pending_jupes)) == NULL)
 	{
-		const char *reason;
+		char *reason;
 
 		jupe_p = make_jupe(parv[0]);
 		jupe_p->add = 1;
 
 		reason = rebuild_params((const char **) parv, parc, 1);
+
+		if(strlen(reason) > REASONLEN)
+			reason[REASONLEN] = '\0';
 
 		if(EmptyString(reason))
 			jupe_p->reason = my_strdup("No Reason");

@@ -34,8 +34,8 @@ static int s_operbot_op(struct client *, char *parv[], int parc);
 
 static struct service_command operbot_command[] =
 {
-	{ "OJOIN",	&s_operbot_ojoin,	1, NULL, 1, 0L, 0, 0, CONF_OPER_OPERBOT_ADMIN, 0 },
-	{ "OPART",	&s_operbot_opart,	1, NULL, 1, 0L, 0, 0, CONF_OPER_OPERBOT_ADMIN, 0 },
+	{ "OJOIN",	&s_operbot_ojoin,	1, NULL, 1, 0L, 0, 0, CONF_OPER_OPERBOT, 0 },
+	{ "OPART",	&s_operbot_opart,	1, NULL, 1, 0L, 0, 0, CONF_OPER_OPERBOT, 0 },
 	{ "INVITE",	&s_operbot_invite,	1, NULL, 1, 0L, 0, 1, 0, 0 },
 	{ "OP",		&s_operbot_op,		0, NULL, 1, 0L, 0, 1, 0, 0 },
 	{ "\0",		NULL,			0, NULL, 0, 0L, 0, 0, 0, 0 }
@@ -43,8 +43,8 @@ static struct service_command operbot_command[] =
 
 static struct ucommand_handler operbot_ucommand[] =
 {
-	{ "ojoin",	u_operbot_ojoin,	CONF_OPER_OPERBOT_ADMIN, 2, 1, NULL },
-	{ "opart",	u_operbot_opart,	CONF_OPER_OPERBOT_ADMIN, 2, 1, NULL },
+	{ "ojoin",	u_operbot_ojoin,	CONF_OPER_OPERBOT, 2, 1, NULL },
+	{ "opart",	u_operbot_opart,	CONF_OPER_OPERBOT, 2, 1, NULL },
 	{ "\0",		NULL,			0, 0, 0, NULL }
 };
 

@@ -264,12 +264,13 @@ static struct flag_table oper_flags[] =
 {
 	{ 'D', CONF_OPER_DCC		},
 	{ 'A', CONF_OPER_ADMIN		},
-	{ 'C', CONF_OPER_CS_ADMIN	},
-	{ 'c', CONF_OPER_CS_REGISTER	},
-	{ 'U', CONF_OPER_US_ADMIN	},
-	{ 'u', CONF_OPER_US_REGISTER	},
-	{ 'O', CONF_OPER_OPERBOT_ADMIN	},
-	{ 'J', CONF_OPER_JUPE_ADMIN	},
+	{ 'C', CONF_OPER_CHANSERV	},
+	{ 'c', CONF_OPER_CREGISTER	},
+	{ 'U', CONF_OPER_USERSERV	},
+	{ 'u', CONF_OPER_UREGISTER	},
+	{ 'O', CONF_OPER_OPERBOT	},
+	{ 'J', CONF_OPER_JUPESERV	},
+	{ 'G', CONF_OPER_GLOBAL		},
 	{ '\0',0 }
 };
 

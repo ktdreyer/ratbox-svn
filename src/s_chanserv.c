@@ -73,10 +73,10 @@ static int s_chan_info(struct client *, char *parv[], int parc);
 
 static struct service_command chanserv_command[] =
 {
-	{ "CHANREGISTER",	&s_chan_chanregister,	2, NULL, 1, 0L, 0, 0, CONF_OPER_CS_REGISTER, 0 },
-	{ "CHANDROP",		&s_chan_chandrop,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CS_ADMIN, 0 },
-	{ "CHANSUSPEND",	&s_chan_chansuspend,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CS_ADMIN, 0 },
-	{ "CHANUNSUSPEND",	&s_chan_chanunsuspend,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CS_ADMIN, 0 },
+	{ "CHANREGISTER",	&s_chan_chanregister,	2, NULL, 1, 0L, 0, 0, CONF_OPER_CREGISTER, 0 },
+	{ "CHANDROP",		&s_chan_chandrop,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CHANSERV, 0 },
+	{ "CHANSUSPEND",	&s_chan_chansuspend,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CHANSERV, 0 },
+	{ "CHANUNSUSPEND",	&s_chan_chanunsuspend,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CHANSERV, 0 },
 	{ "REGISTER",	&s_chan_register,	1, NULL, 1, 0L, 1, 0, 0, UMODE_REGISTER	},
 	{ "ADDUSER",	&s_chan_adduser,	3, NULL, 1, 0L, 1, 0, 0, 0 },
 	{ "DELUSER",	&s_chan_deluser,	2, NULL, 1, 0L, 1, 0, 0, 0 },
@@ -102,10 +102,10 @@ static struct service_command chanserv_command[] =
 
 static struct ucommand_handler chanserv_ucommand[] =
 {
-	{ "chanregister",	u_chan_chanregister,	CONF_OPER_CS_REGISTER,	3, 1, NULL },
-	{ "chandrop",		u_chan_chandrop,	CONF_OPER_CS_ADMIN,	2, 1, NULL },
-	{ "chansuspend",	u_chan_chansuspend,	CONF_OPER_CS_ADMIN,	2, 1, NULL },
-	{ "chanunsuspend",	u_chan_chanunsuspend,	CONF_OPER_CS_ADMIN,	2, 1, NULL },
+	{ "chanregister",	u_chan_chanregister,	CONF_OPER_CREGISTER,	3, 1, NULL },
+	{ "chandrop",		u_chan_chandrop,	CONF_OPER_CHANSERV,	2, 1, NULL },
+	{ "chansuspend",	u_chan_chansuspend,	CONF_OPER_CHANSERV,	2, 1, NULL },
+	{ "chanunsuspend",	u_chan_chanunsuspend,	CONF_OPER_CHANSERV,	2, 1, NULL },
 	{ "\0",			NULL,			0,			0, 0, NULL }
 };
 
