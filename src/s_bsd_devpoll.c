@@ -273,6 +273,9 @@ comm_select(unsigned long delay)
 				} else
 					ilog(L_NOTICE, "comm_select: Unhandled read event: fdmask: %x\n", fdmask[fd]);
 			}
+			
+			if(F->flags.open == 0)
+			   continue;  /* Read handler closed us..go on to do something more useful */
 			if ((dopoll.dp_fds[i].revents & (POLLWRNORM | POLLOUT | POLLHUP | POLLERR)) && (dopoll.dp_fds[i].events & (POLLWRNORM|POLLOUT))) 
 			{
 				if ((hdl = F->write_handler) != NULL) 

@@ -340,6 +340,9 @@ int comm_select(unsigned long delay)
             if (hdl)
                 hdl(fd, F->read_data);
         }
+
+        if(F->flags.open == 0)
+            continue; /* Read handler closed us..go on */             
         if (revents & (POLLWRNORM | POLLOUT | POLLHUP | POLLERR))
         {
             callbacks_called++;

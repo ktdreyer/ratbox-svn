@@ -199,21 +199,19 @@ comm_select(unsigned long delay)
             hdl = F->read_handler;
             F->read_handler = NULL;
             select_update_selectfds(fd, COMM_SELECT_READ, NULL);
-            if (!hdl) {
-                /* XXX Eek! This is another bad place! */
-            } else {
+            if (hdl) 
                 hdl(fd, F->read_data);
-            }
         }
+        
+        if(F->flags.open == 0)
+           continue; /* Read handler closed us..go on */
+          
         if (FD_ISSET(fd, &tmpwritefds)) {
             hdl = F->write_handler;
             F->write_handler = NULL;
             select_update_selectfds(fd, COMM_SELECT_WRITE, NULL);
-            if (!hdl) {
-                /* XXX Eek! This is another bad place! */
-            } else {
+            if (hdl) 
                 hdl(fd, F->write_data);
-            }
         }
     }
     return 0;
