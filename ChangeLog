@@ -1,3 +1,19 @@
+androsyn    2003/01/20 17:09:22 UTC	(20030120_3)
+
+  Modified files:
+    modules              m_dline.c m_trace.c 
+    src                  listener.c s_bsd.c 
+  Log:
+  Think i fixed the conf matching stuff
+  
+  Revision  Changes    Path
+  1.8       +2 -2      ircd-ratbox/modules/m_dline.c
+  1.66      +2 -2      ircd-ratbox/modules/m_trace.c
+  7.81      +0 -2      ircd-ratbox/src/listener.c
+  7.190     +0 -2      ircd-ratbox/src/s_bsd.c
+
+
+
 androsyn    2003/01/20 16:44:13 UTC	(20030120_2)
 
   Modified files:
