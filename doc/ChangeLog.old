@@ -1,3 +1,8 @@
+*** 20010105_23 by toot
+. changed some ugly %lu formating back to %d (caused compile warnings before)
+. use ircd.conf knock_delay instead of hard-coded 30 seconds, for m_knock
+
+
 *** 20010105_22 by toot
 . made +a umode propagate and admins can -a/+a themselves too, again.
   everything except /whois uses the conf flags as a check, rather than the umode.
