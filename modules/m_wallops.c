@@ -44,8 +44,12 @@ struct Message wallops_msgtab = {
 	"WALLOPS", 0, 0, 0, MFLG_SLOW,
 	{mg_unreg, mg_not_oper, {mo_wallops, 2}, {ms_wallops, 2}, {mo_wallops, 2}}
 };
+struct Message operwall_msgtab = {
+	"OPERWALL", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, mg_not_oper, {mo_wallops, 2}, mg_ignore, {mo_wallops, 2}}
+};
 
-mapi_clist_av1 wallops_clist[] = { &wallops_msgtab, NULL };
+mapi_clist_av1 wallops_clist[] = { &wallops_msgtab, &operwall_msgtab, NULL };
 DECLARE_MODULE_AV1(wallops, NULL, NULL, wallops_clist, NULL, NULL, "$Revision$");
 
 /*
@@ -55,10 +59,17 @@ DECLARE_MODULE_AV1(wallops, NULL, NULL, wallops_clist, NULL, NULL, "$Revision$")
 static int
 mo_wallops(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
+	if(MyClient(source_p) && !IsOperOperwall(source_p))
+	{
+		sendto_one(source_p, ":%s NOTICE %s :You need operwall = yes;",
+			   me.name, source_p->name);
+		return 0;
+	}
+
 	sendto_wallops_flags(UMODE_OPERWALL, source_p, "OPERWALL - %s", parv[1]);
-	sendto_server(NULL, NULL, CAP_TS6, NOCAPS, ":%s WALLOPS :%s", 
+	sendto_server(client_p, NULL, CAP_TS6, NOCAPS, ":%s OPERWALL :%s", 
 		      use_id(source_p), parv[1]);
-	sendto_server(NULL, NULL, NOCAPS, CAP_TS6, ":%s WALLOPS :%s", 
+	sendto_server(client_p, NULL, NOCAPS, CAP_TS6, ":%s OPERWALL :%s", 
 		      source_p->name, parv[1]);
 
 	return 0;
