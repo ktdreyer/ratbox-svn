@@ -1,3 +1,8 @@
+*** 20010228_1 by androsyn
+Well..this fixes that core dump..The problem is now that I lines don't seem
+to be working right :/
+
+
 *** 20010227_3 by ejb
 - fixes to make compile on solaris using sunsoft cc work.
   tested compile, and it loads the module fine, but i haven't
