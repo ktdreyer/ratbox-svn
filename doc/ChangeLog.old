@@ -1,3 +1,8 @@
+*** 20010212_1 by androsyn
+Fixed some brain damage on incoming connections...the code has been 
+changed to make it more friendly to ipv6.
+
+
 *** 20010211_5 by db
 - modified logging in adns functions to work with ircd s_log
   bit of a quick hack for now ;-/
