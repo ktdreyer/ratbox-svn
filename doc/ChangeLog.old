@@ -1,3 +1,34 @@
+leeh        2002/04/27 20:26:09 EDT	(20020428_1)
+
+  Modified files:
+    .                    README.FIRST README.PLATFORMS RELNOTES 
+    modules              m_stats.c 
+    src                  s_serv.c 
+  Log:
+  Fix for GCC on SPARC compiling in 32-bit mode.  The solution is to not let
+  GCC move things from the structure pointers in to a register, it apparently
+  is too broken to figure out how to do this properly.  Instead, memcpy the
+  structure to a local one on the stack, and use it.
+  
+  The GCC people were given a bug report on this and did nothing.  Considering
+  the popularity of the SPARC platform, some shame should go around that a
+  lowly IRCD coder had to spend some months trying to work around this, and
+  that despite a bug report, the GCC people did/said nothing.
+  
+  Anyway, this now makes ircd-hybrid-7 work on SPARC systems with GCC.  Great!
+  
+  Submitted by:   virtual jmallett vDD (with superhotfuq support)
+  Reviewed by:    db/leeh
+  
+  Revision  Changes    Path
+  7.33      +0 -7      ircd-hybrid-7/README.FIRST
+  7.12      +3 -3      ircd-hybrid-7/README.PLATFORMS
+  1.25      +2 -0      ircd-hybrid-7/RELNOTES
+  1.108     +9 -7      ircd-hybrid-7/modules/m_stats.c
+  7.252     +35 -33    ircd-hybrid-7/src/s_serv.c
+
+
+
 leeh        2002/04/27 19:55:49 EDT	(20020428_0)
 
   Modified files:
