@@ -19,7 +19,7 @@
 #include "linebuf.h"
 #include "blalloc.h"
 
-static int linebuf_initialised;
+static int linebuf_initialised = 0;
 static BlockHeap *linebuf_bl = NULL;
 
 
