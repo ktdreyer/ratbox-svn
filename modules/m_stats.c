@@ -469,11 +469,11 @@ void do_priv_stats(struct Client *sptr, char *name, char *target,
       if (ConfigFileEntry.stats_p_notice)
 	{
 	  stats_p_spy(sptr);
+	  show_opers(sptr);
 	}
       else
 	{
 	  show_opers(sptr);
-	  stats_spy(sptr,stat);
 	}
       break;
 

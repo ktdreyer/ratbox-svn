@@ -225,9 +225,6 @@ void report_glines(struct Client *sptr)
       sendto_one(sptr,form_str(RPL_STATSKLINE), me.name,
 		 sptr->name, 'G' , host, name, reason);
     }
-
-  sendto_one(sptr,form_str(RPL_ENDOFSTATS),
-	     me.name, sptr->name, 'G');
 }
 
 /*
