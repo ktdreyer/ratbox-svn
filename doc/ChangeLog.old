@@ -1,3 +1,10 @@
+*** 20010802_1 by leeh
+- changed report_error -> sendto_realops_flags() 
+  allows us to show IP to admins, not to opers..
+
+  adding an ilog() for read errors.
+
+
 *** 20010731_1 by leeh
 - added cryptlinks to stats c
 
