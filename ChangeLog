@@ -1,3 +1,16 @@
+androsyn    2003/02/11 19:00:44 UTC	(20030211_1)
+
+  Modified files:
+    src                  irc_string.c newconf.c 
+  Log:
+  Fix a minor goof in the conf parser
+  
+  Revision  Changes    Path
+  7.63      +17 -0     ircd-ratbox/src/irc_string.c
+  7.74      +1 -1      ircd-ratbox/src/newconf.c
+
+
+
 androsyn    2003/02/11 18:29:15 UTC	(20030211_0)
 
   Modified files:
