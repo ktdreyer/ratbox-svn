@@ -145,10 +145,10 @@ mo_dline(struct Client *client_p, struct Client *source_p,
 	}
 	else
 	{
-		if(bits < 24)
+		if(bits < 16)
 		{
 			sendto_one(source_p,
-				   ":%s NOTICE %s :Dline bitmasks less than 24 are for admins only.",
+				   ":%s NOTICE %s :Dline bitmasks less than 16 are for admins only.",
 				   me.name, parv[0]);
 			return 0;
 		}
