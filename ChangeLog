@@ -1,3 +1,15 @@
+androsyn    2002/11/24 12:36:25 UTC	(20021124_14)
+
+  Modified files:
+    src                  s_serv.c 
+  Log:
+  Do bursting away correctly now :)
+  
+  Revision  Changes    Path
+  7.300     +3 -19     ircd-ratbox/src/s_serv.c
+
+
+
 leeh        2002/11/24 12:14:58 UTC	(20021124_13)
 
   Modified files:
