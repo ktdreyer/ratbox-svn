@@ -1,3 +1,15 @@
+leeh        2002/04/27 08:20:38 EDT	(20020427_1)
+
+  Modified files:
+    doc                  vchans.txt 
+  Log:
+  - brought the vchan doc up to date with how they currently work.
+  
+  Revision  Changes    Path
+  1.2       +54 -76    ircd-hybrid-7/doc/vchans.txt
+
+
+
 leeh        2002/04/27 05:30:52 EDT	(20020427_0)
 
   Modified files:
