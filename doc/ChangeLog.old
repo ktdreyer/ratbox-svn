@@ -1,3 +1,8 @@
+*** 20001204_14 by db
+- don't devoice/voice if chanop
+
+
+
 *** 20001204_13 by db
 - identity of who set a ban should be hidden in channel op hide mode
 
