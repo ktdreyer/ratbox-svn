@@ -1,3 +1,33 @@
+leeh        2003/08/09 09:38:16 EDT	(20030809_2)
+
+  Modified files:
+    doc                  example.conf example.efnet.conf 
+    include              reject.h s_conf.h 
+    modules              m_stats.c 
+    src                  cluster.c ircd_parser.y newconf.c 
+                         reject.c s_conf.c s_debug.c 
+    tools                convertconf.c 
+  Log:
+  - removed ServerInfo.max_clients/max_buffer, they didnt do anything.
+  - moved reject stats to stats z
+  - removed a few memset() after MyMalloc()
+  
+  Revision  Changes    Path
+  7.217     +0 -3      ircd-ratbox/doc/example.conf
+  7.53      +0 -3      ircd-ratbox/doc/example.efnet.conf
+  1.4       +3 -1      ircd-ratbox/include/reject.h
+  7.248     +0 -4      ircd-ratbox/include/s_conf.h
+  1.171     +1 -15     ircd-ratbox/modules/m_stats.c
+  7.9       +0 -3      ircd-ratbox/src/cluster.c
+  1.272     +0 -5      ircd-ratbox/src/ircd_parser.y
+  7.103     +0 -24     ircd-ratbox/src/newconf.c
+  1.7       +1 -9      ircd-ratbox/src/reject.c
+  7.423     +0 -5      ircd-ratbox/src/s_conf.c
+  7.96      +4 -0      ircd-ratbox/src/s_debug.c
+  1.42      +0 -1      ircd-ratbox/tools/convertconf.c
+
+
+
 leeh        2003/08/09 08:25:24 EDT	(20030809_1)
 
   Modified files:
