@@ -1754,11 +1754,8 @@ add_lazylinkchannel(struct Client *client_p, struct Channel *chptr)
 {
   dlink_node *m;
 
-  assert(MyClient(client_p));
+  assert(MyConnect(client_p));
  
-  if(!MyClient(client_p))
-    return;
-
   chptr->lazyLinkChannelExists |= client_p->localClient->serverMask;
 
   m = make_dlink_node();
