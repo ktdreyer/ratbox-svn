@@ -94,14 +94,6 @@ void apply_kline(struct Client *sptr, struct ConfItem *aconf,
 		 char *current_date,
 		 int ip_kline, unsigned long ip, unsigned long ip_mask);
 
-void WriteKline(const char *, struct Client *, struct Client *,
-                       const char *, const char *, const char *, 
-                       const char *);
-
-void WriteDline(const char *filename, struct Client *sptr,
-                const char *host, const char *reason, const char *when);
-
-
 char *_version = "20001122";
 
 char buffer[IRCD_BUFSIZE];
@@ -293,8 +285,6 @@ void apply_kline(struct Client *sptr, struct ConfItem *aconf,
 		 char *current_date,
 		 int ip_kline, unsigned long ip, unsigned long ip_mask)
 {
-  const char *kconf; /* kline conf file */
-
   if(ip_kline)
     {
       aconf->ip = ip;
@@ -304,35 +294,12 @@ void apply_kline(struct Client *sptr, struct ConfItem *aconf,
   else
     add_mtrie_conf_entry(aconf,CONF_KILL);
 
-  sendto_realops("%s added K-Line for [%s@%s] [%s]",
-    sptr->name,
-    aconf->user,
-    aconf->host,
-    aconf->passwd);
-
-  log(L_TRACE, "%s added K-Line for [%s@%s] [%s]",
-      sptr->name, aconf->user, aconf->host, aconf->passwd);
-
-  kconf = get_conf_name(KLINE_TYPE);
-
-  sendto_one(sptr,
-    ":%s NOTICE %s :Added K-Line [%s@%s] to %s",
-    me.name,
-    sptr->name,
-    aconf->user,
-    aconf->host,
-    kconf ? kconf : "configuration file");
-
-  /*
-   * Write kline to configuration file
-   */
-  WriteKline(kconf,
-	     sptr,
-	     (struct Client *) NULL,
-	     aconf->user,
-	     aconf->host,
-	     aconf->passwd,
-	     current_date);
+  WriteKlineOrDline( KLINE_TYPE,
+		     sptr,
+		     aconf->user,
+		     aconf->host,
+		     aconf->passwd,
+		     current_date);
 
   /* Now, activate kline against current online clients */
   check_klines();
@@ -524,7 +491,6 @@ int mo_dline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   struct ConfItem *aconf;
   char buffer[1024];
   const char* current_date;
-  const char *dconf;
 
   if(!IsSetOperK(sptr))
     {
@@ -683,157 +649,19 @@ int mo_dline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
   add_Dline(aconf);
 
-  sendto_realops("%s added D-Line for [%s] [%s]",
-		 sptr->name,
-		 host,
-		 reason);
-
-  log(L_TRACE, "%s added D-Line for [%s] [%s]", 
-      sptr->name, host, reason);
-
-  dconf = get_conf_name(DLINE_TYPE);
-
-  sendto_one(sptr,
-	     ":%s NOTICE %s :Added D-Line [%s] to %s",
-	     me.name,
-	     sptr->name,
-	     host,
-	     dconf ? dconf : "configuration file");
-
   /*
    * Write dline to configuration file
    */
-  WriteDline(dconf,
-	     sptr,
-	     host,
-	     reason,
-	     current_date);
+  WriteKlineOrDline(DLINE_TYPE,
+		    sptr,
+		    NULL,
+		    host,
+		    reason,
+		    current_date);
 
   check_klines();
   return 0;
 } /* m_dline() */
-
-/*
- * WriteKline()
- * inputs	- filename
- * 		- client to report to
- * 		- actual client doing kline
- *		- username being klined
- *		- hostname being klined
- *		- reasons for kline
- *		- when (date)
- * output	- NONE
- * side effects	- Write out a kline to the kline configuration file
- */
-void WriteKline(const char *filename, struct Client *sptr,
-		struct Client *rcptr,
-		const char *user, const char *host, const char *reason, 
-		const char *when)
-{
-  char buffer[1024];
-  FBFILE *out;
-
-  if (filename == NULL)
-    {
-      sendto_realops("*** No kline file!");
-      return;
-    }
-
-  if ((out = fbopen(filename, "a")) == NULL)
-    {
-      sendto_realops("Error opening %s: %s",
-		     filename,
-		     strerror(errno));
-      return;
-    }
-
-  ircsprintf(buffer,
-	     "#%s!%s@%s K'd: %s@%s:%s\n",
-	     sptr->name,
-	     sptr->username,
-	     sptr->host,
-	     user,
-	     host,
-	     reason);
-
-  if (safe_write(sptr, filename, out, buffer) < 0)
-    {
-      fbclose(out);
-      return;
-    }
-
-  ircsprintf(buffer, "K:%s:%s (%s):%s\n",
-    host,
-    reason,
-    when,
-    user);
-
-  if (safe_write(sptr, filename, out, buffer) < 0)
-    {
-      fbclose(out);
-      return;
-    }
-
-  fbclose(out);
-} /* WriteKline() */
-
-/*
- * WriteDline()
- * inputs	- filename
- * 		- client to report to
- * 		- actual client doing dline
- *		- hostname being dlined
- *		- reasons for dline
- *		- when (date)
- * output	- NONE
- * side effects	- Write out a kline to the kline configuration file
- */
-void WriteDline(const char *filename, struct Client *sptr,
-		const char *host, const char *reason, const char *when)
-{
-  char buffer[1024];
-  FBFILE *out;
-
-  if (filename == NULL)
-    {
-      sendto_realops("*** No kline file!");
-      return;
-    }
-
-  if ((out = fbopen(filename, "a")) == NULL)
-    {
-      sendto_realops("Error opening %s: %s",
-		     filename,
-		     strerror(errno));
-      return;
-    }
-
-  ircsprintf(buffer,
-	     "#%s!%s@%s D'd: %s:%s (%s)\n",
-	     sptr->name,
-	     sptr->username,
-	     sptr->host,
-	     host,
-	     reason,
-	     when);
-
-  if (safe_write(sptr, filename, out, buffer) < 0)
-    return;
-
-  ircsprintf(buffer, "D:%s:%s (%s)\n",
-	     host,
-	     reason,
-	     when);
-
-  if (safe_write(sptr, filename, out, buffer) < 0)
-    {
-      fbclose(out);
-      return;
-    }
-
-  fbclose(out);
-} /* WriteDline() */
-
 
 /*
  * find_user_host

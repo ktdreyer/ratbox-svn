@@ -24,6 +24,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 7.35  2000/12/05 02:53:37  db
+ * - removed duplicate function from m_kline.c replaced with function
+ *   already in place but unused in s_conf.c duh. can we say BLOAT?
+ *
  * Revision 7.34  2000/12/04 05:50:05  db
  * - fixed m_kline.c code
  * - removed all traces of restricted I line code, thats better handled
@@ -650,14 +654,10 @@ typedef enum {
   DLINE_TYPE
 } KlineType;
 
-extern void write_kline_or_dline_to_conf_and_notice_opers(
-                                                          KlineType,
-                                                          struct Client *,
-                                                          char *,
-                                                          char *,
-                                                          char *,
-                                                          char *
-                                                          );
+extern void WriteKlineOrDline( KlineType, struct Client *,
+			       char *user, char *host, char *reason,
+			       const char *current_date );
+
 extern  const   char *get_conf_name(KlineType);
 extern  void    add_temp_kline(struct ConfItem *);
 extern  void    flush_temp_klines(void);

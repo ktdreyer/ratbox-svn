@@ -568,11 +568,10 @@ static IP_ENTRY *free_ip_entries;
  * clear_ip_hash_table()
  *
  * input                - NONE
- * output                - NONE
- * side effects        - clear the ip hash table
+ * output               - NONE
+ * side effects         - clear the ip hash table
  *
- * stole the link list pre-allocator from list.c
-*/
+ */
 
 void clear_ip_hash_table()
 {
@@ -635,11 +634,7 @@ find_or_add_ip(struct Client *cptr)
   if ( (ptr = ip_hash_table[hash_index]) != (IP_ENTRY *)NULL )
     {
       if( free_ip_entries == (IP_ENTRY *)NULL)
-        {
-          sendto_realops("s_conf.c free_ip_entries was found NULL in find_or_add");
-          sendto_realops("Please report to the hybrid team! ircd-hybrid@the-project.org");
-          outofmemory();
-        }
+	outofmemory();
 
       newptr = ip_hash_table[hash_index] = free_ip_entries;
       free_ip_entries = newptr->next;
@@ -652,11 +647,7 @@ find_or_add_ip(struct Client *cptr)
   else
     {
       if( free_ip_entries == (IP_ENTRY *)NULL)
-        {
-          sendto_realops("s_conf.c free_ip_entries was found NULL in find_or_add");
-          sendto_realops("Please report to the hybrid team! ircd-hybrid@the-project.org");
-          outofmemory();
-        }
+	outofmemory();
 
       ptr = ip_hash_table[hash_index] = free_ip_entries;
       free_ip_entries = ptr->next;
@@ -724,8 +715,6 @@ void remove_one_ip(unsigned long ip_in)
           ptr = ptr->next;
         }
     }
-  sendto_realops("s_conf.c couldn't find ip# in hash table in remove_one_ip()");
-  sendto_realops("Please report to the hybrid team! ircd-hybrid@the-project.org");
   return;
 }
 
@@ -2513,7 +2502,7 @@ static void flush_deleted_I_P(void)
 }
 
 /*
- * write_kline_or_dline_to_conf_and_notice_opers
+ * WriteKlineOrDline
  *
  * inputs       - kline or dline type flag
  *              - client pointer to report to
@@ -2530,14 +2519,13 @@ static void flush_deleted_I_P(void)
  *                forwarding the kline onto the next U lined server
  *                
  */
-void write_kline_or_dline_to_conf_and_notice_opers(
-                                                   KlineType type,
-                                                   struct Client *sptr,
-                                                   char *user,
-                                                   char *host,
-                                                   char *reason,
-                                                   char *current_date)
-  {
+void WriteKlineOrDline( KlineType type,
+			struct Client *sptr,
+			char *user,
+			char *host,
+			char *reason,
+			const char *current_date)
+{
   char buffer[1024];
   FBFILE *out;
   const char *filename;         /* filename to use for kline */
@@ -2550,6 +2538,9 @@ void write_kline_or_dline_to_conf_and_notice_opers(
 		     sptr->name, host, reason);
       sendto_one(sptr, ":%s NOTICE %s :Added D-Line [%s] to %s",
 		 me.name, sptr->name, host, filename);
+
+      log(L_TRACE, "%s added D-Line for [%s] [%s]", 
+	  sptr->name, host, reason);
     }
   else
     {
@@ -2557,6 +2548,8 @@ void write_kline_or_dline_to_conf_and_notice_opers(
 		     sptr->name, user, host, reason);
       sendto_one(sptr, ":%s NOTICE %s :Added K-Line [%s@%s] to %s",
 		 me.name, sptr->name, user, host, filename);
+      log(L_TRACE, "%s added K-Line for [%s] [%s@%s]", 
+	  sptr->name, user, host, reason);
     }
 
   if ( (out = fbopen(filename, "a")) == NULL )
