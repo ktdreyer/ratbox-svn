@@ -432,7 +432,8 @@ const char *inetntop(int af, const void *src, char *dst, unsigned int size)
 		return (inet_ntop4(src, dst, size));
 #ifdef IPV6
 	case AF_INET6:
-		if(ntohl(((u_int32_t *)src)[3]) == 1)
+		if(  (ntohl(((u_int32_t *)src)[0]) == 0) &&  (ntohl(((u_int32_t *)src)[1]) == 0) &&
+			 (ntohl(((u_int32_t *)src)[2]) == 0) &&  (ntohl(((u_int32_t *)src)[3]) == 1) )
 		{
 			memcpy(dst,"127.0.0.1", 10);
 			return(dst);
