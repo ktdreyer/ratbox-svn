@@ -1,3 +1,18 @@
+leeh        2002/01/06 16:09:44 EST	(20020106_4)
+
+  Modified files:
+    modules/core         m_kill.c 
+  Log:
+  - added oper accountability back to kills via quits
+  - fixes for -6, which takes the nick of the killer from the front of the
+    path - so set path = source_p->name when bogus..
+  - cleanups
+  
+  Revision  Changes    Path
+  1.61      +45 -66    ircd-hybrid-7/modules/core/m_kill.c
+
+
+
 leeh        2002/01/06 13:16:12 EST	(20020106_3)
 
   Modified files:
