@@ -1,3 +1,30 @@
+leeh        2002/11/24 02:24:04 UTC	(20021124_4)
+
+  Modified files:
+    contrib              README m_clearchan.c 
+    doc                  index.txt modes.txt whats-new.txt 
+    help/opers           cmode join 
+    src                  channel_mode.c 
+  Removed files:
+    doc                  vchans.txt 
+    help/opers           cjoin 
+  Log:
+  - more traces - these are embedded to hell.
+  
+  Revision  Changes    Path
+  1.27      +1 -1      ircd-ratbox/contrib/README
+  1.44      +11 -28    ircd-ratbox/contrib/m_clearchan.c
+  1.19      +0 -1      ircd-ratbox/doc/index.txt
+  7.10      +1 -3      ircd-ratbox/doc/modes.txt
+  1.3       +0 -132    ircd-ratbox/doc/vchans.txt (dead)
+  7.39      +1 -16     ircd-ratbox/doc/whats-new.txt
+  1.2       +0 -4      ircd-ratbox/help/opers/cjoin (dead)
+  1.3       +0 -18     ircd-ratbox/help/opers/cmode
+  1.3       +2 -5      ircd-ratbox/help/opers/join
+  7.86      +4 -4      ircd-ratbox/src/channel_mode.c
+
+
+
 leeh        2002/11/24 02:01:15 UTC	(20021124_3)
 
   Modified files:
