@@ -1,3 +1,26 @@
+leeh        2003/06/25 08:37:08 UTC	(20030625_0)
+
+  Modified files:
+    modules              m_map.c m_who.c 
+    modules/core         m_sjoin.c 
+    src                  s_auth.c s_debug.c 
+  Log:
+  - some things from stable:
+    - removed the "chname" parameter from do_who_on_channel
+      this is a vchan leftover.
+    - fix IGNORE_BOGUS_TS compile error
+    - s/struct HashEntry/dlink_list in s_debug.c
+    - %d -> %lu in m_map.c
+  
+  Revision  Changes    Path
+  1.175     +2 -2      ircd-ratbox/modules/core/m_sjoin.c
+  1.28      +2 -2      ircd-ratbox/modules/m_map.c
+  1.95      +7 -8      ircd-ratbox/modules/m_who.c
+  7.149     +0 -2      ircd-ratbox/src/s_auth.c
+  7.94      +1 -1      ircd-ratbox/src/s_debug.c
+
+
+
 androsyn    2003/06/24 21:55:14 UTC	(20030624_6)
 
   Modified files:
