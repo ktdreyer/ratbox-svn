@@ -1,3 +1,7 @@
+*** 20001205_4 by toot
+removed zlib from configure, and updated version number
+
+
 *** 20001205_3 by db
 - updated opers.txt for h7, its more or less right now
 - added new 'u' flag for opers, show unauth clients on that flag instead
