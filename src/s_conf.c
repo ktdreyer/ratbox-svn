@@ -1343,19 +1343,21 @@ write_confitem(KlineType type, struct Client *source_p, char *user,
 		if(EmptyString(oper_reason))
 		{
 			sendto_realops_flags(UMODE_ALL, L_ALL,
-					     "%s added K-Line for [%s@%s] [%s]",
-					     get_oper_name(source_p), user, host, reason);
-			ilog(L_KLINE, "%s added K-Line for [%s@%s] [%s]",
-			     source_p->name, user, host, reason);
+					"%s added K-Line for [%s@%s] [%s]",
+					get_oper_name(source_p), user, 
+					host, reason);
+			ilog(L_KLINE, "K %s 0 %s %s %s",
+				get_oper_name(source_p), user, host, reason);
 		}
 		else
 		{
 			sendto_realops_flags(UMODE_ALL, L_ALL,
-					     "%s added K-Line for [%s@%s] [%s|%s]",
-					     get_oper_name(source_p), user,
-					     host, reason, oper_reason);
-			ilog(L_KLINE, "%s added K-Line for [%s@%s] [%s|%s]",
-			     source_p->name, user, host, reason, oper_reason);
+					"%s added K-Line for [%s@%s] [%s|%s]",
+					get_oper_name(source_p), user,
+					host, reason, oper_reason);
+			ilog(L_KLINE, "K %s 0 %s %s %s|%s",
+				get_oper_name(source_p), user, host,
+				reason, oper_reason);
 		}
 
 		sendto_one_notice(source_p, ":Added K-Line [%s@%s]",
@@ -1366,18 +1368,20 @@ write_confitem(KlineType type, struct Client *source_p, char *user,
 		if(EmptyString(oper_reason))
 		{
 			sendto_realops_flags(UMODE_ALL, L_ALL,
-					     "%s added D-Line for [%s] [%s]",
-					     get_oper_name(source_p), host, reason);
-			ilog(L_KLINE, "%s added D-Line for [%s] [%s]",
-			     get_oper_name(source_p), host, reason);
+					"%s added D-Line for [%s] [%s]",
+					get_oper_name(source_p), host, reason);
+			ilog(L_KLINE, "D %s 0 %s %s",
+				get_oper_name(source_p), host, reason);
 		}
 		else
 		{
 			sendto_realops_flags(UMODE_ALL, L_ALL,
-					     "%s added D-Line for [%s] [%s|%s]",
-					     get_oper_name(source_p), host, reason, oper_reason);
-			ilog(L_KLINE, "%s added D-Line for [%s] [%s|%s]",
-			     get_oper_name(source_p), host, reason, oper_reason);
+					"%s added D-Line for [%s] [%s|%s]",
+					get_oper_name(source_p), host, 
+					reason, oper_reason);
+			ilog(L_KLINE, "D %s 0 %s %s|%s",
+				get_oper_name(source_p), host, 
+				reason, oper_reason);
 		}
 
 		sendto_one(source_p,
@@ -1388,9 +1392,10 @@ write_confitem(KlineType type, struct Client *source_p, char *user,
 	else if(type == RESV_TYPE)
 	{
 		sendto_realops_flags(UMODE_ALL, L_ALL,
-				     "%s added RESV for [%s] [%s]",
-				     get_oper_name(source_p), host, reason);
-		ilog(L_KLINE, "%s added RESV for [%s] [%s]", source_p->name, host, reason);
+				"%s added RESV for [%s] [%s]",
+				get_oper_name(source_p), host, reason);
+		ilog(L_KLINE, "R %s 0 %s %s",
+			get_oper_name(source_p), host, reason);
 
 		sendto_one_notice(source_p, ":Added RESV for [%s] [%s]",
 				  host, reason);

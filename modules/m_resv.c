@@ -218,7 +218,7 @@ parse_resv(struct Client *source_p, const char *name,
 				     "%s added temporary %d min. RESV for [%s] [%s]",
 				     get_oper_name(source_p), temp_time / 60,
 				     name, reason);
-			ilog(L_KLINE, "%s added temporary %d min. RESV for [%s] [%s]",
+			ilog(L_KLINE, "R %s %d %s %s",
 				get_oper_name(source_p), temp_time / 60,
 				name, reason);
 			sendto_one_notice(source_p, ":Added temporary %d min. RESV [%s]",
@@ -268,7 +268,7 @@ parse_resv(struct Client *source_p, const char *name,
 				     "%s added temporary %d min. RESV for [%s] [%s]",
 				     get_oper_name(source_p), temp_time / 60,
 				     name, reason);
-			ilog(L_KLINE, "%s added temporary %d min. RESV for [%s] [%s]",
+			ilog(L_KLINE, "R %s %d %s %s",
 				get_oper_name(source_p), temp_time / 60,
 				name, reason);
 			sendto_one_notice(source_p, ":Added temporary %d min. RESV [%s]",
@@ -364,15 +364,7 @@ mo_unresv(struct Client *client_p, struct Client *source_p, int parc, const char
 				"%s", parv[1]);
 
 	if(remove_temp_resv(source_p, parv[1]))
-	{
-		sendto_one_notice(source_p, ":RESV for [%s] is removed", parv[1]);
-		sendto_realops_flags(UMODE_ALL, L_ALL,
-				     "%s has removed the temporary RESV for: [%s]", 
-				     get_oper_name(source_p), parv[1]);
-		ilog(L_KLINE, "%s has removed the temporary RESV for [%s]", 
-			get_oper_name(source_p), parv[1]);
 		return 0;
-	}
 
 	remove_resv(source_p, parv[1]);
 	return 0;
@@ -421,15 +413,7 @@ handle_remote_unresv(struct Client *source_p, const char *name)
 		return;
 
 	if(remove_temp_resv(source_p, name))
-	{
-		sendto_one_notice(source_p, ":RESV for [%s] is removed", name);
-		sendto_realops_flags(UMODE_ALL, L_ALL,
-				"%s has removed the RESV for: [%s]", 
-				get_oper_name(source_p), name);
-		ilog(L_KLINE, "%s has removed the RESV for [%s]", 
-				get_oper_name(source_p), name);
 		return;
-	}
 
 	remove_resv(source_p, name);
 
@@ -464,6 +448,13 @@ remove_temp_resv(struct Client *source_p, const char *name)
 
 	dlinkFindDestroy(&resv_conf_list, aconf);
 	free_conf(aconf);
+
+	sendto_one_notice(source_p, ":RESV for [%s] is removed", name);
+	sendto_realops_flags(UMODE_ALL, L_ALL,
+			"%s has removed the RESV for: [%s]", 
+			get_oper_name(source_p), name);
+	ilog(L_KLINE, "UR %s %s", get_oper_name(source_p), name);
+
 	return 1;
 }
 
@@ -571,5 +562,5 @@ remove_resv(struct Client *source_p, const char *name)
 	sendto_one_notice(source_p, ":RESV for [%s] is removed", name);
 	sendto_realops_flags(UMODE_ALL, L_ALL,
 			     "%s has removed the RESV for: [%s]", get_oper_name(source_p), name);
-	ilog(L_KLINE, "%s has removed the RESV for [%s]", get_oper_name(source_p), name);
+	ilog(L_KLINE, "UR %s %s", get_oper_name(source_p), name);
 }

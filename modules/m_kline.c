@@ -378,7 +378,8 @@ mo_unkline(struct Client *client_p, struct Client *source_p, int parc, const cha
 		sendto_realops_flags(UMODE_ALL, L_ALL,
 				     "%s has removed the temporary K-Line for: [%s@%s]",
 				     get_oper_name(source_p), user, host);
-		ilog(L_KLINE, "%s removed temporary K-Line for [%s@%s]", parv[0], user, host);
+		ilog(L_KLINE, "UK %s %s %s",
+			get_oper_name(source_p), user, host);
 		return 0;
 	}
 
@@ -439,8 +440,8 @@ handle_remote_unkline(struct Client *source_p, const char *user, const char *hos
 				"%s has removed the temporary K-Line for: [%s@%s]",
 				get_oper_name(source_p), user, host);
 
-		ilog(L_KLINE, "%s removed temporary K-Line for [%s@%s]",
-				source_p->name, user, host);
+		ilog(L_KLINE, "UK %s %s %s",
+			get_oper_name(source_p), user, host);
 		return;
 	}
 
@@ -483,8 +484,9 @@ apply_tkline(struct Client *source_p, struct ConfItem *aconf,
 				     "%s added temporary %d min. K-Line for [%s@%s] [%s]",
 				     get_oper_name(source_p), tkline_time / 60,
 				     aconf->user, aconf->host, reason);
-		ilog(L_KLINE, "%s added temporary %d min. K-Line for [%s@%s] [%s]",
-		     source_p->name, tkline_time / 60, aconf->user, aconf->host, reason);
+		ilog(L_KLINE, "K %s %d %s %s %s",
+			get_oper_name(source_p), tkline_time / 60,
+			aconf->user, aconf->host, reason);
 	}
 	else
 	{
@@ -492,9 +494,9 @@ apply_tkline(struct Client *source_p, struct ConfItem *aconf,
 				     "%s added temporary %d min. K-Line for [%s@%s] [%s|%s]",
 				     get_oper_name(source_p), tkline_time / 60,
 				     aconf->user, aconf->host, reason, oper_reason);
-		ilog(L_KLINE, "%s added temporary %d min. K-Line for [%s@%s] [%s|%s]",
-		     source_p->name, tkline_time / 60,
-		     aconf->user, aconf->host, reason, oper_reason);
+		ilog(L_KLINE, "K %s %d %s %s %s|%s",
+			get_oper_name(source_p), tkline_time / 60,
+			aconf->user, aconf->host, reason, oper_reason);
 	}
 
 	sendto_one_notice(source_p, ":Added temporary %d min. K-Line [%s@%s]",
@@ -788,7 +790,8 @@ remove_permkline_match(struct Client *source_p, const char *host, const char *us
 			     "%s has removed the K-Line for: [%s@%s]",
 			     get_oper_name(source_p), user, host);
 
-	ilog(L_KLINE, "%s removed K-Line for [%s@%s]", source_p->name, user, host);
+	ilog(L_KLINE, "UK %s %s %s",
+		get_oper_name(source_p), user, host);
 	return;
 }
 

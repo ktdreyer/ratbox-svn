@@ -281,7 +281,7 @@ apply_xline(struct Client *source_p, const char *name, const char *reason,
 			     "%s added temporary %d min. X-Line for [%s] [%s]",
 			     get_oper_name(source_p), temp_time / 60,
 			     name, reason);
-		ilog(L_KLINE, "%s added temporary %d min. X-Line for [%s] [%s]",
+		ilog(L_KLINE, "X %s %d %s %s",
 			get_oper_name(source_p), temp_time / 60,
 			name, reason);
 		sendto_one_notice(source_p, ":Added temporary %d min. X-Line [%s]",
@@ -296,8 +296,8 @@ apply_xline(struct Client *source_p, const char *name, const char *reason,
 				aconf->name, aconf->passwd);
 		sendto_one_notice(source_p, ":Added X-Line for [%s] [%s]",
 					aconf->name, aconf->passwd);
-		ilog(L_KLINE, "%s added X-Line for [%s] [%s]",
-			get_oper_name(source_p), aconf->name, aconf->passwd);
+		ilog(L_KLINE, "X %s 0 %s %s",
+			get_oper_name(source_p), name, reason);
 	}
 
 	dlinkAddAlloc(aconf, &xline_conf_list);
@@ -499,7 +499,7 @@ remove_temp_xline(struct Client *source_p, const char *name)
 			sendto_realops_flags(UMODE_ALL, L_ALL,
 					 "%s has removed the temporary X-Line for: [%s]",
 					 get_oper_name(source_p), name);
-			ilog(L_KLINE, "%s has removed the temporary X-Line for [%s]",
+			ilog(L_KLINE, "UX %s %s", 
 				get_oper_name(source_p), name);
 			
 			free_conf(aconf);
@@ -612,5 +612,5 @@ remove_xline(struct Client *source_p, const char *huntgecos)
 	sendto_realops_flags(UMODE_ALL, L_ALL,
 			     "%s has removed the X-Line for: [%s]",
 			     get_oper_name(source_p), huntgecos);
-	ilog(L_KLINE, "%s has removed the X-Line for [%s]", get_oper_name(source_p), huntgecos);
+	ilog(L_KLINE, "UX %s %s", get_oper_name(source_p), huntgecos);
 }

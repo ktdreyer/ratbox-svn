@@ -210,8 +210,9 @@ mo_dline(struct Client *client_p, struct Client *source_p,
 					     "%s added temporary %d min. D-Line for [%s] [%s]",
 					     get_oper_name(source_p), tdline_time / 60,
 					     aconf->host, reason);
-			ilog(L_KLINE, "%s added temporary %d min. D-Line for [%s] [%s]",
-			     source_p->name, tdline_time / 60, aconf->host, reason);
+			ilog(L_KLINE, "D %s %d %s %s",
+				get_oper_name(source_p), tdline_time / 60,
+				aconf->host, reason);
 		}
 		else
 		{
@@ -219,8 +220,9 @@ mo_dline(struct Client *client_p, struct Client *source_p,
 					     "%s added temporary %d min. D-Line for [%s] [%s|%s]",
 					     get_oper_name(source_p), tdline_time / 60,
 					     aconf->host, reason, oper_reason);
-			ilog(L_KLINE, "%s added temporary %d min. D-Line for [%s] [%s|%s]",
-			     source_p->name, tdline_time / 60, aconf->host, reason, oper_reason);
+			ilog(L_KLINE, "D %s %d %s %s|%s",
+				get_oper_name(source_p), tdline_time / 60,
+				aconf->host, reason, oper_reason);
 		}
 
 		sendto_one(source_p, ":%s NOTICE %s :Added temporary %d min. D-Line for [%s]",
@@ -273,7 +275,7 @@ mo_undline(struct Client *client_p, struct Client *source_p, int parc, const cha
 		sendto_realops_flags(UMODE_ALL, L_ALL,
 				     "%s has removed the temporary D-Line for: [%s]",
 				     get_oper_name(source_p), cidr);
-		ilog(L_KLINE, "%s removed temporary D-Line for [%s]", parv[0], cidr);
+		ilog(L_KLINE, "UD %s %s", get_oper_name(source_p), cidr);
 		return 0;
 	}
 
@@ -357,7 +359,7 @@ mo_undline(struct Client *client_p, struct Client *source_p, int parc, const cha
 	sendto_one(source_p, ":%s NOTICE %s :D-Line for [%s] is removed", me.name, parv[0], cidr);
 	sendto_realops_flags(UMODE_ALL, L_ALL,
 			     "%s has removed the D-Line for: [%s]", get_oper_name(source_p), cidr);
-	ilog(L_KLINE, "%s removed D-Line for [%s]", get_oper_name(source_p), cidr);
+	ilog(L_KLINE, "UD %s %s", get_oper_name(source_p), cidr);
 
 	return 0;
 }
