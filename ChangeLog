@@ -1,5 +1,11 @@
 leeh        2004/01/15 14:10:48 EST	(20040115_11)
 
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+    include              c_init.h client.h config.h 
+    src                  .depend Makefile.in client.c rserv.c 
+                         service.c 
   Added files:
     src/s_userserv       .cvsignore .depend Makefile.in 
                          s_u_crypt.c s_userserv.c s_userserv.h 
@@ -18,96 +24,11 @@ leeh        2004/01/15 14:10:48 EST	(20040115_11)
   1.1       +207 -0    rserv/src/s_userserv/s_userserv.c (new)
   1.1       +25 -0     rserv/src/s_userserv/s_userserv.h (new)
 
-
-
-leeh        2004/01/15 14:10:46 EST	(20040115_10)
-
-  Modified files:
-    src                  .depend Makefile.in client.c rserv.c 
-                         service.c 
-  Log:
-  - added checks for ranlib/ar to configure
-  - added the initial user registration service, just stored in memory atm
-  - added the Makefile stuff for the service directories
-  - hash_nick() -> global hash_name()
-  - I need to stop just doing "*buf++;" :P
-  
-  Revision  Changes    Path
-  1.3       +49 -30    rserv/src/.depend
-  1.15      +20 -2     rserv/src/Makefile.in
-  1.17      +9 -9      rserv/src/client.c
-  1.21      +3 -0      rserv/src/rserv.c
-  1.11      +2 -2      rserv/src/service.c
-
-
-
-leeh        2004/01/15 14:10:43 EST	(20040115_9)
-
-  Modified files:
-    include              c_init.h client.h config.h 
-  Log:
-  - added checks for ranlib/ar to configure
-  - added the initial user registration service, just stored in memory atm
-  - added the Makefile stuff for the service directories
-  - hash_nick() -> global hash_name()
-  - I need to stop just doing "*buf++;" :P
-  
-  Revision  Changes    Path
-  1.13      +3 -0      rserv/include/c_init.h
-  1.14      +11 -0     rserv/include/client.h
-  1.14      +21 -0     rserv/include/config.h
-
-
-
-leeh        2004/01/15 14:10:39 EST	(20040115_8)
-
-  Modified files:
-    autoconf             configure.in 
-  Log:
-  - added checks for ranlib/ar to configure
-  - added the initial user registration service, just stored in memory atm
-  - added the Makefile stuff for the service directories
-  - hash_nick() -> global hash_name()
-  - I need to stop just doing "*buf++;" :P
-  
-  Revision  Changes    Path
-  1.8       +7 -4      rserv/autoconf/configure.in
-
-
-
-leeh        2004/01/15 14:10:38 EST	(20040115_7)
-
-  Modified files:
-    .                    configure 
-  Log:
-  - added checks for ranlib/ar to configure
-  - added the initial user registration service, just stored in memory atm
-  - added the Makefile stuff for the service directories
-  - hash_nick() -> global hash_name()
-  - I need to stop just doing "*buf++;" :P
-  
-  Revision  Changes    Path
-  1.8       +122 -53   rserv/configure
-
-
-
 leeh        2004/01/15 10:48:34 EST	(20040115_6)
 
   rserv/src/s_userserv - New directory
-
-
-
-leeh        2004/01/15 10:48:31 EST	(20040115_5)
-
   rserv/src/s_jupeserv - New directory
-
-
-
-leeh        2004/01/15 10:48:30 EST	(20040115_4)
-
   rserv/src/s_chanserv - New directory
-
-
 
 leeh        2004/01/15 10:13:19 EST	(20040115_3)
 
