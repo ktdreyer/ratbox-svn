@@ -1,6 +1,6 @@
 /* 
  *
- * fdlist.c   maintain lists of certain important fds 
+ * fdlist.c   maintain lists of file descriptors
  *
  *
  * $Id$
@@ -59,19 +59,6 @@ void fdlist_init(void)
     initialized = 1;
   }
 }
-
-void fdlist_add(int fd, unsigned char mask)
-{
-  assert(fd < MAXCONNECTIONS + 1);
-  fd_table[fd].mask |= mask;
-}
- 
-void fdlist_delete(int fd, unsigned char mask)
-{
-  assert(fd < MAXCONNECTIONS + 1);
-  fd_table[fd].mask &= ~mask;
-}
-
 
 /* Called to open a given filedescriptor */
 void

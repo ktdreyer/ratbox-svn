@@ -1259,7 +1259,6 @@ int user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                   struct Client *prev_cptr = (struct Client *)NULL;
                   struct Client *cur_cptr = oper_cptr_list;
 
-                  fdlist_delete(sptr->fd, FDL_OPER | FDL_BUSY);
                   detach_conf(sptr,sptr->confs->value.aconf);
                   sptr->flags2 &= ~(FLAGS2_OPER_GLOBAL_KILL|
                                     FLAGS2_OPER_REMOTE|

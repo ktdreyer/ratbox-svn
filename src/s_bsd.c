@@ -362,7 +362,6 @@ void close_connection(struct Client *cptr)
     if (!IsDead(cptr))
         send_queued_write(cptr->fd, cptr);
     local[cptr->fd] = NULL;
-    fdlist_delete(cptr->fd, FDL_ALL);
     fd_close(cptr->fd);
     cptr->fd = -1;
   }

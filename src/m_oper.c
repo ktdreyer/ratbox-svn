@@ -233,7 +233,6 @@ int m_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       else
         operprivs = "";
 
-      fdlist_add(sptr->fd, FDL_OPER | FDL_BUSY);
 #ifdef CUSTOM_ERR
       sendto_ops("%s (%s@%s) has just acquired the personality of a petty megalomaniacal tyrant [IRC(%c)p]", parv[0],
 #else
@@ -430,7 +429,6 @@ int mo_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       else
         operprivs = "";
 
-      fdlist_add(sptr->fd, FDL_OPER | FDL_BUSY);
 #ifdef CUSTOM_ERR
       sendto_ops("%s (%s@%s) has just acquired the personality of a petty megalomaniacal tyrant [IRC(%c)p]", parv[0],
 #else
@@ -627,7 +625,6 @@ int ms_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       else
         operprivs = "";
 
-      fdlist_add(sptr->fd, FDL_OPER | FDL_BUSY);
 #ifdef CUSTOM_ERR
       sendto_ops("%s (%s@%s) has just acquired the personality of a petty megalomaniacal tyrant [IRC(%c)p]", parv[0],
 #else

@@ -1491,7 +1491,6 @@ const char* comment         /* Reason for the exit */
 #endif
       if (IsAnyOper(sptr))
         {
-          fdlist_delete(sptr->fd, FDL_OPER | FDL_BUSY);
           /* LINKLIST */
           /* oh for in-line functions... */
           {
@@ -1544,7 +1543,6 @@ const char* comment         /* Reason for the exit */
       if (IsServer(sptr))
         {
           Count.myserver--;
-          fdlist_delete(sptr->fd, FDL_SERVER | FDL_BUSY);
 
 	  if(ConfigFileEntry.hub)
 	    restoreUnusedServerMask(sptr->serverMask);

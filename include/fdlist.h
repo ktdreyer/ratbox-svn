@@ -57,14 +57,12 @@ typedef void PF(int, void *);
 typedef void CNCB(int, int, void *);
 
 struct _fde {
-    int fd;		/* So we can use the fde_t as a callback ptr */
-    int mask;		/* priority values used by the old-school ircd code */
-
     /* New-school stuff, again pretty much ripped from squid */
     /*
      * Yes, this gives us only one pending read and one pending write per
      * filedescriptor. Think though: when do you think we'll need more?
      */
+    int fd;		/* So we can use the fde_t as a callback ptr */
     int type;
     char desc[FD_DESC_SZ];
     PF *read_handler;
@@ -98,10 +96,7 @@ struct _fde {
 
 extern fde_t *fd_table;
 
-void fdlist_add(int fd, unsigned char mask);
-void fdlist_delete(int fd, unsigned char mask);
 void fdlist_init(void);
-void fdlist_check(time_t now);
 
 extern void  fd_open(int, unsigned int, const char *);
 extern void  fd_close(int);
