@@ -1,3 +1,8 @@
+*** 20010418_7 by a1kmm
+- Fixed unkline/undline to work properly with hostmasks. Still a bit messy,
+  and the rehash at the end is really bad, however.
+
+
 *** 20010418_6 by fl_
 - beginnings of a file we can dump to users on /help.. currently
   only covers usermodes/channelmodes.. additions are welcome :P
