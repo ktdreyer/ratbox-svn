@@ -2988,10 +2988,10 @@ char *channel_chanop_or_voice(struct Channel *chptr, struct Client *target_p)
 {
   if(find_user_link(&chptr->chanops,target_p))
     return("@");
-  else if(find_user_link(&chptr->voiced,target_p))
-    return("+");
   else if(find_user_link(&chptr->halfops,target_p))
     return("%");
+  else if(find_user_link(&chptr->voiced,target_p))
+    return("+");
   return("");
 }
 
