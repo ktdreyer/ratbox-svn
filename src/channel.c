@@ -1320,6 +1320,7 @@ void set_channel_mode(struct Client *cptr,
                            chptr->chname, who->name);
                 sendto_channel_butone(who, cptr, chptr, "MODE %s -h %s",
                                       chptr->chname, who->name);
+                sync_oplists(chptr, who, 1, chname);
                 break;
               }
 
