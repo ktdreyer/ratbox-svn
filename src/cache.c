@@ -100,7 +100,7 @@ cache_file(const char *filename, const char *shortname, int flags)
 		struct stat sb;
 		struct tm *local_tm;
 
-		if(fstat(&sb, in) < 0)
+		if(fstat(fileno(in), &sb) < 0)
 			return NULL;
 
 		local_tm = localtime(&sb.st_mtime);
