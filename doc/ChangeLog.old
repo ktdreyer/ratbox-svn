@@ -1,3 +1,6 @@
+*** 20010120_12 by davidt
+Argh.  argh. always test compile something, no matter how simple it is....
+
 *** 20010120_11 by db
 - fixed memory leak in new listen {} code
 - added max_clients = in serverinfo block
