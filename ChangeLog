@@ -1,3 +1,24 @@
+leeh        2005/01/12 11:11:48 EST	(20050112_4)
+
+  Modified files:
+    doc                  example.conf 
+    include              client.h conf.h 
+    src                  client.c conf.c s_chanserv.c s_userserv.c 
+  Log:
+  - remove the hacky allow userregister once per connection
+  - replace it with host based registration limits for usernames and channels
+  
+  Revision  Changes    Path
+  1.32      +16 -4     rserv/doc/example.conf
+  1.35      +0 -4      rserv/include/client.h
+  1.37      +6 -2      rserv/include/conf.h
+  1.30      +1 -1      rserv/src/client.c
+  1.40      +5 -1      rserv/src/conf.c
+  1.39      +25 -0     rserv/src/s_chanserv.c
+  1.35      +25 -8     rserv/src/s_userserv.c
+
+
+
 leeh        2005/01/12 10:46:24 EST	(20050112_3)
 
   Modified files:
