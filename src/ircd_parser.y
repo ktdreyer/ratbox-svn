@@ -374,13 +374,13 @@ sizespec:	NUMBER
  ***************************************************************************/
 
 modules_entry:          MODULES
-  '{' modules_items '}' ';'
+  '{' modules_items '}' ';';
 
 modules_items:   modules_items modules_item |
-                    modules_item
+                    modules_item;
 
 modules_item:    modules_module | modules_path |
-                 error
+                 error;
 
 modules_module:  MODULE '=' QSTRING ';'
 {
@@ -414,10 +414,10 @@ modules_path: PATH '=' QSTRING ';'
  ***************************************************************************/
 
 serverinfo_entry:       SERVERINFO
-  '{' serverinfo_items '}' ';'
+  '{' serverinfo_items '}' ';';
 
 serverinfo_items:       serverinfo_items serverinfo_item |
-                        serverinfo_item 
+                        serverinfo_item ;
 
 serverinfo_item:        serverinfo_name | serverinfo_vhost |
                         serverinfo_hub | serverinfo_description |
@@ -425,7 +425,7 @@ serverinfo_item:        serverinfo_name | serverinfo_vhost |
                         serverinfo_max_clients | 
                         serverinfo_rsa_private_key_file | serverinfo_vhost6 |
                         serverinfo_max_buffer | 
-			error
+			error;
 
 serverinfo_rsa_private_key_file: RSA_PRIVATE_KEY_FILE '=' QSTRING ';'
   {
@@ -483,7 +483,7 @@ serverinfo_rsa_private_key_file: RSA_PRIVATE_KEY_FILE '=' QSTRING ';'
   BIO_set_close(file, BIO_CLOSE);
   BIO_free(file);
 #endif
-  }
+  };
 
 serverinfo_name:        NAME '=' QSTRING ';' 
   {
@@ -600,13 +600,13 @@ serverinfo_hub:         HUB '=' TYES ';'
  * admin section
  ***************************************************************************/
 
-admin_entry: ADMIN  '{' admin_items '}' ';' 
+admin_entry: ADMIN  '{' admin_items '}' ';' ;
 
 admin_items:    admin_items admin_item |
-                admin_item
+                admin_item;
 
 admin_item:     admin_name | admin_description |
-                admin_email | error
+                admin_email | error;
 
 admin_name:     NAME '=' QSTRING ';' 
   {
@@ -630,14 +630,14 @@ admin_description:      DESCRIPTION '=' QSTRING ';'
  *  section logging
  ***************************************************************************/
 
-logging_entry:          LOGGING  '{' logging_items '}' ';' 
+logging_entry:          LOGGING  '{' logging_items '}' ';' ;
 
 logging_items:          logging_items logging_item |
-                        logging_item 
+                        logging_item ;
 
 logging_item:           logging_path | logging_oper_log |
                         logging_gline_log | logging_log_level |
-			error
+			error;
 
 logging_path:           T_LOGPATH '=' QSTRING ';' 
                         {
@@ -736,12 +736,12 @@ oper_entry:     OPERATOR
   }; 
 
 oper_items:     oper_items oper_item |
-                oper_item
+                oper_item;
 
 oper_item:      oper_name  | oper_user | oper_password |
                 oper_class | oper_global_kill | oper_remote |
                 oper_kline | oper_unkline | oper_gline | oper_nick_changes |
-                oper_die | oper_rehash | oper_admin | oper_rsa_public_key_file | error
+                oper_die | oper_rehash | oper_admin | oper_rsa_public_key_file | error;
 
 oper_name:      NAME '=' QSTRING ';'
   {
@@ -909,7 +909,7 @@ class_entry:    CLASS
   };
 
 class_items:    class_items class_item |
-                class_item
+                class_item;
 
 class_item:     class_name |
                 class_ping_time |
@@ -917,7 +917,7 @@ class_item:     class_name |
                 class_connectfreq |
                 class_max_number |
                 class_sendq |
-		error
+		error;
 
 class_name:     NAME '=' QSTRING ';' 
   {
@@ -966,13 +966,13 @@ listen_entry:   LISTEN
   };
 
 listen_items:   listen_items listen_item |
-                listen_item
+                listen_item;
 
-listen_item:    listen_port | listen_address | listen_host | error
+listen_item:    listen_port | listen_address | listen_host | error;
 
 listen_port: PORT '=' port_items ';' ;
 
-port_items: port_items ',' port_item | port_item
+port_items: port_items ',' port_item | port_item;
 
 port_item: NUMBER
 {
@@ -1069,14 +1069,14 @@ auth_entry:   AUTH
   }; 
 
 auth_items:     auth_items auth_item |
-                auth_item
+                auth_item;
 
 auth_item:      auth_user | auth_passwd | auth_class |
                 auth_kline_exempt | auth_have_ident | auth_is_restricted |
                 auth_exceed_limit | auth_no_tilde | auth_gline_exempt |
                 auth_spoof | auth_spoof_notice |
                 auth_redir_serv | auth_redir_port |
-                error
+                error;
 
 auth_user:   USER '=' QSTRING ';'
   {
@@ -1239,9 +1239,9 @@ resv_entry:	RESV
   };
 
 resv_items:	resv_items resv_item |
-                resv_item
+                resv_item;
 
-resv_item:	resv_creason | resv_channel | resv_nick | error
+resv_item:	resv_creason | resv_channel | resv_nick | error;
 
 resv_creason:	REASON '=' QSTRING ';'
 {
@@ -1300,9 +1300,9 @@ shared_entry:		T_SHARED
   };
 
 shared_items:		shared_items shared_item |
-			shared_item
+			shared_item;
 
-shared_item:		shared_name | shared_user | error
+shared_item:		shared_name | shared_user | error;
 
 shared_name:		NAME '=' QSTRING ';'
   {
@@ -1446,7 +1446,7 @@ connect_entry:  CONNECT
   };
 
 connect_items:  connect_items connect_item |
-                connect_item
+                connect_item;
 
 connect_item:   connect_name | connect_host | connect_send_password |
                 connect_accept_password | connect_port | connect_aftype | 
@@ -1455,7 +1455,7 @@ connect_item:   connect_name | connect_host | connect_send_password |
 		connect_encrypted | connect_compressed | connect_cryptlink |
 		connect_rsa_public_key_file | connect_cipher_preference |
 		connect_vhost |
-                error
+                error;
 
 connect_name:   NAME '=' QSTRING ';'
   {
@@ -1728,9 +1728,9 @@ kill_entry:     KILL
   }; 
 
 kill_items:     kill_items kill_item |
-                kill_item
+                kill_item;
 
-kill_item:      kill_user | kill_reason | error
+kill_item:      kill_user | kill_reason | error;
 
 
 kill_user:      USER '=' QSTRING ';'
@@ -1795,9 +1795,9 @@ deny_entry:     DENY
   }; 
 
 deny_items:     deny_items deny_item |
-                deny_item
+                deny_item;
 
-deny_item:      deny_ip | deny_reason | error
+deny_item:      deny_ip | deny_reason | error;
 
 
 deny_ip:        IP '=' QSTRING ';'
@@ -1841,9 +1841,9 @@ exempt_entry:     EXEMPT
   };
 
 exempt_items:     exempt_items exempt_item |
-                exempt_item
+                exempt_item;
 
-exempt_item:      exempt_ip | error
+exempt_item:      exempt_ip | error;
 
 exempt_ip:        IP '=' QSTRING ';'
   {
@@ -1878,9 +1878,9 @@ gecos_entry:     GECOS
   }; 
 
 gecos_items:     gecos_items gecos_item |
-                 gecos_item
+                 gecos_item;
 
-gecos_item:      gecos_name | gecos_reason | gecos_action | error
+gecos_item:      gecos_name | gecos_reason | gecos_action | error;
 
 
 gecos_name:    NAME '=' QSTRING ';' 
@@ -1916,10 +1916,10 @@ gecos_action:    ACTION '=' WARN ';'
  ***************************************************************************/
 
 general_entry:      GENERAL
-  '{' general_items '}' ';'
+  '{' general_items '}' ';';
 
 general_items:      general_items general_item |
-                    general_item
+                    general_item;
 
 general_item:       general_failed_oper_notice |
                     general_anti_nick_flood | general_max_nick_time |
@@ -1952,7 +1952,7 @@ general_item:       general_failed_oper_notice |
                     general_compression_level | general_client_flood |
                     general_throttle_time | general_havent_read_conf |
                     general_dot_in_ip6_addr | general_ping_cookie |
-                    error
+                    error;
 
 general_failed_oper_notice:   FAILED_OPER_NOTICE '=' TYES ';'
   {
@@ -2013,7 +2013,7 @@ general_havent_read_conf:  HAVENT_READ_CONF '=' NUMBER ';'
     ilog(L_CRIT, "Consider actually reading/editing the conf file, and removing this line.");
     exit(0);
   }
-}
+};
 general_kline_with_reason: KLINE_WITH_REASON '=' TYES ';'
   {
     ConfigFileEntry.kline_with_reason = 1;
@@ -2283,7 +2283,7 @@ general_compression_level: COMPRESSION_LEVEL '=' NUMBER ';'
       ConfigFileEntry.compression_level = 0;
     }
 #endif
-  }
+  };
 
 general_use_egd: USE_EGD '=' TYES ';'
   {
@@ -2322,7 +2322,7 @@ general_oper_umodes: OPER_UMODES
   '='  umode_oitems ';' ;
 
 umode_oitems:    umode_oitems ',' umode_oitem |
-  umode_oitem
+  umode_oitem;
 
 umode_oitem:     T_BOTS
   {
@@ -2396,7 +2396,7 @@ general_oper_only_umodes: OPER_ONLY_UMODES
   '='  umode_items ';' ;
 
 umode_items:	umode_items ',' umode_item |
-  umode_item 
+  umode_item ;
 
 umode_item:	T_BOTS 
   {
@@ -2491,10 +2491,10 @@ general_dot_in_ip6_addr: DOT_IN_IP6_ADDR '=' TYES ';'
  ***************************************************************************/
 
 channel_entry:      CHANNEL
-  '{' channel_items '}' ';'
+  '{' channel_items '}' ';';
 
 channel_items:      channel_items channel_item |
-                    channel_item
+                    channel_item;
 
 channel_item:       channel_use_except |
                     channel_use_halfops |
@@ -2512,7 +2512,7 @@ channel_item:       channel_use_except |
 		    channel_default_split_server_count |
 		    channel_no_create_on_split | 
 		    channel_no_join_on_split |
-                    error
+                    error;
 
 channel_use_except:   USE_EXCEPT '=' TYES ';'
   {
@@ -2661,10 +2661,10 @@ channel_no_join_on_split: NO_JOIN_ON_SPLIT '=' TYES ';'
  ***************************************************************************/
 
 serverhide_entry:      SERVERHIDE
-  '{' serverhide_items '}' ';'
+  '{' serverhide_items '}' ';';
 
 serverhide_items:   serverhide_items serverhide_item |
-                    serverhide_item
+                    serverhide_item;
 
 serverhide_item:    serverhide_flatten_links |
 		    serverhide_hide_servers |
@@ -2673,7 +2673,7 @@ serverhide_item:    serverhide_flatten_links |
 		    serverhide_disable_hidden |
 		    serverhide_hidden |
 		    serverhide_disable_local_channels |
-                    error
+                    error;
 
 serverhide_flatten_links: FLATTEN_LINKS '=' TYES ';'
   {
