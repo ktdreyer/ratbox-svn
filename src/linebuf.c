@@ -69,7 +69,7 @@ linebuf_new_line(buf_head_t *bufhead)
     bufline = (buf_line_t *)BlockHeapAlloc(linebuf_bl);
 
     /* XXX Zero data, I'm being paranoid! -- adrian */
-    bzero(bufline, sizeof(buf_line_t));
+    memset(bufline, 0, sizeof(buf_line_t));
 
 #if 0
     bufline->len = 0;
@@ -161,7 +161,7 @@ void
 linebuf_newbuf(buf_head_t *bufhead)
 {
     /* not much to do right now :) */
-    bzero(bufhead, sizeof(buf_head_t));
+    memset(bufhead, 0, sizeof(buf_head_t));
 }
 
 /*
