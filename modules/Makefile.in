@@ -38,6 +38,7 @@ CPPFLAGS	= ${INCLUDES} @CPPFLAGS@
 CORE_SRCS = \
   core/m_die.c \
   core/m_error.c \
+  core/m_join.c \
   core/m_kick.c \
   core/m_kill.c \
   core/m_message.c \
@@ -66,7 +67,6 @@ SRCS =                          \
   m_info.c \
   m_invite.c \
   m_ison.c \
-  m_join.c \
   m_kline.c \
   m_knock.c \
   m_links.c \
