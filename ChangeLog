@@ -1,3 +1,15 @@
+androsyn    2004/09/15 14:52:50 EDT	(20040915_3)
+
+  Modified files:
+    src                  s_auth.c 
+  Log:
+  arpa type argument was removed
+  
+  Revision  Changes    Path
+  7.184     +1 -1      ircd-ratbox/src/s_auth.c
+
+
+
 androsyn    2004/09/15 14:37:55 EDT	(20040915_2)
 
   Modified files:
