@@ -110,8 +110,7 @@ typedef enum
 }
 ReportType;
 
-#define sendheader(c, r) \
-   send((c)->localClient->fd, HeaderMessages[(r)].message, HeaderMessages[(r)].length, 0)
+#define sendheader(c, r) sendto_one(c, HeaderMessages[(r)].message)
 
 /*
  */
@@ -143,6 +142,7 @@ static struct AuthRequest *
 make_auth_request(struct Client *client)
 {
 	struct AuthRequest *request = (struct AuthRequest *) MyMalloc(sizeof(struct AuthRequest));
+	client->localClient->auth_request = request;
 	request->fd = -1;
 	request->client = client;
 	request->timeout = CurrentTime + ConfigFileEntry.connect_timeout;
@@ -312,6 +312,7 @@ start_auth_query(struct AuthRequest *auth)
 	}
 
 	sendheader(auth->client, REPORT_DO_ID);
+
 	if(!set_non_blocking(fd))
 	{
 		report_error(L_ALL, NONB_ERROR_MSG, get_client_name(auth->client, SHOW_IP), errno);
@@ -633,30 +634,9 @@ delete_identd_queries(struct Client *target_p)
 {
 	dlink_node *ptr;
 	dlink_node *next_ptr;
-	struct AuthRequest *auth;
-	DLINK_FOREACH_SAFE(ptr, next_ptr, auth_poll_list.head)
-	{
-		auth = ptr->data;
-
-		if(auth->client == target_p)
-		{
-			if(auth->fd >= 0)
-				fd_close(auth->fd);
-			dlinkDestroy(ptr, &auth_poll_list);
-			free_auth_request(auth);
-		}
-	}
-
-	DLINK_FOREACH_SAFE(ptr, next_ptr, auth_client_list.head)
-	{
-		auth = ptr->data;
-
-		if(auth->client == target_p)
-		{
-			if(auth->fd >= 0)
-				fd_close(auth->fd);
-			dlinkDestroy(ptr, &auth_client_list);
-			free_auth_request(auth);
-		}
-	}
+	struct AuthRequest *auth = target_p->localClient->auth_request;
+	
+	if(auth->fd >= 0)
+		fd_close(fd);
+	free_auth_request(auth);
 }

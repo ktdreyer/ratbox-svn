@@ -178,7 +178,7 @@ free_local_client(struct Client *client_p)
 	if(!MyConnect(client_p))
 		return;
 
-
+	remove_auth_request(client_p);
 	/*
 	 * clean up extra sockets from P-lines which have been discarded.
 	 */

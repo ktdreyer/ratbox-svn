@@ -270,7 +270,7 @@ struct LocalUser
 	int sent_parsed;	/* how many messages we've parsed in this second */
 	time_t last_knock;	/* time of last knock */
 	unsigned long random_ping;
-
+	struct AuthRequest	*auth_request;
 };
 
 /*
