@@ -1,3 +1,7 @@
+*** 19990909_21 by tomh
+change return type for get_sendq, remove redundant casts
+
+
 *** 19990909_20 by tomh
 change return type for get_sendq
 
