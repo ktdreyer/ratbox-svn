@@ -1,3 +1,15 @@
+androsyn    2003/09/17 10:40:37 EDT	(20030917_0)
+
+  Modified files:
+    modules              static_modules.c.SH 
+  Log:
+  Fix the static build..
+  
+  Revision  Changes    Path
+  1.6       +1 -1      ircd-ratbox/modules/static_modules.c.SH
+
+
+
 androsyn    2003/09/15 16:21:00 EDT	(20030915_2)
 
   Modified files:
