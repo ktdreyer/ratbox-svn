@@ -1,3 +1,8 @@
+*** 20010523_3 by davidt
+- Remove extra 'depend:' line
+- Tidy up servlink code slighty
+
+
 *** 20010523_2 by davidt
 - Add check for openssl >= 0.9.6
 - Convert servlink to the new dependency system
