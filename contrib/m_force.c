@@ -56,11 +56,11 @@ static void mo_forcepart(struct Client *client_p, struct Client *source_p,
 
 struct Message forcejoin_msgtab = {
   "FORCEJOIN", 0, 0, 3, 0, MFLG_SLOW, 0,
-  {m_ignore, m_ignore, m_ignore, mo_forcejoin}
+  {m_ignore, m_not_oper, mo_forcejoin, mo_forcejoin}
 };
 struct Message forcepart_msgtab = {
   "FORCEPART", 0, 0, 2, 0, MFLG_SLOW, 0,
-  {m_ignore, m_ignore, m_ignore, mo_forcepart}
+  {m_ignore, m_not_oper, mo_forcepart, mo_forcepart}
 };
 
 #ifndef STATIC_MODULES
@@ -94,9 +94,33 @@ static void mo_forcejoin(struct Client *client_p, struct Client *source_p,
   struct Channel *chptr;
   int type;
   char mode, sjmode;
-  
-  if((target_p = find_client(parv[1])) && MyClient(target_p))
+  char *newch;
+
+  /* if target_p is not existant, print message
+   * to source_p and bail - scuzzy
+   */
+  if ((target_p = find_client(parv[1])) == NULL)
   {
+    sendto_one(source_p, form_str(ERR_NOSUCHNICK), me.name,
+	       source_p->name, parv[1]);
+    return;
+  }
+
+  /* target_p isn't local to us, so hunt_server()
+   * and let source_p know what we're doing - scuzzy
+   */
+  if (!MyClient(target_p))
+  {
+    if ((hunt_server(client_p, source_p, ":%s FORCEJOIN %s %s", 1, parc, parv)) != NULL)
+    return;
+  }
+
+  /* took out the MyClient check here since we
+   * already checked to see if target_p isn't local
+   */
+  if((target_p = find_client(parv[1])))
+  {
+    /* select our modes from parv[2] if they exist... (chanop)*/
     if(*parv[2] == '@')
     {
       type = CHFL_CHANOP;
@@ -126,17 +150,25 @@ static void mo_forcejoin(struct Client *client_p, struct Client *source_p,
     if(mode)
       parv[2]++;
     
-    if((chptr = hash_find_channel(parv[2])))
+    chptr = hash_find_channel(parv[2]);
+
+    /* if chptr exists already, join */
+    if ((chptr != NULL))
     {
       if(IsMember(target_p, chptr))
+      {
+        /* debugging is fun... */
+        sendto_one(source_p, ":%s NOTICE %s :*** Notice -- %s is already in %s", me.name,
+		   source_p->name, target_p->name, chptr->chname);
 	return;
-
+      }
       add_user_to_channel(chptr, target_p, type);
       sendto_server(target_p, target_p, chptr, NOCAPS, NOCAPS, LL_ICLIENT,
 	            ":%s SJOIN %lu %s + :%c%s",
 	            me.name, (unsigned long) chptr->channelts,
 	            chptr->chname, type ? sjmode : ' ', target_p->name);
 
+      /* send the join to our target */
       sendto_channel_local(ALL_MEMBERS, chptr, ":%s!%s@%s JOIN :%s",
 	                     target_p->name, target_p->username, 
 			     target_p->host, chptr->chname);
@@ -156,6 +188,88 @@ static void mo_forcejoin(struct Client *client_p, struct Client *source_p,
 
       channel_member_names(target_p, chptr, chptr->chname, 1);
     }
+
+    /* channel doesn't exist, so create it and join our user...
+     * Don't ask me why this is needed, it could be abused, but
+     * it could also be useful... (we do this if check just to make
+     * sure something isn't messed up with chptr, I hate corefiles)
+     */
+    if ((chptr == NULL))
+    {
+      newch = parv[2];
+      if (!check_channel_name(newch))
+      {
+        sendto_one(source_p, form_str(ERR_BADCHANNAME), me.name,
+		   source_p->name, (unsigned char*)newch);
+	return;
+      }
+
+      /* channel name must begin with & or # */
+      if (!IsChannelName(newch))
+      {
+        sendto_one(source_p, form_str(ERR_BADCHANNAME), me.name,
+		   source_p->name, (unsigned char*)newch);
+        return;
+      }
+
+     /* it would be interesting here to allow an oper
+      * to force target_p into a channel that doesn't exist
+      * even more so, into a local channel when we disable
+      * local channels... but...
+      * I don't want to break anything - scuzzy
+      */
+      if (ConfigServerHide.disable_local_channels &&
+	  (*newch == '&'))
+      {
+        sendto_one(source_p, ":%s NOTICE %s :No such channel (%s)", me.name,
+		   source_p->name, newch);
+        return;
+      }
+
+      /* newch can't be longer than CHANNELLEN */
+      if (strlen(newch) > CHANNELLEN)
+      {
+	sendto_one(source_p, ":%s NOTICE %s :Channel name is too long", me.name,
+		   source_p->name);
+        return;
+      }
+
+      chptr = get_or_create_channel(target_p, newch, NULL);
+      add_user_to_channel(chptr, target_p, type);
+
+      /* send out a join, make target_p join chptr */
+      sendto_server(target_p, target_p, chptr, NOCAPS, NOCAPS, LL_ICLIENT,
+		    ":%s SJOIN %lu %s + :%c%s", me.name,
+		    (unsigned long) chptr->channelts, chptr->chname,
+		    type ? sjmode : ' ', target_p->name);
+      target_p->localClient->last_join_time = CurrentTime;
+
+      sendto_channel_local(ALL_MEMBERS, chptr, ":%s!%s@%s JOIN :%s",
+                             target_p->name, target_p->username,
+                             target_p->host, chptr->chname);
+
+      chptr->mode.mode |= MODE_TOPICLIMIT;
+      chptr->mode.mode |= MODE_NOPRIVMSGS;
+      sendto_server(target_p, target_p, chptr, NOCAPS, NOCAPS, LL_ICLIENT,
+                    ":%s MODE %s +nt", me.name, chptr->chname);
+      sendto_channel_local(ALL_MEMBERS, chptr, ":%s MODE %s +nt", me.name,
+                           chptr->chname);
+
+      /* if type has a mode (@/+/%) send it as well */
+      if(type)
+        sendto_channel_local(ALL_MEMBERS, chptr, ":%s MODE %s +%c %s",
+                             me.name, chptr->chname, mode, target_p->name);
+
+      target_p->localClient->last_join_time = CurrentTime;
+      channel_member_names(target_p, chptr, chptr->chname, 1);
+
+      /* we do this to let the oper know that a channel was created, this will be
+       * seen from the server handling the command instead of the server that
+       * the oper is on.
+       */
+      sendto_one(source_p, ":%s NOTICE %s :*** Notice -- Creating channel %s", me.name,
+		 source_p->name, chptr->chname);
+    }
   }
 }
 
@@ -165,20 +279,50 @@ static void mo_forcepart(struct Client *client_p, struct Client *source_p,
   struct Client *target_p;
   struct Channel *chptr;
 
-  if((target_p = find_client(parv[1])) && MyClient(target_p))
+  /* if target_p == NULL then let the oper know */
+  if ((target_p = find_client(parv[1])) == NULL)
   {
-    if((chptr = hash_find_channel(parv[2])) && IsMember(target_p, chptr))
+    sendto_one(source_p, form_str(ERR_NOSUCHNICK), me.name,
+               source_p->name, parv[1]);
+    return;
+  }
+
+  /* target_p isn't local to us, so hunt_server()
+   * this process is now quiet. - scuzzy  
+   */
+  if (!MyClient(target_p))
+  {
+    if ((hunt_server(client_p, source_p, ":%s FORCEPART %s %s", 1, parc, parv)) != NULL)
+    return;
+  }
+
+  /* took out the MyClient check here since we
+   * already checked to see if target_p isn't local
+   */
+  if((chptr = hash_find_channel(parv[2])) == NULL)
+  {
+    sendto_one(source_p, ":%s NOTICE %s :*** Notice -- %s does not exist", me.name,
+	       source_p->name, parv[2]);
+    return;
+  }
+  else
+  {
+    if (!IsMember(target_p, chptr))
     {
-      sendto_server(target_p, target_p, chptr, NOCAPS, NOCAPS, LL_ICLIENT,
-		    ":%s PART %s :%s",
-		    target_p->name, chptr->chname,
-		    target_p->name);
-      sendto_channel_local(ALL_MEMBERS, chptr, ":%s!%s@%s PART %s :%s",
-                           target_p->name, target_p->username,
-	  	           target_p->host,chptr->chname,
-		           target_p->name);
-      remove_user_from_channel(chptr, target_p);
+      sendto_one(source_p, ":%s NOTICE %s :*** Notice -- %s is not in %s", me.name,
+		 source_p->name, target_p->name, chptr->chname);
+      return;
     }
+     sendto_server(target_p, target_p, chptr, NOCAPS, NOCAPS, LL_ICLIENT,
+		   ":%s PART %s :%s",
+		   target_p->name, chptr->chname,
+		   target_p->name);
+     sendto_channel_local(ALL_MEMBERS, chptr, ":%s!%s@%s PART %s :%s",
+                   target_p->name, target_p->username,
+ 	           target_p->host,chptr->chname,
+		   target_p->name);
+     remove_user_from_channel(chptr, target_p);
+     return;
   }
 }
 
