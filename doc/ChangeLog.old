@@ -1,3 +1,7 @@
+*** 20010514_3 by toot
+/trace <nick> didn't know the time
+
+
 *** 20010514_2 by toot
 . unregged clients can have a nick sometimes (NICK before USER), so changed
   m_admin back and fixed it.
