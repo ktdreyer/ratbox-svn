@@ -400,7 +400,7 @@ sendto_one(struct Client *to, const char *pattern, ...)
 
 	if(IsDeadorAborted(to))
 		return;		/* This socket has already been marked as dead */
-	
+
 	linebuf_newbuf(&linebuf);
 
 	va_start(args, pattern);
@@ -597,13 +597,15 @@ sendto_server(struct Client *one, struct Channel *chptr, unsigned long caps,
 	dlink_node *ptr_next;
 	buf_head_t linebuf;
 
+
 	
 	if(dlink_list_length(&serv_list) == 0) /* Nobody to send to */
 		return;
-	
-	if(dlink_list_length(&serv_list) == 1 && one != NULL) /* Length is 1 and we ain't gonna send to them */
+
+	/* Length is 1 AND one is a server, lets skip them */	
+	if(dlink_list_length(&serv_list) == 1 && (one != NULL && IsServer(one))) 
 		return;
-		
+
 	if(chptr != NULL)
 	{
 		if(*chptr->chname != '#')
@@ -631,6 +633,7 @@ sendto_server(struct Client *one, struct Channel *chptr, unsigned long caps,
 		send_linebuf(client_p, &linebuf);
 	}
 	linebuf_donebuf(&linebuf);
+
 }
 
 /*
