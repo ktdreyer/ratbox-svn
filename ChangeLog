@@ -1,3 +1,25 @@
+leeh        2004/01/10 20:12:13 EST	(20040111_1)
+
+  Modified files:
+    include              scommand.h tools.h 
+    src                  c_error.c c_message.c c_mode.c channel.c 
+                         client.c scommand.c 
+  Log:
+  - fix a core in the hosthash
+  - added hooks for scommands
+  
+  Revision  Changes    Path
+  1.3       +7 -1      rserv/include/scommand.h
+  1.8       +2 -0      rserv/include/tools.h
+  1.4       +1 -1      rserv/src/c_error.c
+  1.12      +1 -1      rserv/src/c_message.c
+  1.9       +1 -1      rserv/src/c_mode.c
+  1.13      +6 -6      rserv/src/channel.c
+  1.13      +10 -6     rserv/src/client.c
+  1.12      +56 -7     rserv/src/scommand.c
+
+
+
 leeh        2004/01/10 19:22:26 EST	(20040111_0)
 
   Modified files:
