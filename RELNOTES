@@ -1,13 +1,15 @@
--- ircd-hybrid-7beta16 RELNOTES
-     
-o) added optional defines for VCHANS, HALFOPS and ANONOPS which if undefined
-   will compile the ircd without the code for the options.
-o) added configure option --enable-efnet to compile the ircd with the three
-   options above undef'd.
-o) fixed a bug with opme causing channel member lists to be corrupted
-o) Fixed the issue where we would attempt to exit an already exited
-   client   
-o) Fixed the TCP resolver so that it actually works
+-- ircd-hybrid-7beta17 RELNOTES
+
+o) updates to some of the contrib modules, allowing remote forcejoin/forcepart
+o) TCP resolver is no longer hardwired on
+o) abort_list fixes
+o) some memory tweaks to make ircd use less ram
+o) '[' is now not allowed in ident replies and will be stripped.
+o) fixes for anon-ops (+a) which should make it fully working.
+o) added a define for HIDE_SPOOF_IPS which will hide the IPs of a spoofed
+   user from everyone.
+o) temp-dline patch and remote-unkline patch have been merged into lmh.diff
+   please see README.LMH for more info
 
 --------------------------------------------------------------------------------
 

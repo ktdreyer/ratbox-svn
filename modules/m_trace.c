@@ -357,6 +357,7 @@ static int report_this_status(struct Client *source_p, struct Client *target_p,
 	   (MyClient(source_p) || !(dow && IsInvisible(target_p))))
 	  || !dow || IsOper(target_p))
 	{
+#ifndef HIDE_SPOOF_IPS
           if (IsAdmin(target_p))
 	    sendto_one(source_p, form_str(RPL_TRACEOPERATOR),
                        me.name, source_p->name, class_name, name,
@@ -364,7 +365,9 @@ static int report_this_status(struct Client *source_p, struct Client *target_p,
                        CurrentTime - target_p->lasttime,
                        (target_p->user) ? (CurrentTime - target_p->user->last) : 0);
 		       
-	  else if (IsOper(target_p))
+	  else 
+#endif
+          if (IsOper(target_p))
 	    sendto_one(source_p, form_str(RPL_TRACEOPERATOR),
 		       me.name, source_p->name, class_name, name, 
 		       MyOper(source_p) ? ip : 

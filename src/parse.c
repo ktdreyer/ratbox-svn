@@ -268,7 +268,7 @@ void parse(struct Client *client_p, char *pbuffer, char *bufend)
                            me.name, ERR_UNKNOWNCOMMAND,
                            from->name, ch);
               Debug((DEBUG_ERROR,"Unknown (%s) from %s",
-                     ch, get_client_name(client_p, SHOW_IP)));
+                     ch, get_client_name(client_p, HIDE_IP)));
             }
           ServerStats->is_unco++;
           return;
