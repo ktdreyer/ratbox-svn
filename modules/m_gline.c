@@ -319,12 +319,13 @@ static void ms_gline(struct Client *client_p,
   else
     return;
 
-  sendto_serv_butone(source_p, ":%s GLINE %s %s %s :%s",
-		     source_p->name,
-		     oper_nick,
-		     user,
-		     host,
-		     reason);
+  sendto_cap_serv_butone(CAP_GLN,
+                         source_p, ":%s GLINE %s %s %s :%s",
+		         source_p->name,
+		         oper_nick,
+		         user,
+		         host,
+		         reason);
 
   if (ConfigFileEntry.glines)
     {

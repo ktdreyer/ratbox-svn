@@ -589,13 +589,13 @@ struct mode_letter {
 };
 
 struct mode_letter flags[] = {
-  { MODE_HIDEOPS,    'a' },
-  { MODE_PRIVATE,    'p' },
-  { MODE_SECRET,     's' },
-  { MODE_MODERATED,  'm' },
   { MODE_NOPRIVMSGS, 'n' },
   { MODE_TOPICLIMIT, 't' },
+  { MODE_SECRET,     's' },
+  { MODE_MODERATED,  'm' },
   { MODE_INVITEONLY, 'i' },
+  { MODE_PRIVATE,    'p' },
+  { MODE_HIDEOPS,    'a' },
   { 0, 0 }
 };
 
