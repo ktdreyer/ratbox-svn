@@ -248,10 +248,8 @@ list_accepts(struct Client *source_p)
 				*nicks = '\0';
 			}
 
-			ircsprintf(nicks + len, "%s ", target_p->name);
-
+			len += ircsnprintf(nicks + len, sizeof(nicks) - len, "%s ", target_p->name);
 			count++;
-			len += strlen(target_p->name) + 1;
 		}
 	}
 
