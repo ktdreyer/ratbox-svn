@@ -1,3 +1,8 @@
+*** 20001227_20 by db
+- removed include from Makefile.in for now
+
+
+
 *** 20001227_19 by ejb
 - install headers into ircd/include
 - check for socklen_t (check doesnt work too well now, will fix later)
