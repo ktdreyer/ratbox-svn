@@ -79,6 +79,10 @@ static inline void free_block(void *ptr, size_t unused)
 	free(ptr);
 }
 
+void initBlockHeap()
+{
+	return;
+}
 #endif /* HAVE_MMAP */
 
 
