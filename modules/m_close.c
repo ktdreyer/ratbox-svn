@@ -64,13 +64,15 @@ static void mo_close(struct Client *client_p, struct Client *source_p,
 {
   struct Client  *target_p;
   dlink_node     *ptr;
+  dlink_node     *ptr_next;
   int            closed = 0;
 
 
 
-  for (ptr = unknown_list.head; ptr; ptr = ptr->next)
+  for (ptr = unknown_list.head; ptr; ptr = ptr_next)
     {
       target_p = ptr->data;
+      ptr_next = ptr->next;
 
   /* Which list would connecting servers be found in? serv_list ? */
 #if 0
