@@ -1,3 +1,9 @@
+*** 19991230_6 by db
+- Added chanop counter to Channel struct, keep track of current op count
+  use instead of that nasty loop in SJOIN code
+
+
+
 *** 19991230_5 by db
 - folding back in USE_IAUTH code
 
