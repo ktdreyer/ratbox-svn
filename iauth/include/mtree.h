@@ -77,6 +77,18 @@ struct Level
   unsigned int flags;
 };
 
+struct UnsortableIline
+{
+  struct UnsortableIline *prev, *next;
+  struct Iline *iptr;
+};
+
+struct UnsortableKline
+{
+  struct UnsortableKline *prev, *next;
+  struct ServerBan *kptr;
+};
+
 /*
  * LV_xxx flags indicate the status of a particular level node
  */

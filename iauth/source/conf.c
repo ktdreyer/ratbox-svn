@@ -474,12 +474,13 @@ AddIline()
  Allocate a new Iline structure with the given information.
 Return a pointer to it.
 
- Assume everything is NON-NULL, except for user and password. user may be
-null in case there was no @ in the userhost field.
+ Assume everything is NON-NULL, except for user and password. user
+may be null in case there was no @ in the userhost field.
 */
 
 static struct Iline *
-AddIline(char *spoofhost, char *password, char *user, char *host, int class)
+AddIline(char *spoofhost, char *password, char *user, char *host,
+         int class)
 
 {
   struct Iline *ptr;

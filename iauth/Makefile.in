@@ -2,7 +2,7 @@
 # $Id$
 
 CC = @CC@
-CFLAGS = @CFLAGS@
+CFLAGS = @CFLAGS@ -Wall
 RM = @RM@
 
 # Debugging CFLAGS

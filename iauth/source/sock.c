@@ -22,6 +22,8 @@
 #include <unistd.h>
 #include <stdarg.h>
 #include <sys/time.h>
+#include <sys/types.h>
+#include <sys/socket.h>
 #include <assert.h>
 #include <fcntl.h>
 #include <errno.h>

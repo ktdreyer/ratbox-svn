@@ -162,6 +162,16 @@ static struct Level          *IlineTree = NULL;
 static struct Level          *KlineTree = NULL;
 
 /*
+ * List of unsortable Ilines
+ */
+struct UnsortableIline       *UnsortableIlines = NULL;
+
+/*
+ * List of unsortable Klines
+ */
+struct UnsortableKline       *UnsortableKlines = NULL;
+
+/*
  * Local functions
  */
 
@@ -177,6 +187,13 @@ static struct Level *IsOnLevel(struct Level *level, char *piece);
 static int CountNonWilds(char *str);
 
 static int BreakupHost(char *hostname, char ***array);
+static int IsSortable(int hostc, char **hostv);
+static void AddUnsortableIline(struct Iline *iptr);
+static struct Iline *FindUnsortableIline(char *username,
+                                         char *hostname);
+static void AddUnsortableKline(struct ServerBan *kptr);
+static struct ServerBan *FindUnsortableKline(char *username,
+                                             char *hostname);
 
 /*
 TreeAddIline()
@@ -201,7 +218,14 @@ TreeAddIline(struct Iline *iptr)
 
   hostpieces = BreakupHost(hostname, &hostv);
 
-  CreateSubTree(&IlineTree, NULL, iptr, hostpieces, hostv);
+  if (IsSortable(hostpieces, hostv))
+    CreateSubTree(&IlineTree, NULL, iptr, hostpieces, hostv);
+  else
+  {
+    fprintf(stderr, "HOSTNAME [%s] IS NOT SORTABLE\n",
+      iptr->hostname);
+    AddUnsortableIline(iptr);
+  }
 
   MyFree(hostv);
 } /* TreeAddIline() */
@@ -229,7 +253,14 @@ TreeAddKline(struct ServerBan *kptr)
 
   hostpieces = BreakupHost(hostname, &hostv);
 
-  CreateSubTree(&KlineTree, NULL, kptr, hostpieces, hostv);
+  if (IsSortable(hostpieces, hostv))
+    CreateSubTree(&KlineTree, NULL, kptr, hostpieces, hostv);
+  else
+  {
+    fprintf(stderr, "HOSTNAME [%s] IS NOT SORTABLE\n",
+      kptr->hostname);
+    AddUnsortableKline(kptr);
+  }
 
   MyFree(hostv);
 } /* TreeAddKline() */
@@ -441,6 +472,9 @@ SearchIlineTree(char *username, char *hostname)
     {
       log(L_ERROR,
         "SearchIlineTree(): search result has 0 Iline pointers");
+      MyFree(hostv);
+      ResetTree(&IlineTree);
+      return (NULL);
     }
 
     /*
@@ -458,10 +492,15 @@ SearchIlineTree(char *username, char *hostname)
     }
   }
 
-  MyFree(hostv);
   ResetTree(&IlineTree);
 
-  return (NULL);
+  /*
+   * We failed to locate the Iline in our tree - search
+   * the unsortable list
+   */
+  tmp = FindUnsortableIline(username, hostname);
+  MyFree(hostv);
+  return (tmp);
 } /* SearchIlineTree() */
 
 /*
@@ -492,6 +531,9 @@ SearchKlineTree(char *username, char *hostname)
     {
       log(L_ERROR,
         "SearchKlineTree(): search result has 0 Kline pointers");
+      MyFree(hostv);
+      ResetTree(&KlineTree);
+      return (NULL);
     }
 
     /*
@@ -509,10 +551,15 @@ SearchKlineTree(char *username, char *hostname)
     }
   }
 
-  MyFree(hostv);
   ResetTree(&KlineTree);
 
-  return (NULL);
+  /*
+   * We failed to locate the Iline in our tree - search
+   * the unsortable list
+   */
+  tmp = FindUnsortableKline(username, hostname);
+  MyFree(hostv);
+  return (tmp);
 } /* SearchKlineTree() */
 
 /*
@@ -531,6 +578,8 @@ SearchSubTree(struct Level **level, int hostc, char **hostv)
   struct Level *tmpnode,
                *tmpnode2,
                *ret;
+  int tmphostc;
+  int ContinueLevel;
 
   if (hostc == 0)
     return (NULL);
@@ -538,6 +587,7 @@ SearchSubTree(struct Level **level, int hostc, char **hostv)
   /*
    * Search the current level for our host piece
    */
+  ContinueLevel = 0;
   while ((tmpnode = IsOnLevel(*level, hostv[hostc - 1])))
   {
     if (tmpnode->UnsearchedSubNodes == 0)
@@ -570,7 +620,9 @@ SearchSubTree(struct Level **level, int hostc, char **hostv)
        *     the next host piece
        */
 
-      if ((tmpnode2 = IsOnLevel(tmpnode->nextlevel, hostv[hostc - 2])))
+      tmphostc = hostc;
+
+      if ((tmpnode2 = IsOnLevel(tmpnode->nextlevel, hostv[tmphostc - 2])))
       {
         /*
          * Since the next index of hostv[] was found
@@ -579,22 +631,58 @@ SearchSubTree(struct Level **level, int hostc, char **hostv)
          * down to the next level to continue the search.
          */
         tmpnode = tmpnode2;
-        --hostc;
+        --tmphostc;
 
         if (tmpnode->UnsearchedSubNodes == 0)
           MarkNodeSearched(tmpnode);
       }
 
-      while (hostc)
+      while (tmphostc)
       {
-        if (!match(tmpnode->name, hostv[hostc - 2]))
+        if (!match(tmpnode->name, hostv[tmphostc - 2]))
           break;
 
-        if (--hostc == 1)
-          return (tmpnode);
+        if (--tmphostc == 1)
+        {
+          /*
+           * There is a case in which the tmpnode we are about
+           * to return is not valid, meaning it does not contain
+           * any pointers to I/K line structures.
+           * Consider the following Iline:
+           *
+           * *@uwns.underworld.*
+           *
+           * Now suppose we have a client connecting from:
+           * *@koruna.varner.com. This loop will match the
+           * "com", "varner", and "koruna" against the "*"
+           * in the Iline and determine we have made a match.
+           * However, the piece containing the "*" is not
+           * the final piece of the Iline, and so it will not
+           * contiain a pointer to an Iline. Therefore we must
+           * ensure that tmpnode contains at least 1 typeptr.
+           */
+          if (!tmpnode->numptrs)
+          {
+            /*
+             * Continue searching the same level for another
+             * match.
+             */
+            ContinueLevel = 1;
+
+            /*
+             * Make sure we don't search the same dead-end
+             * node again.
+             */
+            MarkNodeSearched(tmpnode);
+
+            break;
+          }
+          else
+            return (tmpnode);
+        }
 
         /*
-         * Since we just decremented hostc, we need to check
+         * Since we just decremented tmphostc, we need to check
          * if the corresponding index of hostv[] is on the
          * next level - if so, drop to the next level to
          * continue checking.
@@ -615,10 +703,13 @@ SearchSubTree(struct Level **level, int hostc, char **hostv)
          * corresponding I/K line structure - only the very
          * last branch of the tree does that.
          */
-        if (IsOnLevel(tmpnode->nextlevel, hostv[hostc - 2]))
+        if (IsOnLevel(tmpnode->nextlevel, hostv[tmphostc - 2]))
           break;
-      } /* while (hostc) */
+      } /* while (tmphostc) */
     } /* if (tmpnode->flags & LV_WILDCARD) */
+
+    if (ContinueLevel)
+      continue;
 
     /*
      * Continue our search on the next level
@@ -859,6 +950,7 @@ IsOnLevel(struct Level *level, char *piece)
   }
 #endif
 
+  prevnw = 0;
   prevmatch = NULL;
   for (tmpnode = level; tmpnode; tmpnode = tmpnode->nextpiece)
   {
@@ -970,3 +1062,171 @@ BreakupHost(char *hostname, char ***array)
 
   return (pieces);
 } /* BreakupHost() */
+
+/*
+IsSortable()
+ Determine if hostname is sortable in our modified tree.
+
+Inputs: hostc - host piece count
+        hostv - host piece array
+
+Return: 1 if sortable
+        0 if not
+*/
+
+static int
+IsSortable(int hostc, char **hostv)
+
+{
+  char *tmp;
+  int ii;
+  int precedingchars, /* characters preceding a '*' */
+      postchars,      /* characters after a '*' */
+      wildfound;      /* a '*' was found */
+
+  for (ii = 0; ii < hostc; ++ii)
+  {
+    /*
+     * There are basically two rules for determining a hostname
+     * is unsortable.
+     *
+     *  - If one of the hostname pieces contains a *, preceded by
+     *    characters. (ie: foo* or foo*bar)
+     *
+     *  - If a hostname piece begins with a *, followed by characters.
+     *    (ie: *bar)
+     */
+
+    precedingchars = 0;
+    postchars = 0;
+    wildfound = 0;
+
+    /*
+     * This loop will tell us if there are any characters
+     * preceding a '*', if there are any '*' characters, and if
+     * there are any characters trailing a '*' character in the
+     * hostpiece.
+     */
+    for (tmp = hostv[ii]; *tmp; ++tmp)
+    {
+      if (*tmp != '*')
+      {
+        if (!precedingchars && !wildfound)
+        {
+          precedingchars = 1;
+          continue;
+        }
+
+        if (!postchars && wildfound)
+        {
+          postchars = 1;
+          continue;
+        }
+      }
+      else if (!wildfound)
+      {
+        wildfound = 1;
+        continue;
+      }
+    }
+
+    /*
+     * Case 1a: <chars>*
+     * Case 1b: <chars>*<chars>
+     * Case 2 : *<chars>
+     */
+    if (wildfound)
+    {
+      if (precedingchars || postchars)
+        return (0);
+    }
+  }
+
+  return (1);
+} /* IsSortable() */
+
+/*
+AddUnsortableIline()
+ Add Iline structure 'iptr' to list of unsortable Ilines
+*/
+
+static void
+AddUnsortableIline(struct Iline *iptr)
+
+{
+  struct UnsortableIline *tmp;
+
+  tmp = (struct UnsortableIline *) MyMalloc(sizeof(struct UnsortableIline));
+  tmp->iptr = iptr;
+
+  tmp->prev = NULL;
+  tmp->next = UnsortableIlines;
+  if (tmp->next)
+    tmp->next->prev = tmp;
+  UnsortableIlines = tmp;
+} /* AddUnsortableIline() */
+
+/*
+FindUnsortableIline()
+ Attempt to locate 'username' and 'hostname' in the unsortable
+Iline list
+*/
+
+static struct Iline *
+FindUnsortableIline(char *username, char *hostname)
+
+{
+  struct UnsortableIline *tmp;
+
+  for (tmp = UnsortableIlines; tmp; tmp = tmp->next)
+  {
+    if (match(tmp->iptr->username, username) &&
+        match(tmp->iptr->hostname, hostname))
+      return (tmp->iptr);
+  }
+
+  return (NULL);
+} /* FindUnsortableIline() */
+
+/*
+AddUnsortableKline()
+ Add ServerBan structure 'kptr' to list of unsortable Klines
+*/
+
+static void
+AddUnsortableKline(struct ServerBan *kptr)
+
+{
+  struct UnsortableKline *tmp;
+
+  tmp = (struct UnsortableKline *) MyMalloc(sizeof(struct UnsortableKline));
+  tmp->kptr = kptr;
+
+  tmp->prev = NULL;
+  tmp->next = UnsortableKlines;
+  if (tmp->next)
+    tmp->next->prev = tmp;
+  UnsortableKlines = tmp;
+} /* AddUnsortableKline() */
+
+/*
+FindUnsortableKline()
+ Attempt to locate 'username' and 'hostname' in the unsortable
+Kline list
+*/
+
+static struct ServerBan *
+FindUnsortableKline(char *username, char *hostname)
+
+{
+  struct UnsortableKline *tmp;
+
+  for (tmp = UnsortableKlines; tmp; tmp = tmp->next)
+  {
+    if (match(tmp->kptr->username, username) &&
+        match(tmp->kptr->hostname, hostname))
+      return (tmp->kptr);
+  }
+
+  return (NULL);
+} /* FindUnsortableKline() */

@@ -1,21 +1,21 @@
-/************************************************************************
- *   IRC - Internet Relay Chat, iauth/auth.c
+/**********************************************************************
+ *  IRC - Internet Relay Chat, iauth/auth.c
  *
- *   This program is free software; you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation; either version 1, or (at your option)
- *   any later version.
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 1, or (at your option)
+ *  any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program; if not, write to the Free Software
- *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- *   $Id$
+ *  $Id$
  */
 
 #include <stdio.h>
@@ -28,6 +28,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <assert.h>
+#include <errno.h>
 
 #include "auth.h"
 #include "conf.h"
@@ -39,8 +40,10 @@
 
 static struct AuthRequest *CreateAuthRequest();
 static void FreeAuthRequest(struct AuthRequest *request);
-static void LinkAuthRequest(struct AuthRequest *request, struct AuthRequest **list);
-static void UnlinkAuthRequest(struct AuthRequest *request, struct AuthRequest **list);
+static void LinkAuthRequest(struct AuthRequest *request,
+                            struct AuthRequest **list);
+static void UnlinkAuthRequest(struct AuthRequest *request,
+                              struct AuthRequest **list);
 
 static int BeginIdentQuery(struct AuthRequest *auth);
 static char *GetValidIdent(char *buf);

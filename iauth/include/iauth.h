@@ -26,9 +26,9 @@
 #define INCLUDED_sys_types_h
 #endif
 
-#define    ICONF        "./iauth.conf"
+#define ICONF              "./iauth.conf"
 
-#define    BUFSIZE      512
+#define BUFSIZE            512
 
 #define IRCD_MIN(a, b)  ((a) < (b) ? (a) : (b))
 
