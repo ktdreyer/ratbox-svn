@@ -136,6 +136,7 @@ static void mr_server(struct Client *client_p, struct Client *source_p,
       
       exit_client(client_p, client_p, client_p, "Invalid servername.");
       return;
+      /* NOT REACHED */
       break;
       
     case -2:
@@ -149,6 +150,7 @@ static void mr_server(struct Client *client_p, struct Client *source_p,
 
       exit_client(client_p, client_p, client_p, "Invalid password.");
       return;
+      /* NOT REACHED */
       break;
       
     case -3:
@@ -162,6 +164,7 @@ static void mr_server(struct Client *client_p, struct Client *source_p,
 
       exit_client(client_p, client_p, client_p, "Invalid host.");
       return;
+      /* NOT REACHED */
       break;
     
     /* servername is > HOSTLEN */
@@ -175,6 +178,7 @@ static void mr_server(struct Client *client_p, struct Client *source_p,
 
       exit_client(client_p, client_p, client_p, "Invalid servername.");
       return;
+      /* NOT REACHED */
       break;
   }
     

@@ -86,7 +86,7 @@ void mem_frob(void *data, int len);
  * which is mine.
  *   -- adrian
  */
-extern inline void
+extern void
 dlinkAdd(void *data, dlink_node * m, dlink_list * list)
 {
  m->data = data;
@@ -99,7 +99,7 @@ dlinkAdd(void *data, dlink_node * m, dlink_list * list)
  list->head = m;
 }
 
-extern inline void
+extern void
 dlinkAddBefore(dlink_node *b, void *data, dlink_node *m, dlink_list *list)
 {
     /* Shortcut - if its the first one, call dlinkAdd only */
@@ -114,7 +114,7 @@ dlinkAddBefore(dlink_node *b, void *data, dlink_node *m, dlink_list *list)
     }
 }
 
-extern inline void
+extern void
 dlinkAddTail(void *data, dlink_node *m, dlink_list *list)
 {
  m->data = data;
@@ -131,7 +131,7 @@ dlinkAddTail(void *data, dlink_node *m, dlink_list *list)
 /* Execution profiles show that this function is called the most
  * often of all non-spontaneous functions. So it had better be
  * efficient. */
-extern inline void
+extern void
 dlinkDelete(dlink_node *m, dlink_list *list)
 {
  /* Assumption: If m->next == NULL, then list->tail == m
@@ -156,7 +156,7 @@ dlinkDelete(dlink_node *m, dlink_list *list)
  * output	- return the length (>=0) of a chain of links.
  * side effects	-
  */
-extern inline int dlink_list_length(dlink_list *list)
+extern int dlink_list_length(dlink_list *list)
 {
   dlink_node *ptr;
   int   count = 0;
@@ -173,7 +173,7 @@ extern inline int dlink_list_length(dlink_list *list)
  * output	- pointer to link or NULL if not found
  * side effects	- Look for ptr in the linked listed pointed to by link.
  */
-extern inline dlink_node *dlinkFind(dlink_list *list, void * data )
+extern dlink_node *dlinkFind(dlink_list *list, void * data )
 {
   dlink_node *ptr;
 
@@ -185,7 +185,7 @@ extern inline dlink_node *dlinkFind(dlink_list *list, void * data )
   return (NULL);
 }
 
-extern inline void
+extern void
 dlinkMoveList(dlink_list *from, dlink_list *to)
 {
   /* There are three cases */

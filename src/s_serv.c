@@ -1929,7 +1929,7 @@ void set_autoconn(struct Client *source_p,char *parv0,char *name,int newval)
 
 void initServerMask(void)
 {
-  freeMask = 0xFFFFFFFFL;
+  freeMask = 0xFFFFFFFFUL;
 }
 
 /*

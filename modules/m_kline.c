@@ -655,7 +655,7 @@ mo_dline(struct Client *client_p, struct Client *source_p,
       *p++ = '\0';
       dlhost = cidr_form_host;
 
-      bits = 0xFFFFFF00L;
+      bits = 0xFFFFFF00UL;
 /* XXX: Fix me for IPV6 */
 #endif
     }

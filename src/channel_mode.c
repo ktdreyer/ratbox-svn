@@ -1909,9 +1909,9 @@ struct ChannelMode
                 int *errors, int alev, int dir, char c, void *d,
                 const char *chname);
   void *d;
-}
+};
 /* *INDENT-OFF* */
-static ModeTable[255] =
+static struct ChannelMode ModeTable[255] =
 {
   {chm_nosuch, NULL},
   {chm_nosuch, NULL},                             /* A */

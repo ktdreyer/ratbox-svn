@@ -108,5 +108,5 @@ int main(int argc, char *argv[])
   io_loop(max_fd + 1);
 
   /* NOTREACHED */
-  exit(0);
+  return(0);
 } /* main() */

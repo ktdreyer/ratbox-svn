@@ -233,6 +233,6 @@ int main(int argc, char * argv[]) {
     printf("%20.20s decryption: not supported by OpenSSL\n", cipherstr);
   }
 
-  exit(0);
+  return(0);
 }
 #endif

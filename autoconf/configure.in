@@ -88,14 +88,14 @@ else
     IRC_CFLAGS=""
     CPPFLAGS="$CPPFLAGS -Ylonglong -Yansi -I/usr/include"
   else
-    if test "x$MIPSpro" = "xyes"; then
-      IRC_CFLAGS="-g"
+    if test "x$SunWorkShop" = "xyes"; then
+      IRC_CFLAGS="-fast -g -xinline=dlinkAdd,dlinkAddBefore,dlinkAddTail,dlinkDelete,dlink_list_length,dlink_node,dlinkMoveList,_MyMalloc,_MyRealloc,_MyFree,_DupString"
     else
-      if test "x$ac_cv_prog_cc_g" = "xyes"; then
+      if test "x$MIPSpro" = "xyes"; then
         IRC_CFLAGS="-g"
       else
-        if test "x$SunWorkShop" = "xyes"; then
-          IRC_CFLAGS="-fast -g -xinline=dlinkAdd,dlinkAddBefore,dlinkAddTail,dlinkDelete,dlink_list_length,dlink_node,dlinkMoveList,_MyMalloc,_MyRealloc,_MyFree,_DupString"
+        if test "x$ac_cv_prog_cc_g" = "xyes"; then
+          IRC_CFLAGS="-g"
         else
           IRC_CFLAGS=""
         fi

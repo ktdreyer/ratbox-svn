@@ -106,8 +106,8 @@ SendMessageFile(struct Client *source_p, MessageFile *motdToPrint)
           sendto_one(source_p, ":%s 364 %s %s",
 		     me.name, source_p->name, linePointer->line);
         }
-      /* NOT REACHED */
       return 0;
+      /* NOT REACHED */
       break;
 
     case OPER_MOTD:
