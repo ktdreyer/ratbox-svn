@@ -99,23 +99,24 @@ struct ConfItem
 
 /* Generic flags... */
 /* access flags... */
-#define CONF_FLAGS_DO_IDENTD            0x0001
-#define CONF_FLAGS_LIMIT_IP             0x0002
-#define CONF_FLAGS_NO_TILDE             0x0004
-#define CONF_FLAGS_NEED_IDENTD          0x0008
-#define CONF_FLAGS_PASS_IDENTD          0x0010
-#define CONF_FLAGS_NOMATCH_IP           0x0020
-#define CONF_FLAGS_E_LINED              0x0040
-#define CONF_FLAGS_F_LINED              0x0080
-#define CONF_FLAGS_IDLE_LINED           0x0100
-#define CONF_FLAGS_SPOOF_IP             0x0200
-#define CONF_FLAGS_REDIR                0x0400
-#define CONF_FLAGS_EXEMPTGLINE          0x0800
-#define CONF_FLAGS_RESTRICTED           0x1000
+#define CONF_FLAGS_DO_IDENTD            0x00001
+#define CONF_FLAGS_LIMIT_IP             0x00002
+#define CONF_FLAGS_NO_TILDE             0x00004
+#define CONF_FLAGS_NEED_IDENTD          0x00008
+#define CONF_FLAGS_PASS_IDENTD          0x00010
+#define CONF_FLAGS_NOMATCH_IP           0x00020
+#define CONF_FLAGS_E_LINED              0x00040
+#define CONF_FLAGS_F_LINED              0x00080
+#define CONF_FLAGS_IDLE_LINED           0x00100
+#define CONF_FLAGS_SPOOF_IP             0x00200
+#define CONF_FLAGS_SPOOF_NOTICE         0x00400
+#define CONF_FLAGS_REDIR                0x00800
+#define CONF_FLAGS_EXEMPTGLINE          0x01000
+#define CONF_FLAGS_RESTRICTED           0x02000
 /* server flags */
-#define CONF_FLAGS_ALLOW_AUTO_CONN      0x2000
-#define CONF_FLAGS_LAZY_LINK            0x4000
-#define CONF_FLAGS_ENCRYPTED            0x8000
+#define CONF_FLAGS_ALLOW_AUTO_CONN      0x04000
+#define CONF_FLAGS_LAZY_LINK            0x08000
+#define CONF_FLAGS_ENCRYPTED            0x10000
 
 /* Macros for struct ConfItem */
 
@@ -130,6 +131,7 @@ struct ConfItem
 #define IsConfIdlelined(x)      ((x)->flags & CONF_FLAGS_IDLE_LINED)
 #define IsConfDoIdentd(x)       ((x)->flags & CONF_FLAGS_DO_IDENTD)
 #define IsConfDoSpoofIp(x)      ((x)->flags & CONF_FLAGS_SPOOF_IP)
+#define IsConfSpoofNotice(x)    ((x)->flags & CONF_FLAGS_SPOOF_NOTICE)
 #define IsConfRestricted(x)     ((x)->flags & CONF_FLAGS_RESTRICTED)
 #define IsConfEncrypted(x)      ((x)->flags & CONF_FLAGS_ENCRYPTED)
 

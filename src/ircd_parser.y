@@ -149,6 +149,7 @@ int   class_redirport_var;
 %token  SERVER_MASK
 %token  SHARED
 %token  SPOOF
+%token  SPOOF_NOTICE
 %token  TREJECT
 %token  TNO
 %token  TYES
@@ -716,7 +717,8 @@ auth_items:     auth_items auth_item |
 auth_item:      auth_user | auth_passwd | auth_class |
                 auth_kline_exempt | auth_have_ident | auth_is_restricted |
                 auth_exceed_limit | auth_no_tilde | auth_gline_exempt |
-                auth_spoof | auth_redir_serv | auth_redir_port | error
+                auth_spoof | auth_spoof_notice |
+                auth_redir_serv | auth_redir_port | error
 
 auth_user:   USER '=' QSTRING ';'
   {
@@ -758,6 +760,16 @@ auth_passwd:  PASSWORD '=' QSTRING ';'
   {
     MyFree(yy_aconf->passwd);
     DupString(yy_aconf->passwd,yylval.string);
+  };
+
+auth_spoof_notice:   SPOOF_NOTICE '=' TYES ';'
+  {
+    yy_aconf->flags |= CONF_FLAGS_SPOOF_NOTICE;
+  }
+    |
+    SPOOF_NOTICE '=' TNO ';'
+  {
+    yy_aconf->flags &= ~CONF_FLAGS_SPOOF_NOTICE;
   };
 
 auth_spoof:   SPOOF '=' QSTRING ';' 

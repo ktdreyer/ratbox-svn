@@ -169,6 +169,7 @@ silent          { return SILENT; }
 shared          { return SHARED; }
 short_motd      { return SHORT_MOTD; }
 spoof		{ return SPOOF; }
+spoof_notice	{ return SPOOF_NOTICE; }
 unkline		{ return UNKLINE; }
 user		{ return USER;} 
 vchans_oper_only { return VCHANS_OPER_ONLY; }
