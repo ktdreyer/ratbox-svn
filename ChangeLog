@@ -1,3 +1,15 @@
+androsyn    2003/02/04 02:18:39 UTC	(20030204_0)
+
+  Modified files:
+    src                  s_auth.c 
+  Log:
+  Second half of the freeing of auth clients cleanup..
+  
+  Revision  Changes    Path
+  7.126     +1 -3      ircd-ratbox/src/s_auth.c
+
+
+
 androsyn    2003/02/03 23:21:03 UTC	(20030203_6)
 
   Modified files:
