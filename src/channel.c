@@ -11,9 +11,13 @@
 #include "channel.h"
 #include "scommand.h"
 #include "log.h"
+#include "balloc.h"
 
 static dlink_list channel_table[MAX_CHANNEL_TABLE];
 dlink_list channel_list;
+
+static BlockHeap *channel_heap;
+static BlockHeap *chmember_heap;
 
 static void c_join(struct client *, char *parv[], int parc);
 static void c_kick(struct client *, char *parv[], int parc);
@@ -32,6 +36,9 @@ static struct scommand_handler topic_command = { "TOPIC", c_topic, 0 };
 void
 init_channel(void)
 {
+        channel_heap = BlockHeapCreate(sizeof(struct channel), HEAP_CHANNEL);
+        chmember_heap = BlockHeapCreate(sizeof(struct chmember), HEAP_CHMEMBER);
+
 	add_scommand_handler(&join_command);
 	add_scommand_handler(&kick_command);
 	add_scommand_handler(&part_command);
@@ -140,7 +147,7 @@ add_chmember(struct channel *chptr, struct client *target_p, int flags)
 {
 	struct chmember *mptr;
 
-	mptr = my_malloc(sizeof(struct chmember));
+	mptr = BlockHeapAlloc(chmember_heap);
 	mptr->client_p = target_p;
 	mptr->chptr = chptr;
 	mptr->flags = flags;
@@ -436,7 +443,7 @@ c_sjoin(struct client *client_p, char *parv[], int parc)
 
 	if((chptr = find_channel(parv[2])) == NULL)
 	{
-		chptr = my_malloc(sizeof(struct channel));
+		chptr = BlockHeapAlloc(channel_heap);
 		strlcpy(chptr->name, parv[2], sizeof(chptr->name));
 		chptr->tsinfo = atol(parv[1]);
 		add_channel(chptr);

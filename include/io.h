@@ -38,9 +38,12 @@ extern struct connection_entry *server_p;
 extern dlink_list connection_list;
 
 #define CONN_CONNECTING		0x0001
-#define CONN_DEAD		0x0002
-#define CONN_SENTPING           0x0004
+#define CONN_HANDSHAKE          0x0002
+#define CONN_DEAD		0x0004
+#define CONN_SENTPING           0x0008
+
 #define FLAGS_UNTERMINATED	0x0010
+#define FLAGS_EOB               0x0020
 
 #define UMODE_CHAT              0x1000
 #define UMODE_AUTH              0x2000

@@ -14,11 +14,13 @@
 #include "client.h"
 #include "serno.h"
 #include "service.h"
+#include "log.h"
 
 static dlink_list scommand_table[MAX_SCOMMAND_HASH];
 
 static void c_admin(struct client *, char *parv[], int parc);
 static void c_ping(struct client *, char *parv[], int parc);
+static void c_pong(struct client *, char *parv[], int parc);
 static void c_stats(struct client *, char *parv[], int parc);
 static void c_trace(struct client *, char *parv[], int parc);
 static void c_version(struct client *, char *parv[], int parc);
@@ -26,6 +28,7 @@ static void c_whois(struct client *, char *parv[], int parc);
 
 static struct scommand_handler admin_command = { "ADMIN", c_admin, 0 };
 static struct scommand_handler ping_command = { "PING", c_ping, 0 };
+static struct scommand_handler pong_command = { "PONG", c_pong, 0 };
 static struct scommand_handler stats_command = { "STATS", c_stats, 0 };
 static struct scommand_handler trace_command = { "TRACE", c_trace, 0 };
 static struct scommand_handler version_command = { "VERSION", c_version, 0 };
@@ -36,6 +39,7 @@ init_scommand(void)
 {
 	add_scommand_handler(&admin_command);
 	add_scommand_handler(&ping_command);
+	add_scommand_handler(&pong_command);
 	add_scommand_handler(&stats_command);
 	add_scommand_handler(&trace_command);
 	add_scommand_handler(&version_command);
@@ -103,8 +107,15 @@ handle_scommand(const char *command, char *parv[], int parc)
 
 	if(client_p != NULL)
 		handle_scommand_client(client_p, command, parv, parc);
-	else
+
+        /* we can only accept commands from an unknown entity, when we
+         * dont actually have a server..
+         */
+	else if(server_p->client_p == NULL)
 		handle_scommand_unknown(command, parv, parc);
+
+        else
+                slog("unknown prefix %s for command %s", parv[0], command);
 }
 
 void
@@ -132,11 +143,14 @@ c_admin(struct client *client_p, char *parv[], int parc)
 		      MYNAME, parv[0], MYNAME);
 
 	if(!EmptyString(config_file.admin1))
-		sendto_server(":%s 257 %s :%s", MYNAME, parv[0], config_file.admin1);
+		sendto_server(":%s 257 %s :%s",
+                              MYNAME, parv[0], config_file.admin1);
 	if(!EmptyString(config_file.admin2))
-		sendto_server(":%s 258 %s :%s", MYNAME, parv[0], config_file.admin2);
+		sendto_server(":%s 258 %s :%s",
+                              MYNAME, parv[0], config_file.admin2);
 	if(!EmptyString(config_file.admin3))
-		sendto_server(":%s 259 %s :%s", MYNAME, parv[0], config_file.admin3);
+		sendto_server(":%s 259 %s :%s",
+                              MYNAME, parv[0], config_file.admin3);
 }
 
 static void
@@ -146,6 +160,21 @@ c_ping(struct client *client_p, char *parv[], int parc)
 		return;
 
 	sendto_server(":%s PONG %s :%s", MYNAME, MYNAME, parv[0]);
+}
+
+static void
+c_pong(struct client *client_p, char *parv[], int parc)
+{
+        if(parc < 2 || EmptyString(parv[1]))
+                return;
+
+        if(!(server_p->flags & FLAGS_EOB))
+        {
+                slog("Connection to server %s completed", server_p->name);
+                sendto_all(UMODE_SERVER, "Connection to server %s completed",
+                           server_p->name);
+                server_p->flags |= FLAGS_EOB;
+        }
 }
 
 static void

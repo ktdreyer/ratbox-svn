@@ -40,7 +40,7 @@ struct timeval system_time;
 void
 die(const char *reason)
 {
-	sendto_server(":%s WALLOPS :services terminated: %s", MYNAME, reason);
+	sendto_all(0, "Services terminated: (%s)", reason);
 	slog("ratbox-services terminated: (%s)", reason);
 	exit(1);
 }

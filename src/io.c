@@ -182,6 +182,19 @@ read_io(void)
 					(server_p->io_close)(server_p);
 				}
 
+                                /* authentication timed out.. */
+                                else if((server_p->flags & CONN_HANDSHAKE) &&
+                                        ((server_p->first_time + 60) <=
+                                                CURRENT_TIME))
+                                {
+					slog("Connection to server %s timed out",
+			                     server_p->name);
+					sendto_all(UMODE_SERVER,
+                                                   "Connection to server %s timed out",
+                                                   server_p->name);
+					(server_p->io_close)(server_p);
+				}
+
                                 /* pinged out */
                                 else if((server_p->flags & CONN_SENTPING) &&
                                         ((server_p->last_time + PING_TIME*2) <=
@@ -443,7 +456,9 @@ connect_to_client(struct client *client_p, const char *host, int port)
 static int
 signon_server(struct connection_entry *conn_p)
 {
-	conn_p->flags &= ~CONN_CONNECTING;
+        conn_p->flags &= ~CONN_CONNECTING;
+        conn_p->flags |= CONN_HANDSHAKE;
+
 	conn_p->io_read = read_server;
 	conn_p->io_write = write_sendq;
 
@@ -454,14 +469,17 @@ signon_server(struct connection_entry *conn_p)
 	if(conn_p->flags & CONN_DEAD)
 		return -1;
 
-	slog("Connection to server %s completed", conn_p->name);
-	sendto_all(UMODE_SERVER, "Connection to server %s completed",
+	slog("Connection to server %s established", conn_p->name);
+	sendto_all(UMODE_SERVER, "Connection to server %s established",
                    conn_p->name);
 
 	sendto_server("CAPAB :QS TB");
 	sendto_server("SERVER %s 1 :%s", MYNAME, config_file.my_gecos);
 
 	introduce_services();
+
+        sendto_server("PING :%s", MYNAME);
+
 	return 1;
 }
 

@@ -13,12 +13,17 @@
 #include "io.h"
 #include "log.h"
 #include "service.h"
+#include "balloc.h"
 
 static dlink_list name_table[MAX_NAME_HASH];
 
 dlink_list user_list;
 dlink_list server_list;
 dlink_list exited_list;
+
+static BlockHeap *client_heap;
+static BlockHeap *user_heap;
+static BlockHeap *server_heap;
 
 static void c_kill(struct client *, char *parv[], int parc);
 static void c_nick(struct client *, char *parv[], int parc);
@@ -35,6 +40,10 @@ static struct scommand_handler squit_command = { "SQUIT", c_squit, 0 };
 void
 init_client(void)
 {
+        client_heap = BlockHeapCreate(sizeof(struct client), HEAP_CLIENT);
+        user_heap = BlockHeapCreate(sizeof(struct user), HEAP_USER);
+        server_heap = BlockHeapCreate(sizeof(struct server), HEAP_SERVER);
+
 	add_scommand_handler(&kill_command);
 	add_scommand_handler(&nick_command);
 	add_scommand_handler(&quit_command);
@@ -322,8 +331,8 @@ c_nick(struct client *client_p, char *parv[], int parc)
 			}
 		}
 
-		target_p = my_malloc(sizeof(struct client));
-		target_p->user = my_malloc(sizeof(struct user));
+		target_p = BlockHeapAlloc(client_heap);
+		target_p->user = BlockHeapAlloc(user_heap);
 
 		target_p->uplink = uplink_p;
 
@@ -424,8 +433,23 @@ c_server(struct client *client_p, char *parv[], int parc)
 	if(parc < 4)
 		return;
 
-	target_p = my_malloc(sizeof(struct client));
-	target_p->server = my_malloc(sizeof(struct server));
+        if(client_p == NULL)
+        {
+                if(irccmp(server_p->name, parv[1]))
+                {
+                        slog("Connection to server %s failed: "
+                             "(Servername mismatch)",
+                             server_p->name);
+                        (server_p->io_close)(server_p);
+                        return;
+                }
+
+                server_p->flags &= ~CONN_HANDSHAKE;
+                server_p->first_time = CURRENT_TIME;
+        }
+
+	target_p = BlockHeapAlloc(client_heap);
+	target_p->server = BlockHeapAlloc(server_heap);
 
 	strlcpy(target_p->name, parv[1], sizeof(target_p->name));
 	strlcpy(target_p->info, EmptyString(parv[3]) ? default_gecos : parv[3],
@@ -437,7 +461,8 @@ c_server(struct client *client_p, char *parv[], int parc)
 	if(client_p != NULL)
 	{
 		target_p->uplink = client_p;
-		dlink_add(target_p, &target_p->upnode, &client_p->server->servers);
+		dlink_add(target_p, &target_p->upnode, 
+                          &client_p->server->servers);
 	}
 	/* its connected to us */
 	else

@@ -14,6 +14,7 @@ CFLAGS=-g -O0 -Wall -Werror -DPREFIX=\"$(PREFIX)\"
 MAKE = make
 
 SRCS = 			\
+        balloc.c        \
         c_error.c       \
 	c_message.c	\
 	c_mode.c	\
