@@ -508,7 +508,6 @@ int main(int argc, char *argv[])
   ConfigFileEntry.klinefile = KPATH;    /* Server kline file */
   ConfigFileEntry.dlinefile = DLPATH;   /* dline file */
 
-#endif /* DLPATH */
 
 #ifdef  CHROOTDIR
   if (chdir(DPATH))
