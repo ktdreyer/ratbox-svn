@@ -1,3 +1,20 @@
+leeh        2004/09/05 17:42:51 EDT	(20040905_2)
+
+  Modified files:
+    include              s_newconf.h 
+    src                  banconf.c newconf.c s_newconf.c 
+  Log:
+  - add redundancy checking for dlines/exempts, needed now theyre in a
+    patricia..
+  
+  Revision  Changes    Path
+  7.40      +1 -0      ircd-ratbox/include/s_newconf.h
+  7.6       +3 -0      ircd-ratbox/src/banconf.c
+  7.175     +6 -0      ircd-ratbox/src/newconf.c
+  7.57      +11 -0     ircd-ratbox/src/s_newconf.c
+
+
+
 leeh        2004/09/05 12:04:00 EDT	(20040905_1)
 
   Modified files:
