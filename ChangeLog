@@ -1,3 +1,17 @@
+androsyn    2002/11/30 13:34:45 UTC	(20021130_0)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  Fixed the leaking linebuf issue.  Basically what would happen is that upon
+  exit_one_client() we never called linebuf_donebuf for the clients sendq and
+  recvq..oops.
+  
+  Revision  Changes    Path
+  7.336     +9 -4      ircd-ratbox/src/client.c
+
+
+
 leeh        2002/11/29 17:28:31 UTC	(20021129_0)
 
   Modified files:
