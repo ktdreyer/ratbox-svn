@@ -114,8 +114,6 @@ send_trim(char *lsendbuf, int len );
 static int
 dead_link(struct Client *to, char *notice)
 {
-  SetDead(to);
-
   /*
    * If because of buffer problem then clean linebuf's now so that
    * notices don't hurt operators below.
