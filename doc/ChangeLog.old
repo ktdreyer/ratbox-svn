@@ -1,3 +1,7 @@
+*** 20010102_17 by fl_
+- reapplied the fix that got removed *growl*
+
+
 *** 20010102_16 by davidt
 - Fix SJOIN halfop handling for lazylinks..
 - Fix clear_ban_lists to prevent spewing random memory at clients
