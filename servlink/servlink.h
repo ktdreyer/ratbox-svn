@@ -34,6 +34,14 @@
 #define NUM_FDS                 3       /* nfds for select */
 #endif
 
+#define READLEN                  2048
+
+#ifdef HAVE_LIBZ
+#define BUFLEN                   READLEN * 8 /* allow for decompression */
+#else
+#define BUFLEN                   READLEN
+#endif
+
 extern struct slink_state       in_state;
 extern struct slink_state       out_state;
 extern struct fd_table          fds[NUM_FDS];
@@ -73,6 +81,10 @@ struct slink_state
   unsigned int          crypt:1;
   unsigned int          zip:1;
   unsigned int          active:1;
+
+  unsigned char         buf[BUFLEN*2];
+  unsigned int          ofs;
+  unsigned int          len;
 
 #ifdef HAVE_LIBCRYPTO
   struct crypt_state    crypt_state;

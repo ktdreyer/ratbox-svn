@@ -39,26 +39,11 @@
 
 static struct ctrl_command cmd = {0, 0, 0, 0, NULL};
 
-#define BUFLEN                  2048
-
-#ifdef HAVE_LIBZ
-#define ZIP_BUFLEN              BUFLEN * 8 /* allow for decompression */
-#else
-#define ZIP_BUFLEN              BUFLEN
-#endif
-
-static char out_buf[ZIP_BUFLEN];
-static int  out_ofs = 0;
-static int  out_len = 0;
-static char in_buf[ZIP_BUFLEN];
-static int  in_ofs = 0;
-static int  in_len = 0;
-
 #if defined( HAVE_LIBCRYPTO ) || defined( HAVE_LIBZ )
-static char tmp_buf[ZIP_BUFLEN];
+static unsigned char tmp_buf[BUFLEN];
 #endif
 #if defined( HAVE_LIBZ ) && defined( HAVE_LIBZ )
-static char tmp2_buf[ZIP_BUFLEN];
+static unsigned char tmp2_buf[BUFLEN];
 #endif
 
 void send_data_blocking(int fd, unsigned char *data, int datalen)
@@ -115,20 +100,21 @@ void process_sendq(unsigned char *data, int datalen)
 void process_recvq(unsigned char *data, int datalen)
 {
   int ret;
-  char *buf;
+  unsigned char *buf;
   int  blen;
 
   buf = data;
   blen = datalen;
 
+  assert(datalen <= READLEN);
 #ifdef HAVE_LIBCRYPTO
   if (in_state.crypt)
   {
-    /* set where to store decrypted data */
-    blen = BUFLEN;
+    blen = READLEN;
     assert(EVP_DecryptUpdate(&in_state.crypt_state.ctx,
                              tmp_buf, &blen,
                              data, datalen));
+    assert(blen);
     buf = tmp_buf;
   }
 #endif
@@ -140,17 +126,19 @@ void process_recvq(unsigned char *data, int datalen)
     in_state.zip_state.z_stream.next_in = buf;
     in_state.zip_state.z_stream.avail_in = blen;
     in_state.zip_state.z_stream.next_out = tmp2_buf;
-    in_state.zip_state.z_stream.avail_out = ZIP_BUFLEN;
+    in_state.zip_state.z_stream.avail_out = BUFLEN;
     if ((ret = inflate(&in_state.zip_state.z_stream,
                        Z_NO_FLUSH)) != Z_OK)
       exit(ret);
     assert(in_state.zip_state.z_stream.avail_out);
     assert(in_state.zip_state.z_stream.avail_in == 0);
-    blen = ZIP_BUFLEN - in_state.zip_state.z_stream.avail_out;
+    blen = BUFLEN - in_state.zip_state.z_stream.avail_out;
 
     buf = tmp2_buf;
   }
 #endif
+
+  assert(blen);
   
   send_data_blocking(LOCAL_FD_W, buf, blen);
 }
@@ -270,10 +258,10 @@ void read_ctrl(void)
 void read_data(void)
 {
   int ret;
-  char *buf = out_buf;
+  unsigned char *buf = out_state.buf;
   int  blen;
   
-  if (out_len)
+  if (out_state.len)
     exit(1);
 
 #if defined(HAVE_LIBZ) || defined(HAVE_LIBCRYPTO)
@@ -281,7 +269,7 @@ void read_data(void)
     buf = tmp_buf;
 #endif
     
-  while ((ret = read(LOCAL_FD_R, buf, BUFLEN)) > 0)
+  while ((ret = read(LOCAL_FD_R, buf, READLEN)) > 0)
   {
     blen = ret;
 #ifdef HAVE_LIBZ
@@ -290,18 +278,19 @@ void read_data(void)
       out_state.zip_state.z_stream.next_in = buf;
       out_state.zip_state.z_stream.avail_in = ret;
 
-      buf = out_buf;
+      buf = out_state.buf;
 #ifdef HAVE_LIB_CRYPTO
       if (out_state.crypt)
         buf = tmp2_buf;
 #endif
       out_state.zip_state.z_stream.next_out = buf;
-      out_state.zip_state.z_stream.avail_out = ZIP_BUFLEN;
+      out_state.zip_state.z_stream.avail_out = BUFLEN;
       assert(deflate(&out_state.zip_state.z_stream,
                      Z_PARTIAL_FLUSH) == Z_OK);
       assert(out_state.zip_state.z_stream.avail_out);
       assert(out_state.zip_state.z_stream.avail_in == 0);
-      blen = ZIP_BUFLEN - out_state.zip_state.z_stream.avail_out;
+      blen = BUFLEN - out_state.zip_state.z_stream.avail_out;
+      assert(blen);
     }
 #endif
 
@@ -310,14 +299,15 @@ void read_data(void)
     {
       /* encrypt data */
       ret = blen;
-      blen = BUFLEN;
+      blen = BUFLEN*2;
       assert( EVP_EncryptUpdate(&out_state.crypt_state.ctx,
-                                out_buf, &blen,
+                                out_state.buf, &blen,
                                 buf, ret) );
     }
 #endif
     
-    ret = write(REMOTE_FD_W, out_buf, blen);
+    assert(blen);
+    ret = write(REMOTE_FD_W, out_state.buf, blen);
     if (ret <= 0)
     {
       if (ret == -1 && errno == EAGAIN)
@@ -332,8 +322,8 @@ void read_data(void)
       fds[REMOTE_FD_W].write_cb = write_net;
       /*  deregister read_cb */
       fds[LOCAL_FD_R].read_cb = NULL;
-      out_ofs = ret;
-      out_len = blen - ret;
+      out_state.ofs = ret;
+      out_state.len = blen - ret;
       return;
     }
   }
@@ -347,38 +337,40 @@ void write_net(void)
 {
   int ret;
 
-  if (!out_len)
+  if (!out_state.len)
     exit(1);
 
-  ret = write(REMOTE_FD_W, out_buf+out_ofs, out_len);
+  ret = write(REMOTE_FD_W, (out_state.buf + out_state.ofs), out_state.len);
 
   if (ret == -1 && errno == EAGAIN)
     return;
   else if (ret <= 0)
     exit(1);
 
-  out_len -= ret;
+  out_state.len -= ret;
 
-  if (!out_len)
+  assert(out_state.len >= 0);
+
+  if (!out_state.len)
   {
     /* write completed, de-register write cb */
     fds[REMOTE_FD_W].write_cb = NULL;
     /* reregister read_cb */
     fds[LOCAL_FD_R].read_cb = read_data;
-    out_ofs = 0;
+    out_state.ofs = 0;
   }
   else
-    out_ofs += ret;
+    out_state.ofs += ret;
 }
 
 void read_net(void)
 {
   int ret;
   int ret2;
-  char *buf = in_buf;
+  unsigned char *buf = in_state.buf;
   int  blen;
 
-  if (in_len)
+  if (in_state.len)
     exit(1);
 
 #if defined(HAVE_LIBCRYPTO) || defined(HAVE_LIBZ)
@@ -386,22 +378,23 @@ void read_net(void)
     buf = tmp_buf;
 #endif
 
-  while ((ret = read(REMOTE_FD_R, buf, BUFLEN)) > 0)
+  while ((ret = read(REMOTE_FD_R, buf, READLEN)) > 0)
   {
     blen = ret;
 #ifdef HAVE_LIBCRYPTO
     if (in_state.crypt)
     {
       /* decrypt data */
-      buf = in_buf;
+      buf = in_state.buf;
 #ifdef HAVE_LIBZ
       if (in_state.zip)
         buf = tmp2_buf;
 #endif
-      blen = BUFLEN;
-      assert( EVP_DecryptUpdate(&in_state.crypt_state.ctx,
-                       buf, &blen,
-                       tmp_buf, ret) );
+      blen = READLEN*2;
+      assert(EVP_DecryptUpdate(&in_state.crypt_state.ctx,
+                               buf, &blen,
+                               tmp_buf, ret));
+      assert(blen);
     }
 #endif
     
@@ -411,18 +404,20 @@ void read_net(void)
       /* decompress data */
       in_state.zip_state.z_stream.next_in = buf;
       in_state.zip_state.z_stream.avail_in = ret;
-      in_state.zip_state.z_stream.next_out = in_buf;
-      in_state.zip_state.z_stream.avail_out = ZIP_BUFLEN;
+      in_state.zip_state.z_stream.next_out = in_state.buf;
+      in_state.zip_state.z_stream.avail_out = BUFLEN*2;
       if ((ret2 = inflate(&in_state.zip_state.z_stream,
                           Z_NO_FLUSH)) != Z_OK)
         exit(ret2);
       assert(in_state.zip_state.z_stream.avail_out);
       assert(in_state.zip_state.z_stream.avail_in == 0);
-      blen = ZIP_BUFLEN - in_state.zip_state.z_stream.avail_out;
+      blen = (BUFLEN*2) - in_state.zip_state.z_stream.avail_out;
     }
 #endif
 
-    ret = write(LOCAL_FD_W, in_buf, blen);
+    assert(blen);
+    
+    ret = write(LOCAL_FD_W, in_state.buf, blen);
     if (ret <= 0)
     {
       if (ret == -1 && errno == EAGAIN)
@@ -433,8 +428,8 @@ void read_net(void)
 
     if (ret < blen)
     {
-      in_ofs = ret;
-      in_len = blen - ret;
+      in_state.ofs = ret;
+      in_state.len = blen - ret;
       /* write incomplete, register write cb */
       fds[LOCAL_FD_W].write_cb = write_data;
       /* deregister read_cb */
@@ -451,26 +446,27 @@ void write_data(void)
 {
   int ret;
 
-  if (!in_len)
+  if (!in_state.len)
     exit(1);
 
-  ret = write(LOCAL_FD_W, in_buf+in_ofs, in_len);
+  ret = write(LOCAL_FD_W, (in_state.buf + in_state.ofs), in_state.len);
 
   if (ret == -1 && errno == EAGAIN)
     return;
   else if (ret <= 0)
     exit(1);
 
-  in_len -= ret;
+  in_state.len -= ret;
+  assert(in_state.len >= 0);
 
-  if (!in_len)
+  if (!in_state.len)
   {
     /* write completed, de-register write cb */
     fds[LOCAL_FD_W].write_cb = NULL;
     /* reregister read_cb */
     fds[REMOTE_FD_R].read_cb = read_net;
-    in_ofs = 0;
+    in_state.ofs = 0;
   }
   else
-    in_ofs += ret;
+    in_state.ofs += ret;
 }

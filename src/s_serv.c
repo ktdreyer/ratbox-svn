@@ -1797,7 +1797,7 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
 {
     struct Client *client_p;
     int fd;
-    char serv_desc[HOSTLEN + 20];
+    char serv_desc[FD_DESC_SZ];
     char buf[HOSTIPLEN];
     /* Make sure aconf is useful */
     assert(aconf != NULL);

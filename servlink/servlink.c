@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
   fd_set wfds;
   int i;
 
-#if 0
+#if 1
   int GDBAttached = 0;
 
   while (!GDBAttached)
@@ -377,7 +377,7 @@ void process_command(struct ctrl_command *cmd)
       in_state.zip = 1;
       break;
     case CMD_SET_ZIP_OUT_LEVEL:
-      out_state.zip_state.level = *(unsigned char *)cmd->data;
+      out_state.zip_state.level = *cmd->data;
       if ((out_state.zip_state.level < -1) ||
           (out_state.zip_state.level > 9))
         exit(1);
