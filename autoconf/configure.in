@@ -146,6 +146,9 @@ AC_CHECK_FUNC(nlist,,
 		AC_MSG_WARN(** cannot locate nlist() **))
 	)
 )
+dnl Checks for the existance of strlcat
+
+AC_CHECK_FUNCS(strlcat strlcpy)
 
 dnl We need to find out whether underscores are appended to symbol names in executable
 dnl files.  First, though, we need to see where nlist.h is hiding.
