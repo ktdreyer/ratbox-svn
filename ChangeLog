@@ -1,3 +1,19 @@
+androsyn    2004/03/02 14:27:23 EST	(20040302_8)
+
+  Modified files:
+    modules              Makefile.in m_encap.c 
+  Added files:
+    modules              m_operspy.c 
+  Log:
+  Split operspy from encap..
+  
+  Revision  Changes    Path
+  1.91      +1 -0      ircd-ratbox/modules/Makefile.in
+  1.17      +2 -51     ircd-ratbox/modules/m_encap.c
+  1.1       +103 -0    ircd-ratbox/modules/m_operspy.c (new)
+
+
+
 androsyn    2004/03/02 13:50:48 EST	(20040302_7)
 
   Modified files:
