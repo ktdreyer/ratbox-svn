@@ -209,16 +209,22 @@ void _free_client(struct Client* cptr)
 /*      if (cptr->localClient->dns_reply)
 	--cptr->localClient->dns_reply->ref_count; */
 
+#ifndef NDEBUG
       mem_frob(cptr->localClient, sizeof(struct LocalUser));
+#endif
       if(BlockHeapFree(localUserFreeList, cptr->localClient))
         result = 1;
 
+#ifndef NDEBUG
       mem_frob(cptr, sizeof(struct Client));
+#endif
       if(BlockHeapFree(ClientFreeList, cptr))
         result = 1;
     }
   else {
+#ifndef NDEBUG
     mem_frob(cptr, sizeof(struct Client));
+#endif
     if(BlockHeapFree(ClientFreeList, cptr))
       result = 1;
   }

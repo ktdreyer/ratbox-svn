@@ -15,6 +15,7 @@
 #include "tools.h"
 
 
+#ifndef NDEBUG
 /*
  * frob some memory. debugging time.
  * -- adrian
@@ -31,6 +32,7 @@ mem_frob(void *data, int len)
         cdata++;
     }
 }
+#endif
 
 /* 
  * dlink_ routines are stolen from squid, except for dlinkAddBefore,
