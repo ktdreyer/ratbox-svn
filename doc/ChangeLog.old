@@ -1,3 +1,11 @@
+*** 20010701_2 by db
+- fixed missing change of local client ts (tsinfo) when client changes nick
+- changed "too many nick" changes notice into a 438 numeric, stolen numeric
+  from ircu... but we did the anti nick flood code first!
+  Note, all the language dependent message.tabs now have to be updated. ick
+
+
+
 *** 20010701_1 by greg
 Added myself to h7 core team, since I just almost had a coronary over h7
 not following the rules of TS ...
