@@ -1,3 +1,19 @@
+leeh        2004/08/07 09:45:34 EDT	(20040807_1)
+
+  Modified files:
+    include              s_user.h 
+    modules/core         m_mode.c 
+    src                  s_user.c 
+  Log:
+  - move user_mode() s_user.c -> m_mode.c
+  
+  Revision  Changes    Path
+  7.32      +9 -5      ircd-ratbox/include/s_user.h
+  1.114     +190 -1    ircd-ratbox/modules/core/m_mode.c
+  7.329     +1 -193    ircd-ratbox/src/s_user.c
+
+
+
 leeh        2004/08/06 22:22:24 EDT	(20040807_0)
 
   Modified files:
