@@ -235,12 +235,6 @@ Info MyInformation[] = {
   { "HPATH", "NONE", 0, "Path to Operator Help File" },
 #endif /* HPATH */
 
-#ifdef HUB
-  { "HUB", "ON", 0, "Configured as a HUB Server" },
-#else
-  { "HUB", "OFF", 0, "Configured as a HUB Server" },
-#endif /* HUB */
-
 #ifdef SOMAXCONN
   { "HYBRID_SOMAXCONN", "", SOMAXCONN, "Maximum Queue Length of Pending Connections" },
 #else
