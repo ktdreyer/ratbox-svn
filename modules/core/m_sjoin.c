@@ -61,7 +61,7 @@ _moddeinit(void)
   mod_del_cmd(&sjoin_msgtab);
 }
 
-char *_version = "20001122";
+char *_version = "20010102";
 
 /*
  * ms_sjoin
@@ -111,12 +111,14 @@ int     ms_sjoin(struct Client *cptr,
   int            fl;
   int            people = 0;
   int            isnew;
-  register       char *s, *s0;
+  register       char *s, *s0, *sh;
   static         char buf[BUFSIZE];
   static         char sjbuf[BUFSIZE];
+  char           sjbuf_nh[BUFSIZE];
   char           *nick_pointer;
   char    *p;
   int hide_or_not;
+  int i;
   dlink_node *m;
 
   if (IsClient(sptr) || parc < 5)
@@ -334,43 +336,36 @@ int     ms_sjoin(struct Client *cptr,
 
   *mbuf++ = '+';
 
+  sh = sjbuf_nh;
+  
   for (s = s0 = strtoken(&p, parv[args+4], " "); s;
        				s = s0 = strtoken(&p, (char *)NULL, " "))
     {
       fl = 0;
 
-      if (*s == '@')
+      for (i = 0; i < 2; i++)
+      {
+        if (*s == '@')
 	{
 	  fl |= MODE_CHANOP;
+          *sh++ = *s;
 	  s++;
 	}
-      else if (*s == '+')
+        else if (*s == '+')
 	{
 	  fl |= MODE_VOICE;
+          *sh++ = *s;
 	  s++;
 	}
+        else if (*s == '%')
+        {
+          fl |= MODE_HALFOP;
+          *sh++ = '@';
+          s++;
+        }
+      }
 
-      if (*s == '+')
-	{
-	  fl |= MODE_VOICE;
-	  s++;
-	}
-      else if (*s == '@')
-	{
-	  fl |= MODE_CHANOP;
-	  s++;
-	}
-      
-      if (*s == '%') 
-	{
-	  fl |= MODE_HALFOP;
-	  s++;
-	}
-      else if (*s == '%')
-	{
-	  fl |= MODE_HALFOP;
-	  s++;
-	}
+      sh += ircsprintf(sh, "%s ", s); /* Copy over the nick */
 
       if (!keep_new_modes)
        {
@@ -513,7 +508,9 @@ int     ms_sjoin(struct Client *cptr,
 	}
     }
 
-  sendto_channel_remote(chptr, cptr, "%s %s", buf, sjbuf);
+  sendto_cap_serv_butone(CAP_HOPS, cptr, "%s %s", buf, sjbuf);
+
+  sendto_nocap_serv_butone(CAP_HOPS, cptr, "%s %s", buf, sjbuf_nh);
 
   return 0;
 }
