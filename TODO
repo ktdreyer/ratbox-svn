@@ -22,10 +22,8 @@ is-'s TODO list
 -----------------------------------------------------------------------------
 madmax's TODO
 
-- Fix /links *mask* for non-opers/server_hide output (#4)
 - Make stats p just notice opers, rather than return a list, when
   server_hide is on (#13)
-- Split up server_hide into parts (#17)
 - Client UIDs (ts4 style?) for cookies (later for persistent nicks)
 - Definable server region or 'global' (open I) for /links output (#20)
 -----------------------------------------------------------------------------
@@ -49,9 +47,6 @@ Adrian's TODO list
 * look at the old Listener code in s_bsd.c before I chopped it. Notice
   the anti-flood code in there. Make sure the same load-checking stuff
   is in listener.c
-
-* look at mo_die() - find the restart function, break out the shutdown code,
-  and tidy shit up!
 
 * get send_message(), replace comm_setselect() with send_queued_write(), see
   if the optimization works
@@ -78,17 +73,9 @@ db-->> Actually, the old code was just as slow at doing that, since
     on channel was an op or not... With a channel of 100 clients and 
     thats 100 link SLink's
 
-* Look at removing the whole DNS ref_count evilness now that the cache
-  has gone away. We should be *copying* the returned result, not just
-  storing a pointer to it. This will make a lot of the code much simpler.
-  (Hopefully.)
-
 ------------------------------------------------------------------------------
 Little things to be done given enough time and initiative -Hwy
 
-.  Bring back CIDR support in operator blocks
-   user="wcampbel@144.26.*"; # works - even if the hostname resolves
-   user="wcampbel@144.26.0.0/16"; # Does not work
 .  The 3 logging path settings are NOOP in the conf (logpath, oper_log, 
    gline_log)
 .  Fix convertconf more
@@ -98,12 +85,6 @@ Little things to be done given enough time and initiative -Hwy
 .  <Riedel> walter : have you implemented the motd= thing in the auth block ?
 .  Fix topic bursting to LL servers (broke lately for some reason)
    --> Unknown status
-.  Unconfirmed reports of DNS lookups failing on the first connection to
-   a server, while working fine on subsequent connections.
-   --> I haven't see this happen for a while
-.  Somehow fix the bug that causes cores when an in-use message file is
-   updated.
-   --> Documented as a bug
 .  A FAQ
    --> Dracus is working on this, I will try to put something together too
 .  Major cleanup of example.conf, it's a disgrace
@@ -111,8 +92,6 @@ Little things to be done given enough time and initiative -Hwy
 .  chkconf
    --> SCARY!!!
 .  More translations!
-.  Provide a way (stats?) to show the contents of a modules block from the
-   conf.
 
 
 -- Rodder's list
@@ -131,8 +110,6 @@ Little things to be done given enough time and initiative -Hwy
   *  Re-write proper startup procedure for daemon; procedure should be
      done in stages, similar to boot0/1/2 stages in FreeBSD.
   *  Write secure cryptlink protocol with help from Sean.
-  *  Add byacc checking; if user is using old byacc (small table size),
-     force user to install bison, or make them upgrade byacc.
 
 
 -- Diane's list
