@@ -1,3 +1,7 @@
+*** 20010919_2 by lusky
+pass CFLAGS during linking too
+
+
 *** 20010919_1 by androsyn
 Fixed the 0::1 stuff for IPv6 support and removed stupid check as well.
 
