@@ -398,7 +398,7 @@ void error_exit_client(struct Client* cptr, int error)
 				get_client_name(cptr, SHOW_IP));
 
 	  /* Opers get a masked IP */
-	  sendto_realops_flags(FLAGS_ALL,
+	  sendto_realops_flags(FLAGS_NOTADMIN,
 				"Server %s closed the connection",
 				get_client_name(cptr, MASK_IP));
 

@@ -1390,6 +1390,8 @@ sendto_realops_flags(int flags, const char *pattern, ...)
     {
       cptr = ptr->data;
 
+      if((flags == FLAGS_NOTADMIN) && IsAdmin(cptr)) 
+        continue;
       if(cptr->umodes & flags)
 	{
 	  len =ircsprintf(sendbuf, ":%s NOTICE %s :*** Notice -- %s",

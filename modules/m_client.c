@@ -256,9 +256,9 @@ static int ms_client(struct Client *cptr, struct Client *sptr,
           || (newts == acptr->tsinfo))
 	  {
           sendto_realops_flags(FLAGS_ALL,
-							   "Nick collision on %s(%s <- %s)(both killed)",
-							   acptr->name, acptr->from->name,
-							   get_client_name(cptr, HIDE_IP));
+			   "Nick collision on %s(%s <- %s)(both killed)",
+			   acptr->name, acptr->from->name,
+			   get_client_name(cptr, HIDE_IP));
 		  
 #ifndef LOCAL_NICK_COLLIDE
           /* If we got the message from a LL, ensure it gets the kill */

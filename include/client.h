@@ -363,6 +363,7 @@ struct LocalUser
 #define FLAGS_ADMIN        0x80000 /* Admin on server */
 
 #define FLAGS_ALL	   FLAGS_SERVNOTICE
+#define FLAGS_NOTADMIN     FLAGS_OPER
 
 /* overflow flags */
 #define FLAGS2_EXEMPTGLINE  0x0001	/* client can't be G-lined */

@@ -355,9 +355,12 @@ check_pings_list(dlink_list *list)
               if (IsServer(cptr) || IsConnecting(cptr) ||
                   IsHandshake(cptr))
                 {
-                  sendto_realops_flags(FLAGS_ALL,
+                  sendto_realops_flags(FLAGS_ADMIN,
 				       "No response from %s, closing link",
 				       get_client_name(cptr, HIDE_IP));
+                  sendto_realops_flags(FLAGS_NOTADMIN,
+                                       "No response from %s, closing link",
+                                       get_client_name(cptr, MASK_IP));
                   log(L_NOTICE, "No response from %s, closing link",
                       get_client_name(cptr, HIDE_IP));
                 }
