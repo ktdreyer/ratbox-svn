@@ -317,8 +317,8 @@ build_target_list(int p_or_n, const char *command, struct Client *client_p,
 
 		if(type != 0)
 		{
-			/* suggested by Mortiis */
-			if(*nick == '\0')	/* if its a '\0' dump it, there is no recipient */
+			/* no recipient.. */
+			if(EmptyString(nick))
 			{
 				sendto_one(source_p, form_str(ERR_NORECIPIENT),
 					   me.name, source_p->name, command);

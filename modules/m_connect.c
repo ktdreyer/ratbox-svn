@@ -85,7 +85,7 @@ mo_connect(struct Client *client_p, struct Client *source_p, int parc, const cha
 		return;
 	}
 
-	if(*parv[1] == '\0')
+	if(EmptyString(parv[1]))
 	{
 		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), me.name, parv[0], "CONNECT");
 		return;
@@ -192,7 +192,7 @@ ms_connect(struct Client *client_p, struct Client *source_p, int parc, const cha
 		return;
 	}
 
-	if(*parv[1] == '\0')
+	if(EmptyString(parv[1]))
 	{
 		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), me.name, parv[0], "CONNECT");
 		return;

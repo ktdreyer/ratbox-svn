@@ -272,7 +272,7 @@ cryptlink_serv(struct Client *client_p, struct Client *source_p, int parc, const
 	   return;
 	 */
 
-	if((parc < 5) || (*parv[4] == '\0'))
+	if((parc < 5) || EmptyString(parv[4]))
 	{
 		cryptlink_error(client_p, "SERV", "Invalid params",
 				"CRYPTLINK SERV - Invalid params");

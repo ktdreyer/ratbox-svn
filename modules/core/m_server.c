@@ -323,7 +323,7 @@ ms_server(struct Client *client_p, struct Client *source_p, int parc, const char
 	 * add it to list and propagate word to my other
 	 * server links...
 	 */
-	if(parc == 1 || info[0] == '\0')
+	if(parc == 1 || EmptyString(info))
 	{
 		sendto_one(client_p, "ERROR :No server info specified for %s", name);
 		return;

@@ -458,7 +458,7 @@ check_clean_nick(struct Client *client_p, struct Client *source_p,
 	 * Zero length nicks are bad too..this shouldn't happen but..
 	 */
 
-	if(!clean_nick_name(nick) || strcmp(nick, newnick) || nick[0] == '\0')
+	if(EmptyString(nick) || !clean_nick_name(nick) || strcmp(nick, newnick))
 	{
 		ServerStats->is_kill++;
 		sendto_realops_flags(UMODE_DEBUG, L_ALL,

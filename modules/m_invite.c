@@ -65,7 +65,7 @@ m_invite(struct Client *client_p, struct Client *source_p, int parc, const char 
 	struct Channel *chptr;
 	int chop = 1;
 
-	if(*parv[2] == '\0')
+	if(EmptyString(parv[2]))
 	{
 		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), me.name, parv[0], "INVITE");
 		return;
