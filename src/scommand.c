@@ -17,6 +17,7 @@
 #include "service.h"
 #include "log.h"
 #include "hook.h"
+#include "s_userserv.h"
 
 static dlink_list scommand_table[MAX_SCOMMAND_HASH];
 
@@ -341,6 +342,13 @@ c_whois(struct client *client_p, const char *parv[], int parc)
                 if(ClientOper(target_p))
                         sendto_server(":%s 313 %s %s :is an IRC Operator",
                                       MYNAME, parv[0], target_p->name);
+
+#ifdef ENABLE_USERSERV
+		if(target_p->user->user_reg)
+			sendto_server(":%s 330 %s %s %s :is logged in as",
+					MYNAME, parv[0], target_p->name,
+					target_p->user->user_reg->name);
+#endif
         }
         /* must be one of our services.. */
         else

@@ -77,7 +77,7 @@ u_operbot_objoin(struct connection_entry *conn_p, char *parv[], int parc)
 	if((chptr = find_channel(parv[1])) && 
 	   dlink_find(operbot_p, &chptr->services))
 	{
-		sendto_one(conn_p, "Operbot already in %s", parv[1]);
+		sendto_one(conn_p, "%s already in %s", operbot_p->name, parv[1]);
 		return;
 	}
 
@@ -87,7 +87,7 @@ u_operbot_objoin(struct connection_entry *conn_p, char *parv[], int parc)
 			parv[1], conn_p->name);
 
 	join_service(operbot_p, parv[1], NULL);
-	sendto_one(conn_p, "Operbot joined to %s", parv[1]);
+	sendto_one(conn_p, "%s joined to %s", operbot_p->name, parv[1]);
 }
 
 static void
@@ -99,10 +99,10 @@ u_operbot_obpart(struct connection_entry *conn_p, char *parv[], int parc)
 
 		loc_sqlite_exec(NULL, "DELETE FROM operbot WHERE chname = %Q",
 				parv[1]);
-		sendto_one(conn_p, "Operbot removed from %s", parv[1]);
+		sendto_one(conn_p, "%s removed from %s", operbot_p->name, parv[1]);
 	}
 	else
-		sendto_one(conn_p, "Operbot not in channel %s", parv[1]);
+		sendto_one(conn_p, "%s not in channel %s", operbot_p->name, parv[1]);
 }
 
 static int
@@ -114,7 +114,7 @@ s_operbot_objoin(struct client *client_p, char *parv[], int parc)
 	   dlink_find(operbot_p, &chptr->services))
 	{
 		service_error(operbot_p, client_p, 
-				"Operbot already in %s", parv[0]);
+				"%s already in %s", operbot_p->name, parv[0]);
 		return 1;
 	}
 
@@ -126,7 +126,7 @@ s_operbot_objoin(struct client *client_p, char *parv[], int parc)
 			
 	join_service(operbot_p, parv[0], NULL);
 	service_error(operbot_p, client_p, 
-			"Operbot joined to %s", parv[0]);
+			"%s joined to %s", operbot_p->name, parv[0]);
 	return 1;
 }
 
@@ -141,11 +141,11 @@ s_operbot_obpart(struct client *client_p, char *parv[], int parc)
 		loc_sqlite_exec(NULL, "DELETE FROM operbot WHERE chname = %Q",
 				parv[0]);
 		service_error(operbot_p, client_p, 
-				"Operbot removed from %s", parv[0]);
+				"%s removed from %s", operbot_p->name, parv[0]);
 	}
 	else
 		service_error(operbot_p, client_p, 
-				"Operbot not in channel %s", parv[0]);
+				"%s not in channel %s", operbot_p->name, parv[0]);
 	return 1;
 }
 
