@@ -115,22 +115,22 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       if (ConfigFileEntry.warn_no_nline)
         {
          sendto_realops_flags(FLAGS_ADMIN,
-           "Unauthorised server connection attempt from %s: No entry for "
+           "Unauthorized server connection attempt from %s: No entry for "
            "servername %s.", get_client_name(cptr, TRUE), host);
 
          sendto_realops_flags(FLAGS_ALL,
-           "Unauthorised server connection attempt from %s: No entry for "
+           "Unauthorized server connection attempt from %s: No entry for "
            "servername %s.", get_client_name(cptr, FALSE), host);
         }
       return exit_client(cptr, cptr, cptr,
                 "Invalid servername.");
      case -2:
       sendto_realops_flags(FLAGS_ADMIN,
-        "Unauthorised server connection attempt from %s: Bad password "
+        "Unauthorized server connection attempt from %s: Bad password "
         "for server %s.", get_client_name(cptr, TRUE), host);
 
       sendto_realops_flags(FLAGS_ALL,
-        "Unauthorised server connection attempt from %s: Bad password "
+        "Unauthorized server connection attempt from %s: Bad password "
         "for server %s.", get_client_name(cptr, FALSE), host);
 
       return exit_client(cptr, cptr, cptr,
@@ -138,11 +138,11 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       break;
      case -3:
       sendto_realops_flags(FLAGS_ADMIN,
-        "Unauthorised server connection attempt from %s: Invalid host "
+        "Unauthorized server connection attempt from %s: Invalid host "
         "for server %s.", get_client_name(cptr, TRUE), host);
 
       sendto_realops_flags(FLAGS_ALL,
-        "Unauthorised server connection attempt from %s: Invalid host "
+        "Unauthorized server connection attempt from %s: Invalid host "
         "for server %s.", get_client_name(cptr, FALSE), host);
 
       return exit_client(cptr, cptr, cptr,
