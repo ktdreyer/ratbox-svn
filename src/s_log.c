@@ -29,6 +29,7 @@
 #include "ircd.h"
 #include "s_misc.h"
 #include "event.h"	/* Needed for EVH etc. */
+#include "config.h"     /* Needed for FNAME_USERLOG, INIT_LOG_LEVEL */
 
 #include <assert.h>
 #include <errno.h>
