@@ -1,3 +1,25 @@
+leeh        2005/01/30 19:16:08 EST	(20050131_0)
+
+  Modified files:
+    doc                  hooks.txt 
+    include              hook.h 
+    modules              m_services.c 
+    modules/core         m_server.c 
+    src                  hook.c s_serv.c 
+  Log:
+  - added hook for server_introduced
+  - fixed up services support for hooks
+  
+  Revision  Changes    Path
+  1.4       +10 -0     ircd-ratbox/doc/hooks.txt
+  1.31      +1 -0      ircd-ratbox/include/hook.h
+  1.152     +6 -1      ircd-ratbox/modules/core/m_server.c
+  1.5       +8 -22     ircd-ratbox/modules/m_services.c
+  7.36      +2 -0      ircd-ratbox/src/hook.c
+  7.426     +5 -0      ircd-ratbox/src/s_serv.c
+
+
+
 androsyn    2005/01/29 20:18:12 EST	(20050130_1)
 
   Modified files:
