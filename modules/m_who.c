@@ -65,7 +65,7 @@ static void do_who_on_channel(struct Client *source_p,
 			      int server_oper, int member);
 
 static void do_who_list(struct Client *source_p, struct Channel *chptr,
-                        dlink_list *chanops_list, dlink_list *peons_list,
+                        dlink_list *peons_list, dlink_list *chanops_list,
                         dlink_list *halfops_list, dlink_list *voiced_list,
                         char *chanop_flag, char *halfop_flag, char *voiced_flag,
                         char *chname);
@@ -495,8 +495,7 @@ static void do_who_list(struct Client *source_p, struct Channel *chptr,
       if(voiced_ptr != NULL)
         {
           target_p = voiced_ptr->data;
-          if(target_p == source_p && is_voiced(chptr, source_p) &&
-             chptr->mode.mode & MODE_HIDEOPS)
+          if(target_p == source_p && is_voiced(chptr, source_p) && chptr->mode.mode & MODE_HIDEOPS)
              do_who(source_p, target_p, chname, "+");
           else
             do_who(source_p, target_p, chname, voiced_flag);
