@@ -50,6 +50,7 @@
         ConfigFileEntry.max_targets,NICKLEN-1,TOPICLEN,REASONLEN
 
 #define FEATURES2 "CHANNELLEN=%i"	\
+		" AWAYLEN=%i"		\
 		" CHANTYPES=#&"		\
 		" PREFIX=(ov)@+" 	\
 		" CHANMODES=%s%sb,k,l,imnpst"	\
@@ -60,7 +61,8 @@
 		" WALLCHOPS"		\
 		" ETRACE"
 
-#define FEATURES2VALUES LOC_CHANNELLEN, ConfigChannel.use_except ? "e" : "", \
+#define FEATURES2VALUES LOC_CHANNELLEN, AWAYLEN, \
+			ConfigChannel.use_except ? "e" : "", \
                         ConfigChannel.use_invex ? "I" : "", \
                         ServerInfo.network_name
 
