@@ -1,3 +1,15 @@
+androsyn    2002/08/10 16:24:18 EDT	(20020810_33)
+
+  Modified files:
+    src                  s_serv.c 
+  Log:
+  SetServer if adding to the server list..
+  
+  Revision  Changes    Path
+  7.277     +1 -1      ircd-ratbox/src/s_serv.c
+
+
+
 androsyn    2002/08/10 16:08:39 EDT	(20020810_32)
 
   Modified files:
