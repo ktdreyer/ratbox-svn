@@ -1,3 +1,15 @@
+androsyn    2002/06/07 19:37:39 EDT	(20020608_1)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  We could potentially add a client twice to the abort_list
+  
+  Revision  Changes    Path
+  7.275     +1 -1      ircd-hybrid-7/src/client.c
+
+
+
 leeh        2002/06/07 19:13:51 EDT	(20020608_0)
 
   Modified files:
