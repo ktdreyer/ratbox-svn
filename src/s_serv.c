@@ -92,7 +92,7 @@ struct Capability captab[] = {
 	{ "GLN",	CAP_GLN},
 	{ "KNOCK",	CAP_KNOCK},
 	{ "ZIP",	CAP_ZIP},
-	{ "TBURST",	CAP_TBURST},
+	{ "TB",		CAP_TB},
 	{ "UNKLN",	CAP_UNKLN},
 	{ "CLUSTER",	CAP_CLUSTER},
 	{ "ENCAP",	CAP_ENCAP },
@@ -503,6 +503,12 @@ check_server(const char *name, struct Client *client_p)
 #endif
 		ClearCap(client_p, CAP_ZIP);
 
+	/* if server has announced it supports TB, but we dont want to burst
+	 * topics, disable the capability. --fl
+	 */
+	if(!IsConfTburst(server_aconf))
+		ClearCap(client_p, CAP_TB);
+
 	if(aconf != NULL)
 	{
 #ifdef IPV6
@@ -786,6 +792,13 @@ burst_TS5(struct Client *client_p)
 
 		if(IsCapable(client_p, CAP_IE))
 			burst_modes_TS5(client_p, chptr->chname, &chptr->invexlist, 'I');
+
+		if(IsCapable(client_p, CAP_TB))
+			sendto_one(client_p, ":%s TB %s %ld %s%s:%s",
+				   me.name, chptr->chname, chptr->topic_time,
+				   ConfigChannel.burst_topicwho ? chptr->topic_info : "",
+				   ConfigChannel.burst_topicwho ? " " : "",
+				   chptr->topic);
 	}
 }
 
@@ -913,6 +926,13 @@ burst_TS6(struct Client *client_p)
 		if(IsCapable(client_p, CAP_IE) &&
 		   dlink_list_length(&chptr->invexlist) > 0)
 			burst_modes_TS6(client_p, chptr, &chptr->invexlist, 'I');
+
+		if(IsCapable(client_p, CAP_TB))
+			sendto_one(client_p, ":%s TB %s %ld %s%s:%s",
+				   me.id, chptr->chname, chptr->topic_time,
+				   ConfigChannel.burst_topicwho ? chptr->topic_info : "",
+				   ConfigChannel.burst_topicwho ? " " : "",
+				   chptr->topic);
 	}
 }
 
@@ -1042,8 +1062,8 @@ server_estab(struct Client *client_p)
 		 */
 
 		send_capabilities(client_p, aconf, default_server_capabs
-				  | ((aconf->flags & CONF_FLAGS_COMPRESSED) ?
-				     CAP_ZIP_SUPPORTED : 0));
+				  | IsConfCompressed(aconf) ? CAP_ZIP_SUPPORTED : 0
+				  | IsConfTburst(aconf) ? CAP_TB : 0);
 
 		sendto_one(client_p, "SERVER %s 1 :%s%s",
 			   me.name,
@@ -1804,7 +1824,8 @@ serv_connect_callback(int fd, int status, void *data)
 	 */
 
 	send_capabilities(client_p, aconf, default_server_capabs
-			  | ((aconf->flags & CONF_FLAGS_COMPRESSED) ? CAP_ZIP_SUPPORTED : 0));
+			  | IsConfCompressed(aconf) ? CAP_ZIP_SUPPORTED : 0
+			  | IsConfTburst(aconf) ? CAP_TB : 0);
 
 	sendto_one(client_p, "SERVER %s 1 :%s%s",
 		   me.name,

@@ -1521,6 +1521,17 @@ conf_set_connect_compressed(void *data)
 }
 
 static void
+conf_set_connect_topicburst(void *data)
+{
+	int yesno = *(unsigned int *) data;
+
+	if(yesno)
+		yy_aconf->flags |= CONF_FLAGS_TB;
+	else
+		yy_aconf->flags &= ~CONF_FLAGS_TB;
+}
+
+static void
 conf_set_connect_auto(void *data)
 {
 	int yesno = *(unsigned int *) data;
@@ -2344,6 +2355,12 @@ conf_set_channel_no_oper_resvs(void *data)
 }
 
 static void
+conf_set_channel_burst_topicwho(void *data)
+{
+	ConfigChannel.burst_topicwho = *(unsigned int *) data;
+}
+
+static void
 conf_set_serverhide_flatten_links(void *data)
 {
 	ConfigServerHide.flatten_links = *(unsigned int *) data;
@@ -2654,6 +2671,7 @@ newconf_init()
 	add_conf_item("connect", "autoconn", CF_YESNO, conf_set_connect_auto);
 	add_conf_item("connect", "encrypted", CF_YESNO, conf_set_connect_encrypted);
 	add_conf_item("connect", "compressed", CF_YESNO, conf_set_connect_compressed);
+	add_conf_item("connect", "topicburst", CF_YESNO, conf_set_connect_topicburst);
 	add_conf_item("connect", "rsa_public_key_file", CF_QSTRING,
 		      conf_set_connect_rsa_public_key_file);
 
@@ -2776,6 +2794,7 @@ newconf_init()
 		      conf_set_channel_no_create_on_split);
 	add_conf_item("channel", "no_join_on_split", CF_YESNO, conf_set_channel_no_join_on_split);
 	add_conf_item("channel", "no_oper_resvs", CF_YESNO, conf_set_channel_no_oper_resvs);
+	add_conf_item("channel", "burst_topicwho", CF_YESNO, conf_set_channel_burst_topicwho);
 
 	add_top_conf("serverhide", NULL, NULL);
 	add_conf_item("serverhide", "flatten_links", CF_YESNO, conf_set_serverhide_flatten_links);

@@ -135,6 +135,7 @@ struct ConfItem
 #define CONF_FLAGS_ENCRYPTED            0x00100000
 #define CONF_FLAGS_COMPRESSED           0x00200000
 #define CONF_FLAGS_TEMPORARY            0x00400000
+#define CONF_FLAGS_TB			0x00800000
 #define CONF_FLAGS_VHOSTED		0x01000000
 
 
@@ -158,6 +159,7 @@ struct ConfItem
 #define IsConfEncrypted(x)      ((x)->flags & CONF_FLAGS_ENCRYPTED)
 #define IsConfCompressed(x)     ((x)->flags & CONF_FLAGS_COMPRESSED)
 #define IsConfVhosted(x)	((x)->flags & CONF_FLAGS_VHOSTED)
+#define IsConfTburst(x)		((x)->flags & CONF_FLAGS_TB)
 
 /* flag definitions for opers now in client.h */
 
@@ -264,6 +266,7 @@ struct config_channel_entry
 	int default_split_user_count;
 	int default_split_delay;
 	int no_oper_resvs;
+	int burst_topicwho;
 };
 
 struct config_server_hide
