@@ -1,3 +1,16 @@
+leeh        2004/04/08 19:23:32 EDT	(20040408_7)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  - ok, swap an (!IsUnknown && !IsPerson) for an IsAnyServer(), as thats what
+    we're aiming to test here, only rejected clients got in the way.
+  
+  Revision  Changes    Path
+  7.452     +1 -2      ircd-ratbox/src/client.c
+
+
+
 leeh        2004/04/08 18:16:08 EDT	(20040408_6)
 
   Modified files:
