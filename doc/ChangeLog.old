@@ -1,3 +1,11 @@
+*** 20010530_10 by leeh
+- ok, big revision of stats I, you can now show users nothing,
+  everything, or matching auth blocks
+
+  ill be doing the stuff for stats k/K tomorrow..  but for now, stats K
+  may be dodgy ;p
+
+
 *** 20010530_9 by davidt
 - Use fork() not vfork().
 - Fix --disable-shared-modules build
