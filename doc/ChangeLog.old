@@ -1,3 +1,7 @@
+*** 20010905_1 by leeh
+- added checks for Makefile to build_one
+
+
 *** 20010904_4 by leeh
 - updated it to cover cryptlinks..
 - added it to example.conf
