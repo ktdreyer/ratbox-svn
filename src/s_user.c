@@ -307,8 +307,7 @@ int register_local_user(struct Client *client_p, struct Client *source_p,
     source_p->flags |= FLAGS_PINGSENT;
     return 0;
   } 
-
-
+ 
   user->last = CurrentTime;
   /* Straight up the maximum rate of flooding... */
   source_p->localClient->allow_read = MAX_FLOOD_PER_SEC_I;
@@ -439,6 +438,10 @@ int register_local_user(struct Client *client_p, struct Client *source_p,
 		       ipaddr,
 		       get_client_class(source_p), source_p->info);
   
+  source_p->umodes |= FLAGS_INVISIBLE;
+
+  Count.invisi++;
+    
   if ((++Count.local) > Count.max_loc)
     {
       Count.max_loc = Count.local;
@@ -787,7 +790,6 @@ report_and_set_user_flags(struct Client *source_p,struct ConfItem *aconf)
 int do_local_user(char* nick, struct Client* client_p, struct Client* source_p,
 		  char* username, char *host, char *server, char *realname)
 {
-  unsigned int oflags;
   struct User* user;
 
   assert(NULL != source_p);
@@ -795,17 +797,12 @@ int do_local_user(char* nick, struct Client* client_p, struct Client* source_p,
 
   user = make_user(source_p);
 
-  oflags = source_p->umodes;
-
   if (!IsUnknown(source_p))
     {
       sendto_one(source_p, form_str(ERR_ALREADYREGISTRED), me.name, nick);
       return 0;
     }
-  source_p->umodes |= FLAGS_INVISIBLE;
-
-  if (!(oflags & FLAGS_INVISIBLE) && IsInvisible(source_p))
-    Count.invisi++;
+    
   /*
    * don't take the clients word for it, ever
    *  strncpy_irc(user->host, host, HOSTLEN); 
