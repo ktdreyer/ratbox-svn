@@ -1,3 +1,24 @@
+leeh        2004/02/26 16:43:27 EST	(20040226_5)
+
+  Modified files:
+    doc                  example.conf example.efnet.conf 
+    include              s_conf.h 
+    modules              m_info.c m_stats.c 
+    src                  newconf.c s_conf.c 
+  Log:
+  - add stats_e_disabled to general {};, to disable stats e requests.
+  
+  Revision  Changes    Path
+  7.233     +5 -0      ircd-ratbox/doc/example.conf
+  7.68      +5 -0      ircd-ratbox/doc/example.efnet.conf
+  7.268     +1 -0      ircd-ratbox/include/s_conf.h
+  1.100     +7 -1      ircd-ratbox/modules/m_info.c
+  1.198     +9 -2      ircd-ratbox/modules/m_stats.c
+  7.132     +8 -0      ircd-ratbox/src/newconf.c
+  7.448     +1 -0      ircd-ratbox/src/s_conf.c
+
+
+
 leeh        2004/02/26 16:34:23 EST	(20040226_4)
 
   Modified files:
