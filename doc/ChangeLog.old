@@ -1,3 +1,7 @@
+*** 20010312_1 by androsyn
+Removed remains of release_dns_client_reply()
+
+
 *** 20010311_11 by wcampbel
 Removed myself from the Hybrid-Team, moved myself down to a contributer
 
