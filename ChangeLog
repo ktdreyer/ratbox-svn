@@ -1,3 +1,16 @@
+leeh        2003/11/26 10:36:33 EST	(20031126_1)
+
+  Modified files:
+    src                  newconf.c 
+  Log:
+  - dont give opers operwall privs by default, we dont have <priv> = <yes|no>;
+    anymore so this meant you couldnt disable it..
+  
+  Revision  Changes    Path
+  7.120     +0 -1      ircd-ratbox/src/newconf.c
+
+
+
 androsyn    2003/11/26 09:43:47 EST	(20031126_0)
 
   Modified files:
