@@ -1,3 +1,15 @@
+leeh        2002/01/03 18:46:18 EST	(20020103_1)
+
+  Modified files:
+    src                  channel.c 
+  Log:
+  - dont allow users to send to resv'd channels
+  
+  Revision  Changes    Path
+  7.289     +4 -0      ircd-hybrid-7/src/channel.c
+
+
+
 leeh        2002/01/03 07:11:33 EST	(20020103_0)
 
   Modified files:
