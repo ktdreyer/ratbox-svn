@@ -238,10 +238,16 @@ int   class_redirport_var;
 %token  VCHANS_OPER_ONLY
 %token  MIN_NONWILDCARD
 %token  DISABLE_VCHANS
+%token  SECONDS MINUTES HOURS DAYS WEEKS MONTHS YEARS
+%token  BYTES KBYTES KILOBYTES KB
+%token  MEGABYTES MBYTES MB
+%token  GIGABYTES GBYTES GB
 
 %type   <ip_value> IP_TYPE
 %type   <string>   QSTRING
 %type   <number>   NUMBER
+%type   <number>   timespec
+%type   <number>   sizespec
 
 %%
 conf:   
@@ -266,6 +272,63 @@ conf_item:        admin_entry
                 | error ';'
                 | error '}'
         ;
+
+
+timespec:	NUMBER 
+		= {
+			$$ = $1;
+		}
+		| NUMBER SECONDS
+		= {
+			$$ = $1;
+		}
+		| NUMBER MINUTES
+		= {
+			$$ = $1 * 60;
+		}
+		| NUMBER HOURS
+		= {
+			$$ = $1 * 60 * 60;
+		}
+		| NUMBER DAYS
+		= {
+			$$ = $1 * 60 * 60 * 24;
+		}
+		| NUMBER WEEKS
+		= {
+			$$ = $1 * 60 * 60 * 24 * 7;
+		}
+		| NUMBER MONTHS
+		= {
+			/* a month has 28 days, or 4 weeks */
+			$$ = $1 * 60 * 60 * 24 * 7 * 4;
+		}
+		| NUMBER YEARS
+		= {
+			/* a year has 365 days, *not* 12 months */
+			$$ = $1 * 60 * 60 * 24 * 365;
+		};
+
+sizespec:	NUMBER
+		= {
+			$$ = $1;
+		}
+		NUMBER BYTES
+		= { 
+			$$ = $1;
+		}
+		| NUMBER KBYTES
+		= {
+			$$ = $1 * 1024;
+		}
+		| NUMBER MBYTES
+		= {
+			$$ = $1 * 1024 * 1024;
+		}
+		| NUMBER GBYTES
+		= {
+			$$ = $1 * 1024 * 1024 * 1024;
+		};
 
 /***************************************************************************
  *  section modules
@@ -678,9 +741,9 @@ class_name:     NAME '=' QSTRING ';'
     DupString(class_name_var, yylval.string);
   };
 
-class_ping_time:        PING_TIME '=' NUMBER ';'
+class_ping_time:        PING_TIME '=' timespec ';'
   {
-    class_ping_time_var = yylval.number;
+    class_ping_time_var = $3;
   };
 
 class_number_per_ip:    NUMBER_PER_IP '=' NUMBER ';'
@@ -688,9 +751,9 @@ class_number_per_ip:    NUMBER_PER_IP '=' NUMBER ';'
     class_number_per_ip_var = yylval.number;
   };
 
-class_connectfreq:     CONNECTFREQ '=' NUMBER ';'
+class_connectfreq:     CONNECTFREQ '=' timespec ';'
   {
-    class_number_per_ip_var = yylval.number;
+    class_number_per_ip_var = $3;
   };
 
 class_max_number:       MAX_NUMBER '=' NUMBER ';'
@@ -698,9 +761,9 @@ class_max_number:       MAX_NUMBER '=' NUMBER ';'
     class_max_number_var = yylval.number;
   };
 
-class_sendq:    SENDQ '=' NUMBER ';'
+class_sendq:    SENDQ '=' sizespec ';'
   {
-    class_sendq_var = yylval.number;
+    class_sendq_var = $3;
   };
 
 
@@ -1581,9 +1644,9 @@ general_anti_nick_flood:   ANTI_NICK_FLOOD '=' TYES ';'
     ConfigFileEntry.anti_nick_flood = 0;
   } ;
 
-general_max_nick_time:    MAX_NICK_TIME '=' NUMBER ';'
+general_max_nick_time:    MAX_NICK_TIME '=' timespec ';'
   {
-    ConfigFileEntry.max_nick_time = yylval.number;
+    ConfigFileEntry.max_nick_time = $3; 
   } ;
 
 general_max_nick_changes:  MAX_NICK_CHANGES '=' NUMBER ';'
@@ -1591,24 +1654,24 @@ general_max_nick_changes:  MAX_NICK_CHANGES '=' NUMBER ';'
     ConfigFileEntry.max_nick_changes = yylval.number;
   } ;
 
-general_anti_spam_exit_message_time:  ANTI_SPAM_EXIT_MESSAGE_TIME '=' NUMBER ';'
+general_anti_spam_exit_message_time:  ANTI_SPAM_EXIT_MESSAGE_TIME '=' timespec ';'
   {
-    ConfigFileEntry.anti_spam_exit_message_time = yylval.number;
+    ConfigFileEntry.anti_spam_exit_message_time = $3;
   } ;
 
-general_ts_warn_delta: TS_WARN_DELTA '=' NUMBER ';'
+general_ts_warn_delta: TS_WARN_DELTA '=' timespec ';'
   {
-    ConfigFileEntry.ts_warn_delta = yylval.number;
+    ConfigFileEntry.ts_warn_delta = $3;
   } ;
 
-general_ts_max_delta: TS_MAX_DELTA '=' NUMBER ';'
+general_ts_max_delta: TS_MAX_DELTA '=' timespec ';'
   {
-    ConfigFileEntry.ts_max_delta = yylval.number;
+    ConfigFileEntry.ts_max_delta = $3;
   } ;
 
-general_links_delay:    LINKS_DELAY '=' NUMBER ';'
+general_links_delay:    LINKS_DELAY '=' timespec ';'
   {
-    ConfigFileEntry.links_delay = yylval.number;
+    ConfigFileEntry.links_delay = $3;
   } ;
 general_kline_with_reason: KLINE_WITH_REASON '=' TYES ';'
   {
@@ -1680,24 +1743,24 @@ general_o_lines_oper_only: O_LINES_OPER_ONLY '=' TYES ';'
     ConfigFileEntry.o_lines_oper_only = 0;
   } ;
 
-general_pace_wait: PACE_WAIT '=' NUMBER ';'
+general_pace_wait: PACE_WAIT '=' timespec ';'
   {
-    ConfigFileEntry.pace_wait = yylval.number;
+    ConfigFileEntry.pace_wait = $3;
   } ;
 
-general_caller_id_wait: CALLER_ID_WAIT '=' NUMBER ';'
+general_caller_id_wait: CALLER_ID_WAIT '=' timespec ';'
   {
-    ConfigFileEntry.caller_id_wait = yylval.number;
+    ConfigFileEntry.caller_id_wait = $3;
   } ;
 
-general_whois_wait: WHOIS_WAIT '=' NUMBER ';'
+general_whois_wait: WHOIS_WAIT '=' timespec ';'
   {
-    ConfigFileEntry.whois_wait = yylval.number;
+    ConfigFileEntry.whois_wait = $3;
   } ;
 
-general_knock_delay: KNOCK_DELAY '=' NUMBER ';'
+general_knock_delay: KNOCK_DELAY '=' timespec ';'
   {
-    ConfigFileEntry.knock_delay = yylval.number;
+    ConfigFileEntry.knock_delay = $3;
   } ;
 
 general_short_motd: SHORT_MOTD '=' TYES ';'
@@ -1771,14 +1834,14 @@ general_message_locale: MESSAGE_LOCALE '=' QSTRING ';'
     putenv(langenv);
   } ;
 
-general_gline_time: GLINE_TIME '=' NUMBER ';'
+general_gline_time: GLINE_TIME '=' timespec ';'
   {
-    ConfigFileEntry.gline_time = yylval.number;
+    ConfigFileEntry.gline_time = $3;
   } ;
 
-general_idletime: IDLETIME '=' NUMBER ';'
+general_idletime: IDLETIME '=' timespec ';'
   {
-    ConfigFileEntry.idletime = yylval.number;
+    ConfigFileEntry.idletime = $3;
   } ;
 
 general_dots_in_ident: DOTS_IN_IDENT '=' NUMBER ';'
@@ -1982,9 +2045,9 @@ general_disable_vchans: DISABLE_VCHANS '=' TNO ';'
     ConfigFileEntry.disable_vchans = 1;
   };  
 
-general_persistant_expire_time:  PERSISTANT_EXPIRE_TIME '=' NUMBER ';'
+general_persistant_expire_time:  PERSISTANT_EXPIRE_TIME '=' timespec ';'
   {
-    ConfigFileEntry.persist_expire = yylval.number;  
+    ConfigFileEntry.persist_expire = $3;  
   };
 general_min_nonwildcard:    MIN_NONWILDCARD '=' NUMBER ';'
   {

@@ -246,6 +246,40 @@ wallop                  { return T_WALLOP; }
 callerid                { return T_CALLERID; }
 drone                   { return T_DRONE; }
 locops                  { return T_LOCOPS; }
+
+years			{ return YEARS; }
+year			{ return YEARS; }
+months			{ return MONTHS; }
+month			{ return MONTHS; }
+weeks			{ return WEEKS; }
+week			{ return WEEKS; }
+days			{ return DAYS; }
+day			{ return DAYS; }
+hours			{ return HOURS; }
+hour			{ return HOURS; }
+minutes			{ return MINUTES; }
+minute			{ return MINUTES; }
+seconds			{ return SECONDS; }
+second			{ return SECONDS; }
+
+bytes			{ return BYTES; }
+byte			{ return BYTES; }
+kilobytes		{ return KBYTES; }
+kilobyte		{ return KBYTES; }
+kbytes			{ return KBYTES; }
+kbyte			{ return KBYTES; }
+kb			{ return KBYTES; }
+megabytes		{ return MBYTES; }
+megabyte		{ return MBYTES; }
+mbytes			{ return MBYTES; }
+mbyte			{ return MBYTES; }
+mb			{ return MBYTES; }
+gigabytes		{ return GBYTES; }
+gigabyte		{ return GBYTES; }
+gbytes			{ return GBYTES; }
+gbyte			{ return GBYTES; }
+gb			{ return GBYTES; }
+
 .		        { return yytext[0]; }
 
 %%
