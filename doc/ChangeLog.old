@@ -1,3 +1,19 @@
+*** 20010119_4 by adrian
+
+
+Initial pass at the select code rewrite.
+
+* it isn't multilist like the poll code. that would be kind of stupid
+  considering that the fd set size is a function of the maximum open fd,
+  rather than the number of fds in a "set".
+
+* for some reason the compiler on my laptop is smoking heavy crack with
+  hybrid-7 now. It seems to work, but debugging shows a lot of gremlins.
+  I'll try it on my -stable box now that I'm back online and fix any
+  last minute bugs.
+
+
+
 *** 20010119_3 by ejb
 - fixed placement of libintl.h in ircd.c/numeric.c
 
