@@ -1,3 +1,15 @@
+androsyn    2001/12/10 01:57:45 EST	(20011210_8)
+
+  Modified files:
+    include              fdlist.h 
+  Log:
+  Added a field to track writes for sigio
+  
+  Revision  Changes    Path
+  7.22      +3 -1      ircd-hybrid-7/include/fdlist.h
+
+
+
 androsyn    2001/12/10 01:01:41 EST	(20011210_7)
 
   Modified files:
