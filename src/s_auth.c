@@ -100,6 +100,8 @@ static struct AuthRequest* AuthIncompleteList = 0;
 static EVH timeout_auth_queries_event;
 static BlockHeap *auth_bl = NULL;
 
+static PF read_auth_reply;
+
 /*
  * init_auth()
  *
@@ -560,6 +562,7 @@ void send_auth_query(struct AuthRequest* auth)
   }
   ClearAuthConnect(auth);
   SetAuthPending(auth);
+  comm_setselect(auth->fd, COMM_SELECT_READ, read_auth_reply, auth, 0);
 }
 
 
@@ -571,8 +574,10 @@ void send_auth_query(struct AuthRequest* auth)
  */
 #define AUTH_BUFSIZ 128
 
-void read_auth_reply(struct AuthRequest* auth)
+static void
+read_auth_reply(int fd, void *data)
 {
+  struct AuthRequest *auth = data;
   char* s=(char *)NULL;
   char* t=(char *)NULL;
   int   len;

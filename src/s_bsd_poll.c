@@ -255,8 +255,7 @@ int read_message(time_t delay, unsigned char mask)
       auth->index = nbr_pfds;
       if (IsAuthConnect(auth))
         PFD_SETW(auth->fd);
-      else
-        PFD_SETR(auth->fd);
+        /* Reading is done through comm_setselect now! -- adrian */
     }
     /*
      * set client descriptors
@@ -308,8 +307,6 @@ int read_message(time_t delay, unsigned char mask)
     if (poll_fdarray[i].revents) { 
       if (IsAuthConnect(auth))
         send_auth_query(auth);
-      else
-        read_auth_reply(auth);
       poll_fdarray[i].fd = -1;
       if (0 == --nfds)
         break;
