@@ -121,6 +121,7 @@ int doremotd = 0;
 int debuglevel = -1;		/* Server debug level */
 const char *debugmode = "";	/*  -"-    -"-   -"-  */
 time_t nextconnect = 1;		/* time for next try_connections call */
+int kline_queued = 0;
 
 /* Set to zero because it should be initialized later using
  * initialize_server_capabs

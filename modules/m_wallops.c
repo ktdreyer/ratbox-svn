@@ -36,7 +36,6 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
-#include "client.h"
 
 static void ms_wallops(struct Client *, struct Client *, int, char **);
 static void mo_wallops(struct Client *, struct Client *, int, char **);

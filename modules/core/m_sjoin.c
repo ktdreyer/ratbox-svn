@@ -116,6 +116,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, char *parv[
 	char *p;		/* pointer used making sjbuf */
 	int i;
 	dlink_node *m;
+	const char *server_name = ConfigServerHide.hide_servers ? me.name : source_p->name;
 
 	*buf = '\0';
 	*sjbuf = '\0';
@@ -274,18 +275,9 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, char *parv[
 	}
 
 	if(*modebuf != '\0')
-	{
-		/* This _SHOULD_ be to ALL_MEMBERS
-		 * It contains only +aimnstlki, etc */
-		if(chptr != NULL)
-			sendto_channel_local(ALL_MEMBERS,
-					     chptr, ":%s MODE %s %s %s",
-					     me.name, chptr->chname, modebuf, parabuf);
-		else
-			sendto_channel_local(ALL_MEMBERS,
-					     chptr, ":%s MODE %s %s %s",
-					     me.name, chptr->chname, modebuf, parabuf);
-	}
+		sendto_channel_local(ALL_MEMBERS, chptr,
+				     ":%s MODE %s %s %s",
+				     server_name, chptr->chname, modebuf, parabuf);
 
 	*modebuf = *parabuf = '\0';
 	if(parv[3][0] != '0' && keep_new_modes)
@@ -426,7 +418,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, char *parv[
 					*mbuf = '\0';
 					sendto_channel_local(ALL_MEMBERS, chptr,
 							     ":%s MODE %s %s %s %s %s %s",
-							     me.name, chptr->chname,
+							     server_name, chptr->chname,
 							     modebuf,
 							     para[0], para[1], para[2], para[3]);
 					mbuf = modebuf;
@@ -450,7 +442,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, char *parv[
 			*mbuf = '\0';
 			sendto_channel_local(ALL_MEMBERS, chptr,
 					     ":%s MODE %s %s %s %s %s %s",
-					     me.name,
+					     server_name,
 					     chptr->chname,
 					     modebuf, para[0], para[1], para[2], para[3]);
 			mbuf = modebuf;
@@ -485,7 +477,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, char *parv[
 	{
 		sendto_channel_local(ALL_MEMBERS, chptr,
 				     ":%s MODE %s %s %s %s %s %s",
-				     me.name, chptr->chname, modebuf,
+				     server_name, chptr->chname, modebuf,
 				     EmptyString(para[0]) ? "" : para[0],
 				     EmptyString(para[1]) ? "" : para[1],
 				     EmptyString(para[2]) ? "" : para[2],

@@ -48,6 +48,7 @@ struct ev_entry
 };
 
 extern void eventAdd(const char *name, EVH * func, void *arg, time_t when);
+extern void eventAddOnce(const char *name, EVH * func, void *arg, time_t when);
 extern void eventAddIsh(const char *name, EVH * func, void *arg, time_t delta_ish);
 extern void eventRun(void);
 extern time_t eventNextTime(void);

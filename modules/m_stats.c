@@ -141,8 +141,8 @@ static struct StatsStruct stats_cmd_table[] = {
 	/* letter     function            need_oper need_admin */
 	{'a', stats_adns_servers, 1, 1,},
 	{'A', stats_adns_servers, 1, 1,},
-	{'c', stats_connect, 1, 0,},
-	{'C', stats_connect, 1, 0,},
+	{'c', stats_connect, 0, 0,},
+	{'C', stats_connect, 0, 0,},
 	{'d', stats_tdeny, 1, 0,},
 	{'D', stats_deny, 1, 0,},
 	{'e', stats_exempt, 1, 0,},
@@ -173,8 +173,8 @@ static struct StatsStruct stats_cmd_table[] = {
 	{'T', stats_tstats, 1, 0,},
 	{'u', stats_uptime, 0, 0,},
 	{'U', stats_shared, 1, 0,},
-	{'v', stats_servers, 1, 0,},
-	{'V', stats_servers, 1, 0,},
+	{'v', stats_servers, 0, 0,},
+	{'V', stats_servers, 0, 0,},
 	{'x', stats_gecos, 1, 0,},
 	{'X', stats_gecos, 1, 0,},
 	{'y', stats_class, 1, 0,},
@@ -314,7 +314,12 @@ stats_adns_servers (struct Client *source_p)
 static void
 stats_connect (struct Client *source_p)
 {
-	report_configured_links (source_p, CONF_SERVER);
+	if((ConfigFileEntry.stats_c_oper_only || ConfigServerHide.flatten_links) &&
+	    !IsOper(source_p))
+	  sendto_one(source_p, form_str(ERR_NOPRIVILEGES),
+		     me.name, source_p->name);
+	else
+	  report_configured_links (source_p, CONF_SERVER);
 }
 
 /* stats_tdeny()
@@ -816,6 +821,13 @@ stats_servers (struct Client *source_p)
 	time_t seconds;
 	int days, hours, minutes;
 	int j = 0;
+
+	if(ConfigServerHide.flatten_links && !IsOper(source_p))
+	{
+		sendto_one(source_p, form_str(ERR_NOPRIVILEGES),
+			   me.name, source_p->name);
+		return;
+	}
 
 	DLINK_FOREACH (ptr, serv_list.head)
 	{

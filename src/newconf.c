@@ -1574,6 +1574,19 @@ conf_set_connect_host(void *data)
 }
 
 static void
+conf_set_connect_vhost(void *data)
+{
+	if(inetntop_sock(&yy_aconf->my_ipnum, (char *)data, HOSTIPLEN))
+	{
+		conf_report_error("Invalid netmask for server vhost (%s)",
+		    		  (char *) data);
+		return;
+	}
+
+	yy_aconf->flags |= CONF_FLAGS_VHOSTED;
+}
+
+static void
 conf_set_connect_send_password(void *data)
 {
 	if(yy_aconf->spasswd)
@@ -2105,15 +2118,24 @@ conf_set_general_kline_with_reason(void *data)
 }
 
 static void
-conf_set_general_client_exit(void *data)
-{
-	ConfigFileEntry.client_exit = *(unsigned int *) data;
-}
-
-static void
 conf_set_general_kline_with_connection_closed(void *data)
 {
 	ConfigFileEntry.kline_with_connection_closed = *(unsigned int *) data;
+}
+
+static void
+conf_set_general_kline_delay(void *data)
+{
+	ConfigFileEntry.kline_delay = *(unsigned int *) data;
+
+	/* THIS MUST BE HERE to stop us being unable to check klines */
+	kline_queued = 0;
+}
+
+static void
+conf_set_general_client_exit(void *data)
+{
+	ConfigFileEntry.client_exit = *(unsigned int *) data;
 }
 
 static void
@@ -2126,6 +2148,12 @@ static void
 conf_set_general_non_redundant_klines(void *data)
 {
 	ConfigFileEntry.non_redundant_klines = *(unsigned int *) data;
+}
+
+static void
+conf_set_general_stats_c_oper_only(void *data)
+{
+	ConfigFileEntry.stats_c_oper_only = *(unsigned int *) data;
 }
 
 static void
@@ -2824,6 +2852,7 @@ newconf_init()
 	add_top_conf("connect", conf_begin_connect, conf_end_connect);
 	add_conf_item("connect", "name", CF_QSTRING, conf_set_connect_name);
 	add_conf_item("connect", "host", CF_QSTRING, conf_set_connect_host);
+	add_conf_item("connect", "vhost", CF_QSTRING, conf_set_connect_vhost);
 	add_conf_item("connect", "send_password", CF_QSTRING, conf_set_connect_send_password);
 	add_conf_item("connect", "accept_password", CF_QSTRING, conf_set_connect_accept_password);
 	add_conf_item("connect", "port", CF_INT, conf_set_connect_port);
@@ -2875,19 +2904,22 @@ newconf_init()
 	add_conf_item("general", "kline_with_reason", CF_YESNO, conf_set_general_kline_with_reason);
 	add_conf_item("general", "kline_with_connection_closed", CF_YESNO,
 		      conf_set_general_kline_with_connection_closed);
+	add_conf_item("general", "kline_delay", CF_TIME,
+		      conf_set_general_kline_delay);
 	add_conf_item("general", "warn_no_nline", CF_YESNO, conf_set_general_warn_no_nline);
 	add_conf_item("general", "non_redundant_klines", CF_YESNO,
 		      conf_set_general_non_redundant_klines);
 	add_conf_item("general", "dots_in_ident", CF_INT, conf_set_general_dots_in_ident);
+	add_conf_item("general", "stats_c_oper_only", CF_YESNO, conf_set_general_stats_c_oper_only);
+	add_conf_item("general", "stats_P_oper_only", CF_YESNO, conf_set_general_stats_P_oper_only);
 	add_conf_item("general", "stats_o_oper_only", CF_YESNO, conf_set_general_stats_o_oper_only);
 	add_conf_item("general", "stats_k_oper_only", CF_STRING,
 		      conf_set_general_stats_k_oper_only);
-	add_conf_item("general", "map_oper_only", CF_YESNO, conf_set_general_map_oper_only);
-	add_conf_item("general", "pace_wait", CF_TIME, conf_set_general_pace_wait);
 	add_conf_item("general", "stats_i_oper_only", CF_STRING,
 		      conf_set_general_stats_i_oper_only);
+	add_conf_item("general", "map_oper_only", CF_YESNO, conf_set_general_map_oper_only);
+	add_conf_item("general", "pace_wait", CF_TIME, conf_set_general_pace_wait);
 	add_conf_item("general", "pace_wait_simple", CF_TIME, conf_set_general_pace_wait_simple);
-	add_conf_item("general", "stats_P_oper_only", CF_YESNO, conf_set_general_stats_P_oper_only);
 	add_conf_item("general", "short_motd", CF_YESNO, conf_set_general_short_motd);
 	add_conf_item("general", "no_oper_flood", CF_YESNO, conf_set_general_no_oper_flood);
 	add_conf_item("general", "glines", CF_YESNO, conf_set_general_glines);

@@ -189,7 +189,14 @@ static struct InfoStruct info_table[] = {
 	 "idletime",
 	 OUTPUT_DECIMAL,
 	 &ConfigFileEntry.idletime,
-	 "Number of minutes before a client is considered idle"},
+	 "Number of minutes before a client is considered idle"
+	},
+	{
+	  "kline_delay",
+	  OUTPUT_DECIMAL,
+	  &ConfigFileEntry.kline_delay,
+	  "Duration of time to delay kline checking"
+	},
 	{
 	 "kline_with_connection_closed",
 	 OUTPUT_BOOLEAN_YN,
@@ -268,7 +275,14 @@ static struct InfoStruct info_table[] = {
 	 "short_motd",
 	 OUTPUT_BOOLEAN_YN,
 	 &ConfigFileEntry.short_motd,
-	 "Do not show MOTD; only tell clients they should read it"},
+	 "Do not show MOTD; only tell clients they should read it"
+	},
+	{
+	  "stats_c_oper_only",
+	  OUTPUT_BOOLEAN_YN,
+	  &ConfigFileEntry.stats_c_oper_only,
+	  "STATS C output is only shown to operators",
+	},
 	{
 	 "stats_i_oper_only",
 	 OUTPUT_BOOLEAN2,
@@ -365,6 +379,12 @@ static struct InfoStruct info_table[] = {
 	 &ConfigChannel.no_join_on_split,
 	 "Disallow joining channels when split",
 	 },
+	{
+	  "no_oper_resvs",
+	  OUTPUT_BOOLEAN_YN,
+	  &ConfigChannel.no_oper_resvs,
+	  "Disable channel resvs for operators",
+	},
 	{
 	 "persist_time",
 	 OUTPUT_DECIMAL,

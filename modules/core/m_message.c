@@ -89,7 +89,7 @@ static void msg_channel_flags(int p_or_n, const char *command,
 static void msg_client(int p_or_n, const char *command,
 		       struct Client *source_p, struct Client *target_p, char *text);
 
-static void handle_opers(int p_or_n, const char *command,
+static void handle_special(int p_or_n, const char *command,
 			 struct Client *client_p, struct Client *source_p, char *nick, char *text);
 
 struct Message privmsg_msgtab = {
@@ -371,9 +371,9 @@ build_target_list(int p_or_n, const char *command, struct Client *client_p,
 			continue;
 		}
 
-		if(IsOper(source_p) && ((*nick == '$') || strchr(nick, '@')))
+		if(strchr(nick, '@') || (IsOper(source_p) && (*nick == '$')))
 		{
-			handle_opers(p_or_n, command, client_p, source_p, nick, text);
+			handle_special(p_or_n, command, client_p, source_p, nick, text);
 			continue;
 		}
 
@@ -714,7 +714,7 @@ flood_attack_channel(int p_or_n, struct Client *source_p, struct Channel *chptr,
 
 
 /*
- * handle_opers
+ * handle_special
  *
  * inputs	- server pointer
  *		- client pointer
@@ -730,7 +730,7 @@ flood_attack_channel(int p_or_n, struct Client *source_p, struct Channel *chptr,
  *		  This disambiguates the syntax.
  */
 static void
-handle_opers(int p_or_n, const char *command, struct Client *client_p,
+handle_special(int p_or_n, const char *command, struct Client *client_p,
 	     struct Client *source_p, char *nick, char *text)
 {
 	struct Client *target_p;
@@ -739,49 +739,9 @@ handle_opers(int p_or_n, const char *command, struct Client *client_p,
 	char *s;
 	int count;
 
-	/*
-	 * the following two cases allow masks in NOTICEs
-	 * (for OPERs only)
-	 *
-	 * Armin, 8Jun90 (gruner@informatik.tu-muenchen.de)
-	 */
-	if(*nick == '$')
-	{
-		if((*(nick + 1) == '$' || *(nick + 1) == '#'))
-			nick++;
-		else if(MyOper(source_p))
-		{
-			sendto_one(source_p,
-				   ":%s NOTICE %s :The command %s %s is no longer supported, please use $%s",
-				   me.name, source_p->name, command, nick, nick);
-			return;
-		}
-
-		if((s = strrchr(nick, '.')) == NULL)
-		{
-			sendto_one(source_p, form_str(ERR_NOTOPLEVEL),
-				   me.name, source_p->name, nick);
-			return;
-		}
-		while (*++s)
-			if(*s == '.' || *s == '*' || *s == '?')
-				break;
-		if(*s == '*' || *s == '?')
-		{
-			sendto_one(source_p, form_str(ERR_WILDTOPLEVEL),
-				   me.name, source_p->name, nick);
-			return;
-		}
-
-		sendto_match_butone(IsServer(client_p) ? client_p : NULL, source_p,
-				    nick + 1,
-				    (*nick == '#') ? MATCH_HOST : MATCH_SERVER,
-				    "%s $%s :%s", command, nick, text);
-		return;
-	}
-
-	/*
-	 * user[%host]@server addressed?
+	/* user[%host]@server addressed?
+	 * NOTE: users can send to user@server, but not user%host@server
+	 * or opers@server
 	 */
 	if((server = strchr(nick, '@')) != NULL)
 	{
@@ -794,10 +754,17 @@ handle_opers(int p_or_n, const char *command, struct Client *client_p,
 
 		count = 0;
 
-		/*
-		 * Not destined for a user on me :-(
-		 */
+		if(!IsOper(source_p))
+		{
+			if(strchr(nick, '%') || (strncmp(nick, "opers", 5) == 0))
+			{
+				sendto_one(source_p, form_str(ERR_NOSUCHNICK),
+					   me.name, source_p->name, nick);
+				return;
+			}
+		}
 
+		/* somewhere else.. */
 		if(!IsMe(target_p))
 		{
 			sendto_one(target_p, ":%s %s %s :%s", source_p->name, command, nick, text);
@@ -838,6 +805,47 @@ handle_opers(int p_or_n, const char *command, struct Client *client_p,
 				sendto_one(source_p, form_str(ERR_TOOMANYTARGETS),
 					   me.name, source_p->name, nick);
 		}
+	}
+
+	/*
+	 * the following two cases allow masks in NOTICEs
+	 * (for OPERs only)
+	 *
+	 * Armin, 8Jun90 (gruner@informatik.tu-muenchen.de)
+	 */
+	if(IsOper(source_p) && *nick == '$')
+	{
+		if((*(nick + 1) == '$' || *(nick + 1) == '#'))
+			nick++;
+		else if(MyOper(source_p))
+		{
+			sendto_one(source_p,
+				   ":%s NOTICE %s :The command %s %s is no longer supported, please use $%s",
+				   me.name, source_p->name, command, nick, nick);
+			return;
+		}
+
+		if((s = strrchr(nick, '.')) == NULL)
+		{
+			sendto_one(source_p, form_str(ERR_NOTOPLEVEL),
+				   me.name, source_p->name, nick);
+			return;
+		}
+		while (*++s)
+			if(*s == '.' || *s == '*' || *s == '?')
+				break;
+		if(*s == '*' || *s == '?')
+		{
+			sendto_one(source_p, form_str(ERR_WILDTOPLEVEL),
+				   me.name, source_p->name, nick);
+			return;
+		}
+
+		sendto_match_butone(IsServer(client_p) ? client_p : NULL, source_p,
+				    nick + 1,
+				    (*nick == '#') ? MATCH_HOST : MATCH_SERVER,
+				    "%s $%s :%s", command, nick, text);
+		return;
 	}
 }
 

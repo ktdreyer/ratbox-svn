@@ -37,20 +37,23 @@
 #define CASEMAP "ascii"
 #endif
 
-#define FEATURES "WALLCHOPS"\
-                "%s%s%s" \
-                " MODES=%i" \
+#define FEATURES "STD=i-d"	\
+		"STATUSMSG=@+"	\
+                "%s%s%s" 	\
+                " MODES=%i" 	\
                 " MAXCHANNELS=%i" \
-                " MAXBANS=%i" \
+                " MAXLIST=b%s%s:%i" 	\
                 " MAXTARGETS=%i" \
-                " NICKLEN=%i" \
-                " TOPICLEN=%i" \
+                " NICKLEN=%i" 	\
+                " TOPICLEN=%i" 	\
                 " KICKLEN=%i"
 
 #define FEATURESVALUES ConfigChannel.use_knock ? " KNOCK" : "", \
-        ConfigChannel.use_except ? " EXCEPTS" : "", \
-        ConfigChannel.use_invex ? " INVEX" : "", \
+        ConfigChannel.use_except ? " EXCEPTS=e" : "", \
+        ConfigChannel.use_invex ? " INVEX=I" : "", \
         MAXMODEPARAMS,ConfigChannel.max_chans_per_user, \
+	ConfigChannel.use_except ? "e" : "", \
+	ConfigChannel.use_invex ? "I" : "", \
         ConfigChannel.max_bans, \
         ConfigFileEntry.max_targets,NICKLEN-1,TOPICLEN,TOPICLEN
 
@@ -59,6 +62,7 @@
 		  " CHANMODES=%s%s%s" \
 		  " NETWORK=%s" \
 		  " CASEMAPPING=%s" \
+		  " CHARSET=ascii" \
 		  " CALLERID"
 
 #define FEATURES2VALUES ConfigServerHide.disable_local_channels ? "#" : "#&", \

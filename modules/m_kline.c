@@ -48,6 +48,7 @@
 #include "parse.h"
 #include "modules.h"
 #include "cluster.h"
+#include "event.h"
 
 static void mo_kline(struct Client *, struct Client *, int, char **);
 static void ms_kline(struct Client *, struct Client *, int, char **);
@@ -242,7 +243,17 @@ mo_kline(struct Client *client_p, struct Client *source_p, int parc, char **parv
 		apply_kline(source_p, aconf, reason, oper_reason, current_date);
 	}
 
-	check_klines();
+	if(ConfigFileEntry.kline_delay)
+	{
+		if(kline_queued == 0)
+		{
+			eventAddOnce("check_klines", check_klines_event, NULL,
+				     ConfigFileEntry.kline_delay);
+			kline_queued = 1;
+		}
+	}
+	else
+		check_klines();
 }
 
 /*
@@ -309,8 +320,6 @@ ms_kline(struct Client *client_p, struct Client *source_p, int parc, char *parv[
 				     current_date, tkline_time);
 		else
 			apply_kline(source_p, aconf, aconf->passwd, oper_reason, current_date);
-
-		check_klines();
 	}
 	else if(find_shared(source_p->username, source_p->host, source_p->user->server, OPER_K))
 	{
@@ -372,9 +381,19 @@ ms_kline(struct Client *client_p, struct Client *source_p, int parc, char *parv[
 				     current_date, tkline_time);
 		else
 			apply_kline(source_p, aconf, aconf->passwd, oper_reason, current_date);
-
-		check_klines();
 	}
+
+	if(ConfigFileEntry.kline_delay)
+	{
+		if(kline_queued == 0)
+		{
+			eventAddOnce("check_klines", check_klines_event, NULL,
+				     ConfigFileEntry.kline_delay);
+			kline_queued = 1;
+		}
+	}
+	else
+		check_klines();
 }
 
 /*

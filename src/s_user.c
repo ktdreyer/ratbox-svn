@@ -296,6 +296,7 @@ register_local_user(struct Client *client_p, struct Client *source_p, char *nick
 	struct User *user = source_p->user;
 	char tmpstr2[IRCD_BUFSIZE];
 	char ipaddr[HOSTIPLEN];
+	char myusername[USERLEN+1];
 	int status;
 	char *id;
 	assert(NULL != source_p);
@@ -329,6 +330,24 @@ register_local_user(struct Client *client_p, struct Client *source_p, char *nick
 	/* Straight up the maximum rate of flooding... */
 	source_p->localClient->allow_read = MAX_FLOOD_BURST;
 
+	/* XXX - fixme. we shouldnt have to build a users buffer twice.. */
+	if(!IsGotId(source_p) && (strchr(username, '[') != NULL))
+	{
+		char *p;
+		int i = 0;
+
+		p = username;
+
+		while(*p && i < USERLEN)
+		{
+			if(*p != '[')
+				myusername[i++] = *p;
+			p++;
+		}
+
+		myusername[i] = '\0';
+		username = myusername;
+	}
 
 	if((status = check_client(client_p, source_p, username)) < 0)
 		return (CLIENT_EXITED);

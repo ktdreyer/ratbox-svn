@@ -209,6 +209,7 @@ sendhelpfile(struct Client *source_p, const char *path, const char *topic, const
 		sendto_one(source_p, form_str(RPL_HELPTXT), me.name, nick, topic, line);
 	}
 
+	fbclose(file);
 	sendto_one(source_p, form_str(RPL_ENDOFHELP), me.name, nick, topic);
 	return;
 }

@@ -73,19 +73,19 @@ m_version(struct Client *client_p, struct Client *source_p, int parc, char *parv
 {
 	static time_t last_used = 0L;
 
-	if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
+	if(parc > 1 && !ConfigServerHide.disable_remote)
 	{
-		/* safe enough to give this on a local connect only */
-		sendto_one(source_p, form_str(RPL_LOAD2HI), me.name, parv[0]);
-		return;
-	}
-	else
-	{
-		last_used = CurrentTime;
-	}
+		if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
+		{
+			/* safe enough to give this on a local connect only */
+			sendto_one(source_p, form_str(RPL_LOAD2HI), me.name, parv[0]);
+			return;
+		}
+		else
+		{
+			last_used = CurrentTime;
+		}
 
-	if(!ConfigServerHide.disable_remote)
-	{
 		if(hunt_server(client_p, source_p, ":%s VERSION :%s", 1, parc, parv) != HUNTED_ISME)
 			return;
 	}

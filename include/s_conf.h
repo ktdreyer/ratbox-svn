@@ -137,8 +137,9 @@ struct ConfItem
 #define CONF_FLAGS_COMPRESSED           0x00040000
 #define CONF_FLAGS_TEMPORARY            0x00080000
 #define CONF_FLAGS_CRYPTLINK            0x00100000
-/* Macros for struct ConfItem */
+#define CONF_FLAGS_VHOSTED		0x00200000
 
+/* Macros for struct ConfItem */
 #define IsLimitIp(x)            ((x)->flags & CONF_FLAGS_LIMIT_IP)
 #define IsNoTilde(x)            ((x)->flags & CONF_FLAGS_NO_TILDE)
 #define IsNeedIdentd(x)         ((x)->flags & CONF_FLAGS_NEED_IDENTD)
@@ -156,6 +157,7 @@ struct ConfItem
 #define IsConfEncrypted(x)      ((x)->flags & CONF_FLAGS_ENCRYPTED)
 #define IsConfCompressed(x)     ((x)->flags & CONF_FLAGS_COMPRESSED)
 #define IsConfCryptLink(x)      ((x)->flags & CONF_FLAGS_CRYPTLINK)
+#define IsConfVhosted(x)	((x)->flags & CONF_FLAGS_VHOSTED)
 
 /* flag definitions for opers now in client.h */
 
@@ -202,8 +204,10 @@ struct config_file_entry
 	int ts_warn_delta;
 	int kline_with_reason;
 	int kline_with_connection_closed;
+	int kline_delay;
 	int warn_no_nline;
 	int non_redundant_klines;
+	int stats_c_oper_only;
 	int stats_o_oper_only;
 	int stats_k_oper_only;
 	int stats_i_oper_only;

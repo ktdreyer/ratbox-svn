@@ -540,6 +540,7 @@ struct LocalUser
 #define MASK_IP 2
 
 extern void check_banned_lines(void);
+extern void check_klines_event(void *unused);
 extern void check_klines(void);
 extern void check_glines(void);
 extern void check_dlines(void);

@@ -531,6 +531,19 @@ check_banned_lines(void)
 
 }
 
+/* check_klines_event()
+ *
+ * inputs	-
+ * outputs	-
+ * side effects - check_klines() is called, kline_queued unset
+ */
+void
+check_klines_event(void *unused)
+{
+	kline_queued = 0;
+	check_klines();
+}
+
 /* check_klines
  *
  * inputs       -

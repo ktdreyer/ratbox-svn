@@ -39,7 +39,6 @@
 #include "parse.h"
 #include "modules.h"
 
-
 static void ms_squit(struct Client *, struct Client *, int, char **);
 static void mo_squit(struct Client *, struct Client *, int, char **);
 
@@ -172,11 +171,15 @@ static struct squit_parms *
 find_squit(struct Client *client_p, struct Client *source_p, char *server)
 {
 	static struct squit_parms found_squit;
-	static struct Client *target_p = NULL, *p;
+	struct Client *target_p = NULL;
+	struct Client *p;
 	struct ConfItem *aconf;
 	dlink_node *ptr;
+
+	/* must ALWAYS be reset */
 	found_squit.target_p = NULL;
 	found_squit.server_name = NULL;
+
 	/*
 	 ** To accomodate host masking, a squit for a masked server
 	 ** name is expanded if the incoming mask is the same as
@@ -199,9 +202,9 @@ find_squit(struct Client *client_p, struct Client *source_p, char *server)
 	 ** The following allows wild cards in SQUIT. Only useful
 	 ** when the command is issued by an oper.
 	 */
-	DLINK_FOREACH(ptr, global_client_list.head)
+	DLINK_FOREACH(ptr, global_serv_list.head)
 	{
-		p = (struct Client *) ptr->data;
+		p = ptr->data;
 		if(IsServer(p) || IsMe(p))
 		{
 			if(match(server, p->name))
@@ -212,25 +215,26 @@ find_squit(struct Client *client_p, struct Client *source_p, char *server)
 		}
 	}
 
+	if(target_p == NULL)
+		return NULL;
 
 
 	found_squit.target_p = target_p;
 	found_squit.server_name = server;
 
-	if(target_p && IsMe(target_p))
+	if(IsMe(target_p))
 	{
 		if(IsClient(client_p))
 		{
-			sendto_one(source_p, ":%s NOTICE %s :You are trying to squit me.", me.name,
-				   client_p->name);
-			found_squit.target_p = NULL;
+			sendto_one(source_p, ":%s NOTICE %s :You are trying to squit me.",
+				   me.name, client_p->name);
+			return NULL;
 		}
 		else
 		{
 			found_squit.target_p = client_p;
 			found_squit.server_name = client_p->name;
 		}
-
 	}
 
 	if(found_squit.target_p != NULL)

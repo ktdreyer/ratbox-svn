@@ -597,9 +597,16 @@ try_connections(void *unused)
 			 * error afterwards if it fails.
 			 *   -- adrian
 			 */
+#ifndef HIDE_SERVERS_IPS
 			sendto_realops_flags(UMODE_ALL, L_ALL,
 					     "Connection to %s[%s] activated.",
 					     con_conf->name, con_conf->host);
+#else
+			sendto_realops_flags(UMODE_ALL, L_ALL,
+			    		     "Connection to %s activated",
+					     con_conf->name);
+#endif
+
 			serv_connect(con_conf, 0);
 		}
 	}
@@ -1797,13 +1804,14 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
 	add_client_to_list(client_p);
 
 
-	if(aconf->aftype == AF_INET && ((struct sockaddr_in *)&aconf->my_ipnum)->sin_addr.s_addr != 0)
+	if(IsConfVhosted(aconf))
 	{
 		memcpy(&myipnum, &aconf->my_ipnum, sizeof(myipnum));
 		((struct sockaddr_in *)&myipnum)->sin_port = 0;
 		myipnum.ss_family = aconf->my_ipnum.ss_family;
 				
-	} else if(aconf->aftype == AF_INET && ServerInfo.specific_ipv4_vhost)
+	}
+	else if(aconf->aftype == AF_INET && ServerInfo.specific_ipv4_vhost)
 	{
 		memcpy(&myipnum, &ServerInfo.ip, sizeof(myipnum));
 		((struct sockaddr_in *)&myipnum)->sin_port = 0;

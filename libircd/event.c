@@ -103,6 +103,35 @@ eventAdd(const char *name, EVH * func, void *arg, time_t when)
 
 }
 
+void
+eventAddOnce(const char *name, EVH *func, void *arg, time_t when)
+{
+	int i;
+
+	/* find first inactive index */
+	for (i = 0; i < MAX_EVENTS; i++)
+	{
+		if(event_table[i].active == 0)
+		{
+			event_table[i].func = func;
+			event_table[i].name = name;
+			event_table[i].arg = arg;
+			event_table[i].when = CurrentTime + when;
+			event_table[i].frequency = 0;
+			event_table[i].active = 1;
+
+			if ((event_table[i].when < event_time_min) || (event_time_min == -1))
+				event_time_min = event_table[i].when;
+
+			return;
+		}
+	}
+
+	/* erk! couldnt add to event table */
+	sendto_realops_flags(UMODE_DEBUG, L_ALL,
+			     "Unable to add event [%s] to event table", name);
+}
+
 /*
  * void eventDelete(EVH *func, void *arg)
  *
@@ -168,8 +197,18 @@ eventRun(void)
 		{
 			last_event_ran = event_table[i].name;
 			event_table[i].func(event_table[i].arg);
-			event_table[i].when = CurrentTime + event_table[i].frequency;
 			event_time_min = -1;
+
+			/* event is scheduled more than once */
+			if(event_table[i].frequency)
+				event_table[i].when = CurrentTime + event_table[i].frequency;
+			else
+			{
+				event_table[i].name = NULL;
+				event_table[i].func = NULL;
+				event_table[i].arg = NULL;
+				event_table[i].active = 0;
+			}
 		}
 	}
 }

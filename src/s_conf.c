@@ -211,6 +211,7 @@ free_conf(struct ConfItem *aconf)
 	MyFree(aconf->className);
 	MyFree(aconf->user);
 	MyFree(aconf->host);
+	MyFree(aconf->fakename);
 
 #ifdef HAVE_LIBCRYPTO
 	if(aconf->rsa_public_key)
@@ -288,19 +289,22 @@ report_configured_links(struct Client *source_p, int mask)
 				buf[0] = '\0';
 				c = p->conf_char;
 
-				if(tmp->flags & CONF_FLAGS_ALLOW_AUTO_CONN)
-					*s++ = 'A';
-				if(tmp->flags & CONF_FLAGS_CRYPTLINK)
-					*s++ = 'C';
-				if(tmp->flags & CONF_FLAGS_COMPRESSED)
-					*s++ = 'Z';
-				if(tmp->fakename)
-					*s++ = 'M';
+				if(IsOper(source_p))
+				{
+					if(tmp->flags & CONF_FLAGS_ALLOW_AUTO_CONN)
+						*s++ = 'A';
+					if(tmp->flags & CONF_FLAGS_CRYPTLINK)
+						*s++ = 'C';
+					if(tmp->flags & CONF_FLAGS_COMPRESSED)
+						*s++ = 'Z';
+					if(tmp->fakename)
+						*s++ = 'M';
+				}
 
 				if(!buf[0])
 					*s++ = '*';
 
-				*s++ = '\0';
+				*s = '\0';
 
 				/* Allow admins to see actual ips */
 				/* except if HIDE_SERVERS_IPS is defined */
@@ -364,14 +368,14 @@ report_configured_links(struct Client *source_p, int mask)
 int
 check_client(struct Client *client_p, struct Client *source_p, char *username)
 {
-	static char sockname[HOSTLEN + 1];
 	int i;
 
 	ClearAccess(source_p);
 
 	if((i = verify_access(source_p, username)))
 	{
-		ilog(L_INFO, "Access denied: %s[%s]", source_p->name, sockname);
+		ilog(L_INFO, "Access denied: %s[%s]", 
+		     source_p->name, source_p->localClient->sockhost);
 	}
 
 	switch (i)
@@ -1019,15 +1023,17 @@ set_default_conf(void)
 	ConfigFileEntry.anti_spam_exit_message_time = 0;
 	ConfigFileEntry.ts_warn_delta = TS_WARN_DELTA_DEFAULT;
 	ConfigFileEntry.ts_max_delta = TS_MAX_DELTA_DEFAULT;
-	ConfigFileEntry.kline_with_reason = YES;
 	ConfigFileEntry.client_exit = YES;
 	ConfigFileEntry.kline_with_connection_closed = NO;
+	ConfigFileEntry.kline_with_reason = YES;
+	ConfigFileEntry.kline_delay = 0;
 	ConfigFileEntry.warn_no_nline = YES;
 	ConfigFileEntry.non_redundant_klines = YES;
 	ConfigFileEntry.stats_o_oper_only = NO;
 	ConfigFileEntry.stats_k_oper_only = 1;	/* masked */
 	ConfigFileEntry.stats_i_oper_only = 1;	/* masked */
 	ConfigFileEntry.stats_P_oper_only = NO;
+	ConfigFileEntry.stats_c_oper_only = NO;
 	ConfigFileEntry.map_oper_only = YES;
 	ConfigFileEntry.pace_wait = 10;
 	ConfigFileEntry.caller_id_wait = 60;

@@ -86,6 +86,8 @@ extern const char serveropts[];
 extern int cold_start;
 extern int dorehash;
 extern int doremotd;
+extern int kline_queued;
+
 extern struct Client me;
 extern dlink_list global_client_list;
 extern struct Client *local[];
