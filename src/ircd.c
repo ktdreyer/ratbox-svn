@@ -611,6 +611,10 @@ int main(int argc, char *argv[])
     exit(EXIT_FAILURE);
   }
 
+#ifdef __CYGWIN__
+  server_state.foreground = 1;
+#endif
+
   if (!server_state.foreground)
   {
     make_daemon();
