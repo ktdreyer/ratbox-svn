@@ -1,3 +1,22 @@
+leeh        2002/10/19 13:07:28 UTC	(20021019_5)
+
+  Modified files:
+    doc                  example.efnet.conf 
+    include              client.h 
+    modules              m_operwall.c 
+    src                  send.c 
+  Log:
+  - IsOperOperWall -> IsOperOperwall
+  - dont let people !IsOperOperwall see operwalls.
+  
+  Revision  Changes    Path
+  7.24      +2 -1      ircd-ratbox/doc/example.efnet.conf
+  7.179     +1 -1      ircd-ratbox/include/client.h
+  1.34      +2 -2      ircd-ratbox/modules/m_operwall.c
+  7.223     +4 -0      ircd-ratbox/src/send.c
+
+
+
 leeh        2002/10/19 12:38:23 UTC	(20021019_4)
 
   Modified files:
