@@ -281,7 +281,8 @@ who_global(struct Client *source_p, const char *mask, int server_oper, int opers
 			msptr = lp->data;
 			who_common_channel(source_p, msptr->chptr, mask, server_oper, &maxmatches);
 		}
-	} else
+	}
+	else
 		report_operspy(source_p, "WHO", mask);
 
 	/* second, list all matching visible clients */
