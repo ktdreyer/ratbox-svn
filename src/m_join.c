@@ -31,6 +31,7 @@
 #include "list.h"
 #include "numeric.h"
 #include "send.h"
+#include "common.h"
 
 #include <stdlib.h>
 #include <string.h>
