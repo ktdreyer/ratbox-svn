@@ -221,6 +221,12 @@ int mo_kline(struct Client *cptr,
   if ( already_placed_kline(sptr, user, host, tkline_time, ip) )
     return 0;
 
+  if (ip_kline)
+   {
+     aconf->ip = ip;
+     aconf->ip_mask = ip_mask;
+   }
+
   if(tkline_time)
     {
       ircsprintf(buffer,
@@ -229,11 +235,6 @@ int mo_kline(struct Client *cptr,
 		 reason,
 		 current_date);
       DupString(aconf->passwd, buffer );
-      if (ip_kline)
-	{
-	  aconf->ip = ip;
-	  aconf->ip_mask = ip_mask;
-	}
       apply_tkline(sptr, aconf, current_date, tkline_time,
 		   ip_kline, ip, ip_mask);
     }
@@ -243,7 +244,6 @@ int mo_kline(struct Client *cptr,
 		 reason,
 		 current_date);
       DupString(aconf->passwd, buffer );
-
       apply_kline(sptr, aconf, reason, current_date, ip_kline, ip, ip_mask);
     }
 
@@ -264,6 +264,9 @@ int ms_kline(struct Client *cptr,
   struct Client *rcptr=NULL;
   struct ConfItem *aconf=NULL;
   int    tkline_time;
+  int ip_kline = NO;
+  unsigned long ip;
+  unsigned long ip_mask;
 
   if(parc < 7)
     return 0;
@@ -295,6 +298,7 @@ int ms_kline(struct Client *cptr,
   if( rcptr->host == NULL )
     return 0;
 
+  ip_kline = is_ip_kline(parv[5],&ip,&ip_mask);
   tkline_time = atoi(parv[3]);
 
   if(find_u_conf(sptr->name,rcptr->username,rcptr->host))
@@ -307,6 +311,13 @@ int ms_kline(struct Client *cptr,
 			   rcptr->username,
 			   rcptr->host,
 			   sptr->name);
+
+      /* We check if the kline already exists after we've announced its 
+       * arrived, to avoid confusing opers - fl
+       */
+      if ( already_placed_kline(sptr, parv[4], parv[5], (int)parv[3], ip) )
+        return 0;
+
       aconf = make_conf();
 
       aconf->status = CONF_KILL;
@@ -315,12 +326,20 @@ int ms_kline(struct Client *cptr,
       DupString(aconf->passwd, parv[6]);
       current_date = smalldate((time_t) 0);
 
-      if(tkline_time)
-	apply_tkline(rcptr, aconf, current_date, tkline_time, 0, 0, 0);
-      else
-	apply_kline(rcptr, aconf, aconf->passwd, current_date, 0, 0, 0);	
-    }
+      if(ip_kline)
+        {
+          aconf->ip = ip;
+          aconf->ip_mask = ip_mask;
+        }
 
+      if(tkline_time)
+          apply_tkline(rcptr, aconf, current_date, tkline_time,
+                       ip_kline, ip, ip_mask);
+      else
+	apply_kline(rcptr, aconf, aconf->passwd, current_date,
+                       ip_kline, ip, ip_mask);	
+
+      }
   return 0;
 } /* ms_kline() */
 
@@ -952,11 +971,20 @@ int already_placed_kline(struct Client *sptr, char *luser, char *lhost,
   if(ConfigFileEntry.non_redundant_klines) 
     {
       if ((aconf = find_matching_mtrie_conf(lhost,luser,ip)) && 
-         (aconf->status & CONF_KILL) && !IsServer(sptr))
+         (aconf->status & CONF_KILL))
         {
           reason = aconf->passwd ? aconf->passwd : "<No Reason>";
-          sendto_one(sptr,
-                     ":%s NOTICE %s :[%s@%s] already K-lined by [%s@%s] - %s",
+
+          /* Remote servers can set klines, so if its a dupe we warn all 
+           * local opers and leave it at that
+           */
+          if(IsServer(sptr))
+            sendto_realops_flags(FLAGS_ALL, 
+                     "*** Remote K-Line [%s@%s] already K-Lined by [%s@%s] - %s",
+                     luser, lhost, aconf->user, aconf->host, reason);
+          else
+             sendto_one(sptr,
+                     ":%s NOTICE %s :[%s@%s] already K-Lined by [%s@%s] - %s",
                      me.name, sptr->name, luser, lhost, aconf->user,
                      aconf->host, reason);
           return 1;
@@ -965,8 +993,13 @@ int already_placed_kline(struct Client *sptr, char *luser, char *lhost,
       if (tkline_time && (aconf = find_tkline(lhost,luser,(unsigned long)ip)))
         {
           reason = aconf->passwd ? aconf->passwd : "<No Reason>";
-          sendto_one(sptr,
-                    ":%s NOTICE %s :[%s@%s] already temp K-lined by [%s@%s] - %s",
+          if(IsServer(sptr))
+            sendto_realops_flags(FLAGS_ALL,
+                    "*** Remote K-Line [%s@%s] already temp K-Lined by [%s@%s] - %s",
+                    luser, lhost, aconf->user, aconf->host, reason);
+          else
+            sendto_one(sptr,
+                    ":%s NOTICE %s :[%s@%s] already temp K-Lined by [%s@%s] - %s",
                      me.name, sptr->name, luser, lhost, aconf->user,
                      aconf->host, reason);
           return 1;
