@@ -269,7 +269,7 @@ static void mo_gline(struct Client *client_p,
 /*
  * ms_gline()
  *
- * inputs       - The usual for a m_ function
+ * inputs       - The usual for an ms_ function
  * output       -
  * side effects -
  *
@@ -307,38 +307,32 @@ static void ms_gline(struct Client *client_p,
       user = parv[2];
       host = parv[3];
       reason = parv[4];
-
-      if ((rclient_p = hash_find_client(oper_nick,(struct Client *)NULL)))
-        {
-          if(!IsPerson(rclient_p))
-            return;
-        }
-      else
-        return;
-
-      if ((oper_user = (const char *)rclient_p->username) == NULL)
-        return;
-
-      if ((oper_host = rclient_p->host) == NULL)
-        return;
-
-      if (rclient_p->user && rclient_p->user->server)
-        oper_server = rclient_p->user->server;
-      else
-       return;
     }
   /* or it's a hyb-6 style */
   else if(parc == 8)
     {
       oper_nick = parv[1];
-      oper_user = parv[2];
-      oper_host = parv[3];
-      oper_server = parv[4];
       user = parv[5];
       host = parv[6];
       reason = parv[7];      
     }
   /* none of the above */
+  else
+    return;
+
+  if ((rclient_p = hash_find_client(oper_nick,(struct Client *)NULL)))
+    {
+      if(!IsPerson(rclient_p))
+        return;
+    }
+  else
+    return;
+  if ((oper_user = (const char *)rclient_p->username) == NULL)
+    return;
+  if ((oper_host = rclient_p->host) == NULL)
+    return;
+  if (rclient_p->user && rclient_p->user->server)
+    oper_server = rclient_p->user->server;
   else
     return;
 
