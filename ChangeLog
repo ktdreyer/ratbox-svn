@@ -1,3 +1,25 @@
+leeh        2003/08/31 20:57:37 EDT	(20030901_1)
+
+  Modified files:
+    modules              .depend m_challenge.c 
+    src                  .depend Makefile.in s_serv.c 
+  Removed files:
+    include              rsa.h 
+    src                  rsa.c 
+  Log:
+  - merge whats left of rsa.c into m_challenge.c, removing rsa.?
+  
+  Revision  Changes    Path
+  7.17      +0 -35     ircd-ratbox/include/rsa.h (dead)
+  1.32      +17 -26    ircd-ratbox/modules/.depend
+  1.62      +84 -6     ircd-ratbox/modules/m_challenge.c
+  7.32      +12 -22    ircd-ratbox/src/.depend
+  7.136     +0 -1      ircd-ratbox/src/Makefile.in
+  7.34      +0 -127    ircd-ratbox/src/rsa.c (dead)
+  7.359     +0 -1      ircd-ratbox/src/s_serv.c
+
+
+
 leeh        2003/08/31 20:46:53 EDT	(20030901_0)
 
   Modified files:
