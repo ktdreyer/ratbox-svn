@@ -62,10 +62,9 @@
 #ifndef STATIC_MODULES
 
 #ifndef RTLD_NOW
-#ifdef RTLD_LAZY
 #define RTLD_NOW RTLD_LAZY /* openbsd deficiency */
-#else
-#define RTLD_NOW 0 /* built-in dl*(3) don't care */
+#ifndef RTLD_LAZY
+#define RTLD_NOW 2185 /* built-in dl*(3) don't care */
 #endif
 #endif
 
@@ -141,10 +140,10 @@ NSModule multipleErrorHandler(NSSymbol, NSModule, NSModule);
 void linkEditErrorHandler(NSLinkEditErrors, int,const char *, const char *);
 char *dlerror(void);
 void *dlopen(char *, int);
-void dlclose(void *);
+int dlclose(void *);
 void *dlsym(void *, char *);
 
-static int firstLoad;
+static int firstLoad = TRUE;
 static int myDlError;
 static char *myErrorTable[] =
 { "Loading file as object failed\n",
@@ -170,6 +169,10 @@ NSModule multipleErrorHandler(NSSymbol s, NSModule old, NSModule new)
   ** This results in substantial leaking of memory... Should free one
   ** module, maybe?
   */
+  sendto_realops_flags(FLAGS_ALL, L_ALL, "Symbol `%s' found in `%s' and `%s'",
+                       NSNameOfSymbol(s), NSNameOfMdoule(old), NSNameOfMdoule(new));
+  ilog(L_WARN, "Symbol `%s' found in `%s' and `%s'", NSNameOfSymbol(s),
+       NSNameOfMdoule(old), NSNameOfMdoule(new));
   /* We return which module should be considered valid, I believe */
   return new;
 }
@@ -192,7 +195,7 @@ void *dlopen(char *filename, int unused)
 {
   NSObjectFileImage myImage;
   NSModule myModule;
-  int rv;
+
   if (firstLoad)
     {
       /*
@@ -200,30 +203,32 @@ void *dlopen(char *filename, int unused)
       ** and install link editor error handling!
       */
       NSLinkEditErrorHandlers linkEditorErrorHandlers;
+
       linkEditorErrorHandlers.undefined = undefinedErrorHandler;
       linkEditorErrorHandlers.multiple = multipleErrorHandler;
       linkEditorErrorHandlers.linkEdit = linkEditErrorHandler;
       NSInstallLinkEditErrorHandlers(&linkEditorErrorHandlers);
       firstLoad = FALSE;
     }
-  rv = NSCreateObjectFileImageFromFile(filename, &myImage);
-  if (rv != NSObjectFileImageSuccess)
+  myDlError = NSCreateObjectFileImageFromFile(filename, &myImage);
+  if (myDlError != NSObjectFileImageSuccess)
     {
-      myDlError = rv;
       return NULL;
     }
   myModule = NSLinkModule(myImage, filename, NSLINKMODULE_OPTION_PRIVATE);
   return (void *)myModule;
 }
 
-void dlclose(void *myModule)
+int dlclose(void *myModule)
 {
   NSUnLinkModule(myModule, FALSE);
+  return 0;
 }
 
 void *dlsym(void *myModule, char *mySymbolName)
 {
   NSSymbol mySymbol;
+
   mySymbol = NSLookupSymbolInModule((NSModule)myModule, mySymbolName);
   return NSAddressOfSymbol(mySymbol);
 }
@@ -375,7 +380,7 @@ int unload_one_module (char *name, int warn)
     deinitfunc ();
   }
 
-  dlclose(modlist[modindex]->address);
+  (void)dlclose(modlist[modindex]->address);
 
   MyFree(modlist[modindex]->name);
   memcpy( &modlist[modindex], &modlist[modindex+1],
