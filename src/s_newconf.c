@@ -474,6 +474,9 @@ find_server_conf(const char *name)
 	{
 		server_p = ptr->data;
 
+		if(ServerConfIllegal(server_p))
+			continue;
+
 		if(match(name, server_p->name))
 			return server_p;
 	}
