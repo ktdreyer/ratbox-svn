@@ -450,7 +450,11 @@ void count_memory(struct Client *source_p)
 
   count_user_memory( &user_count, (int *)&user_memory_used );
 
-  assert (users_counted == user_count);
+/*  assert (users_counted == user_count); */
+  if(users_counted != user_count)
+    sendto_realops_flags(FLAGS_ALL, "*** WARNING: Users counted: %d != User count: %d",
+                           users_counted, user_count);
+  
 
 #if 0
   total_memory += user_memory_used;
