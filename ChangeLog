@@ -1,3 +1,15 @@
+androsyn    2005/02/24 15:12:12 EST	(20050224_4)
+
+  Added files:
+    contrib              m_42.c 
+  Log:
+  The Answer to Life, the Universe, and Everything
+  
+  Revision  Changes    Path
+  1.1       +35 -0     ircd-ratbox/contrib/m_42.c (new)
+
+
+
 leeh        2005/02/24 14:53:04 EST	(20050224_3)
 
   Modified files:
