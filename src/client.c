@@ -304,8 +304,7 @@ check_pings_list(dlink_list *list)
           if (((CurrentTime - client_p->lasttime) >= (2 * ping) &&
                (client_p->flags & FLAGS_PINGSENT)))
             {
-              if (IsServer(client_p) || IsConnecting(client_p) ||
-                  IsHandshake(client_p))
+              if(IsAnyServer(client_p))
                 {
                   sendto_realops_flags(UMODE_ALL, L_ADMIN,
 				       "No response from %s, closing link",
@@ -705,7 +704,7 @@ get_client_name(struct Client* client, int showip)
         return client->name;
 
 #ifdef HIDE_SERVERS_IPS
-      if(IsServer(client) || IsConnecting(client) || IsHandshake(client))
+      if(IsAnyServer(client))
         showip = MASK_IP;
 #endif
 #ifdef HIDE_SPOOF_IPS
@@ -1200,8 +1199,7 @@ int exit_client(
        * it has to be put on the serv_list, or SJOIN's to this new server
        * from the connect burst will not be seen.
        */
-      if (IsServer(source_p) || IsConnecting(source_p) ||
-          IsHandshake(source_p))
+      if(IsAnyServer(source_p))
 	{
 	  m = dlinkFind(&serv_list,source_p);
 	  if(m != NULL)
@@ -1649,7 +1647,7 @@ show_ip(struct Client* source_p, struct Client* target_p)
 #endif
 
 #ifdef HIDE_SERVERS_IPS
-  if ( IsServer(target_p) || IsConnecting(target_p) || IsHandshake(target_p) )
+  if(IsAnyServer(target_p))
     return 0;
 #endif
 

@@ -357,9 +357,7 @@ handle_command(struct Message *mptr, struct Client *client_p,
        * ignore it.. more than likely its a header thats sneaked through
        */
 		
-      if((IsHandshake(client_p) || IsConnecting(client_p)
-          || IsServer(client_p))
-	 && !(mptr->flags & MFLG_UNREG))
+      if(IsAnyServer(client_p) && !(mptr->flags & MFLG_UNREG))
 	return(1);
     }
 

@@ -965,10 +965,9 @@ static void stats_L_list(struct Client *source_p,char *name, int doall, int wild
          !IsIPSpoof(target_p) &&
 #endif
 #ifdef HIDE_SERVERS_IPS
-         !IsServer(target_p) && 
+         !IsAnyServer(target_p) && 
 #endif
-         (IsOperAdmin(source_p) || (!IsServer(target_p) && !IsAdmin(target_p) &&
-         !IsHandshake(target_p) && !IsConnecting(target_p))))
+         (IsOperAdmin(source_p) || (!IsAdmin(target_p) && !IsAnyServer(target_p))))
 	{
 	  sendto_one(source_p, Lformat, me.name,
                      RPL_STATSLINKINFO, source_p->name,
@@ -986,9 +985,8 @@ static void stats_L_list(struct Client *source_p,char *name, int doall, int wild
 	}
       else
 	{
-          /* If its a hidden ip, an admin, or a server, mask the real IP */
-	  if(IsIPSpoof(target_p) || IsServer(target_p) || IsAdmin(target_p)
-	     || IsHandshake(target_p) || IsConnecting(target_p))
+          /* If its a hidden ip or a server, mask the real IP */
+	  if(IsIPSpoof(target_p) || IsAnyServer(target_p))
 	    sendto_one(source_p, Lformat, me.name,
 		       RPL_STATSLINKINFO, source_p->name,
 		       get_client_name(target_p, MASK_IP),

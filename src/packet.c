@@ -89,7 +89,7 @@ parse_client_queued(struct Client *client_p)
     }
   }
 
-  if (IsServer(client_p) || IsConnecting(client_p) || IsHandshake(client_p))
+  if(IsAnyServer(client_p))
   {
     while ((dolen = linebuf_get(&client_p->localClient->buf_recvq,
                               readBuf, READBUF_SIZE, LINEBUF_COMPLETE,
