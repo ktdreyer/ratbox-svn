@@ -1,3 +1,11 @@
+*** 20001208_1 by db
+- quick #ifdef of excess flood for tonight. its late
+- redid send_modelist
+- channels that exist for less than 30 minutes are not persistent
+- redid m_sjoin
+
+
+
 *** 20001207_17 by adrian
 
 
