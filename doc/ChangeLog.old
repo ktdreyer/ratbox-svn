@@ -1,3 +1,13 @@
+*** 20010805_1 by a1kmm
+- Send "*" on -k, this should fix the key problems with the USE_TABLE_MODE
+  code. We really shouldn't enable the old code, because it has issues with
+  many things such as wrong compatibility with clients/servers which support
+  more than one of +o/+v/+h. I am tempted to get rid of the previous code
+  altogether.
+- I can't reproduce fl's reported core on unjupe with the new code, so a
+  bt would be good.
+
+
 *** 20010804_5 by leeh
 - added ConfigChannel.persist time to determine the minimum length of time a
   channel will remain when its last user quits from it
