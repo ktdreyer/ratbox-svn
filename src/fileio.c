@@ -76,7 +76,12 @@ FBFILE* fbopen(const char* filename, const char* mode)
   int fd;
   assert(filename);
   assert(mode);
-
+  
+  if(filename == NULL || mode == NULL)
+  {
+     errno = EINVAL;
+     return NULL;
+  }
   while (*mode)
   {
     switch (*mode)
@@ -130,14 +135,24 @@ FBFILE* fdbopen(int fd, const char* mode)
 void fbclose(FBFILE* fb)
 {
   assert(fb);
-  file_close(fb->fd);
-  MyFree(fb);
+  if(fb != NULL)
+  {
+    file_close(fb->fd);
+    MyFree(fb);
+  } else
+    errno = EINVAL;
+   
 }
 
 static int fbfill(FBFILE* fb)
 {
   int n;
   assert(fb);
+  if(fb == NULL)
+  {
+    errno = EINVAL;
+    return -1;
+  }  
   if (fb->flags)
     return -1;
   n = read(fb->fd, fb->buf, BUFSIZ);
@@ -156,6 +171,11 @@ static int fbfill(FBFILE* fb)
 int fbgetc(FBFILE* fb)
 {
   assert(fb);
+  if(fb == NULL)
+  {
+    errno = EINVAL;
+    return -1;
+  }
   if(fb->pbptr)
   {
     if( (fb->pbptr == (fb->pbuf+BUFSIZ)) ||
@@ -171,7 +191,11 @@ int fbgetc(FBFILE* fb)
 void fbungetc(char c, FBFILE* fb)
 {
   assert(fb);
-
+  if(fb == NULL)
+  {
+    errno = EINVAL;
+    return;
+  }
   if(!fb->pbptr)
   {
     fb->pbptr = fb->pbuf+BUFSIZ;
@@ -190,7 +214,12 @@ char* fbgets(char* buf, size_t len, FBFILE* fb)
   assert(buf);
   assert(fb);
   assert(0 < len);
-
+  
+  if(fb == NULL || buf == NULL)
+  {
+    errno = EINVAL;
+    return NULL;
+  }
   if(fb->pbptr)
   {
     strlcpy(buf,fb->pbptr,len);
@@ -235,7 +264,12 @@ int fbputs(const char* str, FBFILE* fb)
   int n = -1;
   assert(str);
   assert(fb);
-
+  
+  if(str == NULL || fb == NULL)
+  {
+    errno = EINVAL;
+    return -1;
+  } 
   if (0 == fb->flags)
   {
     n = write(fb->fd, str, strlen(str));
@@ -249,6 +283,11 @@ int fbstat(struct stat* sb, FBFILE* fb)
 {
   assert(sb);
   assert(fb);
+  if(sb == NULL || fb == NULL)
+  {
+    errno = EINVAL;
+    return -1;
+  }
   return fstat(fb->fd, sb);
 }
 
