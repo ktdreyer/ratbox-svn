@@ -1,3 +1,11 @@
+*** 20001229_12 by fl_
+
+- Added sendto_match_noncap_servs to send.c, and documented it
+- Send mode #channel +h nick as +h via sendto_match_cap_servs, and as +o
+  via sendto_match_noncap_servs, thus keeping the channel synced
+- Updated my todo
+
+
 *** 20001229_11 by db
 - fixed bug in m_sjoin.c that cored server. Non local servers being
   introduced via sjoin and given by sptr, do not have a LocalUser part
