@@ -68,7 +68,7 @@
 } while(0)
 #endif
 
-static void kq_update_events(int, short, PF *);
+static void kq_update_events(fde_t *, short, PF *);
 static int kq;
 static struct timespec zero_timespec;
 
@@ -81,7 +81,7 @@ static int kqoff;		/* offset into the buffer */
 /* Private functions */
 
 void
-kq_update_events(int fd, short filter, PF * handler)
+kq_update_events(fde_t *F, short filter, PF * handler)
 {
   PF *cur_handler;
   int kep_flags;
@@ -89,10 +89,10 @@ kq_update_events(int fd, short filter, PF * handler)
   switch (filter)
     {
     case EVFILT_READ:
-      cur_handler = fd_table[fd].read_handler;
+      cur_handler = F->read_handler;
       break;
     case EVFILT_WRITE:
-      cur_handler = fd_table[fd].write_handler;
+      cur_handler = F->write_handler;
       break;
     default:
       /* XXX bad! -- adrian */
@@ -120,7 +120,7 @@ kq_update_events(int fd, short filter, PF * handler)
 	  kep_flags = EV_DELETE;
 	}
 
-      EV_SET(kep, (uintptr_t) fd, filter, kep_flags, 0, 0, 0);
+      EV_SET(kep, (uintptr_t) F->fd, filter, kep_flags, 0, 0, (void *)F);
 
       if (kqoff == kqmax)
 	{
@@ -187,13 +187,13 @@ comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
 
   if (type & COMM_SELECT_READ)
     {
-      kq_update_events(fd, EVFILT_READ, handler);
+      kq_update_events(F, EVFILT_READ, handler);
       F->read_handler = handler;
       F->read_data = client_data;
     }
   if (type & COMM_SELECT_WRITE)
     {
-      kq_update_events(fd, EVFILT_WRITE, handler);
+      kq_update_events(F, EVFILT_WRITE, handler);
       F->write_handler = handler;
       F->write_data = client_data;
     }
@@ -252,9 +252,8 @@ comm_select(unsigned long delay)
         
     for (i = 0; i < num; i++)
       {
-	int fd = (int) ke[i].ident;
 	PF *hdl = NULL;
-	fde_t *F = &fd_table[fd];
+	fde_t *F = ke[i].udata;
 
 	if (ke[i].flags & EV_ERROR)
 	  {
@@ -268,12 +267,12 @@ comm_select(unsigned long delay)
 	  case EVFILT_READ:
 	    if ((hdl = F->read_handler) != NULL) {
 	      F->read_handler = NULL;
-	      hdl(fd, F->read_data);
+	      hdl(F->fd, F->read_data);
 	    }
 	  case EVFILT_WRITE:
 	    if ((hdl = F->write_handler) != NULL) {
 	      F->write_handler = NULL;
-	      hdl(fd, F->write_data);
+	      hdl(F->fd, F->write_data);
 	    }
 	  default:
 	    /* Bad! -- adrian */
