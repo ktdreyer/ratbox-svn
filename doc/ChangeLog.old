@@ -1,3 +1,17 @@
+db          2002/04/05 11:08:11 EST	(20020405_0)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  - we were removing client from history too late. This meant that a
+    nick chase kill could cause a double exit of a client. oops. thanks
+    to adx for spotting this one.
+  
+  Revision  Changes    Path
+  7.246     +6 -8      ircd-hybrid-7/src/client.c
+
+
+
 db          2002/04/04 14:29:46 EST	(20020404_1)
 
   Modified files:
