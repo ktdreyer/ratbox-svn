@@ -1,3 +1,8 @@
+*** 20010313_3 by fl_
+- ripped the flood bit out of config.h, also if they dont set a config
+  option, we default to 8 in ircd.c, which is what was in config.h
+
+
 *** 20010313_2 by fl_
 - added min_nonwildcard to config for the minimum real chars you need for
   a gline/kline (remote/local)
