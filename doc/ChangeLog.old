@@ -1,3 +1,15 @@
+androsyn    2002/07/27 15:51:20 EDT	(20020727_1)
+
+  Modified files:
+    src                  s_bsd.c 
+  Log:
+  Don't kick out the errno, just the result of the strerror()
+  
+  Revision  Changes    Path
+  7.171     +2 -2      ircd-hybrid-7/src/s_bsd.c
+
+
+
 leeh        2002/07/27 09:27:15 EDT	(20020727_0)
 
   Modified files:
