@@ -1,3 +1,22 @@
+jmallett    2002/01/16 10:48:07 EST	(20020116_0)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+    include              hook.h setup.h.in 
+  Log:
+  If we have <inttypes.h> include it for use of uintptr_t. If we don't, we
+  check to see if we have uintptr_t normally. If we do not, define it as an
+  unsigned long, as that should work on most/all platforms.
+  
+  Revision  Changes    Path
+  7.113     +3 -1      ircd-hybrid-7/autoconf/configure.in
+  7.116     +73 -39    ircd-hybrid-7/configure
+  1.13      +8 -0      ircd-hybrid-7/include/hook.h
+  7.43      +6 -0      ircd-hybrid-7/include/setup.h.in
+
+
+
 leeh        2002/01/14 15:17:40 EST	(20020114_1)
 
   Modified files:
