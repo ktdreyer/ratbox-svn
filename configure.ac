@@ -533,6 +533,9 @@ if test "$cf_enable_openssl" != no; then
 		dnl Work around pmake/gmake conditional incompatibilities
 		AC_SUBST(ENCSPEED, encspeed)
 		
+		dnl Do all the HAVE_LIBCRYPTO magic -- and check for ciphers
+		CPPFLAGS="$CPPFLAGS $SSL_LIBS"
+		AC_CHECK_LIB(crypto, RSA_free)
 		SSL_LIBS="$SSL_LIBS -lcrypto"
 		SSL_SRCS_ENABLE='$(SSL_SRCS)'
 	else
@@ -1100,7 +1103,7 @@ else
 	tmpresult=no
 fi
 
-echo "OpenSSL (CHALLENGE)..... $tmpresult"
+echo "OpenSSL (Cryptlinks)..... $tmpresult"
 
 if test "$shared_modules" = yes; then
 	tmpresult=shared
