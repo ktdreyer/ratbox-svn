@@ -1,3 +1,8 @@
+*** 20010926_3 by leeh
+- unregged clients cant route ping, so they cant get routed pongs..
+  (discussed on irc)
+
+
 *** 20010926_2 by leeh
 - client_p is where we get data from, dont clear FLAGS_PINGSENT (jv)
 
