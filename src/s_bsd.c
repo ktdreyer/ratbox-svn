@@ -453,12 +453,10 @@ void error_exit_client(struct Client* client_p, int error)
         }
       else
 	{
-	  report_error("Lost connection to %s: %s",
+	  report_error("Lost connection to %s: %d",
 	               get_client_name(client_p, SHOW_IP),
 		       current_error);
 
-          ilog(L_NOTICE, "Lost connection to %s: %s",
-	       get_client_name(client_p, SHOW_IP), current_error);
 	}
 
       sendto_realops_flags(FLAGS_ALL, L_ALL,
