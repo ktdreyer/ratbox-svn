@@ -1,3 +1,6 @@
+*** 20010523_9 by davidt
+- fix non-openssl build
+
 *** 20010523_8 by jdc
 * Fixed implicit decl. of bzero(3).
 
