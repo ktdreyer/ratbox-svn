@@ -1,3 +1,34 @@
+*** 20001023_4 by adrian
+
+
+Added a port of squid's event system. This is a very simple mechanism
+to schedule events to happen in some given time period. The main
+function you'll be using is:
+
+eventAdd(const char *text, EVH *func, void *data, time_t when, int weight)
+
+where when is the number of seconds you want to have the event run (so
+if you want it running a second from now, you'd set when to be 1.)
+
+Read event.c for a more precise description.
+
+What has changed:
+
+* changed this over to use the Block allocator rather than squid's mempools
+* disabled debug reporting until I figure out a nice way (ie how the rest
+  of the ircd does it) of doing this
+* made the time offsets integer, rather than double like they are in squid
+* the logic in io_loop() has been changed to allow this to slide in.
+
+Note that eventAddIsh()'s logic on random offsets might be a bit .. off.
+I'll come back to this once I've tidied up bits of the code.
+
+I will also be tidying up io_loop() now an event scheduling mechanism
+exists, making it much, much less twisted. So any breaks there will
+(hopefully) be temporary.
+
+
+
 *** 20001023_3 by adrian
 
 
