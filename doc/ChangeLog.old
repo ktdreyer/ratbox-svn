@@ -1,3 +1,33 @@
+*** 20001024_4 by adrian
+
+
+Commit the tidyup of the resolver network code (notice I said *network* :) 
+-->
+
+* move init_resolver() to a more useful init place and out of init_netio()
+* make the DNS timeout checking an event which is triggered once a second.
+  I figure that when I rewrite the event system soon to work on milliseconds
+  rather than seconds we might revisit this, but doing it once a second
+  actually might be better. Dunno yet..
+* add comm_setselect() calls in the resolver init and just after the
+  recvfrom() to re-register interest in IO.
+* remove the evilness in read_message() which does the IO on
+  ResolverFileDescriptor, making resolver IO happen through the new network
+  IO system
+
+Notes:
+
+* I have *NO* idea how the DNS write flushing works just yet, I guess I'm
+  about to find out.
+
+* The resolver might take a little longer - this is simply the by-product
+  of shoehorning in the comm_select() call (if there is no other pending
+  IO, read_message() can delay for a bit, since the resolver fd isn't
+  covered there.) Once read_message() disappears, so will the delays.
+  (or I might just fix it somehow..)
+
+
+
 *** 20001024_3 by adrian
 
 
