@@ -122,7 +122,7 @@ static inline void *get_block(size_t size)
 {
   void *ptr;
   ptr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE, zero_fd, 0);
-  if(ptr == MAP_FAILED
+  if(ptr == MAP_FAILED)
   	ptr = NULL;
   return(ptr);
 }
