@@ -433,7 +433,7 @@ fix_key_remote(char *arg)
  */
 static void
 chm_nosuch(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
-	   const char **parv, int *errors, int alev, int dir, char c, void *d)
+	   const char **parv, int *errors, int alev, int dir, char c, long mode_type)
 {
 	if(*errors & SM_ERR_UNKNOWN)
 		return;
@@ -443,12 +443,8 @@ chm_nosuch(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
 
 static void
 chm_simple(struct Client *source_p,struct Channel *chptr, int parc, int *parn,
-	   const char **parv, int *errors, int alev, int dir, char c, void *d)
+	   const char **parv, int *errors, int alev, int dir, char c, long mode_type)
 {
-	long mode_type;
-
-	mode_type = (long) d;
-
 	if(alev < CHACCESS_CHANOP)
 	{
 		if(!(*errors & SM_ERR_NOOPS))
@@ -493,20 +489,17 @@ chm_simple(struct Client *source_p,struct Channel *chptr, int parc, int *parn,
 
 static void
 chm_ban(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
-	const char **parv, int *errors, int alev, int dir, char c, void *d)
+	const char **parv, int *errors, int alev, int dir, char c, long mode_type)
 {
 	const char *mask;
 	const char *raw_mask;
 	dlink_list *list;
 	dlink_node *ptr;
 	struct Ban *banptr;
-	int mode_type;
 	int errorval;
 	int rpl_list;
 	int rpl_endlist;
 	int caps;
-
-	mode_type = (int) d;
 
 	switch(mode_type)
 	{
@@ -646,7 +639,7 @@ chm_ban(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
 
 static void
 chm_op(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
-       const char **parv, int *errors, int alev, int dir, char c, void *d)
+       const char **parv, int *errors, int alev, int dir, char c, long mode_type)
 {
 	struct membership *msptr;
 	const char *opnick;
@@ -739,7 +732,7 @@ chm_op(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
 
 static void
 chm_voice(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
-	  const char **parv, int *errors, int alev, int dir, char c, void *d)
+	  const char **parv, int *errors, int alev, int dir, char c, long mode_type)
 {
 	struct membership *msptr;
 	const char *opnick;
@@ -817,7 +810,7 @@ chm_voice(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
 
 static void
 chm_limit(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
-	  const char **parv, int *errors, int alev, int dir, char c, void *d)
+	  const char **parv, int *errors, int alev, int dir, char c, long mode_type)
 {
 	const char *lstr;
 	static char limitstr[30];
@@ -874,7 +867,7 @@ chm_limit(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
 
 static void
 chm_key(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
-	const char **parv, int *errors, int alev, int dir, char c, void *d)
+	const char **parv, int *errors, int alev, int dir, char c, long mode_type)
 {
 	char *key;
 
@@ -938,72 +931,72 @@ struct ChannelMode
 {
 	void (*func) (struct Client *source_p, struct Channel *chptr,
 		      int parc, int *parn, const char **parv, int *errors,
-		      int alev, int dir, char c, void *d);
-	void *d;
+		      int alev, int dir, char c, long mode_type);
+	long mode_type;
 };
 
 /* *INDENT-OFF* */
 static struct ChannelMode ModeTable[255] =
 {
-  {chm_nosuch, NULL},
-  {chm_nosuch, NULL},                             /* A */
-  {chm_nosuch, NULL},                             /* B */
-  {chm_nosuch, NULL},                             /* C */
-  {chm_nosuch, NULL},                             /* D */
-  {chm_nosuch, NULL},                             /* E */
-  {chm_nosuch, NULL},                             /* F */
-  {chm_nosuch, NULL},                             /* G */
-  {chm_nosuch, NULL},                             /* H */
-  {chm_ban,    (void *) CHFL_INVEX},              /* I */
-  {chm_nosuch, NULL},                             /* J */
-  {chm_nosuch, NULL},                             /* K */
-  {chm_nosuch, NULL},                             /* L */
-  {chm_nosuch, NULL},                             /* M */
-  {chm_nosuch, NULL},                             /* N */
-  {chm_nosuch, NULL},                             /* O */
-  {chm_nosuch, NULL},                             /* P */
-  {chm_nosuch, NULL},                             /* Q */
-  {chm_nosuch, NULL},                             /* R */
-  {chm_nosuch, NULL},                             /* S */
-  {chm_nosuch, NULL},                             /* T */
-  {chm_nosuch, NULL},                             /* U */
-  {chm_nosuch, NULL},                             /* V */
-  {chm_nosuch, NULL},                             /* W */
-  {chm_nosuch, NULL},                             /* X */
-  {chm_nosuch, NULL},                             /* Y */
-  {chm_nosuch, NULL},                             /* Z */
-  {chm_nosuch, NULL},
-  {chm_nosuch, NULL},
-  {chm_nosuch, NULL},
-  {chm_nosuch, NULL},
-  {chm_nosuch, NULL},
-  {chm_nosuch, NULL},
-  {chm_nosuch, NULL},				  /* a */
-  {chm_ban,    (void *) CHFL_BAN},                /* b */
-  {chm_nosuch, NULL},                             /* c */
-  {chm_nosuch, NULL},                             /* d */
-  {chm_ban,    (void *) CHFL_EXCEPTION},          /* e */
-  {chm_nosuch, NULL},                             /* f */
-  {chm_nosuch, NULL},                             /* g */
-  {chm_nosuch, NULL},				  /* h */
-  {chm_simple, (void *) MODE_INVITEONLY},         /* i */
-  {chm_nosuch, NULL},                             /* j */
-  {chm_key, NULL},                                /* k */
-  {chm_limit, NULL},                              /* l */
-  {chm_simple, (void *) MODE_MODERATED},          /* m */
-  {chm_simple, (void *) MODE_NOPRIVMSGS},         /* n */
-  {chm_op, NULL},                                 /* o */
-  {chm_simple, (void *) MODE_PRIVATE},            /* p */
-  {chm_nosuch, NULL},                             /* q */
-  {chm_nosuch, NULL},                             /* r */
-  {chm_simple, (void *) MODE_SECRET},             /* s */
-  {chm_simple, (void *) MODE_TOPICLIMIT},         /* t */
-  {chm_nosuch, NULL},                             /* u */
-  {chm_voice, NULL},                              /* v */
-  {chm_nosuch, NULL},                             /* w */
-  {chm_nosuch, NULL},                             /* x */
-  {chm_nosuch, NULL},                             /* y */
-  {chm_nosuch, NULL},                             /* z */
+  {chm_nosuch,	0 },
+  {chm_nosuch,	0 },			/* A */
+  {chm_nosuch,	0 },			/* B */
+  {chm_nosuch,	0 },			/* C */
+  {chm_nosuch,	0 },			/* D */
+  {chm_nosuch,	0 },			/* E */
+  {chm_nosuch,	0 },			/* F */
+  {chm_nosuch,	0 },			/* G */
+  {chm_nosuch,	0 },			/* H */
+  {chm_ban,	CHFL_INVEX },                    /* I */
+  {chm_nosuch,	0 },			/* J */
+  {chm_nosuch,	0 },			/* K */
+  {chm_nosuch,	0 },			/* L */
+  {chm_nosuch,	0 },			/* M */
+  {chm_nosuch,	0 },			/* N */
+  {chm_nosuch,	0 },			/* O */
+  {chm_nosuch,	0 },			/* P */
+  {chm_nosuch,	0 },			/* Q */
+  {chm_nosuch,	0 },			/* R */
+  {chm_nosuch,	0 },			/* S */
+  {chm_nosuch,	0 },			/* T */
+  {chm_nosuch,	0 },			/* U */
+  {chm_nosuch,	0 },			/* V */
+  {chm_nosuch,	0 },			/* W */
+  {chm_nosuch,	0 },			/* X */
+  {chm_nosuch,	0 },			/* Y */
+  {chm_nosuch,	0 },			/* Z */
+  {chm_nosuch,	0 },
+  {chm_nosuch,	0 },
+  {chm_nosuch,	0 },
+  {chm_nosuch,	0 },
+  {chm_nosuch,	0 },
+  {chm_nosuch,	0 },
+  {chm_nosuch,	0 },			/* a */
+  {chm_ban,	CHFL_BAN },		/* b */
+  {chm_nosuch,	0 },			/* c */
+  {chm_nosuch,	0 },			/* d */
+  {chm_ban,	CHFL_EXCEPTION },	/* e */
+  {chm_nosuch,	0 },			/* f */
+  {chm_nosuch,	0 },			/* g */
+  {chm_nosuch,	0 },			/* h */
+  {chm_simple,	MODE_INVITEONLY },	/* i */
+  {chm_nosuch,	0 },			/* j */
+  {chm_key,	0 },			/* k */
+  {chm_limit,	0 },			/* l */
+  {chm_simple,	MODE_MODERATED },	/* m */
+  {chm_simple,	MODE_NOPRIVMSGS },	/* n */
+  {chm_op,	0 },			/* o */
+  {chm_simple,	MODE_PRIVATE },		/* p */
+  {chm_nosuch,	0 },			/* q */
+  {chm_nosuch,	0 },			/* r */
+  {chm_simple,	MODE_SECRET },		/* s */
+  {chm_simple,	MODE_TOPICLIMIT },	/* t */
+  {chm_nosuch,	0 },			/* u */
+  {chm_voice,	0 },			/* v */
+  {chm_nosuch,	0 },			/* w */
+  {chm_nosuch,	0 },			/* x */
+  {chm_nosuch,	0 },			/* y */
+  {chm_nosuch,	0 },			/* z */
 };
 /* *INDENT-ON* */
 
@@ -1059,7 +1052,7 @@ set_channel_mode(struct Client *client_p, struct Client *source_p,
 			ModeTable[table_position].func(source_p, chptr, parc,
 						       &parn, parv, &errors,
 						       alevel, dir, c, 
-						       ModeTable[table_position].d);
+						       ModeTable[table_position].mode_type);
 			break;
 		}
 	}
