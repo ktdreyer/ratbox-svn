@@ -5045,7 +5045,6 @@ trap 'rm -fr `echo "\
  contrib/Makefile               \
  src/Makefile                   \
  adns/Makefile                  \
- include/Makefile               \
  messages/Makefile              \
  messages/translations/Makefile \
  modules/Makefile               \
@@ -5165,7 +5164,6 @@ CONFIG_FILES=\${CONFIG_FILES-"\
  contrib/Makefile               \
  src/Makefile                   \
  adns/Makefile                  \
- include/Makefile               \
  messages/Makefile              \
  messages/translations/Makefile \
  modules/Makefile               \

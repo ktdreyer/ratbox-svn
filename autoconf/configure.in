@@ -1002,7 +1002,6 @@ AC_OUTPUT(                      \
  contrib/Makefile               \
  src/Makefile                   \
  adns/Makefile                  \
- include/Makefile               \
  messages/Makefile              \
  messages/translations/Makefile \
  modules/Makefile               \
