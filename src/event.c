@@ -55,22 +55,34 @@
 #include "client.h"
 #include "send.h"
 #include "memory.h"
-
+#include "s_log.h"
 
 static const char *last_event_ran = NULL;
 struct ev_entry event_table[MAX_EVENTS];
 static int event_max = 0;
+static time_t event_time_min = -1;
 
 
 void
 eventAdd(const char *name, EVH *func, void *arg, time_t when)
 {
+
+  if (event_max > MAX_EVENTS)
+    {
+      ilog(L_ERROR, "event number has exceeded static maximum number of events (%d).  Please raise MAX_EVENTS!", MAX_EVENTS);
+      exit(-1);
+    }
+
   event_table[event_max].func = func;
   event_table[event_max].name = name;
   event_table[event_max].arg = arg;
   event_table[event_max].when = CurrentTime + when;
   event_table[event_max].frequency = when; 
   event_table[event_max].active = 1;
+
+  if ((event_table[event_max].when < event_time_min) || (event_time_min == -1))
+    event_time_min = event_table[event_max].when;
+
   ++event_max;
 }
 
@@ -105,19 +117,28 @@ eventRun(void)
           last_event_ran = event_table[i].name;
           event_table[i].func(event_table[i].arg);
           event_table[i].when = CurrentTime + event_table[i].frequency;
+          event_time_min = -1;
         }
     }
 }
 
+
 time_t
 eventNextTime(void)
 {
-#if 0
-  if (!tasks)
-    return (time_t) 100000;
-  return (time_t) (tasks->when - CurrentTime);
-#endif
-return 10;
+  int i;
+
+  if (event_max == 0)
+    return (CurrentTime+1);
+  else if (event_time_min == -1)
+    {
+      for (i = 0; i < event_max; i++)
+        {
+          if (event_table[i].active && ((event_table[i].when < event_time_min) || (event_time_min == -1)))
+            event_time_min = event_table[i].when;
+        }
+    }
+  return event_time_min;
 }
 
 void
@@ -133,9 +154,9 @@ eventFind(EVH *func, void *arg)
   for (i = 0; i < event_max; i++)
     {
       if (event_table[i].func == func && event_table[i].arg == arg)
-        return 1;
+        return i;
     }
-  return 0;
+  return -1;
 }
 
 void
