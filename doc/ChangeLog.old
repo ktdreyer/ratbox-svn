@@ -1,3 +1,8 @@
+*** 20001223_48 by ejb
+- fix for another parse.c bug
+- make max_targets an ircd.conf options
+
+
 *** 20001223_47 by isomer
 Doh! forgott supported.h (sorry toot!)
 
