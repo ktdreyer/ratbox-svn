@@ -1,3 +1,7 @@
+*** 20001228_16 by ejb
+- add links_notice to config.
+
+
 *** 20001228_15 by toot
 . started adding the ircd.conf options to /info (same order
   as in example.conf)  got as far as max_nick_changes.
