@@ -1,3 +1,15 @@
+androsyn    2004/08/16 11:32:47 EDT	(20040816_1)
+
+  Modified files:
+    modules              m_rehash.c 
+  Log:
+  Replace a pair of strlcats with a ircsnprintf_append
+  
+  Revision  Changes    Path
+  1.85      +8 -10     ircd-ratbox/modules/m_rehash.c
+
+
+
 androsyn    2004/08/16 11:29:49 EDT	(20040816_0)
 
   Modified files:
