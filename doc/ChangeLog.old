@@ -1,3 +1,15 @@
+db          2002/07/02 19:24:24 EDT	(20020703_0)
+
+  Modified files:
+    modules/core         m_message.c 
+  Log:
+  - fixed stupid bug I introduced with @# oops
+  
+  Revision  Changes    Path
+  1.97      +17 -18    ircd-hybrid-7/modules/core/m_message.c
+
+
+
 db          2002/07/02 18:25:02 EDT	(20020702_2)
 
   Modified files:
