@@ -1,3 +1,15 @@
+leeh        2005/04/06 23:08:00 UTC	(20050406_2)
+
+  Modified files:
+    src                  log.c 
+  Log:
+  - whoops, fix a bit of code I misunderstood
+  
+  Revision  Changes    Path
+  1.10      +1 -1      rserv/src/log.c
+
+
+
 leeh        2005/04/06 23:03:23 UTC	(20050406_1)
 
   Modified files:
