@@ -786,13 +786,13 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 				}
 
 				*mbuf++ = 'v';
-				para[pargs++] = s;
+				para[pargs++] = target_p->name;
 			}
 		}
 		else if(fl & CHFL_VOICE)
 		{
 			*mbuf++ = 'v';
-			para[pargs++] = s;
+			para[pargs++] = target_p->name;
 		}
 
 		if(pargs >= MAXMODEPARAMS)
