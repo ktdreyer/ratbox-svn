@@ -1,3 +1,8 @@
+*** 20010623_1 by db
+- fixed some formatting
+
+
+
 *** 20010622_2 by leeh
 - if someone asks a server to reply about a client thats not his.. it
   HAS to be non-detailed, else the info is just gunna be wrong
