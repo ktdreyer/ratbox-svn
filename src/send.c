@@ -371,10 +371,10 @@ sendto_channel_type(struct Client *one, struct Client *from, struct Channel *chp
 
   ++current_serial;
 
-  if(type&MODE_CHANOP)
-    char_type = '@';
-  else
+  if(type&MODE_VOICE)
     char_type = '+';
+  else
+    char_type = '@';
 
   for (lp = chptr->members; lp; lp = lp->next)
     {

@@ -284,15 +284,16 @@ int build_target_list(int p_or_n,
       if(type)
 	{
 	  /* Strip if using DALnet chanop/voice prefix. */
-	  if (*(nick+1) == '@' || *(nick+1) == '+')
-	    {
-	      nick++;
-	      *nick = '@';
-	      type = MODE_CHANOP|MODE_VOICE;
-	    }
+	  if ((*(nick+1) == '@' && (type & MODE_VOICE)) ||
+              *(nick+1) == '+' && !(type & MODE_VOICE))
+            {
+              nick++;
+              *nick = '+';
+              type = MODE_CHANOP|MODE_VOICE;
+            }
 
 	  /* suggested by Mortiis */
-	  if(!*nick)        /* if its a '\0' dump it, there is no recipient */
+	  if(!*(nick+1))   /* if its a '\0' dump it, there is no recipient */
 	    {
 	      sendto_one(sptr, form_str(ERR_NORECIPIENT),
 			 me.name, sptr->name, command);
