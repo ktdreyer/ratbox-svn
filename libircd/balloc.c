@@ -236,7 +236,7 @@ static int newblock(BlockHeap * bh)
     void *offset;
 
     /* Setup the initial data structure. */
-    b = (Block *) MyMalloc(sizeof(Block));
+    b = (Block *) calloc(1, sizeof(Block));
     if (b == NULL)
         return 1;
     b->freeElems = bh->elemsPerBlock;
@@ -300,7 +300,7 @@ BlockHeap *BlockHeapCreate(size_t elemsize, int elemsperblock)
       }
 
     /* Allocate our new BlockHeap */
-    bh = (BlockHeap *) MyMalloc(sizeof(BlockHeap));
+    bh = (BlockHeap *) calloc(1, sizeof(BlockHeap));
     if (bh == NULL)
       {
         outofmemory();          /* die.. out of memory */
@@ -319,7 +319,8 @@ BlockHeap *BlockHeapCreate(size_t elemsize, int elemsperblock)
     /* Be sure our malloc was successful */
     if (newblock(bh))
       {
-        MyFree(bh);
+        if(bh != NULL)
+          free(bh);
         outofmemory();          /* die.. out of memory */
       }
 
@@ -467,13 +468,15 @@ int BlockHeapGarbageCollect(BlockHeap * bh)
             if (last)
 	      {
                 last->next = walker->next;
-                MyFree(walker);
+                if(free)
+                 free(walker);
                 walker = last->next;
 	      }
 	    else
 	      {
                 bh->base = walker->next;
-                MyFree(walker);
+                if(free)
+                 free(walker);
                 walker = bh->base;
 	      }
             bh->blocksAllocated--;
@@ -509,9 +512,11 @@ int BlockHeapDestroy(BlockHeap * bh)
       {
         next = walker->next;
         free_block(walker->elems, walker->alloc_size);
-        MyFree(walker);
+        if(walker)
+          free(walker);
       }
-    MyFree(bh);
+    if(walker)
+      free(bh);
     return 0;
 }
 #endif
