@@ -1,3 +1,7 @@
+*** 19990909_18 by tomh
+remove non-ansi prototype for crypt
+
+
 *** 19990909_17 by tomh
 change int to size_t in accept_connection
 
