@@ -1,3 +1,34 @@
+leeh        2002/12/10 20:00:17 UTC	(20021210_21)
+
+  Modified files:
+    include              s_conf.h 
+    modules              .depend m_stats.c m_unkline.c m_xline.c 
+    src                  .depend Makefile.in ircd.c kdparse.c 
+                         newconf.c s_conf.c s_user.c 
+  Added files:
+    include              s_newconf.h 
+    src                  s_newconf.c 
+  Log:
+  - added s_newconf.* in preparation for what im about to do next.
+  
+  Revision  Changes    Path
+  7.224     +0 -27     ircd-ratbox/include/s_conf.h
+  7.1       +70 -0     ircd-ratbox/include/s_newconf.h (new)
+  1.20      +29 -28    ircd-ratbox/modules/.depend
+  1.139     +2 -2      ircd-ratbox/modules/m_stats.c
+  1.75      +2 -1      ircd-ratbox/modules/m_unkline.c
+  1.14      +2 -1      ircd-ratbox/modules/m_xline.c
+  7.21      +54 -45    ircd-ratbox/src/.depend
+  7.124     +1 -0      ircd-ratbox/src/Makefile.in
+  7.272     +1 -1      ircd-ratbox/src/ircd.c
+  7.19      +1 -0      ircd-ratbox/src/kdparse.c
+  7.68      +1 -0      ircd-ratbox/src/newconf.c
+  7.386     +2 -215    ircd-ratbox/src/s_conf.c
+  7.1       +253 -0    ircd-ratbox/src/s_newconf.c (new)
+  7.245     +1 -0      ircd-ratbox/src/s_user.c
+
+
+
 androsyn    2002/12/10 14:58:15 UTC	(20021210_20)
 
   Modified files:
