@@ -1,3 +1,9 @@
+*** 20010105_53 by db
+- added m_nickinfo, /quote nickinfo nick
+  will give back its ID and tsinfo for developers
+
+
+
 *** 20010105_52 by a1kmm
 - Adding dserv to contrib, as an example of services that could be used so we can consider services
   compatibility etc...
