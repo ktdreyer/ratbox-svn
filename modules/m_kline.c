@@ -226,7 +226,7 @@ int mo_kline(struct Client *cptr,
   ClassPtr(aconf) = find_class(0);
 
   sendto_cap_serv_butone(CAP_KLN, &me,
-			 ":%s KLINE %s %s %s %s",
+			 ":%s KLINE %s %s %s : %s",
 			 me.name, sptr->name, user, host, reason);
 
   apply_kline(sptr, aconf, current_date, ip_kline, ip, ip_mask);
@@ -252,7 +252,7 @@ int ms_kline(struct Client *cptr,
   if(parc < 5)
     return 0;
 
-  sendto_cap_serv_butone (CAP_KLN, cptr, ":%s KLINE %s %s %s %s",
+  sendto_cap_serv_butone (CAP_KLN, cptr, ":%s KLINE %s %s %s : %s",
 			  parv[0], parv[1], parv[2], parv[3], parv[4]);
 
   slave_oper = parv[1];
