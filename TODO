@@ -157,7 +157,7 @@ Done things:
 
 
 ------------------------------------------------------------------------------
-Little things to be done given enough time and initiative
+Little things to be done given enough time and initiative -Hwy
 
 .  Bring back CIDR support in operator blocks
    user="wcampbel@144.26.*"; # works - even if the hostname resolves
@@ -171,7 +171,7 @@ Little things to be done given enough time and initiative
    Hwy-7!wcampbel@bee-90-245.bee.net (DONE -- except for LL bugs)
 .  Have a few more things /quote SET'table
 .  More documentation on the gettext stuff, enough for a layman to use
-.  Extra \r\n sent to the log file by ts_warn needs to go
+.  Extra \r\n sent to the log file by ts_warn needs to go (DONE)
 .  Fix tools/fixklines.c and tools/klineParse.c for the new kline.conf
    format.
 .  Update tools/mkconf as well.
@@ -190,11 +190,16 @@ Little things to be done given enough time and initiative
 .  Re-add the ability to set usermodes from the conf (oldconf field after the
    O: line class)
 .  What does the name field in the listen block do?  (oldconf P:name:ip::port)
+   (Nothing now, it's GONE)
 .  Get rid of the %lu format in m_eob.c, go back to a damn %d
 .  Fix the format of TIME, we used to use %t in date()...that seems to be
    gone now.... Saturday January 20 2001 -- 15:49: 3 - 5: 0
    That looks like shit...fix it
 .  Randomize the order of WHO #channel and NAMES #channel in +a mode.
+.  Add in exemptions to D lines into the conf (old d: lines)
+.  The syntax error in conf line number is 1 less than it actually is.
+   Notice -- 77: syntax error on line:         e_lines_oper_only=yes;
+   When e_lines_oper_only=yes; is on line 78.
 
 -- Rodder's list
 .  Add scaleable database-based authentication.  Probably part of Iauth.
