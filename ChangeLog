@@ -1,3 +1,18 @@
+leeh        2004/03/08 14:15:53 EST	(20040308_8)
+
+  Modified files:
+    .                    RELNOTES 
+    src                  newconf.c 
+  Log:
+  - reworked oper stacking to only use yy_oper_list when we need to
+  - rewrote auth stacking to use dlinks
+  
+  Revision  Changes    Path
+  1.83      +7 -0      ircd-ratbox/RELNOTES
+  7.141     +84 -82    ircd-ratbox/src/newconf.c
+
+
+
 leeh        2004/03/08 10:28:49 EST	(20040308_7)
 
   Modified files:
