@@ -80,7 +80,7 @@ static BlockHeap *event_bl = NULL;
 void
 eventAdd(const char *name, EVH * func, void *arg, time_t when, int weight)
 {
-    struct ev_entry *event = BlockHeapAlloc(event_bl);
+    struct ev_entry *event = (struct ev_entry *)BlockHeapAlloc(event_bl);
     struct ev_entry **E;
     event->func = func;
     event->arg = arg;

@@ -51,7 +51,7 @@ linebuf_new_line(buf_head_t *bufhead)
 {
     buf_line_t *bufline;
 
-    bufline = BlockHeapAlloc(linebuf_bl);
+    bufline = (buf_line_t *)BlockHeapAlloc(linebuf_bl);
 
     /* XXX Zero data, I'm being paranoid! -- adrian */
     bzero(bufline, sizeof(buf_line_t));
