@@ -1511,7 +1511,7 @@ general_pace_wait: PACE_WAIT '=' NUMBER ';'
     ConfigFileEntry.pace_wait = yylval.number;
   } ;
 
-general_pace_wait: CALLER_ID_WAIT '=' NUMBER ';'
+general_caller_id_wait: CALLER_ID_WAIT '=' NUMBER ';'
   {
     ConfigFileEntry.caller_id_wait = yylval.number;
   } ;
