@@ -1,3 +1,15 @@
+leeh        2002/04/27 21:29:09 EDT	(20020428_3)
+
+  Modified files:
+    src                  resv.c 
+  Log:
+  - removed an unneeded +len in MyMalloc()
+  
+  Revision  Changes    Path
+  7.15      +2 -2      ircd-hybrid-7/src/resv.c
+
+
+
 androsyn    2002/04/27 20:50:27 EDT	(20020428_2)
 
   Modified files:
