@@ -1,3 +1,10 @@
+*** 20001030_8 by adrian
+
+
+kill npollfds and use highest_fd in its place, which is just as good.
+
+
+
 *** 20001030_7 by adrian
 
 
