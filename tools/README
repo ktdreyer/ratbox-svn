@@ -19,6 +19,3 @@ klineParse.c  - cleans out redundant klines
 viconf - edit your conf file without having to chdir su etc. etc.
          also locks the file if file locking is used.
 
-
---
-$Id$
