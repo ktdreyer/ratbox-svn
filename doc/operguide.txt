@@ -332,16 +332,15 @@ Example topology :
   How does it work ? Periodically it stores information about the channel state
   in its database, for every channel in there. On every 'run', a channel
   operator gets one point. These scores make a top-5 of 'most frequent opped
-  clients'.
-  When a channel becomes opless, JUPES will join and op the top-5 opped clients
-  CURRENTLY IN THE CHANNEL.
+  clients'.  When a channel becomes opless, JUPES will join and op the top-5
+  opped clients CURRENTLY IN THE CHANNEL.
 
   Chanfix can be invoked manually to. /msg jupes chanfix #channel is the command
   to do it. JUPES will join, and treat the channel as if it were opless. It
   lowers TS by one (resulting in a deop of the entire channel) and re-ops the
-  top-5 clients currently in the channel. The Channel fixer won't log or
-  actively fix channels when there's a split of significant size. Needless to
-  say, the chanfix command must be used with caution.
+  top-5 clients currently in the channel. The Channelfixer won't log or actively
+  fix channels when there's a split of significant size. Needless to say, the
+  chanfix command must be used with caution.
 
 
 12. G-Lines
@@ -352,12 +351,11 @@ Example topology :
   three different servers need to issue the _exact_ same G-Line. This includes
   a reason.
 
-  G-Lines work ideally when the EU side of EFNet is not fragmented. If you oper
-  on an EU-Server and EU is split in two (ie, one part linked to *.gblx and
-  another part to lightning), two G-Lines need to be issued on both 'sides' of
-  EU-EFnet.  Hybrid 5 and comstud servers do not support G-Lines and will not
-  propagate G-Line requests.  Hybrid 6 servers with G-Lines disabled will not
-  allow G-Lines to be set, but will still pass them.
+  G-Lines work ideally when the EU side of EFNet is not fragmented. If you
+  oper on an EU-Server and EU is split in two (ie, one part linked to *.gblx
+  and another part to lightning), two G-Lines need to be issued on both 'sides'
+  of EU-EFnet.  Servers not supporting G-Lines will also not propagate G-Line
+  requests.
 
 
 Best regards,
@@ -367,3 +365,5 @@ Unix System Administrator  \  |  /  Phone - +31 23 5111111
 Vuurwerk Internet           '|.|'   PGP   - 0xD68A7AAB
 
 And on the seventh day, He exited from append mode.
+
+# $Id$
