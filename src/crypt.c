@@ -16,7 +16,9 @@
 
 #define MD5_SIZE 16
 
+#ifdef __VMS__
 typedef unsigned int u_int32_t;
+#endif
 
 /* MD5 context. */
 typedef struct MD5Context
@@ -38,7 +40,7 @@ char *MD5Data(const unsigned char *, unsigned int, char *);
 static unsigned char itoa64[] =	/* 0 ... 63 => ascii - 64 */
 	"./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
-void
+static void
 _crypt_to64(s, v, n)
      char *s;
      unsigned long v;
@@ -58,7 +60,7 @@ _crypt_to64(s, v, n)
 char *
 crypt(const char *pw, const char *salt)
 {
-	static char *magic = "$1$";	/*
+	static const char *magic = "$1$";	/*
 					 * This string is magic for
 					 * this algorithm.  Having
 					 * it this way, we can get
@@ -324,34 +326,34 @@ MD5Update(context, input, inputLen)
      const unsigned char *input;
      unsigned int inputLen;
 {
-	unsigned int i, index, partLen;
+	unsigned int i, xindex, partLen;
 
 	/* Compute number of bytes mod 64 */
-	index = (unsigned int) ((context->count[0] >> 3) & 0x3F);
+	xindex = (unsigned int) ((context->count[0] >> 3) & 0x3F);
 
 	/* Update number of bits */
 	if((context->count[0] += ((u_int32_t) inputLen << 3)) < ((u_int32_t) inputLen << 3))
 		context->count[1]++;
 	context->count[1] += ((u_int32_t) inputLen >> 29);
 
-	partLen = 64 - index;
+	partLen = 64 - xindex;
 
 	/* Transform as many times as possible. */
 	if(inputLen >= partLen)
 	{
-		memcpy((void *) &context->buffer[index], (const void *) input, partLen);
+		memcpy((void *) &context->buffer[xindex], (const void *) input, partLen);
 		MD5Transform(context->state, context->buffer);
 
 		for (i = partLen; i + 63 < inputLen; i += 64)
 			MD5Transform(context->state, &input[i]);
 
-		index = 0;
+		xindex = 0;
 	}
 	else
 		i = 0;
 
 	/* Buffer remaining input */
-	memcpy((void *) &context->buffer[index], (const void *) &input[i], inputLen - i);
+	memcpy((void *) &context->buffer[xindex], (const void *) &input[i], inputLen - i);
 }
 
 /*
@@ -363,14 +365,14 @@ MD5Pad(context)
      MD5_CTX *context;
 {
 	unsigned char bits[8];
-	unsigned int index, padLen;
+	unsigned int xindex, padLen;
 
 	/* Save number of bits */
 	Encode(bits, context->count, 8);
 
 	/* Pad out to 56 mod 64. */
-	index = (unsigned int) ((context->count[0] >> 3) & 0x3f);
-	padLen = (index < 56) ? (56 - index) : (120 - index);
+	xindex = (unsigned int) ((context->count[0] >> 3) & 0x3f);
+	padLen = (xindex < 56) ? (56 - xindex) : (120 - xindex);
 	MD5Update(context, PADDING, padLen);
 
 	/* Append length (before padding) */
