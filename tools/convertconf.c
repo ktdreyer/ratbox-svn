@@ -57,7 +57,6 @@ static void PrintOutServers(FILE *out);
 static void PairUpServers(struct ConnectPair* );
 static void AddHubOrLeaf(int type,char* name,char* host);
 static void OperPrivsFromString(FILE* , char* );
-static char* ClientFlags(FILE* ,char* ,char* );
 
 int main(int argc,char *argv[])
 {
@@ -87,11 +86,9 @@ int main(int argc,char *argv[])
   AddModulesBlock(out);
 
   puts("The config file has been converted however you MUST rearrange the config:\n"
-       "   o class blocks must be before anything that uses then (auth/connect)\n"
-       "   o auth blocks must be listed in order of importance\n"
-       "        - spoofs etc first\n"
-       "        - *@* last\n"
-       "     if this is NOT done, chances are spoofs wont work.\n"
+       "   o class blocks (Y:) must be before anything that uses then\n"
+       "   o auth blocks (I:) have NOT been converted, please use convertilines\n"
+       "     to convert them\n"
        "   o the general/logging/modules parts will need to be edited\n"
        "   o the config file needs to be checked manually.. as this\n"
        "     doesnt have human brains ;P\n");
@@ -453,8 +450,6 @@ static void oldParseOneLine(FILE *out,char* line)
   char* user_field=(char *)NULL;
   char* passwd_field=(char *)NULL;
   char* host_field=(char *)NULL;
-  char*	spoof_field;
-  char* client_allow;
   char* port_field=(char *)NULL;
   char* class_field=(char *)NULL;
   struct ConnectPair* pair;
@@ -551,46 +546,6 @@ static void oldParseOneLine(FILE *out,char* line)
     /* We no longer have restricted connection in Hybrid 7 */
     case 'i': 
     case 'I': 
-      fprintf(out,"auth {\n");
-
-      spoof_field = (char *)NULL;
-      client_allow = (char *)NULL;
-
-      if(host_field)
-	{
-	  if( strcmp(host_field,"NOMATCH") && (*host_field != 'x'))
-	    {
-	      if( user_field && (*user_field == 'x'))
-		{
-		  client_allow = ClientFlags(out,NULL,host_field);
-		  if(client_allow)
-		    fprintf(out,"\tip=%s;\n", client_allow );
-		}
-	      else
-		spoof_field = host_field;
-	    }
-	}
-
-      if(passwd_field && *passwd_field)
-	fprintf(out,"\tpasswd=\"%s\";\n", passwd_field);	
-#if 0
-      /* This part isn't needed at all */
-      else
-	fprintf(out,"\tpasswd=\"*\";\n");	
-#endif
-
-      if(!client_allow && user_field)
-	{
-	  client_allow = ClientFlags(out,spoof_field,user_field);
-	  if(client_allow)
-	    {
-	      fprintf(out,"\tuser=\"%s\";\n", client_allow );
-	    }
-	}
-
-      if(class_field)
-	fprintf(out,"\tclass=\"%s\";\n", class_field);	
-      fprintf(out,"};\n\n");
       break;
       
     case 'K': /* Kill user line on irc.conf           */
@@ -1032,71 +987,5 @@ static void OperPrivsFromString(FILE* out, char *privs)
  	}
       privs++;
     }
-}
-
-/*
- *
- *
- */
-
-static char* ClientFlags(FILE *out, char* spoof, char *tmp)
-{
-  for(;*tmp;tmp++)
-    {
-      switch(*tmp)
-        {
-        case '=':
-	  if(spoof)
-            {
-	      fprintf(out,"\tspoof=\"%s\";\n",spoof);	  
-              fprintf(out,"\tspoof_notice=yes;\n");
-            }
-              break;
-	case '!':
-#if 0
-          /* This is gone */
-	  fprintf(out,"\tlimit_ip;\n");
-#endif
-	  break;
-        case '-':
-	  fprintf(out,"\tno_tilde=yes;\n");	  
-          break;
-        case '+':
-	  fprintf(out,"\tneed_ident=yes;\n");	  
-          break;
-        case '$':
-#if 0
-          /* This is also gone */
-	  fprintf(out,"\thave_ident;\n");	  
-#endif
-          break;
-        case '%':
-#if 0
-          /* As is this... */
-	  fprintf(out,"\tnomatch_ip;\n");	  
-#endif
-          break;
-        case '^':        /* is exempt from k/g lines */
-	  fprintf(out,"\tkline_exempt=yes;\n");	  
-          break;
-        case '&':        /* can run a bot */
-          break;
-        case '>':        /* can exceed max connects */
-	  fprintf(out,"\texceed_limit=yes;\n");	  
-          break;
-        case '<':        /* can idle */
-#if 0
-          /* So's this... */
-	  fprintf(out,"\tcan_idle=yes;\n");	  
-#endif
-          break;
-         case '_':     /* gline exempt */
-           fprintf(out, "\tgline_exempt=yes;\n");
-           break;
-        default:
-          return tmp;
-        }
-    }
-  return tmp;
 }
 

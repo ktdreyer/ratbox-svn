@@ -32,7 +32,7 @@ localstatedir	= @localstatedir@
 moduledir	= @prefix@/modules
 automoduledir	= @prefix@/modules/autoload
 
-PROGS		= viconf mkpasswd convertconf convertklines encspeed
+PROGS		= viconf mkpasswd convertconf convertilines convertklines encspeed
 
 mkpasswd_SOURCES = mkpasswd.c
 mkpasswd_OBJECTS = mkpasswd.o
@@ -44,11 +44,14 @@ convertconf_SOURCES = convertconf.c
 convertconf_OBJECTS = convertconf.o
 convertklines_SOURCES = convertklines.c
 convertklines_OBJECTS = convertklines.o
+convertilines_SOURCES = convertilines.c
+convertilines_OBJECTS = convertilines.o
 encspeed_SOURCES = encspeed.c
 encspeed_OBJECTS = encspeed.o
 
 all_OBJECTS = $(viconf_OBJECTS) $(mkpasswd_OBJECTS) $(fixklines_OBJECTS)\
-	$(convertconf_OBJECTS) $(convertklines_OBJECTS) $(encspeed_OBJECTS)
+	$(convertconf_OBJECTS) $(convertklines_OBJECTS) $(encspeed_OBJECTS)\
+	$(convertilines_OBJECTS)
 
 all: $(PROGS)
 
@@ -62,6 +65,9 @@ mkpasswd: $(mkpasswd_OBJECTS)
 viconf: $(viconf_OBJECTS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o viconf $(viconf_OBJECTS) $(IRCDLIBS)
 
+convertilines: convertilines.o
+	$(CC) $(CFLAGS) $(LDFLAGS) -o convertilines $(convertilines_OBJECTS) $(IRCDLIBS)
+
 convertklines: convertklines.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -o convertklines $(convertklines_OBJECTS) $(IRCDLIBS)
 fixklines: fixklines.o
@@ -71,7 +77,7 @@ convertconf: convertconf.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -o convertconf $(convertconf_OBJECTS) $(IRCDLIBS)
 
 clean:
-	$(RM) -f $(all_OBJECTS) convertconf encspeed fixklines viconf chkconf mkpasswd *~ core *.exe convertklines
+	$(RM) -f $(all_OBJECTS) convertconf encspeed fixklines viconf chkconf mkpasswd *~ core *.exe convertklines convertilines
 
 distclean: clean
 	$(RM) -f Makefile
