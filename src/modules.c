@@ -517,7 +517,7 @@ static int
 mo_modrestart (struct Client *cptr, struct Client *sptr, int parc, char **parv)
 
 {
-  int i, modnum;
+  int modnum;
 
   if (!IsSetOperAdmin (sptr))
   {
@@ -530,10 +530,8 @@ mo_modrestart (struct Client *cptr, struct Client *sptr, int parc, char **parv)
              me.name, parv[0]);
 
   modnum = num_mods;
-  for(i = 0; i < num_mods; )
-  {
-     unload_one_module(modlist[i]->name, 0);
-  }
+  while (num_mods)
+     unload_one_module(modlist[0]->name, 0);
 
   load_all_modules(0);
 
