@@ -120,7 +120,7 @@ extern dlink_node *find_user_link (dlink_list *, struct Client *);
 extern void    add_user_to_channel(struct Channel *chptr,
 				   struct Client *who, int flags);
 extern void    remove_user_from_channel(struct Channel *chptr,
-					struct Client *who, int perm);
+					struct Client *who);
 
 extern int     check_channel_name(const char* name);
 

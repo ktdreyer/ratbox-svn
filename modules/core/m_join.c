@@ -485,6 +485,6 @@ static void do_join_0(struct Client *client_p, struct Client *source_p)
 			   source_p->username,
 			   source_p->host,
 			   RootChan(chptr)->chname);
-      remove_user_from_channel(chptr, source_p, 0);
+      remove_user_from_channel(chptr, source_p);
     }
 }

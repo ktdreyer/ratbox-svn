@@ -55,8 +55,6 @@ options that were in config.h, to be changed with a /rehash.
   the timestamp protocol will remove the newer side's ops.  These preserved
   channels replace the old NO_CHANOPS_ON_SPLIT and NO_JOIN_ON_SPLIT options.
 
-  Channels will not be preserved if the last user parts from the channel.
-
 
 --------------
  User Changes: 
@@ -79,15 +77,6 @@ options that were in config.h, to be changed with a /rehash.
   list, the user will be notified.  More information is available in the
   modeg.txt document in this directory.
 
-- Due to the new flood control for users, the multiple message restriction has
-  been removed. (/msg nick1,nick2,nick3 message)
-
-- LINKS for non-opers uses a file, links.txt, in the etc directory.  This file
-  is automatically updated by the server every links_delay seconds.  There
-  are two reasons for doing this.  One is efficiency, the other is helping
-  to hide transient splits.  LINKS lookers are basically of no value with
-  this option set to a reasonable time.
-
 
 ------------------
  Operator Changes:
@@ -100,7 +89,13 @@ options that were in config.h, to be changed with a /rehash.
      (indicated by umode +a and admin=yes; in oper block)
 
   It also limits certain stats commands to admin only.
-  
+
+- The /notice $irc.server command has been renamed to /notice $$irc.server
+
+- The /notice #*.hostmask command has been renamed to /notice $#*.hostmask
+  This avoids any further confusion between messaging a real channel and
+  messaging a hostmask.
+
 - Remote K-Lines are supported.  These allow you to permit operators on 
   remote servers to place klines on your server.  The shared block in the
   config specifices what server to allow remote klines from, and what
@@ -152,7 +147,8 @@ options that were in config.h, to be changed with a /rehash.
 
   You may also UNRESV, and add resv's in the config.  See resv.txt for more
   details.
-  
+
+
 -----------------------
  Miscellaneous Changes:
 -----------------------
@@ -164,13 +160,15 @@ options that were in config.h, to be changed with a /rehash.
 - Encrypted server<->server links are now supported.
   See doc/cryptlinks.txt and doc/example.conf.
 
-- Server hiding is also a conf file option.  With this option enabled, only
-  opers can see what server a user is on.  TRACE are disabled for non-opers, 
-  WHO, WHOIS and WHOWAS are modified to not show the real server a user is on.
-  LINKS is modified to show a "flat" tree.  Users doing links will appear that
-  everything is linked to their current server, thus hiding the hubs.
+- Server hiding is also a conf file option.  This allows you to only show
+  a users server to opers, WHO, WHOIS and WHOWAS are modified to show 
+  NetworkName.  TRACE is disabled, LINKS can be made to show a "flat" tree,
+  giving the appearance everything is linked to the current server.  Servers
+  can also be hidden from this "flat" tree.
 
   This feature needs to be enabled network wide for it to be fully effective.
+
+  See serverhide.txt for more information.
 
 - LazyLinks are now included.  These enable a leaf server to only need
   information about channels that it's local users are on, and nicks that have
@@ -184,6 +182,9 @@ options that were in config.h, to be changed with a /rehash.
   simple command.  All of these commands are documented in opers.txt and are
   restricted to admins only.  These commands are disabled when compiled with
   static modules.
+
+  Some of these modules are defined as 'core'.  That means they cannot be 
+  unloaded, and may only be reloaded.  If the reload fails the ircd will exit.
 
 - HUB is now a runtime option.
 
@@ -207,9 +208,13 @@ options that were in config.h, to be changed with a /rehash.
 
     KNOCK          - Support KNOCK
     VCHANS         - Support Virtual Channels
-    EXCEPTS        - Support ban exceptions
-    INVEX          - Support invite exceptions
-    WALLCHOPS      - /msg @#channel will msg only ops
+    EXCEPTS        - Support ban exceptions (+e)
+    INVEX          - Support invite exceptions (+I)
+    WALLCHOPS      - /notice @#channel will notice only ops
+                     /notice %#channel will notice only halfops/ops
+		     /notice +#channel will notice only voices/halfops/ops
+
+		     privmsg is also supported.
     MODES=%i       - The number of channel modes accepted per MODE command
     MAXCHANNELS=%i - The maximum channels per user
     MAXBANS=%i     - The limit on the total number of bans, excepts and invite
@@ -223,6 +228,8 @@ options that were in config.h, to be changed with a /rehash.
     PREFIX=%s      - The allowed PRIVMSG/NOTICE channel prefixes (server based
                      /onotice, NOTICE @%#channel :message)
     CHANMODES=%s   - How channel modes are used (see supported.h for details)
+    NETWORK=%s     - The IRC network name
+    CHARSET=%s     - The character set the ircd uses for channel names
 
 - CAPAB List:
 

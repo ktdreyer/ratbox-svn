@@ -55,7 +55,7 @@ BlockHeap *channel_heap;
 BlockHeap *ban_heap;
 
 static void free_channel_list(dlink_list * list);
-static void sub1_from_channel(struct Channel *, int);
+static void sub1_from_channel(struct Channel *);
 static void destroy_channel(struct Channel *);
 
 static void delete_members(struct Channel *chptr, dlink_list * list);
@@ -170,15 +170,13 @@ add_user_to_channel(struct Channel *chptr, struct Client *who, int flags)
  * 
  * inputs       - pointer to channel to remove client from
  *              - pointer to client (who) to remove
- *              - integer: 1 - make persistant
- *                         0 - dont make persistant
  * output       - none
  * side effects - deletes an user from a channel by removing a link in the
  *                channels member chain.
  *                sets a vchan_id if the last user is just leaving
  */
 void
-remove_user_from_channel(struct Channel *chptr, struct Client *who, int perm)
+remove_user_from_channel(struct Channel *chptr, struct Client *who)
 {
   dlink_node *ptr;
   dlink_node *next_ptr;
@@ -254,7 +252,7 @@ remove_user_from_channel(struct Channel *chptr, struct Client *who, int perm)
     if (chptr->locusers > 0)
       chptr->locusers--;
   }
-  sub1_from_channel(chptr, perm);
+  sub1_from_channel(chptr);
 }
 
 /*
@@ -457,7 +455,7 @@ check_channel_name(const char *name)
 **  block, if channel became empty).
 */
 static void
-sub1_from_channel(struct Channel *chptr, int perm)
+sub1_from_channel(struct Channel *chptr)
 {
   if (--chptr->users <= 0)
   {
@@ -465,7 +463,7 @@ sub1_from_channel(struct Channel *chptr, int perm)
                                  * It should never happen but...
                                  */
     /* persistent channel */
-    if (perm == 0 || (chptr->channelts + ConfigChannel.persist_time) < CurrentTime)
+    if ((chptr->channelts + ConfigChannel.persist_time) > CurrentTime)
       destroy_channel(chptr);
   }
 }

@@ -50,7 +50,8 @@
 #define FEATURES2 "CHANTYPES=%s" \
                   " PREFIX=%s" \
 		  " CHANMODES=%s" \
-		  " NETWORK=%s"
+		  " NETWORK=%s" \
+		  " CHARSET=rfc1459"
 
 #define FEATURES2VALUES ConfigServerHide.disable_local_channels ? "#" : "#&", \
                         "(ohv)@%+", "beI,k,l,imnpsta", \
