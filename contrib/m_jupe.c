@@ -109,23 +109,26 @@ static void mo_jupe(struct Client *client_p, struct Client *source_p,
       return;
     }
     
-  sendto_wallops_flags(FLAGS_WALLOP, &me, "JUPE for %s requested by %s!%s@%s: %s",
+  sendto_wallops_flags(FLAGS_WALLOP, &me,
+                       "JUPE for %s requested by %s!%s@%s: %s",
 			 parv[1], source_p->name, source_p->username,
                          source_p->host, parv[2]);
-  sendto_ll_serv_butone(NULL, source_p, 1,
-			":%s WALLOPS :JUPE for %s requested by %s!%s@%s: %s",
-			parv[0], parv[1], source_p->name, 
-                        source_p->username, source_p->host, parv[2]);
+  sendto_server(NULL, source_p, NULL, NOCAPS, NOCAPS, LL_ICLIENT,
+                ":%s WALLOPS :JUPE for %s requested by %s!%s@%s: %s",
+                parv[0], parv[1], source_p->name, 
+                source_p->username, source_p->host, parv[2]);
   log(L_NOTICE, "JUPE for %s requested by %s!%s@%s: %s",
-                parv[1], source_p->name, source_p->username, source_p->host, parv[2]);
+                parv[1], source_p->name, source_p->username,
+                source_p->host, parv[2]);
 
   target_p= find_server(parv[1]);
 
   if(target_p)
     exit_client(client_p, target_p, &me, parv[2]);
 
-  sendto_serv_butone(&me, ":%s SERVER %s 1 :Juped: %s",
-		     me.name, parv[1], parv[2]);
+  sendto_server(NULL, NULL, NULL, NOCAPS, NOCAPS, NOFLAGS,
+                ":%s SERVER %s 1 :Juped: %s",
+                me.name, parv[1], parv[2]);
 
   sendto_realops_flags(FLAGS_ALL,
                        "Link with %s established: (JUPED) link",

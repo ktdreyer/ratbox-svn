@@ -129,22 +129,25 @@ static void mo_clearchan(struct Client *client_p, struct Client *source_p,
      sendto_wallops_flags(FLAGS_WALLOP, &me, 
               "CLEARCHAN called for [%s] by %s!%s@%s",
               parv[1], source_p->name, source_p->username, source_p->host);
-     sendto_ll_serv_butone(NULL, source_p, 1,
-            ":%s WALLOPS :CLEARCHAN called for [%s] by %s!%s@%s",
-              me.name, parv[1], source_p->name, source_p->username, source_p->host);
+     sendto_server(NULL, source_p, NULL, NOCAPS, NOCAPS, LL_ICLIENT,
+                   ":%s WALLOPS :CLEARCHAN called for [%s] by %s!%s@%s",
+                   me.name, parv[1], source_p->name, source_p->username,
+                   source_p->host);
      log(L_NOTICE, "CLEARCHAN called for [%s] by %s!%s@%s",
-                   parv[1], source_p->name, source_p->username, source_p->host);
+         parv[1], source_p->name, source_p->username, source_p->host);
     }
   else
     {
      sendto_wallops_flags(FLAGS_WALLOP, &me,
               "CLEARCHAN called for [%s %s] by %s!%s@%s",
-              parv[1], parv[2], source_p->name, source_p->username, source_p->host);
-     sendto_ll_serv_butone(NULL, source_p, 1,
-            ":%s WALLOPS :CLEARCHAN called for [%s %s] by %s!%s@%s",
-              me.name, parv[1], parv[2], source_p->name, source_p->username, source_p->host);
+              parv[1], parv[2], source_p->name, source_p->username,
+              source_p->host);
+     sendto_server(NULL, source_p, NULL, NOCAPS, NOCAPS, LL_ICLIENT,
+                   ":%s WALLOPS :CLEARCHAN called for [%s %s] by %s!%s@%s",
+                   me.name, parv[1], parv[2], source_p->name,
+                   source_p->username, source_p->host);
      log(L_NOTICE, "CLEARCHAN called for [%s %s] by %s!%s@%s",
-                   parv[1], parv[2], source_p->name, source_p->username, source_p->host);
+         parv[1], parv[2], source_p->name, source_p->username, source_p->host);
     }
 
   /* Kill all the modes we have about the channel.. making everyone a peon */  
@@ -152,12 +155,10 @@ static void mo_clearchan(struct Client *client_p, struct Client *source_p,
   
   /* SJOIN the user to give them ops, and lock the channel */
 
-  sendto_ll_channel_remote(chptr, client_p, source_p,
-      ":%s SJOIN %lu %s +ntsi :@%s",
-      me.name,
-      (unsigned long) (chptr->channelts - 1),
-      chptr->chname,
-      source_p->name);
+  sendto_server(client_p, source_p, chptr, NOCAPS, NOCAPS,
+                LL_ICLIENT, ":%s SJOIN %lu %s +ntsi :@%s",
+                me.name, (unsigned long) (chptr->channelts - 1),
+                chptr->chname, source_p->name);
   sendto_channel_local(ALL_MEMBERS, chptr, ":%s!%s@%s JOIN %s",
                        source_p->name,
                        source_p->username,
@@ -202,8 +203,9 @@ void kick_list(struct Client *client_p, struct Client *source_p, struct Channel 
       sendto_channel_local(ALL_MEMBERS, chptr,
 			   ":%s KICK %s %s :CLEARCHAN",
 			   source_p->name, chname, who->name);
-      sendto_channel_remote(chptr, &me,
-			    ":%s KICK %s %s :CLEARCHAN", source_p->name, chname, who->name);
+      sendto_server(NULL, source_p, chptr, NOCAPS, NOCAPS, LL_ICLIENT,
+                    ":%s KICK %s %s :CLEARCHAN", source_p->name,
+                    chname, who->name);
       remove_user_from_channel(chptr, who, 0);
     }
 

@@ -87,7 +87,8 @@ static void mo_opme(struct Client *client_p, struct Client *source_p,
   /* admins only */
   if (!IsSetOperAdmin(source_p))
     {
-      sendto_one(source_p, ":%s NOTICE %s :You have no A flag", me.name, parv[0]);
+      sendto_one(source_p, ":%s NOTICE %s :You have no A flag", me.name,
+                 parv[0]);
       return;
     }
 
@@ -135,56 +136,46 @@ static void mo_opme(struct Client *client_p, struct Client *source_p,
   if (!on_vchan)
     {
      sendto_wallops_flags(FLAGS_WALLOP, &me,
-              "OPME called for [%s] by %s!%s@%s",
-              parv[1], source_p->name, source_p->username, source_p->host);
-     sendto_ll_serv_butone(NULL, source_p, 1,
-            ":%s WALLOPS :OPME called for [%s] by %s!%s@%s",
-              me.name, parv[1], source_p->name, source_p->username, source_p->host);
+                          "OPME called for [%s] by %s!%s@%s",
+                          parv[1], source_p->name, source_p->username,
+                          source_p->host);
+     sendto_server(NULL, source_p, NULL, NOCAPS, NOCAPS, LL_ICLIENT,
+                   ":%s WALLOPS :OPME called for [%s] by %s!%s@%s",
+                   me.name, parv[1], source_p->name, source_p->username,
+                   source_p->host);
      log(L_NOTICE, "OPME called for [%s] by %s!%s@%s",
-                   parv[1], source_p->name, source_p->username, source_p->host);
+                   parv[1], source_p->name, source_p->username,
+                   source_p->host);
     }
   else
     {
      sendto_wallops_flags(FLAGS_WALLOP, &me,
-               "OPME called for [%s %s] by %s!%s@%s",
-               parv[1], parv[2], source_p->name, source_p->username, source_p->host);
-     sendto_ll_serv_butone(NULL, source_p, 1,
-            ":%s WALLOPS :OPME called for [%s %s] by %s!%s@%s",
-              me.name, parv[1], parv[2], source_p->name, source_p->username, source_p->host);
+                          "OPME called for [%s %s] by %s!%s@%s",
+                          parv[1], parv[2], source_p->name,
+                          source_p->username, source_p->host);
+     sendto_server(NULL, source_p, NULL, NOCAPS, NOCAPS, LL_ICLIENT,
+                   ":%s WALLOPS :OPME called for [%s %s] by %s!%s@%s",
+                   me.name, parv[1], parv[2], source_p->name,
+                   source_p->username, source_p->host);
      log(L_NOTICE, "OPME called for [%s %s] by %s!%s@%s",
-                   parv[1], parv[2], source_p->name, source_p->username, source_p->host);
+                   parv[1], parv[2], source_p->name, source_p->username,
+                   source_p->host);
     }
 
-  sendto_match_cap_servs(chptr, source_p, CAP_UID,
-				":%s PART %s",
-				ID(source_p),
-				parv[1]);
-  sendto_match_nocap_servs(chptr, source_p, CAP_UID,
-				":%s PART %s",
-				source_p->name,
-				parv[1]);
-  sendto_match_cap_servs(chptr, source_p, CAP_UID,
-				":%s SJOIN %ld %s + :@%s",
-				me.name,
-				(signed long) chptr->channelts,
-				parv[1],
-				/* XXX ID(source_p) */
-				source_p->name);
-  sendto_match_nocap_servs(chptr, source_p, CAP_UID,
-				":%s SJOIN %ld %s + :@%s",
-				me.name,
-				(signed long) chptr->channelts,
-				parv[1],
-				source_p->name);
+  sendto_server(NULL, source_p, chptr, CAP_UID, NOCAPS, NOFLAGS,
+                 ":%s PART %s", ID(source_p), parv[1]);
+  sendto_server(NULL, source_p, chptr, NOCAPS, CAP_UID, NOFLAGS,
+                ":%s PART %s", source_p->name, parv[1]);
+  sendto_server(NULL, source_p, chptr, CAP_UID, NOCAPS, NOFLAGS,
+                ":%s SJOIN %ld %s + :@%s",
+                me.name, (signed long) chptr->channelts,
+                parv[1],
+                source_p->name /* XXX ID(source_p) */ );
+  sendto_server(NULL, source_p, chptr, NOCAPS, CAP_UID, NOFLAGS,
+                ":%s SJOIN %ld %s + :@%s",
+                me.name, (signed long) chptr->channelts,
+                parv[1], source_p->name);
   sendto_channel_local(ALL_MEMBERS, chptr,
-				":%s MODE %s +o %s",
-				me.name,
-				parv[1],
-				source_p->name);
-  
-/*
-  sendto_channel_remote(chptr, source_p, ":%s MODE %s +o %s",
-					 me.name, parv[1], source_p->name);
-*/
+                       ":%s MODE %s +o %s",
+                       me.name, parv[1], source_p->name);
 }
-
