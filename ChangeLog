@@ -1,3 +1,19 @@
+leeh        2003/01/23 10:37:09 UTC	(20030123_0)
+
+  Modified files:
+    include              s_serv.h 
+    modules              m_invite.c 
+    src                  s_serv.c 
+  Log:
+  - removed the paranoid invite notices
+  
+  Revision  Changes    Path
+  7.78      +1 -2      ircd-ratbox/include/s_serv.h
+  1.56      +12 -38    ircd-ratbox/modules/m_invite.c
+  7.316     +0 -1      ircd-ratbox/src/s_serv.c
+
+
+
 leeh        2003/01/22 22:28:28 UTC	(20030122_0)
 
   Modified files:
