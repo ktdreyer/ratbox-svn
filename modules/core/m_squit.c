@@ -224,7 +224,7 @@ static struct squit_parms *find_squit(struct Client *client_p,
        else
          {
            found_squit.target_p = client_p;
-           found_squit.server_name = client_p->host;
+           found_squit.server_name = client_p->name;
          }
        
     }
