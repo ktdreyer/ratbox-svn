@@ -193,7 +193,7 @@
  * doc/ts5.txt for more information.  If your network has old servers
  * (hyb5, hyb6.0, +CSr) or hybserv you should NOT define this.
  */
-#undef TS5_ONLY
+#define TS5_ONLY
 
 /* USE_ASCII_CASEMAP
  *

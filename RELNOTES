@@ -1,5 +1,12 @@
 -- ircd-ratbox-1.0 RELNOTES 
 
+-- ircd-ratbox-1.0-rc2
+- fixed a bug with internal channel structures that could core the ircd
+- flood_exempt can now be specified via flags=...; in auth {};
+- fix a bug inherented from hyb7 that would allow a NULL nick
+
+
+-- ircd-ratbox-1.0-rc1
 o) Temp dline support has been added.
 o) Temp klines and dlines are now maxed at 4weeks, due to an improved
    system of storing them.
