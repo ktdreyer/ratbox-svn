@@ -1,3 +1,8 @@
+*** 20010210_3 by db
+- the hash table better be cleared as well
+
+
+
 *** 20010210_2 by db
 - This should fix the pesky asserts once and for all.
   Remember the client struct hasnt' been freed yet, so its cool here.
