@@ -308,6 +308,7 @@ static void who_global(struct Client *sptr,char *mask, int oper)
       for (lp = acptr->user->channel.head; lp; lp = lp->next)
         {
           chptr = lp->data;
+	  chname = chptr->chname;
           member = IsMember(sptr, chptr);
           if (isinvis && !member)
             continue;
@@ -321,30 +322,32 @@ static void who_global(struct Client *sptr,char *mask, int oper)
             showperson = YES;
         }
 
-      if (!acptr->user->channel.head && !isinvis)
-        showperson = YES;
+      if (chptr != NULL)
+	{
+	  if (!acptr->user->channel.head && !isinvis)
+	    showperson = YES;
 
-      if (showperson &&
-          (!mask ||
-           match(mask, acptr->name) ||
-           match(mask, acptr->username) ||
-           match(mask, acptr->host) ||
-           match(mask, acptr->user->server) ||
-           match(mask, acptr->info)))
-        {
-	  if (IsVchan(chptr))
+	  if (showperson &&
+	      (!mask ||
+	       match(mask, acptr->name) ||
+	       match(mask, acptr->username) ||
+	       match(mask, acptr->host) ||
+	       match(mask, acptr->user->server) ||
+	       match(mask, acptr->info)))
 	    {
-	      bchan = find_bchan (chptr);
-	      if (bchan != NULL)
-		chname = bchan->chname;
-	    }
+	      if (IsVchan(chptr))
+		{
+		  bchan = find_bchan (chptr);
+		  if (bchan != NULL)
+		    chname = bchan->chname;
+		}
 
-	  do_who_list(sptr, chptr, &chptr->chanops, chname, "@");
-	  do_who_list(sptr, chptr, &chptr->halfops, chname, "%");
-	  do_who_list(sptr, chptr, &chptr->voiced,  chname, "+");
-	  do_who_list(sptr, chptr, &chptr->peons,   chname, "");
+	      do_who_list(sptr, chptr, &chptr->chanops, chname, "@");
+	      do_who_list(sptr, chptr, &chptr->halfops, chname, "%");
+	      do_who_list(sptr, chptr, &chptr->voiced,  chname, "+");
+	      do_who_list(sptr, chptr, &chptr->peons,   chname, "");
+	    }
 	}
-      chname = chptr->chname;
 
       if (maxmatches > 0)
 	{
