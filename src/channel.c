@@ -1096,9 +1096,6 @@ void set_channel_mode(struct Client *cptr,
   char  modebuf_ex[MODEBUFLEN] = "";
   char  parabuf_ex[MODEBUFLEN] = "";
   
-  char  modebuf_de[MODEBUFLEN] = "";
-  char  parabuf_de[MODEBUFLEN] = "";
-  
   char  modebuf_invex[MODEBUFLEN] = "";
   char  parabuf_invex[MODEBUFLEN] = "";
   
@@ -1114,9 +1111,6 @@ void set_channel_mode(struct Client *cptr,
   
   char  *mbufw_ex = modebuf_ex;
   char  *pbufw_ex = parabuf_ex;
-  
-  char  *mbufw_de = modebuf_de;
-  char  *pbufw_de = parabuf_de;
   
   char  *mbufw_invex = modebuf_invex;
   char  *pbufw_invex = parabuf_invex;
@@ -2200,13 +2194,12 @@ void set_channel_mode(struct Client *cptr,
   */
 
   *mbufw = *mbuf2w = *pbufw = *pbuf2w = *mbufw_ex = *pbufw_ex = 
-  *mbufw_de = *pbufw_de = *mbufw_invex = *pbufw_invex = 
+  *mbufw_invex = *pbufw_invex = 
   *mbufw_hops = *pbufw_hops = *pbufw_id = *pbufw_hops_id = *pbuf2w_id = '\0';
 
   collapse_signs(modebuf);
   collapse_signs(modebuf2);
   collapse_signs(modebuf_ex);
-  collapse_signs(modebuf_de);
   collapse_signs(modebuf_invex);
   collapse_signs(modebuf_hops);
   /* modebuf_aops only ever holds one mode */
@@ -2328,51 +2321,6 @@ void set_channel_mode(struct Client *cptr,
 			     HasID(sptr) ? sptr->user->id : sptr->name,
 			     chptr->chname,
 			     modebuf_ex, parabuf_ex);
-    }
-
-  /*
-   * mode +d, seen by everyone.
-   * Only send remotely to servers with DE
-   * On +a channels pretend to nonops that it's a server mode.
-   */
-  if(*modebuf_de)
-    {
-      if(IsServer(sptr))
-	sendto_channel_local(type,
-			     chptr,
-			     ":%s MODE %s %s %s",
-			     me.name,
-			     chname,
-			     modebuf_de, parabuf_de);
-      else
-      {
-        sendto_channel_local(type,
-                             chptr,
-                             ":%s!%s@%s MODE %s %s %s",
-                             sptr->name,
-                             sptr->username,
-                             sptr->host,
-                             chname,
-                             modebuf_de, parabuf_de);
-        if(chptr->mode.mode & MODE_HIDEOPS)
-          sendto_channel_local(NON_CHANOPS,
-                               chptr,
-                               ":%s MODE %s %s %s",
-                               me.name,
-                               chname,
-                               modebuf_de, parabuf_de);
-      }
-
-      sendto_match_cap_servs_nocap(chptr, cptr, CAP_DE, CAP_UID,
-				   ":%s MODE %s %s %s",
-				   sptr->name, chptr->chname,
-				   modebuf_de, parabuf_de);
-	  
-      sendto_match_cap_servs(chptr, cptr, CAP_DE | CAP_UID,
-			     ":%s MODE %s %s %s",
-                             HasID(sptr) ? sptr->user->id : sptr->name,
-			     chptr->chname,
-                             modebuf_de, parabuf_de);
     }
 
   /*
