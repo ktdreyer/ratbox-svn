@@ -291,7 +291,7 @@ struct ip_subtree *destroy_ip_subtree(struct ip_subtree *head)
  */
 struct ConfItem* find_exception(unsigned long ip)
 {
-  struct ConfItem* scan=leftover;
+  struct ConfItem* scan;
   
   for (scan = leftover; scan; scan = scan->next) {
     if (scan->ip == (ip & scan->ip_mask))
