@@ -1,3 +1,23 @@
+androsyn    2003/02/08 07:09:03 UTC	(20030208_2)
+
+  Modified files:
+    include              modules.h 
+    modules              .cvsignore Makefile.in 
+    src                  modules.c 
+  Added files:
+    modules              static_modules.c.SH 
+  Log:
+  This is a better way of dealing with static modules.
+  
+  Revision  Changes    Path
+  7.47      +3 -81     ircd-ratbox/include/modules.h
+  1.4       +1 -0      ircd-ratbox/modules/.cvsignore
+  1.78      +5 -2      ircd-ratbox/modules/Makefile.in
+  1.1       +106 -0    ircd-ratbox/modules/static_modules.c.SH (new)
+  7.124     +1 -69     ircd-ratbox/src/modules.c
+
+
+
 androsyn    2003/02/08 04:44:43 UTC	(20030208_1)
 
   Modified files:
