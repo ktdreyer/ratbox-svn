@@ -1,3 +1,16 @@
+leeh        2004/03/29 19:35:28 EST	(20040330_1)
+
+  Modified files:
+    src                  devpoll.c s_log.c 
+  Log:
+  - ilog() adds its own \n, so callers dont need to add their own..
+  
+  Revision  Changes    Path
+  7.32      +5 -5      ircd-ratbox/src/devpoll.c
+  7.66      +1 -1      ircd-ratbox/src/s_log.c
+
+
+
 leeh        2004/03/29 19:24:32 EST	(20040330_0)
 
   Modified files:
