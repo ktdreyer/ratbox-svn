@@ -637,8 +637,8 @@ linebuf_flush(int fd, buf_head_t *bufhead)
     }
 
   /* Now, try writing data */
-  retval = write(fd, bufline->buf + bufhead->writeofs, bufline->len
-		 - bufhead->writeofs);
+  retval = send(fd, bufline->buf + bufhead->writeofs, bufline->len
+		 - bufhead->writeofs, 0);
    
   /* Deal with return code */
   if (retval < 0)
