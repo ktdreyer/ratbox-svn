@@ -1,3 +1,9 @@
+*** 20001210_9 by db
+- updated docs in send.txt
+- fixed parser as per walter campbells patch
+
+
+
 *** 20001210_8 by db
 - cleaned up m_gline.c, STILL untested.
 - removed unnecessary lines in ircd_parser.y due to removed botcheck
