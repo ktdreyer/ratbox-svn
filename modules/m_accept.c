@@ -24,6 +24,7 @@
  */
 #include "handlers.h"
 #include "client.h"
+#include "hash.h"       /* for find_client() */
 #include "ircd.h"
 #include "list.h"
 #include "numeric.h"

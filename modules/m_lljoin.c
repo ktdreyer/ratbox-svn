@@ -23,6 +23,7 @@
 #include "channel.h"
 #include "vchannel.h"
 #include "client.h"
+#include "hash.h"       /* for find_client() */
 #include "common.h"
 #include "hash.h"
 #include "irc_string.h"
@@ -133,7 +134,7 @@ static void ms_lljoin(struct Client *client_p,
 
   flags = 0;
 
-  target_p = hash_find_client(nick,(struct Client *)NULL);
+  target_p = find_client(nick,(struct Client *)NULL);
 
   if( !target_p || !target_p->user )
     return;

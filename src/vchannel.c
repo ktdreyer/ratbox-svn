@@ -446,7 +446,7 @@ find_vchan(struct Channel *chptr, char *key)
 
   key++;                        /* go past the '!' */
 
-  if ((target_p = hash_find_client(key, (struct Client *)NULL)))
+  if ((target_p = find_client(key, (struct Client *)NULL)))
     if ((chtmp = map_vchan(chptr, target_p)))
       return chtmp;
 

@@ -30,6 +30,7 @@
 #include "common.h"   /* bleah */
 #include "handlers.h"
 #include "client.h"
+#include "hash.h"       /* for find_client() */
 #include "common.h"   /* bleah */
 #include "channel.h"
 #include "vchannel.h"
@@ -192,7 +193,7 @@ static int do_whois(struct Client *client_p, struct Client *source_p,
 
   if(!wilds)
     {
-      if( (target_p = hash_find_client(nick,(struct Client *)NULL)) )
+      if( (target_p = find_client(nick,(struct Client *)NULL)) )
 	{
 	  /* im being asked to reply to a client that isnt mine..
 	   * I cant answer authoritively, so better make it non-detailed

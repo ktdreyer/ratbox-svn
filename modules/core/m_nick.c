@@ -7,6 +7,7 @@
 
 #include "handlers.h"
 #include "client.h"
+#include "hash.h"       /* for find_client() */
 #include "fdlist.h"
 #include "irc_string.h"
 #include "ircd.h"

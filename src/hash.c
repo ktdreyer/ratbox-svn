@@ -482,33 +482,37 @@ void del_from_resv_hash_table(const char *name, struct ResvChannel *rptr)
 struct Client *
 hash_find_id(const char *name, struct Client *client_p)
 {
-	struct Client *tmp;
-	unsigned int   hashv;
+  struct Client *tmp;
+  unsigned int   hashv;
 	
-	if (name == NULL)
-		return NULL;
+  if (name == NULL)
+    return NULL;
 
-	hashv = hash_id(name);
-	tmp = (struct Client *)idTable[hashv].list;
+  hashv = hash_id(name);
+  tmp = (struct Client *)idTable[hashv].list;
 
-	/*
-	 * Got the bucket, now search the chain.
-	 */
-	for (; tmp; tmp = tmp->idhnext) {
-		if (tmp->user && strcmp(name, tmp->user->id) == 0)
-		{
-			return(tmp);
-		}
-	}
+  /*
+   * Got the bucket, now search the chain.
+   */
+  for (; tmp; tmp = tmp->idhnext) {
+    if (tmp->user && strcmp(name, tmp->user->id) == 0)
+      {
+	return(tmp);
+      }
+  }
 	
-	return (client_p);
+  return (client_p);
 }
 
 
 /*
- * hash_find_client
+ * find_client
+ *
+ * inputs	- name of either server or client
+ * output	- pointer to client pointer
+ * side effects	- none
  */
-struct Client* hash_find_client(const char* name, struct Client* client_p)
+struct Client* find_client(const char* name, struct Client* client_p)
 {
   struct Client* tmp;
   unsigned int   hashv;
@@ -581,7 +585,7 @@ static struct Client* hash_find_masked_server(const char* name)
        * Dont need to check IsServer() here since nicknames cant
        * have *'s in them anyway.
        */
-      if ((server = hash_find_client(s, 0)))
+      if ((server = find_client(s, 0)))
         return server;
       p = s + 2;
     }
