@@ -1,3 +1,8 @@
+*** 20010718_7 by androsyn
+Sorta fixed the warnings in rsa.c.  We need to figure out why we can't include
+pem.h.
+
+
 *** 20010718_6 by androsyn
 Fixed compile warning on 64bit platforms
 
