@@ -70,14 +70,11 @@ mo_die(struct Client *client_p __unused, struct Client *source_p, int parc, cons
 			   me.name, source_p->name, me.name);
 		return 0;
 	}
-	else
+	else if(irccmp(parv[1], me.name))
 	{
-		if(irccmp(parv[1], me.name))
-		{
-			sendto_one(source_p, ":%s NOTICE %s :Mismatch on /die %s",
-				   me.name, source_p->name, me.name);
-			return 0;
-		}
+		sendto_one(source_p, ":%s NOTICE %s :Mismatch on /die %s",
+			   me.name, source_p->name, me.name);
+		return 0;
 	}
 
 	DLINK_FOREACH(ptr, lclient_list.head)

@@ -43,7 +43,7 @@ static int mo_restart(struct Client *, struct Client *, int, const char **);
 
 struct Message restart_msgtab = {
 	"RESTART", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, {mo_restart, 2}}
+	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, {mo_restart, 0}}
 };
 
 mapi_clist_av1 restart_clist[] = { &restart_msgtab, NULL };
@@ -66,7 +66,13 @@ mo_restart(struct Client *client_p, struct Client *source_p, int parc, const cha
 		return 0;
 	}
 
-	if(irccmp(parv[1], me.name))
+	if(parc < 2 || EmptyString(parv[1]))
+	{
+		sendto_one(source_p, ":%s NOTICE %s :Need server name /restart %s",
+			   me.name, source_p->name, me.name);
+		return 0;
+	}
+	else if(irccmp(parv[1], me.name))
 	{
 		sendto_one(source_p, ":%s NOTICE %s :Mismatch on /restart %s",
 			   me.name, source_p->name, me.name);

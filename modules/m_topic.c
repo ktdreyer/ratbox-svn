@@ -71,7 +71,7 @@ m_topic(struct Client *client_p, struct Client *source_p, int parc, const char *
 	if(MyClient(source_p) && !IsFloodDone(source_p))
 		flood_endgrace(source_p);
 
-	if(EmptyString(parv[1]) || !IsChannelName(parv[1]))
+	if(!IsChannelName(parv[1]))
 	{
 		sendto_one_numeric(source_p, ERR_NOSUCHCHANNEL,
 				   form_str(ERR_NOSUCHCHANNEL), parv[1]);
