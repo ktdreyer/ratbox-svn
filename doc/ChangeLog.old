@@ -1,3 +1,7 @@
+*** 20001225_20 by wcampbel
+Updated dependencies
+
+
 *** 20001225_19 by ejb
 - fix knock paramcount
 - make knock use +p to stop it, not +s
