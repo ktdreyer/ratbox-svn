@@ -698,7 +698,7 @@ find_or_add_ip(struct irc_inaddr *ip_in)
     return(ptr);
    }
   }
-  if ( (ptr = ip_hash_table[hash_index]) != (IP_ENTRY *)NULL )
+  if ((ptr = ip_hash_table[hash_index]) != (IP_ENTRY *)NULL)
     {
       if( free_ip_entries == (IP_ENTRY *)NULL)
 	outofmemory();
@@ -713,7 +713,7 @@ find_or_add_ip(struct irc_inaddr *ip_in)
       return(newptr);
     }
 
-  if( free_ip_entries == (IP_ENTRY *)NULL)
+  if (free_ip_entries == (IP_ENTRY *)NULL)
     outofmemory();
 
   ptr = ip_hash_table[hash_index] = free_ip_entries;
@@ -817,7 +817,7 @@ count_ip_hash(int *number_ips_stored,u_long *mem_ips_stored)
   *number_ips_stored = 0;
   *mem_ips_stored = 0;
 
-  for(i = 0; i < IP_HASH_SIZE ;i++)
+  for (i = 0; i < IP_HASH_SIZE ;i++)
     {
       ip_hash_ptr = ip_hash_table[i];
       while(ip_hash_ptr)
@@ -834,9 +834,9 @@ count_ip_hash(int *number_ips_stored,u_long *mem_ips_stored)
 /*
  * iphash_stats()
  *
- * inputs        - 
- * output        -
- * side effects        -
+ * input	- 
+ * output	-
+ * side effects	-
  */
 void 
 iphash_stats(struct Client *client_p, struct Client *source_p,
@@ -900,7 +900,7 @@ detach_conf(struct Client* client_p,struct ConfItem* aconf)
   if(aconf == NULL)
     return -1;
 
-  for( ptr = client_p->localClient->confs.head; ptr; ptr = ptr->next )
+  for(ptr = client_p->localClient->confs.head; ptr; ptr = ptr->next)
     {
       if (ptr->data == aconf)
         {
@@ -974,7 +974,7 @@ attach_conf(struct Client *client_p,struct ConfItem *aconf)
       return(NOT_AUTHORIZED);
     }
 
-  if ( (aconf->status & CONF_OPERATOR) == 0 )
+  if ((aconf->status & CONF_OPERATOR) == 0)
     {
       if ((aconf->status & CONF_CLIENT) &&
           ConfLinks(aconf) >= ConfMaxLinks(aconf) && ConfMaxLinks(aconf) > 0)
@@ -1241,7 +1241,7 @@ find_u_conf(char *server,char *user,char *host)
       if (BadPtr(aconf->name))
           continue;
 
-      if(match(aconf->name,server))
+      if (match(aconf->name,server))
 	{
 	  if (BadPtr(aconf->user) || BadPtr(aconf->host))
 	    return YES;
@@ -1283,9 +1283,10 @@ clear_special_conf(struct ConfItem **this_conf)
  * as a result of an operator issuing this command, else assume it has been
  * called as a result of the server receiving a HUP signal.
  */
-int rehash(int sig)
+int
+rehash(int sig)
 {
-  if (sig)
+  if (sig != 0)
     {
       sendto_realops_flags(FLAGS_ALL, L_ALL,
 			   "Got signal SIGHUP, reloading ircd conf. file");
@@ -1591,7 +1592,12 @@ lookup_confhost(struct ConfItem* aconf)
 }
 
 /*
- * conf_connect_allowed (untested)
+ * conf_connect_allowed
+ *
+ * inputs	- pointer to inaddr
+ *		- int type ipv4 or ipv6
+ * output	- BANNED or accepted
+ * side effects	- none
  */
 int 
 conf_connect_allowed(struct irc_inaddr *addr, int aftype)
@@ -1726,7 +1732,7 @@ oper_privs_as_string(struct Client *client_p,int port)
   privs_ptr = privs_out;
   *privs_ptr = '\0';
 
-  if(port & CONF_OPER_GLINE)
+  if (port & CONF_OPER_GLINE)
     {
       if(client_p)
         SetOperGline(client_p);
@@ -2348,7 +2354,7 @@ conf_add_server(struct ConfItem *aconf, int lcount)
       return -1;
     }
           
-  if( SplitUserHost(aconf) < 0 )
+  if (SplitUserHost(aconf) < 0)
     {
       sendto_realops_flags(FLAGS_ALL, L_ALL,"Bad connect block, name %s",
 			   aconf->name);
@@ -2441,15 +2447,15 @@ conf_add_fields(struct ConfItem *aconf,
 		char *port_field,
 		char *class_field)
 {
-  if(host_field)
+  if (host_field != NULL)
     DupString(aconf->host, host_field);
-  if(pass_field)
+  if (pass_field != NULL)
     DupString(aconf->passwd, pass_field);
-  if(user_field)
+  if (user_field != NULL)
     DupString(aconf->user, user_field);
-  if(port_field)
+  if (port_field != NULL)
     aconf->port = atoi(port_field);
-  if(class_field)
+  if (class_field != NULL)
     DupString(aconf->className, class_field);
 }
 
