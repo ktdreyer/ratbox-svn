@@ -130,6 +130,8 @@ static void stats_servlinks(struct Client *);
 static void stats_ltrace(struct Client *, int, char**);
 static void stats_ziplinks(struct Client *);
 
+static void report_tklines(struct Client *, dlink_list *);
+
 /* This table contains the possible stats items, in order:
  * /stats name,  function to call, operonly? adminonly? /stats letter
  * case only matters in the stats letter column.. -- fl_ */
@@ -532,9 +534,37 @@ static void stats_tklines(struct Client *source_p)
   }
   /* Theyre opered, or allowed to see all klines */
   else
-    report_Klines(source_p, 1);
+  {
+    report_tklines(source_p, &temporary_min);
+    report_tklines(source_p, &temporary_hour);
+    report_tklines(source_p, &temporary_day);
+    report_tklines(source_p, &temporary_week);
+  }
 }
 
+static void
+report_tklines(struct Client *source_p, dlink_list *tkline_list)
+{
+  struct ConfItem *aconf;
+  dlink_node *ptr;
+  char *name;
+  char *host;
+  char *pass;
+  char *user;
+  char *classname;
+  int port;
+
+  DLINK_FOREACH(ptr, tkline_list->head)
+  {
+    aconf = ptr->data;
+
+    get_printable_conf(aconf, &name, &host, &pass, &user, &port,
+                       &classname);
+
+    sendto_one(source_p, form_str(RPL_STATSKLINE), me.name, source_p->name,
+               'k', host, user, pass);
+  }
+}
 
 static void stats_klines(struct Client *source_p)
 {
