@@ -1,3 +1,8 @@
+*** 20001227_26 by db
+- fixed bug stumbled across by mariab, how did this one get missed?
+
+
+
 *** 20001227_25 by ejb
 - check for socklen_t
 
