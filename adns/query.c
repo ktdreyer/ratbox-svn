@@ -280,7 +280,7 @@ int adns_submit_reverse_ip6(adns_state ads,
   cp = (const unsigned char *)&(((const struct sockaddr_in6*)addr) -> sin6_addr.s6_addr);
 	lreq = 71 + strlen(zone) + 1;
   if (lreq > sizeof(shortbuf)) {
-    buf= MyMalloc(strlen(zone) + 4*4 + 1);
+    buf= MyMalloc(strlen(zone) + 4*16 + 1);
 #if 0
     if (!buf) return errno;
 #endif
