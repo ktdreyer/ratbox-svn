@@ -53,7 +53,7 @@ struct Message topic_msgtab = {
 
 #ifndef STATIC_MODULES
 mapi_clist_av1 topic_clist[] = { &topic_msgtab, NULL };
-DECLARE_MODULE_AV1(NULL, NULL, topic_clist, NULL, "$Revision$");
+DECLARE_MODULE_AV1(NULL, NULL, topic_clist, NULL, NULL, "$Revision$");
 #endif
 
 /*

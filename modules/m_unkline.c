@@ -56,7 +56,7 @@ struct Message unkline_msgtab = {
 
 #ifndef STATIC_MODULES
 mapi_clist_av1 unkline_clist[] = { &unkline_msgtab, NULL };
-DECLARE_MODULE_AV1(NULL, NULL, unkline_clist, NULL, "$Revision$");
+DECLARE_MODULE_AV1(NULL, NULL, unkline_clist, NULL, NULL, "$Revision$");
 #endif
 
 static void remove_permkline_match(struct Client *, char *, char *, int);

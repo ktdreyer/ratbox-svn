@@ -50,7 +50,7 @@ struct Message locops_msgtab = {
 
 #ifndef STATIC_MODULES
 mapi_clist_av1 locops_clist[] = { &locops_msgtab, NULL };
-DECLARE_MODULE_AV1(NULL, NULL, locops_clist, NULL, "$Revision$");
+DECLARE_MODULE_AV1(NULL, NULL, locops_clist, NULL, NULL, "$Revision$");
 #endif
 
 /*

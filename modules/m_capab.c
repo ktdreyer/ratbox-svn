@@ -42,7 +42,7 @@ struct Message capab_msgtab = {
 };
 #ifndef STATIC_MODULES
 mapi_clist_av1 capab_clist[] = { &capab_msgtab, NULL };
-DECLARE_MODULE_AV1(NULL, NULL, capab_clist, NULL, "$Revision$");
+DECLARE_MODULE_AV1(NULL, NULL, capab_clist, NULL, NULL, "$Revision$");
 #endif
 
 /*

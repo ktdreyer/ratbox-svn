@@ -65,7 +65,7 @@
 #ifndef HAVE_LIBCRYPTO
 
 #ifndef STATIC_MODULES
-DECLARE_MODULE(NULL, NULL, NULL, NULL, "$Revision$");
+DECLARE_MODULE(NULL, NULL, NULL, NULL, NULL, "$Revision$");
 #endif
 #else
 
@@ -98,7 +98,7 @@ static struct CryptLinkStruct cryptlink_cmd_table[] = {
 
 #ifndef STATIC_MODULES
 mapi_clist_av1 cryptlink_clist[] = { &cryptlink_msgtab, NULL };
-DECLARE_MODULE_AV1(NULL, NULL, cryptlink_clist, NULL, "$Revision$");
+DECLARE_MODULE_AV1(NULL, NULL, cryptlink_clist, NULL, NULL, "$Revision$");
 #endif
 
 

@@ -50,7 +50,7 @@ struct Message version_msgtab = {
 
 #ifndef STATIC_MODULES
 mapi_clist_av1 version_clist[] = { &version_msgtab, NULL };
-DECLARE_MODULE_AV1(NULL, NULL, version_clist, NULL, "$Revision$");
+DECLARE_MODULE_AV1(NULL, NULL, version_clist, NULL, NULL, "$Revision$");
 #endif
 
 /*

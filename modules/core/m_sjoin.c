@@ -53,7 +53,7 @@ struct Message sjoin_msgtab = {
 
 #ifndef STATIC_MODULES
 mapi_clist_av1 sjoin_clist[] = { &sjoin_msgtab, NULL };
-DECLARE_MODULE_AV1(NULL, NULL, sjoin_clist, NULL, "$Revision$");
+DECLARE_MODULE_AV1(NULL, NULL, sjoin_clist, NULL, NULL, "$Revision$");
 #endif
 
 /*

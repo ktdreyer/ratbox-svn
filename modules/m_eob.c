@@ -45,7 +45,7 @@ struct Message eob_msgtab = {
 };
 #ifndef STATIC_MODULES
 mapi_clist_av1 eob_clist[] = { &eob_msgtab, NULL };
-DECLARE_MODULE_AV1(NULL, NULL, eob_clist, NULL, "$Revision$");
+DECLARE_MODULE_AV1(NULL, NULL, eob_clist, NULL, NULL, "$Revision$");
 #endif
 
 /*

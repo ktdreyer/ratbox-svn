@@ -44,7 +44,7 @@ struct Message pass_msgtab = {
 
 #ifndef STATIC_MODULES
 mapi_clist_av1 pass_clist[] = { &pass_msgtab, NULL };
-DECLARE_MODULE_AV1(NULL, NULL, pass_clist, NULL, "$Revision$");
+DECLARE_MODULE_AV1(NULL, NULL, pass_clist, NULL, NULL, "$Revision$");
 #endif
 
 /*

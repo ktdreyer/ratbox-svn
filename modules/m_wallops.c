@@ -47,7 +47,7 @@ struct Message wallops_msgtab = {
 
 #ifndef STATIC_MODULES
 mapi_clist_av1 wallops_clist[] = { &wallops_msgtab, NULL };
-DECLARE_MODULE_AV1(NULL, NULL, wallops_clist, NULL, "$Revision$");
+DECLARE_MODULE_AV1(NULL, NULL, wallops_clist, NULL, NULL, "$Revision$");
 #endif
 
 /*

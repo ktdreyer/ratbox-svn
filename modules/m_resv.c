@@ -57,7 +57,7 @@ struct Message unresv_msgtab = {
 mapi_clist_av1 resv_clist[] = {
 	&resv_msgtab, &unresv_msgtab, NULL
 };
-DECLARE_MODULE_AV1(NULL, NULL, resv_clist, NULL, "$Revision$");
+DECLARE_MODULE_AV1(NULL, NULL, resv_clist, NULL, NULL, "$Revision$");
 #endif
 
 /*

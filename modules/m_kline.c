@@ -60,7 +60,7 @@ struct Message kline_msgtab = {
 
 #ifndef STATIC_MODULES
 mapi_clist_av1 kline_clist[] = { &kline_msgtab, NULL };
-DECLARE_MODULE_AV1(NULL, NULL, kline_clist, NULL, "$Revision$");
+DECLARE_MODULE_AV1(NULL, NULL, kline_clist, NULL, NULL, "$Revision$");
 #endif
 
 /* Local function prototypes */

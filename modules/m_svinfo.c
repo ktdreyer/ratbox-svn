@@ -47,7 +47,7 @@ struct Message svinfo_msgtab = {
 
 #ifndef STATIC_MODULES
 mapi_clist_av1 svinfo_clist[] = { &svinfo_msgtab, NULL };
-DECLARE_MODULE_AV1(NULL, NULL, svinfo_clist, NULL, "$Revision$");
+DECLARE_MODULE_AV1(NULL, NULL, svinfo_clist, NULL, NULL, "$Revision$");
 #endif
 
 /*

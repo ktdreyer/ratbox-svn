@@ -51,7 +51,7 @@ struct Message who_msgtab = {
 
 #ifndef STATIC_MODULES
 mapi_clist_av1 who_clist[] = { &who_msgtab, NULL };
-DECLARE_MODULE_AV1(NULL, NULL, who_clist, NULL, "$Revision$");
+DECLARE_MODULE_AV1(NULL, NULL, who_clist, NULL, NULL, "$Revision$");
 #endif
 
 static void do_who_on_channel(struct Client *source_p,

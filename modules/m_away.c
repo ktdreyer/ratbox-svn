@@ -48,7 +48,7 @@ struct Message away_msgtab = {
 
 #ifndef STATIC_MODULES
 mapi_clist_av1 away_clist[] = { &away_msgtab, NULL };
-DECLARE_MODULE_AV1(NULL, NULL, away_clist, NULL, "$Revision$");
+DECLARE_MODULE_AV1(NULL, NULL, away_clist, NULL, NULL, "$Revision$");
 #endif
 
 /***********************************************************************

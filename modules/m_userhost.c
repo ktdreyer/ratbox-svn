@@ -49,7 +49,7 @@ struct Message userhost_msgtab = {
 
 #ifndef STATIC_MODULES
 mapi_clist_av1 userhost_clist[] = { &userhost_msgtab, NULL };
-DECLARE_MODULE_AV1(NULL, NULL, userhost_clist, NULL, "$Revision$");
+DECLARE_MODULE_AV1(NULL, NULL, userhost_clist, NULL, NULL, "$Revision$");
 #endif
 
 /*

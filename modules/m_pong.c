@@ -51,7 +51,7 @@ struct Message pong_msgtab = {
 
 #ifndef STATIC_MODULES
 mapi_clist_av1 pong_clist[] = { &pong_msgtab, NULL };
-DECLARE_MODULE_AV1(NULL, NULL, pong_clist, NULL, "$Revision$");
+DECLARE_MODULE_AV1(NULL, NULL, pong_clist, NULL, NULL, "$Revision$");
 #endif
 
 static void

@@ -53,7 +53,7 @@ int	challenge_load
 	return -1;
 }
 
-DECLARE_MODULE_AV1(challenge_load, NULL, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV1(challenge_load, NULL, NULL, NULL, NULL, "$Revision$");
 #endif
 #else
 
@@ -68,7 +68,7 @@ struct Message challenge_msgtab = {
 
 #ifndef STATIC_MODULES
 mapi_clist_av1 challenge_clist[] = { &challenge_msgtab, NULL };
-DECLARE_MODULE_AV1(NULL, NULL, challenge_clist, NULL, "$Revision$");
+DECLARE_MODULE_AV1(NULL, NULL, challenge_clist, NULL, NULL, "$Revision$");
 #endif
 
 /*

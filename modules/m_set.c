@@ -56,7 +56,7 @@ struct Message set_msgtab = {
 
 #ifndef STATIC_MODULES
 mapi_clist_av1 set_clist[] = { &set_msgtab, NULL };
-DECLARE_MODULE_AV1(NULL, NULL, set_clist, NULL, "$Revision$");
+DECLARE_MODULE_AV1(NULL, NULL, set_clist, NULL, NULL, "$Revision$");
 #endif
 
 /* Structure used for the SET table itself */

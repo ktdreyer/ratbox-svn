@@ -56,7 +56,7 @@ struct Message list_msgtab = {
 
 #ifndef STATIC_MODULES
 mapi_clist_av1 list_clist[] = { &list_msgtab, NULL };
-DECLARE_MODULE_AV1(NULL, NULL, list_clist, NULL, "$Revision$");
+DECLARE_MODULE_AV1(NULL, NULL, list_clist, NULL, NULL, "$Revision$");
 #endif
 
 static int list_all_channels(struct Client *source_p);

@@ -58,7 +58,7 @@ mapi_hlist_av1 admin_hlist[] = {
 	{ NULL }
 };
 
-DECLARE_MODULE_AV1(NULL, NULL, admin_clist, admin_hlist, "$Revision$");
+DECLARE_MODULE_AV1(NULL, NULL, admin_clist, admin_hlist, NULL, "$Revision$");
 #endif
 
 /*

@@ -70,7 +70,7 @@ struct Message unxline_msgtab = {
 mapi_clist_av1 xline_clist[] =  {
 	&xline_msgtab, &unxline_msgtab, NULL
 };
-DECLARE_MODULE_AV1(NULL, NULL, xline_clist, NULL, "$Revision$");
+DECLARE_MODULE_AV1(NULL, NULL, xline_clist, NULL, NULL, "$Revision$");
 #endif
 
 /* m_xline()

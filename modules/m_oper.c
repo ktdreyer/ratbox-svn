@@ -61,7 +61,7 @@ struct Message oper_msgtab = {
 
 #ifndef STATIC_MODULES
 mapi_clist_av1 oper_clist[] = { &oper_msgtab, NULL };
-DECLARE_MODULE_AV1(NULL, NULL, oper_clist, NULL, "$Revision$");
+DECLARE_MODULE_AV1(NULL, NULL, oper_clist, NULL, NULL, "$Revision$");
 #endif
 
 /*

@@ -49,7 +49,7 @@ struct Message user_msgtab = {
 
 #ifndef STATIC_MODULES
 mapi_clist_av1 user_clist[] = { &user_msgtab, NULL };
-DECLARE_MODULE_AV1(NULL, NULL, user_clist, NULL, "$Revision$");
+DECLARE_MODULE_AV1(NULL, NULL, user_clist, NULL, NULL, "$Revision$");
 #endif
 
 /*

@@ -47,7 +47,7 @@ struct Message lusers_msgtab = {
 
 #ifndef STATIC_MODULES
 mapi_clist_av1 lusers_clist[] = { &lusers_msgtab, NULL };
-DECLARE_MODULE_AV1(NULL, NULL, lusers_clist, NULL, "$Revision$");
+DECLARE_MODULE_AV1(NULL, NULL, lusers_clist, NULL, NULL, "$Revision$");
 #endif
 
 /*

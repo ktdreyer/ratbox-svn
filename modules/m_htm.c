@@ -47,7 +47,7 @@ struct Message htm_msgtab = {
 };
 #ifndef STATIC_MODULES
 mapi_clist_av1 htm_clist[] = { &htm_msgtab, NULL };
-DECLARE_MODULE_AV1(NULL, NULL, htm_clist, NULL, "$Revision$");
+DECLARE_MODULE_AV1(NULL, NULL, htm_clist, NULL, NULL, "$Revision$");
 #endif
 
 /*

@@ -57,7 +57,7 @@ struct Message uhelp_msgtab = {
 mapi_clist_av1 help_clist[] = { 
 	&help_msgtab, &uhelp_msgtab, NULL 
 };
-DECLARE_MODULE_AV1(NULL, NULL, help_clist, NULL, "$Revision$");
+DECLARE_MODULE_AV1(NULL, NULL, help_clist, NULL, NULL, "$Revision$");
 #endif
 
 /*
