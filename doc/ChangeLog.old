@@ -1,3 +1,12 @@
+*** 20010313_2 by fl_
+- added min_nonwildcard to config for the minimum real chars you need for
+  a gline/kline (remote/local)
+- moved the set options below the config file reading in ircd.c
+- instead of #define FLOODCOUNT in config.h.. we now set the default on
+  startup in the config.. I think ill try doing of much as this as I can,
+  so config.h gets smaller :)
+
+
 *** 20010313_1 by adrian
 
 
