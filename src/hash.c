@@ -682,8 +682,8 @@ find_server(const char *name)
 
 	if (IsDigit(*name) && strlen(name) == 3)
 	{
-		client_p = find_id(name);
-      		return(client_p);
+		target_p = find_id(name);
+      		return(target_p);
 	}
 
 	hashv = hash_nick(name);
