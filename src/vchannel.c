@@ -111,7 +111,7 @@ struct Channel* cjoin_channel(struct Channel *root,
 
     ircsprintf( vchan_name, "##%s_%u", name+1, vchan_ts );
     vchan_chptr = hash_find_channel( vchan_name, NULL );
-  } while (vchan_chptr)
+  } while (vchan_chptr);
   
   vchan_chptr = get_channel(sptr, vchan_name, CREATE);
 
