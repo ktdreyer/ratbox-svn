@@ -1,3 +1,16 @@
+*** 20001219_4 by db
+- This completes most of the full LL nick implementation...
+  nicks unknown to a leaf LL must not have information sent to that LL
+  only when introduced i.e. when they JOIN a channel or are /whois'ed
+  /who'ed etc. are burst onto the LL leaf. 
+  a /msg to a nick that only exists on the hub will fail ATM since
+  m_message.c is not set up to burst the target nick onto the LL leaf.
+  However, doing a /whois of the target first, will make the nick
+  available. It will be simple to finish this part.. But after I get some
+  sleep. 
+
+
+
 *** 20001219_3 by db
 - show the name of the server sending a CBURST if its not LL
 
