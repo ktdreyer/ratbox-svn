@@ -845,14 +845,12 @@ hash_ip(struct irc_inaddr *addr)
   hash = ((ip >> 12) + ip) & (IP_HASH_SIZE-1);
   return(hash);
 #else
-  unsigned int hash = 0;
-  char *ip = (char *) &PIN_ADDR(addr);
-
-  while (*ip)
-    { 
-      hash = (hash << 4) - (hash + (unsigned char)*ip++);
-    }
-
+  int hash;
+  u_int32_t *ip = (u_int32_t *) &PIN_ADDR(addr);
+  hash = ip[0];
+  hash ^= ip[2] ^ ip[4];
+  hash ^= hash >> 16;
+  hash ^= hash >> 8;   
   return(hash & (IP_HASH_SIZE - 1));
 #endif
 }
