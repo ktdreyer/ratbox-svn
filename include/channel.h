@@ -185,7 +185,7 @@ extern void    channel_member_list(struct Client *sptr,
 #define MODE_BAN        0x0400
 #define MODE_EXCEPTION  0x0800
 #define MODE_DENY       0x1000
-#define MODE_INVEX	    0x2000
+#define MODE_INVEX	0x2000
 #define MODE_HIDEOPS    0x4000
 #define MODE_LIMIT      0x8000  /* was 0x8000 */
 

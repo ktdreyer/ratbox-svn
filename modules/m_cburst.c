@@ -108,8 +108,8 @@ int     ms_cburst(struct Client *cptr,
     {
       chptr = get_channel(sptr, name, CREATE);
       chptr->channelts = (time_t)(-1); /* ! highest possible TS so its always
-					* over-ruled
-					*/
+                                        * over-ruled
+                                        */
       chptr->users_last = CurrentTime;
 
       chptr->lazyLinkChannelExists |= cptr->localClient->serverMask;

@@ -724,7 +724,7 @@ void channel_modes(struct Channel *chptr, struct Client *cptr,
   if (chptr->mode.mode & MODE_NOPRIVMSGS)
     *mbuf++ = 'n';
   if (chptr->mode.mode & MODE_HIDEOPS)
-	  *mbuf++ = 'z';
+    *mbuf++ = 'z';
   
   if (chptr->mode.limit)
     {
