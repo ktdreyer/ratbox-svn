@@ -106,8 +106,8 @@ static void mo_connect(struct Client* client_p, struct Client* source_p,
 
   if ((target_p = find_server(parv[1])))
     {
-      sendto_one(source_p, ":%s NOTICE %s :Connect: Server %s %s %s.",
-                 me.name, parv[0], parv[1], "already exists from",
+      sendto_one(source_p, ":%s NOTICE %s :Connect: Server %s already exists from %s.",
+                 me.name, parv[0], parv[1],
                  target_p->from->name);
       return;
     }
