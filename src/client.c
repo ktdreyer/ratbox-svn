@@ -1182,7 +1182,11 @@ int exit_client(
         sendto_realops_flags(UMODE_CCONN, L_ALL,
                              "Client exiting: %s (%s@%s) [%s] [%s]",
                              source_p->name, source_p->username, source_p->host,
-                             comment, source_p->localClient->sockhost);
+                             comment, 
+#ifdef HIDE_SPOOF_IPS
+                             IsIPSpoof(source_p) ? "255.255.255.255" :
+#endif
+                             source_p->localClient->sockhost);
 
       log_user_exit(source_p);
 

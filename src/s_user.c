@@ -444,6 +444,9 @@ register_local_user(struct Client *client_p, struct Client *source_p,
   sendto_realops_flags(UMODE_CCONN, L_ALL,
 		       "Client connecting: %s (%s@%s) [%s] {%s} [%s]",
 		       nick, source_p->username, source_p->host,
+#ifdef HIDE_SPOOF_IPS
+                       IsIPSpoof(source_p) ? "255.255.255.255" :
+#endif
 		       ipaddr,
 		       get_client_class(source_p), source_p->info);
 
