@@ -1,3 +1,30 @@
+androsyn    2003/04/25 12:42:31 UTC	(20030425_0)
+
+  Modified files:
+    doc                  example.conf 
+    include              s_conf.h 
+    src                  Makefile.in balloc.c ircd.c newconf.c 
+                         patricia.c s_auth.c s_bsd.c s_conf.c 
+                         s_user.c 
+  Log:
+  Add the reject_ban_time thing.  Forward ported the more verbose messages
+  for balloc.c.  Fixed a bug in match_ip() related to pointer casting.
+  
+  Revision  Changes    Path
+  7.203     +3 -0      ircd-ratbox/doc/example.conf
+  7.232     +1 -0      ircd-ratbox/include/s_conf.h
+  7.127     +2 -1      ircd-ratbox/src/Makefile.in
+  7.61      +21 -8     ircd-ratbox/src/balloc.c
+  7.283     +2 -1      ircd-ratbox/src/ircd.c
+  7.78      +8 -0      ircd-ratbox/src/newconf.c
+  7.19      +12 -11    ircd-ratbox/src/patricia.c
+  7.146     +2 -3      ircd-ratbox/src/s_auth.c
+  7.203     +3 -0      ircd-ratbox/src/s_bsd.c
+  7.403     +4 -5      ircd-ratbox/src/s_conf.c
+  7.260     +2 -0      ircd-ratbox/src/s_user.c
+
+
+
 androsyn    2003/04/21 17:52:48 UTC	(20030421_2)
 
   Modified files:
