@@ -178,6 +178,8 @@ static void	add_cur_list(int type, char *str, int number)
 %type <number> number timespec 
 %type <conf_parm> oneitem single itemlist
 
+%expect 1
+
 %start conf
 
 %%
@@ -187,8 +189,7 @@ conf:
 	| error
 	;
 
-conf_item:
-         | block
+conf_item: block
 	 | loadmodule
          ;
 
@@ -314,7 +315,7 @@ timespec:	number string
 
 			if ((t = conf_find_time($2)) == 0)
 			{
-				conf_report_error("Unrecognised time type '%s'", $2);
+				conf_report_error("Unrecognised time type/size '%s'", $2);
 				t = 1;
 			}
 	    
