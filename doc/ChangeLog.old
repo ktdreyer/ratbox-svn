@@ -1,3 +1,11 @@
+*** 20001223_15 by toot
+empty (ie, persistant) vchans use the last person in the channel as
+the ID, prefixed with an extra ! ..
+so we get
+#test has 2 possible virtual channels available
+#test !toot !!toot_
+
+
 *** 20001223_14 by ejb
 - add OPER_ONLY_UMODES, umodes which only opers can set.
 
