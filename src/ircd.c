@@ -700,18 +700,6 @@ int main(int argc, char *argv[])
   bindtextdomain("ircd-hybrid" , MSGPATH);
 #endif
 
-#ifdef USE_IAUTH
-  iAuth.flags = 0;
-
-  ConnectToIAuth();
-
-  if (iAuth.socket == NOSOCK)
-    {
-      fprintf(stderr, "Unable to connect to IAuth server\n");
-      exit (EXIT_FAILURE);
- }
-#endif
-
   me.from = &me;
   me.servptr = &me;
   SetMe(&me);

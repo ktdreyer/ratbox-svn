@@ -108,7 +108,6 @@ BASE_SRCS =                     \
   sprintf_irc.c			\
   tools.c                       \
   whowas.c
-#  ircdauth.c
 
 SRCS = ${BASE_SRCS}
 

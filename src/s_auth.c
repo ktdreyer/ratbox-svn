@@ -234,12 +234,7 @@ static void auth_dns_callback(void* vptr, adns_answer* reply)
     {
       struct Client *client_p = auth->client;
       unlink_auth_request(auth, &auth_poll_list);
-#ifdef USE_IAUTH
-      ilog(L_ERROR, "Linking to auth client list");
-      link_auth_request(auth, &auth_client_list);
-#else
       free_auth_request(auth);
-#endif
       release_auth_client(client_p);
     }
 
@@ -262,12 +257,7 @@ static void auth_error(struct AuthRequest* auth)
   {
     unlink_auth_request(auth, &auth_poll_list);
     release_auth_client(auth->client);
-#ifdef USE_IAUTH
-    ilog(L_ERROR, "linking to auth client list 2");
-    link_auth_request(auth, &auth_client_list);
-#else
     free_auth_request(auth);
-#endif
   }
 }
 
@@ -454,12 +444,7 @@ timeout_auth_queries_event(void *notused)
 	  auth->client->since = CurrentTime;
 	  dlinkDestroy(ptr, &auth_poll_list);
 	  release_auth_client(auth->client);
-#ifdef USE_IAUTH
-    ilog(L_ERROR, "linking to auth client list 3");
-	  link_auth_request(auth, &auth_client_list);
-#else
 	  free_auth_request(auth);
-#endif
 	}
     }
 }
@@ -590,12 +575,7 @@ read_auth_reply(int fd, void *data)
     {
       unlink_auth_request(auth, &auth_poll_list);
       release_auth_client(auth->client);
-#ifdef USE_IAUTH
-    ilog(L_ERROR, "linking to auth client list 4");
-      link_auth_request(auth, &auth_client_list);
-#else
       free_auth_request(auth);
-#endif
     }
 }
 

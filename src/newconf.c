@@ -464,10 +464,6 @@ void	newconf_init()
 			conf_set_general_short_motd);
 	add_conf_item("general", "no_oper_flood", CF_YESNO,
 			conf_set_general_no_oper_flood);
-	add_conf_item("general", "iauth_server", CF_QSTRING,
-			conf_set_general_iauth_server);
-	add_conf_item("general", "iauth_port", CF_INT,
-			conf_set_general_iauth_port);
 	add_conf_item("general", "glines", CF_YESNO,
 			conf_set_general_glines);
 	add_conf_item("general", "gline_time", CF_TIME,
@@ -2352,20 +2348,6 @@ void	conf_set_general_short_motd(void *data)
 void	conf_set_general_no_oper_flood(void *data)
 {
 	ConfigFileEntry.no_oper_flood = *(unsigned int*) data;
-}
-
-void	conf_set_general_iauth_server(void *data)
-{
-#if 0
-	strncpy(iAuth.hostname, data, HOSTLEN)[HOSTLEN] = 0;
-#endif
-}
-
-void	conf_set_general_iauth_port(void *data)
-{
-#if 0
-	iAuth.port = $3;
-#endif
 }
 
 void	conf_set_general_fname_userlog(void *data)

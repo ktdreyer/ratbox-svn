@@ -252,8 +252,6 @@ extern 	char *		conf_cur_block_name;
 	void	conf_set_general_pace_wait_simple		(void *data);
 	void	conf_set_general_short_motd			(void *data);
 	void	conf_set_general_no_oper_flood			(void *data);
-	void	conf_set_general_iauth_server			(void *data);
-	void	conf_set_general_iauth_port			(void *data);
 	void	conf_set_general_fname_userlog			(void *data);
 	void	conf_set_general_fname_foperlog			(void *data);
 	void	conf_set_general_fname_operlog			(void *data);

@@ -349,18 +349,6 @@ void add_connection(struct Listener* listener, int fd)
   struct irc_sockaddr   irn;
   assert(NULL != listener);
 
-#ifdef USE_IAUTH
-  if (iAuth.socket == NOSOCK)
-  {
-    send(fd,
-      "NOTICE AUTH :*** Ircd Authentication Server is temporarily down, please connect later\r\n",
-      87,
-      0);
-    fd_close(fd);
-    return;
-  }
-#endif
-
   /* 
    * get the client socket name from the socket
    * the client has already been checked out in accept_connection
