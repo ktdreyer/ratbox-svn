@@ -115,8 +115,7 @@ init_auth(void)
 {
   memset(&auth_client_list, 0, sizeof(auth_client_list));
   memset(&auth_poll_list, 0, sizeof(auth_poll_list));
-  eventAdd("timeout_auth_queries_event", timeout_auth_queries_event, NULL,
-    1, 0);
+  eventAdd("timeout_auth_queries_event", timeout_auth_queries_event, NULL, 1);
 }
 
 /*
@@ -479,14 +478,6 @@ timeout_auth_queries_event(void *notused)
 #endif
 	}
     }
-
-  /* And re-register an event .. */
-  /* 
-   * These *REALLY* should be part of the socket timeout, but we aren't
-   * at that stage yet.   -- adrian
-   */
-  eventAdd("timeout_auth_queries_event", timeout_auth_queries_event, NULL,
-    1, 0);
 }
 
 /*

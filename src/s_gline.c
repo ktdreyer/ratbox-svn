@@ -154,9 +154,6 @@ cleanup_glines(void *notused)
 {
   expire_glines();
   expire_pending_glines();
-
-  eventAdd("cleanup_glines", cleanup_glines, NULL,
-	   CLEANUP_GLINES_TIME, 0);
 }
 
 /*

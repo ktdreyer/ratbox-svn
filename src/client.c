@@ -84,7 +84,6 @@ static void client_heap_gc(void *unused)
 {
   BlockHeapGarbageCollect(client_heap);
   BlockHeapGarbageCollect(lclient_heap);
-  eventAdd("client_heap_gc", client_heap_gc, NULL, 30, 0);
 }
 
 /*
@@ -104,9 +103,9 @@ void init_client(void)
    */
   client_heap = BlockHeapCreate(sizeof(struct Client), 10000);
   lclient_heap = BlockHeapCreate(sizeof(struct LocalUser), 512); 
-  eventAdd("check_pings", check_pings, NULL, 30, 0);
-  eventAdd("free_exited_clients()", &free_exited_clients, NULL, 4, 0);
-  eventAdd("client_heap_gc", client_heap_gc, NULL, 30, 0);
+  eventAdd("check_pings", check_pings, NULL, 30);
+  eventAdd("free_exited_clients()", &free_exited_clients, NULL, 4);
+  eventAdd("client_heap_gc", client_heap_gc, NULL, 30);
 }
 
 /*
@@ -242,9 +241,6 @@ check_pings(void *notused)
   check_pings_list(&lclient_list);
   check_pings_list(&serv_list);
   check_unknowns_list(&unknown_list);
-
-  /* Reschedule a new address */
-  eventAdd("check_pings", check_pings, NULL, 30, 0);
 }
 
 /*
@@ -953,27 +949,26 @@ const char* get_client_host(struct Client* client)
 static void
 free_exited_clients(void *unused)
 {
- dlink_node *ptr, *next;
- struct Client *target_p;
+  dlink_node *ptr, *next;
+  struct Client *target_p;
   
- for(ptr = dead_list.head; ptr; ptr = next)
- {
-  target_p = ptr->data;
-  next = ptr->next;
-  if (ptr->data == NULL)
-  {
-   sendto_realops_flags(FLAGS_ALL, L_ALL,
+  for(ptr = dead_list.head; ptr; ptr = next)
+    {
+      target_p = ptr->data;
+      next = ptr->next;
+      if (ptr->data == NULL)
+        {
+          sendto_realops_flags(FLAGS_ALL, L_ALL,
                         "Warning: null client on dead_list!");
-   dlinkDelete(ptr, &dead_list);
-   free_dlink_node(ptr);
-   continue;
-  }
-  release_client_state(target_p);
-  free_client(target_p);
-  dlinkDelete(ptr, &dead_list);
-  free_dlink_node(ptr);
- }
- eventAdd("free_exited_clients()", &free_exited_clients, NULL, 4, 0);
+          dlinkDelete(ptr, &dead_list);
+          free_dlink_node(ptr);
+          continue;
+        }
+      release_client_state(target_p);
+      free_client(target_p);
+      dlinkDelete(ptr, &dead_list);
+      free_dlink_node(ptr);
+    }
 }
 
 /*
@@ -1393,13 +1388,6 @@ const char* comment         /* Reason for the exit */
 	  strcat(comment1," ");
 	  strcat(comment1, source_p->name);
 	}
-
-      if (!refresh_user_links)
-      {
-        refresh_user_links = 1;
-	eventAdd("write_links_file", write_links_file, NULL,
-	         ConfigServerHide.links_delay, 0);
-      }
 
       remove_dependents(client_p, source_p, from, comment, comment1);
 

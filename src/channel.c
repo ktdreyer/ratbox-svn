@@ -110,13 +110,12 @@ static BlockHeap *channel_heap;
 static void channelheap_garbage_collect(void *unused)
 {
 	BlockHeapGarbageCollect(channel_heap);
-	eventAddIsh("channelheap_garbage_collect", channelheap_garbage_collect, NULL, 45, 0);
 	
 }
 void init_channels(void)
 {
 	channel_heap = BlockHeapCreate(sizeof(struct Channel), 2048);
-	eventAddIsh("channelheap_garbage_collect", channelheap_garbage_collect, NULL, 45, 0);
+	eventAddIsh("channelheap_garbage_collect", channelheap_garbage_collect, NULL, 45);
 }
 
 /*
@@ -4397,9 +4396,6 @@ cleanup_channels(void *unused)
 {
   struct Channel *chptr;
   struct Channel *next_chptr;
-
-  eventAdd("cleanup_channels", cleanup_channels, NULL,
-           CLEANUP_CHANNELS_TIME, 0);
 
   if (uplink != NULL)
   {

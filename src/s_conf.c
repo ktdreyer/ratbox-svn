@@ -1670,9 +1670,6 @@ void
 cleanup_tklines(void *notused)
 {
   expire_tklines(&temporary_klines);
-
-  eventAdd("cleanup_tklines", cleanup_tklines, NULL,
-           CLEANUP_TKLINES_TIME, 0);
 }
 
 /*
@@ -2548,12 +2545,5 @@ flush_expired_ips(void *unused)
   }
   *iee = NULL;
  }
- /* This is just so we don't mess up if the throttle_time is set to 0 to
-  * turn connect pacing off, then turned back on. */
- if (ConfigFileEntry.throttle_time > 0)
-  eventAdd("flush_expired_ips", flush_expired_ips, NULL,
-           ConfigFileEntry.throttle_time, 0);
- else
-  eventAdd("flush_expired_ips", flush_expired_ips, NULL, 300, 0);
 }
 #endif

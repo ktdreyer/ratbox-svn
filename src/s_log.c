@@ -53,6 +53,13 @@ static FBFILE* logFile;
 #endif
 static int logLevel = INIT_LOG_LEVEL;
 
+static FBFILE *user_log_fb=NULL;
+
+#ifndef SYSLOG_USERS
+static EVH user_log_resync;
+#endif
+
+
 #ifdef USE_SYSLOG
 static int sysLogLevel[] = {
   LOG_CRIT,
@@ -156,6 +163,7 @@ void init_log(const char* filename)
 #ifdef USE_SYSLOG
   openlog("ircd", LOG_PID | LOG_NDELAY, LOG_FACILITY);
 #endif
+  eventAdd("user_log_resync", user_log_resync, NULL, 60);
 }
 
 void set_log_level(int level)
@@ -179,11 +187,6 @@ const char *get_log_level_as_string(int level)
   return(logLevelToString[level]);
 }
 
-static FBFILE *user_log_fb=NULL;
-
-#ifndef SYSLOG_USERS
-static EVH user_log_resync;
-#endif
 
 /*
  * log_user_exit
@@ -255,12 +258,6 @@ void log_user_exit(struct Client *source_p)
 		       source_p->localClient->receiveK);
 
 	    fbputs(linebuf, user_log_fb);
-
-	    /* Now, schedule file resync every 60 seconds */
-
-	    eventAdd("user_log_resync", user_log_resync, NULL,
-		     60, 0 );
-
 	  }
       }
   }

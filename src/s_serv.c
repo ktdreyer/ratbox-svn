@@ -237,20 +237,6 @@ void slink_zipstats(unsigned int rpl, unsigned int len, unsigned char *data,
       (double)server_p->localClient->zipstats.out) * 100.00);
 }
 
-void start_collect_zipstats(void)
-{
-  static struct ev_entry event;
-
-  collect_zipstats(NULL);
-  event.name = "collect_zipstats";
-  event.func = collect_zipstats;
-  event.arg = NULL;
-  event.frequency = ZIPSTATS_TIME;
-  event.weight = 0;
-  event.static_event = 1;
-  createEventIsh(&event, 0);
-}
-
 void collect_zipstats(void *unused)
 {
   dlink_node *ptr;
@@ -604,11 +590,9 @@ try_connections(void *unused)
     }
 
 
+      /* TODO: change this to set active flag to 0 when added to event! --Habeeb */
     if(GlobalSetOptions.autoconn==0)
-    {
-      /* auto connects disabled, bail */
-      goto finish;
-    }
+      return;
      
     if (connecting)
     {
@@ -644,9 +628,6 @@ try_connections(void *unused)
     }
   }
   Debug((DEBUG_NOTICE,"Next connection check : %s", myctime(next)));
-finish:
-  eventAdd("try_connections", try_connections, NULL,
-      TRY_CONNECTIONS_TIME, 0);
 }
 
 int check_server(const char *name, struct Client* client_p, int cryptlink)
@@ -1294,13 +1275,6 @@ int server_estab(struct Client *client_p)
 #endif
     } else
         fd_note(client_p->fd, "Server: %s", client_p->name);
-
-  if (!refresh_user_links)
-  {
-    refresh_user_links = 1;
-    eventAdd("write_links_file", write_links_file, NULL,
-             ConfigServerHide.links_delay, 0);
-  }
 
   /*
   ** Old sendto_serv_but_one() call removed because we now

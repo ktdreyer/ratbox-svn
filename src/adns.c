@@ -71,7 +71,7 @@ void init_resolver(void)
    ilog(L_CRIT, "Error opening /etc/resolv.conf: %s; r = %d", strerror(errno), r);
    exit(76);
  }
- eventAdd("timeout_adns", timeout_adns, NULL, 1, 0);
+ eventAdd("timeout_adns", timeout_adns, NULL, 1);
  dns_select();
 }
 
@@ -86,7 +86,6 @@ void timeout_adns(void *ptr)
  struct timeval now;
  gettimeofday(&now, 0);
  adns_processtimeouts(dns_state, &now); 
- eventAdd("timeout_adns", timeout_adns, NULL, 1, 0);
 }
 
 /* void dns_writeable(int fd, void *ptr)

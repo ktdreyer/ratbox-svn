@@ -486,7 +486,6 @@ static void cleanup_zombies(void *unused)
 {
   int status;
   waitpid(-1, &status, WNOHANG);
-  eventAdd("cleanup_zombies", cleanup_zombies, NULL, 30, 0);
 }
 
 int main(int argc, char *argv[])
@@ -661,33 +660,30 @@ int main(int argc, char *argv[])
   
   ilog(L_NOTICE, "Server Ready");
   
-  eventAdd("cleanup_channels", cleanup_channels, NULL,
-	   CLEANUP_CHANNELS_TIME, 0);
-
-  eventAdd("cleanup_glines", cleanup_glines, NULL, CLEANUP_GLINES_TIME, 0);
-  
-  eventAdd("cleanup_tklines", cleanup_tklines, NULL, CLEANUP_TKLINES_TIME,
-	   0);
-  
 #if 0 && defined(HAVE_LIBCRYPTO)
   eventAdd("cryptlink_regen_key", cryptlink_regen_key, NULL,
-	   CRYPTLINK_REGEN_TIME, 0);
+	   CRYPTLINK_REGEN_TIME);
 #endif
    
   /* We want try_connections to be called as soon as possible now! -- adrian */
   /* No, 'cause after a restart it would cause all sorts of nick collides */
-  eventAdd("try_connections", try_connections, NULL,
-	   STARTUP_CONNECTIONS_TIME, 0);
+  eventAdd("try_connections", try_connections, NULL, STARTUP_CONNECTIONS_TIME);
 
-  start_collect_zipstats();
+  eventAdd("collect_zipstats", collect_zipstats, NULL, ZIPSTATS_TIME);
 
   /* Setup the timeout check. I'll shift it later :)  -- adrian */
-  eventAdd("comm_checktimeouts", comm_checktimeouts, NULL, 1, 0);
+  eventAdd("comm_checktimeouts", comm_checktimeouts, NULL, 1);
 
-  eventAdd("cleanup_zombies", cleanup_zombies, NULL, 30, 0); 
+  eventAdd("cleanup_zombies", cleanup_zombies, NULL, 30); 
 #ifdef PACE_CONNECT
-  eventAdd("flush_expired_ips", flush_expired_ips, NULL, 30, 0);
+ if (ConfigFileEntry.throttle_time > 0)
+  eventAdd("flush_expired_ips", flush_expired_ips, NULL, ConfigFileEntry.throttle_time);
+ else
+  eventAdd("flush_expired_ips", flush_expired_ips, NULL, 300);
 #endif
+
+  eventAdd("write_links_file", write_links_file, NULL, ConfigServerHide.links_delay);
+
   ServerRunning = 1;
   io_loop();
   return 0;

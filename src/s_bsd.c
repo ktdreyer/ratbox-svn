@@ -595,8 +595,6 @@ comm_checktimeouts(void *notused)
             hdl(fd, fd_table[fd].timeout_data);           
 	  }
       }
-    /* .. next .. */
-    eventAdd("comm_checktimeouts", comm_checktimeouts, NULL, 1, 0);
 }
 
 /*

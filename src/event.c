@@ -43,12 +43,9 @@
 /*
  * How its used:
  *
- * Should be pretty self-explanatory. Events are one-shot, so once your
- * callback is called, you have to re-add the event through eventAdd().
- * Note that the event text is used by last_event_ran to point to the
- * last event run, so you should make sure its a static string. (Don't
- * ask me why, its how it is in the squid code..)
- *   -- Adrian
+ * Should be pretty self-explanatory. Events are added to the static
+ * array event_table with a frequency time telling eventRun how often
+ * to execute it.
  */
 
 #include <stdlib.h>
@@ -60,65 +57,25 @@
 #include "memory.h"
 
 
-static struct ev_entry *tasks = NULL;
-static int run_id = 0;
 static const char *last_event_ran = NULL;
+struct ev_entry event_table[MAX_EVENTS];
+static int event_max = 0;
+
 
 void
-createEvent(struct ev_entry *new_event)
+eventAdd(const char *name, EVH *func, void *arg, time_t when)
 {
-  new_event->id = run_id;
-  new_event->when = CurrentTime + new_event->frequency;
-  new_event->static_event = 1;
-  new_event->mem_free = 0;
-
-  new_event->next = tasks;
-  tasks = new_event;
-
-}
-
-void eventAdd(const char *name, EVH * func, void *arg, time_t when, int weight)
-{
-  struct ev_entry *new_event = (struct ev_entry *)MyMalloc(sizeof(struct ev_entry));
-  struct ev_entry *cur_event;
-
-  new_event->func = func;
-  new_event->arg = arg;
-  new_event->name = name;
-  new_event->when = CurrentTime + when;
-  new_event->weight = weight;
-  new_event->id = run_id;
-  new_event->static_event = 0;
-  new_event->mem_free = 0;
-  new_event->next = NULL;
-
-  new_event->next = tasks;
-  tasks = new_event;
-
-}
-
-/* same as createEvent but adds a random offset within +-1/3 of delta_ish */
-void
-createEventIsh(struct ev_entry *new_event, time_t delta_ish)
-{
-  /* XXX someone finish this */
-#if 0
-  if (delta_ish >= 3.0)
-    {
-      const time_t two_third = (2 * delta_ish) / 3;
-      delta_ish = two_third + ((random() % 1000) * two_third) / 1000;
-      /*
-       * XXX I hate the above magic, I don't even know if its right.
-       * Grr. -- adrian
-       */
-    }
-#endif
-  createEvent(new_event);
+  event_table[event_max].func = func;
+  event_table[event_max].name = name;
+  event_table[event_max].arg = arg;
+  event_table[event_max].when = CurrentTime + when;
+  event_table[event_max].frequency = when; 
+  ++event_max;
 }
 
 /* same as eventAdd but adds a random offset within +-1/3 of delta_ish */
 void
-eventAddIsh(const char *name, EVH * func, void *arg, time_t delta_ish, int weight)
+eventAddIsh(const char *name, EVH *func, void *arg, time_t delta_ish)
 {
   if (delta_ish >= 3.0)
     {
@@ -129,154 +86,79 @@ eventAddIsh(const char *name, EVH * func, void *arg, time_t delta_ish, int weigh
        * Grr. -- adrian
        */
     }
-  eventAdd(name, func, arg, delta_ish, weight);
-}
-
-void
-eventDelete(EVH * func, void *arg)
-{
-  struct ev_entry *event;
-  struct ev_entry *last_event = NULL;
-
-  for (event = tasks; event; event = event->next)
-    {
-      if ((event->func == func) && (event->arg == arg) &&
-	  (event->static_event == 0))
-        {
-          if (last_event != NULL)
-            {
-              last_event->next = event->next;
-              MyFree(event);
-              return;          
-            }
-          else
-            {
-              tasks = event->next;
-              MyFree(event);
-              return;
-            }
-        }
-      last_event = event;
-    }
+  eventAdd(name, func, arg, delta_ish);
 }
 
 void
 eventRun(void)
 {
-  struct ev_entry *event = NULL;
-  struct ev_entry *last_event = NULL;
-  struct ev_entry *next_event;
-  EVH *func;
-  void *arg;
+  int i;
 
-  if (tasks == NULL)
+  if (event_max == 0)
     return;
 
-  run_id++;
-
-  for (event = tasks; event; event = next_event)
+  for (i = 0; i < event_max; i++)
     {
-      next_event = event->next;
-
-      if ((event->when <= CurrentTime) && (event->id != run_id))
+      if (event_table[i].active && (event_table[i].when <= CurrentTime))
         {
-          func = event->func;
-          arg = event->arg;
-
-          if (event->static_event == 0)
-	    {
-	      func = event->func;
-	      arg = event->arg;
-
-	      /* XXX assumes ->name is static memory! */
-	      last_event_ran = event->name;
-	      func(arg);
-	      event->mem_free = 1;
-            }
-	  else
-	    {
-	      func = event->func;
-	      arg = event->arg;
-
-	      /* XXX assumes ->name is static memory! */
-	      last_event_ran = event->name;
-	      func(arg);
-
-	      event->when = CurrentTime + event->frequency;
-	      event->id = run_id;	      
-	    }
+          last_event_ran = event_table[i].name;
+          event_table[i].func(event_table[i].arg);
+          event_table[i].when = CurrentTime + event_table[i].frequency;
         }
-    }
-
-  for (event = tasks; event; event = next_event)
-    {
-      next_event = event->next;
-      if (event->mem_free != 0)
-	{
-	  if (last_event != NULL)
-	    last_event->next = event->next;
-	  else
-	    {
-	      tasks = event->next;
-	      last_event = tasks;
-	    }
-	  MyFree(event);
-	}
-      else
-	last_event = event;
     }
 }
 
 time_t
 eventNextTime(void)
 {
+#if 0
   if (!tasks)
     return (time_t) 100000;
   return (time_t) (tasks->when - CurrentTime);
+#endif
+return 10;
 }
 
 void
 eventInit(void)
 {
-  tasks = NULL; 
   last_event_ran = NULL;
 }
 
 int
-eventFind(EVH * func, void *arg)
+eventFind(EVH *func, void *arg)
 {
-  struct ev_entry *event;
-  for (event = tasks; event; event = event->next)
+  int i;
+  for (i = 0; i < event_max; i++)
     {
-      if (event->func == func && event->arg == arg)
+      if (event_table[i].func == func && event_table[i].arg == arg)
         return 1;
     }
   return 0;
 }
 
-int
+void
 show_events(struct Client *source_p)
 {
-  struct ev_entry *e = tasks;
+  int i;
+
   if (last_event_ran)
     sendto_one(source_p, ":%s NOTICE %s :*** Last event to run: %s",
                me.name, source_p->name,
                last_event_ran);
 
   sendto_one(source_p,
-     ":%s NOTICE %s :*** Operation            Next Execution  Weight",
+     ":%s NOTICE %s :*** Operation            Next Execution",
      me.name, source_p->name);
 
-  while (e != NULL)
+  for (i = 0; i < event_max; i++)
     {
       sendto_one(source_p,
-                 ":%s NOTICE %s :*** %-20s %-3d seconds     %d",
+                 ":%s NOTICE %s :*** %-20s %-3d seconds",
                  me.name, source_p->name,
-                 e->name, (int)(e->when - CurrentTime), e->weight);
-      e = e->next;
+                 event_table[i].name, (int)(event_table[i].when - CurrentTime));
     }
   sendto_one(source_p, ":%s NOTICE %s :*** Finished", me.name, source_p->name);
-  return 0;
 }
 
 /* void set_back_events(time_t by)
@@ -287,19 +169,12 @@ show_events(struct Client *source_p)
 void
 set_back_events(time_t by)
 {
-  struct ev_entry *e;
-  for (e = tasks; e; e = e->next)
-    if (e->when > by)
-      e->when -= by;
+  int i;
+  for (i = 0; i < event_max; i++)
+    if (event_table[i].when > by)
+      event_table[i].when -= by;
     else
-      e->when = 0;
+      event_table[i].when = 0;
 }
-
-
-
-
-
-
-
 
 
