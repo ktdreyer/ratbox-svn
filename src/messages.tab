@@ -303,7 +303,7 @@ static  char *  replies[] = {
 /* 274 */       (char *)NULL,
 /* 275 */       (char *)NULL,
 /* 276 RPL_VCHANEXIST, */       ":%s 276 %s %s :has %d possible virtual channels available",
-/* 277 RPL_VCHANLIST, */        ":%s 277 %s %s %s",
+/* 277 RPL_VCHANLIST, */        ":%s 277 %s %s ",
 /* 278 RPL_VCHANHELP, */        ":%s 278 %s :Type /%s %s <key> to specify the channel you want",
 /* 279 */       (char *)NULL,
 /* 280 */       (char *)NULL,
