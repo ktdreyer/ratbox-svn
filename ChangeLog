@@ -1,3 +1,17 @@
+leeh        2003/06/10 21:25:20 UTC	(20030610_8)
+
+  Modified files:
+    modules              m_gline.c m_stats.c 
+  Log:
+  - fix stats G
+  - more gline cleanups
+  
+  Revision  Changes    Path
+  1.117     +44 -71    ircd-ratbox/modules/m_gline.c
+  1.164     +3 -2      ircd-ratbox/modules/m_stats.c
+
+
+
 leeh        2003/06/10 20:09:28 UTC	(20030610_7)
 
   Modified files:
