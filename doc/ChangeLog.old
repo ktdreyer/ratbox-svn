@@ -1,3 +1,7 @@
+*** 20001229_28 by lusky
+started cleanup of compiler warnings
+
+
 *** 20001229_27 by lusky
 - hack to make the developer CFLAGS the default.  You can still set CFLAGS in
   your environment before running configure if you want to override them.
