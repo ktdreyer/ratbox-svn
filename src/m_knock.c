@@ -31,6 +31,7 @@
 #include "numeric.h"
 #include "send.h"
 #include "s_conf.h"
+#include "vchannel.h"
 
 #include <string.h>
 /*
@@ -90,9 +91,16 @@
  *                      non-NULL pointers.
  */
 
+static struct Channel *parse_knock_args(struct Client *,
+                                        struct Client *,
+                                        int, char **);
+static void send_knock(struct Client *, struct Client *,
+                       struct Channel *, char *);
+
 /* m_knock
 **    parv[0] = sender prefix
 **    parv[1] = channel
+**    parv[2] = 'key' (for vchan)
 **  The KNOCK command has the following syntax:
 **   :<sender> KNOCK <channel>
 **  If a user is not banned from the channel they can use the KNOCK
@@ -112,115 +120,36 @@ int     m_knock(struct Client *cptr,
                char *parv[])
 {
   struct Channel      *chptr;
-  char  *p, *name;
 
-  /* anti flooding code,
-   * I did have this in parse.c with a table lookup
-   * but I think this will be less inefficient doing it in each
-   * function that absolutely needs it
+  chptr = parse_knock_args(cptr, sptr, parc, parv);
+  
+  if (!chptr)
+    return 0;
+
+  /* 
+   * Flood control redone to allow one KNOCK per knock_delay seconds on each
+   * channel.
+   * 
+   * Unfortunately, because the local server handles KNOCK instead of
+   * passing it on, this can be bypassed by KNOCKing from multiple servers.
+   * It's still better than allowing any number of clones to flood a channel
+   * from anywhere, IMO.
    *
-   * -Dianora
-   */
-  static time_t last_used=0L;
-
-  /* We will cut at the first comma reached, however we will not *
-   * process anything afterwards.                                */
-
-  p = strchr(parv[1],',');
-  if(p)
-    *p = '\0';
-  name = parv[1]; /* strtoken(&p, parv[1], ","); */
-
-  if (!IsChannelName(name) || !(chptr = hash_find_channel(name, NullChn)))
-    {
-      sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL), me.name, parv[0],
-                 name);
-      return 0;
-    }
-
-  if(!((chptr->mode.mode & MODE_INVITEONLY) ||
-       (*chptr->mode.key) ||
-       (chptr->mode.limit && chptr->users >= chptr->mode.limit )
-       ))
-    {
-      sendto_one(sptr,":%s NOTICE %s :*** Notice -- Channel is open!",
-                 me.name,
-                 sptr->name);
-      return 0;
-    }
-
-  /* don't allow a knock if the user is banned, or the channel is secret */
-  if ((chptr->mode.mode & MODE_SECRET) || 
-      (is_banned(sptr, chptr) == CHFL_BAN) )
-    {
-      sendto_one(sptr, form_str(ERR_CANNOTSENDTOCHAN), me.name, parv[0],
-                 name);
-      return 0;
-    }
-
-  /* if the user is already on channel, then a knock is pointless! */
-  if (IsMember(sptr, chptr))
-    {
-      sendto_one(sptr,":%s NOTICE %s :*** Notice -- You are on channel already!",
-                 me.name,
-                 sptr->name);
-      return 0;
-    }
-
-  /* flood control server wide, clients on KNOCK
+   * -davidt
    */
 
-  if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
-	  return 0;
-  else
-	  last_used = CurrentTime;
- 
-  /* flood control individual clients on KNOCK
-   * the ugly possibility still exists, 400 clones could all KNOCK
-   * on a channel at once, flooding all the ops. *ugh*
-   * Remember when life was simpler?
-   * -Dianora
-   */
-
-  /* opers are not flow controlled here */
-  if((sptr->last_knock + ConfigFileEntry.knock_delay) > CurrentTime)
+  if((chptr->last_knock + 30) > CurrentTime)
     {
-      sendto_one(sptr, ":%s NOTICE %s :*** Notice -- Wait %d seconds before another knock",
+      sendto_one(sptr, ":%s NOTICE %s :*** Notice -- Wait %d seconds before another knock to %s",
                  me.name, sptr->name,
-                 ConfigFileEntry.knock_delay - (CurrentTime - sptr->last_knock));
+                 30 - (CurrentTime -
+                       chptr->last_knock),
+                 parv[1]);
       return 0;
     }
 
-  sptr->last_knock = CurrentTime;
+  send_knock(cptr, sptr, chptr, parv[1]);
 
-  sendto_one(sptr,":%s NOTICE %s :*** Notice -- Your KNOCK has been delivered",
-                 me.name, sptr->name);
-
-  /* using &me and me.name won't deliver to clients not on this server
-   * so, the notice will have to appear from the "knocker" ick.
-   *
-   * Ideally, KNOCK would be routable. Also it would be nice to add
-   * a new channel mode. Perhaps some day.
-   * For now, clients that don't want to see KNOCK requests will have
-   * to use client side filtering. 
-   *
-   * -Dianora
-   */
-
-  {
-    char message[NICKLEN*2+CHANNELLEN+USERLEN+HOSTLEN+30];
-
-    /* bit of paranoid, be a shame if it cored for this -Dianora */
-    if(sptr->user)
-      {
-        ircsprintf(message,"KNOCK: %s (%s [%s@%s] has asked for an invite)",
-                   chptr->chname,
-                   sptr->name,
-                   sptr->username,
-                   sptr->host);
-        sendto_channel_type_notice(cptr, chptr, MODE_CHANOP, message);
-      }
-  }
   return 0;
 }
 
@@ -229,22 +158,117 @@ int     mo_knock(struct Client *cptr,
                int parc,
                char *parv[])
 {
-  struct Channel      *chptr;
-  char  *p, *name;
+  struct Channel *chptr;
 
+  chptr = parse_knock_args(cptr, sptr, parc, parv);
+
+  if (!chptr)
+    return 0;
+
+  send_knock(cptr, sptr, chptr, parv[1]);
+  
+  return 0;
+}
+
+/*
+ * parse_knock_args
+ *
+ * input        - pointer to physical struct cptr
+ *              - pointer to source struct sptr
+ *              - number of args
+ *              - pointer to array of args
+ *              
+ * output       - returns pointer to channel specified by name/key
+ * 
+ * side effects - sets name to name of base channel
+ *                or sends failure message to sptr
+ */
+
+static struct Channel *parse_knock_args(struct Client *cptr,
+                                        struct Client *sptr,
+                                        int parc, char *parv[])
+{
   /* We will cut at the first comma reached, however we will not *
    * process anything afterwards.                                */
 
-  p = strchr(parv[1],',');
+  struct Channel      *chptr,*vchan_chptr;
+  char *p, *name, *key;
+
+  name = parv[1];
+  key = (parc > 2) ? parv[2] : NULL;
+
+  p = strchr(name,',');
   if(p)
     *p = '\0';
-  name = parv[1]; /* strtoken(&p, parv[1], ","); */
 
   if (!IsChannelName(name) || !(chptr = hash_find_channel(name, NullChn)))
     {
       sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL), me.name, parv[0],
                  name);
-      return 0;
+      return NullChn;
+    }
+
+  if (IsVchanTop(chptr))
+    {
+      /* They specified a vchan basename */
+      if(on_sub_vchan(chptr,sptr))
+        {
+          sendto_one(sptr,":%s NOTICE %s :*** Notice -- You are on channel already!",
+                     me.name, sptr->name);
+          return NullChn;
+        }
+      if (key && key[0] == '!')
+        {
+          /* Make "KNOCK #channel !" work like JOIN */
+          if (!key[1])
+            {
+              show_vchans(cptr, sptr, chptr, "knock");
+              return NullChn;
+            }
+
+          /* Find a matching vchan */
+          if ((vchan_chptr = find_vchan(chptr, key)))
+            {
+              chptr = vchan_chptr;
+            }
+          else
+            {
+              sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL),
+              me.name, parv[0], name);
+              return NullChn;
+            }
+        }
+      else
+        {
+          /* No key specified */
+          if( (!chptr->members) && (!chptr->next_vchan->next_vchan) )
+            {
+              chptr = chptr->next_vchan;
+            }
+          else
+            {
+              /* There's more than one channel, so give them a list */
+              show_vchans(cptr, sptr, chptr, "knock");
+              return NullChn;
+            }
+        }
+    }
+  else if (IsVchan(chptr))
+    {
+      /* Don't allow KNOCK'ing a vchans 'real' name */
+      sendto_one(sptr, form_str(ERR_BADCHANNAME), me.name, parv[0],
+                 name);
+      return NullChn;
+    }
+  else
+    {
+      /* Normal channel, just be sure they aren't on it */
+      if (IsMember(sptr, chptr))
+        {
+          sendto_one(sptr,":%s NOTICE %s :*** Notice -- You are on channel already!",
+                     me.name, sptr->name);
+          return NullChn;
+        }
     }
 
   if(!((chptr->mode.mode & MODE_INVITEONLY) ||
@@ -255,31 +279,41 @@ int     mo_knock(struct Client *cptr,
       sendto_one(sptr,":%s NOTICE %s :*** Notice -- Channel is open!",
                  me.name,
                  sptr->name);
-      return 0;
+      return NullChn;
     }
 
   /* don't allow a knock if the user is banned, or the channel is secret */
-  if ((chptr->mode.mode & MODE_SECRET) || 
+  if ((chptr->mode.mode & MODE_SECRET) ||
       (is_banned(sptr, chptr) == CHFL_BAN) )
     {
       sendto_one(sptr, form_str(ERR_CANNOTSENDTOCHAN), me.name, parv[0],
                  name);
-      return 0;
+      return NullChn;
     }
 
-  /* if the user is already on channel, then a knock is pointless! */
-  if (IsMember(sptr, chptr))
-    {
-      sendto_one(sptr,":%s NOTICE %s :*** Notice -- You are on channel already!",
-                 me.name,
-                 sptr->name);
-      return 0;
-    }
+  return chptr;
+}
 
-  sptr->last_knock = CurrentTime;
+/*
+ * send_knock
+ *
+ * input        - pointer to physical struct cptr
+ *              - pointer to source struct sptr
+ *              - pointer to channel struct chptr
+ *              - pointer to base channel name
+ * output       -
+ * side effects -
+ */
 
-  sendto_one(sptr,":%s NOTICE %s :*** Notice -- Your KNOCK has been delivered",
-                 me.name, sptr->name);
+static void send_knock(struct Client *cptr, struct Client *sptr,
+                       struct Channel *chptr, char *name)
+{
+  char message[NICKLEN*2+CHANNELLEN+USERLEN+HOSTLEN+30];
+
+  chptr->last_knock = CurrentTime;
+
+  sendto_one(sptr, ":%s NOTICE %s :*** Notice -- Your KNOCK has been delivered",
+             me.name, sptr->name);
 
   /* using &me and me.name won't deliver to clients not on this server
    * so, the notice will have to appear from the "knocker" ick.
@@ -287,21 +321,19 @@ int     mo_knock(struct Client *cptr,
    * Ideally, KNOCK would be routable. Also it would be nice to add
    * a new channel mode. Perhaps some day.
    * For now, clients that don't want to see KNOCK requests will have
-   * to use client side filtering. 
+   * to use client side filtering.
    *
    * -Dianora
    */
 
-  {
-    char message[NICKLEN*2+CHANNELLEN+USERLEN+HOSTLEN+30];
+  /* bit of paranoid, be a shame if it cored for this -Dianora */
+  if(sptr->user)
+    {
+      ircsprintf(message,"KNOCK: %s (%s [%s@%s] has asked for an invite)",
+                 name, sptr->name, sptr->username, sptr->host);
+      sendto_channel_type_notice(cptr, chptr, MODE_CHANOP, message);
+    }
 
-    /* bit of paranoid, be a shame if it cored for this -Dianora */
-    if(sptr->user)
-      {
-        ircsprintf(message,"KNOCK: %s (%s [%s@%s] has asked for an invite)",
-                   chptr->chname, sptr->name, sptr->username, sptr->host);
-        sendto_channel_type_notice(cptr, chptr, MODE_CHANOP, message);
-      }
-  }
-  return 0;
+  return;
 }
+

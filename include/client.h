@@ -245,7 +245,6 @@ struct Client
   unsigned long     serverMask; /* Only used for Lazy Links */
   time_t            last_nick_change;
   int               number_of_nick_changes;
-  time_t            last_knock; /* don't allow knock to flood */
   /*
    * client->sockhost contains the ip address gotten from the socket as a
    * string, this field should be considered read-only once the connection

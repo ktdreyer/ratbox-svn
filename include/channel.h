@@ -64,6 +64,7 @@ struct Channel
   /* Only needed for lazy links and leafs */
   int             locusers;
   time_t          locusers_last;
+  time_t          last_knock;           /* don't allow knock to flood */
   struct Channel* next_vchan;           /* Link list of sub channels */
   struct Channel* prev_vchan;           /* Link list of sub channels */
   struct SLink*   members;
