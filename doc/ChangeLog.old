@@ -1,3 +1,9 @@
+*** 20010118_8 by db
+- removed links_notice stats_notice whois_notice from conf, these
+  are handled by hooks now.
+
+
+
 *** 20010118_7 by davidt
 Reorder headers in modules/m_motd.c to fix compile error on linux
 
