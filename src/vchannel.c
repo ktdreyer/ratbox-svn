@@ -90,7 +90,6 @@ void del_vchan_from_client_cache(struct Client *sptr, struct Channel *vchan)
 }
 
 /* see if this client given by sptr is on a subchan already */
-
 int on_sub_vchan(struct Channel *chptr, struct Client *sptr)
 {
   dlink_node *vchanmap_node;
@@ -157,12 +156,10 @@ struct Channel* map_bchan(struct Channel *chptr, struct Client *sptr)
   return NullChn;
 }
 
-/* return the base chan from a vchan, this is less efficient than
- * map_bchan, but only needs a chan pointer.
- */
+/* return the base chan from a vchan */
 struct Channel* find_bchan(struct Channel *chptr)
 {
-  return ( chptr->root_chptr );
+  return (chptr->root_chptr);
 }
 
 /* show available vchans */
@@ -213,9 +210,9 @@ vchan_show_ids(struct Client *sptr, struct Channel *chptr)
   cur_len = mlen;
   t = buf + mlen;
 
-  if((chptr->users != 0) && !SecretChannel(chptr))
+  if(!SecretChannel(chptr))
      {
-       ircsprintf(t,"!%s ",pick_vchan_id(chptr));
+       ircsprintf(t, "!%s ", pick_vchan_id(chptr));
        tlen = strlen(t);
        cur_len += tlen;
        t += tlen;
@@ -230,21 +227,18 @@ vchan_show_ids(struct Client *sptr, struct Channel *chptr)
        if(SecretChannel(chtmp))
 	 continue;
 
-       if (chtmp->users != 0)
-	 {
-	   ircsprintf(t,"!%s ",pick_vchan_id(chtmp));
-	   tlen = strlen(t);
-	   cur_len += tlen;
-	   t += tlen;
-	   reply_to_send = 1;
+       ircsprintf(t, "!%s ", pick_vchan_id(chtmp));
+       tlen = strlen(t);
+       cur_len += tlen;
+       t += tlen;
+       reply_to_send = 1;
 
-	   if (cur_len > (BUFSIZE - NICKLEN - 3))
-	     {
-	       sendto_one(sptr, "%s", buf );
-	       cur_len = mlen;
-	       t = buf + mlen;
-	       reply_to_send = 0;
-	     }
+       if (cur_len > (BUFSIZE - NICKLEN - 3))
+         {
+           sendto_one(sptr, "%s", buf );
+           cur_len = mlen;
+           t = buf + mlen;
+           reply_to_send = 0;
 	 }
      }
 
@@ -294,10 +288,9 @@ char* pick_vchan_id(struct Channel *chptr)
 	return acptr->name;
       }
 
-  /* shouldn't get here! */
-
-  /* weak "solution" for now */
-  ircsprintf(vchan_id,"%lu",chptr->channelts);
+  /* all else failed, must be an empty channel, 
+   * so we use the vchan_id */
+  ircsprintf(vchan_id, "%s", chptr->vchan_id);
   return(vchan_id);
 }
 
@@ -305,6 +298,7 @@ char* pick_vchan_id(struct Channel *chptr)
  * or NULL if there isn't one */
 struct Channel* find_vchan(struct Channel *chptr, char *key)
 {
+  dlink_node *ptr;
   struct Channel *chtmp;
   struct Client *acptr;
 
@@ -313,6 +307,15 @@ struct Channel* find_vchan(struct Channel *chptr, char *key)
   if( (acptr = hash_find_client(key,(struct Client *)NULL)) )
     if( (chtmp = map_vchan(chptr, acptr)) )
       return chtmp;
+
+  /* try and match vchan_id */
+  if (*key == '!')
+    for (ptr = chptr->vchan_list.head; ptr; ptr = ptr->next)
+      {
+        chtmp = ptr->data;
+        if (chtmp->vchan_id && (strcmp(chtmp->vchan_id, key) == 0))
+          return chtmp;
+      }
 
   return NullChn;
 }
