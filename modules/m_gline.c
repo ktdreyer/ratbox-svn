@@ -60,12 +60,12 @@ static void log_gline_request(const char *, const char *, const char *,
 
 static void log_gline(struct Client *, struct gline_pending *,
 		      const char *, const char *, const char *,
-		      const char *oper_server, const char *, const char *, const char *);
+		      const char *oper_server, const char *, 
+		      const char *, const char *);
 
 static int majority_gline(struct Client *source_p,
 			  const char *oper_nick, const char *oper_username,
-			  const char *oper_host,
-			  const char *oper_server,
+			  const char *oper_host, const char *oper_server,
 			  const char *user, const char *host, const char *reason);
 
 static int check_wild_gline(const char *, const char *);
@@ -90,7 +90,6 @@ DECLARE_MODULE_AV1(gline, NULL, NULL, gline_clist, NULL, NULL, NULL, "$Revision$
  * output       -
  * side effects - place a gline if 3 opers agree
  */
-
 static int
 mo_gline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
@@ -161,7 +160,8 @@ mo_gline(struct Client *client_p, struct Client *source_p, int parc, const char 
 		{
 			if(MyClient(source_p))
 				sendto_one(source_p,
-					   ":%s NOTICE %s :Please include at least %d non-wildcard characters with the user@host",
+					   ":%s NOTICE %s :Please include at least %d non-wildcard "
+					   "characters with the user@host",
 					   me.name, parv[0], ConfigFileEntry.min_nonwildcard);
 			return 0;
 		}
@@ -171,18 +171,15 @@ mo_gline(struct Client *client_p, struct Client *source_p, int parc, const char 
 		 */
 		sendto_realops_flags(UMODE_ALL, L_ALL,
 				     "%s!%s@%s on %s is requesting gline for [%s@%s] [%s]",
-				     source_p->name,
-				     source_p->username,
+				     source_p->name, source_p->username,
 				     source_p->host, me.name, user, host, reason);
 		log_gline_request(source_p->name,
 				  (const char *) source_p->username,
 				  source_p->host, me.name, user, host, reason);
 
 		/* If at least 3 opers agree this user should be G lined then do it */
-		majority_gline(source_p,
-				     source_p->name,
-				     (const char *) source_p->username,
-				     source_p->host, me.name, user, host, reason);
+		majority_gline(source_p, source_p->name, source_p->username,
+			       source_p->host, me.name, user, host, reason);
 
 		/* 4 param version for hyb-7 servers */
 		sendto_server(NULL, NULL, CAP_GLN | CAP_UID, NOCAPS,
@@ -204,6 +201,7 @@ mo_gline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	{
 		sendto_one(source_p, ":%s NOTICE %s :GLINE disabled", me.name, parv[0]);
 	}
+
 	return 0;
 }
 
@@ -216,19 +214,17 @@ mo_gline(struct Client *client_p, struct Client *source_p, int parc, const char 
 static int
 ms_gline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	/* These are needed for hyb6 compatibility.. if its ever removed we can
-	 * just use source_p->username etc.. 
-	 */
-	const char *oper_nick = NULL;	/* nick of oper requesting GLINE */
-	const char *oper_user = NULL;	/* username of oper requesting GLINE */
-	const char *oper_host = NULL;	/* hostname of oper requesting GLINE */
-	const char *oper_server = NULL;	/* server of oper requesting GLINE */
-	const char *user = NULL;
-	const char *host = NULL;	/* user and host of GLINE "victim" */
-	const char *reason = NULL;	/* reason for "victims" demise */
+	/* used for hyb6 compat */
 	struct Client *acptr;
+	const char *oper_nick = NULL;
+	const char *oper_user = NULL;
+	const char *oper_host = NULL;
+	const char *oper_server = NULL;
+	const char *user = NULL;
+	const char *host = NULL;
+	const char *reason = NULL;
 
-	/* hyb-7 style gline (post beta3) */
+	/* new style gline */
 	if(parc == 4 && IsPerson(source_p))
 	{
 		oper_nick = parv[0];
@@ -254,10 +250,7 @@ ms_gline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	else
 		return 0;
 
-	/* Its plausible that the server and/or client dont actually exist,
-	 * and its faked, as the oper isnt sending the gline..
-	 * check they're real --fl_ */
-	/* we need acptr for LL introduction anyway -davidt */
+	/* check the server and nick actually exist */
 	if((acptr = find_server(oper_server)))
 	{
 		if((acptr = find_client(oper_nick)) == NULL)
@@ -326,10 +319,7 @@ check_wild_gline(const char *user, const char *host)
 	{
 		if(!IsKWildChar(tmpch))
 		{
-			/*
-			 * If we find enough non-wild characters, we can
-			 * break - no point in searching further.
-			 */
+			/* enough of them, break */
 			if(++nonwild >= ConfigFileEntry.min_nonwildcard)
 				break;
 		}
@@ -337,10 +327,7 @@ check_wild_gline(const char *user, const char *host)
 
 	if(nonwild < ConfigFileEntry.min_nonwildcard)
 	{
-		/*
-		 * The user portion did not contain enough non-wild
-		 * characters, try the host.
-		 */
+		/* user doesnt, try host */
 		p = host;
 		while ((tmpch = *p++))
 		{
@@ -358,14 +345,13 @@ check_wild_gline(const char *user, const char *host)
 
 /* invalid_gline
  *
- * inputs	- pointer to source client
- *		- pointer to ident
- *		- pointer to host
- *		- pointer to reason
+ * inputs	- pointer to source client, ident, host and reason
  * outputs	- 1 if invalid, 0 if valid
+ * side effects -
  */
 static int
-invalid_gline(struct Client *source_p, const char *luser, const char *lhost, char *lreason)
+invalid_gline(struct Client *source_p, const char *luser,
+	      const char *lhost, char *lreason)
 {
 	if(strchr(luser, '!'))
 	{
@@ -383,21 +369,15 @@ invalid_gline(struct Client *source_p, const char *luser, const char *lhost, cha
 /*
  * set_local_gline
  *
- * inputs	- pointer to oper nick
- * 		- pointer to oper username
- * 		- pointer to oper host
- *		- pointer to oper server
- *		- pointer to victim user
- *		- pointer to victim host
- *		- pointer reason
+ * inputs	- pointer to oper nick/username/host/server,
+ * 		  victim user/host and reason
  * output	- NONE
  * side effects	-
  */
 static void
-set_local_gline(const char *oper_nick,
-		const char *oper_user,
-		const char *oper_host,
-		const char *oper_server, const char *user, const char *host, const char *reason)
+set_local_gline(const char *oper_nick, const char *oper_user,
+		const char *oper_host, const char *oper_server, 
+		const char *user, const char *host, const char *reason)
 {
 	char buffer[IRCD_BUFSIZE];
 	struct ConfItem *aconf;
@@ -429,10 +409,9 @@ set_local_gline(const char *oper_nick,
  *
  */
 static void
-log_gline_request(const char *oper_nick,
-		  const char *oper_user,
-		  const char *oper_host,
-		  const char *oper_server, const char *user, const char *host, const char *reason)
+log_gline_request(const char *oper_nick, const char *oper_user,
+		  const char *oper_host, const char *oper_server, 
+		  const char *user, const char *host, const char *reason)
 {
 	char buffer[2 * BUFSIZE];
 	char filenamebuf[PATH_MAX + 1];
@@ -475,12 +454,10 @@ log_gline_request(const char *oper_nick,
  *
  */
 static void
-log_gline(struct Client *source_p,
-	  struct gline_pending *gline_pending_ptr,
-	  const char *oper_nick,
-	  const char *oper_user,
-	  const char *oper_host,
-	  const char *oper_server, const char *user, const char *host, const char *reason)
+log_gline(struct Client *source_p, struct gline_pending *pending,
+	  const char *oper_nick, const char *oper_user,
+	  const char *oper_host, const char *oper_server, const char *user, 
+	  const char *host, const char *reason)
 {
 	char buffer[2 * BUFSIZE];
 	char filenamebuf[PATH_MAX + 1];
@@ -517,11 +494,9 @@ log_gline(struct Client *source_p,
 	}
 
 	snprintf(buffer, sizeof(buffer), "#%s!%s@%s on %s [%s]\n",
-		   gline_pending_ptr->oper_nick1,
-		   gline_pending_ptr->oper_user1,
-		   gline_pending_ptr->oper_host1,
-		   gline_pending_ptr->oper_server1,
-		   (gline_pending_ptr->reason1) ? (gline_pending_ptr->reason1) : "No reason");
+		 pending->oper_nick1, pending->oper_user1,
+		 pending->oper_host1, pending->oper_server1,
+		 pending->reason1 ? pending->reason1 : "No reason");
 
 	if(fbputs(buffer, out) == -1)
 	{
@@ -530,11 +505,9 @@ log_gline(struct Client *source_p,
 	}
 
 	snprintf(buffer, sizeof(buffer), "#%s!%s@%s on %s [%s]\n",
-		   gline_pending_ptr->oper_nick2,
-		   gline_pending_ptr->oper_user2,
-		   gline_pending_ptr->oper_host2,
-		   gline_pending_ptr->oper_server2,
-		   (gline_pending_ptr->reason2) ? (gline_pending_ptr->reason2) : "No reason");
+		 pending->oper_nick2, pending->oper_user2,
+		 pending->oper_host2, pending->oper_server2,
+		 pending->reason2 ? pending->reason2 : "No reason");
 
 	if(fbputs(buffer, out) == -1)
 	{
