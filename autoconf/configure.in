@@ -44,9 +44,9 @@ fi
 dnl Checks for libraries.
 AC_CHECK_LIB(socket, socket)
 
-dnl jdc -- Checks Solaris for libresolv and nsl; needed on Solaris 2.x
-AC_CHECK_LIB(resolv, main)
-AC_CHECK_LIB(nsl, main)
+# dnl jdc -- Checks Solaris for libresolv and nsl; needed on Solaris 2.x
+# AC_CHECK_LIB(resolv, main)
+# AC_CHECK_LIB(nsl, main)
 
 
 
