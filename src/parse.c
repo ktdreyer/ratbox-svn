@@ -674,7 +674,6 @@ do_numeric(char numeric[], struct Client *client_p, struct Client *source_p, int
 	{
 		if(IsMe(target_p))
 		{
-			int 
 			/*
 			 * We shouldn't get numerics sent to us,
 			 * any numerics we do get indicate a bug somewhere..
