@@ -64,6 +64,16 @@ conf_parse(void)
         fbclose(conf_fbfile_in);
 }
 
+void
+free_conf_oper(struct conf_oper *conf_p)
+{
+	my_free(conf_p->name);
+	my_free(conf_p->pass);
+	my_free(conf_p->username);
+	my_free(conf_p->host);
+	my_free(conf_p);
+}
+
 struct conf_server *
 find_conf_server(const char *name)
 {

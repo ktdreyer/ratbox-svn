@@ -19,8 +19,6 @@
 
 #define HOSTSTAT_CLONES_DEFAULT 4
 
-#define HOSTSTAT_ERR_PARAM	1
-
 static struct client *hoststat_p;
 
 static int s_hoststat_clones(struct client *, char *parv[], int parc);
@@ -29,22 +27,16 @@ static int s_hoststat_testmask(struct client *, char *parv[], int parc);
 
 static struct service_command hoststat_command[] =
 {
-	{ "CLONES",	&s_hoststat_clones,	NULL, 0, 1, 0L },
-	{ "HOST",	&s_hoststat_host,	NULL, 0, 1, 0L },
-	{ "TESTMASK",	&s_hoststat_testmask,	NULL, 1, 1, 0L },
-	{ "\0",		NULL,			NULL, 0, 0, 0L }
-};
-
-static struct service_error hoststat_message[] =
-{
-	{ HOSTSTAT_ERR_PARAM,	"Missing parameters."		},
-	{ 0,			"\0"				}
+	{ "CLONES",	&s_hoststat_clones,	0, NULL, 0, 1, 0L },
+	{ "HOST",	&s_hoststat_host,	1, NULL, 0, 1, 0L },
+	{ "TESTMASK",	&s_hoststat_testmask,	1, NULL, 1, 1, 0L },
+	{ "\0",		NULL,			0, NULL, 0, 0, 0L }
 };
 
 static struct service_handler hoststat_service = {
 	"HOSTSTAT", "HOSTSTAT", "hoststat", "services.hoststat",
 	"Host Statistics", 1, 60, 80, 
-	hoststat_command, hoststat_message, NULL, NULL
+	hoststat_command, NULL, NULL, NULL
 };
 
 void
@@ -124,12 +116,6 @@ s_hoststat_host(struct client *client_p, char *parv[], int parc)
 	dlink_node *ptr;
 	int oper_count = 0;
 
-	if(parc < 1)
-	{
-		service_error(hoststat_p, client_p, HOSTSTAT_ERR_PARAM);
-		return 1;
-	}
-
 	if((host_p = find_host(parv[0])) == NULL)
 	{
 		sendto_server(":%s NOTICE %s :No stats for the hostname, "
@@ -178,12 +164,6 @@ s_hoststat_testmask(struct client *client_p, char *parv[], int parc)
 	char *host;
 	dlink_node *ptr;
 	int count = 0;
-
-	if(parc < 1 || EmptyString(parv[0]))
-	{
-		service_error(hoststat_p, client_p, HOSTSTAT_ERR_PARAM);
-		return 1;
-	}
 
 	if((host = strchr(parv[0], '@')) == NULL)
 	{

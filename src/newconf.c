@@ -20,6 +20,7 @@ static dlink_list conf_items;
 
 struct conf_server *yy_server;
 struct conf_oper *yy_oper;
+struct conf_oper *yy_tmpoper;
 static dlink_list yy_oper_list;
 
 struct client *yy_service;
@@ -475,13 +476,13 @@ conf_begin_oper(struct TopConf *tc)
 
         if(yy_oper != NULL)
         {
-                my_free(yy_oper);
+                free_conf_oper(yy_oper);
                 yy_oper = NULL;
         }
 
         DLINK_FOREACH_SAFE(ptr, next_ptr, yy_oper_list.head)
         {
-                my_free(ptr->data);
+                free_conf_oper(ptr->data);
                 dlink_destroy(ptr, &yy_oper_list);
         }
 
@@ -494,72 +495,45 @@ conf_begin_oper(struct TopConf *tc)
 static int
 conf_end_oper(struct TopConf *tc)
 {
+	dlink_node *ptr;
+	dlink_node *next_ptr;
+
         if(conf_cur_block_name != NULL)
                 yy_oper->name = my_strdup(conf_cur_block_name);
 
         if(EmptyString(yy_oper->name) || EmptyString(yy_oper->pass))
                 return 0;
 
-        if(dlink_list_length(&yy_oper_list) == 0)
-                return 0;
-        else
-        {
-                char *data;
-                const char *username;
-                const char *host;
-                dlink_node *ptr;
+	DLINK_FOREACH_SAFE(ptr, next_ptr, yy_oper_list.head)
+	{
+		yy_tmpoper = ptr->data;
+		yy_tmpoper->name = my_strdup(yy_oper->name);
+		yy_tmpoper->pass = my_strdup(yy_oper->pass);
+		yy_tmpoper->flags = yy_oper->flags;
 
-                ptr = yy_oper_list.head;
-                data = ptr->data;
+		dlink_add_tail_alloc(yy_tmpoper, &conf_oper_list);
+		dlink_destroy(ptr, &yy_oper_list);
+	}
 
-                split_user_host(data, &username, &host);
-                yy_oper->username = my_strdup(username);
-                yy_oper->host = my_strdup(host);
-
-                my_free(data);
-                dlink_destroy(ptr, &yy_oper_list);
-
-                /* still some left.. */
-                if(dlink_list_length(&yy_oper_list))
-                {
-                        struct conf_oper *yy_tmp;
-                        dlink_node *next_ptr;
-
-                        DLINK_FOREACH_SAFE(ptr, next_ptr, yy_oper_list.head)
-                        {
-                                data = ptr->data;
-
-                                if(EmptyString(data))
-                                        continue;
-
-                                yy_tmp = my_malloc(sizeof(struct conf_oper));
-                                yy_tmp->name = my_strdup(yy_oper->name);
-                                yy_tmp->pass = my_strdup(yy_oper->pass);
-                                yy_tmp->flags = yy_oper->flags;
-
-                                split_user_host(data, &username, &host);
-                                yy_tmp->username = my_strdup(username);
-                                yy_tmp->host = my_strdup(host);
-
-                                dlink_add_tail_alloc(yy_tmp, &conf_oper_list);
-
-                                my_free(data);
-                                dlink_destroy(ptr, &yy_oper_list);
-                        }
-                }
-        }
-
-        dlink_add_alloc(yy_oper, &conf_oper_list);
-
+	free_conf_oper(yy_oper);
         yy_oper = NULL;
+
         return 0;
 }
 
 static void
 conf_set_oper_user(void *data)
 {
-        char *uh = my_strdup(data);
-        dlink_add_tail_alloc(uh, &yy_oper_list);
+	const char *username;
+	const char *host;
+
+	yy_tmpoper = my_malloc(sizeof(struct conf_oper));
+
+	split_user_host((char *) data, &username, &host);
+	yy_tmpoper->username = my_strdup(username);
+	yy_tmpoper->host = my_strdup(host);
+
+        dlink_add_tail_alloc(yy_tmpoper, &yy_oper_list);
 }
 
 static void

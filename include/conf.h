@@ -68,6 +68,7 @@ extern int lineno;
 extern void yyerror(const char *msg);
 extern int conf_fbgets(char *lbuf, int max_size);
 
+extern void free_conf_oper(struct conf_oper *conf_p);
 extern struct conf_server *find_conf_server(const char *name);
 
 extern struct conf_oper *find_oper(struct connection_entry *conn_p, const char *name);

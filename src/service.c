@@ -331,11 +331,21 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
                 {
                         if(cmd_table[i].operonly && !is_oper(client_p))
                         {
-                                sendto_server(":%s NOTICE %s :No access.",
-                                              MYNAME, client_p->name);
+                                sendto_server(":%s NOTICE %s :No access to %s::%s",
+                                              MYNAME, client_p->name,
+					      service_p->name, cmd_table[i].cmd);
                                 service_p->service->flood++;
                                 return;
                         }
+
+			if(parc < cmd_table[i].minparc)
+			{
+				sendto_server(":%s NOTICE %s :Insufficient parameters to %s::%s",
+						MYNAME, client_p->name,
+						service_p->name, cmd_table[i].cmd);
+				service_p->service->flood++;
+				return;
+			}
 
                         retval = (cmd_table[i].func)(client_p, parv, parc);
 

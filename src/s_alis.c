@@ -37,8 +37,8 @@ static int s_alis_list(struct client *, char *parv[], int parc);
 
 static struct service_command alis_command[] =
 {
-        { "LIST",       &s_alis_list,   NULL, 0, 1, 0L },
-        { "\0",         NULL,           NULL, 0, 0, 0 }
+	{ "LIST",	&s_alis_list,	1, NULL, 0, 1, 0L },
+        { "\0",		NULL,		0, NULL, 0, 0, 0 }
 };
 
 static struct service_error alis_error[] =
@@ -327,12 +327,6 @@ s_alis_list(struct client *client_p, char *parv[], int parc)
 	int maxmatch = ALIS_MAX_MATCH;
 
 	memset(&query, 0, sizeof(struct alis_query));
-
-        if(parc < 1 || EmptyString(parv[0]))
-        {
-                service_error(alis_p, client_p, ALIS_ERR_PARAM);
-                return 1;
-        }
 
         query.mask = parv[0];
 
