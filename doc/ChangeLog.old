@@ -1,3 +1,10 @@
+*** 20010220_4 by davidt
+- Missed test in src/packet.c, while( <get line from sendq> ) should
+  check the client hasn't died before parsing the line..
+- Oddness in s_serv.c -- random garbage was being copied into fd_note,
+  whilst the correctly copied string was being completely ignored...
+
+
 *** 20010220_3 by wcampbel
 Make one of the define's easier to read
 
