@@ -566,7 +566,7 @@ struct Message msgtab[] = {
     { m_user, m_registered, m_ignore, m_registered }
   },
   {MSG_NICK, 0, 1, MFLG_SLOW, 0,
-    { m_nick, m_nick, m_nick, m_nick }
+    { mr_nick, m_nick, ms_nick, m_nick }
   },
   {MSG_AWAY, 0, 0, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */

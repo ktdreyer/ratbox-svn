@@ -83,6 +83,13 @@
 
 struct Client;
 
+/* unregistered */
+extern int mr_nick(struct Client*, struct Client*, int, char**);
+extern int mr_error(struct Client*, struct Client*, int, char**);
+extern int mr_pong(struct Client*, struct Client*, int, char**);
+extern int mr_server(struct Client*, struct Client*, int, char**);
+
+/* registered local clients */
 extern int m_admin(struct Client*, struct Client*, int, char**);
 extern int m_away(struct Client*, struct Client*, int, char**);
 extern int m_dline(struct Client *,struct Client *,int,char **);
@@ -133,6 +140,7 @@ extern int m_who(struct Client*, struct Client*, int, char**);
 extern int m_whois(struct Client*, struct Client*, int, char**);
 extern int m_whowas(struct Client*, struct Client*, int, char**);
 
+/* registered local OPERED */
 extern int mo_close(struct Client*, struct Client*, int, char**);
 extern int mo_connect(struct Client*, struct Client*, int, char**);
 extern int mo_die(struct Client*, struct Client*, int, char**);
@@ -158,10 +166,7 @@ extern int mo_htm(struct Client *,struct Client *,int,char **);
 extern int mo_quit(struct Client*, struct Client*, int, char**);
 extern int mo_part(struct Client*, struct Client*, int, char**);
 
-extern int mr_error(struct Client*, struct Client*, int, char**);
-extern int mr_pong(struct Client*, struct Client*, int, char**);
-extern int mr_server(struct Client*, struct Client*, int, char**);
-
+/* server */
 extern int ms_admin(struct Client*, struct Client*, int, char**);
 extern int ms_away(struct Client*, struct Client*, int, char**);
 extern int ms_capab(struct Client*, struct Client*, int, char**);

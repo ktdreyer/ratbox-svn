@@ -99,8 +99,108 @@
  *                      non-NULL pointers.
  */
 
-static int nickkilldone(struct Client *, struct Client *, int, char **, time_t, char *);
+static int nick_from_server(struct Client *, struct Client *, int, char **, time_t, char *);
+
+static int set_initial_nick(struct Client *cptr, struct Client *sptr,
+			    char *nick);
+static int change_nick( struct Client *cptr, struct Client *sptr,
+			char *nick);
+
 static int clean_nick_name(char* nick);
+
+/*
+** mr_nick
+**      parv[0] = sender prefix
+**      parv[1] = nickname
+**      parv[2] = optional hopcount when new user; TS when nick change
+**      parv[3] = optional TS
+**      parv[4] = optional umode
+**      parv[5] = optional username
+**      parv[6] = optional hostname
+**      parv[7] = optional server
+**      parv[8] = optional ircname
+*/
+
+int mr_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+{
+  struct   Client* acptr;
+  char     nick[NICKLEN + 2];
+  char*    s;
+
+  if (parc < 2)
+    {
+      sendto_one(sptr, form_str(ERR_NONICKNAMEGIVEN),
+                 me.name, parv[0]);
+      return 0;
+    }
+
+  /*
+   * parc == 2 on a normal client sign on (local) and a normal
+   *      client nick change
+   * parc == 4 on a normal server-to-server client nick change
+   *      notice
+   * parc == 9 on a normal TS style server-to-server NICK
+   *      introduction
+   */
+
+  /*
+   * XXX - ok, we terminate the nick with the first '~' ?  hmmm..
+   *  later we allow them? isvalid used to think '~'s were ok
+   *  IsNickChar allows them as well
+   */
+  if ((s = strchr(parv[1], '~')))
+    *s = '\0';
+  /*
+   * nick is an auto, need to terminate the string
+   */
+  strncpy_irc(nick, parv[1], NICKLEN);
+  nick[NICKLEN] = '\0';
+
+  /*
+   * if clean_nick_name() returns a null name OR if the server sent a nick
+   * name and clean_nick_name() changed it in some way (due to rules of nick
+   * creation) then reject it. If from a server and we reject it,
+   * and KILL it. -avalon 4/4/92
+   */
+  if (clean_nick_name(nick) == 0)
+    {
+      sendto_one(sptr, form_str(ERR_ERRONEUSNICKNAME),
+                 me.name, BadPtr(parv[0]) ? "*" : parv[0], parv[1]);
+      return 0;
+    }
+
+  if(find_q_line(nick, sptr->username, sptr->host)) 
+    {
+      sendto_realops_flags(FLAGS_REJ,
+                         "Quarantined nick [%s] from user %s",
+                         nick,get_client_name(cptr, HIDE_IP));
+      sendto_one(sptr, form_str(ERR_ERRONEUSNICKNAME),
+		 me.name, parv[0], parv[1]);
+      return 0;
+    }
+
+  /*
+  ** Check against nick name collisions.
+  **
+  ** Put this 'if' here so that the nesting goes nicely on the screen :)
+  ** We check against server name list before determining if the nickname
+  ** is present in the nicklist (due to the way the below for loop is
+  ** constructed). -avalon
+  */
+  if ((acptr = find_server(nick)))
+    {
+      sendto_one(sptr, form_str(ERR_NICKNAMEINUSE), me.name,
+		 BadPtr(parv[0]) ? "*" : parv[0], nick);
+      return 0; /* NICK message ignored */
+    }
+
+  if (!(acptr = find_client(nick, NULL)))
+    return(set_initial_nick(cptr, sptr, nick));
+  else
+    sendto_one(sptr, form_str(ERR_NICKNAMEINUSE), me.name,
+	       BadPtr(parv[0]) ? "*" : parv[0], nick);
+  return 0; /* NICK message ignored */
+}
 
 /*
 ** m_nick
@@ -114,11 +214,160 @@ static int clean_nick_name(char* nick);
 **      parv[7] = optional server
 **      parv[8] = optional ircname
 */
+
 int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+{
+  char     nick[NICKLEN + 2];
+  struct   Client *acptr;
+
+  if (parc < 2)
+    {
+      sendto_one(sptr, form_str(ERR_NONICKNAMEGIVEN),
+                 me.name, parv[0]);
+      return 0;
+    }
+
+  /*
+   * parc == 2 on a normal client sign on (local) and a normal
+   *      client nick change
+   * parc == 4 on a normal server-to-server client nick change
+   *      notice
+   * parc == 9 on a normal TS style server-to-server NICK
+   *      introduction
+   */
+
+  /*
+   * nick is an auto, need to terminate the string
+   */
+  strncpy_irc(nick, parv[1], NICKLEN);
+  nick[NICKLEN] = '\0';
+
+  /*
+   * if clean_nick_name() returns a null name OR if the server sent a nick
+   * name and clean_nick_name() changed it in some way (due to rules of nick
+   * creation) then reject it. If from a server and we reject it,
+   * and KILL it. -avalon 4/4/92
+   */
+  if (clean_nick_name(nick) == 0)
+    {
+      sendto_one(sptr, form_str(ERR_ERRONEUSNICKNAME),
+                 me.name, BadPtr(parv[0]) ? "*" : parv[0], parv[1]);
+      return 0;
+    }
+
+  if (!IsAnyOper(sptr) && find_q_line(nick, sptr->username, sptr->host))
+    {
+      sendto_realops_flags(FLAGS_REJ,
+                         "Quarantined nick [%s] from user %s",
+                         nick,get_client_name(cptr, HIDE_IP));
+      sendto_one(sptr, form_str(ERR_ERRONEUSNICKNAME),
+		 me.name, parv[0], parv[1]);
+      return 0;
+    }
+
+  /* if quiet_on_ban is set, don't allow nick changes if the user
+   * is banned from a channel.
+   */
+
+  if (ConfigFileEntry.quiet_on_ban && sptr->user)
+    {
+      struct SLink *tmp = sptr->user->channel;
+      while (tmp)
+	{
+	  if (is_banned(sptr, tmp->value.chptr))
+	    {
+	      sendto_one(sptr, form_str(ERR_BANNEDNICK),
+			 me.name,
+			 BadPtr(parv[0]) ? "*" : parv[0],
+			 tmp->value.chptr->chname);
+	      return 0; /* NICK message ignored */
+	    }
+	  tmp = tmp->next;
+	}
+    }
+
+  if ((acptr = find_server(nick)))
+    {
+      sendto_one(sptr, form_str(ERR_NICKNAMEINUSE), me.name,
+		 BadPtr(parv[0]) ? "*" : parv[0], nick);
+      return 0; /* NICK message ignored */
+    }
+
+  if ((acptr = find_client(nick, NULL)))
+    {
+      /*
+      ** If acptr == sptr, then we have a client doing a nick
+      ** change between *equivalent* nicknames as far as server
+      ** is concerned (user is changing the case of his/her
+      ** nickname or somesuch)
+      */
+      if (acptr == sptr)
+	{
+	  if (strcmp(acptr->name, nick) != 0)
+	    /*
+	    ** Allows change of case in his/her nick
+	    */
+	    return(change_nick(cptr,sptr,nick)); /* -- go and process change */
+	  else
+	    {
+	      /*
+	      ** This is just ':old NICK old' type thing.
+	      ** Just forget the whole thing here. There is
+	      ** no point forwarding it to anywhere,
+	      ** especially since servers prior to this
+	      ** version would treat it as nick collision.
+	      */
+	      return 0; /* NICK Message ignored */
+	    }
+	}
+
+      /*
+      ** If the older one is "non-person", the new entry is just
+      ** allowed to overwrite it. Just silently drop non-person,
+      ** and proceed with the nick. This should take care of the
+      ** "dormant nick" way of generating collisions...
+      */
+      if (IsUnknown(acptr)) 
+	{
+	  if (MyConnect(acptr))
+	    {
+	      exit_client(NULL, acptr, &me, "Overridden");
+	      return(change_nick(cptr,sptr,nick));
+	    }
+	  else
+	    {
+	      sendto_one(sptr, form_str(ERR_NICKNAMEINUSE),
+			 /* parv[0] is empty when connecting */
+			 me.name, BadPtr(parv[0]) ? "*" : parv[0], nick);
+	      return 0; /* NICK message ignored */
+	    }
+	}
+    }
+  else
+    {
+      return(change_nick(cptr,sptr,nick)); /* -- go and process change */ 
+    }
+
+  return 1;
+}
+
+
+/*
+** ms_nick
+**      parv[0] = sender prefix
+**      parv[1] = nickname
+**      parv[2] = optional hopcount when new user; TS when nick change
+**      parv[3] = optional TS
+**      parv[4] = optional umode
+**      parv[5] = optional username
+**      parv[6] = optional hostname
+**      parv[7] = optional server
+**      parv[8] = optional ircname
+*/
+int ms_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
   struct Client* acptr;
   char     nick[NICKLEN + 2];
-  char*    s;
   time_t   newts = 0;
   int      sameuser = 0;
   int      fromTS = 0;
@@ -130,11 +379,10 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       return 0;
     }
 
-  if (!IsServer(sptr) && IsServer(cptr) && parc > 2)
+  if (!IsServer(sptr) && parc > 2)
     newts = atol(parv[2]);
   else if (IsServer(sptr) && parc > 3)
     newts = atol(parv[3]);
-  else parc = 2;
 
   /*
    * parc == 2 on a normal client sign on (local) and a normal
@@ -175,13 +423,6 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
   fromTS = (parc > 6);
 
-  /*
-   * XXX - ok, we terminate the nick with the first '~' ?  hmmm..
-   *  later we allow them? isvalid used to think '~'s were ok
-   *  IsNickChar allows them as well
-   */
-  if (MyConnect(sptr) && (s = strchr(parv[1], '~')))
-    *s = '\0';
   /*
    * nick is an auto, need to terminate the string
    */
@@ -226,56 +467,12 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       return 0;
     }
 
-  if (MyConnect(sptr) && !IsServer(sptr) && !IsAnyOper(sptr) &&
-     find_q_line(nick, sptr->username, sptr->host)) 
-    {
-      sendto_realops_flags(FLAGS_REJ,
-                         "Quarantined nick [%s] from user %s",
-                         nick,get_client_name(cptr, HIDE_IP));
-      sendto_one(sptr, form_str(ERR_ERRONEUSNICKNAME),
-		 me.name, parv[0], parv[1]);
-      return 0;
-    }
-
-  /* if quiet_on_ban is set, don't allow nick changes if the user
-   * is banned from a channel.
-   */
-
-  if (ConfigFileEntry.quiet_on_ban && !IsServer(sptr) && sptr->user) {
-    struct SLink *tmp = sptr->user->channel;
-    while (tmp) {
-      if (is_banned(sptr, tmp->value.chptr)) {
-        sendto_one(sptr, form_str(ERR_BANNEDNICK), me.name, BadPtr(parv[0]) ? "*" : parv[0], tmp->value.chptr->chname);
-        return 0; /* NICK message ignored */
-      }
-      tmp = tmp->next;
-    }
-  }
-
   /*
-  ** Check against nick name collisions.
-  **
-  ** Put this 'if' here so that the nesting goes nicely on the screen :)
-  ** We check against server name list before determining if the nickname
-  ** is present in the nicklist (due to the way the below for loop is
-  ** constructed). -avalon
-  */
-  if ((acptr = find_server(nick)))
-    if (MyConnect(sptr))
-      {
-        sendto_one(sptr, form_str(ERR_NICKNAMEINUSE), me.name,
-                   BadPtr(parv[0]) ? "*" : parv[0], nick);
-        return 0; /* NICK message ignored */
-      }
-  /*
-  ** acptr already has result from previous find_server()
-  */
-  /*
-   * Well. unless we have a capricious server on the net,
+   * Check against nick name collisions.
    * a nick can never be the same as a server name - Dianora
    */
 
-  if (acptr)
+  if ((acptr = find_server(nick)))
     {
       /*
       ** We have a nickname trying to use the same name as
@@ -302,10 +499,7 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   
 
   if (!(acptr = find_client(nick, NULL)))
-    return(nickkilldone(cptr,sptr,parc,parv,newts,nick));
-                                                      /* No collisions,
-                                                       * all clear...
-                                                       */
+    return(nick_from_server(cptr,sptr,parc,parv,newts,nick));
 
   /*
   ** If acptr == sptr, then we have a client doing a nick
@@ -319,7 +513,7 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       /*
       ** Allows change of case in his/her nick
       */
-      return(nickkilldone(cptr,sptr,parc,parv,newts,nick)); /* -- go and process change */
+      return(nick_from_server(cptr,sptr,parc,parv,newts,nick)); /* -- go and process change */
     else
       {
         /*
@@ -337,7 +531,6 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   ** acptr != sptr (point to different client structures).
   */
 
-
   /*
   ** If the older one is "non-person", the new entry is just
   ** allowed to overwrite it. Just silently drop non-person,
@@ -349,7 +542,7 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     if (MyConnect(acptr))
       {
         exit_client(NULL, acptr, &me, "Overridden");
-        return(nickkilldone(cptr,sptr,parc,parv,newts,nick));
+        return(nick_from_server(cptr,sptr,parc,parv,newts,nick));
       }
     else
       {
@@ -379,20 +572,7 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         }
       }
    }
-  /*
-  ** Decide, we really have a nick collision and deal with it
-  */
-  if (!IsServer(cptr))
-    {
-      /*
-      ** NICK is coming from local client connection. Just
-      ** send error reply and ignore the command.
-      */
-      sendto_one(sptr, form_str(ERR_NICKNAMEINUSE),
-                 /* parv[0] is empty when connecting */
-                 me.name, BadPtr(parv[0]) ? "*" : parv[0], nick);
-      return 0; /* NICK message ignored */
-    }
+
   /*
   ** NICK was coming from a server connection. Means that the same
   ** nick is registered for different users by different server.
@@ -489,7 +669,7 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
               acptr->flags |= FLAGS_KILLED;
               (void)exit_client(cptr, acptr, &me, "Nick collision");
-              return nickkilldone(cptr,sptr,parc,parv,newts,nick);
+              return nick_from_server(cptr,sptr,parc,parv,newts,nick);
             }
         }
     }
@@ -588,11 +768,11 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
           (void)exit_client(cptr, acptr, &me, "Nick collision");
         }
     }
-  return(nickkilldone(cptr,sptr,parc,parv,newts,nick));
+  return(nick_from_server(cptr,sptr,parc,parv,newts,nick));
 }
 
 /*
- * nickkilldone
+ * nick_from_server
  *
  * input        - pointer to physical struct Client
  *              - pointer to source struct Client
@@ -604,10 +784,9 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
  * side effects -
  */
 
-static int nickkilldone(struct Client *cptr, struct Client *sptr, int parc,
+static int nick_from_server(struct Client *cptr, struct Client *sptr, int parc,
                  char *parv[], time_t newts,char *nick)
 {
-
   if (IsServer(sptr))
     {
       /* A server introducing a new client, change source */
@@ -664,43 +843,6 @@ static int nickkilldone(struct Client *cptr, struct Client *sptr, int parc,
       if (irccmp(parv[0], nick))
         sptr->tsinfo = newts ? newts : CurrentTime;
 
-      if(MyConnect(sptr) && IsRegisteredUser(sptr))
-        {     
-          if( (sptr->last_nick_change + ConfigFileEntry.max_nick_time) < CurrentTime)
-            sptr->number_of_nick_changes = 0;
-          sptr->last_nick_change = CurrentTime;
-          sptr->number_of_nick_changes++;
-
-          if((ConfigFileEntry.anti_nick_flood && 
-             (sptr->number_of_nick_changes <= ConfigFileEntry.max_nick_changes)) ||
-             !ConfigFileEntry.anti_nick_flood)
-            {
-              sendto_realops_flags(FLAGS_NCHANGE,
-                                 "Nick change: From %s to %s [%s@%s]",
-                                 parv[0], nick, sptr->username,
-                                 sptr->host);
-
-              sendto_common_channels(sptr, ":%s NICK :%s", parv[0], nick);
-              if (sptr->user)
-                {
-                  add_history(sptr,1);
-              
-                  sendto_serv_butone(cptr, ":%s NICK %s :%lu",
-                                     parv[0], nick, sptr->tsinfo);
-                }
-            }
-          else
-            {
-              sendto_one(sptr,
-                         ":%s NOTICE %s :*** Notice -- Too many nick changes wait %d seconds before trying to change it again.",
-                         me.name,
-                         sptr->name,
-                         ConfigFileEntry.max_nick_time);
-              return 0;
-            }
-        }
-      else
-        {
           sendto_common_channels(sptr, ":%s NICK :%s", parv[0], nick);
           if (sptr->user)
             {
@@ -708,39 +850,59 @@ static int nickkilldone(struct Client *cptr, struct Client *sptr, int parc,
               sendto_serv_butone(cptr, ":%s NICK %s :%lu",
                                  parv[0], nick, sptr->tsinfo);
             }
-        }
     }
-  else
-    {
-      /* Client setting NICK the first time */
-      
 
-      /* This had to be copied here to avoid problems.. */
-      strcpy(sptr->name, nick);
-      sptr->tsinfo = CurrentTime;
-      if (sptr->user)
-        {
-          char buf[USERLEN + 1];
-          strncpy_irc(buf, sptr->username, USERLEN);
-          buf[USERLEN] = '\0';
-          /*
-          ** USER already received, now we have NICK.
-          ** *NOTE* For servers "NICK" *must* precede the
-          ** user message (giving USER before NICK is possible
-          ** only for local client connection!). register_user
-          ** may reject the client and call exit_client for it
-          ** --must test this and exit m_nick too!!!
-          */
+  /*
+  **  Finally set new nick name.
+  */
+  if (sptr->name[0])
+    del_from_client_hash_table(sptr->name, sptr);
+  strcpy(sptr->name, nick);
+  add_to_client_hash_table(nick, sptr);
+
+  return 0;
+}
+
+/*
+ * set_initial_nick
+ * inputs
+ * output
+ * side effects	-
+ *
+ * This function is only called to set up an initially registering
+ * client. 
+ */
+
+int static set_initial_nick(struct Client *cptr, struct Client *sptr,
+			    char *nick)
+{
+  char buf[USERLEN + 1];
+  /* Client setting NICK the first time */
+
+  /* This had to be copied here to avoid problems.. */
+  strcpy(sptr->name, nick);
+  sptr->tsinfo = CurrentTime;
+  if (sptr->user)
+    {
+      strncpy_irc(buf, sptr->username, USERLEN);
+      buf[USERLEN] = '\0';
+      /*
+      ** USER already received, now we have NICK.
+      ** *NOTE* For servers "NICK" *must* precede the
+      ** user message (giving USER before NICK is possible
+      ** only for local client connection!). register_user
+      ** may reject the client and call exit_client for it
+      ** --must test this and exit m_nick too!!!
+      */
 #ifdef USE_IAUTH
-          /*
-           * Send the client to the iauth module for verification
-           */
-            BeginAuthorization(sptr);
+      /*
+       * Send the client to the iauth module for verification
+       */
+      BeginAuthorization(sptr);
 #else
-            if (register_user(cptr, sptr, nick, buf) == CLIENT_EXITED)
-              return CLIENT_EXITED;
+      if (register_user(cptr, sptr, nick, buf) == CLIENT_EXITED)
+	return CLIENT_EXITED;
 #endif
-        }
     }
 
   /*
@@ -755,15 +917,75 @@ static int nickkilldone(struct Client *cptr, struct Client *sptr, int parc,
    * .. and update the new nick in the fd note.
    * XXX should use IsLocal() ! -- adrian
    */
-  if (cptr->fd > -1) {
-    char nickbuf[NICKLEN + 10];
-    strcpy(nickbuf, "Nick: ");
-    /* XXX nick better be the right length! -- adrian */
-    strncat(nickbuf, nick, NICKLEN);
-    fd_note(cptr->fd, nickbuf);
-  }
+  if (sptr->fd > -1)
+    {
+      char nickbuf[NICKLEN + 10];
+      strcpy(nickbuf, "Nick: ");
+      /* XXX nick better be the right length! -- adrian */
+      strncat(nickbuf, nick, NICKLEN);
+      fd_note(cptr->fd, nickbuf);
+    }
 
   return 0;
+}
+
+/*
+ * change_nick
+ * inputs	- pointer to server
+ *
+ * output	- 
+ * side effects	-
+ *
+ */
+
+static int change_nick( struct Client *cptr, struct Client *sptr,
+			 char *nick)
+{
+  /*
+  ** Client just changing his/her nick. If he/she is
+  ** on a channel, send note of change to all clients
+  ** on that channel. Propagate notice to other servers.
+  */
+
+  if( (sptr->last_nick_change + ConfigFileEntry.max_nick_time) < CurrentTime)
+    sptr->number_of_nick_changes = 0;
+  sptr->last_nick_change = CurrentTime;
+  sptr->number_of_nick_changes++;
+
+  if((ConfigFileEntry.anti_nick_flood && 
+      (sptr->number_of_nick_changes <= ConfigFileEntry.max_nick_changes)) ||
+     !ConfigFileEntry.anti_nick_flood)
+    {
+      sendto_realops_flags(FLAGS_NCHANGE,
+			   "Nick change: From %s to %s [%s@%s]",
+			   sptr->name, nick, sptr->username,
+			   sptr->host);
+
+      sendto_common_channels(sptr, ":%s NICK :%s", sptr->name, nick);
+      if (sptr->user)
+	{
+	  add_history(sptr,1);
+	  
+	  sendto_serv_butone(cptr, ":%s NICK %s :%lu",
+			     sptr->name, nick, sptr->tsinfo);
+	}
+    }
+  else
+    {
+      sendto_one(sptr,
+		 ":%s NOTICE %s :*** Notice -- Too many nick changes wait %d seconds before trying to change it again.",
+		 me.name,
+		 sptr->name,
+		 ConfigFileEntry.max_nick_time);
+      return 0;
+    }
+
+  /* Finally, add to hash */
+  del_from_client_hash_table(sptr->name, sptr);
+  strcpy(sptr->name, nick);
+  add_to_client_hash_table(nick, sptr);
+
+  return 1;
 }
 
 /*
