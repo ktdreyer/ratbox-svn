@@ -74,7 +74,6 @@ extern struct ServerStatistics *ServerStats;
 extern void init_stats(void);
 extern void tstats(struct Client *client);
 
-extern void send_usage(struct Client *);
 extern void count_memory(struct Client *);
 
 #endif /* INCLUDED_s_stats_h */

@@ -805,7 +805,65 @@ stats_resv (struct Client *source_p)
 static void
 stats_usage (struct Client *source_p)
 {
-	send_usage (source_p);
+#ifndef __VMS
+	struct rusage rus;
+#endif
+	time_t secs;
+	time_t rup;
+#ifdef  hz
+# define hzz hz
+#else
+# ifdef HZ
+#  define hzz HZ
+# else
+	int hzz = 1;
+# endif
+#endif
+
+#ifdef __VMS
+	sendto_one(source_p, 
+		   ":%s NOTICE %s :getrusage not supported on this system",
+		   me.name, source_p->name);
+	return;
+#else
+	if(getrusage(RUSAGE_SELF, &rus) == -1)
+	{
+		sendto_one(source_p, ":%s NOTICE %s :Getruseage error: %s.",
+			   me.name, source_p->name, strerror(errno));
+		return;
+	}
+	secs = rus.ru_utime.tv_sec + rus.ru_stime.tv_sec;
+	if(0 == secs)
+		secs = 1;
+
+	rup = (CurrentTime - me.since) * hzz;
+	if(0 == rup)
+		rup = 1;
+
+	sendto_one(source_p,
+		   ":%s %d %s R :CPU Secs %d:%d User %d:%d System %d:%d",
+		   me.name, RPL_STATSDEBUG, source_p->name,
+		   (int) (secs / 60), (int) (secs % 60),
+		   (int) (rus.ru_utime.tv_sec / 60),
+		   (int) (rus.ru_utime.tv_sec % 60),
+		   (int) (rus.ru_stime.tv_sec / 60), (int) (rus.ru_stime.tv_sec % 60));
+	sendto_one(source_p,
+		   ":%s %d %s R :RSS %ld ShMem %ld Data %ld Stack %ld",
+		   me.name, RPL_STATSDEBUG, source_p->name, rus.ru_maxrss,
+		   (rus.ru_ixrss / rup), (rus.ru_idrss / rup), (rus.ru_isrss / rup));
+	sendto_one(source_p, ":%s %d %s R :Swaps %d Reclaims %d Faults %d",
+		   me.name, RPL_STATSDEBUG, source_p->name,
+		   (int) rus.ru_nswap, (int) rus.ru_minflt, (int) rus.ru_majflt);
+	sendto_one(source_p, ":%s %d %s R :Block in %d out %d", me.name,
+		   RPL_STATSDEBUG, source_p->name, (int) rus.ru_inblock, (int) rus.ru_oublock);
+	sendto_one(source_p, ":%s %d %s R :Msg Rcv %d Send %d", me.name,
+		   RPL_STATSDEBUG, source_p->name, (int) rus.ru_msgrcv, (int) rus.ru_msgsnd);
+	sendto_one(source_p,
+		   ":%s %d %s R :Signals %d Context Vol. %d Invol %d",
+		   me.name, RPL_STATSDEBUG, source_p->name, 
+		   (int) rus.ru_nsignals, (int) rus.ru_nvcsw, 
+		   (int) rus.ru_nivcsw);
+#endif /* __VMS */
 }
 
 static void

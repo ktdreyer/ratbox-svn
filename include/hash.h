@@ -46,10 +46,6 @@ struct cachefile;
 
 extern void init_hash(void);
 
-extern size_t hash_get_client_table_size(void);
-extern size_t hash_get_channel_table_size(void);
-extern size_t hash_get_resv_table_size(void);
-
 extern void add_to_client_hash(const char *name, struct Client *client);
 extern void del_from_client_hash(const char *name, struct Client *client);
 extern struct Client *find_client(const char *name);

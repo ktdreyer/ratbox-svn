@@ -62,24 +62,6 @@ static dlink_list *helpTable;
  */
 extern BlockHeap *channel_heap;
 
-size_t
-hash_get_channel_table_size(void)
-{
-	return sizeof(dlink_list) * CH_MAX;
-}
-
-size_t
-hash_get_client_table_size(void)
-{
-	return sizeof(dlink_list) * U_MAX;
-}
-
-size_t
-hash_get_resv_table_size(void)
-{
-	return sizeof(dlink_list) * R_MAX;
-}
-
 /*
  * look in whowas.c for the missing ...[WW_MAX]; entry
  */
