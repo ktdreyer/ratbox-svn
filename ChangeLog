@@ -1,3 +1,17 @@
+leeh        2002/12/15 13:48:25 UTC	(20021215_0)
+
+  Modified files:
+    src                  channel.c 
+  Log:
+  - we cant use MyConnect() to check if its our client here, because we
+    might be exiting them and set sptr->localClient to NULL, so instead,
+          check sptr->servptr == &me
+  
+  Revision  Changes    Path
+  7.367     +1 -1      ircd-ratbox/src/channel.c
+
+
+
 androsyn    2002/12/14 22:33:57 UTC	(20021214_1)
 
   Modified files:
