@@ -57,12 +57,15 @@ static  void    ban_free(dlink_node *ptr);
 static  void    sub1_from_channel (struct Channel *);
 static  void    destroy_channel(struct Channel *);
 
+static void send_mode_list(struct Client *, char *, dlink_list *,
+                           char, int);
 
+static void sync_channel_oplists(struct Channel *,
+                                 int);
 static void sync_oplists(struct Channel *,
-                         struct Client *);
-
+                         struct Client *, int);
 static void send_oplist(char *, struct Client *,
-                        dlink_list *, char *);
+                        dlink_list *, char *, int);
 
 static void send_members(struct Client *cptr,
 			 char *modebuf, char *parabuf,
@@ -711,15 +714,15 @@ int can_send(struct Channel *chptr, struct Client *sptr)
  * 		- pointer to client
  *		- pointer to mode buf
  * 		- pointer to parameter buf
- *              - int flag reset: send -modes too?
  * output	- NONE
  * side effects - write the "simple" list of channel modes for channel
  * chptr onto buffer mbuf with the parameters in pbuf.
  */
 void channel_modes(struct Channel *chptr, struct Client *cptr,
-		   char *mbuf, char *pbuf, int reset)
+		   char *mbuf, char *pbuf)
 {
   *mbuf++ = '+';
+
   if (chptr->mode.mode & MODE_SECRET)
     *mbuf++ = 's';
   if (chptr->mode.mode & MODE_PRIVATE)
@@ -736,47 +739,18 @@ void channel_modes(struct Channel *chptr, struct Client *cptr,
     *mbuf++ = 'a';
   
   if (chptr->mode.limit)
-    {
-      *mbuf++ = 'l';
-      if (IsMember(cptr, chptr) || IsServer(cptr))
-        ircsprintf(pbuf, "%d ", chptr->mode.limit);
-    }
-  if (*chptr->mode.key)
-    {
-      *mbuf++ = 'k';
-      if (IsMember(cptr, chptr) || IsServer(cptr))
-        (void)strcat(pbuf, chptr->mode.key);
-    }
-
-  if (reset)
   {
-    if (!((chptr->mode.mode & MODE_SECRET & MODE_PRIVATE &
-          MODE_MODERATED & MODE_TOPICLIMIT & MODE_INVITEONLY
-          & MODE_NOPRIVMSGS & MODE_HIDEOPS) && chptr->mode.limit
-          && *(chptr->mode.key)))
-    {
-      *mbuf++ = '-';
-      if (!(chptr->mode.mode & MODE_SECRET))
-        *mbuf++ = 's';
-      if (!(chptr->mode.mode & MODE_PRIVATE))
-        *mbuf++ = 'p';
-      if (!(chptr->mode.mode & MODE_MODERATED))
-        *mbuf++ = 'm';
-      if (!(chptr->mode.mode & MODE_TOPICLIMIT))
-        *mbuf++ = 't';
-      if (!(chptr->mode.mode & MODE_INVITEONLY))
-        *mbuf++ = 'i';
-      if (!(chptr->mode.mode & MODE_NOPRIVMSGS))
-        *mbuf++ = 'n';
-      if (!(chptr->mode.mode & MODE_HIDEOPS))
-        *mbuf++ = 'a';
-
-      if (!chptr->mode.limit)
-        *mbuf++ = 'l';
-      if (!*chptr->mode.key)
-        *mbuf++ = 'k';
-    }
+    *mbuf++ = 'l';
+    if (IsMember(cptr, chptr) || IsServer(cptr))
+      ircsprintf(pbuf, "%d ", chptr->mode.limit);
   }
+  if (*chptr->mode.key)
+  {
+    *mbuf++ = 'k';
+    if (IsMember(cptr, chptr) || IsServer(cptr))
+      (void)strcat(pbuf, chptr->mode.key);
+  }
+
   *mbuf++ = '\0';
   return;
 }
@@ -787,6 +761,7 @@ void channel_modes(struct Channel *chptr, struct Client *cptr,
  * 		- pointer to channel
  *		- pointer to top of mode link list to send
  * 		- char flag flagging type of mode i.e. 'b' 'e' etc.
+ * 		- clear (remove all current modes, for ophiding, etc)
  * output	- NONE
  * side effects - only used to send +b and +e now, +d/+a/+I too.
  *		  
@@ -794,7 +769,8 @@ void channel_modes(struct Channel *chptr, struct Client *cptr,
 static void send_mode_list(struct Client *cptr,
 			   char *chname,
 			   dlink_list *top,
-			   char flag)
+			   char flag,
+                           int clear)
 {
   dlink_node *lp;
   struct Ban *banptr;
@@ -825,7 +801,7 @@ static void send_mode_list(struct Client *cptr,
         {
           sendto_one(cptr, "%s%s %s", buf, mbuf, pbuf);
           mp = mbuf;
-          *mp++ = '+';
+          *mp++ = (clear ? '-' : '+');
           *mp = '\0';
 	  pp = pbuf;
 	  cur_len = mlen;
@@ -858,7 +834,7 @@ void send_channel_modes(struct Client *cptr, struct Channel *chptr)
     return;
 
   *modebuf = *parabuf = '\0';
-  channel_modes(chptr, cptr, modebuf, parabuf, 0);
+  channel_modes(chptr, cptr, modebuf, parabuf);
 
   send_members(cptr,modebuf,parabuf,chptr,&chptr->chanops,"@");
   if (IsCapable(cptr, CAP_HOPS))
@@ -869,22 +845,22 @@ void send_channel_modes(struct Client *cptr, struct Channel *chptr)
   send_members(cptr,modebuf,parabuf,chptr,&chptr->voiced,"+");
   send_members(cptr,modebuf,parabuf,chptr,&chptr->peons,"");
 
-  send_mode_list(cptr, chptr->chname, &chptr->banlist, 'b');
+  send_mode_list(cptr, chptr->chname, &chptr->banlist, 'b', 0);
 
   if(!IsCapable(cptr,CAP_EX))
     return;
 
-  send_mode_list(cptr, chptr->chname, &chptr->exceptlist, 'e');
+  send_mode_list(cptr, chptr->chname, &chptr->exceptlist, 'e', 0);
 
   if(!IsCapable(cptr,CAP_DE))
       return;
 
-  send_mode_list(cptr, chptr->chname, &chptr->denylist, 'd');
+  send_mode_list(cptr, chptr->chname, &chptr->denylist, 'd', 0);
   
   if (!IsCapable(cptr,CAP_IE))
     return;
   
-  send_mode_list(cptr, chptr->chname, &chptr->invexlist, 'I');
+  send_mode_list(cptr, chptr->chname, &chptr->invexlist, 'I', 0);
 }
 
 /*
@@ -1081,10 +1057,11 @@ void set_channel_mode(struct Client *cptr,
   struct Client *who;
   char  *curr = parv[0], c, *arg, plus = '+', *tmpc;
   char  numeric[16];
-  /* mbufw gets the param-less mode chars, always with their sign
-   * mbuf2w gets the paramed mode chars, always with their sign
-   * pbufw gets the params, in ID form whenever possible
-   * pbuf2w gets the params, no ID's
+  /* mbufw gets the `simple' mode chars, which nonops can see
+   * on a +a channel (+smntilk)
+   * pbufw gets the params.
+   * mbuf2w gets the other mode chars, always with their sign
+   * pbuf2w gets the other params, no ID's
    */
 
   char  modebuf_ex[MODEBUFLEN];
@@ -1120,6 +1097,8 @@ void set_channel_mode(struct Client *cptr,
   int   isdeop;
   int   chan_op;
   int   type;
+
+  int   target_was_op;
 
   dlink_node *ptr;
   dlink_list *to_list=NULL;
@@ -1286,11 +1265,11 @@ void set_channel_mode(struct Client *cptr,
 		  }
 		  else 
 		  {
-			  *mbufw++ = plus;
-			  *mbufw++ = c;
-			  strcpy(pbufw, who->name);
-			  pbufw += strlen(pbufw);
-			  *pbufw++ = ' ';
+			  *mbuf2w++ = plus;
+			  *mbuf2w++ = c;
+			  strcpy(pbuf2w, who->name);
+			  pbuf2w += strlen(pbuf2w);
+			  *pbuf2w++ = ' ';
 		  }
 
 		  len += tmp + 1;
@@ -1300,6 +1279,8 @@ void set_channel_mode(struct Client *cptr,
 	  if((to_list == &chptr->halfops) && is_chan_op(chptr,who))
 	    break;
 
+          target_was_op = is_any_op(chptr,who);
+
           if(change_channel_membership(chptr,to_list, who))
           {
 	    if((to_list == &chptr->chanops) && (whatt == MODE_ADD))
@@ -1308,12 +1289,21 @@ void set_channel_mode(struct Client *cptr,
             }
           }
 
-          if (((to_list == &chptr->chanops) ||
+          if ((!target_was_op) &&
+              ((to_list == &chptr->chanops) ||
                (to_list == &chptr->halfops))
               && (whatt == MODE_ADD) && MyClient(who)
               && (chptr->mode.mode & MODE_HIDEOPS))
           {
-            sync_oplists(chptr, who);
+            sync_oplists(chptr, who, 0);
+          }
+          else if (target_was_op &
+              ((to_list != &chptr->chanops) &&
+               (to_list != &chptr->halfops))
+              && (whatt == MODE_DEL) && MyClient(who)
+              && (chptr->mode.mode & MODE_HIDEOPS))
+          {
+            sync_oplists(chptr, who, 1);
           }
 
           break;
@@ -1766,11 +1756,11 @@ void set_channel_mode(struct Client *cptr,
                 ((whatt & MODE_DEL) && !del_id(chptr, arg, CHFL_BAN))))
             break;
 
-          *mbufw++ = plus;
-          *mbufw++ = 'b';
-          strcpy(pbufw, arg);
-          pbufw += strlen(pbufw);
-          *pbufw++ = ' ';
+          *mbuf2w++ = plus;
+          *mbuf2w++ = 'b';
+          strcpy(pbuf2w, arg);
+          pbuf2w += strlen(pbuf2w);
+          *pbuf2w++ = ' ';
           len += tmp + 1;
           opcnt++;
 
@@ -2007,6 +1997,7 @@ void set_channel_mode(struct Client *cptr,
               *mbufw++ = '+';
               *mbufw++ = 'a';
               len += 2;
+              sync_channel_oplists(chptr, 1);
 	    }
 	  else
 	    {
@@ -2017,6 +2008,7 @@ void set_channel_mode(struct Client *cptr,
 	      *mbufw++ = '-';
 	      *mbufw++ = 'a';
 	      len += 2;
+              sync_channel_oplists(chptr, 0);
 	    }
 	  break;
 				
@@ -2177,14 +2169,14 @@ void set_channel_mode(struct Client *cptr,
   if(*modebuf)
     {
       if(IsServer(sptr))
-	sendto_channel_local(type,
+	sendto_channel_local(ALL_MEMBERS,
 			     chptr,
 			     ":%s MODE %s %s %s", 
 			     me.name,
 			     chname,
 			     modebuf, parabuf);
       else
-	sendto_channel_local(type,
+	sendto_channel_local(ALL_MEMBERS,
 			     chptr,
 			     ":%s!%s@%s MODE %s %s %s", 
 			     sptr->name,
@@ -2196,6 +2188,30 @@ void set_channel_mode(struct Client *cptr,
       sendto_channel_remote(chptr, cptr, ":%s MODE %s %s %s",
 			    sptr->name, chptr->chname,
 			    modebuf, parabuf);
+    }
+
+  if(*modebuf2)
+    {
+      if(IsServer(sptr))
+        sendto_channel_local(type,
+                             chptr,
+                             ":%s MODE %s %s %s",
+                             me.name,
+                             chname,
+                             modebuf2, parabuf2);
+      else
+        sendto_channel_local(type,
+                             chptr,
+                             ":%s!%s@%s MODE %s %s %s",
+                             sptr->name,
+                             sptr->username,
+                             sptr->host,
+                             chname,
+                             modebuf2, parabuf2);
+
+      sendto_channel_remote(chptr, cptr, ":%s MODE %s %s %s",
+                            sptr->name, chptr->chname,
+                            modebuf2, parabuf2);
     }
 
   if(*modebuf_ex)
@@ -2976,28 +2992,22 @@ char *channel_chanop_or_voice(struct Channel *chptr, struct Client *acptr)
  * side effects - Sends MODE +o/+h/+v list to user
  *                (for +a channels)
  */
-static void sync_oplists(struct Channel *chptr, struct Client *acptr)
+static void sync_oplists(struct Channel *chptr, struct Client *acptr,
+                         int clear)
 {
-  *modebuf2 = *parabuf2 = '\0';
+  send_oplist(chptr->chname, acptr, &chptr->chanops, "o", clear);
+  send_oplist(chptr->chname, acptr, &chptr->halfops, "h", clear);
+  send_oplist(chptr->chname, acptr, &chptr->voiced,  "v", clear);
 
-  channel_modes(chptr, acptr, modebuf2, parabuf2, 1);
-
-  if (*modebuf2)
-    sendto_one( acptr, ":%s MODE %s %s %s", me.name, chptr->chname,
-                modebuf2, parabuf2 );
-  
-  send_oplist(chptr->chname, acptr, &chptr->chanops, "o");
-  send_oplist(chptr->chname, acptr, &chptr->halfops, "h");
-  send_oplist(chptr->chname, acptr, &chptr->voiced,  "v");
-
-  send_mode_list(acptr, chptr->chname, &chptr->banlist,    'b');
-  send_mode_list(acptr, chptr->chname, &chptr->exceptlist, 'e');
-  send_mode_list(acptr, chptr->chname, &chptr->denylist,   'd');
-  send_mode_list(acptr, chptr->chname, &chptr->invexlist,  'I');
+  send_mode_list(acptr, chptr->chname, &chptr->banlist,    'b', clear);
+  send_mode_list(acptr, chptr->chname, &chptr->exceptlist, 'e', clear);
+  send_mode_list(acptr, chptr->chname, &chptr->denylist,   'd', clear);
+  send_mode_list(acptr, chptr->chname, &chptr->invexlist,  'I', clear);
 }
 
 static void send_oplist(char *chname, struct Client *cptr,
-                        dlink_list *list, char *prefix)
+                        dlink_list *list, char *prefix,
+                        int clear)
 {
   dlink_node *ptr;
   int cur_modes=0;      /* no of chars in modebuf */
@@ -3014,7 +3024,7 @@ static void send_oplist(char *chname, struct Client *cptr,
     {
       if ( cur_modes == 0 )
       {
-        mcbuf[cur_modes++] = '+';
+        mcbuf[cur_modes++] = (clear ? '-' : '+');
       }
       
       acptr = ptr->data;
@@ -3049,3 +3059,25 @@ static void send_oplist(char *chname, struct Client *cptr,
     }
 }
 
+static void sync_channel_oplists(struct Channel *chptr,
+                                 int clear)
+{
+  dlink_node *ptr;
+  dlink_list *list;
+  struct Client *acptr;
+
+  list = &chptr->peons;
+  for (ptr = list->head; ptr && ptr->data; ptr = ptr->next)
+  {
+    acptr = ptr->data;
+    if(MyClient(acptr))
+      sync_oplists(chptr, acptr, clear);
+  }
+  list = &chptr->voiced;
+  for (ptr = list->head; ptr && ptr->data; ptr = ptr->next)
+  {
+    acptr = ptr->data;
+    if(MyClient(acptr))
+      sync_oplists(chptr, acptr, clear);
+  }
+}

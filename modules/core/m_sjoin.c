@@ -310,7 +310,7 @@ int     ms_sjoin(struct Client *cptr,
 
   *modebuf = *parabuf = '\0';
   if (parv[3][0] != '0' && keep_new_modes)
-    channel_modes(chptr, sptr, modebuf, parabuf, 0);
+    channel_modes(chptr, sptr, modebuf, parabuf);
   else
     {
       modebuf[0] = '0';
