@@ -1,3 +1,7 @@
+*** 20010604_7 by ejb
+- don't copy version.c any more, since we generate it via version.com.
+
+
 *** 20010604_6 by ejb
 - oops, do these too.
 
