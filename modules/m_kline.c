@@ -69,8 +69,15 @@ _modinit(void)
 extern ConfigFileEntryType ConfigFileEntry; /* defined in ircd.c */
 
 /* Local function prototypes */
+
 int isnumber(char *);    /* return 0 if not, else return number */
 char *cluster(char *);
+int find_user_host(struct Client *sptr,
+                   char *user_host_or_nick, char *user, char *host);
+
+int valid_comment(struct Client *sptr, char *comment);
+int valid_user_host(struct Client *sptr, char *user, char *host);
+int valid_wild_card(struct Client *sptr, char *user, char *host);
 
 /*
  * Linked list of pending klines that need to be written to
@@ -92,278 +99,13 @@ void WritePendingLines(const char *);
 void WriteKline(const char *, struct Client *, struct Client *,
                        const char *, const char *, const char *, 
                        const char *);
+
 void WriteDline(const char *, struct Client *,
-                       const char *, const char *, const char *);
+                const char *, const char *, const char *);
 
-/*
-AddPending()
- Add a pending K/D line to our linked list
-*/
+static void add_to_pending_klines(struct Client *sptr, char *user, char *host,
+                                  char *reason, const char *current_date);
 
-aPendingLine *
-AddPending(void)
-{
-  aPendingLine *temp;
-
-  temp = (aPendingLine *) MyMalloc(sizeof(aPendingLine));
-
-  /*
-   * insert the new entry into our list
-   */
-  temp->next = PendingLines;
-  PendingLines = temp;
-
-  return (temp);
-} /* AddPending() */
-
-/*
-DelPending()
- Delete pending line entry - assume calling function handles
-linked list manipulation (setting next field etc)
-*/
-
-void
-DelPending(aPendingLine *pendptr)
-
-{
-  if (!pendptr)
-    return;
-
-  if (pendptr->user)
-    MyFree(pendptr->user);
-  MyFree(pendptr->host);
-  MyFree(pendptr->reason);
-  MyFree(pendptr->when);
-  MyFree(pendptr);
-} /* DelPending() */
-
-/*
-LockedFile()
- Determine if 'filename' is currently locked. If it is locked,
-there should be a filename.lock file which contains the current
-pid of the editing process. Make sure the pid is valid before
-giving up.
-
-Return: 1 if locked
-        0 if not
-*/
-
-int
-LockedFile(const char *filename)
-
-{
-  char lockpath[PATH_MAX + 1];
-  char buffer[1024];
-  FBFILE *fileptr;
-  int killret;
-
-  if (!filename)
-    return (0);
-
-  ircsprintf(lockpath, "%s.lock", filename);
-
-  if ((fileptr = fbopen(lockpath, "r")) == (FBFILE *) NULL)
-  {
-    /*
-     * lockfile does not exist
-     */
-    return (0);
-  }
-
-  if (fbgets(buffer, sizeof(buffer) - 1, fileptr))
-  {
-    /*
-     * If it is a valid lockfile, 'buffer' should now
-     * contain the pid number of the editing process.
-     * Send the pid a SIGCHLD to see if it is a valid
-     * pid - it could be a remnant left over from a
-     * crashed editor or system reboot etc.
-     */
-    killret = kill(atoi(buffer), SIGCHLD);
-    if (killret == 0)
-    {
-      fbclose(fileptr);
-      return (1);
-    }
-
-    /*
-     * killret must be -1, which indicates an error (most
-     * likely ESRCH - No such process), so it is ok to
-     * proceed writing klines.
-     */
-  }
-
-  fbclose(fileptr);
-
-  /*
-   * Delete the outdated lock file
-   */
-  unlink(lockpath);
-
-  return (0);
-} /* LockedFile() */
-
-void
-WritePendingLines(const char *filename)
-
-{
-  aPendingLine *ptmp;
-
-  if (!filename)
-    return;
-
-  while (PendingLines)
-  {
-    if (PendingLines->type == KLINE_TYPE)
-    {
-      WriteKline(filename,
-        PendingLines->sptr,
-        PendingLines->rcptr,
-        PendingLines->user,
-        PendingLines->host,
-        PendingLines->reason,
-        PendingLines->when);
-    }
-    else
-    {
-      WriteDline(filename,
-        PendingLines->sptr,
-        PendingLines->host,
-        PendingLines->reason,
-        PendingLines->when);
-    }
-
-    /*
-     * Delete the K/D line from the list after we write
-     * it out to the conf
-     */
-    ptmp = PendingLines->next;
-    DelPending(PendingLines);
-    PendingLines = ptmp;
-  } /* while (PendingLines) */
-} /* WritePendingLines() */
-
-/*
-WriteKline()
- Write out a kline to the kline configuration file
-*/
-
-void
-WriteKline(const char *filename, struct Client *sptr, struct Client *rcptr,
-           const char *user, const char *host, const char *reason, 
-           const char *when)
-
-{
-  char buffer[1024];
-  int out;
-
-  if (!filename)
-    return;
-
-  if ((out = file_open(filename, O_RDWR|O_APPEND|O_CREAT, 0644)) == (-1))
-  {
-    sendto_realops("Error opening %s: %s",
-      filename,
-      strerror(errno));
-    return;
-  }
-
-#ifdef SEPARATE_QUOTE_KLINES_BY_DATE
-  fchmod(out, 0660);
-#endif
-
-#ifdef SLAVE_SERVERS
-  if (IsServer(sptr))
-  {
-    if (rcptr)
-      ircsprintf(buffer,
-        "#%s!%s@%s from %s K'd: %s@%s:%s\n",
-        rcptr->name,
-        rcptr->username,
-        rcptr->host,
-        sptr->name,
-        user,
-        host,
-        reason);
-  }
-  else
-#endif /* SLAVE_SERVERS */
-  {
-    ircsprintf(buffer,
-      "#%s!%s@%s K'd: %s@%s:%s\n",
-      sptr->name,
-      sptr->username,
-      sptr->host,
-      user,
-      host,
-      reason);
-  }
-
-  if (safe_write(sptr, filename, out, buffer) == (-1))
-    return;
-
-  ircsprintf(buffer, "K:%s:%s (%s):%s\n",
-    host,
-    reason,
-    when,
-    user);
-
-  if (safe_write(sptr, filename, out, buffer) == (-1))
-    return;
-
-  file_close(out);
-} /* WriteKline() */
-
-/*
-WriteDline()
- Write out a dline to the kline configuration file
-*/
-
-void
-WriteDline(const char *filename, struct Client *sptr,
-           const char *host, const char *reason, const char *when)
-
-{
-  char buffer[1024];
-  int out;
-
-  if (!filename)
-    return;
-
-  if ((out = file_open(filename, O_RDWR|O_APPEND|O_CREAT, 0644)) == (-1))
-  {
-    sendto_realops("Error opening %s: %s",
-      filename,
-      strerror(errno));
-    return;
-  }
-
-#ifdef SEPARATE_QUOTE_KLINES_BY_DATE
-  fchmod(out, 0660);
-#endif
-
-  ircsprintf(buffer,
-    "#%s!%s@%s D'd: %s:%s (%s)\n",
-    sptr->name,
-    sptr->username,
-    sptr->host,
-    host,
-    reason,
-    when);
-
-  if (safe_write(sptr, filename, out, buffer) == (-1))
-    return;
-
-  ircsprintf(buffer, "D:%s:%s (%s)\n",
-    host,
-    reason,
-    when);
-
-  if (safe_write(sptr, filename, out, buffer) == (-1))
-    return;
-
-  file_close(out);
-} /* WriteDline() */
 
 /*
  * mo_kline()
@@ -382,13 +124,12 @@ mo_kline(struct Client *cptr,
   char buffer[IRCD_BUFSIZE];
   char *p;
   char cidr_form_host[HOSTLEN + 1];
-  char *user, *host;
+  char user[USERLEN+2];
+  char host[HOSTLEN+2];
   char *reason = NULL;
   const char* current_date;
   int  ip_kline = NO;
   struct Client *acptr;
-  char tempuser[USERLEN + 2];
-  char temphost[HOSTLEN + 1];
   struct ConfItem *aconf;
   int temporary_kline_time=0;   /* -Dianora */
   time_t temporary_kline_time_seconds=0;
@@ -399,70 +140,23 @@ mo_kline(struct Client *cptr,
   register char tmpch;
   register int nonwild;
 
-#ifdef SLAVE_SERVERS
-  char *slave_oper;
-  struct Client *rcptr=NULL;
-
-  if(IsServer(sptr))
+  if(!IsSetOperK(sptr))
     {
-      if(parc < 2)      /* pick up actual oper who placed kline */
-        return 0;
-
-      slave_oper = parv[1];     /* make it look like normal local kline */
-
-      parc--;
-      parv++;
-
-      if ( parc < 2 )
-        return 0;
-
-      if ((rcptr = hash_find_client(slave_oper,(struct Client *)NULL)))
-        {
-          if(!IsPerson(rcptr))
-            return 0;
-        }
-      else
-        return 0;
-
-      if(!find_special_conf(sptr->name,CONF_ULINE))
-        {
-          sendto_realops("received Unauthorized kline from %s",sptr->name);
-          return 0;
-        }
-      else
-        {
-          sendto_realops("received kline from %s", sptr->name);
-        }
-
-      if(ConfigFileEntry.hub)
-        sendto_slaves(sptr,"KLINE",slave_oper,parc,parv);
+      sendto_one(sptr,":%s NOTICE %s :You have no K flag",me.name,parv[0]);
+      return 0;
     }
-  else
-#endif
+
+  if ( parc < 2 )
     {
-      if (!MyClient(sptr) || !IsAnyOper(sptr))
-        {
-          sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
-          return 0;
-        }
-
-      if(!IsSetOperK(sptr))
-        {
-          sendto_one(sptr,":%s NOTICE %s :You have no K flag",me.name,parv[0]);
-          return 0;
-        }
-
-      if ( parc < 2 )
-        {
-          sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
-                     me.name, parv[0], "KLINE");
-          return 0;
-        }
-
-#ifdef SLAVE_SERVERS
-      sendto_slaves(NULL,"KLINE",sptr->name,parc,parv);
-#endif
+      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
+		 me.name, parv[0], "KLINE");
+      return 0;
     }
+
+  /* XXX This becomes either a loadble .so option or a Config option */
+#ifdef SLAVE_SERVERS
+  sendto_slaves(NULL,"KLINE",sptr->name,parc,parv);
+#endif
 
   argv = parv[1];
 
@@ -470,11 +164,8 @@ mo_kline(struct Client *cptr,
     {
       if(parc < 3)
         {
-#ifdef SLAVE_SERVERS
-          if(!IsServer(sptr))
-#endif    
-             sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
-                        me.name, parv[0], "KLINE");
+	  sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
+		     me.name, parv[0], "KLINE");
           return 0;
         }
       if(temporary_kline_time > (24*60))
@@ -485,73 +176,8 @@ mo_kline(struct Client *cptr,
       parc--;
     }
 
-  if ( (host = strchr(argv, '@')) || *argv == '*' )
-    {
-      /* Explicit user@host mask given */
-
-      if(host)                  /* Found user@host */
-        {
-          user = argv;  /* here is user part */
-          *(host++) = '\0';     /* and now here is host */
-        }
-      else
-        {
-          user = "*";           /* no @ found, assume its *@somehost */
-          host = argv;
-        }
-
-      if (!*host)               /* duh. no host found, assume its '*' host */
-        host = "*";
-      strncpy_irc(tempuser, user, USERLEN + 1); /* allow for '*' in front */
-      tempuser[USERLEN + 1] = '\0';
-      strncpy_irc(temphost, host, HOSTLEN);
-      temphost[HOSTLEN] = '\0';
-      user = tempuser;
-      host = temphost;
-    }
-  else
-    {
-      /* Try to find user@host mask from nick */
-
-      if (!(acptr = find_chasing(sptr, argv, NULL)))
-        return 0;
-
-      if(!acptr->user)
-        return 0;
-
-      if (IsServer(acptr))
-        {
-#ifdef SLAVE_SERVERS
-          if(!IsServer(sptr))
-#endif
-            sendto_one(sptr,
-              ":%s NOTICE %s :Can't KLINE a server, use @'s where appropriate",
-                       me.name, parv[0]);
-          return 0;
-        }
-
-      if(IsElined(acptr))
-        {
-#ifdef SLAVE_SERVERS
-          if(!IsServer(sptr))
-#endif
-            sendto_one(sptr,
-                       ":%s NOTICE %s :%s is E-lined",me.name,parv[0],
-                       acptr->name);
-          return 0;
-        }
-
-      /* turn the "user" bit into "*user", blow away '~'
-         if found in original user name (non-idented) */
-
-      tempuser[0] = '*';
-      if (*acptr->username == '~')
-        strcpy(tempuser+1, (char *)acptr->username+1);
-      else
-        strcpy(tempuser+1, acptr->username);
-      user = tempuser;
-      host = cluster(acptr->host);
-    }
+  if ( find_user_host(sptr,argv,user,host) == 0 )
+    return 0;
 
   if(temporary_kline_time)
     argv = parv[3];
@@ -559,115 +185,17 @@ mo_kline(struct Client *cptr,
     argv = parv[2];
 
   if (parc > 2) 
-    {
-      if(strchr(argv, ':'))
-        {
-#ifdef SLAVE_SERVERS
-          if(!IsServer(sptr))
-#endif
-            sendto_one(sptr,
-                       ":%s NOTICE %s :Invalid character ':' in comment",
-                       me.name, parv[0]);
-          return 0;
-        }
-
-      if(strchr(argv, '#'))
-        {
-#ifdef SLAVE_SERVERS
-          if(!IsServer(sptr))
-#endif
-            sendto_one(sptr,
-                       ":%s NOTICE %s :Invalid character '#' in comment",
-                       me.name, parv[0]);
-          return 0;
-        }
-
-      if(*argv)
-        reason = argv;
-    }
-
-  /*
-   * Check for # in user@host
-   */
-
-  if(strchr(host, '#'))
-    {
-#ifdef SLAVE_SERVERS
-      if(!IsServer(sptr))
-#endif
-        sendto_one(sptr, ":%s NOTICE %s :Invalid character '#' in hostname",
-                   me.name, parv[0]);
+    if ( valid_comment(sptr, argv) == 0 )
       return 0;
-    }
-  if(strchr(user, '#'))
-    { 
-#ifdef SLAVE_SERVERS
-      if(!IsServer(sptr))
-#endif  
-        sendto_one(sptr, ":%s NOTICE %s :Invalid character '#' in username",
-                   me.name, parv[0]);
-      return 0;
-    }   
 
-  /*
-   * Now we must check the user and host to make sure there
-   * are at least NONWILDCHARS non-wildcard characters in
-   * them, otherwise assume they are attempting to kline
-   * *@* or some variant of that. This code will also catch
-   * people attempting to kline *@*.tld, as long as NONWILDCHARS
-   * is greater than 3. In that case, there are only 3 non-wild
-   * characters (tld), so if NONWILDCHARS is 4, the kline will
-   * be disallowed.
-   * -wnder
-   */
+  if(*argv)
+    reason = argv;
 
-  nonwild = 0;
-  p = user;
-  while ((tmpch = *p++))
-  {
-    if (!IsKWildChar(tmpch))
-    {
-      /*
-       * If we find enough non-wild characters, we can
-       * break - no point in searching further.
-       */
-      if (++nonwild >= NONWILDCHARS)
-        break;
-    }
-  }
-
-  if (nonwild < NONWILDCHARS)
-  {
-    /*
-     * The user portion did not contain enough non-wild
-     * characters, try the host.
-     */
-    p = host;
-    while ((tmpch = *p++))
-    {
-      if (!IsKWildChar(tmpch))
-        if (++nonwild >= NONWILDCHARS)
-          break;
-    }
-  }
-
-  if (nonwild < NONWILDCHARS)
-  {
-    /*
-     * Not enough non-wild characters were found, assume
-     * they are trying to kline *@*.
-     */
-#ifdef SLAVE_SERVERS
-    if (!IsServer(sptr))
-#endif
-      sendto_one(sptr,
-        ":%s NOTICE %s :Please include at least %d non-wildcard characters with the user@host",
-        me.name,
-        parv[0],
-        NONWILDCHARS);
-
+  if( valid_user_host(sptr,user,host) == 0 )
     return 0;
-  }
+
+  if( valid_wild_card(sptr,user,host) == 0 )
+    return 0;
 
   /* 
   ** At this point, I know the user and the host to place the k-line on
@@ -700,7 +228,8 @@ mo_kline(struct Client *cptr,
            *p++ = '4';
            *p++ = '\0';
          }
-       host = cidr_form_host;
+       /* XXX */
+       strcpy(host,cidr_form_host);
     }
   else
     {
@@ -715,9 +244,7 @@ mo_kline(struct Client *cptr,
        if( aconf->status & CONF_KILL )
          {
            reason = aconf->passwd ? aconf->passwd : "<No Reason>";
-#ifdef SLAVE_SERVERS
            if(!IsServer(sptr))
-#endif
              sendto_one(sptr,
                         ":%s NOTICE %s :[%s@%s] already K-lined by [%s@%s] - %s",
                         me.name,
@@ -797,37 +324,11 @@ mo_kline(struct Client *cptr,
    * pending klines as well
    */
   if (LockedFile(kconf))
-  {
-    aPendingLine *pptr;
-
-    pptr = AddPending();
-
-    /*
-     * Now fill in the fields
-     */
-    pptr->type = KLINE_TYPE;
-    pptr->sptr = sptr;
-    DupString(pptr->user, user);
-    DupString(pptr->host, host);
-    DupString(pptr->reason, reason ? reason : "No reason");
-    DupString(pptr->when, current_date);
-
-#ifdef SLAVE_SERVERS
-    pptr->rcptr = rcptr;
-#else
-    pptr->rcptr = (struct Client *) NULL;
-#endif
-
-    sendto_one(sptr,
-      ":%s NOTICE %s :Added K-Line [%s@%s] (config file write delayed)",
-      me.name,
-      sptr->name,
-      user,
-      host);
-
-    check_klines();
-    return 0;
-  }
+    {
+      add_to_pending_klines(sptr,user,host,reason,current_date);
+      check_klines();
+      return 0;
+    }
   else if (PendingLines)
     WritePendingLines(kconf);
 
@@ -842,15 +343,6 @@ mo_kline(struct Client *cptr,
   /*
    * Write kline to configuration file
    */
-#ifdef SLAVE_SERVERS
-  WriteKline(kconf,
-    sptr,
-    rcptr,
-    user,
-    host,
-    reason ? reason : "No reason",
-    current_date);
-#else
   WriteKline(kconf,
     sptr,
     (struct Client *) NULL,
@@ -858,7 +350,6 @@ mo_kline(struct Client *cptr,
     host,
     reason ? reason : "No reason",
     current_date);
-#endif
 
   check_klines();
   return 0;
@@ -878,483 +369,38 @@ ms_kline(struct Client *cptr,
                 int parc,
                 char *parv[])
 {
-  char buffer[IRCD_BUFSIZE];
-  char *p;
-  char cidr_form_host[HOSTLEN + 1];
-  char *user, *host;
-  char *reason = NULL;
-  const char* current_date;
-  int  ip_kline = NO;
-  struct Client *acptr;
-  char tempuser[USERLEN + 2];
-  char temphost[HOSTLEN + 1];
-  struct ConfItem *aconf;
-  int temporary_kline_time=0;   /* -Dianora */
-  time_t temporary_kline_time_seconds=0;
-  char *argv;
-  unsigned long ip;
-  unsigned long ip_mask;
-  const char *kconf; /* kline conf file */
-  register char tmpch;
-  register int nonwild;
-
-#ifdef SLAVE_SERVERS
   char *slave_oper;
   struct Client *rcptr=NULL;
 
-  if(IsServer(sptr))
-    {
-      if(parc < 2)      /* pick up actual oper who placed kline */
-        return 0;
-
-      slave_oper = parv[1];     /* make it look like normal local kline */
-
-      parc--;
-      parv++;
-
-      if ( parc < 2 )
-        return 0;
-
-      if ((rcptr = hash_find_client(slave_oper,(struct Client *)NULL)))
-        {
-          if(!IsPerson(rcptr))
-            return 0;
-        }
-      else
-        return 0;
-
-      if(!find_special_conf(sptr->name,CONF_ULINE))
-        {
-          sendto_realops("received Unauthorized kline from %s",sptr->name);
-          return 0;
-        }
-      else
-        {
-          sendto_realops("received kline from %s", sptr->name);
-        }
-
-      if(ConfigFileEntry.hub)
-        sendto_slaves(sptr,"KLINE",slave_oper,parc,parv);
-    }
-  else
-#endif
-    {
-      if (!MyClient(sptr) || !IsAnyOper(sptr))
-        {
-          sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
-          return 0;
-        }
-
-      if(!IsSetOperK(sptr))
-        {
-          sendto_one(sptr,":%s NOTICE %s :You have no K flag",me.name,parv[0]);
-          return 0;
-        }
-
-      if ( parc < 2 )
-        {
-          sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
-                     me.name, parv[0], "KLINE");
-          return 0;
-        }
-
-#ifdef SLAVE_SERVERS
-      sendto_slaves(NULL,"KLINE",sptr->name,parc,parv);
-#endif
-    }
-
-  argv = parv[1];
-
-  if( (temporary_kline_time = isnumber(argv)) )
-    {
-      if(parc < 3)
-        {
-#ifdef SLAVE_SERVERS
-          if(!IsServer(sptr))
-#endif    
-             sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
-                        me.name, parv[0], "KLINE");
-          return 0;
-        }
-      if(temporary_kline_time > (24*60))
-        temporary_kline_time = (24*60); /* Max it at 24 hours */
-      temporary_kline_time_seconds = (time_t)temporary_kline_time * (time_t)60;
-        /* turn it into minutes */
-      argv = parv[2];
-      parc--;
-    }
-
-  if ( (host = strchr(argv, '@')) || *argv == '*' )
-    {
-      /* Explicit user@host mask given */
-
-      if(host)                  /* Found user@host */
-        {
-          user = argv;  /* here is user part */
-          *(host++) = '\0';     /* and now here is host */
-        }
-      else
-        {
-          user = "*";           /* no @ found, assume its *@somehost */
-          host = argv;
-        }
-
-      if (!*host)               /* duh. no host found, assume its '*' host */
-        host = "*";
-      strncpy_irc(tempuser, user, USERLEN + 1); /* allow for '*' in front */
-      tempuser[USERLEN + 1] = '\0';
-      strncpy_irc(temphost, host, HOSTLEN);
-      temphost[HOSTLEN] = '\0';
-      user = tempuser;
-      host = temphost;
-    }
-  else
-    {
-      /* Try to find user@host mask from nick */
-
-      if (!(acptr = find_chasing(sptr, argv, NULL)))
-        return 0;
-
-      if(!acptr->user)
-        return 0;
-
-      if (IsServer(acptr))
-        {
-#ifdef SLAVE_SERVERS
-          if(!IsServer(sptr))
-#endif
-            sendto_one(sptr,
-              ":%s NOTICE %s :Can't KLINE a server, use @'s where appropriate",
-                       me.name, parv[0]);
-          return 0;
-        }
-
-      if(IsElined(acptr))
-        {
-#ifdef SLAVE_SERVERS
-          if(!IsServer(sptr))
-#endif
-            sendto_one(sptr,
-                       ":%s NOTICE %s :%s is E-lined",me.name,parv[0],
-                       acptr->name);
-          return 0;
-        }
-
-      /* turn the "user" bit into "*user", blow away '~'
-         if found in original user name (non-idented) */
-
-      tempuser[0] = '*';
-      if (*acptr->username == '~')
-        strcpy(tempuser+1, (char *)acptr->username+1);
-      else
-        strcpy(tempuser+1, acptr->username);
-      user = tempuser;
-      host = cluster(acptr->host);
-    }
-
-  if(temporary_kline_time)
-    argv = parv[3];
-  else
-    argv = parv[2];
-
-  if (parc > 2) 
-    {
-      if(strchr(argv, ':'))
-        {
-#ifdef SLAVE_SERVERS
-          if(!IsServer(sptr))
-#endif
-            sendto_one(sptr,
-                       ":%s NOTICE %s :Invalid character ':' in comment",
-                       me.name, parv[0]);
-          return 0;
-        }
-
-      if(strchr(argv, '#'))
-        {
-#ifdef SLAVE_SERVERS
-          if(!IsServer(sptr))
-#endif
-            sendto_one(sptr,
-                       ":%s NOTICE %s :Invalid character '#' in comment",
-                       me.name, parv[0]);
-          return 0;
-        }
-
-      if(*argv)
-        reason = argv;
-    }
-
-  /*
-   * Check for # in user@host
-   */
-
-  if(strchr(host, '#'))
-    {
-#ifdef SLAVE_SERVERS
-      if(!IsServer(sptr))
-#endif
-        sendto_one(sptr, ":%s NOTICE %s :Invalid character '#' in hostname",
-                   me.name, parv[0]);
-      return 0;
-    }
-  if(strchr(user, '#'))
-    { 
-#ifdef SLAVE_SERVERS
-      if(!IsServer(sptr))
-#endif  
-        sendto_one(sptr, ":%s NOTICE %s :Invalid character '#' in username",
-                   me.name, parv[0]);
-      return 0;
-    }   
-
-  /*
-   * Now we must check the user and host to make sure there
-   * are at least NONWILDCHARS non-wildcard characters in
-   * them, otherwise assume they are attempting to kline
-   * *@* or some variant of that. This code will also catch
-   * people attempting to kline *@*.tld, as long as NONWILDCHARS
-   * is greater than 3. In that case, there are only 3 non-wild
-   * characters (tld), so if NONWILDCHARS is 4, the kline will
-   * be disallowed.
-   * -wnder
-   */
-
-  nonwild = 0;
-  p = user;
-  while ((tmpch = *p++))
-  {
-    if (!IsKWildChar(tmpch))
-    {
-      /*
-       * If we find enough non-wild characters, we can
-       * break - no point in searching further.
-       */
-      if (++nonwild >= NONWILDCHARS)
-        break;
-    }
-  }
-
-  if (nonwild < NONWILDCHARS)
-  {
-    /*
-     * The user portion did not contain enough non-wild
-     * characters, try the host.
-     */
-    p = host;
-    while ((tmpch = *p++))
-    {
-      if (!IsKWildChar(tmpch))
-        if (++nonwild >= NONWILDCHARS)
-          break;
-    }
-  }
-
-  if (nonwild < NONWILDCHARS)
-  {
-    /*
-     * Not enough non-wild characters were found, assume
-     * they are trying to kline *@*.
-     */
-  #ifdef SLAVE_SERVERS
-    if (!IsServer(sptr))
-  #endif
-      sendto_one(sptr,
-        ":%s NOTICE %s :Please include at least %d non-wildcard characters with the user@host",
-        me.name,
-        parv[0],
-        NONWILDCHARS);
-
+  if(parc < 2)      /* pick up actual oper who placed kline */
     return 0;
-  }
 
-  /* 
-  ** At this point, I know the user and the host to place the k-line on
-  ** I also know whether its supposed to be a temporary kline or not
-  ** I also know the reason field is clean
-  ** Now what I want to do, is find out if its a kline of the form
-  **
-  ** /quote kline *@192.168.0.* i.e. it should be turned into a d-line instead
-  **
-  */
+  slave_oper = parv[1];     /* make it look like normal local kline */
 
-  /*
-   * what to do if host is a legal ip, and its a temporary kline ?
-   * Don't do the CIDR conversion for now of course.
-   */
+  parc--;
+  parv++;
 
-  if(!temporary_kline_time && (ip_kline = is_address(host, &ip, &ip_mask)))
-     {
-       /*
-        * XXX - ack
-        */
-       strncpy_irc(cidr_form_host, host, 32);
-       cidr_form_host[32] = '\0';
-       p = strchr(cidr_form_host,'*');
-       if (p)
-         {
-           *p++ = '0';
-           *p++ = '/';
-           *p++ = '2';
-           *p++ = '4';
-           *p++ = '\0';
-         }
-       host = cidr_form_host;
-    }
-  else
-    {
-      ip = 0L;
-    }
-
-  if( ConfigFileEntry.non_redundant_klines && 
-      (aconf = find_matching_mtrie_conf(host,user,(unsigned long)ip)) )
-     {
-       char *reason;
-
-       if( aconf->status & CONF_KILL )
-         {
-           reason = aconf->passwd ? aconf->passwd : "<No Reason>";
-#ifdef SLAVE_SERVERS
-           if(!IsServer(sptr))
-#endif
-             sendto_one(sptr,
-                        ":%s NOTICE %s :[%s@%s] already K-lined by [%s@%s] - %s",
-                        me.name,
-                        parv[0],
-                        user,host,
-                        aconf->user,aconf->host,reason);
-           return 0;
-         }
-     }
-
-  current_date = smalldate((time_t) 0);
-
-  aconf = make_conf();
-  aconf->status = CONF_KILL;
-  DupString(aconf->host, host);
-
-  DupString(aconf->user, user);
-  aconf->port = 0;
-
-  if(temporary_kline_time)
-    {
-      ircsprintf(buffer,
-        "Temporary K-line %d min. - %s (%s)",
-        temporary_kline_time,
-        reason ? reason : "No reason",
-        current_date);
-      DupString(aconf->passwd, buffer );
-      aconf->hold = CurrentTime + temporary_kline_time_seconds;
-      add_temp_kline(aconf);
-      sendto_realops("%s added temporary %d min. K-Line for [%s@%s] [%s]",
-        parv[0],
-        temporary_kline_time,
-        user,
-        host,
-        reason ? reason : "No reason");
-      check_klines();
-      return 0;
-    }
-  else
-    {
-      ircsprintf(buffer, "%s (%s)",
-        reason ? reason : "No reason",
-        current_date);
-      DupString(aconf->passwd, buffer );
-    }
-  ClassPtr(aconf) = find_class(0);
-
-  if(ip_kline)
-    {
-      aconf->ip = ip;
-      aconf->ip_mask = ip_mask;
-      add_ip_Kline(aconf);
-    }
-  else
-    add_mtrie_conf_entry(aconf,CONF_KILL);
-
-  sendto_realops("%s added K-Line for [%s@%s] [%s]",
-    sptr->name,
-    user,
-    host,
-    reason ? reason : "No reason");
-
-  log(L_TRACE, "%s added K-Line for [%s@%s] [%s]",
-      sptr->name, user, host, reason ? reason : "No reason");
-
-  kconf = get_conf_name(KLINE_TYPE);
-
-  /*
-   * Check if the conf file is locked - if so, add the kline
-   * to our pending kline list, to be written later, if not,
-   * allow this kline to be written, and write out all other
-   * pending klines as well
-   */
-  if (LockedFile(kconf))
-  {
-    aPendingLine *pptr;
-
-    pptr = AddPending();
-
-    /*
-     * Now fill in the fields
-     */
-    pptr->type = KLINE_TYPE;
-    pptr->sptr = sptr;
-    DupString(pptr->user, user);
-    DupString(pptr->host, host);
-    DupString(pptr->reason, reason ? reason : "No reason");
-    DupString(pptr->when, current_date);
-
-  #ifdef SLAVE_SERVERS
-    pptr->rcptr = rcptr;
-  #else
-    pptr->rcptr = (struct Client *) NULL;
-  #endif
-
-    sendto_one(sptr,
-      ":%s NOTICE %s :Added K-Line [%s@%s] (config file write delayed)",
-      me.name,
-      sptr->name,
-      user,
-      host);
-
-    check_klines();
+  if ( parc < 2 )
     return 0;
-  }
-  else if (PendingLines)
-    WritePendingLines(kconf);
 
-  sendto_one(sptr,
-    ":%s NOTICE %s :Added K-Line [%s@%s] to %s",
-    me.name,
-    sptr->name,
-    user,
-    host,
-    kconf ? kconf : "configuration file");
+  if ((rcptr = hash_find_client(slave_oper,(struct Client *)NULL)))
+    {
+      if(!IsPerson(rcptr))
+	return 0;
+    }
+  else
+    return 0;
 
-  /*
-   * Write kline to configuration file
-   */
-#ifdef SLAVE_SERVERS
-  WriteKline(kconf,
-    sptr,
-    rcptr,
-    user,
-    host,
-    reason ? reason : "No reason",
-    current_date);
-#else
-  WriteKline(kconf,
-    sptr,
-    (struct Client *) NULL,
-    user,
-    host,
-    reason ? reason : "No reason",
-    current_date);
-#endif
+  if(!find_special_conf(sptr->name,CONF_ULINE))
+    {
+      sendto_realops("received Unauthorized kline from %s",sptr->name);
+    }
+  else
+    {
+      sendto_realops("received kline from %s", sptr->name);
+      mo_kline(cptr,sptr,parc,parv);
+    }
 
-  check_klines();
   return 0;
 } /* ms_kline() */
 
@@ -1773,3 +819,523 @@ mo_dline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   check_klines();
   return 0;
 } /* m_dline() */
+
+/*
+ * add_to_pending_klines
+ * inputs       - pointer to client adding kline
+ *              - pointer to user being klined	
+ *              - pointer to host being klined
+ *              - reason for kline
+ *              - current date
+ * output       - NONE
+ * side effects - NONE
+ */
+static void add_to_pending_klines(struct Client *sptr, char *user, char *host,
+				  char *reason, const char *current_date)
+{
+  aPendingLine *pptr;
+
+  pptr = AddPending();
+
+  /*
+   * Now fill in the fields
+   */
+  pptr->type = KLINE_TYPE;
+  pptr->sptr = sptr;
+  DupString(pptr->user, user);
+  DupString(pptr->host, host);
+  DupString(pptr->reason, reason ? reason : "No reason");
+  DupString(pptr->when, current_date);
+
+#ifdef SLAVE_SERVERS
+  pptr->rcptr = rcptr;
+#else
+  pptr->rcptr = (struct Client *) NULL;
+#endif
+
+  sendto_one(sptr,
+	     ":%s NOTICE %s :Added K-Line [%s@%s] (config file write delayed)",
+	     me.name,
+	     sptr->name,
+	     user,
+	     host);
+
+}
+
+/*
+ * AddPending()
+ * Add a pending K/D line to our linked list
+ */
+
+aPendingLine * AddPending(void)
+{
+  aPendingLine *temp;
+
+  temp = (aPendingLine *) MyMalloc(sizeof(aPendingLine));
+
+  /*
+   * insert the new entry into our list
+   */
+  temp->next = PendingLines;
+  PendingLines = temp;
+
+  return (temp);
+} /* AddPending() */
+
+/*
+ * DelPending()
+ * Delete pending line entry - assume calling function handles
+ * linked list manipulation (setting next field etc)
+ */
+
+void DelPending(aPendingLine *pendptr)
+{
+  if (!pendptr)
+    return;
+
+  if (pendptr->user)
+    MyFree(pendptr->user);
+  MyFree(pendptr->host);
+  MyFree(pendptr->reason);
+  MyFree(pendptr->when);
+  MyFree(pendptr);
+} /* DelPending() */
+
+/*
+ * LockedFile()
+ * Determine if 'filename' is currently locked. If it is locked,
+ * there should be a filename.lock file which contains the current
+ * pid of the editing process. Make sure the pid is valid before
+ * giving up.
+ *
+ * Return: 1 if locked
+ *        0 if not
+ */
+
+int LockedFile(const char *filename)
+
+{
+  char lockpath[PATH_MAX + 1];
+  char buffer[1024];
+  FBFILE *fileptr;
+  int killret;
+
+  if (!filename)
+    return (0);
+
+  ircsprintf(lockpath, "%s.lock", filename);
+
+  if ((fileptr = fbopen(lockpath, "r")) == (FBFILE *) NULL)
+  {
+    /*
+     * lockfile does not exist
+     */
+    return (0);
+  }
+
+  if (fbgets(buffer, sizeof(buffer) - 1, fileptr))
+  {
+    /*
+     * If it is a valid lockfile, 'buffer' should now
+     * contain the pid number of the editing process.
+     * Send the pid a SIGCHLD to see if it is a valid
+     * pid - it could be a remnant left over from a
+     * crashed editor or system reboot etc.
+     */
+    killret = kill(atoi(buffer), SIGCHLD);
+    if (killret == 0)
+    {
+      fbclose(fileptr);
+      return (1);
+    }
+
+    /*
+     * killret must be -1, which indicates an error (most
+     * likely ESRCH - No such process), so it is ok to
+     * proceed writing klines.
+     */
+  }
+
+  fbclose(fileptr);
+
+  /*
+   * Delete the outdated lock file
+   */
+  unlink(lockpath);
+
+  return (0);
+} /* LockedFile() */
+
+void WritePendingLines(const char *filename)
+
+{
+  aPendingLine *ptmp;
+
+  if (!filename)
+    return;
+
+  while (PendingLines)
+  {
+    if (PendingLines->type == KLINE_TYPE)
+    {
+      WriteKline(filename,
+        PendingLines->sptr,
+        PendingLines->rcptr,
+        PendingLines->user,
+        PendingLines->host,
+        PendingLines->reason,
+        PendingLines->when);
+    }
+    else
+    {
+      WriteDline(filename,
+        PendingLines->sptr,
+        PendingLines->host,
+        PendingLines->reason,
+        PendingLines->when);
+    }
+
+    /*
+     * Delete the K/D line from the list after we write
+     * it out to the conf
+     */
+    ptmp = PendingLines->next;
+    DelPending(PendingLines);
+    PendingLines = ptmp;
+  } /* while (PendingLines) */
+} /* WritePendingLines() */
+
+/*
+ * WriteKline()
+ * Write out a kline to the kline configuration file
+ */
+
+void
+WriteKline(const char *filename, struct Client *sptr, struct Client *rcptr,
+           const char *user, const char *host, const char *reason, 
+           const char *when)
+
+{
+  char buffer[1024];
+  int out;
+
+  if (!filename)
+    return;
+
+  if ((out = file_open(filename, O_RDWR|O_APPEND|O_CREAT, 0644)) == (-1))
+  {
+    sendto_realops("Error opening %s: %s",
+      filename,
+      strerror(errno));
+    return;
+  }
+
+#ifdef SEPARATE_QUOTE_KLINES_BY_DATE
+  fchmod(out, 0660);
+#endif
+
+#ifdef SLAVE_SERVERS
+  if (IsServer(sptr))
+  {
+    if (rcptr)
+      ircsprintf(buffer,
+        "#%s!%s@%s from %s K'd: %s@%s:%s\n",
+        rcptr->name,
+        rcptr->username,
+        rcptr->host,
+        sptr->name,
+        user,
+        host,
+        reason);
+  }
+  else
+#endif /* SLAVE_SERVERS */
+  {
+    ircsprintf(buffer,
+      "#%s!%s@%s K'd: %s@%s:%s\n",
+      sptr->name,
+      sptr->username,
+      sptr->host,
+      user,
+      host,
+      reason);
+  }
+
+  if (safe_write(sptr, filename, out, buffer) == (-1))
+    return;
+
+  ircsprintf(buffer, "K:%s:%s (%s):%s\n",
+    host,
+    reason,
+    when,
+    user);
+
+  if (safe_write(sptr, filename, out, buffer) == (-1))
+    return;
+
+  file_close(out);
+} /* WriteKline() */
+
+/*
+ * WriteDline()
+ *  Write out a dline to the kline configuration file
+ */
+
+void
+WriteDline(const char *filename, struct Client *sptr,
+           const char *host, const char *reason, const char *when)
+
+{
+  char buffer[1024];
+  int out;
+
+  if (!filename)
+    return;
+
+  if ((out = file_open(filename, O_RDWR|O_APPEND|O_CREAT, 0644)) == (-1))
+  {
+    sendto_realops("Error opening %s: %s",
+      filename,
+      strerror(errno));
+    return;
+  }
+
+#ifdef SEPARATE_QUOTE_KLINES_BY_DATE
+  fchmod(out, 0660);
+#endif
+
+  ircsprintf(buffer,
+    "#%s!%s@%s D'd: %s:%s (%s)\n",
+    sptr->name,
+    sptr->username,
+    sptr->host,
+    host,
+    reason,
+    when);
+
+  if (safe_write(sptr, filename, out, buffer) == (-1))
+    return;
+
+  ircsprintf(buffer, "D:%s:%s (%s)\n",
+    host,
+    reason,
+    when);
+
+  if (safe_write(sptr, filename, out, buffer) == (-1))
+    return;
+
+  file_close(out);
+} /* WriteDline() */
+
+
+/*
+ * find_user_host
+ * inputs	- pointer to client placing kline
+ *              - pointer to user_host_or_nick
+ *              - pointer to user buffer
+ *              - pointer to host buffer
+ * output	- 0 if not ok to kline, 1 to kline i.e. if valid user host
+ * side effects -
+ */
+int find_user_host(struct Client *sptr,
+		   char *user_host_or_nick, char *user, char *host)
+{
+  struct Client *acptr;
+  char *hostp;
+
+  if ( (hostp = strchr(user_host_or_nick, '@')) || *user_host_or_nick == '*' )
+    {
+      /* Explicit user@host mask given */
+
+      if(hostp)                                    /* I'm a little user@host */
+        {
+          *(hostp++) = '\0';                       /* short and squat */
+          strncpy(user,user_host_or_nick,USERLEN); /* here is my user */
+          strncpy(host,hostp,HOSTLEN);             /* here is my host */
+        }
+      else
+        {
+          user[0] = '*';             /* no @ found, assume its *@somehost */
+          user[1] = '\0';	  
+          strncpy(host,user_host_or_nick,HOSTLEN);
+        }
+
+      return 1;
+    }
+  else
+    {
+      /* Try to find user@host mask from nick */
+
+      if (!(acptr = find_chasing(sptr, user_host_or_nick, NULL)))
+        return 0;
+
+      if(!acptr->user)
+        return 0;
+
+      if (IsServer(acptr))
+        {
+	  sendto_one(sptr,
+	     ":%s NOTICE %s :Can't KLINE a server, use @'s where appropriate",
+		     me.name, sptr->name);
+          return 0;
+        }
+
+      if(IsElined(acptr))
+        {
+          if(!IsServer(sptr))
+            sendto_one(sptr,
+                       ":%s NOTICE %s :%s is E-lined",me.name,sptr->name,
+                       acptr->name);
+          return 0;
+        }
+
+      /* turn the "user" bit into "*user", blow away '~'
+       * if found in original user name (non-idented)
+       */
+
+      strncpy_irc(user, acptr->username, USERLEN);
+      if (*acptr->username == '~')
+        user[0] = '*';
+
+      strncpy_irc(host,cluster(acptr->host),HOSTLEN);
+    }
+
+  return 1;
+}
+
+/*
+ * valid_user_host
+ * inputs	- pointer to client placing kline
+ *              - pointer to user buffer
+ *              - pointer to host buffer
+ * output	- 0 if not valid user or host, 1 if valid
+ * side effects -
+ */
+int valid_user_host( struct Client *sptr, char *user, char *host)
+{
+  /*
+   * Check for # in user@host
+   */
+
+  if(strchr(host, '#'))
+    {
+      if(!IsServer(sptr))
+        sendto_one(sptr, ":%s NOTICE %s :Invalid character '#' in hostname",
+                   me.name, sptr->name);
+      return 0;
+    }
+  if(strchr(user, '#'))
+    { 
+      if(!IsServer(sptr))
+        sendto_one(sptr, ":%s NOTICE %s :Invalid character '#' in username",
+                   me.name, sptr->name);
+      return 0;
+    }   
+
+  return 1;
+}
+
+/*
+ * valid_wild_card
+ * input        - pointer to client
+ *              - pointer to user to check
+ *              - pointer to host to check
+ * output       - 0 if not valid, 1 if valid
+ * side effects -
+ */
+int valid_wild_card(struct Client *sptr, char *user, char *host)
+{
+  char *p;
+  char tmpch;
+  int nonwild;
+
+  /*
+   * Now we must check the user and host to make sure there
+   * are at least NONWILDCHARS non-wildcard characters in
+   * them, otherwise assume they are attempting to kline
+   * *@* or some variant of that. This code will also catch
+   * people attempting to kline *@*.tld, as long as NONWILDCHARS
+   * is greater than 3. In that case, there are only 3 non-wild
+   * characters (tld), so if NONWILDCHARS is 4, the kline will
+   * be disallowed.
+   * -wnder
+   */
+
+  nonwild = 0;
+  p = user;
+  while ((tmpch = *p++))
+  {
+    if (!IsKWildChar(tmpch))
+    {
+      /*
+       * If we find enough non-wild characters, we can
+       * break - no point in searching further.
+       */
+      if (++nonwild >= NONWILDCHARS)
+        break;
+    }
+  }
+
+  if (nonwild < NONWILDCHARS)
+  {
+    /*
+     * The user portion did not contain enough non-wild
+     * characters, try the host.
+     */
+    p = host;
+    while ((tmpch = *p++))
+    {
+      if (!IsKWildChar(tmpch))
+        if (++nonwild >= NONWILDCHARS)
+          break;
+    }
+  }
+
+  if (nonwild < NONWILDCHARS)
+  {
+    /*
+     * Not enough non-wild characters were found, assume
+     * they are trying to kline *@*.
+     */
+    if (!IsServer(sptr))
+      sendto_one(sptr,
+        ":%s NOTICE %s :Please include at least %d non-wildcard characters with the user@host",
+        me.name,
+        sptr->name,
+        NONWILDCHARS);
+
+    return 0;
+  }
+
+  return 1;
+}
+
+/*
+ * valid_comment
+ * inputs	- pointer to client
+ *              - pointer to comment
+ * output       - 0 if no valid comment, 1 if valid
+ * side effects - NONE
+ */
+int valid_comment(struct Client *sptr, char *comment)
+{
+  if(strchr(comment, ':'))
+    {
+      if(!IsServer(sptr))
+	sendto_one(sptr,
+		   ":%s NOTICE %s :Invalid character ':' in comment",
+		   me.name, sptr->name);
+      return 0;
+    }
+
+  if(strchr(comment, '#'))
+    {
+      if(!IsServer(sptr))
+	sendto_one(sptr,
+		   ":%s NOTICE %s :Invalid character '#' in comment",
+		   me.name, sptr->name);
+      return 0;
+    }
+  return 1;
+}
+
