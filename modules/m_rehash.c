@@ -62,22 +62,6 @@ struct hash_commands
 };
 
 static void
-clear_temps(dlink_list * tlist)
-{
-	dlink_node *ptr;
-	dlink_node *next_ptr;
-	struct ConfItem *aconf;
-
-	DLINK_FOREACH_SAFE(ptr, next_ptr, tlist->head)
-	{
-		aconf = ptr->data;
-
-		delete_one_address_conf(aconf->host, aconf);
-		dlinkDestroy(ptr, tlist);
-	}
-}
-
-static void
 rehash_banconfs(struct Client *source_p)
 {
 	sendto_realops_flags(UMODE_ALL, L_ALL, "%s is rehashing ban configs",
@@ -121,9 +105,21 @@ rehash_omotd(struct Client *source_p)
 static void
 rehash_glines(struct Client *source_p)
 {
+	struct ConfItem *aconf;
+	dlink_node *ptr;
+	dlink_node *next_ptr;
+
 	sendto_realops_flags(UMODE_ALL, L_ALL, "%s is clearing G-lines",
 				get_oper_name(source_p));
-	clear_temps(&glines);
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, glines.head)
+	{
+		aconf = ptr->data;
+
+		delete_one_address_conf(aconf->host, aconf);
+		dlinkDestroy(ptr, &glines);
+	}
+
 }
 
 static void
@@ -150,23 +146,46 @@ rehash_pglines(struct Client *source_p)
 static void
 rehash_tklines(struct Client *source_p)
 {
+	struct ConfItem *aconf;
+	dlink_node *ptr, *next_ptr;
+	int i;
+
 	sendto_realops_flags(UMODE_ALL, L_ALL, "%s is clearing temp klines",
 				get_oper_name(source_p));
-	clear_temps(&tkline_min);
-	clear_temps(&tkline_hour);
-	clear_temps(&tkline_day);
-	clear_temps(&tkline_week);
+
+	for(i = 0; i < LAST_TEMP_TYPE; i++)
+	{
+		DLINK_FOREACH_SAFE(ptr, next_ptr, temp_klines[i].head)
+		{
+			aconf = ptr->data;
+
+			delete_one_address_conf(aconf->host, aconf);
+			dlinkDestroy(ptr, &temp_klines[i]);
+		}
+	}
 }
 
 static void
 rehash_tdlines(struct Client *source_p)
 {
+	struct ConfItem *aconf;
+	dlink_node *ptr, *next_ptr;
+	int i;
+
 	sendto_realops_flags(UMODE_ALL, L_ALL, "%s is clearing temp dlines",
 				get_oper_name(source_p));
-	clear_temps(&tdline_min);
-	clear_temps(&tdline_hour);
-	clear_temps(&tdline_day);
-	clear_temps(&tdline_week);
+
+	for(i = 0; i < LAST_TEMP_TYPE; i++)
+	{
+		DLINK_FOREACH_SAFE(ptr, next_ptr, temp_klines[i].head)
+		{
+			aconf = ptr->data;
+
+			delete_one_address_conf(aconf->host, aconf);
+			dlinkDestroy(ptr, &temp_klines[i]);
+		}
+	}
+
 }
 
 static void

@@ -55,20 +55,17 @@ extern dlink_list resv_conf_list;
 extern dlink_list pending_glines;
 extern dlink_list glines;
 
-#define TEMP_MIN	1
-#define TEMP_HOUR	2
-#define TEMP_DAY	3
-#define TEMP_WEEK	4
+typedef enum temp_list
+{
+	TEMP_MIN,
+	TEMP_HOUR,
+	TEMP_DAY,
+	TEMP_WEEK,
+	LAST_TEMP_TYPE
+} temp_list;
 
-extern dlink_list tkline_min;
-extern dlink_list tkline_hour;
-extern dlink_list tkline_day;
-extern dlink_list tkline_week;
-
-extern dlink_list tdline_min;
-extern dlink_list tdline_hour;
-extern dlink_list tdline_day;
-extern dlink_list tdline_week;
+extern dlink_list temp_klines[LAST_TEMP_TYPE];
+extern dlink_list temp_dlines[LAST_TEMP_TYPE];
 
 extern void init_s_newconf(void);
 extern void clear_s_newconf_ircd(void);
@@ -76,12 +73,6 @@ extern void clear_s_newconf_bans(void);
 
 extern void add_temp_kline(struct ConfItem *);
 extern void add_temp_dline(struct ConfItem *);
-
-extern void cleanup_temps_min(void *);
-extern void cleanup_temps_hour(void *);
-extern void cleanup_temps_day(void *);
-extern void cleanup_temps_week(void *);
-
 
 /* shared/cluster/hub/leaf confs */
 struct remote_conf

@@ -426,14 +426,6 @@ flush_write(struct Client *source_p, FILE * out, char *buf, char *temppath)
 	return (error_on_write);
 }
 
-static dlink_list *tdline_list[] = {
-	&tdline_hour,
-	&tdline_day,
-	&tdline_min,
-	&tdline_week,
-	NULL
-};
-
 /* remove_temp_dline()
  *
  * inputs       - hostname to undline
@@ -443,6 +435,7 @@ static dlink_list *tdline_list[] = {
 static int
 remove_temp_dline(const char *host)
 {
+#if 0
 	dlink_list *tdlist;
 	struct ConfItem *aconf;
 	dlink_node *ptr;
@@ -471,5 +464,7 @@ remove_temp_dline(const char *host)
 		}
 	}
 
+	return NO;
+#endif
 	return NO;
 }
