@@ -468,11 +468,36 @@ static void stats_auth(struct Client *client_p)
 
   /* If unopered, Only return matching auth blocks */
   else if((ConfigFileEntry.stats_i_oper_only == 1) && !IsOper(client_p))
-    report_Ilines(client_p, 1);
+  {
+    struct ConfItem *aconf;
+    char *name, *host, *pass, *user, *classname;
+    int port;
+
+    if(MyConnect(client_p))
+      aconf = find_conf_by_address(client_p->host,
+                                   &client_p->localClient->ip,
+				   CONF_CLIENT,
+				   client_p->localClient->aftype,
+				   client_p->username);
+    else
+      aconf = find_conf_by_address(client_p->host, NULL, CONF_CLIENT,
+                                   0, client_p->username);
+
+    if(aconf == NULL)
+      return;
+    
+    get_printable_conf(aconf, &name, &host, &pass, &user, 
+                       &port, &classname);
+
+    sendto_one(client_p, form_str(RPL_STATSILINE), me.name,
+               client_p->name, (IsConfRestricted(aconf)) ? 'i' : 'I',
+	       name, show_iline_prefix(client_p, aconf, user), host,
+	       port, classname);
+  }
 
   /* Theyre opered, or allowed to see all auth blocks */
   else
-    report_Ilines(client_p, 0);
+    report_auth(client_p);
 }
 
 
@@ -569,7 +594,7 @@ static void stats_operedup(struct Client *client_p)
 
 static void stats_ports(struct Client *client_p)
 {
-  if (!IsOper(client_p) && ConfigFileEntry.stats_o_oper_only)
+  if (!IsOper(client_p) && ConfigFileEntry.stats_P_oper_only)
     sendto_one(client_p, form_str(ERR_NOPRIVILEGES),me.name,client_p->name);
   else
     show_ports(client_p);

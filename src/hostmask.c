@@ -684,39 +684,19 @@ show_iline_prefix(struct Client *sptr, struct ConfItem *aconf, char *name)
   return (prefix_of_host);
 }
 
-/* void report_Ilines(struct Client *client_p, int mask)
+/* report_auth()
+ *
  * Inputs: pointer to client to report to
- *	   mask i.e. 
  * Output: None
  * Side effects: Reports configured auth{} blocks to client_p
  */
 void
-report_Ilines(struct Client *client_p, int mask)
+report_auth(struct Client *client_p)
 {
   char *name, *host, *pass, *user, *classname;
   struct AddressRec *arec;
   struct ConfItem *aconf;
   int i, port;
-
-  if (mask)
-  {
-     if (MyConnect(client_p))
-       aconf = find_address_conf(client_p->host, client_p->username,
-                                 &client_p->localClient->ip,
-                                 client_p->localClient->aftype);
-     else
-       aconf = find_address_conf(client_p->host, client_p->username, NULL,
-                                 0);
-     if (!aconf || (aconf->status & CONF_CLIENT) == 0)
-       return;
-     get_printable_conf(aconf, &name, &host, &pass, &user, &port,
-                        &classname);
-     sendto_one(client_p, form_str(RPL_STATSILINE), me.name,
-                client_p->name, (IsConfRestricted(aconf)) ? 'i' : 'I',
-                name, show_iline_prefix(client_p, aconf, user), host,
-                port, classname);
-     return;
-  }
 
   for (i = 0; i < ATABLE_SIZE; i++)
     for (arec = atable[i]; arec; arec = arec->next)
@@ -741,7 +721,7 @@ report_Ilines(struct Client *client_p, int mask)
       }
 }
 
-/* void report_Klines(struct Client *client_p, int t, int mask)
+/* report_Klines()
  * Inputs: Client to report to,
  *	   type(==0 for perm, !=0 for temporary)
  *	   mask 
@@ -749,14 +729,14 @@ report_Ilines(struct Client *client_p, int mask)
  * Side effects: Reports configured K(or k)-lines to client_p.
  */
 void
-report_Klines(struct Client *client_p, int k_or_K, int mask)
+report_Klines(struct Client *client_p, int tkline, int mask)
 {
   char *name, *host, *pass, *user, *classname, c;
   struct AddressRec *arec;
   struct ConfItem *aconf = NULL;
   int i, port;
 
-  if (k_or_K)
+  if (tkline)
     c = 'k';
   else
     c = 'K';
@@ -778,8 +758,8 @@ report_Klines(struct Client *client_p, int k_or_K, int mask)
     for (arec = atable[i]; arec; arec = arec->next)
       if (arec->type == CONF_KILL)
       {
-        if ((k_or_K && !((aconf = arec->aconf)->flags & CONF_FLAGS_TEMPORARY))
-            || (!k_or_K
+        if ((tkline && !((aconf = arec->aconf)->flags & CONF_FLAGS_TEMPORARY))
+            || (!tkline
                 && ((aconf = arec->aconf)->flags & CONF_FLAGS_TEMPORARY)))
           continue;
         get_printable_conf(aconf, &name, &host, &pass, &user, &port,
