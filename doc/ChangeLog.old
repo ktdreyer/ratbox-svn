@@ -1,3 +1,9 @@
+*** 20001016_2 by db
+- added prelim vchan support to notice as well
+- still have to do @# type of vchan 
+
+
+
 *** 20001016_1 by db
 - fixed stupid bug with vchan == chptr i.e. top level chptr == vchan
   that would result in it never being removed, since vchan == chptr (top chan)
