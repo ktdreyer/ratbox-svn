@@ -63,7 +63,8 @@ c_message(struct client *client_p, const char *parv[], int parc)
 	if(parv[2][0] == '\001')
 	{
 		struct conf_oper *oper_p = find_conf_oper(client_p->user->username,
-							  client_p->user->host);
+							  client_p->user->host,
+							  client_p->user->servername);
 
 		if(oper_p == NULL || !ConfOperDcc(oper_p))
 		{
@@ -75,7 +76,7 @@ c_message(struct client *client_p, const char *parv[], int parc)
 		/* request for us to dcc them.. */
 		if(!strncasecmp(parv[2], "\001CHAT\001", 6))
 		{
-			connect_from_client(client_p, target_p->name);
+			connect_from_client(client_p, oper_p, target_p->name);
 			return;
 		}
 
@@ -134,7 +135,7 @@ c_message(struct client *client_p, const char *parv[], int parc)
 				return;
 			}
 
-			connect_to_client(client_p, host, port);
+			connect_to_client(client_p, oper_p, host, port);
 		}
 
 		return;

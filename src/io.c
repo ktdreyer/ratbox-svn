@@ -450,7 +450,8 @@ connect_to_server(void *target_server)
  * outputs      -
  */
 void
-connect_to_client(struct client *client_p, const char *host, int port)
+connect_to_client(struct client *client_p, struct conf_oper *oper_p,
+			const char *host, int port)
 {
 	struct connection_entry *conn_p;
 	int client_fd;
@@ -462,8 +463,7 @@ connect_to_client(struct client *client_p, const char *host, int port)
 
 	conn_p = my_malloc(sizeof(struct connection_entry));
 	conn_p->name = my_strdup(client_p->name);
-        conn_p->username = my_strdup(client_p->user->username);
-        conn_p->host = my_strdup(client_p->user->host);
+	conn_p->oper = oper_p;
 
 	conn_p->fd = client_fd;
 	conn_p->first_time = conn_p->last_time = CURRENT_TIME;
@@ -479,7 +479,8 @@ connect_to_client(struct client *client_p, const char *host, int port)
 }
 
 void
-connect_from_client(struct client *client_p, const char *servicenick)
+connect_from_client(struct client *client_p, struct conf_oper *oper_p,
+			const char *servicenick)
 {
 	struct connection_entry *conn_p;
 	struct sockaddr_in addr;
@@ -529,8 +530,7 @@ connect_from_client(struct client *client_p, const char *servicenick)
 
 	conn_p = my_malloc(sizeof(struct connection_entry));
 	conn_p->name = my_strdup(client_p->name);
-        conn_p->username = my_strdup(client_p->user->username);
-        conn_p->host = my_strdup(client_p->user->host);
+        conn_p->oper = oper_p;
 
 	conn_p->fd = client_fd;
 	conn_p->first_time = conn_p->last_time = CURRENT_TIME;
@@ -874,7 +874,7 @@ parse_client(struct connection_entry *conn_p, char *buf, int len)
         /* partyline */
 	if(*ch != '.')
         {
-                if(conn_p->oper == NULL)
+                if(!UserAuth(conn_p))
                 {
                         sendto_one(conn_p, "You must .login first");
                         return;
@@ -996,7 +996,7 @@ sendto_all(int umode, const char *format, ...)
         {
                 conn_p = ptr->data;
 
-                if(conn_p->oper == NULL)
+                if(!UserAuth(conn_p))
                         continue;
 
                 if(umode && !(conn_p->flags & umode))
@@ -1029,7 +1029,7 @@ sendto_all_butone(struct connection_entry *one, int umode,
         {
                 conn_p = ptr->data;
 
-                if(conn_p->oper == NULL)
+                if(!UserAuth(conn_p))
                         continue;
 
                 /* the one we shouldnt be sending to.. */
@@ -1398,7 +1398,7 @@ sock_close(struct connection_entry *conn_p)
 		if(server_p->client_p != NULL)
 			exit_client(server_p->client_p);
 	}
-        else if(conn_p->oper != NULL)
+	else if(UserAuth(conn_p))
                 sendto_all(UMODE_AUTH, "%s has disconnected", conn_p->name);
 
 	close(conn_p->fd);

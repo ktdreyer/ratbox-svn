@@ -16,8 +16,6 @@ struct connection_entry
 {
 	struct client *client_p;
 	char *name;
-        char *username;
-        char *host;
         char *pass;
 
 	int fd;
@@ -59,17 +57,22 @@ extern dlink_list connection_list;
 #define SetConnSentPing(x)	((x)->flags |= CONN_SENTPING)
 
 #define ClearConnConnecting(x)	((x)->flags &= ~CONN_CONNECTING)
-#define ClearConnDccIn(x)	((x)->flags &= ~CONN_DCCIN)
-#define ClearConnDccOut(x)	((x)->flags &= ~CONN_DCCOUT)
 #define ClearConnHandshake(x)	((x)->flags &= ~CONN_HANDSHAKE)
-#define ClearConnDead(x)	((x)->flags &= ~CONN_DEAD)
 #define ClearConnSentPing(x)	((x)->flags &= ~CONN_SENTPING)
 
+/* server flags */
 #define FLAGS_UNTERMINATED	0x0100
 #define FLAGS_EOB               0x0200
 
 #define finished_bursting	((server_p) && (server_p->flags & FLAGS_EOB))
 
+/* user flags */
+#define FLAGS_AUTH		0x0100
+
+#define UserAuth(x)	((x)->flags & FLAGS_AUTH)
+#define SetUserAuth(x)	((x)->flags |= FLAGS_AUTH)
+
+/* usermodes */
 #define UMODE_CHAT              0x1000
 #define UMODE_AUTH              0x2000
 #define UMODE_SERVER            0x4000
@@ -82,8 +85,10 @@ extern dlink_list connection_list;
 extern void read_io(void);
 
 extern void connect_to_server(void *unused);
-extern void connect_to_client(struct client *client_p, const char *host, int port);
-extern void connect_from_client(struct client *client_p, const char *);
+extern void connect_to_client(struct client *client_p, struct conf_oper *oper_p,
+				const char *host, int port);
+extern void connect_from_client(struct client *client_p, struct conf_oper *oper_p,
+				const char *servicenick);
 
 extern void sendto_server(const char *format, ...);
 extern void sendto_one(struct connection_entry *, const char *format, ...);

@@ -71,6 +71,7 @@ free_conf_oper(struct conf_oper *conf_p)
 	my_free(conf_p->pass);
 	my_free(conf_p->username);
 	my_free(conf_p->host);
+	my_free(conf_p->server);
 	my_free(conf_p);
 }
 
@@ -92,26 +93,7 @@ find_conf_server(const char *name)
 }
 
 struct conf_oper *
-find_oper(struct connection_entry *conn_p, const char *name)
-{
-        struct conf_oper *oper_p;
-        dlink_node *ptr;
-
-        DLINK_FOREACH(ptr, conf_oper_list.head)
-        {
-                oper_p = ptr->data;
-
-                if(match(oper_p->username, conn_p->username) &&
-                   match(oper_p->host, conn_p->host) &&
-                   !strcasecmp(name, oper_p->name))
-                        return oper_p;
-        }
-
-        return NULL;
-}
-
-struct conf_oper *
-find_conf_oper(const char *username, const char *host)
+find_conf_oper(const char *username, const char *host, const char *server)
 {
         struct conf_oper *oper_p;
         dlink_node *ptr;
@@ -121,7 +103,8 @@ find_conf_oper(const char *username, const char *host)
                 oper_p = ptr->data;
 
                 if(match(oper_p->username, username) &&
-                   match(oper_p->host, host))
+                   match(oper_p->host, host) &&
+		   match(oper_p->server, server))
                         return oper_p;
         }
 

@@ -100,7 +100,7 @@ handle_ucommand(struct connection_entry *conn_p, const char *command,
 	struct ucommand_handler *handler;
 
         /* people who arent logged in, can only do .login */
-        if(conn_p->oper == NULL)
+        if(!UserAuth(conn_p))
         {
                 if(strcasecmp(command, "login"))
                 {
@@ -159,18 +159,12 @@ add_ucommands(struct ucommand_handler *handler, const char *servicename)
 static void
 u_login(struct connection_entry *conn_p, char *parv[], int parc)
 {
-        struct conf_oper *oper_p;
+	struct conf_oper *oper_p = conn_p->oper;
         char *crpass;
 
         if(parc < 3 || EmptyString(parv[2]))
         {
                 sendto_one(conn_p, "Usage: .login <username> <password>");
-                return;
-        }
-
-        if((oper_p = find_oper(conn_p, parv[1])) == NULL)
-        {
-                sendto_one(conn_p, "No matching O: found");
                 return;
         }
 
@@ -193,7 +187,7 @@ u_login(struct connection_entry *conn_p, char *parv[], int parc)
         sendto_all(UMODE_AUTH, "%s has logged in", conn_p->name);
 
         /* set them as 'logged in' */
-        conn_p->oper = oper_p;
+        SetUserAuth(conn_p);
         conn_p->flags |= UMODE_DEFAULT;
 
         sendto_one(conn_p, "Login successful, for available commands see .help");

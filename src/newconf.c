@@ -524,16 +524,43 @@ conf_end_oper(struct TopConf *tc)
 static void
 conf_set_oper_user(void *data)
 {
+	conf_parm_t *args = data;
 	const char *username;
 	const char *host;
 
+	if(yy_tmpoper != NULL)
+	{
+		free_conf_oper(yy_tmpoper);
+		yy_tmpoper = NULL;
+	}
+
 	yy_tmpoper = my_malloc(sizeof(struct conf_oper));
 
-	split_user_host((char *) data, &username, &host);
+	/* args points to servername.. */
+	if(args->next != NULL)
+	{
+		if((args->type & CF_MTYPE) != CF_QSTRING)
+		{
+			conf_report_error("Warning -- server is not a qstring; ignoring.");
+			return;
+		}
+
+		yy_tmpoper->server = my_strdup(args->v.string);
+		args = args->next;
+	}
+
+	if((args->type & CF_MTYPE) != CF_QSTRING)
+	{
+		conf_report_error("Warning -- server is not a qstring; ignoring.");
+		return;
+	}
+
+	split_user_host(args->v.string, &username, &host);
 	yy_tmpoper->username = my_strdup(username);
 	yy_tmpoper->host = my_strdup(host);
 
         dlink_add_tail_alloc(yy_tmpoper, &yy_oper_list);
+	yy_tmpoper = NULL;
 }
 
 static void
@@ -674,7 +701,7 @@ newconf_init()
 			conf_set_connect_autoconn);
 
         add_top_conf("oper", conf_begin_oper, conf_end_oper);
-        add_conf_item("oper", "user", CF_QSTRING,
+        add_conf_item("oper", "user", CF_QSTRING | CF_FLIST,
                       conf_set_oper_user);
         add_conf_item("oper", "password", CF_QSTRING,
                       conf_set_oper_password);
