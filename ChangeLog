@@ -1,3 +1,15 @@
+leeh        2004/03/23 17:46:45 EST	(20040323_3)
+
+  Modified files:
+    servlink             servlink.c 
+  Log:
+  - servlink fix, via -stable
+  
+  Revision  Changes    Path
+  1.36      +0 -1      ircd-ratbox/servlink/servlink.c
+
+
+
 leeh        2004/03/23 13:24:50 EST	(20040323_2)
 
   Modified files:
