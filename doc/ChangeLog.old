@@ -1,3 +1,7 @@
+*** 20010430_2 by ejb
+- call valid_comment even for IPv6.. 
+
+
 *** 20010430_1 by a1kmm
 - Fixed the compile warnings with fl_'s stats code.
 
