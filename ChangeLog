@@ -1,3 +1,29 @@
+leeh        2003/09/07 22:36:31 EDT	(20030908_0)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+    doc                  server-version-info 
+    include              config.h config.h.dist m_info.h 
+                         setup.h.in 
+    modules              m_version.c 
+    src                  s_log.c 
+  Log:
+  - removed the syslog code, part one of my redesign of the log system.
+  
+  Revision  Changes    Path
+  7.178     +1 -1      ircd-ratbox/autoconf/configure.in
+  7.185     +1 -1      ircd-ratbox/configure
+  7.16      +0 -2      ircd-ratbox/doc/server-version-info
+  7.168     +0 -29     ircd-ratbox/include/config.h
+  7.71      +1 -30     ircd-ratbox/include/config.h.dist
+  7.51      +0 -6      ircd-ratbox/include/m_info.h
+  7.70      +0 -3      ircd-ratbox/include/setup.h.in
+  1.62      +1 -5      ircd-ratbox/modules/m_version.c
+  7.59      +29 -87    ircd-ratbox/src/s_log.c
+
+
+
 leeh        2003/09/07 09:01:14 EDT	(20030907_1)
 
   Modified files:
