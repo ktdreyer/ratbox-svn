@@ -1,3 +1,18 @@
+leeh        2005/01/12 10:46:24 EST	(20050112_3)
+
+  Modified files:
+    include              client.h config.h 
+    src                  client.c 
+  Log:
+  - added in a hostname hash..
+  
+  Revision  Changes    Path
+  1.34      +14 -7     rserv/include/client.h
+  1.23      +2 -4      rserv/include/config.h
+  1.29      +77 -0     rserv/src/client.c
+
+
+
 leeh        2005/01/12 10:15:45 EST	(20050112_2)
 
   Modified files:
