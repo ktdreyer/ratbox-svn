@@ -1,3 +1,20 @@
+leeh        2003/08/10 20:39:12 EDT	(20030811_1)
+
+  Modified files:
+    include              send.h 
+    modules              m_away.c m_gline.c 
+    modules/core         m_part.c 
+  Log:
+  - fixed some CAP_UID remnants to use CAP_TS6 and the proper id functions.
+  
+  Revision  Changes    Path
+  7.74      +8 -9      ircd-ratbox/include/send.h
+  1.84      +5 -19     ircd-ratbox/modules/core/m_part.c
+  1.49      +8 -5      ircd-ratbox/modules/m_away.c
+  1.125     +14 -10    ircd-ratbox/modules/m_gline.c
+
+
+
 leeh        2003/08/10 20:25:19 EDT	(20030811_0)
 
   Modified files:
