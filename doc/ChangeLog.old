@@ -1,3 +1,7 @@
+*** 20001213_6 by toot
+fixed some makefile stuff
+
+
 *** 20001213_5 by db
 - I had changed RTLD_LAZY to RTLD_NOW in modules.c thus insisting
   on all names being resolved before loading. oops. should have done this
