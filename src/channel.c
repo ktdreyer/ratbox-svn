@@ -4042,6 +4042,14 @@ void cleanup_channels(void *unused)
    eventAdd("cleanup_channels", cleanup_channels, NULL,
             CLEANUP_CHANNELS_TIME, 0 );
 
+   assert (MyConnect(uplink) == 1);
+
+   if (!MyConnect(uplink))
+     {
+       ilog(L_ERROR, "non-local uplink [%s]", uplink->name);
+       uplink = NULL;
+     }
+
    for(chptr = GlobalChannelList; chptr; chptr = next_chptr)
      {
        next_chptr = chptr->nextch;
@@ -4059,7 +4067,7 @@ void cleanup_channels(void *unused)
                    if(chptr->users == 0)
                      {
                        if (uplink
-                           &&
+			   &&
                            IsCapable(uplink, CAP_LL))
                          {
                            sendto_one(uplink,":%s DROP %s",

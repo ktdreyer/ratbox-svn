@@ -1182,7 +1182,7 @@ int server_estab(struct Client *client_p)
         }
     }
   
-  if(!ServerInfo.hub)
+  if((ServerInfo.hub == 0) && MyConnect(client_p))
     {
       uplink = client_p;
     }
