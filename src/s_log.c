@@ -65,8 +65,8 @@ static struct log_struct log_table[LAST_LOGFILE] =
 	{ ConfigFileEntry.fname_operlog,	&log_oper	},
 	{ ConfigFileEntry.fname_foperlog,	&log_foper	},
 	{ ConfigFileEntry.fname_serverlog,	&log_server	},
-	{ ConfigFileEntry.fname_glinelog,	&log_gline	},
 	{ ConfigFileEntry.fname_klinelog,	&log_kline	},
+	{ ConfigFileEntry.fname_glinelog,	&log_gline	},
 	{ ConfigFileEntry.fname_operspylog,	&log_operspy	},
 	{ ConfigFileEntry.fname_ioerrorlog,	&log_ioerror	}
 };
