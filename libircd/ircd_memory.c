@@ -90,7 +90,7 @@ MemoryEntry *first_mem_entry = NULL;
 
 void *_MyMalloc(size_t size, char *file, int line)
 {
-    void *what = calloc(size + sizeof(MemoryEntry));
+    void *what = malloc(size + sizeof(MemoryEntry));
     if (what == NULL)
 	outofmemory();
     return memlog(what, size, file, line);

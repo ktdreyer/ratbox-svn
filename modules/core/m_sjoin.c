@@ -131,6 +131,7 @@ static void ms_sjoin(struct Client *client_p,
 
   if (IsClient(source_p) || parc < 5)
     return;
+  
   if (!IsChannelName(parv[2]))
     return;
   if (!check_channel_name(parv[2]))
@@ -455,6 +456,8 @@ static void ms_sjoin(struct Client *client_p,
       /* copy the nick to the two buffers */
       hops += ircsprintf(hops, "%s ", s);
       nhops += ircsprintf(nhops, "%s ", s);
+      assert((hops-sjbuf_hops) < sizeof(sjbuf_hops) &&
+             (nhops-sjbuf_nhops) < sizeof(sjbuf_nhops));
 
       if (!keep_new_modes)
 	{

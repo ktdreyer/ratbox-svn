@@ -135,6 +135,8 @@ void parse(struct Client *client_p, char *pbuffer, char *bufend)
   assert(!IsDead(client_p));
   assert(client_p->fd >= 0);
 
+  assert((bufend-pbuffer) < 512);
+
   for (ch = pbuffer; *ch == ' '; ch++)   /* skip spaces */
     /* null statement */ ;
 

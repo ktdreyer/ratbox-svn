@@ -414,6 +414,7 @@ void client_dopacket(struct Client *client_p, char *buffer, size_t length)
 {
   assert(client_p != NULL);
   assert(buffer != NULL);
+  buffer[length] = 0;
 
   /* 
    * Update messages received

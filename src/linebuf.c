@@ -266,13 +266,18 @@ linebuf_copy_line(buf_head_t *bufhead, buf_line_t *bufline,
 
   /* This is the ~overflow case..This doesn't happen often.. */
   if(cpylen > BUF_DATA_SIZE - bufline->len) {
-  	cpylen = BUF_DATA_SIZE - bufline->len;
+  	cpylen = BUF_DATA_SIZE - bufline->len - 1;
   	memcpy(bufch, ch, cpylen);
-  	bufch += cpylen;
-  	*bufch = '\0';
+  	bufch += cpylen-1;
+      while(cpylen && (*bufch == '\r' || *bufch == '\n'))
+      {
+  	 *bufch = '\0';
+  	 cpylen--;
+  	 bufch--;
+      }
   	bufline->overflow = 1;
-	bufline->terminated = 1;
-	bufline->len = cpylen;
+  	bufline->terminated = 1;
+      bufline->len = cpylen;
   	bufhead->len += bufline->len;
   	return clen;
   }
@@ -281,18 +286,20 @@ linebuf_copy_line(buf_head_t *bufhead, buf_line_t *bufline,
   
   if(*bufch != '\r' && *bufch != '\n') /* No linefeed..so we bail for the next time */
   { 
+    *(bufch+1) = 0;
 	bufhead->len += bufline->len += cpylen;
   	bufline->terminated = 0;
 	return clen;
   }
 
   /* Yank the CRLF off this, replace with a \0 */
-  while(*bufch == '\r' || *bufch == '\n')
+  while(cpylen && (*bufch == '\r' || *bufch == '\n'))
   {
   	*bufch = '\0';
   	cpylen--;
   	bufch--;
   }
+  
   bufline->terminated = 1;
   bufhead->len += bufline->len += cpylen;
   return clen;
