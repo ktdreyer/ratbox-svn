@@ -46,9 +46,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-static int mr_server(struct Client *, struct Client *, int, char **);
-static int ms_server(struct Client *, struct Client *, int, char **);
-
 struct Message server_msgtab = {
   MSG_SERVER, 0, 3, 0, MFLG_SLOW | MFLG_UNREG, 0,
   {mr_server, m_registered, ms_server, m_registered}
@@ -66,9 +63,9 @@ _moddeinit(void)
   mod_del_cmd(&server_msgtab);
 }
 
-static char *parse_server_args(char *parv[], int parc, char *info, int *hop);
-static int bogus_host(char *host);
-static void write_links_file(void*);
+char *parse_server_args(char *parv[], int parc, char *info, int *hop);
+int bogus_host(char *host);
+void write_links_file(void*);
 
 char *_version = "20001122";
 
@@ -81,8 +78,7 @@ static int       refresh_user_links=0;
  *      parv[2] = serverinfo/hopcount
  *      parv[3] = serverinfo
  */
-static int mr_server(struct Client *cptr, struct Client *sptr,
-                     int parc, char *parv[])
+int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
   char             info[REALLEN + 1];
   char*            host;
@@ -117,21 +113,21 @@ static int mr_server(struct Client *cptr, struct Client *sptr,
         {
          sendto_realops_flags(FLAGS_ALL,
            "Unauthorised server connection attempt from %s: No entry for "
-           "servername %s.", get_client_name(cptr, TRUE));
+           "servername %s.", get_client_name(cptr, TRUE), host);
         }
       return exit_client(cptr, cptr, cptr,
                 "Invalid servername/host/password.");
      case -2:
       sendto_realops_flags(FLAGS_ALL,
         "Unauthorised server connection attempt from %s: Bad password "
-        "for server %s.", get_client_name(cptr, TRUE));
+        "for server %s.", get_client_name(cptr, TRUE), host);
       return exit_client(cptr, cptr, cptr,
                  "Invalid servername/host/password.");
       break;
      case -3:
       sendto_realops_flags(FLAGS_ALL,
         "Unauthorised server connection attempt from %s: Invalid host "
-        "for server %s.", get_client_name(cptr, TRUE));
+        "for server %s.", get_client_name(cptr, TRUE), host);
       return exit_client(cptr, cptr, cptr,
                  "Invalid servername/host/password.");
     }
@@ -213,8 +209,7 @@ static int mr_server(struct Client *cptr, struct Client *sptr,
  *      parv[2] = serverinfo/hopcount
  *      parv[3] = serverinfo
  */
-static int ms_server(struct Client *cptr, struct Client *sptr,
-                     int parc, char *parv[])
+int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
   char             info[REALLEN + 1];
   char             nbuf[HOSTLEN * 2 + USERLEN + 5];
@@ -400,7 +395,7 @@ static int ms_server(struct Client *cptr, struct Client *sptr,
  *
  * 
  */
-static void write_links_file(void* notused)
+void write_links_file(void* notused)
 {
   MessageFileLine *next_mptr = 0;
   MessageFileLine *mptr = 0;
@@ -482,7 +477,7 @@ static void write_links_file(void* notused)
  * side effects	- parv[1] is trimmed to HOSTLEN size if needed.
  */
 
-static char *parse_server_args(char *parv[], int parc, char *info, int *hop)
+char *parse_server_args(char *parv[], int parc, char *info, int *hop)
 {
   int i;
   char *host;
@@ -530,7 +525,7 @@ static char *parse_server_args(char *parv[], int parc, char *info, int *hop)
  * output	- 1 if a bogus hostname input, 0 if its valid
  * side effects	- none
  */
-static int bogus_host(char *host)
+int bogus_host(char *host)
 {
   int bogus_server = 0;
   char *s;
