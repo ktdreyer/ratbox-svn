@@ -1,3 +1,33 @@
+leeh        2004/07/28 19:23:27 EDT	(20040728_4)
+
+  Modified files:
+    doc                  example.conf example.efnet.conf 
+    include              hostmask.h ircd.h s_conf.h s_newconf.h 
+    modules              m_rehash.c 
+    src                  hostmask.c ircd.c ircd_signal.c newconf.c 
+                         s_conf.c s_newconf.c 
+  Log:
+  - remove ability to set klines/dlines/xlines/resvs via ircd.conf
+  - rehash no longer rereads the ban configs
+  - SIGUSR2 and /rehash banconfigs added to reread ban configs
+  
+  Revision  Changes    Path
+  7.244     +1 -40     ircd-ratbox/doc/example.conf
+  7.76      +1 -43     ircd-ratbox/doc/example.efnet.conf
+  1.34      +1 -1      ircd-ratbox/include/hostmask.h
+  7.74      +1 -0      ircd-ratbox/include/ircd.h
+  7.279     +3 -1      ircd-ratbox/include/s_conf.h
+  7.33      +2 -1      ircd-ratbox/include/s_newconf.h
+  1.82      +11 -1     ircd-ratbox/modules/m_rehash.c
+  7.98      +5 -4      ircd-ratbox/src/hostmask.c
+  7.344     +12 -1     ircd-ratbox/src/ircd.c
+  7.23      +10 -0     ircd-ratbox/src/ircd_signal.c
+  7.157     +0 -280    ircd-ratbox/src/newconf.c
+  7.471     +141 -139  ircd-ratbox/src/s_conf.c
+  7.46      +8 -2      ircd-ratbox/src/s_newconf.c
+
+
+
 leeh        2004/07/27 23:00:30 EDT	(20040728_3)
 
   Modified files:
