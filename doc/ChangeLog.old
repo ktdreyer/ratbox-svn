@@ -1,3 +1,15 @@
+leeh        2002/04/21 08:59:40 EDT	(20020421_0)
+
+  Modified files:
+    help/opers           knock 
+  Log:
+  - s/+s/+p for when you cant knock
+  
+  Revision  Changes    Path
+  1.2       +1 -1      ircd-hybrid-7/help/opers/knock
+
+
+
 leeh        2002/04/20 13:47:50 EDT	(20020420_2)
 
   Modified files:
