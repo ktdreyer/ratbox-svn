@@ -33,6 +33,9 @@
 int yyparse();
 	
 static struct ConfItem *yy_aconf;
+static struct ConfItem *yy_cconf;
+static struct ConfItem *yy_nconf;
+static struct ConfItem *yy_hconf;
 
 char* class_name_var;
 int   class_ping_time_var;
@@ -410,7 +413,70 @@ quarantine_reason:	REASON '=' QSTRING ';'  {
  *  section connect
  ***************************************************************************/
 
-connect_entry:	CONNECT '{' connect_items '}' ';'
+connect_entry:	CONNECT   
+  {
+    if(yy_cconf)
+      {
+	free_conf(yy_cconf);
+	yy_cconf = NULL;
+      }
+
+    if(yy_nconf)
+      {
+	free_conf(yy_nconf);
+	yy_nconf = NULL;
+      }
+
+    if(yy_hconf)
+      {
+	free_conf(yy_hconf);
+	yy_hconf = NULL;
+      }
+
+    yy_cconf=make_conf();
+    yy_nconf=make_conf();
+    yy_hconf=make_conf();
+    yy_cconf->status = CONF_CONNECT_SERVER;
+    yy_nconf->status = CONF_NOCONNECT_SERVER;
+    yy_hconf->status = CONF_HUB;
+  };
+  '{' connect_items '}' ';' {
+    if(yy_cconf->host && yy_cconf->passwd && yy_cconf->user)
+      {
+	++ccount;
+	conf_add_server(yy_cconf,ncount,ccount);
+	conf_add_conf(yy_cconf);
+      }
+    else
+      {
+	free_conf(yy_cconf);
+      }
+
+    if(yy_nconf->host && yy_nconf->passwd && yy_nconf->user)
+      {
+	++ncount;
+	conf_add_server(yy_nconf,ncount,ccount);
+	conf_add_conf(yy_nconf);
+      }
+    else
+      {
+	free_conf(yy_nconf);
+      }
+
+    if(yy_hconf->host)
+      {
+	conf_add_hub_or_leaf(yy_hconf);
+	conf_add_conf(yy_hconf);
+      }
+    else
+      {
+	free_conf(yy_hconf);
+      }
+
+    yy_cconf = NULL;
+    yy_nconf = NULL;
+    yy_hconf = NULL;
+  };
 
 connect_items:	connect_items connect_item |
 		connect_item
@@ -420,27 +486,48 @@ connect_item:	connect_name | connect_host | connect_send_password |
 		connect_compressed | connect_lazylink |
 		connect_hub_mask | connect_class
 
-connect_name:	NAME '=' QSTRING ';'  { sendto_realops("connect.name [%s]",yylval.string); };
+connect_name:	NAME '=' QSTRING ';'  {
+  DupString(yy_cconf->host,yylval.string);
+  DupString(yy_nconf->host,yylval.string);
+  DupString(yy_hconf->user,yylval.string);
+  };
 
-connect_host:	HOST '=' QSTRING ';'  { sendto_realops("connect.host [%s]",yylval.string); };
+connect_host:	HOST '=' QSTRING ';'  {
+  DupString(yy_cconf->user,yylval.string);
+  DupString(yy_nconf->user,yylval.string); 
+  };
 
-connect_send_password:	SEND_PASSWORD '=' QSTRING ';'  { sendto_realops("connect.send_password [%s]",yylval.string); };
+connect_send_password:	SEND_PASSWORD '=' QSTRING ';'  {
+  DupString(yy_cconf->passwd,yylval.string);
+  };
 
-connect_accept_password:	ACCEPT_PASSWORD '=' QSTRING ';'  { sendto_realops("connect.accept_password [%s]",yylval.string); };
+connect_accept_password:	ACCEPT_PASSWORD '=' QSTRING ';'  {
+  DupString(yy_nconf->passwd,yylval.string);
+   };
 
-connect_port:	PORT '=' NUMBER ';'  { sendto_realops("connect.port [%d]",yylval.number); };
+connect_port:	PORT '=' NUMBER ';'  {
+  yy_cconf->port = yylval.number; };
 
-connect_compressed:	COMPRESSED '=' YES ';'  { sendto_realops("connect compressed YES"); } |
-		COMPRESSED '=' NO ';'   { sendto_realops("connect compressed NO"); } ;
+connect_compressed:	COMPRESSED '=' YES ';'  {
+  yy_cconf->flags |= CONF_FLAGS_ZIP_LINK; } |
+		COMPRESSED '=' NO ';'   {
+		  yy_cconf->flags &= ~CONF_FLAGS_ZIP_LINK; } ;
 
-connect_lazylink:	LAZYLINK '=' YES ';'  { sendto_realops("connect lazylink YES"); } |
-		LAZYLINK '=' NO ';'   { sendto_realops("connect lazylink NO"); } ;
+connect_lazylink:	LAZYLINK '=' YES ';'  {
+  yy_nconf->flags |= CONF_FLAGS_LAZY_LINK; } |
+		LAZYLINK '=' NO ';'   {
+		  yy_nconf->flags &= ~CONF_FLAGS_LAZY_LINK; } ;
 
 /* connect_hub.masks:	HUB_MASKS  '{' QSTRING ';' '}' */
 
-connect_hub_mask:	HUB_MASK '=' QSTRING ';'  { sendto_realops("connect.hub_mask [%s]",yylval.string); };
+connect_hub_mask:	HUB_MASK '=' QSTRING ';'  {
+  DupString(yy_hconf->host,yylval.string);
+  };
 
-connect_class:	CLASS '=' QSTRING ';'  { sendto_realops("connect.class [%s]",yylval.string); };
+connect_class:	CLASS '=' QSTRING ';'  {
+  DupString(yy_cconf->className,yylval.string);
+  DupString(yy_nconf->className,yylval.string);
+ };
 
 
 /***************************************************************************

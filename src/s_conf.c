@@ -1740,14 +1740,19 @@ static FBFILE* openconf(const char *filename)
 
 #define MAXCONFLINKS 150
 
+/* bleh. unfortunately, these have to become globals as well */
+
+int              ccount = 0;
+int              ncount = 0;
+
 static void initconf(FBFILE* file)
 {
   char             line[BUFSIZE];
   char             quotedLine[BUFSIZE];
   char*            p;
-  int              ccount = 0;
-  int              ncount = 0;
   struct ConfItem* aconf;
+
+  ccount = ncount = 0;
 
   class0 = find_class("0");       /* which one is class 0 ? */
   aconf = NULL;
