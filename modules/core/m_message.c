@@ -226,16 +226,8 @@ static void m_message(int p_or_n,
       return;
     }
 
-  /* Just a kludge to discourage abuse of the 3s flood time you get at
-   * on registering... */
-  if (!IsPrivileged(source_p) && source_p->tsinfo &&
-      ((CurrentTime-client_p->tsinfo) < 4))
-  {
-   client_p->localClient->allow_read -=
-     MAX_FLOOD_PER_SEC_I-MAX_FLOOD_PER_SEC;
-   if (client_p->localClient->allow_read < 1)
-    client_p->localClient->allow_read = 1;;
-  }
+  /* Finish the flood grace period... */
+  SetFloodDone(source_p);
 
   ntargets = build_target_list(p_or_n,command,
 			       client_p,source_p,parv[1],&target_table,parv[2]);

@@ -496,6 +496,7 @@ int register_local_user(struct Client *client_p, struct Client *source_p,
   /* Increment our total user count here */
   if (++Count.total > Count.max_tot)
     Count.max_tot = Count.total;
+  source_p->localClient->allow_read = MAX_FLOOD_PER_SEC_I;
 
   Count.totalrestartcount++;
   user_welcome(source_p);

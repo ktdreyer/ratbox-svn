@@ -114,7 +114,8 @@ flood_recalc(int fd, void *data)
   */
  if (!IsPrivileged(client_p))
  {
-  if (client_p->user && ((CurrentTime-client_p->tsinfo) < 4))
+  /* Is the grace period still active? */
+  if (client_p->user && !IsFloodDone(client_p))
    max_flood_per_sec = MAX_FLOOD_PER_SEC_I;
   /* ok, we have to recalculate the number of messages we can receive
    * in this second, based upon what happened in the last second.
@@ -135,7 +136,7 @@ flood_recalc(int fd, void *data)
   if (lclient_p->allow_read < 1)
    lclient_p->allow_read = 1;
   else if (lclient_p->allow_read > max_flood_per_sec)
-   lclient_p->allow_read = MAX_FLOOD_PER_SEC;
+   lclient_p->allow_read = max_flood_per_sec;
  }
  /* Reset the sent-per-second count */
  lclient_p->sent_parsed = 0;
@@ -216,7 +217,7 @@ read_packet(int fd, void *data)
     return;
   }
 
-  lclient_p->actually_read += lbuf_len;
+  lclient_p->actually_read++;
   
   /* Check to make sure we're not flooding */
   if (IsPerson(client_p) &&

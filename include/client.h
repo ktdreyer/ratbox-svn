@@ -422,7 +422,10 @@ struct LocalUser
 #define FLAGS2_IP_HIDDEN        0x100000        /* client IP should be hidden
                                                    from non opers */
 #define FLAGS2_PERSISTING       0x200000      /* They have no valid socket
-                                               * but */
+                                               * but are persisting. */
+#define FLAGS2_FLOODDONE        0x400000      /* Flood grace period has
+                                               * been ended. */
+
 #define SEND_UMODES  (FLAGS_INVISIBLE | FLAGS_OPER | FLAGS_WALLOP | \
                       FLAGS_ADMIN|FLAGS_PERSISTANT)
 #define ALL_UMODES   (SEND_UMODES | FLAGS_SERVNOTICE | FLAGS_CCONN | \
@@ -534,6 +537,8 @@ struct LocalUser
 #define IsOperRehash(x)         ((x)->flags2 & FLAGS2_OPER_REHASH)
 #define SetOperAdmin(x)         ((x)->flags2 |= FLAGS2_OPER_ADMIN)
 #define IsSetOperAdmin(x)       ((x)->flags2 & FLAGS2_OPER_ADMIN)
+#define SetFloodDone(x)         ((x)->flags2 |= FLAGS2_FLOODDONE)
+#define IsFloodDone(x)          ((x)->flags2 & FLAGS2_FLOODDONE)
 #define CBurst(x)               ((x)->flags2 & FLAGS2_CBURST)
 
 /*

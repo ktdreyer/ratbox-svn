@@ -219,12 +219,11 @@
  */
 #define MAXSENDQLENGTH 7050000    /* Recommended value: 7050000 for EFnet */
 
-/* CLIENT_FLOOD - client excess flood threshold
- * this controls the number of bytes the server will allow a client to
- * send to the server without processing before disconnecting the client for
- * flooding it.  Values greater than 8000 make no difference to the server.
+/* CLIENT_FLOOD - client excess flood threshold(in messages)
+ * The number of messages that we can receive before we disconnect the
+ * remote client...
  */
-#define CLIENT_FLOOD    2560
+#define CLIENT_FLOOD 20
 
 /*   STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP  */
 
@@ -369,7 +368,7 @@
 /* ------------------------- END CONFIGURATION SECTION -------------------- */
 #define MAX_CLIENTS INIT_MAXCLIENTS
 
-#if defined(CLIENT_FLOOD) && ((CLIENT_FLOOD > 8000) || (CLIENT_FLOOD < 512))
+#if defined(CLIENT_FLOOD) && ((CLIENT_FLOOD > 200) || (CLIENT_FLOOD < 10))
 error CLIENT_FLOOD needs redefining.
 #endif
 

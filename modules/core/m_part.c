@@ -101,14 +101,8 @@ static void m_part(struct Client *client_p,
 
   name = strtoken( &p, parv[1], ",");
 
-  if (!IsPrivileged(source_p) && source_p->tsinfo &&
-      ((CurrentTime-client_p->tsinfo) < 4))
-  {
-   client_p->localClient->allow_read -=
-     MAX_FLOOD_PER_SEC_I-MAX_FLOOD_PER_SEC;
-   if (client_p->localClient->allow_read < 1)
-    client_p->localClient->allow_read = 1;;
-  }
+  /* Finish the flood grace period... */
+  SetFloodDone(source_p);
   /* if its my client, and isn't an oper */
 
   while(name)
