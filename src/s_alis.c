@@ -31,7 +31,7 @@
 static void s_alis(struct client *, char *text);
 
 struct service_handler alis_service = {
-	"ALIS", "alis", "services.alis", "Advanced List Service", &s_alis
+	"ALIS", "ALIS", "alis", "services.alis", "Advanced List Service", 0, &s_alis
 };
 
 static const char *help_list[] =

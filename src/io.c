@@ -12,6 +12,7 @@
 #include <netdb.h>
 
 #include "stdinc.h"
+#include "command.h"
 #include "tools.h"
 #include "rserv.h"
 #include "io.h"
@@ -32,7 +33,14 @@ fd_set writefds;
 static void signon_server(struct connection_entry *conn_p);
 static void read_server(struct connection_entry *conn_p);
 static int write_sendq(struct connection_entry *conn_p);
+static void parse_server(char *buf, int len);
 
+/* get_line()
+ *   Gets a line of data from a given connection
+ *
+ * inputs	- connection to get line for, buffer to put in, size of buffer
+ * outputs	- characters read
+ */
 static int
 get_line(struct connection_entry *conn_p, char *buf, int bufsize)
 {
@@ -80,6 +88,12 @@ get_line(struct connection_entry *conn_p, char *buf, int bufsize)
 	return n;
 }
 
+/* read_io()
+ *   The main IO loop for reading/writing data.
+ *
+ * inputs	-
+ * outputs	-
+ */
 void
 read_io(void)
 {
@@ -121,11 +135,11 @@ read_io(void)
 			}
 		}
 
+		/* we can safely exit anything thats dead at this point */
 		DLINK_FOREACH_SAFE(ptr, next_ptr, exited_list.head)
 		{
 			free_client(ptr->data);
 		}
-
 		exited_list.head = exited_list.tail = NULL;
 		exited_list.length = 0;
 
@@ -231,6 +245,135 @@ read_server(struct connection_entry *conn_p)
 	/* n == 0 we can safely ignore */
 }
 
+/* string_to_array()
+ *   Changes a given buffer into an array of parameters.
+ *   Taken from ircd-ratbox.
+ *
+ * inputs	- string to parse, array to put in
+ * outputs	- number of parameters
+ */
+static inline int
+string_to_array(char *string, char *parv[MAXPARA])
+{
+	char *p, *buf = string;
+	int x = 1;
+
+	parv[x] = NULL;
+	while (*buf == ' ')	/* skip leading spaces */
+		buf++;
+	if(*buf == '\0')	/* ignore all-space args */
+		return x;
+
+	do
+	{
+		if(*buf == ':')	/* Last parameter */
+		{
+			buf++;
+			parv[x++] = buf;
+			parv[x] = NULL;
+			return x;
+		}
+		else
+		{
+			parv[x++] = buf;
+			parv[x] = NULL;
+			if((p = strchr(buf, ' ')) != NULL)
+			{
+				*p++ = '\0';
+				buf = p;
+			}
+			else
+				return x;
+		}
+		while (*buf == ' ')
+			buf++;
+		if(*buf == '\0')
+			return x;
+	}
+	while (x < MAXPARA - 1);
+
+	if(*p == ':')
+		p++;
+
+	parv[x++] = p;
+	parv[x] = NULL;
+	return x;
+}
+
+/* parse_server()
+ *   parses a given buffer into a command and calls handler
+ *
+ * inputs	- buffer to parse, length of buffer
+ * outputs	-
+ */
+void
+parse_server(char *buf, int len)
+{
+	static char *parv[MAXPARA + 1];
+	const char *command;
+	char *s;
+	char *ch;
+	int parc;
+
+	if(len > BUFSIZE)
+		buf[BUFSIZE-1] = '\0';
+
+	if((s = strchr(buf, '\n')) != NULL)
+		*s = '\0';
+
+	if((s = strchr(buf, '\r')) != NULL)
+		*s = '\0';
+
+	/* skip leading spaces.. */
+	for(ch = buf; *ch == ' '; ch++)
+		;
+
+	parv[0] = server_p->name;
+
+	if(*ch == ':')
+	{
+		ch++;
+
+		parv[0] = ch;
+
+		if((s = strchr(ch, ' ')) != NULL)
+		{
+			*s++ = '\0';
+			ch = s;
+		}
+
+		while(*ch == ' ')
+			ch++;
+	}
+
+	if(EmptyString(ch))
+		return;
+
+	command = ch;
+
+	if((s = strchr(ch, ' ')) != NULL)
+	{
+		*s++ = '\0';
+		ch = s;
+	}
+
+	while(*ch == ' ')
+		ch++;
+
+	if(EmptyString(ch))
+		return;
+
+	parc = string_to_array(ch, parv);
+
+	handle_command(command, parv, parc);
+}
+
+/* sendto_server()
+ *   attempts to send the given data to our server
+ *
+ * inputs	- string to send
+ * outputs	-
+ */
 void
 sendto_server(const char *format, ...)
 {
@@ -250,6 +393,73 @@ sendto_server(const char *format, ...)
 		(server_p->io_close)(server_p);
 }
 
+/* write_sendq()
+ *   write()'s as much of a given users sendq as possible
+ *
+ * inputs	- connection to flush sendq of
+ * outputs	- -1 on fatal error, 0 on partial write, otherwise 1
+ */
+static int
+write_sendq(struct connection_entry *conn_p)
+{
+	struct send_queue *sendq;
+	dlink_node *ptr;
+	dlink_node *next_ptr;
+	int n;
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, conn_p->sendq.head)
+	{
+		sendq = ptr->data;
+
+		/* write, starting at the offset */
+		if((n = write(conn_p->fd, sendq->buf + sendq->pos, sendq->len)) < 0)
+		{
+			if(errno != EAGAIN)
+				return -1;
+			return 0;
+		}
+
+		/* wrote full sendq? */
+		if(n == sendq->len)
+		{
+			dlink_destroy(ptr, &conn_p->sendq);
+			my_free((void *)sendq->buf);
+			my_free(sendq);
+		}
+		else
+		{
+			sendq->pos += n;
+			sendq->len -= n;
+			return 0;
+		}
+	}
+
+	return 1;
+}
+
+/* sendq_add()
+ *   adds a given buffer to a connections sendq
+ *
+ * inputs	- connection to add to, buffer to add, length of buffer,
+ *		  offset at where to start writing
+ * outputs	-
+ */
+static void
+sendq_add(struct connection_entry *conn_p, const char *buf, int len, int offset)
+{
+	struct send_queue *sendq = my_calloc(1, sizeof(struct send_queue));
+	sendq->buf = my_strdup(buf);
+	sendq->len = len - offset;
+	sendq->pos = offset;
+	dlink_add_tail_alloc(sendq, &conn_p->sendq);
+}
+
+/* sock_open()
+ *   attempts to open a connection
+ *
+ * inputs	- host/port to connect to, vhost to use
+ * outputs	- fd of socket, -1 on error
+ */
 int
 sock_open(const char *host, int port, const char *vhost)
 {
@@ -305,60 +515,6 @@ sock_open(const char *host, int port, const char *vhost)
 	return fd;
 }
 
-static void
-sendq_add(struct connection_entry *conn_p, const char *buf, int len, int offset)
-{
-	struct send_queue *sendq = my_calloc(1, sizeof(struct send_queue));
-	sendq->buf = my_strdup(buf);
-	sendq->len = len - offset;
-	sendq->pos = offset;
-	dlink_add_tail_alloc(sendq, &conn_p->sendq);
-}
-
-/* write_sendq()
- *   write()'s as much of a given users sendq as possible
- *
- * inputs	- connection to flush sendq of
- * outputs	- -1 on fatal error, 0 on partial write, otherwise 1
- */
-static int
-write_sendq(struct connection_entry *conn_p)
-{
-	struct send_queue *sendq;
-	dlink_node *ptr;
-	dlink_node *next_ptr;
-	int n;
-
-	DLINK_FOREACH_SAFE(ptr, next_ptr, conn_p->sendq.head)
-	{
-		sendq = ptr->data;
-
-		/* write, starting at the offset */
-		if((n = write(conn_p->fd, sendq->buf + sendq->pos, sendq->len)) < 0)
-		{
-			if(errno != EAGAIN)
-				return -1;
-			return 0;
-		}
-
-		/* wrote full sendq? */
-		if(n == sendq->len)
-		{
-			dlink_destroy(ptr, &conn_p->sendq);
-			my_free((void *)sendq->buf);
-			my_free(sendq);
-		}
-		else
-		{
-			sendq->pos += n;
-			sendq->len -= n;
-			return 0;
-		}
-	}
-
-	return 1;
-}
-
 /* sock_write()
  *   Writes a buffer to a given user, flushing sendq first.
  *
@@ -379,9 +535,10 @@ sock_write(struct connection_entry *conn_p, const char *buf, int len)
 			(conn_p->io_close)(conn_p);
 			return -1;
 		}
+		/* got a partial write, add the new line to the sendq */
 		else if(n == 0)
 		{
-			sendq_add(conn_p, buf, len, n);
+			sendq_add(conn_p, buf, len, 0);
 			return 0;
 		}
 	}
@@ -392,6 +549,9 @@ sock_write(struct connection_entry *conn_p, const char *buf, int len)
 			return -1;
 	}
 
+	/* partial write.. add this line to sendq with offset of however
+	 * much we wrote
+	 */
 	if(n != len)
 		sendq_add(conn_p, buf, len, n);
 

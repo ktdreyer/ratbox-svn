@@ -15,6 +15,10 @@
 #include <unistd.h>
 #include <errno.h>
 #include <sys/time.h>
+#include <sys/resource.h>
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
 
 #include "stdinc.h"
 #include "rserv.h"
@@ -27,12 +31,16 @@
 #include "log.h"
 #include "c_init.h"
 #include "service.h"
+#include "fileio.h"
+#include "serno.h"
 
 struct timeval system_time;
 
-int die(const char *s)
+void
+die(const char *reason)
 {
-    exit(0);
+	slog("DIED: %s", reason);
+	exit(1);
 }
 
 void
@@ -43,156 +51,144 @@ set_time(void)
 	newtime.tv_sec = newtime.tv_usec = 0;
 
 	if(gettimeofday(&newtime, NULL) == -1)
-	{
 		die("Clock failure.");
-	}
 
 	system_time.tv_sec = newtime.tv_sec;
 	system_time.tv_usec = newtime.tv_usec;
 }
 
-/* string_to_array()
- *   Changes a given buffer into an array of parameters.
- *   Taken from ircd-ratbox.
- *
- * inputs	- string to parse, array to put in
- * outputs	- number of parameters
- */
-static inline int
-string_to_array(char *string, char *parv[MAXPARA])
+static void
+setup_corefile(void)
 {
-	char *p, *buf = string;
-	int x = 1;
+	struct rlimit rlim;
 
-	parv[x] = NULL;
-	while (*buf == ' ')	/* skip leading spaces */
-		buf++;
-	if(*buf == '\0')	/* ignore all-space args */
-		return x;
-
-	do
+	if(!getrlimit(RLIMIT_CORE, &rlim))
 	{
-		if(*buf == ':')	/* Last parameter */
+		rlim.rlim_cur = rlim.rlim_max;
+		setrlimit(RLIMIT_CORE, &rlim);
+	}
+}
+
+static void
+check_pidfile(void)
+{
+	FBFILE *fb;
+	char buf[32];
+	pid_t filepid;
+
+	if((fb = fbopen(PID_PATH, "r")) != NULL)
+	{
+		if(fbgets(buf, 20, fb) != NULL && errno != ENOENT)
 		{
-			buf++;
-			parv[x++] = buf;
-			parv[x] = NULL;
-			return x;
-		}
-		else
-		{
-			parv[x++] = buf;
-			parv[x] = NULL;
-			if((p = strchr(buf, ' ')) != NULL)
+			filepid = atoi(buf);
+			if(!kill(filepid, 0))
 			{
-				*p++ = '\0';
-				buf = p;
+				printf("ratbox-services: daemon already running\n");
+				exit(-1);
 			}
-			else
-				return x;
 		}
-		while (*buf == ' ')
-			buf++;
-		if(*buf == '\0')
-			return x;
+
+		fbclose(fb);
 	}
-	while (x < MAXPARA - 1);
-
-	if(*p == ':')
-		p++;
-
-	parv[x++] = p;
-	parv[x] = NULL;
-	return x;
 }
 
-void
-parse_server(char *buf, int len)
+static void
+write_pidfile(void)
 {
-	static char *parv[MAXPARA + 1];
-	const char *command;
-	char *s;
-	char *ch;
-	int parc;
-
-	if(len > BUFSIZE)
-		buf[BUFSIZE-1] = '\0';
-
-	if((s = strchr(buf, '\n')) != NULL)
-		*s = '\0';
-
-	if((s = strchr(buf, '\r')) != NULL)
-		*s = '\0';
-
-	/* skip leading spaces.. */
-	for(ch = buf; *ch == ' '; ch++)
-		;
-
-	parv[0] = server_p->name;
-
-	if(*ch == ':')
+	FBFILE *fb;
+	char buf[32];
+	
+	if((fb = fbopen(PID_PATH, "w")) != NULL)
 	{
-		ch++;
+		snprintf(buf, sizeof(buf), "%u\n", (unsigned int) getpid());
 
-		parv[0] = ch;
+		if(fbputs(buf, fb) == -1)
+			slog("ERR: Error writing to pid file %s (%s)",
+			     PID_PATH, strerror(errno));
 
-		if((s = strchr(ch, ' ')) != NULL)
+		fbclose(fb);
+	}
+	else
+		slog("ERR: Error opening pid file %s", PID_PATH);
+}
+
+static void
+print_help(void)
+{
+	printf("rserv [-h|-v|-f]\n");
+	printf(" -h show this help\n");
+	printf(" -v show version\n");
+	printf(" -f foreground mode\n");
+}
+
+int 
+main(int argc, char *argv[])
+{
+	char c;
+	int nofork = 0;
+
+	setup_corefile();
+
+	while((c = getopt(argc, argv, "hvf")) != -1)
+	{
+		switch(c)
 		{
-			*s++ = '\0';
-			ch = s;
+			case 'h':
+				print_help();
+				exit(0);
+				break;
+			case 'v':
+				printf("ratbox-services: version %s(%s)\n",
+					RSERV_VERSION, SERIALNUM);
+				exit(0);
+				break;
+			case 'f':
+				nofork = 1;
+				break;
 		}
-
-		while(*ch == ' ')
-			ch++;
 	}
 
-	if(EmptyString(ch))
-		return;
+	/* time must be set before logs */
+	set_time();
+	init_log();
 
-	command = ch;
+	check_pidfile();
 
-	if((s = strchr(ch, ' ')) != NULL)
+	printf("ratbox-services: version %s(%s)\n",
+		RSERV_VERSION, SERIALNUM);
+	printf("ratbox-services: pid %d\n", getpid());
+
+	if(!nofork)
 	{
-		*s++ = '\0';
-		ch = s;
+		switch (fork())
+		{
+			case -1:
+				perror("fork()");
+				exit(3);
+			case 0:
+				close(STDIN_FILENO);
+				close(STDOUT_FILENO);
+				close(STDERR_FILENO);
+				if (setsid() == -1)
+				{
+					slog("DIED: setsid() error");
+					exit(4);
+				}
+				break;
+			default:
+				printf("ratbox-services: running in background\n");
+				return 0;
+		}
 	}
 
-	while(*ch == ' ')
-		ch++;
+	write_pidfile();
 
-	if(EmptyString(ch))
-		return;
-
-	parc = string_to_array(ch, parv);
-
-	handle_command(command, parv, parc);
-}
-
-
-int main(int argc, char *argv[])
-{
-	switch (fork())
-	{
-		case -1:
-			perror("fork()");
-			exit(3);
-		case 0:
-			close(STDIN_FILENO);
-			close(STDOUT_FILENO);
-			close(STDERR_FILENO);
-			if (setsid() == -1)
-				exit(4);
-			break;
-		default:
-			printf("daemonized.\n");
-			return 0;
-	}
+	slog("ratbox-services started");
 
 	init_events();
 	init_command();
 	init_client();
 	init_channel();
-	init_log();
 
 	/* load specific commands */
 	add_scommand_handler(&mode_command);
@@ -202,7 +198,6 @@ int main(int argc, char *argv[])
 	/* load our services.. */
 	add_service(&alis_service);
 
-	set_time();
 	config_file.first_time = CURRENT_TIME;
 
 	conf_parse();

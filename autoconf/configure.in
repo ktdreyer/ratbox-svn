@@ -15,7 +15,7 @@ AC_PATH_PROG(CP, cp)
 AC_PATH_PROG(MV, mv)
 
 AC_HEADER_STDC
-AC_CHECK_HEADERS(sys/time.h stdlib.h stdarg.h string.h strings.h unistd.h errno.h)
+AC_CHECK_HEADERS(sys/time.h stdlib.h stdarg.h string.h strings.h unistd.h errno.h getopt.h)
 
 AC_TYPE_SIGNAL
 AC_FUNC_STRFTIME

@@ -11,8 +11,6 @@ extern struct timeval system_time;
 
 extern void set_time(void);
 
-extern int die(const char *reason);
-
-extern void parse_server(char *buf, int len);
+extern void die(const char *reason);
 
 #endif

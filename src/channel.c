@@ -111,8 +111,6 @@ add_chmember(struct channel *chptr, struct client *target_p, int flags)
 
 	dlink_add(mptr, &mptr->chnode, &chptr->users);
 	dlink_add(mptr, &mptr->usernode, &target_p->user->channels);
-
-	slog("added %s to channel %s", target_p->name, chptr->name);
 }
 
 void
@@ -126,8 +124,6 @@ del_chmember(struct chmember *mptr)
 
 	chptr = mptr->chptr;
 	client_p = mptr->client_p;
-
-	slog("removed %s from channel %s", client_p->name, chptr->name);
 
 	dlink_delete(&mptr->chnode, &chptr->users);
 	dlink_delete(&mptr->usernode, &client_p->user->channels);
@@ -342,8 +338,6 @@ c_sjoin(struct client *client_p, char *parv[], int parc)
 		add_channel(chptr);
 
 		isnew = 1;
-
-		slog("CHAN: created channel %s", chptr->name);
 	}
 	else
 	{

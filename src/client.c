@@ -92,7 +92,7 @@ find_user(const char *name)
 {
 	struct client *target_p = find_client(name);
 
-	if(IsUser(target_p))
+	if(target_p != NULL && IsUser(target_p))
 		return target_p;
 
 	return NULL;
@@ -103,7 +103,7 @@ find_server(const char *name)
 {
 	struct client *target_p = find_client(name);
 
-	if(IsServer(target_p))
+	if(target_p != NULL && IsServer(target_p))
 		return target_p;
 
 	return NULL;
@@ -114,7 +114,7 @@ find_service(const char *name)
 {
 	struct client *target_p = find_client(name);
 
-	if(IsService(target_p))
+	if(target_p != NULL && IsService(target_p))
 		return target_p;
 
 	return NULL;
@@ -339,8 +339,6 @@ c_nick(struct client *client_p, char *parv[], int parc)
 		add_client(target_p);
 		dlink_add(target_p, &target_p->listnode, &user_list);
 		dlink_add(target_p, &target_p->upnode, &uplink_p->server->users);
-		slog("HASH: Added client %s uplink %s",
-		     target_p->name, target_p->user->servername);
 	}
 	else
 	{
@@ -424,9 +422,6 @@ c_server(struct client *client_p, char *parv[], int parc)
 
 	add_client(target_p);
 	dlink_add(target_p, &target_p->listnode, &server_list);
-
-	slog("HASH: Added server %s uplink %s", 
-	     target_p->name, target_p->uplink ? target_p->uplink->name : "NULL");
 }
 
 void

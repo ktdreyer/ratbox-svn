@@ -54,6 +54,9 @@ struct service
 {
 	char username[USERLEN+1];
 	char host[HOSTLEN+1];
+	char id[NICKLEN+1];
+	int opered;
+
 	void (*func)(struct client *, char *text);
 };
 

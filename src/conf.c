@@ -10,6 +10,9 @@
 #include "conf.h"
 #include "fileio.h"
 #include "tools.h"
+#include "client.h"
+#include "service.h"
+#include "io.h"
 
 struct _config_file config_file;
 dlink_list conf_server_list;
@@ -17,6 +20,7 @@ dlink_list conf_server_list;
 static void parse_servinfo(char *line);
 static void parse_admin(char *line);
 static void parse_connect(char *line);
+static void parse_service(char *line);
 
 static void
 conf_error_fatal(const char *format, ...)
@@ -70,7 +74,7 @@ conf_parse(void)
 
 		switch(line[0])
 		{
-			case 'S':
+			case 'M':
 				parse_servinfo(line+2);
 				break;
 			case 'A':
@@ -78,6 +82,9 @@ conf_parse(void)
 				break;
 			case 'C':
 				parse_connect(line+2);
+				break;
+			case 'S':
+				parse_service(line+2);
 				break;
 			default:
 				conf_error("%c: unknown configuration type", line[0]);
@@ -166,3 +173,63 @@ parse_connect(char *line)
 	dlink_add_alloc(server, &conf_server_list);
 }
 
+static void
+parse_service(char *line)
+{
+	struct client *client_p;
+	const char *s_id = getfield(line);
+	const char *s_name = getfield(NULL);
+	const char *s_username = getfield(NULL);
+	const char *s_host = getfield(NULL);
+	const char *s_info = getfield(NULL);
+	const char *s_opered = getfield(NULL);
+	int reintroduce = 0;
+
+	if((client_p = find_service_id(s_id)) == NULL)
+	{
+		conf_error("Z: unknown service %s", s_id);
+		return;
+	}
+
+	if(EmptyString(s_id) || EmptyString(s_name) ||
+	   EmptyString(s_username) || EmptyString(s_host) ||
+	   EmptyString(s_info) || EmptyString(s_opered))
+	{
+		conf_error("Z: missing fields for service %s", s_id);
+		return;
+	}
+
+	/* need to reintroduce the service */
+	if(irccmp(client_p->name, s_name) ||
+	   irccmp(client_p->service->username, s_username) ||
+	   irccmp(client_p->service->host, s_host) ||
+	   irccmp(client_p->info, s_info))
+	{
+		reintroduce = 1;
+		sendto_server(":%s QUIT :reintroducing service",
+				client_p->name);
+		del_client(client_p);
+	}
+
+	if(irccmp(client_p->name, s_name))
+		strlcpy(client_p->name, s_name, sizeof(client_p->name));
+
+	if(irccmp(client_p->service->username, s_username))
+		strlcpy(client_p->service->username, s_username,
+			sizeof(client_p->service->username));
+
+	if(irccmp(client_p->service->host, s_host))
+		strlcpy(client_p->service->host, s_host,
+			sizeof(client_p->service->host));
+
+	if(irccmp(client_p->info, s_info))
+		strlcpy(client_p->info, s_info, sizeof(client_p->info));
+
+	client_p->service->opered = atoi(s_opered);
+
+	if(reintroduce)
+	{
+		add_client(client_p);
+		introduce_service(client_p);
+	}
+}

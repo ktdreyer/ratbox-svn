@@ -74,9 +74,7 @@ c_mode(struct client *client_p, char *parv[], int parc)
 		if(target_p != client_p)
 			return;
 
-		slog("OLD UMODE: %s", umode_to_string(target_p->user->umode));
 		target_p->user->umode = string_to_umode(parv[2], target_p->user->umode);
-		slog("NEW UMODE: %s", umode_to_string(target_p->user->umode));
 		return;
 	}
 
@@ -85,31 +83,6 @@ c_mode(struct client *client_p, char *parv[], int parc)
 
 	if((chptr = find_channel(parv[1])) == NULL)
 		return;
-
-	{
-		char buf[512];
-		struct chmember *mptr;
-		dlink_node *ptr;
-
-		slog("MODE: Changing mode for channel %s", chptr->name);
-
-		buf[0] = '\0';
-
-		strcat(buf, chmode_to_string(chptr));
-
-		DLINK_FOREACH(ptr, chptr->users.head)
-		{
-			mptr = ptr->data;
-			strcat(buf, " ");
-			if(mptr->flags & MODE_OPPED)
-				strcat(buf, "@");
-			if(mptr->flags & MODE_VOICED)
-				strcat(buf, "+");
-			strcat(buf, mptr->client_p->name);
-		}
-
-		slog("WAS: %s", buf);
-	}
 
 	p = parv[2];
 
@@ -208,27 +181,4 @@ c_mode(struct client *client_p, char *parv[], int parc)
 
 		p++;
 	}
-	{
-		char buf[512];
-		struct chmember *mptr;
-		dlink_node *ptr;
-
-		buf[0] = '\0';
-		strcat(buf, chmode_to_string(chptr));
-
-		DLINK_FOREACH(ptr, chptr->users.head)
-		{
-			mptr = ptr->data;
-			strcat(buf, " ");
-			if(mptr->flags & MODE_OPPED)
-				strcat(buf, "@");
-			if(mptr->flags & MODE_VOICED)
-				strcat(buf, "+");
-			strcat(buf, mptr->client_p->name);
-		}
-
-		slog("IS: %s", buf);
-	}
-
-
 }

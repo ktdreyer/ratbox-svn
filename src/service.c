@@ -55,17 +55,36 @@ add_service(struct service_handler *service)
 	strlcpy(client_p->service->host, service->host,
 		sizeof(client_p->service->host));
 	strlcpy(client_p->info, service->info, sizeof(client_p->info));
+	strlcpy(client_p->service->id, service->id, sizeof(client_p->service->id));
 	client_p->service->func = service->func;
 
 	dlink_add(client_p, &client_p->listnode, &service_list);
 	add_client(client_p);
 }
 
+struct client *
+find_service_id(const char *name)
+{
+	struct client *client_p;
+	dlink_node *ptr;
+
+	DLINK_FOREACH(ptr, service_list.head)
+	{
+		client_p = ptr->data;
+
+		if(!strcasecmp(client_p->service->id, name))
+			return client_p;
+	}
+
+	return NULL;
+}
+
 void
 introduce_service(struct client *target_p)
 {
-	sendto_server("NICK %s 1 1 +i %s %s %s :%s",
-		      target_p->name, target_p->service->username, 
+	sendto_server("NICK %s 1 1 +i%s %s %s %s :%s",
+		      target_p->name, target_p->service->opered ? "o" : "",
+		      target_p->service->username,
 		      target_p->service->host, MYNAME, target_p->info);
 }
 
