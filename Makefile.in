@@ -76,7 +76,13 @@ CFLAGS= -g -Wall
 
 
 SHELL=/bin/sh
-SUBDIRS=zlib src tools
+
+SUBDIRS =          \
+ zlib              \
+ iauth             \
+ src               \
+ tools
+
 # ZSUBDIRS=zlib $(SUBDIRS)
 
 MAKE = make 'CFLAGS=${CFLAGS}' 'INSTALL=${INSTALL}' 'LDFLAGS=${LDFLAGS}'

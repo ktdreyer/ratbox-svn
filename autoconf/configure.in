@@ -148,6 +148,11 @@ case "$target" in
 *) AC_MSG_RESULT(nothing special required) ;;
 esac
 
-AC_OUTPUT(Makefile src/Makefile tools/Makefile zlib/Makefile)
-
-
+AC_OUTPUT(                   \
+ Makefile                    \
+ iauth/Makefile              \
+ iauth/source/Makefile       \
+ src/Makefile                \
+ tools/Makefile              \
+ zlib/Makefile               \
+)
