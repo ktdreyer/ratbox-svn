@@ -1,3 +1,22 @@
+leeh        2002/04/23 10:25:24 EDT	(20020423_1)
+
+  Modified files:
+    contrib              README spy_admin_notice.c 
+                         spy_info_notice.c spy_links_notice.c 
+                         spy_motd_notice.c 
+  Log:
+  - updated README wrt ltrace
+  - removed some bogus MyConnect(source_p)
+  
+  Revision  Changes    Path
+  1.16      +6 -2      ircd-hybrid-7/contrib/README
+  1.5       +2 -3      ircd-hybrid-7/contrib/spy_admin_notice.c
+  1.5       +2 -3      ircd-hybrid-7/contrib/spy_info_notice.c
+  1.10      +2 -3      ircd-hybrid-7/contrib/spy_links_notice.c
+  1.5       +2 -3      ircd-hybrid-7/contrib/spy_motd_notice.c
+
+
+
 leeh        2002/04/23 06:34:59 EDT	(20020423_0)
 
   Modified files:
