@@ -188,6 +188,7 @@ static void poll_update_pollfds(int fd, short event, PF * handler)
 void do_sigio(int s)
 {
     sigio_is_screwed = 1;
+    ilog(L_WARN, "Kernel RT Signal queue overflowed.  Is /proc/sys/kernel/rtsig-nr too small?");
 }
 
 /*
