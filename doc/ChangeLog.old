@@ -1,3 +1,7 @@
+*** 20010316_1 by fl_
+- minor fix to the oper_umode stuff..
+
+
 *** 20010315_4 by db
 - This alleviates the high counts found in the block allocator in profiles.
   The problem was a # of block count that was set way too low.
