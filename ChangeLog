@@ -1,3 +1,15 @@
+leeh        2004/03/07 10:52:40 EST	(20040307_1)
+
+  Modified files:
+    src                  hash.c 
+  Log:
+  - missing increment in fnv_hash()/fnv_hash_len()
+  
+  Revision  Changes    Path
+  7.100     +2 -0      ircd-ratbox/src/hash.c
+
+
+
 androsyn    2004/03/06 23:08:06 EST	(20040307_0)
 
   Modified files:
