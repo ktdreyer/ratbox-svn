@@ -1,3 +1,8 @@
+*** 20011010_2 by androsyn
+Added a vsnprintf() stolen from mutt that is necessary on platforms that do 
+not have any native vsnprintf() 
+
+
 *** 20011010_1 by davidt
 - Slightly modified version of poptix's patch, just check len > 3 before
   testing [len-3], and cache the result of strlen.
