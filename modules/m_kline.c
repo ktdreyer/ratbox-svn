@@ -930,8 +930,7 @@ static int valid_comment(struct Client *source_p, char *comment)
 {
   if(strchr(comment, '"'))
     {
-      if(!IsServer(source_p))
-	sendto_one(source_p,
+      sendto_one(source_p,
 		   ":%s NOTICE %s :Invalid character '\"' in comment",
 		   me.name, source_p->name);
       return 0;
@@ -975,10 +974,12 @@ already_placed_kline(struct Client *source_p, char *luser, char *lhost)
   if ((aconf = find_conf_by_address(lhost, piphost, CONF_KILL, t, luser)))
   {
    reason = aconf->passwd ? aconf->passwd : "<No Reason>";
+
    /* Remote servers can set klines, so if its a dupe we warn all 
     * local opers and leave it at that
     */
-   if (IsServer(source_p))
+   /* they can?  here was me thinking it was only remote clients :P */
+   if(!MyClient(source_p))
     sendto_realops_flags(FLAGS_ALL, L_ALL, 
              "*** Remote K-Line [%s@%s] already K-Lined by [%s@%s] - %s",
              luser, lhost, aconf->user, aconf->host, reason);
