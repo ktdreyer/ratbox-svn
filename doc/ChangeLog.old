@@ -1,3 +1,10 @@
+*** 20010203_1 by db
+- after re-reading rfc1489 a bit, and the original tortured code
+  by avalon I think this is what was meant. I think. I'll have to
+  try a h6 server to verify.
+
+
+
 *** 20010202_19 by wcampbel
 Cleaned up INSTALL a little
 Added documentation for the challenge/response system
