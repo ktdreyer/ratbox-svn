@@ -289,6 +289,9 @@ main(int argc, char *argv[])
 #ifdef ENABLE_JUPESERV
 	init_s_jupeserv();
 #endif
+#ifdef ENABLE_GLOBAL
+	init_s_global();
+#endif
 
 	first_time = CURRENT_TIME;
 

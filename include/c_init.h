@@ -25,6 +25,8 @@ extern void init_s_chanserv(void);
 
 void init_s_jupeserv(void);
 
+void init_s_global(void);
+
 /* u_stats.c */
 extern struct ucommand_handler stats_ucommand;
 

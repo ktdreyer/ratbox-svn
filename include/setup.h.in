@@ -72,3 +72,5 @@
 /* Operbot Service */
 #undef ENABLE_OPERBOT
 
+/* Global Messaging Service */
+#undef ENABLE_GLOBAL

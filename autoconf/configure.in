@@ -107,6 +107,21 @@ else
 	AC_MSG_RESULT(no)
 fi
 
+AC_MSG_CHECKING(Global Service)
+AC_ARG_ENABLE(global,
+[ --enable-global           Enable global messaging service
+ --disable-global          Disable global messaging service],
+ [ cf_enable_global=$enableval ],[ cf_enable_global=yes ])
+
+if test  "X$cf_enable_global" =  "Xyes"; then
+	S_GLOBAL="s_global.c"
+	AC_DEFINE(ENABLE_GLOBAL, 1, Global Messaging Service)
+	AC_MSG_RESULT(yes)
+else
+	S_GLOBAL=""
+	AC_MSG_RESULT(no)
+fi
+
 dnl Try to find SQLite.
 SQLITE_INCLUDES=""
 AC_ARG_WITH([sqlite],
@@ -147,6 +162,7 @@ AC_SUBST(S_USERSERV)
 AC_SUBST(S_ALIS)
 AC_SUBST(S_JUPESERV)
 AC_SUBST(S_OPERBOT)
+AC_SUBST(S_GLOBAL)
 
 AC_OUTPUT(			\
 	Makefile		\

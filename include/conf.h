@@ -100,6 +100,7 @@ struct conf_oper
 
 #define CONF_OPER_OPERBOT_ADMIN	0x0100000
 #define CONF_OPER_JUPE_ADMIN	0x0200000
+#define CONF_OPER_GLOBAL	0x0400000
 
 #define OperAdmin(x)	((x)->privs & CONF_OPER_ADMIN)
 #define CliOperAdmin(x)	((x)->user->oper && (x)->user->oper->flags & CONF_OPER_ADMIN)
@@ -114,6 +115,8 @@ struct conf_oper
 #define CliOperUSAdmin(x)	((x)->user->oper && (x)->user->oper->flags & CONF_OPER_US_ADMIN)
 #define OperUSRegister(x)	((x)->privs & CONF_OPER_CS_REGISTER)
 #define CliOperUSRegister(x)	((x)->user->oper && (x)->user->oper->flags & CONF_OPER_CS_REGISTER)
+#define OperGlobal(x)		((x)->privs & CONF_OPER_GLOBAL)
+#define CliOperGlobal(x)	((x)->user->oper && (x)->user->oper->flags & CONF_OPER_GLOBAL)
 
 #define CONF_SERVER_AUTOCONN	0x0001
 
