@@ -811,29 +811,36 @@ majority_gline(struct Client *source_p,
       if ((irccmp(gline_pending_ptr->user,user) == 0) &&
          (irccmp(gline_pending_ptr->host,host) == 0))
         {
+          /* check oper or server hasnt already voted */
           if (((irccmp(gline_pending_ptr->oper_user1,oper_user) == 0) ||
-              (irccmp(gline_pending_ptr->oper_host1,oper_host) == 0)) ||
-              (irccmp(gline_pending_ptr->oper_server1,oper_server) == 0) )
-            {
-              /* This oper or server has already "voted" */
-              sendto_realops_flags(UMODE_ALL, L_ALL,
-				   "oper or server has already voted");
-              return NO;
-            }
+              (irccmp(gline_pending_ptr->oper_host1,oper_host) == 0)))
+          {
+            sendto_realops_flags(UMODE_ALL, L_ALL, "oper has already voted");
+            return NO;
+          }
+          else if(irccmp(gline_pending_ptr->oper_server1,oper_server) == 0)
+          {
+            sendto_realops_flags(UMODE_ALL, L_ALL,
+                                 "server has already voted");
+            return NO;
+          }
 
           if (gline_pending_ptr->oper_user2[0] != '\0')
             {
               /* if two other opers on two different servers have voted yes */
-
               if(((irccmp(gline_pending_ptr->oper_user2,oper_user)==0) ||
-                  (irccmp(gline_pending_ptr->oper_host2,oper_host)==0)) ||
-                  (irccmp(gline_pending_ptr->oper_server2,oper_server)==0))
-                {
-                  /* This oper or server has already "voted" */
-                  sendto_realops_flags(UMODE_ALL, L_ALL,
-				       "oper or server has already voted");
-                  return NO;
-                }
+                  (irccmp(gline_pending_ptr->oper_host2,oper_host)==0)))
+              {
+                sendto_realops_flags(UMODE_ALL, L_ALL,
+                                     "oper has already voted");
+                return NO;
+              }
+              else if(irccmp(gline_pending_ptr->oper_server2,oper_server) == 0)
+              {
+                sendto_realops_flags(UMODE_ALL, L_ALL,
+		                     "server has already voted");
+                return NO;
+              }
 
               log_gline(source_p,gline_pending_ptr,
                         oper_nick,oper_user,oper_host,oper_server,
