@@ -1,3 +1,84 @@
+leeh        2003/09/09 18:12:15 EDT	(20030909_6)
+
+  Modified files:
+    adns                 setup.c 
+    doc                  example.conf example.efnet.conf 
+    include              defaults.h ircd_defs.h s_bsd.h s_conf.h 
+                         s_log.h 
+    modules              m_challenge.c m_connect.c m_dline.c 
+                         m_encap.c m_gline.c m_kline.c m_oper.c 
+                         m_rehash.c m_resv.c m_set.c m_svinfo.c 
+                         m_xline.c static_modules.c.SH 
+                         static_modules_c.com 
+    modules/core         m_die.c m_kill.c m_server.c m_squit.c 
+    src                  adns.c balloc.c client.c ircd.c 
+                         ircd_lexer.l ircd_signal.c listener.c 
+                         m_error.c memory.c modules.c newconf.c 
+                         parse.c restart.c s_auth.c s_bsd.c 
+                         s_bsd_devpoll.c s_bsd_epoll.c 
+                         s_bsd_kqueue.c s_bsd_sigio.c s_conf.c 
+                         s_log.c s_serv.c send.c 
+  Log:
+  - rewrote the logging system, there are now 10 different logfiles:
+    ircd.log, opers, failed oper, users, failed users,
+    server stuff, operspy, glines, klines, io errors
+  
+    glines/users dont work yet, and im not sure adns/setup.c is logging
+    to the right file (should this be main or io errors?)
+  
+  Revision  Changes    Path
+  1.31      +5 -5      ircd-ratbox/adns/setup.c
+  7.226     +0 -7      ircd-ratbox/doc/example.conf
+  7.62      +0 -7      ircd-ratbox/doc/example.efnet.conf
+  7.13      +0 -1      ircd-ratbox/include/defaults.h
+  7.42      +2 -2      ircd-ratbox/include/ircd_defs.h
+  7.45      +1 -1      ircd-ratbox/include/s_bsd.h
+  7.256     +6 -2      ircd-ratbox/include/s_conf.h
+  7.21      +44 -42    ircd-ratbox/include/s_log.h
+  1.41      +4 -5      ircd-ratbox/modules/core/m_die.c
+  1.92      +3 -3      ircd-ratbox/modules/core/m_kill.c
+  1.126     +5 -5      ircd-ratbox/modules/core/m_server.c
+  1.73      +3 -3      ircd-ratbox/modules/core/m_squit.c
+  1.64      +20 -11    ircd-ratbox/modules/m_challenge.c
+  1.62      +3 -3      ircd-ratbox/modules/m_connect.c
+  1.26      +5 -5      ircd-ratbox/modules/m_dline.c
+  1.13      +3 -3      ircd-ratbox/modules/m_encap.c
+  1.130     +2 -2      ircd-ratbox/modules/m_gline.c
+  1.167     +7 -7      ircd-ratbox/modules/m_kline.c
+  1.77      +12 -6     ircd-ratbox/modules/m_oper.c
+  1.74      +3 -3      ircd-ratbox/modules/m_rehash.c
+  1.44      +2 -2      ircd-ratbox/modules/m_resv.c
+  1.69      +1 -37     ircd-ratbox/modules/m_set.c
+  1.55      +2 -2      ircd-ratbox/modules/m_svinfo.c
+  1.35      +3 -3      ircd-ratbox/modules/m_xline.c
+  1.5       +3 -3      ircd-ratbox/modules/static_modules.c.SH
+  1.2       +3 -3      ircd-ratbox/modules/static_modules_c.com
+  7.62      +1 -1      ircd-ratbox/src/adns.c
+  7.66      +6 -6      ircd-ratbox/src/balloc.c
+  7.415     +6 -2      ircd-ratbox/src/client.c
+  7.313     +10 -22    ircd-ratbox/src/ircd.c
+  1.155     +2 -2      ircd-ratbox/src/ircd_lexer.l
+  7.21      +3 -3      ircd-ratbox/src/ircd_signal.c
+  7.95      +14 -8     ircd-ratbox/src/listener.c
+  7.38      +2 -2      ircd-ratbox/src/m_error.c
+  7.45      +1 -1      ircd-ratbox/src/memory.c
+  7.135     +15 -15    ircd-ratbox/src/modules.c
+  7.114     +31 -66    ircd-ratbox/src/newconf.c
+  7.173     +3 -3      ircd-ratbox/src/parse.c
+  7.30      +2 -2      ircd-ratbox/src/restart.c
+  7.161     +6 -6      ircd-ratbox/src/s_auth.c
+  7.212     +19 -13    ircd-ratbox/src/s_bsd.c
+  7.27      +6 -6      ircd-ratbox/src/s_bsd_devpoll.c
+  1.14      +4 -4      ircd-ratbox/src/s_bsd_epoll.c
+  1.40      +2 -2      ircd-ratbox/src/s_bsd_kqueue.c
+  7.40      +1 -1      ircd-ratbox/src/s_bsd_sigio.c
+  7.435     +29 -27    ircd-ratbox/src/s_conf.c
+  7.60      +95 -352   ircd-ratbox/src/s_log.c
+  7.370     +15 -14    ircd-ratbox/src/s_serv.c
+  7.260     +1 -1      ircd-ratbox/src/send.c
+
+
+
 androsyn    2003/09/09 16:57:38 EDT	(20030909_5)
 
   Modified files:
