@@ -1,3 +1,15 @@
+*** 20010408_4 by davidt
+After reformatting kserver.txt, I couldn't resist rewriting bits of it,
+so I decided instead of overwriting A1kmm's version, I'd add an
+alternative..
+
+I broke it into 2 seperate pieces, a KSERVER public key authentication
+system/capab, and a MSGHASH capab (which requires KSERVER) for verifying
+inter-server commands...
+
+They both require lots of work :)
+
+
 *** 20010408_3 by davidt
 - Tidied up kserver.txt a little.
 
