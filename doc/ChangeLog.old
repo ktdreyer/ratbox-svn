@@ -1,3 +1,11 @@
+*** 20001102_1 by adrian
+
+
+oops, forgot to return; after the COMM_ERR_BIND, which meant it still
+tried to connect..
+
+
+
 *** 20001101_6 by adrian
 
 
