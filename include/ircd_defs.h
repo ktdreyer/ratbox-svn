@@ -87,11 +87,8 @@
 #define LOC_CHANNELLEN	50
 #define IDLEN		10
 
-#ifdef IPV6
+/* always v6 sized, as we can have a v6 sockhost for a remote client */
 #define HOSTIPLEN	53	/* sizeof("ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255.ipv6") */
-#else
-#define HOSTIPLEN       16	/* Length of dotted quad form of IP        */
-#endif
 
 /* reason length of klines, parts, quits etc */
 #define REASONLEN	120

@@ -919,18 +919,7 @@ register_client(struct Client *client_p, struct Client *server,
 	{
 		user->server = find_or_add(server->name);
 		strlcpy(source_p->info, parv[9], sizeof(source_p->info));
-
-		/* if we dont have ipv6 support, then we dont keep track of
-		 * their IP if its in v6 form, we cant parse it, and it wont
-		 * fit into ->sockhost.  --anfl
-		 */
-#ifndef IPV6
-		if(strchr(parv[7], ':'))
-			strcpy(source_p->sockhost, "0");
-		else
-#endif
-			strlcpy(source_p->sockhost, parv[7], sizeof(source_p->sockhost));
-
+		strlcpy(source_p->sockhost, parv[7], sizeof(source_p->sockhost));
 		strlcpy(source_p->id, parv[8], sizeof(source_p->id));
 		add_to_id_hash(source_p->id, source_p);
 	}

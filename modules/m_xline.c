@@ -529,7 +529,7 @@ ms_unxline(struct Client *client_p, struct Client *source_p, int parc, const cha
 	/* parv[0]  parv[1]        parv[2]
 	 * oper     target server  gecos
 	 */
-	propagate_generic(source_p, "UNXLINE", parv[3], CAP_CLUSTER,
+	propagate_generic(source_p, "UNXLINE", parv[1], CAP_CLUSTER,
 			"%s", parv[2]);
 
 	if(!match(parv[1], me.name))
