@@ -297,7 +297,7 @@ channel_db_callback(void *db, int argc, char **argv, char **colnames)
 {
 	struct chan_reg *reg_p;
 
-	if(argc < 6)
+	if(argc < 7)
 		return 0;
 
 	if(EmptyString(argv[0]))
@@ -314,6 +314,9 @@ channel_db_callback(void *db, int argc, char **argv, char **colnames)
 	reg_p->reg_time = atol(argv[3]);
 	reg_p->last_time = atol(argv[4]);
 	reg_p->flags = atoi(argv[5]);
+
+	if(!EmptyString(argv[6]))
+		reg_p->suspender = my_strdup(argv[6]);
 
 	add_channel_reg(reg_p);
 	return 0;
@@ -631,9 +634,10 @@ u_chan_chansuspend(struct connection_entry *conn_p, char *parv[], int parc)
 	slog(chanserv_p, 1, "%s - CHANSUSPEND %s", conn_p->name, parv[1]);
 
 	reg_p->flags |= CS_FLAGS_SUSPENDED;
+	reg_p->suspender = my_strdup(conn_p->name);
 
-	loc_sqlite_exec(NULL, "UPDATE channels SET flags = %d WHERE chname = %Q",
-			reg_p->flags, reg_p->name);
+	loc_sqlite_exec(NULL, "UPDATE channels SET flags=%d, suspender=%Q WHERE chname = %Q",
+			reg_p->flags, reg_p->suspender, reg_p->name);
 
 	sendto_one(conn_p, "Channel %s suspended", parv[1]);
 }
@@ -658,8 +662,10 @@ u_chan_chanunsuspend(struct connection_entry *conn_p, char *parv[], int parc)
 	slog(chanserv_p, 1, "%s - CHANUNSUSPEND %s", conn_p->name, parv[1]);
 
 	reg_p->flags &= ~CS_FLAGS_SUSPENDED;
+	my_free(reg_p->suspender);
+	reg_p->suspender = NULL;
 
-	loc_sqlite_exec(NULL, "UPDATE channels SET flags = %d WHERE chname = %Q",
+	loc_sqlite_exec(NULL, "UPDATE channels SET flags = %d, suspender = NULL WHERE chname = %Q",
 			reg_p->flags, reg_p->name);
 
 	sendto_one(conn_p, "Channel %s unsuspended", parv[1]);
@@ -739,9 +745,10 @@ s_chan_chansuspend(struct client *client_p, char *parv[], int parc)
 		client_p->user->oper->name, parv[0]);
 
 	reg_p->flags |= CS_FLAGS_SUSPENDED;
+	reg_p->suspender = my_strdup(client_p->user->oper->name);
 
-	loc_sqlite_exec(NULL, "UPDATE channels SET flags = %d WHERE chname = %Q",
-			reg_p->flags, reg_p->name);
+	loc_sqlite_exec(NULL, "UPDATE channels SET flags=%d, suspender=%Q WHERE chname = %Q",
+			reg_p->flags, reg_p->suspender, reg_p->name);
 
 	service_error(chanserv_p, client_p, "Channel %s suspended", parv[0]);
 	return 0;
@@ -766,8 +773,10 @@ s_chan_chanunsuspend(struct client *client_p, char *parv[], int parc)
 		client_p->user->oper->name, parv[0]);
 
 	reg_p->flags &= ~CS_FLAGS_SUSPENDED;
+	my_free(reg_p->suspender);
+	reg_p->suspender = NULL;
 
-	loc_sqlite_exec(NULL, "UPDATE channels SET flags = %d WHERE chname = %Q",
+	loc_sqlite_exec(NULL, "UPDATE channels SET flags = %d, suspender = NULL WHERE chname = %Q",
 			reg_p->flags, reg_p->name);
 
 	service_error(chanserv_p, client_p, "Channel %s unsuspended", parv[0]);
@@ -1758,6 +1767,15 @@ s_chan_info(struct client *client_p, char *parv[], int parc)
 
 	service_error(chanserv_p, client_p, "Registered for %dw %dd %dh%dm",
 			weeks, days, hours, minutes);
+
+	if(reg_p->flags & CS_FLAGS_SUSPENDED)
+	{
+		service_error(chanserv_p, client_p, "Channel suspended by services admin");
+
+		if(CliOperCSAdmin(client_p))
+			service_error(chanserv_p, client_p, "Suspended by %s",
+					reg_p->suspender);
+	}
 
 	return 1;
 }

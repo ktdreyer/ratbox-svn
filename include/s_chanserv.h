@@ -11,6 +11,7 @@ struct chan_reg
 {
 	char *name;
 	char *topic;
+	char *suspender;
 #if 0
 	struct chmode mode;
 #endif

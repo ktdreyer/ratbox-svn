@@ -17,6 +17,7 @@ CREATE TABLE channels (
 	reg_time TIMESTAMP,
 	last_time TIMESTAMP,
 	flags INTEGER,
+	suspender TEXT,
 	PRIMARY KEY(chname)
 );
 
