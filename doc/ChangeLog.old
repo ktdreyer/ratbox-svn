@@ -1,3 +1,17 @@
+db          2002/04/06 09:54:43 EST	(20020406_2)
+
+  Modified files:
+    .                    Hybrid-team 
+  Log:
+  - corrected bills email
+    removed and moved older contributors as appropriate.
+    Jon, perhaps you can double check.
+  
+  Revision  Changes    Path
+  7.47      +4 -9      ircd-hybrid-7/Hybrid-team
+
+
+
 db          2002/04/06 00:36:27 EST	(20020406_1)
 
   Modified files:
