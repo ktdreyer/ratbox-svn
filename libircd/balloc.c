@@ -219,9 +219,6 @@ initBlockHeap(void)
 		blockheap_fail("Failed opening /dev/zero");
 	fd_open(zero_fd, FD_FILE, "Anonymous mmap()");
 #endif
-#ifdef DEBUG_BALLOC
-	eventAdd("bh_sanity_check_all", bh_sanity_check_all, NULL, 45);
-#endif
 	eventAddIsh("block_heap_gc", block_heap_gc, NULL, 30);
 }
 
@@ -434,6 +431,9 @@ BlockHeapAlloc(BlockHeap * bh)
 	{
 		if(dlink_list_length(&walker->free_list) > 0)
 		{
+#ifdef DEBUG_BALLOC
+			bh_sanity_check_block(bh, walker);
+#endif
 			bh->freeElems--;
 			new_node = walker->free_list.head;
 			dlinkMoveNode(new_node, &walker->free_list, &walker->used_list);
@@ -447,7 +447,9 @@ BlockHeapAlloc(BlockHeap * bh)
 				struct MemBlock *memblock = (void *) ((size_t) new_node->data - sizeof(MemBlock));
 				if(memblock->magic == BALLOC_FREE_MAGIC)
 					memblock->magic = BALLOC_MAGIC;
+			
 			} while(0);
+			bh_sanity_check_block(bh, walker);
 #endif
 			return (new_node->data);
 		}
@@ -511,6 +513,9 @@ BlockHeapFree(BlockHeap * bh, void *ptr)
 	}
 
 	block = memblock->block;
+#ifdef DEBUG_BALLOC
+	bh_sanity_check_block(bh, block);
+#endif
 	bh->freeElems++;
 	mem_frob(ptr, bh->elemSize);
 	dlinkMoveNode(&memblock->self, &block->used_list, &block->free_list);
