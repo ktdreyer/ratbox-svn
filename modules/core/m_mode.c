@@ -97,9 +97,7 @@ m_mode(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		return 0;
 	}
 
-	/* Now known the channel exists */
-
-
+	/* Now know the channel exists */
 	if(parc < n + 1)
 	{
 		channel_modes(chptr, source_p, modebuf, parabuf);
@@ -109,9 +107,17 @@ m_mode(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		sendto_one(source_p, form_str(RPL_CREATIONTIME),
 			   me.name, parv[0], parv[1], chptr->channelts);
 	}
-	/* bounce all modes from people we deop on sjoin */
-	else if((ptr = find_user_link(&chptr->deopped, source_p)) == NULL)
+	else if(IsServer(source_p))
 	{
+		set_channel_mode(client_p, source_p, chptr, parc - n, parv + n, chptr->chname);
+	}
+	else
+	{
+		msptr = find_channel_membership(chptr, source_p);
+
+		if(is_deop(msptr))
+			return 0;
+
 		/* Finish the flood grace period... */
 		if(MyClient(source_p) && !IsFloodDone(source_p))
 		{

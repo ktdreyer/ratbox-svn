@@ -221,15 +221,17 @@ m_who(struct Client *client_p, struct Client *source_p, int parc, const char *pa
  *
  */
 static void
-who_common_channel(struct Client *source_p, dlink_list chain,
+who_common_channel(struct Client *source_p, struct Channel *chptr,
 		   const char *mask, int server_oper, int *maxmatches)
 {
-	dlink_node *clp;
+	struct membership *msptr;
 	struct Client *target_p;
+	dlink_node *ptr;
 
-	DLINK_FOREACH(clp, chain.head)
+	DLINK_FOREACH(ptr, chptr->members.head)
 	{
-		target_p = clp->data;
+		msptr = ptr->data;
+		target_p = msptr->client_p;
 
 		if(!IsInvisible(target_p) || IsMarked(target_p))
 			continue;
@@ -284,10 +286,7 @@ who_global(struct Client *source_p, const char *mask, int server_oper)
 	DLINK_FOREACH(lp, source_p->user->channel.head)
 	{
 		chptr = lp->data;
-		who_common_channel(source_p, chptr->chanops, mask, server_oper, &maxmatches);
-		who_common_channel(source_p, chptr->chanops_voiced, mask, server_oper, &maxmatches);
-		who_common_channel(source_p, chptr->voiced, mask, server_oper, &maxmatches);
-		who_common_channel(source_p, chptr->peons, mask, server_oper, &maxmatches);
+		who_common_channel(source_p, chptr, mask, server_oper, &maxmatches);
 	}
 
 	/* second, list all matching visible clients */
@@ -343,50 +342,20 @@ do_who_on_channel(struct Client *source_p, struct Channel *chptr,
 		  const char *chname, int server_oper, int member)
 {
 	struct Client *target_p;
+	struct membership *msptr;
 	dlink_node *ptr;
 
-	DLINK_FOREACH(ptr, chptr->peons.head)
+	DLINK_FOREACH(ptr, chptr->members.head)
 	{
-		target_p = ptr->data;
+		msptr = ptr->data;
+		target_p = msptr->client_p;
 
 		if(server_oper && !IsOper(target_p))
 			continue;
 
 		if(member || !IsInvisible(target_p))
-			do_who(source_p, target_p, chname, channel_flags[3]);
-	}
-
-	DLINK_FOREACH(ptr, chptr->voiced.head)
-	{
-		target_p = ptr->data;
-
-		if(server_oper && !IsOper(target_p))
-			continue;
-
-		if(member || !IsInvisible(target_p))
-			do_who(source_p, target_p, chname, channel_flags[2]);
-	}
-
-	DLINK_FOREACH(ptr, chptr->chanops_voiced.head)
-	{
-		target_p = ptr->data;
-
-		if(server_oper && !IsOper(target_p))
-			continue;
-
-		if(member || !IsInvisible(target_p))
-			do_who(source_p, target_p, chname, channel_flags[1]);
-	}
-
-	DLINK_FOREACH(ptr, chptr->chanops.head)
-	{
-		target_p = ptr->data;
-
-		if(server_oper && !IsOper(target_p))
-			continue;
-
-		if(member || !IsInvisible(target_p))
-			do_who(source_p, target_p, chname, channel_flags[0]);
+			do_who(source_p, target_p, chname,
+			       find_channel_status(msptr, 0));
 	}
 }
 

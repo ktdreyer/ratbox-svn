@@ -146,7 +146,7 @@ names_non_public_non_secret(struct Client *source_p)
 	char buf[BUFSIZE];
 	char *t;
 
-	ircsprintf(buf, form_str(RPL_NAMREPLY), me.name, source_p->name, " * * :");
+	ircsprintf(buf, form_str(RPL_NAMREPLY), me.name, source_p->name, "*", "*");
 
 	mlen = strlen(buf);
 	cur_len = mlen;

@@ -50,20 +50,11 @@ struct Channel
 	char *topic_info;
 	time_t topic_time;
 	int users;		/* user count */
-	int locusers;		/* local user count */
 	time_t users_last;	/* when last user was in channel */
 	time_t last_knock;	/* don't allow knock to flood */
 
-	dlink_list chanops;	/* lists of chanops etc. */
-	dlink_list chanops_voiced;	/* UGH I'm sorry */
-	dlink_list voiced;
-	dlink_list peons;	/* non ops, just members */
-	dlink_list deopped;	/* users deopped on sjoin */
-
-	dlink_list locchanops;	/* local versions of the above */
-	dlink_list locchanops_voiced;	/* UGH I'm sorry */
-	dlink_list locvoiced;
-	dlink_list locpeons;	/* ... */
+	dlink_list members;	/* channel members */
+	dlink_list locmembers;	/* local channel members */
 
 	dlink_list invites;
 	dlink_list banlist;
@@ -79,15 +70,20 @@ struct Channel
 	char chname[CHANNELLEN + 1];
 };
 
+struct membership
+{
+	dlink_node channode;
+	dlink_node locchannode;
+	dlink_node usernode;
+
+	struct Channel *chptr;
+	struct Client *client_p;
+	unsigned int flags;
+};
+
 extern dlink_list global_channel_list;
 void init_channels(void);
 void cleanup_channels(void *);
-
-/* Number of chanops, peon, voiced sublists */
-#define NUMLISTS 4
-
-/* the table of flags, chanops, chanops_voiced, voiced, peons */
-extern const char *channel_flags[NUMLISTS];
 
 extern int can_send(struct Channel *chptr, struct Client *who);
 extern int is_banned(struct Channel *chptr, struct Client *who);
@@ -96,9 +92,10 @@ extern int can_join(struct Client *source_p, struct Channel *chptr, char *key);
 extern int is_chan_op(struct Channel *chptr, struct Client *who);
 extern int is_voiced(struct Channel *chptr, struct Client *who);
 
-#define find_user_link(list, who)  who != NULL ? dlinkFind(list, who) : NULL
-extern void add_user_to_channel(struct Channel *chptr, struct Client *who, int flags);
-extern int remove_user_from_channel(struct Channel *chptr, struct Client *who);
+extern struct membership *find_channel_membership(struct Channel *, struct Client *);
+extern const char *find_channel_status(struct membership *msptr, int combine);
+extern void add_user_to_channel(struct Channel *, struct Client *, int flags);
+extern int remove_user_from_channel(struct Channel *, struct Client *);
 extern int qs_user_from_channel(struct Channel *, struct Client *);
 
 extern void free_channel_list(dlink_list *);
@@ -108,7 +105,6 @@ extern int check_channel_name(const char *name);
 extern void channel_member_names(struct Client *source_p,
 				 struct Channel *chptr, char *name_of_channel, int show_eon);
 extern const char *channel_pub_or_secret(struct Channel *chptr);
-extern const char *channel_chanop_or_voice(struct Channel *, struct Client *);
 
 extern void add_invite(struct Channel *chptr, struct Client *who);
 extern void del_invite(struct Channel *chptr, struct Client *who);

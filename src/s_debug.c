@@ -235,10 +235,7 @@ count_memory(struct Client *source_p)
 		channel_count++;
 		channel_memory += (strlen(chptr->chname) + sizeof(struct Channel));
 
-		channel_users += dlink_list_length(&chptr->peons);
-		channel_users += dlink_list_length(&chptr->chanops);
-		channel_users += dlink_list_length(&chptr->chanops_voiced);
-		channel_users += dlink_list_length(&chptr->voiced);
+		channel_users += dlink_list_length(&chptr->members);
 		channel_invites += dlink_list_length(&chptr->invites);
 
 		DLINK_FOREACH(dlink, chptr->banlist.head)

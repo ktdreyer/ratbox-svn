@@ -500,16 +500,7 @@ sendto_channel_butone(struct Client *one, struct Client *from,
 
 	++current_serial;
 
-	sendto_list_anywhere(one, from, &chptr->chanops,
-			     &local_linebuf, &remote_linebuf, &uid_linebuf);
-
-	sendto_list_anywhere(one, from, &chptr->chanops_voiced,
-			     &local_linebuf, &remote_linebuf, &uid_linebuf);
-
-	sendto_list_anywhere(one, from, &chptr->voiced,
-			     &local_linebuf, &remote_linebuf, &uid_linebuf);
-
-	sendto_list_anywhere(one, from, &chptr->peons,
+	sendto_list_anywhere(one, from, &chptr->members,
 			     &local_linebuf, &remote_linebuf, &uid_linebuf);
 
 	linebuf_donebuf(&local_linebuf);
@@ -668,10 +659,7 @@ sendto_common_channels_local(struct Client *user, const char *pattern, ...)
 		{
 			chptr = ptr->data;
 
-			sendto_list_local(&chptr->locchanops, &linebuf);
-			sendto_list_local(&chptr->locchanops_voiced, &linebuf);
-			sendto_list_local(&chptr->locvoiced, &linebuf);
-			sendto_list_local(&chptr->locpeons, &linebuf);
+			sendto_list_local(&chptr->locmembers, &linebuf);
 		}
 
 		if(MyConnect(user) && (user->serial != current_serial))

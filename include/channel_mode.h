@@ -69,6 +69,12 @@ extern void unset_chcap_usage_counts(struct Client *serv_p);
 #define MODE_VOICE      CHFL_VOICE
 #define MODE_DEOPPED	CHFL_DEOPPED
 
+#define is_chanop(x)	((x) && (x)->flags & CHFL_CHANOP)
+#define is_voiced(x)	((x) && (x)->flags & CHFL_VOICE)
+#define is_chanop_voiced(x) ((x) && (x)->flags & (CHFL_CHANOP|CHFL_VOICE))
+#define is_deop(x)	((x) && (x)->flags & CHFL_DEOPPED)
+
+
 /* channel modes ONLY */
 #define MODE_PRIVATE    0x0008
 #define MODE_SECRET     0x0010

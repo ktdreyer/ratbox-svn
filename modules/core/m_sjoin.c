@@ -77,7 +77,7 @@ static void set_final_mode(struct Mode *mode, struct Mode *oldmode);
 static void remove_our_modes(struct Channel *chptr, struct Client *source_p);
 
 static void remove_a_mode(struct Channel *chptr,
-			  struct Client *source_p, dlink_list * list, char flag);
+			  struct Client *source_p, int, char flag);
 
 
 static int
@@ -610,21 +610,9 @@ set_final_mode(struct Mode *mode, struct Mode *oldmode)
 static void
 remove_our_modes(struct Channel *chptr, struct Client *source_p)
 {
-	remove_a_mode(chptr, source_p, &chptr->chanops, 'o');
-	remove_a_mode(chptr, source_p, &chptr->voiced, 'v');
-	remove_a_mode(chptr, source_p, &chptr->chanops_voiced, 'o');
-	remove_a_mode(chptr, source_p, &chptr->chanops_voiced, 'v');
-
-	/* Move all voice/ops etc. to non opped list */
-	dlinkMoveList(&chptr->chanops_voiced, &chptr->peons);
-	dlinkMoveList(&chptr->chanops, &chptr->peons);
-	dlinkMoveList(&chptr->voiced, &chptr->peons);
-
-	dlinkMoveList(&chptr->locchanops, &chptr->locpeons);
-	dlinkMoveList(&chptr->locchanops_voiced, &chptr->locpeons);
-	dlinkMoveList(&chptr->locvoiced, &chptr->locpeons);
+	remove_a_mode(chptr, source_p, CHFL_CHANOP, 'o');
+	remove_a_mode(chptr, source_p, CHFL_VOICE, 'v');
 }
-
 
 /*
  * remove_a_mode
@@ -634,11 +622,11 @@ remove_our_modes(struct Channel *chptr, struct Client *source_p)
  * side effects	- remove ONE mode from a channel
  */
 static void
-remove_a_mode(struct Channel *chptr, struct Client *source_p, dlink_list * list, char flag)
+remove_a_mode(struct Channel *chptr, struct Client *source_p, int mask, char flag)
 {
+	struct membership *msptr;
 	dlink_node *ptr;
 	struct Client *target_p;
-	char buf[BUFSIZE];
 	char lmodebuf[MODEBUFLEN];
 	char *lpara[MAXMODEPARAMS];
 	int count = 0;
@@ -648,13 +636,16 @@ remove_a_mode(struct Channel *chptr, struct Client *source_p, dlink_list * list,
 
 	lpara[0] = lpara[1] = lpara[2] = lpara[3] = NULL;
 
-
-	ircsprintf(buf, ":%s MODE %s ", me.name, chptr->chname);
-
-	DLINK_FOREACH(ptr, list->head)
+	DLINK_FOREACH(ptr, chptr->members.head)
 	{
-		target_p = ptr->data;
-		lpara[count++] = target_p->name;
+		msptr = ptr->data;
+
+		if((msptr->flags & mask) == 0)
+			continue;
+
+		msptr->flags &= ~mask;
+
+		lpara[count++] = msptr->client_p->name;
 
 		*mbuf++ = flag;
 
@@ -663,9 +654,8 @@ remove_a_mode(struct Channel *chptr, struct Client *source_p, dlink_list * list,
 			*mbuf = '\0';
 			sendto_channel_local(ALL_MEMBERS, chptr,
 					     ":%s MODE %s %s %s %s %s %s",
-					     me.name,
-					     chptr->chname,
-					     lmodebuf, lpara[0], lpara[1], lpara[2], lpara[3]);
+					     me.name, chptr->chname, lmodebuf, 
+					     lpara[0], lpara[1], lpara[2], lpara[3]);
 
 			mbuf = lmodebuf;
 			*mbuf++ = '-';

@@ -52,9 +52,7 @@
 static int add_id(struct Client *, struct Channel *, const char *, int);
 static int del_id(struct Channel *, const char *, int);
 
-static void change_channel_membership(struct Channel *chptr,
-				      dlink_list * to_list,
-				      dlink_list * loc_to_list, struct Client *who);
+static void change_channel_membership(struct Channel *chptr, unsigned int, unsigned int);
 
 /* some small utility functions */
 static char *check_string(char *s);
@@ -94,8 +92,6 @@ static void chm_invex(struct Client *, struct Client *, struct Channel *,
 static void send_cap_mode_changes(struct Client *, struct Client *, struct Channel *, int, int);
 
 static void send_mode_changes(struct Client *, struct Client *, struct Channel *, const char *chname);
-
-static void update_channel_info(struct Channel *);
 
 /*
  * some buffers for rebuilding channel/nick lists with ,'s
@@ -290,58 +286,15 @@ del_id(struct Channel *chptr, const char *banid, int type)
  *                
  */
 static void
-change_channel_membership(struct Channel *chptr,
-			  dlink_list * to_list, dlink_list * loc_to_list, struct Client *who)
+change_channel_membership(struct membership *msptr, unsigned int add_flag,
+			  unsigned int del_flag);
 {
-	dlink_node *ptr;
-	int x;
-	dlink_list *loclists[] = {
-		&chptr->locpeons,
-		&chptr->locvoiced,
-		&chptr->locchanops,
-		&chptr->locchanops_voiced,
-		NULL
-	};
+	s_assert(msptr != NULL);
+	if(ms_ptr == NULL)
+		return;
 
-	dlink_list *lists[] = {
-		&chptr->peons,
-		&chptr->voiced,
-		&chptr->chanops,
-		&chptr->chanops_voiced,
-		NULL
-	};
-	/* local clients need to be moved from local list too */
-	if(MyClient(who))
-	{
-		for (x = 0; loclists[x] != NULL; x++)
-		{
-			ptr = find_user_link(loclists[x], who);
-			if(ptr != NULL)
-			{
-				if(loclists[x] != loc_to_list)
-				{
-					dlinkMoveNode(ptr, loclists[x], loc_to_list);
-				}
-				break;
-			}
-		}
-	}
-
-	for (x = 0; lists[x] != NULL; x++)
-	{
-		ptr = find_user_link(lists[x], who);
-		if(ptr != NULL)
-		{
-			if(lists[x] != to_list)
-			{
-				dlinkMoveNode(ptr, lists[x], to_list);
-			}
-			break;
-		}
-	}
-
-	dlinkFindDestroy(&chptr->deopped, who);
-
+	msptr->flags |= add_flag;
+	msptr-.flags &= ~del_flag;
 }
 
 /*
@@ -1056,6 +1009,7 @@ chm_op(struct Client *client_p, struct Client *source_p,
        struct Channel *chptr, int parc, int *parn,
        const char **parv, int *errors, int alev, int dir, char c, void *d, const char *chname)
 {
+	struct membership *msptr;
 	char *opnick;
 	struct Client *targ_p;
 
@@ -1098,7 +1052,9 @@ chm_op(struct Client *client_p, struct Client *source_p,
 		return;
 	}
 
-	if(!IsMember(targ_p, chptr))
+	msptr = find_channel_membership(chptr, source_p);
+
+	if(msptr == NULL)
 	{
 		if(!(*errors & SM_ERR_NOTONCHANNEL))
 			sendto_one(source_p, form_str(ERR_USERNOTINCHANNEL),
@@ -1123,6 +1079,8 @@ chm_op(struct Client *client_p, struct Client *source_p,
 		mode_changes[mode_count].id = targ_p->user->id;
 		mode_changes[mode_count].arg = targ_p->name;
 		mode_changes[mode_count++].client = targ_p;
+
+		change_channel_membership(msptr, CHFL_CHANOP, CHFL_DEOPPED);
 	}
 	else
 	{
@@ -1134,6 +1092,8 @@ chm_op(struct Client *client_p, struct Client *source_p,
 		mode_changes[mode_count].id = targ_p->user->id;
 		mode_changes[mode_count].arg = targ_p->name;
 		mode_changes[mode_count++].client = targ_p;
+
+		change_channel_membership(msptr, 0, CHFL_CHANOP);
 	}
 }
 
@@ -1142,6 +1102,7 @@ chm_voice(struct Client *client_p, struct Client *source_p,
 	  struct Channel *chptr, int parc, int *parn,
 	  const char **parv, int *errors, int alev, int dir, char c, void *d, const char *chname)
 {
+	struct membership *msptr;
 	char *opnick;
 	struct Client *targ_p;
 
@@ -1173,7 +1134,9 @@ chm_voice(struct Client *client_p, struct Client *source_p,
 		return;
 	}
 
-	if(!IsMember(targ_p, chptr))
+	msptr = find_channel_membership(chptr, source_p);
+
+	if(msptr == NULL)
 	{
 		if(!(*errors & SM_ERR_NOTONCHANNEL))
 			sendto_one(source_p, form_str(ERR_USERNOTINCHANNEL),
@@ -1195,6 +1158,8 @@ chm_voice(struct Client *client_p, struct Client *source_p,
 		mode_changes[mode_count].id = targ_p->user->id;
 		mode_changes[mode_count].arg = targ_p->name;
 		mode_changes[mode_count++].client = targ_p;
+
+		change_channel_membership(msptr, CHFL_VOICE, 0);
 	}
 	else
 	{
@@ -1206,6 +1171,8 @@ chm_voice(struct Client *client_p, struct Client *source_p,
 		mode_changes[mode_count].id = targ_p->user->id;
 		mode_changes[mode_count].arg = targ_p->name;
 		mode_changes[mode_count++].client = targ_p;
+
+		change_channel_membership(msptr, 0, CHFL_VOICE);
 	}
 }
 
@@ -1680,106 +1647,6 @@ set_channel_mode(struct Client *client_p, struct Client *source_p,
 			break;
 		}
 
-	update_channel_info(chptr);
-
 	send_mode_changes(client_p, source_p, chptr, chname);
 }
 
-static void
-update_channel_info(struct Channel *chptr)
-{
-	int i;
-
-	/* Update channel members lists. */
-	for (i = 0; i < mode_count; i++)
-	{
-		if(mode_changes[i].letter == 'o')
-		{
-			if(is_voiced(chptr, mode_changes[i].client))
-			{
-				if(mode_changes[i].dir == MODE_DEL)
-				{
-					change_channel_membership(chptr,
-								  &chptr->
-								  voiced,
-								  &chptr->
-								  locvoiced,
-								  mode_changes[i].client);
-				}
-				else
-				{
-					change_channel_membership(chptr,
-								  &chptr->
-								  chanops_voiced,
-								  &chptr->
-								  locchanops_voiced,
-								  mode_changes[i].client);
-				}
-			}
-			else
-			{
-				if(mode_changes[i].dir == MODE_DEL)
-				{
-					change_channel_membership(chptr,
-								  &chptr->
-								  peons,
-								  &chptr->
-								  locpeons, mode_changes[i].client);
-				}
-				else
-				{
-					change_channel_membership(chptr,
-								  &chptr->
-								  chanops,
-								  &chptr->
-								  locchanops,
-								  mode_changes[i].client);
-				}
-			}
-		}
-		else if(mode_changes[i].letter == 'v')
-		{
-			if(is_chan_op(chptr, mode_changes[i].client))
-			{
-				if(mode_changes[i].dir == MODE_DEL)
-				{
-					change_channel_membership(chptr,
-								  &chptr->
-								  chanops,
-								  &chptr->
-								  locchanops,
-								  mode_changes[i].client);
-				}
-				else
-				{
-					change_channel_membership(chptr,
-								  &chptr->
-								  chanops_voiced,
-								  &chptr->
-								  locchanops_voiced,
-								  mode_changes[i].client);
-				}
-			}
-			else
-			{
-				if(mode_changes[i].dir == MODE_DEL)
-				{
-					change_channel_membership(chptr,
-								  &chptr->
-								  peons,
-								  &chptr->
-								  locpeons, mode_changes[i].client);
-				}
-				else
-				{
-					change_channel_membership(chptr,
-								  &chptr->
-								  voiced,
-								  &chptr->
-								  locvoiced,
-								  mode_changes[i].client);
-				}
-			}
-		}
-	}
-}
