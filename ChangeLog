@@ -1,3 +1,88 @@
+leeh        2005/03/20 01:32:58 UTC	(20050320_2)
+
+  Modified files:
+    include              balloc.h channel.h client.h commio.h 
+                         config.h config.h.dist irc_string.h 
+                         ircd.h ircd_defs.h m_info.h memory.h 
+                         modules.h msg.h numeric.h patricia.h 
+                         res.h s_auth.h s_conf.h s_gline.h 
+                         s_newconf.h s_serv.h s_stats.h s_user.h 
+                         s_zip.h send.h stdinc.h supported.h 
+                         whowas.h 
+    modules              m_encap.c m_gline.c m_operspy.c 
+                         m_services.c m_tb.c m_xline.c 
+    src                  adns.c balloc.c class.c client.c commio.c 
+                         devpoll.c epoll.c event.c irc_string.c 
+                         ircd.c ircd_lexer.l ircd_parser.y 
+                         listener.c match.c newconf.c numeric.c 
+                         patricia.c poll.c reject.c s_auth.c 
+                         s_gline.c select.c 
+    tools                viconf.c 
+  Log:
+  - stop config.h including setup.h, have stdinc.h do it instead.
+  - stop including config.h/setup.h where we use stdinc.h
+  
+  Revision  Changes    Path
+  1.32      +0 -1      ircd-ratbox/include/balloc.h
+  7.164     +0 -1      ircd-ratbox/include/channel.h
+  7.268     +0 -2      ircd-ratbox/include/client.h
+  1.15      +0 -2      ircd-ratbox/include/commio.h
+  7.183     +0 -2      ircd-ratbox/include/config.h
+  7.80      +0 -2      ircd-ratbox/include/config.h.dist
+  7.62      +0 -1      ircd-ratbox/include/irc_string.h
+  7.84      +0 -1      ircd-ratbox/include/ircd.h
+  7.56      +0 -2      ircd-ratbox/include/ircd_defs.h
+  7.57      +0 -2      ircd-ratbox/include/m_info.h
+  7.51      +0 -1      ircd-ratbox/include/memory.h
+  7.62      +0 -2      ircd-ratbox/include/modules.h
+  7.54      +0 -2      ircd-ratbox/include/msg.h
+  7.59      +0 -2      ircd-ratbox/include/numeric.h
+  7.21      +0 -1      ircd-ratbox/include/patricia.h
+  7.33      +0 -1      ircd-ratbox/include/res.h
+  7.25      +0 -1      ircd-ratbox/include/s_auth.h
+  7.316     +0 -2      ircd-ratbox/include/s_conf.h
+  7.21      +0 -1      ircd-ratbox/include/s_gline.h
+  7.47      +0 -1      ircd-ratbox/include/s_newconf.h
+  7.98      +0 -2      ircd-ratbox/include/s_serv.h
+  7.21      +0 -2      ircd-ratbox/include/s_stats.h
+  7.36      +0 -2      ircd-ratbox/include/s_user.h
+  7.11      +0 -2      ircd-ratbox/include/s_zip.h
+  7.82      +0 -1      ircd-ratbox/include/send.h
+  1.21      +1 -1      ircd-ratbox/include/stdinc.h
+  7.6       +0 -1      ircd-ratbox/include/supported.h
+  7.18      +0 -2      ircd-ratbox/include/whowas.h
+  1.22      +1 -2      ircd-ratbox/modules/m_encap.c
+  1.151     +1 -2      ircd-ratbox/modules/m_gline.c
+  1.7       +1 -2      ircd-ratbox/modules/m_operspy.c
+  1.7       +1 -2      ircd-ratbox/modules/m_services.c
+  1.10      +1 -2      ircd-ratbox/modules/m_tb.c
+  1.68      +1 -2      ircd-ratbox/modules/m_xline.c
+  7.76      +0 -1      ircd-ratbox/src/adns.c
+  7.86      +0 -1      ircd-ratbox/src/balloc.c
+  7.69      +0 -1      ircd-ratbox/src/class.c
+  7.494     +0 -1      ircd-ratbox/src/client.c
+  1.28      +0 -1      ircd-ratbox/src/commio.c
+  7.37      +0 -3      ircd-ratbox/src/devpoll.c
+  1.34      +0 -1      ircd-ratbox/src/epoll.c
+  7.48      +0 -1      ircd-ratbox/src/event.c
+  7.77      +1 -2      ircd-ratbox/src/irc_string.c
+  7.375     +0 -2      ircd-ratbox/src/ircd.c
+  1.169     +0 -1      ircd-ratbox/src/ircd_lexer.l
+  1.276     +0 -2      ircd-ratbox/src/ircd_parser.y
+  7.126     +0 -1      ircd-ratbox/src/listener.c
+  7.43      +0 -1      ircd-ratbox/src/match.c
+  7.203     +0 -1      ircd-ratbox/src/newconf.c
+  7.36      +0 -2      ircd-ratbox/src/numeric.c
+  7.31      +0 -1      ircd-ratbox/src/patricia.c
+  7.83      +0 -1      ircd-ratbox/src/poll.c
+  1.34      +0 -1      ircd-ratbox/src/reject.c
+  7.193     +0 -1      ircd-ratbox/src/s_auth.c
+  7.2       +0 -1      ircd-ratbox/src/s_gline.c
+  7.45      +0 -2      ircd-ratbox/src/select.c
+  7.7       +2 -1      ircd-ratbox/tools/viconf.c
+
+
+
 leeh        2005/03/20 01:20:18 UTC	(20050320_1)
 
   Modified files:
