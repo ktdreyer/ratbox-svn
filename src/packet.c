@@ -44,62 +44,49 @@ static char               readBuf[READBUF_SIZE];
 /*
  * parse_client_queued - parse client queued messages
  */
-static
-void parse_client_queued(struct Client *client_p)
+static void
+parse_client_queued(struct Client *client_p)
 { 
-    int dolen  = 0;
-
-#if 0
-    struct LocalUser *lclient_p = client_p->localClient;
-    int checkflood = 1; /* Whether we're checking or not */
-#endif
-
-#if 0
-    if (IsServer(client_p))
-#endif
-      {
-	while ((dolen = linebuf_get(&client_p->localClient->buf_recvq,
-				    readBuf, READBUF_SIZE)) > 0)
-        {
-          if (!IsDead(client_p))
-	        client_dopacket(client_p, readBuf, dolen);
-          if (IsDead(client_p))
-    	    {
-    	     if (client_p->localClient)
-    	       {
-	            linebuf_donebuf(&client_p->localClient->buf_recvq);
-	            linebuf_donebuf(&client_p->localClient->buf_sendq);
-	           }
-	         return;
-	        }
-	    }
-      }
-#if 0
-    else
-      {
-	checkflood = 0;
-	if (ConfigFileEntry.no_oper_flood && IsOper(client_p))
-	  checkflood = 0;
-
-	/*
-	 * Handle flood protection here - if we exceed our flood limit on
-	 * messages in this loop, we simply drop out of the loop prematurely.
-	 *   -- adrian
-	 */
-
-	for (;;) {
-	  if (checkflood && (lclient_p->sent_parsed > lclient_p->allow_read))
-            break;
-	  assert(lclient_p->sent_parsed <= lclient_p->allow_read);
-	  dolen = linebuf_get(&client_p->localClient->buf_recvq, readBuf,
-			      READBUF_SIZE);
-	  if (!dolen)
-            break;
-	  client_dopacket(client_p, readBuf, dolen);
-	  lclient_p->sent_parsed++;
-	}
-      }
-#endif
+ int dolen = 0, checkflood = 1;
+ struct LocalUser *lclient_p = client_p->localClient;
+ if (IsServer(client_p))
+ {
+  while ((dolen = linebuf_get(&client_p->localClient->buf_recvq,
+                              readBuf, READBUF_SIZE)) > 0)
+  {
+   if (!IsDead(client_p))
+    client_dopacket(client_p, readBuf, dolen);
+   if (IsDead(client_p))
+   {
+    if (client_p->localClient)
+    {
+     linebuf_donebuf(&client_p->localClient->buf_recvq);
+     linebuf_donebuf(&client_p->localClient->buf_sendq);
+    }
+    return;
+   }
+  }
+ } else {
+  checkflood = 0;
+  if (ConfigFileEntry.no_oper_flood && IsOper(client_p))
+   checkflood = 0;
+    /*
+     * Handle flood protection here - if we exceed our flood limit on
+     * messages in this loop, we simply drop out of the loop prematurely.
+     *   -- adrian
+     */
+  for (;;)
+  {
+   if (checkflood && (lclient_p->sent_parsed > lclient_p->allow_read))
+    break;
+   dolen = linebuf_get(&client_p->localClient->buf_recvq, readBuf,
+                       READBUF_SIZE);
+   if (!dolen)
+    break;
+   client_dopacket(client_p, readBuf, dolen);
+   lclient_p->sent_parsed++;
+  }
+ }
 }
 
 /*
@@ -111,58 +98,54 @@ void parse_client_queued(struct Client *client_p)
 void
 flood_recalc(int fd, void *data)
 {
-    struct Client *client_p = data;
-    struct LocalUser *lclient_p = client_p->localClient;
-    
-    /* This can happen in the event that the client detached. */
-    if (!lclient_p)
-      return;
-    assert(client_p != NULL);
-    assert(lclient_p != NULL);
-
-    /* 
-     * If we're a server, skip to the end. Realising here that this call is
-     * cheap and it means that if a op is downgraded they still get considered
-     * for anti-flood protection ..
-     */
-    if (!IsPrivileged(client_p))
-      {
-	/*
-	 * ok, we have to recalculate the number of messages we can receive
-	 * in this second, based upon what happened in the last second.
-	 * If we still exceed the flood limit, don't move the parsed limit.
-	 * If we are below the flood limit, increase the flood limit.
-	 *   -- adrian
-	 */
-
-	if (lclient_p->allow_read == 0)
-	  /* Give the poor person a go! */
-	  lclient_p->allow_read = 1;
-	else if (lclient_p->actually_read < lclient_p->allow_read)
-	  /* Raise the allowed messages if we flooded under the limit */
-	  lclient_p->allow_read++;
-	else
-	  /* Drop the limit to avoid flooding .. */
-	  lclient_p->allow_read--;
-
-	/* Enforce floor/ceiling restrictions */
-	if (lclient_p->allow_read < 1)
-	  lclient_p->allow_read = 1;
-	else if (lclient_p->allow_read > MAX_FLOOD_PER_SEC)
-	  lclient_p->allow_read = MAX_FLOOD_PER_SEC;
-      }
-
-    /* Reset the sent-per-second count */
-    lclient_p->sent_parsed = 0;
-    lclient_p->actually_read = 0;
-
-    parse_client_queued(client_p);
-    /* And now, try flushing .. */
-    if (!IsDead(client_p))
-    {
-        /* and finally, reset the flood check */
-        comm_setflush(fd, 1, flood_recalc, client_p);
-    }
+ struct Client *client_p = data;
+ struct LocalUser *lclient_p = client_p->localClient;
+ int max_flood_per_sec = MAX_FLOOD_PER_SEC;
+ 
+ /* This can happen in the event that the client detached. */
+ if (!lclient_p)
+  return;
+ assert(client_p != NULL);
+ assert(lclient_p != NULL);
+ /* If we're a server, skip to the end. Realising here that this call is
+  * cheap and it means that if a op is downgraded they still get considered
+  * for anti-flood protection ..
+  */
+ if (!IsPrivileged(client_p))
+ {
+  if (client_p->user && ((CurrentTime-client_p->tsinfo) < 4))
+   max_flood_per_sec = MAX_FLOOD_PER_SEC_I;
+  /* ok, we have to recalculate the number of messages we can receive
+   * in this second, based upon what happened in the last second.
+   * If we still exceed the flood limit, don't move the parsed limit.
+   * If we are below the flood limit, increase the flood limit.
+   *   -- adrian
+   */
+  /* Set to 1 to start with, let it rise/fall after that... */
+  if (lclient_p->allow_read == 0)
+   lclient_p->allow_read = 1;
+  else if (lclient_p->actually_read < lclient_p->allow_read)
+   /* Raise the allowed messages if we flooded under the limit */
+   lclient_p->allow_read++;
+  else
+   /* Drop the limit to avoid flooding .. */
+   lclient_p->allow_read--;
+  /* Enforce floor/ceiling restrictions */
+  if (lclient_p->allow_read < 1)
+   lclient_p->allow_read = 1;
+  else if (lclient_p->allow_read > max_flood_per_sec)
+   lclient_p->allow_read = MAX_FLOOD_PER_SEC;
+ }
+ /* Reset the sent-per-second count */
+ lclient_p->sent_parsed = 0;
+ lclient_p->actually_read = 0;
+ parse_client_queued(client_p);
+ /* And now, try flushing .. */
+ if (!IsDead(client_p))
+ {
+  /* and finally, reset the flood check */
+  comm_setflush(fd, 1, flood_recalc, client_p);
+ }
 }
 
 /*
@@ -179,8 +162,6 @@ read_packet(int fd, void *data)
   char *linebuf_key = NULL;
   
   assert(lclient_p != NULL);
-  assert(lclient_p->allow_read <= MAX_FLOOD_PER_SEC);
-
 #ifdef OPENSSL
   if (IsCryptIn(client_p))
   {
@@ -238,13 +219,10 @@ read_packet(int fd, void *data)
   /* Check to make sure we're not flooding */
   if (IsPerson(client_p) &&
      (linebuf_alloclen(&client_p->localClient->buf_recvq) > CLIENT_FLOOD)) {
-      if (!(ConfigFileEntry.no_oper_flood && IsOper(client_p))) {
-
-#if 0
-        exit_client(client_p, client_p, client_p, "Excess Flood");
-        return;
-#endif
-
+      if (!(ConfigFileEntry.no_oper_flood && IsOper(client_p)))
+      {
+       exit_client(client_p, client_p, client_p, "Excess Flood");
+       return;
       }
     }
 

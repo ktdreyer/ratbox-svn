@@ -28,6 +28,7 @@
 #include <sys/types.h>
 #define INCLUDED_sys_types_h
 #endif
+#include "fdlist.h"
 
 /*
  * this hides in here rather than a config.h because it really shouldn't
@@ -39,7 +40,8 @@
  *   -- adrian
  */
 #define MAX_FLOOD_PER_SEC               8
-
+/* And the initial rate of flooding after registration... -A1kmm. */
+#define MAX_FLOOD_PER_SEC_I            24
 
 extern PF  read_packet;
 extern PF  flood_recalc;

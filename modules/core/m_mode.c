@@ -38,6 +38,7 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
+#include "packet.h"
 
 static void m_mode(struct Client*, struct Client*, int, char**);
 
@@ -84,7 +85,16 @@ static void m_mode(struct Client *client_p, struct Client *source_p,
       user_mode(client_p, source_p, parc, parv);
       return;
     }
-
+  /* Just a kludge to discourage abuse of the 3s flood time you get at
+   * on registering... */
+  if (!IsPrivileged(source_p) && source_p->tsinfo &&
+      ((CurrentTime-client_p->tsinfo) < 4))
+  {
+   client_p->localClient->allow_read -=
+     MAX_FLOOD_PER_SEC_I-MAX_FLOOD_PER_SEC;
+   if (client_p->localClient->allow_read < 1)
+    client_p->localClient->allow_read = 1;;
+  }
   if (!check_channel_name(parv[1]))
     { 
       sendto_one(source_p, form_str(ERR_BADCHANNAME),

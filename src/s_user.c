@@ -62,6 +62,7 @@
 #include "whowas.h"
 #include "md5.h"
 #include "memory.h"
+#include "packet.h"
 
 static int valid_hostname(const char* hostname);
 static int valid_username(const char* username);
@@ -341,9 +342,12 @@ int register_local_user(struct Client *client_p, struct Client *source_p,
   dlink_node *m;
   char *id;
   assert(0 != source_p);
+  assert(0 != source_p->localClient);
   assert(source_p->username != username);
 
   user->last = CurrentTime;
+  /* Straight up the maximum rate of flooding... */
+  source_p->localClient->allow_read = MAX_FLOOD_PER_SEC_I;
 
   /* pointed out by Mortiis, never be too careful */
   if(strlen(username) > USERLEN)
