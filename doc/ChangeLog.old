@@ -1,3 +1,23 @@
+*** 20001222_1 by db
+- modifed m_kline to add directed klines
+
+  All the following should work
+
+kline directed at a specific server
+  /quote kline user@host ON server :reason 
+  /quote kline [time] user@host on server :reason
+
+kline directed at all servers
+  /quote kline user@host on * :reason
+  /quote kline [time] user@host on * :reason
+
+original normal local klines
+
+  /quote kline user@host :reason
+  /quote kline [time] user@host :reason 
+
+
+
 *** 20001221_21 by ejb
 - moved maximum_links to ircd.conf
 
