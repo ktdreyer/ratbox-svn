@@ -69,6 +69,19 @@ Feature Specific Requirements:
   egcs ONLY on 64-bit Solaris7.  gcc-2.95 and SunPro C on 64bit should
   work fine, and any gcc or SunPro compiled on 32bit.
 
+- GCC USERS ON SPARC AND ULTRASPARC: what seems to be a bug in gcc will
+  cause code built with gcc on sparc and ultrasparc systems up to at least
+  2.95.3 to fall flat on its face in at least one known location 
+  reproducably. If it is possible, you should build with SunPro or check
+  to see if the bug exists with newer GCC. We will make a note when GCC
+  has been fixed for this problem when we become aware of a fix.
+
+- DARWIN USERS: Darwin 1.3.7 (Mac OS X before 10.1) will not be able to
+  run with shared modules in the forseeable future, but it does run fine
+  with --disable-shared-modules passed to configure. Later versions of
+  Darwin starting at least with those shipping with Mac OS X 10.1 will
+  build hybrid with working shared modules out of the box.
+
 - SUPPORTED PLATFORMS: this code should compile without any warnings
   on FreeBSD 3.x/4.x, RedHat 6.2, Debian Potato and Solaris 7/8 sparc.  
   Please let us know if you find otherwise.  
