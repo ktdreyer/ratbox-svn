@@ -485,7 +485,7 @@ log_gline_request(
 
   ircsprintf(filenamebuf, "%s.%s", 
              ConfigFileEntry.glinefile, small_file_date((time_t)0));
-  if (!(out = fbopen(filenamebuf, "+a")))
+  if ( (out = fbopen(filenamebuf, "+a")) == NULL )
     {
       sendto_realops_flags(FLAGS_ALL,"*** Problem opening %s",filenamebuf,
 				     strerror(errno));
@@ -501,7 +501,7 @@ log_gline_request(
            oper_nick,oper_user,oper_host,oper_server,
            timebuffer);
 
-  if (fbputs(buffer, out) == -1)
+  if ( (fbputs(buffer, out) == NULL) )
     {
       sendto_realops_flags(FLAGS_ALL,"*** Problem writing to %s (%s)",
 				     filenamebuf, strerror(errno));

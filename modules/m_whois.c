@@ -130,9 +130,24 @@ int do_whois(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 	      found = YES;
 	    }
 	}
+      else
+	{
+	  if (uplink && IsCapable(uplink,CAP_LL))
+	    {
+	      sendto_one(uplink,":%s WHOIS %s",
+			 sptr->name, nick);
+	      return 0;
+	    }
+	}
     }
   else
     {
+      /* disallow wild card whois on lazylink leafs for now */
+
+      if (uplink && IsCapable(uplink,CAP_LL))
+	{
+	  return 0;
+	}
       /* Oh-oh wilds is true so have to do it the hard expensive way */
       found = global_whois(sptr, nick, wilds);
     }

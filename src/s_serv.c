@@ -94,8 +94,6 @@ static void server_burst(struct Client *cptr);
 static void burst_all(struct Client *cptr);
 static void do_lazy_link_burst(struct Client *cptr);
 static void cjoin_all(struct Client *cptr);
-static void sjoin_members(struct Client *cptr, struct Channel *chptr,
-			  dlink_list *list, char *op_flag);
 
 static CNCB serv_connect_callback;
 
@@ -1039,11 +1037,6 @@ sjoin_channel(struct Client *cptr, struct Channel *chptr)
   /* serial counter borrowed from send.c */
   current_serial++;
 
-  sjoin_members(cptr, chptr, &chptr->chanops, "@");
-  sjoin_members(cptr, chptr, &chptr->voiced, "+");
-  sjoin_members(cptr, chptr, &chptr->halfops, "");
-  sjoin_members(cptr, chptr, &chptr->peons, "");
-
   send_channel_modes(cptr, chptr);
   chptr->lazyLinkChannelExists |= cptr->localClient->serverMask;
 
@@ -1056,49 +1049,12 @@ sjoin_channel(struct Client *cptr, struct Channel *chptr)
 	{
           vchan = ptr->data;
 
-          sjoin_members(cptr, vchan, &vchan->chanops, "@");
-          sjoin_members(cptr, vchan, &vchan->voiced, "+");
-          sjoin_members(cptr, vchan, &vchan->halfops, "");
-          sjoin_members(cptr, vchan, &vchan->peons, "");
-
 	  send_channel_modes(cptr, vchan);
           vchan->lazyLinkChannelExists |= cptr->localClient->serverMask;
 
           sendto_one(cptr, ":%s TOPIC %s :%s",
 	     me.name, vchan->chname, vchan->topic);
 
-	}
-    }
-}
-
-/*
- * sjoin_members
- *
- * inputs	- pointer to server to sjoin members to
- * 		- dlink_list pointer to membership list to send
- * output	- NONE
- * side effects	-
- */
-static void
-sjoin_members(struct Client *cptr, struct Channel *chptr,
-	      dlink_list *list, char *op_flag)
-{
-  struct Client *acptr;
-  dlink_node *ptr;
-
-  for (ptr = list->head; ptr; ptr = ptr->next)
-    {
-      acptr = ptr->data;
-
-      if (acptr->from != cptr)
-	{
-	  sendto_one(cptr,
-		     ":%s SJOIN %lu %s + :%s%s",
-		     me.name,
-		     chptr->channelts,
-		     chptr->chname,
-		     op_flag,
-		     acptr->name);
 	}
     }
 }
