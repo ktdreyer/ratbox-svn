@@ -74,7 +74,6 @@ DECLARE_MODULE_AV1(mode, NULL, NULL, mode_clist, NULL, NULL, "$Revision$");
 #define SM_ERR_RPL_B            0x00000010
 #define SM_ERR_RPL_E            0x00000020
 #define SM_ERR_NOTONCHANNEL     0x00000040	/* Not on channel */
-#define SM_ERR_RESTRICTED       0x00000080	/* Restricted chanop */
 #define SM_ERR_RPL_I            0x00000100
 #define SM_ERR_RPL_D            0x00000200
 
@@ -942,17 +941,6 @@ chm_op(struct Client *source_p, struct Channel *chptr,
 
 	if((dir == MODE_QUERY) || (parc <= *parn))
 		return;
-
-	if(IsRestricted(source_p) && (dir == MODE_ADD))
-	{
-		if(!(*errors & SM_ERR_RESTRICTED))
-			sendto_one(source_p,
-				   ":%s NOTICE %s :*** Notice -- You are restricted and cannot chanop others",
-				   me.name, source_p->name);
-
-		*errors |= SM_ERR_RESTRICTED;
-		return;
-	}
 
 	opnick = parv[(*parn)];
 	(*parn)++;

@@ -323,8 +323,6 @@ verify_access(struct Client *client_p, const char *username)
 
 		if(IsConfDoIdentd(aconf))
 			SetNeedId(client_p);
-		if(IsConfRestricted(aconf))
-			SetRestricted(client_p);
 
 		/* Thanks for spoof idea amm */
 		if(IsConfDoSpoofIp(aconf))
@@ -592,9 +590,6 @@ attach_conf(struct Client *client_p, struct ConfItem *aconf)
 		}
 
 	}
-
-	if(aconf->status & FLAGS2_RESTRICTED)
-		SetRestricted(client_p);
 
 	if(client_p->localClient->att_conf != NULL)
 		detach_conf(client_p);

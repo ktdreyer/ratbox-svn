@@ -1074,11 +1074,6 @@ user_welcome(struct Client *source_p)
 	}
 	else
 		send_user_motd(source_p);
-
-	if(IsRestricted(source_p))
-	{
-		sendto_one(source_p, form_str(ERR_RESTRICTED), me.name, source_p->name);
-	}
 }
 
 /* oper_up()

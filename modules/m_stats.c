@@ -595,7 +595,6 @@ stats_auth (struct Client *source_p)
 		get_printable_conf (aconf, &name, &host, &pass, &user, &port, &classname);
 
 		sendto_one_numeric(source_p, RPL_STATSILINE, form_str(RPL_STATSILINE),
-				   (IsConfRestricted (aconf)) ? 'i' : 'I',
 				   name, show_iline_prefix(source_p, aconf, user),
 				   host, port, classname);
 	}

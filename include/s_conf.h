@@ -112,7 +112,6 @@ struct ConfItem
 #define CONF_FLAGS_SPOOF_NOTICE		0x00000400
 #define CONF_FLAGS_REDIR                0x00000800
 #define CONF_FLAGS_EXEMPTGLINE          0x00001000
-#define CONF_FLAGS_RESTRICTED           0x00002000
 #define CONF_FLAGS_EXEMPTFLOOD          0x00004000
 #define CONF_FLAGS_EXEMPTSPAMBOT	0x00008000
 #define CONF_FLAGS_EXEMPTSHIDE		0x00010000
@@ -142,7 +141,6 @@ struct ConfItem
 #define IsConfDoIdentd(x)       ((x)->flags & CONF_FLAGS_DO_IDENTD)
 #define IsConfDoSpoofIp(x)      ((x)->flags & CONF_FLAGS_SPOOF_IP)
 #define IsConfSpoofNotice(x)    ((x)->flags & CONF_FLAGS_SPOOF_NOTICE)
-#define IsConfRestricted(x)     ((x)->flags & CONF_FLAGS_RESTRICTED)
 #define IsConfEncrypted(x)      ((x)->flags & CONF_FLAGS_ENCRYPTED)
 #define IsConfCompressed(x)     ((x)->flags & CONF_FLAGS_COMPRESSED)
 #define IsConfVhosted(x)	((x)->flags & CONF_FLAGS_VHOSTED)

@@ -167,7 +167,6 @@ mo_testline(struct Client *client_p, struct Client *source_p, int parc, const ch
 	if(aconf && aconf->status & CONF_CLIENT)
 	{
 		sendto_one_numeric(source_p, RPL_STATSILINE, form_str(RPL_STATSILINE),
-				(IsConfRestricted(aconf)) ? 'i' : 'I',
 				aconf->name, show_iline_prefix(source_p, aconf, aconf->user),
 				aconf->host, aconf->port, aconf->className);
 		return 0;

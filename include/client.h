@@ -382,7 +382,6 @@ struct exit_client_hook
 #define FLAGS2_EXEMPTFLOOD      0x0400000
 #define FLAGS2_NOLIMIT          0x0800000
 #define FLAGS2_IDLE_LINED       0x1000000
-#define FLAGS2_RESTRICTED       0x2000000
 #define FLAGS2_PING_COOKIE      0x4000000
 #define FLAGS2_IP_SPOOFING      0x8000000
 #define FLAGS2_FLOODDONE        0x10000000
@@ -491,9 +490,6 @@ struct exit_client_hook
 
 #define SetIdlelined(x)         ((x)->flags2 |= FLAGS2_IDLE_LINED)
 #define IsIdlelined(x)          ((x)->flags2 & FLAGS2_IDLE_LINED)
-
-#define IsRestricted(x)         ((x)->flags2 &  FLAGS2_RESTRICTED)
-#define SetRestricted(x)        ((x)->flags2 |= FLAGS2_RESTRICTED)
 
 #define IsFloodDone(x)          ((x)->flags2 & FLAGS2_FLOODDONE)
 #define SetFloodDone(x)         ((x)->flags2 |= FLAGS2_FLOODDONE)
