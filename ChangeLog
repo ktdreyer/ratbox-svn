@@ -1,3 +1,15 @@
+androsyn    2004/09/13 10:19:53 EDT	(20040913_1)
+
+  Modified files:
+    modules/core         users.c 
+  Log:
+  Cast this correctly
+  
+  Revision  Changes    Path
+  1.19      +2 -2      ircd-ratbox/modules/core/users.c
+
+
+
 androsyn    2004/09/13 09:54:04 EDT	(20040913_0)
 
   Modified files:
