@@ -214,5 +214,26 @@ sendto_list_local()
                                             int len);
 
 
+sendto_channel_members()
+                - This local function sends a message to all channel members
+                  as given in a dlink_list, whether they are remote or local
+                  clients. It is used by sendto_channel_butone()
+
+                  usage: send_channel_members(struct Client *one,
+                                              struct Client *from,
+                                              dlink_list *list,
+                                              const char *local_sendbuf,
+                                              int local_len,
+                                              const char *remote_sendbuf,
+                                              int remote_len);
+
+send_trim()     - This local function simply trims a char string
+                  to fit inside 512 bytes as per rfc1459 adding
+                  a cr/lf pair as needed. It does not check to make
+                  sure original string has a cr/lf.
+    
+                  usage - int send_trim(char buffer, int len);
+                  returns length as modified or not,
+                  modifies buffer in-place.
 
 -- Diane Bruce 

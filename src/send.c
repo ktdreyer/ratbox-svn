@@ -48,7 +48,17 @@
 
 #define LOG_BUFSIZE 2048
 
-static  char    sendbuf[IRCD_BUFSIZE*4];
+/* As incoming buffers are limited to 512 bytes by linebuf
+ * The maximum needed here is 2 * 512
+ */
+static  char sendbuf[IRCD_BUFSIZE*2];
+static  char buf[IRCD_BUFSIZE*2];
+static  char local_prefix[NICKLEN+HOSTLEN+USERLEN+5];
+static  char local_sendbuf[IRCD_BUFSIZE*2];
+static  char remote_prefix[NICKLEN+HOSTLEN+USERLEN+5];
+static  char remote_sendbuf[IRCD_BUFSIZE*2];
+static  int local_len;
+static  int remote_len;
 
 static  int
 send_message (struct Client *, char *, int);
@@ -73,6 +83,9 @@ send_channel_members(struct Client *one, struct Client *from,
 
 static int
 send_format(char *sendbuf, const char *pattern, va_list args);
+
+static int
+send_trim(char *sendbuf, int len );
 
 /*
 ** dead_link
@@ -251,7 +264,7 @@ send_message_remote(struct Client *to, struct Client *from,
   else
     {
       if (len)
-          linebuf_put(&to->localClient->buf_sendq, sendbuf, len);
+          linebuf_put(&to->localClient->buf_sendq, (char *)sendbuf, len);
     }
     /*
     ** Update statistics. The following is slightly incorrect
@@ -375,8 +388,7 @@ sendto_one(struct Client *to, const char *pattern, ...)
  *		- pointer to channel being sent to
  *		- vargs message
  * output	- NONE
- * side effects	-
- * BUGS		- This function is now too long.
+ * side effects	- message as given is sent to given channel members.
  */
 void
 sendto_channel_butone(struct Client *one, struct Client *from,
@@ -384,54 +396,31 @@ sendto_channel_butone(struct Client *one, struct Client *from,
                       const char *pattern, ...)
 {
   va_list    args;
-  char buf[IRCD_BUFSIZE*2];
-  char local_prefix[NICKLEN+HOSTLEN+USERLEN+5];
-  char local_sendbuf[IRCD_BUFSIZE*2];
-  char remote_prefix[NICKLEN+HOSTLEN+USERLEN+5];
-  char remote_sendbuf[IRCD_BUFSIZE*2];
-  int local_len;
-  int remote_len;
 
   va_start(args, pattern);
-  (void)send_format(buf,pattern,args);
+  send_format(buf,pattern,args);
   va_end(args);
 
   if(IsServer(from))
     {
-      ircsprintf(local_prefix,":%s ",
-		 from->name);
+      (void)ircsprintf(local_prefix,":%s ",
+		       from->name);
     }
   else
     {
-      ircsprintf(local_prefix,":%s!%s@%s ",
-		 from->name,
-		 from->username,
-		 from->host);
+      (void)ircsprintf(local_prefix,":%s!%s@%s ",
+		       from->name,
+		       from->username,
+		       from->host);
     }
 
-  ircsprintf(remote_prefix,":%s ", from->name);
+  (void)ircsprintf(remote_prefix,":%s ", from->name);
 
-  ircsprintf(remote_sendbuf, "%s%s",remote_prefix,buf);
-  remote_len = strlen(remote_sendbuf);
+  remote_len = ircsprintf(remote_sendbuf, "%s%s",remote_prefix,buf);
+  remote_len = send_trim(remote_sendbuf, remote_len);
 
-  if(remote_len > 510)
-    {
-      remote_sendbuf[IRCD_BUFSIZE-2] = '\r';
-      remote_sendbuf[IRCD_BUFSIZE-1] = '\n';
-      remote_sendbuf[IRCD_BUFSIZE] = '\0';
-      remote_len = IRCD_BUFSIZE;
-    }
-
-  ircsprintf(local_sendbuf, "%s%s",local_prefix,buf);
-  local_len = strlen(local_sendbuf);
-
-  if(local_len > 510)
-    {
-      local_sendbuf[IRCD_BUFSIZE-2] = '\r';
-      local_sendbuf[IRCD_BUFSIZE-1] = '\n';
-      local_sendbuf[IRCD_BUFSIZE] = '\0';
-      local_len = IRCD_BUFSIZE;
-    }
+  local_len = ircsprintf(local_sendbuf, "%s%s",local_prefix,buf);
+  local_len = send_trim(local_sendbuf, local_len);
 
   ++current_serial;
   
@@ -453,6 +442,17 @@ sendto_channel_butone(struct Client *one, struct Client *from,
 
 } /* sendto_channel_butone() */
 
+/*
+ * send_channel_members
+ *
+ * inputs	- pointer to client NOT to send back towards
+ *		- pointer to client from where message is coming from
+ *		- pointer to channel list to send
+ *		- pointer to sendbuf to use for local clients
+ *		- length of local_sendbuf
+ *		- pointer to sendbuf to use for remote clients
+ *		- length of remote_sendbuf
+ */
 void
 send_channel_members(struct Client *one, struct Client *from,
 		     dlink_list *list,
@@ -1127,4 +1127,25 @@ send_format(char *sendbuf, const char *pattern, va_list args)
     }
 
   return(len);
+}
+
+/*
+ * send_trim
+ *
+ * inputs	- pointer to buffer to trim
+ *		- length of buffer
+ * output	- new length of buffer if modified otherwise original len
+ * side effects	- input buffer is trimmed if needed
+ */
+static int
+send_trim(char *sendbuf,int len)
+{
+  if(len > 510)
+    {
+      sendbuf[IRCD_BUFSIZE-2] = '\r';
+      sendbuf[IRCD_BUFSIZE-1] = '\n';
+      sendbuf[IRCD_BUFSIZE] = '\0';
+      return(IRCD_BUFSIZE);
+    }
+  return len;
 }
