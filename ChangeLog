@@ -1,3 +1,15 @@
+androsyn    2002/12/16 00:53:52 UTC	(20021216_1)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  Fix another case of trying to use localClient after it went NULL
+  
+  Revision  Changes    Path
+  7.348     +5 -4      ircd-ratbox/src/client.c
+
+
+
 androsyn    2002/12/16 00:44:12 UTC	(20021216_0)
 
   Modified files:
