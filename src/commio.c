@@ -506,14 +506,14 @@ comm_errstr(int error)
 
 
 /*
- * comm_open() - open a socket
+ * comm_socket() - open a socket
  *
- * This is a highly highly cut down version of squid's comm_open() which
+ * This is a highly highly cut down version of squid's comm_socket() which
  * for the most part emulates socket(), *EXCEPT* it fails if we're about
  * to run out of file descriptors.
  */
 int
-comm_open(int family, int sock_type, int proto, const char *note)
+comm_socket(int family, int sock_type, int proto, const char *note)
 {
 	int fd;
 	/* First, make sure we aren't going to run out of file descriptors */
@@ -543,7 +543,7 @@ comm_open(int family, int sock_type, int proto, const char *note)
 		if(setsockopt(fd, IPPROTO_IPV6, IPV6_V6ONLY, &off, sizeof(off)) == -1)
 		{
 			ilog(L_IOERROR,
-			     "comm_open: Could not set IPV6_V6ONLY option to 1 on FD %d: %s",
+			     "comm_socket: Could not set IPV6_V6ONLY option to 1 on FD %d: %s",
 			     fd, strerror(errno));
 			close(fd);
 			return -1;
@@ -554,7 +554,7 @@ comm_open(int family, int sock_type, int proto, const char *note)
 	/* Set the socket non-blocking, and other wonderful bits */
 	if(!comm_set_nb(fd))
 	{
-		ilog(L_IOERROR, "comm_open: Couldn't set FD %d non blocking: %s", fd, strerror(errno));
+		ilog(L_IOERROR, "comm_socket: Couldn't set FD %d non blocking: %s", fd, strerror(errno));
 		close(fd);
 		return -1;
 	}
@@ -569,7 +569,7 @@ comm_open(int family, int sock_type, int proto, const char *note)
  * comm_accept() - accept an incoming connection
  *
  * This is a simple wrapper for accept() which enforces FD limits like
- * comm_open() does.
+ * comm_socket() does.
  */
 int
 comm_accept(int fd, struct sockaddr *pn)
@@ -584,7 +584,7 @@ comm_accept(int fd, struct sockaddr *pn)
 
 	/*
 	 * Next, do the accept(). if we get an error, we should drop the
-	 * reserved fd limit, but we can deal with that when comm_open()
+	 * reserved fd limit, but we can deal with that when comm_socket()
 	 * also does it. XXX -- adrian
 	 */
 	newfd = accept(fd, (struct sockaddr *) pn, (socklen_t *) & addrlen);

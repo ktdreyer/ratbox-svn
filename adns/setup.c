@@ -527,7 +527,7 @@ static int init_finish(adns_state ads) {
       addserver(ads,ia);
   }
 
-  ads->udpsocket = comm_open(AF_INET, SOCK_DGRAM, 0, "UDP Resolver socket");
+  ads->udpsocket = comm_socket(AF_INET, SOCK_DGRAM, 0, "UDP Resolver socket");
   if (ads->udpsocket<0) { ilog(L_IOERROR, "Failed to open socket"); r= errno; goto x_free; }
 
   r= adns__setnonblock(ads,ads->udpsocket);

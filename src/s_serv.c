@@ -560,7 +560,7 @@ serv_connect(struct server_conf *server_p, struct Client *by)
 	}
 
 	/* create a socket for the server connection */
-	if((fd = comm_open(server_p->ipnum.ss_family, SOCK_STREAM, 0, NULL)) < 0)
+	if((fd = comm_socket(server_p->ipnum.ss_family, SOCK_STREAM, 0, NULL)) < 0)
 	{
 		/* Eek, failure to create the socket */
 		report_error("opening stream socket to %s: %s", 

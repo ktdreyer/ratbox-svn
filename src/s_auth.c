@@ -246,7 +246,7 @@ start_auth_query(struct AuthRequest *auth)
 		return 0;
 	
 	family = auth->client->localClient->ip.ss_family;
-	if((fd = comm_open(family, SOCK_STREAM, 0, "ident")) == -1)
+	if((fd = comm_socket(family, SOCK_STREAM, 0, "ident")) == -1)
 	{
 		report_error("creating auth stream socket %s:%s",
 			     get_client_name(auth->client, SHOW_IP), 

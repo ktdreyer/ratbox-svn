@@ -116,7 +116,7 @@ void adns__tcp_tryconnect(adns_state ads, struct timeval now) {
     assert(!ads->tcprecv.used);
     assert(!ads->tcprecv_skip);
 
-    fd= comm_open(AF_INET, SOCK_STREAM, 0, "adns TCP socket");
+    fd= comm_socket(AF_INET, SOCK_STREAM, 0, "adns TCP socket");
     if (fd<0) {
       adns__diag(ads,-1,0,"cannot create TCP socket: %s",strerror(errno));
       return;

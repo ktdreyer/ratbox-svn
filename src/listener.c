@@ -171,7 +171,7 @@ inetport(struct Listener *listener)
 	 * At first, open a new socket
 	 */
 	
-	fd = comm_open(listener->addr.ss_family, SOCK_STREAM, 0, "Listener socket");
+	fd = comm_socket(listener->addr.ss_family, SOCK_STREAM, 0, "Listener socket");
 
 #ifdef IPV6
 	if(listener->addr.ss_family == AF_INET6)
