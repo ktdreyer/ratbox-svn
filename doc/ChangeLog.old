@@ -1,3 +1,17 @@
+a1kmm       2002/01/06 01:26:30 EST	(20020106_1)
+
+  Modified files:
+    modules              m_gline.c 
+  Log:
+  Cast localtime argument to (const time_t*) first, apparently fixes some
+  compile warnings on OpenBSD/sparc/gcc.
+  Submitted by: flata(Joseph Mallett).
+  
+  Revision  Changes    Path
+  1.73      +3 -3      ircd-hybrid-7/modules/m_gline.c
+
+
+
 a1kmm       2002/01/05 23:46:02 EST	(20020106_0)
 
   Modified files:
