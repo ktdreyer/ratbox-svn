@@ -1243,7 +1243,7 @@ static void chm_hideops(struct Client *, struct Client *, struct Channel *,
                         int, int *, char **, int *, int, int, char, void *,
                         const char *chname);
 static void send_cap_mode_changes(struct Client *, struct Client *,
-                                  struct Channel *, int, int);
+                                  struct Channel *);
 static void send_mode_changes(struct Client *, struct Client *,
                               struct Channel *, char *chname);
 static int get_channel_access(struct Client *, struct Channel *);
@@ -1516,7 +1516,7 @@ chm_except(struct Client *client_p, struct Client *source_p,
       }
 
     mode_changes_plus[mode_count_plus].letter = c;
-    mode_changes_plus[mode_count_plus].caps = 0;
+    mode_changes_plus[mode_count_plus].caps = CAP_EX;
     mode_changes_plus[mode_count_plus].nocaps = 0;
     mode_changes_plus[mode_count_plus].mems = ONLY_CHANOPS_HALFOPS;
     mode_changes_plus[mode_count_plus++].arg = mask;
@@ -1532,7 +1532,7 @@ chm_except(struct Client *client_p, struct Client *source_p,
       }
 
     mode_changes_minus[mode_count_minus].letter = c;
-    mode_changes_minus[mode_count_minus].caps = 0;
+    mode_changes_minus[mode_count_minus].caps = CAP_EX;
     mode_changes_minus[mode_count_minus].nocaps = 0;
     mode_changes_minus[mode_count_minus].mems = ONLY_CHANOPS_HALFOPS;
     mode_changes_minus[mode_count_minus++].arg = mask;
@@ -1593,7 +1593,7 @@ chm_invex(struct Client *client_p, struct Client *source_p,
       }
 
     mode_changes_plus[mode_count_plus].letter = c;
-    mode_changes_plus[mode_count_plus].caps = 0;
+    mode_changes_plus[mode_count_plus].caps = CAP_IE;
     mode_changes_plus[mode_count_plus].nocaps = 0;
     mode_changes_plus[mode_count_plus].mems = ONLY_CHANOPS_HALFOPS;
     mode_changes_plus[mode_count_plus++].arg = mask;
@@ -1610,7 +1610,7 @@ chm_invex(struct Client *client_p, struct Client *source_p,
       }
 
     mode_changes_minus[mode_count_minus].letter = c;
-    mode_changes_minus[mode_count_minus].caps = 0;
+    mode_changes_minus[mode_count_minus].caps = CAP_IE;
     mode_changes_minus[mode_count_minus].nocaps = 0;
     mode_changes_minus[mode_count_minus].mems = ONLY_CHANOPS_HALFOPS;
     mode_changes_minus[mode_count_minus++].arg = mask;
@@ -2351,108 +2351,116 @@ get_channel_access(struct Client *source_p, struct Channel *chptr)
  *                        struct Client *source_p,
  *                        struct Channel *chptr, int cap, int nocap)
  * Input: The client sending(client_p), the source client(source_p),
- *        the channel to send mode changes for(chptr), the list of
- *        required and disallowed caps, mode change globals.
+ *        the channel to send mode changes for(chptr)
  * Output: None.
  * Side-effects: Sends the appropriate mode changes to capable servers.
  */
 static void
 send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
-                      struct Channel *chptr, int cap, int nocap)
+                      struct Channel *chptr)
 {
   int i, mbl, pbl, nc = 0;
+  dlink_node *ptr;
+  struct Client *target_p;
+
+  pbl = 0; 
+  parabuf[0] = 0;
   ircsprintf(modebuf, ":%s MODE %s ", source_p->name, chptr->chname);
   mbl = strlen(modebuf);
-  pbl = 0;
-  parabuf[0] = 0;
 
-  if (mode_count_minus > 0)
+  for(ptr = serv_list.head; ptr; ptr = ptr->next)
   {
-    modebuf[mbl++] = '-';
-    modebuf[mbl] = 0;
-  }
 
-  for (i = 0; i < mode_count_minus; i++)
-  {
-    if (mode_changes_minus[i].letter == 0 ||
-        (mode_changes_minus[i].caps & cap) != mode_changes_minus[i].caps ||
-        (mode_changes_minus[i].nocaps & nocap) != 0)
+    target_p = ptr->data;
+
+    if(target_p == source_p)
       continue;
-
-    nc++;
-
-    if (mode_changes_minus[i].arg != NULL &&
-        strlen(mode_changes_minus[i].arg) + mbl + pbl + 2 > BUFSIZE)
+      
+    if (mode_count_minus > 0)
     {
-      if (nc != 0)
-        sendto_server(client_p, client_p, chptr, cap, nocap, 0, "%s %s",
-                      modebuf, parabuf);
-      nc = 0;
-      ircsprintf(modebuf, ":%s MODE %s -", source_p->name, chptr->chname);
-      mbl = strlen(modebuf);
-      pbl = 0;
-      parabuf[0] = 0;
+      modebuf[mbl++] = '-';
+      modebuf[mbl] = 0;
     }
 
-    modebuf[mbl++] = mode_changes_minus[i].letter;
-    modebuf[mbl] = 0;
-
-    if (mode_changes_minus[i].arg != NULL)
-      pbl = strlen(strcat(parabuf, mode_changes_minus[i].arg));
-
-    parabuf[pbl++] = ' ';
-    parabuf[pbl] = 0;
-  }
-
-  if (mode_count_plus > 0)
-  {
-    if (mbl > 0 && modebuf[mbl - 1] == '-')
-      modebuf[mbl - 1] = '+';
-    else
-      modebuf[mbl++] = '+';
-
-    modebuf[mbl] = 0;
-  }
-
-  for (i = 0; i < mode_count_plus; i++)
-  {
-    if (mode_changes_plus[i].letter == 0 ||
-        (mode_changes_plus[i].caps & cap) != mode_changes_plus[i].caps ||
-        (mode_changes_plus[i].nocaps & nocap) != 0)
-      continue;
-
-    nc++;
-
-    if (mode_changes_plus[i].arg != NULL &&
-        strlen(mode_changes_plus[i].arg) + mbl + pbl + 2 > BUFSIZE)
+    for (i = 0; i < mode_count_minus; i++)
     {
-      if (nc != 0)
-        sendto_server(client_p, source_p, chptr, cap, nocap, 0, "%s %s",
-                      modebuf, parabuf);
+      if (mode_changes_minus[i].letter == 0 ||
+          !IsCapable(source_p, mode_changes_minus[i].caps) ||
+	  IsCapable(source_p, mode_changes_minus[i].nocaps))
+	continue;
 
-      nc = 0;
-      ircsprintf(modebuf, ":%s MODE %s +", source_p->name, chptr->chname);
-      mbl = strlen(modebuf);
-      pbl = 0;
-      parabuf[0] = 0;
+      nc++;
+
+      if (mode_changes_minus[i].arg != NULL &&
+          strlen(mode_changes_minus[i].arg) + mbl + pbl + 2 > BUFSIZE)
+      {
+        if (nc != 0)
+          sendto_one(target_p, "%s %s", modebuf, parabuf);
+        nc = 0;
+        ircsprintf(modebuf, ":%s MODE %s -", source_p->name, chptr->chname);
+        mbl = strlen(modebuf);
+        pbl = 0;
+        parabuf[0] = 0;
+      }
+
+      modebuf[mbl++] = mode_changes_minus[i].letter;
+      modebuf[mbl] = 0;
+
+      if (mode_changes_minus[i].arg != NULL)
+        pbl = strlen(strcat(parabuf, mode_changes_minus[i].arg));
+
+      parabuf[pbl++] = ' ';
+      parabuf[pbl] = 0;
     }
 
-    modebuf[mbl++] = mode_changes_plus[i].letter;
-    modebuf[mbl] = 0;
+    if (mode_count_plus > 0)
+    {
+      if (mbl > 0 && modebuf[mbl - 1] == '-')
+        modebuf[mbl - 1] = '+';
+      else
+        modebuf[mbl++] = '+';
 
-    if (mode_changes_plus[i].arg != NULL)
-      pbl = strlen(strcat(parabuf, mode_changes_plus[i].arg));
+      modebuf[mbl] = 0;
+    }
 
-    parabuf[pbl++] = ' ';
-    parabuf[pbl] = 0;
-  }
+    for (i = 0; i < mode_count_plus; i++)
+    {
+      if (mode_changes_plus[i].letter == 0 ||
+          !IsCapable(target_p, mode_changes_plus[i].caps) ||
+	  IsCapable(target_p, mode_changes_plus[i].nocaps))
+        continue;
 
-  if (pbl && parabuf[pbl - 1] == '+')
-    parabuf[pbl - 1] = 0;
+      nc++;
 
-  if (nc != 0)
-    sendto_server(client_p, source_p, chptr, cap, nocap, 0, "%s %s",
-                  modebuf, parabuf);
+      if (mode_changes_plus[i].arg != NULL &&
+         strlen(mode_changes_plus[i].arg) + mbl + pbl + 2 > BUFSIZE)
+      {
+        if (nc != 0)
+          sendto_one(target_p, "%s %s", modebuf, parabuf);
+
+        nc = 0;
+        ircsprintf(modebuf, ":%s MODE %s +", source_p->name, chptr->chname);
+        mbl = strlen(modebuf);
+        pbl = 0;
+        parabuf[0] = 0;
+      }
+
+      modebuf[mbl++] = mode_changes_plus[i].letter;
+      modebuf[mbl] = 0;
+
+      if (mode_changes_plus[i].arg != NULL)
+        pbl = strlen(strcat(parabuf, mode_changes_plus[i].arg));
+
+      parabuf[pbl++] = ' ';
+      parabuf[pbl] = 0;
+    }
+
+    if (pbl && parabuf[pbl - 1] == '+')
+      parabuf[pbl - 1] = 0;
+
+    if (nc != 0)
+      sendto_one(target_p, "%s %s", modebuf, parabuf);
+  }		    
 }
 
 /* void send_mode_changes(struct Client *client_p,
@@ -2717,10 +2725,7 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
   }
 
   /* Now send to servers... */
-  send_cap_mode_changes(client_p, source_p, chptr, CAP_HOPS | CAP_AOPS, 0);
-  send_cap_mode_changes(client_p, source_p, chptr, CAP_HOPS, CAP_AOPS);
-  send_cap_mode_changes(client_p, source_p, chptr, CAP_AOPS, CAP_HOPS);
-  send_cap_mode_changes(client_p, source_p, chptr, 0, CAP_HOPS | CAP_AOPS);
+  send_cap_mode_changes(client_p, source_p, chptr);
 }
 
 /* void set_channel_mode(struct Client *client_p, struct Client *source_p,
