@@ -32,6 +32,7 @@
 #include "hash.h"
 #include "irc_string.h"
 #include "ircd.h"
+#include "ircdauth.h"
 #include "list.h"
 #include "listener.h"
 #include "motd.h"
@@ -495,6 +496,7 @@ static int register_user(struct Client *cptr, struct Client *sptr,
 
   if (MyConnect(sptr))
     {
+   #if 0
       switch( check_client(sptr,username,&reason))
         {
         case SOCKET_ERROR:
@@ -713,6 +715,8 @@ static int register_user(struct Client *cptr, struct Client *sptr,
               return exit_client(cptr, sptr, &me, "quarantined nick");
             }
         }
+
+     #endif /* 0 */
 
 
       sendto_realops_flags(FLAGS_CCONN,
@@ -1212,8 +1216,16 @@ int nickkilldone(struct Client *cptr, struct Client *sptr, int parc,
           ** may reject the client and call exit_client for it
           ** --must test this and exit m_nick too!!!
           */
+
+          /*
+           * Send the client to the iauth module for verification
+           */
+          BeginAuthorization(sptr);
+
+          #ifdef bingo
             if (register_user(cptr, sptr, nick, buf) == CLIENT_EXITED)
               return CLIENT_EXITED;
+          #endif /* bingo */
         }
     }
 
@@ -1304,7 +1316,19 @@ int do_user(char* nick, struct Client* cptr, struct Client* sptr,
   strncpy_irc(sptr->info, realname, REALLEN);
 
   if (sptr->name[0]) /* NICK already received, now I have USER... */
+  {
+    /*
+     * Now that we have both the NICK and USER, send the
+     * client to the iauth module for verification
+     */
+    #if 0
+    begin_authorization();
+    #endif
+
+  #ifdef bingo
     return register_user(cptr, sptr, sptr->name, username);
+  #endif /* bingo */
+  }
   else
     {
       if (!IsGotId(sptr)) 

@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <stdarg.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <errno.h>
@@ -33,14 +34,22 @@
 #include <string.h>
 #include <assert.h>
 
-#include "common.h"
+#include "class.h"
 #include "client.h"
-#include "ircd_defs.h"
-#include "s_log.h"
+#include "common.h"
 #include "irc_string.h"
-#include "s_bsd.h"
+#include "ircd_defs.h"
+#include "ircd.h"
 #include "ircdauth.h"
+#include "list.h"
+#include "listener.h"
+#include "numeric.h"
 #include "s_auth.h"
+#include "s_bsd.h"
+#include "s_conf.h"
+#include "s_log.h"
+#include "s_user.h"
+#include "send.h"
 
 /*
  * This structure will contain the information for the IAuth
@@ -48,7 +57,31 @@
  */
 struct IrcdAuthentication iAuth;
 
+/*
+ * Contains data read from IAuth server
+ */
+static char buffer[BUFSIZE + 1];
+
+/*
+ * Array of pointers to each parameter IAuth sends
+ */
+static char               *param[MAXPARAMS + 1];
+static int                paramc;               /* param count */
+static char               *nextparam = NULL;    /* pointer to next parameter */
+
+/*
+ * If the data read into buffer[] contains several lines,
+ * and the last one was cut off in the middle, store it into
+ * spill[]. offset is the index of spill[] where we left
+ * off.
+ */
+static char spill[BUFSIZE + 1];
+int offset;
+
 static void ProcessIAuthData(int parc, char **parv);
+static void GoodAuth(int parc, char **parv);
+static void GreetUser(struct Client *client);
+static void BadAuth(int parc, char **parv);
 
 /*
 ConnectToIAuth()
@@ -85,7 +118,6 @@ ConnectToIAuth()
 	{
 		log(L_ERROR,
 			"ConnectToIAuth(): Unable to open stream socket");
-		close(iAuth.socket);
 		iAuth.socket = NOSOCK;
 		return(NOSOCK);
 	}
@@ -104,45 +136,37 @@ ConnectToIAuth()
 } /* ConnectToIAuth() */
 
 /*
-IAuthQuery()
- Called when a client connects - send the client's information
-to the IAuth server to begin an authentication. The syntax
-for an authentication query is as follows:
+BeginAuthorization()
+ Called when a client connects and gives the USER/NICK combo -
+send the client's information to the IAuth server to begin
+an authorization. The syntax for an auth query is as follows:
 
-    DoAuth <ID> <IP Address> <RemotePort> <LocalPort>
+    DoAuth <id> <nickname> <username> <hostname> <ip address>
 
-  <ID>            - A unique ID for the client so when the
+  <id>            - A unique ID for the client so when the
                     authentication completes, we can re-find
                     the client.
 
-  <IP Address>    - IP Address of the client. This is represented
+  <nickname>      - client's nickname
+
+  <username>      - client's ident reply, or the username
+                    given in the USER statement if ident
+                    not available.
+
+  <hostname>      - client's resolved hostname.
+
+  <ip address>    - IP Address of the client. This is represented
                     in unsigned int form.
-
-  <RemotePort>    - Client's remote port for the connection.
-
-  <LocalPort>     - Port the client connected to us on.
 */
 
 void
-IAuthQuery(struct Client *client)
+BeginAuthorization(struct Client *client)
 
 {
 	char buf[BUFSIZE];
 	int len;
-	struct sockaddr_in us;
-	struct sockaddr_in them;
-	int ulen = sizeof(struct sockaddr_in);
-	int tlen = sizeof(struct sockaddr_in);
 
 	assert(iAuth.socket != NOSOCK);
-
-	if (getsockname(client->fd, (struct sockaddr *)&us,   &ulen) ||
-			getpeername(client->fd, (struct sockaddr *)&them, &tlen))
-	{
-		log(L_INFO, "auth get{sock,peer}name error for %s:%m",
-			get_client_name(client, SHOW_IP));
-		return;
-	}
 
 	/*
 	 * The client ID will be the memory address of the
@@ -153,14 +177,39 @@ IAuthQuery(struct Client *client)
 	 */
 
 	len = sprintf(buf,
-		"DoAuth %p %u %u %u\n",
+		"DoAuth %p %s %s %s %u\n",
 		client,
-		(unsigned int) client->ip.s_addr,
-		(unsigned int) ntohs(them.sin_port),
-		(unsigned int) ntohs(us.sin_port));
+		client->name,
+		client->username,
+		client->host,
+		(unsigned int) client->ip.s_addr);
 
 	send(iAuth.socket, buf, len, 0);
-} /* IAuthQuery() */
+} /* BeginAuthorization() */
+
+/*
+SendIAuth()
+ Send a string to the iauth server
+*/
+
+void
+SendIAuth(char *format, ...)
+
+{
+	va_list args;
+	char buf[BUFSIZE];
+	int len;
+
+	assert(iAuth.socket != NOSOCK);
+
+	va_start(args, format);
+
+	len = vsprintf(buf, format, args);
+
+	va_end(args);
+
+	send(iAuth.socket, buf, len, 0);
+} /* SendIAuth() */
 
 /*
 ParseIAuth()
@@ -175,57 +224,167 @@ int
 ParseIAuth()
 
 {
-	int length;
-	char buffer[BUFSIZE + 1];
-	char *ch;
-	int paramc;
-	char *paramv[MAXPARAMS + 1];
+	int length; /* number of bytes we read */
+	register char *ch;
+	register char *linech;
 
+	/* read in a line */
 	length = recv(iAuth.socket, buffer, BUFSIZE, 0);
 
-	if ((length == (-1)) &&
-			((errno == EWOULDBLOCK) || (errno == EAGAIN)))
-		return 2;
+	if ((length == (-1)) && ((errno == EWOULDBLOCK) || (errno == EAGAIN)))
+		return 2; /* no error - there's just nothing to read */
 
 	if (length <= 0)
-		return 0;
+	{
+		log(L_ERROR, "Read error from server: %s",
+			strerror(errno));
+		return 0; /* the connection was closed */
+	}
 
+	/*
+	 * buffer may not be big enough to read the whole last line
+	 * so it may contain only part of it
+	 */
 	buffer[length] = '\0';
 
 	fprintf(stderr, "%s", buffer);
 
-	ch = buffer;
+	/*
+	 * buffer could possibly contain several lines of info,
+	 * especially if this is the inital connect burst, so go
+	 * through, and record each line (until we hit a \n) and
+	 * process it separately
+	 */
 
-	paramc = 0;
-	paramv[paramc++] = buffer;
+	ch = buffer;
+	linech = spill + offset;
+
+	/*
+	 * The following routine works something like this:
+	 * buffer may contain several full lines, and then
+	 * a partial line. If this is the case, loop through
+	 * buffer, storing each character in 'spill' until
+	 * we hit a \n or \r.  When we do, process the line.
+	 * When we hit the end of buffer, spill will contain
+	 * the partial line that buffer had, and offset will
+	 * contain the index of spill where we left off, so the
+	 * next time we recv() from the hub, the beginning
+	 * characters of buffer will be appended to the end of
+	 * spill, thus forming a complete line.
+	 * If buffer does not contain a partial line, then
+	 * linech will simply point to the first index of 'spill'
+	 * (offset will be zero) after we process all of buffer's
+	 * lines, and we can continue normally from there.
+	 */
 
 	while (*ch)
 	{
 		register char tmp;
 
 		tmp = *ch;
-
 		if (IsEol(tmp))
 		{
+			*linech = '\0';
+
+			if (nextparam)
+			{
+				/*
+				 * It is possible nextparam will not be NULL here
+				 * if there is a line like:
+				 * BadAuth id :Blah
+				 * where the text after the colon does not have
+				 * any spaces, so we reach the \n and do not
+				 * execute the code below which sets the next
+				 * index of param[] to nextparam. Do it here.
+				 */
+				param[paramc++] = nextparam;
+			}
+
 			/*
-			 * We've reached the end of our line - process it
+			 * Make sure paramc is non-zero, because if the line
+			 * starts with a \n, we will immediately come here,
+			 * without initializing param[0]
 			 */
-
-			*ch = '\0';
-
 			if (paramc)
-				ProcessIAuthData(paramc, paramv);
+			{
+				/* process the line */
+				ProcessIAuthData(paramc, param);
+			}
 
-			break;
+			linech = spill;
+			offset = 0;
+			paramc = 0;
+			nextparam = NULL;
+
+			/*
+			 * If the line ends in \r\n, then this algorithm would
+			 * have only picked up the \r. We don't want an entire
+			 * other loop to do the \n, so advance ch here.
+			 */
+			if (IsEol(*(ch + 1)))
+				ch++;
 		}
-		else if (IsSpace(tmp))
+		else
 		{
-			*ch++ = '\0';
-			paramv[paramc++] = ch;
+			/* make sure we don't overflow spill[] */
+			if (linech >= (spill + (sizeof(spill) - 1)))
+			{
+				ch++;
+				continue;
+			}
+
+			*linech++ = tmp;
+			if (tmp == ' ')
+			{
+				/*
+				 * Only set the space character to \0 if this is
+				 * the very first parameter, or if nextparam is
+				 * not NULL. If nextparam is NULL, then we've hit
+				 * a parameter that starts with a colon (:), so
+				 * leave it as a whole parameter.
+				 */
+				if (nextparam || (paramc == 0))
+					*(linech - 1) = '\0';
+
+				if (paramc == 0)
+				{
+					/*
+					 * Its the first parameter - set it to the beginning
+					 * of spill
+					 */
+					param[paramc++] = spill;
+					nextparam = linech;
+				}
+				else if (nextparam)
+				{
+					param[paramc++] = nextparam;
+					if (*nextparam == ':')
+					{
+						/*
+						 * We've hit a colon, set nextparam to NULL,
+						 * so we know not to set any more spaces to \0
+						 */
+						nextparam = NULL;
+
+						/*
+						 * Unfortunately, the first space has already
+						 * been set to \0 above, so reset to to a
+						 * space character
+						 */
+						*(linech - 1) = ' ';
+					}
+					else
+						nextparam = linech;
+
+					if (paramc >= MAXPARAMS)
+						nextparam = NULL;
+				}
+			}
+			++offset;
 		}
 
 		/*
-		 * Advance ch to the next letter in buffer[]
+		 * Advance ch to go to the next letter in the buffer
 		 */
 		++ch;
 	} /* while (*ch) */
@@ -242,40 +401,270 @@ static void
 ProcessIAuthData(int parc, char **parv)
 
 {
+	int len;
+
+	len = strlen(parv[0]);
+
+	if (!strncasecmp(parv[0], "DoneAuth", len))
+		GoodAuth(parc, parv);
+	else if (!strncasecmp(parv[0], "BadAuth", len))
+		BadAuth(parc, parv);
+} /* ProcessIAuthData() */
+
+/*
+GoodAuth()
+ Called when an authorization request succeeds - grant the
+client access to the server
+
+parv[0] = "DoneAuth"
+parv[1] = client id
+parv[2] = username
+*/
+
+static void
+GoodAuth(int parc, char **parv)
+
+{
 	struct AuthRequest *auth;
 	long id;
 
-	if (!strcasecmp(parv[0], "DoneAuth"))
+/*	assert(parc == 3); */
+
+	id = strtol(parv[1], 0, 0);
+	for (auth = AuthClientList; auth; auth = auth->next)
 	{
-		id = strtol(parv[1], 0, 0);
-		for (auth = AuthPollList; auth; auth = auth->next)
+		/*
+		 * Remember: the client id is the memory address
+		 * of auth->client, so if it matches id, we
+		 * found our client.
+		 */
+		if ((void *) auth->client == (void *) id)
 		{
 			/*
-			 * Remember: the client id is the memory address
-			 * of auth->client, so if it matches id, we
-			 * found our client.
+			 * Use IAuth's username, because it may be different
+			 * if ident failed, but the client's I: line specified
+			 * no tilde character
 			 */
-			if ((void *) auth->client == (void *) id)
-			{
-				fprintf(stderr, "GOT IT: %s %s %s\n",
-					parv[1],
-					parv[2],
-					parv[3]);
+			strncpy_irc(auth->client->username, parv[2], USERLEN);
 
-				strncpy_irc(auth->client->username, parv[2], USERLEN);
-				strncpy_irc(auth->client->host, parv[3], HOSTLEN);
+			/*
+			 * Register them
+			 */
+			GreetUser(auth->client);
 
-				/*
-				 * The IAuth server will return a "~" if the ident
-				 * query failed.
-				 */
-				if (*auth->client->username != '~')
-					SetGotId(auth->client);
+			remove_auth_request(auth);
 
-				remove_auth_request(auth);
-
-				break;
-			}
+			break;
 		}
 	}
-} /* ProcessIAuthData() */
+} /* GoodAuth() */
+
+/*
+GreetUser()
+ Called after a user passes authorization - register them
+and send them the motd
+*/
+
+static void
+GreetUser(struct Client *client)
+
+{
+	/* bingo - FIX THIS */
+	char *parv[3];
+	static char ubuf[12];
+
+	sendto_realops_flags(FLAGS_CCONN,
+		"Client connecting: %s (%s@%s) [%s] {%d}",
+		client->name,
+		client->username,
+		client->host,
+		inetntoa((char *)&client->ip),
+		get_client_class(client));
+
+	if ((++Count.local) > Count.max_loc)
+	{
+		Count.max_loc = Count.local;
+		if (!(Count.max_loc % 10))
+			sendto_ops("New Max Local Clients: %d",
+				Count.max_loc);
+	}
+
+	SetClient(client);
+
+	client->servptr = find_server(client->user->server);
+	if (!client->servptr)
+	{
+		sendto_ops("Ghost killed: %s on invalid server %s",
+			client->name,
+			client->user->server);
+
+		sendto_one(client, ":%s KILL %s: %s (Ghosted, %s doesn't exist)",
+			me.name,
+			client->name,
+			me.name,
+			client->user->server);
+
+		client->flags |= FLAGS_KILLED;
+
+		exit_client(NULL, client, &me, "Ghost");
+		return;
+	}
+
+	add_client_to_llist(&(client->servptr->serv->users), client);
+
+	/* Increment our total user count here */
+	if (++Count.total > Count.max_tot)
+		Count.max_tot = Count.total;
+
+	sendto_one(client, form_str(RPL_WELCOME),
+		me.name,
+		client->name,
+		client->name);
+
+	/* This is a duplicate of the NOTICE but see below...*/
+	sendto_one(client, form_str(RPL_YOURHOST),
+		me.name,
+		client->name,
+		get_listener_name(client->listener), version);
+      
+	/*
+	** Don't mess with this one - IRCII needs it! -Avalon
+	*/
+	sendto_one(client,
+		"NOTICE %s :*** Your host is %s, running version %s",
+		client->name,
+		get_listener_name(client->listener),
+		version);
+
+	sendto_one(client, form_str(RPL_CREATED),
+		me.name,
+		client->name,
+		creation);
+
+	sendto_one(client, form_str(RPL_MYINFO),
+		me.name,
+		client->name,
+		me.name,
+		version);
+
+	parv[0] = client->name;
+	parv[1] = parv[2] = NULL;
+
+	show_lusers(client, client, 1, parv);
+
+#ifdef SHORT_MOTD
+
+	sendto_one(client,"NOTICE %s :*** Notice -- motd was last changed at %s",
+		client->name,
+		ConfigFileEntry.motd.lastChangedDate);
+
+	sendto_one(client,
+		"NOTICE %s :*** Notice -- Please read the motd if you haven't read it",
+		client->name);
+
+	sendto_one(client, form_str(RPL_MOTDSTART),
+		me.name,
+		client->name,
+		me.name);
+
+	sendto_one(client,
+		form_str(RPL_MOTD),
+		me.name,
+		client->name,
+		"*** This is the short motd ***");
+
+	sendto_one(client, form_str(RPL_ENDOFMOTD),
+		me.name,
+		client->name);
+
+#else
+
+	SendMessageFile(client, &ConfigFileEntry.motd);
+
+#endif /* SHORT_MOTD */
+      
+#ifdef LITTLE_I_LINES
+	if (client->confs && client->confs->value.aconf &&
+			(client->confs->value.aconf->flags & CONF_FLAGS_LITTLE_I_LINE))
+	{
+		SetRestricted(client);
+		sendto_one(client,"NOTICE %s :*** Notice -- You are in a restricted access mode",
+			client->name);
+
+		sendto_one(client,"NOTICE %s :*** Notice -- You can not chanop others",
+			client->name);
+	}
+#endif
+
+#ifdef NEED_SPLITCODE
+	if (server_was_split)
+		sendto_one(client,"NOTICE %s :*** Notice -- server is currently in split-mode",
+			client->name);
+
+	nextping = CurrentTime;
+#endif
+
+	send_umode(NULL, client, 0, SEND_UMODES, ubuf);
+	if (!*ubuf)
+	{
+		ubuf[0] = '+';
+		ubuf[1] = '\0';
+	}
+  
+  /* LINKLIST 
+   * add to local client link list -Dianora
+   * I really want to move this add to link list
+   * inside the if (MyConnect(client)) up above
+   * but I also want to make sure its really good and registered
+   * local client
+   *
+   * double link list only for clients, traversing
+   * a small link list for opers/servers isn't a big deal
+   * but it is for clients -Dianora
+   */
+
+	if (LocalClientList)
+		LocalClientList->prev_local = client;
+
+	client->prev_local = NULL;
+	client->next_local = LocalClientList;
+	LocalClientList = client;
+
+	sendto_serv_butone(client,
+		"NICK %s %d %lu %s %s %s %s :%s",
+		client->name,
+		client->hopcount + 1,
+		client->tsinfo,
+		ubuf,
+		client->username,
+		client->host,
+		client->user->server,
+		client->info);
+
+	if (ubuf[1])
+		send_umode_out(client, client, 0);
+} /* GreetUser() */
+
+/*
+BadAuth()
+ Called when a client fails authorization - exit them
+
+parv[0] = "BadAuth"
+parv[1] = client id
+parv[2] = :reason
+*/
+
+static void
+BadAuth(int parc, char **parv)
+
+{
+	struct AuthRequest *auth;
+	long id;
+
+	id = strtol(parv[1], 0, 0);
+	if ((auth = FindAuthClient(id)))
+	{
+		exit_client(auth->client, auth->client, &me,
+			parv[2] + 1);
+	}
+} /* BadAuth() */
