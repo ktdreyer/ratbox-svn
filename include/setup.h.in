@@ -1,4 +1,4 @@
-/* include/setup.h.in.  Generated automatically from ./configure.in by autoheader.  */
+/* include/setup.h.in.  Generated automatically from configure.in by autoheader.  */
 
 /* Define if you need to in order for stat and other things to work.  */
 #undef _POSIX_SOURCE
@@ -14,6 +14,9 @@
 
 /* Define if you have the ANSI C header files.  */
 #undef STDC_HEADERS
+
+/* Define if lex declares yytext as a char * by default, not a char[].  */
+#undef YYTEXT_POINTER
 
 /* Define if you have the poll() system call.  */
 #undef USE_POLL
@@ -45,6 +48,9 @@
  * to symbols loaded from modules.
  */
 #undef SYMBOL_PREFIX
+
+/* IPv6 support */
+#undef IPV6
 
 /* Define if you have the gettext function.  */
 #undef HAVE_GETTEXT

@@ -233,12 +233,6 @@
  */
 #define CLIENT_FLOOD    2560
 
-/*
- * Define this to enable IPv6 support.  IPv6 is currently still being
- * developed, and is not guaranteed to work properly..
- */
-#undef IPV6
-
 /*   STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP  */
 
 /* You shouldn't change anything below this line, unless absolutely needed. */

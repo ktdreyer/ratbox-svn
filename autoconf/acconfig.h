@@ -32,3 +32,6 @@
  * to symbols loaded from modules.
  */
 #undef SYMBOL_PREFIX
+
+/* IPv6 support */
+#undef IPV6
