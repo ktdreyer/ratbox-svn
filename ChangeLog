@@ -1,3 +1,25 @@
+leeh        2005/01/21 07:14:43 EST	(20050121_2)
+
+  Modified files:
+    doc                  hooks.txt 
+    include              hook.h 
+    modules              m_services.c 
+    src                  hook.c s_serv.c 
+  Log:
+  - added hooks for when we're sending a burst
+  - rewrote hooks.txt
+  - fix up the hooks ive already done in services compatibility, ill add the
+    hooks for server/client introductions in a bit.
+  
+  Revision  Changes    Path
+  1.3       +71 -33    ircd-ratbox/doc/hooks.txt
+  1.30      +4 -0      ircd-ratbox/include/hook.h
+  1.4       +24 -35    ircd-ratbox/modules/m_services.c
+  7.34      +7 -0      ircd-ratbox/src/hook.c
+  7.423     +26 -2     ircd-ratbox/src/s_serv.c
+
+
+
 leeh        2005/01/21 06:34:03 EST	(20050121_1)
 
   Modified files:
