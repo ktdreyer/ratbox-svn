@@ -1,3 +1,11 @@
+*** 20001106_14 by adrian
+
+
+use autoconf'ed CFLAGS, rather than enforcing inheriting it from the
+top level Makefile. This allows 'make' in src/ work *properly*.
+
+
+
 *** 20001106_13 by adrian
 
 
