@@ -168,8 +168,10 @@ eventAddIsh(const char *name, EVH * func, void *arg, time_t delta_ish)
 {
 	if(delta_ish >= 3)
 		delta_ish -= (time_t)((delta_ish/3.00)*rand()/(RAND_MAX+1.0));
-	else if(delta_ish >= 60)
+	else if(delta_ish >= 30)
 		delta_ish -= (time_t)((delta_ish/10.00)*rand()/(RAND_MAX+1.0));
+	else if(delta_ish >= 1000)
+		delta_ish -= (time_t)((delta_ish/(delta_ish * .01)*rand()/(RAND_MAX+1.0));
 	eventAdd(name, func, arg, delta_ish);
 }
 
