@@ -123,7 +123,7 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
            "servername %s.", get_client_name(cptr, FALSE), host);
         }
       return exit_client(cptr, cptr, cptr,
-                "Invalid servername/host/password.");
+                "Invalid servername.");
      case -2:
       sendto_realops_flags(FLAGS_ADMIN,
         "Unauthorised server connection attempt from %s: Bad password "
@@ -134,7 +134,7 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         "for server %s.", get_client_name(cptr, FALSE), host);
 
       return exit_client(cptr, cptr, cptr,
-                 "Invalid servername/host/password.");
+                 "Invalid password.");
       break;
      case -3:
       sendto_realops_flags(FLAGS_ADMIN,
@@ -146,7 +146,7 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         "for server %s.", get_client_name(cptr, FALSE), host);
 
       return exit_client(cptr, cptr, cptr,
-                 "Invalid servername/host/password.");
+                 "Invalid host.");
     }
     
   if ((acptr = find_server(host)))
