@@ -32,15 +32,13 @@
 
 /* List of ircd includes from ../include/ */
 #include "stdinc.h"
-#include "handlers.h"
+
 #include "client.h"
 #include "common.h"     
 #include "ircd.h"
 #include "irc_string.h"
 #include "sprintf_irc.h"
 #include "numeric.h"
-#include "fdlist.h"
-#include "s_bsd.h"
 #include "s_conf.h"
 #include "s_log.h"
 #include "s_serv.h"
@@ -48,38 +46,27 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
-
 #include "s_user.h"    /* send_umode_out() */
+#include "s_newconf.h"
 
-
-static void m_flags(struct Client *client_p, struct Client *source_p,
-                    int parc, char *parv[]);
-static void mo_flags(struct Client *client_p, struct Client *source_p,
-                    int parc, char *parv[]);
+static int m_flags(struct Client *client_p, struct Client *source_p,
+                    int parc, const char *parv[]);
+static int mo_flags(struct Client *client_p, struct Client *source_p,
+                    int parc, const char *parv[]);
 
 static char *set_flags_to_string(struct Client *client_p);
 static char *unset_flags_to_string(struct Client *client_p);
 
+
 struct Message test_msgtab = {
-  "FLAGS", 0, 0, 0, 0, MFLG_SLOW, 0,
-  {m_unregistered, m_flags, m_ignore, mo_flags}
+	"FLAGS", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, {m_flags, 0}, {m_flags, 0}, mg_ignore, mg_ignore, {mo_flags, 0}}
 };
 
-#ifndef STATIC_MODULES
-void
-_modinit(void)
-{
-  mod_add_cmd(&test_msgtab);
-}
 
-void
-_moddeinit(void)
-{
-  mod_del_cmd(&test_msgtab);
-}
+mapi_clist_av1 test_clist[] = { &test_msgtab, NULL };
+DECLARE_MODULE_AV1(test, NULL, NULL, test_clist, NULL, NULL, "$Revision$");
 
-const char *_version = "$Revision$";
-#endif
 
 /* FLAGS requires it's own mini parser, since the last parameter in it can
 ** contain a number of FLAGS.  CS handles FLAGS mode1 mode2 OR
@@ -148,8 +135,9 @@ static struct FlagTable flag_table[] =
 **      parv[0] = sender prefix
 **      parv[1] = parameter
 */
-static void m_flags(struct Client *client_p, struct Client *source_p,
-                   int parc, char *parv[])
+static int
+m_flags(struct Client *client_p, struct Client *source_p,
+                   int parc, const char *parv[])
 {
   int i,j;
   int isadd;
@@ -167,7 +155,7 @@ static void m_flags(struct Client *client_p, struct Client *source_p,
                me.name, parv[0], set_flags_to_string(source_p));
     sendto_one(source_p, ":%s NOTICE %s :Current missing flags:%s",
                me.name, parv[0], unset_flags_to_string(source_p));
-    return;
+    return 1;
   }
 
   /* Preserve the current flags */
@@ -176,8 +164,9 @@ static void m_flags(struct Client *client_p, struct Client *source_p,
 /* XXX - change this to support a multiple last parameter like ISON */
 
   for (i = 1; i < parc; i++)
-  {
-    for (flag = strtoken(&p, parv[i], " "); flag;
+  {	
+	char *s = LOCAL_COPY(parv[i]);
+    for (flag = strtoken(&p, s, " "); flag;
          flag = strtoken(&p, NULL, " "))
     {
       /* We default to being in ADD mode */
@@ -207,7 +196,7 @@ static void m_flags(struct Client *client_p, struct Client *source_p,
         sendto_one(source_p, ":%s NOTICE %s :Current missing flags:%s",
                    me.name, parv[0], unset_flags_to_string(source_p));
         send_umode_out(client_p, source_p, setflags);
-        return;
+        return 1;
       }
 
       for (j = 0; flag_table[j].name; j++)
@@ -241,6 +230,7 @@ static void m_flags(struct Client *client_p, struct Client *source_p,
              me.name, parv[0], unset_flags_to_string(source_p));
 
   send_umode_out(client_p, source_p, setflags);
+  return 0;
 }
 
 /*
@@ -248,8 +238,9 @@ static void m_flags(struct Client *client_p, struct Client *source_p,
 **      parv[0] = sender prefix
 **      parv[1] = parameter
 */
-static void mo_flags(struct Client *client_p, struct Client *source_p,
-                   int parc, char *parv[])
+static int
+mo_flags(struct Client *client_p, struct Client *source_p,
+                   int parc, const char *parv[])
 {		 
   int i,j;
   int isadd;
@@ -267,7 +258,7 @@ static void mo_flags(struct Client *client_p, struct Client *source_p,
                me.name, parv[0], set_flags_to_string(source_p));
     sendto_one(source_p, ":%s NOTICE %s :Current missing flags:%s",
                me.name, parv[0], unset_flags_to_string(source_p));
-    return;
+    return 1;
   }
 
   /* Preserve the current flags */
@@ -277,7 +268,8 @@ static void mo_flags(struct Client *client_p, struct Client *source_p,
 
   for (i = 1; i < parc; i++)
   {
-    for (flag = strtoken(&p, parv[i], " "); flag;
+	char *s = LOCAL_COPY(parv[i]);
+    for (flag = strtoken(&p, s, " "); flag;
          flag = strtoken(&p, NULL, " "))
     {
       /* We default to being in ADD mode */
@@ -307,7 +299,7 @@ static void mo_flags(struct Client *client_p, struct Client *source_p,
         sendto_one(source_p, ":%s NOTICE %s :Current missing flags:%s",
                    me.name, parv[0], unset_flags_to_string(source_p));
         send_umode_out(client_p, source_p, setflags);
-        return;
+        return 1;
       }
 
       if (!irccmp(flag, "NICKCHANGES"))
@@ -358,6 +350,7 @@ static void mo_flags(struct Client *client_p, struct Client *source_p,
              me.name, parv[0], unset_flags_to_string(source_p));
 
   send_umode_out(client_p, source_p, setflags);
+  return 0;
 }
 
 static char *set_flags_to_string(struct Client *client_p)

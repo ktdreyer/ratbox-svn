@@ -1,5 +1,6 @@
 /* contrib/m_force.c
- * Copyright (C) 2002 Hybrid Development Team
+ * Copyright (C) 1996-2002 Hybrid Development Team
+ * Copyright (C) 2004 ircd-ratbox Development Team
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are
@@ -27,59 +28,48 @@
  *
  * $Id$
  */
-
+ 
 #include "stdinc.h"
-#include "handlers.h"
+#include "tools.h"
+#include "channel.h"
+#include "class.h"
 #include "client.h"
-#include "common.h"     /* FALSE bleah */
-#include "ircd.h"
+#include "common.h"
 #include "irc_string.h"
+#include "sprintf_irc.h"
+#include "ircd.h"
+#include "hostmask.h"
 #include "numeric.h"
-#include "fdlist.h"
-#include "hash.h"
-#include "s_bsd.h"
+#include "commio.h"
 #include "s_conf.h"
+#include "s_newconf.h"
 #include "s_log.h"
-#include "s_serv.h"
 #include "send.h"
+#include "hash.h"
+#include "s_serv.h"
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
-#include "channel.h"
-#include "channel_mode.h"
+#include "event.h"
 
 
-static void mo_forcejoin(struct Client *client_p, struct Client *source_p,
-                         int parc, char *parv[]);
-static void mo_forcepart(struct Client *client_p, struct Client *source_p,
-		         int parc, char *parv[]);
+static int mo_forcejoin(struct Client *client_p, struct Client *source_p,
+                         int parc, const char *parv[]);
+static int mo_forcepart(struct Client *client_p, struct Client *source_p,
+		         int parc, const char *parv[]);
 
 struct Message forcejoin_msgtab = {
-  "FORCEJOIN", 0, 0, 3, 0, MFLG_SLOW, 0,
-  {m_ignore, m_not_oper, mo_forcejoin, mo_forcejoin}
+	"FORCEJOIN", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, mg_ignore, {mo_forcejoin, 3}}
 };
+
 struct Message forcepart_msgtab = {
-  "FORCEPART", 0, 0, 3, 0, MFLG_SLOW, 0,
-  {m_ignore, m_not_oper, mo_forcepart, mo_forcepart}
+	"FORCEPART", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, mg_ignore, {mo_forcepart, 3}}
 };
 
-#ifndef STATIC_MODULES
-void
-_modinit(void)
-{
-  mod_add_cmd(&forcejoin_msgtab);
-  mod_add_cmd(&forcepart_msgtab);
-}
-
-void
-_moddeinit(void)
-{
-  mod_del_cmd(&forcejoin_msgtab);
-  mod_del_cmd(&forcepart_msgtab);
-}
-
-char *_version = "$Revision$";
-#endif
+mapi_clist_av1 force_clist[] = { &forcejoin_msgtab, &forcepart_msgtab, NULL };
+DECLARE_MODULE_AV1(force, NULL, NULL, force_clist, NULL, NULL, "$Revision$");
 
 /*
  * m_forcejoin
@@ -87,8 +77,9 @@ char *_version = "$Revision$";
  *      parv[1] = user to force
  *      parv[2] = channel to force them into
  */
-static void mo_forcejoin(struct Client *client_p, struct Client *source_p,
-                         int parc, char *parv[])
+static int
+mo_forcejoin(struct Client *client_p, struct Client *source_p,
+                         int parc, const char *parv[])
 {
   struct Client *target_p;
   struct Channel *chptr;
@@ -97,28 +88,29 @@ static void mo_forcejoin(struct Client *client_p, struct Client *source_p,
   char sjmode;
   char *newch;
 
-  if(!IsAdmin(source_p))
+  if(!IsOperAdmin(source_p))
   {
-    sendto_one(source_p, ":%s NOTICE %s :You have no A flag", me.name, parv[0]);
-    return;
+    sendto_one(source_p, form_str(ERR_NOPRIVS),
+			   me.name, source_p->name, "forcejoin");
+		return 0;
   }
-
+  
   if((hunt_server(client_p, source_p, ":%s FORCEJOIN %s %s", 1, parc, parv)) != HUNTED_ISME)
-    return;
-
+    return 0;
+  
   /* if target_p is not existant, print message
    * to source_p and bail - scuzzy
    */
   if ((target_p = find_client(parv[1])) == NULL)
   {
-    sendto_one(source_p, form_str(ERR_NOSUCHNICK), me.name,
-	       source_p->name, parv[1]);
-    return;
+	sendto_one(source_p, form_str(ERR_NOSUCHNICK), me.name,
+               source_p->name, parv[1]);
+    return 0;
   }
 
-  if(!IsClient(target_p))
-    return;
-
+  if(!IsPerson(target_p))
+    return 0;
+  
   /* select our modes from parv[2] if they exist... (chanop)*/
   if(*parv[2] == '@')
   {
@@ -148,7 +140,7 @@ static void mo_forcejoin(struct Client *client_p, struct Client *source_p,
         /* debugging is fun... */
         sendto_one(source_p, ":%s NOTICE %s :*** Notice -- %s is already in %s", me.name,
 		   source_p->name, target_p->name, chptr->chname);
-	return;
+	return 0;
       }
 
       add_user_to_channel(chptr, target_p, type);
@@ -175,16 +167,16 @@ static void mo_forcejoin(struct Client *client_p, struct Client *source_p,
 	           chptr->topic_info, chptr->topic_time);
       }
 
-      channel_member_names(target_p, chptr, chptr->chname, 1);
+      channel_member_names(chptr, target_p, 1);
     }
   else
     {
-      newch = parv[2];
+      newch = LOCAL_COPY(parv[2]);
       if (!check_channel_name(newch))
       {
         sendto_one(source_p, form_str(ERR_BADCHANNAME), me.name,
 		   source_p->name, (unsigned char*)newch);
-	return;
+	return 0;
       }
 
       /* channel name must begin with & or # */
@@ -192,7 +184,7 @@ static void mo_forcejoin(struct Client *client_p, struct Client *source_p,
       {
         sendto_one(source_p, form_str(ERR_BADCHANNAME), me.name,
 		   source_p->name, (unsigned char*)newch);
-        return;
+        return 0;
       }
 
       /* newch can't be longer than CHANNELLEN */
@@ -200,7 +192,7 @@ static void mo_forcejoin(struct Client *client_p, struct Client *source_p,
       {
 	sendto_one(source_p, ":%s NOTICE %s :Channel name is too long", me.name,
 		   source_p->name);
-        return;
+        return 0;
       }
 
       chptr = get_or_create_channel(target_p, newch, NULL);
@@ -223,7 +215,7 @@ static void mo_forcejoin(struct Client *client_p, struct Client *source_p,
                            chptr->chname);
 
       target_p->localClient->last_join_time = CurrentTime;
-      channel_member_names(target_p, chptr, chptr->chname, 1);
+      channel_member_names(chptr, target_p, 1);
 
       /* we do this to let the oper know that a channel was created, this will be
        * seen from the server handling the command instead of the server that
@@ -232,48 +224,53 @@ static void mo_forcejoin(struct Client *client_p, struct Client *source_p,
       sendto_one(source_p, ":%s NOTICE %s :*** Notice -- Creating channel %s", me.name,
 		 source_p->name, chptr->chname);
     }
+    return 0;
 }
 
 
-static void mo_forcepart(struct Client *client_p, struct Client *source_p,
-		         int parc, char *parv[])
+static int
+mo_forcepart(struct Client *client_p, struct Client *source_p,
+		         int parc, const char *parv[])
 {
   struct Client *target_p;
   struct Channel *chptr;
-
-  if(!IsAdmin(source_p))
+  struct membership *msptr;
+  
+  if(!IsOperAdmin(source_p))
   {
-    sendto_one(source_p, ":%s NOTICE %s :You have no A flag", me.name, parv[0]);
-    return;
+    sendto_one(source_p, form_str(ERR_NOPRIVS),
+			   me.name, source_p->name, "forcepart");
+		return 0;
   }
 
   if((hunt_server(client_p, source_p, ":%s FORCEPART %s %s", 1, parc, parv)) != HUNTED_ISME)
-    return;
+    return 0;
 
   /* if target_p == NULL then let the oper know */
   if ((target_p = find_client(parv[1])) == NULL)
   {
     sendto_one(source_p, form_str(ERR_NOSUCHNICK), me.name,
                source_p->name, parv[1]);
-    return;
+    return 0;
   }
 
   if(!IsClient(target_p))
-    return;
+    return 0;
 
+       
   if((chptr = find_channel(parv[2])) == NULL)
   {
-    sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
-               me.name, parv[0], parv[2]);
-    return;
+    sendto_one_numeric(source_p, ERR_NOSUCHCHANNEL,
+				form_str(ERR_NOSUCHCHANNEL), parv[1]);
+    return 0;
   }
 
-  if (!IsMember(target_p, chptr))
-  {
-    sendto_one(source_p, form_str(ERR_USERNOTINCHANNEL),
-               me.name, parv[0], parv[1], parv[2]);
-    return;
-  }
+  	if((msptr = find_channel_membership(chptr, target_p)) == NULL)
+	{
+		sendto_one(source_p, form_str(ERR_USERNOTINCHANNEL),
+				me.name, parv[0], parv[1], parv[2]);
+		return 0;
+	}
   
     sendto_server(target_p, chptr, NOCAPS, NOCAPS, 
 		  ":%s PART %s :%s",
@@ -284,6 +281,10 @@ static void mo_forcepart(struct Client *client_p, struct Client *source_p,
                        target_p->name, target_p->username,
  	               target_p->host,chptr->chname,
 		       target_p->name);
-  remove_user_from_channel(chptr, target_p);
+		       
+
+  remove_user_from_channel(msptr);
+  
+  return 0;
 }
 

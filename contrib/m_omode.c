@@ -1,9 +1,10 @@
 /*
- *  ircd-ratbox: A slightly useful ircd.
- *  m_omode.c: Sets a user or channel mode without regard to access
- *            This basically sets it as a server..
+ *  ircd-ratbox: an advanced Internet Relay Chat Daemon(ircd).
+ *  m_omode.c: Sets a user or channel mode.
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (C) 1990 Jarkko Oikarinen and University of Oulu, Co Center
+ *  Copyright (C) 1996-2002 Hybrid Development Team
+ *  Copyright (C) 2002 ircd-ratbox development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,9 +26,7 @@
 
 #include "stdinc.h"
 #include "tools.h"
-#include "handlers.h"
 #include "channel.h"
-#include "channel_mode.h"
 #include "client.h"
 #include "hash.h"
 #include "irc_string.h"
@@ -35,104 +34,104 @@
 #include "numeric.h"
 #include "s_user.h"
 #include "s_conf.h"
-#include "s_serv.h"
+#include "s_newconf.h"
 #include "send.h"
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
 #include "packet.h"
 
-static void m_mode(struct Client*, struct Client*, int, char**);
+static int mo_omode(struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
 
-struct Message mode_msgtab = {
-  "OMODE", 0, 0, 2, 0, MFLG_SLOW, 0,
-  {m_unregistered, m_ignore, m_ignore, m_mode}
-};
 #ifndef STATIC_MODULES
 
-void
-_modinit(void)
-{
-  mod_add_cmd(&mode_msgtab);
-}
+struct Message omode_msgtab = {
+	"OMODE", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, mg_ignore, {mo_omode, 2}}
+};
 
-void
-_moddeinit(void)
-{
-  mod_del_cmd(&mode_msgtab);
-}
+mapi_clist_av1 omode_clist[] = { &omode_msgtab, NULL };
 
+DECLARE_MODULE_AV1(omode, NULL, NULL, omode_clist, NULL, NULL, "$Revision$");
 
-const char *_version = "$Revision$";
 #endif
+
 /*
- * m_mode - MODE command handler
+ * m_omode - MODE command handler
  * parv[0] - sender
  * parv[1] - channel
  */
-static void m_mode(struct Client *client_p, struct Client *source_p,
-              int parc, char *parv[])
+static int
+mo_omode(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-  struct Channel* chptr=NULL;
-  static char     modebuf[MODEBUFLEN];
-  static char     parabuf[MODEBUFLEN];
-  dlink_node	*ptr;
-  int n = 2;
-  /* Now, try to find the channel in question */
-  if (!IsChanPrefix(parv[1][0]))
-    {
-      /* if here, it has to be a non-channel name */
-      user_mode(client_p, source_p, parc, parv);
-      return;
-    }
+	struct Channel *chptr = NULL;
+	struct membership *msptr;
+	static char modebuf[MODEBUFLEN];
+	static char parabuf[MODEBUFLEN];
+	int n = 2;
 
-  if (!check_channel_name(parv[1]))
-    { 
-      sendto_one(source_p, form_str(ERR_BADCHANNAME),
-		 me.name, parv[0], (unsigned char *)parv[1]);
-      return;
-    }
-	  
-  chptr = find_channel(parv[1]);
+	if(EmptyString(parv[1]))
+	{
+		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
+			   me.name, parv[0], "MODE");
+		return 0;
+	}
 
-  if (chptr == NULL)
-    {
-      sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
-		 me.name, parv[0], parv[1]);
-      return;
-    }
-  
-  /* Now known the channel exists */
+	/* Now, try to find the channel in question */
+	if(!IsChanPrefix(parv[1][0]))
+	{
+		/* if here, it has to be a non-channel name */
+		user_mode(client_p, source_p, parc, parv);
+		return 0;
+	}
 
+	if(!check_channel_name(parv[1]))
+	{
+		sendto_one(source_p, form_str(ERR_BADCHANNAME),
+			   me.name, parv[0], (unsigned char *) parv[1]);
+		return 0;
+	}
 
-  if (parc < n+1)
-    {
-      channel_modes(chptr, source_p, modebuf, parabuf);
-      sendto_one(source_p, form_str(RPL_CHANNELMODEIS),
-		 me.name, parv[0], parv[1],
-		 modebuf, parabuf);
-      
-      sendto_one(source_p, form_str(RPL_CREATIONTIME),
-		 me.name, parv[0],
-		 parv[1], chptr->channelts);
-    }
-  /* bounce all modes from people we deop on sjoin */
-  else if((ptr = find_user_link(&chptr->deopped, source_p)) == NULL)
-  {
-    /* Finish the flood grace period... */
-    if(MyClient(source_p) && !IsFloodDone(source_p))
-    {
-      if((parc == n) && (parv[n-1][0] == 'b') && (parv[n-1][1] == '\0'))
-        ;
-      else
-        flood_endgrace(source_p);
-    }
+	if((chptr = find_channel(parv[1])) == NULL)
+	{
+		sendto_one_numeric(source_p, ERR_NOSUCHCHANNEL, form_str(ERR_NOSUCHCHANNEL), parv[1]);
+		return 0;
+	}
 
-    set_channel_mode(client_p, source_p->servptr, chptr, parc - n, parv + n, 
-                     chptr->chname);
-  }
+	sendto_wallops_flags(UMODE_WALLOP, &me, 
+			     "OMODE called for [%s] by %s!%s@%s",
+			     parv[1], source_p->name, source_p->username, source_p->host);
+	ilog(L_MAIN, "OMODE called for [%s] by %s!%s@%s",
+	     parv[1], source_p->name, source_p->username, source_p->host);
+
+	if(*chptr->chname != '&')
+		sendto_server(NULL, NULL, NOCAPS, NOCAPS, 
+			      ":%s WALLOPS :OMODE called for [%s] by %s!%s@%s",
+			      me.name, parv[1], source_p->name, source_p->username,
+			      source_p->host);
+
+	/* Now know the channel exists */
+	if(parc < n + 1)
+	{
+		channel_modes(chptr, source_p, modebuf, parabuf);
+		sendto_one(source_p, form_str(RPL_CHANNELMODEIS),
+			   me.name, parv[0], parv[1], modebuf, parabuf);
+
+		sendto_one(source_p, form_str(RPL_CREATIONTIME),
+			   me.name, parv[0], parv[1], chptr->channelts);
+	}
+	else if(IsServer(source_p))
+	{
+		set_channel_mode(client_p, source_p, chptr, NULL,
+				 parc - n, parv + n, chptr->chname);
+	}
+	else
+	{
+		msptr = find_channel_membership(chptr, source_p);
+
+		set_channel_mode(client_p, source_p->servptr, chptr, msptr, 
+				 parc - n, parv + n, chptr->chname);
+	}
+	
+	return 0;
 }
-
-
-
-

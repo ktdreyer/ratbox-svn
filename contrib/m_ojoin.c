@@ -1,5 +1,6 @@
 /*   contrib/m_ojoin.c
  *   Copyright (C) 2002 Hybrid Development Team
+ *   Copyright (C) 2004 ircd-ratbox Development Team
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -20,13 +21,13 @@
 
 #include "stdinc.h"
 #include "tools.h"
-#include "handlers.h"
 #include "channel.h"
 #include "client.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "s_log.h"
 #include "s_serv.h"
+#include "s_newconf.h"
 #include "send.h"
 #include "whowas.h"
 #include "irc_string.h"
@@ -34,71 +35,61 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
-#include "channel_mode.h"
 
-static void mo_ojoin(struct Client *client_p, struct Client *source_p,
-                         int parc, char *parv[]);
+
+static int mo_ojoin(struct Client *client_p, struct Client *source_p,
+                         int parc, const char *parv[]);
+
 
 struct Message ojoin_msgtab = {
-  "OJOIN", 0, 0, 2, 0, MFLG_SLOW, 0,
-  {m_unregistered, m_not_oper, m_ignore, mo_ojoin}
+	"OJOIN", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, mg_ignore, {mo_ojoin, 2}}
 };
 
-void
-_modinit(void)
-{
-  mod_add_cmd(&ojoin_msgtab);
-}
-
-void
-_moddeinit(void)
-{
-  mod_del_cmd(&ojoin_msgtab);
-}
-
-char *_version = "$Revision$";
+mapi_clist_av1 ojoin_clist[] = { &ojoin_msgtab, NULL };
+DECLARE_MODULE_AV1(ojoin, NULL, NULL, ojoin_clist, NULL, NULL, "$Revision$");
 
 /*
 ** mo_ojoin
 **      parv[0] = sender prefix
 **      parv[1] = channel
 */
-static void mo_ojoin(struct Client *client_p, struct Client *source_p,
-                        int parc, char *parv[])
+static int
+mo_ojoin(struct Client *client_p, struct Client *source_p,
+                        int parc, const char *parv[])
 {
   struct Channel *chptr;
   int move_me = 0;
 
   /* admins only */
-  if (!IsOperAdmin(source_p))
-    {
-      sendto_one(source_p, ":%s NOTICE %s :You have no A flag", me.name, parv[0]);
-      return;
-    }
+  if(!IsOperAdmin(source_p))
+  {
+    sendto_one(source_p, form_str(ERR_NOPRIVS),
+			   me.name, source_p->name, "ojoin");
+		return 0;
+  }
 
   /* XXX - we might not have CBURSTed this channel if we are a lazylink
    * yet. */
+   
   if (*parv[1] == '@' || *parv[1] == '%' || *parv[1] == '+')
     {
       parv[1]++;
       move_me = 1;
     }
 
-  chptr= find_channel(parv[1]);
-
-
-  if( chptr == NULL )
+  if((chptr = find_channel(parv[1])) == NULL )
     {
-      sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
-		 me.name, parv[0], parv[1]);
-      return;
+      sendto_one_numeric(source_p, ERR_NOSUCHCHANNEL,
+				form_str(ERR_NOSUCHCHANNEL), parv[1]);
+      return 0;
     }
-
+  
   if(IsMember(source_p, chptr))
     {
       sendto_one(source_p, ":%s NOTICE %s :Please part %s before using OJOIN",
                  me.name, source_p->name, parv[1]);
-      return;
+      return 0;
     }
 
   if (move_me == 1)
@@ -108,7 +99,7 @@ static void mo_ojoin(struct Client *client_p, struct Client *source_p,
     {
        add_user_to_channel(chptr, source_p, CHFL_CHANOP);
        sendto_server(client_p, chptr, NOCAPS, NOCAPS,  
-                 ":%s SJOIN %lu %s + :@%s", me.name, chptr->channelts,
+                 ":%s SJOIN %lu %s + :@%s", me.name, (unsigned long) chptr->channelts,
                  chptr->chname, source_p->name);
        sendto_channel_local(ALL_MEMBERS, chptr, ":%s!%s@%s JOIN %s",
                        source_p->name,
@@ -123,7 +114,7 @@ static void mo_ojoin(struct Client *client_p, struct Client *source_p,
     {
        add_user_to_channel(chptr, source_p, CHFL_VOICE);
        sendto_server(client_p, chptr, NOCAPS, NOCAPS,  
-                 ":%s SJOIN %lu %s + :+%s", me.name, chptr->channelts,
+                 ":%s SJOIN %lu %s + :+%s", me.name, (unsigned long) chptr->channelts,
                  chptr->chname, source_p->name);
        sendto_channel_local(ALL_MEMBERS, chptr, ":%s!%s@%s JOIN %s",
                        source_p->name,
@@ -138,7 +129,7 @@ static void mo_ojoin(struct Client *client_p, struct Client *source_p,
        add_user_to_channel(chptr, source_p, CHFL_PEON);
        sendto_server(client_p, chptr, NOCAPS, NOCAPS,  
                        ":%s SJOIN %lu %s + :%s",
-                       me.name, chptr->channelts,
+                       me.name, (unsigned long) chptr->channelts,
 		       chptr->chname, source_p->name);
        sendto_channel_local(ALL_MEMBERS, chptr, ":%s!%s@%s JOIN %s",
                        source_p->name,
@@ -158,6 +149,8 @@ static void mo_ojoin(struct Client *client_p, struct Client *source_p,
   }
 
   source_p->localClient->last_join_time = CurrentTime;
-  channel_member_names(source_p, chptr, chptr->chname, 1);
+  channel_member_names(chptr, source_p, 1);
+  
+  return 0;
 }
 

@@ -11,14 +11,12 @@
 
 /* List of ircd includes from ../include/ */
 #include "stdinc.h"
-#include "handlers.h"
 #include "client.h"
 #include "common.h"     /* FALSE bleah */
 #include "ircd.h"
 #include "irc_string.h"
 #include "numeric.h"
-#include "fdlist.h"
-#include "s_bsd.h"
+#include "s_newconf.h"
 #include "s_conf.h"
 #include "s_log.h"
 #include "s_serv.h"
@@ -31,36 +29,28 @@
 
 extern char *crypt();
 
-static void m_mkpasswd(struct Client *client_p, struct Client *source_p,
-                    int parc, char *parv[]);
-static void mo_mkpasswd(struct Client *client_p, struct Client *source_p,
-                    int parc, char *parv[]);
+static int m_mkpasswd(struct Client *client_p, struct Client *source_p,
+                    int parc, const char *parv[]);
+static int mo_mkpasswd(struct Client *client_p, struct Client *source_p,
+                    int parc, const char *parv[]);
 static char *make_salt(void);
 static char *make_md5_salt(void);
 
 static char saltChars[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789./";
 
-struct Message test_msgtab = {
-  "MKPASSWD", 0, 0, 1, 2, MFLG_SLOW, 0,
-  {m_unregistered, m_mkpasswd, m_ignore, mo_mkpasswd}
+
+struct Message mkpasswd_msgtab = {
+	"MKPASSWD", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, {m_mkpasswd, 2}, mg_ignore, mg_ignore, mg_ignore, {mo_mkpasswd, 2}}
 };
 
-#ifndef STATIC_MODULES
-void _modinit(void)
-{
-  mod_add_cmd(&test_msgtab);
-}
+mapi_clist_av1 mkpasswd_clist[] = { &mkpasswd_msgtab, NULL };
+DECLARE_MODULE_AV1(mkpasswd, NULL, NULL, mkpasswd_clist, NULL, NULL, "$Revision$");
 
-void _moddeinit(void)
-{
-  mod_del_cmd(&test_msgtab);
-}
 
-const char *_version = "$Revision$";
-#endif
-
-static void m_mkpasswd(struct Client *client_p, struct Client *source_p,
-                   int parc, char *parv[])
+static int
+m_mkpasswd(struct Client *client_p, struct Client *source_p,
+                   int parc, const char *parv[])
 {
   static time_t last_used = 0;
   int is_md5 = 0;
@@ -69,7 +59,7 @@ static void m_mkpasswd(struct Client *client_p, struct Client *source_p,
     {
       /* safe enough to give this on a local connect only */
       sendto_one(source_p,form_str(RPL_LOAD2HI),me.name,parv[0]);
-      return;
+      return 0;
     }
   else
     {
@@ -92,7 +82,7 @@ static void m_mkpasswd(struct Client *client_p, struct Client *source_p,
     else
     {
       sendto_one(source_p, ":%s NOTICE %s :MKPASSWD syntax error:  MKPASSWD pass [DES|MD5]", me.name, parv[0]);
-      return;
+      return 0;
     }
   }
 
@@ -103,6 +93,8 @@ static void m_mkpasswd(struct Client *client_p, struct Client *source_p,
     sendto_one(source_p, ":%s NOTICE %s :Encryption for [%s]:  %s",
                me.name, parv[0], parv[1], crypt(parv[1],
                is_md5 ? make_md5_salt() : make_salt()));
+   
+  return 0;
 }
 
 /*
@@ -110,8 +102,9 @@ static void m_mkpasswd(struct Client *client_p, struct Client *source_p,
 **      parv[0] = sender prefix
 **      parv[1] = parameter
 */
-static void mo_mkpasswd(struct Client *client_p, struct Client *source_p,
-                   int parc, char *parv[])
+static int
+mo_mkpasswd(struct Client *client_p, struct Client *source_p,
+                   int parc, const char *parv[])
 {		 
   int is_md5 = 0;
 
@@ -131,7 +124,7 @@ static void mo_mkpasswd(struct Client *client_p, struct Client *source_p,
     else
     {
       sendto_one(source_p, ":%s NOTICE %s :MKPASSWD syntax error:  MKPASSWD pass [DES|MD5]", me.name, parv[0]);
-      return;
+      return 0;
     }
   }
 
@@ -142,6 +135,8 @@ static void mo_mkpasswd(struct Client *client_p, struct Client *source_p,
     sendto_one(source_p, ":%s NOTICE %s :Encryption for [%s]:  %s",
                me.name, parv[0], parv[1], crypt(parv[1],
                is_md5 ? make_md5_salt() : make_salt()));
+               
+  return 0;
 }
 
 static char *make_salt(void)

@@ -33,17 +33,19 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
+#include "s_newconf.h"
 
-static int mo_opme(struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
+static int mo_opme(struct Client *client_p, struct Client *source_p, 
+					int parc, const char *parv[]);
 
 struct Message opme_msgtab = {
 	"OPME", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, mg_ignore, {mo_opme, 1}}
+	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, mg_ignore, {mo_opme, 2}}
 };
 
 mapi_clist_av1 opme_clist[] = { &opme_msgtab, NULL };
-
 DECLARE_MODULE_AV1(opme, NULL, NULL, opme_clist, NULL, NULL, "$Revision$");
+
 
 /*
 ** mo_opme
@@ -57,24 +59,18 @@ mo_opme(struct Client *client_p, struct Client *source_p, int parc, const char *
 	struct membership *msptr;
 	dlink_node *ptr;
   
-	//is this even working?
-	sendto_one(source_p, ":%s NOTICE %s :blah", 
-			   me.name, parv[0]);
-			   
 	/* admins only */
-	if (!IsAdmin(source_p))
-	{
-		sendto_one(source_p, ":%s NOTICE %s :You have no A flag", 
-			   me.name, parv[0]);
+  if(!IsOperAdmin(source_p))
+  {
+    sendto_one(source_p, form_str(ERR_NOPRIVS),
+			   me.name, source_p->name, "opme");
 		return 0;
-	}
+  }
 
-	chptr = find_channel(parv[1]);
-  
-	if(chptr == NULL)
+	if((chptr = find_channel(parv[1])) == NULL)
 	{
-		sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
-			   me.name, parv[0], parv[1]);
+		sendto_one_numeric(source_p, ERR_NOSUCHCHANNEL,
+				   form_str(ERR_NOSUCHCHANNEL), parv[1]);
 		return 0;
 	}
 

@@ -6,6 +6,7 @@
  *             somebody will likely need it.
  *
  *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (C) 2004 ircd-ratbox Development Team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,55 +27,46 @@
  */
 
 #include "stdinc.h"
-#include "sprintf_irc.h"
 #include "tools.h"
-#include "handlers.h"
 #include "channel.h"
-#include "channel_mode.h"
 #include "client.h"
-#include "hash.h"
-#include "irc_string.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "s_conf.h"
+#include "s_log.h"
 #include "s_serv.h"
 #include "send.h"
+#include "whowas.h"
+#include "irc_string.h"
+#include "hash.h"
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
-#include "newconf.h"
+#include "s_newconf.h"
+#include "sprintf_irc.h"
 
 #ifndef OPER_SPY
 #define OPER_SPY 0x000400
 #define IsOperSpy(x) ((x)->flags2 & OPER_SPY)
 #endif
 
-static void conf_set_oper_spy(void *);
-static void mo_olist(struct Client*, struct Client*, int, char**);
+static int mo_olist(struct Client*, struct Client*,
+					int parc, const char *parv[]);
 static int list_all_channels(struct Client *);
-static void list_one_channel(struct Client *,struct Channel *);
 
-struct Message list_msgtab = {
-  "OLIST", 0, 0, 0, 0, MFLG_SLOW, 0,
-  {m_unregistered, m_ignore, m_ignore, mo_olist}
-};
+
 #ifndef STATIC_MODULES
 
-void
-_modinit(void)
-{
-  mod_add_cmd(&list_msgtab);
-  add_conf_item("operator", "oper_spy", CF_YESNO, conf_set_oper_spy);
-}
+struct Message olist_msgtab = {
+	"OLIST", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, mg_ignore, {mo_olist, 1}}
+};
 
-void
-_moddeinit(void)
-{
-  mod_del_cmd(&list_msgtab);
-  remove_conf_item("operator", "oper_spy");
-}
-const char *_version = "$Revision$";
+mapi_clist_av1 olist_clist[] = { &olist_msgtab, NULL };
+
+DECLARE_MODULE_AV1(okick, NULL, NULL, olist_clist, NULL, NULL, "$Revision$");
+
 #endif
+
 static int list_all_channels(struct Client *source_p);
 static int list_named_channel(struct Client *source_p,char *name);
 
@@ -83,16 +75,17 @@ static int list_named_channel(struct Client *source_p,char *name);
 **      parv[0] = sender prefix
 **      parv[1] = channel
 */
-static void mo_olist(struct Client *client_p,
+static int
+mo_olist(struct Client *client_p,
                    struct Client *source_p,
                    int parc,
-                   char *parv[])
+                   const char *parv[])
 {
   if(!IsOperSpy(source_p))
   {
-    sendto_one(source_p, ":%s NOTICE %s :You need oper_spy = yes;",
+    sendto_one(source_p, ":%s NOTICE %s :You need oper_spy",
                me.name, source_p->name);
-    return;
+    return 0;
   }
 
   /* If no arg, do all channels *whee*, else just one channel */
@@ -102,8 +95,9 @@ static void mo_olist(struct Client *client_p,
     }
   else
     {
-      list_named_channel(source_p,parv[1]);
+      list_named_channel(source_p,LOCAL_COPY(parv[1]));
     }
+    return 0;
 }
 
 
@@ -120,10 +114,14 @@ static int list_all_channels(struct Client *source_p)
   sendto_one(source_p, form_str(RPL_LISTSTART), me.name, source_p->name);
 
   DLINK_FOREACH(ptr, global_channel_list.head)
-    {
-      chptr = (struct Channel *)ptr->data;
-      list_one_channel(source_p,chptr);
-    }
+  {
+	   chptr = (struct Channel *)ptr->data;
+			
+	   sendto_one(source_p, form_str(RPL_LIST), 
+	   me.name, source_p->name, chptr->chname, 
+	   dlink_list_length(&chptr->members), 
+	   chptr->topic == NULL ? "" : chptr->topic);
+  }
 
   sendto_one(source_p, form_str(RPL_LISTEND), me.name, source_p->name);
   return 0;
@@ -148,16 +146,14 @@ static int list_named_channel(struct Client *source_p,char *name)
       
   if(*name == '\0')
     {
-      sendto_one(source_p, form_str(ERR_NOSUCHNICK),me.name, source_p->name, name);
+      sendto_one_numeric(source_p, ERR_NOSUCHCHANNEL, form_str(ERR_NOSUCHCHANNEL), name);
       sendto_one(source_p, form_str(RPL_LISTEND), me.name, source_p->name);
       return 0;
     }
 
-  chptr = find_channel(name);
-
-  if (chptr == NULL)
+  if ((chptr = find_channel(name)) == NULL)
     {
-      sendto_one(source_p, form_str(ERR_NOSUCHNICK),me.name, source_p->name, name);
+      sendto_one_numeric(source_p, ERR_NOSUCHCHANNEL, form_str(ERR_NOSUCHCHANNEL), name);
       sendto_one(source_p, form_str(RPL_LISTEND), me.name, source_p->name);
       return 0;
     }
@@ -165,39 +161,8 @@ static int list_named_channel(struct Client *source_p,char *name)
   ircsprintf(id_and_topic, "%s", chptr->topic == NULL ? "" : chptr->topic);
 
   sendto_one(source_p, form_str(RPL_LIST), me.name, source_p->name,
-             chptr->chname, chptr->users, id_and_topic);
+             chptr->chname, chptr->members, id_and_topic);
       
   sendto_one(source_p, form_str(RPL_LISTEND), me.name, source_p->name);
   return 0;
-}
-
-
-/*
- * list_one_channel
- *
- * inputs       - client pointer to return result to
- *              - pointer to channel to list
- * ouput	- none
- * side effects -
- */
-static void list_one_channel(struct Client *source_p, struct Channel *chptr)
-{
-  static char	  modebuf[MODEBUFLEN];
-  static char	  parabuf[MODEBUFLEN];
-  static char	  buf[MODEBUFLEN*2+TOPICLEN];  
-  channel_modes(chptr, source_p, modebuf, parabuf);  
-  ircsprintf(buf, "%s %s %s", modebuf, parabuf, chptr->topic == NULL ? "" : chptr->topic);
-  sendto_one(source_p, form_str(RPL_LIST), me.name, source_p->name,
-             chptr->chname, chptr->users, buf );
-}
-
-void
-conf_set_oper_spy(void *data)
-{
-  int yesno = *(int*) data;
-
-  if(yesno)
-    yy_achead->port |= OPER_SPY;
-  else
-    yy_achead->port &= ~OPER_SPY;
 }
