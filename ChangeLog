@@ -1,3 +1,17 @@
+leeh        2002/11/04 00:53:12 UTC	(20021104_0)
+
+  Modified files:
+    modules              m_join.c 
+    modules/core         m_part.c 
+  Log:
+  - fix joins/parts to local channels not to be propagated
+  
+  Revision  Changes    Path
+  1.63      +19 -11    ircd-ratbox/modules/core/m_part.c
+  1.105     +20 -17    ircd-ratbox/modules/m_join.c
+
+
+
 leeh        2002/10/31 20:19:06 UTC	(20021031_2)
 
   Modified files:
