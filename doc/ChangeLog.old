@@ -1,3 +1,7 @@
+*** 20010605_1 by kreator
+- add setup_corefile() that will rlimit corefilesize to system max
+
+
 *** 20010604_9 by db
 - =I= Missed a log to ilog in m_restart *sigh*
 
