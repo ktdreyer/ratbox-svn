@@ -1,3 +1,15 @@
+*** 20001029_1 by adrian
+
+
+Kill the flush_*() routines in send.c, since they add an extra level
+of complexity and hackiness to where the code *should* be tidy (and
+well, I'm going to tidy).
+
+The closing-ircd-flush will be fixed once close handlers are implemented.
+They will be soon.
+
+
+
 *** 20001028_8 by adrian
 
 
