@@ -175,17 +175,18 @@ int     m_message(int p_or_n,
   if (!IsPerson(sptr))
     return 0;
 
-  /* privmsg gives different errors, so this still needs to be checked */
   if (parc < 2 || *parv[1] == '\0')
     {
-      sendto_one(sptr, form_str(ERR_NORECIPIENT), me.name, sptr->name,
-		 command );
+      if(p_or_n != NOTICE)
+	sendto_one(sptr, form_str(ERR_NORECIPIENT), me.name, sptr->name,
+		   command );
       return -1;
     }
 
   if (parc < 3 || *parv[2] == '\0')
     {
-      sendto_one(sptr, form_str(ERR_NOTEXTTOSEND), me.name, sptr->name);
+      if(p_or_n != NOTICE)
+	sendto_one(sptr, form_str(ERR_NOTEXTTOSEND), me.name, sptr->name);
       return -1;
     }
 
@@ -277,8 +278,9 @@ int build_target_list(int p_or_n,
 	    }
 	  else
 	    {
-	      sendto_one(sptr, form_str(ERR_NOSUCHNICK), me.name,
-			 sptr->name, nick );
+	      if(p_or_n != NOTICE)
+		sendto_one(sptr, form_str(ERR_NOSUCHNICK), me.name,
+			   sptr->name, nick );
 	      continue;
 	    }
 	}
@@ -329,8 +331,9 @@ int build_target_list(int p_or_n,
 	    }
 	  else
 	    {
-	      sendto_one(sptr, form_str(ERR_NOSUCHNICK), me.name,
-			 sptr->name, nick );
+	      if(p_or_n != NOTICE)
+		sendto_one(sptr, form_str(ERR_NOSUCHNICK), me.name,
+			   sptr->name, nick );
 	      continue;
 	    }
 	}
@@ -359,8 +362,9 @@ int build_target_list(int p_or_n,
 	}
       else
 	{
-	  sendto_one(sptr, form_str(ERR_NOSUCHNICK), me.name,
-		     sptr->name, nick );
+	  if(p_or_n != NOTICE)
+	    sendto_one(sptr, form_str(ERR_NOSUCHNICK), me.name,
+		       sptr->name, nick );
 	  continue;
 	}
 
@@ -436,8 +440,11 @@ void msg_channel( int p_or_n, char *command,
 			  ":%s %s %s :%s",
 			  sptr->name, command, channel_name, text);
   else
-    sendto_one(sptr, form_str(ERR_CANNOTSENDTOCHAN),
-	       me.name, sptr->name, channel_name);
+    {
+      if(p_or_n != NOTICE)
+	sendto_one(sptr, form_str(ERR_CANNOTSENDTOCHAN),
+		   me.name, sptr->name, channel_name);
+    }
 }
 
 /*
@@ -492,8 +499,11 @@ void msg_channel_flags( int p_or_n, char *command,
 			command,
 			text);
   else
-    sendto_one(sptr, form_str(ERR_CANNOTSENDTOCHAN),
-	       me.name, sptr->name, channel_name);
+    {
+      if(p_or_n != NOTICE)
+	sendto_one(sptr, form_str(ERR_CANNOTSENDTOCHAN),
+		   me.name, sptr->name, channel_name);
+    }
 }
 
 /*
