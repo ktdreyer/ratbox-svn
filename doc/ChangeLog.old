@@ -1,3 +1,8 @@
+*** 20001208_15 by db
+- sped up local op code...
+
+
+
 *** 20001208_14 by db
 - sped up m_sjoin.c somewhat... also fixed a bug where the code
   would relink the same vchan over and over again to the root. oops.
