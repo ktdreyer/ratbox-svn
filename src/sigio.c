@@ -143,7 +143,7 @@ poll_update_pollfds(int fd, short event, PF * handler)
  * Output: None
  * Side Effect: Sets the FD up for SIGIO
  */
-void
+static void
 setup_sigio_fd(int fd)
 {
 	int flags;
