@@ -1,3 +1,7 @@
+*** 20010121_7 by spookey
+ - rehash dns on full rehash
+
+
 *** 20010121_6 by db
 - removed some unused definitions notably NONL was not used due to 
   adrians new line parse code.
