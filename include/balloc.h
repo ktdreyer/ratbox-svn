@@ -32,6 +32,22 @@
 #include "memory.h"
 #include "ircd_defs.h"
 
+#define CACHEFILE_HEAP_SIZE	32
+#define CACHELINE_HEAP_SIZE	64
+
+
+#ifdef NOBALLOC 
+  	 
+typedef struct BlockHeap BlockHeap; 	 
+#define initBlockHeap() 	 
+#define BlockHeapGarbageCollect(x) 	 
+#define BlockHeapCreate(es, epb) ((BlockHeap*)(es)) 	 
+#define BlockHeapDestroy(x) 	 
+#define BlockHeapAlloc(x) MyMalloc((int)x) 	 
+#define BlockHeapFree(x,y) MyFree(y) 	 
+ 
+#else
+
 #define DEBUG_BALLOC 1
 
 #ifdef DEBUG_BALLOC
@@ -82,7 +98,10 @@ extern int BlockHeapDestroy(BlockHeap * bh);
 extern void initBlockHeap(void);
 extern void BlockHeapUsage(BlockHeap * bh, size_t * bused, size_t * bfree, size_t * bmemusage);
 
-#define CACHEFILE_HEAP_SIZE	32
-#define CACHELINE_HEAP_SIZE	64
+
+
+#endif /* NOBALLOC */
+
+
 
 #endif /* INCLUDED_blalloc_h */

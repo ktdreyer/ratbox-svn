@@ -61,11 +61,12 @@
 
 #define WE_ARE_MEMORY_C
 #include "setup.h"
+#include "balloc.h"
+#ifndef NOBALLOC
 
 #include "ircd_defs.h"		/* DEBUG_BLOCK_ALLOCATOR */
 #include "ircd.h"
 #include "memory.h"
-#include "balloc.h"
 #include "irc_string.h"
 #include "tools.h"
 #include "s_log.h"
@@ -646,3 +647,6 @@ BlockHeapUsage(BlockHeap * bh, size_t * bused, size_t * bfree, size_t * bmemusag
 	if(bmemusage != NULL)
 		*bmemusage = memusage;
 }
+
+#endif /* NOBALLOC */
+
