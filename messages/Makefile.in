@@ -4,10 +4,20 @@ RM=	@RM@
 default: all
 
 SRCS = \
-  custom.po \
-  custom_ejb.po
+  custom.po
 
 OBJS = ${SRCS:.po=.mo}
+
+prefix          = @prefix@
+exec_prefix     = @exec_prefix@
+exec_suffix     = @exec_suffix@
+bindir          = @bindir@
+libexecdir      = @libexecdir@
+sysconfdir      = @sysconfdir@
+localstatedir   = @localstatedir@
+messagedir       = @prefix@/messages
+
+
 all: ${OBJS}
 build: all
 
@@ -19,8 +29,28 @@ build: all
 
 .PHONY: install depend clean distclean
 
-install: build
-	@echo "Please do a make install from the top level directory"
+install-mkdirs:
+	-@if test ! -d $(messagedir); then \
+		echo "mkdir $(messagedir)"; \
+		mkdir $(messagedir); \
+	fi; \
+	for i in ./*.mo; do \
+		LNAME=`echo $$i | sed 's/^\.\///' | sed 's/\.mo$$//'`; \
+		if test ! -d $(messagedir)/$${LNAME}/LC_MESSAGES/; then \
+			echo "mkdir $(messagedir)/$${LNAME}/LC_MESSAGES/"; \
+			mkdir -p $(messagedir)/$${LNAME}/LC_MESSAGES/; \
+		fi; \
+	done
+
+install: build install-mkdirs
+	@echo    "Installing message files to $(messagedir)..."; \
+	echo -n "   "; \
+	for i in ./*.mo; do \
+		LNAME=`echo $$i | sed 's/^\.\///' | sed 's/\.mo$$//'`; \
+		cp $$i "$(messagedir)/$${LNAME}/LC_MESSAGES/ircd-hybrid.mo"; \
+		echo -n "$${LNAME} "; \
+	done; \
+	echo
 
 depend:
 
