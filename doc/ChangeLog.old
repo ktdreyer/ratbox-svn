@@ -1,3 +1,7 @@
+*** 20010102_30 by a1kmm
+Fixed a core causing bug in fdlist code.
+
+
 *** 20010102_29 by davidt
 Fix kill on nickchange with lazylinks
 
