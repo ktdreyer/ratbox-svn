@@ -1,3 +1,15 @@
+leeh        2002/09/21 22:31:37 UTC	(20020921_3)
+
+  Modified files:
+    modules              m_ison.c 
+  Log:
+  - allow ison for servers if opered or not serverhide
+  
+  Revision  Changes    Path
+  1.33      +5 -3      ircd-ratbox/modules/m_ison.c
+
+
+
 androsyn    2002/09/21 22:13:55 UTC	(20020921_2)
 
   Modified files:
