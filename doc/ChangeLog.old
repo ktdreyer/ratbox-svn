@@ -1,3 +1,15 @@
+androsyn    2002/05/17 12:08:11 EDT	(20020517_1)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  Removed a few of now redudant mem_frob()'s
+  
+  Revision  Changes    Path
+  7.258     +0 -6      ircd-hybrid-7/src/client.c
+
+
+
 androsyn    2002/05/17 12:07:14 EDT	(20020517_0)
 
   Modified files:
