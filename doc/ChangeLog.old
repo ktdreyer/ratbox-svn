@@ -1,3 +1,15 @@
+androsyn    2002/05/30 20:25:43 EDT	(20020531_4)
+
+  Modified files:
+    src                  adns.c 
+  Log:
+  Added some failure code in the case of non debug compiles
+  
+  Revision  Changes    Path
+  7.42      +11 -5     ircd-hybrid-7/src/adns.c
+
+
+
 androsyn    2002/05/30 20:22:53 EDT	(20020531_3)
 
   Modified files:
