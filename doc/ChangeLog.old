@@ -1,3 +1,9 @@
+*** 20001204_16 by db
+- removed duplicate function from m_kline.c replaced with function
+  already in place but unused in s_conf.c duh. can we say BLOAT?
+
+
+
 *** 20001204_15 by db
 - fixed bug in parse_client_queued to do with opered clients.
   code was nver resetting lcptr->sent_parsed = 0 and actually_read = 0
