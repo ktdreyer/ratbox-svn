@@ -1,3 +1,20 @@
+leeh        2001/12/10 18:21:36 EST	(20011210_12)
+
+  Modified files:
+    modules              m_message.c 
+    src                  send.c 
+  Log:
+  - dont check to->from == from->from in sendto_anywhere, stops clients
+    privmsg'ing themselves
+  - moved the check for a client above @#channel etc
+  - fixed a bogus check, only disallow non-chanops to send to +%@#channel
+  
+  Revision  Changes    Path
+  1.80      +23 -32    ircd-hybrid-7/modules/m_message.c
+  7.166     +4 -0      ircd-hybrid-7/src/send.c
+
+
+
 androsyn    2001/12/10 02:26:01 EST	(20011210_11)
 
   Modified files:
