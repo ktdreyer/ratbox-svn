@@ -1,3 +1,22 @@
+leeh        2002/12/08 21:59:40 UTC	(20021208_6)
+
+  Modified files:
+    modules              Makefile.in m_kline.c m_unkline.c 
+  Added files:
+    modules              m_dline.c m_undline.c m_ungline.c 
+  Log:
+  - split dline/undline/ungline out into their own files.
+  
+  Revision  Changes    Path
+  1.77      +3 -0      ircd-ratbox/modules/Makefile.in
+  1.1       +387 -0    ircd-ratbox/modules/m_dline.c (new)
+  1.137     +1 -258    ircd-ratbox/modules/m_kline.c
+  1.1       +291 -0    ircd-ratbox/modules/m_undline.c (new)
+  1.1       +176 -0    ircd-ratbox/modules/m_ungline.c (new)
+  1.71      +6 -326    ircd-ratbox/modules/m_unkline.c
+
+
+
 leeh        2002/12/08 14:52:06 UTC	(20021208_5)
 
   Modified files:
