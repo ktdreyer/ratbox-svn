@@ -57,6 +57,12 @@ DECLARE_MODULE_AV1(join, NULL, NULL, join_clist, NULL, NULL, "$Revision$");
 static void do_join_0(struct Client *client_p, struct Client *source_p);
 void check_spambot_warning(struct Client *source_p, const char *name);
 
+static void set_final_mode(struct Mode *mode, struct Mode *oldmode);
+static void remove_our_modes(struct Channel *chptr, struct Client *source_p);
+
+static char modebuf[MODEBUFLEN];
+static char parabuf[MODEBUFLEN];
+static char *mbuf;
 
 /*
  * m_join
@@ -236,15 +242,9 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 				     source_p->name,
 				     source_p->username, source_p->host, chptr->chname);
 
-		/* if theyre joining opped (ie, new chan or joining one thats
-		 * persisting) then set timestamp to current, set +nt and
-		 * broadcast the sjoin with its old modes, or +nt.
-		 */
+		/* its a new channel, set +nt and burst. */
 		if(flags & CHFL_CHANOP)
 		{
-			char mbuf[MODEBUFLEN];
-			char pbuf[MODEBUFLEN];
-
 			chptr->channelts = CurrentTime;
 			chptr->mode.mode |= MODE_TOPICLIMIT;
 			chptr->mode.mode |= MODE_NOPRIVMSGS;
@@ -254,35 +254,32 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 
 			if(*chptr->chname == '#')
 			{
-				channel_modes(chptr, source_p, mbuf, pbuf);
-
-				strlcat(mbuf, " ", sizeof(mbuf));
-
-				if(pbuf[0] != '\0')
-					strlcat(mbuf, pbuf, sizeof(mbuf));
-
-				/* note: mbuf here will have a trailing space.  we add one above,
-				 * and channel_modes() will leave a trailing space on pbuf if
-				 * its used --fl
-				 */
-				sendto_server(client_p, chptr, NOCAPS, NOCAPS,
-					      ":%s SJOIN %lu %s %s:@%s",
+				sendto_server(client_p, chptr, CAP_TS6, NOCAPS,
+					      ":%s SJOIN %lu %s +nt :@%s",
+					      me.id, (unsigned long) chptr->channelts,
+					      chptr->chname, source_p->id);
+				sendto_server(client_p, chptr, NOCAPS, CAP_TS6,
+					      ":%s SJOIN %lu %s +nt :@%s",
 					      me.name, (unsigned long) chptr->channelts,
-					      chptr->chname, mbuf, parv[0]);
+					      chptr->chname, source_p->name);
 			}
-
-			/* drop our +beI modes */
-			free_channel_list(&chptr->banlist);
-			free_channel_list(&chptr->exceptlist);
-			free_channel_list(&chptr->invexlist);
-			chptr->num_mask = 0;
 		}
 		else
 		{
-			sendto_server(client_p, chptr, NOCAPS, NOCAPS,
-				      ":%s SJOIN %lu %s + :%s",
+			channel_modes(chptr, source_p, modebuf, parabuf);
+
+			sendto_server(client_p, chptr, CAP_TS6, NOCAPS,
+				      ":%s JOIN %lu %s %s %s",
+				      use_id(source_p), chptr->channelts,
+				      chptr->chname, modebuf,
+				      parabuf[0] == '\0' ? "" : parabuf);
+
+			sendto_server(client_p, chptr, NOCAPS, CAP_TS6,
+				      ":%s SJOIN %lu %s %s %s:%s",
 				      me.name, (unsigned long) chptr->channelts,
-				      chptr->chname, parv[0]);
+				      chptr->chname, modebuf, 
+				      parabuf[0] == '\0' ? "" : parabuf, 
+				      source_p->name);
 		}
 
 		del_invite(chptr, source_p);
@@ -320,30 +317,171 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 static int
 ms_join(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	const char *name;
-	int new_ts;
+	struct Channel *chptr;
+	static struct Mode mode, *oldmode;
+	const char *s;
+	time_t oldts;
+	time_t newts;
+	int isnew;
+	int args = 0;
+	int keep_our_modes = YES;
+	int keep_new_modes = YES;
 
-	if(!(source_p->user))
+	if(!IsClient(source_p))
 		return 0;
 
-	name = parv[1];
-
-	if((name[0] == '0') && (name[1] == '\0'))
+	/* special case for join 0 */
+	if((parv[1][0] == '0') && (parv[1][1] == '\0') && parc == 2)
 	{
 		do_join_0(client_p, source_p);
+		return 0;
 	}
-	else
+
+	if(parc < 4)
+		return 0;
+
+	if(!IsChannelName(parv[2]) || !check_channel_name(parv[2]))
+		return 0;
+
+	/* joins for local channels cant happen. */
+	if(parv[2][0] == '&')
+		return 0;
+
+	mbuf = modebuf;
+	mode.key[0] = '\0';
+	mode.mode = mode.limit = 0;
+
+	s = parv[3];
+	while (*s)
 	{
-		if(parc > 2)
+		switch (*(s++))
 		{
-			new_ts = atoi(parv[2]);
-		}
-		else
-		{
-			s_assert(0);
+		case 'i':
+			mode.mode |= MODE_INVITEONLY;
+			break;
+		case 'n':
+			mode.mode |= MODE_NOPRIVMSGS;
+			break;
+		case 'p':
+			mode.mode |= MODE_PRIVATE;
+			break;
+		case 's':
+			mode.mode |= MODE_SECRET;
+			break;
+		case 'm':
+			mode.mode |= MODE_MODERATED;
+			break;
+		case 't':
+			mode.mode |= MODE_TOPICLIMIT;
+			break;
+		case 'k':
+			/* sent a +k without a key, eek. */
+			if(parc < 5 + args)
+				return 0;
+			strlcpy(mode.key, parv[5 + args], sizeof(mode.key));
+			args++;
+			break;
+		case 'l':
+			/* sent a +l without a limit. */
+			if(parc < 5 + args)
+				return 0;
+			mode.limit = atoi(parv[5 + args]);
+			args++;
+			break;
 		}
 	}
 
+	if((chptr = get_or_create_channel(source_p, parv[2], &isnew)) == NULL)
+		return 0;
+
+	newts = atol(parv[1]);
+	oldts = chptr->channelts;
+	oldmode = &chptr->mode;
+
+#ifdef IGNORE_BOGUS_TS
+	if(newts < 800000000)
+	{
+		sendto_realops_flags(UMODE_DEBUG, L_ALL,
+				     "*** Bogus TS %lu on %s ignored from %s",
+				     (unsigned long) newts, chptr->chname, 
+				     client_p->name);
+		newts = (oldts == 0) ? oldts : 800000000;
+	}
+#else
+	/* making a channel TS0 */
+	if(!isnew && !newts && oldts)
+	{
+		sendto_channel_local(ALL_MEMBERS, chptr,
+				     ":%s NOTICE %s :*** Notice -- TS for %s changed from %lu to 0",
+				     me.name, chptr->chname, chptr->chname, oldts);
+		sendto_realops_flags(UMODE_ALL, L_ALL,
+				     "Server %s changing TS on %s from %lu to 0",
+				     source_p->name, chptr->chname, oldts);
+	}
+#endif
+
+	if(isnew)
+		chptr->channelts = newts;
+	else if(newts == 0 || oldts == 0)
+		chptr->channelts = 0;
+	else if(newts == oldts)
+		;
+	else if(newts < oldts)
+	{
+		keep_our_modes = NO;
+		chptr->channelts = newts;
+	}
+	else
+		keep_new_modes = NO;
+
+	if(!keep_new_modes)
+		mode = *oldmode;
+	else if(keep_our_modes)
+	{
+		mode.mode |= oldmode->mode;
+		if(oldmode->limit > mode.limit)
+			mode.limit = oldmode->limit;
+		if(strcmp(mode.key, oldmode->key) < 0)
+			strcpy(mode.key, oldmode->key);
+	}
+
+	set_final_mode(&mode, oldmode);
+	chptr->mode = mode;
+
+	/* Lost the TS, other side wins, so remove modes on this side */
+	if(!keep_our_modes)
+	{
+		remove_our_modes(chptr, source_p);
+		sendto_channel_local(ALL_MEMBERS, chptr,
+				     ":%s NOTICE %s :*** Notice -- TS for %s changed from %lu to %lu",
+				     me.name, chptr->chname, chptr->chname, oldts, newts);
+	}
+
+	if(*modebuf != '\0')
+		sendto_channel_local(ALL_MEMBERS, chptr, ":%s MODE %s %s %s",
+				     ConfigServerHide.hide_servers ? me.name :
+				      source_p->user->server,
+				     chptr->chname, modebuf, parabuf);
+
+	*modebuf = *parabuf = '\0';
+	channel_modes(chptr, source_p, modebuf, parabuf);
+
+	if(!IsMember(source_p, chptr))
+	{
+		add_user_to_channel(chptr, source_p, CHFL_PEON);
+		sendto_channel_local(ALL_MEMBERS, chptr, ":%s!%s@%s JOIN :%s",
+				     source_p->name, source_p->username,
+				     source_p->host, chptr->chname);
+	}
+
+	sendto_server(client_p, chptr, CAP_TS6, NOCAPS,
+		      ":%s JOIN %lu %s %s %s",
+		      source_p->id, chptr->channelts, chptr->chname,
+		      modebuf, parabuf);
+	sendto_server(client_p, chptr, NOCAPS, CAP_TS6,
+		      ":%s SJOIN %lu %s %s %s:%s",
+		      source_p->user->server, chptr->channelts, chptr->chname,
+		      modebuf, parabuf, source_p->name);
 	return 0;
 }
 
@@ -383,5 +521,194 @@ do_join_0(struct Client *client_p, struct Client *source_p)
 				     source_p->name,
 				     source_p->username, source_p->host, chptr->chname);
 		remove_user_from_channel(msptr);
+	}
+}
+
+struct mode_letter
+{
+	int mode;
+	char letter;
+};
+
+struct mode_letter flags[] = {
+	{MODE_NOPRIVMSGS,	'n'},
+	{MODE_TOPICLIMIT,	't'},
+	{MODE_SECRET,		's'},
+	{MODE_MODERATED,	'm'},
+	{MODE_INVITEONLY,	'i'},
+	{MODE_PRIVATE,		'p'},
+	{0,			0}
+};
+
+static void
+set_final_mode(struct Mode *mode, struct Mode *oldmode)
+{
+	int dir = MODE_QUERY;
+	char *pbuf = parabuf;
+	int len;
+	int i;
+
+	/* ok, first get a list of modes we need to add */
+	for (i = 0; flags[i].letter; i++)
+	{
+		if((mode->mode & flags[i].mode) && !(oldmode->mode & flags[i].mode))
+		{
+			if(dir != MODE_ADD)
+			{
+				*mbuf++ = '+';
+				dir = MODE_ADD;
+			}
+			*mbuf++ = flags[i].letter;
+		}
+	}
+
+	/* now the ones we need to remove. */
+	for (i = 0; flags[i].letter; i++)
+	{
+		if((oldmode->mode & flags[i].mode) && !(mode->mode & flags[i].mode))
+		{
+			if(dir != MODE_DEL)
+			{
+				*mbuf++ = '-';
+				dir = MODE_DEL;
+			}
+			*mbuf++ = flags[i].letter;
+		}
+	}
+
+	if(oldmode->limit && !mode->limit)
+	{
+		if(dir != MODE_DEL)
+		{
+			*mbuf++ = '-';
+			dir = MODE_DEL;
+		}
+		*mbuf++ = 'l';
+	}
+	if(oldmode->key[0] && !mode->key[0])
+	{
+		if(dir != MODE_DEL)
+		{
+			*mbuf++ = '-';
+			dir = MODE_DEL;
+		}
+		*mbuf++ = 'k';
+		len = ircsprintf(pbuf, "%s ", oldmode->key);
+		pbuf += len;
+	}
+	if(mode->limit && oldmode->limit != mode->limit)
+	{
+		if(dir != MODE_ADD)
+		{
+			*mbuf++ = '+';
+			dir = MODE_ADD;
+		}
+		*mbuf++ = 'l';
+		len = ircsprintf(pbuf, "%d ", mode->limit);
+		pbuf += len;
+	}
+	if(mode->key[0] && strcmp(oldmode->key, mode->key))
+	{
+		if(dir != MODE_ADD)
+		{
+			*mbuf++ = '+';
+			dir = MODE_ADD;
+		}
+		*mbuf++ = 'k';
+		len = ircsprintf(pbuf, "%s ", mode->key);
+		pbuf += len;
+	}
+	*mbuf = '\0';
+}
+
+/*
+ * remove_our_modes
+ *
+ * inputs	-
+ * output	- 
+ * side effects	- 
+ */
+static void
+remove_our_modes(struct Channel *chptr, struct Client *source_p)
+{
+	struct membership *msptr;
+	dlink_node *ptr;
+	char lmodebuf[MODEBUFLEN];
+	char *lpara[MAXMODEPARAMS];
+	int count = 0;
+
+	mbuf = lmodebuf;
+	*mbuf++ = '-';
+
+	lpara[0] = lpara[1] = lpara[2] = lpara[3] = NULL;
+
+	DLINK_FOREACH(ptr, chptr->members.head)
+	{
+		msptr = ptr->data;
+
+		if(is_chanop(msptr))
+		{
+			msptr->flags &= ~CHFL_CHANOP;
+			lpara[count++] = msptr->client_p->name;
+			*mbuf++ = 'o';
+
+			/* +ov, might not fit so check. */
+			if(is_voiced(msptr))
+			{
+				if(count >= MAXMODEPARAMS)
+				{
+					*mbuf = '\0';
+					sendto_channel_local(ALL_MEMBERS, chptr,
+							     ":%s MODE %s %s %s %s %s %s",
+							     me.name, chptr->chname,
+							     lmodebuf, lpara[0], lpara[1],
+							     lpara[2], lpara[3]);
+
+					/* preserve the initial '-' */
+					mbuf = lmodebuf;
+					*mbuf++ = '-';
+					count = 0;
+					lpara[0] = lpara[1] = lpara[2] = lpara[3] = NULL;
+				}
+
+				msptr->flags &= ~CHFL_VOICE;
+				lpara[count++] = msptr->client_p->name;
+				*mbuf++ = 'v';
+			}
+		}
+		else if(is_voiced(msptr))
+		{
+			msptr->flags &= ~CHFL_VOICE;
+			lpara[count++] = msptr->client_p->name;
+			*mbuf++ = 'v';
+		}
+		else
+			continue;
+
+		if(count >= MAXMODEPARAMS)
+		{
+			*mbuf = '\0';
+			sendto_channel_local(ALL_MEMBERS, chptr,
+					     ":%s MODE %s %s %s %s %s %s",
+					     me.name, chptr->chname, lmodebuf,
+					     lpara[0], lpara[1], lpara[2], lpara[3]);
+			mbuf = lmodebuf;
+			*mbuf++ = '-';
+			count = 0;
+			lpara[0] = lpara[1] = lpara[2] = lpara[3] = NULL;
+		}
+	}
+
+	if(count != 0)
+	{
+		*mbuf = '\0';
+		sendto_channel_local(ALL_MEMBERS, chptr,
+				     ":%s MODE %s %s %s %s %s %s",
+				     me.name, chptr->chname, lmodebuf,
+				     EmptyString(lpara[0]) ? "" : lpara[0],
+				     EmptyString(lpara[1]) ? "" : lpara[1],
+				     EmptyString(lpara[2]) ? "" : lpara[2],
+				     EmptyString(lpara[3]) ? "" : lpara[3]);
+
 	}
 }

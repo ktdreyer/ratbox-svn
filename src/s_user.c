@@ -566,7 +566,8 @@ introduce_client(struct Client *client_p, struct Client *source_p, struct User *
 		if(IsTS6(server) && has_id(source_p))
 			sendto_one(server, 
 				   ":%s UID %s %d %lu %s %s %s %s %s :%s",
-				   me.id, nick, source_p->hopcount + 1,
+				   source_p->servptr->id, nick, 
+				   source_p->hopcount + 1,
 				   (unsigned long) source_p->tsinfo, ubuf,
 				   source_p->username, source_p->host,
 				   IsIPSpoof(source_p) ? "0" : source_p->sockhost,

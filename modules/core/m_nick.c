@@ -234,7 +234,6 @@ static int
 ms_nick(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Client *target_p;
-	char nick[NICKLEN];
 	time_t newts = 0;
 
 	if(parc < 2 || EmptyString(parv[1]))
@@ -301,7 +300,7 @@ ms_nick(struct Client *client_p, struct Client *source_p, int parc, const char *
 					     parv[5], parv[6], parv[7],
 					     client_p->name);
 			sendto_one(client_p, ":%s KILL %s :%s (Bad user@host)",
-				   me.name, nick, me.name);
+				   me.name, parv[1], me.name);
 		}
 
 		/* check the length of the clients gecos */
@@ -322,27 +321,27 @@ ms_nick(struct Client *client_p, struct Client *source_p, int parc, const char *
 	else
 		newts = atol(parv[2]);
 
-	target_p = find_client(nick);
+	target_p = find_client(parv[1]);
 
 	/* if the nick doesnt exist, allow it and process like normal */
 	if(target_p == NULL)
 	{
-		nick_from_server(client_p, source_p, parc, parv, newts, nick);
+		nick_from_server(client_p, source_p, parc, parv, newts, parv[1]);
 	}
 	else if(IsUnknown(target_p))
 	{
 		exit_client(NULL, target_p, &me, "Overridden");
-		nick_from_server(client_p, source_p, parc, parv, newts, nick);
+		nick_from_server(client_p, source_p, parc, parv, newts, parv[1]);
 	}
 	else if(target_p == source_p)
 	{
 		/* client changing case of nick */
-		if(strcmp(target_p->name, nick))
-			nick_from_server(client_p, source_p, parc, parv, newts, nick);
+		if(strcmp(target_p->name, parv[1]))
+			nick_from_server(client_p, source_p, parc, parv, newts, parv[1]);
 	}
 	/* we've got a collision! */
 	else
-		perform_nick_collides(source_p, client_p, target_p, parc, parv, newts, nick);
+		perform_nick_collides(source_p, client_p, target_p, parc, parv, newts, parv[1]);
 
 	return 0;
 }
@@ -362,7 +361,6 @@ static int
 ms_uid(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Client *target_p;
-	char nick[NICKLEN];
 	time_t newts = 0;
 
 	newts = atol(parv[3]);
@@ -401,24 +399,24 @@ ms_uid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		parv[9] = s;
 	}
 
-	target_p = find_client(nick);
+	target_p = find_client(parv[1]);
 	
 	if(target_p == NULL)
 	{
-		register_client(client_p, source_p, nick, parv[5], parv[6],
+		register_client(client_p, source_p, parv[1], parv[5], parv[6],
 				parv[7], source_p->name, parv[9], parv[8],
 				parv[4], atoi(parv[2]), newts);
 	}
 	else if(IsUnknown(target_p))
 	{
 		exit_client(NULL, target_p, &me, "Overridden");
-		register_client(client_p, source_p, nick, parv[5], parv[6],
+		register_client(client_p, source_p, parv[1], parv[5], parv[6],
 				parv[7], source_p->name, parv[9], parv[8],
 				parv[4], atoi(parv[2]), newts);
 	}
 	/* we've got a collision! */
 	else
-		perform_nick_collides(source_p, client_p, target_p, parc, parv, newts, nick);
+		perform_nick_collides(source_p, client_p, target_p, parc, parv, newts, parv[1]);
 
 	return 0;
 }

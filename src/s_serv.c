@@ -673,14 +673,14 @@ send_capabilities(struct Client *client_p, struct ConfItem *aconf,
 	sendto_one(client_p, "CAPAB :%s", msgbuf);
 }
 
-/* burst_mode_list()
+/* burst_modes_TS5()
  *
  * input	- client to burst to, channel name, list to burst, mode flag
  * output	-
  * side effects - client is sent a list of +b, or +e, or +I modes
  */
 static void
-burst_mode_list(struct Client *client_p, char *chname, dlink_list *list, char flag)
+burst_modes_TS5(struct Client *client_p, char *chname, dlink_list *list, char flag)
 {
 	dlink_node *ptr;
 	struct Ban *banptr;
@@ -727,6 +727,63 @@ burst_mode_list(struct Client *client_p, char *chname, dlink_list *list, char fl
 
 	if(count != 0)
 		sendto_one(client_p, "%s%s %s", buf, mbuf, pbuf);
+}
+
+/* burst_modes_TS6()
+ *
+ * input	- client to burst to, channel name, list to burst, mode flag
+ * output	-
+ * side effects - client is sent a list of +b, +e, or +I modes
+ */
+static void
+burst_modes_TS6(struct Client *client_p, struct Channel *chptr, 
+		dlink_list *list, char flag)
+{
+	dlink_node *ptr;
+	struct Ban *banptr;
+	char *t;
+	int tlen;
+	int mlen;
+	int cur_len;
+
+	cur_len = mlen = ircsprintf(buf, ":%s BMASK %lu %s %c :",
+				    me.id, chptr->channelts,
+				    chptr->chname, flag);
+	t = buf + mlen;
+
+	DLINK_FOREACH(ptr, list->head)
+	{
+		banptr = ptr->data;
+
+		tlen = strlen(banptr->banstr) + 1;
+
+		/* uh oh */
+		if(cur_len + tlen > BUFSIZE - 3)
+		{
+			/* the one we're trying to send doesnt fit at all! */
+			if(cur_len == mlen)
+			{
+				s_assert(0);
+				continue;
+			}
+
+			/* chop off trailing space and send.. */
+			*(t-1) = '\0';
+			sendto_one(client_p, "%s", buf);
+			cur_len = mlen;
+			t = buf + mlen;
+		}
+
+		ircsprintf(t, "%s ", banptr->banstr);
+		t += tlen;
+		cur_len += tlen;
+	}
+
+	/* cant ever exit the loop above without having modified buf,
+	 * chop off trailing space and send.
+	 */
+	*(t-1) = '\0';
+	sendto_one(client_p, "%s", buf);
 }
 
 /*
@@ -833,13 +890,13 @@ burst_TS5(struct Client *client_p)
 		*t = '\0';
 		sendto_one(client_p, "%s", buf);
 
-		burst_mode_list(client_p, chptr->chname, &chptr->banlist, 'b');
+		burst_modes_TS5(client_p, chptr->chname, &chptr->banlist, 'b');
 
 		if(IsCapable(client_p, CAP_EX))
-			burst_mode_list(client_p, chptr->chname, &chptr->exceptlist, 'e');
+			burst_modes_TS5(client_p, chptr->chname, &chptr->exceptlist, 'e');
 
 		if(IsCapable(client_p, CAP_IE))
-			burst_mode_list(client_p, chptr->chname, &chptr->invexlist, 'I');
+			burst_modes_TS5(client_p, chptr->chname, &chptr->invexlist, 'I');
 	}
 }
 
@@ -932,7 +989,7 @@ burst_TS6(struct Client *client_p)
 		{
 			msptr = uptr->data;
 
-			tlen = strlen(msptr->client_p->name) + 1;
+			tlen = strlen(use_id(msptr->client_p)) + 1;
 			if(is_chanop(msptr))
 				tlen++;
 			if(is_voiced(msptr))
@@ -940,8 +997,7 @@ burst_TS6(struct Client *client_p)
 
 			if(cur_len + tlen >= BUFSIZE - 3)
 			{
-				t--;
-				*t = '\0';
+				*(t-1) = '\0';
 				sendto_one(client_p, "%s", buf);
 				cur_len = mlen;
 				t = buf + mlen;
@@ -955,17 +1011,19 @@ burst_TS6(struct Client *client_p)
 		}
 
 		/* remove trailing space */
-		t--;
-		*t = '\0';
+		*(t-1) = '\0';
 		sendto_one(client_p, "%s", buf);
 
-		burst_mode_list(client_p, chptr->chname, &chptr->banlist, 'b');
+		if(dlink_list_length(&chptr->banlist) > 0)
+			burst_modes_TS6(client_p, chptr, &chptr->banlist, 'b');
 
-		if(IsCapable(client_p, CAP_EX))
-			burst_mode_list(client_p, chptr->chname, &chptr->exceptlist, 'e');
+		if(IsCapable(client_p, CAP_EX) &&
+		   dlink_list_length(&chptr->exceptlist) > 0)
+			burst_modes_TS6(client_p, chptr, &chptr->exceptlist, 'e');
 
-		if(IsCapable(client_p, CAP_IE))
-			burst_mode_list(client_p, chptr->chname, &chptr->invexlist, 'I');
+		if(IsCapable(client_p, CAP_IE) &&
+		   dlink_list_length(&chptr->invexlist) > 0)
+			burst_modes_TS6(client_p, chptr, &chptr->invexlist, 'I');
 	}
 }
 
@@ -978,7 +1036,6 @@ burst_TS6(struct Client *client_p)
  * output       - pointer to static string
  * side effects - build up string representing capabilities of server listed
  */
-
 const char *
 show_capabilities(struct Client *target_p)
 {

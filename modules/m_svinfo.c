@@ -36,6 +36,7 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
+#include "hash.h"
 
 static int ms_svinfo(struct Client *, struct Client *, int, const char **);
 
@@ -116,6 +117,14 @@ ms_svinfo(struct Client *client_p, struct Client *source_p, int parc, const char
 
 	if(DoesTS6(client_p))
 	{
+		/* SVINFO received twice? erk! */
+		if(client_p->id[0] != '\0')
+		{
+			exit_client(NULL, client_p, client_p, 
+				    "SVINFO received twice.");
+			return 0;
+		}
+
 		/* invalid sid? */
 		if(!IsDigit(parv[3][0]) || !IsIdChar(parv[3][1]) ||
 		   !IsIdChar(parv[3][2]) || parv[3][3] != '\0')
@@ -134,7 +143,10 @@ ms_svinfo(struct Client *client_p, struct Client *source_p, int parc, const char
 				    "Invalid SID");
 		}
 		else
+		{
 			strcpy(client_p->id, parv[3]);
+			add_to_id_hash(client_p->id, client_p);
+		}
 	}		
 
 	return 0;
