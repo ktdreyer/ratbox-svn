@@ -1,3 +1,16 @@
+leeh        2002/08/16 19:41:34 EDT	(20020816_12)
+
+  Modified files:
+    modules              m_connect.c m_stats.c 
+  Log:
+  - cleaned up some IP hiding stuff
+  
+  Revision  Changes    Path
+  1.40      +3 -6      ircd-ratbox/modules/m_connect.c
+  1.113     +14 -7     ircd-ratbox/modules/m_stats.c
+
+
+
 leeh        2002/08/16 19:23:30 EDT	(20020816_11)
 
   Modified files:
