@@ -8,6 +8,7 @@
 #include "debug.h"
 #include "s_log.h"
 
+/* Add new entities here */
 debug_tab dtab[] = {
   /* the second field here is always 0, unless you
      want this to be enabled by default.. */
