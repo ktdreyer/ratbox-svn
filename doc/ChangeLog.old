@@ -1,3 +1,7 @@
+*** 20010225_15 by androsyn
+Without libresolv checks..
+
+
 *** 20010225_14 by androsyn
 Removed libresolv/libnsl checks from configure.in
 
