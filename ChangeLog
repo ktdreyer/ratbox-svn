@@ -1,3 +1,31 @@
+leeh        2004/06/16 21:24:30 EDT	(20040617_0)
+
+  Modified files:
+    doc                  example.conf 
+    include              client.h numeric.h s_conf.h 
+    modules              m_stats.c m_testline.c 
+    modules/core         m_mode.c 
+    src                  hostmask.c messages.tab newconf.c 
+                         s_conf.c s_user.c 
+  Log:
+  - remove the 'restricted' flag from auth {};, its simply not useful at all.
+  
+  Revision  Changes    Path
+  7.241     +1 -2      ircd-ratbox/doc/example.conf
+  7.244     +0 -4      ircd-ratbox/include/client.h
+  7.46      +1 -1      ircd-ratbox/include/numeric.h
+  7.277     +0 -2      ircd-ratbox/include/s_conf.h
+  1.109     +1 -13     ircd-ratbox/modules/core/m_mode.c
+  1.218     +1 -2      ircd-ratbox/modules/m_stats.c
+  1.50      +1 -2      ircd-ratbox/modules/m_testline.c
+  7.97      +0 -1      ircd-ratbox/src/hostmask.c
+  7.114     +2 -2      ircd-ratbox/src/messages.tab
+  7.153     +0 -1      ircd-ratbox/src/newconf.c
+  7.467     +0 -5      ircd-ratbox/src/s_conf.c
+  7.322     +0 -5      ircd-ratbox/src/s_user.c
+
+
+
 leeh        2004/06/15 09:58:30 EDT	(20040615_6)
 
   Modified files:
