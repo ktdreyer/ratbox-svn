@@ -243,13 +243,16 @@ match_cidr(const char *s1, const char *s2)
   strcpy(address, s2);
   
   ipmask = strrchr(mask, '@');
-  if(mask == NULL)
+  if(ipmask == NULL)
     return 0;
   
   *ipmask++ = '\0';
   
   ip = strrchr(address, '@');
+  if(ip == NULL)
+    return 0;
   *ip++ = '\0';
+  
   
   len = strrchr(ipmask, '/');
   if(len == NULL)
