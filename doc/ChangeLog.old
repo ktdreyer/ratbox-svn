@@ -1,3 +1,15 @@
+*** 20001209_9 by db
+- rationalized use of serial numbers for unique sending to client
+  this removes yet another array "sentalong" yay.
+  This also makes server_burst use the same serial # idea instead of
+  nickissent byte flag.
+- I note that prefixes really should be sent for local channel JOIN's
+  ooops. sendto_prefix is =fugly= though. lemme think about it.
+  meanwhile, all JOIN's by remote clients look "weird" as they are
+  missing their user@host prefixes...
+
+
+
 *** 20001209_8 by bill
 
 - changed NONWILDCHARS to 2
