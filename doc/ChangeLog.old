@@ -1,3 +1,8 @@
+*** 20010105_5 by db
+- never commit until you have done a compile test. duh.
+
+
+
 *** 20010105_4 by fl_
 - remote connects are giving wallops properly, this should fix it
 
