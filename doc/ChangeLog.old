@@ -1,3 +1,15 @@
+leeh        2001/12/19 11:02:49 EST	(20011219_3)
+
+  Modified files:
+    modules              m_trace.c 
+  Log:
+  - dont show spoofed ips to remote opers
+  
+  Revision  Changes    Path
+  1.39      +4 -4      ircd-hybrid-7/modules/m_trace.c
+
+
+
 a1kmm       2001/12/19 04:59:31 EST	(20011219_2)
 
   Modified files:
