@@ -226,105 +226,149 @@ linebuf_donebuf(buf_head_t * bufhead)
 	}
 }
 
-static inline void
-linebuf_terminate_crlf(buf_head_t * bufhead, buf_line_t * bufline)
-{
-	bufline->buf[bufline->len++] = '\r';
-	bufline->buf[bufline->len++] = '\n';
-	bufline->buf[bufline->len] = '\0';
-	bufhead->len += 2;
-}
-
-
-
-
+/*
+ * linebuf_copy_line
+ *
+ * Okay..this functions comments made absolutely no sense.
+ * 
+ * Basically what we do is this.  Find the first chunk of text
+ * and then scan for a CRLF.  If we didn't find it, but we didn't
+ * overflow our buffer..we wait for some more data.
+ * If we found a CRLF, we replace them with a \0 character.
+ * If we overflowed, we copy the most our buffer can handle, terminate
+ * it with a \0 and return.
+ *
+ * The return value is the amount of data we consumed.  This could
+ * be different than the size of the linebuffer, as when we discard
+ * the overflow, we don't want to process it again.
+ *
+ * This still sucks in my opinion, but it seems to work.
+ *
+ * -Aaron
+ */
 static int
-linebuf_copy_line(buf_head_t * bufhead, buf_line_t * bufline, char *data, int len, int binary)
+linebuf_copy_line(buf_head_t * bufhead, buf_line_t * bufline, char *data, int len)
 {
 	int cpylen = 0;		/* how many bytes we've copied */
 	char *ch = data;	/* Pointer to where we are in the read data */
-	char *bufch = &bufline->buf[bufline->len];
-	/* Start of where to put new data */
+	char *bufch = bufline->buf + bufline->len;
+	int clen = 0;		/* how many bytes we've processed,
+				   and don't ever want to see again.. */
 
 	/* If its full or terminated, ignore it */
-	if((bufline->len == BUF_DATA_SIZE) || (bufline->terminated == 1))
+
+	bufline->raw = 0;
+	s_assert(bufline->len < BUF_DATA_SIZE);
+	if(bufline->terminated == 1)
 		return 0;
 
-	/* Next, lets enter the copy loop */
-	for (;;)
+	clen = cpylen = linebuf_skip_crlf(ch, len);
+	if(clen == -1)
+		return -1;
+
+	/* This is the ~overflow case..This doesn't happen often.. */
+	if(cpylen > (BUF_DATA_SIZE - bufline->len - 1))
 	{
-		/* Are we out of data? */
-		if(len == 0)
+		memcpy(bufch, ch, (BUF_DATA_SIZE - bufline->len - 1));
+		bufline->buf[BUF_DATA_SIZE - 1] = '\0';
+		bufch = bufline->buf + BUF_DATA_SIZE - 2;
+		while (cpylen && (*bufch == '\r' || *bufch == '\n'))
 		{
-			/* Yes, so we mark this buffer as unterminated, and return */
-			bufline->terminated = 0;	/* XXX it should be anyway :) */
-			break;
+			*bufch = '\0';
+			cpylen--;
+			bufch--;
 		}
-
-		/* Are we out of space to PUT this ? */
-		if(bufline->len == BUF_DATA_SIZE)
-		{
-			/*
-			 * ok, we CR/LF/NUL terminate, set overflow, and loop until the
-			 * next CRLF. We then skip that, and return.
-			 */
-			if(!binary)
-			{
-				cpylen += linebuf_skip_crlf(ch, len);
-				linebuf_terminate_crlf(bufhead, bufline);
-			}
-			/* NOTE: We're finishing, so ignore updating len */
-			bufline->terminated = 1;
-			break;
-		}
-
-		/* Is this a CR or LF? */
-		if((*ch == '\r') || (*ch == '\n'))
-		{
-			if(!binary)
-			{
-				/* Skip */
-				cpylen += linebuf_skip_crlf(ch, len);
-				/* Terminate the line */
-				linebuf_terminate_crlf(bufhead, bufline);
-				/* NOTE: We're finishing, so ignore updating len */
-				bufline->terminated = 1;
-			}
-			else
-			{
-				while ((len > 0) && ((*ch == '\r') || (*ch == '\n')))
-				{
-					*bufch = *ch;
-					bufch++;
-					ch++;
-					cpylen++;
-					assert(len > 0);
-					len--;
-					bufline->len++;
-					bufhead->len++;
-				}
-				bufline->terminated = 1;
-			}
-			break;
-		}
-
-		/*
-		 * phew! we can copy a byte. Do it, and update the counters.
-		 * this definitely blows our register sets on most sane archs,
-		 * but hey, someone can recode this later on if they want to.
-		 */
-		*bufch = *ch;
-		bufch++;
-		ch++;
-		cpylen++;
-		assert(len > 0);
-		len--;
-		bufline->len++;
-		bufhead->len++;
+		bufline->terminated = 1;
+		bufline->len = BUF_DATA_SIZE - 1;
+		bufhead->len += BUF_DATA_SIZE - 1;
+		return clen;
 	}
 
+	memcpy(bufch, ch, cpylen);
+	bufch += cpylen;
 	*bufch = '\0';
-	return cpylen;
+	bufch--;
+
+	if(*bufch != '\r' && *bufch != '\n')
+	{
+		/* No linefeed, bail for the next time */
+		bufhead->len += cpylen;
+		bufline->len += cpylen;
+		bufline->terminated = 0;
+		return clen;
+	}
+
+	/* Yank the CRLF off this, replace with a \0 */
+	while (cpylen && (*bufch == '\r' || *bufch == '\n'))
+	{
+		*bufch = '\0';
+		cpylen--;
+		bufch--;
+	}
+
+	bufline->terminated = 1;
+	bufhead->len += cpylen;
+	bufline->len += cpylen;
+	return clen;
+}
+
+/*
+ * linebuf_copy_raw
+ *
+ * Copy as much data as possible directly into a linebuf,
+ * splitting at \r\n, but without altering any data.
+ *
+ */
+static int
+linebuf_copy_raw(buf_head_t * bufhead, buf_line_t * bufline, char *data, int len)
+{
+	int cpylen = 0;		/* how many bytes we've copied */
+	char *ch = data;	/* Pointer to where we are in the read data */
+	char *bufch = bufline->buf + bufline->len;
+	int clen = 0;		/* how many bytes we've processed,
+				   and don't ever want to see again.. */
+
+	/* If its full or terminated, ignore it */
+
+	bufline->raw = 1;
+	s_assert(bufline->len < BUF_DATA_SIZE);
+	if(bufline->terminated == 1)
+		return 0;
+
+	clen = cpylen = linebuf_skip_crlf(ch, len);
+	if(clen == -1)
+		return -1;
+
+	/* This is the overflow case..This doesn't happen often.. */
+	if(cpylen > (BUF_DATA_SIZE - bufline->len - 1))
+	{
+		memcpy(bufch, ch, (BUF_DATA_SIZE - bufline->len - 1));
+		bufline->buf[BUF_DATA_SIZE - 1] = '\0';
+		bufch = bufline->buf + BUF_DATA_SIZE - 2;
+		bufline->terminated = 1;
+		bufline->len = BUF_DATA_SIZE - 1;
+		bufhead->len += BUF_DATA_SIZE - 1;
+		return clen;
+	}
+
+	memcpy(bufch, ch, cpylen);
+	bufch += cpylen;
+	*bufch = '\0';
+	bufch--;
+
+	if(*bufch != '\r' && *bufch != '\n')
+	{
+		/* No linefeed, bail for the next time */
+		bufhead->len += cpylen;
+		bufline->len += cpylen;
+		bufline->terminated = 0;
+		return clen;
+	}
+
+	bufline->terminated = 1;
+	bufhead->len += cpylen;
+	bufline->len += cpylen;
+	return clen;
 }
 
 
@@ -359,7 +403,11 @@ linebuf_parse(buf_head_t * bufhead, char *data, int len, int raw)
 		bufline = bufhead->list.tail->data;
 		s_assert(!bufline->flushing);
 		/* just try, the worst it could do is *reject* us .. */
-		cpylen = linebuf_copy_line(bufhead, bufline, data, len, raw);
+		if(!raw)
+			cpylen = linebuf_copy_line(bufhead, bufline, data, len);
+		else
+			cpylen = linebuf_copy_raw(bufhead, bufline, data, len);
+			
 		if(cpylen == -1)
 			return -1;
 
@@ -381,7 +429,11 @@ linebuf_parse(buf_head_t * bufhead, char *data, int len, int raw)
 		bufline = linebuf_new_line(bufhead);
 
 		/* And parse */
-		cpylen = linebuf_copy_line(bufhead, bufline, data, len, raw);
+		if(!raw)
+			cpylen = linebuf_copy_line(bufhead, bufline, data, len);
+		else
+			cpylen = linebuf_copy_raw(bufhead, bufline, data, len);
+		
 		if(cpylen == -1)
 			return -1;
 
