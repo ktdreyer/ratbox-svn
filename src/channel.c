@@ -1256,7 +1256,7 @@ chm_simple(struct Client *client_p, struct Client *source_p,
            struct Channel *chptr, int parc, int *parn,
            char **parv, int *errors, int alev, int dir, char c, void *d)
 {
-  int chf;
+  int mode_type;
   int i;
 
   if (alev < CHACCESS_CHANOP)
@@ -1270,11 +1270,13 @@ chm_simple(struct Client *client_p, struct Client *source_p,
 
   /* XXX this causes warnings on a 64bit compiler 
    * sizeof(void *) > sizeof(int) */
-  chf = (int)d;
+  mode_type = (int)d;
 
-  if (dir < 0 && !(chptr->mode.mode & chf))
+  /* setting + */
+  if (dir < 0 && !(chptr->mode.mode & mode_type))
     {
-      chptr->mode.mode |= chf;
+      chptr->mode.mode |= mode_type;
+
       for (i = 0; i < mode_count_minus; i++)
         if (mode_changes_minus[i].letter == c)
           {
@@ -1289,13 +1291,15 @@ chm_simple(struct Client *client_p, struct Client *source_p,
       mode_changes_plus[mode_count_plus].mems = ALL_MEMBERS;
       mode_changes_plus[mode_count_plus++].arg = NULL;
     }
-  else if (dir > 0 && (chptr->mode.mode & chf))
+  /* setting - */
+  else if (dir > 0 && (chptr->mode.mode & mode_type))
     {
-      chptr->mode.mode &= ~chf;
+      chptr->mode.mode &= ~mode_type;
+
       for (i = 0; i < mode_count_plus; i++)
         if (mode_changes_plus[i].letter == c)
           {
-            /* + and - make 0, so return... */
+            /* - and + make 0, so return... */
             mode_changes_plus[i].letter = 0;
             return;
           }
@@ -2666,7 +2670,7 @@ set_channel_mode(struct Client *client_p, struct Client *source_p,
   int dir = -1;                 /* '-' => +1, '+' => -1, '=' => 0. Start with '+' */
   int parn = 1;
   int alevel, errors = 0;
-  char *ml = parv[0], c, cc;
+  char *ml = parv[0], c, table_position;
   mask_pos = 0;
   alevel = get_channel_access(source_p, chptr);
   mode_count_plus = 0;
@@ -2687,12 +2691,13 @@ set_channel_mode(struct Client *client_p, struct Client *source_p,
         break;
       default:
         if (c < 'A' || c > 'z')
-          cc = 0;
+          table_position = 0;
         else
-          cc = c - 'A' + 1;
-        ModeTable[(int)cc].func(client_p, source_p, chptr, parc, &parn,
-                                parv, &errors, alevel, dir, c,
-                                ModeTable[(int)cc].d);
+          table_position = c - 'A' + 1;
+        ModeTable[(int)table_position].func(client_p, source_p, chptr,
+                                            parc, &parn,
+                                            parv, &errors, alevel, dir, c,
+                                            ModeTable[(int)table_position].d);
         break;
       }
 
