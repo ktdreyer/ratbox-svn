@@ -283,7 +283,11 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
 
                         for(i = 0; cmd_table[i].cmd[0] != '\0'; i++)
                         {
-                                if(cmd_table[i].operonly && !is_oper(client_p))
+
+                        	if((cmd_table[i].operonly && !is_oper(client_p)) ||
+				   (cmd_table[i].operflags && 
+				    (!client_p->user->oper || 
+				     (client_p->user->oper->flags & cmd_table[i].operflags) == 0)))
                                         continue;
 
                                 strlcat(buf, cmd_table[i].cmd, sizeof(buf));
@@ -343,7 +347,7 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
                               MYNAME, client_p->name, p);
                 return;
         }
-	else if(!strcasecmp(text, "LOGIN"))
+	else if(!strcasecmp(text, "OPERLOGIN"))
 	{
 		struct conf_oper *oper_p;
 		char *crpass;
@@ -390,7 +394,7 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
 		oper_p->refcount++;
 		return;
 	}
-	else if(!strcasecmp(text, "LOGOUT"))
+	else if(!strcasecmp(text, "OPERLOGOUT"))
 	{
 		if(client_p->user->oper == NULL)
 		{
@@ -411,7 +415,10 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
         {
                 if(!strcasecmp(text, cmd_table[i].cmd))
                 {
-                        if(cmd_table[i].operonly && !is_oper(client_p))
+                        if((cmd_table[i].operonly && !is_oper(client_p)) ||
+			   (cmd_table[i].operflags && 
+			    (!client_p->user->oper || 
+			     (client_p->user->oper->flags & cmd_table[i].operflags) == 0)))
                         {
                                 sendto_server(":%s NOTICE %s :No access to %s::%s",
                                               MYNAME, client_p->name,

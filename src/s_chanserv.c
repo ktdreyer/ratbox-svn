@@ -41,6 +41,8 @@ static dlink_list channel_reg_table[MAX_CHANNEL_TABLE];
 
 static void load_channel_db(void);
 
+static int s_chanserv_cregister(struct client *, char *parv[], int parc);
+static int s_chanserv_cdrop(struct client *, char *parv[], int parc);
 static int s_chanserv_register(struct client *, char *parv[], int parc);
 static int s_chanserv_adduser(struct client *, char *parv[], int parc);
 static int s_chanserv_deluser(struct client *, char *parv[], int parc);
@@ -62,6 +64,8 @@ static int s_chanserv_unban(struct client *, char *parv[], int parc);
 
 static struct service_command chanserv_command[] =
 {
+	{ "CREGISTER",	&s_chanserv_cregister,	2, NULL, 1, 0L, 0, 0, CONF_OPER_CS_REGISTER },
+	{ "CDROP",	&s_chanserv_cdrop,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CS_ADMIN },
 	{ "REGISTER",	&s_chanserv_register,	1, NULL, 1, 0L, 1, 0, 0 },
 	{ "ADDUSER",	&s_chanserv_adduser,	3, NULL, 1, 0L, 1, 0, 0 },
 	{ "DELUSER",	&s_chanserv_deluser,	2, NULL, 1, 0L, 1, 0, 0 },
@@ -97,6 +101,18 @@ init_s_chanserv(void)
 
 	chanserv_p = add_service(&chanserv_service);
 	load_channel_db();
+}
+
+static void
+free_channel_reg(struct chan_reg *reg_p)
+{
+	unsigned int hashv = hash_channel(reg_p->name);
+	dlink_delete(&reg_p->node, &channel_reg_table[hashv]);
+
+	my_free(reg_p->name);
+	my_free(reg_p->topic);
+
+	BlockHeapFree(channel_reg_heap, reg_p);
 }
 
 static void
@@ -352,6 +368,84 @@ write_ban_db_entry(struct ban_reg *reg_p, const char *chname)
 }
 
 static int
+s_chanserv_cregister(struct client *client_p, char *parv[], int parc)
+{
+	struct chan_reg *reg_p;
+	struct user_reg *ureg_p;
+	struct member_reg *mreg_p;
+
+	if((reg_p = find_channel_reg(NULL, parv[0])))
+	{
+		service_error(chanserv_p, client_p, "Channel %s is already registered", parv[0]);
+		return 1;
+	}
+
+	if((ureg_p = find_user_reg_nick(client_p, parv[1])) == NULL)
+		return 1;
+
+	reg_p = BlockHeapAlloc(channel_reg_heap);
+	reg_p->name = my_strdup(parv[0]);
+	reg_p->reg_time = reg_p->last_time = CURRENT_TIME;
+
+	add_channel_reg(reg_p);
+
+	mreg_p = make_member_reg(ureg_p, reg_p, client_p->name, 200);
+
+	write_channel_db_entry(reg_p);
+	write_member_db_entry(mreg_p);
+
+	service_error(chanserv_p, client_p, "Channel %s registered to %s",
+			reg_p->name, ureg_p->name);
+
+	return 5;
+}
+
+static int
+s_chanserv_cdrop(struct client *client_p, char *parv[], int parc)
+{
+	struct chan_reg *reg_p;
+	struct member_reg *mreg_p;
+	struct ban_reg *banreg_p;
+	dlink_node *ptr, *next_ptr;
+
+	if((reg_p = find_channel_reg(client_p, parv[0])) == NULL)
+		return 0;
+
+	loc_sqlite_exec(NULL, "DELETE FROM members WHERE chname = %Q",
+			reg_p->name);
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, reg_p->users.head)
+	{
+		mreg_p = ptr->data;
+
+		my_free(mreg_p->lastmod);
+		dlink_delete(&mreg_p->usernode, &mreg_p->user_reg->channels);
+		dlink_delete(&mreg_p->channode, &mreg_p->channel_reg->users);
+		BlockHeapFree(member_reg_heap, mreg_p);
+	}
+
+	loc_sqlite_exec(NULL, "DELETE FROM bans WHERE chname = %Q",
+			reg_p->name);
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, reg_p->bans.head)
+	{
+		banreg_p = ptr->data;
+
+		free_ban_reg(reg_p, banreg_p);
+	}
+
+	loc_sqlite_exec(NULL, "DELETE FROM channels WHERE chname = %Q",
+			reg_p->name);
+
+	free_channel_reg(reg_p);
+
+	service_error(chanserv_p, client_p, "Channel %s dropped",
+			parv[0]);
+
+	return 0;
+}
+
+static int
 s_chanserv_register(struct client *client_p, char *parv[], int parc)
 {
 	struct channel *chptr;
@@ -391,7 +485,7 @@ s_chanserv_register(struct client *client_p, char *parv[], int parc)
 	write_channel_db_entry(reg_p);
 	write_member_db_entry(mreg_p);
 
-	service_error(chanserv_p, client_p, "Registration of %s successful",
+	service_error(chanserv_p, client_p, "Channel %s registered",
 			chptr->name);
 
 	return 5;
