@@ -214,13 +214,15 @@ remove_user_from_channel(struct Channel *chptr, struct Client *who)
   {
     for(x = 0; loclists[x] != NULL; x++)
     {
-       dlinkFindDestroy(loclists[x], who);
+       if(dlinkFindDestroy(loclists[x], who))
+         break;
     }
   }
 
   for(x = 0; lists[x] != NULL; x++)
   {
-     dlinkFindDestroy(lists[x], who);
+     if(dlinkFindDestroy(lists[x], who))
+       break;
   }
 
   dlinkFindDestroy(&chptr->deopped, who);

@@ -199,9 +199,6 @@ void count_memory(struct Client *source_p)
   int    user_count = 0;
   u_long user_memory_used = 0;
 
-  int    links_count = 0;
-  u_long links_memory_used = 0;
-
   u_long total_memory = 0;
 
   count_whowas_memory(&wwu, &wwm);
@@ -424,13 +421,6 @@ void count_memory(struct Client *source_p)
   sendto_one(source_p, ":%s %d %s :User Memory in use: %d(%d)",
              me.name, RPL_STATSDEBUG, source_p->name,
 	     user_count, (int)user_memory_used);
-
-  count_links_memory( &links_count, (int *)&links_memory_used );
-  total_memory += links_memory_used;
-  sendto_one(source_p, ":%s %d %s :Links Memory in use: %d(%d)",
-             me.name, RPL_STATSDEBUG, source_p->name,
-	     (int)links_count,
-             (int)links_memory_used);
 
   sendto_one(source_p, 
              ":%s %d %s :TOTAL: %d Available:  Current max RSS: %lu",

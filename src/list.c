@@ -158,52 +158,6 @@ void free_user(struct User* user, struct Client* client_p)
 }
 
 
-/*
- * init_dlink_nodes
- *
- */
-static BlockHeap *dnode_heap;
-void init_dlink_nodes(void)
-{
-  dnode_heap = BlockHeapCreate(sizeof(dlink_node), DNODE_HEAP_SIZE);
-  if(dnode_heap == NULL)
-     outofmemory();
-}
- 
-/*
- * make_dlink_node
- *
- * inputs	- NONE
- * output	- pointer to new dlink_node
- * side effects	- NONE
- */
-dlink_node*
-make_dlink_node(void)
-{
-  dlink_node *lp;
-
-  lp = (dlink_node *)BlockHeapAlloc(dnode_heap);;
-  ++links_count;
-
-  lp->next = NULL;
-  lp->prev = NULL;
-  return lp;
-}
-
-/*
- * free_dlink_node
- *
- * inputs	- pointer to dlink_node
- * output	- NONE
- * side effects	- free given dlink_node 
- */
-void free_dlink_node(dlink_node *ptr)
-{
-  BlockHeapFree(dnode_heap, ptr);
-  --links_count;
-  assert(links_count >= 0);
-}
-
 
 /*
  * count_user_memory
@@ -218,21 +172,6 @@ void count_user_memory(int *count,int *user_memory_used)
   *count = user_count;
   *user_memory_used = user_count * sizeof(struct User);
 }
-
-/*
- * count_links_memory
- *
- * inputs	- pointer to dlinks memory actually used
- *		- pointer to dlinks memory allocated total in block allocator
- * output	- NONE
- * side effects	- NONE
- */
-void count_links_memory(int *count,int *links_memory_used)
-{
-  *count = links_count;
-  *links_memory_used = links_count * sizeof(dlink_node);
-}
-
 
 
 

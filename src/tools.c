@@ -27,7 +27,7 @@
 
 #include "stdinc.h"
 #include "tools.h"
-
+#include "balloc.h"
 
 #ifndef NDEBUG
 /*
@@ -47,6 +47,8 @@ mem_frob(void *data, int len)
     }
 }
 #endif
+
+
 
 /* 
  * dlink_ routines are stolen from squid, except for dlinkAddBefore,
@@ -203,6 +205,19 @@ dlinkFindDelete(dlink_list *list, void *data)
   return NULL;
 }
 
+int
+dlinkFindDestroy(dlink_list *list, void *data)
+{
+  void *ptr = dlinkFindDelete(list, data);
+  if(ptr != NULL)
+  {
+  	free_dlink_node(ptr);
+  	return 1;
+  }
+  return 0;
+}
+
+
 void
 dlinkMoveNode(dlink_node *m, dlink_list *oldlist, dlink_list *newlist)
 {
@@ -229,5 +244,49 @@ dlinkMoveNode(dlink_node *m, dlink_list *oldlist, dlink_list *newlist)
  
   oldlist->length--;
   newlist->length++;  
+}
+
+
+/*
+ * init_dlink_nodes
+ *
+ */
+static BlockHeap *dnode_heap;
+void init_dlink_nodes(void)
+{
+  dnode_heap = BlockHeapCreate(sizeof(dlink_node), DNODE_HEAP_SIZE);
+  if(dnode_heap == NULL)
+     outofmemory();
+}
+ 
+/*
+ * make_dlink_node
+ *
+ * inputs	- NONE
+ * output	- pointer to new dlink_node
+ * side effects	- NONE
+ */
+dlink_node*
+make_dlink_node(void)
+{
+  dlink_node *lp;
+
+  lp = (dlink_node *)BlockHeapAlloc(dnode_heap);;
+
+  lp->next = NULL;
+  lp->prev = NULL;
+  return lp;
+}
+
+/*
+ * free_dlink_node
+ *
+ * inputs	- pointer to dlink_node
+ * output	- NONE
+ * side effects	- free given dlink_node 
+ */
+void free_dlink_node(dlink_node *ptr)
+{
+  BlockHeapFree(dnode_heap, ptr);
 }
 

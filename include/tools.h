@@ -45,6 +45,11 @@ struct _dlink_list {
     unsigned long length;
 };
 
+dlink_node *make_dlink_node (void);
+void free_dlink_node(dlink_node *lp);
+void init_dlink_nodes();
+
+
 void
 dlinkMoveNode(dlink_node *m, dlink_list *oldlist, dlink_list *newlist);
 
@@ -68,6 +73,9 @@ dlinkFind(dlink_list *m, void *data);
 
 dlink_node *
 dlinkFindDelete(dlink_list *, void *);
+
+int dlinkFindDestroy(dlink_list *, void *data);
+
 
 #ifndef NDEBUG
 void mem_frob(void *data, int len);
@@ -103,7 +111,6 @@ void mem_frob(void *data, int len);
 
 #define dlinkAddAlloc(data, list) dlinkAdd(data, make_dlink_node(), list)
 #define dlinkDestroy(node, list) do { dlinkDelete(node, list); free_dlink_node(node); } while(0)
-#define dlinkFindDestroy(list, data) do { dlink_node *xxxptrxxx = dlinkFindDelete(list, data); if(xxxptrxxx != NULL) free_dlink_node(xxxptrxxx); } while(0)
 
 
 /*
@@ -251,6 +258,20 @@ dlinkFindDelete(dlink_list *list, void *data)
 
   return NULL;
 }  
+
+extern inline int
+dlinkFindDestroy(dlink_list *list, void *data)
+{
+  extern void free_dlink_node(dlink_node *ptr);
+ 
+  void *ptr = dlinkFindDelete(list, data);
+  if(ptr != NULL)
+  {
+  	free_dlink_node(ptr);
+  	return 1;
+  }
+  return 0;
+}
 
 /*
  * dlinkFind
