@@ -1,3 +1,7 @@
+*** 20010321_3 by ejb
+- turn uint32_t into u_int32_t and make configure check for it.
+
+
 *** 20010321_2 by ejb
 - warn if user specified no $MAKE to configure..
 
