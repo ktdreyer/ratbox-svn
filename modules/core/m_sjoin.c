@@ -115,7 +115,7 @@ static void ms_sjoin(struct Client *client_p,
   int            people = 0;
   int            vc_ts = 0;
   int            isnew;
-  register       char *s, *s0, *sh;
+  register       char *s, *sh;
   static         char buf[BUFSIZE];
   static         char sjbuf[BUFSIZE];
   static         char sjbuf_nh[BUFSIZE];
@@ -124,9 +124,11 @@ static void ms_sjoin(struct Client *client_p,
   int hide_or_not;
   int i;
   dlink_node *m;
-  *buf = '\0';
-  *sjbuf = '\0';
-  *sjbuf_nh = '\0';
+
+  /* changed from \0 to NULL.. */
+  *buf = NULL;
+  *sjbuf = NULL;
+  *sjbuf_nh = NULL;
   
   if (IsClient(source_p) || parc < 5)
     return;
@@ -369,11 +371,23 @@ static void ms_sjoin(struct Client *client_p,
   *mbuf++ = '+';
 
   sh = sjbuf_nh;
-  s = s0 = parv[args+4];
+  s = parv[args+4];
+
+  /* remove any leading spaces */
+  while(*s == ' ')
+  {
+    s++;
+  }
+   
+  /* if theres a space, theres going to be more than one nick, change the
+   * first space to \0, so s is just the first nick, and point p to the
+   * second nick
+   */
   if ((p = strchr(s, ' ')) != NULL)
-    {
-      *p++ = '\0';
-    }
+  {
+    *p = '\0';
+    p++;
+  }
 
   while (s)
     {
@@ -487,7 +501,7 @@ static void ms_sjoin(struct Client *client_p,
        *  if this is ever a possibility...
        */
       if (keep_new_modes)
-	ircsprintf(nick_pointer,"%s ", s0);
+	ircsprintf(nick_pointer,"%s ", sh);
       else
 	ircsprintf(nick_pointer,"%s ", s);
 
@@ -525,15 +539,29 @@ static void ms_sjoin(struct Client *client_p,
         }
 
 nextnick:
-      if ((p = strchr(s, ' ')) != NULL)
+      /* p points to the next nick */
+      s = p;
+      
+      /* if p was NULL due to no spaces, s wont exist due to the above, so
+       * we cant check it for spaces.. if there are no spaces, then when
+       * we next get here, s will be NULL
+       */
+      if (s && ((p = strchr(s, ' ')) != NULL))
 	{
-	  *p++ = '\0';
-	  s = s0 = p;
+	  *p = '\0';
+	  p++;
 	}
+	/* nah, the while will exit if theres nothing left.. and its
+	 * possible we still need to parse one final nick which doesnthave a
+	 * space at the end.. therefore p will become null.. so s will too
+	 * and the loop will exit
+	 */
+#if 0	
       else
 	{
-	  s = s0 = NULL;
+	  s = NULL;
 	}
+#endif	
     }
   
   *mbuf = '\0';
