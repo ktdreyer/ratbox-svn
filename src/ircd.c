@@ -35,6 +35,7 @@
 #include <unistd.h>
 
 #include "setup.h"
+#include "config.h"
 
 #if defined(HAVE_GETOPT_H)
 #include <getopt.h>
@@ -44,7 +45,6 @@
 #include <libintl.h>
 #endif
 
-#include "config.h"
 #include "tools.h"
 #include "ircd.h"
 #include "channel.h"

@@ -20,10 +20,10 @@
  */
 
 #include <sys/types.h>
-
 #include <assert.h>
 
 #include "setup.h"
+#include "config.h"
 
 #ifdef USE_GETTEXT
 #include <libintl.h>
