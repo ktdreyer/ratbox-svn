@@ -64,6 +64,7 @@ char *infotext[] =
   "Based on the original code written by Jarkko Oikarinen",
   "Copyright 1988, 1989, 1990, 1991 University of Oulu, Computing Center",
   "Copyright (c) 1996-2001 Hybrid Development Team", 
+  "Copyright (c) 2002 Ircd-ratbox Development Team 
   "",
   "This program is free software; you can redistribute it and/or",
   "modify it under the terms of the GNU General Public License as",
@@ -74,7 +75,7 @@ char *infotext[] =
 
 IFS='
 '
-for i in `grep -v '^$Id' ../Hybrid-team |tr -d '"'` ; do
+for i in `grep -v '^?Id' ../CREDITS |tr -d '"'` ; do
 echo "  \"$i\"," >> version.c
 done
 $spitshell >>version.c <<!SUB!THISTOO!
