@@ -254,7 +254,6 @@ comm_select(unsigned long delay)
 {
  int num = 0;
  int revents = 0;
- static int loop_count = 0;
  int sig;
  int fd;
  int ci;
@@ -266,7 +265,7 @@ comm_select(unsigned long delay)
  timeout.tv_nsec = 1000000 * delay;
  for (;;)
  {
-  if(!sigio_is_screwed && loop_count <= 3 )
+  if(!sigio_is_screwed)
   {
   	if((sig = sigtimedwait(&our_sigset, &si, &timeout)) > 0)
   	{
@@ -304,7 +303,7 @@ comm_select(unsigned long delay)
   }  else
   	break;
  }
- if(!sigio_is_screwed && loop_count < 3) /* We don't need to proceed */
+ if(!sigio_is_screwed) /* We don't need to proceed */
  	return 0;
  for(;;)
  {
@@ -315,7 +314,6 @@ comm_select(unsigned long delay)
 		sigio_is_screwed = 0;
   	}
   		num = poll(pollfd_list.pollfds, pollfd_list.maxindex + 1, 0);
-  		loop_count = 0;
   		if (num >= 0)
     			break;
   		if (ignoreErrno(errno))
