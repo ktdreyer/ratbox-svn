@@ -39,9 +39,7 @@ CFLAGS		= @CFLAGS@
 #CFLAGS= -DNDEBUG -g -O2 -D"FD_SETSIZE=1024"
 SHELL=/bin/sh
 SUBDIRS=modules adns src tools doc @SUBDIR_MESSAGES@ include servlink help
-CLEANDIRS = ${SUBDIRS} contrib iauth
-# XXX removed `iauth' from the build since it doesn't compile currently
-# SUBDIRS=src tools iauth
+CLEANDIRS = ${SUBDIRS} contrib
 RSA_FILES=rsa_respond/README rsa_respond/respond.c rsa_respond/Makefile
 
 MAKE = make ${MFLAGS} 

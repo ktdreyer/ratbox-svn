@@ -42,7 +42,6 @@
 #include "fdlist.h"
 #include "hash.h"
 #include "irc_string.h"
-#include "ircdauth.h"
 #include "ircd_signal.h"
 #include "sprintf_irc.h"
 #include "s_gline.h"

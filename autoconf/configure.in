@@ -977,8 +977,6 @@ AC_SUBST(SEDOBJ)
 
 AC_OUTPUT(                      \
  Makefile                       \
- iauth/Makefile                 \
- iauth/source/Makefile          \
  servlink/Makefile              \
  contrib/Makefile               \
  src/Makefile                   \
@@ -1000,4 +998,4 @@ if test "X${cf_openssl_ciphers}" != "X"; then
   echo ""
 fi
 
-AC_MSG_RESULT("Server is configured with NICKLEN=$ac_cv_nicklen and MAX_CLIENTS=$ac_cv_maxclients")
+AC_MSG_RESULT(Server is configured with NICKLEN=$ac_cv_nicklen and MAX_CLIENTS=$ac_cv_maxclients)

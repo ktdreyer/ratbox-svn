@@ -484,3 +484,4 @@ irc_sprintf(struct Client *target_p, char *str, const char *format, ...)
 
   return (bytes);
 }
+
