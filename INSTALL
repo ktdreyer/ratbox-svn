@@ -78,5 +78,29 @@ ircd-hybrid@the-project.org.
 safe place in case the developers need to look deeper than a backtrace 
 provides.
 
+OPENSSL NOTES:
+--------------
+Older FreeBSD machines sometimes have the obsolete ports version of OpenSSL
+libcrypto in /usr/local/lib.  When configure is used with --enable-openssl, 
+and libintl is detected in /usr/local/lib, the /usr/local/lib directory will
+be searched BEFORE the system /usr/lib for libraries by the linker.  The 
+linker may try to link to the old /usr/local/lib libcrypto instead of the 
+system /usr/lib libcrypto.  Some older versions may cause error messages 
+similar to the following:
+
+gcc -g -O2 -DIRCD_PREFIX=\"/home/wcampbel/ircd\" -Wl,-export-dynamic  -L/usr/local/lib -o ircd blalloc.o channel.o vchannel.o class.o client.o dline_conf.o event.o fdlist.o fileio.o hash.o irc_string.o ircd.o ircdauth.o ircd_signal.o linebuf.o list.o listener.o m_error.o match.o memdebug.o modules.o motd.o mtrie_conf.o oldparse.o numeric.o packet.o parse.o res.o rsa.o restart.o s_auth.o s_bsd.o s_bsd_kqueue.o s_conf.o s_debug.o s_gline.o s_log.o s_misc.o s_serv.o s_stats.o s_user.o scache.o send.o sprintf_irc.o tools.o whowas.o lex.yy.o y.tab.o version.o -lintl -ldescrypt  -lcrypto -lfl
+rsa.o: In function `get_randomness':
+/home/wcampbel/dev/ircd-hybrid-7/src/rsa.c(.text+0x60): undefined reference to `RAND_pseudo_bytes'
+/usr/local/lib/libcrypto.so: undefined reference to `ERR_load_RSAREF_strings'
+/usr/local/lib/libcrypto.so: undefined reference to `RSA_PKCS1_RSAref'
+*** Error code 1
+
+If this is the case, you may need to rerun configure without the 
+--enable-openssl option, manually edit src/Makefile to put -L/usr/lib before
+the -L/usr/local/lib in LDFLAGS, or remove the old openssl from /usr/local, and
+recompile all applications that use libcrypto to use the system one.
+
+This may be kludged in the future.
+
 --
 $Id$
