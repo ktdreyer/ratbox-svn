@@ -1,3 +1,9 @@
+*** 20001228_26 by db
+- ummm unitialized pointers should not be strcatted... bad bad bad
+  bad coder...
+
+
+
 *** 20001228_25 by spookey
  - Adds string lookup capability to modlist (QUOTE MODLIST [STRING])
 
