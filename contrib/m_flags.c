@@ -300,7 +300,7 @@ static void mo_flags(struct Client *client_p, struct Client *source_p,
 
       if (!irccmp(flag, "NICKCHANGES"))
       {
-        if (!IsSetOperN(source_p))
+        if (!IsOperN(source_p))
         {
           sendto_one(source_p,
                      ":%s NOTICE %s :*** You need oper and N flag for +n",
@@ -370,11 +370,11 @@ static char *set_flags_to_string(struct Client *client_p)
   }
 
 #if 0
-  if (IsOper(client_p) && IsSetOperN(client_p))
+  if (IsOper(client_p) && IsOperN(client_p))
   {
 #endif
     /* You can only be set +NICKCHANGES if you are an oper and
-    ** IsSetOperN(client_p) is true
+    ** IsOperN(client_p) is true
     */
     if (client_p->umodes & FLAGS_NCHANGE)
     {
@@ -412,7 +412,7 @@ static char *unset_flags_to_string(struct Client *client_p)
     }
   }
 
-  if (IsOper(client_p) && IsSetOperN(client_p))
+  if (IsOper(client_p) && IsOperN(client_p))
   {
     if ( !(client_p->umodes & FLAGS_NCHANGE))
     {
