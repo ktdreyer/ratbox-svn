@@ -99,6 +99,25 @@ static int	conf_get_yesno_value(char *str)
 	return -1;
 }
 
+static void	free_cur_list(conf_parm_t* list)
+{
+	switch (list->type & CF_MTYPE)
+	{
+		case CF_STRING:
+		case CF_QSTRING:
+			MyFree(list->v.string);
+			break;
+		case CF_LIST:
+			free_cur_list(list->v.list);
+			break;
+		default: break;
+	}
+
+	if (list->next)
+		free_cur_list(list->next);
+}
+
+		
 conf_parm_t *	cur_list = NULL;
 
 %}
@@ -159,6 +178,7 @@ block_items: block_items block_item
 block_item:	string '=' itemlist ';'
 		{
 			conf_call_set(conf_cur_block, $1, cur_list, CF_LIST);
+			free_cur_list(cur_list);
 			cur_list = NULL;
 		}
 		;

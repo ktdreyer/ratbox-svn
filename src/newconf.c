@@ -2355,7 +2355,15 @@ void	set_modes_from_table(int *modes, conf_parm_t *args)
 {
 	for (; args; args = args->next)
 	{
-		int mode = find_umode(args->v.string);
+		int mode; 
+
+		if ((args->type & CF_MTYPE) != CF_STRING)
+		{
+			conf_report_error("Warning -- umode is not a string; ignoring.");
+			continue;
+		}
+
+		mode = find_umode(args->v.string);
 
 		if (!mode)
 		{
