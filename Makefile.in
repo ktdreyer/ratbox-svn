@@ -80,7 +80,7 @@ CFLAGS		= @CFLAGS@
 
 
 SHELL=/bin/sh
-SUBDIRS=src tools modules
+SUBDIRS=src tools modules messages
 # XXX removed `iauth' from the build since it doesn't compile currently
 # SUBDIRS=src tools iauth
 

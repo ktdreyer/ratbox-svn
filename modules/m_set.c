@@ -83,7 +83,8 @@ char *_version = "20001122";
 #define TOKEN_LOG 7
 #define TOKEN_HIDE 8
 #define TOKEN_CHIDE 9
-#define TOKEN_BAD 10
+#define TOKEN_MSGLOCALE 10
+#define TOKEN_BAD 11
 
 char *set_token_table[] = {
   "MAX",
@@ -95,6 +96,8 @@ char *set_token_table[] = {
   "SPAMTIME",
   "LOG",
   "HIDE",
+  "CHIDE",
+  "MSGLOCALE",
   "CHIDE",
   NULL
 };
@@ -375,7 +378,6 @@ int mo_set(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
             }
           return 0;
           break;
-
         case TOKEN_CHIDE:
           if(parc > 2)
             {
@@ -383,8 +385,8 @@ int mo_set(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
               if(newval)
                 GlobalSetOptions.hide_chanops = 1;
-	      else
-		GlobalSetOptions.hide_chanops = 0;
+              else
+                GlobalSetOptions.hide_chanops = 0;
 
               sendto_realops("%s has changed CHIDE to %i",
                              parv[0], GlobalSetOptions.hide_chanops);
@@ -395,6 +397,36 @@ int mo_set(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                          me.name, parv[0], GlobalSetOptions.hide_chanops);
 
             }
+          return 0;
+          break;
+          
+        case TOKEN_MSGLOCALE:
+#ifdef USE_GETTEXT
+          if(parc > 2)
+            {
+              setenv("LANGUAGE", parv[2], 1);
+              { /* XXX ick, this is what gettext.info _recommends_ */
+                extern int  _nl_msg_cat_cntr;
+                ++_nl_msg_cat_cntr;
+              }
+              sendto_one(sptr, ":%s NOTICE %s :Set MSGLOCALE to '%s'",
+                         me.name, parv[0],
+                         getenv("LANGUAGE") ?
+                           getenv("LANGUAGE") :
+                           "unset");
+            }
+          else
+            {
+              sendto_one(sptr, ":%s NOTICE %s :MSGLOCALE is currently '%s'",
+                         me.name, parv[0],
+                         (getenv("LANGUAGE")) ?
+                           getenv("LANGUAGE") :
+                           "unset");
+            }
+#else
+          sendto_one(sptr, ":%s NOTICE %s :No gettext() support",
+                     me.name, parv[0]);
+#endif
           return 0;
           break;
 
@@ -410,9 +442,9 @@ int mo_set(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
              me.name, parv[0]);
   sendto_one(sptr, ":%s NOTICE %s :Options: SPAMNUM, SPAMTIME",
              me.name, parv[0]);
-  sendto_one(sptr, ":%s NOTICE %s :Options: IDLETIME",
+  sendto_one(sptr, ":%s NOTICE %s :Options: IDLETIME, LOG",
              me.name, parv[0]);
-  sendto_one(sptr, ":%s NOTICE %s :Options: LOG",
+  sendto_one(sptr, ":%s NOTICE %s :Options: HIDE, CHIDE, MSGLOCALE",
              me.name, parv[0]);
   return 0;
 }

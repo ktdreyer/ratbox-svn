@@ -29,6 +29,9 @@ AC_CHECK_FUNC(dlopen,, AC_CHECK_LIB(dl, dlopen,,AC_MSG_ERROR(**
 dlopen could not be found - ircd-hybrid will not compile without it **)))
 AC_CHECK_FUNC(crypt,, AC_CHECK_LIB(descrypt, crypt,,AC_CHECK_LIB(crypt, crypt,,)))
 
+dnl Check for gettext, but it's ok if we don't have it.
+AC_CHECK_FUNCS(gettext,, AC_CHECK_LIB(intl, gettext,,))
+
 dnl Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS(sys/param.h unistd.h errno.h string.h sys/syslog.h stdlib.h stddef.h getopt.h) 
@@ -263,11 +266,21 @@ fi
 AC_SUBST(SSL_DEFINE)
 AC_SUBST(SSL_LIBS)
 
+if test "$ac_cv_func_gettext" = "yes" ; then
+	echo "Building with gettext."
+	MSGFMT="msgfmt -o"
+else
+	MSGFMT="echo"
+fi
+
+AC_SUBST(MSGFMT)
+
 AC_OUTPUT(                   \
  Makefile                    \
  iauth/Makefile              \
  iauth/source/Makefile       \
  src/Makefile                \
+ messages/Makefile           \
  modules/Makefile            \
  tools/Makefile              \
  zlib/Makefile               \

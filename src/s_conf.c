@@ -1832,6 +1832,7 @@ void conf_add_conf(struct ConfItem *aconf)
 	 aconf->user ? aconf->user : "<NULL>",
 	 aconf->port,
 	 aconf->c_class ? ConfClassType(aconf): 0 ));
+
   aconf->next = ConfigItemList;
    ConfigItemList = aconf;
 }

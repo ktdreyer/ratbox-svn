@@ -120,6 +120,7 @@ log_level	{ return LOG_LEVEL; }
 logging         { return LOGGING; }
 logpath         { return LOGPATH; }
 max_number	{ return MAX_NUMBER; }
+message_locale	{ return MESSAGE_LOCALE; }
 name		{ return NAME; }
 nick_changes	{ return NICK_CHANGES; }
 no		{ return TNO; }

@@ -81,12 +81,12 @@
  * SPATH = server executable,
  * MODPATH = directory of module to load automatically,
  * CPATH = conf file,
- * MPATH = MOTD
- * KPATH = kline conf file
- * DLPATH = dline conf file
- * RPATH = RSA keyfile
- *
- * OMOTD = path to MOTD for opers
+ * MPATH = MOTD,
+ * KPATH = kline conf file,
+ * DLPATH = dline conf file,
+ * RPATH = RSA keyfile,
+ * OMOTD = path to MOTD for opers,
+ * MSGPATH = path to gettext message files
  * 
  * For /restart to work, SPATH needs to be a full pathname
  * (unless "." is in your exec path). -Rodder
@@ -111,7 +111,7 @@
 #define PPATH   "ircd.pid"
 #define HPATH   "opers.txt"
 #define OPATH   "opers.motd"
-
+#define MSGPATH "/usr/local/ircd/messages/"
 
 /* TS_MAX_DELTA_DEFAULT and TS_WARN_DELTA_DEFAULT -
  * allowed delta for TS when another server connects.
@@ -165,15 +165,6 @@
  * strongly discouraged on public networks
  */
 #undef ALLOW_DOT_IN_IDENT
-
-/* CUSTOM_ERR - colorful notice/error/messages
- * Defining this will use custom notice/error/messages from src/messages_cust.tab
- * instead of stock ones in src/messages.tab.  If you prefer the "colorful"
- * messages that Hybrid was known for, or if you wish to customize the
- * messages, define this.  Otherwise leave it undef'd for plain ole
- * boring messages.
- */
-#define CUSTOM_ERR
 
 /* DO_IDENTD - check identd
  * if you undefine this, ircd will never check identd regardless of
@@ -622,6 +613,14 @@ error CLIENT_FLOOD undefined.
 
 #define MIN_SPAM_NUM 5
 #define MIN_SPAM_TIME 60
+
+/* This may belong elsewhere... -dt */
+#if defined( HAVE_GETTEXT ) && defined( MSGPATH )
+#define USE_GETTEXT 1
+#define getmsg(a)       (gettext(a))
+#else
+#define getmsg(a)       (a)
+#endif
 
 /* tuck this here for now, it will go away eventually...
  * but meanwhile, at least it will compile a server that works -db

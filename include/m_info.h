@@ -98,12 +98,6 @@ Info MyInformation[] = {
   { "CRYPT_LINK_PASSWORD", "OFF", 0, "Encrypt Server Passwords" },
 #endif /* CRYPT_LINK_PASSWORD */
 
-#ifdef CUSTOM_ERR
-  { "CUSTOM_ERR", "ON", 0, "Customized error messages" },
-#else
-  { "CUSTOM_ERR", "OFF", 0, "Customized error messages" },
-#endif /* CUSTOM_ERR */
-
 #ifdef DEBUGMODE
   { "DEBUGMODE", "ON", 0, "Debugging Mode" },
 #else

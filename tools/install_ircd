@@ -47,6 +47,8 @@ MPATH=`grep '#define.MPATH' include/config.h|awk '{print $3}'|tr -d \"`;
 LPATH=`grep '#define.LPATH' include/config.h|awk '{print $3}'|tr -d \"`;
 PPATH=`grep '#define.PPATH' include/config.h|awk '{print $3}'|tr -d \"`;
 HPATH=`grep '#define.HPATH' include/config.h|awk '{print $3}'|tr -d \"`;
+MODPATH=`grep '#define.MODPATH' include/config.h|awk '{print $3}'|tr -d \"`;
+MSGPATH=`grep '#define.MSGPATH' include/config.h|awk '{print $3}'|tr -d \"`;
 
 SPATH=`dir_concat ${SPATH}`;
 CPATH=`dir_concat ${CPATH}`;
@@ -55,6 +57,8 @@ MPATH=`dir_concat ${MPATH}`;
 LPATH=`dir_concat ${LPATH}`;
 PPATH=`dir_concat ${PPATH}`;
 HPATH=`dir_concat ${HPATH}`;
+MODPATH=`dir_concat ${MODPATH}`;
+MSGPATH=`dir_concat ${MSGPATH}`;
 
 #   DPATH = directory,
 #   SPATH = server executable,
@@ -123,6 +127,23 @@ else
    mv ${HPATH} ${HPATH}.old
    $INSTALL_SH -c opers.txt ${HPATH};
 fi
+
+# try to install their modules
+echo "Installing modules to ${MODPATH}..."
+dir_make ${MODPATH}
+cp modules/*.so ${MODPATH}
+
+# try to install their msg files
+echo    "Installing message files to ${MSGPATH}..."
+dir_make ${MSGPATH}
+echo -n "   "
+for i in messages/*.mo; do
+  LNAME=`echo $i | sed 's/^messages\///' | sed 's/\.mo$//'`
+  dir_make "${MSGPATH}/${LNAME}/LC_MESSAGES/"
+  cp $i "${MSGPATH}/${LNAME}/LC_MESSAGES/ircd-hybrid.mo"
+  echo -n "${LNAME} "
+done
+echo ""
 
 # install mkpasswd
 if [ ! -f ${DPATH}/mkpasswd${EXESUFFIX} ]; then

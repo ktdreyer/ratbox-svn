@@ -44,7 +44,7 @@ const char* form_str(int numeric)
   assert(numeric < ERR_LAST_ERR_MSG);
   assert(0 != replies[numeric]);
   
-  return replies[numeric];
+  return (const char *) getmsg( replies[numeric] );
 }
 
 

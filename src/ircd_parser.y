@@ -102,6 +102,7 @@ int   class_sendq_var;
 %token  LOGPATH
 %token  LOG_LEVEL
 %token  MAX_NUMBER
+%token  MESSAGE_LOCALE
 %token  NAME
 %token  NICK_CHANGES
 %token  NO_TILDE
@@ -227,7 +228,6 @@ serverinfo_entry:       SERVERINFO
       }
     yy_aconf=make_conf();
     yy_aconf->status = CONF_ME;
-log(L_NOTICE,">> Got SERVERINFO");
   }
   '{' serverinfo_items '}' ';'
   {
@@ -252,18 +252,15 @@ serverinfo_name:        NAME '=' QSTRING ';'
   {
     yy_aconf->host = yylval.string;
     yylval.string = (char *)NULL;
-log(L_NOTICE,">> NAME = %s",yylval.string);
   };
 
 serverinfo_description: DESCRIPTION '=' QSTRING ';'
   {
     yy_aconf->user = yylval.string;
-log(L_NOTICE,">> DESCRIPTION = %s",yylval.string);
   };
 
 serverinfo_vhost:       VHOST '=' IP_TYPE ';'
   {
-log(L_NOTICE,">> VHOST = ...");
     yy_aconf->ip = yylval.ip_entry.ip;
   };
 
@@ -1182,7 +1179,8 @@ general_item:       general_quiet_on_ban | general_moderate_nickchange |
 	            general_invite_plus_i_only |
                     general_glines | general_topic_uh | general_gline_time |
 		    general_idletime |
-		    general_hide_server | general_hide_chanops
+		    general_hide_server | general_hide_chanops |
+                    general_message_locale
 
 general_quiet_on_ban:   QUIET_ON_BAN '=' TYES ';'
   {
@@ -1411,6 +1409,11 @@ general_glines: GLINES '=' TYES ';'
 } | GLINES '=' TNO ';'
 {
 	ConfigFileEntry.glines = 0;
+} ;
+
+general_message_locale: MESSAGE_LOCALE '=' QSTRING ';'
+{
+        setenv("LANGUAGE", yylval.string, 1);
 } ;
 
 

@@ -1,0 +1,34 @@
+MSGFMT = @MSGFMT@
+
+default: all
+
+SRCS = \
+  custom.po
+
+OBJS = ${SRCS:.po=.mo}
+all: ${OBJS}
+build: all
+
+.SUFFIXES:
+.SUFFIXES: .po .mo
+
+.po.mo:
+	${MSGFMT} $@ $<
+
+.PHONY: install depend clean distclean
+
+install: build
+	@echo "Please do a make install from the top level directory"
+
+depend:
+clean:
+distclean:
+
+mrclean:
+	rm *.mo
+
+mrupdate:
+	@for i in $(SRCS); do \
+		echo "Updating $$i"; \
+		xgettext -a -j -LC -o $$i ../src/messages.tab; \
+	done

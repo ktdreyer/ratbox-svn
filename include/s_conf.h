@@ -24,6 +24,14 @@
  * $Id$
  *
  * $Log$
+ * Revision 7.31  2000/11/30 22:48:00  davidt
+ * Removed CUSTOM_ERR, and changed it to use gettext(), which allows the
+ * message files to be changed at run time, currently using
+ * /quote set MSGLOCALE ... ('custom' for the custom messages, or anything else
+ * to use the standard ircd messages).
+ * Also, added general_message_locale to the new config file.
+ * If gettext() isn't available, it should just use the standard ircd messages.
+ *
  * Revision 7.30  2000/11/30 09:53:42  db
  * - added two new parms to parser hide_server hide_chanops yes or no
  * - added possible fix (untested by adrian?) to parse.
@@ -500,11 +508,11 @@ typedef struct
   char *klinefile;
   char *dlinefile;
 
-  char  *glinefile;
+  char *glinefile;
 
-  char* logpath;
-  char* operlog;
-  char* glinelog;
+  char *logpath;
+  char *operlog;
+  char *glinelog;
 
   MessageFile helpfile;
   MessageFile motd;

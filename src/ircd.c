@@ -644,6 +644,20 @@ int main(int argc, char *argv[])
     strncpy_irc(me.name, aconf->host, HOSTLEN);
   strncpy_irc(me.host, aconf->host, HOSTLEN);
 
+#ifdef USE_GETTEXT
+  /*
+   * For 'locale' try (in this order):
+   *    Config entry "msglocale" (yyparse() will overwrite LANGUAGE)
+   *    Env variable "LANGUAGE"
+   *    Default of "" (so don't overwrite LANGUAGE here)
+   */
+  
+  setenv("LANGUAGE", "", 0);
+
+  textdomain("ircd-hybrid");
+  bindtextdomain("ircd-hybrid" , MSGPATH);
+#endif
+  
 #ifdef USE_IAUTH
 	/* bingo - hardcoded for now - will be changed later */
   /* done - its in ircd.conf now --is */
