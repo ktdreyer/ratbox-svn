@@ -1,3 +1,16 @@
+leeh        2004/09/05 12:04:00 EDT	(20040905_1)
+
+  Modified files:
+    src                  banconf.c 
+  Log:
+  - make getfields() more robust, by looking for a trailing '"' before a ','
+    when the field begins with a '"'
+  
+  Revision  Changes    Path
+  7.5       +10 -2     ircd-ratbox/src/banconf.c
+
+
+
 leeh        2004/09/05 07:24:03 EDT	(20040905_0)
 
   Modified files:
