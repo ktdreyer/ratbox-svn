@@ -1,3 +1,18 @@
+androsyn    2002/12/09 20:23:05 UTC	(20021209_0)
+
+  Modified files:
+    include              client.h 
+    src                  client.c 
+  Log:
+  Okay here is the proper linebuf leakage fix. Basically close_connection()
+  wasn't making MyConnect() == FALSE..
+  
+  Revision  Changes    Path
+  7.185     +0 -1      ircd-ratbox/include/client.h
+  7.342     +35 -30    ircd-ratbox/src/client.c
+
+
+
 androsyn    2002/12/08 22:04:33 UTC	(20021208_7)
 
   Modified files:
