@@ -2,7 +2,7 @@ Translated message files (user/admin submitted)
 
 There are user submitted message files for ircd-hybrid-7.  There is not as
 of yet an easy way of creating or installing these files, but any submission
-is well apreciated.
+is well appreciated.
 
 At the present time, the following languages are supported
 
@@ -30,7 +30,7 @@ ex. message_locale="ircd-german";
 The ircd-hybrid team is not accountable for any mistakes, mistranslations, or
 accidental insults from the use of one of the included translations.  All
 translations are done by individuals who have given their time and skills to
-provide localized users with prebuilt translations.  The ircd-hybrid team
+provide localized users with pre-built translations.  The ircd-hybrid team
 will try, but cannot guarantee that the translations are up to date with the
 rest of the source tree, and with the "customized" messages.
 

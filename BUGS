@@ -26,7 +26,7 @@
       actually loaded.
 
       So:
-      - Minor changes are normally ok, such as adding a couple of lines to code.
+      - Minor changes are normally Ok, such as adding a couple of lines to code.
       If you do a major change to the module, including adding new commands, it
       is recommended that you unload the module FIRST, replace the module file
       and then /modload the module.
@@ -55,7 +55,7 @@
 8. When updating a message file, in certain unknown situations it will core
    if the file in use is being accessed.  To prevent this from happening,
    use '/quote SET MSGLOCALE standard' BEFORE issuing make install.  When
-   the file is installed, you can SET MSGLOCALE back to the lnaguage that
+   the file is installed, you can SET MSGLOCALE back to the language that
    was just updated.
 
 For more information see http://bugs.efnow.net
