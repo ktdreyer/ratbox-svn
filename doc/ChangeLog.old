@@ -1,3 +1,9 @@
+*** 20011126_3 by davidt
+- Apply fix as discussed on mailing list and IRC.
+  * Do not incorrectly terminate buffer simply because we ran out of data
+    to _read_.
+
+
 *** 20011126_2 by androsyn
 Okay..the dns_host stuff was a good idea..but its a chicken vs the egg
 problem.  The parser needs to setup the dns_host stuff..but the parser
