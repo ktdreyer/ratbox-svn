@@ -1,3 +1,8 @@
+*** 20001224_23 by db
+- extra '\n' in log() not needed
+
+
+
 *** 20001224_22 by wcampbel
 1. Forgot to change the formatting in oper_only_umodes
 2. Add 'rej' '+r' to oper_only_umodes
