@@ -304,7 +304,7 @@ set_time(void)
 static void
 io_loop(void)
 {
- int empty_cycles=0, st=0, status, delay;
+ int empty_cycles=0, st=0, delay;
  while (ServerRunning)
  {
   /* Run pending events, then get the number of seconds to the next
@@ -328,9 +328,6 @@ io_loop(void)
   }
   /* Do IO events */
   comm_select(st);
-  
-  /* clean up any zombies lying around... */
-  waitpid(-1, &status, WNOHANG);
   
   /*
    * Check to see whether we have to rehash the configuration ..
@@ -474,6 +471,19 @@ static void setup_corefile(void)
     rlim.rlim_cur = rlim.rlim_max;
     setrlimit(RLIMIT_CORE, &rlim);
   }
+}
+
+/*
+ * cleanup_zombies
+ * inputs	- nothing
+ * output	- nothing
+ * side effects - Reaps zombies periodically
+ * -AndroSyn
+ */
+static void cleanup_zombies(void *unused)
+{
+  int status;
+  waitpid(-1, &status, WNOHANG);
 }
 
 int main(int argc, char *argv[])
@@ -656,9 +666,12 @@ int main(int argc, char *argv[])
 
  /* Setup the timeout check. I'll shift it later :)  -- adrian */
  eventAdd("comm_checktimeouts", comm_checktimeouts, NULL, 1, 0);
- 
+
+ eventAdd("cleanup_zombies", cleanup_zombies, NULL, 30, 0); 
  ServerRunning = 1;
  io_loop();
  return 0;
 }
+
+
 
