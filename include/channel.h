@@ -29,10 +29,14 @@
 #include "config.h"		/* config settings */
 #include "ircd_defs.h"		/* buffer sizes */
 
+#define MODEBUFLEN      200
+
+/* Maximum mode changes allowed per client, per server is different */
+#define MAXMODEPARAMS   4
+
 struct Client;
 
 /* mode structure for channels */
-
 struct Mode
 {
 	unsigned int mode;
@@ -41,7 +45,6 @@ struct Mode
 };
 
 /* channel structure */
-
 struct Channel
 {
 	dlink_node node;
@@ -80,70 +83,12 @@ struct membership
 	unsigned int flags;
 };
 
-extern dlink_list global_channel_list;
-void init_channels(void);
-
-extern int can_send(struct Channel *chptr, struct Client *who, 
-		    struct membership *);
-extern int is_banned(struct Channel *chptr, struct Client *who);
-
-extern int can_join(struct Client *source_p, struct Channel *chptr, char *key);
-
-extern struct membership *find_channel_membership(struct Channel *, struct Client *);
-extern const char *find_channel_status(struct membership *msptr, int combine);
-extern void add_user_to_channel(struct Channel *, struct Client *, int flags);
-extern int remove_user_from_channel(struct membership *);
-extern void remove_user_from_channels(struct Client *);
-
-extern void free_channel_list(dlink_list *);
-
-extern int check_channel_name(const char *name);
-
-extern void channel_member_names(struct Channel *chptr, struct Client *,
-				 int show_eon);
-extern const char *channel_pub_or_secret(struct Channel *chptr);
-
-extern void add_invite(struct Channel *chptr, struct Client *who);
-extern void del_invite(struct Channel *chptr, struct Client *who);
-
-extern void send_channel_modes(struct Client *, struct Channel *);
-extern void channel_modes(struct Channel *chptr, struct Client *who, char *, char *);
-
-extern void check_spambot_warning(struct Client *source_p, const char *name);
-
-extern void check_splitmode(void *);
-
-/*
-** Channel Related macros follow
-*/
-
-#define HoldChannel(x)          (!(x))
-/* channel visible */
-#define ShowChannel(v,c)        (PubChannel(c) || IsMember((v),(c)))
-
-#define IsMember(who, chan) ((who && who->user && \
-                find_channel_membership(chan, who)) ? 1 : 0)
-
-#define IsChannelName(name) ((name) && (*(name) == '#' || *(name) == '&'))
-
-struct Ban			/* also used for exceptions -orabidoo */
+struct Ban
 {
 	char banstr[NICKLEN+USERLEN+HOSTLEN+6];
 	char who[NICKLEN+USERLEN+HOSTLEN+6];
 	time_t when;
 };
-
-#define CLEANUP_CHANNELS_TIME (30*60)
-
-void set_channel_topic(struct Channel *chptr, const char *topic,
-		       const char *topic_info, time_t topicts);
-void free_topic(struct Channel *);
-int allocate_topic(struct Channel *);
-
-#define MODEBUFLEN      200
-
-/* Maximum mode changes allowed per client, per server is different */
-#define MAXMODEPARAMS   4
 
 struct ChModeChange
 {
@@ -157,70 +102,6 @@ struct ChModeChange
 	struct Client *client;
 };
 
-extern void init_chcap_usage_counts(void);
-extern void set_chcap_usage_counts(struct Client *serv_p);
-extern void unset_chcap_usage_counts(struct Client *serv_p);
-extern void send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
-				  struct Channel *chptr, struct ChModeChange foo[], int);
-/*
-** Channel Related macros follow
-*/
-
-/* can_send results */
-#define CAN_SEND_NO	0
-#define CAN_SEND_NONOP  1
-#define CAN_SEND_OPV	2
-
-
-/* Channel related flags */
-
-#define CHFL_PEON	0x0000	/* normal member of channel */
-#define CHFL_CHANOP     0x0001	/* Channel operator */
-#define CHFL_VOICE      0x0002	/* the power to speak */
-#define CHFL_DEOPPED    0x0004	/* deopped by us, modes need to be bounced */
-#define CHFL_BAN        0x0010	/* ban channel flag */
-#define CHFL_EXCEPTION  0x0020	/* exception to ban channel flag */
-#define CHFL_INVEX      0x0080
-
-/* Channel Visibility macros */
-
-#define MODE_PEON	CHFL_PEON
-#define MODE_CHANOP     CHFL_CHANOP
-#define MODE_VOICE      CHFL_VOICE
-#define MODE_DEOPPED	CHFL_DEOPPED
-
-#define is_chanop(x)	((x) && (x)->flags & CHFL_CHANOP)
-#define is_voiced(x)	((x) && (x)->flags & CHFL_VOICE)
-#define is_chanop_voiced(x) ((x) && (x)->flags & (CHFL_CHANOP|CHFL_VOICE))
-#define is_deop(x)	((x) && (x)->flags & CHFL_DEOPPED)
-
-
-/* channel modes ONLY */
-#define MODE_PRIVATE    0x0008
-#define MODE_SECRET     0x0010
-#define MODE_MODERATED  0x0020
-#define MODE_TOPICLIMIT 0x0040
-#define MODE_INVITEONLY 0x0080
-#define MODE_NOPRIVMSGS 0x0100
-#define MODE_BAN        0x0400
-#define MODE_EXCEPTION  0x0800
-#define MODE_INVEX	0x2000
-
-/* mode flags for direction indication */
-#define MODE_QUERY     0
-#define MODE_ADD       1
-#define MODE_DEL       -1
-
-/* name invisible */
-#define SecretChannel(x)        ((x) && ((x)->mode.mode & MODE_SECRET))
-/* channel not shown but names are */
-#define HiddenChannel(x)        ((x) && ((x)->mode.mode & MODE_PRIVATE))
-#define PubChannel(x)           ((!x) || ((x)->mode.mode &\
-                                 (MODE_PRIVATE | MODE_SECRET)) == 0)
-#define ParanoidChannel(x)	((x) && ((x)->mode.mode &\
-			        (MODE_PRIVATE|MODE_INVITEONLY))==\
-		                (MODE_PRIVATE|MODE_INVITEONLY))
-
 struct ChCapCombo
 {
 	int count;
@@ -228,8 +109,95 @@ struct ChCapCombo
 	int cap_no;
 };
 
+/* channel access flags */
 #define CHACCESS_CHANOP 2
 #define CHACCESS_VOICED 1
 #define CHACCESS_PEON   0
+
+/* can_send results */
+#define CAN_SEND_NO	0
+#define CAN_SEND_NONOP  1
+#define CAN_SEND_OPV	2
+
+/* Channel related flags */
+#define CHFL_PEON	0x0000	/* normal member of channel */
+#define CHFL_CHANOP     0x0001	/* Channel operator */
+#define CHFL_VOICE      0x0002	/* the power to speak */
+#define CHFL_DEOPPED    0x0004	/* deopped by us, modes need to be bounced */
+#define CHFL_BAN        0x0010	/* ban channel flag */
+#define CHFL_EXCEPTION  0x0020	/* exception to ban channel flag */
+#define CHFL_INVEX      0x0040
+
+#define is_chanop(x)	((x) && (x)->flags & CHFL_CHANOP)
+#define is_voiced(x)	((x) && (x)->flags & CHFL_VOICE)
+#define is_chanop_voiced(x) ((x) && (x)->flags & (CHFL_CHANOP|CHFL_VOICE))
+#define is_deop(x)	((x) && (x)->flags & CHFL_DEOPPED)
+
+/* channel modes ONLY */
+#define MODE_PRIVATE    0x0001
+#define MODE_SECRET     0x0002
+#define MODE_MODERATED  0x0004
+#define MODE_TOPICLIMIT 0x0008
+#define MODE_INVITEONLY 0x0010
+#define MODE_NOPRIVMSGS 0x0020
+
+/* mode flags for direction indication */
+#define MODE_QUERY     0
+#define MODE_ADD       1
+#define MODE_DEL       -1
+
+#define SecretChannel(x)        ((x) && ((x)->mode.mode & MODE_SECRET))
+#define HiddenChannel(x)        ((x) && ((x)->mode.mode & MODE_PRIVATE))
+#define PubChannel(x)           ((!x) || ((x)->mode.mode &\
+                                 (MODE_PRIVATE | MODE_SECRET)) == 0)
+
+/* channel visible */
+#define ShowChannel(v,c)        (PubChannel(c) || IsMember((v),(c)))
+
+#define IsMember(who, chan) ((who && who->user && \
+                find_channel_membership(chan, who)) ? 1 : 0)
+
+#define IsChannelName(name) ((name) && (*(name) == '#' || *(name) == '&'))
+
+extern dlink_list global_channel_list;
+void init_channels(void);
+
+extern int can_send(struct Channel *chptr, struct Client *who, 
+		    struct membership *);
+extern int is_banned(struct Channel *chptr, struct Client *who,
+		     const char *, const char *);
+extern int can_join(struct Client *source_p, struct Channel *chptr, char *key);
+
+extern struct membership *find_channel_membership(struct Channel *, struct Client *);
+extern const char *find_channel_status(struct membership *msptr, int combine);
+extern void add_user_to_channel(struct Channel *, struct Client *, int flags);
+extern void remove_user_from_channel(struct membership *);
+extern void remove_user_from_channels(struct Client *);
+
+extern void free_channel_list(dlink_list *);
+
+extern int check_channel_name(const char *name);
+
+extern void channel_member_names(struct Channel *chptr, struct Client *,
+				 int show_eon);
+
+extern void add_invite(struct Channel *chptr, struct Client *who);
+extern void del_invite(struct Channel *chptr, struct Client *who);
+
+extern void burst_channel(struct Channel *, struct Client *);
+extern void channel_modes(struct Channel *chptr, struct Client *who, char *, char *);
+
+extern void check_spambot_warning(struct Client *source_p, const char *name);
+
+extern void check_splitmode(void *);
+
+void set_channel_topic(struct Channel *chptr, const char *topic,
+		       const char *topic_info, time_t topicts);
+
+extern void init_chcap_usage_counts(void);
+extern void set_chcap_usage_counts(struct Client *serv_p);
+extern void unset_chcap_usage_counts(struct Client *serv_p);
+extern void send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
+				  struct Channel *chptr, struct ChModeChange foo[], int);
 
 #endif /* INCLUDED_channel_h */

@@ -307,9 +307,9 @@ build_target_list(int p_or_n, const char *command, struct Client *client_p,
 		for (;;)
 		{
 			if(*nick == '@')
-				type |= MODE_CHANOP;
+				type |= CHFL_CHANOP;
 			else if(*nick == '+')
-				type |= MODE_CHANOP | MODE_VOICE;
+				type |= CHFL_CHANOP | CHFL_VOICE;
 			else
 				break;
 			nick++;
@@ -463,7 +463,7 @@ msg_channel_flags(int p_or_n, const char *command, struct Client *client_p,
 	int type;
 	char c;
 
-	if(flags & MODE_VOICE)
+	if(flags & CHFL_VOICE)
 	{
 		type = ONLY_CHANOPS_VOICED;
 		c = '+';

@@ -305,7 +305,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 		{
 			if(*s == '@')
 			{
-				fl |= MODE_CHANOP;
+				fl |= CHFL_CHANOP;
 				if(keep_new_modes)
 				{
 					*nhops++ = *s;
@@ -316,7 +316,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 			}
 			else if(*s == '+')
 			{
-				fl |= MODE_VOICE;
+				fl |= CHFL_VOICE;
 				if(keep_new_modes)
 				{
 					*nhops++ = *s;
@@ -348,9 +348,9 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 		if(!keep_new_modes)
 		{
-			if(fl & MODE_CHANOP)
+			if(fl & CHFL_CHANOP)
 			{
-				fl = MODE_DEOPPED;
+				fl = CHFL_DEOPPED;
 			}
 			else
 			{
@@ -369,13 +369,13 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 					     target_p->username, target_p->host, parv[2]);
 		}
 
-		if(fl & MODE_CHANOP)
+		if(fl & CHFL_CHANOP)
 		{
 			*mbuf++ = 'o';
 			para[pargs++] = s;
 
 			/* a +ov user.. bleh */
-			if(fl & MODE_VOICE)
+			if(fl & CHFL_VOICE)
 			{
 				/* its possible the +o has filled up MAXMODEPARAMS, if so, start
 				 * a new buffer
@@ -398,7 +398,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 				para[pargs++] = s;
 			}
 		}
-		else if(fl & MODE_VOICE)
+		else if(fl & CHFL_VOICE)
 		{
 			*mbuf++ = 'v';
 			para[pargs++] = s;

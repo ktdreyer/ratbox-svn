@@ -25,7 +25,6 @@
  */
 
 #include "stdinc.h"
-
 #include "tools.h"
 #include "channel.h"
 #include "client.h"
@@ -53,19 +52,23 @@ BlockHeap *ban_heap;
 BlockHeap *topic_heap;
 static BlockHeap *member_heap;
 
-static void destroy_channel(struct Channel *);
+static int channel_capabs[] = { CAP_EX, CAP_IE, CAP_UID };
+#define NCHCAPS         (sizeof(channel_capabs)/sizeof(int))
+#define NCHCAP_COMBOS   (1 << NCHCAPS)
 
-static void send_mode_list(struct Client *client_p, char *chname, dlink_list * top, char flag);
-static int check_banned(struct Channel *chptr, struct Client *who, char *s, char *s2);
+static struct ChCapCombo chcap_combos[NCHCAP_COMBOS];
+
+static void destroy_channel(struct Channel *);
+static void free_topic(struct Channel *chptr);
 
 static char buf[BUFSIZE];
 
-/* 
- * init_channels
+/* init_channels()
  *
- * Initializes the channel blockheap
+ * input	-
+ * output	-
+ * side effects - initialises the various blockheaps
  */
-
 void
 init_channels(void)
 {
@@ -75,6 +78,12 @@ init_channels(void)
 	member_heap = BlockHeapCreate(sizeof(struct membership), MEMBER_HEAP_SIZE);
 }
 
+/* find_channel_membership()
+ *
+ * input	- channel to find them in, client to find
+ * output	- membership of client in channel, else NULL
+ * side effects	-
+ */
 struct membership *
 find_channel_membership(struct Channel *chptr, struct Client *client_p)
 {
@@ -94,6 +103,12 @@ find_channel_membership(struct Channel *chptr, struct Client *client_p)
 	return NULL;
 }
 
+/* find_channel_status()
+ *
+ * input	- membership to get status for, whether we can combine flags
+ * output	- flags of user on channel
+ * side effects -
+ */
 const char *
 find_channel_status(struct membership *msptr, int combine)
 {
@@ -116,6 +131,12 @@ find_channel_status(struct membership *msptr, int combine)
 	return buffer;
 }
 
+/* add_user_to_channel()
+ *
+ * input	- channel to add client to, client to add, channel flags
+ * output	- 
+ * side effects - user is added to channel
+ */
 void
 add_user_to_channel(struct Channel *chptr, struct Client *client_p, int flags)
 {
@@ -139,14 +160,20 @@ add_user_to_channel(struct Channel *chptr, struct Client *client_p, int flags)
 		dlinkAdd(msptr, &msptr->locchannode, &chptr->locmembers);
 }
 
-int
+/* remove_user_from_channel()
+ *
+ * input	- membership pointer to remove from channel
+ * output	-
+ * side effects - membership (thus user) is removed from channel
+ */
+void
 remove_user_from_channel(struct membership *msptr)
 {
 	struct Client *client_p;
 	struct Channel *chptr;
 	s_assert(msptr != NULL);
 	if(msptr == NULL)
-		return 0;
+		return;
 
 	client_p = msptr->client_p;
 	chptr = msptr->chptr;
@@ -162,12 +189,12 @@ remove_user_from_channel(struct membership *msptr)
 	if(dlink_list_length(&chptr->members) <= 0)
 	{
 		destroy_channel(chptr);
-		return 1;
+		return;
 	}
 
 	BlockHeapFree(member_heap, msptr);
 
-	return 0;
+	return;
 }
 
 /* remove_user_from_channels()
@@ -208,10 +235,73 @@ remove_user_from_channels(struct Client *client_p)
 	client_p->user->channel.length = 0;
 }
 
+/* burst_mode_list()
+ *
+ * input	- client to burst to, channel name, list to burst, mode flag
+ * output	-
+ * side effects - client is sent a list of +b, or +e, or +I modes
+ */
 static void
-send_members(struct Channel *chptr, struct Client *client_p,
-	     const char *lmodebuf, const char *lparabuf)
+burst_mode_list(struct Client *client_p, char *chname, dlink_list *list, char flag)
 {
+	dlink_node *ptr;
+	struct Ban *banptr;
+	char mbuf[MODEBUFLEN];
+	char pbuf[BUFSIZE];
+	int tlen;
+	int mlen;
+	int cur_len;
+	char *mp;
+	char *pp;
+	int count = 0;
+
+	mlen = ircsprintf(buf, ":%s MODE %s +", me.name, chname);
+	cur_len = mlen;
+
+	mp = mbuf;
+	pp = pbuf;
+
+	DLINK_FOREACH(ptr, list->head)
+	{
+		banptr = ptr->data;
+		tlen = strlen(banptr->banstr) + 3;
+
+		/* uh oh */
+		if(tlen > MODEBUFLEN)
+			continue;
+
+		if((count >= MAXMODEPARAMS) || ((cur_len + tlen + 2) > (BUFSIZE - 3)))
+		{
+			sendto_one(client_p, "%s%s %s", buf, mbuf, pbuf);
+
+			mp = mbuf;
+			pp = pbuf;
+			cur_len = mlen;
+			count = 0;
+		}
+
+		*mp++ = flag;
+		*mp = '\0';
+		pp += ircsprintf(pp, "%s ", banptr->banstr);
+		cur_len += tlen;
+		count++;
+	}
+
+	if(count != 0)
+		sendto_one(client_p, "%s%s %s", buf, mbuf, pbuf);
+}
+
+/* burst_channel()
+ *
+ * input	- channel to burst, client to burst to
+ * output	-
+ * side effects - client gets SJOIN's of all members in the channel
+ */
+void
+burst_channel(struct Channel *chptr, struct Client *client_p)
+{
+	static char modebuf[MODEBUFLEN];
+	static char parabuf[MODEBUFLEN];
 	struct membership *msptr;
 	dlink_node *ptr;
 	int tlen;		/* length of t (temp pointer) */
@@ -219,13 +309,19 @@ send_members(struct Channel *chptr, struct Client *client_p,
 	int cur_len = 0;	/* current length */
 	char *t;		/* temp char pointer */
 
+	if(*chptr->chname != '#')
+		return;
+
 	s_assert(chptr->members.head != NULL);
 	if(chptr->members.head == NULL)
 		return;
 
+	*modebuf = *parabuf = '\0';
+	channel_modes(chptr, client_p, modebuf, parabuf);
+
 	cur_len = mlen = ircsprintf(buf, ":%s SJOIN %lu %s %s %s:", me.name,
 				    (unsigned long) chptr->channelts,
-				    chptr->chname, lmodebuf, lparabuf);
+				    chptr->chname, modebuf, parabuf);
 
 	t = buf + mlen;
 
@@ -257,96 +353,21 @@ send_members(struct Channel *chptr, struct Client *client_p,
 	t--;
 	*t = '\0';
 	sendto_one(client_p, "%s", buf);
-}
 
-void
-send_channel_modes(struct Client *client_p, struct Channel *chptr)
-{
-	static char modebuf[MODEBUFLEN], parabuf[MODEBUFLEN];
-
-	if(*chptr->chname != '#')
-		return;
-
-	*modebuf = *parabuf = '\0';
-	channel_modes(chptr, client_p, modebuf, parabuf);
-	send_members(chptr, client_p, modebuf, parabuf);
-
-	send_mode_list(client_p, chptr->chname, &chptr->banlist, 'b');
+	burst_mode_list(client_p, chptr->chname, &chptr->banlist, 'b');
 
 	if(IsCapable(client_p, CAP_EX))
-		send_mode_list(client_p, chptr->chname, &chptr->exceptlist, 'e');
+		burst_mode_list(client_p, chptr->chname, &chptr->exceptlist, 'e');
 
 	if(IsCapable(client_p, CAP_IE))
-		send_mode_list(client_p, chptr->chname, &chptr->invexlist, 'I');
+		burst_mode_list(client_p, chptr->chname, &chptr->invexlist, 'I');
 }
 
-/*
- * send_mode_list
- * inputs       - client pointer to server
- *              - pointer to channel
- *              - pointer to top of mode link list to send
- *              - char flag flagging type of mode i.e. 'b' 'e' etc.
- * output       - NONE
- * side effects - sends +b/+e/+I
+/* check_channel_name()
  *
- */
-static void
-send_mode_list(struct Client *client_p, char *chname, dlink_list * top, char flag)
-{
-	dlink_node *lp;
-	struct Ban *banptr;
-	char mbuf[MODEBUFLEN];
-	char pbuf[BUFSIZE];
-	int tlen;
-	int mlen;
-	int cur_len;
-	char *mp;
-	char *pp;
-	int count = 0;
-
-	mlen = ircsprintf(buf, ":%s MODE %s +", me.name, chname);
-	cur_len = mlen;
-
-	mp = mbuf;
-	pp = pbuf;
-
-	DLINK_FOREACH(lp, top->head)
-	{
-		banptr = lp->data;
-		tlen = strlen(banptr->banstr) + 3;
-
-		/* uh oh */
-		if(tlen > MODEBUFLEN)
-			continue;
-
-		if((count >= MAXMODEPARAMS) || ((cur_len + tlen + 2) > (BUFSIZE - 3)))
-		{
-			sendto_one(client_p, "%s%s %s", buf, mbuf, pbuf);
-
-			mp = mbuf;
-			pp = pbuf;
-			cur_len = mlen;
-			count = 0;
-		}
-
-		*mp++ = flag;
-		*mp = '\0';
-		pp += ircsprintf(pp, "%s ", banptr->banstr);
-		cur_len += tlen;
-		count++;
-	}
-
-	if(count != 0)
-		sendto_one(client_p, "%s%s %s", buf, mbuf, pbuf);
-}
-
-
-/*
- * check_channel_name
- * inputs       - channel name
- * output       - true (1) if name ok, false (0) otherwise
- * side effects - check_channel_name - check channel name for
- *                invalid characters
+ * input	- channel name
+ * output	- 1 if valid channel name, else 0
+ * side effects -
  */
 int
 check_channel_name(const char *name)
@@ -364,15 +385,14 @@ check_channel_name(const char *name)
 	return 1;
 }
 
-/*
- * free_channel_list
+/* free_channel_list()
  *
- * inputs       - pointer to dlink_list
- * output       - NONE
- * side effects -
+ * input	- dlink list to free
+ * output	-
+ * side effects - list of b/e/I modes is cleared
  */
 void
-free_channel_list(dlink_list * list)
+free_channel_list(dlink_list *list)
 {
 	dlink_node *ptr;
 	dlink_node *next_ptr;
@@ -390,21 +410,22 @@ free_channel_list(dlink_list * list)
 	list->length = 0;
 }
 
-/*
- * destroy_channel
- * inputs       - channel pointer
- * output       - none
- * side effects - walk through this channel, and destroy it.
+/* destroy_channel()
+ *
+ * input	- channel to destroy
+ * output	-
+ * side effects - channel is obliterated
  */
 static void
 destroy_channel(struct Channel *chptr)
 {
-	dlink_node *ptr, *next;
+	dlink_node *ptr, *next_ptr;
 
-	DLINK_FOREACH_SAFE(ptr, next, chptr->invites.head)
+	DLINK_FOREACH_SAFE(ptr, next_ptr, chptr->invites.head)
 	{
 		del_invite(chptr, ptr->data);
 	}
+
 	/* free all bans/exceptions/denies */
 	free_channel_list(&chptr->banlist);
 	free_channel_list(&chptr->exceptlist);
@@ -419,16 +440,27 @@ destroy_channel(struct Channel *chptr)
 	Count.chan--;
 }
 
-/*
- * channel_member_names
+/* channel_pub_or_secret()
  *
- * inputs       - pointer to client struct requesting names
- *              - pointer to channel block
- *              - pointer to name of channel
- *              - show ENDOFNAMES numeric or not
- *                (don't want it with /names with no params)
- * output       - none
- * side effects - lists all names on given channel
+ * input	- channel
+ * output	- "=" if public, "@" if secret, else "*"
+ * side effects	-
+ */
+static const char *
+channel_pub_or_secret(struct Channel *chptr)
+{
+	if(PubChannel(chptr))
+		return ("=");
+	else if(SecretChannel(chptr))
+		return ("@");
+	return ("*");
+}
+
+/* channel_member_names()
+ *
+ * input	- channel to list, client to list to, show endofnames
+ * output	-
+ * side effects - client is given list of users on channel
  */
 void
 channel_member_names(struct Channel *chptr, struct Client *client_p, int show_eon)
@@ -490,37 +522,15 @@ channel_member_names(struct Channel *chptr, struct Client *client_p, int show_eo
 			   me.name, client_p->name, chptr->chname);
 }
 
-/*
- * channel_pub_or_secret
+/* add_invite()
  *
- * inputs       - pointer to channel
- * output       - string pointer "=" if public, "@" if secret else "*"
- * side effects - NONE
- */
-const char *
-channel_pub_or_secret(struct Channel *chptr)
-{
-	if(PubChannel(chptr))
-		return ("=");
-	else if(SecretChannel(chptr))
-		return ("@");
-	return ("*");
-}
-
-/*
- * add_invite
- *
- * inputs       - pointer to channel block
- *              - pointer to client to add invite to
- * output       - none
- * side effects - adds client to invite list
- *
- * This one is ONLY used by m_invite.c
+ * input	- channel to add invite to, client to add
+ * output	-
+ * side effects - client is added to invite list
  */
 void
 add_invite(struct Channel *chptr, struct Client *who)
 {
-
 	del_invite(chptr, who);
 	/*
 	 * delete last link in chain if the list is max length
@@ -540,15 +550,11 @@ add_invite(struct Channel *chptr, struct Client *who)
 	dlinkAddAlloc(chptr, &who->user->invited);
 }
 
-/*
- * del_invite
+/* del_invite()
  *
- * inputs       - pointer to dlink_list
- *              - pointer to client to remove invites from
- * output       - none
- * side effects - Delete Invite block from channel invite list
- *                and client invite list
- *
+ * input	- channel to remove invite from, client to remove
+ * output	-
+ * side effects - user is removed from invite list, if exists
  */
 void
 del_invite(struct Channel *chptr, struct Client *who)
@@ -557,62 +563,44 @@ del_invite(struct Channel *chptr, struct Client *who)
 	dlinkFindDestroy(&who->user->invited, chptr);
 }
 
-/*
- * is_banned
+/* is_banned()
  *
- * inputs       - pointer to channel block
- *              - pointer to client to check access fo
- * output       - returns an int 0 if not banned,
- *                CHFL_BAN if banned
- *
- * IP_BAN_ALL from comstud
- * always on...
- *
- * +e code from orabidoo
+ * input	- channel to check bans for, user to check bans against
+ *                optional prebuilt buffers
+ * output	- 1 if banned, else 0
+ * side effects -
  */
 int
-is_banned(struct Channel *chptr, struct Client *who)
+is_banned(struct Channel *chptr, struct Client *who,
+	  const char *s, const char *s2)
 {
 	char src_host[NICKLEN + USERLEN + HOSTLEN + 6];
 	char src_iphost[NICKLEN + USERLEN + HOSTLEN + 6];
-
-	if(!IsPerson(who))
-		return (0);
-
-	ircsprintf(src_host, "%s!%s@%s", who->name, who->username, who->host);
-	ircsprintf(src_iphost, "%s!%s@%s", who->name, who->username, who->localClient->sockhost);
-
-	return (check_banned(chptr, who, src_host, src_iphost));
-}
-
-/*
- * check_banned
- *
- * inputs       - pointer to channel block
- *              - pointer to client to check access fo
- *              - pointer to pre-formed nick!user@host
- *              - pointer to pre-formed nick!user@ip
- * output       - returns an int 0 if not banned,
- *                CHFL_BAN if banned
- *
- * IP_BAN_ALL from comstud
- * always on...
- *
- * +e code from orabidoo
- */
-static int
-check_banned(struct Channel *chptr, struct Client *who, char *s, char *s2)
-{
-	dlink_node *ban;
-	dlink_node *except;
+	dlink_node *ptr;
 	struct Ban *actualBan = NULL;
 	struct Ban *actualExcept = NULL;
 
-	DLINK_FOREACH(ban, chptr->banlist.head)
+	if(!MyClient(who))
+		return 0;
+
+	/* if the buffers havent been built, do it here */
+	if(s == NULL)
 	{
-		actualBan = ban->data;
+		ircsprintf(src_host, "%s!%s@%s", who->name, who->username, 
+			   who->host);
+		ircsprintf(src_iphost, "%s!%s@%s", who->name, who->username, 
+			   who->localClient->sockhost);
+
+		s = src_host;
+		s2 = src_iphost;
+	}
+
+	DLINK_FOREACH(ptr, chptr->banlist.head)
+	{
+		actualBan = ptr->data;
 		if(match(actualBan->banstr, s) ||
-		   match(actualBan->banstr, s2) || match_cidr(actualBan->banstr, s2))
+		   match(actualBan->banstr, s2) || 
+		   match_cidr(actualBan->banstr, s2))
 			break;
 		else
 			actualBan = NULL;
@@ -620,12 +608,13 @@ check_banned(struct Channel *chptr, struct Client *who, char *s, char *s2)
 
 	if((actualBan != NULL) && ConfigChannel.use_except)
 	{
-		DLINK_FOREACH(except, chptr->exceptlist.head)
+		DLINK_FOREACH(ptr, chptr->exceptlist.head)
 		{
-			actualExcept = except->data;
+			actualExcept = ptr->data;
 
 			if(match(actualExcept->banstr, s) ||
-			   match(actualExcept->banstr, s2) || match_cidr(actualExcept->banstr, s2))
+			   match(actualExcept->banstr, s2) || 
+			   match_cidr(actualExcept->banstr, s2))
 			{
 				return CHFL_EXCEPTION;
 			}
@@ -635,14 +624,11 @@ check_banned(struct Channel *chptr, struct Client *who, char *s, char *s2)
 	return ((actualBan ? CHFL_BAN : 0));
 }
 
-/* small series of "helper" functions */
-
-/*
- * can_join
+/* can_join()
  *
- * inputs       -
- * output       -
- * side effects - NONE
+ * input	- client to check, channel to check for, key
+ * output	- reason for not being able to join, else 0
+ * side effects -
  */
 int
 can_join(struct Client *source_p, struct Channel *chptr, char *key)
@@ -655,11 +641,13 @@ can_join(struct Client *source_p, struct Channel *chptr, char *key)
 
 	s_assert(source_p->localClient != NULL);
 
-	ircsprintf(src_host, "%s!%s@%s", source_p->name, source_p->username, source_p->host);
-	ircsprintf(src_iphost, "%s!%s@%s", source_p->name,
-		   source_p->username, source_p->localClient->sockhost);
+	ircsprintf(src_host, "%s!%s@%s", 
+		   source_p->name, source_p->username, source_p->host);
+	ircsprintf(src_iphost, "%s!%s@%s",
+		   source_p->name, source_p->username,
+		   source_p->localClient->sockhost);
 
-	if((check_banned(chptr, source_p, src_host, src_iphost)) == CHFL_BAN)
+	if((is_banned(chptr, source_p, src_host, src_iphost)) == CHFL_BAN)
 		return (ERR_BANNEDFROMCHAN);
 
 	if(chptr->mode.mode & MODE_INVITEONLY)
@@ -696,16 +684,11 @@ can_join(struct Client *source_p, struct Channel *chptr, char *key)
 	return 0;
 }
 
-/*
- * can_send
+/* can_send()
  *
- * inputs       - pointer to channel
- *              - pointer to client
- * outputs      - CAN_SEND_OPV if op or voiced on channel
- *              - CAN_SEND_NONOP if can send to channel but is not an op
- *                CAN_SEND_NO if they cannot send to channel
- *                Just means they can send to channel.
- * side effects - NONE
+ * input	- user to check in channel, membership pointer
+ * output	- whether can explicitly send or not, else CAN_SEND_NONOP
+ * side effects -
  */
 int
 can_send(struct Channel *chptr, struct Client *source_p, 
@@ -736,7 +719,7 @@ can_send(struct Channel *chptr, struct Client *source_p,
 		return CAN_SEND_NO;
 
 	if(ConfigChannel.quiet_on_ban && MyClient(source_p) &&
-	   (is_banned(chptr, source_p) == CHFL_BAN))
+	   (is_banned(chptr, source_p, NULL, NULL) == CHFL_BAN))
 	{
 		return (CAN_SEND_NO);
 	}
@@ -861,20 +844,22 @@ check_splitmode(void *unused)
 }
 
 
-/*
- * input	- Channel to allocate a new topic for
- * output	- Success or failure
- * side effects - Allocates a new topic
+/* allocate_topic()
+ *
+ * input	- channel to allocate topic for
+ * output	- 1 on success, else 0
+ * side effects - channel gets a topic allocated
  */
-
-int
+static void
 allocate_topic(struct Channel *chptr)
 {
 	void *ptr;
+
 	if(chptr == NULL)
-		return FALSE;
+		return;
 
 	ptr = BlockHeapAlloc(topic_heap);
+
 	/* Basically we allocate one large block for the topic and
 	 * the topic info.  We then split it up into two and shove it
 	 * in the chptr 
@@ -883,19 +868,22 @@ allocate_topic(struct Channel *chptr)
 	chptr->topic_info = (char *) ptr + TOPICLEN + 1;
 	*chptr->topic = '\0';
 	*chptr->topic_info = '\0';
-	return TRUE;
-
 }
 
-void
+/* free_topic()
+ *
+ * input	- channel which has topic to free
+ * output	-
+ * side effects - channels topic is free'd
+ */
+static void
 free_topic(struct Channel *chptr)
 {
 	void *ptr;
 
-	if(chptr == NULL)
+	if(chptr == NULL || chptr->topic == NULL)
 		return;
-	if(chptr->topic == NULL)
-		return;
+
 	/* This is safe for now - If you change allocate_topic you
 	 * MUST change this as well
 	 */
@@ -905,11 +893,15 @@ free_topic(struct Channel *chptr)
 	chptr->topic_info = NULL;
 }
 
-/*
- * set_channel_topic - Sets the channel topic
+/* set_channel_topic()
+ *
+ * input	- channel, topic to set, topic info and topic ts
+ * output	-
+ * side effects - channels topic, topic info and TS are set.
  */
 void
-set_channel_topic(struct Channel *chptr, const char *topic, const char *topic_info, time_t topicts)
+set_channel_topic(struct Channel *chptr, const char *topic,
+		  const char *topic_info, time_t topicts)
 {
 	if(strlen(topic) > 0)
 	{
@@ -927,24 +919,12 @@ set_channel_topic(struct Channel *chptr, const char *topic, const char *topic_in
 	}
 }
 
-static int channel_capabs[] = { CAP_EX, CAP_IE, CAP_UID };
-#define NCHCAPS         (sizeof(channel_capabs)/sizeof(int))
-#define NCHCAP_COMBOS   (1 << NCHCAPS)
-
-static struct ChCapCombo chcap_combos[NCHCAP_COMBOS];
-
-/*
- * channel_modes
- * inputs       - pointer to channel
- *              - pointer to client
- *              - pointer to mode buf
- *              - pointer to parameter buf
- * output       - NONE
- * side effects - write the "simple" list of channel modes for channel
- * chptr onto buffer mbuf with the parameters in pbuf.
+/* channel_modes()
  *
- * NOTE: m_join.c uses this function and depends on the trailing spaces
- *       in pbuf if there is a key or limit.
+ * input	- channel, client to build for, modebufs to build to
+ * output	-
+ * side effects - user gets list of "simple" modes based on channel access.
+ *                NOTE: m_join.c depends on trailing spaces in pbuf
  */
 void
 channel_modes(struct Channel *chptr, struct Client *client_p, char *mbuf, char *pbuf)

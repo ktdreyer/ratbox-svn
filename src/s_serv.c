@@ -1490,7 +1490,7 @@ server_burst(struct Client *client_p)
 		chptr = ptr->data;
 		if(dlink_list_length(&chptr->members) > 0)
 		{
-			send_channel_modes(client_p, chptr);
+			burst_channel(chptr, client_p);
 			hinfo.chptr = chptr;
 			hinfo.client = client_p;
 			hook_call_event(h_burst_channel_id, &hinfo);
