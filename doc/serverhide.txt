@@ -1,0 +1,121 @@
+                             Server Hide Reference
+
+   $Id$
+
+   Copyright (c) 2001 by ircd-hybrid team
+
+     ----------------------------------------------------------------------
+
+   Due to pressures from abusers, the Hybrid developers have created a set of
+   options to limit what users can and cannot do on the server. Each option
+   can be enabled or disabled at runtime.
+
+   This document describes the Hybrid 7 implementation of the server hiding
+   ideas originated (and credited to) numerous people.
+
+     * 
+
+       LINKS as a file: This option is always enabled. It will generate a
+       file at a certain interval, defined by the links_delay in ircd.conf,
+       that contains the current LINKS data. This data is sent to users
+       whenever a LINKS is requested. Opers will always see the current
+       server structure.
+
+       The file that the LINKS data is stored in is by default etc/links.txt.
+
+       The benefits of this are that transient splits will not be seen by
+       users issuing LINKS commands, and if a server is split, users can
+       still see what other servers are normally available.
+
+     * 
+
+       Flattened LINKS: This option forces every server to look as if it is
+       connected to the local server. Users will see a flat LINKS tree.
+
+       The benefit to using LINKS flattening is that users cannot get
+       information on how servers are routed.
+
+       The flatten_links in the serverhide {} block in the ircd.conf controls
+       this feature.
+
+       As a side effect, all netsplits will appear to originate from the
+       local server.
+
+       +--------------------------------------------------------------------+
+       | Flattened LINKS is needed for any network that uses the hidden hub |
+       | option. See below for more details.                                |
+       +--------------------------------------------------------------------+
+
+     * 
+
+       Hidden server option: This option will hide the server from a
+       flattened LINKS list on other servers. Opers will of course see the
+       true routing of the network.
+
+       This is controlled by the hidden option in ircd.conf.
+
+       +--------------------------------------------------------------------+
+       | Technically, this code is a hack. With this option enabled, the    |
+       | server will prepend '(H) ' to the server info field when           |
+       | connecting to other servers.                                       |
+       +--------------------------------------------------------------------+
+
+     * 
+
+       The allow_hidden option is needed to allow servers to use the hidden
+       server option described above.
+
+     * 
+
+       The hide_servers option forces the server to not be shown when a user
+       issues WHOIS and other commands which may show what server a user is
+       on.
+
+       To be effective, this option must be used network wide.
+
+     * 
+
+       The disable_remote_commands option takes care of most of the remaining
+       issues. These include, for example, ADMIN some.hub.server, VERSION
+       someuser, and similar commands. A server with this option enabled will
+       only prevent local users from issuing remote commands. Remote users
+       will not be affected.
+
+       Remote WHOIS is not blocked. It is, however, restricted to only
+       querying WHOIS nick nick. The ircd will disregard the server parameter
+       and always use queried nick.
+
+     * 
+
+       The disable_local_channels will not allow users to join local
+       &channels. This option is a little extreme, taking away a lot of user
+       privilege. It was created to handle the possible hole in server hide
+       shown below.
+
+   Each item is briefly described in the serverhide {} block in ircd.conf.
+
+     ----------------------------------------------------------------------
+
+                             Questions and Answers
+
+&channels and remote WHOIS
+
+   I brought this up a short while ago; and there are some holes in server
+   hide at the present time with local channels. The issue I raised, if a
+   user is known to be in a local channel, issuing WHOIS servera nick, WHOIS
+   serverb nick, etc. until the local channel is seen in the WHOIS data does
+   not exist. With disable_remote_commands enabled, the WHOIS is still sent
+   (in order to see idle time and the away message) but the server queried
+   will always be the server the user is on. The user can never use remote
+   WHOIS to determine the server a user is on.
+
+   If an abuser knows that a user is on a specific &channel, they could still
+   connect to each server until they find the server. I don't believe there
+   is a way we can avoid this unless local channels are completely disabled
+   with server hiding code enabled.
+
+     ----------------------------------------------------------------------
+
+                                     Index
+
+   XXX - Fill me in with other questions and possible issues

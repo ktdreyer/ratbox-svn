@@ -1,14 +1,8 @@
                          Message Customization Overview
 
-  W. Campbell
-
-   wcampbel@botbay.net
-
    $Id$
 
    Copyright (c) 2001 by ircd-hybrid team
-
-   $Date$
 
      ----------------------------------------------------------------------
 

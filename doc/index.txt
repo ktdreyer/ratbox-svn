@@ -30,6 +30,7 @@ opermyth.txt            - Oper myth's, describes what opers can and cannot do
 opers.txt               - The document shown on /quote HELP
 resv.txt		- Outline of the RESV command.
 server-version-info     - Overview of the flags shown in /version
+serverhide.txt          - Information about the server hide options
 simple.conf             - A simple ircd.conf useful for beginning admins
 users.txt		- New user and channel modes in hybrid, used in
                           /quote HELP by users.

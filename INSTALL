@@ -4,8 +4,6 @@
 
    Copyright (c) 2001 by ircd-hybrid team
 
-   $Date$
-
      ----------------------------------------------------------------------
 
    +------------------------------------------------------------------------+
@@ -33,9 +31,6 @@
        this version. Other good reads are doc/whats-new.txt, BUGS,
        doc/example.conf, and README.FIRST.
 
-       An example.conf for efnet is in doc/ with the values "approved" at
-       14/12/01
-
    2. 
 
        Run the configure script. It will create include/setup.h and the
@@ -59,6 +54,15 @@
             --enable-devpoll - Enable the superior /dev/poll support on
             Solaris. Linux /dev/poll is broken and will not work with this
             option.
+
+          * 
+
+            --enable-rtsigio - Enable the experimental Linux RealTime Signal
+            I/O system. This code works, but is still considered experimental
+            and therefore not for use on production servers.
+
+              Note: The Hybrid Team would like feedback from people who are
+              willing to test this option.
 
           * 
 
