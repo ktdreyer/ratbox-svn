@@ -1,3 +1,15 @@
+androsyn    2003/02/14 06:07:55 UTC	(20030214_5)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  I will compile before I commit
+  
+  Revision  Changes    Path
+  7.370     +8 -7      ircd-ratbox/src/client.c
+
+
+
 androsyn    2003/02/14 05:42:58 UTC	(20030214_4)
 
   Modified files:
