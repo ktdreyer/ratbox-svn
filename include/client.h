@@ -427,7 +427,7 @@ struct exit_client_hook
 
 #define FLAGS_ID     (FLAGS_NEEDID | FLAGS_GOTID)
 
-#define CLICAP_NAMESOV		0x0001
+#define CLICAP_MULTI_PREFIX	0x0001
 
 /*
  * flags macros.

@@ -381,6 +381,7 @@ channel_member_names(struct Channel *chptr, struct Client *client_p, int show_eo
 	int tlen;
 	int cur_len;
 	int is_member;
+	int stack = IsCapable(client_p, CLICAP_MULTI_PREFIX);
 
 	if(ShowChannel(client_p, chptr))
 	{
@@ -401,11 +402,8 @@ channel_member_names(struct Channel *chptr, struct Client *client_p, int show_eo
 			if(IsInvisible(target_p) && !is_member)
 				continue;
 
-			tlen = strlen(target_p->name) + 1;
-			if(is_chanop_voiced(msptr))
-				tlen++;
-
-			if(cur_len + tlen >= BUFSIZE - 3)
+			/* space, possible "@+" prefix */
+			if(cur_len + strlen(target_p->name) + 3 >= BUFSIZE-3)
 			{
 				*(t - 1) = '\0';
 				sendto_one(client_p, "%s", lbuf);
@@ -413,7 +411,7 @@ channel_member_names(struct Channel *chptr, struct Client *client_p, int show_eo
 				t = lbuf + mlen;
 			}
 
-			ircsprintf(t, "%s%s ", find_channel_status(msptr, 0),
+			tlen = ircsprintf(t, "%s%s ", find_channel_status(msptr, stack),
 				   target_p->name);
 
 			cur_len += tlen;

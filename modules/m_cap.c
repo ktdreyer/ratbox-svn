@@ -69,21 +69,8 @@ static struct clicap
 	int flags;
 	int namelen;
 } clicap_list[] = {
-#if 0
-	_CLICAP("x-names-ov", CLICAP_NAMESOV, 0, 0),
-#endif
-	_CLICAP("ircd-ratbox.org/dummy-sticky", 0x001, 0, CLICAP_FLAGS_STICKY),
-	_CLICAP("ircd-ratbox.org/dummy-needack", 0x002, 0x004, 0),
-	_CLICAP("ircd-ratbox.org/dummy-sticky-needack", 0x008, 0x010, CLICAP_FLAGS_STICKY),
-	_CLICAP("ircd-ratbox.org/dummy-normal", 0x020, 0, 0),
-	_CLICAP("ircd-ratbox.org/dummy-thisisareallylongcapabilitynamethatshouldtesthowithandlesbeingreallyreallylong", 0x040, 0, 0),
-	_CLICAP("ircd-ratbox.org/dummy-hisisareallylongcapabilitynamethatshouldtesthowithandlesbeingreallyreallylong", 0x080, 0, 0),
-	_CLICAP("ircd-ratbox.org/dummy-isisareallylongcapabilitynamethatshouldtesthowithandlesbeingreallyreallylong", 0x100, 0, 0),
-	_CLICAP("ircd-ratbox.org/dummy-sisareallylongcapabilitynamethatshouldtesthowithandlesbeingreallyreallylong", 0x200, 0, 0),
-	_CLICAP("ircd-ratbox.org/dummy-isareallylongcapabilitynamethatshouldtesthowithandlesbeingreallyreallylong", 0x400, 0, 0),
+	_CLICAP("multi-prefix",	CLICAP_MULTI_PREFIX, 0, 0)
 };
-
-#define CLICAP_STICKY (0x001|0x008|0x010)
 
 #define CLICAP_LIST_LEN (sizeof(clicap_list) / sizeof(struct clicap))
 
@@ -317,7 +304,11 @@ cap_clear(struct Client *source_p, const char *arg)
 			source_p->localClient->caps ? source_p->localClient->caps : -1, 1);
 
 	/* XXX - sticky capabs */
+#ifdef CLICAP_STICKY
 	source_p->localClient->caps = source_p->localClient->caps & CLICAP_STICKY;
+#else
+	source_p->localClient->caps = 0;
+#endif
 }
 
 static void

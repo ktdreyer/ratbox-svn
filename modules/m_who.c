@@ -162,7 +162,7 @@ m_who(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 		 */
 		if(lp != NULL)
 			do_who(source_p, target_p, chptr->chname,
-			       find_channel_status(lp->data, 0));
+			       find_channel_status(lp->data, IsCapable(source_p, CLICAP_MULTI_PREFIX)));
 		else
 			do_who(source_p, target_p, NULL, "");
 
@@ -338,6 +338,7 @@ do_who_on_channel(struct Client *source_p, struct Channel *chptr,
 	struct Client *target_p;
 	struct membership *msptr;
 	dlink_node *ptr;
+	int combine = IsCapable(source_p, CLICAP_MULTI_PREFIX);
 
 	DLINK_FOREACH(ptr, chptr->members.head)
 	{
@@ -349,7 +350,7 @@ do_who_on_channel(struct Client *source_p, struct Channel *chptr,
 
 		if(member || !IsInvisible(target_p))
 			do_who(source_p, target_p, chptr->chname,
-			       find_channel_status(msptr, 0));
+			       find_channel_status(msptr, combine));
 	}
 }
 
