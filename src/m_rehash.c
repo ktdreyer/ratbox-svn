@@ -174,7 +174,7 @@ int m_rehash(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       else if(irccmp(parv[1],"OMOTD") == 0)
         {
           sendto_ops("%s is forcing re-reading of OPER MOTD file",parv[0]);
-          ReadMessageFile( &ConfigFileEntry.motd );
+          ReadMessageFile( &ConfigFileEntry.opermotd );
           found = YES;
         }
       else if(irccmp(parv[1],"HELP") == 0)
