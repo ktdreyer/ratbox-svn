@@ -1,3 +1,18 @@
+leeh        2002/11/11 18:33:29 UTC	(20021111_0)
+
+  Modified files:
+    include              ircd.h 
+    src                  ircd.c ircd_signal.c 
+  Log:
+  - Hwys patch to allow kill -USR1 to force a reread of the MOTD file.
+  
+  Revision  Changes    Path
+  7.55      +1 -0      ircd-ratbox/include/ircd.h
+  7.258     +8 -0      ircd-ratbox/src/ircd.c
+  7.13      +13 -0     ircd-ratbox/src/ircd_signal.c
+
+
+
 leeh        2002/11/10 12:26:55 UTC	(20021110_0)
 
   Modified files:
