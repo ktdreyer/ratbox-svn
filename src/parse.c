@@ -230,7 +230,7 @@ int parse(struct Client *cptr, char *pbuffer, char *bufend)
 
   /* EOB is 3 chars long but is not a numeric */
 
-  if( *(ch + 3) == ' ' ) && /* ok, lets see if its a possible numeric.. */
+  if( *(ch + 3) == ' '  && /* ok, lets see if its a possible numeric.. */
       IsDigit(*ch) && IsDigit(*(ch + 1)) && IsDigit(*(ch + 2)) )
     {
       mptr = (struct Message *)NULL;
