@@ -1,3 +1,7 @@
+*** 20011103_2 by wcampbel
+Updated mkpasswd from the master site.
+
+
 *** 20011103_1 by db
 - backwards test broke m_invite.c
 
