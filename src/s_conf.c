@@ -2363,7 +2363,7 @@ WriteKlineOrDline( KlineType type,
     oper_reason = "";
 
   if(type==KLINE_TYPE)
-    ircsprintf(buffer, "\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%ld\n",
+    ircsprintf(buffer, "\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%ld\n",
                user,
 	       host,
                reason,
@@ -2372,7 +2372,7 @@ WriteKlineOrDline( KlineType type,
 	       get_oper_name(source_p),
                (long) cur_time);
   else
-    ircsprintf(buffer, "\"%s\",\"%s\",\"%s\",\"%s\",%ld\n",
+    ircsprintf(buffer, "\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%ld\n",
                host,
                reason,
 	       oper_reason,
