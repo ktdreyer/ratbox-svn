@@ -953,17 +953,6 @@ int attach_conf(struct Client *cptr,struct ConfItem *aconf)
   return 0;
 }
 
-struct ConfItem *find_admin()
-{
-  struct ConfItem *aconf;
-
-  for (aconf = ConfigItemList; aconf; aconf = aconf->next)
-    if (aconf->status & CONF_ADMIN && aconf->user)
-      break;
-  
-  return (aconf);
-}
-
 /*
  * attach_confs - Attach all possible CONF lines to a client
  * if the name passed matches that for the conf file (for non-C/N lines) 

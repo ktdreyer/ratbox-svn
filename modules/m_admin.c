@@ -133,24 +133,22 @@ static int ms_admin(struct Client *cptr, struct Client *sptr,
  */
 static void do_admin( struct Client *sptr )
 {
-  struct ConfItem *aconf;
-
   if (IsPerson(sptr))
     sendto_realops_flags(FLAGS_SPY,
                          "ADMIN requested by %s (%s@%s) [%s]", sptr->name,
                          sptr->username, sptr->host, sptr->user->server);
-  if ((aconf = find_admin()))
-    {
-      sendto_one(sptr, form_str(RPL_ADMINME),
-                 me.name, sptr->name, me.name);
-      sendto_one(sptr, form_str(RPL_ADMINLOC1),
-                 me.name, sptr->name, aconf->host);
-      sendto_one(sptr, form_str(RPL_ADMINLOC2),
-                 me.name, sptr->name, aconf->passwd);
-      sendto_one(sptr, form_str(RPL_ADMINEMAIL),
-                 me.name, sptr->name, aconf->user);
-    }
-  else
-    sendto_one(sptr, form_str(ERR_NOADMININFO),
-               me.name, sptr->name, me.name);
+
+  sendto_one(sptr, form_str(RPL_ADMINME),
+	     me.name, sptr->name, me.name);
+
+  if (AdminInfo.name != NULL)
+    sendto_one(sptr, form_str(RPL_ADMINLOC1),
+	       me.name, sptr->name, AdminInfo.name);
+  if (AdminInfo.description != NULL)
+    sendto_one(sptr, form_str(RPL_ADMINLOC2),
+	       me.name, sptr->name, AdminInfo.description);
+
+  if (AdminInfo.email != NULL)
+    sendto_one(sptr, form_str(RPL_ADMINEMAIL),
+	       me.name, sptr->name, AdminInfo.email);
 }

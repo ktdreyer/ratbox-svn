@@ -74,14 +74,11 @@ struct ConfItem
 };
 
 #define CONF_ILLEGAL            0x80000000
-#define CONF_MATCH              0x40000000
 #define CONF_QUARANTINED_NICK   0x0001
 #define CONF_CLIENT             0x0002
 #define CONF_SERVER             0x0004
 #define CONF_OPERATOR           0x0010
 #define CONF_KILL               0x0040
-#define CONF_ADMIN              0x0080
-#define CONF_GENERAL            0x0100
 
 #define CONF_CLASS              0x0400
 #define CONF_LEAF               0x0800
@@ -211,6 +208,13 @@ struct server_info
   unsigned long ip;
 };
 
+struct admin_info
+{
+  char        *name;
+  char        *description;
+  char        *email;
+};
+
 /* bleh. have to become global. */
 extern int scount;
 
@@ -226,6 +230,7 @@ extern struct ConfItem* ConfigItemList;        /* GLOBAL - conf list head */
 extern int              specific_virtual_host; /* GLOBAL - used in s_bsd.c */
 extern struct config_file_entry ConfigFileEntry;/* GLOBAL - defined in ircd.c*/
 extern struct server_info ServerInfo;	       /* GLOBAL - defined in ircd.c */
+extern struct admin_info  AdminInfo;           /* GLOBAL - defined in ircd.c */
 
 dlink_list temporary_klines;
 dlink_list temporary_ip_klines;
@@ -252,7 +257,6 @@ extern int              check_client(struct Client* cptr, struct Client *sptr,
 				     char *);
 extern int              attach_Iline(struct Client* client,
 				     const char* username);
-extern struct ConfItem* find_admin(void);
 extern void             det_confs_butmask (struct Client *, int);
 extern int              detach_conf (struct Client *, struct ConfItem *);
 extern struct ConfItem* det_confs_butone (struct Client *, struct ConfItem *);

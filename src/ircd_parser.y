@@ -1,4 +1,4 @@
-/************************************************************************
+/***********************************************************************
  *   IRC - Internet Relay Chat, src/ircd_parser.y
  *   Copyright (C) 2000 Diane Bruce <db@db.net>
  *   Copyright (C) 1990 Jarkko Oikarinen and
@@ -346,21 +346,7 @@ serverinfo_hub:         HUB '=' TYES ';'
  * admin section
  ***************************************************************************/
 
-admin_entry: ADMIN 
-  {
-    if(yy_aconf)
-      {
-        free_conf(yy_aconf);
-        yy_aconf = (struct ConfItem *)NULL;
-      }
-    yy_aconf=make_conf();
-    yy_aconf->status = CONF_ADMIN;
-  }
- '{' admin_items '}' ';' 
-  {
-    conf_add_conf(yy_aconf);
-    yy_aconf = (struct ConfItem *)NULL;
-  }; 
+admin_entry: ADMIN  '{' admin_items '}' ';' 
 
 admin_items:    admin_items admin_item |
                 admin_item
@@ -370,29 +356,20 @@ admin_item:     admin_name | admin_description |
 
 admin_name:     NAME '=' QSTRING ';' 
   {
-    if (yy_aconf->passwd)
-      MyFree(yy_aconf->passwd);
-    if(yylval.string != NULL)
-      DupString(yy_aconf->passwd, yylval.string);
-    yylval.string = NULL;
+    MyFree(AdminInfo.name);
+    DupString(AdminInfo.name, yylval.string);
   };
 
 admin_email:    EMAIL '=' QSTRING ';'
   {
-    if (yy_aconf->user)
-      MyFree(yy_aconf->user);
-    if (yylval.string != NULL)
-      DupString(yy_aconf->user, yylval.string);
-    yylval.string = NULL;
+    MyFree(AdminInfo.email);
+    DupString(AdminInfo.email, yylval.string);
   };
 
 admin_description:      DESCRIPTION '=' QSTRING ';'
   {
-    if (yy_aconf->host)
-      MyFree(yy_aconf->host);
-    if(yylval.string != NULL)
-      DupString(yy_aconf->host, yylval.string);
-    yylval.string = NULL;
+    MyFree(AdminInfo.description);
+    DupString(AdminInfo.description, yylval.string);
   };
 
 /***************************************************************************
@@ -479,11 +456,8 @@ oper_item:      oper_name  | oper_user | oper_password |
 
 oper_name:      NAME '=' QSTRING ';'
   {
-    if (yy_aconf->name)
-      MyFree(yy_aconf->name);
-    if(yylval.string != NULL)
-      DupString(yy_aconf->name, yylval.string);
-    yylval.string = NULL;
+    MyFree(yy_aconf->name);
+    DupString(yy_aconf->name, yylval.string);
   };
 
 oper_user:      USER '='  QSTRING ';'
@@ -496,41 +470,31 @@ oper_user:      USER '='  QSTRING ';'
       {
 	*p = '\0';
 	DupString(new_user,yylval.string);
-	if (yy_aconf->user)
-	  MyFree(yy_aconf->user);
+	MyFree(yy_aconf->user);
 	yy_aconf->user = new_user;
 	p++;
 	DupString(new_host,p);
-	if (yy_aconf->host)
-	  MyFree(yy_aconf->host);
+	MyFree(yy_aconf->host);
 	yy_aconf->host = new_host;
       }
     else
       {
-       if (yy_aconf->host)
-         MyFree(yy_aconf->host);
+	MyFree(yy_aconf->host);
    	DupString(yy_aconf->host, yylval.string);
    	DupString(yy_aconf->user,"*");
-   	yy_aconf->user = NULL;
       }
   };
 
 oper_password:  PASSWORD '=' QSTRING ';'
   {
-    if (yy_aconf->passwd)
-      MyFree(yy_aconf->passwd);
-    if (yylval.string != NULL)
-      DupString(yy_aconf->passwd, yylval.string);
-    yylval.string = NULL;
+    MyFree(yy_aconf->passwd);
+    DupString(yy_aconf->passwd, yylval.string);
   };
 
 oper_class:     CLASS '=' QSTRING ';'
   {
-    if (yy_aconf->className)
-      MyFree(yy_aconf->className);
-    if(yylval.string != NULL)
-      DupString(yy_aconf->className, yylval.string);
-    yylval.string = NULL;
+    MyFree(yy_aconf->className);
+    DupString(yy_aconf->className, yylval.string);
   };
 
 oper_global_kill: GLOBAL_KILL '=' TYES ';'
@@ -581,9 +545,7 @@ oper_admin: ADMIN '=' TYES ';' { yy_aconf->port |= CONF_OPER_ADMIN;}
 
 class_entry:    CLASS 
   {
-    if(class_name_var)
-      MyFree(class_name_var);
-
+    MyFree(class_name_var);
     class_name_var = NULL;
     class_ping_time_var = 0;
     class_number_per_ip_var = 0;
@@ -598,7 +560,7 @@ class_entry:    CLASS
               class_sendq_var );
 
     MyFree(class_name_var);
-    class_name_var = (char *)NULL;
+    class_name_var = NULL;
   };
 
 class_items:    class_items class_item |
@@ -614,10 +576,8 @@ class_item:     class_name |
 
 class_name:     NAME '=' QSTRING ';' 
   {
-    if (class_name_var)
-      MyFree(class_name_var);
-    if(yylval.string != NULL)
-      DupString(class_name_var, yylval.string);
+    MyFree(class_name_var);
+    DupString(class_name_var, yylval.string);
   };
 
 class_ping_time:        PING_TIME '=' NUMBER ';'
@@ -675,11 +635,8 @@ listen_item:    listen_name | listen_port | listen_address | error
 
 listen_name:    NAME '=' QSTRING ';' 
   {
-    if (yy_aconf->host)
-      MyFree(yy_aconf->host);
-    if (yylval.string != NULL)
-      DupString(yy_aconf->host, yylval.string);
-    yylval.string = NULL;
+    MyFree(yy_aconf->host);
+    DupString(yy_aconf->host, yylval.string);
   };
 
 listen_port:    PORT '=' NUMBER ';'
@@ -689,11 +646,8 @@ listen_port:    PORT '=' NUMBER ';'
 
 listen_address: IP '=' QSTRING ';'
   {
-    if (yy_aconf->passwd)
-      MyFree(yy_aconf->passwd);
-    if(yylval.string != NULL)
-      DupString(yy_aconf->passwd, yylval.string);
-    yylval.string = NULL;
+    MyFree(yy_aconf->passwd);
+    DupString(yy_aconf->passwd, yylval.string);
   };
 
 /***************************************************************************
@@ -753,29 +707,22 @@ auth_user:   USER '=' QSTRING ';'
     char *new_user;
     char *new_host;
 
-    if(yylval.string != NULL)
+    if((p = strchr(yylval.string,'@')))
       {
-	if((p = strchr(yylval.string,'@')))
-	  {
-	    *p = '\0';
-	    DupString(new_user, yylval.string);
-	    if (yy_aconf->user)
-	      MyFree(yy_aconf->user);
-	    yy_aconf->user = new_user;
-	    p++;
-	    if (yy_aconf->host)
-	      MyFree(yy_aconf->host);
-	    DupString(new_host,p);
-	    yy_aconf->host = new_host;
-	  }
-	else
-	  {
-	    if (yy_aconf->host)
-	      MyFree(yy_aconf->host);
-	    DupString(yy_aconf->host, yylval.string);
-	    yylval.string = NULL;
-	    DupString(yy_aconf->user,"*");
-	  }
+	*p = '\0';
+	DupString(new_user, yylval.string);
+	MyFree(yy_aconf->user);
+	yy_aconf->user = new_user;
+	p++;
+	MyFree(yy_aconf->host);
+	DupString(new_host,p);
+	yy_aconf->host = new_host;
+      }
+    else
+      {
+	MyFree(yy_aconf->host);
+	DupString(yy_aconf->host, yylval.string);
+	DupString(yy_aconf->user,"*");
       }
   };
              |
@@ -792,20 +739,14 @@ auth_user:   USER '=' QSTRING ';'
 
 auth_passwd:  PASSWORD '=' QSTRING ';' 
   {
-    if (yy_aconf->passwd)
-      MyFree(yy_aconf->passwd);
-    if(yylval.string != NULL)
-      DupString(yy_aconf->passwd,yylval.string);
-    yylval.string = NULL;
+    MyFree(yy_aconf->passwd);
+    DupString(yy_aconf->passwd,yylval.string);
   };
 
 auth_spoof:   SPOOF '=' QSTRING ';' 
   {
-    if (yy_aconf->name)
-      MyFree(yy_aconf->name);
-    if (yylval.string != NULL)
-      DupString(yy_aconf->name, yylval.string);
-    yylval.string = NULL;
+    MyFree(yy_aconf->name);
+    DupString(yy_aconf->name, yylval.string);
     yy_aconf->flags |= CONF_FLAGS_SPOOF_IP;
   };
 
@@ -852,11 +793,8 @@ auth_no_tilde:        NO_TILDE '=' TYES ';'
 auth_redir_serv:    REDIRSERV '=' QSTRING ';'
   {
     yy_aconf->flags |= CONF_FLAGS_REDIR;
-    if (yy_aconf->name)
-      MyFree(yy_aconf->name);
-    if (yylval.string != NULL)
-      DupString(yy_aconf->name, yylval.string);
-    yylval.string = NULL;
+    MyFree(yy_aconf->name);
+    DupString(yy_aconf->name, yylval.string);
   };
 
 auth_redir_port:    REDIRPORT '=' NUMBER ';'
@@ -869,11 +807,8 @@ auth_class:   CLASS '=' QSTRING ';'
   {
     if (yy_aconf->className == NULL)
       {
-	   if (yylval.string != NULL)
-	     DupString(yy_aconf->className, yylval.string);
+	DupString(yy_aconf->className, yylval.string);
       }
-
-    yylval.string = NULL;
   };
 
 /***************************************************************************
@@ -903,20 +838,14 @@ quarantine_item:        quarantine_name | quarantine_reason | error
 
 quarantine_name:        NAME '=' QSTRING ';'
   {
-    if (yy_aconf->name)
-      MyFree(yy_aconf->name);
-    if (yylval.string != NULL)
-      DupString(yy_aconf->name, yylval.string);
-    yylval.string = NULL;
+    MyFree(yy_aconf->name);
+    DupString(yy_aconf->name, yylval.string);
   };
 
 quarantine_reason:      REASON '=' QSTRING ';' 
   {
-    if (yy_aconf->passwd)
-      MyFree(yy_aconf->passwd);
-    if (yylval.string != NULL)
-      DupString(yy_aconf->passwd, yylval.string);
-    yylval.string = NULL;
+    MyFree(yy_aconf->passwd);
+    DupString(yy_aconf->passwd, yylval.string);
   };
 
 /***************************************************************************
@@ -949,29 +878,20 @@ shared_item:		shared_name | shared_user | shared_host | error
 
 shared_name:		NAME '=' QSTRING ';'
   {
-    if (yy_aconf->name)
-      MyFree(yy_aconf->name);
-    if (yylval.string != NULL)
-      DupString(yy_aconf->name, yylval.string);
-    yylval.string = NULL;
+    MyFree(yy_aconf->name);
+    DupString(yy_aconf->name, yylval.string);
   };
 
 shared_user:		USER '=' QSTRING ';'
   {
-    if (yy_aconf->user)
-      MyFree(yy_aconf->user);
-    if (yylval.string != NULL)
-      DupString(yy_aconf->user, yylval.string);
-    yylval.string = NULL;
+    MyFree(yy_aconf->user);
+    DupString(yy_aconf->user, yylval.string);
   };
 
 shared_host:		HOST '=' QSTRING ';'
   {
-    if (yy_aconf->host)
-      MyFree(yy_aconf->host);
-    if (yylval.string != NULL)
-      DupString(yy_aconf->host, yylval.string);
-    yylval.string = NULL;
+    MyFree(yy_aconf->host);
+    DupString(yy_aconf->host, yylval.string);
   };
 
 /***************************************************************************
@@ -1030,8 +950,9 @@ connect_entry:  CONNECT
     for (yy_hconf = hub_confs; yy_hconf; yy_hconf = yy_aconf_next)
       {
 	yy_aconf_next = yy_hconf->next;
-    if (yy_hconf->name)
-      MyFree(yy_hconf->name);
+	MyFree(yy_hconf->name);
+	yy_hconf->name = NULL;
+
 	/* yy_aconf == NULL is a fatal error for this connect block! */
 	if (yy_aconf != NULL)
 	  {
@@ -1081,39 +1002,27 @@ connect_name:   NAME '=' QSTRING ';'
       }
     else
       {
-       if (yy_aconf->user)
-         MyFree(yy_aconf->user);
-       if (yylval.string != NULL)
-	     DupString(yy_aconf->user, yylval.string);
-	   yylval.string = NULL;
+	MyFree(yy_aconf->user);
+	DupString(yy_aconf->user, yylval.string);
       }
   };
 
 connect_host:   HOST '=' QSTRING ';' 
   {
-    if (yy_aconf->host)
-      MyFree(yy_aconf->host);
-    if (yylval.string != NULL)
-      DupString(yy_aconf->host, yylval.string);
-    yylval.string = NULL;
+    MyFree(yy_aconf->host);
+    DupString(yy_aconf->host, yylval.string);
   };
  
 connect_send_password:  SEND_PASSWORD '=' QSTRING ';'
   {
-    if (yy_aconf->spasswd)
-      MyFree(yy_aconf->spasswd);
-    if (yylval.string != NULL)
-      DupString(yy_aconf->spasswd, yylval.string);
-    yylval.string = NULL;
+    MyFree(yy_aconf->spasswd);
+    DupString(yy_aconf->spasswd, yylval.string);
   };
 
 connect_accept_password: ACCEPT_PASSWORD '=' QSTRING ';'
   {
-    if (yy_aconf->passwd)
-      MyFree(yy_aconf->passwd);
-    if (yylval.string != NULL)
-      DupString(yy_aconf->passwd, yylval.string);
-    yylval.string = NULL;
+    MyFree(yy_aconf->passwd);
+    DupString(yy_aconf->passwd, yylval.string);
   };
 
 connect_port:   PORT '=' NUMBER ';' { yy_aconf->port = yylval.number; };
@@ -1140,63 +1049,48 @@ connect_auto:           AUTOCONN '=' TYES ';'
 
 connect_hub_mask:       HUB_MASK '=' QSTRING ';' 
   {
-    if(yylval.string != NULL)
+    if(hub_confs == NULL)
       {
-	if(hub_confs == NULL)
-	  {
-	    hub_confs = make_conf();
-	    hub_confs->status = CONF_HUB;
-	    DupString(hub_confs->host, yylval.string);
-	    DupString(hub_confs->user, "*");
-	    yylval.string = NULL;
-	  }
-	else
-	  {
-	    yy_hconf = make_conf();
-	    yy_hconf->status = CONF_HUB;
-	    DupString(yy_hconf->host, yylval.string);
-	    yylval.string = NULL;
-	    DupString(yy_hconf->user, "*");
-	    yy_hconf->next = hub_confs;
-	    hub_confs = yy_hconf;
-	  }
+	hub_confs = make_conf();
+	hub_confs->status = CONF_HUB;
+	DupString(hub_confs->host, yylval.string);
+	DupString(hub_confs->user, "*");
+      }
+    else
+      {
+	yy_hconf = make_conf();
+	yy_hconf->status = CONF_HUB;
+	DupString(yy_hconf->host, yylval.string);
+	DupString(yy_hconf->user, "*");
+	yy_hconf->next = hub_confs;
+	hub_confs = yy_hconf;
       }
   };
 
 connect_leaf_mask:       LEAF_MASK '=' QSTRING ';' 
   {
-    if(yylval.string != NULL)
+    if(leaf_confs == NULL)
       {
-	if(leaf_confs == NULL)
-	  {
-	    leaf_confs = make_conf();
-	    leaf_confs->status = CONF_LEAF;
-	    DupString(leaf_confs->host, yylval.string);
-	    yylval.string = NULL;
-	    DupString(leaf_confs->user, "*");
-	  }
-	else
-	  {
-	    yy_lconf = make_conf();
-	    yy_lconf->status = CONF_LEAF;
-	    DupString(yy_lconf->host, yylval.string);
-	    yylval.string = NULL;
-	    DupString(yy_lconf->user, "*");
-	    yy_lconf->next = leaf_confs;
-	    leaf_confs = yy_lconf;
-	  }
+	leaf_confs = make_conf();
+	leaf_confs->status = CONF_LEAF;
+	DupString(leaf_confs->host, yylval.string);
+	DupString(leaf_confs->user, "*");
+      }
+    else
+      {
+	yy_lconf = make_conf();
+	yy_lconf->status = CONF_LEAF;
+	DupString(yy_lconf->host, yylval.string);
+	DupString(yy_lconf->user, "*");
+	yy_lconf->next = leaf_confs;
+	leaf_confs = yy_lconf;
       }
   };
 
 connect_class:  CLASS '=' QSTRING ';'
   {
-    if(yylval.string != NULL)
-      {
-       if (yy_aconf->className)
-         MyFree(yy_aconf->className);
-       DupString(yy_aconf->className, yylval.string);
-       yylval.string = NULL;
-      }
+    MyFree(yy_aconf->className);
+    DupString(yy_aconf->className, yylval.string);
   };
 
 /***************************************************************************
@@ -1238,39 +1132,29 @@ kill_user:      USER '=' QSTRING ';'
     char *new_user;
     char *new_host;
 
-    if(yylval.string != NULL)
+    if((p = strchr(yylval.string,'@')))
       {
-	if((p = strchr(yylval.string,'@')))
-	  {
-	    *p = '\0';
-	    DupString(new_user,yylval.string);
-	    yy_aconf->user = new_user;
-	    p++;
-	    DupString(new_host,p);
-	    if (yy_aconf->host)
-	      MyFree(yy_aconf->host);
-	    yy_aconf->host = new_host;
-	  }
-	else
-	  {
-	    if (yy_aconf->host)
-	      MyFree(yy_aconf->host);
-	    DupString(yy_aconf->host, yylval.string);
-	    yylval.string = NULL;
-	    if (yy_aconf->user)
-	      MyFree(yy_aconf->user);
-	    DupString(yy_aconf->user,"*");
-	  }
+	*p = '\0';
+	DupString(new_user,yylval.string);
+	yy_aconf->user = new_user;
+	p++;
+	DupString(new_host,p);
+	MyFree(yy_aconf->host);
+	yy_aconf->host = new_host;
+      }
+    else
+      {
+	MyFree(yy_aconf->host);
+	DupString(yy_aconf->host, yylval.string);
+	MyFree(yy_aconf->user);
+	DupString(yy_aconf->user,"*");
       }
   };
 
 kill_reason:    REASON '=' QSTRING ';' 
   {
-    if (yy_aconf->passwd)
-      MyFree(yy_aconf->passwd);
-    if (yylval.string != NULL)
-      DupString(yy_aconf->passwd, yylval.string);
-    yylval.string = NULL;
+    MyFree(yy_aconf->passwd);
+    DupString(yy_aconf->passwd, yylval.string);
   };
 
 /***************************************************************************
@@ -1314,24 +1198,18 @@ deny_ip:        IP '=' IP_TYPE ';'
   {
     char *p;
 
-    if(yylval.string != NULL)
-      {
-	yy_aconf->ip = yylval.ip_entry.ip;
-	yy_aconf->ip_mask = yylval.ip_entry.ip_mask;
-	if (yy_aconf->host)
-	  MyFree(yy_aconf->host);
-	DupString(yy_aconf->host,ip_string);
-	if((p = strchr(yy_aconf->host, ';')))
-	  *p = '\0';
-      }
+    yy_aconf->ip = yylval.ip_entry.ip;
+    yy_aconf->ip_mask = yylval.ip_entry.ip_mask;
+    MyFree(yy_aconf->host);
+    DupString(yy_aconf->host,ip_string);
+    if((p = strchr(yy_aconf->host, ';')))
+      *p = '\0';
   };
 
 deny_reason:    REASON '=' QSTRING ';' 
   {
     MyFree(yy_aconf->passwd);
-    if (yylval.string != NULL)
-      DupString(yy_aconf->passwd, yylval.string);
-    yylval.string = NULL;
+    DupString(yy_aconf->passwd, yylval.string);
   };
 
 /***************************************************************************
@@ -1373,17 +1251,13 @@ gecos_item:      gecos_name | gecos_reason | gecos_action | error
 
 gecos_name:    NAME '=' QSTRING ';' 
   {
-    if (yylval.string != NULL)
-      DupString(yy_aconf->host, yylval.string);
-    yylval.string = NULL;
+    DupString(yy_aconf->host, yylval.string);
   };
 
 gecos_reason:    REASON '=' QSTRING ';' 
   {
     MyFree(yy_aconf->passwd);
-    if (yylval.string != NULL)
-      DupString(yy_aconf->passwd, yylval.string);
-    yylval.string = NULL;
+    DupString(yy_aconf->passwd, yylval.string);
   };
 
 gecos_action:    ACTION '=' TREJECT ';'
@@ -1613,20 +1487,20 @@ general_iauth_port: IAUTH_PORT '=' NUMBER ';'
 
 general_fname_userlog: FNAME_USERLOG '=' QSTRING ';'
 {
-	strncpy_irc(ConfigFileEntry.fname_userlog, yylval.string,
-	            MAXPATHLEN-1)[MAXPATHLEN-1] = 0;
+  strncpy_irc(ConfigFileEntry.fname_userlog, yylval.string,
+	      MAXPATHLEN-1)[MAXPATHLEN-1] = 0;
 } ;
 
 general_fname_foperlog: FNAME_FOPERLOG '=' QSTRING ';'
 {
-	strncpy_irc(ConfigFileEntry.fname_foperlog, yylval.string,
-	            MAXPATHLEN-1)[MAXPATHLEN-1] = 0;
+  strncpy_irc(ConfigFileEntry.fname_foperlog, yylval.string,
+	      MAXPATHLEN-1)[MAXPATHLEN-1] = 0;
 };
 
 general_fname_operlog: FNAME_OPERLOG '=' QSTRING ';'
 {
-	strncpy_irc(ConfigFileEntry.fname_operlog, yylval.string,
-	            MAXPATHLEN-1)[MAXPATHLEN-1] = 0;
+  strncpy_irc(ConfigFileEntry.fname_operlog, yylval.string,
+	      MAXPATHLEN-1)[MAXPATHLEN-1] = 0;
 };
 
 general_glines: GLINES '=' TYES ';'
