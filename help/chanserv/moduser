@@ -6,8 +6,8 @@ MODUSER <channel> <username> <level>
 
 Available levels:
 200 - Founder
-190 - Admin
-150 - Userlist Admin (ADDUSER/MODUSER/DELUSER)
+190 - Admin (SET)
+150 - Userlist Admin (ADDUSER/MODUSER/MODAUTO/DELUSER)
 140 - Clear (CLEARMODES/CLEARBANS/CLEAROPS/CLEARALLOPS/CLEARUSERS)
 100 - Userlist Op (SUSPEND/UNSUSPEND/LISTUSERS)
 50  - Op (OP)

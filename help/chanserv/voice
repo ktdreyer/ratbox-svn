@@ -1,3 +1,3 @@
-VOICE <#channel>
+VOICE <channel>
 {  1} Makes services voice yourself
-  <#channel>: Channel to be voiced in
+  <channel>: Channel to be voiced in

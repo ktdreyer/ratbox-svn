@@ -1,4 +1,4 @@
  CHANDROP      - Drops registration of the given channel
  CHANREGISTER  - Registers the given channel to the given username
- CHANUNSUSPEND - Unsuspends the given channels registration
  CHANSUSPEND   - Suspends the given channels registration
+ CHANUNSUSPEND - Unsuspends the given channels registration

@@ -1,9 +1,9 @@
 SET <option> [parameter]
-{190} Sets various channel options:
+{190} Sets various channel options
   AUTOJOIN     [on|off]: Places services within the channel.
   NOOPS        [on|off]: Disallow any user being opped.
   RESTRICTOPS  [on|off]: Disallow any users without OP access being opped.
-  WARNOVERRIDE [on|off]: Warns channel when INVITE/KEY are used.  
+  WARNOVERRIDE [on|off]: Warns chanops when INVITE/GETKEY are used.
                          Requires AUTOJOIN.
   CREATEMODES  [modes] : Channel modes used on channel creation.
   ENFORCEMODES [modes] : Channel modes that are enforced.  You may only

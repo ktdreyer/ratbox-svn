@@ -1,3 +1,3 @@
-CHANUNSUSPEND <channel>
-[ADMIN] Unsuspends the given channels registration
-  <channel>: Channel to unsuspend 
+CHANSUSPEND <channel>
+[ADMIN] Suspends the given channels registration
+  <channel>: Channel to suspend 
