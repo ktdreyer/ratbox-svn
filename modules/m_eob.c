@@ -64,8 +64,10 @@ static int ms_eob(struct Client *cptr, struct Client *sptr,
                   int parc, char *parv[])
 {
   if (parc > 1)
-    sendto_realops_flags(FLAGS_ALL,"*** End of burst from %s (%u seconds)",
-			 sptr->name, strtoul(parv[1], NULL, 10));
+    sendto_realops_flags(
+       FLAGS_ALL,"*** End of burst from %s (%u seconds)",
+       sptr->name,
+       (unsigned int)(strtoul(parv[1], NULL, 10)));
   else
     sendto_realops_flags(FLAGS_ALL,"*** End of burst from %s",
 			 sptr->name);
