@@ -1,3 +1,18 @@
+leeh        2003/05/15 15:19:06 UTC	(20030515_7)
+
+  Modified files:
+    help/opers           unxline 
+    modules              m_help.c 
+  Log:
+  - updated unxline doc
+  - we werent adding \0 to the rebuilt help buffer, fixed.
+  
+  Revision  Changes    Path
+  1.3       +5 -0      ircd-ratbox/help/opers/unxline
+  1.47      +9 -3      ircd-ratbox/modules/m_help.c
+
+
+
 leeh        2003/05/15 14:52:24 UTC	(20030515_6)
 
   Modified files:
