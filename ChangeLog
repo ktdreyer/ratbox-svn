@@ -1,3 +1,15 @@
+leeh        2004/07/30 13:42:08 EDT	(20040730_8)
+
+  Modified files:
+    src                  newconf.c 
+  Log:
+  - moved serverinfo/admin/general to table form
+  
+  Revision  Changes    Path
+  7.161     +37 -85    ircd-ratbox/src/newconf.c
+
+
+
 androsyn    2004/07/30 13:26:46 EDT	(20040730_7)
 
   Modified files:
