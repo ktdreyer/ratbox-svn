@@ -1,3 +1,9 @@
+*** 20010509_2 by a1kmm
+- Re-added androsyn's fix for blocking on one list and neglecting the others.
+  Didn't realise that it had been recently reverted. We should no longer go
+  up to 100% CPU with the graduated usleep code.
+
+
 *** 20010509_1 by a1kmm
 - Added a graduated delay system to stop the idle or lowly loaded ircd from
   soaking up too many clockcycles, and removed some of the unneccessary
