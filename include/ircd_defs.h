@@ -130,37 +130,41 @@
 #endif /* #ifdef IPV6 */
 
 
-#ifndef HAVE_STRUCT_SOCKADDR_STORAGE
-#ifdef SOCKADDR_IN_HAS_LEN /* BSD style sockaddr_storage for BSD style
-                              sockaddr_in */   
-struct sockaddr_storage {
+#ifdef SOCKADDR_IN_HAS_LEN
+struct irc_sockaddr_storage {
 	unsigned char ss_len;
         sa_family_t ss_family;
         char __ss_pad1[((sizeof(int64_t)) - sizeof(unsigned char) -   
                         sizeof(sa_family_t) )];
         int64_t __ss_align;
+#ifdef IPV6
         char __ss_pad2[(128 - sizeof(unsigned char) - sizeof(sa_family_t) -
                         ((sizeof(int64_t)) - sizeof(unsigned char) -
                          sizeof(sa_family_t)) - (sizeof(int64_t)))];
+#endif
 };
-#else /* Linux style for everything else (for now) */
-struct sockaddr_storage
+#else /* SOCKADDR_IN_HAS_LEN */
+struct irc_sockaddr_storage
 {
   	sa_family_t ss_family;
   	u_int32_t __ss_align;
-        char __ss_padding[(128 - (2 * sizeof (u_int32_t)))];
+#ifdef IPV6
+        char __ss_padding[(128 - (sizeof(sa_family_t) + sizeof (u_int32_t)))];
+#else
+        char __ss_padding[(16 - (sizeof(sa_family_t) + sizeof (u_int32_t)))];
+#endif 
 };
 #endif /* SOCKADDR_IN_HAS_LEN */
-#endif /* HAVE_STRUCT_SOCKADDR_STORAGE */
 
 
 
 #ifdef SOCKADDR_IN_HAS_LEN
-#define SET_SS_LEN(x, y) ((struct sockaddr_storage)(x)).ss_len = y
+#define SET_SS_LEN(x, y) ((struct irc_sockaddr_storage)(x)).ss_len = y
 #define GET_SS_LEN(x) x.ss_len
 #else
 #define SET_SS_LEN(x, y)
-#define GET_SS_LEN(x) x.ss_family == AF_INET ? sizeof(struct sockaddr_in) : sizeof(struct sockaddr_storage)
+#define GET_SS_LEN(x) x.ss_family == AF_INET ? sizeof(struct sockaddr_in) : sizeof(struct irc_sockaddr_storage)
 #endif
+
 
 #endif /* INCLUDED_ircd_defs_h */

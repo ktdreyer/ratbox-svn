@@ -534,7 +534,7 @@ int
 serv_connect(struct server_conf *server_p, struct Client *by)
 {
 	struct Client *client_p;
-	struct sockaddr_storage myipnum; 
+	struct irc_sockaddr_storage myipnum; 
 	int fd;
 
 	s_assert(server_p != NULL);
@@ -542,7 +542,7 @@ serv_connect(struct server_conf *server_p, struct Client *by)
 		return 0;
 
 	/* log */
-	inetntop_sock(&server_p->ipnum, buf, sizeof(buf));
+	inetntop_sock((struct sockaddr *)&server_p->ipnum, buf, sizeof(buf));
 	ilog(L_SERVER, "Connect to *[%s] @%s", server_p->name, buf);
 
 	/*

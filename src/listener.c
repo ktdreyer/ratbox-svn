@@ -55,14 +55,14 @@ static PF accept_connection;
 static struct Listener *ListenerPollList = NULL;
 
 static struct Listener *
-make_listener(struct sockaddr_storage *addr)
+make_listener(struct irc_sockaddr_storage *addr)
 {
 	struct Listener *listener = (struct Listener *) MyMalloc(sizeof(struct Listener));
 	s_assert(0 != listener);
 
 	listener->name = me.name;
 	listener->fd = -1;
-	memcpy(&listener->addr, addr, sizeof(struct sockaddr_storage));
+	memcpy(&listener->addr, addr, sizeof(struct irc_sockaddr_storage));
 	listener->next = NULL;
 	return listener;
 }
@@ -259,7 +259,7 @@ inetport(struct Listener *listener)
 }
 
 static struct Listener *
-find_listener(struct sockaddr_storage *addr)
+find_listener(struct irc_sockaddr_storage *addr)
 {
 	struct Listener *listener = NULL;
 	struct Listener *last_closed = NULL;
@@ -321,7 +321,7 @@ void
 add_listener(int port, const char *vhost_ip, int family)
 {
 	struct Listener *listener;
-	struct sockaddr_storage vaddr;
+	struct irc_sockaddr_storage vaddr;
 
 	/*
 	 * if no port in conf line, don't bother
@@ -447,7 +447,7 @@ close_listeners()
  * any client list yet.
  */
 static void
-add_connection(struct Listener *listener, int fd, struct sockaddr_storage *sai)
+add_connection(struct Listener *listener, int fd, struct sockaddr *sai)
 {
 	struct Client *new_client;
 	s_assert(NULL != listener);
@@ -458,13 +458,13 @@ add_connection(struct Listener *listener, int fd, struct sockaddr_storage *sai)
 	 */
 	new_client = make_client(NULL);
 
-	memcpy(&new_client->localClient->ip, sai, sizeof(struct sockaddr_storage));
+	memcpy(&new_client->localClient->ip, sai, sizeof(struct irc_sockaddr_storage));
 
 	/* 
 	 * copy address to 'sockhost' as a string, copy it to host too
 	 * so we have something valid to put into error messages...
 	 */
-	inetntop_sock(&new_client->localClient->ip, new_client->sockhost, 
+	inetntop_sock((struct sockaddr *)&new_client->localClient->ip, new_client->sockhost, 
 		sizeof(new_client->sockhost));
 
 
@@ -496,7 +496,7 @@ accept_connection(int pfd, void *data)
 {
 	static time_t last_oper_notice = 0;
 
-	struct sockaddr_storage sai;
+	struct irc_sockaddr_storage sai;
 	int fd;
 	int pe;
 	struct Listener *listener = data;
@@ -516,10 +516,10 @@ accept_connection(int pfd, void *data)
 	 * be accepted until some old is closed first.
 	 */
 
-	fd = comm_accept(listener->fd, &sai);
+	fd = comm_accept(listener->fd, (struct sockaddr *)&sai);
 
 	/* This needs to be done here, otherwise we break dlines */
-	mangle_mapped_sockaddr(&sai);
+	mangle_mapped_sockaddr((struct sockaddr *)&sai);
 
 	if(fd < 0)
 	{
@@ -555,7 +555,7 @@ accept_connection(int pfd, void *data)
 
 	/* Do an initial check we aren't connecting too fast or with too many
 	 * from this IP... */
-	if((pe = conf_connect_allowed(&sai, sai.ss_family)) != 0)
+	if((pe = conf_connect_allowed((struct sockaddr *)&sai, sai.ss_family)) != 0)
 	{
 		ServerStats.is_ref++;
 
@@ -569,7 +569,7 @@ accept_connection(int pfd, void *data)
 	}
 
 	ServerStats.is_ac++;
-	add_connection(listener, fd, &sai);
+	add_connection(listener, fd, (struct sockaddr *)&sai);
 
 	/* Re-register a new IO request for the next accept .. */
 	comm_setselect(listener->fd, FDLIST_SERVICE, COMM_SELECT_READ,

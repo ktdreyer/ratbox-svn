@@ -237,12 +237,12 @@ comp_with_mask(void *addr, void *dest, u_int mask)
 }
 
 int
-comp_with_mask_sock(struct sockaddr_storage *addr, struct sockaddr_storage *dest, u_int mask)
+comp_with_mask_sock(struct sockaddr *addr, struct sockaddr *dest, u_int mask)
 {
 	void *iaddr = NULL;
 	void *idest = NULL;
 	
-	if(addr->ss_family == AF_INET)
+	if(addr->sa_family == AF_INET)
 	{
 		iaddr = &((struct sockaddr_in *)addr)->sin_addr;
 		idest = &((struct sockaddr_in *)dest)->sin_addr;
@@ -270,7 +270,7 @@ comp_with_mask_sock(struct sockaddr_storage *addr, struct sockaddr_storage *dest
 int
 match_cidr(const char *s1, const char *s2)
 {
-	struct sockaddr_storage ipaddr, maskaddr;
+	struct irc_sockaddr_storage ipaddr, maskaddr;
 	char mask[BUFSIZE];
 	char address[NICKLEN + USERLEN + HOSTLEN + 6];
 	char *ipmask;

@@ -131,8 +131,8 @@ struct _fde
 	struct
 	{
 		/* We don't need the host here ? */
-		struct sockaddr_storage S;
-		struct sockaddr_storage hostaddr;
+		struct irc_sockaddr_storage S;
+		struct irc_sockaddr_storage hostaddr;
 		CNCB *callback;
 		void *data;
 		/* We'd also add the retry count here when we get to that -- adrian */
@@ -180,7 +180,7 @@ extern void comm_connect_tcp(int fd, const char *, u_short,
 			     struct sockaddr *, int, CNCB *, void *, int, int);
 extern const char *comm_errstr(int status);
 extern int comm_open(int family, int sock_type, int proto, const char *note);
-extern int comm_accept(int fd, struct sockaddr_storage *pn);
+extern int comm_accept(int fd, struct sockaddr *pn);
 
 /* These must be defined in the network IO loop code of your choice */
 extern void comm_setselect(int fd, fdlist_t list, unsigned int type,
@@ -190,7 +190,7 @@ extern int read_message(time_t, unsigned char);
 extern int comm_select(unsigned long);
 extern int disable_sock_options(int);
 #ifdef IPV6
-extern void mangle_mapped_sockaddr(struct sockaddr_storage *in);
+extern void mangle_mapped_sockaddr(struct sockaddr *in);
 #else
 #define mangle_mapped_sockaddr(x) 
 #endif

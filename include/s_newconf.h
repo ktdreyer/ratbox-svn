@@ -192,8 +192,8 @@ struct server_conf
 	int servers;
 	time_t hold;
 
-	struct sockaddr_storage ipnum;
-	struct sockaddr_storage my_ipnum;
+	struct irc_sockaddr_storage ipnum;
+	struct irc_sockaddr_storage my_ipnum;
 
 	char *class_name;
 	struct Class *class;

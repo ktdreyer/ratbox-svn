@@ -596,10 +596,10 @@ comm_open(int family, int sock_type, int proto, const char *note)
  * comm_open() does.
  */
 int
-comm_accept(int fd, struct sockaddr_storage *pn)
+comm_accept(int fd, struct sockaddr *pn)
 {
 	int newfd;
-	socklen_t addrlen = sizeof(struct sockaddr_storage);
+	socklen_t addrlen = sizeof(struct irc_sockaddr_storage);
 	if(number_fd >= MASTER_MAX)
 	{
 		errno = ENFILE;
@@ -636,14 +636,14 @@ comm_accept(int fd, struct sockaddr_storage *pn)
  */
 #ifndef mangle_mapped_sockaddr
 void
-mangle_mapped_sockaddr(struct sockaddr_storage *in)
+mangle_mapped_sockaddr(struct sockaddr *in)
 {
 	struct sockaddr_in6 *in6 = (struct sockaddr_in6 *)in;								
 
-	if(in->ss_family == AF_INET)
+	if(in->sa_family == AF_INET)
 		return;
 
-	if(in->ss_family == AF_INET6 && IN6_IS_ADDR_V4MAPPED(&in6->sin6_addr))
+	if(in->sa_family == AF_INET6 && IN6_IS_ADDR_V4MAPPED(&in6->sin6_addr))
 	{
 		struct sockaddr_in in4;
 		memset(&in4, 0, sizeof(struct sockaddr_in));

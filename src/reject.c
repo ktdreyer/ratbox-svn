@@ -116,7 +116,7 @@ add_reject(struct Client *client_p)
 	if(ConfigFileEntry.reject_after_count == 0 || ConfigFileEntry.reject_ban_time == 0)
 		return;
 
-	if((pnode = match_ip(reject_tree, &client_p->localClient->ip)) != NULL)
+	if((pnode = match_ip(reject_tree, (struct sockaddr *)&client_p->localClient->ip)) != NULL)
 	{
 		rdata = pnode->data;
 		rdata->time = CurrentTime;
@@ -129,7 +129,7 @@ add_reject(struct Client *client_p)
 		if(client_p->localClient->ip.ss_family == AF_INET6)
 			bitlen = 128;
 #endif
-		pnode = make_and_lookup_ip(reject_tree, &client_p->localClient->ip, bitlen);
+		pnode = make_and_lookup_ip(reject_tree, (struct sockaddr *)&client_p->localClient->ip, bitlen);
 		pnode->data = rdata = MyMalloc(sizeof(struct reject_data));
 		dlinkAddTail(pnode, &rdata->rnode, &reject_list);
 		rdata->time = CurrentTime;
@@ -148,7 +148,7 @@ check_reject(struct Client *client_p)
 	   ConfigFileEntry.reject_duration == 0)
 		return 0;
 		
-	pnode = match_ip(reject_tree, &client_p->localClient->ip);
+	pnode = match_ip(reject_tree, (struct sockaddr *)&client_p->localClient->ip);
 	if(pnode != NULL)
 	{
 		rdata = pnode->data;

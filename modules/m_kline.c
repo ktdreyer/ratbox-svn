@@ -641,12 +641,12 @@ static int
 already_placed_kline(struct Client *source_p, const char *luser, const char *lhost, int tkline)
 {
 	const char *reason;
-	struct sockaddr_storage iphost, *piphost;
+	struct irc_sockaddr_storage iphost, *piphost;
 	struct ConfItem *aconf;
         int t;
 	if(ConfigFileEntry.non_redundant_klines)
 	{
-		if((t = parse_netmask(lhost, &iphost, NULL)) != HM_HOST)
+		if((t = parse_netmask(lhost, (struct sockaddr *)&iphost, NULL)) != HM_HOST)
 		{
 #ifdef IPV6
 			if(t == HM_IPV6)
@@ -660,7 +660,7 @@ already_placed_kline(struct Client *source_p, const char *luser, const char *lho
 		else
 			piphost = NULL;
 
-		if((aconf = find_conf_by_address(lhost, piphost, CONF_KILL, t, luser)))
+		if((aconf = find_conf_by_address(lhost, (struct sockaddr *)piphost, CONF_KILL, t, luser)))
 		{
 			/* setting a tkline, or existing one is perm */
 			if(tkline || ((aconf->flags & CONF_FLAGS_TEMPORARY) == 0))
@@ -847,11 +847,11 @@ remove_temp_kline(const char *user, const char *host)
 {
 	struct ConfItem *aconf;
 	dlink_node *ptr;
-	struct sockaddr_storage addr, caddr;
+	struct irc_sockaddr_storage addr, caddr;
 	int bits, cbits;
 	int i;
 
-	parse_netmask(host, &addr, &bits);
+	parse_netmask(host, (struct sockaddr *)&addr, &bits);
 
 	for (i = 0; i < LAST_TEMP_TYPE; i++)
 	{
@@ -859,14 +859,14 @@ remove_temp_kline(const char *user, const char *host)
 		{
 			aconf = ptr->data;
 
-			parse_netmask(aconf->host, &caddr, &cbits);
+			parse_netmask(aconf->host, (struct sockaddr *)&caddr, &cbits);
 
 			if(user && irccmp(user, aconf->user))
 				continue;
 
 			if(!irccmp(aconf->host, host) || (bits == cbits
-							  && comp_with_mask_sock(&addr,
-									    &caddr, bits)))
+							  && comp_with_mask_sock((struct sockaddr *)&addr,
+									    (struct sockaddr *)&caddr, bits)))
 			{
 				dlinkDelete(ptr, &temp_klines[i]);
 				delete_one_address_conf(aconf->host, aconf);

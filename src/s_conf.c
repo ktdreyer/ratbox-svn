@@ -283,13 +283,13 @@ verify_access(struct Client *client_p, const char *username)
 	if(IsGotId(client_p))
 	{
 		aconf = find_address_conf(client_p->host, client_p->username,
-					  &client_p->localClient->ip,client_p->localClient->ip.ss_family);
+					  (struct sockaddr *)&client_p->localClient->ip,client_p->localClient->ip.ss_family);
 	}
 	else
 	{
 		strlcpy(non_ident, "~", sizeof(non_ident));
 		strlcat(non_ident, username, sizeof(non_ident));
-		aconf = find_address_conf(client_p->host, non_ident, &client_p->localClient->ip,client_p->localClient->ip.ss_family);
+		aconf = find_address_conf(client_p->host, non_ident, (struct sockaddr *)&client_p->localClient->ip,client_p->localClient->ip.ss_family);
 	}
 
 	if(aconf == NULL)
@@ -390,10 +390,10 @@ add_ip_limit(struct Client *client_p, struct ConfItem *aconf)
 	if(ConfCidrAmount(aconf) == 0 || ConfCidrBitlen(aconf) == 0)
 		return -1;
 
-	pnode = match_ip(ConfIpLimits(aconf), &client_p->localClient->ip);
+	pnode = match_ip(ConfIpLimits(aconf), (struct sockaddr *)&client_p->localClient->ip);
 
 	if(pnode == NULL)
-		pnode = make_and_lookup_ip(ConfIpLimits(aconf), &client_p->localClient->ip, ConfCidrBitlen(aconf));
+		pnode = make_and_lookup_ip(ConfIpLimits(aconf), (struct sockaddr *)&client_p->localClient->ip, ConfCidrBitlen(aconf));
 
 	s_assert(pnode != NULL);
 
@@ -424,7 +424,7 @@ remove_ip_limit(struct Client *client_p, struct ConfItem *aconf)
 	if(ConfCidrAmount(aconf) == 0 || ConfCidrBitlen(aconf) == 0)
 		return;
 
-	pnode = match_ip(ConfIpLimits(aconf), &client_p->localClient->ip);
+	pnode = match_ip(ConfIpLimits(aconf), (struct sockaddr *)&client_p->localClient->ip);
 	if(pnode == NULL)
 		return;
 
@@ -823,7 +823,7 @@ validate_conf(void)
  * side effects	- none
  */
 int
-conf_connect_allowed(struct sockaddr_storage *addr, int aftype)
+conf_connect_allowed(struct sockaddr *addr, int aftype)
 {
 	struct ConfItem *aconf = find_dline(addr, aftype);
 

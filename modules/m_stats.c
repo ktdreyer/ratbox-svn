@@ -582,7 +582,7 @@ stats_auth (struct Client *source_p)
 
 		if(MyConnect (source_p))
 			aconf = find_conf_by_address (source_p->host,
-						      &source_p->localClient->ip,
+						      (struct sockaddr *)&source_p->localClient->ip,
 						      CONF_CLIENT,
 						      source_p->localClient->ip.ss_family,
 						      source_p->username);
@@ -622,7 +622,7 @@ stats_tklines (struct Client *source_p)
 
 		if(MyConnect (source_p))
 			aconf = find_conf_by_address (source_p->host,
-						      &source_p->localClient->ip,
+						      (struct sockaddr *)&source_p->localClient->ip,
 						      CONF_KILL,
 						      source_p->localClient->ip.ss_family,
 						      source_p->username);
@@ -687,7 +687,7 @@ stats_klines (struct Client *source_p)
 		/* search for a kline */
 		if(MyConnect (source_p))
 			aconf = find_conf_by_address (source_p->host,
-						      &source_p->localClient->ip,
+						      (struct sockaddr *)&source_p->localClient->ip,
 						      CONF_KILL,
 						      source_p->localClient->ip.ss_family,
 						      source_p->username);

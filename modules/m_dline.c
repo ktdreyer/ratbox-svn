@@ -78,7 +78,7 @@ mo_dline(struct Client *client_p, struct Client *source_p,
 	const char *dlhost;
 	char *oper_reason;
 	char *reason = def;
-	struct sockaddr_storage daddr;
+	struct irc_sockaddr_storage daddr;
 	char cidr_form_host[HOSTLEN + 1];
 	struct ConfItem *aconf;
 	int bits;
@@ -155,7 +155,7 @@ mo_dline(struct Client *client_p, struct Client *source_p,
 	{
 		const char *creason;
 		int t = AF_INET, ty, b;
-		ty = parse_netmask(dlhost, &daddr, &b);
+		ty = parse_netmask(dlhost, (struct sockaddr *)&daddr, &b);
 #ifdef IPV6
         	if(ty == HM_IPV6)
                 	t = AF_INET6;
@@ -163,7 +163,7 @@ mo_dline(struct Client *client_p, struct Client *source_p,
 #endif
 			t = AF_INET;
                                   		
-		if((aconf = find_dline(&daddr, t)) != NULL)
+		if((aconf = find_dline((struct sockaddr *)&daddr, t)) != NULL)
 		{
 			int bx;
 			parse_netmask(aconf->host, NULL, &bx);
@@ -439,7 +439,7 @@ remove_temp_dline(const char *host)
 	dlink_list *tdlist;
 	struct ConfItem *aconf;
 	dlink_node *ptr;
-	struct sockaddr_storage addr, caddr;
+	struct irc_sockaddr_storage addr, caddr;
 	int bits, cbits;
 	int i;
 

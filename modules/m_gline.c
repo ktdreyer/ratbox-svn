@@ -726,22 +726,22 @@ remove_temp_gline(const char *user, const char *host)
 {
 	struct ConfItem *aconf;
 	dlink_node *ptr;
-	struct sockaddr_storage addr, caddr;
+	struct irc_sockaddr_storage addr, caddr;
 	int bits, cbits;
 
-	parse_netmask(host, &addr, &bits);
+	parse_netmask(host, (struct sockaddr *)&addr, &bits);
 
 	DLINK_FOREACH(ptr, glines.head)
 	{
 		aconf = ptr->data;
 
-		parse_netmask(aconf->host, &caddr, &cbits);
+		parse_netmask(aconf->host, (struct sockaddr *)&caddr, &cbits);
 
 		if(user && irccmp(user, aconf->user))
 			continue;
 
 		if(!irccmp(aconf->host, host) && bits == cbits &&
-		   comp_with_mask_sock(&addr, &caddr, bits))
+		   comp_with_mask_sock((struct sockaddr *)&addr, (struct sockaddr *)&caddr, bits))
 		{
 			dlinkDelete(ptr, &glines);
 			delete_one_address_conf(aconf->host, aconf);

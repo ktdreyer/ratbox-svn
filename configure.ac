@@ -238,12 +238,6 @@ dnl ====================
 
 AC_SEARCH_LIBS(socket, socket, , [AC_MSG_ERROR([You have no socket()! Aborting.])])
 
-
-AC_CHECK_TYPES([struct sockaddr_storage], , ,
-[[#include <sys/types.h>
-#include <sys/socket.h>
-]])
-
 AC_CHECK_MEMBER([struct sockaddr.sa_len], [AC_DEFINE(SOCKADDR_IN_HAS_LEN, 1, [Define to 1 if sockaddr has a 'sa_len'
 member.])],,[[#include <sys/types.h>
 #include <sys/socket.h>

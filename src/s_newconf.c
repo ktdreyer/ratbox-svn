@@ -458,12 +458,12 @@ struct oper_conf *
 find_oper_conf(const char *username, const char *host, const char *locip, const char *name)
 {
 	struct oper_conf *oper_p;
-	struct sockaddr_storage ip, cip;
+	struct irc_sockaddr_storage ip, cip;
 	char addr[HOSTLEN+1];
 	int bits, cbits;
 	dlink_node *ptr;
 
-	parse_netmask(locip, &cip, &cbits);
+	parse_netmask(locip, (struct sockaddr *)&cip, &cbits);
 
 	DLINK_FOREACH(ptr, oper_conf_list.head)
 	{
@@ -475,12 +475,12 @@ find_oper_conf(const char *username, const char *host, const char *locip, const 
 
 		strlcpy(addr, oper_p->host, sizeof(addr));
 
-		if(parse_netmask(addr, &ip, &bits) != HM_HOST)
+		if(parse_netmask(addr, (struct sockaddr *)&ip, &bits) != HM_HOST)
 		{
 			if(ip.ss_family != cip.ss_family)
 				continue;
 
-			if(!comp_with_mask_sock(&ip, &cip, bits))
+			if(!comp_with_mask_sock((struct sockaddr *)&ip, (struct sockaddr *)&cip, bits))
 				continue;
 		}
 		else if(!match(oper_p->host, host))
@@ -641,7 +641,7 @@ add_server_conf(struct server_conf *server_p)
 	if(strchr(server_p->host, '*') || strchr(server_p->host, '?'))
 		return;
 
-	if(inetpton_sock(server_p->host, &server_p->ipnum) > 0)
+	if(inetpton_sock(server_p->host, (struct sockaddr *)&server_p->ipnum) > 0)
 		return;
 
 	server_p->dns_query = MyMalloc(sizeof(struct DNSQuery));

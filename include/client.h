@@ -202,7 +202,7 @@ struct LocalUser
 	struct ConfItem *att_conf;	/* attached conf */
 	struct server_conf *att_sconf;
 
-	struct sockaddr_storage ip;
+	struct irc_sockaddr_storage ip;
 	time_t last_nick_change;
 	int number_of_nick_changes;
 

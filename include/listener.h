@@ -39,7 +39,7 @@ struct Listener
 	int ref_count;		/* number of connection references */
 	int active;		/* current state of listener */
 	int index;		/* index into poll array */
-	struct sockaddr_storage addr;
+	struct irc_sockaddr_storage addr;
 	struct DNSQuery *dns_query;
 	char vhost[HOSTLEN + 1];	/* virtual name of listener */
 };

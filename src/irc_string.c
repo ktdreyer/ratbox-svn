@@ -410,7 +410,7 @@ inet_ntop6(const unsigned char *src, char *dst, unsigned int size)
 #endif
 
 int
-inetpton_sock(const char *src, struct sockaddr_storage *dst)
+inetpton_sock(const char *src, struct sockaddr *dst)
 {
 	if(inetpton(AF_INET, src, &((struct sockaddr_in *)dst)->sin_addr))
 	{
@@ -432,9 +432,9 @@ inetpton_sock(const char *src, struct sockaddr_storage *dst)
 }
 
 const char *
-inetntop_sock(struct sockaddr_storage *src, char *dst, unsigned int size)
+inetntop_sock(struct sockaddr *src, char *dst, unsigned int size)
 {
-	switch(src->ss_family)
+	switch(src->sa_family)
 	{
 		case AF_INET:
 			return(inetntop(AF_INET, &((struct sockaddr_in *)src)->sin_addr, dst, size));

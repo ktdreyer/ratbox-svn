@@ -1109,7 +1109,7 @@ conf_set_connect_host(void *data)
 static void
 conf_set_connect_vhost(void *data)
 {
-	if(inetpton_sock(data, &yy_server->my_ipnum) <= 0)
+	if(inetpton_sock(data, (struct sockaddr *)&yy_server->my_ipnum) <= 0)
 	{
 		conf_report_error("Invalid netmask for server vhost (%s)",
 		    		  (char *) data);

@@ -237,8 +237,8 @@ auth_error(struct AuthRequest *auth)
 static int
 start_auth_query(struct AuthRequest *auth)
 {
-	struct sockaddr_storage localaddr;
-	socklen_t locallen = sizeof(struct sockaddr_storage);
+	struct irc_sockaddr_storage localaddr;
+	socklen_t locallen = sizeof(struct irc_sockaddr_storage);
 	int fd;
 	int family;
 	
@@ -383,7 +383,7 @@ start_auth(struct Client *client)
 	sendheader(client, REPORT_DO_DNS);
 
 	/* No DNS cache now, remember? -- adrian */
-	if(adns_getaddr(&client->localClient->ip, client->localClient->ip.ss_family,
+	if(adns_getaddr((struct sockaddr *)&client->localClient->ip, client->localClient->ip.ss_family,
 		     &auth->dns_query, 0))
 	{
 #ifdef IPV6

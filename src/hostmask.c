@@ -34,12 +34,12 @@
 #include "irc_string.h"
 
 #ifdef IPV6
-static unsigned long hash_ipv6(struct sockaddr_storage *, int);
+static unsigned long hash_ipv6(struct sockaddr *, int);
 #endif
-static unsigned long hash_ipv4(struct sockaddr_storage *, int);
+static unsigned long hash_ipv4(struct sockaddr *, int);
 
 
-/* int parse_netmask(const char *, struct sockaddr_storage *, int *);
+/* int parse_netmask(const char *, struct irc_sockaddr_storage *, int *);
  * Input: A hostmask, or an IPV4/6 address.
  * Output: An integer describing whether it is an IPV4, IPV6 address or a
  *         hostmask, an address(if it is an IP mask),
@@ -47,11 +47,11 @@ static unsigned long hash_ipv4(struct sockaddr_storage *, int);
  * Side effects: None
  */
 int
-parse_netmask(const char *text, struct sockaddr_storage *naddr, int *nb)
+parse_netmask(const char *text, struct sockaddr  *naddr, int *nb)
 {
 	char *ip = LOCAL_COPY(text);
 	char *ptr;
-	struct sockaddr_storage *addr, xaddr;
+	struct irc_sockaddr_storage *addr, xaddr;
 	int *b, xb;
 	if(nb == NULL)
 		b = &xb;
@@ -59,9 +59,9 @@ parse_netmask(const char *text, struct sockaddr_storage *naddr, int *nb)
 		b = nb;
 	
 	if(naddr == NULL)
-		addr = &xaddr;
+		addr = (struct irc_sockaddr_storage *)&xaddr;
 	else
-		addr = naddr;
+		addr = (struct irc_sockaddr_storage *)naddr;
 	
 #ifdef IPV6
 	if(strchr(ip, ':'))
@@ -92,7 +92,7 @@ parse_netmask(const char *text, struct sockaddr_storage *naddr, int *nb)
 				*b = 32;
 		} else
 			*b = 32;
-		if(inetpton_sock(ip, addr) > 0)
+		if(inetpton_sock(ip, (struct sockaddr *)addr) > 0)
 			return HM_IPV4;
 		else
 			return HM_HOST;
@@ -109,13 +109,13 @@ init_host_hash(void)
 	memset(&atable, 0, sizeof(atable));
 }
 
-/* unsigned long hash_ipv4(struct sockaddr_storage*)
+/* unsigned long hash_ipv4(struct irc_sockaddr_storage*)
  * Input: An IP address.
  * Output: A hash value of the IP address.
  * Side effects: None
  */
 static unsigned long
-hash_ipv4(struct sockaddr_storage *saddr, int bits)
+hash_ipv4(struct sockaddr *saddr, int bits)
 {
 	struct sockaddr_in *addr = (struct sockaddr_in *) saddr;
 	
@@ -128,14 +128,14 @@ hash_ipv4(struct sockaddr_storage *saddr, int bits)
 	return 0;
 }
 
-/* unsigned long hash_ipv6(struct sockaddr_storage*)
+/* unsigned long hash_ipv6(struct irc_sockaddr_storage*)
  * Input: An IP address.
  * Output: A hash value of the IP address.
  * Side effects: None
  */
 #ifdef IPV6
 static unsigned long
-hash_ipv6(struct sockaddr_storage *saddr, int bits)
+hash_ipv6(struct sockaddr *saddr, int bits)
 {
 	struct sockaddr_in6 *addr = (struct sockaddr_in6 *) saddr;
 	unsigned long v = 0, n;
@@ -196,7 +196,7 @@ get_mask_hash(const char *text)
 	return hash_text(text);
 }
 
-/* struct ConfItem* find_conf_by_address(const char*, struct sockaddr_storage*,
+/* struct ConfItem* find_conf_by_address(const char*, struct irc_sockaddr_storage*,
  *         int type, int fam, const char *username)
  * Input: The hostname, the address, the type of mask to find, the address
  *        family, the username.
@@ -205,7 +205,7 @@ get_mask_hash(const char *text)
  * Note: Setting bit 0 of the type means that the username is ignored.
  */
 struct ConfItem *
-find_conf_by_address(const char *name, struct sockaddr_storage *addr, int type,
+find_conf_by_address(const char *name, struct sockaddr  *addr, int type,
 		     int fam, const char *username)
 {
 	unsigned long hprecv = 0;
@@ -228,7 +228,7 @@ find_conf_by_address(const char *name, struct sockaddr_storage *addr, int type,
 				for (arec = atable[hash_ipv6(addr, b)]; arec; arec = arec->next)
 					if(arec->type == (type & ~0x1) &&
 					   arec->masktype == HM_IPV6 &&
-					   comp_with_mask_sock(addr, &arec->Mask.ipa.addr,
+					   comp_with_mask_sock(addr, (struct sockaddr *)&arec->Mask.ipa.addr,
 							       arec->Mask.ipa.bits) && (type & 0x1
 											||
 											match(arec->
@@ -250,7 +250,7 @@ find_conf_by_address(const char *name, struct sockaddr_storage *addr, int type,
 				for (arec = atable[hash_ipv4(addr, b)]; arec; arec = arec->next)
 					if(arec->type == (type & ~0x1) &&
 					   arec->masktype == HM_IPV4 &&
-					   comp_with_mask_sock(addr, &arec->Mask.ipa.addr,
+					   comp_with_mask_sock(addr, (struct sockaddr *)&arec->Mask.ipa.addr,
 							       arec->Mask.ipa.bits) && (type & 0x1
 											||
 											match(arec->
@@ -303,13 +303,13 @@ find_conf_by_address(const char *name, struct sockaddr_storage *addr, int type,
 }
 
 /* struct ConfItem* find_address_conf(const char*, const char*,
- * 	                               struct sockaddr_storage*, int);
+ * 	                               struct irc_sockaddr_storage*, int);
  * Input: The hostname, username, address, address family.
  * Output: The applicable ConfItem.
  * Side-effects: None
  */
 struct ConfItem *
-find_address_conf(const char *host, const char *user, struct sockaddr_storage *ip, int aftype)
+find_address_conf(const char *host, const char *user, struct sockaddr *ip, int aftype)
 {
 	struct ConfItem *iconf, *kconf;
 
@@ -358,13 +358,13 @@ find_address_conf(const char *host, const char *user, struct sockaddr_storage *i
 	return iconf;
 }
 
-/* struct ConfItem* find_dline(struct sockaddr_storage*, int)
+/* struct ConfItem* find_dline(struct irc_sockaddr_storage*, int)
  * Input: An address, an address family.
  * Output: The best matching D-line or exempt line.
  * Side effects: None.
  */
 struct ConfItem *
-find_dline(struct sockaddr_storage *addr, int aftype)
+find_dline(struct sockaddr *addr, int aftype)
 {
 	struct ConfItem *eline;
 	eline = find_conf_by_address(NULL, addr, CONF_EXEMPTDLINE | 1, aftype, NULL);
@@ -390,7 +390,7 @@ add_conf_by_address(const char *address, int type, const char *username, struct 
 	if(address == NULL)
 		address = "/NOMATCH!/";
 	arec = MyMalloc(sizeof(struct AddressRec));
-	masktype = parse_netmask(address, &arec->Mask.ipa.addr, &bits);
+	masktype = parse_netmask(address, (struct sockaddr *)&arec->Mask.ipa.addr, &bits);
 	arec->Mask.ipa.bits = bits;
 	arec->masktype = masktype;
 #ifdef IPV6
@@ -407,7 +407,7 @@ add_conf_by_address(const char *address, int type, const char *username, struct 
 	{
 		/* We have to do this, since we do not re-hash for every bit -A1kmm. */
 		bits -= bits % 8;
-		arec->next = atable[(hv = hash_ipv4(&arec->Mask.ipa.addr, bits))];
+		arec->next = atable[(hv = hash_ipv4((struct sockaddr *)&arec->Mask.ipa.addr, bits))];
 		atable[hv] = arec;
 	}
 	else
@@ -434,14 +434,14 @@ delete_one_address_conf(const char *address, struct ConfItem *aconf)
 	int masktype, bits;
 	unsigned long hv;
 	struct AddressRec *arec, *arecl = NULL;
-	struct sockaddr_storage addr;
-	masktype = parse_netmask(address, &addr, &bits);
+	struct irc_sockaddr_storage addr;
+	masktype = parse_netmask(address, (struct sockaddr *)&addr, &bits);
 #ifdef IPV6
 	if(masktype == HM_IPV6)
 	{
 		/* We have to do this, since we do not re-hash for every bit -A1kmm. */
 		bits -= bits % 16;
-		hv = hash_ipv6(&addr, bits);
+		hv = hash_ipv6((struct sockaddr *)&addr, bits);
 	}
 	else
 #endif
@@ -449,7 +449,7 @@ delete_one_address_conf(const char *address, struct ConfItem *aconf)
 	{
 		/* We have to do this, since we do not re-hash for every bit -A1kmm. */
 		bits -= bits % 8;
-		hv = hash_ipv4(&addr, bits);
+		hv = hash_ipv4((struct sockaddr *)&addr, bits);
 	}
 	else
 		hv = get_mask_hash(address);

@@ -346,7 +346,7 @@ report_this_status(struct Client *source_p, struct Client *target_p,
 	if(!MyConnect(target_p))
 		return 0;
 
-	inetntop_sock(&target_p->localClient->ip, ip, sizeof(ip));
+	inetntop_sock((struct sockaddr *)&target_p->localClient->ip, ip, sizeof(ip));
 	class_name = get_client_class(target_p);
 
 	if(IsAnyServer(target_p))
@@ -479,7 +479,7 @@ m_etrace(struct Client *client_p, struct Client *source_p, int parc, const char 
 		else
 #endif
 		{
-			inetntop_sock(&target_p->localClient->ip, ip, sizeof(ip));
+			inetntop_sock((struct sockaddr *)&target_p->localClient->ip, ip, sizeof(ip));
 			ip_ptr = ip;
 		}
 

@@ -44,27 +44,27 @@ struct HostMaskEntry
 	struct HostMaskEntry *next, *nexthash;
 };
 
-int parse_netmask(const char *, struct sockaddr_storage *, int *);
-struct ConfItem *find_conf_by_address(const char *, struct sockaddr_storage *, int, int, const char *);
+int parse_netmask(const char *, struct sockaddr *, int *);
+struct ConfItem *find_conf_by_address(const char *, struct sockaddr *, int, int, const char *);
 void add_conf_by_address(const char *, int, const char *, struct ConfItem *);
 void delete_one_address_conf(const char *, struct ConfItem *);
 void clear_out_address_conf(int type);
 void init_host_hash(void);
-struct ConfItem *find_address_conf(const char *, const char *, struct sockaddr_storage *, int);
+struct ConfItem *find_address_conf(const char *, const char *, struct sockaddr *, int);
 
-struct ConfItem *find_dline(struct sockaddr_storage *, int);
+struct ConfItem *find_dline(struct sockaddr *, int);
 
-#define find_kline(x)	(find_conf_by_address((x)->host, &(x)->localClient->ip, CONF_KILL,\
+#define find_kline(x)	(find_conf_by_address((x)->host, (struct sockaddr *)&(x)->localClient->ip, CONF_KILL,\
 			 (x)->localClient->ip.ss_family, (x)->username))
-#define find_gline(x)	(find_conf_by_address((x)->host, &(x)->localClient->ip, CONF_GLINE,\
+#define find_gline(x)	(find_conf_by_address((x)->host, (struct sockaddr *)&(x)->localClient->ip, CONF_GLINE,\
 			 (x)->localClient->ip.ss_family, (x)->username))
 
 void report_Klines(struct Client *);
 void report_auth(struct Client *);
 #ifdef IPV6
-int match_ipv6(struct sockaddr_storage *, struct sockaddr_storage *, int);
+int match_ipv6(struct sockaddr *, struct sockaddr *, int);
 #endif
-int match_ipv4(struct sockaddr_storage *, struct sockaddr_storage *, int);
+int match_ipv4(struct sockaddr *, struct sockaddr *, int);
 
 /* Hashtable stuff... */
 #define ATABLE_SIZE 0x1000 /* 2^12 */
@@ -82,7 +82,7 @@ struct AddressRec
 		struct
 		{
 			/* Pointer into ConfItem... -A1kmm */
-			struct sockaddr_storage addr;
+			struct irc_sockaddr_storage addr;
 			int bits;
 		}
 		ipa;

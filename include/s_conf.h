@@ -49,7 +49,7 @@ struct hostent;
 
 struct ip_value
 {
-	struct sockaddr_storage ip;
+	struct irc_sockaddr_storage ip;
 	int ip_mask;
 	int type;
 };
@@ -313,9 +313,9 @@ extern int check_client(struct Client *client_p, struct Client *source_p, const 
 
 extern int detach_conf(struct Client *);
 
-extern int conf_connect_allowed(struct sockaddr_storage *addr, int);
+extern int conf_connect_allowed(struct sockaddr *addr, int);
 
-extern struct ConfItem *find_tkline(const char *, const char *, struct sockaddr_storage *);
+extern struct ConfItem *find_tkline(const char *, const char *, struct sockaddr *);
 extern char *show_iline_prefix(struct Client *, struct ConfItem *, char *);
 extern void get_printable_conf(struct ConfItem *,
 			       char **, char **, char **, char **, int *, char **);

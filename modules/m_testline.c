@@ -61,7 +61,7 @@ mo_testline(struct Client *client_p, struct Client *source_p, int parc, const ch
 {
 	struct ConfItem *aconf;
 	struct ConfItem *resv_p;
-	struct sockaddr_storage ip;
+	struct irc_sockaddr_storage ip;
 	const char *name = NULL;
 	const char *username = NULL;
 	const char *host = NULL;
@@ -95,14 +95,14 @@ mo_testline(struct Client *client_p, struct Client *source_p, int parc, const ch
 		host = mask;
 
 	/* parses as an IP, check for a dline */
-	if((type = parse_netmask(host, &ip, &host_mask)) != HM_HOST)
+	if((type = parse_netmask(host, (struct sockaddr *)&ip, &host_mask)) != HM_HOST)
 	{
 #ifdef IPV6
 		if(type == HM_IPV6)
-			aconf = find_dline(&ip, AF_INET6);
+			aconf = find_dline((struct sockaddr *)&ip, AF_INET6);
 		else
 #endif
-			aconf = find_dline(&ip, AF_INET);
+			aconf = find_dline((struct sockaddr *)&ip, AF_INET);
 
 		if(aconf && aconf->status & CONF_DLINE)
 		{
@@ -119,7 +119,7 @@ mo_testline(struct Client *client_p, struct Client *source_p, int parc, const ch
 
 	/* now look for a matching I/K/G */
 	if((aconf = find_address_conf(host, username ? username : "dummy",
-				(type != HM_HOST) ? &ip : NULL,
+				(type != HM_HOST) ? (struct sockaddr *)&ip : NULL,
 				(type != HM_HOST) ? (
 #ifdef IPV6
 				 (type == HM_IPV6) ? AF_INET6 : 
