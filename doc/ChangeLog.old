@@ -1,3 +1,20 @@
+jmallett    2002/01/10 15:45:17 EST	(20020110_7)
+
+  Modified files:
+    iauth/source         auth.c mtree.c sock.c 
+    src                  ircdauth.c 
+  Log:
+  Second round of my commits to change zero and pointer comparing in assertions.
+  This time do ones in the form of 'assert(ptr [!=]= 0)', reverse of last sweep.
+  
+  Revision  Changes    Path
+  7.9       +6 -6      ircd-hybrid-7/iauth/source/auth.c
+  7.8       +3 -3      ircd-hybrid-7/iauth/source/mtree.c
+  7.10      +4 -4      ircd-hybrid-7/iauth/source/sock.c
+  7.46      +2 -2      ircd-hybrid-7/src/ircdauth.c
+
+
+
 jmallett    2002/01/10 15:30:50 EST	(20020110_6)
 
   Modified files:
