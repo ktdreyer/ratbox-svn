@@ -1,3 +1,8 @@
+*** 20010316_3 by androsyn
+Somebody used the boilerplate from vchannel.c and forgot to change the
+filename on the top. Yes I know I'm nit-picking :)
+
+
 *** 20010316_2 by fl_
 - another minor fix..
 
