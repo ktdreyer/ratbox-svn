@@ -127,7 +127,7 @@ static void m_invite(struct Client *client_p,
       return;
     }
 	  
-  if (!(chptr = hash_find_channel(parv[2], NullChn)))
+  if (!(chptr = hash_find_channel(parv[2], NULL)))
     {
       if (MyClient(source_p))
         sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),

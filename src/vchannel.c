@@ -281,7 +281,7 @@ map_vchan(struct Channel *chptr, struct Client *source_p)
         return (vchan_info->vchan);
     }
 
-  return NullChn;
+  return NULL;
 }
 
 /* return the base chan from a vchan */
@@ -465,7 +465,7 @@ find_vchan(struct Channel *chptr, char *key)
             return chtmp;
         }
     }
-  return NullChn;
+  return NULL;
 }
 
 /* return the first found invite matching a subchannel of chptr
@@ -498,5 +498,5 @@ vchan_invites(struct Channel *chptr, struct Client *source_p)
         }
     }
 
-  return NullChn;
+  return NULL;
 }

@@ -329,7 +329,7 @@ static int build_target_list(int p_or_n,
        
       if( IsChanPrefix(*nick) )
 	{
-	  if( (chptr = hash_find_channel(nick, NullChn)) )
+	  if( (chptr = hash_find_channel(nick, NULL)) )
 	    {
 	      if( !duplicate_ptr(chptr, *targets, i) ) 
 		{
@@ -396,7 +396,7 @@ static int build_target_list(int p_or_n,
 	   * if the channel is found, fine, if not report an error
 	   */
 	 
-	  if ( (chptr = hash_find_channel(nick, NullChn)) )
+	  if ( (chptr = hash_find_channel(nick, NULL)) )
 	    {
 		
 	      if((type & MODE_CHANOP) && !is_chan_op(chptr, source_p))

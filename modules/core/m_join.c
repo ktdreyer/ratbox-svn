@@ -169,7 +169,7 @@ static void m_join(struct Client *client_p,
 	}
 
       /* look for the channel */
-      if( (chptr = hash_find_channel(name, NullChn)) != NULL )
+      if( (chptr = hash_find_channel(name, NULL)) != NULL )
 	{
           /* Check if they want to join a subchan or something */
 	  vchan_chptr = select_vchan(chptr, client_p, source_p, vkey, name);

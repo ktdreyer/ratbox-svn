@@ -229,7 +229,7 @@ static int list_named_channel(struct Client *source_p,char *name)
       return 0;
     }
 
-  chptr = hash_find_channel(name, NullChn);
+  chptr = hash_find_channel(name, NULL);
 
   if (chptr == NULL)
     {

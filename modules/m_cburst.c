@@ -105,7 +105,7 @@ static void ms_cburst(struct Client *client_p,
     key ? key : "" );
 #endif
 
-  if( (chptr = hash_find_channel(name, NullChn)) == NULL)
+  if( (chptr = hash_find_channel(name, NULL)) == NULL)
   {
     if((!nick) || (nick && *nick!='!'))
     {

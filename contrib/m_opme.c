@@ -94,7 +94,7 @@ static void mo_opme(struct Client *client_p, struct Client *source_p,
 
   /* XXX - we might not have CBURSTed this channel if we are a lazylink
    * yet. */
-  chptr= hash_find_channel(parv[1], NullChn);
+  chptr= hash_find_channel(parv[1], NULL);
   root_chptr = chptr;
   if (chptr && parc > 2 && parv[2][0] == '!')
     {

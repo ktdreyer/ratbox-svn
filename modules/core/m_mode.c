@@ -94,7 +94,7 @@ static void m_mode(struct Client *client_p, struct Client *source_p,
       return;
     }
 	  
-  chptr = hash_find_channel(parv[1], NullChn);
+  chptr = hash_find_channel(parv[1], NULL);
 
   if(chptr == NULL)
     {

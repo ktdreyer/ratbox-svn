@@ -46,7 +46,7 @@
 
 struct config_channel_entry ConfigChannel;
 
-struct Channel *GlobalChannelList = NullChn;
+struct Channel *GlobalChannelList = NULL;
 
 static int add_id(struct Client *, struct Channel *, char *, int);
 static int del_id(struct Channel *, char *, int);

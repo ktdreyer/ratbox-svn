@@ -103,8 +103,6 @@ void cleanup_channels(void *);
 
 #define MODEBUFLEN      200
 
-#define NullChn ((struct Channel *)0)
-
 
 /* Maximum mode changes allowed per client, per server is different */
 #define MAXMODEPARAMS   4

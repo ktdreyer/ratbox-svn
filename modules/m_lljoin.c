@@ -142,7 +142,7 @@ static void ms_lljoin(struct Client *client_p,
   if( !MyClient(target_p) )
     return;
 
-  chptr = hash_find_channel(chname, NullChn);
+  chptr = hash_find_channel(chname, NULL);
 
   if (cjoin)
   {
