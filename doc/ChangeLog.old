@@ -1,3 +1,10 @@
+*** 20000108_2 by db
+- still slowly working in LazyLinks version 2 code. nick collides
+  have to be handled by the LazyLinks uplink, for now sending back
+  KILL's (which were removed!) as needed...
+
+
+
 *** 20000108_1 by wnder
 fixed missing #include "s_conf.h"
 
