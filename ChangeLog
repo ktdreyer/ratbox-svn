@@ -1,3 +1,19 @@
+leeh        2002/10/20 16:54:25 UTC	(20021020_1)
+
+  Modified files:
+    tools                README.mkpasswd mkpasswd.c 
+  Added files:
+    tools                mkpasswd_vms.c 
+  Log:
+  - updated mkpasswd's via Hwy
+  
+  Revision  Changes    Path
+  1.6       +25 -15    ircd-ratbox/tools/README.mkpasswd
+  7.12      +167 -65   ircd-ratbox/tools/mkpasswd.c
+  7.1       +458 -0    ircd-ratbox/tools/mkpasswd_vms.c (new)
+
+
+
 leeh        2002/10/20 16:24:24 UTC	(20021020_0)
 
   Modified files:
