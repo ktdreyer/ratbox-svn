@@ -567,6 +567,15 @@ c_server(struct client *client_p, const char *parv[], int parc)
         /* our uplink introducing themselves */
         if(client_p == NULL)
         {
+		if(!ConnTS(server_p))
+		{
+			mlog("Connection to server %s failed: "
+				"(Protocol mismatch)",
+				server_p->name);
+			(server_p->io_close)(server_p);
+			return;
+		}
+
                 if(irccmp(server_p->name, parv[1]))
                 {
                         mlog("Connection to server %s failed: "
@@ -576,7 +585,7 @@ c_server(struct client *client_p, const char *parv[], int parc)
                         return;
                 }
 
-                server_p->flags &= ~CONN_HANDSHAKE;
+                ClearConnHandshake(server_p);
                 server_p->first_time = CURRENT_TIME;
         }
 

@@ -21,6 +21,7 @@
 static dlink_list scommand_table[MAX_SCOMMAND_HASH];
 
 static void c_admin(struct client *, const char *parv[], int parc);
+static void c_pass(struct client *, const char *parv[], int parc);
 static void c_ping(struct client *, const char *parv[], int parc);
 static void c_pong(struct client *, const char *parv[], int parc);
 static void c_stats(struct client *, const char *parv[], int parc);
@@ -29,6 +30,7 @@ static void c_version(struct client *, const char *parv[], int parc);
 static void c_whois(struct client *, const char *parv[], int parc);
 
 static struct scommand_handler admin_command = { "ADMIN", c_admin, 0, DLINK_EMPTY };
+static struct scommand_handler pass_command = { "PASS", c_pass, FLAGS_UNKNOWN, DLINK_EMPTY };
 static struct scommand_handler ping_command = { "PING", c_ping, 0, DLINK_EMPTY };
 static struct scommand_handler pong_command = { "PONG", c_pong, 0, DLINK_EMPTY };
 static struct scommand_handler stats_command = { "STATS", c_stats, 0, DLINK_EMPTY };
@@ -40,6 +42,7 @@ void
 init_scommand(void)
 {
 	add_scommand_handler(&admin_command);
+	add_scommand_handler(&pass_command);
 	add_scommand_handler(&ping_command);
 	add_scommand_handler(&pong_command);
 	add_scommand_handler(&stats_command);
@@ -202,6 +205,38 @@ c_admin(struct client *client_p, const char *parv[], int parc)
 	if(!EmptyString(config_file.admin3))
 		sendto_server(":%s 259 %s :%s",
                               MYNAME, parv[0], config_file.admin3);
+}
+
+static void
+c_pass(struct client *client_p, const char *parv[], int parc)
+{
+	if(parc < 3)
+		return;
+
+	/* we shouldnt get this when the link is established.. */
+	if(client_p != NULL)
+		return;
+
+	/* password is wrong */
+	if(strcmp(server_p->pass, parv[1]))
+	{
+		mlog("Connection to server %s failed: "
+			"(Password mismatch)",
+			server_p->name);
+		(server_p->io_close)(server_p);
+		return;
+	}
+
+	if(strcasecmp(parv[2], "TS"))
+	{
+		mlog("Connection to server %s failed: "
+			"(Protocol mismatch)",
+			server_p->name);
+		(server_p->io_close)(server_p);
+		return;
+	}
+
+	SetConnTS(server_p);
 }
 
 static void

@@ -791,6 +791,7 @@ static struct ConfEntry conf_service_table[] =
 static struct ConfEntry conf_userserv_table[] =
 {
 	{ "disable_register",	CF_YESNO, NULL, 0, &config_file.disable_uregister	},
+	{ "register_url",	CF_QSTRING,NULL,0, &config_file.uregister_url },
 	{ "register_time",	CF_TIME,  NULL, 0, &config_file.uregister_time		},
 	{ "register_amount",	CF_INT,   NULL, 0, &config_file.uregister_amount	},
 	{ "register_email",	CF_YESNO, NULL, 0, &config_file.uregister_email		},

@@ -515,6 +515,30 @@ s_user_userunsuspend(struct client *client_p, char *parv[], int parc)
 }
 
 static int
+valid_email(const char *email)
+{
+	char *p;
+
+	/* no username, or no '@' */
+	if(*email == '@' || (p = strchr(email, '@')) == NULL)
+		return 0;
+
+	p++;
+
+	/* no host, or no '.' in host */
+	if(EmptyString(p) || (p = strrchr(p, '.')) == NULL)
+		return 0;
+
+	p++;
+
+	/* it ends in a '.' */
+	if(EmptyString(p))
+		return 0;
+
+	return 1;
+}
+
+static int
 s_user_register(struct client *client_p, char *parv[], int parc)
 {
 	struct user_reg *reg_p;
@@ -522,7 +546,15 @@ s_user_register(struct client *client_p, char *parv[], int parc)
 
 	if(config_file.disable_uregister)
 	{
-		service_error(userserv_p, client_p, "%s::REGISTER is disabled", userserv_p->name);
+		if(config_file.uregister_url)
+			service_error(userserv_p, client_p,
+				"%s::REGISTER is disabled, see %s",
+				userserv_p->name, config_file.uregister_url);
+		else
+			service_error(userserv_p, client_p, 
+					"%s::REGISTER is disabled",
+					userserv_p->name);
+
 		return 1;
 	}
 
@@ -530,6 +562,13 @@ s_user_register(struct client *client_p, char *parv[], int parc)
 	{
 		service_error(userserv_p, client_p, "Insufficient parameters to %s::REGISTER",
 				userserv_p->name);
+		return 1;
+	}
+
+	if(!valid_email(parv[2]))
+	{
+		service_error(userserv_p, client_p, "Email %s invalid",
+				parv[2]);
 		return 1;
 	}
 

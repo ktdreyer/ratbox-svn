@@ -29,6 +29,7 @@ struct _config_file
 
 	/* userserv */
 	int disable_uregister;
+	char *uregister_url;
 	int uregister_time;
 	int uregister_amount;
 	int uregister_email;
