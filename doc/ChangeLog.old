@@ -1,3 +1,13 @@
+*** 20001130_22 by db
+- majorly reworked m_sjoin.c remove_our_ops and channel.c send_mode_list
+  because of the original RFC that started this stupidity off, trying to
+  do four modes at a time is risky due to possible buffer overflow ;-(
+  Taking the time to strlen() before adding to output buffer seems
+  CPU intensive to me. soooo back to 3 mode changes per. This should
+  speed up sjoin's a lot now.
+
+
+
 *** 20001130_21 by db
 - rewrote send_mode_list in channel.c The original was pathetic
   strcat this strcpy that. UGH. This should run much faster.
