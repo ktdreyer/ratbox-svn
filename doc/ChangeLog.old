@@ -1,3 +1,14 @@
+*** 20010618_4 by jdc
+- Fixes compile issues with prior update for OpenSSL error logging.
+  One small note:  There is no way I know of to get around the
+  implicit declaration warning for PEM_read_bio_RSAPrivateKey().  If
+  you include <openssl/pem.h>, you break everything.  Either our SSL
+  code is really, and I mean __REALLY__ bad, or OpenSSL is just a hunk
+  of junk.  fetchmail and mod_ssl don't have the problems we are,
+  though...
+
+
+
 *** 20010618_3 by db
 - bug in USE_TABLE_MODE set_channel_mode code
   I've undeffed it for now until this fix is verified... This
