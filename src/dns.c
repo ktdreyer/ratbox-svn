@@ -166,13 +166,14 @@ fork_resolver(void)
 	pid_t pid;
 	char fx[5];
 	char fy[5];
-	
 	if(fork_count > 10)
 	{
 		ilog(L_MAIN, "Resolver is really hosed and is looping");
 		return;
 	}
 	fork_count++;
+	comm_close(dns_fd);
+	comm_close(ctrl_fd);
 	if(res_pid != 0)
 	{
 		/* if we got here with a resolver running
