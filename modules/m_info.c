@@ -409,7 +409,7 @@ static void m_info(struct Client *client_p, struct Client *source_p,
     last_used = CurrentTime;
   }
 
-  if (!ConfigServerHide.disable_remote || IsOper(source_p))
+  if (!ConfigServerHide.disable_remote)
   {
     if (hunt_server(client_p,source_p,
         ":%s INFO :%s", 1, parc, parv) != HUNTED_ISME)
