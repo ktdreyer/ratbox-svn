@@ -320,8 +320,6 @@ void
 del_from_id_hash(const char *id, struct Client *client_p)
 {
 	unsigned int hashv;
-	dlink_node *ptr;
-	dlink_node *next_ptr;
 
 	s_assert(id != NULL);
 	s_assert(client_p != NULL);
@@ -340,8 +338,6 @@ void
 del_from_client_hash(const char *name, struct Client *client_p)
 {
 	unsigned int hashv;
-	dlink_node *ptr;
-	dlink_node *next_ptr;
 
 	/* no s_asserts, this can happen when removing a client that
 	 * is unregistered.
@@ -360,8 +356,6 @@ del_from_client_hash(const char *name, struct Client *client_p)
 void
 del_from_channel_hash(const char *name, struct Channel *chptr)
 {
-	dlink_node *ptr;
-	dlink_node *next_ptr;
 	unsigned int hashv;
 
 	s_assert(name != NULL);
