@@ -1,3 +1,15 @@
+androsyn    2002/02/27 12:20:17 EST	(20020227_0)
+
+  Modified files:
+    src                  balloc.c 
+  Log:
+  I hate hpux..did I ever tell you this?
+  
+  Revision  Changes    Path
+  7.24      +7 -0      ircd-hybrid-7/src/balloc.c
+
+
+
 wcampbel    2002/02/26 11:44:42 EST	(20020226_0)
 
   Modified files:
