@@ -1,3 +1,10 @@
+*** 20001222_6 by db
+- massive addition to add extra parameter to struct Message
+  this will enable us to have the parser handle parameter counts
+  properly in all cases before it even gets to the module it is calling.
+
+
+
 *** 20001222_5 by db
 - use irccmp() not match in m_kline for "ON" parser duh
 - use irccmp() not strncasecmp in m_set.c
