@@ -1,3 +1,10 @@
+*** 20001130_14 by db
+- removed the evil local struct Client hack and added a new LocalUser
+  "localClient" part. If non NULL, this client struct is a local client..
+  I suppose we can now get rid of local_flag?
+
+
+
 *** 20001130_13 by adrian
 
 
