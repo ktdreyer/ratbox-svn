@@ -307,12 +307,12 @@ int     ms_sjoin(struct Client *cptr,
   if(*modebuf != '\0')
     {
       if(top_chptr != NULL)
-	sendto_channel_local(ALL_MEMBERS,
+	sendto_channel_local(hide_or_not,
 			     chptr, ":%s MODE %s %s %s",
 			     me.name,
 			     top_chptr->chname, modebuf, parabuf);
       else
-	sendto_channel_local(ALL_MEMBERS,
+	sendto_channel_local(hide_or_not,
 			     chptr, ":%s MODE %s %s %s",
 			     me.name,
 			     chptr->chname, modebuf, parabuf);
