@@ -596,6 +596,9 @@ comm_connect_tcp(int fd, const char *host, u_short port,
 {
  fd_table[fd].flags.called_connect = 1;
  assert(callback);
+#ifndef NDEBUG
+ memset(&fd_table[fd].connect, 0, sizeof(fd_table[fd].connect));
+#endif
  fd_table[fd].connect.callback = callback;
  fd_table[fd].connect.data = data;
 
@@ -738,7 +741,7 @@ static void
 comm_connect_tryconnect(int fd, void *notused)
 {
  int retval;
-  
+ assert(fd_table[fd].connect.callback); 
  /* Try the connect() */
  retval = connect(fd, (struct sockaddr *) &SOCKADDR(fd_table[fd].connect.hostaddr), sizeof(struct irc_sockaddr));
  /* Error? */
