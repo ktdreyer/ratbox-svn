@@ -1,3 +1,17 @@
+androsyn    2002/11/13 05:52:50 UTC	(20021113_7)
+
+  Modified files:
+    src                  newconf.c 
+  Log:
+  Fix a bug in conf_end_oper that would cause operator blocks that had
+  multiple hostmasks to fail to copy flags, and cause things like encrypted
+  passwords to fail
+  
+  Revision  Changes    Path
+  7.48      +2 -1      ircd-ratbox/src/newconf.c
+
+
+
 androsyn    2002/11/13 05:16:00 UTC	(20021113_6)
 
   Modified files:
