@@ -49,6 +49,7 @@ struct Message trace_msgtab = {
   {m_unregistered, m_ignore, ms_trace, mo_trace}
 };
 
+#ifndef STATIC_MODULES
 void
 _modinit(void)
 {
@@ -60,11 +61,11 @@ _moddeinit(void)
 {
   mod_del_cmd(&trace_msgtab);
 }
-
+char *_version = "20010109";
+#endif
 static int report_this_status(struct Client *source_p, struct Client *target_p,int dow,
                               int link_u_p, int link_u_s);
 
-char *_version = "20010109";
 
 /*
 ** mo_trace

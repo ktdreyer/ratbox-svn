@@ -50,6 +50,7 @@ struct Message list_msgtab = {
   "LIST", 0, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_list, ms_list, mo_list}
 };
+#ifndef STATIC_MODULES
 
 void
 _modinit(void)
@@ -62,11 +63,11 @@ _moddeinit(void)
 {
   mod_del_cmd(&list_msgtab);
 }
-
+char *_version = "20001122";
+#endif
 static int list_all_channels(struct Client *source_p);
 static int list_named_channel(struct Client *source_p,char *name);
 
-char *_version = "20001122";
 
 /*
 ** m_list

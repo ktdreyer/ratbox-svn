@@ -40,6 +40,7 @@ struct Message accept_msgtab = {
   {m_unregistered, m_accept, m_ignore, m_accept}
 };
 
+#ifndef STATIC_MODULES
 void
 _modinit(void)
 {
@@ -53,7 +54,7 @@ _moddeinit(void)
 }
 
 char *_version = "20001122";
-
+#endif
 /*
  * m_accept - ACCEPT command handler
  *      parv[0] = sender prefix

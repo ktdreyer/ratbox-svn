@@ -43,6 +43,7 @@ struct Message time_msgtab = {
   {m_unregistered, m_time, ms_time, mo_time}
 };
 
+#ifndef STATIC_MODULES
 void
 _modinit(void)
 {
@@ -56,7 +57,7 @@ _moddeinit(void)
 }
 
 char *_version = "20001202";
-
+#endif
 /*
  * m_time
  *      parv[0] = sender prefix

@@ -47,6 +47,7 @@ struct Message links_msgtab = {
   "LINKS", 0, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_links, ms_links, mo_links}
 };
+#ifndef STATIC_MODULES
 
 void
 _modinit(void)
@@ -63,7 +64,7 @@ _moddeinit(void)
 }
 
 char *_version = "20001122";
-
+#endif
 /*
  * m_links - LINKS message handler
  *      parv[0] = sender prefix

@@ -41,7 +41,7 @@ int oper_up( struct Client *source_p, struct ConfItem *aconf );
 
 #ifndef OPENSSL
 /* Maybe this should be an error or something?-davidt */
-
+#ifndef STATIC_MODULES
 void
 _modinit(void)
 {
@@ -55,7 +55,7 @@ _moddeinit(void)
 }
 
 char *_version = "20001122";
-
+#endif
 #else
 
 static void m_challenge(struct Client*, struct Client*, int, char**);
@@ -66,7 +66,7 @@ struct Message challenge_msgtab = {
   "CHALLENGE", 0, 2, 0, MFLG_SLOW, 0,
   {m_unregistered, m_challenge, m_ignore, m_challenge}
 };
-
+#ifndef STATIC_MODULES
 void
 _modinit(void)
 {
@@ -80,7 +80,7 @@ _moddeinit(void)
 }
 
 char *_version = "20001122";
-
+#endif
 /*
  * m_challenge - generate RSA challenge for wouldbe oper
  * parv[0] = sender prefix

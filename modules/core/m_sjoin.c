@@ -51,6 +51,7 @@ struct Message sjoin_msgtab = {
   {m_unregistered, m_ignore, ms_sjoin, m_ignore}
 };
 
+#ifndef STATIC_MODULES
 void
 _modinit(void)
 {
@@ -64,7 +65,7 @@ _moddeinit(void)
 }
 
 char *_version = "20010102";
-
+#endif
 /*
  * ms_sjoin
  * parv[0] - sender

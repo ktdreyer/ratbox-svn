@@ -41,6 +41,7 @@ struct Message operwall_msgtab = {
   {m_unregistered, m_not_oper, ms_operwall, mo_operwall}
 };
 
+#ifndef STATIC_MODULES
 void
 _modinit(void)
 {
@@ -54,7 +55,7 @@ _moddeinit(void)
 }
 
 char *_version = "20010130";
-
+#endif
 /*
  * mo_operwall - OPERWALL message handler
  *  (write to *all* local opers currently online)

@@ -44,7 +44,7 @@ struct Message kick_msgtab = {
   "KICK", 0, 3, 0, MFLG_SLOW, 0,
   {m_unregistered, m_kick, ms_kick, m_kick}
 };
-
+#ifndef STATIC_MODULES
 void
 _modinit(void)
 {
@@ -58,7 +58,7 @@ _moddeinit(void)
 }
 
 char *_version = "20010121";
-
+#endif
 /*
 ** m_kick
 **      parv[0] = sender prefix

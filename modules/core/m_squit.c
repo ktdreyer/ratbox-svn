@@ -46,6 +46,7 @@ struct Message squit_msgtab = {
   {m_unregistered, m_not_oper, ms_squit, mo_squit}
 };
 
+#ifndef STATIC_MODULES
 void
 _modinit(void)
 {
@@ -57,7 +58,8 @@ _moddeinit(void)
 {
   mod_del_cmd(&squit_msgtab);
 }
-
+char *_version = "20001122";
+#endif
 struct squit_parms 
 {
   char *server_name;
@@ -68,7 +70,6 @@ static struct squit_parms *find_squit(struct Client *client_p,
                                       struct Client *source_p,
                                       char *server);
 
-char *_version = "20001122";
 
 /*
  * mo_squit - SQUIT message handler

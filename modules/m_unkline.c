@@ -62,6 +62,7 @@ struct Message msgtabs[] = {
    {m_unregistered, m_not_oper, m_error, mo_ungline}}
 };
 
+#ifndef STATIC_MODULES
 void
 _modinit(void)
 {
@@ -77,11 +78,12 @@ _moddeinit(void)
   mod_del_cmd(&msgtabs[1]);
   mod_del_cmd(&msgtabs[2]);
 }
+char *_version = "20001122";
+#endif
 
 static int flush_write(struct Client *, FBFILE* , char *, char *);
 static int remove_tkline_match(char *,char *);
 
-char *_version = "20001122";
 
 /*
 ** mo_unkline

@@ -42,6 +42,7 @@ struct Message restart_msgtab = {
   {m_unregistered, m_not_oper, m_ignore, mo_restart}
 };
 
+#ifndef STATIC_MODULES
 void
 _modinit(void)
 {
@@ -55,7 +56,7 @@ _moddeinit(void)
 }
 
 char *_version = "20001122";
-
+#endif
 /*
  * mo_restart
  *

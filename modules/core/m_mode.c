@@ -45,6 +45,7 @@ struct Message mode_msgtab = {
   "MODE", 0, 2, 0, MFLG_SLOW, 0,
   {m_unregistered, m_mode, m_mode, m_mode}
 };
+#ifndef STATIC_MODULES
 
 void
 _modinit(void)
@@ -60,7 +61,7 @@ _moddeinit(void)
 
 
 char *_version = "20001122";
-
+#endif
 /*
  * m_mode - MODE command handler
  * parv[0] - sender

@@ -52,6 +52,7 @@ struct Message part_msgtab = {
   {m_unregistered, m_part, ms_part, mo_part}
 };
 
+#ifndef STATIC_MODULES
 void
 _modinit(void)
 {
@@ -63,12 +64,13 @@ _moddeinit(void)
 {
   mod_del_cmd(&part_msgtab);
 }
+char *_version = "20001122";
+#endif
 
 static void part_one_client(struct Client *client_p,
 			    struct Client *source_p,
 			    char *name, char *reason);
 
-char *_version = "20001122";
 
 /*
 ** m_part

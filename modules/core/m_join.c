@@ -52,6 +52,8 @@ struct Message join_msgtab = {
   {m_unregistered, m_join, ms_join, m_join}
 };
 
+#ifndef STATIC_MODULES
+
 void
 _modinit(void)
 {
@@ -63,13 +65,14 @@ _moddeinit(void)
 {
   mod_del_cmd(&join_msgtab);
 }
+char *_version = "20001122";
 
+#endif
 static void build_list_of_channels( struct Client *source_p,
                                     char *jbuf, char *given_names);
 static void do_join_0(struct Client *client_p, struct Client *source_p);
 static void check_spambot_warning( struct Client *source_p, char *name );
 
-char *_version = "20001122";
 
 /*
 ** m_join

@@ -109,6 +109,8 @@ struct Message notice_msgtab = {
   {m_unregistered, m_notice, m_notice, m_notice}
 };
 
+#ifndef STATIC_MODULES
+
 void
 _modinit(void)
 {
@@ -124,7 +126,7 @@ _moddeinit(void)
 }
 
 char *_version = "20001122";
-
+#endif
 /* 
  * free_target_table -
  *

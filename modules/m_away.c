@@ -41,7 +41,7 @@ struct Message away_msgtab = {
   "AWAY", 0, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_away, m_away, m_away}
 };
-
+#ifndef STATIC_MODULES
 void
 _modinit(void)
 {
@@ -53,9 +53,8 @@ _moddeinit(void)
 {
   mod_del_cmd(&away_msgtab);
 }
-
 char *_version = "20010128";
-
+#endif
 /***********************************************************************
  * m_away() - Added 14 Dec 1988 by jto. 
  *            Not currently really working, I don't like this

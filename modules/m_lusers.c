@@ -43,6 +43,7 @@ struct Message lusers_msgtab = {
   "LUSERS", 0, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_lusers, ms_lusers, m_lusers}
 };
+#ifndef STATIC_MODULES
 
 void
 _modinit(void)
@@ -57,7 +58,7 @@ _moddeinit(void)
 }
 
 char *_version = "20001122";
-
+#endif
 /*
  * m_lusers - LUSERS message handler
  * parv[0] = sender

@@ -49,6 +49,7 @@ struct Message kill_msgtab = {
   "KILL", 0, 2, 0, MFLG_SLOW, 0,
   {m_unregistered, m_not_oper, ms_kill, mo_kill}
 };
+#ifndef STATIC_MODULES
 
 void
 _modinit(void)
@@ -63,7 +64,7 @@ _moddeinit(void)
 }
 
 char *_version = "20001122";
-
+#endif
 /*
 ** mo_kill
 **      parv[0] = sender prefix

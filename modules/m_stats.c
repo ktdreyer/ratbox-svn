@@ -63,6 +63,7 @@ struct Message stats_msgtab = {
   {m_unregistered, m_stats, ms_stats, mo_stats}
 };
 
+#ifndef STATIC_MODULES
 void
 _modinit(void)
 {
@@ -78,7 +79,7 @@ _moddeinit(void)
 }
 
 char *_version = "20010127";
-
+#endif
 /*
  * m_stats - STATS message handler
  *      parv[0] = sender prefix

@@ -61,6 +61,7 @@ struct Message oper_msgtab = {
   {m_unregistered, m_oper, ms_oper, mo_oper} 
 };
 
+#ifndef STATIC_MODULES
 void
 _modinit(void)
 {
@@ -74,7 +75,7 @@ _moddeinit(void)
 }
 
 char *_version = "20001122";
-
+#endif
 /*
 ** m_oper
 **      parv[0] = sender prefix

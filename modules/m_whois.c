@@ -63,6 +63,7 @@ struct Message whois_msgtab = {
   {m_unregistered, m_whois, ms_whois, mo_whois}
 };
 
+#ifndef STATIC_MODULES
 void
 _modinit(void)
 {
@@ -78,7 +79,7 @@ _moddeinit(void)
 }
 
 char *_version = "20010105";
-
+#endif
 /*
 ** m_whois
 **      parv[0] = sender prefix

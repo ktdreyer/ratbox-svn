@@ -48,6 +48,7 @@ struct Message set_msgtab = {
   {m_unregistered, m_not_oper, m_error, mo_set}
 };
 
+#ifndef STATIC_MODULES
   void
 _modinit(void)
 {
@@ -61,7 +62,7 @@ _moddeinit(void)
 }
 
 char *_version = "20001122";
-
+#endif
 /* Structure used for the SET table itself */
 struct SetStruct
 {

@@ -39,6 +39,7 @@ struct Message pass_msgtab = {
   {mr_pass, m_registered, m_ignore, m_registered}
 };
 
+#ifndef STATIC_MODULES
 void
 _modinit(void)
 {
@@ -52,7 +53,7 @@ _moddeinit(void)
 }
 
 char *_version = "20001122";
-
+#endif
 /*
  * m_pass() - Added Sat, 4 March 1989
  *

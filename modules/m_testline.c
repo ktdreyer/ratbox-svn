@@ -47,6 +47,7 @@ struct Message testline_msgtab = {
   {m_unregistered, m_not_oper, m_ignore, mo_testline}
 };
  
+#ifndef STATIC_MODULES
 void
 _modinit(void)
 {
@@ -60,7 +61,7 @@ _moddeinit(void)
 }
  
 char *_version = "20001124";
-
+#endif
 /*
  * mo_testline
  *

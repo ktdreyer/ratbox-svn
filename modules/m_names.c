@@ -54,6 +54,7 @@ struct Message names_msgtab = {
   "NAMES", 0, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_names, ms_names, m_names}
 };
+#ifndef STATIC_MODULES
 
 void
 _modinit(void)
@@ -68,7 +69,7 @@ _moddeinit(void)
 }
 
 char *_version = "20001122";
-
+#endif
 
 /************************************************************************
  * m_names() - Added by Jto 27 Apr 1989

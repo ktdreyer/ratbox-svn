@@ -46,6 +46,7 @@ struct Message svinfo_msgtab = {
   {m_unregistered, m_ignore, ms_svinfo, m_ignore}
 };
 
+#ifndef STATIC_MODULES
 void
 _modinit(void)
 {
@@ -59,7 +60,7 @@ _moddeinit(void)
 }
 
 char *_version = "20001122";
-
+#endif
 /*
  * ms_svinfo - SVINFO message handler
  *      parv[0] = sender prefix

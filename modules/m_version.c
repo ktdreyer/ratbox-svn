@@ -46,6 +46,7 @@ struct Message version_msgtab = {
   {m_unregistered, m_version, ms_version, mo_version}
 };
 
+#ifndef STATIC_MODULES
 void
 _modinit(void)
 {
@@ -59,7 +60,7 @@ _moddeinit(void)
 }
 
 char *_version = "20001223";
-
+#endif
 /*
  * m_version - VERSION command handler
  *      parv[0] = sender prefix

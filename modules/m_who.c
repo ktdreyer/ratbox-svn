@@ -48,6 +48,7 @@ struct Message who_msgtab = {
   {m_unregistered, m_who, ms_who, m_who}
 };
 
+#ifndef STATIC_MODULES
 void
 _modinit(void)
 {
@@ -59,7 +60,8 @@ _moddeinit(void)
 {
   mod_del_cmd(&who_msgtab);
 }
-
+char *_version = "20010210";
+#endif
 static void do_who_on_channel(struct Client *source_p,
 			      struct Channel *chptr, char *real_name,
 			      int server_oper, int member);
@@ -77,7 +79,6 @@ static void do_who(struct Client *source_p,
                    char *chname,
                    char *op_flags);
 
-char *_version = "20010210";
 
 /*
 ** m_who

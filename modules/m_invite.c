@@ -47,6 +47,7 @@ struct Message invite_msgtab = {
   "INVITE", 0, 3, 0, MFLG_SLOW, 0,
   {m_unregistered, m_invite, ms_invite, m_invite}
 };
+#ifndef STATIC_MODULES
 
 void
 _modinit(void)
@@ -61,7 +62,7 @@ _moddeinit(void)
 }
 
 char *_version = "20001122";
-
+#endif
 /*
 ** m_invite
 **      parv[0] - sender prefix

@@ -43,6 +43,7 @@ struct Message wallops_msgtab = {
   {m_unregistered, m_not_oper, ms_wallops, mo_wallops}
 };
 
+#ifndef STATIC_MODULES
 void
 _modinit(void)
 {
@@ -56,7 +57,7 @@ _moddeinit(void)
 }
  
 char *_version = "20001122";
-
+#endif
 /*
  * mo_wallops (write to *all* opers currently online)
  *      parv[0] = sender prefix

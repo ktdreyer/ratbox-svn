@@ -53,6 +53,7 @@ struct Message server_msgtab = {
   {mr_server, m_registered, ms_server, m_registered}
 };
 
+#ifndef STATIC_MODULES
 void 
 _modinit(void)
 {
@@ -64,12 +65,13 @@ _moddeinit(void)
 {
   mod_del_cmd(&server_msgtab);
 }
+char *_version = "20001122";
+#endif
 
 char *parse_server_args(char *parv[], int parc, char *info, int *hop);
 int bogus_host(char *host);
 void write_links_file(void*);
 
-char *_version = "20001122";
 
 static int       refresh_user_links=0;
 

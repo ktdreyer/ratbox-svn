@@ -67,6 +67,8 @@ struct Message dline_msgtab = {
   {m_unregistered, m_not_oper, m_error, mo_dline}
 };
 
+#ifndef STATIC_MODULES
+
 void
 _modinit(void)
 {
@@ -80,6 +82,8 @@ _moddeinit(void)
   mod_del_cmd(&kline_msgtab);
   mod_del_cmd(&dline_msgtab);
 }
+char *_version = "20001122";
+#endif
 
 /* Local function prototypes */
 
@@ -109,7 +113,6 @@ static void apply_tkline(struct Client *source_p, struct ConfItem *aconf,
                          int ip_kline, struct irc_inaddr *ip,
                          unsigned long ip_mask);
 
-char *_version = "20001122";
 
 char buffer[IRCD_BUFSIZE];
 char user[USERLEN+2];

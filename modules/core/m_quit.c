@@ -41,6 +41,7 @@ struct Message quit_msgtab = {
   {m_quit, m_quit, ms_quit, m_quit}
 };
 
+#ifndef STATIC_MODULES
 void
 _modinit(void)
 {
@@ -54,7 +55,7 @@ _moddeinit(void)
 }
 
 char *_version = "20001122";
-
+#endif
 /*
 ** m_quit
 **      parv[0] = sender prefix

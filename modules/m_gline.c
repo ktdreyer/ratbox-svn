@@ -107,6 +107,8 @@ struct Message gline_msgtab = {
       {m_unregistered, m_not_oper, ms_gline, mo_gline}
 };
 
+#ifndef STATIC_MODULES
+
 void
 _modinit(void)
 {
@@ -120,6 +122,7 @@ _moddeinit(void)
 }
 
 char *_version = "20001122";
+#endif
 /*
  * mo_gline()
  *

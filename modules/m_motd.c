@@ -46,7 +46,7 @@ struct Message motd_msgtab = {
   "MOTD", 0, 0, 1, MFLG_SLOW, 0,
   {m_unregistered, m_motd, mo_motd, mo_motd}
 };
-
+#ifndef STATIC_MODULES
 void
 _modinit(void)
 {
@@ -60,7 +60,7 @@ _moddeinit(void)
 }
 
 char *_version = "20001122";
-
+#endif
 /*
 ** m_motd
 **      parv[0] = sender prefix

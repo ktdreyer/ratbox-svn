@@ -40,7 +40,7 @@ struct Message close_msgtab = {
   "CLOSE", 0, 1, 0, MFLG_SLOW, 0,
   {m_unregistered, m_not_oper, m_ignore, mo_close}
 };
-
+#ifndef STATIC_MODULES
 void
 _modinit(void)
 {
@@ -54,7 +54,7 @@ _moddeinit(void)
 }
 
 char *_version = "20001122";
-
+#endif
 /*
  * mo_close - CLOSE message handler
  *  - added by Darren Reed Jul 13 1992.

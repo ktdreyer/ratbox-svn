@@ -45,7 +45,7 @@ struct Message cburst_msgtab = {
   "CBURST", 0, 1, 0, MFLG_SLOW | MFLG_UNREG, 0L,
   {m_unregistered, m_error, ms_cburst, m_error}
 };
-
+#ifndef STATIC_MODULES
 void
 _modinit(void)
 {
@@ -59,7 +59,7 @@ _moddeinit(void)
 }
 
 char *_version = "20001122";
-
+#endif
 /*
 ** m_cburst
 **      parv[0] = sender prefix

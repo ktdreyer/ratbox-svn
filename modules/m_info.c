@@ -54,6 +54,7 @@ struct Message info_msgtab = {
   "INFO", 0, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_info, ms_info, mo_info}
 };
+#ifndef STATIC_MODULES
 
 void
 _modinit(void)
@@ -66,12 +67,13 @@ _moddeinit(void)
 {
   mod_del_cmd(&info_msgtab);
 }
+char *_version = "20010109";
+#endif
 
 void send_info_text(struct Client *source_p);
 void send_birthdate_online_time(struct Client *source_p);
 void send_conf_options(struct Client *source_p);
 
-char *_version = "20010109";
 
 /*
 ** m_info

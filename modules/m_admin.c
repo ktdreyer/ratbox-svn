@@ -42,7 +42,7 @@ struct Message admin_msgtab = {
   "ADMIN", 0, 0, 0, MFLG_SLOW | MFLG_UNREG, 0, 
   {mr_admin, m_admin, ms_admin, ms_admin}
 };
-
+#ifndef STATIC_MODULES
 void
 _modinit(void)
 {
@@ -54,9 +54,8 @@ _moddeinit(void)
 {
   mod_del_cmd(&admin_msgtab);
 }
-
 char *_version = "20001202";
-
+#endif
 /*
  * mr_admin - ADMIN command handler
  *      parv[0] = sender prefix   

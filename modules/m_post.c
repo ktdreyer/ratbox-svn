@@ -40,6 +40,7 @@ struct Message post_msgtab = {
   {m_post, m_ignore, m_ignore, m_ignore}
 };
 
+#ifndef STATIC_MODULES
 void
 _modinit(void)
 {
@@ -53,7 +54,7 @@ _moddeinit(void)
 }
 
 char *_version = "20010309";
-
+#endif
 /*
 ** m_post
 **      parv[0] = sender prefix

@@ -40,6 +40,7 @@ struct Message ping_msgtab = {
   {m_unregistered, m_ping, ms_ping, m_ping}
 };
 
+#ifndef STATIC_MODULES
 void
 _modinit(void)
 {
@@ -53,7 +54,7 @@ _moddeinit(void)
 }
 
 char *_version = "20001122";
-
+#endif
 /*
 ** m_ping
 **      parv[0] = sender prefix

@@ -53,6 +53,7 @@ struct Message knock_msgtab = {
   "KNOCK", 0, 2, 0, MFLG_SLOW, 0,
   {m_unregistered, m_knock, m_ignore, m_knock}
 };
+#ifndef STATIC_MODULES
 
 void
 _modinit(void)
@@ -67,7 +68,7 @@ _moddeinit(void)
 }
 
 char *_version = "20010105";
-
+#endif
 /* m_knock
 **    parv[0] = sender prefix
 **    parv[1] = channel

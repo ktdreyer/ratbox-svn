@@ -45,7 +45,7 @@ struct Message dmem_msgtab = {
   "DMEM", 0, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_not_oper, m_ignore, mo_dmem}
 };
-
+#ifndef STATIC_MODULES
 void
 _modinit(void)
 {
@@ -59,7 +59,7 @@ _moddeinit(void)
 }
 
 char *_version = "20001221";
-
+#endif
 #ifdef MEMDEBUG
 void ReportAllocated(struct Client*);
 #endif

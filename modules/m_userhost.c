@@ -45,6 +45,7 @@ struct Message userhost_msgtab = {
   {m_unregistered, m_userhost, m_userhost, m_userhost}
 };
 
+#ifndef STATIC_MODULES
 void
 _modinit(void)
 {
@@ -58,7 +59,7 @@ _moddeinit(void)
 }
 
 char *_version = "20001122";
-
+#endif
 /*
  * m_userhost added by Darren Reed 13/8/91 to aid clients and reduce
  * the need for complicated requests like WHOIS. It returns user/host

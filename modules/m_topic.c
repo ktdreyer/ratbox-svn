@@ -49,6 +49,7 @@ struct Message topic_msgtab = {
   {m_unregistered, m_topic, ms_topic, m_topic}
 };
 
+#ifndef STATIC_MODULES
 void
 _modinit(void)
 {
@@ -62,7 +63,7 @@ _moddeinit(void)
 }
 
 char *_version = "20001122";
-
+#endif
 /*
  * m_topic
  *      parv[0] = sender prefix

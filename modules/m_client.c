@@ -68,7 +68,7 @@ struct Message client_msgtab = {
   {m_unregistered, m_ignore, ms_client, m_ignore}
 };
 #endif
-
+#ifndef STATIC_MODULES
 void
 _modinit(void)
 {
@@ -82,7 +82,7 @@ _moddeinit(void)
 }
 
 char *_version = "20001122";
-
+#endif
 /*
 ** ms_client
 **

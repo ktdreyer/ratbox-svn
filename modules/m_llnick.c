@@ -44,6 +44,7 @@ struct Message llnick_msgtab = {
   "LLNICK", 0, 3, 0, MFLG_SLOW | MFLG_UNREG, 0L,
   {m_unregistered, m_ignore, ms_llnick, m_ignore}
 };
+#ifndef STATIC_MODULES
 
 void
 _modinit(void)
@@ -58,7 +59,7 @@ _moddeinit(void)
 }
 
 char *_version = "20001122";
-
+#endif
 /*
  * m_llnick
  *      parv[0] = sender prefix

@@ -45,7 +45,7 @@ struct Message drop_msgtab = {
   "DROP", 0, 2, 0, MFLG_SLOW | MFLG_UNREG, 0L,
   {m_unregistered, m_ignore, ms_drop, m_ignore}
 };
-
+#ifndef STATIC_MODULES
 void
 _modinit(void)
 {
@@ -59,7 +59,7 @@ _moddeinit(void)
 }
 
 char *_version = "20001122";
-
+#endif
 /*
 ** ms_drop
 **      parv[0] = sender prefix

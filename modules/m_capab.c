@@ -37,7 +37,7 @@ struct Message capab_msgtab = {
   "CAPAB", 0, 0, 0, MFLG_SLOW | MFLG_UNREG, 0,
   {mr_capab, m_error, mr_capab, m_error}
 };
-
+#ifndef STATIC_MODULES
 void
 _modinit(void)
 {
@@ -51,6 +51,7 @@ _moddeinit(void)
 }
 
 char *_version = "20001122";
+#endif
 
 /*
  * mr_capab - CAPAB message handler

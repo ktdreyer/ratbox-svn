@@ -46,6 +46,7 @@ struct Message lljoin_msgtab = {
   "LLJOIN", 0, 3, 0, MFLG_SLOW | MFLG_UNREG, 0L,
   {m_unregistered, m_ignore, ms_lljoin, m_ignore}
 };
+#ifndef STATIC_MODULES
 
 void
 _modinit(void)
@@ -60,7 +61,7 @@ _moddeinit(void)
 }
 
 char *_version = "20001122";
-
+#endif
 /*
  * m_lljoin
  *      parv[0] = sender prefix

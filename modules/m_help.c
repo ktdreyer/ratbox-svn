@@ -41,6 +41,7 @@ struct Message help_msgtab = {
   "HELP", 0, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_help, m_ignore, mo_help}
 };
+#ifndef STATIC_MODULES
 
 void
 _modinit(void)
@@ -55,7 +56,7 @@ _moddeinit(void)
 }
 
 char *_version = "20001122";
-
+#endif
 /*
  * m_help - HELP message handler
  *      parv[0] = sender prefix

@@ -47,6 +47,8 @@ struct Message ison_msgtab = {
   {m_unregistered, m_ison, ms_ison, m_ison}
 };
 
+#ifndef STATIC_MODULES
+
   void
 _modinit(void)
 {
@@ -58,11 +60,12 @@ _moddeinit(void)
 {
   mod_del_cmd(&ison_msgtab);
 }
+char *_version = "20001122";
+#endif
 
 static char buf[BUFSIZE];
 static char buf2[BUFSIZE];
 
-char *_version = "20001122";
 
 /*
  * m_ison added by Darren Reed 13/8/91 to act as an efficent user indicator
