@@ -1052,7 +1052,7 @@ chm_op(struct Client *client_p, struct Client *source_p,
 		return;
 	}
 
-	msptr = find_channel_membership(chptr, source_p);
+	msptr = find_channel_membership(chptr, targ_p);
 
 	if(msptr == NULL)
 	{
@@ -1134,7 +1134,7 @@ chm_voice(struct Client *client_p, struct Client *source_p,
 		return;
 	}
 
-	msptr = find_channel_membership(chptr, source_p);
+	msptr = find_channel_membership(chptr, targ_p);
 
 	if(msptr == NULL)
 	{

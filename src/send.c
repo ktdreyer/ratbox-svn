@@ -612,6 +612,7 @@ sendto_common_channels_local(struct Client *user, const char *pattern, ...)
 	struct Channel *chptr;
 	struct Client *target_p;
 	struct membership *msptr;
+	struct membership *mscptr;
 	buf_head_t linebuf;
 
 	linebuf_newbuf(&linebuf);
@@ -628,7 +629,8 @@ sendto_common_channels_local(struct Client *user, const char *pattern, ...)
 	}
 	DLINK_FOREACH_SAFE(ptr, next_ptr, user->user->channel.head)
 	{
-		chptr = ptr->data;
+		mscptr = ptr->data;
+		chptr = mscptr->chptr;
 
 		DLINK_FOREACH_SAFE(uptr, next_uptr, chptr->locmembers.head)
 		{

@@ -116,6 +116,7 @@ names_global(struct Client *source_p)
 	dlink_node *lp, *ptr;
 	struct Client *target_p;
 	struct Channel *chptr = NULL;
+	struct membership *msptr;
 	char buf[BUFSIZE];
 	char *t;
 
@@ -133,6 +134,7 @@ names_global(struct Client *source_p)
 	DLINK_FOREACH(ptr, global_client_list.head)
 	{
 		target_p = ptr->data;
+		dont_show = NO;
 
 		if(!IsPerson(target_p) || IsInvisible(target_p))
 			continue;
@@ -146,7 +148,8 @@ names_global(struct Client *source_p)
 		 */
 		DLINK_FOREACH(lp, target_p->user->channel.head)
 		{
-			chptr = lp->data;
+			msptr = lp->data;
+			chptr = msptr->chptr;
 
 			if(PubChannel(chptr) || IsMember(source_p, chptr) ||
 			   SecretChannel(chptr))

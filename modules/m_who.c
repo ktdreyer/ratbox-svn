@@ -77,7 +77,6 @@ m_who(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 	char *mask;
 	dlink_node *lp;
 	struct Channel *chptr = NULL;
-	struct Channel *mychannel = NULL;
 	int server_oper = parc > 2 ? (*parv[2] == 'o') : 0;	/* Show OPERS only */
 	int member;
 
@@ -87,7 +86,6 @@ m_who(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 		mask = NULL;
 
 	/* See if mask is there, collapse it or return if not there */
-
 	if(mask != NULL)
 	{
 		(void) collapse(mask);
@@ -111,27 +109,30 @@ m_who(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 	/* mask isn't NULL at this point. repeat after me... -db */
 
 	/* '/who *' */
-
 	if((*(mask + 1) == (char) 0) && (*mask == '*'))
 	{
-		if(source_p->user != NULL)
-			if((lp = source_p->user->channel.head) != NULL)
-				mychannel = lp->data;
+		if(source_p->user == NULL)
+			return 0;
 
-		if(mychannel == NULL)
+		if((lp = source_p->user->channel.head) != NULL)
+		{
+			msptr = lp->data;
+			chptr = msptr->chptr;
+		}
+
+		if(chptr == NULL)
 		{
 			sendto_one(source_p, form_str(RPL_ENDOFWHO), me.name, parv[0], "*");
 			return 0;
 		}
 
-		do_who_on_channel(source_p, mychannel, "*", server_oper, YES);
+		do_who_on_channel(source_p, chptr, "*", server_oper, YES);
 
 		sendto_one(source_p, form_str(RPL_ENDOFWHO), me.name, parv[0], "*");
 		return 0;
 	}
 
 	/* '/who #some_channel' */
-
 	if(IsChannelName(mask))
 	{
 		/* List all users on a given channel */
