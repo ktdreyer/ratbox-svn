@@ -1019,12 +1019,12 @@ static void exit_one_client(struct Client *client_p,
       */
       if (source_p->localClient)
       {
-	if(source_p->localClient->ctrlfd > -1))
+	if(source_p->localClient->ctrlfd > -1)
 	{
           fd_close(source_p->localClient->ctrlfd);
 	  source_p->localClient->ctrlfd = -1;
 
-#ifdef HAVE_SOCKETPAIR
+#ifndef HAVE_SOCKETPAIR
           fd_close(source_p->localClient->ctrlfd_r);
 	  fd_close(source_p->localClient->fd_r);
 	  
