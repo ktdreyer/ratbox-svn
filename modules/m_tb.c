@@ -38,7 +38,7 @@
 #include "client.h"
 #include "ircd.h"
 #include "s_conf.h"
-
+#include "parse.h"
 #include "hook.h"
 #include "modules.h"
 #include "hash.h"

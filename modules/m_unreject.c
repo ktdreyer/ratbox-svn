@@ -29,7 +29,7 @@
 #include "s_conf.h"
 #include "hostmask.h"
 #include "reject.h"
-
+#include "parse.h"
 #include "hook.h"
 #include "modules.h"
 #include "send.h"

@@ -41,13 +41,11 @@
 #include "send.h"
 #include "channel.h"
 #include "s_log.h"
-
 #include "parse.h"
 #include "hook.h"
 #include "modules.h"
 #include "scache.h"
 #include "s_newconf.h"
-#include "balloc.h"
 #include "monitor.h"
 #include "commio.h"
 

@@ -35,7 +35,7 @@
 #include "send.h"
 #include "hook.h"
 #include "modules.h"
-
+#include "parse.h"
 #include "hostmask.h"
 #include "numeric.h"
 #include "s_conf.h"

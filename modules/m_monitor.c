@@ -34,11 +34,9 @@
 #include "tools.h"
 #include "struct.h"
 #include "client.h"
-
 #include "parse.h"
 #include "hook.h"
 #include "modules.h"
-#include "balloc.h"
 #include "monitor.h"
 #include "numeric.h"
 #include "s_conf.h"

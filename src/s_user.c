@@ -53,7 +53,6 @@
 #include "reject.h"
 #include "cache.h"
 #include "hook.h"
-#include "balloc.h"
 #include "monitor.h"
 
 static void report_and_set_user_flags(struct Client *, struct ConfItem *);

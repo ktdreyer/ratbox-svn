@@ -31,7 +31,7 @@
 #include "ircd.h"
 #include "numeric.h"
 #include "send.h"
-
+#include "parse.h"
 #include "memory.h"
 #include "hook.h"
 #include "modules.h"
