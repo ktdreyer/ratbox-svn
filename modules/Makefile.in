@@ -19,7 +19,6 @@ INSTALL_DATA	= @INSTALL_DATA@
 INSTALL_SUID    = @INSTALL_PROGRAM@ -o root -m 4755
 SHELL		= /bin/sh
 AUTOMODULEDIR	= @prefix@/modules/autoload
-
 IRCDLIBS	= @LIBS@ @SSL_LIBS@
 
 INCLUDES	= -I../include
@@ -110,7 +109,12 @@ libmodules.a: $(S_OBJS)
 	$(RANLIB) $@
 
 
-install: all
+install: install_@MOD_TARGET@
+
+install_libmodules.a: libmodules.a
+# Ye olde noop here.	
+
+install_shared_modules:
 	@echo "Installing modules into $(AUTOMODULEDIR) .."
 	@for file in $(SH_OBJS); do \
 		$(INSTALL_DATA) $$file $(AUTOMODULEDIR); \
