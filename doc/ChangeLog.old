@@ -1,3 +1,10 @@
+*** 20010103_26 by db
+- return CLIENT_EXITED in all cases that a client is exited. things
+  are then rosy again for banned clients.
+  Next.
+
+
+
 *** 20010103_25 by db
 - ewwww there were two exit_client()'s on klined banned clients
   moved up where it should have been done. STILL buggy... but closer.
