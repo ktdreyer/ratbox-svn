@@ -77,9 +77,9 @@ static void m_quit(struct Client *client_p,
   if (ConfigFileEntry.client_exit && comment[0])
     {
 #ifndef VMS
-      snprintf(reason, TOPICLEN, "Client Exit: %s", comment);
+      snprintf(reason, TOPICLEN, "Quit: %s", comment);
 #else
-      sprintf(reason, "Client Exit: %s", comment);
+      sprintf(reason, "Quit: %s", comment);
 #endif
       comment = reason;
     }
