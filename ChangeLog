@@ -1,3 +1,19 @@
+androsyn    2004/07/26 12:04:23 EDT	(20040726_0)
+
+  Modified files:
+    doc                  example.conf 
+    src                  listener.c s_conf.c 
+  Log:
+  Disable fake_channel stuff by default and remove a point switch in the dline
+  path
+  
+  Revision  Changes    Path
+  7.243     +1 -1      ircd-ratbox/doc/example.conf
+  7.110     +1 -8      ircd-ratbox/src/listener.c
+  7.470     +1 -1      ircd-ratbox/src/s_conf.c
+
+
+
 leeh        2004/07/24 21:29:23 EDT	(20040725_1)
 
   Modified files:
