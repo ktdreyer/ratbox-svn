@@ -1,3 +1,7 @@
+*** 20010426_3 by fl_
+- tiny fix to the parser
+
+
 *** 20010426_2 by toot
 added max_accept to ircd.conf.. to replace hard coded MAX_ALLOW
 
