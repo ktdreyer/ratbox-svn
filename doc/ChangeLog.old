@@ -1,3 +1,9 @@
+*** 20001231_6 by toot
+. fixed a possible overflow in m_list with persistant vchans
+. moved the vchan_id setting into remove_user_from_chan so the user
+  is still in a dlist_list :P
+
+
 *** 20001231_5 by lusky
 - fixed make distclean for gnats
 
