@@ -364,8 +364,8 @@ static void initialize_global_set_options(void)
   else
     GlobalSetOptions.floodcount = 10;
 
-  split_users = ConfigChannel.default_split_server_count;
-  split_servers = ConfigChannel.default_split_user_count;
+  split_servers = ConfigChannel.default_split_server_count;
+  split_users = ConfigChannel.default_split_user_count;
 
   if(split_users && split_servers && (ConfigChannel.no_create_on_split ||
      ConfigChannel.no_join_on_split))
