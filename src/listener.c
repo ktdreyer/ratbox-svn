@@ -543,7 +543,7 @@ accept_connection(int pfd, void *data)
 			last_oper_notice = CurrentTime;
 		}
 
-		send(fd, "ERROR :All connections in use\r\n", 32, SEND_FLAGS);
+		write(fd, "ERROR :All connections in use\r\n", 32);
 		fd_close(fd);
 		/* Re-register a new IO request for the next accept .. */
 		comm_setselect(listener->fd, FDLIST_SERVICE,
@@ -561,7 +561,7 @@ accept_connection(int pfd, void *data)
 		switch (pe)
 		{
 		case BANNED_CLIENT:
-			send(fd, DLINE_WARNING, sizeof(DLINE_WARNING) - 1, SEND_FLAGS);
+			write(fd, DLINE_WARNING, sizeof(DLINE_WARNING) - 1);
 			break;
 		}
 

@@ -29,10 +29,6 @@
 
 #include "config.h"
 
-#ifndef HAVE_SOCKLEN_T
-typedef int socklen_t;
-#endif
-
 /* Callback for completed IO events */
 typedef void PF(int fd, void *);
 
@@ -48,15 +44,6 @@ typedef void CNCB(int fd, int, void *);
 #define FDL_OPER     0x04
 #define FDL_DEFAULT  0x08
 #define FDL_ALL      0xFF
-
-#ifdef HAVE_MSG_NOSIGNAL
-#define SEND_FLAGS MSG_NOSIGNAL
-#define RECV_FLAGS MSG_NOSIGNAL
-#else
-#define SEND_FLAGS 0
-#define RECV_FLAGS 0
-#endif
-
 
 #define FD_DESC_SZ 128		/* hostlen + comment */
 

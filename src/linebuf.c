@@ -628,16 +628,8 @@ linebuf_flush(int fd, buf_head_t * bufhead)
 	int gather_count = 100; /* This is abitrary */
 	int x, y;
 	int retval, xret;
-	static struct msghdr mhdr;
 	static struct iovec vec[100];
 
-	mhdr.msg_name = NULL;
-	mhdr.msg_namelen = 0;
-	mhdr.msg_iov = vec;
-	mhdr.msg_control = NULL;
-	mhdr.msg_controllen = 0;
-	mhdr.msg_flags = 0;
-	
 	/* Check we actually have a first buffer */
 
 
@@ -676,8 +668,7 @@ linebuf_flush(int fd, buf_head_t * bufhead)
 		return -1;
 	}
 	
-	mhdr.msg_iovlen = x;
-	xret = retval = sendmsg(fd, &mhdr, SEND_FLAGS);	
+	xret = retval = writev(fd, vec, x);	
 	
 	if(retval <= 0)
 		return retval;

@@ -26,8 +26,9 @@ localstatedir   = @localstatedir@
 
 SSL_LIBS	= @SSL_LIBS@
 SSL_INCLUDES	= @SSL_INCLUDES@
+ZIP_LIB		= @ZLIB_LD@
 
-IRCDLIBS        = @LIBS@ $(SSL_LIBS)
+IRCDLIBS        = @LIBS@ $(SSL_LIBS) $(ZIP_LIB)
 
 INCLUDES        = -I. $(SSL_INCLUDES)
 CPPFLAGS        = ${INCLUDES} @CPPFLAGS@

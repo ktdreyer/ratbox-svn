@@ -57,18 +57,9 @@ static int ep;			/* epoll file descriptor */
 
 
 
-/* XXX: This ifdef needs to be fixed once epoll is rolled into glibc someday */
+#ifndef HAVE_EPOLL_CTL /* bah..glibc doesn't support epoll yet.. */
 
-#ifndef HAVE_EPOLL_LIB
-
-
-#include <linux/version.h>
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,5,49)
-#error "epoll support requires kernel headers newer than 2.5.49..try rtsigio instead"
-#endif
-
-
-#include <linux/unistd.h>
+#include <sys/syscall.h>
 
 #define EPOLL_CTL_ADD 1
 #define EPOLL_CTL_DEL 2
@@ -83,14 +74,14 @@ typedef union epoll_data
 {
 	void *ptr;
 	int fd;
-	__uint32_t u32;
-	__uint64_t u64;
+	uint32_t u32;
+	uint64_t u64;
 }
 epoll_data_t;
 
 struct epoll_event
 {
-	__uint32_t events;
+	uint32_t events;
 	epoll_data_t data;
 };
 
@@ -100,7 +91,7 @@ static _syscall4(int, epoll_ctl, int, epfd, int, op, int, fd, struct epoll_event
 static _syscall4(int, epoll_wait, int, epfd, struct epoll_event *, pevents,
 		 int, maxevents, int, timeout);
 
-#endif /* HAVE_EPOLL_LIB */
+#endif /* HAVE_EPOLL_CTL */
 
 
 /*

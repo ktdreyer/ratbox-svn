@@ -233,9 +233,9 @@ send_queued_slink_write(int fd, void *data)
 	/* Next, lets try to write some data */
 	if(to->localClient->slinkq)
 	{
-		retlen = send(to->localClient->ctrlfd,
+		retlen = write(to->localClient->ctrlfd,
 			      to->localClient->slinkq + to->localClient->slinkq_ofs,
-			      to->localClient->slinkq_len, SEND_FLAGS);
+			      to->localClient->slinkq_len);
 
 		if(retlen < 0)
 		{

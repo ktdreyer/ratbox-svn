@@ -59,17 +59,17 @@
 struct module **modlist = NULL;
 
 static const char *core_module_table[] = {
-	"m_die.s",
-	"m_kick.s",
-	"m_kill.s",
-	"m_message.s",
-	"m_mode.s",
-	"m_nick.s",
-	"m_part.s",
-	"m_quit.s",
-	"m_server.s",
-	"m_sjoin.s",
-	"m_squit.s",
+	"m_die",
+	"m_kick",
+	"m_kill",
+	"m_message",
+	"m_mode",
+	"m_nick",
+	"m_part",
+	"m_quit",
+	"m_server",
+	"m_sjoin",
+	"m_squit",
 	NULL
 };
 
@@ -257,21 +257,14 @@ load_all_modules(int warn)
 
 	while ((ldirent = readdir(system_module_dir)) != NULL)
 	{
-		len = strlen(ldirent->d_name);
+        	len = strlen(ldirent->d_name);
+		if((len > 3) && !strcmp(ldirent->d_name+len-3, SHARED_SUFFIX))
+                {
+		 	(void) ircsnprintf(module_fq_name, sizeof(module_fq_name), "%s/%s", AUTOMODPATH, ldirent->d_name);
+		 	(void) load_a_module(module_fq_name, warn, 0);
+                }
 
-		/* On HPUX, we have *.sl as shared library extension
-		 * -TimeMr14C */
-
-		if((len > 3) &&
-		   (ldirent->d_name[len - 3] == '.') &&
-		   (ldirent->d_name[len - 2] == 's') &&
-		   ((ldirent->d_name[len - 1] == 'o') || (ldirent->d_name[len - 1] == 'l')))
-		{
-			(void) ircsnprintf(module_fq_name, sizeof(module_fq_name), "%s/%s", AUTOMODPATH, ldirent->d_name);
-			(void) load_a_module(module_fq_name, warn, 0);
-		}
 	}
-
 	(void) closedir(system_module_dir);
 }
 
@@ -285,21 +278,19 @@ void
 load_core_modules(int warn)
 {
 	char module_name[MAXPATHLEN];
-	int i, hpux = 0;
+	int i;
 
-#ifdef HAVE_SHL_LOAD
-	hpux = 1;
-#endif
 
 	for (i = 0; core_module_table[i]; i++)
 	{
-		ircsnprintf(module_name, sizeof(module_name), "%s/%s%c", MODPATH, core_module_table[i], hpux ? 'l' : 'o');
+		ircsnprintf(module_name, sizeof(module_name), "%s/%s%s", MODPATH,
+			    core_module_table[i], SHARED_SUFFIX);
 
 		if(load_a_module(module_name, warn, 1) == -1)
 		{
 			ilog(L_MAIN,
-			     "Error loading core module %s%c: terminating ircd",
-			     core_module_table[i], hpux ? 'l' : 'o');
+			     "Error loading core module %s%s: terminating ircd",
+			     core_module_table[i], SHARED_SUFFIX);
 			exit(0);
 		}
 	}
@@ -488,13 +479,12 @@ mo_modlist(struct Client *client_p, struct Client *source_p, int parc, const cha
 					   me.name, source_p->name,
 					   modlist[i]->name,
 					   modlist[i]->address,
-					   modlist[i]->version, 
-					   modlist[i]->core ? "(core)" : "");
+					   modlist[i]->version, modlist[i]->core ? "(core)" : "");
 			}
 		}
 		else
 		{
-			sendto_one(source_p, form_str(RPL_MODLIST), 
+			sendto_one(source_p, form_str(RPL_MODLIST),
 				   me.name, source_p->name, modlist[i]->name,
 				   modlist[i]->address, modlist[i]->version,
 				   modlist[i]->core ? "(core)" : "");
@@ -717,29 +707,29 @@ unload_one_module(const char *name, int warn)
 	 ** to and from an integer value here will break some compilers.
 	 **          -jmallett
 	 */
-	/* Left the comment in but the code isn't here any more		-larne */
+	/* Left the comment in but the code isn't here any more         -larne */
 	switch (modlist[modindex]->mapi_version)
 	{
 	case 1:
-	{
-		struct mapi_mheader_av1* mheader = modlist[modindex]->mapi_header;
-		if (mheader->mapi_command_list)
 		{
-			struct Message **m;
-			for (m = mheader->mapi_command_list; *m; ++m)
-				mod_del_cmd(*m);
-		}
+			struct mapi_mheader_av1 *mheader = modlist[modindex]->mapi_header;
+			if(mheader->mapi_command_list)
+			{
+				struct Message **m;
+				for (m = mheader->mapi_command_list; *m; ++m)
+					mod_del_cmd(*m);
+			}
 
-		if (mheader->mapi_unregister)
-			mheader->mapi_unregister();
-		break;
-	}
+			if(mheader->mapi_unregister)
+				mheader->mapi_unregister();
+			break;
+		}
 	default:
 		sendto_realops_flags(UMODE_ALL, L_ALL,
-			"Unknown/unsupported MAPI version %d when unloading %s!",
-			modlist[modindex]->mapi_version, modlist[modindex]->name);
+				     "Unknown/unsupported MAPI version %d when unloading %s!",
+				     modlist[modindex]->mapi_version, modlist[modindex]->name);
 		ilog(L_MAIN, "Unknown/unsupported MAPI version %d when unloading %s!",
-			modlist[modindex]->mapi_version, modlist[modindex]->name);
+		     modlist[modindex]->mapi_version, modlist[modindex]->name);
 		break;
 	}
 
@@ -794,20 +784,21 @@ load_a_module(const char *path, int warn, int core)
 		return -1;
 	}
 
-	
+
 	/*
 	 * _mheader is actually a struct mapi_mheader_*, but mapi_version
 	 * is always the first member of this structure, so we treate it
 	 * as a single int in order to determine the API version.
-	 *	-larne.
+	 *      -larne.
 	 */
-	mapi_version = (int*) (uintptr_t) dlsym(tmpptr, "_mheader");
+	mapi_version = (int *) (uintptr_t) dlsym(tmpptr, "_mheader");
 	if((mapi_version == NULL
-	   && (mapi_version = (int*) (uintptr_t) dlsym(tmpptr, "__mheader")) == NULL)
-	  || MAPI_MAGIC(*mapi_version) != MAPI_MAGIC_HDR)
+	    && (mapi_version = (int *) (uintptr_t) dlsym(tmpptr, "__mheader")) == NULL)
+	   || MAPI_MAGIC(*mapi_version) != MAPI_MAGIC_HDR)
 	{
 		sendto_realops_flags(UMODE_ALL, L_ALL,
-				     "Data format error: module %s has no MAPI header.", mod_basename);
+				     "Data format error: module %s has no MAPI header.",
+				     mod_basename);
 		ilog(L_MAIN, "Data format error: module %s has no MAPI header.", mod_basename);
 		(void) dlclose(tmpptr);
 		MyFree(mod_basename);
@@ -817,48 +808,50 @@ load_a_module(const char *path, int warn, int core)
 	switch (MAPI_VERSION(*mapi_version))
 	{
 	case 1:
-	{
-		struct mapi_mheader_av1* mheader = (struct mapi_mheader_av1*) mapi_version;	/* see above */
-		if (mheader->mapi_register && (mheader->mapi_register() == -1))
 		{
-			ilog(L_MAIN, "Module %s indicated failure during load.", mod_basename);
-			sendto_realops_flags(UMODE_ALL, L_ALL,
-				"Module %s indicated failure during load.", mod_basename);
-			dlclose(tmpptr);
-			MyFree(mod_basename);
-			return -1;
-		}
-		if (mheader->mapi_command_list)
-		{
-			struct Message **m;
-			for (m = mheader->mapi_command_list; *m; ++m)
-				mod_add_cmd(*m);
+			struct mapi_mheader_av1 *mheader = (struct mapi_mheader_av1 *) mapi_version;	/* see above */
+			if(mheader->mapi_register && (mheader->mapi_register() == -1))
+			{
+				ilog(L_MAIN, "Module %s indicated failure during load.",
+				     mod_basename);
+				sendto_realops_flags(UMODE_ALL, L_ALL,
+						     "Module %s indicated failure during load.",
+						     mod_basename);
+				dlclose(tmpptr);
+				MyFree(mod_basename);
+				return -1;
+			}
+			if(mheader->mapi_command_list)
+			{
+				struct Message **m;
+				for (m = mheader->mapi_command_list; *m; ++m)
+					mod_add_cmd(*m);
+			}
+
+			if(mheader->mapi_hook_list)
+			{
+				mapi_hlist_av1 *m;
+				for (m = mheader->mapi_hook_list; m->hapi_name; ++m)
+					hook_add_event(m->hapi_name, m->hapi_id);
+			}
+
+			if(mheader->mapi_hfn_list)
+			{
+				mapi_hfn_list_av1 *m;
+				for (m = mheader->mapi_hfn_list; m->hapi_name; ++m)
+					hook_add_hook(m->hapi_name, m->fn);
+			}
+
+			ver = mheader->mapi_module_version;
+			break;
 		}
 
-		if (mheader->mapi_hook_list)
-		{
-			mapi_hlist_av1 *m;
-			for (m = mheader->mapi_hook_list; m->hapi_name; ++m)
-				hook_add_event(m->hapi_name, m->hapi_id);
-		}
-		
-		if (mheader->mapi_hfn_list)
-		{
-			mapi_hfn_list_av1 *m;
-			for (m = mheader->mapi_hfn_list; m->hapi_name; ++m)
-				hook_add_hook(m->hapi_name, m->fn);
-		}
-		
-		ver = mheader->mapi_module_version;
-		break;
-	}
-	
 	default:
 		ilog(L_MAIN, "Module %s has unknown/unsupported MAPI version %d.",
-			mod_basename, MAPI_VERSION(*mapi_version));
+		     mod_basename, MAPI_VERSION(*mapi_version));
 		sendto_realops_flags(UMODE_ALL, L_ALL,
-			"Module %s has unknown/unsupported MAPI version %d.",
-			mod_basename, *mapi_version);
+				     "Module %s has unknown/unsupported MAPI version %d.",
+				     mod_basename, *mapi_version);
 		dlclose(tmpptr);
 		MyFree(mod_basename);
 		return -1;
@@ -882,10 +875,10 @@ load_a_module(const char *path, int warn, int core)
 	{
 		sendto_realops_flags(UMODE_ALL, L_ALL,
 				     "Module %s [version: %s; MAPI version: %d] loaded at 0x%lx",
-				     mod_basename, ver, MAPI_VERSION(*mapi_version), (unsigned long) tmpptr);
-		ilog(L_MAIN, "Module %s [version: %s; MAPI version: %d] loaded at 0x%lx", 
-			mod_basename, ver, MAPI_VERSION(*mapi_version), 
-			(unsigned long) tmpptr);
+				     mod_basename, ver, MAPI_VERSION(*mapi_version),
+				     (unsigned long) tmpptr);
+		ilog(L_MAIN, "Module %s [version: %s; MAPI version: %d] loaded at 0x%lx",
+		     mod_basename, ver, MAPI_VERSION(*mapi_version), (unsigned long) tmpptr);
 	}
 	MyFree(mod_basename);
 	return 0;

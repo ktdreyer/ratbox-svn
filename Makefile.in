@@ -47,9 +47,9 @@ MAKE = make ${MFLAGS}
 all:	build
 
 
-autoconf: autoconf/configure.in
-	autoconf autoconf/configure.in >configure
-	autoheader -l autoconf autoconf/configure.in > include/setup.h.in
+autoconf: configure.ac
+	autoconf
+	autoheader
 	${RM} -f config.cache
 
 build:
