@@ -58,72 +58,78 @@ int   class_sendq_var;
         struct ip_value ip_entry;
 }
 
-%token  INCLUDE
-%token  NUMBER
-%token  QSTRING
-%token  TYES
-%token  TNO
-%token  SERVERINFO
-%token  DESCRIPTION
-%token  ADMIN
-%token  CLASS
-%token  AUTH
-%token  KLINE_EXEMPT
-%token  ALLOW_BOTS
-%token  AUTOCONN
-%token  NO_TILDE
-%token  HAVE_IDENT
-%token  OPERATOR
-%token  GLOBAL
-%token  USER
-%token  HOST
-%token  KILL
-%token  DENY
-%token  IP
-%token  IP_TYPE
-%token  GLOBAL_KILL
-%token  REMOTE
-%token  KLINE
-%token  UNKLINE
-%token  GLINE
-%token  NICK_CHANGES
-%token  DIE
-%token  REASON
-%token  REHASH
-%token  QUARANTINE
-%token  CONNECT
-%token  SEND_PASSWORD
+%token  ACCEPT
 %token  ACCEPT_PASSWORD
+%token  ACTION
+%token  ADMIN
+%token  ALLOW_BOTS
+%token  AUTH
+%token  AUTOCONN
+%token  CLASS
 %token  COMPRESSED
-%token  LAZYLINK
-%token  NAME
+%token  CONNECT
+%token  DENY
+%token  DESCRIPTION
+%token  DIE
 %token  EMAIL
+%token  GECOS
+%token  GLINE
+%token  GLINE_LOG
+%token  GLOBAL
+%token  GLOBAL_KILL
+%token  HAVE_IDENT
+%token  HOST
 %token  HUB
 %token  HUB_MASK
+%token  INCLUDE
+%token  IP
+%token  IP_TYPE
+%token  KILL
+%token  KLINE
+%token  KLINE_EXEMPT
+%token  LAZYLINK
 %token  LEAF
 %token  LEAF_MASK
-%token  PING_TIME
-%token  NUMBER_PER_IP
-%token  MAX_NUMBER
-%token  SENDQ
-%token  PASSWORD
 %token  LISTEN
-%token  PORT
-%token  SPOOF
-%token  QUARANTINE
-%token  VHOST
 %token  LOGGING
 %token  LOGPATH
-%token  OPER_LOG
-%token  GLINE_LOG
 %token  LOG_LEVEL
+%token  MAX_NUMBER
+%token  NAME
+%token  NICK_CHANGES
+%token  NO_TILDE
+%token  NUMBER
+%token  NUMBER_PER_IP
+%token  OPERATOR
+%token  OPER_LOG
+%token  PASSWORD
+%token  PING_TIME
+%token  PORT
+%token  QSTRING
+%token  QUARANTINE
+%token  QUARANTINE
+%token  REASON
+%token  REHASH
+%token  TREJECT
+%token  REMOTE
+%token  SENDQ
+%token  SEND_PASSWORD
+%token  SERVERINFO
+%token  SPOOF
+%token  TNO
+%token  TYES
 %token  T_L_CRIT
+%token  T_L_DEBUG
 %token  T_L_ERROR
-%token  T_L_WARN
+%token  T_L_INFO
 %token  T_L_NOTICE
 %token  T_L_TRACE
-%token  T_L_INFO
-%token  T_L_DEBUG
+%token  T_L_WARN
+%token  UNKLINE
+%token  USER
+%token  VHOST
+%token  WARN
+
 %%
 conf:   
         | conf conf_item
@@ -140,6 +146,7 @@ conf_item:        admin_entry
                 | connect_entry
                 | kill_entry
                 | deny_entry
+                | gecos_entry
                 | error ';'
                 | error '}'
         ;
@@ -959,7 +966,62 @@ deny_reason:    REASON '=' QSTRING ';'
     DupString(yy_aconf->passwd,yylval.string);
   };
 
+/***************************************************************************
+ *  section gecos
+ ***************************************************************************/
+
+gecos_entry:     GECOS
+  {
+    if(yy_aconf)
+      {
+        free_conf(yy_aconf);
+        yy_aconf = NULL;
+      }
+    yy_aconf=make_conf();
+    yy_aconf->status = CONF_XLINE;
+  };
+ '{' gecos_items '}' ';'
+  {
+    if(yy_aconf->name)
+      {
+	if(!yy_aconf->passwd)
+	  {
+	    DupString(yy_aconf->passwd,"Something about your name");
+	  }
+        conf_add_x_line(yy_aconf);
+      }
+    else
+      {
+        free_conf(yy_aconf);
+      }
+    yy_aconf = NULL;
+  }; 
+
+gecos_items:     gecos_items gecos_item |
+                 gecos_item
+
+gecos_item:      gecos_name | gecos_reason | gecos_action
 
 
+gecos_name:    NAME '=' QSTRING ';' 
+  {
+    DupString(yy_aconf->name,yylval.string);
+  };
 
+gecos_reason:    REASON '=' QSTRING ';' 
+  {
+    DupString(yy_aconf->passwd,yylval.string);
+  };
 
+gecos_action:    ACTION '='
+                 TREJECT 
+  {
+    yy_aconf->port = 1;
+  }
+                 |
+                 WARN
+  {
+    yy_aconf->port = 0;
+  };
+
+ ';' 

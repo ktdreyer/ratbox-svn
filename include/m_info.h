@@ -528,11 +528,7 @@ Info MyInformation[] = {
 
   { "TIMESEC", "", TIMESEC, "Time Interval to Wait Before Checking Pings" },
 
-#ifdef TOPIC_INFO
   { "TOPIC_INFO", "ON", 0, "Show Who Set a Topic and When" },
-#else
-  { "TOPIC_INFO", "OFF", 0, "Show Who Set a Topic and When" },
-#endif /* TOPIC_INFO */
 
   { "TS_MAX_DELTA", "", TS_MAX_DELTA, "Maximum Allowed TS Delta from another Server" },
   { "TS_WARN_DELTA", "", TS_WARN_DELTA, "Maximum TS Delta before Sending Warning" },

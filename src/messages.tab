@@ -360,11 +360,7 @@ static  char *  replies[] = {
 /* 330 */       (char *)NULL,
 /* 331 RPL_NOTOPIC, */          ":%s 331 %s %s :No topic is set.",
 /* 332 RPL_TOPIC, */            ":%s 332 %s %s :%s",
-#ifdef TOPIC_INFO
 /* 333 RPL_TOPICWHOTIME, */     ":%s 333 %s %s %s %lu",
-#else
-/* 333 */       (char *)NULL,
-#endif
 /* 334 */       (char *)NULL,
 /* 335 */       (char *)NULL,
 /* 336 */       (char *)NULL,

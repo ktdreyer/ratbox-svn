@@ -177,12 +177,10 @@ int     m_topic(struct Client *cptr,
               sendto_one(sptr, form_str(RPL_TOPIC),
                          me.name, parv[0],
                          chptr->chname, chptr->topic);
-#ifdef TOPIC_INFO
               sendto_one(sptr, form_str(RPL_TOPICWHOTIME),
                          me.name, parv[0], chptr->chname,
                          chptr->topic_nick,
                          chptr->topic_time);
-#endif
             }
         }
     }
