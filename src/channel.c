@@ -148,10 +148,7 @@ add_user_to_channel(struct Channel *chptr, struct Client *who, int flags)
 
     if(flags & MODE_DEOPPED)
     {
-      dlink_node *dptr;
-      
-      dptr = make_dlink_node();
-      dlinkAdd(who, dptr, &chptr->deopped);
+      dlinkAddAlloc(who, &chptr->deopped);
     }
 
     chptr->users++;
@@ -159,8 +156,7 @@ add_user_to_channel(struct Channel *chptr, struct Client *who, int flags)
     if (MyClient(who))
       chptr->locusers++;
 
-    ptr = make_dlink_node();
-    dlinkAdd(chptr, ptr, &who->user->channel);
+    dlinkAddAlloc(chptr, &who->user->channel);
     who->user->joined++;
   }
 }
@@ -179,7 +175,6 @@ int
 remove_user_from_channel(struct Channel *chptr, struct Client *who)
 {
   int x;
-  dlink_node *ptr;
   dlink_list *loclists[] = {
         &chptr->locpeons,   
         &chptr->locvoiced,  
@@ -205,37 +200,21 @@ remove_user_from_channel(struct Channel *chptr, struct Client *who)
   {
     for(x = 0; loclists[x] != NULL; x++)
     {
-       ptr = find_user_link(loclists[x], who);
-       if(ptr != NULL)
-       {
-          dlinkDelete(ptr, loclists[x]);
-          free_dlink_node(ptr);
-          break;
-       }
+       dlinkFindDestroy(loclists[x], who);
+       break;
     }
   }
 
   for(x = 0; lists[x] != NULL; x++)
   {
-     ptr = find_user_link(lists[x], who);
-     if(ptr != NULL)
-     {
-        dlinkDelete(ptr, lists[x]);
-        free_dlink_node(ptr);
-        break;
-     }
+     dlinkFindDestroy(lists[x], who);
+     break;
   }
 
-  ptr = dlinkFindDelete(&chptr->deopped, who);
-  if(ptr != NULL)
-    free_dlink_node(ptr);
+  dlinkFindDestroy(&chptr->deopped, who);
+  dlinkFindDestroy(&who->user->channel, chptr);
 
   chptr->users_last = CurrentTime;
-
-  ptr = dlinkFindDelete(&who->user->channel, chptr);
-  if(ptr != NULL)
-     free_dlink_node(ptr);
-
   who->user->joined--;
 
   if (MyClient(who))
@@ -563,33 +542,17 @@ delete_members(struct Channel *chptr, dlink_list * list)
 {
   dlink_node *ptr;
   dlink_node *next_ptr;
-  dlink_node *ptr_ch;
-  dlink_node *next_ptr_ch;
 
   struct Client *who;
 
   DLINK_FOREACH_SAFE(ptr, next_ptr, list->head)
   {
     who = (struct Client *)ptr->data;
-
-    /* remove reference to chptr from who */
-    DLINK_FOREACH_SAFE(ptr_ch, next_ptr_ch, who->user->channel.head)
-    {
-      next_ptr_ch = ptr_ch->next;
-
-      if (ptr_ch->data == chptr)
-      {
-        dlinkDelete(ptr_ch, &who->user->channel);
-        free_dlink_node(ptr_ch);
-        break;
-      }
-    }
-
+    dlinkFindDestroy(&who->user->channel, who);
     who->user->joined--;
 
     /* remove reference to who from chptr */
-    dlinkDelete(ptr, list);
-    free_dlink_node(ptr);
+    dlinkDestroy(ptr, list);
   }
 }
 
@@ -807,7 +770,6 @@ channel_pub_or_secret(struct Channel *chptr)
 void
 add_invite(struct Channel *chptr, struct Client *who)
 {
-  dlink_node *inv;
 
   del_invite(chptr, who);
   /*
@@ -821,14 +783,12 @@ add_invite(struct Channel *chptr, struct Client *who)
   /*
    * add client to channel invite list
    */
-  inv = make_dlink_node();
-  dlinkAdd(who, inv, &chptr->invites);
+  dlinkAddAlloc(who, &chptr->invites);
 
   /*
    * add channel to the end of the client invite list
    */
-  inv = make_dlink_node();
-  dlinkAdd(chptr, inv, &who->user->invited);
+  dlinkAddAlloc(chptr, &who->user->invited);
 }
 
 /*
@@ -844,27 +804,8 @@ add_invite(struct Channel *chptr, struct Client *who)
 void
 del_invite(struct Channel *chptr, struct Client *who)
 {
-  dlink_node *ptr, *next;
-
-  DLINK_FOREACH_SAFE(ptr, next, chptr->invites.head)
-  {
-    if (ptr->data == who)
-    {
-      dlinkDelete(ptr, &chptr->invites);
-      free_dlink_node(ptr);
-      break;
-    }
-  }
-
-  DLINK_FOREACH_SAFE(ptr, next, who->user->invited.head)
-  {
-    if (ptr->data == chptr)
-    {
-      dlinkDelete(ptr, &who->user->invited);
-      free_dlink_node(ptr);
-      break;
-    }
-  }
+  dlinkFindDestroy(&chptr->invites, who);
+  dlinkFindDestroy(&who->user->invited, chptr);
 }
 
 /*

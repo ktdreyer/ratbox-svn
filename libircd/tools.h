@@ -101,6 +101,11 @@ void mem_frob(void *data, int len);
 #define dlink_list_length(list) (list)->length
 #define dlink_move_list(oldlist, newlist, node)
 
+#define dlinkAddAlloc(data, list) dlinkAdd(data, make_dlink_node(), list)
+#define dlinkDestroy(node, list) do { dlinkDelete(node, list); free_dlink_node(node); } while(0)
+#define dlinkFindDestroy(list, data) do { dlink_node *xxxptrxxx = dlinkFindDelete(list, data); if(xxxptrxxx != NULL) free_dlink_node(xxxptrxxx); } while(0)
+
+
 /*
  * The functions below are included for the sake of inlining
  * hopefully this will speed up things just a bit

@@ -950,8 +950,7 @@ detach_conf(struct Client* client_p,struct ConfItem* aconf)
             {
               free_conf(aconf);
             }
-	  dlinkDelete(ptr, &client_p->localClient->confs);
-          free_dlink_node(ptr);
+	  dlinkDestroy(ptr, &client_p->localClient->confs);
           return(0);
         }
     }
@@ -992,7 +991,6 @@ is_attached(struct Client *client_p, struct ConfItem *aconf)
 int 
 attach_conf(struct Client *client_p,struct ConfItem *aconf)
 {
-  dlink_node *lp;
 
   if (is_attached(client_p, aconf))
     {
@@ -1026,9 +1024,8 @@ attach_conf(struct Client *client_p,struct ConfItem *aconf)
   if(aconf->status & FLAGS2_RESTRICTED)
     SetRestricted(client_p);
 
-  lp = make_dlink_node();
 
-  dlinkAdd(aconf, lp, &client_p->localClient->confs);
+  dlinkAddAlloc(aconf, &client_p->localClient->confs);
 
   aconf->clients++;
   if (aconf->status & CONF_CLIENT_MASK)
@@ -1724,18 +1721,14 @@ cleanup_temps_week(void *notused)
 static void
 add_temp_line(struct ConfItem *aconf)
 {
-  dlink_node *m;
-
-  m = make_dlink_node();
-  
   if(aconf->hold > CurrentTime + (10080*60))
-    dlinkAdd(aconf, m, &temporary_week);
+    dlinkAddAlloc(aconf, &temporary_week);
   else if(aconf->hold > CurrentTime + (1440*60))
-    dlinkAdd(aconf, m, &temporary_day);
+    dlinkAddAlloc(aconf, &temporary_day);
   else if(aconf->hold > CurrentTime + (60*60))
-    dlinkAdd(aconf, m, &temporary_hour);
+    dlinkAddAlloc(aconf, &temporary_hour);
   else
-    dlinkAdd(aconf, m, &temporary_min);
+    dlinkAddAlloc(aconf, &temporary_min);
 }
 
 /*
@@ -1773,8 +1766,7 @@ expire_temps(dlink_list *tklist, int type)
 			       kill_ptr->host);
 
 	  delete_one_address_conf(kill_ptr->host, kill_ptr);
-	  dlinkDelete(kill_node, tklist);
-	  free_dlink_node(kill_node);
+	  dlinkDestroy(kill_node, tklist);
 	}
       
       else if((type == TEMP_WEEK && kill_ptr->hold < CurrentTime + 10080) ||
@@ -1784,22 +1776,19 @@ expire_temps(dlink_list *tklist, int type)
         /* expires within the hour.. */
         if(kill_ptr->hold < CurrentTime + (60*60))
 	{
-          dlinkDelete(kill_node, tklist);
-	  dlinkAdd(kill_ptr, kill_node, &temporary_min);
+          dlinkMoveNode(kill_node, tklist, &temporary_min);
 	}
 
 	/* expires within the day */
 	else if(kill_ptr->hold < CurrentTime + (1440*60))
 	{
-          dlinkDelete(kill_node, tklist);
-	  dlinkAdd(kill_ptr, kill_node, &temporary_hour);
+          dlinkMoveNode(kill_node, tklist, &temporary_hour);
 	}
 
 	/* expires within the week */
 	else if(kill_ptr->hold < CurrentTime + (10080*60))
 	{
-          dlinkDelete(kill_node, tklist);
-	  dlinkAdd(kill_ptr, kill_node, &temporary_day);
+          dlinkMoveNode(kill_node, tklist, &temporary_day);
 	}
       }
     }

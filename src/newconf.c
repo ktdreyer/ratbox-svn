@@ -168,7 +168,6 @@ int 	add_conf_item(char *topconf, char *name, int type, void (*func)(void*))
 {
 	struct TopConf *tc;
 	struct ConfEntry *cf;
-	dlink_node *n;
 
 	if ((tc = find_top_conf(topconf)) == NULL)
 		return -1;
@@ -182,8 +181,7 @@ int 	add_conf_item(char *topconf, char *name, int type, void (*func)(void*))
 	cf->cf_type = type;
 	cf->cf_func = func;
 
-	n = make_dlink_node();
-	dlinkAdd(cf, n, &tc->tc_items);
+	dlinkAddAlloc(cf, &tc->tc_items);
 
 	return 0;
 }
@@ -203,8 +201,7 @@ int     remove_conf_item(char *topconf, char *name)
         if((ptr = dlinkFind(&tc->tc_items, cf)) == NULL)
                 return -1;
 
-        dlinkDelete(ptr, &tc->tc_items);
-        free_dlink_node(ptr);
+        dlinkDestroy(ptr, &tc->tc_items);
         MyFree(cf->cf_name);
         MyFree(cf);
 
@@ -246,7 +243,6 @@ int 	add_top_conf	(char *name, int (*sfunc)(struct TopConf*),
 			 int (*efunc)(struct TopConf*))
 {
 	struct TopConf *tc;
-	dlink_node *d;
   
 	tc = MyMalloc(sizeof(struct TopConf));
   
@@ -254,8 +250,7 @@ int 	add_top_conf	(char *name, int (*sfunc)(struct TopConf*),
 	tc->tc_sfunc = sfunc;
 	tc->tc_efunc = efunc;
   
-	d = make_dlink_node();
-	dlinkAdd(tc, d, &conf_items);
+	dlinkAddAlloc(tc, &conf_items);
 	return 0;
 }
 
@@ -270,8 +265,7 @@ int     remove_top_conf(char *name)
         if((ptr = dlinkFind(&conf_items, tc)) == NULL)
                 return -1;
 
-        dlinkDelete(ptr, &conf_items);
-        free_dlink_node(ptr);
+        dlinkDestroy(ptr, &conf_items);
         MyFree(tc->tc_name);
         MyFree(tc);
 

@@ -64,9 +64,7 @@ static void expire_pending_glines(void);
 void
 add_gline(struct ConfItem *aconf)
 {
-  dlink_node *gline_node;
-  gline_node = make_dlink_node();
-  dlinkAdd(aconf, gline_node, &glines);
+  dlinkAddAlloc(aconf, &glines);
   add_conf_by_address(aconf->host, CONF_GLINE, aconf->user, aconf);
 }
 
@@ -133,8 +131,7 @@ expire_glines()
 
       if(kill_ptr->hold <= CurrentTime)
 	{
-          dlinkDelete(gline_node, &glines);
-          free_dlink_node(gline_node);
+          dlinkDestroy(gline_node, &glines);
           delete_one_address_conf(kill_ptr->host, kill_ptr);
 	}
     }
@@ -168,8 +165,7 @@ expire_pending_glines()
           MyFree(glp_ptr->reason1);
           MyFree(glp_ptr->reason2);
           MyFree(glp_ptr);
-          dlinkDelete(pending_node, &pending_glines);
-          free_dlink_node(pending_node);
+          dlinkDestroy(pending_node, &pending_glines);
         }
     }
 }

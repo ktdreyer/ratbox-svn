@@ -488,8 +488,7 @@ register_local_user(struct Client *client_p, struct Client *source_p,
   assert(m != NULL);
   if(m != NULL)
   {
-    dlinkDelete(m, &unknown_list);
-    dlinkAdd(source_p, m, &lclient_list);
+    dlinkMoveNode(m, &unknown_list, &lclient_list);
   } else {
      sendto_realops_flags(UMODE_ALL, L_ADMIN, "Tried to register %s (%s@%s) but I couldn't find it?!?", 
      			  nick, source_p->username, source_p->host);
@@ -1010,8 +1009,7 @@ user_mode(struct Client *client_p, struct Client *source_p, int parc, char *parv
 		  dm = dlinkFind(&oper_list,source_p);
 		  if(dm != NULL)
 		    {
-		      dlinkDelete(dm,&oper_list);
-		      free_dlink_node(dm);
+		      dlinkDestroy(dm,&oper_list);
 		    }
                 }
             }
@@ -1288,7 +1286,6 @@ oper_up( struct Client *source_p, struct ConfItem *aconf )
   char *operprivs=NULL;
   dlink_node *ptr;
   struct ConfItem *found_aconf;
-  dlink_node *m;
 
   SetOper(source_p);
   if((int)aconf->hold)
@@ -1316,8 +1313,7 @@ oper_up( struct Client *source_p, struct ConfItem *aconf )
 
   SetExemptKline(source_p);
       
-  m = make_dlink_node();
-  dlinkAdd(source_p,m,&oper_list);
+  dlinkAddAlloc(source_p,&oper_list);
 
   if(source_p->localClient->confs.head)
     {

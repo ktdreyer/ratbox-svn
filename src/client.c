@@ -121,7 +121,6 @@ struct Client* make_client(struct Client* from)
 {
   struct Client* client_p = NULL;
   struct LocalUser *localClient;
-  dlink_node *m;
 
   client_p = BlockHeapAlloc(client_heap);
   if(client_p == NULL)
@@ -145,8 +144,7 @@ struct Client* make_client(struct Client* from)
       client_p->localClient->ctrlfd_r = -1;
 #endif      
       /* as good a place as any... */
-      m = make_dlink_node();
-      dlinkAdd(client_p, m, &unknown_list);
+      dlinkAddAlloc(client_p, &unknown_list);
       ++local_client_count;
     }
   else
@@ -789,14 +787,12 @@ free_exited_clients(void *unused)
         {
           sendto_realops_flags(UMODE_ALL, L_ALL,
                         "Warning: null client on dead_list!");
-          dlinkDelete(ptr, &dead_list);
-          free_dlink_node(ptr);
+          dlinkDestroy(ptr, &dead_list);
           continue;
         }
       release_client_state(target_p);
       free_client(target_p);
-      dlinkDelete(ptr, &dead_list);
-      free_dlink_node(ptr);
+      dlinkDestroy(ptr, &dead_list);
     }
 }
 
@@ -936,9 +932,8 @@ static void exit_one_client(struct Client *client_p,
   /* Check to see if the client isn't already on the dead list */
   assert(dlinkFind(&dead_list, source_p) == NULL);
   /* add to dead client dlist */
-  lp = make_dlink_node();
   SetDead(source_p);
-  dlinkAdd(source_p, lp, &dead_list);
+  dlinkAddAlloc(source_p, &dead_list);
 }
 
 /*
@@ -1139,7 +1134,6 @@ int exit_client(
                )
 {
   char comment1[HOSTLEN + HOSTLEN + 2];
-  dlink_node *m;
   if (MyConnect(source_p))
     {
       /* DO NOT REMOVE. exit_client can be called twice after a failed
@@ -1164,21 +1158,11 @@ int exit_client(
        */
       if (!IsRegistered(source_p))
 	{
-	  m = dlinkFind(&unknown_list,source_p);
-	  if(m != NULL)
-	    {
-	      dlinkDelete(m, &unknown_list);
-	      free_dlink_node(m);
-	    }
+	  dlinkFindDestroy(&unknown_list,source_p);
 	}
       if (IsOper(source_p))
         {
-	  m = dlinkFind(&oper_list,source_p);
-	  if(m != NULL)
-	    {
-	      dlinkDelete(m, &oper_list);
-	      free_dlink_node(m);
-	    }
+	  dlinkFindDestroy(&oper_list,source_p);
         }
       if (IsClient(source_p))
         {
@@ -1186,12 +1170,7 @@ int exit_client(
 
           if(IsPerson(source_p))        /* a little extra paranoia */
             {
-	      m = dlinkFind(&lclient_list,source_p);
-	      if(m != NULL)
-		{
-		  dlinkDelete(m,&lclient_list);
-		  free_dlink_node(m);
-		}
+	      dlinkFindDestroy(&lclient_list,source_p);
             }
         }
 
@@ -1201,13 +1180,8 @@ int exit_client(
        */
       if(IsAnyServer(source_p))
 	{
-	  m = dlinkFind(&serv_list,source_p);
-	  if(m != NULL)
-	    {
-	      dlinkDelete(m,&serv_list);
-	      free_dlink_node(m);
-              unset_chcap_usage_counts(source_p);
-	    }
+	  dlinkFindDestroy(&serv_list,source_p);
+          unset_chcap_usage_counts(source_p);
 	}
 
       if (IsServer(source_p))
@@ -1387,16 +1361,14 @@ void del_from_accept(struct Client *source, struct Client *target)
       target_p = ptr->data;
       if(source == target_p)
 	{
-	  dlinkDelete(ptr, &target->allow_list);
-	  free_dlink_node(ptr);
+	  dlinkDestroy(ptr, &target->allow_list);
 
           DLINK_FOREACH_SAFE(ptr2, next_ptr2, source->on_allow_list.head)
 	    {
 	      target_p = ptr2->data;
 	      if (target == target_p)
 		{
-		  dlinkDelete(ptr2, &source->on_allow_list);
-		  free_dlink_node(ptr2);
+		  dlinkDestroy(ptr2, &source->on_allow_list);
 		}
 	    }
 	}

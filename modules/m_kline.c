@@ -756,11 +756,11 @@ mo_dline(struct Client *client_p, struct Client *source_p,
     aconf->hold = CurrentTime + tdline_time;
     add_temp_dline(aconf);
     sendto_realops_flags(UMODE_ALL, L_ALL,
-		         "%s added temporary %d min. D-Line for [%s] [%s]",
+		         "%s added temporary %ld min. D-Line for [%s] [%s]",
 		         source_p->name, tdline_time/60, 
 		         aconf->host, aconf->passwd);
 
-    sendto_one(source_p, ":%s NOTICE %s :Added temporary %d min. D-Line for [%s]",
+    sendto_one(source_p, ":%s NOTICE %s :Added temporary %ld min. D-Line for [%s]",
                me.name, source_p->name, tdline_time/60, aconf->host);
     ilog(L_TRACE, "%s added temporary %d min. D-Line for [%s] [%s]",
          source_p->name, tdline_time/60, aconf->host, aconf->passwd);

@@ -396,8 +396,7 @@ BlockHeapAlloc(BlockHeap * bh)
             bh->freeElems--;
             walker->freeElems--;
             new_node = walker->free_list.head;
-            dlinkDelete(new_node, &walker->free_list);
-            dlinkAdd(new_node->data, new_node, &walker->used_list);
+            dlinkMoveNode(new_node, &walker->free_list, &walker->used_list);
             assert(new_node->data != NULL);
             if(new_node->data == NULL)
               outofmemory();
@@ -456,8 +455,7 @@ BlockHeapFree(BlockHeap * bh, void *ptr)
     bh->freeElems++;
     block->freeElems++;
     mem_frob(ptr, bh->elemSize);
-    dlinkDelete(&memblock->self, &block->used_list);
-    dlinkAdd(ptr, &memblock->self, &block->free_list);
+    dlinkMoveNode(&memblock->self, &block->used_list, &block->free_list);
     return(0);
 }
 

@@ -257,11 +257,9 @@ int
 add_to_id_hash_table(char *name, struct Client *client_p)
 {
   unsigned int     hashv;
-  dlink_node *m;
 
   hashv = hash_id(name);
-  m = make_dlink_node();
-  dlinkAdd(client_p, m, &idTable[hashv].list);
+  dlinkAddAlloc(client_p, &idTable[hashv].list);
 
   idTable[hashv].links++;
   idTable[hashv].hits++;
@@ -275,7 +273,6 @@ void
 add_to_client_hash_table(const char* name, struct Client* client_p)
 {
   unsigned int hashv;
-  dlink_node *m;
 
   assert(name != NULL);
   assert(client_p != NULL);
@@ -283,8 +280,7 @@ add_to_client_hash_table(const char* name, struct Client* client_p)
     return;
   
   hashv = hash_nick_name(name);
-  m = make_dlink_node();
-  dlinkAdd(client_p, m, &clientTable[hashv].list);
+  dlinkAddAlloc(client_p, &clientTable[hashv].list);
 
   ++clientTable[hashv].links;
   ++clientTable[hashv].hits;
@@ -294,7 +290,6 @@ void
 add_to_hostname_hash_table(const char *hostname, struct Client *client_p)
 {
   unsigned int hashv;
-  dlink_node *m;
 
   assert(hostname != NULL);
   assert(client_p != NULL);
@@ -303,8 +298,7 @@ add_to_hostname_hash_table(const char *hostname, struct Client *client_p)
     return;
 
   hashv = hash_hostname(hostname);
-  m = make_dlink_node();
-  dlinkAdd(client_p, m, &hostTable[hashv].list);
+  dlinkAddAlloc(client_p, &hostTable[hashv].list);
   hostTable[hashv].links++;
   hostTable[hashv].hits++;
 }
@@ -316,7 +310,6 @@ void
 add_to_resv_hash_table(const char *name, struct ResvChannel *resv_p)
 {
   unsigned int hashv;
-  dlink_node *m;
 
   assert(name != NULL);
   assert(resv_p != NULL);
@@ -325,8 +318,7 @@ add_to_resv_hash_table(const char *name, struct ResvChannel *resv_p)
     return;
 
   hashv = hash_resv_channel(name);
-  m = make_dlink_node();
-  dlinkAdd(resv_p, m, &resvTable[hashv].list);
+  dlinkAddAlloc(resv_p, &resvTable[hashv].list);
   ++resvTable[hashv].links;
   ++resvTable[hashv].hits;
 }
@@ -358,8 +350,7 @@ del_from_id_hash_table(const char* id, struct Client* client_p)
 
     if (target_p == client_p)
     {
-      dlinkDelete(ptr, &idTable[hashv].list);
-      free_dlink_node(ptr);
+      dlinkDestroy(ptr, &idTable[hashv].list);
 
       assert(idTable[hashv].links > 0);
       if (idTable[hashv].links > 0)
@@ -400,8 +391,7 @@ del_from_client_hash_table(const char* name, struct Client* client_p)
 
     if(client_p == target_p)
     {
-      dlinkDelete(ptr, &clientTable[hashv].list);
-      free_dlink_node(ptr);
+      dlinkDestroy(ptr, &clientTable[hashv].list);
       
       assert(clientTable[hashv].links > 0);
       if (clientTable[hashv].links > 0)
@@ -441,8 +431,7 @@ del_from_channel_hash_table(const char* name, struct Channel* chptr)
 
     if(chptr == ch2ptr)
     {
-      dlinkDelete(ptr, &channelTable[hashv].list);
-      free_dlink_node(ptr);
+      dlinkDestroy(ptr, &channelTable[hashv].list);
 
       assert(channelTable[hashv].links > 0);
       if (channelTable[hashv].links > 0)
@@ -470,8 +459,7 @@ del_from_hostname_hash_table(const char *hostname, struct Client *client_p)
     target_p = ptr->data;
     if(target_p == client_p)
     {
-      dlinkDelete(ptr, &hostTable[hashv].list);
-      free_dlink_node(ptr);
+      dlinkDestroy(ptr, &hostTable[hashv].list);
 
       if(hostTable[hashv].links > 0)
         hostTable[hashv].links--;
@@ -506,8 +494,7 @@ del_from_resv_hash_table(const char *name, struct ResvChannel *rptr)
     
     if(rptr == r2ptr)
     {
-      dlinkDelete(ptr, &resvTable[hashv].list);
-      free_dlink_node(ptr);
+      dlinkDestroy(ptr, &resvTable[hashv].list);
 
       assert(resvTable[hashv].links > 0);
       --resvTable[hashv].links;
@@ -776,8 +763,7 @@ get_or_create_channel(struct Client *client_p, char *chname, int *isnew)
 
   chptr->channelts = CurrentTime;     /* doesn't hurt to set it here */
 
-  ptr = make_dlink_node();
-  dlinkAdd(chptr, ptr, &channelTable[hashv].list);
+  dlinkAddAlloc(chptr, &channelTable[hashv].list);
   ++channelTable[hashv].links;
   ++channelTable[hashv].hits;
 

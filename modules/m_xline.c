@@ -83,8 +83,6 @@ void
 mo_xline(struct Client *client_p, struct Client *source_p,
          int parc, char *parv[])
 {
-  char buffer[BUFSIZE*2];
-  FBFILE *out;
   struct ConfItem *aconf;
   char *reason;
   int xtype = 1;

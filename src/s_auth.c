@@ -140,12 +140,7 @@ static void free_auth_request(struct AuthRequest* request)
  */
 static void unlink_auth_request(struct AuthRequest* request, dlink_list *list)
 {
-  dlink_node *ptr;
-  if((ptr = dlinkFind(list, request)) != NULL)
-  {
-    dlinkDelete(ptr, list);
-    free_dlink_node(ptr);
-  }
+  dlinkFindDestroy(list, request);
 }
 
 /*
@@ -153,10 +148,7 @@ static void unlink_auth_request(struct AuthRequest* request, dlink_list *list)
  */
 static void link_auth_request(struct AuthRequest* request, dlink_list *list)
 {
-  dlink_node *m;
-
-  m = make_dlink_node();
-  dlinkAdd(request, m, list);
+  dlinkAddAlloc(request, list);
 }
 
 /*
@@ -462,8 +454,7 @@ timeout_auth_queries_event(void *notused)
 	       log_client_name(auth->client, SHOW_IP));
 
 	  auth->client->since = CurrentTime;
-	  dlinkDelete(ptr, &auth_poll_list);
-	  free_dlink_node(ptr);
+	  dlinkDestroy(ptr, &auth_poll_list);
 	  release_auth_client(auth->client);
 #ifdef USE_IAUTH
     ilog(L_ERROR, "linking to auth client list 3");
@@ -665,9 +656,8 @@ delete_identd_queries(struct Client *target_p)
 	{
 	  if (auth->fd >= 0)
 	    fd_close(auth->fd);
-	  dlinkDelete(ptr, &auth_poll_list);
+	  dlinkDestroy(ptr, &auth_poll_list);
 	  free_auth_request(auth);
-	  free_dlink_node(ptr);
 	}
     }
 
@@ -679,9 +669,8 @@ delete_identd_queries(struct Client *target_p)
 	{
 	  if (auth->fd >= 0)
 	    fd_close(auth->fd);
-	  dlinkDelete(ptr, &auth_client_list);
+	  dlinkDestroy(ptr, &auth_client_list);
 	  free_auth_request(auth);
-	  free_dlink_node(ptr);
 	}
     }
 }

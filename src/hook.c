@@ -60,13 +60,11 @@ new_hook(char *name)
 int
 hook_add_event(char *name)
 {
-	dlink_node *node;
 	hook *newhook;
 	
-	node = make_dlink_node();
 	newhook = new_hook(name);
 	
-	dlinkAdd(newhook, node, &hooks);
+	dlinkAddAlloc(newhook, &hooks);
 	return 0;
 }
 
@@ -118,8 +116,7 @@ hook_del_hook(char *event, hookfn *fn)
  {
   if (fn == node->data)
   {
-   dlinkDelete(node, &h->hooks);
-   free_dlink_node(node);
+   dlinkDestroy(node, &h->hooks);
   } 
  }
  return 0;
@@ -129,15 +126,12 @@ int
 hook_add_hook(char *event, hookfn *fn)
 {
 	hook *h;
-	dlink_node *node;
 	
 	h = find_hook(event);
 	if (!h) 
 		return -1;
 
-	node = make_dlink_node();
-	
-	dlinkAdd(fn, node, &h->hooks);
+	dlinkAddAlloc(fn, &h->hooks);
 	return 0;
 }
 

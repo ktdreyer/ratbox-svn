@@ -226,7 +226,6 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, int type)
       return 0;
   }
 
-  ban = make_dlink_node();
 
   actualBan = (struct Ban *)BlockHeapAlloc(ban_heap);
   DupString(actualBan->banstr, banid);
@@ -247,7 +246,7 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, int type)
 
   actualBan->when = CurrentTime;
 
-  dlinkAdd(actualBan, ban, list);
+  dlinkAddAlloc(actualBan, list);
 
   chptr->num_mask++;
   return 1;
@@ -305,9 +304,7 @@ del_id(struct Channel *chptr, char *banid, int type)
       else
         chptr->num_mask = 0;
 
-      dlinkDelete(ban, list);
-      free_dlink_node(ban);
-
+      dlinkDestroy(ban,list);
       return 1;
     }
   }
@@ -360,11 +357,9 @@ change_channel_membership(struct Channel *chptr,
     	if(ptr != NULL)
         {
           if(loclists[x] != loc_to_list)
-          {
-            dlinkDelete(ptr, loclists[x]);
-            dlinkAdd(who, ptr, loc_to_list);
-    	  }
-          
+	  {
+            dlinkMoveNode(ptr, loclists[x], loc_to_list);
+          }
           break;
     	} 
     }
@@ -377,19 +372,13 @@ change_channel_membership(struct Channel *chptr,
     {
       if(lists[x] != to_list)
       {
-        dlinkDelete(ptr, lists[x]);
-        dlinkAdd(who, ptr, to_list);
+	dlinkMoveNode(ptr, lists[x], to_list);
       }
-
       break;
     }
   }
   
-  if((ptr = find_user_link(&chptr->deopped, who)))
-  {
-    dlinkDelete(ptr, &chptr->deopped);
-    free_dlink_node(ptr);
-  }
+  dlinkFindDestroy(&chptr->deopped, who);
 
 }
 
@@ -2167,13 +2156,11 @@ static void update_channel_info(struct Channel *chptr)
         {
           if((ptr = dlinkFind(&opped, mode_changes[i].client)) == NULL)
           {
-            ptr = make_dlink_node();
-            dlinkAdd(mode_changes[i].client, ptr, &deopped);
+            dlinkAddAlloc(mode_changes[i].client, &deopped);
           }
           else
           {
-            dlinkDelete(ptr, &opped);
-            free_dlink_node(ptr);
+            dlinkDestroy(ptr, &opped);
           }
         }
       }
@@ -2184,13 +2171,11 @@ static void update_channel_info(struct Channel *chptr)
         {
           if((ptr = dlinkFind(&deopped, mode_changes[i].client)) == NULL)
           {
-            ptr = make_dlink_node();
-            dlinkAdd(mode_changes[i].client, ptr, &opped);
+            dlinkAddAlloc(mode_changes[i].client, &opped);
           }
           else
           {
-            dlinkDelete(ptr, &deopped);
-            free_dlink_node(ptr);
+            dlinkDestroy(ptr, &deopped);
           }
         }
       }

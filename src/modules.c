@@ -161,16 +161,14 @@ void
 mod_add_path(char *path)
 {
   struct module_path *pathst;
-  dlink_node *node;
   
   if (mod_find_path(path))
     return;
 
   pathst = MyMalloc (sizeof (struct module_path));
-  node = make_dlink_node();
   
   strcpy(pathst->path, path);
-  dlinkAdd(pathst, node, &mod_paths);
+  dlinkAddAlloc(pathst, &mod_paths);
 }
 
 /* mod_clear_paths()
@@ -188,8 +186,7 @@ mod_clear_paths(void)
   DLINK_FOREACH_SAFE(node, next, mod_paths.head)
     {
       pathst = (struct module_path *)node->data;
-      dlinkDelete(node, &mod_paths);
-      free_dlink_node(node);
+      dlinkDestroy(node, &mod_paths);
       MyFree(pathst);
     }
 }

@@ -296,11 +296,7 @@ const char* my_name_for_link(const char* name, struct ConfItem* aconf)
  */
 void add_server_to_list(struct Client *client_p)
 {
-  dlink_node *ptr;
-  ptr = make_dlink_node();
-  dlinkAdd(client_p, ptr, &global_serv_list);
-
-  return;
+  dlinkAddAlloc(client_p, &global_serv_list);
 }
 
 /*
@@ -312,15 +308,7 @@ void add_server_to_list(struct Client *client_p)
  */
 void remove_server_from_list(struct Client *client_p)
 {
-  dlink_node *ptr;
-
-  ptr = dlinkFind(&global_serv_list, client_p);
-
-  if(ptr != NULL)
-  {
-    dlinkDelete(ptr, &global_serv_list);
-    free_dlink_node(ptr);
-  }
+  dlinkFindDestroy(&global_serv_list, client_p);
 }
 
 /*

@@ -136,8 +136,7 @@ linebuf_done_line(buf_head_t *bufhead, buf_line_t *bufline,
                   dlink_node *node)
 {
   /* Remove it from the linked list */
-  dlinkDelete(node, &bufhead->list);
-  free_dlink_node(node);
+  dlinkDestroy(node, &bufhead->list);
 
   /* Update the allocated size */
   bufhead->alloclen--;
