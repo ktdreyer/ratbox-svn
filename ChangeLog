@@ -1,3 +1,17 @@
+leeh        2002/08/16 06:44:33 EDT	(20020816_7)
+
+  Modified files:
+    include              tools.h 
+    src                  tools.c 
+  Log:
+  - ill do dlinkFindDelete when I can think.
+  
+  Revision  Changes    Path
+  1.25      +0 -30     ircd-ratbox/include/tools.h
+  7.28      +0 -28     ircd-ratbox/src/tools.c
+
+
+
 leeh        2002/08/16 06:02:19 EDT	(20020816_6)
 
   Modified files:
