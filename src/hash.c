@@ -109,7 +109,7 @@ init_hash(void)
 static unsigned int
 hash_nick(const char *name)
 {
- 	u_int32_t h = FNV1_32_INIT;;
+ 	u_int32_t h = FNV1_32_INIT;
 
 	while (*name)
 	{
@@ -147,7 +147,7 @@ static unsigned int
 hash_channel(const char *name)
 {
 	int i = 30;
-	u_int32_t h = FNV1_32_INIT;;
+	u_int32_t h = FNV1_32_INIT;
 
 	while (*name && --i)
 	{
@@ -188,7 +188,7 @@ static unsigned int
 hash_resv(const char *name)
 {
 	int i = 30;
-	u_int32_t h = FNV1_32_INIT;;
+	u_int32_t h = FNV1_32_INIT;
 
 	while (*name && --i)
 	{
