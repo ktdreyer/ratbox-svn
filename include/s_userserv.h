@@ -10,6 +10,9 @@ struct user_reg
 	char name[USERREGNAME_LEN+1];
 	char *password;
 
+	time_t reg_time;
+	time_t last_used;
+
 	dlink_node node;
 };
 
