@@ -1,3 +1,7 @@
+*** 20010105_49 by a1kmm
+- Removed debug code I accidentally commited.
+
+
 *** 20010105_48 by a1kmm
 - Cleaned up m_server a bit to squit the right client on error.
 - We now support a leaf{} block.
