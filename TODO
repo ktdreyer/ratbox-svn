@@ -108,7 +108,6 @@ Little things to be done given enough time and initiative -Hwy
 .  Use scrypt or just plain 'crypt' libs on FreeBSD, we support both types
    of passwords without any effort currently, why should we restrict ourselves
    on some systems?  Note:  scrypt only supports MD5, descrypt supports both
-.  m_map.so in contrib
 .  m_mkpasswd.so in contrib
 .  Re-add the ability to set usermodes from the conf (oldconf field after the
    O: line class)
