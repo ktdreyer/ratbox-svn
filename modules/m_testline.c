@@ -20,7 +20,7 @@
  *   along with this program; if not, write to the Free Software
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- *   $Id: 
+ *   $Id$
  */
 #include "handlers.h"
 #include "client.h"
@@ -70,12 +70,6 @@ int mo_testline(struct Client *cptr, struct Client *sptr, int parc, char *parv[]
   unsigned long host_mask;
   char *host, *pass, *user, *name, *classname, *given_host, *given_name, *p;
   int port;
-  
-  if (!MyClient(sptr) || !IsAnyOper(sptr))
-    {
-      sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
-      return 0;
-    }
   
   if (parc > 1)
     {
