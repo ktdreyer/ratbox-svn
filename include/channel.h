@@ -144,6 +144,8 @@ extern void    channel_member_list(struct Client *sptr,
 				   int *cur_len,
 				   int *reply_to_send);
 
+extern void sync_channel_oplists(struct Channel *, int);
+extern void sync_oplists(struct Channel *, struct Client *, int, char *);
 
 /*
 ** Channel Related macros follow

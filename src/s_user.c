@@ -503,6 +503,10 @@ int register_remote_user(struct Client *cptr, struct Client *sptr,
 
   SetClient(sptr);
 
+  /* Increment our total user count here */
+  if (++Count.total > Count.max_tot)
+    Count.max_tot = Count.total;
+
   sptr->servptr = find_server(user->server);
 
   if (sptr->servptr == NULL)
@@ -600,10 +604,10 @@ introduce_client(struct Client *cptr, struct Client *sptr,
     {
       if (IsCapable(uplink, CAP_UID))
 	{
-	  sendto_one(uplink, "NICK %s %d %lu %s %s %s %s %s :%s",
+	  sendto_one(uplink, "CLIENT %s %d %lu %s %s %s %s %s :%s",
 		     nick, sptr->hopcount+1, sptr->tsinfo,
 		     ubuf, sptr->username, sptr->host, user->server,
-		     sptr->user->id, sptr->info);
+		     user->id, sptr->info);
 	}
       else
 	{

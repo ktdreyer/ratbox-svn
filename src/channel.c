@@ -60,10 +60,6 @@ static  void    destroy_channel(struct Channel *);
 static void send_mode_list(struct Client *, char *, dlink_list *,
                            char, int);
 
-static void sync_channel_oplists(struct Channel *,
-                                 int);
-static void sync_oplists(struct Channel *,
-                         struct Client *, int, char *);
 static void send_oplist(char *, struct Client *,
                         dlink_list *, char *, int);
 
@@ -3212,7 +3208,7 @@ char *channel_chanop_or_voice(struct Channel *chptr, struct Client *acptr)
  * side effects - Sends MODE +o/+h/+v list to user
  *                (for +a channels)
  */
-static void sync_oplists(struct Channel *chptr, struct Client *acptr,
+void sync_oplists(struct Channel *chptr, struct Client *acptr,
                          int clear, char *name)
 {
   send_oplist(name, acptr, &chptr->chanops, "o", clear);
@@ -3274,7 +3270,7 @@ static void send_oplist(char *chname, struct Client *cptr,
     }
 }
 
-static void sync_channel_oplists(struct Channel *chptr,
+void sync_channel_oplists(struct Channel *chptr,
                                  int clear)
 {
   dlink_node *ptr;
