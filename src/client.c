@@ -289,11 +289,13 @@ check_pings_list(dlink_list *list)
   time_t        timeout;        /* found necessary ping time */
 #endif
   char          *reason;
-  dlink_node    *ptr;
+  dlink_node    *ptr, *next_ptr;
 
-  for (ptr = list->head; ptr; ptr = ptr->next)
+  for (ptr = list->head; ptr; ptr = next_ptr)
     {
+      next_ptr = ptr->next;
       cptr = ptr->data;
+
       /*
       ** Note: No need to notify opers here. It's
       ** already done when "FLAGS_DEADSOCKET" is set.
@@ -403,13 +405,14 @@ check_pings_list(dlink_list *list)
 static void
 check_unknowns_list(dlink_list *list)
 {
-  dlink_node *ptr, *next;
+  dlink_node *ptr, *next_ptr;
   struct Client *cptr;
 
-  for(ptr = list->head; ptr; ptr = next)
+  for(ptr = list->head; ptr; ptr = next_ptr)
     {
+      next_ptr = ptr->next;
       cptr = ptr->data;
-      next = ptr->next;
+
       /*
        * Check UNKNOWN connections - if they have been in this state
        * for > 30s, close them.
@@ -435,8 +438,7 @@ check_klines(void)
   struct Client *cptr;          /* current local cptr being examined */
   struct ConfItem     *aconf = (struct ConfItem *)NULL;
   char          *reason;                /* pointer to reason string */
-  dlink_node    *ptr;
-  dlink_node    *next_ptr;
+  dlink_node    *ptr, *next_ptr;
 
   for (ptr = lclient_list.head; ptr; ptr = next_ptr)
     {
