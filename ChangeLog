@@ -1,3 +1,27 @@
+leeh        2003/07/19 08:45:44 EDT	(20030719_2)
+
+  Modified files:
+    include              config.h hash.h 
+    modules              .depend m_help.c m_rehash.c 
+    src                  .depend Makefile.in hash.c ircd.c 
+                         s_conf.c 
+  Log:
+  - turned the help cache into a generic file cache
+  
+  Revision  Changes    Path
+  7.161     +2 -2      ircd-ratbox/include/config.h
+  7.38      +3 -3      ircd-ratbox/include/hash.h
+  1.27      +2 -2      ircd-ratbox/modules/.depend
+  1.59      +4 -4      ircd-ratbox/modules/m_help.c
+  1.68      +2 -2      ircd-ratbox/modules/m_rehash.c
+  7.28      +24 -22    ircd-ratbox/src/.depend
+  7.132     +1 -1      ircd-ratbox/src/Makefile.in
+  7.79      +6 -6      ircd-ratbox/src/hash.c
+  7.300     +2 -2      ircd-ratbox/src/ircd.c
+  7.422     +1 -1      ircd-ratbox/src/s_conf.c
+
+
+
 leeh        2003/07/19 07:16:23 EDT	(20030719_1)
 
   Modified files:
