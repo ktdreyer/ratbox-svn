@@ -344,13 +344,21 @@ vchan_show_ids(struct Client *sptr, struct Channel *chptr)
   t = buf + mlen;
 
   if(!SecretChannel(chptr))
-     {
-       ircsprintf(t, "!%s ", pick_vchan_id(chptr));
-       tlen = strlen(t);
-       cur_len += tlen;
-       t += tlen;
-       reply_to_send = 1;
-     }
+  {
+    tlen = ircsprintf(t, "!%s ", pick_vchan_id(chptr));
+    cur_len += tlen;
+    t += tlen;
+    reply_to_send = 1;
+  }
+  else
+  {
+    strcpy(t, "<secret>");
+    tlen = 8;
+    cur_len += tlen;
+    t += tlen;
+    reply_to_send = 1;
+  }
+  
 
   for (ptr = chptr->vchan_list.head; ptr; ptr = ptr->next)
      {
@@ -358,7 +366,14 @@ vchan_show_ids(struct Client *sptr, struct Channel *chptr)
 
        /* Obey the rules of /list */
        if(SecretChannel(chtmp))
+       {
+         strcpy(t, "<secret>");
+         tlen = 8;
+         cur_len += tlen;
+         t += tlen;
+         reply_to_send = 1;
 	 continue;
+       }
 
        ircsprintf(t, "!%s ", pick_vchan_id(chtmp));
        tlen = strlen(t);
