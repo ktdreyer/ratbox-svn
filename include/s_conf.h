@@ -172,7 +172,8 @@ struct config_file_entry
 
 	char default_operstring[REALLEN];
 	char default_adminstring[REALLEN];
-
+	char kline_reason[REALLEN];
+	
 	char fname_userlog[MAXPATHLEN];
 	char fname_fuserlog[MAXPATHLEN];
 	char fname_operlog[MAXPATHLEN];
@@ -195,7 +196,6 @@ struct config_file_entry
 	int ts_max_delta;
 	int ts_warn_delta;
 	int kline_with_reason;
-	int kline_with_connection_closed;
 	int kline_delay;
 	int warn_no_nline;
 	int nick_delay;

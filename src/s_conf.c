@@ -674,7 +674,6 @@ set_default_conf(void)
 	ConfigFileEntry.ts_warn_delta = TS_WARN_DELTA_DEFAULT;
 	ConfigFileEntry.ts_max_delta = TS_MAX_DELTA_DEFAULT;
 	ConfigFileEntry.client_exit = YES;
-	ConfigFileEntry.kline_with_connection_closed = NO;
 	ConfigFileEntry.kline_with_reason = YES;
 	ConfigFileEntry.kline_delay = 0;
 	ConfigFileEntry.warn_no_nline = YES;

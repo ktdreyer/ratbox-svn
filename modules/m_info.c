@@ -234,10 +234,10 @@ static struct InfoStruct info_table[] = {
 		"Duration of time to delay kline checking"
 	},
 	{
-		"kline_with_connection_closed",
-		OUTPUT_BOOLEAN_YN,
-		&ConfigFileEntry.kline_with_connection_closed,
-		"K-lined clients sign off with 'Connection closed'"
+		"kline_reason",
+		OUTPUT_STRING,
+		&ConfigFileEntry.kline_reason,
+		"K-lined clients sign off with this reason"
 	},
 	{
 		"kline_with_reason",

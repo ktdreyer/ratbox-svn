@@ -372,15 +372,12 @@ check_unknowns_list(dlink_list * list)
 static void
 notify_banned_client(struct Client *client_p, struct ConfItem *aconf, int ban)
 {
-	static const char conn_closed[] = "Connection closed";
 	static const char d_lined[] = "D-lined";
 	static const char k_lined[] = "K-lined";
 	static const char g_lined[] = "G-lined";
+	const char *reason = NULL;
 
-	const char *reason = conn_closed;
-	const char *exit_reason = conn_closed;
-
-	if(ConfigFileEntry.kline_with_reason && aconf->passwd != NULL)
+	if(ConfigFileEntry.kline_with_reason && !EmptyString(aconf->passwd))
 	{
 		reason = aconf->passwd;
 	}
@@ -391,13 +388,11 @@ notify_banned_client(struct Client *client_p, struct ConfItem *aconf, int ban)
 		case D_LINED:
 			reason = d_lined;
 			break;
-		case K_LINED:
-			reason = k_lined;
-			break;
 		case G_LINED:
 			reason = g_lined;
 			break;
 		default:
+			reason = k_lined;
 			break;
 		}
 	}
@@ -407,12 +402,10 @@ notify_banned_client(struct Client *client_p, struct ConfItem *aconf, int ban)
 	else
 		sendto_one(client_p, form_str(ERR_YOUREBANNEDCREEP),
 			   me.name, client_p->name, reason);
-
-	if(!ConfigFileEntry.kline_with_connection_closed)
-		exit_reason = reason;
-
-	exit_client(client_p, client_p, &me, exit_reason);
-
+	
+	exit_client(client_p, client_p, &me, 
+			EmptyString(ConfigFileEntry.kline_reason) ? reason :
+			 ConfigFileEntry.kline_reason);
 }
 
 /*

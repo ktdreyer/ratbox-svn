@@ -1793,9 +1793,11 @@ conf_set_general_kline_with_reason(void *data)
 }
 
 static void
-conf_set_general_kline_with_connection_closed(void *data)
+conf_set_general_kline_reason(void *data)
 {
-	ConfigFileEntry.kline_with_connection_closed = *(unsigned int *) data;
+	strlcpy(ConfigFileEntry.kline_reason, data,
+			sizeof(ConfigFileEntry.kline_reason));
+	
 }
 
 static void
@@ -2572,8 +2574,8 @@ newconf_init()
 	add_conf_item("general", "ts_warn_delta", CF_TIME, conf_set_general_ts_warn_delta);
 	add_conf_item("general", "ts_max_delta", CF_TIME, conf_set_general_ts_max_delta);
 	add_conf_item("general", "kline_with_reason", CF_YESNO, conf_set_general_kline_with_reason);
-	add_conf_item("general", "kline_with_connection_closed", CF_YESNO,
-		      conf_set_general_kline_with_connection_closed);
+	add_conf_item("general", "kline_reason", CF_QSTRING,
+		      conf_set_general_kline_reason);
 	add_conf_item("general", "kline_delay", CF_TIME,
 		      conf_set_general_kline_delay);
 	add_conf_item("general", "warn_no_nline", CF_YESNO, conf_set_general_warn_no_nline);
