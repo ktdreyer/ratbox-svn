@@ -1,3 +1,9 @@
+*** 20010108_16 by wcampbel
+Fixed the .depend's...We'll get a couple error messages when we run
+make depend now, but at least system libs (rsa.h) in /usr/local/lib
+on FreeBSD will not be included in the .depend's.  
+
+
 *** 20010108_15 by wcampbel
 Minor fix of a NOTICE in opme
 
