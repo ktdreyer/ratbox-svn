@@ -89,6 +89,8 @@ static int ms_lljoin(struct Client *cptr,
   char *nick = NULL;
   char *key = NULL;
   char *vkey = NULL;
+  char *pvc = NULL;
+  int  vc_ts;
   int  flags;
   int  i;
   struct Client *acptr;
@@ -218,6 +220,34 @@ static int ms_lljoin(struct Client *cptr,
   
   if(flags == CHFL_CHANOP)
     {
+      chptr->channelts = CurrentTime;
+      /*
+       * XXX - this is a rather ugly hack.
+       *
+       * Unfortunately, there's no way to pass
+       * the fact that it is a vchan through SJOIN...
+       */
+      /* Prevent users creating a fake vchan */
+      if (chname[0] == '#' && chname[1] == '#')
+        {
+          if ((pvc = strrchr(chname+3, '_')))
+          {
+            /*
+             * OK, name matches possible vchan:
+             * ##channel_blah
+             */
+            pvc++; /*  point pvc after last _ */
+            vc_ts = atol(pvc);
+            /*
+             * if blah is the same as the TS, up the TS
+             * by one, to prevent this channel being
+             * seen as a vchan
+             */
+            if (vc_ts == CurrentTime)
+              chptr->channelts++;
+          }
+        }
+
       sendto_one(uplink,
 		 ":%s SJOIN %lu %s + :@%s", me.name,
 		 chptr->channelts, chptr->chname, nick);

@@ -112,6 +112,7 @@ static int ms_sjoin(struct Client *cptr,
   int            doesop = 0;
   int            fl;
   int            people = 0;
+  int            vc_ts = 0;
   int            isnew;
   register       char *s, *s0, *sh;
   static         char buf[BUFSIZE];
@@ -200,6 +201,7 @@ static int ms_sjoin(struct Client *cptr,
       /* possible sub vchan being sent along ? */
       if((subp = strrchr(parv[2],'_')))
 	{
+          vc_ts = atol(subp+1);
 	  /* 
            * XXX - Could be a vchan, but we can't be _sure_
            *
@@ -222,7 +224,7 @@ static int ms_sjoin(struct Client *cptr,
 	       */
               /* Compare timestamps too */
 	      if(dlinkFind(&top_chptr->vchan_list,chptr) == NULL &&
-                        (!strcmp(parv[1], subp + 1)))
+                 newts == vc_ts)
 		{
 		  m = make_dlink_node();
 		  dlinkAdd(chptr, m, &top_chptr->vchan_list);
@@ -230,12 +232,15 @@ static int ms_sjoin(struct Client *cptr,
 		}
 	    }
           /* check TS before creating a root channel */
-	  else if(!strcmp(parv[1], subp + 1))
+	  else if(newts == vc_ts)
 	    {
 	      top_chptr = get_channel(sptr, (parv[2] + 1), CREATE);
 	      m = make_dlink_node();
 	      dlinkAdd(chptr, m, &top_chptr->vchan_list);
 	      chptr->root_chptr=top_chptr;
+              /* let users access it somehow... */
+              chptr->vchan_id[0] = '!';
+              chptr->vchan_id[1] = '\0';
 	    }
 
 	  *subp = '_';	/* fugly hack, restore '_' */
@@ -255,6 +260,9 @@ static int ms_sjoin(struct Client *cptr,
       newts = oldts;
     }
 
+  /*
+   * XXX - this no doubt destroys vchans
+   */
   if (isnew)
     chptr->channelts = tstosend = newts;
   else if (newts == 0 || oldts == 0)

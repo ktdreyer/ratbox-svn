@@ -91,7 +91,8 @@ static int m_join(struct Client *cptr,
   char  *name, *key = NULL;
   char *vkey = NULL; /* !key for vchans */
   int   i, flags = 0;
-  char  *p = NULL, *p2 = NULL, *p3 = NULL;
+  char  *p = NULL, *p2 = NULL, *p3 = NULL, *pvc = NULL;
+  int   vc_ts;
   int   successful_join_count = 0; /* Number of channels successfully joined */
   
   if (!(sptr->user) || IsServer(sptr))
@@ -252,6 +253,36 @@ static int m_join(struct Client *cptr,
       if (flags & CHFL_CHANOP)
 	{
 	  chptr->channelts = CurrentTime;
+
+          /*
+           * XXX - this is a rather ugly hack.
+           *
+           * Unfortunately, there's no way to pass
+           * the fact that it is a vchan through SJOIN...
+           */
+
+          /* Prevent users creating a fake vchan */
+          if (name[0] == '#' && name[1] == '#')
+            {
+              if ((pvc = strrchr(name+3, '_'))) 
+                {
+                  /*
+                   * OK, name matches possible vchan:
+                   * ##channel_blah
+                   */
+                  pvc++; /*  point pvc after last _ */
+                  vc_ts = atol(pvc);
+                  
+                  /*
+                   * if blah is the same as the TS, up the TS
+                   * by one, to prevent this channel being
+                   * seen as a vchan
+                   */
+                  if (vc_ts == CurrentTime)
+                    chptr->channelts++;
+                }
+            }
+                  
 	  sendto_ll_channel_remote(chptr, cptr, sptr,
 				   ":%s SJOIN %lu %s + :@%s",
 				   me.name,
