@@ -32,7 +32,6 @@ IRCD_EXE	= ircd
 
 
 PROGS		= $(IRCD_EXE)
-CONFS		= 
 
 IRCDLIBS	= @LIBS@ @SSL_LIBS@
 
@@ -149,15 +148,6 @@ install: install-mkdirs build
 		fi; \
 		echo $(INSTALL_BIN) $$i $(bindir); \
 		$(INSTALL_BIN) $$i $(bindir); \
-	done
-
-	@for i in $(CONFS); do \
-		if test -f $(sysconfdir)/$$i; then \
-			echo $(MV) $(sysconfdir)/$$i $(sysconfdir)/$$i.old; \
-			$(MV) $(sysconfdir)/$$i $(sysconfdir)/$$i.old; \
-		fi; \
-		echo $(INSTALL_DATA) $$i $(sysconfdir); \
-		$(INSTALL_DATA) $$i $(sysconfdir); \
 	done
 
 version.c: version.c.SH

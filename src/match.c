@@ -215,7 +215,7 @@ unsigned long textip_to_ul(const char *ip)
 
   char c;
   while((c=*ip)) {
-    if(isdigit(c)) {
+    if(isdigit((int)c)) {
       octet *= 10;
       octet += (*ip & 0xF);
     } else if(c == '.') {

@@ -44,11 +44,10 @@ install-mkdirs:
 
 install: build install-mkdirs
 	-@echo    "Installing message files to $(messagedir)..."; \
-	echo -n "   "; \
 	for i in ./*.mo; do \
 		LNAME=`echo $$i | sed 's/^\.\///' | sed 's/\.mo$$//'`; \
+		echo "$${LNAME} "; \
 		cp $$i "$(messagedir)/$${LNAME}/LC_MESSAGES/ircd-hybrid.mo"; \
-		echo -n "$${LNAME} "; \
 	done; \
 	echo
 
@@ -62,7 +61,7 @@ clean:
 
 mrupdate:
 	@for i in $(SRCS); do \
-                echo -n "Updating $$i"; \
+                echo "Updating $$i"; \
                 xgettext -a -LC -o $$i.tmp$$$$ ../src/messages.tab; \
                 xgettext --keyword=_ -j -LC -o $$i.tmp$$$$ ../include/*.h; \
                 xgettext --keyword=_ -j -LC -o $$i.tmp$$$$ ../src/*.c; \

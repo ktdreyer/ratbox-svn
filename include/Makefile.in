@@ -2,7 +2,7 @@
 
 INSTALL=	@INSTALL@
 INSTALL_DATA=	@INSTALL_DATA@
-INSTALL_BIN=	@INSTALL_BIN@
+INSTALL_BIN=	@INSTALL_PROGRAM@
 RM=		@RM@
 
 prefix=		@prefix@
@@ -16,11 +16,14 @@ clean:
 depend:
 
 install:
-	install -d $(prefix)/include/ircd-hybrid-7
 	@echo installing header files...
+	-@if test ! -d $(prefix)/include; then \
+		echo "mkdir $(prefix)/include"; \
+		mkdir $(prefix)/include; \
+	fi
 	@for header in *.h; do \
 	echo 	$$header; \
-		install -c $$header $(prefix)/include/ircd-hybrid-7; \
+		${INSTALL_DATA} $$header $(prefix)/include/ircd-hybrid-7; \
 	done
 
 distclean:

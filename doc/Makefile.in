@@ -39,15 +39,6 @@ install-mkdirs:
 	fi
 
 install: install-mkdirs build
-	@for i in $(PROGS); do \
-		if test -f $(bindir)/$$i; then \
-			echo $(MV) $(bindir)/$$i $(bindir)/$$i.old; \
-			$(MV) $(bindir)/$$i $(bindir)/$$i.old; \
-		fi; \
-		echo $(INSTALL_BIN) $$i $(bindir); \
-		$(INSTALL_BIN) $$i $(bindir); \
-	done
-
 	@for i in $(CONFS); do \
 		if test -f $(sysconfdir)/$$i; then \
 			echo $(MV) $(sysconfdir)/$$i $(sysconfdir)/$$i.old; \

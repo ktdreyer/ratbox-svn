@@ -183,7 +183,7 @@ LockedFile(char *filename)
     }
 
   fileptr = fdopen(fd,"w");
-  fprintf(fileptr,"%d\n",getpid());
+  fprintf(fileptr,"%d\n",(int)getpid());
   fclose(fileptr);
   return (0);
 } /* LockedFile() */

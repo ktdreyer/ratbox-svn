@@ -30,7 +30,6 @@ moduledir	= @prefix@/modules
 automoduledir	= @prefix@/modules/autoload
 
 PROGS		= viconf mkpasswd fixklines convertconf md5mkpasswd
-CONFS		=
 
 mkpasswd_SOURCES = mkpasswd.c
 mkpasswd_OBJECTS = mkpasswd.o
@@ -59,10 +58,10 @@ md5mkpasswd: $(md5mkpasswd_OBJECTS)
 viconf: $(viconf_OBJECTS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o viconf $(viconf_OBJECTS) $(IRCDLIBS)
 
-fixklines: fixklines.o $(IRCDLIBS)
+fixklines: fixklines.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -o fixklines $(fixklines_OBJECTS) $(IRCDLIBS)
 
-convertconf: convertconf.o $(IRCDLIBS)
+convertconf: convertconf.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -o convertconf $(convertconf_OBJECTS) $(IRCDLIBS)
 
 clean:
@@ -133,14 +132,5 @@ install: install-mkdirs build
 		fi; \
 		echo $(INSTALL_BIN) $$i $(bindir); \
 		$(INSTALL_BIN) $$i $(bindir); \
-	done
-
-	@for i in $(CONFS); do \
-		if test -f $(sysconfdir)/$$i; then \
-			echo $(MV) $(sysconfdir)/$$i $(sysconfdir)/$$i.old; \
-			$(MV) $(sysconfdir)/$$i $(sysconfdir)/$$i.old; \
-		fi; \
-		echo $(INSTALL_DATA) $$i $(sysconfdir); \
-		$(INSTALL_DATA) $$i $(sysconfdir); \
 	done
 

@@ -180,7 +180,7 @@ CompleteIAuthConnection(int fd, void *notused)
 
 	errval = 0;
 	errlen = sizeof(errval);
-	if (getsockopt(fd, SOL_SOCKET, SO_ERROR, &errval, &errlen) < 0)
+	if (getsockopt(fd, SOL_SOCKET, SO_ERROR, (void *)&errval, &errlen) < 0)
 	{
 		log(L_ERROR,
 			"CompleteIAuthConnection(): getsockopt(SO_ERROR) failed: %s",
