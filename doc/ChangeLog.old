@@ -1,3 +1,7 @@
+*** 20010525_14 by ejb
+- added generation support to version.com.
+
+
 *** 20010525_13 by davidt
 - refcounts for outgoing sendbufs
   send.c now creates linebufs, which send_linebuf attaches to the
