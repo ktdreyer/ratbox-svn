@@ -1333,7 +1333,7 @@ sock_open(const char *host, int port, const char *vhost, int type)
 	struct hostent *host_addr;
 	int fd = -1;
 
-	fd = sock_create();
+	fd = sock_create(AF_INET);
 
 	if(fd < 0)
 	{

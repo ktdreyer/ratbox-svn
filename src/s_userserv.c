@@ -9,7 +9,6 @@
 #include "stdinc.h"
 
 #ifdef ENABLE_USERSERV
-#include <sqlite.h>
 #include "service.h"
 #include "client.h"
 #include "rserv.h"

@@ -8,7 +8,6 @@
  */
 #include "stdinc.h"
 
-#include <sqlite.h>
 #include "service.h"
 #include "client.h"
 #include "channel.h"
