@@ -1,5 +1,5 @@
 /************************************************************************
- *   IRC - Internet Relay Chat, iauth/iauth.h
+ *   IRC - Internet Relay Chat, iauth/log.h
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -18,33 +18,20 @@
  *   $Id$
  */
 
-#ifndef INCLUDED_iauth_h
-#define INCLUDED_iauth_h
-
-#ifndef INCLUDED_sys_types_h
-#include <sys/types.h>         /* time_t */
-#define INCLUDED_sys_types_h
-#endif
-
-#define ICONF              "./iauth.conf"
-
-#define BUFSIZE            512
-
-#define IRCD_MIN(a, b)  ((a) < (b) ? (a) : (b))
+#ifndef INCLUDED_log_h
+#define INCLUDED_log_h
 
 /*
- * The IA_xxx defines are for the communication between the ircd
- * server and the iauth server.
+ * Logging levels
  */
-#define IA_DOAUTH        0x01  /* perform an auth query */
-#define IA_GOODAUTH      0x02  /* client passed auth checks */
-#define IA_BADAUTH       0x03  /* client failed auth checks */
+#define L_ERROR    1
+#define L_INFO     2
 
 /*
- * External declarations
+ * Prototypes
  */
 
-extern time_t              CurrentTime;
-extern FILE                *LogPtr;
+void log(int level, char *format, ...);
+void InitLog(char *filename);
 
-#endif /* INCLUDED_iauth_h */
+#endif /* INCLUDED_log_h */

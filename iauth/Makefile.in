@@ -5,6 +5,8 @@ CC = @CC@
 CFLAGS = @CFLAGS@
 RM = @RM@
 
+#CFLAGS = -g -Wall
+
 all: source
 	@cd source ; $(MAKE) "CC=$(CC)" "CFLAGS=$(CFLAGS)"
 
