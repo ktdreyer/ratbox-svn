@@ -61,7 +61,6 @@
 
 #define WE_ARE_MEMORY_C
 #include "setup.h"
-#ifndef NOBALLOC
 
 #include "ircd_defs.h"          /* DEBUG_BLOCK_ALLOCATOR */
 #include "ircd.h"
@@ -553,4 +552,3 @@ BlockHeapDestroy(BlockHeap * bh)
     free(bh);
     return(0);
 }
-#endif
