@@ -1,3 +1,19 @@
+androsyn    2003/02/03 23:17:31 UTC	(20030203_5)
+
+  Modified files:
+    include              client.h 
+    src                  client.c s_auth.c 
+  Log:
+  Keep track of the auth request in struct LocalUser, saves searching through
+  the list of pending auths when it comes time to remove it..
+  
+  Revision  Changes    Path
+  7.195     +1 -1      ircd-ratbox/include/client.h
+  7.364     +1 -1      ircd-ratbox/src/client.c
+  7.125     +8 -28     ircd-ratbox/src/s_auth.c
+
+
+
 androsyn    2003/02/03 22:48:58 UTC	(20030203_4)
 
   Modified files:
