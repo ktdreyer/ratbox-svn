@@ -1,3 +1,8 @@
+*** 20001206_12 by db
+- cleaned up m_server.c some more. ugh. it was horrid
+
+
+
 *** 20001206_11 by db
 - riedel's patch to keep from adding nicks twice to an accept list
 
