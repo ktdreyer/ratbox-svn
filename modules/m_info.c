@@ -33,6 +33,10 @@ _modinit(void)
   mod_add_cmd(MSG_INFO, &info_msgtab);
 }
 
+void send_info_text(struct Client *sptr);
+void send_birthdate_online_time(struct Client *sptr);
+void send_conf_options(struct Client *sptr);
+
 char *_version = "20001122";
 
 /*
@@ -41,13 +45,9 @@ char *_version = "20001122";
 **  parv[1] = servername
 */
 
-int
-m_info(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
-
+int m_info(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
-  char **text = infotext;
   static time_t last_used=0L;
-  Info *infoptr;
 
   if (hunt_server(cptr,sptr,":%s INFO :%s",1,parc,parv) == HUNTED_ISME)
   {
@@ -64,25 +64,8 @@ m_info(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       else
         last_used = CurrentTime;
 
-    while (*text)
-      sendto_one(sptr, form_str(RPL_INFO), me.name, parv[0], *text++);
-
-    sendto_one(sptr, form_str(RPL_INFO), me.name, parv[0], "");
-
-    sendto_one(sptr,
-      ":%s %d %s :Birth Date: %s, compile # %s",
-      me.name,
-      RPL_INFO,
-      parv[0],
-      creation,
-      generation);
-
-    sendto_one(sptr,
-      ":%s %d %s :On-line since %s",
-      me.name,
-      RPL_INFO,
-      parv[0],
-      myctime(me.firsttime));
+    send_info_text(sptr);
+    send_birthdate_online_time(sptr);
 
     sendto_one(sptr, form_str(RPL_ENDOFINFO), me.name, parv[0]);
   } /* if (hunt_server(cptr,sptr,":%s INFO :%s",1,parc,parv) == HUNTED_ISME) */
@@ -95,75 +78,18 @@ m_info(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 **  parv[0] = sender prefix
 **  parv[1] = servername
 */
-
-int
-mo_info(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+int mo_info(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
 {
-  char **text = infotext;
-  static time_t last_used=0L;
-  Info *infoptr;
-
   if (hunt_server(cptr,sptr,":%s INFO :%s",1,parc,parv) == HUNTED_ISME)
   {
     sendto_realops_flags(FLAGS_SPY, "info requested by %s (%s@%s) [%s]",
       sptr->name, sptr->username, sptr->host,
       sptr->user->server);
 
-    while (*text)
-      sendto_one(sptr, form_str(RPL_INFO), me.name, parv[0], *text++);
-
-    sendto_one(sptr, form_str(RPL_INFO), me.name, parv[0], "");
-
-    /*
-     * Now send them a list of all our configuration options
-     * (mostly from config.h)
-     */
-
-    for (infoptr = MyInformation; infoptr->name; infoptr++)
-      {
-        if (infoptr->intvalue)
-          sendto_one(sptr,
-            ":%s %d %s :%-30s %-5d [%-30s]",
-            me.name,
-            RPL_INFO,
-            parv[0],
-            infoptr->name,
-            infoptr->intvalue,
-            infoptr->desc);
-        else
-          sendto_one(sptr,
-            ":%s %d %s :%-30s %-5s [%-30s]",
-            me.name,
-            RPL_INFO,
-            parv[0],
-            infoptr->name,
-            infoptr->strvalue,
-            infoptr->desc);
-      }
-      sendto_one(sptr,
-        ":%s %d %s :Compiled on [%s]",
-        me.name, 
-        RPL_INFO,
-        parv[0],
-        platform); 
-
-    sendto_one(sptr, form_str(RPL_INFO), me.name, parv[0], "");
-
-    sendto_one(sptr,
-      ":%s %d %s :Birth Date: %s, compile # %s",
-      me.name,
-      RPL_INFO,
-      parv[0],
-      creation,
-      generation);
-
-    sendto_one(sptr,
-      ":%s %d %s :On-line since %s",
-      me.name,
-      RPL_INFO,
-      parv[0],
-      myctime(me.firsttime));
+    send_info_text(sptr);
+    send_conf_options(sptr);
+    send_birthdate_online_time(sptr);
 
     sendto_one(sptr, form_str(RPL_ENDOFINFO), me.name, parv[0]);
   } /* if (hunt_server(cptr,sptr,":%s INFO :%s",1,parc,parv) == HUNTED_ISME) */
@@ -176,9 +102,7 @@ mo_info(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 **  parv[0] = sender prefix
 **  parv[1] = servername
 */
-
-int
-ms_info(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+int ms_info(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
 {
   if (hunt_server(cptr,sptr,":%s INFO :%s",1,parc,parv) == HUNTED_ISME)
@@ -190,3 +114,94 @@ ms_info(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     }
 
 } /* ms_info() */
+
+
+/*
+ * send_info_text
+ *
+ * inputs	- client pointer to send info text to
+ * output	- none
+ * side effects	- info text is sent to client
+ */
+void send_info_text(struct Client *sptr)
+{
+  char **text = infotext;
+
+  while (*text)
+    sendto_one(sptr, form_str(RPL_INFO), me.name, sptr->name, *text++);
+  
+  sendto_one(sptr, form_str(RPL_INFO), me.name, sptr->name, "");
+}
+
+/*
+ * send_birthdate_online_time
+ *
+ * inputs	- client pointer to send to
+ * output	- none
+ * side effects	- birthdate and online time are sent
+ */
+void send_birthdate_online_time(struct Client *sptr)
+{
+  sendto_one(sptr,
+	     ":%s %d %s :Birth Date: %s, compile # %s",
+	     me.name,
+	     RPL_INFO,
+	     sptr->name,
+	     creation,
+	     generation);
+
+  sendto_one(sptr,
+	     ":%s %d %s :On-line since %s",
+	     me.name,
+	     RPL_INFO,
+	     sptr->name,
+	     myctime(me.firsttime));
+}
+
+/*
+ * send_conf_options
+ *
+ * inputs	- client pointer to send to
+ * output	- none
+ * side effects	- send config options to client
+ */
+void send_conf_options(struct Client *sptr)
+{
+  Info *infoptr;
+
+  /*
+   * Now send them a list of all our configuration options
+   * (mostly from config.h)
+   */
+  
+  for (infoptr = MyInformation; infoptr->name; infoptr++)
+    {
+      if (infoptr->intvalue)
+	sendto_one(sptr,
+		   ":%s %d %s :%-30s %-5d [%-30s]",
+		   me.name,
+		   RPL_INFO,
+		   sptr->name,
+		   infoptr->name,
+		   infoptr->intvalue,
+		   infoptr->desc);
+      else
+	sendto_one(sptr,
+		   ":%s %d %s :%-30s %-5s [%-30s]",
+		   me.name,
+		   RPL_INFO,
+		   sptr->name,
+		   infoptr->name,
+		   infoptr->strvalue,
+		   infoptr->desc);
+    }
+  sendto_one(sptr,
+	     ":%s %d %s :Compiled on [%s]",
+	     me.name, 
+	     RPL_INFO,
+	     sptr->name,
+	     platform); 
+
+  sendto_one(sptr, form_str(RPL_INFO), me.name, sptr->name, "");
+}
+

@@ -77,12 +77,6 @@ int mo_hash(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
 {
   struct HashStats stats;
 
-  if (!MyClient(sptr))
-    {
-      sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
-      return 0;
-    }
-
   if (parc < 2)
     {
       sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS), me.name, parv[0], "HASH");

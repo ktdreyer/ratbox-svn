@@ -36,7 +36,7 @@ static void do_admin( struct Client *sptr );
 
 struct Message admin_msgtab = {
   MSG_ADMIN, 0, 0, MFLG_SLOW | MFLG_UNREG, 0, 
-  {m_unregistered, m_admin, ms_admin, ms_admin}
+  {m_unregistered, m_admin, ms_admin, mo_admin}
 };
 
 void
@@ -56,12 +56,9 @@ int m_admin(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
   static time_t last_used=0L;
 
-  /* Never an oper here */
   if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
     {
-      /* safe enough to give this on a local connect only */
-      if(MyClient(sptr))
-	sendto_one(sptr,form_str(RPL_LOAD2HI),me.name,parv[0]);
+      sendto_one(sptr,form_str(RPL_LOAD2HI),me.name,parv[0]);
       return 0;
     }
   else
@@ -77,14 +74,37 @@ int m_admin(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 }
 
 /*
+ * mo_admin - ADMIN command handler
+ *      parv[0] = sender prefix
+ *      parv[1] = servername
+ */
+int mo_admin(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+{
+  if (IsRegisteredUser(sptr) &&
+      (hunt_server(cptr,sptr,":%s ADMIN :%s",1,parc,parv) != HUNTED_ISME))
+    return 0;
+
+  do_admin( sptr );
+
+  if(ConfigFileEntry.hub)
+    sendto_one(sptr, ":%s NOTICE %s :Server is a HUB",
+                     me.name,sptr->name);
+  else
+    sendto_one(sptr, ":%s NOTICE %s :Server is a LEAF",
+                     me.name,sptr->name);
+
+  return 0;
+}
+
+/*
  * ms_admin - ADMIN command handler, used for OPERS as well
  *      parv[0] = sender prefix
  *      parv[1] = servername
  */
 int ms_admin(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
-  /*if (hunt_server(cptr,sptr,":%s ADMIN :%s",1,parc,parv) != HUNTED_ISME)
-    return 0;*/
+  if (hunt_server(cptr,sptr,":%s ADMIN :%s",1,parc,parv) != HUNTED_ISME)
+    return 0;
 
   do_admin( sptr );
 
@@ -99,7 +119,6 @@ int ms_admin(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
  * output	- none
  * side effects	- admin info is sent to client given
  */
-
 static void do_admin( struct Client *sptr )
 {
   struct ConfItem *aconf;
@@ -122,16 +141,4 @@ static void do_admin( struct Client *sptr )
   else
     sendto_one(sptr, form_str(ERR_NOADMININFO),
                me.name, sptr->name, me.name);
-
-/* UHHHHHHHHHHHHHHHHHHHHHHHHHH NO
- * - bysin
- */
-#if 0
-  if(ConfigFileEntry.hub)
-    sendto_one(sptr, ":%s NOTICE %s :Server is a HUB",
-                     me.name,sptr->name);
-  else
-    sendto_one(sptr, ":%s NOTICE %s :Server is a LEAF",
-                     me.name,sptr->name);
-#endif
 }

@@ -54,12 +54,6 @@ int mo_die(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   struct Client* acptr;
   int      i;
 
-  if (!MyClient(sptr) || !IsAnyOper(sptr))
-    {
-      sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
-      return 0;
-    }
-
   if (!IsOperDie(sptr))
     {
       sendto_one(sptr,":%s NOTICE %s :You have no D flag", me.name, parv[0]);

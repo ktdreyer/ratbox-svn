@@ -641,8 +641,14 @@ int user_channel_mode(struct Channel *chptr, struct Client *who)
 }
 
 /*
- * write the "simple" list of channel modes for channel chptr onto buffer mbuf
- * with the parameters in pbuf.
+ * channel_modes
+ * inputs	- pointer to channel
+ * 		- pointer to client
+ *		- pointer to mode buf
+ * 		- pointer to parameter buf
+ * output	- NONE
+ * side effects - write the "simple" list of channel modes for channel
+ * chptr onto buffer mbuf with the parameters in pbuf.
  */
 void channel_modes(struct Channel *chptr, struct Client *cptr,
 		   char *mbuf, char *pbuf)
@@ -677,10 +683,20 @@ void channel_modes(struct Channel *chptr, struct Client *cptr,
 }
 
 /*
- * only used to send +b and +e now, +d/+a too.
+
  * 
  */
 
+/*
+ * send_mode_list
+ * inputs	- client
+ * 		- pointer to channel
+ *		- pointer
+ * 		- 
+ * output	- 
+ * side effects -
+ * only used to send +b and +e now, +d/+a too.
+ */
 static  void    send_mode_list(struct Client *cptr,
                                char *chname,
                                struct SLink *top,
@@ -732,7 +748,12 @@ static  void    send_mode_list(struct Client *cptr,
 }
 
 /*
- * send "cptr" a full list of the modes for channel chptr.
+ * send_channel_modes
+ * 
+ * inputs	- pointer to client cptr
+ * 		- pointer to channel pointer
+ * output	- NONE
+ * side effects	- send "cptr" a full list of the modes for channel chptr.
  */
 void send_channel_modes(struct Client *cptr, struct Channel *chptr)
 {
@@ -850,10 +871,15 @@ void send_channel_modes(struct Client *cptr, struct Channel *chptr)
                me.name, chptr->chname, modebuf, parabuf);
 }
 
-/* stolen from Undernet's ircd  -orabidoo
+/*
+ * pretty_mask
+ * 
+ * inputs	- pointer string
+ * output	- pointer to cleaned up mask
+ * side effects	- 
  *
+ * stolen from Undernet's ircd  -orabidoo
  */
-
 static char* pretty_mask(char* mask)
 {
   register char* cp = mask;
@@ -874,7 +900,16 @@ static char* pretty_mask(char* mask)
                              check_string(host));
 }
 
-static  char    *fix_key(char *arg)
+/*
+ * fix_key
+ * 
+ * inputs	- pointer to key to clean up
+ * output	- pointer to cleaned up key
+ * side effects	- 
+ *
+ * stolen from Undernet's ircd  -orabidoo
+ */
+static  char *fix_key(char *arg)
 {
   u_char        *s, *t, c;
 
@@ -889,6 +924,11 @@ static  char    *fix_key(char *arg)
 }
 
 /*
+ * fix_key_old
+ * 
+ * inputs	- pointer to key to clean up
+ * output	- pointer to cleaned up key
+ * side effects	- 
  * Here we attempt to be compatible with older non-hybrid servers.
  * We can't back down from the ':' issue however.  --Rodder
  */
@@ -907,6 +947,11 @@ static  char    *fix_key_old(char *arg)
 }
 
 /*
+ * collapse_signs
+ * 
+ * inputs	- pointer to signs to collapse
+ * output	- pointer to collapsed string
+ * side effects	- 
  * like the name says...  take out the redundant signs in a modechange list
  */
 static  void    collapse_signs(char *s)
@@ -955,6 +1000,8 @@ static  int     errsent(int err, int *errs)
  * rewritten to remove +h/+c/z 
  * in spirit with the one pass idea, I've re-written how "imnspt"
  * handling was done
+ * There isn't much that can be done to shorten it, its one giant
+ * switch. *sigh*
  *
  * I've also left some "remnants" of the +h code in for possible
  * later addition.
@@ -1159,12 +1206,12 @@ void set_channel_mode(struct Client *cptr,
               }
 
           /* ignore server-generated MODE +-ovh */
+	  /* naw, allow it but still flag it */
           if (IsServer(sptr))
             {
-              ts_warn( "MODE %c%c on %s for %s from server %s (ignored)", 
+              ts_warn( "MODE %c%c on %s for %s from server %s", 
                        (whatt == MODE_ADD ? '+' : '-'), c, real_name, 
                        who->name,sptr->name);
-              break;
             }
 
           if (c == 'o')
@@ -1498,13 +1545,6 @@ void set_channel_mode(struct Client *cptr,
            * with the pbufw_new nonsense removed -Dianora
            */
 
-          /*
-          *mbufw++ = plus;
-          *mbufw++ = 'e';
-          strcpy(pbufw, arg);
-          pbufw += strlen(pbufw);
-          *pbufw++ = ' ';
-          */
           len += tmp + 1;
           opcnt++;
 
@@ -1589,13 +1629,6 @@ void set_channel_mode(struct Client *cptr,
            * with the pbufw_new nonsense removed -Dianora
            */
 
-          /*
-          *mbufw++ = plus;
-          *mbufw++ = 'e';
-          strcpy(pbufw, arg);
-          pbufw += strlen(pbufw);
-          *pbufw++ = ' ';
-          */
           len += tmp + 1;
           opcnt++;
 
@@ -2085,8 +2118,11 @@ void set_channel_mode(struct Client *cptr,
 
 
 /*
- * check_channel_name - check channel name for invalid characters
- * return true (1) if name ok, false (0) otherwise
+ * check_channel_name
+ * inputs	- channel name
+ * output	- true (1) if name ok, false (0) otherwise
+ * side effects	- check_channel_name - check channel name for
+ *		  invalid characters
  */
 int check_channel_name(const char* name)
 {
@@ -2100,9 +2136,15 @@ int check_channel_name(const char* name)
 }
 
 /*
-**  Get Channel block for chname (and allocate a new channel
-**  block, if it didn't exist before).
-*/
+ * get_channel
+ * inputs	- client pointer
+ *		- channel name
+ *		- flag == CREATE if non existent
+ * output	- returns channel block
+ *
+ *  Get Channel block for chname (and allocate a new channel
+ *  block, if it didn't exist before).
+ */
 struct Channel* get_channel(struct Client *cptr, char *chname, int flag)
 {
   struct Channel *chptr;
@@ -2242,12 +2284,11 @@ static  void    sub1_from_channel(struct Channel *chptr)
 /*
  * clear_bans_exceptions_denies
  *
- * I could have re-written del_banid/del_exceptid to do this
- *
- * still need a bit of cleanup on the MODE -b stuff...
- * -Dianora
+ * inputs	- pointer to client
+ * 		- channel pointer
+ * output	- NONE
+ * side effects  -
  */
-
 void clear_bans_exceptions_denies(struct Client *sptr, struct Channel *chptr)
 {
   static char modebuf[MODEBUFLEN];
@@ -2469,7 +2510,12 @@ static void free_channel_masks(struct Channel *chptr)
   chptr->num_bed = 0;
 }
 
-/* Only leaves need to remove channels that have no local members
+/*
+ * cleanup_channels
+ *
+ * inputs	- not used
+ * output	- none
+ * Only leaves need to remove channels that have no local members
  * If a channel has 0 LOCAL users and is NOT the top of a set of
  * vchans, remove it.
  */

@@ -82,3 +82,5 @@ int mo_help(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
   SendMessageFile(sptr, &ConfigFileEntry.helpfile);
 }
+
+
