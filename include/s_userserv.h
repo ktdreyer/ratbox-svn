@@ -20,6 +20,9 @@ extern void free_user_reg(struct user_reg *);
 
 extern void add_user_reg(struct user_reg *);
 
+extern void load_user_db(void);
+extern void save_user_db(void);
+
 extern const char *get_crypt(const char *password, const char *salt);
 
 #endif

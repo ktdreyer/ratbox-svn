@@ -8,7 +8,7 @@
 
 /* XXX UGLY */
 #ifdef USER_SERVICE
-#include "../src/s_userserv/s_userserv.h"
+#include "s_userserv.h"
 #endif
 
 #define USERHOSTLEN (USERLEN + HOSTLEN + 1)
