@@ -63,7 +63,6 @@
  * Stuff for poll()
  */
 #ifdef USE_POLL
-#include <stropts.h>
 #include <poll.h>
 #endif
 
