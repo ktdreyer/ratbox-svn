@@ -195,7 +195,7 @@ match_esc(const char *mask, const char *name)
 		}
 		if(ToLower(*m) != ToLower(*n) && !(!quote && *m == '?') &&
 			!(!quote && *m == '@' && IsAlpha(*n)) &&
-			!(!quote && *m == '#' && IsNum(*n)))
+			!(!quote && *m == '#' && IsDigit(*n)))
 		{
 			if(!wild)
 				return 0;
