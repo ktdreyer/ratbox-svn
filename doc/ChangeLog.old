@@ -1,3 +1,16 @@
+*** 20001105_3 by db
+- fixed stupid in m_oper.c, it wouldn't have honoured O from other servers..
+
+- removed show oper password on fail... The reason is nasty.. When
+  Europeans got hackered recently, irc.hemmet etc.... The kiddies were 
+  opered up with hacked O lines.. A few opers accidentally used the 
+  O line passwords for other servers on the hacked server... showing the
+  kiddies their O line passwords for yet more servers... This is a 
+  bad idea completely. *sigh* Yes, maybe it should be up to the admins, 
+  but it is just a bad idea I think. Sorry is- 
+
+
+
 *** 20001105_2 by db
 - redid m_oper.c to clean that up a bit 
 - changed the header in m_challenge.c from m_version.c to m_challenge.c
