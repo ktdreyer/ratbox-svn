@@ -1,3 +1,7 @@
+*** 19990804_3 by tomh
+fix luser count bug
+
+
 *** 19990804_2 by db
 - fixed broken m_unkline.c it would unkline everything. duh
 
