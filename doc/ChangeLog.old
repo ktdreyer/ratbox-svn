@@ -1,3 +1,8 @@
+*** 20010302_2 by davidt
+- Reset buf/sjbuf/sjbuf_nh to "" in m_sjoin, so we don't accidentaly
+  reuse previous nicks....
+
+
 *** 20010302_1 by a1kmm
 - Fixed a potential buffer overflow where strncat is used incorrectly.
 
