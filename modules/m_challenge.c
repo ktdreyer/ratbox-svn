@@ -131,7 +131,7 @@ static void m_challenge( struct Client *client_p, struct Client *source_p,
 
       if(ConfigFileEntry.failed_oper_notice)
         sendto_realops_flags(UMODE_ALL, L_ALL,
-                             "Failed OPER attempt - host mismatch by %s (%s@%s)",
+                             "Failed CHALLENGE attempt - host mismatch by %s (%s@%s)",
                              source_p->name, source_p->username, source_p->host);
       return;
     }
@@ -145,7 +145,7 @@ static void m_challenge( struct Client *client_p, struct Client *source_p,
       sendto_one(source_p,":%s NOTICE %s :Can't attach conf!",
                  me.name,source_p->name);
       sendto_realops_flags(UMODE_ALL, L_ALL,
-                           "Failed OPER attempt by %s (%s@%s) can't attach conf!",
+                           "Failed CHALLENGE attempt by %s (%s@%s) can't attach conf!",
 	                   source_p->name, source_p->username, source_p->host);
       log_foper(source_p, source_p->user->auth_oper);
 
@@ -170,7 +170,7 @@ static void m_challenge( struct Client *client_p, struct Client *source_p,
   MyFree(source_p->user->response);
   MyFree(source_p->user->auth_oper);
   source_p->user->response = NULL;
-  source_p->user->response = NULL;
+  source_p->user->auth_oper = NULL;
 
   if (!(aconf = find_conf_exact(parv[1], source_p->username, source_p->host,
 	             		CONF_OPERATOR)) &&
@@ -183,7 +183,7 @@ static void m_challenge( struct Client *client_p, struct Client *source_p,
 
     if(ConfigFileEntry.failed_oper_notice)
       sendto_realops_flags(UMODE_ALL, L_ALL,
-                           "Failed OPER attempt - host mismatch by %s (%s@%s)",
+                           "Failed CHALLENGE attempt - host mismatch by %s (%s@%s)",
                            source_p->name, source_p->username, source_p->host);
     return;
   }
