@@ -1,3 +1,8 @@
+*** 20011001_5 by db
+- If fixklines.c is missing in tools, it shouldn't be in Makefile
+
+
+
 *** 20011001_4 by wcampbel
 Corrected previous spelling errors
 
