@@ -1,3 +1,18 @@
+leeh        2004/03/07 18:08:38 EST	(20040307_7)
+
+  Modified files:
+    src                  devpoll.c epoll.c kqueue.c 
+  Log:
+  - make init_netio() use fprintf() rather than ilog(), which isnt initialised
+    at this point.
+  
+  Revision  Changes    Path
+  7.30      +3 -2      ircd-ratbox/src/devpoll.c
+  1.25      +1 -1      ircd-ratbox/src/epoll.c
+  1.44      +1 -1      ircd-ratbox/src/kqueue.c
+
+
+
 leeh        2004/03/07 17:11:30 EST	(20040307_6)
 
   Modified files:
