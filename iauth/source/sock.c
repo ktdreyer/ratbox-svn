@@ -98,7 +98,7 @@ DoListen(struct Port *portptr)
 {
   struct sockaddr_in sockname;
 
-  assert(portptr != 0);
+  assert(portptr != NULL);
 
   memset((void *) &sockname, 0, sizeof(struct sockaddr));
   sockname.sin_family = AF_INET;
@@ -678,7 +678,7 @@ EstablishConnection(struct Port *portptr)
   int clientlen;
   struct Server *newconn;
 
-  assert(portptr != 0);
+  assert(portptr != NULL);
 
   newconn = (struct Server *) MyMalloc(sizeof(struct Server));
   memset(newconn, 0, sizeof(struct Server));
@@ -720,7 +720,7 @@ static void
 AddServer(struct Server *sptr)
 
 {
-  assert(sptr != 0);
+  assert(sptr != NULL);
 
   sptr->prev = NULL;
   sptr->next = ServerList;
@@ -738,7 +738,7 @@ static void
 DelServer(struct Server *sptr)
 
 {
-  assert(sptr != 0);
+  assert(sptr != NULL);
 
   if (sptr->next)
     sptr->next->prev = sptr->prev;

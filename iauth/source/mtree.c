@@ -217,7 +217,7 @@ TreeAddIline(struct Iline *iptr)
   char hostname[HOSTLEN + 1];
   int hostpieces;
 
-  assert(iptr != 0);
+  assert(iptr != NULL);
 
   /*
    * So we don't destroy iptr->hostname, use another buffer
@@ -252,7 +252,7 @@ TreeAddKline(struct ServerBan *kptr)
   char hostname[HOSTLEN + 1];
   int hostpieces;
 
-  assert(kptr != 0);
+  assert(kptr != NULL);
 
   /*
    * So we don't destroy kptr->hostname, use another buffer

@@ -235,7 +235,7 @@ BeginIdentQuery(struct AuthRequest *auth)
   int length;
   int fd;
 
-  assert(auth != 0);
+  assert(auth != NULL);
 
   if ((fd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
   {
@@ -304,7 +304,7 @@ static void
 IdentError(struct AuthRequest *auth)
 
 {
-  assert(auth != 0);
+  assert(auth != NULL);
 
   close(auth->identfd);
   auth->identfd = NOSOCK;
@@ -333,7 +333,7 @@ SendIdentQuery(struct AuthRequest *auth)
 {
   char authbuf[32];
 
-  assert(auth != 0);
+  assert(auth != NULL);
 
   sprintf(authbuf, "%u , %u\r\n",
     auth->remoteport,
@@ -486,7 +486,7 @@ BeginDNSQuery(struct AuthRequest *auth)
 {
   struct DNSQuery query;
 
-  assert(auth != 0);
+  assert(auth != NULL);
 
   query.vptr = auth;
   query.callback = AuthDNSCallback;
@@ -678,7 +678,7 @@ CompleteAuthRequest(struct AuthRequest *auth)
   }
   else
   {
-    assert(iptr != 0);
+    assert(iptr != NULL);
 
     /*
      * If the ident query failed, make their username "~",
