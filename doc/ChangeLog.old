@@ -1,3 +1,18 @@
+leeh        2002/05/30 16:14:01 EDT	(20020530_0)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  - fix for the idle client bug found by scuzzy <scuzzy@aniverse.net>
+  
+    I *think* this is the right fix, but my server decided the idlelimit
+    wasnt worth bothering with anymore anyway.
+  
+  Revision  Changes    Path
+  7.271     +1 -1      ircd-hybrid-7/src/client.c
+
+
+
 db          2002/05/29 12:13:43 EDT	(20020529_0)
 
   Modified files:
