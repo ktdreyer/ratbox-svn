@@ -144,10 +144,7 @@ static void conf_dns_callback(void* vptr, adns_answer *reply)
   if(reply->status == adns_s_ok)
   {
 #ifdef IPV6
-	copy_s_addr(IN_ADDR(aconf->ipnum), reply->rrs.in6addr->s6_addr);
-#else
-#if 0
-	copy_s_addr(IN_ADDR(aconf->ipnum), reply->rrs.inaddr->s_addr);
+	copy_s_addr(IN_ADDR(aconf->ipnum), reply->rrs.addr->addr.inet6.sin6_addr.s6_addr);
 #endif
 	copy_s_addr(IN_ADDR(aconf->ipnum), reply->rrs.addr->addr.inet.sin_addr.s_addr);
 #endif
