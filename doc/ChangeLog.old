@@ -1,3 +1,8 @@
+*** 20010124_2 by db
+- This code will need to be revisted for IPv6, but it at least works now.
+
+
+
 *** 20010124_1 by db
 - m_whowas.c was referencing ConfigFileEntry intead of ServerInfo
   causing a core. oops.
