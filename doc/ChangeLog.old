@@ -1,3 +1,16 @@
+androsyn    2002/06/18 13:34:15 EDT	(20020618_2)
+
+  Modified files:
+    src                  channel.c channel_mode.c 
+  Log:
+  Fixed that stupid space showing up in SJOINS
+  
+  Revision  Changes    Path
+  7.324     +1 -4      ircd-hybrid-7/src/channel.c
+  7.42      +1 -1      ircd-hybrid-7/src/channel_mode.c
+
+
+
 androsyn    2002/06/18 13:25:59 EDT	(20020618_1)
 
   Modified files:
