@@ -1,3 +1,8 @@
+*** 20001130_11 by db
+- similar bug to parse.c in modules.c when increasing moduletable
+
+
+
 *** 20001130_10 by db
 - added two new parms to parser hide_server hide_chanops yes or no
 - added possible fix (untested by adrian?) to parse.
