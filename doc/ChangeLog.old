@@ -1,3 +1,8 @@
+*** 20010126_7 by wcampbel
+Update yacc/lex files (is- please remove!)
+Do NOT enable IPV6 by default!
+
+
 *** 20010126_6 by androsyn
 Somebody thought it was funny to commit config.h with #define IPV6 1
 
