@@ -234,6 +234,9 @@ read_ctrl_packet(int fd, void *data)
       if (reply->datalen > 0)
         reply->data = MyMalloc(reply->datalen);
     }
+
+    if (reply->gotdatalen < 2)
+      return; /* wait for more data */
   }
 
   if (reply->readdata < reply->datalen) /* try to get any remaining data */
