@@ -1,3 +1,17 @@
+androsyn    2002/12/07 18:12:19 UTC	(20021207_2)
+
+  Modified files:
+    include              tools.h 
+    src                  tools.c 
+  Log:
+  Add some asserts into the dlink code..
+  
+  Revision  Changes    Path
+  1.40      +33 -2     ircd-ratbox/include/tools.h
+  7.34      +34 -1     ircd-ratbox/src/tools.c
+
+
+
 leeh        2002/12/07 18:10:47 UTC	(20021207_1)
 
   Modified files:
