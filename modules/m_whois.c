@@ -548,7 +548,8 @@ static void ms_whois(struct Client *client_p,
         struct Client *whois_p;
 
         /* try to find the client */
-	if(whois_p = find_client(parv[2], NULL))
+	whois_p = find_client(parv[2], NULL);
+	if (whois_p)
 	{
 	  /* check the server being asked to perform the whois, is that
 	   * clients uplink */
