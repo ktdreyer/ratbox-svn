@@ -1,3 +1,15 @@
+leeh        2003/08/07 12:15:28 EDT	(20030807_0)
+
+  Modified files:
+    src                  s_auth.c 
+  Log:
+  - auth_client needs to be reset to NULL.
+  
+  Revision  Changes    Path
+  7.153     +7 -5      ircd-ratbox/src/s_auth.c
+
+
+
 androsyn    2003/08/06 15:02:16 EDT	(20030806_1)
 
   Modified files:
