@@ -241,6 +241,7 @@ struct config_file_entry
 	int htm_messages;
 	int htm_interval;
 	int htm_trigger;
+	int reject_ban_time;
 #ifdef IPV6
 	int fallback_to_ip6_int;
 #endif

@@ -55,6 +55,7 @@
 #include "md5.h"
 #include "memory.h"
 #include "packet.h"
+#include "reject.h"
 
 static int valid_hostname(const char *hostname);
 static int valid_username(const char *username);
@@ -1272,6 +1273,7 @@ check_X_line(struct Client *client_p, struct Client *source_p)
 						     get_client_name(client_p, HIDE_IP));
 
 			ServerStats->is_ref++;
+			add_reject(source_p);
 			exit_client(client_p, source_p, &me, "Bad user info");
 			return (CLIENT_EXITED);
 		}

@@ -137,7 +137,7 @@ free_auth_request(struct AuthRequest *request)
 static void
 unlink_auth_request(struct AuthRequest *request, dlink_list * list)
 {
-	assert(dlinkFindDestroy(list, request) == 1);
+	dlinkFindDestroy(list,request);
 }
 
 /*
@@ -166,8 +166,7 @@ release_auth_client(struct Client *client)
 	 * us. This is what read_packet() does.
 	 *     -- adrian
 	 */
-	assert(client->localClient->dns_query == NULL);
-//	delete_adns_queries(client->localClient->dns_query);
+	delete_adns_queries(client->localClient->dns_query);
 	client->localClient->allow_read = MAX_FLOOD;
 	comm_setflush(client->localClient->fd, 1000, flood_recalc, client);
 	dlinkAddTail(client, &client->node, &global_client_list);

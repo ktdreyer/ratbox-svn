@@ -29,8 +29,11 @@ static BlockHeap *prefix_heap;
 static BlockHeap *node_heap;
 static BlockHeap *patricia_heap;
 
-
-
+/* Enable both of these to debug patricia.c
+ * #define NOTYET 1
+ * #define PATRICIA_DEBUG 1
+ */
+ 
 #define PREFIX_HEAP_COUNT	1024
 #define NODE_HEAP_COUNT		1024
 #define PATRICIA_HEAP_COUNT	128
@@ -268,7 +271,7 @@ Deref_Prefix(prefix_t * prefix)
 
 /* } */
 
-/* #define PATRICIA_DEBUG 1 */
+// #define PATRICIA_DEBUG 1 
 
 static int num_active_patricia = 0;
 
@@ -428,8 +431,8 @@ patricia_search_exact(patricia_tree_t * patricia, prefix_t * prefix)
 
 #ifdef PATRICIA_DEBUG
 	if(node->prefix)
-		fprintf(stderr, "patricia_search_exact: stop at %s/%d\n",
-			prefix_toa(node->prefix), node->prefix->bitlen);
+		fprintf(stderr, "patricia_search_exact: stop at %s/%d %d\n",
+			prefix_toa(node->prefix), node->prefix->bitlen, node->bit);
 	else
 		fprintf(stderr, "patricia_search_exact: stop at %d\n", node->bit);
 #endif /* PATRICIA_DEBUG */
@@ -928,15 +931,13 @@ make_and_lookup_ip(patricia_tree_t * tree, struct sockaddr_storage *in, int bitl
 	void *ipptr = NULL;
 #ifdef IPV6
 	if(in->ss_family == AF_INET6)
-	{
 		ipptr = &((struct sockaddr_in6 *)in)->sin6_addr;	
-	} else
+	 else
 #endif
-	{
 		ipptr = &((struct sockaddr_in *)in)->sin_addr;
-	}
 	
 	prefix = New_Prefix(in->ss_family, ipptr, bitlen);
+
 	if(prefix == NULL)
 		return NULL;
 
@@ -1026,11 +1027,11 @@ match_ip(patricia_tree_t * tree, struct sockaddr_storage *ip)
 	{
 		len = 128;
 		family = AF_INET6;
-		ipptr = &((struct sockaddr_in6 *)&ip)->sin6_addr;
+		ipptr = &((struct sockaddr_in6 *)ip)->sin6_addr;
 	} else {
 		len = 32;
 		family = AF_INET;
-		ipptr = &((struct sockaddr_in *)&ip)->sin_addr;
+		ipptr = &((struct sockaddr_in *)ip)->sin_addr;
 	}
 #endif
 	

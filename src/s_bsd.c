@@ -48,6 +48,7 @@
 #include "s_stats.h"
 #include "send.h"
 #include "s_debug.h"
+#include "reject.h"
 #include "memory.h"
 
 
@@ -384,6 +385,8 @@ add_connection(struct Listener *listener, int fd, struct sockaddr_storage *sai)
 
 	if(!set_non_blocking(new_client->localClient->fd))
 		report_error(L_ALL, NONB_ERROR_MSG, get_client_name(new_client, SHOW_IP), errno);
+	if(check_reject(new_client))
+		return; 
 	start_auth(new_client);
 }
 

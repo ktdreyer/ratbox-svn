@@ -92,6 +92,16 @@ static dlink_list heap_lists;
 static int zero_fd = -1;
 #endif
 
+#define blockheap_fail(x) _blockheap_fail(x, __FILE__, __LINE__)
+
+static void
+_blockheap_fail(const char *reason, const char *file, int line)
+{
+	ilog(L_CRIT, "Blockheap failure: %s (%s:%d)", file, line);
+	abort();
+}
+                
+
 /*
  * static inline void free_block(void *ptr, size_t size)
  *
@@ -125,7 +135,7 @@ initBlockHeap(void)
 	zero_fd = open("/dev/zero", O_RDWR);
 
 	if(zero_fd < 0)
-		outofmemory();
+		blockheap_fail("Failed opening /dev/zero");
 	fd_open(zero_fd, FD_FILE, "Anonymous mmap()");
 #endif
 	eventAddIsh("block_heap_gc", block_heap_gc, NULL, 30);
@@ -251,13 +261,14 @@ BlockHeapCreate(size_t elemsize, int elemsperblock)
 	/* Catch idiotic requests up front */
 	if((elemsize <= 0) || (elemsperblock <= 0))
 	{
-		outofmemory();	/* die.. out of memory */
+		blockheap_fail("Attempting to BlockHeapCreate idiotic sizes");
 	}
 
 	/* Allocate our new BlockHeap */
 	bh = (BlockHeap *) calloc(1, sizeof(BlockHeap));
 	if(bh == NULL)
 	{
+		ilog(L_CRIT, "Attempt to calloc() failed: (%s:%d)", __FILE__, __LINE__);
 		outofmemory();	/* die.. out of memory */
 	}
 
@@ -279,12 +290,13 @@ BlockHeapCreate(size_t elemsize, int elemsperblock)
 	{
 		if(bh != NULL)
 			free(bh);
+		ilog(L_CRIT, "newblock() failed");
 		outofmemory();	/* die.. out of memory */
 	}
 
 	if(bh == NULL)
 	{
-		outofmemory();	/* die.. out of memory */
+		blockheap_fail("bh == NULL when it shouldn't be");
 	}
 	dlinkAdd(bh, &bh->hlist, &heap_lists);
 	return (bh);
@@ -311,7 +323,7 @@ BlockHeapAlloc(BlockHeap * bh)
 	assert(bh != NULL);
 	if(bh == NULL)
 	{
-		outofmemory();
+		blockheap_fail("Cannot allocate if bh == NULL");
 	}
 
 	if(bh->freeElems == 0)
@@ -325,6 +337,7 @@ BlockHeapAlloc(BlockHeap * bh)
 			BlockHeapGarbageCollect(bh);
 			if(bh->freeElems == 0)
 			{
+				ilog(L_CRIT, "newblock() failed and garbage collection didn't help");
 				outofmemory();	/* Well that didn't work either...bail */
 			}
 		}
@@ -339,12 +352,11 @@ BlockHeapAlloc(BlockHeap * bh)
 			dlinkMoveNode(new_node, &walker->free_list, &walker->used_list);
 			assert(new_node->data != NULL);
 			if(new_node->data == NULL)
-				outofmemory();
+				blockheap_fail("new_node->data is NULL and that shouldn't happen!!!");
 			return (new_node->data);
 		}
 	}
-	assert(0 == 1);
-	outofmemory();
+	blockheap_fail("BlockHeapAlloc failed, giving up");
 	return NULL;
 }
 
@@ -386,6 +398,7 @@ BlockHeapFree(BlockHeap * bh, void *ptr)
 	assert(memblock->block != NULL);
 	if(memblock->block == NULL)
 	{
+		blockheap_fail("memblock->block == NULL, not a valid block?");
 		outofmemory();
 	}
 	/* Is this block really on the used list? */
@@ -393,7 +406,7 @@ BlockHeapFree(BlockHeap * bh, void *ptr)
 
 	block = memblock->block;
 	bh->freeElems++;
-//	mem_frob(ptr, bh->elemSize);
+	mem_frob(ptr, bh->elemSize);
 	dlinkMoveNode(&memblock->self, &block->used_list, &block->free_list);
 	return (0);
 }

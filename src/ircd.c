@@ -74,7 +74,7 @@
 #include "newconf.h"
 #include "patricia.h"
 #include "s_newconf.h"
-
+#include "reject.h"
 /*
  * Try and find the correct name to use with getrlimit() for setting the max.
  * number of files allowed to be open by this process.
@@ -725,6 +725,7 @@ main(int argc, char *argv[])
 	initwhowas();
 	init_stats();
 	init_hooks();
+	init_reject();
 	load_all_modules(1);
 #ifndef STATIC_MODULES
 	load_core_modules(1);

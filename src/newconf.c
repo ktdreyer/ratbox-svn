@@ -2439,6 +2439,12 @@ conf_set_general_dot_in_ip6_addr(void *data)
 }
 
 static void
+conf_set_general_reject_ban_time(void *data)
+{
+	ConfigFileEntry.reject_ban_time = *(unsigned int *) data;
+}
+
+static void
 conf_set_channel_use_except(void *data)
 {
 	ConfigChannel.use_except = *(unsigned int *) data;
@@ -2962,6 +2968,8 @@ newconf_init()
 	add_conf_item("general", "htm_messages", CF_YESNO, conf_set_general_htm_messages);
 	add_conf_item("general", "htm_interval", CF_TIME, conf_set_general_htm_interval);
 	add_conf_item("general", "htm_trigger", CF_INT, conf_set_general_htm_trigger);
+	add_conf_item("general", "reject_ban_time", CF_TIME, conf_set_general_reject_ban_time);
+	
 #ifdef IPV6
 	add_conf_item("general", "fallback_to_ip6_int", CF_YESNO,
 		      conf_set_general_fallback_to_ip6_int);

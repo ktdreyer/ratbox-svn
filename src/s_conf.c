@@ -56,6 +56,7 @@
 #include "balloc.h"
 #include "patricia.h"
 #include "cluster.h"
+#include "reject.h"
 
 struct config_server_hide ConfigServerHide;
 
@@ -377,7 +378,7 @@ check_client(struct Client *client_p, struct Client *source_p, const char *usern
 		ilog(L_INFO, "Access denied: %s[%s]", 
 		     source_p->name, source_p->localClient->sockhost);
 	}
-
+	
 	switch (i)
 	{
 	case SOCKET_ERROR:
@@ -459,12 +460,13 @@ check_client(struct Client *client_p, struct Client *source_p, const char *usern
 			     log_client_name(source_p, SHOW_IP),
 			     source_p->localClient->listener->name,
 			     port);
-
+			add_reject(client_p);
 			exit_client(client_p, source_p, &me,
 				    "You are not authorised to use this server");
 			break;
 		}
 	case BANNED_CLIENT:
+		add_reject(client_p);
 		exit_client(client_p, client_p, &me, "*** Banned ");
 		ServerStats->is_ref++;
 		break;
@@ -644,9 +646,6 @@ attach_iline(struct Client *client_p, struct ConfItem *aconf)
 	int global_count = 0;
 	int ident_count = 0;
 	int unidented = 0;
-
-
-
 
 	if(IsConfExemptLimits(aconf))
 		return (attach_conf(client_p, aconf));
