@@ -1,3 +1,18 @@
+androsyn    2002/06/01 01:28:07 EDT	(20020601_1)
+
+  Modified files:
+    adns                 event.c transmit.c 
+    src                  adns.c 
+  Log:
+  Fixed the adns tcp resolver.
+  
+  Revision  Changes    Path
+  1.16      +6 -2      ircd-hybrid-7/adns/event.c
+  1.11      +2 -3      ircd-hybrid-7/adns/transmit.c
+  7.43      +2 -3      ircd-hybrid-7/src/adns.c
+
+
+
 androsyn    2002/05/31 22:32:17 EDT	(20020601_0)
 
   Modified files:
