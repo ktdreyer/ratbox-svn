@@ -1,3 +1,14 @@
+*** 20001226_3 by db
+- don't burst the TOPIC in s_serv.c until there is a ms_topic() handler
+  the server isn't on channel so the leaf will send back an not on channel
+  numeric to the server!
+
+- cleaned up setting of fd_note in m_nick()... in both cases it
+  is known the nick is local, as non local nicks are handled in separate
+  function.
+
+
+
 *** 20001226_2 by db
 - fix core in m_list.c if /list of non-existent channel is done. oops
 
