@@ -427,7 +427,7 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
                                 return;
                         }
 
-#ifdef USER_SERVICE
+#ifdef ENABLE_USERSERV
 			if(cmd_table[i].userreg && client_p->user->user_reg == NULL)
 			{
 				sendto_server(":%s NOTICE %s :You must be logged in for %s::%s",

@@ -16,6 +16,7 @@
 #include "ucommand.h"
 #include "log.h"
 #include "io.h"
+#include "s_userserv.h"
 #include "s_chanserv.h"
 #include "c_init.h"
 #include "balloc.h"

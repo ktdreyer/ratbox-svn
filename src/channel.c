@@ -307,8 +307,11 @@ part_service(struct client *service_p, const char *chname)
 }
 
 void
-rejoin_service(struct client *service_p, struct channel *chptr)
+rejoin_service(struct client *service_p, struct channel *chptr, int part)
 {
+	if(part)
+		sendto_server(":%s PART %s", service_p->name, chptr->name);
+
 	sendto_server(":%s SJOIN %lu %s %s :@%s",
 			MYNAME, (unsigned long) chptr->tsinfo, chptr->name, 
 			chmode_to_string(chptr),  service_p->name);
@@ -357,7 +360,7 @@ c_kick(struct client *client_p, const char *parv[], int parc)
 
 	if((target_p = find_service(parv[2])) != NULL)
 	{
-		rejoin_service(target_p, chptr);
+		rejoin_service(target_p, chptr, 0);
 		return;
 	}
 
@@ -469,9 +472,19 @@ c_tb(struct client *client_p, const char *parv[], int parc)
 static void
 remove_our_modes(struct channel *chptr)
 {
+	struct chmember *msptr;
+	dlink_node *ptr;
+
 	chptr->mode.mode = 0;
 	chptr->mode.key[0] = '\0';
 	chptr->mode.limit = 0;
+
+	DLINK_FOREACH(ptr, chptr->users.head)
+	{
+		msptr = ptr->data;
+
+		msptr->flags &= ~(MODE_OPPED|MODE_VOICED);
+	}
 }
 
 /* chmode_to_string()
@@ -753,7 +766,7 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 		{
 			member_p = ptr->data;
 			service_p = member_p->client_p;
-			rejoin_service(target_p, chptr);
+			rejoin_service(target_p, chptr, 1);
 		}
 	}
 

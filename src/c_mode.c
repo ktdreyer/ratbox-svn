@@ -37,11 +37,15 @@ change_chmember_status(struct channel *chptr, const char *nick,
 
 	if((target_p = find_service(nick)) != NULL)
 	{
-		/* we only care about -o */
-		if(type != 'o' || dir)
+		/* only care about +/-o */
+		if(type != 'o')
 			return;
 
-		if(dlink_find(&deopped_list, target_p) == NULL)
+		/* handle -o+o */
+		if(dir)
+			dlink_find_destroy(&deopped_list, target_p);
+		/* this is a -o */
+		else if(dlink_find(&deopped_list, target_p) == NULL)
 			dlink_add_alloc(target_p, &deopped_list);
 
 		return;
@@ -285,13 +289,10 @@ c_mode(struct client *client_p, const char *parv[], int parc)
 	opped_list.length = 0;
 
 	/* some services were deopped.. */
-	if(dlink_list_length(&deopped_list))
+	DLINK_FOREACH_SAFE(ptr, next_ptr, deopped_list.head)
 	{
-		DLINK_FOREACH_SAFE(ptr, next_ptr, deopped_list.head)
-		{
-			target_p = ptr->data;
-			rejoin_service(target_p, chptr);
-			dlink_destroy(ptr, &deopped_list);
-		}
+		target_p = ptr->data;
+		rejoin_service(target_p, chptr, 1);
+		dlink_destroy(ptr, &deopped_list);
 	}
 }

@@ -8,7 +8,7 @@
  */
 #include "stdinc.h"
 
-#ifdef USER_SERVICE
+#ifdef ENABLE_USERSERV
 #include <sqlite.h>
 #include "service.h"
 #include "client.h"
