@@ -13,6 +13,13 @@
 #include "tools.h"
 #include "client.h"
 
+struct ConfEntry
+{
+	const char *cf_name;
+	int cf_type;
+	void (*cf_func) (void *);
+	void *cf_arg;
+};
 
 struct TopConf
 {
@@ -20,8 +27,8 @@ struct TopConf
 	int (*tc_sfunc) (struct TopConf *);
 	int (*tc_efunc) (struct TopConf *);
 	dlink_list tc_items;
+	struct ConfEntry *tc_entries;
 };
-
 
 #define CF_QSTRING	0x01
 #define CF_INT		0x02
@@ -49,14 +56,6 @@ typedef struct conf_parm_t_stru
 	v;
 }
 conf_parm_t;
-
-
-struct ConfEntry
-{
-	char *cf_name;
-	int cf_type;
-	void (*cf_func) (void *);
-};
 
 extern struct TopConf *conf_cur_block;
 

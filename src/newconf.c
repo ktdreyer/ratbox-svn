@@ -71,7 +71,8 @@ conf_strtype(int type)
 
 
 static int
-add_top_conf(const char *name, int (*sfunc) (struct TopConf *), int (*efunc) (struct TopConf *))
+add_top_conf(const char *name, int (*sfunc) (struct TopConf *), 
+		int (*efunc) (struct TopConf *), struct ConfEntry *items)
 {
 	struct TopConf *tc;
 
@@ -80,6 +81,7 @@ add_top_conf(const char *name, int (*sfunc) (struct TopConf *), int (*efunc) (st
 	DupString(tc->tc_name, name);
 	tc->tc_sfunc = sfunc;
 	tc->tc_efunc = efunc;
+	tc->tc_entries = items;
 
 	dlinkAddAlloc(tc, &conf_items);
 	return 0;
@@ -105,8 +107,21 @@ find_top_conf(const char *name)
 static struct ConfEntry *
 find_conf_item(const struct TopConf *top, const char *name)
 {
-	dlink_node *d;
 	struct ConfEntry *cf;
+	dlink_node *d;
+
+	if(top->tc_entries)
+	{
+		int i;
+
+		for(i = 0; top->tc_entries[i].cf_type; i++)
+		{
+			cf = &top->tc_entries[i];
+
+			if(!strcasecmp(cf->cf_name, name))
+				return cf;
+		}
+	}
 
 	DLINK_FOREACH(d, top->tc_items.head)
 	{
@@ -1410,60 +1425,6 @@ conf_set_general_default_adminstring(void *data)
 }
 
 static void
-conf_set_general_failed_oper_notice(void *data)
-{
-	ConfigFileEntry.failed_oper_notice = *(unsigned int *) data;
-}
-
-static void
-conf_set_general_anti_nick_flood(void *data)
-{
-	ConfigFileEntry.anti_nick_flood = *(unsigned int *) data;
-}
-
-static void
-conf_set_general_max_nick_time(void *data)
-{
-	ConfigFileEntry.max_nick_time = *(unsigned int *) data;
-}
-
-static void
-conf_set_general_max_nick_changes(void *data)
-{
-	ConfigFileEntry.max_nick_changes = *(unsigned int *) data;
-}
-
-static void
-conf_set_general_max_accept(void *data)
-{
-	ConfigFileEntry.max_accept = *(unsigned int *) data;
-}
-
-static void
-conf_set_general_nick_delay(void *data)
-{
-	ConfigFileEntry.nick_delay = *(unsigned int *) data;
-}
-
-static void
-conf_set_general_anti_spam_exit_message_time(void *data)
-{
-	ConfigFileEntry.anti_spam_exit_message_time = *(unsigned int *) data;
-}
-
-static void
-conf_set_general_ts_warn_delta(void *data)
-{
-	ConfigFileEntry.ts_warn_delta = *(unsigned int *) data;
-}
-
-static void
-conf_set_general_ts_max_delta(void *data)
-{
-	ConfigFileEntry.ts_max_delta = *(unsigned int *) data;
-}
-
-static void
 conf_set_general_havent_read_conf(void *data)
 {
 	if(*(unsigned int *) data)
@@ -1494,12 +1455,6 @@ conf_set_general_hide_error_messages(void *data)
 }
 
 static void
-conf_set_general_kline_with_reason(void *data)
-{
-	ConfigFileEntry.kline_with_reason = *(unsigned int *) data;
-}
-
-static void
 conf_set_general_kline_reason(void *data)
 {
 	strlcpy(ConfigFileEntry.kline_reason, data,
@@ -1514,60 +1469,6 @@ conf_set_general_kline_delay(void *data)
 
 	/* THIS MUST BE HERE to stop us being unable to check klines */
 	kline_queued = 0;
-}
-
-static void
-conf_set_general_client_exit(void *data)
-{
-	ConfigFileEntry.client_exit = *(unsigned int *) data;
-}
-
-static void
-conf_set_general_warn_no_nline(void *data)
-{
-	ConfigFileEntry.warn_no_nline = *(unsigned int *) data;
-}
-
-static void
-conf_set_general_non_redundant_klines(void *data)
-{
-	ConfigFileEntry.non_redundant_klines = *(unsigned int *) data;
-}
-
-static void
-conf_set_general_stats_e_disabled(void *data)
-{
-	ConfigFileEntry.stats_e_disabled = *(unsigned int *) data;
-}
-
-static void
-conf_set_general_stats_c_oper_only(void *data)
-{
-	ConfigFileEntry.stats_c_oper_only = *(unsigned int *) data;
-}
-
-static void
-conf_set_general_stats_h_oper_only(void *data)
-{
-	ConfigFileEntry.stats_h_oper_only = *(unsigned int *) data;
-}
-
-static void
-conf_set_general_stats_y_oper_only(void *data)
-{
-	ConfigFileEntry.stats_y_oper_only = *(unsigned int *) data;
-}
-
-static void
-conf_set_general_stats_o_oper_only(void *data)
-{
-	ConfigFileEntry.stats_o_oper_only = *(unsigned int *) data;
-}
-
-static void
-conf_set_general_stats_P_oper_only(void *data)
-{
-	ConfigFileEntry.stats_P_oper_only = *(unsigned int *) data;
 }
 
 static void
@@ -1601,90 +1502,6 @@ conf_set_general_stats_i_oper_only(void *data)
 }
 
 static void
-conf_set_general_map_oper_only(void *data)
-{
-	ConfigFileEntry.map_oper_only = *(unsigned int *) data;
-}
-
-static void
-conf_set_general_operspy_admin_only(void *data)
-{
-	ConfigFileEntry.operspy_admin_only = *(unsigned int *) data;
-}
-
-static void
-conf_set_general_pace_wait(void *data)
-{
-	ConfigFileEntry.pace_wait = *(unsigned int *) data;
-}
-
-static void
-conf_set_general_caller_id_wait(void *data)
-{
-	ConfigFileEntry.caller_id_wait = *(unsigned int *) data;
-}
-
-static void
-conf_set_general_pace_wait_simple(void *data)
-{
-	ConfigFileEntry.pace_wait_simple = *(unsigned int *) data;
-}
-
-static void
-conf_set_general_short_motd(void *data)
-{
-	ConfigFileEntry.short_motd = *(unsigned int *) data;
-}
-
-static void
-conf_set_general_no_oper_flood(void *data)
-{
-	ConfigFileEntry.no_oper_flood = *(unsigned int *) data;
-}
-
-static void
-conf_set_general_glines(void *data)
-{
-	ConfigFileEntry.glines = *(unsigned int *) data;
-}
-
-static void
-conf_set_general_gline_time(void *data)
-{
-	ConfigFileEntry.gline_time = *(unsigned int *) data;
-}
-
-static void
-conf_set_general_gline_min_cidr(void *data)
-{
-	ConfigFileEntry.gline_min_cidr = *(unsigned int *) data;
-}
-
-static void
-conf_set_general_gline_min_cidr6(void *data)
-{
-	ConfigFileEntry.gline_min_cidr6 = *(unsigned int *) data;
-}
-
-static void
-conf_set_general_idletime(void *data)
-{
-	ConfigFileEntry.idletime = *(unsigned int *) data;
-}
-
-static void
-conf_set_general_dots_in_ident(void *data)
-{
-	ConfigFileEntry.dots_in_ident = *(unsigned int *) data;
-}
-
-static void
-conf_set_general_max_targets(void *data)
-{
-	ConfigFileEntry.max_targets = *(unsigned int *) data;
-}
-
-static void
 conf_set_general_servlink_path(void *data)
 {
 	MyFree(ConfigFileEntry.servlink_path);
@@ -1710,67 +1527,11 @@ conf_set_general_compression_level(void *data)
 }
 
 static void
-conf_set_general_use_egd(void *data)
-{
-	ConfigFileEntry.use_egd = *(unsigned int *) data;
-}
-
-static void
 conf_set_general_egdpool_path(void *data)
 {
 	MyFree(ConfigFileEntry.egdpool_path);
 	DupString(ConfigFileEntry.egdpool_path, data);
 }
-
-static void
-conf_set_general_ping_cookie(void *data)
-{
-	ConfigFileEntry.ping_cookie = *(unsigned int *) data;
-}
-
-static void
-conf_set_general_disable_auth(void *data)
-{
-	ConfigFileEntry.disable_auth = *(unsigned int *) data;
-}
-
-static void
-conf_set_general_use_whois_actually(void *data)
-{
-	ConfigFileEntry.use_whois_actually = *(unsigned int *) data;
-}
-
-static void
-conf_set_general_tkline_expire_notices(void *data)
-{
-	ConfigFileEntry.tkline_expire_notices = *(unsigned int *) data;
-}
-
-static void
-conf_set_general_connect_timeout(void *data)
-{
-	ConfigFileEntry.connect_timeout = *(unsigned int *) data;
-}
-
-static void
-conf_set_general_disable_fake_channels(void *data)
-{
-	ConfigFileEntry.disable_fake_channels = *(unsigned int *) data;
-}
-
-static void
-conf_set_general_burst_away(void *data)
-{
-	ConfigFileEntry.burst_away = *(unsigned int *) data;
-}
-
-#ifdef IPV6
-static void
-conf_set_general_fallback_to_ip6_int(void *data)
-{
-	ConfigFileEntry.fallback_to_ip6_int = *(unsigned int *) data;
-}
-#endif
 
 static void
 conf_set_general_oper_umodes(void *data)
@@ -1782,176 +1543,6 @@ static void
 conf_set_general_oper_only_umodes(void *data)
 {
 	set_modes_from_table(&ConfigFileEntry.oper_only_umodes, "umode", umode_table, data);
-}
-
-static void
-conf_set_general_min_nonwildcard(void *data)
-{
-	ConfigFileEntry.min_nonwildcard = *(unsigned int *) data;
-}
-
-static void
-conf_set_general_min_nonwildcard_simple(void *data)
-{
-	ConfigFileEntry.min_nonwildcard_simple = *(unsigned int *) data;
-}
-
-static void
-conf_set_general_default_floodcount(void *data)
-{
-	ConfigFileEntry.default_floodcount = *(unsigned int *) data;
-}
-
-static void
-conf_set_general_client_flood(void *data)
-{
-	ConfigFileEntry.client_flood = *(unsigned int *) data;
-}
-
-static void
-conf_set_general_dot_in_ip6_addr(void *data)
-{
-	ConfigFileEntry.dot_in_ip6_addr = *(unsigned int *) data;
-}
-
-static void
-conf_set_general_reject_ban_time(void *data)
-{
-	ConfigFileEntry.reject_ban_time = *(unsigned int *) data;
-}
-
-static void
-conf_set_general_reject_after_count(void *data)
-{
-	ConfigFileEntry.reject_after_count = *(unsigned int *) data;
-}
-
-static void
-conf_set_general_reject_duration(void *data)
-{
-	ConfigFileEntry.reject_duration = *(unsigned int *) data;
-}
-
-static void
-conf_set_channel_use_except(void *data)
-{
-	ConfigChannel.use_except = *(unsigned int *) data;
-}
-
-static void
-conf_set_channel_use_invex(void *data)
-{
-	ConfigChannel.use_invex = *(unsigned int *) data;
-}
-
-static void
-conf_set_channel_use_knock(void *data)
-{
-	ConfigChannel.use_knock = *(unsigned int *) data;
-}
-
-static void
-conf_set_channel_knock_delay(void *data)
-{
-	ConfigChannel.knock_delay = *(unsigned int *) data;
-}
-
-static void
-conf_set_channel_knock_delay_channel(void *data)
-{
-	ConfigChannel.knock_delay_channel = *(unsigned int *) data;
-}
-
-static void
-conf_set_channel_max_chans_per_user(void *data)
-{
-	ConfigChannel.max_chans_per_user = *(unsigned int *) data;
-}
-
-static void
-conf_set_channel_quiet_on_ban(void *data)
-{
-	ConfigChannel.quiet_on_ban = *(unsigned int *) data;
-}
-
-static void
-conf_set_channel_max_bans(void *data)
-{
-	ConfigChannel.max_bans = *(unsigned int *) data;
-}
-
-static void
-conf_set_channel_default_split_user_count(void *data)
-{
-	ConfigChannel.default_split_user_count = *(unsigned int *) data;
-}
-
-static void
-conf_set_channel_default_split_server_count(void *data)
-{
-	ConfigChannel.default_split_server_count = *(unsigned int *) data;
-}
-
-static void
-conf_set_channel_default_split_delay(void *data)
-{
-	ConfigChannel.default_split_delay = *(unsigned int *) data;
-}
-
-static void
-conf_set_channel_no_create_on_split(void *data)
-{
-	ConfigChannel.no_create_on_split = *(unsigned int *) data;
-}
-
-static void
-conf_set_channel_no_join_on_split(void *data)
-{
-	ConfigChannel.no_join_on_split = *(unsigned int *) data;
-}
-
-static void
-conf_set_channel_no_oper_resvs(void *data)
-{
-	ConfigChannel.no_oper_resvs = *(unsigned int *) data;
-}
-
-static void
-conf_set_channel_burst_topicwho(void *data)
-{
-	ConfigChannel.burst_topicwho = *(unsigned int *) data;
-}
-
-static void
-conf_set_serverhide_flatten_links(void *data)
-{
-	ConfigServerHide.flatten_links = *(unsigned int *) data;
-}
-
-static void
-conf_set_serverhide_links_delay(void *data)
-{
-	int val = *(unsigned int *) data;
-
-	if((val > 0) && ConfigServerHide.links_disabled == 1)
-	{
-		eventAddIsh("cache_links", cache_links, NULL, val);
-		ConfigServerHide.links_disabled = 0;
-	}
-
-	ConfigServerHide.links_delay = val;
-}
-
-static void
-conf_set_serverhide_hidden(void *data)
-{
-	ConfigServerHide.hidden = *(unsigned int *) data;
-}
-
-static void
-conf_set_serverhide_disable_hidden(void *data)
-{
-	ConfigServerHide.disable_hidden = *(unsigned int *) data;
 }
 
 /* public functions */
@@ -2006,6 +1597,12 @@ conf_end_block(struct TopConf *tc)
 
 	MyFree(conf_cur_block_name);
 	return 0;
+}
+
+static void
+conf_set_generic_int(void *data, void *location)
+{
+	*((int *) location) = *((unsigned int *) data);
 }
 
 int
@@ -2068,7 +1665,12 @@ conf_call_set(struct TopConf *tc, char *item, conf_parm_t * value, int type)
 	if(cf->cf_type & CF_FLIST)
 	{
 		/* just pass it the extended argument list */
-		cf->cf_func(value->v.list);
+#if 0
+		if(cf->cf_arg)
+			conf_set_generic_list(value->v.list, cf->cf_arg);
+		else
+#endif
+			cf->cf_func(value->v.list);
 	}
 	else
 	{
@@ -2078,11 +1680,19 @@ conf_call_set(struct TopConf *tc, char *item, conf_parm_t * value, int type)
 		case CF_INT:
 		case CF_TIME:
 		case CF_YESNO:
-			cf->cf_func(&cp->v.number);
+			if(cf->cf_arg)
+				conf_set_generic_int(&cp->v.number, cf->cf_arg);
+			else
+				cf->cf_func(&cp->v.number);
 			break;
 		case CF_STRING:
 		case CF_QSTRING:
-			cf->cf_func(cp->v.string);
+#if 0
+			if(cf->cf_arg)
+				conf_set_generic_string(cp->v.string, cf->cf_arg);
+			else
+#endif
+				cf->cf_func(cp->v.string);
 			break;
 		}
 	}
@@ -2108,12 +1718,14 @@ add_conf_item(const char *topconf, const char *name, int type, void (*func) (voi
 	DupString(cf->cf_name, name);
 	cf->cf_type = type;
 	cf->cf_func = func;
+	cf->cf_arg = NULL;
 
 	dlinkAddAlloc(cf, &tc->tc_items);
 
 	return 0;
 }
 
+#if 0
 int
 remove_conf_item(const char *topconf, const char *name)
 {
@@ -2136,18 +1748,102 @@ remove_conf_item(const char *topconf, const char *name)
 
 	return 0;
 }
+#endif
 
+static struct ConfEntry conf_general_table[] =
+{
+	{ "anti_spam_exit_message_time", CF_TIME,  NULL, &ConfigFileEntry.anti_spam_exit_message_time },
+	{ "disable_fake_channels",	 CF_YESNO, NULL, &ConfigFileEntry.disable_fake_channels },
+	{ "min_nonwildcard_simple",	 CF_INT,   NULL, &ConfigFileEntry.min_nonwildcard_simple },
+	{ "non_redundant_klines",	 CF_YESNO, NULL, &ConfigFileEntry.non_redundant_klines },
+	{ "tkline_expire_notices",	 CF_YESNO, NULL, &ConfigFileEntry.tkline_expire_notices },
+	{ "anti_nick_flood",	CF_YESNO, NULL, &ConfigFileEntry.anti_nick_flood	},
+	{ "burst_away",		CF_YESNO, NULL, &ConfigFileEntry.burst_away		},
+	{ "caller_id_wait",	CF_TIME,  NULL, &ConfigFileEntry.caller_id_wait	},
+	{ "client_exit",	CF_YESNO, NULL, &ConfigFileEntry.client_exit		},
+	{ "client_flood",	CF_INT,   NULL, &ConfigFileEntry.client_flood		},
+	{ "connect_timeout",	CF_TIME,  NULL, &ConfigFileEntry.connect_timeout	},
+	{ "default_floodcount", CF_INT,   NULL, &ConfigFileEntry.default_floodcount	},
+	{ "disable_auth",	CF_YESNO, NULL, &ConfigFileEntry.disable_auth		},
+	{ "dot_in_ip6_addr",	CF_YESNO, NULL, &ConfigFileEntry.dot_in_ip6_addr	},
+	{ "dots_in_ident",	CF_INT,   NULL, &ConfigFileEntry.dots_in_ident		},
+	{ "failed_oper_notice",	CF_YESNO, NULL, &ConfigFileEntry.failed_oper_notice	},
+#ifdef IPV6
+	{ "fallback_to_ip6_int",CF_YESNO, NULL, &ConfigFileEntry.fallback_to_ip6_int	},
+#endif
+	{ "glines",		CF_YESNO, NULL, &ConfigFileEntry.glines			},
+	{ "gline_min_cidr",	CF_INT,   NULL, &ConfigFileEntry.gline_min_cidr		},
+	{ "gline_min_cidr6",	CF_INT,   NULL, &ConfigFileEntry.gline_min_cidr6	},
+	{ "gline_time",		CF_TIME,  NULL, &ConfigFileEntry.gline_time		},
+	{ "idletime",		CF_TIME,  NULL, &ConfigFileEntry.idletime		},
+	{ "kline_with_reason",	CF_YESNO, NULL, &ConfigFileEntry.kline_with_reason	},
+	{ "map_oper_only",	CF_YESNO, NULL, &ConfigFileEntry.map_oper_only		},
+	{ "max_accept",		CF_INT,   NULL, &ConfigFileEntry.max_accept		},
+	{ "max_nick_time",	CF_TIME,  NULL, &ConfigFileEntry.max_nick_time		},
+	{ "max_nick_changes",	CF_INT,   NULL, &ConfigFileEntry.max_nick_changes	},
+	{ "max_targets",	CF_INT,   NULL, &ConfigFileEntry.max_targets		},
+	{ "min_nonwildcard",	CF_INT,   NULL, &ConfigFileEntry.min_nonwildcard	},
+	{ "nick_delay",		CF_TIME,  NULL, &ConfigFileEntry.nick_delay		},
+	{ "no_oper_flood",	CF_YESNO, NULL, &ConfigFileEntry.no_oper_flood		},
+	{ "operspy_admin_only",	CF_YESNO, NULL, &ConfigFileEntry.operspy_admin_only	},
+	{ "pace_wait",		CF_TIME,  NULL, &ConfigFileEntry.pace_wait		},
+	{ "pace_wait_simple",	CF_TIME,  NULL, &ConfigFileEntry.pace_wait_simple	},
+	{ "ping_cookie",	CF_YESNO, NULL, &ConfigFileEntry.ping_cookie		},
+	{ "reject_after_count",	CF_INT,   NULL, &ConfigFileEntry.reject_after_count	},
+	{ "reject_ban_time",	CF_TIME,  NULL, &ConfigFileEntry.reject_ban_time	},
+	{ "reject_duration",	CF_TIME,  NULL, &ConfigFileEntry.reject_duration	},
+	{ "short_motd",		CF_YESNO, NULL, &ConfigFileEntry.short_motd		},
+	{ "stats_c_oper_only",	CF_YESNO, NULL, &ConfigFileEntry.stats_c_oper_only	},
+	{ "stats_e_disabled",	CF_YESNO, NULL, &ConfigFileEntry.stats_e_disabled	},
+	{ "stats_h_oper_only",	CF_YESNO, NULL, &ConfigFileEntry.stats_h_oper_only	},
+	{ "stats_o_oper_only",	CF_YESNO, NULL, &ConfigFileEntry.stats_o_oper_only	},
+	{ "stats_P_oper_only",	CF_YESNO, NULL, &ConfigFileEntry.stats_P_oper_only	},
+	{ "stats_y_oper_only",	CF_YESNO, NULL, &ConfigFileEntry.stats_y_oper_only	},
+	{ "ts_max_delta",	CF_TIME,  NULL, &ConfigFileEntry.ts_max_delta		},
+	{ "use_egd",		CF_YESNO, NULL, &ConfigFileEntry.use_egd		},
+	{ "ts_warn_delta",	CF_TIME,  NULL, &ConfigFileEntry.ts_warn_delta		},
+	{ "use_whois_actually", CF_YESNO, NULL, &ConfigFileEntry.use_whois_actually	},
+	{ "warn_no_nline",	CF_YESNO, NULL, &ConfigFileEntry.warn_no_nline	},
+	{ "\0", 		  0, 	    NULL, NULL }
+};
 
+static struct ConfEntry conf_channel_table[] =
+{
+	{ "default_split_user_count",	CF_INT,  NULL, &ConfigChannel.default_split_user_count	 },
+	{ "default_split_server_count",	CF_INT,	 NULL, &ConfigChannel.default_split_server_count },
+	{ "default_split_delay",	CF_TIME, NULL, &ConfigChannel.default_split_delay	 },
+	{ "burst_topicwho",	CF_YESNO, NULL, &ConfigChannel.burst_topicwho		},
+	{ "knock_delay",	CF_TIME,  NULL, &ConfigChannel.knock_delay		},
+	{ "knock_delay_channel",CF_TIME,  NULL, &ConfigChannel.knock_delay_channel	},
+	{ "max_bans",		CF_INT,   NULL, &ConfigChannel.max_bans			},
+	{ "max_chans_per_user", CF_INT,   NULL, &ConfigChannel.max_chans_per_user 	},
+	{ "no_create_on_split", CF_YESNO, NULL, &ConfigChannel.no_create_on_split 	},
+	{ "no_join_on_split",	CF_YESNO, NULL, &ConfigChannel.no_join_on_split		},
+	{ "no_oper_resvs",	CF_YESNO, NULL, &ConfigChannel.no_oper_resvs		},
+	{ "quiet_on_ban",	CF_YESNO, NULL, &ConfigChannel.quiet_on_ban		},
+	{ "use_except",		CF_YESNO, NULL, &ConfigChannel.use_except		},
+	{ "use_invex",		CF_YESNO, NULL, &ConfigChannel.use_invex		},
+	{ "use_knock",		CF_YESNO, NULL, &ConfigChannel.use_knock		},
+	{ "\0", 		0, 	  NULL, NULL }
+};
 
+static struct ConfEntry conf_serverhide_table[] =
+{
+	{ "disable_hidden",	CF_YESNO, NULL, &ConfigServerHide.disable_hidden },
+	{ "flatten_links",	CF_YESNO, NULL, &ConfigServerHide.flatten_links	},
+	{ "hidden",		CF_YESNO, NULL, &ConfigServerHide.hidden	},
+	{ "links_delay",	CF_TIME,  NULL, &ConfigServerHide.links_delay	},
+	{ "\0", 		0, 	  NULL, NULL }
+};
 
 void
 newconf_init()
 {
-	add_top_conf("modules", NULL, NULL);
+	add_top_conf("modules", NULL, NULL, NULL);
 	add_conf_item("modules", "path", CF_QSTRING, conf_set_modules_path);
 	add_conf_item("modules", "module", CF_QSTRING, conf_set_modules_module);
 
-	add_top_conf("serverinfo", NULL, NULL);
+	add_top_conf("serverinfo", NULL, NULL, NULL);
 	add_conf_item("serverinfo", "name", CF_QSTRING, conf_set_serverinfo_name);
 	add_conf_item("serverinfo", "sid", CF_QSTRING, conf_set_serverinfo_sid);
 	add_conf_item("serverinfo", "description", CF_QSTRING, conf_set_serverinfo_description);
@@ -2158,12 +1854,12 @@ newconf_init()
 	add_conf_item("serverinfo", "hub", CF_YESNO, conf_set_serverinfo_hub);
 	add_conf_item("serverinfo", "use_ts6", CF_YESNO, conf_set_serverinfo_use_ts6);
 
-	add_top_conf("admin", NULL, NULL);
+	add_top_conf("admin", NULL, NULL, NULL);
 	add_conf_item("admin", "name", CF_QSTRING, conf_set_admin_name);
 	add_conf_item("admin", "description", CF_QSTRING, conf_set_admin_description);
 	add_conf_item("admin", "email", CF_QSTRING, conf_set_admin_email);
 
-	add_top_conf("log", NULL, NULL);
+	add_top_conf("log", NULL, NULL, NULL);
 	add_conf_item("log", "fname_userlog", CF_QSTRING, conf_set_log_fname_userlog);
 	add_conf_item("log", "fname_fuserlog", CF_QSTRING, conf_set_log_fname_fuserlog);
 	add_conf_item("log", "fname_operlog", CF_QSTRING, conf_set_log_fname_operlog);
@@ -2175,7 +1871,7 @@ newconf_init()
 	add_conf_item("log", "fname_operspylog", CF_QSTRING, conf_set_log_fname_operspylog);
 	add_conf_item("log", "fname_ioerrorlog", CF_QSTRING, conf_set_log_fname_ioerrorlog);
 
-	add_top_conf("operator", conf_begin_oper, conf_end_oper);
+	add_top_conf("operator", conf_begin_oper, conf_end_oper, NULL);
 	add_conf_item("operator", "user", CF_QSTRING, conf_set_oper_user);
 	add_conf_item("operator", "password", CF_QSTRING, conf_set_oper_password);
 	add_conf_item("operator", "encrypted", CF_YESNO, conf_set_oper_encrypted);
@@ -2184,7 +1880,7 @@ newconf_init()
 	add_conf_item("operator", "flags", CF_STRING | CF_FLIST, conf_set_oper_flags);
 	add_conf_item("operator", "umodes", CF_STRING | CF_FLIST, conf_set_oper_umodes);
 
-	add_top_conf("class", conf_begin_class, conf_end_class);
+	add_top_conf("class", conf_begin_class, conf_end_class, NULL);
 	add_conf_item("class", "ping_time", CF_TIME, conf_set_class_ping_time);
 	add_conf_item("class", "cidr_bitlen", CF_INT, conf_set_class_cidr_bitlen);
 	add_conf_item("class", "number_per_cidr", CF_INT, conf_set_class_number_per_cidr);
@@ -2196,12 +1892,12 @@ newconf_init()
 	add_conf_item("class", "sendq", CF_TIME, conf_set_class_sendq);
 	add_conf_item("class", "sendq_eob", CF_TIME, conf_set_class_sendq_eob);
 
-	add_top_conf("listen", conf_begin_listen, conf_end_listen);
+	add_top_conf("listen", conf_begin_listen, conf_end_listen, NULL);
 	add_conf_item("listen", "port", CF_INT | CF_FLIST, conf_set_listen_port);
 	add_conf_item("listen", "ip", CF_QSTRING, conf_set_listen_address);
 	add_conf_item("listen", "host", CF_QSTRING, conf_set_listen_address);
 
-	add_top_conf("auth", conf_begin_auth, conf_end_auth);
+	add_top_conf("auth", conf_begin_auth, conf_end_auth, NULL);
 	add_conf_item("auth", "user", CF_QSTRING, conf_set_auth_user);
 	add_conf_item("auth", "password", CF_QSTRING, conf_set_auth_passwd);
 	add_conf_item("auth", "encrypted", CF_YESNO, conf_set_auth_encrypted);
@@ -2211,12 +1907,12 @@ newconf_init()
 	add_conf_item("auth", "redirport", CF_INT, conf_set_auth_redir_port);
 	add_conf_item("auth", "flags", CF_STRING | CF_FLIST, conf_set_auth_flags);
 
-	add_top_conf("shared", conf_begin_shared, conf_end_shared);
+	add_top_conf("shared", conf_begin_shared, conf_end_shared, NULL);
 	add_conf_item("shared", "name", CF_QSTRING, conf_set_shared_name);
 	add_conf_item("shared", "user", CF_QSTRING, conf_set_shared_user);
 	add_conf_item("shared", "type", CF_STRING | CF_FLIST, conf_set_shared_type);
 
-	add_top_conf("connect", conf_begin_connect, conf_end_connect);
+	add_top_conf("connect", conf_begin_connect, conf_end_connect, NULL);
 	add_conf_item("connect", "host", CF_QSTRING, conf_set_connect_host);
 	add_conf_item("connect", "vhost", CF_QSTRING, conf_set_connect_vhost);
 	add_conf_item("connect", "send_password", CF_QSTRING, conf_set_connect_send_password);
@@ -2229,124 +1925,36 @@ newconf_init()
 	add_conf_item("connect", "flags", CF_STRING | CF_FLIST,
 			conf_set_connect_flags);
 
-	add_top_conf("exempt", NULL, NULL);
+	add_top_conf("exempt", NULL, NULL, NULL);
 	add_conf_item("exempt", "ip", CF_QSTRING, conf_set_exempt_ip);
 
-	add_top_conf("cluster", conf_begin_cluster, conf_end_cluster);
+	add_top_conf("cluster", conf_begin_cluster, conf_end_cluster, NULL);
 	add_conf_item("cluster", "name", CF_QSTRING, conf_set_cluster_name);
 	add_conf_item("cluster", "type", CF_STRING | CF_FLIST, conf_set_cluster_type);
 
-	add_top_conf("general", NULL, NULL);
+	add_top_conf("general", NULL, NULL, conf_general_table);
 	add_conf_item("general", "default_operstring", CF_QSTRING,
 		      conf_set_general_default_operstring);
 	add_conf_item("general", "default_adminstring", CF_QSTRING,
 		      conf_set_general_default_adminstring);
-	add_conf_item("general", "failed_oper_notice", CF_YESNO,
-		      conf_set_general_failed_oper_notice);
-	add_conf_item("general", "anti_nick_flood", CF_YESNO, conf_set_general_anti_nick_flood);
-	add_conf_item("general", "max_nick_time", CF_TIME, conf_set_general_max_nick_time);
-	add_conf_item("general", "max_nick_changes", CF_INT, conf_set_general_max_nick_changes);
-	add_conf_item("general", "max_accept", CF_INT, conf_set_general_max_accept);
-	add_conf_item("general", "anti_spam_exit_message_time", CF_TIME,
-		      conf_set_general_anti_spam_exit_message_time);
-	add_conf_item("general", "ts_warn_delta", CF_TIME, conf_set_general_ts_warn_delta);
-	add_conf_item("general", "ts_max_delta", CF_TIME, conf_set_general_ts_max_delta);
-	add_conf_item("general", "kline_with_reason", CF_YESNO, conf_set_general_kline_with_reason);
 	add_conf_item("general", "kline_reason", CF_QSTRING,
 		      conf_set_general_kline_reason);
-	add_conf_item("general", "kline_delay", CF_TIME,
-		      conf_set_general_kline_delay);
-	add_conf_item("general", "warn_no_nline", CF_YESNO, conf_set_general_warn_no_nline);
-	add_conf_item("general", "nick_delay", CF_TIME,
-			conf_set_general_nick_delay);
-	add_conf_item("general", "non_redundant_klines", CF_YESNO,
-		      conf_set_general_non_redundant_klines);
-	add_conf_item("general", "dots_in_ident", CF_INT, conf_set_general_dots_in_ident);
-	add_conf_item("general", "stats_e_disabled", CF_YESNO,
-			conf_set_general_stats_e_disabled);
-	add_conf_item("general", "stats_c_oper_only", CF_YESNO, conf_set_general_stats_c_oper_only);
-	add_conf_item("general", "stats_y_oper_only", CF_YESNO, conf_set_general_stats_y_oper_only);
-	add_conf_item("general", "stats_h_oper_only", CF_YESNO, conf_set_general_stats_h_oper_only);
-	add_conf_item("general", "stats_P_oper_only", CF_YESNO, conf_set_general_stats_P_oper_only);
-	add_conf_item("general", "stats_o_oper_only", CF_YESNO, conf_set_general_stats_o_oper_only);
 	add_conf_item("general", "stats_k_oper_only", CF_STRING,
 		      conf_set_general_stats_k_oper_only);
 	add_conf_item("general", "stats_i_oper_only", CF_STRING,
 		      conf_set_general_stats_i_oper_only);
-	add_conf_item("general", "map_oper_only", CF_YESNO, conf_set_general_map_oper_only);
-	add_conf_item("general", "operspy_admin_only", CF_YESNO, conf_set_general_operspy_admin_only);
-	add_conf_item("general", "pace_wait", CF_TIME, conf_set_general_pace_wait);
-	add_conf_item("general", "pace_wait_simple", CF_TIME, conf_set_general_pace_wait_simple);
-	add_conf_item("general", "short_motd", CF_YESNO, conf_set_general_short_motd);
-	add_conf_item("general", "no_oper_flood", CF_YESNO, conf_set_general_no_oper_flood);
-	add_conf_item("general", "glines", CF_YESNO, conf_set_general_glines);
-	add_conf_item("general", "gline_time", CF_TIME, conf_set_general_gline_time);
-	add_conf_item("general", "gline_min_cidr", CF_INT, conf_set_general_gline_min_cidr);
-	add_conf_item("general", "gline_min_cidr6", CF_INT, conf_set_general_gline_min_cidr6);
 	add_conf_item("general", "hide_error_messages", CF_STRING,
 		      conf_set_general_hide_error_messages);
-	add_conf_item("general", "idletime", CF_TIME, conf_set_general_idletime);
-	add_conf_item("general", "client_exit", CF_YESNO, conf_set_general_client_exit);
 	add_conf_item("general", "oper_only_umodes", CF_STRING | CF_FLIST,
 		      conf_set_general_oper_only_umodes);
-	add_conf_item("general", "max_targets", CF_INT, conf_set_general_max_targets);
-	add_conf_item("general", "use_egd", CF_YESNO, conf_set_general_use_egd);
 	add_conf_item("general", "egdpool_path", CF_QSTRING, conf_set_general_egdpool_path);
 	add_conf_item("general", "oper_umodes", CF_STRING | CF_FLIST, conf_set_general_oper_umodes);
-	add_conf_item("general", "caller_id_wait", CF_TIME, conf_set_general_caller_id_wait);
-	add_conf_item("general", "default_floodcount", CF_INT, conf_set_general_default_floodcount);
-	add_conf_item("general", "min_nonwildcard", CF_INT, conf_set_general_min_nonwildcard);
-	add_conf_item("general", "min_nonwildcard_simple", CF_INT,
-		      conf_set_general_min_nonwildcard_simple);
 	add_conf_item("general", "servlink_path", CF_QSTRING, conf_set_general_servlink_path);
-	add_conf_item("general", "tkline_expire_notices", CF_YESNO,
-		      conf_set_general_tkline_expire_notices);
-	add_conf_item("general", "use_whois_actually", CF_YESNO,
-		      conf_set_general_use_whois_actually);
 	add_conf_item("general", "compression_level", CF_INT, conf_set_general_compression_level);
-	add_conf_item("general", "client_flood", CF_INT, conf_set_general_client_flood);
 	add_conf_item("general", "havent_read_conf", CF_YESNO, conf_set_general_havent_read_conf);
-	add_conf_item("general", "dot_in_ip6_addr", CF_YESNO, conf_set_general_dot_in_ip6_addr);
-	add_conf_item("general", "ping_cookie", CF_YESNO, conf_set_general_ping_cookie);
-	add_conf_item("general", "disable_auth", CF_YESNO, conf_set_general_disable_auth);
-	add_conf_item("general", "disable_fake_channels", CF_YESNO,
-			conf_set_general_disable_fake_channels);
-	add_conf_item("general", "connect_timeout", CF_TIME, conf_set_general_connect_timeout);
-	add_conf_item("general", "burst_away", CF_YESNO, conf_set_general_burst_away);
-	add_conf_item("general", "reject_ban_time", CF_TIME, conf_set_general_reject_ban_time);
-	add_conf_item("general", "reject_after_count", CF_INT, conf_set_general_reject_after_count);
-	add_conf_item("general", "reject_duration", CF_TIME, conf_set_general_reject_duration);
-
+	add_conf_item("general", "kline_delay", CF_TIME, conf_set_general_kline_delay);
 	
-#ifdef IPV6
-	add_conf_item("general", "fallback_to_ip6_int", CF_YESNO,
-		      conf_set_general_fallback_to_ip6_int);
-#endif
-	add_top_conf("channel", NULL, NULL);
-	add_conf_item("channel", "use_except", CF_YESNO, conf_set_channel_use_except);
-	add_conf_item("channel", "use_invex", CF_YESNO, conf_set_channel_use_invex);
-	add_conf_item("channel", "use_knock", CF_YESNO, conf_set_channel_use_knock);
-	add_conf_item("channel", "max_bans", CF_INT, conf_set_channel_max_bans);
-	add_conf_item("channel", "knock_delay", CF_TIME, conf_set_channel_knock_delay);
-	add_conf_item("channel", "knock_delay_channel", CF_TIME,
-		      conf_set_channel_knock_delay_channel);
-	add_conf_item("channel", "max_chans_per_user", CF_INT, conf_set_channel_max_chans_per_user);
-	add_conf_item("channel", "quiet_on_ban", CF_YESNO, conf_set_channel_quiet_on_ban);
-	add_conf_item("channel", "default_split_user_count", CF_INT,
-		      conf_set_channel_default_split_user_count);
-	add_conf_item("channel", "default_split_server_count", CF_INT,
-		      conf_set_channel_default_split_server_count);
-	add_conf_item("channel", "default_split_delay", CF_TIME,
-		      conf_set_channel_default_split_delay);
-	add_conf_item("channel", "no_create_on_split", CF_YESNO,
-		      conf_set_channel_no_create_on_split);
-	add_conf_item("channel", "no_join_on_split", CF_YESNO, conf_set_channel_no_join_on_split);
-	add_conf_item("channel", "no_oper_resvs", CF_YESNO, conf_set_channel_no_oper_resvs);
-	add_conf_item("channel", "burst_topicwho", CF_YESNO, conf_set_channel_burst_topicwho);
 
-	add_top_conf("serverhide", NULL, NULL);
-	add_conf_item("serverhide", "flatten_links", CF_YESNO, conf_set_serverhide_flatten_links);
-	add_conf_item("serverhide", "links_delay", CF_TIME, conf_set_serverhide_links_delay);
-	add_conf_item("serverhide", "disable_hidden", CF_YESNO, conf_set_serverhide_disable_hidden);
-	add_conf_item("serverhide", "hidden", CF_YESNO, conf_set_serverhide_hidden);
+	add_top_conf("channel", NULL, NULL, conf_channel_table);
+	add_top_conf("serverhide", NULL, NULL, conf_serverhide_table);
 }
