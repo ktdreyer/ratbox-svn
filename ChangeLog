@@ -1,3 +1,26 @@
+leeh        2004/03/02 16:09:05 EST	(20040302_14)
+
+  Modified files:
+    .                    configure 
+    doc                  example.conf example.efnet.conf 
+    include              s_newconf.h 
+    src                  newconf.c s_newconf.c s_serv.c 
+  Log:
+  - force -O0 for now [until rc!]
+  - oper_invisible is now invisible
+  - remove server_p->aftype, use ipnum.ss_family
+  
+  Revision  Changes    Path
+  7.206     +6 -6      ircd-ratbox/configure
+  7.236     +1 -1      ircd-ratbox/doc/example.conf
+  7.71      +1 -1      ircd-ratbox/doc/example.efnet.conf
+  7.27      +0 -1      ircd-ratbox/include/s_newconf.h
+  7.139     +3 -3      ircd-ratbox/src/newconf.c
+  7.32      +2 -2      ircd-ratbox/src/s_newconf.c
+  7.379     +3 -3      ircd-ratbox/src/s_serv.c
+
+
+
 leeh        2004/03/02 15:35:15 EST	(20040302_13)
 
   Modified files:
