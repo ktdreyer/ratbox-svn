@@ -2761,7 +2761,7 @@ void report_temp_klines(struct Client *sptr)
   struct ConfItem *last_list_ptr;
   struct ConfItem *tmp_list_ptr;
   char *host;
-  char *name;
+  char *user;
   char *reason;
   char *p;
 
@@ -2798,10 +2798,10 @@ void report_temp_klines(struct Client *sptr)
               else
                 host = "*";
 
-              if(kill_list_ptr->name)
-                name = kill_list_ptr->name;
+              if(kill_list_ptr->user)
+                user = kill_list_ptr->user;
               else
-                name = "*";
+                user = "*";
 
               if(kill_list_ptr->passwd)
                 reason = kill_list_ptr->passwd;
@@ -2814,13 +2814,13 @@ void report_temp_klines(struct Client *sptr)
                     *p = '\0';
 
                   sendto_one(sptr,form_str(RPL_STATSKLINE), me.name,
-                             sptr->name, 'k' , host, name, reason);
+                             sptr->name, 'k' , host, user, reason);
                   if(p)
                     *p = '|';
                 }
               else
                 sendto_one(sptr,form_str(RPL_STATSKLINE), me.name,
-                           sptr->name, 'k' , host, name, reason);
+                           sptr->name, 'k' , host, user, reason);
 
               last_list_ptr = kill_list_ptr;
               kill_list_ptr = kill_list_ptr->next;
