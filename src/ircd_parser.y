@@ -207,6 +207,7 @@ int   class_redirport_var;
 %token  OPER_ONLY_UMODES
 %token  PATH
 %token  MAX_TARGETS
+%token  T_MAX_CLIENTS
 %token  LINKS_NOTICE
 %token  LINKS_DELAY
 %token  VCHANS_OPER_ONLY
@@ -279,6 +280,7 @@ serverinfo_items:       serverinfo_items serverinfo_item |
 serverinfo_item:        serverinfo_name | serverinfo_vhost |
                         serverinfo_hub | serverinfo_description |
                         serverinfo_network_name | serverinfo_network_desc |
+                        serverinfo_max_clients |
 			error
 
 serverinfo_name:        NAME '=' QSTRING ';' 
@@ -308,6 +310,11 @@ serverinfo_network_desc: NETWORK_DESC '=' QSTRING ';'
 serverinfo_vhost:       VHOST '=' IP_TYPE ';'
   {
     ServerInfo.ip = yylval.ip_entry.ip;
+  };
+
+serverinfo_max_clients: T_MAX_CLIENTS '=' NUMBER ';'
+  {
+    ServerInfo.max_clients = yylval.number;
   };
 
 serverinfo_hub:         HUB '=' TYES ';' 
@@ -613,10 +620,17 @@ class_sendq:    SENDQ '=' NUMBER ';'
  *  section listen
  ***************************************************************************/
 
-listen_entry:   LISTEN  '{' listen_items '}' ';'
+listen_entry:   LISTEN
+  {
+    listener_address = NULL;
+    listener_port = 0;
+  }
+  '{' listen_items '}' ';'
   {
     add_listener (listener_port, listener_address);     
-  } ;
+    MyFree (listener_address);
+    listener_address = NULL;
+  };
 
 listen_items:   listen_items listen_item |
                 listen_item

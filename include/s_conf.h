@@ -206,6 +206,7 @@ struct server_info
   int         hub;
   /* XXX a no no in the IPV6 world */
   unsigned long ip;
+  int         max_clients;
 };
 
 struct admin_info

@@ -132,9 +132,10 @@
 #define OPER_ONLY_UMODES 388
 #define PATH 389
 #define MAX_TARGETS 390
-#define LINKS_NOTICE 391
-#define LINKS_DELAY 392
-#define VCHANS_OPER_ONLY 393
+#define T_MAX_CLIENTS 391
+#define LINKS_NOTICE 392
+#define LINKS_DELAY 393
+#define VCHANS_OPER_ONLY 394
 typedef union {
         int  number;
         char *string;

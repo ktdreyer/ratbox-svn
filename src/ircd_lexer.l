@@ -130,6 +130,7 @@ listen		{ return LISTEN; }
 log_level	{ return LOG_LEVEL; }
 logging         { return LOGGING; }
 logpath         { return T_LOGPATH; }
+max_clients     { return T_MAX_CLIENTS; }
 max_number	{ return MAX_NUMBER; }
 maximum_links   { return MAXIMUM_LINKS; }
 message_locale	{ return MESSAGE_LOCALE; }
