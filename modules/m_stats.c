@@ -216,7 +216,7 @@ int ms_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   return 0;
 }
 
-static void do_normal_stats(struct Client *sptr,
+void do_normal_stats(struct Client *sptr,
 			    char *name, char *target,
 			    char stat, int doall, int wilds)
 {
@@ -255,7 +255,7 @@ static void do_normal_stats(struct Client *sptr,
     }
 }
 
-static void do_non_priv_stats(struct Client *sptr, char *name, char *target,
+void do_non_priv_stats(struct Client *sptr, char *name, char *target,
 			      char stat, int doall, int wilds)
 {
   switch (stat)
@@ -335,7 +335,7 @@ static void do_non_priv_stats(struct Client *sptr, char *name, char *target,
     }
 }
 
-static void do_priv_stats(struct Client *sptr, char *name, char *target,
+void do_priv_stats(struct Client *sptr, char *name, char *target,
 			    char stat, int doall, int wilds)
 {
   struct Message* mptr;
@@ -397,7 +397,7 @@ static void do_priv_stats(struct Client *sptr, char *name, char *target,
       break;
 
     case 'M' : case 'm' :
-      for (mptr = msgtab; mptr->cmd; mptr++)
+      for (mptr = *msgtab; mptr->cmd; mptr++)
           sendto_one(sptr, form_str(RPL_STATSCOMMANDS),
                      me.name, sptr->name, mptr->cmd,
                      mptr->count, mptr->bytes);
@@ -472,7 +472,7 @@ static void do_priv_stats(struct Client *sptr, char *name, char *target,
     }
 }
 
-static void stats_L(struct Client *sptr,char *name,int doall, int wilds)
+void stats_L(struct Client *sptr,char *name,int doall, int wilds)
 {
   int i;
   struct Client *acptr;
@@ -566,7 +566,7 @@ static void stats_L(struct Client *sptr,char *name,int doall, int wilds)
  * done --is
  */
 
-static void stats_spy(struct Client *sptr,char stat)
+void stats_spy(struct Client *sptr,char stat)
 {
   if (ConfigFileEntry.stats_notice)
     {
@@ -580,7 +580,7 @@ static void stats_spy(struct Client *sptr,char stat)
     }
 }
 
-static void stats_L_spy(struct Client *sptr, char stat, char *name)
+void stats_L_spy(struct Client *sptr, char stat, char *name)
 {
   if (ConfigFileEntry.stats_notice)
     {
@@ -606,7 +606,7 @@ static void stats_L_spy(struct Client *sptr, char stat, char *name)
     }
 }
 
-static void stats_p_spy(struct Client *sptr)
+void stats_p_spy(struct Client *sptr)
 {
   sendto_realops_flags(FLAGS_SPY,
 		       "STATS p requested by %s (%s@%s) [%s]",
@@ -619,7 +619,7 @@ static void stats_p_spy(struct Client *sptr)
  * 
  */
 
-static char *parse_stats_args(int parc,char *parv[],int *doall,int *wilds)
+char *parse_stats_args(int parc,char *parv[],int *doall,int *wilds)
 {
   char *name;
 

@@ -15,6 +15,8 @@
 #include "s_user.h"
 #include "send.h"
 #include "s_conf.h"
+#include "handlers.h"
+
 #include "msg.h"
 
 #include <time.h>

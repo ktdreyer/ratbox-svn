@@ -30,14 +30,15 @@
 #include "s_serv.h"       /* captab */
 #include "s_user.h"
 #include "send.h"
+#include "handlers.h"
 #include "msg.h"
 
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
 
-struct drop_msgtab = {
-  {MSG_DROP, 0, 2, MFLG_SLOW | MFLG_UNREG, 0L,
+struct Message drop_msgtab = {
+  MSG_DROP, 0, 2, MFLG_SLOW | MFLG_UNREG, 0L,
   {m_unregistered, m_error, ms_drop, m_error}
 };
 

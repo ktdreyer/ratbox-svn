@@ -31,6 +31,7 @@
 #include "s_conf.h"
 #include "s_serv.h"
 #include "send.h"
+#include "msg.h"
 
 #include "channel.h"
 #include "vchannel.h"
@@ -67,7 +68,7 @@ void handle_opers(struct Client *cptr,
 			 char *text);
 
 struct Message privmsg_msgtab = {
-  {MSG_PRIVMSG, 0, 1, MFLG_SLOW | MFLG_UNREG, 0L,
+  MSG_PRIVMSG, 0, 1, MFLG_SLOW | MFLG_UNREG, 0L,
   {m_unregistered, m_privmsg, ms_privmsg, mo_privmsg}
 };
 

@@ -39,6 +39,7 @@
 #include "s_misc.h"
 #include "send.h"
 #include "hash.h"
+#include "handlers.h"
 #include "msg.h"
 
 #include <stdlib.h>

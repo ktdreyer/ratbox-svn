@@ -30,7 +30,6 @@ SRCS =                          \
   m_drop.c \
   m_error.c \
   m_gline.c \
-  m_hash.c \
   m_help.c \
   m_htm.c \
   m_info.c \

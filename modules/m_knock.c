@@ -140,7 +140,7 @@ int     mo_knock(struct Client *cptr,
  *                or sends failure message to sptr
  */
 
-static struct Channel *parse_knock_args(struct Client *cptr,
+struct Channel *parse_knock_args(struct Client *cptr,
                                         struct Client *sptr,
                                         int parc, char *parv[])
 {
@@ -261,7 +261,7 @@ static struct Channel *parse_knock_args(struct Client *cptr,
  * side effects -
  */
 
-static void send_knock(struct Client *cptr, struct Client *sptr,
+void send_knock(struct Client *cptr, struct Client *sptr,
                        struct Channel *chptr, char *name)
 {
   char message[NICKLEN*2+CHANNELLEN+USERLEN+HOSTLEN+30];

@@ -37,71 +37,26 @@
 #include "list.h"
 #include "irc_string.h"
 #include "s_conf.h"
+#include "msg.h"
 
-/*
- * m_functions execute protocol messages on this server:
- *
- *      cptr    is always NON-NULL, pointing to a *LOCAL* client
- *              structure (with an open socket connected!). This
- *              identifies the physical socket where the message
- *              originated (or which caused the m_function to be
- *              executed--some m_functions may call others...).
- *
- *      sptr    is the source of the message, defined by the
- *              prefix part of the message if present. If not
- *              or prefix not found, then sptr==cptr.
- *
- *              (!IsServer(cptr)) => (cptr == sptr), because
- *              prefixes are taken *only* from servers...
- *
- *              (IsServer(cptr))
- *                      (sptr == cptr) => the message didn't
- *                      have the prefix.
- *
- *                      (sptr != cptr && IsServer(sptr) means
- *                      the prefix specified servername. (?)
- *
- *                      (sptr != cptr && !IsServer(sptr) means
- *                      that message originated from a remote
- *                      user (not local).
- *
- *              combining
- *
- *              (!IsServer(sptr)) means that, sptr can safely
- *              taken as defining the target structure of the
- *              message in this server.
- *
- *      *Always* true (if 'parse' and others are working correct):
- *
- *      1)      sptr->from == cptr  (note: cptr->from == cptr)
- *
- *      2)      MyConnect(sptr) <=> sptr == cptr (e.g. sptr
- *              *cannot* be a local connection, unless it's
- *              actually cptr!). [MyConnect(x) should probably
- *              be defined as (x == x->from) --msa ]
- *
- *      parc    number of variable parameter strings (if zero,
- *              parv is allowed to be NULL)
- *
- *      parv    a NULL terminated list of parameter pointers,
- *
- *                      parv[0], sender (prefix string), if not present
- *                              this points to an empty string.
- *                      parv[1]...parv[parc-1]
- *                              pointers to additional parameters
- *                      parv[parc] == NULL, *always*
- *
- *              note:   it is guaranteed that parv[0]..parv[parc-1] are all
- *                      non-NULL pointers.
- */
+struct Message who_msgtab = {
+  MSG_WHO, 0, 1, MFLG_SLOW, 0,
+  {m_unregistered, m_who, ms_who, m_who}
+};
 
-static void do_who_on_channel(struct Client *sptr,
+void
+_modinit(void)
+{
+  mod_add_cmd(MSG_WHO, &who_msgtab);
+}
+
+void do_who_on_channel(struct Client *sptr,
 			      struct Channel *chptr, char *real_name,
 			      int oper, int member);
 
-static void who_global(struct Client *sptr, char *mask, int oper);
+void who_global(struct Client *sptr, char *mask, int oper);
 
-static  void    do_who(struct Client *sptr,
+void    do_who(struct Client *sptr,
 			     struct Client *acptr,
 			     char *repname,
 			     struct SLink *lp);
@@ -276,7 +231,7 @@ int     m_who(struct Client *cptr,
  *		  this is slightly expensive on EFnet ...
  */
 
-static void who_global(struct Client *sptr,char *mask, int oper)
+void who_global(struct Client *sptr,char *mask, int oper)
 {
   struct Channel *chptr=NULL;
   struct Channel *bchan;
@@ -362,7 +317,7 @@ static void who_global(struct Client *sptr,char *mask, int oper)
  * side effects - do a who on given channel
  */
 
-static void do_who_on_channel(struct Client *sptr,
+void do_who_on_channel(struct Client *sptr,
 			      struct Channel *chptr,
 			      char *real_name,
 			      int oper, int member)
@@ -390,7 +345,7 @@ static void do_who_on_channel(struct Client *sptr,
  * side effects - do a who on given person
  */
 
-static  void    do_who(struct Client *sptr,
+void    do_who(struct Client *sptr,
 			     struct Client *acptr,
 			     char *repname,
 			     struct SLink *lp)

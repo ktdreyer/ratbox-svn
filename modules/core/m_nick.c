@@ -740,7 +740,7 @@ int ms_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
  * side effects -
  */
 
-static int nick_from_server(struct Client *cptr, struct Client *sptr, int parc,
+int nick_from_server(struct Client *cptr, struct Client *sptr, int parc,
                  char *parv[], time_t newts,char *nick)
 {
   if (IsServer(sptr))
@@ -894,7 +894,7 @@ int static set_initial_nick(struct Client *cptr, struct Client *sptr,
  *
  */
 
-static int change_nick( struct Client *cptr, struct Client *sptr,
+int change_nick( struct Client *cptr, struct Client *sptr,
 			 char *nick)
 {
   /*
@@ -963,7 +963,7 @@ static int change_nick( struct Client *cptr, struct Client *sptr,
  *      a change should be global, some confusion would
  *      result if only few servers allowed it...
  */
-static int clean_nick_name(char* nick)
+int clean_nick_name(char* nick)
 {
   char* ch   = nick;
   char* endp = ch + NICKLEN;

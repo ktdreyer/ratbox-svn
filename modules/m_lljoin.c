@@ -29,6 +29,7 @@
 #include "numeric.h"
 #include "s_serv.h"
 #include "send.h"
+#include "handlers.h"
 #include "msg.h"
 
 #include <assert.h>

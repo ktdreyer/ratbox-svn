@@ -34,6 +34,7 @@
 #include "numeric.h"
 #include "send.h"
 #include "s_serv.h"
+#include "msg.h"
 
 #include <stdlib.h>
 #include <string.h>

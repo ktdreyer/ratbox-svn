@@ -169,7 +169,7 @@ int ms_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
  * side effects - FNAME_OPERLOG is written to, if its present
  */
 
-static void log_fname( struct Client *sptr, char *name )
+void log_fname( struct Client *sptr, char *name )
 {
 #ifdef FNAME_OPERLOG
   int     logfile;
@@ -202,7 +202,7 @@ static void log_fname( struct Client *sptr, char *name )
  * output	-
  */
 
-static struct ConfItem *find_password_aconf(char *name, struct Client *sptr)
+struct ConfItem *find_password_aconf(char *name, struct Client *sptr)
 {
   struct ConfItem *aconf;
 
@@ -225,7 +225,7 @@ static struct ConfItem *find_password_aconf(char *name, struct Client *sptr)
  * side effects	- none
  */
 
-static int match_oper_password(char *password, struct ConfItem *aconf)
+int match_oper_password(char *password, struct ConfItem *aconf)
 {
   char *encr;
 
@@ -262,7 +262,7 @@ static int match_oper_password(char *password, struct ConfItem *aconf)
  * This could also be used by rsa oper routines. 
  */
 
-static int oper_up( struct Client *sptr, struct ConfItem *aconf )
+int oper_up( struct Client *sptr, struct ConfItem *aconf )
 {
   int old = (sptr->umodes & ALL_UMODES);
   char *operprivs;

@@ -33,13 +33,13 @@
 #include "s_bsd.h"
 #include "s_serv.h"
 #include "send.h"
-
+#include "msg.h"
 #include <string.h>
 #include <time.h>
 
 struct Message ltrace_msgtab = {
   MSG_LTRACE, 0, 0, MFLG_SLOW, 0,
-  {m_unregistered, m_ltrace, ms_ltrace, mo_ltrace}
+  {m_unregistered, m_ltrace, m_ltrace, m_ltrace}
 };
 
 void
