@@ -5,7 +5,7 @@
 
   The bit map idea was used to mark which channels a leaf "knows" about.
 This limits the number of LL servers to a hub at 32 for now. This is
-easily rewritten, though a little more code consumming.
+easily rewritten, though a little more code consuming.
   Each client needs a bit mask as well, to mark if that client is
 known to the leaf or not.
 

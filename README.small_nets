@@ -19,14 +19,14 @@ by modifying the file "list.c" in src
   These comments will be found in list.c
 
 /* Number of Link's to pre-allocate at a time 
-   for Efnet 1000 seems reasonable, 
+   for EFnet 1000 seems reasonable, 
    for smaller nets who knows? -Dianora
    */
 
 #define LINK_PREALLOCATE 1024
 
 /* Number of aClient structures to preallocate at a time
-   for Efnet 1024 is reasonable 
+   for EFnet 1024 is reasonable 
    for smaller nets who knows? -Dianora
    */
 

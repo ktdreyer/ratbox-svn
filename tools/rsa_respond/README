@@ -1,9 +1,9 @@
 # $Id$
 
 rsa_respond
-(a tiny little example implimentation of client support for RSA authentication)
+(a tiny little example implementation of client support for RSA authentication)
 
-This program takes the hexidecimal challenge string from the irc server and
+This program takes the hexadecimal challenge string from the irc server and
 produces the appropriate response (as calculated against your ssh identity file
 or by ssh-agent)
 

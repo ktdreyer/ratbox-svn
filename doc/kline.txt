@@ -13,7 +13,7 @@ us completely EFnet compatible.
 
   Oper usage:
 
-  Oper wishes to place a permament kline on user@host giving reason for kline.
+  Oper wishes to place a permanent kline on user@host giving reason for kline.
 
   /quote kline [nick|user@host]   :reason
 
@@ -81,7 +81,7 @@ without a KLN capability.
     
   Note the difference between hybrid-6 GLINE which explicitly passed
 the oper user@host and server along. This was originally done to handle
-possible desync conditions, but is now shelved in favour of saving 
+possible desync conditions, but is now shelved in favor of saving 
 some bandwidth.
 
 

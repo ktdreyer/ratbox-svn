@@ -8,13 +8,13 @@ I've always wanted to write something like this.. Its half rant, half
 fact, so bear with it. Hopefully it will be worth reading.
 
 There's a lot of hate for opers for a lot of reasons. Some are directly
-oper related (i.e. 99% of us are collossal assholes), some are directly
+oper related (i.e. 99% of us are colossal assholes), some are directly
 user related (i.e. 99% of you are raving lunatics), and some is just plain
 misconceptions. I'd like to take a minute to talk about part three in
 hopes of clearing a few things up. This will kind of be in a FAQ form,
 maybe you'll like it,  maybe not, but its worth a shot.
 
-Q: What can an oper on efnet do.
+Q: What can an oper on EFnet do.
 A: This is an EXACT list of what we can do:
         1) /squit a server, separating it from the rest of the net
         2) /die our server
@@ -44,7 +44,7 @@ A: We can *NOT*:
            channel op for that channel)
 
 Notice a trend, with the exception of 4, all of these are 100% channel
-related. Efnet is made so that opers have *NO* power of channels, for
+related. EFnet is made so that opers have *NO* power of channels, for
 better or worse. If we don't help you with these requests, its not because
 we won't, its because we are completely incapable doing so. On the other
 hand....
@@ -53,8 +53,8 @@ Q: What can opers do, but won't?
 A: This will be a bit differently done, because I figure I should explain 
    why opers don't do these things, when they may normally make sense.
         1) Why won't they kill somebody who has stolen your nick.
-              Efnet has gone on the basis of nicks not being owned, which is 
-           why there is no nickserv on Efnet.  Of course we see opers kill 
+              EFnet has gone on the basis of nicks not being owned, which is 
+           why there is no nickserv on EFnet.  Of course we see opers kill 
            all the time for nicks, though, so it seems rather hypocrital, 
            doesn't it?  
               An oper who kills for his nick will tell you its because the 
@@ -68,7 +68,7 @@ A: This will be a bit differently done, because I figure I should explain
            that you are really the person that uses that nick, or are you 
            the guy that wants to nick jupe that nick out from the real guy? 
            Unless the oper knows you well, they don't.. And saying that 
-           people generally tell the truth means you haven't been on efnet 
+           people generally tell the truth means you haven't been on EFnet 
            very long. 
               I would prefer to think I am one of the more well respected 
            people on the net and people still lie to me on a regular basis. 
@@ -78,28 +78,28 @@ A: This will be a bit differently done, because I figure I should explain
         2) Why won't they kill that guy nuking/smurfing/ping -f'ing me?
               This one is simple.  There is no way to prove that somebody is 
            doing any of these things to you from an opers point of view. All 
-           logs are fakable, and the oper has no way to firsthand prove its 
+           logs are fakeable, and the oper has no way to firsthand prove its 
            happening. Your best bet in this situation is to log what you can 
            and complain loud and long to their ISPs.
         3) Why won't they help me take my channel back?
               There's a bunch of answers to this. First, it is popular 
-           opinion at efnet that channels are not owned, and therefore, if 
+           opinion at EFnet that channels are not owned, and therefore, if 
            you lose a channel, you should go make another one.  Notice I 
-           say popular instead of official, because efnet has never had an 
+           say popular instead of official, because EFnet has never had an 
            "official" policy on much of anything. 
               But more and more you see opers killing for takeovers, so why 
            are they helping their channels and not yours.  
               Well, first, let's say your channel was taken over, and is now 
            +smtinlk. How exactly is the oper supposed to find out who is 
-           opd in the channel right now to mass kill them? Even if they do get 
+           oped in the channel right now to mass kill them? Even if they do get 
            all the nicks, they have to somehow manage to kill them all in 
            one hit, or they'll all just op each other again and it will be 
            fruitless. Or worse, they could have it all set up, and some 
            other oper could kill them halfway through because they don't 
-           like masskills and it would be all ruined. 
-              Or, let's say the masskill goes off, then the channel is 
+           like mass-kills and it would be all ruined. 
+              Or, let's say the mass-kill goes off, then the channel is 
            opless and generally speaking, chaos begins. People start 
-           massnuking or flooding the channel to clear it out, or just to 
+           mass-nuking or flooding the channel to clear it out, or just to 
            be annoying. And there's still a 50/50 chance that takeover
            people will get the channel back on a split and we'll have to try 
            to do it all over again.  

@@ -8,7 +8,7 @@ This document is an overview of the new and hopefully improved network
 subsystem.
 
 The code is based loosely upon the network core found in the Squid web cache
-server, with some optimisations for ircd-specific IO patterns.
+server, with some optimizations for ircd-specific IO patterns.
 
 
 

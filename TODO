@@ -5,7 +5,7 @@ then the bug number should appear in brackets (ie (#15)) - madmax
 - add more stderr debugging (ircd -s)... one for every place we syslog()
 - make wrapper function for res_init() to do spare_fd crap
 - ircd -s doesn't work through a restart
-- re-implement first parm in m_lusers()
+- re-implement first param in m_lusers()
 - trie' channel name list
 - one time oper passwords
 - SSL support
@@ -19,7 +19,7 @@ is-'s TODO list
 - change nick instead of kill on nick collide
 - PART_REASON
 - dynamically extensible parser for modules
-- modularise channel, network code etc (not just commands)
+- modularize channel, network code etc (not just commands)
     we can use override_function() or similar for this
 - username/passwords (iauth ?)
 - channel modes to allow/prevent talking on channel
@@ -49,7 +49,7 @@ Adrian's TODO list
 * Check to make sure a SIGHUP actually causes a rehash. The last time I tried
   it, the server stayed running, but the ircd stopped listening on ports.
 
-* make the reserved FD limit run-time tuneable, esp from comm_open()
+* make the reserved FD limit run-time tunable, esp from comm_open()
   This involves making fd_table[] a dynamically growing/(don't bother with
   shrinking) list.. have the max fd list configurable in the conf file..
 
@@ -71,7 +71,7 @@ Adrian's TODO list
   and tidy shit up!
 
 * get send_message(), replace comm_setselect() with send_queued_write(), see
-  if the optimisation works
+  if the optimization works
 
 * search for FLAGS_DEADSOCKET and IsDead() tests, figure out how to get
   rid of them. Remember that you can't just call exit_client() from
@@ -81,7 +81,7 @@ Adrian's TODO list
 
 * remove aconf->ipnum, since we're doing a DNS lookup each time we
   connect. If people don't like this, they can (should!) be running
-  a namecache locally!
+  a name cache locally!
 
 db-->>ummm aconf->ipnum is used for IP based klines only, not for DNS
 
@@ -95,10 +95,10 @@ db-->>ummm aconf->ipnum is used for IP based klines only, not for DNS
 
 thats INADDR_NONE. Find, fix.
 
-* Add the ircnet(?) split logic for nick collisions - on a nick collision,
+* Add the IRCnet(?) split logic for nick collisions - on a nick collision,
   change to "%d-%s", random, nick
 
-* Hrm. Since diane changed the user->channel code to use dlink_lists,
+* Hrm. Since Diane changed the user->channel code to use dlink_lists,
   she's made some things faster (deopping lists of people in a net.join,
   finding an op, etc) but some things slower (deleting from the channel,
   change_channel_membership(), etc.) What needs to happen is that for
@@ -111,7 +111,7 @@ db-->> Actually, the old code was just as slow at doing that, since
     on channel was an op or not... With a channel of 100 clients and 
     thats 100 link SLink's
 
-* Look at removing the whole dns ref_count evilness now that the cache
+* Look at removing the whole DNS ref_count evilness now that the cache
   has gone away. We should be *copying* the returned result, not just
   storing a pointer to it. This will make a lot of the code much simpler.
   (Hopefully.)
@@ -136,14 +136,14 @@ Done things:
 * check out what the hell safe_write() is, why its in s_conf.c but being
   used in other places, and why its closing the fd for people. It should
   be moved out of there, and *not* close fds (forcing its users to instead!)
-  (Its been deleted now.. thanks dianora)
+  (Its been deleted now.. thanks Dianora)
 
 * ok, this sucks. search for cptr->since, and esp in src/parse.c .
   All this flood protection has to come out and reappear in *one* place!
   (Adrian rewrote the line buffering code and client flood code..)
 
 * look at timeout_resolver() and the actual work function, remove needing
-  to track the time for the next dns timeout, see if we can make them
+  to track the time for the next DNS timeout, see if we can make them
   simpler.
     -- Nah, don't worry about this one. leave the DNS resolver alone..
 
@@ -167,7 +167,7 @@ Little things to be done given enough time and initiative -Hwy
 .  Fix tools/fixklines.c and tools/klineParse.c for the new kline.conf
    format.
 .  Update tools/mkconf as well.
-.  Document the openssl CHALLENGE support more.
+.  Document the OpenSSL CHALLENGE support more.
 .  Create some make release or something for rsa_respond
 .  Fix convertconf more
 .  Do we still need start_ircd.c and ircd_start.c?
@@ -194,10 +194,10 @@ Little things to be done given enough time and initiative -Hwy
    When e_lines_oper_only=yes; is on line 78. (fixed...)
 
 -- Rodder's list
-.  Add scaleable database-based authentication.  Probably part of Iauth.
+.  Add scalable database-based authentication.  Probably part of Iauth.
    Also add support for server-side notify with the list stored in the
    auth database.  This would make ircd an awesome instant messaging
-   backend.
+   back-end.
 
 
 -- Diane's list

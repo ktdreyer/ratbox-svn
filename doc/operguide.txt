@@ -7,15 +7,15 @@ E-Mail : vink@vuurwerk.nl
  1.  Commands you should know about
  2.  The client of your choice
  3.  Your primary responsibilities
- 4.  Rerouting
- 4.1 Rerouting other servers and remote connects
+ 4.  Re-routing
+ 4.1 Re-routing other servers and remote connects
  5.  Kills and klines
  6.  Kill and K-Line requests
  7.  Happy birthday!
  8.  Security
  9.  Know who your friends are
 10.  The TCM bot
-11.  Modern Operdom, Hybrid 7
+11.  Modern Oper-dom, Hybrid 7
 
 1. Commands you should know about
 
@@ -26,9 +26,9 @@ E-Mail : vink@vuurwerk.nl
 2. The client of your choice
 
   There are many IRC clients around for a wide variety of operating systems.
-  Being an IRC Operator doesn't *require* you to use a unix client, however
-  i personally prefer unix-based clients. If you're familiar with unix and
-  use unix for opering, i suggest ircII / epic. There are a lot of scripts
+  Being an IRC Operator doesn't *require* you to use a UNIX client, however
+  i personally prefer UNIX-based clients. If you're familiar with UNIX and
+  use UNIX for opering, i suggest ircII / epic. There are a lot of scripts
   available for those two clients, and it's not that hard to write scripts
   yourself to suite your needs. It is important that you know how to operate
   your client, and familiarize yourself with the options and features. For
@@ -37,23 +37,23 @@ E-Mail : vink@vuurwerk.nl
 
 Resources :
 
-  www.mirc.co.uk	- mIRC (ms-windows)
+  www.mirc.co.uk	- mIRC (MS-Windows)
   www.irchelp.org	- a variety of clients and scripts
-  ftp.blackened.com	- several unix based clients available
+  ftp.blackened.com	- several UNIX based clients available
 
 
 3. Your primary responsibilities
 
   As an IRC Operator, you're responsible for maintaining the server on a
-  realtime basis. You represent your server, and you represent the network.
+  real-time basis. You represent your server, and you represent the network.
   Irresponsible / rude / offensive / stupid behavior may discredit your server
-  and the network. You should focus on the task you were chosen for... maintance.
+  and the network. You should focus on the task you were chosen for... maintainance.
   Sounds simple, no ? It means getting rid of users that abuse the service,
   enforcing the server's policy and keeping the server linked. Users will ask
   you questions, and expect you to know all the answers.. after all, you're the
   oper!
 
-  Be prepared for users trying to fool you, sweettalk you into things you don't
+  Be prepared for users trying to fool you, sweet talk you into things you don't
   want, lie and deceive. Most users are handling in good faith... however, the
   abusers have learned how to manipulate opers. They have studied the alien
   creature 'oper' for ages like biologists study animals. Be paranoid, be
@@ -63,7 +63,7 @@ Resources :
   but you were chosen to maintain the server. However, you may want to be able
   to reroute servers. If you see something broken, don't be afraid to fix it.
   If you do, be sure you fix things and don't make it worse. Before you
-  step into routing, be sure you've familiarised yourself with the network's
+  step into routing, be sure you've familiarized yourself with the network's
   topology, and be confident enough to perform such actions. (re)routing is
   covered in the next chapter.
 
@@ -76,9 +76,9 @@ Resources :
   your admin says otherwise.
 
 
-4. Rerouting
+4. Re-routing
 
-  Rerouting is not hard, and it's not scary but it is important that you do it
+  Re-routing is not hard, and it's not scary but it is important that you do it
   right. The commands you'll use are SQUIT and CONNECT. First, a very simple
   example. Let's say your server, irc.yourserver.com is lagged to it's uplink,
   irc.uplink.com and you want to reroute your server. You have to think about
@@ -124,7 +124,7 @@ S:[irc.uplink.com ] V:[2.8/hybrid] U:[irc.yourserver.com  ]
 S:[irc.yourserver.] OPER [yournick!user@yourhost]
 
   If it doesn't, we know the lag is only between yourserver and uplink.
-  Usually if there is lag between your server and your uplink, the sendqueue
+  Usually if there is lag between your server and your uplink, the send-queue
   rises. This is not always the case. Sometimes your server can write perfectly
   to your uplink, but not reverse. That is called one sided lag.
 
@@ -133,19 +133,19 @@ S:[irc.yourserver.] OPER [yournick!user@yourhost]
   /quote SQUIT irc.uplink.com reroute
   /connect SERVER_B
 
-  we *DON'T* SQUIT irc.yourserver.com... and i'll try to explain why :
+  we *DON'T* SQUIT irc.yourserver.com... and I'll try to explain why :
   If we wanted to remove hub M from the network, and with it N, we'd issue
   a SQUIT M. An SQUIT follows a path, relays the SQUIT request to each server in
   that path. Finally it reaches server H, which is the hub for M. Server H sees
   the SQUIT and drops the link to M.
 
-  Now a different situation, we want to seperate yourserver, uplink, C and D
+  Now a different situation, we want to separate yourserver, uplink, C and D
   from the rest of the network, in order to reroute. We'd have to SQUIT server B,
   since we want the -uplink- of server B (being irc.uplink.com) to drop the link
   to server B.
 
   If you'd SQUIT irc.yourserver.com, you ask yourserver.com to drop the link to
-  itsself, which is impossible. If you SQUIT irc.uplink.com, you ask yourserver
+  itself, which is impossible. If you SQUIT irc.uplink.com, you ask yourserver
   to drop the link to uplink, which is what we want to do.
 
   After the SQUIT and CONNECT, the new situation looks like this :
@@ -162,11 +162,11 @@ S:[irc.yourserver.] OPER [yournick!user@yourhost]
                                 \
                                  N
 
-  If yourserver is a HuB, it makes the situation more complex, since your actions
+  If yourserver is a Hub, it makes the situation more complex, since your actions
   have more impact.
 
 
-4.1 - Rerouting other servers and remote connects
+4.1 - Re-routing other servers and remote connects
 
 Example topology :
 
@@ -187,17 +187,17 @@ Example topology :
 
   We'd do :
 
-  /quote SQUIT serverh rerouting you babe
+  /quote SQUIT serverh re-routing you babe
   /connect serverh 6667 serverg
 
   A global wallops will be sent :
   !serverg! Remote CONNECT serverh 6667 from ItsMe
 
-  When rerouting, always give the server some time to prevent nick collides.
+  When re-routing, always give the server some time to prevent nick collides.
   When there is lag, people will connect to another server. When you SQUIT and
   CONNECT to fast, a lot of those clients will be collided. Also, stick to your
-  territory. How enthausiastic you may be, you cannot route the world. If you're
-  an oper on the US side, stick to the US side when rerouting. Needless to say,
+  territory. How enthusiastic you may be, you cannot route the world. If you're
+  an oper on the US side, stick to the US side when re-routing. Needless to say,
   if you're EU, keep it to EU ;)
 
 
@@ -213,7 +213,7 @@ Example topology :
   it may cause the server to be attacked. Maybe good to think about is this :
   - if /ignore solves the problem rather than a kick, /ignore
   - kick if a ban is unneeded
-  - ban if a /kill is unwarrented for
+  - ban if a /kill is unwarranted for
   - kill rather than kline if that solves the problem
   - kline when a server ban is really needed.
 
@@ -223,7 +223,7 @@ Example topology :
   Crosskills (killing users on another server) are another issue. Some admins
   don't care if users get /kill'ed off their server, for any reason or no
   reason at all... and other admins are very anal about it. A good way to go
-  (imo) is to issue a KILL if there is an absolute need for the target user to
+  (IMO) is to issue a KILL if there is an absolute need for the target user to
   be disconnected. If there are active opers on that server, let them handle it.
   They'll be upset if you /kill a user off their server, without contacting them.
   /stats p irc.server.here shows the active opers on a particular server. Some
@@ -269,10 +269,10 @@ Example topology :
   hosts. You and only you should know your password. Don't share your oper
   account, and make your oper password a UNIQUE one. If your o/O line gets
   compromised, nasty things may/will happen. Imagine an oper with crosskill
-  capabilities whoms operline gets 'hacked'... the results are often
-  disasterous and you will lose respect and trust from others. It can cause
+  capabilities who's operline gets 'hacked'... the results are often
+  disastrous and you will lose respect and trust from others. It can cause
   your oper privileges to be revoked, or even the server to be (temporarily)
-  delinked.
+  de-linked.
 
 
 9. Know who your friends are
@@ -280,7 +280,7 @@ Example topology :
   As an oper you will get a lot of users that want to be 'friends' with you.
   Users offer you free* access to their *nix servers, ops in channels, unlimited
   leech access to the biggest and fastest warez sites *gasp* and more. They
-  want favours in return. They say they don't but they truely want something
+  want favors in return. They say they don't but they truly want something
   in return. They -expect- something in return. You could either don't respond
   to such offers, or use them. The last option creates an even more distorted
   image of opers and doesn't do any good for the user -> oper relationship.
@@ -291,9 +291,9 @@ Example topology :
 
   A TCM bot can be a valuable tool for opers. It keeps record of all connected
   clients, flags clients with multiple connections and has all sorts of other
-  usefull commands. There are three different kind of TCM's in use on EFnet,
-  being oomon, TCM-Dianora and TCM-Hybrid. Every one of them requires you
-  to log in to be able to access the privileged commands. On oomon you
+  useful commands. There are three different kind of TCM's in use on EFnet,
+  being OOMon, TCM-Dianora and TCM-Hybrid. Every one of them requires you
+  to log in to be able to access the privileged commands. On OOMon you
   DCC chat the TCM bot and do '.auth yournick' where yournick is your oper name
   in your o/O line. In TCM-Dianora and TCM-Hybrid you register with :
   '.register yourpass', where yourpass is your password ;)
@@ -303,12 +303,12 @@ Example topology :
   Resources :	http://toast.blackened.com/oomon/help
 		http://www.db.net/~db/tcm.html
 
-11. Modern Operdom - Hybrid 7
+11. Modern Oper-dom - Hybrid 7
 
   Unfortunately these times are drastic times, and drastic times require drastic
   measures. EFnet has been the playground of takeover groups and other scum. The
   services provided to the EFnet community have been heavily abused. DoS attacks
-  against servers is something we see every day. Modern Operdom is a timeage
+  against servers is something we see every day. Modern Oper-dom is a timeage
   where we have been forced to obscure information from our users, so that they
   cannot use it against us. It is also a timeage where new features give the
   user more control to remedy the problems. We'll cover a few of those features
@@ -317,7 +317,7 @@ Example topology :
 Flood Throttling :
 
   The newest Hybrid IRCd offers users flood protection to a certain extent.
-  Anyone who floods the channel with text, ctcp's, or any other junk
+  Anyone who floods the channel with text, CTCP's, or any other junk
   imaginable will be throttled. Massive flood attacks will have little impact.
   
 Server side ignore :
@@ -339,7 +339,7 @@ Hiding Chanops :
  
 Halfops :
 
-  You can reconize a HalfOp by the % before the nick.
+  You can recognize a HalfOp by the % before the nick.
   A halfop can kick non-ops from the channel and set bans but cannot deop
   nor kick full chanops.
 
@@ -363,7 +363,7 @@ Virtual Channels
   friend of Joe, and Joe wants to join kaaZ's version of the channel.
   /join #nederland !kaaZ
 
-  If Joe was a badguy and took over kaaZ'es version of the channel, kaaZ would
+  If Joe was a bad guy and took over kaaZ'es version of the channel, kaaZ would
   just start a new instance of the same channel (or requests it) and nothing
   would've changed. Virtual channels will make channel takeovers useless.
 
@@ -373,7 +373,7 @@ Virtual Channels
   probably be used to hide hubs. Server names have been removed from WHOIS.
   This is not to annoy the mere user, but merely the removal of information
   that's been used against us on structural basis by the abusers. It will
-  not ban out DoS attacks completely, but it will help a lot. IRC was ment
+  not ban out DoS attacks completely, but it will help a lot. IRC was meant
   to be about having fun, to be able to communicate with thousands of others
   all over the world. Let's get back to that point.
 

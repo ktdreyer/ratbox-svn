@@ -20,7 +20,7 @@ First, please note one thing - a *LOT* has changed in hybrid-7.
   it is more efficient, but the split-list code in s_bsd_poll.c needs some
   further research.
 
-  Please read the documentation avaliable, which will go into more detail.
+  Please read the documentation available, which will go into more detail.
 
 * An event system has been added, again borrowed mainly from squid. This
   allows periodic events (channel cleanup, server connection retries, etc)

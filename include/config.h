@@ -223,7 +223,7 @@
 /* CRYPT_LINK_PASSWORD - use crypted N-line passwords in the ircd.conf
  * If you want to store encrypted passwords in N-lines for server links,
  * define this.  For a C/N pair in your ircd.conf file, the password
- * need not be the same for both, as long as hte opposite end has the
+ * need not be the same for both, as long as the opposite end has the
  * right password in the opposite line.
  */
 #undef  CRYPT_LINK_PASSWORD
@@ -231,7 +231,7 @@
 /* MAXSENDQLENGTH - Max amount of internal send buffering
  * Max amount of internal send buffering when socket is stuck (bytes)
  */
-#define MAXSENDQLENGTH 7050000    /* Recommended value: 7050000 for efnet */
+#define MAXSENDQLENGTH 7050000    /* Recommended value: 7050000 for EFnet */
 
 /* CLIENT_FLOOD - client excess flood threshold
  * this controls the number of bytes the server will allow a client to
@@ -242,7 +242,7 @@
 
 /*
  * Define this to enable IPv6 support.  IPv6 is currently still being
- * developed, and is not guarenteed to work properly..
+ * developed, and is not guaranteed to work properly..
  */
 
 #undef IPV6
@@ -266,20 +266,20 @@
 
 /* PORTNUM - default port where ircd resides
  * Port where ircd resides. NOTE: This *MUST* be greater than 1024 if you
- * plan to run ircd under any other uid than root.
+ * plan to run ircd under any other UID than root.
  */
 #define PORTNUM 6667
 
 /* MAXCONNECTIONS - don't touch - change the HARD_FDLIMIT_ instead
  * Maximum number of network connections your server will allow.  This should
- * never exceed max. number of open file descrpitors and wont increase this.
+ * never exceed max. number of open file descriptors and wont increase this.
  * Should remain LOW as possible. Most sites will usually have under 30 or so
  * connections. A busy hub or server may need this to be as high as 50 or 60.
  * Making it over 100 decreases any performance boost gained from it being low.
  * if you have a lot of server connections, it may be worth splitting the load
  * over 2 or more servers.
  * 1 server = 1 connection, 1 user = 1 connection.
- * This should be at *least* 3: 1 listen port, 1 dns port + 1 client
+ * This should be at *least* 3: 1 listen port, 1 DNS port + 1 client
  */
 /* change the HARD_FDLIMIT_ instead */
 #define MAXCONNECTIONS  HARD_FDLIMIT
@@ -301,7 +301,7 @@
  */
 #define PINGFREQUENCY    120    /* Recommended value: 120 */
 
-/* CONNECTFREQUENCY - time to wait before auto-reconencting
+/* CONNECTFREQUENCY - time to wait before auto-reconnecting
  * If the connection to to uphost is down, then attempt to reconnect every 
  * CONNECTFREQUENCY  seconds.
  */
@@ -315,7 +315,7 @@
  * (HANGONGOODLINK) and we give the net few seconds to steady
  * (HANGONRETRYDELAY). This latter has to be long enough that the
  * other end of the connection has time to notice it broke too.
- * 1997/09/18 recommended values by ThemBones for modern Efnet
+ * 1997/09/18 recommended values by ThemBones for modern EFnet
  */
 
 #define HANGONRETRYDELAY 60     /* Recommended value: 30-60 seconds */
@@ -331,7 +331,7 @@
 
 /* KILLCHASETIMELIMIT -
  * Max time from the nickname change that still causes KILL
- * automaticly to switch for the current nick of that user. (seconds)
+ * automatically to switch for the current nick of that user. (seconds)
  */
 #define KILLCHASETIMELIMIT 90   /* Recommended value: 90 */
 
@@ -365,7 +365,7 @@
 #define OPER_SPAM_COUNTDOWN   5 
 #define JOIN_LEAVE_COUNT_EXPIRE_TIME 120
 
-/* Doo not allow the clients exit message to be
+/* Do not allow the clients exit message to be
  * sent to a channel if the client has been on for less than
  * ANTI_SPAM_EXIT_MESSAGE_TIME.
  * The idea is, some spambots exit with their spam, thus advertising

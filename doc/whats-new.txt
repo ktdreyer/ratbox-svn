@@ -1,7 +1,7 @@
 There have been quite a few changes in Hybrid-7 from previous versions.
 This document is an overview of what new features are included
 
-AWAY is now propogated.  
+AWAY is now propagated.  
 
 The conf file format has been vastly improved.  The old conf format is 
 no longer supported.  Many options that were defined at compile time are
@@ -34,16 +34,16 @@ of this is that channel CTCP's will be throttled for non ops, but this cannot
 be helped.
 
 Half ops are included.  Setting a user +h in a channel will give them half-op
-privilages.  Half ops can kick regular users but not full ops.
+privileges.  Half ops can kick regular users but not full ops.
 
 Channel Op Hiding is included as a channel mode.  By setting a channel +a, 
 the ops are hidden to non-ops.  Once a user receives ops or halfops, they
 may have to issue a NAMES command to resync their userlist.
 
 Server hiding is also a conf file option.  With this option enabled, only 
-opers can see what server a user is on.  TRACE and LTRACE are disabled for
-non-opers, LINKS, WHO, WHOIS and the like are modified to not show a server.
-Note that this can break certain clients.
+opers can see what server a user is on.  TRACE are disabled for non-opers,
+LINKS, WHO, WHOIS and the like are modified to not show a server.  Note that
+this can break certain clients.
 
 The old $*.server.mask and #*.host.mask no longer work.  The replacement is
 $$*.server.mask and $#*.host.mask.  This change removes a long standing "bug"
@@ -68,7 +68,7 @@ the ircd.conf file.
 Channels that have existed for at least 30 minutes are now preserved for 30
 minutes if they are empty or split.  If a channel was +i before a split, it
 will remain that way for 30 minutes.  All bans will still exist, preventing
-abusers from joining through a ban on splits.  A user that does sucessfully
+abusers from joining through a ban on splits.  A user that does successfully
 join an empty preserved channel will have ops.  If it was split at the time,
 the timestamp protocol will remove the newer side's ops.  These preserved
 channels replace the old NO_CHANOPS_ON_SPLIT and NO_JOIN_ON_SPLIT options.

@@ -1,4 +1,4 @@
-Message customisation/localisation system
+Message customization/localization system
 David Taylor <davidt@yadt.co.uk>
 
 $Id$
@@ -29,10 +29,10 @@ Currently available locales are:
 	custom		These are the messages you would have seen if
 			you used the old CUSTOM_ERR define in config.h.
 	standard	(This doesn't actually exist as a locale, but
-			 using a non-existant locale will use the compiled
+			 using a non-existent locale will use the compiled
 			 in defaults).
 
-Customising the messages
+Customizing the messages
 ------------------------
 In messages/, run ./create_po with the name of the new po file
 (<locale>.po), and add the new po file to Makefile.in.

@@ -26,7 +26,7 @@ e.g. as seen sent to a remote server:
 ":Dianora PRIVMSG #us-opers :ON TOP OF ...\r\n"
 
   It has been argued that full prefixes sent locally are a waste of bandwidth
-(Isomer from undernet has argued this). i.e. instead of sending:
+(Isomer from Undernet has argued this). i.e. instead of sending:
 ":nick!user@host" for a local prefix, one could just send ":nick"..
 Unfortunately, this breaks many clients badly. Personally I feel that
 until clients are updated to understand that a full prefix isn't always
@@ -121,7 +121,7 @@ sendto_cap_serv_butone()
 
 sendto_common_channels_local()
                 - This function is used only by m_nick and exit_one_client
-                  its used to propogate nick changes to all channels user
+                  its used to propagate nick changes to all channels user
                   is in, and QUIT messages to all channels user is in.
                   As it only sends to local clients, prefix generation
                   is left to the user. It also sends the message to the
@@ -135,7 +135,7 @@ sendto_channel_local()
                 - This function is used only to send locally, never
                   to remote servers. This is useful when removing
                   local chanops, or adding a local chanop. MODE/SJOIN
-                  sent to remote server allows that server to propogate
+                  sent to remote server allows that server to propagate
                   mode changes to its clients locally.
 
                   usage - sendto_channel_local(type,

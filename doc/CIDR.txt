@@ -193,7 +193,7 @@ Netblock               IP range
 206.184.139.128/25     206.184.139.128 to 206.184.139.255
 
   For the record, 206.184.139.0 and 206.184.139.128 are both known as
-  "network addresses" (not to be confused with "netblocks" or "ethernet
+  "network addresses" (not to be confused with "netblocks" or "Ethernet
   hardware addresses" or "MAC addresses").  Network addresses are
   *ALWAYS EVEN*.
 

@@ -47,14 +47,14 @@ COMMAND         - USAGE and DESCRIPTION
 
   STATS         - STATS <letter> [server|nick]
                   Queries server [server] (or your own server if no
-                  server parameter is given) for info corresponing to
+                  server parameter is given) for info corresponding to
                   <letter>.
                   LETTER (* = Oper only.)
                   ------ (^ = Can be configured to be oper only.)
                   * c - Shows C/N lines
                   * d - Shows D lines
                   * e - Shows Events
-                  * f - Shows File Descripters
+                  * f - Shows File Descriptors
                   * g - Shows G lines
                   * h - Shows H/L lines
                   * i - Shows I lines
@@ -66,7 +66,7 @@ COMMAND         - USAGE and DESCRIPTION
                   ^ o - Shows O/o lines
                   * P - Shows configured ports
                     p - Shows opers connected and their idle times
-                  * q - Shows quaranteened nicks (Old Q: lines)
+                  * q - Shows quarantined nicks (Old Q: lines)
                   * r - Shows resource usage by ircd
                   * s - Shows the server cache
                   * t - Shows generic server stats
@@ -82,7 +82,7 @@ COMMAND         - USAGE and DESCRIPTION
                   When [server_B] is used, CONNECT asks [server_B] to
                   connect to <server_A>.  Global Opers only.
 
-                  When [server_B] is not used, CONNECT trys to connect
+                  When [server_B] is not used, CONNECT tries to connect
                   your server to <server_A>.  Local and Global Opers.
 
                   When [port] is used, the connection will be attempted
@@ -175,9 +175,9 @@ COMMAND         - USAGE and DESCRIPTION
 
 + SET           - SET <option> <value>
                   <option> can be one of the following:
-                    AUTOCONN    - Sets autoconnect on or off for a particular
+                    AUTOCONN    - Sets auto-connect on or off for a particular
                                   server
-                    AUTOCONNALL - Sets autoconnect on or off for all servers
+                    AUTOCONNALL - Sets auto-connect on or off for all servers
                     LOG         - Sets the Logging level for what is logged
                                   to ircd.log and syslog.
                     MAX         - Sets the number of max connections

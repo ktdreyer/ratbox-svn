@@ -230,7 +230,7 @@ and let it deal with it.
 
 4) Avoiding Desyncs
 
-There is one particularily treacherous potential desync: a Lazy Leaf is
+There is one particularly treacherous potential desync: a Lazy Leaf is
 convinced that it has authoritative information about a channel, but its
 hub is convinced that the leaf doesn't.  The hub doesn't keep sending
 new information, so the leaf's info grows stale, but it keeps acting on

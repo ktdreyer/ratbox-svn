@@ -30,7 +30,7 @@ An event is identified by its callback function and data pair.
 
 Events are run through eventRun(). This is designed to be called *BEFORE*
 your IO handlers, to let events scheduled immediately (ie a time of 0)
-to initate IO before the IO handlers are called.
+to initiate IO before the IO handlers are called.
 
 (Believe me, its useful.)
 
@@ -45,7 +45,7 @@ Say you have something which must be called every 15 seconds.
 static EVH foo_periodic_event;
 static int initialised = 0;
 
-* You would then add the event in your initialisation function:
+* You would then add the event in your initialization function:
 
 void foo_init(void)
 {

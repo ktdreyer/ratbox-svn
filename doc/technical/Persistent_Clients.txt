@@ -5,12 +5,12 @@
 
 
 Background: This idea has been going around for a while, I think I 
-            first described it to bleep of undernet over a year ago,
+            first described it to bleep of Undernet over a year ago,
             and it made it in an edited irc log form to coder-com
-            on undernet. I'd have to look.
+            on Undernet. I'd have to look.
 
 Basic idea: Clients really don't need to "quit" when the user using
-            using that client /quit's or the client gets ddos'ed off.
+            using that client /quit's or the client gets DDoS'ed off.
             Rather, that client can be marked as "suspended" waiting 
             for an active person to reconnect to the client making 
             it active again.
@@ -45,7 +45,7 @@ Their session then becomes attached to the client sitting in all the
 channels with all their modes restored.
 
 
-Unfortuntely occasional oper intervention will be necessary using
+Unfortunately occasional oper intervention will be necessary using
 the following commands.
 
 4) /destroy uid|channel
@@ -57,7 +57,7 @@ is a form of old style /kill but it also destroys the uid and cookie pair.
 A channel name if given instead, will result in all members of the channel
 being tossed out, and apparently kicked by themselves. (chanop hiding
 in h7) The channel will then be marked as "juped" for a period of 1 
-minute. First come, first serve just like old style efnet.
+minute. First come, first serve just like old style EFnet.
 
 5) /setpass uid
 
@@ -88,7 +88,7 @@ as suspended.
 
 1.3
 
-User disconnection due to ddos or phone line hang ups results in the
+User disconnection due to DDoS or phone line hang ups results in the
 client being marked as suspended.
 
 1.4
@@ -98,11 +98,11 @@ resume every 24 hours, you lose the client.
 
 1.5
 
-To cut down on abuse, a client may not register more than one suspeded
+To cut down on abuse, a client may not register more than one suspended
 client per user@host.
 
 TBD. What to do if a dronebot net is programmed to /suspend as many
-as possible, in order to eat up memory in a ddos attempt. One of the
+as possible, in order to eat up memory in a DDoS attempt. One of the
 same criticisms against vchans actually.
 
 $Id$

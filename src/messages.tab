@@ -460,7 +460,7 @@ static  char *  replies[] = {
 /* 429 */       (char *)NULL,
 /* 430 */       (char *)NULL,
 /* 431 ERR_NONICKNAMEGIVEN, */  ":%s 431 %s :No nickname given",
-/* 432 ERR_ERRONEUSNICKNAME, */ ":%s 432 %s %s :Erroneus Nickname",
+/* 432 ERR_ERRONEUSNICKNAME, */ ":%s 432 %s %s :Erroneous Nickname",
 /* 433 ERR_NICKNAMEINUSE, */    ":%s 433 %s %s :Nickname is already in use.",
 /* 434 */       (char *)NULL,
 /* 435 */       (char *)NULL,

@@ -5,7 +5,7 @@ Here is the overview of the documents in the doc/ directory.
 CIDR.txt		- Description of CIDR in IPv4
 LazyLinks.as.implemented.txt
 LazyLinks.txt		- The lazylinks leaf concept
-Persistent_Clients.txt  - A global UID and Persistant client (with cookies)
+Persistent_Clients.txt  - A global UID and Persistent client (with cookies)
                           proposal
 README.TSora            - Description of the TS3 protocol
 Tao-of-IRC.940110
@@ -36,5 +36,5 @@ send.txt                - Document on all of the send_to functions
 server-version-info     - Overview of the flags shown in /version
 simple.conf             - A simple ircd.conf useful for beginning admins
 vchans.txt              - The paper describing virtual channels
-whats-new.txt		- What new features are avaliable
+whats-new.txt		- What new features are available
 whats-new-code.txt	- Whats changed in the code
