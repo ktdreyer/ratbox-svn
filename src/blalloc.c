@@ -272,7 +272,7 @@ void * _BlockHeapAlloc (BlockHeap *bh)
               strncpy_irc(mme->file, file, 50)[49] = 0;
             mme->line = line;
             assert(mme->next != mme);
-            ret += (void *)sizeof(MemoryEntry);
+            ret += sizeof(MemoryEntry);
            }
 #endif
 		   return ret;
@@ -319,7 +319,7 @@ int _BlockHeapFree(BlockHeap *bh, void *ptr)
        return 1;
      }
 #ifdef MEMDEBUG
-   ptr -= (void *)sizeof(MemoryEntry);
+   ptr -= sizeof(MemoryEntry);
    {
     MemoryEntry *mme = (MemoryEntry*)ptr;
     assert(mme->next != mme);
