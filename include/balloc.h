@@ -32,6 +32,12 @@
 #include "memory.h"
 #include "ircd_defs.h"
 
+#define DEBUG_BALLOC
+
+#ifdef DEBUG_BALLOC
+#define BALLOC_MAGIC 0x3d3a3c3d
+#endif
+
 /* status information for an allocated block in heap */
 struct Block
 {
@@ -45,9 +51,13 @@ typedef struct Block Block;
 
 struct MemBlock
 {
+#ifdef DEBUG_BALLOC
+	unsigned long magic;
+#endif
 	dlink_node self;
 	Block *block;		/* Which block we belong to */
 };
+
 typedef struct MemBlock MemBlock;
 
 /* information for the root node of the heap */

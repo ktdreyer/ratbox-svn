@@ -221,6 +221,9 @@ newblock(BlockHeap * bh)
 		void *data;
 		newblk = (void *) offset;
 		newblk->block = b;
+#ifdef BALLOC_DEBUG
+		newblk->magic = BALLOC_MAGIC;
+#endif
 		data = (void *) ((size_t) offset + sizeof(MemBlock));
 		newblk->block = b;
 		dlinkAdd(data, &newblk->self, &b->free_list);
@@ -394,6 +397,13 @@ BlockHeapFree(BlockHeap * bh, void *ptr)
 	}
 
 	memblock = (void *) ((size_t) ptr - sizeof(MemBlock));
+#ifdef BALLOC_DEBUG
+	if(memblock->magic != BALLOC_MAGIC)
+	{
+		blockheap_fail("memblock->magic != BALLOC_MAGIC, got %lx", memblock->magic);
+		outofmemory();
+	}
+#endif
 	s_assert(memblock->block != NULL);
 	if(memblock->block == NULL)
 	{
