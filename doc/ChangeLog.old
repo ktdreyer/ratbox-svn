@@ -1,3 +1,10 @@
+*** 20010923_7 by a1kmm
+- Fixed a _MyRealloc debug version bug.
+- Kludged the strncpy_irc for now so it doesn't core(someone please fix!)
+- Fixed the depend system for modules so it actually works with both
+  static and shared modules.
+
+
 *** 20010923_6 by a1kmm
 - Changing a #ifdef to a #undef is not a smart way to disable something.
 
