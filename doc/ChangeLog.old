@@ -1,3 +1,18 @@
+*** 20001110_2 by db
+- channel specific stuff should stay in channel.c ya ya ya 
+  anyway, m_join.so was having a nit pick fit over names_on_this_channel()
+  which of course, was way over in m_names.so.... so I have renamed
+  the function to channel_member_names() and placed it into channel.c
+  Ignore the mods to src/m_join.c duh. everything m_* in src goes away...
+
+  Eventually in an universe far far away, channel becomes channel.so
+  which means, it will have to have a list of dependancies on it to unload
+  and reload or something, or maybe just unload all the m_ functions and
+  reload autoload? Sometime in an alternate universe...
+
+
+
+
 *** 20001110_1 by db
 - nasty DoS 
   if user enters long prefix, it puts the parser into an infinite loop
