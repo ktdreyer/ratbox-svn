@@ -71,6 +71,8 @@ static int valid_comment(struct Client *source_p, char *comment);
 static int valid_user_host(struct Client *source_p, const char *user, const char *host);
 static int valid_wild_card(struct Client *source_p, const char *user, const char *host);
 
+static void handle_remote_kline(struct Client *source_p, int tkline_time,
+		const char *user, const char *host, char *reason);
 static void apply_kline(struct Client *source_p, struct ConfItem *aconf,
 			const char *reason, const char *oper_reason, const char *current_date);
 static void apply_tkline(struct Client *source_p, struct ConfItem *aconf,
@@ -221,13 +223,10 @@ mo_kline(struct Client *client_p, struct Client *source_p,
 static int
 ms_kline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	const char *current_date;
-	struct ConfItem *aconf = NULL;
 	int tkline_time = atoi(parv[2]);
 	const char *kuser = parv[3];
 	const char *khost = parv[4];
 	char *kreason = LOCAL_COPY(parv[5]);
-	char *oper_reason;
 
 	propagate_generic(source_p, "KLINE", parv[1], CAP_KLN,
 			"%d %s %s %s",
@@ -239,25 +238,37 @@ ms_kline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	if(!IsPerson(source_p))
 		return 0;
 
+	handle_remote_kline(source_p, tkline_time, kuser, khost, kreason);
+	return 0;
+}
+
+static void
+handle_remote_kline(struct Client *source_p, int tkline_time,
+		const char *user, const char *host, char *reason)
+{
+	const char *current_date;
+	struct ConfItem *aconf = NULL;
+	char *oper_reason;
+	
 	if(find_shared_conf(source_p->username, source_p->host,
 				source_p->user->server, SHARED_KLINE))
 	{
-		if(!valid_user_host(source_p, kuser, khost) || 
-		   !valid_wild_card(source_p, kuser, khost) ||
-		   !valid_comment(source_p, kreason))
-			return 0;
+		if(!valid_user_host(source_p, user, host) || 
+		   !valid_wild_card(source_p, user, host) ||
+		   !valid_comment(source_p, reason))
+			return;
 
-		if(already_placed_kline(source_p, kuser, khost, tkline_time))
+		if(already_placed_kline(source_p, user, host, tkline_time))
 			return 0;
 
 		aconf = make_conf();
 
 		aconf->status = CONF_KILL;
-		DupString(aconf->user, kuser);
-		DupString(aconf->host, khost);
+		DupString(aconf->user, user);
+		DupString(aconf->host, host);
 
 		/* Look for an oper reason */
-		if((oper_reason = strchr(kreason, '|')) != NULL)
+		if((oper_reason = strchr(reason, '|')) != NULL)
 		{
 			*oper_reason = '\0';
 			oper_reason++;
@@ -266,11 +277,11 @@ ms_kline(struct Client *client_p, struct Client *source_p, int parc, const char 
 				DupString(aconf->spasswd, oper_reason);
 		}
 
-		DupString(aconf->passwd, kreason);
+		DupString(aconf->passwd, reason);
 		current_date = smalldate();
 
 		if(tkline_time > 0)
-			apply_tkline(source_p, aconf, kreason, oper_reason,
+			apply_tkline(source_p, aconf, reason, oper_reason,
 				     current_date, tkline_time);
 		else
 			apply_kline(source_p, aconf, aconf->passwd, oper_reason, current_date);
