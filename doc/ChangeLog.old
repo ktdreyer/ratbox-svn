@@ -1,3 +1,10 @@
+*** 20001204_12 by db
+- empty vchans shown on list have no clients to key off of,
+  return a timestamp for now. You can't join them still since 
+  the join code doesnt' know anything about joining on a ts key.
+
+
+
 *** 20001204_11 by db
 - class.c get_client_class returns a string class name now
   It was trying to use a struct ConfItem as a class pointer. oops.
