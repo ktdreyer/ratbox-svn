@@ -1,3 +1,15 @@
+leeh        2005/04/05 01:22:59 UTC	(20050405_0)
+
+  Modified files:
+    src                  newconf.c 
+  Log:
+  - reset flags to 0 before trying to add shared privs..
+  
+  Revision  Changes    Path
+  7.209     +1 -1      ircd-ratbox/src/newconf.c
+
+
+
 androsyn    2005/03/30 18:02:06 UTC	(20050330_1)
 
   Modified files:
