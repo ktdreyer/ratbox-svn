@@ -326,6 +326,7 @@ vchan_show_ids(struct Client *source_p, struct Channel *chptr)
   int tlen;
   dlink_node *ptr;
   struct Channel *chtmp;
+  done_secret = 0;
 
   ircsprintf(buf, form_str(RPL_VCHANLIST), me.name, source_p->name,
 	     chptr->chname);
@@ -335,48 +336,53 @@ vchan_show_ids(struct Client *source_p, struct Channel *chptr)
   t = buf + mlen;
 
   if(!SecretChannel(chptr))
-  {
-    ircsprintf(t, "!%s ", pick_vchan_id(chptr));
-    tlen = strlen(t);
-    cur_len += tlen;
-    t += tlen;
-  }
+    {
+      ircsprintf(t, "!%s ", pick_vchan_id(chptr));
+      tlen = strlen(t);
+      cur_len += tlen;
+      t += tlen;
+    }
   else
-  {
-    strcpy(t, "<secret> ");
-    tlen = 9;
-    cur_len += tlen;
-    t += tlen;
-  }
+    {
+      strcpy(t, "<secret> ");
+      tlen = 9;
+      cur_len += tlen;
+      t += tlen;
+      done_secret = 1;
+    }
   
 
   for (ptr = chptr->vchan_list.head; ptr; ptr = ptr->next)
-     {
-       chtmp = ptr->data;
+    {
+      chtmp = ptr->data;
 
-       if ((cur_len + IRCD_MAX((NICKLEN*2)+2, 9)) > (BUFSIZE - 3))
-         {
-           sendto_one(source_p, "%s", buf );
-           cur_len = mlen;
-           t = buf + mlen;
-	 }
+      if ( cur_len > (BUFSIZE - (NICKLEN*2 + 5)) )
+	{
+	  sendto_one(source_p, "%s", buf );
+	  cur_len = mlen;
+	  t = buf + mlen;
+	}
 
-       /* Obey the rules of /list */
-       if(SecretChannel(chtmp))
-         {
-           strcpy(t, "<secret> ");
-           tlen = 9;
-           cur_len += tlen;
-           t += tlen;
-         }
-       else
-         {
-           ircsprintf(t, "!%s ", pick_vchan_id(chtmp));
-           tlen = strlen(t);
-           cur_len += tlen;
-           t += tlen;
-         }
-     }
+      /* Obey the rules of /list */
+      if ( SecretChannel(chtmp) )
+	{
+	  if ( !done_secret )
+	    {
+	      strcpy(t, "<secret> ");
+	      tlen = 9;
+	      cur_len += tlen;
+	      t += tlen;
+	      done_secret = 1;
+	    }
+	}
+      else
+	{
+	  ircsprintf(t, "!%s ", pick_vchan_id(chtmp));
+	  tlen = strlen(t);
+	  cur_len += tlen;
+	  t += tlen;
+	}
+    }
 
   sendto_one(source_p, "%s", buf);
 }
