@@ -1,3 +1,19 @@
+leeh        2004/02/29 14:35:32 EST	(20040229_1)
+
+  Modified files:
+    doc                  example.conf example.efnet.conf 
+    src                  newconf.c 
+  Log:
+  - class { name = "foo"; ... }; is no longer supported, use class "foo" { };
+  - updated example confs with new logging stuff
+  
+  Revision  Changes    Path
+  7.234     +23 -8     ircd-ratbox/doc/example.conf
+  7.69      +24 -5     ircd-ratbox/doc/example.efnet.conf
+  7.135     +6 -13     ircd-ratbox/src/newconf.c
+
+
+
 leeh        2004/02/29 07:29:47 EST	(20040229_0)
 
   Modified files:
