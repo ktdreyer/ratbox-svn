@@ -1,3 +1,18 @@
+androsyn    2004/06/17 07:29:08 EDT	(20040617_6)
+
+  Modified files:
+    servlink             io.c 
+    src                  s_serv.c 
+  Log:
+  Fix some issues with zip stats that could blow up where unsigned long >
+  32bits
+  
+  Revision  Changes    Path
+  1.41      +25 -20    ircd-ratbox/servlink/io.c
+  7.403     +1 -1      ircd-ratbox/src/s_serv.c
+
+
+
 androsyn    2004/06/17 07:04:03 EDT	(20040617_5)
 
   Modified files:
