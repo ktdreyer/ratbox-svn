@@ -53,7 +53,8 @@ int build_target_list(int p_or_n, char *command,
 		      char *text);
 
 int flood_attack_client(struct Client *sptr, struct Client *acptr);
-int flood_attack_channel(struct Client *sptr, struct Channel *chptr);
+int flood_attack_channel(struct Client *sptr, struct Channel *chptr,
+			 char *chname);
 
 #define MAX_TARGETS 20
 
@@ -438,7 +439,7 @@ void msg_channel( int p_or_n, char *command,
 	}
       else
 	{
-	  if(!flood_attack_channel(sptr, chptr))
+	  if(!flood_attack_channel(sptr, chptr,channel_name))
 	    sendto_channel_butone(cptr, sptr, chptr,
 				  ":%s %s %s :%s",
 				  sptr->name, command, channel_name, text);
@@ -639,7 +640,8 @@ int flood_attack_client(struct Client *sptr,struct Client *acptr)
  * output	- 1 if target is under flood attack
  * side effects	- check for flood attack on target chptr
  */
-int flood_attack_channel(struct Client *sptr,struct Channel *chptr)
+int flood_attack_channel(struct Client *sptr,struct Channel *chptr,
+			 char *chname)
 {
   int delta;
 
@@ -674,7 +676,7 @@ int flood_attack_channel(struct Client *sptr,struct Channel *chptr)
 	    }
 	  if(MyClient(sptr))
 	    sendto_one(sptr, ":%s NOTICE %s :*** Message to %s throttled due to flooding",
-		       me.name, sptr->name, chptr->chname);
+		       me.name, sptr->name, chname);
 	  return 1;
 	}
       else
