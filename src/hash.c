@@ -116,7 +116,7 @@ hash_nick(const char *name)
          	h ^= ToUpper(*name++);
 		h += (h<<1) + (h<<4) + (h<<7) + (h << 8) + (h << 24);
 	}
-        h = (h>> U_MAX_BITS) ^ (h & U_MAX-1);
+        h = (h>> U_MAX_BITS) ^ (h & (U_MAX-1));
 	return (unsigned int)h;
 
 }
