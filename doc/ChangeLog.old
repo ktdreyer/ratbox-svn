@@ -1,3 +1,15 @@
+leeh        2002/01/01 17:27:27 EST	(20020101_8)
+
+  Modified files:
+    modules/core         m_kill.c 
+  Log:
+  - tell users when they get killed
+  
+  Revision  Changes    Path
+  1.58      +2 -3      ircd-hybrid-7/modules/core/m_kill.c
+
+
+
 leeh        2002/01/01 17:12:42 EST	(20020101_7)
 
   Modified files:
