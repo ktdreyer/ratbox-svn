@@ -1,3 +1,15 @@
+androsyn    2003/08/20 11:42:27 EDT	(20030820_0)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  /me beats lee with a comma
+  
+  Revision  Changes    Path
+  7.405     +1 -1      ircd-ratbox/src/client.c
+
+
+
 leeh        2003/08/19 17:57:59 EDT	(20030819_0)
 
   Modified files:
