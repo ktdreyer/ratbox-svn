@@ -58,18 +58,13 @@ static int
 m_ping(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Client *target_p;
-	const char *origin, *destination;
+	const char *destination;
 
-	origin = parv[1];
 	destination = parv[2];	/* Will get NULL or pointer (parc >= 2!!) */
 
-	if(!EmptyString(destination) && irccmp(destination, me.name))
+	if(!EmptyString(destination) && !match(destination, me.name))
 	{
-		/* We're sending it across servers.. origin == client_p->name --fl_ */
-		origin = client_p->name;
-
-		/* XXX - sendto_server() ? --fl_ */
-		if((target_p = find_server(destination)))
+		if((target_p = find_server(source_p, destination)))
 		{
 			sendto_one(target_p, ":%s PING %s :%s",
 				   get_id(source_p, target_p),
@@ -85,7 +80,7 @@ m_ping(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	}
 	else
 		sendto_one(source_p, ":%s PONG %s :%s", me.name,
-			   (destination) ? destination : me.name, origin);
+			   (destination) ? destination : me.name, parv[1]);
 
 	return 0;
 }
@@ -98,7 +93,8 @@ ms_ping(struct Client *client_p, struct Client *source_p, int parc, const char *
 
 	destination = parv[2];	/* Will get NULL or pointer (parc >= 2!!) */
 
-	if(!EmptyString(destination) && irccmp(destination, me.name))
+	if(!EmptyString(destination) && irccmp(destination, me.name) &&
+	   irccmp(destination, me.id))
 	{
 		if((target_p = find_client(destination)) && IsServer(target_p))
 		{

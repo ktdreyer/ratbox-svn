@@ -122,7 +122,7 @@ ms_squit(struct Client *client_p, struct Client *source_p, int parc, const char 
 		return 0;
 	}
 	
-	if((target_p = find_server(parv[1])) == NULL)
+	if((target_p = find_server(NULL, parv[1])) == NULL)
 		return 0;
 		
 	if(!IsServer(target_p) || IsMe(target_p))
@@ -181,7 +181,7 @@ find_squit(struct Client *client_p, struct Client *source_p, const char *server)
 		p = ptr->data;
 		if(IsServer(p) || IsMe(p))
 		{
-			if(match(server, p->name) )
+			if(match(server, p->name))
 			{
 				target_p = p;
 				break;

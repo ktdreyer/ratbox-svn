@@ -69,7 +69,7 @@ ms_pong(struct Client *client_p, struct Client *source_p, int parc, const char *
 	   irccmp(destination, me.id))
 	{
 		if((target_p = find_client(destination)) || 
-		   (target_p = find_server(destination)))
+		   (target_p = find_server(NULL, destination)))
 			sendto_one(target_p, ":%s PONG %s %s", 
 				   get_id(source_p, target_p), parv[1], 
 				   get_id(target_p, target_p));

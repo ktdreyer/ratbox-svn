@@ -82,7 +82,7 @@ mo_connect(struct Client *client_p, struct Client *source_p, int parc, const cha
 	if(hunt_server(client_p, source_p, ":%s CONNECT %s %s :%s", 3, parc, parv) != HUNTED_ISME)
 		return 0;
 
-	if((target_p = find_server(parv[1])))
+	if((target_p = find_server(source_p, parv[1])))
 	{
 		sendto_one(source_p, ":%s NOTICE %s :Connect: Server %s already exists from %s.",
 			   me.name, parv[0], parv[1], target_p->from->name);
@@ -180,7 +180,7 @@ ms_connect(struct Client *client_p, struct Client *source_p, int parc, const cha
 	if(hunt_server(client_p, source_p, ":%s CONNECT %s %s :%s", 3, parc, parv) != HUNTED_ISME)
 		return 0;
 
-	if((target_p = find_server(parv[1])))
+	if((target_p = find_server(NULL, parv[1])))
 	{
 		sendto_one_notice(source_p, ":Connect: Server %s already exists from %s.",
 				  parv[1], target_p->from->name);

@@ -954,7 +954,7 @@ register_client(struct Client *client_p, struct Client *server,
 	
 	if(server == NULL)
 	{
-		if((source_p->servptr = find_server(user->server)) == NULL)
+		if((source_p->servptr = find_server(NULL, user->server)) == NULL)
 		{
 			sendto_realops_flags(UMODE_ALL, L_ALL,
 					     "Ghost killed: %s on invalid server %s",

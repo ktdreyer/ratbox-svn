@@ -479,7 +479,7 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 	SetClient(source_p);
 
 	/* XXX source_p->servptr is &me, since local client */
-	source_p->servptr = find_server(user->server);
+	source_p->servptr = find_server(NULL, user->server);
 	dlinkAdd(source_p, &source_p->lnode, &source_p->servptr->serv->users);
 	/* Increment our total user count here */
 	if(++Count.total > Count.max_tot)

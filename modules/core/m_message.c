@@ -714,7 +714,7 @@ handle_special(int p_or_n, const char *command, struct Client *client_p,
 	 */
 	if((server = strchr(nick, '@')) != NULL)
 	{
-		if((target_p = find_server(server + 1)) == NULL)
+		if((target_p = find_server(source_p, server + 1)) == NULL)
 		{
 			sendto_one_numeric(source_p, ERR_NOSUCHSERVER, 
 					   form_str(ERR_NOSUCHSERVER), server + 1);

@@ -274,7 +274,7 @@ hunt_server(struct Client *client_p, struct Client *source_p,
 		if(target_p->from == source_p->from && !MyConnect(target_p))
 			target_p = NULL;
 
-	if(target_p == NULL && (target_p = find_server(new)))
+	if(target_p == NULL && (target_p = find_server(source_p, new)))
 		if(target_p->from == source_p->from && !MyConnect(target_p))
 			target_p = NULL;
 
@@ -385,7 +385,7 @@ try_connections(void *unused)
 		 * Found a CONNECT config with port specified, scan clients
 		 * and see if this server is already connected?
 		 */
-		client_p = find_server(tmp_p->name);
+		client_p = find_server(NULL, tmp_p->name);
 
 		if(!client_p && (CurrUsers(cltmp) < MaxUsers(cltmp)) && !connecting)
 		{
@@ -1484,7 +1484,7 @@ serv_connect(struct server_conf *server_p, struct Client *by)
 	/*
 	 * Make sure this server isn't already connected
 	 */
-	if((client_p = find_server(server_p->name)))
+	if((client_p = find_server(NULL, server_p->name)))
 	{
 		sendto_realops_flags(UMODE_ALL, L_ADMIN,
 				     "Server %s already present from %s",

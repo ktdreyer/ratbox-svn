@@ -489,7 +489,7 @@ find_id(const char *name)
  * --Bleep
  */
 static struct Client *
-hash_find_masked_server(const char *name)
+hash_find_masked_server(struct Client *source_p, const char *name)
 {
 	char buf[HOSTLEN + 1];
 	char *p = buf;
@@ -509,7 +509,7 @@ hash_find_masked_server(const char *name)
 		 * Dont need to check IsServer() here since nicknames cant
 		 * have *'s in them anyway.
 		 */
-		if((server = find_server(s)))
+		if((server = find_server(source_p, s)))
 			return server;
 		p = s + 2;
 	}
@@ -547,7 +547,7 @@ find_any_client(const char *name)
 	}
 
 	/* wasnt found, look for a masked server */
-	return hash_find_masked_server(name);
+	return hash_find_masked_server(NULL, name);
 }
 
 /* find_client()
@@ -615,7 +615,7 @@ find_named_client(const char *name)
  * finds a server from the client hash table
  */
 struct Client *
-find_server(const char *name)
+find_server(struct Client *source_p, const char *name)
 {
 	struct Client *target_p;
 	dlink_node *ptr;
@@ -624,7 +624,8 @@ find_server(const char *name)
 	if(EmptyString(name))
 		return NULL;
 
-	if (IsDigit(*name) && strlen(name) == 3)
+	if((source_p == NULL || !MyClient(source_p)) && 
+	   IsDigit(*name) && strlen(name) == 3)
 	{
 		target_p = find_id(name);
       		return(target_p);
@@ -642,7 +643,7 @@ find_server(const char *name)
 	}
 
 	/* wasnt found, look for a masked server */
-	return hash_find_masked_server(name);
+	return hash_find_masked_server(source_p, name);
 }
 
 /* find_hostname()
