@@ -1,3 +1,7 @@
+*** 20010121_12 by wcampbel
+Changed some debugging code logging to L_NOTICE to L_DEBUG
+
+
 *** 20010121_11 by lusky
 - removed XOPEN_SOURCE defines.  If you REALLY need these, it needs to
   be detected by autoconf and specified in the CFLAGS--XOPEN_SOURCE *must*
