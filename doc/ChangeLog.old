@@ -1,3 +1,15 @@
+leeh        2002/02/23 12:54:37 EST	(20020223_5)
+
+  Modified files:
+    src                  class.c 
+  Log:
+  - cleanups to get_client_ping
+  
+  Revision  Changes    Path
+  7.33      +3 -7      ircd-hybrid-7/src/class.c
+
+
+
 androsyn    2002/02/23 12:32:45 EST	(20020223_4)
 
   Modified files:
