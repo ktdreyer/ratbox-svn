@@ -306,15 +306,14 @@ mo_modunload (struct Client *cptr, struct Client *sptr, int parc, char **parv)
       return 0;
     }
 
-  m_bn = basename (parv[1]);
-
   if (!IsSetOperAdmin (sptr))
     {
       sendto_one (sptr, ":%s NOTICE %s :You have no A flag",
 		  me.name, parv[0]);
-      free (m_bn);
       return 0;
     }
+
+  m_bn = basename (parv[1]);
 
   if (findmodule_byname (m_bn) == -1)
     {
