@@ -2239,14 +2239,14 @@ void set_channel_mode(struct Client *cptr,
   if(*modebuf_ex)
     {
       if(IsServer(sptr))
-	sendto_channel_local(type,
+	sendto_channel_local(ONLY_CHANOPS,
 			     chptr,
 			     ":%s MODE %s %s %s", 
 			     me.name,
 			     chname,
 			     modebuf_ex, parabuf_ex);
       else
-	sendto_channel_local(type,
+	sendto_channel_local(ONLY_CHANOPS,
 			     chptr,
 			     ":%s!%s@%s MODE %s %s %s", 
 			     sptr->name,
@@ -2285,14 +2285,14 @@ void set_channel_mode(struct Client *cptr,
   if(*modebuf_invex)
     {
       if(IsServer(sptr))
-	sendto_channel_local(type,
+	sendto_channel_local(ONLY_CHANOPS,
 			     chptr,
 			     ":%s MODE %s %s %s",
 			     me.name,
 			     chname,
 			     modebuf_invex, parabuf_invex);
       else
-	sendto_channel_local(type,
+	sendto_channel_local(ONLY_CHANOPS,
 			     chptr,
 			     ":%s!%s@%s MODE %s %s %s",
 			     sptr->name,
