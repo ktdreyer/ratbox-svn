@@ -1,3 +1,21 @@
+androsyn    2003/04/21 17:03:32 UTC	(20030421_1)
+
+  Modified files:
+    include              balloc.h 
+    servlink             io.c 
+    src                  balloc.c channel.c parse.c 
+  Log:
+  More signed/unsigned comparsion warning fixes
+  
+  Revision  Changes    Path
+  1.20      +3 -3      ircd-ratbox/include/balloc.h
+  1.32      +2 -2      ircd-ratbox/servlink/io.c
+  7.60      +1 -1      ircd-ratbox/src/balloc.c
+  7.372     +1 -1      ircd-ratbox/src/channel.c
+  7.156     +1 -1      ircd-ratbox/src/parse.c
+
+
+
 androsyn    2003/04/21 16:47:26 UTC	(20030421_0)
 
   Modified files:
