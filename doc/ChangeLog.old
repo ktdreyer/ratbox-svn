@@ -1,3 +1,17 @@
+leeh        2002/02/23 06:23:15 EST	(20020223_1)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  - we only set IsDead for local clients
+  - the ->localClient->listener is already in the MyConnect() below? - you
+    cant try to access it if its not a local client..
+  
+  Revision  Changes    Path
+  7.234     +6 -0      ircd-hybrid-7/src/client.c
+
+
+
 a1kmm       2002/02/23 00:29:17 EST	(20020223_0)
 
   Modified files:
