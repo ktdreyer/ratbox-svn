@@ -1048,9 +1048,8 @@ const char* show_capabilities(struct Client* target_p)
       target_p->localClient->in_cipher &&
       target_p->localClient->out_cipher)
   {
-    tl = ircsprintf(t, "ENC:%s,%s ",
-                    target_p->localClient->in_cipher->name,
-                    target_p->localClient->out_cipher->name);
+    tl = ircsprintf(t, "ENC:%s ",
+                    target_p->localClient->in_cipher->name);
     t += tl;
   }
 #endif
