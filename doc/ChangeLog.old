@@ -1,3 +1,9 @@
+*** 20001221_12 by db
+- removed allow_bots from convertconf.c
+- removed example of allow_bots ircd.conf.new
+
+
+
 *** 20001221_11 by wcampbel
 Documented all currently working options
 
