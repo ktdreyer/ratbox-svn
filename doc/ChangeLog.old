@@ -1,3 +1,9 @@
+*** 20010702_7 by androsyn
+Fixed buglet where we print the pid before fork() not after fork().
+
+
+
+
 *** 20010702_6 by jdc
 - include/linebuf.h
   src/linebuf.c
