@@ -724,10 +724,6 @@ add_new_majority_gline(const char* oper_nick,
   struct gline_pending *pending = (struct gline_pending*)
     MyMalloc(sizeof(struct gline_pending));
 
-  assert(0 != pending);
-
-  memset(pending, 0, sizeof(struct gline_pending));
-
   strncpy_irc(pending->oper_nick1, oper_nick, NICKLEN);
   strncpy_irc(pending->oper_user1, oper_user, USERLEN);
   strncpy_irc(pending->oper_host1, oper_host, HOSTLEN);
