@@ -167,6 +167,10 @@ static void mo_forcejoin(struct Client *client_p, struct Client *source_p,
 	              me.name, (unsigned long) chptr->channelts,
 	              chptr->chname, type ? sjmode : ' ', target_p->name);
 
+      sendto_channel_local(ALL_MEMBERS, chptr, ":%s!%s@%s JOIN :%s",
+                             target_p->name, target_p->username,
+                             target_p->host, chptr->chname);
+
       if(type)
         sendto_channel_local(ALL_MEMBERS, chptr, ":%s MODE %s +%c %s",
 	                     me.name, chptr->chname, mode, target_p->name);
