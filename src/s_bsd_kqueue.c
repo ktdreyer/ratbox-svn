@@ -89,7 +89,9 @@ void
 kq_update_events(int fd, short filter, PF * handler)
 {
     PF *cur_handler;
+#if 0
     int retval;
+#endif
 
     switch (filter) {
     case EVFILT_READ:
@@ -130,7 +132,7 @@ kq_update_events(int fd, short filter, PF * handler)
 	}
 	if (kqoff == kqmax) {
 		kevent(kq, kqlst, kqoff, NULL, 0, &zero_timespec);
-		kqoff == 0;
+		kqoff = 0;
 	} else {
 		kqoff++;
 	}
