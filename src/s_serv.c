@@ -1244,15 +1244,8 @@ server_estab(struct Client *client_p)
 		/* we won't overflow FD_DESC_SZ here, as it can hold
 		 * client_p->name + 64
 		 */
-#ifdef HAVE_SOCKETPAIR
 		fd_note(client_p->localClient->fd, "slink data: %s", client_p->name);
 		fd_note(client_p->localClient->ctrlfd, "slink ctrl: %s", client_p->name);
-#else
-		fd_note(client_p->localClient->fd, "slink data (out): %s", client_p->name);
-		fd_note(client_p->localClient->ctrlfd, "slink ctrl (out): %s", client_p->name);
-		fd_note(client_p->localClient->fd_r, "slink data  (in): %s", client_p->name);
-		fd_note(client_p->localClient->ctrlfd_r, "slink ctrl  (in): %s", client_p->name);
-#endif
 	}
 	else
 		fd_note(client_p->localClient->fd, "Server: %s", client_p->name);
@@ -1461,7 +1454,7 @@ fork_server(struct Client *server)
 	char fd_str[5][6];	/* store 5x '6' '5' '5' '3' '5' '\0' */
 	char *kid_argv[7];
 	char slink[] = "-slink";
-#ifdef HAVE_SOCKETPAIR
+
 	/* ctrl */
 	if(socketpair(AF_UNIX, SOCK_STREAM, 0, fd_temp) < 0)
 		goto fork_error;
@@ -1479,31 +1472,6 @@ fork_server(struct Client *server)
 	slink_fds[1][1][1] = fd_temp[1];
 	slink_fds[1][0][1] = fd_temp[0];
 	slink_fds[1][1][0] = fd_temp[1];
-#else
-	/* ctrl parent -> child */
-	if(pipe(fd_temp) < 0)
-		goto fork_error;
-	slink_fds[0][0][0] = fd_temp[0];
-	slink_fds[0][1][1] = fd_temp[1];
-
-	/* ctrl child -> parent */
-	if(pipe(fd_temp) < 0)
-		goto fork_error;
-	slink_fds[0][1][0] = fd_temp[0];
-	slink_fds[0][0][1] = fd_temp[1];
-
-	/* data parent -> child */
-	if(pipe(fd_temp) < 0)
-		goto fork_error;
-	slink_fds[1][0][0] = fd_temp[0];
-	slink_fds[1][1][1] = fd_temp[1];
-
-	/* data child -> parent */
-	if(pipe(fd_temp) < 0)
-		goto fork_error;
-	slink_fds[1][1][0] = fd_temp[0];
-	slink_fds[1][0][1] = fd_temp[1];
-#endif
 #ifdef __CYGWIN__
 	if((ret = vfork()) < 0)
 #else
@@ -1574,11 +1542,6 @@ fork_server(struct Client *server)
 		server->localClient->ctrlfd = slink_fds[0][1][1];
 		server->localClient->fd = slink_fds[1][1][1];
 
-#ifndef HAVE_SOCKETPAIR
-		server->localClient->ctrlfd_r = slink_fds[0][1][0];
-		server->localClient->fd_r = slink_fds[1][1][0];
-#endif
-
 		if(!set_non_blocking(server->localClient->fd))
 		{
 			report_error(L_ADMIN, NONB_ERROR_MSG,
@@ -1605,42 +1568,8 @@ fork_server(struct Client *server)
 				     get_client_name(server, MASK_IP), errno);
 		}
 
-#ifndef HAVE_SOCKETPAIR
-		if(!set_non_blocking(server->localClient->fd_r))
-		{
-			report_error(L_ADMIN, NONB_ERROR_MSG,
-#ifdef HIDE_SERVERS_IPS
-				     get_client_name(server, MASK_IP),
-#else
-				     get_client_name(server, SHOW_IP),
-#endif
-				     errno);
-			report_error(L_OPER, NONB_ERROR_MSG,
-				     get_client_name(server, MASK_IP), errno);
-		}
-		if(!set_non_blocking(server->localClient->ctrlfd_r))
-		{
-			report_error(L_ADMIN, NONB_ERROR_MSG,
-#ifdef HIDE_SERVERS_IPS
-				     get_client_name(server, MASK_IP),
-#else
-				     get_client_name(server, SHOW_IP),
-#endif
-				     errno);
-			report_error(L_OPER, NONB_ERROR_MSG,
-				     get_client_name(server, MASK_IP), errno);
-		}
-#endif
-
-#ifdef HAVE_SOCKETPAIR
 		fd_open(server->localClient->ctrlfd, FD_SOCKET, NULL);
 		fd_open(server->localClient->fd, FD_SOCKET, NULL);
-#else
-		fd_open(server->localClient->ctrlfd, FD_PIPE, NULL);
-		fd_open(server->localClient->fd, FD_PIPE, NULL);
-		fd_open(server->localClient->ctrlfd_r, FD_PIPE, NULL);
-		fd_open(server->localClient->fd_r, FD_PIPE, NULL);
-#endif
 
 		read_ctrl_packet(slink_fds[0][1][0], server);
 		read_packet(slink_fds[1][1][0], server);

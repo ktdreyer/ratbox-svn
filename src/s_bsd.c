@@ -318,12 +318,6 @@ close_connection(struct Client *client_p)
 		if(client_p->localClient->fd > -1)
 		{
 			fd_close(client_p->localClient->ctrlfd);
-#ifndef HAVE_SOCKETPAIR
-			fd_close(client_p->localClient->ctrlfd_r);
-			fd_close(client_p->localClient->fd_r);
-			client_p->localClient->ctrlfd_r = -1;
-			client_p->localClient->fd_r = -1;
-#endif
 			client_p->localClient->ctrlfd = -1;
 		}
 	}

@@ -142,10 +142,7 @@ make_client(struct Client *from)
 
 		client_p->localClient->fd = -1;
 		client_p->localClient->ctrlfd = -1;
-#ifndef HAVE_SOCKETPAIR
-		client_p->localClient->fd_r = -1;
-		client_p->localClient->ctrlfd_r = -1;
-#endif
+
 		/* as good a place as any... */
 		dlinkAdd(client_p, &client_p->localClient->tnode, &unknown_list);
 	}
@@ -1360,12 +1357,6 @@ exit_local_server(struct Client *client_p, struct Client *source_p, struct Clien
 	{
 		fd_close(source_p->localClient->ctrlfd);
 		source_p->localClient->ctrlfd = -1;
-#ifndef HAVE_SOCKETPAIR
-		fd_close(source_p->localClient->ctrlfd_r);
-		fd_close(source_p->localClient->fd_r);
-		source_p->localClient->ctrlfd_r = -1;
-		source_p->localClient->fd_r = -1;
-#endif
 	}
 
 	if(source_p->servptr && source_p->servptr->serv)

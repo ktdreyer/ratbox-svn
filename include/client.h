@@ -228,16 +228,10 @@ struct LocalUser
 #endif
 
 	int fd;			/* >= 0, for local clients */
-#ifndef HAVE_SOCKETPAIR
-	int fd_r;		/* fd for reading */
-#endif
 
 	int ctrlfd;		/* For servers:
 				   control fd used for sending commands
 				   to servlink */
-#ifndef HAVE_SOCKETPAIR
-	int ctrlfd_r;		/* control fd for reading */
-#endif
 
 	struct SlinkRpl slinkrpl;	/* slink reply being parsed */
 	unsigned char *slinkq;	/* sendq for control data */

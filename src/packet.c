@@ -338,7 +338,7 @@ read_packet(int fd, void *data)
 	struct LocalUser *lclient_p = client_p->localClient;
 	int length = 0;
 	int lbuf_len;
-	int fd_r;
+
 	int binary = 0;
 #ifndef NDEBUG
 	struct hook_io_data hdata;
@@ -346,22 +346,13 @@ read_packet(int fd, void *data)
 	if(IsDeadorAborted(client_p))
 		return;
 
-	fd_r = client_p->localClient->fd;
-
-#ifndef HAVE_SOCKETPAIR
-	if(HasServlink(client_p))
-	{
-		s_assert(client_p->localClient->fd_r > -1);
-		fd_r = client_p->localClient->fd_r;
-	}
-#endif
 
 	/*
 	 * Read some data. We *used to* do anti-flood protection here, but
 	 * I personally think it makes the code too hairy to make sane.
 	 *     -- adrian
 	 */
-	length = recv(fd_r, readBuf, READBUF_SIZE, RECV_FLAGS);
+	length = recv(client_p->localClient->fd, readBuf, READBUF_SIZE, RECV_FLAGS);
 
 	if(length <= 0)
 	{
@@ -420,27 +411,15 @@ read_packet(int fd, void *data)
 		}
 	}
 
-	/* server fd may have changed */
-
-	fd_r = client_p->localClient->fd;
-#ifndef HAVE_SOCKETPAIR
-	if(HasServlink(client_p))
-	{
-		s_assert(client_p->localClient->fd_r > -1);
-		fd_r = client_p->localClient->fd_r;
-	}
-#endif
-
-
 	/* If we get here, we need to register for another COMM_SELECT_READ */
 	if(PARSE_AS_SERVER(client_p))
 	{
-		comm_setselect(fd_r, FDLIST_SERVER, COMM_SELECT_READ,
+		comm_setselect(client->localClient->fd, FDLIST_SERVER, COMM_SELECT_READ,
 			      read_packet, client_p, 0);
 	}
 	else
 	{
-		comm_setselect(fd_r, FDLIST_IDLECLIENT,
+		comm_setselect(client->localClient->fd, FDLIST_IDLECLIENT,
 			       COMM_SELECT_READ, read_packet, client_p, 0);
 	}
 }
