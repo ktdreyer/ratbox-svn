@@ -301,9 +301,15 @@ check_pings_list(dlink_list *list)
     {
       next_ptr = ptr->next;
       client_p = ptr->data;
-
+#ifdef PERSISTANT_CLIENTS
       if (IsPersisting(client_p))
-        continue;
+        {
+         if ((CurrentTime - client_p->user->last_detach_time)
+              > ConfigFileEntry.persist_expire)
+           exit_client(client_p, client_p, client_p, "Client Expired");
+         continue;
+        }
+#endif
       /*
       ** Note: No need to notify opers here. It's
       ** already done when "FLAGS_DEADSOCKET" is set.

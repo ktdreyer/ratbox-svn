@@ -129,6 +129,7 @@ hide_server	{ return HIDESERVER; }
 host		{ return HOST; }
 hub		{ return HUB; }
 hub_mask	{ return HUB_MASK; }
+persistant_expire_time { return PERSISTANT_EXPIRE_TIME; }
 idletime        { return IDLETIME; }
 include		{ return INCLUDE; }
 ip		{ return IP; }

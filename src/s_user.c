@@ -67,7 +67,7 @@ static int valid_hostname(const char* hostname);
 static int valid_username(const char* username);
 static void report_and_set_user_flags( struct Client *, struct ConfItem * );
 static int check_X_line(struct Client *client_p, struct Client *source_p);
-static void user_welcome(struct Client *source_p);
+void user_welcome(struct Client *source_p);
 static int introduce_client(struct Client *client_p, struct Client *source_p,
 			    struct User *user, char *nick);
 int oper_up( struct Client *source_p, struct ConfItem *aconf );
@@ -1223,7 +1223,7 @@ void send_umode_out(struct Client *client_p,
  * output	- NONE
  * side effects	-
  */
-static void user_welcome(struct Client *source_p)
+void user_welcome(struct Client *source_p)
 {
   sendto_one(source_p, form_str(RPL_WELCOME), me.name, source_p->name, source_p->name );
   /* This is a duplicate of the NOTICE but see below...*/
