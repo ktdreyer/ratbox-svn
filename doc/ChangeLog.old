@@ -1,3 +1,15 @@
+*** 20001103_6 by adrian
+
+
+* move highest_fd into fdlist.h and out of s_bsd.h for the time
+  being
+* add a number_fd variable giving us the number of file descriptors
+  currently open. This will become useful for limiting socket creation
+  and so forth when we're trying to avoid over-flowing the number of
+  file descriptors open ..
+
+
+
 *** 20001103_5 by adrian
 
 
