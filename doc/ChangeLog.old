@@ -1,3 +1,18 @@
+androsyn    2002/02/03 13:58:08 EST	(20020203_0)
+
+  Modified files:
+    modules              m_kline.c m_trace.c 
+  Log:
+  A few changes that will keep code from directly calling time() by itself.
+  It now calls set_time(), updating SystemTime(and CurrentTime), and uses
+  CurrentTime directly.
+  
+  Revision  Changes    Path
+  1.96      +7 -6      ircd-hybrid-7/modules/m_kline.c
+  1.43      +14 -17    ircd-hybrid-7/modules/m_trace.c
+
+
+
 leeh        2002/02/02 11:01:14 EST	(20020202_3)
 
   Modified files:
