@@ -1,3 +1,98 @@
+leeh        2004/03/03 18:03:09 EST	(20040303_18)
+
+  Modified files:
+    include              msg.h 
+    modules              m_accept.c m_admin.c m_away.c m_capab.c 
+                         m_challenge.c m_close.c m_connect.c 
+                         m_dline.c m_encap.c m_eob.c m_etrace.c 
+                         m_gline.c m_help.c m_htm.c m_info.c 
+                         m_invite.c m_ison.c m_join.c m_kline.c 
+                         m_knock.c m_links.c m_list.c m_locops.c 
+                         m_lusers.c m_map.c m_motd.c m_names.c 
+                         m_oper.c m_operspy.c m_pass.c m_ping.c 
+                         m_pong.c m_post.c m_rehash.c m_restart.c 
+                         m_resv.c m_set.c m_stats.c m_svinfo.c 
+                         m_tb.c m_testline.c m_time.c m_topic.c 
+                         m_trace.c m_user.c m_userhost.c m_users.c 
+                         m_version.c m_wallops.c m_who.c m_whois.c 
+                         m_whowas.c m_xline.c 
+    modules/core         m_die.c m_error.c m_kick.c m_kill.c 
+                         m_message.c m_mode.c m_nick.c m_part.c 
+                         m_quit.c m_server.c m_sjoin.c m_squit.c 
+  Log:
+  - add an encap handler to struct Message
+    this regexp was sponsored by netmunky :)
+  
+  Revision  Changes    Path
+  7.49      +1 -0      ircd-ratbox/include/msg.h
+  1.45      +2 -2      ircd-ratbox/modules/core/m_die.c
+  1.7       +2 -2      ircd-ratbox/modules/core/m_error.c
+  1.75      +2 -2      ircd-ratbox/modules/core/m_kick.c
+  1.99      +2 -2      ircd-ratbox/modules/core/m_kill.c
+  1.143     +3 -3      ircd-ratbox/modules/core/m_message.c
+  1.97      +4 -4      ircd-ratbox/modules/core/m_mode.c
+  1.144     +2 -2      ircd-ratbox/modules/core/m_nick.c
+  1.89      +2 -2      ircd-ratbox/modules/core/m_part.c
+  1.44      +2 -2      ircd-ratbox/modules/core/m_quit.c
+  1.130     +3 -3      ircd-ratbox/modules/core/m_server.c
+  1.194     +2 -2      ircd-ratbox/modules/core/m_sjoin.c
+  1.77      +2 -2      ircd-ratbox/modules/core/m_squit.c
+  1.56      +2 -2      ircd-ratbox/modules/m_accept.c
+  1.57      +2 -2      ircd-ratbox/modules/m_admin.c
+  1.54      +2 -2      ircd-ratbox/modules/m_away.c
+  1.45      +3 -3      ircd-ratbox/modules/m_capab.c
+  1.68      +3 -3      ircd-ratbox/modules/m_challenge.c
+  1.41      +2 -2      ircd-ratbox/modules/m_close.c
+  1.68      +2 -2      ircd-ratbox/modules/m_connect.c
+  1.32      +3 -3      ircd-ratbox/modules/m_dline.c
+  1.18      +2 -2      ircd-ratbox/modules/m_encap.c
+  1.46      +2 -2      ircd-ratbox/modules/m_eob.c
+  1.9       +2 -2      ircd-ratbox/modules/m_etrace.c
+  1.138     +3 -3      ircd-ratbox/modules/m_gline.c
+  1.66      +3 -3      ircd-ratbox/modules/m_help.c
+  1.18      +2 -2      ircd-ratbox/modules/m_htm.c
+  1.103     +2 -2      ircd-ratbox/modules/m_info.c
+  1.79      +2 -2      ircd-ratbox/modules/m_invite.c
+  1.50      +2 -2      ircd-ratbox/modules/m_ison.c
+  1.145     +2 -2      ircd-ratbox/modules/m_join.c
+  1.178     +3 -3      ircd-ratbox/modules/m_kline.c
+  1.87      +2 -2      ircd-ratbox/modules/m_knock.c
+  1.61      +2 -2      ircd-ratbox/modules/m_links.c
+  1.75      +2 -2      ircd-ratbox/modules/m_list.c
+  1.48      +2 -2      ircd-ratbox/modules/m_locops.c
+  1.42      +2 -2      ircd-ratbox/modules/m_lusers.c
+  1.36      +2 -2      ircd-ratbox/modules/m_map.c
+  1.52      +2 -2      ircd-ratbox/modules/m_motd.c
+  1.78      +2 -2      ircd-ratbox/modules/m_names.c
+  1.81      +2 -2      ircd-ratbox/modules/m_oper.c
+  1.2       +2 -2      ircd-ratbox/modules/m_operspy.c
+  1.44      +2 -2      ircd-ratbox/modules/m_pass.c
+  1.52      +2 -2      ircd-ratbox/modules/m_ping.c
+  1.51      +2 -2      ircd-ratbox/modules/m_pong.c
+  1.27      +4 -4      ircd-ratbox/modules/m_post.c
+  1.78      +2 -2      ircd-ratbox/modules/m_rehash.c
+  1.43      +2 -2      ircd-ratbox/modules/m_restart.c
+  1.53      +3 -3      ircd-ratbox/modules/m_resv.c
+  1.75      +2 -2      ircd-ratbox/modules/m_set.c
+  1.200     +2 -2      ircd-ratbox/modules/m_stats.c
+  1.56      +2 -2      ircd-ratbox/modules/m_svinfo.c
+  1.3       +2 -2      ircd-ratbox/modules/m_tb.c
+  1.46      +2 -2      ircd-ratbox/modules/m_testline.c
+  1.44      +2 -2      ircd-ratbox/modules/m_time.c
+  1.86      +2 -2      ircd-ratbox/modules/m_topic.c
+  1.93      +2 -2      ircd-ratbox/modules/m_trace.c
+  1.42      +2 -2      ircd-ratbox/modules/m_user.c
+  1.55      +2 -2      ircd-ratbox/modules/m_userhost.c
+  1.42      +2 -2      ircd-ratbox/modules/m_users.c
+  1.63      +2 -2      ircd-ratbox/modules/m_version.c
+  1.55      +3 -3      ircd-ratbox/modules/m_wallops.c
+  1.106     +2 -2      ircd-ratbox/modules/m_who.c
+  1.134     +2 -2      ircd-ratbox/modules/m_whois.c
+  1.48      +2 -2      ircd-ratbox/modules/m_whowas.c
+  1.45      +3 -3      ircd-ratbox/modules/m_xline.c
+
+
+
 leeh        2004/03/03 17:44:56 EST	(20040303_17)
 
   Modified files:
