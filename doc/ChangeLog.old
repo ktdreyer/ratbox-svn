@@ -1,3 +1,7 @@
+*** 20010409_6 by fl_
+- added serverhiding checking to commands that can be used remotely..
+
+
 *** 20010409_5 by a1kmm
 - Removed a htonl that shouldn't be there... so now vhosts should work.
 
