@@ -1,3 +1,15 @@
+leeh        2004/01/16 05:50:22 EST	(20040116_0)
+
+  Modified files:
+    src                  s_user.c 
+  Log:
+  - fix valid_hostname()
+  
+  Revision  Changes    Path
+  7.300     +2 -1      ircd-ratbox/src/s_user.c
+
+
+
 androsyn    2004/01/14 14:31:37 EST	(20040114_3)
 
   Modified files:
