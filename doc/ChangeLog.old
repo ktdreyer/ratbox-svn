@@ -1,3 +1,7 @@
+*** 19990831_6 by tomh
+break out m_nick
+
+
 *** 19990831_5 by tomh
 Changed MyFree to automatically set the pointer to zero after freeing it.
 #define MyFree(x) do { if ((x)) { free((x)); (x) = 0; } while (0)
