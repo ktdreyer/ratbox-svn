@@ -172,8 +172,6 @@ struct config_file_entry
 	const char *xlinefile;
 	const char *resvfile;
 
-	const char *glinefile;
-
 	char *logpath;
 	char *operlog;
 	char *glinelog;

@@ -596,7 +596,6 @@ main(int argc, char *argv[])
 	ConfigFileEntry.configfile = CPATH;	/* Server configuration file */
 	ConfigFileEntry.klinefile = KPATH;	/* Server kline file */
 	ConfigFileEntry.dlinefile = DLPATH;	/* dline file */
-	ConfigFileEntry.glinefile = GPATH;	/* gline log file */
 	ConfigFileEntry.xlinefile = XPATH;
 	ConfigFileEntry.resvfile = RESVPATH;
 	ConfigFileEntry.connect_timeout = 30;	/* Default to 30 */

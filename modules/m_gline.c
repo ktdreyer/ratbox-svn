@@ -42,7 +42,6 @@
 #include "scache.h"
 #include "send.h"
 #include "msg.h"
-#include "fileio.h"
 #include "s_serv.h"
 #include "hash.h"
 #include "parse.h"
@@ -71,14 +70,8 @@ static int majority_gline(struct Client *source_p, const char *user,
 static void set_local_gline(struct Client *source_p, const char *user,
 			    const char *host, const char *reason);
 
-static void log_gline_request(struct Client *source_p, const char *user,
-			      const char *host, const char *reason);
-static void log_gline(struct Client *, struct gline_pending *,
-		      const char *user, const char *host, const char *reason); 
-
 static int check_wild_gline(const char *, const char *);
 static int invalid_gline(struct Client *, const char *, const char *, char *);
-static char *small_file_date(void);
 
 static int remove_temp_gline(const char *, const char *);
 
@@ -163,7 +156,9 @@ mo_gline(struct Client *client_p, struct Client *source_p, int parc, const char 
 			"%s!%s@%s on %s is requesting gline for [%s@%s] [%s]",
 			source_p->name, source_p->username,
 			source_p->host, me.name, user, host, reason);
-	log_gline_request(source_p, user, host, reason);
+	ilog(L_GLINE, "GLINE requested by %s!%s@%s on %s for %s@%s [%s]",
+	     source_p->name, source_p->username, source_p->host, 
+	     source_p->user->server, user, host, reason);
 
 	/* If at least 3 opers agree this user should be G lined then do it */
 	majority_gline(source_p, user, host, reason);
@@ -233,12 +228,14 @@ mc_gline(struct Client *client_p, struct Client *source_p,
 		return 0;
 	}
 
-	log_gline_request(acptr, user, host, reason);
-
 	sendto_realops_flags(UMODE_ALL, L_ALL,
 			"%s!%s@%s on %s is requesting gline for [%s@%s] [%s]",
 			acptr->name, acptr->username, acptr->host,
 			acptr->user->server, user, host, reason);
+
+	ilog(L_GLINE, "GLINE requested by %s!%s@%s on %s for %s@%s [%s]",
+	     source_p->name, source_p->username, source_p->host, 
+	     source_p->user->server, user, host, reason);
 
 	/* If at least 3 opers agree this user should be G lined then do it */
 	majority_gline(acptr, user, host, reason);
@@ -306,12 +303,14 @@ ms_gline(struct Client *client_p, struct Client *source_p, int parc, const char 
 		return 0;
 	}
 
-	log_gline_request(acptr, user, host, reason);
-
 	sendto_realops_flags(UMODE_ALL, L_ALL,
 			"%s!%s@%s on %s is requesting gline for [%s@%s] [%s]",
 			acptr->name, acptr->username, acptr->host,
 			acptr->user->server, user, host, reason);
+
+	ilog(L_GLINE, "GLINE requested by %s!%s@%s on %s for %s@%s [%s]",
+	     source_p->name, source_p->username, source_p->host, 
+	     source_p->user->server, user, host, reason);
 
 	/* If at least 3 opers agree this user should be G lined then do it */
 	majority_gline(acptr, user, host, reason);
@@ -503,145 +502,11 @@ set_local_gline(struct Client *source_p, const char *user,
 			     source_p->name, source_p->username,
 			     source_p->host, source_p->user->server,
 			     user, host, reason);
+	ilog(L_GLINE, "GLINE triggered by %s!%s@%s on %s for %s@%s [%s]",
+	     source_p->name, source_p->username, source_p->host, 
+	     source_p->user->server, user, host, reason);
+
 	check_glines();
-}
-
-
-/*
- * log_gline_request()
- *
- */
-static void
-log_gline_request(struct Client *source_p, const char *user,
-		  const char *host, const char *reason)
-{
-	char buffer[2 * BUFSIZE];
-	char filenamebuf[PATH_MAX + 1];
-	static char timebuffer[MAX_DATE_STRING];
-	struct tm *tmptr;
-	FBFILE *out;
-
-	if(ConfigFileEntry.glinefile == NULL)
-	{
-		sendto_realops_flags(UMODE_ALL, L_ALL, "*** Problem opening glinefile");
-		return;
-	}
-
-	ircsnprintf(filenamebuf, sizeof(filenamebuf), "%s.%s",
-		 ConfigFileEntry.glinefile, small_file_date());
-
-	if((out = fbopen(filenamebuf, "+a")) == NULL)
-	{
-		sendto_realops_flags(UMODE_ALL, L_ALL, "*** Problem opening %s: %s",
-				     filenamebuf, strerror(errno));
-		return;
-	}
-
-	tmptr = localtime((const time_t *) &CurrentTime);
-	strftime(timebuffer, MAX_DATE_STRING, "%Y/%m/%d %H:%M:%S", tmptr);
-
-	ircsnprintf(buffer, sizeof(buffer),
-		   "#Gline for %s@%s [%s] requested by %s!%s@%s on %s at %s\n",
-		   user, host, reason, source_p->name, source_p->username, 
-		   source_p->host, source_p->user->server, timebuffer);
-
-	if(fbputs(buffer, out) == -1)
-	{
-		sendto_realops_flags(UMODE_ALL, L_ALL, "*** Problem writing to %s (%s)",
-				     filenamebuf, strerror(errno));
-	}
-	fbclose(out);
-}
-
-/*
- * log_gline()
- *
- */
-static void
-log_gline(struct Client *source_p, struct gline_pending *pending,
-	  const char *user, const char *host, const char *reason)
-{
-	char buffer[2 * BUFSIZE];
-	char filenamebuf[PATH_MAX + 1];
-	static char timebuffer[MAX_DATE_STRING + 1];
-	struct tm *tmptr;
-	FBFILE *out;
-
-	if(ConfigFileEntry.glinefile == NULL)
-	{
-		sendto_realops_flags(UMODE_ALL, L_ALL, "*** Problem opening glinefile.");
-		return;
-	}
-
-	ircsnprintf(filenamebuf, sizeof(filenamebuf),
-		 "%s.%s", ConfigFileEntry.glinefile, small_file_date());
-
-	if((out = fbopen(filenamebuf, "a")) == NULL)
-	{
-		sendto_realops_flags(UMODE_ALL, L_ALL, "*** Problem opening %s", filenamebuf);
-		return;
-	}
-
-	tmptr = localtime((const time_t *) &CurrentTime);
-	strftime(timebuffer, MAX_DATE_STRING, "%Y/%m/%d %H:%M:%S", tmptr);
-
-	ircsnprintf(buffer, sizeof(buffer),
-		 "#Gline for %s@%s %s added by the following\n", user, host, timebuffer);
-
-	if(fbputs(buffer, out) == -1)
-	{
-		sendto_realops_flags(UMODE_ALL, L_ALL, "*** Problem writing to %s", filenamebuf);
-		fbclose(out);
-		return;
-	}
-
-	ircsnprintf(buffer, sizeof(buffer), "#%s!%s@%s on %s [%s]\n",
-		 pending->oper_nick1, pending->oper_user1,
-		 pending->oper_host1, pending->oper_server1,
-		 pending->reason1 ? pending->reason1 : "No reason");
-
-	if(fbputs(buffer, out) == -1)
-	{
-		sendto_realops_flags(UMODE_ALL, L_ALL, "*** Problem writing to %s", filenamebuf);
-		return;
-	}
-
-	ircsnprintf(buffer, sizeof(buffer), "#%s!%s@%s on %s [%s]\n",
-		 pending->oper_nick2, pending->oper_user2,
-		 pending->oper_host2, pending->oper_server2,
-		 pending->reason2 ? pending->reason2 : "No reason");
-
-	if(fbputs(buffer, out) == -1)
-	{
-		sendto_realops_flags(UMODE_ALL, L_ALL, "*** Problem writing to %s", filenamebuf);
-		fbclose(out);
-		return;
-	}
-
-	ircsnprintf(buffer, sizeof(buffer), "#%s!%s@%s on %s [%s]\n",
-		 source_p->name, source_p->username, source_p->host,
-		 source_p->user->server, (reason) ? reason : "No reason");
-
-	if(fbputs(buffer, out) == -1)
-	{
-		sendto_realops_flags(UMODE_ALL, L_ALL, "*** Problem writing to %s", filenamebuf);
-		fbclose(out);
-		return;
-	}
-
-	ircsnprintf(buffer, sizeof(buffer),
-		 "\"%s\",\"%s\",\"%s %s\",\"%s\",%lu\n",
-		 user, host, reason, timebuffer, source_p->name,
-		 (unsigned long) CurrentTime);
-
-	if(fbputs(buffer, out) == -1)
-	{
-		sendto_realops_flags(UMODE_ALL, L_ALL, "*** Problem writing to %s", filenamebuf);
-		fbclose(out);
-		return;
-	}
-
-	fbclose(out);
 }
 
 /* majority_gline()
@@ -701,9 +566,6 @@ majority_gline(struct Client *source_p, const char *user,
 					return NO;
 				}
 
-				log_gline(source_p, pending, 
-					  user, host, reason);
-
 				/* trigger the gline using the original reason --fl */
 				set_local_gline(source_p, user, host,
 						pending->reason1);
@@ -752,24 +614,6 @@ majority_gline(struct Client *source_p, const char *user,
 	dlinkAddAlloc(pending, &pending_glines);
 
 	return NO;
-}
-
-/* small_file_date()
- *
- * Make a small YYYYMMDD formatted string suitable for a
- * dated file stamp.
- */
-static char *
-small_file_date(void)
-{
-	static char tbuffer[MAX_DATE_STRING];
-	struct tm *tmptr;
-	time_t lclock;
-
-	lclock = CurrentTime;
-	tmptr = localtime(&lclock);
-	strftime(tbuffer, MAX_DATE_STRING, "%Y%m%d", tmptr);
-	return tbuffer;
 }
 
 /* remove_temp_gline()

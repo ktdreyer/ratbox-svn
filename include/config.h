@@ -66,7 +66,6 @@
 #define DLPATH   ETCPATH "/dline.conf"	/* dline file */
 #define XPATH	 ETCPATH "/xline.conf"	/* xline file */
 #define RESVPATH ETCPATH "/resv.conf"	/* resv file */
-#define GPATH    LOGPATH "/gline.log"	/* gline logfile */
 #define RPATH    ETCPATH "/ircd.rsa"	/* ircd rsa private keyfile */
 #define MPATH    ETCPATH "/ircd.motd"	/* MOTD file */
 #define LPATH    LOGPATH "/ircd.log"	/* ircd logfile */
@@ -104,7 +103,6 @@
 #define DLPATH   ETCPATH "DLINE.CONF"	/* dline file */
 #define XPATH	 ETCPATH "XLINE.CONF"	/* xline file */
 #define RESVPATH ETCPATH "RESV.CONF"	/* resv file */
-#define GPATH    LOGPATH "GLINE.LOG"	/* gline logfile */
 #define RPATH    ETCPATH "IRCD.RSA"	/* RSA private key file */
 #define MPATH    ETCPATH "IRCD.MOTD"	/* MOTD filename */
 #define LPATH    LOGPATH "IRCD.LOG"	/* logfile */
