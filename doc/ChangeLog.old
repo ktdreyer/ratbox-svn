@@ -1,3 +1,8 @@
+*** 20010105_25 by db
+- you can't safely re-use bitmasks!
+
+
+
 *** 20010105_24 by db
 - removed BLOAT again add_hub_or_leaf was not necessary with
   new conf format, only with old.
