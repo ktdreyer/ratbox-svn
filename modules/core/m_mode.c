@@ -150,9 +150,9 @@ static void m_mode(struct Client *cptr, struct Client *sptr,
      n++;
     }
 
-  else if (HasVchans(chptr) || IsVchan(chptr))
+  else
     {
-      if(HasVchans(chptr))
+      if (HasVchans(chptr))
         {
           if ((vchan = map_vchan(chptr,sptr)) != NULL)
             chptr = vchan; /* root = chptr, chptr = vchan */
@@ -162,7 +162,7 @@ static void m_mode(struct Client *cptr, struct Client *sptr,
            *       channel.  MODE #vchan !nick ? (ugh)
            */
         }
-      else
+      else if (IsVchan(chptr))
         {
           vchan = find_bchan(chptr);
           root = vchan;  /* root = vchan, chptr = chptr */
