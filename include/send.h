@@ -46,7 +46,7 @@ struct Channel;
 struct dlink_list;
 
 /* The nasty global also used in s_serv.c for server bursts */
-unsigned long current_serial;
+extern unsigned long current_serial;
 
 /* send.c prototypes */
 
@@ -81,7 +81,7 @@ AFP(2, 3);
 			       const char *format, ...) AFP(5, 6);
 
      extern void sendto_match_butone(struct Client *, struct Client *,
-				     char *, int, const char *, ...) AFP(5, 6);
+				     const char *, int, const char *, ...) AFP(5, 6);
 
      extern void sendto_match_servs(struct Client *source_p,
 				    const char *mask, int capab, const char *, ...) AFP(4, 5);

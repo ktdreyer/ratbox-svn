@@ -39,8 +39,8 @@
 #include "parse.h"
 #include "modules.h"
 
-static void ms_squit(struct Client *, struct Client *, int, char **);
-static void mo_squit(struct Client *, struct Client *, int, char **);
+static void ms_squit(struct Client *, struct Client *, int, const char **);
+static void mo_squit(struct Client *, struct Client *, int, const char **);
 
 struct Message squit_msgtab = {
 	"SQUIT", 0, 0, 1, 0, MFLG_SLOW, 0,
@@ -52,12 +52,12 @@ DECLARE_MODULE_AV1(NULL, NULL, squit_clist, NULL, NULL, "$Revision$");
 
 struct squit_parms
 {
-	char *server_name;
+	const char *server_name;
 	struct Client *target_p;
 };
 
 static struct squit_parms *find_squit(struct Client *client_p,
-				      struct Client *source_p, char *server);
+				      struct Client *source_p, const char *server);
 
 
 /*
@@ -67,10 +67,10 @@ static struct squit_parms *find_squit(struct Client *client_p,
  *      parv[2] = comment
  */
 static void
-mo_squit(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mo_squit(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct squit_parms *found_squit;
-	char *comment = (parc > 2 && parv[2]) ? parv[2] : client_p->name;
+	const char *comment = (parc > 2 && parv[2]) ? parv[2] : client_p->name;
 
 	if(!IsOperRemote(source_p))
 	{
@@ -112,10 +112,10 @@ mo_squit(struct Client *client_p, struct Client *source_p, int parc, char *parv[
  *      parv[2] = comment
  */
 static void
-ms_squit(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+ms_squit(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct squit_parms *found_squit;
-	char *comment = (parc > 2 && parv[2]) ? parv[2] : client_p->name;
+	const char *comment = (parc > 2 && parv[2]) ? parv[2] : client_p->name;
 
 	if(parc < 2)
 	{
@@ -157,7 +157,7 @@ ms_squit(struct Client *client_p, struct Client *source_p, int parc, char *parv[
  * side effects	-
  */
 static struct squit_parms *
-find_squit(struct Client *client_p, struct Client *source_p, char *server)
+find_squit(struct Client *client_p, struct Client *source_p, const char *server)
 {
 	static struct squit_parms found_squit;
 	struct Client *target_p = NULL;

@@ -770,7 +770,7 @@ remove_client_from_list(struct Client *client_p)
  * side effects -
  */
 struct Client *
-find_person(char *name)
+find_person(const char *name)
 {
 	struct Client *c2ptr;
 
@@ -788,7 +788,7 @@ find_person(char *name)
  *      through the history, chasing will be 1 and otherwise 0.
  */
 struct Client *
-find_chasing(struct Client *source_p, char *user, int *chasing)
+find_chasing(struct Client *source_p, const char *user, int *chasing)
 {
 	struct Client *who = find_client(user);
 

@@ -263,7 +263,7 @@ init_hash(void)
  * add_to_id_hash_table
  */
 int
-add_to_id_hash_table(char *name, struct Client *client_p)
+add_to_id_hash_table(const char *name, struct Client *client_p)
 {
 	unsigned int hashv;
 
@@ -723,36 +723,40 @@ hash_find_channel(const char *name)
  *  block, if it didn't exist before).
  */
 struct Channel *
-get_or_create_channel(struct Client *client_p, char *chname, int *isnew)
+get_or_create_channel(struct Client *client_p, const char *chname, int *isnew)
 {
 	struct Channel *chptr;
 	dlink_node *ptr;
 	unsigned int hashv;
 	int len;
+	const char *s = chname;
 
-	if(EmptyString(chname))
+	if(EmptyString(s))
 		return NULL;
 
-	len = strlen(chname);
+	len = strlen(s);
 	if(len > CHANNELLEN)
 	{
+		char *t;
 		if(IsServer(client_p))
 		{
 			sendto_realops_flags(UMODE_DEBUG, L_ALL,
 					     "*** Long channel name from %s (%d > %d): %s",
-					     client_p->name, len, CHANNELLEN, chname);
+					     client_p->name, len, CHANNELLEN, s);
 		}
 		len = CHANNELLEN;
-		*(chname + CHANNELLEN) = '\0';
+		t = LOCAL_COPY(s);
+		*(t + CHANNELLEN) = '\0';
+		s = t;
 	}
 
-	hashv = hash_channel_name(chname);
+	hashv = hash_channel_name(s);
 
 	DLINK_FOREACH(ptr, channelTable[hashv].list.head)
 	{
 		chptr = ptr->data;
 
-		if(irccmp(chname, chptr->chname) == 0)
+		if(irccmp(s, chptr->chname) == 0)
 		{
 			if(isnew != NULL)
 				*isnew = 0;
@@ -765,7 +769,7 @@ get_or_create_channel(struct Client *client_p, char *chname, int *isnew)
 
 	chptr = BlockHeapAlloc(channel_heap);
 	memset(chptr, 0, sizeof(struct Channel));
-	strlcpy(chptr->chname, chname, sizeof(chptr->chname));
+	strlcpy(chptr->chname, s, sizeof(chptr->chname));
 
 	dlinkAdd(chptr, &chptr->node, &global_channel_list);
 

@@ -37,8 +37,8 @@
 #include "parse.h"
 #include "modules.h"
 
-static void ms_wallops(struct Client *, struct Client *, int, char **);
-static void mo_wallops(struct Client *, struct Client *, int, char **);
+static void ms_wallops(struct Client *, struct Client *, int, const char **);
+static void mo_wallops(struct Client *, struct Client *, int, const char **);
 
 struct Message wallops_msgtab = {
 	"WALLOPS", 0, 0, 2, 0, MFLG_SLOW, 0,
@@ -54,9 +54,9 @@ DECLARE_MODULE_AV1(NULL, NULL, wallops_clist, NULL, NULL, "$Revision$");
  *      parv[1] = message text
  */
 static void
-mo_wallops(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mo_wallops(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	char *message;
+	const char *message;
 
 	message = parv[1];
 
@@ -76,9 +76,9 @@ mo_wallops(struct Client *client_p, struct Client *source_p, int parc, char *par
  *      parv[1] = message text
  */
 static void
-ms_wallops(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+ms_wallops(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	char *message;
+	const char *message;
 
 	message = parv[1];
 

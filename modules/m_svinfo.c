@@ -38,7 +38,7 @@
 #include "modules.h"
 
 
-static void ms_svinfo(struct Client *, struct Client *, int, char **);
+static void ms_svinfo(struct Client *, struct Client *, int, const char **);
 
 struct Message svinfo_msgtab = {
 	"SVINFO", 0, 0, 4, 0, MFLG_SLOW, 0,
@@ -57,7 +57,7 @@ DECLARE_MODULE_AV1(NULL, NULL, svinfo_clist, NULL, NULL, "$Revision$");
  *      parv[4] = server's idea of UTC time
  */
 static void
-ms_svinfo(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+ms_svinfo(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	time_t deltat;
 	time_t theirtime;

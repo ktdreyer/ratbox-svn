@@ -53,8 +53,8 @@
 #include "s_conf.h"
 #include "s_newconf.h"
 
-static void mo_xline(struct Client *client_p, struct Client *source_p, int parc, char *parv[]);
-static void mo_unxline(struct Client *client_p, struct Client *source_p, int parc, char *parv[]);
+static void mo_xline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
+static void mo_unxline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
 
 struct Message xline_msgtab = {
 	"XLINE", 0, 0, 3, 0, MFLG_SLOW, 0,
@@ -78,7 +78,7 @@ DECLARE_MODULE_AV1(NULL, NULL, xline_clist, NULL, NULL, "$Revision$");
  * parv[3] - reason
  */
 void
-mo_xline(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mo_xline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	char buffer[BUFSIZE * 2];
 	FBFILE *out;
@@ -156,7 +156,7 @@ mo_xline(struct Client *client_p, struct Client *source_p, int parc, char *parv[
  * parv[1] - thing to unxline
  */
 static void
-mo_unxline(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mo_unxline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	FBFILE *in, *out;
 	char buf[BUFSIZE];

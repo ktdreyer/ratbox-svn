@@ -975,7 +975,7 @@ match_it(const struct Client *one, const char *mask, int what)
  */
 void
 sendto_match_butone(struct Client *one, struct Client *from,
-		    char *mask, int what, const char *pattern, ...)
+		    const char *mask, int what, const char *pattern, ...)
 {
 	va_list args;
 	struct Client *client_p;

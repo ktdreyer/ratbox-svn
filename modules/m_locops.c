@@ -40,8 +40,8 @@
 #include "cluster.h"
 #include "s_serv.h"
 
-static void m_locops(struct Client *, struct Client *, int, char **);
-static void ms_locops(struct Client *, struct Client *, int, char **);
+static void m_locops(struct Client *, struct Client *, int, const char **);
+static void ms_locops(struct Client *, struct Client *, int, const char **);
 
 struct Message locops_msgtab = {
 	"LOCOPS", 0, 0, 2, 0, MFLG_SLOW, 0,
@@ -58,7 +58,7 @@ DECLARE_MODULE_AV1(NULL, NULL, locops_clist, NULL, NULL, "$Revision$");
  *      parv[1] = message text
  */
 static void
-m_locops(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_locops(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	if(EmptyString(parv[1]))
 	{
@@ -73,7 +73,7 @@ m_locops(struct Client *client_p, struct Client *source_p, int parc, char *parv[
 }
 
 static void
-ms_locops(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+ms_locops(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	if(parc != 3 || EmptyString(parv[2]))
 		return;

@@ -37,9 +37,9 @@
 #include "hook.h"
 #include "modules.h"
 
-static void m_admin(struct Client *, struct Client *, int, char **);
-static void mr_admin(struct Client *, struct Client *, int, char **);
-static void ms_admin(struct Client *, struct Client *, int, char **);
+static void m_admin(struct Client *, struct Client *, int, const char **);
+static void mr_admin(struct Client *, struct Client *, int, const char **);
+static void ms_admin(struct Client *, struct Client *, int, const char **);
 static void do_admin(struct Client *source_p);
 
 static void admin_spy(struct Client *);
@@ -65,7 +65,7 @@ DECLARE_MODULE_AV1(NULL, NULL, admin_clist, admin_hlist, NULL, "$Revision$");
  *      parv[1] = servername   
  */
 static void
-mr_admin(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mr_admin(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	static time_t last_used = 0L;
 
@@ -87,7 +87,7 @@ mr_admin(struct Client *client_p, struct Client *source_p, int parc, char *parv[
  *      parv[1] = servername
  */
 static void
-m_admin(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_admin(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	static time_t last_used = 0L;
 
@@ -115,7 +115,7 @@ m_admin(struct Client *client_p, struct Client *source_p, int parc, char *parv[]
  *      parv[1] = servername
  */
 static void
-ms_admin(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+ms_admin(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	if(hunt_server(client_p, source_p, ":%s ADMIN :%s", 1, parc, parv) != HUNTED_ISME)
 		return;

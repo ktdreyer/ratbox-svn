@@ -119,7 +119,7 @@ off_history(struct Client *client_p)
 }
 
 struct Client *
-get_history(char *nick, time_t timelimit)
+get_history(const char *nick, time_t timelimit)
 {
 	struct Whowas *temp;
 	int blah;

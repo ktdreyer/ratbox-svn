@@ -40,8 +40,8 @@
 #include "s_log.h"
 #include "sprintf_irc.h"
 
-static void mo_resv(struct Client *, struct Client *, int, char **);
-static void mo_unresv(struct Client *, struct Client *, int, char **);
+static void mo_resv(struct Client *, struct Client *, int, const char **);
+static void mo_unresv(struct Client *, struct Client *, int, const char **);
 
 struct Message resv_msgtab = {
 	"RESV", 0, 0, 3, 0, MFLG_SLOW | MFLG_UNREG, 0,
@@ -64,7 +64,7 @@ DECLARE_MODULE_AV1(NULL, NULL, resv_clist, NULL, NULL, "$Revision$");
  *      parv[1] = channel/nick to forbid
  */
 static void
-mo_resv(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mo_resv(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	if(EmptyString(parv[1]) || EmptyString(parv[2]))
 	{
@@ -126,7 +126,7 @@ mo_resv(struct Client *client_p, struct Client *source_p, int parc, char *parv[]
  *     parv[1] = channel/nick to unforbid
  */
 static void
-mo_unresv(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mo_unresv(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	FBFILE *in, *out;
 	char buf[BUFSIZE];

@@ -215,7 +215,7 @@ report_resv(struct Client *source_p)
 }
 
 int
-clean_resv_nick(char *nick)
+clean_resv_nick(const char *nick)
 {
 	char tmpch;
 	int as = 0;

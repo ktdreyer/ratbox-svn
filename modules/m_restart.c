@@ -40,7 +40,7 @@
 #include "parse.h"
 #include "modules.h"
 
-static void mo_restart(struct Client *, struct Client *, int, char **);
+static void mo_restart(struct Client *, struct Client *, int, const char **);
 
 struct Message restart_msgtab = {
 	"RESTART", 0, 0, 0, 0, MFLG_SLOW, 0,
@@ -55,7 +55,7 @@ DECLARE_MODULE_AV1(NULL, NULL, restart_clist, NULL, NULL, "$Revision$");
  *
  */
 static void
-mo_restart(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mo_restart(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	char buf[BUFSIZE];
 	dlink_node *ptr;

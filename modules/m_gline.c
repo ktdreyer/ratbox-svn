@@ -77,13 +77,13 @@ static int majority_gline(struct Client *source_p,
 static void add_new_majority_gline(const char *, const char *, const char *,
 				   const char *, const char *, const char *, const char *);
 
-static int check_wild_gline(char *, char *);
-static int invalid_gline(struct Client *, char *, char *, char *);
+static int check_wild_gline(const char *, const char *);
+static int invalid_gline(struct Client *, const char *, const char *, const char *);
 
 static char *small_file_date(void);
 
-static void ms_gline(struct Client *, struct Client *, int, char **);
-static void mo_gline(struct Client *, struct Client *, int, char **);
+static void ms_gline(struct Client *, struct Client *, int, const char **);
+static void mo_gline(struct Client *, struct Client *, int, const char **);
 
 struct Message gline_msgtab = {
 	"GLINE", 0, 0, 3, 0, MFLG_SLOW, 0,
@@ -109,9 +109,9 @@ DECLARE_MODULE_AV1(NULL, NULL, gline_clist, NULL, NULL, "$Revision$");
  */
 
 static void
-mo_gline(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mo_gline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	char *user = NULL;
+	const char *user = NULL;
 	char *host = NULL;	/* user and host of GLINE "victim" */
 	const char *reason = NULL;	/* reason for "victims" demise */
 	char splat[] = "*";
@@ -143,7 +143,7 @@ mo_gline(struct Client *client_p, struct Client *source_p, int parc, char *parv[
 			else
 			{
 				user = splat;	/* no @ found, assume its *@somehost */
-				host = parv[1];
+				host = LOCAL_COPY(parv[1]);
 			}
 
 			if(!*host)	/* duh. no host found, assume its '*' host */
@@ -231,7 +231,7 @@ mo_gline(struct Client *client_p, struct Client *source_p, int parc, char *parv[
  */
 
 static void
-ms_gline(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+ms_gline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	/* These are needed for hyb6 compatibility.. if its ever removed we can
 	 * just use source_p->username etc.. 
@@ -240,8 +240,8 @@ ms_gline(struct Client *client_p, struct Client *source_p, int parc, char *parv[
 	const char *oper_user = NULL;	/* username of oper requesting GLINE */
 	const char *oper_host = NULL;	/* hostname of oper requesting GLINE */
 	const char *oper_server = NULL;	/* server of oper requesting GLINE */
-	char *user = NULL;
-	char *host = NULL;	/* user and host of GLINE "victim" */
+	const char *user = NULL;
+	const char *host = NULL;	/* user and host of GLINE "victim" */
 	const char *reason = NULL;	/* reason for "victims" demise */
 	struct Client *acptr;
 
@@ -332,9 +332,9 @@ ms_gline(struct Client *client_p, struct Client *source_p, int parc, char *parv[
  */
 
 static int
-check_wild_gline(char *user, char *host)
+check_wild_gline(const char *user, const char *host)
 {
-	char *p;
+	const char *p;
 	char tmpch;
 	int nonwild;
 
@@ -384,7 +384,7 @@ check_wild_gline(char *user, char *host)
  * outputs	- 1 if invalid, 0 if valid
  */
 static int
-invalid_gline(struct Client *source_p, char *luser, char *lhost, char *lreason)
+invalid_gline(struct Client *source_p, const char *luser, const char *lhost, const char *lreason)
 {
 	if(strchr(luser, '!'))
 	{

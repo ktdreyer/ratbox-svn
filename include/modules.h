@@ -115,11 +115,11 @@ extern void load_all_modules(int warn);
 /* load core modules */
 extern void load_core_modules(int);
 
-extern int unload_one_module(char *, int);
-extern int load_one_module(char *, int);
-extern int load_a_module(char *, int, int);
-extern int findmodule_byname(char *);
-extern char *irc_basename(char *);
+extern int unload_one_module(const char *, int);
+extern int load_one_module(const char *, int);
+extern int load_a_module(const char *, int, int);
+extern int findmodule_byname(const char *);
+extern char *irc_basename(const char *);
 extern void modules_init(void);
 
 #endif /* INCLUDED_modules_h */

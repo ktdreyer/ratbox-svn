@@ -62,7 +62,7 @@ static void report_and_set_user_flags(struct Client *, struct ConfItem *);
 static int check_X_line(struct Client *client_p, struct Client *source_p);
 void user_welcome(struct Client *source_p);
 static int introduce_client(struct Client *client_p, struct Client *source_p,
-			    struct User *user, char *nick);
+			    struct User *user, const char *nick);
 int oper_up(struct Client *source_p, struct ConfItem *aconf);
 
 extern char *crypt();
@@ -290,7 +290,7 @@ show_isupport(struct Client *source_p)
 */
 
 int
-register_local_user(struct Client *client_p, struct Client *source_p, char *nick, char *username)
+register_local_user(struct Client *client_p, struct Client *source_p, const char *nick, const char *username)
 {
 	struct ConfItem *aconf;
 	struct User *user = source_p->user;
@@ -333,7 +333,7 @@ register_local_user(struct Client *client_p, struct Client *source_p, char *nick
 	/* XXX - fixme. we shouldnt have to build a users buffer twice.. */
 	if(!IsGotId(source_p) && (strchr(username, '[') != NULL))
 	{
-		char *p;
+		const char *p;
 		int i = 0;
 
 		p = username;
@@ -370,7 +370,7 @@ register_local_user(struct Client *client_p, struct Client *source_p, char *nick
 
 	if(!IsGotId(source_p))
 	{
-		char *p;
+		const char *p;
 		int i = 0;
 
 		if(IsNeedIdentd(aconf))
@@ -533,7 +533,7 @@ register_local_user(struct Client *client_p, struct Client *source_p, char *nick
  *		  is introduced by a server.
  */
 int
-register_remote_user(struct Client *client_p, struct Client *source_p, char *nick, char *username)
+register_remote_user(struct Client *client_p, struct Client *source_p, const char *nick, const char *username)
 {
 	struct User *user = source_p->user;
 	struct Client *target_p;
@@ -617,7 +617,7 @@ register_remote_user(struct Client *client_p, struct Client *source_p, char *nic
  *		  from a remote connect.
  */
 static int
-introduce_client(struct Client *client_p, struct Client *source_p, struct User *user, char *nick)
+introduce_client(struct Client *client_p, struct Client *source_p, struct User *user, const char *nick)
 {
 	dlink_node *server_node;
 	struct Client *server;
@@ -834,8 +834,8 @@ report_and_set_user_flags(struct Client *source_p, struct ConfItem *aconf)
  * side effects -
  */
 int
-do_local_user(char *nick, struct Client *client_p, struct Client *source_p,
-	      char *username, char *host, char *server, char *realname)
+do_local_user(const char *nick, struct Client *client_p, struct Client *source_p,
+	      const char *username, const char *host, const char *server, const char *realname)
 {
 	struct User *user;
 
@@ -885,8 +885,9 @@ do_local_user(char *nick, struct Client *client_p, struct Client *source_p,
  * side effects -
  */
 int
-do_remote_user(char *nick, struct Client *client_p, struct Client *source_p,
-	       char *username, char *host, char *server, char *realname, char *id)
+do_remote_user(const char *nick, struct Client *client_p, struct Client *source_p,
+	       const char *username, const char *host, const char *server, 
+	       const char *realname, const char *id)
 {
 	unsigned int oflags;
 	struct User *user;
@@ -921,11 +922,13 @@ do_remote_user(char *nick, struct Client *client_p, struct Client *source_p,
  * parv[2] - modes to change
  */
 int
-user_mode(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+user_mode(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	int flag;
 	int i;
-	char **p, *m;
+	const char **p;
+	char *m;
+	const char *pm;
 	struct Client *target_p;
 	int what, setflags;
 	int badflag = NO;	/* Only send one bad flag notice */
@@ -985,8 +988,8 @@ user_mode(struct Client *client_p, struct Client *source_p, int parc, char *parv
 	 * parse mode change string(s)
 	 */
 	for (p = &parv[2]; p && *p; p++)
-		for (m = *p; *m; m++)
-			switch (*m)
+		for (pm = *p; *pm; pm++)
+			switch (*pm)
 			{
 			case '+':
 				what = MODE_ADD;
@@ -1042,7 +1045,7 @@ user_mode(struct Client *client_p, struct Client *source_p, int parc, char *parv
 				break;
 
 			default:
-				if((flag = user_modes_from_c_to_bitmask[(unsigned char) *m]))
+				if((flag = user_modes_from_c_to_bitmask[(unsigned char) *pm]))
 				{
 					if(MyConnect(source_p)
 					   && !IsOper(source_p)

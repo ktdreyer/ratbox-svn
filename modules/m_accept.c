@@ -38,8 +38,8 @@
 #include "sprintf_irc.h"
 #include "modules.h"
 
-static void m_accept(struct Client *, struct Client *, int, char **);
-static void build_nicklist(struct Client *, char *, char *, char *);
+static void m_accept(struct Client *, struct Client *, int, const char **);
+static void build_nicklist(struct Client *, char *, char *, const char *);
 
 static void add_accept(struct Client *, struct Client *);
 static void list_accepts(struct Client *);
@@ -60,7 +60,7 @@ DECLARE_MODULE_AV1(NULL, NULL, accept_clist, NULL, NULL, "$Revision$");
  *      parv[1] = servername
  */
 static void
-m_accept(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_accept(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	char *nick;
 	char *p = NULL;
@@ -147,7 +147,7 @@ m_accept(struct Client *client_p, struct Client *source_p, int parc, char *parv[
  * side effects - addbuf/delbuf are modified to give valid nicks
  */
 static void
-build_nicklist(struct Client *source_p, char *addbuf, char *delbuf, char *nicks)
+build_nicklist(struct Client *source_p, char *addbuf, char *delbuf, const char *nicks)
 {
 	char *name;
 	char *p;
@@ -155,12 +155,13 @@ build_nicklist(struct Client *source_p, char *addbuf, char *delbuf, char *nicks)
 	int lendel;
 	int del;
 	struct Client *target_p;
+	char *n = LOCAL_COPY(nicks);
 
 	*addbuf = *delbuf = '\0';
 	del = lenadd = lendel = 0;
 
 	/* build list of clients to add into addbuf, clients to remove in delbuf */
-	for (name = strtoken(&p, nicks, ","); name; name = strtoken(&p, NULL, ","), del = 0)
+	for (name = strtoken(&p, n, ","); name; name = strtoken(&p, NULL, ","), del = 0)
 	{
 		if(*name == '-')
 		{

@@ -45,7 +45,7 @@
 #include "s_serv.h"
 #include "cluster.h"
 
-static void mo_undline(struct Client *, struct Client *, int, char **);
+static void mo_undline(struct Client *, struct Client *, int, const char **);
 
 struct Message undline_msgtab = {
 	"UNDLINE", 0, 0, 2, 0, MFLG_SLOW, 0,
@@ -56,7 +56,7 @@ mapi_clist_av1 undline_clist[] = { &undline_msgtab, NULL };
 DECLARE_MODULE_AV1(NULL, NULL, undline_clist, NULL, NULL, "$Revision$");
 
 static int flush_write(struct Client *, FBFILE *, char *, char *);
-static int remove_temp_dline(char *);
+static int remove_temp_dline(const char *);
 
 /* mo_undline()
  *
@@ -64,13 +64,13 @@ static int remove_temp_dline(char *);
  *      parv[1] = dline to remove
  */
 static void
-mo_undline(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mo_undline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	FBFILE *in;
 	FBFILE *out;
 	char buf[BUFSIZE], buff[BUFSIZE], temppath[BUFSIZE], *p;
 	const char *filename, *found_cidr;
-	char *cidr;
+	const char *cidr;
 	int pairme = NO, error_on_write = NO;
 	mode_t oldumask;
 
@@ -226,7 +226,7 @@ static dlink_list *tdline_list[] = {
  * side effects - tries to undline anything that matches
  */
 static int
-remove_temp_dline(char *host)
+remove_temp_dline(const char *host)
 {
 	dlink_list *tdlist;
 	struct ConfItem *aconf;

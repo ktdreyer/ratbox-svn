@@ -44,7 +44,7 @@
 #include "s_conf.h"
 
 
-static void ms_sjoin(struct Client *, struct Client *, int, char **);
+static void ms_sjoin(struct Client *, struct Client *, int, const char **);
 
 struct Message sjoin_msgtab = {
 	"SJOIN", 0, 0, 0, 0, MFLG_SLOW, 0,
@@ -69,7 +69,7 @@ DECLARE_MODULE_AV1(NULL, NULL, sjoin_clist, NULL, NULL, "$Revision$");
 
 static char modebuf[MODEBUFLEN];
 static char parabuf[MODEBUFLEN];
-static char *para[MAXMODEPARAMS];
+static const char *para[MAXMODEPARAMS];
 static char *mbuf;
 static int pargs;
 
@@ -81,7 +81,7 @@ static void remove_a_mode(struct Channel *chptr,
 
 
 static void
-ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Channel *chptr;
 	struct Client *target_p;
@@ -98,13 +98,15 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, char *parv[
 	int num_prefix = 0;
 	int isnew;
 	int buflen = 0;
-	register char *s, *nhops;
+	const char *s;
+	char *nhops;
 	static char buf[2 * BUFSIZE];	/* buffer for modes and prefix */
 	static char sjbuf[BUFSIZE];
 	char *p;		/* pointer used making sjbuf */
 	int i;
 	dlink_node *m;
 	const char *server_name = ConfigServerHide.hide_servers ? me.name : source_p->name;
+	static char empty[] = "";
 
 	*buf = '\0';
 	*sjbuf = '\0';
@@ -293,7 +295,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, char *parv[
 	}
 
 	mbuf = modebuf;
-	para[0] = para[1] = para[2] = para[3] = NULL;
+	para[0] = para[1] = para[2] = para[3] = empty;
 	pargs = 0;
 
 	*mbuf++ = '+';
@@ -466,10 +468,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, char *parv[
 		sendto_channel_local(ALL_MEMBERS, chptr,
 				     ":%s MODE %s %s %s %s %s %s",
 				     server_name, chptr->chname, modebuf,
-				     EmptyString(para[0]) ? "" : para[0],
-				     EmptyString(para[1]) ? "" : para[1],
-				     EmptyString(para[2]) ? "" : para[2],
-				     EmptyString(para[3]) ? "" : para[3]);
+				     para[0], para[1], para[2], para[3]);
 	}
 
 	if(!people)

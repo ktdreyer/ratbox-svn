@@ -42,8 +42,8 @@
 #include "modules.h"
 
 
-static void mo_connect(struct Client *, struct Client *, int, char **);
-static void ms_connect(struct Client *, struct Client *, int, char **);
+static void mo_connect(struct Client *, struct Client *, int, const char **);
+static void ms_connect(struct Client *, struct Client *, int, const char **);
 
 struct Message connect_msgtab = {
 	"CONNECT", 0, 0, 2, 0, MFLG_SLOW, 0,
@@ -65,7 +65,7 @@ DECLARE_MODULE_AV1(NULL, NULL, connect_clist, NULL, NULL, "$Revision$");
  *      parv[3] = remote server
  */
 static void
-mo_connect(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mo_connect(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	int port;
 	int tmpport;
@@ -180,7 +180,7 @@ mo_connect(struct Client *client_p, struct Client *source_p, int parc, char *par
  *      parv[3] = remote server
  */
 static void
-ms_connect(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+ms_connect(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	int port;
 	int tmpport;

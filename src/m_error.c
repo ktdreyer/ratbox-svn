@@ -51,7 +51,7 @@ struct Message error_msgtab = {
  *      parv[*] = parameters
  */
 void
-m_error(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_error(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	const char *para;
 
@@ -83,7 +83,7 @@ m_error(struct Client *client_p, struct Client *source_p, int parc, char *parv[]
 }
 
 void
-ms_error(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+ms_error(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	const char *para;
 

@@ -36,8 +36,8 @@
 #include "parse.h"
 #include "modules.h"
 
-static void mo_operwall(struct Client *, struct Client *, int, char **);
-static void ms_operwall(struct Client *, struct Client *, int, char **);
+static void mo_operwall(struct Client *, struct Client *, int, const char **);
+static void ms_operwall(struct Client *, struct Client *, int, const char **);
 
 struct Message operwall_msgtab = {
 	"OPERWALL", 0, 0, 2, 0, MFLG_SLOW, 0,
@@ -55,9 +55,9 @@ DECLARE_MODULE_AV1(NULL, NULL, operwall_clist, NULL, NULL, "$Revision$");
  */
 
 static void
-mo_operwall(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mo_operwall(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	char *message = parv[1];
+	const char *message = parv[1];
 
 	if(!IsOperOperwall(source_p))
 	{
@@ -83,9 +83,9 @@ mo_operwall(struct Client *client_p, struct Client *source_p, int parc, char *pa
  */
 
 static void
-ms_operwall(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+ms_operwall(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	char *message = parv[1];
+	const char *message = parv[1];
 
 	if(EmptyString(message))
 	{

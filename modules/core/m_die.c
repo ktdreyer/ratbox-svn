@@ -40,9 +40,9 @@
 #include "parse.h"
 #include "modules.h"
 
-static void mo_die(struct Client *, struct Client *, int, char **);
+static void mo_die(struct Client *, struct Client *, int, const char **);
 
-struct Message die_msgtab = {
+static struct Message die_msgtab = {
 	"DIE", 0, 0, 1, 0, MFLG_SLOW, 0,
 	{m_unregistered, m_not_oper, m_ignore, mo_die}
 };
@@ -54,7 +54,7 @@ DECLARE_MODULE_AV1(NULL, NULL, die_clist, NULL, NULL, "$Revision$");
  * mo_die - DIE command handler
  */
 static void
-mo_die(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mo_die(struct Client *client_p __unused, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Client *target_p;
 	dlink_node *ptr;

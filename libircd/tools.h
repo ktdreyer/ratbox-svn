@@ -51,7 +51,7 @@ struct _dlink_list
 
 dlink_node *make_dlink_node(void);
 void free_dlink_node(dlink_node * lp);
-void init_dlink_nodes();
+void init_dlink_nodes(void);
 
 
 void dlinkMoveNode(dlink_node * m, dlink_list * oldlist, dlink_list * newlist);

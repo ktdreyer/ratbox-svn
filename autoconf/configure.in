@@ -56,6 +56,17 @@ case `$CC -V 2>&1` in
     SunWorkShop=no
     ;;
 esac
+AC_MSG_CHECKING(if we are using Intel(R) C/C++ Compiler for Linux)
+case `$CC -V 2>&1` in
+	*Intel*C++*Compiler*)
+		AC_MSG_RESULT(yes)
+		ICC=yes
+		SGS=yes
+		;;
+	*)
+		AC_MSG_RESULT(no)
+		;;
+esac
 AC_MSG_CHECKING(if we are using Apple GCC)
 case `$CC -v 2>&1 | tail -1` in
   *Apple*)
@@ -79,13 +90,12 @@ fi
 dnl XXX This could be consecutive 'if' statements, and then check
 dnl for a zero "$IRC_CFLAGS" (but what should we use for TenDRA??)
 dnl and then do the check for whether -g works... Hrrm. -jmallett
-if test "x$GCC" = "xyes"; then
+if test -z "$IRC_CFLAGS"; then
+  if test "x$GCC" = "xyes"; then
 #  Use this for development..
-  if test -z "$IRC_CFLAGS"; then
-    IRC_CFLAGS="-O2 -g -Wunused -Wall -Wwrite-strings -Wshadow -Wmissing-declarations"
-  fi
-# IRC_CFLAGS="-O2 -g "
-else
+      IRC_CFLAGS="-O2 -g -Wunused -Wall -Wwrite-strings -Wshadow -Wmissing-declarations"
+#     IRC_CFLAGS="-O2 -g "
+  else
   if test "x$TenDRA" = "xyes"; then
     dnl CPPFLAGS here is really IRC_CFLAGS but autoconf does silly
     dnl things with the wrong variables, so this works. -jmallett
@@ -106,6 +116,7 @@ else
       fi
     fi
   fi
+fi
 fi
 
 dnl cc on HPUX 11.00 does not produce any output on cc -V

@@ -43,7 +43,7 @@
 #include "modules.h"
 #include "packet.h"
 
-static void m_invite(struct Client *, struct Client *, int, char **);
+static void m_invite(struct Client *, struct Client *, int, const char **);
 
 struct Message invite_msgtab = {
 	"INVITE", 0, 0, 3, 0, MFLG_SLOW, 0,
@@ -59,7 +59,7 @@ DECLARE_MODULE_AV1(NULL, NULL, invite_clist, NULL, NULL, "$Revision$");
 **      parv[2] - channel number
 */
 static void
-m_invite(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_invite(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Client *target_p;
 	struct Channel *chptr;

@@ -40,9 +40,9 @@
 #include "hook.h"
 
 
-static void m_links(struct Client *, struct Client *, int, char **);
-static void mo_links(struct Client *, struct Client *, int, char **);
-static void ms_links(struct Client *, struct Client *, int, char **);
+static void m_links(struct Client *, struct Client *, int, const char **);
+static void mo_links(struct Client *, struct Client *, int, const char **);
+static void ms_links(struct Client *, struct Client *, int, const char **);
 
 struct Message links_msgtab = {
 	"LINKS", 0, 0, 0, 0, MFLG_SLOW, 0,
@@ -70,7 +70,7 @@ DECLARE_MODULE_AV1(NULL, NULL, links_clist, NULL, NULL, "$Revision$");
  */
 
 static void
-m_links(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_links(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	if(!ConfigServerHide.flatten_links)
 	{
@@ -91,7 +91,7 @@ m_links(struct Client *client_p, struct Client *source_p, int parc, char *parv[]
 }
 
 static void
-mo_links(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mo_links(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	const char *mask = "";
 	struct Client *target_p;
@@ -168,7 +168,7 @@ mo_links(struct Client *client_p, struct Client *source_p, int parc, char *parv[
  *      parv[2] = servername mask
  */
 static void
-ms_links(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+ms_links(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	if(hunt_server(client_p, source_p, ":%s LINKS %s :%s", 1, parc, parv) != HUNTED_ISME)
 		return;

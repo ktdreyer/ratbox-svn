@@ -47,7 +47,7 @@
 #include "modules.h"
 
 
-static void mo_set(struct Client *, struct Client *, int, char **);
+static void mo_set(struct Client *, struct Client *, int, const char **);
 
 struct Message set_msgtab = {
 	"SET", 0, 0, 0, 0, MFLG_SLOW, 0,
@@ -484,12 +484,12 @@ quote_splitusers(struct Client *source_p, int newval)
  * set options while running
  */
 static void
-mo_set(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mo_set(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	int newval;
 	int i, n;
-	char *arg = NULL;
-	char *intarg = NULL;
+	const char *arg = NULL;
+	const char *intarg = NULL;
 
 	if(parc > 1)
 	{

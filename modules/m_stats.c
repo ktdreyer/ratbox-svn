@@ -55,9 +55,9 @@
 #include "resv.h"		/* report_resv */
 #include "s_newconf.h"
 
-static void m_stats (struct Client *, struct Client *, int, char **);
-static void mo_stats (struct Client *, struct Client *, int, char **);
-static void ms_stats (struct Client *, struct Client *, int, char **);
+static void m_stats (struct Client *, struct Client *, int, const char **);
+static void mo_stats (struct Client *, struct Client *, int, const char **);
+static void ms_stats (struct Client *, struct Client *, int, const char **);
 
 struct Message stats_msgtab = {
 	"STATS", 0, 0, 2, 0, MFLG_SLOW, 0,
@@ -80,13 +80,13 @@ DECLARE_MODULE_AV1(NULL, NULL, stats_clist, stats_hlist, NULL, "$Revision$");
 
 const char *Lformat = ":%s %d %s %s %u %u %u %u %u :%u %u %s";
 
-static char *parse_stats_args (int, char **, int *, int *);
+static const char *parse_stats_args (int, const char **, int *, int *);
 
-static void stats_L (struct Client *, char *, int, int, char);
-static void stats_L_list (struct Client *s, char *, int, int, dlink_list *, char);
+static void stats_L (struct Client *, const char *, int, int, char);
+static void stats_L_list (struct Client *s, const char *, int, int, dlink_list *, char);
 static void stats_spy (struct Client *, char);
 static void stats_p_spy (struct Client *);
-static void stats_L_spy (struct Client *, char, char *);
+static void stats_L_spy (struct Client *, char, const char *);
 
 /* Heres our struct for the stats table */
 struct StatsStruct
@@ -123,7 +123,7 @@ static void stats_gecos (struct Client *);
 static void stats_class (struct Client *);
 static void stats_memory (struct Client *);
 static void stats_servlinks (struct Client *);
-static void stats_ltrace (struct Client *, int, char **);
+static void stats_ltrace (struct Client *, int, const char **);
 static void stats_ziplinks (struct Client *);
 
 static void report_tklines (struct Client *, dlink_list *);
@@ -190,7 +190,7 @@ static struct StatsStruct stats_cmd_table[] = {
  */
 
 static void
-m_stats (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_stats (struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	int i;
 	char statchar;
@@ -257,7 +257,7 @@ m_stats (struct Client *client_p, struct Client *source_p, int parc, char *parv[
  */
 
 static void
-mo_stats (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mo_stats (struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	int i;
 	char statchar;
@@ -971,11 +971,11 @@ stats_servlinks (struct Client *source_p)
 }
 
 static void
-stats_ltrace (struct Client *source_p, int parc, char *parv[])
+stats_ltrace (struct Client *source_p, int parc, const char *parv[])
 {
 	int doall = 0;
 	int wilds = 0;
-	char *name = NULL;
+	const char *name = NULL;
 	char statchar;
 
 	name = parse_stats_args (parc, parv, &doall, &wilds);
@@ -1002,7 +1002,7 @@ stats_ltrace (struct Client *source_p, int parc, char *parv[])
  */
 
 static void
-ms_stats (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+ms_stats (struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	if(hunt_server (client_p, source_p, ":%s STATS %s :%s", 2, parc, parv) != HUNTED_ISME)
 		return;
@@ -1022,7 +1022,7 @@ ms_stats (struct Client *client_p, struct Client *source_p, int parc, char *parv
  * side effects	-
  */
 static void
-stats_L (struct Client *source_p, char *name, int doall, int wilds, char statchar)
+stats_L (struct Client *source_p, const char *name, int doall, int wilds, char statchar)
 {
 	stats_L_list (source_p, name, doall, wilds, &unknown_list, statchar);
 	stats_L_list (source_p, name, doall, wilds, &lclient_list, statchar);
@@ -1030,7 +1030,7 @@ stats_L (struct Client *source_p, char *name, int doall, int wilds, char statcha
 }
 
 static void
-stats_L_list (struct Client *source_p, char *name, int doall, int wilds,
+stats_L_list (struct Client *source_p, const char *name, int doall, int wilds,
 	      dlink_list * list, char statchar)
 {
 	dlink_node *ptr;
@@ -1172,7 +1172,7 @@ stats_p_spy (struct Client *source_p)
  * 		  in the conf file.
  */
 static void
-stats_L_spy (struct Client *source_p, char statchar, char *name)
+stats_L_spy (struct Client *source_p, char statchar, const char *name)
 {
 	struct hook_stats_data data;
 
@@ -1195,10 +1195,10 @@ stats_L_spy (struct Client *source_p, char statchar, char *name)
  * common parse routine for m_stats args
  * 
  */
-static char *
-parse_stats_args (int parc, char *parv[], int *doall, int *wilds)
+static const char *
+parse_stats_args (int parc, const char *parv[], int *doall, int *wilds)
 {
-	char *name;
+	const char *name;
 
 	if(parc > 2)
 	{

@@ -416,11 +416,15 @@ write_links_file(void *notused)
  */
 int
 hunt_server(struct Client *client_p, struct Client *source_p,
-	    const char *command, int server, int parc, char *parv[])
+	    const char *command, int server, int parc, const char *parv[])
 {
 	struct Client *target_p;
 	int wilds;
 	dlink_node *ptr;
+	const char *old __unused = parv[server];
+	char *new = LOCAL_COPY(parv[server]);
+	parv[server] = new;
+
 	/*
 	 * Assume it's me, if no server
 	 */
@@ -439,7 +443,7 @@ hunt_server(struct Client *client_p, struct Client *source_p,
 		if(target_p->from == source_p->from && !MyConnect(target_p))
 			target_p = NULL;
 
-	collapse(parv[server]);
+	collapse(new);
 	wilds = (strchr(parv[server], '?') || strchr(parv[server], '*'));
 
 	/*

@@ -41,8 +41,8 @@
 #include "packet.h"
 
 
-static void m_kick(struct Client *, struct Client *, int, char **);
-static void ms_kick(struct Client *, struct Client *, int, char **);
+static void m_kick(struct Client *, struct Client *, int, const char **);
+static void ms_kick(struct Client *, struct Client *, int, const char **);
 
 struct Message kick_msgtab = {
 	"KICK", 0, 0, 3, 0, MFLG_SLOW, 0,
@@ -60,15 +60,15 @@ DECLARE_MODULE_AV1(NULL, NULL, kick_clist, NULL, NULL, "$Revision$");
 **      parv[3] = kick comment
 */
 static void
-m_kick(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_kick(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Client *who;
 	struct Channel *chptr;
 	int chasing = 0;
 	char *comment;
-	char *name;
+	const char *name;
 	char *p = NULL;
-	char *user;
+	const char *user;
 	static char buf[BUFSIZE];
 
 	if(*parv[2] == '\0')
@@ -80,7 +80,7 @@ m_kick(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 	if(MyClient(source_p) && !IsFloodDone(source_p))
 		flood_endgrace(source_p);
 
-	comment = (EmptyString(parv[3])) ? parv[2] : parv[3];
+	comment = LOCAL_COPY((EmptyString(parv[3])) ? parv[2] : parv[3]);
 	if(strlen(comment) > (size_t) TOPICLEN)
 		comment[TOPICLEN] = '\0';
 
@@ -181,7 +181,7 @@ m_kick(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 }
 
 static void
-ms_kick(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+ms_kick(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	if(*parv[2] == '\0')
 	{

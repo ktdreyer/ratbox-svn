@@ -46,10 +46,10 @@
 #include "modules.h"
 
 
-static void mr_server(struct Client *, struct Client *, int, char **);
-static void ms_server(struct Client *, struct Client *, int, char **);
+static void mr_server(struct Client *, struct Client *, int, const char **);
+static void ms_server(struct Client *, struct Client *, int, const char **);
 
-static int set_server_gecos(struct Client *, char *);
+static int set_server_gecos(struct Client *, const char *);
 
 struct Message server_msgtab = {
 	"SERVER", 0, 0, 4, 0, MFLG_SLOW | MFLG_UNREG, 0,
@@ -59,8 +59,8 @@ struct Message server_msgtab = {
 mapi_clist_av1 server_clist[] = { &server_msgtab, NULL };
 DECLARE_MODULE_AV1(NULL, NULL, server_clist, NULL, NULL, "$Revision$");
 
-int bogus_host(char *host);
-struct Client *server_exists(char *);
+int bogus_host(const char *host);
+struct Client *server_exists(const char *);
 
 /*
  * mr_server - SERVER message handler
@@ -70,10 +70,10 @@ struct Client *server_exists(char *);
  *      parv[3] = serverinfo
  */
 static void
-mr_server(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mr_server(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	char info[REALLEN + 1];
-	char *name;
+	const char *name;
 	struct Client *target_p;
 	int hop;
 
@@ -229,11 +229,11 @@ mr_server(struct Client *client_p, struct Client *source_p, int parc, char *parv
  *      parv[3] = serverinfo
  */
 static void
-ms_server(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+ms_server(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	char info[REALLEN + 1];
 	/* same size as in s_misc.c */
-	char *name;
+	const char *name;
 	struct Client *target_p;
 	struct Client *bclient_p;
 	struct ConfItem *aconf;
@@ -485,7 +485,7 @@ ms_server(struct Client *client_p, struct Client *source_p, int parc, char *parv
  * side effects - servers gecos field is set
  */
 static int
-set_server_gecos(struct Client *client_p, char *info)
+set_server_gecos(struct Client *client_p, const char *info)
 {
 	/* check the info for [IP] */
 	if(info[0])
@@ -494,7 +494,7 @@ set_server_gecos(struct Client *client_p, char *info)
 		char *s;
 		char *t;
 
-		s = info;
+		s = LOCAL_COPY(info);
 
 		/* we should only check the first word for an ip */
 		if((p = strchr(s, ' ')))
@@ -557,10 +557,10 @@ set_server_gecos(struct Client *client_p, char *info)
  * side effects	- none
  */
 int
-bogus_host(char *host)
+bogus_host(const char *host)
 {
 	int bogus_server = 0;
-	char *s;
+	const char *s;
 	int dots = 0;
 
 	for (s = host; *s; s++)
@@ -587,7 +587,7 @@ bogus_host(char *host)
  * output	- 1 if server exists, 0 if doesnt exist
  */
 struct Client *
-server_exists(char *servername)
+server_exists(const char *servername)
 {
 	struct Client *target_p;
 	dlink_node *ptr;

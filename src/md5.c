@@ -246,7 +246,7 @@ md5_block(u_int32_t * in, u_int32_t * out, u_int32_t * x)
  * using MyMalloc().  It should be freed after use.
  */
 int
-base64_block(char **output, char *data, int len)
+base64_block(char **output, const char *data, int len)
 {
 	unsigned char *out;
 	unsigned char *in = (unsigned char *) data;
@@ -300,7 +300,7 @@ base64_block(char **output, char *data, int len)
  * using MyMalloc().  It should be freed after use.
  */
 int
-unbase64_block(char **output, char *data, int len)
+unbase64_block(char **output, const char *data, int len)
 {
 	unsigned char *out;
 	unsigned char *in = (unsigned char *) data;

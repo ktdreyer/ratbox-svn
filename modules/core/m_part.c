@@ -42,7 +42,7 @@
 #include "s_conf.h"
 #include "packet.h"
 
-static void m_part(struct Client *, struct Client *, int, char **);
+static void m_part(struct Client *, struct Client *, int, const char **);
 void check_spambot_warning(struct Client *source_p, const char *name);
 
 struct Message part_msgtab = {
@@ -64,10 +64,11 @@ static void part_one_client(struct Client *client_p,
 **      parv[2] = reason
 */
 static void
-m_part(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_part(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	char *p, *name;
 	char reason[TOPICLEN + 1];
+	char *s = LOCAL_COPY(parv[1]);
 
 	if(*parv[1] == '\0')
 	{
@@ -80,7 +81,7 @@ m_part(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 	if(parc > 2)
 		strlcpy(reason, parv[2], sizeof(reason));
 
-	name = strtoken(&p, parv[1], ",");
+	name = strtoken(&p, s, ",");
 
 	/* Finish the flood grace period... */
 	if(MyClient(source_p) && !IsFloodDone(source_p))

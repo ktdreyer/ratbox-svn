@@ -55,12 +55,12 @@ struct entity
 
 static int build_target_list(int p_or_n, const char *command,
 			     struct Client *client_p,
-			     struct Client *source_p, char *nicks_channels, char *text);
+			     struct Client *source_p, const char *nicks_channels, const char *text);
 
 static int flood_attack_client(int p_or_n, struct Client *source_p, struct Client *target_p);
 static int flood_attack_channel(int p_or_n, struct Client *source_p,
 				struct Channel *chptr, char *chname);
-static struct Client *find_userhost(char *, char *, int *);
+static struct Client *find_userhost(const char *, const char *, int *);
 
 #define ENTITY_NONE    0
 #define ENTITY_CHANNEL 1
@@ -72,25 +72,25 @@ static int ntargets = 0;
 
 static int duplicate_ptr(void *);
 
-static void m_message(int, const char *, struct Client *, struct Client *, int, char **);
+static void m_message(int, const char *, struct Client *, struct Client *, int, const char **);
 
-static void m_privmsg(struct Client *, struct Client *, int, char **);
-static void m_notice(struct Client *, struct Client *, int, char **);
+static void m_privmsg(struct Client *, struct Client *, int, const char **);
+static void m_notice(struct Client *, struct Client *, int, const char **);
 
 static void msg_channel(int p_or_n, const char *command,
 			struct Client *client_p,
-			struct Client *source_p, struct Channel *chptr, char *text);
+			struct Client *source_p, struct Channel *chptr, const char *text);
 
 static void msg_channel_flags(int p_or_n, const char *command,
 			      struct Client *client_p,
 			      struct Client *source_p,
-			      struct Channel *chptr, int flags, char *text);
+			      struct Channel *chptr, int flags, const char *text);
 
 static void msg_client(int p_or_n, const char *command,
-		       struct Client *source_p, struct Client *target_p, char *text);
+		       struct Client *source_p, struct Client *target_p, const char *text);
 
 static void handle_special(int p_or_n, const char *command,
-			 struct Client *client_p, struct Client *source_p, char *nick, char *text);
+			 struct Client *client_p, struct Client *source_p, const char *nick, const char *text);
 
 struct Message privmsg_msgtab = {
 	"PRIVMSG", 0, 0, 1, 0, MFLG_SLOW | MFLG_UNREG, 0L,
@@ -130,7 +130,7 @@ DECLARE_MODULE_AV1(NULL, NULL, message_clist, NULL, NULL, "$Revision$");
 #define NOTICE  1
 
 static void
-m_privmsg(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_privmsg(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	/* servers have no reason to send privmsgs, yet sometimes there is cause
 	 * for a notice.. (for example remote kline replies) --fl_
@@ -142,7 +142,7 @@ m_privmsg(struct Client *client_p, struct Client *source_p, int parc, char *parv
 }
 
 static void
-m_notice(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_notice(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	m_message(NOTICE, "NOTICE", client_p, source_p, parc, parv);
 }
@@ -157,7 +157,7 @@ m_notice(struct Client *client_p, struct Client *source_p, int parc, char *parv[
 static void
 m_message(int p_or_n,
 	  const char *command,
-	  struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+	  struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	int i;
 
@@ -228,14 +228,14 @@ m_message(int p_or_n,
 
 static int
 build_target_list(int p_or_n, const char *command, struct Client *client_p,
-		  struct Client *source_p, char *nicks_channels, char *text)
+		  struct Client *source_p, const char *nicks_channels, const char *text)
 {
 	int type;
 	char *p, *nick, *target_list;
 	struct Channel *chptr = NULL;
 	struct Client *target_p;
 
-	target_list = nicks_channels;	/* skip strcpy for non-lazyleafs */
+	target_list = LOCAL_COPY(nicks_channels);	/* skip strcpy for non-lazyleafs */
 
 	ntargets = 0;
 
@@ -407,7 +407,7 @@ duplicate_ptr(void *ptr)
  */
 static void
 msg_channel(int p_or_n, const char *command,
-	    struct Client *client_p, struct Client *source_p, struct Channel *chptr, char *text)
+	    struct Client *client_p, struct Client *source_p, struct Channel *chptr, const char *text)
 {
 	int result;
 
@@ -451,7 +451,7 @@ msg_channel(int p_or_n, const char *command,
  */
 static void
 msg_channel_flags(int p_or_n, const char *command, struct Client *client_p,
-		  struct Client *source_p, struct Channel *chptr, int flags, char *text)
+		  struct Client *source_p, struct Channel *chptr, int flags, const char *text)
 {
 	int type;
 	char c;
@@ -513,7 +513,7 @@ msg_channel_flags(int p_or_n, const char *command, struct Client *client_p,
  */
 static void
 msg_client(int p_or_n, const char *command,
-	   struct Client *source_p, struct Client *target_p, char *text)
+	   struct Client *source_p, struct Client *target_p, const char *text)
 {
 	if(MyClient(source_p))
 	{
@@ -717,7 +717,7 @@ flood_attack_channel(int p_or_n, struct Client *source_p, struct Channel *chptr,
  */
 static void
 handle_special(int p_or_n, const char *command, struct Client *client_p,
-	     struct Client *source_p, char *nick, char *text)
+	     struct Client *source_p, const char *nick, const char *text)
 {
 	struct Client *target_p;
 	char *host;
@@ -846,13 +846,14 @@ handle_special(int p_or_n, const char *command, struct Client *client_p,
  *
  */
 static struct Client *
-find_userhost(char *user, char *host, int *count)
+find_userhost(const char *user, const char *host, int *count)
 {
 	struct Client *c2ptr;
 	struct Client *res = NULL;
+	char *u = LOCAL_COPY(user);
 	dlink_node *ptr;
 	*count = 0;
-	if(collapse(user) != NULL)
+	if(collapse(u) != NULL)
 	{
 		DLINK_FOREACH(ptr, global_client_list.head)
 		{
@@ -860,7 +861,7 @@ find_userhost(char *user, char *host, int *count)
 			if(!MyClient(c2ptr))	/* implies mine and an user */
 				continue;
 			if((!host || match(host, c2ptr->host)) &&
-			   irccmp(user, c2ptr->username) == 0)
+			   irccmp(u, c2ptr->username) == 0)
 			{
 				(*count)++;
 				res = c2ptr;

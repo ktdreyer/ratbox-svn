@@ -49,25 +49,25 @@
 #include "packet.h"
 
 
-static void mr_nick(struct Client *, struct Client *, int, char **);
-static void m_nick(struct Client *, struct Client *, int, char **);
-static void ms_nick(struct Client *, struct Client *, int, char **);
+static void mr_nick(struct Client *, struct Client *, int, const char **);
+static void m_nick(struct Client *, struct Client *, int, const char **);
+static void ms_nick(struct Client *, struct Client *, int, const char **);
 
-static void ms_client(struct Client *, struct Client *, int, char **);
+static void ms_client(struct Client *, struct Client *, int, const char **);
 
-static int nick_from_server(struct Client *, struct Client *, int, char **, time_t, char *);
-static int client_from_server(struct Client *, struct Client *, int, char **, time_t, char *);
+static int nick_from_server(struct Client *, struct Client *, int, const char **, time_t, const char *);
+static int client_from_server(struct Client *, struct Client *, int, const char **, time_t, const char *);
 
-static int check_clean_nick(struct Client *, struct Client *, char *, char *, char *);
-static int check_clean_user(struct Client *, char *, char *, char *);
-static int check_clean_host(struct Client *, char *, char *, char *);
+static int check_clean_nick(struct Client *, struct Client *, const char *, const char *, const char *);
+static int check_clean_user(struct Client *, const char *, const char *, const char *);
+static int check_clean_host(struct Client *, const char *, const char *, const char *);
 
-static int clean_nick_name(char *);
-static int clean_user_name(char *);
-static int clean_host_name(char *);
+static int clean_nick_name(const char *);
+static int clean_user_name(const char *);
+static int clean_host_name(const char *);
 
 static int perform_nick_collides(struct Client *, struct Client *,
-				 struct Client *, int, char **, time_t, char *);
+				 struct Client *, int, const char **, time_t, const char *);
 
 
 struct Message nick_msgtab = {
@@ -92,7 +92,7 @@ DECLARE_MODULE_AV1(NULL, NULL, nick_clist, NULL, NULL, "$Revision$");
  *       parv[1] = nickname
  */
 static void
-mr_nick(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mr_nick(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Client *target_p;
 	char nick[NICKLEN];
@@ -159,7 +159,7 @@ mr_nick(struct Client *client_p, struct Client *source_p, int parc, char *parv[]
  *     parv[1] = nickname
  */
 static void
-m_nick(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_nick(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	char nick[NICKLEN];
 	struct Client *target_p;
@@ -260,7 +260,7 @@ m_nick(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
  *    parv[8] = ircname
  */
 static void
-ms_nick(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+ms_nick(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Client *target_p;
 	char nick[NICKLEN];
@@ -310,10 +310,13 @@ ms_nick(struct Client *client_p, struct Client *source_p, int parc, char *parv[]
 		/* check the length of the clients gecos */
 		if(strlen(parv[8]) > REALLEN)
 		{
+			char *s = LOCAL_COPY(parv[8]);
 			sendto_realops_flags(UMODE_ALL, L_ALL,
 					     "Long realname from server %s for %s", parv[7],
 					     parv[1]);
-			parv[8][REALLEN] = '\0';
+			
+			s[REALLEN] = '\0';
+			parv[8] = s;
 		}
 
 		if(IsServer(source_p))
@@ -362,13 +365,13 @@ ms_nick(struct Client *client_p, struct Client *source_p, int parc, char *parv[]
  * ms_client()
  */
 static void
-ms_client(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+ms_client(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Client *target_p;
 	char nick[NICKLEN];
 	time_t newts = 0;
-	char *id;
-	char *name;
+	const char *id;
+	const char *name;
 
 	id = parv[8];
 	name = parv[9];
@@ -385,9 +388,11 @@ ms_client(struct Client *client_p, struct Client *source_p, int parc, char *parv
 	/* check length of clients gecos */
 	if(strlen(name) > REALLEN)
 	{
+		char *s = LOCAL_COPY(name);
 		sendto_realops_flags(UMODE_ALL, L_ALL, "Long realname from server %s for %s",
 				     parv[0], parv[1]);
-		name[REALLEN] = '\0';
+		s[REALLEN] = '\0';
+		name = parv[9] = s;
 	}
 
 	newts = atol(parv[3]);
@@ -442,7 +447,7 @@ ms_client(struct Client *client_p, struct Client *source_p, int parc, char *parv
  */
 static int
 check_clean_nick(struct Client *client_p, struct Client *source_p,
-		 char *nick, char *newnick, char *server)
+		 const char *nick, const char *newnick, const char *server)
 {
 	/* the old code did some wacky stuff here, if the nick is invalid, kill it
 	 * and dont bother messing at all
@@ -484,7 +489,7 @@ check_clean_nick(struct Client *client_p, struct Client *source_p,
  * side effects - if username is erroneous, return 1
  */
 static int
-check_clean_user(struct Client *client_p, char *nick, char *user, char *server)
+check_clean_user(struct Client *client_p, const char *nick, const char *user, const char *server)
 {
 	if(strlen(user) > USERLEN)
 	{
@@ -516,7 +521,7 @@ check_clean_user(struct Client *client_p, char *nick, char *user, char *server)
  * side effects - if hostname is erroneous, return 1
  */
 static int
-check_clean_host(struct Client *client_p, char *nick, char *host, char *server)
+check_clean_host(struct Client *client_p, const char *nick, const char *host, const char *server)
 {
 	if(strlen(host) > HOSTLEN)
 	{
@@ -545,7 +550,7 @@ check_clean_host(struct Client *client_p, char *nick, char *host, char *server)
  * side effects - walks through the nickname, returning 0 if erroneous
  */
 static int
-clean_nick_name(char *nick)
+clean_nick_name(const char *nick)
 {
 	assert(nick);
 	if(nick == NULL)
@@ -571,7 +576,7 @@ clean_nick_name(char *nick)
  * side effects - walks through the username, returning 0 if erroneous
  */
 static int
-clean_user_name(char *user)
+clean_user_name(const char *user)
 {
 	assert(user);
 	if(user == NULL)
@@ -593,7 +598,7 @@ clean_user_name(char *user)
  * side effects - walks through the hostname, returning 0 if erroneous
  */
 static int
-clean_host_name(char *host)
+clean_host_name(const char *host)
 {
 	assert(host);
 	if(host == NULL)
@@ -613,7 +618,7 @@ clean_host_name(char *host)
  */
 static int
 nick_from_server(struct Client *client_p, struct Client *source_p, int parc,
-		 char *parv[], time_t newts, char *nick)
+		 const char *parv[], time_t newts, const char *nick)
 {
 	if(IsServer(source_p))
 	{
@@ -638,7 +643,7 @@ nick_from_server(struct Client *client_p, struct Client *source_p, int parc,
 		if(parc > 8)
 		{
 			int flag;
-			char *m;
+			const char *m;
 
 			/* parse usermodes */
 			m = &parv[4][1];
@@ -697,12 +702,12 @@ nick_from_server(struct Client *client_p, struct Client *source_p, int parc,
  */
 static int
 client_from_server(struct Client *client_p, struct Client *source_p, int parc,
-		   char *parv[], time_t newts, char *nick)
+		   const char *parv[], time_t newts, const char *nick)
 {
-	char *name;
-	char *id;
+	const char *name;
+	const char *id;
 	int flag;
-	char *m;
+	const char *m;
 
 	id = parv[8];
 	name = parv[9];
@@ -738,7 +743,7 @@ client_from_server(struct Client *client_p, struct Client *source_p, int parc,
 
 static int
 perform_nick_collides(struct Client *source_p, struct Client *client_p,
-		      struct Client *target_p, int parc, char *parv[], time_t newts, char *nick)
+		      struct Client *target_p, int parc, const char *parv[], time_t newts, const char *nick)
 {
 	int sameuser;
 

@@ -47,7 +47,7 @@
 static void names_all_visible_channels(struct Client *source_p);
 static void names_non_public_non_secret(struct Client *source_p);
 
-static void m_names(struct Client *, struct Client *, int, char **);
+static void m_names(struct Client *, struct Client *, int, const char **);
 
 struct Message names_msgtab = {
 	"NAMES", 0, 0, 0, 0, MFLG_SLOW, 0,
@@ -68,28 +68,29 @@ DECLARE_MODULE_AV1(NULL, NULL, names_clist, NULL, NULL, "$Revision$");
 **      parv[2] = vkey
 */
 static void
-m_names(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_names(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Channel *ch2ptr = NULL;
 	char *s;
-	char *para = parc > 1 ? parv[1] : NULL;
+	const char *para = parc > 1 ? parv[1] : NULL;
 
 	if(!EmptyString(para))
 	{
-		if((s = strchr(para, ',')))
+		char *p = LOCAL_COPY(para);
+		if((s = strchr(p, ',')))
 			*s = '\0';
 
-		if(!check_channel_name(para))
+		if(!check_channel_name(p))
 		{
 			sendto_one(source_p, form_str(ERR_BADCHANNAME),
-				   me.name, parv[0], (unsigned char *) para);
+				   me.name, parv[0], (unsigned char *) p);
 			return;
 		}
 
 		if((ch2ptr = hash_find_channel(para)) != NULL)
 			channel_member_names(source_p, ch2ptr, ch2ptr->chname, 1);
 		else
-			sendto_one(source_p, form_str(RPL_ENDOFNAMES), me.name, parv[0], para);
+			sendto_one(source_p, form_str(RPL_ENDOFNAMES), me.name, parv[0], p);
 	}
 	else
 	{

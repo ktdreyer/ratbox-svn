@@ -148,7 +148,7 @@ clear_xlines(void)
  * side effects - looks for a match on name field
  */
 struct xline *
-find_xline(char *gecos)
+find_xline(const char *gecos)
 {
 	struct xline *xconf;
 	dlink_node *ptr;

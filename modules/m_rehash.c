@@ -42,7 +42,7 @@
 #include "modules.h"
 #include "hostmask.h"
 
-static void mo_rehash(struct Client *, struct Client *, int, char **);
+static void mo_rehash(struct Client *, struct Client *, int, const char **);
 
 struct Message rehash_msgtab = {
 	"REHASH", 0, 0, 0, 0, MFLG_SLOW, 0,
@@ -177,7 +177,7 @@ static struct hash_commands rehash_commands[] = {
  *
  */
 static void
-mo_rehash(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mo_rehash(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	if(!IsOperRehash(source_p))
 	{

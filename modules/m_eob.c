@@ -37,7 +37,7 @@
 #include "modules.h"
 #include <stdlib.h>
 
-static void ms_eob(struct Client *, struct Client *, int, char **);
+static void ms_eob(struct Client *, struct Client *, int, const char **);
 
 struct Message eob_msgtab = {
 	"EOB", 0, 0, 0, 0, MFLG_SLOW | MFLG_UNREG, 0,
@@ -52,7 +52,7 @@ DECLARE_MODULE_AV1(NULL, NULL, eob_clist, NULL, NULL, "$Revision$");
  *      parv[1] = servername   
  */
 static void
-ms_eob(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+ms_eob(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	sendto_realops_flags(UMODE_ALL, L_ALL,
 			     "End of burst from %s (%d seconds)",

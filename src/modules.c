@@ -77,11 +77,11 @@ int max_mods = MODS_INCREMENT;
 
 static dlink_list mod_paths;
 
-static void mo_modload(struct Client *, struct Client *, int, char **);
-static void mo_modlist(struct Client *, struct Client *, int, char **);
-static void mo_modreload(struct Client *, struct Client *, int, char **);
-static void mo_modunload(struct Client *, struct Client *, int, char **);
-static void mo_modrestart(struct Client *, struct Client *, int, char **);
+static void mo_modload(struct Client *, struct Client *, int, const char **);
+static void mo_modlist(struct Client *, struct Client *, int, const char **);
+static void mo_modreload(struct Client *, struct Client *, int, const char **);
+static void mo_modunload(struct Client *, struct Client *, int, const char **);
+static void mo_modrestart(struct Client *, struct Client *, int, const char **);
 
 struct Message modload_msgtab = {
 	"MODLOAD", 0, 0, 2, 0, MFLG_SLOW, 0,
@@ -198,10 +198,10 @@ mod_clear_paths(void)
  * side effects -
  */
 char *
-irc_basename(char *path)
+irc_basename(const char *path)
 {
 	char *mod_basename = MyMalloc(strlen(path) + 1);
-	char *s;
+	const char *s;
 
 	if(!(s = strrchr(path, '/')))
 		s = path;
@@ -220,7 +220,7 @@ irc_basename(char *path)
  */
 
 int
-findmodule_byname(char *name)
+findmodule_byname(const char *name)
 {
 	int i;
 
@@ -317,7 +317,7 @@ load_core_modules(int warn)
  * side effects -
  */
 int
-load_one_module(char *path, int coremodule)
+load_one_module(const char *path, int coremodule)
 {
 	char modpath[MAXPATHLEN];
 	dlink_node *pathst;
@@ -355,7 +355,7 @@ load_one_module(char *path, int coremodule)
 
 /* load a module .. */
 static void
-mo_modload(struct Client *client_p, struct Client *source_p, int parc, char **parv)
+mo_modload(struct Client *client_p, struct Client *source_p, int parc, const char **parv)
 {
 	char *m_bn;
 
@@ -384,7 +384,7 @@ mo_modload(struct Client *client_p, struct Client *source_p, int parc, char **pa
 
 /* unload a module .. */
 static void
-mo_modunload(struct Client *client_p, struct Client *source_p, int parc, char **parv)
+mo_modunload(struct Client *client_p, struct Client *source_p, int parc, const char **parv)
 {
 	char *m_bn;
 	int modindex;
@@ -424,7 +424,7 @@ mo_modunload(struct Client *client_p, struct Client *source_p, int parc, char **
 
 /* unload and load in one! */
 static void
-mo_modreload(struct Client *client_p, struct Client *source_p, int parc, char **parv)
+mo_modreload(struct Client *client_p, struct Client *source_p, int parc, const char **parv)
 {
 	char *m_bn;
 	int modindex;
@@ -469,7 +469,7 @@ mo_modreload(struct Client *client_p, struct Client *source_p, int parc, char **
 
 /* list modules .. */
 static void
-mo_modlist(struct Client *client_p, struct Client *source_p, int parc, char **parv)
+mo_modlist(struct Client *client_p, struct Client *source_p, int parc, const char **parv)
 {
 	int i;
 
@@ -506,7 +506,7 @@ mo_modlist(struct Client *client_p, struct Client *source_p, int parc, char **pa
 
 /* unload and reload all modules */
 static void
-mo_modrestart(struct Client *client_p, struct Client *source_p, int parc, char **parv)
+mo_modrestart(struct Client *client_p, struct Client *source_p, int parc, const char **parv)
 {
 	int modnum;
 

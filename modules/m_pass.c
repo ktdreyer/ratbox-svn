@@ -35,7 +35,7 @@
 #include "parse.h"
 #include "modules.h"
 
-static void mr_pass(struct Client *, struct Client *, int, char **);
+static void mr_pass(struct Client *, struct Client *, int, const char **);
 
 struct Message pass_msgtab = {
 	"PASS", 0, 0, 2, 0, MFLG_SLOW | MFLG_UNREG, 0,
@@ -55,7 +55,7 @@ DECLARE_MODULE_AV1(NULL, NULL, pass_clist, NULL, NULL, "$Revision$");
  *      parv[2] = optional extra version information
  */
 static void
-mr_pass(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mr_pass(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	const char *password = parv[1];
 

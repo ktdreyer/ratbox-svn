@@ -57,7 +57,7 @@ extern dlink_list xline_list;
 extern struct xline *make_xline(const char *, const char *, int);
 extern void free_xline(struct xline *);
 extern void clear_xlines(void);
-extern struct xline *find_xline(char *);
+extern struct xline *find_xline(const char *);
 
 extern dlink_list shared_list;
 extern struct shared *make_shared(void);

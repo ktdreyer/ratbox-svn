@@ -43,7 +43,7 @@
 #include "modules.h"
 #include "packet.h"
 
-static void m_mode(struct Client *, struct Client *, int, char **);
+static void m_mode(struct Client *, struct Client *, int, const char **);
 
 struct Message mode_msgtab = {
 	"MODE", 0, 0, 2, 0, MFLG_SLOW, 0,
@@ -59,7 +59,7 @@ DECLARE_MODULE_AV1(NULL, NULL, mode_clist, NULL, NULL, "$Revision$");
  * parv[1] - channel
  */
 static void
-m_mode(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_mode(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Channel *chptr = NULL;
 	static char modebuf[MODEBUFLEN];

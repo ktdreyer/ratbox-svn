@@ -55,7 +55,7 @@ int	challenge_load
 DECLARE_MODULE_AV1(challenge_load, NULL, NULL, NULL, NULL, "$Revision$");
 #else
 
-static void m_challenge(struct Client *, struct Client *, int, char **);
+static void m_challenge(struct Client *, struct Client *, int, const char **);
 void binary_to_hex(unsigned char *bin, char *hex, int length);
 
 /* We have openssl support, so include /CHALLENGE */
@@ -74,7 +74,7 @@ DECLARE_MODULE_AV1(NULL, NULL, challenge_clist, NULL, NULL, "$Revision$");
  *
  */
 static void
-m_challenge(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_challenge(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	char *challenge;
 	struct ConfItem *aconf, *oconf;

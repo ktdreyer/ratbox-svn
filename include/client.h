@@ -563,8 +563,8 @@ extern int exit_client(struct Client *, struct Client *, struct Client *, const 
 extern void count_local_client_memory(size_t * count, size_t * memory);
 extern void count_remote_client_memory(size_t * count, size_t * memory);
 
-extern struct Client *find_chasing(struct Client *, char *, int *);
-extern struct Client *find_person(char *);
+extern struct Client *find_chasing(struct Client *, const char *, int *);
+extern struct Client *find_person(const char *);
 extern struct Client *next_client(struct Client *, const char *);
 extern int accept_message(struct Client *source, struct Client *target);
 extern void del_from_accept(struct Client *source, struct Client *target);

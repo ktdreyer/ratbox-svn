@@ -53,10 +53,10 @@ struct HashEntry
 void clear_hostname_hash_table(void);
 
 struct Client *find_id(const char *name);
-extern int add_to_id_hash_table(char *, struct Client *);
+extern int add_to_id_hash_table(const char *, struct Client *);
 extern struct HashEntry hash_get_channel_block(int i);
 
-extern struct Channel *get_or_create_channel(struct Client *client_p, char *chname, int *isnew);
+extern struct Channel *get_or_create_channel(struct Client *client_p, const char *chname, int *isnew);
 
 extern size_t hash_get_client_table_size(void);
 extern size_t hash_get_channel_table_size(void);

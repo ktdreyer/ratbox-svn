@@ -203,7 +203,7 @@ hpux_dlsym(void *handle, char *name)
  * side effects	- module is unloaded
  */
 int
-unload_one_module(char *name, int warn)
+unload_one_module(const char *name, int warn)
 {
 	int modindex;
 
@@ -272,7 +272,7 @@ unload_one_module(char *name, int warn)
  * side effects - loads a module if successful
  */
 int
-load_a_module(char *path, int warn, int core)
+load_a_module(const char *path, int warn, int core)
 {
 	void *tmpptr = NULL;
 

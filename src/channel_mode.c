@@ -49,8 +49,8 @@
 
 #include "s_log.h"
 
-static int add_id(struct Client *, struct Channel *, char *, int);
-static int del_id(struct Channel *, char *, int);
+static int add_id(struct Client *, struct Channel *, const char *, int);
+static int del_id(struct Channel *, const char *, int);
 
 static void change_channel_membership(struct Channel *chptr,
 				      dlink_list * to_list,
@@ -64,36 +64,36 @@ static char *fix_key_old(char *);
 
 
 static void chm_nosuch(struct Client *, struct Client *,
-		       struct Channel *, int, int *, char **, int *, int,
+		       struct Channel *, int, int *, const char **, int *, int,
 		       int, char, void *, const char *chname);
 
 static void chm_simple(struct Client *, struct Client *, struct Channel *,
-		       int, int *, char **, int *, int, int, char, void *, const char *chname);
+		       int, int *, const char **, int *, int, int, char, void *, const char *chname);
 
 static void chm_limit(struct Client *, struct Client *, struct Channel *,
-		      int, int *, char **, int *, int, int, char, void *, const char *chname);
+		      int, int *, const char **, int *, int, int, char, void *, const char *chname);
 
 static void chm_key(struct Client *, struct Client *, struct Channel *,
-		    int, int *, char **, int *, int, int, char, void *, const char *chname);
+		    int, int *, const char **, int *, int, int, char, void *, const char *chname);
 
 static void chm_op(struct Client *, struct Client *, struct Channel *, int,
-		   int *, char **, int *, int, int, char, void *, const char *chname);
+		   int *, const char **, int *, int, int, char, void *, const char *chname);
 
 static void chm_voice(struct Client *, struct Client *, struct Channel *,
-		      int, int *, char **, int *, int, int, char, void *, const char *chname);
+		      int, int *, const char **, int *, int, int, char, void *, const char *chname);
 
 static void chm_ban(struct Client *, struct Client *, struct Channel *, int,
-		    int *, char **, int *, int, int, char, void *, const char *chname);
+		    int *, const char **, int *, int, int, char, void *, const char *chname);
 
 static void chm_except(struct Client *, struct Client *, struct Channel *,
-		       int, int *, char **, int *, int, int, char, void *, const char *chname);
+		       int, int *, const char **, int *, int, int, char, void *, const char *chname);
 
 static void chm_invex(struct Client *, struct Client *, struct Channel *,
-		      int, int *, char **, int *, int, int, char, void *, const char *chname);
+		      int, int *, const char **, int *, int, int, char, void *, const char *chname);
 
 static void send_cap_mode_changes(struct Client *, struct Client *, struct Channel *, int, int);
 
-static void send_mode_changes(struct Client *, struct Client *, struct Channel *, char *chname);
+static void send_mode_changes(struct Client *, struct Client *, struct Channel *, const char *chname);
 
 static void update_channel_info(struct Channel *);
 
@@ -155,11 +155,12 @@ check_string(char *s)
  */
 
 static int
-add_id(struct Client *client_p, struct Channel *chptr, char *banid, int type)
+add_id(struct Client *client_p, struct Channel *chptr, const char *banid, int type)
 {
 	dlink_list *list;
 	dlink_node *ban;
 	struct Ban *actualBan;
+	char *realban = LOCAL_COPY(banid);
 
 	/* dont let local clients overflow the banlist */
 	if(MyClient(client_p))
@@ -167,11 +168,11 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, int type)
 		if(chptr->num_mask >= ConfigChannel.max_bans)
 		{
 			sendto_one(client_p, form_str(ERR_BANLISTFULL),
-				   me.name, client_p->name, chptr->chname, banid);
+				   me.name, client_p->name, chptr->chname, realban);
 			return 0;
 		}
 
-		collapse(banid);
+		collapse(realban);
 	}
 
 	switch (type)
@@ -194,13 +195,13 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, int type)
 	DLINK_FOREACH(ban, list->head)
 	{
 		actualBan = ban->data;
-		if(match(actualBan->banstr, banid))
+		if(match(actualBan->banstr, realban))
 			return 0;
 	}
 
 
 	actualBan = (struct Ban *) BlockHeapAlloc(ban_heap);
-	DupString(actualBan->banstr, banid);
+	DupString(actualBan->banstr, realban);
 
 	if(IsPerson(client_p))
 	{
@@ -233,7 +234,7 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, int type)
  * (invex/excemp/etc)
  */
 static int
-del_id(struct Channel *chptr, char *banid, int type)
+del_id(struct Channel *chptr, const char *banid, int type)
 {
 	dlink_list *list;
 	dlink_node *ban;
@@ -679,7 +680,7 @@ unset_chcap_usage_counts(struct Client *serv_p)
 static void
 chm_nosuch(struct Client *client_p, struct Client *source_p,
 	   struct Channel *chptr, int parc, int *parn,
-	   char **parv, int *errors, int alev, int dir, char c, void *d, const char *chname)
+	   const char **parv, int *errors, int alev, int dir, char c, void *d, const char *chname)
 {
 	if(*errors & SM_ERR_UNKNOWN)
 		return;
@@ -690,7 +691,7 @@ chm_nosuch(struct Client *client_p, struct Client *source_p,
 static void
 chm_simple(struct Client *client_p, struct Client *source_p,
 	   struct Channel *chptr, int parc, int *parn,
-	   char **parv, int *errors, int alev, int dir, char c, void *d, const char *chname)
+	   const char **parv, int *errors, int alev, int dir, char c, void *d, const char *chname)
 {
 	long mode_type;
 
@@ -741,9 +742,9 @@ chm_simple(struct Client *client_p, struct Client *source_p,
 static void
 chm_ban(struct Client *client_p, struct Client *source_p,
 	struct Channel *chptr, int parc, int *parn,
-	char **parv, int *errors, int alev, int dir, char c, void *d, const char *chname)
+	const char **parv, int *errors, int alev, int dir, char c, void *d, const char *chname)
 {
-	char *mask;
+	const char *mask;
 	char *raw_mask;
 	dlink_node *ptr;
 	struct Ban *banptr;
@@ -777,7 +778,7 @@ chm_ban(struct Client *client_p, struct Client *source_p,
 	if(MyClient(source_p) && (++mode_limit > MAXMODEPARAMS))
 		return;
 
-	raw_mask = parv[(*parn)++];
+	raw_mask = LOCAL_COPY(parv[(*parn)++]);
 
 	if(IsServer(client_p))
 		mask = raw_mask;
@@ -824,7 +825,7 @@ chm_ban(struct Client *client_p, struct Client *source_p,
 static void
 chm_except(struct Client *client_p, struct Client *source_p,
 	   struct Channel *chptr, int parc, int *parn,
-	   char **parv, int *errors, int alev, int dir, char c, void *d, const char *chname)
+	   const char **parv, int *errors, int alev, int dir, char c, void *d, const char *chname)
 {
 	dlink_node *ptr;
 	struct Ban *banptr;
@@ -873,7 +874,7 @@ chm_except(struct Client *client_p, struct Client *source_p,
 	if(MyClient(source_p) && (++mode_limit > MAXMODEPARAMS))
 		return;
 
-	raw_mask = parv[(*parn)++];
+	raw_mask = LOCAL_COPY(parv[(*parn)++]);
 	if(IsServer(client_p))
 		mask = raw_mask;
 	else
@@ -922,7 +923,7 @@ chm_except(struct Client *client_p, struct Client *source_p,
 static void
 chm_invex(struct Client *client_p, struct Client *source_p,
 	  struct Channel *chptr, int parc, int *parn,
-	  char **parv, int *errors, int alev, int dir, char c, void *d, const char *chname)
+	  const char **parv, int *errors, int alev, int dir, char c, void *d, const char *chname)
 {
 	char *mask, *raw_mask;
 	dlink_node *ptr;
@@ -971,7 +972,7 @@ chm_invex(struct Client *client_p, struct Client *source_p,
 	if(MyClient(source_p) && (++mode_limit > MAXMODEPARAMS))
 		return;
 
-	raw_mask = parv[(*parn)++];
+	raw_mask = LOCAL_COPY(parv[(*parn)++]);
 	if(IsServer(client_p))
 		mask = raw_mask;
 	else
@@ -1025,7 +1026,7 @@ chm_invex(struct Client *client_p, struct Client *source_p,
 static void
 chm_op(struct Client *client_p, struct Client *source_p,
        struct Channel *chptr, int parc, int *parn,
-       char **parv, int *errors, int alev, int dir, char c, void *d, const char *chname)
+       const char **parv, int *errors, int alev, int dir, char c, void *d, const char *chname)
 {
 	char *opnick;
 	struct Client *targ_p;
@@ -1053,7 +1054,7 @@ chm_op(struct Client *client_p, struct Client *source_p,
 		return;
 	}
 
-	opnick = parv[(*parn)++];
+	opnick = LOCAL_COPY(parv[(*parn)++]);
 
 	if((targ_p = find_chasing(source_p, opnick, NULL)) == NULL)
 	{
@@ -1102,7 +1103,7 @@ chm_op(struct Client *client_p, struct Client *source_p,
 static void
 chm_voice(struct Client *client_p, struct Client *source_p,
 	  struct Channel *chptr, int parc, int *parn,
-	  char **parv, int *errors, int alev, int dir, char c, void *d, const char *chname)
+	  const char **parv, int *errors, int alev, int dir, char c, void *d, const char *chname)
 {
 	char *opnick;
 	struct Client *targ_p;
@@ -1119,7 +1120,7 @@ chm_voice(struct Client *client_p, struct Client *source_p,
 	if((dir == MODE_QUERY) || parc <= *parn)
 		return;
 
-	opnick = parv[(*parn)++];
+	opnick = LOCAL_COPY(parv[(*parn)++]);
 
 	if((targ_p = find_chasing(source_p, opnick, NULL)) == NULL)
 	{
@@ -1165,7 +1166,7 @@ chm_voice(struct Client *client_p, struct Client *source_p,
 static void
 chm_limit(struct Client *client_p, struct Client *source_p,
 	  struct Channel *chptr, int parc, int *parn,
-	  char **parv, int *errors, int alev, int dir, char c, void *d, const char *chname)
+	  const char **parv, int *errors, int alev, int dir, char c, void *d, const char *chname)
 {
 	int limit;
 	char *lstr;
@@ -1184,7 +1185,7 @@ chm_limit(struct Client *client_p, struct Client *source_p,
 
 	if((dir == MODE_ADD) && parc > *parn)
 	{
-		lstr = parv[(*parn)++];
+		lstr = LOCAL_COPY(parv[(*parn)++]);
 
 		if((limit = strtoul(lstr, NULL, 10)) <= 0)
 			return;
@@ -1221,9 +1222,9 @@ chm_limit(struct Client *client_p, struct Client *source_p,
 static void
 chm_key(struct Client *client_p, struct Client *source_p,
 	struct Channel *chptr, int parc, int *parn,
-	char **parv, int *errors, int alev, int dir, char c, void *d, const char *chname)
+	const char **parv, int *errors, int alev, int dir, char c, void *d, const char *chname)
 {
-	char *key;
+	 char *key;
 
 	if(alev < CHACCESS_CHANOP)
 	{
@@ -1239,7 +1240,7 @@ chm_key(struct Client *client_p, struct Client *source_p,
 
 	if((dir == MODE_ADD) && parc > *parn)
 	{
-		key = parv[(*parn)++];
+		key = LOCAL_COPY(parv[(*parn)++]);
 
 		if(MyClient(source_p))
 			fix_key(key);
@@ -1278,7 +1279,7 @@ struct ChannelMode
 {
 	void (*func) (struct Client * client_p, struct Client * source_p,
 		      struct Channel * chptr, int parc, int *parn,
-		      char **parv, int *errors, int alev, int dir, char c,
+		      const char **parv, int *errors, int alev, int dir, char c,
 		      void *d, const char *chname);
 	void *d;
 };
@@ -1482,7 +1483,7 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
  */
 static void
 send_mode_changes(struct Client *client_p, struct Client *source_p,
-		  struct Channel *chptr, char *chname)
+		  struct Channel *chptr, const char *chname)
 {
 	int pbl, mbl, nc, mc;
 	int i, st;
@@ -1586,12 +1587,13 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
  */
 void
 set_channel_mode(struct Client *client_p, struct Client *source_p,
-		 struct Channel *chptr, int parc, char *parv[], char *chname)
+		 struct Channel *chptr, int parc, const char *parv[], const char *chname)
 {
 	int dir = MODE_ADD;
 	int parn = 1;
 	int alevel, errors = 0;
-	char *ml = parv[0], c;
+	const char *ml = parv[0];
+	char c;
 	int table_position;
 
 	mask_pos = 0;

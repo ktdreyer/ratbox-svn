@@ -69,11 +69,11 @@ DECLARE_MODULE(NULL, NULL, NULL, NULL, NULL, "$Revision$");
 
 static int bogus_host(char *host);
 static char *parse_cryptserv_args(struct Client *client_p,
-				  char *parv[], int parc, char *info, char *key);
+				  const char *parv[], int parc, char *info, char *key);
 
-static void mr_cryptlink(struct Client *, struct Client *, int, char **);
-static void cryptlink_serv(struct Client *, struct Client *, int, char **);
-static void cryptlink_auth(struct Client *, struct Client *, int, char **);
+static void mr_cryptlink(struct Client *, struct Client *, int, const char **);
+static void cryptlink_serv(struct Client *, struct Client *, int, const char **);
+static void cryptlink_auth(struct Client *, struct Client *, int, const char **);
 
 struct Message cryptlink_msgtab = {
 	"CRYPTLINK", 0, 0, 4, 0, MFLG_SLOW | MFLG_UNREG, 0,
@@ -115,7 +115,7 @@ DECLARE_MODULE_AV1(NULL, NULL, cryptlink_clist, NULL, NULL, "$Revision$");
  *                          parv[3] == keyphrase
  */
 static void
-mr_cryptlink(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mr_cryptlink(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	int i;
 
@@ -139,7 +139,7 @@ mr_cryptlink(struct Client *client_p, struct Client *source_p, int parc, char *p
  *        parv[1] = secret key
  */
 static void
-cryptlink_auth(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+cryptlink_auth(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct EncCapability *ecap;
 	struct ConfItem *aconf;
@@ -255,7 +255,7 @@ cryptlink_auth(struct Client *client_p, struct Client *source_p, int parc, char 
  *        parv[4] == :server info (M-line)
  */
 static void
-cryptlink_serv(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+cryptlink_serv(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	char info[REALLEN + 1];
 	char *name;
@@ -427,16 +427,14 @@ cryptlink_serv(struct Client *client_p, struct Client *source_p, int parc, char 
  * side effects	- parv[2] is trimmed to HOSTLEN size if needed.
  */
 static char *
-parse_cryptserv_args(struct Client *client_p, char *parv[], int parc, char *info, char *key)
+parse_cryptserv_args(struct Client *client_p, const char *parv[], int parc, char *info, char *key)
 {
-	char *name;
+	char *name = LOCAL_COPY(parv[2]);
 	unsigned char *tmp, *out;
 	int len;
 	int decoded_len;
 
 	info[0] = '\0';
-
-	name = parv[2];
 
 	/* parv[2] contains encrypted auth data */
 	if(!(decoded_len = unbase64_block((char **) &tmp, parv[3], strlen(parv[3]))))

@@ -41,7 +41,7 @@
 
 #include <string.h>
 
-static void m_ison(struct Client *, struct Client *, int, char **);
+static void m_ison(struct Client *, struct Client *, int, const char **);
 
 struct Message ison_msgtab = {
 	"ISON", 0, 0, 1, 1, MFLG_SLOW, 0,
@@ -65,7 +65,7 @@ static char buf2[BUFSIZE];
  * ISON :nicklist
  */
 static void
-m_ison(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_ison(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Client *target_p;
 	char *nick;
@@ -87,7 +87,8 @@ m_ison(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 	 */
 	for (i = 1; i < parc; i++)
 	{
-		for (nick = strtoken(&p, parv[i], " "); nick; nick = strtoken(&p, NULL, " "))
+		char *cs = LOCAL_COPY(parv[i]);
+		for (nick = strtoken(&p, cs, " "); nick; nick = strtoken(&p, NULL, " "))
 		{
 			target_p = find_person(nick);
 

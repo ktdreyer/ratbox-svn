@@ -45,8 +45,8 @@
 #include "modules.h"
 #include "s_serv.h"
 
-static void mo_ungline(struct Client *, struct Client *, int, char **);
-static int remove_temp_gline(char *, char *);
+static void mo_ungline(struct Client *, struct Client *, int, const char **);
+static int remove_temp_gline(const char *, const char *);
 
 struct Message ungline_msgtab = {
 	"UNGLINE", 0, 0, 2, 0, MFLG_SLOW, 0,
@@ -63,9 +63,11 @@ DECLARE_MODULE_AV1(NULL, NULL, ungline_clist, NULL, NULL, "$Revision$");
  */
 
 static void
-mo_ungline(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mo_ungline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	char *user, *host;
+	const char *user;
+	char *h = LOCAL_COPY(parv[1]);
+	char *host;
 	char splat[] = "*";
 
 	if(!ConfigFileEntry.glines)
@@ -80,7 +82,7 @@ mo_ungline(struct Client *client_p, struct Client *source_p, int parc, char *par
 		return;
 	}
 
-	if((host = strchr(parv[1], '@')) || *parv[1] == '*')
+	if((host = strchr(h, '@')) || *h == '*')
 	{
 		/* Explicit user@host mask given */
 
@@ -92,7 +94,7 @@ mo_ungline(struct Client *client_p, struct Client *source_p, int parc, char *par
 		else
 		{
 			user = splat;	/* no @ found, assume its *@somehost */
-			host = parv[1];
+			host = h;
 		}
 	}
 	else
@@ -126,7 +128,7 @@ mo_ungline(struct Client *client_p, struct Client *source_p, int parc, char *par
  * side effects - tries to ungline anything that matches
  */
 static int
-remove_temp_gline(char *user, char *host)
+remove_temp_gline(const char *user, const char *host)
 {
 	struct ConfItem *aconf;
 	dlink_node *ptr;

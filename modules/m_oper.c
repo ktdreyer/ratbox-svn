@@ -44,14 +44,14 @@
 #include "modules.h"
 #include "packet.h"
 
-static struct ConfItem *find_password_aconf(char *name, struct Client *source_p);
+static struct ConfItem *find_password_aconf(const char *name, struct Client *source_p);
 static int match_oper_password(const char *password, struct ConfItem *aconf);
 
 extern char *crypt();
 
-static void m_oper(struct Client *, struct Client *, int, char **);
-static void ms_oper(struct Client *, struct Client *, int, char **);
-static void mo_oper(struct Client *, struct Client *, int, char **);
+static void m_oper(struct Client *, struct Client *, int, const char **);
+static void ms_oper(struct Client *, struct Client *, int, const char **);
+static void mo_oper(struct Client *, struct Client *, int, const char **);
 
 
 struct Message oper_msgtab = {
@@ -69,12 +69,12 @@ DECLARE_MODULE_AV1(NULL, NULL, oper_clist, NULL, NULL, "$Revision$");
  *      parv[2] = oper password
  */
 static void
-m_oper(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_oper(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct ConfItem *aconf;
 	struct ConfItem *oconf = NULL;
-	char *name;
-	char *password;
+	const char *name;
+	const char *password;
 
 	name = parv[1];
 	password = parv[2];
@@ -151,7 +151,7 @@ m_oper(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 **      parv[2] = oper password
 */
 static void
-mo_oper(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mo_oper(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	sendto_one(source_p, form_str(RPL_YOUREOPER), me.name, parv[0]);
 	SendMessageFile(source_p, &ConfigFileEntry.opermotd);
@@ -165,7 +165,7 @@ mo_oper(struct Client *client_p, struct Client *source_p, int parc, char *parv[]
 **      parv[2] = oper password
 */
 static void
-ms_oper(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+ms_oper(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	/* if message arrived from server, trust it, and set to oper */
 
@@ -187,7 +187,7 @@ ms_oper(struct Client *client_p, struct Client *source_p, int parc, char *parv[]
  */
 
 static struct ConfItem *
-find_password_aconf(char *name, struct Client *source_p)
+find_password_aconf(const char *name, struct Client *source_p)
 {
 	struct ConfItem *aconf;
 

@@ -45,8 +45,8 @@
 #include "sprintf_irc.h"
 #include "packet.h"
 
-static void m_join(struct Client *, struct Client *, int, char **);
-static void ms_join(struct Client *, struct Client *, int, char **);
+static void m_join(struct Client *, struct Client *, int, const char **);
+static void ms_join(struct Client *, struct Client *, int, const char **);
 
 struct Message join_msgtab = {
 	"JOIN", 0, 0, 2, 0, MFLG_SLOW, 0,
@@ -67,7 +67,7 @@ void check_spambot_warning(struct Client *source_p, const char *name);
  *      parv[2] = channel password (key)
  */
 static void
-m_join(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_join(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Channel *chptr = NULL;
 	char *name, *key = NULL;
@@ -83,10 +83,10 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 
 	if(parc > 2)
 	{
-		key = strtoken(&p2, parv[2], ",");
+		key = strtoken(&p2, LOCAL_COPY(parv[2]), ",");
 	}
 
-	for (name = strtoken(&p, parv[1], ","); name;
+	for (name = strtoken(&p, LOCAL_COPY(parv[1]), ","); name;
 	     key = (key) ? strtoken(&p2, NULL, ",") : NULL, name = strtoken(&p, NULL, ","))
 	{
 
@@ -309,9 +309,9 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
  */
 
 static void
-ms_join(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+ms_join(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	char *name;
+	const char *name;
 	int new_ts;
 
 	if(!(source_p->user))

@@ -44,7 +44,7 @@
 #include "parse.h"
 #include "modules.h"
 
-static void m_trace(struct Client *, struct Client *, int, char **);
+static void m_trace(struct Client *, struct Client *, int, const char **);
 
 static void trace_spy(struct Client *);
 
@@ -72,15 +72,15 @@ static int report_this_status(struct Client *source_p, struct Client *target_p, 
  *      parv[1] = servername
  */
 static void
-m_trace(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_trace(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Client *target_p = NULL;
 	struct Class *cltmp;
-	char *tname;
+	const char *tname;
 	int doall, link_s[MAXCONNECTIONS], link_u[MAXCONNECTIONS];
 	int cnt = 0, wilds, dow;
 	dlink_node *ptr;
-	char *looking_for = parv[0];
+	const char *looking_for = parv[0];
 
 	if(!IsClient(source_p))
 		return;

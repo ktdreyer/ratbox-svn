@@ -44,8 +44,8 @@
 
 static char buf[BUFSIZE];
 
-static void ms_kill(struct Client *, struct Client *, int, char **);
-static void mo_kill(struct Client *, struct Client *, int, char **);
+static void ms_kill(struct Client *, struct Client *, int, const char **);
+static void mo_kill(struct Client *, struct Client *, int, const char **);
 static void relay_kill(struct Client *, struct Client *, struct Client *,
 		       const char *, const char *);
 
@@ -64,11 +64,11 @@ DECLARE_MODULE_AV1(NULL, NULL, kill_clist, NULL, NULL, "$Revision$");
 **      parv[2] = kill path
 */
 static void
-mo_kill(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mo_kill(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Client *target_p;
 	const char *inpath = client_p->name;
-	char *user;
+	const char *user;
 	const char *reason;
 
 	user = parv[1];
@@ -81,9 +81,11 @@ mo_kill(struct Client *client_p, struct Client *source_p, int parc, char *parv[]
 
 	if(!EmptyString(parv[2]))
 	{
-		if(strlen(parv[2]) > (size_t) KILLLEN)
-			parv[2][KILLLEN] = '\0';
-		reason = parv[2];
+		char *s;
+		s = LOCAL_COPY(parv[2]);
+		if(strlen(s) > (size_t) KILLLEN)
+			s[KILLLEN] = '\0';
+		reason = s;
 	}
 	else
 		reason = "<No reason given>";
@@ -159,13 +161,13 @@ mo_kill(struct Client *client_p, struct Client *source_p, int parc, char *parv[]
  *      parv[2] = kill path and reason
  */
 static void
-ms_kill(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+ms_kill(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Client *target_p;
-	char *user;
-	char *reason;
+	const char *user;
+	const char *reason;
 	char default_reason[] = "<No reason given>";
-	char *path;
+	const char *path;
 	int chasing = 0;
 
 	*buf = '\0';
@@ -187,12 +189,14 @@ ms_kill(struct Client *client_p, struct Client *source_p, int parc, char *parv[]
 	}
 	else
 	{
-		reason = strchr(parv[2], ' ');
+		char *s = LOCAL_COPY(parv[2]), *t;
+		t = strchr(s, ' ');
 
-		if(reason)
+		if(t)
 		{
-			*reason = '\0';
-			reason++;
+			*t = '\0';
+			t++;
+			reason = t;
 		}
 		else
 			reason = default_reason;

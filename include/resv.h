@@ -52,6 +52,6 @@ extern struct ResvEntry *get_nick_resv(const char *);
 
 extern void report_resv(struct Client *);
 
-extern int clean_resv_nick(char *);
+extern int clean_resv_nick(const char *);
 
 #endif /* INCLUDED_hash_h */

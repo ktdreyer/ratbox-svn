@@ -41,8 +41,8 @@
 #include "hash.h"
 #include "modules.h"
 
-static void mr_pong(struct Client *, struct Client *, int, char **);
-static void ms_pong(struct Client *, struct Client *, int, char **);
+static void mr_pong(struct Client *, struct Client *, int, const char **);
+static void ms_pong(struct Client *, struct Client *, int, const char **);
 
 struct Message pong_msgtab = {
 	"PONG", 0, 0, 1, 0, MFLG_SLOW | MFLG_UNREG, 0,
@@ -53,10 +53,10 @@ mapi_clist_av1 pong_clist[] = { &pong_msgtab, NULL };
 DECLARE_MODULE_AV1(NULL, NULL, pong_clist, NULL, NULL, "$Revision$");
 
 static void
-ms_pong(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+ms_pong(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Client *target_p;
-	char *origin, *destination;
+	const char *origin, *destination;
 
 	if(parc < 2 || *parv[1] == '\0')
 	{
@@ -94,7 +94,7 @@ ms_pong(struct Client *client_p, struct Client *source_p, int parc, char *parv[]
 }
 
 static void
-mr_pong(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mr_pong(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	if(parc == 2 && *parv[1] != '\0')
 	{

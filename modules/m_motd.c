@@ -40,9 +40,9 @@
 #include "s_conf.h"
 
 
-static void mr_motd(struct Client *, struct Client *, int, char **);
-static void m_motd(struct Client *, struct Client *, int, char **);
-static void mo_motd(struct Client *, struct Client *, int, char **);
+static void mr_motd(struct Client *, struct Client *, int, const char **);
+static void m_motd(struct Client *, struct Client *, int, const char **);
+static void mo_motd(struct Client *, struct Client *, int, const char **);
 
 static void motd_spy(struct Client *);
 
@@ -66,7 +66,7 @@ DECLARE_MODULE_AV1(NULL, NULL, motd_clist, NULL, NULL, "$Revision$");
  * parv[0] = sender prefix
  */
 static void
-mr_motd(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mr_motd(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	/* allow unregistered clients to see the motd, but exit them */
 	SendMessageFile(source_p, &ConfigFileEntry.motd);
@@ -79,7 +79,7 @@ mr_motd(struct Client *client_p, struct Client *source_p, int parc, char *parv[]
 **      parv[1] = servername
 */
 static void
-m_motd(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_motd(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	static time_t last_used = 0;
 
@@ -110,7 +110,7 @@ m_motd(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 **      parv[1] = servername
 */
 static void
-mo_motd(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mo_motd(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	if(!IsClient(source_p))
 		return;

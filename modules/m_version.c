@@ -39,9 +39,9 @@
 
 static char *confopts(struct Client *source_p);
 
-static void m_version(struct Client *, struct Client *, int, char **);
-static void ms_version(struct Client *, struct Client *, int, char **);
-static void mo_version(struct Client *, struct Client *, int, char **);
+static void m_version(struct Client *, struct Client *, int, const char **);
+static void ms_version(struct Client *, struct Client *, int, const char **);
+static void mo_version(struct Client *, struct Client *, int, const char **);
 
 struct Message version_msgtab = {
 	"VERSION", 0, 0, 0, 0, MFLG_SLOW, 0,
@@ -57,7 +57,7 @@ DECLARE_MODULE_AV1(NULL, NULL, version_clist, NULL, NULL, "$Revision$");
  *      parv[1] = remote server
  */
 static void
-m_version(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_version(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	static time_t last_used = 0L;
 
@@ -91,7 +91,7 @@ m_version(struct Client *client_p, struct Client *source_p, int parc, char *parv
  *      parv[1] = remote server
  */
 static void
-mo_version(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mo_version(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 
 	if(hunt_server(client_p, source_p, ":%s VERSION :%s", 1, parc, parv) != HUNTED_ISME)
@@ -111,7 +111,7 @@ mo_version(struct Client *client_p, struct Client *source_p, int parc, char *par
  *      parv[1] = remote server
  */
 static void
-ms_version(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+ms_version(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	if(hunt_server(client_p, source_p, ":%s VERSION :%s", 1, parc, parv) == HUNTED_ISME)
 	{

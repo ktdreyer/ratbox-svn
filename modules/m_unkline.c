@@ -46,8 +46,8 @@
 #include "s_serv.h"
 #include "cluster.h"
 
-static void mo_unkline(struct Client *, struct Client *, int, char **);
-static void ms_unkline(struct Client *, struct Client *, int, char **);
+static void mo_unkline(struct Client *, struct Client *, int, const char **);
+static void ms_unkline(struct Client *, struct Client *, int, const char **);
 
 struct Message unkline_msgtab = {
 	"UNKLINE", 0, 0, 2, 0, MFLG_SLOW, 0,
@@ -57,9 +57,9 @@ struct Message unkline_msgtab = {
 mapi_clist_av1 unkline_clist[] = { &unkline_msgtab, NULL };
 DECLARE_MODULE_AV1(NULL, NULL, unkline_clist, NULL, NULL, "$Revision$");
 
-static void remove_permkline_match(struct Client *, char *, char *, int);
-static int flush_write(struct Client *, FBFILE *, char *, char *);
-static int remove_temp_kline(char *, char *);
+static void remove_permkline_match(struct Client *, const char *, const char *, int);
+static int flush_write(struct Client *, FBFILE *, const char *, const char *);
+static int remove_temp_kline(const char *, const char *);
 
 /*
 ** mo_unkline
@@ -72,10 +72,13 @@ static int remove_temp_kline(char *, char *);
 *
 */
 static void
-mo_unkline(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mo_unkline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	char *user, *host;
+	const char *user;
+	char *host;
 	char splat[] = "*";
+	char *h = LOCAL_COPY(parv[1]);
+
 	if(!IsOperUnkline(source_p))
 	{
 		sendto_one(source_p, ":%s NOTICE %s :You need unkline = yes;", me.name, parv[0]);
@@ -89,7 +92,7 @@ mo_unkline(struct Client *client_p, struct Client *source_p, int parc, char *par
 		return;
 	}
 
-	if((host = strchr(parv[1], '@')) || *parv[1] == '*')
+	if((host = strchr(h, '@')) || *h == '*')
 	{
 		/* Explicit user@host mask given */
 
@@ -101,7 +104,7 @@ mo_unkline(struct Client *client_p, struct Client *source_p, int parc, char *par
 		else
 		{
 			user = splat;	/* no @ found, assume its *@somehost */
-			host = parv[1];
+			host = h;
 		}
 	}
 	else
@@ -149,10 +152,10 @@ mo_unkline(struct Client *client_p, struct Client *source_p, int parc, char *par
  * side effects - kline is removed if matching shared {} is found.
  */
 static void
-ms_unkline(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+ms_unkline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	char *kuser;
-	char *khost;
+	const char *kuser;
+	const char *khost;
 
 	if(parc != 4)
 		return;
@@ -216,7 +219,7 @@ ms_unkline(struct Client *client_p, struct Client *source_p, int parc, char *par
  * hunts for a permanent kline, and removes it.
  */
 static void
-remove_permkline_match(struct Client *source_p, char *host, char *user, int cluster)
+remove_permkline_match(struct Client *source_p, const char *host, const char *user, int cluster)
 {
 	FBFILE *in, *out;
 	int pairme = 0;
@@ -359,7 +362,7 @@ remove_permkline_match(struct Client *source_p, char *host, char *user, int clus
  */
 
 static int
-flush_write(struct Client *source_p, FBFILE * out, char *buf, char *temppath)
+flush_write(struct Client *source_p, FBFILE * out, const char *buf, const char *temppath)
 {
 	int error_on_write = (fbputs(buf, out) < 0) ? YES : NO;
 
@@ -389,7 +392,7 @@ static dlink_list *tkline_list[] = {
  * side effects - tries to unkline anything that matches
  */
 static int
-remove_temp_kline(char *user, char *host)
+remove_temp_kline(const char *user, const char *host)
 {
 	dlink_list *tklist;
 	struct ConfItem *aconf;

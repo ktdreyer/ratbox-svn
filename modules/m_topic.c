@@ -43,8 +43,8 @@
 #include "modules.h"
 #include "packet.h"
 
-static void m_topic(struct Client *, struct Client *, int, char **);
-static void ms_topic(struct Client *, struct Client *, int, char **);
+static void m_topic(struct Client *, struct Client *, int, const char **);
+static void ms_topic(struct Client *, struct Client *, int, const char **);
 
 struct Message topic_msgtab = {
 	"TOPIC", 0, 0, 2, 0, MFLG_SLOW, 0,
@@ -61,7 +61,7 @@ DECLARE_MODULE_AV1(NULL, NULL, topic_clist, NULL, NULL, "$Revision$");
  *	parv[2] = new topic, if setting topic
  */
 static void
-m_topic(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_topic(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Channel *chptr = NULL;
 	char *p = NULL;
@@ -152,7 +152,7 @@ m_topic(struct Client *client_p, struct Client *source_p, int parc, char *parv[]
  * Let servers always set a topic
  */
 static void
-ms_topic(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+ms_topic(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Channel *chptr = NULL;
 

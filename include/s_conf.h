@@ -346,7 +346,7 @@ extern void read_conf_files(int cold);
 
 extern int attach_conf(struct Client *, struct ConfItem *);
 extern int attach_connect_block(struct Client *client, const char *name, const char *host);
-extern int check_client(struct Client *client_p, struct Client *source_p, char *);
+extern int check_client(struct Client *client_p, struct Client *source_p, const char *);
 
 extern int detach_conf(struct Client *);
 

@@ -36,8 +36,8 @@
 #include "parse.h"
 #include "modules.h"
 
-static void m_users(struct Client *, struct Client *, int, char **);
-static void mo_users(struct Client *, struct Client *, int, char **);
+static void m_users(struct Client *, struct Client *, int, const char **);
+static void mo_users(struct Client *, struct Client *, int, const char **);
 
 struct Message users_msgtab = {
 	"USERS", 0, 0, 0, 0, MFLG_SLOW, 0,
@@ -53,7 +53,7 @@ DECLARE_MODULE_AV1(NULL, NULL, users_clist, NULL, NULL, "$Revision$");
  *      parv[1] = servername
  */
 static void
-m_users(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_users(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	if(!ConfigServerHide.disable_remote)
 	{
@@ -75,7 +75,7 @@ m_users(struct Client *client_p, struct Client *source_p, int parc, char *parv[]
  *      parv[1] = servername
  */
 static void
-mo_users(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mo_users(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	if(hunt_server(client_p, source_p, ":%s USERS :%s", 1, parc, parv) == HUNTED_ISME)
 	{

@@ -43,8 +43,8 @@
 #include "modules.h"
 
 
-static void m_whowas(struct Client *, struct Client *, int, char **);
-static void mo_whowas(struct Client *, struct Client *, int, char **);
+static void m_whowas(struct Client *, struct Client *, int, const char **);
+static void mo_whowas(struct Client *, struct Client *, int, const char **);
 
 struct Message whowas_msgtab = {
 	"WHOWAS", 0, 0, 0, 0, MFLG_SLOW, 0L,
@@ -54,7 +54,7 @@ struct Message whowas_msgtab = {
 mapi_clist_av1 whowas_clist[] = { &whowas_msgtab, NULL };
 DECLARE_MODULE_AV1(NULL, NULL, whowas_clist, NULL, NULL, "$Revision$");
 
-static int whowas_do(struct Client *client_p, struct Client *source_p, int parc, char *parv[]);
+static int whowas_do(struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
 
 
 /*
@@ -63,7 +63,7 @@ static int whowas_do(struct Client *client_p, struct Client *source_p, int parc,
 **      parv[1] = nickname queried
 */
 static void
-m_whowas(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_whowas(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	static time_t last_used = 0L;
 
@@ -87,7 +87,7 @@ m_whowas(struct Client *client_p, struct Client *source_p, int parc, char *parv[
 }
 
 static void
-mo_whowas(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mo_whowas(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	if(parc < 2)
 	{
@@ -99,12 +99,13 @@ mo_whowas(struct Client *client_p, struct Client *source_p, int parc, char *parv
 }
 
 static int
-whowas_do(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+whowas_do(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Whowas *temp;
 	int cur = 0;
 	int max = -1, found = 0;
-	char *p, *nick;
+	char *p;
+	const char *nick;
 
 	if(parc < 2 || EmptyString(parv[1]))
 	{

@@ -56,7 +56,7 @@ struct hook_stats_data
 {
 	struct Client *source_p;
 	char statchar;
-	char *name;
+	const char *name;
 };
 
 struct hook_links_data
@@ -64,7 +64,7 @@ struct hook_links_data
 	struct Client *client_p;
 	struct Client *source_p;
 	int parc;
-	char **parv;
+	const char **parv;
 	const char statchar;
 	const char *mask;
 };
@@ -77,7 +77,7 @@ struct hook_spy_data
 struct hook_io_data
 {
 	struct Client *connection;
-	char *data;
+	const char *data;
 	unsigned int len;
 };
 

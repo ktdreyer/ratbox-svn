@@ -366,7 +366,7 @@ report_configured_links(struct Client *source_p, int mask)
  * 		  status as the flags passed.
  */
 int
-check_client(struct Client *client_p, struct Client *source_p, char *username)
+check_client(struct Client *client_p, struct Client *source_p, const char *username)
 {
 	int i;
 

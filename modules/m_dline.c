@@ -47,7 +47,7 @@
 #include "parse.h"
 #include "modules.h"
 
-static void mo_dline(struct Client *, struct Client *, int, char **);
+static void mo_dline(struct Client *, struct Client *, int, const char **);
 
 struct Message dline_msgtab = {
 	"DLINE", 0, 0, 2, 0, MFLG_SLOW, 0,
@@ -59,7 +59,7 @@ DECLARE_MODULE_AV1(NULL, NULL, dline_clist, NULL, NULL, "$Revision$");
 
 /* Local function prototypes */
 
-static time_t valid_tkline(struct Client *source_p, char *string);
+static time_t valid_tkline(struct Client *source_p, const char *string);
 static int valid_comment(const char *comment);
 
 char user[USERLEN + 2];
@@ -77,9 +77,10 @@ char host[HOSTLEN + 2];
  *
  */
 static void
-mo_dline(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mo_dline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	char *dlhost, *oper_reason;
+	const char *dlhost;
+	char *oper_reason;
 	const char *reason = "<No Reason>";
 	struct Client *target_p;
 	struct sockaddr_storage daddr;
@@ -297,7 +298,7 @@ mo_dline(struct Client *client_p, struct Client *source_p, int parc, char *parv[
  * side effects - none
  */
 static time_t
-valid_tkline(struct Client *source_p, char *p)
+valid_tkline(struct Client *source_p, const char *p)
 {
 	time_t result = 0;
 

@@ -56,7 +56,7 @@ static void remove_unknown(struct Client *, char *, char *);
 
 static void do_numeric(char[], struct Client *, struct Client *, int, char **);
 
-static int handle_command(struct Message *, struct Client *, struct Client *, int, char **);
+static int handle_command(struct Message *, struct Client *, struct Client *, int, const char**);
 
 static int hash(const char *p);
 static struct Message *hash_parse(char *);
@@ -299,7 +299,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
 		return;
 	}
 
-	if(handle_command(mptr, client_p, from, i, para) < -1)
+	if(handle_command(mptr, client_p, from, i, /* XXX discards const!!! */ (const char **)para) < -1)
 	{
 		char *p;
 		for (p = pbuffer; p <= end; p += 8)
@@ -341,7 +341,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
  */
 static int
 handle_command(struct Message *mptr, struct Client *client_p,
-	       struct Client *from, int i, char *hpara[MAXPARA])
+	       struct Client *from, int i, const char* hpara[MAXPARA])
 {
 	MessageHandler handler = 0;
 
@@ -859,13 +859,13 @@ do_numeric(char numeric[], struct Client *client_p, struct Client *source_p, int
  * side effects	- just returns a nastyogram to given user
  */
 void
-m_not_oper(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_not_oper(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	sendto_one(source_p, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
 }
 
 void
-m_unregistered(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_unregistered(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	/* bit of a hack.
 	 * I don't =really= want to waste a bit in a flag
@@ -882,13 +882,13 @@ m_unregistered(struct Client *client_p, struct Client *source_p, int parc, char 
 }
 
 void
-m_registered(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_registered(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	sendto_one(client_p, form_str(ERR_ALREADYREGISTRED), me.name, parv[0]);
 }
 
 void
-m_ignore(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_ignore(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	return;
 }

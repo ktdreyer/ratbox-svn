@@ -36,8 +36,8 @@
 #include "modules.h"
 #include "s_conf.h"
 
-static void m_quit(struct Client *, struct Client *, int, char **);
-static void ms_quit(struct Client *, struct Client *, int, char **);
+static void m_quit(struct Client *, struct Client *, int, const char **);
+static void ms_quit(struct Client *, struct Client *, int, const char **);
 
 struct Message quit_msgtab = {
 	"QUIT", 0, 0, 0, 0, MFLG_SLOW | MFLG_UNREG, 0,
@@ -53,9 +53,9 @@ DECLARE_MODULE_AV1(NULL, NULL, quit_clist, NULL, NULL, "$Revision$");
 **      parv[1] = comment
 */
 static void
-m_quit(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_quit(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	char *comment = (parc > 1 && parv[1]) ? parv[1] : client_p->name;
+	char *comment = LOCAL_COPY((parc > 1 && parv[1]) ? parv[1] : client_p->name);
 	char reason[TOPICLEN + 1];
 
 	source_p->flags |= FLAGS_NORMALEX;
@@ -89,9 +89,9 @@ m_quit(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 **      parv[1] = comment
 */
 static void
-ms_quit(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+ms_quit(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	char *comment = (parc > 1 && parv[1]) ? parv[1] : client_p->name;
+	char *comment = LOCAL_COPY((parc > 1 && parv[1]) ? parv[1] : client_p->name);
 
 	source_p->flags |= FLAGS_NORMALEX;
 	if(strlen(comment) > (size_t) TOPICLEN)

@@ -40,7 +40,7 @@
 
 #define UFLAGS  (FLAGS_INVISIBLE|FLAGS_WALLOP|FLAGS_SERVNOTICE)
 
-static void mr_user(struct Client *, struct Client *, int, char **);
+static void mr_user(struct Client *, struct Client *, int, const char **);
 
 struct Message user_msgtab = {
 	"USER", 0, 0, 5, 0, MFLG_SLOW, 0L,
@@ -59,7 +59,7 @@ DECLARE_MODULE_AV1(NULL, NULL, user_clist, NULL, NULL, "$Revision$");
 **      parv[4] = users real name info
 */
 static void
-mr_user(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mr_user(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	char *p;
 

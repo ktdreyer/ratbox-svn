@@ -42,16 +42,16 @@
 #include "s_serv.h"
 
 
-static void m_knock(struct Client *, struct Client *, int, char **);
-static void ms_knock(struct Client *, struct Client *, int, char **);
+static void m_knock(struct Client *, struct Client *, int, const char **);
+static void ms_knock(struct Client *, struct Client *, int, const char **);
 
-static void parse_knock_local(struct Client *, struct Client *, int, char **, char *);
-static void parse_knock_remote(struct Client *, struct Client *, int, char **);
+static void parse_knock_local(struct Client *, struct Client *, int, const char **, const char *);
+static void parse_knock_remote(struct Client *, struct Client *, int, const char **);
 
-static void send_knock(struct Client *, struct Client *, struct Channel *, char *, int);
+static void send_knock(struct Client *, struct Client *, struct Channel *, const char *, int);
 
-static int is_banned_knock(struct Channel *, struct Client *, char *);
-static int check_banned_knock(struct Channel *, struct Client *, char *, char *);
+static int is_banned_knock(struct Channel *, struct Client *, const char *);
+static int check_banned_knock(struct Channel *, struct Client *, const char *, const char *);
 
 struct Message knock_msgtab = {
 	"KNOCK", 0, 0, 2, 0, MFLG_SLOW, 0,
@@ -80,7 +80,7 @@ DECLARE_MODULE_AV1(NULL, NULL, knock_clist, NULL, NULL, "$Revision$");
  */
 
 static void
-m_knock(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_knock(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	char *sockhost = NULL;
 
@@ -102,7 +102,7 @@ m_knock(struct Client *client_p, struct Client *source_p, int parc, char *parv[]
  */
 
 static void
-ms_knock(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+ms_knock(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	if(IsClient(source_p))
 		parse_knock_remote(client_p, source_p, parc, parv);
@@ -124,7 +124,7 @@ ms_knock(struct Client *client_p, struct Client *source_p, int parc, char *parv[
 
 static void
 parse_knock_local(struct Client *client_p,
-		  struct Client *source_p, int parc, char *parv[], char *sockhost)
+		  struct Client *source_p, int parc, const char *parv[], const char *sockhost)
 {
 	/* We will cut at the first comma reached, however we will not *
 	 * process anything afterwards.                                */
@@ -132,7 +132,7 @@ parse_knock_local(struct Client *client_p,
 	struct Channel *chptr;
 	char *p, *name;
 
-	name = parv[1];
+	name = LOCAL_COPY(parv[1]);
 
 	if((p = strchr(name, ',')))
 		*p = '\0';
@@ -207,12 +207,12 @@ parse_knock_local(struct Client *client_p,
  * 		  called
  */
 static void
-parse_knock_remote(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+parse_knock_remote(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Channel *chptr;
 	char *p, *name;
 
-	name = parv[1];
+	name = LOCAL_COPY(parv[1]);
 
 	if((p = strchr(name, ',')))
 		*p = '\0';
@@ -246,7 +246,7 @@ parse_knock_remote(struct Client *client_p, struct Client *source_p, int parc, c
 
 static void
 send_knock(struct Client *client_p, struct Client *source_p,
-	   struct Channel *chptr, char *name, int llclient)
+	   struct Channel *chptr, const char *name, int llclient)
 {
 	chptr->last_knock = CurrentTime;
 
@@ -286,7 +286,7 @@ send_knock(struct Client *client_p, struct Client *source_p,
  * side effects - return check_banned_knock()
  */
 static int
-is_banned_knock(struct Channel *chptr, struct Client *who, char *sockhost)
+is_banned_knock(struct Channel *chptr, struct Client *who, const char *sockhost)
 {
 	char src_host[NICKLEN + USERLEN + HOSTLEN + 6];
 	char src_iphost[NICKLEN + USERLEN + HOSTLEN + 6];
@@ -310,7 +310,7 @@ is_banned_knock(struct Channel *chptr, struct Client *who, char *sockhost)
  * side effects - return CHFL_EXCEPTION, CHFL_BAN or 0
  */
 static int
-check_banned_knock(struct Channel *chptr, struct Client *who, char *s, char *s2)
+check_banned_knock(struct Channel *chptr, struct Client *who, const char *s, const char *s2)
 {
 	dlink_node *ban;
 	dlink_node *except;

@@ -34,7 +34,7 @@
 #include "parse.h"
 #include "modules.h"
 
-static void mr_capab(struct Client *, struct Client *, int, char **);
+static void mr_capab(struct Client *, struct Client *, int, const char **);
 
 struct Message capab_msgtab = {
 	"CAPAB", 0, 0, 0, 0, MFLG_SLOW | MFLG_UNREG, 0,
@@ -51,7 +51,7 @@ DECLARE_MODULE_AV1(NULL, NULL, capab_clist, NULL, NULL, "$Revision$");
  *
  */
 static void
-mr_capab(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mr_capab(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Capability *cap;
 	int i;
@@ -61,6 +61,7 @@ mr_capab(struct Client *client_p, struct Client *source_p, int parc, char *parv[
 	struct EncCapability *ecap;
 	unsigned int cipher = 0;
 #endif
+	
 
 	/* ummm, this shouldn't happen. Could argue this should be logged etc. */
 	if(client_p->localClient == NULL)
@@ -76,7 +77,8 @@ mr_capab(struct Client *client_p, struct Client *source_p, int parc, char *parv[
 
 	for (i = 1; i < parc; i++)
 	{
-		for (s = strtoken(&p, parv[i], " "); s; s = strtoken(&p, NULL, " "))
+		char *t = LOCAL_COPY(parv[i]);
+		for (s = strtoken(&p, t, " "); s; s = strtoken(&p, NULL, " "))
 		{
 #ifdef HAVE_LIBCRYPTO
 			if((strncmp(s, "ENC:", 4) == 0))

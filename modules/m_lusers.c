@@ -37,8 +37,8 @@
 #include "parse.h"
 #include "modules.h"
 
-static void m_lusers(struct Client *, struct Client *, int, char **);
-static void ms_lusers(struct Client *, struct Client *, int, char **);
+static void m_lusers(struct Client *, struct Client *, int, const char **);
+static void ms_lusers(struct Client *, struct Client *, int, const char **);
 
 struct Message lusers_msgtab = {
 	"LUSERS", 0, 0, 0, 0, MFLG_SLOW, 0,
@@ -58,7 +58,7 @@ DECLARE_MODULE_AV1(NULL, NULL, lusers_clist, NULL, NULL, "$Revision$");
  * to cause a force
  */
 static void
-m_lusers(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_lusers(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	static time_t last_used = 0;
 
@@ -91,7 +91,7 @@ m_lusers(struct Client *client_p, struct Client *source_p, int parc, char *parv[
  * to cause a force
  */
 static void
-ms_lusers(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+ms_lusers(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	if(parc > 2)
 	{

@@ -43,8 +43,8 @@
 
 void id_init(void);
 void save_random(void);
-int base64_block(char **out, char *in, int len);
-int unbase64_block(char **out, char *data, int len);
+int base64_block(char **out, const char *in, int len);
+int unbase64_block(char **out, const char *data, int len);
 char *id_get(void);
 
 #endif

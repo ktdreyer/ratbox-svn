@@ -42,7 +42,7 @@
 #include "parse.h"
 #include "modules.h"
 
-static void m_who(struct Client *, struct Client *, int, char **);
+static void m_who(struct Client *, struct Client *, int, const char **);
 
 struct Message who_msgtab = {
 	"WHO", 0, 0, 2, 0, MFLG_SLOW, 0,
@@ -69,15 +69,20 @@ static void do_who(struct Client *source_p,
 **      parv[2] = additional selection flag, only 'o' for now.
 */
 static void
-m_who(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_who(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Client *target_p;
-	char *mask = parc > 1 ? parv[1] : NULL;
+	char *mask;
 	dlink_node *lp;
 	struct Channel *chptr = NULL;
 	struct Channel *mychannel = NULL;
 	int server_oper = parc > 2 ? (*parv[2] == 'o') : 0;	/* Show OPERS only */
 	int member;
+
+	if (parc > 1)
+		mask = LOCAL_COPY(parv[1]);
+	else
+		mask = NULL;
 
 	/* See if mask is there, collapse it or return if not there */
 

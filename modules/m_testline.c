@@ -41,7 +41,7 @@
 #include "modules.h"
 
 
-static void mo_testline(struct Client *, struct Client *, int, char **);
+static void mo_testline(struct Client *, struct Client *, int, const char **);
 
 struct Message testline_msgtab = {
 	"TESTLINE", 0, 0, 0, 0, MFLG_SLOW, 0,
@@ -67,7 +67,7 @@ DECLARE_MODULE_AV1(NULL, NULL, testline_clist, NULL, NULL, "$Revision$");
  */
 
 static void
-mo_testline(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mo_testline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct ConfItem *aconf;
 	struct sockaddr_storage ip;
@@ -77,7 +77,7 @@ mo_testline(struct Client *client_p, struct Client *source_p, int parc, char *pa
 
 	if(parc > 1)
 	{
-		given_name = parv[1];
+		given_name = LOCAL_COPY(parv[1]);
 		if(!(p = (char *) strchr(given_name, '@')))
 		{
 			if((t = parse_netmask(given_name, &ip, &host_mask)) != HM_HOST)

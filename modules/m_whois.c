@@ -46,14 +46,14 @@
 #include "modules.h"
 #include "hook.h"
 
-static int do_whois(struct Client *client_p, struct Client *source_p, int parc, char *parv[]);
+static int do_whois(struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
 static int single_whois(struct Client *source_p, struct Client *target_p, int wilds, int glob);
 static void whois_person(struct Client *source_p, struct Client *target_p, int glob);
 static int global_whois(struct Client *source_p, char *nick, int wilds, int glob);
 
-static void m_whois(struct Client *, struct Client *, int, char **);
-static void ms_whois(struct Client *, struct Client *, int, char **);
-static void mo_whois(struct Client *, struct Client *, int, char **);
+static void m_whois(struct Client *, struct Client *, int, const char **);
+static void ms_whois(struct Client *, struct Client *, int, const char **);
+static void mo_whois(struct Client *, struct Client *, int, const char **);
 
 struct Message whois_msgtab = {
 	"WHOIS", 0, 0, 0, 0, MFLG_SLOW, 0L,
@@ -78,7 +78,7 @@ DECLARE_MODULE_AV1(NULL, NULL, whois_clist, whois_hlist, NULL, "$Revision$");
 **      parv[1] = nickname masklist
 */
 static void
-m_whois(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_whois(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	static time_t last_used = 0;
 
@@ -125,7 +125,7 @@ m_whois(struct Client *client_p, struct Client *source_p, int parc, char *parv[]
 **      parv[1] = nickname masklist
 */
 static void
-mo_whois(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mo_whois(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	if(parc < 2 || EmptyString(parv[1]))
 	{
@@ -154,7 +154,7 @@ mo_whois(struct Client *client_p, struct Client *source_p, int parc, char *parv[
  * side effects -
  */
 static int
-do_whois(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+do_whois(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Client *target_p;
 	char *nick;
@@ -170,7 +170,7 @@ do_whois(struct Client *client_p, struct Client *source_p, int parc, char *parv[
 	if(parc > 2)
 		glob = 1;
 
-	nick = parv[1];
+	nick = LOCAL_COPY(parv[1]);
 	if((p = strchr(parv[1], ',')))
 		*p = '\0';
 
@@ -444,7 +444,7 @@ whois_person(struct Client *source_p, struct Client *target_p, int glob)
  * stuck heavy comments in it.. it looks ugly.. but at least you
  * know what it does.. --fl_ */
 static void
-ms_whois(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+ms_whois(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	/* its a misconfigured server */
 	if(parc < 2 || EmptyString(parv[1]))

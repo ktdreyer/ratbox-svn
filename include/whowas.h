@@ -90,7 +90,7 @@ void off_history(struct Client *);
 **      nickname within the timelimit. Returns NULL, if no
 **      one found...
 */
-struct Client *get_history(char *, time_t);
+struct Client *get_history(const char *, time_t);
 					/* Nick name */
 					/* Time limit in seconds */
 

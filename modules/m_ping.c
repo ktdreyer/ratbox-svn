@@ -38,8 +38,8 @@
 #include "s_conf.h"
 #include "s_serv.h"
 
-static void m_ping(struct Client *, struct Client *, int, char **);
-static void ms_ping(struct Client *, struct Client *, int, char **);
+static void m_ping(struct Client *, struct Client *, int, const char **);
+static void ms_ping(struct Client *, struct Client *, int, const char **);
 
 struct Message ping_msgtab = {
 	"PING", 0, 0, 1, 0, MFLG_SLOW, 0,
@@ -56,10 +56,10 @@ DECLARE_MODULE_AV1(NULL, NULL, ping_clist, NULL, NULL, "$Revision$");
 **      parv[2] = destination
 */
 static void
-m_ping(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_ping(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Client *target_p;
-	char *origin, *destination;
+	const char *origin, *destination;
 
 	if(parc < 2 || *parv[1] == '\0')
 	{
@@ -103,10 +103,10 @@ m_ping(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 }
 
 static void
-ms_ping(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+ms_ping(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Client *target_p;
-	char *origin, *destination;
+	const char *origin, *destination;
 
 	if(parc < 2 || *parv[1] == '\0')
 	{

@@ -265,7 +265,7 @@ extern int refresh_user_links;
 extern int check_server(const char *name, struct Client *server, int cryptlink);
 extern int hunt_server(struct Client *client_pt,
 		       struct Client *source_pt,
-		       const char *command, int server, int parc, char **parv);
+		       const char *command, int server, int parc, const char **parv);
 extern const char *my_name_for_link(const char *name, struct ConfItem *conf);
 extern void send_capabilities(struct Client *, struct ConfItem *conf, int, int);
 extern void write_links_file(void *);

@@ -34,16 +34,17 @@ struct ConfItem;
 extern time_t LastUsedWallops;
 
 
-extern int user_mode(struct Client *, struct Client *, int, char **);
+extern int user_mode(struct Client *, struct Client *, int, const char **);
 extern void send_umode(struct Client *, struct Client *, int, int, char *);
 extern void send_umode_out(struct Client *, struct Client *, int);
 extern int show_lusers(struct Client *source_p);
-extern int register_local_user(struct Client *, struct Client *, char *, char *);
-extern int register_remote_user(struct Client *, struct Client *, char *, char *);
-extern int do_local_user(char *, struct Client *, struct Client *, char *, char *, char *, char *);
+extern int register_local_user(struct Client *, struct Client *, const char *, const char *);
+extern int register_remote_user(struct Client *, struct Client *, const char *, const char *);
+extern int do_local_user(const char *, struct Client *, struct Client *, const char *, const char *, 
+                         const char *, const char *);
 
-extern int do_remote_user(char *, struct Client *, struct Client *,
-			  char *, char *, char *, char *, char *);
+extern int do_remote_user(const char *, struct Client *, struct Client *,
+			  const char *, const char *, const char *, const char *, const char *);
 
 extern int user_modes_from_c_to_bitmask[];
 extern void show_isupport(struct Client *);

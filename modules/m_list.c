@@ -44,8 +44,8 @@
 #include "linebuf.h"
 
 
-static void m_list(struct Client *, struct Client *, int, char **);
-static void mo_list(struct Client *, struct Client *, int, char **);
+static void m_list(struct Client *, struct Client *, int, const char **);
+static void mo_list(struct Client *, struct Client *, int, const char **);
 static int list_all_channels(struct Client *);
 static void list_one_channel(struct Client *, struct Channel *);
 
@@ -58,7 +58,7 @@ mapi_clist_av1 list_clist[] = { &list_msgtab, NULL };
 DECLARE_MODULE_AV1(NULL, NULL, list_clist, NULL, NULL, "$Revision$");
 
 static int list_all_channels(struct Client *source_p);
-static int list_named_channel(struct Client *source_p, char *name);
+static int list_named_channel(struct Client *source_p, const char *name);
 
 /*
 ** m_list
@@ -66,7 +66,7 @@ static int list_named_channel(struct Client *source_p, char *name);
 **      parv[1] = channel
 */
 static void
-m_list(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_list(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	static time_t last_used = 0L;
 
@@ -100,7 +100,7 @@ m_list(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 **      parv[1] = channel
 */
 static void
-mo_list(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mo_list(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 
 	/* If no arg, do all channels *whee*, else just one channel */
@@ -164,29 +164,30 @@ list_all_channels(struct Client *source_p)
  * side effects	- list all channels to source_p
  */
 static int
-list_named_channel(struct Client *source_p, char *name)
+list_named_channel(struct Client *source_p, const char *name)
 {
 	struct Channel *chptr;
 	char id_and_topic[TOPICLEN + NICKLEN + 6];	/* <!!>, space and null */
 	char *p;
+	char *n = LOCAL_COPY(name);
 
 	sendto_one(source_p, form_str(RPL_LISTSTART), me.name, source_p->name);
 
-	if((p = strchr(name, ',')))
+	if((p = strchr(n, ',')))
 		*p = '\0';
 
-	if(*name == '\0')
+	if(*n == '\0')
 	{
 		sendto_one(source_p, form_str(ERR_NOSUCHNICK), me.name, source_p->name, name);
 		sendto_one(source_p, form_str(RPL_LISTEND), me.name, source_p->name);
 		return 0;
 	}
 
-	chptr = hash_find_channel(name);
+	chptr = hash_find_channel(n);
 
 	if(chptr == NULL)
 	{
-		sendto_one(source_p, form_str(ERR_NOSUCHNICK), me.name, source_p->name, name);
+		sendto_one(source_p, form_str(ERR_NOSUCHNICK), me.name, source_p->name, n);
 		sendto_one(source_p, form_str(RPL_LISTEND), me.name, source_p->name);
 		return 0;
 	}

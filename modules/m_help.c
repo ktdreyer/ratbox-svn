@@ -38,9 +38,9 @@
 #include "parse.h"
 #include "modules.h"
 
-static void m_help(struct Client *, struct Client *, int, char **);
-static void mo_help(struct Client *, struct Client *, int, char **);
-static void mo_uhelp(struct Client *, struct Client *, int, char **);
+static void m_help(struct Client *, struct Client *, int, const char **);
+static void mo_help(struct Client *, struct Client *, int, const char **);
+static void mo_uhelp(struct Client *, struct Client *, int, const char **);
 static void dohelp(struct Client *, const char *, const char *, const char *);
 static void sendhelpfile(struct Client *, const char *, const char *, const char *);
 
@@ -64,7 +64,7 @@ DECLARE_MODULE_AV1(NULL, NULL, help_clist, NULL, NULL, "$Revision$");
  *      parv[0] = sender prefix
  */
 static void
-m_help(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_help(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	static time_t last_used = 0;
 
@@ -98,7 +98,7 @@ m_help(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
  *      parv[0] = sender prefix
  */
 static void
-mo_help(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mo_help(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	if(parc > 1)
 		dohelp(source_p, HPATH, parv[1], parv[0]);
@@ -113,7 +113,7 @@ mo_help(struct Client *client_p, struct Client *source_p, int parc, char *parv[]
  */
 
 static void
-mo_uhelp(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mo_uhelp(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	if(parc > 1)
 		dohelp(source_p, UHPATH, parv[1], parv[0]);

@@ -39,7 +39,7 @@
 #include "packet.h"
 
 
-static void m_away(struct Client *, struct Client *, int, char **);
+static void m_away(struct Client *, struct Client *, int, const char **);
 
 struct Message away_msgtab = {
 	"AWAY", 0, 0, 0, 0, MFLG_SLOW, 0,
@@ -66,9 +66,10 @@ DECLARE_MODULE_AV1(NULL, NULL, away_clist, NULL, NULL, "$Revision$");
 **      parv[1] = away message
 */
 static void
-m_away(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_away(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	char *away, *awy2 = parv[1];
+	char *away;
+	char *awy2 = LOCAL_COPY(parv[1]);
 
 	if(MyClient(source_p) && !IsFloodDone(source_p))
 		flood_endgrace(source_p);

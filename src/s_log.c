@@ -289,7 +289,7 @@ user_log_resync(void *notused)
  */
 
 void
-log_oper(struct Client *source_p, char *name)
+log_oper(struct Client *source_p, const char *name)
 {
 	FBFILE *oper_fb;
 	char linebuf[BUFSIZE];
@@ -324,7 +324,7 @@ log_oper(struct Client *source_p, char *name)
  * side effects - FNAME_FOPERLOG is written to, if present
  */
 void
-log_foper(struct Client *source_p, char *name)
+log_foper(struct Client *source_p, const char *name)
 {
 	FBFILE *oper_fb;
 	char linebuf[BUFSIZE];

@@ -50,8 +50,8 @@
 #include "cluster.h"
 #include "event.h"
 
-static void mo_kline(struct Client *, struct Client *, int, char **);
-static void ms_kline(struct Client *, struct Client *, int, char **);
+static void mo_kline(struct Client *, struct Client *, int, const char **);
+static void ms_kline(struct Client *, struct Client *, int, const char **);
 
 struct Message kline_msgtab = {
 	"KLINE", 0, 0, 2, 0, MFLG_SLOW, 0,
@@ -63,9 +63,9 @@ DECLARE_MODULE_AV1(NULL, NULL, kline_clist, NULL, NULL, "$Revision$");
 
 /* Local function prototypes */
 
-static time_t valid_tkline(struct Client *source_p, char *string);
+static time_t valid_tkline(struct Client *source_p, const char *string);
 static char *format_kline(char *);
-static int find_user_host(struct Client *source_p, char *user_host_or_nick, char *user, char *host);
+static int find_user_host(struct Client *source_p, const char *user_host_or_nick, char *user, char *host);
 
 static int valid_comment(const char *comment);
 static int valid_user_host(const char *user, const char *host);
@@ -97,7 +97,7 @@ char host[HOSTLEN + 2];
  *
  */
 static void
-mo_kline(struct Client *client_p, struct Client *source_p, int parc, char **parv)
+mo_kline(struct Client *client_p, struct Client *source_p, int parc, const char **parv)
 {
 	const char *reason = "No Reason";
 	char *oper_reason;
@@ -249,15 +249,15 @@ mo_kline(struct Client *client_p, struct Client *source_p, int parc, char **parv
  *
  */
 static void
-ms_kline(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+ms_kline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	const char *current_date;
 	struct ConfItem *aconf = NULL;
 	int tkline_time;
 
-	char *kuser;
-	char *khost;
-	char *kreason;
+	const char *kuser;
+	const char *khost;
+	const char *kreason;
 	char *oper_reason;
 
 	if(parc != 6)
@@ -450,7 +450,7 @@ apply_tkline(struct Client *source_p, struct ConfItem *aconf,
  * side effects - none
  */
 static time_t
-valid_tkline(struct Client *source_p, char *p)
+valid_tkline(struct Client *source_p, const char *p)
 {
 	time_t result = 0;
 
@@ -602,7 +602,7 @@ format_kline(char *hostname)
  * side effects -
  */
 static int
-find_user_host(struct Client *source_p, char *user_host_or_nick, char *luser, char *lhost)
+find_user_host(struct Client *source_p, const char *user_host_or_nick, char *luser, char *lhost)
 {
 	struct Client *target_p;
 	char *hostp;

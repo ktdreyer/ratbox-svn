@@ -51,7 +51,7 @@ struct Class
 
 };
 
-struct Class *ClassList;
+extern struct Class *ClassList;
 
 #define ClassName(x)	((x)->class_name)
 #define ConFreq(x)      ((x)->con_freq)
