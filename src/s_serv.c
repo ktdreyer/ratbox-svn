@@ -316,10 +316,16 @@ hunt_server(struct Client *client_p, struct Client *source_p,
 	 * message to go in the wrong direction while doing quick fast
 	 * non-matching lookups.
 	 */
-	if((target_p = find_client(parv[server])))
+	if(MyClient(source_p))
+		target_p = find_named_client(parv[server]);
+	else
+		target_p = find_client(parv[server]);
+
+	if(target_p == NULL)
 		if(target_p->from == source_p->from && !MyConnect(target_p))
 			target_p = NULL;
-	if(!target_p && (target_p = find_server(parv[server])))
+
+	if(target_p == NULL && (target_p = find_server(parv[server])))
 		if(target_p->from == source_p->from && !MyConnect(target_p))
 			target_p = NULL;
 
@@ -334,13 +340,10 @@ hunt_server(struct Client *client_p, struct Client *source_p,
 	{
 		if(!wilds)
 		{
-			if(!(target_p = find_server(parv[server])))
-			{
-				sendto_one_numeric(source_p, ERR_NOSUCHSERVER,
-						   form_str(ERR_NOSUCHSERVER),
-						   parv[server]);
-				return (HUNTED_NOSUCH);
-			}
+			sendto_one_numeric(source_p, ERR_NOSUCHSERVER,
+					   form_str(ERR_NOSUCHSERVER),
+					   parv[server]);
+			return (HUNTED_NOSUCH);
 		}
 		else
 		{

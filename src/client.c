@@ -832,6 +832,19 @@ find_person(const char *name)
 	return (NULL);
 }
 
+struct Client *
+find_named_person(const char *name)
+{
+	struct Client *c2ptr;
+
+	c2ptr = find_named_client(name);
+
+	if(c2ptr && IsPerson(c2ptr))
+		return (c2ptr);
+	return (NULL);
+}
+
+
 /*
  * find_chasing - find the client structure for a nick name (user) 
  *      using history mechanism if necessary. If the client is not found, 
@@ -841,7 +854,7 @@ find_person(const char *name)
 struct Client *
 find_chasing(struct Client *source_p, const char *user, int *chasing)
 {
-	struct Client *who = find_client(user);
+	struct Client *who = find_named_person(user);
 
 	if(chasing)
 		*chasing = 0;

@@ -90,10 +90,7 @@ m_ison(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		char *cs = LOCAL_COPY(parv[i]);
 		for (nick = strtoken(&p, cs, " "); nick; nick = strtoken(&p, NULL, " "))
 		{
-			target_p = find_person(nick);
-
-			if(target_p == NULL)
-				target_p = find_server(nick);
+			target_p = find_named_client(nick);
 
 			if(target_p != NULL)
 			{

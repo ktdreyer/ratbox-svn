@@ -89,7 +89,7 @@ mo_kill(struct Client *client_p, struct Client *source_p, int parc, const char *
 	else
 		reason = "<No reason given>";
 
-	if((target_p = find_client(user)) == NULL)
+	if((target_p = find_named_person(user)) == NULL)
 	{
 		/*
 		 ** If the user has recently changed nick, automatically
@@ -207,7 +207,7 @@ ms_kill(struct Client *client_p, struct Client *source_p, int parc, const char *
 		 * not an uid, automatically rewrite the KILL for this new nickname.
 		 * --this keeps servers in synch when nick change and kill collide
 		 */
-		if((*user == '.') || (!(target_p = get_history(user, (long) KILLCHASETIMELIMIT))))
+		if(IsDigit(*user) || (!(target_p = get_history(user, (long) KILLCHASETIMELIMIT))))
 		{
 			sendto_one_numeric(source_p, ERR_NOSUCHNICK, 
 					   form_str(ERR_NOSUCHNICK), user);

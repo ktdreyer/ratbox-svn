@@ -102,15 +102,20 @@ m_trace(struct Client *client_p, struct Client *source_p, int parc, const char *
 	case HUNTED_PASS:	/* note: gets here only if parv[1] exists */
 		{
 			struct Client *ac2ptr;
-			if((ac2ptr = find_client(tname)) == NULL)
+
+			if(MyClient(source_p))
+				ac2ptr = find_named_client(tname);
+			else
+				ac2ptr = find_client(tname);
+
+			if(ac2ptr == NULL)
 			{
 				DLINK_FOREACH(ptr, global_client_list.head)
 				{
 					ac2ptr = ptr->data;
+
 					if(match(tname, ac2ptr->name) || match(ac2ptr->name, tname))
-					{
 						break;
-					}
 					else
 						ac2ptr = NULL;
 				}
@@ -145,9 +150,12 @@ m_trace(struct Client *client_p, struct Client *source_p, int parc, const char *
 	/* specific trace */
 	if(dow == 0)
 	{
-		target_p = find_client(tname);
+		if(MyClient(source_p))
+			target_p = find_named_person(tname);
+		else
+			target_p = find_person(tname);
 
-		if(target_p && IsPerson(target_p))
+		if(target_p != NULL)
 			report_this_status(source_p, target_p, 0, 0, 0);
 
 		sendto_one_numeric(source_p, RPL_ENDOFTRACE, 

@@ -157,8 +157,8 @@ m_who(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 
 	/* '/who nick' */
 
-	if(((target_p = find_client(mask)) != NULL) &&
-	   IsPerson(target_p) && (!server_oper || IsOper(target_p)))
+	if(((target_p = find_named_person(mask)) != NULL) &&
+	   (!server_oper || IsOper(target_p)))
 	{
 		int isinvis = 0;
 

@@ -88,7 +88,7 @@ m_accept(struct Client *client_p, struct Client *source_p, int parc, const char 
 	for (nick = strtoken(&p, delbuf, ","); nick != NULL; nick = strtoken(&p, NULL, ","))
 	{
 		/* shouldnt happen, but lets be paranoid */
-		if(((target_p = find_client(nick)) == NULL) || !IsPerson(target_p))
+		if((target_p = find_named_person(nick)) == NULL)
 		{
 			sendto_one_numeric(source_p, ERR_NOSUCHNICK,
 					   form_str(ERR_NOSUCHNICK), nick);
@@ -113,7 +113,7 @@ m_accept(struct Client *client_p, struct Client *source_p, int parc, const char 
 	for (nick = strtoken(&p, addbuf, ","); nick; nick = strtoken(&p, NULL, ","), accept_num++)
 	{
 		/* shouldnt happen, but lets be paranoid */
-		if(((target_p = find_client(nick)) == NULL) || !IsPerson(target_p))
+		if((target_p = find_named_person(nick)) == NULL)
 		{
 			sendto_one_numeric(source_p, ERR_NOSUCHNICK,
 					   form_str(ERR_NOSUCHNICK), nick);
@@ -176,7 +176,7 @@ build_nicklist(struct Client *source_p, char *addbuf, char *delbuf, const char *
 			name++;
 		}
 
-		if(((target_p = find_client(name)) == NULL) || !IsPerson(target_p))
+		if((target_p = find_named_person(name)) == NULL)
 		{
 			sendto_one_numeric(source_p, ERR_NOSUCHNICK, 
 					   form_str(ERR_NOSUCHNICK), name);

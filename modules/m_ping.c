@@ -110,10 +110,12 @@ ms_ping(struct Client *client_p, struct Client *source_p, int parc, const char *
 
 	if(!EmptyString(destination) && irccmp(destination, me.name))
 	{
-		if((target_p = find_server(destination)))
+		if((target_p = find_client(destination)) && IsServer(target_p))
+		{
 			sendto_one(target_p, ":%s PING %s :%s", 
 				   get_id(source_p, target_p), source_p->name,
 				   get_id(target_p, target_p));
+		}
 		else
 		{
 			sendto_one_numeric(source_p, ERR_NOSUCHSERVER,

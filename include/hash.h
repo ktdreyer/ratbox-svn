@@ -50,6 +50,7 @@ extern void add_to_client_hash(const char *name, struct Client *client);
 extern void del_from_client_hash(const char *name, struct Client *client);
 extern struct Client *find_any_client(const char *name);
 extern struct Client *find_client(const char *name);
+extern struct Client *find_named_client(const char *name);
 extern struct Client *find_server(const char *name);
 
 extern void add_to_id_hash(const char *, struct Client *);

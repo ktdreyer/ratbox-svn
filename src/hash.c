@@ -646,6 +646,34 @@ find_client(const char *name)
 	return NULL;
 }
 
+/* find_named_client()
+ *
+ * finds a client/server entry from the client hash table
+ */
+struct Client *
+find_named_client(const char *name)
+{
+	struct Client *target_p;
+	dlink_node *ptr;
+	unsigned int hashv;
+
+	s_assert(name != NULL);
+	if(EmptyString(name))
+		return NULL;
+
+	hashv = hash_nick(name);
+
+	DLINK_FOREACH(ptr, clientTable[hashv].head)
+	{
+		target_p = ptr->data;
+
+		if(irccmp(name, target_p->name) == 0)
+			return target_p;
+	}
+
+	return NULL;
+}
+
 /* find_server()
  *
  * finds a server from the client hash table
@@ -659,26 +687,6 @@ find_server(const char *name)
 
 	if(EmptyString(name))
 		return NULL;
-
-	/* looking for a SID? */
-	if(IsDigit(*name))
-	{
-		hashv = hash_id(name);
-
-		DLINK_FOREACH(ptr, idTable[hashv].head)
-		{
-			target_p = ptr->data;
-
-			if((IsServer(target_p) || IsMe(target_p)) &&
-			   strcmp(name, target_p->id) == 0)
-				return target_p;
-		}
-
-		/* masked entities are already in the sid table, so it
-		 * doesnt exist --fl
-		 */
-		return NULL;
-	}
 
 	hashv = hash_nick(name);
 

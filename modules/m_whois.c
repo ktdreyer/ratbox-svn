@@ -206,7 +206,12 @@ do_whois(struct Client *client_p, struct Client *source_p, int parc, const char 
 	if((p = strchr(parv[1], ',')))
 		*p = '\0';
 
-	if((target_p = find_client(nick)) != NULL && IsPerson(target_p))
+	if(MyClient(source_p))
+		target_p = find_named_person(nick);
+	else
+		target_p = find_person(nick);
+
+	if(target_p != NULL)
 		single_whois(source_p, target_p);
 	else
 		sendto_one_numeric(source_p, ERR_NOSUCHNICK,
@@ -253,7 +258,7 @@ single_whois(struct Client *source_p, struct Client *target_p)
 		return;
 	}
 
-	a2client_p = find_server(target_p->user->server);
+	a2client_p = target_p->servptr;
 
 	sendto_one_numeric(source_p, RPL_WHOISUSER, form_str(RPL_WHOISUSER),
 			   target_p->name, target_p->username, 

@@ -1150,11 +1150,9 @@ stats_ltrace(struct Client *source_p, int parc, const char *parv[])
 		/* on a single client, this is simple */
 		if(!doall && !wilds)
 		{
-			struct Client *target_p;
+			struct Client *target_p = find_named_person(name);
 
-			target_p = find_client(name);
-
-			if(target_p != NULL && IsPerson(target_p))
+			if(target_p != NULL)
 				stats_l_client(source_p, target_p, statchar);
 
 			return;
