@@ -1,3 +1,9 @@
+*** 20010505_1 by fl_
+- till make install takes account of the paths in config.h, people shouldnt
+  change the paths in there.. especially not the modules ones.. so warn
+  them not to :P
+
+
 *** 20010504_3 by db
 - major major stupid buffer overflow in send.c MEA CULPA fixed.
 
