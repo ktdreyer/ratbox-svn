@@ -1773,8 +1773,8 @@ add_lazylinkchannel(struct Client *client_p, struct Channel *chptr)
  *		  being introduced to this hub
  *              - pointer to client being introduced
  * output       - NONE
- * side effects - The client pointed to by source_p is now known
- *                to be on lazyleaf server given by client_p.
+ * side effects - The client pointed to by client_p is now known
+ *                to be on lazyleaf server given by local_server_p.
  *                mark that in the bit map and add to the list
  *                of clients to examine after this newly introduced
  *                server is squit off.
