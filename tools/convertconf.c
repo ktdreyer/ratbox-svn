@@ -604,7 +604,7 @@ static void PrintOutServers(FILE* out)
 	  fprintf(out,"\t\thost=\"%s\";\n", p->host);
 	  fprintf(out,"\t\tsend_password=\"%s\";\n", p->c_passwd);
 	  fprintf(out,"\t\taccept_password=\"%s\";\n", p->n_passwd);
-	  fprintf(out,"\t\tport=\"%d\";\n", p->port );
+	  fprintf(out,"\t\tport=%d;\n", p->port );
 
 	  if(p->compressed)
 	    fprintf(out,"\t\tcompressed=yes;\n");

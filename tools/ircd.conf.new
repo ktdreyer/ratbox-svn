@@ -158,7 +158,7 @@
 		host="irc.blackened.com";
 		send_password="l00p3r";
 		accept_password="l00p3r";
-		port="6666";
+		port=6666;
 		compressed=yes;
 		lazylink=yes;
 		class="3";
@@ -169,7 +169,7 @@
 		host="irc.imyth.com";
 		send_password="l00p3r";
 		accept_password="5u31ts";
-		port="6666";
+		port=6666;
 		compressed=yes;
 		hub_mask="*";
 		class="3";
