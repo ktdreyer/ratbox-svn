@@ -96,6 +96,5 @@ extern int get_client_ping(struct Client *);
 extern void check_class(void);
 extern void initclass(void);
 extern void free_class(struct Class *);
-extern void report_classes(struct Client *);
 
 #endif /* INCLUDED_class_h */
