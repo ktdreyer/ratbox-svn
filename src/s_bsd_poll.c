@@ -90,27 +90,107 @@
 
 extern struct sockaddr_in vserv;               /* defined in s_conf.c */
 
-static struct pollfd pollfds[MAXCONNECTIONS];
+struct _pollfd_list {
+    struct pollfd pollfds[MAXCONNECTIONS];
+    int maxindex;		/* highest FD number */
+};
 
-static void poll_update_pollfds(int, short, PF *);
+typedef struct _pollfd_list		pollfd_list_t;
+
+pollfd_list_t pollfd_lists[FDLIST_MAX];
+
+static void poll_update_pollfds(int, fdlist_t, short, PF *);
 
 /* XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX */
 /* Private functions */
 
 /*
+ * find a spare slot in the fd list. We can optimise this out later!
+ *   -- adrian
+ */
+static int
+poll_findslot(fdlist_t list)
+{
+    int i;
+    pollfd_list_t *pf = &pollfd_lists[list];
+    for (i = 0; i < MAXCONNECTIONS; i++) {
+        if (pf->pollfds[i].fd == -1) {
+            /* MATCH!!#$*&$ */
+            return i;
+        }
+    }
+    assert(1 == 0);
+    /* NOTREACHED */
+    return -1;
+}
+
+/*
  * set and clear entries in the pollfds[] array.
  */ 
 static void
-poll_update_pollfds(int fd, short event, PF * handler)
+poll_update_pollfds(int fd, fdlist_t list, short event, PF * handler)
 {  
+    fde_t *F = &fd_table[fd];
+    pollfd_list_t *pf, *npf;
+    int comm_index, ncomm_index;
+
+    /* First, see if we have to shift this across to a new list */
+    if (list != F->list) {
+        npf = &pollfd_lists[list];
+        pf = &pollfd_lists[F->list];
+        comm_index = F->comm_index;
+        ncomm_index = poll_findslot(list);
+        F->comm_index = ncomm_index;
+
+        /* Put the client on the new list */
+        assert(npf->pollfds[ncomm_index].fd == -1);
+        npf->pollfds[ncomm_index].fd = fd;
+        npf->pollfds[ncomm_index].revents = 0; /* Being paranoid */
+        npf->pollfds[ncomm_index].events = 0;
+
+        if (comm_index >= 0)
+        {
+          /* Copy over old events, and clear the old entry */
+          npf->pollfds[ncomm_index].events = pf->pollfds[comm_index].events;
+          pf->pollfds[comm_index].fd = -1;
+          pf->pollfds[comm_index].events = 0;
+          pf->pollfds[comm_index].revents = 0;
+        }
+
+        /* update maxindex here */
+        if (comm_index == pf->maxindex)
+            while( pf->pollfds[pf->maxindex].fd == -1 && pf->maxindex >= 0 )
+              pf->maxindex--;
+
+        if (ncomm_index > npf->maxindex)
+            npf->maxindex = ncomm_index;
+    }
+
+    /* Reset stuff here so we can keep the code simple for now */
+    pf = &pollfd_lists[list];
+    comm_index = F->comm_index;
+    F->list = list;
+
+    /* Update the events */
     if (handler) {
-        pollfds[fd].events |= event;
-        pollfds[fd].fd = fd;
+        pf->pollfds[comm_index].events |= event;
+        pf->pollfds[comm_index].fd = fd;
+        /* update maxindex here */
+        if (comm_index > pf->maxindex)
+            pf->maxindex = comm_index;
     } else {
-        pollfds[fd].events &= ~event;
-        if (pollfds[fd].events == 0) {
-            pollfds[fd].fd = -1;
-            pollfds[fd].revents = 0;
+        pf->pollfds[comm_index].events &= ~event;
+        if (pf->pollfds[comm_index].events == 0) {
+            pf->pollfds[comm_index].fd = -1;
+            pf->pollfds[comm_index].revents = 0;
+            F->comm_index = -1;
+            F->list = FDLIST_NONE;
+
+            /* update pf->maxindex here */
+            if (comm_index == pf->maxindex)
+                while( pf->pollfds[pf->maxindex].fd == -1 && 
+                       pf->maxindex >= 0 )
+                    pf->maxindex--;
         }
     }
 }
@@ -128,7 +208,14 @@ poll_update_pollfds(int fd, short event, PF * handler)
  */
 void init_netio(void)
 {
-	/* Nothing to do here yet .. */
+    int i, fd;
+
+    for (i = 0; i < FDLIST_MAX; i++) {
+        for (fd = 0; fd < MAXCONNECTIONS; fd++) {
+            pollfd_lists[i].pollfds[fd].fd = -1;
+        }
+        pollfd_lists[i].maxindex = 0;
+    }
 }
 
 /*
@@ -148,16 +235,15 @@ comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
     debug(5, 5) ("commSetSelect: FD %d type %d, %s\n", fd, type, handler ? "SET"
  : "CLEAR");
 #endif
-    F->list = list;
     if (type & COMM_SELECT_READ) {
         F->read_handler = handler;
         F->read_data = client_data;
-        poll_update_pollfds(fd, POLLRDNORM, handler);
+        poll_update_pollfds(fd, list, POLLRDNORM, handler);
     }
     if (type & COMM_SELECT_WRITE) {
         F->write_handler = handler;
         F->write_data = client_data;
-        poll_update_pollfds(fd, POLLWRNORM, handler);
+        poll_update_pollfds(fd, list, POLLWRNORM, handler);
     }
     if (timeout)
         F->timeout = CurrentTime + timeout;
@@ -214,7 +300,7 @@ comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
 #endif
 
 /*
- * comm_select
+ * comm_select_fdlist
  *
  * Called to do the new-style IO, courtesy of of squid (like most of this
  * new IO code). This routine handles the stuff we've hidden in
@@ -223,11 +309,13 @@ comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
  */
 
 int
-comm_select(time_t delay)
+comm_select_fdlist(fdlist_t fdlist, time_t delay)
 {
     int num;
     int fd;
+    int ci;
     PF *hdl;
+    pollfd_list_t *pf = &pollfd_lists[fdlist];
 
     /* update current time */
     if ((CurrentTime = time(0)) == -1) {
@@ -236,7 +324,8 @@ comm_select(time_t delay)
     }   
 
     for (;;) {
-        num = poll(pollfds, highest_fd + 1, delay * 1000);
+        /* XXX kill that +1 later ! -- adrian */
+        num = poll(pf->pollfds, pf->maxindex + 1, delay * 1000);
         if (num >= 0)
             break;
         if (ignoreErrno(errno))
@@ -256,16 +345,17 @@ comm_select(time_t delay)
         return 0;
 
     /* XXX we *could* optimise by falling out after doing num fds ... */
-    for (fd = 0; fd < highest_fd + 1; fd++) {
+    for (ci = 0; ci < pf->maxindex + 1; ci++) {
         fde_t *F;
 	int revents;
-	if (((revents = pollfds[fd].revents) == 0) ||
-	    (pollfds[fd].fd) == -1)
+	if (((revents = pf->pollfds[ci].revents) == 0) ||
+	    (pf->pollfds[ci].fd) == -1)
 	    continue;
+        fd = pf->pollfds[ci].fd;
         F = &fd_table[fd];
 	if (revents & (POLLREADFLAGS | POLLERRORS)) {
 	    hdl = F->read_handler;
-	    poll_update_pollfds(fd, POLLRDNORM, NULL);
+	    poll_update_pollfds(fd, fdlist, POLLRDNORM, NULL);
 	    if (!hdl) {
 		/* XXX Eek! This is another bad place! */
 	    } else {
@@ -274,7 +364,7 @@ comm_select(time_t delay)
 	}
 	if (revents & (POLLWRITEFLAGS | POLLERRORS)) {
 	    hdl = F->write_handler;
-	    poll_update_pollfds(fd, POLLWRNORM, NULL);
+	    poll_update_pollfds(fd, fdlist, POLLWRNORM, NULL);
 	    if (!hdl) {
 		/* XXX Eek! This is another bad place! */
 	    } else {
@@ -285,3 +375,12 @@ comm_select(time_t delay)
     return 0;
 }
 
+int
+comm_select(time_t delay)
+{
+    comm_select_fdlist(FDLIST_SERVICE, 0);
+    comm_select_fdlist(FDLIST_SERVER, 0);
+    comm_select_fdlist(FDLIST_BUSYCLIENT, 0);
+    comm_select_fdlist(FDLIST_IDLECLIENT, delay);
+    return 0;
+}

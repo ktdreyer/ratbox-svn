@@ -90,6 +90,7 @@ fd_open(int fd, unsigned int type, const char *desc)
     F->defer.handler = NULL;
 #endif
     fdlist_update_biggest(fd, 1);
+    F->comm_index = -1;
     F->list = FDLIST_NONE;
     if (desc)
         strncpy(F->desc, desc, FD_DESC_SZ);
