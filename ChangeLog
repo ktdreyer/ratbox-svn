@@ -1,3 +1,16 @@
+leeh        2005/03/27 00:54:42 UTC	(20050327_0)
+
+  Modified files:
+    modules/core         m_join.c 
+  Log:
+  - make set_final_mode() use internal function buffers and send the mode
+    change itself.
+  
+  Revision  Changes    Path
+  1.174     +47 -38    ircd-ratbox/modules/core/m_join.c
+
+
+
 androsyn    2005/03/26 22:38:50 UTC	(20050326_1)
 
   Modified files:
