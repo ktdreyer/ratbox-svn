@@ -1,3 +1,7 @@
+*** 20010114_1 by fl_
+- we now have a fully working, unobtrusive modrestart command
+
+
 *** 20010113_2 by fl_
 - added the beginnings of a modrestart command
   be warned:
