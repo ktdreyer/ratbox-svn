@@ -45,16 +45,16 @@ static void u_status(struct connection_entry *, char *parv[], int parc);
 
 static struct ucommand_handler ucommands[] =
 {
-	{ "connect",	u_connect,	CONF_OPER_ADMIN,	NULL },
-	{ "die",	u_die,		CONF_OPER_SADMIN,	NULL },
-	{ "events",	u_events,	CONF_OPER_ADMIN,	NULL },
-	{ "flags",	u_flags,	0,			NULL },
-	{ "help",	u_help,		0,			NULL },
-	{ "quit",	u_quit,		0,			NULL },
-	{ "rehash",	u_rehash,	CONF_OPER_SADMIN,	NULL },
-	{ "service",	u_service,	0,			NULL },
-	{ "status",	u_status,	0,			NULL },
-	{ "\0",         NULL,		0,			NULL }
+	{ "connect",	u_connect,	CONF_OPER_ROUTE,	2, NULL },
+	{ "die",	u_die,		CONF_OPER_ADMIN,	2, NULL },
+	{ "events",	u_events,	CONF_OPER_ADMIN,	0, NULL },
+	{ "flags",	u_flags,	0,			0, NULL },
+	{ "help",	u_help,		0,			0, NULL },
+	{ "quit",	u_quit,		0,			0, NULL },
+	{ "rehash",	u_rehash,	CONF_OPER_ADMIN,	0, NULL },
+	{ "service",	u_service,	0,			0, NULL },
+	{ "status",	u_status,	0,			0, NULL },
+	{ "\0",         NULL,		0,			0, NULL }
 };
 
 void
@@ -116,7 +116,9 @@ handle_ucommand(struct connection_entry *conn_p, const char *command,
 
         if((handler = find_ucommand(command)) != NULL)
 	{
-		if(!handler->flags || conn_p->privs & handler->flags)
+		if(parc < handler->minpara)
+			sendto_one(conn_p, "Insufficient parameters");
+		else if(!handler->flags || conn_p->privs & handler->flags)
 			handler->func(conn_p, parv, parc);
 		else
 			sendto_one(conn_p, "Insufficient access");
@@ -210,12 +212,6 @@ u_connect(struct connection_entry *conn_p, char *parv[], int parc)
         struct conf_server *conf_p;
         int port = 0;
 
-        if(parc < 2 || EmptyString(parv[1]))
-        {
-                sendto_one(conn_p, "Usage: .connect <server> [port]");
-                return;
-        }
-
         if((conf_p = find_conf_server(parv[1])) == NULL)
         {
                 sendto_one(conn_p, "No such server %s", parv[1]);
@@ -256,8 +252,7 @@ u_connect(struct connection_entry *conn_p, char *parv[], int parc)
 static void
 u_die(struct connection_entry *conn_p, char *parv[], int parc)
 {
-        if(parc < 2 || EmptyString(parv[1]) ||
-           strcasecmp(MYNAME, parv[1]))
+        if(strcasecmp(MYNAME, parv[1]))
         {
                 sendto_one(conn_p, "Usage: .die <servername>");
                 return;

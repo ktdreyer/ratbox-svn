@@ -14,7 +14,7 @@
 #include "io.h"
 
 static void u_stats(struct connection_entry *, char *parv[], int parc);
-struct ucommand_handler stats_ucommand = { "stats", u_stats, 0, NULL };
+struct ucommand_handler stats_ucommand = { "stats", u_stats, 0, 0, NULL };
 
 struct _stats_table
 {
@@ -90,11 +90,22 @@ u_stats(struct connection_entry *conn_p, char *parv[], int parc)
 {
         int i;
 
-        if(parc < 2 || EmptyString(parv[1]))
-        {
-                sendto_one(conn_p, "Usage: .stats <type>");
-                return;
-        }
+	if(parc < 2)
+	{
+		char buf[BUFSIZE];
+
+		buf[0] = '\0';
+
+		for(i = 0; stats_table[i].type[0] != '\0'; i++)
+		{
+			strlcat(buf, stats_table[i].type, sizeof(buf));
+			strlcat(buf, " ", sizeof(buf));
+		}
+
+		sendto_one(conn_p, "Stats types: %s", buf);
+
+		return;
+	}
 
         for(i = 0; stats_table[i].type[0] != '\0'; i++)
         {

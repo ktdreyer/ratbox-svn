@@ -32,13 +32,12 @@ struct mode_table
 	int mode;
 };
 
-#if 0
-static struct mode_table umode_table[] = {
-	{"bots", UMODE_BOTS},
-	{"cconn", UMODE_CCONN},
-	{NULL}
+static struct mode_table privs_table[] = {
+	{ "admin",	CONF_OPER_ADMIN		},
+	{ "dcc",	CONF_OPER_DCC		},
+	{ "route",	CONF_OPER_ROUTE		},
+	{ "\0",		0			}
 };
-#endif
 
 static const char *
 conf_strtype(int type)
@@ -157,7 +156,6 @@ find_conf_item(const struct TopConf *top, const char *name)
 	return NULL;
 }
 
-#if 0
 static int
 find_umode(struct mode_table *tab, char *name)
 {
@@ -196,7 +194,6 @@ set_modes_from_table(int *modes, const char *whatis, struct mode_table *tab, con
 		*modes |= mode;
 	}
 }
-#endif
 
 void
 conf_report_error(const char *fmt, ...)
@@ -509,7 +506,7 @@ conf_begin_oper(struct TopConf *tc)
         }
 
         yy_oper = my_malloc(sizeof(struct conf_oper));
-        yy_oper->flags |= CONF_OPER_ENCRYPTED|CONF_OPER_DCC;
+        yy_oper->flags |= CONF_OPER_ENCRYPTED;
 
         return 0;
 }
@@ -604,25 +601,9 @@ conf_set_oper_encrypted(void *data)
 }
 
 static void
-conf_set_oper_dcc(void *data)
-{
-        int yesno = *(unsigned int *) data;
-
-        if(yesno)
-                yy_oper->flags |= CONF_OPER_DCC;
-        else
-                yy_oper->flags &= ~CONF_OPER_DCC;
-}
-
-static void
 conf_set_oper_flags(void *data)
 {
-	const char *flag = data;
-
-	if(!strcasecmp(flag, "sadmin"))
-		yy_oper->flags |= CONF_OPER_SADMIN|CONF_OPER_ADMIN;
-	else if(!strcasecmp(flag, "admin"))
-		yy_oper->flags |= CONF_OPER_ADMIN;
+	set_modes_from_table(&yy_oper->flags, "flag", privs_table, data);
 }
 
 static int
@@ -744,8 +725,7 @@ static struct ConfEntry conf_oper_table[] =
 	{ "user",	CF_QSTRING|CF_FLIST, conf_set_oper_user, 0, NULL },
 	{ "password",	CF_QSTRING, conf_set_oper_password,	0, NULL },
 	{ "encrypted",	CF_YESNO,   conf_set_oper_encrypted,	0, NULL },
-	{ "dcc",	CF_YESNO,   conf_set_oper_dcc,		0, NULL },
-	{ "flags",	CF_STRING,  conf_set_oper_flags,	0, NULL },
+	{ "flags",	CF_STRING|CF_FLIST,  conf_set_oper_flags,	0, NULL },
 	{ "\0", 0, NULL, 0, NULL }
 };
 

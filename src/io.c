@@ -122,7 +122,7 @@ get_line(struct connection_entry *conn_p, char *buf, int bufsize)
 		else
 			buf[n] = '\0';
 
-		if(term)
+		if(!term)
 			conn_p->flags |= FLAGS_UNTERMINATED;
 
 		return n;
@@ -132,7 +132,10 @@ get_line(struct connection_entry *conn_p, char *buf, int bufsize)
 	if(term)
 		conn_p->flags &= ~FLAGS_UNTERMINATED;
 
-	return n;
+	/* we dont want to parse this.. its the remainder of an unterminated
+	 * line --fl
+	 */
+	return 0;
 }
 
 /* read_io()
@@ -706,7 +709,7 @@ signoff_server(struct connection_entry *conn_p)
 static void
 read_server(struct connection_entry *conn_p)
 {
-	char buf[BUFSIZE*2];
+	static char buf[BUFSIZE*2];
 	int n;
 
 	if((n = get_line(server_p, buf, sizeof(buf))) > 0)
@@ -746,7 +749,7 @@ read_server(struct connection_entry *conn_p)
 static void
 read_client(struct connection_entry *conn_p)
 {
-	char buf[BUFSIZE*2];
+	static char buf[BUFSIZE*2];
 	int n;
 
 	if((n = get_line(conn_p, buf, sizeof(buf))) > 0)
