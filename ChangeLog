@@ -1,3 +1,15 @@
+leeh        2003/07/02 14:06:14 EDT	(20030702_3)
+
+  Modified files:
+    modules              m_invite.c 
+  Log:
+  - missing return
+  
+  Revision  Changes    Path
+  1.70      +4 -1      ircd-ratbox/modules/m_invite.c
+
+
+
 leeh        2003/07/02 08:11:39 EDT	(20030702_2)
 
   Modified files:
