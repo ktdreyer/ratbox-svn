@@ -1043,9 +1043,13 @@ sendto_anywhere(struct Client *to, struct Client *from,
   va_list args;
   buf_head_t linebuf;
 
+  /* this check stops clients privmsg'ing themselves: BAD. */
+#if 0
   /* This check is worth doing... */
   if (from->from == to->from)
     return;
+#endif
+
   linebuf_newbuf(&linebuf);
   va_start(args, pattern);
 

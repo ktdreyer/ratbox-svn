@@ -316,6 +316,21 @@ build_target_list(int p_or_n, char *command, struct Client *client_p,
       }
     }
 
+    /* look for a privmsg to another client */
+    if ((target_p = find_person(nick)) != NULL)
+    {
+      if (!duplicate_ptr(target_p))
+      {
+        targets[ntargets].ptr = (void *)target_p;
+        targets[ntargets].type = ENTITY_CLIENT;
+        targets[ntargets++].flags = 0;
+
+        if (ntargets >= ConfigFileEntry.max_targets)
+          return (ntargets);
+        continue;
+      }
+    }
+    
     /* @#channel or +#channel message ? */
 
     type = 0;
@@ -351,12 +366,13 @@ build_target_list(int p_or_n, char *command, struct Client *client_p,
       if ((chptr = hash_find_channel(nick)) != NULL)
       {
 
-        if ((type & MODE_CHANOP) && !is_chan_op(chptr, source_p))
+        if(!is_any_op(chptr, source_p) && !is_voiced(chptr, source_p))
         {
           sendto_one(source_p, form_str(ERR_NOSUCHNICK),
                      me.name, source_p->name, with_prefix);
           continue;
         }
+	
         if (!duplicate_ptr(chptr))
         {
           targets[ntargets].ptr = (void *)chptr;
@@ -379,45 +395,20 @@ build_target_list(int p_or_n, char *command, struct Client *client_p,
       }
     }
 
-    if (IsOper(source_p))
+    if(IsOper(source_p) && ((*nick == '$') || strchr(nick, '@')))
     {
-      if (*nick == '$')
-      {
-        handle_opers(p_or_n, command, client_p, source_p, nick, text);
-        continue;
-      }
-      if (strchr(nick, '@'))
-      {
-        handle_opers(p_or_n, command, client_p, source_p, nick, text);
-        continue;
-      }
-    }
-
-    /* At this point, its likely its another client */
-
-    if ((target_p = find_person(nick)) != NULL)
-    {
-      if (!duplicate_ptr(target_p))
-      {
-        targets[ntargets].ptr = (void *)target_p;
-        targets[ntargets].type = ENTITY_CLIENT;
-        targets[ntargets++].flags = 0;
-
-        if (ntargets >= ConfigFileEntry.max_targets)
-          return (ntargets);
-        continue;
-      }
+      handle_opers(p_or_n, command, client_p, source_p, nick, text);
+      continue;
     }
     else
     {
       if (!ServerInfo.hub && uplink && IsCapable(uplink, CAP_LL))
         return -1;
-      else if (p_or_n != NOTICE)
-        sendto_one(source_p, form_str(ERR_NOSUCHNICK), me.name,
-                   source_p->name, nick);
+      else if(p_or_n != NOTICE)
+        sendto_one(source_p, form_str(ERR_NOSUCHNICK),
+	           me.name, source_p->name, nick);
       continue;
     }
-
   }
   return ntargets;
 }
