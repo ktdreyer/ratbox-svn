@@ -1,3 +1,10 @@
+*** 20010525_10 by leeh
+- dont show ips of servers/admins in /trace for non-admins
+- dont show ips of servers/admins in /stats L for non-admins ;p
+
+  are there anymore?  stats c, stats ? are already done..
+
+
 *** 20010525_9 by db
 - removed BUF_BLOCK_SIZE no block allocator.
 
