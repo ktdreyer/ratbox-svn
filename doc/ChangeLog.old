@@ -1,3 +1,10 @@
+*** 20000109_3 by db
+- split m_privmsg and m_notice into two files. My rationale for doing this
+  is: slightly faster, no more if(notice) in code, m_privmsg/m_notice
+  rarely change anyway.
+
+
+
 *** 20000109_2 by wnder
 Added support for when SerialNumber rolls over to 0
 
