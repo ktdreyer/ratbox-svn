@@ -44,6 +44,8 @@ new_hook(char *name)
 	hook *h;
 	
 	h = malloc(sizeof(hook));
+	memset(h, 0, sizeof(hook));
+
 	h->name = malloc(strlen(name) + 1);
 	strcpy(h->name, name);
 	return h;
