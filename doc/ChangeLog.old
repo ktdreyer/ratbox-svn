@@ -1,3 +1,8 @@
+*** 20001209_10 by bill
+
+- added duration to EOB snotice
+
+
 *** 20001209_9 by db
 - rationalized use of serial numbers for unique sending to client
   this removes yet another array "sentalong" yay.
