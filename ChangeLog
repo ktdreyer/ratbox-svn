@@ -1,3 +1,20 @@
+ejb         2002/08/26 20:08:47 EDT	(20020827_0)
+
+  Modified files:        (Branch: parser-devel)
+    .                    INSTALL RELNOTES 
+    modules              m_whois.c 
+    src                  channel_mode.c 
+  Log:
+  - merge with HEAD
+  
+  Revision  Changes    Path
+  7.31.2.1  +0 -0      ircd-ratbox/INSTALL
+  1.44.2.1  +1 -0      ircd-ratbox/RELNOTES
+  1.91.2.1  +2 -3      ircd-ratbox/modules/m_whois.c
+  7.73.2.1  +12 -27    ircd-ratbox/src/channel_mode.c
+
+
+
 ejb         2002/08/26 19:59:53 EDT	(20020826_14)
 
   Modified files:        (Branch: parser-devel)
