@@ -242,7 +242,7 @@ int mo_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         }
       else
         killer = path;
-      ircsprintf(buf2, "Killed (%s)", killer);
+      ircsprintf(buf2, "Killed by %s", killer);
     }
   return exit_client(cptr, acptr, sptr, buf2);
 }
@@ -336,9 +336,8 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       inpath = cptr->host;
       if (!BadPtr(path))
         {
-          ircsprintf(buf, "%s!%s%s (%s)",
-                     cptr->username, cptr->name,
-                     IsGlobalOper(sptr) ? "" : "(L)", path);
+          ircsprintf(buf, "%s!%s (%s)",
+                     cptr->username, cptr->name, path);
           path = buf;
           reason = path;
         }
@@ -387,7 +386,7 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 			 acptr->name, parv[0]);
 
 #if defined(USE_SYSLOG) && defined(SYSLOG_KILL)
-  if (IsGlobalOper(sptr))
+  if (IsOperGlobalKill(sptr))
     log(L_INFO,"KILL From %s For %s Path %s!%s",
                         parv[0], acptr->name, inpath, path);
 #endif
@@ -440,7 +439,7 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         }
       else
         killer = path;
-      ircsprintf(buf2, "Killed (%s)", killer);
+      ircsprintf(buf2, "Killed by %s", killer);
     }
   return exit_client(cptr, acptr, sptr, buf2);
 }
