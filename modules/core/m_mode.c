@@ -802,8 +802,8 @@ chm_ban(struct Client *source_p, struct Channel *chptr,
 	raw_mask = parv[(*parn)];
 	(*parn)++;
 
-	/* empty ban, ignore it */
-	if(EmptyString(raw_mask))
+	/* empty ban, or starts with ':' which messes up s2s, ignore it */
+	if(EmptyString(raw_mask) || *raw_mask == ':')
 		return;
 
 	if(!MyClient(source_p))
