@@ -1,3 +1,9 @@
+*** 20010608_11 by db
+- fixed header, it read convertconf still
+- fixed spelling mistake seperate -> separate a very common one..
+
+
+
 *** 20010608_10 by jdc
 * Fixed time_t vs. long warnings (typecasted properly as '(long)').
 
