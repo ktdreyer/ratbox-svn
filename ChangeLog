@@ -1,3 +1,15 @@
+androsyn    2004/02/26 13:28:31 EST	(20040226_3)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  First half of the ND stuff..
+  
+  Revision  Changes    Path
+  7.425     +30 -9     ircd-ratbox/src/client.c
+
+
+
 leeh        2004/02/26 11:58:34 EST	(20040226_2)
 
   Modified files:
