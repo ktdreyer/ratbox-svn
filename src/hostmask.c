@@ -184,6 +184,7 @@ void clear_conf(void)
    }
  first_mask = NULL;
  first_miscmask = NULL;
+ memset((void *)hmhash,0,sizeof(hmhash));
 }
 
 /*
