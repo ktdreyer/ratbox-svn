@@ -1,3 +1,27 @@
+androsyn    2003/09/01 13:31:42 EDT	(20030901_6)
+
+  Modified files:
+    src                  cache.c client.c event.c ircd.c 
+                         listener.c modules.c patricia.c s_auth.c 
+                         s_bsd.c s_conf.c s_log.c 
+  Log:
+  First pass at the ircsprintf() review
+  
+  Revision  Changes    Path
+  1.9       +1 -1      ircd-ratbox/src/cache.c
+  7.411     +9 -9      ircd-ratbox/src/client.c
+  7.40      +1 -1      ircd-ratbox/src/event.c
+  7.311     +2 -2      ircd-ratbox/src/ircd.c
+  7.94      +1 -1      ircd-ratbox/src/listener.c
+  7.132     +3 -3      ircd-ratbox/src/modules.c
+  7.21      +1 -1      ircd-ratbox/src/patricia.c
+  7.159     +1 -1      ircd-ratbox/src/s_auth.c
+  7.210     +2 -2      ircd-ratbox/src/s_bsd.c
+  7.431     +5 -5      ircd-ratbox/src/s_conf.c
+  7.58      +4 -4      ircd-ratbox/src/s_log.c
+
+
+
 androsyn    2003/09/01 13:11:14 EDT	(20030901_5)
 
   Modified files:
