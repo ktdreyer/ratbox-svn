@@ -95,7 +95,7 @@ static void mr_capab(struct Client *client_p, struct Client *source_p,
        */
       for (ecap = CipherTable; ecap->name; ecap++)
       {
-        if ( (!strcasecmp(ecap->name, s)) && (ecap->cap & CAP_ENC_MASK))
+        if ( (!irccmp(ecap->name, s)) && (ecap->cap & CAP_ENC_MASK))
         {
           cipher = ecap->cap;
           break;

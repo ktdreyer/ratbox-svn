@@ -101,7 +101,7 @@ static void m_challenge( struct Client *client_p, struct Client *source_p,
      if (!source_p->user->response)
        return;
      
-     if (strcasecmp(source_p->user->response, ++parv[1]))
+     if (irccmp(source_p->user->response, ++parv[1]))
        {
          sendto_one(source_p, form_str(ERR_PASSWDMISMATCH), me.name,
                     source_p->name);

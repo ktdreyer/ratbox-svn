@@ -186,7 +186,7 @@ static void cryptlink_auth(struct Client *client_p, struct Client *source_p,
 
   for (ecap = CipherTable; ecap->name; ecap++)
   {
-    if ( (!strcasecmp(ecap->name, parv[2])) &&
+    if ( (!irccmp(ecap->name, parv[2])) &&
          (IsCapableEnc(client_p, ecap->cap)) )
     {
       client_p->localClient->in_cipher = ecap;
