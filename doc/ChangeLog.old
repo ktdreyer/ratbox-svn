@@ -1,3 +1,15 @@
+androsyn    2002/02/27 14:41:40 EST	(20020227_3)
+
+  Modified files:
+    src                  s_auth.c 
+  Log:
+  Fixed stuff with usernames getting set to unknown.
+  
+  Revision  Changes    Path
+  7.85      +1 -1      ircd-hybrid-7/src/s_auth.c
+
+
+
 enygma      2002/02/27 12:51:50 EST	(20020227_2)
 
   Modified files:
