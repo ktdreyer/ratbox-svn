@@ -263,7 +263,8 @@ linebuf_copy_line(buf_head_t *bufhead, buf_line_t *bufline,
   /* If its full or terminated, ignore it */
 
   bufline->binary = 0;
-  if ((bufline->len == BUF_DATA_SIZE) || (bufline->terminated == 1))
+  assert(bufline->len < BUF_DATA_SIZE);
+  if (bufline->terminated == 1)
     return 0;
 
   clen = cpylen = linebuf_skip_crlf(ch, len);
