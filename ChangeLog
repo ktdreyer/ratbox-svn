@@ -1,3 +1,22 @@
+androsyn    2002/12/10 10:54:29 UTC	(20021210_9)
+
+  Modified files:
+    include              confmatch.h iplines.h 
+    modules              m_stats.c 
+    src                  confmatch.c iplines.c 
+  Log:
+  Some other various fixes..the question here is..which one do we let match
+  first..hostnames or ips.. It seems the old hostmask.c took hostnames first.
+  
+  Revision  Changes    Path
+  7.2       +1 -0      ircd-ratbox/include/confmatch.h
+  7.2       +5 -0      ircd-ratbox/include/iplines.h
+  1.136     +14 -61    ircd-ratbox/modules/m_stats.c
+  7.4       +42 -11    ircd-ratbox/src/confmatch.c
+  7.2       +104 -1    ircd-ratbox/src/iplines.c
+
+
+
 androsyn    2002/12/10 10:11:24 UTC	(20021210_8)
 
   Modified files:
