@@ -729,9 +729,6 @@ general {
 	 */
 	maximum_links = 1;
 
-	/* REMOVE ME.  The following line checks you've been reading. */
-	havent_read_conf = 1;
-	
 	/* logfiles: the logfiles to use for user connects, /oper uses,
 	 * and failed /oper.  These files must exist for logging to be used.
 	 */

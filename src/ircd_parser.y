@@ -1374,9 +1374,6 @@ connect_entry:  CONNECT
     yy_aconf->status = CONF_SERVER;
 
     /* defaults */
-#ifdef HAVE_LIBZ
-    yy_aconf->flags |= CONF_FLAGS_COMPRESSED;
-#endif
     yy_aconf->port = PORTNUM;
   }
   '{' connect_items '}' ';'
