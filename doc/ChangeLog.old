@@ -1,3 +1,8 @@
+*** 20010425_5 by kreator
+- missing "" for vhost in convertconf, together with missing `;' in
+  oper_umodes line.
+
+
 *** 20010425_4 by toot
 added make_daemon in ircd.h to kill a compile warning..
 
