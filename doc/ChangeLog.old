@@ -1,3 +1,9 @@
+*** 20011128_3 by leeh
+- dont allow halfops to kick halfops, or set +/-h
+- allowing +h to set bans, but not see a real banlist is daft
+- halfops can also set simple modes
+
+
 *** 20011128_2 by leeh
 - undef BOUNCE_BAD_HOPS by default and reenable for release.
 
