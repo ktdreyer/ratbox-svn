@@ -1,3 +1,8 @@
+*** 20010101_23 by db
+- ignore capab sent from remote server
+
+
+
 *** 20010101_22 by davidt
 Missed a change to cburst..
 
