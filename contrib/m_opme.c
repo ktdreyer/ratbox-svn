@@ -78,6 +78,7 @@ static void mo_opme(struct Client *client_p, struct Client *source_p,
   struct Channel *chptr, *root_chptr;
   int on_vchan = 0;
   dlink_node *ptr;
+  dlink_node *locptr;
   
   /* admins only */
   if (!IsAdmin(source_p))
@@ -130,17 +131,17 @@ static void mo_opme(struct Client *client_p, struct Client *source_p,
        return;      
     }
 
-  if((ptr = find_user_link(&chptr->locpeons, source_p)))
+  if((locptr = find_user_link(&chptr->locpeons, source_p)))
     dlinkDelete(ptr, &chptr->locpeons);
-  else if((ptr = find_user_link(&chptr->locvoiced, source_p)))
+  else if((locptr = find_user_link(&chptr->locvoiced, source_p)))
     dlinkDelete(ptr, &chptr->locvoiced);
-  else if((ptr = find_user_link(&chptr->lochalfops, source_p)))
+  else if((locptr = find_user_link(&chptr->lochalfops, source_p)))
     dlinkDelete(ptr, &chptr->lochalfops);
-  else if((ptr = find_user_link(&chptr->locchanops, source_p)))
+  else if((locptr = find_user_link(&chptr->locchanops, source_p)))
     dlinkDelete(ptr, &chptr->locchanops);
   
 #ifdef REQUIRE_OANDV
-  else if((ptr = find_user_link(&chptr->locchanops_voiced, source_p)))
+  else if((locptr = find_user_link(&chptr->locchanops_voiced, source_p)))
     dlinkDelete(ptr, &chptr->locchanops_voiced);
 #endif
 
@@ -148,8 +149,8 @@ static void mo_opme(struct Client *client_p, struct Client *source_p,
     return;
 
   dlinkAdd(source_p, ptr, &chptr->chanops);
-  dlinkAdd(source_p, ptr, &chptr->locchanops);
-  
+  dlinkAdd(source_p, locptr, &chptr->locchanops);
+ 
   if (!on_vchan)
     {
      sendto_wallops_flags(FLAGS_WALLOP, &me,
