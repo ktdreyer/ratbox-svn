@@ -58,7 +58,8 @@ static PF accept_connection;
 
 static struct Listener* ListenerPollList = NULL;
 
-struct Listener* make_listener(int port, struct irc_inaddr *addr)
+struct Listener* 
+make_listener(int port, struct irc_inaddr *addr)
 {
   struct Listener* listener =
     (struct Listener*) MyMalloc(sizeof(struct Listener));
@@ -75,7 +76,8 @@ struct Listener* make_listener(int port, struct irc_inaddr *addr)
   return listener;
 }
 
-void free_listener(struct Listener* listener)
+void
+free_listener(struct Listener* listener)
 {
   assert(0 != listener);
   /*
@@ -83,10 +85,13 @@ void free_listener(struct Listener* listener)
    */
   if (listener == ListenerPollList)
     ListenerPollList = listener->next;
-  else {
+  else
+  {
     struct Listener* prev = ListenerPollList;
-    for ( ; prev; prev = prev->next) {
-      if (listener == prev->next) {
+    for ( ; prev; prev = prev->next)
+    {
+      if (listener == prev->next)
+      {
         prev->next = listener->next;
         break;
       }
@@ -103,7 +108,8 @@ void free_listener(struct Listener* listener)
  * get_listener_name - return displayable listener name and port
  * returns "host.foo.org:6667" for a given listener
  */
-const char* get_listener_name(const struct Listener* listener)
+const char* 
+get_listener_name(const struct Listener* listener)
 {
   static char buf[HOSTLEN + HOSTLEN + PORTNAMELEN + 4];
   assert(0 != listener);
@@ -118,21 +124,22 @@ const char* get_listener_name(const struct Listener* listener)
  * output       - none
  * side effects - show ports
  */
-void show_ports(struct Client* source_p)
+void 
+show_ports(struct Client* source_p)
 {
   struct Listener* listener = 0;
 
   for (listener = ListenerPollList; listener; listener = listener->next)
-    {
-      sendto_one(source_p, form_str(RPL_STATSPLINE),
-                 me.name,
-                 source_p->name,
-                 'P',
-                 listener->port,
-                 IsOperAdmin(source_p) ? listener->name : me.name,
-                 listener->ref_count,
-                 (listener->active)?"active":"disabled");
-    }
+  {
+    sendto_one(source_p, form_str(RPL_STATSPLINE),
+               me.name,
+               source_p->name,
+               'P',
+               listener->port,
+               IsOperAdmin(source_p) ? listener->name : me.name,
+               listener->ref_count,
+               (listener->active)?"active":"disabled");
+  }
 }
 
 /*
@@ -148,7 +155,8 @@ void show_ports(struct Client* source_p)
 #define HYBRID_SOMAXCONN SOMAXCONN
 #endif
 
-static int inetport(struct Listener* listener)
+static int 
+inetport(struct Listener* listener)
 {
   struct irc_sockaddr lsin;
   int                fd;
@@ -160,19 +168,24 @@ static int inetport(struct Listener* listener)
   fd = comm_open(DEF_FAM, SOCK_STREAM, 0, "Listener socket");
 
 #ifdef IPV6
-  if (!IN6_ARE_ADDR_EQUAL((struct in6_addr *)&listener->addr, &in6addr_any)) {
+  if (!IN6_ARE_ADDR_EQUAL((struct in6_addr *)&listener->addr, &in6addr_any))
+  {
 #else
-  if (INADDR_ANY != listener->addr.sins.sin.s_addr) {
+  if (INADDR_ANY != listener->addr.sins.sin.s_addr)
+  {
 #endif
     inetntop(DEF_FAM, &IN_ADDR(listener->addr), listener->vhost, HOSTLEN);
     listener->name = listener->vhost;
   }
-  if (-1 == fd) {
+
+  if (fd == -1)
+  {
     report_error(L_ALL, "opening listener socket %s:%s",
                  get_listener_name(listener), errno);
     return 0;
   }
-  else if ((HARD_FDLIMIT - 10) < fd) {
+  else if ((HARD_FDLIMIT - 10) < fd)
+  {
     report_error(L_ALL, "no more connections left for listener %s:%s",
                  get_listener_name(listener), errno);
     fd_close(fd);
@@ -182,7 +195,8 @@ static int inetport(struct Listener* listener)
    * XXX - we don't want to do all this crap for a listener
    * set_sock_opts(listener);
    */
-  if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (char*) &opt, sizeof(opt))) {
+  if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (char*) &opt, sizeof(opt)))
+  {
     report_error(L_ALL, "setting SO_REUSEADDR for listener %s:%s",
                  get_listener_name(listener), errno);
     fd_close(fd);
@@ -225,11 +239,12 @@ static int inetport(struct Listener* listener)
 
   /* Listen completion events are READ events .. */
 
-   accept_connection(fd, listener);
+  accept_connection(fd, listener);
   return 1;
 }
 
-static struct Listener* find_listener(int port, struct irc_inaddr *addr)
+static struct Listener* 
+find_listener(int port, struct irc_inaddr *addr)
 {
   struct Listener* listener = NULL;
   struct Listener* last_closed = NULL;
@@ -259,7 +274,8 @@ static struct Listener* find_listener(int port, struct irc_inaddr *addr)
  * vhost_ip - if non-null must contain a valid IP address string in
  * the format "255.255.255.255"
  */
-void add_listener(int port, const char* vhost_ip)
+void 
+add_listener(int port, const char* vhost_ip)
 {
   struct Listener* listener;
   struct irc_inaddr   vaddr;
@@ -267,7 +283,7 @@ void add_listener(int port, const char* vhost_ip)
   /*
    * if no port in conf line, don't bother
    */
-  if (0 == port)
+  if (port == 0)
     return;
 
 #ifdef IPV6
@@ -275,7 +291,9 @@ void add_listener(int port, const char* vhost_ip)
 #else
   copy_s_addr(IN_ADDR(vaddr), INADDR_ANY);
 #endif
-  if (vhost_ip) {
+
+  if (vhost_ip)
+  {
     if(inetpton(DEF_FAM, vhost_ip, &IN_ADDR(vaddr)) <= 0)
       return;
   }
@@ -305,9 +323,9 @@ void add_listener(int port, const char* vhost_ip)
  */
 void close_listener(struct Listener* listener)
 {
-  assert(0 != listener);
+  assert(listener != NULL);
 
-  if (-1 < listener->fd)
+  if (listener->fd >= 0)
   {
     fd_close(listener->fd);
     listener->fd = -1;
@@ -324,14 +342,16 @@ void close_listener(struct Listener* listener)
 /*
  * close_listeners - close and free all listeners that are not being used
  */
-void close_listeners()
+void 
+close_listeners()
 {
   struct Listener* listener;
   struct Listener* listener_next = 0;
   /*
    * close all 'extra' listening ports we have
    */
-  for (listener = ListenerPollList; listener; listener = listener_next) {
+  for (listener = ListenerPollList; listener; listener = listener_next)
+  {
     listener_next = listener->next;
     close_listener(listener);
   }
@@ -340,7 +360,8 @@ void close_listeners()
 #define TOOFAST_WARNING "ERROR :Trying to reconnect too fast.\r\n"
 #define DLINE_WARNING "ERROR :You have been D-lined.\r\n"
 
-static void accept_connection(int pfd, void *data)
+static void 
+accept_connection(int pfd, void *data)
 {
   static time_t      last_oper_notice = 0;
 
@@ -350,7 +371,7 @@ static void accept_connection(int pfd, void *data)
   int pe;
   struct Listener *  listener = data;
 
-  assert(0 != listener);
+  assert(listener != NULL);
 
   listener->last_accept = CurrentTime;
   /*
