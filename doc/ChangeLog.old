@@ -1,3 +1,9 @@
+*** 20010926_1 by androsyn
+Added the mmap() check in autoconf that was discussed earlier.  Added a work around
+for balloc.c if mmap() isn't found.  I feel bad for the poor bastard who doesn't have
+a mmap().  
+
+
 *** 20010925_11 by androsyn
 Eliminated a stupid compile warning when ziplinks and cryptlinks are disabled
 
