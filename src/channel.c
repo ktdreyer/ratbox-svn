@@ -2456,8 +2456,11 @@ static  void    sub1_from_channel(struct Channel *chptr)
           free_fluders(NULL, chptr);
 #endif
 
-          /* If channel has subchannels don't delete this channel */
-          if ( chptr->next_vchan == NULL )	  
+          /* Is this the top level channel? 
+	   * If so, don't remove if it has sub vchans
+	   * top level chan always has prev_chan == NULL
+	   */
+          if ( (chptr->prev_vchan == NULL) && (chptr->next_vchan == NULL) )
             {
 	      if (chptr->prevch)
 		chptr->prevch->nextch = chptr->nextch;
@@ -2471,13 +2474,23 @@ static  void    sub1_from_channel(struct Channel *chptr)
 	    }
 
           /* if this is a subchan take it out the linked list */
-          if (chptr->prev_vchan)
+          else if (chptr->prev_vchan)
             {
+	      /* remove from vchan double link list */
               chptr->prev_vchan->next_vchan = chptr->next_vchan;
               if (chptr->next_vchan)
                 chptr->next_vchan->prev_vchan = chptr->prev_vchan;
+
+	      /* remove from global chan double link list and hash */
+	      if (chptr->prevch)
+		chptr->prevch->nextch = chptr->nextch;
+	      else
+		GlobalChannelList = chptr->nextch;
+	      if (chptr->nextch)
+		chptr->nextch->prevch = chptr->prevch;
+              del_from_channel_hash_table(chptr->chname, chptr);
               MyFree((char*) chptr);
-              Count.chan--; /* is this line needed for subchans? */
+              Count.chan--; /* is this line needed for subchans? yes -db */
             }
         }
     }
