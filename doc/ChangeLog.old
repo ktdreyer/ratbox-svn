@@ -1,3 +1,11 @@
+*** 20010606_9 by jdc
+* Yup.  Here we go again.  Changes for OpenSSL to work properly during
+  make; servlink/Makefile.in was also majorly wrong, including the SSL
+  LIBS for INCLUDES rather than the INCLUDES, blah blah blah...  It's
+  all fixed now.
+
+
+
 *** 20010606_8 by jdc
 * Little fix for missing @SSL_LIBS@ (-L) in servlink/Makefile.in
 
