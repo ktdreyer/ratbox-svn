@@ -87,7 +87,6 @@ SRCS =                          \
   m_set.c \
   m_stats.c \
   m_svinfo.c \
-  m_tb.c \
   m_testline.c \
   m_testmask.c \
   m_time.c \

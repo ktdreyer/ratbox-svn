@@ -43,13 +43,19 @@
 
 static int m_topic(struct Client *, struct Client *, int, const char **);
 static int ms_topic(struct Client *, struct Client *, int, const char **);
+static int ms_tb(struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
 
 struct Message topic_msgtab = {
 	"TOPIC", 0, 0, 0, MFLG_SLOW,
 	{mg_unreg, {m_topic, 2}, {m_topic, 2}, {ms_topic, 5}, mg_ignore, {m_topic, 2}}
 };
 
-mapi_clist_av1 topic_clist[] = { &topic_msgtab, NULL };
+struct Message tb_msgtab = {
+	"TB", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, mg_ignore, mg_ignore, {ms_tb, 4}, mg_ignore, mg_ignore}
+};
+
+mapi_clist_av1 topic_clist[] = { &topic_msgtab, &tb_msgtab, NULL };
 DECLARE_MODULE_AV1(topic, NULL, NULL, topic_clist, NULL, NULL, "$Revision$");
 
 /*
@@ -174,6 +180,67 @@ ms_topic(struct Client *client_p, struct Client *source_p, int parc, const char 
 		sendto_channel_local(ALL_MEMBERS, chptr, ":%s TOPIC %s :%s",
 				     source_p->name, parv[1], 
 				     chptr->topic == NULL ? "" : chptr->topic);
+	}
+
+	return 0;
+}
+
+
+/* ms_tb()
+ *
+ * parv[1] - channel
+ * parv[2] - topic ts
+ * parv[3] - optional topicwho/topic
+ * parv[4] - topic
+ */
+static int
+ms_tb(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
+{
+	struct Channel *chptr;
+	const char *newtopic;
+	const char *newtopicwho;
+	time_t newtopicts;
+
+	chptr = find_channel(parv[1]);
+
+	if(chptr == NULL)
+		return 0;
+
+	newtopicts = atol(parv[2]);
+
+	if(parc == 5)
+	{
+		newtopic = parv[4];
+		newtopicwho = parv[3];
+	}
+	else
+	{
+		newtopic = parv[3];
+		newtopicwho = source_p->name;
+	}
+
+	if(chptr->topic == NULL || chptr->topic_time > newtopicts)
+	{
+		/* its possible the topicts is a few seconds out on some
+		 * servers, due to lag when propagating it, so if theyre the
+		 * same topic just drop the message --fl
+		 */
+		if(chptr->topic != NULL && strcmp(chptr->topic, newtopic) == 0)
+			return 0;
+
+		set_channel_topic(chptr, newtopic, newtopicwho, newtopicts);
+		sendto_channel_local(ALL_MEMBERS, chptr, ":%s TOPIC %s :%s",
+				     source_p->name, chptr->chname, newtopic);
+		sendto_server(client_p, chptr, CAP_TB|CAP_TS6, NOCAPS,
+			      ":%s TB %s %ld %s%s:%s",
+			      use_id(source_p), chptr->chname, (long) chptr->topic_time,
+			      ConfigChannel.burst_topicwho ? chptr->topic_info : "",
+			      ConfigChannel.burst_topicwho ? " " : "", chptr->topic);
+		sendto_server(client_p, chptr, CAP_TB, CAP_TS6,
+			      ":%s TB %s %ld %s%s:%s",
+			      source_p->name, chptr->chname, (long) chptr->topic_time,
+			      ConfigChannel.burst_topicwho ? chptr->topic_info : "",
+			      ConfigChannel.burst_topicwho ? " " : "", chptr->topic);
 	}
 
 	return 0;

@@ -506,16 +506,6 @@ m_svinfo.so: m_svinfo.c ../include/stdinc.h ../include/config.h \
   ../include/common.h ../include/numeric.h ../include/s_conf.h \
   ../include/class.h ../include/patricia.h ../include/msg.h \
   ../include/parse.h ../include/modules.h ../include/hook.h
-m_tb.so: m_tb.c ../include/stdinc.h ../include/config.h ../include/setup.h \
-  ../include/defaults.h ../include/tools.h ../include/send.h \
-  ../include/ircd_defs.h ../include/s_log.h ../include/channel.h \
-  ../include/client.h ../include/linebuf.h ../include/res.h \
-  ../adns/adns.h ../include/commio.h ../include/ircd.h \
-  ../include/memory.h ../include/balloc.h ../include/irc_string.h \
-  ../include/common.h ../include/s_conf.h ../include/class.h \
-  ../include/patricia.h ../include/numeric.h ../include/msg.h \
-  ../include/modules.h ../include/parse.h ../include/hook.h \
-  ../include/hash.h ../include/s_serv.h
 m_testline.so: m_testline.c ../include/stdinc.h ../include/config.h \
   ../include/setup.h ../include/defaults.h ../include/tools.h \
   ../include/send.h ../include/ircd_defs.h ../include/s_log.h \
