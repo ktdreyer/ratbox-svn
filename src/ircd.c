@@ -48,6 +48,11 @@
 #include <libintl.h>
 #endif
 
+#ifdef VMS
+# include descrip
+# include starlet
+#endif
+
 #include "tools.h"
 #include "ircd.h"
 #include "channel.h"
@@ -237,6 +242,11 @@ make_daemon(void)
   /*  fclose(stdin);
   fclose(stdout);
   fclose(stderr); */
+#else
+  /* if we get here, assume we've been detached.
+     better set a process name. */
+  $DESCRIPTOR(myname, "IRCD-HYBRID-7");
+  SYS$SETPRN(&myname);
 #endif
   return 0;
 }
