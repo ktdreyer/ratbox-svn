@@ -1,3 +1,8 @@
+*** 20001026_2 by db
+- messed up 4am commit. Here is the changes to config.h
+
+
+
 *** 20001026_1 by db
 - cleaned up kline code in client.c
 - missing check_klines in m_kline.c
