@@ -1,3 +1,8 @@
+*** 20011026_2 by androsyn
+Tracked down that ever annoying /trace bug that causes garbage to end up in
+it.
+
+
 *** 20011026_1 by db
 - *sigh* I should have known better. yes yes yes *fwap*
   another reversed if
