@@ -1,3 +1,15 @@
+db          2002/06/28 14:48:07 EDT	(20020628_1)
+
+  Modified files:
+    modules/core         m_message.c 
+  Log:
+  - fixed other style problems, removed unnecessary casts
+  
+  Revision  Changes    Path
+  1.94      +9 -8      ircd-hybrid-7/modules/core/m_message.c
+
+
+
 db          2002/06/28 14:18:51 EDT	(20020628_0)
 
   Modified files:
