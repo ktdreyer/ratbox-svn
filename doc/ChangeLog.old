@@ -1,3 +1,7 @@
+*** 20010720_3 by androsyn
+Added check for inlined functions..    
+
+
 *** 20010720_2 by wcampbel
 UHELP command added, this lets an oper view the user help file without
 deopering.  UHELP for non-opers just does a regular HELP for non-opers (paced)
