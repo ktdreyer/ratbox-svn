@@ -160,7 +160,7 @@ static void mr_cryptauth(struct Client *client_p, struct Client *source_p,
   ClearWaitAuth(client_p);
   server_estab(client_p);
 
-#ifdef 0
+#if 0
   {
     char *in, *out;
 
