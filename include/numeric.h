@@ -212,6 +212,8 @@ extern const char* form_str(int);
 #define RPL_UNAWAY           305
 #define RPL_NOWAWAY          306
 
+#define RPL_WHOISADMIN       308
+
 #define RPL_WHOISUSER        311
 #define RPL_WHOISSERVER      312
 #define RPL_WHOISOPERATOR    313
@@ -225,7 +227,6 @@ extern const char* form_str(int);
 
 #define RPL_ENDOFWHOIS       318
 #define RPL_WHOISCHANNELS    319
-#define RPL_WHOISADMIN       320
 
 #define RPL_LISTSTART        321
 #define RPL_LIST             322

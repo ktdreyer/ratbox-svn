@@ -120,7 +120,7 @@ int user_modes_from_c_to_bitmask[] =
   0,            /* L */
   0,            /* M */
   0,            /* N */
-  FLAGS_LOCOPS, /* O */
+  FLAGS_LOCOP,  /* O */
   0,            /* P */
   0,            /* Q */
   0,            /* R */
