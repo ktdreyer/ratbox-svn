@@ -9,6 +9,11 @@
 #include <sys/types.h>         /* time_t */
 #define INCLUDED_sys_types_h
 #endif
+#ifndef INCLUDED_sys_socket_h
+#define INCLUDED_sys_socket_h
+#include <sys/socket.h>		/* Socket structs */
+#include <netinet/in.h>
+#endif
 
 #define FD_DESC_SZ 32
 
@@ -32,12 +37,24 @@ enum {
     FD_UNKNOWN
 };
 
+enum {
+    COMM_OK,
+    COMM_ERR_DNS,
+    COMM_ERR_TIMEOUT,
+    COMM_ERROR
+};
+
 typedef struct _fde fde_t;
 
 /* Callback for completed IO events */
 typedef void PF(int, void *);
 
+/* Callback for completed connections */
+/* int fd, int status, void * */
+typedef void CNCB(int, int, void *);
+
 struct _fde {
+    int fd;		/* So we can use the fde_t as a callback ptr */
     int mask;		/* priority values used by the old-school ircd code */
 
     /* New-school stuff, again pretty much ripped from squid */
@@ -65,6 +82,15 @@ struct _fde {
         unsigned int ipc:1;
         unsigned int called_connect:1;
     } flags;
+    struct {
+        /* We don't need the host here ? */
+        struct sockaddr_in S;
+        struct in_addr in_addr;
+        u_short port;
+        CNCB *callback;
+        void *data;
+        /* We'd also add the retry count here when we get to that -- adrian */
+    } connect;
 };
 
 extern fde_t *fd_table;

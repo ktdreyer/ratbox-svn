@@ -88,6 +88,7 @@ fd_open(int fd, unsigned int type, const char *desc)
 #ifdef NOTYET
     debug(51, 3) ("fd_open FD %d %s\n", fd, desc);
 #endif
+    F->fd = fd;
     F->type = type;
     F->flags.open = 1;
 #ifdef NOTYET

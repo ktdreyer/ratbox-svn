@@ -83,6 +83,11 @@ int            highest_fd = -1;
 static struct sockaddr_in mysk;
 static char               readBuf[READBUF_SIZE];
 
+static void comm_connect_callback(int fd, int status);
+static PF comm_connect_timeout;
+static void comm_connect_dns_callback(void *vptr, struct DNSReply *reply);
+static PF comm_connect_tryconnect;
+
 /* close_all_connections() can be used *before* the system come up! */
 
 void close_all_connections(void)
@@ -991,3 +996,102 @@ comm_checktimeouts(void *notused)
     eventAdd("comm_checktimeouts", comm_checktimeouts, NULL, 1, 0);
 }
 
+
+/*
+ * comm_connect_tcp() - connect a given socket to a remote address
+ *
+ * Begin the process of connecting a socket to a remote host/port.
+ * Pass a 'local' address to bind to, a remote host/port, and a callback
+ * for completion.
+ * This routine binds the socket locally if required, and then formulate
+ * a DNS request.
+ */
+void
+comm_connect_tcp(int fd, const char *host, u_short port, CNCB *callback,
+    void *data)
+{
+    struct DNSReply *reply;
+    struct DNSQuery query;
+
+    /* First, attempt to bind */
+        /* Failure, call the callback with COMM_ERROR */
+        /* ... and quit */
+
+    /* Next, send the DNS request, for the next level */
+    query.vptr = &fd_table[fd];
+    query.callback = comm_connect_dns_callback;
+    reply = gethost_byname(host, &query);
+    assert(reply == NULL);	/* We don't have a DNS cache now -- adrian */
+
+    /* If we get here, we're on our way to connecting .. */
+    fd_table[fd].flags.called_connect = 1;
+}
+
+
+/*
+ * comm_connect_callback() - call the callback, and continue with life
+ */
+static void
+comm_connect_callback(int fd, int status)
+{
+    CNCB *hdl;
+
+    /* Clear the connect flag + handler */
+    hdl = fd_table[fd].connect.callback;
+    fd_table[fd].connect.callback = NULL;
+    fd_table[fd].flags.called_connect = 0;
+
+    /* Call the handler */
+    hdl(fd, status, fd_table[fd].connect.data);
+
+    /* Finish! */
+}
+
+
+/*
+ * comm_connect_timeout() - this gets called when the socket connection
+ * times out. This *only* can be called once connect() is initially
+ * called ..
+ */
+static void
+comm_connect_timeout(int fd, void *notused)
+{
+    /* error! */
+    comm_connect_callback(fd, COMM_ERR_TIMEOUT);
+}
+
+
+/*
+ * comm_connect_dns_callback() - called at the completion of the DNS request
+ *
+ * The DNS request has completed, so if we've got an error, return it,
+ * otherwise we initiate the connect()
+ */
+static void
+comm_connect_dns_callback(void *vptr, struct DNSReply *reply)
+{
+    fde_t *F = vptr;
+
+    /* Error ? */
+        /* Yes, callback + return */
+
+    /* No error, set a 10 second timeout */
+    comm_settimeout(F->fd, 30, comm_connect_timeout, NULL);
+
+    /* Now, call the tryconnect() routine to try a connect() */
+    comm_connect_tryconnect(F->fd, NULL);
+}
+
+
+/*
+ * comm_connect_tryconnect() - called to attempt a connect()
+ *
+ * Attempt a connect(). If we get a non-fatal error, retry. If we get a fatal
+ * error, callback with error. If we suceed, callback with OK.
+ */
+static void
+comm_connect_tryconnect(int fd, void *notused)
+{
+
+
+}
