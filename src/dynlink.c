@@ -277,7 +277,6 @@ load_a_module(char *path, int warn, int core)
 	void *tmpptr = NULL;
 
 	char *mod_basename;
-	void (*initfunc) (void) = NULL;
 	const char *ver;
 
 	int *mapi_version;

@@ -103,25 +103,43 @@ struct Message test_msgtab = {
 /* Thats the msgtab finished */
 
 #ifndef STATIC_MODULES
+/* The mapi_clist_av1 indicates which commands (struct Message)
+   should be loaded from the module. The list should be terminated
+   by a NULL. */
+mapi_clist_av1 test_clist[] = { &test_msgtab, NULL };
+
 /* Here we tell it what to do when the module is loaded */
-void
-_modinit(void)
+int
+modinit(void)
 {
-  /* This will add the commands in test_msgtab (which is above) */
-  mod_add_cmd(&test_msgtab);
+	/* Nothing to do for the example module. */
+	/* The init function should return -1 on failure,
+	   which will cause the module to be unloaded,
+	   otherwise 0 to indicate success. */
+	return 0;
 }
 
 /* here we tell it what to do when the module is unloaded */
 void
-_moddeinit(void)
+moddeinit(void)
 {
-  /* This will remove the commands in test_msgtab (which is above) */
-  mod_del_cmd(&test_msgtab);
+	/* Again, nothing to do. */
 }
 
-/* When we last modified the file (shown in /modlist), this is usually:
- */
-const char *_version = "$Revision$";
+/* DECLARE_MODULE_AV1() actually declare the MAPI header. */
+DECLARE_MODULE_AV1(
+	/* The first argument is the function to call on load */
+	modinit,
+	/* And the function to call on unload */
+	moddeinit,
+	/* Then the MAPI command list */
+	test_clist,
+	/* Next the hook list, if we have one. */
+	NULL,
+	/* And finally the version number of this module. */
+	"$Revision$");
+
+/* Any of the above arguments can be NULL to indicate they aren't used. */
 #endif
 
 /*
