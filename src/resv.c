@@ -58,7 +58,7 @@ create_channel_resv(char *name, char *reason, int conf)
     len = TOPICLEN;
   }
 
-  resv_p = (struct ResvChannel *)MyMalloc(sizeof(struct ResvChannel) + len);
+  resv_p = (struct ResvChannel *)MyMalloc(sizeof(struct ResvChannel));
 
   strlcpy(resv_p->name, name, CHANNELLEN+1);
   DupString(resv_p->reason, reason);
@@ -92,7 +92,7 @@ create_nick_resv(char *name, char *reason, int conf)
     len = TOPICLEN;
   }
 
-  resv_p = (struct ResvNick *)MyMalloc(sizeof(struct ResvNick) + len);
+  resv_p = (struct ResvNick *)MyMalloc(sizeof(struct ResvNick));
 
   strlcpy(resv_p->name, name, RESVNICKLEN);
   DupString(resv_p->reason, reason);
