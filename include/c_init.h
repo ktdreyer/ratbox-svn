@@ -14,4 +14,7 @@ extern struct scommand_handler mode_command;
 /* s_alis.c */
 extern void init_s_alis(void);
 
+/* u_help.c */
+extern struct ucommand_handler help_ucommand;
+
 #endif

@@ -13,6 +13,7 @@
 #include "conf.h"
 #include "client.h"
 #include "serno.h"
+#include "stats.h"
 
 static dlink_list scommand_table[MAX_SCOMMAND_HASH];
 
@@ -163,8 +164,9 @@ c_version(struct client *client_p, char *parv[], int parc)
 		return;
 
 	if(IsUser(client_p))
-		sendto_server(":%s 351 %s ratbox-services-1.0beta(%s). %s A TS",
-			      MYNAME, parv[0], SERIALNUM, MYNAME);
+		sendto_server(":%s 351 %s ratbox-services-%s(%s). %s A TS",
+			      MYNAME, parv[0], RSERV_VERSION,
+                              SERIALNUM, MYNAME);
 }
 
 static void
@@ -191,9 +193,11 @@ c_stats(struct client *client_p, char *parv[], int parc)
 			{
 				conf_p = ptr->data;
 
-				sendto_server(":%s 213 %s C *@%s A %s %d uplink",
+				sendto_server(":%s 213 %s C *@%s %s %s %d uplink",
 					      MYNAME, parv[0], conf_p->name,
-					      conf_p->name, conf_p->port);
+                                              (conf_p->defport > 0) ? "A" : "*",
+					      conf_p->name, 
+                                              abs(conf_p->defport));
 			}
 		}
 			break;
@@ -214,46 +218,19 @@ c_stats(struct client *client_p, char *parv[], int parc)
 			break;
 
 		case 'u':
-		{
-			time_t seconds;
-			int days, hours, minutes;
-
-			seconds = CURRENT_TIME - config_file.first_time;
-
-			days = (int) (seconds / 86400);
-			seconds %= 86400;
-			hours = (int) (seconds / 3600);
-			hours %= 3600;
-			minutes = (int) (seconds / 60);
-			seconds %= 60;
-
-			sendto_server(":%s 242 %s :Server Up %d day%s, %d:%02d:%02ld",
-				      MYNAME, parv[0], days, (days == 1) ? "" : "s",
-				      hours, minutes, seconds);
-		}
+			sendto_server(":%s 242 %s :Server Up %s",
+				      MYNAME, parv[0],
+                                      get_duration(CURRENT_TIME -
+                                                   config_file.first_time));
 			break;
 
 		case 'v': case 'V':
-		{
-			time_t seconds;
-			int days, hours, minutes;
-
-			seconds = CURRENT_TIME - server_p->first_time;
-
-			days = (int) (seconds / 86400);
-			seconds %= 86400;
-			hours = (int) (seconds / 3600);
-			hours %= 3600;
-			minutes = (int) (seconds / 60);
-			seconds %= 60;
-
-			sendto_server(":%s 249 %s V :%s (AutoConn.!*@*) Idle: %d "
-				      "SendQ: %d Connected %d day%s, %d:%02d:%02ld",
+			sendto_server(":%s 249 %s V :%s (AutoConn.!*@*) Idle: "
+                                      "%d SendQ: %d Connected %s",
 				      MYNAME, parv[0], server_p->name, 
 				      (CURRENT_TIME - server_p->last_time), 0,
-				      days, (days == 1) ? "" : "s", hours,
-				      minutes, seconds);
-		}
+                                      get_duration(CURRENT_TIME -
+                                                   server_p->first_time));
 			break;
 
 		default:

@@ -4,6 +4,8 @@
 
 #define	MAX_EVENTS	50
 
+struct connection_entry;
+
 typedef void EVH(void *);
 
 /* The list of event processes */
@@ -24,5 +26,7 @@ extern time_t eventNextTime(void);
 extern void init_events(void);
 extern void eventDelete(EVH * func, void *);
 extern int eventFind(EVH * func, void *);
+
+extern void event_show(struct connection_entry *conn_p);
 
 #endif /* INCLUDED_event_h */

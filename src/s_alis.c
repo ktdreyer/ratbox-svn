@@ -17,8 +17,8 @@
 #define ALIS_MAX_MATCH	60
 #define ALIS_MAX_PARC	10
 
-#define ALIS_FLOOD_MAX		40	/* at what point we stop parsing queries */
-#define ALIS_FLOOD_MAX_SILENT	55	/* at what point we silently drop messages */
+#define ALIS_FLOOD_MAX		10	/* at what point we stop parsing queries */
+#define ALIS_FLOOD_MAX_SILENT	20	/* at what point we silently drop messages */
 
 #define ALIS_FLOOD_HELP		1	/* normal help */
 #define ALIS_FLOOD_EHELP	2	/* specific extended help */
@@ -35,6 +35,18 @@
 #define ERROR_MAX		4
 #define ERROR_SKIP		5
 #define ERROR_FLOOD		6
+
+struct _alis_stats
+{
+        unsigned long help;
+        unsigned long ehelp;
+        unsigned long list;
+        unsigned long error_param;
+        unsigned long error_parse;
+        unsigned long flood;
+        unsigned long flood_ignore;
+};
+static struct _alis_stats alis_stats;
 
 static struct client *alis_p;
 
@@ -208,6 +220,7 @@ parse_alis(struct client *client_p, struct alis_query *query, char *text)
 		if(EmptyString(param))
 		{
 			alis_error(client_p, ERROR_PARAM);
+                        alis_stats.error_param++;
 			return 0;
 		}
 
@@ -216,6 +229,7 @@ parse_alis(struct client *client_p, struct alis_query *query, char *text)
 			if((query->min = atoi(param)) < 1)
 			{
 				alis_error(client_p, ERROR_MIN);
+                                alis_stats.error_parse++;
 				return 0;
 			}
 		}
@@ -224,6 +238,7 @@ parse_alis(struct client *client_p, struct alis_query *query, char *text)
 			if((query->max = atoi(param)) < 1)
 			{
 				alis_error(client_p, ERROR_MAX);
+                                alis_stats.error_parse++;
 				return 0;
 			}
 		}
@@ -232,6 +247,7 @@ parse_alis(struct client *client_p, struct alis_query *query, char *text)
 			if((query->skip = atoi(param)) < 1)
 			{
 				alis_error(client_p, ERROR_SKIP);
+                                alis_stats.error_parse++;
 				return 0;
 			}
 		}
@@ -275,6 +291,7 @@ parse_alis(struct client *client_p, struct alis_query *query, char *text)
 					break;
 				default:
 					alis_error(client_p, ERROR_MODE);
+                                        alis_stats.error_parse++;
 					return 0;
 			}
 
@@ -285,12 +302,14 @@ parse_alis(struct client *client_p, struct alis_query *query, char *text)
 			if(query->mode == -1)
 			{
 				alis_error(client_p, ERROR_MODE);
+                                alis_stats.error_parse++;
 				return 0;
 			}
 		}
 		else
 		{
 			alis_error(client_p, ERROR_UNKNOWNOPTION);
+                        alis_stats.error_parse++;
 			return 0;
 		}
 
@@ -356,13 +375,17 @@ s_alis(struct client *client_p, char *text)
 
 	/* flood too excessive, silently drop */
 	if(alis_p->service->floodcount >= ALIS_FLOOD_MAX_SILENT)
+        {
+                alis_stats.flood_ignore++;
 		return;
+        }
 
 	/* flood too excessive, but we can still error */
 	if(alis_p->service->floodcount >= ALIS_FLOOD_MAX)
 	{
 		alis_error(client_p, ERROR_FLOOD);
 		alis_p->service->floodcount++;
+                alis_stats.flood++;
 		return;
 	}
 
@@ -380,6 +403,7 @@ s_alis(struct client *client_p, char *text)
 			sendto_server(":%s NOTICE %s :Topics: LIST",
 				      MYNAME, client_p->name);
 			alis_p->service->floodcount += ALIS_FLOOD_HELP;
+                        alis_stats.help++;
 		}
 		else if(!strcasecmp(p, "LIST"))
 		{
@@ -392,12 +416,14 @@ s_alis(struct client *client_p, char *text)
 			}
 
 			alis_p->service->floodcount += ALIS_FLOOD_EHELP;
+                        alis_stats.ehelp++;
 		}
 		else
 		{
 			alis_p->service->floodcount += ALIS_FLOOD_HELP;
 			sendto_server(":%s NOTICE %s :Unknown topic '%s'",
 				      MYNAME, client_p->name);
+                        alis_stats.help++;
 		}
 
 		return;
@@ -410,6 +436,7 @@ s_alis(struct client *client_p, char *text)
 		{
 			alis_error(client_p, ERROR_PARAM);
 			alis_p->service->floodcount++;
+                        alis_stats.error_param++;
 			return;
 		}
 
@@ -429,6 +456,8 @@ s_alis(struct client *client_p, char *text)
 		sendto_server(":%s NOTICE %s :Returning maximum of %d channel names "
 				"matching '%s'",
 				MYNAME, client_p->name, ALIS_MAX_MATCH, query.mask);
+
+                alis_stats.list++;
 
 		/* hunting for one channel.. */
 		if(strchr(query.mask, '*') == NULL)
@@ -522,4 +551,13 @@ void
 s_alis_stats(struct connection_entry *conn_p, char *parv[], int parc)
 {
         sendto_connection(conn_p, "ALIS Stats:");
+        sendto_connection(conn_p, "  Command usage: HELP:%d EHELP:%d LIST:%d",
+                          alis_stats.help, alis_stats.ehelp,
+                          alis_stats.list);
+        sendto_connection(conn_p, "  Missing parameters: %d",
+                          alis_stats.error_param);
+        sendto_connection(conn_p, "  Parse errors: %d",
+                          alis_stats.error_parse);
+        sendto_connection(conn_p, "  Flood proctection: Paced:%d Ignored: %d",
+                          alis_stats.flood, alis_stats.flood_ignore);
 }

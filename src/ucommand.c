@@ -15,6 +15,8 @@
 #include "event.h"
 #include "service.h"
 #include "client.h"
+#include "serno.h"
+#include "stats.h"
 
 static dlink_list ucommand_table[MAX_UCOMMAND_HASH];
 
@@ -22,21 +24,27 @@ static void u_login(struct connection_entry *, char *parv[], int parc);
 
 static void u_connect(struct connection_entry *, char *parv[], int parc);
 static void u_die(struct connection_entry *, char *parv[], int parc);
+static void u_events(struct connection_entry *, char *parv[], int parc);
 static void u_quit(struct connection_entry *, char *parv[], int parc);
 static void u_stats(struct connection_entry *, char *parv[], int parc);
+static void u_status(struct connection_entry *, char *parv[], int parc);
 
 static struct ucommand_handler connect_ucommand = { "connect", u_connect, 0 };
 static struct ucommand_handler die_ucommand = { "die", u_die, 0 };
+static struct ucommand_handler events_ucommand = { "events", u_events, 0 };
 static struct ucommand_handler quit_ucommand = { "quit", u_quit, 0 };
 static struct ucommand_handler stats_ucommand = { "stats", u_stats, 0 };
+static struct ucommand_handler status_ucommand = { "status", u_status, 0 };
 
 void
 init_ucommand(void)
 {
         add_ucommand_handler(&connect_ucommand);
         add_ucommand_handler(&die_ucommand);
+        add_ucommand_handler(&events_ucommand);
 	add_ucommand_handler(&quit_ucommand);
 	add_ucommand_handler(&stats_ucommand);
+        add_ucommand_handler(&status_ucommand);
 }
 
 static int
@@ -97,6 +105,54 @@ add_ucommand_handler(struct ucommand_handler *chandler)
 
 	hashv = hash_command(chandler->cmd);
 	dlink_add_alloc(chandler, &ucommand_table[hashv]);
+}
+
+#define MAX_HELP_ROW 8
+
+void
+list_ucommand(struct connection_entry *conn_p)
+{
+        struct ucommand_handler *uhandler;
+        const char *hparv[MAX_HELP_ROW];
+        char buf[BUFSIZE];
+        dlink_node *ptr;
+        char *p;
+        int i;
+        int j = 0;
+
+        for(i = 0; i < MAX_UCOMMAND_HASH; i++)
+        {
+                DLINK_FOREACH(ptr, ucommand_table[i].head)
+                {
+                        uhandler = ptr->data;
+                        hparv[j] = uhandler->cmd;
+                        j++;
+
+                        if(j >= MAX_HELP_ROW)
+                        {
+                                sendto_connection(conn_p,
+                                        "   %-8s %-8s %-8s %-8s "
+                                        "%-8s %-8s %-8s %-8s",
+                                        hparv[0], hparv[1], hparv[2],
+                                        hparv[3], hparv[4], hparv[5],
+                                        hparv[6], hparv[7]);
+                                j = 0;
+                        }
+                }
+        }
+
+        if(!j)
+                return;
+
+        /* rebuild a buffer of the remaining ones.. */
+        p = buf;
+
+        for(; j > 0; j--)
+        {
+                p += sprintf(p, "%-8s ", hparv[j-1]);
+        }
+
+        sendto_connection(conn_p, "   %s", buf);
 }
 
 static void
@@ -200,6 +256,12 @@ u_die(struct connection_entry *conn_p, char *parv[], int parc)
 }
 
 static void
+u_events(struct connection_entry *conn_p, char *parv[], int parc)
+{
+        event_show(conn_p);
+}
+
+static void
 u_quit(struct connection_entry *conn_p, char *parv[], int parc)
 {
 	sendto_connection(conn_p, "Goodbye.");
@@ -224,4 +286,20 @@ u_stats(struct connection_entry *conn_p, char *parv[], int parc)
         }
 
         (service_p->service->stats)(conn_p, parv, parc);
+}
+
+static void
+u_status(struct connection_entry *conn_p, char *parv[], int parc)
+{
+        sendto_connection(conn_p, "%s, version ratbox-services-%s(%s), up %s",
+                          MYNAME, RSERV_VERSION, SERIALNUM,
+                          get_duration(CURRENT_TIME - config_file.first_time));
+
+        if(server_p != NULL)
+                sendto_connection(conn_p, "Currently connected to %s, for %s",
+                                  server_p->name,
+                                  get_duration(CURRENT_TIME -
+                                               server_p->last_time));
+        else
+                sendto_connection(conn_p, "Currently disconnected");
 }

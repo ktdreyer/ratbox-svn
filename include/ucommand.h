@@ -18,4 +18,6 @@ extern void handle_ucommand(struct connection_entry *, const char *command,
 				char *parv[], int parc);
 extern void add_ucommand_handler(struct ucommand_handler *);
 
+extern void list_ucommand(struct connection_entry *);
+
 #endif
