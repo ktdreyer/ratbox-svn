@@ -26,7 +26,7 @@ libexecdir	= @libexecdir@
 sysconfdir	= @sysconfdir@
 localstatedir	= @localstatedir@
 
-PROGS		= viconf mkpasswd convertconf convertilines convertklines 
+PROGS		= viconf mkpasswd convertilines convertklines 
 
 all: $(PROGS)
 
@@ -44,17 +44,14 @@ convertilines:
 convertklines:
 	$(CC) $(CFLAGS) $(LDFLAGS) $(INCLUDES) convertklines.c -o convertklines $(IRCDLIBS)
 
-convertconf:
-	$(CC) $(CFLAGS) $(LDFLAGS) $(INCLUDES) convertconf.c -o convertconf $(IRCDLIBS)
-
 clean:
-	$(RM) -f convertconf encspeed viconf chkconf mkpasswd *~ core *.exe convertklines convertilines
+	$(RM) -f encspeed viconf chkconf mkpasswd *~ core *.exe convertklines convertilines
 
 distclean: clean
 	$(RM) -f Makefile
 
 lint:
-	lint -aacgprxhH $(CPPFLAGS) -DIRCD_PREFIX=\"@prefix@\" $(convertconf_SOURCES) $(convertklines_SOURCES) $(mkpasswd_SOURCES) $(viconf_SOURCES) $(encspeed_SOURCES) >>../lint.out
+	lint -aacgprxhH $(CPPFLAGS) -DIRCD_PREFIX=\"@prefix@\" $(convertklines_SOURCES) $(mkpasswd_SOURCES) $(viconf_SOURCES) $(encspeed_SOURCES) >>../lint.out
 
 depend:
 
