@@ -3,7 +3,7 @@
 - re-implement first param in m_lusers()
 - trie' channel name list
 - finish RFC'ing m_message.c
-
+              
 ----
 is-'s TODO list
 
