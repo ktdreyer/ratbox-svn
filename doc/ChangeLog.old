@@ -1,3 +1,10 @@
+*** 20001115_4 by adrian
+
+
+When a FD goes inactive, make sure its moved onto the NONE fdlist.
+
+
+
 *** 20001115_3 by db
 - removed /rehash dump for one reason... and one reason only BLOAT
 
