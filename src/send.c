@@ -1009,11 +1009,11 @@ sendto_realops_flags(int flags, const char *pattern, ...)
   len = send_format(nbuf, pattern, args);
   va_end(args);
 
-  if(len > (512-60))
+  if(len > 400)
     {
-      nbuf[512-60] = '\r';
-      nbuf[512-59] = '\n';
-      nbuf[512-58] = '\0';
+      nbuf[400] = '\r';
+      nbuf[401] = '\n';
+      nbuf[402] = '\0';
     }
 
   if (flags == FLAGS_ALL)
@@ -1024,12 +1024,12 @@ sendto_realops_flags(int flags, const char *pattern, ...)
 
 	  if (SendServNotice(cptr))
 	    {
-	      (void)ircsprintf(sendbuf, ":%s NOTICE %s :*** Notice -- %s",
+	      len = ircsprintf(sendbuf, ":%s NOTICE %s :*** Notice -- %s",
 			       me.name,
 			       cptr->name,
 			       nbuf);
 
-	      len = strlen(sendbuf);	/* XXX *sigh* */
+	      len = send_trim(sendbuf,len);
 	      send_message(cptr, (char *)sendbuf, len);
 	    }
 	}
@@ -1042,11 +1042,12 @@ sendto_realops_flags(int flags, const char *pattern, ...)
 
 	  if(cptr->umodes & flags)
 	    {
-	      (void)ircsprintf(sendbuf, ":%s NOTICE %s :*** Notice -- %s",
-			       me.name,
-			       cptr->name,
-			       nbuf);
+	      len =ircsprintf(sendbuf, ":%s NOTICE %s :*** Notice -- %s",
+			      me.name,
+			      cptr->name,
+			      nbuf);
 
+	      len = send_trim(sendbuf,len);
 	      send_message(cptr, (char *)sendbuf, len);
 	    }
 	}
