@@ -69,28 +69,17 @@
 #endif
 #include <arpa/inet.h>
 
-/*
- * Stuff for poll()
- */
-#ifdef linux
-# include <features.h>
-# if ((__GLIBC__ == 2) && (__GLIBC_MINOR__ < 1))
-#  define POLLRDNORM  0x0040
-# endif
-#endif
-
 #define __USE_XOPEN    /* XXXX had to add this define to make it compile -toby */
 #include <sys/poll.h>
-#define CONNECTFAST
 
-#ifndef IN_LOOPBACKNET
-#define IN_LOOPBACKNET        0x7f
+
+/* I hate linux -- adrian */
+#ifndef POLLRDNORM
+#define POLLRDNORM POLLIN
 #endif
-
-#ifndef INADDR_NONE
-#define INADDR_NONE ((unsigned int) 0xffffffff)
+#ifndef POLLWRNORM
+#define POLLWRNORM POLLOUT
 #endif
-
 
 struct _pollfd_list {
     struct pollfd pollfds[MAXCONNECTIONS];
@@ -265,49 +254,6 @@ comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
  * write it out.
  */
 
-#if defined(POLLMSG) && defined(POLLIN) && defined(POLLRDNORM)
-#define POLLREADFLAGS (POLLMSG | POLLIN | POLLRDNORM)
-#else
-
-# if defined(POLLIN) && defined(POLLRDNORM)
-# define POLLREADFLAGS (POLLIN | POLLRDNORM)
-# else
-
-#  if defined(POLLIN)
-#  define POLLREADFLAGS POLLIN
-#  else
-
-#   if defined(POLLRDNORM)
-#    define POLLREADFLAGS POLLRDNORM
-#   endif
-
-#  endif
-
-# endif
-
-#endif
-
-#if defined(POLLOUT) && defined(POLLWRNORM)
-#define POLLWRITEFLAGS (POLLOUT | POLLWRNORM)
-#else
-
-# if defined(POLLOUT)
-# define POLLWRITEFLAGS POLLOUT
-# else
-
-#  if defined(POLLWRNORM)
-#  define POLLWRITEFLAGS POLLWRNORM
-#  endif
-
-# endif
-
-#endif
-
-#if defined(POLLERR) && defined(POLLHUP)
-#define POLLERRORS (POLLERR | POLLHUP)
-#else
-#define POLLERRORS POLLERR
-#endif
 
 /*
  * comm_select_fdlist
@@ -363,7 +309,7 @@ comm_select_fdlist(fdlist_t fdlist, time_t delay)
 	    continue;
         fd = pf->pollfds[ci].fd;
         F = &fd_table[fd];
-	if (revents & (POLLREADFLAGS | POLLERRORS)) {
+	if (revents & (POLLRDNORM | POLLIN | POLLHUP | POLLERR)) {
 	    hdl = F->read_handler;
 	    poll_update_pollfds(fd, fdlist, POLLRDNORM, NULL);
 	    if (!hdl) {
@@ -372,7 +318,7 @@ comm_select_fdlist(fdlist_t fdlist, time_t delay)
 		hdl(fd, F->read_data);
             }
 	}
-	if (revents & (POLLWRITEFLAGS | POLLERRORS)) {
+	if (revents & (POLLWRNORM | POLLOUT | POLLHUP | POLLERR)) {
 	    hdl = F->write_handler;
 	    poll_update_pollfds(fd, fdlist, POLLWRNORM, NULL);
 	    if (!hdl) {
