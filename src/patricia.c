@@ -1020,6 +1020,7 @@ match_ip(patricia_tree_t * tree, struct sockaddr_storage *ip)
 #ifndef IPV6
 	len = 32;
 	family = AF_INET;
+	ipptr = &((struct sockaddr_in *)&ip)->sin_addr;
 #else
 	if(ip->ss_family == AF_INET6)
 	{
