@@ -1,3 +1,15 @@
+leeh        2003/06/11 08:30:55 UTC	(20030611_0)
+
+  Modified files:
+    modules              m_testline.c 
+  Log:
+  - revert the testline changes
+  
+  Revision  Changes    Path
+  1.43      +3 -4      ircd-ratbox/modules/m_testline.c
+
+
+
 leeh        2003/06/10 21:25:20 UTC	(20030610_8)
 
   Modified files:
