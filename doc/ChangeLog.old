@@ -1,3 +1,9 @@
+*** 20001011_1 by lusky
+fix for *@*.foo.com I:lines being broken by a user@host.foo.com I:lines
+change chptr->vchans to chptr->vchan_flag in channel.c to get this tree
+  to compile.  not sure if this is correct.
+
+
 *** 20001006_4 by db
 Make virtual channels doubly linked.
 
