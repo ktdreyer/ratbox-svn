@@ -145,7 +145,7 @@ Little things to be done given enough time and initiative
    CC='gcc -L/usr/local/lib' ./configure --prefix='...'
    THEN...it doesn't adjust the #define in setup.h
    Known to occur on FreeBSD 4.x-STABLE with the gettext port installed
-   to /usr/local
+   to /usr/local (DONE)
 .  The 3 logging path settings are NOOP in the conf (logpath, oper_log, 
    gline_log)
 .  $$*.server.mask and $#*.user.mask do not currently work...
