@@ -29,11 +29,11 @@
 #include <sys/param.h>
 #endif
 
+#undef PACE_CONNECT
+
 #ifdef HAVE_LIBCRYPTO
 #include <openssl/rsa.h>
 #endif
-
-#define PACE_CONNECT
 
 #include "config.h"             /* defines */
 #include "fileio.h"             /* FBFILE */
