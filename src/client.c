@@ -1337,6 +1337,7 @@ exit_client(struct Client *client_p,	/* The local client originating the
 	    const char *comment	/* Reason for the exit */
 	)
 {
+	unsigned sendk = 0, recvk = 0;
 	char comment1[HOSTLEN + HOSTLEN + 2];
 	if(MyConnect(source_p))
 	{
@@ -1381,6 +1382,8 @@ exit_client(struct Client *client_p,	/* The local client originating the
 		{
 			Count.myserver--;
 			unset_chcap_usage_counts(source_p);
+			sendk = source_p->localClient->sendK;
+			recvk = source_p->localClient->receiveK;
 		}
 
 		if(IsPerson(source_p))
@@ -1438,14 +1441,12 @@ exit_client(struct Client *client_p,	/* The local client originating the
 					     "%s was connected for %d seconds.  %d/%d sendK/recvK.",
 					     source_p->name,
 					     (int) (CurrentTime -
-						    source_p->firsttime),
-					     source_p->localClient->sendK,
-					     source_p->localClient->receiveK);
+						    source_p->firsttime), sendk, recvk);
 			ilog(L_NOTICE,
 			     "%s was connected for %d seconds.  %d/%d sendK/recvK.",
 			     source_p->name,
 			     CurrentTime - source_p->firsttime,
-			     source_p->localClient->sendK, source_p->localClient->receiveK);
+			     sendk, recvk);
 		}
 	}
 
