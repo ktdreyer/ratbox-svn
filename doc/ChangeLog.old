@@ -1,3 +1,7 @@
+*** 20010223_3 by fl_
+- we dont need mo_oper(), an !IsOper() check is better :)
+
+
 *** 20010223_2 by androsyn
 Untested module loader for HP-UX using shl_*().  This should get integrated
 into the current modules.c, but I didn't feel like messing with autoconf
