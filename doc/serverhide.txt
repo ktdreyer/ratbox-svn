@@ -135,10 +135,7 @@ Using Non-QS Compliant Hubs
    The flattened LINKS option will, as a side effect, display all user QUIT's
    due to network splits in the following format:
 
-   :user QUIT :your.server.name a.server.on.NetName.net
-
-   The NetName item is replaced with the contents of the network_name option
-   in ircd.conf.
+   :user QUIT :your.server.name *.split
 
    This works extremely well as long as all servers on your network are
    compliant with the QS capability, which sends a single SQUIT to the
