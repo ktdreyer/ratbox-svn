@@ -1,3 +1,15 @@
+androsyn    2002/06/10 21:41:29 EDT	(20020611_5)
+
+  Modified files:
+    src                  channel.c 
+  Log:
+  Free the topic if we are destroying the channel
+  
+  Revision  Changes    Path
+  7.320     +2 -0      ircd-hybrid-7/src/channel.c
+
+
+
 androsyn    2002/06/10 21:39:43 EDT	(20020611_4)
 
   Modified files:
