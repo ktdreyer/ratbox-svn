@@ -113,11 +113,6 @@ int     ms_sjoin(struct Client *cptr,
   int hide_or_not;
   dlink_node *m;
 
-  if(chptr->mode.mode & MODE_HIDEOPS)
-    hide_or_not = ONLY_CHANOPS;
-  else
-    hide_or_not = ALL_MEMBERS;
-
   if (IsClient(sptr) || parc < 5)
     return 0;
   if (!IsChannelName(parv[2]))
@@ -179,6 +174,11 @@ int     ms_sjoin(struct Client *cptr,
       }
 
   *parabuf = '\0';
+
+  if(mode.mode & MODE_HIDEOPS)
+    hide_or_not = ONLY_CHANOPS;
+  else
+    hide_or_not = ALL_MEMBERS;
 
   isnew = ChannelExists(parv[2]) ? 0 : 1;
   chptr = get_channel(sptr, parv[2], CREATE);
