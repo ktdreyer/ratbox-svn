@@ -1,3 +1,15 @@
+androsyn    2004/03/29 22:13:20 EST	(20040330_5)
+
+  Modified files:
+    include              balloc.h 
+  Log:
+  Disable the block heap magic number memblock stuff
+  
+  Revision  Changes    Path
+  1.27      +1 -1      ircd-ratbox/include/balloc.h
+
+
+
 androsyn    2004/03/29 21:02:13 EST	(20040330_4)
 
   Modified files:
