@@ -1,3 +1,8 @@
+*** 20010126_12 by jdc
+Cosmetical changes.
+
+
+
 *** 20010126_11 by db
 - added kill_client() for formatting up a KILL to an uid or nick as needed
   unused function at the moment.
