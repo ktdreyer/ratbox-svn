@@ -1,3 +1,23 @@
+leeh        2003/07/08 12:47:03 EDT	(20030708_5)
+
+  Modified files:
+    help                 Makefile.in 
+    src                  s_log.c 
+  Removed files:
+    contrib              m_owho.c m_owhois.c 
+  Log:
+  - removed m_owho, m_owhois - use opercheats.
+  - fix the help Makefile to move old help dir out of the way
+  - smalldate() doesnt take params in -devel :P
+  
+  Revision  Changes    Path
+  1.11      +0 -452    ircd-ratbox/contrib/m_owho.c (dead)
+  1.14      +0 -397    ircd-ratbox/contrib/m_owhois.c (dead)
+  1.16      +13 -5     ircd-ratbox/help/Makefile.in
+  7.56      +1 -1      ircd-ratbox/src/s_log.c
+
+
+
 leeh        2003/07/08 10:25:21 EDT	(20030708_4)
 
   Removed files:
