@@ -1,3 +1,16 @@
+androsyn    2002/01/21 22:02:29 EST	(20020122_0)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  An assert that should catch this double free bug. Basically we check to make
+  sure the client isn't already on the dead list.
+  
+  Revision  Changes    Path
+  7.221     +3 -1      ircd-hybrid-7/src/client.c
+
+
+
 jmallett    2002/01/20 01:26:45 EST	(20020120_0)
 
   Modified files:
