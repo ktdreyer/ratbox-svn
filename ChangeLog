@@ -1,3 +1,26 @@
+leeh        2004/08/08 17:21:15 EDT	(20040808_1)
+
+  Modified files:
+    include              tools.h 
+    modules/core         m_mode.c 
+    src                  channel.c client.c hash.c ircd.c 
+                         newconf.c 
+  Log:
+  - moved dlinkFind* to use (node, list) as params to be consistent with the
+    rest of the dlink code
+  - fixed a compile warning in ircd.c
+  
+  Revision  Changes    Path
+  1.51      +4 -4      ircd-ratbox/include/tools.h
+  1.115     +2 -2      ircd-ratbox/modules/core/m_mode.c
+  7.422     +2 -2      ircd-ratbox/src/channel.c
+  7.476     +5 -5      ircd-ratbox/src/client.c
+  7.110     +4 -4      ircd-ratbox/src/hash.c
+  7.358     +3 -1      ircd-ratbox/src/ircd.c
+  7.169     +1 -1      ircd-ratbox/src/newconf.c
+
+
+
 androsyn    2004/08/08 16:54:25 EDT	(20040808_0)
 
   Modified files:
