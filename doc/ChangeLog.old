@@ -1,3 +1,16 @@
+leeh        2002/04/14 15:42:37 EDT	(20020414_6)
+
+  Modified files:
+    contrib              m_force.c m_tburst.c 
+  Log:
+  - added a license
+  
+  Revision  Changes    Path
+  1.5       +25 -1     ircd-hybrid-7/contrib/m_force.c
+  1.4       +25 -1     ircd-hybrid-7/contrib/m_tburst.c
+
+
+
 leeh        2002/04/14 10:56:34 EDT	(20020414_5)
 
   Modified files:
