@@ -1,3 +1,36 @@
+leeh        2005/03/20 01:20:18 UTC	(20050320_1)
+
+  Modified files:
+    include              client.h packet.h 
+    modules              m_away.c m_invite.c m_oper.c m_time.c 
+                         m_topic.c m_who.c 
+    modules/core         m_join.c m_kick.c m_message.c m_mode.c 
+                         m_nick.c m_part.c 
+    src                  client.c packet.c 
+  Log:
+  - move flood_endgrace() to client.h/c, stop anything including packet.h that
+    was just using it for this
+  
+  Revision  Changes    Path
+  7.267     +2 -0      ircd-ratbox/include/client.h
+  7.28      +0 -1      ircd-ratbox/include/packet.h
+  1.165     +1 -2      ircd-ratbox/modules/core/m_join.c
+  1.82      +1 -2      ircd-ratbox/modules/core/m_kick.c
+  1.163     +1 -2      ircd-ratbox/modules/core/m_message.c
+  1.122     +1 -2      ircd-ratbox/modules/core/m_mode.c
+  1.162     +1 -2      ircd-ratbox/modules/core/m_nick.c
+  1.95      +1 -2      ircd-ratbox/modules/core/m_part.c
+  1.60      +1 -3      ircd-ratbox/modules/m_away.c
+  1.84      +1 -2      ircd-ratbox/modules/m_invite.c
+  1.91      +1 -2      ircd-ratbox/modules/m_oper.c
+  1.46      +1 -2      ircd-ratbox/modules/m_time.c
+  1.91      +1 -2      ircd-ratbox/modules/m_topic.c
+  1.116     +1 -2      ircd-ratbox/modules/m_who.c
+  7.493     +19 -0     ircd-ratbox/src/client.c
+  7.139     +0 -18     ircd-ratbox/src/packet.c
+
+
+
 leeh        2005/03/20 00:32:37 UTC	(20050320_0)
 
   Modified files:
