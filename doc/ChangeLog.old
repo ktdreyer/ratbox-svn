@@ -1,3 +1,13 @@
+*** 20001222_5 by db
+- use irccmp() not match in m_kline for "ON" parser duh
+- use irccmp() not strncasecmp in m_set.c
+- slight fix for stupid memory leak in class.c found by einride
+- use POSIX non blocking now all the time in s_bsd.c
+- added log entries for bad parse in s_conf.c
+- cleaned up more comment blocks 
+
+
+
 *** 20001222_4 by wcampbel
 1. Don't invalidate entire blocks just because they have an error
 2. Fixed SMALL bug with oper_admin
