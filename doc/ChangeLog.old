@@ -1,3 +1,7 @@
+*** 20010125_3 by ejb
+- fix to prevent coring on IPv4 connections.
+
+
 *** 20010125_2 by db
 - fixed restricted auth blocks works the same as it does in h6 for now
 - fixed core on /squit *oops*
