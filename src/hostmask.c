@@ -204,7 +204,6 @@ get_mask_hash(const char *text)
  *        family, the username.
  * Output: The matching value with the highest precedence.
  * Side-effects: None
- * Note: Setting bit 0 of the type means that the username is ignored.
  */
 struct ConfItem *
 find_conf_by_address(const char *name, const char *sockhost, 
@@ -229,19 +228,18 @@ find_conf_by_address(const char *name, const char *sockhost,
 			for (b = 128; b >= 0; b -= 16)
 			{
 				for (arec = atable[hash_ipv6(addr, b)]; arec; arec = arec->next)
-					if(arec->type == (type & ~0x1) &&
+				{
+					if(type == (arec->type & ~CONF_SKIPUSER) &&
 					   arec->masktype == HM_IPV6 &&
 					   comp_with_mask_sock(addr, (struct sockaddr *)&arec->Mask.ipa.addr,
-							       arec->Mask.ipa.bits) && (type & 0x1
-											||
-											match(arec->
-											      username,
-											      username))
-					   && arec->precedence > hprecv)
+							       arec->Mask.ipa.bits) && 
+					  (arec->type & CONF_SKIPUSER || match(arec->username, username)) &&
+					  arec->precedence > hprecv)
 					{
 						hprecv = arec->precedence;
 						hprec = arec->aconf;
 					}
+				}
 			}
 		}
 		else
@@ -251,12 +249,12 @@ find_conf_by_address(const char *name, const char *sockhost,
 			for (b = 32; b >= 0; b -= 8)
 			{
 				for (arec = atable[hash_ipv4(addr, b)]; arec; arec = arec->next)
-					if(arec->type == (type & ~0x1) &&
+					if(type == (arec->type & ~CONF_SKIPUSER) &&
 					   arec->masktype == HM_IPV4 &&
 					   arec->precedence > hprecv && 
 					   comp_with_mask_sock(addr, (struct sockaddr *)&arec->Mask.ipa.addr,
 							       arec->Mask.ipa.bits) && 
-					   (type & 0x1 || match(arec->username, username)))
+					   (arec->type & CONF_SKIPUSER || match(arec->username, username)))
 					{
 						hprecv = arec->precedence;
 						hprec = arec->aconf;
@@ -273,15 +271,18 @@ find_conf_by_address(const char *name, const char *sockhost,
 		for (p = name; p != NULL;)
 		{
 			for (arec = atable[hash_text(p)]; arec; arec = arec->next)
-				if((arec->type == (type & ~0x1)) &&
+			{
+				if(type == (arec->type & ~CONF_SKIPUSER) &&
 				   (arec->masktype == HM_HOST) &&
 				   arec->precedence > hprecv &&
 				   match(arec->Mask.hostname, name) &&
-				   (type & 0x1 || match(arec->username, username)))
+				   (arec->type & CONF_SKIPUSER || match(arec->username, username)))
 				{
 					hprecv = arec->precedence;
 					hprec = arec->aconf;
 				}
+			}
+
 			p = strchr(p, '.');
 			if(p != NULL)
 				p++;
@@ -290,12 +291,12 @@ find_conf_by_address(const char *name, const char *sockhost,
 		}
 		for (arec = atable[0]; arec; arec = arec->next)
 		{
-			if(arec->type == (type & ~0x1) &&
+			if(type == (arec->type & ~CONF_SKIPUSER) &&
 			   arec->masktype == HM_HOST &&
 			   arec->precedence > hprecv && 
 			   (match(arec->Mask.hostname, name) ||
 			    (sockhost && match(arec->Mask.hostname, sockhost))) &&
-			   (type & 0x1 || match(arec->username, username)))
+			   (arec->type & CONF_SKIPUSER || match(arec->username, username)))
 			{
 				hprecv = arec->precedence;
 				hprec = arec->aconf;
@@ -374,10 +375,10 @@ struct ConfItem *
 find_dline(struct sockaddr *addr, int aftype)
 {
 	struct ConfItem *eline;
-	eline = find_conf_by_address(NULL, NULL, addr, CONF_EXEMPTDLINE | 1, aftype, NULL);
+	eline = find_conf_by_address(NULL, NULL, addr, CONF_EXEMPTDLINE, aftype, NULL);
 	if(eline)
 		return eline;
-	return find_conf_by_address(NULL, NULL, addr, CONF_DLINE | 1, aftype, NULL);
+	return find_conf_by_address(NULL, NULL, addr, CONF_DLINE, aftype, NULL);
 }
 
 /* void add_conf_by_address(const char*, int, const char *,
@@ -427,6 +428,9 @@ add_conf_by_address(const char *address, int type, const char *username, struct 
 	arec->aconf = aconf;
 	arec->precedence = prec_value--;
 	arec->type = type;
+
+	if(EmptyString(username) || (username[0] == '*' && username[1] == '\0'))
+		arec->type |= CONF_SKIPUSER;
 }
 
 /* void delete_one_address(const char*, struct ConfItem*)
@@ -501,7 +505,8 @@ clear_out_address_conf(void)
 			/* We keep the temporary K-lines and destroy the
 			 * permanent ones, just to be confusing :) -A1kmm */
 			if(arec->aconf->flags & CONF_FLAGS_TEMPORARY ||
-			   (arec->type != CONF_CLIENT && arec->type != CONF_EXEMPTDLINE))
+			   ((arec->type & ~CONF_SKIPUSER) != CONF_CLIENT && 
+			    (arec->type & ~CONF_SKIPUSER) != CONF_EXEMPTDLINE))
 			{
 				*store_next = arec;
 				store_next = &arec->next;
@@ -534,7 +539,8 @@ clear_out_address_conf_bans(void)
 			/* We keep the temporary K-lines and destroy the
 			 * permanent ones, just to be confusing :) -A1kmm */
 			if(arec->aconf->flags & CONF_FLAGS_TEMPORARY ||
-			   (arec->type == CONF_CLIENT || arec->type == CONF_EXEMPTDLINE))
+			   ((arec->type & ~CONF_SKIPUSER) == CONF_CLIENT || 
+			    (arec->type & ~CONF_SKIPUSER) == CONF_EXEMPTDLINE))
 			{
 				*store_next = arec;
 				store_next = &arec->next;
@@ -599,7 +605,7 @@ report_auth(struct Client *client_p)
 
 	for (i = 0; i < ATABLE_SIZE; i++)
 		for (arec = atable[i]; arec; arec = arec->next)
-			if(arec->type == CONF_CLIENT)
+			if((arec->type & ~CONF_SKIPUSER) == CONF_CLIENT)
 			{
 				aconf = arec->aconf;
 
@@ -637,7 +643,7 @@ report_Klines(struct Client *source_p)
 	{
 		for (arec = atable[i]; arec; arec = arec->next)
 		{
-			if(arec->type == CONF_KILL)
+			if((arec->type & ~CONF_SKIPUSER) == CONF_KILL)
 			{
 				aconf = arec->aconf;
 

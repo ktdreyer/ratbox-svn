@@ -68,6 +68,7 @@ struct ConfItem
 };
 
 #define CONF_ILLEGAL            0x80000000
+#define CONF_SKIPUSER		0x0001	/* skip username checks (ie, *@x) */
 #define CONF_CLIENT             0x0002
 #define CONF_KILL               0x0040
 #define CONF_XLINE		0x0080
