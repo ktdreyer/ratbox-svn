@@ -213,14 +213,14 @@ int     m_cjoin(struct Client *cptr,
   /*
   ** notify all other users on the new channel
   */
-  sendto_channel_local(ALL_MEMBERS, vchan_chptr, sptr, ":%s JOIN :%s",
+  sendto_channel_local(ALL_MEMBERS, vchan_chptr, ":%s JOIN :%s",
 			 parv[0], chptr->chname);
 
 
   vchan_chptr->mode.mode |= MODE_TOPICLIMIT;
   vchan_chptr->mode.mode |= MODE_NOPRIVMSGS;
 
-  sendto_channel_local(ONLY_CHANOPS,vchan_chptr, sptr,
+  sendto_channel_local(ONLY_CHANOPS,vchan_chptr,
 			 ":%s MODE %s +nt",
 			 me.name, chptr->chname);
 

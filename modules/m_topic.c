@@ -139,16 +139,16 @@ int     m_topic(struct Client *cptr,
 	      if(GlobalSetOptions.hide_chanops)
 		{
 		  sendto_channel_local(ONLY_CHANOPS,
-					 chptr, sptr, ":%s TOPIC %s :%s",
-					 parv[0],
-					 name, chptr->topic);
+				       chptr, ":%s TOPIC %s :%s",
+				       parv[0],
+				       name, chptr->topic);
 		}
 	      else
 		{
 		  sendto_channel_local(ALL_MEMBERS,
-					 chptr, sptr, ":%s TOPIC %s :%s",
-					 parv[0],
-					 name, chptr->topic);
+				       chptr, ":%s TOPIC %s :%s",
+				       parv[0],
+				       name, chptr->topic);
 		}
 	    }
 	  else

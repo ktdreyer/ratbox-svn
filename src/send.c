@@ -52,7 +52,9 @@
 static  char    sendbuf[2048];
 static  int     send_message (struct Client *, char *, int);
 
-static  void vsendto_prefix_one(register struct Client *, register struct Client *, const char *, va_list);
+static  void vsendto_prefix_one(register struct Client *,
+				register struct Client *,
+				const char *, va_list);
 static  void vsendto_one(struct Client *, const char *, va_list);
 static  void vsendto_realops(const char *, va_list);
 
@@ -61,7 +63,7 @@ static unsigned long current_serial=0L;
 static void sendto_common_channel( dlink_list *list,
 				   struct Client *user,
 				   const char *pattern , va_list args);
-static void sendto_list(dlink_list *list, struct Client *from,
+static void sendto_list(dlink_list *list,
 			const char *pattern, va_list args);
 void
 send_channel_members(struct Client *one, struct Client *from,
@@ -580,16 +582,12 @@ sendto_common_channel( dlink_list *list, struct Client *user,
  * side effects - Send a message to all members of a channel that are
  *		  locally connected to this server.
  */
-
 void
 sendto_channel_local(int type,
-		       struct Channel *chptr, struct Client *from, 
-                       const char *pattern, ...)
-
+		     struct Channel *chptr,
+		     const char *pattern, ...)
 {
   va_list args;
-  register struct SLink *lp;
-  register struct Client *acptr;
 
   va_start(args, pattern);
 
@@ -597,37 +595,69 @@ sendto_channel_local(int type,
     {
     default:
     case ALL_MEMBERS:
-      sendto_list(&chptr->peons, from, pattern, args);
-      sendto_list(&chptr->voiced, from, pattern, args);
+      sendto_list(&chptr->peons, pattern, args);
+      sendto_list(&chptr->voiced, pattern, args);
     case ONLY_CHANOPS:
-      sendto_list(&chptr->chanops, from, pattern, args);
-      sendto_list(&chptr->halfops, from, pattern, args);
+      sendto_list(&chptr->chanops, pattern, args);
+      sendto_list(&chptr->halfops, pattern, args);
       break;
     case NON_CHANOPS:
-      sendto_list(&chptr->peons, from, pattern, args);
+      sendto_list(&chptr->peons, pattern, args);
       break;
     }
 
   va_end(args);
-}
 
-static void sendto_list(dlink_list *list, struct Client *from,
-			const char *pattern, va_list args)
+} /* sendto_channel_local() */
+
+/*
+ * sendto_list
+ *
+ * inputs	- pointer to channel list of some channel
+ *		- pointer to client message is from
+ *		- format pattern
+ *		- args for format
+ * output	- NONE
+ * side effects	- all members of given list are sent
+ * 		  given message. Right now, its always a channel list
+ *		  but there is no reason we could not use another dlink
+ *		  list to send a message to a group of people.
+ */
+static void
+sendto_list(dlink_list *list, const char *pattern, va_list args)
 {
   dlink_node *ptr;
   struct Client *acptr;
+  static char sendbuf[1024];
+  int len;
 
   for (ptr = list->head; ptr; ptr = ptr->next)
     {
       acptr = ptr->data;
 
-      if (MyConnect(acptr))
+      if (acptr && MyConnect(acptr))
 	{
-	  vsendto_prefix_one(acptr, from, pattern, args);
+          len = vsprintf_irc(sendbuf, pattern, args);
+
+	  if (len > 510)
+	    {
+	      sendbuf[IRCD_BUFSIZE-2] = '\r';
+	      sendbuf[IRCD_BUFSIZE-1] = '\n';
+	      sendbuf[IRCD_BUFSIZE] = '\0';
+	      len = IRCD_BUFSIZE;
+	    }
+	  else
+	    {
+	      sendbuf[len++] = '\r';
+	      sendbuf[len++] = '\n';
+	      sendbuf[len] = '\0';
+	    }
+
+	  send_message(acptr, sendbuf, len);
 	}
     }  
 
-} /* sendto_channel_local() */
+} /* sendto_list() */
 
 /*
 ** send a msg to all ppl on servers/hosts that match a specified mask
