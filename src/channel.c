@@ -38,6 +38,7 @@
 #include "event.h"
 #include "memory.h"
 #include "balloc.h"
+#include "resv.h"
 
 #include <assert.h>
 #include <string.h>
@@ -1136,6 +1137,9 @@ is_voiced(struct Channel *chptr, struct Client *who)
 int
 can_send(struct Channel *chptr, struct Client *source_p)
 {
+  if(MyClient(source_p) && find_channel_resv(chptr->chname))
+    return CAN_SEND_NO;
+    
   if (is_any_op(chptr, source_p))
     return CAN_SEND_OPV;
   if (is_voiced(chptr, source_p))
