@@ -109,7 +109,7 @@ dlink_list lazylink_channels;   /* known about lazylink channels on HUB */
 int callbacks_called;          /* A measure of server load... */
 
 static unsigned long       initialVMTop = 0;   /* top of virtual memory at init */
-static const char * logFileName = LPATH;
+const char * logFileName = LPATH;
 static const char * pidFileName = PPATH;
 
 char**  myargv;

@@ -1307,6 +1307,7 @@ int rehash(int sig)
 
   flush_deleted_I_P();
   check_klines();
+  reopen_log(logFileName);
   return 0;
 }
 

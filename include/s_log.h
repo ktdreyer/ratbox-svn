@@ -36,6 +36,7 @@ struct Client;
 #define L_DEBUG   6
 
 extern void init_log(const char* filename);
+extern void reopen_log(const char* filename);
 extern void set_log_level(int level);
 extern int  get_log_level(void);
 extern void ilog(int priority, const char* fmt, ...);

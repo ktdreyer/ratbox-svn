@@ -77,6 +77,7 @@ extern char*          platform;
 extern char*          infotext[];
 extern char*          serno;
 extern char*          ircd_version;
+extern const char*    logFileName;
 extern const char     serveropts[];
 extern int            cold_start;
 extern int            dorehash;
