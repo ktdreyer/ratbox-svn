@@ -1,3 +1,7 @@
+*** 20010105_29 by cosine
+minor fix for DEBUGMODE #ifdef
+
+
 *** 20010105_28 by ejb
 - remove ID debugging code, fix.
 
