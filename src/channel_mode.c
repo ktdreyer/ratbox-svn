@@ -357,10 +357,12 @@ change_channel_membership(struct Channel *chptr,
     for(x = 0; loclists[x] != NULL; x++)
     {
     	ptr = find_user_link(loclists[x], who);
-    	if(ptr != NULL && loclists[x] != loc_to_list)
-    	{
-    	   dlinkMoveNode(ptr, loclists[x], loc_to_list);
-    	   break;
+    	if(ptr != NULL)
+        {
+          if(loclists[x] != loc_to_list)
+    	    dlinkMoveNode(ptr, loclists[x], loc_to_list);
+          
+          break;
     	} 
     }
   }
@@ -368,10 +370,12 @@ change_channel_membership(struct Channel *chptr,
   for(x = 0; lists[x] != NULL; x++)
   {
     ptr = find_user_link(lists[x], who);
-    if(ptr != NULL && lists[x] != to_list)
+    if(ptr != NULL)
     {
-       dlinkMoveNode(ptr, lists[x], to_list);
-       break;
+      if(lists[x] != to_list)
+        dlinkMoveNode(ptr, lists[x], to_list);
+
+      break;
     }
   }
   
