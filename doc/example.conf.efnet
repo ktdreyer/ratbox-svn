@@ -59,7 +59,7 @@ serverinfo {
 	/* Define the maximum number of clients that can connect to the 
 	 * server.
 	 */
-	max_clients = 512;
+	max_clients = 2048;
 
 	/* Set to a file containing an RSA key, if you wish to use KSERVER
 	 * authentication.
@@ -590,12 +590,12 @@ channel {
 	 * ircnet) allows the setting of a nick!user@host mask
 	 * that will be allowed to always join a +i channel.
 	 */
-	use_invex = yes;
+	use_invex = no;
 
         /*
          * Enable/disable support for chanmode "+h <nick>" (halfops).
          */
-        use_halfops = yes;
+        use_halfops = no;
 
 	/* allow the use of +e as a channel mode. This mode (from
 	 * just about every other net,including ircnet) allows the
@@ -603,13 +603,13 @@ channel {
 	 * channel bans. This would allow you to set +b *!*@*.aol.com
 	 * but +e *!friend@*aol.com would allow them to join through the ban.
 	 */
-	use_except = yes;
+	use_except = no;
 
 	/* This allows you to /quote knock #channel, when you are unsure
 	 * who is in the channel. If the channel is +p or you are banned
 	 * the knock will not be sent.
 	 */
-	use_knock = yes;
+	use_knock = no;
 
         /* use_vchans
          * disable the creation of vchans by remote servers.. we do not
@@ -617,7 +617,7 @@ channel {
          * functionality, however it's here for those who don't want
          * vchan support at all.
          */
-        use_vchans = yes;
+        use_vchans = no;
 
 	/* vchans_oper_only
          * allow non-opers to use CJOIN?
@@ -647,7 +647,7 @@ channel {
 	max_chans_per_user = 15;
 
         /* stop banned people from being able to talk in channels. */
-        quiet_on_ban = yes;
+        quiet_on_ban = no;
 
         /* maximum number of +b/e/I modes in a channel */
         maxbans = 25;
@@ -670,18 +670,18 @@ channel {
 	/* the minimum number of users we have before we consider ourselves
 	 * split from the network
 	 */
-	split_user_count = 0;
+	split_user_count = 15000;
 
 	/* the minimum number of servers we have before we consider
 	 * ourselves split from the network
 	 */
-	split_server_count = 0;
+	split_server_count = 10;
 
 	/* disallow users creating channels on split, works in tandem with
 	 * persisting channels, they can join channels that are persisting
 	 * and have kept their modes, which will retain +ki etc
 	 */
-	no_create_on_split = no;
+	no_create_on_split = yes;
 
 	/* disallow users joining channels at all on a split
 	 */
@@ -813,7 +813,7 @@ general {
 	 * K-lined.  The user will still see the real reason.  This prevents 
 	 * other users seeing the client disconnect from harassing the IRCops.
 	 */
-	kline_with_connection_closed = no;
+	kline_with_connection_closed = yes;
 
 	/* Set to "yes" if you wish your server to flag and not apply redundant
 	 * K-lines.
@@ -862,7 +862,7 @@ general {
 	no_oper_flood = yes;
 
 	/* Enable G-lines */
-	glines = yes;
+	glines = no;
 
 	/* Set the time for how long G-lines will last.  This example is
 	 * the old setting of 12 * 3600. 

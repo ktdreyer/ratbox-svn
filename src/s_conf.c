@@ -1584,7 +1584,7 @@ set_default_conf(void)
   ConfigChannel.use_except  = YES;
   /* ConfigChannel.use_halfops = YES; */ /* Don't set, as this can't
                                             be changed at runtime */
-  ConfigChannel.use_invex   = NO;
+  ConfigChannel.use_invex   = YES;
   ConfigChannel.use_knock   = YES;
   ConfigChannel.use_vchans = NO;
   ConfigChannel.knock_delay = 300;
