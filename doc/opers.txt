@@ -247,3 +247,9 @@ COMMAND         - USAGE and DESCRIPTION
                    -- Reload a module into the ircd
                    path is optional
                    NOTE:  Restricted to admins only
+
++ MODRESTART     - MODRESTART
+                   -- Reload all modules into the ircd
+                   All modules are unloaded, then those in modules/autoload 
+                   are loaded
+                   NOTE:  Restricted to admins only
