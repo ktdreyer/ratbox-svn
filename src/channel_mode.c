@@ -2799,8 +2799,14 @@ sync_oplists(struct Channel *chptr, struct Client *target_p,
              int dir, const char *name)
 {
   send_oplist(name, target_p, &chptr->chanops, "o", dir);
+#ifdef REQUIRE_OANDV
+  send_oplist(name, target_p, &chptr->chanops_voiced, "o", dir);
+#endif
   send_oplist(name, target_p, &chptr->halfops, "h", dir);
   send_oplist(name, target_p, &chptr->voiced, "v", dir);
+#ifdef REQUIRE_OANDV
+  send_oplist(name, target_p, &chptr->chanops_voiced, "v", dir);
+#endif
 }
 
 static void
