@@ -55,7 +55,7 @@ void _moddeinit(void)
   mod_del_cmd(&test_msgtab);
 }
 
-char *_version = "$Revision$";
+const char *_version = "$Revision$";
 #endif
 
 static void m_mkpasswd(struct Client *client_p, struct Client *source_p,

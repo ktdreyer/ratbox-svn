@@ -56,7 +56,7 @@ _moddeinit(void)
   mod_del_cmd(&die_msgtab);
 }
 
-char *_version = "$Revision$";
+const char *_version = "$Revision$";
 #endif
 /*
  * mo_die - DIE command handler

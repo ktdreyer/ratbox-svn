@@ -629,7 +629,7 @@ sendto_list_anywhere(struct Client *one, struct Client *from,
 void sendto_server(struct Client *one, struct Client *source_p,
                    struct Channel *chptr, unsigned long caps,
                    unsigned long nocaps, unsigned long llflags,
-                   char *format, ...)
+                   const char *format, ...)
 {
   va_list args;
   struct Client *client_p;
@@ -806,7 +806,7 @@ sendto_channel_local(int type,
 void
 sendto_channel_remote(struct Client *one,
 		      struct Client *from, int type, int caps,
-                      int nocaps, struct Channel *chptr, char *pattern,
+                      int nocaps, struct Channel *chptr, const char *pattern,
                       ...)
 {
   va_list args;

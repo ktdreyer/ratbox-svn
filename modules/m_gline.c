@@ -122,7 +122,7 @@ _moddeinit(void)
   mod_del_cmd(&gline_msgtab);
 }
 
-char *_version = "$Revision$";
+const char *_version = "$Revision$";
 #endif
 /*
  * mo_gline()

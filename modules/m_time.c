@@ -55,7 +55,7 @@ _moddeinit(void)
   mod_del_cmd(&time_msgtab);
 }
 
-char *_version = "$Revision$";
+const char *_version = "$Revision$";
 #endif
 /*
  * m_time

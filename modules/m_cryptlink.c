@@ -71,7 +71,7 @@
 void _modinit(void) {}
 void _moddeinit(void) {}
 
-char *_version = "$Revision$";
+const char *_version = "$Revision$";
 #endif
 #else
 
@@ -117,7 +117,7 @@ _moddeinit(void)
   mod_del_cmd(&cryptlink_msgtab);
 }
 
-char *_version = "$Revision$";
+const char *_version = "$Revision$";
 #endif
 
 

@@ -54,7 +54,7 @@ _moddeinit(void)
 {
   mod_del_cmd(&away_msgtab);
 }
-char *_version = "$Revision$";
+const char *_version = "$Revision$";
 #endif
 /***********************************************************************
  * m_away() - Added 14 Dec 1988 by jto. 

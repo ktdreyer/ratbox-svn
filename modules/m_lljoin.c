@@ -66,7 +66,7 @@ _moddeinit(void)
   mod_del_cmd(&lljoin_msgtab);
 }
 
-char *_version = "$Revision$";
+const char *_version = "$Revision$";
 #endif
 /*
  * m_lljoin

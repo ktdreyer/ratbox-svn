@@ -60,7 +60,7 @@ _moddeinit(void)
 {
   mod_del_cmd(&ison_msgtab);
 }
-char *_version = "$Revision$";
+const char *_version = "$Revision$";
 #endif
 
 static char buf[BUFSIZE];

@@ -82,7 +82,7 @@ _moddeinit(void)
   mod_del_cmd(&kline_msgtab);
   mod_del_cmd(&dline_msgtab);
 }
-char *_version = "$Revision$";
+const char *_version = "$Revision$";
 #endif
 
 /* Local function prototypes */

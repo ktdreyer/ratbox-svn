@@ -58,7 +58,7 @@ _moddeinit(void)
 {
   mod_del_cmd(&squit_msgtab);
 }
-char *_version = "$Revision$";
+const char *_version = "$Revision$";
 #endif
 struct squit_parms 
 {

@@ -53,7 +53,7 @@ _moddeinit(void)
   mod_del_cmd(&eob_msgtab);
 }
 
-char *_version = "$Revision$";
+const char *_version = "$Revision$";
 #endif
 /*
  * ms_eob - EOB command handler

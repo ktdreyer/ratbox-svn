@@ -59,7 +59,7 @@ _moddeinit(void)
   mod_del_cmd(&testline_msgtab);
 }
  
-char *_version = "$Revision$";
+const char *_version = "$Revision$";
 #endif
 /*
  * mo_testline

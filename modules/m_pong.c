@@ -59,7 +59,7 @@ _moddeinit(void)
   mod_del_cmd(&pong_msgtab);
 }
 
-char *_version = "$Revision$";
+const char *_version = "$Revision$";
 #endif
 static void ms_pong(struct Client *client_p,
                    struct Client *source_p,

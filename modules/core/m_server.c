@@ -68,7 +68,7 @@ _moddeinit(void)
 {
   mod_del_cmd(&server_msgtab);
 }
-char *_version = "$Revision$";
+const char *_version = "$Revision$";
 #endif
 
 int bogus_host(char *host);

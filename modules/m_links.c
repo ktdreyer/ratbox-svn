@@ -63,7 +63,7 @@ _moddeinit(void)
   mod_del_cmd(&links_msgtab);
 }
 
-char *_version = "$Revision$";
+const char *_version = "$Revision$";
 #endif
 /*
  * m_links - LINKS message handler

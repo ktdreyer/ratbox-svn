@@ -61,7 +61,7 @@ _moddeinit(void)
   mod_del_cmd(&drop_msgtab);
 }
 
-char *_version = "$Revision$";
+const char *_version = "$Revision$";
 #endif
 /*
 ** ms_drop

@@ -65,7 +65,7 @@ _moddeinit(void)
   mod_del_cmd(&uhelp_msgtab);
 }
 
-char *_version = "$Revision$";
+const char *_version = "$Revision$";
 #endif
 /*
  * m_help - HELP message handler

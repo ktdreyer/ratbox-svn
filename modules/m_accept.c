@@ -59,7 +59,7 @@ _moddeinit(void)
   mod_del_cmd(&accept_msgtab);
 }
 
-char *_version = "$Revision$";
+const char *_version = "$Revision$";
 #endif
 /*
  * m_accept - ACCEPT command handler

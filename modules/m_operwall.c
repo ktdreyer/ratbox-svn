@@ -54,7 +54,7 @@ _moddeinit(void)
   mod_del_cmd(&operwall_msgtab);
 }
 
-char *_version = "$Revision$";
+const char *_version = "$Revision$";
 #endif
 /*
  * mo_operwall - OPERWALL message handler

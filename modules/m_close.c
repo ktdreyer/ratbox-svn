@@ -53,7 +53,7 @@ _moddeinit(void)
   mod_del_cmd(&close_msgtab);
 }
 
-char *_version = "$Revision$";
+const char *_version = "$Revision$";
 #endif
 /*
  * mo_close - CLOSE message handler

@@ -58,7 +58,7 @@ _moddeinit(void)
   mod_del_cmd(&dmem_msgtab);
 }
 
-char *_version = "$Revision$";
+const char *_version = "$Revision$";
 #endif
 #ifdef MEMDEBUG
 void ReportAllocated(struct Client*);

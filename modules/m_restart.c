@@ -56,7 +56,7 @@ _moddeinit(void)
   mod_del_cmd(&restart_msgtab);
 }
 
-char *_version = "$Revision$";
+const char *_version = "$Revision$";
 #endif
 /*
  * mo_restart

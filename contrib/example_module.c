@@ -122,7 +122,7 @@ _moddeinit(void)
 
 /* When we last modified the file (shown in /modlist), this is usually:
  */
-char *_version = "$Revision$";
+const char *_version = "$Revision$";
 #endif
 
 /*

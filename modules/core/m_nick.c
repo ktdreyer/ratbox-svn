@@ -98,7 +98,7 @@ _moddeinit(void)
   mod_del_cmd(&client_msgtab);
 }
 
-char *_version = "$Revision$";
+const char *_version = "$Revision$";
 #endif
 
 /*

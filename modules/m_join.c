@@ -67,7 +67,7 @@ _moddeinit(void)
 {
   mod_del_cmd(&join_msgtab);
 }
-char *_version = "$Revision$";
+const char *_version = "$Revision$";
 
 #endif
 static void do_join_0(struct Client *client_p, struct Client *source_p);

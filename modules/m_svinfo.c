@@ -59,7 +59,7 @@ _moddeinit(void)
   mod_del_cmd(&svinfo_msgtab);
 }
 
-char *_version = "$Revision$";
+const char *_version = "$Revision$";
 #endif
 /*
  * ms_svinfo - SVINFO message handler

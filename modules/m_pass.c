@@ -52,7 +52,7 @@ _moddeinit(void)
   mod_del_cmd(&pass_msgtab);
 }
 
-char *_version = "$Revision$";
+const char *_version = "$Revision$";
 #endif
 /*
  * m_pass() - Added Sat, 4 March 1989

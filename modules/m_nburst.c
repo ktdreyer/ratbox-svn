@@ -64,7 +64,7 @@ _moddeinit(void)
   mod_del_cmd(&nburst_msgtab);
 }
 
-char *_version = "$Revision$";
+const char *_version = "$Revision$";
 #endif
 /*
 ** m_nburst

@@ -63,7 +63,7 @@ _moddeinit(void)
 {
   mod_del_cmd(&whowas_msgtab);
 }
-char *_version = "$Revision$";
+const char *_version = "$Revision$";
 #endif
 static int whowas_do(struct Client *client_p, struct Client *source_p,
                      int parc, char *parv[]);

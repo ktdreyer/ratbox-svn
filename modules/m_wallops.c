@@ -56,7 +56,7 @@ _moddeinit(void)
   mod_del_cmd(&wallops_msgtab);
 }
  
-char *_version = "$Revision$";
+const char *_version = "$Revision$";
 #endif
 /*
  * mo_wallops (write to *all* opers currently online)

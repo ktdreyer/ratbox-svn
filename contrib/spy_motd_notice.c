@@ -42,7 +42,7 @@ _moddeinit(void)
   hook_del_hook("doing_motd", (hookfn *)show_motd);
 }
 
-char *_version = "$Revision$";
+const char *_version = "$Revision$";
 
 int show_motd(struct hook_spy_data *data)
 {
