@@ -1,3 +1,20 @@
+androsyn    2002/03/09 19:03:14 EST	(20020310_0)
+
+  Modified files:
+    include              packet.h 
+    src                  client.c packet.c s_serv.c 
+  Log:
+  Made client_dopacket() local, removed two dead functions from packet.c,
+  fixed a compile warning in s_serv.c
+  
+  Revision  Changes    Path
+  7.13      +0 -1      ircd-hybrid-7/include/packet.h
+  7.244     +0 -43     ircd-hybrid-7/src/client.c
+  7.73      +1 -0      ircd-hybrid-7/src/packet.c
+  7.250     +3 -2      ircd-hybrid-7/src/s_serv.c
+
+
+
 androsyn    2002/03/09 18:54:14 EST	(20020309_10)
 
   Modified files:
