@@ -1,3 +1,7 @@
+*** 20010716_3 by leeh
+- an unregged client might not have a nick.. send "*" if they dont
+
+
 *** 20010716_2 by spookey
 - changes kqueue support checking to looking for kevent() instead of sys/event.h
 
