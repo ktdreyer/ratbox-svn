@@ -330,12 +330,21 @@ start_auth_query(struct AuthRequest *auth)
 	getsockname(auth->client->localClient->fd,
 		    (struct sockaddr *) &localaddr, &locallen);
 	
+	mangle_mapped_sockaddr(&localaddr);
+#ifdef IPV6
+	if(localaddr.ss_family == AF_INET6)
+	{
+		((struct sockaddr_in6 *)&localaddr)->sin6_port = 0;
+	} else
+#endif
+	((struct sockaddr_in *)&localaddr)->sin_port = 0;
+	
 	auth->fd = fd;
 	SetAuthConnect(auth);
 
 	comm_connect_tcp(fd, auth->client->localClient->sockhost, 113,
 			 (struct sockaddr *) &localaddr, locallen,
-			 auth_connect_callback, auth, DEF_FAM, GlobalSetOptions.ident_timeout);
+			 auth_connect_callback, auth, localaddr.ss_family, GlobalSetOptions.ident_timeout);
 	return 1;		/* We suceed here for now */
 }
 

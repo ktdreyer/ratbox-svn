@@ -80,6 +80,11 @@ extern void init_netio(void);
 extern int read_message(time_t, unsigned char);
 extern int comm_select(unsigned long);
 extern int disable_sock_options(int);
+#ifdef IPV6
+extern void mangle_mapped_sockaddr(struct sockaddr_storage *in);
+#else
+#define mangle_mapped_sockaddr(x) 
+#endif
 
 #ifdef USE_SIGIO
 void do_sigio(int);

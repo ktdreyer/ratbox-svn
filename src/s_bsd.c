@@ -383,24 +383,7 @@ add_connection(struct Listener *listener, int fd)
 		return;
 	}
 
-#ifdef IPV6
-	if(new_client->localClient->ip.ss_family == AF_INET6)
-	{
-		struct sockaddr_in6 *in6 = (struct sockaddr_in6 *)&new_client->localClient->ip;
-		if(IN6_IS_ADDR_V4MAPPED(&in6->sin6_addr))
-		{
-			/* Some fucking prick left IPv4 in IPv6 mapped sockets enabled.
-			 * Little assholes.  Anyways work around the retardation
-			 */
-			struct sockaddr_in in;
-			memset(&in, 0, sizeof(struct sockaddr_in));
-			in.sin_family = AF_INET;
-			in.sin_port = in6->sin6_port;
-			in.sin_addr.s_addr = ((uint32_t *)&in6->sin6_addr)[3];
-			memcpy(&new_client->localClient->ip, &in, sizeof(struct sockaddr_in)); 
-		}
-	}
-#endif
+	mangle_mapped_sockaddr(&new_client->localClient->ip);
 
 	/* 
 	 * copy address to 'sockhost' as a string, copy it to host too
@@ -937,3 +920,30 @@ comm_accept(int fd, struct sockaddr_storage *pn)
 	/* .. and return */
 	return newfd;
 }
+
+/*
+ * If a sockaddr_storage is AF_INET6 but is a mapped IPv4
+ * socket manged the sockaddr.
+ */
+void
+mangle_mapped_sockaddr(struct sockaddr_storage *in)
+{
+#ifdef IPV6
+	struct sockaddr_in6 *in6 = (struct sockaddr_in6 *)in;								
+
+	if(in->ss_family == AF_INET)
+		return;
+
+	if(in->ss_family == AF_INET6 && IN6_IS_ADDR_V4MAPPED(&in6->sin6_addr))
+	{
+		struct sockaddr_in in4;
+		memset(&in4, 0, sizeof(struct sockaddr_in));
+		in4.sin_family = AF_INET;
+		in4.sin_port = in6->sin6_port;
+		in4.sin_addr.s_addr = ((uint32_t *)&in6->sin6_addr)[3];
+		memcpy(in, &in4, sizeof(struct sockaddr_in)); 		
+	}	
+#endif
+	return;
+}
+
