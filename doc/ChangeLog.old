@@ -1,3 +1,9 @@
+*** 20010918_3 by db
+- yet more cleanups. Its still a cesspool. 
+  no more attach_cn_lines its now attach_connect_block
+
+
+
 *** 20010918_2 by db
 - some cleanups to s_conf.c, no more attach_Iline vs. attach_iline
   (happy now jer?) IMO s_conf.c is still a cesspool.
