@@ -310,25 +310,13 @@ int oper_up( struct Client *sptr, struct ConfItem *aconf )
     sptr->umodes |= FLAGS_ADMIN;
 
   sendto_realops_flags(FLAGS_ALL,
-		       "%s (%s@%s) is now operator (%c)", sptr->name,
-		       sptr->username, sptr->host,
-		       IsOper(sptr) ? 'O' : 'o');
-	
+		       "%s (%s@%s) is now an operator", sptr->name,
+		       sptr->username, sptr->host);
   send_umode_out(sptr, sptr, old);
-
   sendto_one(sptr, form_str(RPL_YOUREOPER), me.name, sptr->name);
-  sendto_one(sptr, ":%s NOTICE %s :*** Oper privs are %s",me.name,
-	     sptr->name,	
-	     operprivs);
+  sendto_one(sptr, ":%s NOTICE %s :*** Oper privs are %s", me.name,
+             sptr->name, operprivs);
   SendMessageFile(sptr, &ConfigFileEntry.opermotd);
   
   return 1;
 }
-
-
-
-
-
-
-
-

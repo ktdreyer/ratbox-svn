@@ -725,7 +725,7 @@ void channel_modes(struct Channel *chptr, struct Client *cptr,
   if (chptr->mode.mode & MODE_NOPRIVMSGS)
     *mbuf++ = 'n';
   if (chptr->mode.mode & MODE_HIDEOPS)
-    *mbuf++ = 'z';
+    *mbuf++ = 'a';
   
   if (chptr->mode.limit)
     {
@@ -1888,7 +1888,7 @@ void set_channel_mode(struct Client *cptr,
             }
           break;
 
-	case 'z':
+	case 'a':
 	  if (!isok_c)
 	    {
 	      if (MyClient(sptr) && !errsent(SM_ERR_NOOPS, &errors_sent))
@@ -1915,7 +1915,7 @@ void set_channel_mode(struct Client *cptr,
 		break;
               chptr->mode.mode |= MODE_HIDEOPS;
               *mbufw++ = '+';
-              *mbufw++ = 'z';
+              *mbufw++ = 'a';
               len += 2;
 	    }
 	  else
@@ -1925,7 +1925,7 @@ void set_channel_mode(struct Client *cptr,
 	      
 	      chptr->mode.mode &= ~MODE_HIDEOPS;
 	      *mbufw++ = '-';
-	      *mbufw++ = 'z';
+	      *mbufw++ = 'a';
 	      len += 2;
 	    }
 	  break;

@@ -1,5 +1,4 @@
 # $Id$
-# $Id$
 
 CC		= @CC@
 INSTALL		= @INSTALL@
