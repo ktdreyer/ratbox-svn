@@ -1,3 +1,7 @@
+*** 20010905_2 by leeh
+- *_notice.c -> spy_*_notice.c
+
+
 *** 20010905_1 by leeh
 - added checks for Makefile to build_one
 
