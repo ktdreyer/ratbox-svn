@@ -284,7 +284,7 @@ struct LocalUser
 #define IsServer(x)             ((x)->status == STAT_SERVER)
 #define IsClient(x)             ((x)->status == STAT_CLIENT)
 #define IsOper(x)		((x)->umodes & FLAGS_OPER)
-#define IsAdmin(x)		(IsSetOperAdmin(x))
+#define IsAdmin(x)		((x)->umodes & FLAGS_ADMIN)
 
 #define SetConnecting(x)        {(x)->status = STAT_CONNECTING; \
 				 (x)->handler = UNREGISTERED_HANDLER; }
@@ -396,7 +396,8 @@ struct LocalUser
 #define FLAGS2_IP_SPOOFING      0x100000        /* client IP is spoofed */
 #define FLAGS2_IP_HIDDEN        0x200000        /* client IP should be hidden
                                                    from non opers */
-#define SEND_UMODES  (FLAGS_INVISIBLE | FLAGS_OPER | FLAGS_WALLOP)
+#define SEND_UMODES  (FLAGS_INVISIBLE | FLAGS_OPER | FLAGS_WALLOP | \
+                      FLAGS_ADMIN)
 #define ALL_UMODES   (SEND_UMODES | FLAGS_SERVNOTICE | FLAGS_CCONN | \
                       FLAGS_REJ | FLAGS_SKILL | FLAGS_FULL | FLAGS_SPY | \
                       FLAGS_NCHANGE | FLAGS_OPERWALL | FLAGS_DEBUG | \

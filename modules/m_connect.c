@@ -160,7 +160,7 @@ static int mo_connect(struct Client* cptr, struct Client* sptr,
    */
   if (serv_connect(aconf, sptr))
     {
-      if (IsAdmin(sptr))
+      if (IsSetOperAdmin(sptr))
 	sendto_one(sptr, ":%s NOTICE %s :*** Connecting to %s[%s].%d",
 		   me.name, parv[0], aconf->host, aconf->name, aconf->port);
       else

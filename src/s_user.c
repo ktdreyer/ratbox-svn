@@ -1003,23 +1003,23 @@ int user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         case '\r' :
         case '\t' :
           break;
-			case 'a':
-				if (MyConnect(sptr)) {
-					badflag = 1;
-					break;
-				}
+
         default :
           if( (flag = user_modes_from_c_to_bitmask[(unsigned char)*m]))
             {
-				if (MyConnect(sptr) && !IsOper(sptr) && (ConfigFileEntry.oper_only_umodes & flag)) {
-					badflag = YES;
-				} else {
-					if (what == MODE_ADD)
-						sptr->umodes |= flag;
-					else
-						sptr->umodes &= ~flag;  
-				}
-			}
+              if (MyConnect(sptr) && !IsOper(sptr) &&
+                 (ConfigFileEntry.oper_only_umodes & flag))
+                {
+                  badflag = YES;
+                }
+              else
+                {
+                  if (what == MODE_ADD)
+                    sptr->umodes |= flag;
+                  else
+                    sptr->umodes &= ~flag;  
+                }
+            }
           else
             {
               if (MyConnect(sptr))
@@ -1037,6 +1037,14 @@ int user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                  me.name,parv[0]);
       sptr->umodes &= ~FLAGS_NCHANGE; /* only tcm's really need this */
     }
+
+  if (MyConnect(sptr) && (sptr->umodes & FLAGS_ADMIN) && !IsSetOperAdmin(sptr))
+    {
+      sendto_one(sptr,":%s NOTICE %s :*** You need oper and A flag for +a",
+                 me.name, parv[0]);
+      sptr->umodes &= ~FLAGS_ADMIN;
+    }
+
 
   if (!(setflags & FLAGS_INVISIBLE) && IsInvisible(sptr))
     ++Count.invisi;

@@ -57,7 +57,7 @@ int mo_jupe(struct Client *cptr, struct Client *sptr,
 		 int parc, char *parv[]);
 
 struct Message jupe_msgtab = {
-  "JUPE", 0, 2, 0, MFLG_SLOW, 0,
+  "JUPE", 0, 3, 0, MFLG_SLOW, 0,
   {m_unregistered, m_not_oper, mo_jupe, mo_jupe}
 };
 
@@ -87,20 +87,13 @@ int mo_jupe(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   struct Client *ajupe;
   dlink_node *m;
 
-  if( parc < 3 )
-    {
-      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
-		 me.name, sptr->name, "JUPE");
-      return 0;
-    }
-
   if(!ConfigFileEntry.hub)
     return 0;
 
-  if(!IsAdmin(sptr))
+  if(!IsSetOperAdmin(sptr))
     {
       sendto_one(sptr, ":%s NOTICE %s :You must be an admin to use this command",
-               me.name, parv[0]);
+                 me.name, parv[0]);
       return 0;
     }
 

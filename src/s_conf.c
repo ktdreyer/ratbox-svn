@@ -274,7 +274,7 @@ void report_configured_links(struct Client* sptr, int mask)
               c = 'c';
 
             /* Allow admins to see actual ips */
-            if(IsAdmin(sptr))
+            if(IsSetOperAdmin(sptr))
               sendto_one(sptr, form_str(p->rpl_stats), me.name,
                          sptr->name, c,
                          host,
@@ -1985,6 +1985,8 @@ char *oper_flags_as_string(int flags)
     *flags_ptr++ = 'd';
   if(flags & FLAGS_NCHANGE)
     *flags_ptr++ = 'n';
+  if(flags & FLAGS_ADMIN)
+    *flags_ptr++ = 'a';
   *flags_ptr = '\0';
 
   return(flags_out);
