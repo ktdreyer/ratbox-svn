@@ -857,17 +857,24 @@ void send_channel_modes(struct Client *cptr, struct Channel *chptr)
   *modebuf = *parabuf = '\0';
   channel_modes(chptr, cptr, modebuf, parabuf);
 
-  send_members(cptr,modebuf,parabuf,chptr,&chptr->chanops,"@");
-
-  if (IsCapable(cptr, CAP_HOPS))
-    send_members(cptr,modebuf,parabuf,chptr,&chptr->halfops,"%");
-  else
+  /* Only call send_members 4 times if there is users in the channel, else we send
+   * four blank SJOIN's -- fl */
+  if(chptr->users != 0)
     {
-      /* Ok, halfops can still generate a kick, they'll just looked opped */
-      send_members(cptr,modebuf,parabuf,chptr,&chptr->halfops,"@");
+      send_members(cptr,modebuf,parabuf,chptr,&chptr->chanops,"@");
+
+      if (IsCapable(cptr, CAP_HOPS))
+        send_members(cptr,modebuf,parabuf,chptr,&chptr->halfops,"%");
+      else
+        {
+          /* Ok, halfops can still generate a kick, they'll just looked opped */
+          send_members(cptr,modebuf,parabuf,chptr,&chptr->halfops,"@");
+        }
+
+      send_members(cptr,modebuf,parabuf,chptr,&chptr->voiced,"+");
     }
 
-  send_members(cptr,modebuf,parabuf,chptr,&chptr->voiced,"+");
+  /* Make sure send_members is called at least once, to send a blank SJOIN for empty chans */
   send_members(cptr,modebuf,parabuf,chptr,&chptr->peons,"");
 
   send_mode_list(cptr, chptr->chname, &chptr->banlist, 'b', 0);
@@ -904,6 +911,11 @@ static void send_members(struct Client *cptr,
 
   cur_len = mlen = strlen(buf);
   t = buf + mlen;
+
+  /* If the channel is opless, we need to send an sjoin anyway, else we cant send mode +beI's
+   * which means desync -- fl */
+  if(chptr->users == 0) 
+    data_to_send = 1;
 
   for (ptr = list->head; ptr && ptr->data; ptr = ptr->next)
     {
