@@ -104,14 +104,14 @@ find_channel_status(struct membership *msptr, int combine)
 
 	p = buffer;
 
-	if(msptr->flags & CHFL_CHANOP)
+	if(is_chanop(msptr))
 	{
 		if(!combine)
 			return "@";
 		*p++ = '@';
 	}
 
-	if(msptr->flags & CHFL_VOICE)
+	if(is_voiced(msptr))
 		*p++ = '+';
 
 	*p = '\0';
@@ -227,9 +227,9 @@ send_members(struct Channel *chptr, struct Client *client_p,
 		msptr = ptr->data;
 
 		tlen = strlen(msptr->client_p->name) + 1;
-		if(msptr->flags & CHFL_CHANOP)
+		if(is_chanop(msptr))
 			tlen++;
-		if(msptr->flags & CHFL_VOICE)
+		if(is_voiced(msptr))
 			tlen++;
 
 		if(cur_len + tlen >= BUFSIZE - 3)
@@ -480,16 +480,15 @@ channel_member_names(struct Channel *chptr, struct Client *client_p, int show_eo
 				continue;
 
 			tlen = strlen(target_p->name) + 1;
-			if(msptr->flags & (CHFL_CHANOP|CHFL_VOICE))
+			if(is_chanop_voiced(msptr))
 				tlen++;
 
 			if(cur_len + tlen >= BUFSIZE - 3)
 			{
 				*(t - 1) = '\0';
-
 				sendto_one(client_p, "%s", lbuf);
 				cur_len = mlen;
-				t = buf + mlen;
+				t = lbuf + mlen;
 			}
 
 			ircsprintf(t, "%s%s ", find_channel_status(msptr, 0),
@@ -499,11 +498,8 @@ channel_member_names(struct Channel *chptr, struct Client *client_p, int show_eo
 			t += tlen;
 		}
 
-		if(cur_len > mlen)
-		{
-			*(t - 1) = '\0';
-			sendto_one(client_p, "%s", lbuf);
-		}
+		*(t - 1) = '\0';
+		sendto_one(client_p, "%s", lbuf);
 	}
 
 	if(show_eon)
