@@ -1,3 +1,86 @@
+leeh        2004/09/04 07:22:06 EDT	(20040904_7)
+
+  Modified files:
+    include              s_conf.h stdinc.h 
+    modules              .depend m_dline.c m_encap.c m_gline.c 
+                         m_info.c m_kline.c m_oper.c m_operspy.c 
+                         m_rehash.c m_restart.c m_set.c m_stats.c 
+                         m_svinfo.c m_testmask.c m_trace.c m_who.c 
+                         m_whois.c m_whowas.c m_xline.c 
+    modules/core         channels.c m_error.c m_message.c 
+                         m_server.c m_squit.c users.c 
+    src                  .depend cache.c channel.c class.c 
+                         client.c commio.c devpoll.c epoll.c 
+                         hash.c ircd.c ircd_lexer.l ircd_parser.y 
+                         kqueue.c newconf.c numeric.c packet.c 
+                         parse.c poll.c restart.c s_auth.c 
+                         s_conf.c s_newconf.c s_serv.c s_user.c 
+                         scache.c select.c send.c whowas.c 
+  Removed files:
+    include              common.h 
+  Log:
+  - merge common.h into stdinc.h
+  
+  Revision  Changes    Path
+  7.8       +0 -67     ircd-ratbox/include/common.h (dead)
+  7.296     +0 -1      ircd-ratbox/include/s_conf.h
+  1.13      +41 -1     ircd-ratbox/include/stdinc.h
+  1.43      +177 -194  ircd-ratbox/modules/.depend
+  1.10      +1 -2      ircd-ratbox/modules/core/channels.c
+  1.10      +1 -2      ircd-ratbox/modules/core/m_error.c
+  1.151     +1 -2      ircd-ratbox/modules/core/m_message.c
+  1.148     +1 -2      ircd-ratbox/modules/core/m_server.c
+  1.80      +1 -2      ircd-ratbox/modules/core/m_squit.c
+  1.16      +1 -2      ircd-ratbox/modules/core/users.c
+  1.44      +1 -2      ircd-ratbox/modules/m_dline.c
+  1.20      +1 -2      ircd-ratbox/modules/m_encap.c
+  1.146     +1 -2      ircd-ratbox/modules/m_gline.c
+  1.117     +1 -2      ircd-ratbox/modules/m_info.c
+  1.193     +1 -2      ircd-ratbox/modules/m_kline.c
+  1.88      +1 -2      ircd-ratbox/modules/m_oper.c
+  1.5       +1 -2      ircd-ratbox/modules/m_operspy.c
+  1.86      +1 -2      ircd-ratbox/modules/m_rehash.c
+  1.45      +1 -2      ircd-ratbox/modules/m_restart.c
+  1.79      +1 -2      ircd-ratbox/modules/m_set.c
+  1.234     +1 -2      ircd-ratbox/modules/m_stats.c
+  1.62      +1 -2      ircd-ratbox/modules/m_svinfo.c
+  1.3       +1 -2      ircd-ratbox/modules/m_testmask.c
+  1.104     +1 -2      ircd-ratbox/modules/m_trace.c
+  1.113     +1 -2      ircd-ratbox/modules/m_who.c
+  1.145     +1 -2      ircd-ratbox/modules/m_whois.c
+  1.50      +1 -2      ircd-ratbox/modules/m_whowas.c
+  1.61      +1 -2      ircd-ratbox/modules/m_xline.c
+  7.46      +123 -143  ircd-ratbox/src/.depend
+  1.21      +0 -1      ircd-ratbox/src/cache.c
+  7.427     +0 -1      ircd-ratbox/src/channel.c
+  7.65      +0 -1      ircd-ratbox/src/class.c
+  7.481     +0 -1      ircd-ratbox/src/client.c
+  1.19      +0 -1      ircd-ratbox/src/commio.c
+  7.35      +0 -1      ircd-ratbox/src/devpoll.c
+  1.31      +0 -1      ircd-ratbox/src/epoll.c
+  7.111     +0 -1      ircd-ratbox/src/hash.c
+  7.362     +0 -1      ircd-ratbox/src/ircd.c
+  1.164     +0 -1      ircd-ratbox/src/ircd_lexer.l
+  1.274     +0 -1      ircd-ratbox/src/ircd_parser.y
+  1.48      +0 -1      ircd-ratbox/src/kqueue.c
+  7.174     +0 -1      ircd-ratbox/src/newconf.c
+  7.30      +1 -1      ircd-ratbox/src/numeric.c
+  7.135     +0 -1      ircd-ratbox/src/packet.c
+  7.185     +0 -1      ircd-ratbox/src/parse.c
+  7.81      +0 -1      ircd-ratbox/src/poll.c
+  7.33      +0 -1      ircd-ratbox/src/restart.c
+  7.181     +0 -1      ircd-ratbox/src/s_auth.c
+  7.490     +0 -1      ircd-ratbox/src/s_conf.c
+  7.56      +0 -1      ircd-ratbox/src/s_newconf.c
+  7.416     +0 -1      ircd-ratbox/src/s_serv.c
+  7.331     +0 -1      ircd-ratbox/src/s_user.c
+  7.26      +0 -1      ircd-ratbox/src/scache.c
+  7.43      +0 -1      ircd-ratbox/src/select.c
+  7.282     +0 -1      ircd-ratbox/src/send.c
+  7.31      +0 -1      ircd-ratbox/src/whowas.c
+
+
+
 leeh        2004/09/04 07:09:21 EDT	(20040904_6)
 
   Modified files:
