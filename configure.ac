@@ -80,7 +80,8 @@ esac
 fi
 
 AC_MSG_CHECKING([uname -s for Cygwin, Solaris or HPUX])
-case `uname -s` in
+OSNAME=`uname -s`
+case "$OSNAME" in
         HP-UX*)
 	dnl only do this if we haven't already detected the newer one
 	dnl and we're not already using gcc
@@ -271,23 +272,51 @@ AC_COMPILE_IFELSE(
 fi
 
 
-dnl 32-bit time_t can use the PRId32 formatting macro, if available.
-dnl 64-bit time_t can use the PRId64 formatting macro, if available.
-dnl If these macros don't exist, use a legitimate default.
-dnl ================================================================
+dnl Good old time_t.  A true annoyance...
+dnl
+dnl                      sizeof(time_t)   printf() format
+dnl ----------------------------------------------------------
+dnl Cygwin 32-bit            4            %ld
+dnl FreeBSD 4.x 32-bit       4            %lu
+dnl FreeBSD 5.x 32-bit       4            %u
+dnl FreeBSD 5.x 64-bit       8            %lu
+dnl Linux 2.4 i386           4            %ld
+dnl Linux 2.6 Sparc 32-bit   4            %ld
+dnl Linux 2.6 Sparc 64-bit   8            %ld
+dnl Solaris 2.9 32-bit       4            %ld
+dnl Solaris 2.9 64-bit       8            %ld
+dnl Other                  assume 4       assume %ld
+dnl ----------------------------------------------------------
 AC_CHECK_SIZEOF(time_t)
 
-if test "$ac_cv_sizeof_time_t" = "4"; then
-AC_CHECK_DECL(PRId32,
-        AC_DEFINE(IRCD_TIME_FMT, ["%l" PRId32], [Formatting for time_t strings]),
-        AC_DEFINE(IRCD_TIME_FMT, ["%ld"], [Formatting for time_t strings]), [
-		#include <inttypes.h> ] )
-elif test "$ac_cv_sizeof_time_t" = "8"; then
-AC_CHECK_DECL(PRId64,
-        AC_DEFINE(IRCD_TIME_FMT, ["%l" PRId64], [Formatting for time_t strings]),
-        AC_DEFINE(IRCD_TIME_FMT, ["%lld"], [Formatting for time_t strings]), [ 
-		#include <inttypes.h> ] )
-fi
+AC_MSG_CHECKING([how your OS prints time_t])
+case "$OSNAME" in
+    CYGWIN*)
+      AC_DEFINE(IRCD_TIME_FMT, ["%ld"], [Formatting for time_t strings])
+      AC_MSG_RESULT([%ld])
+    ;;
+    FreeBSD*)
+      if test "$ac_cv_sizeof_time_t" = "4"; then
+        AC_DEFINE(IRCD_TIME_FMT, ["%u"], [Formatting for time_t strings])
+        AC_MSG_RESULT([%u])
+      elif test "$ac_cv_sizeof_time_t" = "8"; then
+        AC_DEFINE(IRCD_TIME_FMT, ["%lu"], [Formatting for time_t strings])
+        AC_MSG_RESULT([%llu])
+      fi
+    ;;
+    Linux*)
+      AC_DEFINE(IRCD_TIME_FMT, ["%ld"], [Formatting for time_t strings])
+      AC_MSG_RESULT([%ld])
+    ;;
+    Solaris*)
+      AC_DEFINE(IRCD_TIME_FMT, ["%ld"], [Formatting for time_t strings])
+      AC_MSG_RESULT([%ld])
+    ;;
+    *)
+      AC_DEFINE(IRCD_TIME_FMT, ["%ld"], [Formatting for time_t strings])
+      AC_MSG_RESULT([%ld])
+    ;;
+esac
 
 
 AC_ARG_ENABLE(ipv6,

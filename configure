@@ -2339,7 +2339,8 @@ fi
 
 echo "$as_me:$LINENO: checking uname -s for Cygwin, Solaris or HPUX" >&5
 echo $ECHO_N "checking uname -s for Cygwin, Solaris or HPUX... $ECHO_C" >&6
-case `uname -s` in
+OSNAME=`uname -s`
+case "$OSNAME" in
         HP-UX*)
 
 		if test "$HPUX" != yes -a "$ac_cv_c_compiler_gnu" = no; then
@@ -5105,151 +5106,65 @@ _ACEOF
 
 
 
-if test "$ac_cv_sizeof_time_t" = "4"; then
-echo "$as_me:$LINENO: checking whether PRId32 is declared" >&5
-echo $ECHO_N "checking whether PRId32 is declared... $ECHO_C" >&6
-if test "${ac_cv_have_decl_PRId32+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-		#include <inttypes.h>
-
-int
-main ()
-{
-#ifndef PRId32
-  char *p = (char *) PRId32;
-#endif
-
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest.$ac_objext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  ac_cv_have_decl_PRId32=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-ac_cv_have_decl_PRId32=no
-fi
-rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
-fi
-echo "$as_me:$LINENO: result: $ac_cv_have_decl_PRId32" >&5
-echo "${ECHO_T}$ac_cv_have_decl_PRId32" >&6
-if test $ac_cv_have_decl_PRId32 = yes; then
-
-cat >>confdefs.h <<\_ACEOF
-#define IRCD_TIME_FMT "%l" PRId32
-_ACEOF
-
-else
+echo "$as_me:$LINENO: checking how your OS prints time_t" >&5
+echo $ECHO_N "checking how your OS prints time_t... $ECHO_C" >&6
+case "$OSNAME" in
+    CYGWIN*)
 
 cat >>confdefs.h <<\_ACEOF
 #define IRCD_TIME_FMT "%ld"
 _ACEOF
 
-fi
-
-elif test "$ac_cv_sizeof_time_t" = "8"; then
-echo "$as_me:$LINENO: checking whether PRId64 is declared" >&5
-echo $ECHO_N "checking whether PRId64 is declared... $ECHO_C" >&6
-if test "${ac_cv_have_decl_PRId64+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-		#include <inttypes.h>
-
-int
-main ()
-{
-#ifndef PRId64
-  char *p = (char *) PRId64;
-#endif
-
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest.$ac_objext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  ac_cv_have_decl_PRId64=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-ac_cv_have_decl_PRId64=no
-fi
-rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
-fi
-echo "$as_me:$LINENO: result: $ac_cv_have_decl_PRId64" >&5
-echo "${ECHO_T}$ac_cv_have_decl_PRId64" >&6
-if test $ac_cv_have_decl_PRId64 = yes; then
+      echo "$as_me:$LINENO: result: %ld" >&5
+echo "${ECHO_T}%ld" >&6
+    ;;
+    FreeBSD*)
+      if test "$ac_cv_sizeof_time_t" = "4"; then
 
 cat >>confdefs.h <<\_ACEOF
-#define IRCD_TIME_FMT "%l" PRId64
+#define IRCD_TIME_FMT "%u"
 _ACEOF
 
-else
+        echo "$as_me:$LINENO: result: %u" >&5
+echo "${ECHO_T}%u" >&6
+      elif test "$ac_cv_sizeof_time_t" = "8"; then
 
 cat >>confdefs.h <<\_ACEOF
-#define IRCD_TIME_FMT "%lld"
+#define IRCD_TIME_FMT "%lu"
 _ACEOF
 
-fi
+        echo "$as_me:$LINENO: result: %llu" >&5
+echo "${ECHO_T}%llu" >&6
+      fi
+    ;;
+    Linux*)
 
-fi
+cat >>confdefs.h <<\_ACEOF
+#define IRCD_TIME_FMT "%ld"
+_ACEOF
+
+      echo "$as_me:$LINENO: result: %ld" >&5
+echo "${ECHO_T}%ld" >&6
+    ;;
+    Solaris*)
+
+cat >>confdefs.h <<\_ACEOF
+#define IRCD_TIME_FMT "%ld"
+_ACEOF
+
+      echo "$as_me:$LINENO: result: %ld" >&5
+echo "${ECHO_T}%ld" >&6
+    ;;
+    *)
+
+cat >>confdefs.h <<\_ACEOF
+#define IRCD_TIME_FMT "%ld"
+_ACEOF
+
+      echo "$as_me:$LINENO: result: %ld" >&5
+echo "${ECHO_T}%ld" >&6
+    ;;
+esac
 
 
 # Check whether --enable-ipv6 or --disable-ipv6 was given.
