@@ -119,29 +119,68 @@ AC_ARG_ENABLE(openssl,
 [
   case "$enableval" in
   no)
-    ac_cv_func_openssl='no'
+    ac_cv_lib_crypto_RSA_free='no'
     ;;
   yes)
     dnl Check for ciphers supported by OpenSSL crypto lib
     AC_CHECK_FUNCS(RSA_free,, AC_CHECK_LIB(crypto, RSA_free,))
-    AC_CHECK_FUNCS(BF_cfb64_encrypt,, AC_CHECK_LIB(crypto, RSA_free,))
-    AC_CHECK_FUNCS(idea_cfb64_encrypt,, AC_CHECK_LIB(crypto, RSA_free,))
-    AC_CHECK_FUNCS(CAST_cfb64_encrypt,, AC_CHECK_LIB(crypto, RSA_free,))
-    AC_CHECK_FUNCS(RC5_32_cfb64_encrypt,, AC_CHECK_LIB(crypto, RSA_free,))
-    AC_CHECK_FUNCS(des_cfb64_encrypt,, AC_CHECK_LIB(crypto, RSA_free,))
-    AC_CHECK_FUNCS(des_ede3_cfb64_encrypt,, AC_CHECK_LIB(crypto, RSA_free,))
+    if test "$ac_cv_lib_crypto_RSA_free" = "yes"; then
+      AC_MSG_CHECKING(for required OpenSSL version)
+      AC_TRY_RUN(
+      [
+#include <openssl/opensslv.h>
+int main() {
+  if (OPENSSL_VERSION_NUMBER < 0x00906000)
+    exit(1);
+  exit(0);
+}
+      ],
+      [
+        AC_MSG_RESULT(ok)
+        AC_CHECK_FUNCS(BF_cfb64_encrypt,, AC_CHECK_LIB(crypto, RSA_free,))
+        AC_CHECK_FUNCS(idea_cfb64_encrypt,, AC_CHECK_LIB(crypto, RSA_free,))
+        AC_CHECK_FUNCS(CAST_cfb64_encrypt,, AC_CHECK_LIB(crypto, RSA_free,))
+        AC_CHECK_FUNCS(RC5_32_cfb64_encrypt,, AC_CHECK_LIB(crypto, RSA_free,))
+        AC_CHECK_FUNCS(des_cfb64_encrypt,, AC_CHECK_LIB(crypto, RSA_free,))
+        AC_CHECK_FUNCS(des_ede3_cfb64_encrypt,, AC_CHECK_LIB(crypto, RSA_free,))
+      ],
+      [
+        AC_MSG_RESULT(OpenSSL version below 0.9.6 - OpenSSL support disabled)
+        ac_cv_crypto_RSA_free = "no"
+      ], AC_MSG_ERROR(Unable to test))
+    fi
     ;;
   esac
 ],
 [
     dnl Check for ciphers supported by OpenSSL crypto lib
     AC_CHECK_FUNCS(RSA_free,, AC_CHECK_LIB(crypto, RSA_free,))
-    AC_CHECK_FUNCS(BF_cfb64_encrypt,, AC_CHECK_LIB(crypto, RSA_free,))
-    AC_CHECK_FUNCS(idea_cfb64_encrypt,, AC_CHECK_LIB(crypto, RSA_free,))
-    AC_CHECK_FUNCS(CAST_cfb64_encrypt,, AC_CHECK_LIB(crypto, RSA_free,))
-    AC_CHECK_FUNCS(RC5_32_cfb64_encrypt,, AC_CHECK_LIB(crypto, RSA_free,))
-    AC_CHECK_FUNCS(des_cfb64_encrypt,, AC_CHECK_LIB(crypto, RSA_free,))
-    AC_CHECK_FUNCS(des_ede3_cfb64_encrypt,, AC_CHECK_LIB(crypto, RSA_free,))
+    if test "$ac_cv_lib_crypto_RSA_free" = "yes"; then
+      AC_MSG_CHECKING(for required OpenSSL version)
+      AC_TRY_RUN(
+      [
+#include <openssl/opensslv.h>
+int main() {
+  if (OPENSSL_VERSION_NUMBER < 0x00906000)
+    exit(1);
+  exit(0);
+}
+      ],
+      [
+        AC_MSG_RESULT(ok)
+        AC_CHECK_FUNCS(BF_cfb64_encrypt,, AC_CHECK_LIB(crypto, RSA_free,))
+        AC_CHECK_FUNCS(idea_cfb64_encrypt,, AC_CHECK_LIB(crypto, RSA_free,))
+        AC_CHECK_FUNCS(CAST_cfb64_encrypt,, AC_CHECK_LIB(crypto, RSA_free,))
+        AC_CHECK_FUNCS(RC5_32_cfb64_encrypt,, AC_CHECK_LIB(crypto, RSA_free,))
+        AC_CHECK_FUNCS(des_cfb64_encrypt,, AC_CHECK_LIB(crypto, RSA_free,))
+        AC_CHECK_FUNCS(des_ede3_cfb64_encrypt,, AC_CHECK_LIB(crypto, RSA_free,))
+      ],
+      [
+        AC_MSG_RESULT(OpenSSL version below 0.9.6 - OpenSSL support disabled)
+        ac_cv_RSA_free="no"
+        ac_cv_crypto_RSA_free="no"
+      ], AC_MSG_ERROR(Unable to test))
+    fi
 ])
 
 dnl zlib?

@@ -38,7 +38,7 @@ static struct ctrl_command cmd = {0, 0, 0, 0, NULL};
 #define BUFLEN                  2048
 
 #ifdef HAVE_LIBZ
-#define ZIP_BUFLEN              BUFLEN * 6 /* allow for decompression */
+#define ZIP_BUFLEN              BUFLEN * 16 /* allow for decompression */
 #else
 #define ZIP_BUFLEN              BUFLEN
 #endif
