@@ -203,8 +203,6 @@ comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
 		F->write_data = client_data;
 		if((!(type & COMM_SELECT_RETRY)) && F->write_handler != NULL)
 		{
-			if(type & COMM_SELECT_RETRY)
-			fprintf(stderr, "Not a retry write - but did it anyways?!?\n");
 			F->write_handler(F->fd, F->write_data);
 		}
 		poll_update_pollfds(F->fd, POLLOUT, handler);
