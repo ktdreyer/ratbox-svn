@@ -1337,7 +1337,7 @@ exit_client(struct Client *client_p,	/* The local client originating the
 	    const char *comment	/* Reason for the exit */
 	)
 {
-	unsigned sendk = 0, recvk = 0;
+	unsigned int sendk = 0, recvk = 0;
 	char comment1[HOSTLEN + HOSTLEN + 2];
 	if(MyConnect(source_p))
 	{
