@@ -3,7 +3,7 @@
 #ifndef _I_MEMORY_H
 #define _I_MEMORY_H
 
-/* #define MEMDEBUG */
+#define MEMDEBUG
 
 #include "ircd_defs.h"
 #include "blalloc.h"
