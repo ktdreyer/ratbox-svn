@@ -267,17 +267,9 @@ static void ms_topic(struct Client *client_p,
 
       chptr->topic_time = atoi(parv[3]);
 
-      if(chptr->mode.mode & MODE_HIDEOPS)
+      if(ConfigServerHide.hide_servers)
 	{
-	  sendto_channel_local(ONLY_CHANOPS_HALFOPS,
-			       chptr, ":%s!%s@%s TOPIC %s :%s",
-			       me.name,
-			       source_p->username,
-			       source_p->host,
-			       parv[1],
-			       chptr->topic);
-
-	  sendto_channel_local(NON_CHANOPS,
+	  sendto_channel_local(ALL_MEMBERS,
 			       chptr, ":%s TOPIC %s :%s",
 			       me.name,
 			       parv[1],
@@ -287,10 +279,8 @@ static void ms_topic(struct Client *client_p,
       else
 	{
 	  sendto_channel_local(ALL_MEMBERS,
-			       chptr, ":%s!%s@%s TOPIC %s :%s",
-			       me.name,
-			       source_p->username,
-			       source_p->host,
+			       chptr, ":%s TOPIC %s :%s",
+			       source_p->name,
 			       parv[1], chptr->topic);
 	}
     }
