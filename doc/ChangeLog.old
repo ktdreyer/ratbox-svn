@@ -1,3 +1,8 @@
+*** 20010528_12 by a1kmm
+- Always always do a compile test, even for simple patches. cptrs don't
+  exist anymore...
+
+
 *** 20010528_11 by a1kmm
 - Fixed the same bug in CRYPTSERV as was in PASS.
 
