@@ -1,3 +1,22 @@
+leeh        2002/12/08 13:12:43 UTC	(20021208_4)
+
+  Modified files:
+    include              cluster.h s_serv.h 
+    modules              m_locops.c 
+    src                  cluster.c s_serv.c 
+  Log:
+  - heres support for clustered locops
+  - added CAP_CLUSTER
+  
+  Revision  Changes    Path
+  7.3       +1 -0      ircd-ratbox/include/cluster.h
+  7.74      +2 -1      ircd-ratbox/include/s_serv.h
+  1.30      +38 -12    ircd-ratbox/modules/m_locops.c
+  7.3       +17 -0     ircd-ratbox/src/cluster.c
+  7.307     +1 -0      ircd-ratbox/src/s_serv.c
+
+
+
 androsyn    2002/12/08 02:03:56 UTC	(20021208_3)
 
   Modified files:
