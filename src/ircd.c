@@ -132,7 +132,7 @@ dlink_list lazylink_nicks;	/* known about lazylink nicks on HUB */
 
 int callbacks_called;          /* A measure of server load... */
 
-static size_t       initialVMTop = 0;   /* top of virtual memory at init */
+static unsigned long       initialVMTop = 0;   /* top of virtual memory at init */
 static const char * logFileName = LPATH;
 static const char * pidFileName = PPATH;
 
@@ -145,7 +145,7 @@ time_t  nextconnect = 1;        /* time for next try_connections call */
 /*
  * get_vm_top - get the operating systems notion of the resident set size
  */
-static size_t get_vm_top(void)
+static unsigned long get_vm_top(void)
 {
   /*
    * NOTE: sbrk is not part of the ANSI C library or the POSIX.1 standard
@@ -159,7 +159,7 @@ static size_t get_vm_top(void)
    */
 #ifndef VMS
   void* vptr = sbrk(0);
-  return (size_t) vptr;
+  return (unsigned long) vptr;
 #else
   return 0;
 #endif
@@ -168,7 +168,7 @@ static size_t get_vm_top(void)
 /*
  * get_maxrss - get the operating systems notion of the resident set size
  */
-size_t get_maxrss(void)
+unsigned long get_maxrss(void)
 {
   return get_vm_top() - initialVMTop;
 }

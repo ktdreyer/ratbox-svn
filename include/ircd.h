@@ -102,7 +102,7 @@ extern dlink_list lazylink_nicks;
 extern int callbacks_called;
 
 extern int make_daemon(void);
-extern size_t get_maxrss(void);
+extern unsigned long get_maxrss(void);
 extern void set_time(void);
 
 #endif

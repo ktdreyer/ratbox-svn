@@ -83,6 +83,9 @@
 /* Define if you have the gettext function.  */
 #undef HAVE_GETTEXT
 
+/* Define if you have the kevent function.  */
+#undef HAVE_KEVENT
+
 /* Define if you have the socketpair function.  */
 #undef HAVE_SOCKETPAIR
 
