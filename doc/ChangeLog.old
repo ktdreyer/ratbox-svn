@@ -1,3 +1,16 @@
+a1kmm       2001/12/18 02:20:09 EST	(20011218_0)
+
+  Modified files:
+    src                  s_bsd_sigio.c 
+  Log:
+  - Fixed sigio; we now try to read/write immediately when a handler is set but
+    wasn't before on comm_setselect()
+  
+  Revision  Changes    Path
+  7.10      +11 -2     ircd-hybrid-7/src/s_bsd_sigio.c
+
+
+
 leeh        2001/12/17 12:06:51 EST	(20011217_0)
 
   Modified files:
