@@ -679,7 +679,9 @@ unset_chcap_usage_counts(struct Client *serv_p)
     {
       /* Hopefully capabs can't change dynamically or anything... */
       assert(chcap_combos[n].count > 0);
-      chcap_combos[n].count--;
+
+      if(chcap_combos[n].count > 0)
+        chcap_combos[n].count--;
       return;
     }
   }
