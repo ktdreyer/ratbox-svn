@@ -1,3 +1,18 @@
+leeh        2002/08/01 09:55:09 EDT	(20020801_1)
+
+  Modified files:
+    .                    RELNOTES 
+    modules              m_kline.c 
+  Log:
+  - updated relnotes
+  - adxs fix for klines such as @foo and foo@
+  
+  Revision  Changes    Path
+  1.39      +6 -2      ircd-hybrid-7/RELNOTES
+  1.107     +9 -3      ircd-hybrid-7/modules/m_kline.c
+
+
+
 leeh        2002/08/01 09:22:17 EDT	(20020801_0)
 
   Modified files:
