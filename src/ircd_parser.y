@@ -86,6 +86,7 @@ int   class_redirport_var;
 %token  AUTH
 %token  AUTOCONN
 %token  CLASS
+%token  COMPRESSED
 %token  CONNECT
 %token  CONNECTFREQ
 %token  DENY
@@ -1085,7 +1086,7 @@ connect_item:   connect_name | connect_host | connect_send_password |
                 connect_accept_password | connect_port | connect_aftype | 
  		connect_fakename | connect_lazylink | connect_hub_mask | 
 		connect_leaf_mask | connect_class | connect_auto | 
-		connect_encrypted |
+		connect_encrypted | connect_compressed |
                 error
 
 connect_name:   NAME '=' QSTRING ';'
@@ -1156,7 +1157,17 @@ connect_encrypted:       ENCRYPTED '=' TYES ';'
                         |
                         ENCRYPTED '=' TNO ';'
   {
-    yy_aconf->flags &= ~ENCRYPTED;
+    yy_aconf->flags &= ~CONF_FLAGS_ENCRYPTED;
+  };
+
+connect_compressed:       COMPRESSED '=' TYES ';'
+  {
+    yy_aconf->flags |= CONF_FLAGS_COMPRESSED;
+  }
+                        |
+                        COMPRESSED '=' TNO ';'
+  {
+    yy_aconf->flags &= ~CONF_FLAGS_COMPRESSED;
   };
 
 connect_auto:           AUTOCONN '=' TYES ';'

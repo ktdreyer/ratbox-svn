@@ -103,6 +103,7 @@ autoconn	{ return AUTOCONN; }
 caller_id_wait	{ return CALLER_ID_WAIT; }
 class		{ return CLASS; }
 client_exit     { return CLIENT_EXIT; }
+compressed	{ return COMPRESSED; }
 connect		{ return CONNECT; }
 connectfreq     { return CONNECTFREQ; }
 deny		{ return DENY; }

@@ -120,6 +120,7 @@ struct ConfItem
 #define CONF_FLAGS_ALLOW_AUTO_CONN      0x04000
 #define CONF_FLAGS_LAZY_LINK            0x08000
 #define CONF_FLAGS_ENCRYPTED            0x10000
+#define CONF_FLAGS_COMPRESSED		0x20000
 
 /* Macros for struct ConfItem */
 
@@ -138,6 +139,7 @@ struct ConfItem
 #define IsConfSpoofNotice(x)    (!((x)->flags & CONF_FLAGS_SPOOF_NOTICE))
 #define IsConfRestricted(x)     ((x)->flags & CONF_FLAGS_RESTRICTED)
 #define IsConfEncrypted(x)      ((x)->flags & CONF_FLAGS_ENCRYPTED)
+#define IsConfCompressed(x)	((x)->flags & CONF_FLAGS_COMPRESSED)
 
 /* port definitions for Opers */
 
