@@ -233,10 +233,8 @@ comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
     	assert(handler != NULL);
 #endif
 
-#ifdef NOTYET
-    debug(5, 5) ("commSetSelect: FD %d type %d, %s\n", fd, type, handler ? "SET"
- : "CLEAR");
-#endif
+    if(list != FDLIST_NONE)
+    	list =  FDLIST_IDLECLIENT;
     if (type & COMM_SELECT_READ) {
         F->read_handler = handler;
         F->read_data = client_data;
@@ -335,10 +333,12 @@ comm_select_fdlist(fdlist_t fdlist, unsigned long delay)
 int
 comm_select(unsigned long delay)
 {
-  comm_select_fdlist(FDLIST_IDLECLIENT, 0);
+  comm_select_fdlist(FDLIST_IDLECLIENT, delay);
+#if 0
   /* comm_select_fdlist(BUSYCLIENT, 0); */
   comm_select_fdlist(FDLIST_SERVICE, 0);
   comm_select_fdlist(FDLIST_SERVER, delay);
+#endif
   return 0;
 }
 #endif
