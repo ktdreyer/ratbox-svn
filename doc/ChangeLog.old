@@ -1,3 +1,15 @@
+leeh        2002/05/08 10:40:30 EDT	(20020508_2)
+
+  Modified files:
+    contrib              m_opme.c 
+  Log:
+  - missing +ov stuff, missing local list stuff
+  
+  Revision  Changes    Path
+  1.21      +24 -2     ircd-hybrid-7/contrib/m_opme.c
+
+
+
 leeh        2002/05/08 08:19:52 EDT	(20020508_1)
 
   Modified files:
