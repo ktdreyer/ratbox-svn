@@ -175,7 +175,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 	if(!isnew && !newts && oldts)
 	{
 		sendto_channel_local(ALL_MEMBERS, chptr,
-				     ":%s NOTICE %s :*** Notice -- TS for %s"
+				     ":%s NOTICE %s :*** Notice -- TS for %s "
                                      "changed from " IRCD_TIME_FMT " to 0",
 				     me.name, chptr->chname, chptr->chname, oldts);
 		sendto_realops_flags(UMODE_ALL, L_ALL,
