@@ -1,3 +1,7 @@
+*** 19990906_2 by tomh
+read dbufs right into client buffer
+
+
 *** 19990906_1 by db
 - -k should remove key only if matching key or its a *
   thats a bug. 
