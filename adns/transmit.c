@@ -171,8 +171,10 @@ adns_status adns__mkquery_frdgram(adns_state ads, vbuf *vb, int *id_r,
 
 void adns__querysend_tcp(adns_query qu, struct timeval now) {
   byte length[2];
+#if 0
   struct iovec iov[2];
-  int wr, wr2, r;
+#endif
+  int wr, wr2 = 0, r;
   adns_state ads;
 
   if (qu->ads->tcpstate != server_ok) return;
