@@ -1,3 +1,9 @@
+*** 20001208_17 by db
+- m_who is less broken for single nick who, but it looks broken to me
+  still... checked on efnet, it looks broken.
+
+
+
 *** 20001208_16 by db
 - added m_eob to modules, this means changes to handlers.h, msg.h, Makefile.in
 - also had to modify s_serv.c to send EOB message
