@@ -1,3 +1,16 @@
+ejb         2002/02/05 22:37:53 EST	(20020206_0)
+
+  Added files:
+    .                    clean.com 
+  Log:
+  - Added clean.com .. this is a hack and will go away as soon as i
+    have a working top-level descrip.mms for VMS.
+  
+  Revision  Changes    Path
+  1.1       +10 -0     ircd-hybrid-7/clean.com (new)
+
+
+
 ejb         2002/02/05 16:46:00 EST	(20020205_8)
 
   Modified files:
