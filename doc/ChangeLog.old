@@ -1,3 +1,8 @@
+*** 20010825_4 by wcampbel
+This is an updated m_mkpasswd.c, allowing you to use a second parameter to
+specify which password hashing algorithm to use, DES or MD5.
+
+
 *** 20010825_3 by a1kmm
 - Fixed the core on JUPE bug, we cannot remove capabs when a juped server
   exits if we never set them for that server.
