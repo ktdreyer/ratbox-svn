@@ -1,3 +1,7 @@
+*** 20010118_3 by ejb
+- some more fixes for VMS CC.
+
+
 *** 20010118_2 by ejb
 - added README.VMS and make.com
 - minor compile for for VMX.
