@@ -1,3 +1,7 @@
+*** 20010119_3 by ejb
+- fixed placement of libintl.h in ircd.c/numeric.c
+
+
 *** 20010119_2 by ejb
 - typo in readme.vms
 - fix logging in m_kill.c
