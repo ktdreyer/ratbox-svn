@@ -2449,46 +2449,6 @@ get_conf_name(KlineType type)
 }
 
 /*
- * conf_add_hub_or_leaf
- * inputs       - pointer to config item
- * output       - NONE
- * side effects -
- * Add a hub or leaf
- */
-void conf_add_hub_or_leaf(struct ConfItem *aconf)
-{
-  char *ps;        /* space finder */
-  char *pt;        /* tab finder */
-
-  /* For Gersh
-   * make sure H: lines don't have trailing spaces!
-   * BUG: This code will fail if there is leading whitespace.
-   */
-
-  if(!aconf->user)
-    {
-      DupString(aconf->name, "*");
-      DupString(aconf->user, "*");
-    }
-  else
-    {
-      ps = strchr(aconf->user,' ');
-      pt = strchr(aconf->user,'\t');
-      
-      if(ps || pt)
-	{
-	  sendto_realops_flags(FLAGS_ALL,
-			       "H: or L: line trailing whitespace [%s]",
-			       aconf->user);
-	  if(ps)*ps = '\0';
-	  if(pt)*pt = '\0';
-	}
-      aconf->name = aconf->user;
-      DupString(aconf->user, "*");
-    }
-}
-
-/*
  * conf_add_class
  * inputs       - pointer to config item
  * output       - NONE
