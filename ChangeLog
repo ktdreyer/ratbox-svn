@@ -1,3 +1,15 @@
+leeh        2005/03/24 17:09:42 UTC	(20050324_0)
+
+  Modified files:
+    modules/core         m_message.c 
+  Log:
+  - exempt users messaging themselves from target change
+  
+  Revision  Changes    Path
+  1.172     +5 -1      ircd-ratbox/modules/core/m_message.c
+
+
+
 leeh        2005/03/23 13:56:28 UTC	(20050323_6)
 
   Modified files:
