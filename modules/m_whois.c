@@ -97,10 +97,9 @@ static int m_whois(struct Client *cptr,
 
   if(parc > 2)
     {
-
+      /* seeing as this is going across servers, we should limit it */
       if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
         {             
-          /* safe enough to give this on a local connect only */
           if(MyClient(sptr))
             sendto_one(sptr,form_str(RPL_LOAD2HI),me.name,sptr->name);
           return 0;
@@ -475,8 +474,8 @@ static int ms_whois(struct Client *cptr,
     }
 
   /* We need this to keep compatibility with hyb6 */
-  if ((acptr = hash_find_client(parv[1], (struct Client*)NULL)) &&
-      !MyConnect(acptr) && IsClient(acptr) && parc > 2)
+  if ((parc > 2) && (acptr = hash_find_client(parv[1], (struct Client*)NULL)) &&
+      !MyConnect(acptr) && IsClient(acptr))
     {
       client_burst_if_needed(acptr->from, sptr);
       sendto_one(acptr->from, ":%s WHOIS %s :%s", parv[0], parv[1],
