@@ -13,6 +13,7 @@ struct chan_reg
 	char *topic;
 	struct chmode *mode;
 	int flags;
+	time_t tsinfo;
 
 	time_t reg_time;
 	time_t last_used;

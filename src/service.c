@@ -120,13 +120,17 @@ find_service_id(const char *name)
 void
 introduce_service(struct client *target_p)
 {
-	struct channel *chptr;
-	dlink_node *ptr;
-
 	sendto_server("NICK %s 1 1 +i%s %s %s %s :%s",
 		      target_p->name, target_p->service->opered ? "o" : "",
 		      target_p->service->username,
 		      target_p->service->host, MYNAME, target_p->info);
+}
+
+void
+introduce_service_channels(struct client *target_p)
+{
+	struct channel *chptr;
+	dlink_node *ptr;
 
 	DLINK_FOREACH(ptr, target_p->service->channels.head)
 	{
@@ -140,7 +144,7 @@ introduce_service(struct client *target_p)
 }
 
 void
-introduce_services(void)
+introduce_services()
 {
 	dlink_node *ptr;
 
@@ -151,10 +155,22 @@ introduce_services(void)
 }
 
 void
+introduce_services_channels()
+{
+	dlink_node *ptr;
+
+	DLINK_FOREACH(ptr, service_list.head)
+	{
+		introduce_service_channels(ptr->data);
+	}
+}
+
+void
 reintroduce_service(struct client *target_p)
 {
 	sendto_server(":%s QUIT :Updating information", target_p->name);
 	introduce_service(target_p);
+	introduce_service_channels(target_p);
 }
 
 void

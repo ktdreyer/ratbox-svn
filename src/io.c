@@ -585,6 +585,8 @@ signon_server(struct connection_entry *conn_p)
 	sendto_server("CAPAB :QS TB");
 	sendto_server("SERVER %s 1 :%s", MYNAME, config_file.gecos);
 
+	introduce_services();
+
         sendto_server("PING :%s", MYNAME);
 
 	return 1;

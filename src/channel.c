@@ -16,6 +16,7 @@
 #include "log.h"
 #include "balloc.h"
 #include "io.h"
+#include "hook.h"
 
 static dlink_list channel_table[MAX_CHANNEL_TABLE];
 dlink_list channel_list;
@@ -149,7 +150,7 @@ free_channel(struct channel *chptr)
  * inputs	- channel to add to, client to add, flags
  * outputs	-
  */
-void
+struct chmember *
 add_chmember(struct channel *chptr, struct client *target_p, int flags)
 {
 	struct chmember *mptr;
@@ -162,6 +163,8 @@ add_chmember(struct channel *chptr, struct client *target_p, int flags)
 
 	dlink_add(mptr, &mptr->chnode, &chptr->users);
 	dlink_add(mptr, &mptr->usernode, &target_p->user->channels);
+
+	return mptr;
 }
 
 /* del_chmember()
@@ -185,7 +188,8 @@ del_chmember(struct chmember *mptr)
 	dlink_delete(&mptr->chnode, &chptr->users);
 	dlink_delete(&mptr->usernode, &client_p->user->channels);
 
-	if(dlink_list_length(&chptr->users) == 0)
+	if(dlink_list_length(&chptr->users) == 0 &&
+	   dlink_list_length(&chptr->services) == 0)
 		free_channel(chptr);
 
 	BlockHeapFree(chmember_heap, mptr);
@@ -550,14 +554,20 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 	struct channel *chptr;
 	struct client *target_p;
 	struct chmode newmode;
+	struct chmember *member_p;
+	dlink_list joined_members;
+	dlink_node *ptr;
+	dlink_node *next_ptr;
 	char *p;
 	const char *s;
 	char *nicks;
 	time_t newts;
 	int flags = 0;
-	int isnew = 0;
+	int keep_old_modes = 1;
 	int keep_new_modes = 1;
 	int args = 0;
+
+	memset(&joined_members, 0, sizeof(dlink_list));
 
 	/* :<server> SJOIN <TS> <#channel> +[modes [key][limit]] :<nicks> */
 	if(parc < 5 || EmptyString(parv[4]))
@@ -572,25 +582,18 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 		chptr->tsinfo = atol(parv[1]);
 		add_channel(chptr);
 
-		isnew = 1;
+		keep_old_modes = 0;
 	}
 	else
 	{
 		newts = atol(parv[1]);
 
 		if(newts == 0 || chptr->tsinfo == 0)
-		{
 			chptr->tsinfo = 0;
-		}
 		else if(newts < chptr->tsinfo)
-		{
-			chptr->tsinfo = newts;
-			remove_our_modes(chptr);
-		}
+			keep_old_modes = 0;
 		else if(chptr->tsinfo < newts)
-		{
 			keep_new_modes = 0;
-		}
 	}
 
 	newmode.mode = 0;
@@ -641,6 +644,12 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 		}
 	}
 
+	if(!keep_old_modes)
+	{
+		chptr->tsinfo = newts;
+		remove_our_modes(chptr);
+	}
+
 	if(keep_new_modes)
 	{
 		chptr->mode.mode |= newmode.mode;
@@ -652,20 +661,6 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 			strlcpy(chptr->mode.key, newmode.key,
 				sizeof(chptr->mode.key));
 
-		if(finished_bursting && dlink_list_length(&chptr->services))
-		{
-			struct client *service_p;
-			struct chmember *mptr;
-			dlink_node *ptr;
-
-			DLINK_FOREACH(ptr, chptr->services.head)
-			{
-				mptr = ptr->data;
-				service_p = mptr->client_p;
-
-				rejoin_service(target_p, chptr);
-			}
-		}
 	}
 
 	if(EmptyString(parv[4+args]))
@@ -721,10 +716,35 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 			continue;
 
 		if(!is_member(chptr, target_p))
-			add_chmember(chptr, target_p, flags);
+		{
+			member_p = add_chmember(chptr, target_p, flags);
+			dlink_add_alloc(member_p, &joined_members);
+		}
+	}
+
+	hook_call(HOOK_JOIN_CHANNEL, &joined_members, &keep_old_modes);
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, joined_members.head)
+	{
+		free_dlink_node(ptr);
+	}
+
+	/* services in the channel, not keeping it as opped.. */
+	if(finished_bursting && !keep_old_modes &&
+	   dlink_list_length(&chptr->services))
+	{
+		struct client *service_p;
+
+		DLINK_FOREACH(ptr, chptr->services.head)
+		{
+			member_p = ptr->data;
+			service_p = member_p->client_p;
+			rejoin_service(target_p, chptr);
+		}
 	}
 
 	/* didnt join any members, nuke it */
-	if(dlink_list_length(&chptr->users) == 0)
+	if(dlink_list_length(&chptr->users) == 0 &&
+	   dlink_list_length(&chptr->services) == 0)
 		free_channel(chptr);
 }

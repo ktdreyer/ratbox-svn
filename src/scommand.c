@@ -225,7 +225,7 @@ c_pong(struct client *client_p, const char *parv[], int parc)
                            server_p->name);
                 server_p->flags |= FLAGS_EOB;
 
-		introduce_services();
+		introduce_services_channels();
         }
 }
 
