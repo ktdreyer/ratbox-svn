@@ -1,3 +1,11 @@
+*** 19990902_5 by wnder
+ircd needs these changes to work with iauth - as of right now,
+ircd attempts a connection to 127.0.0.1 port 4444 where it
+expects the IAuth server to be - you just need to run
+-7/iauth/source/iauth first so it listens on 4444. In the future,
+the iauth host/port will be dynamically configurable.
+
+
 *** 19990902_4 by wnder
 ident support
 
