@@ -422,7 +422,7 @@ void    do_who(struct Client *sptr,
 		 IsOper(acptr) ? "*" : "", op_flags );
     }
 
-  if(ConfigFileEntry.hide_server)
+  if(GlobalSetOptions.hide_server)
     {
       sendto_one(sptr, form_str(RPL_WHOREPLY), me.name, sptr->name,
 		 chname, acptr->username,
