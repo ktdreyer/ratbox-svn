@@ -24,6 +24,7 @@
  */
 #include "handlers.h"
 #include "channel.h"
+#include "vchannel.h"
 #include "client.h"
 #include "irc_string.h"
 #include "ircd.h"
@@ -117,6 +118,7 @@ int     m_kick(struct Client *cptr,
 {
   struct Client *who;
   struct Channel *chptr;
+  struct Channel *vchan;
   int   chasing = 0;
   char  *comment;
   char  *name;
@@ -151,6 +153,15 @@ int     m_kick(struct Client *cptr,
       return(0);
     }
 
+  if (HasVchans(chptr))
+    {
+      vchan = map_vchan(chptr,sptr);
+      if(vchan != 0)
+	{
+	  chptr = vchan;
+	}
+    }
+
   /* You either have chan op privs, or you don't -Dianora */
   /* orabidoo and I discussed this one for a while...
    * I hope he approves of this code, (he did) users can get quite confused...
@@ -166,7 +177,7 @@ int     m_kick(struct Client *cptr,
           /* user on _my_ server, with no chanops.. so go away */
           
           sendto_one(sptr, form_str(ERR_CHANOPRIVSNEEDED),
-                     me.name, parv[0], chptr->chname);
+                     me.name, parv[0], name);
           return(0);
         }
 
@@ -175,7 +186,7 @@ int     m_kick(struct Client *cptr,
           /* If its a TS 0 channel, do it the old way */
           
           sendto_one(sptr, form_str(ERR_CHANOPRIVSNEEDED),
-                     me.name, parv[0], chptr->chname);
+                     me.name, parv[0], name);
           return(0);
         }
 
@@ -234,7 +245,7 @@ int     m_kick(struct Client *cptr,
                              name, who->name, comment);
       sendto_match_servs(chptr, cptr,
                          ":%s KICK %s %s :%s",
-                         parv[0], name,
+                         parv[0], chptr->chname,
                          who->name, comment);
       remove_user_from_channel(who, chptr, 1);
     }

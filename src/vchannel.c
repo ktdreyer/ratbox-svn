@@ -47,6 +47,10 @@ void    add_vchan_to_client_cache(struct Client *sptr,
 
   assert(sptr != NULL);
 
+  /* oops its the top channel of the subchans */
+  if( base_chan == vchan )
+    return;
+
   while(sptr->vchan_map[i].base_chan != NULL)
     {
       i++;
