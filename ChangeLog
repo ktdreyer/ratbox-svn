@@ -1,3 +1,35 @@
+androsyn    2003/09/25 21:59:01 EDT	(20030926_0)
+
+  Modified files:
+    servlink             control.c control.h io.c io.h servlink.c 
+                         servlink.h 
+    src                  adns.c epoll.c poll.c s_serv.c send.c 
+                         sigio.c 
+  Log:
+  Bunch of changes here..
+  1) Get epoll() working correctly and playing nice with the sendmsg() stuff
+  2) Fix up servlink to just pass 3 fds along, instead of 5.
+  3) Make servlink dup2() fd's > 255 down to <255.  This is an issue on some
+  versions of Solaris apparently when using select().
+  
+  Servlink + sendmsg() stuff is still probably hosed, or at least suboptimal
+  
+  Revision  Changes    Path
+  1.10      +9 -9      ircd-ratbox/servlink/control.c
+  1.6       +20 -20    ircd-ratbox/servlink/control.h
+  1.38      +68 -69    ircd-ratbox/servlink/io.c
+  1.13      +1 -2      ircd-ratbox/servlink/io.h
+  1.31      +37 -16    ircd-ratbox/servlink/servlink.c
+  1.24      +29 -32    ircd-ratbox/servlink/servlink.h
+  7.65      +5 -3      ircd-ratbox/src/adns.c
+  1.18      +23 -23    ircd-ratbox/src/epoll.c
+  7.73      +0 -2      ircd-ratbox/src/poll.c
+  7.372     +25 -51    ircd-ratbox/src/s_serv.c
+  7.263     +3 -6      ircd-ratbox/src/send.c
+  7.43      +1 -1      ircd-ratbox/src/sigio.c
+
+
+
 androsyn    2003/09/24 16:39:29 EDT	(20030924_0)
 
   Modified files:
