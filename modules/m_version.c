@@ -180,7 +180,9 @@ static char* confopts(struct Client *source_p)
   *p++ = 'p';
 #endif
 
+#ifdef IGNORE_BOGUS_TS
   *p++ = 'T';
+#endif
 
 #ifdef USE_SYSLOG
   *p++ = 'Y';
