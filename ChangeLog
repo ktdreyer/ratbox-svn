@@ -1,3 +1,41 @@
+leeh        2004/09/04 07:09:21 EDT	(20040904_6)
+
+  Modified files:
+    include              cache.h class.h common.h hash.h msg.h 
+                         numeric.h patricia.h sprintf_irc.h 
+    modules              m_trace.c 
+    src                  cache.c commio.c devpoll.c epoll.c 
+                         ircd_lexer.l kqueue.c numeric.c 
+                         patricia.c poll.c reject.c s_log.c 
+                         s_newconf.c 
+  Log:
+  - stopped a few files in include/ including other files..
+  
+  Revision  Changes    Path
+  1.6       +0 -3      ircd-ratbox/include/cache.h
+  7.24      +0 -2      ircd-ratbox/include/class.h
+  7.7       +0 -1      ircd-ratbox/include/common.h
+  7.52      +0 -2      ircd-ratbox/include/hash.h
+  7.52      +0 -2      ircd-ratbox/include/msg.h
+  7.49      +0 -2      ircd-ratbox/include/numeric.h
+  7.17      +0 -24     ircd-ratbox/include/patricia.h
+  7.17      +0 -2      ircd-ratbox/include/sprintf_irc.h
+  1.103     +2 -1      ircd-ratbox/modules/m_trace.c
+  1.20      +2 -1      ircd-ratbox/src/cache.c
+  1.18      +1 -0      ircd-ratbox/src/commio.c
+  7.34      +1 -1      ircd-ratbox/src/devpoll.c
+  1.30      +1 -1      ircd-ratbox/src/epoll.c
+  1.163     +1 -0      ircd-ratbox/src/ircd_lexer.l
+  1.47      +1 -1      ircd-ratbox/src/kqueue.c
+  7.29      +1 -7      ircd-ratbox/src/numeric.c
+  7.24      +2 -0      ircd-ratbox/src/patricia.c
+  7.80      +1 -1      ircd-ratbox/src/poll.c
+  1.29      +1 -1      ircd-ratbox/src/reject.c
+  7.75      +1 -0      ircd-ratbox/src/s_log.c
+  7.55      +1 -1      ircd-ratbox/src/s_newconf.c
+
+
+
 leeh        2004/09/04 06:40:32 EDT	(20040904_5)
 
   Modified files:
