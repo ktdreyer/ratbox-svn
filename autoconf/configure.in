@@ -210,7 +210,10 @@ else
   AC_MSG_RESULT(disabled)
 fi
 
-
+save_CPPFLAGS="$CPPFLAGS"
+CPPFLAGS="$CPPFLAGS $SSL_INCLUDES"
+save_LIBS="$LIBS"
+LIBS="$LIBS $SSL_LIBS"
 if test "X$cf_enable_openssl" != "Xno"; then
     dnl Check OpenSSL version (must be 0.9.6 or above!)
     AC_MSG_CHECKING(for OpenSSL 0.9.6 or above)
@@ -232,7 +235,9 @@ int main(void) {
     if test "X$cf_openssl_version_ok" = "Xyes"; then
         AC_MSG_RESULT(ok)
         dnl Do all the HAVE_LIBCRYPTO magic -- and check for ciphers
-        AC_CHECK_LIB(crypto, RSA_free)
+        save_CPPFLAGS="$CPPFLAGS"
+	CPPFLAGS="$CPPFLAGS $SSL_LIBS"
+	AC_CHECK_LIB(crypto, RSA_free)
         if test "X$ac_cv_lib_crypto_RSA_free" = "Xyes"; then
             cf_openssl_ciphers=''
             AC_CHECK_FUNCS(EVP_bf_cfb,
@@ -248,10 +253,14 @@ int main(void) {
             AC_CHECK_FUNCS(EVP_des_cfb,
                 cf_openssl_ciphers="${cf_openssl_ciphers}DES/56 ")
         fi
+	CPPFLAGS="$save_CPPFLAGS"
+	SSL_LIBS="$SSL_LIBS -lcrypto"
     else
         AC_MSG_RESULT(no - OpenSSL support disabled)
     fi
 fi
+CPPFLAGS="$save_CPPFLAGS"
+LIBS="$save_LIBS"
 
 dnl zlib?
 AC_MSG_CHECKING(if you want to try to use zlib)                              
@@ -262,9 +271,18 @@ AC_ARG_ENABLE(zlib,
 [ cf_enable_zlib='yes' ])
 AC_MSG_RESULT($cf_enable_zlib)
 
-if test "X$cf_enable_zlib" = "Xyes"; then
-    AC_CHECK_LIB(z, deflate)
-fi
+case "$cf_enable_zlib" in
+	yes)
+		AC_CHECK_LIB(z, deflate)
+		;;
+	no)
+		;;
+	*)
+		LIBS="$LIBS -L$cf_enable_zlib"	
+    		AC_CHECK_LIB(z, deflate)
+		;;
+	esac
+
 
 dnl check for netio plugin stuff
 dnl Enable poll()
