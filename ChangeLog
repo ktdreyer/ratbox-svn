@@ -1,3 +1,15 @@
+leeh        2003/09/03 12:34:22 EDT	(20030903_3)
+
+  Modified files:
+    modules/core         m_nick.c 
+  Log:
+  - split ms_nick() up into two handlers and other cleanups to m_nick.c
+  
+  Revision  Changes    Path
+  1.131     +119 -106  ircd-ratbox/modules/core/m_nick.c
+
+
+
 androsyn    2003/09/03 00:03:03 EDT	(20030903_2)
 
   Removed files:
