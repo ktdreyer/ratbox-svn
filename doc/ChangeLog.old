@@ -1,3 +1,6 @@
+*** 20010102_29 by davidt
+Fix kill on nickchange with lazylinks
+
 *** 20010102_28 by db
 - backed out a changed until beta-2 , its broken hostmasking
 
