@@ -1,3 +1,15 @@
+androsyn    2003/11/25 10:48:12 EST	(20031125_5)
+
+  Modified files:
+    src                  sigio.c 
+  Log:
+  Lets try that again
+  
+  Revision  Changes    Path
+  7.49      +2 -2      ircd-ratbox/src/sigio.c
+
+
+
 androsyn    2003/11/25 10:24:36 EST	(20031125_4)
 
   Modified files:
