@@ -81,7 +81,7 @@ _moddeinit(void)
   mod_del_cmd(&kline_msgtab);
   mod_del_cmd(&dline_msgtab);
 }
-char *_version = "20001122";
+char *_version = "20010517";
 #endif
 
 /* Local function prototypes */
@@ -668,13 +668,27 @@ static void mo_dline(struct Client *client_p, struct Client *source_p,
     reason = "No reason";
 
 
-  if (bits < 24)
+  if(IsSetOperAdmin(source_p))
   {
-   sendto_one(source_p,
-              ":%s NOTICE %s :Can't use a mask less than 24 with dline.",
-              me.name, parv[0]);
-     return;
+    if (bits < 8)
+    {
+      sendto_one(source_p,
+        ":%s NOTICE %s :For safety, bitmasks less than 8 require conf access.",
+        me.name, parv[0]);
+      return;
+    }
   }
+  else
+  {
+    if (bits < 24)
+    {
+      sendto_one(source_p,
+        ":%s NOTICE %s :Dline bitmasks less than 24 are for admins only.",
+        me.name, parv[0]);
+      return;
+    }
+  }
+
 #ifdef IPV6
   if (t == HM_IPV6)
    t = AF_INET6;
