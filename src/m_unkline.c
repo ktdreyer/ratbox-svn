@@ -86,7 +86,7 @@ int mo_unkline (struct Client *cptr,struct Client *sptr,int parc,char *parv[])
       return -1;
     }
 
-  if (!IsAnOper(sptr))  
+  if (!IsAnyOper(sptr))  
     {
       sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, 
                  parv[0]);

@@ -188,7 +188,7 @@ int     m_whowas(struct Client *cptr,
     if (hunt_server(cptr,sptr,":%s WHOWAS %s %s :%s", 3,parc,parv))
       return 0;
 
-  if(!IsAnOper(sptr) && !MyConnect(sptr)) /* pace non local requests */
+  if(!IsAnyOper(sptr) && !MyConnect(sptr)) /* pace non local requests */
     {
       if((last_used + ConfigFileEntry.whois_wait) > CurrentTime)
         {

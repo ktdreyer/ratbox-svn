@@ -199,11 +199,11 @@ void show_opers(struct Client *cptr)
   for(cptr2 = oper_cptr_list; cptr2; cptr2 = cptr2->next_oper_client)
     {
       ++j;
-      if (MyClient(cptr) && IsAnOper(cptr))
+      if (MyClient(cptr) && IsAnyOper(cptr))
         {
           sendto_one(cptr, ":%s %d %s :[%c][%s] %s (%s@%s) Idle: %d",
                      me.name, RPL_STATSDEBUG, cptr->name,
-                     IsOper(cptr2) ? 'O' : 'o',
+                     IsGlobalOper(cptr2) ? 'O' : 'o',
                      oper_privs_as_string(cptr2,
                                           cptr2->confs->value.aconf->port),
                      cptr2->name,
@@ -214,7 +214,7 @@ void show_opers(struct Client *cptr)
         {
           sendto_one(cptr, ":%s %d %s :[%c] %s (%s@%s) Idle: %d",
                      me.name, RPL_STATSDEBUG, cptr->name,
-                     IsOper(cptr2) ? 'O' : 'o',
+                     IsGlobalOper(cptr2) ? 'O' : 'o',
                      cptr2->name,
                      cptr2->username, cptr2->host,
                      CurrentTime - cptr2->user->last);
@@ -239,7 +239,7 @@ int show_lusers(struct Client *cptr, struct Client *sptr,
   struct Client *acptr;
 
 /*  forced = (parc >= 2); */
-  forced = (IsAnOper(sptr) && (parc > 3));
+  forced = (IsAnyOper(sptr) && (parc > 3));
 
 /* (void)collapse(parv[1]); */
 
@@ -270,7 +270,7 @@ int show_lusers(struct Client *cptr, struct Client *sptr,
               s_count++;
               break;
             case STAT_CLIENT:
-              if (IsAnOper(acptr))
+              if (IsAnyOper(acptr))
                 o_count++;
 #ifdef  SHOW_INVISIBLE_LUSERS
               if (MyConnect(acptr))
@@ -284,7 +284,7 @@ int show_lusers(struct Client *cptr, struct Client *sptr,
                 {
                   if (IsInvisible(acptr))
                     {
-                      if (IsAnOper(sptr))
+                      if (IsAnyOper(sptr))
                         m_client++;
                     }
                   else
@@ -354,7 +354,7 @@ int show_lusers(struct Client *cptr, struct Client *sptr,
     } /* Recount loop */
   
 #ifndef SHOW_INVISIBLE_LUSERS
-  if (IsAnOper(sptr) && i_count)
+  if (IsAnyOper(sptr) && i_count)
 #endif
     sendto_one(sptr, form_str(RPL_LUSERCLIENT), me.name, parv[0],
                c_count, i_count, s_count);
@@ -696,7 +696,7 @@ int register_user(struct Client *cptr, struct Client *sptr,
         }
       /* end of valid user name check */
 
-      if(!IsAnOper(sptr))
+      if(!IsAnyOper(sptr))
         {
           char *reason;
 
@@ -1235,7 +1235,7 @@ int user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         case 'O': case 'o' :
           if(what == MODE_ADD)
             {
-              if(IsServer(cptr) && !IsOper(sptr))
+              if(IsServer(cptr) && !IsGlobalOper(sptr))
                 {
                   ++Count.oper;
                   SetOper(sptr);
@@ -1247,7 +1247,7 @@ int user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                * found by Pat Szuta, Perly , perly@xnet.com 
                */
 
-              if(!IsAnOper(sptr))
+              if(!IsAnyOper(sptr))
                 break;
 
               sptr->umodes &= ~(FLAGS_OPER|FLAGS_LOCOP);

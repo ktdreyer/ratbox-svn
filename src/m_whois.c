@@ -131,7 +131,7 @@ int     m_whois(struct Client *cptr,
       parv[1] = parv[2];
     }
 
-  if(!IsAnOper(sptr) && !MyConnect(sptr)) /* pace non local requests */
+  if(!IsAnyOper(sptr) && !MyConnect(sptr)) /* pace non local requests */
     {
       if((last_used + ConfigFileEntry.whois_wait) > CurrentTime)
         {
@@ -347,12 +347,12 @@ static int single_whois(struct Client *sptr,struct Client *acptr,int wilds)
     sendto_one(sptr, form_str(RPL_AWAY), me.name,
 	       sptr->name, name, user->away);
 
-  if (IsAnOper(acptr))
+  if (IsAnyOper(acptr))
     {
       sendto_one(sptr, form_str(RPL_WHOISOPERATOR),
 		 me.name, sptr->name, name);
 
-      if (acptr->umodes & FLAGS_ADMIN )
+      if (IsAdmin(acptr))
 	sendto_one(sptr, form_str(RPL_WHOISADMIN),
 		   me.name, sptr->name, name);
     }

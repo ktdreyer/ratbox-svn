@@ -157,7 +157,7 @@ int m_locops(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       return 0;
     }
 
-  if(MyConnect(sptr) && IsAnOper(sptr))
+  if(MyConnect(sptr) && IsAnyOper(sptr))
     {
 
 #ifdef SLAVE_SERVERS

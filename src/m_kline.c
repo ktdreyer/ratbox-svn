@@ -422,7 +422,7 @@ mo_kline(struct Client *cptr,
   else
 #endif
     {
-      if (!MyClient(sptr) || !IsAnOper(sptr))
+      if (!MyClient(sptr) || !IsAnyOper(sptr))
         {
           sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
           return 0;
@@ -921,7 +921,7 @@ ms_kline(struct Client *cptr,
   else
 #endif
     {
-      if (!MyClient(sptr) || !IsAnOper(sptr))
+      if (!MyClient(sptr) || !IsAnyOper(sptr))
         {
           sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
           return 0;
@@ -1515,7 +1515,7 @@ mo_dline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   const char* current_date;
   const char *dconf;
 
-  if (!MyClient(sptr) || !IsAnOper(sptr))
+  if (!MyClient(sptr) || !IsAnyOper(sptr))
     {
       sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
       return 0;

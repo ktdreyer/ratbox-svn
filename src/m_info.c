@@ -40,7 +40,7 @@ m_info(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       sptr->name, sptr->username, sptr->host,
       sptr->user->server);
 
-    if (!IsAnOper(sptr))
+    if (!IsAnyOper(sptr))
     {
       /* reject non local requests */
       if (!MyConnect(sptr))
@@ -53,7 +53,7 @@ m_info(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       }
       else
         last_used = CurrentTime;
-    } /* if (!IsAnOper(sptr)) */
+    } /* if (!IsAnyOper(sptr)) */
 
     while (*text)
       sendto_one(sptr, form_str(RPL_INFO), me.name, parv[0], *text++);
@@ -64,7 +64,7 @@ m_info(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
      * Now send them a list of all our configuration options
      * (mostly from config.h)
      */
-    if (IsAnOper(sptr))
+    if (IsAnyOper(sptr))
     {
       for (infoptr = MyInformation; infoptr->name; infoptr++)
       {
@@ -93,7 +93,7 @@ m_info(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         RPL_INFO,
         parv[0],
         platform); 
-    } /* if (IsAnOper(sptr)) */
+    } /* if (IsAnyOper(sptr)) */
 
     sendto_one(sptr, form_str(RPL_INFO), me.name, parv[0], "");
 
@@ -138,7 +138,7 @@ mo_info(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       sptr->name, sptr->username, sptr->host,
       sptr->user->server);
 
-    if (!IsAnOper(sptr))
+    if (!IsAnyOper(sptr))
     {
       /* reject non local requests */
       if (!MyConnect(sptr))
@@ -151,7 +151,7 @@ mo_info(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       }
       else
         last_used = CurrentTime;
-    } /* if (!IsAnOper(sptr)) */
+    } /* if (!IsAnyOper(sptr)) */
 
     while (*text)
       sendto_one(sptr, form_str(RPL_INFO), me.name, parv[0], *text++);
@@ -162,7 +162,7 @@ mo_info(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
      * Now send them a list of all our configuration options
      * (mostly from config.h)
      */
-    if (IsAnOper(sptr))
+    if (IsAnyOper(sptr))
     {
       for (infoptr = MyInformation; infoptr->name; infoptr++)
       {
@@ -191,7 +191,7 @@ mo_info(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         RPL_INFO,
         parv[0],
         platform); 
-    } /* if (IsAnOper(sptr)) */
+    } /* if (IsAnyOper(sptr)) */
 
     sendto_one(sptr, form_str(RPL_INFO), me.name, parv[0], "");
 
@@ -236,7 +236,7 @@ ms_info(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       sptr->name, sptr->username, sptr->host,
       sptr->user->server);
 
-    if (!IsAnOper(sptr))
+    if (!IsAnyOper(sptr))
     {
       /* reject non local requests */
       if (!MyConnect(sptr))
@@ -249,7 +249,7 @@ ms_info(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       }
       else
         last_used = CurrentTime;
-    } /* if (!IsAnOper(sptr)) */
+    } /* if (!IsAnyOper(sptr)) */
 
     while (*text)
       sendto_one(sptr, form_str(RPL_INFO), me.name, parv[0], *text++);
@@ -260,7 +260,7 @@ ms_info(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
      * Now send them a list of all our configuration options
      * (mostly from config.h)
      */
-    if (IsAnOper(sptr))
+    if (IsAnyOper(sptr))
     {
       for (infoptr = MyInformation; infoptr->name; infoptr++)
       {
@@ -289,7 +289,7 @@ ms_info(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         RPL_INFO,
         parv[0],
         platform); 
-    } /* if (IsAnOper(sptr)) */
+    } /* if (IsAnyOper(sptr)) */
 
     sendto_one(sptr, form_str(RPL_INFO), me.name, parv[0], "");
 

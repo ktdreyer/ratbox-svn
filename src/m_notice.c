@@ -855,7 +855,7 @@ int     ms_notice(struct Client *cptr,
       if(MyClient(sptr) && sptr->user)
         sptr->user->last = CurrentTime;
 
-      if(MyConnect(acptr) && IsClient(sptr) && !IsAnOper(sptr) &&
+      if(MyConnect(acptr) && IsClient(sptr) && !IsAnyOper(sptr) &&
 	 GlobalSetOptions.dronetime)
         {
           if((acptr->first_received_message_time+GlobalSetOptions.dronetime)
@@ -953,7 +953,7 @@ int     ms_notice(struct Client *cptr,
   if ((*nick == '$' || *nick == '#'))
     {
 
-      if(!IsAnOper(sptr))
+      if(!IsAnyOper(sptr))
         {
           sendto_one(sptr, form_str(ERR_NOSUCHNICK),
                      me.name, parv[0], nick);
@@ -996,7 +996,7 @@ int     ms_notice(struct Client *cptr,
        * -Dianora
        */
 
-      if( (char *)strchr(nick,'%') && !IsAnOper(sptr))
+      if( (char *)strchr(nick,'%') && !IsAnyOper(sptr))
         {
           sendto_one(sptr, form_str(ERR_NOSUCHNICK),
                      me.name, parv[0], nick);
@@ -1016,7 +1016,7 @@ int     ms_notice(struct Client *cptr,
       *server = '\0';
 
       /* special case opers@server */
-      if(!irccmp(nick,"opers") && IsAnOper(sptr))
+      if(!irccmp(nick,"opers") && IsAnyOper(sptr))
         {
           sendto_realops("To opers: From %s: %s",sptr->name,parv[2]);
           return 0;

@@ -460,7 +460,7 @@ int m_hash(struct Client *cptr, struct Client *sptr,int parc,char *parv[])
   char  hash_log_file[256];
   char  timebuffer[MAX_DATE_STRING];
 
-  if (!MyClient(sptr) || !IsOper(sptr))
+  if (!MyClient(sptr) || !IsGlobalOper(sptr))
     {
       sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
       return 0;

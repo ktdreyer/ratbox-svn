@@ -132,7 +132,7 @@ send_message(struct Client *to, char *msg, int len)
       if (IsDoingList(to))
         {
           /* Pop the sendq for this message */
-          /*if (!IsAnOper(to))
+          /*if (!IsAnyOper(to))
           sendto_ops("LIST blocked for %s", get_client_name(to, FALSE)); */
           SetSendqPop(to);
           return 0;
@@ -954,10 +954,10 @@ sendto_wallops_butone(struct Client *one, struct Client *from, const char *patte
         continue;
       
       if (!(IsServer(from) || IsMe(from)) &&
-          MyClient(cptr) && !IsOper(cptr))
+          MyClient(cptr) && !IsGlobalOper(cptr))
         continue;
 
-      if (MyClient(cptr) && !IsAnOper(cptr) &&
+      if (MyClient(cptr) && !IsAnyOper(cptr) &&
           !(IsServer(from) || IsMe(from)))
         continue;
 

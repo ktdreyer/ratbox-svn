@@ -119,7 +119,7 @@ int mo_version(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
  */
 int ms_version(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
 {
-  if (IsAnOper(sptr))
+  if (IsAnyOper(sptr))
      {
        if (hunt_server(cptr, sptr, ":%s VERSION :%s", 
                        1, parc, parv) == HUNTED_ISME)

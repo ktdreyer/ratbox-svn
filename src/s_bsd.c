@@ -864,7 +864,7 @@ read_packet(int fd, void *data)
     }
     
     if (IsPerson(cptr) &&
-        (ConfigFileEntry.no_oper_flood && !IsAnOper(cptr)) &&
+        (ConfigFileEntry.no_oper_flood && !IsAnyOper(cptr)) &&
         DBufLength(&cptr->recvQ) > CLIENT_FLOOD) {
       exit_client(cptr, cptr, cptr, "Excess Flood");
       return;

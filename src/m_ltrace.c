@@ -158,7 +158,7 @@ int     m_ltrace(struct Client *cptr,
   wilds = !parv[1] || strchr(tname, '*') || strchr(tname, '?');
   dow = wilds || doall;
 
-  if(!IsAnOper(sptr) || !dow) /* non-oper traces must be full nicks */
+  if(!IsAnyOper(sptr) || !dow) /* non-oper traces must be full nicks */
                               /* lets also do this for opers tracing nicks */
     { 
       const char* name;
@@ -179,12 +179,12 @@ int     m_ltrace(struct Client *cptr,
 
       c_class = get_client_class(acptr);
 
-      if (IsAnOper(acptr))
+      if (IsAnyOper(acptr))
         { 
           sendto_one(sptr, form_str(RPL_TRACEOPERATOR),
                      me.name, parv[0], c_class,
                      name,
-                     IsAnOper(sptr)?ip:(IsIPHidden(acptr)?"127.0.0.1":ip),
+                     IsAnyOper(sptr)?ip:(IsIPHidden(acptr)?"127.0.0.1":ip),
                      now - acptr->lasttime,
                      (acptr->user)?(now - acptr->user->last):0);
         }
@@ -196,7 +196,7 @@ int     m_ltrace(struct Client *cptr,
   for (i = 0; i < MAXCONNECTIONS; i++)
     link_s[i] = 0, link_u[i] = 0;
                         
-  if (dow && GlobalSetOptions.lifesux && !IsOper(sptr))
+  if (dow && GlobalSetOptions.lifesux && !IsGlobalOper(sptr))
     {
       sendto_one(sptr,form_str(RPL_LOAD2HI),me.name,parv[0]);
       return 0;
@@ -223,8 +223,8 @@ int     m_ltrace(struct Client *cptr,
       if (!(acptr = local[i])) /* Local Connection? */
         continue;
       if (IsInvisible(acptr) && dow &&
-          !(MyConnect(sptr) && IsAnOper(sptr)) &&
-          !IsAnOper(acptr) && (acptr != sptr))
+          !(MyConnect(sptr) && IsAnyOper(sptr)) &&
+          !IsAnyOper(acptr) && (acptr != sptr))
         continue;
       if (!doall && wilds && !match(tname, acptr->name))
         continue;
@@ -246,16 +246,16 @@ int     m_ltrace(struct Client *cptr,
           break;
         case STAT_CLIENT:
           /* Well, most servers don't have a LOT of OPERs... let's show them too */
-          if ((IsAnOper(sptr) &&
+          if ((IsAnyOper(sptr) &&
               (MyClient(sptr) || !(dow && IsInvisible(acptr))))
-              || !dow || IsAnOper(acptr))
+              || !dow || IsAnyOper(acptr))
             {
-              if (IsAnOper(acptr))
+              if (IsAnyOper(acptr))
                 sendto_one(sptr,
                            form_str(RPL_TRACEOPERATOR),
                            me.name, parv[0], c_class,
                            name, 
-                           IsAnOper(sptr)?ip:(IsIPHidden(acptr)?"127.0.0.1":ip), 
+                           IsAnyOper(sptr)?ip:(IsIPHidden(acptr)?"127.0.0.1":ip), 
                            now - acptr->lasttime,
                            (acptr->user)?(now - acptr->user->last):0);
               cnt++;
@@ -289,7 +289,7 @@ int     m_ltrace(struct Client *cptr,
    * Add these lines to summarize the above which can get rather long
    * and messy when done remotely - Avalon
    */
-  if (!IsAnOper(sptr) || !cnt)
+  if (!IsAnyOper(sptr) || !cnt)
     {
       if (cnt)
           return 0;

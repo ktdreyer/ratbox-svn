@@ -296,6 +296,7 @@ struct Client
 #define IsAnyOper(x)		((x)->umodes & (FLAGS_OPER | FLAGS_LOCOP))
 #define IsGlobalOper(x)		((x)->umodes & FLAGS_OPER)
 #define IsLocalOper(x)		((x)->umodes & FLAGS_LOCOP)
+#define IsAdmin(x)		((x)->umodes & FLAGS_ADMIN)
 
 #define SetConnecting(x)        {(x)->status = STAT_CONNECTING; \
 				 (x)->handler = UNREGISTERED_HANDLER; }
@@ -313,7 +314,7 @@ struct Client
 				 (x)->handler = SERVER_HANDLER; }
 
 #define SetClient(x)            {(x)->status = STAT_CLIENT; \
-				 (x)->handler = IsAnOper((x)) ? \
+				 (x)->handler = IsAnyOper((x)) ? \
 					OPER_HANDLER : CLIENT_HANDLER; }
 
 #define STAT_CLIENT_PARSE (STAT_UNKNOWN | STAT_CLIENT)
@@ -439,10 +440,7 @@ struct Client
 #define MyClient(x)             (MyConnect(x) && IsClient(x))
 
 /* oper flags */
-#define MyOper(x)               (MyConnect(x) && IsOper(x))
-#define IsOper(x)               ((x)->umodes & FLAGS_OPER)
-#define IsLocOp(x)              ((x)->umodes & FLAGS_LOCOP)
-#define IsAnOper(x)             ((x)->umodes & (FLAGS_OPER|FLAGS_LOCOP))
+#define MyOper(x)               (MyConnect(x) && IsAnyOper(x))
 
 #define SetOper(x)              {(x)->umodes |= FLAGS_OPER; \
 				 if (!IsServer((x))) (x)->handler = OPER_HANDLER;}
@@ -451,14 +449,14 @@ struct Client
 				 if (!IsServer((x))) (x)->handler = OPER_HANDLER;}
 
 #define ClearOper(x)            {(x)->umodes &= ~FLAGS_OPER; \
-				 if (!IsAnOper((x)) && !IsServer((x))) \
+				 if (!IsAnyOper((x)) && !IsServer((x))) \
 				  (x)->handler = CLIENT_HANDLER; }
 
 #define ClearLocOp(x)           {(x)->umodes &= ~FLAGS_LOCOP; \
-				 if (!IsAnOper((x)) && !IsServer((x))) \
+				 if (!IsAnyOper((x)) && !IsServer((x))) \
 				  (x)->handler = CLIENT_HANDLER; }
 
-#define IsPrivileged(x)         (IsAnOper(x) || IsServer(x))
+#define IsPrivileged(x)         (IsAnyOper(x) || IsServer(x))
 
 /* umode flags */
 #define IsInvisible(x)          ((x)->umodes & FLAGS_INVISIBLE)

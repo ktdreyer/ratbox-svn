@@ -72,7 +72,7 @@ int     m_list(struct Client *cptr,
 	 }
     }
 
-  if(!IsAnOper(sptr))
+  if(!IsAnyOper(sptr))
     {
       if(((last_used + ConfigFileEntry.pace_wait) > CurrentTime) && (!IsDoingList(sptr)))
         {

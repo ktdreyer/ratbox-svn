@@ -126,7 +126,7 @@ int m_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         
   /* if message arrived from server, trust it, and set to oper */
   
-  if ((IsServer(cptr) || IsMe(cptr)) && !IsOper(sptr))
+  if ((IsServer(cptr) || IsMe(cptr)) && !IsGlobalOper(sptr))
     {
       if (sptr->status == STAT_CLIENT)
 	sptr->handler = OPER_HANDLER;
@@ -139,7 +139,7 @@ int m_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                    me.name, parv[0]);
       return 0;
     }
-  else if (IsAnOper(sptr))
+  else if (IsAnyOper(sptr))
     {
       if (MyConnect(sptr))
         {
@@ -240,7 +240,7 @@ int m_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       sendto_ops("%s (%s@%s) is now operator (%c)", parv[0],
 #endif /* CUSTOM_ERR */
                  sptr->username, sptr->host,
-                 IsOper(sptr) ? 'O' : 'o');
+                 IsGlobalOper(sptr) ? 'O' : 'o');
       send_umode_out(cptr, sptr, old);
       sendto_one(sptr, form_str(RPL_YOUREOPER), me.name, parv[0]);
       sendto_one(sptr, ":%s NOTICE %s :*** Oper privs are %s",me.name,parv[0],
@@ -323,7 +323,7 @@ int mo_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         
   /* if message arrived from server, trust it, and set to oper */
   
-  if ((IsServer(cptr) || IsMe(cptr)) && !IsOper(sptr))
+  if ((IsServer(cptr) || IsMe(cptr)) && !IsGlobalOper(sptr))
     {
       if (sptr->status == STAT_CLIENT)
 	sptr->handler = OPER_HANDLER;
@@ -336,7 +336,7 @@ int mo_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                    me.name, parv[0]);
       return 0;
     }
-  else if (IsAnOper(sptr))
+  else if (IsAnyOper(sptr))
     {
       if (MyConnect(sptr))
         {
@@ -437,7 +437,7 @@ int mo_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       sendto_ops("%s (%s@%s) is now operator (%c)", parv[0],
 #endif /* CUSTOM_ERR */
                  sptr->username, sptr->host,
-                 IsOper(sptr) ? 'O' : 'o');
+                 IsGlobalOper(sptr) ? 'O' : 'o');
       send_umode_out(cptr, sptr, old);
       sendto_one(sptr, form_str(RPL_YOUREOPER), me.name, parv[0]);
       sendto_one(sptr, ":%s NOTICE %s :*** Oper privs are %s",me.name,parv[0],
@@ -520,7 +520,7 @@ int ms_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         
   /* if message arrived from server, trust it, and set to oper */
   
-  if ((IsServer(cptr) || IsMe(cptr)) && !IsOper(sptr))
+  if ((IsServer(cptr) || IsMe(cptr)) && !IsGlobalOper(sptr))
     {
       if (sptr->status == STAT_CLIENT)
 	sptr->handler = OPER_HANDLER;
@@ -533,7 +533,7 @@ int ms_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                    me.name, parv[0]);
       return 0;
     }
-  else if (IsAnOper(sptr))
+  else if (IsAnyOper(sptr))
     {
       if (MyConnect(sptr))
         {
@@ -634,7 +634,7 @@ int ms_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       sendto_ops("%s (%s@%s) is now operator (%c)", parv[0],
 #endif /* CUSTOM_ERR */
                  sptr->username, sptr->host,
-                 IsOper(sptr) ? 'O' : 'o');
+                 IsGlobalOper(sptr) ? 'O' : 'o');
       send_umode_out(cptr, sptr, old);
       sendto_one(sptr, form_str(RPL_YOUREOPER), me.name, parv[0]);
       sendto_one(sptr, ":%s NOTICE %s :*** Oper privs are %s",me.name,parv[0],

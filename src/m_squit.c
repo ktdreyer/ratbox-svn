@@ -203,7 +203,7 @@ int ms_squit(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                  me.name, parv[0], server);
       return 0;
     }
-  if (IsLocOp(sptr) && !MyConnect(acptr))
+  if (IsLocalOper(sptr) && !MyConnect(acptr))
     {
       sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
       return 0;
@@ -218,7 +218,7 @@ int ms_squit(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   /*
   **  Notify all opers, if my local link is remotely squitted
   */
-  if (MyConnect(acptr) && !IsAnOper(cptr))
+  if (MyConnect(acptr) && !IsAnyOper(cptr))
     {
       sendto_ops_butone(NULL, &me,
                         ":%s WALLOPS :Received SQUIT %s from %s (%s)",
@@ -343,7 +343,7 @@ int mo_squit(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                  me.name, parv[0], server);
       return 0;
     }
-  if (IsLocOp(sptr) && !MyConnect(acptr))
+  if (IsLocalOper(sptr) && !MyConnect(acptr))
     {
       sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
       return 0;
@@ -358,7 +358,7 @@ int mo_squit(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   /*
   **  Notify all opers, if my local link is remotely squitted
   */
-  if (MyConnect(acptr) && !IsAnOper(cptr))
+  if (MyConnect(acptr) && !IsAnyOper(cptr))
     {
       sendto_ops_butone(NULL, &me,
                         ":%s WALLOPS :Received SQUIT %s from %s (%s)",

@@ -137,14 +137,14 @@ int     m_userhost(struct Client *cptr,
           if (acptr == sptr) /* show real IP for USERHOST on yourself */
             ircsprintf(response[i], "%s%s=%c%s@%s",
                        acptr->name,
-                       IsAnOper(acptr) ? "*" : "",
+                       IsAnyOper(acptr) ? "*" : "",
                        (acptr->user->away) ? '-' : '+',
                        acptr->username,
                        acptr->sockhost);
           else
             ircsprintf(response[i], "%s%s=%c%s@%s",
                        acptr->name,
-                       IsAnOper(acptr) ? "*" : "",
+                       IsAnyOper(acptr) ? "*" : "",
                        (acptr->user->away) ? '-' : '+',
                        acptr->username,
                        acptr->host);

@@ -1233,7 +1233,7 @@ static void report_unsortable_klines(struct Client *sptr,char *need_host)
       if(match(host,need_host))
         {
           p = (char *)NULL;
-          if(!IsAnOper(sptr))
+          if(!IsAnyOper(sptr))
             {
               p = strchr(pass,'|');
               if(p)
@@ -1277,7 +1277,7 @@ void report_mtrie_conf_links(struct Client *sptr, int flags)
           /* Non local opers do not need to know about
            * I lines that do spoofing 
            */
-          if(!(MyConnect(sptr) && IsAnOper(sptr)) &&
+          if(!(MyConnect(sptr) && IsAnyOper(sptr)) &&
              IsConfDoSpoofIp(found_conf))
             continue;
 
@@ -1352,7 +1352,7 @@ void report_mtrie_conf_links(struct Client *sptr, int flags)
 
           /* Hide any comment following a '|' seen in the password field */
           p = (char *)NULL;
-          if(!IsAnOper(sptr))
+          if(!IsAnyOper(sptr))
             {
               p = strchr(pass,'|');
               if(p)
@@ -1399,20 +1399,20 @@ char *show_iline_prefix(struct Client *sptr,struct ConfItem *aconf,char *name)
   if (IsConfDoSpoofIp(aconf))
     *prefix_ptr++ = '=';
 
-  if((ConfigFileEntry.e_lines_oper_only && IsAnOper(sptr)) || !ConfigFileEntry.e_lines_oper_only)
+  if((ConfigFileEntry.e_lines_oper_only && IsAnyOper(sptr)) || !ConfigFileEntry.e_lines_oper_only)
     if (IsConfElined(aconf))
       *prefix_ptr++ = '^';
 
-  if((ConfigFileEntry.b_lines_oper_only && IsAnOper(sptr)) || !ConfigFileEntry.b_lines_oper_only)
+  if((ConfigFileEntry.b_lines_oper_only && IsAnyOper(sptr)) || !ConfigFileEntry.b_lines_oper_only)
     if (IsConfBlined(aconf))
       *prefix_ptr++ = '&';
 
-  if((ConfigFileEntry.f_lines_oper_only && IsAnOper(sptr)) || !ConfigFileEntry.f_lines_oper_only)
+  if((ConfigFileEntry.f_lines_oper_only && IsAnyOper(sptr)) || !ConfigFileEntry.f_lines_oper_only)
     if (IsConfFlined(aconf))
       *prefix_ptr++ = '>';
 
 #ifdef IDLE_CHECK  
-  if((ConfigFileEntry.e_lines_oper_only && IsAnOper(sptr)) || !ConfigFileEntry.e_lines_oper_only)
+  if((ConfigFileEntry.e_lines_oper_only && IsAnyOper(sptr)) || !ConfigFileEntry.e_lines_oper_only)
     if (IsConfIdlelined(aconf))
       *prefix_ptr++ = '<';
 #endif
@@ -1463,7 +1463,7 @@ static void report_sub_mtrie(struct Client *sptr, int flags, DOMAIN_LEVEL *dl_pt
                        * password field
                        */
                       p = (char *)NULL;
-                      if(!IsAnOper(sptr))
+                      if(!IsAnyOper(sptr))
                         {
                           p = strchr(pass,'|');
                           if(p)
@@ -1484,7 +1484,7 @@ static void report_sub_mtrie(struct Client *sptr, int flags, DOMAIN_LEVEL *dl_pt
                       /* Non local opers do not need to know about
                        * I lines that do spoofing
                        */
-                      if(!(MyConnect(sptr) && IsAnOper(sptr))
+                      if(!(MyConnect(sptr) && IsAnyOper(sptr))
                          && IsConfDoSpoofIp(aconf))
                         continue;
 
@@ -1518,7 +1518,7 @@ static void report_sub_mtrie(struct Client *sptr, int flags, DOMAIN_LEVEL *dl_pt
                   if (aconf->status == CONF_KILL)
                     {
                       p = (char *)NULL;
-                      if(!IsAnOper(sptr))
+                      if(!IsAnyOper(sptr))
                         {
                           p = strchr(pass,'|');
                           if(p)
@@ -1539,7 +1539,7 @@ static void report_sub_mtrie(struct Client *sptr, int flags, DOMAIN_LEVEL *dl_pt
                       /* Non local opers do not need to know about
                        * I lines that do spoofing
                        */
-                      if(!(MyConnect(sptr) && IsAnOper(sptr))
+                      if(!(MyConnect(sptr) && IsAnyOper(sptr))
                          && IsConfDoSpoofIp(aconf))
                         continue;
                       c = 'I';

@@ -112,7 +112,7 @@ int     mo_gline(struct Client *cptr,
     {
 		if (ConfigFileEntry.glines) {
 			/* Only globals can apply Glines */
-			if (!IsOper(sptr))
+			if (!IsGlobalOper(sptr))
 			{
 				sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
 				return 0;
@@ -371,7 +371,7 @@ int     ms_gline(struct Client *cptr,
   {
 	  if (ConfigFileEntry.glines) {
 /* Only globals can apply Glines */
-      if (!IsOper(sptr))
+      if (!IsGlobalOper(sptr))
         {
           sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
           return 0;

@@ -125,13 +125,13 @@ int mo_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       return 0;
     }
 
-  if (MyClient(sptr) && IsAnOper(sptr) && !IsSetOperK(sptr))
+  if (MyClient(sptr) && IsAnyOper(sptr) && !IsSetOperK(sptr))
     {
       sendto_one(sptr,":%s NOTICE %s :You have no K flag",me.name,parv[0]);
       return 0;
     }
 
-  if (IsAnOper(cptr))
+  if (IsAnyOper(cptr))
     {
       if (!BadPtr(path))
         if (strlen(path) > (size_t) KILLLEN)
@@ -155,7 +155,7 @@ int mo_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                  me.name, parv[0], user, acptr->name);
       chasing = 1;
     }
-  if (!MyConnect(acptr) && IsLocOp(cptr))
+  if (!MyConnect(acptr) && IsLocalOper(cptr))
     {
       sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
       return 0;
@@ -189,7 +189,7 @@ int mo_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         {
           ircsprintf(buf, "%s!%s%s (%s)",
                      cptr->username, cptr->name,
-                     IsOper(sptr) ? "" : "(L)", path);
+                     IsGlobalOper(sptr) ? "" : "(L)", path);
           path = buf;
           reason = path;
         }
@@ -206,7 +206,7 @@ int mo_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   ** Note: "acptr->name" is used instead of "user" because we may
   **     have changed the target because of the nickname change.
   */
-  if (IsLocOp(sptr) && !MyConnect(acptr))
+  if (IsLocalOper(sptr) && !MyConnect(acptr))
     {
       sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
       return 0;
@@ -218,7 +218,7 @@ int mo_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     }
   else
     {
-      if(IsAnOper(cptr))
+      if(IsAnyOper(cptr))
         {
           reason = parv[2];
         }
@@ -232,7 +232,7 @@ int mo_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 	}
     }
 
-  if (IsAnOper(sptr)) /* send it normally */
+  if (IsAnyOper(sptr)) /* send it normally */
     {
       sendto_realops("Received KILL message for %s. From %s Path: %s!%s", 
                acptr->name, parv[0], inpath, path);
@@ -252,7 +252,7 @@ int mo_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                      acptr->name, parv[0]);
 
 #if defined(USE_SYSLOG) && defined(SYSLOG_KILL)
-  if (IsOper(sptr))
+  if (IsGlobalOper(sptr))
     log(L_INFO,"KILL From %s For %s Path %s!%s",
                         parv[0], acptr->name, inpath, path);
 #endif
@@ -262,7 +262,7 @@ int mo_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   ** back.
   ** Suicide kills are NOT passed on --SRB
   */
-  if (!MyConnect(acptr) || !MyConnect(sptr) || !IsAnOper(sptr))
+  if (!MyConnect(acptr) || !MyConnect(sptr) || !IsAnyOper(sptr))
     {
       sendto_serv_butone(cptr, ":%s KILL %s :%s!%s",
                          parv[0], acptr->name, inpath, path);
@@ -293,7 +293,7 @@ int mo_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   ** the unnecessary QUIT for this. (This flag should never be
   ** set in any other place)
   */
-  if (MyConnect(acptr) && MyConnect(sptr) && IsAnOper(sptr))
+  if (MyConnect(acptr) && MyConnect(sptr) && IsAnyOper(sptr))
     ircsprintf(buf2, "Local kill by %s (%s)", sptr->name,
                      BadPtr(parv[2]) ? sptr->name : parv[2]);
   else
@@ -346,13 +346,13 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       return 0;
     }
 
-  if (MyClient(sptr) && IsAnOper(sptr) && !IsSetOperK(sptr))
+  if (MyClient(sptr) && IsAnyOper(sptr) && !IsSetOperK(sptr))
     {
       sendto_one(sptr,":%s NOTICE %s :You have no K flag",me.name,parv[0]);
       return 0;
     }
 
-  if (IsAnOper(cptr))
+  if (IsAnyOper(cptr))
     {
       if (!BadPtr(path))
         if (strlen(path) > (size_t) KILLLEN)
@@ -376,7 +376,7 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                  me.name, parv[0], user, acptr->name);
       chasing = 1;
     }
-  if (!MyConnect(acptr) && IsLocOp(cptr))
+  if (!MyConnect(acptr) && IsLocalOper(cptr))
     {
       sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
       return 0;
@@ -410,7 +410,7 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         {
           ircsprintf(buf, "%s!%s%s (%s)",
                      cptr->username, cptr->name,
-                     IsOper(sptr) ? "" : "(L)", path);
+                     IsGlobalOper(sptr) ? "" : "(L)", path);
           path = buf;
           reason = path;
         }
@@ -427,7 +427,7 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   ** Note: "acptr->name" is used instead of "user" because we may
   **     have changed the target because of the nickname change.
   */
-  if (IsLocOp(sptr) && !MyConnect(acptr))
+  if (IsLocalOper(sptr) && !MyConnect(acptr))
     {
       sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
       return 0;
@@ -439,7 +439,7 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     }
   else
     {
-      if(IsAnOper(cptr))
+      if(IsAnyOper(cptr))
         {
           reason = parv[2];
         }
@@ -453,7 +453,7 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 	}
     }
 
-  if (IsAnOper(sptr)) /* send it normally */
+  if (IsAnyOper(sptr)) /* send it normally */
     {
       sendto_realops("Received KILL message for %s. From %s Path: %s!%s", 
                acptr->name, parv[0], inpath, path);
@@ -473,7 +473,7 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                      acptr->name, parv[0]);
 
 #if defined(USE_SYSLOG) && defined(SYSLOG_KILL)
-  if (IsOper(sptr))
+  if (IsGlobalOper(sptr))
     log(L_INFO,"KILL From %s For %s Path %s!%s",
                         parv[0], acptr->name, inpath, path);
 #endif
@@ -483,7 +483,7 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   ** back.
   ** Suicide kills are NOT passed on --SRB
   */
-  if (!MyConnect(acptr) || !MyConnect(sptr) || !IsAnOper(sptr))
+  if (!MyConnect(acptr) || !MyConnect(sptr) || !IsAnyOper(sptr))
     {
       sendto_serv_butone(cptr, ":%s KILL %s :%s!%s",
                          parv[0], acptr->name, inpath, path);
@@ -514,7 +514,7 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   ** the unnecessary QUIT for this. (This flag should never be
   ** set in any other place)
   */
-  if (MyConnect(acptr) && MyConnect(sptr) && IsAnOper(sptr))
+  if (MyConnect(acptr) && MyConnect(sptr) && IsAnyOper(sptr))
     ircsprintf(buf2, "Local kill by %s (%s)", sptr->name,
                      BadPtr(parv[2]) ? sptr->name : parv[2]);
   else

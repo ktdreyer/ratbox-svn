@@ -160,7 +160,7 @@ int mo_set(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   char *command;
   int cnum;
 
-  if (!MyClient(sptr) || !IsAnOper(sptr))
+  if (!MyClient(sptr) || !IsAnyOper(sptr))
     {
       sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
       return 0;

@@ -116,7 +116,7 @@ int mo_connect(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
 
   /* always privileged with handlers */
 
-  if (IsLocOp(sptr) && parc > 3) {
+  if (IsLocalOper(sptr) && parc > 3) {
     /* 
      * Only allow LocOps to make local CONNECTS --SRB
      */
@@ -184,7 +184,7 @@ int mo_connect(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
   /*
    * Notify all operators about remote connect requests
    */
-  if (!IsAnOper(cptr))
+  if (!IsAnyOper(cptr))
     {
       sendto_ops_butone(NULL, &me,
                         ":%s WALLOPS :Remote CONNECT %s %s from %s",
@@ -238,7 +238,7 @@ int ms_connect(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
       return -1;
     }
 
-  if (IsLocOp(sptr) && parc > 3) {
+  if (IsLocalOper(sptr) && parc > 3) {
     /* 
      * Only allow LocOps to make local CONNECTS --SRB
      */
@@ -306,7 +306,7 @@ int ms_connect(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
   /*
    * Notify all operators about remote connect requests
    */
-  if (!IsAnOper(cptr))
+  if (!IsAnyOper(cptr))
     {
       sendto_ops_butone(NULL, &me,
                         ":%s WALLOPS :Remote CONNECT %s %s from %s",

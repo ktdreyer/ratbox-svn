@@ -298,7 +298,7 @@ void report_configured_links(struct Client* sptr, int mask)
               c = 'n';
 
             /* Don't allow non opers to see actual ips */
-            if(IsAnOper(sptr))
+            if(IsAnyOper(sptr))
               sendto_one(sptr, form_str(p->rpl_stats), me.name,
                          sptr->name, c,
                          host,
@@ -318,7 +318,7 @@ void report_configured_links(struct Client* sptr, int mask)
         else if(mask & (CONF_OPERATOR|CONF_LOCOP))
           {
             /* Don't allow non opers to see oper privs */
-            if(IsAnOper(sptr))
+            if(IsAnyOper(sptr))
               sendto_one(sptr, form_str(p->rpl_stats), me.name,
                          sptr->name,
                          p->conf_char,
@@ -2298,7 +2298,7 @@ show_temp_klines(struct Client *sptr, struct ConfItem *tklist)
 	  else
 	    reason = "No Reason";
 
-	  if (!IsAnOper(sptr))
+	  if (!IsAnyOper(sptr))
 	    {
 	      if ((p = strchr(reason, '|')))
 		*p = '\0';
@@ -2651,7 +2651,7 @@ int mo_testline(struct Client *cptr, struct Client *sptr, int parc, char *parv[]
   char *host, *pass, *user, *name, *classname, *given_host, *given_name, *p;
   int port;
 
-  if (!MyClient(sptr) || !IsAnOper(sptr))
+  if (!MyClient(sptr) || !IsAnyOper(sptr))
     {
       sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
       return 0;

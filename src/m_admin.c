@@ -97,7 +97,7 @@ int m_admin(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   struct ConfItem *aconf;
   static time_t last_used=0L;
 
-  if(!IsAnOper(sptr))
+  if(!IsAnyOper(sptr))
     {
       if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
         {
@@ -152,7 +152,7 @@ int ms_admin(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   struct ConfItem *aconf;
   static time_t last_used=0L;
 
-  if(!IsAnOper(sptr))
+  if(!IsAnyOper(sptr))
     {
       if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
         {

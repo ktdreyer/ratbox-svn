@@ -122,7 +122,7 @@ int m_links(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
   assert(0 != mask);
 
-  if(!IsAnOper(sptr))
+  if(!IsAnyOper(sptr))
     {
       /* reject non local requests */
       if(!MyClient(sptr))
@@ -180,7 +180,7 @@ int m_links(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         continue;
       if (*mask && !match(mask, acptr->name))
         continue;
-      if(IsAnOper(sptr))
+      if(IsAnyOper(sptr))
          sendto_one(sptr, form_str(RPL_LINKS),
                     me.name, parv[0], acptr->name, acptr->serv->up,
                     acptr->hopcount, (acptr->info[0] ? acptr->info :
@@ -244,7 +244,7 @@ int ms_links(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
   assert(0 != mask);
 
-  if(!IsAnOper(sptr))
+  if(!IsAnyOper(sptr))
     {
       /* reject non local requests */
       if(!MyClient(sptr))
@@ -303,7 +303,7 @@ int ms_links(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         continue;
       if (*mask && !match(mask, acptr->name))
         continue;
-      if(IsAnOper(sptr))
+      if(IsAnyOper(sptr))
          sendto_one(sptr, form_str(RPL_LINKS),
                     me.name, parv[0], acptr->name, acptr->serv->up,
                     acptr->hopcount, (acptr->info[0] ? acptr->info :

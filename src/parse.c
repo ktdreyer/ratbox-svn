@@ -232,7 +232,7 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
       if ((mptr->flags & 1) && !(IsServer(cptr)))
         {
 	  if (ConfigFileEntry.no_oper_flood) {
-            if (IsAnOper(cptr))
+            if (IsAnyOper(cptr))
               /* "randomly" (weighted) increase the since */
               cptr->since += (cptr->receiveM % 5) ? 1 : 0;
             else

@@ -98,7 +98,7 @@ int m_help(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   int i;
   static time_t last_used = 0;
 
-  if (!IsAnOper(sptr))
+  if (!IsAnyOper(sptr))
     {
       /* HELP is always local */
       if ((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
@@ -113,7 +113,7 @@ int m_help(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         }
     }
 
-  if (!IsAnOper(sptr) )
+  if (!IsAnyOper(sptr) )
     {
       for (i = 0; msgtab[i].cmd; i++)
         sendto_one(sptr,":%s NOTICE %s :%s",

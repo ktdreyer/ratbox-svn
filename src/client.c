@@ -326,7 +326,7 @@ check_pings(void *notused)
           if( !IsElined(cptr) &&
               GlobalSetOptions.idletime && 
 #ifdef OPER_IDLE
-              !IsAnOper(cptr) &&
+              !IsAnyOper(cptr) &&
 #endif /* OPER_IDLE */
               !IsIdlelined(cptr) && 
               ((CurrentTime - cptr->user->last) > GlobalSetOptions.idletime))
@@ -656,7 +656,7 @@ void check_klines(void)
           if( !IsElined(cptr) &&
               GlobalSetOptions.idletime && 
 #ifdef OPER_IDLE
-              !IsAnOper(cptr) &&
+              !IsAnyOper(cptr) &&
 #endif /* OPER_IDLE */
               !IsIdlelined(cptr) && 
               ((CurrentTime - cptr->user->last) > GlobalSetOptions.idletime))
@@ -768,7 +768,7 @@ static void update_client_exit_stats(struct Client* cptr)
 
   else if (IsClient(cptr)) {
     --Count.total;
-    if (IsAnOper(cptr))
+    if (IsAnyOper(cptr))
       --Count.oper;
     if (IsInvisible(cptr)) 
       --Count.invisi;
@@ -1489,7 +1489,7 @@ const char* comment         /* Reason for the exit */
         remove_one_ip(sptr->ip.s_addr);
 #endif
 #endif
-      if (IsAnOper(sptr))
+      if (IsAnyOper(sptr))
         {
           fdlist_delete(sptr->fd, FDL_OPER | FDL_BUSY);
           /* LINKLIST */

@@ -232,7 +232,7 @@ int     m_who(struct Client *cptr,
   /* '/who nick' */
 
   if (((acptr = find_client(mask, NULL)) != NULL) &&
-      IsPerson(acptr) && (!oper || IsAnOper(acptr)))
+      IsPerson(acptr) && (!oper || IsAnyOper(acptr)))
     {
       int isinvis = 0;
       struct Channel *ch2ptr = NULL;
@@ -281,7 +281,7 @@ static void who_global(struct Client *sptr,char *mask, int oper)
     {
       if (!IsPerson(acptr))
         continue;
-      if (oper && !IsAnOper(acptr))
+      if (oper && !IsAnyOper(acptr))
         continue;
       
       showperson = NO;
@@ -338,7 +338,7 @@ static void do_who_on_channel(struct Client *sptr,
 
   for (lp = chptr->members; lp; lp = lp->next)
     {
-      if (oper && !IsAnOper(lp->value.cptr))
+      if (oper && !IsAnyOper(lp->value.cptr))
 	continue;
       if (IsInvisible(lp->value.cptr) && !member)
 	continue;
@@ -359,7 +359,7 @@ static  void    do_who(struct Client *sptr,
     *p++ = 'G';
   else
     *p++ = 'H';
-  if (IsAnOper(acptr))
+  if (IsAnyOper(acptr))
     *p++ = '*';
   if (lp != NULL)
     {

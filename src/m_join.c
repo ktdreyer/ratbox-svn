@@ -604,7 +604,7 @@ int     ms_join(struct Client *cptr,
 
 #ifdef ANTI_SPAMBOT       /* Dianora */
 
-          if( MyConnect(sptr) && !IsAnOper(sptr) )
+          if( MyConnect(sptr) && !IsAnyOper(sptr) )
             {
               if(GlobalSetOptions.spam_num &&
 		 (sptr->join_leave_count >= GlobalSetOptions.spam_num))
@@ -678,7 +678,7 @@ int     ms_join(struct Client *cptr,
              }
 
           if ((sptr->user->joined >= MAXCHANNELSPERUSER) &&
-             (!IsAnOper(sptr) || (sptr->user->joined >= MAXCHANNELSPERUSER*3)))
+             (!IsAnyOper(sptr) || (sptr->user->joined >= MAXCHANNELSPERUSER*3)))
             {
               sendto_one(sptr, form_str(ERR_TOOMANYCHANNELS),
                          me.name, parv[0], name);

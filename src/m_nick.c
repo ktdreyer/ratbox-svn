@@ -225,7 +225,7 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       return 0;
     }
 
-  if (MyConnect(sptr) && !IsServer(sptr) && !IsAnOper(sptr) &&
+  if (MyConnect(sptr) && !IsServer(sptr) && !IsAnyOper(sptr) &&
      find_q_line(nick, sptr->username, sptr->host)) 
     {
       sendto_realops_flags(FLAGS_REJ,
