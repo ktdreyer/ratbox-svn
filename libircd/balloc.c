@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <assert.h>
+#include <fcntl.h>
 #include "ircd_defs.h"		/* DEBUG_BLOCK_ALLOCATOR */
 #include "ircd.h"
 #include "memory.h"
@@ -23,6 +24,7 @@
 #include "tools.h"
 #include "s_log.h"
 #include "client.h"
+#include "fdlist.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -33,14 +35,15 @@ static int newblock(BlockHeap * bh);
 int zero_fd = -1;
 void initBlockHeap(void)
 {
-  fd_open(zero_fd, "/dev/zero", "Anonymous mmap()");
-  if(fd < 0)
+  zero_fd = open("/dev/zero", O_RDWR);
+  if(zero_fd < 0)
     outofmemory();
+  fd_open(zero_fd, FD_FILE, "Anonymous mmap()");
 }
 
 static inline void *get_block(size_t size)
 {
-  return(mmap(NULL, size, PROT_READ|PROT_WRITE, MAP_PRIVATE, fd, 0));
+  return(mmap(NULL, size, PROT_READ|PROT_WRITE, MAP_PRIVATE, zero_fd, 0));
 }
 #else
 void initBlockHeap(void)
@@ -51,7 +54,6 @@ void initBlockHeap(void)
 static inline void *get_block(size_t size)
 {
   return(mmap(NULL,size,PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANON, -1, 0));
-
 }
 #endif
 
