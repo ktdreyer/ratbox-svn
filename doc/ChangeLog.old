@@ -1,3 +1,15 @@
+androsyn    2002/05/18 01:42:21 EDT	(20020518_0)
+
+  Modified files:
+    src                  listener.c 
+  Log:
+  Removed bogus warning..
+  
+  Revision  Changes    Path
+  7.66      +0 -12     ircd-hybrid-7/src/listener.c
+
+
+
 db          2002/05/17 14:58:53 EDT	(20020517_3)
 
   Modified files:
