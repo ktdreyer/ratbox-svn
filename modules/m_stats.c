@@ -243,7 +243,9 @@ static void m_stats(struct Client *client_p, struct Client *source_p,
 
   /* Send the end of stats notice, and the stats_spy */
   sendto_one(source_p, form_str(RPL_ENDOFSTATS), me.name, parv[0], parv[1]);
-  stats_spy(source_p, parv[1]);
+
+  if((parv[1][0] != 'L') && (parv[1][0] != 'l'))
+    stats_spy(source_p, parv[1]);
 }
 
 /*
@@ -758,7 +760,7 @@ static void stats_ltrace(struct Client *client_p, int parc, char *parv[])
   statchar=parv[1][0];
  
   stats_L(client_p,name,doall,wilds,statchar);
-  stats_L_spy(client_p, name, parv[1]);
+  stats_L_spy(client_p, parv[1], name);
 
   return;
 }
@@ -898,7 +900,7 @@ static void stats_L_list(struct Client *source_p,char *name, int doall, int wild
  *
  * done --is
  */
-static void stats_spy(struct Client *source_p,char *statchar)
+static void stats_spy(struct Client *source_p, char *statchar)
 {
   struct hook_stats_data data;
 
