@@ -121,6 +121,7 @@ static void m_challenge( struct Client *client_p, struct Client *source_p,
      if (!(aconf = find_conf_by_name(source_p->user->auth_oper, CONF_OPERATOR)))
        {
          sendto_one (source_p, form_str(ERR_NOOPERHOST), me.name, parv[0]);
+         log_foper(source_p, source_p->user->auth_oper);
          return;
        }
 
@@ -136,6 +137,7 @@ static void m_challenge( struct Client *client_p, struct Client *source_p,
 	                     "Failed OPER attempt by %s (%s@%s) can't attach conf!",
 	                     source_p->name, source_p->username, source_p->host);
 	attach_conf(source_p, oconf);
+        log_foper(source_p, source_p->user->auth_oper);
 	return;
       }
      
@@ -164,8 +166,9 @@ static void m_challenge( struct Client *client_p, struct Client *source_p,
                                 source_p->localClient->sockhost,
                                 CONF_OPERATOR)))
     {
-     sendto_one (source_p, form_str(ERR_NOOPERHOST), me.name, parv[0]);
-     return;
+      sendto_one (source_p, form_str(ERR_NOOPERHOST), me.name, parv[0]);
+      log_failed_oper(source_p, source_p->user->auth_oper);
+      return;
     }
   if (!aconf->rsa_public_key)
     {

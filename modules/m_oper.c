@@ -108,6 +108,8 @@ static void m_oper(struct Client *client_p, struct Client *source_p,
   if( (aconf = find_password_aconf(name,source_p)) == NULL)
     {
       sendto_one(source_p, form_str(ERR_NOOPERHOST), me.name, source_p->name);
+      log_foper(source_p, name);
+
       if (ConfigFileEntry.failed_oper_notice)
         {
           sendto_realops_flags(UMODE_ALL, L_ALL,
@@ -139,6 +141,7 @@ static void m_oper(struct Client *client_p, struct Client *source_p,
           sendto_realops_flags(UMODE_ALL, L_ALL,
                                "Failed OPER attempt by %s (%s@%s) can't attach conf!",
                                source_p->name, source_p->username, source_p->host);
+          log_foper(source_p, name);
           /* 
              20001216:
              Reattach old iline
@@ -158,6 +161,8 @@ static void m_oper(struct Client *client_p, struct Client *source_p,
   else
     {
       sendto_one(source_p,form_str(ERR_PASSWDMISMATCH),me.name, parv[0]);
+      log_foper(source_p, source_p->user->auth_oper);
+
       if (ConfigFileEntry.failed_oper_notice)
         {
           sendto_realops_flags(UMODE_ALL, L_ALL,

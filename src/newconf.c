@@ -313,6 +313,12 @@ void	newconf_init()
 			conf_set_logging_gline_log);
 	add_conf_item("logging", "log_level", CF_STRING,
 			conf_set_logging_log_level);
+	add_conf_item("logging", "fname_userlog", CF_QSTRING,
+			conf_set_logging_fname_userlog);
+	add_conf_item("logging", "fname_operlog", CF_QSTRING,
+                        conf_set_logging_fname_operlog);
+	add_conf_item("logging", "fname_foperlog", CF_QSTRING,
+			conf_set_logging_fname_foperlog);
 
 	add_top_conf("operator", conf_begin_oper, conf_end_oper);
 	add_conf_item("operator", "name", CF_QSTRING, conf_set_oper_name);
@@ -474,12 +480,6 @@ void	newconf_init()
 			conf_set_general_message_locale);
 	add_conf_item("general", "client_exit", CF_YESNO,
 			conf_set_general_client_exit);
-	add_conf_item("general", "fname_userlog", CF_QSTRING,
-			conf_set_general_fname_userlog);
-	add_conf_item("general", "fname_operlog", CF_QSTRING,
-			conf_set_general_fname_operlog);
-	add_conf_item("general", "fname_foperlog", CF_QSTRING,
-			conf_set_general_fname_foperlog);
 	add_conf_item("general", "oper_only_umodes", CF_STRING | CF_FLIST,
 			conf_set_general_oper_only_umodes);
 	add_conf_item("general", "max_targets", CF_INT,
@@ -766,6 +766,21 @@ void	conf_set_logging_oper_log(void *data)
 void	conf_set_logging_gline_log(void *data)
 {
 	conf_report_error("Warning -- logging::gline_log is not yet implemented.");
+}
+
+void	conf_set_logging_fname_userlog(void *data)
+{
+	strlcpy(ConfigFileEntry.fname_userlog, data, sizeof(ConfigFileEntry.fname_userlog));
+}
+
+void	conf_set_logging_fname_foperlog(void *data)
+{
+	strlcpy(ConfigFileEntry.fname_foperlog, data, sizeof(ConfigFileEntry.fname_foperlog));
+}
+
+void	conf_set_logging_fname_operlog(void *data)
+{
+	strlcpy(ConfigFileEntry.fname_operlog, data, sizeof(ConfigFileEntry.fname_operlog));
 }
 
 static struct
@@ -2340,21 +2355,6 @@ void	conf_set_general_short_motd(void *data)
 void	conf_set_general_no_oper_flood(void *data)
 {
 	ConfigFileEntry.no_oper_flood = *(unsigned int*) data;
-}
-
-void	conf_set_general_fname_userlog(void *data)
-{
-	strlcpy(ConfigFileEntry.fname_userlog, data, sizeof(ConfigFileEntry.fname_userlog));
-}
-
-void	conf_set_general_fname_foperlog(void *data)
-{
-	strlcpy(ConfigFileEntry.fname_foperlog, data, sizeof(ConfigFileEntry.fname_foperlog));
-}
-
-void	conf_set_general_fname_operlog(void *data)
-{
-	strlcpy(ConfigFileEntry.fname_operlog, data, sizeof(ConfigFileEntry.fname_operlog));
 }
 
 void	conf_set_general_glines(void *data)

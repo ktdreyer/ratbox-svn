@@ -88,7 +88,8 @@ static int
 open_log(const char* filename)
 {
   logFile = fbopen(filename, "a");
-  if (logFile == NULL) {
+  if (logFile == NULL)
+  {
 #ifdef USE_SYSLOG
     syslog(LOG_ERR, "Unable to open log file: %s: %s",
            filename, strerror(errno));
@@ -122,7 +123,6 @@ ilog(int priority, const char* fmt, ...)
   assert(-1 < priority);
   if(fmt == NULL)
     return;
-  assert(0 != fmt);
 
   if (priority > logLevel)
     return;
@@ -213,11 +213,8 @@ log_user_exit(struct Client *source_p)
 	  (signed long) on_for / 3600,
 	  (signed long) (on_for % 3600)/60,
 	  (signed long) on_for % 60,
-	  source_p->name,
-	  source_p->username,
-	  source_p->host,
-	  source_p->localClient->sendK,
-	  source_p->localClient->receiveK);
+	  source_p->name, source_p->username, source_p->host,
+	  source_p->localClient->sendK, source_p->localClient->receiveK);
     }
 
 #else
@@ -234,7 +231,7 @@ log_user_exit(struct Client *source_p)
       {
 	if (user_log_fb == NULL)
 	  {
-	    if( ConfigFileEntry.fname_userlog && 
+	    if((ConfigFileEntry.fname_userlog[0] != '\0') && 
 		(user_log_fb = fbopen(ConfigFileEntry.fname_userlog, "r")) != NULL )
 	      {
 		fbclose(user_log_fb);
@@ -296,8 +293,8 @@ log_oper( struct Client *source_p, char *name )
   FBFILE *oper_fb;
   char linebuf[BUFSIZE];
 
-  if (!ConfigFileEntry.fname_operlog)
-	  return;
+  if(ConfigFileEntry.fname_operlog[0] == '\0')
+    return;
   
   if (IsPerson(source_p))
     {
@@ -319,3 +316,38 @@ log_oper( struct Client *source_p, char *name )
 	}
     }
 }
+
+/* log_foper()
+ *
+ * inputs       - pointer to client
+ * output       -
+ * side effects - FNAME_FOPERLOG is written to, if present
+ */
+void
+log_foper(struct Client *source_p, char *name)
+{
+  FBFILE *oper_fb;
+  char linebuf[BUFSIZE];
+
+  if(ConfigFileEntry.fname_foperlog[0] == '\0')
+    return;
+
+  if(IsPerson(source_p))
+  {
+    if((oper_fb = fbopen(ConfigFileEntry.fname_foperlog, "r")) != NULL)
+    {
+      fbclose(oper_fb);
+      oper_fb = fbopen(ConfigFileEntry.fname_foperlog, "a");
+    }
+
+    if(oper_fb != NULL)
+    {
+      ircsprintf(linebuf, "%s FAILED OPER (%s) by (%s!%s@%s)\n",
+                 myctime(CurrentTime), name,
+                 source_p->name, source_p->username, source_p->host);
+      fbputs(linebuf,oper_fb);
+      fbclose(oper_fb);
+    }
+  }
+}
+

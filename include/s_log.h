@@ -44,5 +44,6 @@ extern const char *get_log_level_as_string(int level);
 
 extern void log_user_exit(struct Client *);
 extern void log_oper(struct Client *, char *name);
+extern void log_foper(struct Client *, char *name);
 
 #endif /* INCLUDED_s_log_h */
