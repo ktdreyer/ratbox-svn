@@ -520,43 +520,46 @@ static void
 GoodAuth(int parc, char **parv)
 
 {
-	struct AuthRequest *auth;
-	long id;
+  struct AuthRequest *auth;
+  long id;
 
 /*	assert(parc == 3); */
 
-	id = strtol(parv[1], 0, 0);
-	for (auth = AuthClientList; auth; auth = auth->next)
-	{
-		/*
-		 * Remember: the client id is the memory address
-		 * of auth->client, so if it matches id, we
-		 * found our client.
-		 */
-		if ((void *) auth->client == (void *) id)
-		{
-			/*
-			 * Use IAuth's username, because it may be different
-			 * if ident failed, but the client's I: line specified
-			 * no tilde character
-			 */
-			strncpy_irc(auth->client->username, parv[2], USERLEN);
+  id = strtol(parv[1], 0, 0);
 
+#if 0
+  for (auth = AuthClientList; auth; auth = auth->next)
+    {
       /*
-       * Also use IAuth's hostname in case of SPOOF_FREEFORM
+       * Remember: the client id is the memory address
+       * of auth->client, so if it matches id, we
+       * found our client.
        */
-      strncpy_irc(auth->client->host, parv[3], HOSTLEN);
+      if ((void *) auth->client == (void *) id)
+	{
+	  /*
+	   * Use IAuth's username, because it may be different
+	   * if ident failed, but the client's I: line specified
+	   * no tilde character
+	   */
+	  strncpy_irc(auth->client->username, parv[2], USERLEN);
 
-			/*
-			 * Register them
-			 */
-			GreetUser(auth->client);
+	  /*
+	   * Also use IAuth's hostname in case of SPOOF_FREEFORM
+	   */
+	  strncpy_irc(auth->client->host, parv[3], HOSTLEN);
 
-			remove_auth_request(auth);
+	  /*
+	   * Register them
+	   */
+	  GreetUser(auth->client);
 
-			break;
-		}
+	  remove_auth_request(auth);
+	  
+	  break;
 	}
+    }
+#endif
 } /* GoodAuth() */
 
 /*
