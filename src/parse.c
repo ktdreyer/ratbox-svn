@@ -414,10 +414,19 @@ mod_add_cmd(struct Message *msg)
 	struct MessageHash *last_ptr = NULL;
 	struct MessageHash *new_ptr;
 	int msgindex;
-
+	int x;
 	s_assert(msg != NULL);
 	if(msg == NULL)
 		return;
+
+	for(x = 0; x < LAST_HANDLER_TYPE; x++)
+	{
+		if(msg->handlers[x].handler == NULL)
+		{
+			ilog(L_MAIN, "Handler %d for command %s == NULL", x, msg->cmd);
+			s_assert(0);
+		}
+	}
 
 	msgindex = cmd_hash(msg->cmd);
 
