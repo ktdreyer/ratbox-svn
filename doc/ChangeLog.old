@@ -1,3 +1,8 @@
+*** 20001201_7 by db
+- fix to whois... this function needs review... it "feels" wrong... sigh
+
+
+
 *** 20001201_6 by db
 - fixed m_names.c missing reply_to_send = 1
 
