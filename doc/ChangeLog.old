@@ -1,3 +1,10 @@
+*** 20001030_1 by db
+- cleaned up m_stats.c just a little
+  I like Isomers idea of renaming things a bit more, but this is
+  a start...
+
+
+
 *** 20001029_5 by db
 - finally moved check_client from s_bsd.c, where it really never seemed
   to me to belong, moved into s_conf.c 
