@@ -1,3 +1,18 @@
+androsyn    2002/12/09 21:25:53 UTC	(20021209_1)
+
+  Modified files:
+    src                  client.c s_bsd_sigio.c 
+  Log:
+  The close connection check needed to be moved further down in the code..also
+  add a few asserts in s_bsd_sigio to track down a weird core dump i'm
+  getting..
+  
+  Revision  Changes    Path
+  7.343     +6 -18     ircd-ratbox/src/client.c
+  7.31      +3 -2      ircd-ratbox/src/s_bsd_sigio.c
+
+
+
 androsyn    2002/12/09 20:23:05 UTC	(20021209_0)
 
   Modified files:
