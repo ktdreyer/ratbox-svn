@@ -1,3 +1,15 @@
+*** 20011002_5 by wcampbel
+Fixed m_map.c's random failing to be recognized as a command without a
+  trailing space.
+Added m_flags.c, ircd-comstud like FLAGS command, completely optional bloat.
+  It works, has been tested, and as far as I can tell, has no issues.  This is
+  slightly different than the one I posted.  It had the same issue as MAP did.
+
+Anyone available to explain why these won't work sometimes with 0, 1, 0
+in the msgtab while 0, 0, 0 does.  It only appears to be that one combination
+of parameters too, as JUPE's 0, 3, 0 and NICKINFO's 0, 2, 0 work fine.
+
+
 *** 20011002_4 by db
 - reformatting this makes it understandable now.
 
