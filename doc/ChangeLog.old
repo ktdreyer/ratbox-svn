@@ -1,3 +1,10 @@
+*** 20010106_27 by davidt
+Fixes for lazylinks kill
+Fixes for privmsg/notice for vchans
+Fixed some odd stuff in set_channel_mode that was wrong..
+and i'm sure i probably broke something, since it's 3:30am.. *sigh*
+
+
 *** 20010106_26 by wcampbel
 Added some more conf variables to INFO
 
