@@ -1,3 +1,8 @@
+*** 20010528_5 by jdc
+* Updated the _version definitions in m_clearchan, m_nickinfo, and m_opme.
+
+
+
 *** 20010528_4 by jdc
 * Typecasted time_t references to their appropriate types (%ld being
   signed long, %lu being unsigned long).  Yes, there are some %lds,
