@@ -73,7 +73,7 @@ static void who_global(struct Client *sptr, char *mask, int oper);
 static void do_who(struct Client *sptr,
                    struct Client *acptr,
                    struct Channel *chptr,
-                   char *repname,
+                   char *chname,
                    char *op_flags);
 
 char *_version = "20001122";
@@ -293,6 +293,9 @@ static void who_global(struct Client *sptr,char *mask, int oper)
   int   member;
   int   isinvis;
   int   maxmatches = 500;
+  char  *chanop_flag;
+  char  *halfop_flag;
+  char  *voiced_flag;
 
   for (acptr = GlobalClientList; acptr; acptr = acptr->next)
     {
@@ -347,15 +350,30 @@ static void who_global(struct Client *sptr,char *mask, int oper)
 		    chname = bchan->chname;
 		}
 
-	      do_who_list(sptr, chptr, &chptr->chanops, chname, "@");
-	      do_who_list(sptr, chptr, &chptr->halfops, chname, "%");
-	      do_who_list(sptr, chptr, &chptr->voiced,  chname, "+");
-	      do_who_list(sptr, chptr, &chptr->peons,   chname, "");
+	      if(chptr->mode.mode & MODE_HIDEOPS)
+		{
+		  chanop_flag = "";
+		  halfop_flag = "";
+		  voiced_flag = "";
+		}
+	      else
+		{
+		  chanop_flag = "@";
+		  halfop_flag = "%";
+		  voiced_flag = "+";
+		}
+
+	      if (is_chan_op(chptr,acptr))
+		do_who(sptr, acptr, chptr, chname, chanop_flag);
+	      else if(is_half_op(chptr,acptr))
+		do_who(sptr, acptr, chptr, chname, halfop_flag);
+	      else if(is_voiced(chptr,acptr))
+		do_who(sptr, acptr, chptr, chname, voiced_flag);
+	      else 
+		do_who(sptr, acptr, chptr, chname, "");
 	    }
 	  else
-	    {
-	      do_who(sptr, acptr, NULL, NULL, "");
-	    }
+	    do_who(sptr, acptr, NULL, NULL, "");
 
 	  if (maxmatches > 0)
 	    {
@@ -385,9 +403,26 @@ static void do_who_on_channel(struct Client *sptr,
 			      char *chname,
 			      int oper, int member)
 {
-  do_who_list(sptr, chptr, &chptr->chanops, chname, "@");
-  do_who_list(sptr, chptr, &chptr->halfops, chname, "%");
-  do_who_list(sptr, chptr, &chptr->voiced,  chname, "+");
+  char *chanop_flag;
+  char *halfop_flag;
+  char *voiced_flag;
+
+  if(chptr->mode.mode & MODE_HIDEOPS)
+    {
+      chanop_flag = "";
+      halfop_flag = "";
+      voiced_flag = "";
+    }
+  else
+    {
+      chanop_flag = "@";
+      halfop_flag = "%";
+      voiced_flag = "+";
+    }
+
+  do_who_list(sptr, chptr, &chptr->chanops, chname, chanop_flag);
+  do_who_list(sptr, chptr, &chptr->halfops, chname, halfop_flag);
+  do_who_list(sptr, chptr, &chptr->voiced,  chname, voiced_flag);
   do_who_list(sptr, chptr, &chptr->peons,   chname, "");
 }
 
@@ -424,22 +459,9 @@ static void do_who(struct Client *sptr,
 {
   char  status[5];
 
-  if((chptr == NULL)			/* No channel */
-     ||
-     (chptr->mode.mode & MODE_HIDEOPS)  /* Or channel is anon */
-     ||
-     !is_any_op(chptr,sptr))		/* Or user is not an op at all */
-    {
-      ircsprintf(status,"%c%s", 
-		 acptr->user->away ? 'G' : 'H',
-		 IsOper(acptr) ? "*" : "");
-    }
-  else
-    {
-      ircsprintf(status,"%c%s%s", 
-		 acptr->user->away ? 'G' : 'H',
-		 IsOper(acptr) ? "*" : "", op_flags );
-    }
+  ircsprintf(status,"%c%s%s", 
+	     acptr->user->away ? 'G' : 'H',
+	     IsOper(acptr) ? "*" : "", op_flags );
 
   if(GlobalSetOptions.hide_server)
     {
@@ -448,7 +470,7 @@ static void do_who(struct Client *sptr,
 		 acptr->username,
 		 acptr->host, IsOper(sptr) ? acptr->user->server : "*",
 		 acptr->name,
-		 status, acptr->hopcount, acptr->info);
+		 status, 0, acptr->info);
     }
   else
     {
