@@ -97,8 +97,10 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
    */
   if (!DoesTS(cptr))
     {
-      sendto_realops_flags(FLAGS_ALL,"Link %s dropped, non-TS server",
+      sendto_realops_flags(FLAGS_ADMIN,"Link %s dropped, non-TS server",
 			   get_client_name(cptr, TRUE));
+      sendto_realops_flags(FLAGS_ALL,"Link %s dropped, non-TS server",
+			   get_client_name(cptr, FALSE));
       return exit_client(cptr, cptr, cptr, "Non-TS server");
     }
 
@@ -112,23 +114,37 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
      case -1:
       if (ConfigFileEntry.warn_no_nline)
         {
-         sendto_realops_flags(FLAGS_ALL,
+         sendto_realops_flags(FLAGS_ADMIN,
            "Unauthorised server connection attempt from %s: No entry for "
            "servername %s.", get_client_name(cptr, TRUE), host);
+
+         sendto_realops_flags(FLAGS_ALL,
+           "Unauthorised server connection attempt from %s: No entry for "
+           "servername %s.", get_client_name(cptr, FALSE), host);
         }
       return exit_client(cptr, cptr, cptr,
                 "Invalid servername/host/password.");
      case -2:
-      sendto_realops_flags(FLAGS_ALL,
+      sendto_realops_flags(FLAGS_ADMIN,
         "Unauthorised server connection attempt from %s: Bad password "
         "for server %s.", get_client_name(cptr, TRUE), host);
+
+      sendto_realops_flags(FLAGS_ALL,
+        "Unauthorised server connection attempt from %s: Bad password "
+        "for server %s.", get_client_name(cptr, FALSE), host);
+
       return exit_client(cptr, cptr, cptr,
                  "Invalid servername/host/password.");
       break;
      case -3:
-      sendto_realops_flags(FLAGS_ALL,
+      sendto_realops_flags(FLAGS_ADMIN,
         "Unauthorised server connection attempt from %s: Invalid host "
         "for server %s.", get_client_name(cptr, TRUE), host);
+
+      sendto_realops_flags(FLAGS_ALL,
+        "Unauthorised server connection attempt from %s: Invalid host "
+        "for server %s.", get_client_name(cptr, FALSE), host);
+
       return exit_client(cptr, cptr, cptr,
                  "Invalid servername/host/password.");
     }
@@ -146,9 +162,14 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
        * Definitely don't do that here. This is from an unregistered
        * connect - A1kmm.
        */
-      sendto_realops_flags(FLAGS_ALL,
+      sendto_realops_flags(FLAGS_ADMIN,
          "Attempt to re-introduce server %s from %s", host,
          get_client_name(cptr, TRUE));
+
+      sendto_realops_flags(FLAGS_ALL,
+         "Attempt to re-introduce server %s from %s", host,
+         get_client_name(cptr, FALSE));
+
       sendto_one(cptr, "ERROR :Server already exists.");
       return exit_client(cptr, cptr, cptr, "Server Exists");
     }
@@ -331,7 +352,7 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     {
       /* OOOPs nope can't HUB */
       sendto_realops_flags(FLAGS_ALL,"Non-Hub link %s introduced %s.",
-                get_client_name(cptr,  TRUE), host);
+                get_client_name(cptr,  FALSE), host);
       /* If it is new, we are probably misconfigured, so split the
        * non-hub server introducing this. Otherwise, split the new
        * server. -A1kmm. */
@@ -350,7 +371,7 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     {
       /* OOOPs nope can't HUB this leaf */
       sendto_realops_flags(FLAGS_ALL,"link %s introduced leafed %s.",
-                get_client_name(cptr,  TRUE), host);
+                get_client_name(cptr,  FALSE), host);
       /* If it is new, we are probably misconfigured, so split the
        * non-hub server introducing this. Otherwise, split the new
        * server. -A1kmm. */
@@ -395,7 +416,7 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       if (!(aconf = bcptr->serv->sconf))
 	{
 	  sendto_realops_flags(FLAGS_ALL,"Lost N-line for %s on %s. Closing",
-			       get_client_name(cptr, TRUE), host);
+			       get_client_name(cptr, FALSE), host);
 	  return exit_client(cptr, cptr, cptr, "Lost N line");
 	}
       if (match(my_name_for_link(me.name, aconf), acptr->name))
