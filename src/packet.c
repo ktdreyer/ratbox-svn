@@ -522,10 +522,6 @@ client_dopacket(struct Client *client_p, char *buffer, size_t length)
     }
 
   parse(client_p, buffer, buffer + length);
-
-  /* Remove any id they had for this command (set in parse() above) */
-  if (IsPerson(client_p))
-	client_p->user->prefix[0] = '\0';
 }
 
 

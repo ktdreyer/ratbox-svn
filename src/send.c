@@ -410,26 +410,7 @@ sendto_one(struct Client *to, const char *pattern, ...)
 {
   va_list args;
   buf_head_t linebuf;
-  char *s, *t, rmsg[IRCD_BUFSIZE + 1];
-  const char *p = pattern;
 
-  if (MyConnect(to) && IsPerson(to) &&
-	to->user->prefix[0] != '\0')
-  {
-	for (s = to->user->prefix, t = rmsg; *s; s++)
-	{
-		if (*s == '%')
-		{
-			*t++ = '%';
-		}
-		*t++ = *s;
-	}
-	*t++ = ' ';
-	*t++ = '\0';
-	strncat(rmsg, pattern, IRCD_BUFSIZE - 1);
-	p = rmsg;
-  }
-		
   if (IsDead(to))
     return; /* This socket has already been marked as dead */
 
@@ -440,7 +421,7 @@ sendto_one(struct Client *to, const char *pattern, ...)
   linebuf_newbuf(&linebuf);
 
   va_start(args, pattern);
-  linebuf_putmsg(&linebuf, p, &args, NULL);
+  linebuf_putmsg(&linebuf, pattern, &args, NULL);
   va_end(args);
 
   send_linebuf(to, &linebuf);
