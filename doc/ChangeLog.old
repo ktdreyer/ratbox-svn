@@ -1,3 +1,6 @@
+*** 20001231_7 by davidt
+Attempt to fix various issues with channel modes.. although there are still a few bugs left :/
+
 *** 20001231_6 by toot
 . fixed a possible overflow in m_list with persistant vchans
 . moved the vchan_id setting into remove_user_from_chan so the user
