@@ -247,6 +247,9 @@ struct config_file_entry
   int		disable_auth;
   int		connect_timeout;
   int		burst_away;
+  int		htm_messages;
+  int		htm_interval;
+  int		htm_trigger;
 #ifdef IPV6
   int		fallback_to_ip6_int;
 #endif

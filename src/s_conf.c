@@ -1549,7 +1549,11 @@ set_default_conf(void)
   DupString(ConfigFileEntry.servlink_path, SLPATH);
   ConfigFileEntry.egdpool_path = NULL;
   ConfigFileEntry.use_whois_actually = YES;
-
+  ConfigFileEntry.burst_away = NO;
+  ConfigFileEntry.htm_messages = NO;
+  ConfigFileEntry.htm_trigger = 40;
+  ConfigFileEntry.htm_interval = 5;
+  
 #ifdef HAVE_LIBCRYPTO
   /* jdc -- This is our default value for a cipher.  According to the
    *        CRYPTLINK document (doc/cryptlink.txt), BF/128 must be supported

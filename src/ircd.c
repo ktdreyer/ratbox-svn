@@ -307,11 +307,61 @@ set_time(void)
   SystemTime.tv_usec = newtime.tv_usec;
 }
 
+static time_t lasttime = 0;
+static long last_recvK = 0;
+static long last_sendK = 0;
+static int htm_mode = 0;
+static float in_curr_bandwidth = 0.0;
+static float out_curr_bandwidth = 0.0;
+
+static void check_htm(void)
+{
+  long htm_trigger = (long)ConfigFileEntry.htm_trigger;
+  long htm_check = (long)ConfigFileEntry.htm_interval ;
+  long htm_combined = htm_trigger * htm_check;
+  
+  if(CurrentTime - lasttime < ConfigFileEntry.htm_interval)
+     return;
+  
+  lasttime = CurrentTime;
+  in_curr_bandwidth = (float)me.localClient->receiveK - (float)(last_recvK/htm_check);
+  out_curr_bandwidth = (float)me.localClient->sendK - (float)(last_sendK/htm_check);
+  
+  
+  
+  if((long)me.localClient->receiveK - htm_combined > last_recvK || 
+     (long)me.localClient->sendK - htm_combined > last_sendK)
+  
+  {
+     if(!htm_mode)
+     {
+        sendto_realops_flags(UMODE_ALL, L_ALL,
+                                 "Entering high-traffic mode - In (%.1fk/s) Out(%.1fk/s)",
+                                  	in_curr_bandwidth, out_curr_bandwidth);
+     } else {
+        sendto_realops_flags(UMODE_ALL, L_ALL, "Still in high-traffic mode - In(%.1fk/s) Out(%.1fk/s)",
+               		         in_curr_bandwidth, out_curr_bandwidth);
+     }
+     htm_mode = 1;
+   }
+   else
+   {
+     if(htm_mode)
+     {
+       sendto_realops_flags(UMODE_ALL, L_ALL, "Exiting high traffic mode");
+       htm_mode = 0;
+     }
+   }
+   last_recvK = (long)me.localClient->receiveK;
+   last_sendK = (long)me.localClient->sendK;
+}
+
 static void
 io_loop(void)
 {
   unsigned long empty_cycles=0, st=0, delay;
   while (ServerRunning)
+  
     {
       /* Run pending events, then get the number of seconds to the next
        * event
@@ -336,7 +386,9 @@ io_loop(void)
       irc_sleep(st);
 
       comm_select(0);
-  
+      if(ConfigFileEntry.htm_messages)
+         check_htm();        
+      
       /*
        * Check to see whether we have to rehash the configuration ..
        */
@@ -726,19 +778,19 @@ int main(int argc, char *argv[])
 
   /* Setup the timeout check. I'll shift it later :)  -- adrian */
   eventAddIsh("comm_checktimeouts", comm_checktimeouts, NULL, 1);
-
   eventAddIsh("cleanup_zombies", cleanup_zombies, NULL, 30); 
-  
  if (ConfigFileEntry.throttle_time > 0)
    eventAddIsh("flush_expired_ips", flush_expired_ips, NULL, ConfigFileEntry.throttle_time);
  else
    eventAddIsh("flush_expired_ips", flush_expired_ips, NULL, 300);
 
+  
   if(ConfigServerHide.links_delay > 0)
     eventAddIsh("write_links_file", write_links_file, NULL, ConfigServerHide.links_delay);
   else
     ConfigServerHide.links_disabled = 1;
 
+  
   if(splitmode)
     eventAddIsh("check_splitmode", check_splitmode, NULL, 60);
 

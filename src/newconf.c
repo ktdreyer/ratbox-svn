@@ -1806,6 +1806,7 @@ static void	conf_set_gecos_action(void *data)
 		conf_report_error("Warning -- invalid gecos::action.");
 }
 
+
 static void	conf_set_general_failed_oper_notice(void *data)
 {
 	ConfigFileEntry.failed_oper_notice = *(unsigned int*) data;
@@ -1971,6 +1972,20 @@ static void	conf_set_general_max_targets(void *data)
 	ConfigFileEntry.max_targets = *(unsigned int*) data;
 }
 
+static void	conf_set_general_htm_messages(void *data)
+{
+	ConfigFileEntry.htm_messages = *(unsigned int*) data;
+}
+
+static void	conf_set_general_htm_interval(void *data)
+{
+	ConfigFileEntry.htm_interval = *(unsigned int *)data;
+}
+
+static void	conf_set_general_htm_trigger(void *data)
+{
+	ConfigFileEntry.htm_trigger = *(unsigned int *)data;
+}
 static void	conf_set_general_servlink_path(void *data)
 {
 	MyFree(ConfigFileEntry.servlink_path);
@@ -2676,6 +2691,12 @@ void	newconf_init()
 			conf_set_general_connect_timeout);
         add_conf_item("general", "burst_away", CF_YESNO,
         		conf_set_general_burst_away);
+	add_conf_item("general", "htm_messages", CF_YESNO,
+			conf_set_general_htm_messages);
+	add_conf_item("general", "htm_interval", CF_INT,
+			conf_set_general_htm_interval);
+	add_conf_item("general", "htm_trigger", CF_INT,
+			conf_set_general_htm_trigger);
 #ifdef IPV6
 	add_conf_item("general", "fallback_to_ip6_int", CF_YESNO,
 			conf_set_general_fallback_to_ip6_int);
