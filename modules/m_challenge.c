@@ -147,11 +147,11 @@ static void m_challenge( struct Client *client_p, struct Client *source_p,
   source_p->user->response = NULL;
   source_p->user->response = NULL;
 
-  /* XXX - better get the host matching working sometime... */
-  if (!(aconf = find_conf_by_name (parv[1], CONF_OPERATOR))
-      /*|| !(match(source_p->host, aconf->host) ||
-           memcmp(&source_p->localClient->ip, &aconf->ip,
-                  sizeof(struct irc_inaddr)))*/)
+  if (!(aconf = find_conf_exact(parv[1], source_p->username, source_p->host,
+	             		CONF_OPERATOR)) &&
+  	!(aconf = find_conf_exact(parv[1], source_p->username,
+                                source_p->localClient->sockhost,
+                                CONF_OPERATOR)))
     {
      sendto_one (source_p, form_str(ERR_NOOPERHOST), me.name, parv[0]);
      return;
