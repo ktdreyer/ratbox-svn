@@ -1,3 +1,8 @@
+*** 20001229_24 by davidt
+Fix $$/$# -- still problems with LL, just like everything else..
+I'll look into that [again] later..
+
+
 *** 20001229_23 by lusky
 - don't recurse into messages if we don't have gettext
 
