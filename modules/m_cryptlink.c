@@ -74,7 +74,8 @@ char *_version = "20010409";
 #else
 
 static int bogus_host(char *host);
-static char *parse_cryptserv_args(char *parv[], int parc, char *info,
+static char *parse_cryptserv_args(struct Client *client_p,
+                                  char *parv[], int parc, char *info,
                                   char *key);
 
 static void mr_cryptserv(struct Client*, struct Client*, int, char **);
@@ -177,12 +178,7 @@ static void mr_cryptauth(struct Client *client_p, struct Client *source_p,
     return;
   }
 
-  if ((key = MyMalloc( RSA_size( ServerInfo.rsa_private_key ) )) == NULL)
-  {
-    exit_client(client_p, client_p, &me, "Malformed CRYPTAUTH reply");
-    MyFree(enc);
-    return;
-  }
+  key = MyMalloc(RSA_size(ServerInfo.rsa_private_key));
 
   len = RSA_private_decrypt( enc_len, enc, key,
                              ServerInfo.rsa_private_key,
@@ -190,6 +186,14 @@ static void mr_cryptauth(struct Client *client_p, struct Client *source_p,
 
   if ( len < client_p->localClient->in_cipher->keylen )
   {
+    sendto_realops_flags(FLAGS_ADMIN,
+          "Unauthorized server connection attempt from %s: %s",
+          get_client_name(client_p, HIDE_IP),
+          (len < 0) ? "decryption failed" : "not enough random data sent");
+    sendto_realops_flags(FLAGS_NOTADMIN,
+          "Unauthorized server connection attempt from %s: %s",
+          get_client_name(client_p, MASK_IP),
+          (len < 0) ? "decryption failed" : "not enough random data sent");
     exit_client(client_p, client_p, &me, "Malformed CRYPTAUTH reply");
     MyFree(enc);
     MyFree(key);
@@ -200,11 +204,11 @@ static void mr_cryptauth(struct Client *client_p, struct Client *source_p,
              client_p->localClient->in_cipher->keylen) != 0)
   {
     sendto_realops_flags(FLAGS_ADMIN,
-          "Unauthorized server connection attempt from %s: invalid CRYPTAUTH "
+          "Unauthorized server connection attempt from %s: incorrect CRYPTAUTH "
           "response from server %s", get_client_name(client_p, HIDE_IP),
           client_p->name);
     sendto_realops_flags(FLAGS_NOTADMIN,
-          "Unauthorized server connection attempt from %s: invalid CRYPTAUTH "
+          "Unauthorized server connection attempt from %s: incorrect CRYPTAUTH "
           "response from server %s", get_client_name(client_p, MASK_IP),
           client_p->name);
     exit_client(client_p, client_p, &me, "Invalid CRYPTAUTH reply");
@@ -235,9 +239,10 @@ static void mr_cryptserv(struct Client *client_p, struct Client *source_p,
   int              enc_len;
 
 
-  if ( (name = parse_cryptserv_args(parv, parc, info, key)) == NULL )
+  if ( (name = parse_cryptserv_args(client_p, parv, parc, info, key)) == NULL )
     {
       sendto_one(client_p,"ERROR :Invalid parameters");
+      exit_client(client_p, client_p, &me, "Invalid CRYPTSERV command");
       return;
     }
 
@@ -477,7 +482,8 @@ static void m_cryptkey(struct Client *client_p, struct Client *source_p,
  * output	- NULL if invalid params, server name otherwise
  * side effects	- parv[1] is trimmed to HOSTLEN size if needed.
  */
-static char *parse_cryptserv_args(char *parv[], int parc, char *info,
+static char *parse_cryptserv_args(struct Client *client_p,
+                                  char *parv[], int parc, char *info,
                                   char *key)
 {
   char *name;
@@ -495,13 +501,14 @@ static char *parse_cryptserv_args(char *parv[], int parc, char *info,
   /* parv[2] contains encrypted auth data */
   if ( !(decoded_len = unbase64_block((char **)&tmp, parv[2],
                                       strlen(parv[2]))) )
-    return NULL;
-
-  if ( (out = MyMalloc( RSA_size( ServerInfo.rsa_private_key ) )) == NULL )
   {
-    MyFree(tmp);
+    sendto_realops_flags(FLAGS_ALL,
+          "Invalid CRYPTSERV command from %s: unbase64 failed",
+          get_client_name(client_p, MASK_IP));
     return NULL;
   }
+
+  out = MyMalloc(RSA_size(ServerInfo.rsa_private_key));
 
   len = RSA_private_decrypt( decoded_len, tmp, out,
                              ServerInfo.rsa_private_key,
@@ -511,6 +518,10 @@ static char *parse_cryptserv_args(char *parv[], int parc, char *info,
 
   if ( len < CIPHERKEYLEN )
   {
+    sendto_realops_flags(FLAGS_ALL,
+          "Invalid CRYPTSERV command from %s: %s",
+          get_client_name(client_p, MASK_IP),
+          (len < 0) ? "decrypt failed" : "not enough session key data sent");
     MyFree( out );
     return NULL;
   }

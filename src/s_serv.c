@@ -820,7 +820,7 @@ int server_estab(struct Client *client_p)
   struct ConfItem*  aconf;
   const char*       inpath;
   static char       inpath_ip[HOSTLEN * 2 + USERLEN + 5];
-  char 		    serv_desc[HOSTLEN + 20];
+  char 		    serv_desc[FD_DESC_SZ];
   char*             host;
   dlink_node        *m;
   dlink_node        *ptr;
@@ -987,20 +987,20 @@ int server_estab(struct Client *client_p)
   fd_note (client_p->fd, serv_desc);
   ircsprintf(serv_desc, "slink ctrl: %s", client_p->name);
   serv_desc[FD_DESC_SZ-1] = '\0';
-  fd_note (client_p->fd, serv_desc);
+  fd_note (client_p->localClient->ctrlfd, serv_desc);
 #else
   ircsprintf(serv_desc, "slink data (out): %s", client_p->name);
   serv_desc[FD_DESC_SZ-1] = '\0';
   fd_note (client_p->fd, serv_desc);
   ircsprintf(serv_desc, "slink ctrl (out): %s", client_p->name);
   serv_desc[FD_DESC_SZ-1] = '\0';
-  fd_note (client_p->fd, serv_desc);
+  fd_note (client_p->localClient->ctrlfd, serv_desc);
   ircsprintf(serv_desc, "slink data  (in): %s", client_p->name);
   serv_desc[FD_DESC_SZ-1] = '\0';
-  fd_note (client_p->fd, serv_desc);
+  fd_note (client_p->fd_r, serv_desc);
   ircsprintf(serv_desc, "slink ctrl  (in): %s", client_p->name);
   serv_desc[FD_DESC_SZ-1] = '\0';
-  fd_note (client_p->fd, serv_desc);
+  fd_note (client_p->localClient->ctrlfd_r, serv_desc);
 #endif
   /*
   ** Old sendto_serv_but_one() call removed because we now
@@ -1212,13 +1212,18 @@ int fork_server(struct Client *server)
   else if (ret == 0)
   {
     /* Child - use dup2 to override 0/1/2, then close everything else */
-    dup2(ctrl_pipe[0], 0);
-    dup2(data_pipe[0], 1);
-    dup2(server->fd, 2);
+    if(dup2(ctrl_pipe[0], 0) < 0)
+      exit(1);
+    if(dup2(data_pipe[0], 1) < 0)
+      exit(1);
+    if(dup2(server->fd, 2) < 0)
+      return -1;
 #ifdef MISSING_SOCKPAIR
     /* only uni-directional pipes, so use 3/4 for writing */
-    dup2(ctrl_pipe2[1], 3);
-    dup2(data_pipe2[1], 4);
+    if(dup2(ctrl_pipe2[1], 3) < 0)
+      exit(1);
+    if(dup2(data_pipe2[1], 4) < 0)
+      exit(1);
 #endif
 
     for(i = 0; i <= LAST_SLINK_FD; i++)
