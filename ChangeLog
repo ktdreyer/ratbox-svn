@@ -1,3 +1,15 @@
+leeh        2004/04/03 07:44:44 EST	(20040403_0)
+
+  Modified files:
+    modules/core         m_mode.c 
+  Log:
+  - only attempt to propagate modes if its our client, or we're hubbing
+  
+  Revision  Changes    Path
+  1.105     +4 -2      ircd-ratbox/modules/core/m_mode.c
+
+
+
 leeh        2004/04/02 13:05:38 EST	(20040402_1)
 
   Modified files:
