@@ -1,3 +1,9 @@
+*** 20001225_7 by db
+- I'm convinced. Lets allow remote motd in non shide mode at least
+  Its a module, so it can all be changed on the fly anyway.
+
+
+
 *** 20001225_6 by db
 - sending channel_member_names() to a server is not useful, sending it to the
   client that just joined, might be.
