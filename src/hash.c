@@ -676,9 +676,15 @@ find_server(const char *name)
 	struct Client *target_p;
 	dlink_node *ptr;
 	unsigned int hashv;
-
+  
 	if(EmptyString(name))
 		return NULL;
+
+	if (IsDigit(*name) && strlen(name) == 3)
+	{
+		client_p = find_id(name);
+      		return(client_p);
+	}
 
 	hashv = hash_nick(name);
 
