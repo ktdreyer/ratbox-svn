@@ -1,3 +1,8 @@
+*** 20010105_6 by spookey
+ - fixes core in m_pass (const char* not char*)
+ - removes /usr/local/include/rsa.h from .depend (why was this here?)
+
+
 *** 20010105_5 by db
 - never commit until you have done a compile test. duh.
 
