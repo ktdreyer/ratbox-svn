@@ -1,3 +1,7 @@
+*** 20010106_12 by fl_
+- removed some excess code I left
+
+
 *** 20010106_11 by fl_
 - added an IsServer() check in parse.c
 - split up three identical error messages in m_server.c, so you knew
