@@ -1259,12 +1259,14 @@ chm_op(struct Client *client_p, struct Client *source_p,
         && !irccmp(mode_changes_minus[i].arg, opnick))
     {
       if (mode_changes_minus[i].letter == 'o')
+      {
+        mode_changes_minus[i].letter = 0; /* clear the mode */
         was_opped = 1;
+      }
       else if (mode_changes_minus[i].letter == 'v')
         was_voiced = 1;
       else if (mode_changes_minus[i].letter == 'h')
         was_hopped = 1;
-      mode_changes_minus[i].letter = 0; /* clear the mode */
     }
   }
 
@@ -1360,9 +1362,6 @@ chm_op(struct Client *client_p, struct Client *source_p,
         mode_changes_minus[mode_count_minus++].arg = targ_p->name;
 #endif
       }
-
-      change_channel_membership(chptr, &chptr->peons,
-                                &chptr->locpeons, targ_p);
     }
     else
     {
@@ -1376,10 +1375,10 @@ chm_op(struct Client *client_p, struct Client *source_p,
         mode_changes_minus[mode_count_minus].id = NULL;
         mode_changes_minus[mode_count_minus++].arg = targ_p->name;
       }
-
-      change_channel_membership(chptr, &chptr->peons,
-                                &chptr->locpeons, targ_p);
     }
+
+    change_channel_membership(chptr, &chptr->peons,
+                              &chptr->locpeons, targ_p);
 
     for (i = 0; i < resync_count; i++)
     {
@@ -2315,7 +2314,7 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
   {
     if (mode_changes_plus[i].letter == 0 ||
         mode_changes_plus[i].mems == NON_CHANOPS ||
-        mode_changes_minus[i].mems == ONLY_SERVERS)
+        mode_changes_plus[i].mems == ONLY_SERVERS)
       continue;
     nc++;
     if (mode_changes_plus[i].arg != NULL &&
@@ -2379,7 +2378,7 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
     {
       if (mode_changes_minus[i].letter == 0 ||
           mode_changes_minus[i].mems != ALL_MEMBERS ||
-        mode_changes_minus[i].mems == ONLY_SERVERS)
+          mode_changes_minus[i].mems == ONLY_SERVERS)
         continue;
 
       nc++;
@@ -2427,7 +2426,7 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
     {
       if (mode_changes_plus[i].letter == 0 ||
           mode_changes_plus[i].mems != ALL_MEMBERS ||
-          mode_changes_minus[i].mems == ONLY_SERVERS)
+          mode_changes_plus[i].mems == ONLY_SERVERS)
         continue;
 
       nc++;
