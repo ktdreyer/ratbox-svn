@@ -107,6 +107,8 @@ dead_link(struct Client *to, char *notice)
 {
   /* XXX is this the =right= thing to do? or anyone have a better idea? */
 
+  to->flags |= FLAGS_DEADSOCKET;
+
   exit_client(to, to, &me,
               (to->flags & FLAGS_SENDQEX) ?
               "SendQ exceeded" : "Dead socket");
