@@ -134,9 +134,9 @@ expire_glines()
 
       if(kill_ptr->hold <= CurrentTime)
 	{
-	  free_conf(kill_ptr);
           dlinkDelete(gline_node, &glines);
           free_dlink_node(gline_node);
+          delete_one_address_conf(kill_ptr->host, kill_ptr);
 	}
     }
 }
