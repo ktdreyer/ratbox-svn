@@ -391,7 +391,8 @@ comm_connect_tcp(int fd, const char *host, u_short port,
 		/* We have a valid IP, so we just call tryconnect */
 		/* Make sure we actually set the timeout here .. */
 		comm_settimeout(F->fd, timeout * 1000, comm_connect_timeout, NULL);
-		comm_connect_tryconnect(F->fd, NULL);
+		comm_setselect(F->fd, FDLIST_SERVER, COMM_SELECT_WRITE,
+		               comm_connect_tryconnect, NULL, 0);
 	}
 }
 
@@ -482,7 +483,8 @@ comm_connect_dns_callback(void *vptr, adns_answer * reply)
 
 	/* Now, call the tryconnect() routine to try a connect() */
 	MyFree(reply);
-	comm_connect_tryconnect(F->fd, NULL);
+	comm_setselect(F->fd, FDLIST_SERVER, COMM_SELECT_WRITE,
+		       comm_connect_tryconnect, NULL, 0);
 }
 
 
@@ -518,7 +520,7 @@ comm_connect_tryconnect(int fd, void *notused)
 			comm_connect_callback(F->fd, COMM_OK);
 		else if(ignoreErrno(errno))
 			/* Ignore error? Reschedule */
-			comm_setselect(F->fd, FDLIST_SERVER, COMM_SELECT_WRITE,
+			comm_setselect(F->fd, FDLIST_SERVER, COMM_SELECT_WRITE|COMM_SELECT_RETRY,
 				       comm_connect_tryconnect, NULL, 0);
 		else
 			/* Error? Fail with COMM_ERR_CONNECT */

@@ -608,6 +608,8 @@ linebuf_putmsg(buf_head_t * bufhead, const char *format, va_list * va_args,
 	bufhead->len += len;
 }
 
+
+
 /*
  * linebuf_flush
  *
@@ -620,6 +622,7 @@ linebuf_putmsg(buf_head_t * bufhead, const char *format, va_list * va_args,
  *        and tag it so that we don't re-schedule another write until
  *        we have a CRLF.
  */
+
 int
 linebuf_flush(int fd, buf_head_t * bufhead)
 {
@@ -633,7 +636,7 @@ linebuf_flush(int fd, buf_head_t * bufhead)
 #define UIO_MAXIOV 16
 #endif
 	static struct iovec vec[UIO_MAXIOV];
-
+	
         /* Check we actually have a first buffer */
 	if(bufhead->list.head == NULL)
 	{
@@ -652,7 +655,6 @@ linebuf_flush(int fd, buf_head_t * bufhead)
 	
 		if(!bufline->terminated)
 			break;
-
 	        if(bufline->flushing)
                 {
 	                vec[x].iov_base = bufline->buf + bufhead->writeofs;
@@ -663,9 +665,6 @@ linebuf_flush(int fd, buf_head_t * bufhead)
                         vec[x].iov_len = bufline->len;
 		}
 		ptr = ptr->next;
-		if(vec[x].iov_len == 0)
-			break;		
-        
         } while(++x < UIO_MAXIOV);
 
         if(x == 0)
@@ -677,14 +676,20 @@ linebuf_flush(int fd, buf_head_t * bufhead)
 	xret = retval = writev(fd, vec, x);
 	if(retval <= 0)
 	        return retval;
-	
+
 	ptr = bufhead->list.head;
+
 	for(y = 0; y < x; y++)   
 	{
 	 	bufline = ptr->data;
-	 	if(xret >= bufline->len)
-	 	{
-         	 	xret -= bufline->len;
+		if((bufline->flushing == 0 && xret >= bufline->len) || (bufline->flushing == 1 && xret >= bufline->len - bufhead->writeofs))
+		{
+         		bufhead->writeofs = 0;
+         	 	if(bufline->flushing == 0)
+	         	 	xret -= bufline->len;
+	 	 	else
+	 	 		xret -= bufhead->writeofs;
+	 	 		
 	 	 	ptr = ptr->next;
 	 	 	s_assert(bufhead->len >= 0);
 	 	 	linebuf_done_line(bufhead, bufline, bufhead->list.head);
@@ -693,7 +698,8 @@ linebuf_flush(int fd, buf_head_t * bufhead)
 		 	bufhead->writeofs += xret;
 	 	        break;
 	 	}
-	} 
+	}
+	 
 	
 #else /* HAVE_WRITEV */	
 	/* Check we actually have a first buffer */
@@ -742,6 +748,7 @@ linebuf_flush(int fd, buf_head_t * bufhead)
 #endif /* HAVE_WRITEV */
 	return retval;
 }
+
 
 
 /*

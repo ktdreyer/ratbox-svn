@@ -180,9 +180,9 @@ typedef struct FileBuf FBFILE;
 #define READBUF_SIZE    16384	/* used by src/packet.c and src/s_serv.c */
 
 /* Type of IO */
-#define	COMM_SELECT_READ		1
-#define	COMM_SELECT_WRITE		2
-
+#define	COMM_SELECT_READ		0x1
+#define	COMM_SELECT_WRITE		0x2
+#define COMM_SELECT_RETRY		0x4
 extern int readcalls;
 extern const char *const NONB_ERROR_MSG;
 extern const char *const SETBUF_ERROR_MSG;
