@@ -1,3 +1,13 @@
+*** 20010821_3 by davidt
+- Create linebuf_putmsg, which essentially replaces linebuf_put, since we no
+  longer use linebuf_put anywhere.  This get rids of a few needless copies
+  of outgoing messages per call of sendto_* functions.
+- Unfortunately, we now use snprintf/vsnprintf, not ircsprintf, since there
+  is no irc[v]snprintf function available.  Not sure how badly this affect
+  things, but if it's bad, make a ircvsnprintf function...
+- Tidy a few warnings in --disable-assert mode.
+
+
 *** 20010821_2 by davidt
 - Clean up m_sjoin.c slightly.
 
