@@ -1,3 +1,11 @@
+*** 20001220_7 by db
+- shared {} can now have user/host for user@host of oper allowed
+  to place a remote kline from server given by name.
+
+- updated the lazy link docs a bit, its badly written, fix.
+
+
+
 *** 20001220_6 by db
 - I hate furry logic when I'm tired. 
 
