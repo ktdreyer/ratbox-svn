@@ -1,3 +1,11 @@
+*** 20010315_3 by db
+- print all channel member lists at once in names
+  this hides somewhat better who the chanops are.
+  Its not optimized at all at the moment, fact is its terrible.
+  If someone optimizes it before me, great. I won't mind. ;)
+
+
+
 *** 20010315_2 by fl_
 - made jupe use exit_client()
 - added a hack for the long reason core.. I made into into a topiclen,
