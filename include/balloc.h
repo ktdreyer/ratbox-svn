@@ -89,10 +89,8 @@ typedef struct BlockHeap BlockHeap;
 /* This is really kludgy, passing ints as pointers is always bad. */
 #define BlockHeapCreate(es, epb) ((BlockHeap*)(es))
 #define BlockHeapDestroy(x)
-#ifdef NOBALLOC
 #define BlockHeapAlloc(x) MyMalloc((int)x)
 #define BlockHeapFree(x,y) MyFree(y)
-#endif
 
 
 #endif /* NOBALLOC */
