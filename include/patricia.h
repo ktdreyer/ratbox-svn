@@ -29,7 +29,6 @@
 #include "numeric.h"
 #include "send.h"
 #include "memory.h"
-#include "config.h"
 #endif
 
 

@@ -35,7 +35,6 @@
 #ifndef INCLUDED_s_newconf_h
 #define INCLUDED_s_newconf_h
 
-#include "setup.h"
 #include "tools.h"
 
 #ifdef HAVE_LIBCRYPTO

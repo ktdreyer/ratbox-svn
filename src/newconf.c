@@ -20,7 +20,6 @@
 #include "s_user.h"
 #include "s_newconf.h"
 #include "send.h"
-#include "setup.h"
 #include "modules.h"
 #include "listener.h"
 #include "hostmask.h"

@@ -25,8 +25,6 @@
  *  $Id$
  */
 
-#include "config.h"
-
 #include "stdinc.h"
 #include "commio.h"
 #include "class.h"

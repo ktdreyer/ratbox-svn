@@ -15,10 +15,8 @@
 #include <stdio.h>
 #define WE_ARE_MEMORY_C
 #include "stdinc.h"
-#include "setup.h"
 #include "common.h"
 #include "ircd_defs.h"
-#include "config.h"
 #include "client.h"
 #include "modules.h"
 #include "newconf.h"

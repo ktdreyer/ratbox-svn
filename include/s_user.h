@@ -27,8 +27,6 @@
 #ifndef INCLUDED_s_user_h
 #define INCLUDED_s_user_h
 
-#include "config.h"
-
 struct Client;
 struct User;
 struct oper_conf;

@@ -27,8 +27,6 @@
 #ifndef INCLUDED_m_info_h
 #define INCLUDED_m_info_h
 
-#include "config.h"
-
 typedef struct Information
 {
 	const char *name;	/* name of item */

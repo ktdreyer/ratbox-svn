@@ -25,12 +25,9 @@
  *  $Id$
  */
 
-#include "config.h"
-
 #include "stdinc.h"
 #include <sys/devpoll.h>
 
-#include "config.h"
 #include "commio.h"
 #include "class.h"
 #include "client.h"

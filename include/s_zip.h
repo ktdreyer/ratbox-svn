@@ -27,8 +27,6 @@
 #ifndef INCLUDED_s_zip_h
 #define INCLUDED_s_zip_h
 
-#include "config.h"		/* config settings */
-
 struct Client;
 
 /* the minimum amount of data needed to trigger compression */

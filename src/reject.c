@@ -24,7 +24,6 @@
  */
 
 #include "stdinc.h"
-#include "config.h"
 #include "patricia.h"
 #include "client.h"
 #include "s_conf.h"

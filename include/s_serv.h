@@ -27,8 +27,6 @@
 #ifndef INCLUDED_serv_h
 #define INCLUDED_serv_h
 
-#include "config.h"
-
 /*
  * The number of seconds between calls to try_connections(). Fiddle with
  * this ONLY if you KNOW what you're doing!

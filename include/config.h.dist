@@ -27,8 +27,6 @@
 #ifndef INCLUDED_config_h
 #define INCLUDED_config_h
 
-#include "setup.h"
-
 /* 
  * Directory paths and filenames for UNIX systems.
  * IRCD_PREFIX is set using ./configure --prefix, see INSTALL.

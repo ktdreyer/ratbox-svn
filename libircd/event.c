@@ -51,7 +51,6 @@
  */
 
 #include "stdinc.h"
-#include "config.h"
 
 #include "ircd.h"
 #include "event.h"

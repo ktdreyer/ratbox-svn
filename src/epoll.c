@@ -26,7 +26,6 @@
  *  $Id$
  */
 
-#include "config.h"
 #include "stdinc.h"
 #include <sys/epoll.h>
 

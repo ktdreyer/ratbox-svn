@@ -60,7 +60,6 @@
 #include "stdinc.h"
 
 #define WE_ARE_MEMORY_C
-#include "setup.h"
 #include "balloc.h"
 #ifndef NOBALLOC
 

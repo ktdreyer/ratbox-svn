@@ -34,7 +34,6 @@
  *     --Bleep  Thomas Helvey <tomh@inxpress.net>
  */
 #include "stdinc.h"
-#include "config.h"
 #include "tools.h"
 #include "s_auth.h"
 #include "s_conf.h"

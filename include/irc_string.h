@@ -27,7 +27,6 @@
 #ifndef INCLUDED_irc_string_h
 #define INCLUDED_irc_string_h
 
-#include "setup.h"
 #include "ircd_defs.h"
 
 /*

@@ -25,7 +25,6 @@
  */
 
 #include "stdinc.h"
-#include "config.h"
 
 #include "tools.h"
 #include "class.h"

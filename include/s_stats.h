@@ -27,8 +27,6 @@
 #ifndef INCLUDED_s_stats_h
 #define INCLUDED_s_stats_h
 
-#include "config.h"
-
 #define _1MEG     (1024.0)
 #define _1GIG     (1024.0*1024.0)
 #define _1TER     (1024.0*1024.0*1024.0)

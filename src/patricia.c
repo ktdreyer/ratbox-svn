@@ -20,7 +20,6 @@
 
 
 #include "stdinc.h"
-#include "config.h"
 #include "ircd_defs.h"
 #include "patricia.h"
 #include "balloc.h"

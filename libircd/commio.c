@@ -25,7 +25,6 @@
  */
 
 #include "stdinc.h"
-#include "config.h"
 #include "commio.h"
 #include "class.h"
 #include "client.h"

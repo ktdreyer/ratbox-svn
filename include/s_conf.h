@@ -26,8 +26,6 @@
 
 #ifndef INCLUDED_s_conf_h
 #define INCLUDED_s_conf_h
-#include "setup.h"
-
 
 
 #ifdef HAVE_LIBCRYPTO

@@ -27,7 +27,6 @@
 #ifndef INCLUDED_blalloc_h
 #define INCLUDED_blalloc_h
 
-#include "setup.h"
 #include "tools.h"
 #include "memory.h"
 #include "ircd_defs.h"

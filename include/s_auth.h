@@ -27,7 +27,6 @@
 #ifndef INCLUDED_s_auth_h
 #define INCLUDED_s_auth_h
 
-#include "config.h"
 #include "res.h"
 /* 
  * How many auth allocations to allocate in a block. I'm guessing that

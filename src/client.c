@@ -24,7 +24,6 @@
  *  $Id$
  */
 #include "stdinc.h"
-#include "config.h"
 
 #include "tools.h"
 #include "client.h"

@@ -25,8 +25,6 @@
  */
 
 #include "stdinc.h"
-#include "setup.h"
-#include "config.h"
 #include "s_conf.h"
 #include "numeric.h"
 #include "irc_string.h"

@@ -27,8 +27,6 @@
 #ifndef INCLUDED_numeric_h
 #define INCLUDED_numeric_h
 
-#include "config.h"
-
 /*
  * form_str - return a format string for a message number
  * messages are defined below

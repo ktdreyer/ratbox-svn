@@ -29,8 +29,6 @@
 #include "ircd_defs.h"
 #include "client.h"
 
-#include "setup.h"
-
 /*
  * Whowas hash table size
  *

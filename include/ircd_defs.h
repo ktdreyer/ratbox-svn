@@ -36,8 +36,6 @@
 #ifndef INCLUDED_ircd_defs_h
 #define INCLUDED_ircd_defs_h
 
-#include "config.h"
-
 /* For those unfamiliar with GNU format attributes, a is the 1 based
  * argument number of the format string, and b is the 1 based argument
  * number of the variadic ... */

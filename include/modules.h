@@ -26,8 +26,6 @@
 
 #ifndef INCLUDED_modules_h
 #define INCLUDED_modules_h
-#include "config.h"
-#include "setup.h"
 #include "parse.h"
 
 #define MAPI_RATBOX 1

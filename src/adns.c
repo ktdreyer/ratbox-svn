@@ -25,7 +25,6 @@
  */
 
 #include "stdinc.h"
-#include "setup.h"
 
 #include "res.h"
 #include "send.h"
