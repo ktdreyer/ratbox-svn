@@ -1,3 +1,30 @@
+leeh        2002/05/12 10:50:53 EDT	(20020512_2)
+
+  Modified files:
+    include              channel.h channel_mode.h 
+    modules              m_who.c 
+    modules/core         m_kick.c m_sjoin.c 
+    src                  channel.c channel_mode.c ircd_parser.y 
+                         s_serv.c vchannel.c 
+  Log:
+  - adxs fix for an inverted if() in ircd_parser.y
+  - bigger and badder HALFOPS and ANONOPS fixes, run children, run for your
+    lives*!&(£!£
+  
+  Revision  Changes    Path
+  7.111     +6 -0      ircd-hybrid-7/include/channel.h
+  7.8       +3 -1      ircd-hybrid-7/include/channel_mode.h
+  1.41      +5 -1      ircd-hybrid-7/modules/core/m_kick.c
+  1.136     +51 -17    ircd-hybrid-7/modules/core/m_sjoin.c
+  1.58      +61 -7     ircd-hybrid-7/modules/m_who.c
+  7.310     +22 -0     ircd-hybrid-7/src/channel.c
+  7.37      +25 -5     ircd-hybrid-7/src/channel_mode.c
+  1.248     +1 -1      ircd-hybrid-7/src/ircd_parser.y
+  7.253     +8 -0      ircd-hybrid-7/src/s_serv.c
+  7.62      +2 -0      ircd-hybrid-7/src/vchannel.c
+
+
+
 leeh        2002/05/12 08:28:17 EDT	(20020512_1)
 
   Modified files:
