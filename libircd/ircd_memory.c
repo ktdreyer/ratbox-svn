@@ -81,7 +81,7 @@ _MyFree(void *what, char *file, int line)
  MemoryEntry *mme;
  if (!what)
    return;
- mme = (MemoryEntry*)(what - sizeof(MemoryEntry));
+ mme = (MemoryEntry*)((char *)what - sizeof(MemoryEntry));
  if (mme->last)
    mme->last->next = mme->next;
  else
@@ -107,7 +107,7 @@ _MyRealloc(void *what, size_t size, char *file, int line)
     _MyFree(what, file, line);
     return NULL;
    }
- mme = (MemoryEntry*)(what - sizeof(MemoryEntry));
+ mme = (MemoryEntry*)((char *)what - sizeof(MemoryEntry));
  mme = realloc(mme, size+sizeof(MemoryEntry));
  mme->size = size;
  mme->next->last = mme;

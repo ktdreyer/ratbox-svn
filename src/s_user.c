@@ -67,7 +67,7 @@ static int valid_hostname(const char* hostname);
 static int valid_username(const char* username);
 static void report_and_set_user_flags( struct Client *, struct ConfItem * );
 static int check_X_line(struct Client *client_p, struct Client *source_p);
-static void user_welcome(struct Client *source_p);
+void user_welcome(struct Client *source_p);
 static int introduce_client(struct Client *client_p, struct Client *source_p,
 			    struct User *user, char *nick);
 int oper_up( struct Client *source_p, struct ConfItem *aconf );
@@ -95,6 +95,9 @@ static struct flag_item user_modes[] =
   {FLAGS_LOCOPS, 'l'},
   {FLAGS_NCHANGE, 'n'},
   {FLAGS_OPER, 'o'},
+#ifdef PERSISTANT_CLIENTS
+  {FLAGS_PERSISTANT, 'p'},
+#endif
   {FLAGS_REJ, 'r'},
   {FLAGS_SERVNOTICE, 's'},
   {FLAGS_UNAUTH, 'u'},
@@ -157,7 +160,11 @@ int user_modes_from_c_to_bitmask[] =
   0,            /* m */
   FLAGS_NCHANGE, /* n */
   FLAGS_OPER,   /* o */
-  0,            /* p */
+#ifdef PERSISTANT_CLIENTS
+  FLAGS_PERSISTANT,/* p */
+#else
+  0,               /* p */
+#endif
   0,            /* q */
   FLAGS_REJ,    /* r */
   FLAGS_SERVNOTICE, /* s */
@@ -441,17 +448,17 @@ int register_local_user(struct Client *client_p, struct Client *source_p,
 
   /* end of valid user name check */
   
-  if( (status = check_X_line(client_p,source_p)) < 0 )
-    return(status);
+  if ((status = check_X_line(client_p,source_p)) < 0)
+    return status;
 
   if (source_p->user->id[0] == '\0') 
     {
-      do {
-	id = id_get();
-      } while (hash_find_id(id, NULL));
-      
+      for (id = id_get(); hash_find_id(id, NULL); id = id_get())
+        ;
       strcpy(source_p->user->id, id);
-      add_to_id_hash_table(source_p->user->id, source_p);
+      add_to_id_hash_table(id, source_p);
+      id = id_get();
+      strcpy(user->id_key, id);
     }
 
   inetntop(source_p->localClient->aftype, &IN_ADDR(source_p->localClient->ip), 
@@ -1097,6 +1104,28 @@ int user_mode(struct Client *client_p, struct Client *source_p, int parc, char *
       source_p->umodes &= ~FLAGS_NCHANGE; /* only tcm's really need this */
     }
 
+#ifdef PERSISTANT_CLIENTS
+  if (MyConnect(source_p) && (source_p->umodes & ~setflags &
+      FLAGS_PERSISTANT))
+    {
+     for (ptr=source_p->localClient->confs.head; ptr; ptr=ptr->next)
+       {
+        aconf = (struct ConfItem*)ptr->data;
+        if ((aconf->status & CONF_CLIENT))
+          {
+           if (!(aconf->flags & CONF_FLAGS_PERSISTANT))
+             {
+              sendto_one(source_p,
+                ":%s NOTICE %s :Your auth block does not allow +p",
+                me.name, source_p->name);
+              source_p->umodes &= ~FLAGS_PERSISTANT;
+             }
+           break;
+          }
+       }
+    }
+#endif
+
   if (MyConnect(source_p) && (source_p->umodes & FLAGS_ADMIN) && !IsSetOperAdmin(source_p))
     {
       sendto_one(source_p,":%s NOTICE %s :*** You need oper and A flag for +a",
@@ -1214,7 +1243,7 @@ void send_umode_out(struct Client *client_p,
  * output	- NONE
  * side effects	-
  */
-static void user_welcome(struct Client *source_p)
+void user_welcome(struct Client *source_p)
 {
   sendto_one(source_p, form_str(RPL_WELCOME), me.name, source_p->name, source_p->name );
   /* This is a duplicate of the NOTICE but see below...*/
@@ -1232,7 +1261,10 @@ static void user_welcome(struct Client *source_p)
   sendto_one(source_p, form_str(RPL_CREATED),me.name,source_p->name,creation);
   sendto_one(source_p, form_str(RPL_MYINFO), me.name, source_p->name,
 	     me.name, version);
-
+#ifdef PERSISTANT_CLIENTS
+  sendto_one(source_p, form_str(RPL_YOURID), me.name, source_p->name,
+             source_p->user->id, source_p->user->id_key);
+#endif
   show_isupport(source_p);
   
   show_lusers(source_p);

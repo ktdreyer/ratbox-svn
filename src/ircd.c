@@ -146,6 +146,7 @@ dlink_list lclient_list;        /* local clients only ON this server */
 dlink_list serv_list;           /* local servers to this server ONLY */
 dlink_list oper_list;           /* our opers, duplicated in lclient_list */
 dlink_list dead_list;           /* clients that have exited, to be freed */
+dlink_list persist_list;        /* Persisting(i.e. no open fd) clients. */
 
 dlink_list lazylink_channels;   /* known about lazylink channels on HUB */
 dlink_list lazylink_nicks;	/* known about lazylink nicks on HUB */

@@ -137,7 +137,8 @@ extern const char* form_str(int);
 #define RPL_CREATED          003
 #define RPL_MYINFO           004
 #define RPL_ISUPPORT         005
-#define RPL_REDIR             10
+#define RPL_REDIR            10
+#define RPL_YOURID           20
 
 /*
  * Numeric replies from server commands.

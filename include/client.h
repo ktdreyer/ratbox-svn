@@ -83,7 +83,10 @@ struct User
   char*          response;  /* expected response from client */
   char*          auth_oper; /* Operator to become if they supply the response.*/
 	/* client ID, unique ID per client */
-	char id[IDLEN + 1];
+  char id[IDLEN + 1];
+  char id_key[IDLEN + 1];
+  /* When did we detach from them, if they are detached... */
+  time_t            last_detach_time;
 };
 
 struct Server
@@ -208,7 +211,6 @@ struct LocalUser
   time_t            first_received_message_time;
   int               received_number_of_privmsgs;
   int               flood_noticed;
-
 
   /* Send and receive linebuf queues .. */
   buf_head_t        buf_sendq;
@@ -362,10 +364,12 @@ struct LocalUser
 #define FLAGS_UNAUTH       0x8000 /* show unauth connects here */
 #define FLAGS_DRONE        0x10000 /* show drone connects */
 #define FLAGS_LOCOPS       0x20000 /* show locops */
+#define FLAGS_PERSISTANT   0x100000 /* persist on close. */
 
 /* user information flags, only settable by remote mode or local oper */
 #define FLAGS_OPER         0x40000 /* Operator */
 #define FLAGS_ADMIN        0x80000 /* Admin on server */
+
 
 #define FLAGS_ALL	   FLAGS_SERVNOTICE
 #define FLAGS_NOTADMIN     FLAGS_OPER
@@ -402,14 +406,16 @@ struct LocalUser
 #define FLAGS2_IP_SPOOFING      0x80000        /* client IP is spoofed */
 #define FLAGS2_IP_HIDDEN        0x100000        /* client IP should be hidden
                                                    from non opers */
+#define FLAGS2_PERSISTING       0x200000      /* They have no valid socket
+                                               * but */
 #define SEND_UMODES  (FLAGS_INVISIBLE | FLAGS_OPER | FLAGS_WALLOP | \
-                      FLAGS_ADMIN)
+                      FLAGS_ADMIN|FLAGS_PERSISTANT)
 #define ALL_UMODES   (SEND_UMODES | FLAGS_SERVNOTICE | FLAGS_CCONN | \
                       FLAGS_REJ | FLAGS_SKILL | FLAGS_FULL | FLAGS_SPY | \
                       FLAGS_NCHANGE | FLAGS_OPERWALL | FLAGS_DEBUG | \
                       FLAGS_BOTS | FLAGS_EXTERNAL | FLAGS_DRONE | \
  		      FLAGS_ADMIN | FLAGS_UNAUTH | FLAGS_CALLERID | \
-                      FLAGS_LOCOPS)
+                      FLAGS_LOCOPS | FLAGS_PERSISTANT)
 
 #ifndef OPER_UMODES
 #define OPER_UMODES  (FLAGS_OPER | FLAGS_WALLOP | FLAGS_SERVNOTICE | \
@@ -466,6 +472,8 @@ struct LocalUser
 #define SetIpHash(x)            ((x)->flags |= FLAGS_IPHASH)
 #define ClearIpHash(x)          ((x)->flags &= ~FLAGS_IPHASH)
 #define IsIpHash(x)             ((x)->flags & FLAGS_IPHASH)
+#define IsPersistant(x)             ((x)->umodes & FLAGS_PERSISTANT)
+#define IsPersisting(x)             ((x)->flags2 & FLAGS2_PERSISTING)
 
 #define SetNeedId(x)            ((x)->flags |= FLAGS_NEEDID)
 #define IsNeedId(x)             (((x)->flags & FLAGS_NEEDID) != 0)
@@ -534,6 +542,8 @@ extern void           del_client_from_llist(struct Client** list,
                                             struct Client* client);
 extern int            exit_client(struct Client*, struct Client*, 
                                   struct Client*, const char* comment);
+extern int            detach_client(struct Client*, const char* comment);
+
 
 extern void     count_local_client_memory(int *, int *);
 extern void     count_remote_client_memory(int *, int *);

@@ -138,6 +138,7 @@ int   class_redirport_var;
 %token  OPERATOR
 %token  OPER_LOG
 %token  PASSWORD
+%token  PERSISTANT
 %token  PING_TIME
 %token  PORT
 %token  QSTRING
@@ -222,6 +223,7 @@ int   class_redirport_var;
 %token  T_WALLOP
 %token  OPER_ONLY_UMODES
 %token  PATH
+%token  PERSISTANT_EXPIRE_TIME
 %token  MAX_TARGETS
 %token  T_MAX_CLIENTS
 %token  LINKS_NOTICE
@@ -740,7 +742,8 @@ auth_item:      auth_user | auth_passwd | auth_class |
                 auth_kline_exempt | auth_have_ident | auth_is_restricted |
                 auth_exceed_limit | auth_no_tilde | auth_gline_exempt |
                 auth_spoof | auth_spoof_notice |
-                auth_redir_serv | auth_redir_port | error
+                auth_redir_serv | auth_redir_port | auth_persistant |
+                error
 
 auth_user:   USER '=' QSTRING ';'
   {
@@ -895,6 +898,14 @@ auth_class:   CLASS '=' QSTRING ';'
       {
 	DupString(yy_aconf->className, yylval.string);
       }
+  };
+
+auth_persistant: PERSISTANT '=' TYES ';'
+  {
+   yy_aconf->flags |= CONF_FLAGS_PERSISTANT
+  } |            PERSISTANT '=' TNO ';'
+  {
+   yy_aconf->flags &= CONF_FLAGS_PERSISTANT
   };
 
 /***************************************************************************
@@ -1444,6 +1455,7 @@ general_item:       general_failed_oper_notice | general_show_failed_oper_id |
                     general_links_delay |
                     general_vchans_oper_only |
                     general_caller_id_wait |
+                    general_persistant_expire_time |
                     error
 
 general_failed_oper_notice:   FAILED_OPER_NOTICE '=' TYES ';'
@@ -1782,4 +1794,8 @@ general_vchans_oper_only: VCHANS_OPER_ONLY '=' TYES ';'
     VCHANS_OPER_ONLY '=' TNO ';'
   {
     ConfigFileEntry.vchans_oper_only = 0;
+  };
+general_persistant_expire_time:  PERSISTANT_EXPIRE_TIME '=' NUMBER ';'
+  {
+    ConfigFileEntry.persist_expire = yylval.number;  
   };

@@ -51,13 +51,22 @@ static int nick_from_server(struct Client *, struct Client *, int, char **,
                             time_t, char *);
 
 int clean_nick_name(char* nick);
-
+void read_packet(int fd, void *data);
+void user_welcome(struct Client *source_p);
 static void ms_client(struct Client*, struct Client*, int, char**);
+static void m_client(struct Client*, struct Client*, int, char**);
 
+#ifdef PERSISTANT_CLIENTS
+struct Message client_msgtab = {
+  "CLIENT", 0, 3, 0, MFLG_SLOW, 0,
+  {m_client, m_ignore, ms_client, m_ignore}
+};
+#else
 struct Message client_msgtab = {
   "CLIENT", 0, 10, 0, MFLG_SLOW, 0,
   {m_unregistered, m_ignore, ms_client, m_ignore}
 };
+#endif
 
 void
 _modinit(void)
@@ -99,6 +108,10 @@ static void ms_client(struct Client *client_p, struct Client *source_p,
   char    *id;
   char    *name;
   
+#ifdef PERSISTANT_CLIENTS
+  if (parc < 10)
+    return;
+#endif
   id = parv[8];
   name = parv[9];
   
@@ -448,6 +461,99 @@ static void ms_client(struct Client *client_p, struct Client *source_p,
     }
   nick_from_server(client_p,source_p,parc,parv,newts,nick);
 }
+
+#ifdef PERSISTANT_CLIENTS
+static void
+m_client(struct Client *client_p, struct Client *source_p,
+         int parc, char *parv[])
+{
+ struct Client *target_p;
+ dlink_node *m;
+ target_p = hash_find_id(parv[1], NULL);
+ if (target_p == NULL || !MyConnect(target_p) ||
+     !(target_p->user &&
+       !strcmp(target_p->user->id_key, parv[2])
+      )
+    )
+   {
+    /* This is intentionally _one_ message for both wrong id &
+     * wrong key for security reasons... */
+    exit_client(NULL, client_p, &me, "Bad ID or ID-key.");
+    return;
+   }
+ /* Now do a quick k-line check etc... */
+ if (check_client(client_p, source_p,
+                  (client_p->username[0]==0) ? target_p->username :
+                                               client_p->username
+                 ) < 0)
+   return;
+ if (!IsPersisting(target_p) && target_p->fd >= 0)
+   {
+    sendto_one(target_p, "ERROR :Your ID has been reclaimed.");
+    if (!IsDead(target_p))
+      send_queued_write(target_p->fd, target_p);
+    fd_close(target_p->fd);
+    target_p->fd = -1;
+   }
+ /* Now we can detach target_p's I-lines... */
+ remove_one_ip(&target_p->localClient->ip);
+ det_confs_butmask(target_p, ~CONF_CLIENT);
+ /* And transfer the I-lines from client_p to target_p... */
+ client_p->localClient->confs.tail->next =
+   target_p->localClient->confs.head;
+ target_p->localClient->confs.head = client_p->localClient->confs.head;
+ client_p->localClient->confs.head = NULL;
+ client_p->localClient->confs.tail = NULL;
+ /* Bring back target_p from the dead... */
+ target_p->flags &= ~FLAGS_DEADSOCKET;
+ target_p->flags2 &= ~FLAGS2_PERSISTING;
+ target_p->fd = client_p->fd;
+ client_p->fd = -1;
+ if (IsPersisting(source_p))
+   {
+    m = dlinkFind(&persist_list,source_p);
+    if ( m != NULL )
+      {
+       dlinkDelete(m, &persist_list);
+       free_dlink_node(m);
+      }
+   }
+ /* And kill the old client_p... */
+ SetDead(client_p);
+ m = dlinkFind(&unknown_list, source_p);
+ if (m != NULL)
+   {
+    dlinkDelete(m, &unknown_list);
+    free_dlink_node(m);
+   }
+ fd_table[target_p->fd].read_data = target_p;
+ fd_table[target_p->fd].write_data = target_p;
+ fd_table[target_p->fd].flush_data = target_p; 
+ if (client_p->name[0] != 0)
+   del_from_client_hash_table(client_p->name, client_p);
+ remove_client_from_list(client_p);
+ dlinkAdd(client_p, make_dlink_node(), &dead_list);
+ client_p->localClient = NULL;
+ /* Re-register for io... */
+ comm_setselect(target_p->fd, FDLIST_IDLECLIENT, COMM_SELECT_READ,
+                read_packet, target_p, 0);
+ /* And client_p now has moved over to target_p...
+  * Welcome them in... */
+ user_welcome(target_p);
+ send_umode_out(target_p, target_p, 0);
+ /* Just for the sake of away scripts etc... */
+ sendto_one(target_p, form_str(RPL_NOWAWAY), me.name, target_p->name);
+ /* Now we have to send out stuff for every channel they are on... */
+ for (m=target_p->user->channel.head; m; m=m->next)
+   {
+    struct Channel *root_chptr, *chptr = m->data;
+    root_chptr = chptr->root_chptr ? chptr->root_chptr : chptr;
+    sendto_one(target_p, ":%s!%s@%s JOIN %s", target_p->name,
+               target_p->username, target_p->host, root_chptr->chname);
+    channel_member_names(target_p, chptr, root_chptr->chname);               
+   }
+}
+#endif
 
 /*
  * nick_from_server

@@ -295,27 +295,35 @@ check_pings_list(dlink_list *list)
 #if 0
   time_t        timeout;        /* found necessary ping time */
 #endif
-  char          *reason;
   dlink_node    *ptr, *next_ptr;
 
   for (ptr = list->head; ptr; ptr = next_ptr)
     {
       next_ptr = ptr->next;
       client_p = ptr->data;
-
+#ifdef PERSISTANT_CLIENTS
+      if (IsPersisting(client_p))
+        {
+         if ((CurrentTime - client_p->user->last_detach_time)
+              > ConfigFileEntry.persist_expire)
+           exit_client(client_p, client_p, client_p, "Client Expired");
+         continue;
+        }
+#endif
       /*
       ** Note: No need to notify opers here. It's
       ** already done when "FLAGS_DEADSOCKET" is set.
       */
       if (client_p->flags & FLAGS_DEADSOCKET)
         {
-          reason = ((client_p->flags & FLAGS_SENDQEX) ?
-		    "SendQ exceeded" : "Dead socket");
-
-	  (void)exit_client(client_p, client_p, &me, reason );
+         if (client_p->flags & FLAGS_SENDQEX)
+           {
+            exit_client(client_p, client_p, &me, "SendQ exceeded");
+            continue;
+           }
+          detach_client(client_p, "Dead socket");
           continue; 
         }
-      
       if (IsPerson(client_p))
         {
           if( !IsElined(client_p) &&
@@ -375,7 +383,7 @@ check_pings_list(dlink_list *list)
 			       "Ping timeout: %d seconds",
 			       (int)(CurrentTime - client_p->lasttime));
 	      
-	      (void)exit_client(client_p, client_p, &me, scratch);
+	      (void)detach_client(client_p, scratch);
               continue;
             }
           else if ((client_p->flags & FLAGS_PINGSENT) == 0)
@@ -1274,6 +1282,43 @@ static void remove_dependents(struct Client* client_p,
   recurse_remove_clients(source_p, comment1);
 }
 
+/* int detach_client(struct Client *cptr, const char *reason);
+ * Input: The pointer to the client, and the reason for the detach.
+ * Output: 0 on success.
+ * Side-effects: Exits the client if they cannot be made to persist,
+ *               otherwises closes the fd and makes it persist.
+ */
+int
+detach_client(struct Client *cptr, const char *reason)
+{
+#ifdef PERSISTANT_CLIENTS
+ if (cptr->user==NULL || !MyConnect(cptr) || !IsPersistant(cptr))
+   return exit_client(NULL, cptr, &me, reason);
+ if (IsPersisting(cptr))
+   return 0;
+ cptr->flags2 |= FLAGS2_PERSISTING;
+ if (cptr->fd >= 0)
+   fd_close(cptr->fd);
+ cptr->fd = -1;
+ dlinkAdd((void*)cptr, make_dlink_node(), &persist_list);
+ cptr->user->last_detach_time = CurrentTime;
+#if 0 /* No we can actually keep this... */
+ if (cptr->localClient != NULL)
+   BlockHeapFree(localUserFreeList, cptr->localClient);
+ cptr->localClient = NULL;
+#endif
+ if (cptr->user->away == NULL)
+   {
+    DupString(cptr->user->away, reason);
+    cptr->user->last_away = CurrentTime;
+    sendto_ll_serv_butone(NULL, NULL, 0, ":%s AWAY :%s", cptr->name,
+                          cptr->user->away);
+   }
+ return 0;
+#else
+ return exit_client(NULL, cptr, &me, reason);
+#endif
+}
 
 /*
 ** exit_client - This is old "m_bye". Name  changed, because this is not a
@@ -1317,7 +1362,15 @@ const char* comment         /* Reason for the exit */
     {
       if (source_p->flags & FLAGS_IPHASH)
         remove_one_ip(&source_p->localClient->ip);
-      
+      if (IsPersisting(source_p))
+        {
+         m = dlinkFind(&persist_list,source_p);
+         if ( m != NULL )
+           {
+            dlinkDelete(m, &persist_list);
+            free_dlink_node(m);
+           }
+        }
       delete_adns_queries(source_p->localClient->dns_query);
       delete_identd_queries(source_p);
 

@@ -112,7 +112,10 @@ flood_recalc(int fd, void *data)
 {
     struct Client *client_p = data;
     struct LocalUser *lclient_p = client_p->localClient;
-
+    
+    /* This can happen in the event that the client detached. */
+    if (!lclient_p)
+      return;
     assert(client_p != NULL);
     assert(lclient_p != NULL);
 
