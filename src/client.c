@@ -1539,9 +1539,8 @@ void add_to_accept(struct Client *source, struct Client *target)
   if (!IsPerson(target))
     return;
 
-  /* XXX MAX_ALLOW should be in config file not hard coded */
   if ( (len = dlink_list_length(&target->allow_list)) >= 
-       MAX_ALLOW)
+       ConfigFileEntry.max_accept)
     {
       sendto_one(target,":%s NOTICE %s :Max accept targets reached %d",
 		 me.name, target->name, len);

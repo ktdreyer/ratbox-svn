@@ -1429,6 +1429,9 @@ static void read_conf(FBFILE* file)
   if (!ConfigFileEntry.caller_id_wait)
     ConfigFileEntry.caller_id_wait = 60;
   
+  if (!ConfigFileEntry.max_accept)
+     ConfigFileEntry.max_accept = 20;
+
   GlobalSetOptions.idletime = (ConfigFileEntry.idletime * 60);
 
   if (!ConfigFileEntry.links_delay)

@@ -574,8 +574,6 @@ extern struct Client* next_client(struct Client* next, const char* name);
 extern struct Client* next_client_double(struct Client* next, 
                                          const char* name);
 
-#define MAX_ALLOW 20
-
 extern int accept_message(struct Client *source, struct Client *target);
 extern void add_to_accept(struct Client *source, struct Client *target);
 extern void del_from_accept(struct Client *source, struct Client *target);
