@@ -326,7 +326,6 @@ vchan_show_ids(struct Client *source_p, struct Channel *chptr)
   int tlen;
   dlink_node *ptr;
   struct Channel *chtmp;
-  int reply_to_send = 0;
 
   ircsprintf(buf, form_str(RPL_VCHANLIST), me.name, source_p->name,
 	     chptr->chname);
@@ -337,10 +336,10 @@ vchan_show_ids(struct Client *source_p, struct Channel *chptr)
 
   if(!SecretChannel(chptr))
   {
-    tlen = ircsprintf(t, "!%s ", pick_vchan_id(chptr));
+    ircsprintf(t, "!%s ", pick_vchan_id(chptr));
+    tlen = strlen(t);
     cur_len += tlen;
     t += tlen;
-    reply_to_send = 1;
   }
   else
   {
@@ -348,7 +347,6 @@ vchan_show_ids(struct Client *source_p, struct Channel *chptr)
     tlen = 9;
     cur_len += tlen;
     t += tlen;
-    reply_to_send = 1;
   }
   
 
@@ -356,34 +354,31 @@ vchan_show_ids(struct Client *source_p, struct Channel *chptr)
      {
        chtmp = ptr->data;
 
-       /* Obey the rules of /list */
-       if(SecretChannel(chtmp))
-       {
-         strcpy(t, "<secret> ");
-         tlen = 9;
-         cur_len += tlen;
-         t += tlen;
-         reply_to_send = 1;
-	 continue;
-       }
-
-       ircsprintf(t, "!%s ", pick_vchan_id(chtmp));
-       tlen = strlen(t);
-       cur_len += tlen;
-       t += tlen;
-       reply_to_send = 1;
-
-       if (cur_len > (BUFSIZE - NICKLEN - 3))
+       if ((cur_len + IRCD_MAX((NICKLEN*2)+2, 9)) > (BUFSIZE - 3))
          {
            sendto_one(source_p, "%s", buf );
            cur_len = mlen;
            t = buf + mlen;
-           reply_to_send = 0;
 	 }
+
+       /* Obey the rules of /list */
+       if(SecretChannel(chtmp))
+         {
+           strcpy(t, "<secret> ");
+           tlen = 9;
+           cur_len += tlen;
+           t += tlen;
+         }
+       else
+         {
+           ircsprintf(t, "!%s ", pick_vchan_id(chtmp));
+           tlen = strlen(t);
+           cur_len += tlen;
+           t += tlen;
+         }
      }
 
-   if (reply_to_send)
-     sendto_one(source_p, "%s", buf);
+  sendto_one(source_p, "%s", buf);
 }
 
 /*
@@ -398,7 +393,6 @@ char* pick_vchan_id(struct Channel *chptr)
 {
   dlink_node *lp;
   struct Client *target_p;
-  static char vchan_id[NICKLEN*2];
 
   for (lp = chptr->chanops.head; lp; lp = lp->next)
     if (!lp->next)
@@ -428,11 +422,7 @@ char* pick_vchan_id(struct Channel *chptr)
 	return target_p->name;
       }
 
-  /* all else failed, must be an empty channel, 
-   * so we use the vchan_id */
-  ircsprintf(vchan_id, "%s", chptr->vchan_id);
-
-  return(vchan_id);
+  return chptr->vchan_id;
 }
 
 /* return matching vchan, from root and !key (nick)
