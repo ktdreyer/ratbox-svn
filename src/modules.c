@@ -63,9 +63,6 @@
 
 #ifndef RTLD_NOW
 #define RTLD_NOW RTLD_LAZY /* openbsd deficiency */
-#ifndef RTLD_LAZY
-#define RTLD_NOW 2185 /* built-in dl*(3) don't care */
-#endif
 #endif
 
 static char unknown_ver[] = "<unknown>";
@@ -135,6 +132,10 @@ extern struct Message error_msgtab;
 #include <mach-o/dyld.h>
 
 #ifndef HAVE_DLOPEN
+#ifndef	RTLD_NOW
+#define RTLD_NOW 2185 /* built-in dl*(3) don't care */
+#endif
+
 void undefinedErrorHandler(const char *);
 NSModule multipleErrorHandler(NSSymbol, NSModule, NSModule);
 void linkEditErrorHandler(NSLinkEditErrors, int,const char *, const char *);
