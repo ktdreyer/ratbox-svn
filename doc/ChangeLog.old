@@ -1,3 +1,7 @@
+*** 20010105_4 by fl_
+- remote connects are giving wallops properly, this should fix it
+
+
 *** 20010105_3 by db
 - in the aop case, it was trying to send an UID for a server
   missing IsServer(sptr) ? sptr->name :sptr->user->id 
