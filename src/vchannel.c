@@ -23,6 +23,7 @@
 #include "tools.h"
 #include "vchannel.h"
 #include "channel.h"
+#include "channel_mode.h"
 #include "client.h"
 #include "common.h"
 #include "hash.h"

@@ -21,6 +21,7 @@
  */
 #include "tools.h"
 #include "channel.h"
+#include "channel_mode.h"
 #include "vchannel.h"
 #include "client.h"
 #include "hash.h"       /* for find_client() */

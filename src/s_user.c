@@ -38,6 +38,7 @@
 #include "tools.h"
 #include "s_user.h"
 #include "channel.h"
+#include "channel_mode.h"
 #include "class.h"
 #include "client.h"
 #include "common.h"
@@ -1080,7 +1081,7 @@ void send_umode(struct Client *client_p, struct Client *source_p, int old,
   int   i;
   int flag;
   char  *m;
-  int   what = MODE_NULL;
+  int   what = 0;
 
   /*
    * build a string in umode_buf to represent the change in the user's

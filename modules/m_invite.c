@@ -26,6 +26,7 @@
 #include "handlers.h"
 #include "common.h"
 #include "channel.h"
+#include "channel_mode.h"
 #include "list.h"
 #include "vchannel.h"
 #include "client.h"

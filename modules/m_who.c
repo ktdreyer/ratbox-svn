@@ -27,6 +27,7 @@
 #include "handlers.h"
 #include "client.h"
 #include "channel.h"
+#include "channel_mode.h"
 #include "vchannel.h"
 #include "hash.h"
 #include "ircd.h"

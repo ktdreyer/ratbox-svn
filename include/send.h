@@ -76,6 +76,7 @@ extern void sendto_server(struct Client *one, struct Client *source_p,
 #define ONLY_CHANOPS_HALFOPS_VOICED 2
 #define ONLY_CHANOPS_HALFOPS 3
 #define ONLY_CHANOPS 4
+#define ONLY_SERVERS 5 /* for channel_mode.c */
 
 #define L_ALL 	0
 #define L_OPER 	1

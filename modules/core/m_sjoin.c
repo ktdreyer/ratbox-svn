@@ -25,6 +25,7 @@
 #include "tools.h"
 #include "handlers.h"
 #include "channel.h"
+#include "channel_mode.h"
 #include "vchannel.h"
 #include "client.h"
 #include "hash.h"
@@ -318,12 +319,12 @@ static void ms_sjoin(struct Client *client_p,
     hide_or_not = ALL_MEMBERS;
 
   if ((MODE_HIDEOPS & mode.mode) && !(MODE_HIDEOPS & oldmode->mode))
-    sync_channel_oplists(chptr, 1);
+    sync_channel_oplists(chptr, MODE_DEL);
 
   /* Don't reveal the ops, only to remove them all */
   if (keep_our_modes)
     if (!(MODE_HIDEOPS & mode.mode) && (MODE_HIDEOPS & oldmode->mode))
-      sync_channel_oplists(chptr, 0);
+      sync_channel_oplists(chptr, MODE_ADD);
 
   set_final_mode(&mode,oldmode);
   chptr->mode = mode;

@@ -32,11 +32,6 @@
 #include "ircd_defs.h"        /* buffer sizes */
 #endif
 
-/* XXX until debugged and verified thoroughly */
-#undef USE_TABLE_MODE
-
-#define USE_TABLE_MODE
-
 struct Client;
 
 /* mode structure for channels */
@@ -101,11 +96,15 @@ void cleanup_channels(void *);
 #define CREATE 1        /* whether a channel should be
                            created or just tested for existence */
 
-#define MODEBUFLEN      200
+extern int     can_send (struct Channel *chptr, struct Client *who);
+extern int     is_banned (struct Channel *chptr, struct Client *who);
 
-
-/* Maximum mode changes allowed per client, per server is different */
-#define MAXMODEPARAMS   4
+extern int     can_join(struct Client *source_p, struct Channel *chptr,
+                        char *key);
+extern int     is_chan_op (struct Channel *chptr,struct Client *who);
+extern int     is_any_op (struct Channel *chptr,struct Client *who);
+extern int     is_half_op (struct Channel *chptr,struct Client *who);
+extern int     is_voiced (struct Channel *chptr,struct Client *who);
 
 extern dlink_node *find_user_link (dlink_list *, struct Client *);
 extern void    add_user_to_channel(struct Channel *chptr,
@@ -113,22 +112,9 @@ extern void    add_user_to_channel(struct Channel *chptr,
 extern void    remove_user_from_channel(struct Channel *chptr,
 					struct Client *who, int perm);
 
-extern int     can_send (struct Channel *chptr, struct Client *who);
-extern int     is_banned (struct Channel *chptr, struct Client *who);
-
-extern int     can_join(struct Client *source_p, struct Channel *chptr, char *key);
-extern int     is_chan_op (struct Channel *chptr,struct Client *who);
-extern int     is_any_op (struct Channel *chptr,struct Client *who);
-extern int     is_half_op (struct Channel *chptr,struct Client *who);
-extern int     is_voiced (struct Channel *chptr,struct Client *who);
-
-extern void    send_channel_modes (struct Client *, struct Channel *);
-extern int     check_channel_name(const char* name);
-extern void    channel_modes(struct Channel *chptr, struct Client *who,
-			     char *, char *);
-extern void    set_channel_mode(struct Client *, struct Client *, 
-                                struct Channel *, int, char **, char *);
 extern struct  Channel* get_channel(struct Client *,char*,int );
+
+extern int     check_channel_name(const char* name);
 
 extern void    channel_member_names( struct Client *source_p,
 				     struct Channel *chptr,
@@ -155,89 +141,20 @@ extern void    channel_member_list(struct Client *source_p,
 				   int *cur_len,
 				   int *reply_to_send);
 
-extern void sync_channel_oplists(struct Channel *, int);
-extern void sync_oplists(struct Channel *, struct Client *, int,
-                         const char *);
-extern void set_channel_mode_flags( char flags_ptr[4][2],
-				    struct Channel *chptr,
-				    struct Client *source_p);
-extern void init_chcap_usage_counts(void);
-extern void set_chcap_usage_counts(struct Client *serv_p);
-extern void unset_chcap_usage_counts(struct Client *serv_p);
+extern void    send_channel_modes (struct Client *, struct Channel *);
+extern void    channel_modes(struct Channel *chptr, struct Client *who,
+                             char *, char *);
+
+extern void    check_spambot_warning(struct Client *source_p, const
+                                     char *name);
 
 /*
 ** Channel Related macros follow
 */
 
-/* can_send results */
-#define CAN_SEND_NO	0
-#define CAN_SEND_NONOP  1
-#define CAN_SEND_OPV	2
-
-
-/* Channel related flags */
-
-#define CHFL_PEON	0x0000 /* normal member of channel */
-#define CHFL_CHANOP     0x0001 /* Channel operator */
-#define CHFL_VOICE      0x0002 /* the power to speak */
-#define CHFL_DEOPPED    0x0004 /* deopped by us, modes need to be bounced */
-#define CHFL_HALFOP     0x0008 /* Channel half op */
-#define CHFL_BAN        0x0010 /* ban channel flag */
-#define CHFL_EXCEPTION  0x0020 /* exception to ban channel flag */
-#define CHFL_INVEX      0x0080
-
-/* Channel Visibility macros */
-
-#define MODE_PEON	CHFL_PEON
-#define MODE_CHANOP     CHFL_CHANOP
-#define MODE_VOICE      CHFL_VOICE
-#define MODE_HALFOP	CHFL_HALFOP
-#define MODE_DEOPPED	CHFL_DEOPPED
-
-/* channel modes ONLY */
-#define MODE_PRIVATE    0x0008
-#define MODE_SECRET     0x0010
-#define MODE_MODERATED  0x0020
-#define MODE_TOPICLIMIT 0x0040
-#define MODE_INVITEONLY 0x0080
-#define MODE_NOPRIVMSGS 0x0100
-#define MODE_KEY        0x0200
-#define MODE_BAN        0x0400
-#define MODE_EXCEPTION  0x0800
-#define MODE_INVEX	0x2000
-#define MODE_HIDEOPS    0x4000
-#define MODE_LIMIT      0x8000
-
-/*
- * mode flags which take another parameter (With PARAmeterS)
- */
-#define MODE_WPARAS (MODE_CHANOP|MODE_VOICE|MODE_BAN|\
-                     MODE_EXCEPTION|MODE_KEY|MODE_LIMIT|MODE_INVEX)
-
-/*
- * Undefined here, these are used in conjunction with the above modes in
- * the source.
-#define MODE_QUERY     0x10000000
-#define MODE_DEL       0x40000000
-#define MODE_ADD       0x80000000
- */
-
-/* used in SetMode() in channel.c and m_umode() in s_msg.c */
-
-#define MODE_NULL      0
-#define MODE_QUERY     0x10000000
-#define MODE_ADD       0x40000000
-#define MODE_DEL       0x20000000
-
 #define HoldChannel(x)          (!(x))
-/* name invisible */
-#define SecretChannel(x)        ((x) && ((x)->mode.mode & MODE_SECRET))
-/* channel not shown but names are */
-#define HiddenChannel(x)        ((x) && ((x)->mode.mode & MODE_PRIVATE))
 /* channel visible */
 #define ShowChannel(v,c)        (PubChannel(c) || IsMember((v),(c)))
-#define PubChannel(x)           ((!x) || ((x)->mode.mode &\
-                                 (MODE_PRIVATE | MODE_SECRET)) == 0)
 
 #define IsMember(who, chan) ((who && who->user && \
                 dlinkFind(&who->user->channel, chan)) ? 1 : 0)
@@ -256,25 +173,4 @@ typedef struct Ban      /* also used for exceptions -orabidoo */
 /* Number of chanops, peon, voiced, halfops sublists */
 #define MAX_SUBLISTS 4
 
-#ifdef USE_TABLE_MODE
-struct ChModeChange
-{
- char letter;
- char *arg, *id;
- int caps, nocaps, mems;
-};
-
-struct ChResyncOp
-{
- struct Client *client_p;
- int dir, sync, send;
- char c;
-};
-
-#define CHACCESS_CHANOP 3
-#define CHACCESS_HALFOP 2
-#define CHACCESS_VOICED 1
-#define CHACCESS_PEON   0
-
-#endif
 #endif  /* INCLUDED_channel_h */

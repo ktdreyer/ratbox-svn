@@ -25,7 +25,7 @@
 #include "tools.h"
 #include "client.h"
 #include "class.h"
-#include "channel.h"
+#include "channel_mode.h"
 #include "common.h"
 #include "event.h"
 #include "fdlist.h"
@@ -1316,9 +1316,7 @@ const char* comment         /* Reason for the exit */
 	    {
 	      dlinkDelete(m,&serv_list);
 	      free_dlink_node(m);
-#ifdef USE_TABLE_MODE
-          unset_chcap_usage_counts(source_p);
-#endif
+              unset_chcap_usage_counts(source_p);
 	    }
 	}
 

@@ -33,6 +33,7 @@
 #include "hash.h"       /* for find_client() */
 #include "common.h"   /* bleah */
 #include "channel.h"
+#include "channel_mode.h"
 #include "vchannel.h"
 #include "hash.h"
 #include "ircd.h"

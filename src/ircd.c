@@ -56,6 +56,7 @@
 #include "tools.h"
 #include "ircd.h"
 #include "channel.h"
+#include "channel_mode.h"
 #include "class.h"
 #include "client.h"
 #include "common.h"
@@ -562,10 +563,8 @@ int main(int argc, char *argv[])
   memset((void *)&ServerInfo, 0, sizeof(ServerInfo));
   memset((void *)&AdminInfo, 0, sizeof(AdminInfo));
 
-#ifdef USE_TABLE_MODE
   /* Initialise the channel capability usage counts... */
   init_chcap_usage_counts();
-#endif
 
   ConfigFileEntry.dpath = DPATH;
   ConfigFileEntry.configfile = CPATH;   /* Server configuration file */
