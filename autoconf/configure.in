@@ -39,10 +39,15 @@ case `$CC -version 2>&1` in
     MIPSpro=no
     ;;
 esac
-AC_MSG_CHECKING(if we are using Sun WorkShop)
+AC_MSG_CHECKING(if we are using Sun WorkShop/Forte)
 case `$CC -V 2>&1` in
   *Sun*WorkShop*)
-    AC_MSG_RESULT(success! We are using Sun WorkShop.)
+    AC_MSG_RESULT(success! We are using Sun WorkShop/Forte.)
+    SunWorkShop=yes
+    SGS=yes
+    ;;
+  *Forte*Developer*)
+    AC_MSG_RESULT(success! We are using Sun WorkShop/Forte.)
     SunWorkShop=yes
     SGS=yes
     ;;
@@ -115,7 +120,7 @@ esac
 
 AC_MSG_CHECKING(how to generate dependancy info)
 if test "$SunWorkShop" = "yes"; then
-  AC_MSG_RESULT(Sun WorkShop using $CC -xM)
+  AC_MSG_RESULT(Sun WorkShop/Forte using $CC -xM)
   MKDEP="$CC -xM"
 fi
 if test "$HPUX" = "yes"; then
@@ -999,11 +1004,6 @@ if test "X${cf_openssl_ciphers}" != "X"; then
   echo ""
   echo "${cf_openssl_ciphers}"
   echo ""
-fi
-
-if test "$ac_cv_efnet" = "yes"; then
-        AC_MSG_RESULT("This server is configured for EFNet usage.  You should NOT use the")
-        AC_MSG_RESULT("example.conf that will be installed.  Use example.efnet.conf instead.")
 fi
 
 AC_MSG_RESULT("Server is configured with NICKLEN=$ac_cv_nicklen and MAX_CLIENTS=$ac_cv_maxclients")

@@ -89,11 +89,11 @@
 /* nicklen */
 #undef NICKLEN
 
-/* efnet */
-#undef EFNET
-
 /* max_clients */
 #undef MAX_CLIENTS
+
+/* EFNET */
+#undef EFNET
 
 /* Define if you have the EVP_bf_cfb function.  */
 #undef HAVE_EVP_BF_CFB

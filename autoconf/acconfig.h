@@ -76,3 +76,6 @@
 /* max_clients */
 #undef MAX_CLIENTS
 
+/* EFNET */
+#undef EFNET
+
