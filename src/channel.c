@@ -2523,6 +2523,14 @@ extern int list_length(dlink_list *list)
   return count;
 }
 
+/*
+ * channel_chanop_or_voice
+ * inputs	- pointer to channel
+ * 		- pointer to client
+ * output	- string either @,+% or"" depending on whether
+ *		  chanop, voiced, halfop or user
+ * side effects	-
+ */
 char *channel_chanop_or_voice(struct Channel *chptr, struct Client *acptr)
 {
   dlink_node *ptr;

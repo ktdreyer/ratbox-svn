@@ -270,6 +270,7 @@ void names_list( struct Client *sptr, struct Channel *chptr, char *chname,
 
       strcat(buf,buf2);
       cur_len += strlen(buf2);
+      reply_to_send = YES;
 
       if ((cur_len + NICKLEN) > (BUFSIZE - 3))
 	{
@@ -341,14 +342,11 @@ void names_non_public_non_secret(struct Client *sptr)
       if(lp == NULL)	/* Nothing to do. yay */
 	continue;
 
-      /* XXX */
-#if 0
       if(GlobalSetOptions.hide_chanops)
 	ircsprintf(buf2," %s ", c2ptr->name);
       else
-	ircsprintf(buf2,"%s%s ", channel_chanop_or_voice(lp->flags),
+	ircsprintf(buf2,"%s%s ", channel_chanop_or_voice(ch3ptr, c2ptr),
 		   c2ptr->name);
-#endif
 
       strcat(buf,buf2);
       cur_len += strlen(buf2);
