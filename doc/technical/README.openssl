@@ -77,25 +77,18 @@ SERVER CONFIGURATION
   To be done.
 
 
-OUTDATED OPENSSL
-================
-  OpenSSL 0.9.6 (or above) is **REQUIRED** for cryptlinks to work.
+OPENSSL VERSION REQUIREMENT
+===========================
+  OpenSSL 0.9.6 (or above) is required for cryptlinks to work.
 
-  The reason for this is that prior to OpenSSL 0.9.6, none of the
-  encryption/decryption functions supported any form of error checking.
-  The reasons for this are unknown, but the reasons behind not supporting
+  The reason for this is severe: prior to OpenSSL 0.9.6, none of the
+  encryption/decryption functions did any form of error handling.  The
+  reasons for this are unknown, but the reasons behind not supporting
   0.9.5 or below should be self-explanatory at this point.
 
   To find out what OpenSSL version you have, try the following:
 
     $ openssl version
-    OpenSSL 0.9.6 24 Sep 2000
-
-  If you have installed OpenSSL into a directory structure which is not
-  in your path (i.e. /usr/local/ssl/bin), please run the openssl binary
-  via it's full pathname, such as:
-
-    $ /usr/local/ssl/bin/openssl version
     OpenSSL 0.9.6 24 Sep 2000
 
 
@@ -129,19 +122,9 @@ MULTIPLE OPENSSL INSTALLATIONS
   In the case of FreeBSD, you may either rebuild world (make buildworld)
   or use the OpenSSL version provided in /usr/ports/security/openssl.
 
-  For example, let's assume a Linux machine has two (2) copies of OpenSSL
-  installed:
 
-    /usr/openssl         - Stock system install (0.9.5)
-    /usr/local/ssl       - Additional install (0.9.6a)
-
-  In this case, you would want to run "configure" as follows:
-
-    ./configure --enable-openssl=/usr/local/ssl
-
-
-OPENSSL ODDITIES
-================
+OPENSSL INSTALLATION PATHS
+==========================
   The stock source-code release of OpenSSL is written to install itself,
   by default, in /usr/local/ssl.  This can be changed using the
   "--prefix" and "--openssldir" arguments of OpenSSL's "config" stage.
@@ -150,71 +133,25 @@ OPENSSL ODDITIES
   installations.  Here are some examples of OpenSSL configurations, and
   how to get hybrid-7 to work with them:
 
-    OpenSSL: ./config --prefix=/usr/local
-    =====================================
-      /usr/local
-      /usr/local/bin
-      /usr/local/include           <required by hybrid-7>
-      /usr/local/include/openssl   <required by hybrid-7>
-      /usr/local/lib               <required by hybrid-7>
-      /usr/local/man
-      /usr/local/ssl
-      /usr/local/ssl/certs
-      /usr/local/ssl/lib
-      /usr/local/ssl/man
-      /usr/local/ssl/misc
-      /usr/local/ssl/openssl.cnf
-      /usr/local/ssl/private
-    =================================================
+    OpenSSL:  ./config --prefix=/usr/local
     hybrid-7: ./configure --enable-openssl=/usr/local
 
-
-    OpenSSL: ./config --openssldir=/usr/local
-    =========================================
-      /usr/local
-      /usr/local/bin
-      /usr/local/include           <required by hybrid-7>
-      /usr/local/include/openssl   <required by hybrid-7>
-      /usr/local/lib               <required by hybrid-7>
-      /usr/local/man
-      /usr/local/certs
-      /usr/local/misc
-      /usr/local/openssl.cnf
-      /usr/local/private
-    =================================================
+    OpenSSL:  ./config --openssldir=/usr/local
     hybrid-7: ./configure --enable-openssl=/usr/local
 
-
-    OpenSSL: ./config --prefix=/usr/local --openssldir=/usr/local/ssl
-    =================================================================
-      /usr/local
-      /usr/local/bin
-      /usr/local/include           <required by hybrid-7>
-      /usr/local/include/openssl   <required by hybrid-7>
-      /usr/local/lib               <required by hybrid-7>
-      /usr/local/ssl/certs
-      /usr/local/ssl/lib
-      /usr/local/ssl/man
-      /usr/local/ssl/misc
-      /usr/local/ssl/certs
-      /usr/local/ssl/openssl.cnf
-      /usr/local/ssl/private
-    =================================================
+    OpenSSL:  ./config --prefix=/usr/local --openssldir=/usr/local/ssl
     hybrid-7: ./configure --enable-openssl=/usr/local
-
-
-  hybrid-7 will work with all of the above configurations.
 
   We recommend that administrators install OpenSSL using the "--openssldir"
   argument, rather than the "--prefix" argument.  The reason for this is
   purely cosmetical; it's nice to keep everything in one place, and keeps
   a clean directory tree.
 
-  We also recommend against using "--openssldir=/usr/local", as shown
-  in the above examples.  We recommend using /usr/local/ssl.
-
   Finally, please verify that your OpenSSL installation was installed
-  properly, otherwise you will be unable to compile hybrid-7.
+  properly, otherwise you will be unable to compile hybrid-7.  A proper
+  installation should have an include/openssl/ directory, and a
+  lib/ directory.  Both (and the files within) are needed for hybrid-7
+  to properly work with OpenSSL.
 
 
 CIPHERS
@@ -248,6 +185,26 @@ CIPHERS
   the IDEA cipher, and (I believe?) export regulations.  Henceforth, it
   cannot be provided with stock FreeBSD systems.  Other systems may
   differ.
+
+
+SOLARIS CAVEATS
+===============
+  Some versions of Solaris lack /dev/random or /dev/urandom.  These
+  are practically considered pre-requisites for OpenSSL to function
+  properly.
+
+  If you're using a version of Solaris which lacks /dev/random or
+  /dev/urandom, the OpenSSL authors provide two (2) possible
+  solutions.  Please read the following section of the OpenSSL FAQ:
+
+    http://www.openssl.org/support/faq.html#USER1
+
+  In summary, it is recommended that Solaris users install the EGD
+  (Entropy Gathering Daemon).  If this is not an option, the other
+  solution is only available to Solaris 2.6 users: install Sun vendor
+  patc 105710-0 and use the $RANDFILE environment variable to specify
+  /dev/random.  There are caveats to using this method as well (issues
+  with blocking vs. non-blocking).
 
 
 
