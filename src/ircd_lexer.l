@@ -83,6 +83,7 @@ auth		{ return AUTH; }
 autoconn	{ return AUTOCONN; }
 class		{ return CLASS; }
 connect		{ return CONNECT; }
+connectfreq     { return CONNECTFREQ; }
 deny		{ return DENY; }
 description	{ return DESCRIPTION; }
 die		{ return DIE; }
