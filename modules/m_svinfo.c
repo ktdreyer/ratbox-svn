@@ -136,7 +136,7 @@ static void ms_svinfo(struct Client *client_p, struct Client *source_p,
     { 
       sendto_realops_flags(FLAGS_ALL,
                 "Link %s notable TS delta (my TS=%lu, their TS=%lu, delta=%d)",
-                get_client_name(source_p, MASK_IP),
+                source_p->name,
                 (unsigned long) CurrentTime,
                 (unsigned long) theirtime,
                 (int) deltat);

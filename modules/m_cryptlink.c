@@ -208,8 +208,10 @@ static void mr_cryptauth(struct Client *client_p, struct Client *source_p,
 
   if (!aconf)
   {
-    sendto_realops_flags(FLAGS_ALL, "Lost C-Line for %s",
+    sendto_realops_flags(FLAGS_SERVADMIN, "Lost C-Line for %s",
                          get_client_name(client_p, HIDE_IP));
+    sendto_realops_flags(FLAGS_SERVOPER, "Lost C-Line for %s",
+                         get_client_name(client_p, MASK_IP));
     exit_client(client_p, client_p, &me, "Lost C-line");
     return;
   }
@@ -368,8 +370,10 @@ static void mr_cryptserv(struct Client *client_p, struct Client *source_p,
                          name, CONF_SERVER);
   if (!aconf)
   {
-    sendto_realops_flags(FLAGS_ALL,
+    sendto_realops_flags(FLAGS_SERVADMIN,
       "Lost C-Line for %s", get_client_name(client_p, HIDE_IP));
+    sendto_realops_flags(FLAGS_SERVOPER,
+      "Lost C-Line for %s", get_client_name(client_p, MASK_IP));
     exit_client(client_p, client_p, &me, "Lost C-line");
     return;
   }

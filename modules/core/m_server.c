@@ -402,7 +402,7 @@ static void ms_server(struct Client *client_p, struct Client *source_p,
 	    get_client_name(client_p, HIDE_IP), name);
       sendto_realops_flags(FLAGS_SERVOPER, 
             "link %s introduced leafed %s.",
-            get_client_name(client_p, HIDE_IP), name);
+            get_client_name(client_p, MASK_IP), name);
       /* If it is new, we are probably misconfigured, so split the
        * non-hub server introducing this. Otherwise, split the new
        * server. -A1kmm. */
