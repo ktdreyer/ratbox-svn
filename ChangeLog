@@ -1,3 +1,25 @@
+leeh        2004/01/15 09:48:10 EST	(20040115_1)
+
+  Modified files:
+    include              client.h config.h tools.h 
+    src                  client.c conf.c s_hoststat.c tools.c 
+  Log:
+  - added an extended hosthash for hoststat service, keeps track of maximum
+    host counts etc
+  - added get_time() to return time as DD/MM/YY HH:MM TZ
+  - oper {}; shouldve been using match(), not strcmp()
+  
+  Revision  Changes    Path
+  1.13      +14 -1     rserv/include/client.h
+  1.12      +10 -0     rserv/include/config.h
+  1.9       +1 -0      rserv/include/tools.h
+  1.16      +57 -0     rserv/src/client.c
+  1.14      +4 -4      rserv/src/conf.c
+  1.4       +14 -2     rserv/src/s_hoststat.c
+  1.6       +14 -0     rserv/src/tools.c
+
+
+
 leeh        2004/01/15 09:01:16 EST	(20040115_0)
 
   Modified files:
