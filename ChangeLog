@@ -1,3 +1,20 @@
+leeh        2003/06/11 09:17:32 UTC	(20030611_1)
+
+  Modified files:
+    modules              m_gline.c m_stats.c 
+    src                  dynlink.c 
+  Log:
+  - fix oper reason for glines
+  - we werent storing the mapi_version, so when we tried to unload it, it
+    was 0 and we failed.
+  
+  Revision  Changes    Path
+  1.118     +17 -1     ircd-ratbox/modules/m_gline.c
+  1.165     +3 -2      ircd-ratbox/modules/m_stats.c
+  7.22      +1 -0      ircd-ratbox/src/dynlink.c
+
+
+
 leeh        2003/06/11 08:30:55 UTC	(20030611_0)
 
   Modified files:
