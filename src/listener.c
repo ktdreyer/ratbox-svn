@@ -329,7 +329,7 @@ add_listener(int port, const char *vhost_ip, int family)
 	 */
 	if(port == 0)
 		return;
-
+	memset(&vaddr, 0, sizeof(vaddr));
 	vaddr.ss_family = family;
 
 	if(vhost_ip != NULL)
