@@ -1,3 +1,9 @@
+*** 20001203_13 by db
+- fixed bug in m_names.c removed redundant/duplicate code in m_names.c
+  which was already in channel.c
+
+
+
 *** 20001203_12 by db
 - removed DEBUG code from dlink
 
