@@ -1,3 +1,7 @@
+*** 20000516_1 by wnder
+ Fix for % in user's ident bug
+
+
 *** 20000407_1 by db
 - unused variable never caught, uneeded va_end caused solaris compiler
   to not compile
