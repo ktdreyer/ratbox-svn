@@ -1,3 +1,10 @@
+*** 20001012_1 by db
+- folded in work toot (Toby Verrall) to7@antipope.fsnet.co.uk
+  did for first rough proof of concept vchans. We'll have to go in and
+  #ifdef these later.
+
+
+
 *** 20001011_1 by lusky
 fix for *@*.foo.com I:lines being broken by a user@host.foo.com I:lines
 change chptr->vchans to chptr->vchan_flag in channel.c to get this tree
