@@ -863,7 +863,7 @@ void client_burst_if_needed(struct Client *client_p, struct Client *target_p)
  
   if((target_p->lazyLinkClientExists & client_p->localClient->serverMask) == 0)
     {
-      sendnick_TS( client_p, target_p );
+      sendnick_TS(client_p, target_p);
       add_lazylinkclient(client_p,target_p);
     }
 }
