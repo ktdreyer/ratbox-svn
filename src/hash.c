@@ -731,8 +731,8 @@ get_or_create_channel(struct Client *client_p, char *chname, int *isnew)
     *isnew = 1;
 
   chptr = BlockHeapAlloc(channel_heap);
-  memset(chptr, 0, sizeof(*chptr)-CHANNELLEN);
-  strcpy(chptr->chname, chname);
+  memset(chptr, 0, sizeof(struct Channel));
+  strlcpy(chptr->chname, chname, CHANNELLEN+1);
 
   if (GlobalChannelList)
     GlobalChannelList->prevch = chptr;
