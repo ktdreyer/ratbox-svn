@@ -1,0 +1,2 @@
+- part never contains multiple channels in one line
+- SJOIN sent with an older ts, and a key will never happen
