@@ -98,20 +98,16 @@ static struct DBufBuffer* dbuf_alloc()
 {
   struct DBufBuffer* db = dbufFreeList;
 
-  if (DBufUsedCount * DBUF_SIZE == BUFFERPOOL)
-    return NULL;
-
-  if (db)
-    dbufFreeList = dbufFreeList->next;
-  else {
+  if (db) {
+    dbufFreeList = db->next;
+    ++DBufUsedCount;
+  }
+  else if (DBufCount * DBUF_SIZE < BUFFERPOOL) {
     db = (struct DBufBuffer*) MyMalloc(sizeof(struct DBufBuffer));
     assert(0 != db);
     ++DBufCount;
+    ++DBufUsedCount;
   }
-  ++DBufUsedCount;
-
-  db->next  = 0;
-  db->start = db->end = db->data;
   return db;
 }
 
@@ -152,7 +148,7 @@ static int dbuf_malloc_error(struct DBuf* dyn)
 int dbuf_put(struct DBuf* dyn, const char* buf, size_t length)
 {
   struct DBufBuffer** h;
-  struct DBufBuffer*  d;
+  struct DBufBuffer*  db;
   int                 chunk;
 
   assert(0 != dyn);
@@ -173,23 +169,25 @@ int dbuf_put(struct DBuf* dyn, const char* buf, size_t length)
   dyn->length += length;
 
   for ( ; length > 0; h = &(d->next)) {
-    if (0 == (d = *h)) {
-      if (0 == (d = dbuf_alloc()))
+    if (0 == (db = *h)) {
+      if (0 == (db = dbuf_alloc()))
         return dbuf_malloc_error(dyn);
 
-      dyn->tail = d;
-      *h        = d;        /* prev->next = d */
+      db->next  = 0;
+      db->start = db->end = db->data;
+      dyn->tail = db;
+      *h        = db;       /* prev->next = db */
     }
-    chunk = (d->data + DBUF_SIZE) - d->end;
+    chunk = (db->data + DBUF_SIZE) - db->end;
     if (chunk) {
       if (chunk > length)
         chunk = length;
       
-      memcpy(d->end, buf, chunk);
+      memcpy(db->end, buf, chunk);
 
       length -= chunk;
       buf    += chunk;
-      d->end += chunk;
+      db->end += chunk;
     }
   }
   return 1;
