@@ -1,3 +1,8 @@
+*** 19990804_2 by db
+- fixed broken m_unkline.c it would unkline everything. duh
+
+
+
 *** 19990804_1 by db
 - fixes IP Klines not showing host
 
