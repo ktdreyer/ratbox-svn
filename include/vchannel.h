@@ -43,11 +43,28 @@ extern void	add_vchan_to_client_cache(struct Client *sptr,
 					  struct Channel *vchan,
 					  struct Channel *base_chan);
 
+extern void	del_vchan_from_client_cache(struct Client *sptr,
+					    struct Channel *vchan);
+
 extern void	show_vchans(struct Client *cptr,
 			    struct Client *sptr,
 			    struct Channel *chptr);
 
 extern struct Channel* find_vchan(struct Channel *chptr, char *key);
+
+/* See if this client is on a sub chan already */
+extern int on_sub_vchan(struct Channel *chptr, struct Client *sptr);
+
+/* Valid to verify a channel is a subchan */
+#define IsVchan(chan)	(chan->prev_vchan)
+
+/* Only valid for top chan, i.e. only valid to determine if there are vchans
+ * under hash table lookup of top level channel
+ */
+#define HasVchans(chan)	(chan->next_vchan)
+
+/* Valid to determine if this is the top of a set of vchans */
+#define IsVchanTop(chan)	((chan->next_vchan)&&(chan->prev_vchan==0))
 
 #endif  /* INCLUDED_vchannel_h */
 

@@ -35,6 +35,10 @@
 #include <string.h>
 #include <stdlib.h>
 
+/* Given base chan pointer and vchan pointer add to
+ * translation table cache for this client
+ */
+
 void    add_vchan_to_client_cache(struct Client *sptr,
 				  struct Channel *vchan,
 				  struct Channel *base_chan)
@@ -51,6 +55,41 @@ void    add_vchan_to_client_cache(struct Client *sptr,
 
   sptr->vchan_map[i].base_chan = base_chan;
   sptr->vchan_map[i].vchan = vchan;
+}
+
+/* Given vchan pointer remove from translation table cache */
+
+void del_vchan_from_client_cache(struct Client *sptr, struct Channel *vchan)
+{
+  int i;
+
+  assert(sptr != NULL);
+
+  for(i=0;sptr->vchan_map[i].base_chan;i++)
+    {
+      if( sptr->vchan_map[i].vchan == vchan )
+	{
+	  sptr->vchan_map[i].vchan = NULL;
+	  sptr->vchan_map[i].base_chan = NULL;
+	}
+    }
+}
+
+/* see if this client given by sptr is on a subchan already */
+
+int on_sub_vchan(struct Channel *chptr, struct Client *sptr)
+{
+  int i;
+
+  assert(sptr != NULL);
+
+  for(i=0;sptr->vchan_map[i].base_chan;i++)
+    {
+      if( sptr->vchan_map[i].base_chan == chptr )
+	return YES;
+    }
+
+  return NO;
 }
 
 
