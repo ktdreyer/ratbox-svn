@@ -1,3 +1,7 @@
+*** 20010104_19 by wcampbel
+Removed the old test data from MONTHS ago
+
+
 *** 20010104_18 by db
 - fixed too many arguments for format in m_gline.c
 - fixed too few arguments for format in s_user.c and the conflict
