@@ -151,10 +151,7 @@ get_client_ping(struct Client *target_p)
 		aconf = target_p->localClient->att_conf;
 
 		if(aconf != NULL)
-		{
-			if(aconf->status & CONF_CLIENT_MASK)
-				ping = get_conf_ping(aconf);
-		}
+			ping = get_conf_ping(aconf);
 		else
 			ping = DEFAULT_PINGFREQUENCY;
 	}

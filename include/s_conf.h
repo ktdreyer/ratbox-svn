@@ -79,7 +79,6 @@ struct ConfItem
 #define CONF_ILLEGAL            0x80000000
 #define CONF_QUARANTINED_NICK   0x0001
 #define CONF_CLIENT             0x0002
-#define CONF_SERVER             0x0004
 #define CONF_KILL               0x0040
 #define CONF_XLINE		0x0080
 #define CONF_RESV_CHANNEL	0x0100
@@ -93,9 +92,6 @@ struct ConfItem
 #define CONF_GLINE             0x10000
 #define CONF_DLINE             0x20000
 #define CONF_EXEMPTDLINE      0x100000
-
-#define CONF_SERVER_MASK       CONF_SERVER
-#define CONF_CLIENT_MASK       (CONF_CLIENT | CONF_SERVER_MASK)
 
 #define IsIllegal(x)    ((x)->status & CONF_ILLEGAL)
 

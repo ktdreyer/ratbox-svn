@@ -523,11 +523,8 @@ detach_conf(struct Client *client_p)
 		{
 			remove_ip_limit(client_p, aconf);
 
-			if(aconf->status & CONF_CLIENT_MASK)
-			{
-				if(ConfCurrUsers(aconf) > 0)
-					--ConfCurrUsers(aconf);
-			}
+			if(ConfCurrUsers(aconf) > 0)
+				--ConfCurrUsers(aconf);
 
 			if(ConfMaxUsers(aconf) == -1 && ConfCurrUsers(aconf) == 0)
 			{
@@ -595,8 +592,7 @@ attach_conf(struct Client *client_p, struct ConfItem *aconf)
 	client_p->localClient->att_conf = aconf;
 
 	aconf->clients++;
-	if(aconf->status & CONF_CLIENT_MASK)
-		ConfCurrUsers(aconf)++;
+	ConfCurrUsers(aconf)++;
 	return (0);
 }
 
