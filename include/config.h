@@ -98,9 +98,9 @@
  *
  */
 
-#define DPATH   "/usr/ejb/ircd/"
-#define SPATH   "/usr/ejb/ircd/ircd"
-#define MODPATH "/usr/ejb/ircd/modules/autoload/"
+#define DPATH   "/usr/local/ircd/"
+#define SPATH   "/usr/local/ircd/ircd"
+#define MODPATH "/usr/local/ircd/modules/autoload/"
 #define CPATH   "ircd.conf"
 #define KPATH   "kline.conf"
 #define DLPATH  "kline.conf"
