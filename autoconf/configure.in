@@ -370,24 +370,33 @@ dnl are actually going to (ab)use
 dnl Actually do the define magic now
 dnl mostly ripped from squid-commloops, thanks to adrian and benno
 
+dnl Make sure headers required for kqueue exist if we want to use it.
 if test "$ac_cv_func_kqueue" = "yes" ; then
-        SELECT_TYPE="kqueue"   
-	AC_DEFINE(USE_KQUEUE)
-elif test "$ac_cv_func_devpoll" = "yes" ; then
-        SELECT_TYPE="devpoll"
-        AC_DEFINE(HAVE_DEVPOLL)
-	AC_DEFINE(USE_DEVPOLL)
-elif test "$ac_cv_func_poll" = "yes" ; then
-        SELECT_TYPE="poll"
-	AC_DEFINE(USE_POLL)
-elif test "$ac_cv_func_select" = "yes" ; then
-        SELECT_TYPE="select"
-	AC_DEFINE(USE_SELECT)
-else
-        echo "Eep!  Can't find kqueue, devpoll, poll _or_ select!"
-        echo "I'll try select and hope for the best."
-        SELECT_TYPE="select"
-	AC_DEFINE(USE_SELECT)
+	AC_CHECK_HEADER(sys/event.h, [ event_h="sys/event.h" ], )
+	if test "X$event_h" = "X" ; then
+		AC_MSG_WARN(** sys/event.h not found - can not build kqueue support without it **)
+	else
+	        SELECT_TYPE="kqueue"
+		AC_DEFINE(USE_KQUEUE)
+	fi
+fi
+if test "$SELECT_TYPE" != "kqueue" ; then
+	if test "$ac_cv_func_devpoll" = "yes" ; then
+        	SELECT_TYPE="devpoll"
+        	AC_DEFINE(HAVE_DEVPOLL)
+		AC_DEFINE(USE_DEVPOLL)
+	elif test "$ac_cv_func_poll" = "yes" ; then
+	        SELECT_TYPE="poll"
+		AC_DEFINE(USE_POLL)
+	elif test "$ac_cv_func_select" = "yes" ; then
+	        SELECT_TYPE="select"
+		AC_DEFINE(USE_SELECT)
+	else
+	        echo "Eep!  Can't find kqueue, devpoll, poll _or_ select!"
+	        echo "I'll try select and hope for the best."
+	        SELECT_TYPE="select"
+		AC_DEFINE(USE_SELECT)
+	fi
 fi
 echo "Using ${SELECT_TYPE} for select loop."
 AC_DEFINE_UNQUOTED(SELECT_TYPE, "$SELECT_TYPE")
@@ -485,17 +494,20 @@ else
 	dnl files.  First, though, we need to see where nlist.h is hiding.
 	AC_CHECK_HEADER(libelf/nlist.h, [ nlist_h="libelf/nlist.h" ], )
 	AC_CHECK_HEADER(elf/nlist.h, [ nlist_h="elf/nlist.h" ], )
-	AC_CHECK_HEADER(nlist.h, [ nlist_h="nlist.h" ] , )
+	AC_CHECK_HEADER(nlist.h, [ nlist_h="nlist.h" ], )
 	if test x"$nlist_h" = "x"; then
 		AC_MSG_WARN(** cannot locate an nlist.h **)
-	fi
-	AC_MSG_CHECKING(for extra underscores prepended to symbol names)
-	AC_CACHE_VAL(symbol_underscores, 
-	[
+		AC_MSG_WARN(** cannot check for extra underscores prepended to symbol names - nlist.h is missing **)
+		AC_MSG_WARN(** assuming no underscores prepend symbol names **)
+		AC_DEFINE_UNQUOTED(SYMBOL_PREFIX, "")
+	else
+		AC_MSG_CHECKING(for extra underscores prepended to symbol names)
+		AC_CACHE_VAL(symbol_underscores, 
+		[
 cat << EOF > conftest.c
 	#include <$nlist_h>
 	#include <stdio.h>
-  #include <stdlib.h>
+	#include <stdlib.h>
 	void _modinit(void);
 	int main(int argc, char *argv[[]]) {
         	int i;
@@ -535,8 +547,9 @@ EOF
 		symbol_underscores=`./conftest conftest`
 		AC_MSG_RESULT($symbol_underscores)
 		$RM -f conftest conftest.c
-	])
-	AC_DEFINE_UNQUOTED(SYMBOL_PREFIX, "${symbol_underscores}")
+		])
+		AC_DEFINE_UNQUOTED(SYMBOL_PREFIX, "${symbol_underscores}")
+	fi
 fi 
 AC_SUBST(MODULES_DEFINE)
 AC_SUBST(MODULES_LIBS)  
