@@ -27,6 +27,7 @@
 #include "hostmask.h"
 #include "numeric.h"
 #include "send.h"
+#include "irc_string.h"
 
 #ifdef IPV6
 static int try_parse_v6_netmask(const char*, struct irc_inaddr*, int*);
@@ -54,23 +55,17 @@ try_parse_v6_netmask(const char *text, struct irc_inaddr *addr, int *b)
   short dc[8];
 
   for (p=text; (c=*p); p++)
-    if (c >= '0' && c <= '9')
+    if (IsDigit(c))
       {
 	if (nyble == 0)
 	  return HM_HOST;
-	d[dp] |= (c-'0')<<(4*--nyble);
+	d[dp] |= (c & 0xF) << (4*--nyble);
       }
-    else if (c >= 'A' && c <= 'F')
+    else if (IsXDigit(c))
       {
 	if (nyble == 0)
 	  return HM_HOST;
-	d[dp] |= (c-'A'+0xA)<<(4*--nyble);
-      }
-    else if (c >= 'a' && c <= 'f')
-      {
-	if (nyble == 0)
-	  return HM_HOST;
-	d[dp] |= (c-'a'+0xA)<<(4*--nyble);
+	d[dp] |= ( c & 0xF + 0xA) << (4*--nyble);
       }
     else if (c == ':')
       {
