@@ -251,7 +251,7 @@ comm_select (unsigned long delay)
 				num++;
 				F = &fd_table[fd];
 				set_time ();
-				if(revents & (POLLRDNORM | POLLIN | POLLHUP | POLLERR))
+				if(F->flags.open && revents & (POLLRDNORM | POLLIN | POLLHUP | POLLERR))
 				{
 					callbacks_called++;
 					hdl = F->read_handler;
