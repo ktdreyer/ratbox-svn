@@ -1,3 +1,26 @@
+leeh        2003/06/20 09:35:23 UTC	(20030620_1)
+
+  Modified files:
+    include              hash.h 
+    modules              m_help.c m_rehash.c 
+    src                  hash.c help.c s_auth.c s_conf.c 
+  Log:
+  - added /rehash HELP to reread help files
+  - fixed embedding of \n in help text
+  - better hash function to lower the collisions
+  - wrapped the resolver in #ifndef IMFLMYISPSUCKS
+  
+  Revision  Changes    Path
+  7.34      +1 -0      ircd-ratbox/include/hash.h
+  1.53      +15 -2     ircd-ratbox/modules/m_help.c
+  1.66      +25 -12    ircd-ratbox/modules/m_rehash.c
+  7.73      +32 -2     ircd-ratbox/src/hash.c
+  1.2       +4 -0      ircd-ratbox/src/help.c
+  7.148     +3 -0      ircd-ratbox/src/s_auth.c
+  7.416     +0 -3      ircd-ratbox/src/s_conf.c
+
+
+
 leeh        2003/06/20 00:21:00 UTC	(20030620_0)
 
   Added files:
