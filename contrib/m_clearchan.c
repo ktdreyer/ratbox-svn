@@ -133,7 +133,7 @@ static void mo_clearchan(struct Client *client_p, struct Client *source_p,
                    ":%s WALLOPS :CLEARCHAN called for [%s] by %s!%s@%s",
                    me.name, parv[1], source_p->name, source_p->username,
                    source_p->host);
-     log(L_NOTICE, "CLEARCHAN called for [%s] by %s!%s@%s",
+     ilog(L_NOTICE, "CLEARCHAN called for [%s] by %s!%s@%s",
          parv[1], source_p->name, source_p->username, source_p->host);
     }
   else
@@ -146,7 +146,7 @@ static void mo_clearchan(struct Client *client_p, struct Client *source_p,
                    ":%s WALLOPS :CLEARCHAN called for [%s %s] by %s!%s@%s",
                    me.name, parv[1], parv[2], source_p->name,
                    source_p->username, source_p->host);
-     log(L_NOTICE, "CLEARCHAN called for [%s %s] by %s!%s@%s",
+     ilog(L_NOTICE, "CLEARCHAN called for [%s %s] by %s!%s@%s",
          parv[1], parv[2], source_p->name, source_p->username, source_p->host);
     }
 

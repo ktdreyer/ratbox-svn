@@ -117,7 +117,7 @@ static void mo_jupe(struct Client *client_p, struct Client *source_p,
                 ":%s WALLOPS :JUPE for %s requested by %s!%s@%s: %s",
                 parv[0], parv[1], source_p->name, 
                 source_p->username, source_p->host, parv[2]);
-  log(L_NOTICE, "JUPE for %s requested by %s!%s@%s: %s",
+  ilog(L_NOTICE, "JUPE for %s requested by %s!%s@%s: %s",
                 parv[1], source_p->name, source_p->username,
                 source_p->host, parv[2]);
 
