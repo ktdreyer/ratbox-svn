@@ -1,3 +1,8 @@
+*** 20010106_16 by davidt
+Oops, sorry, discovered the lazylinks code moved to m_server.c, but
+slightly broken. Fixed it, and removed my duplicate code...
+
+
 *** 20010106_15 by davidt
 Fix for changing hub at runtime with active lazylinks
 
