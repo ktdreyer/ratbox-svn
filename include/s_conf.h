@@ -409,8 +409,6 @@ extern void conf_add_class_to_conf(struct ConfItem *);
 extern void conf_add_me(struct ConfItem *);
 extern void conf_add_class(struct ConfItem *, int);
 extern void conf_add_d_conf(struct ConfItem *);
-extern void conf_add_fields(struct ConfItem *, const char *, const char *,
-			    const char *, const char *);
 extern void conf_add_conf(struct ConfItem *);
 extern void flush_expired_ips(void *);
 

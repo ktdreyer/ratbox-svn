@@ -2216,34 +2216,6 @@ conf_add_d_conf(struct ConfItem *aconf)
 	}
 }
 
-/*
- * conf_add_fields
- * inputs       - pointer to config item
- *              - pointer to host_field
- *		- pointer to pass_field
- *              - pointer to user_field
- *              - pointer to port_field
- *		- pointer to class_field
- * output       - NONE
- * side effects - update host/pass/user/port fields of given aconf
- */
-
-void
-conf_add_fields(struct ConfItem *aconf,
-		const char *host_field,
-		const char *pass_field,
-		const char *user_field, 
-		const char *operreason_field)
-{
-	if(host_field != NULL)
-		DupString(aconf->host, host_field);
-	if(pass_field != NULL)
-		DupString(aconf->passwd, pass_field);
-	if(user_field != NULL)
-		DupString(aconf->user, user_field);
-	if(operreason_field != NULL)
-		DupString(aconf->spasswd, operreason_field);
-}
 
 /*
  * yyerror

@@ -35,6 +35,27 @@
 #include "memory.h"
 #include "resv.h"
 
+/* conf_add_fields()
+ * 
+ * inputs       - pointer to config item, host/pass/user/operreason fields
+ * output       - NONE
+ * side effects - update respective fields with pointers
+ */
+static void
+conf_add_fields(struct ConfItem *aconf,	const char *host_field,
+		const char *pass_field,	const char *user_field,
+		const char *operreason_field)
+{
+	if(host_field != NULL)
+		DupString(aconf->host, host_field);
+	if(pass_field != NULL)
+		DupString(aconf->passwd, pass_field);
+	if(user_field != NULL)
+		DupString(aconf->user, user_field);
+	if(operreason_field != NULL)
+		DupString(aconf->spasswd, operreason_field);
+}
+
 /*
  * parse_k_file
  * Inputs       - pointer to line to parse
