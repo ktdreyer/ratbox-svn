@@ -1,7 +1,6 @@
-
 /*
  *  ircd-ratbox: A slightly useful ircd.
- *  s_bsd.c: Network functions.
+ *  commio.c: Network/file related functions
  *
  *  Copyright (C) 1990 Jarkko Oikarinen and University of Oulu, Co Center
  *  Copyright (C) 1996-2002 Hybrid Development Team
