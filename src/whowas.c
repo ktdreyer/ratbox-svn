@@ -37,10 +37,10 @@
 
 
 /* internally defined function */
-static void add_whowas_to_clist(aWhowas **,aWhowas *);
-static void del_whowas_from_clist(aWhowas **,aWhowas *);
-static void add_whowas_to_list(aWhowas **,aWhowas *);
-static void del_whowas_from_list(aWhowas **,aWhowas *);
+static void add_whowas_to_clist(struct Whowas **, struct Whowas *);
+static void del_whowas_from_clist(struct Whowas **,struct Whowas *);
+static void add_whowas_to_list(struct Whowas **, struct Whowas *);
+static void del_whowas_from_list(struct Whowas **,struct Whowas *);
 
 struct Whowas WHOWAS[NICKNAMEHISTORYLENGTH];
 struct Whowas *WHOWASHASH[WW_MAX];
@@ -60,7 +60,7 @@ unsigned int hash_whowas_name(const char* name)
 
 void add_history(struct Client* cptr, int online)
 {
-  aWhowas* who = &WHOWAS[whowas_next];
+  struct Whowas* who = &WHOWAS[whowas_next];
 
   assert(0 != cptr);
   /*
@@ -109,7 +109,7 @@ void add_history(struct Client* cptr, int online)
 
 void off_history(struct Client *cptr)
 {
-  aWhowas *temp, *next;
+  struct Whowas *temp, *next;
 
   for(temp=cptr->whowas;temp;temp=next)
     {
@@ -121,7 +121,7 @@ void off_history(struct Client *cptr)
 
 struct Client *get_history(char *nick,time_t timelimit)
 {
-  aWhowas *temp;
+  struct Whowas *temp;
   int blah;
 
   timelimit = CurrentTime - timelimit;
@@ -141,7 +141,7 @@ struct Client *get_history(char *nick,time_t timelimit)
 void    count_whowas_memory(int *wwu,
                             u_long *wwum)
 {
-  aWhowas *tmp;
+  struct Whowas *tmp;
   int i;
   int     u = 0;
   u_long  um = 0;
@@ -153,7 +153,7 @@ void    count_whowas_memory(int *wwu,
     if (tmp->hashv != -1)
       {
         u++;
-        um += sizeof(aWhowas);
+        um += sizeof(struct Whowas);
       }
   *wwu = u;
   *wwum = um;
@@ -166,7 +166,7 @@ void    initwhowas()
 
   for (i=0;i<NICKNAMEHISTORYLENGTH;i++)
     {
-      memset((void *)&WHOWAS[i], 0, sizeof(aWhowas));
+      memset((void *)&WHOWAS[i], 0, sizeof(struct Whowas));
       WHOWAS[i].hashv = -1;
     }
   for (i=0;i<WW_MAX;i++)
@@ -174,7 +174,7 @@ void    initwhowas()
 }
 
 
-static void add_whowas_to_clist(aWhowas **bucket,aWhowas *whowas)
+static void add_whowas_to_clist(struct Whowas **bucket,struct Whowas *whowas)
 {
   whowas->cprev = NULL;
   if ((whowas->cnext = *bucket) != NULL)
@@ -182,7 +182,8 @@ static void add_whowas_to_clist(aWhowas **bucket,aWhowas *whowas)
   *bucket = whowas;
 }
  
-static void    del_whowas_from_clist(aWhowas **bucket, aWhowas *whowas)
+static void    del_whowas_from_clist(struct Whowas **bucket,
+				     struct Whowas *whowas)
 {
   if (whowas->cprev)
     whowas->cprev->cnext = whowas->cnext;
@@ -192,7 +193,7 @@ static void    del_whowas_from_clist(aWhowas **bucket, aWhowas *whowas)
     whowas->cnext->cprev = whowas->cprev;
 }
 
-static void add_whowas_to_list(aWhowas **bucket, aWhowas *whowas)
+static void add_whowas_to_list(struct Whowas **bucket, struct Whowas *whowas)
 {
   whowas->prev = NULL;
   if ((whowas->next = *bucket) != NULL)
@@ -200,7 +201,8 @@ static void add_whowas_to_list(aWhowas **bucket, aWhowas *whowas)
   *bucket = whowas;
 }
  
-static void    del_whowas_from_list(aWhowas **bucket, aWhowas *whowas)
+static void    del_whowas_from_list(struct Whowas **bucket,
+				    struct Whowas *whowas)
 {
   if (whowas->prev)
     whowas->prev->next = whowas->next;
