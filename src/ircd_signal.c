@@ -26,7 +26,7 @@
 #include "restart.h"		/* server_reboot */
 #include "s_log.h"
 #include "memory.h"
-#include "s_bsd.h"
+#include "commio.h"
 #include "s_conf.h"
 #include "client.h"
 #include "send.h"

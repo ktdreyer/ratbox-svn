@@ -34,7 +34,6 @@
 #include <openssl/rsa.h>
 #endif
 
-#include "fdlist.h"		
 #include "ircd_defs.h"
 #include "class.h"
 #include "client.h"

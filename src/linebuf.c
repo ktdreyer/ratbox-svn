@@ -32,7 +32,7 @@
 #include "event.h"
 #include "balloc.h"
 #include "hook.h"
-#include "s_bsd.h"
+#include "commio.h"
 #include "sprintf_irc.h"
 
 #ifdef STRING_WITH_STRINGS

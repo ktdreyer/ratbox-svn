@@ -30,8 +30,7 @@
 
 #include "stdinc.h"
 #include "memory.h"
-#include "fdlist.h"
-#include "s_bsd.h"
+#include "commio.h"
 #include "internal.h"
 #include "s_log.h"
 
@@ -474,7 +473,7 @@ static void readconfigenvtext(adns_state ads, const char *envvar) {
 
 
 int adns__setnonblock(adns_state ads, int fd) {
-  if(!set_non_blocking(fd))
+  if(!comm_set_nb(fd))
     return errno;
   return 0;
 }

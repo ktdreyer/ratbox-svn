@@ -30,7 +30,7 @@
 #include "res.h"
 #include "send.h"
 #include "s_conf.h"
-#include "s_bsd.h"
+#include "commio.h"
 #include "s_log.h"
 #include "event.h"
 #include "client.h"

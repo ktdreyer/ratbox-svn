@@ -61,8 +61,8 @@ BASE_SRCS =                     \
   class.c                       \
   client.c                      \
   cluster.c			\
+  commio.c			\
   event.c                       \
-  fdlist.c                      \
   getopt.c                      \
   hash.c                        \
   hook.c                        \
@@ -85,7 +85,6 @@ BASE_SRCS =                     \
   reject.c			\
   restart.c                     \
   s_auth.c                      \
-  s_bsd.c                       \
   s_conf.c                      \
   s_newconf.c                   \
   s_gline.c                     \

@@ -35,7 +35,6 @@
 #include "client.h"
 #include "common.h"
 #include "event.h"
-#include "fdlist.h"
 #include "hash.h"
 #include "irc_string.h"
 #include "ircd_signal.h"
@@ -48,7 +47,7 @@
 #include "res.h"
 #include "restart.h"
 #include "s_auth.h"
-#include "s_bsd.h"
+#include "commio.h"
 #include "s_conf.h"
 #include "s_log.h"
 #include "s_serv.h"		/* try_connections */
@@ -643,7 +642,7 @@ main(int argc, char *argv[])
 
 	if(!server_state_foreground)
 	{
-		close_all_connections();
+		comm_close_all();
 	}
 	init_main_logfile();
 	initBlockHeap();

@@ -27,7 +27,6 @@
 #include "stdinc.h"
 #include "client.h"
 #include "hash.h"
-#include "fdlist.h"
 #include "irc_string.h"
 #include "ircd.h"
 #include "numeric.h"

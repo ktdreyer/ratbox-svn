@@ -70,7 +70,6 @@
 #include "tools.h"
 #include "s_log.h"
 #include "client.h"
-#include "fdlist.h"
 #include "event.h"
 
 #ifdef HAVE_MMAP		/* We've got mmap() that is good */

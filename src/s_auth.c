@@ -41,14 +41,13 @@
 #include "client.h"
 #include "common.h"
 #include "event.h"
-#include "fdlist.h"		/* fdlist_add */
 #include "irc_string.h"
 #include "sprintf_irc.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "packet.h"
 #include "res.h"
-#include "s_bsd.h"
+#include "commio.h"
 #include "s_log.h"
 #include "s_stats.h"
 #include "send.h"
@@ -269,7 +268,7 @@ start_auth_query(struct AuthRequest *auth)
 
 	sendheader(auth->client, REPORT_DO_ID);
 
-	if(!set_non_blocking(fd))
+	if(!comm_set_nb(fd))
 	{
 		report_error(NONB_ERROR_MSG, get_client_name(auth->client, SHOW_IP), 
 				log_client_name(auth->client, SHOW_IP), errno);

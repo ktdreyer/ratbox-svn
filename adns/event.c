@@ -31,7 +31,7 @@
 
 #include "stdinc.h"
 
-#include "s_bsd.h"
+#include "commio.h"
 #include "internal.h"
 #include "memory.h"
 #include "tvarith.h"

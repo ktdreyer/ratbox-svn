@@ -58,5 +58,6 @@ extern void sync_logfiles(void);
 extern void ilog(ilogfile dest, const char *fmt, ...) AFP(2, 3);
 extern void report_operspy(struct Client *, const char *, const char *);
 extern const char *smalldate(void);
+extern void report_error(const char *, const char *, const char *, int);
 
 #endif

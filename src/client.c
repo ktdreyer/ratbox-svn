@@ -31,7 +31,6 @@
 #include "class.h"
 #include "common.h"
 #include "event.h"
-#include "fdlist.h"
 #include "hash.h"
 #include "irc_string.h"
 #include "sprintf_irc.h"
@@ -40,10 +39,11 @@
 #include "numeric.h"
 #include "packet.h"
 #include "s_auth.h"
-#include "s_bsd.h"
+#include "commio.h"
 #include "s_conf.h"
 #include "s_log.h"
 #include "s_serv.h"
+#include "s_stats.h"
 #include "send.h"
 #include "whowas.h"
 #include "s_user.h"
@@ -67,6 +67,7 @@ static int exit_remote_server(struct Client *, struct Client *, struct Client *,
 static int exit_local_client(struct Client *, struct Client *, struct Client *,const char *);
 static int exit_unknown_client(struct Client *, struct Client *, struct Client *,const char *);
 static int exit_local_server(struct Client *, struct Client *, struct Client *,const char *);
+static void close_connection(struct Client *);
 
 static int h_local_exit_client;
 static int h_unknown_exit_client;
@@ -1905,4 +1906,181 @@ generate_uid(void)
 		current_uid[i]++;
 
 	return current_uid;
+}
+
+/*
+ * close_connection
+ *        Close the physical connection. This function must make
+ *        MyConnect(client_p) == FALSE, and set client_p->from == NULL.
+ */
+static void
+close_connection(struct Client *client_p)
+{
+	struct ConfItem *aconf;
+	s_assert(client_p != NULL);
+	if(client_p == NULL)
+		return;
+
+	s_assert(MyConnect(client_p));
+	if(!MyConnect(client_p))
+		return;
+	
+	if(IsServer(client_p))
+	{
+		ServerStats->is_sv++;
+		ServerStats->is_sbs += client_p->localClient->sendB;
+		ServerStats->is_sbr += client_p->localClient->receiveB;
+		ServerStats->is_sks += client_p->localClient->sendK;
+		ServerStats->is_skr += client_p->localClient->receiveK;
+		ServerStats->is_sti += CurrentTime - client_p->firsttime;
+		if(ServerStats->is_sbs > 2047)
+		{
+			ServerStats->is_sks += (ServerStats->is_sbs >> 10);
+			ServerStats->is_sbs &= 0x3ff;
+		}
+		if(ServerStats->is_sbr > 2047)
+		{
+			ServerStats->is_skr += (ServerStats->is_sbr >> 10);
+			ServerStats->is_sbr &= 0x3ff;
+		}
+		/*
+		 * If the connection has been up for a long amount of time, schedule
+		 * a 'quick' reconnect, else reset the next-connect cycle.
+		 */
+		if((aconf =
+		    find_conf_exact(client_p->name, client_p->username,
+				    client_p->host, CONF_SERVER)))
+		{
+			/*
+			 * Reschedule a faster reconnect, if this was a automatically
+			 * connected configuration entry. (Note that if we have had
+			 * a rehash in between, the status has been changed to
+			 * CONF_ILLEGAL). But only do this if it was a "good" link.
+			 */
+			aconf->hold = time(NULL);
+			aconf->hold +=
+				(aconf->hold - client_p->since >
+				 HANGONGOODLINK) ? HANGONRETRYDELAY : ConfConFreq(aconf);
+			if(nextconnect > aconf->hold)
+				nextconnect = aconf->hold;
+		}
+
+	}
+	else if(IsClient(client_p))
+	{
+		ServerStats->is_cl++;
+		ServerStats->is_cbs += client_p->localClient->sendB;
+		ServerStats->is_cbr += client_p->localClient->receiveB;
+		ServerStats->is_cks += client_p->localClient->sendK;
+		ServerStats->is_ckr += client_p->localClient->receiveK;
+		ServerStats->is_cti += CurrentTime - client_p->firsttime;
+		if(ServerStats->is_cbs > 2047)
+		{
+			ServerStats->is_cks += (ServerStats->is_cbs >> 10);
+			ServerStats->is_cbs &= 0x3ff;
+		}
+		if(ServerStats->is_cbr > 2047)
+		{
+			ServerStats->is_ckr += (ServerStats->is_cbr >> 10);
+			ServerStats->is_cbr &= 0x3ff;
+		}
+	}
+	else
+		ServerStats->is_ni++;
+
+	if(-1 < client_p->localClient->fd)
+	{
+		/* attempt to flush any pending dbufs. Evil, but .. -- adrian */
+		send_queued_write(client_p->localClient->fd, client_p);
+		fd_close(client_p->localClient->fd);
+		client_p->localClient->fd = -1;
+	}
+
+	if(HasServlink(client_p))
+	{
+		if(client_p->localClient->fd > -1)
+		{
+			fd_close(client_p->localClient->ctrlfd);
+			client_p->localClient->ctrlfd = -1;
+		}
+	}
+
+	linebuf_donebuf(&client_p->localClient->buf_sendq);
+	linebuf_donebuf(&client_p->localClient->buf_recvq);
+	memset(client_p->localClient->passwd, 0, sizeof(client_p->localClient->passwd));
+	detach_conf(client_p);
+	client_p->from = NULL;	/* ...this should catch them! >:) --msa */
+	ClearMyConnect(client_p);
+}
+
+
+
+void
+error_exit_client(struct Client *client_p, int error)
+{
+	/*
+	 * ...hmm, with non-blocking sockets we might get
+	 * here from quite valid reasons, although.. why
+	 * would select report "data available" when there
+	 * wasn't... so, this must be an error anyway...  --msa
+	 * actually, EOF occurs when read() returns 0 and
+	 * in due course, select() returns that fd as ready
+	 * for reading even though it ends up being an EOF. -avalon
+	 */
+	char errmsg[255];
+
+	int current_error = comm_get_sockerr(client_p->localClient->fd);
+
+	if(IsServer(client_p) || IsHandshake(client_p))
+	{
+		int connected = CurrentTime - client_p->firsttime;
+
+		if(error == 0)
+		{
+			/* Admins get the real IP */
+			sendto_realops_flags(UMODE_ALL, L_ADMIN,
+					     "Server %s closed the connection",
+					     get_client_name(client_p, SHOW_IP));
+
+			/* Opers get a masked IP */
+			sendto_realops_flags(UMODE_ALL, L_OPER,
+					     "Server %s closed the connection",
+					     get_client_name(client_p, MASK_IP));
+
+			ilog(L_SERVER, "Server %s closed the connection",
+			     log_client_name(client_p, SHOW_IP));
+		}
+		else
+		{
+			report_error("Lost connection to %s: %d",
+#ifndef HIDE_SERVERS_IPS
+				     get_client_name(client_p, SHOW_IP),
+#else
+				     get_client_name(client_p, MASK_IP),
+#endif
+				     log_client_name(client_p, SHOW_IP),
+				     current_error);
+			ilog(L_SERVER, "Lost connection to %s: %d",
+			     log_client_name(client_p, SHOW_IP), current_error);
+
+		}
+
+		sendto_realops_flags(UMODE_ALL, L_ALL,
+				     "%s had been connected for %d day%s, %2d:%02d:%02d",
+				     client_p->name, connected / 86400,
+				     (connected / 86400 == 1) ? "" : "s",
+				     (connected % 86400) / 3600,
+				     (connected % 3600) / 60, connected % 60);
+	}
+	if(error == 0)
+	{
+		strlcpy(errmsg, "Remote host closed the connection", sizeof(errmsg));
+	}
+	else
+	{
+		ircsnprintf(errmsg, sizeof(errmsg), "Read error: %s", strerror(current_error));
+	}
+	fd_close(client_p->localClient->fd);
+	client_p->localClient->fd = -1;
+	exit_client(client_p, client_p, &me, errmsg);
 }

@@ -36,7 +36,6 @@
 #include "client.h"
 #include "common.h"
 #include "event.h"
-#include "fdlist.h"
 #include "hash.h"
 #include "irc_string.h"
 #include "sprintf_irc.h"
@@ -45,7 +44,7 @@
 #include "numeric.h"
 #include "packet.h"
 #include "res.h"
-#include "s_bsd.h"
+#include "commio.h"
 #include "s_conf.h"
 #include "s_log.h"
 #include "s_stats.h"
@@ -1075,10 +1074,7 @@ server_estab(struct Client *client_p)
 			   (me.info[0]) ? (me.info) : "IRCers United");
 	}
 
-	/*
-	 * XXX - this should be in s_bsd
-	 */
-	if(!set_sock_buffers(client_p->localClient->fd, READBUF_SIZE))
+	if(!comm_set_buffers(client_p->localClient->fd, READBUF_SIZE))
 		report_error(SETBUF_ERROR_MSG, 
 			     get_client_name(client_p, SHOW_IP), 
 			     log_client_name(client_p, SHOW_IP), errno);
@@ -1385,7 +1381,7 @@ fork_server(struct Client *server)
 			   || (i == slink_fds[1][0][1]) 
 			   || (i == server->localClient->fd))
 			{
-				set_non_blocking(i);
+				comm_set_nb(i);
 #ifdef USE_SIGIO		/* the servlink process doesn't need O_ASYNC */
 				{
 					int flags;
@@ -1437,7 +1433,7 @@ fork_server(struct Client *server)
 		server->localClient->ctrlfd = slink_fds[0][1][1];
 		server->localClient->fd = slink_fds[1][1][1];
 
-		if(!set_non_blocking(server->localClient->fd))
+		if(!comm_set_nb(server->localClient->fd))
 		{
 			report_error(NONB_ERROR_MSG,
 #ifdef HIDE_SERVERS_IPS
@@ -1449,7 +1445,7 @@ fork_server(struct Client *server)
 				     errno);
 		}
 
-		if(!set_non_blocking(server->localClient->ctrlfd))
+		if(!comm_set_nb(server->localClient->ctrlfd))
 		{
 			report_error(NONB_ERROR_MSG,
 #ifdef HIDE_SERVERS_IPS
@@ -1605,7 +1601,7 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
 	 *   -- adrian
 	 */
 
-	if(!set_non_blocking(client_p->localClient->fd))
+	if(!comm_set_nb(client_p->localClient->fd))
 	{
 		report_error(NONB_ERROR_MSG,
 #ifdef HIDE_SERVERS_IPS
@@ -1617,7 +1613,7 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
 			     errno);
 	}
 
-	if(!set_sock_buffers(client_p->localClient->fd, READBUF_SIZE))
+	if(!comm_set_buffers(client_p->localClient->fd, READBUF_SIZE))
 	{
 		report_error(SETBUF_ERROR_MSG,
 #ifdef HIDE_SERVERS_IPS

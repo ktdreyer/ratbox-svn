@@ -36,7 +36,6 @@
 #include "s_log.h"
 #include "s_conf.h"
 #include "sprintf_irc.h"
-#include "fdlist.h"
 #include "send.h"
 #include "client.h"
 #include "s_serv.h"
@@ -160,4 +159,34 @@ smalldate(void)
 		    lt->tm_mday, lt->tm_hour, lt->tm_min);
 
 	return buf;
+}
+
+/*
+ * report_error - report an error from an errno. 
+ * Record error to log and also send a copy to all *LOCAL* opers online.
+ *
+ *        text        is a *format* string for outputing error. It must
+ *                contain only two '%s', the first will be replaced
+ *                by the sockhost from the client_p, and the latter will
+ *                be taken from sys_errlist[errno].
+ *
+ *        client_p        if not NULL, is the *LOCAL* client associated with
+ *                the error.
+ *
+ * Cannot use perror() within daemon. stderr is closed in
+ * ircd and cannot be used. And, worse yet, it might have
+ * been reassigned to a normal connection...
+ * 
+ * Actually stderr is still there IFF ircd was run with -s --Rodder
+ */
+
+void
+report_error(const char *text, const char *who, const char *wholog, int error)
+{
+	who = (who) ? who : "";
+	wholog = (wholog) ? wholog : "";
+
+	sendto_realops_flags(UMODE_DEBUG, L_ALL, text, who, strerror(error));
+
+	ilog(L_IOERROR, text, wholog, strerror(error));
 }

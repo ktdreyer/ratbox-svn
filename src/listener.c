@@ -28,13 +28,12 @@
 #include "setup.h"
 #include "listener.h"
 #include "client.h"
-#include "fdlist.h"
 #include "irc_string.h"
 #include "sprintf_irc.h"
 #include "ircd.h"
 #include "ircd_defs.h"
 #include "numeric.h"
-#include "s_bsd.h"
+#include "commio.h"
 #include "s_conf.h"
 #include "s_stats.h"
 #include "send.h"
@@ -247,10 +246,7 @@ inetport(struct Listener *listener)
 		return 0;
 	}
 
-	/*
-	 * XXX - this should always work, performance will suck if it doesn't
-	 */
-	if(!set_non_blocking(fd))
+	if(!comm_set_nb(fd))
 		report_error(NONB_ERROR_MSG, 
 			     get_listener_name(listener), 
 			     get_listener_name(listener), errno);
@@ -484,7 +480,7 @@ add_connection(struct Listener *listener, int fd, struct sockaddr_storage *sai)
 	new_client->localClient->listener = listener;
 	++listener->ref_count;
 
-	if(!set_non_blocking(new_client->localClient->fd))
+	if(!comm_set_nb(new_client->localClient->fd))
 		report_error(NONB_ERROR_MSG, get_client_name(new_client, SHOW_IP), 
 			     log_client_name(new_client, SHOW_IP), errno);
 	if(check_reject(new_client))

@@ -39,7 +39,6 @@
 #include "common.h"
 #include "config.h"
 #include "s_log.h"
-#include "fdlist.h"
 #include "s_conf.h"
 #include "newconf.h"
 

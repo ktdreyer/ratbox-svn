@@ -29,8 +29,7 @@
 
 #ifdef USE_SELECT
 #include "stdinc.h"
-#include "fdlist.h"
-#include "s_bsd.h"
+#include "commio.h"
 #include "class.h"
 #include "client.h"
 #include "common.h"
@@ -47,7 +46,7 @@
 #include "s_serv.h"
 #include "s_stats.h"
 #include "send.h"
-#include "s_bsd.h"
+#include "commio.h"
 #include "memory.h"
 
 

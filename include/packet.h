@@ -27,7 +27,6 @@
 #ifndef INCLUDED_packet_h
 #define INCLUDED_packet_h
 
-#include "fdlist.h"
 
 /*
  * this hides in here rather than a config.h because it really shouldn't

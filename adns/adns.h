@@ -58,7 +58,7 @@
 #define ADNS_H_INCLUDED
 
 #include "stdinc.h"
-#include "fdlist.h"
+#include "commio.h"
 #include "ircd.h"
 #include "ircd_defs.h"
 #include "irc_string.h"

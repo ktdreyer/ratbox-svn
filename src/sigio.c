@@ -35,8 +35,7 @@
 #include "stdinc.h"
 #include <sys/poll.h>
 
-#include "fdlist.h"
-#include "s_bsd.h"
+#include "commio.h"
 #include "class.h"
 #include "client.h"
 #include "common.h"
@@ -53,7 +52,7 @@
 #include "s_serv.h"
 #include "s_stats.h"
 #include "send.h"
-#include "s_bsd.h"
+#include "commio.h"
 #include "memory.h"
 
 
@@ -184,20 +183,21 @@ void
 comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
 	       void *client_data, time_t timeout)
 {
-	fde_t *F = &fd_table[fd];
+	fde_t *F;
 	s_assert(fd >= 0);
+	F = &fd_table[fd];
 	s_assert(F->flags.open);
 	if(type & COMM_SELECT_READ)
 	{
 		F->read_handler = handler;
 		F->read_data = client_data;
-		poll_update_pollfds(fd, POLLIN, handler);
+		poll_update_pollfds(F->fd, POLLIN, handler);
 	}
 	if(type & COMM_SELECT_WRITE)
 	{
 		F->write_handler = handler;
 		F->write_data = client_data;
-		poll_update_pollfds(fd, POLLOUT, handler);
+		poll_update_pollfds(F->fd, POLLOUT, handler);
 	}
 	if(timeout)
 		F->timeout = CurrentTime + (timeout / 1000);
@@ -259,7 +259,7 @@ comm_select(unsigned long delay)
 					hdl = F->read_handler;
 					F->read_handler = NULL;
 					if(hdl)
-						hdl(fd, F->read_data);
+						hdl(F->fd, F->read_data);
 				}
 
 				if(F->flags.open
@@ -268,7 +268,7 @@ comm_select(unsigned long delay)
 					hdl = F->write_handler;
 					F->write_handler = NULL;
 					if(hdl)
-						hdl(fd, F->write_data);
+						hdl(F->fd, F->write_data);
 				}
 
 				if(F->read_handler == NULL)
@@ -328,7 +328,7 @@ comm_select(unsigned long delay)
 			hdl = F->read_handler;
 			F->read_handler = NULL;
 			if(hdl)
-				hdl(fd, F->read_data);
+				hdl(F->fd, F->read_data);
 		}
 
 		if(F->flags.open == 0)
@@ -338,7 +338,7 @@ comm_select(unsigned long delay)
 			hdl = F->write_handler;
 			F->write_handler = NULL;
 			if(hdl)
-				hdl(fd, F->write_data);
+				hdl(F->fd, F->write_data);
 		}
 
 		if(F->read_handler == NULL)
