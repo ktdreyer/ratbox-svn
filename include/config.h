@@ -41,14 +41,14 @@
 /* VMS NOTE - VMS is basically unlimited with FDs, so just set this
    to any suitable value.. */
 
-#define HARD_FDLIMIT_   256
-#define INIT_MAXCLIENTS 200
+#define HARD_FDLIMIT_   1024
+#define INIT_MAXCLIENTS 800
 
 /*
  * This is how many 'buffer connections' we allow... 
  * Remember, MAX_BUFFER + MAX_CLIENTS can't exceed HARD_FDLIMIT :)
  */
-#define MAX_BUFFER      60
+#define MAX_BUFFER      200
 
 /* Don't change this... */
 #define HARD_FDLIMIT    (HARD_FDLIMIT_ - 10)
