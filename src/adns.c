@@ -118,7 +118,6 @@ void
 timeout_adns(void *ptr)
 {
 	adns_processtimeouts(dns_state, &SystemTime);
-	dns_select();
 }
 
 /* void dns_writeable(int fd, void *ptr)

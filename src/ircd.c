@@ -264,7 +264,7 @@ set_time(void)
 	struct timeval newtime;
 	newtime.tv_sec = 0;
 	newtime.tv_usec = 0;
-#ifndef HAVE_GETTIMEOFDAY
+#ifdef HAVE_GETTIMEOFDAY
 	if(gettimeofday(&newtime, NULL) == -1)
 	{
 		ilog(L_MAIN, "Clock Failure (%d)", errno);

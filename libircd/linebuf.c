@@ -627,10 +627,9 @@ linebuf_flush(int fd, buf_head_t * bufhead)
 	int retval;
 #ifdef HAVE_WRITEV
 	dlink_node *ptr;
-	int gather_count = 100; /* This is abitrary */
 	int x, y;
 	int xret;
-	static struct iovec vec[100];
+	static struct iovec vec[UIO_MAXIOV];
 
 	/* Check we actually have a first buffer */
 	if(bufhead->list.head == NULL)
@@ -642,7 +641,7 @@ linebuf_flush(int fd, buf_head_t * bufhead)
 	
 	ptr = bufhead->list.head;
 
-	for(x = 0; x < gather_count; x++)
+	for(x = 0; x < UIO_MAXIOV; x++)
 	{
 		if(ptr == NULL)
 			break;

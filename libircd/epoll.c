@@ -87,7 +87,6 @@ init_netio(void)
 	fd_note(ep, "epoll file descriptor");
 }
 
-
 /*
  * comm_setselect
  *
@@ -101,11 +100,13 @@ comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
 	struct epoll_event ep_event;
 	fde_t *F = &fd_table[fd];
 	int old_flags = F->pflags;
-	int op = EPOLL_CTL_DEL;
+	int op = -1;
 	
 	s_assert(fd >= 0);
 	s_assert(F->flags.open);
-
+	
+	fprintf(stderr, "comm_setselect: %d COMM_SELECT_READ: %d COMM_SELECT_WRITE: %d handler: %lx\n", fd, type & COMM_SELECT_READ,
+			type & COMM_SELECT_WRITE, (unsigned long)handler); 
 	/* Update the list, even though we're not using it .. */
 	F->list = list;
 	if(type & COMM_SELECT_READ)
@@ -128,23 +129,30 @@ comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
 		F->write_data = client_data;
 	}
 
-	if(old_flags > 0)
-	{
-		if(F->pflags > 0)
-			op = EPOLL_CTL_MOD;
-	} else
-		op = EPOLL_CTL_ADD;
-
-
 	if(timeout)
 		F->timeout = CurrentTime + (timeout / 1000);
+
+	if(old_flags == 0 && F->pflags == 0)
+		return;
+	else if(F->pflags <= 0)
+		op = EPOLL_CTL_DEL;
+	else if(old_flags == 0 && F->pflags > 0)
+		op = EPOLL_CTL_ADD;
+	else if(F->pflags != old_flags)
+		op = EPOLL_CTL_MOD;
+
+	if(op == -1)
+		return;
+
 
 	ep_event.events = F->pflags;
 	ep_event.data.ptr = F;
 
+	fprintf(stderr, "XUpdating epoll_ctl: %d\n", F->fd);
 	if(epoll_ctl(ep, op, fd, &ep_event) != 0)
 	{
-		ilog(L_IOERROR, "comm_setselect(): epoll_ctl failed: %s", strerror(errno));
+		ilog(L_IOERROR, "Xcomm_setselect(): epoll_ctl failed: %s", strerror(errno));
+		abort();
 	}
 
 
@@ -162,7 +170,8 @@ comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
 int
 comm_select(unsigned long delay)
 {
-	int num, i;
+	int num, i, flags, old_flags, op;
+	struct epoll_event ep_event;
 	static struct epoll_event pfd[EPOLL_LENGTH];
 	void *data;
 
@@ -180,11 +189,13 @@ comm_select(unsigned long delay)
 	{
 		PF *hdl;
 		fde_t *F = pfd[i].data.ptr;
+		old_flags = F->pflags;
 		if(pfd[i].events & (EPOLLIN | EPOLLHUP | EPOLLERR))
 		{
 			hdl = F->read_handler;
 			data = F->read_data;
-			comm_setselect(F->fd, 0, COMM_SELECT_READ, NULL, NULL, 0);
+			F->read_handler = NULL;
+			F->read_data = NULL;
 			if(hdl)
 				hdl(F->fd, data);
 			else
@@ -194,16 +205,13 @@ comm_select(unsigned long delay)
 
 
 		if(F->flags.open == 0)
-		{
-			/* Read handler closed us..go on and do something useful */
 			continue;
-		}
 		if(pfd[i].events & (EPOLLOUT | EPOLLHUP | EPOLLERR))
 		{
 			hdl = F->write_handler;
 			data = F->write_data;
 			F->write_handler = NULL;
-			comm_setselect(F->fd, 0, COMM_SELECT_WRITE, NULL, NULL, 0);
+			F->write_data = NULL;
 
 			if(hdl)
 				hdl(F->fd, data);
@@ -211,6 +219,32 @@ comm_select(unsigned long delay)
 				ilog(L_IOERROR, "epoll.c: NULL write handler called");
 		}
 		
+		if(F->flags.open == 0)
+			continue;		
+		
+		flags = 0;
+		
+		if(F->read_handler != NULL)
+			flags |= EPOLLIN;
+		if(F->write_handler != NULL)
+			flags |= EPOLLOUT;
+		
+		if(old_flags != flags)
+		{
+			if(flags == 0)
+				op = EPOLL_CTL_DEL;			
+			else
+				op = EPOLL_CTL_MOD;
+			F->pflags = ep_event.events = flags;
+			ep_event.data.ptr = F;
+			fprintf(stderr, "Updating epoll_ctl: %d %d %d\n", F->fd, old_flags, flags);
+			if(epoll_ctl(ep, op, F->fd, &ep_event) != 0)
+			{
+				ilog(L_IOERROR, "comm_setselect(): epoll_ctl failed: %s", strerror(errno));
+				abort();
+			}
+		}
+					
 	}
 	return COMM_OK;
 }
