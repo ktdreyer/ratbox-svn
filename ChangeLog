@@ -1,3 +1,19 @@
+leeh        2004/11/29 06:09:14 EST	(20041129_0)
+
+  Modified files:
+    doc                  schema.txt 
+    include              s_userserv.h 
+    src                  s_userserv.c 
+  Log:
+  - add tracking of who suspends a username
+  
+  Revision  Changes    Path
+  1.11      +1 -0      rserv/doc/schema.txt
+  1.13      +1 -0      rserv/include/s_userserv.h
+  1.20      +25 -13    rserv/src/s_userserv.c
+
+
+
 leeh        2004/11/28 18:40:47 EST	(20041128_2)
 
   Modified files:
