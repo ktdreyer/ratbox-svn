@@ -1,3 +1,8 @@
+*** 20010724_1 by leeh
+- added a catcher for those who dont bother reading the config files,
+  will exit() the ircd unless its removed (its off if the lines not there)
+
+
 *** 20010723_2 by leeh
 - IsAdmin != IsSetOperAdmin
   ugh ugh ugh!
