@@ -1,3 +1,24 @@
+leeh        2004/11/29 06:15:28 EST	(20041129_1)
+
+  Modified files:
+    help                 genindex.sh 
+    help/chanserv        index-admin 
+    help/jupeserv        index-admin 
+    help/operbot         index-admin 
+    help/userserv        index-admin userdrop 
+  Log:
+  - tweaked alignment for index-admin to 13 chars
+  
+  Revision  Changes    Path
+  1.3       +3 -3      rserv/help/chanserv/index-admin
+  1.3       +1 -1      rserv/help/genindex.sh
+  1.2       +2 -2      rserv/help/jupeserv/index-admin
+  1.2       +2 -2      rserv/help/operbot/index-admin
+  1.3       +3 -3      rserv/help/userserv/index-admin
+  1.2       +1 -1      rserv/help/userserv/userdrop
+
+
+
 leeh        2004/11/29 06:09:14 EST	(20041129_0)
 
   Modified files:
