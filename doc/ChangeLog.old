@@ -1,3 +1,18 @@
+db          2002/07/02 18:25:02 EDT	(20020702_2)
+
+  Modified files:
+    modules/core         m_message.c 
+  Log:
+  - fix redundant nick/message handling. duplicate nicks/messages should
+    simply be ignored. i.e. /msg #channel,#channel hi
+    results in "hi" to #channel
+  - fix so it properly reports too many targets.
+  
+  Revision  Changes    Path
+  1.96      +54 -42    ircd-hybrid-7/modules/core/m_message.c
+
+
+
 leeh        2002/07/02 06:35:28 EDT	(20020702_1)
 
   Modified files:
