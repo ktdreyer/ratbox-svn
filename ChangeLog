@@ -1,3 +1,17 @@
+leeh        2004/09/04 07:27:25 EDT	(20040904_8)
+
+  Modified files:
+    include              config.h config.h.dist m_info.h 
+  Log:
+  - remove a couple of unused options from config.h
+  
+  Revision  Changes    Path
+  7.180     +0 -12     ircd-ratbox/include/config.h
+  7.77      +0 -12     ircd-ratbox/include/config.h.dist
+  7.55      +0 -6      ircd-ratbox/include/m_info.h
+
+
+
 leeh        2004/09/04 07:22:06 EDT	(20040904_7)
 
   Modified files:
