@@ -1,3 +1,7 @@
+*** 20011117_2 by androsyn
+Documented balloc.c a bit better than what it was.
+
+
 *** 20011117_1 by androsyn
 Updated function documentation for comm_select()
 
