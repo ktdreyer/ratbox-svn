@@ -1,3 +1,6 @@
+*** 20010101_53 by davidt
+Fix possible core bug in lljoin...
+
 *** 20010101_52 by davidt
 removed test for length of string (which is checked in build_channel_list) against address of pointer.. oops?
 
