@@ -204,10 +204,8 @@ send_queued_write(int fd, void *data)
 			return;
 		}
 	}
-
-	/* if we have any more data, reschedule a write */
 	if(linebuf_len(&to->localClient->buf_sendq))
-		comm_setselect(fd, FDLIST_IDLECLIENT, COMM_SELECT_WRITE,
+	comm_setselect(fd, FDLIST_IDLECLIENT, COMM_SELECT_WRITE,
 			       send_queued_write, to, 0);
 }
 

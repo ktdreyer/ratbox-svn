@@ -105,8 +105,6 @@ comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
 	s_assert(fd >= 0);
 	s_assert(F->flags.open);
 	
-	fprintf(stderr, "comm_setselect: %d COMM_SELECT_READ: %d COMM_SELECT_WRITE: %d handler: %lx\n", fd, type & COMM_SELECT_READ,
-			type & COMM_SELECT_WRITE, (unsigned long)handler); 
 	/* Update the list, even though we're not using it .. */
 	F->list = list;
 	if(type & COMM_SELECT_READ)
@@ -148,7 +146,6 @@ comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
 	ep_event.events = F->pflags;
 	ep_event.data.ptr = F;
 
-	fprintf(stderr, "XUpdating epoll_ctl: %d\n", F->fd);
 	if(epoll_ctl(ep, op, fd, &ep_event) != 0)
 	{
 		ilog(L_IOERROR, "Xcomm_setselect(): epoll_ctl failed: %s", strerror(errno));
@@ -184,7 +181,6 @@ comm_select(unsigned long delay)
 
 	if(num == 0)
 		return COMM_OK;
-
 	for (i = 0; i < num; i++)
 	{
 		PF *hdl;
@@ -196,8 +192,9 @@ comm_select(unsigned long delay)
 			data = F->read_data;
 			F->read_handler = NULL;
 			F->read_data = NULL;
-			if(hdl)
+			if(hdl) {
 				hdl(F->fd, data);
+			}
 			else
 				ilog(L_IOERROR, "epoll.c: NULL read handler called");
 
@@ -213,8 +210,9 @@ comm_select(unsigned long delay)
 			F->write_handler = NULL;
 			F->write_data = NULL;
 
-			if(hdl)
+			if(hdl) {
 				hdl(F->fd, data);
+			}
 			else
 				ilog(L_IOERROR, "epoll.c: NULL write handler called");
 		}
@@ -237,11 +235,9 @@ comm_select(unsigned long delay)
 				op = EPOLL_CTL_MOD;
 			F->pflags = ep_event.events = flags;
 			ep_event.data.ptr = F;
-			fprintf(stderr, "Updating epoll_ctl: %d %d %d\n", F->fd, old_flags, flags);
 			if(epoll_ctl(ep, op, F->fd, &ep_event) != 0)
 			{
 				ilog(L_IOERROR, "comm_setselect(): epoll_ctl failed: %s", strerror(errno));
-				abort();
 			}
 		}
 					

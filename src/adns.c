@@ -72,6 +72,7 @@ delete_adns_queries(struct DNSQuery *q)
 		adns_cancel(q->query);
 		q->callback = NULL;
 	}
+	dns_select();
 }
 
 /* void restart_resolver(void)
@@ -208,7 +209,6 @@ dns_select(void)
 {
 	struct adns_pollfd pollfds[MAXFD_POLL];
 	int npollfds, i, fd;
-
 	adns__consistency(dns_state, 0, cc_entex);
 	npollfds = adns__pollfds(dns_state, pollfds);
 	for (i = 0; i < npollfds; i++)
@@ -244,6 +244,7 @@ adns_gethost(const char *name, int aftype, struct DNSQuery *req)
 	else
 #endif
 		result = adns_submit(dns_state, name, adns_r_addr, adns_qf_owner, req, &req->query);
+	dns_select();
 	return result;
 }
 
@@ -294,5 +295,6 @@ adns_getaddr(struct sockaddr_storage *addr, int aftype, struct DNSQuery *req, in
 				    adns_qf_owner | adns_qf_cname_loose |
 				    adns_qf_quoteok_anshost, req, &req->query);
 	}
+	dns_select();
 	return result;
 }
