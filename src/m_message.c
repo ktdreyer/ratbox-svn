@@ -269,6 +269,13 @@ static  int     m_message(struct Client *cptr,
   /*
   ** nickname addressed?
   */
+
+  if(!ConfigFileEntry.hub && serv_cptr_list &&
+     IsCapable(serv_cptr_list,CAP_LL))
+    {
+
+    }
+
   if ((acptr = find_person(nick, NULL)))
     {
 #ifdef  IDLE_CHECK

@@ -823,12 +823,14 @@ int server_estab(struct Client *cptr)
   /* On a "lazy link" (version 1 at least) only send the nicks
    * Leafs always have to send nicks plus channels
    */
-  if (ConfigFileEntry.hub &&
-        IsCapable(cptr, CAP_LL) && (n_conf->flags & CONF_FLAGS_LAZY_LINK))
+  if (ConfigFileEntry.hub && IsCapable(cptr, CAP_LL))
     {
+     /* LazyLinks version 2, don't send nicks! */
+#if LLVER1
       for (acptr = &me; acptr; acptr = acptr->prev)
         if (acptr->from != cptr)
           sendnick_TS(cptr, acptr);
+#endif
     }
   else
     {
@@ -839,7 +841,7 @@ int server_estab(struct Client *cptr)
         {
           for (chptr = GlobalChannelList; chptr; chptr = chptr->nextch)
             {
-              sendto_one(cptr,":%s CBURST %s ",
+              sendto_one(cptr,":%s CBURST %s",
                 me.name, chptr->chname );
             }
         }

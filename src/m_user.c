@@ -31,6 +31,11 @@
 #include "send.h"
 
 #include <string.h>
+
+#ifdef BOTCHECK
+static int bot_check(char *host);
+#endif
+
 /*
  * m_functions execute protocol messages on this server:
  *
@@ -91,15 +96,16 @@
 #define UFLAGS  (FLAGS_INVISIBLE|FLAGS_WALLOP|FLAGS_SERVNOTICE)
 
 /*
- * m_user - handle USER message
- *      parv[0] = sender prefix
- *      parv[1] = username (login name, account)
- *      parv[2] = client host name (used only from other servers)
- *      parv[3] = server host name (used only from other servers)
- *      parv[4] = users real name info
- */
+** m_user
+**      parv[0] = sender prefix
+**      parv[1] = username (login name, account)
+**      parv[2] = client host name (used only from other servers)
+**      parv[3] = server host name (used only from other servers)
+**      parv[4] = users real name info
+*/
 int m_user(struct Client* cptr, struct Client* sptr, int parc, char *parv[])
 {
+#define UFLAGS  (FLAGS_INVISIBLE|FLAGS_WALLOP|FLAGS_SERVNOTICE)
   char* username;
   char* host;
   char* server;
@@ -121,10 +127,10 @@ int m_user(struct Client* cptr, struct Client* sptr, int parc, char *parv[])
 
   /* Copy parameters into better documenting variables */
 
-  username = (parc < 2 || EmptyString(parv[1])) ? "<bad-boy>" : parv[1];
-  host     = (parc < 3 || EmptyString(parv[2])) ? "<nohost>" : parv[2];
-  server   = (parc < 4 || EmptyString(parv[3])) ? "<noserver>" : parv[3];
-  realname = (parc < 5 || EmptyString(parv[4])) ? "<bad-realname>" : parv[4];
+  username = (parc < 2 || BadPtr(parv[1])) ? "<bad-boy>" : parv[1];
+  host     = (parc < 3 || BadPtr(parv[2])) ? "<nohost>" : parv[2];
+  server   = (parc < 4 || BadPtr(parv[3])) ? "<noserver>" : parv[3];
+  realname = (parc < 5 || BadPtr(parv[4])) ? "<bad-realname>" : parv[4];
   
 #ifdef BOTCHECK
   /* Only do bot checks on local connecting clients */
@@ -135,3 +141,24 @@ int m_user(struct Client* cptr, struct Client* sptr, int parc, char *parv[])
   return do_user(parv[0], cptr, sptr, username, host, server, realname);
 }
 
+#ifdef BOTCHECK
+/**
+ ** bot_check(host)
+ **   Reject a bot based on a fake hostname...
+ **           -Taner
+ **/
+static int bot_check(char *host)
+{
+/*
+ * Eggdrop Bots:        "USER foo 1 1 :foo"
+ * Vlad, Com, joh Bots: "USER foo null null :foo"
+ * Annoy/OJNKbots:      "user foo . . :foo"   (disabled)
+ * Spambots that are based on OJNK: "user foo x x :foo"
+ */
+  if (!strcmp(host,"1")) return 1;
+  if (!strcmp(host,"null")) return 2;
+  if (!strcmp(host, "x")) return 3;
+
+  return 0;
+}
+#endif

@@ -38,12 +38,15 @@ extern time_t LastUsedWallops;
 #endif
 
 
-extern int   user_mode(struct Client *, struct Client *, int, char **);
-extern void  send_umode (struct Client *, struct Client *,
-                         int, int, char *);
-extern void  send_umode_out (struct Client*, struct Client *, int);
-extern int   show_lusers(struct Client *, struct Client *, int, char **);
+extern int   user_mode(struct Client* , struct Client* , int, char** );
+extern void  send_umode (struct Client* , struct Client* ,
+                         int, int, char* );
+extern void  send_umode_out(struct Client* , struct Client* , int);
+extern int   show_lusers(struct Client* , struct Client* , int, char** );
 extern void  show_opers(struct Client* client);
+extern int   register_user(struct Client* ,struct Client* ,char* ,char* );
+extern int   do_user(char* ,struct Client* ,struct Client*,
+                   char* ,char *,char *,char *);
 
-
+extern int   user_modes_from_c_to_bitmask[];
 #endif

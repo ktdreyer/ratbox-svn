@@ -63,6 +63,7 @@ SRCS =                          \
   m_message.c                   \
   m_mode.c                      \
   m_names.c                     \
+  m_nick.c			\
   m_operwall.c                  \
   m_oper.c                      \
   m_part.c                      \
@@ -83,6 +84,7 @@ SRCS =                          \
   m_trace.c                     \
   m_unkline.c                   \
   m_userhost.c                  \
+  m_user.c			\
   m_users.c                     \
   m_version.c                   \
   m_wallops.c                   \
