@@ -95,3 +95,6 @@ lmh.diff 	- This patch adds remote unkline support, temp dline support,
 		  Please read README.LMH for more information as this patch
 		  requires different methods to be applied and adds multiple
 		  config options.
+
+disable_identd.diff - This patch adds support for disabling identd queries.
+                      See README.disable_identd for more information.
