@@ -259,7 +259,8 @@ comm_select (unsigned long delay)
 					if(hdl)
 						hdl (fd, F->read_data);
 				}
-				if(revents & (POLLWRNORM | POLLOUT | POLLHUP | POLLERR))
+				
+				if(F->flags.open && (revents & (POLLWRNORM | POLLOUT | POLLHUP | POLLERR)))
 				{
 					callbacks_called++;
 					hdl = F->write_handler;
@@ -330,7 +331,7 @@ comm_select (unsigned long delay)
 
 		if(F->flags.open == 0)
 			continue;	/* Read handler closed us..go on */
-		if(revents & (POLLWRNORM | POLLOUT | POLLHUP | POLLERR))
+		if(F->flags.open && (revents & (POLLWRNORM | POLLOUT | POLLHUP | POLLERR)))
 		{
 			callbacks_called++;
 			hdl = F->write_handler;
