@@ -141,7 +141,7 @@ DECLARE_MODULE_AV1(
 			  test_clist,
 			  /* Next the hook list, if we have one. */
 			  test_hlist,
-			  /* No idea */
+			  /* Then the hook function list, if we have one */
 			  test_hfnlist,
 			  /* And finally the version number of this module. */
 			  "$Revision$");

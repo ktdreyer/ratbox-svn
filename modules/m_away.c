@@ -71,7 +71,7 @@ static int
 m_away(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	char *away;
-	char *awy2 = LOCAL_COPY(parv[1]);
+	char *awy2;
 
 	if(MyClient(source_p) && !IsFloodDone(source_p))
 		flood_endgrace(source_p);
@@ -81,10 +81,9 @@ m_away(struct Client *client_p, struct Client *source_p, int parc, const char *p
 
 	away = source_p->user->away;
 
-	if(parc < 2 || !*awy2)
+	if(parc < 2 || EmptyString(parv[1]))
 	{
 		/* Marking as not away */
-
 		if(away)
 		{
 			/* we now send this only if they were away before --is */
@@ -113,6 +112,7 @@ m_away(struct Client *client_p, struct Client *source_p, int parc, const char *p
 
 	source_p->user->last_away = CurrentTime;
 
+	awy2 = LOCAL_COPY(parv[1]);
 	if(strlen(awy2) > AWAYLEN)
 		awy2[AWAYLEN] = '\0';
 
