@@ -1,3 +1,17 @@
+leeh        2003/12/17 17:27:07 EST	(20031217_0)
+
+  Modified files:
+    src                  client.c rserv.c 
+  Log:
+  - add in some services fight checking
+  - fix to show right pid after the fork()
+  
+  Revision  Changes    Path
+  1.5       +21 -0     rserv/src/client.c
+  1.7       +6 -2      rserv/src/rserv.c
+
+
+
 leeh        2003/12/15 15:43:46 EST	(20031215_0)
 
   Modified files:
