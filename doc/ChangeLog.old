@@ -1,3 +1,7 @@
+*** 20010104_4 by ejb
+- remove ID debug code, and fix a nasty bug.
+
+
 *** 20010104_3 by ejb
 - commit initial user ID (TS4) code.
   we support IDs, but a couple of things are missing, most notable ID collisions.
