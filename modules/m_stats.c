@@ -259,7 +259,7 @@ stats_connect(struct Client *source_p)
 {
 	static char buf[5];
 	struct server_conf *server_p;
-	char *s = buf;
+	char *s;
 	dlink_node *ptr;
 
 	if((ConfigFileEntry.stats_c_oper_only || 
@@ -276,6 +276,7 @@ stats_connect(struct Client *source_p)
 		server_p = ptr->data;
 
 		buf[0] = '\0';
+		s = buf;
 
 		if(IsOper(source_p))
 		{
