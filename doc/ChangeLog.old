@@ -1,3 +1,10 @@
+*** 20010216_3 by db
+- cleaned up hostmask.c clear_conf() there is no need to keep
+  a separate link list at all
+- note register is deprecated or ignored with any modern compiler.
+
+
+
 *** 20010216_2 by ejb
 - fix for /quote accept -nick flooding
 
