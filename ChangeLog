@@ -1,3 +1,20 @@
+leeh        2003/04/10 18:06:30 UTC	(20030410_2)
+
+  Modified files:
+    include              s_newconf.h supported.h 
+    modules              m_xline.c 
+    src                  s_newconf.c 
+  Log:
+  - updated 005 here too
+  
+  Revision  Changes    Path
+  7.6       +2 -1      ircd-ratbox/include/s_newconf.h
+  1.30      +3 -2      ircd-ratbox/include/supported.h
+  1.22      +4 -3      ircd-ratbox/modules/m_xline.c
+  7.6       +2 -1      ircd-ratbox/src/s_newconf.c
+
+
+
 leeh        2003/04/10 13:40:47 UTC	(20030410_1)
 
   Modified files:
