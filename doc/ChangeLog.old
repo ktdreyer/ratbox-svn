@@ -1,3 +1,21 @@
+*** 20001121_3 by adrian
+
+
+Add in the beginnings of my new and hopefully improved dbuf replacement.
+
+The general idea here is that we *should* be pre-parsing buffers into lines
+so we can later throw references around.
+
+src/dbuf.c throws data into the dbuf and parses it when its coming out.
+This code parses data into lines when it comes in, so its already
+in a per-line format (minus the trailing CRLFs) when we come to parsing
+it.
+
+Its building, but I haven't tested it yet. THAT is next.
+
+
+
+
 *** 20001121_2 by adrian
 
 Actually create a tools module with stuff that is abused reguarly,
