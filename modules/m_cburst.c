@@ -129,7 +129,8 @@ int     ms_cburst(struct Client *cptr,
   else
     {
       sendto_realops_flags(FLAGS_ALL,
-		   "*** CBURST request received from non LL capable server!");
+		   "*** CBURST request received from non LL capable server! [%s]",
+			   cptr->name);
       return 0;
     }
 
