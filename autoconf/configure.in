@@ -745,7 +745,7 @@ AC_ARG_ENABLE(small-net,
 ])
 
 ac_cv_nicklen="9"
-ac_cv_maxclients="200"
+ac_cv_maxclients="3000"
 ac_cv_topiclen="120"
 
 dnl Nicklen
@@ -769,7 +769,7 @@ AC_ARG_WITH(maxclients,
 
 [
   if test "$withval" = "no"; then
-	ac_cv_maxclients="200"
+	ac_cv_maxclients="3000"
   else
 	ac_cv_maxclients="$withval"
   fi

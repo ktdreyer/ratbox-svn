@@ -887,8 +887,8 @@ fi
 
 if test "x$GCC" = "xyes"; then
 #  Use this for development..
-  IRC_CFLAGS="-O2 -g -ggdb -Wunused -Wall -Wshadow -Wmissing-declarations"
-#   IRC_CFLAGS="-O2 -g -ggdb"
+#  IRC_CFLAGS="-O2 -g -ggdb -Wunused -Wall -Wshadow -Wmissing-declarations"
+   IRC_CFLAGS="-O2 -g -ggdb"
 else
   if test "x$TenDRA" = "xyes"; then
             IRC_CFLAGS=""
@@ -3989,7 +3989,7 @@ fi
 
 
 ac_cv_nicklen="9"
-ac_cv_maxclients="200"
+ac_cv_maxclients="3000"
 ac_cv_topiclen="120"
 
 # Check whether --with-nicklen or --without-nicklen was given.
@@ -4016,7 +4016,7 @@ if test "${with_maxclients+set}" = set; then
   withval="$with_maxclients"
   
   if test "$withval" = "no"; then
-	ac_cv_maxclients="200"
+	ac_cv_maxclients="3000"
   else
 	ac_cv_maxclients="$withval"
   fi
