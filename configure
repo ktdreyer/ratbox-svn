@@ -311,7 +311,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT MKDEP MAKEDEPEND STDOUT CPP EGREP SET_MAKE INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA RM CP MV LN SED AR LD RANLIB TOUCH YACC LEX LEXLIB LEX_OUTPUT_ROOT CRYPT_C CRYPT_LIB VICONF ALLOCA ENCSPEED ZLIB_LD ETC_DIR confdir LOG_DIR logdir HELP_DIR helpdir MODULE_DIR moduledir SELECT_TYPE M_SERVICES MODULES_LIBS MOD_TARGET SSL_SRCS_ENABLE SSL_INCLUDES SSL_LIBS PICFLAGS IRC_CFLAGS SEDOBJ LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT MKDEP MAKEDEPEND STDOUT CPP EGREP SET_MAKE INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA RM CP MV LN SED AR LD RANLIB TOUCH YACC LEX LEXLIB LEX_OUTPUT_ROOT CRYPT_LIB VICONF ALLOCA ENCSPEED ZLIB_LD ETC_DIR confdir LOG_DIR logdir HELP_DIR helpdir MODULE_DIR moduledir SELECT_TYPE M_SERVICES MODULES_LIBS MOD_TARGET SSL_SRCS_ENABLE SSL_INCLUDES SSL_LIBS PICFLAGS IRC_CFLAGS SEDOBJ LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -4846,10 +4846,8 @@ CRYPT_LIB=$ac_cv_search_crypt
 if test "$CRYPT_LIB" = "none required"; then
 	unset CRYPT_LIB
 elif test "$CRYPT_LIB" = no; then
-	CRYPT_C=crypt.c
 	unset CRYPT_LIB
 fi
-
 
 
 
@@ -11010,7 +11008,6 @@ s,@YACC@,$YACC,;t t
 s,@LEX@,$LEX,;t t
 s,@LEXLIB@,$LEXLIB,;t t
 s,@LEX_OUTPUT_ROOT@,$LEX_OUTPUT_ROOT,;t t
-s,@CRYPT_C@,$CRYPT_C,;t t
 s,@CRYPT_LIB@,$CRYPT_LIB,;t t
 s,@VICONF@,$VICONF,;t t
 s,@ALLOCA@,$ALLOCA,;t t

@@ -301,11 +301,9 @@ CRYPT_LIB=$ac_cv_search_crypt
 if test "$CRYPT_LIB" = "none required"; then
 	unset CRYPT_LIB
 elif test "$CRYPT_LIB" = no; then
-	CRYPT_C=crypt.c
 	unset CRYPT_LIB
 fi
 
-AC_SUBST(CRYPT_C)
 AC_SUBST(CRYPT_LIB)
 
 if test "$ac_cv_header_sys_wait_h" = yes -o "$ac_cv_header_wait_h" = yes; then
