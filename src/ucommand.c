@@ -26,14 +26,14 @@ static void u_connect(struct connection_entry *, char *parv[], int parc);
 static void u_die(struct connection_entry *, char *parv[], int parc);
 static void u_events(struct connection_entry *, char *parv[], int parc);
 static void u_quit(struct connection_entry *, char *parv[], int parc);
-static void u_stats(struct connection_entry *, char *parv[], int parc);
+static void u_service(struct connection_entry *, char *parv[], int parc);
 static void u_status(struct connection_entry *, char *parv[], int parc);
 
 static struct ucommand_handler connect_ucommand = { "connect", u_connect, 0 };
 static struct ucommand_handler die_ucommand = { "die", u_die, 0 };
 static struct ucommand_handler events_ucommand = { "events", u_events, 0 };
 static struct ucommand_handler quit_ucommand = { "quit", u_quit, 0 };
-static struct ucommand_handler stats_ucommand = { "stats", u_stats, 0 };
+static struct ucommand_handler service_ucommand = { "service", u_service, 0 };
 static struct ucommand_handler status_ucommand = { "status", u_status, 0 };
 
 void
@@ -43,7 +43,7 @@ init_ucommand(void)
         add_ucommand_handler(&die_ucommand);
         add_ucommand_handler(&events_ucommand);
 	add_ucommand_handler(&quit_ucommand);
-	add_ucommand_handler(&stats_ucommand);
+	add_ucommand_handler(&service_ucommand);
         add_ucommand_handler(&status_ucommand);
 }
 
@@ -269,23 +269,37 @@ u_quit(struct connection_entry *conn_p, char *parv[], int parc)
 }
 
 static void
-u_stats(struct connection_entry *conn_p, char *parv[], int parc)
+u_service(struct connection_entry *conn_p, char *parv[], int parc)
 {
         struct client *service_p;
+        dlink_node *ptr;
 
-        if(parc < 2 || EmptyString(parv[1]))
+        if(parc > 1)
         {
-                sendto_connection(conn_p, "Usage: .stats <service>");
+                if((service_p = find_service_id(parv[1])) == NULL)
+                {
+                        sendto_connection(conn_p, "No such service %s",
+                                          parv[1]);
+                        return;
+                }
+
+                (service_p->service->stats)(conn_p, parv, parc);
                 return;
         }
 
-        if((service_p = find_service_id(parv[1])) == NULL)
-        {
-                sendto_connection(conn_p, "No such service %s", parv[1]);
-                return;
-        }
+        sendto_connection(conn_p, "Services:");
 
-        (service_p->service->stats)(conn_p, parv, parc);
+        DLINK_FOREACH(ptr, service_list.head)
+        {
+                service_p = ptr->data;
+
+                sendto_connection(conn_p, "  %s: Online as %s!%s@%s [%s]",
+                                  service_p->service->id,
+                                  service_p->name,
+                                  service_p->service->username,
+                                  service_p->service->host,
+                                  service_p->info);
+        }
 }
 
 static void
@@ -296,10 +310,8 @@ u_status(struct connection_entry *conn_p, char *parv[], int parc)
                           get_duration(CURRENT_TIME - config_file.first_time));
 
         if(server_p != NULL)
-                sendto_connection(conn_p, "Currently connected to %s, for %s",
-                                  server_p->name,
-                                  get_duration(CURRENT_TIME -
-                                               server_p->last_time));
+                sendto_connection(conn_p, "Currently connected to %s",
+                                  server_p->name);
         else
                 sendto_connection(conn_p, "Currently disconnected");
 }

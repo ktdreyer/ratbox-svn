@@ -550,14 +550,16 @@ s_alis(struct client *client_p, char *text)
 void
 s_alis_stats(struct connection_entry *conn_p, char *parv[], int parc)
 {
-        sendto_connection(conn_p, "ALIS Stats:");
+        sendto_connection(conn_p, "ALIS Service:");
+        sendto_connection(conn_p, "  Online as %s!%s@%s [%s]",
+                          alis_p->name, alis_p->service->username,
+                          alis_p->service->host, alis_p->info);
+
         sendto_connection(conn_p, "  Command usage: HELP:%d EHELP:%d LIST:%d",
                           alis_stats.help, alis_stats.ehelp,
                           alis_stats.list);
-        sendto_connection(conn_p, "  Missing parameters: %d",
-                          alis_stats.error_param);
-        sendto_connection(conn_p, "  Parse errors: %d",
-                          alis_stats.error_parse);
-        sendto_connection(conn_p, "  Flood proctection: Paced:%d Ignored: %d",
+        sendto_connection(conn_p, "  Missing parameters: %d Parse errors: %d",
+                          alis_stats.error_param, alis_stats.error_parse);
+        sendto_connection(conn_p, "  Flood protection: Paced:%d Ignored: %d",
                           alis_stats.flood, alis_stats.flood_ignore);
 }

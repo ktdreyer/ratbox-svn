@@ -330,7 +330,9 @@ c_nick(struct client *client_p, char *parv[], int parc)
 		strlcpy(target_p->name, parv[1], sizeof(target_p->name));
 		strlcpy(target_p->user->username, parv[5], 
 			sizeof(target_p->user->username));
-		strlcpy(target_p->user->host, parv[6], sizeof(target_p->user->host));
+		strlcpy(target_p->user->host, parv[6], 
+                        sizeof(target_p->user->host));
+                strlcpy(target_p->info, parv[8], sizeof(target_p->info));
 
 		target_p->user->servername = uplink_p->name;
 		target_p->user->tsinfo = newts;

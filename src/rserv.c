@@ -200,6 +200,7 @@ main(int argc, char *argv[])
 	add_scommand_handler(&privmsg_command);
 
         add_ucommand_handler(&help_ucommand);
+        add_ucommand_handler(&stats_ucommand);
 
 	/* load our services.. */
 	init_s_alis();
