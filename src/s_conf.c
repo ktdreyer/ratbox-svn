@@ -201,7 +201,7 @@ check_client(struct Client *client_p, struct Client *source_p, const char *usern
 			source_p->name, IsGotId(source_p) ? "" : "~",
 			source_p->username, source_p->sockhost);	
 
-		ServerStats->is_ref++;
+		ServerStats.is_ref++;
 		exit_client(client_p, source_p, &me, "Too many host connections (local)");
 		break;
 
@@ -214,7 +214,7 @@ check_client(struct Client *client_p, struct Client *source_p, const char *usern
 			source_p->name, IsGotId(source_p) ? "" : "~",
 			source_p->username, source_p->sockhost);
 
-		ServerStats->is_ref++;
+		ServerStats.is_ref++;
 		exit_client(client_p, source_p, &me, "Too many host connections (global)");
 		break;
 
@@ -227,7 +227,7 @@ check_client(struct Client *client_p, struct Client *source_p, const char *usern
 			source_p->name, IsGotId(source_p) ? "" : "~",
 			source_p->username, source_p->sockhost);
 
-		ServerStats->is_ref++;
+		ServerStats.is_ref++;
 		exit_client(client_p, source_p, &me, "Too many user connections (global)");
 		break;
 
@@ -242,7 +242,7 @@ check_client(struct Client *client_p, struct Client *source_p, const char *usern
 			source_p->name, IsGotId(source_p) ? "" : "~",
 			source_p->username, source_p->sockhost);
 
-		ServerStats->is_ref++;
+		ServerStats.is_ref++;
 		exit_client(client_p, source_p, &me,
 			    "No more connections allowed in your connection class");
 		break;
@@ -257,7 +257,7 @@ check_client(struct Client *client_p, struct Client *source_p, const char *usern
 #endif
 				port = ((struct sockaddr_in *)&source_p->localClient->listener)->sin_port;
 			
-			ServerStats->is_ref++;
+			ServerStats.is_ref++;
 			/* jdc - lists server name & port connections are on */
 			/*       a purely cosmetical change */
 			/* why ipaddr, and not just source_p->sockhost? --fl */
@@ -286,7 +286,7 @@ check_client(struct Client *client_p, struct Client *source_p, const char *usern
 	case BANNED_CLIENT:
 		add_reject(client_p);
 		exit_client(client_p, client_p, &me, "*** Banned ");
-		ServerStats->is_ref++;
+		ServerStats.is_ref++;
 		break;
 
 	case 0:

@@ -158,7 +158,7 @@ check_reject(struct Client *client_p)
 		rdata->time = CurrentTime;
 		if(rdata->count > ConfigFileEntry.reject_after_count)
 		{
-			ServerStats->is_rej++;
+			ServerStats.is_rej++;
 			SetReject(client_p);
 			comm_setselect(client_p->localClient->fd, FDLIST_NONE, COMM_SELECT_WRITE | COMM_SELECT_READ, NULL, NULL, 0);
 			SetClosing(client_p);

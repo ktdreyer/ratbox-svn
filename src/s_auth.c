@@ -215,7 +215,7 @@ auth_dns_callback(void *vptr, adns_answer * reply)
 static void
 auth_error(struct AuthRequest *auth)
 {
-	++ServerStats->is_abad;
+	++ServerStats.is_abad;
 
 	comm_close(auth->fd);
 	auth->fd = -1;
@@ -251,7 +251,7 @@ start_auth_query(struct AuthRequest *auth)
 		report_error("creating auth stream socket %s:%s",
 			     get_client_name(auth->client, SHOW_IP), 
 			     log_client_name(auth->client, SHOW_IP), errno);
-		++ServerStats->is_abad;
+		++ServerStats.is_abad;
 		return 0;
 	}
 	if((MAXCONNECTIONS - 10) < fd)
@@ -551,14 +551,14 @@ read_auth_reply(int fd, void *data)
 
 	if(s == NULL)
 	{
-		++ServerStats->is_abad;
+		++ServerStats.is_abad;
 		strcpy(auth->client->username, "unknown");
 		sendheader(auth->client, REPORT_FAIL_ID);
 	}
 	else
 	{
 		sendheader(auth->client, REPORT_FIN_ID);
-		++ServerStats->is_asuc;
+		++ServerStats.is_asuc;
 		SetGotId(auth->client);
 	}
 

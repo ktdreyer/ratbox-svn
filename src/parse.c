@@ -159,7 +159,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
 			/* didnt find any matching client, issue a kill */
 			if(from == NULL)
 			{
-				ServerStats->is_unpf++;
+				ServerStats.is_unpf++;
 				remove_unknown(client_p, sender, pbuffer);
 				return;
 			}
@@ -169,7 +169,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
 			/* fake direction, hmm. */
 			if(from->from != client_p)
 			{
-				ServerStats->is_wrdi++;
+				ServerStats.is_wrdi++;
 				cancel_clients(client_p, from, pbuffer);
 				return;
 			}
@@ -180,7 +180,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
 
 	if(*ch == '\0')
 	{
-		ServerStats->is_empt++;
+		ServerStats.is_empt++;
 		return;
 	}
 
@@ -201,7 +201,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
 	{
 		mptr = NULL;
 		numeric = ch;
-		ServerStats->is_num++;
+		ServerStats.is_num++;
 		s = ch + 3;	/* I know this is ' ' from above if */
 		*s++ = '\0';	/* blow away the ' ', and point s to next part */
 	}
@@ -234,7 +234,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
 					sendto_one(from, form_str(ERR_UNKNOWNCOMMAND),
 						   me.name, from->name, ch);
 			}
-			ServerStats->is_unco++;
+			ServerStats.is_unco++;
 			return;
 		}
 

@@ -531,7 +531,7 @@ accept_connection(int pfd, void *data)
 	 */
 	if((MAXCONNECTIONS - 10) < fd)
 	{
-		++ServerStats->is_ref;
+		++ServerStats.is_ref;
 		/*
 		 * slow down the whining to opers bit
 		 */
@@ -555,7 +555,7 @@ accept_connection(int pfd, void *data)
 	 * from this IP... */
 	if((aconf = conf_connect_allowed((struct sockaddr *)&sai, sai.ss_family)) != NULL)
 	{
-		ServerStats->is_ref++;
+		ServerStats.is_ref++;
 
         if(ConfigFileEntry.dline_with_reason)
         {
@@ -578,7 +578,7 @@ accept_connection(int pfd, void *data)
 		return;
 	}
 
-	ServerStats->is_ac++;
+	ServerStats.is_ac++;
 	add_connection(listener, fd, (struct sockaddr *)&sai);
 
 	/* Re-register a new IO request for the next accept .. */
