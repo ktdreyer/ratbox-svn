@@ -184,6 +184,15 @@ void show_vchans(struct Client *cptr,
               me.name, sptr->name, command, chptr->chname);
 }
 
+/*
+ * vchan_show_ids
+ *
+ * inputs	- pointer to client to report to
+ *
+ * output	- 
+ * side effects - 
+ *                
+ */
 static void
 vchan_show_ids(struct Client *sptr, struct Channel *chptr)
 {
@@ -247,8 +256,7 @@ vchan_show_ids(struct Client *sptr, struct Channel *chptr)
  * inputs	- pointer to vchan
  * output	- pointer to static string
  * side effects - pick a name from the channel.
- *                the topic setters nick if available,
- *                otherwise use who's been there longest according 
+ *                use who's been there longest according 
  *                to the server.
  */
 char* pick_vchan_id(struct Channel *chptr)

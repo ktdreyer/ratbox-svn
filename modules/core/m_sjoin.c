@@ -74,8 +74,11 @@ char *_version = "20001122";
 
 char    modebuf[MODEBUFLEN];
 char    parabuf[MODEBUFLEN];
+char    *para[4];
+char    *server_nick[4];
 char    *mbuf;
 int     pargs;
+int     server_nick_count;
 
 void set_final_mode(struct Mode *mode,struct Mode *oldmode);
 void remove_our_modes(int type,
@@ -103,7 +106,6 @@ int     ms_sjoin(struct Client *cptr,
   int   doesop = 0, fl, people = 0, isnew;
   register      char *s, *s0;
   static        char sjbuf[BUFSIZE];
-  char    *t = sjbuf;
   char    *p;
   int hide_or_not;
   dlink_node *m;
@@ -197,18 +199,20 @@ int     ms_sjoin(struct Client *cptr,
 	  /* + 1 skip the extra '#' in the name */
 	  if((top_chptr = hash_find_channel((parv[2] + 1), NULL)))
 	    {
-	      sendto_realops("Found top_chptr for %s", (parv[2] + 1));
+	      /* If the vchan is already in the vchan_list for this
+	       * root, don't re-add it.
+	       */
 
-	      m = make_dlink_node();
-	      dlinkAdd(chptr, m, &top_chptr->vchan_list);
-	      chptr->root_chptr=top_chptr;
+	      if(dlinkFind(&top_chptr->vchan_list,chptr) == NULL)
+		{
+		  m = make_dlink_node();
+		  dlinkAdd(chptr, m, &top_chptr->vchan_list);
+		  chptr->root_chptr=top_chptr;
+		}
 	    }
 	  else
 	    {
-	      sendto_realops("Creating top_chptr for %s", (parv[2] + 1));
-
 	      top_chptr = get_channel(sptr, (parv[2] + 1), CREATE);
-
 	      m = make_dlink_node();
 	      dlinkAdd(chptr, m, &top_chptr->vchan_list);
 	      chptr->root_chptr=top_chptr;
@@ -285,13 +289,15 @@ int     ms_sjoin(struct Client *cptr,
       modebuf[1] = '\0';
     }
 
-  ircsprintf(t, ":%s SJOIN %lu %s %s %s :", parv[0], tstosend, parv[2],
+  ircsprintf(sjbuf, ":%s SJOIN %lu %s %s %s :", parv[0], tstosend, parv[2],
           modebuf, parabuf);
-  t += strlen(t);
 
   mbuf = modebuf;
-  parabuf[0] = '\0';
+  para[0] = para[1] = para[2] = para[3] = "";
+  server_nick[0] = server_nick[1] = server_nick[2] = server_nick[3] = "";
   pargs = 0;
+  server_nick_count = 0;
+
   *mbuf++ = '+';
 
   for (s = s0 = strtoken(&p, parv[args+4], " "); s;
@@ -355,18 +361,19 @@ int     ms_sjoin(struct Client *cptr,
 				     s, parv[2]);
 	    }
         }
+
+      /* XXX if (server_nick_count >= MAXMODEPARAMS) ... 
+       *  if this is ever a possibility...
+       */
       if (keep_new_modes)
-        strcpy(t, s0);
+	server_nick[server_nick_count++] = s0;
       else
-        strcpy(t, s);
-      t += strlen(t);
-      *t++ = ' ';
+	server_nick[server_nick_count++] = s;
+
       if (fl & MODE_CHANOP)
         {
           *mbuf++ = 'o';
-          strcat(parabuf, s);
-          strcat(parabuf, " ");
-          pargs++;
+	  para[pargs++] = s;
           if (pargs >= MAXMODEPARAMS)
             {
               *mbuf = '\0';
@@ -374,21 +381,23 @@ int     ms_sjoin(struct Client *cptr,
 		{
 		  sendto_channel_butserv(hide_or_not, chptr, sptr,
 					 ":%s MODE %s %s %s", parv[0],
-					 top_chptr->chname, modebuf, parabuf );
+					 top_chptr->chname, modebuf,
+					 para[0],para[1],para[2],para[3] );
 		}
 	      else
 		{
 		  sendto_channel_butserv(hide_or_not, chptr, sptr,
 					 ":%s MODE %s %s %s", parv[0],
-					 chptr->chname, modebuf, parabuf );
+					 chptr->chname, modebuf,
+					 para[0],para[1],para[2],para[3] );
 		}
               mbuf = modebuf;
               *mbuf++ = '+';
-              parabuf[0] = '\0';
+              para[0] = para[1] = para[2] = para[3] = "";
               pargs = 0;
             }
         }
-      if (fl & MODE_VOICE)
+      else if (fl & MODE_VOICE)
         {
           *mbuf++ = 'v';
           strcat(parabuf, s);
@@ -401,17 +410,19 @@ int     ms_sjoin(struct Client *cptr,
 		{
 		  sendto_channel_butserv(hide_or_not, chptr, sptr,
 					 ":%s MODE %s %s %s", parv[0],
-					 top_chptr->chname, modebuf, parabuf );
+					 top_chptr->chname, modebuf,
+					 para[0],para[1],para[2],para[3] );
 		}
 	      else
 		{
 		  sendto_channel_butserv(hide_or_not, chptr, sptr,
 					 ":%s MODE %s %s %s", parv[0],
-					 chptr->chname, modebuf, parabuf );
+					 chptr->chname, modebuf,
+					 para[0],para[1],para[2],para[3] );
 		}
               mbuf = modebuf;
               *mbuf++ = '+';
-              parabuf[0] = '\0';
+              para[0] = para[1] = para[2] = para[3] = "";
               pargs = 0;
             }
         }
@@ -424,23 +435,27 @@ int     ms_sjoin(struct Client *cptr,
 	{
 	  sendto_channel_butserv(hide_or_not, chptr, sptr,
 				 ":%s MODE %s %s %s", parv[0],
-				 top_chptr->chname, modebuf, parabuf );
+				 top_chptr->chname, modebuf,
+				 para[0],para[1],para[2],para[3] );
 	}
       else
 	{
 	  sendto_channel_butserv(hide_or_not, chptr, sptr,
 				 ":%s MODE %s %s %s", parv[0],
-				 chptr->chname, modebuf, parabuf );
+				 chptr->chname, modebuf,
+				 para[0],para[1],para[2],para[3] );
 	}
     }
 
   if (people)
     {
-      if (t[-1] == ' ')
-        t[-1] = '\0';
-      else
-        *t = '\0';
-      sendto_match_servs(chptr, cptr, "%s", sjbuf);
+      sendto_match_servs(chptr, cptr, "%s %s %s %s",
+			 sjbuf,
+			 server_nick[0],
+			 server_nick[1],
+			 server_nick[2],
+			 server_nick[3]
+			 );
     }
   return 0;
 }

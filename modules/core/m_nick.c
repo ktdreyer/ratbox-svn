@@ -260,7 +260,7 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 **      parv[1] = nickname
 **      parv[2] = TS when nick change
 **
-** when its a server introucing a new nick
+** when its a server introducing a new nick
 **      parv[0] = sender prefix
 **      parv[1] = nickname
 **      parv[2] = hop count
