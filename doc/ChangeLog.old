@@ -1,3 +1,7 @@
+*** 20011203_3 by androsyn
+Actually do something with the ts_winner field
+
+
 *** 20011203_2 by androsyn
 Minor changes to support a hook on bursting channels and add a field to keep
 track of the ts winner...
