@@ -316,6 +316,8 @@ struct admin_info
 /* bleh. have to become global. */
 extern int scount;
 
+extern void init_conf(void);
+
 /* All variables are GLOBAL */
 extern struct ConfItem* ConfigItemList;      /* conf list head */
 extern int              specific_ipv4_vhost; /* used in s_bsd.c */

@@ -52,6 +52,7 @@
 #include "s_debug.h"
 #include "fileio.h"
 #include "memory.h"
+#include "balloc.h"
 
 struct config_server_hide ConfigServerHide;
 
@@ -65,6 +66,9 @@ int scount = 0;       /* used by yyparse(), etc */
 #define INADDR_NONE ((unsigned int) 0xffffffff)
 #endif
 
+static BlockHeap *xline_heap = NULL;
+static BlockHeap *shared_heap = NULL;
+static void conf_heap_gc(void *);
 
 /* internally defined functions */
 
@@ -119,6 +123,33 @@ static IP_ENTRY *find_or_add_ip(struct irc_inaddr*);
 
 /* general conf items link list root */
 struct ConfItem* ConfigItemList = NULL;
+
+/* conf_heap_gc()
+ *
+ * inputs       -
+ * outputs      -
+ * side effects - garbage collection of various conf heaps
+ */
+static void
+conf_heap_gc(void *unused)
+{
+  BlockHeapGarbageCollect(xline_heap);
+  BlockHeapGarbageCollect(shared_heap);
+}
+
+/* init_conf()
+ *
+ * inputs       -
+ * outputs      -
+ * side effects - starts some events etc for s_conf.c
+ */
+void
+init_conf(void)
+{
+  xline_heap = BlockHeapCreate(sizeof(struct xline), XLINE_HEAP_SIZE);
+  shared_heap = BlockHeapCreate(sizeof(struct shared), SHARED_HEAP_SIZE);
+  eventAddIsh("conf_heap_gc", conf_heap_gc, NULL, 600);
+}
 
 /*
  * conf_dns_callback
@@ -240,7 +271,7 @@ make_xline(const char *gecos, const char *reason, int type)
 {
   struct xline *xconf;
 
-  xconf = (struct xline *) MyMalloc(sizeof(struct xline));
+  xconf = BlockHeapAlloc(xline_heap);
   memset(xconf, 0, sizeof(struct xline));
 
   if(!BadPtr(gecos))
@@ -268,7 +299,7 @@ free_xline(struct xline *xconf)
 
   MyFree(xconf->gecos);
   MyFree(xconf->reason);
-  MyFree((char *) xconf);
+  BlockHeapFree(xline_heap, xconf);
 }
 
 /* clear_xlines()
@@ -328,7 +359,7 @@ make_shared(void)
 {
   struct shared *uconf;
 
-  uconf = (struct shared *) MyMalloc(sizeof(struct shared));
+  uconf = BlockHeapAlloc(shared_heap);
   memset(uconf, 0, sizeof(struct shared));
 
   return uconf;
@@ -350,7 +381,7 @@ free_shared(struct shared *uconf)
   MyFree(uconf->username);
   MyFree(uconf->host);
   MyFree(uconf->servername);
-  MyFree((char *) uconf);
+  BlockHeapFree(shared_heap, uconf);
 }
 
 /* clear_shared()
