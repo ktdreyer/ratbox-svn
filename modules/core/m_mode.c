@@ -110,7 +110,8 @@ int m_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 	  sendto_one(uplink, ":%s CBURST %s",
 		      me.name, parv[1]);
 	      
-	  /* a "callback" is triggered by an LLJOIN from uplink */
+	  sendto_one(uplink, ":%s MODE %s",
+		     me.name, parv[1]);
 	  return 0;
 	}
       else
