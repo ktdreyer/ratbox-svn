@@ -3,19 +3,30 @@ $Id$
 ratbox-services installation guide
 ----------------------------------
 
-1. Run the configure script.  If you wish to install it to a different 
-   directory than the default /usr/local/ratbox-services, include the
-   --prefix option.
+1. Decide which services you dont want compiled in.  By default all 
+   will be compiled in, as they can be disabled in the config file.
 
-   eg, ./configure --prefix=/home/user/services
+2. Run the configure script.  By default it will attempt to install to
+   /usr/local/ratbox-services.  If you want it in this directory, then
+   as root you must first:
+   	mkdir /usr/local/ratbox-services
+	chown youruser:yourgroup /usr/local/ratbox-services
+   Then install as normal from your username.
 
-2. Edit include/config.h
+   If you wish to install it to a different directory include the 
+   --prefix option:
+   	./configure --prefix=/home/user/services
+
+   If there are services you dont want compiled in, like the operbot:
+   	./configure --prefix=/home/user/services --disable-operbot
+
+   See ./configure --help for more information.
 
 3. Run make
 
 4. Run make install
 
 5. Change to the directory it installed to, edit example.conf and save it
-   as the filename specified in CONF_PATH in config.h, default rserv.conf
+   as services.conf.
 
-6. Run ./rserv
+6. Run ./ratbox-services

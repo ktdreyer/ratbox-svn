@@ -41,6 +41,7 @@ static struct mode_table privs_table[] = {
 	{ "us_admin",	CONF_OPER_US_ADMIN	},
 	{ "us_register",CONF_OPER_US_REGISTER	},
 	{ "operbot_admin", CONF_OPER_OPERBOT_ADMIN },
+	{ "jupe_admin", CONF_OPER_JUPE_ADMIN	},
 	{ "\0",		0			}
 };
 

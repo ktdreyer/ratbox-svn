@@ -16,6 +16,7 @@
 #include "serno.h"
 #include "service.h"
 #include "log.h"
+#include "hook.h"
 
 static dlink_list scommand_table[MAX_SCOMMAND_HASH];
 
@@ -226,6 +227,7 @@ c_pong(struct client *client_p, const char *parv[], int parc)
                 server_p->flags |= FLAGS_EOB;
 
 		introduce_services_channels();
+		hook_call(HOOK_FINISHED_BURSTING, NULL, NULL);
         }
 }
 

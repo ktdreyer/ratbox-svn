@@ -2,13 +2,11 @@ $Id$
 
 ratbox-services is an advanced services daemon for use with ircd-ratbox.  It
 has been (mainly) coded from scratch by:
-
-fl, Lee Hardy, <lee -at- leeh.co.uk>
+	anfl, Lee Hardy, <lee -at- leeh.co.uk>
 
 Thanks also go to
-
-AndroSyn, Aaron Sethman <androsyn -at- ratbox.org>
-Hwy, W. Campbell <wcampbel -at- botbay.net>
-larne, Edward Brocklesby <ejf -at- lythe.org.uk>
+	AndroSyn, Aaron Sethman <androsyn -at- ratbox.org>
+	Hwy, W. Campbell <wcampbel -at- botbay.net>
+	larne, Edward Brocklesby <ejf -at- lythe.org.uk>
 
 As well as the developers whose code in ircd-ratbox has been used here.

@@ -37,11 +37,15 @@ static dlink_list active_jupes;
 
 static struct client *jupeserv_p;
 
+static int s_jupeserv_jupe(struct client *, char *parv[], int parc);
+static int s_jupeserv_unjupe(struct client *, char *parv[], int parc);
 static int s_jupeserv_calljupe(struct client *, char *parv[], int parc);
 static int s_jupeserv_callunjupe(struct client *, char *parv[], int parc);
 
 static struct service_command jupeserv_command[] =
 {
+	{ "JUPE",	&s_jupeserv_jupe,	2, NULL, 1, 0L, 0, 0, CONF_OPER_JUPE_ADMIN },
+	{ "UNJUPE",	&s_jupeserv_unjupe,	1, NULL, 1, 0L, 0, 0, CONF_OPER_JUPE_ADMIN },
 	{ "CALLJUPE",	&s_jupeserv_calljupe,	1, NULL, 1, 0L, 0, 1, 0 },
 	{ "CALLUNJUPE",	&s_jupeserv_callunjupe,	1, NULL, 1, 0L, 0, 1, 0 },
 	{ "\0",		NULL,			0, NULL, 0, 0L, 0, 1, 0 }
@@ -55,12 +59,14 @@ static struct service_handler jupe_service = {
 
 static int jupe_db_callback(void *db, int argc, char **argv, char **colnames);
 static int h_jupeserv_squit(void *name, void *unused);
+static int h_jupeserv_finburst(void *unused, void *unused2);
 
 void
 init_s_jupeserv(void)
 {
 	jupeserv_p = add_service(&jupe_service);
 	hook_add(h_jupeserv_squit, HOOK_SQUIT_UNKNOWN);
+	hook_add(h_jupeserv_finburst, HOOK_FINISHED_BURSTING);
 	loc_sqlite_exec(jupe_db_callback, "SELECT * FROM jupes");
 }
 
@@ -84,8 +90,9 @@ add_jupe(struct server_jupe *jupe_p)
 		exit_client(target_p);
 	}
 
-	sendto_server(":%s SERVER %s 1 :JUPED: %s",
-			MYNAME, jupe_p->name, jupe_p->reason);
+	if(finished_bursting)
+		sendto_server(":%s SERVER %s 1 :JUPED: %s",
+				MYNAME, jupe_p->name, jupe_p->reason);
 	dlink_move_node(&jupe_p->node, &pending_jupes, &active_jupes);
 }
 
@@ -145,6 +152,96 @@ h_jupeserv_squit(void *name, void *unused)
 				MYNAME, jupe_p->name, jupe_p->reason);
 		return -1;
 	}
+
+	return 0;
+}
+
+static int
+h_jupeserv_finburst(void *unused, void *unused2)
+{
+	struct client *target_p;
+	struct server_jupe *jupe_p;
+	dlink_node *ptr;
+
+	DLINK_FOREACH(ptr, active_jupes.head)
+	{
+		jupe_p = ptr->data;
+
+		if((target_p = find_server(jupe_p->name)))
+		{
+			sendto_server("SQUIT %s :%s", jupe_p->name, jupe_p->reason);
+			exit_client(target_p);
+		}
+
+		sendto_server(":%s SERVER %s 2 :JUPED: %s",
+				MYNAME, jupe_p->name, jupe_p->reason);
+	}
+
+	return 0;
+}
+
+static int
+s_jupeserv_jupe(struct client *client_p, char *parv[], int parc)
+{
+	struct server_jupe *jupe_p;
+	const char *reason;
+
+	if((jupe_p = find_jupe(parv[0], &active_jupes)))
+	{
+		service_error(jupeserv_p, client_p, "Server %s is already juped",
+				jupe_p->name);
+		return 0;
+	}
+
+	/* if theres a pending oper jupe, cancel it because we're gunna
+	 * place a proper one.. --fl
+	 */
+	if((jupe_p = find_jupe(parv[0], &pending_jupes)))
+	{
+		dlink_delete(&jupe_p->node, &pending_jupes);
+		free_jupe(jupe_p);
+	}
+
+	jupe_p = make_jupe(parv[0]);
+	reason = rebuild_params((const char **) parv, parc, 1);
+
+	if(EmptyString(reason))
+		jupe_p->reason = my_strdup("No Reason");
+	else
+		jupe_p->reason = my_strdup(reason);
+
+	loc_sqlite_exec(NULL, "INSERT INTO jupes VALUES(%Q, %Q)",
+			jupe_p->name, jupe_p->reason);
+
+	add_jupe(jupe_p);
+
+	return 0;
+}
+
+static int
+s_jupeserv_unjupe(struct client *client_p, char *parv[], int parc)
+{
+	struct server_jupe *ajupe_p, *jupe_p;
+
+	if((jupe_p = find_jupe(parv[0], &active_jupes)) == NULL)
+	{
+		service_error(jupeserv_p, client_p, "Server %s is not juped",
+				parv[0]);
+		return 0;
+	}
+
+	if((ajupe_p = find_jupe(parv[0], &pending_jupes)))
+	{
+		dlink_delete(&ajupe_p->node, &pending_jupes);
+		free_jupe(ajupe_p);
+	}
+
+	loc_sqlite_exec(NULL, "DELETE FROM jupes WHERE servername = %Q",
+			jupe_p->name);
+
+	sendto_server("SQUIT %s :Unjuped", jupe_p->name);
+	dlink_delete(&jupe_p->node, &active_jupes);
+	free_jupe(jupe_p);
 
 	return 0;
 }

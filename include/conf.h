@@ -90,6 +90,7 @@ struct conf_oper
 #define CONF_OPER_US_REGISTER	0x0020000
 
 #define CONF_OPER_OPERBOT_ADMIN	0x0100000
+#define CONF_OPER_JUPE_ADMIN	0x0200000
 
 #define OperAdmin(x)	((x)->privs & CONF_OPER_ADMIN)
 #define CliOperAdmin(x)	((x)->user->oper && (x)->user->oper->flags & CONF_OPER_ADMIN)
