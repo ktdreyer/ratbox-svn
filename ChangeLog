@@ -1,3 +1,15 @@
+androsyn    2002/11/24 10:03:30 UTC	(20021124_10)
+
+  Modified files:
+    src                  s_user.c 
+  Log:
+  That would be server_p not client_p
+  
+  Revision  Changes    Path
+  7.235     +2 -2      ircd-ratbox/src/s_user.c
+
+
+
 androsyn    2002/11/24 09:55:12 UTC	(20021124_9)
 
   Modified files:
