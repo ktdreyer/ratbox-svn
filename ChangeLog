@@ -1,3 +1,21 @@
+leeh        2004/04/05 21:21:15 EDT	(20040406_1)
+
+  Modified files:
+    .                    RELNOTES 
+  Removed files:
+    doc                  simple.conf 
+    doc/old              ircd.8 
+  Log:
+  - remove a couple of old docs
+  - update RELNOTES
+  
+  Revision  Changes    Path
+  1.96      +9 -1      ircd-ratbox/RELNOTES
+  1.2       +0 -145    ircd-ratbox/doc/old/ircd.8 (dead)
+  7.7       +0 -113    ircd-ratbox/doc/simple.conf (dead)
+
+
+
 leeh        2004/04/05 20:16:36 EDT	(20040406_0)
 
   Modified files:
