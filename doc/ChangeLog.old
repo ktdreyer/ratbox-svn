@@ -1,3 +1,20 @@
+leeh        2002/03/04 16:30:00 EST	(20020304_0)
+
+  Modified files:
+    modules/core         m_sjoin.c 
+    src                  channel.c 
+  Log:
+  - patch by adx <nizynski@optimus.waw.pl> to correctly add a +ov user to
+    &chptr->chanops_voiced
+  - make sure for +ov users we send +v as well as +o.. this is icky though, as
+    we have to recheck MAXMODEPARAMS..
+  
+  Revision  Changes    Path
+  1.128     +25 -1     ircd-hybrid-7/modules/core/m_sjoin.c
+  7.301     +8 -0      ircd-hybrid-7/src/channel.c
+
+
+
 enygma      2002/03/01 19:23:59 EST	(20020302_1)
 
   Modified files:
