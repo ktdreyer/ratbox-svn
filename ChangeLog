@@ -1,3 +1,26 @@
+leeh        2002/11/25 21:52:15 UTC	(20021125_8)
+
+  Modified files:
+    include              s_conf.h 
+    modules              m_cryptlink.c 
+    src                  s_conf.c s_serv.c s_user.c 
+  Log:
+  - finished up these cleanups - basically, having a dlink_list of confs
+    attached to a client is pointless - they never need more than one.
+    it creates stupid layers of complexity
+  
+    hub/leaf stuff is checked with the list of hub/leaf masks - not those
+    attached to the server anyway..
+  
+  Revision  Changes    Path
+  7.217     +0 -3      ircd-ratbox/include/s_conf.h
+  1.40      +11 -8     ircd-ratbox/modules/m_cryptlink.c
+  7.373     +0 -27     ircd-ratbox/src/s_conf.c
+  7.302     +33 -23    ircd-ratbox/src/s_serv.c
+  7.240     +5 -9      ircd-ratbox/src/s_user.c
+
+
+
 leeh        2002/11/25 21:03:34 UTC	(20021125_7)
 
   Modified files:
