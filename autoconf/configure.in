@@ -316,14 +316,16 @@ __EOF__
 
 rm -f conftest.t
 
-$MAKE -f conftest mytest 2>&1 >/dev/null
+$MAKE -f conftest mytest >/dev/null >/dev/null
 if test -f conftest.t; then
 	AC_MSG_RESULT(.include)
-	INCLUDE=".include"
+	INCDEP=".include \".depend\""
 else
 	AC_MSG_RESULT(include)
-	INCLUDE=include
+	INCDEP="include .depend"
 fi
+
+rm -f conftest.t conftest
 
 AC_CHECK_TYPE(u_int32_t, unsigned long)
 
@@ -401,7 +403,7 @@ if test "$ac_cv_ipv6" = "yes" ; then
 	echo "Using IPv6 support"
 fi
 
-AC_SUBST(INCLUDE)
+AC_SUBST(INCDEP)
 
 AC_SUBST(SUBDIR_MESSAGES)
 

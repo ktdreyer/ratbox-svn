@@ -90,7 +90,7 @@ distclean:
 
 depend:
 	@for i in $(SUBDIRS); do \
-		echo "Making dependencies in $$i";\
+		echo "depend ==> $$i";\
 		cd $$i;\
 		${MAKE} depend; cd ..;\
 	done

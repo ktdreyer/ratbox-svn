@@ -55,6 +55,7 @@ clean:
 distclean: clean
 	${RM} -f Makefile
 
-@INCLUDE@ .depend
+
+@INCDEP@
 
 # End of Makefile
