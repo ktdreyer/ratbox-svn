@@ -96,7 +96,6 @@
 #include "modules.h"
 #include "memory.h"
 #include "hook.h"
-#include "debug.h"
 #include "ircd_getopt.h"
 #include "balloc.h"
 /*

@@ -27,7 +27,6 @@
 #include <string.h>
 
 #include "ircd_getopt.h"
-#include "debug.h"
 #include "config.h"
 
 #ifndef VMS
