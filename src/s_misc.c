@@ -103,7 +103,7 @@ const char* smalldate(time_t lclock)
   gm = &gmbuf; 
   lt = localtime(&lclock);
   
-  ircsprintf(buf, "%d/%d/%d %d.%d",
+  ircsprintf(buf, "%d/%d/%d %02d.%02d",
              lt->tm_year + 1900, lt->tm_mon + 1, lt->tm_mday,
              lt->tm_hour, lt->tm_min);
   
