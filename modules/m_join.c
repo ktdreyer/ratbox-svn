@@ -433,7 +433,7 @@ void do_join_0(struct Client *cptr, struct Client *sptr)
 			   sptr->name,
 			   sptr->username,
 			   sptr->host,
-			   chptr->chname);
+			   RootChan(chptr)->chname);
       remove_user_from_channel(chptr, sptr);
     }
 }

@@ -32,7 +32,7 @@
 #include "s_conf.h"
 #include "rsa.h"
 #include "msg.h"
-
+#include "parse.h"
 
 #ifndef OPENSSL
 
