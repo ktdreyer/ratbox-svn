@@ -1,3 +1,75 @@
+leeh        2003/05/15 13:18:17 UTC	(20030515_0)
+
+  Modified files:
+    include              ircd_defs.h s_log.h send.h 
+    modules              m_connect.c m_encap.c m_links.c m_stats.c 
+    modules/core         m_nick.c m_sjoin.c 
+    src                  balloc.c channel.c channel_mode.c 
+                         client.c cluster.c dynlink.c fdlist.c 
+                         fileio.c hash.c irc_string.c linebuf.c 
+                         listener.c match.c numeric.c packet.c 
+                         parse.c rsa.c s_auth.c s_bsd.c 
+                         s_bsd_devpoll.c s_bsd_epoll.c 
+                         s_bsd_kqueue.c s_bsd_poll.c 
+                         s_bsd_select.c s_bsd_sigio.c s_conf.c 
+                         s_log.c s_serv.c s_user.c scache.c send.c 
+                         whowas.c 
+  Log:
+  - stable ports:
+    - This is my soft assert changes.  Basically if you just want warning for
+      asserts and no core dumps, do ./configure --enable-assert=soft
+      - ive left the expensive asserts in, because its devel.
+    - Fix a minor error, also move AFP() macrp into ircd_defs.h as it is
+      useful
+      for ilog() to use this as well, and probably other things
+    - numeric.c needs s_conf.h
+    - fixed broken assert
+  
+  Revision  Changes    Path
+  7.40      +41 -0     ircd-ratbox/include/ircd_defs.h
+  7.18      +3 -1      ircd-ratbox/include/s_log.h
+  7.71      +1 -9      ircd-ratbox/include/send.h
+  1.117     +4 -4      ircd-ratbox/modules/core/m_nick.c
+  1.168     +2 -2      ircd-ratbox/modules/core/m_sjoin.c
+  1.53      +3 -3      ircd-ratbox/modules/m_connect.c
+  1.2       +3 -2      ircd-ratbox/modules/m_encap.c
+  1.49      +2 -2      ircd-ratbox/modules/m_links.c
+  1.154     +5 -3      ircd-ratbox/modules/m_stats.c
+  7.62      +6 -8      ircd-ratbox/src/balloc.c
+  7.373     +4 -4      ircd-ratbox/src/channel.c
+  7.102     +4 -4      ircd-ratbox/src/channel_mode.c
+  7.381     +28 -27    ircd-ratbox/src/client.c
+  7.7       +1 -1      ircd-ratbox/src/cluster.c
+  7.20      +3 -2      ircd-ratbox/src/dynlink.c
+  7.39      +12 -11    ircd-ratbox/src/fdlist.c
+  7.29      +15 -14    ircd-ratbox/src/fileio.c
+  7.70      +23 -23    ircd-ratbox/src/hash.c
+  7.67      +4 -4      ircd-ratbox/src/irc_string.c
+  7.109     +13 -13    ircd-ratbox/src/linebuf.c
+  7.91      +5 -5      ircd-ratbox/src/listener.c
+  7.30      +8 -8      ircd-ratbox/src/match.c
+  7.26      +4 -4      ircd-ratbox/src/numeric.c
+  7.118     +7 -7      ircd-ratbox/src/packet.c
+  7.157     +7 -7      ircd-ratbox/src/parse.c
+  7.31      +1 -1      ircd-ratbox/src/rsa.c
+  7.147     +1 -1      ircd-ratbox/src/s_auth.c
+  7.204     +8 -8      ircd-ratbox/src/s_bsd.c
+  7.24      +2 -2      ircd-ratbox/src/s_bsd_devpoll.c
+  1.10      +2 -2      ircd-ratbox/src/s_bsd_epoll.c
+  1.37      +2 -2      ircd-ratbox/src/s_bsd_kqueue.c
+  7.68      +3 -3      ircd-ratbox/src/s_bsd_poll.c
+  7.35      +2 -2      ircd-ratbox/src/s_bsd_select.c
+  7.37      +3 -3      ircd-ratbox/src/s_bsd_sigio.c
+  7.406     +10 -10    ircd-ratbox/src/s_conf.c
+  7.53      +1 -1      ircd-ratbox/src/s_log.c
+  7.330     +11 -11    ircd-ratbox/src/s_serv.c
+  7.262     +12 -12    ircd-ratbox/src/s_user.c
+  7.22      +1 -1      ircd-ratbox/src/scache.c
+  7.242     +1 -1      ircd-ratbox/src/send.c
+  7.27      +1 -1      ircd-ratbox/src/whowas.c
+
+
+
 leeh        2003/05/14 19:06:58 UTC	(20030514_0)
 
   Modified files:
