@@ -1,13 +1,13 @@
 	serverinfo {
 		name="ircd.db.net";
-		description="This is a test conf";
 		email="admin@ircd.db.net";
 		hub=yes;
 	};
 
 	administrator {
-		name="Diane's ircd";
+		name="Diane Bruce";
 		email="<db@db.net>";
+		description="Diane's ircd";
 	};
 
 	class {
@@ -34,53 +34,58 @@
 		sendq=100000;
 	};
 
-	client {
+	auth {
 		passwd="";
-		allow="*";
+		user="*";
 		class="1";
 	};
 
-	client {
+	auth {
 		passwd="";
-		allow="*@*ppp*";
+		user="*";
+		host="*ppp*";
 		class="3";
 	};
 
-	client {
+	auth {
 		passwd="";
-		allow="*@*slip*";
+		user="*";
+		host="*slip*";
 		class="3";
 	};
 
-	client {
+	auth {
 		passwd="";
-		allow="*@*ts*";
+		user="*";
+		host="*ts*";
 		class="3";
 	};
 
-	client {
+	auth {
 		passwd="";
 		kline_exempt=yes;
 		allow_bots=yes;
 		have_ident;
 		no_tilde;
-		allow="db@*db.net";
+		user="db";
+		host="*db.net";
 		class="3";
 	};
 
-	client {
+	auth {
 		passwd="";
 		spoof="localhost";
 		kline_exempt=yes;
 		allow_bots=yes;
 		have_ident;
 		no_tilde;
-		allow="db@home.db.net";
+		user="db";
+		host="home.db.net";
 		class="3";
 	};
 
-	client {
-		allow="192.168.0.0/24";
+	auth {
+		ip=192.168.0.0/24;
 		passwd="";
 		class="3";
 	};
@@ -92,7 +97,8 @@
 
 	operator {
 		name="Dianora";
-		host="db@artemis.db.dbn";
+		user="db";
+		host="artemis.db.dbn";
 		password="heFw0NKyvGSTg";
 		global_kill=yes;
 		remote=yes;
@@ -105,7 +111,8 @@
 
 	operator {
 		name="Dianora";
-		host="db@127.0.0.1";
+		user="db";
+		host="127.0.0.1";
 		password="heFw0NKyvGSTg";
 		global_kill=yes;
 		remote=yes;
@@ -118,7 +125,7 @@
 
 	operator {
 		name="Dianora";
-		host="*dbn";
+		user="*dbn";
 		password="heFw0NKyvGSTg";
 		global_kill=yes;
 		remote=yes;
@@ -165,8 +172,8 @@
 	};
 
 	connect {
-		name="192.168.0.100";
-		host="irc.blackened.com";
+		host="192.168.0.100";
+		name="irc.blackened.com";
 		send_password="l00p3r";
 		accept_password="l00p3r";
 		port=6666;
@@ -176,8 +183,8 @@
 	};
 
 	connect {
-		name="irc.imyth.com";
 		host="irc.imyth.com";
+		name="irc.imyth.com";
 		send_password="l00p3r";
 		accept_password="5u31ts";
 		port=6666;
@@ -185,3 +192,4 @@
 		hub_mask="*";
 		class="3";
 	};
+

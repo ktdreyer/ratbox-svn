@@ -234,6 +234,7 @@ static void oldParseOneLine(FILE *out,char* line)
 {
   char conf_letter;
   char* tmp;
+  char* p;
   char* user_field=(char *)NULL;
   char* passwd_field=(char *)NULL;
   char* host_field=(char *)NULL;
@@ -279,9 +280,11 @@ static void oldParseOneLine(FILE *out,char* line)
     case 'A':case 'a': /* Name, e-mail address of administrator */
       fprintf(out,"\tadministrator {\n");
       if(host_field)
-	fprintf(out,"\t\tname=\"%s\";\n", host_field);
+	fprintf(out,"\t\tname=\"%s\";\n", passwd_field);
       if(user_field)
 	fprintf(out,"\t\temail=\"%s\";\n", user_field);
+      if(passwd_field)
+	fprintf(out,"\t\tdescription=\"%s\";\n", host_field);
       fprintf(out,"\t};\n\n");
       break;
 
@@ -342,7 +345,7 @@ static void oldParseOneLine(FILE *out,char* line)
       break;
 
     case 'i': 
-      fprintf(out,"\tclient {\n");
+      fprintf(out,"\tauth {\n");
 
       spoof_field = (char *)NULL;
       if(host_field)
@@ -374,7 +377,7 @@ static void oldParseOneLine(FILE *out,char* line)
       break;
 
     case 'I': 
-      fprintf(out,"\tclient {\n");
+      fprintf(out,"\tauth {\n");
 
       spoof_field = (char *)NULL;
       client_allow = (char *)NULL;
@@ -387,7 +390,7 @@ static void oldParseOneLine(FILE *out,char* line)
 		{
 		  client_allow = ClientFlags(out,NULL,host_field);
 		  if(client_allow)
-		    fprintf(out,"\t\tallow=\"%s\";\n", client_allow );
+		    fprintf(out,"\t\tip=%s;\n", client_allow );
 		}
 	      else
 		spoof_field = host_field;
@@ -403,7 +406,17 @@ static void oldParseOneLine(FILE *out,char* line)
 	{
 	  client_allow = ClientFlags(out,spoof_field,user_field);
 	  if(client_allow)
-	    fprintf(out,"\t\tallow=\"%s\";\n", client_allow );
+	    {
+	      p = strchr(client_allow,'@');
+	      if(p)
+		*p = '\0';
+	      fprintf(out,"\t\tuser=\"%s\";\n", client_allow );
+	      if(p)
+		{
+		  p++;
+		  fprintf(out,"\t\thost=\"%s\";\n", p );
+		}
+	    }
 	}
 
       if(class_field)
@@ -433,8 +446,6 @@ static void oldParseOneLine(FILE *out,char* line)
       fprintf(out,"\tserverinfo {\n");
       if(host_field)
 	fprintf(out,"\t\tname=\"%s\";\n", host_field);
-      if(passwd_field)
-	fprintf(out,"\t\tdescription=\"%s\";\n", passwd_field);
       if(user_field)
 	fprintf(out,"\t\temail=\"%s\";\n", user_field);
       if(port_field)
@@ -485,7 +496,17 @@ static void oldParseOneLine(FILE *out,char* line)
       if(user_field)
 	fprintf(out,"\t\tname=\"%s\";\n", user_field);
       if(host_field)
-	fprintf(out,"\t\thost=\"%s\";\n", host_field);
+	{
+	  p = strchr(host_field,'@');
+	  if(p)
+	    *p = '\0';
+	  fprintf(out,"\t\tuser=\"%s\";\n", host_field);
+	  if(p)
+	    {
+	      p++;
+	      fprintf(out,"\t\thost=\"%s\";\n", p);
+	    }
+	}
       if(passwd_field)
 	fprintf(out,"\t\tpassword=\"%s\";\n", passwd_field);
       if(port_field)
@@ -602,8 +623,8 @@ static void PrintOutServers(FILE* out)
       if(p->name && p->c_passwd && p->n_passwd && p->host)
 	{
 	  fprintf(out,"\tconnect {\n");
-	  fprintf(out,"\t\tname=\"%s\";\n", p->name);
-	  fprintf(out,"\t\thost=\"%s\";\n", p->host);
+	  fprintf(out,"\t\thost=\"%s\";\n", p->name);
+	  fprintf(out,"\t\tname=\"%s\";\n", p->host);
 	  fprintf(out,"\t\tsend_password=\"%s\";\n", p->c_passwd);
 	  fprintf(out,"\t\taccept_password=\"%s\";\n", p->n_passwd);
 	  fprintf(out,"\t\tport=%d;\n", p->port );
@@ -882,3 +903,4 @@ static char* ClientFlags(FILE *out, char* spoof, char *tmp)
     }
   return tmp;
 }
+
