@@ -1,3 +1,15 @@
+androsyn    2002/12/10 07:43:03 UTC	(20021210_2)
+
+  Modified files:
+    src                  packet.c 
+  Log:
+  Fix the NULL localClient related bugs...
+  
+  Revision  Changes    Path
+  7.104     +8 -1      ircd-ratbox/src/packet.c
+
+
+
 androsyn    2002/12/10 07:33:29 UTC	(20021210_1)
 
   Modified files:
