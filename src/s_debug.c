@@ -390,7 +390,7 @@ void count_memory(struct Client *source_p)
 
   sendto_one(source_p, ":%s %d %s :linebuf %d(%d)",
              me.name, RPL_STATSDEBUG, source_p->name,
-	     linebuf_count, linebuf_memory_used);
+	     linebuf_count, (int)linebuf_memory_used);
 
   count_scache(&number_servers_cached,&mem_servers_cached);
 

@@ -145,7 +145,6 @@ struct Client* make_client(struct Client* from)
 
 void _free_client(struct Client* client_p)
 {
-  int result = 0;
   assert(0 != client_p);
   assert(&me != client_p);
   assert(0 == client_p->prev);

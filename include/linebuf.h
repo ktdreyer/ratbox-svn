@@ -53,5 +53,5 @@ extern int linebuf_get(buf_head_t *, char *, int);
 extern void linebuf_put(buf_head_t *, char *, int);
 extern int linebuf_flush(int, buf_head_t *);
 
-extern void count_linebuf_memory( int *count, int *memory_used);
+extern void count_linebuf_memory( int *count, u_long *memory_used);
 #endif

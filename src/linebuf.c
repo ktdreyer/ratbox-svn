@@ -521,7 +521,7 @@ linebuf_flush(int fd, buf_head_t *bufhead)
  * count linebufs for s_debug
  */
 
-void count_linebuf_memory(int *count, int *linebuf_memory_used)
+void count_linebuf_memory(int *count, u_long *linebuf_memory_used)
 {
   *count = bufline_count;
   *linebuf_memory_used = bufline_count * sizeof(buf_line_t);
