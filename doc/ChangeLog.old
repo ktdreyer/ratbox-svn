@@ -1,3 +1,10 @@
+*** 20001028_3 by db
+- rewrote burst code, added new function to do the actual burst. 'bout time.
+  rewrote the burst code to send vchans as sub chans of top level channels.
+  Next need to redo SJOIN to paste 'em back into sub vchans from burst
+
+
+
 *** 20001028_2 by db
 - adds /quote events which will list the event queue
   I'd rather add a generic "debug" function later on i.e. something like
