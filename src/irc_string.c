@@ -371,7 +371,11 @@ inet_ntop6(const unsigned char *src, char *dst, unsigned int size)
 		if(best.base != -1 && i >= best.base && i < (best.base + best.len))
 		{
 			if(i == best.base)
+			{
+				if(i == '0')
+					*tp++ = '0';
 				*tp++ = ':';
+			}
 			continue;
 		}
 		/* Are we following an initial run of 0x00s or any real hex? */

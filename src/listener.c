@@ -468,26 +468,15 @@ add_connection(struct Listener *listener, int fd, struct sockaddr_storage *sai)
 	inetntop_sock(&new_client->localClient->ip, new_client->sockhost, 
 		sizeof(new_client->sockhost));
 
-	*new_client->host = '\0';
-#ifdef IPV6
-	/* ':' at beginning of sockhost would break things like ips in UID, 
-	 * rebuild it with a leading '0' --fl
-	 */
-	if(*new_client->sockhost == ':')
-	{
-		char *foo = LOCAL_COPY(new_client->sockhost);
-		ircsnprintf(new_client->sockhost, sizeof(new_client->sockhost),
-				"0%s", foo);
-	}
 
+	strlcpy(new_client->host, new_client->sockhost, sizeof(new_client->host));
+
+#ifdef IPV6
 	if(new_client->localClient->ip.ss_family == AF_INET6 && ConfigFileEntry.dot_in_ip6_addr == 1)
 	{
-		strlcat(new_client->host, new_client->sockhost, sizeof(new_client->host));
 		strlcat(new_client->host, ".", sizeof(new_client->host));
 	}
-	else
 #endif
-		strlcat(new_client->host, new_client->sockhost, sizeof(new_client->host));
 
 	new_client->localClient->fd = fd;
 
