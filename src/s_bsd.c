@@ -77,9 +77,6 @@ const char* const SETBUF_ERROR_MSG = "set_sock_buffers failed for server %s:%s";
 
 struct Client* local[MAXCONNECTIONS];
 
-/* Its -1 because at startup, we don't have any FDs opened -- adrian */
-int            highest_fd = -1;
-
 static char               readBuf[READBUF_SIZE];
 
 static const char *comm_err_str[] = { "Comm OK", "Error during bind()",

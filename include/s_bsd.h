@@ -38,7 +38,6 @@ struct hostent;
 struct DNSReply;
 struct Listener;
 
-extern int   highest_fd;
 extern int   readcalls;
 extern const char* const NONB_ERROR_MSG; 
 extern const char* const SETBUF_ERROR_MSG;

@@ -20,6 +20,10 @@ fde_t *fd_table = NULL;
 
 static void fdlist_update_biggest(int fd, int opening);
 
+/* Highest FD and number of open FDs .. */
+int highest_fd = -1; /* Its -1 because we haven't started yet -- adrian */
+int number_fd = 0;
+
 static void
 fdlist_update_biggest(int fd, int opening)
 { 
@@ -87,9 +91,7 @@ fd_open(int fd, unsigned int type, const char *desc)
     fdlist_update_biggest(fd, 1);
     if (desc)
         strncpy(F->desc, desc, FD_DESC_SZ);
-#ifdef NOTYET
-    Number_FD++;
-#endif
+    number_fd++;
 }
 
 
@@ -110,9 +112,7 @@ fd_close(int fd)
     comm_setselect(fd, COMM_SELECT_WRITE|COMM_SELECT_READ, NULL, NULL, 0);
     F->flags.open = 0;
     fdlist_update_biggest(fd, 0);
-#if NOTYET
-    Number_FD--;
-#endif
+    number_fd--;
     memset(F, '\0', sizeof(fde_t));
     F->timeout = 0;
     /* Unlike squid, we're actually closing the FD here! -- adrian */

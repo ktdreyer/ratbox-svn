@@ -56,6 +56,9 @@ typedef void PF(int, void *);
 /* int fd, int status, void * */
 typedef void CNCB(int, int, void *);
 
+extern int highest_fd;
+extern int number_fd;
+
 struct _fde {
     /* New-school stuff, again pretty much ripped from squid */
     /*
