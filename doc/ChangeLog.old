@@ -1,3 +1,7 @@
+*** 20001231_19 by davidt
+Fixes to allow @#chan and +#chan to work correctly.
+
+
 *** 20001231_18 by db
 - really ANONOPS is way longer than any other capability we have
   lets shorten it to AOPS ok?
