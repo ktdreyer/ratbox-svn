@@ -959,10 +959,18 @@ server_estab(struct Client *client_p)
 				  | ((aconf->flags & CONF_FLAGS_COMPRESSED) ?
 				     CAP_ZIP_SUPPORTED : 0), 0);
 
+		opt = 1;
+		/* Turn on Nagle so we shove this packet out immediately otherwise we'll confuse the 
+		 * remote with compressed and uncompressed data arriving all at once
+		 */
+		setsockopt(client_p->localClient->fd, IPPROTO_TCP, TCP_NODELAY, &opt, sizeof(opt));
+		
 		sendto_one(client_p, "SERVER %s 1 :%s%s",
 			   my_name_for_link(me.name, aconf),
 			   ConfigServerHide.hidden ? "(H) " : "",
 			   (me.info[0]) ? (me.info) : "IRCers United");
+		opt = 0;
+		setsockopt(client_p->localClient->fd, IPPROTO_TCP, TCP_NODELAY, &opt, sizeof(opt));
 	}
 
 	/*
