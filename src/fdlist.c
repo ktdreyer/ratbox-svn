@@ -47,7 +47,7 @@ fdlist_update_biggest(int fd, int opening)
      * re-opening it
      */
     assert(!opening);
-    while (!fd_table[highest_fd].flags.open)
+    while (highest_fd >= 0 && !fd_table[highest_fd].flags.open)
         highest_fd--;
 }
 
