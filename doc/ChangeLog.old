@@ -1,3 +1,11 @@
+*** 20010210_1 by a1kmm
+- Reverted back to scanning forward in hostmask.c - the idea of scanning backwards and not hashing the string
+  seems to take more clockcycles on the average hostname to get everything right than just rehashing the
+  string each time, since we have a relatively good hash function(So we have to hash about 5 strings when
+  a client connects, but it isn't that bad). And we should also get rid of a few special cases that were
+  messing up k-lines and spoofs before.
+
+
 *** 20010208_8 by wcampbel
 Minor update of example.conf
 
