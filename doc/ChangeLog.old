@@ -1,3 +1,11 @@
+*** 20011128_1 by leeh
+- attempt at fixing up +a.. there was a bogus if() that was preventing
+  resyncs when setting -a, amongst other things.. (unsure if it was ok to
+  remove, hunt for the XXX)
+
+  theres still a bug where setting -ao will give a user the oplist..
+
+
 *** 20011127_1 by davidt
 - Yet more linebuf fixes.
   * Rename 'binary' flag 'raw', since it was confusing people, and
