@@ -9,10 +9,11 @@ struct chmode;
 #define CS_FLAGS_NOOPS		0x002
 #define CS_FLAGS_AUTOJOIN	0x004
 #define CS_FLAGS_WARNOVERRIDE	0x008
+#define CS_FLAGS_RESTRICTOPS	0x010
 
 /* those flags shown in CHANSERV::INFO */
 #define CS_FLAGS_SHOW	(CS_FLAGS_NOOPS|CS_FLAGS_AUTOJOIN|\
-			 CS_FLAGS_WARNOVERRIDE)
+			 CS_FLAGS_WARNOVERRIDE|CS_FLAGS_RESTRICTOPS)
 
 #define CS_MEMBER_AUTOOP	0x001
 #define CS_MEMBER_AUTOVOICE	0x002
@@ -25,7 +26,8 @@ struct chan_reg
 	char *name;
 	char *topic;
 	char *suspender;
-	struct chmode mode;
+	struct chmode cmode;
+	struct chmode emode;
 
 	int flags;
 

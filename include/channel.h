@@ -56,10 +56,12 @@ struct chmember
 #define MODE_PRIVATE		0x0008
 #define MODE_SECRET		0x0010
 #define MODE_TOPIC		0x0020
+#define MODE_LIMIT		0x0040
+#define MODE_KEY		0x0080
 
-#define MODE_OPPED		0x0100
-#define MODE_VOICED		0x0200
-#define MODE_DEOPPED		0x0400
+#define MODE_OPPED		0x0001
+#define MODE_VOICED		0x0002
+#define MODE_DEOPPED		0x0004
 
 #define is_opped(x)	((x)->flags & MODE_OPPED)
 #define is_voiced(x)	((x)->flags & MODE_VOICED)

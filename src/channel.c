@@ -713,6 +713,8 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 				rejoin_service(ptr->data, chptr, 1);
 			}
 		}
+
+		hook_call(HOOK_SJOIN_LOWERTS, chptr, NULL);
 	}
 
 	if(keep_new_modes)

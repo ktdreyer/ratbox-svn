@@ -121,11 +121,15 @@ parse_simple_mode(struct chmode *mode, const char *parv[], int parc, int start)
 					if(fixed == NULL)
 						return 0;
 
+					mode->mode |= MODE_KEY;
 					strlcpy(mode->key, fixed,
 						sizeof(mode->key));
 				}
 				else
+				{
+					mode->mode &= ~MODE_KEY;
 					mode->key[0] = '\0';
+				}
 
 				start++;
 				break;
@@ -135,11 +139,15 @@ parse_simple_mode(struct chmode *mode, const char *parv[], int parc, int start)
 					if(EmptyString(parv[start]))
 						return 0;
 
+					mode->mode |= MODE_LIMIT;
 					mode->limit = atoi(parv[start]);
 					start++;
 				}
 				else
+				{
+					mode->mode &= ~MODE_LIMIT;
 					mode->limit = 0;
+				}
 
 				break;
 
@@ -253,6 +261,7 @@ c_mode(struct client *client_p, const char *parv[], int parc)
 	const char *p;
 	int args = 0;
 	int dir = 1;
+	int oldmode;
 
 	if(parc < 2 || EmptyString(parv[1]))
 		return;
@@ -281,6 +290,8 @@ c_mode(struct client *client_p, const char *parv[], int parc)
 
 	if((chptr = find_channel(parv[1])) == NULL)
 		return;
+
+	oldmode = chptr->mode.mode;
 
 	p = parv[2];
 
@@ -337,10 +348,16 @@ c_mode(struct client *client_p, const char *parv[], int parc)
 					return;
 
 				if(dir)
+				{
+					chptr->mode.mode |= MODE_KEY;
 					strlcpy(chptr->mode.key, parv[3+args],
 						sizeof(chptr->mode.key));
+				}
 				else
+				{
+					chptr->mode.mode &= ~MODE_KEY;
 					chptr->mode.key[0] = '\0';
+				}
 
 				args++;
 				break;
@@ -350,11 +367,15 @@ c_mode(struct client *client_p, const char *parv[], int parc)
 					if(EmptyString(parv[3+args]))
 						return;
 
+					chptr->mode.mode |= MODE_LIMIT;
 					chptr->mode.limit = atoi(parv[3+args]);
 					args++;
 				}
 				else
+				{
+					chptr->mode.mode &= ~MODE_LIMIT;
 					chptr->mode.limit = 0;
+				}
 
 				break;
 
@@ -409,6 +430,9 @@ c_mode(struct client *client_p, const char *parv[], int parc)
 
 	if(dlink_list_length(&opped_list))
 		hook_call(HOOK_MODE_OP, chptr, &opped_list);
+
+	if(oldmode != chptr->mode.mode)
+		hook_call(HOOK_MODE_SIMPLE, chptr, NULL);
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, opped_list.head)
 	{
