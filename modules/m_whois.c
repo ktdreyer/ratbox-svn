@@ -354,7 +354,7 @@ void whois_person(struct Client *sptr,struct Client *acptr)
   if (reply_to_send)
     sendto_one(sptr, "%s", buf);
           
-  if (!GlobalSetOptions.hide_server || acptr == sptr)
+  if ((IsOper(sptr) || !GlobalSetOptions.hide_server) || acptr == sptr)
     sendto_one(sptr, form_str(RPL_WHOISSERVER),
 	       me.name, sptr->name, acptr->name, server_name,
 	       a2cptr?a2cptr->info:"*Not On This Net*");
@@ -378,7 +378,7 @@ void whois_person(struct Client *sptr,struct Client *acptr)
 		   me.name, sptr->name, acptr->name);
     }
 
-  if (!GlobalSetOptions.hide_server && MyConnect(acptr))
+  if ((IsOper(sptr) || !GlobalSetOptions.hide_server) && MyConnect(acptr))
     sendto_one(sptr, form_str(RPL_WHOISIDLE),
 	       me.name, sptr->name, acptr->name,
 	       CurrentTime - acptr->user->last,
