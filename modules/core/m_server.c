@@ -117,46 +117,49 @@ static void mr_server(struct Client *client_p, struct Client *source_p,
   /* Now we just have to call check_server and everything should be
    * check for us... -A1kmm. */
   switch (check_server(name, client_p, CHECK_SERVER_NOCRYPTLINK))
-    {
-     case -1:
+  {
+    case -1:
       if (ConfigFileEntry.warn_no_nline)
-        {
-         sendto_realops_flags(FLAGS_ALL, L_ADMIN,
+      {
+        sendto_realops_flags(FLAGS_ALL, L_ADMIN,
            "Unauthorized server connection attempt from %s: No entry for "
            "servername %s", get_client_name(client_p, HIDE_IP), name);
 
-         sendto_realops_flags(FLAGS_ALL, L_OPER,
+        sendto_realops_flags(FLAGS_ALL, L_OPER,
            "Unauthorized server connection attempt from %s: No entry for "
            "servername %s", get_client_name(client_p, MASK_IP), name);
-        }
+      }
+      
       exit_client(client_p, client_p, client_p, "Invalid servername.");
       return;
       break;
-     case -2:
+      
+    case -2:
       sendto_realops_flags(FLAGS_ALL, L_ADMIN,
-        "Unauthorized server connection attempt from %s: Bad password "
-        "for server %s", get_client_name(client_p, HIDE_IP), name);
+           "Unauthorized server connection attempt from %s: Bad password "
+           "for server %s", get_client_name(client_p, HIDE_IP), name);
 
       sendto_realops_flags(FLAGS_ALL, L_OPER,
-        "Unauthorized server connection attempt from %s: Bad password "
-        "for server %s", get_client_name(client_p, MASK_IP), name);
+           "Unauthorized server connection attempt from %s: Bad password "
+           "for server %s", get_client_name(client_p, MASK_IP), name);
 
       exit_client(client_p, client_p, client_p, "Invalid password.");
       return;
       break;
-     case -3:
+      
+    case -3:
       sendto_realops_flags(FLAGS_ALL, L_ADMIN,
-        "Unauthorized server connection attempt from %s: Invalid host "
-        "for server %s", get_client_name(client_p, HIDE_IP), name);
+           "Unauthorized server connection attempt from %s: Invalid host "
+           "for server %s", get_client_name(client_p, HIDE_IP), name);
 
       sendto_realops_flags(FLAGS_ALL, L_OPER,
-        "Unauthorized server connection attempt from %s: Invalid host "
-        "for server %s", get_client_name(client_p, MASK_IP), name);
+           "Unauthorized server connection attempt from %s: Invalid host "
+           "for server %s", get_client_name(client_p, MASK_IP), name);
 
       exit_client(client_p, client_p, client_p, "Invalid host.");
       return;
       break;
-    }
+  }
     
   if ((target_p = find_server(name)))
     {
@@ -270,6 +273,12 @@ static void ms_server(struct Client *client_p, struct Client *source_p,
        * I think that we should exit the link itself, not the introducer,
        * and we should always exit the most recently received(i.e. the
        * one we are receiving this SERVER for. -A1kmm
+       *
+       * You *cant* do this, if you link somewhere, it bursts you a server
+       * that already exists, then sends you a client burst, you squit the
+       * server, but you keep getting the burst of clients on a server that
+       * doesnt exist, although ircd can handle it, its not a realistic
+       * solution.. --fl_ 
        */
       /* It is behind a host-masked server. Completely ignore the
        * server message(don't propagate or we will delink from whoever
@@ -277,13 +286,36 @@ static void ms_server(struct Client *client_p, struct Client *source_p,
       if (irccmp(target_p->name, name) && target_p->from==client_p)
         return;
       
-      sendto_realops_flags(FLAGS_ALL, L_ALL,
-                           "Server %s(via %s) introduced an existing server %s.",
-                           source_p->name, client_p->name, name);
-      exit_client(NULL, source_p, &me, "Server Exists");
-      return;
-    }
+      if(client_p->firsttime > target_p->from->firsttime)
+      {
+        sendto_one(client_p, "ERROR :Server %s already exists", name);
+	
+        sendto_realops_flags(FLAGS_ALL, L_ADMIN,
+	                  "Link %s cancelled, server %s already exists",
+			  get_client_name(client_p, SHOW_IP), name);
+        sendto_realops_flags(FLAGS_ALL, L_OPER,
+	                  "Link %s cancelled, server %s already exists",
+			  client_p->name, name);
+      
+        exit_client(client_p, client_p, &me, "Server Exists");
+	return;
+      }
+      else
+      {
+        sendto_one(target_p->from, "ERROR :Server %s already exists", name);
+        sendto_realops_flags(FLAGS_ALL, L_ADMIN,
+	            "Link %s cancelled, server %s reintroduced by %s",
+		    get_client_name(target_p->from, SHOW_IP),
+		    name, client_p->name);
+        sendto_realops_flags(FLAGS_ALL, L_ADMIN,
+	            "Link %s cancelled, server %s reintroduced by %s",
+		    target_p->from->name, name, client_p->name);
 
+        exit_client(target_p->from, target_p->from, &me, "Server Exists");
+	return;
+      }
+  }
+  
   /* 
    * User nicks never have '.' in them and server names
    * must always have '.' in them.
