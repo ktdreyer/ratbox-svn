@@ -391,6 +391,7 @@ verify_member_reg(struct client *client_p, struct channel **chptr,
 
 	/* this is called when someone issues a command.. */
 	mreg_p->channel_reg->last_time = CURRENT_TIME;
+	mreg_p->channel_reg->flags |= CS_FLAGS_NEEDUPDATE;
 
 	return mreg_p;
 }
@@ -646,6 +647,34 @@ find_owner(struct chan_reg *chreg_p)
 	return NULL;
 }
 
+/* are any users with access on the channel? */
+static int
+access_users_on_channel(struct chan_reg *chreg_p)
+{
+	struct channel *chptr;
+	struct member_reg *mreg_tp;
+	struct user_reg *ureg_p;
+	struct chmember *msptr;
+	dlink_node *ptr;
+
+	chptr = find_channel(chreg_p->name);
+	if (chptr == NULL)
+		return 0;
+
+	DLINK_FOREACH(ptr, chptr->users.head)
+	{
+		msptr = ptr->data;
+		ureg_p = msptr->client_p->user->user_reg;
+
+		if(ureg_p && (mreg_tp = find_member_reg(ureg_p, chreg_p)))
+		{
+			if(!mreg_tp->suspend)
+				return 1;
+		}
+	}
+	return 0;
+}
+
 static void
 e_chanserv_expirechan(void *unused)
 {
@@ -657,8 +686,28 @@ e_chanserv_expirechan(void *unused)
 	{
 		chreg_p = ptr->data;
 
+		if(chreg_p->flags & CS_FLAGS_NEEDUPDATE)
+		{
+			chreg_p->flags &= ~CS_FLAGS_NEEDUPDATE;
+			loc_sqlite_exec(NULL, "UPDATE channels "
+					"SET last_time = %lu WHERE chname = %Q",
+					chreg_p->last_time, chreg_p->name);
+		}
+
 		if((chreg_p->last_time + config_file.cexpire_time) > CURRENT_TIME)
 			continue;
+
+		/* final check: make sure nobody with access is on the
+		 * channel; to save cpu only do this if the channel would
+		 * otherwise expire. */
+		if(access_users_on_channel(chreg_p))
+		{
+			chreg_p->last_time = CURRENT_TIME;
+			loc_sqlite_exec(NULL, "UPDATE channels "
+					"SET last_time = %lu WHERE chname = %Q",
+					chreg_p->last_time, chreg_p->name);
+			continue;
+		}
 
 		destroy_channel_reg(chreg_p);
 	}
@@ -918,6 +967,10 @@ h_chanserv_join(void *v_chptr, void *v_members)
 
 		mreg_p = find_member_reg(member_p->client_p->user->user_reg,
 					chreg_p);
+		/* so we don't have to check mreg_p->suspend for the rest
+		 * of this loop */
+		if(mreg_p != NULL && mreg_p->suspend)
+			mreg_p = NULL;
 
 		DLINK_FOREACH(bptr, chreg_p->bans.head)
 		{
@@ -926,8 +979,7 @@ h_chanserv_join(void *v_chptr, void *v_members)
 			if(!match(banreg_p->mask, member_p->client_p->user->mask))
 				continue;
 
-			if(mreg_p && mreg_p->level >= banreg_p->level &&
-			   !mreg_p->suspend)
+			if(mreg_p && mreg_p->level >= banreg_p->level)
 				continue;
 
 			if(find_exempt(member_p->chptr, member_p->client_p))
@@ -967,12 +1019,18 @@ h_chanserv_join(void *v_chptr, void *v_members)
 		if(hit)
 			continue;
 
+		if(mreg_p != NULL)
+		{
+			/* update last_time whenever a user with access joins */
+			mreg_p->channel_reg->last_time = CURRENT_TIME;
+			mreg_p->channel_reg->flags |= CS_FLAGS_NEEDUPDATE;
+		}
+
 		if(is_opped(member_p))
 		{
 			if((chreg_p->flags & CS_FLAGS_NOOPS) ||
 			   (chreg_p->flags & CS_FLAGS_RESTRICTOPS &&
-			    (!mreg_p || mreg_p->suspend ||
-			     mreg_p->level < S_C_OP)))
+			    (!mreg_p || mreg_p->level < S_C_OP)))
 			{
 				/* stop them cycling for ops */
 				if(dlink_list_length(&chptr->users) == 1)
@@ -986,11 +1044,8 @@ h_chanserv_join(void *v_chptr, void *v_members)
 			continue;
 		}
 
-		if((mreg_p = find_member_reg(member_p->client_p->user->user_reg,
-					chreg_p)))
+		if(mreg_p != NULL)
 		{
-			if(mreg_p->suspend)
-				continue;
 
 			if(mreg_p->flags & CS_MEMBER_AUTOOP &&
 			   mreg_p->level >= S_C_OP &&
@@ -1000,7 +1055,6 @@ h_chanserv_join(void *v_chptr, void *v_members)
 					member_p->client_p->name);
 				member_p->flags &= ~MODE_DEOPPED;
 				member_p->flags |= MODE_OPPED;
-				mreg_p->channel_reg->last_time = CURRENT_TIME;
 			}
 			else if(mreg_p->flags & CS_MEMBER_AUTOVOICE &&
 				!is_voiced(member_p))
@@ -1008,7 +1062,6 @@ h_chanserv_join(void *v_chptr, void *v_members)
 				modebuild_add(DIR_ADD, "v",
 					member_p->client_p->name);
 				member_p->flags |= MODE_VOICED;
-				mreg_p->channel_reg->last_time = CURRENT_TIME;
 			}
 		}
 	}
@@ -1019,7 +1072,10 @@ h_chanserv_join(void *v_chptr, void *v_members)
 	return 0;
 }
 
-/* User logged in; op/voice them on any channels they are on and have access */
+/* A user logged in;
+ * if they have access, note the channel is being used and op/voice them if
+ * appropriate
+ */
 static int
 h_chanserv_user_login(void *v_client_p, void *unused)
 {
@@ -1045,6 +1101,12 @@ h_chanserv_user_login(void *v_client_p, void *unused)
 		/* user has no access to channel */
 		if((mreg_p = find_member_reg(ureg_p, chreg_p)) == NULL)
 			continue;
+		if(mreg_p->suspend)
+			continue;
+
+		/* channel is being used */
+		mreg_p->channel_reg->last_time = CURRENT_TIME;
+		mreg_p->channel_reg->flags |= CS_FLAGS_NEEDUPDATE;
 
 		/* autoop/voice dont work on +o users */
 		if(is_opped(member_p))
@@ -1058,7 +1120,6 @@ h_chanserv_user_login(void *v_client_p, void *unused)
 					member_p->client_p->name);
 			member_p->flags &= ~MODE_DEOPPED;
 			member_p->flags |= MODE_OPPED;
-			mreg_p->channel_reg->last_time = CURRENT_TIME;
 		}
 		else if(mreg_p->flags & CS_MEMBER_AUTOVOICE &&
 			!is_voiced(member_p))
@@ -1067,7 +1128,6 @@ h_chanserv_user_login(void *v_client_p, void *unused)
 					chanserv_p->name, chptr->name,
 					member_p->client_p->name);
 			member_p->flags |= MODE_VOICED;
-			mreg_p->channel_reg->last_time = CURRENT_TIME;
 		}
 	}
 
