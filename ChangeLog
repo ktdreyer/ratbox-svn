@@ -1,3 +1,21 @@
+leeh        2005/02/03 11:10:25 EST	(20050203_3)
+
+  Modified files:
+    help/operserv        takeover u-takeover 
+    src                  s_chanserv.c s_operserv.c s_userserv.c 
+  Log:
+  - merge chanserv handlers
+  - merge operserv handlers
+  
+  Revision  Changes    Path
+  1.3       +1 -2      rserv/help/operserv/takeover
+  1.3       +1 -2      rserv/help/operserv/u-takeover
+  1.58      +54 -150   rserv/src/s_chanserv.c
+  1.12      +46 -169   rserv/src/s_operserv.c
+  1.48      +1 -1      rserv/src/s_userserv.c
+
+
+
 leeh        2005/02/03 10:37:05 EST	(20050203_2)
 
   Modified files:
