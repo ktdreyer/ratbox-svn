@@ -83,8 +83,9 @@ void m_error(struct Client *client_p, struct Client *source_p,
       sendto_realops_flags(FLAGS_ADMIN,
             "ERROR :from %s -- %s",
 	    get_client_name(client_p, HIDE_IP), para);
-      sendto_realops_flags(FLAGS_ALL,"ERROR :from %s -- %s",
-			 get_client_name(client_p, MASK_IP), para);
+      sendto_realops_flags(FLAGS_NOTADMIN,
+            "ERROR :from %s -- %s",
+	    get_client_name(client_p, MASK_IP), para);
     }
   else
     {
