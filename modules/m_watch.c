@@ -110,7 +110,7 @@ m_watch(struct Client * client_p, struct Client * source_p, int parc, const char
 				{
 					if(dlink_list_length(&source_p->localClient->watchlist) >= ConfigFileEntry.max_watch)
 					{
-						sendto_one(source_p, form_str(ERR_TOOMANYWATCH), me.name, client_p->name, s + 1);
+						sendto_one(source_p, form_str(ERR_TOOMANYWATCH), me.name, client_p->name, s + 1, ConfigFileEntry.max_watch);
 						continue;
 					}
 					add_to_watch_hash_table(s + 1, source_p);
