@@ -1,3 +1,25 @@
+leeh        2004/05/06 18:24:01 EDT	(20040506_2)
+
+  Modified files:
+    include              s_newconf.h 
+    modules              m_resv.c 
+    modules/core         m_join.c 
+    src                  channel.c kdparse.c newconf.c s_newconf.c 
+  Log:
+  - remove find_channel_resv(), simply use hash_find_resv()
+  - append resv reason to joining juped channel notice
+  
+  Revision  Changes    Path
+  7.31      +0 -1      ircd-ratbox/include/s_newconf.h
+  1.154     +5 -4      ircd-ratbox/modules/core/m_join.c
+  1.57      +2 -2      ircd-ratbox/modules/m_resv.c
+  7.417     +1 -1      ircd-ratbox/src/channel.c
+  7.35      +1 -1      ircd-ratbox/src/kdparse.c
+  7.150     +1 -1      ircd-ratbox/src/newconf.c
+  7.40      +0 -9      ircd-ratbox/src/s_newconf.c
+
+
+
 leeh        2004/05/06 14:45:51 EDT	(20040506_1)
 
   Modified files:
