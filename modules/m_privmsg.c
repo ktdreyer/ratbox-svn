@@ -287,7 +287,7 @@ int duplicate_ptr( void *ptr,
 
   for(i = 0; i < n; i++)
     {
-      if (target_table[i].ptr == ptr )
+      if (target_table[i].ptr == ptr)
 	return YES;
     }
   return NO;
@@ -322,11 +322,14 @@ void privmsg_channel( struct Client *cptr,
   else
     channel_name = chptr->chname;
 
-  if(MyClient(sptr) && sptr->user)
-    sptr->user->last = CurrentTime;
+  if(MyClient(sptr))
+    {
+      if(sptr->user)
+	sptr->user->last = CurrentTime;
 
-  if(check_for_ctcp(text))
-    check_for_flud(sptr, NULL, chptr, 1);
+      if(check_for_ctcp(text))
+	check_for_flud(sptr, NULL, chptr, 1);
+    }
 
   if (can_send(chptr, sptr) == 0)
     sendto_channel_butone(cptr, sptr, chptr,
@@ -367,11 +370,14 @@ void privmsg_channel_flags( struct Client *cptr,
   else
     channel_name = chptr->chname;
 
-  if(MyClient(sptr) && sptr->user)
-    sptr->user->last = CurrentTime;
+  if(MyClient(sptr))
+    {
+      if(sptr->user)
+	sptr->user->last = CurrentTime;
 
-  if(check_for_ctcp(text))
-    check_for_flud(sptr, NULL, chptr, 1);
+      if(check_for_ctcp(text))
+	check_for_flud(sptr, NULL, chptr, 1);
+    }
 
   if (can_send(chptr, sptr) == 0)
     sendto_channel_type(cptr,
@@ -389,8 +395,8 @@ void privmsg_channel_flags( struct Client *cptr,
 /*
  * privmsg_client
  *
- * inputs	- pointer to sptr
- *		- pointer to acptr (struct Client *)
+ * inputs	- pointer to sptr source (struct Client *)
+ *		- pointer to acptr target (struct Client *)
  *		- pointer to text
  * output	- NONE
  * side effects	- message given channel either chanop or voice
@@ -398,19 +404,15 @@ void privmsg_channel_flags( struct Client *cptr,
 void privmsg_client(struct Client *sptr, struct Client *acptr,
 			   char *text)
 {
-  /* reset idle time for message only if its not to self */
-  if (sptr != acptr)
+  if(MyClient(sptr))
     {
-      if(sptr->user)
+      /* reset idle time for message only if its not to self */
+      if((sptr != acptr) && sptr->user)
 	sptr->user->last = CurrentTime;
+
+      if(check_for_ctcp(text))
+	check_for_flud(sptr, acptr, NULL, 1);
     }
-
-  /* reset idle time for message only if target exists */
-  if(MyClient(sptr) && sptr->user)
-    sptr->user->last = CurrentTime;
-
-  if(check_for_ctcp(text))
-    check_for_flud(sptr, acptr, NULL, 1);
 
   if (MyConnect(sptr) &&
       acptr->user && acptr->user->away)
@@ -479,8 +481,8 @@ int     ms_privmsg(struct Client *cptr,
 
 int drone_attack(struct Client *sptr,struct Client *acptr)
 {
-  if(MyConnect(acptr) && IsClient(sptr) &&
-     GlobalSetOptions.dronetime)
+  if(GlobalSetOptions.dronetime &&
+     MyConnect(acptr) && IsClient(sptr) )
     {
       if((acptr->first_received_message_time+GlobalSetOptions.dronetime)
 	 < CurrentTime)
