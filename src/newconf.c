@@ -34,6 +34,7 @@ struct	TopConf *	conf_cur_block;
 
 	dlink_list	conf_items;
 
+
 static char*	conf_strtype(int type)
 {
 	switch(type & CF_MTYPE)
@@ -54,6 +55,2208 @@ static char*	conf_strtype(int type)
 }
 
 			
+  
+static int 	add_top_conf	(char *name, int (*sfunc)(struct TopConf*), 
+			 int (*efunc)(struct TopConf*))
+{
+	struct TopConf *tc;
+  
+	tc = MyMalloc(sizeof(struct TopConf));
+  
+	DupString(tc->tc_name, name);
+	tc->tc_sfunc = sfunc;
+	tc->tc_efunc = efunc;
+  
+	dlinkAddAlloc(tc, &conf_items);
+	return 0;
+}
+
+static struct 	TopConf *find_top_conf(char *name)
+{
+	dlink_node *d;
+	struct TopConf* tc;
+
+	DLINK_FOREACH(d, conf_items.head)
+	{
+		tc = d->data;
+		if (strcasecmp(tc->tc_name, name) == 0)
+			return tc;
+	}
+
+	return NULL;
+}
+
+        
+static struct 	ConfEntry *find_conf_item(const struct TopConf *top, const char* name)
+{
+	dlink_node *d;
+ 	struct ConfEntry* cf;
+ 
+	DLINK_FOREACH(d, top->tc_items.head)
+	{
+		cf = d->data;
+		if (strcasecmp(cf->cf_name, name) == 0)
+			return cf;
+	}
+
+	return NULL;
+}
+
+#if 0 /* XXX unused */
+static int     remove_top_conf(char *name)
+{
+        struct TopConf *tc;
+        dlink_node *ptr;
+
+        if((tc = find_top_conf(name)) == NULL)
+                return -1;
+
+        if((ptr = dlinkFind(&conf_items, tc)) == NULL)
+                return -1;
+
+        dlinkDestroy(ptr, &conf_items);
+        MyFree(tc->tc_name);
+        MyFree(tc);
+
+        return 0;
+}
+#endif
+
+
+
+static void	conf_set_serverinfo_rsa_private_key_file(void *data)
+{
+#ifdef HAVE_LIBCRYPTO
+	BIO *file;
+
+	if (ServerInfo.rsa_private_key)
+	{
+		RSA_free(ServerInfo.rsa_private_key);
+		ServerInfo.rsa_private_key = NULL;
+	}
+
+	if (ServerInfo.rsa_private_key_file)
+	{
+		MyFree(ServerInfo.rsa_private_key_file);
+		ServerInfo.rsa_private_key_file = NULL;
+	}
+
+	DupString(ServerInfo.rsa_private_key_file, (char*)data);
+
+	file = BIO_new_file((char*)data, "r");
+
+	if (file == NULL)
+	{
+		conf_report_error(
+			"Ignoring config file entry rsa_private_key -- file open failed"
+			" (%s)", (char*)data);
+		return;
+	}
+
+	ServerInfo.rsa_private_key = (RSA *) PEM_read_bio_RSAPrivateKey(file,
+							NULL, 0, NULL);
+	if (ServerInfo.rsa_private_key == NULL)
+	{
+		conf_report_error("Ignoring config file entry rsa_private_key -- couldn't extract key");
+		return;
+	}
+
+	if (!RSA_check_key(ServerInfo.rsa_private_key))
+	{
+		conf_report_error("Ignoring config file entry rsa_private_key -- invalid key");
+		return;
+	}
+
+	/* require 2048 bit (256 byte) key */
+	if ( RSA_size(ServerInfo.rsa_private_key) != 256 )
+	{
+		conf_report_error("Ignoring config file entry rsa_private_key -- not 2048 bit");
+		return;
+	}
+
+	BIO_set_close(file, BIO_CLOSE);
+	BIO_free(file);
+#else
+	conf_report_error("Ignoring serverinfo::rsa_private_key -- SSL support not available.");
+#endif
+}
+
+static void	conf_set_serverinfo_name(void *data)
+{
+	if(ServerInfo.name == NULL)
+	{
+		/* the ircd will exit() in main() if we dont set one */
+		if(strlen((char*)data) <= HOSTLEN)
+			DupString(ServerInfo.name, (char*)data);
+	}
+}
+
+static void	conf_set_serverinfo_description(void *data)
+{
+	MyFree(ServerInfo.description);
+	DupString(ServerInfo.description, (char*)data);
+}
+
+static void	conf_set_serverinfo_network_name(void *data)
+{
+	char *p;
+
+	if((p = strchr((char *)data, ' ')))
+		*p = '\0';
+
+	MyFree(ServerInfo.network_name);
+	DupString(ServerInfo.network_name, (char*)data);
+}
+
+static void	conf_set_serverinfo_network_desc(void *data)
+{
+	MyFree(ServerInfo.network_desc);
+	DupString(ServerInfo.network_desc, (char*) data);
+}
+
+static void	conf_set_serverinfo_vhost(void *data)
+{
+	if(inetpton(DEF_FAM, (char*)data, &IN_ADDR(ServerInfo.ip)) <= 0)
+	{
+		conf_report_error("Invalid netmask for server IPv4 vhost (%s)",
+					(char*) data);
+		return;
+	}
+
+	ServerInfo.specific_ipv4_vhost = 1;
+}
+
+static void	conf_set_serverinfo_vhost6(void *data)
+{
+#ifdef IPV6
+	if(inetpton(DEF_FAM, (char*)data, &IN_ADDR(ServerInfo.ip6)) <= 0)
+	{
+		conf_report_error("Invalid netmask for server IPv6 vhost (%s)",
+					(char*) data);
+		return;
+	}
+
+	ServerInfo.specific_ipv6_vhost = 1;
+#else
+	conf_report_error("Warning -- ignoring serverinfo::vhost6 -- IPv6 support not available.");
+#endif
+}
+
+static void	conf_set_serverinfo_max_clients(void *data)
+{
+	int max = *(int*)data;
+
+	if (MAX_CLIENTS >= max)
+		ServerInfo.max_clients = max;
+	else
+	{
+		conf_report_error("Compile-time MAX_CLIENTS (%d) is less than serverinfo::max_clients (%d) -- using %d",
+			MAX_CLIENTS, max, MAX_CLIENTS);
+		ServerInfo.max_clients = MAX_CLIENTS;
+	}
+}
+
+static void	conf_set_serverinfo_max_buffer(void *data)
+{
+	ServerInfo.max_buffer = *(int*) data;
+}
+
+static void	conf_set_serverinfo_hub(void *data)
+{
+	int hub = *(int*) data;
+
+	ServerInfo.hub = hub;
+}
+
+static void	conf_set_modules_module(void *data)
+{
+#ifndef STATIC_MODULES
+	char *m_bn;
+
+	m_bn = irc_basename((char*) data);
+
+	if (findmodule_byname(m_bn) != -1)
+		return;
+
+	load_one_module((char*) data, 0);
+
+	MyFree(m_bn);
+#else
+	conf_report_error("Ignoring modules::module -- loadable module support not present.");
+#endif
+}
+
+static void	conf_set_modules_path(void *data)
+{
+#ifndef STATIC_MODULES
+	mod_add_path((char*) data);
+#else
+	conf_report_error("Ignoring modules::path -- loadable module support net present.");
+#endif
+}
+
+static void	conf_set_admin_name(void *data)
+{
+	MyFree(AdminInfo.name);
+	DupString(AdminInfo.name, (char*) data);
+}
+
+static void	conf_set_admin_email(void *data)
+{
+	MyFree(AdminInfo.email);
+	DupString(AdminInfo.email, (char*) data);
+}
+
+static void	conf_set_admin_description(void *data)
+{
+	MyFree(AdminInfo.description);
+	DupString(AdminInfo.description, (char*) data);
+}
+
+static void	conf_set_logging_path(void *data)
+{
+	conf_report_error("Warning -- logging::path is not yet implemented.");
+}
+
+static void	conf_set_logging_oper_log(void *data)
+{
+	conf_report_error("Warning -- logging::oper_log is not yet implemented.");
+}
+
+static void	conf_set_logging_gline_log(void *data)
+{
+	conf_report_error("Warning -- logging::gline_log is not yet implemented.");
+}
+
+static void	conf_set_logging_fname_userlog(void *data)
+{
+	strlcpy(ConfigFileEntry.fname_userlog, data, sizeof(ConfigFileEntry.fname_userlog));
+}
+
+static void	conf_set_logging_fname_foperlog(void *data)
+{
+	strlcpy(ConfigFileEntry.fname_foperlog, data, sizeof(ConfigFileEntry.fname_foperlog));
+}
+
+static void	conf_set_logging_fname_operlog(void *data)
+{
+	strlcpy(ConfigFileEntry.fname_operlog, data, sizeof(ConfigFileEntry.fname_operlog));
+}
+
+static struct
+{
+	char *name;
+	int level;
+} log_levels[] = {
+	{"l_crit",	L_CRIT},
+	{"l_error",	L_ERROR},
+	{"l_warn",	L_WARN},
+	{"l_notice",	L_NOTICE},
+	{"l_trace",	L_TRACE},
+	{"l_info",	L_INFO},
+	{"l_debug",	L_DEBUG},
+	{NULL,		0}
+};
+
+static void	conf_set_logging_log_level(void *data)
+{
+	int i;
+
+	for (i = 0; log_levels[i].name; i++)
+	{
+		if (strcasecmp((char*) data, log_levels[i].name) == 0)
+		{
+			set_log_level(log_levels[i].level);
+			return;
+		}
+	}
+
+	conf_report_error("Warning -- log level '%s' is not defined, "
+			  "using default of L_NOTICE", (char*) data);
+	set_log_level(L_NOTICE);
+}
+
+/* XXX This _really_ needs to go away */
+struct ConfItem *yy_achead = NULL;
+struct ConfItem *yy_aconf = NULL;
+struct ConfItem *yy_aprev = NULL;
+int              yy_acount = 0;
+struct ConfItem *yy_hconf;
+struct ConfItem *yy_lconf;
+
+struct ConfItem *hub_confs;
+struct ConfItem *leaf_confs;
+struct ConfItem *yy_aconf_next;
+
+struct Class *yy_class = NULL;
+char *resv_reason;
+
+char  *class_redirserv_var;
+int   class_redirport_var;
+
+struct mode_table
+{
+	char *	name;
+	int	mode;
+};
+
+static struct mode_table umode_table[] = {
+	{"bots",	UMODE_BOTS},
+	{"cconn",	UMODE_CCONN},
+	{"debug",	UMODE_DEBUG},
+	{"full",	UMODE_FULL},
+	{"callerid",	UMODE_CALLERID},
+	{"invisible",	UMODE_INVISIBLE},
+	{"skill",	UMODE_SKILL},
+	{"locops",	UMODE_LOCOPS},
+	{"nchange",	UMODE_NCHANGE},
+	{"rej",		UMODE_REJ},
+	{"servnotice",	UMODE_SERVNOTICE},
+	{"unauth",	UMODE_UNAUTH},
+	{"wallop",	UMODE_WALLOP},
+	{"external",	UMODE_EXTERNAL},
+	{"spy",		UMODE_SPY},
+	{"operwall",	UMODE_OPERWALL},
+	{NULL}
+};
+
+static struct mode_table flag_table[] = {
+	{"global_kill",		OPER_GLOBAL_KILL},
+	{"remote",		OPER_REMOTE},
+	{"kline",		OPER_K},
+	{"unkline",		OPER_UNKLINE},
+	{"gline",		OPER_GLINE},
+	{"nick_changes",	OPER_N},
+	{"rehash",		OPER_REHASH},
+	{"die",			OPER_DIE},
+	{"admin",		OPER_ADMIN},
+        {"hidden_admin",        OPER_HIDDENADMIN},
+	{"xline",		OPER_XLINE},
+	{"operwall",		OPER_OPERWALL},
+	{NULL}
+};
+
+static struct mode_table auth_table[] = {
+	{"no_spoof_notice",	CONF_FLAGS_NO_SPOOF_NOTICE},
+	{"exceed_limit",	CONF_FLAGS_NOLIMIT},
+	{"kline_exempt",	CONF_FLAGS_EXEMPTKLINE},
+	{"gline_exempt",	CONF_FLAGS_EXEMPTGLINE},
+        {"flood_exempt",        CONF_FLAGS_EXEMPTFLOOD},
+	{"no_tilde",		CONF_FLAGS_NO_TILDE},
+	{"restricted",		CONF_FLAGS_RESTRICTED},
+	{"need_ident",		CONF_FLAGS_NEED_IDENTD},
+	{NULL}
+};
+
+
+static
+int	find_umode(struct mode_table* tab, char *name)
+{
+	int i;
+
+	for (i = 0; tab[i].name; i++)
+	{
+		if (strcmp(tab[i].name, name) == 0)
+			return tab[i].mode;
+	}
+
+	return 0;
+}
+
+static
+void	set_modes_from_table(	int *modes, char *whatis,
+				struct mode_table *tab, conf_parm_t *args)
+{
+	for (; args; args = args->next)
+	{
+		int mode; 
+
+		if ((args->type & CF_MTYPE) != CF_STRING)
+		{
+			conf_report_error("Warning -- %s is not a string; ignoring.",
+						whatis);
+			continue;
+		}
+
+		mode = find_umode(tab, args->v.string);
+
+		if (!mode)
+		{
+			conf_report_error("Warning -- unknown %s %s.",
+					whatis, args->v.string);
+			continue;
+		}
+
+		*modes |= mode;
+	}
+}
+
+static int	conf_begin_oper(struct TopConf* tc)
+{
+	struct ConfItem *yy_tmp;
+	
+	yy_tmp = yy_achead;
+	while(yy_tmp)
+	{
+		yy_aconf = yy_tmp;
+		yy_tmp = yy_tmp->next;
+		yy_aconf->next = NULL;
+		free_conf(yy_aconf);
+	}
+	yy_acount = 0;
+	yy_achead = yy_aconf = make_conf();
+	yy_aconf->status = CONF_OPERATOR;
+        yy_aconf->flags |= CONF_FLAGS_ENCRYPTED;
+        yy_achead->port |= OPER_OPERWALL;
+	return 0;
+}
+
+static int	conf_end_oper(struct TopConf* tc)
+{
+	struct ConfItem *yy_tmp;
+	struct ConfItem *yy_next;
+	
+	if(conf_cur_block_name != NULL)
+	{
+		MyFree(yy_achead->name);
+		DupString(yy_achead->name, conf_cur_block_name);
+	}
+	/* copy over settings from first struct */
+	for( yy_tmp = yy_achead->next; yy_tmp; yy_tmp = yy_tmp->next )
+	{
+		if (yy_achead->className)
+			DupString(yy_tmp->className, yy_achead->className);
+		if (yy_achead->name)
+			DupString(yy_tmp->name, yy_achead->name);
+		if (yy_achead->passwd)
+			DupString(yy_tmp->passwd, yy_achead->passwd);
+		yy_tmp->port = yy_achead->port;
+		yy_tmp->flags = yy_achead->flags;
+		
+#ifdef HAVE_LIBCRYPTO
+		if(yy_achead->rsa_public_key_file)
+			DupString(yy_tmp->rsa_public_key_file, yy_achead->rsa_public_key_file);
+		
+		if(yy_achead->rsa_public_key)
+		{
+			BIO *file;
+			
+			file = BIO_new_file(yy_achead->rsa_public_key_file, "r");
+			yy_tmp->rsa_public_key = (RSA *)PEM_read_bio_RSA_PUBKEY(file,
+						NULL, 0, NULL);
+			BIO_set_close(file, BIO_CLOSE);
+			BIO_free(file);
+		}
+#endif
+	}
+
+	for( yy_tmp = yy_achead; yy_tmp; yy_tmp = yy_next )
+	{
+		yy_next = yy_tmp->next;
+
+#ifdef HAVE_LIBCRYPTO
+		if(yy_tmp->name && (yy_tmp->passwd || yy_aconf->rsa_public_key) && yy_tmp->host)
+#else
+		if(yy_tmp->name && yy_tmp->passwd && yy_tmp->host)
+#endif
+		{
+			conf_add_class_to_conf(yy_tmp);
+			conf_add_conf(yy_tmp);
+		}
+		else
+		{
+			free_conf(yy_tmp);
+		}
+	}
+
+	yy_achead = NULL;
+	yy_aconf = NULL;
+	yy_aprev = NULL;
+	yy_acount = 0;
+
+	return 0;
+}
+
+static void	conf_set_oper_flags(void *data)
+{
+	conf_parm_t *args = data;
+
+	set_modes_from_table(&yy_achead->port, "flag", flag_table, args);
+}
+
+static void	conf_set_oper_name(void *data)
+{
+	int oname_len;
+
+	MyFree(yy_achead->name);
+
+	if ((oname_len = strlen((char*) data)) > OPERNICKLEN)
+		((char*) data)[OPERNICKLEN] = 0;
+
+	DupString(yy_achead->name, (char*) data);
+}
+
+static void	conf_set_oper_user(void *data)
+{
+	char *p;
+	char *new_user;
+	char *new_host;
+	char *host = (char*) data;
+
+	/* The first user= line doesn't allocate a new conf */
+	if (yy_acount++)
+	{
+		yy_aconf = (yy_aconf->next = make_conf());
+		yy_aconf->status = CONF_OPERATOR;
+	}
+
+	if((p = strchr(host, '@')))
+	{
+		*p = '\0';
+		DupString(new_user, host);
+		MyFree(yy_aconf->user);
+		yy_aconf->user = new_user;
+		p++;
+		DupString(new_host, p);
+		MyFree(yy_aconf->host);
+		yy_aconf->host = new_host;
+	}
+	else
+	{
+		MyFree(yy_aconf->host);
+		DupString(yy_aconf->host, host);
+		DupString(yy_aconf->user, "*");
+	}
+}
+
+static void	conf_set_oper_password(void *data)
+{
+	if (yy_achead->passwd)
+		memset(yy_achead->passwd, 0, strlen(yy_achead->passwd));
+
+	MyFree(yy_achead->passwd);
+	DupString(yy_achead->passwd, (char*) data);
+}
+
+static void	conf_set_oper_rsa_public_key_file(void *data)
+{
+#ifdef HAVE_LIBCRYPTO
+	BIO *file;
+
+	if (yy_achead->rsa_public_key)
+	{
+		RSA_free(yy_achead->rsa_public_key);
+		yy_achead->rsa_public_key = NULL;
+	}
+
+	if (yy_achead->rsa_public_key_file)
+	{
+		MyFree(yy_achead->rsa_public_key_file);
+		yy_achead->rsa_public_key_file = NULL;
+	}
+
+	DupString(yy_achead->rsa_public_key_file, (char *)data);
+
+	file = BIO_new_file((char *) data, "r");
+
+	if (file == NULL)
+	{
+		conf_report_error("Ignoring rsa_public_key_file -- does %s exist?",
+					(char*) data);
+		return;
+	}
+
+	yy_achead->rsa_public_key = (RSA *) PEM_read_bio_RSA_PUBKEY(file,
+						NULL, 0, NULL );
+
+	if (yy_achead->rsa_public_key == NULL)
+	{
+		conf_report_error("Ignoring rsa_public_key_file -- Key invalid; check key syntax.");
+		return;
+	}
+
+	BIO_set_close(file, BIO_CLOSE);
+	BIO_free(file);
+#else
+	conf_report_error("Warning -- ignoring rsa_public_key_file (OpenSSL support not available");
+#endif
+}
+
+static void	conf_set_oper_encrypted(void *data)
+{
+	int yesno = *(unsigned int*) data;
+
+	if (yesno)
+		yy_achead->flags |= CONF_FLAGS_ENCRYPTED;
+	else
+		yy_achead->flags &= ~CONF_FLAGS_ENCRYPTED;
+}
+
+static void	conf_set_oper_class(void *data)
+{
+	MyFree(yy_achead->className);
+	DupString(yy_achead->className, (char *) data);
+}
+
+static void	conf_set_oper_global_kill(void *data)
+{
+	int yesno = *(int*)data;
+
+	if (yesno)
+		yy_achead->port |= OPER_GLOBAL_KILL;
+	else
+		yy_achead->port &= ~OPER_GLOBAL_KILL;
+}
+
+static void	conf_set_oper_remote(void *data)
+{
+	int yesno = *(int*)data;
+	
+	if (yesno)
+		yy_achead->port |= OPER_REMOTE;
+	else
+		yy_achead->port &= ~OPER_REMOTE;
+}
+
+static void	conf_set_oper_kline(void *data)
+{
+	int yesno = *(int*)data;
+
+	if (yesno)
+		yy_achead->port |= OPER_K;
+	else	
+		yy_achead->port &= ~OPER_K;
+}
+
+static void	conf_set_oper_unkline(void *data)
+{
+	int yesno = *(int*) data;
+
+	if (yesno)
+		yy_achead->port |= OPER_UNKLINE;
+	else
+		yy_achead->port &= ~OPER_UNKLINE;
+}
+
+static void	conf_set_oper_xline(void *data)
+{
+	int yesno = *(int*) data;
+
+	if (yesno)
+		yy_achead->port |= OPER_XLINE;
+	else
+		yy_achead->port &= ~OPER_XLINE;
+}
+
+static void	conf_set_oper_gline(void *data)
+{
+	int yesno = *(int*) data;
+
+	if (yesno)
+		yy_achead->port |= OPER_GLINE;
+	else
+		yy_achead->port &= ~OPER_GLINE;
+}
+
+static void	conf_set_oper_operwall(void *data)
+{
+	int yesno = *(int*) data;
+
+	if (yesno)
+		yy_achead->port |= OPER_OPERWALL;
+	else
+		yy_achead->port &= ~OPER_OPERWALL;
+}
+
+static void	conf_set_oper_nick_changes(void *data)
+{
+	int yesno = *(int*) data;
+
+	if (yesno)
+		yy_achead->port |= OPER_N;
+	else
+		yy_achead->port &= ~OPER_N;
+}
+
+static void	conf_set_oper_die(void *data)
+{
+	int yesno = *(int*) data;
+
+	if (yesno)
+		yy_achead->port |= OPER_DIE;
+	else
+		yy_achead->port &= ~OPER_DIE; 
+}
+
+static void	conf_set_oper_rehash(void *data)
+{
+	int yesno = *(int*) data;
+
+	if (yesno)
+		yy_achead->port |= OPER_REHASH;
+	else
+		yy_achead->port &= ~OPER_REHASH;
+}
+
+static void	conf_set_oper_admin(void *data)
+{
+	int yesno = *(int*) data;
+
+	if (yesno)
+		yy_achead->port |= OPER_ADMIN;
+	else
+		yy_achead->port &= ~OPER_ADMIN;
+}
+
+static void    conf_set_oper_hidden_admin(void *data)
+{
+        int yesno = *(int*) data;
+
+        if(yesno)
+                yy_achead->port |= OPER_HIDDENADMIN;
+        else
+                yy_achead->port &= ~OPER_HIDDENADMIN;
+}
+
+static int	conf_begin_class(struct TopConf *tc)
+{
+	yy_class = make_class();
+	return 0;
+}
+
+static int	conf_end_class(struct TopConf *tc)
+{
+	if(conf_cur_block_name != NULL)
+	{       
+		MyFree(yy_class->class_name);
+		DupString(yy_class->class_name, conf_cur_block_name);
+	}
+
+	if(yy_class->class_name)
+		add_class(yy_class);
+	else
+		free_class(yy_class);
+	return 0;
+}
+
+static void	conf_set_class_name(void *data)
+{
+	DupString(yy_class->class_name, (char*) data);
+}
+
+static void	conf_set_class_ping_time(void *data)
+{
+	yy_class->ping_freq = *(unsigned int*)data;
+}
+
+static void	conf_set_class_number_per_ip(void *data)
+{
+	yy_class->max_local = *(unsigned int *)data;
+}
+
+static void	conf_set_class_number_per_ip_global(void *data)
+{
+	yy_class->max_global = *(unsigned int *)data;
+}
+
+static void	conf_set_class_number_per_ident(void *data)
+{
+	yy_class->max_ident = *(unsigned int *)data;
+}
+
+static void	conf_set_class_connectfreq(void *data)
+{
+	yy_class->con_freq = *(unsigned int *) data;
+}
+
+static void	conf_set_class_max_number(void *data)
+{
+	yy_class->max_total = *(unsigned int *) data;
+}
+
+static void	conf_set_class_sendq(void *data)
+{
+	yy_class->max_sendq = *(unsigned int *) data;
+}
+
+static char *listener_address;
+
+static int	conf_begin_listen(struct TopConf *tc)
+{
+	listener_address = NULL;
+	return 0;
+}
+
+static int	conf_end_listen(struct TopConf *tc)
+{
+	MyFree(listener_address);
+	listener_address = NULL;
+	return 0;
+}
+
+static void	conf_set_listen_port(void *data)
+{
+	conf_parm_t *args = data;
+
+	for (; args; args = args->next)
+	{
+		if ((args->type & CF_MTYPE) != CF_INT)
+		{
+			conf_report_error("listener::port argument is not an integer "
+				"-- ignoring.");
+			continue;	
+		}
+
+		add_listener(args->v.number, listener_address);
+	}
+}
+
+static void	conf_set_listen_address(void *data)
+{
+	MyFree(listener_address);
+	DupString(listener_address, data);
+}
+
+static int	conf_begin_auth(struct TopConf *tc)
+{
+	struct ConfItem *yy_tmp;
+
+	yy_tmp = yy_achead;
+	while(yy_tmp)
+	{
+		yy_aconf = yy_tmp;
+		yy_tmp = yy_tmp->next;
+		yy_aconf->next = NULL;
+		free_conf(yy_aconf);
+	}
+	yy_achead = NULL;
+	yy_aconf = NULL;
+	yy_aprev = NULL;
+	yy_achead = yy_aprev = yy_aconf = make_conf();
+	yy_aconf->status = CONF_CLIENT;
+	yy_achead->flags |= CONF_FLAGS_NO_SPOOF_NOTICE;
+
+	return 0;
+}
+
+static int	conf_end_auth(struct TopConf *tc)
+{
+	struct ConfItem *yy_tmp;
+	struct ConfItem *yy_next;
+
+	/* copy over settings from first struct */
+	for( yy_tmp = yy_achead->next; yy_tmp; yy_tmp = yy_tmp->next )
+	{
+		if(yy_achead->passwd)
+			DupString(yy_tmp->passwd, yy_achead->passwd);
+		if(yy_achead->name)
+			DupString(yy_tmp->name, yy_achead->name);
+		if(yy_achead->className)
+			DupString(yy_tmp->className, yy_achead->className);
+
+		yy_tmp->flags = yy_achead->flags;
+		yy_tmp->port  = yy_achead->port;
+	}
+
+	for( yy_tmp = yy_achead; yy_tmp; yy_tmp = yy_next )
+	{
+		yy_next = yy_tmp->next; /* yy_tmp->next is used by conf_add_conf */
+		yy_tmp->next = NULL;
+
+		if (yy_tmp->name == NULL)
+			DupString(yy_tmp->name,"NOMATCH");
+
+		conf_add_class_to_conf(yy_tmp);
+
+		if (yy_tmp->user == NULL)
+			DupString(yy_tmp->user,"*");
+		else
+			collapse(yy_tmp->user);
+
+		if (yy_tmp->host == NULL)
+			continue;
+		else
+			collapse(yy_tmp->host);
+
+		add_conf_by_address(yy_tmp->host, CONF_CLIENT, yy_tmp->user, yy_tmp);
+	}
+
+	yy_achead = NULL;
+	yy_aconf = NULL;
+	yy_aprev = NULL;
+	yy_acount = 0;
+	return 0;
+}
+
+static void	conf_set_auth_user(void *data)
+{
+	char *p;
+	char *new_user;
+	char *new_host;
+
+	/* The first user= line doesn't allocate a new conf */
+	if ( yy_acount++ )
+	{
+		yy_aprev = yy_aconf;
+		yy_aconf = (yy_aconf->next = make_conf());
+		yy_aconf->status = CONF_CLIENT;
+	}
+
+	if((p = strchr(data, '@')))
+	{
+		*p = '\0';
+		DupString(new_user, data);
+		MyFree(yy_aconf->user);
+		yy_aconf->user = new_user;
+		p++;
+		MyFree(yy_aconf->host);
+		DupString(new_host,p);
+		yy_aconf->host = new_host;
+	}
+	else
+	{
+		MyFree(yy_aconf->host);
+		DupString(yy_aconf->host, data);
+		DupString(yy_aconf->user,"*");
+	}
+}
+
+static void	conf_set_auth_passwd(void *data)
+{
+	if (yy_achead->passwd)
+		memset(yy_achead->passwd, 0, strlen(yy_achead->passwd));
+	MyFree(yy_achead->passwd);
+	DupString(yy_achead->passwd, data);
+}
+
+static void	conf_set_auth_encrypted(void *data)
+{
+	int yesno = *(unsigned int*) data;
+
+	if (yesno)
+		yy_achead->flags |= CONF_FLAGS_ENCRYPTED;
+	else
+		yy_achead->flags &= ~CONF_FLAGS_ENCRYPTED;
+}
+
+static void	conf_set_auth_no_spoof_notice(void *data)
+{
+	int yesno = *(unsigned int *)data;
+
+	if (yesno)
+		yy_achead->flags |= CONF_FLAGS_NO_SPOOF_NOTICE;
+	else
+		yy_achead->flags &= ~CONF_FLAGS_NO_SPOOF_NOTICE;
+}
+
+static void	conf_set_auth_spoof(void *data)
+{
+	MyFree(yy_achead->name);
+	if(strlen(data) < HOSTLEN)
+	{
+		DupString(yy_achead->name, data);
+		yy_achead->flags |= CONF_FLAGS_SPOOF_IP;
+	}
+	else
+		conf_report_error("Warning -- spoof length must be less than %d characters; ignoring this.", HOSTLEN);
+}
+
+static void	conf_set_auth_flags(void *data)
+{
+	conf_parm_t *args = data;
+
+	set_modes_from_table((int *)&yy_achead->flags, "flag", auth_table, args);
+}
+
+static void	conf_set_auth_exceed_limit(void *data)
+{
+	int yesno = *(unsigned int*) data;
+
+	if (yesno)
+		yy_achead->flags |= CONF_FLAGS_NOLIMIT;
+	else
+		yy_achead->flags &= ~CONF_FLAGS_NOLIMIT;
+}
+
+static void	conf_set_auth_is_restricted(void *data)
+{
+	int yesno = *(unsigned int*) data;
+
+	if (yesno)
+		yy_achead->flags |= CONF_FLAGS_RESTRICTED;
+	else
+		yy_achead->flags &= ~CONF_FLAGS_RESTRICTED;
+}
+
+static void	conf_set_auth_kline_exempt(void *data)
+{
+	int yesno = *(unsigned int*) data;
+
+	if (yesno)
+		yy_achead->flags |= CONF_FLAGS_EXEMPTKLINE;
+	else
+		yy_achead->flags &= ~CONF_FLAGS_EXEMPTKLINE;
+}
+
+static void	conf_set_auth_need_ident(void *data)
+{
+	int yesno = *(unsigned int*) data;
+
+	if (yesno)
+		yy_achead->flags |= CONF_FLAGS_NEED_IDENTD;
+	else
+		yy_achead->flags &= ~CONF_FLAGS_NEED_IDENTD;
+}
+
+static void	conf_set_auth_no_tilde(void *data)
+{
+	int yesno = *(unsigned int*) data;
+
+	if (yesno)
+		yy_achead->flags |= CONF_FLAGS_NO_TILDE;
+	else
+		yy_achead->flags &= ~CONF_FLAGS_NO_TILDE;
+}
+
+static void	conf_set_auth_gline_exempt(void *data)
+{
+	int yesno = *(unsigned int*) data;
+
+	if (yesno)
+		yy_achead->flags |= CONF_FLAGS_EXEMPTGLINE;
+	else
+		yy_achead->flags &= ~CONF_FLAGS_EXEMPTGLINE;
+}
+
+static void	conf_set_auth_flood_exempt(void *data)
+{
+	int yesno = *(unsigned int *) data;
+
+	if (yesno)
+		yy_achead->flags |= CONF_FLAGS_EXEMPTFLOOD;
+	else
+		yy_achead->flags &= ~CONF_FLAGS_EXEMPTFLOOD;
+}
+
+static void	conf_set_auth_redir_serv(void *data)
+{
+	yy_achead->flags |= CONF_FLAGS_REDIR;
+	MyFree(yy_achead->name);
+	DupString(yy_achead->name, data);
+}
+
+static void	conf_set_auth_redir_port(void *data)
+{
+	int port = *(unsigned int *) data;
+
+	yy_achead->flags |= CONF_FLAGS_REDIR;
+	yy_achead->port = port;
+}
+
+static void	conf_set_auth_class(void *data)
+{
+	MyFree(yy_achead->className);
+	DupString(yy_achead->className, data);
+}
+
+static int	conf_begin_resv(struct TopConf *tc)
+{
+	resv_reason = NULL;
+	return 0;
+}
+
+static int	conf_end_resv(struct TopConf *tc)
+{
+	MyFree(resv_reason);
+	resv_reason = NULL;
+	return 0;
+}
+
+static void	conf_set_resv_channel(void *data)
+{
+	if(IsChannelName((char*) data))
+	{
+		if(resv_reason)
+			create_resv(data, resv_reason, RESV_CHANNEL);
+		else
+			create_resv(data, "No Reason", RESV_CHANNEL);
+	}
+	else
+	{
+		conf_report_error("Warning -- channel '%s' in resv is not a valid channel name.", (char*) data);
+	}
+}
+
+static void	conf_set_resv_reason(void *data)
+{
+	MyFree(resv_reason);
+	DupString(resv_reason, data);
+}
+
+static void	conf_set_resv_nick(void *data)
+{
+	if(clean_resv_nick(data))
+	{
+		if(resv_reason)
+			create_resv(data, resv_reason, RESV_NICK);
+		else
+			create_resv(data, "No Reason", RESV_NICK);
+	}
+	else
+	{
+		conf_report_error("Warning -- nickname '%s' in resv is not a valid nickname.", (char*) data);
+	}
+}
+
+static int	conf_begin_shared(struct TopConf *tc)
+{
+	if(yy_aconf != NULL)
+	{
+		free_conf(yy_aconf);
+		yy_aconf = NULL;
+	}
+	yy_aconf=make_conf();
+	yy_aconf->status = CONF_ULINE;
+	yy_aconf->port = OPER_K;
+	return 0;
+}
+
+static int	conf_end_shared(struct TopConf *tc)
+{
+	conf_add_u_conf(yy_aconf);
+	yy_aconf = (struct ConfItem *)NULL;
+	return 0;
+}
+
+static void	conf_set_shared_name(void *data)
+{
+	MyFree(yy_aconf->name);
+	DupString(yy_aconf->name, data);
+}
+
+static void	conf_set_shared_user(void *data)
+{
+	char *p;
+	char *new_user;
+	char *new_host;
+
+	if((p = strchr(data, '@')))
+	{
+		*p = '\0';
+		DupString(new_user, data);
+		MyFree(yy_aconf->user);
+		yy_aconf->user = new_user;
+		
+		p++;
+		DupString(new_host, p);
+		MyFree(yy_aconf->host);
+		yy_aconf->host = new_host;
+	}
+}
+
+static void	conf_set_shared_kline(void *data)	
+{
+	int yesno = *(unsigned int*) data;
+
+	if (yesno)
+		yy_aconf->port |= OPER_K; 
+	else
+		yy_aconf->port &= ~OPER_K; 
+}
+
+static void	conf_set_shared_unkline(void *data)
+{
+	int yesno = *(unsigned int*) data;
+
+	if (yesno)
+		yy_aconf->port |= OPER_UNKLINE; 
+	else
+		yy_aconf->port &= ~OPER_UNKLINE;
+}
+
+static int	conf_begin_connect(struct TopConf *tc)
+{
+	hub_confs = NULL;
+
+	if(yy_aconf)
+	{
+		free_conf(yy_aconf);
+		yy_aconf = NULL;
+	}
+
+	if(yy_hconf)
+	{
+		free_conf(yy_hconf);
+		yy_hconf = NULL;
+	}
+
+	if(yy_lconf)
+	{
+		free_conf(yy_lconf);
+		yy_lconf = NULL;
+	}
+
+	yy_aconf=make_conf();
+	yy_aconf->passwd = NULL;
+	yy_aconf->status = CONF_SERVER;
+	yy_aconf->port = PORTNUM;
+	return 0;
+}
+
+static int	conf_end_connect(struct TopConf *tc)
+{
+	if(conf_cur_block_name != NULL)
+	{
+		MyFree(yy_aconf->name);
+		DupString(yy_aconf->name, conf_cur_block_name);	
+	}
+#ifdef HAVE_LIBCRYPTO
+	if(yy_aconf->host &&
+	   ((yy_aconf->passwd && yy_aconf->spasswd) ||
+	    (yy_aconf->rsa_public_key && IsConfCryptLink(yy_aconf))))
+#else /* !HAVE_LIBCRYPTO */
+	if(yy_aconf->host && !IsConfCryptLink(yy_aconf) && 
+	   yy_aconf->passwd && yy_aconf->spasswd)
+#endif /* !HAVE_LIBCRYPTO */
+	{
+		if( conf_add_server(yy_aconf, scount) >= 0 )
+		{
+			conf_add_conf(yy_aconf);
+			++scount;
+		}
+		else
+		{
+			free_conf(yy_aconf);
+			yy_aconf = NULL;
+		}
+	}
+	else
+	{
+		if (yy_aconf->name)
+		{
+#ifndef HAVE_LIBCRYPTO
+			if (IsConfCryptLink(yy_aconf))
+				conf_report_error("Ignoring connect block for %s -- OpenSSL support is not available.", yy_aconf->name);
+#else
+			if(IsConfCryptLink(yy_aconf) && !yy_aconf->rsa_public_key)
+				conf_report_error("Ignoring connect block for %s -- missing key.",
+						yy_aconf->name);
+#endif
+			if(!yy_aconf->host)
+				conf_report_error("Ignoring connect block for %s -- missing host.",
+							yy_aconf->name);
+			else if(!IsConfCryptLink(yy_aconf) && 
+				(!yy_aconf->passwd || !yy_aconf->spasswd))
+					conf_report_error("Ignoring connect block for %s -- missing password.",
+							yy_aconf->name);
+		}
+	
+		free_conf(yy_aconf);
+		yy_aconf = NULL;
+	}
+
+	/*
+	 * yy_aconf is still pointing at the server that is having
+	 * a connect block built for it. This means, y_aconf->name 
+	 * points to the actual irc name this server will be known as.
+	 * Now this new server has a set or even just one hub_mask (or leaf_mask)
+	 * given in the link list at yy_hconf. Fill in the HUB confs
+	 * from this link list now.
+	 */    
+
+	for (yy_hconf = hub_confs; yy_hconf; yy_hconf = yy_aconf_next)
+	{
+		yy_aconf_next = yy_hconf->next;
+		MyFree(yy_hconf->name);
+		yy_hconf->name = NULL;
+
+		/* yy_aconf == NULL is a fatal error for this connect block! */
+		if (yy_aconf != NULL)
+		{
+			DupString(yy_hconf->name, yy_aconf->name);
+			conf_add_conf(yy_hconf);
+		}
+		else
+			free_conf(yy_hconf);
+	}
+
+	for (yy_lconf = leaf_confs; yy_lconf; yy_lconf = yy_aconf_next)
+	{
+		yy_aconf_next = yy_lconf->next;
+		if (yy_aconf != NULL)
+		{
+			DupString(yy_lconf->name, yy_aconf->name);
+			conf_add_conf(yy_lconf);
+		}
+		else
+			free_conf(yy_lconf);
+	}
+
+	hub_confs = NULL;
+	leaf_confs = NULL;
+	yy_aconf = NULL;
+	yy_hconf = NULL;
+	yy_lconf = NULL;
+	return 0;
+}
+
+static void	conf_set_connect_name(void *data)
+{
+	if(yy_aconf->name != NULL)
+	{
+		conf_report_error("Warning -- connect::name specified multiple times.");
+	}
+
+	MyFree(yy_aconf->name);
+	DupString(yy_aconf->name, data);
+}
+
+static void	conf_set_connect_host(void *data)
+{
+	MyFree(yy_aconf->host);
+	DupString(yy_aconf->host, data);
+}
+
+static void	conf_set_connect_send_password(void *data)
+{
+	if (yy_aconf->spasswd)
+		memset(yy_aconf->spasswd, 0, strlen(yy_aconf->spasswd));
+	MyFree(yy_aconf->spasswd);
+	DupString(yy_aconf->spasswd, data);
+}
+
+static void	conf_set_connect_accept_password(void *data)
+{
+	if (yy_aconf->passwd)
+		memset(yy_aconf->passwd, 0, strlen(yy_aconf->passwd));
+	MyFree(yy_aconf->passwd);
+	DupString(yy_aconf->passwd, data);
+}
+
+static void	conf_set_connect_port(void *data)
+{
+	yy_aconf->port = *(unsigned int*) data;
+}
+
+static void	conf_set_connect_aftype(void *data)
+{
+	char *aft = data;
+
+	if (strcasecmp(aft, "ipv4") == 0)
+		yy_aconf->aftype = AF_INET;
+#ifdef IPV6
+	else if (strcasecmp(aft, "ipv6") == 0)
+		yy_aconf->aftype = AF_INET6;
+#endif
+	else
+		conf_report_error("connect::aftype '%s' is unknown.", aft);
+}
+
+static void	conf_set_connect_fakename(void *data)
+{
+	MyFree(yy_aconf->fakename);
+	DupString(yy_aconf->fakename, data);
+}
+
+static void	conf_set_connect_encrypted(void *data)
+{
+	int yesno = *(unsigned int*) data;
+
+	if (yesno)
+		yy_aconf->flags |= CONF_FLAGS_ENCRYPTED;
+	else
+		yy_aconf->flags &= ~CONF_FLAGS_ENCRYPTED;
+}
+
+static void	conf_set_connect_rsa_public_key_file(void *data)
+{
+#ifdef HAVE_LIBCRYPTO
+	BIO *file;
+
+	if (yy_aconf->rsa_public_key)
+	{
+		RSA_free(yy_aconf->rsa_public_key);
+		yy_aconf->rsa_public_key = NULL;
+	}
+
+	if (yy_aconf->rsa_public_key_file)
+	{
+		MyFree(yy_aconf->rsa_public_key_file);
+		yy_aconf->rsa_public_key_file = NULL;
+	}
+
+	DupString(yy_aconf->rsa_public_key_file, data);
+
+	file = BIO_new_file(data, "r");
+
+	if (file == NULL)
+	{
+		conf_report_error("Ignoring connect::rsa_public_key_file %s -- couldn't open file.", data);
+		return;
+	}
+
+	yy_aconf->rsa_public_key = (RSA *) PEM_read_bio_RSA_PUBKEY(file,
+					                                                    NULL, 0, NULL );
+
+	if (yy_aconf->rsa_public_key == NULL)
+	{
+		conf_report_error("Ignoring connect::rsa_public_key_file -- Key invalid; check syntax.");
+		return;
+	}
+
+	BIO_set_close(file, BIO_CLOSE);
+	BIO_free(file);
+#else
+	conf_report_error("Ignoring connect::rsa_public_key_file -- OpenSSL support not available.");
+#endif
+}
+
+static void	conf_set_connect_cryptlink(void *data)
+{
+	int yesno = *(unsigned int *) data;
+
+	if (yesno)
+		yy_aconf->flags |= CONF_FLAGS_CRYPTLINK;
+	else
+		yy_aconf->flags &= ~CONF_FLAGS_CRYPTLINK;
+}
+
+static void	conf_set_connect_compressed(void *data)
+{
+#ifdef HAVE_LIBZ
+	int yesno = *(unsigned int*) data;
+
+	if (yesno)
+		yy_aconf->flags |= CONF_FLAGS_COMPRESSED;
+	else
+		yy_aconf->flags &= ~CONF_FLAGS_COMPRESSED;
+#else
+	conf_report_error("Ignoring connect::compressed -- zlib not available.");
+#endif
+}
+
+static void	conf_set_connect_auto(void *data)
+{
+	int yesno = *(unsigned int *) data;
+
+	if (yesno)
+		yy_aconf->flags |= CONF_FLAGS_ALLOW_AUTO_CONN;
+	else
+		yy_aconf->flags &= ~CONF_FLAGS_ALLOW_AUTO_CONN;
+}
+
+static void	conf_set_connect_hub_mask(void *data)
+{
+	if(hub_confs == NULL)
+	{
+		hub_confs = make_conf();
+		hub_confs->status = CONF_HUB;
+		DupString(hub_confs->host, data);
+		DupString(hub_confs->user, "*");
+	}
+	else
+	{
+		yy_hconf = make_conf();
+		yy_hconf->status = CONF_HUB;
+		DupString(yy_hconf->host, data);
+		DupString(yy_hconf->user, "*");
+		yy_hconf->next = hub_confs;
+		hub_confs = yy_hconf;
+	}
+}
+
+static void	conf_set_connect_leaf_mask(void *data)
+{
+	if(leaf_confs == NULL)
+	{
+		leaf_confs = make_conf();
+		leaf_confs->status = CONF_LEAF;
+		DupString(leaf_confs->host, data);
+		DupString(leaf_confs->user, "*");
+	}
+	else
+	{
+		yy_lconf = make_conf();
+		yy_lconf->status = CONF_LEAF;
+		DupString(yy_lconf->host, data);
+		DupString(yy_lconf->user, "*");
+		yy_lconf->next = leaf_confs;
+		leaf_confs = yy_lconf;
+	}
+}
+
+static void	conf_set_connect_class(void *data)
+{
+	MyFree(yy_aconf->className);
+	DupString(yy_aconf->className, data);
+}
+
+static void	conf_set_connect_cipher_preference(void *data)
+{
+#ifdef HAVE_LIBCRYPTO
+	struct EncCapability *ecap;
+	char *cipher_name;
+	int found = 0;
+
+	yy_aconf->cipher_preference = NULL;
+
+	cipher_name = data;
+
+	for (ecap = CipherTable; ecap->name; ecap++)
+	{
+		if ((!irccmp(ecap->name, cipher_name)) &&
+		    (ecap->cap & CAP_ENC_MASK))
+		{
+			yy_aconf->cipher_preference = ecap;
+			found = 1;
+		}
+	}
+
+	if (!found)
+	{
+		conf_report_error("Invalid cipher '%s'.", cipher_name);
+	}
+#else
+	conf_report_error("Ignoring connect::cipher_preference -- OpenSSL support not available.");
+#endif
+}
+
+static int	conf_begin_kill(struct TopConf* tc)
+{
+	if(yy_aconf)
+	{
+		free_conf(yy_aconf);
+		yy_aconf = NULL;
+	}
+
+	yy_aconf=make_conf();
+	yy_aconf->status = CONF_KILL;
+	return 0;
+}
+
+static int	conf_end_kill(struct TopConf *tc)
+{
+	if(yy_aconf->user && yy_aconf->passwd && yy_aconf->host)
+	{
+		if (yy_aconf->host != NULL)
+			add_conf_by_address(yy_aconf->host, CONF_KILL,
+					    yy_aconf->user, yy_aconf);
+	}
+	else
+	{
+		free_conf(yy_aconf);
+	}
+	yy_aconf = NULL;
+	return 0;
+}
+
+static void	conf_set_kill_user(void *data)
+{
+	char *p;
+	char *new_user;
+	char *new_host;
+
+	if((p = strchr(data, '@')))
+	{
+		*p = '\0';
+		DupString(new_user,data);
+		yy_aconf->user = new_user;
+		p++;
+		DupString(new_host,p);
+		MyFree(yy_aconf->host);
+		yy_aconf->host = new_host;
+	}
+	else
+	{
+		MyFree(yy_aconf->host);
+		DupString(yy_aconf->host, data);
+		MyFree(yy_aconf->user);
+		DupString(yy_aconf->user,"*");
+	}
+}
+
+static void	conf_set_kill_reason(void *data)
+{
+	MyFree(yy_aconf->passwd);
+	DupString(yy_aconf->passwd, data);
+}
+
+static int	conf_begin_deny(struct TopConf* tc)
+{
+	if(yy_aconf)
+	{
+		free_conf(yy_aconf);
+		yy_aconf = NULL;
+	}
+
+	yy_aconf=make_conf();
+	yy_aconf->status = CONF_DLINE;
+	/* default reason */
+	DupString(yy_aconf->passwd, "No Reason");
+	
+	return 0;
+}
+
+static int	conf_end_deny(struct TopConf *tc)
+{
+	if (yy_aconf->host &&
+	    parse_netmask(yy_aconf->host, NULL, NULL) != HM_HOST)
+	{
+		add_conf_by_address(yy_aconf->host, CONF_DLINE, NULL, yy_aconf);
+	}
+	else
+	{
+		free_conf(yy_aconf);
+		conf_report_error("Ignoring deny -- invalid hostname.");
+	}
+	yy_aconf = NULL;
+	return 0;
+}
+
+static void	conf_set_deny_ip(void *data)
+{
+	MyFree(yy_aconf->host);
+	DupString(yy_aconf->host, data);
+}
+
+static void	conf_set_deny_reason(void *data)
+{
+	MyFree(yy_aconf->passwd);
+	DupString(yy_aconf->passwd, data);
+}
+
+static int	conf_begin_exempt(struct TopConf *tc)
+{
+	if(yy_aconf)
+	{
+		free_conf(yy_aconf);
+		yy_aconf = NULL;
+	}
+
+	yy_aconf=make_conf();
+	DupString(yy_aconf->passwd, "*");
+	yy_aconf->status = CONF_EXEMPTDLINE;
+
+	return 0;
+}
+
+static int	conf_end_exempt(struct TopConf *tc)
+{
+	if (yy_aconf->host &&
+	    parse_netmask(yy_aconf->host, NULL, NULL) != HM_HOST)
+	{
+		add_conf_by_address(yy_aconf->host, CONF_EXEMPTDLINE, NULL, yy_aconf);
+	}
+	else
+	{
+		conf_report_error("Ignoring exempt -- invalid exempt::ip.");
+		free_conf(yy_aconf);
+	}
+
+	yy_aconf = NULL;
+	return 0;
+}
+
+static void	conf_set_exempt_ip(void *data)
+{
+	MyFree(yy_aconf->host);
+	DupString(yy_aconf->host, data);
+}
+
+static int	conf_begin_gecos(struct TopConf *tc)
+{
+	if(yy_aconf)
+	{
+		free_conf(yy_aconf);
+		yy_aconf = NULL;
+	}
+
+	yy_aconf = make_conf();
+	yy_aconf->status = CONF_XLINE;
+	DupString(yy_aconf->passwd, "No Reason");
+	return 0;
+}
+
+static int	conf_end_gecos(struct TopConf *tc)
+{
+	if(yy_aconf->host)
+		conf_add_x_conf(yy_aconf);
+	else
+	{
+		conf_report_error("Ignoring gecos -- invalid gecos::name.");
+		free_conf(yy_aconf);
+	}
+
+	yy_aconf = NULL;
+
+	return 0;
+}
+
+static void	conf_set_gecos_name(void *data)
+{
+	MyFree(yy_aconf->host);
+	DupString(yy_aconf->host, data);
+	collapse(yy_aconf->host);
+}
+
+static void	conf_set_gecos_reason(void *data)
+{
+	MyFree(yy_aconf->passwd);
+	DupString(yy_aconf->passwd, data);
+}
+
+static void	conf_set_gecos_action(void *data)
+{
+	char *act = data;
+
+	if (strcasecmp(act, "warn") == 0)
+		yy_aconf->port = 0;
+	else if (strcasecmp(act, "reject") == 0)
+		yy_aconf->port = 1;
+	else if (strcasecmp(act, "silent") == 0)
+		yy_aconf->port = 2;
+	else
+		conf_report_error("Warning -- invalid gecos::action.");
+}
+
+static void	conf_set_general_failed_oper_notice(void *data)
+{
+	ConfigFileEntry.failed_oper_notice = *(unsigned int*) data;
+}
+
+static void	conf_set_general_anti_nick_flood(void *data)
+{
+	ConfigFileEntry.anti_nick_flood = *(unsigned int*) data;
+}
+
+static void	conf_set_general_max_nick_time(void *data)
+{
+	ConfigFileEntry.max_nick_time = *(unsigned int*) data;
+}
+
+static void	conf_set_general_max_nick_changes(void *data)
+{
+	ConfigFileEntry.max_nick_changes = *(unsigned int*) data;
+}
+
+static void	conf_set_general_max_accept(void *data)
+{
+	ConfigFileEntry.max_accept = *(unsigned int*) data;
+}
+
+static void	conf_set_general_anti_spam_exit_message_time(void *data)
+{
+	ConfigFileEntry.anti_spam_exit_message_time = *(unsigned int*) data;
+}
+
+static void	conf_set_general_ts_warn_delta(void *data)
+{
+	ConfigFileEntry.ts_warn_delta = *(unsigned int*) data;
+}
+
+static void	conf_set_general_ts_max_delta(void *data)
+{
+	ConfigFileEntry.ts_max_delta = *(unsigned int*) data;
+}
+
+static void	conf_set_general_havent_read_conf(void *data)
+{
+	if (*(unsigned int*)data)
+	{
+		conf_report_error("You haven't read your config file properly.");
+		conf_report_error("There is a line in the example conf that will kill your server if not removed.");
+		conf_report_error("Consider actually reading/editing the conf file, and removing this line.");
+		exit(0);
+	}
+}
+
+static void	conf_set_general_kline_with_reason(void *data)
+{
+	ConfigFileEntry.kline_with_reason = *(unsigned int*) data;
+}
+
+static void	conf_set_general_client_exit(void *data)
+{
+	ConfigFileEntry.client_exit = *(unsigned int*) data;
+}
+
+static void	conf_set_general_kline_with_connection_closed(void *data)
+{
+	ConfigFileEntry.kline_with_connection_closed = *(unsigned int*) data;
+}
+
+static void	conf_set_general_warn_no_nline(void *data)
+{
+	ConfigFileEntry.warn_no_nline = *(unsigned int*) data;
+}
+
+static void	conf_set_general_non_redundant_klines(void *data)
+{
+	ConfigFileEntry.non_redundant_klines = *(unsigned int*) data;
+}
+
+static void	conf_set_general_stats_o_oper_only(void *data)
+{
+	ConfigFileEntry.stats_o_oper_only = *(unsigned int*) data;
+}
+
+static void	conf_set_general_stats_P_oper_only(void *data)
+{
+	ConfigFileEntry.stats_P_oper_only = *(unsigned int*) data;
+}
+
+static void	conf_set_general_stats_k_oper_only(void *data)
+{
+	char *val = data;
+
+	if (strcasecmp(val, "yes") == 0)
+		ConfigFileEntry.stats_k_oper_only = 2;
+	else if (strcasecmp(val, "masked") == 0)
+		ConfigFileEntry.stats_k_oper_only = 1;
+	else if (strcasecmp(val, "no") == 0)
+		ConfigFileEntry.stats_k_oper_only = 0;
+	else
+		conf_report_error("Invalid setting '%s' for general::stats_k_oper_only.",
+					val);
+}
+
+static void	conf_set_general_stats_i_oper_only(void *data)
+{
+	char *val = data;
+
+	if (strcasecmp(val, "yes") == 0)
+		ConfigFileEntry.stats_i_oper_only = 2;
+	else if (strcasecmp(val, "masked") == 0)
+		ConfigFileEntry.stats_i_oper_only = 1;
+	else if (strcasecmp(val, "no") == 0)
+		ConfigFileEntry.stats_i_oper_only = 0;
+	else
+		conf_report_error("Invalid setting '%s' for general::stats_i_oper_only.", val);
+}
+
+static void	conf_set_general_pace_wait(void *data)
+{
+	ConfigFileEntry.pace_wait = *(unsigned int*) data;
+}
+
+static void	conf_set_general_caller_id_wait(void *data)
+{
+	ConfigFileEntry.caller_id_wait = *(unsigned int*) data;
+}
+
+static void	conf_set_general_pace_wait_simple(void *data)
+{
+	ConfigFileEntry.pace_wait_simple = *(unsigned int*) data;
+}
+
+static void	conf_set_general_short_motd(void *data)
+{
+	ConfigFileEntry.short_motd = *(unsigned int*) data;
+}
+
+static void	conf_set_general_no_oper_flood(void *data)
+{
+	ConfigFileEntry.no_oper_flood = *(unsigned int*) data;
+}
+
+static void	conf_set_general_glines(void *data)
+{
+	ConfigFileEntry.glines = *(unsigned int*) data;
+}
+
+static void	conf_set_general_gline_time(void *data)
+{
+	ConfigFileEntry.gline_time = *(unsigned int*) data;
+}
+
+static void	conf_set_general_idletime(void *data)
+{
+	ConfigFileEntry.idletime = *(unsigned int*) data;
+}
+
+static void	conf_set_general_dots_in_ident(void *data)
+{
+	ConfigFileEntry.dots_in_ident = *(unsigned int*) data;
+}
+
+static void	conf_set_general_max_targets(void *data)
+{
+	ConfigFileEntry.max_targets = *(unsigned int*) data;
+}
+
+static void	conf_set_general_servlink_path(void *data)
+{
+	MyFree(ConfigFileEntry.servlink_path);
+	DupString(ConfigFileEntry.servlink_path, data);
+}
+
+static void	conf_set_general_default_cipher_preference(void *data)
+{
+#ifdef HAVE_LIBCRYPTO
+	struct EncCapability *ecap;
+	char *cipher_name;
+
+	ConfigFileEntry.default_cipher_preference = NULL;
+
+	cipher_name = data;
+
+	for (ecap = CipherTable; ecap->name; ecap++)
+	{
+		if ( (!irccmp(ecap->name, cipher_name)) &&
+		    (ecap->cap & CAP_ENC_MASK))
+		{
+			ConfigFileEntry.default_cipher_preference = ecap;
+			return;
+		}
+	}
+
+	conf_report_error("Invalid general::default_cipher_preference '%s'.",
+				cipher_name);
+#else
+	conf_report_error("Ignoring general::default_cipher_preference -- OpenSSL support not available.");
+#endif
+}
+
+static void	conf_set_general_compression_level(void *data)
+{
+#ifdef HAVE_LIBZ
+	ConfigFileEntry.compression_level = *(unsigned int*)data;
+
+	if ((ConfigFileEntry.compression_level < 1) ||
+	    (ConfigFileEntry.compression_level > 9))
+	{
+		conf_report_error("Invalid general::compression_level %d -- using default.",
+			ConfigFileEntry.compression_level);
+		ConfigFileEntry.compression_level = 0;
+	}
+#else
+	conf_report_error("Ignoring general::compression_level -- zlib not available.");
+#endif
+}
+
+static void	conf_set_general_use_egd(void *data)
+{
+	ConfigFileEntry.use_egd = *(unsigned int*)data;
+}
+
+static void	conf_set_general_egdpool_path(void *data)
+{
+	MyFree(ConfigFileEntry.egdpool_path);
+	DupString(ConfigFileEntry.egdpool_path, data);
+}
+
+static void	conf_set_general_ping_cookie(void *data)
+{
+	ConfigFileEntry.ping_cookie = *(unsigned int*)data;
+}
+
+static void	conf_set_general_disable_auth(void *data)
+{
+	ConfigFileEntry.disable_auth = *(unsigned int*)data;
+}
+
+static void	conf_set_general_use_global_limits(void *data)
+{
+        int yesno = *(int*)data;
+
+	if(yesno)
+        {
+                ConfigFileEntry.use_global_limits = *(unsigned int*)data;
+        }
+        else
+        {
+                /* if its being changed from 1 -> 0, wipe the hash. */
+                if(ConfigFileEntry.use_global_limits == 1)
+                        clear_hostname_hash_table();
+                ConfigFileEntry.use_global_limits = *(unsigned int*)data;
+        }
+}
+
+static void	conf_set_general_use_help(void *data)
+{
+	ConfigFileEntry.use_help = *(unsigned int*)data;
+}
+
+static void    conf_set_general_use_whois_actually(void *data)
+{
+        ConfigFileEntry.use_whois_actually = *(unsigned int*)data;
+}
+
+static void    conf_set_general_tkline_expire_notices(void *data)
+{
+        ConfigFileEntry.tkline_expire_notices = *(unsigned int*)data;
+}
+
+static void	conf_set_general_throttle_time(void *data)
+{
+	ConfigFileEntry.throttle_time = *(unsigned int*)data;
+}
+
+static void	conf_set_general_connect_timeout(void *data)
+{
+	ConfigFileEntry.connect_timeout = *(unsigned int*)data;
+}
+
+static void	conf_set_general_burst_away(void *data)
+{
+	ConfigFileEntry.burst_away = *(unsigned int*)data;
+}
+
+#ifdef IPV6
+static void	 conf_set_general_fallback_to_ip6_int(void *data)
+{
+	ConfigFileEntry.fallback_to_ip6_int = *(unsigned int*)data;
+}
+#endif
+
+static void	conf_set_general_oper_umodes(void *data)
+{
+	set_modes_from_table(&ConfigFileEntry.oper_umodes, "umode", 
+				umode_table, data);
+}
+
+static void	conf_set_general_oper_only_umodes(void *data)
+{
+	set_modes_from_table(&ConfigFileEntry.oper_only_umodes, "umode", 
+				umode_table, data);
+}
+
+static void	conf_set_general_min_nonwildcard(void *data)
+{
+	ConfigFileEntry.min_nonwildcard = *(unsigned int*)data;
+}
+
+static void	conf_set_general_default_floodcount(void *data)
+{
+	ConfigFileEntry.default_floodcount = *(unsigned int*)data;
+}
+
+static void	conf_set_general_client_flood(void *data)
+{
+	ConfigFileEntry.client_flood = *(unsigned int*)data;
+}
+
+static void	conf_set_general_dot_in_ip6_addr(void *data)
+{
+	ConfigFileEntry.dot_in_ip6_addr = *(unsigned int*)data;
+}
+
+static void	conf_set_channel_use_except(void *data)
+{
+	ConfigChannel.use_except = *(unsigned int*)data;
+}
+
+static void	conf_set_channel_use_invex(void *data)
+{
+	ConfigChannel.use_invex = *(unsigned int*)data;
+}
+
+static void	conf_set_channel_use_knock(void *data)
+{
+	ConfigChannel.use_knock = *(unsigned int*)data;
+}
+
+static void	conf_set_channel_knock_delay(void *data)
+{
+	ConfigChannel.knock_delay = *(unsigned int*)data;
+}
+
+static void	conf_set_channel_knock_delay_channel(void *data)
+{
+	ConfigChannel.knock_delay_channel = *(unsigned int*)data;
+}
+
+static void	conf_set_channel_max_chans_per_user(void *data)
+{
+	ConfigChannel.max_chans_per_user = *(unsigned int*)data;
+}
+
+static void	conf_set_channel_quiet_on_ban(void *data)
+{
+	ConfigChannel.quiet_on_ban = *(unsigned int*)data;
+}
+
+static void	conf_set_channel_max_bans(void *data)
+{
+	ConfigChannel.max_bans = *(unsigned int*)data;
+}
+
+static void	conf_set_channel_persist_time(void *data)
+{
+	ConfigChannel.persist_time = *(unsigned int*)data;
+}
+
+static void	conf_set_channel_default_split_user_count(void *data)
+{
+	ConfigChannel.default_split_user_count = *(unsigned int*)data;
+}
+
+static void	conf_set_channel_default_split_server_count(void *data)
+{
+	ConfigChannel.default_split_server_count = *(unsigned int*)data;
+}
+
+static void	conf_set_channel_no_create_on_split(void *data)
+{
+	ConfigChannel.no_create_on_split = *(unsigned int*)data;
+}
+
+static void	conf_set_channel_no_join_on_split(void *data)
+{
+	ConfigChannel.no_join_on_split = *(unsigned int*)data;
+}
+
+static void	conf_set_channel_no_oper_resvs(void *data)
+{
+	ConfigChannel.no_oper_resvs = *(unsigned int*) data;
+}
+
+static void	conf_set_serverhide_flatten_links(void *data)
+{
+	ConfigServerHide.flatten_links = *(unsigned int*)data;
+}
+
+static void	conf_set_serverhide_hide_servers(void *data)
+{
+	ConfigServerHide.hide_servers = *(unsigned int*)data;
+}
+
+static void	conf_set_serverhide_disable_remote_commands(void *data)
+{
+	ConfigServerHide.disable_remote = *(unsigned int*)data;
+}
+
+static void	conf_set_serverhide_disable_local_channels(void *data)
+{
+	ConfigServerHide.disable_local_channels = *(unsigned int*)data;
+}
+
+static void	conf_set_serverhide_links_delay(void *data)
+{
+	int val = *(unsigned int*) data;
+
+	if((val > 0) && ConfigServerHide.links_disabled == 1)
+	{
+		eventAddIsh("write_links_file", write_links_file, NULL, val);
+		ConfigServerHide.links_disabled = 0;
+	}
+
+	ConfigServerHide.links_delay = val;
+}
+
+static void	conf_set_serverhide_hidden(void *data)
+{
+	ConfigServerHide.hidden = *(unsigned int*)data;
+}
+
+static void	conf_set_serverhide_disable_hidden(void *data)
+{
+	ConfigServerHide.disable_hidden = *(unsigned int*)data;
+}
+
+/* public functions */
+
+
 void	conf_report_error(char *fmt, ...)
 {
 	va_list ap;
@@ -224,70 +2427,9 @@ int     remove_conf_item(char *topconf, char *name)
 
         return 0;
 }
-        
-        
-struct 	ConfEntry *find_conf_item(const struct TopConf *top, const char* name)
-{
-	dlink_node *d;
- 	struct ConfEntry* cf;
- 
-	DLINK_FOREACH(d, top->tc_items.head)
-	{
-		cf = d->data;
-		if (strcasecmp(cf->cf_name, name) == 0)
-			return cf;
-	}
 
-	return NULL;
-}
 
-struct 	TopConf *find_top_conf(char *name)
-{
-	dlink_node *d;
-	struct TopConf* tc;
 
-	DLINK_FOREACH(d, conf_items.head)
-	{
-		tc = d->data;
-		if (strcasecmp(tc->tc_name, name) == 0)
-			return tc;
-	}
-
-	return NULL;
-}
-  
-int 	add_top_conf	(char *name, int (*sfunc)(struct TopConf*), 
-			 int (*efunc)(struct TopConf*))
-{
-	struct TopConf *tc;
-  
-	tc = MyMalloc(sizeof(struct TopConf));
-  
-	DupString(tc->tc_name, name);
-	tc->tc_sfunc = sfunc;
-	tc->tc_efunc = efunc;
-  
-	dlinkAddAlloc(tc, &conf_items);
-	return 0;
-}
-
-int     remove_top_conf(char *name)
-{
-        struct TopConf *tc;
-        dlink_node *ptr;
-
-        if((tc = find_top_conf(name)) == NULL)
-                return -1;
-
-        if((ptr = dlinkFind(&conf_items, tc)) == NULL)
-                return -1;
-
-        dlinkDestroy(ptr, &conf_items);
-        MyFree(tc->tc_name);
-        MyFree(tc);
-
-        return 0;
-}
 
 void	newconf_init()
 {
@@ -591,2132 +2733,4 @@ void	newconf_init()
 			conf_set_serverhide_disable_local_channels);
 }
 
-void	conf_set_serverinfo_rsa_private_key_file(void *data)
-{
-#ifdef HAVE_LIBCRYPTO
-	BIO *file;
 
-	if (ServerInfo.rsa_private_key)
-	{
-		RSA_free(ServerInfo.rsa_private_key);
-		ServerInfo.rsa_private_key = NULL;
-	}
-
-	if (ServerInfo.rsa_private_key_file)
-	{
-		MyFree(ServerInfo.rsa_private_key_file);
-		ServerInfo.rsa_private_key_file = NULL;
-	}
-
-	DupString(ServerInfo.rsa_private_key_file, (char*)data);
-
-	file = BIO_new_file((char*)data, "r");
-
-	if (file == NULL)
-	{
-		conf_report_error(
-			"Ignoring config file entry rsa_private_key -- file open failed"
-			" (%s)", (char*)data);
-		return;
-	}
-
-	ServerInfo.rsa_private_key = (RSA *) PEM_read_bio_RSAPrivateKey(file,
-							NULL, 0, NULL);
-	if (ServerInfo.rsa_private_key == NULL)
-	{
-		conf_report_error("Ignoring config file entry rsa_private_key -- couldn't extract key");
-		return;
-	}
-
-	if (!RSA_check_key(ServerInfo.rsa_private_key))
-	{
-		conf_report_error("Ignoring config file entry rsa_private_key -- invalid key");
-		return;
-	}
-
-	/* require 2048 bit (256 byte) key */
-	if ( RSA_size(ServerInfo.rsa_private_key) != 256 )
-	{
-		conf_report_error("Ignoring config file entry rsa_private_key -- not 2048 bit");
-		return;
-	}
-
-	BIO_set_close(file, BIO_CLOSE);
-	BIO_free(file);
-#else
-	conf_report_error("Ignoring serverinfo::rsa_private_key -- SSL support not available.");
-#endif
-}
-
-void	conf_set_serverinfo_name(void *data)
-{
-	if(ServerInfo.name == NULL)
-	{
-		/* the ircd will exit() in main() if we dont set one */
-		if(strlen((char*)data) <= HOSTLEN)
-			DupString(ServerInfo.name, (char*)data);
-	}
-}
-
-void	conf_set_serverinfo_description(void *data)
-{
-	MyFree(ServerInfo.description);
-	DupString(ServerInfo.description, (char*)data);
-}
-
-void	conf_set_serverinfo_network_name(void *data)
-{
-	char *p;
-
-	if((p = strchr((char *)data, ' ')))
-		*p = '\0';
-
-	MyFree(ServerInfo.network_name);
-	DupString(ServerInfo.network_name, (char*)data);
-}
-
-void	conf_set_serverinfo_network_desc(void *data)
-{
-	MyFree(ServerInfo.network_desc);
-	DupString(ServerInfo.network_desc, (char*) data);
-}
-
-void	conf_set_serverinfo_vhost(void *data)
-{
-	if(inetpton(DEF_FAM, (char*)data, &IN_ADDR(ServerInfo.ip)) <= 0)
-	{
-		conf_report_error("Invalid netmask for server IPv4 vhost (%s)",
-					(char*) data);
-		return;
-	}
-
-	ServerInfo.specific_ipv4_vhost = 1;
-}
-
-void	conf_set_serverinfo_vhost6(void *data)
-{
-#ifdef IPV6
-	if(inetpton(DEF_FAM, (char*)data, &IN_ADDR(ServerInfo.ip6)) <= 0)
-	{
-		conf_report_error("Invalid netmask for server IPv6 vhost (%s)",
-					(char*) data);
-		return;
-	}
-
-	ServerInfo.specific_ipv6_vhost = 1;
-#else
-	conf_report_error("Warning -- ignoring serverinfo::vhost6 -- IPv6 support not available.");
-#endif
-}
-
-void	conf_set_serverinfo_max_clients(void *data)
-{
-	int max = *(int*)data;
-
-	if (MAX_CLIENTS >= max)
-		ServerInfo.max_clients = max;
-	else
-	{
-		conf_report_error("Compile-time MAX_CLIENTS (%d) is less than serverinfo::max_clients (%d) -- using %d",
-			MAX_CLIENTS, max, MAX_CLIENTS);
-		ServerInfo.max_clients = MAX_CLIENTS;
-	}
-}
-
-void	conf_set_serverinfo_max_buffer(void *data)
-{
-	ServerInfo.max_buffer = *(int*) data;
-}
-
-void	conf_set_serverinfo_hub(void *data)
-{
-	int hub = *(int*) data;
-
-	ServerInfo.hub = hub;
-}
-
-void	conf_set_modules_module(void *data)
-{
-#ifndef STATIC_MODULES
-	char *m_bn;
-
-	m_bn = irc_basename((char*) data);
-
-	if (findmodule_byname(m_bn) != -1)
-		return;
-
-	load_one_module((char*) data, 0);
-
-	MyFree(m_bn);
-#else
-	conf_report_error("Ignoring modules::module -- loadable module support not present.");
-#endif
-}
-
-void	conf_set_modules_path(void *data)
-{
-#ifndef STATIC_MODULES
-	mod_add_path((char*) data);
-#else
-	conf_report_error("Ignoring modules::path -- loadable module support net present.");
-#endif
-}
-
-void	conf_set_admin_name(void *data)
-{
-	MyFree(AdminInfo.name);
-	DupString(AdminInfo.name, (char*) data);
-}
-
-void	conf_set_admin_email(void *data)
-{
-	MyFree(AdminInfo.email);
-	DupString(AdminInfo.email, (char*) data);
-}
-
-void	conf_set_admin_description(void *data)
-{
-	MyFree(AdminInfo.description);
-	DupString(AdminInfo.description, (char*) data);
-}
-
-void	conf_set_logging_path(void *data)
-{
-	conf_report_error("Warning -- logging::path is not yet implemented.");
-}
-
-void	conf_set_logging_oper_log(void *data)
-{
-	conf_report_error("Warning -- logging::oper_log is not yet implemented.");
-}
-
-void	conf_set_logging_gline_log(void *data)
-{
-	conf_report_error("Warning -- logging::gline_log is not yet implemented.");
-}
-
-void	conf_set_logging_fname_userlog(void *data)
-{
-	strlcpy(ConfigFileEntry.fname_userlog, data, sizeof(ConfigFileEntry.fname_userlog));
-}
-
-void	conf_set_logging_fname_foperlog(void *data)
-{
-	strlcpy(ConfigFileEntry.fname_foperlog, data, sizeof(ConfigFileEntry.fname_foperlog));
-}
-
-void	conf_set_logging_fname_operlog(void *data)
-{
-	strlcpy(ConfigFileEntry.fname_operlog, data, sizeof(ConfigFileEntry.fname_operlog));
-}
-
-static struct
-{
-	char *name;
-	int level;
-} log_levels[] = {
-	{"l_crit",	L_CRIT},
-	{"l_error",	L_ERROR},
-	{"l_warn",	L_WARN},
-	{"l_notice",	L_NOTICE},
-	{"l_trace",	L_TRACE},
-	{"l_info",	L_INFO},
-	{"l_debug",	L_DEBUG},
-	{NULL,		0}
-};
-
-void	conf_set_logging_log_level(void *data)
-{
-	int i;
-
-	for (i = 0; log_levels[i].name; i++)
-	{
-		if (strcasecmp((char*) data, log_levels[i].name) == 0)
-		{
-			set_log_level(log_levels[i].level);
-			return;
-		}
-	}
-
-	conf_report_error("Warning -- log level '%s' is not defined, "
-			  "using default of L_NOTICE", (char*) data);
-	set_log_level(L_NOTICE);
-}
-
-/* XXX This _really_ needs to go away */
-struct ConfItem *yy_achead = NULL;
-struct ConfItem *yy_aconf = NULL;
-struct ConfItem *yy_aprev = NULL;
-int              yy_acount = 0;
-struct ConfItem *yy_hconf;
-struct ConfItem *yy_lconf;
-
-struct ConfItem *hub_confs;
-struct ConfItem *leaf_confs;
-struct ConfItem *yy_aconf_next;
-
-struct Class *yy_class = NULL;
-char *resv_reason;
-
-char  *class_redirserv_var;
-int   class_redirport_var;
-
-struct mode_table
-{
-	char *	name;
-	int	mode;
-};
-
-struct mode_table umode_table[] = {
-	{"bots",	UMODE_BOTS},
-	{"cconn",	UMODE_CCONN},
-	{"debug",	UMODE_DEBUG},
-	{"full",	UMODE_FULL},
-	{"callerid",	UMODE_CALLERID},
-	{"invisible",	UMODE_INVISIBLE},
-	{"skill",	UMODE_SKILL},
-	{"locops",	UMODE_LOCOPS},
-	{"nchange",	UMODE_NCHANGE},
-	{"rej",		UMODE_REJ},
-	{"servnotice",	UMODE_SERVNOTICE},
-	{"unauth",	UMODE_UNAUTH},
-	{"wallop",	UMODE_WALLOP},
-	{"external",	UMODE_EXTERNAL},
-	{"spy",		UMODE_SPY},
-	{"operwall",	UMODE_OPERWALL},
-	{NULL}
-};
-
-struct mode_table flag_table[] = {
-	{"global_kill",		OPER_GLOBAL_KILL},
-	{"remote",		OPER_REMOTE},
-	{"kline",		OPER_K},
-	{"unkline",		OPER_UNKLINE},
-	{"gline",		OPER_GLINE},
-	{"nick_changes",	OPER_N},
-	{"rehash",		OPER_REHASH},
-	{"die",			OPER_DIE},
-	{"admin",		OPER_ADMIN},
-        {"hidden_admin",        OPER_HIDDENADMIN},
-	{"xline",		OPER_XLINE},
-	{"operwall",		OPER_OPERWALL},
-	{NULL}
-};
-
-struct mode_table auth_table[] = {
-	{"no_spoof_notice",	CONF_FLAGS_NO_SPOOF_NOTICE},
-	{"exceed_limit",	CONF_FLAGS_NOLIMIT},
-	{"kline_exempt",	CONF_FLAGS_EXEMPTKLINE},
-	{"gline_exempt",	CONF_FLAGS_EXEMPTGLINE},
-        {"flood_exempt",        CONF_FLAGS_EXEMPTFLOOD},
-	{"no_tilde",		CONF_FLAGS_NO_TILDE},
-	{"restricted",		CONF_FLAGS_RESTRICTED},
-	{"need_ident",		CONF_FLAGS_NEED_IDENTD},
-	{NULL}
-};
-
-
-static
-int	find_umode(struct mode_table* tab, char *name)
-{
-	int i;
-
-	for (i = 0; tab[i].name; i++)
-	{
-		if (strcmp(tab[i].name, name) == 0)
-			return tab[i].mode;
-	}
-
-	return 0;
-}
-
-static
-void	set_modes_from_table(	int *modes, char *whatis,
-				struct mode_table *tab, conf_parm_t *args)
-{
-	for (; args; args = args->next)
-	{
-		int mode; 
-
-		if ((args->type & CF_MTYPE) != CF_STRING)
-		{
-			conf_report_error("Warning -- %s is not a string; ignoring.",
-						whatis);
-			continue;
-		}
-
-		mode = find_umode(tab, args->v.string);
-
-		if (!mode)
-		{
-			conf_report_error("Warning -- unknown %s %s.",
-					whatis, args->v.string);
-			continue;
-		}
-
-		*modes |= mode;
-	}
-}
-
-int	conf_begin_oper(struct TopConf* tc)
-{
-	struct ConfItem *yy_tmp;
-	
-	yy_tmp = yy_achead;
-	while(yy_tmp)
-	{
-		yy_aconf = yy_tmp;
-		yy_tmp = yy_tmp->next;
-		yy_aconf->next = NULL;
-		free_conf(yy_aconf);
-	}
-	yy_acount = 0;
-	yy_achead = yy_aconf = make_conf();
-	yy_aconf->status = CONF_OPERATOR;
-        yy_aconf->flags |= CONF_FLAGS_ENCRYPTED;
-        yy_achead->port |= OPER_OPERWALL;
-	return 0;
-}
-
-int	conf_end_oper(struct TopConf* tc)
-{
-	struct ConfItem *yy_tmp;
-	struct ConfItem *yy_next;
-	
-	if(conf_cur_block_name != NULL)
-	{
-		MyFree(yy_achead->name);
-		DupString(yy_achead->name, conf_cur_block_name);
-	}
-	/* copy over settings from first struct */
-	for( yy_tmp = yy_achead->next; yy_tmp; yy_tmp = yy_tmp->next )
-	{
-		if (yy_achead->className)
-			DupString(yy_tmp->className, yy_achead->className);
-		if (yy_achead->name)
-			DupString(yy_tmp->name, yy_achead->name);
-		if (yy_achead->passwd)
-			DupString(yy_tmp->passwd, yy_achead->passwd);
-		yy_tmp->port = yy_achead->port;
-		yy_tmp->flags = yy_achead->flags;
-		
-#ifdef HAVE_LIBCRYPTO
-		if(yy_achead->rsa_public_key_file)
-			DupString(yy_tmp->rsa_public_key_file, yy_achead->rsa_public_key_file);
-		
-		if(yy_achead->rsa_public_key)
-		{
-			BIO *file;
-			
-			file = BIO_new_file(yy_achead->rsa_public_key_file, "r");
-			yy_tmp->rsa_public_key = (RSA *)PEM_read_bio_RSA_PUBKEY(file,
-						NULL, 0, NULL);
-			BIO_set_close(file, BIO_CLOSE);
-			BIO_free(file);
-		}
-#endif
-	}
-
-	for( yy_tmp = yy_achead; yy_tmp; yy_tmp = yy_next )
-	{
-		yy_next = yy_tmp->next;
-
-#ifdef HAVE_LIBCRYPTO
-		if(yy_tmp->name && (yy_tmp->passwd || yy_aconf->rsa_public_key) && yy_tmp->host)
-#else
-		if(yy_tmp->name && yy_tmp->passwd && yy_tmp->host)
-#endif
-		{
-			conf_add_class_to_conf(yy_tmp);
-			conf_add_conf(yy_tmp);
-		}
-		else
-		{
-			free_conf(yy_tmp);
-		}
-	}
-
-	yy_achead = NULL;
-	yy_aconf = NULL;
-	yy_aprev = NULL;
-	yy_acount = 0;
-
-	return 0;
-}
-
-void	conf_set_oper_flags(void *data)
-{
-	conf_parm_t *args = data;
-
-	set_modes_from_table(&yy_achead->port, "flag", flag_table, args);
-}
-
-void	conf_set_oper_name(void *data)
-{
-	int oname_len;
-
-	MyFree(yy_achead->name);
-
-	if ((oname_len = strlen((char*) data)) > OPERNICKLEN)
-		((char*) data)[OPERNICKLEN] = 0;
-
-	DupString(yy_achead->name, (char*) data);
-}
-
-void	conf_set_oper_user(void *data)
-{
-	char *p;
-	char *new_user;
-	char *new_host;
-	char *host = (char*) data;
-
-	/* The first user= line doesn't allocate a new conf */
-	if (yy_acount++)
-	{
-		yy_aconf = (yy_aconf->next = make_conf());
-		yy_aconf->status = CONF_OPERATOR;
-	}
-
-	if((p = strchr(host, '@')))
-	{
-		*p = '\0';
-		DupString(new_user, host);
-		MyFree(yy_aconf->user);
-		yy_aconf->user = new_user;
-		p++;
-		DupString(new_host, p);
-		MyFree(yy_aconf->host);
-		yy_aconf->host = new_host;
-	}
-	else
-	{
-		MyFree(yy_aconf->host);
-		DupString(yy_aconf->host, host);
-		DupString(yy_aconf->user, "*");
-	}
-}
-
-void	conf_set_oper_password(void *data)
-{
-	if (yy_achead->passwd)
-		memset(yy_achead->passwd, 0, strlen(yy_achead->passwd));
-
-	MyFree(yy_achead->passwd);
-	DupString(yy_achead->passwd, (char*) data);
-}
-
-void	conf_set_oper_rsa_public_key_file(void *data)
-{
-#ifdef HAVE_LIBCRYPTO
-	BIO *file;
-
-	if (yy_achead->rsa_public_key)
-	{
-		RSA_free(yy_achead->rsa_public_key);
-		yy_achead->rsa_public_key = NULL;
-	}
-
-	if (yy_achead->rsa_public_key_file)
-	{
-		MyFree(yy_achead->rsa_public_key_file);
-		yy_achead->rsa_public_key_file = NULL;
-	}
-
-	DupString(yy_achead->rsa_public_key_file, (char *)data);
-
-	file = BIO_new_file((char *) data, "r");
-
-	if (file == NULL)
-	{
-		conf_report_error("Ignoring rsa_public_key_file -- does %s exist?",
-					(char*) data);
-		return;
-	}
-
-	yy_achead->rsa_public_key = (RSA *) PEM_read_bio_RSA_PUBKEY(file,
-						NULL, 0, NULL );
-
-	if (yy_achead->rsa_public_key == NULL)
-	{
-		conf_report_error("Ignoring rsa_public_key_file -- Key invalid; check key syntax.");
-		return;
-	}
-
-	BIO_set_close(file, BIO_CLOSE);
-	BIO_free(file);
-#else
-	conf_report_error("Warning -- ignoring rsa_public_key_file (OpenSSL support not available");
-#endif
-}
-
-void	conf_set_oper_encrypted(void *data)
-{
-	int yesno = *(unsigned int*) data;
-
-	if (yesno)
-		yy_achead->flags |= CONF_FLAGS_ENCRYPTED;
-	else
-		yy_achead->flags &= ~CONF_FLAGS_ENCRYPTED;
-}
-
-void	conf_set_oper_class(void *data)
-{
-	MyFree(yy_achead->className);
-	DupString(yy_achead->className, (char *) data);
-}
-
-void	conf_set_oper_global_kill(void *data)
-{
-	int yesno = *(int*)data;
-
-	if (yesno)
-		yy_achead->port |= OPER_GLOBAL_KILL;
-	else
-		yy_achead->port &= ~OPER_GLOBAL_KILL;
-}
-
-void	conf_set_oper_remote(void *data)
-{
-	int yesno = *(int*)data;
-	
-	if (yesno)
-		yy_achead->port |= OPER_REMOTE;
-	else
-		yy_achead->port &= ~OPER_REMOTE;
-}
-
-void	conf_set_oper_kline(void *data)
-{
-	int yesno = *(int*)data;
-
-	if (yesno)
-		yy_achead->port |= OPER_K;
-	else	
-		yy_achead->port &= ~OPER_K;
-}
-
-void	conf_set_oper_unkline(void *data)
-{
-	int yesno = *(int*) data;
-
-	if (yesno)
-		yy_achead->port |= OPER_UNKLINE;
-	else
-		yy_achead->port &= ~OPER_UNKLINE;
-}
-
-void	conf_set_oper_xline(void *data)
-{
-	int yesno = *(int*) data;
-
-	if (yesno)
-		yy_achead->port |= OPER_XLINE;
-	else
-		yy_achead->port &= ~OPER_XLINE;
-}
-
-void	conf_set_oper_gline(void *data)
-{
-	int yesno = *(int*) data;
-
-	if (yesno)
-		yy_achead->port |= OPER_GLINE;
-	else
-		yy_achead->port &= ~OPER_GLINE;
-}
-
-void	conf_set_oper_operwall(void *data)
-{
-	int yesno = *(int*) data;
-
-	if (yesno)
-		yy_achead->port |= OPER_OPERWALL;
-	else
-		yy_achead->port &= ~OPER_OPERWALL;
-}
-
-void	conf_set_oper_nick_changes(void *data)
-{
-	int yesno = *(int*) data;
-
-	if (yesno)
-		yy_achead->port |= OPER_N;
-	else
-		yy_achead->port &= ~OPER_N;
-}
-
-void	conf_set_oper_die(void *data)
-{
-	int yesno = *(int*) data;
-
-	if (yesno)
-		yy_achead->port |= OPER_DIE;
-	else
-		yy_achead->port &= ~OPER_DIE; 
-}
-
-void	conf_set_oper_rehash(void *data)
-{
-	int yesno = *(int*) data;
-
-	if (yesno)
-		yy_achead->port |= OPER_REHASH;
-	else
-		yy_achead->port &= ~OPER_REHASH;
-}
-
-void	conf_set_oper_admin(void *data)
-{
-	int yesno = *(int*) data;
-
-	if (yesno)
-		yy_achead->port |= OPER_ADMIN;
-	else
-		yy_achead->port &= ~OPER_ADMIN;
-}
-
-void    conf_set_oper_hidden_admin(void *data)
-{
-        int yesno = *(int*) data;
-
-        if(yesno)
-                yy_achead->port |= OPER_HIDDENADMIN;
-        else
-                yy_achead->port &= ~OPER_HIDDENADMIN;
-}
-
-int	conf_begin_class(struct TopConf *tc)
-{
-	yy_class = make_class();
-	return 0;
-}
-
-int	conf_end_class(struct TopConf *tc)
-{
-	if(conf_cur_block_name != NULL)
-	{       
-		MyFree(yy_class->class_name);
-		DupString(yy_class->class_name, conf_cur_block_name);
-	}
-
-	if(yy_class->class_name)
-		add_class(yy_class);
-	else
-		free_class(yy_class);
-	return 0;
-}
-
-void	conf_set_class_name(void *data)
-{
-	DupString(yy_class->class_name, (char*) data);
-}
-
-void	conf_set_class_ping_time(void *data)
-{
-	yy_class->ping_freq = *(unsigned int*)data;
-}
-
-void	conf_set_class_number_per_ip(void *data)
-{
-	yy_class->max_local = *(unsigned int *)data;
-}
-
-void	conf_set_class_number_per_ip_global(void *data)
-{
-	yy_class->max_global = *(unsigned int *)data;
-}
-
-void	conf_set_class_number_per_ident(void *data)
-{
-	yy_class->max_ident = *(unsigned int *)data;
-}
-
-void	conf_set_class_connectfreq(void *data)
-{
-	yy_class->con_freq = *(unsigned int *) data;
-}
-
-void	conf_set_class_max_number(void *data)
-{
-	yy_class->max_total = *(unsigned int *) data;
-}
-
-void	conf_set_class_sendq(void *data)
-{
-	yy_class->max_sendq = *(unsigned int *) data;
-}
-
-static char *listener_address;
-
-int	conf_begin_listen(struct TopConf *tc)
-{
-	listener_address = NULL;
-	return 0;
-}
-
-int	conf_end_listen(struct TopConf *tc)
-{
-	MyFree(listener_address);
-	listener_address = NULL;
-	return 0;
-}
-
-void	conf_set_listen_port(void *data)
-{
-	conf_parm_t *args = data;
-
-	for (; args; args = args->next)
-	{
-		if ((args->type & CF_MTYPE) != CF_INT)
-		{
-			conf_report_error("listener::port argument is not an integer "
-				"-- ignoring.");
-			continue;	
-		}
-
-		add_listener(args->v.number, listener_address);
-	}
-}
-
-void	conf_set_listen_address(void *data)
-{
-	MyFree(listener_address);
-	DupString(listener_address, data);
-}
-
-int	conf_begin_auth(struct TopConf *tc)
-{
-	struct ConfItem *yy_tmp;
-
-	yy_tmp = yy_achead;
-	while(yy_tmp)
-	{
-		yy_aconf = yy_tmp;
-		yy_tmp = yy_tmp->next;
-		yy_aconf->next = NULL;
-		free_conf(yy_aconf);
-	}
-	yy_achead = NULL;
-	yy_aconf = NULL;
-	yy_aprev = NULL;
-	yy_achead = yy_aprev = yy_aconf = make_conf();
-	yy_aconf->status = CONF_CLIENT;
-	yy_achead->flags |= CONF_FLAGS_NO_SPOOF_NOTICE;
-
-	return 0;
-}
-
-int	conf_end_auth(struct TopConf *tc)
-{
-	struct ConfItem *yy_tmp;
-	struct ConfItem *yy_next;
-
-	/* copy over settings from first struct */
-	for( yy_tmp = yy_achead->next; yy_tmp; yy_tmp = yy_tmp->next )
-	{
-		if(yy_achead->passwd)
-			DupString(yy_tmp->passwd, yy_achead->passwd);
-		if(yy_achead->name)
-			DupString(yy_tmp->name, yy_achead->name);
-		if(yy_achead->className)
-			DupString(yy_tmp->className, yy_achead->className);
-
-		yy_tmp->flags = yy_achead->flags;
-		yy_tmp->port  = yy_achead->port;
-	}
-
-	for( yy_tmp = yy_achead; yy_tmp; yy_tmp = yy_next )
-	{
-		yy_next = yy_tmp->next; /* yy_tmp->next is used by conf_add_conf */
-		yy_tmp->next = NULL;
-
-		if (yy_tmp->name == NULL)
-			DupString(yy_tmp->name,"NOMATCH");
-
-		conf_add_class_to_conf(yy_tmp);
-
-		if (yy_tmp->user == NULL)
-			DupString(yy_tmp->user,"*");
-		else
-			collapse(yy_tmp->user);
-
-		if (yy_tmp->host == NULL)
-			continue;
-		else
-			collapse(yy_tmp->host);
-
-		add_conf_by_address(yy_tmp->host, CONF_CLIENT, yy_tmp->user, yy_tmp);
-	}
-
-	yy_achead = NULL;
-	yy_aconf = NULL;
-	yy_aprev = NULL;
-	yy_acount = 0;
-	return 0;
-}
-
-void	conf_set_auth_user(void *data)
-{
-	char *p;
-	char *new_user;
-	char *new_host;
-
-	/* The first user= line doesn't allocate a new conf */
-	if ( yy_acount++ )
-	{
-		yy_aprev = yy_aconf;
-		yy_aconf = (yy_aconf->next = make_conf());
-		yy_aconf->status = CONF_CLIENT;
-	}
-
-	if((p = strchr(data, '@')))
-	{
-		*p = '\0';
-		DupString(new_user, data);
-		MyFree(yy_aconf->user);
-		yy_aconf->user = new_user;
-		p++;
-		MyFree(yy_aconf->host);
-		DupString(new_host,p);
-		yy_aconf->host = new_host;
-	}
-	else
-	{
-		MyFree(yy_aconf->host);
-		DupString(yy_aconf->host, data);
-		DupString(yy_aconf->user,"*");
-	}
-}
-
-void	conf_set_auth_passwd(void *data)
-{
-	if (yy_achead->passwd)
-		memset(yy_achead->passwd, 0, strlen(yy_achead->passwd));
-	MyFree(yy_achead->passwd);
-	DupString(yy_achead->passwd, data);
-}
-
-void	conf_set_auth_encrypted(void *data)
-{
-	int yesno = *(unsigned int*) data;
-
-	if (yesno)
-		yy_achead->flags |= CONF_FLAGS_ENCRYPTED;
-	else
-		yy_achead->flags &= ~CONF_FLAGS_ENCRYPTED;
-}
-
-void	conf_set_auth_no_spoof_notice(void *data)
-{
-	int yesno = *(unsigned int *)data;
-
-	if (yesno)
-		yy_achead->flags |= CONF_FLAGS_NO_SPOOF_NOTICE;
-	else
-		yy_achead->flags &= ~CONF_FLAGS_NO_SPOOF_NOTICE;
-}
-
-void	conf_set_auth_spoof(void *data)
-{
-	MyFree(yy_achead->name);
-	if(strlen(data) < HOSTLEN)
-	{
-		DupString(yy_achead->name, data);
-		yy_achead->flags |= CONF_FLAGS_SPOOF_IP;
-	}
-	else
-		conf_report_error("Warning -- spoof length must be less than %d characters; ignoring this.", HOSTLEN);
-}
-
-void	conf_set_auth_flags(void *data)
-{
-	conf_parm_t *args = data;
-
-	set_modes_from_table((int *)&yy_achead->flags, "flag", auth_table, args);
-}
-
-void	conf_set_auth_exceed_limit(void *data)
-{
-	int yesno = *(unsigned int*) data;
-
-	if (yesno)
-		yy_achead->flags |= CONF_FLAGS_NOLIMIT;
-	else
-		yy_achead->flags &= ~CONF_FLAGS_NOLIMIT;
-}
-
-void	conf_set_auth_is_restricted(void *data)
-{
-	int yesno = *(unsigned int*) data;
-
-	if (yesno)
-		yy_achead->flags |= CONF_FLAGS_RESTRICTED;
-	else
-		yy_achead->flags &= ~CONF_FLAGS_RESTRICTED;
-}
-
-void	conf_set_auth_kline_exempt(void *data)
-{
-	int yesno = *(unsigned int*) data;
-
-	if (yesno)
-		yy_achead->flags |= CONF_FLAGS_EXEMPTKLINE;
-	else
-		yy_achead->flags &= ~CONF_FLAGS_EXEMPTKLINE;
-}
-
-void	conf_set_auth_need_ident(void *data)
-{
-	int yesno = *(unsigned int*) data;
-
-	if (yesno)
-		yy_achead->flags |= CONF_FLAGS_NEED_IDENTD;
-	else
-		yy_achead->flags &= ~CONF_FLAGS_NEED_IDENTD;
-}
-
-void	conf_set_auth_no_tilde(void *data)
-{
-	int yesno = *(unsigned int*) data;
-
-	if (yesno)
-		yy_achead->flags |= CONF_FLAGS_NO_TILDE;
-	else
-		yy_achead->flags &= ~CONF_FLAGS_NO_TILDE;
-}
-
-void	conf_set_auth_gline_exempt(void *data)
-{
-	int yesno = *(unsigned int*) data;
-
-	if (yesno)
-		yy_achead->flags |= CONF_FLAGS_EXEMPTGLINE;
-	else
-		yy_achead->flags &= ~CONF_FLAGS_EXEMPTGLINE;
-}
-
-void	conf_set_auth_flood_exempt(void *data)
-{
-	int yesno = *(unsigned int *) data;
-
-	if (yesno)
-		yy_achead->flags |= CONF_FLAGS_EXEMPTFLOOD;
-	else
-		yy_achead->flags &= ~CONF_FLAGS_EXEMPTFLOOD;
-}
-
-void	conf_set_auth_redir_serv(void *data)
-{
-	yy_achead->flags |= CONF_FLAGS_REDIR;
-	MyFree(yy_achead->name);
-	DupString(yy_achead->name, data);
-}
-
-void	conf_set_auth_redir_port(void *data)
-{
-	int port = *(unsigned int *) data;
-
-	yy_achead->flags |= CONF_FLAGS_REDIR;
-	yy_achead->port = port;
-}
-
-void	conf_set_auth_class(void *data)
-{
-	MyFree(yy_achead->className);
-	DupString(yy_achead->className, data);
-}
-
-int	conf_begin_resv(struct TopConf *tc)
-{
-	resv_reason = NULL;
-	return 0;
-}
-
-int	conf_end_resv(struct TopConf *tc)
-{
-	MyFree(resv_reason);
-	resv_reason = NULL;
-	return 0;
-}
-
-void	conf_set_resv_channel(void *data)
-{
-	if(IsChannelName((char*) data))
-	{
-		if(resv_reason)
-			create_resv(data, resv_reason, RESV_CHANNEL);
-		else
-			create_resv(data, "No Reason", RESV_CHANNEL);
-	}
-	else
-	{
-		conf_report_error("Warning -- channel '%s' in resv is not a valid channel name.", (char*) data);
-	}
-}
-
-void	conf_set_resv_reason(void *data)
-{
-	MyFree(resv_reason);
-	DupString(resv_reason, data);
-}
-
-void	conf_set_resv_nick(void *data)
-{
-	if(clean_resv_nick(data))
-	{
-		if(resv_reason)
-			create_resv(data, resv_reason, RESV_NICK);
-		else
-			create_resv(data, "No Reason", RESV_NICK);
-	}
-	else
-	{
-		conf_report_error("Warning -- nickname '%s' in resv is not a valid nickname.", (char*) data);
-	}
-}
-
-int	conf_begin_shared(struct TopConf *tc)
-{
-	if(yy_aconf != NULL)
-	{
-		free_conf(yy_aconf);
-		yy_aconf = NULL;
-	}
-	yy_aconf=make_conf();
-	yy_aconf->status = CONF_ULINE;
-	yy_aconf->port = OPER_K;
-	return 0;
-}
-
-int	conf_end_shared(struct TopConf *tc)
-{
-	conf_add_u_conf(yy_aconf);
-	yy_aconf = (struct ConfItem *)NULL;
-	return 0;
-}
-
-void	conf_set_shared_name(void *data)
-{
-	MyFree(yy_aconf->name);
-	DupString(yy_aconf->name, data);
-}
-
-void	conf_set_shared_user(void *data)
-{
-	char *p;
-	char *new_user;
-	char *new_host;
-
-	if((p = strchr(data, '@')))
-	{
-		*p = '\0';
-		DupString(new_user, data);
-		MyFree(yy_aconf->user);
-		yy_aconf->user = new_user;
-		
-		p++;
-		DupString(new_host, p);
-		MyFree(yy_aconf->host);
-		yy_aconf->host = new_host;
-	}
-}
-
-void	conf_set_shared_kline(void *data)	
-{
-	int yesno = *(unsigned int*) data;
-
-	if (yesno)
-		yy_aconf->port |= OPER_K; 
-	else
-		yy_aconf->port &= ~OPER_K; 
-}
-
-void	conf_set_shared_unkline(void *data)
-{
-	int yesno = *(unsigned int*) data;
-
-	if (yesno)
-		yy_aconf->port |= OPER_UNKLINE; 
-	else
-		yy_aconf->port &= ~OPER_UNKLINE;
-}
-
-int	conf_begin_connect(struct TopConf *tc)
-{
-	hub_confs = NULL;
-
-	if(yy_aconf)
-	{
-		free_conf(yy_aconf);
-		yy_aconf = NULL;
-	}
-
-	if(yy_hconf)
-	{
-		free_conf(yy_hconf);
-		yy_hconf = NULL;
-	}
-
-	if(yy_lconf)
-	{
-		free_conf(yy_lconf);
-		yy_lconf = NULL;
-	}
-
-	yy_aconf=make_conf();
-	yy_aconf->passwd = NULL;
-	yy_aconf->status = CONF_SERVER;
-	yy_aconf->port = PORTNUM;
-	return 0;
-}
-
-int	conf_end_connect(struct TopConf *tc)
-{
-	if(conf_cur_block_name != NULL)
-	{
-		MyFree(yy_aconf->name);
-		DupString(yy_aconf->name, conf_cur_block_name);	
-	}
-#ifdef HAVE_LIBCRYPTO
-	if(yy_aconf->host &&
-	   ((yy_aconf->passwd && yy_aconf->spasswd) ||
-	    (yy_aconf->rsa_public_key && IsConfCryptLink(yy_aconf))))
-#else /* !HAVE_LIBCRYPTO */
-	if(yy_aconf->host && !IsConfCryptLink(yy_aconf) && 
-	   yy_aconf->passwd && yy_aconf->spasswd)
-#endif /* !HAVE_LIBCRYPTO */
-	{
-		if( conf_add_server(yy_aconf, scount) >= 0 )
-		{
-			conf_add_conf(yy_aconf);
-			++scount;
-		}
-		else
-		{
-			free_conf(yy_aconf);
-			yy_aconf = NULL;
-		}
-	}
-	else
-	{
-		if (yy_aconf->name)
-		{
-#ifndef HAVE_LIBCRYPTO
-			if (IsConfCryptLink(yy_aconf))
-				conf_report_error("Ignoring connect block for %s -- OpenSSL support is not available.", yy_aconf->name);
-#else
-			if(IsConfCryptLink(yy_aconf) && !yy_aconf->rsa_public_key)
-				conf_report_error("Ignoring connect block for %s -- missing key.",
-						yy_aconf->name);
-#endif
-			if(!yy_aconf->host)
-				conf_report_error("Ignoring connect block for %s -- missing host.",
-							yy_aconf->name);
-			else if(!IsConfCryptLink(yy_aconf) && 
-				(!yy_aconf->passwd || !yy_aconf->spasswd))
-					conf_report_error("Ignoring connect block for %s -- missing password.",
-							yy_aconf->name);
-		}
-	
-		free_conf(yy_aconf);
-		yy_aconf = NULL;
-	}
-
-	/*
-	 * yy_aconf is still pointing at the server that is having
-	 * a connect block built for it. This means, y_aconf->name 
-	 * points to the actual irc name this server will be known as.
-	 * Now this new server has a set or even just one hub_mask (or leaf_mask)
-	 * given in the link list at yy_hconf. Fill in the HUB confs
-	 * from this link list now.
-	 */    
-
-	for (yy_hconf = hub_confs; yy_hconf; yy_hconf = yy_aconf_next)
-	{
-		yy_aconf_next = yy_hconf->next;
-		MyFree(yy_hconf->name);
-		yy_hconf->name = NULL;
-
-		/* yy_aconf == NULL is a fatal error for this connect block! */
-		if (yy_aconf != NULL)
-		{
-			DupString(yy_hconf->name, yy_aconf->name);
-			conf_add_conf(yy_hconf);
-		}
-		else
-			free_conf(yy_hconf);
-	}
-
-	for (yy_lconf = leaf_confs; yy_lconf; yy_lconf = yy_aconf_next)
-	{
-		yy_aconf_next = yy_lconf->next;
-		if (yy_aconf != NULL)
-		{
-			DupString(yy_lconf->name, yy_aconf->name);
-			conf_add_conf(yy_lconf);
-		}
-		else
-			free_conf(yy_lconf);
-	}
-
-	hub_confs = NULL;
-	leaf_confs = NULL;
-	yy_aconf = NULL;
-	yy_hconf = NULL;
-	yy_lconf = NULL;
-	return 0;
-}
-
-void	conf_set_connect_name(void *data)
-{
-	if(yy_aconf->name != NULL)
-	{
-		conf_report_error("Warning -- connect::name specified multiple times.");
-	}
-
-	MyFree(yy_aconf->name);
-	DupString(yy_aconf->name, data);
-}
-
-void	conf_set_connect_host(void *data)
-{
-	MyFree(yy_aconf->host);
-	DupString(yy_aconf->host, data);
-}
-
-void	conf_set_connect_send_password(void *data)
-{
-	if (yy_aconf->spasswd)
-		memset(yy_aconf->spasswd, 0, strlen(yy_aconf->spasswd));
-	MyFree(yy_aconf->spasswd);
-	DupString(yy_aconf->spasswd, data);
-}
-
-void	conf_set_connect_accept_password(void *data)
-{
-	if (yy_aconf->passwd)
-		memset(yy_aconf->passwd, 0, strlen(yy_aconf->passwd));
-	MyFree(yy_aconf->passwd);
-	DupString(yy_aconf->passwd, data);
-}
-
-void	conf_set_connect_port(void *data)
-{
-	yy_aconf->port = *(unsigned int*) data;
-}
-
-void	conf_set_connect_aftype(void *data)
-{
-	char *aft = data;
-
-	if (strcasecmp(aft, "ipv4") == 0)
-		yy_aconf->aftype = AF_INET;
-#ifdef IPV6
-	else if (strcasecmp(aft, "ipv6") == 0)
-		yy_aconf->aftype = AF_INET6;
-#endif
-	else
-		conf_report_error("connect::aftype '%s' is unknown.", aft);
-}
-
-void	conf_set_connect_fakename(void *data)
-{
-	MyFree(yy_aconf->fakename);
-	DupString(yy_aconf->fakename, data);
-}
-
-void	conf_set_connect_encrypted(void *data)
-{
-	int yesno = *(unsigned int*) data;
-
-	if (yesno)
-		yy_aconf->flags |= CONF_FLAGS_ENCRYPTED;
-	else
-		yy_aconf->flags &= ~CONF_FLAGS_ENCRYPTED;
-}
-
-void	conf_set_connect_rsa_public_key_file(void *data)
-{
-#ifdef HAVE_LIBCRYPTO
-	BIO *file;
-
-	if (yy_aconf->rsa_public_key)
-	{
-		RSA_free(yy_aconf->rsa_public_key);
-		yy_aconf->rsa_public_key = NULL;
-	}
-
-	if (yy_aconf->rsa_public_key_file)
-	{
-		MyFree(yy_aconf->rsa_public_key_file);
-		yy_aconf->rsa_public_key_file = NULL;
-	}
-
-	DupString(yy_aconf->rsa_public_key_file, data);
-
-	file = BIO_new_file(data, "r");
-
-	if (file == NULL)
-	{
-		conf_report_error("Ignoring connect::rsa_public_key_file %s -- couldn't open file.", data);
-		return;
-	}
-
-	yy_aconf->rsa_public_key = (RSA *) PEM_read_bio_RSA_PUBKEY(file,
-					                                                    NULL, 0, NULL );
-
-	if (yy_aconf->rsa_public_key == NULL)
-	{
-		conf_report_error("Ignoring connect::rsa_public_key_file -- Key invalid; check syntax.");
-		return;
-	}
-
-	BIO_set_close(file, BIO_CLOSE);
-	BIO_free(file);
-#else
-	conf_report_error("Ignoring connect::rsa_public_key_file -- OpenSSL support not available.");
-#endif
-}
-
-void	conf_set_connect_cryptlink(void *data)
-{
-	int yesno = *(unsigned int *) data;
-
-	if (yesno)
-		yy_aconf->flags |= CONF_FLAGS_CRYPTLINK;
-	else
-		yy_aconf->flags &= ~CONF_FLAGS_CRYPTLINK;
-}
-
-void	conf_set_connect_compressed(void *data)
-{
-#ifdef HAVE_LIBZ
-	int yesno = *(unsigned int*) data;
-
-	if (yesno)
-		yy_aconf->flags |= CONF_FLAGS_COMPRESSED;
-	else
-		yy_aconf->flags &= ~CONF_FLAGS_COMPRESSED;
-#else
-	conf_report_error("Ignoring connect::compressed -- zlib not available.");
-#endif
-}
-
-void	conf_set_connect_auto(void *data)
-{
-	int yesno = *(unsigned int *) data;
-
-	if (yesno)
-		yy_aconf->flags |= CONF_FLAGS_ALLOW_AUTO_CONN;
-	else
-		yy_aconf->flags &= ~CONF_FLAGS_ALLOW_AUTO_CONN;
-}
-
-void	conf_set_connect_hub_mask(void *data)
-{
-	if(hub_confs == NULL)
-	{
-		hub_confs = make_conf();
-		hub_confs->status = CONF_HUB;
-		DupString(hub_confs->host, data);
-		DupString(hub_confs->user, "*");
-	}
-	else
-	{
-		yy_hconf = make_conf();
-		yy_hconf->status = CONF_HUB;
-		DupString(yy_hconf->host, data);
-		DupString(yy_hconf->user, "*");
-		yy_hconf->next = hub_confs;
-		hub_confs = yy_hconf;
-	}
-}
-
-void	conf_set_connect_leaf_mask(void *data)
-{
-	if(leaf_confs == NULL)
-	{
-		leaf_confs = make_conf();
-		leaf_confs->status = CONF_LEAF;
-		DupString(leaf_confs->host, data);
-		DupString(leaf_confs->user, "*");
-	}
-	else
-	{
-		yy_lconf = make_conf();
-		yy_lconf->status = CONF_LEAF;
-		DupString(yy_lconf->host, data);
-		DupString(yy_lconf->user, "*");
-		yy_lconf->next = leaf_confs;
-		leaf_confs = yy_lconf;
-	}
-}
-
-void	conf_set_connect_class(void *data)
-{
-	MyFree(yy_aconf->className);
-	DupString(yy_aconf->className, data);
-}
-
-void	conf_set_connect_cipher_preference(void *data)
-{
-#ifdef HAVE_LIBCRYPTO
-	struct EncCapability *ecap;
-	char *cipher_name;
-	int found = 0;
-
-	yy_aconf->cipher_preference = NULL;
-
-	cipher_name = data;
-
-	for (ecap = CipherTable; ecap->name; ecap++)
-	{
-		if ((!irccmp(ecap->name, cipher_name)) &&
-		    (ecap->cap & CAP_ENC_MASK))
-		{
-			yy_aconf->cipher_preference = ecap;
-			found = 1;
-		}
-	}
-
-	if (!found)
-	{
-		conf_report_error("Invalid cipher '%s'.", cipher_name);
-	}
-#else
-	conf_report_error("Ignoring connect::cipher_preference -- OpenSSL support not available.");
-#endif
-}
-
-int	conf_begin_kill(struct TopConf* tc)
-{
-	if(yy_aconf)
-	{
-		free_conf(yy_aconf);
-		yy_aconf = NULL;
-	}
-
-	yy_aconf=make_conf();
-	yy_aconf->status = CONF_KILL;
-	return 0;
-}
-
-int	conf_end_kill(struct TopConf *tc)
-{
-	if(yy_aconf->user && yy_aconf->passwd && yy_aconf->host)
-	{
-		if (yy_aconf->host != NULL)
-			add_conf_by_address(yy_aconf->host, CONF_KILL,
-					    yy_aconf->user, yy_aconf);
-	}
-	else
-	{
-		free_conf(yy_aconf);
-	}
-	yy_aconf = NULL;
-	return 0;
-}
-
-void	conf_set_kill_user(void *data)
-{
-	char *p;
-	char *new_user;
-	char *new_host;
-
-	if((p = strchr(data, '@')))
-	{
-		*p = '\0';
-		DupString(new_user,data);
-		yy_aconf->user = new_user;
-		p++;
-		DupString(new_host,p);
-		MyFree(yy_aconf->host);
-		yy_aconf->host = new_host;
-	}
-	else
-	{
-		MyFree(yy_aconf->host);
-		DupString(yy_aconf->host, data);
-		MyFree(yy_aconf->user);
-		DupString(yy_aconf->user,"*");
-	}
-}
-
-void	conf_set_kill_reason(void *data)
-{
-	MyFree(yy_aconf->passwd);
-	DupString(yy_aconf->passwd, data);
-}
-
-int	conf_begin_deny(struct TopConf* tc)
-{
-	if(yy_aconf)
-	{
-		free_conf(yy_aconf);
-		yy_aconf = NULL;
-	}
-
-	yy_aconf=make_conf();
-	yy_aconf->status = CONF_DLINE;
-	/* default reason */
-	DupString(yy_aconf->passwd, "No Reason");
-	
-	return 0;
-}
-
-int	conf_end_deny(struct TopConf *tc)
-{
-	if (yy_aconf->host &&
-	    parse_netmask(yy_aconf->host, NULL, NULL) != HM_HOST)
-	{
-		add_conf_by_address(yy_aconf->host, CONF_DLINE, NULL, yy_aconf);
-	}
-	else
-	{
-		free_conf(yy_aconf);
-		conf_report_error("Ignoring deny -- invalid hostname.");
-	}
-	yy_aconf = NULL;
-	return 0;
-}
-
-void	conf_set_deny_ip(void *data)
-{
-	MyFree(yy_aconf->host);
-	DupString(yy_aconf->host, data);
-}
-
-void	conf_set_deny_reason(void *data)
-{
-	MyFree(yy_aconf->passwd);
-	DupString(yy_aconf->passwd, data);
-}
-
-int	conf_begin_exempt(struct TopConf *tc)
-{
-	if(yy_aconf)
-	{
-		free_conf(yy_aconf);
-		yy_aconf = NULL;
-	}
-
-	yy_aconf=make_conf();
-	DupString(yy_aconf->passwd, "*");
-	yy_aconf->status = CONF_EXEMPTDLINE;
-
-	return 0;
-}
-
-int	conf_end_exempt(struct TopConf *tc)
-{
-	if (yy_aconf->host &&
-	    parse_netmask(yy_aconf->host, NULL, NULL) != HM_HOST)
-	{
-		add_conf_by_address(yy_aconf->host, CONF_EXEMPTDLINE, NULL, yy_aconf);
-	}
-	else
-	{
-		conf_report_error("Ignoring exempt -- invalid exempt::ip.");
-		free_conf(yy_aconf);
-	}
-
-	yy_aconf = NULL;
-	return 0;
-}
-
-void	conf_set_exempt_ip(void *data)
-{
-	MyFree(yy_aconf->host);
-	DupString(yy_aconf->host, data);
-}
-
-int	conf_begin_gecos(struct TopConf *tc)
-{
-	if(yy_aconf)
-	{
-		free_conf(yy_aconf);
-		yy_aconf = NULL;
-	}
-
-	yy_aconf = make_conf();
-	yy_aconf->status = CONF_XLINE;
-	DupString(yy_aconf->passwd, "No Reason");
-	return 0;
-}
-
-int	conf_end_gecos(struct TopConf *tc)
-{
-	if(yy_aconf->host)
-		conf_add_x_conf(yy_aconf);
-	else
-	{
-		conf_report_error("Ignoring gecos -- invalid gecos::name.");
-		free_conf(yy_aconf);
-	}
-
-	yy_aconf = NULL;
-
-	return 0;
-}
-
-void	conf_set_gecos_name(void *data)
-{
-	MyFree(yy_aconf->host);
-	DupString(yy_aconf->host, data);
-	collapse(yy_aconf->host);
-}
-
-void	conf_set_gecos_reason(void *data)
-{
-	MyFree(yy_aconf->passwd);
-	DupString(yy_aconf->passwd, data);
-}
-
-void	conf_set_gecos_action(void *data)
-{
-	char *act = data;
-
-	if (strcasecmp(act, "warn") == 0)
-		yy_aconf->port = 0;
-	else if (strcasecmp(act, "reject") == 0)
-		yy_aconf->port = 1;
-	else if (strcasecmp(act, "silent") == 0)
-		yy_aconf->port = 2;
-	else
-		conf_report_error("Warning -- invalid gecos::action.");
-}
-
-void	conf_set_general_failed_oper_notice(void *data)
-{
-	ConfigFileEntry.failed_oper_notice = *(unsigned int*) data;
-}
-
-void	conf_set_general_anti_nick_flood(void *data)
-{
-	ConfigFileEntry.anti_nick_flood = *(unsigned int*) data;
-}
-
-void	conf_set_general_max_nick_time(void *data)
-{
-	ConfigFileEntry.max_nick_time = *(unsigned int*) data;
-}
-
-void	conf_set_general_max_nick_changes(void *data)
-{
-	ConfigFileEntry.max_nick_changes = *(unsigned int*) data;
-}
-
-void	conf_set_general_max_accept(void *data)
-{
-	ConfigFileEntry.max_accept = *(unsigned int*) data;
-}
-
-void	conf_set_general_anti_spam_exit_message_time(void *data)
-{
-	ConfigFileEntry.anti_spam_exit_message_time = *(unsigned int*) data;
-}
-
-void	conf_set_general_ts_warn_delta(void *data)
-{
-	ConfigFileEntry.ts_warn_delta = *(unsigned int*) data;
-}
-
-void	conf_set_general_ts_max_delta(void *data)
-{
-	ConfigFileEntry.ts_max_delta = *(unsigned int*) data;
-}
-
-void	conf_set_general_havent_read_conf(void *data)
-{
-	if (*(unsigned int*)data)
-	{
-		conf_report_error("You haven't read your config file properly.");
-		conf_report_error("There is a line in the example conf that will kill your server if not removed.");
-		conf_report_error("Consider actually reading/editing the conf file, and removing this line.");
-		exit(0);
-	}
-}
-
-void	conf_set_general_kline_with_reason(void *data)
-{
-	ConfigFileEntry.kline_with_reason = *(unsigned int*) data;
-}
-
-void	conf_set_general_client_exit(void *data)
-{
-	ConfigFileEntry.client_exit = *(unsigned int*) data;
-}
-
-void	conf_set_general_kline_with_connection_closed(void *data)
-{
-	ConfigFileEntry.kline_with_connection_closed = *(unsigned int*) data;
-}
-
-void	conf_set_general_warn_no_nline(void *data)
-{
-	ConfigFileEntry.warn_no_nline = *(unsigned int*) data;
-}
-
-void	conf_set_general_non_redundant_klines(void *data)
-{
-	ConfigFileEntry.non_redundant_klines = *(unsigned int*) data;
-}
-
-void	conf_set_general_stats_o_oper_only(void *data)
-{
-	ConfigFileEntry.stats_o_oper_only = *(unsigned int*) data;
-}
-
-void	conf_set_general_stats_P_oper_only(void *data)
-{
-	ConfigFileEntry.stats_P_oper_only = *(unsigned int*) data;
-}
-
-void	conf_set_general_stats_k_oper_only(void *data)
-{
-	char *val = data;
-
-	if (strcasecmp(val, "yes") == 0)
-		ConfigFileEntry.stats_k_oper_only = 2;
-	else if (strcasecmp(val, "masked") == 0)
-		ConfigFileEntry.stats_k_oper_only = 1;
-	else if (strcasecmp(val, "no") == 0)
-		ConfigFileEntry.stats_k_oper_only = 0;
-	else
-		conf_report_error("Invalid setting '%s' for general::stats_k_oper_only.",
-					val);
-}
-
-void	conf_set_general_stats_i_oper_only(void *data)
-{
-	char *val = data;
-
-	if (strcasecmp(val, "yes") == 0)
-		ConfigFileEntry.stats_i_oper_only = 2;
-	else if (strcasecmp(val, "masked") == 0)
-		ConfigFileEntry.stats_i_oper_only = 1;
-	else if (strcasecmp(val, "no") == 0)
-		ConfigFileEntry.stats_i_oper_only = 0;
-	else
-		conf_report_error("Invalid setting '%s' for general::stats_i_oper_only.", val);
-}
-
-void	conf_set_general_pace_wait(void *data)
-{
-	ConfigFileEntry.pace_wait = *(unsigned int*) data;
-}
-
-void	conf_set_general_caller_id_wait(void *data)
-{
-	ConfigFileEntry.caller_id_wait = *(unsigned int*) data;
-}
-
-void	conf_set_general_pace_wait_simple(void *data)
-{
-	ConfigFileEntry.pace_wait_simple = *(unsigned int*) data;
-}
-
-void	conf_set_general_short_motd(void *data)
-{
-	ConfigFileEntry.short_motd = *(unsigned int*) data;
-}
-
-void	conf_set_general_no_oper_flood(void *data)
-{
-	ConfigFileEntry.no_oper_flood = *(unsigned int*) data;
-}
-
-void	conf_set_general_glines(void *data)
-{
-	ConfigFileEntry.glines = *(unsigned int*) data;
-}
-
-void	conf_set_general_gline_time(void *data)
-{
-	ConfigFileEntry.gline_time = *(unsigned int*) data;
-}
-
-void	conf_set_general_idletime(void *data)
-{
-	ConfigFileEntry.idletime = *(unsigned int*) data;
-}
-
-void	conf_set_general_dots_in_ident(void *data)
-{
-	ConfigFileEntry.dots_in_ident = *(unsigned int*) data;
-}
-
-void	conf_set_general_max_targets(void *data)
-{
-	ConfigFileEntry.max_targets = *(unsigned int*) data;
-}
-
-void	conf_set_general_servlink_path(void *data)
-{
-	MyFree(ConfigFileEntry.servlink_path);
-	DupString(ConfigFileEntry.servlink_path, data);
-}
-
-void	conf_set_general_default_cipher_preference(void *data)
-{
-#ifdef HAVE_LIBCRYPTO
-	struct EncCapability *ecap;
-	char *cipher_name;
-
-	ConfigFileEntry.default_cipher_preference = NULL;
-
-	cipher_name = data;
-
-	for (ecap = CipherTable; ecap->name; ecap++)
-	{
-		if ( (!irccmp(ecap->name, cipher_name)) &&
-		    (ecap->cap & CAP_ENC_MASK))
-		{
-			ConfigFileEntry.default_cipher_preference = ecap;
-			return;
-		}
-	}
-
-	conf_report_error("Invalid general::default_cipher_preference '%s'.",
-				cipher_name);
-#else
-	conf_report_error("Ignoring general::default_cipher_preference -- OpenSSL support not available.");
-#endif
-}
-
-void	conf_set_general_compression_level(void *data)
-{
-#ifdef HAVE_LIBZ
-	ConfigFileEntry.compression_level = *(unsigned int*)data;
-
-	if ((ConfigFileEntry.compression_level < 1) ||
-	    (ConfigFileEntry.compression_level > 9))
-	{
-		conf_report_error("Invalid general::compression_level %d -- using default.",
-			ConfigFileEntry.compression_level);
-		ConfigFileEntry.compression_level = 0;
-	}
-#else
-	conf_report_error("Ignoring general::compression_level -- zlib not available.");
-#endif
-}
-
-void	conf_set_general_use_egd(void *data)
-{
-	ConfigFileEntry.use_egd = *(unsigned int*)data;
-}
-
-void	conf_set_general_egdpool_path(void *data)
-{
-	MyFree(ConfigFileEntry.egdpool_path);
-	DupString(ConfigFileEntry.egdpool_path, data);
-}
-
-void	conf_set_general_ping_cookie(void *data)
-{
-	ConfigFileEntry.ping_cookie = *(unsigned int*)data;
-}
-
-void	conf_set_general_disable_auth(void *data)
-{
-	ConfigFileEntry.disable_auth = *(unsigned int*)data;
-}
-
-void	conf_set_general_use_global_limits(void *data)
-{
-        int yesno = *(int*)data;
-
-	if(yesno)
-        {
-                ConfigFileEntry.use_global_limits = *(unsigned int*)data;
-        }
-        else
-        {
-                /* if its being changed from 1 -> 0, wipe the hash. */
-                if(ConfigFileEntry.use_global_limits == 1)
-                        clear_hostname_hash_table();
-                ConfigFileEntry.use_global_limits = *(unsigned int*)data;
-        }
-}
-
-void	conf_set_general_use_help(void *data)
-{
-	ConfigFileEntry.use_help = *(unsigned int*)data;
-}
-
-void    conf_set_general_use_whois_actually(void *data)
-{
-        ConfigFileEntry.use_whois_actually = *(unsigned int*)data;
-}
-
-void    conf_set_general_tkline_expire_notices(void *data)
-{
-        ConfigFileEntry.tkline_expire_notices = *(unsigned int*)data;
-}
-
-void	conf_set_general_throttle_time(void *data)
-{
-	ConfigFileEntry.throttle_time = *(unsigned int*)data;
-}
-
-void	conf_set_general_connect_timeout(void *data)
-{
-	ConfigFileEntry.connect_timeout = *(unsigned int*)data;
-}
-
-void	conf_set_general_burst_away(void *data)
-{
-	ConfigFileEntry.burst_away = *(unsigned int*)data;
-}
-
-#ifdef IPV6
-void	 conf_set_general_fallback_to_ip6_int(void *data)
-{
-	ConfigFileEntry.fallback_to_ip6_int = *(unsigned int*)data;
-}
-#endif
-
-void	conf_set_general_oper_umodes(void *data)
-{
-	set_modes_from_table(&ConfigFileEntry.oper_umodes, "umode", 
-				umode_table, data);
-}
-
-void	conf_set_general_oper_only_umodes(void *data)
-{
-	set_modes_from_table(&ConfigFileEntry.oper_only_umodes, "umode", 
-				umode_table, data);
-}
-
-void	conf_set_general_min_nonwildcard(void *data)
-{
-	ConfigFileEntry.min_nonwildcard = *(unsigned int*)data;
-}
-
-void	conf_set_general_default_floodcount(void *data)
-{
-	ConfigFileEntry.default_floodcount = *(unsigned int*)data;
-}
-
-void	conf_set_general_client_flood(void *data)
-{
-	ConfigFileEntry.client_flood = *(unsigned int*)data;
-}
-
-void	conf_set_general_dot_in_ip6_addr(void *data)
-{
-	ConfigFileEntry.dot_in_ip6_addr = *(unsigned int*)data;
-}
-
-void	conf_set_channel_use_except(void *data)
-{
-	ConfigChannel.use_except = *(unsigned int*)data;
-}
-
-void	conf_set_channel_use_invex(void *data)
-{
-	ConfigChannel.use_invex = *(unsigned int*)data;
-}
-
-void	conf_set_channel_use_knock(void *data)
-{
-	ConfigChannel.use_knock = *(unsigned int*)data;
-}
-
-void	conf_set_channel_knock_delay(void *data)
-{
-	ConfigChannel.knock_delay = *(unsigned int*)data;
-}
-
-void	conf_set_channel_knock_delay_channel(void *data)
-{
-	ConfigChannel.knock_delay_channel = *(unsigned int*)data;
-}
-
-void	conf_set_channel_max_chans_per_user(void *data)
-{
-	ConfigChannel.max_chans_per_user = *(unsigned int*)data;
-}
-
-void	conf_set_channel_quiet_on_ban(void *data)
-{
-	ConfigChannel.quiet_on_ban = *(unsigned int*)data;
-}
-
-void	conf_set_channel_max_bans(void *data)
-{
-	ConfigChannel.max_bans = *(unsigned int*)data;
-}
-
-void	conf_set_channel_persist_time(void *data)
-{
-	ConfigChannel.persist_time = *(unsigned int*)data;
-}
-
-void	conf_set_channel_default_split_user_count(void *data)
-{
-	ConfigChannel.default_split_user_count = *(unsigned int*)data;
-}
-
-void	conf_set_channel_default_split_server_count(void *data)
-{
-	ConfigChannel.default_split_server_count = *(unsigned int*)data;
-}
-
-void	conf_set_channel_no_create_on_split(void *data)
-{
-	ConfigChannel.no_create_on_split = *(unsigned int*)data;
-}
-
-void	conf_set_channel_no_join_on_split(void *data)
-{
-	ConfigChannel.no_join_on_split = *(unsigned int*)data;
-}
-
-void	conf_set_channel_no_oper_resvs(void *data)
-{
-	ConfigChannel.no_oper_resvs = *(unsigned int*) data;
-}
-
-void	conf_set_serverhide_flatten_links(void *data)
-{
-	ConfigServerHide.flatten_links = *(unsigned int*)data;
-}
-
-void	conf_set_serverhide_hide_servers(void *data)
-{
-	ConfigServerHide.hide_servers = *(unsigned int*)data;
-}
-
-void	conf_set_serverhide_disable_remote_commands(void *data)
-{
-	ConfigServerHide.disable_remote = *(unsigned int*)data;
-}
-
-void	conf_set_serverhide_disable_local_channels(void *data)
-{
-	ConfigServerHide.disable_local_channels = *(unsigned int*)data;
-}
-
-void	conf_set_serverhide_links_delay(void *data)
-{
-	int val = *(unsigned int*) data;
-
-	if((val > 0) && ConfigServerHide.links_disabled == 1)
-	{
-		eventAddIsh("write_links_file", write_links_file, NULL, val);
-		ConfigServerHide.links_disabled = 0;
-	}
-
-	ConfigServerHide.links_delay = val;
-}
-
-void	conf_set_serverhide_hidden(void *data)
-{
-	ConfigServerHide.hidden = *(unsigned int*)data;
-}
-
-void	conf_set_serverhide_disable_hidden(void *data)
-{
-	ConfigServerHide.disable_hidden = *(unsigned int*)data;
-}
