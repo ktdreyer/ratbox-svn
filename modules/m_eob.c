@@ -76,8 +76,8 @@ static void ms_eob(struct Client *client_p, struct Client *source_p,
 	DeltaTime = CurrentTime - TheirTime;
 
       sendto_realops_flags(
-       FLAGS_ALL,"*** End of burst from %s (%lu seconds)",
-       source_p->name, DeltaTime );
+       FLAGS_ALL,"*** End of burst from %s (%d seconds)",
+       source_p->name, (int)DeltaTime );
     }
   else
     sendto_realops_flags(FLAGS_ALL,"*** End of burst from %s",
