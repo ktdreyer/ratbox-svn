@@ -248,6 +248,20 @@ valid_xline(struct Client *source_p, const char *gecos,
 		return 0;
 	}
 
+	if(strchr(reason, '"'))
+	{
+		sendto_one_notice(source_p,
+				":Invalid character '\"' in comment");
+		return 0;
+	}
+
+	if(strstr(reason, "\","))
+	{
+		sendto_one_notice(source_p,
+				":Invalid characters \", in comment");
+		return 0;
+	}
+
 	if(!valid_wild_card_simple(gecos))
 	{
 		sendto_one_notice(source_p,
@@ -269,7 +283,41 @@ apply_xline(struct Client *source_p, const char *name, const char *reason,
 	aconf = make_conf();
 	aconf->status = CONF_XLINE;
 
-	DupString(aconf->name, name);
+	if(strstr(name, "\\s"))
+	{
+		char *tmp = LOCAL_COPY(name);
+		char *orig = tmp;
+		char *new = tmp;
+
+		while(*orig)
+		{
+			if(*orig == '\\')
+			{
+				if(*(orig + 1) == 's')
+				{
+					*new++ = ' ';
+					orig += 2;
+				}
+				/* otherwise skip that and the escaped
+				 * character after it, so we dont mistake
+				 * \\s as \s --fl
+				 */
+				else
+				{
+					*new++ = *orig++;
+					*new++ = *orig++;
+				}
+			}
+			else
+				*new++ = *orig++;
+		}
+
+		*new = '\0';
+		DupString(aconf->name, tmp);
+	}
+	else
+		DupString(aconf->name, name);
+
 	DupString(aconf->passwd, reason);
 	collapse(aconf->name);
 

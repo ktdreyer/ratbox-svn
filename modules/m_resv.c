@@ -200,6 +200,13 @@ parse_resv(struct Client *source_p, const char *name,
 			return;
 		}
 
+		if(strchr(reason, '"'))
+		{
+			sendto_one_notice(source_p,
+					":Invalid character '\"' in comment");
+			return;
+		}
+
 		aconf = make_conf();
 		aconf->status = CONF_RESV_CHANNEL;
 		DupString(aconf->name, name);
@@ -230,6 +237,13 @@ parse_resv(struct Client *source_p, const char *name,
 		{
 			sendto_one_notice(source_p, ":Invalid RESV length: %s",
 					   name);
+			return;
+		}
+
+		if(strchr(reason, '"'))
+		{
+			sendto_one_notice(source_p,
+					":Invalid character '\"' in comment");
 			return;
 		}
 
