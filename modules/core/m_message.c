@@ -54,15 +54,14 @@ int build_target_list(int p_or_n, char *command,
 
 int drone_attack(struct Client *sptr, struct Client *acptr);
 
-#define MAX_MULTI_MESSAGES 10
-
+#define MAX_TARGETS 20
 
 #define ENTITY_NONE    0
 #define ENTITY_CHANNEL 1
 #define ENTITY_CHANOPS_ON_CHANNEL 2
 #define ENTITY_CLIENT  3
 
-struct entity target_table[MAX_MULTI_MESSAGES];
+struct entity target_table[MAX_TARGETS];
 
 int duplicate_ptr( void *ptr, struct entity target_table[], int n);
 
@@ -270,7 +269,7 @@ int build_target_list(int p_or_n,
 		  target_table[i].ptr = (void *)chptr;
 		  target_table[i++].type = ENTITY_CHANNEL;
 	  
-		  if( i >= MAX_MULTI_MESSAGES)
+		  if( i >= MAX_TARGETS)
 		    return(i);
 		  continue;
 		}
@@ -323,7 +322,7 @@ int build_target_list(int p_or_n,
 		  target_table[i].type = ENTITY_CHANOPS_ON_CHANNEL;
 		  target_table[i++].flags = type;
 
-		  if( i >= MAX_MULTI_MESSAGES)
+		  if( i >= MAX_TARGETS)
 		    return(i);
 		  continue;
 		}
@@ -354,7 +353,7 @@ int build_target_list(int p_or_n,
 	      target_table[i].type = ENTITY_CLIENT;
 	      target_table[i++].flags = 0;
 	      
-	      if( i >= MAX_MULTI_MESSAGES)
+	      if( i >= MAX_TARGETS)
 		return(i);
 	      continue;
 	    }
@@ -527,10 +526,6 @@ void msg_client(int n_or_p, char *command,
     {
       if(IsSetCallerId(acptr))
 	{
-	  /* check for accept, flag recipient incoming message */
-	  sendto_prefix_one(sptr, acptr,
-		    ":%s NOTICE %s :*** I'm in +u mode (server side ignore).",
-			    acptr->name, sptr->name);
 
 	  /* Here is the anti-drone bot/spambot bloat^H^H^H^H^Hcode -db */
 	  if(accept_message(sptr,acptr))
@@ -540,8 +535,12 @@ void msg_client(int n_or_p, char *command,
 	    }
 	  else
 	    {
+	      /* check for accept, flag recipient incoming message */
+	      sendto_prefix_one(sptr, acptr,
+		":%s NOTICE %s :*** I'm in +u mode (server side ignore).",
+			    acptr->name, sptr->name);
 	      /* XXX hard coded 60 ick fix -db */
-	      if( (acptr->localClient->last_caller_id_time + 60) < CurrentTime )
+	      if((acptr->localClient->last_caller_id_time + 60) < CurrentTime)
 		{
 		  sendto_prefix_one(sptr, acptr,
 		    ":%s NOTICE %s :*** I've been informed you messaged me.",

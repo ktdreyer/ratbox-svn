@@ -58,6 +58,51 @@ char *_version = "20001122";
  */
 int m_accept(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
+  char *nick;
+  int  add=1;
+  struct Client *source;
+
+  if (parc < 2)
+    {
+      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
+		 me.name, parv[0], "ACCEPT");
+      return 0;
+    }
+
+  nick = parv[1];
+
+  add = 1;
+
+  if (*nick == '-')
+    {
+      add = -1;
+      nick++;
+    }
+  else if(*nick == '*')
+    {
+      list_all_accepts(sptr);
+      return 0;
+    }
+
+  if( (source = find_client(nick,NULL)) == NULL)
+    {
+      sendto_one(sptr, form_str(ERR_ERRONEUSNICKNAME),
+		 me.name, parv[0], parv[1]);
+      return 0;
+    }
+
+  if(add == 1)
+    {
+      add_to_accept(source,sptr);
+      sendto_one(sptr, ":%s NOTICE %s :Now allowing %s", 
+		 me.name, parv[0], source->name);
+    }
+  else if(add == -1)
+    {
+      del_from_accept(source,sptr);
+      sendto_one(sptr, ":%s NOTICE %s :Now removed %s from allow list", 
+		 me.name, parv[0], source->name);
+    }
 
   return 0;
 }

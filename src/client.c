@@ -1212,6 +1212,10 @@ static void exit_one_client(struct Client *cptr, struct Client *sptr, struct Cli
 	      del_invite(lp->data, sptr);
 	      free_dlink_node(lp);
 	    }
+
+	  /* Clean up allow lists */
+	  del_all_accepts(sptr);
+
           /* again, this is all that is needed */
         }
     }
@@ -1557,13 +1561,188 @@ void count_remote_client_memory(int *remote_client_memory_used,
 
 
 /*
+ * accept processing, this adds a form of "caller ID" to ircd
+ * 
+ * If a client puts themselves into "caller ID only" mode,
+ * only clients that match a client pointer they have put on 
+ * the accept list will be allowed to message them.
+ *
+ * [ source.on_allow_list ] -> [ target1 ] -> [ target2 ]
+ *
+ * [target.allow_list] -> [ source1 ] -> [source2 ]
+ *
+ * i.e. a target will have a link list of source pointers it will allow
+ * each source client then has a back pointer pointing back
+ * to the client that has it on its accept list.
+ * This allows for exit_one_client to remove these now bogus entries
+ * from any client having an accept on them. 
+ */
+
+/*
  * accept_message
  *
  * inputs	- pointer to source client
  * 		- pointer to target client
  * output	- 1 if accept this message 0 if not
- * side effects -
+ * side effects - See if source is on target's allow list
  */
 int accept_message(struct Client *source, struct Client *target)
 {
+  dlink_node *ptr;
+  struct Client *acptr;
+
+  assert(source->localClient != NULL);
+  assert(target->localClient != NULL);
+
+  for(ptr = target->localClient->allow_list.head; ptr; ptr = ptr->next )
+    {
+      acptr = ptr->data;
+      if(source == acptr)
+	return 1;
+    }
+  return 0;
 }
+
+/*
+ * add_to_accept
+ *
+ * inputs	- pointer to source client
+ * 		- pointer to target client
+ * output	- 
+ * side effects - Add's source pointer to targets allow list
+ */
+int add_to_accept(struct Client *source, struct Client *target)
+{
+  dlink_node *m;
+  struct Client *acptr;
+  int len;
+
+  assert(source->localClient != NULL);
+  assert(target->localClient != NULL);
+
+  /* XXX MAX_ALLOW should be in config file not hard coded */
+  if ( (len = dlink_list_length(&target->localClient->allow_list)) >= 
+       MAX_ALLOW)
+    {
+      sendto_one(":%s NOTICE %s :Max accept targets reached %d",
+		 me.name, target->name, len);
+      return 0;
+    }
+
+  m = make_dlink_node();
+  dlinkAdd(source, m, &target->localClient->allow_list);
+
+  m = make_dlink_node();
+  dlinkAdd(target, m, &source->localClient->on_allow_list);
+  return 0;
+}
+
+/*
+ * del_from_accept
+ *
+ * inputs	- pointer to source client
+ * 		- pointer to target client
+ * output	- 
+ * side effects - Delete's source pointer to targets allow list
+ *
+ * Walk through the target's accept list, remove if source is found,
+ * Then walk through the source's on_accept_list remove target if found.
+ */
+int del_from_accept(struct Client *source, struct Client *target)
+{
+  dlink_node *ptr;
+  dlink_node *ptr2;
+  dlink_node *next_ptr;
+  dlink_node *next_ptr2;
+  struct Client *acptr;
+
+  assert(source->localClient != NULL);
+  assert(target->localClient != NULL);
+
+  for (ptr = target->localClient->allow_list.head; ptr; ptr = next_ptr)
+    {
+      next_ptr = ptr->next;
+
+      acptr = ptr->data;
+      if(source == acptr)
+	{
+	  dlinkDelete(ptr, &target->localClient->allow_list);
+	  free_dlink_node(ptr);
+
+	  for (ptr2 = source->localClient->on_allow_list.head; ptr2;
+	       ptr2 = next_ptr2)
+	    {
+	      next_ptr2 = ptr2->next;
+
+	      acptr = ptr2->data;
+	      if (target == acptr)
+		{
+		  dlinkDelete(ptr2, &source->localClient->on_allow_list);
+		  free_dlink_node(ptr2);
+		}
+	    }
+	}
+    }
+
+  return 0;
+}
+
+/*
+ * del_all_accepts
+ *
+ * inputs	- pointer to exiting client
+ * output	- 
+ * side effects - Delete's source pointer to targets allow list
+ *
+ * Walk through the target's accept list, remove if source is found,
+ * Then walk through the source's on_accept_list remove target if found.
+ */
+int del_all_accepts(struct Client *dying)
+{
+  dlink_node *ptr;
+  struct Client *acptr;
+
+  assert(dying->localClient != NULL);
+
+  for (ptr = dying->localClient->on_allow_list.head; ptr; ptr = ptr->next)
+    {
+      acptr = ptr->data;
+      del_from_accept(acptr, dying);
+    }
+
+  return 0;
+}
+
+/*
+ * list_all_accepts
+ *
+ * inputs	- pointer to exiting client
+ * output	- 
+ * side effects - list allow list
+ *
+ * Walk through the target's accept list, remove if source is found,
+ * Then walk through the source's on_accept_list remove target if found.
+ */
+int list_all_accepts(struct Client *sptr)
+{
+  dlink_node *ptr;
+  struct Client *acptr;
+
+  assert(sptr->localClient != NULL);
+
+  sendto_one(sptr,":%s NOTICE %s :*** Current accept list",
+	     me.name, sptr->name);
+
+  for (ptr = sptr->localClient->allow_list.head; ptr; ptr = ptr->next)
+    {
+      acptr = ptr->data;
+      if(acptr != NULL)
+	sendto_one(sptr,":%s NOTICE %s :%s",
+		   me.name, sptr->name, acptr->name);
+    }
+
+  return 0;
+}
+
+
+
