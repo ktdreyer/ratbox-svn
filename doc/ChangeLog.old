@@ -1,3 +1,18 @@
+*** 20010622_2 by leeh
+- if someone asks a server to reply about a client thats not his.. it
+  HAS to be non-detailed, else the info is just gunna be wrong
+
+- (the big one), made ms_whois() work.. if someone asks a LL to answer
+  about a client thats not /on/ the LL.. stuff will just break, so the
+  hub will answer for the LL
+
+  this made the hub more conscious about what it can/cant do.. it
+  could possibly be tidied up but its.. dodgy 
+
+  someone needs to audit this, its *very* well documented in the source,
+  you just need to follow it..
+
+
 *** 20010622_1 by jdc
 - modules/m_gline.c: time_t warning (moved to %lu with a typecast).
 
