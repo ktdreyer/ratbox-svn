@@ -1,3 +1,16 @@
+leeh        2002/11/11 20:35:40 UTC	(20021111_2)
+
+  Modified files:
+    modules              m_list.c 
+  Log:
+  - rework the math slightly, first divide by 10 then multiply by 9.
+    a sendq that isnt an integer multiple of 10 would be rather bizarre
+  
+  Revision  Changes    Path
+  1.51      +3 -2      ircd-ratbox/modules/m_list.c
+
+
+
 leeh        2002/11/11 20:31:20 UTC	(20021111_1)
 
   Modified files:
