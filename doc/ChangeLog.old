@@ -1,3 +1,7 @@
+*** 20010126_4 by androsyn
+Fixes for identd checking for IPv6.
+
+
 *** 20010126_3 by androsyn
 Fixed compile error for IPv4.
 
