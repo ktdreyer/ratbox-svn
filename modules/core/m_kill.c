@@ -127,11 +127,6 @@ static void mo_kill(struct Client *client_p, struct Client *source_p,
       return;
     }
 
-#if 0
-  ircsprintf(buf, "%s!%s (%s)",
-	     inpath, client_p->username, reason);
-#endif
-
   if(MyConnect(target_p))
     sendto_one(target_p, ":%s KILL %s :%s", parv[0], target_p->name, reason);
 
@@ -162,22 +157,26 @@ static void mo_kill(struct Client *client_p, struct Client *source_p,
       target_p->flags |= FLAGS_KILLED;
     }
 
-  exit_client(client_p, target_p, source_p, reason);
+  ircsprintf(buf, "Killed (%s (%s))", source_p->name, reason);
+  
+  exit_client(client_p, target_p, source_p, buf);
 }
 
 /*
-** ms_kill
-**      parv[0] = sender prefix
-**      parv[1] = kill victim
-**      parv[2] = kill path
-*/
+ * ms_kill
+ *      parv[0] = sender prefix
+ *      parv[1] = kill victim
+ *      parv[2] = kill path and reason
+ */
 static void ms_kill(struct Client *client_p, struct Client *source_p,
                     int parc, char *parv[])
 {
-  struct Client*    target_p;
-  char*       user;
-  char*       reason;
-  int         chasing = 0;
+  struct Client *target_p;
+  char *user;
+  char *reason;
+  char *path;
+  int chasing = 0;
+
   *buf = '\0';
 
   if (*parv[1] == '\0')
@@ -189,15 +188,27 @@ static void ms_kill(struct Client *client_p, struct Client *source_p,
 
   user = parv[1];
 
-/* OK, parv[2] contains the path AND the reason, so we either
-   split it up, or make the path ourselves using the info
-   we know.. (host/user/name).. for now we use the latter --fl */
+  if(BadPtr(parv[2]))
+  {
+    reason = "<No reason given>";
 
-  if(IsServer(source_p))
-    ircsprintf(buf, "%s", source_p->name);
+    /* hyb6 takes the nick of the killer from the path *sigh* --fl_ */
+    path = source_p->name;
+  }
   else
-    ircsprintf(buf, "%s!%s!%s!%s", source_p->user->server, source_p->host,
-               source_p->username, source_p->name);
+  {
+    reason = strchr(parv[2], ' ');
+      
+    if(reason)
+    {
+      *reason = '\0';
+      reason++;
+    }
+    else
+      reason = "<No reason given>";
+
+    path = parv[2];
+  }
 
   if ((target_p = find_client(user)) == NULL)
     {
@@ -217,36 +228,12 @@ static void ms_kill(struct Client *client_p, struct Client *source_p,
                  me.name, parv[0], user, target_p->name);
       chasing = 1;
     }
+    
   if (IsServer(target_p) || IsMe(target_p))
     {
       sendto_one(source_p, form_str(ERR_CANTKILLSERVER),
                  me.name, parv[0]);
       return;
-    }
-
-#if 0
-  /* If we make the path ourselves, there can never BE a bogus path */
-  if (BadPtr(path))
-    path = "*no-path*"; /* Bogus server sending??? */
-#endif
-
-  /*
-  ** Notify all *local* opers about the KILL (this includes the one
-  ** originating the kill, if from this server--the special numeric
-  ** reply message is not generated anymore).
-  **
-  ** Note: "target_p->name" is used instead of "user" because we may
-  **     have changed the target because of the nickname change.
-  */
-  if(BadPtr(parv[2]))
-      reason = "<No reason given>";
-  else
-    {
-      reason = strchr(parv[2], ' ');
-      if(reason)
-        reason++;
-      else
-        reason = parv[2];
     }
 
   /* dont send clients kills from a hidden server */
@@ -278,26 +265,18 @@ static void ms_kill(struct Client *client_p, struct Client *source_p,
   ilog(L_INFO,"KILL From %s For %s Path %s %s",
        parv[0], target_p->name, parv[0], reason);
 
-  /*
-  ** And pass on the message to other servers. Note, that if KILL
-  ** was changed, the message has to be sent to all links, also
-  ** back.
-  ** Suicide kills are NOT passed on --SRB
-  */
+  relay_kill(client_p, source_p, target_p, path, reason);
 
-  if (!MyConnect(target_p) || !MyConnect(source_p) || !IsOper(source_p))
-    {
-      relay_kill(client_p, source_p, target_p, buf, reason);
+  /* FLAGS_KILLED prevents a quit being sent out */ 
+  target_p->flags |= FLAGS_KILLED;
 
-      /*
-      ** Set FLAGS_KILLED. This prevents exit_one_client from sending
-      ** the unnecessary QUIT for this. (This flag should never be
-      ** set in any other place)
-      */
-      target_p->flags |= FLAGS_KILLED;
-    }
-
-  exit_client(client_p, target_p, source_p, reason );
+  /* reason comes supplied with its own ()'s */
+  if(ConfigServerHide.hide_servers && IsServer(source_p))
+    ircsprintf(buf, "Killed (%s %s)", me.name, reason);
+  else
+    ircsprintf(buf, "Killed (%s %s)", source_p->name, reason);
+    
+  exit_client(client_p, target_p, source_p, buf);
 }
 
 static void relay_kill(struct Client *one, struct Client *source_p,
