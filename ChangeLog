@@ -1,3 +1,15 @@
+androsyn    2003/11/25 09:48:05 EST	(20031125_2)
+
+  Modified files:
+    src                  sigio.c 
+  Log:
+  Make setup_sigio_fd() a static
+  
+  Revision  Changes    Path
+  7.46      +1 -1      ircd-ratbox/src/sigio.c
+
+
+
 androsyn    2003/11/25 01:45:38 EST	(20031125_1)
 
   Modified files:
