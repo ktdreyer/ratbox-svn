@@ -1,3 +1,7 @@
+*** 20010612_9 by androsyn
+Oops..i should have been checking to see if the connection was an AF_INET6
+
+
 *** 20010612_8 by androsyn
 All this world is not 32bits...
 
