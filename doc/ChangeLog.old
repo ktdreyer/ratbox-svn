@@ -1,3 +1,24 @@
+androsyn    2002/03/01 15:23:02 EST	(20020301_7)
+
+  Modified files:
+    src                  adns.c channel.c client.c ircd.c 
+                         ircd_parser.y s_auth.c s_log.c 
+  Log:
+  Changed a bunch of eventAdd()'s to eventAddIsh().  I think it is a bad idea
+  to have 15 events all coming up at the same time.  This will stagger the
+  events a bit.
+  
+  Revision  Changes    Path
+  7.39      +1 -1      ircd-hybrid-7/src/adns.c
+  7.300     +1 -1      ircd-hybrid-7/src/channel.c
+  7.241     +3 -3      ircd-hybrid-7/src/client.c
+  7.222     +11 -11    ircd-hybrid-7/src/ircd.c
+  1.239     +1 -1      ircd-hybrid-7/src/ircd_parser.y
+  7.89      +1 -1      ircd-hybrid-7/src/s_auth.c
+  7.39      +1 -1      ircd-hybrid-7/src/s_log.c
+
+
+
 jmallett    2002/03/01 11:03:22 EST	(20020301_6)
 
   Modified files:
