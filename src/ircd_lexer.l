@@ -94,6 +94,8 @@ gline_log       { return GLINE_LOG; }
 global		{ return GLOBAL; }
 global_kill	{ return GLOBAL_KILL; }
 have_ident	{ return HAVE_IDENT; }
+hide_chanops	{ return HIDECHANOPS; }
+hide_server	{ return HIDESERVER; }
 host		{ return HOST; }
 hub		{ return HUB; }
 hub_mask	{ return HUB_MASK; }

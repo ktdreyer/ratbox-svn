@@ -24,6 +24,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 7.30  2000/11/30 09:53:42  db
+ * - added two new parms to parser hide_server hide_chanops yes or no
+ * - added possible fix (untested by adrian?) to parse.
+ *
  * Revision 7.29  2000/11/29 21:00:54  db
  * - reworked register_user
  *   moved all check for conf/kline notification etc. back into s_conf.c
@@ -536,6 +540,7 @@ typedef struct
   int         gline_time;
   int         idletime;
   int	      hide_server;
+  int	      hide_chanops;
 } ConfigFileEntryType;
 
 /* bleh. have to become global. */

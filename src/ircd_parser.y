@@ -171,6 +171,8 @@ int   class_sendq_var;
 %token  TOPIC_UH
 %token  MODULE
 %token  MODULES
+%token  HIDECHANOPS
+%token  HIDESERVER
 
 %%
 conf:   
@@ -1162,16 +1164,25 @@ general_items:      general_items general_item |
 
 general_item:       general_quiet_on_ban | general_moderate_nickchange |
                     general_failed_oper_notice | general_show_failed_oper_id |
-                    general_anti_nick_flood | general_max_nick_time | general_max_nick_changes |
-                    general_ts_warn_delta | general_ts_max_delta | general_kline_with_reason |
-                    general_kline_with_connection_closed | general_warn_no_nline |
+                    general_anti_nick_flood | general_max_nick_time |
+ 		    general_max_nick_changes |
+                    general_ts_warn_delta | general_ts_max_delta |
+		    general_kline_with_reason |
+                    general_kline_with_connection_closed |
+	            general_warn_no_nline |
                     general_non_redundant_klines | general_b_lines_oper_only |
-                    general_e_lines_oper_only | general_f_lines_oper_only | general_stats_notice |
-                    general_whois_notice | general_pace_wait | general_whois_wait | 
+                    general_e_lines_oper_only | general_f_lines_oper_only |
+	            general_stats_notice |
+                    general_whois_notice | general_pace_wait |
+	            general_whois_wait | 
                     general_knock_delay |
-                    general_short_motd | general_no_oper_flood | general_iauth_server |
-                    general_iauth_port | general_stats_p_notice | general_invite_plus_i_only |
-                    general_glines | general_topic_uh | general_gline_time | general_idletime 
+                    general_short_motd | general_no_oper_flood |
+	            general_iauth_server |
+                    general_iauth_port | general_stats_p_notice |
+	            general_invite_plus_i_only |
+                    general_glines | general_topic_uh | general_gline_time |
+		    general_idletime |
+		    general_hide_server | general_hide_chanops
 
 general_quiet_on_ban:   QUIET_ON_BAN '=' TYES ';'
   {
@@ -1426,3 +1437,21 @@ general_idletime: IDLETIME '=' NUMBER ';'
 {
         ConfigFileEntry.idletime = yylval.number;
 } ;
+
+general_hide_server: HIDESERVER '=' TYES ';'
+{
+        ConfigFileEntry.hide_server = 1;
+} | HIDESERVER '=' TNO ';'
+{
+        ConfigFileEntry.hide_server = 0;
+} ;
+
+general_hide_chanops: HIDECHANOPS '=' TYES ';'
+{
+        ConfigFileEntry.hide_chanops = 1;
+} | HIDECHANOPS '=' TNO ';'
+{
+        ConfigFileEntry.hide_chanops = 0;
+} ;
+
+

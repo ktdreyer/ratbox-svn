@@ -571,7 +571,7 @@ static void increase_msgtab()
 {
   struct Message *new_msgtab;
 
-  if( num_msgs < max_msgs )
+  if( (num_msgs + 1) < max_msgs )
     return;
 
   new_msgtab = (struct Message *)MyMalloc(
