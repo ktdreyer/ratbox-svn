@@ -36,6 +36,8 @@
 #include "ircdauth.h"
 #include "memdebug.h"
 #include "modules.h"
+#include "s_serv.h" /* for CAP_LL / IsCapable */
+
 extern char *ip_string;
 
 int yyparse();
@@ -47,6 +49,8 @@ static struct ConfItem *yy_lconf;
 static struct ConfItem *hub_confs;
 static struct ConfItem *yy_aconf;
 static struct ConfItem *yy_aconf_next;
+
+static dlink_node *node;
 
 char* class_name_var;
 int   class_ping_time_var;
@@ -320,12 +324,37 @@ serverinfo_vhost:       VHOST '=' IP_TYPE ';'
 
 serverinfo_hub:         HUB '=' TYES ';' 
   {
-    ConfigFileEntry.hub = 1;
+    /* Don't become a hub if we have a lazylink active. */
+    if (!ConfigFileEntry.hub && uplink && IsCapable(uplink, CAP_LL))
+    {
+      sendto_realops_flags(FLAGS_ALL,
+        "Ignoring config file line hub = yes; due to active LazyLink (%s)",
+        uplink->name);
+    }
+    else
+      ConfigFileEntry.hub = 1;
   }
                         |
                         HUB '=' TNO ';'
   {
-    ConfigFileEntry.hub = 0;
+    /* Don't become a leaf if we have a lazylink active. */
+    if (ConfigFileEntry.hub)
+    {
+      ConfigFileEntry.hub = 0;
+      for(node = serv_list.head; node; node = node->next)
+      {
+        if(MyConnect((struct Client *)node->data) &&
+           IsCapable((struct Client *)node->data,CAP_LL))
+        {
+          sendto_realops_flags(FLAGS_ALL,
+            "Ignoring config file line hub = no; due to active LazyLink (%s)",
+            ((struct Client *)node->data)->name);
+          ConfigFileEntry.hub = 1;
+        }
+      }
+    }
+    else
+      ConfigFileEntry.hub = 0;
   } ;
 
 /***************************************************************************
