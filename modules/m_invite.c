@@ -214,7 +214,8 @@ m_invite(struct Client *client_p,
                         chptr, ":%s INVITE %s :%s", parv[0], 
                         target_p->name, vchan->chname);
 
-  if (!MyConnect(target_p) && target_p->from->serial != current_serial)
+  if (!MyConnect(target_p) && target_p->from->serial != current_serial &&
+      target_p->from != client_p)
     sendto_one(target_p->from, ":%s INVITE %s :%s", parv[0],
                target_p->name, vchan->chname);
   if (vchan->mode.mode & MODE_PRIVATE)
