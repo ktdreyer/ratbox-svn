@@ -1,3 +1,8 @@
+*** 19990809_1 by db
+- missing #include breaks SLAVE_SERVERS
+
+
+
 *** 19990806_1 by sean
 Diane's freaky patch
 
