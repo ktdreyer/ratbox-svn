@@ -179,7 +179,7 @@ void _free_user(struct User* user, struct Client* cptr)
   if (--user->refcnt <= 0)
     {
       if (user->away)
-        MyFree((char *)user->away);
+        MyFree(user->away);
       /*
        * sanity check
        */
@@ -260,7 +260,7 @@ aClass *make_class()
 
 void free_class(aClass *tmp)
 {
-  MyFree((char *)tmp);
+  MyFree(tmp);
 }
 
 /*

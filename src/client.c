@@ -706,7 +706,7 @@ static void release_client_state(struct Client* cptr)
     {
       if (cptr->serv->user)
         free_user(cptr->serv->user, cptr);
-      MyFree((char*) cptr->serv);
+      MyFree(cptr->serv);
     }
 
 #ifdef FLUD

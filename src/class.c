@@ -125,7 +125,7 @@ int     get_con_freq(aClass *clptr)
  * if no present entry is found, then create a new one and add it in
  * immediately after the first one (class 0).
  */
-void    add_class(int class,
+void    add_class(int c_class,
                   int ping,
                   int confreq,
                   int maxli,
@@ -133,8 +133,8 @@ void    add_class(int class,
 {
   aClass *t, *p;
 
-  t = find_class(class);
-  if ((t == ClassList) && (class != 0))
+  t = find_class(c_class);
+  if ((t == ClassList) && (c_class != 0))
     {
       p = (aClass *)make_class();
       p->next = t->next;
@@ -144,8 +144,8 @@ void    add_class(int class,
     p = t;
   Debug((DEBUG_DEBUG,
          "Add Class %d: p %x t %x - cf: %d pf: %d ml: %d sq: %l",
-         class, p, t, confreq, ping, maxli, sendq));
-  ClassType(p) = class;
+         c_class, p, t, confreq, ping, maxli, sendq));
+  ClassType(p) = c_class;
   ConFreq(p) = confreq;
   PingFreq(p) = ping;
   MaxLinks(p) = maxli;
