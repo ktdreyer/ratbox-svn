@@ -1,3 +1,9 @@
+*** 20001228_24 by bill
+
+- fixed mode bug (thank you, Diane)
+- I hear that a new messages/custom.mo wouldn't hurt :)
+
+
 *** 20001228_23 by davidt
 Attempt to sync the client up when it gets given ops on a +a channel..
 
