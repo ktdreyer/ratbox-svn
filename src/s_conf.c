@@ -73,7 +73,6 @@ static void ReplaceQuotes(char* quotedLine,char* line);
 
 static FBFILE*  openconf(const char* filename);
 static void     initconf(FBFILE*);
-static void     initnewconf(FBFILE*);
 static void     clear_out_old_conf(void);
 static void     flush_deleted_I_P(void);
 
@@ -1764,6 +1763,25 @@ static void initconf(FBFILE* file)
       if ((p = strchr(line, '\n')))
         *p = '\0';
 
+      if(!p)
+        p = strchr(line, '\0');
+
+      if(line[1] != ':')
+	{
+	  while (p != line)
+	    {
+	      fbungetc(*p,file);
+	      p--;
+	    }
+	  fbungetc(*p,file);
+
+	  yy_aconf = NULL;
+	  lineno = 1;
+	  yyparse(); /* wheee! */
+	  fbclose(file);
+	  return;
+	}
+
       ReplaceQuotes(quotedLine,line);
 
       if (!*quotedLine || quotedLine[0] == '#')
@@ -1816,34 +1834,12 @@ static void initconf(FBFILE* file)
   fbclose(file);
   check_class();
   nextping = nextconnect = time(NULL);
-#if 0
+
   if(me.name[0] == '\0')
     {
-      log(L_CRIT, "Server has no M: line");
+      log(L_CRIT, "Server has no M:/serverinfo line");
       exit(-1);
     }
-#endif
-}
-
-/*
-** initnewconf() 
-**    Read configuration file.
-**
-*
-* Inputs        - file descriptor pointing to config file to use
-*
-**    returns -1, if file cannot be opened
-**             0, if file opened
-*/
-
-#define MAXCONFLINKS 150
-
-static void initnewconf(FBFILE* file)
-{
-  yy_aconf = NULL;
-  lineno = 1;
-  yyparse(); /* wheee! */
-  fbclose(file);
 }
 
 /*
@@ -2736,14 +2732,6 @@ void read_conf_files(int cold)
     clear_out_old_conf();
 
   initconf(conf_fbfile_in);
-
-  if ((conf_fbfile_in = openconf("ircd.conf.new")) == 0)
-    {
-      sendto_ops("Can't open %s file aborting rehash!", "ircd.conf.new" );
-      return;
-    }
-
-  initnewconf(conf_fbfile_in);
 
 #ifdef KPATH
   filename = get_conf_name(KLINE_TYPE);

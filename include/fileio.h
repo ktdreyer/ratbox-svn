@@ -62,6 +62,10 @@ extern int     fbgetc(FBFILE* fb);
  */
 extern char*   fbgets(char* buf, size_t len, FBFILE* fb);
 /*
+ * ungets c to fb see ungetc(3)
+ */
+extern void    fbungetc(char c, FBFILE* fb);
+/*
  * write a null terminated string to a file, see fputs(3)
  */
 extern int     fbputs(const char* str, FBFILE* fb);

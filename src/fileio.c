@@ -19,6 +19,7 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 #include "fileio.h"
+#include "irc_string.h"
 #include <stdio.h>  /* BUFSIZ, EOF */
 #include <stdlib.h> /* malloc, free */
 #include <fcntl.h>  /* O_RDONLY, O_WRONLY, ... */
@@ -32,8 +33,10 @@ struct FileBuf {
   int   fd;           /* file descriptor */
   char* endp;         /* one past the end */
   char* ptr;          /* current read pos */
+  char* pbptr;        /* pointer to push back char */
   int   flags;        /* file state */
   char  buf[BUFSIZ];  /* buffer */
+  char  pbuf[BUFSIZ+1]; /* push back buffer */
 };
 
 FBFILE* fbopen(const char* filename, const char* mode)
@@ -90,6 +93,7 @@ FBFILE* fdbopen(int fd, const char* mode)
     fb->ptr = fb->endp = fb->buf;
     fb->fd = fd;
     fb->flags = 0;
+    fb->pbptr = (char *)NULL;
   }
   return fb;
 }
@@ -122,9 +126,34 @@ static int fbfill(FBFILE* fb)
 int fbgetc(FBFILE* fb)
 {
   assert(fb);
+  if(fb->pbptr)
+    {
+      int c;
+      c = *fb->pbptr++;
+      if( (fb->pbptr == (fb->pbuf+BUFSIZ)) ||
+	  (!*fb->pbptr) )
+	fb->pbptr = NULL;
+    }
+
   if (fb->ptr < fb->endp || fbfill(fb) > 0)
     return *fb->ptr++;
   return EOF;
+}
+
+void fbungetc(char c, FBFILE* fb)
+{
+  assert(fb);
+
+  if(!fb->pbptr)
+    {
+      fb->pbptr = fb->pbuf+BUFSIZ;
+    }
+
+  if(fb->pbptr != fb->pbuf)
+    {
+       fb->pbptr--;
+      *fb->pbptr = c;
+    }
 }
 
 char* fbgets(char* buf, size_t len, FBFILE* fb)
@@ -133,6 +162,13 @@ char* fbgets(char* buf, size_t len, FBFILE* fb)
   assert(buf);
   assert(fb);
   assert(0 < len);
+
+  if(fb->pbptr)
+    {
+      strncpy_irc(buf,fb->pbptr,len);
+      fb->pbptr = NULL;
+      return(buf);
+    }
 
   if (fb->ptr == fb->endp && fbfill(fb) < 1)
     return 0;

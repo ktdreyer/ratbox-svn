@@ -113,9 +113,7 @@ accept_password { return ACCEPT_PASSWORD; }
 compressed	{ return COMPRESSED; }
 lazylink	{ return LAZYLINK; }
 hub_mask	{ return HUB_MASK; }
-hub_masks	{ return HUB_MASKS; }
 leaf_mask	{ return LEAF_MASK; }
-leaf_masks	{ return LEAF_MASKS; }
 password	{ return PASSWORD; }
 passwd		{ return PASSWORD; }
 kline_exempt	{ return KLINE_EXEMPT; }

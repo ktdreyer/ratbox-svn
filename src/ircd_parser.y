@@ -93,10 +93,8 @@ int   class_sendq_var;
 %token  EMAIL
 %token  HUB
 %token  HUB_MASK
-%token  HUB_MASKS
 %token  LEAF
 %token  LEAF_MASK
-%token  LEAF_MASKS
 %token  PING_TIME
 %token  NUMBER_PER_IP
 %token  MAX_NUMBER
