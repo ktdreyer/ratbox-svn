@@ -1,3 +1,11 @@
+*** 20000103_4 by db
+- *sigh* code got lost in the shuffle
+  fix stats c so n lines show as n not N
+  fix spacing on 333 numeric to match others
+
+
+
+
 *** 20000103_3 by db
 - removed last vestige of TOPIC_WHO define
 
