@@ -198,6 +198,18 @@ static struct InfoStruct info_table[] = {
 		"Expiry time for G-lines"
 	},
 	{
+		"gline_min_cidr",
+		OUTPUT_DECIMAL,
+		&ConfigFileEntry.gline_min_cidr,
+		"Minimum CIDR bitlen for ipv4 glines"
+	},
+	{
+		"gline_min_cidr6",
+		OUTPUT_DECIMAL,
+		&ConfigFileEntry.gline_min_cidr6,
+		"Minimum CIDR bitlen for ipv6 glines"
+	},
+	{
 		"hub",
 		OUTPUT_BOOLEAN_YN,
 		&ServerInfo.hub,

@@ -1027,6 +1027,8 @@ set_default_conf(void)
 	ConfigFileEntry.glines = NO;
 	ConfigFileEntry.use_egd = NO;
 	ConfigFileEntry.gline_time = 12 * 3600;
+	ConfigFileEntry.gline_min_cidr = 16;
+	ConfigFileEntry.gline_min_cidr6 = 48;
 	ConfigFileEntry.idletime = 0;
 	ConfigFileEntry.dots_in_ident = 0;
 	ConfigFileEntry.max_targets = MAX_TARGETS_DEFAULT;

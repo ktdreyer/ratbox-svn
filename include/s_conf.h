@@ -221,6 +221,8 @@ struct config_file_entry
 	int no_oper_flood;
 	int glines;
 	int gline_time;
+	int gline_min_cidr;
+	int gline_min_cidr6;
 	int idletime;
 	int hide_server;
 	int client_exit;

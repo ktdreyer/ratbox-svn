@@ -88,6 +88,7 @@ mo_gline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	char *host = NULL;	/* user and host of GLINE "victim" */
 	char *reason = NULL;	/* reason for "victims" demise */
 	char splat[] = "*";
+	char *ptr;
 
 	if(!ConfigFileEntry.glines)
 	{
@@ -148,6 +149,32 @@ mo_gline(struct Client *client_p, struct Client *source_p, int parc, const char 
 		return 0;
 	}
 
+	if((ptr = strchr(host, '/')) != NULL)
+	{
+		int bitlen;
+		bitlen = strtol(++ptr, NULL, 10);
+
+		/* ipv4? */
+		if(strchr(host, ':') == NULL)
+		{
+			if(bitlen < ConfigFileEntry.gline_min_cidr)
+			{
+				sendto_one(source_p, ":%s NOTICE %s :Cannot set G-Lines with cidr length < %d",
+					   me.name, source_p->name,
+					   ConfigFileEntry.gline_min_cidr);
+				return 0;
+			}
+		}
+		/* ipv6 */
+		else if(bitlen < ConfigFileEntry.gline_min_cidr6)
+		{
+			sendto_one(source_p, ":%s NOTICE %s :Cannot set G-Lines with cidr length < %d",
+				   me.name, source_p->name, 
+				   ConfigFileEntry.gline_min_cidr6);
+			return 0;
+		}
+	}
+
 	/* inform users about the gline before we call majority_gline()
 	 * so already voted comes below gline request --fl
 	 */
@@ -189,6 +216,7 @@ mc_gline(struct Client *client_p, struct Client *source_p,
 	const char *user;
 	const char *host;
 	char *reason;
+	char *ptr;
 
 	acptr = source_p;
 
@@ -226,6 +254,39 @@ mc_gline(struct Client *client_p, struct Client *source_p,
 				user, host, reason);
 		return 0;
 	}
+
+	if((ptr = strchr(host, '/')) != NULL)
+	{
+		int bitlen;
+		bitlen = strtol(++ptr, NULL, 10);
+
+		/* ipv4? */
+		if(strchr(host, ':') == NULL)
+		{
+			if(bitlen < ConfigFileEntry.gline_min_cidr)
+			{
+				sendto_realops_flags(UMODE_ALL, L_ALL, "%s!%s@%s on %s is requesting a "
+						     "gline with a cidr mask < %d for [%s@%s] [%s]",
+						     acptr->name, acptr->username, acptr->host,
+						     acptr->user->server,
+						     ConfigFileEntry.gline_min_cidr, 
+						     user, host, reason);
+				return 0;
+			}
+		}
+		/* ipv6 */
+		else if(bitlen < ConfigFileEntry.gline_min_cidr6)
+		{
+			sendto_realops_flags(UMODE_ALL, L_ALL, "%s!%s@%s on %s is requesting a "
+					     "gline with a cidr mask < %d for [%s@%s] [%s]",
+					     acptr->name, acptr->username, acptr->host,
+					     acptr->user->server,
+					     ConfigFileEntry.gline_min_cidr6,
+					     user, host, reason);
+			return 0;
+		}
+	}
+
 
 	sendto_realops_flags(UMODE_ALL, L_ALL,
 			"%s!%s@%s on %s is requesting gline for [%s@%s] [%s]",

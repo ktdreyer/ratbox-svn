@@ -2067,6 +2067,18 @@ conf_set_general_gline_time(void *data)
 }
 
 static void
+conf_set_general_gline_min_cidr(void *data)
+{
+	ConfigFileEntry.gline_min_cidr = *(unsigned int *) data;
+}
+
+static void
+conf_set_general_gline_min_cidr6(void *data)
+{
+	ConfigFileEntry.gline_min_cidr6 = *(unsigned int *) data;
+}
+
+static void
 conf_set_general_idletime(void *data)
 {
 	ConfigFileEntry.idletime = *(unsigned int *) data;
@@ -2709,6 +2721,8 @@ newconf_init()
 	add_conf_item("general", "no_oper_flood", CF_YESNO, conf_set_general_no_oper_flood);
 	add_conf_item("general", "glines", CF_YESNO, conf_set_general_glines);
 	add_conf_item("general", "gline_time", CF_TIME, conf_set_general_gline_time);
+	add_conf_item("general", "gline_min_cidr", CF_INT, conf_set_general_gline_min_cidr);
+	add_conf_item("general", "gline_min_cidr6", CF_INT, conf_set_general_gline_min_cidr6);
 	add_conf_item("general", "idletime", CF_TIME, conf_set_general_idletime);
 	add_conf_item("general", "client_exit", CF_YESNO, conf_set_general_client_exit);
 	add_conf_item("general", "oper_only_umodes", CF_STRING | CF_FLIST,

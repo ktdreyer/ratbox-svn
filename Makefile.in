@@ -38,7 +38,7 @@ CFLAGS		= @CFLAGS@
 # the system one.
 #CFLAGS= -DNDEBUG -g -O2 -D"FD_SETSIZE=1024"
 SHELL=/bin/sh
-SUBDIRS=modules adns src tools servlink doc servlink help
+SUBDIRS=modules adns src tools servlink doc help
 CLEANDIRS = ${SUBDIRS} contrib
 RSA_FILES=rsa_respond/README rsa_respond/respond.c rsa_respond/Makefile
 
