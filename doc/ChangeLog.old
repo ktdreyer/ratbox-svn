@@ -1,3 +1,15 @@
+androsyn    2001/12/16 02:48:35 EST	(20011216_3)
+
+  Modified files:
+    src                  restart.c 
+  Log:
+  I will compile before I commit
+  
+  Revision  Changes    Path
+  7.19      +1 -1      ircd-hybrid-7/src/restart.c
+
+
+
 androsyn    2001/12/16 02:43:28 EST	(20011216_2)
 
   Modified files:
