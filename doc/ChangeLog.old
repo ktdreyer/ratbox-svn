@@ -1,3 +1,17 @@
+*** 20010720_4 by androsyn
+Made some changes to strncpy_irc().
+
+Basically on systems using gcc with -O2 set, gcc will provide its own
+builtin version of memcpy() which is far faster than strncpy_irc() so
+we set a macro to do that.
+
+For systems not using gcc, but have inlined functions, we provide an inlined
+version of strncpy_irc().  
+
+Alas, for systems that neither use gcc or support inlined functions we fall
+back to the plain old version we've been using all the long.
+
+
 *** 20010720_3 by androsyn
 Added check for inlined functions..    
 
