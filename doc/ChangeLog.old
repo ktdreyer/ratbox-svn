@@ -1,3 +1,16 @@
+db          2002/01/04 00:33:43 EST	(20020104_2)
+
+  Modified files:
+    src                  ircd.c modules.c 
+  Log:
+  - Don't try to load core modules if doing a static link
+  
+  Revision  Changes    Path
+  7.211     +2 -0      ircd-hybrid-7/src/ircd.c
+  7.84      +1 -0      ircd-hybrid-7/src/modules.c
+
+
+
 db          2002/01/04 00:02:23 EST	(20020104_1)
 
   Modified files:
