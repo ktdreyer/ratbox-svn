@@ -183,8 +183,8 @@ extern const unsigned int CharAttrs[];
 #define IsLower(c)      (IsAlpha((c)) && ((unsigned char)(c) > 0x5f))
 #define IsUpper(c)      (IsAlpha((c)) && ((unsigned char)(c) < 0x60))
 #define IsDigit(c)      (CharAttrs[(unsigned char)(c)] & DIGIT_C)
-#define IsXDigit(c) (IsDigit(c) || 'a' <= (c) && (c) <= 'f' || \
-        'A' <= (c) && (c) <= 'F')
+#define IsXDigit(c) (IsDigit(c) || ('a' <= (c) && (c) <= 'f') || \
+        ('A' <= (c) && (c) <= 'F'))
 #define IsAlNum(c) (CharAttrs[(unsigned char)(c)] & (DIGIT_C | ALPHA_C))
 #define IsPrint(c) (CharAttrs[(unsigned char)(c)] & PRINT_C)
 #define IsAscii(c) ((unsigned char)(c) < 0x80)
