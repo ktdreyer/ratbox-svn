@@ -1,3 +1,50 @@
+a1kmm       2001/12/10 22:22:46 EST	(20011211_3)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+    help                 Makefile.in 
+    include              rsa.h setup.h.in 
+    modules              Makefile.in 
+    src                  Makefile.in rsa.c s_bsd_devpoll.c 
+                         s_bsd_kqueue.c s_bsd_poll.c 
+                         s_bsd_select.c s_bsd_sigio.c 
+  Added files:
+    modules              .depend 
+    src                  .depend 
+  Log:
+  - Fixed dependencies so they are saved to a file ".depend". This means that
+    building doesn't depend on sed, and it fixes the problems admins on boxes
+    that don't support cc -MM by allowing the .depend file to already exist
+    in the tarball.
+  - Moved all the #include "file" that were inside a #ifdef out of them
+    so that we always have dependencies at least as strong as they should
+    be.
+  - Wrapped rsa.h in #ifdef HAVE_LIBCRYPTO so we can include it even when
+    we don't have libcrypto.
+  - Took the dependency build out of configure.
+  - Added a depend target to help/Makefile.in
+  - Added a $Id$ tag to help/Makefile.in so commit doesn't complain.
+  
+  Revision  Changes      Path
+  7.102     +0 -3        ircd-hybrid-7/autoconf/configure.in
+  7.103     +4998 -2622  ircd-hybrid-7/configure
+  1.11      +3 -0        ircd-hybrid-7/help/Makefile.in
+  7.8       +3 -2        ircd-hybrid-7/include/rsa.h
+  7.39      +85 -62      ircd-hybrid-7/include/setup.h.in
+  1.38      +706 -0      ircd-hybrid-7/modules/.depend (new)
+  1.55      +5 -8        ircd-hybrid-7/modules/Makefile.in
+  7.59      +486 -0      ircd-hybrid-7/src/.depend (new)
+  7.102     +4 -10       ircd-hybrid-7/src/Makefile.in
+  7.23      +4 -2        ircd-hybrid-7/src/rsa.c
+  7.11      +2 -2        ircd-hybrid-7/src/s_bsd_devpoll.c
+  1.22      +2 -2        ircd-hybrid-7/src/s_bsd_kqueue.c
+  7.51      +2 -2        ircd-hybrid-7/src/s_bsd_poll.c
+  7.21      +2 -2        ircd-hybrid-7/src/s_bsd_select.c
+  7.6       +1 -1        ircd-hybrid-7/src/s_bsd_sigio.c
+
+
+
 joant       2001/12/10 22:17:39 EST	(20011211_2)
 
   Modified files:
