@@ -1,3 +1,18 @@
+androsyn    2002/06/04 01:30:18 EDT	(20020604_1)
+
+  Modified files:
+    src                  ircd.c modules.c 
+  Log:
+  Set a default path for modules.  Also do not allow the user to specify a
+  particular pathname of a module to load.  They should only be allowed to
+  load modules in the search path.  Also reject things with ".." in them.
+  
+  Revision  Changes    Path
+  7.236     +5 -0      ircd-hybrid-7/src/ircd.c
+  7.103     +14 -7     ircd-hybrid-7/src/modules.c
+
+
+
 androsyn    2002/06/04 00:33:04 EDT	(20020604_0)
 
   Modified files:
