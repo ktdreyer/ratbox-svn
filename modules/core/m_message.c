@@ -853,12 +853,8 @@ handle_opers(int p_or_n,
     /* Check if someones msg'ing opers@our.server */
     if (!strcmp(nick, "opers"))
     {
-#if 0
-      sendto_realops_flags(FLAGS_ALL, L_ALL, "To opers: From: %s!%s@%s: %s",
-                           source_p->name, source_p->username, source_p->host,
-                           text);
-#endif
-      sendto_wallops_flags(FLAGS_LOCOPS, source_p, "%s", text);
+      sendto_realops_flags(FLAGS_ALL, L_ALL, "To opers: From: %s: %s",
+                           source_p->name, text);
       return;
     }
 
