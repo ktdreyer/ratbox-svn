@@ -869,7 +869,7 @@ static void handle_opers(int p_or_n,
 	}
       sendto_match_butone(IsServer(cptr) ? cptr : NULL, sptr,
 			  nick + 1,
-                          (nick[1] == '#') ? MATCH_HOST : MATCH_SERVER,
+                          (*nick == '#') ? MATCH_HOST : MATCH_SERVER,
 			  "PRIVMSG %s :%s",
 			  nick,
 			  text);
