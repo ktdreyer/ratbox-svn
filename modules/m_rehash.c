@@ -128,7 +128,7 @@ int mo_rehash(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                  ConfigFileEntry.configfile);
       sendto_realops_flags(FLAGS_ALL,
 			   "%s is rehashing server config file", parv[0]);
-      log(L_NOTICE, "REHASH From %s\n", get_client_name(sptr, SHOW_IP));
+      log(L_NOTICE, "REHASH From %s", get_client_name(sptr, SHOW_IP));
       return rehash(cptr, sptr, 0);
     }
   return 0; /* shouldn't ever get here */
