@@ -257,7 +257,7 @@ load_one_module (char *path)
 	struct stat statbuf;
 
 	if (strchr(path, '/')) /* absolute path, try it */
-		return load_a_module(modpath, 1);
+		return load_a_module(path, 1);
 
 	for (pathst = mod_paths.head; pathst; pathst = pathst->next)
 	{
@@ -293,7 +293,8 @@ load_a_module (char *path, int check)
   mod_basename = irc_basename(path);
 
   tmpptr = dlopen (path, RTLD_NOW);
-  
+
+sendto_realops_flags(FLAGS_ALL, "%s", path);  
   if (tmpptr == NULL)
   {
       const char *err = dlerror();
