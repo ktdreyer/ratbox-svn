@@ -60,7 +60,7 @@
  * message return values 
  */
 #define CLIENT_EXITED    -2
-#define HANDLED_OK        0
+#define CLIENT_OK	1
 
 /* 
  * Macros everyone uses :/ moved here from sys.h
