@@ -315,7 +315,6 @@ extern  int     is_address(char *,unsigned long *,unsigned long *);
 extern  int     rehash (struct Client *, struct Client *, int);
 
 extern struct ConfItem* conf_add_server(struct ConfItem *,int);
-extern void conf_add_port(struct ConfItem *);
 extern void conf_add_class_to_conf(struct ConfItem *);
 extern void conf_delist_old_conf(struct ConfItem *);
 extern void conf_add_me(struct ConfItem *);

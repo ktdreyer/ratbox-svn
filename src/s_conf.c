@@ -2399,24 +2399,6 @@ void conf_add_class(struct ConfItem *aconf,int sendq)
 }
 
 /*
- * conf_add_port
- * inputs       - pointer to config item
- * output       - NONE
- * side effects - Add a port
- */
-
-void conf_add_port(struct ConfItem *aconf)
-{
-  /*
-   * P: line - listener port
-   */
-  if((aconf->passwd[0] == '\0') || (aconf->passwd[0] == '*'))
-    add_listener(aconf->port, NULL );
-  else
-    add_listener(aconf->port, (const char *)aconf->passwd);
-}
-
-/*
  * conf_add_class_to_conf
  * inputs       - pointer to config item
  * output       - NONE

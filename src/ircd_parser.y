@@ -53,13 +53,16 @@ static struct ConfItem *yy_aconf_next;
 
 static dlink_node *node;
 
-char* class_name_var;
+char  *class_name_var;
 int   class_ping_time_var;
 int   class_number_per_ip_var;
 int   class_max_number_var;
 int   class_sendq_var;
 
-char* class_redirserv_var;
+static int   listener_port;
+static char  *listener_address;
+
+char  *class_redirserv_var;
 int   class_redirport_var;
 
 %}
@@ -610,44 +613,24 @@ class_sendq:    SENDQ '=' NUMBER ';'
  *  section listen
  ***************************************************************************/
 
-listen_entry:   LISTEN 
+listen_entry:   LISTEN  '{' listen_items '}' ';'
   {
-    if(yy_aconf)
-      {
-        free_conf(yy_aconf);
-        yy_aconf = (struct ConfItem *)NULL;
-      }
-    yy_aconf=make_conf();
-    yy_aconf->status = CONF_LISTEN_PORT;
-    DupString(yy_aconf->passwd,"*");
-  }
- '{' listen_items '}' ';'
-  {
-    conf_add_port(yy_aconf);
-    free_conf(yy_aconf);
-    yy_aconf = (struct ConfItem *)NULL;
-  }; 
+    add_listener (listener_port, listener_address);     
+  } ;
 
 listen_items:   listen_items listen_item |
                 listen_item
 
-listen_item:    listen_name | listen_port | listen_address | error
-
-listen_name:    NAME '=' QSTRING ';' 
-  {
-    MyFree(yy_aconf->host);
-    DupString(yy_aconf->host, yylval.string);
-  };
+listen_item:    listen_port | listen_address | error
 
 listen_port:    PORT '=' NUMBER ';'
   {
-    yy_aconf->port = yylval.number;
+    listener_port = yylval.number;
   };
 
 listen_address: IP '=' QSTRING ';'
   {
-    MyFree(yy_aconf->passwd);
-    DupString(yy_aconf->passwd, yylval.string);
+    DupString(listener_address, yylval.string);
   };
 
 /***************************************************************************
