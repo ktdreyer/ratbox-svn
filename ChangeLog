@@ -1,3 +1,16 @@
+leeh        2004/03/31 13:50:13 EST	(20040331_3)
+
+  Modified files:
+    modules/core         m_mode.c 
+  Log:
+  - fixed the ban logic, local clients cant set redundant bans, remote stuff
+    can set redundant bans, but no duplicates
+  
+  Revision  Changes    Path
+  1.104     +22 -13    ircd-ratbox/modules/core/m_mode.c
+
+
+
 leeh        2004/03/31 13:12:25 EST	(20040331_2)
 
   Modified files:
