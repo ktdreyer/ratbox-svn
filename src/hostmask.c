@@ -271,7 +271,7 @@ match_ipv4(struct irc_inaddr *addr, struct irc_inaddr *mask, int bits)
   return -1;
 }
 
-/* Hashtable stuff... -A1kmm */
+/* Hashtable stuff...now external as its used in m_stats.c */
 struct AddressRec *atable[ATABLE_SIZE];
 
 void
@@ -622,67 +622,19 @@ clear_out_address_conf(void)
 	    {
 	      *store_next = arec;
 	      store_next = &arec->next;
-	    } else
-	      {
-		arec->aconf->flags |= CONF_ILLEGAL;
-		if (!arec->aconf->clients)
+	    } 
+	  else
+	    {
+	      arec->aconf->flags |= CONF_ILLEGAL;
+	      if (!arec->aconf->clients)
 		  free_conf(arec->aconf);
-		MyFree(arec);
-	      }
+	      MyFree(arec);
+	    }
 	}
       *store_next = NULL;
     }
 }
 
-/* void report_dlines(struct Client *client_p)
- * Input: Client to report to.
- * Output: None
- * Side effects: Reports configured D-lines to client_p
- */
-void
-report_dlines(struct Client *client_p)
-{
-  char *name, *host, *pass, *user, *classname;
-  struct AddressRec *arec;
-  struct ConfItem *aconf;
-  int i, port;
-
-  for (i=0; i<ATABLE_SIZE; i++)
-    for (arec=atable[i]; arec; arec=arec->next)
-      if (arec->type == CONF_DLINE)
-	{
-	  aconf = arec->aconf;
-	  get_printable_conf(aconf, &name, &host, &pass, &user, &port,
-			     &classname);
-	  sendto_one(client_p, form_str(RPL_STATSDLINE), me.name,
-		     client_p->name, 'D', host, pass);
-	}
-}
-
-/* void report_exemptlines(struct Client *client_p)
- * Input: Client to report to.
- * Output: None
- * Side effects: Reports configured exemptions to client_p
- */
-void
-report_exemptlines(struct Client *client_p)
-{
-  char *name, *host, *pass, *user, *classname;
-  struct AddressRec *arec;
-  struct ConfItem *aconf;
-  int i, port;
-  
-  for (i=0; i<ATABLE_SIZE; i++)
-    for (arec=atable[i]; arec; arec=arec->next)
-      if (arec->type == CONF_EXEMPTDLINE)
-        {
-           aconf = arec->aconf;
-           get_printable_conf(aconf, &name, &host, &pass,
-                              &user, &port, &classname);
-           sendto_one(client_p, form_str(RPL_STATSDLINE), me.name,
-                      client_p->name, 'e', host, pass);
-        }
-}
  
 /*
  * show_iline_prefix()

@@ -305,15 +305,67 @@ static void stats_connect(struct Client *client_p)
   report_configured_links(client_p, CONF_SERVER);
 }
 
+/* stats_deny()
+ *
+ * input	- client to report to
+ * output	- none
+ * side effects - client is given dline list.
+ */
 static void stats_deny(struct Client *client_p)
 {
-  report_dlines(client_p);
+  char *name, *host, *pass, *user, *classname;
+  struct AddressRec *arec;
+  struct ConfItem *aconf;
+  int i, port;
+
+  for (i=0; i < ATABLE_SIZE; i++)
+  {
+    for (arec = atable[i]; arec; arec=arec->next)
+    {
+      if (arec->type == CONF_DLINE)
+      {
+        aconf = arec->aconf;
+	get_printable_conf(aconf, &name, &host, &pass, &user, &port,
+	                  &classname);
+			  
+	sendto_one(client_p, form_str(RPL_STATSDLINE), me.name,
+	           client_p->name, 'D', host, pass);
+      }
+    }
+  }
 }
 
+
+/* stats_exempt()
+ *
+ * input	- client to report to
+ * output	- none
+ * side effects - client is given list of exempt blocks
+ */
 static void stats_exempt(struct Client *client_p)
 {
-  report_exemptlines(client_p);
+  char *name, *host, *pass, *user, *classname;
+  struct AddressRec *arec;
+  struct ConfItem *aconf;
+  int i, port;
+
+  for (i=0; i<ATABLE_SIZE; i++)
+  {
+    for (arec = atable[i]; arec; arec=arec->next)
+    {
+      if (arec->type == CONF_EXEMPTDLINE)
+      {
+        aconf = arec->aconf;
+	get_printable_conf(aconf, &name, &host, &pass,
+	                   &user, &port, &classname);
+	
+	sendto_one(client_p, form_str(RPL_STATSDLINE), me.name,
+	           client_p->name, 'e', host, pass);
+      }
+    }
+  }
 }
+
 
 static void stats_events(struct Client *client_p)
 {
