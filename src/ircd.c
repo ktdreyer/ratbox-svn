@@ -511,14 +511,14 @@ write_pidfile(const char *filename)
 static void
 check_pidfile(const char *filename)
 {
-	FBFILE *fb;
+	FILE *fb;
 	char buff[32];
 	pid_t pidfromfile;
 
 	/* Don't do logging here, since we don't have log() initialised */
-	if((fb = fbopen(filename, "r")))
+	if((fb = fopen(filename, "r")))
 	{
-		if(fbgets(buff, 20, fb) != NULL)
+		if(fgets(buff, 20, fb) != NULL)
 		{
 			pidfromfile = atoi(buff);
 			if(!kill(pidfromfile, 0))
@@ -527,7 +527,7 @@ check_pidfile(const char *filename)
 				exit(-1);
 			}
 		}
-		fbclose(fb);
+		fclose(fb);
 	}
 }
 
@@ -641,7 +641,6 @@ main(int argc, char *argv[])
 		comm_close_all();
 	}
 
-	init_netio();		/* This needs to be setup early ! -- adrian */
 
 	/* Check if there is pidfile and daemon already running */
 	if(!testing_conf)
@@ -655,6 +654,8 @@ main(int argc, char *argv[])
 		else
 			print_startup(getpid());
 	}
+
+	init_netio();		/* This needs to be setup early ! -- adrian */
 
 	/* Init the event subsystem */
 	eventInit();
