@@ -45,7 +45,6 @@ static struct ConfItem *yy_hconf;
 static struct ConfItem *yy_lconf;
 
 static struct ConfItem *hub_confs;
-static struct ConfItem *leaf_confs;
 static struct ConfItem *yy_aconf;
 static struct ConfItem *yy_aconf_next;
 
@@ -134,6 +133,7 @@ int   class_redirport_var;
 %token  SENDQ
 %token  SEND_PASSWORD
 %token  SERVERINFO
+%token  SERVER_MASK
 %token  SHARED
 %token  SPOOF
 %token  TREJECT
@@ -223,6 +223,7 @@ conf_item:        admin_entry
                 | connect_entry
                 | kill_entry
                 | deny_entry
+                | leaf_entry
 		| general_entry
                 | gecos_entry
                 | modules_entry
@@ -892,7 +893,6 @@ shared_host:		HOST '=' QSTRING ';'
 connect_entry:  CONNECT   
   {
     hub_confs = (struct ConfItem *)NULL;
-    leaf_confs = (struct ConfItem *)NULL;
 
     if(yy_aconf)
       {
@@ -943,19 +943,7 @@ connect_entry:  CONNECT
 	  free_conf(yy_hconf);
       }
 
-    for (yy_lconf=leaf_confs;yy_lconf;yy_lconf=yy_aconf_next)
-      {
-       yy_aconf_next = yy_lconf->next;
-       if (yy_aconf)
-         {
-          DupString(yy_lconf->name, yy_aconf->name);
-          conf_add_conf(yy_lconf);
-         }
-       else
-         free_conf(yy_lconf);
-      }
     hub_confs = (struct ConfItem*)NULL;
-    leaf_confs = (struct ConfItem*)NULL;
 
     yy_aconf = (struct ConfItem *)NULL;
     yy_hconf = (struct ConfItem *)NULL;
@@ -967,8 +955,8 @@ connect_items:  connect_items connect_item |
 connect_item:   connect_name | connect_host | connect_send_password |
                 connect_accept_password | connect_port |
                 connect_lazylink | connect_hub_mask |
-                connect_leaf_mask | connect_class |
-                connect_auto | error
+                connect_class | connect_auto |
+                error
 
 connect_name:   NAME '=' QSTRING ';'
   {
@@ -1050,29 +1038,6 @@ connect_hub_mask:       HUB_MASK '=' QSTRING ';'
       }
   };
 
-connect_leaf_mask:       LEAF_MASK '=' QSTRING ';' 
-  {
-    if(yylval.string != NULL)
-      {
-	if(leaf_confs == NULL)
-	  {
-	    leaf_confs = make_conf();
-	    leaf_confs->status = CONF_LEAF;
-	    DupString(leaf_confs->host,yylval.string);
-	    DupString(leaf_confs->user, "*");
-	  }
-	else
-	  {
-	    yy_lconf = make_conf();
-	    yy_lconf->status = CONF_LEAF;
-	    DupString(yy_lconf->name,yylval.string);
-	    DupString(yy_lconf->user, "*");
-	    yy_lconf->next = leaf_confs;
-	    leaf_confs = yy_lconf;
-	  }
-      }
-  };
- 
 connect_class:  CLASS '=' QSTRING ';'
   {
     if(yylval.string != NULL)
@@ -1081,6 +1046,51 @@ connect_class:  CLASS '=' QSTRING ';'
       }
   };
 
+/***************************************************************************
+ *  section leaf
+ ***************************************************************************/
+ 
+leaf_entry: LEAF
+  {
+   if (yy_aconf)
+     {
+      free_conf(yy_aconf);
+      yy_aconf = (struct ConfItem *)NULL;
+     }
+   yy_aconf = make_conf();
+   yy_aconf->status = CONF_LEAF;
+  };
+ '{' leaf_items '}' ';'
+  {
+   if (yy_aconf->name && yy_aconf->host && yy_aconf->user)
+     {
+      conf_add_conf(yy_aconf);
+     }
+   else
+     free_conf(yy_aconf);
+   yy_aconf = (struct ConfItem *)NULL;
+  };
+
+leaf_items: leaf_items leaf_item | leaf_item
+leaf_item:  leaf_server_mask | leaf_leaf_mask | leaf_reason | error
+leaf_server_mask: SERVER_MASK '=' QSTRING ';'
+{
+ if (yy_aconf->name)
+   MyFree(yy_aconf->name);
+ yy_aconf->name = yylval.string;
+}
+leaf_leaf_mask: LEAF_MASK '=' QSTRING ';'
+{
+ if (yy_aconf->host)
+   MyFree(yy_aconf->host);
+ yy_aconf->host = yylval.string;
+}
+leaf_reason: REASON '=' QSTRING ';'
+{
+ if (yy_aconf->user)
+   MyFree(yy_aconf->user);
+ yy_aconf->user = yylval.string;
+}
 
 /***************************************************************************
  *  section kill

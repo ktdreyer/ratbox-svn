@@ -85,7 +85,6 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   char             info[REALLEN + 1];
   char*            host;
   struct Client*   acptr;
-  struct Client*   bcptr;
   int              hop;
 
   if ( (host = parse_server_args(parv, parc, info, &hop)) == NULL )
@@ -143,37 +142,15 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
        *
        * Rather than KILL the link which introduced it, KILL the
        * youngest of the two links. -avalon
-       */
-      char nbuf[HOSTLEN * 2 + USERLEN + 5]; /* same size as in s_misc.c */
-
-      bcptr = (cptr->firsttime > acptr->from->firsttime) ? cptr : acptr->from;
-      sendto_one(bcptr,"ERROR :Server %s already exists", host);
-      if (bcptr == cptr)
-      {
-        sendto_realops_flags(FLAGS_ALL,
-			     "Link %s cancelled, server %s already exists",
-			     get_client_name(bcptr, TRUE), host);
-        log(L_NOTICE, "Link %s cancelled, server %s already exists",
-            get_client_name(bcptr, TRUE), host);
-        return exit_client(bcptr, bcptr, &me, "Server Exists");
-      }
-      /*
-       * in this case, we are not dropping the link from
-       * which we got the SERVER message.  Thus we canNOT
-       * `return' yet! -krys
        *
-       *
-       * get_client_name() can return ptr to static buffer...can't use
-       * 2 times in same sendto_realops(), so we have to strcpy one =(
-       *  - comstud
+       * Definitely don't do that here. This is from an unregistered
+       * connect - A1kmm.
        */
-      strcpy(nbuf, get_client_name(bcptr, TRUE));
       sendto_realops_flags(FLAGS_ALL,
-			   "Link %s cancelled, server %s reintroduced by %s",
-			   nbuf, host, get_client_name(cptr, TRUE));
-      log(L_NOTICE, "Link %s cancelled, server %s reintroduced by %s",
-          nbuf, host, get_client_name(cptr, TRUE));
-      exit_client(bcptr, bcptr, &me, "Server Exists");
+         "Attempt to re-introduce server %s from %s", host,
+         get_client_name(cptr, TRUE));
+      sendto_one(cptr, "ERROR :Server already exists.");
+      return exit_client(cptr, cptr, cptr, "Server Exists");
     }
 
   if (ConfigFileEntry.hub)
@@ -214,14 +191,13 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
   char             info[REALLEN + 1];
-  char             nbuf[HOSTLEN * 2 + USERLEN + 5];
                    /* same size as in s_misc.c */
   char*            host;
   struct Client*   acptr;
   struct Client*   bcptr;
   struct ConfItem* aconf;
   int              hop;
-  int              hlined = 0, llined = 0;
+  int              hlined = 0;
   dlink_node	   *ptr;
 
   if ( (host = parse_server_args(parv, parc, info, &hop)) == NULL )
@@ -244,44 +220,20 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
        *
        * Rather than KILL the link which introduced it, KILL the
        * youngest of the two links. -avalon
+       *
+       * I think that we should exit the link itself, not the introducer,
+       * and we should always exit the most recently received(i.e. the
+       * one we are receiving this SERVER for. -A1kmm
        */
       /* It is behind a host-masked server. Completely ignore the
        * server message(don't propagate or we will delink from whoever
        * we propagate to). -A1kmm */
       if (irccmp(acptr->name, host) && acptr->from==cptr)
         return 0;
-      if (acptr->from == NULL)
-	{
 	  sendto_realops_flags(FLAGS_ALL,
-			       "Link %s cancelled, server %s already exists",
-			       get_client_name(cptr, TRUE), host);
-	  return exit_client(cptr, cptr, &me, "Server Exists");
-	}
-
-      bcptr = (cptr->firsttime > acptr->from->firsttime) ? cptr : acptr->from;
-      sendto_one(bcptr,"ERROR :Server %s already exists", host);
-      if (bcptr == cptr)
-	{
-	  sendto_realops_flags(FLAGS_ALL,
-			       "Link %s cancelled, server %s already exists",
-			       get_client_name(bcptr, TRUE), host);
-	  return exit_client(bcptr, bcptr, &me, "Server Exists");
-	}
-      /*
-       * in this case, we are not dropping the link from
-       * which we got the SERVER message.  Thus we canNOT
-       * `return' yet! -krys
-       *
-       *
-       * get_client_name() can return ptr to static buffer...can't use
-       * 2 times in same sendto_realops(), so we have to strcpy one =(
-       *  - comstud
-       */
-      strcpy(nbuf, get_client_name(bcptr, TRUE));
-      sendto_realops_flags(FLAGS_ALL,
-			   "Link %s cancelled, server %s reintroduced by %s",
-			   nbuf, host, get_client_name(cptr, TRUE));
-      exit_client(bcptr, bcptr, &me, "Server Exists");
+			 "Server %s(via %s) introduced an existing server %s.",
+			 sptr->name, cptr->name, host);
+	  return exit_client(NULL, sptr, &me, "Server Exists");
     }
 
   /* 
@@ -316,10 +268,41 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
   /*
    * See if the newly found server is behind a guaranteed
-   * leaf (L-line). If so, close the link.
+   * leaf. If so, close the link.
+   */
+  /* We also check for hubs here now. Notice that if we are leafed and
+   * hub-masked, the leaf{} over-rules - A1kmm.
    */
   for (aconf = ConfigItemList; aconf; aconf=aconf->next)
     {
+     if (!(aconf->status == CONF_LEAF || aconf->status == CONF_HUB))
+       continue;
+     sendto_realops_flags(FLAGS_ALL,
+              "Conf: status = %d, name = %s, user = %s, host = %s",
+                    aconf->status, aconf->name, aconf->user, aconf->host);
+     if (!match(aconf->host, host))
+       continue;
+     if (aconf->status == CONF_HUB && match(aconf->name, cptr->name))
+       hlined++;
+     else if (aconf->status == CONF_LEAF)
+       {
+        /* We have to check every server between us and the new server 
+         * to see if the server_mask matches them -A1kmm. */
+        for (acptr = cptr; acptr && !IsMe(acptr);
+             acptr=find_server(acptr->serv->up)
+            )
+          if (match(aconf->name, acptr->name))
+            {
+             sendto_realops_flags(FLAGS_ALL,
+               "Dropping leafed server %s introduced by %s via %s"
+               "(%s leafed): %s",
+               host, sptr->name, sptr->name, acptr->name, aconf->user);
+             sendto_one(sptr, ":%s SQUIT %s :Leafed(behind %s): %s",
+                        me.name, host, acptr->name, aconf->user);
+             return 0;
+            }
+       }
+#if 0
      if (!(aconf->status == CONF_LEAF || aconf->status == CONF_HUB))
        continue;
 
@@ -336,19 +319,24 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 	      llined++;
 	  }
        }
+#endif
     }
-  if (llined)
-    {
-     sendto_realops_flags(FLAGS_ALL,"Leaf-only link %s introduced %s "
-                          "- Closing",
-			  get_client_name(cptr,  TRUE), sptr->name);
-     return exit_client(NULL, sptr, &me, "Leaf Only");
-    }
+
   if (!hlined)
     {
       sendto_realops_flags(FLAGS_ALL,"Non-Hub link %s introduced %s.",
-			   get_client_name(cptr,  TRUE), host);
-      return exit_client(NULL, sptr, &me, "No H-line");
+                get_client_name(cptr,  TRUE), host);
+      /* If it is new, we are probably misconfigured, so split the
+       * non-hub server introducing this. Otherwise, split the new
+       * server. -A1kmm. */
+      if ((CurrentTime - sptr->firsttime) < 20)
+        return exit_client(NULL, sptr, &me, "No H-line.");
+      else
+        {
+          sendto_one(sptr, ":%s SQUIT %s :Sorry, no H-line.",
+                     me.name, host);
+          return 0;
+        }
     }
 
   acptr = make_client(cptr);

@@ -161,6 +161,7 @@ remote		{ return REMOTE; }
 send_password	{ return SEND_PASSWORD; }
 sendq		{ return SENDQ; }
 serverinfo	{ return SERVERINFO; }
+server_mask   { return SERVER_MASK; }
 shared          { return SHARED; }
 short_motd      { return SHORT_MOTD; }
 spoof		{ return SPOOF; }
