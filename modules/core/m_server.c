@@ -399,7 +399,7 @@ static void ms_server(struct Client *client_p, struct Client *source_p,
                            "Non-Hub link %s introduced %s.",
    	                   get_client_name(client_p, MASK_IP), name);
 
-      exit_client(NULL, source_p, &me, "No matching hub_mask.");
+      exit_client(NULL, client_p, &me, "No matching hub_mask.");
       return;
     }
 
