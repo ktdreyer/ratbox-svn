@@ -51,6 +51,10 @@
  * removed escape handling, none of the masks used with this
  * function should contain an escape '\\' unless you are searching
  * for one, it is no longer possible to escape * and ?. 
+ *
+ * - This is no longer the case. We can use match on gecos which we could
+ * legitimately want to use an escape. So I re-enabled escaping - A1kmm.
+ *
  * Moved calls rollup to function body, since match isn't recursive
  * there isn't any reason to have it exposed to the file, this change
  * also has the added benefit of making match reentrant. :)
@@ -71,19 +75,37 @@ int match(const char *mask, const char *name)
   const unsigned char* na = (const unsigned char*) name;
   int   wild  = 0;
   int   calls = 0;
+  int   quote = 0;
   assert(0 != mask);
   assert(0 != name);
   if (!mask || !name)
     return 0;
-
   while (calls++ < MATCH_MAX_CALLS) {
-    if (*m == '*') {
+    if (quote)
+      quote++;
+    if (quote == 3)
+      quote = 0;
+    if (*m == '\\' && !quote)
+      {
+       m++;
+       quote = 1;
+       continue;
+      }
+    if (!quote && *m == '*') {
       /*
        * XXX - shouldn't need to spin here, the mask should have been
        * collapsed before match is called
        */
       while (*m == '*')
         m++;
+      if (*m == '\\')
+        {
+          m++;
+          /* This means it is an invalid mask -A1kmm. */
+          if (!*m)
+            return 0;
+          quote = 2;
+        }
       wild = 1;
       ma = m;
       na = n;
@@ -92,9 +114,11 @@ int match(const char *mask, const char *name)
     if (!*m) {
       if (!*n)
         return 1;
+      if (quote)
+        return 0;
       for (m--; (m > (const unsigned char*) mask) && (*m == '?'); m--)
         ;
-      if ((*m == '*') && (m > (const unsigned char*) mask))
+      if (*m == '*' && (m > (const unsigned char*) mask))
         return 1;
       if (!wild)
         return 0;
@@ -106,11 +130,13 @@ int match(const char *mask, const char *name)
        * XXX - shouldn't need to spin here, the mask should have been
        * collapsed before match is called
        */
+      if (quote)
+        return 0;
       while (*m == '*')
         m++;
       return (*m == 0);
     }
-    if (ToLower(*m) != ToLower(*n) && *m != '?') {
+    if (ToLower(*m) != ToLower(*n) && !(!quote && *m == '?')) {
       if (!wild)
         return 0;
       m = ma;
@@ -126,7 +152,40 @@ int match(const char *mask, const char *name)
   return 0;
 }
 
+/*
+ * Rewritten to work properly with escaping, and hopefully to run faster
+ * in most cases... -A1kmm.
+ */
+char *
+collapse(char *pattern)
+{
+ char *p = pattern, *po = pattern;
+ char c;
+ int f = 0;
+ while ((c = *p++))
+   {
+    if (!(f & 2) && c == '*')
+      {
+       if (!(f & 1))
+         *po++ = '*';
+       f |= 1;
+      }
+    else if (!(f & 2) && c == '\\')
+      {
+       *po++ = '\\';
+       f |= 2;
+      }
+    else
+      {
+       *po++ = c;
+       f &= ~3;
+      }
+   }
+ *po++ = 0;
+ return pattern;
+}
 
+#if 0
 /*
 ** collapse a pattern string into minimal components.
 ** This particular version is "in place", so that it changes the pattern
@@ -167,6 +226,8 @@ char* collapse(char *pattern)
   }
   return pattern;
 }
+#endif
+
 
 /*
  * irccmp - case insensitive comparison of two 0 terminated strings.
