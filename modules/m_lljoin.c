@@ -115,7 +115,7 @@ int     ms_lljoin(struct Client *cptr,
 
   acptr = hash_find_client(nick,(struct Client *)NULL);
 
-  if( !acptr && !acptr->user )
+  if( !acptr || !acptr->user )
     return 0;
 
   if( !MyClient(acptr) )
