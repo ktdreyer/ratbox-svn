@@ -843,6 +843,7 @@ void
 channel_modes(struct Channel *chptr, struct Client *client_p,
               char *mbuf, char *pbuf)
 {
+  int len;
   *mbuf++ = '+';
   *pbuf = '\0';
 
@@ -864,13 +865,16 @@ channel_modes(struct Channel *chptr, struct Client *client_p,
   {
     *mbuf++ = 'l';
     if (IsMember(client_p, chptr) || IsServer(client_p))
-      ircsprintf(pbuf, "%d ", chptr->mode.limit);
+    {
+      len = ircsprintf(pbuf, "%d ", chptr->mode.limit);
+      pbuf += len;
+    }
   }
   if (*chptr->mode.key)
   {
     *mbuf++ = 'k';
     if (IsMember(client_p, chptr) || IsServer(client_p))
-      (void)strcat(pbuf, chptr->mode.key);
+      ircsprintf(pbuf, "%s", chptr->mode.key);
   }
 
   *mbuf++ = '\0';
@@ -960,7 +964,9 @@ send_channel_modes(struct Client *client_p, struct Channel *chptr)
   send_members(client_p, modebuf, parabuf, chptr, &chptr->chanops, "@");
 
   if (IsCapable(client_p, CAP_HOPS))
+  {
     send_members(client_p, modebuf, parabuf, chptr, &chptr->halfops, "%");
+  }
   else
   {
     /* Ok, halfops can still generate a kick, they'll just looked opped */

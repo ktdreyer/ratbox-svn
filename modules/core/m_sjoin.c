@@ -139,7 +139,7 @@ static void ms_sjoin(struct Client *client_p,
     return;
 
   /* SJOIN's for local channels can't happen. */
-  if(*parv[2] == '&')
+  if (*parv[2] == '&')
     return;
 
   mbuf = modebuf;
@@ -191,18 +191,18 @@ static void ms_sjoin(struct Client *client_p,
 
   *parabuf = '\0';
 
-  if ( (chptr = get_or_create_channel(source_p, parv[2], &isnew)) == NULL )
+  if ((chptr = get_or_create_channel(source_p, parv[2], &isnew)) == NULL)
     return; /* channel name too long? */
 
   /* XXX vchan cruft */
   /* vchans are encoded as "##mainchanname_timestamp" */
 
-  if(parv[2][1] == '#' && !ConfigChannel.disable_vchans)
+  if (parv[2][1] == '#' && !ConfigChannel.disable_vchans)
     {
       char *subp;
 
       /* possible sub vchan being sent along ? */
-      if((subp = strrchr(parv[2],'_')))
+      if ((subp = strrchr(parv[2],'_')))
 	{
           vc_ts = atol(subp+1);
 	  /* 
@@ -220,13 +220,13 @@ static void ms_sjoin(struct Client *client_p,
 	  *subp = '\0';	/* fugly hack for now ... */
 
 	  /* + 1 skip the extra '#' in the name */
-	  if((top_chptr = hash_find_channel((parv[2] + 1), NULL)))
+	  if ((top_chptr = hash_find_channel((parv[2] + 1), NULL)))
 	    {
 	      /* If the vchan is already in the vchan_list for this
 	       * root, don't re-add it.
 	       */
               /* Compare timestamps too */
-	      if(dlinkFind(&top_chptr->vchan_list,chptr) == NULL &&
+	      if (dlinkFind(&top_chptr->vchan_list,chptr) == NULL &&
                  newts == vc_ts)
 		{
 		  m = make_dlink_node();
@@ -235,7 +235,7 @@ static void ms_sjoin(struct Client *client_p,
 		}
 	    }
           /* check TS before creating a root channel */
-	  else if(newts == vc_ts)
+	  else if (newts == vc_ts)
 	    {
 	      top_chptr = get_channel(source_p, (parv[2] + 1), CREATE);
 	      m = make_dlink_node();
@@ -312,7 +312,7 @@ static void ms_sjoin(struct Client *client_p,
         strcpy(mode.key, oldmode->key);
     }
 
-  if(mode.mode & MODE_HIDEOPS)
+  if (mode.mode & MODE_HIDEOPS)
     hide_or_not = ONLY_CHANOPS_HALFOPS;
   else
     hide_or_not = ALL_MEMBERS;
@@ -334,11 +334,11 @@ static void ms_sjoin(struct Client *client_p,
       remove_our_modes(hide_or_not, chptr, top_chptr, source_p);
     }
 
-  if(*modebuf != '\0')
+  if (*modebuf != '\0')
     {
       /* This _SHOULD_ be to ALL_MEMBERS
        * It contains only +aimnstlki, etc */
-      if(top_chptr != NULL)
+      if (top_chptr != NULL)
 	sendto_channel_local(ALL_MEMBERS,
 			     chptr, ":%s MODE %s %s %s",
 			     me.name,
@@ -352,7 +352,9 @@ static void ms_sjoin(struct Client *client_p,
 
   *modebuf = *parabuf = '\0';
   if (parv[3][0] != '0' && keep_new_modes)
-    channel_modes(chptr, source_p, modebuf, parabuf);
+    {
+      channel_modes(chptr, source_p, modebuf, parabuf);
+    }
   else
     {
       modebuf[0] = '0';
@@ -449,7 +451,7 @@ static void ms_sjoin(struct Client *client_p,
       /* if the client doesnt exist, backtrack over the prefix (@%+) that we
        * just added and skip to the next nick
        */
-      if(!(target_p = find_client(s, NULL)))
+      if (!(target_p = find_client(s, NULL)))
       {
         sendto_one(source_p, form_str(ERR_NOSUCHNICK), me.name,
 	           source_p->name, s);
@@ -508,12 +510,12 @@ static void ms_sjoin(struct Client *client_p,
 		continue;
 
 	      /* Ignore servers we won't tell anyway */
-	      if( !(RootChan(chptr)->lazyLinkChannelExists &
+	      if (!(RootChan(chptr)->lazyLinkChannelExists &
 		    lclient_p->localClient->serverMask) )
 		continue;
 
 	      /* Ignore servers that already know target_p */
-	      if( !(target_p->lazyLinkClientExists &
+	      if (!(target_p->lazyLinkClientExists &
 		    lclient_p->localClient->serverMask) )
 		{
 		  /* Tell LazyLink Leaf about client_p,
@@ -529,7 +531,7 @@ static void ms_sjoin(struct Client *client_p,
           add_user_to_channel(chptr, target_p, fl);
 	  /* XXX vchan stuff */
 
-	  if( top_chptr )
+	  if (top_chptr)
 	    {
 	      add_vchan_to_client_cache(target_p,top_chptr, chptr);
 	      sendto_channel_local(ALL_MEMBERS,chptr, ":%s!%s@%s JOIN :%s",
@@ -587,14 +589,14 @@ nextnick:
        * need to exit.. this has the side effect of breaking double spaces
        * in an sjoin.. but that shouldnt happen anyway
        */
-      if(s && (*s == '\0'))
+      if (s && (*s == '\0'))
         s = p = NULL;
 	
       /* if p was NULL due to no spaces, s wont exist due to the above, so
        * we cant check it for spaces.. if there are no spaces, then when
        * we next get here, s will be NULL
        */
-      if(s && ((p = strchr(s, ' ')) != NULL))
+      if (s && ((p = strchr(s, ' ')) != NULL))
       {
         *p++ = '\0';
       }
@@ -611,7 +613,7 @@ nextnick:
                            para[0], para[1], para[2], para[3]);
     }
 
-  if(!people)
+  if (!people)
     return;
 
   /* relay the SJOIN to other servers */
@@ -625,7 +627,7 @@ nextnick:
       /* skip lazylinks that don't know about this server */
       if (ServerInfo.hub && IsCapable(target_p,CAP_LL))
       {
-        if( !(RootChan(chptr)->lazyLinkChannelExists &
+        if (!(RootChan(chptr)->lazyLinkChannelExists &
               target_p->localClient->serverMask) )
           continue;
       }
@@ -634,7 +636,7 @@ nextnick:
       if (!parv[4+args][0])
           return;
   
-      if(IsCapable(target_p, CAP_HOPS))
+      if (IsCapable(target_p, CAP_HOPS))
         sendto_one(target_p, "%s %s", buf, sjbuf_hops);
       else
         sendto_one(target_p, "%s %s", buf, sjbuf_nhops);
@@ -669,8 +671,9 @@ struct mode_letter flags[] = {
 static void set_final_mode(struct Mode *mode,struct Mode *oldmode)
 {
   int what = 0;
-  char numeric[16];
   char *s;
+  char *pbuf=parabuf;
+  int  len;
   int  i;
 
   for (i = 0; flags[i].letter; i++)
@@ -685,7 +688,6 @@ static void set_final_mode(struct Mode *mode,struct Mode *oldmode)
 	  *mbuf++ = flags[i].letter;
 	}
     }
-
   for (i = 0; flags[i].letter; i++)
     {
       if ((flags[i].mode & oldmode->mode) && !(flags[i].mode & mode->mode))
@@ -698,7 +700,6 @@ static void set_final_mode(struct Mode *mode,struct Mode *oldmode)
 	  *mbuf++ = flags[i].letter;
 	}
     }
-
   if (oldmode->limit && !mode->limit)
     {
       if (what != -1)
@@ -716,8 +717,8 @@ static void set_final_mode(struct Mode *mode,struct Mode *oldmode)
           what = -1;
         }
       *mbuf++ = 'k';
-      strcat(parabuf, oldmode->key);
-      strcat(parabuf, " ");
+      len = ircsprintf(pbuf,"%s ", oldmode->key);
+      pbuf += len;
       pargs++;
     }
   if (mode->limit && oldmode->limit != mode->limit)
@@ -728,11 +729,8 @@ static void set_final_mode(struct Mode *mode,struct Mode *oldmode)
           what = 1;
         }
       *mbuf++ = 'l';
-      ircsprintf(numeric, "%d", mode->limit);
-      if ((s = strchr(numeric, ' ')))
-        *s = '\0';
-      strcat(parabuf, numeric);
-      strcat(parabuf, " ");
+      len = ircsprintf(pbuf, "%d ", mode->limit);
+      pbuf += len;
       pargs++;
     }
   if (mode->key[0] && strcmp(oldmode->key, mode->key))
@@ -743,8 +741,8 @@ static void set_final_mode(struct Mode *mode,struct Mode *oldmode)
           what = 1;
         }
       *mbuf++ = 'k';
-      strcat(parabuf, mode->key);
-      strcat(parabuf, " ");
+      len = ircsprintf(pbuf, "%s ", mode->key);
+      pbuf += len;
       pargs++;
     }
   *mbuf = '\0';
@@ -808,7 +806,7 @@ static void remove_a_mode( int hide_or_not,
 
   chname = chptr->chname;
 
-  if(IsVchan(chptr) && top_chptr)
+  if (IsVchan(chptr) && top_chptr)
     chname = top_chptr->chname;
 
   ircsprintf(buf,":%s MODE %s ", me.name, chname);
@@ -837,7 +835,7 @@ static void remove_a_mode( int hide_or_not,
 	}
     }
 
-  if(count != 0)
+  if (count != 0)
     {
       *mbuf   = '\0';
       sendto_channel_local(hide_or_not, chptr,
