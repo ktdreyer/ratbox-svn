@@ -385,7 +385,7 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     {
       refresh_user_links = 1;
       eventAdd("write_links_file", write_links_file, NULL,
-	       300, 0);
+	ConfigFileEntry.links_delay, 0);
     }
 
   return 0;

@@ -1642,6 +1642,8 @@ static void read_conf(FBFILE* file)
 	  ConfigFileEntry.max_targets = MAX_TARGETS_DEFAULT;
   
   GlobalSetOptions.idletime = (ConfigFileEntry.idletime * 60);
+  if (!ConfigFileEntry.links_delay)
+        ConfigFileEntry.links_delay = LINKS_DELAY_DEFAULT;
   GlobalSetOptions.hide_server = ConfigFileEntry.hide_server;
 
   if(me.name[0] == '\0')

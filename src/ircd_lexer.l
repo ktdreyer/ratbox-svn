@@ -176,6 +176,7 @@ max_nick_time           { return MAX_NICK_TIME; }
 anti_nick_flood         { return ANTI_NICK_FLOOD; }
 ts_max_delta            { return TS_MAX_DELTA; }
 ts_warn_delta           { return TS_WARN_DELTA; }
+links_delay           { return LINKS_DELAY; }
 kline_with_connection_closed { return KLINE_WITH_CONNECTION_CLOSED; }
 kline_with_reason       { return KLINE_WITH_REASON; }
 warn_no_nline           { return WARN_NO_NLINE; }

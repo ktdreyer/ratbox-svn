@@ -302,6 +302,15 @@ void send_conf_options(struct Client *sptr)
                 ConfigFileEntry.max_nick_time : 0,
               "Anti nick flood time setting");
 
+    sendto_one(sptr,
+              ":%s %d %s :%-30s %-5d [%-30s]",
+              me.name,
+              RPL_INFO,
+              sptr->name,
+              "links_delay",
+              ConfigFileEntry.links_delay ?
+                ConfigFileEntry.links_delay : 0,
+              "How often the links file is rehashed");
    sendto_one(sptr,
               ":%s %d %s :%-30s %-5d [%-30s]",
               me.name,
