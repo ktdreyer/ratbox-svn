@@ -1,3 +1,7 @@
+*** 20010331_3 by toot
+fixes some compile warnings
+
+
 *** 20010331_2 by ejb
 - fixed make .include checking stuff to actually work;
   rebuilt dependencies.
