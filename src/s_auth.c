@@ -110,7 +110,7 @@ typedef enum
 }
 ReportType;
 
-#define sendheader(c, r) sendto_one(c, HeaderMessages[(r)].message)
+#define sendheader(c, r) send(c->localClient->fd, HeaderMessages[(r)].message, HeaderMessages[(r)].length)
 
 /*
  */
@@ -218,8 +218,9 @@ auth_dns_callback(void *vptr, adns_answer * reply)
 			strlcpy(auth->client->host, *reply->rrs.str, sizeof(auth->client->host));
 			sendheader(auth->client, REPORT_FIN_DNS);
 		}
-		else
+		else {
 			sendheader(auth->client, REPORT_HOST_TOOLONG);
+		}
 	}
 	else
 	{
@@ -267,7 +268,7 @@ auth_error(struct AuthRequest *auth)
 
 	ClearAuth(auth);
 	sendheader(auth->client, REPORT_FAIL_ID);
-
+		
 	if(!IsDNSPending(auth))
 	{
 		unlink_auth_request(auth, &auth_poll_list);
@@ -312,7 +313,7 @@ start_auth_query(struct AuthRequest *auth)
 	}
 
 	sendheader(auth->client, REPORT_DO_ID);
-
+	
 	if(!set_non_blocking(fd))
 	{
 		report_error(L_ALL, NONB_ERROR_MSG, get_client_name(auth->client, SHOW_IP), errno);
@@ -461,7 +462,9 @@ timeout_auth_queries_event(void *notused)
 				fd_close(auth->fd);
 
 			if(IsDoingAuth(auth))
+			{
 				sendheader(auth->client, REPORT_FAIL_ID);
+			}
 			if(IsDNSPending(auth))
 			{
 				delete_adns_queries(auth->client->localClient->dns_query);
