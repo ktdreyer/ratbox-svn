@@ -1,3 +1,65 @@
+leeh        2004/12/10 16:28:22 EST	(20041210_0)
+
+  Modified files:
+    .                    Makefile.in 
+    doc                  example.conf example.efnet.conf 
+    include              channel.h hostmask.h s_newconf.h 
+    modules              m_kline.c m_resv.c m_stats.c m_testline.c 
+                         m_xline.c 
+    modules/core         m_mode.c users.c 
+    src                  channel.c hostmask.c ircd_lexer.l 
+                         newconf.c numeric.c s_newconf.c s_serv.c 
+  Log:
+  - via 2.0:
+    - evil hack around the +k-k bug, when we get a -k, look back through
+      mode_table looking for a +k, setting its arg to "*"
+    - added new operator {}; flag, "remoteban", controls whether oper can
+      issue remote klines etc
+    - added the negation of flags, via ~flag.  Default oper flags modified to
+      be operwall and remoteban
+    - propagate upto MAXMODEPARAMSSERV (10) modes in one go, rather than
+      splitting it up into 4,4,2
+    - rework buffer length tracking when building outbound mode buffers.
+    - tack our SID onto the end of RPL_VERSION
+    - remove encrypted=yes|no; from auth {}; and operator {};, its now in
+      flags in both.  Defaults to off for auth {}, on for operator {} which
+      requires the negation of ~encrypted to disable it.
+    - fix klines/glines against user@1.2.3.* etc.  We pass string
+      representation of ip as well, and check that against the "unhashables",
+      those that end in a "*" or "?"
+    - properly substitute logdir into the Makefile so its created on make
+      install
+    - send ERR_NOSUCHSERVER in hunt_server() when a local client issues
+      something against a target beginning with a digit, as this doesnt leak
+      UIDs
+    - via hyb, dont change the ts of a client who we then stop changing nick
+      because theyre nick flooding, and dont alter TS if theyre just changing
+      case of their nickname
+  
+  Revision  Changes    Path
+  7.51      +1 -0      ircd-ratbox/Makefile.in
+  7.251     +15 -17    ircd-ratbox/doc/example.conf
+  7.82      +16 -18    ircd-ratbox/doc/example.efnet.conf
+  7.161     +1 -0      ircd-ratbox/include/channel.h
+  1.39      +8 -4      ircd-ratbox/include/hostmask.h
+  7.43      +4 -1      ircd-ratbox/include/s_newconf.h
+  1.117     +20 -5     ircd-ratbox/modules/core/m_mode.c
+  1.25      +41 -34    ircd-ratbox/modules/core/users.c
+  1.195     +16 -2     ircd-ratbox/modules/m_kline.c
+  1.70      +15 -1     ircd-ratbox/modules/m_resv.c
+  1.237     +7 -7      ircd-ratbox/modules/m_stats.c
+  1.53      +2 -2      ircd-ratbox/modules/m_testline.c
+  1.64      +15 -1     ircd-ratbox/modules/m_xline.c
+  7.428     +3 -4      ircd-ratbox/src/channel.c
+  7.104     +16 -19    ircd-ratbox/src/hostmask.c
+  1.165     +1 -1      ircd-ratbox/src/ircd_lexer.l
+  7.186     +20 -28    ircd-ratbox/src/newconf.c
+  7.33      +1 -1      ircd-ratbox/src/numeric.c
+  7.61      +1 -0      ircd-ratbox/src/s_newconf.c
+  7.419     +1 -1      ircd-ratbox/src/s_serv.c
+
+
+
 leeh        2004/12/07 07:18:14 EST	(20041207_0)
 
   Modified files:
