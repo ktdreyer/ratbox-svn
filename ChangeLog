@@ -1,3 +1,19 @@
+androsyn    2002/11/24 08:45:32 UTC	(20021124_7)
+
+  Modified files:
+    src                  s_bsd_devpoll.c s_bsd_poll.c 
+                         s_bsd_select.c s_bsd_sigio.c 
+  Log:
+  Make these bail out if F closed on us during the read handler..
+  
+  Revision  Changes    Path
+  7.20      +3 -0      ircd-ratbox/src/s_bsd_devpoll.c
+  7.59      +3 -0      ircd-ratbox/src/s_bsd_poll.c
+  7.30      +6 -8      ircd-ratbox/src/s_bsd_select.c
+  7.28      +3 -0      ircd-ratbox/src/s_bsd_sigio.c
+
+
+
 androsyn    2002/11/24 08:40:41 UTC	(20021124_6)
 
   Modified files:
