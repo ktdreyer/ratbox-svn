@@ -1,3 +1,22 @@
+jmallett    2002/01/09 12:38:38 EST	(20020109_8)
+
+  Modified files:
+    src                  client.c s_bsd.c s_gline.c s_serv.c 
+                         s_user.c whowas.c 
+  Log:
+  Clean up a number of uses of "assert(0 != pointer)" and "assert(0 == pointer)"
+  and use NULL instead, since that will always do the right thing.
+  
+  Revision  Changes    Path
+  7.220     +5 -5      ircd-hybrid-7/src/client.c
+  7.157     +2 -2      ircd-hybrid-7/src/s_bsd.c
+  1.19      +1 -1      ircd-hybrid-7/src/s_gline.c
+  7.234     +2 -2      ircd-hybrid-7/src/s_serv.c
+  7.178     +7 -7      ircd-hybrid-7/src/s_user.c
+  7.15      +1 -1      ircd-hybrid-7/src/whowas.c
+
+
+
 db          2002/01/09 12:30:35 EST	(20020109_7)
 
   Modified files:
