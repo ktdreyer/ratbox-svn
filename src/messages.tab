@@ -40,7 +40,7 @@ static  char *  replies[] = {
 /* 017 */       (char *)NULL,
 /* 018 */       (char *)NULL,
 /* 019 */       (char *)NULL,
-/* 020 */       (char *)NULL,
+/* 020 RPL_YOURID */  ":%s 020 %s %s %s :Your ID and key is",
 /* 021 */       (char *)NULL,
 /* 022 */       (char *)NULL,
 /* 023 */       (char *)NULL,

@@ -459,8 +459,6 @@ int register_local_user(struct Client *client_p, struct Client *source_p,
       add_to_id_hash_table(id, source_p);
       id = id_get();
       strcpy(user->id_key, id);
-      sendto_one(source_p, ":%s NOTICE %s :Your ID = %s, KEY=%s",
-                 me.name, source_p->name, source_p->user->id, id);
     }
 
   inetntop(source_p->localClient->aftype, &IN_ADDR(source_p->localClient->ip), 
@@ -1263,7 +1261,10 @@ void user_welcome(struct Client *source_p)
   sendto_one(source_p, form_str(RPL_CREATED),me.name,source_p->name,creation);
   sendto_one(source_p, form_str(RPL_MYINFO), me.name, source_p->name,
 	     me.name, version);
-
+#ifdef PERSISTANT_CLIENTS
+  sendto_one(source_p, form_str(RPL_YOURID), me.name, source_p->name,
+             source_p->user->id, source_p->user->id_key);
+#endif
   show_isupport(source_p);
   
   show_lusers(source_p);
