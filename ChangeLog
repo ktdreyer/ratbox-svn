@@ -1,3 +1,17 @@
+androsyn    2002/09/10 19:40:54 UTC	(20020910_5)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+  Log:
+  Update configure flags for forte c even more..
+  
+  Revision  Changes    Path
+  7.152     +1 -1      ircd-ratbox/autoconf/configure.in
+  7.158     +1 -1      ircd-ratbox/configure
+
+
+
 androsyn    2002/09/10 19:35:23 UTC	(20020910_4)
 
   Modified files:
