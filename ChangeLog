@@ -1,3 +1,15 @@
+leeh        2002/09/04 10:53:07 EDT	(20020904_1)
+
+  Modified files:
+    modules              m_trace.c 
+  Log:
+  - check a user is local before showing them theirselves in /trace.
+  
+  Revision  Changes    Path
+  1.59      +9 -4      ircd-ratbox/modules/m_trace.c
+
+
+
 leeh        2002/09/04 09:44:07 EDT	(20020904_0)
 
   Modified files:
