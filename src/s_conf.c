@@ -1434,9 +1434,9 @@ static void set_default_conf(void)
   ConfigFileEntry.kline_with_connection_closed = NO;
   ConfigFileEntry.warn_no_nline = YES;
   ConfigFileEntry.non_redundant_klines = YES;
-  ConfigFileEntry.o_lines_oper_only = NO;
-  ConfigFileEntry.k_lines_oper_only = 1; /* masked */
-  ConfigFileEntry.i_lines_oper_only = 1; /* masked */
+  ConfigFileEntry.stats_o_oper_only = NO;
+  ConfigFileEntry.stats_k_oper_only = 1; /* masked */
+  ConfigFileEntry.stats_i_oper_only = 1; /* masked */
   ConfigFileEntry.pace_wait = 10;
   ConfigFileEntry.caller_id_wait = 60;
   ConfigFileEntry.whois_wait = 0;

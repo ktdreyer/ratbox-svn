@@ -208,9 +208,9 @@ typedef struct config_file_entry
   int           kline_with_connection_closed;
   int           warn_no_nline;
   int           non_redundant_klines;
-  int           o_lines_oper_only;
-  int		k_lines_oper_only;
-  int		i_lines_oper_only;
+  int           stats_o_oper_only;
+  int		stats_k_oper_only;
+  int		stats_i_oper_only;
   int           pace_wait;
   int           whois_wait;
   int           knock_delay;

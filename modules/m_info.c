@@ -262,9 +262,9 @@ static struct InfoStruct info_table[] =
     "Check for and disallow redundant K-lines"
   },
   {
-    "o_lines_oper_only",
+    "stats_o_oper_only",
     OUTPUT_BOOLEAN_YN,
-    &ConfigFileEntry.o_lines_oper_only,
+    &ConfigFileEntry.stats_o_oper_only,
     "STATS o output is only shown to operators"
   },
   {
