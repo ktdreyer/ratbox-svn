@@ -1,3 +1,16 @@
+leeh        2004/05/06 14:37:14 EDT	(20040506_0)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  - SetIOError() in close_connection(), seeing as we test that rather than
+    fd > 0 now
+  
+  Revision  Changes    Path
+  7.457     +1 -0      ircd-ratbox/src/client.c
+
+
+
 leeh        2004/04/29 11:13:09 EDT	(20040429_4)
 
   Modified files:
