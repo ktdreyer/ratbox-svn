@@ -1,3 +1,7 @@
+*** 20011023_1 by wcampbel
+Minor doc update
+
+
 *** 20011022_2 by db
 - We renamed IsSetOperN to IsOperN, correcting this contrib module to match
 
