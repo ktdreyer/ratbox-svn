@@ -219,6 +219,7 @@ static void auth_dns_callback(void* vptr, adns_answer* reply)
       unlink_auth_request(auth, &auth_poll_list);
       free_auth_request(auth);
       release_auth_client(client_p);
+      fprintf(stderr, "released auth\n");
     }
 
 }
@@ -546,6 +547,7 @@ read_auth_reply(int fd, void *data)
     {
       ++ServerStats->is_abad;
       strcpy(auth->client->username, "unknown");
+      sendheader(auth->client, REPORT_FAIL_ID);
     }
   else
     {
