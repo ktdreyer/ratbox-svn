@@ -294,4 +294,6 @@ AC_OUTPUT(                   \
  modules/Makefile            \
  tools/Makefile              \
  doc/Makefile                \
+ gnats/Makefile              \
+ gnats/send-pr               \
 )

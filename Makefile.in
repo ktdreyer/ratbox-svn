@@ -83,7 +83,7 @@ CFLAGS		= @CFLAGS@
 
 SHELL=/bin/sh
 #SUBDIRS=src tools modules messages
-SUBDIRS=src tools modules doc
+SUBDIRS=src tools modules doc gnats
 # XXX removed `iauth' from the build since it doesn't compile currently
 # SUBDIRS=src tools iauth
 # XXX removed 'messages' from the build until thats fixed
