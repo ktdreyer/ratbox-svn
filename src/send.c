@@ -257,15 +257,8 @@ send_queued_write(int fd, void *data)
     {
       /* we have a non-fatal error, so just continue */
     }
-    else if (retlen < 0)
+    else if (retlen <= 0)
     {
-      /* We have a fatal error */
-      dead_link(to);
-      return;
-    }
-    else if (retlen == 0)
-    {
-      /* 0 bytes is an EOF .. */
       dead_link(to);
       return;
     }
