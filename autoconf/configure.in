@@ -624,21 +624,25 @@ else
 	fi
 
 	AC_MSG_CHECKING(for compiler option to produce PIC)
-	if test "$ac_cv_prog_gcc" = "yes"; then
-		AC_MSG_RESULT(gcc: -fPIC -DPIC -shared)
-		PICFLAGS="-fPIC -DPIC -shared"
-	else
-		case `uname -s` in
-		SunOS*)
-			AC_MSG_RESULT(SunOS - Assuming Sun Workshop compiler: -KPIC -DPIC -G)
-			PICFLAGS="-KPIC -DPIC -G"
+	case `uname -s` in
+	Darwin*)
+		AC_MSG_RESULT(Darwin or Mac OS X - Assuming you want to make Mach-O bundles: -fno-common -bundle -flat_namespace -undefined suppress)
+		PICFLAGS="-fno-common -bundle -flat_namespace -undefined suppress"
 		;;
-		*)
+	SunOS*)
+		AC_MSG_RESULT(SunOS - Assuming Sun Workshop compiler: -KPIC -DPIC -G)
+		PICFLAGS="-KPIC -DPIC -G"
+		;;
+	*)
+		if test "$ac_cv_prog_gcc" = "yes"; then
+			AC_MSG_RESULT(gcc: -fPIC -DPIC -shared)
+			PICFLAGS="-fPIC -DPIC -shared"
+		else
 			AC_MSG_RESULT(no)
 			AC_MSG_ERROR(could not find a way to produce position independent code. Try ./configure  --disable-shared-modules)
+		fi
 		;;
-		esac
-	fi
+	esac
 	AC_SUBST(PICFLAGS)
 
 	nlist_lib=""
