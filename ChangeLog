@@ -1,3 +1,15 @@
+androsyn    2003/08/07 12:27:50 EDT	(20030807_1)
+
+  Modified files:
+    src                  s_auth.c 
+  Log:
+  memset can be useful
+  
+  Revision  Changes    Path
+  7.154     +1 -0      ircd-ratbox/src/s_auth.c
+
+
+
 leeh        2003/08/07 12:15:28 EDT	(20030807_0)
 
   Modified files:
