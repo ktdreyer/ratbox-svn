@@ -466,7 +466,7 @@ void error_exit_client(struct Client* client_p, int error)
     }
   if (error == 0)
   {
-    strcpy(errmsg, "Remote closed the connection");
+    strcpy(errmsg, "Remote host closed the connection");
   }
   else
   {
