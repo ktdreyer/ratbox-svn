@@ -1,3 +1,13 @@
+*** 20001204_7 by db
+- +m moderated channel logic was missing oops.
+- removed count of servers in server hide mode in /lusers
+- /links will show current server with hop count of 0, everyone else with 1
+  in server hide mode to all but opers
+- allow half ops to set topic
+- removed zlib, better to use system installed lib
+
+
+
 *** 20001204_6 by db
 - ripped out LIMIT_UH for now. BLOAT BLOAT BLOAT
   in preparation for doing IP throttling ...
