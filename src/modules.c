@@ -59,44 +59,45 @@ static struct module_path *mod_paths = NULL;
 static struct module_path *
 mod_find_path(char *path)
 {
-	struct module_path *pathst = mod_paths;
-	
-	if (!pathst)
-		return NULL;
-	
-	for (pathst = mod_paths; pathst; pathst = pathst->next)
-		if (!strcmp(path, pathst->path))
-			return pathst;
-	return NULL;
+  struct module_path *pathst = mod_paths;
+
+  if (!pathst)
+    return NULL;
+
+  for (pathst = mod_paths; pathst; pathst = pathst->next)
+    if (!strcmp(path, pathst->path))
+      return pathst;
+  return NULL;
 }
-			  
+
 void
 mod_add_path(char *path)
 {
-	struct module_path *pathst = NULL;
-	
-	if (mod_find_path(path))
-		return;
-	
-	if (!mod_paths) {
-		mod_paths = malloc (sizeof (struct module_path));
-		mod_paths->prev = NULL;
-		mod_paths->next = NULL;
-	}
-	
-	for (pathst = mod_paths; pathst->next; pathst = pathst->next)
-		;
-	
-	strcpy(pathst->path, path);
+  struct module_path *pathst = NULL;
+
+  if (mod_find_path(path))
+    return;
+
+  if (!mod_paths)
+  {
+    mod_paths = malloc (sizeof (struct module_path));
+    mod_paths->prev = NULL;
+    mod_paths->next = NULL;
+  }
+
+  for (pathst = mod_paths; pathst->next; pathst = pathst->next)
+    ;
+
+  strcpy(pathst->path, path);
 }
 
-	
+
 static char *
 irc_basename(char *path)
 {
   char *mod_basename = MyMalloc (strlen (path) + 1);
   char *s;
- 
+
   if (!(s = strrchr (path, '/')))
     s = path;
   else
@@ -113,10 +114,10 @@ findmodule_byname (char *name)
   int i;
 
   for (i = 0; i < num_mods; i++) 
-    {
-      if (!irccmp (modlist[i]->name, name))
-	return i;
-    }
+  {
+    if (!irccmp (modlist[i]->name, name))
+      return i;
+  }
   return -1;
 }
 
@@ -138,15 +139,15 @@ int unload_one_module (char *name)
   deinitfunc = (void (*)(void))dlsym (modlist[modindex]->address, "_moddeinit");
 
   if( deinitfunc != NULL )
-    {
-      deinitfunc ();
-    }
+  {
+    deinitfunc ();
+  }
 
   dlclose(modlist[modindex]->address);
-  
+
   MyFree(modlist[modindex]->name);
   memcpy( &modlist[modindex], &modlist[modindex+1],
-	  sizeof(struct module) * ((num_mods-1) - modindex) );
+          sizeof(struct module) * ((num_mods-1) - modindex) );
 
   if(num_mods != 0)
     num_mods--;
@@ -187,7 +188,7 @@ load_all_modules (void)
   char            module_fq_name[PATH_MAX + 1];
 
   modlist = (struct module **)MyMalloc ( sizeof (struct module) *
-					     (MODS_INCREMENT));
+                                         (MODS_INCREMENT));
   max_mods = MODS_INCREMENT;
 
   mod_add_cmd(&modload_msgtab);
@@ -196,31 +197,31 @@ load_all_modules (void)
   mod_add_cmd(&hash_msgtab);
 
   if (chdir (system_module_dir_name) == -1)
-    {
-      log (L_WARN, "Could not load modules from %s: %s",
-	   system_module_dir_name, strerror (errno));
-      return;
-    }
+  {
+    log (L_WARN, "Could not load modules from %s: %s",
+         system_module_dir_name, strerror (errno));
+    return;
+  }
   system_module_dir = opendir (".");
   if (system_module_dir == NULL)
-    {
-      log (L_WARN, "Could not load modules from %s: %s",
-	   system_module_dir_name, strerror (errno));
-      return;
-    }
+  {
+    log (L_WARN, "Could not load modules from %s: %s",
+         system_module_dir_name, strerror (errno));
+    return;
+  }
 
   while ((ldirent = readdir (system_module_dir)) != NULL)
+  {
+    if (ldirent->d_name [strlen (ldirent->d_name) - 3] == '.' &&
+        ldirent->d_name [strlen (ldirent->d_name) - 2] == 's' &&
+        ldirent->d_name [strlen (ldirent->d_name) - 1] == 'o')
     {
-      if (ldirent->d_name [strlen (ldirent->d_name) - 3] == '.' &&
-	  ldirent->d_name [strlen (ldirent->d_name) - 2] == 's' &&
-	  ldirent->d_name [strlen (ldirent->d_name) - 1] == 'o')
-	{
-	  (void)snprintf (module_fq_name, sizeof (module_fq_name),
-			  "%s/%s",  system_module_dir_name,
-			  ldirent->d_name);
-	  (void)load_one_module (module_fq_name);
-	}
+      (void)snprintf (module_fq_name, sizeof (module_fq_name),
+                      "%s/%s",  system_module_dir_name,
+                      ldirent->d_name);
+      (void)load_one_module (module_fq_name);
     }
+  }
 
   (void)closedir (system_module_dir);
   (void)chdir (old_dir);
@@ -246,57 +247,76 @@ load_one_module (char *path)
   struct module_path *pathst;
 
   mod_basename = irc_basename(path);
-  
+
   if (strchr(path, '/')) {
-	  /* absolute pathname, try it */
-	  errno = 0;
-	  tmpptr = dlopen (path, RTLD_NOW);
-	  
-	  if (tmpptr == NULL)
-	  {
-		  const char *err = dlerror();
-		  
-		  sendto_realops_flags (FLAGS_ALL,
-								"Error loading module %s: %s", mod_basename, err);
-		  log (L_WARN, "Error loading module %s: %s", mod_basename, err);
-		  MyFree (mod_basename);
-		  return -1;
-	  }
-  }
-  else
-  {
-	  /* non-absolute path, try all module paths */
-	  for (pathst = mod_paths; pathst; pathst = pathst->next) {
-		  sprintf(realmodpath, "%s/%s", pathst->path, path);
-		  errno = 0;
-		  tmpptr = dlopen (realmodpath, RTLD_NOW);
-		  
-		  if (tmpptr == NULL)
-		  {
-			  const char *err = dlerror();
-			  
-			  if (errno == ENOENT) /* module not found, try next path */
-				  continue;
-			  
-			  sendto_realops_flags (FLAGS_ALL,
-									"Error loading module %s: %s", mod_basename, err);
-			  log (L_WARN, "Error loading module %s: %s", mod_basename, err);
-			  MyFree (mod_basename);
-			  return -1;
-		  }
-	  }
-  }
-  
-  initfunc = (void (*)(void))dlsym (tmpptr, "_modinit");
-  if (!initfunc)
+    /* absolute pathname, try it */
+    errno = 0;
+    tmpptr = dlopen (path, RTLD_NOW);
+
+    if (tmpptr == NULL)
     {
+      const char *err = dlerror();
+
       sendto_realops_flags (FLAGS_ALL,
-		    "Module %s has no _modinit() function", mod_basename);
-      log (L_WARN, "Module %s has no _modinit() function", mod_basename);
-      (void)dlclose (tmpptr);
+                            "Error loading module %s: %s",
+                            mod_basename, err);
+      log (L_WARN, "Error loading module %s: %s", mod_basename, err);
       MyFree (mod_basename);
       return -1;
     }
+  }
+  else
+  {
+    /* non-absolute path, try all module paths */
+    for (pathst = mod_paths; pathst; pathst = pathst->next)
+    {
+      sprintf(realmodpath, "%s/%s", pathst->path, path);
+      errno = 0;
+      tmpptr = dlopen (realmodpath, RTLD_NOW);
+
+      if (tmpptr == NULL)
+      {
+        char *err;
+
+        if (errno == ENOENT) /* module not found, try next path */
+          continue;
+
+        err = dlerror();
+
+        sendto_realops_flags (FLAGS_ALL,
+                              "Error loading module %s: %s",
+                              mod_basename, err);
+        log (L_WARN, "Error loading module %s: %s", mod_basename, err);
+        MyFree (mod_basename);
+        return -1;
+      }
+    }
+  }
+
+  if (tmpptr == NULL)
+  {
+    const char *err = dlerror();
+
+    sendto_realops_flags(FLAGS_ALL,
+                         "Error loading module %s: %s",
+                         mod_basename, err);
+    log(L_WARN, "Error loading module %s: %s",
+        mod_basename, err);
+    MyFree(mod_basename);
+    return -1;
+  }
+
+  initfunc = (void (*)(void))dlsym (tmpptr, "_modinit");
+  if (!initfunc)
+  {
+    sendto_realops_flags (FLAGS_ALL,
+                          "Module %s has no _modinit() function",
+                          mod_basename);
+    log (L_WARN, "Module %s has no _modinit() function", mod_basename);
+    (void)dlclose (tmpptr);
+    MyFree (mod_basename);
+    return -1;
+  }
 
   if (!(verp = (char **)dlsym (tmpptr, "_version")))
     ver = unknown_ver;
@@ -314,7 +334,7 @@ load_one_module (char *path)
   initfunc ();
 
   sendto_realops_flags (FLAGS_ALL, "Module %s [version: %s] loaded at 0x%x",
-			mod_basename, ver, tmpptr);
+                        mod_basename, ver, tmpptr);
   log (L_WARN, "Module %s [version: %s] loaded at 0x%x",
        mod_basename, ver, tmpptr);
   MyFree (mod_basename);
@@ -337,9 +357,9 @@ static void increase_modlist(void)
     return;
 
   new_modlist = (struct module **)MyMalloc ( sizeof (struct module) *
-					     (max_mods + MODS_INCREMENT));
+                                             (max_mods + MODS_INCREMENT));
   memcpy((void *)new_modlist,
-	 (void *)modlist, sizeof(struct module) * num_mods);
+         (void *)modlist, sizeof(struct module) * num_mods);
 
   MyFree(modlist);
   modlist = new_modlist;
@@ -353,19 +373,19 @@ mo_modload (struct Client *cptr, struct Client *sptr, int parc, char **parv)
   char *m_bn;
 
   if (!IsSetOperAdmin(sptr))
-    {
-      sendto_one(sptr, ":%s NOTICE %s :You have no A flag", me.name, parv[0]);
-      return 0;
-    }
+  {
+    sendto_one(sptr, ":%s NOTICE %s :You have no A flag", me.name, parv[0]);
+    return 0;
+  }
 
   m_bn = irc_basename (parv[1]);
 
   if (findmodule_byname (m_bn) != -1)
-    {
-      sendto_one (sptr, ":%s NOTICE %s :Module %s is already loaded",
-		  me.name, sptr->name, m_bn);
-      return 0;
-    }
+  {
+    sendto_one (sptr, ":%s NOTICE %s :Module %s is already loaded",
+                me.name, sptr->name, m_bn);
+    return 0;
+  }
 
   (void)load_one_module (parv[1]);
   return 0;
@@ -379,27 +399,27 @@ mo_modunload (struct Client *cptr, struct Client *sptr, int parc, char **parv)
   char *m_bn;
 
   if (!IsSetOperAdmin (sptr))
-    {
-      sendto_one (sptr, ":%s NOTICE %s :You have no A flag",
-		  me.name, parv[0]);
-      return 0;
-    }
+  {
+    sendto_one (sptr, ":%s NOTICE %s :You have no A flag",
+                me.name, parv[0]);
+    return 0;
+  }
 
   m_bn = irc_basename (parv[1]);
 
   if (findmodule_byname (m_bn) == -1)
-    {
-      sendto_one (sptr, ":%s NOTICE %s :Module %s is not loaded",
-		  me.name, sptr->name, m_bn);
-      MyFree (m_bn);
-      return 0;
-    }
+  {
+    sendto_one (sptr, ":%s NOTICE %s :Module %s is not loaded",
+                me.name, sptr->name, m_bn);
+    MyFree (m_bn);
+    return 0;
+  }
 
   if( unload_one_module (m_bn) == -1 )
-    {
-      sendto_one (sptr, ":%s NOTICE %s :Module %s is not loaded",
-		  me.name, sptr->name, m_bn);
-    }
+  {
+    sendto_one (sptr, ":%s NOTICE %s :Module %s is not loaded",
+                me.name, sptr->name, m_bn);
+  }
   MyFree (m_bn);
   return 0;
 }
@@ -412,17 +432,20 @@ mo_modlist (struct Client *cptr, struct Client *sptr, int parc, char **parv)
 
   if (!IsSetOperAdmin (sptr))
   {
-      sendto_one (sptr, ":%s NOTICE %s :You have no A flag",
-		  me.name, parv[0]);
-      return 0;
+    sendto_one (sptr, ":%s NOTICE %s :You have no A flag",
+                me.name, parv[0]);
+    return 0;
   }
 
   if (parc>1)
   {
-    sendto_one(sptr, ":%s NOTICE %s :Listing modules matching string '%s'...", me.name, parv[0], parv[1]);
+    sendto_one(sptr,
+               ":%s NOTICE %s :Listing modules matching string '%s'...",
+               me.name, parv[0], parv[1]);
   }
   else {
-    sendto_one(sptr, ":%s NOTICE %s :Listing all modules...", me.name, parv[0]);
+    sendto_one(sptr, ":%s NOTICE %s :Listing all modules...",
+               me.name, parv[0]);
   }
 
   for(i = 0; i < num_mods; i++ )
@@ -431,13 +454,15 @@ mo_modlist (struct Client *cptr, struct Client *sptr, int parc, char **parv)
     {
       if(strstr(modlist[i]->name,parv[1]))
       {
-  	sendto_one(sptr, form_str(RPL_MODLIST), me.name, parv[0],
-                 modlist[i]->name, modlist[i]->address, modlist[i]->version);
+        sendto_one(sptr, form_str(RPL_MODLIST), me.name, parv[0],
+                   modlist[i]->name, modlist[i]->address,
+                   modlist[i]->version);
       }
     }
     else {
       sendto_one(sptr, form_str(RPL_MODLIST), me.name, parv[0],
-                 modlist[i]->name, modlist[i]->address, modlist[i]->version);
+                 modlist[i]->name, modlist[i]->address,
+                 modlist[i]->version);
     }
   }
   sendto_one(sptr, ":%s NOTICE %s :Done.", me.name, parv[0]);
