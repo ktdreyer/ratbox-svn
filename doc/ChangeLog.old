@@ -1,3 +1,9 @@
+*** 20010613_6 by leeh
+- started removing server names in collisions..
+  the old ones are wrapped in #if 0 for now
+- removed an excess ) from m_oper.c
+
+
 *** 20010613_5 by leeh
 - ug, I came across check_klines() when trying to find this bug..
   it was just about unreadable.. 
