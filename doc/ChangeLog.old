@@ -1,3 +1,7 @@
+*** 19990902_1 by lusky
+added check for '#' in username and hostname of /quote kline
+
+
 *** 19990901_10 by wnder
 goes with ircdauth.c
 
