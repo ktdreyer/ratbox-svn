@@ -1,3 +1,16 @@
+androsyn    2004/01/14 14:26:10 EST	(20040114_1)
+
+  Modified files:
+    src                  newconf.c s_user.c 
+  Log:
+  require local users to have a '.' or ':' in their host as hyb6 has problems with it
+  
+  Revision  Changes    Path
+  7.123     +1 -1      ircd-ratbox/src/newconf.c
+  7.299     +7 -1      ircd-ratbox/src/s_user.c
+
+
+
 androsyn    2004/01/14 14:23:24 EST	(20040114_0)
 
   Modified files:
