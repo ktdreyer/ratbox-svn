@@ -179,7 +179,7 @@ void init_netio(void)
  */
 void
 comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
-    void *client_data, unsigned long timeout)
+    void *client_data, time_t timeout)
 {  
     fde_t *F = &fd_table[fd];
     assert(fd >= 0);
