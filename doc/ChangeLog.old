@@ -1,3 +1,9 @@
+*** 20010104_3 by ejb
+- commit initial user ID (TS4) code.
+  we support IDs, but a couple of things are missing, most notable ID collisions.
+  we also don't actually do anything with the IDs yet.
+
+
 *** 20010104_2 by a1kmm
 - Cleaned up m_server and the associated find_server, we now check earlier for it.
 - Fixed hostmasking.
