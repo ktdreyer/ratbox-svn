@@ -813,10 +813,10 @@ majority_gline(struct Client *source_p,
     {
       gline_pending_ptr = pending_node->data;
 
-      if( (irccmp(gline_pending_ptr->user,user) == 0) &&
-          (irccmp(gline_pending_ptr->host,host) == 0 ) )
+      if ((irccmp(gline_pending_ptr->user,user) == 0) &&
+         (irccmp(gline_pending_ptr->host,host) == 0))
         {
-          if(((irccmp(gline_pending_ptr->oper_user1,oper_user) == 0) ||
+          if (((irccmp(gline_pending_ptr->oper_user1,oper_user) == 0) ||
               (irccmp(gline_pending_ptr->oper_host1,oper_host) == 0)) ||
               (irccmp(gline_pending_ptr->oper_server1,oper_server) == 0) )
             {
@@ -826,7 +826,7 @@ majority_gline(struct Client *source_p,
               return NO;
             }
 
-          if(gline_pending_ptr->oper_user2[0] != '\0')
+          if (gline_pending_ptr->oper_user2[0] != '\0')
             {
               /* if two other opers on two different servers have voted yes */
 

@@ -75,22 +75,27 @@ int match(const char *mask, const char *name)
   int   wild  = 0;
   int   calls = 0;
   int   quote = 0;
+
   assert(0 != mask);
   assert(0 != name);
+
   if (!mask || !name)
     return 0;
-  while (calls++ < MATCH_MAX_CALLS) {
+
+  while (calls++ < MATCH_MAX_CALLS)
+  {
     if (quote)
       quote++;
     if (quote == 3)
       quote = 0;
     if (*m == '\\' && !quote)
-      {
-       m++;
-       quote = 1;
-       continue;
-      }
-    if (!quote && *m == '*') {
+    {
+      m++;
+      quote = 1;
+      continue;
+    }
+    if (!quote && *m == '*')
+    {
       /*
        * XXX - shouldn't need to spin here, the mask should have been
        * collapsed before match is called
@@ -98,19 +103,20 @@ int match(const char *mask, const char *name)
       while (*m == '*')
         m++;
       if (*m == '\\')
-        {
-          m++;
-          /* This means it is an invalid mask -A1kmm. */
-          if (!*m)
-            return 0;
-          quote = 2;
-        }
+      {
+	m++;
+	/* This means it is an invalid mask -A1kmm. */
+	if (!*m)
+	  return 0;
+	quote = 2;
+      }
       wild = 1;
       ma = m;
       na = n;
     }
 
-    if (!*m) {
+    if (!*m)
+    {
       if (!*n)
         return 1;
       if (quote)
@@ -124,7 +130,8 @@ int match(const char *mask, const char *name)
       m = ma;
       n = ++na;
     }
-    else if (!*n) {
+    else if (!*n)
+    {
       /*
        * XXX - shouldn't need to spin here, the mask should have been
        * collapsed before match is called
@@ -141,7 +148,8 @@ int match(const char *mask, const char *name)
       m = ma;
       n = ++na;
     }
-    else {
+    else
+    {
       if (*m)
         m++;
       if (*n)
@@ -162,28 +170,28 @@ collapse(char *pattern)
  char c;
  int f = 0;
 
- if (!p)
+ if (p == NULL)
    return NULL;
  
  while ((c = *p++))
+ {
+   if (!(f & 2) && c == '*')
    {
-    if (!(f & 2) && c == '*')
-      {
-       if (!(f & 1))
-         *po++ = '*';
-       f |= 1;
-      }
-    else if (!(f & 2) && c == '\\')
-      {
-       *po++ = '\\';
-       f |= 2;
-      }
-    else
-      {
-       *po++ = c;
-       f &= ~3;
-      }
+     if (!(f & 1))
+       *po++ = '*';
+     f |= 1;
    }
+   else if (!(f & 2) && c == '\\')
+   {
+     *po++ = '\\';
+     f |= 2;
+   }
+   else
+   {
+     *po++ = c;
+     f &= ~3;
+   }
+ }
  *po++ = 0;
  return pattern;
 }
@@ -203,7 +211,8 @@ int irccmp(const char *s1, const char *s2)
   assert(0 != s1);
   assert(0 != s2);
 
-  while ((res = ToUpper(*str1) - ToUpper(*str2)) == 0) {
+  while ((res = ToUpper(*str1) - ToUpper(*str2)) == 0)
+  {
     if (*str1 == '\0')
       return 0;
     str1++;
@@ -220,36 +229,15 @@ int ircncmp(const char* s1, const char *s2, int n)
   assert(0 != s1);
   assert(0 != s2);
 
-  while ((res = ToUpper(*str1) - ToUpper(*str2)) == 0) {
+  while ((res = ToUpper(*str1) - ToUpper(*str2)) == 0)
+  {
     str1++; str2++; n--;
     if (n == 0 || (*str1 == '\0' && *str2 == '\0'))
       return 0;
   }
   return (res);
 }
-#ifdef DEAD_CODE
-unsigned long textip_to_ul(const char *ip)
-{
-  unsigned long ipr=0;
-  unsigned int octet=0;
 
-  char c;
-  while((c=*ip)) {
-    if(isdigit((int)c)) {
-      octet *= 10;
-      octet += (*ip & 0xF);
-    } else if(c == '.') {
-      ipr <<= 8;
-      ipr += octet;
-      octet = 0;
-    } else if(c=='/')break;
-    ip++;
-  }
-  ipr <<= 8;
-  ipr += octet;
-  return ipr;
-}
-#endif 
 const unsigned char ToLowerTab[] = { 
   0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa,
   0xb, 0xc, 0xd, 0xe, 0xf, 0x10, 0x11, 0x12, 0x13, 0x14,
