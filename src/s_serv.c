@@ -569,7 +569,7 @@ serv_connect(struct server_conf *server_p, struct Client *by)
 	}
 
 	/* servernames are always guaranteed under HOSTLEN chars */
-	fd_note(fd, "Server: %s", server_p->name);
+	comm_note(fd, "Server: %s", server_p->name);
 
 	/* Create a local client */
 	client_p = make_client(NULL);

@@ -143,13 +143,13 @@ extern fde_t *fd_table;
 
 void fdlist_init(void);
 
-extern void fd_open(int, unsigned int, const char *);
-extern void fd_close(int);
-extern void fd_dump(struct Client *source_p);
+extern void comm_open(int, unsigned int, const char *);
+extern void comm_close(int);
+extern void comm_dump(struct Client *source_p);
 #ifndef __GNUC__
-extern void fd_note(int fd, const char *format, ...);
+extern void comm_note(int fd, const char *format, ...);
 #else
-extern void fd_note(int fd, const char *format, ...) __attribute__ ((format(printf, 2, 3)));
+extern void comm_note(int fd, const char *format, ...) __attribute__ ((format(printf, 2, 3)));
 #endif
 
 /* Size of a read buffer */

@@ -99,7 +99,7 @@ comm_close_all(void)
 		for (i = 4; i < MAXCONNECTIONS; ++i)
 		{
 			if(fd_table[i].flags.open)
-				fd_close(i);
+				comm_close(i);
 			else
 				close(i);
 		}
@@ -252,16 +252,6 @@ comm_checktimeouts(void *notused)
 			continue;
 		if(F->flags.closing)
 			continue;
-
-		/* check flush functions */
-		if(F->flush_handler &&
-		   F->flush_timeout > 0 && F->flush_timeout < CurrentTime)
-		{
-			hdl = F->flush_handler;
-			data = F->flush_data;
-			comm_setflush(F->fd, 0, NULL, NULL);
-			hdl(F->fd, data);
-		}
 
 		/* check timeouts */
 		if(F->timeout_handler &&
@@ -560,7 +550,7 @@ comm_socket(int family, int sock_type, int proto, const char *note)
 	}
 
 	/* Next, update things in our fd tracking */
-	fd_open(fd, FD_SOCKET, note);
+	comm_open(fd, FD_SOCKET, note);
 	return fd;
 }
 
@@ -600,7 +590,7 @@ comm_accept(int fd, struct sockaddr *pn)
 	}
 
 	/* Next, tag the FD as an incoming connection */
-	fd_open(newfd, FD_SOCKET, "Incoming connection");
+	comm_open(newfd, FD_SOCKET, "Incoming connection");
 
 	/* .. and return */
 	return newfd;
@@ -676,14 +666,14 @@ fdlist_init(void)
 
 /* Called to open a given filedescriptor */
 void
-fd_open(int fd, unsigned int type, const char *desc)
+comm_open(int fd, unsigned int type, const char *desc)
 {
 	fde_t *F = &fd_table[fd];
 	s_assert(fd >= 0);
 
 	if(F->flags.open)
 	{
-		fd_close(fd);
+		comm_close(fd);
 	}
 	s_assert(!F->flags.open);
 	F->fd = fd;
@@ -705,7 +695,7 @@ fd_open(int fd, unsigned int type, const char *desc)
 
 /* Called to close a given filedescriptor */
 void
-fd_close(int fd)
+comm_close(int fd)
 {
 	fde_t *F = &fd_table[fd];
 	s_assert(F->flags.open);
@@ -717,7 +707,6 @@ fd_close(int fd)
 		s_assert(F->write_handler == NULL);
 	}
 	comm_setselect(F->fd, FDLIST_NONE, COMM_SELECT_WRITE | COMM_SELECT_READ, NULL, NULL, 0);
-	comm_setflush(F->fd, 0, NULL, NULL);
 	
 	if (F->dns_query != NULL)
 	{
@@ -737,10 +726,10 @@ fd_close(int fd)
 
 
 /*
- * fd_dump() - dump the list of active filedescriptors
+ * comm_dump() - dump the list of active filedescriptors
  */
 void
-fd_dump(struct Client *source_p)
+comm_dump(struct Client *source_p)
 {
 	int i;
 
@@ -756,13 +745,13 @@ fd_dump(struct Client *source_p)
 }
 
 /*
- * fd_note() - set the fd note
+ * comm_note() - set the fd note
  *
  * Note: must be careful not to overflow fd_table[fd].desc when
  *       calling.
  */
 void
-fd_note(int fd, const char *format, ...)
+comm_note(int fd, const char *format, ...)
 {
 	va_list args;
 

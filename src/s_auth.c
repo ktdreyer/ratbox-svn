@@ -217,7 +217,7 @@ auth_error(struct AuthRequest *auth)
 {
 	++ServerStats.is_abad;
 
-	fd_close(auth->fd);
+	comm_close(auth->fd);
 	auth->fd = -1;
 
 	ClearAuth(auth);
@@ -259,7 +259,7 @@ start_auth_query(struct AuthRequest *auth)
 		sendto_realops_flags(UMODE_ALL, L_ALL,
 				     "Can't allocate fd for auth on %s",
 				     get_client_name(auth->client, SHOW_IP));
-		fd_close(fd);
+		comm_close(fd);
 		return 0;
 	}
 
@@ -269,7 +269,7 @@ start_auth_query(struct AuthRequest *auth)
 	{
 		report_error(NONB_ERROR_MSG, get_client_name(auth->client, SHOW_IP), 
 				log_client_name(auth->client, SHOW_IP), errno);
-		fd_close(fd);
+		comm_close(fd);
 		return 0;
 	}
 
@@ -431,7 +431,7 @@ timeout_auth_queries_event(void *notused)
 		if(auth->timeout < CurrentTime)
 		{
 			if(auth->fd >= 0)
-				fd_close(auth->fd);
+				comm_close(auth->fd);
 
 			if(IsDoingAuth(auth))
 			{
@@ -561,7 +561,7 @@ read_auth_reply(int fd, void *data)
 		}
 	}
 
-	fd_close(auth->fd);
+	comm_close(auth->fd);
 	auth->fd = -1;
 	ClearAuth(auth);
 
@@ -603,7 +603,7 @@ delete_auth_queries(struct Client *target_p)
 		delete_adns_queries(&auth->dns_query);
 
 	if(auth->fd >= 0)
-		fd_close(auth->fd);
+		comm_close(auth->fd);
 		
 	dlinkDelete(&auth->node, &auth_poll_list);
 	free_auth_request(auth);

@@ -45,7 +45,7 @@ static void tcp_close(adns_state ads) {
   int serv;
   
   serv= ads->tcpserver;
-  fd_close(ads->tcpsocket);
+  comm_close(ads->tcpsocket);
   ads->tcpsocket= -1;
   ads->tcprecv.used= ads->tcprecv_skip= ads->tcpsend.used= 0;
 }
@@ -124,7 +124,7 @@ void adns__tcp_tryconnect(adns_state ads, struct timeval now) {
     r= adns__setnonblock(ads,fd);
     if (r) {
       adns__diag(ads,-1,0,"cannot make TCP socket nonblocking: %s",strerror(r));
-      fd_close(fd);
+      comm_close(fd);
       return;
     }
     memset(&addr,0,sizeof(addr));

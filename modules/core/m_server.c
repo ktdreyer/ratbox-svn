@@ -938,11 +938,11 @@ server_estab(struct Client *client_p)
 		/* we won't overflow FD_DESC_SZ here, as it can hold
 		 * client_p->name + 64
 		 */
-		fd_note(client_p->localClient->fd, "slink data: %s", client_p->name);
-		fd_note(client_p->localClient->ctrlfd, "slink ctrl: %s", client_p->name);
+		comm_note(client_p->localClient->fd, "slink data: %s", client_p->name);
+		comm_note(client_p->localClient->ctrlfd, "slink ctrl: %s", client_p->name);
 	}
 	else
-		fd_note(client_p->localClient->fd, "Server: %s", client_p->name);
+		comm_note(client_p->localClient->fd, "Server: %s", client_p->name);
 
 	/*
 	 ** Old sendto_serv_but_one() call removed because we now
@@ -1621,7 +1621,7 @@ fork_server(struct Client *server)
 	}
 	else
 	{
-		fd_close(server->localClient->fd);
+		comm_close(server->localClient->fd);
 
 		/* close the childs end of the pipes */
 		close(ctrl_fds[1]);
@@ -1647,8 +1647,8 @@ fork_server(struct Client *server)
 					errno);
 		}
 
-		fd_open(server->localClient->ctrlfd, FD_SOCKET, NULL);
-		fd_open(server->localClient->fd, FD_SOCKET, NULL);
+		comm_open(server->localClient->ctrlfd, FD_SOCKET, NULL);
+		comm_open(server->localClient->fd, FD_SOCKET, NULL);
 
 		read_ctrl_packet(server->localClient->ctrlfd, server);
 		read_packet(server->localClient->fd, server);

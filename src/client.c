@@ -180,7 +180,7 @@ free_local_client(struct Client *client_p)
 	}
 
 	if(client_p->localClient->fd >= 0)
-		fd_close(client_p->localClient->fd);
+		comm_close(client_p->localClient->fd);
 
 	if(client_p->localClient->passwd)
 	{
@@ -1403,7 +1403,7 @@ exit_local_server(struct Client *client_p, struct Client *source_p, struct Clien
 	
 	if(source_p->localClient->ctrlfd >= 0)
 	{
-		fd_close(source_p->localClient->ctrlfd);
+		comm_close(source_p->localClient->ctrlfd);
 		source_p->localClient->ctrlfd = -1;
 	}
 
@@ -2038,7 +2038,7 @@ close_connection(struct Client *client_p)
 		if(!IsIOError(client_p))
 			send_queued_write(client_p->localClient->fd, client_p);
 
-		fd_close(client_p->localClient->fd);
+		comm_close(client_p->localClient->fd);
 		client_p->localClient->fd = -1;
 	}
 
@@ -2046,7 +2046,7 @@ close_connection(struct Client *client_p)
 	{
 		if(client_p->localClient->fd > -1)
 		{
-			fd_close(client_p->localClient->ctrlfd);
+			comm_close(client_p->localClient->ctrlfd);
 			client_p->localClient->ctrlfd = -1;
 		}
 	}

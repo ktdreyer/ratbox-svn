@@ -183,7 +183,7 @@ mr_nick(struct Client *client_p, struct Client *source_p, int parc, const char *
 		add_to_client_hash(nick, source_p);
 
 		/* fd_desc is long enough */
-		fd_note(client_p->localClient->fd, "Nick: %s", nick);
+		comm_note(client_p->localClient->fd, "Nick: %s", nick);
 
 		if(HasSentUser(source_p))
 			register_local_user(client_p, source_p);
@@ -1729,7 +1729,7 @@ change_local_nick(struct Client *client_p, struct Client *source_p, char *nick)
 	del_all_accepts(source_p);
 
 	/* fd_desc is long enough */
-	fd_note(client_p->localClient->fd, "Nick: %s", nick);
+	comm_note(client_p->localClient->fd, "Nick: %s", nick);
 
 	return;
 }

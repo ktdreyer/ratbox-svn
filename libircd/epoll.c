@@ -85,7 +85,7 @@ init_netio(void)
 		fprintf(stderr, "init_netio: Couldn't open epoll fd!\n");
 		exit(115);	/* Whee! */
 	}
-	fd_note(ep, "epoll file descriptor");
+	comm_note(ep, "epoll file descriptor");
 }
 
 /*

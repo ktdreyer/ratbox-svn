@@ -536,7 +536,7 @@ static int init_finish(adns_state ads) {
   return 0;
 
  x_closeudp:
-  fd_close(ads->udpsocket);
+  comm_close(ads->udpsocket);
  x_free:
   MyFree(ads);
   ilog(L_IOERROR, "Returning from init_finish: r = %d", r);
@@ -623,8 +623,8 @@ void adns_finish(adns_state ads) {
     else if (ads->output.head) adns_cancel(ads->output.head);
     else break;
   }
-  fd_close(ads->udpsocket);
-  if (ads->tcpsocket >= 0) fd_close(ads->tcpsocket);
+  comm_close(ads->udpsocket);
+  if (ads->tcpsocket >= 0) comm_close(ads->tcpsocket);
   adns__vbuf_free(&ads->tcpsend);
   adns__vbuf_free(&ads->tcprecv);
   freesearchlist(ads);
