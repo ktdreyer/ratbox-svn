@@ -174,30 +174,13 @@ int     ms_list(struct Client *cptr,
 int list_all_channels(struct Client *sptr)
 {
   struct Channel *chptr;
-  struct Channel *tmpchptr;
-  int i;
-  int j;
 
-  /* we'll do this by looking through each hash table bucket */
-  for (i=0; i<CH_MAX; i++)
+  for ( chptr = GlobalChannelList; chptr; chptr = chptr->nextch )
     {
-      for (j=0, chptr = (struct Channel*)(hash_get_channel_block(i).list);
-	   (chptr) && (j<hash_get_channel_block(i).links);
-	   chptr = chptr->hnextch, j++)
-	{
-	  if (!chptr->members || !sptr->user ||
-	      (SecretChannel(chptr) && !IsMember(sptr, chptr)))
-	    continue;
-
-	  /* EVIL!  sendto_one doesnt return status of any kind!
-	   *  Forcing us to make up yet another stupid client flag
-	   * (we could just negate the DOING_LIST flag,
-	   * but that might confuse people) -good
-	   */
-
-	  list_one_channel(sptr,chptr);
-	}
-      
+      if (!chptr->members || !sptr->user ||
+	  (SecretChannel(chptr) && !IsMember(sptr, chptr)))
+	continue;
+      list_one_channel(sptr,chptr);
     }
 
   sendto_one(sptr, form_str(RPL_LISTEND), me.name, sptr->name);
@@ -206,8 +189,8 @@ int list_all_channels(struct Client *sptr)
           
 /*
  * list_named_channel
- * inputs	- pointer to client requesting list
- * output	- 0/1
+ * inputs       - pointer to client requesting list
+ * output       - 0/1
  * side effects	- list all channels to sptr
  */
 int list_named_channel(struct Client *sptr,char *name)
@@ -229,11 +212,11 @@ int list_named_channel(struct Client *sptr,char *name)
   for (tmpchptr = root_chptr; tmpchptr; tmpchptr = tmpchptr->next_vchan)
     if (ShowChannel(sptr, tmpchptr) && tmpchptr->members && sptr->user)
       {
-	if( (IsVchan(tmpchptr) || HasVchans(tmpchptr)) &&
+        if( (IsVchan(tmpchptr) || HasVchans(tmpchptr)) &&
 	    (root_chptr->members || root_chptr->next_vchan->next_vchan) )
-	  {
-	    ircsprintf(vname, "%s<!%s>", root_chptr->chname,
-		       pick_vchan_id(tmpchptr));
+          {
+            ircsprintf(vname, "%s<!%s>", root_chptr->chname,
+                       pick_vchan_id(tmpchptr));
 	  }
 	else
 	  ircsprintf(vname, "%s", root_chptr->chname);
@@ -248,8 +231,8 @@ int list_named_channel(struct Client *sptr,char *name)
 /*
  * list_one_channel
  *
- * inputs	- client pointer to return result to
- *		- pointer to channel to list
+ * inputs       - client pointer to return result to
+ *              - pointer to channel to list
  * ouput	- none
  * side effects -
  */
@@ -271,5 +254,7 @@ void list_one_channel(struct Client *sptr,struct Channel *chptr)
 
   sendto_one(sptr, form_str(RPL_LIST), me.name, sptr->name,
 	     vname, chptr->users, chptr->topic);
-
 }
+
+
+

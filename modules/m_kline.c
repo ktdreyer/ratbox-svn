@@ -70,7 +70,7 @@ extern ConfigFileEntryType ConfigFileEntry; /* defined in ircd.c */
 
 /* Local function prototypes */
 
-int isnumber(char *);    /* return 0 if not, else return number */
+time_t  valid_tkline(struct Client *sptr, int argc, char *string);
 char *cluster(char *);
 int find_user_host(struct Client *sptr,
                    char *user_host_or_nick, char *user, char *host);
@@ -78,6 +78,8 @@ int find_user_host(struct Client *sptr,
 int valid_comment(struct Client *sptr, char *comment);
 int valid_user_host(struct Client *sptr, char *user, char *host);
 int valid_wild_card(struct Client *sptr, char *user, char *host);
+int already_placed_kline( struct Client *sptr, char *user, char *host,
+			  unsigned long ip);
 
 /*
  * Linked list of pending klines that need to be written to
@@ -123,22 +125,17 @@ mo_kline(struct Client *cptr,
 {
   char buffer[IRCD_BUFSIZE];
   char *p;
-  char cidr_form_host[HOSTLEN + 1];
   char user[USERLEN+2];
   char host[HOSTLEN+2];
   char *reason = NULL;
   const char* current_date;
   int  ip_kline = NO;
-  struct Client *acptr;
   struct ConfItem *aconf;
-  int temporary_kline_time=0;   /* -Dianora */
-  time_t temporary_kline_time_seconds=0;
+  time_t temporary_kline_time=0;   /* -Dianora */
   char *argv;
   unsigned long ip;
   unsigned long ip_mask;
   const char *kconf; /* kline conf file */
-  register char tmpch;
-  register int nonwild;
 
   if(!IsSetOperK(sptr))
     {
@@ -160,18 +157,12 @@ mo_kline(struct Client *cptr,
 
   argv = parv[1];
 
-  if( (temporary_kline_time = isnumber(argv)) )
+  temporary_kline_time = valid_tkline(sptr,parc,argv);
+
+  if( temporary_kline_time == -1 )
+    return 0;
+  else if( temporary_kline_time > 0 )
     {
-      if(parc < 3)
-        {
-	  sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
-		     me.name, parv[0], "KLINE");
-          return 0;
-        }
-      if(temporary_kline_time > (24*60))
-        temporary_kline_time = (24*60); /* Max it at 24 hours */
-      temporary_kline_time_seconds = (time_t)temporary_kline_time * (time_t)60;
-        /* turn it into minutes */
       argv = parv[2];
       parc--;
     }
@@ -203,10 +194,9 @@ mo_kline(struct Client *cptr,
   ** I also know the reason field is clean
   ** Now what I want to do, is find out if its a kline of the form
   **
-  ** /quote kline *@192.168.0.* i.e. it should be turned into a d-line instead
+  ** /quote kline *@192.168.0.*
   **
   */
-
   /*
    * what to do if host is a legal ip, and its a temporary kline ?
    * Don't do the CIDR conversion for now of course.
@@ -214,12 +204,7 @@ mo_kline(struct Client *cptr,
 
   if((ip_kline = is_address(host, &ip, &ip_mask)))
      {
-       /*
-        * XXX - ack
-        */
-       strncpy_irc(cidr_form_host, host, 32);
-       cidr_form_host[32] = '\0';
-       p = strchr(cidr_form_host,'*');
+       p = strchr(host,'*');
        if (p)
          {
            *p++ = '0';
@@ -228,32 +213,14 @@ mo_kline(struct Client *cptr,
            *p++ = '4';
            *p++ = '\0';
          }
-       /* XXX */
-       strcpy(host,cidr_form_host);
     }
   else
     {
       ip = 0L;
     }
 
-  if( ConfigFileEntry.non_redundant_klines && 
-      (aconf = find_matching_mtrie_conf(host,user,(unsigned long)ip)) )
-     {
-       char *reason;
-
-       if( aconf->status & CONF_KILL )
-         {
-           reason = aconf->passwd ? aconf->passwd : "<No Reason>";
-           if(!IsServer(sptr))
-             sendto_one(sptr,
-                        ":%s NOTICE %s :[%s@%s] already K-lined by [%s@%s] - %s",
-                        me.name,
-                        parv[0],
-                        user,host,
-                        aconf->user,aconf->host,reason);
-           return 0;
-         }
-     }
+  if ( already_placed(sptr, user, host, ip) )
+    return 0;
 
   current_date = smalldate((time_t) 0);
 
@@ -272,7 +239,7 @@ mo_kline(struct Client *cptr,
         reason ? reason : "No reason",
         current_date);
       DupString(aconf->passwd, buffer );
-      aconf->hold = CurrentTime + temporary_kline_time_seconds;
+      aconf->hold = CurrentTime + temporary_kline_time;
       if (ip_kline)
 	{
 	  aconf->ip = ip;
@@ -281,7 +248,7 @@ mo_kline(struct Client *cptr,
       add_temp_kline(aconf);
       sendto_realops("%s added temporary %d min. K-Line for [%s@%s] [%s]",
         parv[0],
-        temporary_kline_time,
+        temporary_kline_time/60,
         user,
         host,
         reason ? reason : "No reason");
@@ -405,16 +372,18 @@ ms_kline(struct Client *cptr,
 } /* ms_kline() */
 
 /*
- * isnumber()
+ * valid_tkline()
  * 
- * inputs       - pointer to ascii string in
- * output       - 0 if not an integer number, else the number
+ * inputs       - pointer to client requesting kline
+ *              - argument count
+ *              - pointer to ascii string in
+ * output       - -1 not enough parameters
+ *              - 0 if not an integer number, else the number
  * side effects - none
-*/
-
-int isnumber(char *p)
+ */
+time_t valid_tkline(struct Client *sptr, int parc, char *p)
 {
-  int result = 0;
+  time_t result = 0;
 
   while(*p)
     {
@@ -434,6 +403,19 @@ int isnumber(char *p)
 
   if(result == 0)
     result = 1;
+
+  if(parc < 3)
+    {
+      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
+		 me.name, sptr->name, "KLINE");
+      return -1;
+    }
+
+  if(result > (24*60))
+    result = (24*60); /* Max it at 24 hours */
+
+  result = (time_t)result * (time_t)60;  /* turn it into minutes */
+
   return(result);
 }
 
@@ -578,12 +560,6 @@ mo_dline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   char buffer[1024];
   const char* current_date;
   const char *dconf;
-
-  if (!MyClient(sptr) || !IsAnyOper(sptr))
-    {
-      sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
-      return 0;
-    }
 
   if(!IsSetOperK(sptr))
     {
@@ -898,7 +874,6 @@ void DelPending(aPendingLine *pendptr)
  * Return: 1 if locked
  *        0 if not
  */
-
 int LockedFile(const char *filename)
 
 {
@@ -1326,3 +1301,37 @@ int valid_comment(struct Client *sptr, char *comment)
   return 1;
 }
 
+/*
+ * already_placed_kline
+ * inputs	- pointer to client placing kline
+ *		- user
+ *		- host
+ *		- ip 
+ * output	- 1 if already placed, 0 if not
+ * side effects - NONE
+ */
+int already_placed_kline( struct Client *sptr, char *user, char *host,
+			  unsigned long ip)
+{
+  char *reason;
+  struct ConfItem *aconf;
+
+  if( ConfigFileEntry.non_redundant_klines && 
+      (aconf = find_matching_mtrie_conf(host,user,ip)) )
+     {
+       if( aconf->status & CONF_KILL )
+         {
+           reason = aconf->passwd ? aconf->passwd : "<No Reason>";
+           if(!IsServer(sptr))
+             sendto_one(sptr,
+                        ":%s NOTICE %s :[%s@%s] already K-lined by [%s@%s] - %s",
+                        me.name,
+                        sptr->name,
+                        user,host,
+                        aconf->user,aconf->host,reason);
+           return 1;
+         }
+     }
+
+  return 0;
+}
