@@ -1,3 +1,15 @@
+androsyn    2004/03/03 10:12:46 EST	(20040303_5)
+
+  Modified files:
+    src                  linebuf.c 
+  Log:
+  We'll come back to using writev() some other year ;)
+  
+  Revision  Changes    Path
+  7.125     +0 -75     ircd-ratbox/src/linebuf.c
+
+
+
 leeh        2004/03/03 09:57:18 EST	(20040303_4)
 
   Modified files:
