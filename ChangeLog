@@ -1,3 +1,15 @@
+leeh        2005/02/03 10:37:05 EST	(20050203_2)
+
+  Modified files:
+    src                  s_userserv.c 
+  Log:
+  - merge userserv handlers..
+  
+  Revision  Changes    Path
+  1.47      +47 -171   rserv/src/s_userserv.c
+
+
+
 leeh        2005/02/03 10:25:18 EST	(20050203_1)
 
   Modified files:
