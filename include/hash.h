@@ -79,7 +79,7 @@ extern void del_from_resv_hash_table(const char *name, struct ResvEntry *resv_p)
 extern struct ResvEntry *hash_find_resv(const char *name);
 
 extern void add_to_xline_hash(const char *name, struct xline *xconf);
-extern void clear_xline_hash(void);
+extern void del_from_xline_hash(const char *name, struct xline *xconf);
 extern struct xline *hash_find_xline(const char *name);
 
 #endif /* INCLUDED_hash_h */

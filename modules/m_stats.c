@@ -864,6 +864,14 @@ stats_gecos (struct Client *source_p)
 		sendto_one (source_p, form_str (RPL_STATSXLINE),
 			    me.name, source_p->name, xconf->gecos, xconf->reason);
 	}
+
+	DLINK_FOREACH(ptr, xline_hash_list.head)
+	{
+		xconf = ptr->data;
+
+		sendto_one(source_p, form_str(RPL_STATSXLINE),
+			   me.name, source_p->name, xconf->gecos, xconf->reason);
+	}
 }
 
 static void

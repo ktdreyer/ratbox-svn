@@ -490,24 +490,28 @@ del_from_resv_hash_table(const char *name, struct ResvEntry *resv_p)
 }
 
 void
-clear_xline_hash(void)
+del_from_xline_hash(const char *name, struct xline *xconf)
 {
-	struct xline *xconf;
+	struct xline *acptr;
 	dlink_node *ptr;
 	dlink_node *next_ptr;
-	int i;
+	unsigned int hashv;
 
-	for(i = 0; i < R_MAX; i++)
+	if(EmptyString(name) || (xconf == NULL))
+		return;
+
+	hashv = hash_xline(name);
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, xlineTable[hashv].list.head)
 	{
-		DLINK_FOREACH_SAFE(ptr, next_ptr, xlineTable[i].list.head)
+		acptr = ptr->data;
+
+		if(xconf == acptr)
 		{
-			xconf = ptr->data;
-
-			free_xline(xconf);
-			dlinkDestroy(ptr, &xlineTable[i].list);
+			dlinkDestroy(ptr, &xlineTable[hashv].list);
+			--xlineTable[hashv].links;
+			return;
 		}
-
-		xlineTable[i].links = 0;
 	}
 }
 

@@ -59,6 +59,8 @@ struct shared
 extern void init_conf(void);
 
 extern dlink_list xline_list;
+extern dlink_list xline_hash_list;
+
 extern struct xline *make_xline(const char *, const char *, int);
 extern void add_xline(struct xline *);
 extern void free_xline(struct xline *);

@@ -48,6 +48,7 @@ static BlockHeap *xline_heap = NULL;
 static BlockHeap *shared_heap = NULL;
 
 dlink_list xline_list;
+dlink_list xline_hash_list;
 dlink_list shared_list;
 
 /* conf_heap_gc()
@@ -117,6 +118,7 @@ add_xline(struct xline *xconf)
 	{
 		xconf->flags = XLINE_PLAIN;
 		add_to_xline_hash(xconf->gecos, xconf);
+		dlinkAddAlloc(xconf, &xline_hash_list);
 	}
 
 	/* otherwise it goes in the dlink */
@@ -154,19 +156,31 @@ free_xline(struct xline *xconf)
 void
 clear_xlines(void)
 {
-	struct xline *xconf;
 	dlink_node *ptr;
 	dlink_node *next_ptr;
+	struct xline *xconf;
 
-	clear_xline_hash();
-
+	/* this is more optimised for clearing the whole list */
 	DLINK_FOREACH_SAFE(ptr, next_ptr, xline_list.head)
+	{
+		free_xline(ptr->data);
+		free_dlink_node(ptr);
+	}
+
+	xline_list.head = xline_list.tail = NULL;
+	xline_list.length = 0;
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, xline_hash_list.head)
 	{
 		xconf = ptr->data;
 
-		free_xline(xconf);
-		dlinkDestroy(ptr, &xline_list);
+		del_from_xline_hash(xconf->gecos, xconf);
+		free_xline(ptr->data);
+		free_dlink_node(ptr);
 	}
+
+	xline_hash_list.head = xline_hash_list.tail = NULL;
+	xline_hash_list.length = 0;
 }
 
 /*
