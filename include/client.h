@@ -610,10 +610,8 @@ extern struct Client* next_client_double(struct Client* next,
                                          const char* name);
 
 extern int accept_message(struct Client *source, struct Client *target);
-extern void add_to_accept(struct Client *source, struct Client *target);
 extern void del_from_accept(struct Client *source, struct Client *target);
 extern void del_all_accepts(struct Client *client_p);
-extern void list_all_accepts(struct Client *source_p);
 
 extern int set_initial_nick(struct Client *client_p, struct Client *source_p,
                             char *nick);

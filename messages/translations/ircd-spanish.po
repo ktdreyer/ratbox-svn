@@ -282,6 +282,16 @@ msgstr	":%s 277 %s %s "
 msgid	":%s 278 %s :Type /%s %s <key> to specify the channel you want"
 msgstr	":%s 278 %s :Tipo /%s %s <llave> para espeficicar el canal que quieres"
 
+#: ../src/messages.tab:306
+#, c-format
+msgid   ":%s 281 %s %s :"
+msgstr  ""
+
+#: ../src/messages.tab:307
+#, c-format
+msgid   ":%s 282 %s :End of /ACCEPT list."
+msgstr  ""
+
 #: ../../src/messages.tab:328
 #, c-format
 msgid	":%s 301 %s %s :%s"
@@ -671,6 +681,21 @@ msgstr	":%s 446 %s :Usuarios han sido removidos"
 #, c-format
 msgid	":%s 451 %s :You have not registered"
 msgstr	":%s 451 %s :No te has registrado"
+
+#: ../src/messages.tab:481
+#, c-format
+msgid   ":%s 456 %s :Accept list is full"
+msgstr  ""
+
+#: ../src/messages.tab:482
+#, c-format
+msgid   ":%s 457 %s %s :is already on your accept list"
+msgstr  ""
+
+#: ../src/messages.tab:483
+#, c-format
+msgid   ":%s 458 %s %s :is not on your accept list"
+msgstr  ""
 
 #: ../../src/messages.tab:490
 #, c-format

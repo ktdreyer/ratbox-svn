@@ -1520,40 +1520,6 @@ int accept_message(struct Client *source, struct Client *target)
   return 0;
 }
 
-/*
- * add_to_accept
- *
- * inputs	- pointer to source client
- * 		- pointer to target client
- * output	- 
- * side effects - Add's source pointer to targets allow list
- */
-void add_to_accept(struct Client *source, struct Client *target)
-{
-  dlink_node *m;
-  int len;
-
-  /* Safety checks, neither of these tests should happen */
-  if (!IsPerson(source))
-    return;
-
-  if (!IsPerson(target))
-    return;
-
-  if ( (len = dlink_list_length(&target->allow_list)) >= 
-       ConfigFileEntry.max_accept)
-    {
-      sendto_one(target,":%s NOTICE %s :Max accept targets reached %d",
-		 me.name, target->name, len);
-      return;
-    }
-
-  m = make_dlink_node();
-  dlinkAdd(source, m, &target->allow_list);
-
-  m = make_dlink_node();
-  dlinkAdd(target, m, &source->on_allow_list);
-}
 
 /*
  * del_from_accept
@@ -1631,54 +1597,6 @@ void del_all_accepts(struct Client *client_p)
     }
 }
 
-/*
- * list_all_accepts
- *
- * inputs	- pointer to exiting client
- * output	- NONE
- * side effects - list allow list
- */
-void list_all_accepts(struct Client *source_p)
-{
-  dlink_node *ptr;
-  struct Client *target_p;
-  char *nicks[8];
-  int j=0;
-
-  nicks[0] = nicks[1] = nicks[2] = nicks[3] = nicks[4] = nicks[5]
-    = nicks[6] = nicks[7] = "";
-
-  sendto_one(source_p,":%s NOTICE %s :*** Current accept list",
-	     me.name, source_p->name);
-
-  for (ptr = source_p->allow_list.head; ptr; ptr = ptr->next)
-    {
-      target_p = ptr->data;
-
-      if(target_p != NULL)
-	{
-	  nicks[j++] = target_p->name;
-	}
-
-      if(j > 7)
-	{
-	  sendto_one(source_p,":%s NOTICE %s :%s %s %s %s %s %s %s %s",
-		     me.name, source_p->name,
-		     nicks[0], nicks[1], nicks[2], nicks[3],
-		     nicks[4], nicks[5], nicks[6], nicks[7] );
-	  j = 0;
-	  nicks[0] = nicks[1] = nicks[2] = nicks[3] = nicks[4] = nicks[5]
-	    = nicks[6] = nicks[7] = "";
-	}
-	
-    }
-
-  if(j)
-    sendto_one(source_p,":%s NOTICE %s :%s %s %s %s %s %s %s %s",
-	       me.name, source_p->name,
-	       nicks[0], nicks[1], nicks[2], nicks[3],
-	       nicks[4], nicks[5], nicks[6], nicks[7] );
-}
 
 /*
  * set_initial_nick
