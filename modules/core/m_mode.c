@@ -138,8 +138,18 @@ int m_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 	      channel_modes(vchan, sptr, modebuf, parabuf);
 	      sendto_one(sptr, form_str(RPL_CHANNELMODEIS), me.name, parv[0],
 			 chptr->chname, modebuf, parabuf);
-	      sendto_one(sptr, form_str(RPL_CREATIONTIME), me.name, parv[0],
-			 chptr->chname, vchan->channelts);
+
+	      /* Let opers see the "true" TS everyone else see's
+	       * the top root chan TS
+	       */
+	      if (!IsAnyOper(sptr))
+		  sendto_one(sptr, form_str(RPL_CREATIONTIME),
+			     me.name, parv[0],
+			     chptr->chname, chptr->channelts);
+	      else
+		  sendto_one(sptr, form_str(RPL_CREATIONTIME),
+			     me.name, parv[0],
+			     chptr->chname, vchan->channelts);
 	    }
 	}
       else
