@@ -1,3 +1,18 @@
+androsyn    2003/09/01 13:09:31 EDT	(20030901_4)
+
+  Modified files:
+    src                  snprintf.c 
+  Removed files:
+    src                  snprint.c 
+  Log:
+  I screwed that up good..
+  
+  Revision  Changes    Path
+  7.2       +0 -959    ircd-ratbox/src/snprint.c (dead)
+  1.11      +884 -742  ircd-ratbox/src/snprintf.c
+
+
+
 androsyn    2003/09/01 13:01:40 EDT	(20030901_3)
 
   Modified files:
