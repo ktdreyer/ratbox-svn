@@ -1,3 +1,17 @@
+androsyn    2004/07/03 15:45:16 EDT	(20040703_0)
+
+  Modified files:
+    .                    RELNOTES 
+    include              patchlevel.h 
+  Log:
+  Update relnotes and rev patchlevel
+  
+  Revision  Changes    Path
+  1.107     +4 -0      ircd-ratbox/RELNOTES
+  7.64      +1 -1      ircd-ratbox/include/patchlevel.h
+
+
+
 androsyn    2004/07/02 17:03:34 EDT	(20040702_0)
 
   Modified files:
