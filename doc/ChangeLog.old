@@ -1,3 +1,11 @@
+*** 20010428_1 by habeeb
+Modified NAMES to work with vchans.  "NAMES <channel> [vkey]".  If no
+vkey is specified it will check if you are on <channel> or one of its
+vchans and default to that channel.  Otherwise a list of vchans are
+specified.  "NAMES <channel> !" will give a list of channels since
+the key is invalid.  It should not break current clients.
+
+
 *** 20010427_6 by habeeb
 Fix for vchan listing bug.
 
