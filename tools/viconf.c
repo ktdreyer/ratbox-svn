@@ -37,7 +37,7 @@ static char lockpath[PATH_MAX + 1];
 
 int main(int argc, char *argv[])
 {
-  char *ed, *p, *filename = MPATH;
+  char *ed, *p, *filename = CPATH;
 
   if( chdir(DPATH) < 0 )
     {
@@ -53,6 +53,9 @@ int main(int argc, char *argv[])
   if(strcmp(p, "viklines") == 0)
     filename = KPATH;
 #endif /* KPATH */
+
+  if(strcmp(p, "vimotd") == 0)
+    filename = MPATH;
 
   if(LockedFile(filename))
     {
