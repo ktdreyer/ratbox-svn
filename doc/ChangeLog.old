@@ -1,3 +1,11 @@
+*** 20000111_1 by db
+- Now pretty much handles a "normal" conf file.. output is
+  a "new" style conf format file, with details still to be hashed out.
+  Do we want to handle multiple C/N's ? multiple H lines? *sigh* yes
+  Thats next, but not yet.
+ 
+
+
 *** 20000110_4 by db
 - tiny tweak much more to do
 
