@@ -1,3 +1,6 @@
+*** 20010603_3 by davidt
+- Set hopcount correctly for cryptlinks
+
 *** 20010603_2 by davidt
 - Remove some #if 0'd code from m_join.c which is broken and unneeded.
 - Fix stupid bug in ircd_parser.y from my mass-cleanup..
