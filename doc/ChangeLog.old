@@ -1,3 +1,11 @@
+*** 20001106_15 by adrian
+
+
+We don't need to flush a socket buffer when we've already done it.
+REJECT_HOLD is fun code .. and yes, it was my screwup.
+
+
+
 *** 20001106_14 by adrian
 
 
