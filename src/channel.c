@@ -3110,11 +3110,12 @@ set_channel_mode(struct Client *client_p,
 
         /* ignore server-generated MODE +-ovh */
         /* naw, allow it but still flag it */
-        if (IsServer(source_p))
+	/* ignore +ovh and flag it, allow -ovh */
+        if (IsServer(source_p) && (whatt == MODE_ADD))
         {
-          ts_warn("MODE %c%c on %s for %s from server %s",
-                  (whatt == MODE_ADD ? '+' : '-'), c, chname,
-                  who->name, source_p->name);
+          ts_warn("MODE +%c on %s for %s from server %s",
+                  c, chname, who->name, source_p->name);
+          break;
         }
 
         target_was_chop = is_chan_op(chptr, who);
