@@ -1,3 +1,16 @@
+leeh        2004/03/02 15:35:15 EST	(20040302_13)
+
+  Modified files:
+    src                  s_newconf.c 
+  Log:
+  - remove a bogus return; that was breaking aftype on connects with an
+    invalid class.
+  
+  Revision  Changes    Path
+  7.31      +0 -1      ircd-ratbox/src/s_newconf.c
+
+
+
 androsyn    2004/03/02 15:15:43 EST	(20040302_12)
 
   Modified files:
