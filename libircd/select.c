@@ -27,7 +27,6 @@
 
 #include "config.h"
 
-#ifdef USE_SELECT
 #include "stdinc.h"
 #include "commio.h"
 #include "class.h"
@@ -222,4 +221,3 @@ comm_select(unsigned long delay)
 	return 0;
 }
 
-#endif /* USE_SELECT */
