@@ -1,3 +1,7 @@
+*** 20010105_10 by a1kmm
+Separate C/N structures no longer exist, only one with status CONF_SERVER.
+
+
 *** 20010105_9 by db
 - fixed m_jupe.c so it works now. /squit jupe when done
 
