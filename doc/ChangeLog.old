@@ -1,3 +1,10 @@
+*** 20010120_8 by davidt
+- Tidy up m_part.c (merge vchan/nonvchan stuff into the same code, so we
+  aren't duplicating stuff everywhere)
+- Make sure ##vchannel_1234 has a TS of 1234 when we create it with CJOIN,
+  fl- is doing the same for SJOIN i think :)
+
+
 *** 20010120_7 by toot
 fixed compile error with gettext..  needed config.h included before
 the #ifdef..
