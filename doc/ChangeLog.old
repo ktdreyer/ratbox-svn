@@ -1,3 +1,15 @@
+leeh        2002/02/25 15:22:32 EST	(20020225_5)
+
+  Modified files:
+    modules/core         m_nick.c 
+  Log:
+  - nick[NICKLEN + 2] -> nick[NICKLEN]
+  
+  Revision  Changes    Path
+  1.85      +5 -5      ircd-hybrid-7/modules/core/m_nick.c
+
+
+
 leeh        2002/02/25 14:56:04 EST	(20020225_4)
 
   Modified files:
