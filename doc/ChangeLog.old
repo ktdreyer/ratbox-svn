@@ -1,3 +1,11 @@
+*** 20001028_2 by db
+- adds /quote events which will list the event queue
+  I'd rather add a generic "debug" function later on i.e. something like
+  "/quote debug events" "/quote debug memory" etc. etc. but this will
+  do for now...
+
+
+
 *** 20001028_1 by adrian
 
 
