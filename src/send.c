@@ -305,11 +305,8 @@ send_queued_write(int fd, void *data)
         me.localClient->sendB &= 0x03ff;
       }
     }
-    if ((retlen < 0) && (ignoreErrno(errno)))
-    {
-      /* we have a non-fatal error, so just continue */
-    }
-    else if (retlen <= 0)
+    
+    if(retlen == 0 || (retlen < 0 && !ignoreErrno(errno)))
     {
       dead_link(to);
       return;
