@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <unistd.h>
 
 fde_t *fd_table = NULL;
 
