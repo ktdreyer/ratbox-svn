@@ -44,7 +44,8 @@
         ConfigChannel.use_invex ? " INVEX" : "", \
         MAXMODEPARAMS,ConfigChannel.max_chans_per_user, \
         ConfigChannel.maxbans, \
-        ConfigFileEntry.max_targets,NICKLEN,TOPICLEN,TOPICLEN,"#&","(ohv)@%+", \
+        ConfigFileEntry.max_targets,NICKLEN,TOPICLEN,TOPICLEN, \
+	ConfigServerHide.disable_local_channels ? "#" : "#&","(ohv)@%+", \
         "beI,k,l,imnpsta"
 
 /*
