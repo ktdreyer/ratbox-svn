@@ -1,3 +1,9 @@
+*** 20001029_2 by db
+- m_sjoin.c is still a mess, but starting to split it up into
+  manageable pieces. 
+
+
+
 *** 20001029_1 by adrian
 
 
