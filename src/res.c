@@ -1072,7 +1072,7 @@ void get_res(void)
        * got a name and address response, client resolved
        */
       cp = make_cache(request);
-      (*request->query.callback)(request->query.vptr, &cp->reply);
+      (*request->query.callback)(request->query.vptr, cp ? &cp->reply : 0 );
       rem_request(request);
     }
   }
