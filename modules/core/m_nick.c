@@ -326,7 +326,7 @@ int ms_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                      nick, cptr->name);
           if (sptr != cptr) /* bad nick change */
             {
-              sendto_serv_butone(cptr,
+              sendto_ll_serv_butone(cptr, sptr, 0,
                                  ":%s KILL %s :%s (%s <- %s!%s@%s)",
                                  me.name, parv[0], me.name,
                                  get_client_name(cptr, HIDE_IP),
@@ -415,7 +415,11 @@ int ms_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                    cptr->name);
 
 #ifndef LOCAL_NICK_COLLIDE
-	    sendto_serv_butone(NULL, /* all servers */
+            /* If we got the message from a LL, ensure it gets the kill */
+            if (ConfigFileEntry.hub && IsCapable(cptr,CAP_LL))
+              add_lazylinkclient(cptr, acptr);
+            
+	    sendto_ll_serv_butone(NULL, acptr, 0, /* all servers */
 		       ":%s KILL %s :%s (%s(NOUSER) <- %s!%s@%s)(TS:%s)",
 			       me.name,
 			       acptr->name,
@@ -455,8 +459,11 @@ int ms_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   if (IsServer(sptr))
     {
 #ifdef LOCAL_NICK_COLLIDE
+      /* XXX what does this code do?
+       * This is a new nick that's being introduced, not a nickchange
+       */
       /* just propogate it through */
-      sendto_serv_butone(cptr, ":%s NICK %s :%lu",
+      sendto_ll_serv_butone(cptr, sptr, 0, ":%s NICK %s :%lu",
                          parv[0], nick, sptr->tsinfo);
 #endif
       /*
@@ -472,7 +479,11 @@ int ms_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 			       get_client_name(cptr, HIDE_IP));
 
 #ifndef LOCAL_NICK_COLLIDE
-	  sendto_serv_butone(NULL, /* all servers */
+          /* If we got the message from a LL, ensure it gets the kill */
+          if (ConfigFileEntry.hub && IsCapable(cptr,CAP_LL))
+            add_lazylinkclient(cptr, acptr);
+
+          sendto_ll_serv_butone(NULL, acptr, 0,/* all servers */
 			     ":%s KILL %s :%s (%s <- %s)",
 			     me.name, acptr->name, me.name,
 			     acptr->from->name,
@@ -496,7 +507,11 @@ int ms_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
             irccmp(acptr->host, parv[6]) == 0;
           if ((sameuser && newts < acptr->tsinfo) ||
               (!sameuser && newts > acptr->tsinfo))
-            return 0;
+            {
+              /* We don't need to kill the user, the other end does */
+              client_burst_if_needed(cptr, acptr);
+              return 0;
+            }
           else
             {
               if (sameuser)
@@ -515,7 +530,9 @@ int ms_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                          me.name, acptr->name, acptr->name);
 
 #ifndef LOCAL_NICK_COLLIDE
-	      sendto_serv_butone(sptr, /* all servers but sptr */
+              /* If it came from a LL server, it'd have been sptr,
+               * so we don't need to mark acptr as known */
+	      sendto_ll_serv_butone(sptr, acptr, 0, /* all servers but sptr */
 				 ":%s KILL %s :%s (%s <- %s)",
 				 me.name, acptr->name, me.name,
 				 acptr->from->name,
@@ -547,7 +564,9 @@ int ms_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                  me.name, acptr->name, acptr->name);
 
 #ifndef LOCAL_NICK_COLLIDE
-      sendto_serv_butone(NULL, /* KILL old from outgoing servers */
+      /* If we got the message from a LL, it would know
+         about sptr already */
+      sendto_ll_serv_butone(NULL, sptr, 0, /* KILL old from outgoing servers */
 			 ":%s KILL %s :%s (%s(%s) <- %s)",
 			 me.name, sptr->name, me.name, acptr->from->name,
 			 acptr->name, get_client_name(cptr, HIDE_IP));
@@ -556,7 +575,11 @@ int ms_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       ServerStats->is_kill++;
 
 #ifndef LOCAL_NICK_COLLIDE
-      sendto_serv_butone(NULL, /* Kill new from incoming link */
+      /* If we got the message from a LL, ensure it gets the kill */
+      if (ConfigFileEntry.hub && IsCapable(cptr,CAP_LL))
+        add_lazylinkclient(cptr, acptr);
+
+      sendto_ll_serv_butone(NULL, acptr, 0, /* Kill new from incoming link */
 			 ":%s KILL %s :%s (%s <- %s(%s))",
 			 me.name, acptr->name, me.name, acptr->from->name,
 			 get_client_name(cptr, HIDE_IP), sptr->name);
@@ -588,7 +611,9 @@ int ms_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
           ServerStats->is_kill++;
 
 #ifndef LOCAL_NICK_COLLIDE
-	  sendto_serv_butone(cptr, /* KILL old from outgoing servers */
+          /* this won't go back to the incoming link, so it doesn't
+           * matter if it is an LL */
+	  sendto_ll_serv_butone(cptr, sptr, 0, /* KILL old from outgoing servers */
 			     ":%s KILL %s :%s (%s(%s) <- %s)",
 			     me.name, sptr->name, me.name, acptr->from->name,
 			     acptr->name, get_client_name(cptr, HIDE_IP));
@@ -614,7 +639,9 @@ int ms_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                          get_client_name(cptr, HIDE_IP));
           
 #ifndef LOCAL_NICK_COLLIDE
-	  sendto_serv_butone(sptr, /* all servers but sptr */
+          /* this won't go back to the incoming link, so it doesn't
+           * matter if it's an LL */
+	  sendto_ll_serv_butone(sptr, acptr, 0, /* all servers but sptr */
 			     ":%s KILL %s :%s (%s <- %s)",
 			     me.name, acptr->name, me.name,
 			     acptr->from->name,
@@ -709,12 +736,8 @@ nick_from_server(struct Client *cptr, struct Client *sptr, int parc,
           if (sptr->user)
             {
               add_history(sptr,1);
-              if (ConfigFileEntry.hub)
-                sendto_ll_serv_butone(cptr, sptr, 0, ":%s NICK %s :%lu",
-                                      parv[0], nick, sptr->tsinfo);
-              else
-                sendto_serv_butone(cptr, ":%s NICK %s :%lu",
-                                   parv[0], nick, sptr->tsinfo);
+              sendto_ll_serv_butone(cptr, sptr, 0, ":%s NICK %s :%lu",
+                                    parv[0], nick, sptr->tsinfo);
             }
     }
 
@@ -840,12 +863,8 @@ int change_local_nick(struct Client *cptr, struct Client *sptr,
 	   * hubs might not propogate a nick change, if the leaf
 	   * does not know about that client yet.
 	   */
-	  if (ConfigFileEntry.hub)
-	    sendto_ll_serv_butone(cptr, sptr, 0, ":%s NICK %s :%lu",
-				  sptr->name, nick, sptr->tsinfo);
-	  else
-	    sendto_serv_butone(cptr, ":%s NICK %s :%lu",
-			       sptr->name, nick, sptr->tsinfo);
+          sendto_ll_serv_butone(cptr, sptr, 0, ":%s NICK %s :%lu",
+                                sptr->name, nick, sptr->tsinfo);
 	}
     }
   else

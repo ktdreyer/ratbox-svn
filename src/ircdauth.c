@@ -52,6 +52,7 @@
 #include "s_user.h"
 #include "send.h"
 #include "memdebug.h"
+#include "s_serv.h"
 
 static PF CompleteIAuthConnection;
 static PF ParseIAuth;
@@ -716,17 +717,17 @@ GreetUser(struct Client *client)
 		     client->info);
 #endif
 
-  sendto_ll_serv_butone(client, client, 1,
-    ":%s NICK %s %d %lu %s %s %s %s :%s",
-    me.name,
-    client->name,
-    client->hopcount + 1,
-    client->tsinfo,
-    ubuf,
-    client->username,
-    client->host,
-    client->user->server,
-    client->info);
+  if (!ConfigFileEntry.hub && uplink && IsCapable(uplink,CAP_LL))
+    sendto_one(uplink, "NICK %s %d %lu %s %s %s %s :%s",
+               client->name, client->hopcount+1, client->tsinfo,
+               ubuf, client->username, client->host, client->user->server,
+               client->info);
+  else
+    sendto_nocap_serv_butone(CAP_LL, NULL,
+                             "NICK %s %d %lu %s %s %s %s :%s",
+                             client->name, client->hopcount+1, client->tsinfo,
+                             ubuf, client->username, client->host,
+                             client->user->server, client->info);
   
   if (ubuf[1])
     send_umode_out(client, client, 0);

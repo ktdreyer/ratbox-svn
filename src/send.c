@@ -222,9 +222,10 @@ send_message_remote(struct Client *to, struct Client *from,
 			   from->name, from->username, from->host,
 			   to->from->name);
       
-      sendto_serv_butone(NULL, ":%s KILL %s :%s (%s[%s@%s] Ghosted %s)",
-                         me.name, to->name, me.name, to->name,
-                         to->username, to->host, to->from->name);
+      sendto_ll_serv_butone(NULL, to, 0,
+                            ":%s KILL %s :%s (%s[%s@%s] Ghosted %s)",
+                            me.name, to->name, me.name, to->name,
+                            to->username, to->host, to->from->name);
 
       to->flags |= FLAGS_KILLED;
 
@@ -552,7 +553,7 @@ sendto_ll_serv_butone(struct Client *one, struct Client *sptr, int add,
   dlink_node *ptr;
 
   va_start(args, pattern);
-  len = send_format(sendbuf,pattern,args);
+  len = send_format(sendbuf2,pattern,args);
   va_end(args);
   
   for(ptr = serv_list.head; ptr; ptr = ptr->next)
@@ -569,15 +570,15 @@ sendto_ll_serv_butone(struct Client *one, struct Client *sptr, int add,
 	    {
 	      if(add)
 		{
-		  add_lazylinkclient(cptr,sptr);
-		  send_message(cptr, (char *)sendbuf, len);
+                  client_burst_if_needed(cptr,sptr);
+		  send_message(cptr, (char *)sendbuf2, len);
 		}
 	    }
 	  else
-	    send_message(cptr, (char *)sendbuf, len);
+	    send_message(cptr, (char *)sendbuf2, len);
 	}
       else
-	send_message(cptr, (char *)sendbuf, len);
+	send_message(cptr, (char *)sendbuf2, len);
     }
 } /* sendto_ll_serv_butone() */
 

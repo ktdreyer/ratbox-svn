@@ -220,6 +220,9 @@ int hunt_server(struct Client *cptr, struct Client *sptr, char *command,
         return HUNTED_ISME;
       if (!match(acptr->name, parv[server]))
         parv[server] = acptr->name;
+
+      /* Deal with lazylinks */
+      client_burst_if_needed(acptr, sptr);
       sendto_one(acptr, command, parv[0],
                  parv[1], parv[2], parv[3], parv[4],
                  parv[5], parv[6], parv[7], parv[8]);

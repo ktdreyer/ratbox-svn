@@ -183,7 +183,8 @@ int ms_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       
       sptr->flags |= FLAGS_OPER;
       Count.oper++;
-      sendto_serv_butone(cptr, ":%s MODE %s :+o", parv[0], parv[0]);
+      sendto_ll_serv_butone(cptr,  sptr, 0,
+                            ":%s MODE %s :+o", parv[0], parv[0]);
     }
 
   return 1;

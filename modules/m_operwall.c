@@ -70,7 +70,8 @@ int mo_operwall(struct Client *cptr, struct Client *sptr, int parc, char *parv[]
       return 0;
     }
 
-  sendto_serv_butone( NULL, ":%s OPERWALL :%s", parv[0], message);
+  sendto_ll_serv_butone(NULL, sptr, 1,
+                        ":%s OPERWALL :%s", parv[0], message);
   sendto_all_local_opers(sptr, NULL, "OPERWALL - %s", message);
   return 0;
 }
@@ -94,7 +95,7 @@ int ms_operwall(struct Client *cptr, struct Client *sptr, int parc, char *parv[]
       return 0;
     }
 
-  sendto_serv_butone(IsServer(cptr) ? cptr : NULL, ":%s OPERWALL :%s",
+  sendto_ll_serv_butone(cptr, sptr, 1, ":%s OPERWALL :%s",
                      parv[0], message);
   sendto_all_local_opers(sptr, NULL, "OPERWALL - %s", message);
   return 0;

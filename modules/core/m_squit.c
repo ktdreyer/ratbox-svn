@@ -132,13 +132,13 @@ int ms_squit(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       if (MyConnect(found_squit->acptr))
 	{
 	  sendto_all_local_opers(&me, NULL,
-				 "Received SQUIT %s from %s (%s)",
+				 "Remote SQUIT %s from %s (%s)",
 				 found_squit->server_name,
 				 get_client_name(sptr,FALSE), comment);
 
           sendto_serv_butone(NULL,
-			     "Received SQUIT %s from %s (%s)",
-			     found_squit->server_name,
+			     ":%s WALLOPS :Remote SQUIT %s from %s (%s)",
+			     me.name, found_squit->server_name,
 			     get_client_name(sptr,FALSE),comment);
 
 	  log(L_TRACE, "SQUIT From %s : %s (%s)", parv[0],
