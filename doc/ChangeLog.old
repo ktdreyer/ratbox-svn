@@ -1,3 +1,8 @@
+*** 20001202_10 by toot
+made vchan_map in to a dlink_list,
+not tested loads, but it seems to work
+
+
 *** 20001202_9 by db
 - made list_length a generic function moved into tools.c
   renamed as dlink_list_length()
