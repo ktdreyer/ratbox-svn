@@ -1,3 +1,15 @@
+jmallett    2002/02/04 21:40:24 EST	(20020205_1)
+
+  Modified files:
+    tools                viconf.c 
+  Log:
+  Fix typo, viconf.c["Cant'", "Can't"]
+  
+  Revision  Changes    Path
+  7.4       +2 -2      ircd-hybrid-7/tools/viconf.c
+
+
+
 ejb         2002/02/04 21:20:49 EST	(20020205_0)
 
   Modified files:
