@@ -42,7 +42,6 @@
 #include "packet.h"
 
 static int m_part(struct Client *, struct Client *, int, const char **);
-void check_spambot_warning(struct Client *source_p, const char *name);
 
 struct Message part_msgtab = {
 	"PART", 0, 0, 0, MFLG_SLOW,

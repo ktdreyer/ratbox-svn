@@ -577,7 +577,7 @@ can_join(struct Client *source_p, struct Channel *chptr, char *key)
 		return (ERR_BADCHANNELKEY);
 
 	if(chptr->mode.limit && 
-	   dlink_list_length(&chptr->members) >= chptr->mode.limit)
+	   dlink_list_length(&chptr->members) >= (unsigned long)chptr->mode.limit)
 		return (ERR_CHANNELISFULL);
 
 	return 0;
@@ -723,7 +723,7 @@ check_splitmode(void *unused)
 	if(splitchecking && (ConfigChannel.no_join_on_split || ConfigChannel.no_create_on_split))
 	{
 		if(!splitmode && 
-		   ((dlink_list_length(&global_serv_list) < split_servers) ||
+		   ((dlink_list_length(&global_serv_list) < (unsigned long)split_servers) ||
 		    (Count.total < split_users)))
 		{
 			splitmode = 1;
@@ -733,7 +733,7 @@ check_splitmode(void *unused)
 			eventAddIsh("check_splitmode", check_splitmode, NULL, 10);
 		}
 		else if(splitmode && 
-			(dlink_list_length(&global_serv_list) >= split_servers) &&
+			(dlink_list_length(&global_serv_list) >= (unsigned long)split_servers) &&
 			(Count.total >= split_users))
 		{
 			/* splitmode ended, if we're delaying the

@@ -56,7 +56,7 @@ int doing_trace_hook;
 mapi_clist_av1 trace_clist[] = { &trace_msgtab, NULL };
 mapi_hlist_av1 trace_hlist[] = {
 	{ "doing_trace",	&doing_trace_hook },
-	{ NULL }
+	{ NULL, NULL }
 };
 DECLARE_MODULE_AV1(trace, NULL, NULL, trace_clist, trace_hlist, NULL, "$Revision$");
 

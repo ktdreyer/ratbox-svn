@@ -244,7 +244,8 @@ int
 generate_challenge(char **r_challenge, char **r_response, RSA * rsa)
 {
 	unsigned char secret[32], *tmp;
-	unsigned long length, ret;
+	unsigned long length;
+	int ret;
 
 	if(!rsa)
 		return -1;

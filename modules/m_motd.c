@@ -52,7 +52,7 @@ int doing_motd_hook;
 mapi_clist_av1 motd_clist[] = { &motd_msgtab, NULL };
 mapi_hlist_av1 motd_hlist[] = {
 	{ "doing_motd",	&doing_motd_hook },
-	{ NULL }
+	{ NULL, NULL }
 };
 
 DECLARE_MODULE_AV1(motd, NULL, NULL, motd_clist, NULL, NULL, "$Revision$");

@@ -67,7 +67,7 @@ mapi_hlist_av1 stats_hlist[] = {
 	{ "doing_stats",	&doing_stats_hook },
 	{ "doing_stats_p",	&doing_stats_p_hook },
 	{ "doing_stats_L",	&doing_stats_L_hook },
-	{ NULL }
+	{ NULL, NULL }
 };
 
 DECLARE_MODULE_AV1(stats, NULL, NULL, stats_clist, stats_hlist, NULL, "$Revision$");

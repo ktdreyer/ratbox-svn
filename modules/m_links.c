@@ -51,7 +51,7 @@ int doing_links_hook;
 mapi_clist_av1 links_clist[] = { &links_msgtab, NULL };
 mapi_hlist_av1 links_hlist[] = {
 	{ "doing_links",	&doing_links_hook },
-	{ NULL }
+	{ NULL, NULL }
 };
 
 DECLARE_MODULE_AV1(links, NULL, NULL, links_clist, NULL, NULL, "$Revision$");

@@ -53,7 +53,7 @@ int doing_admin_hook;
 mapi_clist_av1 admin_clist[] = { &admin_msgtab, NULL };
 mapi_hlist_av1 admin_hlist[] = { 
 	{ "doing_admin",	&doing_admin_hook },
-	{ NULL }
+	{ NULL, NULL }
 };
 
 DECLARE_MODULE_AV1(admin, NULL, NULL, admin_clist, admin_hlist, NULL, "$Revision$");

@@ -58,9 +58,7 @@
 struct config_server_hide ConfigServerHide;
 
 extern int yyparse();		/* defined in y.tab.c */
-extern int lineno;
 extern char linebuf[];
-extern char conffilebuf[IRCD_BUFSIZE + 1];
 int scount = 0;			/* used by yyparse(), etc */
 
 #ifndef INADDR_NONE

@@ -188,15 +188,15 @@ mc_gline(struct Client *client_p, struct Client *source_p,
 	struct Client *acptr;
 	const char *user;
 	const char *host;
-	const char *reason;
+	char *reason;
 
 	acptr = source_p;
 
 	user = parv[1];
 	host = parv[2];
-	reason = parv[3];
+	reason = LOCAL_COPY(parv[3]);
 
-	if(invalid_gline(acptr, user, host, (char *) reason))
+	if(invalid_gline(acptr, user, host, reason))
 		return 0;
 
 	sendto_server(client_p, NULL, CAP_GLN|CAP_TS6, NOCAPS,
@@ -255,7 +255,7 @@ ms_gline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	struct Client *acptr;
 	const char *user;
 	const char *host;
-	const char *reason;
+	char *reason;
 
 	/* client doesnt exist.. someones messing */
 	if((acptr = find_client(parv[1])) == NULL)
@@ -269,9 +269,9 @@ ms_gline(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	user = parv[5];
 	host = parv[6];
-	reason = parv[7];
+	reason = LOCAL_COPY(parv[7]);
 
-	if(invalid_gline(acptr, user, host, (char *) reason))
+	if(invalid_gline(acptr, user, host, reason))
 		return 0;
 
 	sendto_server(client_p, NULL, CAP_GLN|CAP_TS6, NOCAPS,
@@ -491,8 +491,8 @@ set_local_gline(struct Client *source_p, const char *user,
 	ircsnprintf(buffer, sizeof(buffer), "%s (%s)", reason, current_date);
 
 	DupString(aconf->passwd, buffer);
-	DupString(aconf->user, (char *) user);
-	DupString(aconf->host, (char *) host);
+	DupString(aconf->user, user);
+	DupString(aconf->host, host);
 	aconf->hold = CurrentTime + ConfigFileEntry.gline_time;
 	add_gline(aconf);
 

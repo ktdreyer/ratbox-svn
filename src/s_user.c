@@ -56,7 +56,6 @@
 static void report_and_set_user_flags(struct Client *, struct ConfItem *);
 static int check_X_line(struct Client *client_p, struct Client *source_p);
 void user_welcome(struct Client *source_p);
-int oper_up(struct Client *source_p, struct ConfItem *aconf);
 
 extern char *crypt();
 
@@ -209,11 +208,11 @@ show_lusers(struct Client *source_p)
 			   MaxConnectionCount, MaxClientCount, 
 			   Count.totalrestartcount);
 
-	if(dlink_list_length(&lclient_list) > MaxClientCount)
+	if(dlink_list_length(&lclient_list) > (unsigned long)MaxClientCount)
 		MaxClientCount = dlink_list_length(&lclient_list);
 
 	if((dlink_list_length(&lclient_list) + dlink_list_length(&serv_list)) >
-	   MaxConnectionCount)
+	   (unsigned long)MaxConnectionCount)
 		MaxConnectionCount = dlink_list_length(&lclient_list) + 
 					dlink_list_length(&serv_list);
 
@@ -415,9 +414,9 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 	 */
 	/* Except "F:" clients */
 	if(((dlink_list_length(&lclient_list) + 1) >= 
-	   (GlobalSetOptions.maxclients + MAX_BUFFER) ||
+	   ((unsigned long)GlobalSetOptions.maxclients + MAX_BUFFER) ||
            (dlink_list_length(&lclient_list) + 1) >= 
-	    (GlobalSetOptions.maxclients - 5)) && !(IsExemptLimits(source_p)))
+	    ((unsigned long)GlobalSetOptions.maxclients - 5)) && !(IsExemptLimits(source_p)))
 	{
 		sendto_realops_flags(UMODE_FULL, L_ALL,
 				     "Too many clients, rejecting %s[%s].", nick, source_p->host);
@@ -488,7 +487,7 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 	dlinkMoveNode(&source_p->localClient->tnode, &unknown_list, &lclient_list);
 	s_assert(source_p->localClient != NULL);
 
-	if(dlink_list_length(&lclient_list) > Count.max_loc)
+	if(dlink_list_length(&lclient_list) > (unsigned long)Count.max_loc)
 	{
 		Count.max_loc = dlink_list_length(&lclient_list);
 		if(!(Count.max_loc % 10))

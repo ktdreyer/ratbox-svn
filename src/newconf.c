@@ -403,7 +403,7 @@ static struct mode_table umode_table[] = {
 	{"spy",		UMODE_SPY	},
 	{"operwall",	UMODE_OPERWALL	},
 	{"operspy",	UMODE_OPERSPY	},
-	{NULL}
+	{NULL, 0}
 };
 
 static struct mode_table flag_table[] = {
@@ -421,7 +421,7 @@ static struct mode_table flag_table[] = {
 	{"operwall",		OPER_OPERWALL		},
 	{"oper_spy",		OPER_SPY		},
 	{"oper_invisible",	OPER_INVIS		},
-	{NULL}
+	{NULL, 0}
 };
 
 static struct mode_table auth_table[] = {
@@ -436,7 +436,7 @@ static struct mode_table auth_table[] = {
 	{"restricted",		CONF_FLAGS_RESTRICTED	},
 	{"need_ident",		CONF_FLAGS_NEED_IDENTD	},
 	{"have_ident",		CONF_FLAGS_NEED_IDENTD	},
-	{NULL}
+	{NULL, 0}
 };
 
 static struct mode_table cluster_table[] = {
@@ -448,7 +448,7 @@ static struct mode_table cluster_table[] = {
 	{ "resv",	CLUSTER_RESV	},
 	{ "unresv",	CLUSTER_UNRESV	},
 	{ "all",	CLUSTER_ALL	},
-	{NULL}
+	{NULL, 0}
 };
 
 static struct mode_table shared_table[] =
@@ -458,7 +458,7 @@ static struct mode_table shared_table[] =
 	{ "xline",	OPER_XLINE	},
 	{ "resv",	OPER_RESV	},
 	{ "all",	OPER_K|OPER_UNKLINE|OPER_XLINE },
-	{NULL}
+	{NULL, 0}
 };
 /* *INDENT-ON* */
 

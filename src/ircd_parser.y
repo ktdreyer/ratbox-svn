@@ -53,7 +53,7 @@ static struct {
 	{"mb",		NULL,		1024 * 1024},
 	{"mbyte",	"mbytes",	1024 * 1024},
 	{"megabyte",	"megabytes",	1024 * 1024},
-	{NULL},
+	{NULL, NULL, 0},
 };
 
 time_t conf_find_time(char *name)

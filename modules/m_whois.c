@@ -62,7 +62,7 @@ mapi_clist_av1 whois_clist[] = { &whois_msgtab, NULL };
 mapi_hlist_av1 whois_hlist[] = {
 	{ "doing_whois_local",	&doing_whois_local_hook },
 	{ "doing_whois_global",	&doing_whois_global_hook },
-	{ NULL }
+	{ NULL, NULL }
 };
 
 DECLARE_MODULE_AV1(whois, NULL, NULL, whois_clist, whois_hlist, NULL, "$Revision$");

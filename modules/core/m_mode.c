@@ -114,7 +114,7 @@ m_mode(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	{
 		sendto_one_numeric(source_p, ERR_BADCHANNAME,
 				   form_str(ERR_BADCHANNAME),
-				   (unsigned char *) parv[1]);
+				   parv[1]);
 		return 0;
 	}
 
@@ -189,7 +189,7 @@ ms_tmode(struct Client *client_p, struct Client *source_p, int parc, const char 
 	{
 		sendto_one_numeric(source_p, ERR_BADCHANNAME,
 				   form_str(ERR_BADCHANNAME), 
-				   (unsigned char *) parv[2]);
+				   parv[2]);
 		return 0;
 	}
 
