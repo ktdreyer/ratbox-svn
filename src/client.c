@@ -41,6 +41,7 @@
 #include "s_log.h"
 #include "s_misc.h"
 #include "s_serv.h"
+#include "s_zip.h"
 #include "send.h"
 #include "whowas.h"
 
