@@ -57,7 +57,6 @@ void
 dlinkAdd(void *data, dlink_node * m, dlink_list * list)
 {
  m->data = data;
- m->next = NULL;
  m->next = list->head;
  /* Assumption: If list->tail != NULL, list->head != NULL */
  if (list->head != NULL)
