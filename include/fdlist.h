@@ -11,13 +11,12 @@
 #endif
 #ifndef INCLUDED_sys_socket_h
 #define INCLUDED_sys_socket_h
-#include "ircd_defs.h"
 #include <sys/socket.h>		/* Socket structs */
-#include <netinet/in.h>
-
 #endif
 
+#include <netinet/in.h>
 #include "config.h"
+#include "ircd_defs.h"
 
 #define FD_DESC_SZ 32
 
