@@ -190,7 +190,16 @@ static void ms_kill(struct Client *client_p, struct Client *source_p,
     }
 
   user = parv[1];
-  path = parv[2]; /* Either defined or NULL (parc >= 2!!) */
+
+/* OK, parv[2] contains the path AND the reason, so we either
+   split it up, or make the path ourselves using the info
+   we know.. (host/user/name).. for now we use the latter --fl */
+
+  if(IsServer(source_p))
+    ircsprintf(buf, "%s", source_p->name);
+  else
+    ircsprintf(buf, "%s!%s!%s!%s", source_p->user->server, source_p->host,
+               source_p->username, source_p->name);
 
   if (!(target_p = find_client(user, NULL)))
     {
@@ -217,8 +226,11 @@ static void ms_kill(struct Client *client_p, struct Client *source_p,
       return;
     }
 
+#if 0
+  /* If we make the path ourselves, there can never BE a bogus path */
   if (BadPtr(path))
     path = "*no-path*"; /* Bogus server sending??? */
+#endif
 
   /*
   ** Notify all *local* opers about the KILL (this includes the one
@@ -245,18 +257,18 @@ static void ms_kill(struct Client *client_p, struct Client *source_p,
   if (IsOper(source_p)) /* send it normally */
     {
       sendto_realops_flags(FLAGS_ALL,
-			   "Received KILL message for %s. From %s Path: %s %s",
+			   "Received KILL message for %s. From: %s Path: %s %s",
 			   target_p->name, parv[0], source_p->user->server, reason);
     }
   else
     {
       sendto_realops_flags(FLAGS_SKILL,
-			   "Received KILL message for %s %s. From %s",
+			   "Received KILL message for %s From: %s %s",
 			   target_p->name, parv[0], reason);
     }
 
-  log(L_INFO,"KILL From %s For %s Path %s!%s (%s)",
-      parv[0], target_p->name, inpath, path, reason);
+  log(L_INFO,"KILL From %s For %s Path %s (%s)",
+      parv[0], target_p->name, inpath, buf, reason);
   /*
   ** And pass on the message to other servers. Note, that if KILL
   ** was changed, the message has to be sent to all links, also
@@ -266,7 +278,7 @@ static void ms_kill(struct Client *client_p, struct Client *source_p,
 
   if (!MyConnect(target_p) || !MyConnect(source_p) || !IsOper(source_p))
     {
-      relay_kill(client_p, source_p, target_p, inpath, reason);
+      relay_kill(client_p, source_p, target_p, buf, reason);
 
       /*
       ** Set FLAGS_KILLED. This prevents exit_one_client from sending
@@ -341,19 +353,19 @@ static void relay_kill(struct Client *one, struct Client *source_p,
     else
       user = target_p->name;
 
-    if(MyConnect(source_p))
-    {
-      sendto_one(client_p, ":%s KILL %s :%s!%s!%s!%s %s",
-                 source_p->name, user,
-                 me.name, source_p->host, source_p->username,
-                 source_p->name, reason);
-    }
+    if(MyClient(source_p))
+      {
+        sendto_one(client_p, ":%s KILL %s :%s!%s!%s!%s (%s)",
+                   source_p->name, user,
+                   me.name, source_p->host, source_p->username,
+                   source_p->name, reason);
+      }
     else
-    {
-      sendto_one(client_p, ":%s KILL %s :%s!%s %s",
-                 source_p->name, user, me.name,
-                 inpath, reason);
-    }
+      {
+        sendto_one(client_p, ":%s KILL %s :%s %s",
+                   source_p->name, user, me.name,
+                   inpath, reason);
+      }
   }
 }
 
