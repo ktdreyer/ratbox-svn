@@ -528,9 +528,9 @@ comm_checktimeouts(void *notused)
             fd_table[fd].timeout > 0 && fd_table[fd].timeout < CurrentTime) {
             /* Call timeout handler */
             hdl = fd_table[fd].timeout_handler;
-            hdl(fd, fd_table[fd].timeout_data);           
-            /* .. and clear .. */
+            data = fd_table[fd].timeout_data;
             comm_settimeout(fd, 0, NULL, NULL);
+            hdl(fd, fd_table[fd].timeout_data);           
         }
     }
     /* .. next .. */
