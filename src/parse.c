@@ -140,6 +140,7 @@ int parse(struct Client *cptr, char *pbuffer, char *bufend)
   int             paramcount, mpara=0;
   char*           numeric = 0;
   struct Message* mptr;
+  int status;
 
   Debug((DEBUG_DEBUG, "Parsing %s:", pbuffer));
 
@@ -299,11 +300,11 @@ int parse(struct Client *cptr, char *pbuffer, char *bufend)
     return do_numeric(numeric, cptr, from, i, para);
   else
   {
-    handle_command(mptr, cptr, from, i, para);
+    status = handle_command(mptr, cptr, from, i, para);
     if (cptr->fd < 0)
       return(CLIENT_EXITED);
     else
-      return 0;
+      return status;
   }
 }
 
