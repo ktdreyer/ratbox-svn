@@ -31,6 +31,7 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
+#include "hash.h"
 #include "s_conf.h"
 
 static void m_ping(struct Client*, struct Client*, int, char**);
@@ -71,10 +72,10 @@ static void m_ping(struct Client *client_p,
   char  *origin, *destination;
 
   if (parc < 2 || *parv[1] == '\0')
-    {
-      sendto_one(source_p, form_str(ERR_NOORIGIN), me.name, parv[0]);
-      return;
-    }
+  {
+    sendto_one(source_p, form_str(ERR_NOORIGIN), me.name, parv[0]);
+    return;
+  }
 
   origin = parv[1];
   destination = parv[2]; /* Will get NULL or pointer (parc >= 2!!) */
@@ -97,19 +98,19 @@ static void m_ping(struct Client *client_p,
 #endif
 
   if (!EmptyString(destination) && !match(destination, me.name))
+  {
+    /* We're sending it across servers.. origin == client_p->name --fl_ */
+    origin = client_p->name;
+    if ((target_p = find_server(destination)))
+      sendto_one(target_p,":%s PING %s :%s", parv[0],
+                 origin, destination);
+    else
     {
-      /* We're sending it across servers.. origin == client_p->name --fl_ */
-      origin = client_p->name;
-      if ((target_p = find_server(destination)))
-        sendto_one(target_p,":%s PING %s :%s", parv[0],
-                   origin, destination);
-      else
-        {
-          sendto_one(source_p, form_str(ERR_NOSUCHSERVER),
-                     me.name, parv[0], destination);
-          return;
-        }
+      sendto_one(source_p, form_str(ERR_NOSUCHSERVER),
+                 me.name, parv[0], destination);
+      return;
     }
+  }
   else
     sendto_one(source_p,":%s PONG %s :%s", me.name,
                (destination) ? destination : me.name, origin);
@@ -124,10 +125,10 @@ static void ms_ping(struct Client *client_p,
   char  *origin, *destination;
 
   if (parc < 2 || *parv[1] == '\0')
-    {
-      sendto_one(source_p, form_str(ERR_NOORIGIN), me.name, parv[0]);
-      return;
-    }
+  {
+    sendto_one(source_p, form_str(ERR_NOORIGIN), me.name, parv[0]);
+    return;
+  }
 
 /* origin == source_p->name, lets not even both wasting effort on it --fl_ */
 #if 0
@@ -145,17 +146,17 @@ static void ms_ping(struct Client *client_p,
 #endif
 
   if (!EmptyString(destination) && !match(destination, me.name))
+  {
+    if ((target_p = find_server(destination)))
+      sendto_one(target_p,":%s PING %s :%s", parv[0],
+                 origin, destination);
+    else
     {
-      if ((target_p = find_server(destination)))
-        sendto_one(target_p,":%s PING %s :%s", parv[0],
-                   origin, destination);
-      else
-        {
-          sendto_one(source_p, form_str(ERR_NOSUCHSERVER),
-                     me.name, parv[0], destination);
-          return;
-        }
+      sendto_one(source_p, form_str(ERR_NOSUCHSERVER),
+                 me.name, parv[0], destination);
+      return;
     }
+  }
   else
     sendto_one(source_p,":%s PONG %s :%s", me.name,
                (destination) ? destination : me.name, origin);
