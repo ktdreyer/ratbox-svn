@@ -1,3 +1,19 @@
+androsyn    2004/09/28 11:18:49 EDT	(20040928_0)
+
+  Modified files:
+    include              commio.h 
+    src                  commio.c listener.c 
+  Log:
+  have the addrlen variable get passed to comm_accept() instead of doing it
+  locally.
+  
+  Revision  Changes    Path
+  1.12      +1 -1      ircd-ratbox/include/commio.h
+  1.21      +2 -3      ircd-ratbox/src/commio.c
+  7.119     +2 -1      ircd-ratbox/src/listener.c
+
+
+
 androsyn    2004/09/27 18:04:48 EDT	(20040927_2)
 
   Modified files:
