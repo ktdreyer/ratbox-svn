@@ -294,15 +294,14 @@ build_target_list(int p_or_n, char *command, struct Client *client_p,
       {
         if (!duplicate_ptr(chptr))
         {
-          targets[ntargets].ptr = (void *)chptr;
-          targets[ntargets++].type = ENTITY_CHANNEL;
-
           if (ntargets >= ConfigFileEntry.max_targets)
 	    {
 	      sendto_one(source_p, form_str(ERR_TOOMANYTARGETS),
 			 me.name, source_p->name, nick);
 	      return (1);
 	    }
+          targets[ntargets].ptr = (void *)chptr;
+          targets[ntargets++].type = ENTITY_CHANNEL;
         }
       }
       else
@@ -321,16 +320,15 @@ build_target_list(int p_or_n, char *command, struct Client *client_p,
     {
       if (!duplicate_ptr(target_p))
       {
-        targets[ntargets].ptr = (void *)target_p;
-        targets[ntargets].type = ENTITY_CLIENT;
-        targets[ntargets++].flags = 0;
-
         if (ntargets >= ConfigFileEntry.max_targets)
 	  {
 	    sendto_one(source_p, form_str(ERR_TOOMANYTARGETS),
 		       me.name, source_p->name, nick);
 	    return (1);
 	  }
+        targets[ntargets].ptr = (void *)target_p;
+        targets[ntargets].type = ENTITY_CLIENT;
+        targets[ntargets++].flags = 0;
       }
       continue;
     }
@@ -378,16 +376,15 @@ build_target_list(int p_or_n, char *command, struct Client *client_p,
 
 	  if (!duplicate_ptr(chptr))
 	    {
-	      targets[ntargets].ptr = (void *)chptr;
-	      targets[ntargets].type = ENTITY_CHANOPS_ON_CHANNEL;
-	      targets[ntargets++].flags = type;
-
 	      if (ntargets >= ConfigFileEntry.max_targets)
 		{
 		  sendto_one(source_p, form_str(ERR_TOOMANYTARGETS),
 			     me.name, source_p->name, nick);
 		  return (1);
 		}
+	      targets[ntargets].ptr = (void *)chptr;
+	      targets[ntargets].type = ENTITY_CHANOPS_ON_CHANNEL;
+	      targets[ntargets++].flags = type;
 	    }
 	}
       else
