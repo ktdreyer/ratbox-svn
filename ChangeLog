@@ -1,3 +1,20 @@
+leeh        2005/01/04 20:40:24 EST	(20050105_1)
+
+  Modified files:
+    .                    INSTALL configure 
+    autoconf             configure.in 
+    include              setup.h.in 
+  Log:
+  - add --with-nicklen and --with-topiclen
+  
+  Revision  Changes    Path
+  1.6       +8 -1      rserv/INSTALL
+  1.21      +17 -1     rserv/autoconf/configure.in
+  1.19      +113 -80   rserv/configure
+  1.10      +6 -0      rserv/include/setup.h.in
+
+
+
 leeh        2005/01/04 19:31:00 EST	(20050105_0)
 
   Modified files:
