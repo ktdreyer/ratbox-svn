@@ -1,3 +1,8 @@
+*** 20010216_4 by db
+- oops. reporting the wrong things for Klines. fixed.
+
+
+
 *** 20010216_3 by db
 - cleaned up hostmask.c clear_conf() there is no need to keep
   a separate link list at all
