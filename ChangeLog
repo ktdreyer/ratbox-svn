@@ -1,3 +1,15 @@
+leeh        2005/01/20 19:19:20 EST	(20050121_0)
+
+  Modified files:
+    include              hostmask.h 
+  Log:
+  - remove an unused struct
+  
+  Revision  Changes    Path
+  1.41      +0 -9      ircd-ratbox/include/hostmask.h
+
+
+
 leeh        2005/01/20 13:38:39 EST	(20050120_1)
 
   Modified files:
