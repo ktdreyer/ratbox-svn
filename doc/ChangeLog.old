@@ -1,3 +1,7 @@
+*** 20010220_7 by wcampbel
+Added trbz's Swedish translation
+
+
 *** 20010220_6 by wcampbel
 Revised custom.po, Added the README for the translations.  I'll create
 a Makefile (might need help) to install a specific language, and to do 
