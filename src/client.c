@@ -1641,7 +1641,7 @@ count_remote_client_memory(size_t * count, size_t * remote_client_memory_used)
 int
 accept_message(struct Client *source, struct Client *target)
 {
-	if(dlinkFind(&target->allow_list, source) != NULL)
+	if(dlinkFind(&target->localClient->allow_list, source) != NULL)
 		return 1;
 
 	return 0;
@@ -1668,12 +1668,12 @@ del_from_accept(struct Client *source, struct Client *target)
 	dlink_node *next_ptr2;
 	struct Client *target_p;
 
-	DLINK_FOREACH_SAFE(ptr, next_ptr, target->allow_list.head)
+	DLINK_FOREACH_SAFE(ptr, next_ptr, target->localClient->allow_list.head)
 	{
 		target_p = ptr->data;
 		if(source == target_p)
 		{
-			dlinkDestroy(ptr, &target->allow_list);
+			dlinkDestroy(ptr, &target->localClient->allow_list);
 
 			DLINK_FOREACH_SAFE(ptr2, next_ptr2, source->on_allow_list.head)
 			{
@@ -1702,11 +1702,14 @@ del_all_accepts(struct Client *client_p)
 	dlink_node *next_ptr;
 	struct Client *target_p;
 
-	DLINK_FOREACH_SAFE(ptr, next_ptr, client_p->allow_list.head)
+	if(MyClient(client_p))
 	{
-		target_p = ptr->data;
-		if(target_p != NULL)
-			del_from_accept(target_p, client_p);
+		DLINK_FOREACH_SAFE(ptr, next_ptr, client_p->localClient->allow_list.head)
+		{
+			target_p = ptr->data;
+			if(target_p != NULL)
+				del_from_accept(target_p, client_p);
+		}
 	}
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, client_p->on_allow_list.head)

@@ -151,11 +151,9 @@ struct Client
 
 	char id[IDLEN + 1];	/* UID/SID, unique on the network */
 
-	/* caller ID allow list */
-	/* This has to be here, since a client on an on_allow_list could
-	 * be a remote client. simpler to keep both here.
+	/* list of who has this client on their allow list,
+	 * its counterpart is in LocalUser
 	 */
-	dlink_list allow_list;	/* clients I'll allow to talk to me */
 	dlink_list on_allow_list;	/* clients that have =me= on their allow list */
 
 	struct LocalUser *localClient;
@@ -237,6 +235,9 @@ struct LocalUser
 	/* challenge stuff */
 	char *response;
 	char *auth_oper;
+
+	/* list of clients allowed to talk through +g */
+	dlink_list allow_list;
 
 	/*
 	 * Anti-flood stuff. We track how many messages were parsed and how

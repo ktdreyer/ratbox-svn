@@ -99,7 +99,7 @@ m_accept(struct Client *client_p, struct Client *source_p, int parc, const char 
 	}
 
 	/* get the number of accepts they have */
-	accept_num = dlink_list_length(&source_p->allow_list);
+	accept_num = dlink_list_length(&source_p->localClient->allow_list);
 
 	/* parse the add list */
 	for (nick = strtoken(&p, addbuf, ","); nick; nick = strtoken(&p, NULL, ","), accept_num++)
@@ -207,7 +207,7 @@ build_nicklist(struct Client *source_p, char *addbuf, char *delbuf, const char *
 static void
 add_accept(struct Client *source_p, struct Client *target_p)
 {
-	dlinkAddAlloc(target_p, &source_p->allow_list);
+	dlinkAddAlloc(target_p, &source_p->localClient->allow_list);
 	dlinkAddAlloc(source_p, &target_p->on_allow_list);
 }
 
@@ -232,7 +232,7 @@ list_accepts(struct Client *source_p)
 	*nicks = '\0';
 	len2 = strlen(source_p->name) + 10;
 
-	DLINK_FOREACH(ptr, source_p->allow_list.head)
+	DLINK_FOREACH(ptr, source_p->localClient->allow_list.head)
 	{
 		target_p = ptr->data;
 
