@@ -26,7 +26,7 @@
 
 #include "stdinc.h"
 #include "tools.h"
-#include "linebuf.h"
+#include "struct.h"
 #include "client.h"
 #include "hash.h"		/* for find_client() */
 #include "ircd.h"

@@ -26,7 +26,7 @@
 
 #include "stdinc.h"
 #include "tools.h"
-#include "linebuf.h"
+#include "struct.h"
 #include "s_gline.h"
 #include "channel.h"
 #include "client.h"

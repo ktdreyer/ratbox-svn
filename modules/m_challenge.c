@@ -37,7 +37,7 @@
 #endif
 
 #include "tools.h"
-#include "linebuf.h"
+#include "struct.h"
 #include "memory.h"
 #include "client.h"
 #include "ircd.h"

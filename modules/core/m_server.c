@@ -26,7 +26,7 @@
 
 #include "stdinc.h"
 #include "tools.h"
-#include "linebuf.h"
+#include "struct.h"
 #include "client.h"		/* client struct */
 #include "event.h"
 #include "hash.h"		/* add_to_client_hash */

@@ -26,6 +26,7 @@
 
 #include "stdinc.h"
 #include "tools.h"
+#include "struct.h"
 #include "send.h"
 #include "channel.h"
 #include "class.h"

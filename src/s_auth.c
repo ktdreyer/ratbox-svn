@@ -35,11 +35,11 @@
  */
 #include "stdinc.h"
 #include "tools.h"
+#include "struct.h"
 #include "adns.h"
 #include "res.h"
 #include "s_auth.h"
 #include "s_conf.h"
-#include "linebuf.h"
 #include "client.h"
 #include "event.h"
 #include "irc_string.h"

@@ -31,8 +31,6 @@
 #include "tools.h"
 #include "commio.h"
 #include "class.h"
-#include "linebuf.h"
-#include "client.h"
 #include "irc_string.h"
 #include "ircd.h"
 #include "listener.h"

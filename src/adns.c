@@ -25,15 +25,15 @@
  */
 
 #include "stdinc.h"
+#include "tools.h"
+#include "struct.h"
 #include "adns.h"
 #include "res.h"
-#include "tools.h"
 #include "send.h"
 #include "s_conf.h"
 #include "commio.h"
 #include "s_log.h"
 #include "event.h"
-#include "linebuf.h"
 #include "client.h"
 #include "numeric.h"
 #include "../adns/internal.h"

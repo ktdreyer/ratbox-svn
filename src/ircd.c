@@ -25,8 +25,8 @@
  */
 
 #include "stdinc.h"
-
 #include "tools.h"
+#include "struct.h"
 #include "ircd.h"
 #include "channel.h"
 #include "class.h"

@@ -33,8 +33,7 @@
  */
 #include "stdinc.h"
 #include "tools.h"
-#include "linebuf.h"
-#include "client.h"
+#include "struct.h"
 #include "memory.h"
 #include "balloc.h"
 #include "monitor.h"

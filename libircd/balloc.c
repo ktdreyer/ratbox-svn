@@ -69,8 +69,6 @@
 #include "irc_string.h"
 #include "tools.h"
 #include "s_log.h"
-#include "linebuf.h"
-#include "client.h"
 #include "event.h"
 
 #ifdef HAVE_MMAP		/* We've got mmap() that is good */

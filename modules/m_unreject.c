@@ -25,8 +25,7 @@
 
 #include "stdinc.h"
 #include "tools.h"
-#include "linebuf.h"
-#include "client.h"
+#include "struct.h"
 #include "s_conf.h"
 #include "hostmask.h"
 #include "reject.h"

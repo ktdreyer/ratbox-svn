@@ -30,8 +30,6 @@
 #include "s_conf.h"
 #include "s_newconf.h"
 #include "hostmask.h"
-#include "linebuf.h"
-#include "client.h"
 #include "irc_string.h"
 #include "memory.h"
 #include "hash.h"

@@ -26,7 +26,7 @@
 
 #include "stdinc.h"
 #include "tools.h"		/* dlink_node/dlink_list */
-#include "linebuf.h"
+#include "struct.h"
 #include "class.h"		/* report_classes */
 #include "client.h"		/* Client */
 #include "irc_string.h"

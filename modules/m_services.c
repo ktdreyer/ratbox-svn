@@ -33,7 +33,7 @@
 
 #ifdef ENABLE_SERVICES
 #include "tools.h"
-#include "linebuf.h"
+#include "struct.h"
 #include "send.h"
 #include "channel.h"
 #include "client.h"

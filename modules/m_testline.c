@@ -31,9 +31,8 @@
  */
 #include "stdinc.h"
 #include "tools.h"
-#include "linebuf.h"
+#include "struct.h"
 #include "send.h"
-#include "client.h"
 #include "hook.h"
 #include "modules.h"
 #include "msg.h"

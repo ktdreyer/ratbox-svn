@@ -26,7 +26,7 @@
 
 #include "stdinc.h"
 #include "tools.h"
-#include "linebuf.h"
+#include "struct.h"
 #include "ircd.h"
 #include "s_user.h"
 #include "client.h"

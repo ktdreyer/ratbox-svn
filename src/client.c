@@ -24,9 +24,8 @@
  *  $Id$
  */
 #include "stdinc.h"
-
 #include "tools.h"
-#include "linebuf.h"
+#include "struct.h"
 #include "client.h"
 #include "channel.h"
 #include "class.h"
@@ -58,6 +57,7 @@
 #include "hook.h"
 #include "msg.h"
 #include "monitor.h"
+#include "linebuf.h"
 
 #define DEBUG_EXITED_CLIENTS
 

@@ -27,7 +27,7 @@
 #include "stdinc.h"
 #include "sprintf_irc.h"
 #include "tools.h"
-#include "linebuf.h"
+#include "struct.h"
 #include "channel.h"
 #include "client.h"
 #include "hash.h"

@@ -34,9 +34,9 @@
 
 #include "stdinc.h"
 #include "tools.h"
+#include "struct.h"
 #include "s_conf.h"
 #include "s_newconf.h"
-#include "linebuf.h"
 #include "client.h"
 #include "memory.h"
 #include "s_serv.h"

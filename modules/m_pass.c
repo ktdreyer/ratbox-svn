@@ -26,7 +26,7 @@
 
 #include "stdinc.h"
 #include "tools.h"
-#include "linebuf.h"
+#include "struct.h"
 #include "client.h"		/* client struct */
 #include "irc_string.h"
 #include "send.h"		/* sendto_one */

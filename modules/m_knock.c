@@ -25,7 +25,7 @@
 
 #include "stdinc.h"
 #include "tools.h"
-#include "linebuf.h"
+#include "struct.h"
 #include "sprintf_irc.h"
 #include "tools.h"
 #include "channel.h"

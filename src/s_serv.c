@@ -31,10 +31,10 @@
 #endif
 
 #include "tools.h"
+#include "struct.h"
 #include "s_serv.h"
 #include "class.h"
 #include "linebuf.h"
-#include "client.h"
 #include "event.h"
 #include "hash.h"
 #include "irc_string.h"

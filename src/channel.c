@@ -26,8 +26,8 @@
 
 #include "stdinc.h"
 #include "tools.h"
+#include "struct.h"
 #include "channel.h"
-#include "linebuf.h"
 #include "client.h"
 #include "hash.h"
 #include "hook.h"

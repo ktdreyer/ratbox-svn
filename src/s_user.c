@@ -26,10 +26,10 @@
 
 #include "stdinc.h"
 #include "tools.h"
+#include "struct.h"
 #include "s_user.h"
 #include "channel.h"
 #include "class.h"
-#include "linebuf.h"
 #include "client.h"
 #include "hash.h"
 #include "irc_string.h"

@@ -25,6 +25,7 @@
  */
 #include "stdinc.h"
 #include "tools.h"
+#include "struct.h"
 #include "commio.h"
 #include "s_conf.h"
 #include "s_serv.h"

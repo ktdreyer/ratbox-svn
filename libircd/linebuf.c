@@ -26,8 +26,8 @@
 
 #include "stdinc.h"
 #include "tools.h"
+#include "struct.h"
 #include "linebuf.h"
-#include "client.h"
 #include "memory.h"
 #include "event.h"
 #include "balloc.h"

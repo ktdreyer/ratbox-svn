@@ -28,7 +28,7 @@
 
 #include "stdinc.h"
 #include "tools.h"
-#include "linebuf.h"
+#include "struct.h"
 #include "client.h"
 #include "event.h"
 #include "irc_string.h"

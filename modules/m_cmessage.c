@@ -34,7 +34,7 @@
  */
 #include "stdinc.h"
 #include "tools.h"
-#include "linebuf.h"
+#include "struct.h"
 #include "client.h"
 #include "channel.h"
 #include "numeric.h"

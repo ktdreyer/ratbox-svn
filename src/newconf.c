@@ -10,7 +10,7 @@
 #endif
 
 #include "tools.h"
-#include "linebuf.h"
+#include "struct.h"
 #include "client.h"
 #include "memory.h"
 #include "newconf.h"

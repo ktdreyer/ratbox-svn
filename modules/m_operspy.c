@@ -31,10 +31,9 @@
 
 #include "stdinc.h"
 #include "tools.h"
-#include "linebuf.h"
+#include "struct.h"
 #include "send.h"
 #include "channel.h"
-#include "client.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "memory.h"

@@ -29,9 +29,6 @@
 #include "memory.h"
 #include "commio.h"
 #include "s_conf.h"
-#include "linebuf.h"
-#include "client.h"
-#include "send.h"
 
 /*
  * dummy_handler - don't know if this is really needed but if alarm is still
