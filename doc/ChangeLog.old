@@ -1,3 +1,8 @@
+*** 20001230_12 by fl_
+- Fix for IP klines 
+- We now check to see if remote klines exist locally, before applying them
+
+
 *** 20001230_11 by db
 - removed ';' that were in the wrong spot, these caused bison and solaris
   yacc to have a fit.
