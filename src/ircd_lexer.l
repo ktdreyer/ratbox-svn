@@ -364,10 +364,10 @@ void ccomment(void)
 void cinclude(void)
 {
   char *c;
-  if ((c = index(yytext, '<')) == NULL)
-    *index(c = index(yytext, '"') + 1, '"') = 0;
+  if ((c = strchr(yytext, '<')) == NULL)
+    *strchr(c = strchr(yytext, '"') + 1, '"') = 0;
   else
-    *index(++c, '>') = 0;
+    *strchr(++c, '>') = 0;
 
   /* log(L_NOTICE, "got include %s!", c); */
 
