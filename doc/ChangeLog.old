@@ -1,3 +1,7 @@
+*** 20010629_1 by a1kmm
+- Set uplink to NULL on changing to a hub.
+
+
 *** 20010628_2 by leeh
 - I should probably actually add the files ;p
 - made the makefiles compile them too
