@@ -838,7 +838,6 @@ comm_open(int family, int sock_type, int proto, const char *note)
 
   /* Next, update things in our fd tracking */
   fd_open(fd, FD_SOCKET, note);
-  log(L_CRIT, "Made it to the end of comm_open!");
   return fd;
 }
 
