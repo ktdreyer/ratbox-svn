@@ -179,7 +179,7 @@ void *_MyMalloc(size_t size)
  */
 void *_MyRealloc(void *x, size_t y)
 {
-    char *ret = realloc(x, y);
+    void *ret = realloc(x, y);
 
     if (!ret)
 	outofmemory();
