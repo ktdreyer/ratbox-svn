@@ -1,3 +1,7 @@
+*** 20010122_8 by wcampbel
+Fixed the off by 1 error in the syntax error in the conf notice
+
+
 *** 20010122_7 by ejb
 - initial commit of androsyn's ipv6 code, hacked up so it compiles. 
   it accepts a connection, but doesn't get further than the initial
