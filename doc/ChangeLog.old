@@ -1,3 +1,22 @@
+leeh        2002/04/16 20:05:13 EDT	(20020417_0)
+
+  Modified files:
+    include              irc_string.h 
+    src                  ircd_parser.y match.c s_conf.c 
+  Log:
+  - duplicated match() into match_esc() and collapse() into collapse_esc()
+  - removed escaping from match() and collapse()
+  - run collapse_esc() before we add a gecos {};
+  - make gecos {}; use match_esc()
+  
+  Revision  Changes    Path
+  7.35      +8 -0      ircd-hybrid-7/include/irc_string.h
+  1.242     +1 -0      ircd-hybrid-7/src/ircd_parser.y
+  7.18      +122 -39   ircd-hybrid-7/src/match.c
+  7.297     +1 -1      ircd-hybrid-7/src/s_conf.c
+
+
+
 leeh        2002/04/15 18:51:43 EDT	(20020415_7)
 
   Modified files:
