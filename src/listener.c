@@ -355,9 +355,8 @@ static void accept_connection(int pfd, void *data)
 {
   static time_t      last_oper_notice = 0;
 
+  struct irc_sockaddr sai;
   struct irc_inaddr addr;
-  struct sockaddr sai;
-  socklen_t addrlen = sizeof(struct sockaddr);
   int                fd;
   struct Listener *  listener = data;
 
@@ -376,24 +375,8 @@ static void accept_connection(int pfd, void *data)
    * be accepted until some old is closed first.
    */
 
-  fd = comm_accept(listener->fd, &sai, &addrlen);
-  if (sai.sa_family == AF_INET)
-    {
-     addr.sins.sin = ((struct sockaddr_in*)&sai)->sin_addr;
-    }
-#ifdef IPV6
-  else if (sai.sa_family == AF_INET6)
-    {
-     addr.sins.sin6 = ((struct sockaddr_in6*)&sai)->in6_addr;
-    }
-#endif
-  else
-    {
-     /* Re-register a new IO request for the next accept .. */
-     comm_setselect(listener->fd, FDLIST_SERVICE, COMM_SELECT_READ,
-                    accept_connection, listener, 0);
-     return;
-    }
+  fd = comm_accept(listener->fd, &sai);
+  copy_s_addr(IN_ADDR(addr), S_ADDR(sai));  
   if (fd < 0)
     {
 #if 0
