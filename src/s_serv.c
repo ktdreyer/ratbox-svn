@@ -1814,7 +1814,7 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
 	}
 	client_p->serv->up = me.name;
 	SetConnecting(client_p);
-	add_client_to_list(client_p);
+	dlinkAddTail(client_p, &client_p->node, &global_client_list);
 
 
 	if(IsConfVhosted(aconf))

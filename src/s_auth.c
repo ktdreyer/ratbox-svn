@@ -166,7 +166,7 @@ release_auth_client(struct Client *client)
 	 */
 	client->localClient->allow_read = MAX_FLOOD;
 	comm_setflush(client->localClient->fd, 1000, flood_recalc, client);
-	add_client_to_list(client);
+	dlinkAddTail(client, &client->node, &global_client_list);
 	read_packet(client->localClient->fd, client);
 }
 

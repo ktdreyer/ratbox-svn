@@ -162,8 +162,8 @@ make_client(struct Client *from)
 		client_p->localClient = NULL;
 		client_p->from = from;	/* 'from' of local client is self! */
 	}
-
-	client_p->status = STAT_UNKNOWN;
+	
+	SetUnknown(client_p);
 	strcpy(client_p->username, "unknown");
 
 	return client_p;
@@ -740,7 +740,7 @@ release_client_state(struct Client *client_p)
  * side effects - taken the code from ExitOneClient() for this
  *		  and placed it here. - avalon
  */
-void
+static void
 remove_client_from_list(struct Client *client_p)
 {
 	assert(NULL != client_p);

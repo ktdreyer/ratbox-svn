@@ -550,13 +550,7 @@ extern const char *log_client_name(struct Client *, int);
 extern void init_client(void);
 extern struct Client *make_client(struct Client *from);
 extern void free_client(struct Client *client);
-/*
- * extern void           add_client_to_list(struct Client* client);
- * This used to be a function..but now it is a macro
- */
-#define add_client_to_list(client) dlinkAddTail(client, &client->node, &global_client_list)
 
-extern void remove_client_from_list(struct Client *);
 extern int exit_client(struct Client *, struct Client *, struct Client *, const char *);
 
 
