@@ -5,7 +5,7 @@
 #, fuzzy
 msgid	""
 msgstr	"Project-Id-Version: ircd-hybrid-7\n"
-	"POT-Creation-Date: 2001-02-20 21:53-0500\n"
+	"POT-Creation-Date: 2001-07-01 21:52-0700\n"
 	"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 	"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 	"Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,7 +20,7 @@ msgstr	":%s 001 %s :ALL YOUR BASE ARE BELONG TO %s, %s!!!"
 
 #: ../src/messages.tab:25
 #, c-format
-msgid	":%s 002 %s :Your host is %s, running version %s for great justice"
+msgid	":%s 002 %s :Your host is %s, running version %s"
 msgstr	""
 
 #: ../src/messages.tab:26
@@ -41,7 +41,13 @@ msgstr	":%s 005 %s %s :are moved for great justice"
 #: ../src/messages.tab:33
 #, c-format
 msgid	":%s 010 %s %s %d :Please use this Server/Port instead"
-msgstr	":%s 010 %s %s %d :You have no chance to survive make this Server/Port instead. Ha ha ha."
+msgstr	":%s 010 %s %s %d :You have no chance to survive make this "
+	"Server/Port instead. Ha ha ha."
+
+#: ../src/messages.tab:43
+#, c-format
+msgid	":%s 020 %s %s %s :Your ID and key is"
+msgstr	""
 
 #: ../src/messages.tab:223
 #, c-format
@@ -60,7 +66,7 @@ msgstr	""
 
 #: ../src/messages.tab:226
 #, c-format
-msgid	":%s 203 %s ???? %d %s (%s) %d"
+msgid	":%s 203 %s ???? %s %s (%s) %d"
 msgstr	""
 
 #: ../src/messages.tab:227
@@ -146,6 +152,11 @@ msgstr	""
 #: ../src/messages.tab:248
 #, c-format
 msgid	":%s 225 %s %c %s %s"
+msgstr	""
+
+#: ../src/messages.tab:249
+#, c-format
+msgid	":%s 226 %s %s"
 msgstr	""
 
 #: ../src/messages.tab:264
@@ -289,7 +300,8 @@ msgstr	""
 #: ../src/messages.tab:332
 #, c-format
 msgid	":%s 305 %s :You are no longer marked as being away"
-msgstr	":%s 305 %s :OK, you're not /away anymore. Did you move Zig for great justice?"
+msgstr	":%s 305 %s :OK, you're not /away anymore. Did you move Zig for great "
+	"justice?"
 
 #: ../src/messages.tab:333
 #, c-format
@@ -622,6 +634,11 @@ msgstr	""
 msgid	":%s 437 %s %s :Nick/channel is temporarily unavailable"
 msgstr	""
 
+#: ../src/messages.tab:467
+#, fuzzy, c-format
+msgid	":%s 438 %s %s %s :Nick change too fast. Please wait %d seconds."
+msgstr	":%s 433 %s %s :Zig is belong to someone else."
+
 #: ../src/messages.tab:470
 #, c-format
 msgid	":%s 441 %s %s %s :They aren't on that channel"
@@ -679,9 +696,9 @@ msgstr	":%s 464 %s :BZZT!! Wrong password, homez. Are you sure you know what "
 	"you're doing??"
 
 #: ../src/messages.tab:494
-#, c-format
-msgid	":%s 465 %s :SOMEONE SET YOU UP THE KLINE - %s"
-msgstr	""
+#, fuzzy, c-format
+msgid	":%s 465 %s :You are banned from this server- %s"
+msgstr	":%s 005 %s %s :are moved for great justice"
 
 #: ../src/messages.tab:496
 #, c-format

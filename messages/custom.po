@@ -5,7 +5,7 @@
 #, fuzzy
 msgid	""
 msgstr	"Project-Id-Version: ircd-hybrid-7\n"
-	"POT-Creation-Date: 2001-02-20 21:53-0500\n"
+	"POT-Creation-Date: 2001-07-01 21:52-0700\n"
 	"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 	"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 	"Language-Team: LANGUAGE <LL@li.org>\n"
@@ -43,6 +43,11 @@ msgstr	""
 msgid	":%s 010 %s %s %d :Please use this Server/Port instead"
 msgstr	""
 
+#: ../src/messages.tab:43
+#, c-format
+msgid	":%s 020 %s %s %s :Your ID and key is"
+msgstr	""
+
 #: ../src/messages.tab:223
 #, c-format
 msgid	":%s 200 %s Link %s%s %s %s"
@@ -60,7 +65,7 @@ msgstr	""
 
 #: ../src/messages.tab:226
 #, c-format
-msgid	":%s 203 %s ???? %d %s (%s) %d"
+msgid	":%s 203 %s ???? %s %s (%s) %d"
 msgstr	""
 
 #: ../src/messages.tab:227
@@ -146,6 +151,11 @@ msgstr	""
 #: ../src/messages.tab:248
 #, c-format
 msgid	":%s 225 %s %c %s %s"
+msgstr	""
+
+#: ../src/messages.tab:249
+#, c-format
+msgid	":%s 226 %s %s"
 msgstr	""
 
 #: ../src/messages.tab:264
@@ -620,6 +630,11 @@ msgstr	""
 #: ../src/messages.tab:466
 #, c-format
 msgid	":%s 437 %s %s :Nick/channel is temporarily unavailable"
+msgstr	""
+
+#: ../src/messages.tab:467
+#, c-format
+msgid	":%s 438 %s %s %s :Nick change too fast. Please wait %d seconds."
 msgstr	""
 
 #: ../src/messages.tab:470
