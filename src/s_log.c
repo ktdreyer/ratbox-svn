@@ -104,7 +104,11 @@ void close_log(void)
 static void write_log(const char* message)
 {
   char buf[LOG_BUFSIZE];
-  sprintf(buf, "[%s] %s\n", smalldate(CurrentTime), message);
+
+  if( !logFile )
+    return;
+
+  snprintf(buf, LOG_BUFSIZE, "[%s] %s\n", smalldate(CurrentTime), message);
   fbputs(buf, logFile);
 }
 #endif
