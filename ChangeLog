@@ -1,3 +1,15 @@
+androsyn    2003/09/23 09:36:37 EDT	(20030923_4)
+
+  Modified files:
+    modules/core         m_error.c 
+  Log:
+  Actually make m_error work as a module
+  
+  Revision  Changes    Path
+  1.2       +7 -0      ircd-ratbox/modules/core/m_error.c
+
+
+
 androsyn    2003/09/23 09:33:43 EDT	(20030923_3)
 
   Modified files:
