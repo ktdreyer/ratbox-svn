@@ -1,3 +1,47 @@
+androsyn    2002/08/15 14:09:23 EDT	(20020815_9)
+
+  Modified files:
+    include              channel.h resv.h s_conf.h tools.h 
+    modules              m_cryptlink.c m_gline.c m_kline.c 
+                         m_pass.c m_pong.c m_unkline.c 
+    modules/core         m_nick.c m_part.c m_server.c m_sjoin.c 
+    src                  channel.c channel_mode.c client.c hash.c 
+                         resv.c s_auth.c s_conf.c s_serv.c 
+                         s_user.c scache.c tools.c whowas.c 
+  Log:
+  strlcpy cleanups.  Also add dlinkFindDelete() and make find_user_link() a
+  macro to speed up things just a little bit.
+  
+  Revision  Changes    Path
+  7.122     +2 -1      ircd-ratbox/include/channel.h
+  1.8       +1 -1      ircd-ratbox/include/resv.h
+  7.193     +1 -1      ircd-ratbox/include/s_conf.h
+  1.21      +25 -2     ircd-ratbox/include/tools.h
+  1.98      +5 -5      ircd-ratbox/modules/core/m_nick.c
+  1.60      +2 -2      ircd-ratbox/modules/core/m_part.c
+  1.94      +11 -12    ircd-ratbox/modules/core/m_server.c
+  1.149     +2 -2      ircd-ratbox/modules/core/m_sjoin.c
+  1.37      +5 -5      ircd-ratbox/modules/m_cryptlink.c
+  1.89      +11 -11    ircd-ratbox/modules/m_gline.c
+  1.114     +10 -11    ircd-ratbox/modules/m_kline.c
+  1.24      +3 -2      ircd-ratbox/modules/m_pass.c
+  1.28      +2 -2      ircd-ratbox/modules/m_pong.c
+  1.55      +3 -3      ircd-ratbox/modules/m_unkline.c
+  7.336     +2 -17     ircd-ratbox/src/channel.c
+  7.63      +1 -1      ircd-ratbox/src/channel_mode.c
+  7.309     +3 -3      ircd-ratbox/src/client.c
+  7.55      +2 -2      ircd-ratbox/src/hash.c
+  7.17      +2 -2      ircd-ratbox/src/resv.c
+  7.104     +1 -1      ircd-ratbox/src/s_auth.c
+  7.333     +6 -6      ircd-ratbox/src/s_conf.c
+  7.287     +2 -2      ircd-ratbox/src/s_serv.c
+  7.216     +7 -7      ircd-ratbox/src/s_user.c
+  7.16      +1 -1      ircd-ratbox/src/scache.c
+  7.24      +19 -0     ircd-ratbox/src/tools.c
+  7.20      +1 -1      ircd-ratbox/src/whowas.c
+
+
+
 androsyn    2002/08/15 05:08:49 EDT	(20020815_8)
 
   Removed files:
