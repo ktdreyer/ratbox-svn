@@ -1,3 +1,8 @@
+*** 20001227_11 by db
+- wrong parmcount, cores each of unkline, undline, ungline
+
+
+
 *** 20001227_10 by db
 - use the parameter block, don't core on 0 parameters for dline
 
