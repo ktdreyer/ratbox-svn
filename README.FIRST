@@ -61,6 +61,11 @@ Feature Specific Requirements:
   block of ircd.conf.  Look at example.conf for more information about
   these options.
 
+- The files, /etc/services, /etc/protocols, and /etc/resolv.conf, MUST be
+  readable by the user running the server in order for ircd to start.
+  Errors from adns causing the ircd to refuse to start up are often related
+  to permission problems on these files.
+
 - There is now a mailing list for general discussion of Hybrid.  To subscribe
   to the Hybrid List, send email to listmanager@the-project.org with
   the subject "subscribe hybrid".
