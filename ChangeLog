@@ -1,3 +1,18 @@
+androsyn    2003/09/10 11:23:26 EDT	(20030910_3)
+
+  Modified files:
+    include              s_bsd.h 
+    src                  listener.c s_bsd.c 
+  Log:
+  Move add_connection to listener.c, as it was only used there
+  
+  Revision  Changes    Path
+  7.46      +0 -1      ircd-ratbox/include/s_bsd.h
+  7.96      +58 -2     ircd-ratbox/src/listener.c
+  7.213     +0 -53     ircd-ratbox/src/s_bsd.c
+
+
+
 androsyn    2003/09/10 11:17:28 EDT	(20030910_2)
 
   Modified files:
