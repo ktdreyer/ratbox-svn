@@ -262,8 +262,8 @@ stats_delay(struct Client *source_p)
 	HASH_WALK(i, U_MAX, ptr, ndTable)
 	{
 		nd = ptr->data;
-		sendto_one_notice(source_p, "Delaying: %s for %" PRIdMAX,
-				nd->name, (intmax_t) nd->expire);
+		sendto_one_notice(source_p, "Delaying: %s for %ld",
+				nd->name, (long) nd->expire);
 	}
 	HASH_WALK_END
 }

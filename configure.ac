@@ -432,20 +432,6 @@ AC_CHECK_TYPE([u_int16_t], [],
 	])
 ])
 
-AC_CHECK_TYPE([intmax_t], [],
-[
-	AC_DEFINE(intmax_t, [uint32_t], [If system does not define intmax_t, define a usable substitute])
-	AC_MSG_WARN([system lacks intmax_t, using default of uint32_t])
-],
-[#include <inttypes.h>])
-
-AC_CHECK_DECL([PRIdMAX], [],
-[
-	AC_DEFINE(PRIdMAX, ["d"], [If system does not define PRIdMAX, define a usable substitute])
-	AC_MSG_WARN([system lacks PRIdMAX, using default of %d])
-],
-[#include <inttypes.h>])
-
 AC_CHECK_TYPE([in_port_t], [],
 [AC_DEFINE(in_port_t, [u_int16_t], [If system does not define in_port_t, define it to what it should be.])],
 [[#include <sys/types.h>

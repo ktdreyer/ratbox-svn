@@ -106,8 +106,8 @@ mo_opme(struct Client *client_p, struct Client *source_p, int parc, const char *
 			      me.name, parv[1], source_p->name, source_p->username, source_p->host);
 		sendto_server(NULL, chptr, NOCAPS, NOCAPS, ":%s PART %s", source_p->name, parv[1]);
 		sendto_server(NULL, chptr, NOCAPS, NOCAPS,
-			      ":%s SJOIN %" PRIdMAX " %s + :@%s",
-			      me.name, (intmax_t) chptr->channelts, parv[1], source_p->name);
+			      ":%s SJOIN %ld %s + :@%s",
+			      me.name, (long) chptr->channelts, parv[1], source_p->name);
 	}
 
 	sendto_channel_local(ALL_MEMBERS, chptr,

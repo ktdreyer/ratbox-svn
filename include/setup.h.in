@@ -210,9 +210,6 @@
 /* Path to /dev/null */
 #undef PATH_DEVNULL
 
-/* If system does not define PRIdMAX, define a usable substitute */
-#undef PRIdMAX
-
 /* This is the type of IO loop we are using */
 #undef SELECT_TYPE
 
@@ -279,9 +276,6 @@
 #ifndef __cplusplus
 #undef inline
 #endif
-
-/* If system does not define intmax_t, define a usable substitute */
-#undef intmax_t
 
 /* If system does not define sa_family_t, define it here. */
 #undef sa_family_t
