@@ -795,8 +795,10 @@ static void stats_servlinks(struct Client *source_p)
 
     sendto_one(source_p, Sformat, me.name, RPL_STATSLINKINFO,
                source_p->name, 
-               IsOperAdmin(source_p) ? get_client_name(target_p, SHOW_IP)
-	       : get_client_name(target_p, MASK_IP),
+#ifndef HIDE_SPOOF_IPS
+               IsOperAdmin(source_p) ? get_client_name(target_p, SHOW_IP) :
+#endif
+	       get_client_name(target_p, MASK_IP),
                (int)linebuf_len(&target_p->localClient->buf_sendq),
                (int)target_p->localClient->sendM,
                (int)target_p->localClient->sendK,
@@ -915,10 +917,15 @@ static void stats_L_list(struct Client *source_p,char *name, int doall, int wild
 
       /* This basically shows ips for our opers if its not a server/admin, or
        * its one of our admins.  */
-      if(MyClient(source_p) && IsOper(source_p) && 
-        (IsOperAdmin(source_p) || 
-	(!IsServer(target_p) && !IsAdmin(target_p) && 
-	 !IsHandshake(target_p) && !IsConnecting(target_p))))
+      if(MyClient(source_p) && IsOper(source_p) &&
+#ifdef HIDE_SPOOF_IPS
+         !IsIPSpoof(target_p) &&
+#endif
+#ifdef HIDE_SERVERS_IPS
+         !IsServer(target_p) && 
+#endif
+         (IsOperAdmin(source_p) || (!IsServer(target_p) && !IsAdmin(target_p)
+         !IsHandshake(target_p) && !IsConnecting(target_p))))
 	{
 	  sendto_one(source_p, Lformat, me.name,
                      RPL_STATSLINKINFO, source_p->name,
