@@ -1,3 +1,7 @@
+*** 20010401_1 by ejb
+- fix for broken daemon(), caused abort upon start.
+
+
 *** 20010331_7 by db
 - one more batch of cleanups on s_debug.c
 
