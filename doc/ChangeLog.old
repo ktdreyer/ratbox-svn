@@ -1,3 +1,9 @@
+*** 20000402_3 by db
+- changed CONFIG_H_LEVEL_6 to CONFIG_H_LEVEL_7
+- updated config.h.dist to match config.h
+
+
+
 *** 20000402_2 by db
 - Pointed out by "is" with non standard p vs. s this else if is wrong
   "is" <ejb@debian.org>
