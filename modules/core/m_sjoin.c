@@ -334,7 +334,11 @@ static void ms_sjoin(struct Client *client_p,
     {
       remove_our_modes(hide_or_not, chptr, top_chptr, source_p);
     }
-
+  if(!keep_our_modes)
+     chptr->ts_winner = NO;
+  else
+     chptr->ts_winner = YES;
+     
   if (*modebuf != '\0')
     {
       /* This _SHOULD_ be to ALL_MEMBERS
