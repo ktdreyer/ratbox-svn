@@ -1,3 +1,9 @@
+*** 20010524_21 by davidt
+- test for ENC capab before trying to create an encrypted link, else
+  the remote server doesn't respond to CRYPTSERV, and we sit there for
+  a while and time out...
+
+
 *** 20010524_20 by davidt
 - add cryptlinks commands to STATIC_MODULES list
 
