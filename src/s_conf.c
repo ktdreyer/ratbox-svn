@@ -1697,8 +1697,8 @@ static void initconf(FBFILE* file)
       if ((p = strchr(line, '\n')))
         *p = '\0';
 
-      if(!p)
-        p = strchr(line, '\0');
+      if ((p = strchr(line, '\r')))
+        *p = '\0';
 
       if (!*line || line[0] == '#')
         continue;
@@ -1715,7 +1715,6 @@ static void initconf(FBFILE* file)
 	  yy_aconf = NULL;
 	  lineno = 1;
 	  yyparse(); /* wheee! */
-	  fbclose(file);
 	  return;
 	}
 
@@ -1765,7 +1764,6 @@ static void initconf(FBFILE* file)
         oldParseOneLine(quotedLine,aconf,&ccount,&ncount);
     }
 
-  fbclose(file);
   check_class();
 
   if( ConfigFileEntry.ts_warn_delta < TS_WARN_DELTA_MIN )
@@ -2530,9 +2528,10 @@ void read_conf_files(int cold)
     clear_out_old_conf();
 
   initconf(conf_fbfile_in);
+  fbclose(conf_fbfile_in);
 
   kfilename = get_conf_name(KLINE_TYPE);
-  if (irccmp(filename, kfilename) != 0)
+  if (irccmp(filename, kfilename))
     {
       if((file = openconf(kfilename)) == 0)
         {
@@ -2543,11 +2542,14 @@ void read_conf_files(int cold)
 			   kfilename);
 	}
       else
-	initconf(file);
+	{
+	  initconf(file);
+	  fbclose(file);
+	}
     }
 
   dfilename = get_conf_name(DLINE_TYPE);
-  if ((irccmp(filename, dfilename) != 0) && (irccmp(kfilename, dfilename) != 0))
+  if (irccmp(filename, dfilename) && irccmp(kfilename, dfilename)
     {
       if ((file = openconf(dfilename)) == 0)
 	{
@@ -2558,7 +2560,10 @@ void read_conf_files(int cold)
 			   dfilename);
 	}
       else
-	initconf(file);
+	{
+	  initconf(file);
+	  fbclose(file);
+	}
    }
 }
 
@@ -2569,7 +2574,6 @@ void read_conf_files(int cold)
  * output       - none
  * side effects - Clear out the old configuration
  */
-
 static void clear_out_old_conf(void)
 {
   struct ConfItem **tmp = &ConfigItemList;

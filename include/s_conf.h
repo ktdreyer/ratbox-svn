@@ -24,6 +24,15 @@
  * $Id$
  *
  * $Log$
+ * Revision 7.34  2000/12/04 05:50:05  db
+ * - fixed m_kline.c code
+ * - removed all traces of restricted I line code, thats better handled
+ *   using half ops anyway.
+ * - removed horrible '|' oper only messages in mtrie_conf.c
+ * - fixed /stats K in m_stats.c for opers
+ * - redid send_mode_list in channel.c to account for possible buffer overflow
+ *   even with 3 bans per channel..
+ *
  * Revision 7.33  2000/12/03 23:11:35  db
  * - removed REJECT_HOLD that should be replaced with IP throttling
  * - moved safe_write into fileio.c for now, changed to use fbopen() etc.
@@ -482,7 +491,6 @@ typedef struct QlineItem {
 #define CONF_FLAGS_ALLOW_AUTO_CONN      0x0400
 #define CONF_FLAGS_SPOOF_IP             0x1000
 #define CONF_FLAGS_LAZY_LINK            0x2000
-#define CONF_FLAGS_LITTLE_I_LINE        0x8000
 
 
 /* Macros for aConfItem */
@@ -498,7 +506,6 @@ typedef struct QlineItem {
 #define IsConfIdlelined(x)      ((x)->flags & CONF_FLAGS_IDLE_LINED)
 #define IsConfDoIdentd(x)       ((x)->flags & CONF_FLAGS_DO_IDENTD)
 #define IsConfDoSpoofIp(x)      ((x)->flags & CONF_FLAGS_SPOOF_IP)
-#define IsConfLittleI(x)        ((x)->flags & CONF_FLAGS_LITTLE_I_LINE)
 
 /* port definitions for Opers */
 

@@ -95,8 +95,8 @@ void WriteKline(const char *, struct Client *, struct Client *,
                        const char *, const char *, const char *, 
                        const char *);
 
-void WriteDline(const char *, struct Client *,
-                const char *, const char *, const char *);
+void WriteDline(const char *filename, struct Client *sptr,
+                const char *host, const char *reason, const char *when);
 
 
 char *_version = "20001122";
@@ -669,6 +669,8 @@ int mo_dline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   log(L_TRACE, "%s added D-Line for [%s] [%s]", 
       sptr->name, host, reason);
 
+  dconf = get_conf_name(DLINE_TYPE);
+
   sendto_one(sptr,
 	     ":%s NOTICE %s :Added D-Line [%s] to %s",
 	     me.name,
@@ -732,7 +734,7 @@ void WriteKline(const char *filename, struct Client *sptr,
 	     host,
 	     reason);
 
-  if (safe_write(sptr, filename, out, buffer) <= 0)
+  if (safe_write(sptr, filename, out, buffer) < 0)
     {
       fbclose(out);
       return;

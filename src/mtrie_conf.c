@@ -1217,29 +1217,19 @@ static void report_unsortable_klines(struct Client *sptr,char *need_host)
 {
   struct ConfItem *found_conf;
   char *host, *pass, *user, *name, *classname;
-  char *p;
   int port;
 
   for(found_conf = unsortable_list_klines;
       found_conf;found_conf=found_conf->next)
     {
-      get_printable_conf(found_conf, &name, &host, &pass, &user, &port, &classname);
+      get_printable_conf(found_conf, &name, &host, &pass, &user, &port,
+			 &classname);
 
-      /* Hide any comment following a '|' seen in the password field */
       if(match(host,need_host))
         {
-          p = (char *)NULL;
-          if(!IsAnyOper(sptr))
-            {
-              p = strchr(pass,'|');
-              if(p)
-                *p = '\0';
-            }
           sendto_one(sptr, form_str(RPL_STATSKLINE), me.name,
                      sptr->name, 'K', host,
                      name, pass);
-          if(p)
-            *p = '|';
         }
     }
 }
@@ -1257,9 +1247,8 @@ static void report_unsortable_klines(struct Client *sptr,char *need_host)
 void report_mtrie_conf_links(struct Client *sptr, int flags)
 {
   struct ConfItem *found_conf;
-  char *name, *host, *pass, *user, *classname, *p;
+  char *name, *host, *pass, *user, *classname;
   int  port;
-  char c;               /* conf char used for CONF_CLIENT only */
 
   if(trie_list)
     report_sub_mtrie(sptr,flags,trie_list);
@@ -1277,14 +1266,12 @@ void report_mtrie_conf_links(struct Client *sptr, int flags)
              IsConfDoSpoofIp(found_conf))
             continue;
 
-          get_printable_conf(found_conf, &name, &host, &pass, &user, &port, &classname);
+          get_printable_conf(found_conf, &name, &host, &pass, &user, &port,
+			     &classname);
 
-          c = 'I';
-          if(IsConfLittleI(found_conf))
-            c = 'i';
           sendto_one(sptr, form_str(RPL_STATSILINE), me.name,
                      sptr->name,
-                     c,
+                     'I',
                      name,
                      show_iline_prefix(sptr,found_conf,user),
                      host,
@@ -1295,14 +1282,12 @@ void report_mtrie_conf_links(struct Client *sptr, int flags)
       for(found_conf = wild_card_ilines;
           found_conf;found_conf=found_conf->next)
         {
-          get_printable_conf(found_conf, &name, &host, &pass, &user, &port, &classname);
+          get_printable_conf(found_conf, &name, &host, &pass, &user, &port,
+			     &classname);
 
-          c = 'I';
-          if(IsConfLittleI(found_conf))
-            c = 'i';
           sendto_one(sptr, form_str(RPL_STATSILINE), me.name,
                      sptr->name,
-                     c,
+                     'I',
                      name,
                      show_iline_prefix(sptr,found_conf,user),
                      host,
@@ -1313,17 +1298,15 @@ void report_mtrie_conf_links(struct Client *sptr, int flags)
       for(found_conf = ip_i_lines;
           found_conf;found_conf=found_conf->next)
         {
-          get_printable_conf(found_conf, &name, &host, &pass, &user, &port, &classname );
+          get_printable_conf(found_conf, &name, &host, &pass, &user, &port,
+			     &classname );
 
           if(!(found_conf->status&CONF_CLIENT))
             continue;
 
-          c = 'I';
-          if(IsConfLittleI(found_conf))
-            c = 'i';
           sendto_one(sptr, form_str(RPL_STATSILINE), me.name,
                      sptr->name,
-                     c,
+                     'I',
                      name,
                      show_iline_prefix(sptr,found_conf,name),
                      host,
@@ -1338,22 +1321,12 @@ void report_mtrie_conf_links(struct Client *sptr, int flags)
       for(found_conf = unsortable_list_klines;
           found_conf;found_conf=found_conf->next)
         {
-          get_printable_conf(found_conf, &name, &host, &pass, &user, &port, &classname);
-
-          /* Hide any comment following a '|' seen in the password field */
-          p = (char *)NULL;
-          if(!IsAnyOper(sptr))
-            {
-              p = strchr(pass,'|');
-              if(p)
-                *p = '\0';
-            }
+          get_printable_conf(found_conf, &name, &host, &pass, &user, &port,
+			     &classname);
 
           sendto_one(sptr, form_str(RPL_STATSKLINE), me.name,
                      sptr->name, 'K', host,
                      user, pass);
-          if(p)
-            *p = '|';
         }
     }
 }
@@ -1424,9 +1397,8 @@ static void report_sub_mtrie(struct Client *sptr, int flags, DOMAIN_LEVEL *dl_pt
   DOMAIN_PIECE *dp_ptr;
   struct ConfItem *aconf;
   int i;
-  char *name, *host, *pass, *user, *classname, *p;
+  char *name, *host, *pass, *user, *classname;
   int  port;
-  char c='\0';
 
   if(!dl_ptr)
     return;
@@ -1448,16 +1420,6 @@ static void report_sub_mtrie(struct Client *sptr, int flags, DOMAIN_LEVEL *dl_pt
 
                   if (aconf->status == CONF_KILL)
                     {
-                      /* Hide any comment following a '|' seen in the
-                       * password field
-                       */
-                      p = (char *)NULL;
-                      if(!IsAnyOper(sptr))
-                        {
-                          p = strchr(pass,'|');
-                          if(p)
-                            *p = '\0';
-                        }
                       sendto_one(sptr, form_str(RPL_STATSKLINE),
                                  me.name,
                                  sptr->name,
@@ -1465,8 +1427,6 @@ static void report_sub_mtrie(struct Client *sptr, int flags, DOMAIN_LEVEL *dl_pt
                                  host,
                                  user,
                                  pass);
-                      if(p)
-                        *p = '|';
                     }
                   else
                     {
@@ -1477,13 +1437,10 @@ static void report_sub_mtrie(struct Client *sptr, int flags, DOMAIN_LEVEL *dl_pt
                          && IsConfDoSpoofIp(aconf))
                         continue;
 
-                      c = 'I';
-                      if(IsConfLittleI(aconf))
-                        c = 'i';
                       sendto_one(sptr, form_str(RPL_STATSILINE),
                                  me.name,
                                  sptr->name,
-                                 c,
+                                 'I',
                                  name,
                                  show_iline_prefix(sptr,aconf,user),
                                  host,
@@ -1504,13 +1461,6 @@ static void report_sub_mtrie(struct Client *sptr, int flags, DOMAIN_LEVEL *dl_pt
 
                   if (aconf->status == CONF_KILL)
                     {
-                      p = (char *)NULL;
-                      if(!IsAnyOper(sptr))
-                        {
-                          p = strchr(pass,'|');
-                          if(p)
-                            *p = '\0';
-                        }
                       sendto_one(sptr, form_str(RPL_STATSKLINE),
                                  me.name,
                                  sptr->name,
@@ -1518,8 +1468,6 @@ static void report_sub_mtrie(struct Client *sptr, int flags, DOMAIN_LEVEL *dl_pt
                                  host,
                                  user,
                                  pass);
-                      if(p)
-                        *p = '|';
                     }
                   else
                     {
@@ -1529,13 +1477,11 @@ static void report_sub_mtrie(struct Client *sptr, int flags, DOMAIN_LEVEL *dl_pt
                       if(!(MyConnect(sptr) && IsAnyOper(sptr))
                          && IsConfDoSpoofIp(aconf))
                         continue;
-                      c = 'I';
-                      if(IsConfLittleI(aconf))
-                        c = 'i';
+
                       sendto_one(sptr, form_str(RPL_STATSILINE),
                                  me.name,
                                  sptr->name,
-                                 c,
+                                 'I',
                                  name,
                                  show_iline_prefix(sptr,aconf,user),
                                  host,

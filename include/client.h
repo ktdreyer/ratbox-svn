@@ -337,11 +337,10 @@ struct LocalUser
 #define FLAGS_CALLERID     0x20000 /* block unless caller id's */
 
 /* *sigh* overflow flags */
-#define FLAGS2_RESTRICTED   0x0001      /* restricted client */
-#define FLAGS2_PING_TIMEOUT 0x0002
-#define FLAGS2_E_LINED      0x0004      /* client is graced with E line */
-#define FLAGS2_B_LINED      0x0008      /* client is graced with B line */
-#define FLAGS2_F_LINED      0x0010      /* client is graced with F line */
+#define FLAGS2_PING_TIMEOUT 0x0001
+#define FLAGS2_E_LINED      0x0002      /* client is graced with E line */
+#define FLAGS2_B_LINED      0x0004      /* client is graced with B line */
+#define FLAGS2_F_LINED      0x0008      /* client is graced with F line */
 
 /* oper priv flags */
 #define FLAGS2_OPER_GLOBAL_KILL 0x0020  /* oper can global kill */
@@ -457,8 +456,6 @@ struct LocalUser
 /*
  * flags2 macros.
  */
-#define IsRestricted(x)         ((x)->flags2 & FLAGS2_RESTRICTED)
-#define SetRestricted(x)        ((x)->flags2 |= FLAGS2_RESTRICTED)
 #define IsElined(x)             ((x)->flags2 & FLAGS2_E_LINED)
 #define SetElined(x)            ((x)->flags2 |= FLAGS2_E_LINED)
 #define IsBlined(x)             ((x)->flags2 & FLAGS2_B_LINED)

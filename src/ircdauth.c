@@ -639,20 +639,6 @@ GreetUser(struct Client *client)
   else
     SendMessageFile(client, &ConfigFileEntry.motd);
 
-  if ( (ptr = client->localClient->confs.head) )
-    {
-      if ( (found_aconf = ptr->data) )
-	if(found_aconf->flags & CONF_FLAGS_LITTLE_I_LINE)
-	  {
-	    SetRestricted(client);
-	    sendto_one(client,"NOTICE %s :*** Notice -- You are in a restricted access mode",
-		       client->name);
-	    
-	    sendto_one(client,"NOTICE %s :*** Notice -- You can not chanop others",
-		       client->name);
-	  }
-    }
-
   send_umode(NULL, client, 0, SEND_UMODES, ubuf);
   if (!*ubuf)
     {

@@ -390,10 +390,7 @@ void do_priv_stats(struct Client *sptr, char *name, char *target,
       break;
 
     case 'K' :
-      if(target != (char *)NULL)
-        report_matching_host_klines(sptr,target);
-      else
-	report_matching_host_klines(sptr,sptr->host);
+      report_mtrie_conf_links(sptr, CONF_KILL);
       stats_spy(sptr,stat);
       break;
 

@@ -596,11 +596,7 @@ void channel_modes(struct Channel *chptr, struct Client *cptr,
  * 		- char flag flagging type of mode i.e. 'b' 'e' etc.
  * output	- NONE
  * side effects - only used to send +b and +e now, +d/+a/+I too.
- *
- * WARNING	- if MAXMODEPARAMS is increased over 3, this code
- *		  breaks due to hard coded 3 para's HOWEVER
- *		  the RFC constrains us to a max of 3 anyway, due
- *		  to max buffer size of 512 bytes.
+ *		  
  */
 static  void    send_mode_list(struct Client *cptr,
                                char *chname,
@@ -609,41 +605,55 @@ static  void    send_mode_list(struct Client *cptr,
 {
   dlink_node *lp;
   struct Ban *banptr;
-  char  *cp;
-  int   count = 0;
-  char *para[MAXMODEPARAMS];
+  int   tlen;
+  int   mlen;
+  int   cur_len;
+  char  *mp;
+  char  *pp;
+  int   count;
   char modebuf[MODEBUFLEN];
+  char parabuf[MODEBUFLEN];
 
-  cp = modebuf;
-  *cp++ = '+';
-  *cp   = '\0';
+  mp = modebuf;
+  *mp++ = '+';
+  *mp   = '\0';
 
-  para[0] = para[1] = para[2] = "";
+  pp = parabuf;
+
+  ircsprintf(buf, ":%s MODE %s ", me.name, chname);
+  mlen = strlen(buf);
+  mlen += 4;		/* account for + plus two spaces plus '\0' */
+  cur_len = mlen;
+  count = 0;
 
   for (lp = top->head; lp; lp = lp->next)
     {
       banptr = lp->data;
-      para[count++] = banptr->banstr;
-      *cp++ = flag;
-      *cp = '\0';
+      tlen = strlen(banptr);
+      tlen++;
 
-      if (count >= MAXMODEPARAMS)
+      if ((count >= MAXMODEPARAMS) || ((cur_len + tlen) > BUFSIZE))
         {
-          sendto_one(cptr, ":%s MODE %s %s %s %s %s",
-                     me.name, chname, modebuf,
-		     para[0], para[1], para[2]);
-          cp = modebuf;
-          *cp++ = '+';
-          *cp = '\0';
-	  para[0] = para[1] = para[2] = "";
+          sendto_one(cptr, "%s %s %s", buf, modebuf, parabuf);
+          mp = modebuf;
+          *mp++ = '+';
+          *mp = '\0';
+	  pp = parabuf;
+	  cur_len = mlen;
 	  count = 0;
-        }
+	}
+
+      *mp++ = flag;
+      *mp = '\0';
+      ircsprintf(pp,"%s ",banptr);
+      pp += tlen;
+      cur_len += tlen;
+      count++;
     }
 
   if(count != 0)
-    sendto_one(cptr, ":%s MODE %s %s %s %s %s",
-	       me.name, chname, modebuf,
-	       para[0], para[1], para[2]);
+    sendto_one(cptr, "%s %s %s", buf, modebuf, parabuf);
+
 }
 
 /*
@@ -989,6 +999,9 @@ void set_channel_mode(struct Client *cptr,
           /* NOT REACHED */
           break;
 
+	case 'h':
+	  break;
+
         case 'o' :
         case 'v' :
           if (MyClient(sptr))
@@ -1002,23 +1015,6 @@ void set_channel_mode(struct Client *cptr,
                   parc--;
                   parv++;
                   break;
-                }
-              else
-                {
-                  if(IsRestricted(sptr) && (whatt == MODE_ADD))
-                    {
-                      if(!errsent(SM_ERR_RESTRICTED, &errors_sent))
-                        {
-                          sendto_one(sptr,
-            ":%s NOTICE %s :*** Notice -- You are restricted and cannot chanop others",
-                                 me.name,
-                                 sptr->name);
-                        }
-                      /* eat the parameter */
-                      parc--;
-                      parv++;
-                      break;
-                    }
                 }
             }
           if (whatt == MODE_QUERY)

@@ -1020,20 +1020,6 @@ static void user_welcome(struct Client *sptr)
     }
   else  
     SendMessageFile(sptr, &ConfigFileEntry.motd);
-      
-  if( (ptr = sptr->localClient->confs.head) )
-    {
-      aconf = ptr->data;
-      if(aconf && (aconf->flags & CONF_FLAGS_LITTLE_I_LINE))
-	{
-	  SetRestricted(sptr);
-	  sendto_one(sptr,
-	     "NOTICE %s :*** Notice -- You are in a restricted access mode",
-		     sptr->name);
-	  sendto_one(sptr,"NOTICE %s :*** Notice -- You can not chanop others",
-		     sptr->name);
-	}
-    }
 }
 
 /*
