@@ -588,6 +588,23 @@ AC_ARG_ENABLE(rtsigio,
 esac
 ])
 
+dnl Enable epoll support - linux only
+AC_ARG_ENABLE(epoll,
+[  --enable-epoll               Enable Linux epoll support(experimental).
+  --disable-epoll              Disable Linux epoll support. ],
+[
+  case "$enableval" in
+  yes)
+    echo "Forcing Linux epoll to be enabled"
+    ac_cv_func_epoll="yes"
+    ;;
+  no)
+    ac_cv_func_epoll="no"
+  ;;
+esac
+])
+
+
 dnl Checks for library functions.
 AC_PROG_GCC_TRADITIONAL
 
@@ -621,6 +638,9 @@ if test "$SELECT_TYPE" != "kqueue" ; then
                 SELECT_TYPE="devpoll"
                 AC_DEFINE(HAVE_DEVPOLL)
                 AC_DEFINE(USE_DEVPOLL)
+	elif test "$ac_cv_func_epoll" = "yes" ; then
+		SELECT_TYPE="epoll"
+		AC_DEFINE(USE_EPOLL)
 	elif test "$ac_cv_func_rtsigio" = "yes" ; then
 		SELECT_TYPE="sigio"
 		AC_DEFINE(USE_SIGIO)
@@ -631,7 +651,7 @@ if test "$SELECT_TYPE" != "kqueue" ; then
                 SELECT_TYPE="select"
                 AC_DEFINE(USE_SELECT)
         else
-                echo "Eep!  Can't find kqueue, devpoll, poll, rtsigio _or_ select!"
+                echo "Eep!  Can't find kqueue, devpoll, poll, epoll, rtsigio _or_ select!"
                 echo "I'll try select and hope for the best."
                 SELECT_TYPE="select"
                 AC_DEFINE(USE_SELECT)
