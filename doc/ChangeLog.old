@@ -1,3 +1,9 @@
+*** 20010625_4 by jdc
+- src/rsa.c  -- Looks like the RSA_free() prior to the PEM_ function
+                results in a segfault.  I had a feeling about this;
+                so what the hell are the OpenSSL people talking about?
+
+
 *** 20010625_3 by jdc
 - include/rsa.h  -- Changed verify_private_key() to return int.
   modules/m_cryptlink.c  -- Updated use of verify_private_key().
