@@ -125,6 +125,10 @@ static void ms_llnick(struct Client *client_p,
     if (!target_p) /* Can't find them -- maybe they got a different nick */
       return;
   }
+
+  /* Don't try this on a remote client... */
+  if (!MyConnect(target_p))
+    return;
   
   if(find_client(nick) || exists)
   {
