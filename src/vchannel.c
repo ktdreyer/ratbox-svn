@@ -326,7 +326,7 @@ vchan_show_ids(struct Client *source_p, struct Channel *chptr)
   int tlen;
   dlink_node *ptr;
   struct Channel *chtmp;
-  done_secret = 0;
+  int done_secret = 0;
 
   ircsprintf(buf, form_str(RPL_VCHANLIST), me.name, source_p->name,
 	     chptr->chname);
