@@ -45,8 +45,10 @@
 #include <time.h>
 /* XXX - This breaks Cygwin, and APPEARS to not be needed...someone please
  * check for me though...
- * #include <arpa/nameser.h>
  */
+#ifndef __CYGWIN32__
+#include <arpa/nameser.h>
+#endif
 
 #if defined(VMS) || defined(__CYGWIN32__)
 # define INADDRSZ 4
