@@ -369,7 +369,7 @@ static time_t io_loop(time_t delay)
                  CurrentTime, lasttimeofday);
       report_error(to_send, me.name, 0);
     }
-  else if ((lasttimeofday + 1800) < CurrentTime)
+  else if ((lasttimeofday + MAX_SETBACK_TIME) < CurrentTime)
     {
       log(L_ERROR, "Clock Failure (%d)", errno);
       sendto_ops("Clock set back more than %d seconds, TS can be corrupted",
