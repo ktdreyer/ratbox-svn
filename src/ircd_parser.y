@@ -773,7 +773,7 @@ auth_redir_port:    REDIRPORT '=' NUMBER ';'
 
 auth_class:   CLASS '=' QSTRING ';'
   {
-    if(yy_aconf->name == NULL)
+    if(yy_aconf->className == NULL)
       DupString(yy_aconf->className,yylval.string);
   };
 

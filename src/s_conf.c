@@ -2804,10 +2804,8 @@ void conf_add_port(struct ConfItem *aconf)
 
 void conf_add_class_to_conf(struct ConfItem *aconf)
 {
-  if(!aconf->className)
+  if(aconf->className == NULL)
     {
-      sendto_realops_flags(FLAGS_ALL,
-			   "Warning *** Missing class field");
       DupString(aconf->className,"default");
       ClassPtr(aconf) = class0;
       return;
