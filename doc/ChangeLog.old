@@ -1,3 +1,7 @@
+*** 20010108_4 by wcampbel
+Added action=silent; to gecos blocks, like old X:...:2
+
+
 *** 20010108_3 by db
 - dlinked s_auth.c
 - in doing so found a nasty bug in s_bsd_poll.c where it would "walk"
