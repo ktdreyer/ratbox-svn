@@ -472,6 +472,28 @@ comm_settimeout(int fd, time_t timeout, PF *callback, void *cbdata)
 
 
 /*
+ * comm_setflush() - set a flush function
+ *
+ * A flush function is simply a function called if found during
+ * comm_timeouts(). Its basically a second timeout, except in this case
+ * I'm too lazy to implement multiple timeout functions! :-)
+ * its kinda nice to have it seperate, since this is designed for
+ * flush functions, and when comm_close() is implemented correctly
+ * with close functions, we _actually_ don't call comm_close() here ..
+ */
+void
+comm_setflush(int fd, time_t timeout, PF *callback, void *cbdata)
+{
+    assert(fd > -1);
+    assert(fd_table[fd].flags.open);
+
+    fd_table[fd].flush_timeout = CurrentTime + timeout;
+    fd_table[fd].flush_handler = callback;
+    fd_table[fd].flush_data = cbdata;
+}
+
+
+/*
  * comm_checktimeouts() - check the socket timeouts
  *
  * All this routine does is call the given callback/cbdata, without closing
@@ -483,12 +505,25 @@ comm_checktimeouts(void *notused)
 {
     int fd;
     PF *hdl;
+    void *data;
 
     for (fd = 0; fd <= highest_fd; fd++) {
         if (!fd_table[fd].flags.open)
             continue;
         if (fd_table[fd].flags.closing)
             continue;
+
+        /* check flush functions */
+        if (fd_table[fd].flush_handler &&
+            fd_table[fd].flush_timeout > 0 && fd_table[fd].flush_timeout 
+            < CurrentTime) {
+            hdl = fd_table[fd].flush_handler;
+            data = fd_table[fd].flush_data;
+            comm_setflush(fd, 0, NULL, NULL);
+            hdl(fd, data);
+        }
+
+        /* check timeouts */
         if (fd_table[fd].timeout_handler &&
             fd_table[fd].timeout > 0 && fd_table[fd].timeout < CurrentTime) {
             /* Call timeout handler */
