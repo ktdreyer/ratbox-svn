@@ -44,12 +44,12 @@
 #include <string.h>
 #include <assert.h>
 
-int nick_from_server(struct Client *, struct Client *, int, char **,
-		     time_t, char *);
-int set_initial_nick(struct Client *cptr, struct Client *sptr,char *nick);
-int change_nick( struct Client *cptr, struct Client *sptr, char *nick);
-int nick_equal_server( struct, Client *cptr, struct Client *sptr, char *nick);
-int clean_nick_name(char* nick);
+static int nick_from_server(struct Client *, struct Client *, int, char **,
+                            time_t, char *);
+static int set_initial_nick(struct Client *cptr, struct Client *sptr,char *nick);
+static int change_nick(struct Client *cptr, struct Client *sptr, char *nick);
+static int nick_equal_server(struct Client *cptr, struct Client *sptr, char *nick);
+static int clean_nick_name(char* nick);
 
 
 struct Message nick_msgtab = {
@@ -409,7 +409,7 @@ int ms_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
    * a nick can never be the same as a server name - Dianora
    */
 
-  if ( nick_equal_server(sptr,nick) )
+  if ( nick_equal_server(cptr, sptr, nick) )
     {
       sptr->flags |= FLAGS_KILLED;      
       return exit_client(cptr, sptr, &me, "Nick/Server collision");
@@ -691,7 +691,8 @@ int ms_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
  * side effects -
  */
 
-int nick_from_server(struct Client *cptr, struct Client *sptr, int parc,
+static int
+nick_from_server(struct Client *cptr, struct Client *sptr, int parc,
                  char *parv[], time_t newts,char *nick)
 {
   if (IsServer(sptr))
@@ -780,8 +781,9 @@ int nick_from_server(struct Client *cptr, struct Client *sptr, int parc,
  * client. 
  */
 
-static int set_initial_nick(struct Client *cptr, struct Client *sptr,
-			    char *nick)
+static int
+set_initial_nick(struct Client *cptr, struct Client *sptr,
+                 char *nick)
 {
   char buf[USERLEN + 1];
   /* Client setting NICK the first time */
@@ -845,8 +847,8 @@ static int set_initial_nick(struct Client *cptr, struct Client *sptr,
  *
  */
 
-int change_nick( struct Client *cptr, struct Client *sptr,
-			 char *nick)
+static int change_nick(struct Client *cptr, struct Client *sptr,
+                       char *nick)
 {
   /*
   ** Client just changing his/her nick. If he/she is
@@ -929,7 +931,7 @@ int change_nick( struct Client *cptr, struct Client *sptr,
  *      a change should be global, some confusion would
  *      result if only few servers allowed it...
  */
-int clean_nick_name(char* nick)
+static int clean_nick_name(char* nick)
 {
   char* ch   = nick;
   char* endp = ch + NICKLEN;
@@ -956,8 +958,8 @@ int clean_nick_name(char* nick)
  * output	- 1 if equal 0 if not
  * side effects	-
  */
-int
-nick_equal_server( struct, Client *cptr, struct Client *sptr, char *nick )
+static int
+nick_equal_server(struct Client *cptr, struct Client *sptr, char *nick )
 {
   struct Client *acptr;
 
