@@ -1,3 +1,8 @@
+*** 20001215_2 by db
+- removed obsolete BUFFERPOOL from config.h and m_info.h
+
+
+
 *** 20001215_1 by toot
 replaced some stuff that'd gone missing in slow_lusers
 
