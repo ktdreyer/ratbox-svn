@@ -1,3 +1,36 @@
+androsyn    2003/09/30 12:54:55 EDT	(20030930_0)
+
+  Modified files:
+    .                    Makefile.in configure 
+    include              balloc.h commio.h setup.h.in 
+    servlink             Makefile.in 
+    src                  epoll.c linebuf.c listener.c modules.c 
+                         packet.c s_auth.c send.c 
+  Added files:
+    .                    configure.ac 
+  Log:
+  Swiped most of configure.ac from hybrid ;).  Twiddled a bunch of files as a
+  result to deal with that.  Auto-detection exists for most i/o loops. Also
+  changed send/sendmsg/recv to write/writev/read
+  
+  Revision  Changes      Path
+  7.42      +3 -3        ircd-ratbox/Makefile.in
+  7.187     +9447 -3813  ircd-ratbox/configure
+  7.1       +1076 -0     ircd-ratbox/configure.ac (new)
+  1.23      +0 -23       ircd-ratbox/include/balloc.h
+  1.2       +0 -13       ircd-ratbox/include/commio.h
+  7.71      +239 -137    ircd-ratbox/include/setup.h.in
+  1.14      +2 -1        ircd-ratbox/servlink/Makefile.in
+  1.20      +6 -15       ircd-ratbox/src/epoll.c
+  7.118     +1 -10       ircd-ratbox/src/linebuf.c
+  7.98      +2 -2        ircd-ratbox/src/listener.c
+  7.137     +88 -95      ircd-ratbox/src/modules.c
+  7.124     +5 -5        ircd-ratbox/src/packet.c
+  7.163     +2 -2        ircd-ratbox/src/s_auth.c
+  7.265     +2 -2        ircd-ratbox/src/send.c
+
+
+
 androsyn    2003/09/29 12:08:43 EDT	(20030929_1)
 
   Modified files:
