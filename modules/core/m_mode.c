@@ -1245,6 +1245,7 @@ set_channel_mode(struct Client *client_p, struct Client *source_p,
 	static char modebuf[BUFSIZE];
 	static char parabuf[MODEBUFLEN];
 	char *mbuf;
+	char *pbuf;
 	int cur_len, mlen, paralen, paracount, arglen;
 	int i, j, flags;
 	int dir = MODE_ADD;
@@ -1303,6 +1304,7 @@ set_channel_mode(struct Client *client_p, struct Client *source_p,
 	{
 		cur_len = mlen;
 		mbuf = modebuf + mlen;
+		pbuf = parabuf;
 		parabuf[0] = '\0';
 		paracount = paralen = 0;
 		dir = MODE_QUERY;
@@ -1338,6 +1340,7 @@ set_channel_mode(struct Client *client_p, struct Client *source_p,
 				paracount = paralen = 0;
 				cur_len = mlen;
 				mbuf = modebuf + mlen;
+				pbuf = parabuf;
 				parabuf[0] = '\0';
 				dir = MODE_QUERY;
 			}
@@ -1355,7 +1358,8 @@ set_channel_mode(struct Client *client_p, struct Client *source_p,
 			if(mode_changes[i].arg != NULL)
 			{
 				paracount++;
-				paralen += ircsprintf(parabuf, "%s ", mode_changes[i].arg);
+				paralen += ircsprintf(pbuf, "%s ", mode_changes[i].arg);
+				pbuf += paralen;
 			}
 		}
 

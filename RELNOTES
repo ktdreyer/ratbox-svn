@@ -18,6 +18,12 @@ it is important you read this file before upgrading.
 - added hash statistics via stats B
 - fixed the server ip hiding mess.  HIDE_SERVERS_IPS now either hides to
   everyone or noone.
+- fix core in CIDR channel bans
+- make channel hash bigger for better results
+- fixed dead clients ending up on abort list
+- operspy log [and others] had a double \n
+- fix core in AWAY
+- gline/klinelog were inverted
 
 -- ircd-ratbox-2.0b5
 - AWAYLEN added to 005, shows maximum length of an away message.  Default is

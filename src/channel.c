@@ -988,6 +988,7 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
 	static char modebuf[BUFSIZE];
 	static char parabuf[MODEBUFLEN];
 	int i, mbl, pbl, nc, mc, preflen;
+	char *pbuf;
 	const char *arg;
 	int dir;
 	int j;
@@ -1005,6 +1006,7 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
 		nc = 0;
 		pbl = 0;
 		parabuf[0] = 0;
+		pbuf = parabuf;
 		dir = MODE_QUERY;
 
 		cap = chcap_combos[j].cap_yes;
@@ -1064,6 +1066,7 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
 
 				mbl = preflen;
 				pbl = 0;
+				pbuf = parabuf;
 				parabuf[0] = 0;
 				dir = MODE_QUERY;
 			}
@@ -1080,7 +1083,8 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
 
 			if(arg != NULL)
 			{
-				pbl += ircsprintf(parabuf, "%s ", arg);
+				pbl += ircsprintf(pbuf, "%s ", arg);
+				pbuf += pbl;
 				mc++;
 			}
 		}
