@@ -24,6 +24,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 7.47  2000/12/22 04:10:04  ejb
+ * - moved maximum_links to ircd.conf
+ *
  * Revision 7.46  2000/12/21 20:05:38  db
  * - added redirserv redirport to auth {} block
  *   I've been wanting this one a long time, finally epic supports it. yay.
@@ -632,7 +635,8 @@ typedef struct
   int         gline_time;
   int         idletime;
   int	      hide_server;
-	int         client_exit;
+  int         client_exit;
+  int         maximum_links;
 } ConfigFileEntryType;
 
 /* bleh. have to become global. */

@@ -129,6 +129,7 @@ log_level	{ return LOG_LEVEL; }
 logging         { return LOGGING; }
 logpath         { return LOGPATH; }
 max_number	{ return MAX_NUMBER; }
+maximum_links   { return MAXIMUM_LINKS; }
 message_locale	{ return MESSAGE_LOCALE; }
 name		{ return NAME; }
 network_name    { return NETWORK_NAME; }

@@ -110,6 +110,7 @@ int   class_redirport_var;
 %token  LOGPATH
 %token  LOG_LEVEL
 %token  MAX_NUMBER
+%token  MAXIMUM_LINKS
 %token  MESSAGE_LOCALE
 %token  NAME
 %token  NETWORK_NAME
@@ -1235,7 +1236,7 @@ general_item:       general_failed_oper_notice | general_show_failed_oper_id |
                     general_iauth_port | general_stats_p_notice |
                     general_glines | general_gline_time |
 		    general_idletime |
-		    general_hide_server | 
+		    general_hide_server | general_maximum_links |
                     general_message_locale | general_client_exit
 
 
@@ -1447,6 +1448,11 @@ general_idletime: IDLETIME '=' NUMBER ';'
 general_dots_in_ident: DOTS_IN_IDENT '=' NUMBER ';'
 {
         ConfigFileEntry.dots_in_ident = yylval.number;
+} ;
+
+general_maximum_links: MAXIMUM_LINKS '=' NUMBER ';'
+{
+  ConfigFileEntry.maximum_links = yylval.number;
 } ;
 
 general_hide_server: HIDESERVER '=' TYES ';'

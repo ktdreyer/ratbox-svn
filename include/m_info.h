@@ -144,7 +144,7 @@ Info MyInformation[] = {
   { "MAX_JOIN_LEAVE_COUNT", "", MAX_JOIN_LEAVE_COUNT, "Anti SpamBot Parameter" },
 
   { "MAXCHANNELSPERUSER", "", MAXCHANNELSPERUSER, "Maximum Channels per User" },
-  { "MAXIMUM_LINKS", "", MAXIMUM_LINKS, "Maximum Links for Class 0" },
+  { "MAXIMUM_LINKS_DEFAULT", "", MAXIMUM_LINKS_DEFAULT, "Default Maximum Links for Class 0" },
 
   { "MIN_JOIN_LEAVE_TIME", "", MIN_JOIN_LEAVE_TIME, "Anti SpamBot Parameter" },
 

@@ -174,7 +174,7 @@
  * a server is in class 0 (the default class if none is set).
  *
  */
-#define MAXIMUM_LINKS 1
+#define MAXIMUM_LINKS_DEFAULT 1
 
 /* CMDLINE_CONFIG - allow conf-file to be specified on command line
  * NOTE: defining CMDLINE_CONFIG and installing ircd SUID or SGID is a MAJOR

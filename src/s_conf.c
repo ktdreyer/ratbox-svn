@@ -1650,6 +1650,9 @@ static void initconf(FBFILE* file)
   if(!ConfigFileEntry.network_desc)
     ConfigFileEntry.network_desc = NETWORK_DESC_DEFAULT;
 
+  if (!ConfigFileEntry.maximum_links)
+    ConfigFileEntry.maximum_links = MAXIMUM_LINKS_DEFAULT;
+
   GlobalSetOptions.idletime = (ConfigFileEntry.idletime * 60);
   GlobalSetOptions.hide_server = ConfigFileEntry.hide_server;
 

@@ -273,7 +273,7 @@ void    initclass()
   DupString(ClassName(ClassList),"default");
   ConFreq(ClassList) = CONNECTFREQUENCY;
   PingFreq(ClassList) = PINGFREQUENCY;
-  MaxLinks(ClassList) = MAXIMUM_LINKS;
+  MaxLinks(ClassList) = ConfigFileEntry.maximum_links;
   MaxSendq(ClassList) = MAXSENDQLENGTH;
   Links(ClassList) = 0;
   ClassList->next = NULL;
