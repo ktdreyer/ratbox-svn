@@ -3196,6 +3196,18 @@ set_channel_mode(struct Client *client_p,
         break;
 
       case 'h':
+        /* If +-h, and halfops are disabled in the conf... */
+        if ( ConfigChannel.use_halfops == 0)
+        {
+          /* eat the parameter */
+          parc--;
+          parv++;
+          break;
+        }
+        /* If use_halfops is enabled (1), it'll just drop through to
+         * the below code, which handles it fine.
+         */
+
       case 'o':
       case 'v':
         if (MyClient(source_p))

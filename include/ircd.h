@@ -88,6 +88,7 @@ extern struct Client* local[];
 extern struct Counter Count;
 extern time_t         CurrentTime;
 extern time_t         nextconnect;
+extern int            default_server_capabs;
 
 extern dlink_list unknown_list;
 extern dlink_list lclient_list;

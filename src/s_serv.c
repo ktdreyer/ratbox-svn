@@ -1160,7 +1160,7 @@ int server_estab(struct Client *client_p)
        * If this is a HUB, pass on CAP_HUB
        */
 
-      send_capabilities(client_p, aconf, CAP_MASK
+      send_capabilities(client_p, aconf, default_server_capabs
              | ((aconf->flags & CONF_FLAGS_LAZY_LINK) ? CAP_LL : 0)
              | (ServerInfo.hub ? CAP_HUB : 0)
              | ((aconf->flags & CONF_FLAGS_COMPRESSED) ? CAP_ZIP_SUPPORTED : 0),
@@ -2325,7 +2325,7 @@ serv_connect_callback(int fd, int status, void *data)
      * If this is a HUB, pass on CAP_HUB
      */
 
-    send_capabilities(client_p, aconf, CAP_MASK
+    send_capabilities(client_p, aconf, default_server_capabs
              | ((aconf->flags & CONF_FLAGS_LAZY_LINK) ? CAP_LL : 0)
              | ((aconf->flags & CONF_FLAGS_COMPRESSED) ? CAP_ZIP_SUPPORTED : 0)
              | (ServerInfo.hub ? CAP_HUB : 0),
@@ -2423,7 +2423,7 @@ void cryptlink_init(struct Client *client_p,
   }
 
 
-  send_capabilities(client_p, aconf, CAP_MASK
+  send_capabilities(client_p, aconf, default_server_capabs
          | ((aconf->flags & CONF_FLAGS_LAZY_LINK) ? CAP_LL : 0)
          | ((aconf->flags & CONF_FLAGS_COMPRESSED) ? CAP_ZIP_SUPPORTED : 0)
          | (ServerInfo.hub ? CAP_HUB : 0),
