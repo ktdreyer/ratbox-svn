@@ -23,11 +23,9 @@
 
 static struct client *operbot_p;
 
-static int u_operbot_objoin(struct client *, struct lconn *, const char **, int);
-static int u_operbot_obpart(struct client *, struct lconn *, const char **, int);
+static int o_operbot_objoin(struct client *, struct lconn *, const char **, int);
+static int o_operbot_obpart(struct client *, struct lconn *, const char **, int);
 
-static int s_operbot_objoin(struct client *, struct lconn *, const char **, int);
-static int s_operbot_obpart(struct client *, struct lconn *, const char **, int);
 static int s_operbot_invite(struct client *, struct lconn *, const char **, int);
 static int s_operbot_op(struct client *, struct lconn *, const char **, int);
 
@@ -35,16 +33,16 @@ static int h_operbot_sjoin_lowerts(void *chptr, void *unused);
 
 static struct service_command operbot_command[] =
 {
-	{ "OBJOIN",	&s_operbot_objoin,	1, NULL, 1, 0L, 0, 0, CONF_OPER_OPERBOT, 0 },
-	{ "OBPART",	&s_operbot_obpart,	1, NULL, 1, 0L, 0, 0, CONF_OPER_OPERBOT, 0 },
+	{ "OBJOIN",	&o_operbot_objoin,	1, NULL, 1, 0L, 0, 0, CONF_OPER_OPERBOT, 0 },
+	{ "OBPART",	&o_operbot_obpart,	1, NULL, 1, 0L, 0, 0, CONF_OPER_OPERBOT, 0 },
 	{ "INVITE",	&s_operbot_invite,	1, NULL, 1, 0L, 0, 1, 0, 0 },
 	{ "OP",		&s_operbot_op,		0, NULL, 1, 0L, 0, 1, 0, 0 }
 };
 
 static struct ucommand_handler operbot_ucommand[] =
 {
-	{ "objoin",	u_operbot_objoin,	CONF_OPER_OPERBOT, 1, 1, NULL },
-	{ "obpart",	u_operbot_obpart,	CONF_OPER_OPERBOT, 1, 1, NULL },
+	{ "objoin",	o_operbot_objoin,	CONF_OPER_OPERBOT, 1, 1, NULL },
+	{ "obpart",	o_operbot_obpart,	CONF_OPER_OPERBOT, 1, 1, NULL },
 	{ "\0",		NULL,			0, 0, 0, NULL }
 };
 
@@ -88,9 +86,8 @@ h_operbot_sjoin_lowerts(void *v_chptr, void *unused)
 	return 0;
 }
 
-
 static int
-u_operbot_objoin(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+o_operbot_objoin(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct channel *chptr;
 	time_t tsinfo;
@@ -98,11 +95,13 @@ u_operbot_objoin(struct client *client_p, struct lconn *conn_p, const char *parv
 	if((chptr = find_channel(parv[0])) && 
 	   dlink_find(operbot_p, &chptr->services))
 	{
-		sendto_one(conn_p, "%s already in %s", operbot_p->name, parv[0]);
+		service_send(operbot_p, client_p, conn_p,
+				"%s already in %s", operbot_p->name, chptr->name);
 		return 0;
 	}
 
-	slog(operbot_p, 1, "%s - OBJOIN %s", conn_p->name, parv[0]);
+	slog(operbot_p, 1, "%s - OBJOIN %s", 
+		OPER_NAME(client_p, conn_p), parv[0]);
 
 	tsinfo = chptr != NULL ? chptr->tsinfo : CURRENT_TIME;
 
@@ -110,74 +109,31 @@ u_operbot_objoin(struct client *client_p, struct lconn *conn_p, const char *parv
 			parv[0], tsinfo, conn_p->name);
 
 	join_service(operbot_p, parv[0], tsinfo, NULL);
-	sendto_one(conn_p, "%s joined to %s", operbot_p->name, parv[0]);
-	return 0;
-}
 
-static int
-u_operbot_obpart(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
-{
-	if(part_service(operbot_p, parv[0]))
-	{
-		slog(operbot_p, 1, "%s - OBPART %s", conn_p->name, parv[0]);
-
-		loc_sqlite_exec(NULL, "DELETE FROM operbot WHERE chname = %Q",
-				parv[0]);
-		sendto_one(conn_p, "%s removed from %s", operbot_p->name, parv[0]);
-	}
-	else
-		sendto_one(conn_p, "%s not in channel %s", operbot_p->name, parv[0]);
-
-	return 0;
-}
-
-static int
-s_operbot_objoin(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
-{
-	struct channel *chptr;
-	time_t tsinfo;
-
-	if((chptr = find_channel(parv[0])) && 
-	   dlink_find(operbot_p, &chptr->services))
-	{
-		service_error(operbot_p, client_p, 
-				"%s already in %s", operbot_p->name, parv[0]);
-		return 1;
-	}
-
-	slog(operbot_p, 1, "%s - OBJOIN %s",
-		client_p->user->oper->name, parv[0]);
-
-	tsinfo = chptr != NULL ? chptr->tsinfo : CURRENT_TIME;
-
-	loc_sqlite_exec(NULL, "INSERT INTO operbot VALUES(%Q, %lu, %Q)",
-			parv[0], tsinfo, client_p->user->oper->name);
-			
-	join_service(operbot_p, parv[0], tsinfo, NULL);
-	service_error(operbot_p, client_p, 
+	service_send(operbot_p, client_p, conn_p,
 			"%s joined to %s", operbot_p->name, parv[0]);
-	return 1;
+	return 0;
 }
 
 static int
-s_operbot_obpart(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+o_operbot_obpart(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	if(part_service(operbot_p, parv[0]))
 	{
-		slog(operbot_p, 1, "%s - OBPART %s",
-			client_p->user->oper->name, parv[0]);
+		slog(operbot_p, 1, "%s - OBPART %s", 
+			OPER_NAME(client_p, conn_p), parv[0]);
 
 		loc_sqlite_exec(NULL, "DELETE FROM operbot WHERE chname = %Q",
 				parv[0]);
-		service_error(operbot_p, client_p, 
+		service_send(operbot_p, client_p, conn_p,
 				"%s removed from %s", operbot_p->name, parv[0]);
 	}
 	else
-		service_error(operbot_p, client_p, 
+		service_send(operbot_p, client_p, conn_p,
 				"%s not in channel %s", operbot_p->name, parv[0]);
-	return 1;
-}
 
+	return 0;
+}
 
 static int
 s_operbot_invite(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
