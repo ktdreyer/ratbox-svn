@@ -444,7 +444,7 @@ void error_exit_client(struct Client* client_p, int error)
 				get_client_name(client_p, MASK_IP));
 
 	  ilog(L_NOTICE, "Server %s closed the connection",
-		get_client_name(client_p, SHOW_IP));
+		log_client_name(client_p, SHOW_IP));
         }
       else
 	{
@@ -454,6 +454,8 @@ void error_exit_client(struct Client* client_p, int error)
 	  report_error(L_OPER, "Lost connection to %s: %d",
 	               get_client_name(client_p, MASK_IP),
 		       current_error);
+          ilog(L_NOTICE, "Lost connection to %s: %d",
+               log_client_name(client_p, SHOW_IP), current_error);
 
 	}
 

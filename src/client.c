@@ -285,7 +285,6 @@ check_pings_list(dlink_list *list)
 			   "Idle time limit exceeded for %s - temp k-lining",
 				   get_client_name(client_p, HIDE_IP));
 
-
 	      (void)exit_client(client_p, client_p, &me, aconf->passwd);
               continue;
             }
@@ -315,7 +314,7 @@ check_pings_list(dlink_list *list)
                                        "No response from %s, closing link",
                                        get_client_name(client_p, MASK_IP));
                   ilog(L_NOTICE, "No response from %s, closing link",
-                      get_client_name(client_p, HIDE_IP));
+                      log_client_name(client_p, HIDE_IP));
                 }
 	      (void)ircsprintf(scratch,
 			       "Ping timeout: %d seconds",
@@ -738,6 +737,46 @@ get_client_name(struct Client* client, int showip)
   return client->name;
 }
 
+/* log_client_name()
+ *
+ * This version is the same as get_client_name, but doesnt contain the
+ * code that will hide IPs always.  This should be used for logfiles.
+ */
+const char *
+log_client_name(struct Client *target_p, int showip)
+{
+  static char nbuf[HOSTLEN * 2 + USERLEN + 5];
+
+  if(target_p == NULL)
+    return NULL;
+
+  if(MyConnect(target_p))
+  {
+    if(irccmp(target_p->name, target_p->host) == 0)
+      return client_p->name;
+
+    switch(showip)
+    {
+      case SHOW_IP:
+        ircsprintf(nbuf, "%s[%s@%s]", target_p->name, target_p->username,
+                   target_p->localClient->sockhost);
+        break;
+
+      case MASK_IP:
+        ircsprintf(nbuf, "%s[%s@255.255.255.255]",
+                   target_p->name, target_p->username);
+
+      default:
+        ircsprintf(nbuf, "%s[%s@%s]", target_p->name, target_p->username,
+                   target_p->host);
+    }
+
+    return nbuf;
+  }
+
+  return client_p->name;
+}
+                  
 static void
 free_exited_clients(void *unused)
 {

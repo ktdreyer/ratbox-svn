@@ -159,11 +159,22 @@ _send_linebuf(struct Client *to, buf_head_t *linebuf)
   if (linebuf_len(&to->localClient->buf_sendq) > get_sendq(to))
   {
     if (IsServer(to))
-      sendto_realops_flags(UMODE_ALL, L_ALL,
+    {
+      sendto_realops_flags(UMODE_ALL, L_ADMIN,
                            "Max SendQ limit exceeded for %s: %u > %lu",
                            get_client_name(to, HIDE_IP),
                            linebuf_len(&to->localClient->buf_sendq),
                            get_sendq(to));
+      sendto_realops_flags(UMODE_ALL, L_ALL,
+                           "Max SendQ limit exceeded for %s: %u > %lu",
+                           get_client_name(to, MASK_IP),
+                           linebuf_len(&to->localClient->buf_sendq),
+                           get_sendq(to));
+      ilog(L_NOTICE, "Max SendQ limit exceeded for %s: %u > %lu",
+           log_client_name(to, SHOW_IP), 
+           linebuf_len(&to->localClient->buf_sendq), get_sendq(to));
+    }
+
     if (IsClient(to))
       to->flags |= FLAGS_SENDQEX;
     dead_link(to);

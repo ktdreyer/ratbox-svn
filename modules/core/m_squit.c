@@ -105,7 +105,7 @@ static void mo_squit(struct Client *client_p, struct Client *source_p,
 			       found_squit->target_p->name,
 			       get_client_name(source_p, HIDE_IP), comment);
           ilog(L_NOTICE, "Received SQUIT %s from %s (%s)",
-	       found_squit->target_p->name, get_client_name(source_p, HIDE_IP),
+	       found_squit->target_p->name, log_client_name(source_p, HIDE_IP),
 	       comment);
 	}
       exit_client(client_p, found_squit->target_p, source_p, comment);

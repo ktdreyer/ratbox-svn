@@ -121,9 +121,7 @@ static void ms_svinfo(struct Client *client_p, struct Client *source_p,
            (int) deltat);
       ilog(L_NOTICE,
           "Link %s dropped, excessive TS delta (my TS=%lu, their TS=%lu, delta=%d)",
-          get_client_name(source_p, SHOW_IP),
-          (unsigned long) CurrentTime,
-          (unsigned long) theirtime,
+          log_client_name(source_p, SHOW_IP), CurrentTime, theirtime,
           (int) deltat);
       exit_client(source_p, source_p, source_p, "Excessive TS delta");
       return;
@@ -133,9 +131,6 @@ static void ms_svinfo(struct Client *client_p, struct Client *source_p,
     { 
       sendto_realops_flags(UMODE_ALL, L_ALL,
                 "Link %s notable TS delta (my TS=%lu, their TS=%lu, delta=%d)",
-                source_p->name,
-                (unsigned long) CurrentTime,
-                (unsigned long) theirtime,
-                (int) deltat);
+                source_p->name, CurrentTime, theirtime, (int)deltat);
     }
 }

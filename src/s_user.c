@@ -1252,8 +1252,7 @@ check_X_line(struct Client *client_p, struct Client *source_p)
 	    {
 	      sendto_realops_flags(UMODE_REJ, L_ALL,
 				   "X-line Rejecting [%s] [%s], user %s",
-				   source_p->info,
-				   reason,
+				   source_p->info, reason,
 				   get_client_name(client_p, HIDE_IP));
 	    }
 	  ServerStats->is_ref++;      
@@ -1263,8 +1262,7 @@ check_X_line(struct Client *client_p, struct Client *source_p)
       else
 	sendto_realops_flags(UMODE_REJ, L_ALL,
 			     "X-line Warning [%s] [%s], user %s",
-			     source_p->info,
-			     reason,
+			     source_p->info, reason,
 			     get_client_name(client_p, HIDE_IP));
     }
 

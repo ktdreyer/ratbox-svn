@@ -73,14 +73,9 @@ static void mo_close(struct Client *client_p, struct Client *source_p,
     {
       target_p = ptr->data;
 
-  /* Which list would connecting servers be found in? serv_list ? */
-#if 0
-      if (!IsUnknown(target_p) && !IsConnecting(target_p) &&
-          !IsHandshake(target_p) && !IsDoingKauth(target_p))
-        continue;
-#endif
       sendto_one(source_p, form_str(RPL_CLOSING), me.name, parv[0],
                  get_client_name(target_p, SHOW_IP), target_p->status);
+
       (void)exit_client(target_p, target_p, target_p, "Oper Closing");
       closed++;
     }

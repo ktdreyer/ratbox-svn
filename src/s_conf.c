@@ -444,7 +444,7 @@ check_client(struct Client *client_p, struct Client *source_p, char *username)
 			   get_client_name(source_p, SHOW_IP));
 			   
       ilog(L_INFO,"Too many local connections from %s",
-           get_client_name(source_p, SHOW_IP));
+           log_client_name(source_p, SHOW_IP));
       
       ServerStats->is_ref++;
       exit_client(client_p, source_p, &me, "Too many host connections (local)");
@@ -455,7 +455,7 @@ check_client(struct Client *client_p, struct Client *source_p, char *username)
 		           "Too many global connections for %s",
 			   get_client_name(source_p, SHOW_IP));
       ilog(L_INFO, "Too many global connections from %s",
-           get_client_name(source_p, SHOW_IP));
+           log_client_name(source_p, SHOW_IP));
 
       ServerStats->is_ref++;
       exit_client(client_p, source_p, &me,
@@ -467,7 +467,7 @@ check_client(struct Client *client_p, struct Client *source_p, char *username)
 		           "Too many user connections for %s",
 			   get_client_name(source_p, SHOW_IP));
       ilog(L_INFO, "Too many user connections from %s",
-           get_client_name(source_p, SHOW_IP));
+           log_client_name(source_p, SHOW_IP));
 
       ServerStats->is_ref++;
       exit_client(client_p, source_p, &me,
@@ -481,7 +481,7 @@ check_client(struct Client *client_p, struct Client *source_p, char *username)
 			   source_p->localClient->sockhost);
 			   
       ilog(L_INFO,"Too many connections from %s.",
-	   get_client_name(source_p, SHOW_IP));
+	   log_client_name(source_p, SHOW_IP));
       
       ServerStats->is_ref++;
       (void)exit_client(client_p, source_p, &me, 
@@ -497,14 +497,12 @@ check_client(struct Client *client_p, struct Client *source_p, char *username)
       inetntop(source_p->localClient->aftype, &IN_ADDR(source_p->localClient->ip), ipaddr, HOSTIPLEN);
       sendto_realops_flags(UMODE_UNAUTH, L_ALL,
 			   "Unauthorised client connection from %s [%s] on [%s/%u].",
-			   get_client_name(source_p, SHOW_IP),
-			   ipaddr,
+			   get_client_name(source_p, SHOW_IP), ipaddr,
 			   source_p->localClient->listener->name,
 			   source_p->localClient->listener->port);
 			   
-      ilog(L_INFO,
-	  "Unauthorised client connection from %s on [%s/%u].",
-	  get_client_name(source_p, SHOW_IP),
+      ilog(L_INFO, "Unauthorised client connection from %s on [%s/%u].",
+	  log_client_name(source_p, SHOW_IP),
 	  source_p->localClient->listener->name,
 	  source_p->localClient->listener->port);
 	  
