@@ -1,3 +1,11 @@
+*** 20010718_1 by leeh
+- *********** blat ************
+  rewrote m_nick.c to include m_client.c, seperated out all the collide
+  stuff and removed god knows how much bloat
+
+  I now need to gocrawl into bed.
+
+
 *** 20010717_9 by lusky
 - revved patchlevel to b7
 
