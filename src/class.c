@@ -43,7 +43,6 @@ struct Class *make_class()
   struct Class        *tmp;
 
   tmp = (struct Class *)MyMalloc(sizeof(struct Class));
-  memset((void*)tmp, 0, sizeof(struct Class));
   return tmp;
 }
 

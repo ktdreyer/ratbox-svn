@@ -53,9 +53,7 @@
 /* Number of struct Client structures to preallocate at a time
  * for Efnet 1024 is reasonable 
  * for smaller nets who knows?
- */
-
-/* This means you call MyMalloc 30 some odd times,
+ * This means you call MyMalloc 30 some odd times,
  * rather than 30k times 
  */
 
@@ -139,7 +137,6 @@ struct Server *make_server(struct Client *cptr)
   if (!serv)
     {
       serv = (struct Server *)MyMalloc(sizeof(struct Server));
-      memset((void *)serv, 0, sizeof(struct Server));
 
       /* The commented out lines before are
        * for documentation purposes only

@@ -54,8 +54,6 @@ struct Listener* make_listener(int port, struct in_addr addr)
     (struct Listener*) MyMalloc(sizeof(struct Listener));
   assert(0 != listener);
 
-  memset(listener, 0, sizeof(struct Listener));
-
   listener->name        = me.name;
   listener->fd          = -1;
   listener->port        = port;

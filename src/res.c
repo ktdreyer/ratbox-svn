@@ -1197,7 +1197,6 @@ static struct cache* make_cache(ResRQ* request)
   /*
    */ 
   cp = (struct cache*) MyMalloc(sizeof(struct cache));
-  memset(cp, 0, sizeof(struct cache));
   dup_hostent(&cp->he, hp);
   cp->reply.hp = &cp->he.h;
 

@@ -183,7 +183,6 @@ struct ConfItem* make_conf()
   struct ConfItem* aconf;
 
   aconf = (struct ConfItem*) MyMalloc(sizeof(struct ConfItem));
-  memset(aconf, 0, sizeof(struct ConfItem));
   aconf->status       = CONF_ILLEGAL;
   aconf->ipnum.s_addr = INADDR_NONE;
   return (aconf);
