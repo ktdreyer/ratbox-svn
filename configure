@@ -3515,6 +3515,12 @@ EOF
 #define USE_DEVPOLL 1
 EOF
 
+	elif test "$ac_cv_func_rtsigio" = "yes" ; then
+		SELECT_TYPE="sigio"
+		cat >> confdefs.h <<\EOF
+#define USE_SIGIO 1
+EOF
+
 	elif test "$ac_cv_func_poll" = "yes" ; then
                 SELECT_TYPE="poll"
                 cat >> confdefs.h <<\EOF
@@ -3525,12 +3531,6 @@ EOF
                 SELECT_TYPE="select"
                 cat >> confdefs.h <<\EOF
 #define USE_SELECT 1
-EOF
-
-	elif test "$ac_cv_func_rtsigio" = "yes" ; then
-		SELECT_TYPE="sigio"
-		cat >> confdefs.h <<\EOF
-#define USE_SIGIO 1
 EOF
 
         else
