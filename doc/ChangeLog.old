@@ -1,3 +1,9 @@
+*** 20010615_4 by a1kmm
+- 1 microsecond != 1 millisecond. Changed the delay stuff so ircd doesn't hang
+  for too long.
+- Added some connect pacing(for 7.1). It is all wrapped in #ifdef for now.
+
+
 *** 20010615_3 by toot
 /names should say "#channel End of /NAMES list.", even when the channel doesn't exist
 
