@@ -174,12 +174,14 @@ static void m_kick(struct Client *client_p,
   if (IsMember(who, chptr))
     {
       /* half ops cannot kick full chanops */
+#ifdef HALFOPS
       if (is_half_op(chptr,source_p) && is_any_op(chptr,who))
 	{
           sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
                      me.name, parv[0], name);
 	  return;
 	}
+#endif
       /* jdc
        * - In the case of a server kicking a user (i.e. CLEARCHAN),
        *   the kick should show up as coming from the server which did
@@ -192,6 +194,7 @@ static void m_kick(struct Client *client_p,
         sendto_channel_local(ALL_MEMBERS, chptr, ":%s KICK %s %s :%s",
           source_p->name, name, who->name, comment);
       }
+#ifdef ANONOPS
       else if(chptr->mode.mode & MODE_HIDEOPS)
 	{
 	  /* jdc -- Non-chanops get kicked from me.name, not
@@ -211,6 +214,7 @@ static void m_kick(struct Client *client_p,
 			       who->name, comment);
 	}
       else
+#endif
 	{
 	  sendto_channel_local(ALL_MEMBERS, chptr,
 			       ":%s!%s@%s KICK %s %s :%s",

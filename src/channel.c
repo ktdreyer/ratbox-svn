@@ -123,11 +123,13 @@ add_user_to_channel(struct Channel *chptr, struct Client *who, int flags)
           dlinkAdd(who, lptr, &chptr->locchanops);
         break;
 
+#ifdef HALFOPS
       case MODE_HALFOP:
         dlinkAdd(who, ptr, &chptr->halfops);
         if (MyClient(who))
           dlinkAdd(who, lptr, &chptr->lochalfops);
         break;
+#endif
 
       case MODE_VOICE:
         dlinkAdd(who, ptr, &chptr->voiced);
@@ -199,8 +201,10 @@ remove_user_from_channel(struct Channel *chptr, struct Client *who)
 #endif
   else if ((ptr = find_user_link(&chptr->voiced, who)))
     dlinkDelete(ptr, &chptr->voiced);
+#ifdef HALFOPS
   else if ((ptr = find_user_link(&chptr->halfops, who)))
     dlinkDelete(ptr, &chptr->halfops);
+#endif
   else
     return;                     /* oops */
 
@@ -220,8 +224,10 @@ remove_user_from_channel(struct Channel *chptr, struct Client *who)
       dlinkDelete(ptr, &chptr->locchanops);
     else if ((ptr = find_user_link(&chptr->locvoiced, who)))
       dlinkDelete(ptr, &chptr->locvoiced);
+#ifdef HALFOPS
     else if ((ptr = find_user_link(&chptr->lochalfops, who)))
       dlinkDelete(ptr, &chptr->lochalfops);
+#endif
 #ifdef REQUIRE_OANDV
     else if ((ptr = find_user_link(&chptr->locchanops_voiced, who)))
       dlinkDelete(ptr, &chptr->locchanops_voiced);
@@ -347,6 +353,7 @@ send_channel_modes(struct Client *client_p, struct Channel *chptr)
   send_members(client_p, modebuf, parabuf, chptr, &chptr->chanops_voiced, "@+");
 #endif
 
+#ifdef HALFOPS
   if (IsCapable(client_p, CAP_HOPS))
   {
     send_members(client_p, modebuf, parabuf, chptr, &chptr->halfops, "%");
@@ -356,6 +363,7 @@ send_channel_modes(struct Client *client_p, struct Channel *chptr)
     /* Ok, halfops can still generate a kick, they'll just looked opped */
     send_members(client_p, modebuf, parabuf, chptr, &chptr->halfops, "@");
   }
+#endif
 
   send_members(client_p, modebuf, parabuf, chptr, &chptr->voiced, "+");
   send_members(client_p, modebuf, parabuf, chptr, &chptr->peons, "");
@@ -621,7 +629,9 @@ destroy_channel(struct Channel *chptr)
 #endif
   delete_members(chptr, &chptr->voiced);
   delete_members(chptr, &chptr->peons);
+#ifdef HALFOPS
   delete_members(chptr, &chptr->halfops);
+#endif
 
   delete_members(chptr, &chptr->locchanops);
 #ifdef REQUIRE_OANDV
@@ -629,7 +639,9 @@ destroy_channel(struct Channel *chptr)
 #endif
   delete_members(chptr, &chptr->locvoiced);
   delete_members(chptr, &chptr->locpeons);
+#ifdef HALFOPS
   delete_members(chptr, &chptr->lochalfops);
+#endif
 
   while ((ptr = chptr->invites.head))
     del_invite(chptr, ptr->data);
@@ -755,7 +767,11 @@ channel_member_names(struct Client *source_p,
     t = lbuf + cur_len;
     set_channel_mode_flags(show_flags, chptr, source_p);
     members_ptr[0] = chptr->chanops.head;
+#ifdef HALFOPS
     members_ptr[1] = chptr->halfops.head;
+#else
+    members_ptr[1] = NULL;
+#endif
     members_ptr[2] = chptr->voiced.head;
     members_ptr[3] = chptr->peons.head;
 #ifdef REQUIRE_OANDV
@@ -925,8 +941,10 @@ channel_chanop_or_voice(struct Channel *chptr, struct Client *target_p)
 {
   if (find_user_link(&chptr->chanops, target_p))
     return ("@");
+#ifdef HALFOPS
   else if (find_user_link(&chptr->halfops, target_p))
     return ("%");
+#endif
   else if (find_user_link(&chptr->voiced, target_p))
     return ("+");
 #ifdef REQUIRE_OANDV
@@ -1108,8 +1126,10 @@ is_any_op(struct Channel *chptr, struct Client *who)
   {
     if (find_user_link(&chptr->chanops, who) != NULL)
       return 1;
+#ifdef HALFOPS
     if (find_user_link(&chptr->halfops, who) != NULL)
       return 1;
+#endif
 #ifdef REQUIRE_OANDV
     if (find_user_link(&chptr->chanops_voiced, who) != NULL)
       return 1;
@@ -1126,6 +1146,7 @@ is_any_op(struct Channel *chptr, struct Client *who)
  * output       - yes if anyop no if not
  * side effects -
  */
+#ifdef HALFOPS
 int
 is_half_op(struct Channel *chptr, struct Client *who)
 {
@@ -1137,6 +1158,7 @@ is_half_op(struct Channel *chptr, struct Client *who)
 
   return 0;
 }
+#endif
 
 /*
  * is_voiced

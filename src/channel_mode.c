@@ -132,14 +132,18 @@ static int mask_pos;
 
 static struct ChModeChange mode_changes_plus[BUFSIZE];
 static struct ChModeChange mode_changes_minus[BUFSIZE];
-static struct ChModeBounce mode_bounces[BUFSIZE];
 
+#ifdef HALFOPS
+static struct ChModeBounce mode_bounces[BUFSIZE];
+#endif
 #ifdef ANONOPS
 static struct ChResyncOp resync_ops[BUFSIZE];
 #endif
 
-static int mode_count_plus, mode_count_minus, bounce_count;
-
+static int mode_count_plus, mode_count_minus;
+#ifdef HALFOPS
+static int bounce_count;
+#endif
 #ifdef ANONOPS
 static int resync_count;
 #endif
@@ -2501,11 +2505,19 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
                   struct Channel *chptr, char *chname)
 {
   int pbl, mbl, nc, mc;
-  int i, st, dir = MODE_QUERY;
+  int i, st;
+#ifdef HALFOPS
+  int dir = MODE_QUERY;
+#endif
 
   /* bail out if we have nothing to do... */
-  if (!(mode_count_plus || mode_count_minus || bounce_count))
+  if (!(mode_count_plus || mode_count_minus))
     return;
+
+#ifdef HALFOPS
+  if(!bounce_count)
+    return;
+#endif
 
 #ifdef ANONOPS
   if(!resync_count)
@@ -2773,6 +2785,7 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
   }
 #endif
 
+#ifdef HALFOPS
   /* Bounce modes to client_p */
   nc = 0;
   if (bounce_count)
@@ -2826,6 +2839,7 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
 
   if (nc != 0)
     sendto_one(client_p, "%s %s", modebuf, parabuf);
+#endif
 
   /* Now send to servers... */
   for (i = 0; i < NCHCAP_COMBOS; i++)
@@ -2859,7 +2873,9 @@ set_channel_mode(struct Client *client_p, struct Client *source_p,
   mask_pos = 0;
   mode_count_plus = 0;
   mode_count_minus = 0;
+#ifdef HALFOPS
   bounce_count = 0;
+#endif
 #ifdef ANONOPS
   resync_count = 0;
 #endif
@@ -2924,7 +2940,11 @@ set_channel_mode_flags(char flags_ptr[NUMLISTS][2], struct Channel *chptr,
 #endif
   {
     flags_ptr[0][0] = '@';
+#ifdef HALFOPS
     flags_ptr[1][0] = '%';
+#else
+    flags_ptr[1][0] = '\0';
+#endif
     flags_ptr[2][0] = '+';
     flags_ptr[3][0] = '\0';
 #ifdef REQUIRE_OANDV

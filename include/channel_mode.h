@@ -134,14 +134,16 @@ struct ChModeChange
  int caps, nocaps, mems;
 };
 
+#ifdef HALFOPS
 struct ChModeBounce
 {
   char letter;
   char *arg, *id;
   int dir;
 };
+#endif
 
-#ifndef ANONOPS
+#ifdef ANONOPS
 struct ChResyncOp
 {
  struct Client *client_p;

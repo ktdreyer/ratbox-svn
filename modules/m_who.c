@@ -72,8 +72,13 @@ static void do_who_list(struct Client *source_p, struct Channel *chptr,
 #ifdef REQUIRE_OANDV
                         dlink_list *chanops_voiced_list,
 #endif
-                        dlink_list *halfops_list, dlink_list *voiced_list,
-                        char *chanop_flag, char *halfop_flag, char *voiced_flag,
+#ifdef HALFOPS
+                        dlink_list *halfops_list, 
+#endif
+			dlink_list *voiced_list,
+                        char *chanop_flag,
+			char *halfop_flag,
+			char *voiced_flag,
                         char *chname);
 
 static void who_global(struct Client *source_p, char *mask, int server_oper);
@@ -233,8 +238,10 @@ static void m_who(struct Client *client_p,
 
 	  if (is_chan_op(chptr,target_p))
 	    do_who(source_p, target_p, chname, flags[0]);
+#ifdef HALFOPS
 	  else if(is_half_op(chptr,target_p))
 	    do_who(source_p, target_p, chname, flags[1]);
+#endif
 	  else if(is_voiced(chptr,target_p))
 	    do_who(source_p, target_p, chname, flags[2]);
 	  else
@@ -335,7 +342,9 @@ static void who_global(struct Client *source_p,char *mask, int server_oper)
 #ifdef REQUIRE_OANDV
      who_common_channel(source_p,chptr->chanops_voiced,mask,server_oper,&maxmatches);
 #endif
+#ifdef HALFOPS
      who_common_channel(source_p,chptr->halfops,mask,server_oper,&maxmatches);
+#endif
      who_common_channel(source_p,chptr->voiced,mask,server_oper,&maxmatches);
      who_common_channel(source_p,chptr->peons,mask,server_oper,&maxmatches);
   }
@@ -403,7 +412,9 @@ static void do_who_on_channel(struct Client *source_p,
 #ifdef REQUIRE_OANDV
               &chptr->chanops_voiced,
 #endif
+#ifdef HALFOPS
               &chptr->halfops,
+#endif
               &chptr->voiced,
               flags[0],
               flags[1],
@@ -416,29 +427,37 @@ static void do_who_list(struct Client *source_p, struct Channel *chptr,
 			dlink_list *peons_list,
                         dlink_list *chanops_list,
 #ifdef REQUIRE_OANDV
-            dlink_list *chanops_voiced_list,
+                        dlink_list *chanops_voiced_list,
 #endif
+#ifdef HALFOPS
 			dlink_list *halfops_list,
+#endif
 			dlink_list *voiced_list,
 			char *chanop_flag,
 			char *halfop_flag,
 			char *voiced_flag,
 			char *chname)
 {
+  struct Client *target_p;
+
+#ifdef ANONOPS
   dlink_node *chanops_ptr;
   dlink_node *peons_ptr;
-  dlink_node *halfops_ptr;
   dlink_node *voiced_ptr;
 #ifdef REQUIRE_OANDV
   dlink_node *chanops_voiced_ptr;
 #endif
-  struct Client *target_p;
+#ifdef HALFOPS
+  dlink_node *halfops_ptr;
+#endif
   int done=0;
 
   peons_ptr   = peons_list->head;
   chanops_ptr = chanops_list->head;
-  halfops_ptr = halfops_list->head;
   voiced_ptr  = voiced_list->head;
+#ifdef HALFOPS
+  halfops_ptr = halfops_list->head;
+#endif
 #ifdef REQUIRE_OANDV
   chanops_voiced_ptr = chanops_voiced_list->head;
 #endif
@@ -465,6 +484,7 @@ static void do_who_list(struct Client *source_p, struct Channel *chptr,
       else
         done++;
 
+#ifdef HALFOPS
       if(halfops_ptr != NULL)
         {
           target_p = halfops_ptr->data;
@@ -473,6 +493,9 @@ static void do_who_list(struct Client *source_p, struct Channel *chptr,
         }
       else
         done++;
+#else
+      done++;
+#endif
 
       if(voiced_ptr != NULL)
         {
@@ -497,6 +520,35 @@ static void do_who_list(struct Client *source_p, struct Channel *chptr,
         done++;
 #endif
     }
+#else /* ANONOPS */
+    dlink_node *ptr;
+
+    for(ptr = peons_list->head; ptr; ptr = ptr->next)
+    {
+      target_p = ptr->data;
+      do_who(source_p, target_p, chname, "");
+    }
+
+    for(ptr = voiced_list->head; ptr; ptr = ptr->next)
+    {
+      target_p = ptr->data;
+      do_who(source_p, target_p, chname, voiced_flag);
+    }
+
+#ifdef REQUIRE_OANDV
+    for(ptr = chanops_voiced_list->head; ptr; ptr = ptr->next)
+    {
+      target_p = ptr->data;
+      do_who(source_p, target_p, chname, chanop_flag);
+    }
+#endif
+
+    for(ptr = chanops_list->head; ptr; ptr = ptr->next)
+    {
+      target_p = ptr->data;
+      do_who(source_p, target_p, chname, chanop_flag);
+    }
+#endif
 }
 
 /*
@@ -521,6 +573,7 @@ static void do_who(struct Client *source_p,
 	     target_p->user->away ? 'G' : 'H',
 	     IsOper(target_p) ? "*" : "", op_flags );
 
+#ifdef ANONOPS
   if(ConfigServerHide.hide_servers)
     {
       sendto_one(source_p, form_str(RPL_WHOREPLY), me.name, source_p->name,
@@ -531,6 +584,7 @@ static void do_who(struct Client *source_p,
 		 status, 0, target_p->info);
     }
   else
+#endif
     {
       sendto_one(source_p, form_str(RPL_WHOREPLY), me.name, source_p->name,
 		 (chname) ? (chname) : "*",

@@ -2590,7 +2590,7 @@ channel_use_halfops:   USE_HALFOPS '=' TYES ';'
 channel_use_anonops: USE_ANONOPS '=' TYES ';'
   {
 #ifdef ANONOPS
-    if(ConfigChannel.use_anonops)
+    if(ConfigChannel.use_anonops == 0)
     {
       ilog(L_ERROR, "Ignoring config file entry 'use_anonops = yes' "
                     "-- can only be changed on boot");

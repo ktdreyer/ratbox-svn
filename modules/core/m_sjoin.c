@@ -118,9 +118,12 @@ static void ms_sjoin(struct Client *client_p,
   int            vc_ts = 0;
   int            isnew;
   int		 buflen = 0;
-  register       char *s, *hops, *nhops;
+  register       char *s, *nhops;
   static         char buf[2*BUFSIZE]; /* buffer for modes and prefix */
+#ifdef HALFOPS
   static         char sjbuf_hops[BUFSIZE]; /* buffer with halfops as % */
+  register       *hops;
+#endif
   static         char sjbuf_nhops[BUFSIZE]; /* buffer with halfops as @ */
   char           *p; /* pointer used making sjbuf */
   int hide_or_not;
@@ -128,7 +131,9 @@ static void ms_sjoin(struct Client *client_p,
   dlink_node *m;
 
   *buf = '\0';
+#ifdef HALFOPS
   *sjbuf_hops = '\0';
+#endif
   *sjbuf_nhops = '\0';
 
   if (IsClient(source_p) || parc < 5)
@@ -173,10 +178,12 @@ static void ms_sjoin(struct Client *client_p,
       case 't':
         mode.mode |= MODE_TOPICLIMIT;
         break;
+#ifdef ANONOPS
       case 'a':
 	if(ConfigChannel.use_anonops)
           mode.mode |= MODE_HIDEOPS;
         break;
+#endif
       case 'k':
         strlcpy(mode.key, parv[4 + args], KEYLEN);
         args++;
@@ -327,11 +334,14 @@ static void ms_sjoin(struct Client *client_p,
         strcpy(mode.key, oldmode->key);
     }
 
+#ifdef ANONOPS
   if (mode.mode & MODE_HIDEOPS)
     hide_or_not = ONLY_CHANOPS_HALFOPS;
   else
+#endif
     hide_or_not = ALL_MEMBERS;
 
+#ifdef ANONOPS
   if ((MODE_HIDEOPS & mode.mode) && !(MODE_HIDEOPS & oldmode->mode))
     sync_channel_oplists(chptr, MODE_DEL);
 
@@ -339,6 +349,7 @@ static void ms_sjoin(struct Client *client_p,
   if (keep_our_modes)
     if (!(MODE_HIDEOPS & mode.mode) && (MODE_HIDEOPS & oldmode->mode))
       sync_channel_oplists(chptr, MODE_ADD);
+#endif
 
   set_final_mode(&mode,oldmode);
   chptr->mode = mode;
@@ -401,7 +412,9 @@ static void ms_sjoin(struct Client *client_p,
 
   *mbuf++ = '+';
 
+#ifdef HALFOPS
   hops = sjbuf_hops;
+#endif
   nhops = sjbuf_nhops;
 
   s = parv[args+4];
@@ -433,7 +446,9 @@ static void ms_sjoin(struct Client *client_p,
 	      fl |= MODE_CHANOP;
 	      if (keep_new_modes)
 	      {
+#ifdef HALFOPS
 	        *hops++ = *s;
+#endif
 		*nhops++ = *s;
 		num_prefix++;
               }
@@ -445,7 +460,9 @@ static void ms_sjoin(struct Client *client_p,
 	      fl |= MODE_VOICE;
 	      if (keep_new_modes)
 	      {
+#ifdef HALFOPS
 	        *hops++ = *s;
+#endif
 		*nhops++ = *s;
 		num_prefix++;
 	      }
@@ -454,10 +471,16 @@ static void ms_sjoin(struct Client *client_p,
 	    }
 	  else if (*s == '%')
 	    {
+#ifdef HALFOPS
 	      fl |= MODE_HALFOP;
+#else
+	      fl |= MODE_CHANOP;
+#endif
 	      if (keep_new_modes)
 	      {
+#ifdef HALFOPS
 	        *hops++ = *s;
+#endif
 		*nhops++ = '@';
 		num_prefix++;
 	      }
@@ -476,8 +499,10 @@ static void ms_sjoin(struct Client *client_p,
         sendto_one(source_p, form_str(ERR_NOSUCHNICK), me.name,
 	           source_p->name, s);
 
+#ifdef HALFOPS
         hops -= num_prefix;
 	*hops = '\0';
+#endif
 
 	nhops -= num_prefix;
 	*nhops = '\0';
@@ -486,10 +511,13 @@ static void ms_sjoin(struct Client *client_p,
       }
 
       /* copy the nick to the two buffers */
+#ifdef HALFOPS
       hops += ircsprintf(hops, "%s ", s);
+      assert((hops - sjbuf_hops) < sizeof(sjbuf_hops));
+#endif
+
       nhops += ircsprintf(nhops, "%s ", s);
-      assert((hops-sjbuf_hops) < sizeof(sjbuf_hops) &&
-             (nhops-sjbuf_nhops) < sizeof(sjbuf_nhops));
+      assert((nhops-sjbuf_nhops) < sizeof(sjbuf_nhops));
 
       if (!keep_new_modes)
 	{
@@ -597,11 +625,13 @@ static void ms_sjoin(struct Client *client_p,
           *mbuf++ = 'v';
 	  para[pargs++] = s;
         }
+#ifdef HALFOPS
       else if (fl & MODE_HALFOP)
         {
           *mbuf++ = 'h';
           para[pargs++] = s;
         }
+#endif
 
       if (pargs >= MAXMODEPARAMS)
         {
@@ -672,10 +702,12 @@ nextnick:
       /* Its a blank sjoin, ugh */
       if (!parv[4+args][0])
           return;
-  
+
+#ifdef HALFOPS
       if (IsCapable(target_p, CAP_HOPS))
         sendto_one(target_p, "%s %s", buf, sjbuf_hops);
       else
+#endif
         sendto_one(target_p, "%s %s", buf, sjbuf_nhops);
    }
 }
@@ -701,7 +733,9 @@ struct mode_letter flags[] = {
   { MODE_MODERATED,  'm' },
   { MODE_INVITEONLY, 'i' },
   { MODE_PRIVATE,    'p' },
+#ifdef ANONOPS
   { MODE_HIDEOPS,    'a' },
+#endif
   { 0, 0 }
 };
 
@@ -800,28 +834,28 @@ static void remove_our_modes( int hide_or_not,
                               struct Client *source_p)
 {
   remove_a_mode(hide_or_not, chptr, top_chptr, source_p, &chptr->chanops, 'o');
-  remove_a_mode(hide_or_not, chptr, top_chptr, source_p, &chptr->halfops, 'h');
   remove_a_mode(hide_or_not, chptr, top_chptr, source_p, &chptr->voiced, 'v');
+
+  /* Move all voice/ops etc. to non opped list */
+  dlinkMoveList(&chptr->chanops, &chptr->peons);
+  dlinkMoveList(&chptr->voiced, &chptr->peons);
+  
+  dlinkMoveList(&chptr->locchanops, &chptr->locpeons);
+  dlinkMoveList(&chptr->locvoiced, &chptr->locpeons);
+
 #ifdef REQUIRE_OANDV
   remove_a_mode(hide_or_not, chptr, top_chptr, source_p,
                 &chptr->chanops_voiced, 'o');
   remove_a_mode(hide_or_not, chptr, top_chptr, source_p,
                 &chptr->chanops_voiced, 'v');    
+  dlinkMoveList(&chptr->chanops_voiced, &chptr->peons);
+  dlinkMoveList(&chptr->locchanops_voiced, &chptr->locpeons);
 #endif
 
-  /* Move all voice/ops etc. to non opped list */
-  dlinkMoveList(&chptr->chanops, &chptr->peons);
+#ifdef HALFOPS
+  remove_a_mode(hide_or_not, chptr, top_chptr, source_p, &chptr->halfops, 'h');
   dlinkMoveList(&chptr->halfops, &chptr->peons);
-  dlinkMoveList(&chptr->voiced, &chptr->peons);
-#ifdef REQUIRE_OANDV
-  dlinkMoveList(&chptr->chanops_voiced, &chptr->peons);
-#endif
-  
-  dlinkMoveList(&chptr->locchanops, &chptr->locpeons);
   dlinkMoveList(&chptr->lochalfops, &chptr->locpeons);
-  dlinkMoveList(&chptr->locvoiced, &chptr->locpeons);
-#ifdef REQUIRE_OANDV
-  dlinkMoveList(&chptr->locchanops_voiced, &chptr->locpeons);
 #endif
 }
 

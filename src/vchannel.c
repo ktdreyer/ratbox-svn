@@ -478,12 +478,14 @@ pick_vchan_id(struct Channel *chptr)
       }
 #endif
 
+#ifdef HALFOPS
   for (lp = chptr->halfops.head; lp; lp = lp->next)
     if (!lp->next)
       {
         target_p = lp->data;
         return target_p->name;
       }
+#endif
 
   for (lp = chptr->voiced.head; lp; lp = lp->next)
     if (!lp->next)
