@@ -1,3 +1,18 @@
+androsyn    2002/06/26 17:16:15 EDT	(20020626_5)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  Fixed the issue with quit storms making the server completely unresponsive.
+  Basically what we do now is, add the clients that need exited to a linked
+  list then have an event that will exit them 1500 at a time, rather than
+  trying to exit say, 50000 clients at once.
+  
+  Revision  Changes    Path
+  7.280     +60 -15    ircd-hybrid-7/src/client.c
+
+
+
 androsyn    2002/06/26 10:20:19 EDT	(20020626_4)
 
   Modified files:
