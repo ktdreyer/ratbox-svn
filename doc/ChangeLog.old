@@ -1,3 +1,16 @@
+jmallett    2002/01/09 19:51:29 EST	(20020110_2)
+
+  Modified files:
+    .                    README.PLATFORMS 
+  Log:
+  Reformat the table to have space for 'Mac OS X' in the OS area. Also I'll
+  support both Darwin and Mac OS X users. The two are orthogonal sometimes.
+  
+  Revision  Changes    Path
+  7.3       +9 -8      ircd-hybrid-7/README.PLATFORMS
+
+
+
 joant       2002/01/09 19:31:45 EST	(20020110_1)
 
   Modified files:
