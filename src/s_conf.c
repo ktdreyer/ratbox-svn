@@ -203,7 +203,8 @@ void free_conf(struct ConfItem* aconf)
 {
   assert(0 != aconf);
 
-  if (aconf->dns_pending)
+  /* XXX Andro, fix this better ok? -db */
+  if (aconf->dns_pending && (aconf->dns_query.query != NULL))
     adns_cancel(aconf->dns_query.query);
   MyFree(aconf->host);
   if (aconf->passwd)
