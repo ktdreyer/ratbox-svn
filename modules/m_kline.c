@@ -102,7 +102,7 @@ mo_kline(struct Client *client_p, struct Client *source_p,
 	const char *current_date;
 	const char *target_server = NULL;
 	struct ConfItem *aconf;
-	time_t tkline_time = 0;
+	int tkline_time = 0;
 	int loc = 1;
 
 	if(!IsOperK(source_p))
@@ -114,6 +114,9 @@ mo_kline(struct Client *client_p, struct Client *source_p,
 
 	if((tkline_time = valid_temp_time(parv[loc])) >= 0)
 		loc++;
+	/* we just set tkline_time to -1! */
+	else
+		tkline_time = 0;
 
 	if(find_user_host(source_p, parv[loc], user, host) == 0)
 		return 0;
@@ -137,10 +140,9 @@ mo_kline(struct Client *client_p, struct Client *source_p,
 
 	if(target_server != NULL)
 	{
-		sendto_match_servs(source_p, target_server, CAP_KLN, NOCAPS,
-				   "KLINE %s %lu %s %s :%s",
-				   target_server, (unsigned long) tkline_time, 
-				   user, host, reason);
+		propagate_generic(source_p, "KLINE", target_server, CAP_KLN,
+				"%d %s %s %s",
+				tkline_time, user, host, reason);
 
 		/* If we are sending it somewhere that doesnt include us, stop */
 		if(!match(target_server, me.name))
@@ -221,26 +223,21 @@ ms_kline(struct Client *client_p, struct Client *source_p, int parc, const char 
 {
 	const char *current_date;
 	struct ConfItem *aconf = NULL;
-	int tkline_time;
-
-	const char *kuser;
-	const char *khost;
-	char *kreason;
+	int tkline_time = atoi(parv[2]);
+	const char *kuser = parv[3];
+	const char *khost = parv[4];
+	char *kreason = LOCAL_COPY(parv[5]);
 	char *oper_reason;
 
-	sendto_match_servs(source_p, parv[1], CAP_KLN, NOCAPS,
-			   "KLINE %s %s %s %s :%s", 
-			   parv[1], parv[2], parv[3], parv[4], parv[5]);
+	propagate_generic(source_p, "KLINE", parv[1], CAP_KLN,
+			"%d %s %s %s",
+			tkline_time, kuser, khost, kreason);
 
 	if(!match(parv[1], me.name))
 		return 0;
 
 	if(!IsPerson(source_p))
 		return 0;
-
-	kuser = parv[3];
-	khost = parv[4];
-	kreason = LOCAL_COPY(parv[5]);
 
 	if(find_shared_conf(source_p->username, source_p->host,
 				source_p->user->server, SHARED_KLINE))
@@ -249,8 +246,6 @@ ms_kline(struct Client *client_p, struct Client *source_p, int parc, const char 
 		   !valid_wild_card(source_p, kuser, khost) ||
 		   !valid_comment(source_p, kreason))
 			return 0;
-
-		tkline_time = atoi(parv[2]);
 
 		if(already_placed_kline(source_p, kuser, khost, tkline_time))
 			return 0;
@@ -274,7 +269,7 @@ ms_kline(struct Client *client_p, struct Client *source_p, int parc, const char 
 		DupString(aconf->passwd, kreason);
 		current_date = smalldate();
 
-		if(tkline_time)
+		if(tkline_time > 0)
 			apply_tkline(source_p, aconf, kreason, oper_reason,
 				     current_date, tkline_time);
 		else
@@ -341,8 +336,8 @@ mo_unkline(struct Client *client_p, struct Client *source_p, int parc, const cha
 	/* possible remote kline.. */
 	if((parc > 3) && (irccmp(parv[2], "ON") == 0))
 	{
-		sendto_match_servs(source_p, parv[3], CAP_UNKLN, NOCAPS,
-				   "UNKLINE %s %s %s", parv[3], user, host);
+		propagate_generic(source_p, "UNKLINE", parv[3], CAP_UNKLN,
+				"%s %s", user, host);
 
 		if(match(parv[3], me.name) == 0)
 			return 0;
@@ -382,11 +377,11 @@ ms_unkline(struct Client *client_p, struct Client *source_p, int parc, const cha
 
 	/* parv[0]  parv[1]        parv[2]  parv[3]
 	 * oper     target server  user     host    */
-	sendto_match_servs(source_p, parv[1], CAP_UNKLN, NOCAPS,
-			   "UNKLINE %s %s %s", parv[1], parv[2], parv[3]);
-
 	kuser = parv[2];
 	khost = parv[3];
+
+	propagate_generic(source_p, "UNKLINE", parv[1], CAP_UNKLN,
+			"%s %s", kuser, khost);
 
 	if(!match(parv[1], me.name))
 		return 0;

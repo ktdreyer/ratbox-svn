@@ -74,6 +74,8 @@ static int valid_xline(struct Client *, const char *, const char *);
 static void apply_xline(struct Client *client_p, const char *name, 
 			const char *reason, int temp_time);
 static void write_xline(struct Client *source_p, struct ConfItem *aconf);
+static void propagate_xline(struct Client *source_p, const char *target,
+			int temp_time, const char *name, const char *reason);
 static void cluster_xline(struct Client *source_p, int temp_time,
 			const char *name, const char *reason);
 
@@ -106,6 +108,9 @@ mo_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	if((temp_time = valid_temp_time(parv[loc])) >= 0)
 		loc++;
+	/* we just set temp_time to -1! */
+	else
+		temp_time = 0;
 
 	name = parv[loc];
 	loc++;
@@ -135,9 +140,8 @@ mo_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	if(target_server != NULL)
 	{
-		sendto_match_servs(source_p, target_server, CAP_CLUSTER, NOCAPS,
-				   "XLINE %s %s 2 :%s",
-				   target_server, name, reason);
+		propagate_xline(source_p, target_server, temp_time,
+				name, reason);
 
 		if(!match(target_server, me.name))
 			return 0;
@@ -165,10 +169,7 @@ ms_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	/* parv[0]  parv[1]      parv[2]  parv[3]  parv[4]
 	 * oper     target serv  xline    type     reason
 	 */
-	/* XXXLEEH - type no longer exists */
-	sendto_match_servs(source_p, parv[1], CAP_CLUSTER, NOCAPS,
-			   "XLINE %s %s %s :%s",
-			   parv[1], parv[2], parv[3], parv[4]);
+	propagate_xline(source_p, parv[1], 0, parv[2], parv[4]);
 
 	if(!IsPerson(source_p))
 		return 0;
@@ -316,6 +317,25 @@ write_xline(struct Client *source_p, struct ConfItem *aconf)
 	fbclose(out);
 }
 
+static void 
+propagate_xline(struct Client *source_p, const char *target,
+		int temp_time, const char *name, const char *reason)
+{
+	if(!temp_time)
+	{
+		sendto_match_servs(source_p, target, CAP_CLUSTER, NOCAPS,
+					"XLINE %s %s 2 :%s",
+					target, name, reason);
+		sendto_match_servs(source_p, target, CAP_ENCAP, CAP_CLUSTER,
+				"ENCAP %s XLINE %d %s :%s",
+				target, temp_time, name, reason);
+	}
+	else
+		sendto_match_servs(source_p, target, CAP_ENCAP, NOCAPS,
+				"ENCAP %s XLINE %d %s :%s",
+				target, temp_time, name, reason);
+}
+			
 static void
 cluster_xline(struct Client *source_p, int temp_time, const char *name,
 		const char *reason)
@@ -334,13 +354,18 @@ cluster_xline(struct Client *source_p, int temp_time, const char *name,
 		 * to convert them to perm.. --fl
 		 */
 		if(!temp_time)
+		{
 			sendto_match_servs(source_p, shared_p->server, CAP_CLUSTER, NOCAPS,
 					"XLINE %s %s 2 :%s",
 					shared_p->server, name, reason);
-
-		sendto_match_servs(source_p, shared_p->server, CAP_ENCAP, CAP_CLUSTER,
-				"ENCAP %s XLINE %d %s :%s",
-				shared_p->server, temp_time, name, reason);
+			sendto_match_servs(source_p, shared_p->server, CAP_ENCAP, CAP_CLUSTER,
+					"ENCAP %s XLINE %d %s :%s",
+					shared_p->server, temp_time, name, reason);
+		}
+		else
+			sendto_match_servs(source_p, shared_p->server, CAP_ENCAP, NOCAPS,
+					"ENCAP %s XLINE %d %s :%s",
+					shared_p->server, temp_time, name, reason);
 	}
 }
 
@@ -360,9 +385,8 @@ mo_unxline(struct Client *client_p, struct Client *source_p, int parc, const cha
 
 	if(parc == 4 && !(irccmp(parv[2], "ON")))
 	{
-		sendto_match_servs(source_p, parv[3], CAP_CLUSTER, NOCAPS,
-				"UNXLINE %s %s",
-				parv[3], parv[1]);
+		propagate_generic(source_p, "UNXLINE", parv[3], CAP_CLUSTER,
+				"%s", parv[1]);
 
 		if(match(parv[3], me.name) == 0)
 			return 0;
@@ -389,9 +413,8 @@ ms_unxline(struct Client *client_p, struct Client *source_p, int parc, const cha
 	/* parv[0]  parv[1]        parv[2]
 	 * oper     target server  gecos
 	 */
-	sendto_match_servs(source_p, parv[1], CAP_CLUSTER, NOCAPS,
-			   "UNXLINE %s %s",
-			   parv[1], parv[2]);
+	propagate_generic(source_p, "UNXLINE", parv[3], CAP_CLUSTER,
+			"%s", parv[2]);
 
 	if(!match(parv[1], me.name))
 		return 0;

@@ -103,6 +103,8 @@ extern void free_remote_conf(struct remote_conf *);
 
 extern int find_shared_conf(const char *username, const char *host,
 			const char *server, int flags);
+extern void propagate_generic(struct Client *source_p, const char *command,
+		const char *target, int cap, const char *format, ...);
 extern void cluster_generic(struct Client *, const char *, int cltype,
 			int cap, const char *format, ...);
 

@@ -63,7 +63,7 @@ case `$CC -V 2>&1` in
 ;;
 *Tru64*)
 	AC_MSG_RESULT(Tru64 cc)
-	IRC_CFLAGS="-O2"
+	IRC_CFLAGS="-O0"
 	CPPFLAGS="-I/usr/local/include"
 	Tru=yes
 ;;
@@ -117,12 +117,12 @@ if test "$ac_cv_c_compiler_gnu" = yes; then
 
 	AC_MSG_RESULT($AppleGCC)
 
-	IRC_CFLAGS="$IRC_CFLAGS -O2 -Wall"
+	IRC_CFLAGS="$IRC_CFLAGS -O0 -Wall"
 fi
 
 dnl If we support -g, use it!
 if test "$ac_cv_prog_cc_g" = yes; then
-	dnl Tru64 needs -g3 for -O2
+	dnl Tru64 needs -g3 for -O0
 	if test "$Tru" = yes; then
 		IRC_CFLAGS="$IRC_CFLAGS -g3"
 	else
@@ -185,7 +185,7 @@ fi
 
 dnl jdc -- If CFLAGS is defined, best use it everywhere...
 dnl NOTE: jv says it must be added to the *END*, because things like
-dnl "gcc -O9 -O2" will result in -O2 getting preference.  How stupid.
+dnl "gcc -O9 -O0" will result in -O0 getting preference.  How stupid.
 if test ! -z "$CFLAGS"; then
 	IRC_CFLAGS="$IRC_CFLAGS $CFLAGS"
 fi

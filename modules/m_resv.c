@@ -58,6 +58,8 @@ DECLARE_MODULE_AV1(resv, NULL, NULL, resv_clist, NULL, NULL, "$Revision$");
 
 static void parse_resv(struct Client *source_p, const char *name,
 			const char *reason, int temp_time);
+static void propagate_resv(struct Client *source_p, const char *target,
+			int temp_time, const char *name, const char *reason);
 static void cluster_resv(struct Client *source_p, int temp_time, 
 			const char *name, const char *reason);
 
@@ -83,6 +85,9 @@ mo_resv(struct Client *client_p, struct Client *source_p, int parc, const char *
 
 	if((temp_time = valid_temp_time(parv[loc])) >= 0)
 		loc++;
+	/* we just set temp_time to -1! */
+	else
+		temp_time = 0;
 
 	name = parv[loc];
 	loc++;
@@ -105,9 +110,7 @@ mo_resv(struct Client *client_p, struct Client *source_p, int parc, const char *
 	/* remote resv.. */
 	if(target_server)
 	{
-		sendto_match_servs(source_p, parv[3], CAP_CLUSTER, NOCAPS,
-				   "RESV %s %s :%s",
-				   parv[3], parv[1], reason);
+		propagate_resv(source_p, target_server, temp_time, name, reason);
 
 		if(match(parv[3], me.name) == 0)
 			return 0;
@@ -133,9 +136,7 @@ ms_resv(struct Client *client_p, struct Client *source_p,
 	/* parv[0]  parv[1]        parv[2]  parv[3]
 	 * oper     target server  resv     reason
 	 */
-	sendto_match_servs(source_p, parv[1], CAP_CLUSTER, NOCAPS,
-			   "RESV %s %s :%s",
-			   parv[1], parv[2], parv[3]);
+	propagate_resv(source_p, parv[1], 0, parv[2], parv[3]);
 
 	if(!match(parv[1], me.name))
 		return 0;
@@ -263,6 +264,28 @@ parse_resv(struct Client *source_p, const char *name,
 				  name);
 }
 
+static void 
+propagate_resv(struct Client *source_p, const char *target,
+		int temp_time, const char *name, const char *reason)
+{
+	if(!temp_time)
+	{
+		sendto_match_servs(source_p, target,
+				CAP_CLUSTER, NOCAPS,
+				"RESV %s %s :%s",
+				target, name, reason);
+		sendto_match_servs(source_p, target,
+				CAP_ENCAP, CAP_CLUSTER,
+				"ENCAP %s RESV %d %s 0 :%s",
+				target, temp_time, name, reason);
+	}
+	else
+		sendto_match_servs(source_p, target,
+				CAP_ENCAP, NOCAPS,
+				"ENCAP %s RESV %d %s 0 :%s",
+				target, temp_time, name, reason);
+}
+
 static void
 cluster_resv(struct Client *source_p, int temp_time, const char *name,
 		const char *reason)
@@ -281,13 +304,21 @@ cluster_resv(struct Client *source_p, int temp_time, const char *name,
 		 * to convert them to perm.. --fl
 		 */
 		if(!temp_time)
-			sendto_match_servs(source_p, shared_p->server, CAP_CLUSTER, NOCAPS,
+		{
+			sendto_match_servs(source_p, shared_p->server,
+					CAP_CLUSTER, NOCAPS,
 					"RESV %s %s :%s",
 					shared_p->server, name, reason);
-
-		sendto_match_servs(source_p, shared_p->server, CAP_ENCAP, CAP_CLUSTER,
-				"ENCAP %s RESV %d %s 0 :%s",
-				shared_p->server, temp_time, name, reason);
+			sendto_match_servs(source_p, shared_p->server,
+					CAP_ENCAP, CAP_CLUSTER,
+					"ENCAP %s RESV %d %s 0 :%s",
+					shared_p->server, temp_time, name, reason);
+		}
+		else
+			sendto_match_servs(source_p, shared_p->server,
+					CAP_ENCAP, NOCAPS,
+					"ENCAP %s RESV %d %s 0 :%s",
+					shared_p->server, temp_time, name, reason);
 	}
 }
 
@@ -302,9 +333,8 @@ mo_unresv(struct Client *client_p, struct Client *source_p, int parc, const char
 {
 	if((parc == 4) && (irccmp(parv[2], "ON") == 0))
 	{
-		sendto_match_servs(source_p, parv[3], CAP_CLUSTER, NOCAPS,
-				   "UNRESV %s %s",
-				   parv[3], parv[1]);
+		propagate_generic(source_p, "UNRESV", parv[3], CAP_CLUSTER,
+				"%s", parv[1]);
 
 		if(match(parv[3], me.name) == 0)
 			return 0;
@@ -339,9 +369,8 @@ ms_unresv(struct Client *client_p, struct Client *source_p, int parc, const char
 	/* parv[0]  parv[1]        parv[2]
 	 * oper     target server  resv to remove
 	 */
-	sendto_match_servs(source_p, parv[1], CAP_CLUSTER, NOCAPS,
-			   "UNRESV %s %s",
-			   parv[1], parv[2]);
+	propagate_generic(source_p, "UNRESV", parv[3], CAP_CLUSTER,
+			"%s", parv[2]);
 
 	if(!match(me.name, parv[1]))
 		return 0;

@@ -7,4 +7,4 @@ Nick resvs accept wildcard characters '*' and '?'.
 
 RESV [time] <channel|nick> ON <server> :<reason>
 
-Will attempt to set the RESV on <server> if <server accepts remote RESVs.
+Will attempt to set the RESV on <server> if <server> accepts remote RESVs.
