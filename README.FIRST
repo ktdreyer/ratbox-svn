@@ -28,8 +28,13 @@ Necessary Requirements:
   should be used.
 
 - A working bison or byacc.  FreeBSD and BSD/OS
-  byacc are currently broken, and will dump core
-  when building the ircd_parser.y.
+  byacc are broken in some releases, and will
+  dump core when building the ircd_parser.y. The
+  solution to this is to upgrade to the most
+  recent release, or to simply obtain a current
+  copy of byacc (such as building source from
+  FreeBSD CVS/CVSup). This is fixed in FreeBSD
+  4.4-STABLE and later.
 
 Feature Specific Requirements:
 
