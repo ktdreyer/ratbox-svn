@@ -1,3 +1,8 @@
+*** 20001107_2 by db
+- bah moved changes over to m_notice.c
+
+
+
 *** 20001107_1 by db
 - added back anti drone flood code. *sigh* Though I suspect this all
   has to be modified in the grand scheme of things eventually...
