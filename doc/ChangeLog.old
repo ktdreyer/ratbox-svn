@@ -1,3 +1,30 @@
+leeh        2002/04/25 13:53:25 EDT	(20020425_3)
+
+  Modified files:
+    doc                  example.conf example.conf.efnet 
+    include              s_conf.h 
+    src                  channel_mode.c ircd.c ircd_lexer.l 
+                         ircd_parser.y s_conf.c 
+  Log:
+  - changed the sendto_realops_flags() when +h has changed status to an
+    ilog(), we dont want this *every* time we unkline something, ugh.
+  - added use_anonops, disabled by default with comments reflecting theyre
+    slightly broken.
+  - made the use_invex/halfops/anonops/except actually ignore the modes
+    from local users if theyre unset (duh!)
+  
+  Revision  Changes    Path
+  7.154     +13 -0     ircd-hybrid-7/doc/example.conf
+  7.7       +6 -0      ircd-hybrid-7/doc/example.conf.efnet
+  7.179     +1 -0      ircd-hybrid-7/include/s_conf.h
+  7.32      +39 -9     ircd-hybrid-7/src/channel_mode.c
+  7.229     +4 -0      ircd-hybrid-7/src/ircd.c
+  1.137     +2 -1      ircd-hybrid-7/src/ircd_lexer.l
+  1.243     +31 -6     ircd-hybrid-7/src/ircd_parser.y
+  7.299     +6 -3      ircd-hybrid-7/src/s_conf.c
+
+
+
 leeh        2002/04/25 12:25:05 EDT	(20020425_2)
 
   Modified files:
