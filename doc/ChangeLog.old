@@ -1,3 +1,10 @@
+*** 19990912_2 by wnder
+IAuth updates:
+ * got "I line is full" check working
+ * ircd now sends iauth it's list of classes (Y:) upon
+   connection
+
+
 *** 19990912_1 by wnder
 IAuth updates:
  * bug fix in iauth connection code
