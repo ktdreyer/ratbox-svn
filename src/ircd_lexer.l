@@ -192,6 +192,23 @@ stats_p_notice	        { return STATS_P_NOTICE; }
 glines                  { return GLINES; }
 modules                 { return MODULES; }
 module                  { return MODULE; }
+
+oper_only_umodes        { return OPER_ONLY_UMODES; }
+bots                    { return T_BOTS; }
+cconn                   { return T_CCONN; }
+debug                   { return T_DEBUG; }
+full                    { return T_FULL; }
+skill                   { return T_SKILL; }
+nchange                 { return T_NCHANGE; }
+rej                     { return T_REJ; }
+unauth                  { return T_UNAUTH; }
+spy                     { return T_SPY; }
+external                { return T_EXTERNAL; }
+operwall                { return T_OPERWALL; }
+servnotice              { return T_SERVNOTICE; }
+invisible               { return T_INVISIBLE; }
+wallop                  { return T_WALLOP; }
+callerid                { return T_CALLERID; }
 .		        { return yytext[0]; }
 
 %%

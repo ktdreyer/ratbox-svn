@@ -214,6 +214,8 @@ typedef struct
   int	      hide_server;
   int         client_exit;
   int         maximum_links;
+	int       oper_only_umodes;
+	
 } ConfigFileEntryType;
 
 /* bleh. have to become global. */

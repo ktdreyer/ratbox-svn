@@ -182,6 +182,22 @@ int   class_redirport_var;
 %token  MODULES
 %token  HIDESERVER
 %token  CLIENT_EXIT
+%token  T_BOTS
+%token  T_CCONN
+%token  T_DEBUG
+%token  T_FULL
+%token  T_SKILL
+%token  T_NCHANGE
+%token  T_REJ
+%token  T_UNAUTH
+%token  T_SPY
+%token  T_EXTERNAL
+%token  T_OPERWALL
+%token  T_SERVNOTICE
+%token  T_INVISIBLE
+%token  T_CALLERID
+%token  T_WALLOP
+%token  OPER_ONLY_UMODES
 
 %%
 conf:   
@@ -1245,7 +1261,7 @@ general_item:       general_failed_oper_notice | general_show_failed_oper_id |
                     general_hide_server | general_maximum_links |
                     general_message_locale | general_client_exit |
                     general_fname_userlog | general_fname_operlog |
-                    general_fname_foperlog |
+                    general_fname_foperlog | general_oper_only_umodes |
                     error
 
 
@@ -1487,5 +1503,78 @@ general_hide_server: HIDESERVER '=' TYES ';'
         ConfigFileEntry.hide_server = 0;
 } ;
 
+general_oper_only_umodes: OPER_ONLY_UMODES 
+  {
+    ConfigFileEntry.oper_only_umodes = 0;
+  }
+  '='  umode_items ';'
+			  umode_item
 
+umode_items:	umode_items ',' umode_item |
+		umode_item ;
+
+umode_item:	T_BOTS 
+  {
+    ConfigFileEntry.oper_only_umodes |= FLAGS_BOTS;
+  } 
+              | T_CCONN
+  {
+    ConfigFileEntry.oper_only_umodes |= FLAGS_CCONN;
+  }
+              | T_DEBUG
+  {
+    ConfigFileEntry.oper_only_umodes |= FLAGS_DEBUG;
+  }
+              | T_FULL
+  { 
+    ConfigFileEntry.oper_only_umodes |= FLAGS_FULL;
+  }
+              | T_SKILL
+  {
+    ConfigFileEntry.oper_only_umodes |= FLAGS_SKILL;
+  }
+              | T_NCHANGE
+  {
+    ConfigFileEntry.oper_only_umodes |= FLAGS_NCHANGE;
+  }
+              | OPERATOR
+  {
+    ConfigFileEntry.oper_only_umodes |= FLAGS_OPER;
+  }
+              | T_REJ
+  {
+    ConfigFileEntry.oper_only_umodes |= FLAGS_REJ;
+  }
+              | T_UNAUTH
+  {
+    ConfigFileEntry.oper_only_umodes |= FLAGS_UNAUTH;
+  }
+              | T_SPY
+  {
+    ConfigFileEntry.oper_only_umodes |= FLAGS_SPY;
+  }
+              | T_EXTERNAL
+  {
+    ConfigFileEntry.oper_only_umodes |= FLAGS_EXTERNAL;
+  }
+              | T_OPERWALL
+  {
+    ConfigFileEntry.oper_only_umodes |= FLAGS_OPERWALL;
+  } 
+| T_SERVNOTICE
+{
+	ConfigFileEntry.oper_only_umodes |= FLAGS_SERVNOTICE;
+}
+| T_INVISIBLE
+{
+	ConfigFileEntry.oper_only_umodes |= FLAGS_INVISIBLE;
+}
+| T_WALLOP
+{
+	ConfigFileEntry.oper_only_umodes |= FLAGS_WALLOP;
+}
+| T_CALLERID
+{
+	ConfigFileEntry.oper_only_umodes |= FLAGS_CALLERID;
+} ;
 
