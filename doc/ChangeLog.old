@@ -1,3 +1,11 @@
+*** 20001014_3 by db
+- mod Makefile.in to  add new vchannel.c
+- added new vchannel.c for vchan support
+- added new vchannel.h for vchan support
+- added vchan cache call in m_cjoin.c
+
+
+
 *** 20001014_2 by db
 - m_names() after cjoin (toot)
 
