@@ -31,7 +31,6 @@
 #include "s_serv.h"
 #include "send.h"
 
-#include "msg.h"  /* ZZZ should be able to remove this */
 #include "channel.h"
 #include "irc_string.h"
 #include "hash.h"
@@ -39,6 +38,7 @@
 
 #include <string.h>
 
+#define MSG_NOTICE "NOTICE"
 
 /*
  * m_functions execute protocol messages on this server:
