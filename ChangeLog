@@ -1,3 +1,22 @@
+androsyn    2002/08/22 16:43:12 EDT	(20020822_9)
+
+  Modified files:
+    include              list.h tools.h 
+    src                  channel.c list.c s_debug.c tools.c 
+  Log:
+  Make dlinkFindDestroy a real function now.  Move
+  make_dlink_node/free_dlink_node to tools.c.
+  
+  Revision  Changes    Path
+  7.16      +0 -3      ircd-ratbox/include/list.h
+  1.34      +22 -1     ircd-ratbox/include/tools.h
+  7.347     +4 -2      ircd-ratbox/src/channel.c
+  7.49      +0 -61     ircd-ratbox/src/list.c
+  7.74      +0 -10     ircd-ratbox/src/s_debug.c
+  7.31      +60 -1     ircd-ratbox/src/tools.c
+
+
+
 androsyn    2002/08/22 16:06:41 EDT	(20020822_8)
 
   Modified files:
