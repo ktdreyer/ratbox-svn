@@ -1,3 +1,18 @@
+leeh        2004/04/08 11:10:56 EDT	(20040408_3)
+
+  Modified files:
+    .                    RELNOTES 
+    modules/core         m_sjoin.c 
+  Log:
+  - move the test for empty sjoins up to the top, and make it strip leading
+    spaces first
+  
+  Revision  Changes    Path
+  1.98      +2 -0      ircd-ratbox/RELNOTES
+  1.201     +12 -9     ircd-ratbox/modules/core/m_sjoin.c
+
+
+
 leeh        2004/04/08 10:18:41 EDT	(20040408_2)
 
   Modified files:
