@@ -1258,6 +1258,14 @@ exit_remote_client(struct Client *client_p, struct Client *source_p, struct Clie
 		dlinkDelete(&source_p->lnode, &source_p->servptr->serv->users);
 	}
 
+	if((source_p->flags & FLAGS_KILLED) == 0)
+	{
+		sendto_server(client_p, NULL, CAP_TS6, NOCAPS,
+			      ":%s QUIT :%s", use_id(source_p), comment);
+		sendto_server(client_p, NULL, NOCAPS, CAP_TS6,
+			      ":%s QUIT :%s", source_p->name, comment);
+	}
+
 	exit_generic_client(client_p, source_p, from, comment);
 	return(CLIENT_EXITED);
 }
