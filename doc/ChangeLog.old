@@ -1,3 +1,22 @@
+*** 20010225_7 by jdc
+CVS prior to now would not compile on FreeBSD.  So here are my fixes.
+If any of this is wrong, someone please fix it.  This isn't code I
+should be playing with in the first place, but it seems to work...
+
+* include/listener.h
+    Changed Listener 'addr' def. from struct in_addr to irc_inaddr.
+* src/listener.c
+    make_listener(): copy_s_addr() needed to be changed due to the
+      include/listener.h change.
+    inetport(): lsin.sin_addr assignment needed to be changed (used
+      memcpy() to be safe; used inet6 stuff as example).
+    find_listener(): Changed PIN_ADDR() and IN_ADDR() to &PIN_ADDR()
+      and &IN_ADDR().  More importantly, memcmp() logic was backwards I
+      think -- result was /REHASH, then /STATS P showing two of the same
+      listening ports; changed to (!memcmp()).
+
+
+
 *** 20010225_6 by androsyn
 Fixed a few minor bugs I introduced...ipv6 vhost listeners almost work. They 
 re scribbling over the listener port right now.. I don't think this happens 
