@@ -39,6 +39,7 @@
 #include "parse.h"
 #include "irc_string.h"
 #include "s_log.h"
+#include "s_user.h"
 
 #ifndef HAVE_LIBCRYPTO
 /* Maybe this should be an error or something?-davidt */
@@ -92,7 +93,6 @@ static void m_challenge( struct Client *client_p, struct Client *source_p,
                         int parc, char *parv[] )
 {
   char * challenge;
-  dlink_node *ptr;
   struct ConfItem *aconf, *oconf;
   if(!(source_p->user) || !source_p->localClient)
     return;
