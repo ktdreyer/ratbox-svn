@@ -1,3 +1,8 @@
+*** 20010529_4 by jdc
+* Only send kernel compile information to admins on an /INFO.
+
+
+
 *** 20010529_3 by jdc
 * Fixed "no previous declaration for start/stoptimer()" warnings by
   defining functions as static.
