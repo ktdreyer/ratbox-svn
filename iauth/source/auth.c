@@ -474,6 +474,7 @@ GetValidIdent(char *buf)
   return(colon3Ptr);
 } /* GetValidIdent() */
 
+#if 0
 /*
 BeginDNSQuery()
  Initiate a non-blocking dns query for auth->ip
@@ -555,6 +556,8 @@ AuthDNSCallback(void* vptr, struct DNSReply* reply)
     FreeAuthRequest(auth);
   }
 } /* AuthDNSCallback() */
+
+#endif /* 0 */
 
 /*
 CompleteAuthRequest()

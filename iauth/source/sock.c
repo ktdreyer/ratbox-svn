@@ -279,11 +279,13 @@ CheckConnections()
         FD_SET(auth->identfd, &readfds);
     }
 
+#if 0
     /*
      * Check dns resolver
      */
     if (ResolverFileDescriptor >= 0)
       FD_SET(ResolverFileDescriptor, &readfds);
+#endif
 
     activefds = select(FD_SETSIZE, &readfds, &writefds, 0, &TimeOut);
 
@@ -348,9 +350,11 @@ CheckConnections()
           ReadIdentReply(auth);
       }
 
+#if 0
       if ((-1 < ResolverFileDescriptor) &&
           FD_ISSET(ResolverFileDescriptor, &readfds))
         DoDNSAsync();
+#endif
     }
     else if ((activefds == (-1)) && (errno != EINTR))
     {
@@ -757,6 +761,7 @@ DoDNSAsync()
   int bytes = 0;
   int packets = 0;
 
+#if 0
   do
   {
     get_res();
@@ -764,4 +769,5 @@ DoDNSAsync()
       bytes = 0;
     packets++;
   }  while ((bytes > 0) && (packets < 10)); 
+#endif
 } /* DoDNSAsync() */

@@ -96,7 +96,9 @@ main()
   /* Initialize listening ports */
   InitListenPorts();
 
+#if 0
   init_resolver();
+#endif
 
   /*
    * Enter this loop constantly waiting for incoming data

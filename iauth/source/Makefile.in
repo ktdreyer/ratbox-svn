@@ -27,7 +27,6 @@ SOURCES =     \
   match.c     \
   misc.c      \
   mtree.c     \
-  res.c       \
   sock.c
 
 OBJECTS = ${SOURCES:.c=.o}
