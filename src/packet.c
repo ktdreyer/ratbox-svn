@@ -60,6 +60,8 @@ void parse_client_queued(struct Client *cptr)
 	while ((dolen = linebuf_get(&cptr->localClient->buf_recvq,
 				    readBuf, READBUF_SIZE)) > 0)
         {
+          if (IsDead(cptr))
+            return;
 	  client_dopacket(cptr, readBuf, dolen);
 	}
       }
@@ -164,19 +166,7 @@ read_packet(int fd, void *data)
   assert(lcptr != NULL);
   assert(lcptr->allow_read <= MAX_FLOOD_PER_SEC);
 
-  /*
-   * Check for a dead connection here. This is done here for legacy
-   * reasons which to me sound like people didn't check the return
-   * values of functions, and so we can't just free the cptr in
-   * dead_link() :-)
-   *     -- adrian
-   */
-  if (IsDead(cptr)) {
-    /* Shouldn't we just do the following? -- adrian */
-    /* error_exit_client(cptr, length); */
-    exit_client(cptr, cptr, &me, strerror(get_sockerr(cptr->fd)));
-    return;
-  }
+  assert(!IsDead(cptr));
 
   /*
    * Read some data. We *used to* do anti-flood protection here, but
@@ -184,16 +174,12 @@ read_packet(int fd, void *data)
    *     -- adrian
    */
   length = recv(cptr->fd, readBuf, READBUF_SIZE, 0);
-  if (length < 0) {
+
+  if (length <= 0) {
     /*
-     * This shouldn't give an EWOULDBLOCK since we only call this routine
-     * when we have data. Therefore, any error we get will be fatal.
-     *     -- adrian
+     * We only get called when data is waiting,
+     * so EOF/any error is fatal.
      */
-    error_exit_client(cptr, length);
-    return;
-  } else if (length == 0) {
-    /* EOF from client */
     error_exit_client(cptr, length);
     return;
   }
@@ -227,6 +213,7 @@ read_packet(int fd, void *data)
 
   /* Attempt to parse what we have */
   parse_client_queued(cptr);
+
   if (!IsDead(cptr))
   {
     /* If we get here, we need to register for another COMM_SELECT_READ */

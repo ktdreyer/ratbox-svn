@@ -455,7 +455,7 @@ void error_exit_client(struct Client* cptr, int error)
                current_error, strerror(current_error));
   }
 
-  cptr->flags |= FLAGS_DEADSOCKET;
+  SetDead(cptr); /* mark the socket dead so it doesn't get any error msgs */
   exit_client(cptr, cptr, &me, errmsg);
 }
 

@@ -1432,7 +1432,6 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
 {
     struct Client *cptr;
     int fd;
-    char servname[HOSTLEN + 1];
     char serv_desc[HOSTLEN + 15];
     char buf[HOSTIPLEN];
     /* Make sure aconf is useful */
@@ -1459,13 +1458,12 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
         return 0;
       }
 
-    /* XXX we should make sure we're not already connected! */
     /* servernames are always guaranteed under HOSTLEN chars */
     ircsprintf(serv_desc, "Server: %s", aconf->name);
     serv_desc[FD_DESC_SZ-1] = '\0';
 
     /* create a socket for the server connection */ 
-    if ((fd = comm_open(DEF_FAM, SOCK_STREAM, 0, servname)) < 0)
+    if ((fd = comm_open(DEF_FAM, SOCK_STREAM, 0, serv_desc)) < 0)
       {
         /* Eek, failure to create the socket */
         report_error("opening stream socket to %s: %s", aconf->name, errno);
