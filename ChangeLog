@@ -1,3 +1,26 @@
+leeh        2005/01/04 14:48:28 EST	(20050104_8)
+
+  Modified files:
+    doc                  example.conf 
+    include              conf.h 
+    src                  conf.c io.c newconf.c s_chanserv.c 
+  Added files:
+    help/chanserv        modban 
+  Log:
+  - added CHANSERV::MODBAN, to modify access level on a ban
+  - added max_bans to chanserv config, controlling how many bans may be set
+  
+  Revision  Changes    Path
+  1.25      +3 -0      rserv/doc/example.conf
+  1.1       +5 -0      rserv/help/chanserv/modban (new)
+  1.31      +1 -0      rserv/include/conf.h
+  1.33      +1 -0      rserv/src/conf.c
+  1.30      +1 -1      rserv/src/io.c
+  1.35      +1 -0      rserv/src/newconf.c
+  1.31      +88 -26    rserv/src/s_chanserv.c
+
+
+
 leeh        2005/01/04 14:45:27 EST	(20050104_7)
 
   Modified files:
