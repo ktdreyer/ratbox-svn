@@ -14,7 +14,7 @@
 #include "io.h"
 
 static void c_error(struct client *, char *parv[], int parc);
-struct scommand_handler error_command = { "ERROR", c_error, FLAGS_UNKNOWN };
+struct scommand_handler error_command = { "ERROR", c_error, FLAGS_UNKNOWN, DLINK_EMPTY };
 
 static void
 c_error(struct client *client_p, char *parv[], int parc)

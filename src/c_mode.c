@@ -14,7 +14,7 @@
 #include "log.h"
 
 static void c_mode(struct client *, char *parv[], int parc);
-struct scommand_handler mode_command = { "MODE", c_mode, 0 };
+struct scommand_handler mode_command = { "MODE", c_mode, 0, DLINK_EMPTY };
 
 /* change_chmember_status()
  *   changes a channel members +ov status

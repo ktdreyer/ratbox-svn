@@ -80,6 +80,8 @@ struct _dlink_list
 	unsigned long length;
 };
 
+#define DLINK_EMPTY { NULL, NULL, 0 }
+
 extern dlink_node *make_dlink_node(void);
 extern void free_dlink_node(dlink_node *lp);
 

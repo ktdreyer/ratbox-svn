@@ -35,11 +35,11 @@ static void c_quit(struct client *, char *parv[], int parc);
 static void c_server(struct client *, char *parv[], int parc);
 static void c_squit(struct client *, char *parv[], int parc);
 
-static struct scommand_handler kill_command = { "KILL", c_kill, 0 };
-static struct scommand_handler nick_command = { "NICK", c_nick, 0 };
-static struct scommand_handler quit_command = { "QUIT", c_quit, 0 };
-static struct scommand_handler server_command = { "SERVER", c_server, FLAGS_UNKNOWN };
-static struct scommand_handler squit_command = { "SQUIT", c_squit, 0 };
+static struct scommand_handler kill_command = { "KILL", c_kill, 0, DLINK_EMPTY };
+static struct scommand_handler nick_command = { "NICK", c_nick, 0, DLINK_EMPTY };
+static struct scommand_handler quit_command = { "QUIT", c_quit, 0, DLINK_EMPTY };
+static struct scommand_handler server_command = { "SERVER", c_server, FLAGS_UNKNOWN, DLINK_EMPTY};
+static struct scommand_handler squit_command = { "SQUIT", c_squit, 0, DLINK_EMPTY };
 
 /* init_client()
  *   initialises various things
@@ -177,7 +177,7 @@ del_host(struct client *target_p)
 
 		DLINK_FOREACH(uptr, hptr->uhosts.head)
 		{
-			uhost_p = ptr->data;
+			uhost_p = uptr->data;
 
 			if(strcasecmp(uhost_p->username, target_p->user->username))
 				continue;
@@ -194,6 +194,8 @@ del_host(struct client *target_p)
 			}
 			else
 				BlockHeapFree(uhost_heap, uhost_p);
+
+			break;
 		}
 
 		dlink_delete(&target_p->user->hostptr, &hptr->users);
@@ -207,6 +209,8 @@ del_host(struct client *target_p)
 		}
 		else
 			BlockHeapFree(host_heap, hptr);
+
+		break;
 	}
 }
 

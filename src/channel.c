@@ -27,12 +27,12 @@ static void c_sjoin(struct client *, char *parv[], int parc);
 static void c_tb(struct client *, char *parv[], int parc);
 static void c_topic(struct client *, char *parv[], int parc);
 
-static struct scommand_handler join_command = { "JOIN", c_join, 0 };
-static struct scommand_handler kick_command = { "KICK", c_kick, 0 };
-static struct scommand_handler part_command = { "PART", c_part, 0 };
-static struct scommand_handler sjoin_command = { "SJOIN", c_sjoin, 0 };
-static struct scommand_handler tb_command = { "TB", c_tb, 0 };
-static struct scommand_handler topic_command = { "TOPIC", c_topic, 0 };
+static struct scommand_handler join_command = { "JOIN", c_join, 0, DLINK_EMPTY };
+static struct scommand_handler kick_command = { "KICK", c_kick, 0, DLINK_EMPTY };
+static struct scommand_handler part_command = { "PART", c_part, 0, DLINK_EMPTY };
+static struct scommand_handler sjoin_command = { "SJOIN", c_sjoin, 0, DLINK_EMPTY };
+static struct scommand_handler tb_command = { "TB", c_tb, 0, DLINK_EMPTY };
+static struct scommand_handler topic_command = { "TOPIC", c_topic, 0, DLINK_EMPTY };
 
 /* init_channel()
  *   initialises various things

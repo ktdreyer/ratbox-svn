@@ -27,13 +27,13 @@ static void c_trace(struct client *, char *parv[], int parc);
 static void c_version(struct client *, char *parv[], int parc);
 static void c_whois(struct client *, char *parv[], int parc);
 
-static struct scommand_handler admin_command = { "ADMIN", c_admin, 0 };
-static struct scommand_handler ping_command = { "PING", c_ping, 0 };
-static struct scommand_handler pong_command = { "PONG", c_pong, 0 };
-static struct scommand_handler stats_command = { "STATS", c_stats, 0 };
-static struct scommand_handler trace_command = { "TRACE", c_trace, 0 };
-static struct scommand_handler version_command = { "VERSION", c_version, 0 };
-static struct scommand_handler whois_command = { "WHOIS", c_whois, 0 };
+static struct scommand_handler admin_command = { "ADMIN", c_admin, 0, DLINK_EMPTY };
+static struct scommand_handler ping_command = { "PING", c_ping, 0, DLINK_EMPTY };
+static struct scommand_handler pong_command = { "PONG", c_pong, 0, DLINK_EMPTY };
+static struct scommand_handler stats_command = { "STATS", c_stats, 0, DLINK_EMPTY };
+static struct scommand_handler trace_command = { "TRACE", c_trace, 0, DLINK_EMPTY };
+static struct scommand_handler version_command = { "VERSION", c_version, 0, DLINK_EMPTY };
+static struct scommand_handler whois_command = { "WHOIS", c_whois, 0, DLINK_EMPTY };
 
 void
 init_scommand(void)
@@ -85,7 +85,9 @@ handle_scommand_client(struct client *client_p, const char *command,
 			char *parv[], int parc)
 {
 	struct scommand_handler *handler;
+	scommand_func hook;
 	dlink_node *ptr;
+	dlink_node *hptr;
 	unsigned int hashv = hash_command(command);
 	
 	DLINK_FOREACH(ptr, scommand_table[hashv].head)
@@ -94,6 +96,13 @@ handle_scommand_client(struct client *client_p, const char *command,
 		if(!strcasecmp(command, handler->cmd))
 		{
 			handler->func(client_p, parv, parc);
+
+			DLINK_FOREACH(hptr, handler->hooks.head)
+			{
+				hook = hptr->data;
+				(*hook)(client_p, parv, parc);
+			}
+
 			break;
 		}
 	}
@@ -129,6 +138,46 @@ add_scommand_handler(struct scommand_handler *chandler)
 
 	hashv = hash_command(chandler->cmd);
 	dlink_add_alloc(chandler, &scommand_table[hashv]);
+}
+
+void
+add_scommand_hook(scommand_func hook, const char *command)
+{
+	struct scommand_handler *handler;
+	dlink_node *ptr;
+	unsigned int hashv = hash_command(command);
+
+	DLINK_FOREACH(ptr, scommand_table[hashv].head)
+	{
+		handler = ptr->data;
+		if(!strcasecmp(command, handler->cmd))
+		{
+			dlink_add_alloc(hook, &handler->hooks);
+			return;
+		}
+	}
+
+	s_assert(0);
+}
+
+void
+del_scommand_hook(scommand_func hook, const char *command)
+{
+	struct scommand_handler *handler;
+	dlink_node *ptr;
+	unsigned int hashv = hash_command(command);
+
+	DLINK_FOREACH(ptr, scommand_table[hashv].head)
+	{
+		handler = ptr->data;
+		if(!strcasecmp(command, handler->cmd))
+		{
+			dlink_find_destroy(&handler->hooks, hook);
+			return;
+		}
+	}
+
+	s_assert(0);
 }
 
 static void
