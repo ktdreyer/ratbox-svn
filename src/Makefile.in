@@ -12,7 +12,7 @@ BIN=rserv@EXEEXT@
 INCLUDES=-I ../include/
 LDFLAGS=
 LIBS=@LIBS@
-CFLAGS=-g -O0 -Wall -Werror -Wunused -Wshadow -DPREFIX=\"$(PREFIX)\"
+CFLAGS=-g -O0 -Wall -Werror -Wunused -Wshadow -Wmissing-declarations -Wwrite-strings -DPREFIX=\"$(PREFIX)\"
 MAKE = make
 
 SERVICEDIRS=s_userserv s_chanserv

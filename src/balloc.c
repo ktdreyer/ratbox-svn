@@ -121,7 +121,7 @@ init_balloc(void)
  * frob some memory. debugging time.
  * -- adrian
  */
-void
+static void
 mem_frob(void *data, int len)
 {
 	/* correct for Intel only! little endian */

@@ -133,8 +133,9 @@ introduce_service(struct client *target_p)
 		chptr = ptr->data;
 
 		sendto_server(":%s SJOIN %lu %s %s :@%s",
-				MYNAME, chptr->tsinfo, chptr->name,
-				chmode_to_string(chptr), target_p->name);
+				MYNAME, (unsigned long) chptr->tsinfo, 
+				chptr->name, chmode_to_string(chptr), 
+				target_p->name);
 	}
 }
 

@@ -260,8 +260,9 @@ join_service(struct client *service_p, const char *chname)
 
 	if(finished_bursting)
 		sendto_server(":%s SJOIN %lu %s %s :@%s",
-				MYNAME, chptr->tsinfo, chptr->name,
-				chmode_to_string(chptr), service_p->name);
+				MYNAME, (unsigned long) chptr->tsinfo, 
+				chptr->name, chmode_to_string(chptr), 
+				service_p->name);
 }
 
 void
@@ -278,8 +279,8 @@ void
 rejoin_service(struct client *service_p, struct channel *chptr)
 {
 	sendto_server(":%s SJOIN %lu %s %s :@%s",
-			MYNAME, chptr->tsinfo, chptr->name,
-			chmode_to_string(chptr), service_p->name);
+			MYNAME, (unsigned long) chptr->tsinfo, chptr->name, 
+			chmode_to_string(chptr),  service_p->name);
 }
 
 /* c_join()

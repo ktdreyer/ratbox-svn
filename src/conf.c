@@ -30,7 +30,7 @@ int scount = 0;                 /* used by yyparse(), etc */
 FBFILE *conf_fbfile_in;
 extern char yytext[];
 
-void
+static void
 set_default_conf(void)
 {
 	config_file.dcc_low_port = 1025;
@@ -40,7 +40,7 @@ set_default_conf(void)
 	config_file.reconnect_time = 300;
 }
 
-void
+static void
 validate_conf(void)
 {
 	if(EmptyString(config_file.name))

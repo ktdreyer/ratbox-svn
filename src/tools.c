@@ -79,9 +79,9 @@ get_duration(time_t seconds)
         minutes = (int) (seconds / 60);
         seconds %= 60;
 
-        snprintf(buf, sizeof(buf), "%d day%s, %d:%02d:%02ld",
+        snprintf(buf, sizeof(buf), "%d day%s, %d:%02d:%02lu",
                  days, (days == 1) ? "" : "s", hours,
-                 minutes, seconds);
+                 minutes, (unsigned long) seconds);
 
         return buf;
 }

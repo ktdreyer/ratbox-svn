@@ -62,6 +62,7 @@ extern const unsigned int CharAttrs[];
 
 extern int match(const char *mask, const char *name);
 extern int irccmp(const char *s1, const char *s2);
+extern int ircncmp(const char *s1, const char *s2, int n);
 
 extern char *strip_tabs(char *dest, const unsigned char *src, size_t len);
 
