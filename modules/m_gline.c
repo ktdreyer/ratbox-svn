@@ -454,13 +454,6 @@ check_wild_gline(char *user, char *host)
 static int invalid_gline(struct Client *source_p, char *luser, char *lhost,
                        char *lreason)
 {
-  if(strchr(luser, '#') || strchr(lhost, '#') || strchr(lreason, '#'))
-  {
-    sendto_one(source_p, ":%s NOTICE %s :Invalid character '#' in gline",
-               me.name, source_p->name);
-    return 1;
-  }
-  
   if(strchr(luser, '!'))
   {
     sendto_one(source_p, ":%s NOTICE %s :Invalid character '!' in gline",
@@ -468,6 +461,7 @@ static int invalid_gline(struct Client *source_p, char *luser, char *lhost,
     return 1;
   }
 
+  return 0;
 }
 
 /*
@@ -559,7 +553,7 @@ log_gline_request(
 		  const char *host,
 		  const char *reason)
 {
-  char        buffer[1024];
+  char        buffer[2*BUFSIZE];
   char        filenamebuf[PATH_MAX + 1];
   static char timebuffer[MAX_DATE_STRING];
   struct tm*  tmptr;
@@ -612,7 +606,7 @@ log_gline(struct Client *source_p,
 	  const char *host,
 	  const char *reason)
 {
-  char         buffer[1024];
+  char         buffer[2*BUFSIZE];
   char         filenamebuf[PATH_MAX + 1];
   static  char timebuffer[MAX_DATE_STRING + 1];
   struct tm*   tmptr;
@@ -689,7 +683,14 @@ log_gline(struct Client *source_p,
       return;
     }
 
-  ircsprintf(buffer, "K:%s:%s:%s\n", host,user,reason);
+  ircsprintf(buffer, "\"%s\",\"%s\",\"%s %s\",\"%s\",%ld\n",
+	     user,
+	     host,
+	     reason,
+	     timebuffer,
+	     oper_nick,
+	     CurrentTime);
+
   if (fbputs(buffer,out) == -1)
     {
       sendto_realops_flags(FLAGS_ALL,"*** Problem writing to %s",filenamebuf);
