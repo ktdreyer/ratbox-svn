@@ -68,7 +68,7 @@ BASE_SRCS =                     \
   irc_string.c                  \
   ircd.c                        \
   ircd_signal.c                 \
-  ircdauth.c                    \
+#  ircdauth.c                    \
   kdparse.c			\
   linebuf.c                     \
   list.c                        \
