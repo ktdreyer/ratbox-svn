@@ -436,21 +436,17 @@ int register_local_user(struct Client *cptr, struct Client *sptr,
 /* Put this in #ifdef now, and make sure that we are using openssl or
  * it breaks the build. */
 #ifdef USE_IDS
-	  if (sptr->user->id[0] == '\0') 
-	  {
-		  do {
-			  id = id_get();
-		  } while (hash_find_id(id, NULL));
-		  
-		  strcpy(sptr->user->id, id);
-		  add_to_id_hash_table(sptr->user->id, sptr);
-	  }
-#endif
-
+  if (sptr->user->id[0] == '\0') 
+    {
+      do {
+	id = id_get();
+      } while (hash_find_id(id, NULL));
+      
       strcpy(sptr->user->id, id);
       add_to_id_hash_table(sptr->user->id, sptr);
     }
-	  
+#endif
+
   sendto_realops_flags(FLAGS_CCONN,
 		       "Client connecting: %s (%s@%s) [%s] {%s}",
 		       nick, sptr->username, sptr->host,

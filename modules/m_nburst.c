@@ -42,8 +42,10 @@
 
 static int ms_nburst(struct Client*, struct Client*, int, char**);
 
+#define MSG_NBURST "NBURST"
+
 struct Message nburst_msgtab = {
-  MSG_CBURST, 0, 1, 0, MFLG_SLOW | MFLG_UNREG, 0L,
+  MSG_NBURST, 0, 1, 0, MFLG_SLOW | MFLG_UNREG, 0L,
   {m_unregistered, m_ignore, ms_nburst, m_ignore}
 };
 
@@ -78,65 +80,20 @@ static int ms_nburst(struct Client *cptr,
                      int parc,
                      char *parv[])
 {
-  char *name;
   char *nick;
-  char *key;
-  struct Channel *chptr;
 
   if( parc < 2 || *parv[1] == '\0' )
      return 0;
 
-  name = parv[1];
+  nick = parv[1];
 
-  if( parc > 2 )
-    nick = parv[2];
-  else
-    nick = NULL;
-
-  if( parc > 3 )
-    key = parv[3];
-  else
-    key = "";
+  /* XXX more to come obviously */
 
 #ifdef DEBUGLL
-  sendto_realops_flags(FLAGS_ALL, "CBURST called by %s for %s %s %s",
-    cptr->name,
-    name,
-    nick ? nick : "",
-    key ? key : "" );
+  sendto_realops_flags(FLAGS_ALL, "NBURST called by %s for %s",
+		       cptr->name,
+		       nick ? nick : "");
 #endif
-
-  if( (chptr = hash_find_channel(name, NullChn)) == NULL)
-  {
-    if((!nick) || (nick && *nick!='!'))
-    {
-      chptr = get_channel(sptr, name, CREATE);
-      chptr->channelts = (time_t)(-1); /* ! highest possible TS so its always-                                          * over-ruled
-                                        */
-      chptr->users_last = CurrentTime;
-    }
-    else if(nick && *nick=='!')
-    {
-      sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL),
-                 me.name, nick+1, name);
-      return 0;
-    }
-  }
-
-  if(IsCapable(cptr,CAP_LL))
-    {
-      burst_channel(cptr,chptr);
-
-      if(nick)
-	sendto_one(cptr,":%s LLJOIN %s %s %s", me.name, name,
-                   nick, key);
-    }
-  else
-    {
-      sendto_realops_flags(FLAGS_ALL,
-		   "*** CBURST request received from non LL capable server! [%s]",
-			   cptr->name);
-    }
 
   return 0;
 }

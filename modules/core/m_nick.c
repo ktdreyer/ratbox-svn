@@ -145,7 +145,7 @@ static int mr_nick(struct Client *cptr, struct Client *sptr, int parc,
        * involve killing someone, instead of just sending a
        * NICKNAMEINUSE error
        */
-      sendto_one(sptr, ":%s NBURST %s %s", me.name, nick);
+      sendto_one(sptr, ":%s NBURST %s", me.name, nick);
     }
     else
       return(set_initial_nick(cptr, sptr, nick));
