@@ -58,8 +58,8 @@ struct ConfItem
   unsigned int     flags;
   int              clients;  /* Number of *LOCAL* clients using this */
   struct irc_inaddr ipnum;
-  unsigned long    ip;       /* only used for I D lines etc. */
-  unsigned long    ip_mask;
+  unsigned int     ip;       /* only used for I D lines etc. */
+  unsigned int     ip_mask;
   char*            name;     /* IRC name, nick, server name, or original u@h */
   char*            host;     /* host part of user@host */
   char*            passwd;

@@ -197,7 +197,7 @@ static int inetport(struct Listener* listener)
 
 
 #ifdef IPV6
-  if (!IN6_ARE_ADDR_EQUAL(&listener->addr, &in6addr_any)) {
+  if (!IN6_ARE_ADDR_EQUAL((struct in6_addr *)&listener->addr, &in6addr_any)) {
 #else
   if (INADDR_ANY != listener->addr.s_addr) {
 #endif

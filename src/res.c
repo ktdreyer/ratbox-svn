@@ -647,7 +647,8 @@ static void do_query_number(const struct DNSQuery* query,
   assert(addr != NULL);
 
 #ifdef IPV6
-  if(!IN6_IS_ADDR_V4MAPPED(PIN_ADDR(addr)) && !IN6_IS_ADDR_V4COMPAT(PIN_ADDR(addr)))
+  if(!IN6_IS_ADDR_V4MAPPED((struct in6_addr *)PIN_ADDR(addr))
+     && !IN6_IS_ADDR_V4COMPAT((struct in6_addr *)PIN_ADDR(addr)))
   {
 	unsigned char *qp;
 	int n, c;

@@ -340,7 +340,7 @@ void add_connection(struct Listener* listener, int fd)
    * the client has already been checked out in accept_connection
    */
   new_client = make_client(NULL);
-  if (getpeername(fd, &SOCKADDR(irn), &len))
+  if (getpeername(fd, (struct sockaddr *)&SOCKADDR(irn), &len))
     {
       report_error("Failed in adding new connection %s :%s", 
 		   get_listener_name(listener), errno);
@@ -570,7 +570,8 @@ comm_connect_tcp(int fd, const char *host, u_short port,
      */
     inetpton(DEF_FAM, host, S_ADDR(&fd_table[fd].connect.hostaddr));
 #ifdef IPV6
-    if(IN6_IS_ADDR_UNSPECIFIED(S_ADDR(&fd_table[fd].connect.hostaddr))) {
+    if(IN6_IS_ADDR_UNSPECIFIED((struct in6_addr *)
+                               S_ADDR(&fd_table[fd].connect.hostaddr))) {
 #else
     if (S_ADDR(fd_table[fd].connect.hostaddr) == INADDR_NONE) {
 #endif

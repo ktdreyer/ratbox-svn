@@ -37,6 +37,7 @@
 #include "send.h"
 #include "memory.h"
 
+#include <assert.h>
 #include <string.h>
 #include <stdlib.h>
 
@@ -176,13 +177,16 @@ void _free_user(struct User* user, struct Client* cptr)
        */
       if (user->joined || user->refcnt < 0 ||
           user->invited.head || user->channel.head)
-      sendto_realops_flags(FLAGS_ALL,
+      {
+        sendto_realops_flags(FLAGS_ALL,
 			   "* %#lx user (%s!%s@%s) %#lx %#lx %#lx %d %d *",
 			   (unsigned long)cptr, cptr ? cptr->name : "<noname>",
 			   cptr->username, cptr->host, (unsigned long)user,
 			   (unsigned long)user->invited.head,
 			   (unsigned long)user->channel.head, user->joined,
 			   user->refcnt);
+        assert(0);
+      }
 
       if(BlockHeapFree(free_anUsers,user))
         {
