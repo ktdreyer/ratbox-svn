@@ -45,7 +45,8 @@
 #include <string.h>
 #include "memdebug.h"
 
-int do_whois(struct Client *cptr, struct Client *sptr, int parc, char *parv[]);int single_whois(struct Client *sptr, struct Client *acptr, int wilds);
+int do_whois(struct Client *cptr, struct Client *sptr, int parc, char *parv[]);
+int single_whois(struct Client *sptr, struct Client *acptr, int wilds);
 void whois_person(struct Client *sptr,struct Client *acptr);
 int global_whois(struct Client *sptr, char *nick, int wilds);
 
@@ -107,9 +108,11 @@ int     mo_whois(struct Client *cptr,
 
   if(parc > 2)
     {
-      if (hunt_server(cptr,sptr,":%s WHOIS %s :%s", 1,parc,parv) !=
+      if (hunt_server(cptr,sptr,":%s WHOIS %s :%s", 1, parc, parv) !=
           HUNTED_ISME)
-        return 0;
+        {
+          return 0;
+        }
       parv[1] = parv[2];
     }
 
