@@ -183,10 +183,7 @@ int     m_invite(struct Client *cptr,
   if(MyConnect(acptr) && chop)
     add_invite(chptr, acptr);
 
-  sendto_anywhere(acptr, sptr, ":%s!%s@%s INVITE %s :%s",
-		  sptr->name,
-		  sptr->username,
-		  sptr->host,
+  sendto_anywhere(acptr, sptr, "INVITE %s :%s",
 		  acptr->name, parv[2]);
   return 0;
 }

@@ -1079,16 +1079,13 @@ static void exit_one_client(struct Client *cptr, struct
           
           /* Clean up invitefield */
           for (lp = sptr->user->invited.head; lp; lp = next_lp)
-	    {
-	      next_lp = lp->next;
-	      del_invite(lp->data, sptr);
-#if 0
-	      free_dlink_node(lp);
-#endif
-	    }
+           {
+              next_lp = lp->next;
+              del_invite(lp->data, sptr);
+           }
 
-	  /* Clean up allow lists */
-	  del_all_accepts(sptr);
+          /* Clean up allow lists */
+          del_all_accepts(sptr);
 
           /* again, this is all that is needed */
         }
