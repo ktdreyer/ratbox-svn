@@ -1,3 +1,6 @@
+*** 20001228_8 by davidt
+/set autoconn with no params would core the server.
+
 *** 20001228_7 by bill
 
 - fixed typo
