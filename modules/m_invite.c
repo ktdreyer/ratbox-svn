@@ -200,7 +200,6 @@ int     ms_invite(struct Client *cptr,
                  int parc,
                  char *parv[])
 {
-  /* XXX Consider just mapping this to m_invite in parse.c -db */
   return (m_invite(cptr,sptr,parc,parv));
   /* NOT REACHED */
   return 0;
