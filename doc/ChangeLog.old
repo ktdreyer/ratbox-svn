@@ -1,3 +1,7 @@
+*** 20010225_20 by androsyn
+Error condition for inetpton() should be <= 0 :)
+
+
 *** 20010225_19 by androsyn
 Fixed broken /rehash dns
 
