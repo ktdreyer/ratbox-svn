@@ -17,7 +17,7 @@
 #include <stddef.h>
 #define INCLUDED_stddef_h
 #endif
-
+#include "ircd_defs.h"
 
 
 /* 

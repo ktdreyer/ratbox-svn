@@ -313,8 +313,9 @@ int _BlockHeapFree(BlockHeap *bh, void *ptr)
        return 1;
      }
 #ifdef MEMDEBUG
+   bh -= sizeof(MemoryEntry);
    {
-    MemoryEntry *mme = (MemoryEntry*)(((char*)bh)-sizeof(MemoryEntry));
+    MemoryEntry *mme = (MemoryEntry*)bh;
     if (mme->last)
       mme->last->next = mme->next;
     else
