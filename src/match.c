@@ -113,7 +113,7 @@ match(const char *mask, const char *name)
 /* match_esc()
  *
  * The match() function with support for escaping characters such
- * as '*' and '?'
+ * as '*', '?', '#' and '@'
  */
 int
 match_esc(const char *mask, const char *name)
@@ -171,7 +171,8 @@ match_esc(const char *mask, const char *name)
 				return 1;
 			if(quote)
 				return 0;
-			for (m--; (m > (const unsigned char *) mask) && (*m == '?'); m--)
+			for (m--; (m > (const unsigned char *) mask) && 
+					(*m == '?' || *m == '#' || *m == '@' ); m--)
 				;
 			if(*m == '*' && (m > (const unsigned char *) mask))
 				return 1;
@@ -192,7 +193,9 @@ match_esc(const char *mask, const char *name)
 				m++;
 			return (*m == 0);
 		}
-		if(ToLower(*m) != ToLower(*n) && !(!quote && *m == '?'))
+		if(ToLower(*m) != ToLower(*n) && !(!quote && *m == '?') &&
+			!(!quote && *m == '@' && IsAlpha(*n)) &&
+			!(!quote && *m == '#' && IsNum(*n)))
 		{
 			if(!wild)
 				return 0;
