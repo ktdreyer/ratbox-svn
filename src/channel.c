@@ -2458,6 +2458,9 @@ static  void    sub1_from_channel(struct Channel *chptr)
 	  /* free all bans/exceptions/denies */
 	  free_channel_masks( chptr );
 
+          /* free topic_info */
+          MyFree(chptr->topic_info);            
+
 #ifdef FLUD
           free_fluders(NULL, chptr);
 #endif
@@ -2853,7 +2856,9 @@ void remove_empty_channels()
         channel = empty_channel_list->nextch;
       if (empty_channel_list->nextch)
         empty_channel_list->nextch->prevch = empty_channel_list->prevch;
-      
+
+      MyFree(chptr->topic_info);
+
 #ifdef FLUD
       free_fluders(NULL, empty_channel_list);
 #endif
@@ -2973,6 +2978,8 @@ static void destroy_channel(struct Channel *chptr)
     GlobalChannelList = chptr->nextch;
   if (chptr->nextch)
     chptr->nextch->prevch = chptr->prevch;
+
+  MyFree(chptr->topic_info);
 
 #ifdef FLUD
   free_fluders(NULL, chptr);

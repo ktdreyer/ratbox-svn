@@ -154,8 +154,7 @@ int     m_topic(struct Client *cptr,
 	       */
 	      strncpy_irc(chptr->topic, topic, TOPICLEN);
 	      
-	      if (chptr->topic_info)
-		free(chptr->topic_info);
+              MyFree(chptr->topic_info);
 	      
 	      if (ConfigFileEntry.topic_uh)
 		{
@@ -275,8 +274,7 @@ int     ms_topic(struct Client *cptr,
 	       */
 	      strncpy_irc(chptr->topic, topic, TOPICLEN);
 	      
-	      if (chptr->topic_info)
-		free(chptr->topic_info);
+              MyFree(chptr->topic_info);
 	      
 	      if (ConfigFileEntry.topic_uh)
 		{
