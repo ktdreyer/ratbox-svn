@@ -1,3 +1,15 @@
+leeh        2002/01/16 17:21:20 EST	(20020116_2)
+
+  Modified files:
+    modules              m_invite.c 
+  Log:
+  - check_channel_name returns an int, not null..
+  
+  Revision  Changes    Path
+  1.39      +2 -2      ircd-hybrid-7/modules/m_invite.c
+
+
+
 jmallett    2002/01/16 11:02:25 EST	(20020116_1)
 
   Modified files:
