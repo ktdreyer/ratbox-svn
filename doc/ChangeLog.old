@@ -1,3 +1,16 @@
+*** 19991011_1 by db
+  It turns out, that cptr->fd is <0 in some cases when its being used, just
+as Q described. I was confused at first, because it sounded like he
+was saying cptr was =freed= then being used. It appears its still a valid
+pointer, but its fd has been closed...
+
+  The ideal solution would be to make sure the cptr is removed from the 
+channel link list before the code even gets to sendto_common_channels()
+
+  In any case, using an fd < 0 in this section is a BAD THING 
+
+
+
 *** 19991009_1 by db
 - better fix for umode code
 
