@@ -1,3 +1,18 @@
+leeh        2002/09/04 09:44:07 EDT	(20020904_0)
+
+  Modified files:
+    modules              m_topic.c 
+    src                  channel_mode.c 
+  Log:
+  - missing bracket in channel_mode.c
+  - missing #ifdef in m_topic.c
+  
+  Revision  Changes    Path
+  1.61      +13 -10    ircd-ratbox/modules/m_topic.c
+  7.79      +1 -1      ircd-ratbox/src/channel_mode.c
+
+
+
 leeh        2002/09/02 16:40:06 EDT	(20020902_0)
 
   Modified files:
