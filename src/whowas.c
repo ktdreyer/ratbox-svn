@@ -83,7 +83,7 @@ void add_history(struct Client* client_p, int online)
    * NOTE: strcpy ok here, the sizes in the client struct MUST
    * match the sizes in the whowas struct
    */
-  strlcpy(who->name, client_p->name, NICKLEN+1);
+  strlcpy(who->name, client_p->name, NICKLEN);
   strcpy(who->username, client_p->username);
   strcpy(who->hostname, client_p->host);
   strcpy(who->realname, client_p->info);
