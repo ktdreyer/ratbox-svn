@@ -1,3 +1,9 @@
+*** 20010823_1 by db
+- I couldn't take it anymore. cleaned up build_list_of_channels slightly
+- started preliminary code for JOIN TS from remote server.
+
+
+
 *** 20010822_8 by leeh
 - removed +e and stuck gecos on the end of the +c notice
 
