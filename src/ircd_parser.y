@@ -196,8 +196,8 @@ int   class_redirport_var;
 %token  T_L_WARN
 %token  UNKLINE
 %token  USER
-%token  IPV4_VHOST
-%token	IPV6_VHOST
+%token  VHOST
+%token	VHOST6
 %token  WARN
 %token  SILENT
 %token  GENERAL
@@ -450,11 +450,11 @@ serverinfo_entry:       SERVERINFO
 serverinfo_items:       serverinfo_items serverinfo_item |
                         serverinfo_item 
 
-serverinfo_item:        serverinfo_name | serverinfo_ipv4_vhost |
+serverinfo_item:        serverinfo_name | serverinfo_vhost |
                         serverinfo_hub | serverinfo_description |
                         serverinfo_network_name | serverinfo_network_desc |
                         serverinfo_max_clients | serverinfo_no_hack_ops |
-                        serverinfo_rsa_private_key | serverinfo_ipv6_vhost |
+                        serverinfo_rsa_private_key | serverinfo_vhost6 |
 			error
 
 serverinfo_rsa_private_key: RSA_PRIVATE_KEY '=' QSTRING ';'
@@ -539,7 +539,7 @@ serverinfo_network_desc: NETWORK_DESC '=' QSTRING ';'
     DupString(ServerInfo.network_desc,yylval.string);
   };
 
-serverinfo_ipv4_vhost:  IPV4_VHOST '=' QSTRING ';'
+serverinfo_vhost:  VHOST '=' QSTRING ';'
   {
     if(inetpton(DEF_FAM, yylval.string, &IN_ADDR(ServerInfo.ip)) <= 0)
     {
@@ -548,7 +548,7 @@ serverinfo_ipv4_vhost:  IPV4_VHOST '=' QSTRING ';'
     ServerInfo.specific_ipv4_vhost = 1;
   };
 
-serverinfo_ipv6_vhost:	IPV6_VHOST '=' QSTRING ';'
+serverinfo_vhost6:	VHOST6 '=' QSTRING ';'
   {
 #ifdef IPV6
     if(inetpton(DEF_FAM,yylval.string, &IN_ADDR(ServerInfo.ip6)) <= 0)
