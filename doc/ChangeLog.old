@@ -1,3 +1,8 @@
+*** 20001216_1 by toot
+. let opers see full /lusers report even if server-hide is on
+. parse() can check the number of params for a lot of m_commands
+
+
 *** 20001215_15 by db
 - m_mode.c had some twisted logic. Corrected. *duh*
 - did some variable renaming in channel.c chname instead of "real_name"
