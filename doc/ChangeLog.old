@@ -1,3 +1,8 @@
+*** 20010708_1 by a1kmm
+- If we get a small TS on a non-existant channel, set the newts to 800000000
+  not 0.
+
+
 *** 20010707_3 by a1kmm
 - Reverted the testsuite module stuff, it probably shouldn't be committed
   yet.
