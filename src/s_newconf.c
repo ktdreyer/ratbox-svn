@@ -395,7 +395,7 @@ conf_dns_callback(void *vptr, adns_answer * reply)
 		if(reply->type ==  adns_r_addr6)
 		{
 			struct sockaddr_in6 *in6 = (struct sockaddr_in6 *)&server_p->ipnum;
-			SET_SS_LEN(server_p->ipnum, sizeof(struct sockaddr_in6);
+			SET_SS_LEN(server_p->ipnum, sizeof(struct sockaddr_in6));
 			in6->sin6_family = AF_INET6;
 			in6->sin6_port = 0;
 			memcpy(&in6->sin6_addr, &reply->rrs.addr->addr.inet6.sin6_addr, sizeof(struct in6_addr));
@@ -404,7 +404,7 @@ conf_dns_callback(void *vptr, adns_answer * reply)
 #endif
 		{
 			struct sockaddr_in *in = (struct sockaddr_in *)&server_p->ipnum;
-			SET_SS_LEN(server_p->ipnum, sizeof(struct sockaddr_in);
+			SET_SS_LEN(server_p->ipnum, sizeof(struct sockaddr_in));
 			in->sin_family = AF_INET;
 			in->sin_port = 0;
 			in->sin_addr.s_addr = reply->rrs.addr->addr.inet.sin_addr.s_addr;
