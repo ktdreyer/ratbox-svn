@@ -418,8 +418,18 @@ channel_member_names(struct Channel *chptr, struct Client *client_p, int show_eo
 			t += tlen;
 		}
 
-		*(t - 1) = '\0';
-		sendto_one(client_p, "%s", lbuf);
+		/* The old behaviour here was to always output our buffer,
+		 * even if there are no clients we can show.  This happens
+		 * when a client does "NAMES" with no parameters, and all
+		 * the clients on a -sp channel are +i.  I dont see a good
+		 * reason for keeping that behaviour, as it just wastes
+		 * bandwidth.  --anfl
+		 */
+		if(cur_len != mlen)
+		{
+			*(t - 1) = '\0';
+			sendto_one(client_p, "%s", lbuf);
+		}
 	}
 
 	if(show_eon)

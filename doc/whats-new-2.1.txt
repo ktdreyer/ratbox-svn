@@ -37,7 +37,12 @@ Client
 - Target change anti-spam system.  Restrictions are now placed upon how many
   different clients (not channels) can be messaged within a specific time
   period.
-- Client capabilities.
+- Server-side notify lists.  These allow a client to request a server
+  notifies them when a nickname comes online or goesoffline.  See 
+  doc/monitor.txt for more information.
+- Client capabilities.  These allow clients to negotiate capabilities with
+  the server.  Currently supports:
+    - multi-prefix: A +ov client will have "@+" shown in names/who replies.
 
 Oper
 ----
@@ -59,4 +64,6 @@ Code cleanups
 - Removed support for VMS.  It hasnt worked for a long time.
 - Cleanups to the expiry of temp klines/dlines.
 - Various other things ;-).
-
+- Better splitcode, it now works on how many servers have notified
+  us of burst finishing, rather than how many servers are linked to the
+  network.
