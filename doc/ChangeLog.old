@@ -1,3 +1,7 @@
+*** 20001227_9 by davidt
+Fixed the off-by-one error in the paramcount
+
+
 *** 20001227_8 by davidt
 Added back /quote set msglocale, which vanished mysteriously when
 the new table-based SET code was comitted.
