@@ -1,3 +1,7 @@
+*** 20001223_14 by ejb
+- add OPER_ONLY_UMODES, umodes which only opers can set.
+
+
 *** 20001223_13 by wcampbel
 1. Make STATS for non-opers consistent...if it's an oper only STATS request,
    then always show ERR_NOPRIVILEGES.
