@@ -1,3 +1,30 @@
+androsyn    2005/03/22 16:27:52 UTC	(20050322_0)
+
+  Modified files:
+    .                    Makefile.in 
+    adns                 Makefile.in 
+    modules              Makefile.in 
+    servlink             Makefile.in 
+    src                  Makefile.am Makefile.in ircd_lexer.l 
+                         ircd_parser.y 
+    tools                Makefile.in viconf.c 
+  Log:
+  Fix the remaining issues in the tree after the disaster of a merge
+  
+  Revision  Changes    Path
+  7.54      +0 -0      ircd-ratbox/Makefile.in
+  1.16      +2 -2      ircd-ratbox/adns/Makefile.in
+  1.123     +3 -3      ircd-ratbox/modules/Makefile.in
+  1.24      +2 -2      ircd-ratbox/servlink/Makefile.in
+  7.3       +14 -7     ircd-ratbox/src/Makefile.am
+  7.160     +17 -54    ircd-ratbox/src/Makefile.in
+  1.173     +3 -1      ircd-ratbox/src/ircd_lexer.l
+  1.281     +4 -1      ircd-ratbox/src/ircd_parser.y
+  7.42      +2 -2      ircd-ratbox/tools/Makefile.in
+  7.9       +2 -1      ircd-ratbox/tools/viconf.c
+
+
+
 androsyn    2005/03/21 23:27:25 UTC	(20050321_10)
 
   Modified files:
