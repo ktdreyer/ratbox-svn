@@ -1,3 +1,8 @@
+*** 20010106_22 by fl_
+- dont warn about numerics sent to us from servers
+  theyre gunna be unavoidable with lazylinks and nick collides..
+
+
 *** 20010106_21 by fl_
 - added logging, amongst other things to the contrib stuff
 
