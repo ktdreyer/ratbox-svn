@@ -1,3 +1,10 @@
+*** 20010426_6 by jdc
+* Fixed unused retval variable in kq_update_events() via #if 0.
+* In kq_update_events(), kqoff was never set to 0 correctly (typo;
+  someone had "== 0", not "= 0").
+
+
+
 *** 20010426_5 by jdc
 * Fixed unused path declaration via #if 0.
 * ms_kill() lacked a "(%s)" for the kill reason at the end of the function.
