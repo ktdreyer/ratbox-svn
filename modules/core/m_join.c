@@ -370,14 +370,14 @@ ms_join(struct Client *client_p, struct Client *source_p, int parc, const char *
 			/* sent a +k without a key, eek. */
 			if(parc < 5 + args)
 				return 0;
-			strlcpy(mode.key, parv[5 + args], sizeof(mode.key));
+			strlcpy(mode.key, parv[4 + args], sizeof(mode.key));
 			args++;
 			break;
 		case 'l':
 			/* sent a +l without a limit. */
 			if(parc < 5 + args)
 				return 0;
-			mode.limit = atoi(parv[5 + args]);
+			mode.limit = atoi(parv[4 + args]);
 			args++;
 			break;
 		}
