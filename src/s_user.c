@@ -327,8 +327,9 @@ int register_local_user(struct Client *cptr, struct Client *sptr,
   int  status;
   dlink_node *ptr;
   dlink_node *m;
+#ifdef USE_IDS
   char *id;
-
+#endif
   assert(0 != sptr);
   assert(sptr->username != username);
 

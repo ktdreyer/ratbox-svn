@@ -56,6 +56,7 @@ static int m_stats(struct Client*, struct Client*, int, char**);
 static int ms_stats(struct Client*, struct Client*, int, char**);
 static int mo_stats(struct Client*, struct Client*, int, char**);
 
+
 struct Message stats_msgtab = {
   MSG_STATS, 0, 1, 0, MFLG_SLOW, 0,
   {m_unregistered, m_stats, ms_stats, mo_stats}
@@ -99,7 +100,7 @@ char *_version = "20001228";
 
 const char* Lformat = ":%s %d %s %s %u %u %u %u %u :%u %u %s";
 
-char *parse_stats_args(int, char **, int *, int *);
+static char *parse_stats_args(int, char **, int *, int *);
 
 static void stats_L(struct Client *, char *, int, int, char);
 static void stats_L_list(struct Client *s, char *, int, int,

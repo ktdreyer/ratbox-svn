@@ -56,8 +56,6 @@ static int set_initial_nick(struct Client *cptr, struct Client *sptr,
                             char *nick);
 static int change_local_nick(struct Client *cptr, struct Client *sptr,
                              char *nick);
-static int nick_equal_server(struct Client *cptr, struct Client *sptr,
-                             char *nick);
 static int clean_nick_name(char* nick);
 
 
