@@ -65,6 +65,7 @@
 #include <netdb.h>
 #include <unistd.h>
 #include <time.h>
+#include <string.h>
 
 /*
  * Note that this is only a single list - multiple lists is kinda pointless

@@ -210,6 +210,7 @@ int disable_sock_options(int fd)
  */
 int set_non_blocking(int fd)
 {
+#ifndef VMS
   int nonb = 0;
   int res;
   nonb |= O_NONBLOCK;
@@ -220,6 +221,20 @@ int set_non_blocking(int fd)
 
   fd_table[fd].flags.nonblocking = 1;
   return 1;
+#else
+  int val = 1;
+  int res;
+
+  log(L_CRIT, "Using ioctl to set FD %d non-blocking", fd);
+  printf("Using ioctl to set FD %d non-blocking\n", fd);
+  res = ioctl(fd, FIONBIO, &val);
+  if (res == -1)
+    return 0;
+
+  fd_table[fd].flags.nonblocking = 1;
+  log(L_CRIT, "Succeeded.");
+  return 1;
+#endif
 }
 
 /*
@@ -815,14 +830,18 @@ comm_open(int family, int sock_type, int proto, const char *note)
   /* Set the socket non-blocking, and other wonderful bits */
   if (!set_non_blocking(fd))
     {
-      log(L_CRIT, "comm_open: Couldn't set FD %d non blocking!", fd);
+      log(L_CRIT, "comm_open: Couldn't set FD %d non blocking: %s", fd, strerror(errno));
+    /* if VMS, we might be opening a file (ircd.conf, resolv.conf).
+       VMS doesn't let us set non-blocking on a file, so it might fail. */
+#ifndef VMS
       close(fd);
       return -1;
+#endif
     }
 
   /* Next, update things in our fd tracking */
   fd_open(fd, FD_SOCKET, note);
-
+  log(L_CRIT, "Made it to the end of comm_open!");
   return fd;
 }
 

@@ -33,6 +33,9 @@
 #include <limits.h>
 #include <unistd.h>
 #include <fcntl.h>
+#ifdef VMS
+# include <sys/ioctl.h>
+#endif
 
 #include <netdb.h>
 #include <sys/socket.h>
@@ -42,6 +45,7 @@
 #include "fileio.h"
 #include "s_bsd.h"
 #include "internal.h"
+#include "s_log.h"
 
 /* For some reason BSD/OS doesn't define INADDR_LOOPBACK */
 #ifndef INADDR_LOOPBACK
@@ -483,10 +487,15 @@ static void readconfigenvtext(adns_state ads, const char *envvar) {
 
 int adns__setnonblock(adns_state ads, int fd) {
   int r;
-  
+#ifdef VMS
+  int val = 1;
+ 
+  r = ioctl(fd, FIONBIO, &val); if (r < 0) return errno;
+#else
   r= fcntl(fd,F_GETFL,0); if (r<0) return errno;
   r |= O_NONBLOCK;
   r= fcntl(fd,F_SETFL,r); if (r<0) return errno;
+#endif
   return 0;
 }
 
@@ -540,10 +549,10 @@ static int init_finish(adns_state ads) {
   }
 
   ads->udpsocket = comm_open(AF_INET, SOCK_DGRAM, 0, "UDP Resolver socket");
-  if (ads->udpsocket<0) { r= errno; goto x_free; }
+  if (ads->udpsocket<0) { log(L_CRIT, "Failed to open socket"); r= errno; goto x_free; }
 
   r= adns__setnonblock(ads,ads->udpsocket);
-  if (r) { r= errno; goto x_closeudp; }
+  if (r) { log(L_CRIT, "Failed to make socket non-blocking"); r= errno; goto x_closeudp; }
   
   return 0;
 
@@ -551,6 +560,7 @@ static int init_finish(adns_state ads) {
   fd_close(ads->udpsocket);
  x_free:
   MyFree(ads);
+  log(L_CRIT, "Returning from init_finish: r = %d", r);
   return r;
 }
 
@@ -577,10 +587,11 @@ int adns_init(adns_state *ads_r, adns_initflags flags, FBFILE *diagfile) {
 
 #ifndef VMS
   readconfig(ads,"/etc/resolv.conf",0);
-#else
-  readconfig(ads,"DISK$USER[EBROCKLESBY.IRCD]RESOLV.CONF",0);
-#endif
   readconfig(ads,"/etc/resolv-adns.conf",0);
+#else
+  log(L_CRIT, "Opening []RESOLV.CONF (VMS)");
+  readconfig(ads,"[]RESOLV.CONF",0);
+#endif
   readconfigenv(ads,"RES_CONF");
   readconfigenv(ads,"ADNS_RES_CONF");
 
@@ -594,13 +605,16 @@ int adns_init(adns_state *ads_r, adns_initflags flags, FBFILE *diagfile) {
   ccf_search(ads,"ADNS_LOCALDOMAIN",-1,instrum_getenv(ads,"ADNS_LOCALDOMAIN"));
 
   if (ads->configerrno && ads->configerrno != EINVAL) {
+    log(L_CRIT, "Failed at 1");
     r= ads->configerrno;
     init_abort(ads);
     return r;
   }
 
+  log(L_CRIT, "About to pass 2");
   r= init_finish(ads);
   if (r) return r;
+  log(L_CRIT, "Reached 2");
 
   adns__consistency(ads,0,cc_entex);
   *ads_r= ads;
@@ -692,7 +706,7 @@ int adns__rereadconfig(adns_state ads)
 #ifndef VMS
   readconfig(ads,"/etc/resolv.conf",0);
 #else
-  readconfig(ads,"resolv.conf",0);
+  readconfig(ads,"[]resolv.conf",0);
 #endif
   adns__consistency(ads,0,cc_entex);
   return 0;
