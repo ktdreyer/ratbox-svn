@@ -1,3 +1,42 @@
+leeh        2003/12/26 16:39:48 EST	(20031226_4)
+
+  Modified files:
+    include              channel.h config.h io.h tools.h 
+                         ucommand.h 
+    src                  Makefile.in c_message.c channel.c conf.c 
+                         io.c s_alis.c scommand.c tools.c u_help.c 
+                         u_stats.c ucommand.c 
+  Log:
+  - add PING_TIME, how often a server can be idle before we send a PING, double
+    this with no data will cause a server to be exited
+  - added get_sendq(), so the sendq bit in stats u/.stats uplink works
+  - moved getfield() tools.c -> conf.c
+  - moved get_duration() stats.c -> tools.c
+  - stats.c is now u_stats.c, which only contains .stats
+  - reworked .help, list_ucommand() is gone, now have extended help too
+  - improved .status a bit to give channel/topic counts etc
+  - reset the ALIS flood values to something sensible
+  
+  Revision  Changes    Path
+  1.4       +2 -0      rserv/include/channel.h
+  1.4       +2 -0      rserv/include/config.h
+  1.6       +3 -0      rserv/include/io.h
+  1.4       +2 -2      rserv/include/tools.h
+  1.3       +0 -2      rserv/include/ucommand.h
+  1.5       +1 -1      rserv/src/Makefile.in
+  1.7       +0 -1      rserv/src/c_message.c
+  1.9       +24 -0     rserv/src/channel.c
+  1.9       +31 -0     rserv/src/conf.c
+  1.13      +38 -0     rserv/src/io.c
+  1.11      +2 -2      rserv/src/s_alis.c
+  1.8       +2 -2      rserv/src/scommand.c
+  1.2       +16 -25    rserv/src/tools.c
+  1.2       +132 -3    rserv/src/u_help.c
+  1.3       +5 -24     rserv/src/u_stats.c
+  1.6       +12 -49    rserv/src/ucommand.c
+
+
+
 leeh        2003/12/26 16:37:46 EST	(20031226_3)
 
   Modified files:
