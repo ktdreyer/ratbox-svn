@@ -1237,6 +1237,14 @@ int nickkilldone(struct Client *cptr, struct Client *sptr, int parc,
           m = &parv[4][1];
           while (*m)
             {
+              /* Don't allow non alpha chars through to confuse
+               * the lookup table
+               */
+              if(!IsAlpha(*m))
+                {
+                  m++;
+                  continue;
+                }
               flag = user_modes_from_c_to_bitmask[(int)(*m & 0x1F)];
               if ((flag & FLAGS_INVISIBLE))
                 {
@@ -1606,7 +1614,8 @@ int user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         case '\t' :
           break;
         default :
-          if((flag = user_modes_from_c_to_bitmask[(int)(*m & 0x1F)]))
+          if( IsAlpha(*m) &&
+            (flag = user_modes_from_c_to_bitmask[(int)(*m & 0x1F)]))
             {
               if (what == MODE_ADD)
                 sptr->umodes |= flag;
