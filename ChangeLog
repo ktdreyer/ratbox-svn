@@ -1,3 +1,29 @@
+leeh        2004/03/08 10:28:49 EST	(20040308_7)
+
+  Modified files:
+    include              hash.h 
+    modules              m_connect.c m_ping.c m_pong.c 
+    modules/core         m_message.c m_nick.c m_squit.c 
+    src                  hash.c s_serv.c s_user.c 
+  Log:
+  - fixed PING/PONG
+  - reworked find_server() to take a source_p, used to determine whether
+    we can do an id lookup or not
+  
+  Revision  Changes    Path
+  7.47      +1 -1      ircd-ratbox/include/hash.h
+  1.145     +2 -2      ircd-ratbox/modules/core/m_message.c
+  1.147     +2 -2      ircd-ratbox/modules/core/m_nick.c
+  1.78      +3 -3      ircd-ratbox/modules/core/m_squit.c
+  1.69      +3 -3      ircd-ratbox/modules/m_connect.c
+  1.53      +7 -11     ircd-ratbox/modules/m_ping.c
+  1.52      +2 -2      ircd-ratbox/modules/m_pong.c
+  7.102     +7 -6      ircd-ratbox/src/hash.c
+  7.385     +3 -3      ircd-ratbox/src/s_serv.c
+  7.307     +1 -1      ircd-ratbox/src/s_user.c
+
+
+
 leeh        2004/03/08 10:00:36 EST	(20040308_6)
 
   Modified files:
