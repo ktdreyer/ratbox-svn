@@ -1,3 +1,10 @@
+*** 20010523_7 by jdc
+* Changed a whole slew of long int references (%ld and %lu) to
+  %d or %u.  Most of these went alongside channelts, which is
+  defined as time_t.
+
+
+
 *** 20010523_6 by leeh
 - kserver -> cryptlink
 
