@@ -85,6 +85,7 @@ static struct flag_item user_modes[] =
   {FLAGS_CALLERID, 'g'},
   {FLAGS_INVISIBLE, 'i'},
   {FLAGS_SKILL, 'k'},
+  {FLAGS_LOCOPS, 'l'},
   {FLAGS_NCHANGE, 'n'},
   {FLAGS_OPER, 'o'},
   {FLAGS_REJ, 'r'},
@@ -145,7 +146,7 @@ int user_modes_from_c_to_bitmask[] =
   FLAGS_INVISIBLE, /* i */
   0,            /* j */
   FLAGS_SKILL,  /* k */
-  0,            /* l */
+  FLAGS_LOCOPS, /* l */
   0,            /* m */
   FLAGS_NCHANGE, /* n */
   FLAGS_OPER,   /* o */

@@ -76,7 +76,7 @@ static int m_locops(struct Client *cptr, struct Client *sptr,
       return 0;
     }
 
-  sendto_all_local_opers(sptr, NULL, "LOCOPS - %s", message);
+  sendto_realops_flags_opers(FLAGS_LOCOPS, sptr, "LOCOPS - %s", message);
 
   return 0;
 }

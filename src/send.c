@@ -1289,65 +1289,6 @@ sendto_match_butone(struct Client *one, struct Client *from,
 
 } /* sendto_match_butone() */
 
-/*
- * sendto_all_local_opers()
- *
- * inputs	- pointer to client message is from
- *              - string to insert after "WALLOPS" if given
- * 		- pointer to var arg message
- * output	- NONE
- * side effects	- send given message to all local opers,
- *                clients go nuts if sent message types of "LOCOPS"
- *                or "OPERWALL" hence, they are all "WALLOPS" but
- *                with "OPERWALL" or "LOCOPS" prefixed to the message.
- *
- * now va'ified  -bill
- */
-
-void
-sendto_all_local_opers(struct Client *from, char *type_message,
-		       const char *pattern, ...)
-
-{
-  char prefix[NICKLEN + USERLEN + HOSTLEN + 5];
-  va_list args;
-  struct Client *acptr;
-  dlink_node *ptr;
-  char message[IRCD_BUFSIZE*2];
-  int len;
-
-  if (!from || !message[0])
-    return;
-
-  va_start(args, pattern);
-  (void)send_format(message, pattern, args);
-  va_end(args);
-  
-  if(IsPerson(from))
-    (void)ircsprintf(prefix,":%s!%s@%s",
-		     from->name, from->username, from->host);
-  else
-    (void)ircsprintf(prefix,":%s", from->name);
-
-  if(type_message != NULL)
-    len = ircsprintf(sendbuf,"%s WALLOPS :%s> %s",
-		     prefix, type_message, message);
-  else
-    len = ircsprintf(sendbuf,"%s WALLOPS :%s",
-		     prefix, message);
-
-  len = send_trim(sendbuf,len);
-
-  for (ptr = oper_list.head; ptr; ptr = ptr->next)
-    {
-      acptr = ptr->data;
-      
-      if (!SendOperwall(acptr))
-	continue; /* has to be oper if in this linklist */
-      send_message(acptr, sendbuf, len);
-    }
-} /* sendto_all_local_opers() */
-
 
 /*
  * sendto_anywhere
@@ -1442,7 +1383,7 @@ sendto_realops_flags(int flags, const char *pattern, ...)
 	    }
 	}
     }
-  else 
+  else
     {
       for (ptr = oper_list.head; ptr; ptr = ptr->next)
 	{
@@ -1462,6 +1403,54 @@ sendto_realops_flags(int flags, const char *pattern, ...)
     }
 } /* sendto_realops_flags() */
 
+/*
+ * sendto_realops_flags_opers
+ *
+ * inputs       - flag types of messages to show to real opers
+ *              - client sending request
+ *              - var args input message
+ * output       - NONE
+ * side effects - Send to *local* ops only but NOT +s nonopers.
+ */
+
+void
+sendto_realops_flags_opers(int flags, struct Client *sptr, const char *pattern, ...)
+
+{
+  char prefix[NICKLEN + USERLEN + HOSTLEN + 5];
+  int len;
+  struct Client *cptr;
+  char nbuf[IRCD_BUFSIZE*2];
+  dlink_node *ptr;
+  va_list args;
+
+  va_start(args, pattern);
+  len = send_format(nbuf, pattern, args);
+  va_end(args);
+
+  if(IsPerson(sptr))
+    (void)ircsprintf(prefix, ":%s!%s@%s",
+                     sptr->name, sptr->username, sptr->host);
+  else
+    (void)ircsprintf(prefix, ":%s", sptr->name);
+
+  if (flags == FLAGS_WALLOP || flags == FLAGS_OPERWALL || flags  == FLAGS_LOCOPS)
+    {
+      for (ptr = oper_list.head; ptr; ptr = ptr->next)
+        {
+          cptr = ptr->data;
+
+          if(cptr->umodes & flags)
+            {
+              len =ircsprintf(sendbuf, "%s WALLOPS :%s",
+                               prefix,
+                               nbuf);
+              len = send_trim(sendbuf,len);
+              send_message(cptr, (char *)sendbuf, len);
+            }
+         }
+    }
+}
 /*
  * ts_warn
  * inputs	- var args message
@@ -1504,7 +1493,7 @@ ts_warn(const char *pattern, ...)
   va_end(args);
 
   sendto_realops_flags(FLAGS_ALL,"%s",lbuf);
-  log(L_CRIT, "%s", lbuf);
+  log(L_CRIT, lbuf);
 } /* ts_warn() */
 
 

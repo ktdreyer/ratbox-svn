@@ -365,10 +365,11 @@ struct LocalUser
 #define FLAGS_CALLERID     0x4000 /* block unless caller id's */
 #define FLAGS_UNAUTH       0x8000 /* show unauth connects here */
 #define FLAGS_DRONE        0x10000 /* show drone connects */
+#define FLAGS_LOCOPS       0x20000 /* show locops */
 
 /* user information flags, only settable by remote mode or local oper */
-#define FLAGS_OPER         0x20000 /* Operator */
-#define FLAGS_ADMIN        0x40000 /* Admin on server */
+#define FLAGS_OPER         0x40000 /* Operator */
+#define FLAGS_ADMIN        0x80000 /* Admin on server */
 
 
 /* *sigh* overflow flags */
@@ -399,9 +400,8 @@ struct LocalUser
 #define FLAGS2_CBURST       0x10000  /* connection burst being sent */
 
 #define FLAGS2_IDLE_LINED       0x40000
-#define FLAGS2_ALREADY_EXITED   0x80000         /* kludge grrrr */
-#define FLAGS2_IP_SPOOFING      0x100000        /* client IP is spoofed */
-#define FLAGS2_IP_HIDDEN        0x200000        /* client IP should be hidden
+#define FLAGS2_IP_SPOOFING      0x80000        /* client IP is spoofed */
+#define FLAGS2_IP_HIDDEN        0x100000        /* client IP should be hidden
                                                    from non opers */
 #define SEND_UMODES  (FLAGS_INVISIBLE | FLAGS_OPER | FLAGS_WALLOP | \
                       FLAGS_ADMIN)
@@ -409,12 +409,13 @@ struct LocalUser
                       FLAGS_REJ | FLAGS_SKILL | FLAGS_FULL | FLAGS_SPY | \
                       FLAGS_NCHANGE | FLAGS_OPERWALL | FLAGS_DEBUG | \
                       FLAGS_BOTS | FLAGS_EXTERNAL | FLAGS_DRONE | \
- 		      FLAGS_ADMIN | FLAGS_UNAUTH | FLAGS_CALLERID)
+ 		      FLAGS_ADMIN | FLAGS_UNAUTH | FLAGS_CALLERID | \
+                      FLAGS_LOCOPS)
 
 #ifndef OPER_UMODES
 #define OPER_UMODES  (FLAGS_OPER | FLAGS_WALLOP | FLAGS_SERVNOTICE | \
                       FLAGS_SPY | FLAGS_OPERWALL | FLAGS_DEBUG | FLAGS_BOTS | \
-	                  FLAGS_ADMIN | FLAGS_DRONE)
+	                  FLAGS_ADMIN | FLAGS_DRONE | FLAGS_LOCOPS)
 #endif /* OPER_UMODES */
 
 #define FLAGS_ID     (FLAGS_NEEDID | FLAGS_GOTID)
@@ -449,6 +450,7 @@ struct LocalUser
 #define ClearInvisible(x)       ((x)->umodes &= ~FLAGS_INVISIBLE)
 #define SendWallops(x)          ((x)->umodes & FLAGS_WALLOP)
 #define ClearWallops(x)         ((x)->umodes &= ~FLAGS_WALLOP)
+#define SendLocops(x)           ((x)->umodes & FLAGS_LOCOPS)
 #define SendServNotice(x)       ((x)->umodes & FLAGS_SERVNOTICE)
 #define SendOperwall(x)         ((x)->umodes & FLAGS_OPERWALL)
 #define SendCConnNotice(x)      ((x)->umodes & FLAGS_CCONN)
