@@ -1,3 +1,15 @@
+leeh        2002/02/23 16:20:41 EST	(20020223_6)
+
+  Modified files:
+    src                  class.c 
+  Log:
+  - apparently you cant do that, oh well
+  
+  Revision  Changes    Path
+  7.34      +7 -3      ircd-hybrid-7/src/class.c
+
+
+
 leeh        2002/02/23 12:54:37 EST	(20020223_5)
 
   Modified files:
