@@ -1209,8 +1209,12 @@ void dead_link(struct Client *client_p)
 {
   dlink_node *m;
   const char *notice;
+  if(IsClosing(client_p))
+    return;
+
   linebuf_donebuf(&client_p->localClient->buf_recvq);
   linebuf_donebuf(&client_p->localClient->buf_sendq);
+  
   if(client_p->flags & FLAGS_SENDQEX)
     notice = "Max SendQ exceeded";
   else
