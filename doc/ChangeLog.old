@@ -1,3 +1,6 @@
+*** 20010101_45 by davidt
+Remove extra variable i forgot about
+
 *** 20010101_44 by db
 - ignore bogus TS from servers. pure and simple. TS0 is broken
   It =will= desync for a while. *TOUGH*
