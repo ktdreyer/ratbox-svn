@@ -1489,7 +1489,8 @@ set_default_conf(void)
   ServerInfo.max_buffer = MAX_BUFFER;    /*       actually do anything! */
   /* Don't reset hub, as that will break lazylinks */
   /* ServerInfo.hub = NO; */
-
+  ServerInfo.dns_host.sin_addr.s_addr = 0;
+  ServerInfo.dns_host.sin_port = 0;
   AdminInfo.name = NULL;
   AdminInfo.email = NULL;
   AdminInfo.description = NULL;

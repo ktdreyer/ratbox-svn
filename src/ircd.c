@@ -112,7 +112,10 @@ struct admin_info AdminInfo;
 struct  Counter Count;
 struct  ServerState_t server_state;
 
+#if 0
 time_t  CurrentTime;            /* GLOBAL - current system timestamp */
+#endif 
+struct timeval SystemTime;
 int     ServerRunning;          /* GLOBAL - server execution state */
 struct Client me;               /* That's me */
 struct LocalUser meLocalUser;	/* That's also part of me */
@@ -288,25 +291,27 @@ void
 set_time(void)
 {
   static char to_send[200];
-  time_t newtime = time(NULL);
- 
-  if (newtime == -1)
+  struct timeval newtime;
+  newtime.tv_sec = 0;
+  newtime.tv_usec = 0;
+  if(gettimeofday(&newtime, NULL) == -1)
     {
       ilog(L_ERROR, "Clock Failure (%d)", errno);
       sendto_realops_flags(FLAGS_ALL, L_ALL,
 			   "Clock Failure (%d), TS can be corrupted", errno);
+   
       restart("Clock Failure");
     }
-  if (newtime < CurrentTime)
+  if (newtime.tv_sec < CurrentTime)
     {
       ircsprintf(to_send, "System clock is running backwards - (%lu < %lu)",
-		 (unsigned long) newtime,
+		 (unsigned long) newtime.tv_sec,
 		 (unsigned long) CurrentTime);
-
       report_error(L_ALL, to_send, me.name, 0);
-      set_back_events(CurrentTime - newtime);
+      set_back_events(CurrentTime - newtime.tv_sec);
     }
-  CurrentTime = newtime;
+  SystemTime.tv_sec = newtime.tv_sec;
+  SystemTime.tv_usec = newtime.tv_usec;
 }
 
 static void
@@ -525,7 +530,6 @@ int main(int argc, char *argv[])
    * save server boot time right away, so getrusage works correctly
    */
   set_time();
-
   /*
    * Setup corefile size immediately after boot -kre
    */
@@ -609,6 +613,7 @@ int main(int argc, char *argv[])
   /* Init the event subsystem */
   eventInit();
   init_sys();
+
   if (!server_state.foreground)
   {
     close_all_connections();
@@ -616,7 +621,6 @@ int main(int argc, char *argv[])
   init_log(logFileName);
   initBlockHeap();
   init_dlink_nodes();
-  init_resolver();      /* Needs to be setup before the io loop */
   initialize_message_files();
   linebuf_init();       /* set up some linebuf stuff to control paging */
   init_hash();
@@ -636,6 +640,8 @@ int main(int argc, char *argv[])
   initServerMask();
   init_auth();                  /* Initialise the auth code */
   read_conf_files(YES);         /* cold start init conf files */
+  init_resolver();      /* Needs to be setup before the io loop */
+
   initialize_server_capabs();   /* Set up default_server_capabs */
   initialize_global_set_options();
 

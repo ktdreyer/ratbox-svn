@@ -285,6 +285,7 @@ struct server_info
   int         no_hack_ops;
   int         specific_ipv4_vhost;
   int         specific_ipv6_vhost;
+  struct      sockaddr_in dns_host;
 };
 
 struct admin_info

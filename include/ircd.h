@@ -86,7 +86,11 @@ extern struct Client  me;
 extern struct Client* GlobalClientList;
 extern struct Client* local[];
 extern struct Counter Count;
+#if 0
 extern time_t         CurrentTime;
+#endif
+extern struct timeval SystemTime;
+#define CurrentTime SystemTime.tv_sec
 extern time_t         nextconnect;
 extern int            default_server_capabs;
 

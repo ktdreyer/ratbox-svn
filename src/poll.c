@@ -236,8 +236,8 @@ comm_select(unsigned long delay)
    break;
   if (ignoreErrno(errno))
    continue;
-  set_time();
   /* error! */
+  set_time();
   return -1;
   /* NOTREACHED */
  }

@@ -7,6 +7,7 @@
 #include "fileio.h"
 #include "res.h"
 #include "send.h"
+#include "s_conf.h"
 #include "s_bsd.h"
 #include "s_log.h"
 #include "event.h"
@@ -74,7 +75,13 @@ void init_resolver(void)
    ilog(L_CRIT, "Error opening /etc/resolv.conf: %s; r = %d", strerror(errno), r);
    exit(76);
  }
- eventAdd("timeout_adns", timeout_adns, NULL, 1);
+ 
+ if(bind(dns_state->udpsocket, (struct sockaddr *)&ServerInfo.dns_host, sizeof(struct sockaddr_in)) == -1)
+ {
+ 	sendto_realops_flags(FLAGS_ALL, L_ALL, "Attempt to bind DNS port failed..using generic options");
+ } 
+   
+ eventAdd("timeout_adns", timeout_adns, NULL, 2);
  dns_select();
 }
 
@@ -86,9 +93,7 @@ void init_resolver(void)
  */
 void timeout_adns(void *ptr)
 {
- struct timeval now;
- gettimeofday(&now, 0);
- adns_processtimeouts(dns_state, &now); 
+ adns_processtimeouts(dns_state, &SystemTime); 
 }
 
 /* void dns_writeable(int fd, void *ptr)
@@ -99,9 +104,7 @@ void timeout_adns(void *ptr)
  */
 void dns_writeable(int fd, void *ptr)
 {
- struct timeval now;
- gettimeofday(&now, 0);
- adns_processwriteable(dns_state, fd, &now); 
+ adns_processwriteable(dns_state, fd, &SystemTime); 
  dns_select();
 }
 
@@ -119,8 +122,7 @@ void dns_do_callbacks(void)
  adns_forallqueries_begin(dns_state);
  while((q = adns_forallqueries_next(dns_state, (void **)&r)) != NULL)
  {
-  switch(adns_check(dns_state, &q, &answer, (void **)&query))
-  {
+  switch(adns_check(dns_state, &q, &answer, (void **)&query))  {
    case 0:
     /* Looks like we got a winner */            
     assert(query->callback != NULL);
@@ -148,9 +150,7 @@ void dns_do_callbacks(void)
  */
 void dns_readable(int fd, void *ptr)
 {
- struct timeval now;
- gettimeofday(&now, 0);
- adns_processreadable(dns_state, fd, &now);  
+ adns_processreadable(dns_state, fd, &SystemTime);  
  dns_do_callbacks();
  dns_select();
 }
@@ -177,7 +177,9 @@ void dns_select(void)
  }        
  /* Call our callbacks, now that they may have some relevant data...
   */
- dns_do_callbacks();
+/*
+ *dns_do_callbacks();
+ */
 }
 
 /* void adns_gethost(const char *name, int aftype, struct DNSQuery *req);
