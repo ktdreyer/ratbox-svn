@@ -1,3 +1,15 @@
+leeh        2002/07/06 07:15:30 EDT	(20020706_1)
+
+  Modified files:
+    .                    BUGS 
+  Log:
+  - updated BUGS with the multiple dline bug.
+  
+  Revision  Changes    Path
+  7.49      +2 -3      ircd-hybrid-7/BUGS
+
+
+
 leeh        2002/07/06 07:05:04 EDT	(20020706_0)
 
   Modified files:
