@@ -1387,10 +1387,12 @@ void	conf_set_auth_spoof_notice(void *data)
 {
 	int yesno = *(unsigned int *)data;
 
+	/* reverse the meaning here -- it's reversed again in
+	   conf_end_auth */
 	if (yesno)
-		yy_achead->flags |= CONF_FLAGS_SPOOF_NOTICE;
-	else
 		yy_achead->flags &= ~CONF_FLAGS_SPOOF_NOTICE;
+	else
+		yy_achead->flags |= CONF_FLAGS_SPOOF_NOTICE;
 }
 
 void	conf_set_auth_spoof(void *data)
