@@ -89,7 +89,6 @@ exceed_limit    { return EXCEED_LIMIT; }
 gecos		{ return GECOS; }
 general		{ return GENERAL; }
 gline		{ return GLINE; }
-gline_file      { return GLINE_FILE; }
 gline_time      { return GLINE_TIME; }
 gline_log       { return GLINE_LOG; }
 global		{ return GLOBAL; }
