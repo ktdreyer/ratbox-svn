@@ -238,10 +238,8 @@ int   class_redirport_var;
 %token  VCHANS_OPER_ONLY
 %token  MIN_NONWILDCARD
 %token  DISABLE_VCHANS
-%token  SECONDS MINUTES HOURS DAYS WEEKS MONTHS YEARS
-%token  BYTES KBYTES KILOBYTES KB
-%token  MEGABYTES MBYTES MB
-%token  GIGABYTES GBYTES GB
+%token  SECONDS MINUTES HOURS DAYS WEEKS MONTHS YEARS DECADES CENTURIES MILLENNIA
+%token  BYTES KBYTES MBYTES GBYTES TBYTES
 
 %left '-' '+'
 %left '*' '/'
@@ -313,6 +311,18 @@ timespec:	expr
 			/* a year has 365 days, *not* 12 months */
 			$$ = $1 * 60 * 60 * 24 * 365;
 		}
+		| expr DECADES
+		= {
+			$$ = $1 * 60 * 60 * 24 * 365 * 10;
+		}
+		| expr CENTURIES
+		= {
+			$$ = $1 * 60 * 60 * 24 * 365 * 10 * 10;
+		}
+		| expr MILLENNIA
+		= {
+			$$ = $1 * 60 * 60 * 24 * 365 * 10 * 10 * 10;
+		}
 		| timespec timespec
 		= {
 			/* 2 years 3 days */
@@ -337,6 +347,10 @@ sizespec:	expr
 			$$ = $1 * 1024 * 1024;
 		}
 		| expr GBYTES
+		= {
+			$$ = $1 * 1024 * 1024 * 1024;
+		}
+		| expr TBYTES
 		= {
 			$$ = $1 * 1024 * 1024 * 1024;
 		}

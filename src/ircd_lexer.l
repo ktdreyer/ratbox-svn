@@ -247,6 +247,12 @@ callerid                { return T_CALLERID; }
 drone                   { return T_DRONE; }
 locops                  { return T_LOCOPS; }
 
+millennia		{ return MILLENNIA; }
+millennium		{ return MILLENNIA; }
+centuries		{ return CENTURIES; }
+century			{ return CENTURIES; }
+decades			{ return DECADES; }
+decade			{ return DECADES; }
 years			{ return YEARS; }
 year			{ return YEARS; }
 months			{ return MONTHS; }
@@ -279,7 +285,11 @@ gigabyte		{ return GBYTES; }
 gbytes			{ return GBYTES; }
 gbyte			{ return GBYTES; }
 gb			{ return GBYTES; }
-
+terabytes		{ return TBYTES; }
+terabyte		{ return TBYTES; }
+tbytes			{ return TBYTES; }
+tbyte			{ return TBYTES; }
+tb			{ return TBYTES; }
 .		        { return yytext[0]; }
 
 %%
