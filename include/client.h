@@ -465,9 +465,9 @@ struct Client
 #define IsRejectHeld(x)         ((x)->flags & FLAGS_REJECT_HOLD)
 #define SetRejectHold(x)        ((x)->flags |= FLAGS_REJECT_HOLD)
 
-#define SetIpHash               ((x)->flags |= FLAGS_IPHASH)
-#define ClearIpHash             ((x)->flags &= ~FLAGS_IPHASH)
-#define IsIpHash                ((x)->flags & FLAGS_IPHASH)
+#define SetIpHash(x)            ((x)->flags |= FLAGS_IPHASH)
+#define ClearIpHash(x)          ((x)->flags &= ~FLAGS_IPHASH)
+#define IsIpHash(x)             ((x)->flags & FLAGS_IPHASH)
 
 #define SetNeedId(x)            ((x)->flags |= FLAGS_NEEDID)
 #define IsNeedId(x)             (((x)->flags & FLAGS_NEEDID) != 0)

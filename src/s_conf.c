@@ -188,12 +188,6 @@ struct ConfItem* make_conf()
   memset(aconf, 0, sizeof(struct ConfItem));
   aconf->status       = CONF_ILLEGAL;
   aconf->ipnum.s_addr = INADDR_NONE;
-
-#if defined(NULL_POINTER_NOT_ZERO)
-  aconf->next = NULL;
-  aconf->host = aconf->passwd = aconf->name = NULL;
-  ClassPtr(aconf) = NULL;
-#endif
   return (aconf);
 }
 
@@ -529,9 +523,7 @@ static int attach_iline(struct Client *cptr, struct ConfItem *aconf)
   ip_found = find_or_add_ip(cptr);
 #endif
 
-  /* too tired FIX later */
-  /*  SetIpHash(cptr); */
-  cptr->flags |= FLAGS_IPHASH;
+  SetIpHash(cptr);
   ip_found->count++;
 
 #ifdef LIMIT_UH
@@ -3036,26 +3028,13 @@ int safe_write(struct Client *sptr, const char *filename, int out, char *buffer)
 const char *
 get_conf_name(KlineType type)
 {
-#ifdef SEPARATE_QUOTE_KLINES_BY_DATE
-  static char filenamebuf[PATH_MAX+1];
-  static  char    timebuffer[MAX_DATE_STRING];
-  struct tm *tmptr;
-#endif
-
   if(type == CONF_TYPE)
     {
       return(ConfigFileEntry.configfile);
     }
   else if(type == KLINE_TYPE)
     {
-#ifdef SEPARATE_QUOTE_KLINES_BY_DATE
-      tmptr = localtime(&CurrentTime);
-      strftime(timebuffer, MAX_DATE_STRING, "%Y%m%d", tmptr);
-      ircsprintf(filenamebuf, "%s.%s", ConfigFileEntry.klinefile, timebuffer);
-      return(filenamebuf);
-#else
       return(ConfigFileEntry.klinefile);
-#endif                  
     }
 
   return(ConfigFileEntry.dlinefile);
