@@ -69,6 +69,8 @@ int m_ison(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   char *p;
   char *current_insert_point;
   int len;
+  int i;
+  int done = 0;
 
   if (parc < 2)
     {
@@ -81,22 +83,33 @@ int m_ison(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   len = strlen(buf);
   current_insert_point = buf + len;
 
-  for (nick = strtoken(&p, parv[1], " "); nick;
-       nick = strtoken(&p, NULL, " "))
+  /* rfc1489 is ambigious about how to handle ISON
+   * this should handle both interpretations.
+   */
+  for (i = 1; i < parc; i++)
     {
-      if ((acptr = find_person(nick, NULL)))
+      for (nick = strtoken(&p, parv[i], " "); nick;
+	   nick = strtoken(&p, NULL, " "))
 	{
-	  len = strlen(acptr->name);
-	  if( (current_insert_point + (len + 5)) < (buf + sizeof(buf)) )
+	  if ((acptr = find_person(nick, NULL)))
 	    {
-	      memcpy((void *)current_insert_point,
-		     (void *)acptr->name, len);
-	      current_insert_point += len;
-	      *current_insert_point++ = ' ';
+	      len = strlen(acptr->name);
+	      if( (current_insert_point + (len + 5)) < (buf + sizeof(buf)) )
+		{
+		  memcpy((void *)current_insert_point,
+			 (void *)acptr->name, len);
+		  current_insert_point += len;
+		  *current_insert_point++ = ' ';
+		}
+	      else
+		{
+		  done = 1;
+		  break;
+		}
 	    }
-	  else
-	    break;
 	}
+      if(done)
+	break;
     }
 
 /*  current_insert_point--; Do NOT take out the trailing space, it breaks ircII --Rodder */
