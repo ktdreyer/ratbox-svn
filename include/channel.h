@@ -91,7 +91,7 @@ typedef struct  Channel aChannel;
 
 extern  struct  Channel *GlobalChannelList;
 
-void cleanup_channels(void);
+void cleanup_channels(void *);
 
 #define CREATE 1        /* whether a channel should be
                            created or just tested for existance */
