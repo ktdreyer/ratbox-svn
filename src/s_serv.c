@@ -1546,8 +1546,8 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
       {
 	struct irc_sockaddr ipn;
 	memset(&ipn, 0, sizeof(struct irc_sockaddr));
-	S_FAM(s_ipn) = DEF_FAM;
-	S_PORT(s_ipn) = 0;
+	S_FAM(ipn) = DEF_FAM;
+	S_PORT(ipn) = 0;
 #ifdef IPV6
 	copy_s_addr(S_ADDR(ipn), IN_ADDR(vserv));
 #else
