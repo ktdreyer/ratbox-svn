@@ -741,14 +741,14 @@ sendto_match_butone(struct Client *one, struct Client *source_p,
  * side effects - message is sent to matching servers with caps.
  */
 void
-sendto_match_servs(struct Client *source_p, const char *mask, int cap, const char *pattern, ...)
+sendto_match_servs(struct Client *source_p, const char *mask, int cap, 
+			int nocap, const char *pattern, ...)
 {
 	va_list args;
 	dlink_node *ptr;
 	struct Client *target_p;
 	buf_head_t linebuf_id;
 	buf_head_t linebuf_name;
-	int found = 0;
 
 	if(EmptyString(mask))
 		return;
@@ -780,9 +780,11 @@ sendto_match_servs(struct Client *source_p, const char *mask, int cap, const cha
 			 * a match() again if !IsCapable()
 			 */
 			target_p->from->serial = current_serial;
-			found++;
 
-			if(!IsCapable(target_p->from, cap))
+			if(cap && !IsCapable(target_p->from, cap))
+				continue;
+
+			if(nocap && IsCapable(target_p->from, nocap))
 				continue;
 
 			if(DoesTS6(target_p->from))
@@ -794,14 +796,6 @@ sendto_match_servs(struct Client *source_p, const char *mask, int cap, const cha
 
 	linebuf_donebuf(&linebuf_id);
 	linebuf_donebuf(&linebuf_name);
-
-	/* didnt find any matching servers to send to, if the target
-	 * doesnt include us, error.
-	 */
-	if(found == 0 && IsClient(source_p) &&
-	  (match(mask, me.name) == 0))
-		sendto_one_numeric(source_p, ERR_NOSUCHSERVER,
-				   form_str(ERR_NOSUCHSERVER), mask);
 }
 
 /* sendto_anywhere()

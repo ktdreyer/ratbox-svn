@@ -74,6 +74,9 @@ static int valid_xline(struct Client *, const char *, const char *);
 static void apply_xline(struct Client *client_p, const char *name, 
 			const char *reason, int temp_time);
 static void write_xline(struct Client *source_p, struct ConfItem *aconf);
+static void cluster_xline(struct Client *source_p, int temp_time,
+			const char *name, const char *reason);
+
 static int remove_temp_xline(struct Client *source_p, const char *name);
 static void remove_xline(struct Client *source_p, const char *gecos);
 
@@ -132,17 +135,15 @@ mo_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	if(target_server != NULL)
 	{
-		sendto_match_servs(source_p, target_server, CAP_CLUSTER,
+		sendto_match_servs(source_p, target_server, CAP_CLUSTER, NOCAPS,
 				   "XLINE %s %s 2 :%s",
 				   target_server, name, reason);
 
 		if(!match(target_server, me.name))
 			return 0;
 	}
-#ifdef XXX_BROKEN_CLUSTER
 	else if(dlink_list_length(&cluster_conf_list) > 0)
-		cluster_xline(source_p, name, 2, reason);
-#endif
+		cluster_xline(source_p, temp_time, name, reason);
 
 	if(!valid_xline(source_p, name, reason))
 		return 0;
@@ -165,7 +166,7 @@ ms_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	 * oper     target serv  xline    type     reason
 	 */
 	/* XXXLEEH - type no longer exists */
-	sendto_match_servs(source_p, parv[1], CAP_CLUSTER,
+	sendto_match_servs(source_p, parv[1], CAP_CLUSTER, NOCAPS,
 			   "XLINE %s %s %s :%s",
 			   parv[1], parv[2], parv[3], parv[4]);
 
@@ -315,6 +316,34 @@ write_xline(struct Client *source_p, struct ConfItem *aconf)
 	fbclose(out);
 }
 
+static void
+cluster_xline(struct Client *source_p, int temp_time, const char *name,
+		const char *reason)
+{
+	struct remote_conf *shared_p;
+	dlink_node *ptr;
+
+	DLINK_FOREACH(ptr, cluster_conf_list.head)
+	{
+		shared_p = ptr->data;
+
+		if(!(shared_p->flags & SHARED_XLINE))
+			continue;
+
+		/* old protocol cant handle temps, and we dont really want
+		 * to convert them to perm.. --fl
+		 */
+		if(!temp_time)
+			sendto_match_servs(source_p, shared_p->server, CAP_CLUSTER, NOCAPS,
+					"XLINE %s %s 2 :%s",
+					shared_p->server, name, reason);
+
+		sendto_match_servs(source_p, shared_p->server, CAP_ENCAP, CAP_CLUSTER,
+				"ENCAP %s XLINE %d %s :%s",
+				shared_p->server, temp_time, name, reason);
+	}
+}
+
 /* mo_unxline()
  *
  * parv[1] - thing to unxline
@@ -328,6 +357,19 @@ mo_unxline(struct Client *client_p, struct Client *source_p, int parc, const cha
 			   me.name, source_p->name, "xline");
 		return 0;
 	}
+
+	if(parc == 4 && !(irccmp(parv[2], "ON")))
+	{
+		sendto_match_servs(source_p, parv[3], CAP_CLUSTER, NOCAPS,
+				"UNXLINE %s %s",
+				parv[3], parv[1]);
+
+		if(match(parv[3], me.name) == 0)
+			return 0;
+	}
+	else if(dlink_list_length(&cluster_conf_list))
+		cluster_generic(source_p, "UNXLINE", SHARED_UNXLINE, CAP_CLUSTER,
+				"%s", parv[1]);
 
 	if(remove_temp_xline(source_p, parv[1]))
 		return 0;
@@ -347,7 +389,7 @@ ms_unxline(struct Client *client_p, struct Client *source_p, int parc, const cha
 	/* parv[0]  parv[1]        parv[2]
 	 * oper     target server  gecos
 	 */
-	sendto_match_servs(source_p, parv[1], CAP_CLUSTER,
+	sendto_match_servs(source_p, parv[1], CAP_CLUSTER, NOCAPS,
 			   "UNXLINE %s %s",
 			   parv[1], parv[2]);
 

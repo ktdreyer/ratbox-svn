@@ -47,6 +47,7 @@
 #include "hash.h"
 #include "balloc.h"
 #include "event.h"
+#include "sprintf_irc.h"
 
 dlink_list shared_conf_list;
 dlink_list cluster_conf_list;
@@ -191,6 +192,35 @@ find_shared_conf(const char *username, const char *host,
 	}
 
 	return NO;
+}
+
+void
+cluster_generic(struct Client *source_p, const char *command,
+		int cltype, int cap, const char *format, ...)
+{
+	char buffer[BUFSIZE];
+	struct remote_conf *shared_p;
+	va_list args;
+	dlink_node *ptr;
+
+	va_start(args, format);
+	ircvsnprintf(buffer, sizeof(buffer), format, args);
+	va_end(args);
+
+	DLINK_FOREACH(ptr, cluster_conf_list.head)
+	{
+		shared_p = ptr->data;
+
+		if(!(shared_p->flags & cltype))
+			continue;
+
+		sendto_match_servs(source_p, shared_p->server, cap, NOCAPS,
+				"%s %s %s",
+				command, shared_p->server, buffer);
+		sendto_match_servs(source_p, shared_p->server, CAP_ENCAP, cap,
+				"ENCAP %s %s %s",
+				shared_p->server, command, buffer);
+	}
 }
 
 struct oper_conf *

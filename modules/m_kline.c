@@ -137,21 +137,20 @@ mo_kline(struct Client *client_p, struct Client *source_p,
 
 	if(target_server != NULL)
 	{
-		sendto_match_servs(source_p, target_server, CAP_KLN,
+		sendto_match_servs(source_p, target_server, CAP_KLN, NOCAPS,
 				   "KLINE %s %lu %s %s :%s",
-				   target_server, (unsigned long) tkline_time, user, host, reason);
+				   target_server, (unsigned long) tkline_time, 
+				   user, host, reason);
 
 		/* If we are sending it somewhere that doesnt include us, stop */
 		if(!match(target_server, me.name))
 			return 0;
 	}
-#ifdef XXX_BROKEN_CLUSTER
 	/* if we have cluster servers, send it to them.. */
 	else if(dlink_list_length(&cluster_conf_list) > 0)
-	{
-		cluster_kline(source_p, tkline_time, user, host, reason);
-	}
-#endif
+		cluster_generic(source_p, "KLINE", SHARED_KLINE, CAP_KLN,
+				"%lu %s %s :%s",
+				tkline_time, user, host, reason);
 
 	if(!valid_user_host(source_p, user, host) || 
 	   !valid_wild_card(source_p, user, host) ||
@@ -229,8 +228,9 @@ ms_kline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	char *kreason;
 	char *oper_reason;
 
-	sendto_match_servs(source_p, parv[1], CAP_KLN,
-			   "KLINE %s %s %s %s :%s", parv[1], parv[2], parv[3], parv[4], parv[5]);
+	sendto_match_servs(source_p, parv[1], CAP_KLN, NOCAPS,
+			   "KLINE %s %s %s %s :%s", 
+			   parv[1], parv[2], parv[3], parv[4], parv[5]);
 
 	if(!match(parv[1], me.name))
 		return 0;
@@ -341,18 +341,15 @@ mo_unkline(struct Client *client_p, struct Client *source_p, int parc, const cha
 	/* possible remote kline.. */
 	if((parc > 3) && (irccmp(parv[2], "ON") == 0))
 	{
-		sendto_match_servs(source_p, parv[3], CAP_UNKLN,
+		sendto_match_servs(source_p, parv[3], CAP_UNKLN, NOCAPS,
 				   "UNKLINE %s %s %s", parv[3], user, host);
 
 		if(match(parv[3], me.name) == 0)
 			return 0;
 	}
-#ifdef XXX_BROKEN_CLUSTER
 	else if(dlink_list_length(&cluster_conf_list) > 0)
-	{
-		cluster_unkline(source_p, user, host);
-	}
-#endif
+		cluster_generic(source_p, "UNKLINE", SHARED_UNKLINE, CAP_UNKLN,
+				"%s %s", user, host);
 
 	if(remove_temp_kline(user, host))
 	{
@@ -385,7 +382,7 @@ ms_unkline(struct Client *client_p, struct Client *source_p, int parc, const cha
 
 	/* parv[0]  parv[1]        parv[2]  parv[3]
 	 * oper     target server  user     host    */
-	sendto_match_servs(source_p, parv[1], CAP_UNKLN,
+	sendto_match_servs(source_p, parv[1], CAP_UNKLN, NOCAPS,
 			   "UNKLINE %s %s %s", parv[1], parv[2], parv[3]);
 
 	kuser = parv[2];

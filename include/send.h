@@ -61,7 +61,7 @@ extern void sendto_common_channels_local(struct Client *, const char *, ...) AFP
 extern void sendto_match_butone(struct Client *, struct Client *,
 				const char *, int, const char *, ...) AFP(5, 6);
 extern void sendto_match_servs(struct Client *source_p, const char *mask, 
-				int capab, const char *, ...) AFP(4, 5);
+				int capab, int, const char *, ...) AFP(5, 6);
 
 extern void sendto_anywhere(struct Client *, struct Client *, const char *,
 			    const char *, ...) AFP(4, 5);

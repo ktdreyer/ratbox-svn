@@ -58,6 +58,9 @@ DECLARE_MODULE_AV1(resv, NULL, NULL, resv_clist, NULL, NULL, "$Revision$");
 
 static void parse_resv(struct Client *source_p, const char *name,
 			const char *reason, int temp_time);
+static void cluster_resv(struct Client *source_p, int temp_time, 
+			const char *name, const char *reason);
+
 static void remove_resv(struct Client *source_p, const char *name);
 static int remove_temp_resv(struct Client *source_p, const char *name);
 
@@ -102,19 +105,15 @@ mo_resv(struct Client *client_p, struct Client *source_p, int parc, const char *
 	/* remote resv.. */
 	if(target_server)
 	{
-		sendto_match_servs(source_p, parv[3], CAP_CLUSTER,
+		sendto_match_servs(source_p, parv[3], CAP_CLUSTER, NOCAPS,
 				   "RESV %s %s :%s",
 				   parv[3], parv[1], reason);
 
 		if(match(parv[3], me.name) == 0)
 			return 0;
 	}
-#ifdef XXX_BROKEN_CLUSTER
 	else if(dlink_list_length(&cluster_conf_list) > 0)
-	{
-		cluster_resv(source_p, parv[1], reason);
-	}
-#endif
+		cluster_resv(source_p, temp_time, name, reason);
 
 	parse_resv(source_p, name, reason, temp_time);
 
@@ -134,7 +133,7 @@ ms_resv(struct Client *client_p, struct Client *source_p,
 	/* parv[0]  parv[1]        parv[2]  parv[3]
 	 * oper     target server  resv     reason
 	 */
-	sendto_match_servs(source_p, parv[1], CAP_CLUSTER,
+	sendto_match_servs(source_p, parv[1], CAP_CLUSTER, NOCAPS,
 			   "RESV %s %s :%s",
 			   parv[1], parv[2], parv[3]);
 
@@ -264,6 +263,35 @@ parse_resv(struct Client *source_p, const char *name,
 				  name);
 }
 
+static void
+cluster_resv(struct Client *source_p, int temp_time, const char *name,
+		const char *reason)
+{
+	struct remote_conf *shared_p;
+	dlink_node *ptr;
+
+	DLINK_FOREACH(ptr, cluster_conf_list.head)
+	{
+		shared_p = ptr->data;
+
+		if(!(shared_p->flags & SHARED_RESV))
+			continue;
+
+		/* old protocol cant handle temps, and we dont really want
+		 * to convert them to perm.. --fl
+		 */
+		if(!temp_time)
+			sendto_match_servs(source_p, shared_p->server, CAP_CLUSTER, NOCAPS,
+					"RESV %s %s :%s",
+					shared_p->server, name, reason);
+
+		sendto_match_servs(source_p, shared_p->server, CAP_ENCAP, CAP_CLUSTER,
+				"ENCAP %s RESV %d %s 0 :%s",
+				shared_p->server, temp_time, name, reason);
+	}
+}
+
+
 /*
  * mo_unresv()
  *     parv[0] = sender prefix
@@ -274,19 +302,16 @@ mo_unresv(struct Client *client_p, struct Client *source_p, int parc, const char
 {
 	if((parc == 4) && (irccmp(parv[2], "ON") == 0))
 	{
-		sendto_match_servs(source_p, parv[3], CAP_CLUSTER,
+		sendto_match_servs(source_p, parv[3], CAP_CLUSTER, NOCAPS,
 				   "UNRESV %s %s",
 				   parv[3], parv[1]);
 
 		if(match(parv[3], me.name) == 0)
 			return 0;
 	}
-#ifdef XXX_BROKEN_CLUSTER
 	else if(dlink_list_length(&cluster_conf_list) > 0)
-	{
-		cluster_unresv(source_p, parv[1]);
-	}
-#endif
+		cluster_generic(source_p, "UNRESV", SHARED_UNRESV, CAP_CLUSTER,
+				"%s", parv[1]);
 
 	if(remove_temp_resv(source_p, parv[1]))
 	{
@@ -314,7 +339,7 @@ ms_unresv(struct Client *client_p, struct Client *source_p, int parc, const char
 	/* parv[0]  parv[1]        parv[2]
 	 * oper     target server  resv to remove
 	 */
-	sendto_match_servs(source_p, parv[1], CAP_CLUSTER,
+	sendto_match_servs(source_p, parv[1], CAP_CLUSTER, NOCAPS,
 			   "UNRESV %s %s",
 			   parv[1], parv[2]);
 

@@ -98,6 +98,14 @@ struct oper_conf
 #endif
 };
 
+extern struct remote_conf *make_remote_conf(void);
+extern void free_remote_conf(struct remote_conf *);
+
+extern int find_shared_conf(const char *username, const char *host,
+			const char *server, int flags);
+extern void cluster_generic(struct Client *, const char *, int cltype,
+			int cap, const char *format, ...);
+
 #define OPER_ENCRYPTED	0x00001
 #define OPER_KLINE	0x00002
 #define OPER_UNKLINE	0x00004
@@ -142,12 +150,6 @@ struct oper_conf
 #define IsOperOperwall(x)       ((x)->flags2 & OPER_OPERWALL)
 #define IsOperSpy(x)            ((x)->flags2 & OPER_SPY)
 #define IsOperInvis(x)          ((x)->flags2 & OPER_INVIS)
-
-extern struct remote_conf *make_remote_conf(void);
-extern void free_remote_conf(struct remote_conf *);
-
-extern int find_shared_conf(const char *username, const char *host,
-			const char *server, int flags);
 
 extern struct oper_conf *make_oper_conf(void);
 extern void free_oper_conf(struct oper_conf *);

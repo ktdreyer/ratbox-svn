@@ -75,7 +75,8 @@ ms_locops(struct Client *client_p, struct Client *source_p, int parc, const char
 	/* parv[0]  parv[1]      parv[2]
 	 * oper     target serv  message
 	 */
-	sendto_match_servs(client_p, parv[1], CAP_CLUSTER, "LOCOPS %s :%s", parv[1], parv[2]);
+	sendto_match_servs(client_p, parv[1], CAP_CLUSTER, NOCAPS,
+			"LOCOPS %s :%s", parv[1], parv[2]);
 
 	if(!match(parv[1], me.name))
 		return 0;
