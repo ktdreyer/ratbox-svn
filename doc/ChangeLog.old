@@ -1,3 +1,10 @@
+*** 20001223_1 by toot
+. removed that pointless s_conf.h log
+. changed +z to +a.. it's anonymous ops ;)
+. "is now an operator.." notice doesn't need to show if they are global/local now
+. slight fix to example.conf
+
+
 *** 20001222_15 by db
 - moved obsolete conf file examples into old
   purely for historical reasons
