@@ -474,16 +474,8 @@ static void readconfigenvtext(adns_state ads, const char *envvar) {
 
 
 int adns__setnonblock(adns_state ads, int fd) {
-  int r;
-#ifdef VMS
-  int val = 1;
- 
-  r = ioctl(fd, FIONBIO, &val); if (r < 0) return errno;
-#else
-  r= fcntl(fd,F_GETFL,0); if (r<0) return errno;
-  r |= O_NONBLOCK;
-  r= fcntl(fd,F_SETFL,r); if (r<0) return errno;
-#endif
+  if(!set_non_blocking(fd))
+    return errno;
   return 0;
 }
 
