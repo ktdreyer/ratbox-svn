@@ -1,3 +1,23 @@
+davidt      2002/01/22 12:21:15 EST	(20020122_2)
+
+  Modified files:
+    include              client.h 
+    src                  client.c 
+  Log:
+  - Add client_p->free_file and client_p->free_line.
+    When exit_client() is called, it records the line/file it was called
+    from in the client struct, and if the client has already been added
+    to the dead_list, it will fail an assert leaving free_[file|line] to
+    be examined.
+  - This should be backed out before releasing, all changes are wrapped
+    in #ifdef DUPFREEDEBUG
+  
+  Revision  Changes    Path
+  7.138     +17 -1     ircd-hybrid-7/include/client.h
+  7.222     +75 -14    ircd-hybrid-7/src/client.c
+
+
+
 androsyn    2002/01/22 01:11:36 EST	(20020122_1)
 
   Modified files:
