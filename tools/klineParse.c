@@ -1,4 +1,4 @@
-/* klineParse.c   
+/* $Id$
  * 1.0  17Dec98 Darkshde -- Initial bug ridden release
  * 2.0  07Jan99 Darkshde -- added redundant kline checking
  * 2.1  11Jan99 Darkshde -- added -f made verbose display optional with -v
