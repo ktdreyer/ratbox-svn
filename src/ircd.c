@@ -45,7 +45,6 @@
 #include "ircdauth.h"
 #include "ircd_signal.h"
 #include "sprintf_irc.h"
-#include "list.h"
 #include "s_gline.h"
 #include "motd.h"
 #include "ircd_handler.h"

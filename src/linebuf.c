@@ -29,7 +29,6 @@
 #include "linebuf.h"
 #include "memory.h"
 #include "event.h"
-#include "list.h"
 #include "balloc.h"
 #include "hook.h"
 

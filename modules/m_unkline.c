@@ -32,7 +32,6 @@
 #include "irc_string.h"
 #include "sprintf_irc.h"
 #include "ircd.h"
-#include "list.h"
 #include "hostmask.h"
 #include "numeric.h"
 #include "s_conf.h"

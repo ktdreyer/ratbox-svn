@@ -33,7 +33,6 @@
 #include "fileio.h"
 #include "hash.h"
 #include "ircd.h"
-#include "list.h"
 #include "numeric.h"
 #include "res.h"
 #include "s_conf.h"
@@ -415,12 +414,6 @@ void count_memory(struct Client *source_p)
              me.name, RPL_STATSDEBUG, source_p->name,
 	     remote_client_count,
              (int)remote_client_memory_used);
-
-  count_user_memory( &user_count, (int *)&user_memory_used );
-  total_memory += user_memory_used;
-  sendto_one(source_p, ":%s %d %s :User Memory in use: %d(%d)",
-             me.name, RPL_STATSDEBUG, source_p->name,
-	     user_count, (int)user_memory_used);
 
   sendto_one(source_p, 
              ":%s %d %s :TOTAL: %d Available:  Current max RSS: %lu",

@@ -30,7 +30,6 @@
 #include "ircd.h"
 #include "irc_string.h"
 #include "memory.h"
-#include "list.h"
 #include "client.h"
 #include "send.h"
 #include "tools.h"

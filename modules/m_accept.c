@@ -27,7 +27,6 @@
 #include "client.h"
 #include "hash.h"      
 #include "ircd.h"
-#include "list.h"
 #include "numeric.h"
 #include "s_conf.h"
 #include "s_serv.h"

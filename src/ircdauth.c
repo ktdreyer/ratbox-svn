@@ -32,7 +32,6 @@
 #include "ircd_defs.h"
 #include "ircd.h"
 #include "ircdauth.h"
-#include "list.h"
 #include "listener.h"
 #include "numeric.h"
 #include "s_auth.h"

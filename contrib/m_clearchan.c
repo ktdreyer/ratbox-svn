@@ -36,7 +36,6 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
-#include "list.h"
 
 
 #define MSG_CLEARCHAN "CLEARCHAN"

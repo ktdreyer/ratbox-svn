@@ -29,7 +29,6 @@
 #include "common.h"
 #include "irc_string.h"
 #include "ircd.h"
-#include "list.h"
 #include "s_gline.h"
 #include "numeric.h"
 #include "res.h"

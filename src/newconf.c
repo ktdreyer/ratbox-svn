@@ -12,7 +12,6 @@
 #include "memory.h"
 #include "newconf.h"
 #include "tools.h"
-#include "list.h"
 #include "ircd_defs.h"
 #include "sprintf_irc.h"
 #include "common.h"

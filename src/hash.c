@@ -41,7 +41,6 @@
 #include "memory.h"
 #include "msg.h"
 #include "handlers.h"
-#include "list.h"
 
 /* New hash code */
 /*

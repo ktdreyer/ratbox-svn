@@ -27,7 +27,6 @@
 #include "tools.h"
 #include "irc_string.h"
 #include "client.h"
-#include "list.h"
 #include "memory.h"
 #include "setup.h"
 

@@ -38,7 +38,6 @@
 #include "irc_string.h"
 #include "sprintf_irc.h"
 #include "ircd.h"
-#include "list.h"
 #include "listener.h"
 #include "hostmask.h"
 #include "modules.h"

@@ -52,7 +52,6 @@
 #include "event.h"
 #include "hash.h"        /* add_to_client_hash_table */
 #include "md5.h"
-#include "list.h"        /* make_server */
 #include "s_conf.h"      /* struct ConfItem */
 
 #include "s_log.h"       /* log level defines */

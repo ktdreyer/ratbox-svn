@@ -45,7 +45,6 @@
 #include "event.h"
 
 #include "fdlist.h"
-#include "list.h"
 #include "s_conf.h"
 #include "scache.h"
 

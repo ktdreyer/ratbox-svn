@@ -38,7 +38,6 @@
 #include "irc_string.h"
 #include "memory.h"
 #include "tools.h"
-#include "list.h"
 
 /* -TimeMr14C:
  * I have moved the dl* function definitions and

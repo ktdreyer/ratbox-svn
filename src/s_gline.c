@@ -46,7 +46,6 @@
 #include "s_gline.h"
 #include "hash.h"
 #include "event.h"
-#include "list.h"
 #include "memory.h"
 
 

@@ -35,7 +35,6 @@
 #include "irc_string.h"
 #include "sprintf_irc.h"
 #include "ircd.h"
-#include "list.h"
 #include "s_gline.h"
 #include "numeric.h"
 #include "packet.h"
@@ -1625,5 +1624,121 @@ show_ip(struct Client* source_p, struct Client* target_p)
 
   /* This should never happen */
   return 0;
+}
+
+/*
+ * initUser
+ *
+ * inputs	- none
+ * outputs	- none
+ *
+ * side effects - Creates a block heap for struct Users
+ *
+ */
+static BlockHeap *user_heap;
+void initUser(void)
+{
+  user_heap = BlockHeapCreate(sizeof(struct User), USER_HEAP_SIZE);
+  if(!user_heap)
+     outofmemory();	
+}
+/*
+ * make_user
+ *
+ * inputs	- pointer to client struct
+ * output	- pointer to struct User
+ * side effects - add's an User information block to a client
+ *                if it was not previously allocated.
+ */
+struct User* make_user(struct Client *client_p)
+{
+  struct User        *user;
+
+  user = client_p->user;
+  if (!user)
+    {
+      user = (struct User *)BlockHeapAlloc(user_heap);
+
+      ++user_count;
+
+      memset(user, 0, sizeof(struct User));
+      user->refcnt = 1;
+      client_p->user = user;
+    }
+  return user;
+}
+
+/*
+ * make_server
+ *
+ * inputs	- pointer to client struct
+ * output	- pointer to struct Server
+ * side effects - add's an Server information block to a client
+ *                if it was not previously allocated.
+ */
+struct Server *make_server(struct Client *client_p)
+{
+  struct Server* serv = client_p->serv;
+
+  if (!serv)
+    {
+      serv = (struct Server *)MyMalloc(sizeof(struct Server));
+
+      /* The commented out lines here are
+       * for documentation purposes only
+       * as they are zeroed by MyMalloc above
+       */
+#if 0
+      serv->user = NULL;
+      serv->users = NULL;
+      serv->servers = NULL;
+      *serv->by = '\0'; 
+      serv->up = (char *)NULL;
+#endif
+      client_p->serv = serv;
+    }
+  return client_p->serv;
+}
+
+/*
+ * free_user
+ * 
+ * inputs	- pointer to user struct
+ *		- pointer to client struct
+ * output	- none
+ * side effects - Decrease user reference count by one and release block,
+ *                if count reaches 0
+ */
+void free_user(struct User* user, struct Client* client_p)
+{
+  if (--user->refcnt <= 0)
+    {
+      if (user->away)
+        MyFree((char *)user->away);
+      /*
+       * sanity check
+       */
+      if (user->joined || user->refcnt < 0 ||
+          user->invited.head || user->channel.head)
+      {
+        sendto_realops_flags(UMODE_ALL, L_ALL,
+			     "* %#lx user (%s!%s@%s) %#lx %#lx %#lx %d %d *",
+			     (unsigned long)client_p, client_p ? client_p->name : "<noname>",
+			     client_p->username, client_p->host, (unsigned long)user,
+			     (unsigned long)user->invited.head,
+			     (unsigned long)user->channel.head, user->joined,
+			     user->refcnt);
+        assert(!user->joined);
+        assert(!user->refcnt);
+        assert(!user->invited.head);
+        assert(!user->channel.head);
+      }
+
+      BlockHeapFree(user_heap, user);
+    }
+}
+
+
+
 }
 

@@ -31,7 +31,6 @@
 #include "hash.h"        /* add_to_client_hash_table */
 #include "irc_string.h" 
 #include "ircd.h"        /* me */
-#include "list.h"        /* make_server */
 #include "numeric.h"     /* ERR_xxx */
 #include "s_conf.h"      /* struct ConfItem */
 #include "s_log.h"       /* log level defines */

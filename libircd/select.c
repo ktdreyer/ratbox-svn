@@ -35,7 +35,6 @@
 #include "irc_string.h"
 #include "ircdauth.h"
 #include "ircd.h"
-#include "list.h"
 #include "listener.h"
 #include "numeric.h"
 #include "packet.h"

@@ -37,7 +37,6 @@
 #include "whowas.h"
 #include "s_serv.h"
 #include "send.h"
-#include "list.h"
 #include "channel.h"
 #include "s_log.h"
 #include "resv.h"
@@ -113,7 +112,7 @@ static void mr_nick(struct Client *client_p, struct Client *source_p,
   char nick[NICKLEN];
   char*    s;
    
-  if(parc < 2)
+  if(parc < 2 || BadPtr(parv[1]))
   {
     sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN),
                me.name, BadPtr(parv[0]) ? "*" : parv[0]);
@@ -171,7 +170,7 @@ static void mr_nick(struct Client *client_p, struct Client *source_p,
   char     nick[NICKLEN];
   struct   Client *target_p;
 
-  if(parc < 2)
+  if(parc < 2 || BadPtr(parv[1]))
   {
     sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN),
                me.name, parv[0]);
@@ -277,7 +276,7 @@ static void ms_nick(struct Client *client_p, struct Client *source_p,
   char     nick[NICKLEN];
   time_t   newts = 0;
 
-  if(parc < 2)
+  if(parc < 2 || BadPtr(parv[1]))
   {
     sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN), me.name, parv[0]);
     return;
@@ -460,7 +459,11 @@ static int check_clean_nick(struct Client *client_p, struct Client *source_p,
    * and dont bother messing at all
    */
 
-  if(!clean_nick_name(nick) || strcmp(nick, newnick))
+  /*
+   * Zero length nicks are bad too..this shouldn't happen but..
+   */
+   
+  if(!clean_nick_name(nick) || strcmp(nick, newnick) || nick[0] == '\0')
   {
     ServerStats->is_kill++;
     sendto_realops_flags(UMODE_DEBUG, L_ALL,

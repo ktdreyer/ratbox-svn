@@ -35,7 +35,6 @@
 #include "ircdauth.h"
 #include "ircd.h"
 #include "linebuf.h"
-#include "list.h"
 #include "listener.h"
 #include "numeric.h"
 #include "packet.h"

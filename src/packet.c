@@ -29,7 +29,6 @@
 #include "client.h"
 #include "common.h"
 #include "ircd.h"
-#include "list.h"
 #include "parse.h"
 #include "fdlist.h"
 #include "packet.h"

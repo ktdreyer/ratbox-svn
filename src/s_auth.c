@@ -34,7 +34,6 @@
  */
 #include "stdinc.h"
 #include "tools.h"
-#include "list.h"
 #include "s_auth.h"
 #include "s_conf.h"
 #include "client.h"

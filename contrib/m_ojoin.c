@@ -34,7 +34,6 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
-#include "list.h"
 #include "channel_mode.h"
 
 static void mo_ojoin(struct Client *client_p, struct Client *source_p,

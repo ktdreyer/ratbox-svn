@@ -48,7 +48,6 @@
 #include "hash.h"
 #include "parse.h"
 #include "modules.h"
-#include "list.h"
 
 /* internal functions */
 static void set_local_gline(

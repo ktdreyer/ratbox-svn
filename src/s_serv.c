@@ -43,7 +43,6 @@
 #include "sprintf_irc.h"
 #include "ircd.h"
 #include "ircd_defs.h"
-#include "list.h"
 #include "numeric.h"
 #include "packet.h"
 #include "res.h"

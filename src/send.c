@@ -39,7 +39,6 @@
 #include "sprintf_irc.h"
 #include "s_conf.h"
 #include "linebuf.h"
-#include "list.h"
 #include "s_debug.h"
 #include "s_log.h"
 #include "memory.h"

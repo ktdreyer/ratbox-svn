@@ -36,7 +36,6 @@
 #include "s_conf.h"
 #include "s_serv.h"
 #include "send.h"
-#include "list.h"
 #include "irc_string.h"
 #include "sprintf_irc.h"
 #include "s_conf.h"
@@ -90,7 +89,7 @@ static void m_whois(struct Client *client_p,
 {
   static time_t last_used = 0;
   
-  if (parc < 2)
+  if (parc < 2 || BadPtr(parv[1]))
     {
       sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN),
                  me.name, parv[0]);
@@ -137,7 +136,7 @@ static void mo_whois(struct Client *client_p,
                     int parc,
                     char *parv[])
 {
-  if(parc < 2)
+  if(parc < 2 || BadPtr(parv[1]))
     {
       sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN),
                  me.name, parv[0]);
@@ -472,7 +471,7 @@ static void ms_whois(struct Client *client_p,
                     char *parv[])
 {
   /* its a misconfigured server */
-  if (parc < 2)
+  if (parc < 2 || BadPtr(parv[1]))
     {
       sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN),
                  me.name, parv[0]);
