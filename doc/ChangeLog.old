@@ -1,3 +1,8 @@
+*** 20001223_4 by db
+- re-added "Ping timeout: nnn seconds" to time out code. 
+
+
+
 *** 20001223_3 by db
 - client that is notice'ed should not reply with an away.. noticed by Rodder
 
