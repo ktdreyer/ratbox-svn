@@ -1093,27 +1093,18 @@ void get_res(void)
     else {
       /*
        * got a name and address response, client resolved
+       *
+       * I liked the undernet comment better:
+       *
+       * XXX - Bug found here by Dianora -
+       * make_cache() occasionally returns a NULL pointer when a
+       * PTR returned a CNAME, cp was not checked before so the
+       * callback was being called with a value of 0x2C != NULL
+       *
        */
       cp = make_cache(request);
-
-      /* if cp is NULL then don't try to use it...&cp->reply will be 0x2c
-       * in this case btw.
-       * make_cache can return NULL if hp->h_name and hp->h_addr_list[0]
-       * are NULL -Dianora
-       */
-
-      if(cp)
-        {        
-          (*request->query.callback)(request->query.vptr, &cp->reply);
-        }
-      else
-        {
-          (*request->query.callback)(request->query.vptr, 0 );
-        }
-
-#ifdef  DEBUG
-      Debug((DEBUG_INFO,"get_res:cp=%#x request=%#x (made)",cp,request));
-#endif
+      (*request->query.callback)(request->query.vptr,
+				 (cp) ? &cp->reply : 0);
       rem_request(request);
     }
   }
