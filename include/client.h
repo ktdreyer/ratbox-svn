@@ -35,11 +35,9 @@
 #include <netinet/in.h>      /* in_addr */
 #define INCLUDED_netinet_in_h
 #endif
-#if defined(HAVE_STDDEF_H)
-# ifndef INCLUDED_stddef_h
-#  include <stddef.h>        /* offsetof */
-#  define INCLUDED_stddef_h
-# endif
+#ifndef INCLUDED_stddef_h
+#include <stddef.h>        /* offsetof */
+#define INCLUDED_stddef_h
 #endif
 #ifndef INCLUDED_ircd_defs_h
 # include "ircd_defs.h"
@@ -66,6 +64,12 @@ struct Zdata;
 struct DNSReply;
 struct Listener;
 struct Client;
+
+/*
+ * NOTE: Just because something is declared as a global doesn't
+ * mean we want to keep it that way forever. --Bleep
+ */
+extern struct Client* LocalClientList;  /* GLOBAL - Local client list */
 
 /*
  * Client structures
@@ -116,13 +120,6 @@ struct Client
   struct Client*    lprev;      /* Used for Server->servers/users */
 
 /* LINKLIST */
-  /* N.B. next_local_client, and previous_local_client
-   * duplicate the link list referenced to by struct Server -> users
-   * someday, we'll rationalize this... -Dianora
-   */
-
-  struct Client*    next_local_client;      /* keep track of these */
-  struct Client*    previous_local_client;
 
   struct Client*    next_server_client;
   struct Client*    next_oper_client;
@@ -140,7 +137,6 @@ struct Client
   unsigned int      umodes;     /* opers, normal users subset */
   unsigned int      flags;      /* client flags */
   unsigned int      flags2;     /* ugh. overflow */
-  int               fd;         /* >= 0, for local clients */
   int               hopcount;   /* number of servers to this 0 = local */
   unsigned short    status;     /* Client type */
   char              nicksent;
@@ -183,28 +179,16 @@ struct Client
    * these fields, if (from != self).
    */
   int               count;       /* Amount of data in buffer */
-#ifdef BOTCHECK
-  unsigned char     isbot;      /* non 0 if its a type of bot */
-#endif
-#ifdef FLUD
-  time_t            fludblock;
-  struct fludbot*   fluders;
-#endif
-#ifdef ANTI_SPAMBOT
-  time_t            last_join_time;   /* when this client last 
-                                         joined a channel */
-  time_t            last_leave_time;  /* when this client last 
-                                       * left a channel */
-  int               join_leave_count; /* count of JOIN/LEAVE in less than 
-                                         MIN_JOIN_LEAVE_TIME seconds */
-  int               oper_warn_count_down; /* warn opers of this possible 
-                                          spambot every time this gets to 0 */
-#endif
-#ifdef ANTI_DRONE_FLOOD
-  time_t            first_received_message_time;
-  int               received_number_of_privmsgs;
-  int               drone_noticed;
-#endif
+
+  int               fd;         /* >= 0, for local clients */
+  /*
+   * N.B. next_local, and prev_local
+   * duplicate the link list referenced to by struct Server -> users
+   * someday, we'll rationalize this... -Dianora
+   */
+  struct Client*    next_local;      /* keep track of these */
+  struct Client*    prev_local;
+
   char  buffer[CLIENT_BUFSIZE]; /* Incoming message buffer */
 
   struct Zdata*     zip;        /* zip data */
@@ -235,10 +219,6 @@ struct Client
   struct in_addr    ip;         /* keep real ip# too */
   unsigned short    port;       /* and the remote port# too :-) */
   struct DNSReply*  dns_reply;  /* result returned from resolver query */
-#ifdef ANTI_NICK_FLOOD
-  time_t            last_nick_change;
-  int               number_of_nick_changes;
-#endif
   time_t            last_knock; /* don't allow knock to flood */
   /*
    * client->sockhost contains the ip address gotten from the socket as a
@@ -253,6 +233,33 @@ struct Client
    */
   char              passwd[PASSWDLEN + 1];
   int               caps;       /* capabilities bit-field */
+
+#ifdef ANTI_NICK_FLOOD
+  time_t            last_nick_change;
+  int               number_of_nick_changes;
+#endif
+#ifdef BOTCHECK
+  unsigned char     isbot;      /* non 0 if its a type of bot */
+#endif
+#ifdef FLUD
+  time_t            fludblock;
+  struct fludbot*   fluders;
+#endif
+#ifdef ANTI_SPAMBOT
+  time_t            last_join_time;   /* when this client last 
+                                         joined a channel */
+  time_t            last_leave_time;  /* when this client last 
+                                       * left a channel */
+  int               join_leave_count; /* count of JOIN/LEAVE in less than 
+                                         MIN_JOIN_LEAVE_TIME seconds */
+  int               oper_warn_count_down; /* warn opers of this possible 
+                                          spambot every time this gets to 0 */
+#endif
+#ifdef ANTI_DRONE_FLOOD
+  time_t            first_received_message_time;
+  int               received_number_of_privmsgs;
+  int               drone_noticed;
+#endif
 };
 
 /*

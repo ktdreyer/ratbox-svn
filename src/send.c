@@ -841,7 +841,7 @@ sendto_match_butone(struct Client *one, struct Client *from, char *mask,
   va_start(args, pattern);
 
   /* scan the local clients */
-  for(cptr = local_cptr_list; cptr; cptr = cptr->next_local_client)
+  for(cptr = LocalClientList; cptr; cptr = cptr->next_local)
     {
       if (cptr == one)  /* must skip the origin !! */
         continue;
@@ -905,18 +905,18 @@ sendto_ops_flags(int flags, const char *pattern, ...)
 
   if( flags & FLAGS_SKILL)
     {
-      for(cptr = local_cptr_list; cptr; cptr = cptr->next_local_client)
+      for(cptr = LocalClientList; cptr; cptr = cptr->next_local)
         {
           if(cptr->umodes & FLAGS_SKILL)
             {
-              (void)ircsprintf(nbuf, ":%s NOTICE %s :*** Notice -- ",
+              ircsprintf(nbuf, ":%s NOTICE %s :*** Notice -- ",
                                me.name, cptr->name);
       
-              (void)strncat(nbuf, pattern, sizeof(nbuf) - strlen(nbuf));
+              strncat(nbuf, pattern, sizeof(nbuf) - strlen(nbuf));
       
               vsendto_one(cptr, nbuf, args);
             }
-        } /* for(cptr = local_cptr_list; cptr; cptr = cptr->next_local_client) */
+        } /* for(cptr = LocalClientList; cptr; cptr = cptr->next_local) */
     }
 
 
@@ -956,13 +956,13 @@ sendto_ops(const char *pattern, ...)
 
   va_start(args, pattern);
   
-  for (cptr = local_cptr_list; cptr; cptr = cptr->next_local_client)
+  for (cptr = LocalClientList; cptr; cptr = cptr->next_local)
     {
       if (SendServNotice(cptr))
         {
-          (void)ircsprintf(nbuf, ":%s NOTICE %s :*** Notice -- ",
+          ircsprintf(nbuf, ":%s NOTICE %s :*** Notice -- ",
                            me.name, cptr->name);
-          (void)strncat(nbuf, pattern, sizeof(nbuf) - strlen(nbuf));
+          strncat(nbuf, pattern, sizeof(nbuf) - strlen(nbuf));
           
           vsendto_one(cptr, nbuf, args);
         }
