@@ -1,3 +1,9 @@
+*** 20010106_18 by db
+- fixed leaf server code, please read comments in m_server.c
+- removed leaf{} block, its really unnecessary read above
+
+
+
 *** 20010106_17 by davidt
 Fix m_whois for lazyleafs -- hubs were asking leafs about unknown people
 
