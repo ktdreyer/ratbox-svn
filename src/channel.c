@@ -1006,7 +1006,7 @@ can_join(struct Client *source_p, struct Channel *chptr, char *key)
       for (ptr = chptr->invexlist.head; ptr; ptr = ptr->next)
       {
         invex = ptr->data;
-        if (match(invex->banstr, src_host) || match(invex->banstr, s_iphost))
+        if (match(invex->banstr, src_host) || match(invex->banstr, src_iphost))
           break;
       }
       if (ptr == NULL)
