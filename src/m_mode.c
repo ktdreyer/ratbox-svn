@@ -30,6 +30,8 @@
 #include "ircd.h"
 #include "numeric.h"
 #include "s_user.h"
+#include "s_conf.h"
+#include "s_serv.h"
 #include "send.h"
 
 /*
@@ -117,8 +119,32 @@ int m_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
             }
 
           chptr = hash_find_channel(parv[1], NullChn);
-          if (!chptr)
-            return user_mode(cptr, sptr, parc, parv);
+	  if(!chptr)
+	    {
+	      /* LazyLinks */
+	      if ( !ConfigFileEntry.hub && IsCapable( serv_cptr_list, CAP_LL) )
+		{
+		  /* cache the channel if it exists on uplink */
+		  /* nasty possibility of a DoS here... ?
+		   * nefarious user purposefully mode's non existent
+		   * channel hoping to create a lot of traffic...
+		   */
+
+		  sendto_one( serv_cptr_list, ":%s CBURST %s",
+			      me.name, parv[1] );
+
+		  /* meanwhile, ask for channel mode */
+		  sendto_one( serv_cptr_list, ":%s MODE %s",
+			      sptr->name, parv[1] );
+		  return 0;
+		}
+	      else
+		{
+		  sendto_one(sptr, form_str(ERR_BADCHANNAME),
+			     me.name, parv[0], (unsigned char *)parv[1]);
+		  return 0;
+		}
+	    }
         }
       else
         {
@@ -144,6 +170,10 @@ int m_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                  chptr->chname, chptr->channelts);
       return 0;
     }
+
+  /* LazyLinks - can't do mode "#channel +o" unless user is on channel
+   * and in that case, channel has been cached using CBURST
+   */
 
   set_channel_mode(cptr, sptr, chptr, parc - 2, parv + 2);
 

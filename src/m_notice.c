@@ -247,11 +247,15 @@ int     m_notice(struct Client *cptr,
   ** nickname addressed?
   */
 
+  /* LazyLinks */
+#ifndef LLVER1
+
   if(!ConfigFileEntry.hub && serv_cptr_list &&
      IsCapable(serv_cptr_list,CAP_LL))
     {
 
     }
+#endif
 
   if ((acptr = find_person(nick, NULL)))
     {
