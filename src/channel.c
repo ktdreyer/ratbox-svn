@@ -726,7 +726,7 @@ static  void    send_mode_list(struct Client *cptr,
 
       *mp++ = flag;
       *mp = '\0';
-      ircsprintf(pp,"%s ",banptr);
+      ircsprintf(pp,"%s ",banptr->banstr);
       pp += tlen;
       cur_len += tlen;
       count++;

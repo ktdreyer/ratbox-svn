@@ -56,8 +56,6 @@
 #include <sys/stat.h>
 
 
-time_t LastUsedWallops = 0;
-
 static int valid_hostname(const char* hostname);
 static int valid_username(const char* username);
 static void report_and_set_user_flags( struct Client *, struct ConfItem * );
