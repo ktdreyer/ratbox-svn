@@ -41,6 +41,10 @@
     403 numerics.  This is caused by the NOTICE AUTH :*** ... messages,
     and is normal.
 
+5.  Modules loaded via 'module="..."' in the modules {} block do not get
+    loaded on start-up.  They must be manually MODLOAD'd after the server
+    starts.
+
 
 For more information see http://bugs.efnow.net
 
