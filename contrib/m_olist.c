@@ -172,6 +172,7 @@ static int list_named_channel(struct Client *source_p,char *name)
   return 0;
 }
 
+
 /*
  * list_one_channel
  *
@@ -182,8 +183,13 @@ static int list_named_channel(struct Client *source_p,char *name)
  */
 static void list_one_channel(struct Client *source_p, struct Channel *chptr)
 {
+  static char	  modebuf[MODEBUFLEN];
+  static char	  parabuf[MODEBUFLEN];
+  static char	  buf[MODEBUFLEN*2+TOPICLEN];  
+  channel_modes(chptr, source_p, modebuf, parabuf);  
+  ircsprintf(buf, "%s %s %s", modebuf, parabuf, chptr->topic == NULL ? "" : chptr->topic);
   sendto_one(source_p, form_str(RPL_LIST), me.name, source_p->name,
-             chptr->chname, chptr->users, chptr->topic == NULL ? "" : chptr->topic );
+             chptr->chname, chptr->users, buf );
 }
 
 void
