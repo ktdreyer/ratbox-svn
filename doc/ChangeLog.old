@@ -1,3 +1,7 @@
+*** 20001214_11 by spookey
+Minor _version misplacement.. (above the #else ,  not below it =P)
+
+
 *** 20001214_10 by toot
 ripped out some more unused stuff
 
