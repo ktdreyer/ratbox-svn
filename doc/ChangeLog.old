@@ -1,3 +1,8 @@
+*** 20001213_14 by db
+- fixed small typo in the parser, spotted by Walter Campbell
+
+
+
 *** 20001213_13 by spookey
 
   --disable-openssl enabled openssl... that didn't seem right..
