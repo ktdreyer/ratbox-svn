@@ -1,3 +1,15 @@
+leeh        2002/10/23 22:24:37 UTC	(20021023_1)
+
+  Modified files:
+    src                  s_conf.c 
+  Log:
+  - fixed oper_reason for perm klines, these need to be stored too.
+  
+  Revision  Changes    Path
+  7.359     +55 -39    ircd-ratbox/src/s_conf.c
+
+
+
 leeh        2002/10/23 22:18:03 UTC	(20021023_0)
 
   Modified files:
