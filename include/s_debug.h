@@ -44,8 +44,8 @@ struct Client;
 #define DEBUG_LIST  10  /* debug list use */
 
 
-extern void send_usage(struct Client*, char *);
-extern void count_memory (struct Client *, char *);
+extern void send_usage(struct Client*);
+extern void count_memory (struct Client *);
 
 extern void debug(int, char *, ...);
 

@@ -12,7 +12,7 @@
 struct Client;
 struct ConfItem;
 
-extern void    serv_info (struct Client *, char *);
+extern void    serv_info (struct Client *);
 extern char*   date(time_t);
 extern const char* smalldate(time_t);
 extern char    *small_file_date(time_t);

@@ -242,7 +242,7 @@ msgstr	""
 
 #: ../src/messages.tab:306
 #, c-format
-msgid	":%s 276 %s %s :has %d possible channels available"
+msgid	":%s 276 %s %s :has %d possible virtual channels available"
 msgstr	""
 
 #: ../src/messages.tab:307

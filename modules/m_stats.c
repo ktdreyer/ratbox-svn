@@ -326,7 +326,7 @@ void do_non_priv_stats(struct Client *sptr, char *name, char *target,
       break;
 
     case '?':
-      serv_info(sptr, sptr->name);
+      serv_info(sptr);
       stats_spy(sptr,stat);
       break;
 
@@ -423,7 +423,7 @@ void do_priv_stats(struct Client *sptr, char *name, char *target,
       break;
 
     case 'R' : case 'r' :
-      send_usage(sptr,sptr->name);
+      send_usage(sptr);
       stats_spy(sptr,stat);
       break;
 
@@ -470,12 +470,12 @@ void do_priv_stats(struct Client *sptr, char *name, char *target,
       break;
 
     case 'Z' : case 'z' :
-      count_memory(sptr, sptr->name);
+      count_memory(sptr);
       stats_spy(sptr,stat);
       break;
 
     case '?':
-      serv_info(sptr, sptr->name);
+      serv_info(sptr);
       stats_spy(sptr,stat);
       break;
 
