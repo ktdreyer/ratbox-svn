@@ -1,3 +1,17 @@
+leeh        2002/11/27 02:47:56 UTC	(20021127_0)
+
+  Modified files:
+    src                  channel.c newconf.c 
+  Log:
+  - htm_interval is a time, not int
+  - do /names output in a more sensible order (reported by BlackJac)
+  
+  Revision  Changes    Path
+  7.362     +3 -3      ircd-ratbox/src/channel.c
+  7.60      +1 -1      ircd-ratbox/src/newconf.c
+
+
+
 androsyn    2002/11/26 05:00:02 UTC	(20021126_6)
 
   Modified files:
