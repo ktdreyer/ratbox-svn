@@ -58,18 +58,22 @@
 #define HPATH  IRCD_PREFIX "/help/opers"
 
 /* files */
-#define SPATH    BINPATH "/ircd"	/* ircd executable */
-#define SLPATH   BINPATH "/servlink"	/* servlink executable */
-#define CPATH    ETCPATH "/ircd.conf"	/* ircd.conf file */
-#define KPATH    ETCPATH "/kline.conf"	/* kline file */
-#define DLPATH   ETCPATH "/dline.conf"	/* dline file */
-#define XPATH	 ETCPATH "/xline.conf"	/* xline file */
-#define RESVPATH ETCPATH "/resv.conf"	/* resv file */
-#define RPATH    ETCPATH "/ircd.rsa"	/* ircd rsa private keyfile */
-#define MPATH    ETCPATH "/ircd.motd"	/* MOTD file */
-#define LPATH    LOGPATH "/ircd.log"	/* ircd logfile */
-#define PPATH    ETCPATH "/ircd.pid"	/* pid file */
-#define OPATH    ETCPATH "/opers.motd"	/* oper MOTD file */
+#define SPATH		BINPATH "/ircd"	/* ircd executable */
+#define SLPATH		BINPATH "/servlink"	/* servlink executable */
+#define CPATH		ETCPATH "/ircd.conf"	/* ircd.conf file */
+#define KLINEPATH	ETCPATH "/kline.conf"	/* kline file */
+#define DLINEPATH	ETCPATH "/dline.conf"	/* dline file */
+#define XLINEPATH	ETCPATH "/xline.conf"	/* xline file */
+#define RESVPATH	ETCPATH "/resv.conf"	/* resv file */
+#define KLINEPATHPERM	ETCPATH "/kline.conf.perm"	/* kline file */
+#define DLINEPATHPERM	ETCPATH "/dline.conf.perm"	/* dline file */
+#define XLINEPATHPERM	ETCPATH "/xline.conf.perm"	/* xline file */
+#define RESVPATHPERM	ETCPATH "/resv.conf.perm"	/* resv file */
+#define RPATH		ETCPATH "/ircd.rsa"	/* ircd rsa private keyfile */
+#define MPATH		ETCPATH "/ircd.motd"	/* MOTD file */
+#define LPATH		LOGPATH "/ircd.log"	/* ircd logfile */
+#define PPATH		ETCPATH "/ircd.pid"	/* pid file */
+#define OPATH		ETCPATH "/opers.motd"	/* oper MOTD file */
 
 /* IGNORE_BOGUS_TS
  * Ignore bogus timestamps from other servers. Yes this will desync

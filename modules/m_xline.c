@@ -318,7 +318,7 @@ write_xline(struct Client *source_p, struct ConfItem *aconf)
 	FILE *out;
 	const char *filename;
 
-	filename = ConfigFileEntry.xlinefile;
+	filename = XLINEPATH;
 
 	if((out = fopen(filename, "a")) == NULL)
 	{

@@ -614,10 +614,14 @@ read_ban_confs(int cold)
 	if(!cold)
 		clear_ban_confs();
 
-	read_kline_conf(ConfigFileEntry.klinefile);
-	read_dline_conf(ConfigFileEntry.dlinefile);
-	read_xline_conf(ConfigFileEntry.xlinefile);
-	read_resv_conf(ConfigFileEntry.resvfile);
+	read_kline_conf(KLINEPATH, 1);
+	read_kline_conf(KLINEPATHPERM, 0);
+	read_dline_conf(DLINEPATH, 1);
+	read_dline_conf(DLINEPATHPERM, 0);
+	read_xline_conf(XLINEPATH, 1);
+	read_xline_conf(XLINEPATHPERM, 0);
+	read_resv_conf(RESVPATH, 1);
+	read_resv_conf(RESVPATHPERM, 0);
 }
 
 /* write_confitem()
@@ -732,14 +736,14 @@ get_conf_name(KlineType type)
 	}
 	else if(type == DLINE_TYPE)
 	{
-		return (ConfigFileEntry.dlinefile);
+		return (DLINEPATH);
 	}
 	else if(type == RESV_TYPE)
 	{
-		return (ConfigFileEntry.resvfile);
+		return (RESVPATH);
 	}
 
-	return ConfigFileEntry.klinefile;
+	return KLINEPATH;
 }
 
 /*

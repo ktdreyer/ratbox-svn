@@ -104,7 +104,7 @@ getfields(char *line)
 }
 
 void
-read_kline_conf(const char *filename)
+read_kline_conf(const char *filename, int warn)
 {
 	FILE *in;
 	struct ConfItem *aconf;
@@ -114,10 +114,14 @@ read_kline_conf(const char *filename)
 
 	if((in = fopen(filename, "r")) == NULL)
 	{
-		sendto_realops_flags(UMODE_ALL, L_ALL,
-				"Can't open %s file klines could be missing!",
-				filename);
-		ilog(L_MAIN, "Failed reading kline file %s", filename);
+		if(warn)
+		{
+			sendto_realops_flags(UMODE_ALL, L_ALL,
+					"Can't open %s file klines could be missing!",
+					filename);
+			ilog(L_MAIN, "Failed reading kline file %s", filename);
+		}
+
 		return;
 	}
 
@@ -153,7 +157,7 @@ read_kline_conf(const char *filename)
 }
 
 void
-read_dline_conf(const char *filename)
+read_dline_conf(const char *filename, int warn)
 {
 	FILE *in;
 	struct ConfItem *aconf;
@@ -163,10 +167,13 @@ read_dline_conf(const char *filename)
 
 	if((in = fopen(filename, "r")) == NULL)
 	{
-		sendto_realops_flags(UMODE_ALL, L_ALL,
-				"Can't open %s file dlines could be missing!",
-				filename);
-		ilog(L_MAIN, "Failed reading dline file %s", filename);
+		if(warn)
+		{
+			sendto_realops_flags(UMODE_ALL, L_ALL,
+					"Can't open %s file dlines could be missing!",
+					filename);
+			ilog(L_MAIN, "Failed reading dline file %s", filename);
+		}
 		return;
 	}
 
@@ -206,7 +213,7 @@ read_dline_conf(const char *filename)
 }
 
 void
-read_xline_conf(const char *filename)
+read_xline_conf(const char *filename, int warn)
 {
 	FILE *in;
 	struct ConfItem *aconf;
@@ -216,10 +223,14 @@ read_xline_conf(const char *filename)
 
 	if((in = fopen(filename, "r")) == NULL)
 	{
-		sendto_realops_flags(UMODE_ALL, L_ALL,
-				"Can't open %s file xlines could be missing!",
-				filename);
-		ilog(L_MAIN, "Failed reading xline file %s", filename);
+		if(warn)
+		{
+			sendto_realops_flags(UMODE_ALL, L_ALL,
+					"Can't open %s file xlines could be missing!",
+					filename);
+			ilog(L_MAIN, "Failed reading xline file %s", filename);
+		}
+
 		return;
 	}
 
@@ -253,7 +264,7 @@ read_xline_conf(const char *filename)
 }
 
 void
-read_resv_conf(const char *filename)
+read_resv_conf(const char *filename, int warn)
 {
 	FILE *in;
 	struct ConfItem *aconf;
@@ -263,10 +274,14 @@ read_resv_conf(const char *filename)
 
 	if((in = fopen(filename, "r")) == NULL)
 	{
-		sendto_realops_flags(UMODE_ALL, L_ALL,
-				"Can't open %s file resvs could be missing!",
-				filename);
-		ilog(L_MAIN, "Failed reading resv file %s", filename);
+		if(warn)
+		{
+			sendto_realops_flags(UMODE_ALL, L_ALL,
+					"Can't open %s file resvs could be missing!",
+					filename);
+			ilog(L_MAIN, "Failed reading resv file %s", filename);
+		}
+
 		return;
 	}
 

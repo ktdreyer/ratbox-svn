@@ -146,10 +146,6 @@ struct config_file_entry
 {
 	const char *dpath;	/* DPATH if set from command line */
 	const char *configfile;
-	const char *klinefile;
-	const char *dlinefile;
-	const char *xlinefile;
-	const char *resvfile;
 
 	char *servlink_path;
 	char *egdpool_path;

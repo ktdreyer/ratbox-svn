@@ -7,9 +7,9 @@
 #ifndef INCLUDED_banconf_h
 #define INCLUDED_banconf_h
 
-void read_kline_conf(const char *filename);
-void read_dline_conf(const char *filename);
-void read_xline_conf(const char *filename);
-void read_resv_conf(const char *filename);
+void read_kline_conf(const char *filename, int warn);
+void read_dline_conf(const char *filename, int warn);
+void read_xline_conf(const char *filename, int warn);
+void read_resv_conf(const char *filename, int warn);
 
 #endif
