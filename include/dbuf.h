@@ -47,7 +47,6 @@ struct DBuf {
   struct DBufBuffer* head;   /* First data buffer, if length > 0 */
   struct DBufBuffer* tail;   /* last data buffer, if length > 0 */
   size_t             length; /* Current number of bytes stored */
-  size_t             offset; /* Offset to the first byte */
 };
 
 extern int DBufCount;
@@ -62,10 +61,7 @@ extern int DBufUsedCount;
 **      returns > 0, if operation successfull
 **              < 0, if failed (due memory allocation problem)
 */
-extern int dbuf_put(struct DBuf *, char *, int);
-                                        /* Dynamic buffer header */
-                                        /* Pointer to data to be stored */
-                                        /* Number of bytes to store */
+extern int dbuf_put(struct DBuf* dyn, const char* buf, size_t len);
 
 /*
 ** dbuf_get
@@ -82,10 +78,7 @@ extern int dbuf_put(struct DBuf *, char *, int);
 **              Negative return values indicate some unspecified
 **              error condition, rather fatal...
 */
-extern int dbuf_get(struct DBuf *, char *, int);
-                                /* Dynamic buffer header */
-                                /* Pointer to buffer to receive the data */
-                                /* Max amount of bytes that can be received */
+extern size_t dbuf_get(struct DBuf* dbuf, char* buf, size_t len);
 
 /*
 ** dbuf_map, dbuf_delete
@@ -111,13 +104,12 @@ extern int dbuf_get(struct DBuf *, char *, int);
 **      Note:   delete can be used alone, there is no real binding
 **              between map and delete functions...
 */
-extern char* dbuf_map(struct DBuf* dyn, int* len);
-                                        /* Dynamic buffer header */
-                                        /* Return number of bytes accessible */
-
-extern void dbuf_delete(struct DBuf* dyn, int len);
-                                        /* Dynamic buffer header */
-                                        /* Number of bytes to delete */
+/*
+ * dyn - Dynamic buffer header
+ * len - Return number of bytes accessible 
+ */
+extern const char* dbuf_map(const struct DBuf* dyn, size_t* len);
+extern void        dbuf_delete(struct DBuf* dyn, size_t len);
 
 /*
 ** DBufLength
@@ -134,8 +126,8 @@ extern void dbuf_delete(struct DBuf* dyn, int len);
 */
 #define DBufClear(dyn)  dbuf_delete((dyn), DBufLength(dyn))
 
-extern int    dbuf_getmsg (struct DBuf *, char *, int);
-extern void   dbuf_init(void);
-extern void   count_dbuf_memory(size_t* allocated, size_t* used);
+extern int  dbuf_getmsg(struct DBuf* dyn, char* buf, size_t len);
+extern void dbuf_init(void);
+extern void count_dbuf_memory(size_t* allocated, size_t* used);
 
 #endif /* INCLUDED_dbuf_h */
