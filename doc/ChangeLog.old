@@ -1,3 +1,8 @@
+*** 20001211_7 by db
+- removed some unused variables
+
+
+
 *** 20001211_6 by db
 - unknown clients should be removed from the unknown_list on exit!
   or you get duplicates on the unknown_list and neat things like that.
