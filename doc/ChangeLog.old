@@ -1,3 +1,15 @@
+jmallett    2002/01/13 02:02:37 EST	(20020113_1)
+
+  Modified files:
+    include              s_bsd.h 
+  Log:
+  Update comments about READBUF_SIZE
+  
+  Revision  Changes    Path
+  7.35      +2 -1      ircd-hybrid-7/include/s_bsd.h
+
+
+
 androsyn    2002/01/12 19:41:46 EST	(20020113_0)
 
   Modified files:
