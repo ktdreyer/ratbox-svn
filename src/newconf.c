@@ -434,6 +434,14 @@ static struct mode_table auth_table[] = {
 	{NULL, 0}
 };
 
+static struct mode_table connect_table[] = {
+	{ "autocon",	SERVER_AUTOCONN		},
+	{ "compressed",	SERVER_COMPRESSED	},
+	{ "encrypted",	SERVER_ENCRYPTED	},
+	{ "topicburst",	SERVER_TB		},
+	{ NULL,		0			},
+};
+
 static struct mode_table cluster_table[] = {
 	{ "kline",	SHARED_KLINE	},
 	{ "unkline",	SHARED_UNKLINE	},
@@ -1250,6 +1258,14 @@ conf_end_connect(struct TopConf *tc)
 		return 0;
 	}
 
+#ifndef HAVE_LIBZ
+	if(ServerConfEncrypted(yy_server))
+	{
+		conf_report_error("Ignoring connect::flags::compressed -- zlib not available.");
+		yy_server->flags &= ~SERVER_COMPRESSED;
+	}
+#endif
+
 	add_server_conf(yy_server);
 	dlinkAdd(yy_server, &yy_server->node, &server_conf_list);
 
@@ -1327,51 +1343,14 @@ conf_set_connect_aftype(void *data)
 }
 
 static void
-conf_set_connect_encrypted(void *data)
+conf_set_connect_flags(void *data)
 {
-	int yesno = *(unsigned int *) data;
+	conf_parm_t *args = data;
 
-	if(yesno)
-		yy_server->flags |= SERVER_ENCRYPTED;
-	else
-		yy_server->flags &= ~SERVER_ENCRYPTED;
-}
-
-static void
-conf_set_connect_compressed(void *data)
-{
-#ifdef HAVE_LIBZ
-	int yesno = *(unsigned int *) data;
-
-	if(yesno)
-		yy_server->flags |= SERVER_COMPRESSED;
-	else
-		yy_server->flags &= ~SERVER_COMPRESSED;
-#else
-	conf_report_error("Ignoring connect::compressed -- zlib not available.");
-#endif
-}
-
-static void
-conf_set_connect_topicburst(void *data)
-{
-	int yesno = *(unsigned int *) data;
-
-	if(yesno)
-		yy_server->flags |= SERVER_TB;
-	else
-		yy_server->flags &= ~SERVER_TB;
-}
-
-static void
-conf_set_connect_auto(void *data)
-{
-	int yesno = *(unsigned int *) data;
-
-	if(yesno)
-		yy_server->flags |= SERVER_AUTOCONN;
-	else
-		yy_server->flags &= ~SERVER_AUTOCONN;
+	/* note, we allow them to set compressed, then remove it later if
+	 * they do and LIBZ isnt available
+	 */
+	set_modes_from_table(&yy_server->flags, "flag", connect_table, args);
 }
 
 static void
@@ -2507,10 +2486,8 @@ newconf_init()
 	add_conf_item("connect", "hub_mask", CF_QSTRING, conf_set_connect_hub_mask);
 	add_conf_item("connect", "leaf_mask", CF_QSTRING, conf_set_connect_leaf_mask);
 	add_conf_item("connect", "class", CF_QSTRING, conf_set_connect_class);
-	add_conf_item("connect", "autoconn", CF_YESNO, conf_set_connect_auto);
-	add_conf_item("connect", "encrypted", CF_YESNO, conf_set_connect_encrypted);
-	add_conf_item("connect", "compressed", CF_YESNO, conf_set_connect_compressed);
-	add_conf_item("connect", "topicburst", CF_YESNO, conf_set_connect_topicburst);
+	add_conf_item("connect", "flags", CF_STRING | CF_FLIST,
+			conf_set_connect_flags);
 
 	add_top_conf("kill", conf_begin_kill, conf_end_kill);
 	add_conf_item("kill", "user", CF_QSTRING, conf_set_kill_user);
