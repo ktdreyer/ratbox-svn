@@ -469,6 +469,11 @@ BlockHeapFree(BlockHeap * bh, void *ptr)
 
 	memblock = (void *) ((size_t) ptr - sizeof(MemBlock));
 #ifdef DEBUG_BALLOC
+	if(memblock->magic == BALLOC_FREE_MAGIC)
+	{
+		blockheap_fail("double free of a block");
+		outofmemory();
+	} else 
 	if(memblock->magic != BALLOC_MAGIC)
 	{
 		blockheap_fail("memblock->magic != BALLOC_MAGIC");
@@ -486,6 +491,12 @@ BlockHeapFree(BlockHeap * bh, void *ptr)
 	bh->freeElems++;
 	mem_frob(ptr, bh->elemSize);
 	dlinkMoveNode(&memblock->self, &block->used_list, &block->free_list);
+#ifdef DEBUG_BALLOC
+	if(dlink_list_length(&block->free_list) > 0 && block->free_list.head == NULL)
+	{
+		blockheap_fail("block->free_list > 0 and free_list.head == NULL");
+	}
+#endif
 	return (0);
 }
 

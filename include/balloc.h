@@ -36,6 +36,7 @@
 
 #ifdef DEBUG_BALLOC
 #define BALLOC_MAGIC 0x3d3a3c3d
+#define BALLOC_FREE_MAGIC 0xafafafaf
 #endif
 
 /* status information for an allocated block in heap */
