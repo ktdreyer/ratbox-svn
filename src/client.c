@@ -377,9 +377,13 @@ check_pings_list(dlink_list *list)
             }
         }
       /* ping_timeout: */
+
+      /* bloat for now */
+#if 0
       timeout = cptr->lasttime + ping;
       while (timeout <= CurrentTime)
         timeout += ping;
+#endif
     }
 }
 
