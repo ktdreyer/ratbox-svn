@@ -1,3 +1,15 @@
+leeh        2004/10/27 13:21:34 EDT	(20041027_1)
+
+  Modified files:
+    src                  s_jupeserv.c 
+  Log:
+  - added wallops to calljupe/callunjupe
+  
+  Revision  Changes    Path
+  1.9       +24 -4     rserv/src/s_jupeserv.c
+
+
+
 leeh        2004/10/27 12:43:32 EDT	(20041027_0)
 
   Modified files:
