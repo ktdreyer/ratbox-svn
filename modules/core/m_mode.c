@@ -542,6 +542,7 @@ chm_ban(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
 		default:
 			sendto_realops_flags(UMODE_ALL, L_ALL,
 					     "chm_ban() called with unknown type!");
+			return;
 			break;
 	}
 
