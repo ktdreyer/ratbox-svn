@@ -93,7 +93,7 @@ include   \.include{ws}(\<.*\>|\".*\")
 
 {qstring}	{ yylval.string = yytext+1;
 		  if(yylval.string[yyleng-2] != '"')
-		    log(L_ERROR, "Unterminated character string");
+		    ilog(L_ERROR, "Unterminated character string");
 		  else
 		    yylval.string[yyleng-2] = '\0'; /* remove close quote */
 		  return QSTRING;
@@ -352,7 +352,7 @@ void cinclude(void)
 
   /* do stacking and co. */ 
   if (include_stack_ptr >= MAX_INCLUDE_DEPTH)
-    log(L_ERROR, "Includes nested too deep in %s", c);
+    ilog(L_ERROR, "Includes nested too deep in %s", c);
   else
   {
     FBFILE *tmp_fbfile_in;
@@ -367,7 +367,7 @@ void cinclude(void)
     
     if (tmp_fbfile_in == NULL)
     {
-      log(L_ERROR, "Cannot include %s", filenamebuf);
+      ilog(L_ERROR, "Cannot include %s", filenamebuf);
       return;
     }
     lineno_stack[include_stack_ptr] = lineno;

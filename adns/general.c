@@ -97,7 +97,7 @@ void adns__debug(adns_state ads, int serv, adns_query qu, const char *fmt, ...) 
   /* redundant calls to vsprintf() but what can you do,
    * when you live in a shoe?
    */
-  log(L_DEBUG, "%s", buf);
+  ilog(L_DEBUG, "%s", buf);
 }
 
 void adns__warn(adns_state ads, int serv, adns_query qu, const char *fmt, ...) {
@@ -111,7 +111,7 @@ void adns__warn(adns_state ads, int serv, adns_query qu, const char *fmt, ...) {
 #endif
   va_end(al);
 
-  log(L_WARN, "%s", buf);
+  ilog(L_WARN, "%s", buf);
 }
 
 void adns__diag(adns_state ads, int serv, adns_query qu, const char *fmt, ...) {
@@ -125,7 +125,7 @@ void adns__diag(adns_state ads, int serv, adns_query qu, const char *fmt, ...) {
 #endif
   va_end(al);
 
-  log(L_DEBUG, "%s", buf);
+  ilog(L_DEBUG, "%s", buf);
 }
 
 /* vbuf functions */
