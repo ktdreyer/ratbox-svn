@@ -109,7 +109,6 @@ struct Client
   struct Client*    next;
   struct Client*    prev;
   struct Client*    hnext;
-  struct Client*    idhnext;
 
 /* QS */
 
