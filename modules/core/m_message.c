@@ -375,7 +375,7 @@ static int build_target_list(int p_or_n,
 	   * if the channel is found, fine, if not report an error
 	   */
 
-	  if ( (chptr = hash_find_channel(nick+1, NullChn)) )
+	  if ( (chptr = hash_find_channel(nick, NullChn)) )
 	    {
 	      if( !duplicate_ptr(chptr, *targets, i) )
 		{
@@ -542,13 +542,23 @@ static void msg_channel_flags( int p_or_n, char *command,
   struct Channel *vchan = NULL;
   char *chname=NULL;
   int type;
+  char c;
 
   if (flags & MODE_VOICE)
+  {
     type = ONLY_CHANOPS_HALFOPS_VOICED;
+    c = '+';
+  }
   else if (flags & MODE_HALFOP)
+  {
     type = ONLY_CHANOPS_HALFOPS;
+    c = '%';
+  }
   else
+  {
     type = ONLY_CHANOPS;
+    c = '@';
+  }
   
   chname = RootChan(chptr)->chname;
 
@@ -571,7 +581,7 @@ static void msg_channel_flags( int p_or_n, char *command,
 		       sptr->username,
 		       sptr->host,
 		       command,
-                       ((type == ONLY_CHANOPS_HALFOPS) ? '@' : '+'),
+                       c,
 		       chname,
 		       text);
 
@@ -579,7 +589,7 @@ static void msg_channel_flags( int p_or_n, char *command,
 			 ":%s %s %c%s :%s",
 			 sptr->name,
 			 command,
-			 ((type == ONLY_CHANOPS_HALFOPS) ? '@' : '+'),
+			 c,
 			 chptr->chname,
 			 text);
 }
