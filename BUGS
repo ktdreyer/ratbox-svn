@@ -54,11 +54,7 @@
     This translates into a WALLOPS message, and not marked as an oper@server
     message.
 
-7.  TCP Resolver does not function properly and is disabled.
-    The only time you are likely to hit the TCP resolver is for queries
-    over 512 bytes.
-
-8.  IAuthd is broken beyond belief.  It does not work at this time.  If this
+7.  IAuthd is broken beyond belief.  It does not work at this time.  If this
     bothers you, fix it for us.
 
 BUG REPORTS: If you run this code and encounter problems, you must report
