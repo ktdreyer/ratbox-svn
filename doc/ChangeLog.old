@@ -1,3 +1,7 @@
+*** 20010925_9 by androsyn
+Okay..so everything thinks it can pass a NULL pointer to MyFree()..shoot me :P
+
+
 *** 20010925_8 by androsyn
 Would you like an assert.h
 
