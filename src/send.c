@@ -94,44 +94,6 @@ dead_link(struct Client *to, char *notice)
   return (-1);
 } /* dead_link() */
 
-/*
- * flush_connections - Used to empty all output buffers for all connections. 
- * Should only be called once per scan of connections. There should be a 
- * select in here perhaps but that means either forcing a timeout or doing 
- * a poll. When flushing, all we do is empty the obuffer array for each local
- * client and try to send it. if we cant send it, it goes into the sendQ
- *      -avalon
- */
-void flush_connections(struct Client* cptr)
-{
-  if (0 == cptr) {
-    int i;
-    for (i = highest_fd; i >= 0; --i) {
-      if ((cptr = local[i]) && DBufLength(&cptr->sendQ) > 0)
-        send_queued(cptr);
-    }
-  }
-  else if (-1 < cptr->fd && DBufLength(&cptr->sendQ) > 0)
-    send_queued(cptr);
-}
-
-/*
- * flush_connections_butone - Used to empty all output buffers
- * Except for given DBuf pointer
- */
-void flush_sendq_except(struct DBuf* notThisBuf)
-{
-  int i;
-  struct Client* cptr;
-
-  for (i = highest_fd; i >= 0; --i)
-    {
-      if ((cptr = local[i]) && (DBufLength(&cptr->sendQ) > 0) &&
-          (&cptr->sendQ != notThisBuf ))
-        send_queued(cptr);
-    }
-}
-
 
 /*
 ** send_message
@@ -1330,15 +1292,6 @@ ts_warn(const char *pattern, ...)
   va_end(args);
 } /* ts_warn() */
 
-void
-flush_server_connections()
-{
-  struct Client *cptr;
-
-  for(cptr = serv_cptr_list; cptr; cptr = cptr->next_server_client)
-    if (DBufLength(&cptr->sendQ) > 0)
-      (void)send_queued(cptr);
-} /* flush_server_connections() */
 
 #ifdef SLAVE_SERVERS
 

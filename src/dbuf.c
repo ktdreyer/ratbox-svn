@@ -234,7 +234,13 @@ int dbuf_put(struct DBuf* dyn, const char* buf, size_t length)
     if (0 == (d = *h)) {
       if (0 == (d = dbuf_alloc()))
         {
-           flush_sendq_except(dyn);
+           /*
+            * XXX we used to flush_sendq_except() here, probably to keep
+            * the data flowing. It is kind of pointless now, as I'm going
+            * to optimise the rest of the code so we don't need things
+            * like that here.
+            *     -- adrian
+            */
            if(0 == ( d = dbuf_malloc()))
              return dbuf_malloc_error(dyn);
         }

@@ -661,7 +661,7 @@ void close_connection(struct Client *cptr)
     cptr->dns_reply = 0;
   }
   if (-1 < cptr->fd) {
-    flush_connections(cptr);
+    send_queued(cptr);
     local[cptr->fd] = NULL;
     fdlist_delete(cptr->fd, FDL_ALL);
     fd_close(cptr->fd);

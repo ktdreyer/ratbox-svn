@@ -146,7 +146,11 @@ int mo_die(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         sendto_one(acptr, ":%s ERROR :Terminated by %s",
                    me.name, get_client_name(sptr, MASK_IP));
     }
-  flush_connections(0);
+  /*
+   * XXX we called flush_connections() here. Read server_rebot()
+   * for an explanation as to what we should do.
+   *     -- adrian
+   */
   log(L_NOTICE, "Server terminated by %s", get_client_name(sptr, HIDE_IP));
   /* 
    * this is a normal exit, tell the os it's ok 

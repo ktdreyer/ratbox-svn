@@ -481,7 +481,6 @@ static time_t io_loop(time_t delay)
           read_message(1, FDL_BUSY);
           read_message(1, FDL_SERVER);
         }
-      flush_server_connections();
     }
 
   /*
@@ -510,7 +509,6 @@ static time_t io_loop(time_t delay)
    }
 #else
   read_message(delay, FDL_ALL); /*  check everything! */
-  flush_server_connections();
 #endif
 
   if (dorehash && !GlobalSetOptions.lifesux)
@@ -518,13 +516,6 @@ static time_t io_loop(time_t delay)
       rehash(&me, &me, 1);
       dorehash = 0;
     }
-  /*
-  ** Flush output buffers on all connections now if they
-  ** have data in them (or at least try to flush)
-  ** -avalon
-  */
-  flush_connections(0);
-
 #ifndef NO_PRIORITY
   fdlist_check(CurrentTime);
 #endif

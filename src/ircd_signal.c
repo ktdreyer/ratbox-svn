@@ -23,7 +23,6 @@
 #include "ircd.h"         /* dorehash */
 #include "restart.h"      /* server_reboot */
 #include "s_log.h"
-#include "send.h"         /* flush_connections */
 
 #include <signal.h>
 
@@ -41,7 +40,10 @@ static void dummy_handler(int sig)
  */
 static void sigterm_handler(int sig)  
 {
-  flush_connections(0);
+  /* XXX we had a flush_connections() here - we should close all the
+   * connections and flush data. read server_reboot() for my explanation.
+   *     -- adrian
+   */
   log(L_CRIT, "Server killed By SIGTERM");
   exit(-1);
 }
