@@ -1,3 +1,7 @@
+*** 20010227_1 by androsyn
+Made IPv6 a configure option
+
+
 *** 20010226_10 by androsyn
 Minor change to the build system so that s_bsd_*.c will always generate
 an .o file, but are empty for the loop type you're not using. Makes for
