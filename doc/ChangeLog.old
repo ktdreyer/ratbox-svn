@@ -1,3 +1,7 @@
+*** 20001214_10 by toot
+ripped out some more unused stuff
+
+
 *** 20001214_9 by db
 - missing show_opers in m_stats.c found by Walter Campbell
 - duplicate end of stats in gline pointed out by toot
