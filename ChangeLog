@@ -1,3 +1,15 @@
+leeh        2005/02/14 12:41:46 EST	(20050214_1)
+
+  Modified files:
+    src                  channel.c 
+  Log:
+  - join services with CURRENT_TIME if TS is unset on a channel
+  
+  Revision  Changes    Path
+  1.41      +1 -1      rserv/src/channel.c
+
+
+
 leeh        2005/02/14 12:40:15 EST	(20050214_0)
 
   Modified files:
