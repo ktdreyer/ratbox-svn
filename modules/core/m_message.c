@@ -496,6 +496,14 @@ msg_client(int p_or_n, const char *command,
 		if((p_or_n != NOTICE) && source_p->user)
 			source_p->user->last = CurrentTime;
 	}
+	else if(source_p->from == target_p->from)
+	{
+		sendto_realops_flags(UMODE_DEBUG, L_ALL,
+				"Send message to %s[%s] dropped from %s(Fake Dir)",
+				target_p->name, target_p->from->name,
+				source_p->name);
+		return;
+	}
 
 	if(MyConnect(source_p) && (p_or_n != NOTICE) && target_p->user && target_p->user->away)
 		sendto_one_numeric(source_p, RPL_AWAY, form_str(RPL_AWAY),
