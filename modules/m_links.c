@@ -84,7 +84,6 @@ mo_links(struct Client *client_p, struct Client *source_p, int parc, const char 
 	const char *mask = "";
 	struct Client *target_p;
 	char clean_mask[2 * HOSTLEN + 4];
-	const char *p;
 	struct hook_links_data hd;
 
 	dlink_node *ptr;
@@ -119,22 +118,13 @@ mo_links(struct Client *client_p, struct Client *source_p, int parc, const char 
 		if(*mask && !match(mask, target_p->name))
 			continue;
 
-		if(target_p->info[0])
-		{
-			if((p = strchr(target_p->info, ']')))
-				p += 2;	/* skip the nasty [IP] part */
-			else
-				p = target_p->info;
-		}
-		else
-			p = "(Unknown Location)";
-
 		/* We just send the reply, as if theyre here theres either no SHIDE,
 		 * or theyre an oper..  
 		 */
 		sendto_one_numeric(source_p, RPL_LINKS, form_str(RPL_LINKS),
 				   target_p->name, target_p->serv->up,
-				   target_p->hopcount, p);
+				   target_p->hopcount,
+				   target_p->info[0] ? target_p->info : "(Unknown Location)");
 	}
 
 	sendto_one_numeric(source_p, RPL_ENDOFLINKS, form_str(RPL_ENDOFLINKS),
