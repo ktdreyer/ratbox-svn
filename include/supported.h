@@ -38,7 +38,7 @@
 #endif
 
 #define FEATURES "STD=i-d"	\
-		"STATUSMSG=@+"	\
+		" STATUSMSG=@+"	\
                 "%s%s%s" 	\
                 " MODES=%i" 	\
                 " MAXCHANNELS=%i" \
@@ -63,7 +63,8 @@
 		  " NETWORK=%s" \
 		  " CASEMAPPING=%s" \
 		  " CHARSET=ascii" \
-		  " CALLERID"
+		  " CALLERID" \
+		  " WALLCHOPS"
 
 #define FEATURES2VALUES ConfigServerHide.disable_local_channels ? "#" : "#&", \
                         ConfigChannel.use_except ? "e" : "", \
