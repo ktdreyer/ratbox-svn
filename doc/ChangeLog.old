@@ -1,3 +1,14 @@
+*** 20001213_10 by db
+- when msgtab went away, due to the hash table replacement,
+  m_stats.c, m_help.c had to be rewritten. I had to add a new 
+  report command in parse. I stumbled across an apparent compiler bug..
+  the hash table is defined to be 387 entries, but the report function
+  was walking in to the poll fd lists at 385... Something is screwy here
+  perhaps a rounding error? In any case, thats why the weird +10 
+  in parse.c msg_hash_table[MAX_MSG_HASH+10];
+
+
+
 *** 20001213_9 by db
 - ripped out the trie (tree parse) code that Roger wrote. Too hard to
   debug for now. Replaced with a simplistic (very) hash table. The hash
