@@ -1,3 +1,17 @@
+ejb         2003/02/05 16:54:09 UTC	(20030205_0)
+
+  Modified files:
+    autoconf             configure.in 
+    .                    configure 
+  Log:
+  - allow IRC_CFLAGS to be specified on the command line.
+  
+  Revision  Changes      Path
+  7.167     +3 -2        ircd-ratbox/autoconf/configure.in
+  7.174     +6826 -2920  ircd-ratbox/configure
+
+
+
 androsyn    2003/02/04 21:42:12 UTC	(20030204_19)
 
   Modified files:
