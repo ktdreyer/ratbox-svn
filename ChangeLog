@@ -1,3 +1,17 @@
+androsyn    2004/09/27 18:04:48 EDT	(20040927_2)
+
+  Modified files:
+    src                  listener.c s_auth.c s_serv.c 
+  Log:
+  cleanup some dumbness where we would set a socket nonblocking more than once
+  
+  Revision  Changes    Path
+  7.118     +0 -8      ircd-ratbox/src/listener.c
+  7.187     +0 -8      ircd-ratbox/src/s_auth.c
+  7.417     +0 -8      ircd-ratbox/src/s_serv.c
+
+
+
 androsyn    2004/09/27 14:44:41 EDT	(20040927_1)
 
   Modified files:
