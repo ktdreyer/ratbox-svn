@@ -123,6 +123,7 @@ find_conf_item(const struct TopConf *top, const char *name)
 		}
 	}
 
+	/* this is mirrored in remove_conf_item() */
 	DLINK_FOREACH(d, top->tc_items.head)
 	{
 		cf = d->data;
@@ -1566,30 +1567,37 @@ add_conf_item(const char *topconf, const char *name, int type, void (*func) (voi
 	return 0;
 }
 
-#if 0
 int
 remove_conf_item(const char *topconf, const char *name)
 {
 	struct TopConf *tc;
-	struct ConfEntry *cf;
+	struct ConfEntry *cf = NULL;
 	dlink_node *ptr;
 
 	if((tc = find_top_conf(topconf)) == NULL)
 		return -1;
 
-	if((cf = find_conf_item(tc, name)) == NULL)
-		return -1;
+	/* we cant call find_conf_item(), as we only want stuff added via
+	 * add_conf_item(), so added to the dlink..
+	 */
+	DLINK_FOREACH(ptr, tc->tc_items.head)
+	{
+		cf = ptr->data;
+		if(strcasecmp(cf->cf_name, name) == 0)
+		{
+			dlinkDestroy(ptr, &tc->tc_items);
 
-	if((ptr = dlinkFind(&tc->tc_items, cf)) == NULL)
-		return -1;
+			/* this has been malloc()'d, but its const for the
+			 * tables.. --fl
+			 */
+			MyFree((char *) cf->cf_name);
+			MyFree(cf);
+			return 0;
+		}
+	}
 
-	dlinkDestroy(ptr, &tc->tc_items);
-	MyFree(cf->cf_name);
-	MyFree(cf);
-
-	return 0;
+	return -1;
 }
-#endif
 
 /* *INDENT-OFF* */
 static struct ConfEntry conf_serverinfo_table[] =
