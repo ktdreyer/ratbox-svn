@@ -30,9 +30,9 @@
 
 int show_admin(struct hook_spy_data *);
 
-mapi_hfn_list_av1 admin_hfnlist[] = { 
-	{ "doing_admin", (hookfn) show_admin },
-	{ NULL, NULL }
+mapi_hfn_list_av1 admin_hfnlist[] = {
+	{"doing_admin", (hookfn) show_admin},
+	{NULL, NULL}
 };
 
 DECLARE_MODULE_AV1(admin_spy, NULL, NULL, NULL, NULL, admin_hfnlist, "$Revision$");
@@ -41,9 +41,9 @@ int
 show_admin(struct hook_spy_data *data)
 {
 	sendto_realops_flags(UMODE_SPY, L_ALL,
-			"admin requested by %s (%s@%s) [%s]",
-			data->source_p->name, data->source_p->username,
-			data->source_p->host, data->source_p->user->server);
+			     "admin requested by %s (%s@%s) [%s]",
+			     data->source_p->name, data->source_p->username,
+			     data->source_p->host, data->source_p->user->server);
 
 	return 0;
 }

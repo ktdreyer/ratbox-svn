@@ -30,23 +30,26 @@
 
 int show_whois_global(struct hook_mfunc_data *);
 
-mapi_hfn_list_av1 whois_global_hfnlist[] = { 
-	{ "doing_whois_global", (hookfn) show_whois_global },
-	{ NULL, NULL }
+mapi_hfn_list_av1 whois_global_hfnlist[] = {
+	{"doing_whois_global", (hookfn) show_whois_global},
+	{NULL, NULL}
 };
 
-DECLARE_MODULE_AV1(whois_global_spy, NULL, NULL, NULL, NULL, whois_global_hfnlist, "$Revision$");
+DECLARE_MODULE_AV1(whois_global_spy, NULL, NULL, NULL, NULL, whois_global_hfnlist,
+		   "$Revision$");
 
 int
 show_whois_global(struct hook_mfunc_data *data)
 {
 	if(MyConnect(data->client_p) &&
-		IsOper(data->client_p) && (data->client_p != data->source_p) 
-		&& data->client_p->umodes & UMODE_SPY) 
+	   IsOper(data->client_p) && (data->client_p != data->source_p)
+	   && data->client_p->umodes & UMODE_SPY)
 	{
-		sendto_one(data->client_p, ":%s NOTICE %s :*** Notice -- %s (%s@%s) is doing a whois on you [%s]",
-				me.name, data->client_p->name, data->source_p->name, data->source_p->username,
-				data->source_p->host, data->source_p->user->server);
+		sendto_one(data->client_p,
+			   ":%s NOTICE %s :*** Notice -- %s (%s@%s) is doing a whois on you [%s]",
+			   me.name, data->client_p->name, data->source_p->name,
+			   data->source_p->username, data->source_p->host,
+			   data->source_p->user->server);
 	}
 
 	return 0;

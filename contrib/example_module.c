@@ -23,7 +23,7 @@
 #include "stdinc.h"
 #include "handlers.h"
 #include "client.h"
-#include "common.h"     /* FALSE bleah */
+#include "common.h"		/* FALSE bleah */
 #include "ircd.h"
 #include "irc_string.h"
 #include "numeric.h"
@@ -47,59 +47,56 @@
  * parc     == the number of parameters
  * parv     == an array of the parameters
  */
-static void mr_test(struct Client *client_p, struct Client *source_p,
-                    int parc, char *parv[]);
-static void m_test(struct Client *client_p, struct Client *source_p,
-                    int parc, char *parv[]);
-static void ms_test(struct Client *client_p, struct Client *source_p,
-                    int parc, char *parv[]);
-static void mo_test(struct Client *client_p, struct Client *source_p,
-                    int parc, char *parv[]);
+static void mr_test(struct Client *client_p, struct Client *source_p, int parc, char *parv[]);
+static void m_test(struct Client *client_p, struct Client *source_p, int parc, char *parv[]);
+static void ms_test(struct Client *client_p, struct Client *source_p, int parc, char *parv[]);
+static void mo_test(struct Client *client_p, struct Client *source_p, int parc, char *parv[]);
 
 /* Show the commands this module can handle in a msgtab
  * and give the msgtab a name, here its test_msgtab
  */
 struct Message test_msgtab = {
 
- /* Fields are in order:
-  *-> "COMMAND", 0, 0, parc_count, maxparc, MFLG_SLOW, 0,
-  *
-  * where:
-  * COMMAND == the /command you want
-  * parc_count == the number of parameters needed
-  *               (the clients name is one param, parv[0])
-  * maxparc == the maximum parameters we allow
-  * the 0's and MFLG_SLOW should not be changed..
-  */
+	/* Fields are in order:
+	 *-> "COMMAND", 0, 0, parc_count, maxparc, MFLG_SLOW, 0,
+	 *
+	 * where:
+	 * COMMAND == the /command you want
+	 * parc_count == the number of parameters needed
+	 *               (the clients name is one param, parv[0])
+	 * maxparc == the maximum parameters we allow
+	 * the 0's and MFLG_SLOW should not be changed..
+	 */
 
- /* This would add the command "TEST" which requires no additional
-  * parameters
-  */
-  "TEST", 0, 0, 1, 0, MFLG_SLOW, 0,
+	/* This would add the command "TEST" which requires no additional
+	 * parameters
+	 */
+	"TEST", 0, 0, 1, 0, MFLG_SLOW, 0,
 
- /* Fields are in order:
-  *-> {unregged, regged, remote, oper}
-  *
-  * where:
-  * unregged == function to call for unregistered clients
-  * regged == function to call for normal users
-  * remote == function to call for servers/remote users
-  * oper == function to call for operators
-  *
-  * There are also some pre-coded functions for use:
-  * m_unregistered: prevent the client using this if unregistered
-  * m_not_oper:     tell the client it requires being an operator
-  * m_ignore:       ignore the command when it comes from certain types
-  * m_error:        give an error when the command comes from certain types
-  */
-  {mr_test, m_test, ms_test, mo_test}
+	/* Fields are in order:
+	 *-> {unregged, regged, remote, oper}
+	 *
+	 * where:
+	 * unregged == function to call for unregistered clients
+	 * regged == function to call for normal users
+	 * remote == function to call for servers/remote users
+	 * oper == function to call for operators
+	 *
+	 * There are also some pre-coded functions for use:
+	 * m_unregistered: prevent the client using this if unregistered
+	 * m_not_oper:     tell the client it requires being an operator
+	 * m_ignore:       ignore the command when it comes from certain types
+	 * m_error:        give an error when the command comes from certain types
+	 */
+	{mr_test, m_test, ms_test, mo_test}
 
- /* It is normal for unregistered functions to be prefixed with mr_
-  *   "      "       normal users to be prefixed with m_
-  *   "      "       remote clients to be prefixed with ms_
-  *   "      "       operators to be prefixed with mo_
-  */
+	/* It is normal for unregistered functions to be prefixed with mr_
+	 *   "      "       normal users to be prefixed with m_
+	 *   "      "       remote clients to be prefixed with ms_
+	 *   "      "       operators to be prefixed with mo_
+	 */
 };
+
 /* Thats the msgtab finished */
 
 #ifndef STATIC_MODULES
@@ -128,16 +125,16 @@ moddeinit(void)
 
 /* DECLARE_MODULE_AV1() actually declare the MAPI header. */
 DECLARE_MODULE_AV1(
-	/* The first argument is the function to call on load */
-	modinit,
-	/* And the function to call on unload */
-	moddeinit,
-	/* Then the MAPI command list */
-	test_clist,
-	/* Next the hook list, if we have one. */
-	NULL,
-	/* And finally the version number of this module. */
-	"$Revision$");
+			  /* The first argument is the function to call on load */
+			  modinit,
+			  /* And the function to call on unload */
+			  moddeinit,
+			  /* Then the MAPI command list */
+			  test_clist,
+			  /* Next the hook list, if we have one. */
+			  NULL,
+			  /* And finally the version number of this module. */
+			  "$Revision$");
 
 /* Any of the above arguments can be NULL to indicate they aren't used. */
 #endif
@@ -151,15 +148,15 @@ DECLARE_MODULE_AV1(
 /* Here we have the functions themselves that we declared above,
  * and the fairly normal C coding
  */
-static void mr_test(struct Client *client_p, struct Client *source_p,
-                    int parc, char *parv[])
+static void
+mr_test(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
-  if(parc == 1)
-    sendto_one(source_p, ":%s NOTICE %s :You are unregistered and sent no parameters",
-    	       me.name, source_p->name);
-  else
-    sendto_one(source_p, ":%s NOTICE %s :You are unregistered and sent parameter: %s", 
-               me.name, source_p->name, parv[1]);
+	if(parc == 1)
+		sendto_one(source_p, ":%s NOTICE %s :You are unregistered and sent no parameters",
+			   me.name, source_p->name);
+	else
+		sendto_one(source_p, ":%s NOTICE %s :You are unregistered and sent parameter: %s",
+			   me.name, source_p->name, parv[1]);
 }
 
 /*
@@ -167,15 +164,16 @@ static void mr_test(struct Client *client_p, struct Client *source_p,
  *      parv[0] = sender prefix
  *      parv[1] = parameter
  */
-static void m_test(struct Client *client_p, struct Client *source_p,
-                   int parc, char *parv[])
+static void
+m_test(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
-  if(parc == 1)
-    sendto_one(source_p, ":%s NOTICE %s :You are a normal user, and sent no parameters",
-    	       me.name, source_p->name);
-  else
-    sendto_one(source_p, ":%s NOTICE %s :You are a normal user, and send parameters: %s",
-               me.name, source_p->name, parv[1]);
+	if(parc == 1)
+		sendto_one(source_p, ":%s NOTICE %s :You are a normal user, and sent no parameters",
+			   me.name, source_p->name);
+	else
+		sendto_one(source_p,
+			   ":%s NOTICE %s :You are a normal user, and send parameters: %s", me.name,
+			   source_p->name, parv[1]);
 }
 
 /*
@@ -183,43 +181,47 @@ static void m_test(struct Client *client_p, struct Client *source_p,
  *      parv[0] = sender prefix
  *      parv[1] = parameter
  */
-static void ms_test(struct Client *client_p, struct Client *source_p,
-                   int parc, char *parv[])
+static void
+ms_test(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
-  if(parc == 1)
-  {
-    if(IsServer(source_p))
-      sendto_one(source_p, ":%s NOTICE %s :You are a server, and sent no parameters",
-                 me.name, source_p->name);
-    else
-      sendto_one(source_p, ":%s NOTICE %s :You are a remote client, and sent no parameters",
-      		 me.name, source_p->name);
-  }
-  else
-  {
-    if(IsServer(source_p))
-      sendto_one(source_p, ":%s NOTICE %s :You are a server, and sent parameters: %s",
-		 me.name, source_p->name, parv[1]);
-    else
-      sendto_one(source_p, ":%s NOTICE %s :You are a remote client, and sent parameters: %s",
-		 me.name, source_p->name, parv[1]);
-  }
-}    
-	  
+	if(parc == 1)
+	{
+		if(IsServer(source_p))
+			sendto_one(source_p,
+				   ":%s NOTICE %s :You are a server, and sent no parameters",
+				   me.name, source_p->name);
+		else
+			sendto_one(source_p,
+				   ":%s NOTICE %s :You are a remote client, and sent no parameters",
+				   me.name, source_p->name);
+	}
+	else
+	{
+		if(IsServer(source_p))
+			sendto_one(source_p,
+				   ":%s NOTICE %s :You are a server, and sent parameters: %s",
+				   me.name, source_p->name, parv[1]);
+		else
+			sendto_one(source_p,
+				   ":%s NOTICE %s :You are a remote client, and sent parameters: %s",
+				   me.name, source_p->name, parv[1]);
+	}
+}
+
 /*
  * mo_test
  *      parv[0] = sender prefix
  *      parv[1] = parameter
  */
-static void mo_test(struct Client *client_p, struct Client *source_p,
-                   int parc, char *parv[])
-{		 
-  if(parc == 1)
-    sendto_one(source_p, ":%s NOTICE %s :You are an operator, and sent no parameters",
-	       me.name, source_p->name);
-  else
-    sendto_one(source_p, ":%s NOTICE %s :You are an operator, and sent parameters: %s",
-               me.name, source_p->name, parv[1]);
+static void
+mo_test(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+{
+	if(parc == 1)
+		sendto_one(source_p, ":%s NOTICE %s :You are an operator, and sent no parameters",
+			   me.name, source_p->name);
+	else
+		sendto_one(source_p, ":%s NOTICE %s :You are an operator, and sent parameters: %s",
+			   me.name, source_p->name, parv[1]);
 }
 
 /* END OF EXAMPLE MODULE */

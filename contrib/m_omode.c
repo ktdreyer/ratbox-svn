@@ -72,8 +72,7 @@ mo_omode(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	if(EmptyString(parv[1]))
 	{
-		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-			   me.name, parv[0], "MODE");
+		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), me.name, parv[0], "MODE");
 		return 0;
 	}
 
@@ -94,21 +93,21 @@ mo_omode(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	if((chptr = find_channel(parv[1])) == NULL)
 	{
-		sendto_one_numeric(source_p, ERR_NOSUCHCHANNEL, form_str(ERR_NOSUCHCHANNEL), parv[1]);
+		sendto_one_numeric(source_p, ERR_NOSUCHCHANNEL, form_str(ERR_NOSUCHCHANNEL),
+				   parv[1]);
 		return 0;
 	}
 
-	sendto_wallops_flags(UMODE_WALLOP, &me, 
+	sendto_wallops_flags(UMODE_WALLOP, &me,
 			     "OMODE called for [%s] by %s!%s@%s",
 			     parv[1], source_p->name, source_p->username, source_p->host);
 	ilog(L_MAIN, "OMODE called for [%s] by %s!%s@%s",
 	     parv[1], source_p->name, source_p->username, source_p->host);
 
 	if(*chptr->chname != '&')
-		sendto_server(NULL, NULL, NOCAPS, NOCAPS, 
+		sendto_server(NULL, NULL, NOCAPS, NOCAPS,
 			      ":%s WALLOPS :OMODE called for [%s] by %s!%s@%s",
-			      me.name, parv[1], source_p->name, source_p->username,
-			      source_p->host);
+			      me.name, parv[1], source_p->name, source_p->username, source_p->host);
 
 	/* Now know the channel exists */
 	if(parc < n + 1)
@@ -129,9 +128,9 @@ mo_omode(struct Client *client_p, struct Client *source_p, int parc, const char 
 	{
 		msptr = find_channel_membership(chptr, source_p);
 
-		set_channel_mode(client_p, source_p->servptr, chptr, msptr, 
+		set_channel_mode(client_p, source_p->servptr, chptr, msptr,
 				 parc - n, parv + n, chptr->chname);
 	}
-	
+
 	return 0;
 }

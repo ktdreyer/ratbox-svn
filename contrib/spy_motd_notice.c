@@ -30,9 +30,9 @@
 
 int show_motd(struct hook_spy_data *);
 
-mapi_hfn_list_av1 motd_hfnlist[] = { 
-	{ "doing_motd", (hookfn) show_motd },
-	{ NULL, NULL }
+mapi_hfn_list_av1 motd_hfnlist[] = {
+	{"doing_motd", (hookfn) show_motd},
+	{NULL, NULL}
 };
 
 DECLARE_MODULE_AV1(motd_spy, NULL, NULL, NULL, NULL, motd_hfnlist, "$Revision$");
@@ -41,9 +41,9 @@ int
 show_motd(struct hook_spy_data *data)
 {
 	sendto_realops_flags(UMODE_SPY, L_ALL,
-			"motd requested by %s (%s@%s) [%s]",
-			data->source_p->name, data->source_p->username,
-			data->source_p->host, data->source_p->user->server);
+			     "motd requested by %s (%s@%s) [%s]",
+			     data->source_p->name, data->source_p->username,
+			     data->source_p->host, data->source_p->user->server);
 
 	return 0;
 }

@@ -37,7 +37,7 @@
 #include "packet.h"
 
 static int mo_clearchan(struct Client *client_p, struct Client *source_p,
-                         int parc, const char *parv[]);
+			int parc, const char *parv[]);
 
 struct Message clearchan_msgtab = {
 	"CLEARCHAN", 0, 0, 0, MFLG_SLOW,
@@ -45,6 +45,7 @@ struct Message clearchan_msgtab = {
 };
 
 mapi_clist_av1 clearchan_clist[] = { &clearchan_msgtab, NULL };
+
 DECLARE_MODULE_AV1(clearchan, NULL, NULL, clearchan_clist, NULL, NULL, "$Revision$");
 
 /*
@@ -53,8 +54,7 @@ DECLARE_MODULE_AV1(clearchan, NULL, NULL, clearchan_clist, NULL, NULL, "$Revisio
 **      parv[1] = channel
 */
 static int
-mo_clearchan(struct Client *client_p, struct Client *source_p,
-                        int parc, const char *parv[])
+mo_clearchan(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Channel *chptr;
 	struct membership *msptr;
@@ -63,18 +63,17 @@ mo_clearchan(struct Client *client_p, struct Client *source_p,
 	dlink_node *next_ptr;
 
 	/* admins only */
-	if (!IsOperAdmin(source_p))
+	if(!IsOperAdmin(source_p))
 	{
-		sendto_one(source_p, ":%s NOTICE %s :You have no A flag", 
-			   me.name, parv[0]);
+		sendto_one(source_p, ":%s NOTICE %s :You have no A flag", me.name, parv[0]);
 		return 0;
 	}
 
-	
+
 	if((chptr = find_channel(parv[1])) == NULL)
 	{
 		sendto_one_numeric(source_p, ERR_NOSUCHCHANNEL,
-						form_str(ERR_NOSUCHCHANNEL), parv[1]);
+				   form_str(ERR_NOSUCHCHANNEL), parv[1]);
 		return 0;
 	}
 
@@ -89,10 +88,10 @@ mo_clearchan(struct Client *client_p, struct Client *source_p,
 	DLINK_FOREACH(ptr, chptr->members.head)
 	{
 		msptr = ptr->data;
-		msptr->flags &= ~CHFL_CHANOP|CHFL_VOICE;
+		msptr->flags &= ~CHFL_CHANOP | CHFL_VOICE;
 	}
 
-	sendto_wallops_flags(UMODE_WALLOP, &me, 
+	sendto_wallops_flags(UMODE_WALLOP, &me,
 			     "CLEARCHAN called for [%s] by %s!%s@%s",
 			     parv[1], source_p->name, source_p->username, source_p->host);
 	ilog(L_MAIN, "CLEARCHAN called for [%s] by %s!%s@%s",
@@ -100,21 +99,19 @@ mo_clearchan(struct Client *client_p, struct Client *source_p,
 
 	if(*chptr->chname != '&')
 	{
-		sendto_server(NULL, NULL, NOCAPS, NOCAPS, 
+		sendto_server(NULL, NULL, NOCAPS, NOCAPS,
 			      ":%s WALLOPS :CLEARCHAN called for [%s] by %s!%s@%s",
-			      me.name, parv[1], source_p->name, source_p->username,
-			      source_p->host);
+			      me.name, parv[1], source_p->name, source_p->username, source_p->host);
 
 		/* SJOIN the user to give them ops, and lock the channel */
 		sendto_server(client_p, chptr, NOCAPS, NOCAPS,
-				":%s SJOIN %lu %s +ntsi :@%s",
-				me.name, (unsigned long) (chptr->channelts - 1),
-				chptr->chname, source_p->name);
+			      ":%s SJOIN %lu %s +ntsi :@%s",
+			      me.name, (unsigned long) (chptr->channelts - 1),
+			      chptr->chname, source_p->name);
 	}
 
 	sendto_channel_local(ALL_MEMBERS, chptr, ":%s!%s@%s JOIN %s",
-			     source_p->name, source_p->username,
-			     source_p->host, chptr->chname);
+			     source_p->name, source_p->username, source_p->host, chptr->chname);
 	sendto_channel_local(ALL_MEMBERS, chptr, ":%s MODE %s +o %s",
 			     me.name, chptr->chname, source_p->name);
 
@@ -122,10 +119,10 @@ mo_clearchan(struct Client *client_p, struct Client *source_p,
 
 	/* Take the TS down by 1, so we don't see the channel taken over
 	 * again. */
-	if (chptr->channelts)
+	if(chptr->channelts)
 		chptr->channelts--;
 
-	chptr->mode.mode = MODE_SECRET|MODE_TOPICLIMIT|MODE_INVITEONLY|MODE_NOPRIVMSGS;
+	chptr->mode.mode = MODE_SECRET | MODE_TOPICLIMIT | MODE_INVITEONLY | MODE_NOPRIVMSGS;
 	free_topic(chptr);
 	chptr->mode.key[0] = '\0';
 
@@ -140,14 +137,12 @@ mo_clearchan(struct Client *client_p, struct Client *source_p,
 
 		sendto_channel_local(ALL_MEMBERS, chptr,
 				     ":%s KICK %s %s :CLEARCHAN",
-				     source_p->name, chptr->chname, 
-				     target_p->name);
+				     source_p->name, chptr->chname, target_p->name);
 
 		if(*chptr->chname != '&')
-			sendto_server(NULL, chptr, NOCAPS, NOCAPS, 
-				      ":%s KICK %s %s :CLEARCHAN", 
-				      source_p->name, chptr->chname, 
-				      target_p->name);
+			sendto_server(NULL, chptr, NOCAPS, NOCAPS,
+				      ":%s KICK %s %s :CLEARCHAN",
+				      source_p->name, chptr->chname, target_p->name);
 
 		remove_user_from_channel(msptr);
 	}
@@ -155,11 +150,9 @@ mo_clearchan(struct Client *client_p, struct Client *source_p,
 	/* Join the user themselves to the channel down here, so they dont see a nicklist 
 	 * or people being kicked */
 	sendto_one(source_p, ":%s!%s@%s JOIN %s",
-		   source_p->name, source_p->username,
-		   source_p->host, chptr->chname);
+		   source_p->name, source_p->username, source_p->host, chptr->chname);
 
 	channel_member_names(chptr, source_p, 1);
-	
+
 	return 0;
 }
-

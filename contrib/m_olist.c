@@ -49,8 +49,7 @@
 #define IsOperSpy(x) ((x)->flags2 & OPER_SPY)
 #endif
 
-static int mo_olist(struct Client*, struct Client*,
-					int parc, const char *parv[]);
+static int mo_olist(struct Client *, struct Client *, int parc, const char *parv[]);
 static int list_all_channels(struct Client *);
 
 
@@ -68,7 +67,7 @@ DECLARE_MODULE_AV1(okick, NULL, NULL, olist_clist, NULL, NULL, "$Revision$");
 #endif
 
 static int list_all_channels(struct Client *source_p);
-static int list_named_channel(struct Client *source_p,char *name);
+static int list_named_channel(struct Client *source_p, char *name);
 
 /*
 ** mo_olist
@@ -76,28 +75,24 @@ static int list_named_channel(struct Client *source_p,char *name);
 **      parv[1] = channel
 */
 static int
-mo_olist(struct Client *client_p,
-                   struct Client *source_p,
-                   int parc,
-                   const char *parv[])
+mo_olist(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-  if(!IsOperSpy(source_p))
-  {
-    sendto_one(source_p, ":%s NOTICE %s :You need oper_spy",
-               me.name, source_p->name);
-    return 0;
-  }
+	if(!IsOperSpy(source_p))
+	{
+		sendto_one(source_p, ":%s NOTICE %s :You need oper_spy", me.name, source_p->name);
+		return 0;
+	}
 
-  /* If no arg, do all channels *whee*, else just one channel */
-  if (parc < 2 || EmptyString(parv[1]))
-    {
-      list_all_channels(source_p);
-    }
-  else
-    {
-      list_named_channel(source_p,LOCAL_COPY(parv[1]));
-    }
-    return 0;
+	/* If no arg, do all channels *whee*, else just one channel */
+	if(parc < 2 || EmptyString(parv[1]))
+	{
+		list_all_channels(source_p);
+	}
+	else
+	{
+		list_named_channel(source_p, LOCAL_COPY(parv[1]));
+	}
+	return 0;
 }
 
 
@@ -107,62 +102,64 @@ mo_olist(struct Client *client_p,
  * output	- 0/1
  * side effects	- list all channels to source_p
  */
-static int list_all_channels(struct Client *source_p)
+static int
+list_all_channels(struct Client *source_p)
 {
-  struct Channel *chptr;
-  dlink_node *ptr;
-  sendto_one(source_p, form_str(RPL_LISTSTART), me.name, source_p->name);
+	struct Channel *chptr;
+	dlink_node *ptr;
+	sendto_one(source_p, form_str(RPL_LISTSTART), me.name, source_p->name);
 
-  DLINK_FOREACH(ptr, global_channel_list.head)
-  {
-	   chptr = (struct Channel *)ptr->data;
-			
-	   sendto_one(source_p, form_str(RPL_LIST), 
-	   me.name, source_p->name, chptr->chname, 
-	   dlink_list_length(&chptr->members), 
-	   chptr->topic == NULL ? "" : chptr->topic);
-  }
+	DLINK_FOREACH(ptr, global_channel_list.head)
+	{
+		chptr = (struct Channel *) ptr->data;
 
-  sendto_one(source_p, form_str(RPL_LISTEND), me.name, source_p->name);
-  return 0;
-}   
-          
+		sendto_one(source_p, form_str(RPL_LIST),
+			   me.name, source_p->name, chptr->chname,
+			   dlink_list_length(&chptr->members),
+			   chptr->topic == NULL ? "" : chptr->topic);
+	}
+
+	sendto_one(source_p, form_str(RPL_LISTEND), me.name, source_p->name);
+	return 0;
+}
+
 /*
  * list_named_channel
  * inputs       - pointer to client requesting list
  * output       - 0/1
  * side effects	- list all channels to source_p
  */
-static int list_named_channel(struct Client *source_p,char *name)
+static int
+list_named_channel(struct Client *source_p, char *name)
 {
-  struct Channel *chptr;
-  char id_and_topic[TOPICLEN+NICKLEN+6]; /* <!!>, space and null */
-  char *p;
+	struct Channel *chptr;
+	char id_and_topic[TOPICLEN + NICKLEN + 6];	/* <!!>, space and null */
+	char *p;
 
-  sendto_one(source_p, form_str(RPL_LISTSTART), me.name, source_p->name);
+	sendto_one(source_p, form_str(RPL_LISTSTART), me.name, source_p->name);
 
-  if((p = strchr(name,',')))
-    *p = '\0';
-      
-  if(*name == '\0')
-    {
-      sendto_one_numeric(source_p, ERR_NOSUCHCHANNEL, form_str(ERR_NOSUCHCHANNEL), name);
-      sendto_one(source_p, form_str(RPL_LISTEND), me.name, source_p->name);
-      return 0;
-    }
+	if((p = strchr(name, ',')))
+		*p = '\0';
 
-  if ((chptr = find_channel(name)) == NULL)
-    {
-      sendto_one_numeric(source_p, ERR_NOSUCHCHANNEL, form_str(ERR_NOSUCHCHANNEL), name);
-      sendto_one(source_p, form_str(RPL_LISTEND), me.name, source_p->name);
-      return 0;
-    }
+	if(*name == '\0')
+	{
+		sendto_one_numeric(source_p, ERR_NOSUCHCHANNEL, form_str(ERR_NOSUCHCHANNEL), name);
+		sendto_one(source_p, form_str(RPL_LISTEND), me.name, source_p->name);
+		return 0;
+	}
 
-  ircsprintf(id_and_topic, "%s", chptr->topic == NULL ? "" : chptr->topic);
+	if((chptr = find_channel(name)) == NULL)
+	{
+		sendto_one_numeric(source_p, ERR_NOSUCHCHANNEL, form_str(ERR_NOSUCHCHANNEL), name);
+		sendto_one(source_p, form_str(RPL_LISTEND), me.name, source_p->name);
+		return 0;
+	}
 
-  sendto_one(source_p, form_str(RPL_LIST), me.name, source_p->name,
-             chptr->chname, chptr->members, id_and_topic);
-      
-  sendto_one(source_p, form_str(RPL_LISTEND), me.name, source_p->name);
-  return 0;
+	ircsprintf(id_and_topic, "%s", chptr->topic == NULL ? "" : chptr->topic);
+
+	sendto_one(source_p, form_str(RPL_LIST), me.name, source_p->name,
+		   chptr->chname, chptr->members, id_and_topic);
+
+	sendto_one(source_p, form_str(RPL_LISTEND), me.name, source_p->name);
+	return 0;
 }

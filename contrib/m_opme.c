@@ -35,8 +35,7 @@
 #include "modules.h"
 #include "s_newconf.h"
 
-static int mo_opme(struct Client *client_p, struct Client *source_p, 
-					int parc, const char *parv[]);
+static int mo_opme(struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
 
 struct Message opme_msgtab = {
 	"OPME", 0, 0, 0, MFLG_SLOW,
@@ -44,6 +43,7 @@ struct Message opme_msgtab = {
 };
 
 mapi_clist_av1 opme_clist[] = { &opme_msgtab, NULL };
+
 DECLARE_MODULE_AV1(opme, NULL, NULL, opme_clist, NULL, NULL, "$Revision$");
 
 
@@ -58,14 +58,13 @@ mo_opme(struct Client *client_p, struct Client *source_p, int parc, const char *
 	struct Channel *chptr;
 	struct membership *msptr;
 	dlink_node *ptr;
-  
+
 	/* admins only */
-  if(!IsOperAdmin(source_p))
-  {
-    sendto_one(source_p, form_str(ERR_NOPRIVS),
-			   me.name, source_p->name, "opme");
+	if(!IsOperAdmin(source_p))
+	{
+		sendto_one(source_p, form_str(ERR_NOPRIVS), me.name, source_p->name, "opme");
 		return 0;
-  }
+	}
 
 	if((chptr = find_channel(parv[1])) == NULL)
 	{
@@ -81,7 +80,7 @@ mo_opme(struct Client *client_p, struct Client *source_p, int parc, const char *
 		if(is_chanop(msptr))
 		{
 			sendto_one(source_p, ":%s NOTICE %s :%s Channel is not opless",
-					me.name, parv[0], parv[1]);
+				   me.name, parv[0], parv[1]);
 			return 0;
 		}
 	}
@@ -95,29 +94,24 @@ mo_opme(struct Client *client_p, struct Client *source_p, int parc, const char *
 
 	sendto_wallops_flags(UMODE_WALLOP, &me,
 			     "OPME called for [%s] by %s!%s@%s",
-			     parv[1], source_p->name, source_p->username,
-			     source_p->host);
+			     parv[1], source_p->name, source_p->username, source_p->host);
 	ilog(L_MAIN, "OPME called for [%s] by %s!%s@%s",
 	     parv[1], source_p->name, source_p->username, source_p->host);
 
 	/* dont send stuff for local channels remotely. */
 	if(*chptr->chname != '&')
 	{
-		sendto_server(NULL, NULL, NOCAPS, NOCAPS, 
+		sendto_server(NULL, NULL, NOCAPS, NOCAPS,
 			      ":%s WALLOPS :OPME called for [%s] by %s!%s@%s",
-			      me.name, parv[1], source_p->name, source_p->username,
-			      source_p->host);
-		sendto_server(NULL, chptr, NOCAPS, NOCAPS, 
-			      ":%s PART %s", source_p->name, parv[1]);
-		sendto_server(NULL, chptr, NOCAPS, NOCAPS, 
+			      me.name, parv[1], source_p->name, source_p->username, source_p->host);
+		sendto_server(NULL, chptr, NOCAPS, NOCAPS, ":%s PART %s", source_p->name, parv[1]);
+		sendto_server(NULL, chptr, NOCAPS, NOCAPS,
 			      ":%s SJOIN %ld %s + :@%s",
-			      me.name, (signed long) chptr->channelts,
-			      parv[1], source_p->name);
+			      me.name, (signed long) chptr->channelts, parv[1], source_p->name);
 	}
 
 	sendto_channel_local(ALL_MEMBERS, chptr,
-			     ":%s MODE %s +o %s",
-			     me.name, parv[1], source_p->name);
-	
+			     ":%s MODE %s +o %s", me.name, parv[1], source_p->name);
+
 	return 0;
 }

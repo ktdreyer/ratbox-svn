@@ -30,9 +30,9 @@
 
 int show_stats(struct hook_stats_data *);
 
-mapi_hfn_list_av1 stats_hfnlist[] = { 
-	{ "doing_stats", (hookfn) show_stats },
-	{ NULL, NULL }
+mapi_hfn_list_av1 stats_hfnlist[] = {
+	{"doing_stats", (hookfn) show_stats},
+	{NULL, NULL}
 };
 
 DECLARE_MODULE_AV1(stats_spy, NULL, NULL, NULL, NULL, stats_hfnlist, "$Revision$");
@@ -44,28 +44,26 @@ show_stats(struct hook_stats_data *data)
 	{
 		if(data->name != NULL)
 			sendto_realops_flags(UMODE_SPY, L_ALL,
-					"STATS %c requested by %s (%s@%s) [%s] on %s",
-					data->statchar,
-					data->source_p->name,
-					data->source_p->username,
-					data->source_p->host,
-					data->source_p->user->server,
-					data->name);
+					     "STATS %c requested by %s (%s@%s) [%s] on %s",
+					     data->statchar,
+					     data->source_p->name,
+					     data->source_p->username,
+					     data->source_p->host,
+					     data->source_p->user->server, data->name);
 		else
 			sendto_realops_flags(UMODE_SPY, L_ALL,
-					"STATS %c requested by %s (%s@%s) [%s]",
-					data->statchar,
-					data->source_p->name,
-					data->source_p->username,
-					data->source_p->host,
-					data->source_p->user->server);
+					     "STATS %c requested by %s (%s@%s) [%s]",
+					     data->statchar,
+					     data->source_p->name,
+					     data->source_p->username,
+					     data->source_p->host, data->source_p->user->server);
 	}
 	else
 	{
 		sendto_realops_flags(UMODE_SPY, L_ALL,
-				"STATS %c requested by %s (%s@%s) [%s]",
-				data->statchar, data->source_p->name, data->source_p->username,
-				data->source_p->host, data->source_p->user->server);
+				     "STATS %c requested by %s (%s@%s) [%s]",
+				     data->statchar, data->source_p->name, data->source_p->username,
+				     data->source_p->host, data->source_p->user->server);
 	}
 
 	return 0;
