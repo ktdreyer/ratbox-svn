@@ -1,3 +1,8 @@
+*** 20001026_5 by db
+- check_klines() has to be called after placing tklines as well
+
+
+
 *** 20001026_4 by adrian
 
 
