@@ -2372,7 +2372,8 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
   {
     target_p = ptr->data;
 
-    if(target_p == source_p)
+    if((IsServer(source_p) && (target_p == source_p)) ||
+       (IsClient(source_p) && (target_p == source_p->servptr)))
       continue;
     
     /* if its a LL, check they have the channel */
