@@ -1,3 +1,18 @@
+leeh        2004/09/25 11:28:22 EDT	(20040925_4)
+
+  Modified files:
+    include              newconf.h 
+    src                  newconf.c s_operbot.c 
+  Log:
+  - port my generic conf parser stuff from ircd
+  
+  Revision  Changes    Path
+  1.3       +11 -10    rserv/include/newconf.h
+  1.10      +103 -128  rserv/src/newconf.c
+  1.8       +1 -1      rserv/src/s_operbot.c
+
+
+
 leeh        2004/09/25 11:27:12 EDT	(20040925_3)
 
   Modified files:
