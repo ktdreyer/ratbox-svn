@@ -2667,7 +2667,7 @@ void	newconf_init()
         		conf_set_general_burst_away);
 	add_conf_item("general", "htm_messages", CF_YESNO,
 			conf_set_general_htm_messages);
-	add_conf_item("general", "htm_interval", CF_INT,
+	add_conf_item("general", "htm_interval", CF_TIME,
 			conf_set_general_htm_interval);
 	add_conf_item("general", "htm_trigger", CF_INT,
 			conf_set_general_htm_trigger);

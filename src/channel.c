@@ -644,9 +644,9 @@ channel_member_names(struct Client *source_p,
   if(ShowChannel(source_p, chptr))
   {
     ptr_list[0] = chptr->chanops.head;
-    ptr_list[1] = chptr->voiced.head;
-    ptr_list[2] = chptr->peons.head;
-    ptr_list[3] = chptr->chanops_voiced.head;
+    ptr_list[1] = chptr->chanops_voiced.head;
+    ptr_list[2] = chptr->voiced.head;
+    ptr_list[3] = chptr->peons.head;
 
     set_channel_mode_flags(ptr_flags, chptr, source_p);
 
