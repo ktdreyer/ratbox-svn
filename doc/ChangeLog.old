@@ -1,3 +1,15 @@
+leeh        2002/05/07 08:50:48 EDT	(20020507_1)
+
+  Modified files:
+    modules              m_challenge.c 
+  Log:
+  - move the IsOper check up, and make it send omotd
+  
+  Revision  Changes    Path
+  1.35      +17 -11    ircd-hybrid-7/modules/m_challenge.c
+
+
+
 db          2002/05/07 08:26:29 EDT	(20020507_0)
 
   Modified files:
