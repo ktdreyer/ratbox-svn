@@ -97,9 +97,7 @@ static int valid_comment(struct Client *source_p, char *comment);
 #endif
 static int valid_user_host(char *user, char *host);
 static int valid_wild_card(char *user, char *host);
-static int already_placed_kline(struct Client *source_p, char *user, char *host,
-                                time_t tkline_time);
-
+static int already_placed_kline(struct Client*, char*, char*);
 static void apply_kline(struct Client *source_p, struct ConfItem *aconf,
                         const char *reason, const char *current_date);
 
@@ -112,6 +110,7 @@ char user[USERLEN+2];
 char host[HOSTLEN+2];
 
 #define MAX_EXT_REASON 100
+
 
 /*
  * mo_kline
@@ -224,11 +223,11 @@ static void mo_kline(struct Client *client_p,
       /* If we are sending it somewhere that doesnt include us, we stop
        * else we apply it locally too
        */
-      if(!match(target_server,me.name))
-	return;
+      if (!match(target_server, me.name))
+	   return;
     }
 
-  if (already_placed_kline(source_p, user, host, tkline_time))
+  if (already_placed_kline(source_p, user, host))
    return;
 
   if(tkline_time)
@@ -329,7 +328,7 @@ static void ms_kline(struct Client *client_p,
       /* We check if the kline already exists after we've announced its 
        * arrived, to avoid confusing opers - fl
        */
-      if (already_placed_kline(source_p, parv[4], parv[5], (int)parv[3]))
+      if (already_placed_kline(source_p, parv[4], parv[5]))
         return;
 
       aconf = make_conf();
@@ -461,7 +460,7 @@ static char *cluster(char *hostname)
 
   if(strchr(hostname,'@'))      
     {
-      strncpy_irc(result, hostname, HOSTLEN);      
+      strncpy_irc(result, hostname, HOSTLEN);
       result[HOSTLEN] = '\0';
       return(result);
     }
@@ -563,9 +562,10 @@ static void mo_dline(struct Client *client_p, struct Client *source_p,
   char *dlhost, *reason;
   char *p;
   struct Client *target_p;
+  struct irc_inaddr daddr;
   char cidr_form_host[HOSTLEN + 1];
   struct ConfItem *aconf;
-  int bits;
+  int bits, t;
   char dlbuffer[1024];
   const char* current_date;
 
@@ -579,7 +579,7 @@ static void mo_dline(struct Client *client_p, struct Client *source_p,
   strncpy_irc(cidr_form_host, dlhost, HOSTLEN);
   cidr_form_host[HOSTLEN] = '\0';
 
-  if (parse_netmask(dlhost, NULL, &bits) == HM_HOST)
+  if ((t=parse_netmask(dlhost, NULL, &bits)) == HM_HOST)
   {
 #ifdef IPV6
    sendto_one(source_p, ":%s NOTICE %s :Sorry, please supply an address.",
@@ -591,7 +591,7 @@ static void mo_dline(struct Client *client_p, struct Client *source_p,
 
       if(!target_p->user)
         return;
-
+      t = HM_IPV4;
       if (IsServer(target_p))
         {
           sendto_one(source_p,
@@ -677,26 +677,25 @@ static void mo_dline(struct Client *client_p, struct Client *source_p,
               me.name, parv[0]);
      return;
   }
-#if 0
-  if( ConfigFileEntry.non_redundant_klines && (aconf = match_Dline(&ipn)) )
-     {
-       char *creason;
-       creason = aconf->passwd ? aconf->passwd : "<No Reason>";
-       if(IsConfExemptKline(aconf))
-         sendto_one(source_p, ":%s NOTICE %s :[%s] is (E)d-lined by [%s] - %s",
-                    me.name,
-                    parv[0],
-                    dlhost,
-                    aconf->host,creason);
-         else
-           sendto_one(source_p, ":%s NOTICE %s :[%s] already D-lined by [%s] - %s",
-                      me.name,
-                      parv[0],
-                      dlhost,
-                      aconf->host,creason);
-      return;
-     }
+#ifdef IPV6
+  if (t == HM_IPV6)
+   t = AF_INET6;
+  else
 #endif
+  t = AF_INET;
+  if (ConfigFileEntry.non_redundant_klines &&
+      (aconf = find_dline(&daddr, t)) )
+  {
+   char *creason;
+   creason = aconf->passwd ? aconf->passwd : "<No Reason>";
+   if (IsConfExemptKline(aconf))
+    sendto_one(source_p, ":%s NOTICE %s :[%s] is (E)d-lined by [%s] - %s",
+               me.name, parv[0], dlhost, aconf->host, creason);
+   else
+    sendto_one(source_p, ":%s NOTICE %s :[%s] already D-lined by [%s] - %s",
+               me.name, parv[0], dlhost, aconf->host, creason);
+   return;
+  }
   current_date = smalldate((time_t) 0);
 
   ircsprintf(dlbuffer, "%s (%s)",reason,current_date);
@@ -903,41 +902,55 @@ static int valid_comment(struct Client *source_p, char *comment)
 }
 #endif
 
-/*
- * already_placed_kline
- * inputs	- pointer to client placing kline
- *		- user
- *		- host
- *              - tkline_time
- *		- ip 
- * output	- 1 if already placed, 0 if not
- * side effects - NONE
+/* static int already_placed_kline(source_p, luser, lhost)
+ * Input: user to complain to, username & host to check for.
+ * Output: returns 1 on existing K-line, 0 if doesn't exist.
+ * Side-effects: Notifies source_p if the K-line already exists.
+ * Note: This currently works if the new K-line is a special case of an
+ *       existing K-line, but not the other way round. To do that we would
+ *       have to walk the hash and check every existing K-line. -A1kmm.
  */
-static int already_placed_kline(struct Client *source_p, char *luser, char *lhost,
-                                time_t tkline_time)
+static int
+already_placed_kline(struct Client *source_p, char *luser, char *lhost)
 {
-  char *reason;
-  struct ConfItem *aconf;
-  if(ConfigFileEntry.non_redundant_klines) 
-    {
-     if ((aconf = find_conf_by_address(lhost, NULL, 0, CONF_KILL, luser)))
-     {
-      reason = aconf->passwd ? aconf->passwd : "<No Reason>";
-      /* Remote servers can set klines, so if its a dupe we warn all 
-       * local opers and leave it at that
-       */
-      if (IsServer(source_p))
-       sendto_realops_flags(FLAGS_ALL, 
+ char *reason;
+ struct irc_inaddr iphost, *piphost;
+ struct ConfItem *aconf;
+ int t;
+ if (ConfigFileEntry.non_redundant_klines) 
+ {
+  if ((t=parse_netmask(lhost, &iphost, &t)) != HM_HOST)
+  {
+#ifdef IPV6
+   if (t == HM_IPV6)
+    t = AF_INET6;
+   else
+#endif
+   t = AF_INET;
+   piphost = &iphost;
+  }
+  else
+  {
+   t = 0;
+   piphost = NULL;
+  }
+  if ((aconf = find_conf_by_address(lhost, piphost, CONF_KILL, t, luser)))
+  {
+   reason = aconf->passwd ? aconf->passwd : "<No Reason>";
+   /* Remote servers can set klines, so if its a dupe we warn all 
+    * local opers and leave it at that
+    */
+   if (IsServer(source_p))
+    sendto_realops_flags(FLAGS_ALL, 
              "*** Remote K-Line [%s@%s] already K-Lined by [%s@%s] - %s",
              luser, lhost, aconf->user, aconf->host, reason);
-      else
-       sendto_one(source_p,
+   else
+    sendto_one(source_p,
              ":%s NOTICE %s :[%s@%s] already K-Lined by [%s@%s] - %s",
               me.name, source_p->name, luser, lhost, aconf->user,
               aconf->host, reason);
-      return 1;
-     }
-    }
-  return 0;
+     return 1;
+  }
+ }
+ return 0;
 }
-
