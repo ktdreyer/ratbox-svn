@@ -1,3 +1,36 @@
+leeh        2003/08/09 05:42:59 EDT	(20030809_0)
+
+  Modified files:
+    doc                  example.efnet.conf 
+    include              supported.h 
+    modules              m_list.c m_set.c m_trace.c m_whois.c 
+    modules/core         m_mode.c 
+    src                  channel.c m_error.c newconf.c s_auth.c 
+  Log:
+  - sync with stable:
+    - errors shouldnt be shown to opers during HIDE_SERVERS_IPS
+    - typo in /quote set splitdelay
+    - allow @+ in a /whois channel list
+    - fix '\0' on long sjoins
+    - efnet approved +eI, update defaults.
+    - go back to MAXBANS until the 005 spec is approved
+    - spoof lengths were using >= instead of >
+  
+  Revision  Changes    Path
+  7.52      +7 -6      ircd-ratbox/doc/example.efnet.conf
+  1.32      +3 -5      ircd-ratbox/include/supported.h
+  1.84      +3 -3      ircd-ratbox/modules/core/m_mode.c
+  1.71      +1 -2      ircd-ratbox/modules/m_list.c
+  1.67      +2 -2      ircd-ratbox/modules/m_set.c
+  1.81      +16 -9     ircd-ratbox/modules/m_trace.c
+  1.123     +3 -3      ircd-ratbox/modules/m_whois.c
+  7.392     +2 -0      ircd-ratbox/src/channel.c
+  7.34      +21 -5     ircd-ratbox/src/m_error.c
+  7.102     +2 -2      ircd-ratbox/src/newconf.c
+  7.155     +8 -3      ircd-ratbox/src/s_auth.c
+
+
+
 androsyn    2003/08/07 12:27:50 EDT	(20030807_1)
 
   Modified files:
