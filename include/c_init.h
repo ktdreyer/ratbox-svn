@@ -10,6 +10,6 @@ extern struct scommand_handler privmsg_command;
 extern struct scommand_handler mode_command;
 
 /* s_alis.c */
-extern struct service_handler alis_service;
+extern void init_s_alis(void);
 
 #endif

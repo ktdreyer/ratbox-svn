@@ -47,8 +47,8 @@ c_message(struct client *client_p, char *parv[], int parc)
 
 		return;
 	}
-	
 
+	/* hunt for the nick.. */
 	if((target_p = find_service(parv[1])) != NULL)
 		target_p->service->func(client_p, parv[2]);
 }

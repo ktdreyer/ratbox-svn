@@ -199,6 +199,12 @@ parse_service(char *line)
 		return;
 	}
 
+	if(strchr(s_name, '.') != NULL)
+	{
+		conf_error("Z: invalid service name %s", s_name);
+		return;
+	}
+
 	/* need to reintroduce the service */
 	if(irccmp(client_p->name, s_name) ||
 	   irccmp(client_p->service->username, s_username) ||

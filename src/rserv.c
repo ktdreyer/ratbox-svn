@@ -192,15 +192,17 @@ main(int argc, char *argv[])
 
 	/* load specific commands */
 	add_scommand_handler(&mode_command);
-/*	add_scommand_handler(&notice_command); */
 	add_scommand_handler(&privmsg_command);
 
 	/* load our services.. */
-	add_service(&alis_service);
+	init_s_alis();
 
 	config_file.first_time = CURRENT_TIME;
 
+	/* must be done after adding services. */
 	conf_parse();
+
+	eventAdd("update_service_floodcount", update_service_floodcount, NULL, 1);
 
 	connect_to_server(NULL);
 

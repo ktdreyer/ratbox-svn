@@ -57,6 +57,8 @@ struct service
 	char id[NICKLEN+1];
 	int opered;
 
+	int floodcount;
+
 	void (*func)(struct client *, char *text);
 };
 

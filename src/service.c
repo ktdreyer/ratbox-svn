@@ -16,25 +16,28 @@
 
 dlink_list service_list;
 
-void
+struct client *
 add_service(struct service_handler *service)
 {
 	struct client *client_p;
 
 	if(strchr(client_p->name, '.') != NULL)
-		return;
+	{
+		slog("ERR: Invalid service name %s", client_p->name);
+		return NULL;
+	}
 
 	if((client_p = find_client(service->name)) != NULL)
 	{
 		if(IsService(client_p))
 		{
 			slog("ERR: Tried to add duplicate service %s", service->name);
-			return;
+			return NULL;
 		}
 		else if(IsServer(client_p))
 		{
-			slog("ERR: A server exists with service name %s", service->name);
-			return;
+			slog("ERR: A server exists with service name %s?!", service->name);
+			return NULL;
 		}
 		else if(IsUser(client_p))
 		{
@@ -60,6 +63,8 @@ add_service(struct service_handler *service)
 
 	dlink_add(client_p, &client_p->listnode, &service_list);
 	add_client(client_p);
+
+	return client_p;
 }
 
 struct client *
@@ -98,3 +103,21 @@ introduce_services(void)
 		introduce_service(ptr->data);
 	}
 }
+
+void
+update_service_floodcount(void *unused)
+{
+	struct client *client_p;
+	dlink_node *ptr;
+
+	DLINK_FOREACH(ptr, service_list.head)
+	{
+		client_p = ptr->data;
+
+		client_p->service->floodcount -= 5;
+
+		if(client_p->service->floodcount < 0)
+			client_p->service->floodcount = 0;
+	}
+}
+

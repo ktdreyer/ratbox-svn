@@ -40,6 +40,12 @@ init_channel(void)
 	add_scommand_handler(&topic_command);
 }
 
+/* hash_channel()
+ *   hashes the name of a channel
+ *
+ * inputs	- channel name
+ * outputs	- hash value
+ */
 static unsigned int
 hash_channel(const char *p)
 {
@@ -54,6 +60,12 @@ hash_channel(const char *p)
 	return(h & (MAX_CHANNEL_TABLE-1));
 }
 
+/* add_channel()
+ *   adds a channel to the internal hash, and channel_list
+ *
+ * inputs	- channel to add
+ * outputs	-
+ */
 void
 add_channel(struct channel *chptr)
 {
@@ -62,6 +74,12 @@ add_channel(struct channel *chptr)
 	dlink_add(chptr, &chptr->listptr, &channel_list);
 }
 
+/* del_channel()
+ *   removes a channel from the internal hash and channel_list
+ *
+ * inputs	- channel to remove
+ * outputs	-
+ */
 void
 del_channel(struct channel *chptr)
 {
@@ -70,6 +88,12 @@ del_channel(struct channel *chptr)
 	dlink_delete(&chptr->listptr, &channel_list);
 }
 
+/* find_channel()
+ *   hunts for a channel in the hash
+ *
+ * inputs	- channel name to find
+ * outputs	- channel struct, or NULL if not found
+ */
 struct channel *
 find_channel(const char *name)
 {
@@ -88,6 +112,12 @@ find_channel(const char *name)
 	return NULL;
 }
 
+/* free_channel()
+ *   removes a channel from hash, and free()'s the memory its using
+ *
+ * inputs	- channel to free()
+ * outputs	-
+ */
 void
 free_channel(struct channel *chptr)
 {
@@ -99,6 +129,12 @@ free_channel(struct channel *chptr)
 	my_free(chptr);
 }
 
+/* add_chmember()
+ *   adds a given client to a given channel with given flags
+ *
+ * inputs	- channel to add to, client to add, flags
+ * outputs	-
+ */
 void
 add_chmember(struct channel *chptr, struct client *target_p, int flags)
 {
@@ -113,6 +149,12 @@ add_chmember(struct channel *chptr, struct client *target_p, int flags)
 	dlink_add(mptr, &mptr->usernode, &target_p->user->channels);
 }
 
+/* del_chmember()
+ *   removes a given member from a channel
+ *
+ * inputs	- chmember to remove
+ * outputs	-
+ */
 void
 del_chmember(struct chmember *mptr)
 {
@@ -134,6 +176,12 @@ del_chmember(struct chmember *mptr)
 	my_free(mptr);
 }
 
+/* find_chmember()
+ *   hunts for a chmember struct for the given user in given channel
+ *
+ * inputs	- channel to search, client to search for
+ * outputs	- chmember struct if found, else NULL
+ */
 struct chmember *
 find_chmember(struct channel *chptr, struct client *target_p)
 {
@@ -150,6 +198,9 @@ find_chmember(struct channel *chptr, struct client *target_p)
 	return NULL;
 }
 
+/* c_join()
+ *   the JOIN handler
+ */
 static void
 c_join(struct client *client_p, char *parv[], int parc)
 {
@@ -172,6 +223,9 @@ c_join(struct client *client_p, char *parv[], int parc)
 	}
 }
 
+/* c_kick()
+ *   the KICK handler
+ */
 static void
 c_kick(struct client *client_p, char *parv[], int parc)
 {
@@ -194,7 +248,9 @@ c_kick(struct client *client_p, char *parv[], int parc)
 	del_chmember(mptr);
 }
 		
-
+/* c_part()
+ *   the PART handler
+ */
 static void
 c_part(struct client *client_p, char *parv[], int parc)
 {
@@ -216,6 +272,9 @@ c_part(struct client *client_p, char *parv[], int parc)
 	del_chmember(mptr);
 }
 
+/* c_topic()
+ *   the TOPIC handler
+ */
 static void
 c_topic(struct client *client_p, char *parv[], int parc)
 {
@@ -245,6 +304,9 @@ c_topic(struct client *client_p, char *parv[], int parc)
 	}
 }
 
+/* c_tb()
+ *   the TB handler
+ */
 static void
 c_tb(struct client *client_p, char *parv[], int parc)
 {
@@ -256,6 +318,7 @@ c_tb(struct client *client_p, char *parv[], int parc)
 	if((chptr = find_channel(parv[1])) == NULL)
 		return;
 
+	/* :<server> TB <#channel> <topicts> <topicwho> :<topic> */
 	if(parc == 5)
 	{
 		if(EmptyString(parv[4]))
@@ -264,6 +327,7 @@ c_tb(struct client *client_p, char *parv[], int parc)
 		strlcpy(chptr->topic, parv[4], sizeof(chptr->topic));
 		strlcpy(chptr->topicwho, parv[3], sizeof(chptr->topicwho));
 	}
+	/* :<server> TB <#channel> <topicts> :<topic> */
 	else
 	{
 		if(EmptyString(parv[3]))
@@ -274,6 +338,12 @@ c_tb(struct client *client_p, char *parv[], int parc)
 	}
 }
 
+/* remove_our_modes()
+ *   clears our channel modes from a channel
+ *
+ * inputs	- channel to remove modes from
+ * outputs	-
+ */
 static void
 remove_our_modes(struct channel *chptr)
 {
@@ -282,6 +352,12 @@ remove_our_modes(struct channel *chptr)
 	chptr->mode.limit = 0;
 }
 
+/* chmode_to_string()
+ *   converts a channels mode into a string
+ *
+ * inputs	- channel to get modes for
+ * outputs	- string version of modes
+ */
 const char *
 chmode_to_string(struct channel *chptr)
 {
@@ -313,6 +389,9 @@ chmode_to_string(struct channel *chptr)
 	return buf;
 }
 
+/* c_sjoin()
+ *   the SJOIN handler
+ */
 static void
 c_sjoin(struct client *client_p, char *parv[], int parc)
 {
@@ -327,6 +406,7 @@ c_sjoin(struct client *client_p, char *parv[], int parc)
 	int keep_new_modes = 1;
 	int args = 0;
 
+	/* :<server> SJOIN <#channel> <TS> +[modes [key][limit]] :<nicks> */
 	if(parc < 5 || EmptyString(parv[4]))
 		return;
 

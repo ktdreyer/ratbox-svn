@@ -16,6 +16,13 @@
 static void c_mode(struct client *, char *parv[], int parc);
 struct scommand_handler mode_command = { "MODE", c_mode, 0 };
 
+/* change_chmember_status()
+ *   changes a channel members +ov status
+ *
+ * inputs	- channel to change on, nick to change, mode to change,
+ *		  direction
+ * outputs	-
+ */
 static void
 change_chmember_status(struct channel *chptr, const char *nick, 
 			char type, int dir)
@@ -48,6 +55,9 @@ change_chmember_status(struct channel *chptr, const char *nick,
 	}
 }
 
+/* c_mode()
+ *   the MODE handler
+ */
 static void
 c_mode(struct client *client_p, char *parv[], int parc)
 {
@@ -78,6 +88,7 @@ c_mode(struct client *client_p, char *parv[], int parc)
 		return;
 	}
 
+	/* channel mode */
 	if(parc < 3 || EmptyString(parv[2]))
 		return;
 
@@ -169,6 +180,7 @@ c_mode(struct client *client_p, char *parv[], int parc)
 				args++;
 				break;
 
+			/* we dont need to parse these at this point */
 			case 'b':
 			case 'e':
 			case 'I':
