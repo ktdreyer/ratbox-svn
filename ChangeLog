@@ -1,3 +1,17 @@
+leeh        2002/10/19 12:34:46 UTC	(20021019_3)
+
+  Modified files:
+    .                    RELNOTES 
+    src                  s_conf.c 
+  Log:
+  - added a default setting of YES for fallback_to_ip6_int
+  
+  Revision  Changes    Path
+  1.58      +1 -2      ircd-ratbox/RELNOTES
+  7.358     +4 -0      ircd-ratbox/src/s_conf.c
+
+
+
 androsyn    2002/10/19 00:59:33 UTC	(20021019_2)
 
   Modified files:
