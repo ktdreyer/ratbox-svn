@@ -1,3 +1,9 @@
+*** 20001130_20 by db
+- fixed broken messages stuff for now I'll double check with David tomorrow
+- redid how m_sjoin.c did a remove ops
+
+
+
 *** 20001130_19 by davidt
 m_error.so wasn't being built.
 
