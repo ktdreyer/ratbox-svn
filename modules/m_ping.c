@@ -79,7 +79,7 @@ static int m_ping(struct Client *cptr,
   acptr = find_client(origin, NULL);
   if (!acptr)
     acptr = find_server(origin);
-  if (acptr != sptr)
+  if (acptr && acptr != sptr)
     origin = cptr->name;
   if (!EmptyString(destination) && irccmp(destination, me.name) != 0)
     {
