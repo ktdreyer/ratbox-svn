@@ -1,3 +1,7 @@
+*** 19990909_12 by tomh
+remove misplaced cast
+
+
 *** 19990909_11 by tomh
 remove inappropriate casts in MyFree, rename class c_class
 
