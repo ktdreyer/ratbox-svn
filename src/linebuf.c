@@ -629,6 +629,10 @@ linebuf_flush(int fd, buf_head_t * bufhead)
 	dlink_node *ptr;
 	int x, y;
 	int xret;
+#ifndef UIO_MAXIOV
+#define UIO_MAXIOV 16 /* Posix values, apparently */
+#endif
+
 	static struct iovec vec[UIO_MAXIOV];
 
 	/* Check we actually have a first buffer */
