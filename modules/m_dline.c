@@ -339,23 +339,27 @@ mo_undline(struct Client *client_p, struct Client *source_p, int parc, const cha
 	fbclose(in);
 	fbclose(out);
 
-	if(!error_on_write)
-	{
-		(void) rename(temppath, filename);
-		rehash(0);
-	}
-	else
+	if(error_on_write)
 	{
 		sendto_one(source_p,
-			   ":%s NOTICE %s :Couldn't write D-line file, aborted", me.name, parv[0]);
+			   ":%s NOTICE %s :Couldn't write D-line file, aborted", 
+			   me.name, parv[0]);
+		return 0;
+	}
+	else if(!pairme)
+	{
+		sendto_one(source_p, ":%s NOTICE %s :No D-Line for %s",
+			   me.name, parv[0], cidr);
+
+		if(temppath != NULL)
+			(void) unlink(temppath);
+
 		return 0;
 	}
 
-	if(!pairme)
-	{
-		sendto_one(source_p, ":%s NOTICE %s :No D-Line for %s", me.name, parv[0], cidr);
-		return 0;
-	}
+	(void) rename(temppath, filename);
+	rehash(0);
+
 
 	sendto_one(source_p, ":%s NOTICE %s :D-Line for [%s] is removed", me.name, parv[0], cidr);
 	sendto_realops_flags(UMODE_ALL, L_ALL,

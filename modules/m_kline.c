@@ -886,26 +886,27 @@ remove_permkline_match(struct Client *source_p, const char *host, const char *us
 /* If there was an error on a write above, then its been reported
  * and I am not going to trash the original kline /conf file
  */
-	if(!error_on_write)
-	{
-		(void) rename(temppath, filename);
-		rehash(0);
-	}
-	else
+	if(error_on_write)
 	{
 		sendto_one(source_p,
 			   ":%s NOTICE %s :Couldn't write temp kline file, aborted",
 			   me.name, source_p->name);
 		return;
 	}
-
-	if(!pairme)
+	else if(!pairme)
 	{
 		if(!cluster)
 			sendto_one(source_p, ":%s NOTICE %s :No K-Line for %s@%s",
 				   me.name, source_p->name, user, host);
+
+		if(temppath != NULL)
+			(void) unlink(temppath);
+
 		return;
 	}
+		
+	(void) rename(temppath, filename);
+	rehash(0);
 
 	if(!cluster)
 	{

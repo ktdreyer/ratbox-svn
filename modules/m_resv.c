@@ -389,12 +389,7 @@ remove_resv(struct Client *source_p, const char *name, int cluster)
 	fbclose(in);
 	fbclose(out);
 
-	if(!error_on_write)
-	{
-		(void) rename(temppath, filename);
-		rehash(0);
-	}
-	else
+	if(error_on_write)
 	{
 		if(!cluster)
 			sendto_one(source_p,
@@ -402,14 +397,20 @@ remove_resv(struct Client *source_p, const char *name, int cluster)
 				   me.name, source_p->name);
 		return;
 	}
-
-	if(!found_resv)
+	else if(!found_resv)
 	{
 		if(!cluster)
 			sendto_one(source_p, ":%s NOTICE %s :No RESV for %s",
 				   me.name, source_p->name, name);
+
+		if(temppath != NULL)
+			(void) unlink(temppath);
+
 		return;
 	}
+
+	(void) rename(temppath, filename);
+	rehash(0);
 
 	if(!cluster)
 		sendto_one(source_p, ":%s NOTICE %s :RESV for [%s] is removed",

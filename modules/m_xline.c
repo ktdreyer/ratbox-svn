@@ -474,19 +474,19 @@ remove_xline(struct Client *source_p, const char *huntgecos, int warn)
 				   me.name, source_p->name);
 		return;
 	}
-	else
-	{
-		(void) rename(temppath, filename);
-		rehash(0);
-	}
-
-	if(found_xline == 0)
+	else if(found_xline == 0)
 	{
 		if(warn)
 			sendto_one(source_p, ":%s NOTICE %s :No X-Line for %s",
 				   me.name, source_p->name, huntgecos);
+
+		if(temppath != NULL)
+			(void) unlink(temppath);
 		return;
 	}
+
+	(void) rename(temppath, filename);
+	rehash(0);
 
 	if(warn)
 		sendto_one(source_p, ":%s NOTICE %s :X-Line for [%s] is removed",
