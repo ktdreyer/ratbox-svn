@@ -1,3 +1,7 @@
+*** 20010202_3 by wcampbel
+m_who fix, not perfect, but it doesn't core now.
+
+
 *** 20010202_2 by a1kmm
 - "mode #channel !vchan [+...]" now works.
 
