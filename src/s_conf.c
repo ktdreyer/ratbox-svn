@@ -1389,9 +1389,7 @@ int rehash(struct Client *cptr,struct Client *sptr, int sig)
   }
 
   close_listeners();
-#if 0
   restart_resolver();
-#endif
   read_conf_files(NO);
 
   if (ServerInfo.description != NULL)

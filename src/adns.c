@@ -17,10 +17,8 @@ adns_state dns_state;
 
 void restart_resolver(void)
 {
-#if 0   /* Check why this core dumps us */
 	adns_finish(dns_state);
 	init_resolver();
-#endif
 }
 void init_resolver(void)
 {
