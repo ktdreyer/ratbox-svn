@@ -68,6 +68,7 @@ static int s_chan_op(struct client *, char *parv[], int parc);
 static int s_chan_voice(struct client *, char *parv[], int parc);
 static int s_chan_addban(struct client *, char *parv[], int parc);
 static int s_chan_delban(struct client *, char *parv[], int parc);
+static int s_chan_modban(struct client *, char *parv[], int parc);
 static int s_chan_listbans(struct client *, char *parv[], int parc);
 static int s_chan_unban(struct client *, char *parv[], int parc);
 static int s_chan_info(struct client *, char *parv[], int parc);
@@ -96,6 +97,7 @@ static struct service_command chanserv_command[] =
 	{ "VOICE",	&s_chan_voice,		1, NULL, 1, 0L, 1, 0, 0, 0 },
 	{ "ADDBAN",	&s_chan_addban,		4, NULL, 1, 0L, 1, 0, 0, 0 },
 	{ "DELBAN",	&s_chan_delban,		2, NULL, 1, 0L, 1, 0, 0, 0 },
+	{ "MODBAN",	&s_chan_modban,		3, NULL, 1, 0L, 1, 0, 0, 0 },
 	{ "LISTBANS",	&s_chan_listbans,	1, NULL, 1, 0L, 1, 0, 0, 0 },
 	{ "UNBAN",	&s_chan_unban,		1, NULL, 1, 0L, 1, 0, 0, 0 },
 	{ "INFO",	&s_chan_info,		1, NULL, 1, 0L, 0, 0, 0, 0 },
@@ -438,6 +440,23 @@ free_ban_reg(struct chan_reg *chreg_p, struct ban_reg *banreg_p)
 	my_free(banreg_p->username);
 
 	BlockHeapFree(ban_reg_heap, banreg_p);
+}
+
+static struct ban_reg *
+find_ban_reg(struct chan_reg *chreg_p, const char *mask)
+{
+	struct ban_reg *banreg_p;
+	dlink_node *ptr;
+
+	DLINK_FOREACH(ptr, chreg_p->bans.head)
+	{
+		banreg_p = ptr->data;
+
+		if(!irccmp(banreg_p->mask, mask))
+			return banreg_p;
+	}
+
+	return NULL;
 }
 
 static int
@@ -1124,6 +1143,7 @@ s_chan_moduser(struct client *client_p, char *parv[], int parc)
 	struct user_reg *ureg_p;
 	struct member_reg *mreg_p;
 	struct member_reg *mreg_tp;
+	char *endptr;
 	int level;
 
 	if((mreg_p = verify_member_reg_name(client_p, NULL, parv[0], S_C_USERLIST)) == NULL)
@@ -1146,11 +1166,12 @@ s_chan_moduser(struct client *client_p, char *parv[], int parc)
 		return 1;
 	}
 
-	level = atoi(parv[2]);
+	level = strtol(parv[2], &endptr, 10);
 
-	if(level < 1 || level >= mreg_p->level)
+	if(!EmptyString(endptr) || level < 1 || level >= mreg_p->level)
 	{
-		service_error(chanserv_p, client_p, "Access level %d invalid", level);
+		service_error(chanserv_p, client_p, "Access level %s invalid",
+				parv[2]);
 		return 1;
 	}
 
@@ -1822,6 +1843,13 @@ s_chan_addban(struct client *client_p, char *parv[], int parc)
 
 	mask = parv[loc++];
 
+	if(dlink_list_length(&mreg_p->channel_reg->bans) > config_file.cmax_bans)
+	{
+		service_error(chanserv_p, client_p, "Channel %s banlist full",
+				chptr->name);
+		return 1;
+	}
+
 	p = mask;
 
 	while(*p)
@@ -1836,21 +1864,16 @@ s_chan_addban(struct client *client_p, char *parv[], int parc)
 		p++;
 	}
 
-	DLINK_FOREACH(ptr, mreg_p->channel_reg->bans.head)
+	if((banreg_p = find_ban_reg(mreg_p->channel_reg, mask)) != NULL)
 	{
-		banreg_p = ptr->data;
-
-		if(!irccmp(banreg_p->mask, mask))
-		{
-			service_error(chanserv_p, client_p, "Ban %s on %s already set",
-					mask, mreg_p->channel_reg->name);
-			return 1;
-		}
+		service_error(chanserv_p, client_p, "Ban %s on %s already set",
+				mask, mreg_p->channel_reg->name);
+		return 1;
 	}
 
 	level = (int) strtol(parv[loc], &endptr, 10);
 
-	if(!EmptyString(endptr))
+	if(!EmptyString(endptr) || level < 1 || level > mreg_p->level)
 	{
 		service_error(chanserv_p, client_p, "Access level %s invalid",
 				parv[loc]);
@@ -1957,23 +1980,11 @@ s_chan_delban(struct client *client_p, char *parv[], int parc)
 	struct member_reg *mreg_p;
 	struct ban_reg *banreg_p;
 	dlink_node *ptr;
-	int found = 0;
 
 	if((mreg_p = verify_member_reg_name(client_p, &chptr, parv[0], S_C_REGULAR)) == NULL)
 		return 1;
 
-	DLINK_FOREACH(ptr, mreg_p->channel_reg->bans.head)
-	{
-		banreg_p = ptr->data;
-
-		if(!irccmp(banreg_p->mask, parv[1]))
-		{
-			found++;
-			break;
-		}
-	}
-
-	if(!found)
+	if((banreg_p = find_ban_reg(mreg_p->channel_reg, parv[1])) == NULL)
 	{
 		service_error(chanserv_p, client_p, "Ban %s on %s not found",
 				parv[1], mreg_p->channel_reg->name);
@@ -2013,6 +2024,57 @@ s_chan_delban(struct client *client_p, char *parv[], int parc)
 			return 1;
 		}
 	}
+
+	return 1;
+}
+
+static int
+s_chan_modban(struct client *client_p, char *parv[], int parc)
+{
+	struct member_reg *mreg_p;
+	struct ban_reg *banreg_p;
+	char *endptr;
+	int level;
+
+	if((mreg_p = verify_member_reg_name(client_p, NULL, parv[0], S_C_REGULAR)) == NULL)
+		return 1;
+
+	level = (int) strtol(parv[2], &endptr, 10);
+
+	if(!EmptyString(endptr) || level < 1 || level > mreg_p->level)
+	{
+		service_error(chanserv_p, client_p,
+				"Access level %s invalid", parv[2]);
+		return 1;
+	}
+
+	if((banreg_p = find_ban_reg(mreg_p->channel_reg, parv[1])) == NULL)
+	{
+		service_error(chanserv_p, client_p, "Ban %s on %s not found",
+				parv[1], mreg_p->channel_reg->name);
+		return 1;
+	}
+
+	if(banreg_p->level > mreg_p->level)
+	{
+		service_error(chanserv_p, client_p,
+				"Ban %s on %s higher level",
+				parv[1], mreg_p->channel_reg->name);
+		return 1;
+	}
+
+	banreg_p->level = level;
+	my_free(banreg_p->username);
+	banreg_p->username = my_strdup(mreg_p->user_reg->name);
+
+	service_error(chanserv_p, client_p,
+			"Ban %s on %s level %d set",
+			parv[1], mreg_p->channel_reg->name, level);
+
+	loc_sqlite_exec(NULL, "UPDATE bans SET level = %d, username = %Q "
+			"WHERE chname = %Q AND mask = %Q",
+			level, mreg_p->user_reg->name,
+			mreg_p->channel_reg->name, parv[1]);
 
 	return 1;
 }

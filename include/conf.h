@@ -42,6 +42,7 @@ struct _config_file
 	int cregister_time;
 	int cregister_amount;
 	int cexpire_time;
+	int cmax_bans;
 
 	/* jupeserv */
 	int oper_score;
