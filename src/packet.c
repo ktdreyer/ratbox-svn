@@ -403,7 +403,7 @@ read_packet(int fd, void *data)
 		return;
 		
 	/* Check to make sure we're not flooding */
-	if(IsPerson(client_p) &&
+	if(!IsAnyServer(client_p) &&
 	   (linebuf_alloclen(&client_p->localClient->buf_recvq) > ConfigFileEntry.client_flood))
 	{
 		if(!(ConfigFileEntry.no_oper_flood && IsOper(client_p)))
