@@ -1,3 +1,8 @@
+*** 20010607_2 by jdc
+* Fixed SSL_LIBS= =stuff.  Note the extra equals sign.
+
+
+
 *** 20010607_1 by androsyn
 My attempt at fixing the SSL include/libs stuff..its good and likely I screwed
 pretty bad, but it worked for me :P
