@@ -62,9 +62,9 @@ static int
 m_mode(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Channel *chptr = NULL;
+	struct membership *msptr;
 	static char modebuf[MODEBUFLEN];
 	static char parabuf[MODEBUFLEN];
-	dlink_node *ptr;
 	int n = 2;
 
 	if(EmptyString(parv[1]))
@@ -109,7 +109,8 @@ m_mode(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	}
 	else if(IsServer(source_p))
 	{
-		set_channel_mode(client_p, source_p, chptr, parc - n, parv + n, chptr->chname);
+		set_channel_mode(client_p, source_p, chptr, NULL,
+				 parc - n, parv + n, chptr->chname);
 	}
 	else
 	{
@@ -125,7 +126,8 @@ m_mode(struct Client *client_p, struct Client *source_p, int parc, const char *p
 				flood_endgrace(source_p);
 		}
 
-		set_channel_mode(client_p, source_p, chptr, parc - n, parv + n, chptr->chname);
+		set_channel_mode(client_p, source_p, chptr, msptr, 
+			         parc - n, parv + n, chptr->chname);
 	}
 
 	return 0;

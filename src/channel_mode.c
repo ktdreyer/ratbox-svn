@@ -52,7 +52,7 @@
 static int add_id(struct Client *, struct Channel *, const char *, int);
 static int del_id(struct Channel *, const char *, int);
 
-static void change_channel_membership(struct Channel *chptr, unsigned int, unsigned int);
+static void change_channel_membership(struct membership *, unsigned int, unsigned int);
 
 /* some small utility functions */
 static char *check_string(char *s);
@@ -287,14 +287,14 @@ del_id(struct Channel *chptr, const char *banid, int type)
  */
 static void
 change_channel_membership(struct membership *msptr, unsigned int add_flag,
-			  unsigned int del_flag);
+			  unsigned int del_flag)
 {
 	s_assert(msptr != NULL);
-	if(ms_ptr == NULL)
+	if(msptr == NULL)
 		return;
 
 	msptr->flags |= add_flag;
-	msptr-.flags &= ~del_flag;
+	msptr->flags &= ~del_flag;
 }
 
 /*
@@ -1376,14 +1376,14 @@ static struct ChannelMode ModeTable[255] =
  * Side-effects: None.
  */
 static int
-get_channel_access(struct Client *source_p, struct Channel *chptr)
+get_channel_access(struct Client *source_p, struct Channel *chptr,
+		   struct membership *msptr)
 {
 	/* Let hacked servers in for now... */
-
 	if(!MyClient(source_p))
 		return CHACCESS_CHANOP;
 
-	if(is_chan_op(chptr, source_p))
+	if(is_chanop(msptr))
 		return CHACCESS_CHANOP;
 
 	return CHACCESS_PEON;
@@ -1608,7 +1608,8 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
  */
 void
 set_channel_mode(struct Client *client_p, struct Client *source_p,
-		 struct Channel *chptr, int parc, const char *parv[], const char *chname)
+		 struct Channel *chptr, struct membership *msptr,
+		 int parc, const char *parv[], const char *chname)
 {
 	int dir = MODE_ADD;
 	int parn = 1;
@@ -1621,7 +1622,7 @@ set_channel_mode(struct Client *client_p, struct Client *source_p,
 	mode_count = 0;
 	mode_limit = 0;
 
-	alevel = get_channel_access(source_p, chptr);
+	alevel = get_channel_access(source_p, chptr, msptr);
 
 	for (; (c = *ml) != 0; ml++)
 		switch (c)

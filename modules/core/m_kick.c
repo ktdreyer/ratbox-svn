@@ -62,6 +62,7 @@ DECLARE_MODULE_AV1(kick, NULL, NULL, kick_clist, NULL, NULL, NULL, "$Revision$")
 static int
 m_kick(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
+	struct membership *msptr;
 	struct Client *who;
 	struct Channel *chptr;
 	int chasing = 0;
@@ -97,27 +98,33 @@ m_kick(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		return 0;
 	}
 
-
-	if(!IsServer(source_p) && !is_chan_op(chptr, source_p))
+	if(!IsServer(source_p))
 	{
-		/* was a user, not a server, and user isn't seen as a chanop here */
+		msptr = find_channel_membership(chptr, source_p);
 
-		if(MyConnect(source_p))
+		if((msptr == NULL) && MyConnect(source_p))
 		{
-			/* user on _my_ server, with no chanops.. so go away */
-
-			sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
-				   me.name, parv[0], name);
+			sendto_one(source_p, form_str(ERR_NOTONCHANNEL),
+				   me.name, source_p->name, name);
 			return 0;
 		}
 
-		if(chptr->channelts == 0)
+		if(!is_chanop(msptr))
 		{
-			/* If its a TS 0 channel, do it the old way */
+			if(MyConnect(source_p))
+			{
+				sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
+					   me.name, parv[0], name);
+				return 0;
+			}
 
-			sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
-				   me.name, parv[0], name);
-			return 0;
+			/* If its a TS 0 channel, do it the old way */
+			if(chptr->channelts == 0)
+			{
+				sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
+					   me.name, parv[0], name);
+				return 0;
+			}
 		}
 
 		/* Its a user doing a kick, but is not showing as chanop locally

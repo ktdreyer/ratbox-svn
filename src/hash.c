@@ -931,6 +931,7 @@ hash_find_help(const char *name, int flags)
 	return NULL;
 }
 
+#ifdef IMFLMYISPSUCKS
 void
 help_hash_stats(struct Client *source_p)
 {
@@ -960,3 +961,4 @@ help_hash_stats(struct Client *source_p)
 			   i, helpTable[i].hits, buffer);
 	}
 }
+#endif

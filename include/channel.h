@@ -85,12 +85,11 @@ extern dlink_list global_channel_list;
 void init_channels(void);
 void cleanup_channels(void *);
 
-extern int can_send(struct Channel *chptr, struct Client *who);
+extern int can_send(struct Channel *chptr, struct Client *who, 
+		    struct membership *);
 extern int is_banned(struct Channel *chptr, struct Client *who);
 
 extern int can_join(struct Client *source_p, struct Channel *chptr, char *key);
-extern int is_chan_op(struct Channel *chptr, struct Client *who);
-extern int is_voiced(struct Channel *chptr, struct Client *who);
 
 extern struct membership *find_channel_membership(struct Channel *, struct Client *);
 extern const char *find_channel_status(struct membership *msptr, int combine);
@@ -102,8 +101,8 @@ extern void free_channel_list(dlink_list *);
 
 extern int check_channel_name(const char *name);
 
-extern void channel_member_names(struct Client *source_p,
-				 struct Channel *chptr, char *name_of_channel, int show_eon);
+extern void channel_member_names(struct Channel *chptr, struct Client *,
+				 int show_eon);
 extern const char *channel_pub_or_secret(struct Channel *chptr);
 
 extern void add_invite(struct Channel *chptr, struct Client *who);
@@ -125,7 +124,7 @@ extern void check_splitmode(void *);
 #define ShowChannel(v,c)        (PubChannel(c) || IsMember((v),(c)))
 
 #define IsMember(who, chan) ((who && who->user && \
-                dlinkFind(&who->user->channel, chan)) ? 1 : 0)
+                find_channel_membership(chan, who)) ? 1 : 0)
 
 #define IsChannelName(name) ((name) && (*(name) == '#' || *(name) == '&'))
 

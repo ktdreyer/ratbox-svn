@@ -63,6 +63,7 @@ m_invite(struct Client *client_p, struct Client *source_p, int parc, const char 
 {
 	struct Client *target_p;
 	struct Channel *chptr;
+	struct membership *msptr;
 	int chop = 1;
 
 	if(EmptyString(parv[2]))
@@ -121,7 +122,8 @@ m_invite(struct Client *client_p, struct Client *source_p, int parc, const char 
 		return 0;
 	}
 
-	if(MyClient(source_p) && !IsMember(source_p, chptr))
+	msptr = find_channel_membership(chptr, source_p);
+	if(MyClient(source_p) && (msptr == NULL))
 	{
 		sendto_one(source_p, form_str(ERR_NOTONCHANNEL), me.name, parv[0], parv[2]);
 		return 0;
@@ -136,7 +138,7 @@ m_invite(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	/* remote clients are always 'chop' */
 	if(MyClient(source_p))
-		chop = is_chan_op(chptr, source_p);
+		chop = is_chanop(msptr);
 
 	if(chptr && (chptr->mode.mode & MODE_INVITEONLY))
 	{

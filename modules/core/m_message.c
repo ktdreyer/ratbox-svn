@@ -333,7 +333,11 @@ build_target_list(int p_or_n, const char *command, struct Client *client_p,
 
 			if((chptr = find_channel(nick)) != NULL)
 			{
-				if(!is_chan_op(chptr, source_p) && !is_voiced(chptr, source_p))
+				struct membership *msptr;
+
+				msptr = find_channel_membership(chptr, source_p);
+
+				if(!is_chanop_voiced(msptr))
 				{
 					sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
 						   me.name, source_p->name, with_prefix);
@@ -424,7 +428,7 @@ msg_channel(int p_or_n, const char *command,
 	}
 
 	/* chanops and voiced can flood their own channel with impunity */
-	if((result = can_send(chptr, source_p)))
+	if((result = can_send(chptr, source_p, NULL)))
 	{
 		if(result == CAN_SEND_OPV ||
 		   !flood_attack_channel(p_or_n, source_p, chptr, chptr->chname))

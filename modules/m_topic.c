@@ -64,6 +64,7 @@ static int
 m_topic(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Channel *chptr = NULL;
+	struct membership *msptr;
 	char *p = NULL;
 
 	if(EmptyString(parv[1]))
@@ -93,13 +94,16 @@ m_topic(struct Client *client_p, struct Client *source_p, int parc, const char *
 		/* setting topic */
 		if(parc > 2)
 		{
-			if(!IsMember(source_p, chptr))
+			msptr = find_channel_membership(chptr, source_p);
+
+			if(msptr == NULL)
 			{
 				sendto_one(source_p, form_str(ERR_NOTONCHANNEL), me.name, parv[0],
 					   parv[1]);
 				return 0;
 			}
-			if((chptr->mode.mode & MODE_TOPICLIMIT) == 0 || is_chan_op(chptr, source_p))
+
+			if((chptr->mode.mode & MODE_TOPICLIMIT) == 0 || is_chanop(msptr))
 			{
 				char topic_info[USERHOST_REPLYLEN];
 				ircsprintf(topic_info, "%s!%s@%s",

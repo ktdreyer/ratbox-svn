@@ -86,7 +86,7 @@ find_channel_membership(struct Channel *chptr, struct Client *client_p)
 	if(!IsClient(client_p))
 		return NULL;
 
-	DLINK_FOREACH(ptr, &client_p->user->channel.head)
+	DLINK_FOREACH(ptr, client_p->user->channel.head)
 	{
 		msptr = ptr->data;
 		if(msptr->chptr == chptr)
@@ -141,7 +141,7 @@ add_user_to_channel(struct Channel *chptr, struct Client *client_p, int flags)
 		dlinkAdd(msptr, &msptr->locchannode, &chptr->locmembers);
 		
 	chptr->users++;
-	who->user->joined++;
+	client_p->user->joined++;
 }
 
 int
@@ -158,11 +158,11 @@ remove_user_from_channel(struct Channel *chptr, struct Client *client_p)
 	dlinkDelete(&msptr->usernode, &client_p->user->channel);
 	dlinkDelete(&msptr->channode, &chptr->members);
 
-	if(who->servptr == &me)
+	if(client_p->servptr == &me)
 		dlinkDelete(&msptr->locchannode, &chptr->locmembers);
 
 	chptr->users_last = CurrentTime;
-	who->user->joined--;
+	client_p->user->joined--;
 
 	if(--chptr->users <= 0)
 	{
@@ -216,6 +216,7 @@ static void
 send_members(struct Channel *chptr, struct Client *client_p,
 	     const char *lmodebuf, const char *lparabuf)
 {
+	struct membership *msptr;
 	dlink_node *ptr;
 	int tlen;		/* length of t (temp pointer) */
 	int mlen;		/* minimum length */
@@ -470,7 +471,6 @@ channel_member_names(struct Channel *chptr, struct Client *client_p, int show_eo
 	int tlen;
 	int cur_len;
 	int is_member;
-	int i;
 
 	if(ShowChannel(client_p, chptr))
 	{
@@ -740,10 +740,9 @@ can_join(struct Client *source_p, struct Channel *chptr, char *key)
  * side effects - NONE
  */
 int
-can_send(struct Channel *chptr, struct Client *source_p)
+can_send(struct Channel *chptr, struct Client *source_p, 
+	 struct membership *msptr)
 {
-	struct membership *msptr;
-
 	if(IsServer(source_p))
 		return CAN_SEND_OPV;
 
@@ -751,18 +750,19 @@ can_send(struct Channel *chptr, struct Client *source_p)
 	   (!IsOper(source_p) || !ConfigChannel.no_oper_resvs))
 		return CAN_SEND_NO;
 
-	msptr = find_channel_membership(chptr, source_p);
+	if(msptr == NULL)
+	{
+		msptr = find_channel_membership(chptr, source_p);
 
-	if(msptr != NULL)
-	{
-		if(is_chanop_voiced(msptr))
-			return CAN_SEND_OPV;
+		if(msptr == NULL)
+		{
+			if(chptr->mode.mode & MODE_NOPRIVMSGS)
+				return CAN_SEND_NO;
+		}
 	}
-	else
-	{
-		if(chptr->mode.mode & MODE_NOPRIVMSGS)
-			return CAN_SEND_NO;
-	}
+
+	if(is_chanop_voiced(msptr))
+		return CAN_SEND_OPV;
 
 	if(chptr->mode.mode & MODE_MODERATED)
 		return CAN_SEND_NO;

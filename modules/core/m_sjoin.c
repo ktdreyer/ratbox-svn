@@ -626,7 +626,6 @@ remove_a_mode(struct Channel *chptr, struct Client *source_p, int mask, char fla
 {
 	struct membership *msptr;
 	dlink_node *ptr;
-	struct Client *target_p;
 	char lmodebuf[MODEBUFLEN];
 	char *lpara[MAXMODEPARAMS];
 	int count = 0;

@@ -28,6 +28,7 @@
 #include "tools.h"
 #include "handlers.h"
 #include "channel.h"
+#include "channel_mode.h"
 #include "client.h"
 #include "common.h"
 #include "hash.h"
@@ -108,6 +109,7 @@ static void
 part_one_client(struct Client *client_p, struct Client *source_p, char *name, char *reason)
 {
 	struct Channel *chptr;
+	struct membership *msptr;
 
 	if((chptr = find_channel(name)) == NULL)
 	{
@@ -115,11 +117,13 @@ part_one_client(struct Client *client_p, struct Client *source_p, char *name, ch
 		return;
 	}
 
-	if(!chptr || !IsMember(source_p, chptr))
+	msptr = find_channel_membership(chptr, source_p);
+	if(msptr == NULL)
 	{
 		sendto_one(source_p, form_str(ERR_NOTONCHANNEL), me.name, source_p->name, name);
 		return;
 	}
+
 	if(MyConnect(source_p) && !IsOper(source_p))
 		check_spambot_warning(source_p, NULL);
 
@@ -127,8 +131,8 @@ part_one_client(struct Client *client_p, struct Client *source_p, char *name, ch
 	 *  Remove user from the old channel (if any)
 	 *  only allow /part reasons in -m chans
 	 */
-	if(reason[0] && (is_chan_op(chptr, source_p) || !MyConnect(source_p) ||
-			 ((can_send(chptr, source_p) > 0 &&
+	if(reason[0] && (is_chanop(msptr) || !MyConnect(source_p) ||
+			 ((can_send(chptr, source_p, msptr) > 0 &&
 			   (source_p->firsttime + ConfigFileEntry.anti_spam_exit_message_time)
 			   < CurrentTime))))
 	{
