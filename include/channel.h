@@ -278,7 +278,7 @@ struct ChModeChange
 struct ChResyncOp
 {
  struct Client *client_p;
- int dir, sync;
+ int dir, sync, send;
  char c;
 };
 
