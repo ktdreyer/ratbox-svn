@@ -1,3 +1,8 @@
+*** 20010428_5 by jdc
+* Bump up the _version string.
+
+
+
 *** 20010428_4 by jdc
 * A non-opped client in a +a channel should be shown the local server
   that kicked them, NOT their own nick (eg. me.name  vs.  who->name).
