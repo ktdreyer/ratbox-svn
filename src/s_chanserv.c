@@ -1294,6 +1294,10 @@ s_chanserv_addban(struct client *client_p, char *parv[], int parc)
 		}
 
 		loc++;
+
+		/* more params to come */
+		if(loc != parc)
+			strlcat(reason, " ", sizeof(reason));
 	}
 
 	banreg_p = make_ban_reg(mreg_p->channel_reg, mask, reason, 
@@ -1314,6 +1318,9 @@ s_chanserv_addban(struct client *client_p, char *parv[], int parc)
 	}
 
 	loc = 0;
+
+	modebuild_start(chanserv_p, chptr);
+	kickbuild_start();
 
 	/* now enforce the ban.. */
 	DLINK_FOREACH_SAFE(ptr, next_ptr, chptr->users.head)
@@ -1337,22 +1344,19 @@ s_chanserv_addban(struct client *client_p, char *parv[], int parc)
 					continue;
 			}
 
-			if(!loc)
-			{
-				char *banstr = my_strdup(mask);
+			if(is_opped(msptr))
+				modebuild_add(DIR_DEL, "o", msptr->client_p->name);
 
-				sendto_server(":%s MODE %s +b %s",
-						chanserv_p->name, chptr->name, mask);
-				dlink_add_alloc(banstr, &chptr->bans);
-				loc++;
-			}
-
-			sendto_server(":%s KICK %s %s :%s",
-					chanserv_p->name, chptr->name, msptr->client_p->name,
-					reason);
+			kickbuild_add(msptr->client_p->name, reason);
 			del_chmember(msptr);
 		}
 	}
+
+	dlink_add_alloc(my_strdup(mask), &chptr->bans);
+
+	modebuild_add(DIR_ADD, "b", mask);
+	modebuild_finish();
+	kickbuild_finish(chanserv_p, chptr);
 
 	return 1;
 }
