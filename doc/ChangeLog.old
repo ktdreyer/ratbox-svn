@@ -1,3 +1,28 @@
+davidt      2001/12/28 11:41:49 EST	(20011228_2)
+
+  Modified files:
+    help                 Makefile.in 
+    modules              m_help.c 
+  Added files:
+    help/opers           index 
+    help/users           index 
+  Log:
+  - De-K&Rify m_help.c
+  - Make /HELP and /UHELP case-insensitive
+  - Make /UHELP with no args do /UHELP index (like /HELP)
+  - Add 'make index' target in help/
+  - Add indexes.
+    Currently these are in CVS, and auto-generated.  Perhaps they shouldn't
+    be.
+  
+  Revision  Changes    Path
+  1.12      +27 -3     ircd-hybrid-7/help/Makefile.in
+  1.1       +82 -0     ircd-hybrid-7/help/opers/index (new)
+  1.1       +41 -0     ircd-hybrid-7/help/users/index (new)
+  1.27      +55 -50    ircd-hybrid-7/modules/m_help.c
+
+
+
 a1kmm       2001/12/27 20:21:49 EST	(20011228_1)
 
   Modified files:
