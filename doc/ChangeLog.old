@@ -1,3 +1,10 @@
+*** 20001219_6 by ejb
+- added client_exit:
+   *** Signoff: foo (Client Exit: foo)
+- removed ms_quit.
+
+
+
 *** 20001219_5 by db
 - removed goto in channel.c dealing with invex
 
