@@ -482,6 +482,11 @@ struct Channel* vchan_invites(struct Channel *chptr, struct Client *source_p)
 
   for (lp = source_p->user->invited.head; lp; lp = lp->next)
     {
+      /* check root first */    
+      if (lp->data == chptr)
+        return chptr;
+
+      /* then vchan list */
       for (vptr = chptr->vchan_list.head; vptr; vptr = vptr->next)
 	{
 	  cp = vptr->data;

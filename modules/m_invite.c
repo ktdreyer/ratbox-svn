@@ -41,11 +41,10 @@
 #include "modules.h"
 
 static void m_invite(struct Client*, struct Client*, int, char**);
-static void ms_invite(struct Client*, struct Client*, int, char**);
 
 struct Message invite_msgtab = {
   "INVITE", 0, 3, 0, MFLG_SLOW, 0,
-  {m_unregistered, m_invite, ms_invite, m_invite}
+  {m_unregistered, m_invite, m_invite, m_invite}
 };
 #ifndef STATIC_MODULES
 
@@ -61,8 +60,9 @@ _moddeinit(void)
   mod_del_cmd(&invite_msgtab);
 }
 
-char *_version = "20001122";
+char *_version = "20010407";
 #endif
+
 /*
 ** m_invite
 **      parv[0] - sender prefix
@@ -77,7 +77,6 @@ static void m_invite(struct Client *client_p,
   struct Client *target_p;
   struct Channel *chptr;
   struct Channel *vchan;
-  char   *chname;
   int    chop;			/* Is channel op */
 
   if (*parv[2] == '\0')
@@ -152,8 +151,6 @@ static void m_invite(struct Client *client_p,
 	chptr = vchan;
     }
 
-  chname = chptr->chname;
-
   if (!IsMember(source_p, chptr))
     {
       if (MyClient(source_p))
@@ -186,7 +183,7 @@ static void m_invite(struct Client *client_p,
   if (MyConnect(source_p))
     {
       sendto_one(source_p, form_str(RPL_INVITING), me.name, parv[0],
-                 target_p->name, ((chname) ? (chname) : parv[2]));
+                 target_p->name, parv[2]);
       if (target_p->user->away)
         sendto_one(source_p, form_str(RPL_AWAY), me.name, parv[0],
                    target_p->name, target_p->user->away);
@@ -210,18 +207,4 @@ static void m_invite(struct Client *client_p,
 
   sendto_anywhere(target_p, source_p, "INVITE %s :%s",
 		  target_p->name, parv[2]);
-}
-
-/*
-** ms_invite
-**      parv[0] - sender prefix
-**      parv[1] - user to invite
-**      parv[2] - channel number
-*/
-static void ms_invite(struct Client *client_p,
-                     struct Client *source_p,
-                     int parc,
-                     char *parv[])
-{
-  m_invite(client_p,source_p,parc,parv);
 }
