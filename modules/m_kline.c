@@ -33,7 +33,7 @@
 #include "irc_string.h"
 #include "sprintf_irc.h"
 #include "ircd.h"
-#include "confmatch.h"
+#include "hostmask.h"
 #include "numeric.h"
 #include "fdlist.h"
 #include "s_bsd.h"
@@ -781,15 +781,24 @@ already_placed_kline(struct Client *source_p, const char *luser, const char *lho
 	const char *reason;
 	struct irc_inaddr iphost, *piphost;
 	struct ConfItem *aconf;
-
+        int t;
 	if(ConfigFileEntry.non_redundant_klines)
 	{
-		if(parse_netmask(lhost, &iphost, NULL))
+		if((t = parse_netmask(lhost, &iphost, NULL)) != HM_HOST)
+		{
+#ifdef IPV6
+			if(t == HM_IPV6)
+				t = AF_INET6;
+			else
+#endif
+				t = AF_INET;
+				
 			piphost = &iphost;
+		}
 		else
 			piphost = NULL;
 
-		if((aconf = find_conf_by_address(lhost, piphost, CONF_KILL, luser)))
+		if((aconf = find_conf_by_address(lhost, piphost, CONF_KILL, t, luser)))
 		{
 			/* setting a tkline, or existing one is perm */
 			if(tkline || ((aconf->flags & CONF_FLAGS_TEMPORARY) == 0))

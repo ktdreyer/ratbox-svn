@@ -22,7 +22,7 @@
 #include "setup.h"
 #include "modules.h"
 #include "listener.h"
-#include "confmatch.h"
+#include "hostmask.h"
 #include "resv.h"
 #include "s_serv.h"
 #include "event.h"

@@ -430,7 +430,7 @@ accept_connection(int pfd, void *data)
 
 	/* Do an initial check we aren't connecting too fast or with too many
 	 * from this IP... */
-	if((pe = conf_connect_allowed(&addr)) != 0)
+	if((pe = conf_connect_allowed(&addr, sai.sins.sin.sin_family)) != 0)
 	{
 		ServerStats->is_ref++;
 

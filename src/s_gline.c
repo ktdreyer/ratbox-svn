@@ -33,7 +33,7 @@
 #include "config.h"
 #include "irc_string.h"
 #include "ircd.h"
-#include "confmatch.h"
+#include "hostmask.h"
 #include "numeric.h"
 #include "fdlist.h"
 #include "s_bsd.h"
@@ -132,7 +132,7 @@ expire_glines()
 			break;
 
 		dlinkDestroy(gline_node, &glines);
-		delete_one_address_conf(kill_ptr);
+		delete_one_address_conf(kill_ptr->host, kill_ptr);
 	}
 }
 

@@ -34,7 +34,7 @@
 #include "irc_string.h"
 #include "sprintf_irc.h"
 #include "ircd.h"
-#include "confmatch.h"
+#include "hostmask.h"
 #include "numeric.h"
 #include "s_conf.h"
 #include "s_log.h"
@@ -160,7 +160,7 @@ remove_temp_gline(char *user, char *host)
 		   comp_with_mask(&IN_ADDR(addr), &IN_ADDR(caddr), bits))
 		{
 			dlinkDestroy(ptr, &glines);
-			delete_one_address_conf(aconf);
+			delete_one_address_conf(aconf->host, aconf);
 			return YES;
 		}
 	}

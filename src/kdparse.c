@@ -29,7 +29,7 @@
 #include "s_log.h"
 #include "s_conf.h"
 #include "s_newconf.h"
-#include "confmatch.h"
+#include "hostmask.h"
 #include "client.h"
 #include "irc_string.h"
 #include "memory.h"

@@ -42,7 +42,7 @@
 #include "sprintf_irc.h"
 #include "ircd.h"
 #include "listener.h"
-#include "confmatch.h"
+#include "hostmask.h"
 #include "modules.h"
 #include "numeric.h"
 #include "fdlist.h"
@@ -472,13 +472,13 @@ verify_access(struct Client *client_p, const char *username)
 	if(IsGotId(client_p))
 	{
 		aconf = find_address_conf(client_p->host, client_p->username,
-					  &client_p->localClient->ip);
+					  &client_p->localClient->ip,client_p->localClient->aftype);
 	}
 	else
 	{
 		strlcpy(non_ident, "~", sizeof(non_ident));
 		strlcat(non_ident, username, sizeof(non_ident));
-		aconf = find_address_conf(client_p->host, non_ident, &client_p->localClient->ip);
+		aconf = find_address_conf(client_p->host, non_ident, &client_p->localClient->ip,client_p->localClient->aftype);
 	}
 
 	if(aconf != NULL)
@@ -1220,9 +1220,9 @@ lookup_confhost(struct ConfItem *aconf)
  * side effects	- none
  */
 int
-conf_connect_allowed(struct irc_inaddr *addr)
+conf_connect_allowed(struct irc_inaddr *addr, int aftype)
 {
-	struct ConfItem *aconf = find_dline(addr);
+	struct ConfItem *aconf = find_dline(addr, aftype);
 
 	/* DLINE exempt also gets you out of static limits/pacing... */
 	if(aconf && (aconf->status & CONF_EXEMPTDLINE))
@@ -1250,7 +1250,7 @@ find_kill(struct Client *client_p)
 	if(client_p == NULL)
 		return (NULL);
 
-	aconf = find_address_conf(client_p->host, client_p->username, &client_p->localClient->ip);
+	aconf = find_address_conf(client_p->host, client_p->username, &client_p->localClient->ip,client_p->localClient->aftype);
 	if(aconf == NULL)
 		return (aconf);
 	if((aconf->status & CONF_KILL) || (aconf->status & CONF_GLINE))
@@ -1359,7 +1359,7 @@ expire_tkline(dlink_list * tklist, int type)
 						     (aconf->user) ? aconf->
 						     user : "*", (aconf->host) ? aconf->host : "*");
 
-			delete_one_address_conf(aconf);
+			delete_one_address_conf(aconf->host, aconf);
 			dlinkDestroy(ptr, tklist);
 		}
 		else if((type == TEMP_WEEK
@@ -1408,7 +1408,7 @@ expire_tdline(dlink_list * tdlist, int type)
 						     "Temporary D-line for [%s] expired",
 						     aconf->host);
 
-			delete_one_address_conf(aconf);
+			delete_one_address_conf(aconf->host, aconf);
 			dlinkDestroy(ptr, tdlist);
 		}
 		else if((type == TEMP_WEEK

@@ -33,7 +33,7 @@
 #include "irc_string.h"
 #include "sprintf_irc.h"
 #include "ircd.h"
-#include "confmatch.h"
+#include "hostmask.h"
 #include "numeric.h"
 #include "fdlist.h"
 #include "s_bsd.h"
@@ -219,9 +219,16 @@ mo_dline(struct Client *client_p, struct Client *source_p, int parc, char *parv[
 	if(ConfigFileEntry.non_redundant_klines)
 	{
 		const char *creason;
+		int t = AF_INET;
 		(void) parse_netmask(dlhost, &daddr, NULL);
-
-		if((aconf = find_dline(&daddr)) != NULL)
+#ifdef IPV6
+        	if(t == HM_IPV6)
+                	t = AF_INET6;
+                else
+#endif
+			t = AF_INET;
+                                  		
+		if((aconf = find_dline(&daddr, t)) != NULL)
 		{
 			creason = aconf->passwd ? aconf->passwd : "<No Reason>";
 			if(IsConfExemptKline(aconf))

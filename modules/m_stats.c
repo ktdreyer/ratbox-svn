@@ -36,7 +36,7 @@
 #include "s_gline.h"
 #include "ircd_handler.h"
 #include "msg.h"		/* Message */
-#include "confmatch.h"
+#include "hostmask.h"
 #include "iplines.h"
 #include "numeric.h"		/* ERR_xxx */
 #include "scache.h"		/* list_scache */
@@ -327,8 +327,6 @@ stats_connect(struct Client *source_p)
 static void
 stats_tdeny(struct Client *source_p)
 {
-#warning fix stats_tdeny()
-#ifdef XXX_FIX_ME_XXX
 	char *name, *host, *pass, *user, *classname;
 	struct AddressRec *arec;
 	struct ConfItem *aconf;
@@ -353,7 +351,6 @@ stats_tdeny(struct Client *source_p)
 			}
 		}
 	}
-#endif
 }
 
 /* stats_deny()
@@ -498,10 +495,10 @@ stats_auth(struct Client *source_p)
 		if(MyConnect(source_p))
 			aconf = find_conf_by_address(source_p->host,
 						     &source_p->localClient->ip,
-						     CONF_CLIENT, source_p->username);
+						     CONF_CLIENT, source_p->localClient->aftype,source_p->username);
 		else
 			aconf = find_conf_by_address(source_p->host, NULL, CONF_CLIENT,
-						     source_p->username);
+						     source_p->localClient->aftype, source_p->username);
 
 		if(aconf == NULL)
 			return;
@@ -516,8 +513,7 @@ stats_auth(struct Client *source_p)
 	/* Theyre opered, or allowed to see all auth blocks */
 	else
 	{
-		report_ipIlines(source_p);
-		report_ilines(source_p);
+		report_auth(source_p);
 	}
 }
 
@@ -539,10 +535,10 @@ stats_tklines(struct Client *source_p)
 		if(MyConnect(source_p))
 			aconf = find_conf_by_address(source_p->host,
 						     &source_p->localClient->ip,
-						     CONF_KILL, source_p->username);
+						     CONF_KILL, source_p->localClient->aftype,source_p->username);
 		else
 			aconf = find_conf_by_address(source_p->host, NULL, CONF_KILL,
-						     source_p->username);
+						     source_p->localClient->aftype,source_p->username);
 
 		if(aconf == NULL)
 			return;
@@ -607,10 +603,10 @@ stats_klines(struct Client *source_p)
 		if(MyConnect(source_p))
 			aconf = find_conf_by_address(source_p->host,
 						     &source_p->localClient->ip,
-						     CONF_KILL, source_p->username);
+						     CONF_KILL, source_p->localClient->aftype,source_p->username);
 		else
 			aconf = find_conf_by_address(source_p->host, NULL, CONF_KILL,
-						     source_p->username);
+						     source_p->localClient->aftype,source_p->username);
 
 		if(aconf == NULL)
 			return;
@@ -627,8 +623,7 @@ stats_klines(struct Client *source_p)
 	/* Theyre opered, or allowed to see all klines */
 	else
 	{
-		report_ipKlines(source_p);
-		report_klines(source_p);
+		report_Klines(source_p);
 	}
 }
 

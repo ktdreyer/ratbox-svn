@@ -347,7 +347,7 @@ extern struct ConfItem *find_conf_exact(const char *name, const char *user,
 extern struct ConfItem *find_conf_by_name(const char *name, int status);
 extern struct ConfItem *find_conf_by_host(const char *host, int status);
 extern struct ConfItem *find_kill(struct Client *);
-extern int conf_connect_allowed(struct irc_inaddr *addr);
+extern int conf_connect_allowed(struct irc_inaddr *addr, int);
 extern char *oper_flags_as_string(int);
 extern char *oper_privs_as_string(struct Client *, int);
 

@@ -34,7 +34,7 @@
 #include "irc_string.h"
 #include "sprintf_irc.h"
 #include "ircd.h"
-#include "confmatch.h"
+#include "hostmask.h"
 #include "numeric.h"
 #include "s_conf.h"
 #include "s_newconf.h"
@@ -430,7 +430,7 @@ remove_temp_kline(char *user, char *host)
 									    &IN_ADDR(caddr), bits)))
 			{
 				dlinkDestroy(ptr, tklist);
-				delete_one_address_conf(aconf);
+				delete_one_address_conf(aconf->host, aconf);
 				return YES;
 			}
 		}
