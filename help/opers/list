@@ -1,4 +1,4 @@
-LIST [#channel]
+LIST [#channel]|[modifiers]
 
 Without any arguments, LIST will give an entire list of all
 channels which are not set as secret (+s). The list will be in
@@ -6,7 +6,11 @@ the form:
 
   <#channel> <amount of users> :[topic]
 
-If an argument is supplied, LIST will give just the statistics
-for the given channel.
+If an argument supplied is a channel name, LIST will give just
+the statistics for the given channel.
 
-See also: join
+Modifiers are also supported, seperated by a comma:
+  <n	- List channels with less than n users
+  >n	- List channels with more than n users
+
+eg LIST <100,>20
