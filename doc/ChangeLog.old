@@ -1,3 +1,10 @@
+*** 20010130_2 by wcampbel
+Removed "OPERWALL - " from in front of the OPERWALL message...
+This may be exerting my opinion...but the two commands do the same damn 
+thing, why should they look any different?  Other than "elite-ness", I don't
+see any reason why OPERWALL should exist at all.
+
+
 *** 20010130_1 by a1kmm
 - Fixed the memdebug code again, you can't add a void* to a ptr, it is perfectly valid to add an unsigned
 long to a ptr however.
