@@ -111,6 +111,33 @@ dnl Checks for the existance of strlcat
 AC_CHECK_FUNCS(strlcat strlcpy)
 
 
+dnl Check for whether or not size_t is a long
+dnl NOTE 1: This should probably be extended to check for things like
+dnl         sizeof(time_t) returning 8 in the case of a 64-bit platform.
+dnl NOTE 2: The default for cross-compiling is 'yes'.  This should
+dnl         probably be fixed as well.
+AC_DEFUN(AC_CHECK_SIZEOF_TIME_T,
+[
+	AC_CACHE_CHECK(for whether time_t is long, ac_cv_c_long_time_t,
+	[
+	  AC_TRY_RUN(
+	  [
+#include <time.h>
+int main() {
+  exit(sizeof(time_t) == sizeof(long));
+}
+	  ],
+	  ac_cv_c_long_time_t=no, ac_cv_c_long_time_t=yes,
+	  ac_cv_c_long_time_t=yes)
+	])
+	if test $ac_cv_c_long_time_t = yes; then
+	  AC_DEFINE(HAVE_LONG_TIME_T)
+	fi
+])
+
+dnl Do the actual time_t size check
+AC_CHECK_SIZEOF_TIME_T
+
 
 
 dnl openssl?
