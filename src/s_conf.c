@@ -707,56 +707,35 @@ find_or_add_ip(struct irc_inaddr *ip_in)
 
 void remove_one_ip(struct irc_inaddr *ip_in)
 {
-  int hash_index;
-  IP_ENTRY *last_ptr;
-  IP_ENTRY *ptr;
-  IP_ENTRY *old_free_ip_entries;
-
-  last_ptr = ptr = ip_hash_table[hash_index = hash_ip(ip_in)];
-  while(ptr)
-    {
-      /* XXX - XXX - XXX - XXX */
+  IP_ENTRY *ptr, **lptr;
+  int hash_index = hash_ip(ip_in);
+  for (lptr = ip_hash_table+hash_index, ptr = *lptr;
+       ptr;
+       lptr=&ptr->next, ptr=*lptr)
+  {
 #ifndef IPV6
-      if(ptr->ip == PIN_ADDR(ip_in))
+   if (ptr->ip != PIN_ADDR(ip_in))
+    continue;
 #else
-      if(!memcmp(&IN_ADDR(ptr->ip), &PIN_ADDR(ip_in), sizeof(struct irc_inaddr)))
+   if (memcmp(&IN_ADDR(ptr->ip), &PIN_ADDR(ip_in),
+              sizeof(struct irc_inaddr)))
+    continue;
 #endif
-        {
-          if(ptr->count != 0)
-            ptr->count--;
+  if (ptr->count != 0)
+   ptr->count--;
 #ifndef PACE_CONNECT
-          if(ptr->count == 0)
+  if (ptr->count != 0)
+   continue;
 #else
-          if(ptr->count == 0 &&
-             (CurrentTime-ptr->last_attempt)<RECONNECT_TIME)
+  if (ptr->count != 0 ||
+      (CurrentTime-ptr->last_attempt)>RECONNECT_TIME)
+   continue;
 #endif
-            {
-              if(ip_hash_table[hash_index] == ptr)
-                ip_hash_table[hash_index] = ptr->next;
-              else
-                last_ptr->next = ptr->next;
-        
-              if(free_ip_entries != (IP_ENTRY *)NULL)
-                {
-                  old_free_ip_entries = free_ip_entries;
-                  free_ip_entries = ptr;
-                  ptr->next = old_free_ip_entries;
-                }
-              else
-                {
-                  free_ip_entries = ptr;
-                  ptr->next = (IP_ENTRY *)NULL;
-                }
-            }
-          return;
-        }
-      else
-        {
-          last_ptr = ptr;
-          ptr = ptr->next;
-        }
-    }
+  *lptr = ptr->next;
+  ptr->next = free_ip_entries;
+  free_ip_entries = ptr;
   return;
+ }
 }
 
 /*
