@@ -1,3 +1,10 @@
+*** 20010103_7 by madmax
+I was going to wait until we were ready to change the patch level.. but 
+thought i'd commit these now before they got lost.
+Just updated the files to reflect it being a beta release, and tidied stuff
+up a bit.
+
+
 *** 20010103_6 by madmax
 Forgot to commit this (reference to BUGS file)
 
