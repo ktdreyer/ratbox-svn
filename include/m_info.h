@@ -84,6 +84,12 @@ Info MyInformation[] = {
   { "HPATH", "NONE", 0, "Path to Operator Help File" },
 #endif /* HPATH */
 
+#ifdef UHPATH
+  { "UHPATH", UHPATH, 0, "Path to User Help File" },
+#else
+  { "UHPATH", "NONE", 0, "Path to User Help File" },
+#endif /* UH PATH */
+
 #ifdef SOMAXCONN
   { "HYBRID_SOMAXCONN", "", SOMAXCONN, "Maximum Queue Length of Pending Connections" },
 #else

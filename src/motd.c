@@ -123,6 +123,9 @@ int SendMessageFile(struct Client *source_p, MessageFile *motdToPrint)
     case HELP_MOTD:
       break;
 
+    case UHELP_MOTD:
+      break;
+
     default:
       return 0;
       /* NOT REACHED */
