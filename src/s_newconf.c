@@ -46,8 +46,6 @@
 #include "event.h"
 #include "hash.h"
 
-static void ms_encap_foo(struct Client *, struct Client *, int, const char **);
-
 static BlockHeap *xline_heap = NULL;
 static BlockHeap *shared_heap = NULL;
 
@@ -81,7 +79,6 @@ init_conf(void)
 	xline_heap = BlockHeapCreate(sizeof(struct xline), XLINE_HEAP_SIZE);
 	shared_heap = BlockHeapCreate(sizeof(struct shared), SHARED_HEAP_SIZE);
 	eventAddIsh("conf_heap_gc", conf_heap_gc, NULL, 600);
-	add_encap("FOO", ms_encap_foo, 0);
 }
 
 /* make_xline()
@@ -309,29 +306,6 @@ find_shared(const char *username, const char *host, const char *servername, int 
 	return NO;
 }
 
-/* find_encap()
- *
- * inputs	- token to find
- * outputs	- 0 on failure, 1 if found
- * side effects -
- */
-static struct encap *
-find_encap(const char *name)
-{
-	struct encap *enptr;
-	dlink_node *ptr;
-
-	DLINK_FOREACH(ptr, encap_list.head)
-	{
-		enptr = ptr->data;
-
-		if(irccmp(enptr->name, name) == 0)
-			return enptr;
-	}
-
-	return NULL;
-}
-
 /* add_encap()
  *
  * inputs	- token, handler, flags
@@ -388,22 +362,25 @@ del_encap(const char *name)
 	return 0;
 }
 
-void
-handle_encap(struct Client *client_p, struct Client *source_p,
-	     int parc, const char *parv[])
+/* find_encap()
+ *
+ * inputs	- token to find
+ * outputs	- 0 on failure, 1 if found
+ * side effects -
+ */
+struct encap *
+find_encap(const char *name)
 {
-	MessageHandler handler = 0;
 	struct encap *enptr;
+	dlink_node *ptr;
 
-	enptr = find_encap(parv[2]);
-
-	if(enptr != NULL)
+	DLINK_FOREACH(ptr, encap_list.head)
 	{
-		handler = enptr->handler;
+		enptr = ptr->data;
 
-		(*handler) (client_p, source_p, parc, parv);
+		if(irccmp(enptr->name, name) == 0)
+			return enptr;
 	}
 
-	return;
+	return NULL;
 }
-

@@ -88,8 +88,7 @@ extern int find_shared(const char *username, const char *host,
 extern dlink_list encap_list;
 extern int add_encap(const char *name, void *handler, int flags);
 extern int del_encap(const char *name);
-extern void handle_encap(struct Client *client_p, struct Client *source_p, 
-			 int parc, const char *parv[]);
+extern struct encap *find_encap(const char *name);
 
 #endif
 

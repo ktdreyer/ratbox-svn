@@ -105,8 +105,20 @@ ms_encap(struct Client *client_p, struct Client *source_p, int parc, const char 
 	sendto_match_servs(source_p, parv[1], CAP_ENCAP,
 			   "ENCAP %s", buffer);
 
+	/* if it matches us, find a matching handler and call it */
 	if(match(parv[1], me.name))
-		handle_encap(client_p, source_p, parc, parv);
+	{
+		MessageHandler handler = 0;
+		struct encap *enptr;
+
+		enptr = find_encap(parv[2]);
+
+		if(enptr != NULL)
+		{
+			handler = enptr->handler;
+			(*handler) (client_p, source_p, parc, parv);
+		}
+	}
 
 	return 0;
 }
