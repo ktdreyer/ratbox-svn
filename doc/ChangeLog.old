@@ -1,3 +1,8 @@
+*** 20001222_14 by db
+- simplified conf handling for yacc
+
+
+
 *** 20001222_13 by db
 - converted all use of IsGlobalOper and IsLocalOper to IsOper
   there is no local oper now
