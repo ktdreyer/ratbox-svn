@@ -17,6 +17,7 @@
 
 typedef enum {
   USER_MOTD,
+  USER_LINKS,
   OPER_MOTD,
   HELP_MOTD
 } MotdType;

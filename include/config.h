@@ -103,6 +103,7 @@
 #define PPATH   ETCPATH "/ircd.pid"
 #define HPATH   ETCPATH "/opers.txt"
 #define OPATH   ETCPATH "/opers.motd"
+#define LIPATH   ETCPATH "/links.txt"
 
 /* TS_MAX_DELTA_DEFAULT and TS_WARN_DELTA_DEFAULT -
  * allowed delta for TS when another server connects.

@@ -389,10 +389,12 @@ static void initialize_message_files(void)
     InitMessageFile( HELP_MOTD, HPATH, &ConfigFileEntry.helpfile );
     InitMessageFile( USER_MOTD, MPATH, &ConfigFileEntry.motd );
     InitMessageFile( OPER_MOTD, OPATH, &ConfigFileEntry.opermotd );
+    InitMessageFile( USER_LINKS, LIPATH, &ConfigFileEntry.linksfile );
 
     ReadMessageFile( &ConfigFileEntry.helpfile );
     ReadMessageFile( &ConfigFileEntry.motd );
     ReadMessageFile( &ConfigFileEntry.opermotd );
+    ReadMessageFile( &ConfigFileEntry.linksfile );
   }
 
 /*

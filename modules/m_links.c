@@ -31,6 +31,7 @@
 #include "send.h"
 #include "s_conf.h"
 #include "msg.h"
+#include "motd.h"
 #include "parse.h"
 #include "modules.h"
 
@@ -39,7 +40,7 @@
 
 struct Message links_msgtab = {
   MSG_LINKS, 0, 0, 0, MFLG_SLOW, 0,
-  {m_unregistered, m_links, ms_links, m_links}
+  {m_unregistered, m_links, ms_links, mo_links}
 };
 
 void
@@ -65,7 +66,15 @@ char *_version = "20001122";
  *      parv[1] = server to query 
  *      parv[2] = servername mask
  */
+
 int m_links(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+{
+  SendMessageFile(sptr, &ConfigFileEntry.linksfile);
+  sendto_one(sptr, form_str(RPL_ENDOFLINKS), me.name, parv[0], "*");
+  return 0;
+}
+
+int mo_links(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
   const char*    mask = "";
   struct Client* acptr;

@@ -37,6 +37,7 @@
 #include "s_stats.h"     /* ServerStats */
 #include "scache.h"      /* find_or_add */
 #include "send.h"        /* sendto_one */
+#include "motd.h"
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
@@ -63,8 +64,11 @@ _moddeinit(void)
 
 char *parse_server_args(char *parv[], int parc, char *info, int *hop);
 int bogus_host(char *host);
+int write_links_file(void*);
 
 char *_version = "20001122";
+
+static int       refresh_user_links=0;
 
 /*
  * mr_server - SERVER message handler
@@ -376,7 +380,72 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       
   sendto_realops_flags(FLAGS_EXTERNAL, "Server %s being introduced by %s",
 		       acptr->name, sptr->name);
+
+  if (!refresh_user_links)
+    {
+      refresh_user_links = 1;
+      eventAdd("write_links_file", write_links_file, NULL,
+	       300, 0);
+    }
+
   return 0;
+}
+
+/*
+ * write_links_file
+ *
+ * 
+ */
+int write_links_file(void* notused)
+{
+  MessageFileLine *next_mptr = 0;
+  MessageFileLine *mptr = 0;
+  MessageFileLine *currentMessageLine = 0;
+  MessageFileLine *newMessageLine = 0;
+  MessageFile *MessageFileptr;
+  struct Client *acptr;
+  FBFILE* file;
+  char buff[512];
+
+  refresh_user_links = 0;
+
+  MessageFileptr = &ConfigFileEntry.linksfile;
+
+  if ((file = fbopen(MessageFileptr->fileName, "w")) == 0)
+    return(-1);
+
+  for( mptr = MessageFileptr->contentsOfFile; mptr; mptr = next_mptr)
+    {
+      next_mptr = mptr->next;
+      MyFree(mptr);
+    }
+  MessageFileptr->contentsOfFile = NULL;
+  currentMessageLine = NULL;
+
+  for (acptr = GlobalClientList; acptr; acptr = acptr->next) 
+    {
+      if(IsServer(acptr))
+	{
+	  newMessageLine = (MessageFileLine*) MyMalloc(sizeof(MessageFileLine));
+	  ircsprintf(newMessageLine->line,"%s * * 0",acptr->name);
+	  newMessageLine->next = (MessageFileLine *)NULL;
+
+	  if (MessageFileptr->contentsOfFile)
+	    {
+	      if (currentMessageLine)
+		currentMessageLine->next = newMessageLine;
+	      currentMessageLine = newMessageLine;
+	    }
+	  else
+	    {
+	      MessageFileptr->contentsOfFile = newMessageLine;
+	      currentMessageLine = newMessageLine;
+	    }
+	  ircsprintf(buff,"%s * * 0\n", acptr->name);
+	  fbputs(buff,file);
+	}
+    }
+  fbclose(file);
 }
 
 /*

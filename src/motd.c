@@ -68,7 +68,7 @@ int SendMessageFile(struct Client *sptr, MessageFile *motdToPrint)
   MessageFileLine *linePointer;
   MotdType motdType;
 
-  if(motdToPrint)
+  if(motdToPrint != NULL)
     motdType = motdToPrint->motdType;
   else
     return -1;
@@ -97,11 +97,25 @@ int SendMessageFile(struct Client *sptr, MessageFile *motdToPrint)
       /* NOT REACHED */
       break;
 
+    case USER_LINKS:
+      if (motdToPrint->contentsOfFile == (MessageFileLine *)NULL)
+	return -1;
+
+      for(linePointer = motdToPrint->contentsOfFile;linePointer;
+          linePointer = linePointer->next)
+        {
+          sendto_one(sptr, ":%s 364 %s %s",
+		     me.name, sptr->name, linePointer->line);
+        }
+      /* NOT REACHED */
+      return 0;
+      break;
+
     case OPER_MOTD:
-      if (motdToPrint == (MessageFile *)NULL)
+      if (motdToPrint->contentsOfFile == (MessageFileLine *)NULL)
         {
           sendto_one(sptr, ":%s NOTICE %s :No OPER MOTD", me.name, sptr->name);
-          return 0;
+          return -1;
         }
       sendto_one(sptr,":%s NOTICE %s :Start of OPER MOTD",me.name,sptr->name);
       break;
@@ -155,9 +169,15 @@ int ReadMessageFile(MessageFile *MessageFileptr)
   FBFILE* file;
 
   if( stat(MessageFileptr->fileName, &sb) < 0 )
-  /* file doesn't exist oh oh */
-  /* might consider printing error message to all opers */
     return -1;
+
+  for( mptr = MessageFileptr->contentsOfFile; mptr; mptr = next_mptr)
+    {
+      next_mptr = mptr->next;
+      MyFree(mptr);
+    }
+
+  MessageFileptr->contentsOfFile = NULL;
 
   local_tm = localtime(&sb.st_mtime);
 
@@ -170,16 +190,6 @@ int ReadMessageFile(MessageFile *MessageFileptr)
                local_tm->tm_hour,
                local_tm->tm_min);
 
-  /*
-   * Clear out the old MOTD
-   */
-  for( mptr = MessageFileptr->contentsOfFile; mptr; mptr = next_mptr)
-    {
-      next_mptr = mptr->next;
-      MyFree(mptr);
-    }
-
-  MessageFileptr->contentsOfFile = NULL;
 
   if ((file = fbopen(MessageFileptr->fileName, "r")) == 0)
     return(-1);
@@ -210,5 +220,6 @@ int ReadMessageFile(MessageFile *MessageFileptr)
   fbclose(file);
   return(0);
 }
+
 
 
