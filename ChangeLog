@@ -1,3 +1,20 @@
+leeh        2003/09/05 17:55:52 EDT	(20030905_1)
+
+  Modified files:
+    include              irc_string.h 
+    modules              Makefile.in 
+    src                  match.c 
+  Log:
+  - made match_esc() use IsLetter() instead of IsAlpha()
+  - add m_tb.c to the Makefile
+  
+  Revision  Changes    Path
+  7.51      +1 -0      ircd-ratbox/include/irc_string.h
+  1.87      +1 -0      ircd-ratbox/modules/Makefile.in
+  7.36      +1 -1      ircd-ratbox/src/match.c
+
+
+
 leeh        2003/09/05 16:29:02 EDT	(20030905_0)
 
   Modified files:
