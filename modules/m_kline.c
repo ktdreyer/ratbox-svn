@@ -54,12 +54,12 @@
 #include <errno.h>
 
 struct Message kline_msgtab = {
-  MSG_KLINE, 0, 2, 0, MFLG_SLOW, 0,
+  MSG_KLINE, 0, 1, 0, MFLG_SLOW, 0,
   {m_unregistered, m_not_oper, ms_kline, mo_kline}
 };
 
 struct Message dline_msgtab = {
-  MSG_DLINE, 0, 2, 0, MFLG_SLOW, 0,
+  MSG_DLINE, 0, 1, 0, MFLG_SLOW, 0,
   {m_unregistered, m_not_oper, m_error, mo_dline}
 };
 

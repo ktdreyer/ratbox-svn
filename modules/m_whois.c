@@ -50,7 +50,8 @@ void whois_person(struct Client *sptr,struct Client *acptr);
 int global_whois(struct Client *sptr, char *nick, int wilds);
 
 struct Message whois_msgtab = {
-  MSG_WHOIS, 0, 1, 0, MFLG_SLOW, 0L, {m_unregistered, m_whois, ms_whois, mo_whois}
+  MSG_WHOIS, 0, 0, 0, MFLG_SLOW, 0L,
+  {m_unregistered, m_whois, ms_whois, mo_whois}
 };
 
 void
@@ -77,6 +78,13 @@ int     m_whois(struct Client *cptr,
                 int parc,
                 char *parv[])
 {
+  if (parc < 2)
+    {
+      sendto_one(sptr, form_str(ERR_NONICKNAMEGIVEN),
+                 me.name, parv[0]);
+      return 0;
+    }
+
   return(do_whois(cptr,sptr,parc,parv));
 }
 
@@ -90,6 +98,13 @@ int     mo_whois(struct Client *cptr,
                 int parc,
                 char *parv[])
 {
+  if (parc < 2)
+    {
+      sendto_one(sptr, form_str(ERR_NONICKNAMEGIVEN),
+                 me.name, parv[0]);
+      return 0;
+    }
+
   if(parc > 2)
     {
       if (hunt_server(cptr,sptr,":%s WHOIS %s :%s", 1,parc,parv) !=
@@ -134,8 +149,8 @@ int do_whois(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 	    {
 	      (void)single_whois(sptr,acptr,wilds);
 	      found = YES;
-	    }
-	}
+            }
+        }
       else
 	{
 	  if (uplink && IsCapable(uplink,CAP_LL))
@@ -398,11 +413,17 @@ int     ms_whois(struct Client *cptr,
                 int parc,
                 char *parv[])
 {
+  if (parc < 2)
+    {
+      sendto_one(sptr, form_str(ERR_NONICKNAMEGIVEN),
+                 me.name, parv[0]);
+      return 0;
+    }
+
   /* If its running as a hub, and linked with lazy links
    * then allow leaf to use normal client m_whois()
    * other wise, ignore it.
    */
-
   if(ConfigFileEntry.hub)
     {
       if(!IsCapable(cptr->from,CAP_LL))

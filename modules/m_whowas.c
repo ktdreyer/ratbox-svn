@@ -41,7 +41,7 @@
 #include "memdebug.h"
 
 struct Message whowas_msgtab = {
-  MSG_WHOWAS, 0, 1, 0, MFLG_SLOW, 0L,
+  MSG_WHOWAS, 0, 0, 0, MFLG_SLOW, 0L,
   {m_unregistered, m_whowas, mo_whowas, m_whowas}
 };
 
@@ -74,6 +74,13 @@ int     m_whowas(struct Client *cptr,
 {
   static time_t last_used=0L;
 
+  if (parc < 2)
+    {
+      sendto_one(sptr, form_str(ERR_NONICKNAMEGIVEN),
+                 me.name, parv[0]);
+      return 0;
+    }
+
   if((last_used + ConfigFileEntry.whois_wait) > CurrentTime)
     {
       return 0;
@@ -91,6 +98,13 @@ int     mo_whowas(struct Client *cptr,
                  int parc,
                  char *parv[])
 {
+  if (parc < 2)
+    {
+      sendto_one(sptr, form_str(ERR_NONICKNAMEGIVEN),
+                 me.name, parv[0]);
+      return 0;
+    }
+
   return(whowas_do(cptr,sptr,parc,parv));
 }
 

@@ -68,7 +68,7 @@ typedef struct gline_pending
  */
 
 #define GLINE_PENDING_EXPIRE 600
-#define CLEANUP_GLINES_TIME  1800
+#define CLEANUP_GLINES_TIME  300
 
 dlink_list pending_glines;
 
