@@ -865,6 +865,36 @@ msgstr	""
 msgid	":%s 706 %s %s :End of /HELP."
 msgstr	""
 
+#: ../src/messages.tab:741
+#, c-format
+msgid	":%s 710 %s %s %s!%s@%s :has asked for an invite."
+msgstr	""
+
+#: ../src/messages.tab:742
+#, c-format
+msgid	":%s 711 %s %s :Your KNOCK has been delivered."
+msgstr ""
+
+#: ../src/messages.tab:743
+#, c-format
+msgid	":%s 712 %s %s :Too many KNOCKs (%s)."
+msgstr	""
+
+#: ../src/messages.tab:744
+#, c-format
+msgid	":%s 713 %s %s :Channel is open."
+msgstr	""
+
+#: ../src/messages.tab:745
+#, c-format
+msgid	":%s 714 %s %s :You are already on that channel."
+msgstr	""
+
+#: ../src/messages.tab:746
+#, c-format
+msgid	":%s 715 %s :KNOCKs are disabled."
+msgstr	""
+
 #: ../src/messages.tab:536
 #, c-format
 msgid	":%s 999 %s :Last Error Message"
