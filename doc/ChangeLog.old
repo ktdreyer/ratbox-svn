@@ -1,3 +1,8 @@
+*** 20011202_7 by leeh
+- $server -> $$server
+- #host.mask -> $#host.mask
+
+
 *** 20011202_6 by leeh
 - commited KNOCK stuff.. clients doing a KNOCK on a LL will have the uplink
   answer their queries, theres a bit of kludging here.. but it works
