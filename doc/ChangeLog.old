@@ -1,3 +1,8 @@
+*** 20010104_38 by davidt
+oops, the rest of the sjoin fixes, along with a fix for not updating the
+global client count.
+
+
 *** 20010104_37 by a1kmm
 Added check that parc is not too small for m_client.
 
