@@ -1,3 +1,18 @@
+androsyn    2003/09/29 11:40:13 EDT	(20030929_0)
+
+  Modified files:
+    src                  epoll.c kqueue.c send.c 
+  Log:
+  Minor cleanups.  Make RT Sigio work again, but i've come to the conclusion
+  it kinda sucks..
+  
+  Revision  Changes    Path
+  1.19      +4 -3      ircd-ratbox/src/epoll.c
+  1.43      +0 -2      ircd-ratbox/src/kqueue.c
+  7.264     +4 -0      ircd-ratbox/src/send.c
+
+
+
 androsyn    2003/09/25 21:59:01 EDT	(20030926_0)
 
   Modified files:
