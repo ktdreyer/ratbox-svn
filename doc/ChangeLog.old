@@ -1,3 +1,9 @@
+*** 20001203_3 by db
+- oopsie in m_nick.c wrong order of things... gah this code is 
+  still a mess ;-(
+
+
+
 *** 20001203_2 by db
 - cleaned up m_nick.c some more... removed obsolete checks
   moved some tests where they make more sense for the new world order
