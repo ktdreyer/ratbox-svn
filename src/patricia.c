@@ -173,7 +173,7 @@ New_Prefix(int family, void *dest, int bitlen)
 static prefix_t *
 ascii2prefix(int family, const char *string)
 {
-	u_long bitlen, maxbitlen = 0;
+	long bitlen, maxbitlen = 0;
 	char *cp;
 	struct in_addr sinaddr;
 #ifdef IPV6
@@ -214,7 +214,7 @@ ascii2prefix(int family, const char *string)
 		memcpy(save, string, cp - string);
 		save[cp - string] = '\0';
 		string = save;
-		if(bitlen <= 0 || bitlen > maxbitlen)
+		if(bitlen < 0 || bitlen > maxbitlen)
 			bitlen = maxbitlen;
 	}
 	else
