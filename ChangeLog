@@ -1,3 +1,24 @@
+androsyn    2002/08/15 19:37:51 EDT	(20020815_11)
+
+  Modified files:
+    contrib              m_owhois.c 
+    include              client.h numeric.h 
+    modules              m_whois.c 
+    src                  client.c messages.tab 
+  Log:
+  Add a 338 numeric to whois that will show a clients IP address if the user
+  is local, or it is a remote whois
+  
+  Revision  Changes    Path
+  1.4       +7 -1      ircd-ratbox/contrib/m_owhois.c
+  7.169     +3 -0      ircd-ratbox/include/client.h
+  7.30      +1 -0      ircd-ratbox/include/numeric.h
+  1.87      +7 -1      ircd-ratbox/modules/m_whois.c
+  7.310     +105 -0    ircd-ratbox/src/client.c
+  7.74      +1 -1      ircd-ratbox/src/messages.tab
+
+
+
 androsyn    2002/08/15 14:25:24 EDT	(20020815_10)
 
   Modified files:
