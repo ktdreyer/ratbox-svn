@@ -1,3 +1,8 @@
+*** 20010207_4 by wcampbel
+Updated the TODO list
+kline=yes|no; in the conf controls KILL too
+
+
 *** 20010207_3 by db
 - ok. once a client has exited, any recvq linebufs it has, must be flushed
   else client_dopacket() will try to parse stuff while the client has
