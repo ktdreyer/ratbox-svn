@@ -595,7 +595,7 @@ read_auth_reply(int fd, void *data)
   auth->fd = -1;
   ClearAuth(auth);
   
-  if (s == NULL && auth->client->username[0] != '\0')
+  if (s == NULL)
     {
       ++ServerStats->is_abad;
       strcpy(auth->client->username, "unknown");
