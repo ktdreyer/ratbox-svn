@@ -1152,11 +1152,11 @@ stats_ziplinks (struct Client *source_p)
 				sizeof (struct ZipStats)); 
 			sendto_one_numeric(source_p, RPL_STATSDEBUG,
 					    "Z :ZipLinks stats for %s send[%.2f%% compression "
-					    "(%lu bytes data/%lu bytes wire)] recv[%.2f%% compression "
-					    "(%lu bytes data/%lu bytes wire)]",
+					    "(%lu kB data/%lu kB wire)] recv[%.2f%% compression "
+					    "(%lu kB data/%lu kB wire)]",
 					    target_p->name,
-					    zipstats.out_ratio, zipstats.out, zipstats.out_wire,
-					    zipstats.in_ratio, zipstats.in, zipstats.in_wire);
+					    zipstats.out_ratio, zipstats.outK, zipstats.outK_wire,
+					    zipstats.in_ratio, zipstats.inK, zipstats.inK_wire);
 			sent_data++;
 		}
 	}

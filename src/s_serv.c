@@ -167,29 +167,33 @@ slink_zipstats(unsigned int rpl, unsigned int len, unsigned char *data, struct C
 	out_wire |= (data[i++] << 8);
 	out_wire |= (data[i++]);
 
-	/* This macro adds b to a if a plus b is not an overflow, and sets the
-	 * value of a to b if it is.
-	 * Add and Set if No Overflow.
-	 */
-#define	ASNO(a,b)	\
-	a = (a + b >= a? a + b: b)
+	zipstats.in += in;
+	zipstats.inK += zipstats.in >> 10;
+	zipstats.in &= 0x03ff;
 
-	ASNO(zipstats.in, in);
-	ASNO(zipstats.out, out);
-	ASNO(zipstats.in_wire, in_wire);
-	ASNO(zipstats.out_wire, out_wire);
+	zipstats.in_wire += in_wire;
+	zipstats.inK_wire += zipstats.in_wire >> 10;
+	zipstats.in_wire &= 0x03ff;
 
-	if(zipstats.in > 0)
+	zipstats.out += out;
+	zipstats.outK += zipstats.out >> 10;
+	zipstats.out &= 0x03ff;
+
+	zipstats.out_wire += out_wire;
+	zipstats.outK_wire += zipstats.out_wire >> 10;
+	zipstats.out_wire &= 0x03ff;
+
+	if(zipstats.inK > 0)
 		zipstats.in_ratio =
-			(((double) (zipstats.in - zipstats.in_wire) /
-			  (double) zipstats.in) * 100.00);
+			(((double) (zipstats.inK - zipstats.inK_wire) /
+			  (double) zipstats.inK) * 100.00);
 	else
 		zipstats.in_ratio = 0;
 
-	if(zipstats.out > 0)
+	if(zipstats.outK > 0)
 		zipstats.out_ratio =
-			(((double) (zipstats.out - zipstats.out_wire) /
-			  (double) zipstats.out) * 100.00);
+			(((double) (zipstats.outK - zipstats.outK_wire) /
+			  (double) zipstats.outK) * 100.00);
 	else
 		zipstats.out_ratio = 0;
 

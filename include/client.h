@@ -101,6 +101,10 @@ struct ZipStats
 	unsigned long in_wire;
 	unsigned long out;
 	unsigned long out_wire;
+	unsigned long inK;
+	unsigned long inK_wire;
+	unsigned long outK;
+	unsigned long outK_wire;
 	double in_ratio;
 	double out_ratio;
 };
