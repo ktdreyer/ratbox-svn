@@ -1,3 +1,9 @@
+*** 20010225_6 by androsyn
+Fixed a few minor bugs I introduced...ipv6 vhost listeners almost work. They 
+re scribbling over the listener port right now.. I don't think this happens 
+for IPv4 but I haven't checked either.
+
+
 *** 20010225_5 by androsyn
 Made listener.c use adns instead of gethostbyaddr() which should kill the
 last of the libresolv code.  Also I think I've fixed vhosting for IPv6, but
