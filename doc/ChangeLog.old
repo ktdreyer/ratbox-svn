@@ -1,3 +1,21 @@
+androsyn    2002/07/10 02:48:25 EDT	(20020710_1)
+
+  Modified files:
+    .                    configure 
+    autoconf             acconfig.h configure.in 
+    include              setup.h.in 
+  Log:
+  Changes to configure for Forte C stuff also added a missing entry in
+  acconfig.h for EFNET
+  
+  Revision  Changes    Path
+  7.22      +3 -0      ircd-hybrid-7/autoconf/acconfig.h
+  7.138     +8 -8      ircd-hybrid-7/autoconf/configure.in
+  7.141     +220 -220  ircd-hybrid-7/configure
+  7.54      +3 -3      ircd-hybrid-7/include/setup.h.in
+
+
+
 leeh        2002/07/09 20:05:53 EDT	(20020710_0)
 
   Modified files:
