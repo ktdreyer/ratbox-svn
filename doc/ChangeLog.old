@@ -1,3 +1,9 @@
+*** 20010626_14 by androsyn
+Knocked off about 12 seconds of a burst by replacing malloc/memset with calloc. Go figure..
+
+
+
+
 *** 20010626_13 by androsyn
 Its seems inlining MyMalloc() doesn't help much...
 
