@@ -1,3 +1,16 @@
+db          2002/02/10 16:24:35 EST	(20020210_3)
+
+  Modified files:
+    modules              m_who.c 
+  Log:
+  - Stop a /who 0 coring
+    it would not core on fbsd because of libc, but does on solaris.
+  
+  Revision  Changes    Path
+  1.50      +8 -6      ircd-hybrid-7/modules/m_who.c
+
+
+
 androsyn    2002/02/10 12:26:35 EST	(20020210_2)
 
   Modified files:
