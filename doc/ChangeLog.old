@@ -1,3 +1,8 @@
+*** 20010816_5 by davidt
+- Commit fixed version of improved linebuf_copy_line.
+  This _should_ work. I hope.
+
+
 *** 20010816_4 by leeh
 - missed this one
 
