@@ -52,7 +52,7 @@ struct Message resv_msgtab = {
 };
 struct Message unresv_msgtab = {
 	"UNRESV", 0, 0, 0, MFLG_SLOW | MFLG_UNREG,
-	{mg_ignore, mg_not_oper, {ms_unresv, 3}, {ms_unresv, 3}, {me_unresv, 3}, {mo_unresv, 2}}
+	{mg_ignore, mg_not_oper, {ms_unresv, 3}, {ms_unresv, 3}, {me_unresv, 2}, {mo_unresv, 2}}
 };
 
 mapi_clist_av1 resv_clist[] = {	&resv_msgtab, &unresv_msgtab, NULL };
