@@ -57,7 +57,7 @@ _moddeinit(void)
   mod_del_cmd(&kick_msgtab);
 }
 
-char *_version = "20001122";
+char *_version = "20010121";
 
 /*
 ** m_kick
@@ -88,7 +88,7 @@ static int m_kick(struct Client *cptr,
       return 0;
     }
 
-  comment = (BadPtr(parv[3])) ? parv[0] : parv[3];
+  comment = (BadPtr(parv[3])) ? parv[2] : parv[3];
   if (strlen(comment) > (size_t) TOPICLEN)
     comment[TOPICLEN] = '\0';
 
