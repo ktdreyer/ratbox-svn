@@ -1,3 +1,24 @@
+leeh        2004/10/04 15:37:24 EDT	(20041004_1)
+
+  Modified files:
+    include              conf.h newconf.h 
+    src                  newconf.c s_chanserv.c s_jupeserv.c 
+                         s_operbot.c s_userserv.c 
+  Log:
+  - extended the conf parser so that service "chanserv" { }; can have chanserv
+    specific options etc.
+  
+  Revision  Changes    Path
+  1.13      +12 -0     rserv/include/conf.h
+  1.4       +7 -0      rserv/include/newconf.h
+  1.11      +89 -4     rserv/src/newconf.c
+  1.4       +6 -0      rserv/src/s_chanserv.c
+  1.2       +4 -4      rserv/src/s_jupeserv.c
+  1.9       +0 -19     rserv/src/s_operbot.c
+  1.4       +6 -0      rserv/src/s_userserv.c
+
+
+
 leeh        2004/10/04 15:36:22 EDT	(20041004_0)
 
   Modified files:
