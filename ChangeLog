@@ -1,3 +1,24 @@
+leeh        2004/01/16 11:00:00 EST	(20040116_7)
+
+  Modified files:
+    src                  s_operbot.c service.c 
+  Added files:
+    help/operbot         invite op 
+  Log:
+  - set the operonly flag in operbot cmd_table, removed it from each
+    function
+  - fix check for '.' in service nick
+  - fix scommand helpfiles
+  - dont send help index if no commands available
+  
+  Revision  Changes    Path
+  1.1       +2 -0      rserv/help/operbot/invite (new)
+  1.1       +2 -0      rserv/help/operbot/op (new)
+  1.3       +3 -17     rserv/src/s_operbot.c
+  1.12      +15 -9     rserv/src/service.c
+
+
+
 leeh        2004/01/16 10:38:31 EST	(20040116_6)
 
   rserv/help/operbot - New directory
