@@ -1,3 +1,15 @@
+leeh        2003/10/17 18:14:49 EDT	(20031017_0)
+
+  Modified files:
+    modules/core         m_mode.c 
+  Log:
+  - dont allow +beI starting with ':'
+  
+  Revision  Changes    Path
+  1.96      +3 -3      ircd-ratbox/modules/core/m_mode.c
+
+
+
 androsyn    2003/10/15 16:07:57 EDT	(20031015_1)
 
   Modified files:
