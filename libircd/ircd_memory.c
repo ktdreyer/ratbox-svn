@@ -42,7 +42,7 @@
 #endif
 
 
-#undef MEMDEBUG
+#ifdef MEMDEBUG
 /* Hopefully this debugger will work better than the existing one...
  * -A1kmm. */
 
