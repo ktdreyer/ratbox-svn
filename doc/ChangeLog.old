@@ -1,3 +1,12 @@
+*** 20001025_6 by adrian
+
+
+tidy up the highest_fd handling. Now, the handling is done through
+fd_open() / fd_close(), reducing the number of places tracking is
+done.
+
+
+
 *** 20001025_5 by db
 - why I deleted that crucial code I don't know
   anyway, privmsgs to channels now works again.
