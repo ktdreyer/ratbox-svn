@@ -586,7 +586,9 @@ int main(int argc, char *argv[])
            CLEANUP_TKLINES_TIME, 0);
 
   /* We want try_connections to be called as soon as possible now! -- adrian */
-  eventAdd("try_connections", try_connections, NULL, 0, 0);
+  /* No, 'cause after a restart it would cause all sorts of nick collides */
+  eventAdd("try_connections", try_connections, NULL, 
+	   STARTUP_CONNECTIONS_TIME, 0);
 
   /* Setup the timeout check. I'll shift it later :)  -- adrian */
   eventAdd("comm_checktimeouts", comm_checktimeouts, NULL, 1, 0);
