@@ -301,7 +301,7 @@ static void do_non_priv_stats(struct Client *sptr, char *name, char *target,
 	{
 	  if(IsOper(sptr))
 	    {
-	      report_configured_links(sptr, CONF_OPS);
+	      report_configured_links(sptr, CONF_OPERATOR);
 	    }
 	  else
 	    {
@@ -310,7 +310,7 @@ static void do_non_priv_stats(struct Client *sptr, char *name, char *target,
 	}
       else
 	{
-	  report_configured_links(sptr, CONF_OPS);
+	  report_configured_links(sptr, CONF_OPERATOR);
 	}
       stats_spy(sptr,statchar);
       break;
@@ -428,7 +428,7 @@ static void do_priv_stats(struct Client *sptr, char *name, char *target,
       break;
 
     case 'o' : case 'O' :
-      report_configured_links(sptr, CONF_OPS);
+      report_configured_links(sptr, CONF_OPERATOR);
       stats_spy(sptr,statchar);
       break;
 

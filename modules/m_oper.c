@@ -210,10 +210,10 @@ struct ConfItem *find_password_aconf(char *name, struct Client *sptr)
   struct ConfItem *aconf;
 
   if (!(aconf = find_conf_exact(name, sptr->username, sptr->host,
-				CONF_OPS)) &&
+				CONF_OPERATOR)) &&
       !(aconf = find_conf_exact(name, sptr->username,
 				inetntoa((char *)&sptr->localClient->ip),
-				CONF_OPS)))
+				CONF_OPERATOR)))
     {
       return 0;
     }
@@ -234,7 +234,7 @@ static int match_oper_password(char *password,
 {
   char *encr;
 
-  if (!aconf->status & CONF_OPS)
+  if (!aconf->status & CONF_OPERATOR)
     return NO;
 
 #ifdef CRYPT_OPER_PASSWORD
