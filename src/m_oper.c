@@ -104,13 +104,12 @@
 */
 int m_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
-  struct ConfItem *aconf;
-  char  *name, *password, *encr;
-#ifdef CRYPT_OPER_PASSWORD
-  extern        char *crypt();
-#endif /* CRYPT_OPER_PASSWORD */
-  char *operprivs;
-  static char buf[BUFSIZE];
+  struct ConfItem* aconf;
+  char*            name;
+  char*            password;
+  char*            encr;
+  char*            operprivs;
+  static char      buf[BUFSIZE];
 
   name = parc > 1 ? parv[1] : (char *)NULL;
   password = parc > 2 ? parv[2] : (char *)NULL;
