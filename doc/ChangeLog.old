@@ -1,3 +1,6 @@
+*** 20000929_1 by ejb
+merged toot's patch to resync with -6rc4
+
 *** 20000926_1 by ejb
 - added myself to core team list in version.c.SH
 - added ircnet's +I invite exceptions
