@@ -218,7 +218,7 @@ static struct capab_entry
 	const char *name;
 	int flag;
 } capab_table[] = {
-	{ "SERVICE",	CONN_CAP_SERVICE	},
+	{ "SERVICES",	CONN_CAP_SERVICE	},
 	{ "\0", 0 }
 };
 
