@@ -335,6 +335,14 @@ static void send_conf_options(struct Client *source_p)
               "max_nick_changes",
               ConfigFileEntry.max_nick_changes,
               "How many nick changes to allow");
+   sendto_one(source_p,
+              ":%s %d %s :%-30s %-5d [%-30s]",
+              me.name,
+              RPL_INFO,
+              source_p->name,
+              "max_chans_per_user",
+              ConfigFileEntry.max_chans_per_user,
+              "Maximum number of channels a client can join");
     sendto_one(source_p,
               ":%s %d %s :%-30s %-5d [%-30s]",
               me.name, 
