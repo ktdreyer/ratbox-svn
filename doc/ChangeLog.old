@@ -1,3 +1,20 @@
+leeh        2002/04/23 06:34:59 EDT	(20020423_0)
+
+  Modified files:
+    contrib              Makefile.in spy_trace_notice.c 
+  Added files:
+    contrib              m_ltrace.c 
+  Log:
+  - added a very cutdown version of ltrace, modded spy_trace_notice to
+    watch for ltrace too.
+  
+  Revision  Changes    Path
+  1.32      +1 -0      ircd-hybrid-7/contrib/Makefile.in
+  1.1       +337 -0    ircd-hybrid-7/contrib/m_ltrace.c (new)
+  1.5       +16 -5     ircd-hybrid-7/contrib/spy_trace_notice.c
+
+
+
 leeh        2002/04/22 18:16:59 EDT	(20020422_2)
 
   Modified files:
