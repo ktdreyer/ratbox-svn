@@ -325,6 +325,12 @@ extern const char *form_str(int);
 #define RPL_TESTLINE		725
 #define RPL_NOTESTLINE		726
 
+#define RPL_MONONLINE		730
+#define RPL_MONOFFLINE		731
+#define RPL_MONLIST		732
+#define RPL_ENDOFMONLIST	733
+#define ERR_MONLISTFULL		734
+
 #define ERR_LAST_ERR_MSG     999
 
 #endif /* INCLUDED_numeric_h */

@@ -73,6 +73,7 @@ BASE_SRCS =                     \
   match.c                       \
   memory.c                      \
   modules.c                     \
+  monitor.c			\
   newconf.c			\
   numeric.c                     \
   packet.c                      \

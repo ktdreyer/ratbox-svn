@@ -56,6 +56,7 @@
 #include "listener.h"
 #include "hook.h"
 #include "msg.h"
+#include "monitor.h"
 
 #define DEBUG_EXITED_CLIENTS
 
@@ -1331,6 +1332,8 @@ exit_generic_client(struct Client *client_p, struct Client *source_p, struct Cli
 
 	add_history(source_p, 0);
 	off_history(source_p);
+
+	monitor_signoff(source_p);
 
 	if(has_id(source_p))
 		del_from_id_hash(source_p->id, source_p);

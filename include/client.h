@@ -245,6 +245,9 @@ struct LocalUser
 	/* clients allowed to talk through +g */
 	dlink_list allow_list;
 
+	/* nicknames theyre monitoring */
+	dlink_list monitor_list;
+
 	/*
 	 * Anti-flood stuff. We track how many messages were parsed and how
 	 * many we were allowed in the current second, and apply a simple decay

@@ -98,11 +98,11 @@ in their monitor list.
 
 733 - RPL_ENDOFMONLIST
 ------------------------
-:<server> 733 <nick> :End of MONITOR LIST
+:<server> 733 <nick> :End of MONITOR list
 
 This numeric is used to indicate to a client the end of a monitor list.
 
-734 - RPL_MONLISTFULL
+734 - ERR_MONLISTFULL
 ---------------------
 :<server> 734 <nick> <limit> <nicks> :Monitor list is full.
 

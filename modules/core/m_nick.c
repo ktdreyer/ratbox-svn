@@ -46,6 +46,7 @@
 #include "packet.h"
 #include "scache.h"
 #include "s_newconf.h"
+#include "monitor.h"
 
 static int mr_nick(struct Client *, struct Client *, int, const char **);
 static int m_nick(struct Client *, struct Client *, int, const char **);
@@ -621,7 +622,10 @@ change_local_nick(struct Client *client_p, struct Client *source_p, char *nick)
 
         /* dont reset TS if theyre just changing case of nick */
         if(!samenick)
+	{
                 source_p->tsinfo = CurrentTime;
+		monitor_signoff(source_p);
+	}
 
 	sendto_realops_flags(UMODE_NCHANGE, L_ALL,
 			"Nick change: From %s to %s [%s@%s]",
@@ -648,6 +652,9 @@ change_local_nick(struct Client *client_p, struct Client *source_p, char *nick)
 	strcpy(source_p->name, nick);
 	add_to_client_hash(nick, source_p);
 
+	if(!samenick)
+		monitor_signon(source_p);
+
 	/* Make sure everyone that has this client on its accept list
 	 * loses that reference. 
 	 */
@@ -669,9 +676,12 @@ change_remote_nick(struct Client *client_p, struct Client *source_p, int parc,
 	struct nd_entry *nd;
 	int samenick = irccmp(source_p->name, nick) ? 0 : 1;
 
-	/* client changing their nick */
-	if(samenick)
+	/* client changing their nick - dont reset ts if its same */
+	if(!samenick)
+	{
 		source_p->tsinfo = newts ? newts : CurrentTime;
+		monitor_signoff(source_p);
+	}
 
 	sendto_common_channels_local(source_p, ":%s!%s@%s NICK :%s",
 				     source_p->name, source_p->username,
@@ -692,6 +702,9 @@ change_remote_nick(struct Client *client_p, struct Client *source_p, int parc,
 
 	strcpy(source_p->name, nick);
 	add_to_client_hash(nick, source_p);
+
+	if(!samenick)
+		monitor_signon(source_p);
 
 	/* remove all accepts pointing to the client */
 	del_all_accepts(source_p);
@@ -924,6 +937,7 @@ register_client(struct Client *client_p, struct Client *server,
 
 	add_to_client_hash(nick, source_p);
 	add_to_hostname_hash(source_p->host, source_p);
+	monitor_signon(source_p);
 
 	m = &parv[4][1];
 	while(*m)

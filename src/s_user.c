@@ -53,6 +53,7 @@
 #include "reject.h"
 #include "cache.h"
 #include "hook.h"
+#include "monitor.h"
 
 static void report_and_set_user_flags(struct Client *, struct ConfItem *);
 void user_welcome(struct Client *source_p);
@@ -544,6 +545,7 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 	if(find_tgchange(source_p->sockhost))
 		USED_TARGETS(source_p) = 6;
 
+	monitor_signon(source_p);
 	user_welcome(source_p);
 	return (introduce_client(client_p, source_p, user, source_p->name));
 }
