@@ -1,3 +1,6 @@
+*** 20010130_5 by davidt
+fix userhost for lazylinks
+
 *** 20010130_4 by fl_
 - added FLAGS_NOTADMIN and removed as many of the double notices as
   I could.. I might have missed some though :)
