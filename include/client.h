@@ -66,7 +66,6 @@ struct LocalUser;
  */
 struct User
 {
-  struct User*   next;          /* chain of anUser structures */
   dlink_list     channel;       /* chain of channel pointer blocks */
   dlink_list     invited;       /* chain of invite pointer blocks */
   char*          away;          /* pointer to away message */
