@@ -1,3 +1,9 @@
+*** 19991013_9 by lusky
+fixed m_ison to put trailing space on 303 responses
+CONNECTFAST is always defined for USE_POLL now, was causing very poor
+  accept performance on heavily loaded non-Solaris machines using poll()
+
+
 *** 19991013_8 by tomh
 put USE_POLL back in setup.h.in, removed stuff that wasn't needed
 
