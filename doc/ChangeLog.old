@@ -1,3 +1,17 @@
+leeh        2001/12/13 05:07:34 EST	(20011213_0)
+
+  Removed files:
+    include              dline_conf.h 
+    src                  dline_conf.c 
+  Log:
+  - removed the old dline-conf stuff
+  
+  Revision  Changes    Path
+  7.14      +0 -34     ircd-hybrid-7/include/dline_conf.h (dead)
+  7.33      +0 -241    ircd-hybrid-7/src/dline_conf.c (dead)
+
+
+
 davidt      2001/12/12 18:22:49 EST	(20011212_4)
 
   Modified files:
