@@ -1,3 +1,20 @@
+jmallett    2002/02/07 22:26:34 EST	(20020208_0)
+
+  Modified files:
+    src                  channel.c 
+  Log:
+  Bring can_send into the logic that a server can send to a channel, because
+  we allow servers to m_message() with a NOTICE, but the NOTICE always
+  fails because of course they aren't on that channel. This doesn't affect
+  PRIVMSG as that is stopped in m_privmsg().
+  
+  Explained hastently to: Dianora
+  
+  Revision  Changes    Path
+  7.297     +2 -0      ircd-hybrid-7/src/channel.c
+
+
+
 leeh        2002/02/06 10:02:35 EST	(20020206_1)
 
   Modified files:
