@@ -463,17 +463,16 @@ linebuf_putmsg(buf_head_t *bufhead, const char *format, va_list va_args,
   }
   
   /* Truncate the data if required */
-  if (len > BUF_DATA_SIZE)
+  if (len > 510)
   {
-    len = BUF_DATA_SIZE;
+    len = 510;
     bufline->overflow = 1;
   }
 
   /* Chop trailing CRLF's .. */
-  assert(bufline->buf[len] == '\0');
-
   len--; /* change len to index of last char */
-  while ((bufline->buf[len] == '\r') || (bufline->buf[len] == '\n'))
+  while ((bufline->buf[len] == '\r') || (bufline->buf[len] == '\n') ||
+         (bufline->buf[len] == '\0'))
     len--;
 
   bufline->buf[++len] = '\r';

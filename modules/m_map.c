@@ -31,6 +31,7 @@
 #include "handlers.h"
 #include "numeric.h"
 #include "send.h"
+#include "s_conf.h"
 
 static void m_map(struct Client *client_p, struct Client *source_p,
                     int parc, char *parv[]);
