@@ -345,6 +345,11 @@ static void do_priv_stats(struct Client *sptr, char *name, char *target,
 { 
  switch (statchar)
     {
+    case 'A' : case 'a' :
+      report_adns_servers(sptr);
+      stats_spy(sptr,statchar);
+      break;
+
     case 'C' : case 'c' :
       report_configured_links(sptr, CONF_SERVER);
       stats_spy(sptr,statchar);
