@@ -1309,7 +1309,20 @@ void set_channel_mode(struct Client *cptr,
 
           if (isdeop && (c == 'o') && whatt == MODE_ADD)
             change_channel_membership(chptr,&chptr->peons, who);
-	  
+
+          /* Allow users to -h themselves */
+          if (whatt == MODE_DEL && target_was_hop && (c == 'h') &&
+            (who->name == sptr->name))
+              { 
+                change_channel_membership(chptr,&chptr->peons, who);
+                sendto_one(who, "%s!%s@%s MODE %s -h %s",
+                           who->name, who->username, who->host,
+                           chptr->chname, who->name);
+                sendto_channel_butone(who, cptr, chptr, "MODE %s -h %s",
+                                      chptr->chname, who->name);
+                break;
+              }
+
           if (!isok)
             {
               if (MyClient(sptr) && !errsent(SM_ERR_NOOPS, &errors_sent))
