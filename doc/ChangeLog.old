@@ -1,3 +1,7 @@
+*** 20011004_11 by androsyn
+Warnings related to signedness of char
+
+
 *** 20011004_10 by androsyn
 Keep Forte C from whining so much...
 
