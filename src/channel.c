@@ -82,7 +82,7 @@ static void channelheap_garbage_collect(void *unused)
 void init_channels(void)
 {
   channel_heap = BlockHeapCreate(sizeof(struct Channel), 1024);
-  ban_heap = BlockHeapCreate(sizeof(struct Ban), 2048);
+  ban_heap = BlockHeapCreate(sizeof(struct Ban), 1024);
   eventAddIsh("channelheap_garbage_collect", channelheap_garbage_collect,
               NULL, 45);
 }
