@@ -1,3 +1,8 @@
+*** 20001211_11 by db
+- how did THAT get back in. removed local[] again *sigh*
+
+
+
 *** 20001211_10 by db
 - simple re-work to m_ison.c, rfc1489 is ambigious about how this should
   be handled...
