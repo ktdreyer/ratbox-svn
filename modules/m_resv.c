@@ -165,7 +165,7 @@ parse_resv(struct Client *source_p, const char *name,
 	{
 		struct rxconf *resv_p;
 
-		resv_p = make_rxconf(name, reason, RESV_CHANNEL, CONF_RESV);
+		resv_p = make_rxconf(name, reason, 0, CONF_RESV|RESV_CHANNEL);
 
 		if(resv_p == NULL)
 		{
@@ -195,7 +195,7 @@ parse_resv(struct Client *source_p, const char *name,
 			return;
 		}
 
-		resv_p = make_rxconf(name, reason, RESV_NICK, CONF_RESV);
+		resv_p = make_rxconf(name, reason, 0, CONF_RESV|RESV_NICK);
 
 		if(resv_p == NULL)
 		{

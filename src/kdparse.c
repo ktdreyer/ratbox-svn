@@ -210,12 +210,14 @@ parse_resv_file(FBFILE * file)
 
 		if(IsChannelName(host_field))
 		{
-			rxptr = make_rxconf(host_field, reason_field, RESV_CHANNEL, CONF_RESV);
+			rxptr = make_rxconf(host_field, reason_field, 0,
+					    CONF_RESV|RESV_CHANNEL);
 			add_rxconf(rxptr);
 		}
 		else if(clean_resv_nick(host_field))
 		{
-			rxptr = make_rxconf(host_field, reason_field, RESV_NICK, CONF_RESV);
+			rxptr = make_rxconf(host_field, reason_field, 0,
+					    CONF_RESV|RESV_NICK);
 			add_rxconf(rxptr);
 		}
 	}
