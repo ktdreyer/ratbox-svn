@@ -1070,6 +1070,7 @@ res_readreply(int fd, void *data)
 	  requestListTail->he.buf = request->he.buf;
 	  request->he.buf = 0;
 	  memcpy(&requestListTail->he.h, &request->he.h, sizeof(struct hostent));
+	  rem_request(request);
 	}
       else
 	{
