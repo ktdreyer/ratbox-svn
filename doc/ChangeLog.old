@@ -1,3 +1,15 @@
+leeh        2002/04/22 18:16:59 EDT	(20020422_2)
+
+  Modified files:
+    src                  s_conf.c 
+  Log:
+  - english spellings vs american spellings.. made them all the same
+  
+  Revision  Changes    Path
+  7.298     +2 -2      ircd-hybrid-7/src/s_conf.c
+
+
+
 leeh        2002/04/22 16:50:18 EDT	(20020422_1)
 
   Modified files:
