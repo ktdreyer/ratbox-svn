@@ -4,6 +4,11 @@
 
 #include "stdinc.h"
 
+#ifdef HAVE_LIBCRYPTO
+#include <openssl/pem.h>
+#include <openssl/rsa.h>
+#endif
+
 #include "memory.h"
 #include "newconf.h"
 #include "tools.h"
@@ -20,12 +25,6 @@
 #include "resv.h"
 #include "s_serv.h"
 #include "event.h"
-
-#ifdef HAVE_LIBCRYTO
-# include <openssl/rsa.h>
-# include <openssl/bio.h>
-# include <openssl/pem.h>
-#endif
 
 struct	TopConf *	conf_cur_block;
 	char *		conf_cur_block_name;
@@ -329,6 +328,7 @@ void	newconf_init()
 	add_conf_item("auth", "flood_exempt", CF_YESNO, conf_set_auth_flood_exempt);
 	add_conf_item("auth", "redirserv", CF_QSTRING, conf_set_auth_redir_serv);
 	add_conf_item("auth", "redirport", CF_INT, conf_set_auth_redir_port);
+	add_conf_item("auth", "flags", CF_STRING | CF_FLIST, conf_set_auth_flags);
 	
 	add_top_conf("resv", conf_begin_resv, conf_end_resv);
 	add_conf_item("resv", "reason", CF_QSTRING, conf_set_resv_reason);
@@ -818,6 +818,17 @@ struct mode_table flag_table[] = {
 	{NULL}
 };
 
+struct mode_table auth_table[] = {
+	{"spoof_notice",	CONF_FLAGS_SPOOF_NOTICE},
+	{"exceed_limit",	CONF_FLAGS_NOLIMIT},
+	{"kline_exempt",	CONF_FLAGS_EXEMPTKLINE},
+	{"gline_exempt",	CONF_FLAGS_EXEMPTGLINE},
+	{"no_tilde",		CONF_FLAGS_NO_TILDE},
+	{"restricted",		CONF_FLAGS_RESTRICTED},
+	{"have_ident",		CONF_FLAGS_NEED_IDENTD},
+	{NULL}
+};
+
 
 static
 int	find_umode(struct mode_table* tab, char *name)
@@ -1271,6 +1282,8 @@ int	conf_begin_auth(struct TopConf *tc)
 	yy_aprev = NULL;
 	yy_achead = yy_aprev = yy_aconf = make_conf();
 	yy_aconf->status = CONF_CLIENT;
+	yy_achead->flags |= CONF_FLAGS_SPOOF_NOTICE;
+
 	return 0;
 }
 
@@ -1278,6 +1291,12 @@ int	conf_end_auth(struct TopConf *tc)
 {
 	struct ConfItem *yy_tmp;
 	struct ConfItem *yy_next;
+
+	/* reverse the meaning of spoof_notice */
+	if (yy_achead->flags & CONF_FLAGS_SPOOF_NOTICE)
+		yy_achead->flags &= ~CONF_FLAGS_SPOOF_NOTICE;
+	else
+		yy_achead->flags |= CONF_FLAGS_SPOOF_NOTICE;
 
 	/* copy over settings from first struct */
 	for( yy_tmp = yy_achead->next; yy_tmp; yy_tmp = yy_tmp->next )
@@ -1384,6 +1403,13 @@ void	conf_set_auth_spoof(void *data)
 	}
 	else
 		conf_report_error("Warning -- spoof length must be less than %d characters; ignoring this.", HOSTLEN);
+}
+
+void	conf_set_auth_flags(void *data)
+{
+	conf_parm_t *args = data;
+
+	set_modes_from_table(&yy_achead->flags, "flag", auth_table, args);
 }
 
 void	conf_set_auth_exceed_limit(void *data)

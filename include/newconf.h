@@ -139,6 +139,7 @@ extern 	char *		conf_cur_block_name;
 	int	conf_begin_auth					(struct TopConf *tc);
 	int	conf_end_auth					(struct TopConf *tc);
 
+	void	conf_set_auth_flags				(void *data);
 	void	conf_set_auth_user				(void *data);
 	void	conf_set_auth_passwd				(void *data);
 	void	conf_set_auth_spoof_notice			(void *data);
