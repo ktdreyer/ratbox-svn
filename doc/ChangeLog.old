@@ -1,3 +1,7 @@
+*** 20010101_43 by ejb
+- DONT put all modules in example.conf, they are loaded on startup anyway.
+
+
 *** 20010101_42 by davidt
 *Sigh*. sorry. I missed a space. :(
 
