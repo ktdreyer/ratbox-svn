@@ -22,6 +22,11 @@
  *
  * $Id$
  */
+
+#include <time.h>
+#include <string.h>
+#include <limits.h>
+
 #include "tools.h"
 #include "m_info.h"
 #include "channel.h"
@@ -38,9 +43,6 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
-
-#include <time.h>
-#include <string.h>
 
 static void send_conf_options(struct Client *source_p);
 static void send_birthdate_online_time(struct Client *source_p);
