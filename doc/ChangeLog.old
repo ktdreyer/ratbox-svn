@@ -1,3 +1,10 @@
+*** 20001216_9 by db
+- fixed join 0 grrrr
+- m_lljoin should give member names when joining
+- lazy links flag should be set when joining
+ 
+
+
 *** 20001216_8 by db
 - lazy link lljoin was relying on can_join which needed to be moved into
   channel.c from m_join.c
