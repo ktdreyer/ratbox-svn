@@ -88,6 +88,8 @@ static int m_ison(struct Client *cptr, struct Client *sptr,
  * ms_ison added by David Taylor 04/01/2000 to handle relayed ISON requests.
  * It's slightly less bandwidth efficient than a normal ISON, but it's
  * only ever going to get relayed over one link...
+ * Plus, we'll only ever relay each nick once in it's lifetime, if it
+ * exists...
  * ISON :nicklist
  */
 static int ms_ison(struct Client *cptr, struct Client *sptr,
@@ -149,10 +151,11 @@ static int do_ison(struct Client *up, struct Client *sptr,
       if (up)
       {
         /* Build up a single list, for use if we relay.. */
+        len = strlen(nick);
         if((current_insert_point2 + len + 5) < (buf2 + sizeof(buf2)))
         {
           memcpy((void *)current_insert_point2,
-                 (void *)acptr->name, len);
+                 (void *)nick, len);
           current_insert_point2 += len;
           *current_insert_point2++ = ' ';
         }
