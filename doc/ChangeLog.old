@@ -1,3 +1,8 @@
+*** 20011121_7 by androsyn
+A half-assed attempt at documenting the dns_host and dns_port options.  I'm
+sure somebody else could explain it better than I did :P
+
+
 *** 20011121_6 by androsyn
 Added dns_host and dns_port to server info.  Modified set_time() to use
 gettimeofday() and store the result in struct timeval SystemTime. 
