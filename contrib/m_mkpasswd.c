@@ -45,6 +45,7 @@ static void m_mkpasswd(struct Client *client_p, struct Client *source_p,
 static void mo_mkpasswd(struct Client *client_p, struct Client *source_p,
                     int parc, char *parv[]);
 static char *make_salt(void);
+static char *make_md5_salt(void);
 
 static char saltChars[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789./";
 
@@ -69,6 +70,7 @@ static void m_mkpasswd(struct Client *client_p, struct Client *source_p,
                    int parc, char *parv[])
 {
   static time_t last_used = 0;
+  int is_md5 = 0;
 
   if ((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
     {
@@ -81,12 +83,33 @@ static void m_mkpasswd(struct Client *client_p, struct Client *source_p,
       last_used = CurrentTime;
     }
 
+  if (parc == 3)
+  {
+    if (!irccmp(parv[2], "MD5"))
+    {
+      is_md5 = 1;
+    }
+    else if (!irccmp(parv[2], "DES"))
+    {
+      /* Not really needed, but we may want to have a default encryption
+       * setting somewhere down the road
+       */
+      is_md5 = 0;
+    }
+    else
+    {
+      sendto_one(source_p, ":%s NOTICE %s :MKPASSWD syntax error:  MKPASSWD pass [DES|MD5]", me.name, parv[0]);
+      return;
+    }
+  }
+
   if(parc == 1)
     sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
                me.name, parv[0], "MKPASSWD");
   else
     sendto_one(source_p, ":%s NOTICE %s :Encryption for [%s]:  %s",
-               me.name, parv[0], parv[1], crypt(parv[1], make_salt()));
+               me.name, parv[0], parv[1], crypt(parv[1],
+               is_md5 ? make_md5_salt() : make_salt()));
 }
 
 /*
@@ -97,12 +120,35 @@ static void m_mkpasswd(struct Client *client_p, struct Client *source_p,
 static void mo_mkpasswd(struct Client *client_p, struct Client *source_p,
                    int parc, char *parv[])
 {		 
-  if(parc == 1)
+  int is_md5 = 0;
+
+  if (parc == 3)
+  {
+    if (!irccmp(parv[2], "MD5"))
+    {
+      is_md5 = 1;
+    }
+    else if (!irccmp(parv[2], "DES"))
+    {
+      /* Not really needed, but we may want to have a default encryption
+       * setting somewhere down the road
+       */
+      is_md5 = 0;
+    }
+    else
+    {
+      sendto_one(source_p, ":%s NOTICE %s :MKPASSWD syntax error:  MKPASSWD pass [DES|MD5]", me.name, parv[0]);
+      return;
+    }
+  }
+
+  if (parc == 1)
     sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
                me.name, parv[0], "MKPASSWD");
   else
     sendto_one(source_p, ":%s NOTICE %s :Encryption for [%s]:  %s",
-               me.name, parv[0], parv[1], crypt(parv[1], make_salt()));
+               me.name, parv[0], parv[1], crypt(parv[1],
+               is_md5 ? make_md5_salt() : make_salt()));
 }
 
 static char *make_salt(void)
@@ -111,5 +157,19 @@ static char *make_salt(void)
   salt[0] = saltChars[random() % 64];
   salt[1] = saltChars[random() % 64];
   salt[2] = '\0';
+  return salt;
+}
+
+static char *make_md5_salt(void)
+{
+  static char salt[13];
+  int i;
+  salt[0] = '$';
+  salt[1] = '1';
+  salt[2] = '$';
+  for (i=3; i<11; i++)
+    salt[i] = saltChars[random() % 64];
+  salt[11] = '$';
+  salt[12] = '\0';
   return salt;
 }
