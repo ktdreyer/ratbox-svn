@@ -76,13 +76,7 @@ static void m_ping(struct Client *client_p,
       return;
     }
 
-/* OK, there is absolutely NO reason the origin shouldnt always be the clients
- * nick, so we ignore what they say, and use that --fl_ */
-#if 0
   origin = parv[1];
-#endif
-  
-  origin = client_p->name;
   destination = parv[2]; /* Will get NULL or pointer (parc >= 2!!) */
 
   if (GlobalSetOptions.hide_server && !IsOper(source_p))
@@ -92,7 +86,7 @@ static void m_ping(struct Client *client_p,
    return;
   }
 
-/* Screw this, origin == clients nick --fl_ */
+/* Screw this, origin == clients nick if remote, what they sent if local --fl_  */
 #if 0
   target_p = find_client(origin, NULL);
   if (!target_p)
@@ -104,6 +98,8 @@ static void m_ping(struct Client *client_p,
 
   if (!EmptyString(destination) && irccmp(destination, me.name) != 0)
     {
+      /* We're sending it across servers.. origin == client_p->name --fl_ */
+      origin = client_p->name;
       if ((target_p = find_server(destination)))
         sendto_one(target_p,":%s PING %s :%s", parv[0],
                    origin, destination);
