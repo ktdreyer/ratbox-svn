@@ -691,7 +691,6 @@ comm_connect_dns_callback(void *vptr, adns_answer *reply)
         comm_connect_callback(F->fd, COMM_ERR_DNS);
 	MyFree(reply);
 	MyFree(F->dns_query);
-//	F->dns_query = NULL;
         return;
       } 
 
