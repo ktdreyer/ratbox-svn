@@ -95,16 +95,21 @@ free_channel(struct Channel *chptr)
 }
 
 struct Ban *
-allocate_ban(void)
+allocate_ban(const char *banstr, const char *who)
 {
 	struct Ban *bptr;
 	bptr = BlockHeapAlloc(ban_heap);
+	DupNString(bptr->banstr, banstr, BANLEN);
+	DupNString(bptr->who, who, BANLEN);
+	
 	return(bptr);
 }
 
 void
 free_ban(struct Ban *bptr)
 {
+	MyFree(bptr->banstr);
+	MyFree(bptr->who);
 	BlockHeapFree(ban_heap, bptr);
 }
 

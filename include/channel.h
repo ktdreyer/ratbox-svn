@@ -28,7 +28,6 @@
 #define INCLUDED_channel_h
 #include "config.h"		/* config settings */
 #include "ircd_defs.h"		/* buffer sizes */
-
 #define MODEBUFLEN      200
 
 /* Maximum mode changes allowed per client, per server is different */
@@ -89,10 +88,11 @@ struct membership
 	unsigned long bants;
 };
 
+#define BANLEN NICKLEN+USERLEN+HOSTLEN+6
 struct Ban
 {
-	char banstr[NICKLEN+USERLEN+HOSTLEN+6];
-	char who[NICKLEN+USERLEN+HOSTLEN+6];
+	char *banstr;
+	char *who;
 	time_t when;
 	dlink_node node;
 };
@@ -172,7 +172,7 @@ void init_channels(void);
 
 struct Channel *allocate_channel(const char *chname);
 void free_channel(struct Channel *chptr);
-struct Ban *allocate_ban(void);
+struct Ban *allocate_ban(const char *, const char *);
 void free_ban(struct Ban *bptr);
 
 void free_topic(struct Channel *chptr);

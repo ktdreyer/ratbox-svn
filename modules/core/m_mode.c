@@ -420,6 +420,7 @@ add_id(struct Client *source_p, struct Channel *chptr, const char *banid,
        dlink_list *list, long mode_type)
 {
 	struct Ban *actualBan;
+	static char who[BANLEN];
 	char *realban = LOCAL_COPY(banid);
 	dlink_node *ptr;
 
@@ -455,16 +456,15 @@ add_id(struct Client *source_p, struct Channel *chptr, const char *banid,
 		}
 	}
 
-	actualBan = allocate_ban();
-
-	strlcpy(actualBan->banstr, realban, sizeof(actualBan->banstr));
-	actualBan->when = CurrentTime;
 
 	if(IsPerson(source_p))
-		ircsprintf(actualBan->who, "%s!%s@%s",
+		ircsprintf(who, "%s!%s@%s",
 			   source_p->name, source_p->username, source_p->host);
 	else
-		strlcpy(actualBan->who, source_p->name, sizeof(actualBan->who));
+		strlcpy(who, source_p->name, sizeof(who));
+
+	actualBan = allocate_ban(realban, who);
+	actualBan->when = CurrentTime;
 
 	dlinkAdd(actualBan, &actualBan->node, list);
 	chptr->num_mask++;
