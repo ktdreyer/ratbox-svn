@@ -1,3 +1,15 @@
+androsyn    2004/04/14 14:24:24 EDT	(20040414_5)
+
+  Modified files:
+    src                  commio.c 
+  Log:
+  Clear the flush handlers on close as well
+  
+  Revision  Changes    Path
+  1.9       +2 -1      ircd-ratbox/src/commio.c
+
+
+
 androsyn    2004/04/14 12:35:12 EDT	(20040414_4)
 
   Modified files:
