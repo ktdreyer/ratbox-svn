@@ -241,6 +241,9 @@ struct LocalUser
 
 	/* list of clients allowed to talk through +g */
 	dlink_list allow_list;
+	
+	/* watch list */
+	dlink_list watchlist;   
 
 	/*
 	 * Anti-flood stuff. We track how many messages were parsed and how

@@ -44,6 +44,7 @@
 #include "s_log.h"
 #include "s_serv.h"
 #include "send.h"
+#include "watch.h"
 #include "whowas.h"
 #include "s_user.h"
 #include "linebuf.h"
@@ -1198,6 +1199,8 @@ exit_generic_client(struct Client *client_p, struct Client *source_p, struct Cli
 
 	add_history(source_p, 0);
 	off_history(source_p);
+	hash_check_watch(source_p, RPL_LOGOFF);
+	                   
 
 	if(has_id(source_p))
 		del_from_id_hash(source_p->id, source_p);
@@ -1404,7 +1407,8 @@ exit_local_client(struct Client *client_p, struct Client *source_p, struct Clien
 		  const char *comment)
 {
 	unsigned long on_for;
-
+	
+	hash_del_watch_list(source_p);
 	exit_generic_client(client_p, source_p, from, comment);
 
 	s_assert(IsPerson(source_p));

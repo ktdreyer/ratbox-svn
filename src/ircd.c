@@ -53,6 +53,7 @@
 #include "scache.h"
 #include "send.h"
 #include "whowas.h"
+#include "watch.h"
 #include "modules.h"
 #include "memory.h"
 #include "hook.h"
@@ -603,6 +604,7 @@ main(int argc, char *argv[])
 	init_channels();
 	initclass();
 	initwhowas();
+	initwatch();
 	init_hook();
 	init_reject();
 	init_cache();

@@ -90,6 +90,7 @@ BASE_SRCS =                     \
   send.c                        \
   snprintf.c			\
   tools.c                       \
+  watch.c			\
   whowas.c
 
 SRCS = ${BASE_SRCS}   @SELECT_TYPE@.c

@@ -33,6 +33,7 @@
 #include "s_conf.h"
 #include "s_user.h"
 #include "hash.h"
+#include "watch.h"
 #include "whowas.h"
 #include "s_serv.h"
 #include "s_user.h"
@@ -836,12 +837,14 @@ m_version(struct Client *client_p, struct Client *source_p, int parc, const char
 		" WALLCHOPS"		\
 		" ETRACE"		\
 		" SAFELIST"		\
-		" ELIST=U"
+		" ELIST=U"		\
+		" WATCH=%i"		
 
 #define FEATURES2VALUES LOC_CHANNELLEN, \
 			ConfigChannel.use_except ? "e" : "", \
                         ConfigChannel.use_invex ? "I" : "", \
-                        ServerInfo.network_name
+                        ServerInfo.network_name, \
+			ConfigFileEntry.watch_max
 
 /*
  * show_isupport
@@ -1890,7 +1893,7 @@ static void
 change_local_nick(struct Client *client_p, struct Client *source_p, char *nick)
 {
 	source_p->tsinfo = CurrentTime;
-
+	int samenick;
 	if((source_p->localClient->last_nick_change + ConfigFileEntry.max_nick_time) < CurrentTime)
 		source_p->localClient->number_of_nick_changes = 0;
 	source_p->localClient->last_nick_change = CurrentTime;
@@ -1921,6 +1924,7 @@ change_local_nick(struct Client *client_p, struct Client *source_p, char *nick)
 			sendto_server(client_p, NULL, NOCAPS, CAP_TS6, ":%s NICK %s :%ld",
 				      source_p->name, nick, (long) source_p->tsinfo);
 		}
+
 	}
 	else
 	{
@@ -1930,10 +1934,17 @@ change_local_nick(struct Client *client_p, struct Client *source_p, char *nick)
 		return;
 	}
 
+	samenick = irccmp(source_p->name, nick) ? 0 : 1;
+
+	if(!samenick)
+		hash_check_watch(source_p, RPL_LOGOFF);
+
 	/* Finally, add to hash */
 	del_from_client_hash(source_p->name, source_p);
 	strcpy(source_p->name, nick);
 	add_to_client_hash(nick, source_p);
+	if(!samenick)
+		hash_check_watch(source_p, RPL_LOGON);
 
 	/* Make sure everyone that has this client on its accept list
 	 * loses that reference. 
@@ -1954,9 +1965,9 @@ change_remote_nick(struct Client *client_p, struct Client *source_p, int parc,
 		 const char *parv[], time_t newts, const char *nick)
 {
 	struct nd_entry *nd;
-
+	int samenick = irccmp(source_p->name, nick) ? 0 : 1;
 	/* client changing their nick */
-	if(irccmp(parv[0], nick))
+	if(samenick)
 		source_p->tsinfo = newts ? newts : CurrentTime;
 
 	sendto_common_channels_local(source_p, ":%s!%s@%s NICK :%s",
@@ -1969,15 +1980,20 @@ change_remote_nick(struct Client *client_p, struct Client *source_p, int parc,
 		sendto_server(client_p, NULL, NOCAPS, NOCAPS, ":%s NICK %s :%ld",
 			      parv[0], nick, (long) source_p->tsinfo);
 	}
+	if(!samenick)
+		hash_check_watch(source_p, RPL_LOGOFF);
 
 	del_from_client_hash(source_p->name, source_p);
-
+	
 	/* invalidate nick delay when a remote client uses the nick.. */
 	if((nd = hash_find_nd(nick)))
 		free_nd_entry(nd);
 
 	strcpy(source_p->name, nick);
 	add_to_client_hash(nick, source_p);
+
+	if(!samenick)
+		hash_check_watch(source_p, RPL_LOGOFF);
 
 	/* remove all accepts pointing to the client */
 	del_all_accepts(source_p);
