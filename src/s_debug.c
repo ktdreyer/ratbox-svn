@@ -178,17 +178,20 @@ void count_memory(struct Client *source_p)
   struct Client *target_p;
   struct Channel *chptr;
   struct ConfItem *aconf;
+  struct Ban *actualBan;
   struct Class *cltmp;
   dlink_node *dlink;
 
-  int lc = 0;           /* local clients */
-  int ch = 0;           /* channels */
+  int channel_count = 0; 
   int lcc = 0;          /* local client conf links */
-  int rc = 0;           /* remote clients */
   int us = 0;           /* user structs */
-  int chu = 0;          /* channel users */
-  int chi = 0;          /* channel invites */
-  int chb = 0;          /* channel bans */
+
+  int channel_users = 0;
+  int channel_invites = 0;
+  int channel_bans = 0;      
+  int channel_except = 0;
+  int channel_invex = 0;
+
   int wwu = 0;          /* whowas users */
   int cl = 0;           /* classes */
   int co = 0;           /* conf lines */
@@ -198,8 +201,11 @@ void count_memory(struct Client *source_p)
   int number_ips_stored;        /* number of ip addresses hashed */
   int number_servers_cached; /* number of servers cached by scache */
 
-  u_long chm = 0;       /* memory used by channels */
-  u_long chbm = 0;      /* memory used by channel bans */
+  u_long channel_memory = 0;
+  u_long channel_ban_memory = 0;
+  u_long channel_except_memory = 0;
+  u_long channel_invex_memory = 0;
+
   u_long awm = 0;       /* memory used by aways */
   u_long wwm = 0;       /* whowas array memory used */
   u_long com = 0;       /* memory used by conf lines */
@@ -235,13 +241,11 @@ void count_memory(struct Client *source_p)
     {
       if (MyConnect(target_p))
         {
-          lc++;
           for (dlink = target_p->localClient->confs.head;
 	       dlink; dlink = dlink->next)
             lcc++;
         }
-      else
-        rc++;
+
       if (target_p->user)
         {
           us++;
@@ -261,34 +265,58 @@ void count_memory(struct Client *source_p)
 
   for (chptr = GlobalChannelList; chptr; chptr = chptr->nextch)
     {
-      ch++;
-      chm += (strlen(chptr->chname) + sizeof(struct Channel));
+      channel_count++;
+      channel_memory += (strlen(chptr->chname) + sizeof(struct Channel));
 
       for (dlink = chptr->peons.head; dlink; dlink = dlink->next)
-        chu++;
+        channel_users++;
       for (dlink = chptr->chanops.head; dlink; dlink = dlink->next)
-        chu++;
+        channel_users++;
       for (dlink = chptr->voiced.head; dlink; dlink = dlink->next)
-        chu++;
+        channel_users++;
       for (dlink = chptr->halfops.head; dlink; dlink = dlink->next)
-        chu++;
+        channel_users++;
 
       for (dlink = chptr->invites.head; dlink; dlink = dlink->next)
-        chi++;
+        channel_invites++;
 
-      /* XXX invex deny except */
       for (dlink = chptr->banlist.head; dlink; dlink = dlink->next)
         {
-          chb++;
+	  actualBan = dlink->data;
+          channel_bans++;
 
-	  /* XXX */
-#if 0
-          chbm += (strlen(dlink->data)+1+sizeof(dlink_node));
-          if (dlink->value.banptr->banstr)
-            chbm += strlen(dlink->value.banptr->banstr);
-          if (dlink->value.banptr->who)
-            chbm += strlen(dlink->value.banptr->who);
-#endif
+          channel_ban_memory += sizeof(dlink_node) +
+	    sizeof(struct Ban);
+          if (actualBan->banstr)
+            channel_ban_memory += strlen(actualBan->banstr);
+          if (actualBan->who)
+            channel_ban_memory += strlen(actualBan->who);
+        }
+
+      for (dlink = chptr->exceptlist.head; dlink; dlink = dlink->next)
+        {
+	  actualBan = dlink->data;
+          channel_except++;
+
+          channel_except_memory += (sizeof(dlink_node) +
+				     sizeof(struct Ban));
+          if (actualBan->banstr)
+            channel_except_memory += strlen(actualBan->banstr);
+          if (actualBan->who)
+            channel_except_memory += strlen(actualBan->who);
+        }
+
+      for (dlink = chptr->invexlist.head; dlink; dlink = dlink->next)
+        {
+	  actualBan = dlink->data;
+          channel_invex++;
+
+          channel_invex_memory += (sizeof(dlink_node) + 
+				   sizeof(struct Ban));
+          if (actualBan->banstr)
+            channel_invex_memory += strlen(actualBan->banstr);
+          if (actualBan->who)
+            channel_invex_memory += strlen(actualBan->who);
         }
     }
 
@@ -322,13 +350,30 @@ void count_memory(struct Client *source_p)
   sendto_one(source_p, ":%s %d %s :Classes %u(%u)",
              me.name, RPL_STATSDEBUG, source_p->name, cl, cl*sizeof(struct Class));
 
-  sendto_one(source_p, ":%s %d %s :Channels %u(%d) Bans %u(%d)",
-             me.name, RPL_STATSDEBUG, source_p->name, ch, (int)chm, chb, (int)chbm);
-  sendto_one(source_p, ":%s %d %s :Channel members %u(%u) invite %u(%u)",
-             me.name, RPL_STATSDEBUG, source_p->name, chu, chu*sizeof(dlink_node),
-             chi, chi*sizeof(dlink_node));
+  sendto_one(source_p, ":%s %d %s :Channels %u(%d)",
+             me.name, RPL_STATSDEBUG, source_p->name,
+	     channel_count, (int)channel_memory);
 
-  totch = chm + chbm + chu*sizeof(dlink_node) + chi*sizeof(dlink_node);
+  sendto_one(source_p, ":%s %d %s :Bans %u(%d)",
+             me.name, RPL_STATSDEBUG, source_p->name,
+	     channel_bans, (int)channel_ban_memory);
+
+  sendto_one(source_p, ":%s %d %s :Exceptions %u(%d)",
+             me.name, RPL_STATSDEBUG, source_p->name,
+	     channel_except, (int)channel_except_memory);
+
+  sendto_one(source_p, ":%s %d %s :Invex %u(%d)",
+             me.name, RPL_STATSDEBUG, source_p->name,
+	     channel_invex, (int)channel_invex_memory);
+
+  sendto_one(source_p, ":%s %d %s :Channel members %u(%u) invite %u(%u)",
+             me.name, RPL_STATSDEBUG, source_p->name, channel_users,
+	     channel_users*sizeof(dlink_node),
+             channel_invites, channel_invites*sizeof(dlink_node));
+
+  totch = channel_memory + channel_ban_memory +
+    channel_users*sizeof(dlink_node) + 
+    channel_invites*sizeof(dlink_node);
 
   sendto_one(source_p, ":%s %d %s :Whowas users %u(%u)",
              me.name, RPL_STATSDEBUG, source_p->name,

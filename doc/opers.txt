@@ -125,8 +125,6 @@ COMMAND         - USAGE and DESCRIPTION
 
                   [option] can be one of the following:
                     DNS      - Re-read the /etc/resolv.conf file
-                    GC       - Performs garbage collecting of excess
-                              memory.
                     MOTD     - Re-reads MOTD file
                     OMOTD    - Re-reads Oper MOTD file
                     HELP     - Re-reads this HELP file
