@@ -1,3 +1,18 @@
+ejb         2003/02/05 19:21:43 UTC	(20030205_1)
+
+  Modified files:
+    contrib              example_module.c 
+    src                  dynlink.c 
+  Log:
+  - fix dynlink.c unused variables.
+  - update example_module for new MAPI
+  
+  Revision  Changes    Path
+  1.7       +28 -10    ircd-ratbox/contrib/example_module.c
+  7.18      +0 -1      ircd-ratbox/src/dynlink.c
+
+
+
 ejb         2003/02/05 16:54:09 UTC	(20030205_0)
 
   Modified files:
