@@ -233,7 +233,7 @@ static void part_one_client(struct Client *cptr,
        *  Remove user from the old channel (if any)
        *  only allow /part reasons in -m chans
        */
-      if (reason[0] && (can_send(chptr, cptr) > 0))
+      if (reason[0] && (can_send(chptr, sptr) > 0))
         {
           sendto_channel_remote(chptr, cptr, ":%s PART %s :%s",
                                 sptr->name,
