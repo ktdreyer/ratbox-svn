@@ -112,7 +112,7 @@ void count_scache(int *number_servers_cached,u_long *mem_servers_cached)
 
 /* list all server names in scache very verbose */
    
-void list_scache(struct Client *cptr,struct Client *sptr,int parc,char *parv[])
+void list_scache(struct Client *sptr)
 {
   int hash_index;
   SCACHE *ptr;
@@ -124,7 +124,7 @@ void list_scache(struct Client *cptr,struct Client *sptr,int parc,char *parv[])
         {
           if(ptr->name)
             sendto_one(sptr,":%s NOTICE %s :%s",
-                       me.name, parv[0], ptr->name);
+                       me.name, sptr->name, ptr->name);
           ptr = ptr->next;
         }
     }

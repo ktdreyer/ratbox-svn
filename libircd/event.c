@@ -235,10 +235,7 @@ eventFind(EVH * func, void *arg)
 
 #ifndef SQUID
 int
-show_events( struct Client *cptr,
-	   struct Client *sptr,
-	   int parc,
-	   char *parv[])
+show_events(struct Client *sptr)
 {
     struct ev_entry *e = tasks;
     if (last_event_ran)

@@ -28,6 +28,6 @@
 extern void        clear_scache_hash_table(void);
 extern const char* find_or_add(const char* name);
 extern void        count_scache(int *,unsigned long *);
-extern void        list_scache(struct Client *, struct Client *,int, char **);
+extern void        list_scache(struct Client *sptr);
 
 #endif
