@@ -1,3 +1,23 @@
+*** 20001202_12 by db
+- fixed DEBUG_BLOCK_ALLOCATOR for free_dlink_node case so it will
+  no longer core in sprintf.. all the free calls are "wrapped" 
+  in ircd_def.h .. to include a file name and line number, without
+  free_dlink_node being wrapped, it tried to print a non-existent filename
+  oops
+
+- I removed the "wrapped" free_link in ircd_def.h as well no longer used.
+  which reminds me...
+
+- LIMIT_UH code in the new world order is currently =broken= until
+  it understands how to properly use dlink_node etc. Someone else
+  bored and care to fix?
+
+- Added reference counting to dlink_node =for now= *ICK* barf its an
+  #ifdef .. I don't want it going out into production like that either adrian.
+  I'll remove before the beta cut.
+
+
+
 *** 20001202_11 by toot
 small bugfix in m_who
 
