@@ -1,3 +1,15 @@
+androsyn    2002/11/27 03:23:20 UTC	(20021127_1)
+
+  Modified files:
+    src                  channel_mode.c 
+  Log:
+  Actually check the return value on add_id()
+  
+  Revision  Changes    Path
+  7.88      +7 -5      ircd-ratbox/src/channel_mode.c
+
+
+
 leeh        2002/11/27 02:47:56 UTC	(20021127_0)
 
   Modified files:
