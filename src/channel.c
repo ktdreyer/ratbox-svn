@@ -2842,8 +2842,8 @@ void channel_member_names( struct Client *source_p,
   t = lbuf + cur_len;
   set_channel_mode_flags(show_flags, chptr, source_p);
   members_ptr[0] = chptr->chanops.head;
-  members_ptr[1] = chptr->voiced.head;
-  members_ptr[2] = chptr->halfops.head;
+  members_ptr[1] = chptr->halfops.head;
+  members_ptr[2] = chptr->voiced.head;
   members_ptr[3] = chptr->peons.head;
   is_member = IsMember(source_p, chptr);
   /* Note: This code will show one chanop followed by one voiced followed
