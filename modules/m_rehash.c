@@ -41,6 +41,7 @@
 #include "parse.h"
 #include "modules.h"
 #include "hostmask.h"
+#include "reject.h"
 
 static int mo_rehash(struct Client *, struct Client *, int, const char **);
 
@@ -159,6 +160,14 @@ rehash_tdlines(struct Client *source_p)
 	clear_temps(&tdline_week);
 }
 
+static void
+rehash_rejectcache(struct Client *source_p)
+{
+	sendto_realops_flags(UMODE_ALL, L_ALL, "%s is clearing reject cache", source_p->name);
+	flush_reject(source_p);
+
+}
+                                                                                                             		                
 static struct hash_commands rehash_commands[] = {
 	{"CHANNELS", rehash_channels},
 	{"DNS", rehash_dns},
@@ -168,6 +177,7 @@ static struct hash_commands rehash_commands[] = {
 	{"PGLINES", rehash_pglines},
 	{"TKLINES", rehash_tklines},
 	{"TDLINES", rehash_tdlines},
+	{"REJECTCACHE", rehash_rejectcache},
 	{NULL, NULL}
 };
 

@@ -957,7 +957,7 @@ conf_set_class_cidr_bitlen(void *data)
 
 }
 static void
-conf_set_class_cidr_amount(void *data)
+conf_set_class_number_per_cidr(void *data)
 {
 	yy_class->cidr_amount = *(unsigned int *) data;
 }
@@ -2508,6 +2508,18 @@ conf_set_general_reject_ban_time(void *data)
 }
 
 static void
+conf_set_general_reject_after_count(void *data)
+{
+	ConfigFileEntry.reject_after_count = *(unsigned int *) data;
+}
+
+static void
+conf_set_general_reject_duration(void *data)
+{
+	ConfigFileEntry.reject_duration = *(unsigned int *) data;
+}
+
+static void
 conf_set_channel_use_except(void *data)
 {
 	ConfigChannel.use_except = *(unsigned int *) data;
@@ -2882,7 +2894,7 @@ newconf_init()
 	add_conf_item("class", "name", CF_QSTRING, conf_set_class_name);
 	add_conf_item("class", "ping_time", CF_TIME, conf_set_class_ping_time);
 	add_conf_item("class", "cidr_bitlen", CF_INT, conf_set_class_cidr_bitlen);
-	add_conf_item("class", "cidr_amount", CF_INT, conf_set_class_cidr_amount);
+	add_conf_item("class", "number_per_cidr", CF_INT, conf_set_class_number_per_cidr);
 	add_conf_item("class", "number_per_ip", CF_INT, conf_set_class_number_per_ip);
 	add_conf_item("class", "number_per_ip_global", CF_INT, conf_set_class_number_per_ip_global);
 	add_conf_item("class", "number_per_ident", CF_INT, conf_set_class_number_per_ident);
@@ -3038,6 +3050,9 @@ newconf_init()
 	add_conf_item("general", "htm_interval", CF_TIME, conf_set_general_htm_interval);
 	add_conf_item("general", "htm_trigger", CF_INT, conf_set_general_htm_trigger);
 	add_conf_item("general", "reject_ban_time", CF_TIME, conf_set_general_reject_ban_time);
+	add_conf_item("general", "reject_after_count", CF_INT, conf_set_general_reject_after_count);
+	add_conf_item("general", "reject_duration", CF_TIME, conf_set_general_reject_duration);
+
 	
 #ifdef IPV6
 	add_conf_item("general", "fallback_to_ip6_int", CF_YESNO,

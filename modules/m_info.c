@@ -277,6 +277,24 @@ static struct InfoStruct info_table[] = {
 	 &ConfigFileEntry.ping_cookie,
 	 "Require ping cookies to connect",
 	 },
+        {
+       		"reject_after_count",
+  		OUTPUT_DECIMAL,
+                &ConfigFileEntry.reject_after_count,   
+   		"Client rejection threshold setting",
+	},
+        {
+                "reject_ban_time",
+                OUTPUT_DECIMAL,
+                &ConfigFileEntry.reject_ban_time,
+                "Client rejection time interval",
+        },
+        {
+                "reject_duration",
+                OUTPUT_DECIMAL,
+                &ConfigFileEntry.reject_duration,
+                "Client rejection cache duration",
+        },
 	{
 	 "short_motd",
 	 OUTPUT_BOOLEAN_YN,
