@@ -102,8 +102,9 @@ int     m_topic(struct Client *cptr,
           sendto_one(uplink, ":%s CBURST %s",
                       me.name, parv[1]);
 
-          sendto_one(uplink, ":%s TOPIC %s",
-                     sptr->name, parv[1]);
+          sendto_one(uplink, ":%s TOPIC %s %s",
+                     sptr->name, parv[1],
+                     ((parc > 2) ? parv[2] : ""));
           return 0;
         }
         else
@@ -199,25 +200,23 @@ int     m_topic(struct Client *cptr,
               sendto_one(sptr, form_str(RPL_TOPIC),
                          me.name, parv[0],
                          parv[1], chptr->topic);
-              if (!chptr->mode.mode & MODE_HIDEOPS)
+              if (!(chptr->mode.mode & MODE_HIDEOPS) ||
+                  is_any_op(chptr,sptr))
                 {
                   sendto_one(sptr, form_str(RPL_TOPICWHOTIME),
                              me.name, parv[0], parv[1],
                              chptr->topic_info,
                              chptr->topic_time);
                 }
-	      else 
+	      else /* Hide from nonops */
 		{
-		  if(is_any_op(chptr,sptr))
-		    {
-		      sendto_one(sptr, form_str(RPL_TOPICWHOTIME),
-				 me.name, parv[0], parv[1],
-				 chptr->topic_info,
-				 chptr->topic_time);
-		    }
-		}
-	    }
-	}
+                  sendto_one(sptr, form_str(RPL_TOPICWHOTIME),
+                             me.name, parv[0], parv[1],
+                             me.name,
+                             chptr->topic_time);
+                }
+            }
+        }
     }
   else
     {
