@@ -113,25 +113,21 @@ struct ChCapCombo
 	int cap_no;
 };
 
-/* channel access flags */
-#define CHACCESS_CHANOP 2
-#define CHACCESS_VOICED 1
-#define CHACCESS_PEON   0
-
 /* can_send results */
 #define CAN_SEND_NO	0
 #define CAN_SEND_NONOP  1
 #define CAN_SEND_OPV	2
 
-/* Channel related flags */
-#define CHFL_PEON	0x0000	/* normal member of channel */
-#define CHFL_CHANOP     0x0001	/* Channel operator */
-#define CHFL_VOICE      0x0002	/* the power to speak */
-#define CHFL_DEOPPED    0x0004	/* deopped by us, modes need to be bounced */
-#define CHFL_BAN        0x0010	/* ban channel flag */
-#define CHFL_EXCEPTION  0x0020	/* exception to ban channel flag */
-#define CHFL_INVEX      0x0040
-#define CHFL_BANNED	0x0080
+/* channel status flags */
+#define CHFL_PEON		0x0000	/* normal member of channel */
+#define CHFL_CHANOP     	0x0001	/* Channel operator */
+#define CHFL_VOICE      	0x0002	/* the power to speak */
+#define CHFL_DEOPPED    	0x0004	/* deopped on sjoin, bounce modes */
+#define CHFL_BANNED		0x0008  /* cached as banned */
+#define ONLY_SERVERS		0x0010
+#define ALL_MEMBERS		CHFL_PEON
+#define ONLY_CHANOPS		CHFL_CHANOP
+#define ONLY_CHANOPSVOICED	(CHFL_CHANOP|CHFL_VOICE)
 
 #define is_chanop(x)	((x) && (x)->flags & CHFL_CHANOP)
 #define is_voiced(x)	((x) && (x)->flags & CHFL_VOICE)
@@ -146,6 +142,9 @@ struct ChCapCombo
 #define MODE_TOPICLIMIT 0x0008
 #define MODE_INVITEONLY 0x0010
 #define MODE_NOPRIVMSGS 0x0020
+#define CHFL_BAN        0x0040	/* ban channel flag */
+#define CHFL_EXCEPTION  0x0080	/* exception to ban channel flag */
+#define CHFL_INVEX      0x0100
 
 /* mode flags for direction indication */
 #define MODE_QUERY     0

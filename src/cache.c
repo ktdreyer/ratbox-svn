@@ -165,6 +165,7 @@ cache_links(void *unused)
 		   (IsHidden(target_p) && !ConfigServerHide.disable_hidden))
 			continue;
 
+		/* if the below is ever modified, change LINKSLINELEN */
 		links_line = MyMalloc(LINKSLINELEN);
 		ircsprintf(links_line, "%s %s :1 %s",
 			   target_p->name, me.name, 
