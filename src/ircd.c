@@ -435,8 +435,6 @@ static void initialize_message_files(void)
     ReadMessageFile( &ConfigFileEntry.helpfile );
     ReadMessageFile( &ConfigFileEntry.motd );
     ReadMessageFile( &ConfigFileEntry.opermotd );
-    
-    ircsprintf(isupportbuffer,FEATURES,FEATURESVALUES);
   }
 
 /*

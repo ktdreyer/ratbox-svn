@@ -37,7 +37,7 @@
                 " PART_REASON" \
                 " PREFIX=%s"
                  
-#define FEATURESVALUES MAXMODEPARAMS,MAXCHANNELSPERUSER,MAXBANS,MAXRECIPIENTS, \
+#define FEATURESVALUES MAXMODEPARAMS,MAXCHANNELSPERUSER,MAXBANS,ConfigFileEntry.max_targets, \
         NICKLEN,TOPICLEN,TOPICLEN,"#&","@+%"
 
 extern char isupportbuffer[512];

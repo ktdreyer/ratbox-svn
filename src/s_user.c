@@ -1031,6 +1031,8 @@ static void user_welcome(struct Client *sptr)
   sendto_one(sptr, form_str(RPL_CREATED),me.name,sptr->name,creation);
   sendto_one(sptr, form_str(RPL_MYINFO), me.name, sptr->name,
 	     me.name, version);
+
+  ircsprintf(isupportbuffer,FEATURES,FEATURESVALUES);
   sendto_one(sptr, form_str(RPL_ISUPPORT), me.name, sptr->name, 
   	     isupportbuffer);
   show_lusers(sptr);
