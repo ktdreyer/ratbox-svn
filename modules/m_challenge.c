@@ -32,6 +32,19 @@
 #include "rsa.h"
 #include "msg.h"
 
+
+#ifndef OPENSSL
+
+/* Maybe this should be an error or something? -davidt */
+void
+_modinit(void)
+{
+  return;
+}
+
+#else
+
+/* We have openssl support, so include /CHALLENGE */
 struct Message challenge_msgtab = {
   MSG_CHALLENGE, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_challenge, m_ignore, m_challenge}
@@ -43,16 +56,14 @@ _modinit(void)
   mod_add_cmd(MSG_CHALLENGE, &challenge_msgtab);
 }
 
-/*
- * m_challenge - generate RSA challenge for wouldbe oper
- * parv[0] = sender prefix
- * 
- */
-#ifdef OPENSSL
-
 /* isn't this cute? :) */
 #define DESRT_IDENTITY "1024 35 129898254114702764644161311398742945367211656239843407101360565864933766487482427601420598335314129357193904532215504249652048024499002590622257138142186907550826986726417399616128993705932451404433561862389005312041126460533080690966003918873462732636475035659370143015664222562459185971059059633407429578727"
 
+/*
+ * m_challenge - generate RSA challenge for wouldbe oper
+ * parv[0] = sender prefix
+ *
+ */
 int m_challenge( struct Client *cptr, struct Client *sptr, int parc, char *parv[] )
 {
   char * challenge;

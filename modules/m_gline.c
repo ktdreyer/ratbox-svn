@@ -22,6 +22,7 @@
  *
  *  $Id$
  */
+#include "handlers.h"
 #include "m_gline.h"
 #include "channel.h"
 #include "client.h"
@@ -39,6 +40,7 @@
 #include "s_misc.h"
 #include "scache.h"
 #include "send.h"
+#include "msg.h"
 
 #include <assert.h>
 #include <string.h>
@@ -72,6 +74,17 @@ static void expire_pending_glines();
 static int majority_gline(struct Client*, const char *,const char *, const char *, 
                           const char* serv_name,
                           const char *,const char *,const char *); 
+
+struct Message gline_msgtab = {
+    MSG_GLINE, 0, 1, MFLG_SLOW, 0,
+      {m_unregistered, m_not_oper, ms_gline, mo_gline}
+};
+
+void
+_modinit(void)
+{
+    mod_add_cmd(MSG_GLINE, &gline_msgtab);
+}
 
 
 /*

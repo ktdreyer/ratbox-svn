@@ -48,7 +48,6 @@ _modinit(void)
   mod_add_cmd(MSG_LTRACE, &ltrace_msgtab);
 }
 
-#ifdef LTRACE
 /*
 ** m_ltrace - LimitedTRACE... like m_trace() but doesn't return TRACEUSER, TRACEUNKNOWN, or TRACECLASS
 **      parv[0] = sender prefix
@@ -256,5 +255,3 @@ int     m_ltrace(struct Client *cptr,
     }
   return 0;
 }
-#endif /* LTRACE */
-
