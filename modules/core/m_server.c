@@ -447,6 +447,9 @@ ms_server(struct Client *client_p, struct Client *source_p, int parc, const char
 	sendto_realops_flags(UMODE_EXTERNAL, L_ALL,
 			     "Server %s being introduced by %s", target_p->name, source_p->name);
 
+	/* quick, dirty EOB.  you know you love it. */
+	sendto_one(target_p, ":%s PING %s %s",
+			get_id(&me, target_p), me.name, target_p->name);
 	return 0;
 }
 
@@ -599,6 +602,10 @@ ms_sid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	sendto_realops_flags(UMODE_EXTERNAL, L_ALL,
 			     "Server %s being introduced by %s",
 			     target_p->name, source_p->name);
+
+	/* quick, dirty EOB.  you know you love it. */
+	sendto_one(target_p, ":%s PING %s %s",
+			get_id(&me, target_p), me.name, get_id(target_p, target_p));
 	return 0;
 }
 	
