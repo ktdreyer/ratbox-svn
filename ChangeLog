@@ -1,3 +1,15 @@
+leeh        2003/07/03 08:51:42 EDT	(20030703_0)
+
+  Modified files:
+    modules              m_invite.c 
+  Log:
+  - um yeah, I already declared ptr :P
+  
+  Revision  Changes    Path
+  1.71      +2 -2      ircd-ratbox/modules/m_invite.c
+
+
+
 leeh        2003/07/02 14:06:14 EDT	(20030702_3)
 
   Modified files:
