@@ -1,3 +1,15 @@
+androsyn    2004/12/03 08:41:17 EST	(20041203_0)
+
+  Modified files:
+    src                  send.c 
+  Log:
+  Fix kqueue for devel as well
+  
+  Revision  Changes    Path
+  7.284     +1 -1      ircd-ratbox/src/send.c
+
+
+
 androsyn    2004/12/02 10:43:19 EST	(20041202_0)
 
   Modified files:
