@@ -1,3 +1,11 @@
+*** 20001210_10 by db
+- re-wrote send_operwall, renamed as sendto_all_local_opers()
+  this necessitated changes to send.c send.h send.txt
+  m_connect.c m_locops.c m_operwall.c m_squit.c m_wallops.c
+- cleaned up check_string() in ircd.c added more comments
+
+
+
 *** 20001210_9 by db
 - updated docs in send.txt
 - fixed parser as per walter campbells patch
