@@ -1,3 +1,7 @@
+*** 20010101_47 by bysin
+Why didnt anyone make sure parv[1] was > CHANNELLEN, i had a fun time buffer overflowing that.
+
+
 *** 20010101_46 by ejb
 - fix s_serv.c
 
