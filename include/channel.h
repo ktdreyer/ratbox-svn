@@ -138,8 +138,8 @@ extern void check_splitmode(void *);
 
 struct Ban			/* also used for exceptions -orabidoo */
 {
-	char *banstr;
-	char *who;
+	char banstr[NICKLEN+USERLEN+HOSTLEN+6];
+	char who[NICKLEN+USERLEN+HOSTLEN+6];
 	time_t when;
 };
 

@@ -201,19 +201,16 @@ add_id(struct Client *client_p, struct Channel *chptr, const char *banid, int ty
 
 
 	actualBan = (struct Ban *) BlockHeapAlloc(ban_heap);
-	DupString(actualBan->banstr, realban);
+	strlcpy(actualBan->banstr, realban, sizeof(actualBan->banstr));
 
 	if(IsPerson(client_p))
 	{
-		actualBan->who =
-			(char *) MyMalloc(strlen(client_p->name) +
-					  strlen(client_p->username) + strlen(client_p->host) + 3);
 		ircsprintf(actualBan->who, "%s!%s@%s",
 			   client_p->name, client_p->username, client_p->host);
 	}
 	else
 	{
-		DupString(actualBan->who, client_p->name);
+		strlcpy(actualBan->who, client_p->name, sizeof(actualBan->who));
 	}
 
 	actualBan->when = CurrentTime;
@@ -266,8 +263,6 @@ del_id(struct Channel *chptr, const char *banid, int type)
 
 		if(irccmp(banid, banptr->banstr) == 0)
 		{
-			MyFree(banptr->banstr);
-			MyFree(banptr->who);
 			BlockHeapFree(ban_heap, banptr);
 
 			/* num_mask should never be < 0 */

@@ -244,10 +244,6 @@ count_memory(struct Client *source_p)
 			channel_bans++;
 
 			channel_ban_memory += sizeof(dlink_node) + sizeof(struct Ban);
-			if(actualBan->banstr)
-				channel_ban_memory += strlen(actualBan->banstr);
-			if(actualBan->who)
-				channel_ban_memory += strlen(actualBan->who);
 		}
 
 		DLINK_FOREACH(dlink, chptr->exceptlist.head)
@@ -256,10 +252,6 @@ count_memory(struct Client *source_p)
 			channel_except++;
 
 			channel_except_memory += (sizeof(dlink_node) + sizeof(struct Ban));
-			if(actualBan->banstr)
-				channel_except_memory += strlen(actualBan->banstr);
-			if(actualBan->who)
-				channel_except_memory += strlen(actualBan->who);
 		}
 
 		DLINK_FOREACH(dlink, chptr->invexlist.head)
@@ -268,10 +260,6 @@ count_memory(struct Client *source_p)
 			channel_invex++;
 
 			channel_invex_memory += (sizeof(dlink_node) + sizeof(struct Ban));
-			if(actualBan->banstr)
-				channel_invex_memory += strlen(actualBan->banstr);
-			if(actualBan->who)
-				channel_invex_memory += strlen(actualBan->who);
 		}
 	}
 
