@@ -1,3 +1,19 @@
+leeh        2004/03/29 08:08:00 EST	(20040329_2)
+
+  Modified files:
+    src                  client.c parse.c s_serv.c send.c 
+  Log:
+  - finished auditing get_client_name() for ip hiding leaks.  I think I got
+    them all..
+  
+  Revision  Changes    Path
+  7.448     +7 -25     ircd-ratbox/src/client.c
+  7.179     +6 -23     ircd-ratbox/src/parse.c
+  7.395     +6 -16     ircd-ratbox/src/s_serv.c
+  7.277     +2 -7      ircd-ratbox/src/send.c
+
+
+
 leeh        2004/03/29 07:40:24 EST	(20040329_1)
 
   Modified files:
