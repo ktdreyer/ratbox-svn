@@ -1,3 +1,10 @@
+*** 20010121_11 by lusky
+- removed XOPEN_SOURCE defines.  If you REALLY need these, it needs to
+  be detected by autoconf and specified in the CFLAGS--XOPEN_SOURCE *must*
+  be defined before you parse any system includes.
+- fixed a couple of pedantic compile warnings, there are still more.
+
+
 *** 20010121_10 by wcampbel
 Updated the docs to be with the present status of the conf parser.
 Also noted a few minor bugs and issues into the TODO file
