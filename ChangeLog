@@ -1,3 +1,15 @@
+androsyn    2002/08/13 13:14:46 EDT	(20020813_10)
+
+  Modified files:
+    modules              m_lusers.c 
+  Log:
+  Lazylinks..what are those
+  
+  Revision  Changes    Path
+  1.24      +1 -3      ircd-ratbox/modules/m_lusers.c
+
+
+
 androsyn    2002/08/13 13:11:59 EDT	(20020813_9)
 
   Modified files:
