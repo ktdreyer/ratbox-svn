@@ -465,7 +465,11 @@ nick_from_server(struct Client *cptr, struct Client *sptr, int parc,
   
   sptr = make_client(cptr);
   add_client_to_list(sptr);         /* double linked list */
-	
+
+  /* We don't need to introduce leafs clients back to them! */
+  if (ConfigFileEntry.hub && IsCapable(cptr, CAP_LL))
+    add_lazylinkclient(cptr, sptr);
+
   sptr->hopcount = atoi(parv[2]);
   sptr->tsinfo = newts;
 
