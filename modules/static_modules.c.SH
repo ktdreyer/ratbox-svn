@@ -39,7 +39,7 @@ for x in $SYMS; do
 done >> static_modules.c
 
 
-echo struct mapi_header_av1 *mapi_headers[] = { >> static_modules.c 
+echo static const struct mapi_header_av1 *mapi_headers[] = { >> static_modules.c 
 for x in $SYMS; do 
 	echo \&"$x"_mheader,
 done >> static_modules.c
