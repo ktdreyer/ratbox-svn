@@ -2,7 +2,8 @@
  *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
  *  s_bsd_poll.c: POSIX poll() compatible network routines.
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Originally by Adrian Chadd <adrian@creative.net.au>
+ *  Copyright (C) 2002 Hybrid Development Team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by

@@ -2,7 +2,26 @@
  *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
  *  event.c: Event functions.
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (C) 1998-2000 Regents of the University of California
+ *  Copyright (C) 2001-2002 Hybrid Development Team
+ *
+ *  Code borrowed from the squid web cache by Adrian Chadd.
+ *  Original header:
+ *
+ *  DEBUG: section 41   Event Processing
+ *  AUTHOR: Henrik Nordstrom
+ *
+ *  SQUID Internet Object Cache  http://squid.nlanr.net/Squid/
+ *  ----------------------------------------------------------
+ *
+ *  Squid is the result of efforts by numerous individuals from the
+ *  Internet community.  Development is led by Duane Wessels of the
+ *  National Laboratory for Applied Network Research and funded by the
+ *  National Science Foundation.  Squid is Copyrighted (C) 1998 by
+ *  the Regents of the University of California.  Please see the
+ *  COPYRIGHT file for full details.  Squid incorporates software
+ *  developed and/or copyrighted by other sources.  Please see the
+ *  CREDITS file for full details.
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
