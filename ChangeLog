@@ -1,3 +1,20 @@
+androsyn    2002/11/25 02:18:14 UTC	(20021125_0)
+
+  Modified files:
+    include              s_conf.h 
+    src                  ircd.c newconf.c s_conf.c 
+  Log:
+  Add back HTM messages.  It doesn't actually change the behavior of anything,
+  just prints out the pretty messages.
+  
+  Revision  Changes    Path
+  7.213     +3 -0      ircd-ratbox/include/s_conf.h
+  7.263     +55 -3     ircd-ratbox/src/ircd.c
+  7.57      +21 -0     ircd-ratbox/src/newconf.c
+  7.369     +5 -1      ircd-ratbox/src/s_conf.c
+
+
+
 leeh        2002/11/24 22:58:21 UTC	(20021124_21)
 
   Modified files:
