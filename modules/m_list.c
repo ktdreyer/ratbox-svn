@@ -257,4 +257,3 @@ void list_one_channel(struct Client *sptr,struct Channel *chptr)
 }
 
 
-

@@ -505,6 +505,25 @@ void    remove_user_from_channel(struct Channel *chptr,struct Client *who,
 }
 
 /*
+ * find_user_link
+ * inputs	-
+ *		- client pointer to find
+ * output	- pointer to link or NULL if not found
+ * side effects	- Look for ptr in the linked listed pointed to by link.
+ */
+struct SLink *find_user_link(struct SLink *lp, struct Client *ptr)
+{
+  if (ptr)
+    while (lp)
+      {
+        if (lp->value.cptr == ptr)
+          return (lp);
+        lp = lp->next;
+      }
+  return ((struct SLink *)NULL);
+}
+
+/*
  * change_chan_flag
  *
  * inputs	- pointer to channel to change flags of client on
@@ -513,7 +532,7 @@ void    remove_user_from_channel(struct Channel *chptr,struct Client *who,
  * output	- none
  * side effects -
  */
-static  void    change_chan_flag(struct Channel *chptr,struct Client *who,
+static void change_chan_flag(struct Channel *chptr,struct Client *who,
 				 int flag)
 {
   struct SLink *tmp;
@@ -555,7 +574,7 @@ static  void    change_chan_flag(struct Channel *chptr,struct Client *who,
  * output	- none
  * side effects -
  */
-static  void   set_deopped(struct Channel *chptr, struct Client *who, int flag)
+static void set_deopped(struct Channel *chptr, struct Client *who, int flag)
 {
   struct SLink  *tmp;
 
@@ -572,7 +591,7 @@ static  void   set_deopped(struct Channel *chptr, struct Client *who, int flag)
  * output	- yes if chanop no if not
  * side effects -
  */
-int     is_chan_op(struct Channel *chptr, struct Client *who )
+int is_chan_op(struct Channel *chptr, struct Client *who )
 {
   struct SLink  *lp;
 
@@ -591,22 +610,25 @@ int     is_chan_op(struct Channel *chptr, struct Client *who )
  * output	- yes if can send, no if cannot
  * side effects -
  */
-int     can_send(struct Channel *chptr, struct Client *who)
+int can_send(struct Channel *chptr, struct Client *who)
 {
   struct SLink  *lp;
 
-  lp = find_user_link(chptr->members, who);
+  if( lp = find_user_link(chptr->members, who) )
+    {
+      if (ConfigFileEntry.quiet_on_ban)
+	if (is_banned(chptr, who))
+	  return MODE_BAN;
 
-  if (ConfigFileEntry.quiet_on_ban)
-    if (is_banned(chptr, who))
-      return MODE_BAN;
-
-  if (chptr->mode.mode & MODE_MODERATED &&
-      (!lp || !(lp->flags & (CHFL_CHANOP|CHFL_VOICE))))
-    return (MODE_MODERATED);
-
-  if (chptr->mode.mode & MODE_NOPRIVMSGS && !lp)
-    return (MODE_NOPRIVMSGS);
+      if (chptr->mode.mode & MODE_MODERATED &&
+	  (!(lp->flags & (CHFL_CHANOP|CHFL_VOICE))))
+	return (MODE_MODERATED);
+    }
+  else
+    {
+      if (chptr->mode.mode & MODE_NOPRIVMSGS)
+	return (MODE_NOPRIVMSGS);
+    }
 
   return 0;
 }
@@ -2716,7 +2738,6 @@ static void destroy_channel(struct Channel *chptr)
   /* Wheee */
 }
 
-
 /*
  * channel_member_names
  *
@@ -2750,7 +2771,7 @@ void channel_member_names( struct Client *sptr,
   for (lp = chptr->members; lp; lp = lp->next)
     {
       c2ptr = lp->value.cptr;
-      ircsprintf(buf2,"%s%s ", channel_chanop_or_voice(lp), c2ptr->name);
+      ircsprintf(buf2,"%s%s ",channel_chanop_or_voice(lp->flags),c2ptr->name);
       strcat(buf,buf2);
       cur_len += strlen(buf2);
       reply_to_send = YES;
@@ -2769,7 +2790,6 @@ void channel_member_names( struct Client *sptr,
   if(reply_to_send)
     sendto_one(sptr, form_str(RPL_NAMREPLY), me.name, sptr->name, buf);
 }
-
 
 /*
  * channel_pub_or_secret
@@ -2792,20 +2812,16 @@ char *channel_pub_or_secret(struct Channel *chptr)
 /*
  * channel_chanop_or_voice
  *
- * inputs	- pointer to struct SLink
+ * inputs	- channel mode flag
  * output	- string pointer "@" if chanop, "+" if not
  * side effects	-
  */
 
-char *channel_chanop_or_voice(struct SLink *lp)
+char *channel_chanop_or_voice(int flags)
 {
-  /* lp should not be NULL */
-  if ( lp == NULL )
-    return ("");
-
-  if (lp->flags & CHFL_CHANOP)
+  if (flags & CHFL_CHANOP)
     return("@");
-  else if (lp->flags & CHFL_VOICE)
+  else if (flags & CHFL_VOICE)
     return("+");
   return("");
 }

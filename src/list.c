@@ -200,20 +200,6 @@ void _free_user(struct User* user, struct Client* cptr)
     }
 }
 
-/*
- * Look for ptr in the linked listed pointed to by link.
- */
-struct SLink *find_user_link(struct SLink *lp, struct Client *ptr)
-{
-  if (ptr)
-    while (lp)
-      {
-        if (lp->value.cptr == ptr)
-          return (lp);
-        lp = lp->next;
-      }
-  return ((struct SLink *)NULL);
-}
 
 struct SLink *make_link()
 {

@@ -137,15 +137,6 @@
  */
 #undef SLAVE_SERVERS
 
-/* SEPARATE_QUOTE_KLINES_BY_DATE
- * If you define this, then klines will be read and written
- * to a separate kline file according to date. You =must= then run
- * a daily/nightly script to consolidate your klines, or the previous
- * days klines are lost. If you define this, LOCKFILE on kline file
- * makes no sense
- */
-#undef SEPARATE_QUOTE_KLINES_BY_DATE
-
 /* FNAME_USERLOG and FNAME_OPERLOG - logs of local USERS and OPERS
  * Define this filename to maintain a list of persons who log
  * into this server. Logging will stop when the file does not exist.
@@ -179,13 +170,6 @@
  */
 #define CUSTOM_ERR
 
-
-/* SHOW_FAILED_OPER_PASSWD - if FAILED_OPER_NOTICE is defined, also show the
- * attempted passwd
- */
-#undef SHOW_FAILED_OPER_PASSWD
-
-
 /* DO_IDENTD - check identd
  * if you undefine this, ircd will never check identd regardless of
  * @'s in I:lines.  You must still use @'s in your I: lines to get
@@ -201,7 +185,7 @@
 #undef WHOIS_NOTICE
 
 /* SHORT_MOTD
- * There are client ignoring the FORCE_MOTD MOTD numeric, there is
+ * There are clients ignoring the FORCE_MOTD MOTD numeric, there is
  * no point forcing MOTD on connecting clients IMO. Give them a short
  * NOTICE telling them they should read the motd, and leave it at that.
  */

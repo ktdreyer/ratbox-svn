@@ -671,7 +671,7 @@ void set_final_mode(struct Mode *mode,struct Mode *oldmode)
  *		  chanop modes etc. We've lost the TS.
  */
   
-static void remove_our_modes( struct Channel *chptr, struct Channel *top_chptr,
+void remove_our_modes( struct Channel *chptr, struct Channel *top_chptr,
 			      struct Client *sptr)
 {
   int what;

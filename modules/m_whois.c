@@ -42,6 +42,7 @@
 #include <string.h>
 
 int single_whois(struct Client *sptr, struct Client *acptr, int wilds);
+void whois_person(struct Client *sptr,struct Client *acptr);
 int global_whois(struct Client *sptr, char *nick, int wilds);
 
 struct Message whois_msgtab = {
@@ -205,42 +206,36 @@ int global_whois(struct Client *sptr, char *nick, int wilds)
  * Side Effects	- do a single whois on given client
  * 		  writing results to sptr
  */
-
 int single_whois(struct Client *sptr,struct Client *acptr,int wilds)
 {
-  char buf[BUFSIZE];
-  char *chname;
-  static struct User UnknownUser =
-  {
-    NULL,       /* next */
-    NULL,       /* channel */
-    NULL,       /* invited */
-    NULL,       /* away */
-    0,          /* last */
-    1,          /* refcount */
-    0,          /* joined */
-    "<Unknown>" /* server */
-  };
   struct SLink  *lp;
-  char *name;
-  struct User   *user;
-  struct Client *a2cptr;
   struct Channel *chptr;
-  struct Channel *bchan;
-  int   len;
-  int   mlen;
-  int found_mode;
+  char *name;
   int invis;
   int member;
   int showperson;
 
-  user = acptr->user ? acptr->user : &UnknownUser;
-  name = (!*acptr->name) ? "?" : acptr->name;
+  if (acptr->name[0] == '\0')
+    name = "?";
+  else
+    name = acptr->name;
+
+  if( acptr->user == NULL )
+    {
+      sendto_one(sptr, form_str(RPL_WHOISUSER), me.name,
+		 sptr->name, name,
+		 acptr->username, acptr->host, acptr->info);
+      sendto_one(sptr, form_str(RPL_WHOISSERVER),
+		 me.name, sptr->name, name, "<Unknown>",
+		 "*Not On This Net*");
+      return 0;
+    }
+
   invis = IsInvisible(acptr);
-  member = (user->channel) ? 1 : 0;
+  member = (acptr->user->channel) ? 1 : 0;
   showperson = (wilds && !invis && !member) || !wilds;
 
-  for (lp = user->channel; lp; lp = lp->next)
+  for (lp = acptr->user->channel; lp; lp = lp->next)
     {
       chptr = lp->value.chptr;
       member = IsMember(sptr, chptr);
@@ -251,22 +246,50 @@ int single_whois(struct Client *sptr,struct Client *acptr,int wilds)
 	  showperson = 1;
 	  break;
 	}
-      if (!invis && HiddenChannel(chptr) &&
-	  !SecretChannel(chptr))
-	showperson = 1;
+      if (!invis && HiddenChannel(chptr) && !SecretChannel(chptr))
+	{
+	  showperson = 1;
+	  break;
+	}
     }
+  if(showperson)
+    whois_person(sptr,acptr);
+  return 0;
+}
 
-  if (!showperson)
-    return 0;
-          
-  a2cptr = find_server(user->server);
+/*
+ * whois_person()
+ *
+ * Inputs	- sptr client to report to
+ *		- acptr client to report on
+ * Output	- NONE
+ * Side Effects	- 
+ */
+void whois_person(struct Client *sptr,struct Client *acptr)
+{
+  char buf[BUFSIZE];
+  char buf2[2*NICKLEN];
+  char *chname;
+  struct SLink  *lp;
+  struct Client *a2cptr;
+  struct Channel *chptr;
+  struct Channel *bchan;
+  int user_flags;
+  int cur_len = 0;
+  int mlen;
+  int reply_to_send = NO;
+
+  a2cptr = find_server(acptr->user->server);
           
   sendto_one(sptr, form_str(RPL_WHOISUSER), me.name,
-	     sptr->name, name,
+	     sptr->name, acptr->name,
 	     acptr->username, acptr->host, acptr->info);
-  mlen = strlen(me.name) + strlen(sptr->name) + 6 + strlen(name);
-  for (len = 0, *buf = '\0', lp = user->channel; lp;
-       lp = lp->next)
+
+  mlen = strlen(me.name) + strlen(sptr->name) + 6 + strlen(acptr->name);
+  cur_len = mlen;
+  buf[0] = '\0';
+
+  for (lp = acptr->user->channel; lp; lp = lp->next)
     {
       chptr = lp->value.chptr;
       chname = chptr->chname;
@@ -280,50 +303,47 @@ int single_whois(struct Client *sptr,struct Client *acptr,int wilds)
 
       if (ShowChannel(sptr, chptr))
 	{
-	  if (len + strlen(chname)
-	      > (size_t) BUFSIZE - 4 - mlen)
+	  user_flags = user_channel_mode(chptr, acptr);
+	  ircsprintf(buf2,"%s%s ", channel_chanop_or_voice(user_flags),
+		     chname);
+	  strcat(buf,buf2);
+	  cur_len += strlen(buf2);
+	  reply_to_send = YES;
+
+	  if ((cur_len + NICKLEN) > (BUFSIZE - 4))
 	    {
 	      sendto_one(sptr,
 			 ":%s %d %s %s :%s",
 			 me.name,
 			 RPL_WHOISCHANNELS,
-			 sptr->name, name, buf);
-	      *buf = '\0';
-	      len = 0;
+			 sptr->name, acptr->name, buf);
+	      cur_len = mlen;
+	      buf[0] = '\0';
+	      reply_to_send = NO;
 	    }
-	  found_mode = user_channel_mode(chptr, acptr);
-	  if (found_mode & CHFL_CHANOP)
-	    *(buf + len++) = '@';
-	  else if (found_mode & CHFL_VOICE)
-	    *(buf + len++) = '+';
-	  if (len)
-	    *(buf + len) = '\0';
-	  (void)strcpy(buf + len, chname);
-	  len += strlen(chptr->chname);
-	  (void)strcat(buf + len, " ");
-	  len++;
 	}
     }
-  if (buf[0] != '\0')
+
+  if (reply_to_send)
     sendto_one(sptr, form_str(RPL_WHOISCHANNELS),
-	       me.name, sptr->name, name, buf);
+	       me.name, sptr->name, acptr->name, buf);
           
   sendto_one(sptr, form_str(RPL_WHOISSERVER),
-	     me.name, sptr->name, name, user->server,
+	     me.name, sptr->name, acptr->name, acptr->user->server,
 	     a2cptr?a2cptr->info:"*Not On This Net*");
 
-  if (user->away)
+  if (acptr->user->away)
     sendto_one(sptr, form_str(RPL_AWAY), me.name,
-	       sptr->name, name, user->away);
+	       sptr->name, acptr->name, acptr->user->away);
 
   if (IsAnyOper(acptr))
     {
       sendto_one(sptr, form_str(RPL_WHOISOPERATOR),
-		 me.name, sptr->name, name);
+		 me.name, sptr->name, acptr->name);
 
       if (IsAdmin(acptr))
 	sendto_one(sptr, form_str(RPL_WHOISADMIN),
-		   me.name, sptr->name, name);
+		   me.name, sptr->name, acptr->name);
     }
 
   if (ConfigFileEntry.whois_notice && 
@@ -335,13 +355,13 @@ int single_whois(struct Client *sptr,struct Client *acptr,int wilds)
 	       sptr->host);
   
   
-  if (acptr->user && MyConnect(acptr))
+  if (MyConnect(acptr))
     sendto_one(sptr, form_str(RPL_WHOISIDLE),
-	       me.name, sptr->name, name,
-	       CurrentTime - user->last,
+	       me.name, sptr->name, acptr->name,
+	       CurrentTime - acptr->user->last,
 	       acptr->firsttime);
   
-  return 1;
+  return;
 }
 
 /*
