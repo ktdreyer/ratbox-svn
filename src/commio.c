@@ -762,7 +762,8 @@ fd_close(int fd)
 		s_assert(F->write_handler == NULL);
 	}
 	comm_setselect(F->fd, FDLIST_NONE, COMM_SELECT_WRITE | COMM_SELECT_READ, NULL, NULL, 0);
-
+	comm_setflush(F->fd, 0, NULL, NULL);
+	
 	if (F->dns_query != NULL)
 	{
 		delete_adns_queries(F->dns_query);	
