@@ -42,6 +42,13 @@ struct Message error_msgtab = {
 	{{m_error, 0}, mg_ignore, mg_ignore, {ms_error, 0}, mg_ignore}
 };
 
+mapi_clist_av1 error_clist[] = {
+        &error_msgtab, NULL
+};
+
+DECLARE_MODULE_AV1(error, NULL, NULL, error_clist, NULL, NULL, "$Revision$");
+
+
 /*
  * Note: At least at protocol level ERROR has only one parameter,
  * although this is called internally from other functions
