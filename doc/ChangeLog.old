@@ -1,3 +1,6 @@
+*** 20010101_41 by davidt
+Display <secret> for +s vchans in the vchan list.
+
 *** 20010101_40 by a1kmm
 better check realname too while we are at it...
 
