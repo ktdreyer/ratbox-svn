@@ -1,3 +1,10 @@
+*** 20001231_4 by db
+- hard to find typo in ircd_parser.y yyval instead of yylval
+  caused it to core parsing message_local="string";
+
+
+
+
 *** 20001231_3 by db
 - this is some very old fugly hacked code we had in hybrid-6 to 
   allow multiple Q lined nicks ... never mind it was a hack, its
