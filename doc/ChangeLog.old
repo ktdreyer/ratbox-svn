@@ -1,3 +1,21 @@
+db          2002/04/18 12:12:15 EDT	(20020418_1)
+
+  Modified files:
+    contrib              m_clearchan.c 
+    src                  channel.c 
+  Log:
+  Two patches sent in by adx
+  - clear +ov members in channel.c
+  - use block heap free in m_clearchan.c
+  
+  approved db
+  
+  Revision  Changes    Path
+  1.26      +3 -2      ircd-hybrid-7/contrib/m_clearchan.c
+  7.307     +6 -0      ircd-hybrid-7/src/channel.c
+
+
+
 leeh        2002/04/18 09:15:53 EDT	(20020418_0)
 
   Modified files:
