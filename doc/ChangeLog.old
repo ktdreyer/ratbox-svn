@@ -1,3 +1,8 @@
+*** 20001127_7 by db
+- added deinit
+
+
+
 *** 20001127_6 by db
 - modunload now works. But all modules need to be updated to add a deinit
   function *sigh* I did m_admin.c, 59 more to go
