@@ -30,40 +30,40 @@
  *
  */
 
+#include <string.h>
+#include <stdlib.h>
 #include <assert.h>
 
+#include "handlers.h"
+#include "client.h"      /* client struct */
+#include "ircd.h"        /* me */
+#include "modules.h"
+#include "numeric.h"     /* ERR_xxx */
+#include "send.h"        /* sendto_one */
+
 #ifdef HAVE_LIBCRYPTO
-#include "rsa.h"
 #include <openssl/rsa.h>
-#include <openssl/pem.h>
-#include <openssl/bio.h>
+#include "rsa.h"
 #endif
+
+#include "msg.h"
+#include "parse.h"
+#include "irc_string.h"  /* strncpy_irc */
 
 #include "tools.h"
 #include "memory.h"
-#include "handlers.h"
-#include "client.h"      /* client struct */
 #include "common.h"      /* TRUE bleah */
 #include "event.h"
 #include "hash.h"        /* add_to_client_hash_table */
 #include "md5.h"
-#include "irc_string.h"  /* strncpy_irc */
-#include "ircd.h"        /* me */
 #include "list.h"        /* make_server */
-#include "numeric.h"     /* ERR_xxx */
 #include "s_conf.h"      /* struct ConfItem */
+
 #include "s_log.h"       /* log level defines */
 #include "s_serv.h"      /* server_estab, check_server, my_name_for_link */
 #include "s_stats.h"     /* ServerStats */
 #include "scache.h"      /* find_or_add */
-#include "send.h"        /* sendto_one */
 #include "motd.h"
-#include "msg.h"
-#include "parse.h"
-#include "modules.h"
-
-#include <string.h>
-#include <stdlib.h>
 
 #ifndef HAVE_LIBCRYPTO
 

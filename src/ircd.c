@@ -431,18 +431,24 @@ static void initialize_server_capabs(void)
 static void write_pidfile(const char *filename)
 {
   FBFILE* fd;
-  char buff[20];
+  char buff[sizeof(unsigned int)+1];
   if ((fd = fbopen(filename, "w")))
-    {
-      ircsprintf(buff,"%d\n", (int)getpid());
+  {
+      unsigned int pid = (unsigned int) getpid();
+
+      ircsprintf(buff,"%u\n", pid);
       if ((fbputs(buff, fd) == -1))
-        ilog(L_ERROR,"Error writing to pid file %s (%s)", filename,
-		    strerror(errno));
+      {
+        ilog(L_ERROR,"Error writing %u to pid file %s (%s)",
+             pid, filename, strerror(errno));
+      }
       fbclose(fd);
       return;
-    }
+  }
   else
+  {
     ilog(L_ERROR, "Error opening pid file %s", filename);
+  }
 }
 
 /*

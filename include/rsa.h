@@ -21,12 +21,11 @@
  *
  * $Id$
  */
-#include <openssl/rsa.h>
 
-void report_crypto_errors(void);
-int verify_private_key(void);
-int generate_challenge( char ** r_challenge, char ** r_response, RSA * key );
-int crypt_data(char **out, char *in, int len, char *key);
-int decrypt_data(char **out, char *in, int len, char *key);
-int get_randomness( unsigned char * buf, int length );
+extern void report_crypto_errors(void);
+extern int verify_private_key(void);
+extern int generate_challenge( char ** r_challenge, char ** r_response, RSA * key );
+extern int crypt_data(char **out, char *in, int len, char *key);
+extern int decrypt_data(char **out, char *in, int len, char *key);
+extern int get_randomness( unsigned char * buf, int length );
   

@@ -36,11 +36,8 @@
 #include "config.h"
 
 #ifdef HAVE_LIBCRYPTO
-#include "rsa.h"
 #include <openssl/rsa.h>
-#include <openssl/bio.h>
-#include <openssl/evp.h>
-#include <openssl/rand.h>
+#include "rsa.h"
 #endif
 
 #include "tools.h"
