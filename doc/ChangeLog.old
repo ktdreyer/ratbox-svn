@@ -1,3 +1,10 @@
+*** 20010426_4 by fl_
+- ok, this should fix kill
+  parv[2] contains both path and reason.. to save us splitting parv[2] up
+  to get at the path.. we generate the path ourselves (user who sent
+  the kills server/host/ident/nick).. 
+
+
 *** 20010426_3 by fl_
 - tiny fix to the parser
 
