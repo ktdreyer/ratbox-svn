@@ -595,13 +595,17 @@ int is_half_op(struct Channel *chptr, struct Client *who )
 int can_send(struct Channel *chptr, struct Client *sptr)
 {
   if (chptr->mode.mode & MODE_MODERATED)
-    if(is_any_op(chptr,sptr))
-      return 1;
-
+    {
+      if(is_any_op(chptr,sptr))
+	return 1;
+      else
+	return 0;
+    }
+  
   if (chptr->mode.mode & MODE_NOPRIVMSGS && !IsMember(sptr,chptr))
-    return (MODE_NOPRIVMSGS);
+    return (0);
 
-  return 0;
+  return 1;
 }
 
 /*
