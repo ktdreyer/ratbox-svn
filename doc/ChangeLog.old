@@ -1,3 +1,20 @@
+*** 20001219_8 by db
+- lazylinks final form. New nicks introduced after the burst, are
+  simply passed on. The reason is simple. SJOIN would have to be modifed
+  to pass new nicks onto ll servers, and its a pita. SJOIN needs more
+  rewriting before I attempt that. ugh. So for now, any new nicks that
+  join the network, get propogated to the LL leaf as normal. The hub
+  does not burst nicks at all, it bursts channel back ON request of 
+  a cburst from the ll server, as it does so, it SJOIN's the nicks needed
+  as well as SJOINing the channels requested. Nicks that are on the server
+  but not sjoin'ed to a channel, will be propogated to the LL leaf
+  when they join a channel, not before. i.e. if you are nick A on 
+  hub HUBA you will not be nick propogated to the leaf until you join
+  a channel, or you /quit and rejoin the network. Simple?
+  Capiche?
+
+
+
 *** 20001219_7 by ejb
 - made modlist return a numeric
 - put ms_quit back in (oops).
