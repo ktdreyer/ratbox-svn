@@ -1,3 +1,9 @@
+*** 19990831_5 by tomh
+Changed MyFree to automatically set the pointer to zero after freeing it.
+#define MyFree(x) do { if ((x)) { free((x)); (x) = 0; } while (0)
+The assignment is cheap, and it should eliminate double free issues.
+
+
 *** 19990831_4 by tomh
 break out m_user
 
