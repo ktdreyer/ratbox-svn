@@ -1072,6 +1072,12 @@ int	conf_begin_class(struct TopConf *tc)
 
 int	conf_end_class(struct TopConf *tc)
 {
+	if(conf_cur_block_name != NULL)
+	{       
+		MyFree(yy_class->class_name);
+		DupString(yy_class->class_name, conf_cur_block_name);
+	}
+
 	if(yy_class->class_name)
 		add_class(yy_class);
 	else
