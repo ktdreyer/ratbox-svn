@@ -211,10 +211,21 @@ static void auth_dns_callback(void* vptr, adns_answer* reply)
   else
     {
 #ifdef IPV6
+	
       if(*auth->client->localClient->sockhost == ':')
       {
 	strlcat(str, "0",HOSTLEN);
       }
+      if(auth->client->localClient->aftype == AF_INET6 && ConfigFileEntry.fallback_to_ip6_int == 1 && auth->ip6_int == 0)
+      {
+        struct Client *client = auth->client;
+        auth->ip6_int = 1;
+	MyFree(reply);
+	SetDNSPending(auth);
+        adns_getaddr(&client->localClient->ip, client->localClient->aftype, client->localClient->dns_query, 1);
+        return;
+      }
+
       if(auth->client->localClient->aftype == AF_INET6 && ConfigFileEntry.dot_in_ip6_addr == 1)
       {
         strlcat(str, auth->client->localClient->sockhost,HOSTLEN+1);
@@ -403,7 +414,7 @@ void start_auth(struct Client* client)
   sendheader(client, REPORT_DO_DNS);
 
   /* No DNS cache now, remember? -- adrian */
-  adns_getaddr(&client->localClient->ip, client->localClient->aftype, client->localClient->dns_query);
+  adns_getaddr(&client->localClient->ip, client->localClient->aftype, client->localClient->dns_query, 0);
   SetDNSPending(auth);
 
   if(ConfigFileEntry.disable_auth == 0) 

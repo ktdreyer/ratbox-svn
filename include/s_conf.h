@@ -231,6 +231,9 @@ struct config_file_entry
   int           use_whois_actually;
   int		disable_auth;
   int		connect_timeout;
+#ifdef IPV6
+  int		fallback_to_ip6_int;
+#endif
 #ifdef HAVE_LIBCRYPTO
   struct EncCapability *default_cipher_preference;
 #endif

@@ -547,7 +547,10 @@ void	newconf_init()
 			conf_set_general_disable_auth);
 	add_conf_item("general", "connect_timeout", CF_TIME,
 			conf_set_general_connect_timeout);
-					
+#ifdef IPV6
+	add_conf_item("general", "fallback_to_ip6_int", CF_YESNO,
+			conf_set_general_fallback_to_ip6_int);
+#endif					
 	add_top_conf("channel", NULL, NULL);
 	add_conf_item("channel", "use_except", CF_YESNO, conf_set_channel_use_except);
 	add_conf_item("channel", "use_invex", CF_YESNO, conf_set_channel_use_invex);
@@ -2569,6 +2572,13 @@ void	conf_set_general_connect_timeout(void *data)
 {
 	ConfigFileEntry.connect_timeout = *(unsigned int*)data;
 }
+
+#ifdef IPV6
+void	 conf_set_general_fallback_to_ip6_int(void *data)
+{
+	ConfigFileEntry.fallback_to_ip6_int = *(unsigned int*)data;
+}
+#endif
 
 void	conf_set_general_oper_umodes(void *data)
 {
