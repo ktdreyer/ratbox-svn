@@ -1,3 +1,11 @@
+*** 20010105_35 by db
+- added umode +e , requested by pryzm.. She wants a specialized
+  +c connect monitor for watching for drones... rather than modify
+  +c to give her the information she wants, I've added +e... 
+  Possibly only useful to pryzm *sigh*
+
+
+
 *** 20010105_34 by toot
 . put quiet_on_ban option back in
 . got rid of ircd.c compile warning
