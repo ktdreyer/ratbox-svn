@@ -1,3 +1,10 @@
+*** 20010519_1 by a1kmm
+- Don't send modes to lazy link clients for channels when the client doing
+  the mode change hasn't been burst. This is a pretty ugly kludge as the
+  mode is simply not sent(which could result in a desync!) but it is better
+  than having the mode dropped and the client sending it killed.
+
+
 *** 20010518_1 by db
 - removed mtrie doc from index.txt
 
