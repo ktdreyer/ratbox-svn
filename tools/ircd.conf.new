@@ -1,0 +1,166 @@
+	server {
+		name="ircd.db.net";
+		email="Dianora's private ircd";
+		hub=yes;
+	};
+
+	administrator {
+		name="Diane's ircd";
+		email="<db@db.net>";
+	};
+
+	class {
+		name="1";
+		ping_time=90;
+		number_per_ip=0;
+		max_number=20;
+		sendq=100000;
+	};
+
+	class {
+		name="2";
+		ping_time=90;
+		number_per_ip=300;
+		max_number=10;
+		sendq=4000000;
+	};
+
+	class {
+		name="3";
+		ping_time=90;
+		number_per_ip=1;
+		max_number=100;
+		sendq=100000;
+	};
+
+	client {
+		passwd="";
+		allow="*";
+		class="1";
+	};
+
+	client {
+		passwd="";
+		allow="*@*ppp*";
+		class="3";
+	};
+
+	client {
+		passwd="";
+		allow="*@*slip*";
+		class="3";
+	};
+
+	client {
+		passwd="";
+		allow="*@*ts*";
+		class="3";
+	};
+
+	client {
+		passwd="";
+		kline_exempt;
+		bot;
+		have_ident;
+		no_tilde;
+		allow="db@*db.net";
+		class="3";
+	};
+
+	client {
+		passwd="";
+		spoof="localhost";
+		kline_exempt;
+		bot;
+		have_ident;
+		no_tilde;
+		allow="db@home.db.net";
+		class="3";
+	};
+
+	client {
+		allow="192.168.0.0/24";
+		passwd="";
+		class="3";
+	};
+
+	listen {
+		name="*";
+		port=6667;
+	};
+
+	operator {
+		name="Dianora";
+		host="db@artemis.db.dbn";
+		password="heFw0NKyvGSTg";
+		global_kill=yes;
+		remote=yes;
+		unkline=yes;
+		gline=yes;
+		nick_changes=yes;
+		die=yes;
+		class="3";
+	};
+
+	operator {
+		name="Dianora";
+		host="db@127.0.0.1";
+		password="heFw0NKyvGSTg";
+		global_kill=yes;
+		remote=yes;
+		unkline=yes;
+		gline=yes;
+		nick_changes=yes;
+		die=yes;
+		class="3";
+	};
+
+	operator {
+		name="Dianora";
+		host="*dbn";
+		password="heFw0NKyvGSTg";
+		global_kill=yes;
+		remote=yes;
+		unkline=yes;
+		gline=yes;
+		nick_changes=yes;
+		die=yes;
+		class="3            ";
+	};
+
+	quarantine {
+		name="#madland";
+		reason="lame channel";
+	};
+
+	quarantine {
+		name="lamestbot";
+		reason="You have to be kidding me";
+	};
+
+	quarantine {
+		name="lamestbot";
+		reason="You have to be kidding me";
+	};
+
+	quarantine {
+		name="foobar";
+		reason="test";
+	};
+
+	quarantine {
+		name="*Serv";
+		reason="Reserved for HybNet services                   ";
+	};
+
+	connect {
+		name="irc.imyth.com";
+		host="irc.imyth.com";
+		send_password="l00p3r";
+		accept_password="5u31ts";
+		port="6666";
+		compressed;
+		hub_mask="*";
+		class="3";
+	};
+
