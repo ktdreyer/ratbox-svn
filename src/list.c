@@ -35,6 +35,7 @@
 #include "s_log.h"
 #include "send.h"
 #include "memory.h"
+#include "balloc.h"
 
 #include <assert.h>
 #include <string.h>
@@ -44,6 +45,22 @@
 int links_count=0;
 int user_count=0;
 
+/*
+ * initUser
+ *
+ * inputs	- none
+ * outputs	- none
+ *
+ * side effects - Creates a block heap for struct Users
+ *
+ */
+static BlockHeap *user_heap;
+void initUser(void)
+{
+  user_heap = BlockHeapCreate(sizeof(struct User), 1024);
+  if(!user_heap)
+     outofmemory();	
+}
 /*
  * make_user
  *
@@ -59,16 +76,10 @@ struct User* make_user(struct Client *client_p)
   user = client_p->user;
   if (!user)
     {
-      user = (struct User *)MyMalloc(sizeof (struct User));
+      user = (struct User *)BlockHeapAlloc(user_heap);
 
       ++user_count;
 
-      /* The commented out lines here are
-       * for documentation purposes only
-       * as they are zeroed by MyMalloc
-       */
-
-#if 0
       user->away = NULL;
       user->server = (char *)NULL;      /* scache server name */
       user->joined = 0;
@@ -77,7 +88,6 @@ struct User* make_user(struct Client *client_p)
       user->invited.head = NULL;
       user->invited.tail = NULL;
       user->id[0] = '\0';
-#endif
       user->refcnt = 1;
       client_p->user = user;
     }
@@ -147,7 +157,7 @@ void _free_user(struct User* user, struct Client* client_p)
         assert(0);
       }
 
-      MyFree(user);
+      BlockHeapFree(user_heap, user);
       --user_count;
       assert(user_count >= 0);
     }

@@ -587,6 +587,7 @@ int main(int argc, char *argv[])
  init_host_hash();             /* Host-hashtable. */
  clear_hash_parse();
  init_client();
+ initUser();
  initclass();
  initwhowas();
  init_stats();
