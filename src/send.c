@@ -118,12 +118,6 @@ dead_link(struct Client *to, char *notice)
 {
   SetDead(to);
 
-#if 0
-  exit_client(to, to, &me,
-              (to->flags & FLAGS_SENDQEX) ?
-              "SendQ exceeded" : "Dead socket");
-
-#endif
   /*
    * If because of buffer problem then clean linebuf's now so that
    * notices don't hurt operators below.
@@ -1040,13 +1034,6 @@ sendto_anywhere(struct Client *to, struct Client *from,
 {
   va_list args;
   buf_head_t linebuf;
-
-  /* this check stops clients privmsg'ing themselves: BAD. */
-#if 0
-  /* This check is worth doing... */
-  if (from->from == to->from)
-    return;
-#endif
 
   linebuf_newbuf(&linebuf);
   va_start(args, pattern);
