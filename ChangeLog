@@ -1,3 +1,15 @@
+leeh        2003/05/15 15:30:17 UTC	(20030515_8)
+
+  Modified files:
+    modules              m_join.c 
+  Log:
+  - strtoken() doesnt like LOCAL_COPY being inside it.
+  
+  Revision  Changes    Path
+  1.121     +5 -3      ircd-ratbox/modules/m_join.c
+
+
+
 leeh        2003/05/15 15:19:06 UTC	(20030515_7)
 
   Modified files:
