@@ -1,3 +1,8 @@
+*** 20001220_25 by ryan
+!ptr && ptr->bleah?
+wtf?.. don't think so.. try || :)
+
+
 *** 20001220_24 by ejb
 - fixed m_sjoin() for +Z
 
