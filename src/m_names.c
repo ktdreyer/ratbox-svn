@@ -191,7 +191,7 @@ int m_names(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
    * First, do all visible channels (public and the one user self is)
    */
 
-  for (chptr = channel; chptr; chptr = chptr->nextch)
+  for (chptr = GlobalChannelList; chptr; chptr = chptr->nextch)
     {
       if ((chptr != ch2ptr) && !BadPtr(para))
         continue; /* -- wanted a specific channel */

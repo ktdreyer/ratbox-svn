@@ -783,7 +783,7 @@ int server_estab(struct Client *cptr)
        yet - must be different each time and !=0, so we
        alternate between 1 and 2 -orabidoo
        */
-    for (chptr = channel; chptr; chptr = chptr->nextch)
+    for (chptr = GlobalChannelList; chptr; chptr = chptr->nextch)
       {
         for (l = chptr->members; l; l = l->next)
           {

@@ -613,8 +613,8 @@ int m_hash(struct Client *cptr, struct Client *sptr,int parc,char *parv[])
 
         sendto_one(sptr,"NOTICE %s :Rehashing Channel List.", parv[0]);
         clear_channel_hash_table();
-        for (acptr = channel; acptr; acptr = acptr->nextch)
-          (void)add_to_channel_hash_table(acptr->chname, acptr);
+        for (acptr = GlobalChannelList; acptr; acptr = acptr->nextch)
+          add_to_channel_hash_table(acptr->chname, acptr);
         break;
       }
     case 'H' :

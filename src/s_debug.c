@@ -307,7 +307,7 @@ void count_memory(struct Client* cptr, char* nick)
   user_mem          = user_count   * sizeof(struct User);
   server_mem        = server_count * sizeof(struct Server);
 
-  for (chptr = channel; chptr; chptr = chptr->nextch)
+  for (chptr = GlobalChannelList; chptr; chptr = chptr->nextch)
     {
       ++channel_count;
       channel_mem += (strlen(chptr->chname) + 1 + sizeof(struct Channel));

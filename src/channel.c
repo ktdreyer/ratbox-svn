@@ -56,17 +56,17 @@
 #ifdef NEED_SPLITCODE
 
 static void check_still_split();
-int server_was_split=YES;
-int got_server_pong;
-time_t server_split_time;
+int         server_was_split=YES;
+int         got_server_pong;
+time_t      server_split_time;
 
 #if defined(PRESERVE_CHANNEL_ON_SPLIT) || defined(NO_JOIN_ON_SPLIT)
-struct Channel *empty_channel_list=(struct Channel*)NULL;
+struct Channel* empty_channel_list = NULL;
 void remove_empty_channels();
 #endif
 #endif
 
-struct Channel* channel = 0;
+struct Channel* GlobalChannelList = 0;
 
 static  int     add_banid (struct Client *, struct Channel *, char *);
 static  int     add_exceptid(struct Client *, struct Channel *, char *);
@@ -2322,11 +2322,11 @@ struct Channel* get_channel(struct Client *cptr, char *chname, int flag)
        * NOTE: strcpy ok here, we have allocated strlen + 1
        */
       strcpy(chptr->chname, chname);
-      if (channel)
-        channel->prevch = chptr;
+      if (GlobalChannelList)
+        GlobalChannelList->prevch = chptr;
       chptr->prevch = NULL;
-      chptr->nextch = channel;
-      channel = chptr;
+      chptr->nextch = GlobalChannelList;
+      GlobalChannelList = chptr;
       if (Count.myserver == 0)
         chptr->locally_created = YES;
       chptr->keep_their_modes = YES;
@@ -2468,7 +2468,7 @@ static  void    sub1_from_channel(struct Channel *chptr)
           if (chptr->prevch)
             chptr->prevch->nextch = chptr->nextch;
           else
-            channel = chptr->nextch;
+            GlobalChannelList = chptr->nextch;
           if (chptr->nextch)
             chptr->nextch->prevch = chptr->prevch;
 
@@ -2862,7 +2862,7 @@ int     count_channels(struct Client *sptr)
   struct Channel      *chptr;
   int   count = 0;
 
-  for (chptr = channel; chptr; chptr = chptr->nextch)
+  for (chptr = GlobalChannelList; chptr; chptr = chptr->nextch)
     count++;
   return (count);
 }
@@ -2944,7 +2944,7 @@ void sync_channels(time_t delta)
   register      struct Channel        *chptr;
   time_t newts;
 
-  for (chptr = channel; chptr; chptr = chptr->nextch)
+  for (chptr = GlobalChannelList; chptr; chptr = chptr->nextch)
     {
       if(chptr->locally_created)
         {

@@ -79,7 +79,7 @@ struct Channel
 };
 
 typedef struct  Channel aChannel;
-extern  struct  Channel *channel;
+extern  struct  Channel* GlobalChannelList;
 
 extern const char* const PartFmt;
 
