@@ -267,7 +267,7 @@ check_pings_list(dlink_list * list)
 		 ** Note: No need to notify opers here. It's
 		 ** already done when "FLAGS_DEADSOCKET" is set.
 		 */
-		if(client_p->flags & FLAGS_DEADSOCKET)
+		if(!MyConnect(client_p))
 		{
 			/* Ignore it, its been exited already */
 			continue;
