@@ -1,3 +1,21 @@
+*** 20001111_1 by db
+- initial rewrite of m_list.c moved some code into channel.c for the moment.
+  is- can do a better job on this later (HI!)
+
+- m_admin now only available locally if unregistered (rodder's fix in 6)
+  this allows one to figure out just who the loser is thats connecting
+  to your server without having to register... yet gets rid of the 
+  stupid nick collide "feature"
+
+- modules/Makefile should really be generated from configure no? for now
+  I've modified modules/Makefile to generate m_list.so again since I've
+  moved some of the depedancies out of m_list.c
+  is- can figure out what to do with this later. (HI again!) at least
+  the code is sane now. (I've left code #if 0 out in m_list.c so it
+  can go back in later)
+
+
+
 *** 20001110_3 by db
 - added missing m_list.c in Makefile.in
 
