@@ -79,8 +79,9 @@ struct Channel
 };
 
 typedef struct  Channel aChannel;
-
 extern  struct  Channel *channel;
+
+extern const char* const PartFmt;
 
 #define CREATE 1        /* whether a channel should be
                            created or just tested for existance */
@@ -113,7 +114,14 @@ extern void    channel_modes(struct Client *, char *, char *, struct Channel*);
 extern void    set_channel_mode(struct Client *, struct Client *, 
                                 struct Channel *, int, char **);
 
+extern struct Channel* get_channel(struct Client* cptr, 
+                                   char* chname, int flag);
 
+extern int     can_join(struct Client* client, struct Channel* chan, 
+                        char* key, int* flags);
+
+extern void    add_user_to_channel(struct Channel* chptr, 
+                                   struct Client* who, int flags);
 
 /* this should eliminate a lot of ifdef's in the main code... -orabidoo */
 #ifdef BAN_INFO
