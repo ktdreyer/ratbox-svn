@@ -348,7 +348,7 @@ struct exit_client_hook
 #define FLAGS_HIDDEN       0x40000	/* hidden server */
 #define FLAGS_EOB          0x80000	/* EOB */
 #define FLAGS_MYCONNECT	   0x100000	/* MyConnect */
-#define FLAGS_ABORTED	   0x200000	/* IsAborted */
+#define FLAGS_IOERROR      0x200000	/* IO error */
 /* umodes, settable flags */
 
 #define UMODE_SERVNOTICE   0x0001	/* server notices such as kill */
@@ -427,11 +427,12 @@ struct exit_client_hook
 #define HasSentEob(x)		((x)->flags & FLAGS_EOB)
 #define IsDead(x)          	((x)->flags &  FLAGS_DEAD)
 #define SetDead(x)         	((x)->flags |= FLAGS_DEAD)
-#define IsClosing(x)		((x)->flags & FLAGS_CLOSING)	/* read error */
+#define IsClosing(x)		((x)->flags & FLAGS_CLOSING)
 #define SetClosing(x)		((x)->flags |= FLAGS_CLOSING)
-#define IsAborted(x)		((x)->flags & FLAGS_ABORTED)	/* write error */
-#define SetAborted(x)		((x)->flags |= FLAGS_ABORTED)
-#define IsAnyDead(x)		(IsAborted(x) || IsDead(x) || IsClosing(x))
+#define IsIOError(x)		((x)->flags & FLAGS_IOERROR)
+#define SetIOError(x)		((x)->flags |= FLAGS_IOERROR)
+#define IsAnyDead(x)		(IsIOError(x) || IsDead(x) || IsClosing(x))
+#define IsIODead(x)		(IsIOError(x) || IsDead(x))
 
 /* oper flags */
 #define MyOper(x)               (MyConnect(x) && IsOper(x))

@@ -1233,7 +1233,7 @@ dead_link(struct Client *client_p)
 
     	abt->client = client_p;
 	s_assert(dlinkFind(&abort_list, client_p) == NULL);
-	SetAborted(client_p);
+	SetIOError(client_p);
 	dlinkAdd(abt, &abt->node, &abort_list);
 }
 
@@ -1573,8 +1573,15 @@ exit_client(struct Client *client_p,	/* The local client originating the
 	    const char *comment	/* Reason for the exit */
 	)
 {
-	if(IsDead(source_p))
+	if(IsDead(source_p) || IsClosing(source_p))
 		return -1;
+
+	/* note, this HAS to be here, when we exit a client we attempt to
+	 * send them data, if this generates a write error we must *not* add
+	 * them to the abort list --fl
+	 */
+	SetClosing(source_p);
+
 	if(MyConnect(source_p))
 	{
 		/* Local clients of various types */
@@ -2115,7 +2122,7 @@ error_exit_client(struct Client *client_p, int error)
 	if(IsAnyDead(client_p))
 		return;
 
-	SetClosing(client_p);
+	SetIOError(client_p);
 
 	if(IsServer(client_p) || IsHandshake(client_p))
 	{

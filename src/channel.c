@@ -1053,8 +1053,8 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
 			 * which even then won't work as we don't always know the uid -A1kmm.
 			 */
 			if(arg && ((mc == MAXMODEPARAMS) ||
-				(arglen + pbl + 1) > sizeof(parabuf) ||
-				(arglen + pbl + mbl + 2) > BUFSIZE))
+				(arglen + pbl + 3) > sizeof(parabuf) ||
+				(arglen + pbl + mbl + 4) > BUFSIZE-5))
 			{
 				if(nc != 0)
 					sendto_server(client_p, chptr, cap, nocap,
