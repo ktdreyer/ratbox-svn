@@ -36,7 +36,7 @@ void restart(char *mesg)
 void server_reboot(void)
 {
   int i;
-  
+
   sendto_realops_flags(FLAGS_ALL,
 		       "Aieeeee!!!  Restarting server... memory: %d",
 		       get_maxrss());
@@ -48,9 +48,12 @@ void server_reboot(void)
    * when close handlers come into existance, comm_close() will be called
    * below, and the data flushing will be implicit.
    *    -- adrian
+   *
+   * bah, for now, the program ain't coming back to here, so forcibly
+   * close everything the "wrong" way for now, and just LEAVE...
    */
   for (i = 0; i < MAXCONNECTIONS; ++i)
-    fd_close(i);
+    close(i);
   execv(SPATH, myargv);
 
   exit(-1);
