@@ -1,3 +1,7 @@
+*** 20010321_2 by ejb
+- warn if user specified no $MAKE to configure..
+
+
 *** 20010321_1 by ejb
 - detect in configure how we should include files in Makefile.
   This isn't a perfect test, but it should work..
