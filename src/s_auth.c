@@ -144,7 +144,6 @@ release_auth_client(struct AuthRequest *auth)
 	client->localClient->auth_request = NULL;
 	dlinkDelete(&auth->node, &auth_poll_list);
 	free_auth_request(auth);	
-	client->localClient->auth_request = NULL;
 	if(client->localClient->fd > highest_fd)
 		highest_fd = client->localClient->fd;
 
@@ -182,7 +181,6 @@ auth_dns_callback(void *vptr, adns_answer * reply)
 		else {
 			sendheader(auth->client, REPORT_HOST_TOOLONG);
 		}
-		MyFree(reply);
 	}
 	else
 	{
