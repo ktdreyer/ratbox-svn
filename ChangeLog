@@ -1,3 +1,16 @@
+leeh        2004/03/08 08:53:00 EST	(20040308_4)
+
+  Modified files:
+    .                    configure configure.ac 
+  Log:
+  - attempted fix at the test of gcc on darwin
+  
+  Revision  Changes    Path
+  7.212     +12 -8     ircd-ratbox/configure
+  7.25      +11 -8     ircd-ratbox/configure.ac
+
+
+
 leeh        2004/03/08 07:49:27 EST	(20040308_3)
 
   Modified files:
