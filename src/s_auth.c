@@ -164,12 +164,8 @@ release_auth_client(struct AuthRequest *auth)
 static void
 auth_dns_callback(void *vptr, adns_answer * reply)
 {
-
 	struct AuthRequest *auth = (struct AuthRequest *) vptr;
 	ClearDNSPending(auth);
-
-
-
 
 	if(reply && (reply->status == adns_s_ok))
 	{
