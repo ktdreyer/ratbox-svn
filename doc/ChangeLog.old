@@ -1,3 +1,15 @@
+androsyn    2002/06/10 21:42:36 EDT	(20020611_6)
+
+  Modified files:
+    src                  channel.c 
+  Log:
+  Don't bother to free the topic if its not set
+  
+  Revision  Changes    Path
+  7.321     +2 -0      ircd-hybrid-7/src/channel.c
+
+
+
 androsyn    2002/06/10 21:41:29 EDT	(20020611_5)
 
   Modified files:
