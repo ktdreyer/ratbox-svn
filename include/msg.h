@@ -57,14 +57,6 @@ struct  Message
   MessageHandler handlers[LAST_HANDLER_TYPE];
 };
 
-struct MessageTree
-{
-  char*               final;
-  struct Message*     msg;
-  struct MessageTree* pointers[26];
-}; 
-
-typedef struct MessageTree MESSAGE_TREE;
 
 #ifdef DBOP
 #define MSG_DBOP     "DBOP"

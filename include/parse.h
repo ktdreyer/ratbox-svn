@@ -29,6 +29,15 @@
 struct Message;
 struct Client;
 
+struct MessageTree
+{
+  char*               final;
+  struct Message*     msg;
+  struct MessageTree* pointers[26];
+}; 
+
+typedef struct MessageTree MESSAGE_TREE;
+
 extern  int     parse (struct Client *, char *, char *);
 extern  void    init_tree_parse (struct Message *);
 extern  int     mod_del_cmd(char *cmd);
