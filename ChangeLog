@@ -1,3 +1,16 @@
+leeh        2003/08/26 12:17:24 EDT	(20030826_2)
+
+  Modified files:
+    modules/core         m_mode.c 
+  Log:
+  - added back get_channel_access(), its quicker than testing MyClient() in
+    every chm_() function
+  
+  Revision  Changes    Path
+  1.90      +30 -20    ircd-ratbox/modules/core/m_mode.c
+
+
+
 leeh        2003/08/26 11:52:01 EDT	(20030826_1)
 
   Modified files:
