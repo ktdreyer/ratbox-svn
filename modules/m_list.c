@@ -143,7 +143,8 @@ static int list_all_channels(struct Client *source_p)
 
   /* give them an output limit of 90% of their sendq. --fl */
   sendq_limit = (int) get_sendq(source_p);
-  sendq_limit *= (int)0.9;
+  sendq_limit /= 10;
+  sendq_limit *= 9;
 
   sendto_one(source_p, form_str(RPL_LISTSTART), me.name, source_p->name);
 
