@@ -31,7 +31,7 @@
 #define BAD_PING                -2
 #define BAD_CLIENT_CLASS        -3
 
-aClass* ClassList;
+struct Class* ClassList;
 
 int     get_conf_class(struct ConfItem *aconf)
 {
@@ -59,7 +59,7 @@ static  int     get_conf_ping(struct ConfItem *aconf)
 int     get_client_class(struct Client *acptr)
 {
   struct SLink  *tmp;
-  aClass        *cl;
+  struct Class        *cl;
   int   retc = BAD_CLIENT_CLASS;
 
   if (acptr && !IsMe(acptr)  && (acptr->confs))
@@ -110,7 +110,7 @@ int     get_client_ping(struct Client *acptr)
   return (ping);
 }
 
-int     get_con_freq(aClass *clptr)
+int     get_con_freq(struct Class *clptr)
 {
   if (clptr)
     return (ConFreq(clptr));
@@ -131,12 +131,12 @@ void    add_class(int c_class,
                   int maxli,
                   long sendq)
 {
-  aClass *t, *p;
+  struct Class *t, *p;
 
   t = find_class(c_class);
   if ((t == ClassList) && (c_class != 0))
     {
-      p = (aClass *)make_class();
+      p = make_class();
       p->next = t->next;
       t->next = p;
     }
@@ -154,9 +154,9 @@ void    add_class(int c_class,
     Links(p) = 0;
 }
 
-aClass  *find_class(int cclass)
+struct Class  *find_class(int cclass)
 {
-  aClass *cltmp;
+  struct Class *cltmp;
   
   for (cltmp = ClassList; cltmp; cltmp = cltmp->next)
     if (ClassType(cltmp) == cclass)
@@ -166,7 +166,7 @@ aClass  *find_class(int cclass)
 
 void    check_class()
 {
-  aClass *cltmp, *cltmp2;
+  struct Class *cltmp, *cltmp2;
 
   Debug((DEBUG_DEBUG, "Class check:"));
 
@@ -187,9 +187,9 @@ void    check_class()
     }
 }
 
-void    initclass()
+void initclass()
 {
-  ClassList = (aClass *)make_class();
+  ClassList = make_class();
 
   ClassType(ClassList) = 0;
   ConFreq(ClassList) = CONNECTFREQUENCY;
@@ -202,7 +202,7 @@ void    initclass()
 
 void    report_classes(struct Client *sptr)
 {
-  aClass *cltmp;
+  struct Class *cltmp;
 
   for (cltmp = ClassList; cltmp; cltmp = cltmp->next)
     sendto_one(sptr, form_str(RPL_STATSYLINE), me.name, sptr->name,
@@ -210,12 +210,12 @@ void    report_classes(struct Client *sptr)
                MaxLinks(cltmp), MaxSendq(cltmp));
 }
 
-long    get_sendq(struct Client *cptr)
+size_t get_sendq(struct Client *cptr)
 {
   int   sendq = MAXSENDQLENGTH;
   int   retc = BAD_CLIENT_CLASS;
   struct SLink  *tmp;
-  aClass        *cl;
+  struct Class        *cl;
 
   if (cptr && !IsMe(cptr)  && (cptr->confs))
     for (tmp = cptr->confs; tmp; tmp = tmp->next)
