@@ -1,3 +1,16 @@
+leeh        2003/02/19 15:24:37 UTC	(20030219_0)
+
+  Modified files:
+    src                  channel_mode.c 
+  Log:
+  - due to the way we use LOCAL_COPY, incrementing pointers in the function
+    cant be done
+  
+  Revision  Changes    Path
+  7.98      +16 -7     ircd-ratbox/src/channel_mode.c
+
+
+
 leeh        2003/02/17 00:53:34 UTC	(20030217_1)
 
   Modified files:
