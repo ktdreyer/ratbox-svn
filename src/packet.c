@@ -158,7 +158,8 @@ parse_client_queued(struct Client *client_p)
  *
  * marks the end of the clients grace period
  */
-void flood_endgrace(struct Client *client_p)
+void
+flood_endgrace(struct Client *client_p)
 {
   SetFloodDone(client_p);
 
@@ -431,13 +432,14 @@ read_packet(int fd, void *data)
   /* Check to make sure we're not flooding */
   if (IsPerson(client_p) &&
      (linebuf_alloclen(&client_p->localClient->buf_recvq) >
-      ConfigFileEntry.client_flood)) {
+      ConfigFileEntry.client_flood))
+  {
       if (!(ConfigFileEntry.no_oper_flood && IsOper(client_p)))
       {
        exit_client(client_p, client_p, client_p, "Excess Flood");
        return;
       }
-    }
+  }
 
   /* server fd may have changed */
   fd_r = client_p->localClient->fd;
@@ -481,7 +483,8 @@ read_packet(int fd, void *data)
  *      with client_p of "local" variation, which contains all the
  *      necessary fields (buffer etc..)
  */
-void client_dopacket(struct Client *client_p, char *buffer, size_t length)
+void
+client_dopacket(struct Client *client_p, char *buffer, size_t length)
 {
   assert(client_p != NULL);
   assert(buffer != NULL);
@@ -499,7 +502,8 @@ void client_dopacket(struct Client *client_p, char *buffer, size_t length)
    */
   client_p->localClient->receiveB += length;
 
-  if (client_p->localClient->receiveB > 1023) {
+  if (client_p->localClient->receiveB > 1023)
+  {
     client_p->localClient->receiveK += (client_p->localClient->receiveB >> 10);
     client_p->localClient->receiveB &= 0x03ff; /* 2^10 = 1024, 3ff = 1023 */
   }
