@@ -1,3 +1,9 @@
+*** 20001107_6 by ejb
+added support for /undline and /ungline (ported from toot's
+patch to -6)
+
+
+
 *** 20001107_5 by ejb
 we now propagate /away if the state is changing - ie if they were
 away before and are marking unaway, or vise verse.
