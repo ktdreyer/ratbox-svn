@@ -1,3 +1,18 @@
+leeh        2002/01/03 07:11:33 EST	(20020103_0)
+
+  Modified files:
+    modules              Makefile.in 
+    src                  modules-dld.c modules.c 
+  Log:
+  - made quit a core module
+  
+  Revision  Changes    Path
+  1.63      +1 -1      ircd-hybrid-7/modules/Makefile.in
+  1.15      +1 -0      ircd-hybrid-7/src/modules-dld.c
+  7.83      +1 -0      ircd-hybrid-7/src/modules.c
+
+
+
 leeh        2002/01/02 17:19:33 EST	(20020102_7)
 
   Modified files:
