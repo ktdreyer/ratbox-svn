@@ -1,3 +1,11 @@
+*** 20001216_8 by db
+- lazy link lljoin was relying on can_join which needed to be moved into
+  channel.c from m_join.c
+- applied einrides conf changes, which will remove the original I line
+  conf from an oper replacing it with the new one.
+
+
+
 *** 20001216_7 by db
 - ok did some more clean up on LazyLinks connect works fine more or less
   The nicks are SJOIN'ed one nick at a time to the leaf, That should be
