@@ -863,16 +863,16 @@ static char* ClientFlags(FILE *out, char* spoof, char *tmp)
 	  fprintf(out,"\t\tnomatch_ip;\n");	  
           break;
         case '^':        /* is exempt from k/g lines */
-	  fprintf(out,"\t\tkline_exempt;\n");	  
+	  fprintf(out,"\t\tkline_exempt=yes;\n");	  
           break;
         case '&':        /* can run a bot */
-	  fprintf(out,"\t\tbot;\n");	  
+	  fprintf(out,"\t\tallow_bots=yes;\n");	  
           break;
         case '>':        /* can exceed max connects */
-	  fprintf(out,"\t\texceed_limit;\n");	  
+	  fprintf(out,"\t\texceed_limit=yes;\n");	  
           break;
         case '<':        /* can idle */
-	  fprintf(out,"\t\tcan_idle;\n");	  
+	  fprintf(out,"\t\tcan_idle=yes;\n");	  
           break;
         default:
           return tmp;

@@ -59,8 +59,8 @@
 
 	client {
 		passwd="";
-		kline_exempt;
-		bot;
+		kline_exempt=yes;
+		allow_bots=yes;
 		have_ident;
 		no_tilde;
 		allow="db@*db.net";
@@ -70,8 +70,8 @@
 	client {
 		passwd="";
 		spoof="localhost";
-		kline_exempt;
-		bot;
+		kline_exempt=yes;
+		allow_bots=yes;
 		have_ident;
 		no_tilde;
 		allow="db@home.db.net";
