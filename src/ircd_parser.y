@@ -393,6 +393,7 @@ modules_item:    modules_module | modules_path |
 
 modules_module:  MODULE '=' QSTRING ';'
 {
+#ifndef STATIC_MODULES /* NOOP in the static case */
   char *m_bn;
 
   m_bn = irc_basename(yylval.string);
@@ -405,11 +406,14 @@ modules_module:  MODULE '=' QSTRING ';'
   load_one_module (yylval.string);
 
   MyFree(m_bn);
+#endif
 };
 
 modules_path: PATH '=' QSTRING ';'
 {
+#ifndef STATIC_MODULES
   mod_add_path(yylval.string);
+#endif
 };
 
 

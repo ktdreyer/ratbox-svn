@@ -21,9 +21,9 @@
 
 #ifndef INCLUDED_modules_h
 #define INCLUDED_modules_h
-
+#include "config.h"
 #include "setup.h"
-
+#include "parse.h"
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
@@ -32,6 +32,7 @@
 #include "msg.h"
 #include "memory.h"
 
+#ifndef STATIC_MODULES
 struct module {
   char *name;
   char *version;
@@ -62,4 +63,80 @@ extern int findmodule_byname (char *);
 extern char* irc_basename(char *);
 extern void modules_init(void);
 
+#else /* STATIC_MODULES */
+
+extern struct Message accept_msgtab;
+extern struct Message admin_msgtab;
+extern struct Message away_msgtab;
+extern struct Message capab_msgtab;
+extern struct Message cburst_msgtab;
+#ifdef OPENSSL
+extern struct Message challenge_msgtab;
 #endif
+extern struct Message cjoin_msgtab;
+extern struct Message client_msgtab;
+extern struct Message close_msgtab;
+extern struct Message connect_msgtab;
+extern struct Message die_msgtab;
+extern struct Message dmem_msgtab;
+extern struct Message drop_msgtab;
+extern struct Message eob_msgtab;
+extern struct Message error_msgtab;
+extern struct Message gline_msgtab;
+extern struct Message help_msgtab;
+extern struct Message info_msgtab;
+extern struct Message invite_msgtab;
+extern struct Message ison_msgtab;
+extern struct Message join_msgtab;
+extern struct Message kick_msgtab;
+extern struct Message kill_msgtab;
+extern struct Message kline_msgtab;
+extern struct Message dline_msgtab;
+extern struct Message knock_msgtab;
+extern struct Message links_msgtab;
+extern struct Message list_msgtab;
+extern struct Message lljoin_msgtab;
+extern struct Message llnick_msgtab;
+extern struct Message locops_msgtab;
+extern struct Message lusers_msgtab;
+extern struct Message privmsg_msgtab;
+extern struct Message notice_msgtab;
+extern struct Message mode_msgtab;
+extern struct Message motd_msgtab;
+extern struct Message names_msgtab;
+extern struct Message nburst_msgtab;
+extern struct Message nick_msgtab;
+extern struct Message oper_msgtab;
+extern struct Message operwall_msgtab;
+extern struct Message part_msgtab;
+extern struct Message pass_msgtab;
+extern struct Message ping_msgtab;
+extern struct Message pong_msgtab;
+extern struct Message post_msgtab;
+extern struct Message quit_msgtab;
+extern struct Message rehash_msgtab;
+extern struct Message restart_msgtab;
+extern struct Message server_msgtab;
+extern struct Message set_msgtab;
+extern struct Message sjoin_msgtab;
+extern struct Message squit_msgtab;
+extern struct Message stats_msgtab;
+extern struct Message svinfo_msgtab;
+extern struct Message testline_msgtab;
+extern struct Message time_msgtab;
+extern struct Message topic_msgtab;
+extern struct Message trace_msgtab;
+extern struct Message msgtabs[];
+extern struct Message user_msgtab;
+extern struct Message userhost_msgtab;
+extern struct Message users_msgtab;
+extern struct Message version_msgtab;
+extern struct Message wallops_msgtab;
+extern struct Message who_msgtab;
+extern struct Message whois_msgtab;
+extern struct Message whowas_msgtab;
+
+extern void load_all_modules(int check);
+
+#endif /* STATIC_MODULES */
+#endif /* INCLUDED_modules_h */

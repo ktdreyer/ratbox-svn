@@ -18,8 +18,11 @@
  *
  * $Id$
  */
+#include "config.h"
 
+#ifndef STATIC_MODULES
 #include <dlfcn.h>
+#endif
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -33,7 +36,6 @@
 
 #include "modules.h"
 #include "s_log.h"
-#include "config.h"
 #include "ircd.h"
 #include "client.h"
 #include "send.h"
@@ -45,6 +47,10 @@
 #include "memory.h"
 #include "tools.h"
 #include "list.h"
+
+
+
+#ifndef STATIC_MODULES
 
 #ifndef RTLD_NOW
 #define RTLD_NOW RTLD_LAZY /* openbsd deficiency */
@@ -538,3 +544,83 @@ mo_modrestart (struct Client *client_p, struct Client *source_p, int parc, char 
   log(L_WARN, "Module Restart: %d modules unloaded, %d modules loaded",
       modnum, num_mods);
 }
+
+#else /* STATIC_MODULES */
+
+void
+load_all_modules(int check)
+{
+	mod_add_cmd(&accept_msgtab);
+	mod_add_cmd(&admin_msgtab);
+	mod_add_cmd(&away_msgtab);
+	mod_add_cmd(&capab_msgtab);
+	mod_add_cmd(&cburst_msgtab);
+#ifdef OPENSSL
+	mod_add_cmd(&challenge_msgtab);
+#endif
+	mod_add_cmd(&cjoin_msgtab);
+	mod_add_cmd(&client_msgtab);
+	mod_add_cmd(&close_msgtab);
+	mod_add_cmd(&connect_msgtab);
+	mod_add_cmd(&die_msgtab);
+	mod_add_cmd(&dmem_msgtab);
+	mod_add_cmd(&drop_msgtab);
+	mod_add_cmd(&eob_msgtab);
+	mod_add_cmd(&gline_msgtab);
+	mod_add_cmd(&help_msgtab);
+	mod_add_cmd(&info_msgtab);
+	mod_add_cmd(&invite_msgtab);
+	mod_add_cmd(&ison_msgtab);
+	mod_add_cmd(&join_msgtab);
+	mod_add_cmd(&kick_msgtab);
+	mod_add_cmd(&kill_msgtab);
+	mod_add_cmd(&kline_msgtab);
+	mod_add_cmd(&dline_msgtab);
+	mod_add_cmd(&knock_msgtab);
+	mod_add_cmd(&links_msgtab);
+	mod_add_cmd(&list_msgtab);
+	mod_add_cmd(&lljoin_msgtab);
+	mod_add_cmd(&llnick_msgtab);
+	mod_add_cmd(&locops_msgtab);
+	mod_add_cmd(&lusers_msgtab);
+	mod_add_cmd(&privmsg_msgtab);
+	mod_add_cmd(&notice_msgtab);
+	mod_add_cmd(&mode_msgtab);
+	mod_add_cmd(&motd_msgtab);
+	mod_add_cmd(&names_msgtab);
+	mod_add_cmd(&nburst_msgtab);
+	mod_add_cmd(&nick_msgtab);
+	mod_add_cmd(&oper_msgtab);
+	mod_add_cmd(&operwall_msgtab);
+	mod_add_cmd(&part_msgtab);
+	mod_add_cmd(&pass_msgtab);
+	mod_add_cmd(&ping_msgtab);
+	mod_add_cmd(&pong_msgtab);
+	mod_add_cmd(&post_msgtab);
+	mod_add_cmd(&quit_msgtab);
+	mod_add_cmd(&rehash_msgtab);
+	mod_add_cmd(&restart_msgtab);
+	mod_add_cmd(&server_msgtab);
+	mod_add_cmd(&set_msgtab);
+	mod_add_cmd(&sjoin_msgtab);
+	mod_add_cmd(&squit_msgtab);
+	mod_add_cmd(&stats_msgtab);
+	mod_add_cmd(&svinfo_msgtab);
+	mod_add_cmd(&testline_msgtab);
+	mod_add_cmd(&time_msgtab);
+	mod_add_cmd(&topic_msgtab);
+	mod_add_cmd(&trace_msgtab);
+	mod_add_cmd(&msgtabs[0]);
+	mod_add_cmd(&msgtabs[1]);
+	mod_add_cmd(&msgtabs[2]);
+	mod_add_cmd(&user_msgtab);
+	mod_add_cmd(&userhost_msgtab);
+	mod_add_cmd(&users_msgtab);
+	mod_add_cmd(&version_msgtab);
+	mod_add_cmd(&wallops_msgtab);
+	mod_add_cmd(&who_msgtab);
+	mod_add_cmd(&whois_msgtab);
+	mod_add_cmd(&whowas_msgtab);
+}
+
+#endif /* STATIC_MODULES */
