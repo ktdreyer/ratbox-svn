@@ -1,3 +1,24 @@
+leeh        2003/04/09 16:01:06 UTC	(20030409_0)
+
+  Modified files:
+    include              hash.h s_newconf.h 
+    modules              m_xline.c 
+    src                  hash.c kdparse.c newconf.c s_newconf.c 
+  Log:
+  - added an xline hash for xlines without wildcards, this should offer
+    a fair speed improvement.
+  
+  Revision  Changes    Path
+  7.28      +16 -14    ircd-ratbox/include/hash.h
+  7.4       +6 -0      ircd-ratbox/include/s_newconf.h
+  1.21      +4 -2      ircd-ratbox/modules/m_xline.c
+  7.67      +64 -115   ircd-ratbox/src/hash.c
+  7.23      +1 -1      ircd-ratbox/src/kdparse.c
+  7.76      +1 -1      ircd-ratbox/src/newconf.c
+  7.4       +36 -0     ircd-ratbox/src/s_newconf.c
+
+
+
 androsyn    2003/04/06 22:47:52 UTC	(20030406_5)
 
   Modified files:
