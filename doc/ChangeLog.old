@@ -1,3 +1,7 @@
+*** 20010226_3 by androsyn
+memory.h was in the wrong place with MEMDEBUG set.
+
+
 *** 20010226_2 by androsyn
 More updates to adns.  Using the block allocator for struct DNSQuery now.
 
