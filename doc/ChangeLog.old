@@ -1,3 +1,7 @@
+*** 20010106_6 by fl_
+- fixes and added rate limiting to remote whois (whois nick nick)
+
+
 *** 20010106_5 by toot
 it doesn't break them :P  a missing blank line hardly matters
 
