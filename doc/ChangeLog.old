@@ -1,3 +1,8 @@
+*** 20001211_2 by db
+- removed unused variable
+
+
+
 *** 20001211_1 by db
 - m_eob.c was not reporting length of burst like it should have been
 - m_squit.c I forgot to send out WALLOPS when squit matched local link
