@@ -1,3 +1,19 @@
+androsyn    2005/03/22 20:13:55 UTC	(20050322_1)
+
+  Modified files:
+    modules              Makefile.am Makefile.in 
+  Added files:
+    modules              instdso.sh 
+  Log:
+  Add a helper script for installing modules, swipped from apache
+  
+  Revision  Changes    Path
+  1.4       +2 -4      ircd-ratbox/modules/Makefile.am
+  1.124                ircd-ratbox/modules/Makefile.in
+  1.1       +94 -0     ircd-ratbox/modules/instdso.sh (new)
+
+
+
 androsyn    2005/03/22 16:27:52 UTC	(20050322_0)
 
   Modified files:
