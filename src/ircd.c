@@ -83,7 +83,7 @@
 #include "modules.h"
 #include "memory.h"
 #include "hook.h"
-
+#include "debug.h"
 
 /*
  * for getopt
@@ -277,10 +277,11 @@ static void bad_command()
  * -n          - do not fork, run in foreground
  * -v          - print version and exit
  * -x          - set debug level, if compiled for debug logging
+ * -D <thing>  - enable debugging for <thing>
  */
 static void parse_command_line(int argc, char* argv[])
 {
-  const char* options = "d:f:h:k:l:nvx:"; 
+  const char* options = "d:f:h:k:l:nvx:D:"; 
   int         opt;
 
   while ((opt = getopt(argc, argv, options)) != EOF) {
@@ -308,6 +309,13 @@ static void parse_command_line(int argc, char* argv[])
     case 'l':
       if (optarg)
         logFileName = optarg;
+      break;
+    case 'D':
+      if(enable_debug(optarg) == -1)
+	{
+	  fprintf(stderr, "ircd: '%s' is not a valid debug option\n", optarg);
+	  exit(EXIT_FAILURE);
+	}
       break;
     case 'n':
       bootDaemon = 0; 
@@ -511,6 +519,9 @@ int main(int argc, char *argv[])
       exit(EXIT_FAILURE);
     }
 
+  printf("ircd: running in %s mode from %s\n", bootDaemon ? "background" : "foreground",
+	 ConfigFileEntry.dpath);
+ 
   setup_signals();
 
   /* We need this to initialise the fd array before anything else */
@@ -520,8 +531,9 @@ int main(int argc, char *argv[])
   eventInit();
 
   init_sys();
-  init_log(logFileName);
+  close_all_connections();
 
+  init_log(logFileName);
   init_netio();		/* This needs to be setup early ! -- adrian */
   init_resolver();	/* Needs to be setup before the io loop */
 
@@ -611,12 +623,9 @@ int main(int argc, char *argv[])
   write_pidfile();
 
   log(L_NOTICE, "Server Ready");
-  printf("server ready: %s\n", bootDaemon ? "detaching from terminal" : "not detaching");
 
   if (bootDaemon)
     daemon(1,1);
-
-  close_all_connections();
 
   eventAdd("cleanup_channels", cleanup_channels, NULL,
 	   CLEANUP_CHANNELS_TIME, 0);

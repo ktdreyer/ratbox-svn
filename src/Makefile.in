@@ -59,6 +59,7 @@ BASE_SRCS =                     \
   vchannel.c                    \
   class.c                       \
   client.c                      \
+  debug.c                       \
   dline_conf.c                  \
   event.c                       \
   fdlist.c                      \
