@@ -1,3 +1,15 @@
+a1kmm       2002/07/20 22:59:43 EDT	(20020721_0)
+
+  Modified files:
+    src                  s_serv.c 
+  Log:
+  - Fixed a core with servers dying while they are being established.
+  
+  Revision  Changes    Path
+  7.267     +2 -1      ircd-hybrid-7/src/s_serv.c
+
+
+
 leeh        2002/07/20 11:51:55 EDT	(20020720_3)
 
   Modified files:
