@@ -63,7 +63,10 @@ static int handle_command(struct Message *, struct Client *, struct Client *, in
 static int hash(char *p);
 static struct Message *hash_parse(char *);
 
-struct MessageHash *msg_hash_table[MAX_MSG_HASH+10];
+/* XXX - jdc: hopefully the fd-walkover bug is gone now... */
+/* struct MessageHash *msg_hash_table[MAX_MSG_HASH+10]; */
+
+struct MessageHash *msg_hash_table[MAX_MSG_HASH];
 
 static char buffer[1024];
 
