@@ -76,8 +76,6 @@ struct Message
 
 #define MFLG_SLOW	0x01	/* executed roughly once per 2s */
 #define MFLG_UNREG	0x02	/* available to unregistered clients */
-#define MFLG_ENCAP	0x04	/* available as an encap command */
-#define MFLG_ENCAPONLY	0x08	/* only available as an encap command */
 
 #define MAXPARA    15
 

@@ -50,8 +50,8 @@ static int ms_operspy(struct Client *client_p, struct Client *source_p,
 		      int parc, const char *parv[]);
 
 struct Message operspy_msgtab = {
-	"OPERSPY", 0, 0, 0, MFLG_ENCAP|MFLG_ENCAPONLY,
-	{mg_ignore, mg_ignore, {ms_operspy, 2}, {ms_operspy, 2}, mg_ignore, mg_ignore}
+	"OPERSPY", 0, 0, 0, MFLG_SLOW,
+	{mg_ignore, mg_ignore, mg_ignore, mg_ignore, {ms_operspy, 2}, mg_ignore}
 };
 
 mapi_clist_av1 operspy_clist[] = { &operspy_msgtab, NULL };

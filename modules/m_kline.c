@@ -259,7 +259,7 @@ handle_remote_kline(struct Client *source_p, int tkline_time,
 			return;
 
 		if(already_placed_kline(source_p, user, host, tkline_time))
-			return 0;
+			return;
 
 		aconf = make_conf();
 
@@ -299,7 +299,7 @@ handle_remote_kline(struct Client *source_p, int tkline_time,
 	else
 		check_klines();
 
-	return 0;
+	return;
 }
 
 /* mo_unkline()

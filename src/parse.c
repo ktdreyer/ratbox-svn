@@ -215,7 +215,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
 		mptr = hash_parse(ch);
 
 		/* no command or its encap only, error */
-		if(!mptr || !mptr->cmd || mptr->flags & MFLG_ENCAPONLY)
+		if(!mptr || !mptr->cmd)
 		{
 			/*
 			 * Note: Give error message *only* to recognized
@@ -372,11 +372,10 @@ handle_encap(struct Client *client_p, struct Client *source_p,
 
 	mptr = hash_parse(command);
 
-	if(mptr == NULL || mptr->cmd == NULL ||
-	   (mptr->flags & MFLG_ENCAP) == 0)
+	if(mptr == NULL || mptr->cmd == NULL)
 		return;
 
-	ehandler = mptr->handlers[client_p->handler];
+	ehandler = mptr->handlers[ENCAP_HANDLER];
 	handler = ehandler.handler;
 
 	if(parc < ehandler.min_para || 

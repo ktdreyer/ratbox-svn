@@ -41,8 +41,8 @@ struct Message capab_msgtab = {
 	{{mr_capab, 0}, mg_ignore, mg_ignore, mg_ignore, mg_ignore, mg_ignore}
 };
 struct Message gcap_msgtab = {
-	"GCAP", 0, 0, 0, MFLG_ENCAP | MFLG_ENCAPONLY,
-	{mg_ignore, mg_ignore, mg_ignore, {me_gcap, 2}, mg_ignore, mg_ignore}
+	"GCAP", 0, 0, 0, MFLG_SLOW,
+	{mg_ignore, mg_ignore, mg_ignore, mg_ignore, {me_gcap, 2}, mg_ignore}
 };
 
 mapi_clist_av1 capab_clist[] = { &capab_msgtab, &gcap_msgtab, NULL };
