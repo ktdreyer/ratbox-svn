@@ -1,3 +1,15 @@
+leeh        2002/07/06 07:05:04 EDT	(20020706_0)
+
+  Modified files:
+    modules              m_ping.c 
+  Log:
+  - fixed ping for LL
+  
+  Revision  Changes    Path
+  1.29      +15 -11    ircd-hybrid-7/modules/m_ping.c
+
+
+
 leeh        2002/07/04 19:21:56 EDT	(20020705_0)
 
   Modified files:
