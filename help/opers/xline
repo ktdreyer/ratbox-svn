@@ -8,8 +8,6 @@ The type field denotes how the XLINE works and may be:
   1 - Reject the user and send a warning to +r opers.
   2 - Reject the user silently.
 
-An XLINE can only be removed by editing the xline.conf file.
-
 Eg. /quote xline eggdrop?bot 2 :no bots
 
 - Requires Oper Priv: X

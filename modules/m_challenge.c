@@ -44,7 +44,7 @@
 #ifndef HAVE_LIBCRYPTO
 /* Maybe this should be an error or something?-davidt */
 /* now it is	-larne	*/
-int	challenge_load
+static int	challenge_load(void)
 {
 	sendto_realops_flags(UMODE_ALL, L_ALL, 
 		"Challenge module not loaded because OpenSSL is not available.");

@@ -64,7 +64,7 @@
 
 #ifndef HAVE_LIBCRYPTO
 
-DECLARE_MODULE(NULL, NULL, NULL, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV1(NULL, NULL, NULL, NULL, NULL, "$Revision$");
 #else
 
 static int bogus_host(char *host);
