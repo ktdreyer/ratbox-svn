@@ -237,6 +237,8 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
   ** changed how this works - now paramcount is simply the
   ** required number of arguments for a command.  imo the
   ** previous behavior isn't needed --is
+  ** ok, now we do support it, for ISON brokenness among
+  ** other things. --is
   */
 
   /* Note initially true: s==NULL || *(s-1) == '\0' !! */
