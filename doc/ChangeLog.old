@@ -1,3 +1,8 @@
+*** 20010707_3 by a1kmm
+- Reverted the testsuite module stuff, it probably shouldn't be committed
+  yet.
+
+
 *** 20010707_2 by a1kmm
 - Actually set the key/limit to 0 on -k / -l as join requires this, turning
   off the mode flag is not enough.
