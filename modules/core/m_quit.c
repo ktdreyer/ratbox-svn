@@ -35,7 +35,7 @@
 
 struct Message quit_msgtab = {
   MSG_QUIT, 0, 0, MFLG_SLOW | MFLG_UNREG, 0,
-  {m_quit, m_quit, m_error, mo_quit}
+  {m_quit, m_quit, ms_quit, mo_quit}
 };
 
 void
@@ -80,6 +80,24 @@ int     m_quit(struct Client *cptr,
      (sptr->firsttime + ANTI_SPAM_EXIT_MESSAGE_TIME) > CurrentTime)
     comment = "Client Quit";
 #endif
+  return exit_client(cptr, sptr, sptr, comment);
+}
+/*
+** m_quit
+**      parv[0] = sender prefix
+**      parv[1] = comment
+*/
+int     ms_quit(struct Client *cptr,
+               struct Client *sptr,
+               int parc,
+               char *parv[])
+{
+  char *comment = (parc > 1 && parv[1]) ? parv[1] : cptr->name;
+
+  sptr->flags |= FLAGS_NORMALEX;
+  if (strlen(comment) > (size_t) TOPICLEN)
+    comment[TOPICLEN] = '\0';
+
   return exit_client(cptr, sptr, sptr, comment);
 }
 

@@ -346,11 +346,10 @@ mo_modlist (struct Client *cptr, struct Client *sptr, int parc, char **parv)
 
   for(i = 0; i < num_mods; i++ )
     {
-      sendto_one(sptr, ":%s NOTICE %s :%s %X %s",
-		 me.name, sptr->name,
-		 modlist[i]->name,
-		 modlist[i]->address,
-		 modlist[i]->version);
+		sendto_one(sptr, form_str(RPL_MODLIST), me.name, parv[0],
+				   modlist[i]->name,
+				   modlist[i]->address,
+				   modlist[i]->version);
     }
   return 0;
 }

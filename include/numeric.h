@@ -167,8 +167,8 @@ extern const char* form_str(int);
  * -Dianora
  */
 #define RPL_STATSPLINE       220
-
 #define RPL_UMODEIS          221
+#define RPL_MODLIST          222
 
 #define RPL_STATSFLINE       224
 #define RPL_STATSDLINE       225
