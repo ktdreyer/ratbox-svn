@@ -528,6 +528,7 @@ static void set_local_gline(const char *oper_nick,
           
   aconf = make_conf();
   aconf->status = CONF_GLINE;
+  aconf->flags |= CONF_FLAGS_TEMPORARY;
 
   ircsprintf(buffer, "%s (%s)",reason,current_date);
       
