@@ -1,3 +1,8 @@
+*** 20000105_7 by db
+- oops. removed comments belonging to channel.c only
+
+
+
 *** 20000105_6 by db
 - committing the split out m_cburst.c m_drop.c m_lljoin.c
 
