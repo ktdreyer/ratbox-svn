@@ -1,8 +1,9 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-ratbox: an advanced Internet Relay Chat Daemon(ircd).
  *  m_resv.c: Reserves(jupes) a nickname or channel.
  *
  *  Copyright (C) 2001-2002 Hybrid Development Team
+ *  Copyright (C) 2002 ircd-ratbox development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by

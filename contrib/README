@@ -2,7 +2,7 @@ $Id$
 
 This directory contains modules and patches that have been contributed
 by other people, or aren't suitable for including into the 
-hybrid tree.  The coding team do not officially support the contrib/ 
+ircd-ratbox tree.  The coding team do not officially support the contrib/ 
 modules, or guarantee any of them will actually work.
 
 
@@ -74,6 +74,7 @@ spy_stats_notice.c   - Spy on clients doing all STATS
 spy_stats_p_notice.c - Spy on clients doing STATS p only
 spy_trace_notice.c   - Spy on clients doing TRACE/LTRACE
 spy_whois_notice.c   - Spy on local clients who WHOIS you.
+spy_whois_notice_global.c - Spy on remote clients who WHOIS you.
 
 Note: if you have both spy_stats_notice.c and spy_stats_p_notice.c loaded
 you will get two messages.

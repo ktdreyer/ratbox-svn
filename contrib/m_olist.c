@@ -1,5 +1,5 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-ratbox: an advanced Internet Relay Chat Daemon(ircd).
  *  m_olist.c: List channels.  olist is an oper only command
  *             that shows channels regardless of modes.  This
  *             is kinda evil, and might be morally wrong, but

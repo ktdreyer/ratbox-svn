@@ -3,14 +3,13 @@
    $Id$
 
    Copyright (c) 2001 by ircd-hybrid team
+   Copyright (c) 2002 ircd-ratbox development team
 
      ----------------------------------------------------------------------
 
-   Updated for Hybrid 7 (2000/12/28)
-
    When you type /version, you will often see something like this:
 
- hybrid-7beta7(20010803_2). irc.leeh.co.uk egGHIKMpTZp TS3ow
+ ircd-ratbox-1.0rc7(20021120_0). embers.lan egGHIKMpZ6 TS5ow
 
    Ever wondered what those funny chars mean after the version number? Well
    here they are:

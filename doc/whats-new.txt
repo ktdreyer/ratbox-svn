@@ -1,4 +1,4 @@
-There have been quite a few changes in Hybrid 7 and this is a list of the main 
+There have been quite a few changes in ircd-ratbox and this is a list of the main 
 new features:
 
 The Config File has drastically changed.  It now however allows most of the
@@ -192,7 +192,7 @@ options that were in config.h, to be changed with a /rehash.
 - Connection throttling has been included.  This allows fast reconnecting bots
   to be throttled.  Similar to ircu's implementation.
 
-- Hybrid now supports IRCnet-like redirection.  The redirserv and redirport
+- ircd-ratbox now supports IRCnet-like redirection.  The redirserv and redirport
   options in an auth {} block will allow an admin to specify other servers
   to forward user connections to.  The client must support the 010 numeric
   for this to work (EPIC supports it).  Note that there must always be a class
@@ -205,7 +205,7 @@ options that were in config.h, to be changed with a /rehash.
   provided in contrib, providing WHOIS notice, STATS notice, and LINKS notice.
   Others will be added as the ircd matures.
 
-- Hybrid now has the ISUPPORT/005 numeric, showing the client what modes this
+- ircd-ratbox now has the ISUPPORT/005 numeric, showing the client what modes this
   server will support, and what commands:
 
     KNOCK          - Support KNOCK

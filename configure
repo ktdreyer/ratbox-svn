@@ -2316,7 +2316,7 @@ if eval "test \"`echo '$ac_cv_header_'$ac_safe`\" = yes"; then
   :
 else
   echo "$ac_t""no" 1>&6
-{ echo "configure: error: ** stdarg.h could not be found - ircd-hybrid will not compile without it **" 1>&2; exit 1; }
+{ echo "configure: error: ** stdarg.h could not be found - ircd-ratbox will not compile without it **" 1>&2; exit 1; }
 fi
 
 

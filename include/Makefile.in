@@ -22,10 +22,10 @@ install:
 	-@if test ! -d $(prefix)/include; then \
 		echo "mkdir $(prefix)/include"; \
 		mkdir $(prefix)/include; \
-		mkdir $(prefix)/include/ircd-hybrid-7; \
+		mkdir $(prefix)/include/ircd-ratbox-7; \
 	fi
 	@for header in *.h; do \
-		${INSTALL_DATA} $$header $(prefix)/include/ircd-hybrid-7; \
+		${INSTALL_DATA} $$header $(prefix)/include/ircd-ratbox-7; \
 	done
 
 distclean:

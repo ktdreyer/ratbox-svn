@@ -249,7 +249,7 @@ AC_DEFUN(CHECK_SOCKLEN_T,
 CHECK_SOCKLEN_T
 
 dnl Check for stdarg.h - if we can't find it, halt configure
-AC_CHECK_HEADER(stdarg.h, , AC_MSG_ERROR(** stdarg.h could not be found - ircd-hybrid will not compile without it **))
+AC_CHECK_HEADER(stdarg.h, , AC_MSG_ERROR(** stdarg.h could not be found - ircd-ratbox will not compile without it **))
 
 dnl Checks for the existance of strlcat
 AC_CHECK_FUNCS(strlcat strlcpy)

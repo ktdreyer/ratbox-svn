@@ -3,6 +3,7 @@
    $Id$
 
    Copyright (c) 2001 by ircd-hybrid team
+   Copyright (c) 2002 ircd-ratbox development team
 
      ----------------------------------------------------------------------
 
@@ -39,7 +40,7 @@
    2. 
 
        Run the configure script. It will create include/setup.h and the
-       Makefiles to match your system. In hybrid-7, the paths are now handled
+       Makefiles to match your system. In ircd-ratbox, the paths are now handled
        with the --prefix option to configure, not in config.h.
        /usr/local/ircd is the default if no prefix is specified.
 
@@ -187,17 +188,16 @@
                                 HOW TO GET HELP
 
    Send Check or Money Order to... just kidding! You're on your own for
-   support. Try asking other ircd-hybrid admins on EFnet if you can't fix it
+   support. Try asking other ircd-ratbox admins on EFnet if you can't fix it
    yourself. If you do fix anything, however, please send context or unified
-   diffs to ircd-hybrid@the-project.org so the fixes can be incorporated into
-   the next release of ircd-hybrid. If hybrid crashes on you, PLEASE contact
-   ircd-hybrid@the-project.org ASAP with a backtrace of the core. The Hybrid
-   team can't fix bugs if no one tells us about them!
+   diffs to ircd-ratbox@lists.ratbox.org so the fixes can be incorporated into
+   the next release of ircd-hybrid. If ratbox crashes on you, PLEASE contact
+   ircd-ratbox@lists.ratbox.org ASAP with a backtrace of the core.
 
-   There is now a mailing list for general discussion of Hybrid. To subscribe,
-   send an emal to listmanager@the-project.org with a single line in the body
-   containing "subscribe hybrid". 
-
+   DISCUSSION: There is a mailing list for discussion of ratbox issues,
+    To subscribe, visit:
+       http://lists.ratbox.org/cgi-bin/mailman/listinfo/ircd-ratbox
+       
      ----------------------------------------------------------------------
 
                                      NOTES
@@ -211,7 +211,7 @@
 
    2. 
 
-       Run gdb on the binary and the core file. With an unmodified Hybrid-7
+       Run gdb on the binary and the core file. With an unmodified ircd-ratbox
        installation, an example command line is below (in the /usr/local/ircd
        directory)
 
@@ -224,7 +224,7 @@
    4. 
 
        Save the output of the backtrace command and send it to
-       ircd-hybrid@the-project.org.
+       ircd-ratbox@lists.ratbox.org
 
    5. 
 
@@ -253,7 +253,7 @@
  s_misc.o s_serv.o s_stats.o s_user.o scache.o send.o sprintf_irc.o tools.o
  whowas.o lex.yy.o y.tab.o version.o -lintl -ldescrypt  -lcrypto -lfl
  rsa.o: In function `get_randomness':
- /home/wcampbel/dev/ircd-hybrid-7/src/rsa.c(.text+0x60): undefined reference to
+ /home/wcampbel/dev/ircd-ratbox/src/rsa.c(.text+0x60): undefined reference to
  `RAND_pseudo_bytes'
  /usr/local/lib/libcrypto.so: undefined reference to `ERR_load_RSAREF_strings'
  /usr/local/lib/libcrypto.so: undefined reference to `RSA_PKCS1_RSAref'

@@ -1,5 +1,5 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-ratbox: an advanced Internet Relay Chat Daemon(ircd).
  *  config.h: The ircd compile-time-configurable header.
  *
  *  Copyright (C) 2002 by the past and present ircd coders, and others.

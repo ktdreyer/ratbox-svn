@@ -1,4 +1,4 @@
-$ WRITE SYS$OUTPUT "Commencing build of ircd-hybrid-7 for VMS..."
+$ WRITE SYS$OUTPUT "Commencing build of ircd-ratbox for VMS..."
 $ WRITE SYS$OUTPUT "Examining source directory..."
 $
 $! $Id$
@@ -50,7 +50,7 @@ $ MMK
 $ WRITE SYS$OUTPUT "Leaving directory tools..."
 $ SET DEF [-]
 $
-$ WRITE SYS$OUTPUT "Build of ircd-hybrid-7 for VMS complete!"
+$ WRITE SYS$OUTPUT "Build of ircd-ratbox for VMS complete!"
 $ EXIT
 
 $ ERREXIT:

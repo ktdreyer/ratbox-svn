@@ -1,5 +1,6 @@
 /* modules/m_xline.c
- * Copyright (C) 2002 Hybrid Development Team
+ *  Copyright (C) 2002 Hybrid Development Team
+ *  Copyright (C) 2002 ircd-ratbox development team
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are

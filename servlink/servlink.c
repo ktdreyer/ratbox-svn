@@ -61,10 +61,10 @@ struct fd_table          fds[5] =
  */
 static void usage(void)
 {
-  fprintf(stderr, "ircd-hybrid server link v1.0\n");
+  fprintf(stderr, "ircd-ratbox server link v1.0\n");
   fprintf(stderr, "2001-06-04\n");
   fprintf(stderr, "\n");
-  fprintf(stderr, "This program is called by the ircd-hybrid ircd.\n");
+  fprintf(stderr, "This program is called by the ircd-ratbox ircd.\n");
   fprintf(stderr, "It cannot be used on its own.\n");
   exit(1);
 }
@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
   ERR_load_crypto_strings();
 #endif
 
-  /* Make sure we are running under hybrid.. */
+  /* Make sure we are running under ircd.. */
   if (argc != 6 || strcmp(argv[0], "-slink"))
     usage(); /* exits */
 

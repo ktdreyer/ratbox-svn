@@ -1,5 +1,5 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-ratbox: an advanced Internet Relay Chat Daemon(ircd).
  *  spy_trace_notice.c: Sends a notice when someone uses TRACE or LTRACE
  *
  *  Copyright (C) 2002 Hybrid Development Team

@@ -1,8 +1,10 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-ratbox: an advanced Internet Relay Chat Daemon(ircd).
  *  numeric.h: A header for the numeric functions.
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (C) 1990 Jarkko Oikarinen and University of Oulu, Co Center
+ *  Copyright (C) 1996-2002 Hybrid Development Team
+ *  Copyright (C) 2002 ircd-ratbox development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -92,7 +94,7 @@ extern const char* form_str(int);
 #define RPL_STATSUPTIME      242
 #define RPL_STATSOLINE       243
 #define RPL_STATSHLINE       244
-/* 245 No longer used in ircd-hybrid */
+/* 245 No longer used in ircd-ratbox */
 #define RPL_STATSSLINE       245
 #define RPL_STATSXLINE       247
 #define RPL_STATSULINE       248

@@ -1,5 +1,5 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-ratbox: an advanced Internet Relay Chat Daemon(ircd).
  *  m_who.c: Shows who is on a channel.
  *
  *  Copyright (C) 2002 by the past and present ircd coders, and others.

@@ -1,5 +1,5 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-ratbox: an advanced Internet Relay Chat Daemon(ircd).
  *  m_okick.c: Kicks a user from a channel with much prejudice.
  *
  *  Copyright (C) 2002 by the past and present ircd coders, and others.

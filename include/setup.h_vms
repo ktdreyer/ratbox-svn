@@ -1,5 +1,5 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-ratbox: an advanced Internet Relay Chat Daemon(ircd).
  *  setup.h_vms: ircd compile-time settings, for VMS
  *
  *  Copyright (C) 2002 by the past and present ircd coders, and others.

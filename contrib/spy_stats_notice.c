@@ -1,5 +1,5 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-ratbox: an advanced Internet Relay Chat Daemon(ircd).
  *  spy_stats_notice.c: Sends a notice when someone uses STATS.
  *
  *  Copyright (C) 2002 by the past and present ircd coders, and others.
