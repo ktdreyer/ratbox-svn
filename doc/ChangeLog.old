@@ -1,3 +1,10 @@
+*** 20001030_10 by adrian
+
+
+Eek, don't re-register a read if cptr->fd == -1, ie she's shutting down.
+
+
+
 *** 20001030_9 by adrian
 
 
