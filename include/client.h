@@ -167,7 +167,8 @@ struct Client
  * is on.
  */
 
-  struct	    Vchan_map vchan_map[MAXCHANNELSPERUSER];
+  dlink_list      vchan_map;
+
   struct LocalUser *localClient;
 };
 

@@ -45,7 +45,8 @@ void    add_vchan_to_client_cache(struct Client *sptr,
 				  struct Channel *base_chan,
 				  struct Channel *vchan)
 {
-  int i=0;
+  dlink_node *vchanmap_node;
+  struct Vchan_map *vchan_info;
 
   assert(sptr != NULL);
 
@@ -53,31 +54,34 @@ void    add_vchan_to_client_cache(struct Client *sptr,
   if( base_chan == vchan )
     return;
 
-  while(sptr->vchan_map[i].base_chan != NULL)
-    {
-      i++;
-    }
-  assert(i != MAXCHANNELSPERUSER);
+  vchan_info = (struct Vchan_map *)MyMalloc(sizeof(struct Vchan_map));
+  vchan_info->base_chan = base_chan;
+  vchan_info->vchan = vchan;
 
-  sptr->vchan_map[i].base_chan = base_chan;
-  sptr->vchan_map[i].vchan = vchan;
+  vchanmap_node = make_dlink_node();
+  dlinkAdd(vchan_info, vchanmap_node, &sptr->vchan_map);
 }
 
 /* Given vchan pointer remove from translation table cache */
 
 void del_vchan_from_client_cache(struct Client *sptr, struct Channel *vchan)
 {
-  int i;
+  dlink_node *vchanmap_node;
+  struct Vchan_map *vchan_info;
 
   assert(sptr != NULL);
 
-  for(i=0;sptr->vchan_map[i].base_chan;i++)
+  for (vchanmap_node = sptr->vchan_map.head; vchanmap_node;
+       vchanmap_node = vchanmap_node->next)
     {
-      if( sptr->vchan_map[i].vchan == vchan )
-	{
-	  sptr->vchan_map[i].vchan = NULL;
-	  sptr->vchan_map[i].base_chan = NULL;
-	}
+      vchan_info = vchanmap_node->data;     
+      if (vchan_info->vchan == vchan)
+        {
+          MyFree(vchan_info);
+          dlinkDelete(vchanmap_node, &sptr->vchan_map);
+          free_dlink_node(vchanmap_node);
+          return;
+        }
     }
 }
 
@@ -85,7 +89,8 @@ void del_vchan_from_client_cache(struct Client *sptr, struct Channel *vchan)
 
 int on_sub_vchan(struct Channel *chptr, struct Client *sptr)
 {
-  int i;
+  dlink_node *vchanmap_node;
+  struct Vchan_map *vchan_info;
 
   assert(sptr != NULL);
 
@@ -93,10 +98,12 @@ int on_sub_vchan(struct Channel *chptr, struct Client *sptr)
   if (IsMember(sptr, chptr))
     return YES;
 
-  for(i=0;sptr->vchan_map[i].base_chan;i++)
+  for (vchanmap_node = sptr->vchan_map.head; vchanmap_node;
+       vchanmap_node = vchanmap_node->next)
     {
-      if( sptr->vchan_map[i].base_chan == chptr )
-	return YES;
+      vchan_info = vchanmap_node->data;
+      if (vchan_info->base_chan == chptr)
+        return YES;
     }
 
   return NO;
@@ -105,7 +112,8 @@ int on_sub_vchan(struct Channel *chptr, struct Client *sptr)
 /* return matching vchan given base chan and sptr */
 struct Channel* map_vchan(struct Channel *chptr, struct Client *sptr)
 {
-  int i;
+  dlink_node *vchanmap_node;
+  struct Vchan_map *vchan_info;
 
   assert(sptr != NULL);
 
@@ -113,10 +121,12 @@ struct Channel* map_vchan(struct Channel *chptr, struct Client *sptr)
   if (IsMember(sptr, chptr))
     return chptr;
 
-  for(i=0;sptr->vchan_map[i].base_chan;i++)
+  for (vchanmap_node = sptr->vchan_map.head; vchanmap_node;
+       vchanmap_node = vchanmap_node->next)
     {
-      if( sptr->vchan_map[i].base_chan == chptr )
-	return (sptr->vchan_map[i].vchan);
+      vchan_info = vchanmap_node->data;
+      if (vchan_info->base_chan == chptr)
+	return (vchan_info->vchan);
     }
 
   return NullChn;
@@ -125,14 +135,17 @@ struct Channel* map_vchan(struct Channel *chptr, struct Client *sptr)
 /* return matching bchan given vchan and sptr */
 struct Channel* map_bchan(struct Channel *chptr, struct Client *sptr)
 {
-  int i;
+  dlink_node *vchanmap_node;
+  struct Vchan_map *vchan_info;
 
   assert(sptr != NULL);
 
-  for(i=0;sptr->vchan_map[i].base_chan;i++)
+  for (vchanmap_node = sptr->vchan_map.head; vchanmap_node;
+       vchanmap_node = vchanmap_node->next)
     {
-      if( sptr->vchan_map[i].vchan == chptr )
-	return (sptr->vchan_map[i].base_chan);
+      vchan_info = vchanmap_node->data;
+      if (vchan_info->vchan == chptr)
+	return (vchan_info->base_chan);
     }
 
   return NullChn;
