@@ -1305,6 +1305,8 @@ const char* comment         /* Reason for the exit */
       remove_one_ip(sptr->localClient->ip.s_addr);
 #endif
 
+      delete_resolver_queries(sptr);
+
       /* This sptr could have status of one of STAT_UNKNOWN, STAT_CONNECTING
        * STAT_HANDSHAKE or STAT_UNKNOWN
        * all of which are lumped together into unknown_list

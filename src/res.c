@@ -10,7 +10,9 @@
  *     added callbacks and reference counting of returned hostents.
  *     --Bleep (Thomas Helvey <tomh@inxpress.net>)
  */
+#include "tools.h"
 #include "client.h"
+#include "list.h"
 #include "common.h"
 #include "event.h"
 #include "res.h"
@@ -164,7 +166,6 @@ typedef struct reslist {
   time_t          timeout;
   struct in_addr  addr;
   char*           name;
-  struct reslist* next;
   struct DNSQuery query;             /* query callback for this request */
   aHostent        he;
 } ResRQ;
@@ -187,9 +188,7 @@ static int    ResolverFileDescriptor = -1;
 
 static FBFILE*         spare_fd;
 
-static ResRQ*      requestListHead;     /* head of resolver request list */
-static ResRQ*      requestListTail;     /* tail of resolver request list */
-
+static dlink_list request_list;
 
 static void     add_request(ResRQ* request);
 static void     rem_request(ResRQ* request);
@@ -324,7 +323,7 @@ int init_resolver(void)
    */
   memset((void*) &reinfo,   0, sizeof(struct resinfo));
 
-  requestListHead = requestListTail = NULL;
+  memset(&request_list, 0, sizeof(request_list));
   start_resolver();
   return ResolverFileDescriptor;
 }
@@ -349,13 +348,6 @@ void add_local_domain(char* hname, int size)
    */
   if ((_res.options & RES_DEFNAMES) && !strchr(hname, '.'))
     {
-#if 0
-      /*
-       * XXX - resolver should already be initialized
-       */
-      if (0 == (_res.options & RES_INIT))
-	init_resolver();
-#endif 
       if (_res.defdname[0])
 	{
 	  size_t len = strlen(hname);
@@ -372,15 +364,13 @@ void add_local_domain(char* hname, int size)
  */
 static void add_request(ResRQ* request)
 {
+  dlink_node *m;
+
   assert(0 != request);
-  if (!requestListHead)
-    requestListHead = requestListTail = request;
-  else 
-    {
-      requestListTail->next = request;
-      requestListTail = request;
-    }
-  request->next = NULL;
+
+  m = make_dlink_node();
+
+  dlinkAdd(request, m, &request_list);
   reinfo.re_requests++;
 }
 
@@ -391,29 +381,26 @@ static void add_request(ResRQ* request)
  */
 static void rem_request(ResRQ* request)
 {
-  ResRQ** current;
-  ResRQ*  prev = NULL;
+  dlink_node *ptr;
+  dlink_node *next_ptr;
 
   assert(0 != request);
-  for (current = &requestListHead; *current; )
+
+  for(ptr = request_list.head; ptr; ptr = next_ptr)
     {
-      if (*current == request)
+      next_ptr = ptr->next;
+
+      /* The request =should= only be in the list once */
+      if(ptr->data == request)
 	{
-	  *current = request->next;
-	  if (requestListTail == request)
-	    requestListTail = prev;
-	  break;
-	} 
-      prev    = *current;
-      current = &(*current)->next;
+	  dlinkDelete(ptr, &request_list);
+	  MyFree(request->he.buf);
+	  MyFree(request->name);
+	  MyFree(request);
+	  free_dlink_node(ptr);
+	  return;
+	}
     }
-#ifdef  DEBUG
-  Debug((DEBUG_DNS, "rem_request:Remove %#x at %#x %#x",
-         old, *current, prev));
-#endif
-  MyFree(request->he.buf);
-  MyFree(request->name);
-  MyFree(request);
 }
 
 /*
@@ -437,7 +424,6 @@ static ResRQ* make_request(const struct DNSQuery* query)
   request->query.callback   = query->callback;
 
 #if defined(NULL_POINTER_NOT_ZERO)
-  request->next             = NULL;
   request->he.buf           = NULL;
   request->he.h.h_name      = NULL;
   request->he.h.h_aliases   = NULL;
@@ -453,15 +439,19 @@ static ResRQ* make_request(const struct DNSQuery* query)
  */
 static time_t timeout_query_list(time_t now)
 {
+  dlink_node *ptr;
+  dlink_node *next_ptr;
   ResRQ*   request;
-  ResRQ*   next_request = 0;
   time_t   next_time    = 0;
   time_t   timeout      = 0;
 
   Debug((DEBUG_DNS, "timeout_query_list at %s", myctime(now)));
-  for (request = requestListHead; request; request = next_request)
+  for(ptr = request_list.head; ptr; ptr = next_ptr)
     {
-      next_request = request->next;
+      next_ptr = ptr->next;
+
+      request = ptr->data;
+
       timeout = request->sentat + request->timeout;
       if (now >= timeout)
 	{
@@ -516,14 +506,20 @@ timeout_resolver(void *notused)
  */
 void delete_resolver_queries(const void* vptr)
 {
+  dlink_node *ptr;
+  dlink_node *next_ptr;
   ResRQ* request;
-  ResRQ* next_request;
 
-  for (request = requestListHead; request; request = next_request)
+  for(ptr = request_list.head; ptr; ptr = next_ptr)
     {
-      next_request = request->next;
-      if (vptr == request->query.vptr)
-	rem_request(request);
+      next_ptr = ptr->next;
+
+      if( (request = ptr->data) != NULL )
+	{
+	  if (vptr == request->query.vptr)
+	    rem_request(request);
+	  return;
+	}
     }
 }
 
@@ -572,10 +568,13 @@ static int send_res_msg(const char* msg, int len, int rcount)
  */
 static ResRQ* find_id(int id)
 {
+  dlink_node *ptr;
   ResRQ* request;
 
-  for (request = requestListHead; request; request = request->next)
+  for(ptr = request_list.head; ptr; ptr = ptr->next)
     {
+      request = ptr->data;
+
       if (request->id == id)
 	return request;
     }
@@ -974,7 +973,9 @@ res_readreply(int fd, void *data)
 {
   char               buf[sizeof(HEADER) + MAXPACKET];
   HEADER*            header;
+  dlink_node	     *m_tail;
   ResRQ*             request = NULL;
+  ResRQ*             request_tail = NULL;
   struct cache	     *cp = NULL;
   int                rc;
   int                answer_count;
@@ -1071,15 +1072,24 @@ res_readreply(int fd, void *data)
 	   */
           /* Assume no DNS cache now, guys! -- adrian */
 	  gethost_byname(request->he.h.h_name, &request->query);
+
 	  /*
 	   * If name wasn't found, a request has been queued and it will
 	   * be the last one queued.  This is rather nasty way to keep
 	   * a host alias with the query. -avalon
 	   */
-	  MyFree(requestListTail->he.buf);
-	  requestListTail->he.buf = request->he.buf;
-	  request->he.buf = 0;
-	  memcpy(&requestListTail->he.h, &request->he.h, sizeof(struct hostent));
+
+	  m_tail = request_list.tail;
+	  request_tail = m_tail->data;
+
+	  if( request_tail != NULL )
+	    {
+	      MyFree(request_tail->he.buf);
+	      request_tail->he.buf = request->he.buf;
+	      request->he.buf = 0;
+	      memcpy(&request_tail->he.h, &request->he.h, sizeof(struct hostent));
+	    }
+
 	  rem_request(request);
 	}
       else
@@ -1101,12 +1111,18 @@ res_readreply(int fd, void *data)
     }
   else if (!request->sent)
     {
+
       /*
        * XXX - we got a response for a query we didn't send with a valid id?
        * this should never happen, bail here and leave the client unresolved
        */
+
+      assert(!request->sent);
+
+#if 0
       (*request->query.callback)(request->query.vptr, 0);
       rem_request(request);
+#endif
     }
 }
 
