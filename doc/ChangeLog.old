@@ -1,3 +1,8 @@
+*** 20010524_24 by ejb
+- ok, i think this is the last VMS commit for a while.
+  it should work fine .. updated the docs (README.VMS) too.
+
+
 *** 20010524_23 by ejb
 - VMS support. not SERVLINK yet, still working on it ..
   however, we can now link a VMS server, and it'll work.
