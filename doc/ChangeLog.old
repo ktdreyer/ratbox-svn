@@ -1,3 +1,7 @@
+*** 20010301_5 by androsyn
+Adds a /STATS A for listing the current set of DNS servers adns is using.
+
+
 *** 20010301_4 by androsyn
 this lets adns process timeouts correctly.
 
