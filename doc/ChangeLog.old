@@ -1,3 +1,7 @@
+*** 19990909_25 by tomh
+change (void*)1 to valid sentinel pointer
+
+
 *** 19990909_24 by tomh
 type fixes
 
