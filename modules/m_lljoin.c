@@ -58,21 +58,21 @@ _moddeinit(void)
 char *_version = "20001122";
 
 /*
-** m_lljoin
-**      parv[0] = sender prefix
-**      parv[1] = channel
-*
-* If a lljoin is received, from our uplink, join
-* the requested client to the given channel, or ignore it
-* if there is an error.
-*
-*   Ok, the way this works. Leaf client tries to join a channel, 
-* it doesn't exist so the join does a cburst request on behalf of the
-* client, and aborts that join. The cburst sjoin's the channel if it
-* exists on the hub, and sends back an LLJOIN to the leaf. Thats where
-* this is now..
-*
-*/
+ * m_lljoin
+ *      parv[0] = sender prefix
+ *      parv[1] = channel
+ *
+ * If a lljoin is received, from our uplink, join
+ * the requested client to the given channel, or ignore it
+ * if there is an error.
+ *
+ *   Ok, the way this works. Leaf client tries to join a channel, 
+ * it doesn't exist so the join does a cburst request on behalf of the
+ * client, and aborts that join. The cburst sjoin's the channel if it
+ * exists on the hub, and sends back an LLJOIN to the leaf. Thats where
+ * this is now..
+ *
+ */
 int     ms_lljoin(struct Client *cptr,
                struct Client *sptr,
                int parc,
@@ -134,7 +134,7 @@ int     ms_lljoin(struct Client *cptr,
     {
       /* XXX code needs to be added to deal with vchans 
        * simplest solution for now, would be to "punt"
-       * tell use to try rejoining. *sigh*
+       * tell user, for now, to try rejoining. *sigh*
        */
 
       if (HasVchans(chptr))
@@ -204,6 +204,8 @@ int     ms_lljoin(struct Client *cptr,
 		 ":%s MODE %s +nt",
 		 me.name, chptr->chname);
     }
-  
+
+  (void)channel_member_names(sptr, chptr, chname);
+
   return 0;
 }

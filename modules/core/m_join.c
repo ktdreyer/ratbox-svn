@@ -122,7 +122,7 @@ int     m_join(struct Client *cptr,
         {
           if (sptr->user->channel.head == NULL)
             continue;
-	  do_join_0(cptr,sptr);
+	  do_join_0(&me,sptr);
 	  check_spambot_warning(sptr,"0");
 	  continue;
 	}
@@ -286,13 +286,24 @@ int     m_join(struct Client *cptr,
       
       add_user_to_channel(chptr, sptr, flags);
 
+      if (joining_vchan)
+	{
+	  add_vchan_to_client_cache(sptr,root_chptr,chptr);
+
+	  if(IsCapable(cptr,CAP_LL))
+	    root_chptr->lazyLinkChannelExists |= cptr->localClient->serverMask;
+	}
+      else
+	{
+	  if(IsCapable(cptr,CAP_LL))
+	    chptr->lazyLinkChannelExists |= cptr->localClient->serverMask;
+	}
+
       /*
       **  Set timestamp if appropriate, and propagate
       */
       if (flags & CHFL_CHANOP)
 	{
-	  if (joining_vchan)
-	    add_vchan_to_client_cache(sptr,root_chptr,chptr);
 	  chptr->channelts = CurrentTime;
 	  sendto_channel_remote(chptr, cptr,
 				":%s SJOIN %lu %s + :@%s",
@@ -303,8 +314,6 @@ int     m_join(struct Client *cptr,
 	}
       else 
 	{
-	  if (joining_vchan)
-	    add_vchan_to_client_cache(sptr,root_chptr,chptr);
 	  sendto_channel_remote(chptr, cptr,
 				":%s SJOIN %lu %s + :%s",
 				me.name,
@@ -377,7 +386,7 @@ int     ms_join(struct Client *cptr,
   */
   if ((name[0] == '0') && (name[1] == '\0'))
     {
-      do_join_0( cptr, sptr );
+      do_join_0(cptr, sptr);
     }
   else
     {
@@ -464,7 +473,7 @@ void do_join_0(struct Client *cptr, struct Client *sptr)
   struct Channel *chptr=NULL;
   dlink_node   *lp;
 
-  sendto_channel_remote(NULL, cptr, ":%s JOIN 0", sptr->name);
+  sendto_serv_butone(cptr, ":%s JOIN 0", sptr->name);
 
   while ((lp = sptr->user->channel.head))
     {
