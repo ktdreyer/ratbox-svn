@@ -1,3 +1,15 @@
+leeh        2003/09/06 11:59:44 EDT	(20030906_5)
+
+  Modified files:
+    src                  s_serv.c 
+  Log:
+  - missing brackets causing us to lose capabs..
+  
+  Revision  Changes    Path
+  7.368     +4 -4      ircd-ratbox/src/s_serv.c
+
+
+
 leeh        2003/09/06 11:49:26 EDT	(20030906_4)
 
   Modified files:
