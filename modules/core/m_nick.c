@@ -472,11 +472,11 @@ static int check_clean_nick(struct Client *client_p, struct Client *source_p,
 static int check_clean_user(struct Client *client_p, struct Client *source_p,
                             char *nick, char *user)
 {
-  if((strlen(user) > USERLEN) || !clean_user_name(user))
+  if(strlen(user) > USERLEN)
   {
     ServerStats->is_kill++;
     sendto_realops_flags(FLAGS_DEBUG, L_ALL,
-                         "Bad Username: %s(%s) From: %s %s",
+                         "Long Username: %s Nickname: %s From: %s %s",
 			 user, nick, source_p->name, client_p->name);
 
     sendto_one(client_p, ":%s KILL %s :%s (Bad Username)",
@@ -485,6 +485,11 @@ static int check_clean_user(struct Client *client_p, struct Client *source_p,
     return 1;
   }
 
+  if(!clean_user_name(user))
+    sendto_realops_flags(FLAGS_DEBUG, L_ALL,
+                         "Bad sername: %s Nickname: %s From: %s %s",
+			 user, nick, source_p->name, client_p->name);
+			 
   return 0;
 }
 
@@ -500,11 +505,11 @@ static int check_clean_user(struct Client *client_p, struct Client *source_p,
 static int check_clean_host(struct Client *client_p, struct Client *source_p,
                            char *nick, char *host)
 {
-  if((strlen(host) > HOSTLEN) || !clean_host_name(host))
+  if(strlen(host) > HOSTLEN)
   {
     ServerStats->is_kill++;
     sendto_realops_flags(FLAGS_DEBUG, L_ALL,
-                         "Bad Hostname: %s(%s) From: %s %s",
+                         "Long Hostname: %s Nickname: %s From: %s %s",
 			 host, nick, source_p->name, client_p->name);
 
     sendto_one(client_p, ":%s KILL %s :%s (Bad Hostname)",
@@ -512,6 +517,11 @@ static int check_clean_host(struct Client *client_p, struct Client *source_p,
 
     return 1;
   }
+
+  if(!clean_host_name(host))
+    sendto_realops_flags(FLAGS_DEBUG, L_ALL,
+                         "Bad Hostname: %s Nickname: %s From: %s %s",
+			 host, nick, source_p->name, client_p->name);
 
   return 0;
 }
