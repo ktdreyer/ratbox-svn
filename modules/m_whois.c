@@ -426,7 +426,7 @@ int     ms_whois(struct Client *cptr,
    */
   if( !IsOper(sptr) && GlobalSetOptions.hide_server
       && !IsCapable(cptr->from,CAP_LL) )
-    }
+    {
 	return 0;
     }
 
