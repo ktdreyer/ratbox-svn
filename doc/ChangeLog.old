@@ -1,3 +1,10 @@
+*** 20010824_1 by leeh
+- dumped build_list_of_channels, theres no point remaking the buffer, with
+  the possibility that we will ignore half of the new buffer anyway
+
+  I havent dropped the strtoken()'s yet.. possibly later :)
+
+
 *** 20010823_3 by davidt
 Add Id tag
 
