@@ -29,10 +29,14 @@ to edit.
 4.  "make install" to install the server, modules, and tools in the path 
 defined in config.h and the prefix specified when configure was run.
 
-5.  If you wish to enable the user log and oper log, issue these commands
-at the shell prompt (in the prefix directory)
-$ touch etc/users
-$ touch etc/opers
+5.  If you wish to enable the user log, oper log, and failed oper log, issue 
+these commands at the shell prompt (in the prefix directory)
+$ touch logs/userlog
+$ touch logs/operlog
+$ touch logs/foperlog
+
+Note that if you use different names in ircd.conf, you must 'touch' those 
+specific names.
 
 
 HOW TO GET HELP:
