@@ -1,3 +1,15 @@
+*** 20000103_1 by db
+- Folded in Perly's cleanup channel code. The idea is to remove
+  channels from the lazylinks leaf server if no local members are on them
+  and they haven't been used by anyone locally in a "while" where
+  "while" is set in s_serv.h CLEANUP_CHANNELS_TIME seconds.
+  I've redone the destroy channel code. It should work, but its untested.
+  CLEANUP_CHANNELS_TIME is set way low still for debugging,
+  its currently 30 seconds. In production it could range from 15 to 60 minutes
+  I'd guess.
+
+
+
 *** 20000102_9 by db
 - key handling was broken in m_cburst
 
