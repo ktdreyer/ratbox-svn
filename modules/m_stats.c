@@ -72,8 +72,6 @@ DECLARE_MODULE_AV1(stats, NULL, NULL, stats_clist, stats_hlist, NULL, "$Revision
 
 const char *Lformat = "%s %u %u %u %u %u :%u %u %s";
 
-static const char *parse_stats_args (int, const char **, int *, int *);
-
 static void stats_l_list(struct Client *s, const char *, int, int, dlink_list *, char);
 static void stats_l_client(struct Client *source_p, struct Client *target_p,
 				char statchar);
@@ -230,7 +228,7 @@ m_stats(struct Client *client_p, struct Client *source_p, int parc, const char *
 
 			/* Blah, stats L needs the parameters, none of the others do.. */
 			if(statchar == 'L' || statchar == 'l')
-				stats_cmd_table[i].handler (source_p, parc, parv, statchar);
+				stats_cmd_table[i].handler (source_p, parc, parv);
 			else
 				stats_cmd_table[i].handler (source_p);
 		}
@@ -1173,52 +1171,58 @@ stats_ltrace(struct Client *source_p, int parc, const char *parv[])
 {
 	int doall = 0;
 	int wilds = 0;
-	const char *name = NULL;
+	const char *name;
 	char statchar;
 
-	name = parse_stats_args(parc, parv, &doall, &wilds);
-
-	if(name)
-	{
-		statchar = parv[1][0];
-
-		stats_spy(source_p, statchar, name);
-
-		/* on a single client, this is simple */
-		if(!doall && !wilds)
-		{
-			struct Client *target_p = find_named_person(name);
-
-			if(target_p != NULL)
-				stats_l_client(source_p, target_p, statchar);
-
-			return;
-		}
-
-		/* give non-opers, or remote opers a limited output of
-		 * servers, opers and themselves (if local)
-		 */
-		if(!MyOper(source_p))
-		{
-			stats_l_list(source_p, name, doall, wilds, &serv_list, statchar);
-			stats_l_list(source_p, name, doall, wilds, &oper_list, statchar);
-
-			if(MyClient(source_p))
-			{
-				if(doall || (wilds && match(name, source_p->name)))
-					stats_l_client(source_p, source_p, statchar);
-			}
-
-			return;
-		}
-
-		stats_l_list(source_p, name, doall, wilds, &unknown_list, statchar);
-		stats_l_list(source_p, name, doall, wilds, &lclient_list, statchar);
-		stats_l_list(source_p, name, doall, wilds, &serv_list, statchar);
-	}
+	if(parc > 2 && !EmptyString(parv[2]))
+		name = parv[2];
 	else
-		sendto_one (source_p, form_str (ERR_NEEDMOREPARAMS),
-			    me.name, source_p->name, "STATS");
+		name = me.name;
+
+	if(match(name, me.name))
+		doall = 1;
+	else if(!MyClient(source_p) && !irccmp(name, me.id))
+	{
+		doall = 1;
+		name = me.name;
+	}
+
+	wilds = strchr(name, '*') || strchr(name, '?');
+	statchar = parv[1][0];
+
+	stats_spy(source_p, statchar, name);
+
+	/* on a single client, this is simple */
+	if(!doall && !wilds)
+	{
+		struct Client *target_p = find_named_person(name);
+
+		if(target_p != NULL)
+			stats_l_client(source_p, target_p, statchar);
+
+		return;
+	}
+
+	/* give non-opers, or remote opers a limited output of
+	 * servers, opers and themselves (if local)
+	 */
+	if(!MyOper(source_p))
+	{
+		stats_l_list(source_p, name, doall, wilds, &serv_list, statchar);
+		stats_l_list(source_p, name, doall, wilds, &oper_list, statchar);
+
+		if(MyClient(source_p))
+		{
+			if(doall || (wilds && match(name, source_p->name)))
+				stats_l_client(source_p, source_p, statchar);
+		}
+
+		return;
+	}
+
+	stats_l_list(source_p, name, doall, wilds, &unknown_list, statchar);
+	stats_l_list(source_p, name, doall, wilds, &lclient_list, statchar);
+	stats_l_list(source_p, name, doall, wilds, &serv_list, statchar);
 
 	return;
 }
@@ -1348,38 +1352,5 @@ stats_p_spy (struct Client *source_p)
 	data.statchar = 'p';
 
 	hook_call_event (doing_stats_p_hook, &data);
-}
-
-/*
- * parse_stats_args
- *
- * inputs	- arg count
- *		- args
- *		- doall flag
- *		- wild card or not
- * output	- pointer to name to use
- * side effects	-
- * common parse routine for m_stats args
- * 
- */
-static const char *
-parse_stats_args (int parc, const char *parv[], int *doall, int *wilds)
-{
-	const char *name;
-
-	if(parc > 2)
-	{
-		name = parv[2];
-		if(!irccmp (name, me.name))
-			*doall = 2;
-		else if(match (name, me.name))
-			*doall = 1;
-		if(strchr (name, '*') || strchr (name, '?'))
-			*wilds = 1;
-
-		return (name);
-	}
-	else
-		return (NULL);
 }
 
