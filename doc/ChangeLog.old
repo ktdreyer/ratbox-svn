@@ -1,3 +1,9 @@
+*** 20010529_7 by davidt
+- Revert commit checking client_p->name is "", since i've no idea what
+  its trying to do, and it breaks stuff.  (heh. oddly enough 'Break Stuff'
+  is currently playing on MTV2. weird.)
+
+
 *** 20010529_6 by leeh
 - updated make clean to remove encspeed
 
