@@ -1,3 +1,10 @@
+*** 20001205_8 by db
+- ok, added channel throttling tested both channel throttling and message
+  throttling, both appear to work. Removed FLOODTIME, default to always
+  one second for now. 
+
+
+
 *** 20001205_7 by db
 - redid m_set.c precalculate newval etc.
 
