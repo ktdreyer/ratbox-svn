@@ -46,7 +46,9 @@
  * NOTE: parse() should not be called recursively by other functions!
  */
 static char *sender;
-static char *para[MAXPARA + 1];
+
+/* parv[0] == source, and parv[LAST] == NULL */
+static char *para[MAXPARA + 2];
 
 static void cancel_clients(struct Client *, struct Client *, char *);
 static void remove_unknown(struct Client *, char *, char *);
@@ -66,7 +68,7 @@ static char buffer[1024];
 
 
 static inline int
-string_to_array(char *string, char *parv[MAXPARA])
+string_to_array(char *string, char **parv)
 {
 	char *p, *buf = string;
 	int x = 1;
@@ -103,7 +105,8 @@ string_to_array(char *string, char *parv[MAXPARA])
 		if(*buf == '\0')
 			return x;
 	}
-	while (x < MAXPARA - 1);
+	/* we can go upto parv[MAXPARA], as parv[0] is taken by source */
+	while (x < MAXPARA);
 
 	if(*p == ':')
 		p++;
@@ -298,7 +301,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
  */
 static int
 handle_command(struct Message *mptr, struct Client *client_p,
-	       struct Client *from, int i, const char* hpara[MAXPARA])
+	       struct Client *from, int i, const char** hpara)
 {
 	struct MessageEntry ehandler;
 	MessageHandler handler = 0;
