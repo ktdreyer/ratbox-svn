@@ -14,6 +14,8 @@
 #include "io.h"
 #include "modebuild.h"
 
+static dlink_list kickbuild_list;
+
 static char modebuf[BUFSIZE];
 static char parabuf[BUFSIZE];
 static int modedir;
@@ -82,3 +84,36 @@ modebuild_finish(void)
 		sendto_server("%s %s", modebuf, parabuf);
 }
 
+void
+kickbuild_start(void)
+{
+	dlink_node *ptr, *next_ptr;
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, kickbuild_list.head)
+	{
+		my_free(ptr->data);
+		dlink_destroy(ptr, &kickbuild_list);
+	}
+}
+
+void
+kickbuild_add(const char *nick)
+{
+	dlink_add_alloc(my_strdup(nick), &kickbuild_list);
+}
+
+void
+kickbuild_finish(struct client *service_p, struct channel *chptr,
+		const char *reason)
+{
+	dlink_node *ptr, *next_ptr;
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, kickbuild_list.head)
+	{
+		sendto_server(":%s KICK %s %s :%s",
+				service_p->name, chptr->name,
+				ptr->data, reason);
+		my_free(ptr->data);
+		dlink_destroy(ptr, &kickbuild_list);
+	}
+}
