@@ -1,3 +1,15 @@
+androsyn    2002/12/16 01:07:25 UTC	(20021216_2)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  Add int to that unsigned
+  
+  Revision  Changes    Path
+  7.349     +1 -1      ircd-ratbox/src/client.c
+
+
+
 androsyn    2002/12/16 00:53:52 UTC	(20021216_1)
 
   Modified files:
