@@ -205,7 +205,7 @@ int set_sock_buffers(int fd, int size)
  */
 int disable_sock_options(int fd)
 {
-#if defined(IP_OPTIONS) && defined(IPPROTO_IP)
+#if defined(IP_OPTIONS) && defined(IPPROTO_IP) && !defined(IPV6)
   if (setsockopt(fd, IPPROTO_IP, IP_OPTIONS, NULL, 0))
     return 0;
 #endif
