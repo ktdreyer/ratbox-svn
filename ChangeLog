@@ -1,3 +1,24 @@
+androsyn    2003/11/25 00:12:03 EST	(20031125_0)
+
+  Modified files:
+    include              commio.h 
+    src                  commio.c linebuf.c send.c 
+  Added files:
+    src                  sigio.c 
+  Log:
+  Readd sigio and make it a lot less invasive than the old code was.  Also
+  this code seems to actually work a lot better.  Still need to add in the
+  autoconf checks for sigio though.
+  
+  Revision  Changes    Path
+  1.4       +3 -3      ircd-ratbox/include/commio.h
+  1.5       +5 -3      ircd-ratbox/src/commio.c
+  7.123     +17 -10    ircd-ratbox/src/linebuf.c
+  7.269     +7 -4      ircd-ratbox/src/send.c
+  7.45      +363 -0    ircd-ratbox/src/sigio.c (new)
+
+
+
 leeh        2003/11/21 14:13:13 EST	(20031121_0)
 
   Modified files:
