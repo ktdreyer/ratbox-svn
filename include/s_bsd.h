@@ -60,6 +60,7 @@ extern int   get_sockerr(int);
 extern int   ignoreErrno(int ierrno);
 
 extern void  comm_settimeout(int, time_t, PF *, void *);
+extern void  comm_setflush(int, time_t, PF *, void *);
 extern void  comm_checktimeouts(void *);
 extern void  comm_connect_tcp(int, const char *, u_short,
                  struct sockaddr *, int, CNCB *, void *);

@@ -43,18 +43,98 @@ static char               readBuf[READBUF_SIZE];
 /*
  * parse_client_queued - parse client queued messages
  */
-int parse_client_queued(struct Client* cptr)
+static
+int parse_client_queued(struct Client *cptr)
 { 
-  int dolen  = 0;
+    int dolen  = 0;
+    struct LocalUser *lcptr = cptr->localClient;
+    int checkflood = 1; /* Whether we're checking or not */
 
-  while ((dolen = linebuf_get(&cptr->localClient->buf_recvq,
-                              readBuf, READBUF_SIZE)) > 0) {
-    if (CLIENT_EXITED == client_dopacket(cptr, readBuf, dolen))
-      return CLIENT_EXITED;
-  }
-  return 1;
+    if (IsServer(cptr))
+        checkflood = 0;
+    if (ConfigFileEntry.no_oper_flood && IsAnyOper(cptr))
+        checkflood = 0;
+
+    /*
+     * Handle flood protection here - if we exceed our flood limit on
+     * messages in this loop, we simply drop out of the loop prematurely.
+     *   -- adrian
+     */
+
+    for (;;) {
+        if (checkflood && (lcptr->sent_parsed > lcptr->allow_read))
+            break;
+        assert(lcptr->sent_parsed <= lcptr->allow_read);
+        dolen = linebuf_get(&cptr->localClient->buf_recvq, readBuf,
+          READBUF_SIZE);
+        if (!dolen)
+            break;
+        if (CLIENT_EXITED == client_dopacket(cptr, readBuf, dolen))
+            return CLIENT_EXITED;
+        lcptr->sent_parsed++;
+    }
+    return 1;
 }
 
+/*
+ * flood_recalc
+ *
+ * recalculate the number of allowed flood lines. this should be called
+ * once a second on any given client. We then attempt to flush some data.
+ */
+void
+flood_recalc(int fd, void *data)
+{
+    struct Client *cptr = data;
+    struct LocalUser *lcptr = cptr->localClient;
+    int new_allow_parsed;
+
+    assert(cptr != NULL);
+    assert(lcptr != NULL);
+
+    /* 
+     * If we're a server, skip to the end. Realising here that this call is
+     * cheap and it means that if a op is downgraded they still get considered
+     * for anti-flood protection ..
+     */
+    if (IsServer(cptr) || IsAnyOper(cptr))
+        goto finish;
+
+    /*
+     * ok, we have to recalculate the number of messages we can recieve
+     * in this second, based upon what happened in the last second.
+     * If we still exceed the flood limit, don't move the parsed limit.
+     * If we are below the flood limit, increase the flood limit.
+     *   -- adrian
+     */
+
+    if (lcptr->allow_read == 0)
+        /* Give the poor person a go! */
+        lcptr->allow_read = 1;
+    else if (lcptr->actually_read < lcptr->allow_read)
+        /* Raise the allowed messages if we flooded under the limit */
+        lcptr->allow_read++;
+    else
+        /* Drop the limit to avoid flooding .. */
+        lcptr->allow_read--;
+
+    /* Enforce floor/ceiling restrictions */
+    if (lcptr->allow_read < 1)
+        lcptr->allow_read = 1;
+    else if (lcptr->allow_read > MAX_FLOOD_PER_SEC)
+        lcptr->allow_read = MAX_FLOOD_PER_SEC;
+
+    /* Reset the sent-per-second count */
+    lcptr->sent_parsed = 0;
+    lcptr->actually_read = 0;
+
+    /* And now, try flushing .. */
+    parse_client_queued(cptr);
+
+finish:
+    /* and finally, reset the flood check */
+    comm_setflush(fd, 1, flood_recalc, cptr);
+}
 
 /*
  * read_packet - Read a 'packet' of data from a connection and process it.
@@ -63,8 +143,12 @@ void
 read_packet(int fd, void *data)
 {
   struct Client *cptr = data;
+  struct LocalUser *lcptr = cptr->localClient;
   int length = 0;
   int done;
+
+  assert(lcptr != NULL);
+  assert(lcptr->allow_read <= MAX_FLOOD_PER_SEC);
 
   /*
    * Check for a dead connection here. This is done here for legacy
@@ -100,9 +184,10 @@ read_packet(int fd, void *data)
     return;
   }
 
-  cptr->lasttime = CurrentTime;
+  if (cptr->lasttime < CurrentTime)
+    cptr->lasttime = CurrentTime;
   if (cptr->lasttime > cptr->since)
-    cptr->since = cptr->lasttime;
+    cptr->since = CurrentTime;
   cptr->flags &= ~(FLAGS_PINGSENT | FLAGS_NONL);
 
   /*
@@ -110,15 +195,19 @@ read_packet(int fd, void *data)
    * it on the end of the receive queue and do it when its
    * turn comes around.
    */
-  linebuf_parse(&cptr->localClient->buf_recvq, readBuf, length);
+  lcptr->actually_read += linebuf_parse(&cptr->localClient->buf_recvq,
+      readBuf, length);
 
+  /* Check to make sure we're not flooding */
   if (IsPerson(cptr) &&
-      (ConfigFileEntry.no_oper_flood && !IsAnyOper(cptr)) &&
-      linebuf_len(&cptr->localClient->buf_recvq) > CLIENT_FLOOD)
-    {
-      exit_client(cptr, cptr, cptr, "Excess Flood");
-      return;
+     (linebuf_len(&cptr->localClient->buf_recvq) > CLIENT_FLOOD)) {
+      if (!(ConfigFileEntry.no_oper_flood && IsAnyOper(cptr))) {
+        exit_client(cptr, cptr, cptr, "Excess Flood");
+        return;
+      }
     }
+
+  /* Attempt to parse what we have */
   parse_client_queued(cptr);
 #ifdef REJECT_HOLD
   /* Silence compiler warnings -- adrian */

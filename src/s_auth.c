@@ -183,6 +183,8 @@ static void release_auth_client(struct Client* client)
    */
   comm_setselect(client->fd, FDLIST_IDLECLIENT, COMM_SELECT_READ, read_packet,
     client, 0);
+  client->localClient->allow_read = MAX_FLOOD_PER_SEC;
+  comm_setflush(client->fd, 1, flood_recalc, client);
   add_client_to_list(client);
 }
  

@@ -240,6 +240,16 @@ struct LocalUser
   char              passwd[PASSWDLEN + 1];
   int               caps;       /* capabilities bit-field */
 
+
+  /*
+   * Anti-flood stuff. We track how many messages were parsed and how
+   * many we were allowed in the current second, and apply a simple decay
+   * to avoid flooding.
+   *   -- adrian
+   */
+  int allow_read;	/* how many we're allowed to read in this second */
+  int actually_read;  /* how many we've actually read in this second */
+  int sent_parsed;      /* how many messages we've parsed in this second */
 };
 
 /*
