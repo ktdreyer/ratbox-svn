@@ -1,3 +1,14 @@
+*** 20001227_12 by davidt
+Massive bunch of fixes for LazyLinks.
+INVITE now works if a hub is trying to relay an INVITE to a LL leaf
+which doesn't know about the channel yet.
+TOPIC now works if a user on a LL leaf tries to get the topic for a
+channel the leaf doesn't know about
+Hubs now only send MODE changes to LL leafs that know about the user
+coredump in LLJOIN fixed..
+some other misc stuff too...
+
+
 *** 20001227_11 by db
 - wrong parmcount, cores each of unkline, undline, ungline
 
