@@ -61,5 +61,5 @@ clean:
 distclean: clean
 	${RM} -f Makefile
 
-@INCLUDE@ ".depend"
+@INCLUDE@ .depend
 
