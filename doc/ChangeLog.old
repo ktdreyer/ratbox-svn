@@ -1,3 +1,7 @@
+*** 20010319_2 by toot
+restored some stuff in config.h that'd been changed..  and synced config.h.dist
+
+
 *** 20010319_1 by toot
 . moved anti_spam_exit_message_time to ircd.conf
 . don't add "Client Exit: " if the quit message was blank anyway.
