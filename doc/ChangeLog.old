@@ -1,3 +1,18 @@
+*** 20010315_4 by db
+- This alleviates the high counts found in the block allocator in profiles.
+  The problem was a # of block count that was set way too low.
+  128 for BUF_BLOCK_SIZE means we allocate a bit map of 128 bits
+  which means for many allocated linebufs, we end up with a series
+  of smallish Block's with 128 bit maps... 
+  In reality, the block allocator should be rewritten to embed a
+  "hint" into the allocated memory as to where the returned memory
+  block should go. There are a few other easier to do optimizations
+  as well. It has been pointed out that modern OS's have now caught up
+  and now use block allocation for malloc, if thats true, the block
+  allocator code might well be obsolete.
+  
+
+
 *** 20010315_3 by db
 - print all channel member lists at once in names
   this hides somewhat better who the chanops are.
