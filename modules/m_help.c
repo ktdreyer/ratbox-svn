@@ -116,6 +116,7 @@ dohelp(struct Client *source_p, int flags, const char *topic)
 	struct helpfile *hptr;
 	struct helpline *lineptr;
 	dlink_node *ptr;
+	dlink_node *fptr;
 	const char *myline;
 
 	if(EmptyString(topic))
@@ -130,10 +131,14 @@ dohelp(struct Client *source_p, int flags, const char *topic)
 		return;
 	}
 
-	sendto_one(source_p, form_str(RPL_HELPSTART),
-		   me.name, source_p->name, topic, hptr->firstline);
+	fptr = hptr->contents.head;
+	lineptr = fptr->data;
 
-	DLINK_FOREACH(ptr, hptr->contents.head)
+	/* first line cant be empty */
+	sendto_one(source_p, form_str(RPL_HELPSTART),
+		   me.name, source_p->name, topic, lineptr->data);
+
+	DLINK_FOREACH(ptr, fptr->next)
 	{
 		if(ptr->data != emptyline)
 		{

@@ -17,7 +17,6 @@ extern const char emptyline[];
 struct helpfile
 {
 	char helpname[HELPFILELEN];
-	char firstline[HELPLINELEN];
 	dlink_list contents;
 	int flags;
 };
