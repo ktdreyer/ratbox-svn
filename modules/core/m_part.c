@@ -117,7 +117,6 @@ int     m_part(struct Client *cptr,
 	      if( (CurrentTime - (sptr->localClient->last_join_time)) < 
 		  GlobalSetOptions.spam_time)
 		{
-		  /* oh, its a possible spambot */
 		  sptr->localClient->join_leave_count++;
 		}
 	    }
@@ -145,8 +144,8 @@ int     m_part(struct Client *cptr,
  * side effects	- remove ONE client given the channel name 
  */
 static void part_one_client(struct Client *cptr,
-			   struct Client *sptr,
-			   char *name)
+			    struct Client *sptr,
+			    char *name)
 {
   struct Channel *chptr;
   struct Channel *vchan;

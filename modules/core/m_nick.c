@@ -770,7 +770,7 @@ set_initial_nick(struct Client *cptr, struct Client *sptr,
 /*
  * change_local_nick
  * inputs	- pointer to server
- *
+ *		- pointer to client
  * output	- 
  * side effects	- changes nick of a LOCAL user
  *

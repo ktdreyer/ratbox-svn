@@ -89,9 +89,9 @@ void remove_a_mode(int hide_or_not,
 
 
 int     ms_sjoin(struct Client *cptr,
-                struct Client *sptr,
-                int parc,
-                char *parv[])
+		 struct Client *sptr,
+		 int parc,
+		 char *parv[])
 {
   struct Channel *chptr;
   struct Channel *top_chptr;	/* XXX vchans */
