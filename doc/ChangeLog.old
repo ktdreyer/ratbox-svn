@@ -1,3 +1,10 @@
+*** 20001109_1 by ejb
+convert a few more m_functions, only 8 left to do now.  most of them
+will compile, although a couple will not and src/ircd will still not
+link.  as i said, will try to fix that tonight.
+
+
+
 *** 20001108_8 by ejb
 Initial commit of loadable modules support.  right now we can
 load modules, but not unload them.  support for adding commands
