@@ -1,3 +1,9 @@
+*** 20000116_1 by db
+- copyright touch ups
+- missing -ll in Makefile
+
+
+
 *** 20000115_3 by db
 - The lex/yacc files...
 
