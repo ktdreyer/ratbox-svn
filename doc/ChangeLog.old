@@ -1,3 +1,9 @@
+*** 20001208_8 by db
+- fixed remote join bug, it was joining the root channel instead of the
+  vchan on remote servers due to the wrong name being passed to the SJOIN
+
+
+
 *** 20001208_7 by toot
 gline_file isn't used anywhere.  and it was also the one
 making the '1 rule not reduced' error :)
