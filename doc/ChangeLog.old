@@ -1,3 +1,28 @@
+androsyn    2002/05/26 06:56:01 EDT	(20020526_6)
+
+  Modified files:        (Branch: WIN32_WIP)
+    include              fdlist.h 
+    src                  fdlist.c listener.c s_auth.c s_bsd.c 
+                         win32.c 
+  Added files:           (Branch: WIN32_WIP)
+    include              win32_defs.h 
+    src                  io_unix.c io_win32.c 
+  Log:
+  Started the basic framework for correctly abstracting the IO layer.
+  
+  Revision   Changes    Path
+  7.25.2.1   +19 -0     ircd-hybrid-7/include/fdlist.h
+  1.1.2.1    +48 -0     ircd-hybrid-7/include/win32_defs.h (new)
+  7.29.2.2   +13 -1     ircd-hybrid-7/src/fdlist.c
+  1.1.2.1    +142 -0    ircd-hybrid-7/src/io_unix.c (new)
+  1.1.2.1    +178 -0    ircd-hybrid-7/src/io_win32.c (new)
+  7.67.2.1   +3 -3      ircd-hybrid-7/src/listener.c
+  7.95.2.2   +2 -2      ircd-hybrid-7/src/s_auth.c
+  7.169.2.2  +4 -3      ircd-hybrid-7/src/s_bsd.c
+  1.1.2.2    +1 -0      ircd-hybrid-7/src/win32.c
+
+
+
 androsyn    2002/05/26 03:16:01 EDT	(20020526_5)
 
   Modified files:        (Branch: WIN32_WIP)
