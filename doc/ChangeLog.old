@@ -1,3 +1,15 @@
+androsyn    2002/05/30 20:29:47 EDT	(20020531_5)
+
+  Modified files:
+    src                  balloc.c 
+  Log:
+  Added some non-assert failure code
+  
+  Revision  Changes    Path
+  7.34      +6 -0      ircd-hybrid-7/src/balloc.c
+
+
+
 androsyn    2002/05/30 20:25:43 EDT	(20020531_4)
 
   Modified files:
