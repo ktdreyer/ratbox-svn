@@ -16,11 +16,34 @@ SYMLINKS=	topic accept cjoin cmode admin names links away whowas \
 		time credits motd userhost users whois ison lusers \
 		user help pass error challenge knock ping pong
 
-all:
-build:
+all: build
+build: index
+
 clean:
 depend:
 lint:
+
+index:
+	@echo building index files
+	rm -f users/index.tmp
+	@for help in users/*; do \
+		if [ -f $$help ]; then \
+			echo $$help >> users/index.tmp; \
+		fi \
+	done
+	@for help in $(SYMLINKS); do \
+		echo $$help >> users/index.tmp; \
+	done
+	sed -e 's|^users/||' users/index.tmp | sort -u > users/index
+	rm -f users/index.tmp
+	rm -f opers/index.tmp
+	@for help in opers/*; do \
+		if [ -f $$help ]; then \
+			echo $$help >> opers/index.tmp; \
+		fi \
+	done
+	sed -e 's|^opers/||' opers/index.tmp | sort -u > opers/index
+	rm -f opers/index.tmp
 
 install:
 	@echo installing help files...
@@ -46,6 +69,7 @@ install:
 		rm -f $(uhelpdir)/$$link; \
 		ln -s $(ohelpdir)/$$link $(uhelpdir); \
 	done
+
 
 distclean:
 	${RM} -f Makefile
