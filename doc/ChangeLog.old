@@ -1,3 +1,7 @@
+*** 20010115_5 by ejb
+- don't let people flood by accepting them more than once.
+
+
 *** 20010115_4 by ejb
 - initial stats_notice.so, not finished yet.
 
