@@ -1,3 +1,7 @@
+*** 19990909_11 by tomh
+remove inappropriate casts in MyFree, rename class c_class
+
+
 *** 19990909_10 by lusky
 killpath fixes (jl)
 check for client instead of connect in m_links
