@@ -357,11 +357,23 @@ static int ms_nick(struct Client *cptr, struct Client *sptr,
           sendto_realops_flags(FLAGS_DEBUG, "Bad Nick: %s From: %s %s",
 			       parv[1], parv[0],
 			       get_client_name(cptr, HIDE_IP));
+
+
+	  /* XXX UID */
           sendto_one(cptr, ":%s KILL %s :%s (%s <- %s[%s])",
                      me.name, parv[1], me.name, parv[1],
                      nick, cptr->name);
           if (sptr != cptr) /* bad nick change */
             {
+              kill_client_ll_serv_butone(cptr, sptr,
+					 "%s (%s <- %s!%s@%s)",
+					 me.name,
+					 get_client_name(cptr, HIDE_IP),
+					 parv[0],
+					 sptr->username,
+					 sptr->user ?
+					 sptr->user->server : cptr->name);
+#if 0
               sendto_ll_serv_butone(cptr, sptr, 0,
                                  ":%s KILL %s :%s (%s <- %s!%s@%s)",
                                  me.name, parv[0], me.name,
@@ -370,6 +382,7 @@ static int ms_nick(struct Client *cptr, struct Client *sptr,
                                  sptr->username,
                                  sptr->user ? sptr->user->server :
                                  cptr->name);
+#endif
               sptr->flags |= FLAGS_KILLED;
               return exit_client(cptr,sptr,&me,"BadNick");
             }
@@ -455,6 +468,15 @@ static int ms_nick(struct Client *cptr, struct Client *sptr,
             if (ServerInfo.hub && IsCapable(cptr,CAP_LL))
               add_lazylinkclient(cptr, acptr);
             
+	    kill_client_ll_serv_butone(NULL, acptr,
+				       "%s (%s(NOUSER) <- %s!%s@%s)(TS:%s)",
+				       me.name,
+				       acptr->from->name,
+				       parv[1],
+				       parv[5],
+				       parv[6],
+				       cptr->name);
+#if 0
 	    sendto_ll_serv_butone(NULL, acptr, 0, /* all servers */
 		       ":%s KILL %s :%s (%s(NOUSER) <- %s!%s@%s)(TS:%s)",
 			       me.name,
@@ -465,6 +487,7 @@ static int ms_nick(struct Client *cptr, struct Client *sptr,
 			       parv[5],
 			       parv[6],
 			       cptr->name);
+#endif
 #endif
 
             acptr->flags |= FLAGS_KILLED;
@@ -519,6 +542,12 @@ static int ms_nick(struct Client *cptr, struct Client *sptr,
           if (ServerInfo.hub && IsCapable(cptr,CAP_LL))
             add_lazylinkclient(cptr, acptr);
 
+          kill_client_ll_serv_butone(NULL, acptr,
+				     "%s (%s <- %s)",
+				     me.name,
+				     acptr->from->name,
+				     get_client_name(cptr, HIDE_IP));
+#if 0
           sendto_ll_serv_butone(NULL, acptr, 0,/* all servers */
 			     ":%s KILL %s :%s (%s <- %s)",
 			     me.name, acptr->name, me.name,
@@ -528,6 +557,7 @@ static int ms_nick(struct Client *cptr, struct Client *sptr,
 			     ** the other info would be lost
 			     */
 			     get_client_name(cptr, HIDE_IP));
+#endif
 #endif
           ServerStats->is_kill++;
           sendto_one(acptr, form_str(ERR_NICKCOLLISION),
@@ -567,12 +597,21 @@ static int ms_nick(struct Client *cptr, struct Client *sptr,
 
 #ifndef LOCAL_NICK_COLLIDE
               /* If it came from a LL server, it'd have been sptr,
-               * so we don't need to mark acptr as known */
+               * so we don't need to mark acptr as known
+	       */
+
+	      kill_client_ll_serv_butone(sptr, acptr,
+					 "%s (%s <- %s)",
+					 me.name,
+					 acptr->from->name,
+					 get_client_name(cptr, HIDE_IP));
+#if 0
 	      sendto_ll_serv_butone(sptr, acptr, 0, /* all servers but sptr */
 				 ":%s KILL %s :%s (%s <- %s)",
 				 me.name, acptr->name, me.name,
 				 acptr->from->name,
 				 get_client_name(cptr, HIDE_IP));
+#endif
 #endif
 
               acptr->flags |= FLAGS_KILLED;
@@ -602,10 +641,19 @@ static int ms_nick(struct Client *cptr, struct Client *sptr,
 #ifndef LOCAL_NICK_COLLIDE
       /* If we got the message from a LL, it would know
          about sptr already */
+
+      kill_client_ll_serv_butone(NULL, sptr,
+				 "%s (%s(%s) <- %s)",
+				 me.name,
+				 acptr->from->name,
+				 acptr->name,
+				 get_client_name(cptr, HIDE_IP));
+#if 0
       sendto_ll_serv_butone(NULL, sptr, 0, /* KILL old from outgoing servers */
 			 ":%s KILL %s :%s (%s(%s) <- %s)",
 			 me.name, sptr->name, me.name, acptr->from->name,
 			 acptr->name, get_client_name(cptr, HIDE_IP));
+#endif
 #endif
 
       ServerStats->is_kill++;
@@ -615,10 +663,18 @@ static int ms_nick(struct Client *cptr, struct Client *sptr,
       if (ServerInfo.hub && IsCapable(cptr,CAP_LL))
         add_lazylinkclient(cptr, acptr);
 
+      kill_client_ll_serv_butone(NULL, acptr,
+				 "%s (%s <- %s(%s))",
+				 me.name, 
+				 acptr->from->name,
+				 get_client_name(cptr, HIDE_IP),
+				 sptr->name);
+#if 0
       sendto_ll_serv_butone(NULL, acptr, 0, /* Kill new from incoming link */
 			 ":%s KILL %s :%s (%s <- %s(%s))",
 			 me.name, acptr->name, me.name, acptr->from->name,
 			 get_client_name(cptr, HIDE_IP), sptr->name);
+#endif
 #endif
 
       acptr->flags |= FLAGS_KILLED;
@@ -649,10 +705,20 @@ static int ms_nick(struct Client *cptr, struct Client *sptr,
 #ifndef LOCAL_NICK_COLLIDE
           /* this won't go back to the incoming link, so it doesn't
            * matter if it is an LL */
+
+	  kill_client_ll_serv_butone(cptr, sptr,
+				     /* KILL old from outgoing servers */
+				     "%s (%s(%s) <- %s)",
+				     me.name, acptr->from->name,
+				     acptr->name,
+				     get_client_name(cptr, HIDE_IP));
+#if 0
+
 	  sendto_ll_serv_butone(cptr, sptr, 0, /* KILL old from outgoing servers */
 			     ":%s KILL %s :%s (%s(%s) <- %s)",
 			     me.name, sptr->name, me.name, acptr->from->name,
 			     acptr->name, get_client_name(cptr, HIDE_IP));
+#endif
 #endif
 
           sptr->flags |= FLAGS_KILLED;
@@ -676,12 +742,20 @@ static int ms_nick(struct Client *cptr, struct Client *sptr,
           
 #ifndef LOCAL_NICK_COLLIDE
           /* this won't go back to the incoming link, so it doesn't
-           * matter if it's an LL */
+           * matter if it's an LL
+	   */
+	  kill_client_ll_serv_butone(sptr, acptr,
+				     "%s (%s <- %s)",
+				     me.name,
+				     acptr->from->name,
+				     get_client_name(cptr, HIDE_IP));
+#if 0
 	  sendto_ll_serv_butone(sptr, acptr, 0, /* all servers but sptr */
 			     ":%s KILL %s :%s (%s <- %s)",
 			     me.name, acptr->name, me.name,
 			     acptr->from->name,
 			     get_client_name(cptr, HIDE_IP));
+#endif
 #endif
 
           ServerStats->is_kill++;

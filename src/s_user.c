@@ -530,8 +530,14 @@ int register_remote_user(struct Client *cptr, struct Client *sptr,
     {
       sendto_realops_flags(FLAGS_ALL,"Ghost killed: %s on invalid server %s",
 			   sptr->name, sptr->user->server);
+
+      kill_client(cptr, sptr, "%s (Ghosted %s doesn't exist)",
+		  me.name, user->server);
+
+#if 0
       sendto_one(cptr,":%s KILL %s :%s (Ghosted, %s doesn't exist)",
                  me.name, sptr->name, me.name, user->server);
+#endif
       sptr->flags |= FLAGS_KILLED;
       return exit_client(NULL, sptr, &me, "Ghost");
     }
@@ -545,10 +551,19 @@ int register_remote_user(struct Client *cptr, struct Client *sptr,
 			   cptr->name, nick, sptr->username,
 			   sptr->host, user->server,
 			   acptr->name, acptr->from->name);
+      kill_client(cptr, sptr,
+		 ":%s (%s != %s[%s] USER from wrong direction)",
+		  me.name,
+		  user->server,
+		  acptr->from->name, acptr->from->host);
+
+#if 0
       sendto_one(cptr,
 		 ":%s KILL %s :%s (%s != %s[%s] USER from wrong direction)",
 		 me.name, sptr->name, me.name, user->server,
 		 acptr->from->name, acptr->from->host);
+
+#endif
       sptr->flags |= FLAGS_KILLED;
       return exit_client(sptr, sptr, &me,
 			 "USER server wrong direction");
@@ -556,15 +571,20 @@ int register_remote_user(struct Client *cptr, struct Client *sptr,
     }
   /*
    * Super GhostDetect:
-   *        If we can't find the server the user is supposed to be on,
+   * If we can't find the server the user is supposed to be on,
    * then simply blow the user away.        -Taner
    */
   if (!acptr)
     {
+      kill_client(cptr, sptr,
+		  "%s GHOST (no server %s on the net)",		  
+		  me.name, user->server);
+#if 0
       sendto_one(cptr,
 		 ":%s KILL %s :%s GHOST (no server %s on the net)",
 		 me.name,
 		 sptr->name, me.name, user->server);
+#endif
       sendto_realops_flags(FLAGS_ALL,"No server %s for user %s[%s@%s] from %s",
 			   user->server, sptr->name, sptr->username,
 			   sptr->host, sptr->from->name);

@@ -187,11 +187,12 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   if (!(acptr = find_client(user, NULL)))
     {
       /*
-      ** If the user has recently changed nick, automatically
-      ** rewrite the KILL for this new nickname--this keeps
-      ** servers in synch when nick change and kill collide
-      */
-      if (!(acptr = get_history(user, (long)KILLCHASETIMELIMIT)))
+       * If the user has recently changed nick, but only if its 
+       * not an uid, automatically rewrite the KILL for this new nickname.
+       * --this keeps servers in synch when nick change and kill collide
+       */
+      if( (*user != '.')  &&
+	  (!(acptr = get_history(user, (long)KILLCHASETIMELIMIT))))
         {
           sendto_one(sptr, form_str(ERR_NOSUCHNICK),
                      me.name, parv[0], user);
