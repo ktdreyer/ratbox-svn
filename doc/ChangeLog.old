@@ -1,3 +1,8 @@
+*** 20010203_7 by a1kmm
+- 'I' is not the same as 'K'.
+- flags is not the same as status.
+
+
 *** 20010203_6 by a1kmm
 - Got rid of mtrie_conf, we now have new hashtable orientated code that should be faster on servers with
 lots of k-lines & I-lines etc...
