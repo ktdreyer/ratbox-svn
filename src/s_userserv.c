@@ -894,25 +894,14 @@ static int
 s_user_info(struct client *client_p, char *parv[], int parc)
 {
 	struct user_reg *ureg_p;
-	time_t seconds;
-	int minutes, hours, days, weeks;
 
 	if((ureg_p = find_user_reg_nick(client_p, parv[0])) == NULL)
 		return 1;
 
-	seconds = (CURRENT_TIME - ureg_p->reg_time);
-	minutes = (seconds / 60);
-	weeks = (int) (seconds / 604800);
-	seconds %= 604800;
-	days = (int) (seconds / 86400);
-	seconds %= 86400;
-	hours = (int) (seconds / 3600);
-	seconds %= 3600;
-	minutes = (int) (seconds / 60);
-	
 	service_error(userserv_p, client_p, 
-			"[%s] Username %s registered for %dw %dd %d%dm",
-			parv[0], ureg_p->name, weeks, days, hours, minutes);
+			"[%s] Username %s registered for %s",
+			parv[0], ureg_p->name,
+			get_duration((time_t) (CURRENT_TIME - ureg_p->reg_time)));
 
 	if(ureg_p == client_p->user->user_reg)
 	{

@@ -533,6 +533,9 @@ static struct _flags_table flags_table[] = {
 #ifdef ENABLE_USERSERV
 	{ "register",	UMODE_REGISTER	},
 #endif
+#ifdef ENABLE_CHANSERV
+	{ "botfight",	UMODE_BOTFIGHT	},
+#endif
 #ifdef ENABLE_JUPESERV
 	{ "jupes",	UMODE_JUPES	},
 #endif

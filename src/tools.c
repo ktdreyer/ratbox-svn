@@ -75,7 +75,7 @@ get_duration(time_t seconds)
         days = (int) (seconds / 86400);
         seconds %= 86400;
         hours = (int) (seconds / 3600);
-        hours %= 3600;
+        seconds %= 3600;
         minutes = (int) (seconds / 60);
         seconds %= 60;
 

@@ -2760,28 +2760,16 @@ s_chan_info(struct client *client_p, char *parv[], int parc)
 	struct chan_reg *reg_p;
 	struct member_reg *mreg_p;
 	const char *owner;
-	time_t seconds;
-	int minutes, hours, days, weeks;
 
 	if((reg_p = find_channel_reg(client_p, parv[0])) == NULL)
 		return 1;
 
 	owner = find_owner(reg_p);
 
-	seconds = (CURRENT_TIME - reg_p->reg_time);
-
-	weeks = (int) (seconds / 604800);
-	seconds %= 604800;
-	days = (int) (seconds / 86400);
-	seconds %= 86400;
-	hours = (int) (seconds / 3600);
-	seconds %= 3600;
-	minutes = (int) (seconds / 60);
-
 	service_error(chanserv_p, client_p, 
-			"[%s] Registered to %s for %dw %dd %dh%dm",
+			"[%s] Registered to %s for %s",
 			reg_p->name, owner ?  owner : "?unknown?",
-			weeks, days, hours, minutes);
+			get_duration((time_t) (CURRENT_TIME - reg_p->reg_time)));
 
 	if(reg_p->flags & CS_FLAGS_SUSPENDED)
 	{

@@ -7,3 +7,4 @@ Usage: .flags [[+|-]flag]
        register  - Username/Channel registrations
        jupes     - Oper jupes
        alis      - LIST usage in ALIS
+       botfight  - See warnings about bots fighting with chanserv
