@@ -500,21 +500,7 @@ register_local_user(struct Client *client_p, struct Client *source_p, char *nick
 
 	Count.totalrestartcount++;
 
-	m = dlinkFind(&unknown_list, source_p);
-
-	assert(m != NULL);
-	if(m != NULL)
-	{
-		dlinkMoveNode(m, &unknown_list, &lclient_list);
-	}
-	else
-	{
-		sendto_realops_flags(UMODE_ALL, L_ADMIN,
-				     "Tried to register %s (%s@%s) but I couldn't find it?!?",
-				     nick, source_p->username, source_p->host);
-		exit_client(client_p, source_p, &me, "Client exited");
-		return CLIENT_EXITED;
-	}
+	dlinkMoveNode(&source_p->localClient->tnode, &unknown_list, &lclient_list);
 	user_welcome(source_p);
 
 	return (introduce_client(client_p, source_p, user, nick));
