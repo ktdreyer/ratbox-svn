@@ -1051,7 +1051,7 @@ static void exit_one_client(struct Client *client_p, struct
           for (lp = source_p->user->channel.head; lp; lp = next_lp)
 	    {
 	      next_lp = lp->next;
-	      remove_user_from_channel(lp->data,source_p, 1);
+	      remove_user_from_channel(lp->data, source_p, 1);
 	    }
           /* Should not be in any channels now */
           assert(source_p->user->channel.head == NULL);
