@@ -1,3 +1,15 @@
+leeh        2004/04/03 08:12:43 EST	(20040403_1)
+
+  Modified files:
+    tools                convertilines.c 
+  Log:
+  - update convertilines to take account of new config format
+  
+  Revision  Changes    Path
+  7.6       +47 -34    ircd-ratbox/tools/convertilines.c
+
+
+
 leeh        2004/04/03 07:44:44 EST	(20040403_0)
 
   Modified files:
