@@ -2080,7 +2080,7 @@ struct ChannelMode
   void *d;
 }
 /* *INDENT-OFF* */
-ModeTable[255] =
+static ModeTable[255] =
 {
   {chm_nosuch, NULL},
   {chm_nosuch, NULL},                             /* A */
