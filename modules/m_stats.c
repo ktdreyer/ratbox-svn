@@ -874,7 +874,7 @@ static void stats_L_list(struct Client *source_p,char *name, int doall, int wild
       else
 	{
           /* If its a hidden ip, an admin, or a server, mask the real IP */
-	  if(IsIPHidden(target_p) || IsServer(target_p) || IsAdmin(target_p)
+	  if(IsIPSpoof(target_p) || IsServer(target_p) || IsAdmin(target_p)
 	     || IsHandshake(target_p) || IsConnecting(target_p))
 	    sendto_one(source_p, Lformat, me.name,
 		       RPL_STATSLINKINFO, source_p->name,

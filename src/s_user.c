@@ -1307,7 +1307,6 @@ int oper_up( struct Client *source_p,
         }
     }
 	
-  SetIPHidden(source_p);
   Count.oper++;
 
   SetExemptKline(source_p);

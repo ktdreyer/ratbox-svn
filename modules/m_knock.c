@@ -202,7 +202,7 @@ static void parse_knock_local(struct Client *client_p,
     {
       sendto_one(uplink, ":%s KNOCKLL %s %s %s",
                  source_p->name, parv[1],
-		 IsIPHidden(source_p) ? "255.255.255.255" :
+		 IsIPSpoof(source_p) ? "255.255.255.255" :
 		 source_p->localClient->sockhost,
 		 (parc > 2) ? parv[2] : "");
     }

@@ -109,6 +109,10 @@ static void mo_trace(struct Client *client_p, struct Client *source_p,
   static time_t now;
   dlink_node *ptr;
   char *looking_for = parv[0];
+
+  if(!IsClient(source_p))
+    return;
+    
   if (parc > 2)
     if (hunt_server(client_p, source_p, ":%s TRACE %s :%s", 2, parc, parv))
       return;
@@ -139,8 +143,7 @@ static void mo_trace(struct Client *client_p, struct Client *source_p,
       return;
     }
 
-  if(IsClient(source_p))
-    trace_spy(source_p);
+  trace_spy(source_p);
 
   doall = (parv[1] && (parc > 1)) ? match(tname, me.name): TRUE;
   wilds = !parv[1] || strchr(tname, '*') || strchr(tname, '?');
@@ -156,37 +159,34 @@ static void mo_trace(struct Client *client_p, struct Client *source_p,
       char ipaddr[HOSTIPLEN];
 
       target_p = find_client(tname);
-      if(!target_p || !IsPerson(target_p)) 
-        {
-          /* this should only be reached if the matching
-             target is this server */
-          sendto_one(source_p, form_str(RPL_ENDOFTRACE),me.name,
-                     parv[0], tname);
-          return;
-        }
-      name = get_client_name(target_p, HIDE_IP);
-      inetntop(target_p->localClient->aftype, &IN_ADDR(target_p->localClient->ip), ipaddr, HOSTIPLEN);
+      
+      if(target_p && IsPerson(target_p)) 
+      {
+        name = get_client_name(target_p, HIDE_IP);
+        inetntop(target_p->localClient->aftype, &IN_ADDR(target_p->localClient->ip), ipaddr, HOSTIPLEN);
 
-      class_name = get_client_class(target_p);
+        class_name = get_client_class(target_p);
 
-      if (IsOper(target_p))
+        if (IsOper(target_p))
         {
           sendto_one(source_p, form_str(RPL_TRACEOPERATOR),
-                     me.name, parv[0], class_name,
-                     name, 
-                     MyOper(source_p)?ipaddr:(IsIPHidden(target_p)?"127.0.0.1":ipaddr),
+                     me.name, parv[0], class_name, name, 
+                     MyOper(source_p) ? ipaddr :
+		     (IsIPSpoof(target_p) ? "255.255.255.255" : ipaddr),
                      now - target_p->lasttime,
-                     (target_p->user)?(now - target_p->user->last):0);
+                     (target_p->user) ? (now - target_p->user->last) : 0);
         }
-      else
+        else
         {
           sendto_one(source_p,form_str(RPL_TRACEUSER),
-                     me.name, parv[0], class_name,
-                     name, 
-                     MyOper(source_p)?ipaddr:(IsIPHidden(target_p)?"127.0.0.1":ipaddr),
+                     me.name, parv[0], class_name, name, 
+                     MyOper(source_p) ? ipaddr : 
+		     (IsIPSpoof(target_p) ? "255.255.255.255" : ipaddr),
                      now - target_p->lasttime,
                      (target_p->user)?(now - target_p->user->last):0);
         }
+      }
+      
       sendto_one(source_p, form_str(RPL_ENDOFTRACE),me.name,
                  parv[0], tname);
       return;
@@ -212,6 +212,7 @@ static void mo_trace(struct Client *client_p, struct Client *source_p,
 	}
      }
    }
+   
   /* report all direct connections */
   for (ptr = lclient_list.head; ptr; ptr = ptr->next)
     {
@@ -262,26 +263,27 @@ static void mo_trace(struct Client *client_p, struct Client *source_p,
    */
   if (!SendWallops(source_p) || !cnt)
     {
-      if (cnt)
-        {
-          sendto_one(source_p, form_str(RPL_ENDOFTRACE),me.name,
-                     parv[0],tname);
-          return;
-        }
+      /* redundant given we dont allow trace from non-opers anyway.. but its
+       * left here in case that should ever change --fl
+       */
+      if(!cnt)
+	sendto_one(source_p, form_str(RPL_TRACESERVER),
+	           me.name, parv[0], 0, link_s[me.fd],
+		   link_u[me.fd], me.name, "*", "*", me.name);
+		   
       /* let the user have some idea that its at the end of the
        * trace
        */
-      sendto_one(source_p, form_str(RPL_TRACESERVER),
-                 me.name, parv[0], 0, link_s[me.fd],
-                 link_u[me.fd], me.name, "*", "*", me.name);
       sendto_one(source_p, form_str(RPL_ENDOFTRACE),me.name,
                  parv[0],tname);
       return;
     }
+    
   for (cltmp = ClassList; doall && cltmp; cltmp = cltmp->next)
     if (Links(cltmp) > 0)
       sendto_one(source_p, form_str(RPL_TRACECLASS), me.name,
                  parv[0], ClassName(cltmp), Links(cltmp));
+		 
   sendto_one(source_p, form_str(RPL_ENDOFTRACE),me.name, parv[0],tname);
 }
 
@@ -360,34 +362,33 @@ static int report_this_status(struct Client *source_p, struct Client *target_p,
 	  || !dow || IsOper(target_p))
 	{
           if (IsAdmin(target_p))
-	    sendto_one(source_p,
-                       form_str(RPL_TRACEOPERATOR),
-                       me.name,
-                       source_p->name, class_name,
-		       name,
+	    sendto_one(source_p, form_str(RPL_TRACEOPERATOR),
+                       me.name, source_p->name, class_name, name,
                        IsOperAdmin(source_p) ? ip : "255.255.255.255",
                        now - target_p->lasttime,
-                       (target_p->user)?(now - target_p->user->last):0);
+                       (target_p->user) ? (now - target_p->user->last) : 0);
+		       
 	  else if (IsOper(target_p))
-	    sendto_one(source_p,
-		       form_str(RPL_TRACEOPERATOR),
-		       me.name,
-		       source_p->name, class_name,
-		       name, MyOper(source_p)?ip:(IsIPHidden(target_p)?"127.0.0.1":ip),
+	    sendto_one(source_p, form_str(RPL_TRACEOPERATOR),
+		       me.name, source_p->name, class_name, name, 
+		       MyOper(source_p) ? ip : 
+		       (IsIPSpoof(target_p) ? "255.255.255.255" : ip),
 		       now - target_p->lasttime,
 		       (target_p->user)?(now - target_p->user->last):0);
+		       
 	  else
-	    sendto_one(source_p,form_str(RPL_TRACEUSER),
-		       me.name, source_p->name, class_name,
-		       name,
-		       MyOper(source_p)?ip:(IsIPHidden(target_p)?"127.0.0.1":ip),
+	    sendto_one(source_p, form_str(RPL_TRACEUSER),
+		       me.name, source_p->name, class_name, name,
+		       MyOper(source_p) ? ip : 
+		       (IsIPSpoof(target_p) ? "255.255.255.255" : ip),
 		       now - target_p->lasttime,
 		       (target_p->user)?(now - target_p->user->last):0);
 	  cnt++;
 	}
       break;
     case STAT_SERVER:
-    name = IsOperAdmin(source_p) ? get_client_name(target_p, HIDE_IP):get_client_name(target_p, MASK_IP);
+      if(!IsOperAdmin(source_p))
+        name = get_client_name(target_p, MASK_IP);
 
       sendto_one(source_p, form_str(RPL_TRACESERVER),
 		 me.name, source_p->name, class_name, link_s_p,
@@ -396,6 +397,7 @@ static int report_this_status(struct Client *source_p, struct Client *target_p,
 		 me.name, now - target_p->lasttime);
       cnt++;
       break;
+      
     default: /* ...we actually shouldn't come here... --msa */
       sendto_one(source_p, form_str(RPL_TRACENEWTYPE), me.name,
 		 source_p->name, name);

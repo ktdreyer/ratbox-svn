@@ -619,7 +619,6 @@ verify_access(struct Client* client_p, const char* username)
 		}
 	      strncpy_irc(client_p->host, aconf->name, HOSTLEN);
 	      SetIPSpoof(client_p);
-	      SetIPHidden(client_p);
 	    }
 	  return(attach_iline(client_p, aconf));
 	}
