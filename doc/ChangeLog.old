@@ -1,3 +1,7 @@
+*** 20010524_4 by toot
+fixes a couple of small compile warnings in adns
+
+
 *** 20010524_3 by kreator
 - fix small typo in example conf (comRession options :-)
 
