@@ -199,11 +199,6 @@ CompleteIAuthConnection(int fd, void *notused)
     return;
 	}
 
-	/* XXX THIS IS A STATIC */
-#if 0
-  comm_connect_callback(fd, COMM_OK);
-#endif
-
   comm_setselect(fd, FDLIST_SERVER, COMM_SELECT_READ,
                  ParseIAuth, NULL, 0);
 
@@ -318,15 +313,19 @@ ParseIAuth(int fd, void *notused)
 	length = recv(fd, buffer, BUFSIZE, 0);
 
 	if ((length == (-1)) && ((errno == EWOULDBLOCK) || (errno == EAGAIN)))
-/*		return 2; /* no error - there's just nothing to read */
-    return;
+    return; /* no error - there's just nothing to read */
+  #if 0
+    return 2; /* no error - there's just nothing to read */
+  #endif
 
 	if (length <= 0)
 	{
 		log(L_ERROR, "Read error from server: %s",
 			strerror(errno));
     return;
-		/* bingo return 0; /* the connection was closed */
+  #if 0
+		return 0; /* the connection was closed */
+  #endif
 	}
 
 	/*
@@ -573,6 +572,10 @@ GreetUser(struct Client *client)
   static char ubuf[12];
   dlink_node *m;
 
+  assert(client != 0);
+
+  client->user->last = CurrentTime;
+
   sendto_realops_flags(FLAGS_CCONN,
 		       "Client connecting: %s (%s@%s) [%s] {%d}",
 		       client->name,
@@ -688,9 +691,18 @@ GreetUser(struct Client *client)
       ubuf[1] = '\0';
     }
   
+#if 0
   m = make_dlink_node();
   dlinkAdd(client, m, &lclient_list);
+#endif
 
+  m = dlinkFind(&unknown_list, client);
+  assert(m != 0);
+
+  dlinkDelete(m, &unknown_list);
+  dlinkAdd(client, m, &lclient_list);
+
+#if 0
   sendto_serv_butone(client,
 		     "NICK %s %d %lu %s %s %s %s :%s",
 		     client->name,
@@ -701,6 +713,19 @@ GreetUser(struct Client *client)
 		     client->host,
 		     client->user->server,
 		     client->info);
+#endif
+
+  sendto_ll_serv_butone(client, client, 1,
+    ":%s NICK %s %d %lu %s %s %s %s :%s",
+    me.name,
+    client->name,
+    client->hopcount + 1,
+    client->tsinfo,
+    ubuf,
+    client->username,
+    client->host,
+    client->user->server,
+    client->info);
   
   if (ubuf[1])
     send_umode_out(client, client, 0);
