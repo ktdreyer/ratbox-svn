@@ -1,3 +1,11 @@
+*** 20001108_5 by adrian
+
+
+Break out the documentation in network.txt into seperate files for
+filedescriptor management and file management.
+
+
+
 *** 20001108_4 by adrian
 
 
