@@ -1,3 +1,18 @@
+leeh        2002/07/28 15:19:05 EDT	(20020728_0)
+
+  Modified files:
+    include              channel_mode.h 
+    src                  channel_mode.c 
+  Log:
+  - commited the first half of the desync fixes.  this will allow users to
+    set +b-b on channels.
+  
+  Revision  Changes    Path
+  7.11      +8 -4      ircd-hybrid-7/include/channel_mode.h
+  7.46      +504 -698  ircd-hybrid-7/src/channel_mode.c
+
+
+
 androsyn    2002/07/27 15:51:20 EDT	(20020727_1)
 
   Modified files:
