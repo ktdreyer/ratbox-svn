@@ -1,3 +1,20 @@
+leeh        2002/04/20 13:34:00 EDT	(20020420_0)
+
+  Modified files:
+    include              channel.h 
+    modules              m_who.c 
+    modules/core         m_sjoin.c 
+  Log:
+  - wrapped some +ov stuff in #ifdef's.
+  - removed chptr->ts_winner
+  
+  Revision  Changes    Path
+  7.108     +0 -1      ircd-hybrid-7/include/channel.h
+  1.132     +10 -6     ircd-hybrid-7/modules/core/m_sjoin.c
+  1.57      +3 -1      ircd-hybrid-7/modules/m_who.c
+
+
+
 leeh        2002/04/19 12:21:08 EDT	(20020419_0)
 
   Modified files:
