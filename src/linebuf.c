@@ -21,7 +21,7 @@
 #include "linebuf.h"
 #include "memory.h"
 #include "event.h"
-#include "blalloc.h"
+#include "balloc.h"
 
 #ifdef STRING_WITH_STRINGS
 # include <string.h>

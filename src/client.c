@@ -50,7 +50,7 @@
 #include "hash.h"
 #include "memory.h"
 #include "hostmask.h"
-#include "blalloc.h"
+#include "balloc.h"
 
 #include <assert.h>
 #include <fcntl.h>
