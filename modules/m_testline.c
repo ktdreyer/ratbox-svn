@@ -132,7 +132,7 @@ int mo_testline(struct Client *cptr, struct Client *sptr, int parc, char *parv[]
           else if(aconf->status & CONF_CLIENT)
             {
               sendto_one(sptr,
-":%s NOTICE %s :I-line mask [%s] prefix [%s] name [%s] host [%s] port [%d] class [%d]",
+":%s NOTICE %s :I-line mask [%s] prefix [%s] name [%s] host [%s] port [%d] class [%s]",
                          me.name, parv[0],
                          name,
                          show_iline_prefix(sptr,aconf,user),

@@ -69,11 +69,7 @@ char *_version = "20001122";
  * 
  * process a SJOIN, taking the TS's into account to either ignore the
  * incoming modes or undo the existing ones or merge them, and JOIN
- * all the specified users while sending JOIN/MODEs to non-TS servers
- * and to clients
- *
- * This function is a festering pile of doggie doo-doo left in the
- * hot sun for 2 weeks, coated with flies. -db
+ * all the specified users while sending JOIN/MODEs to local clients
  */
 
 char    modebuf[MODEBUFLEN];
@@ -82,9 +78,13 @@ char    *mbuf;
 int     pargs;
 
 void set_final_mode(struct Mode *mode,struct Mode *oldmode);
-void remove_our_modes( int type,
-		       struct Channel *chptr, struct Channel *top_chptr,
-		       struct Client *sptr);
+void remove_our_modes(int type,
+		      struct Channel *chptr, struct Channel *top_chptr,
+		      struct Client *sptr);
+
+void remove_a_mode(int hide_or_not,
+		   struct Channel *chptr, struct Channel *top_chptr,
+		   struct Client *sptr, dlink_list *list, char flag);
 
 
 int     ms_sjoin(struct Client *cptr,
@@ -635,104 +635,103 @@ void remove_our_modes( int hide_or_not,
 		       struct Channel *chptr, struct Channel *top_chptr,
 		       struct Client *sptr)
 {
-  int count;
-  dlink_node *l;
-  struct Client *acptr;
-  char *para[MAXMODEPARAMS];
-  char modebuf[MODEBUFLEN];
-  char *chname;
-
-  para[0] = para[1] = para[2] = "";
-
-  count = 0;
-
-  mbuf = modebuf;
-  *mbuf++ = '-';
-  *mbuf   = '\0';
-
-  if(IsVchan(chptr) && top_chptr)
-    chname = top_chptr->chname;
-  else
-    chname = chptr->chname;
-
-  for (l = chptr->chanops.head; l && l->data; l = l->next)
-    {
-      if( chptr->opcount )
-	chptr->opcount--;
-
-      acptr = l->data;
-      para[count++] = acptr->name;
-      *mbuf++ = 'o';
-      *mbuf   = '\0';
-
-      if (count >= MAXMODEPARAMS)
-	{
-	  *mbuf = '\0';
-	  sendto_channel_butserv(hide_or_not, chptr, sptr,
-				 ":%s MODE %s %s %s %s %s",
-				 sptr->name,
-				 chname,
-				 modebuf,
-				 para[0], para[1], para[2]);
-	  mbuf = modebuf;
-	  *mbuf++ = '-';
-	  *mbuf   = '\0';
-	  para[0] = para[1] = para[2] = "";
-	  count = 0;
-	}
-    }
-
-  if(count != 0)
-    {
-      sendto_channel_butserv(hide_or_not, chptr, sptr,
-			     ":%s MODE %s %s %s %s %s",
-			     sptr->name,
-			     chname,
-			     modebuf,
-			     para[0], para[1], para[2]);
-    }
-
-  mbuf = modebuf;
-  *mbuf++ = '-';
-  *mbuf = '\0';
-  count = 0;
-
-  for (l = chptr->voiced.head; l && l->data; l = l->next)
-    {
-      acptr = l->data;
-      para[count++] = acptr->name;
-      *mbuf++ = 'v';
-      *mbuf   = '\0';
-
-      if (count >= MAXMODEPARAMS)
-	{
-	  *mbuf = '\0';
-	  sendto_channel_butserv(hide_or_not, chptr, sptr,
-				 ":%s MODE %s %s %s %s %s",
-				 sptr->name,
-				 chname,
-				 modebuf,
-				 para[0], para[1], para[2]);
-	  mbuf = modebuf;
-	  *mbuf++ = '-';
-	  *mbuf   = '\0';
-	  para[0] = para[1] = para[2] = "";
-	  count = 0;
-	}
-    }
-
-  if(count != 0)
-    {
-      sendto_channel_butserv(hide_or_not, chptr, sptr,
-			     ":%s MODE %s %s %s %s %s",
-			     sptr->name,
-			     chname,
-			     modebuf,
-			     para[0], para[1], para[2]);
-    }
+  remove_a_mode(hide_or_not, chptr, top_chptr, sptr, &chptr->chanops, 'o');
+  remove_a_mode(hide_or_not, chptr, top_chptr, sptr, &chptr->halfops, 'h');
+  remove_a_mode(hide_or_not, chptr, top_chptr, sptr, &chptr->voiced, 'v');
 
   /* Move all voice/ops etc. to non opped list */
   dlinkMoveList(&chptr->chanops, &chptr->peons);
   dlinkMoveList(&chptr->halfops, &chptr->peons);
   dlinkMoveList(&chptr->voiced, &chptr->peons);
+
+  chptr->opcount = 0;
 }
+
+
+/*
+ * remove_a_mode
+ *
+ * inputs	-
+ * output	- NONE
+ * side effects	- remove ONE mode from a channel
+ */
+void remove_a_mode( int hide_or_not,
+		    struct Channel *chptr, struct Channel *top_chptr,
+		    struct Client *sptr, dlink_list *list, char flag)
+{
+  dlink_node *l;
+  struct Client *acptr;
+  char buf[BUFSIZE];
+  char modebuf[MODEBUFLEN];
+  char parabuf[MODEBUFLEN];
+  char *chname;
+  char *t;
+  int mlen;
+  int tlen;
+  int cur_len;
+  int count = 0;
+
+  mbuf = modebuf;
+  *mbuf++ = '-';
+  *mbuf   = '\0';
+  t = parabuf;
+
+  chname = chptr->chname;
+
+  if(IsVchan(chptr) && top_chptr)
+    chname = top_chptr->chname;
+
+  ircsprintf(buf,":%s MODE %s ", sptr->name, chname);
+  mlen = strlen(buf);
+  cur_len = mlen + 3;	/* allow for `- ' */
+
+  for (l = list->head; l && l->data; l = l->next)
+    {
+      acptr = l->data;
+      ircsprintf(t,"%s ", acptr->name);
+      tlen = strlen(t);
+      cur_len += tlen;
+      t += tlen;
+
+      *mbuf++ = flag;
+      *mbuf   = '\0';
+      cur_len++;
+      count++;
+
+      if ((count >= MAXMODEPARAMS) || ((cur_len + NICKLEN + 4) > BUFSIZE))
+	{
+	  sendto_channel_butserv(hide_or_not, chptr, sptr,
+				 ":%s MODE %s %s %s",
+				 sptr->name,
+				 chname,
+				 modebuf,
+				 parabuf);
+
+	  mbuf = modebuf;
+	  *mbuf++ = '-';
+	  *mbuf   = '\0';
+	  t = parabuf;
+	  cur_len = mlen + 3;	/* allow for `- ' */
+	  count = 0;
+	}
+    }
+
+  if(count != 0)
+    {
+      sendto_channel_butserv(hide_or_not, chptr, sptr,
+			     ":%s MODE %s %s %s",
+			     sptr->name,
+			     chname,
+			     modebuf,
+			     parabuf);
+    }
+}
+
+
+
+
+
+
+
+
+

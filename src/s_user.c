@@ -444,6 +444,7 @@ int register_user(struct Client *cptr, struct Client *sptr,
   if (MyConnect(sptr))
     {
       user_welcome(sptr);
+      Count.total_client_count++;
     }
   else if (IsServer(cptr))
     {
