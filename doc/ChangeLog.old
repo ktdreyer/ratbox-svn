@@ -1,3 +1,9 @@
+*** 20010402_1 by db
+- Edward, could you review this? 
+  this fixes botch with getops.h
+
+
+
 *** 20010401_7 by toot
 removed some old stuff from the parser
 
