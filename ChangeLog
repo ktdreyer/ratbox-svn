@@ -1,3 +1,15 @@
+leeh        2004/07/24 21:29:23 EDT	(20040725_1)
+
+  Modified files:
+    modules/core         m_join.c 
+  Log:
+  - better exempt opers from the fake channel restriction..
+  
+  Revision  Changes    Path
+  1.156     +5 -5      ircd-ratbox/modules/core/m_join.c
+
+
+
 leeh        2004/07/24 21:20:25 EDT	(20040725_0)
 
   Modified files:
