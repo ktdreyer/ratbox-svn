@@ -1,3 +1,8 @@
+*** 20001229_10 by fl_
+
+- fixed a bug I made which caused a -o nick when they werent being deopped
+
+
 *** 20001229_9 by fl_
 
 - gave myself a todo list..
