@@ -175,8 +175,6 @@ struct cache {
 
 static int    ResolverFileDescriptor = -1;
 
-static time_t nextDNSCheck    = 0;
-
 /*
  * Keep a spare file descriptor open. res_init calls fopen to read the
  * resolv.conf file. If ircd is hogging all the file descriptors below 256,
@@ -592,7 +590,6 @@ struct DNSReply* gethost_byname(const char* name,
   ++reinfo.re_na_look;
 
   do_query_name(query, name, NULL);
-  nextDNSCheck = 1;
   return NULL;
 }
 
@@ -607,7 +604,6 @@ struct DNSReply* gethost_byaddr(const char* addr,
   ++reinfo.re_nu_look;
 
   do_query_number(query, (const struct in_addr*) addr, NULL);
-  nextDNSCheck = 1;
   return NULL;
 }
 /*
