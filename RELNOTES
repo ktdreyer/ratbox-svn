@@ -18,6 +18,13 @@ it is important you read this file before upgrading.
 - TRACE no longer lists unknowns to remote opers
 - fixed kline checking on spoofs, need to test bitmask rather than
   aconf->name
+- fixed a core when a user on a TS6 server joined a +lk channel
+- m_join.c is now a core module
+- fixed a core in /info
+- fixed /who leaking hopcount during flatten_links
+- fixed serverhiding leaks
+- fixed dns/host issue with ::1
+- fixed local +beI to collapse ** into *
 
 -- ircd-ratbox-2.0b3
 - fix ipv6 on openbsd
