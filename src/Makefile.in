@@ -5,6 +5,9 @@
 #
 CC = @CC@
 RM = @RM@
+LEX = @LEX@
+LEXLIB = @LEXLIB@
+
 MKDEP = ${CC} -MM
 
 IRCDLIBS = @LIBS@ ../zlib/libz.a
@@ -12,8 +15,6 @@ IRCDLIBS = @LIBS@ ../zlib/libz.a
 INCLUDES = -I../include -I../zlib
 CPPFLAGS = ${INCLUDES} @CPPFLAGS@
  
-nparse:	y.tab.o lex.yy.o
-
 y.tab.o:	y.tab.c ircd_parser.y
 	gcc -g -I ../include -I. -c y.tab.c
 
@@ -24,7 +25,7 @@ lex.yy.o:	lex.yy.c ircd_lexer.l
 	gcc -g -I ../include -c lex.yy.c
 
 lex.yy.c:	ircd_lexer.l
-	lex ircd_lexer.l
+	${LEX} ircd_lexer.l
 
 SRCS =                          \
   blalloc.c                     \
@@ -131,8 +132,8 @@ all: ircd
 
 build: all
 
-ircd: ${OBJS} nparse version.o
-	${CC} ${LDFLAGS} -o $@ ${OBJS} lex.yy.o y.tab.o version.o ${IRCDLIBS} -ll
+ircd: ${OBJS} y.tab.o lex.yy.o version.o
+	${CC} ${LDFLAGS} -o $@ ${OBJS} lex.yy.o y.tab.o version.o ${IRCDLIBS} ${LEXLIB}
 	mv version.c version.c.last
 
 install: build
