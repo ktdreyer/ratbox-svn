@@ -1,3 +1,8 @@
+*** 20010822_6 by leeh
+- theres no need to make two sjoin bufs at all, especially when theyre
+  *identical* and one of them isnt even done properly..
+
+
 *** 20010822_5 by leeh
 - setting a pointer to p, which is null, then checking if its \0 is bad.
 
