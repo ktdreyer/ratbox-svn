@@ -82,7 +82,6 @@ static int  SplitUserHost( struct ConfItem * );
 static void     set_default_conf(void);
 static void     check_conf(void);
 static void     read_conf(FBFILE*);
-static void     read_kd_lines(FBFILE*);
 static void     clear_out_old_conf(void);
 static void     flush_deleted_I_P(void);
 static void     expire_tklines(dlink_list *);
@@ -1572,27 +1571,6 @@ static void check_conf(void)
 #endif
 }
 
-static void read_kd_lines(FBFILE* file)
-{
-  char             line[BUFSIZE];
-  char*            p;
-
-  scount = 0;
-
-  while (fbgets(line, sizeof(line), file))
-    {
-      if ((p = strchr(line, '\n')))
-        *p = '\0';
-
-      if (!*line || line[0] == '#')
-        continue;
-
-      if (line[1] == ':')
-        oldParseOneLine(line);
-    }
-
-}
-
 /*
  * conf_add_conf
  * Inputs	- ConfItem
@@ -2015,7 +1993,7 @@ void read_conf_files(int cold)
 	}
       else
 	{
-	  read_kd_lines(file);
+	  KParseFile(file);
 	  fbclose(file);
 	}
     }
@@ -2034,7 +2012,7 @@ void read_conf_files(int cold)
 	}
       else
 	{
-	  read_kd_lines(file);
+	  DParseFile(file);
 	  fbclose(file);
 	}
     }
@@ -2230,41 +2208,13 @@ void WriteKlineOrDline( KlineType type,
     }
 
   if(type==KLINE_TYPE)
-    {
-      if (MyClient(source_p))
-	{
-	  ircsprintf(buffer, "#%s!%s@%s K'd: %s@%s:%s\n",
-		     source_p->name, source_p->username, source_p->host,
-		     user, host, reason);
-	}
-      else
-	{
-	  ircsprintf(buffer, "#%s!%s@%s on %s K'd: %s@%s:%s\n",
-		     source_p->name, source_p->username, source_p->host,
-		     source_p->servptr?source_p->servptr->name:"<Unknown>",
-		     user, host, reason);
-	}
-    }
-  else
-    ircsprintf(buffer, "#%s!%s@%s D'd: %s:%s\n",
-	       source_p->name, source_p->username, source_p->host,
-	       host, reason);
-  
-  if (fbputs(buffer,out) == -1)
-    {
-      sendto_realops_flags(FLAGS_ALL,"*** Problem writing to %s",filename);
-      fbclose(out);
-      return;
-    }
-
-  if(type==KLINE_TYPE)
-    ircsprintf(buffer, "K:%s:%s (%s):%s\n",
-               host,
+    ircsprintf(buffer, "\"%s\",\"%s\",\"%s\",\"%s\"\n",
+               user,
+	       host,
                reason,
-               current_date,
-               user);
+               current_date);
   else
-    ircsprintf(buffer, "D:%s:%s (%s)\n",
+    ircsprintf(buffer, "\"%s\",\"%s\",\"%s\"\n",
                host,
                reason,
                current_date);
