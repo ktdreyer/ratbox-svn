@@ -987,7 +987,11 @@ kill_client_serv_butone(struct Client *one, struct Client *target_p, const char 
 	{
 		client_p = ptr->data;
 
-		if((one != NULL) && (client_p == one->from))
+		/* ok, if the client we're supposed to not send to has an
+		 * ID, then we still want to issue the kill there..
+		 */
+		if(one != NULL && (client_p == one->from) &&
+			(!has_id(client_p) || !has_id(target_p)))
 			continue;
 
 		if(has_id(client_p))

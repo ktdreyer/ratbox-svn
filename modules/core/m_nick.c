@@ -78,7 +78,8 @@ static int register_client(struct Client *client_p, struct Client *server,
 			   const char *nick, time_t newts, int parc, const char *parv[]);
 
 static int perform_nick_collides(struct Client *, struct Client *,
-				 struct Client *, int, const char **, time_t, const char *);
+				 struct Client *, int, const char **, 
+				 time_t, const char *, const char *);
 static int perform_nickchange_collides(struct Client *, struct Client *,
 				       struct Client *, int, const char **, 
 				       time_t, const char *);
@@ -376,7 +377,8 @@ ms_nick(struct Client *client_p, struct Client *source_p, int parc, const char *
 	}
 	/* we've got a collision! */
 	else
-		perform_nick_collides(source_p, client_p, target_p, parc, parv, newts, parv[1]);
+		perform_nick_collides(source_p, client_p, target_p, parc, parv, 
+					newts, parv[1], NULL);
 
 	return 0;
 }
@@ -460,7 +462,8 @@ ms_uid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	}
 	/* we've got a collision! */
 	else
-		perform_nick_collides(source_p, client_p, target_p, parc, parv, newts, parv[1]);
+		perform_nick_collides(source_p, client_p, target_p, parc, parv,
+					newts, parv[1], parv[8]);
 
 	return 0;
 }
@@ -701,7 +704,8 @@ change_remote_nick(struct Client *client_p, struct Client *source_p, int parc,
 
 static int
 perform_nick_collides(struct Client *source_p, struct Client *client_p,
-		      struct Client *target_p, int parc, const char *parv[], time_t newts, const char *nick)
+		      struct Client *target_p, int parc, const char *parv[],
+		      time_t newts, const char *nick, const char *uid)
 {
 	int sameuser;
 
@@ -714,6 +718,15 @@ perform_nick_collides(struct Client *source_p, struct Client *client_p,
 
 		sendto_one_numeric(target_p, ERR_NICKCOLLISION,
 				   form_str(ERR_NICKCOLLISION), target_p->name);
+
+		/* if the new client being introduced has a UID, we need to
+		 * issue a KILL for it..
+		 */
+		if(uid)
+			sendto_one(client_p, ":%s KILL %s :%s (Nick collision (new))",
+					me.id, uid, me.name);
+
+		/* we then need to KILL the old client everywhere */
 		kill_client_serv_butone(NULL, target_p,
 					"%s (Nick collision (new))", me.name);
 		ServerStats->is_kill++;
@@ -728,13 +741,17 @@ perform_nick_collides(struct Client *source_p, struct Client *client_p,
 		sameuser = (target_p->user) && !irccmp(target_p->username, parv[5])
 				&& !irccmp(target_p->host, parv[6]);
 
-		/* if the users are the same (loaded a client on a different server)
-		 * and the new users ts is older, or the users are different and the
-		 * new users ts is newer, ignore the new client and let it do the kill
-		 */
 		if((sameuser && newts < target_p->tsinfo) ||
 		   (!sameuser && newts > target_p->tsinfo))
 		{
+			/* if we have a UID, then we need to issue a KILL,
+			 * otherwise we do nothing and hope that the other
+			 * client will collide it..
+			 */
+			if(uid)
+				sendto_one(client_p,
+					":%s KILL %s :%s (Nick collision (new))",
+					me.id, uid, me.name);
 			return 0;
 		}
 		else
@@ -754,10 +771,8 @@ perform_nick_collides(struct Client *source_p, struct Client *client_p,
 			sendto_one_numeric(target_p, ERR_NICKCOLLISION,
 					   form_str(ERR_NICKCOLLISION), target_p->name);
 
-			/* if it came from a LL server, itd have been source_p,
-			 * so we dont need to mark target_p as known
-			 */
-			kill_client_serv_butone(source_p, target_p,
+			/* now we just need to kill the existing client */
+			kill_client_serv_butone(client_p, target_p,
 						"%s (Nick collision (new))", me.name);
 
 			target_p->flags |= FLAGS_KILLED;
@@ -826,7 +841,8 @@ perform_nickchange_collides(struct Client *source_p, struct Client *client_p,
 
 			sendto_one_numeric(target_p, ERR_NICKCOLLISION,
 					   form_str(ERR_NICKCOLLISION), target_p->name);
-			/* this won't go back to the incoming link, so LL doesnt matter */
+
+			/* kill the client issuing the nickchange */
 			kill_client_serv_butone(client_p, source_p,
 						"%s (Nick change collision)", me.name);
 
@@ -853,7 +869,10 @@ perform_nickchange_collides(struct Client *source_p, struct Client *client_p,
 
 			sendto_one_numeric(target_p, ERR_NICKCOLLISION,
 					   form_str(ERR_NICKCOLLISION), target_p->name);
-			kill_client_serv_butone(source_p, target_p, "%s (Nick collision)", me.name);
+
+			/* kill the client who existed before hand */
+			kill_client_serv_butone(client_p, target_p, 
+					"%s (Nick collision)", me.name);
 
 			ServerStats->is_kill++;
 
