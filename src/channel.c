@@ -2457,9 +2457,13 @@ static  void    sub1_from_channel(struct Channel *chptr)
 #ifdef FLUD
           free_fluders(NULL, chptr);
 #endif
-          del_from_channel_hash_table(chptr->chname, chptr);
-          MyFree((char*) chptr);
-          Count.chan--;
+          /* If channel has subchannels don't delete this channel */
+          if ( chptr->vchans == NULL )	  
+            {
+              del_from_channel_hash_table(chptr->chname, chptr);
+              MyFree((char*) chptr);
+              Count.chan--;
+            }
         }
     }
 }

@@ -96,6 +96,7 @@ extern int m_info(struct Client*, struct Client*, int, char**);
 extern int m_invite(struct Client*, struct Client*, int, char**);
 extern int m_ison(struct Client*, struct Client*, int, char**);
 extern int m_join(struct Client*, struct Client*, int, char**);
+extern int m_cjoin(struct Client*, struct Client*, int, char**);
 extern int m_kick(struct Client*, struct Client*, int, char**);
 extern int m_knock(struct Client*, struct Client*, int, char**);
 extern int m_kline(struct Client *,struct Client *,int,char **);

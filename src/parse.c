@@ -508,6 +508,10 @@ struct Message msgtab[] = {
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_join, ms_join, m_join }
   },
+  {MSG_CJOIN, 0, 1, MFLG_SLOW, 0,
+    /* UNREG, CLIENT, SERVER, OPER */
+    { m_unregistered, m_cjoin, m_error, m_error }
+  },
   {MSG_MODE, 0, 1, MFLG_SLOW, 0,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_mode, ms_mode, m_mode }

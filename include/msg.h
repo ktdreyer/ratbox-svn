@@ -107,6 +107,7 @@ typedef struct MessageTree MESSAGE_TREE;
 #define MSG_LTRACE   "LTRACE"   /* LTRA */
 #define MSG_NOTICE   "NOTICE"   /* NOTI */
 #define MSG_JOIN     "JOIN"     /* JOIN */
+#define MSG_CJOIN    "CJOIN"    /* CJOIN */
 #define MSG_PART     "PART"     /* PART */
 #define MSG_LUSERS   "LUSERS"   /* LUSE */
 #define MSG_MOTD     "MOTD"     /* MOTD */

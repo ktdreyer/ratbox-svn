@@ -62,7 +62,7 @@ struct Channel
   /* Only needed for lazy links and leafs */
   int             locusers;
   time_t          locusers_last;
-  struct SLink*   vchans;           /* Link list of sub channels */
+  struct Channel* vchans;           /* Link list of sub channels */
   struct SLink*   members;
   struct SLink*   invites;
   struct SLink*   banlist;
