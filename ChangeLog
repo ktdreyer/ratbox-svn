@@ -1,3 +1,16 @@
+leeh        2004/10/05 18:44:43 EDT	(20041005_3)
+
+  Modified files:
+    src                  s_chanserv.c 
+  Log:
+  - drop a channel registration when the only person with access removes
+    themselves
+  
+  Revision  Changes    Path
+  1.7       +52 -33    rserv/src/s_chanserv.c
+
+
+
 leeh        2004/10/05 18:08:07 EDT	(20041005_2)
 
   Modified files:
