@@ -1,3 +1,16 @@
+*** 20010129_7 by jdc
+Changed all get_client_name() references, respectively, from
+TRUE/FALSE to SHOW_IP/HIDE_IP.  Also changed HIDEME to MASK_IP.
+
+Also, forgot to mention this:
+
+src/s_bsd.c and src/s_serv.c were modified earlier to send two
+sendto_realops_flags() notices, one for admins (with SHOW_IP)
+and one for opers (with HIDE_IP).  This means admins will get
+two notices during a connect/disconnect, but I digress.
+
+
+
 *** 20010129_6 by jdc
 Changed all get_client_name() references, respectively, from
 TRUE/FALSE to SHOW_IP/HIDE_IP.  Also changed HIDEME to MASK_IP.
