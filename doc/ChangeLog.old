@@ -1,3 +1,13 @@
+*** 20010607_3 by db
+- redid kline/dline parser to use a spreadsheet compatible file format
+  klines are now stored as discussed on ircd-coders
+  "user","host","reason","time" (for now) I'll convert time
+  to decimal field later, and add oper id ...
+  for now this works..
+- also fixed typo in example.conf pointed out by MrPerfect
+
+
+
 *** 20010607_2 by jdc
 * Fixed SSL_LIBS= =stuff.  Note the extra equals sign.
 
