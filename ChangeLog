@@ -1,3 +1,31 @@
+leeh        2004/01/16 12:40:51 EST	(20040116_8)
+
+  Modified files:
+    include              tools.h 
+    src                  Makefile.in balloc.c channel.c conf.c 
+                         service.c tools.c 
+  Added files:
+    help/hoststat        clones host testmask 
+  Log:
+  - added compile flags -Wwrite-strings and -Wmissing-declarations and fixed
+    compile errors with them
+  - added casts for time_t usage
+  - add some hoststat help files
+  
+  Revision  Changes    Path
+  1.1       +4 -0      rserv/help/hoststat/clones (new)
+  1.1       +4 -0      rserv/help/hoststat/host (new)
+  1.1       +4 -0      rserv/help/hoststat/testmask (new)
+  1.11      +1 -0      rserv/include/tools.h
+  1.17      +1 -1      rserv/src/Makefile.in
+  1.4       +1 -1      rserv/src/balloc.c
+  1.20      +5 -4      rserv/src/channel.c
+  1.15      +2 -2      rserv/src/conf.c
+  1.13      +3 -2      rserv/src/service.c
+  1.8       +2 -2      rserv/src/tools.c
+
+
+
 leeh        2004/01/16 11:00:00 EST	(20040116_7)
 
   Modified files:
