@@ -1,3 +1,10 @@
+*** 20001209_5 by db
+- renamed yet another poorly named function...
+  sendto_channel_remote makes more sense than sendto_match_serv 
+  its sending stuff to a channel remotely folks *sheesH*
+
+
+
 *** 20001209_4 by db
 - removed unused extra parameter in sendto_channel_local
   I think I got them, all ;) if not it will just core mysteriously.. ;)
