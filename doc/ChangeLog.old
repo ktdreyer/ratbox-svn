@@ -1,3 +1,10 @@
+*** 20010717_4 by leeh
+- I didnt mean to do that (it explains the double commit) I saw it
+  commiting configure and went "erp!"
+
+  this backs out the configure change ;)
+
+
 *** 20010717_3 by leeh
 - thats it, persistent clients are gone
 
