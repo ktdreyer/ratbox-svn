@@ -1,3 +1,9 @@
+*** 20010210_5 by jdc
+- *Server name* being reported on connect was listener->name, not
+  me.name.
+
+
+
 *** 20010210_4 by jdc
 - Fixed bug where /WHO *, /WHO NICK, and /WHO #chan would not show
   +o or +v clients when opped or +h'd; bug was due to lack-of 
