@@ -1,3 +1,7 @@
+*** 20010629_2 by leeh
+- fixed the compile warnings..
+
+
 *** 20010629_1 by a1kmm
 - Set uplink to NULL on changing to a hub.
 
