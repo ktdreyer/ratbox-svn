@@ -54,6 +54,7 @@ static void PrintOutServers(FILE *out);
 static void PairUpServers(struct ConnectPair* );
 static void AddHubOrLeaf(int type,char* name,char* host);
 static void OperPrivsFromString(FILE* , char* );
+
 int main(int argc,char *argv[])
 {
   FILE *in;
@@ -379,7 +380,7 @@ static void oldParseOneLine(FILE *out,char* line)
       AddHubOrLeaf(IS_LEAF,user_field,host_field);
       break;
 
-      /* Me. Host field is name used for this host */
+/* Me. Host field is name used for this host */
       /* and port number is the number of the port */
     case 'M':
     case 'm':
@@ -388,11 +389,11 @@ static void oldParseOneLine(FILE *out,char* line)
 	fprintf(out,"\t\tname=\"%s\";\n", host_field);
       if(user_field)
 	fprintf(out,"\t\temail=\"%s\";\n", user_field);
-      fprintf(out,"\t};\n\n");
-
       if(port_field)
-        {
-	}
+	fprintf(out,"\t\thub=yes;\n");
+      else
+     	fprintf(out,"\t\thub=no;\n");
+      fprintf(out,"\t};\n\n");
       break;
 
     case 'n': 
@@ -780,7 +781,7 @@ static void OperPrivsFromString(FILE* out, char *privs)
       else if(*privs == 'd')
 	{
 	  fprintf(out,"\t\tdie=no;\n");
-	}
+ 	}
       privs++;
     }
 }
