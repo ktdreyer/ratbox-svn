@@ -1060,10 +1060,14 @@ int server_estab(struct Client *client_p)
   add_client_to_llist(&(me.serv->servers), client_p);
 
   m = dlinkFind(&unknown_list, client_p);
+  assert(m == NULL);
   if(m != NULL)
     {
       dlinkDelete(m, &unknown_list);
       dlinkAdd(client_p, m, &serv_list);
+    } else {
+      sendto_realops_flags(FLAGS_ALL, L_ADMIN, "Tried to register (%s) server but it was already registered!?!", host);
+      exit_client(client_p, client_p, client_p, "Tried to register server but it was already registered?!?"); 
     }
 
   Count.server++;
