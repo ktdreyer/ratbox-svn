@@ -45,7 +45,29 @@ AC_CHECK_FUNCS(gettext,, AC_CHECK_LIB(intl, gettext,,))
 dnl Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS(sys/param.h unistd.h errno.h string.h sys/syslog.h stdlib.h stddef.h getopt.h) 
-AC_CHECK_TYPE(socklen_t, size_t)
+
+dnl check for socklen_t
+dnl we can't use ac_check_Type because it doesnt include the required files
+
+AC_DEFUN(AC_CHECK_SOCKLEN,
+[AC_REQUIRE([AC_HEADER_STDC])dnl
+AC_MSG_CHECKING(for socklen_t)
+AC_CACHE_VAL(ac_cv_type_socklen_t,
+[AC_EGREP_CPP(dnl
+changequote(<<,>>)dnl
+<<(^|[^a-zA-Z_0-9])$1[^a-zA-Z_0-9]>>dnl
+changequote([,]), [#include <sys/types.h>
+#if STDC_HEADERS
+#include <stdlib.h>
+#include <stddef.h>
+#endif], ac_cv_type_socklen_t=yes, ac_cv_type_socklen_t=no)])dnl
+AC_MSG_RESULT($ac_cv_type_socklen_t)
+if test $ac_cv_type_socklen_t = no; then
+  AC_DEFINE(socklen_t, $1)
+fi
+])
+
+AC_CHECK_SOCKLEN(size_t)
 
 dnl Check for stdarg.h - if we can't find it, halt configure
 AC_CHECK_HEADER(stdarg.h, , AC_MSG_ERROR(** stdarg.h could not be found - ircd-hybrid will not compile without it **))
