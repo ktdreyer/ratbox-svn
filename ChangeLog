@@ -1,3 +1,15 @@
+leeh        2004/07/03 15:48:10 EDT	(20040703_1)
+
+  Modified files:
+    src                  getopt.c 
+  Log:
+  - patch via Tomas Janousek to fix getopt argument handling
+  
+  Revision  Changes    Path
+  7.21      +6 -0      ircd-ratbox/src/getopt.c
+
+
+
 androsyn    2004/07/03 15:45:16 EDT	(20040703_0)
 
   Modified files:
