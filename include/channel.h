@@ -137,6 +137,7 @@ extern void    del_invite(struct Channel *chptr, struct Client *who);
 
 extern void    list_one_channel(struct Client *sptr,struct Channel *chptr);
 extern void    channel_member_list(struct Client *sptr,
+                                   struct Channel *chptr,
 				   dlink_list *list,
 				   char *show_flag,
 				   char *buf,

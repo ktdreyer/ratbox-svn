@@ -74,6 +74,7 @@ static void send_members(struct Client *cptr,
 			 char *op_flag );
 
 void channel_member_list(struct Client *sptr,
+                         struct Channel *chptr,
 			 dlink_list *list,
 			 char *show_flag,
 			 char *buf,
@@ -2983,44 +2984,47 @@ void channel_member_names( struct Client *sptr,
 
   /* Find users on same channel (defined by chptr) */
 
-  ircsprintf(lbuf, form_str(RPL_NAMREPLY),
-	     me.name, sptr->name,
-	     channel_pub_or_secret(chptr));
-  mlen = strlen(lbuf);
-  ircsprintf(lbuf + mlen, " %s :", name_of_channel);
-  mlen = strlen(lbuf);
-  cur_len = mlen;
-
-  if(chptr->mode.mode & MODE_HIDEOPS && !is_any_op(chptr,sptr))
+  if (ShowChannel(sptr, chptr))
     {
-      show_ops_flag = "";
-      show_halfops_flag = "";
-      show_voiced_flag = "";
+      ircsprintf(lbuf, form_str(RPL_NAMREPLY),
+                 me.name, sptr->name,
+                 channel_pub_or_secret(chptr));
+      mlen = strlen(lbuf);
+      ircsprintf(lbuf + mlen, " %s :", name_of_channel);
+      mlen = strlen(lbuf);
+      cur_len = mlen;
+
+      if(chptr->mode.mode & MODE_HIDEOPS && !is_any_op(chptr,sptr))
+        {
+          show_ops_flag = "";
+          show_halfops_flag = "";
+          show_voiced_flag = "";
+        }
+      else
+        {
+          show_ops_flag = "@";
+          show_halfops_flag = "%";
+          show_voiced_flag = "+";
+        }
+
+      channel_member_list(sptr, chptr,
+                          &chptr->chanops, show_ops_flag,  
+                          lbuf, mlen, &cur_len, &reply_to_send);
+
+      channel_member_list(sptr, chptr,
+                          &chptr->voiced, show_voiced_flag,
+                          lbuf, mlen, &cur_len, &reply_to_send);
+
+      channel_member_list(sptr, chptr,
+                          &chptr->halfops, show_halfops_flag,
+                          lbuf, mlen, &cur_len, &reply_to_send);
+
+      channel_member_list(sptr, chptr, &chptr->peons, "",
+                          lbuf, mlen, &cur_len, &reply_to_send);
+
+      if(reply_to_send)
+        sendto_one(sptr, "%s", lbuf);
     }
-  else
-    {
-      show_ops_flag = "@";
-      show_halfops_flag = "%";
-      show_voiced_flag = "+";
-    }
-
-  channel_member_list(sptr,
-		      &chptr->chanops, show_ops_flag,
-		      lbuf, mlen, &cur_len, &reply_to_send);
-
-  channel_member_list(sptr,
-		      &chptr->voiced, show_voiced_flag,
-		      lbuf, mlen, &cur_len, &reply_to_send);
-
-  channel_member_list(sptr,
-		      &chptr->halfops, show_halfops_flag,
-		      lbuf, mlen, &cur_len, &reply_to_send);
-
-  channel_member_list(sptr, &chptr->peons, "",
-		      lbuf, mlen, &cur_len, &reply_to_send);
-
-  if(reply_to_send)
-    sendto_one(sptr, "%s", lbuf);
 
   sendto_one(sptr, form_str(RPL_ENDOFNAMES),
              me.name, sptr->name, name_of_channel);
@@ -3030,6 +3034,7 @@ void channel_member_names( struct Client *sptr,
  * channel_member_list
  *
  * inputs	- pointer to client struct requesting names
+ *              - pointer to channel
  *		- pointer to list on channel
  *		- pointer to show flag, i.e. what to show '@' etc.
  *		- buffer to use
@@ -3041,6 +3046,7 @@ void channel_member_names( struct Client *sptr,
  */
 void
 channel_member_list(struct Client *sptr,
+                    struct Channel *chptr,
 			 dlink_list *list,
 			 char *show_flag,
 			 char *lbuf,
@@ -3058,6 +3064,11 @@ channel_member_list(struct Client *sptr,
   for (ptr = list->head; ptr; ptr = ptr->next)
     {
       who = ptr->data;
+
+      /* skip +invis peeps if requestee is not a member */
+      if (IsInvisible(who) && !IsMember(sptr, chptr))
+        continue;
+
       ircsprintf(t, "%s%s ", show_flag, who->name);
       tlen = strlen(t);
       *cur_len += tlen;

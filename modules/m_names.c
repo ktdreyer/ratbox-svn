@@ -186,21 +186,24 @@ void names_all_visible_channels(struct Client *sptr)
 	  cur_len = mlen;
 
 	  channel_member_list(sptr,
+                              chptr,
 			      &chptr->chanops,
 			      show_ops_flag,
 			      buf, mlen, &cur_len, &reply_to_send);
 
 	  channel_member_list(sptr,
+                              chptr,
 			      &chptr->voiced,
 			      show_voiced_flag,
 			      buf, mlen, &cur_len, &reply_to_send);
 
 	  channel_member_list(sptr,
+                              chptr,
 			      &chptr->halfops,
 			      show_voiced_flag,
 			      buf, mlen, &cur_len, &reply_to_send);
 
-	  channel_member_list(sptr, &chptr->peons,
+	  channel_member_list(sptr, chptr, &chptr->peons,
 			      "",
 			      buf, mlen, &cur_len, &reply_to_send);
 
