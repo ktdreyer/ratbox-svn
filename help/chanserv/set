@@ -5,10 +5,14 @@ SET <option> [parameter]
   RESTRICTOPS  [on|off]: Disallow any users without OP access being opped.
   WARNOVERRIDE [on|off]: Warns chanops when INVITE/GETKEY are used.
                          Requires AUTOJOIN.
-  CREATEMODES  [modes] : Channel modes used on channel creation.
+  CREATEMODES  [modes] : Channel modes used on channel creation.  Set to "+"
+                         to clear.
   ENFORCEMODES [modes] : Channel modes that are enforced.  You may only
                          enforce modes exist (eg, +n).  For proper
-                         enforcement of +i and +k, enable AUTOJOIN.
+                         enforcement of +i and +k, enable AUTOJOIN.  Set to
+                         "+" to clear.
   TOPIC        [topic] : Sets channel topic to [topic].  This will be
-                         enforced periodically by services.
-  URL          [url]   : Sets channel URL to [url]
+                         enforced periodically by services.  Set to 
+                         "-none" to clear.
+  URL          [url]   : Sets channel URL to [url].  Set to "-none" to
+                         clear.
