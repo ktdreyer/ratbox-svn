@@ -1,3 +1,7 @@
+*** 20001223_36 by ejb
+- use CAP_HOPS for half-ops
+
+
 *** 20001223_35 by madmax
 All server modes now show as coming from the current server.
 This is now whether you are shiding or not - CS has always done it that way 
