@@ -1,3 +1,7 @@
+*** 20010301_4 by androsyn
+this lets adns process timeouts correctly.
+
+
 *** 20010301_3 by db
 - can't use mem_frob if NDEBUG is defined
 
