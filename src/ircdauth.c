@@ -102,7 +102,7 @@ ConnectToIAuth()
 
 {
 	struct sockaddr_in ServAddr;
-	register struct hostent *hostptr;
+	struct hostent *hostptr;
 	struct in_addr *ptr;
 
 	iAuth.socket = comm_open(AF_INET, SOCK_STREAM, 0, "iAuth socket");
@@ -315,8 +315,8 @@ ParseIAuth(int fd, void *notused)
 
 {
 	int length; /* number of bytes we read */
-	register char *ch;
-	register char *linech;
+	char *ch;
+	char *linech;
 
 	/* read in a line */
 	length = recv(fd, buffer, BUFSIZE, 0);
@@ -375,7 +375,7 @@ ParseIAuth(int fd, void *notused)
 
 	while (*ch)
 	{
-		register char tmp;
+		char tmp;
 
 		tmp = *ch;
 		if (IsEol(tmp))

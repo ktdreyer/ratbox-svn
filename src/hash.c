@@ -171,7 +171,7 @@ hash_id(const char *nname)
 static unsigned
 int hash_channel_name(const char* name)
 {
-  register int i = 30;
+  int i = 30;
   unsigned int h = 0;
 
   while (*name && --i)
@@ -192,7 +192,7 @@ int hash_channel_name(const char* name)
 static unsigned
 int hash_resv_channel(const char *name)
 {
-  register int i = 30;
+  int i = 30;
   unsigned int h = 0;
 
   while (*name && --i)

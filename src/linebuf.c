@@ -150,7 +150,7 @@ linebuf_done_line(buf_head_t *bufhead, buf_line_t *bufline,
 static inline int
 linebuf_skip_crlf(char *ch, int len)
 {
-  register int orig_len = len;
+  int orig_len = len;
   
   /* First, skip until the first non-CRLF */
   for(; len; len--, ch++)
@@ -255,9 +255,9 @@ static int
 linebuf_copy_line(buf_head_t *bufhead, buf_line_t *bufline,
                   char *data, int len)
 {
-  register int cpylen = 0;	/* how many bytes we've copied */
-  register char *ch = data;	/* Pointer to where we are in the read data */
-  register char *bufch = bufline->buf + bufline->len;
+  int cpylen = 0;	/* how many bytes we've copied */
+  char *ch = data;	/* Pointer to where we are in the read data */
+  char *bufch = bufline->buf + bufline->len;
   int clen = 0;                 /* how many bytes we've processed,
                                    and don't ever want to see again.. */
 
@@ -328,8 +328,8 @@ static int
 linebuf_copy_raw(buf_head_t *bufhead, buf_line_t *bufline,
                  char *data, int len)
 {
-  register char *ch = data;	/* Pointer to where we are in the read data */
-  register char *bufch = bufline->buf + bufline->len;
+  char *ch = data;	/* Pointer to where we are in the read data */
+  char *bufch = bufline->buf + bufline->len;
   int clen = 0;                 /* how many bytes we've processed,
                                    and don't ever want to see again.. */
   int remaining;

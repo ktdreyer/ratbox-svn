@@ -333,8 +333,8 @@ hash_ipv6(struct irc_inaddr *addr, int bits)
 static int
 hash_text(const char *start)
 {
-  register const char *p = start;
-  register unsigned long h = 0;
+  const char *p = start;
+  unsigned long h = 0;
 
   while (*p)
   {
