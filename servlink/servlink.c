@@ -109,14 +109,10 @@ main(int argc, char *argv[])
 			}
 		}		
 		fcntl(fds[i].fd, F_SETFL, O_NONBLOCK);
-	}
-	
-	for(i = 0; i < 3; i++)
-	{
 		if(fds[i].fd > max_fd)
 			max_fd = fds[i].fd;
 	}
-
+	
 	/* enter io loop */
 	io_loop(max_fd + 1);
 
