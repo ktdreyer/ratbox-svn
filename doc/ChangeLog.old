@@ -1,3 +1,7 @@
+*** 20010502_2 by a1kmm
+- Sanified the flood checking and sendq checking code a little.
+
+
 *** 20010502_1 by db
 - removed caching of channels for lazylinks in mode and topic
   I think those were the two flame was complaining about.
