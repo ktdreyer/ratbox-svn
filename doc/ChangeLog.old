@@ -1,3 +1,8 @@
+*** 19990825_3 by lusky
+cleaned up tools/Makefile.in
+added CVS Id tags to a many files
+
+
 *** 19990825_2 by db
 - Don't be lazy *BAD* Diane, BAD BAD BAD
 
