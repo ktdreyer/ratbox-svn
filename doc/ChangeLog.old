@@ -1,3 +1,10 @@
+*** 20010603_6 by jdc
+* Fix for --enable-openssl.  Now the automatic mode (no =DIR arguments)
+  correctly traverses through the list of internal paths.  I forgot a
+  break statement.
+
+
+
 *** 20010603_5 by davidt
 - Fix the two easiest compile warnings from VMS.
 
