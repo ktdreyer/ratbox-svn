@@ -54,12 +54,12 @@
 #include <errno.h>
 
 struct Message kline_msgtab = {
-  MSG_KLINE, 0, 1, 0, MFLG_SLOW, 0,
+  MSG_KLINE, 0, 2, 0, MFLG_SLOW, 0,
   {m_unregistered, m_not_oper, ms_kline, mo_kline}
 };
 
 struct Message dline_msgtab = {
-  MSG_DLINE, 0, 1, 0, MFLG_SLOW, 0,
+  MSG_DLINE, 0, 2, 0, MFLG_SLOW, 0,
   {m_unregistered, m_not_oper, m_error, mo_dline}
 };
 
@@ -143,13 +143,6 @@ int mo_kline(struct Client *cptr,
 
   parv++;
   parc--;
-
-  if(0 == parc)
-    {
-      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
-		 me.name, sptr->name, "KLINE");
-      return -1;
-    }
 
   tkline_time = valid_tkline(sptr,*parv);
 
