@@ -2596,12 +2596,6 @@ conf_set_channel_max_bans(void *data)
 }
 
 static void
-conf_set_channel_persist_time(void *data)
-{
-	ConfigChannel.persist_time = *(unsigned int *) data;
-}
-
-static void
 conf_set_channel_default_split_user_count(void *data)
 {
 	ConfigChannel.default_split_user_count = *(unsigned int *) data;
@@ -3103,7 +3097,6 @@ newconf_init()
 		      conf_set_channel_knock_delay_channel);
 	add_conf_item("channel", "max_chans_per_user", CF_INT, conf_set_channel_max_chans_per_user);
 	add_conf_item("channel", "quiet_on_ban", CF_YESNO, conf_set_channel_quiet_on_ban);
-	add_conf_item("channel", "persist_time", CF_TIME, conf_set_channel_persist_time);
 	add_conf_item("channel", "default_split_user_count", CF_INT,
 		      conf_set_channel_default_split_user_count);
 	add_conf_item("channel", "default_split_server_count", CF_INT,

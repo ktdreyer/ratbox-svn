@@ -757,8 +757,6 @@ main(int argc, char *argv[])
 
 	ilog(L_NOTICE, "Server Ready");
 
-	eventAddIsh("cleanup_channels", cleanup_channels, NULL, CLEANUP_CHANNELS_TIME);
-
 	eventAddIsh("cleanup_glines", cleanup_glines, NULL, CLEANUP_GLINES_TIME);
 
 	eventAddIsh("cleanup_temps_min", cleanup_temps_min, NULL, 60);

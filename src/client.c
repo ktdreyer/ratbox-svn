@@ -1232,10 +1232,7 @@ exit_generic_client(struct Client *client_p, struct Client *source_p, struct Cli
 				     source_p->name,
 				     source_p->username, source_p->host, comment);
 
-	DLINK_FOREACH_SAFE(ptr, next_ptr, source_p->user->channel.head)
-	{
-		remove_user_from_channel(ptr->data);
-	}
+	remove_user_from_channels(source_p);
 
 	/* Should not be in any channels now */
 	s_assert(source_p->user->channel.head == NULL);

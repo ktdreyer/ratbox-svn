@@ -82,7 +82,6 @@ struct membership
 
 extern dlink_list global_channel_list;
 void init_channels(void);
-void cleanup_channels(void *);
 
 extern int can_send(struct Channel *chptr, struct Client *who, 
 		    struct membership *);
@@ -94,7 +93,7 @@ extern struct membership *find_channel_membership(struct Channel *, struct Clien
 extern const char *find_channel_status(struct membership *msptr, int combine);
 extern void add_user_to_channel(struct Channel *, struct Client *, int flags);
 extern int remove_user_from_channel(struct membership *);
-extern int qs_user_from_channel(struct Channel *, struct Client *);
+extern void remove_user_from_channels(struct Client *);
 
 extern void free_channel_list(dlink_list *);
 

@@ -203,27 +203,6 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	if(isnew)
 		chptr->channelts = tstosend = newts;
-
-	/* Remote is sending users to a permanent channel.. we need to drop our
-	 * version and use theirs, to keep compatibility -- fl */
-	else if(dlink_list_length(&chptr->members) == 0 && parv[4 + args][0])
-	{
-		keep_our_modes = NO;
-		chptr->channelts = tstosend = newts;
-
-		/* drop +beI lists to avoid desync as they will not be burst
-		 * with the sjoin --fl
-		 */
-		free_channel_list(&chptr->banlist);
-		free_channel_list(&chptr->exceptlist);
-		free_channel_list(&chptr->invexlist);
-	}
-
-	/* remote is bursting a persistent channel to us, ignore it */
-	else if(dlink_list_length(&chptr->members) == 0 && !parv[4 + args][0])
-		return 0;
-
-	/* It isnt a perm channel, do normal timestamp rules */
 	else if(newts == 0 || oldts == 0)
 		chptr->channelts = tstosend = 0;
 	else if(!newts)

@@ -1085,9 +1085,6 @@ set_default_conf(void)
 	ConfigChannel.max_bans = 25;
 	ConfigChannel.no_oper_resvs = NO;
 
-	/* 60 * 30 = 1800 = 30 minutes */
-	ConfigChannel.persist_time = 1800;
-
 	ConfigChannel.default_split_user_count = 0;
 	ConfigChannel.default_split_server_count = 0;
 	ConfigChannel.default_split_delay = 15;

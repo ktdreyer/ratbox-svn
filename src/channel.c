@@ -167,38 +167,47 @@ remove_user_from_channel(struct membership *msptr)
 		return 1;
 	}
 
+	BlockHeapFree(member_heap, msptr);
+
 	return 0;
 }
 
-int
-qs_user_from_channel(struct Channel *chptr, struct Client *client_p)
+/* remove_user_from_channels()
+ *
+ * input        - user to remove from all channels
+ * output       -
+ * side effects - user is removed from all channels
+ */
+void
+remove_user_from_channels(struct Client *client_p)
 {
+	struct Channel *chptr;
 	struct membership *msptr;
+	dlink_node *ptr;
 
-	msptr = find_channel_membership(chptr, client_p);
+	if(client_p == NULL)
+		return;
 
-	s_assert(msptr != NULL);
-	if(msptr == NULL)
-		return 0;
-
-	/* note, a QS can never be done for our own users */
-	dlinkDelete(&msptr->usernode, &client_p->user->channel);
-	dlinkDelete(&msptr->channode, &chptr->members);
-
-	chptr->users_last = CurrentTime;
-
-	if(dlink_list_length(&chptr->members) <= 0)
+	DLINK_FOREACH(ptr, client_p->user->channel.head)
 	{
-		/* persistent channel - must be 12h old */
-		if(!ConfigChannel.persist_time ||
-		   ((chptr->channelts + (60 * 60 * 12)) > CurrentTime))
-		{
+		msptr = ptr->data;
+		chptr = msptr->chptr;
+
+		dlinkDelete(&msptr->channode, &chptr->members);
+
+		if(client_p->servptr == &me)
+			dlinkDelete(&msptr->locchannode, &chptr->locmembers);
+
+		chptr->users_last = CurrentTime;
+
+		if(dlink_list_length(&chptr->members) <= 0)
 			destroy_channel(chptr);
-			return 1;
-		}
+
+		BlockHeapFree(member_heap, msptr);
 	}
 
-	return 0;
+	client_p->user->channel.head = client_p->user->channel.tail = NULL;
+	client_p->user->channel.length = 0;
 }
 
 static void
@@ -379,32 +388,6 @@ free_channel_list(dlink_list * list)
 
 	list->head = list->tail = NULL;
 	list->length = 0;
-}
-
-/*
- * cleanup_channels
- *
- * inputs       - not used
- * output       - none
- * side effects - persistent channels... 
- */
-void
-cleanup_channels(void *unused)
-{
-	struct Channel *chptr;
-	dlink_node *ptr, *next_ptr;
-
-	DLINK_FOREACH_SAFE(ptr, next_ptr, global_channel_list.head)
-	{
-		chptr = ptr->data;
-		if(dlink_list_length(&chptr->members) <= 0)
-		{
-			if((chptr->users_last + ConfigChannel.persist_time) < CurrentTime)
-			{
-				destroy_channel(chptr);
-			}
-		}
-	}
 }
 
 /*
