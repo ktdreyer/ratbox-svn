@@ -22,6 +22,8 @@
  * $Id$
  */
 
+#include <sys/param.h>
+
 #ifndef INCLUDED_config_h
 #include "config.h"             /* defines */
 #endif
@@ -176,9 +178,9 @@ typedef struct
   char* network_name;
   char* network_desc;
 
-	char *fname_operlog;
-	char *fname_userlog;
-	char *fname_foperlog;
+	char fname_operlog[MAXPATHLEN];
+	char fname_userlog[MAXPATHLEN];
+	char fname_foperlog[MAXPATHLEN];
 	
   MessageFile helpfile;
   MessageFile motd;
