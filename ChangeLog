@@ -1,3 +1,49 @@
+leeh        2004/02/24 11:31:50 EST	(20040224_0)
+
+  Modified files:
+    include              hash.h s_conf.h s_newconf.h 
+    modules              .depend m_encap.c m_join.c m_resv.c 
+                         m_stats.c m_xline.c 
+    modules/core         m_nick.c 
+    src                  .depend Makefile.in channel.c client.c 
+                         hash.c ircd.c kdparse.c newconf.c 
+                         s_conf.c s_newconf.c s_user.c 
+  Removed files:
+    include              s_oldnewconf.h 
+    src                  s_oldnewconf.c 
+  Log:
+  - moved xlines/resvs back into ConfItem
+  - remove the hashing of xlines without wildcards, there should be a proper
+    way of searching them thats not match()
+  - fixed a bug with ERR_BADCHANNAME in m_join.c
+  
+  Revision  Changes    Path
+  7.42      +6 -12     ircd-ratbox/include/hash.h
+  7.267     +4 -0      ircd-ratbox/include/s_conf.h
+  7.21      +15 -1     ircd-ratbox/include/s_newconf.h
+  7.16      +0 -90     ircd-ratbox/include/s_oldnewconf.h (dead)
+  1.38      +12 -13    ircd-ratbox/modules/.depend
+  1.138     +2 -2      ircd-ratbox/modules/core/m_nick.c
+  1.15      +1 -2      ircd-ratbox/modules/m_encap.c
+  1.144     +4 -4      ircd-ratbox/modules/m_join.c
+  1.48      +21 -14    ircd-ratbox/modules/m_resv.c
+  1.194     +13 -29    ircd-ratbox/modules/m_stats.c
+  1.39      +23 -18    ircd-ratbox/modules/m_xline.c
+  7.40      +29 -37    ircd-ratbox/src/.depend
+  7.145     +0 -1      ircd-ratbox/src/Makefile.in
+  7.399     +1 -1      ircd-ratbox/src/channel.c
+  7.423     +5 -7      ircd-ratbox/src/client.c
+  7.92      +54 -124   ircd-ratbox/src/hash.c
+  7.324     +0 -2      ircd-ratbox/src/ircd.c
+  7.31      +24 -12    ircd-ratbox/src/kdparse.c
+  7.130     +90 -65    ircd-ratbox/src/newconf.c
+  7.447     +1 -6      ircd-ratbox/src/s_conf.c
+  7.21      +171 -55   ircd-ratbox/src/s_newconf.c
+  7.16      +0 -437    ircd-ratbox/src/s_oldnewconf.c (dead)
+  7.305     +6 -7      ircd-ratbox/src/s_user.c
+
+
+
 leeh        2004/02/23 18:54:10 EST	(20040223_4)
 
   Modified files:
