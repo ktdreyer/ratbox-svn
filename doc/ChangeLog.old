@@ -1,3 +1,11 @@
+*** 20000103_5 by db
+- this version doesn't core as often. *sigh*
+  cleanup channels code needs to be gone over again, its stable
+  without.
+- removed some cruft and useless comments from client.c
+
+
+
 *** 20000103_4 by db
 - *sigh* code got lost in the shuffle
   fix stats c so n lines show as n not N
