@@ -55,6 +55,7 @@
 #include "memory.h"
 #include "packet.h"
 #include "reject.h"
+#include "cache.h"
 
 static void report_and_set_user_flags(struct Client *, struct ConfItem *);
 static int check_X_line(struct Client *client_p, struct Client *source_p);
@@ -1213,6 +1214,7 @@ user_welcome(struct Client *source_p)
 
 	show_lusers(source_p);
 
+#if 0
 	if(ConfigFileEntry.short_motd)
 	{
 		sendto_one(source_p,
@@ -1232,7 +1234,8 @@ user_welcome(struct Client *source_p)
 		sendto_one(source_p, form_str(RPL_ENDOFMOTD), me.name, source_p->name);
 	}
 	else
-		SendMessageFile(source_p, &ConfigFileEntry.motd);
+#endif
+		send_user_motd(source_p);
 
 	if(IsRestricted(source_p))
 	{
@@ -1324,7 +1327,7 @@ oper_up(struct Client *source_p, struct ConfItem *aconf)
 	sendto_one(source_p, form_str(RPL_YOUREOPER), me.name, source_p->name);
 	sendto_one(source_p, ":%s NOTICE %s :*** Oper privs are %s", me.name,
 		   source_p->name, oper_privs_as_string(source_p, aconf->port));
-	SendMessageFile(source_p, &ConfigFileEntry.opermotd);
+	send_oper_motd(source_p);
 
 	return (1);
 }

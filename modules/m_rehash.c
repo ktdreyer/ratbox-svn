@@ -78,11 +78,54 @@ clear_temps(dlink_list * tlist)
 }
 
 static void
-clear_pending_glines(void)
+rehash_dns(struct Client *source_p)
+{
+	sendto_realops_flags(UMODE_ALL, L_ALL, "%s is rehashing DNS", 
+			     get_oper_name(source_p));
+
+	/* reread /etc/resolv.conf and reopen res socket */
+	restart_resolver();
+}
+
+static void
+rehash_motd(struct Client *source_p)
+{
+	sendto_realops_flags(UMODE_ALL, L_ALL,
+			     "%s is forcing re-reading of MOTD file",
+			     get_oper_name(source_p));
+
+	free_cachefile(user_motd);
+	user_motd = cache_file(MPATH, "ircd.motd", 0);
+}
+
+static void
+rehash_omotd(struct Client *source_p)
+{
+	sendto_realops_flags(UMODE_ALL, L_ALL,
+			     "%s is forcing re-reading of OPER MOTD file",
+			     get_oper_name(source_p));
+
+	free_cachefile(oper_motd);
+	oper_motd = cache_file(OPATH, "opers.motd", 0);
+}
+
+static void
+rehash_glines(struct Client *source_p)
+{
+	sendto_realops_flags(UMODE_ALL, L_ALL, "%s is clearing G-lines",
+			     source_p->name);
+	clear_temps(&glines);
+}
+
+static void
+rehash_pglines(struct Client *source_p)
 {
 	struct gline_pending *glp_ptr;
 	dlink_node *ptr;
 	dlink_node *next_ptr;
+
+	sendto_realops_flags(UMODE_ALL, L_ALL, "%s is clearing pending glines",
+			     source_p->name);
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, pending_glines.head)
 	{
@@ -93,44 +136,6 @@ clear_pending_glines(void)
 		MyFree(glp_ptr);
 		dlinkDestroy(ptr, &pending_glines);
 	}
-}
-
-static void
-rehash_dns(struct Client *source_p)
-{
-	sendto_realops_flags(UMODE_ALL, L_ALL, "%s is rehashing DNS", get_oper_name(source_p));
-	restart_resolver();	/* re-read /etc/resolv.conf AGAIN?
-				   and close/re-open res socket */
-}
-
-static void
-rehash_motd(struct Client *source_p)
-{
-	sendto_realops_flags(UMODE_ALL, L_ALL,
-			     "%s is forcing re-reading of MOTD file", get_oper_name(source_p));
-	ReadMessageFile(&ConfigFileEntry.motd);
-}
-
-static void
-rehash_omotd(struct Client *source_p)
-{
-	sendto_realops_flags(UMODE_ALL, L_ALL,
-			     "%s is forcing re-reading of OPER MOTD file", get_oper_name(source_p));
-	ReadMessageFile(&ConfigFileEntry.opermotd);
-}
-
-static void
-rehash_glines(struct Client *source_p)
-{
-	sendto_realops_flags(UMODE_ALL, L_ALL, "%s is clearing G-lines", source_p->name);
-	clear_temps(&glines);
-}
-
-static void
-rehash_pglines(struct Client *source_p)
-{
-	sendto_realops_flags(UMODE_ALL, L_ALL, "%s is clearing pending glines", source_p->name);
-	clear_pending_glines();
 }
 
 static void
@@ -170,19 +175,22 @@ rehash_help(struct Client *source_p)
 	clear_help_hash();
 	load_help();
 }
-	
-static struct hash_commands rehash_commands[] = {
-	{"DNS", 	rehash_dns },
-	{"MOTD", 	rehash_motd },
-	{"OMOTD", 	rehash_omotd	},
-	{"GLINES", 	rehash_glines },
-	{"PGLINES", 	rehash_pglines },
-	{"TKLINES", 	rehash_tklines },
-	{"TDLINES", 	rehash_tdlines },
-	{"REJECTCACHE",	rehash_rejectcache },
-	{"HELP", 	rehash_help },
-	{NULL, 		NULL }
+
+/* *INDENT-OFF* */
+static struct hash_commands rehash_commands[] =
+{
+	{"DNS", 	rehash_dns		},
+	{"MOTD", 	rehash_motd		},
+	{"OMOTD", 	rehash_omotd		},
+	{"GLINES", 	rehash_glines		},
+	{"PGLINES", 	rehash_pglines		},
+	{"TKLINES", 	rehash_tklines		},
+	{"TDLINES", 	rehash_tdlines		},
+	{"REJECTCACHE",	rehash_rejectcache	},
+	{"HELP", 	rehash_help		},
+	{NULL, 		NULL 			}
 };
+/* *INDENT-ON* */
 
 /*
  * mo_rehash - REHASH message handler

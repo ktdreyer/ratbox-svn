@@ -194,8 +194,6 @@ struct config_file_entry
 	char fname_operspylog[MAXPATHLEN];
 	char fname_operspyremotelog[MAXPATHLEN];
 
-	MessageFile motd;
-	MessageFile opermotd;
 	MessageFile linksfile;
 
 	int hub;

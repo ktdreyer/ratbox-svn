@@ -40,6 +40,7 @@
 #include "irc_string.h"
 #include "s_log.h"
 #include "s_user.h"
+#include "cache.h"
 
 #ifndef HAVE_LIBCRYPTO
 /* Maybe this should be an error or something?-davidt */
@@ -89,7 +90,7 @@ m_challenge(struct Client *client_p, struct Client *source_p, int parc, const ch
 	if(IsOper(source_p))
 	{
 		sendto_one(source_p, form_str(RPL_YOUREOPER), me.name, parv[0]);
-		SendMessageFile(source_p, &ConfigFileEntry.opermotd);
+		send_oper_motd(source_p);
 		return 0;
 	}
 

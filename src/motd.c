@@ -67,76 +67,22 @@ SendMessageFile(struct Client *source_p, MessageFile * motdToPrint)
 {
 	MessageFileLine *linePointer;
 	MotdType motdType;
-	const char *nick;
 
 	if(motdToPrint != NULL)
 		motdType = motdToPrint->motdType;
 	else
 		return -1;
 
-	switch (motdType)
-	{
-	case USER_MOTD:
-		nick = EmptyString(source_p->name) ? "*" : source_p->name;
-
-		if(motdToPrint->contentsOfFile == NULL)
-		{
-			sendto_one(source_p, form_str(ERR_NOMOTD), me.name, nick);
-			return 0;
-		}
-
-		sendto_one(source_p, form_str(RPL_MOTDSTART), me.name, nick, me.name);
-
-		for (linePointer = motdToPrint->contentsOfFile; linePointer;
-		     linePointer = linePointer->next)
-		{
-			sendto_one(source_p, form_str(RPL_MOTD), me.name, nick, linePointer->line);
-		}
-		sendto_one(source_p, form_str(RPL_ENDOFMOTD), me.name, nick);
-		return 0;
-		/* NOT REACHED */
-		break;
-
-	case USER_LINKS:
-		if(motdToPrint->contentsOfFile == NULL)
-			return -1;
-
-		for (linePointer = motdToPrint->contentsOfFile; linePointer;
-		     linePointer = linePointer->next)
-		{
-			sendto_one(source_p, ":%s 364 %s %s",
-				   me.name, source_p->name, linePointer->line);
-		}
-		return 0;
-		/* NOT REACHED */
-		break;
-
-	case OPER_MOTD:
-		if(motdToPrint->contentsOfFile == NULL)
-		{
-/*          sendto_one(source_p, ":%s NOTICE %s :No OPER MOTD", me.name,
- *          source_p->name); */
-			return -1;
-		}
-		sendto_one(source_p, ":%s NOTICE %s :Start of OPER MOTD", me.name, source_p->name);
-		break;
-
-	default:
-		return 0;
-		/* NOT REACHED */
-	}
-
-	sendto_one(source_p, ":%s NOTICE %s :%s", me.name, source_p->name,
-		   motdToPrint->lastChangedDate);
-
+	if(motdToPrint->contentsOfFile == NULL)
+		return -1;
 
 	for (linePointer = motdToPrint->contentsOfFile; linePointer;
 	     linePointer = linePointer->next)
 	{
-		sendto_one(source_p,
-			   ":%s NOTICE %s :%s", me.name, source_p->name, linePointer->line);
+		sendto_one(source_p, ":%s 364 %s %s",
+			   me.name, source_p->name, linePointer->line);
 	}
-	sendto_one(source_p, ":%s NOTICE %s :End", me.name, source_p->name);
+
 	return 0;
 }
 

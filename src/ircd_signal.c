@@ -72,7 +72,8 @@ ircd$rehash_conf(void)
 static void
 ircd$rehash_motd(void)
 {
-	ReadMessageFile(&ConfigFileEntry.motd);
+	free_cachefile(user_motd);
+	user_motd = cache_file(MPATH, "ircd.motd", 0);
 	sendto_realops_flags(UMODE_ALL, L_ALL,
 		"Got signal SIGUSR1, reloading ircd motd file");
 }

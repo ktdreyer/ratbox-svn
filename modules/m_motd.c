@@ -38,7 +38,7 @@
 #include "parse.h"
 #include "modules.h"
 #include "s_conf.h"
-
+#include "cache.h"
 
 static int mr_motd(struct Client *, struct Client *, int, const char **);
 static int m_motd(struct Client *, struct Client *, int, const char **);
@@ -69,7 +69,7 @@ static int
 mr_motd(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	/* allow unregistered clients to see the motd, but exit them */
-	SendMessageFile(source_p, &ConfigFileEntry.motd);
+	send_user_motd(source_p);
 	exit_client(client_p, source_p, source_p, "Client Exit after MOTD");
 
 	return 0;
@@ -103,8 +103,7 @@ m_motd(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	}
 
 	motd_spy(source_p);
-
-	SendMessageFile(source_p, &ConfigFileEntry.motd);
+	send_user_motd(source_p);
 
 	return 0;
 }
@@ -124,8 +123,7 @@ mo_motd(struct Client *client_p, struct Client *source_p, int parc, const char *
 		return 0;
 
 	motd_spy(source_p);
-
-	SendMessageFile(source_p, &ConfigFileEntry.motd);
+	send_user_motd(source_p);
 
 	return 0;
 }

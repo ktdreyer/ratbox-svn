@@ -47,19 +47,30 @@
 static BlockHeap *cachefile_heap = NULL;
 static BlockHeap *cacheline_heap = NULL;
 
-const char emptyline[] = " ";
+struct cachefile *user_motd = NULL;
+struct cachefile *oper_motd = NULL;
+
+struct cacheline *emptyline = NULL;
 
 /* init_cache()
  *
  * inputs	-
  * outputs	-
- * side effects - inits the file/line cache blockheaps
+ * side effects - inits the file/line cache blockheaps, loads motds
  */
 void
 init_cache(void)
 {
 	cachefile_heap = BlockHeapCreate(sizeof(struct cachefile), CACHEFILE_HEAP_SIZE);
 	cacheline_heap = BlockHeapCreate(sizeof(struct cacheline), CACHELINE_HEAP_SIZE);
+
+	/* allocate the emptyline */
+	emptyline = BlockHeapAlloc(cacheline_heap);
+	emptyline->data[0] = ' ';
+	emptyline->data[1] = '\0';
+
+	user_motd = cache_file(MPATH, "ircd.motd", 0);
+	oper_motd = cache_file(OPATH, "opers.motd", 0);
 }
 
 /* cache_file()
@@ -99,7 +110,7 @@ cache_file(const char *filename, const char *shortname, int flags)
 			dlinkAddTail(lineptr, &lineptr->linenode, &cacheptr->contents);
 		}
 		else
-			dlinkAddTailAlloc((char *) emptyline, &cacheptr->contents);
+			dlinkAddTailAlloc(emptyline, &cacheptr->contents);
 	}
 
 	fbclose(in);
@@ -117,6 +128,9 @@ free_cachefile(struct cachefile *cacheptr)
 {
 	dlink_node *ptr;
 	dlink_node *next_ptr;
+
+	if(cacheptr == NULL)
+		return;
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, cacheptr->contents.head)
 	{
@@ -191,5 +205,64 @@ load_help(void)
 	}
 
 	closedir(helpfile_dir);
+}
+
+/* send_user_motd()
+ *
+ * inputs	- client to send motd to
+ * outputs	- client is sent motd if exists, else ERR_NOMOTD
+ * side effects -
+ */
+void
+send_user_motd(struct Client *source_p)
+{
+	struct cacheline *lineptr;
+	dlink_node *ptr;
+	const char *nick = EmptyString(source_p->name) ? "*" : source_p->name;
+
+	if(user_motd == NULL || dlink_list_length(&user_motd->contents) == 0)
+	{
+		sendto_one(source_p, form_str(ERR_NOMOTD), me.name, nick);
+		return;
+	}
+
+	sendto_one(source_p, form_str(RPL_MOTDSTART), me.name, nick, me.name);
+
+	DLINK_FOREACH(ptr, user_motd->contents.head)
+	{
+		lineptr = ptr->data;
+		sendto_one(source_p, form_str(RPL_MOTD),
+			   me.name, source_p->name, lineptr->data);
+	}
+
+	sendto_one(source_p, form_str(RPL_ENDOFMOTD), me.name, nick);
+}
+
+/* send_oper_motd()
+ *
+ * inputs	- client to send motd to
+ * outputs	- client is sent oper motd if exists
+ * side effects -
+ */
+void
+send_oper_motd(struct Client *source_p)
+{
+	struct cacheline *lineptr;
+	dlink_node *ptr;
+
+	if(oper_motd == NULL || dlink_list_length(&oper_motd->contents) == 0)
+		return;
+
+	sendto_one(source_p, ":%s NOTICE %s :Start of OPER MOTD",
+		   me.name, source_p->name);
+
+	DLINK_FOREACH(ptr, oper_motd->contents.head)
+	{
+		lineptr = ptr->data;
+		sendto_one(source_p, ":%s NOTICE %s :%s",
+			   me.name, source_p->name, lineptr->data);
+	}
+
+	sendto_one(source_p, ":%s NOTICE %s :End", me.name, source_p->name);
 }
 

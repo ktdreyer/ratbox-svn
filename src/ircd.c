@@ -390,9 +390,10 @@ io_loop(void)
 		}
 		if(doremotd)
 		{
-			ReadMessageFile(&ConfigFileEntry.motd);
 			sendto_realops_flags(UMODE_ALL, L_ALL,
 					     "Got signal SIGUSR1, reloading ircd motd file");
+			free_cachefile(user_motd);
+			user_motd = cache_file(MPATH, "ircd.motd", 0);
 			doremotd = 0;
 		}
 	}
@@ -461,12 +462,7 @@ initialize_global_set_options(void)
 static void
 initialize_message_files(void)
 {
-	InitMessageFile(USER_MOTD, MPATH, &ConfigFileEntry.motd);
-	InitMessageFile(OPER_MOTD, OPATH, &ConfigFileEntry.opermotd);
 	InitMessageFile(USER_LINKS, LIPATH, &ConfigFileEntry.linksfile);
-
-	ReadMessageFile(&ConfigFileEntry.motd);
-	ReadMessageFile(&ConfigFileEntry.opermotd);
 	ReadMessageFile(&ConfigFileEntry.linksfile);
 }
 

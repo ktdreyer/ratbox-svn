@@ -62,6 +62,10 @@ index:
 
 install:
 	@echo installing help files...
+	-@if test -d $(prefix)/help-old; then \
+		rm -rf $(prefix)/help-old; \
+	fi
+
 	-@if test -d $(prefix)/help; then \
 		mv $(prefix)/help $(prefix)/help-old; \
 	fi

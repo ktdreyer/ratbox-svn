@@ -43,6 +43,7 @@
 #include "parse.h"
 #include "modules.h"
 #include "packet.h"
+#include "cache.h"
 
 static struct ConfItem *find_password_aconf(const char *name, struct Client *source_p);
 static int match_oper_password(const char *password, struct ConfItem *aconf);
@@ -156,7 +157,7 @@ static int
 mo_oper(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	sendto_one(source_p, form_str(RPL_YOUREOPER), me.name, parv[0]);
-	SendMessageFile(source_p, &ConfigFileEntry.opermotd);
+	send_oper_motd(source_p);
 	return 0;
 }
 

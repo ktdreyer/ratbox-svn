@@ -117,7 +117,6 @@ dohelp(struct Client *source_p, int flags, const char *topic)
 	struct cacheline *lineptr;
 	dlink_node *ptr;
 	dlink_node *fptr;
-	const char *myline;
 
 	if(EmptyString(topic))
 		topic = ntopic;
@@ -140,16 +139,10 @@ dohelp(struct Client *source_p, int flags, const char *topic)
 
 	DLINK_FOREACH(ptr, fptr->next)
 	{
-		if(ptr->data != emptyline)
-		{
-			lineptr = ptr->data;
-			myline = lineptr->data;
-		}
-		else
-			myline = emptyline;
+		lineptr = ptr->data;
 
 		sendto_one(source_p, form_str(RPL_HELPTXT),
-			   me.name, source_p->name, topic, myline);
+			   me.name, source_p->name, topic, lineptr->data);
 	}
 
 	sendto_one(source_p, form_str(RPL_ENDOFHELP),
