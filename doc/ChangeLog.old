@@ -1,3 +1,7 @@
+*** 20010720_6 by androsyn
+I think i this should be the right way to do the inline stuff :)
+
+
 *** 20010720_5 by androsyn
 inline vsprintf_irc() for the sake of ircsprintf() save a single function call at least :)
 
