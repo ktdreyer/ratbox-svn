@@ -1,3 +1,15 @@
+leeh        2004/09/04 07:29:06 EDT	(20040904_9)
+
+  Removed files:
+    .                    clean.com 
+  Log:
+  - remove a vms remnant
+  
+  Revision  Changes    Path
+  1.2       +0 -10     ircd-ratbox/clean.com (dead)
+
+
+
 leeh        2004/09/04 07:27:25 EDT	(20040904_8)
 
   Modified files:
