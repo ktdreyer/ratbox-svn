@@ -1,3 +1,17 @@
+androsyn    2004/03/02 16:21:36 EST	(20040302_15)
+
+  Modified files:
+    .                    configure configure.ac 
+  Log:
+  Make IPv6 default to on if the system supports it.  This is harmless most of
+  the time
+  
+  Revision  Changes    Path
+  7.207     +9 -10     ircd-ratbox/configure
+  7.20      +4 -6      ircd-ratbox/configure.ac
+
+
+
 leeh        2004/03/02 16:09:05 EST	(20040302_14)
 
   Modified files:
