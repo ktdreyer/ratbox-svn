@@ -1,3 +1,21 @@
+leeh        2002/09/21 09:59:29 UTC	(20020921_0)
+
+  Modified files:
+    help/opers           dline rehash stats unkline 
+  Added files:
+    help/opers           xline 
+  Log:
+  - doc updates via royalsexy <royalsexy@virushelp.info>
+  
+  Revision  Changes    Path
+  1.2       +3 -1      ircd-ratbox/help/opers/dline
+  1.3       +3 -0      ircd-ratbox/help/opers/rehash
+  1.2       +2 -1      ircd-ratbox/help/opers/stats
+  1.2       +4 -0      ircd-ratbox/help/opers/unkline
+  1.1       +15 -0     ircd-ratbox/help/opers/xline (new)
+
+
+
 leeh        2002/09/20 10:38:16 UTC	(20020920_2)
 
   Modified files:
