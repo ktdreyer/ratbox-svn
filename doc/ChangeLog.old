@@ -1,3 +1,7 @@
+*** 20010315_1 by fl_
+- tidied up whats-new a lot.. split the stuff into sections etc :)
+
+
 *** 20010314_8 by toot
 this fixes the bug that made join #x,0 put you in #x0
 
