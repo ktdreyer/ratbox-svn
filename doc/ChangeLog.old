@@ -1,3 +1,7 @@
+*** 20010124_4 by wcampbel
+Ran all the docs through ispell
+
+
 *** 20010124_3 by db
 - partially added in "restricted=yes/no" in auth blocks
   this is the old little i line support. Needs code in channel.c in set_mode()
