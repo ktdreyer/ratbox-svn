@@ -356,12 +356,32 @@ static void stats_auth(struct Client *client_p)
 
 static void stats_tklines(struct Client *client_p)
 {
-  report_Klines(client_p, -1);
+  /* Oper only, if unopered, return ERR_NOPRIVS */
+  if((ConfigFileEntry.k_lines_oper_only == 2) && !IsOper(client_p))
+    sendto_one(client_p, form_str(ERR_NOPRIVILEGES),me.name,client_p->name);
+
+  /* If unopered, Only return matching klines */
+  else if((ConfigFileEntry.k_lines_oper_only == 1) && !IsOper(client_p))
+    report_Klines(client_p, 1, 1);
+
+  /* Theyre opered, or allowed to see all klines */
+  else
+    report_Klines(client_p, 1, 0);
 }
 
 static void stats_klines(struct Client *client_p)
 {
-  report_Klines(client_p, 0);
+  /* Oper only, if unopered, return ERR_NOPRIVS */
+  if((ConfigFileEntry.k_lines_oper_only == 2) && !IsOper(client_p))
+    sendto_one(client_p, form_str(ERR_NOPRIVILEGES),me.name,client_p->name);
+
+  /* If unopered, Only return matching klines */
+  else if((ConfigFileEntry.k_lines_oper_only == 1) && !IsOper(client_p))
+    report_Klines(client_p, 0, 1);
+
+  /* Theyre opered, or allowed to see all klines */
+  else
+    report_Klines(client_p, 0, 0);
 }
 
 static void stats_messages(struct Client *client_p)

@@ -700,7 +700,8 @@ show_iline_prefix(struct Client *sptr,struct ConfItem *aconf,char *name)
 }
 
 /* void report_Ilines(struct Client *client_p, int mask)
- * Input: None
+ * Inputs: pointer to client to report to
+ *	   mask i.e. 
  * Output: None
  * Side effects: Reports configured auth{} blocks to client_p
  */
@@ -711,6 +712,7 @@ report_Ilines(struct Client *client_p, int mask)
  struct AddressRec *arec;
  struct ConfItem *aconf;
  int i, port;
+
  for (i=0; i<ATABLE_SIZE; i++)
   for (arec=atable[i]; arec; arec=arec->next)
    if (arec->type == CONF_CLIENT)
@@ -745,32 +747,54 @@ report_Ilines(struct Client *client_p, int mask)
    }
 }
 
-/* void report_Klines(struct Client *client_p, int t)
- * Input: Client to report to, type(==0 for perm, !=0 for temporary).
+/* void report_Klines(struct Client *client_p, int t, int mask)
+ * Inputs: Client to report to,
+ *	   type(==0 for perm, !=0 for temporary)
+ *	   mask 
  * Output: None
  * Side effects: Reports configured K(or k)-lines to client_p.
  */
 void
-report_Klines(struct Client *client_p, int t)
+report_Klines(struct Client *client_p, int temp, int mask)
 {
  char *name, *host, *pass, *user, *classname, c;
  struct AddressRec *arec;
  struct ConfItem *aconf;
  int i, port;
- if (t)
+
+ if (temp)
   c = 'k';
  else
   c = 'K';
+
  for (i=0; i<ATABLE_SIZE; i++)
   for (arec=atable[i]; arec; arec=arec->next)
    if (arec->type == CONF_KILL)
    {
-    if ((t && !((aconf=arec->aconf)->flags & CONF_FLAGS_TEMPORARY))
-        || (!t && ((aconf=arec->aconf)->flags & CONF_FLAGS_TEMPORARY)))
+    if ((temp && !((aconf=arec->aconf)->flags & CONF_FLAGS_TEMPORARY))
+        || (!temp && ((aconf=arec->aconf)->flags & CONF_FLAGS_TEMPORARY)))
      continue;
     get_printable_conf(aconf, &name, &host, &pass, &user, &port,
                        &classname);
+    /* We are doing a partial list, based on what matches the u@h of the
+     * sender, so prepare the strings for comparing --fl_ */
+    if(mask)
+      {
+        char usermask[USERLEN+HOSTLEN+10], maskmatch[USERLEN+HOSTLEN+10];
+        ircsprintf(usermask, "%s@%s", user, host);
+        ircsprintf(maskmatch, "%s@%s", client_p->username, client_p->host);
+
+        /* If the strings dont match, continue to the next auth block */
+        if(!match(host, maskmatch))
+          continue;
+
+      }
+
     sendto_one(client_p, form_str(RPL_STATSKLINE), me.name,
                client_p->name, c, host, user, pass);
    }
 }
+
+
+
+

@@ -51,8 +51,8 @@ struct ConfItem* find_dline(struct irc_inaddr *, int);
 
 void report_dlines(struct Client*);
 void report_exemptlines(struct Client*);
-void report_Klines(struct Client*, int);
-void report_Ilines(struct Client*, int);
+void report_Klines(struct Client*, int temp, int mask);
+void report_Ilines(struct Client*, int mask);
 #ifdef IPV6
 int match_ipv6(struct irc_inaddr*, struct irc_inaddr*, int);
 #endif
