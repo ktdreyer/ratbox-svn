@@ -427,7 +427,9 @@ find_conf_by_address(const char *name, struct irc_inaddr *addr, int type,
   if (name != NULL)
   {
     const char *p;
-    for (p = name; ; )
+    /* And yes - we have to check p after strchr and p after increment for
+     * NULL -kre */
+    for (p = name; p != NULL; )
     {
       for (arec = atable[hash_text(p)]; arec; arec = arec->next)
         if ((arec->type == (type & ~0x1)) &&
