@@ -1,3 +1,17 @@
+androsyn    2001/12/11 23:13:49 EST	(20011212_0)
+
+  Removed files:
+    src                  .depend 
+    modules              .depend 
+  Log:
+  Down with depends...
+  
+  Revision  Changes    Path
+  1.41      +0 -42722  ircd-hybrid-7/modules/.depend (dead)
+  7.62      +0 -20720  ircd-hybrid-7/src/.depend (dead)
+
+
+
 leeh        2001/12/11 18:09:11 EST	(20011211_9)
 
   Modified files:
