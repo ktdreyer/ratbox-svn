@@ -1,3 +1,11 @@
+*** 20001231_9 by toot
+. changed most remaining param counts so that parse() checks them
+. servers don't send USER any more do they? - removed some checks
+  which were only used for that anyway..
+. removed a few more redundant checks, which parse() takes care of
+. show "*" inplace of Nick for unregged users with no nick
+
+
 *** 20001231_8 by spookey
  - minor cleaups
 
