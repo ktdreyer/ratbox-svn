@@ -1,3 +1,34 @@
+leeh        2002/11/25 02:56:47 UTC	(20021125_3)
+
+  Modified files:
+    doc                  example.conf example.efnet.conf 
+    include              client.h listener.h s_conf.h 
+    modules              m_info.c m_kline.c m_stats.c 
+    src                  client.c ircd.c listener.c newconf.c 
+                         s_conf.c s_debug.c s_user.c 
+  Log:
+  - nuked the iphash, hosthash is better for class limits, connection
+    throttling was anal beyond belief anyway.
+  
+  Revision  Changes    Path
+  7.195     +0 -22     ircd-ratbox/doc/example.conf
+  7.33      +0 -25     ircd-ratbox/doc/example.efnet.conf
+  7.181     +0 -5      ircd-ratbox/include/client.h
+  7.12      +0 -1      ircd-ratbox/include/listener.h
+  7.214     +0 -10     ircd-ratbox/include/s_conf.h
+  1.68      +1 -13     ircd-ratbox/modules/m_info.c
+  1.132     +4 -4      ircd-ratbox/modules/m_kline.c
+  1.132     +2 -2      ircd-ratbox/modules/m_stats.c
+  7.332     +2 -7      ircd-ratbox/src/client.c
+  7.264     +0 -7      ircd-ratbox/src/ircd.c
+  7.74      +21 -20    ircd-ratbox/src/listener.c
+  7.58      +0 -26     ircd-ratbox/src/newconf.c
+  7.370     +32 -397   ircd-ratbox/src/s_conf.c
+  7.81      +2 -13     ircd-ratbox/src/s_debug.c
+  7.238     +2 -4      ircd-ratbox/src/s_user.c
+
+
+
 androsyn    2002/11/25 02:26:59 UTC	(20021125_2)
 
   Modified files:
