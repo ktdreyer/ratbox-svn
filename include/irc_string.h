@@ -82,7 +82,7 @@ const char *inetntoa(const char *in_addr);
 const char *inetntop(int af, const void *src, char *dst, unsigned int size);
 int inetpton(int af, const char *src, void *dst);
 const char *inetntop_sock(struct sockaddr_storage *src, char *dst, unsigned int size);
-
+int inetpton_sock(const char *src, struct sockaddr_storage *dst);
 
 #ifndef HAVE_STRLCPY
 size_t strlcpy(char *dst, const char *src, size_t siz);

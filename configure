@@ -3275,7 +3275,7 @@ if test "${enable_profile+set}" = set; then
   case "$enableval" in
   yes)
     ac_cv_profile="yes"
-    IRC_CFLAGS="$IRC_CFLAGS -pg -a -static"
+    IRC_CFLAGS="$IRC_CFLAGS -pg -static"
     ;;
   no)
     ac_cv_profile="no"
