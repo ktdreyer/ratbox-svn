@@ -585,25 +585,23 @@ msg_client(int p_or_n, char *command,
       {
         /* check for accept, flag recipient incoming message */
         if (p_or_n != NOTICE)
-          sendto_anywhere(source_p, target_p,
-                          "NOTICE %s :*** I'm in +g mode (server side ignore).",
-                          source_p->name);
+	{
+		sendto_one(source_p, form_str(ERR_TARGUMODEG),
+				me.name, source_p->name, target_p->name);
+	}
 
         if ((target_p->localClient->last_caller_id_time +
              ConfigFileEntry.caller_id_wait) < CurrentTime)
         {
-          if (p_or_n != NOTICE)
-            sendto_anywhere(source_p, target_p,
-                            "NOTICE %s :*** I've been informed you messaged me.",
-                            source_p->name);
+		if (p_or_n != NOTICE)
+			sendto_one(source_p, form_str(RPL_TARGNOTIFY),
+				me.name, source_p->name, target_p->name);
 
-          sendto_one(target_p,
-                     ":%s NOTICE %s :*** Client %s [%s@%s] is messaging you and you are +g",
-                     me.name, target_p->name,
-                     source_p->name, source_p->username, source_p->host);
+		sendto_one(target_p, form_str(RPL_UMODEGMSG),
+				me.name, target_p->name, source_p->name,
+				source_p->username, source_p->host);
 
-          target_p->localClient->last_caller_id_time = CurrentTime;
-
+		target_p->localClient->last_caller_id_time = CurrentTime;
         }
         /* Only so opers can watch for floods */
         (void)flood_attack_client(p_or_n, source_p, target_p);
