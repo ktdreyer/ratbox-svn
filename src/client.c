@@ -1145,7 +1145,7 @@ exit_remote_pending(void *unused)
   {
     rexit = ptr->data;
     next = ptr->next;
-    assert(ptr->data == NULL);
+    assert(ptr->data != NULL);
     if(ptr->data == NULL)
     {
        sendto_realops_flags(FLAGS_ALL, L_ALL,
