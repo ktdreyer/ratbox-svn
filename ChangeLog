@@ -1,3 +1,15 @@
+leeh        2004/01/08 08:26:43 EST	(20040108_2)
+
+  Modified files:
+    src                  Makefile.in 
+  Log:
+  - add an empty install target
+  
+  Revision  Changes    Path
+  1.12      +2 -0      rserv/src/Makefile.in
+
+
+
 leeh        2004/01/08 07:54:01 EST	(20040108_1)
 
   Modified files:
