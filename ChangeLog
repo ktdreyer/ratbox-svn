@@ -1,3 +1,16 @@
+leeh        2005/01/04 20:42:21 EST	(20050105_3)
+
+  Modified files:
+    include              channel.h client.h 
+  Log:
+  - ... and stop redefining NICKLEN/TOPICLEN
+  
+  Revision  Changes    Path
+  1.22      +0 -1      rserv/include/channel.h
+  1.33      +0 -1      rserv/include/client.h
+
+
+
 leeh        2005/01/04 20:41:10 EST	(20050105_2)
 
   Modified files:
