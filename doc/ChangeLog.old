@@ -1,3 +1,18 @@
+*** 20001026_4 by adrian
+
+
+Tidy up Dianora's event-ing of the channel_cleanup() code:
+
+* change the declaration of channel_cleanup() so it matches the EVH
+  function prototype
+
+* Change the call to eventAdd() to not need the typecast to EVH ..
+* .. to pass NULL instead of 0 ..
+* .. and split across two lines so the line isn't > 80 characters
+
+
+
+
 *** 20001026_3 by db
 - removed checkpings to localize it in ircd.c only
 
