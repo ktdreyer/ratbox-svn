@@ -1,3 +1,16 @@
+leeh        2004/04/12 19:36:46 EDT	(20040412_10)
+
+  Modified files:
+    modules              m_list.c 
+  Log:
+  - quick and simple channel list searches on min/max users..
+    eg: LIST >5,<100
+  
+  Revision  Changes    Path
+  1.78      +83 -3     ircd-ratbox/modules/m_list.c
+
+
+
 androsyn    2004/04/12 13:19:45 EDT	(20040412_9)
 
   Modified files:
