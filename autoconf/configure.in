@@ -55,7 +55,7 @@ dnl jdc -- Checks Solaris for libresolv and nsl; needed on Solaris 2.x
 dnl AC_CHECK_LIB(resolv, main)
 dnl AC_CHECK_LIB(nsl, main)
 
-AC_CHECK_LIB(bottle, beer, , AC_MSG_WARN(I have no more beer))
+dnl AC_CHECK_LIB(bottle, beer, , AC_MSG_WARN(I have no more beer))
 
 AC_CHECK_FUNC(crypt,, AC_CHECK_LIB(descrypt, crypt,,AC_CHECK_LIB(crypt, crypt,,)))
 
@@ -468,13 +468,14 @@ if test "$ac_cv_shared_modules" = "no"; then
 	MODULES_DEFINE=""
 	MOD_TARGET="libmodules.a"
 	MODULES_LIBS="../modules/libmodules.a"
+	SEDOBJ=""
 	AC_DEFINE(STATIC_MODULES)
 else
 	echo "Checking for shared module support"
 	MODULES_DEFINE=""
 	MODULES_LIBS=""
 	MOD_TARGET="shared_modules"
-	
+	SEDOBJ="-e s/.o:/.so:/"
 	AC_CHECK_FUNC(dlopen,, AC_CHECK_LIB(dl, dlopen,,AC_MSG_ERROR(**
 	dlopen could not be found - try running configure with --disable-shared-modules)))
 
@@ -596,6 +597,7 @@ AC_SUBST(SUBDIR_MESSAGES)
 AC_SUBST(LDFLAGS)
 AC_SUBST(MSGFMT)
 AC_SUBST(IRC_CFLAGS)
+AC_SUBST(SEDOBJ)
 
 AC_OUTPUT(                      \
  Makefile                       \

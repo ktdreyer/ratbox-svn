@@ -124,6 +124,8 @@ _MyRealloc(void *what, size_t size, char *file, int line)
     mme->next->last = mme;
   if (mme->last != NULL)
     mme->last->next = mme; 
+  else
+    first_mem_entry = mme;
   return DATA(mme);
 }
 
