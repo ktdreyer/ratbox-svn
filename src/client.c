@@ -1152,11 +1152,11 @@ void dead_link(struct Client *client_p)
 
   linebuf_donebuf(&client_p->localClient->buf_recvq);
   linebuf_donebuf(&client_p->localClient->buf_sendq);
-  
   if(client_p->flags & FLAGS_SENDQEX)
     notice = "Max SendQ exceeded";
   else
-    notice = "Dead link";
+    notice = "Write error: connection closed";
+
     	
   if (!IsPerson(client_p) && !IsUnknown(client_p) && !IsClosing(client_p))
   {
@@ -1178,7 +1178,7 @@ void exit_aborted_clients(void)
 {
   dlink_node *ptr, *next;
   struct Client *target_p;
-  
+  char *notice;
   for(ptr = abort_list.head; ptr; ptr = next)
     {
       target_p = ptr->data;
@@ -1192,7 +1192,12 @@ void exit_aborted_clients(void)
           continue;
         }
       dlinkDelete(ptr, &abort_list);
-      exit_client(target_p, target_p, &me, "Write error: connection closed");  
+      if(target_p->flags & FLAGS_SENDQEX)
+        notice = "Max SendQ exceeded";
+      else
+        notice = "Write error: connection closed";
+      
+      exit_client(target_p, target_p, &me, notice);  
       free_dlink_node(ptr);
     }
 }
