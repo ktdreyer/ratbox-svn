@@ -1,3 +1,10 @@
+*** 20001106_12 by adrian
+
+
+Only add a client to the AuthClientList if we're doing iauth.
+
+
+
 *** 20001106_11 by db
 - don't list secret channels in vchan ! list
 
