@@ -1,3 +1,7 @@
+*** 19990910_3 by tomh
+change poll.h to sys/poll.h
+
+
 *** 19990910_2 by wnder
 IAuth changes:
  * the listen port is now dynamically configurable (iauth.conf)
