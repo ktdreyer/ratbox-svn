@@ -1,4 +1,4 @@
-diff -ur ircd-hybrid-7/doc/Makefile.in ircd-hybrid-7+lmh/doc/Makefile.in
+diff -urN --exclude=CVS ircd-hybrid-7/doc/Makefile.in ircd-hybrid-7+lmh/doc/Makefile.in
 --- ircd-hybrid-7/doc/Makefile.in	Wed Jul 10 01:05:48 2002
 +++ ircd-hybrid-7+lmh/doc/Makefile.in	Wed Jul 17 17:26:58 2002
 @@ -30,7 +30,7 @@
@@ -20,7 +20,7 @@ diff -ur ircd-hybrid-7/doc/Makefile.in ircd-hybrid-7+lmh/doc/Makefile.in
  		if test ! -f $(sysconfdir)/$$i; then \
  			echo $(INSTALL_DATA) $$i $(sysconfdir); \
  			$(INSTALL_DATA) $$i $(sysconfdir); \
-diff -ur ircd-hybrid-7/include/class.h ircd-hybrid-7+lmh/include/class.h
+diff -urN --exclude=CVS ircd-hybrid-7/include/class.h ircd-hybrid-7+lmh/include/class.h
 --- ircd-hybrid-7/include/class.h	Sat Mar  9 21:48:35 2002
 +++ ircd-hybrid-7+lmh/include/class.h	Wed Jul 17 17:26:58 2002
 @@ -28,38 +28,47 @@
@@ -104,7 +104,7 @@ diff -ur ircd-hybrid-7/include/class.h ircd-hybrid-7+lmh/include/class.h
  extern  void    fix_class (struct ConfItem *, struct ConfItem *);
  extern  void    report_classes (struct Client *);
  
-diff -ur ircd-hybrid-7/include/client.h ircd-hybrid-7+lmh/include/client.h
+diff -urN --exclude=CVS ircd-hybrid-7/include/client.h ircd-hybrid-7+lmh/include/client.h
 --- ircd-hybrid-7/include/client.h	Fri Jul 12 01:43:19 2002
 +++ ircd-hybrid-7+lmh/include/client.h	Wed Jul 17 17:26:58 2002
 @@ -127,6 +127,7 @@
@@ -150,7 +150,7 @@ diff -ur ircd-hybrid-7/include/client.h ircd-hybrid-7+lmh/include/client.h
  
  #define IsFloodDone(x)          ((x)->flags2 & FLAGS2_FLOODDONE)
  #define SetFloodDone(x)         ((x)->flags2 |= FLAGS2_FLOODDONE)
-diff -ur ircd-hybrid-7/include/config.h ircd-hybrid-7+lmh/include/config.h
+diff -urN --exclude=CVS ircd-hybrid-7/include/config.h ircd-hybrid-7+lmh/include/config.h
 --- ircd-hybrid-7/include/config.h	Wed Jul 10 01:05:51 2002
 +++ ircd-hybrid-7+lmh/include/config.h	Wed Jul 17 17:26:58 2002
 @@ -102,6 +102,7 @@
@@ -198,7 +198,7 @@ diff -ur ircd-hybrid-7/include/config.h ircd-hybrid-7+lmh/include/config.h
  
  #define CONFIG_H_LEVEL_7
  
-diff -ur ircd-hybrid-7/include/config.h.dist ircd-hybrid-7+lmh/include/config.h.dist
+diff -urN --exclude=CVS ircd-hybrid-7/include/config.h.dist ircd-hybrid-7+lmh/include/config.h.dist
 --- ircd-hybrid-7/include/config.h.dist	Wed Jun 19 21:17:44 2002
 +++ ircd-hybrid-7+lmh/include/config.h.dist	Wed Jul 17 17:26:58 2002
 @@ -187,6 +187,18 @@
@@ -220,7 +220,7 @@ diff -ur ircd-hybrid-7/include/config.h.dist ircd-hybrid-7+lmh/include/config.h.
  /* USE_LOGFILE - log errors and such to LPATH
   * If you wish to have the server send 'vital' messages about server
   * to a logfile, define USE_LOGFILE.
-diff -ur ircd-hybrid-7/include/handlers.h ircd-hybrid-7+lmh/include/handlers.h
+diff -urN --exclude=CVS ircd-hybrid-7/include/handlers.h ircd-hybrid-7+lmh/include/handlers.h
 --- ircd-hybrid-7/include/handlers.h	Sat Jan  5 09:14:28 2002
 +++ ircd-hybrid-7+lmh/include/handlers.h	Wed Jul 17 17:26:58 2002
 @@ -95,5 +95,9 @@
@@ -233,7 +233,7 @@ diff -ur ircd-hybrid-7/include/handlers.h ircd-hybrid-7+lmh/include/handlers.h
 +
  #endif /* INCLUDED_handlers_h */
  
-diff -ur ircd-hybrid-7/include/hash.h ircd-hybrid-7+lmh/include/hash.h
+diff -urN --exclude=CVS ircd-hybrid-7/include/hash.h ircd-hybrid-7+lmh/include/hash.h
 --- ircd-hybrid-7/include/hash.h	Sat May 25 00:34:07 2002
 +++ ircd-hybrid-7+lmh/include/hash.h	Wed Jul 17 17:26:58 2002
 @@ -39,6 +39,9 @@
@@ -257,7 +257,7 @@ diff -ur ircd-hybrid-7/include/hash.h ircd-hybrid-7+lmh/include/hash.h
  
  extern void add_to_resv_hash_table(const char *name,
                                     struct ResvChannel *resv_p);
-diff -ur ircd-hybrid-7/include/irc_string.h ircd-hybrid-7+lmh/include/irc_string.h
+diff -urN --exclude=CVS ircd-hybrid-7/include/irc_string.h ircd-hybrid-7+lmh/include/irc_string.h
 --- ircd-hybrid-7/include/irc_string.h	Sat May 25 00:34:07 2002
 +++ ircd-hybrid-7+lmh/include/irc_string.h	Wed Jul 17 17:26:58 2002
 @@ -115,11 +115,16 @@
@@ -277,7 +277,7 @@ diff -ur ircd-hybrid-7/include/irc_string.h ircd-hybrid-7+lmh/include/irc_string
  
  extern const unsigned int CharAttrs[];
  
-diff -ur ircd-hybrid-7/include/modules.h ircd-hybrid-7+lmh/include/modules.h
+diff -urN --exclude=CVS ircd-hybrid-7/include/modules.h ircd-hybrid-7+lmh/include/modules.h
 --- ircd-hybrid-7/include/modules.h	Sat May 25 02:38:09 2002
 +++ ircd-hybrid-7+lmh/include/modules.h	Wed Jul 17 17:26:58 2002
 @@ -97,6 +97,9 @@
@@ -290,7 +290,7 @@ diff -ur ircd-hybrid-7/include/modules.h ircd-hybrid-7+lmh/include/modules.h
  extern struct Message help_msgtab;
  extern struct Message info_msgtab;
  extern struct Message invite_msgtab;
-diff -ur ircd-hybrid-7/include/s_conf.h ircd-hybrid-7+lmh/include/s_conf.h
+diff -urN --exclude=CVS ircd-hybrid-7/include/s_conf.h ircd-hybrid-7+lmh/include/s_conf.h
 --- ircd-hybrid-7/include/s_conf.h	Fri Jul 12 01:51:05 2002
 +++ ircd-hybrid-7+lmh/include/s_conf.h	Wed Jul 17 17:26:58 2002
 @@ -161,6 +161,8 @@
@@ -387,7 +387,7 @@ diff -ur ircd-hybrid-7/include/s_conf.h ircd-hybrid-7+lmh/include/s_conf.h
  
  #endif /* INCLUDED_s_conf_h */
  
-diff -ur ircd-hybrid-7/include/s_serv.h ircd-hybrid-7+lmh/include/s_serv.h
+diff -urN --exclude=CVS ircd-hybrid-7/include/s_serv.h ircd-hybrid-7+lmh/include/s_serv.h
 --- ircd-hybrid-7/include/s_serv.h	Sat May 25 00:34:08 2002
 +++ ircd-hybrid-7+lmh/include/s_serv.h	Wed Jul 17 17:26:58 2002
 @@ -74,12 +74,13 @@
@@ -405,7 +405,7 @@ diff -ur ircd-hybrid-7/include/s_serv.h ircd-hybrid-7+lmh/include/s_serv.h
  
  #ifdef HAVE_LIBZ
  #define CAP_ZIP_SUPPORTED       CAP_ZIP
-diff -ur ircd-hybrid-7/modules/Makefile.in ircd-hybrid-7+lmh/modules/Makefile.in
+diff -urN --exclude=CVS ircd-hybrid-7/modules/Makefile.in ircd-hybrid-7+lmh/modules/Makefile.in
 --- ircd-hybrid-7/modules/Makefile.in	Sun Jun 16 17:31:25 2002
 +++ ircd-hybrid-7+lmh/modules/Makefile.in	Wed Jul 17 17:26:59 2002
 @@ -103,7 +103,8 @@
@@ -418,7 +418,7 @@ diff -ur ircd-hybrid-7/modules/Makefile.in ircd-hybrid-7+lmh/modules/Makefile.in
  
  ALL_SRCS = $(CORE_SRCS) \
             $(SRCS)
-diff -ur ircd-hybrid-7/modules/m_kline.c ircd-hybrid-7+lmh/modules/m_kline.c
+diff -urN --exclude=CVS ircd-hybrid-7/modules/m_kline.c ircd-hybrid-7+lmh/modules/m_kline.c
 --- ircd-hybrid-7/modules/m_kline.c	Fri Jul 12 04:29:55 2002
 +++ ircd-hybrid-7+lmh/modules/m_kline.c	Wed Jul 17 17:26:59 2002
 @@ -90,12 +90,17 @@
@@ -600,7 +600,7 @@ diff -ur ircd-hybrid-7/modules/m_kline.c ircd-hybrid-7+lmh/modules/m_kline.c
    check_klines();
  } /* m_dline() */
  
-diff -ur ircd-hybrid-7/modules/m_trace.c ircd-hybrid-7+lmh/modules/m_trace.c
+diff -urN --exclude=CVS ircd-hybrid-7/modules/m_trace.c ircd-hybrid-7+lmh/modules/m_trace.c
 --- ircd-hybrid-7/modules/m_trace.c	Sun Jul  7 06:45:08 2002
 +++ ircd-hybrid-7+lmh/modules/m_trace.c	Wed Jul 17 17:26:59 2002
 @@ -278,9 +278,9 @@
@@ -615,7 +615,7 @@ diff -ur ircd-hybrid-7/modules/m_trace.c ircd-hybrid-7+lmh/modules/m_trace.c
  		 
    sendto_one(source_p, form_str(RPL_ENDOFTRACE),me.name, parv[0],tname);
  }
-diff -ur ircd-hybrid-7/modules/m_unkline.c ircd-hybrid-7+lmh/modules/m_unkline.c
+diff -urN --exclude=CVS ircd-hybrid-7/modules/m_unkline.c ircd-hybrid-7+lmh/modules/m_unkline.c
 --- ircd-hybrid-7/modules/m_unkline.c	Thu Jun 27 00:38:57 2002
 +++ ircd-hybrid-7+lmh/modules/m_unkline.c	Wed Jul 17 17:26:59 2002
 @@ -42,15 +42,17 @@
@@ -906,8 +906,157 @@ diff -ur ircd-hybrid-7/modules/m_unkline.c ircd-hybrid-7+lmh/modules/m_unkline.c
  
    filename = get_conf_name(DLINE_TYPE);
  
-Only in ircd-hybrid-7+lmh/modules: m_xline.c
-diff -ur ircd-hybrid-7/src/class.c ircd-hybrid-7+lmh/src/class.c
+diff -urN --exclude=CVS ircd-hybrid-7/modules/m_xline.c ircd-hybrid-7+lmh/modules/m_xline.c
+--- ircd-hybrid-7/modules/m_xline.c	Thu Jan  1 01:00:00 1970
++++ ircd-hybrid-7+lmh/modules/m_xline.c	Wed Jul 17 17:26:59 2002
+@@ -0,0 +1,146 @@
++/* modules/m_xline.c
++ * Copyright (C) 2002 Hybrid Development Team
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions are
++ * met:
++ *
++ * 1.Redistributions of source code must retain the above copyright notice,
++ *   this list of conditions and the following disclaimer.
++ * 2.Redistributions in binary form must reproduce the above copyright
++ *   notice, this list of conditions and the following disclaimer in the
++ *   documentation and/or other materials provided with the distribution.
++ * 3.The name of the author may not be used to endorse or promote products
++ *   derived from this software without specific prior written permission.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
++ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
++ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
++ * DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT,
++ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
++ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
++ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
++ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
++ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
++ * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
++ * POSSIBILITY OF SUCH DAMAGE.
++ *
++ * $Id$
++ */
++
++#include "stdinc.h"
++#include "tools.h"
++#include "handlers.h"
++#include "send.h"
++#include "channel.h"
++#include "client.h"
++#include "common.h"
++#include "config.h"
++#include "class.h"
++#include "ircd.h"
++#include "numeric.h"
++#include "memory.h"
++#include "s_log.h"
++#include "s_serv.h"
++#include "whowas.h"
++#include "irc_string.h"
++#include "hash.h"
++#include "msg.h"
++#include "parse.h"
++#include "modules.h"
++#include "s_conf.h"
++
++static void mo_xline(struct Client *client_p, struct Client *source_p,
++                    int parc, char *parv[]);
++
++struct Message xline_msgtab = {
++  "XLINE", 0, 0, 3, 0, MFLG_SLOW, 0,
++  {m_unregistered, m_not_oper, m_ignore, mo_xline}
++};
++
++void
++_modinit(void)
++{
++  mod_add_cmd(&xline_msgtab);
++}
++
++void
++_moddeinit(void)
++{
++  mod_del_cmd(&xline_msgtab);
++}
++
++char *_version = "$Revision$";
++
++/* m_xline()
++ *
++ * parv[1] - thing to xline
++ * parv[2] - optional type/reason
++ * parv[3] - reason
++ */
++void 
++mo_xline(struct Client *client_p, struct Client *source_p,
++         int parc, char *parv[])
++{
++  char buffer[BUFSIZE*2];
++  FBFILE *out;
++  struct ConfItem *aconf;
++  char *reason;
++  int xtype = 1;
++
++  if(!IsOperXline(source_p))
++  {
++    sendto_one(source_p, ":%s NOTICE %s :You need xline = yes;",
++               me.name, source_p->name);
++    return;
++  }
++
++  if(parc > 3)
++  {
++    xtype = atoi(parv[2]);
++    reason = parv[3];
++  }
++  else
++  {
++    if(IsDigit(*parv[2]))
++    {
++      xtype = atoi(parv[2]);
++      reason = "No Reason";
++    }
++    else
++      reason = parv[2];
++  }
++
++  sendto_realops_flags(FLAGS_ALL, L_ALL,
++		       "%s added X-line for [%s] [%s]",
++		       get_oper_name(source_p), parv[1], reason);
++  sendto_one(source_p, ":%s NOTICE %s :Added X-line for [%s] [%s]",
++             me.name, source_p->name, parv[1], reason);
++  ilog(L_TRACE, "%s added X-line for [%s] [%s]",
++       source_p->name, parv[1], reason);
++  
++  aconf = make_conf();
++  aconf->status = CONF_XLINE;
++  DupString(aconf->host, parv[1]);
++  DupString(aconf->passwd, reason);
++  aconf->port = xtype;
++
++  collapse(aconf->host);
++  conf_add_x_conf(aconf);
++
++  if((out = fbopen(ConfigFileEntry.xlinefile, "a")) == NULL)
++  {
++    sendto_realops_flags(FLAGS_ALL, L_ALL,
++		         "*** Problem opening %s", ConfigFileEntry.xlinefile);
++    return;
++  }
++
++  ircsprintf(buffer, "\"%s\",\"%d\",\"%s\",\"%s\",%lu\n",
++             parv[1], xtype, reason, get_oper_name(source_p), CurrentTime);
++
++  if(fbputs(buffer, out) == -1)
++    sendto_realops_flags(FLAGS_ALL, L_ALL,
++		         "*** Problem writing to %s", ConfigFileEntry.xlinefile);
++
++  fbclose(out);
++}
+diff -urN --exclude=CVS ircd-hybrid-7/src/class.c ircd-hybrid-7+lmh/src/class.c
 --- ircd-hybrid-7/src/class.c	Sat May 25 00:34:45 2002
 +++ ircd-hybrid-7+lmh/src/class.c	Wed Jul 17 17:26:59 2002
 @@ -45,19 +45,19 @@
@@ -1079,7 +1228,7 @@ diff -ur ircd-hybrid-7/src/class.c ircd-hybrid-7+lmh/src/class.c
            sendq = MaxSendq(cl);
        }
    return sendq;
-diff -ur ircd-hybrid-7/src/client.c ircd-hybrid-7+lmh/src/client.c
+diff -urN --exclude=CVS ircd-hybrid-7/src/client.c ircd-hybrid-7+lmh/src/client.c
 --- ircd-hybrid-7/src/client.c	Sat Jul 13 01:48:22 2002
 +++ ircd-hybrid-7+lmh/src/client.c	Wed Jul 17 17:26:59 2002
 @@ -998,6 +998,9 @@
@@ -1092,7 +1241,7 @@ diff -ur ircd-hybrid-7/src/client.c ircd-hybrid-7+lmh/src/client.c
    
          /* again, this is all that is needed */
      }
-diff -ur ircd-hybrid-7/src/hash.c ircd-hybrid-7+lmh/src/hash.c
+diff -urN --exclude=CVS ircd-hybrid-7/src/hash.c ircd-hybrid-7+lmh/src/hash.c
 --- ircd-hybrid-7/src/hash.c	Fri Jun  7 22:59:17 2002
 +++ ircd-hybrid-7+lmh/src/hash.c	Wed Jul 17 17:26:59 2002
 @@ -39,6 +39,8 @@
@@ -1354,7 +1503,7 @@ diff -ur ircd-hybrid-7/src/hash.c ircd-hybrid-7+lmh/src/hash.c
 +               me.name, RPL_STATSDEBUG, source_p->name, i, node[i]);
 +}
 +#endif
-diff -ur ircd-hybrid-7/src/ircd.c ircd-hybrid-7+lmh/src/ircd.c
+diff -urN --exclude=CVS ircd-hybrid-7/src/ircd.c ircd-hybrid-7+lmh/src/ircd.c
 --- ircd-hybrid-7/src/ircd.c	Fri Jul 12 01:51:08 2002
 +++ ircd-hybrid-7+lmh/src/ircd.c	Wed Jul 17 17:26:59 2002
 @@ -261,6 +261,8 @@
@@ -1399,7 +1548,7 @@ diff -ur ircd-hybrid-7/src/ircd.c ircd-hybrid-7+lmh/src/ircd.c
  
    /* We want try_connections to be called as soon as possible now! -- adrian */
    /* No, 'cause after a restart it would cause all sorts of nick collides */
-diff -ur ircd-hybrid-7/src/ircd_lexer.l ircd-hybrid-7+lmh/src/ircd_lexer.l
+diff -urN --exclude=CVS ircd-hybrid-7/src/ircd_lexer.l ircd-hybrid-7+lmh/src/ircd_lexer.l
 --- ircd-hybrid-7/src/ircd_lexer.l	Fri Jul 12 00:40:22 2002
 +++ ircd-hybrid-7+lmh/src/ircd_lexer.l	Wed Jul 17 17:26:59 2002
 @@ -127,6 +127,7 @@
@@ -1437,7 +1586,7 @@ diff -ur ircd-hybrid-7/src/ircd_lexer.l ircd-hybrid-7+lmh/src/ircd_lexer.l
  yes		{ return TYES; }
  
  failed_oper_notice      { return FAILED_OPER_NOTICE; }
-diff -ur ircd-hybrid-7/src/ircd_parser.y ircd-hybrid-7+lmh/src/ircd_parser.y
+diff -urN --exclude=CVS ircd-hybrid-7/src/ircd_parser.y ircd-hybrid-7+lmh/src/ircd_parser.y
 --- ircd-hybrid-7/src/ircd_parser.y	Fri Jul 12 00:40:22 2002
 +++ ircd-hybrid-7+lmh/src/ircd_parser.y	Wed Jul 17 17:26:59 2002
 @@ -37,6 +37,7 @@
@@ -1689,7 +1838,7 @@ diff -ur ircd-hybrid-7/src/ircd_parser.y ircd-hybrid-7+lmh/src/ircd_parser.y
  
  general_use_help: USE_HELP '=' TYES ';'
    {
-diff -ur ircd-hybrid-7/src/kdparse.c ircd-hybrid-7+lmh/src/kdparse.c
+diff -urN --exclude=CVS ircd-hybrid-7/src/kdparse.c ircd-hybrid-7+lmh/src/kdparse.c
 --- ircd-hybrid-7/src/kdparse.c	Sat Jul  6 17:58:57 2002
 +++ ircd-hybrid-7+lmh/src/kdparse.c	Wed Jul 17 17:26:59 2002
 @@ -110,6 +110,40 @@
@@ -1733,7 +1882,7 @@ diff -ur ircd-hybrid-7/src/kdparse.c ircd-hybrid-7+lmh/src/kdparse.c
  /*
   * getfield
   *
-diff -ur ircd-hybrid-7/src/messages.tab ircd-hybrid-7+lmh/src/messages.tab
+diff -urN --exclude=CVS ircd-hybrid-7/src/messages.tab ircd-hybrid-7+lmh/src/messages.tab
 --- ircd-hybrid-7/src/messages.tab	Fri Jun 28 19:18:49 2002
 +++ ircd-hybrid-7+lmh/src/messages.tab	Wed Jul 17 17:26:59 2002
 @@ -238,7 +238,7 @@
@@ -1745,7 +1894,7 @@ diff -ur ircd-hybrid-7/src/messages.tab ircd-hybrid-7+lmh/src/messages.tab
  /* 219 RPL_ENDOFSTATS, */       ":%s 219 %s %s :End of /STATS report",
  /* 220 RPL_STATSPLINE, */       ":%s 220 %s %c %d %s %d :%s",
  /* 221 RPL_UMODEIS, */          ":%s 221 %s %s",
-diff -ur ircd-hybrid-7/src/modules.c ircd-hybrid-7+lmh/src/modules.c
+diff -urN --exclude=CVS ircd-hybrid-7/src/modules.c ircd-hybrid-7+lmh/src/modules.c
 --- ircd-hybrid-7/src/modules.c	Tue Jun  4 06:30:16 2002
 +++ ircd-hybrid-7+lmh/src/modules.c	Wed Jul 17 17:26:59 2002
 @@ -110,6 +110,10 @@
@@ -1769,7 +1918,7 @@ diff -ur ircd-hybrid-7/src/modules.c ircd-hybrid-7+lmh/src/modules.c
  }
  
  /* mod_find_path()
-diff -ur ircd-hybrid-7/src/packet.c ircd-hybrid-7+lmh/src/packet.c
+diff -urN --exclude=CVS ircd-hybrid-7/src/packet.c ircd-hybrid-7+lmh/src/packet.c
 --- ircd-hybrid-7/src/packet.c	Fri May 31 03:21:04 2002
 +++ ircd-hybrid-7+lmh/src/packet.c	Wed Jul 17 17:26:59 2002
 @@ -74,7 +74,8 @@
@@ -1793,7 +1942,7 @@ diff -ur ircd-hybrid-7/src/packet.c ircd-hybrid-7+lmh/src/packet.c
        
        /* allow opers 4 times the amount of messages as users. why 4?
         * why not. :) --fl_
-diff -ur ircd-hybrid-7/src/s_conf.c ircd-hybrid-7+lmh/src/s_conf.c
+diff -urN --exclude=CVS ircd-hybrid-7/src/s_conf.c ircd-hybrid-7+lmh/src/s_conf.c
 --- ircd-hybrid-7/src/s_conf.c	Wed Jul 17 14:58:59 2002
 +++ ircd-hybrid-7+lmh/src/s_conf.c	Wed Jul 17 17:27:00 2002
 @@ -73,7 +73,8 @@
@@ -2295,7 +2444,7 @@ diff -ur ircd-hybrid-7/src/s_conf.c ircd-hybrid-7+lmh/src/s_conf.c
      {
        ClassPtr(aconf) = find_class(0);
        MyFree(aconf->className);
-diff -ur ircd-hybrid-7/src/s_debug.c ircd-hybrid-7+lmh/src/s_debug.c
+diff -urN --exclude=CVS ircd-hybrid-7/src/s_debug.c ircd-hybrid-7+lmh/src/s_debug.c
 --- ircd-hybrid-7/src/s_debug.c	Sat May 25 00:34:51 2002
 +++ ircd-hybrid-7+lmh/src/s_debug.c	Wed Jul 17 17:27:00 2002
 @@ -44,7 +44,6 @@
@@ -2332,7 +2481,7 @@ diff -ur ircd-hybrid-7/src/s_debug.c ircd-hybrid-7+lmh/src/s_debug.c
  
    total_memory = totww + total_channel_memory + conf_memory +
      class_count * sizeof(struct Class);
-diff -ur ircd-hybrid-7/src/s_serv.c ircd-hybrid-7+lmh/src/s_serv.c
+diff -urN --exclude=CVS ircd-hybrid-7/src/s_serv.c ircd-hybrid-7+lmh/src/s_serv.c
 --- ircd-hybrid-7/src/s_serv.c	Fri Jul 12 04:30:04 2002
 +++ ircd-hybrid-7+lmh/src/s_serv.c	Wed Jul 17 17:27:00 2002
 @@ -104,6 +104,7 @@
@@ -2363,7 +2512,7 @@ diff -ur ircd-hybrid-7/src/s_serv.c ircd-hybrid-7+lmh/src/s_serv.c
            con_conf = aconf;
            /* We connect only one at time... */
            connecting = TRUE;
-diff -ur ircd-hybrid-7/src/s_user.c ircd-hybrid-7+lmh/src/s_user.c
+diff -urN --exclude=CVS ircd-hybrid-7/src/s_user.c ircd-hybrid-7+lmh/src/s_user.c
 --- ircd-hybrid-7/src/s_user.c	Wed Jul 17 17:26:39 2002
 +++ ircd-hybrid-7+lmh/src/s_user.c	Wed Jul 17 17:27:00 2002
 @@ -449,6 +449,9 @@
@@ -2386,7 +2535,7 @@ diff -ur ircd-hybrid-7/src/s_user.c ircd-hybrid-7+lmh/src/s_user.c
  
    source_p->servptr = find_server(user->server);
  
-diff -ur ircd-hybrid-7/src/version.c.SH ircd-hybrid-7+lmh/src/version.c.SH
+diff -urN --exclude=CVS ircd-hybrid-7/src/version.c.SH ircd-hybrid-7+lmh/src/version.c.SH
 --- ircd-hybrid-7/src/version.c.SH	Tue Nov 13 08:59:01 2001
 +++ ircd-hybrid-7+lmh/src/version.c.SH	Wed Jul 17 17:27:00 2002
 @@ -51,11 +51,12 @@
