@@ -1,3 +1,17 @@
+leeh        2004/03/22 14:04:36 EST	(20040322_2)
+
+  Modified files:
+    .                    RELNOTES 
+    src                  client.c 
+  Log:
+  - made read errors test for write errors and vice versa
+  
+  Revision  Changes    Path
+  1.88      +2 -0      ircd-ratbox/RELNOTES
+  7.443     +4 -5      ircd-ratbox/src/client.c
+
+
+
 leeh        2004/03/22 12:38:01 EST	(20040322_1)
 
   Modified files:
