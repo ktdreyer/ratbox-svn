@@ -56,9 +56,6 @@ extern  void    count_ip_hash(int *,u_long *);    /* defined in s_conf.c */
  * Option string.  Must be before #ifdef DEBUGMODE.
  */
 const char serveropts[] = {
-#ifdef  CHROOTDIR
-  'c',
-#endif
 #ifdef  CMDLINE_CONFIG
   'C',
 #endif
