@@ -1,3 +1,7 @@
+*** 20010122_1 by toot
+fixed formatting shite in /time and EOB message
+
+
 *** 20010121_12 by wcampbel
 Changed some debugging code logging to L_NOTICE to L_DEBUG
 
