@@ -75,9 +75,9 @@ extern void sendto_channel_remote(struct Client *one,
                    int caps, int nocaps, struct Channel *chptr,
                    const char *pattern, ...) AFP(7, 8);
 
-extern void sendto_server(struct Client *one, unsigned long caps,
+extern void sendto_server(struct Client *one, struct Channel *chptr, unsigned long caps,
                           unsigned long nocaps,
-                          const char *format, ...) AFP(4, 5);
+                          const char *format, ...) AFP(5, 6);
 
 extern  void sendto_match_butone(struct Client *, struct Client *, 
                                  char *, int, const char *, ...)

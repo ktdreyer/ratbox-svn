@@ -230,7 +230,7 @@ send_linebuf_remote(struct Client *to, struct Client *from,
                          from->name, from->username, from->host,
                          to->from->name);
 
-    sendto_server(NULL, NOCAPS, NOCAPS,
+    sendto_server(NULL, NULL, NOCAPS, NOCAPS,
                   ":%s KILL %s :%s (%s[%s@%s] Ghosted %s)",
                   me.name, to->name, me.name, to->name,
                   to->username, to->host, to->from->name);
@@ -595,7 +595,7 @@ sendto_list_anywhere(struct Client *one, struct Client *from,
  * -davidt
  */
 void 
-sendto_server(struct Client *one, unsigned long caps,
+sendto_server(struct Client *one, struct Channel *chptr, unsigned long caps,
               unsigned long nocaps, const char *format, ...)
 {
   va_list args;
@@ -603,7 +603,12 @@ sendto_server(struct Client *one, unsigned long caps,
   dlink_node *ptr;
   dlink_node *ptr_next;
   buf_head_t linebuf;
-
+  
+  if(chptr != NULL)
+  {
+    if(*chptr->chname != '#')
+      return;
+  }
   linebuf_newbuf(&linebuf);
   va_start(args, format);
   linebuf_putmsg(&linebuf, format, &args, NULL);

@@ -279,7 +279,7 @@ m_join(struct Client *client_p,
              * and channel_modes() will leave a trailing space on pbuf if
              * its used --fl
              */
-	    sendto_server(client_p, NOCAPS, NOCAPS,
+	    sendto_server(client_p, chptr, NOCAPS, NOCAPS,
                           ":%s SJOIN %lu %s %s:@%s",
                           me.name, (unsigned long) chptr->channelts, 
                           chptr->chname, mbuf, parv[0]);
@@ -290,9 +290,9 @@ m_join(struct Client *client_p,
           free_channel_list(&chptr->exceptlist);
           free_channel_list(&chptr->invexlist);
 	}
-      else if(*chptr->chname == '#')
+      else 
 	{
-	  sendto_server(client_p, NOCAPS, NOCAPS,
+	  sendto_server(client_p, chptr, NOCAPS, NOCAPS,
                         ":%s SJOIN %lu %s + :%s",
                         me.name, (unsigned long) chptr->channelts,
                         chptr->chname, parv[0]);
@@ -389,7 +389,7 @@ static void do_join_0(struct Client *client_p, struct Client *source_p)
   struct Channel *chptr=NULL;
   dlink_node   *lp;
 
-  sendto_server(client_p, NOCAPS, NOCAPS, 
+  sendto_server(client_p, NULL, NOCAPS, NOCAPS, 
                 ":%s JOIN 0", source_p->name);
 
   if (source_p->user->channel.head &&

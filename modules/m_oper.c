@@ -203,7 +203,7 @@ static void ms_oper(struct Client *client_p, struct Client *source_p,
         source_p->handler = OPER_HANDLER;
       source_p->umodes |= UMODE_OPER;
       Count.oper++;
-      sendto_server(client_p, NOCAPS, NOCAPS, 
+      sendto_server(client_p, NULL, NOCAPS, NOCAPS, 
                     ":%s MODE %s :+o", parv[0], parv[0]);
     }
 }

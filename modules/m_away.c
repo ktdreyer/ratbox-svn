@@ -95,9 +95,9 @@ static void m_away(struct Client *client_p,
       if (away)
         {
           /* we now send this only if they were away before --is */
-          sendto_server(client_p, CAP_UID, NOCAPS,
+          sendto_server(client_p, NULL, CAP_UID, NOCAPS,
                          ":%s AWAY", ID(source_p));
-          sendto_server(client_p, NOCAPS, CAP_UID,
+          sendto_server(client_p, NULL, NOCAPS, CAP_UID,
                          ":%s AWAY", source_p->name);
           MyFree(away);
           source_p->user->away = NULL;
@@ -125,9 +125,9 @@ static void m_away(struct Client *client_p,
   /* we now send this only if they weren't away already --is */
   if (!away)
   {
-    sendto_server(client_p, CAP_UID, NOCAPS,
+    sendto_server(client_p, NULL, CAP_UID, NOCAPS,
                    ":%s AWAY :%s", ID(source_p), awy2);
-    sendto_server(client_p, NOCAPS, CAP_UID,
+    sendto_server(client_p, NULL, NOCAPS, CAP_UID,
                    ":%s AWAY :%s", source_p->name, awy2);
   }
   else
