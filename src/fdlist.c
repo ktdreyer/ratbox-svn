@@ -7,6 +7,7 @@
  */
 #include "fdlist.h"
 #include "client.h"  /* struct Client */
+#include "event.h"
 #include "ircd.h"    /* GlobalSetOptions */
 #include "s_bsd.h"   /* highest_fd */
 #include "config.h"  /* option settings */
@@ -54,6 +55,8 @@ void fdlist_init(void)
     /* XXXX I HATE THIS CHECK. Can someone please fix? */
     if (!fd_table)
         exit(69);
+    /* Setup the timeout check. I'll shift it later :)  -- adrian */
+    eventAdd("comm_checktimeouts", comm_checktimeouts, NULL, 1, 0);
     initialized = 1;
   }
 }

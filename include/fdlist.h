@@ -51,6 +51,8 @@ struct _fde {
     void *read_data;
     PF *write_handler;
     void *write_data;
+    PF *timeout_handler;
+    void *timeout_data;
     time_t timeout;
     struct {
         unsigned int open:1;

@@ -943,3 +943,51 @@ ignoreErrno(int ierrno)
 }
 
 
+/*
+ * comm_settimeout() - set the socket timeout
+ *
+ * Set the timeout for the fd
+ */
+void
+comm_settimeout(int fd, time_t timeout, PF *callback, void *cbdata)
+{
+    assert(fd > -1);
+    assert(fd_table[fd].flags.open);
+
+    fd_table[fd].timeout = CurrentTime + timeout;
+    fd_table[fd].timeout_handler = callback;
+    fd_table[fd].timeout_data = cbdata;
+}
+
+
+/*
+ * comm_checktimeouts() - check the socket timeouts
+ *
+ * All this routine does is call the given callback/cbdata, without closing
+ * down the file descriptor. When close handlers have been implemented,
+ * this will happen.
+ */
+void
+comm_checktimeouts(void *notused)
+{
+    int fd;
+    PF *hdl;
+
+    for (fd = 0; fd <= highest_fd; fd++) {
+        if (!fd_table[fd].flags.open)
+            continue;
+        if (fd_table[fd].flags.closing)
+            continue;
+        if (fd_table[fd].timeout_handler &&
+            fd_table[fd].timeout > 0 && fd_table[fd].timeout < CurrentTime) {
+            /* Call timeout handler */
+            hdl = fd_table[fd].timeout_handler;
+            hdl(fd, fd_table[fd].timeout_data);           
+            /* .. and clear .. */
+            comm_settimeout(fd, 0, NULL, NULL);
+        }
+    }
+    /* .. next .. */
+    eventAdd("comm_checktimeouts", comm_checktimeouts, NULL, 1, 0);
+}
+

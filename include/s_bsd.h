@@ -61,6 +61,9 @@ extern int   get_sockerr(int);
 extern int   parse_client_queued(struct Client*);
 extern int   ignoreErrno(int ierrno);
 
+extern void  comm_settimeout(int, time_t, PF *, void *);
+extern void  comm_checktimeouts(void *);
+
 /* These must be defined in the network IO loop code of your choice */
 extern void  comm_setselect(int fd, unsigned int type, PF *handler, 
                  void *client_data, time_t timeout);
