@@ -1,3 +1,18 @@
+leeh        2002/09/11 13:29:11 UTC	(20020911_1)
+
+  Modified files:
+    include              resv.h 
+    modules              m_resv.c 
+  Log:
+  - removed some #if 0'd declarations
+  - send an error on bad params
+  
+  Revision  Changes    Path
+  1.11      +0 -10     ircd-ratbox/include/resv.h
+  1.20      +9 -3      ircd-ratbox/modules/m_resv.c
+
+
+
 leeh        2002/09/11 13:17:37 UTC	(20020911_0)
 
   Modified files:
