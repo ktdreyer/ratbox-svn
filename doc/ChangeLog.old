@@ -1,3 +1,7 @@
+*** 20001231_27 by toot
+fixed some formatting in m_whois
+
+
 *** 20001231_26 by toot
 it didn't :P
 char *_version = "$Revision$"; looks a bit poo
