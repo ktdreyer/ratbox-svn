@@ -26,7 +26,6 @@
 #include "common.h"   /* bleah */
 #include "handlers.h"
 #include "client.h"
-#include "common.h"   /* bleah */
 #include "channel.h"
 #include "vchannel.h"
 #include "hash.h"
@@ -72,7 +71,6 @@ static void who_global(struct Client *sptr, char *mask, int oper);
 
 static void do_who(struct Client *sptr,
                    struct Client *acptr,
-                   struct Channel *chptr,
                    char *chname,
                    char *op_flags);
 
@@ -154,7 +152,7 @@ static int m_who(struct Client *cptr,
 	    do_who_on_channel(sptr,mychannel,"*",NO,YES);
 	}
       else
-	do_who_on_channel(sptr,mychannel,"*",NO,YES);
+	do_who_on_channel(sptr, mychannel, "*", NO, YES);
       sendto_one(sptr, form_str(RPL_ENDOFWHO), me.name, parv[0], "*");
       return 0;
     }
@@ -175,21 +173,21 @@ static int m_who(struct Client *cptr,
 
 	      /* If vchan not 0, that makes them a member automatically */
 	      if ( vchan != 0 )
-		do_who_on_channel(sptr,vchan,chptr->chname,NO,YES);
+		do_who_on_channel(sptr, vchan, chptr->chname, NO, YES);
 	      else
 		{
 		  if ( IsMember(sptr, chptr) )
-		    do_who_on_channel(sptr,chptr,chptr->chname,NO,YES);
+		    do_who_on_channel(sptr, chptr, chptr->chname, NO, YES);
 		  else if(!SecretChannel(chptr))
-		    do_who_on_channel(sptr,chptr,chptr->chname,NO,NO);
+		    do_who_on_channel(sptr, chptr, chptr->chname, NO, NO);
 		}
 	    }
 	  else
 	    {
 	      if ( IsMember(sptr, chptr) )
-		do_who_on_channel(sptr,chptr,chptr->chname,NO,YES);
+		do_who_on_channel(sptr, chptr, chptr->chname, NO, YES);
 	      else if(!SecretChannel(chptr))
-		do_who_on_channel(sptr,chptr,chptr->chname,NO,NO);
+		do_who_on_channel(sptr, chptr, chptr->chname, NO, NO);
 	    }
 	}
       sendto_one(sptr, form_str(RPL_ENDOFWHO), me.name, parv[0], mask );
@@ -247,18 +245,18 @@ static int m_who(struct Client *cptr,
 	    }
 
 	  if (is_chan_op(chptr,acptr))
-	    do_who(sptr,acptr,chptr,chname,chanop_flag);
+	    do_who(sptr, acptr, chname, chanop_flag);
 	  else if(is_half_op(chptr,acptr))
-	    do_who(sptr,acptr,chptr,chname,halfop_flag);
+	    do_who(sptr, acptr, chname, halfop_flag);
 	  else if(is_voiced(chptr,acptr))
-	    do_who(sptr,acptr,chptr,chname,voiced_flag);
+	    do_who(sptr, acptr, chname, voiced_flag);
 	  else
-	    do_who(sptr,acptr,chptr,chname,"");
+	    do_who(sptr, acptr, chname, "");
 	}
       else
 	{
 	  if (!isinvis)
-	    do_who(sptr,acptr,NULL,NULL,"");
+	    do_who(sptr, acptr, NULL, "");
 	}
 
       sendto_one(sptr, form_str(RPL_ENDOFWHO), me.name, parv[0], mask );
@@ -364,16 +362,16 @@ static void who_global(struct Client *sptr,char *mask, int oper)
 		}
 
 	      if (is_chan_op(chptr,acptr))
-		do_who(sptr, acptr, chptr, chname, chanop_flag);
+		do_who(sptr, acptr, chname, chanop_flag);
 	      else if(is_half_op(chptr,acptr))
-		do_who(sptr, acptr, chptr, chname, halfop_flag);
+		do_who(sptr, acptr, chname, halfop_flag);
 	      else if(is_voiced(chptr,acptr))
-		do_who(sptr, acptr, chptr, chname, voiced_flag);
+		do_who(sptr, acptr, chname, voiced_flag);
 	      else 
-		do_who(sptr, acptr, chptr, chname, "");
+		do_who(sptr, acptr, chname, "");
 	    }
 	  else
-	    do_who(sptr, acptr, NULL, NULL, "");
+	    do_who(sptr, acptr, NULL, "");
 
 	  if (maxmatches > 0)
 	    {
@@ -435,7 +433,7 @@ static void do_who_list(struct Client *sptr, struct Channel *chptr,
   for(ptr = list->head; ptr; ptr = ptr->next)
     {
       acptr = ptr->data;
-      do_who(sptr,acptr,chptr,chname,op_flags);
+      do_who(sptr, acptr, chname, op_flags);
     }
 }
 
@@ -444,7 +442,6 @@ static void do_who_list(struct Client *sptr, struct Channel *chptr,
  *
  * inputs	- pointer to client requesting who
  *		- pointer to client to do who on
- *		- pointer to channel
  *		- The reported name
  *		- channel flags
  * output	- NONE
@@ -453,7 +450,6 @@ static void do_who_list(struct Client *sptr, struct Channel *chptr,
 
 static void do_who(struct Client *sptr,
                    struct Client *acptr,
-                   struct Channel *chptr,
                    char *chname,
                    char *op_flags)
 {
