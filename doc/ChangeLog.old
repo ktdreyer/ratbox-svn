@@ -1,3 +1,9 @@
+*** 20010118_6 by davidt
+Fixes to m_message.c for lazylinks
+Make send.c reentrant, to fix problems with calling client_burst_if_needed
+from inside various sendto_* functions.
+
+
 *** 20010118_5 by ejb
 - oops, better make it compile on unix too..
 
