@@ -1,3 +1,13 @@
+*** 20001102_6 by adrian
+
+
+* convert send_queued_write() to a global so we can use it in other places ..
+* .. like close_connection(), to flush data before the socket closes
+
+This now means peopl get their quit messages back before the FD closes! :P
+
+
+
 *** 20001102_5 by adrian
 
 
