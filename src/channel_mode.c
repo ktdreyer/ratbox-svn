@@ -790,6 +790,10 @@ chm_hideops(struct Client *client_p, struct Client *source_p,
     *errors |= SM_ERR_NOOPS;
     return;
   }
+  
+  
+  if (MyClient(source_p) && (++mode_limit > MAXMODEPARAMS))
+    return;
 
   if (dir == MODE_ADD && !(chptr->mode.mode & MODE_HIDEOPS))
   {
