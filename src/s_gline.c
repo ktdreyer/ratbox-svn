@@ -33,7 +33,6 @@
 #include "config.h"
 #include "irc_string.h"
 #include "ircd.h"
-#include "m_kline.h"
 #include "hostmask.h"
 #include "numeric.h"
 #include "fdlist.h"

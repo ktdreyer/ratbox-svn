@@ -26,7 +26,6 @@
 
 #include "stdinc.h"
 #include "tools.h"
-#include "m_kline.h"
 #include "channel.h"
 #include "class.h"
 #include "client.h"
