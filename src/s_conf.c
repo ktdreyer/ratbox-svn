@@ -340,6 +340,7 @@ set_default_conf(void)
 	ConfigChannel.max_bans = 25;
 	ConfigChannel.no_oper_resvs = NO;
 	ConfigChannel.burst_topicwho = NO;
+	ConfigChannel.invite_ops_only = YES;
 
 	ConfigChannel.default_split_user_count = 0;
 	ConfigChannel.default_split_server_count = 0;

@@ -1163,7 +1163,7 @@ m_invite(struct Client *client_p, struct Client *source_p, int parc, const char 
 	}
 
 	/* only store invites for +i channels */
-	if(chptr && (chptr->mode.mode & MODE_INVITEONLY))
+	if(ConfigChannel.invite_ops_only || (chptr->mode.mode & MODE_INVITEONLY))
 	{
 		/* treat remote clients as chanops */
 		if(MyClient(source_p) && !is_chanop(msptr))
@@ -1173,7 +1173,8 @@ m_invite(struct Client *client_p, struct Client *source_p, int parc, const char 
 			return 0;
 		}
 
-		store_invite = 1;
+		if(chptr->mode.mode & MODE_INVITEONLY)
+			store_invite = 1;
 	}
 
 	if(MyConnect(source_p))

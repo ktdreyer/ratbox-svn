@@ -244,6 +244,7 @@ struct config_channel_entry
 	int default_split_delay;
 	int no_oper_resvs;
 	int burst_topicwho;
+	int invite_ops_only;
 };
 
 struct config_server_hide
