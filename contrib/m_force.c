@@ -59,7 +59,7 @@ struct Message forcejoin_msgtab = {
   {m_ignore, m_not_oper, mo_forcejoin, mo_forcejoin}
 };
 struct Message forcepart_msgtab = {
-  "FORCEPART", 0, 0, 2, 0, MFLG_SLOW, 0,
+  "FORCEPART", 0, 0, 3, 0, MFLG_SLOW, 0,
   {m_ignore, m_not_oper, mo_forcepart, mo_forcepart}
 };
 
