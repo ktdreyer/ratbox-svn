@@ -1,3 +1,15 @@
+leeh        2001/12/13 12:57:42 EST	(20011213_3)
+
+  Modified files:
+    .                    configure 
+  Log:
+  - updated from configure.in or something
+  
+  Revision  Changes    Path
+  7.106     +202 -191  ircd-hybrid-7/configure
+
+
+
 leeh        2001/12/13 12:40:47 EST	(20011213_2)
 
   Modified files:
