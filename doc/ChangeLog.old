@@ -1,3 +1,15 @@
+androsyn    2002/06/07 17:59:19 EDT	(20020607_1)
+
+  Modified files:
+    src                  hash.c 
+  Log:
+  Remove a very hideous ugly stupid hack
+  
+  Revision  Changes    Path
+  7.43      +2 -2      ircd-hybrid-7/src/hash.c
+
+
+
 leeh        2002/06/07 10:22:46 EDT	(20020607_0)
 
   Modified files:
