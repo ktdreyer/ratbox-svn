@@ -1,3 +1,11 @@
+*** 20010611_6 by leeh
+- FLAGS_ADMIN -> FLAGS_SERVADMIN
+  this means the notices goes to admins who are +s, and not all admins..
+  (this is how it shouldve been)
+- FLAGS_NOTADMIN -> FLAGS_SERVOPER
+  as above
+
+
 *** 20010611_5 by androsyn
 Its always useful to rearm your timer.
 
