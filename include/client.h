@@ -552,7 +552,7 @@ extern struct Client* next_client_double(struct Client* next,
 extern int accept_message(struct Client *source, struct Client *target);
 extern int add_to_accept(struct Client *source, struct Client *target);
 extern int del_from_accept(struct Client *source, struct Client *target);
-extern int del_all_accepts(struct Client *dying);
+extern int del_all_accepts(struct Client *cptr);
 extern int list_all_accepts(struct Client *sptr);
 
 extern void free_exited_clients(void);

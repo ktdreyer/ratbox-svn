@@ -1636,22 +1636,23 @@ int del_from_accept(struct Client *source, struct Client *target)
  * del_all_accepts
  *
  * inputs	- pointer to exiting client
- * output	- 
- * side effects - Delete's source pointer to targets allow list
- *
- * Walk through the target's accept list, remove if source is found,
- * Then walk through the source's on_accept_list remove target if found.
+ * output	- 0
+ * side effects - Walk through given clients on_allow_list remove all
+ *                references to this client from the clients in each of their
+ *                on_allow_list
  */
-int del_all_accepts(struct Client *dying)
+int del_all_accepts(struct Client *cptr)
 {
   dlink_node *ptr;
+  dlink_node *next_ptr;
   struct Client *acptr;
 
-  for (ptr = dying->on_allow_list.head; ptr; ptr = ptr->next)
+  for (ptr = cptr->on_allow_list.head; ptr; ptr = next_ptr)
     {
+      next_ptr = ptr->next;
       acptr = ptr->data;
       if(acptr != NULL)
-	del_from_accept(acptr, dying);
+	del_from_accept(cptr, acptr);
     }
 
   return 0;
@@ -1839,6 +1840,12 @@ int change_local_nick(struct Client *cptr, struct Client *sptr,
   del_from_client_hash_table(sptr->name, sptr);
   strcpy(sptr->name, nick);
   add_to_client_hash_table(nick, sptr);
+
+  /* Make sure everyone that has this client on its accept list
+   * loses that reference. 
+   */
+
+  del_all_accepts(sptr);
 
   /*
    * .. and update the new nick in the fd note.

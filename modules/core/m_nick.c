@@ -785,6 +785,11 @@ nick_from_server(struct Client *cptr, struct Client *sptr, int parc,
   strcpy(sptr->name, nick);
   add_to_client_hash_table(nick, sptr);
 
+  /* Make sure everyone that has this client on its accept list
+   * loses that reference. 
+   */
+
+  del_all_accepts(sptr);
   return 0;
 }
 
