@@ -1,3 +1,18 @@
+androsyn    2004/01/21 20:20:35 EST	(20040122_0)
+
+  Removed files:
+    include              db.h 
+    src                  db-pgsql.c db-sqlite.c 
+  Log:
+  I think we'll only support sqlite so the abstraction interface is silly
+  
+  Revision  Changes    Path
+  1.2       +0 -21     rserv/include/db.h (dead)
+  1.2       +0 -89     rserv/src/db-pgsql.c (dead)
+  1.2       +0 -46     rserv/src/db-sqlite.c (dead)
+
+
+
 androsyn    2004/01/21 15:30:01 EST	(20040121_2)
 
   Added files:
