@@ -49,6 +49,7 @@ char *ip_string;
 
 int  lineno;
 char linebuf[IRCD_BUFSIZE];
+void ccomment(void);
 %}
 
 ws		[ \t]*
@@ -56,6 +57,7 @@ comment		#.*
 qstring		\"[^\"\n]*[\"\n]
 
 %%
+"/*"		{ ccomment(); }
 \n.*		{ 
 		  strcpy(linebuf, yytext+1); 
 		  lineno++;
@@ -294,3 +296,23 @@ tb			{ return TBYTES; }
 
 %%
 
+/* -kre*/
+void ccomment(void)
+{
+  int c;
+
+  while (1)
+  {
+    while ((c=input())!='*' && c!=EOF);
+    if (c=='*')
+    {
+      while ((c=input())=='*');
+      if (c=='/') break;
+    }
+    if (c==EOF)
+    {
+      YY_FATAL_ERROR("EOF in comment");
+      break;
+    }
+  }
+}

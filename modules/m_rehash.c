@@ -94,12 +94,6 @@ static void mo_rehash(struct Client *client_p, struct Client *source_p,
                                    and close/re-open res socket */
           found = YES;
         }
-      else if(irccmp(parv[1],"GC") == 0)
-        {
-          sendto_one(source_p, form_str(RPL_REHASHING), me.name, parv[0], "garbage collecting");
-          sendto_realops_flags(FLAGS_ALL,"%s is garbage collecting", parv[0]);
-          found = YES;
-        }
       else if(irccmp(parv[1],"MOTD") == 0)
         {
           sendto_realops_flags(FLAGS_ALL,
