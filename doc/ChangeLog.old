@@ -1,3 +1,7 @@
+*** 20010301_6 by androsyn
+Forgot to commit res.h last night
+
+
 *** 20010301_5 by androsyn
 Adds a /STATS A for listing the current set of DNS servers adns is using.
 
