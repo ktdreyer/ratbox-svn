@@ -87,8 +87,7 @@ static void m_mode(struct Client *client_p, struct Client *source_p,
       user_mode(client_p, source_p, parc, parv);
       return;
     }
-  /* Finish the flood grace period... */
-  SetFloodDone(source_p);
+
   if (!check_channel_name(parv[1]))
     { 
       sendto_one(source_p, form_str(ERR_BADCHANNAME),
@@ -204,8 +203,13 @@ static void m_mode(struct Client *client_p, struct Client *source_p,
     }
   /* bounce all modes from people we deop on sjoin */
   else if((ptr = find_user_link(&chptr->deopped, source_p)) == NULL)
+  {
+    /* Finish the flood grace period... */
+    SetFloodDone(source_p);
+
     set_channel_mode(client_p, source_p, chptr, parc - n, parv + n, 
                      root->chname);
+  }
 }
 
 
