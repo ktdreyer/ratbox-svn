@@ -181,8 +181,12 @@ static int m_kick(struct Client *cptr,
                      me.name, parv[0], name);
 	  return 0;
 	}
-
-      if(chptr->mode.mode & MODE_HIDEOPS)
+      if (IsServer(sptr))
+    {
+      sendto_channel_local(ALL_MEMBERS, chptr, ":%s KICK %s %s :%s",
+        who->name, name, who->name, comment);
+    }
+      else if(chptr->mode.mode & MODE_HIDEOPS)
 	{
 	  sendto_channel_local(NON_CHANOPS, chptr,
 			       ":%s KICK %s %s :%s", 

@@ -37,6 +37,7 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
+#include "vchannel.h"
 
 #include <string.h>
 
@@ -75,7 +76,12 @@ char *_version = "20010104";
 */
 int mo_clearchan(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
-  struct Channel *chptr;
+  struct Channel *chptr, *root_chptr;
+  int on_vchan = 0;
+
+  /* Local opers only... */
+  if (!MyConnect(sptr))
+    return 0;
 
   if( parc < 2 )
     {
@@ -84,7 +90,16 @@ int mo_clearchan(struct Client *cptr, struct Client *sptr, int parc, char *parv[
       return 0;
     }
 
+  /* XXX - we might not have CBURSTed this channel if we are a lazylink
+   * yet. */
   chptr= hash_find_channel(parv[1], NullChn);
+  root_chptr = chptr;
+  if (chptr && parc > 2 && parv[2][0] == '!')
+    {
+      chptr = find_vchan(chptr, parv[2]);
+      if (root_chptr != chptr)
+        on_vchan++;
+    }
 
   if( chptr == NULL )
     {
@@ -93,16 +108,52 @@ int mo_clearchan(struct Client *cptr, struct Client *sptr, int parc, char *parv[
       return 0;
     }
 
-  sendto_all_local_opers(sptr, NULL, "CLEARCHAN called for %s by %s",
-			 parv[1], sptr->name);
-  sendto_ll_serv_butone(NULL,sptr, 1,
-			":%s WALLOPS :CLEARCHAN called for %s by %s",
-			parv[1], sptr->name);
+  if (!on_vchan)
+    {
+     sendto_all_local_opers(sptr, NULL, "CLEARCHAN called for %s by %s",
+              parv[1], parv[0]);
+     sendto_ll_serv_butone(NULL, sptr, 1,
+            ":%s WALLOPS :CLEARCHAN called for %s by %s",
+              me.name, parv[1], parv[0]);
+    }
+  else
+    {
+     sendto_all_local_opers(sptr, NULL, "CLEARCHAN called for %s %s by %s",
+              parv[1], parv[2], parv[0]);
+     sendto_ll_serv_butone(NULL, sptr, 1,
+            ":%s WALLOPS :CLEARCHAN called for %s %s by %s",
+              me.name, parv[1], parv[2], parv[0]);
+    }
+  
+  add_user_to_channel(chptr, sptr, CHFL_CHANOP);
   kick_list(cptr, chptr, &chptr->chanops, parv[1]);
   kick_list(cptr, chptr, &chptr->voiced, parv[1]);
   kick_list(cptr, chptr, &chptr->halfops, parv[1]);
   kick_list(cptr, chptr, &chptr->peons, parv[1]);
 
+  /* Don't reset channel TS. */
+  /* XXX - check this isn't too big above... */
+  sptr->user->joined++;
+  /* Take the TS down by 1, so we don't see the channel taken over
+   * again. */
+  if (chptr->channelts)
+    chptr->channelts--;
+  if (on_vchan)
+    add_vchan_to_client_cache(sptr,root_chptr,chptr);
+  chptr->mode.mode =
+    MODE_SECRET | MODE_TOPICLIMIT | MODE_INVITEONLY | MODE_NOPRIVMSGS;
+  if (chptr->topic_info)
+    {
+      free(chptr->topic_info);
+      chptr->topic_info = 0;
+    }
+  *chptr->topic = 0;
+  *chptr->mode.key = 0;
+  sendto_ll_channel_remote(chptr, cptr, sptr,
+      ":%s SJOIN %lu %s +ntsi :@%s", me.name, chptr->channelts,
+      chptr->chname, sptr->name);
+  sendto_one(sptr, ":%s JOIN %s", sptr->name, chptr->chname);
+  channel_member_names(sptr, chptr, root_chptr->chname);
   return 0;
 }
 
@@ -111,22 +162,18 @@ void kick_list(struct Client *cptr, struct Channel *chptr,
 {
   struct Client *who;
   dlink_node *ptr;
-
-  for (ptr= list->head; ptr; ptr = ptr->next)
+  /* Skip the first entry(our newly added one) if this is the chanops
+   * list... */
+  for (ptr = (list == &chptr->chanops) ? list->head->next : list->head;
+       ptr; ptr = ptr->next)
     {
       who = ptr->data;
-
       sendto_channel_local(ALL_MEMBERS, chptr,
-			   ":%s!%s@%s KICK %s %s :CLEARCHAN",
-			   who->name,
-			   who->username,
-			   who->host,
-			   chname, who->name);
+			   ":%s KICK %s %s :CLEARCHAN",
+			   me.name, chname, who->name);
 
       sendto_channel_remote(chptr, cptr,
-			    ":%s KICK %s %s :%s",
-			    who->name, chname,
-			    who->name, "CLEARCHAN");
+			    "KICK %s %s :CLEARCHAN", chname, who->name);
 
       remove_user_from_channel(chptr, who);
 
