@@ -823,7 +823,7 @@ echo $ac_n "checking Checking how to generate dependancy info""... $ac_c" 1>&6
 echo "configure:824: checking Checking how to generate dependancy info" >&5
 
 if test "x$GCC" = "xyes"; then
-  MKDEP="$GCC -MM"
+  MKDEP="$CC -MM"
 else
    case `uname -s` in
     SunOS*)
