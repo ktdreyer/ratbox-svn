@@ -1,3 +1,11 @@
+*** 20010125_6 by db
+- sendto_channel_remote_prefix() was using sendto_one when it
+  should have been using send_message() this caused it to nicely core
+  on #%s%s%s... as sendto_one() is varargs unlike send_message()
+  This probably also explains some odd bugs cropping up with uids..
+
+
+
 *** 20010125_5 by androsyn
 Fixed ident checking for IPv4.  Ident *may* work for IPv6 as well, but don't
 count on it
