@@ -286,13 +286,13 @@ int register_local_user(struct Client *client_p, struct Client *source_p,
   dlink_node *m;
   char *id;
   assert(NULL != source_p);
-  assert(MyClient(source_p));
+  assert(MyConnect(source_p));
   assert(source_p->username != username);
   
   if(source_p == NULL)
     return -1;
   
-  if(!MyClient(source_p))
+  if(!MyConnect(source_p))
     return -1;
 
   if(ConfigFileEntry.ping_cookie)
@@ -473,7 +473,7 @@ int register_local_user(struct Client *client_p, struct Client *source_p,
   m = dlinkFind(&unknown_list, source_p);
 
   assert(m != NULL);
-  if(m == NULL)
+  if(m != NULL)
   {
     dlinkDelete(m, &unknown_list);
     dlinkAdd(source_p, m, &lclient_list);
