@@ -212,6 +212,7 @@ static int m_who(struct Client *cptr,
       for (lp = acptr->user->channel.head; lp; lp = lp->next)
 	{
 	  chptr = lp->data;
+	  chname = chptr->chname;
 
           member = IsMember(sptr, chptr);
           if (isinvis && !member)
@@ -224,7 +225,6 @@ static int m_who(struct Client *cptr,
 
       if (chptr != NULL)
 	{
-	  chname = chptr->chname;
 	  if (IsVchan(chptr))
 	    {
 	      bchan = find_bchan (chptr);
@@ -254,6 +254,11 @@ static int m_who(struct Client *cptr,
 	    do_who(sptr,acptr,chptr,chname,voiced_flag);
 	  else
 	    do_who(sptr,acptr,chptr,chname,"");
+	}
+      else
+	{
+	  if (!isinvis)
+	    do_who(sptr,acptr,NULL,NULL,"");
 	}
 
       sendto_one(sptr, form_str(RPL_ENDOFWHO), me.name, parv[0], mask );
@@ -322,18 +327,18 @@ static void who_global(struct Client *sptr,char *mask, int oper)
             showperson = YES;
         }
 
-      if (chptr != NULL)
-	{
-	  if (!acptr->user->channel.head && !isinvis)
-	    showperson = YES;
+      if ((acptr->user->channel.head == NULL) && !isinvis)
+	showperson = YES;
 
-	  if (showperson &&
-	      (!mask ||
-	       match(mask, acptr->name) ||
-	       match(mask, acptr->username) ||
-	       match(mask, acptr->host) ||
-	       match(mask, acptr->user->server) ||
-	       match(mask, acptr->info)))
+      if (showperson &&
+	  (!mask ||
+	   match(mask, acptr->name) ||
+	   match(mask, acptr->username) ||
+	   match(mask, acptr->host) ||
+	   match(mask, acptr->user->server) ||
+	   match(mask, acptr->info)))
+	{
+	  if (chptr != NULL)
 	    {
 	      if (IsVchan(chptr))
 		{
@@ -347,13 +352,17 @@ static void who_global(struct Client *sptr,char *mask, int oper)
 	      do_who_list(sptr, chptr, &chptr->voiced,  chname, "+");
 	      do_who_list(sptr, chptr, &chptr->peons,   chname, "");
 	    }
-	}
+	  else
+	    {
+	      do_who(sptr, acptr, NULL, NULL, "");
+	    }
 
-      if (maxmatches > 0)
-	{
-	  --maxmatches;
-	  if( maxmatches == 0 )
-	    return;
+	  if (maxmatches > 0)
+	    {
+	      --maxmatches;
+	      if( maxmatches == 0 )
+		return;
+	    }
 	}
     }
 }
@@ -415,7 +424,11 @@ static void do_who(struct Client *sptr,
 {
   char  status[5];
 
-  if(chptr->mode.mode & MODE_HIDEOPS && !is_any_op(chptr,sptr))
+  if((chptr == NULL)			/* No channel */
+     ||
+     (chptr->mode.mode & MODE_HIDEOPS)  /* Or channel is anon */
+     ||
+     !is_any_op(chptr,sptr))		/* Or user is not an op at all */
     {
       ircsprintf(status,"%c%s", 
 		 acptr->user->away ? 'G' : 'H',
@@ -431,7 +444,8 @@ static void do_who(struct Client *sptr,
   if(GlobalSetOptions.hide_server)
     {
       sendto_one(sptr, form_str(RPL_WHOREPLY), me.name, sptr->name,
-		 chname, acptr->username,
+		 (chname) ? (chname) : "*",
+		 acptr->username,
 		 acptr->host, IsOper(sptr) ? acptr->user->server : "*",
 		 acptr->name,
 		 status, acptr->hopcount, acptr->info);
@@ -439,9 +453,10 @@ static void do_who(struct Client *sptr,
   else
     {
       sendto_one(sptr, form_str(RPL_WHOREPLY), me.name, sptr->name,
-             chname, acptr->username,
-             acptr->host,  acptr->user->server, acptr->name,
-             status, acptr->hopcount, acptr->info);
+		 (chname) ? (chname) : "*",
+		 acptr->username,
+		 acptr->host,  acptr->user->server, acptr->name,
+		 status, acptr->hopcount, acptr->info);
     }
 }
 
