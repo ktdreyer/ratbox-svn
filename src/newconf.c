@@ -358,7 +358,7 @@ void	newconf_init()
 	add_conf_item("auth", "password", CF_QSTRING, conf_set_auth_passwd);
 	add_conf_item("auth", "class", CF_QSTRING, conf_set_auth_class);
 	add_conf_item("auth", "kline_exempt", CF_YESNO, conf_set_auth_kline_exempt);
-	add_conf_item("auth", "have_ident", CF_YESNO, conf_set_auth_have_ident);
+	add_conf_item("auth", "need_ident", CF_YESNO, conf_set_auth_need_ident);
 	add_conf_item("auth", "restricted", CF_YESNO,
 			conf_set_auth_is_restricted);
 	add_conf_item("auth", "exceed_limit", CF_YESNO,
@@ -366,7 +366,7 @@ void	newconf_init()
 	add_conf_item("auth", "no_tilde", CF_YESNO, conf_set_auth_no_tilde);
 	add_conf_item("auth", "gline_exempt", CF_YESNO, conf_set_auth_gline_exempt);
 	add_conf_item("auth", "spoof", CF_QSTRING, conf_set_auth_spoof);
-	add_conf_item("auth", "spoof_notice", CF_YESNO, conf_set_auth_spoof_notice);
+	add_conf_item("auth", "no_spoof_notice", CF_YESNO, conf_set_auth_no_spoof_notice);
 	add_conf_item("auth", "flood_exempt", CF_YESNO, conf_set_auth_flood_exempt);
 	add_conf_item("auth", "redirserv", CF_QSTRING, conf_set_auth_redir_serv);
 	add_conf_item("auth", "redirport", CF_INT, conf_set_auth_redir_port);
@@ -860,14 +860,14 @@ struct mode_table flag_table[] = {
 };
 
 struct mode_table auth_table[] = {
-	{"spoof_notice",	CONF_FLAGS_SPOOF_NOTICE},
+	{"no_spoof_notice",	CONF_FLAGS_NO_SPOOF_NOTICE},
 	{"exceed_limit",	CONF_FLAGS_NOLIMIT},
 	{"kline_exempt",	CONF_FLAGS_EXEMPTKLINE},
 	{"gline_exempt",	CONF_FLAGS_EXEMPTGLINE},
         {"flood_exempt",        CONF_FLAGS_EXEMPTFLOOD},
 	{"no_tilde",		CONF_FLAGS_NO_TILDE},
 	{"restricted",		CONF_FLAGS_RESTRICTED},
-	{"have_ident",		CONF_FLAGS_NEED_IDENTD},
+	{"need_ident",		CONF_FLAGS_NEED_IDENTD},
 	{NULL}
 };
 
@@ -1324,7 +1324,7 @@ int	conf_begin_auth(struct TopConf *tc)
 	yy_aprev = NULL;
 	yy_achead = yy_aprev = yy_aconf = make_conf();
 	yy_aconf->status = CONF_CLIENT;
-	yy_achead->flags |= CONF_FLAGS_SPOOF_NOTICE;
+	yy_achead->flags |= CONF_FLAGS_NO_SPOOF_NOTICE;
 
 	return 0;
 }
@@ -1335,10 +1335,10 @@ int	conf_end_auth(struct TopConf *tc)
 	struct ConfItem *yy_next;
 
 	/* reverse the meaning of spoof_notice */
-	if (yy_achead->flags & CONF_FLAGS_SPOOF_NOTICE)
-		yy_achead->flags &= ~CONF_FLAGS_SPOOF_NOTICE;
+	if (yy_achead->flags & CONF_FLAGS_NO_SPOOF_NOTICE)
+		yy_achead->flags &= ~CONF_FLAGS_NO_SPOOF_NOTICE;
 	else
-		yy_achead->flags |= CONF_FLAGS_SPOOF_NOTICE;
+		yy_achead->flags |= CONF_FLAGS_NO_SPOOF_NOTICE;
 
 	/* copy over settings from first struct */
 	for( yy_tmp = yy_achead->next; yy_tmp; yy_tmp = yy_tmp->next )
@@ -1432,9 +1432,9 @@ void	conf_set_auth_spoof_notice(void *data)
 	/* reverse the meaning here -- it's reversed again in
 	   conf_end_auth */
 	if (yesno)
-		yy_achead->flags &= ~CONF_FLAGS_SPOOF_NOTICE;
+		yy_achead->flags &= ~CONF_FLAGS_NO_SPOOF_NOTICE;
 	else
-		yy_achead->flags |= CONF_FLAGS_SPOOF_NOTICE;
+		yy_achead->flags |= CONF_FLAGS_NO_SPOOF_NOTICE;
 }
 
 void	conf_set_auth_spoof(void *data)
@@ -1486,7 +1486,7 @@ void	conf_set_auth_kline_exempt(void *data)
 		yy_achead->flags &= ~CONF_FLAGS_EXEMPTKLINE;
 }
 
-void	conf_set_auth_have_ident(void *data)
+void	conf_set_auth_need_ident(void *data)
 {
 	int yesno = *(unsigned int*) data;
 
