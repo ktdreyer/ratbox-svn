@@ -60,8 +60,14 @@ DECLARE_MODULE_AV1(pass, NULL, NULL, pass_clist, NULL, NULL, "$Revision$");
 static int
 mr_pass(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	strlcpy(client_p->localClient->passwd, parv[1], 
-		sizeof(client_p->localClient->passwd));
+	if(client_p->localClient->passwd)
+	{
+		memset(client_p->localClient->passwd, 0,
+			strlen(client_p->localClient->passwd));
+		MyFree(client_p->localClient->passwd);
+	}
+
+	DupNString(client_p->localClient->passwd, parv[1], PASSWDLEN);
 
 	if(parc > 2)
 	{

@@ -42,7 +42,7 @@
 #else
 #define HOSTIPLEN       16	/* Length of dotted quad form of IP        */
 #endif
-#define PASSWDLEN       20
+#define PASSWDLEN       128
 #define CIPHERKEYLEN    64	/* 512bit */
 #define CLIENT_BUFSIZE 512	/* must be at least 512 bytes */
 
@@ -215,7 +215,7 @@ struct LocalUser
 	 * XXX - there is no reason to save this, it should be checked when it's
 	 * received and not stored, this is not used after registration
 	 */
-	char passwd[PASSWDLEN + 1];
+	char *passwd;
 	char *opername;
 
 	int caps;		/* capabilities bit-field */

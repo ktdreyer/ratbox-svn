@@ -1006,7 +1006,11 @@ server_estab(struct Client *client_p)
 	/* We shouldn't have to check this, it should already done before
 	 * server_estab is called. -A1kmm
 	 */
-	memset(client_p->localClient->passwd, 0, sizeof(client_p->localClient->passwd));
+	if(client_p->localClient->passwd)
+	{
+		memset(client_p->localClient->passwd, 0, strlen(client_p->localClient->passwd));
+		MyFree(client_p->localClient->passwd);
+	}
 
 	/* Its got identd , since its a server */
 	SetGotId(client_p);

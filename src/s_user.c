@@ -411,7 +411,11 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 		}
 	}
 
-	memset(source_p->localClient->passwd, 0, sizeof(source_p->localClient->passwd));
+	if(source_p->localClient->passwd)
+	{
+		memset(source_p->localClient->passwd, 0, strlen(source_p->localClient->passwd));
+		MyFree(source_p->localClient->passwd);
+	}
 
 	/* report if user has &^>= etc. and set flags as needed in source_p */
 	report_and_set_user_flags(source_p, aconf);

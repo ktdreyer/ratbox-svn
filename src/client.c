@@ -184,6 +184,13 @@ free_local_client(struct Client *client_p)
 	if(client_p->localClient->fd >= 0)
 		fd_close(client_p->localClient->fd);
 
+	if(client_p->localClient->passwd)
+	{
+		memset(client_p->localClient->passwd, 0,
+			strlen(client_p->localClient->passwd));
+		MyFree(client_p->localClient->passwd);
+	}
+
 	BlockHeapFree(lclient_heap, client_p->localClient);
 	client_p->localClient = NULL;
 }
@@ -2048,7 +2055,6 @@ close_connection(struct Client *client_p)
 
 	linebuf_donebuf(&client_p->localClient->buf_sendq);
 	linebuf_donebuf(&client_p->localClient->buf_recvq);
-	memset(client_p->localClient->passwd, 0, sizeof(client_p->localClient->passwd));
 	detach_conf(client_p);
 
 	/* XXX shouldnt really be done here. */
