@@ -1,3 +1,8 @@
+*** 20000104_4 by db
+- also report how many malloc()'ed dbufs there were max
+
+
+
 *** 20000104_3 by db
 - changed slightly wording in LazyLinks As Implemented doc
 - removed more DEBUGLL debug cruft
