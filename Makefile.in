@@ -38,14 +38,16 @@ CFLAGS		= @CFLAGS@
 # the system one.
 #CFLAGS= -DNDEBUG -g -O2 -D"FD_SETSIZE=1024"
 SHELL=/bin/sh
-SUBDIRS=src tools modules doc gnats messages
-# XXX removed include for now... 
+SUBDIRS=src tools modules doc gnats messages include
 # XXX removed `iauth' from the build since it doesn't compile currently
 # SUBDIRS=src tools iauth
 
 MAKE = make ${MFLAGS} 
 
-all:	build
+all:	configure build
+
+configure: autoconf/configure.in
+	autoconf autoconf/configure.in >configure
 
 build:
 	-@if [ ! -f include/setup.h ] ; then \
