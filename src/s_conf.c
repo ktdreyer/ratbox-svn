@@ -760,7 +760,6 @@ set_default_conf(void)
 	ConfigChannel.no_create_on_split = NO;
 
 	ConfigServerHide.flatten_links = 0;
-	ConfigServerHide.links_delay = 300;
 	ConfigServerHide.hidden = 0;
 	ConfigServerHide.disable_hidden = 0;
 

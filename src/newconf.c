@@ -1725,10 +1725,9 @@ static struct ConfEntry conf_channel_table[] =
 
 static struct ConfEntry conf_serverhide_table[] =
 {
-	{ "disable_hidden",	CF_YESNO, NULL, 0, &ConfigServerHide.disable_hidden },
+	{ "disable_hidden",	CF_YESNO, NULL, 0, &ConfigServerHide.disable_hidden	},
 	{ "flatten_links",	CF_YESNO, NULL, 0, &ConfigServerHide.flatten_links	},
-	{ "hidden",		CF_YESNO, NULL, 0, &ConfigServerHide.hidden	},
-	{ "links_delay",	CF_TIME,  NULL, 0, &ConfigServerHide.links_delay	},
+	{ "hidden",		CF_YESNO, NULL, 0, &ConfigServerHide.hidden		},
 	{ "\0", 		0, 	  NULL, 0, NULL }
 };
 /* *INDENT-ON* */

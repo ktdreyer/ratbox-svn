@@ -707,11 +707,7 @@ main(int argc, char *argv[])
 	/* Setup the timeout check. I'll shift it later :)  -- adrian */
 	eventAddIsh("comm_checktimeouts", comm_checktimeouts, NULL, 1);
 
-	if(ConfigServerHide.links_delay > 0)
-		eventAddIsh("cache_links", cache_links, NULL,
-			    ConfigServerHide.links_delay);
-	else
-		ConfigServerHide.links_disabled = 1;
+	eventAddIsh("cache_links", cache_links, NULL, 300);
 
 	if(splitmode)
 		eventAddIsh("check_splitmode", check_splitmode, NULL, 60);

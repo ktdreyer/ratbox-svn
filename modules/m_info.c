@@ -564,12 +564,6 @@ static struct InfoStruct info_table[] = {
 		&ConfigServerHide.hidden,
 		"Hide this server from a flattened /links on remote servers",
 	},
-	{
-		"links_delay",
-		OUTPUT_DECIMAL,
-		&ConfigServerHide.links_delay,
-		"Links rehash delay"
-	},
 	/* --[  END OF TABLE  ]---------------------------------------------- */
 	{ (char *) 0, (unsigned int) 0, (void *) 0, (char *) 0}
 };

@@ -157,10 +157,6 @@ struct config_file_entry
 	const char *xlinefile;
 	const char *resvfile;
 
-	char *logpath;
-	char *operlog;
-	char *glinelog;
-
 	char *servlink_path;
 	char *egdpool_path;
 
@@ -263,8 +259,6 @@ struct config_channel_entry
 struct config_server_hide
 {
 	int flatten_links;
-	int links_delay;
-	int links_disabled;
 	int hidden;
 	int disable_hidden;
 };
