@@ -391,9 +391,10 @@ accept_connection (int pfd, void *data)
 #ifdef IPV6
 	if((IN6_IS_ADDR_V4MAPPED (&IN_ADDR2 (addr))) || (IN6_IS_ADDR_V4COMPAT (&IN_ADDR2 (addr))))
 	{
+#if 0 /* This memmove isn't really necessary */
 		memmove (&addr.sins.sin.s_addr, addr.sins.sin6.s6_addr + 12,
 			 sizeof (struct in_addr));
-
+#endif
 		sai.sins.sin.sin_family = AF_INET;
 	}
 #endif
