@@ -1,3 +1,20 @@
+leeh        2005/01/10 15:28:17 EST	(20050110_2)
+
+  Modified files:
+    include              io.h 
+    src                  s_userserv.c scommand.c 
+  Log:
+  - fix a core with userserv::register
+  - parse CAPAB
+  - issue "ENCAP * SU" when someone logs in (ircd compatibility)
+  
+  Revision  Changes    Path
+  1.19      +2 -0      rserv/include/io.h
+  1.30      +24 -14    rserv/src/s_userserv.c
+  1.23      +48 -0     rserv/src/scommand.c
+
+
+
 leeh        2005/01/09 20:38:09 EST	(20050110_1)
 
   Modified files:
