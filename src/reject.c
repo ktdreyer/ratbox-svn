@@ -86,7 +86,7 @@ reject_expires(void *unused)
 		rdata = pnode->data;		
 
 		if(rdata->time + ConfigFileEntry.reject_duration > CurrentTime)
-			return;
+			continue;
 
 		dlinkDelete(ptr, &reject_list);
 		MyFree(rdata);
