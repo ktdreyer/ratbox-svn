@@ -1,3 +1,33 @@
+androsyn    2003/06/26 14:51:26 UTC	(20030626_2)
+
+  Added files:           (Branch: STABLE)
+    messages             Makefile.in ayb.po build_one create_po 
+                         custom.po 
+    messages/translations Makefile.in README ircd-croatian.po 
+                          ircd-danish.po ircd-dutch.po 
+                          ircd-german.po ircd-norwegian.po 
+                          ircd-spanish.po ircd-swedish.po 
+  Log:
+  Lost in merging
+  
+  Revision  Changes    Path
+  1.12.2.1  +76 -0     ircd-ratbox/messages/Makefile.in (new)
+  1.15.2.1  +903 -0    ircd-ratbox/messages/ayb.po (new)
+  1.3.2.1   +28 -0     ircd-ratbox/messages/build_one (new)
+  1.2.2.1   +18 -0     ircd-ratbox/messages/create_po (new)
+  1.34.2.1  +900 -0    ircd-ratbox/messages/custom.po (new)
+  1.9.2.1   +78 -0     ircd-ratbox/messages/translations/Makefile.in (new)
+  1.9.2.1   +41 -0     ircd-ratbox/messages/translations/README (new)
+  1.15.2.1  +896 -0    ircd-ratbox/messages/translations/ircd-croatian.po (new)
+  1.13.2.1  +898 -0    ircd-ratbox/messages/translations/ircd-danish.po (new)
+  1.14.2.1  +900 -0    ircd-ratbox/messages/translations/ircd-dutch.po (new)
+  1.15.2.1  +910 -0    ircd-ratbox/messages/translations/ircd-german.po (new)
+  1.14.2.1  +902 -0    ircd-ratbox/messages/translations/ircd-norwegian.po (new)
+  1.13.2.1  +898 -0    ircd-ratbox/messages/translations/ircd-spanish.po (new)
+  1.16.2.1  +905 -0    ircd-ratbox/messages/translations/ircd-swedish.po (new)
+
+
+
 androsyn    2003/06/26 14:04:11 UTC	(20030626_1)
 
   Modified files:        (Branch: STABLE)
