@@ -1,3 +1,19 @@
+androsyn    2004/08/02 15:47:56 EDT	(20040802_1)
+
+  Modified files:
+    include              packet.h 
+    src                  ircd.c packet.c s_auth.c 
+  Log:
+  move flood recalc to an event
+  
+  Revision  Changes    Path
+  7.26      +1 -1      ircd-ratbox/include/packet.h
+  7.354     +2 -1      ircd-ratbox/src/ircd.c
+  7.131     +26 -32    ircd-ratbox/src/packet.c
+  7.169     +0 -1      ircd-ratbox/src/s_auth.c
+
+
+
 leeh        2004/08/01 20:55:45 EDT	(20040802_0)
 
   Modified files:
