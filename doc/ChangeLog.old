@@ -1,3 +1,15 @@
+androsyn    2002/03/10 20:46:18 EST	(20020311_0)
+
+  Modified files:
+    src                  ircd.c 
+  Log:
+  Fix compile error with select for delay.
+  
+  Revision  Changes    Path
+  7.225     +1 -1      ircd-hybrid-7/src/ircd.c
+
+
+
 androsyn    2002/03/09 19:08:34 EST	(20020310_1)
 
   Modified files:
