@@ -1,3 +1,20 @@
+androsyn    2004/09/14 12:43:46 EDT	(20040914_0)
+
+  Modified files:
+    src                  event.c listener.c packet.c s_auth.c 
+                         send.c 
+  Log:
+  Change read/write calls to recv/send for portablity.
+  
+  Revision  Changes    Path
+  7.45      +1 -1      ircd-ratbox/src/event.c
+  7.116     +2 -2      ircd-ratbox/src/listener.c
+  7.136     +5 -5      ircd-ratbox/src/packet.c
+  7.182     +2 -2      ircd-ratbox/src/s_auth.c
+  7.283     +2 -2      ircd-ratbox/src/send.c
+
+
+
 androsyn    2004/09/13 12:48:39 EDT	(20040913_6)
 
   Modified files:
