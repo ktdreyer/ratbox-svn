@@ -55,7 +55,7 @@ androsyn    2002/08/12 12:15:36 EDT	(20020812_2)
   Removed files:
     src                  sprintf_irc.c 
   Log:
-  Add bleeth's ircsprintf().  Also fixed some headers.  It seems that most
+  Add beeth's ircsprintf().  Also fixed some headers.  It seems that most
   of the code was relying on adns.h to pull in sprintf_irc.h. Go figure.
   
   Revision  Changes    Path
