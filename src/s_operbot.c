@@ -67,7 +67,7 @@ init_s_operbot(void)
 static int
 operbot_db_callback(void *db, int argc, char **argv, char **colnames)
 {
-	join_service(operbot_p, argv[0]);
+	join_service(operbot_p, argv[0], NULL);
 	return 0;
 }
 
@@ -88,7 +88,7 @@ u_operbot_ojoin(struct connection_entry *conn_p, char *parv[], int parc)
 	loc_sqlite_exec(NULL, "INSERT INTO operbot VALUES(%Q, %Q)",
 			parv[0], conn_p->name);
 
-	join_service(operbot_p, parv[1]);
+	join_service(operbot_p, parv[1], NULL);
 	sendto_one(conn_p, "Operbot joined to %s", parv[1]);
 }
 
@@ -127,7 +127,7 @@ s_operbot_ojoin(struct client *client_p, char *parv[], int parc)
 			parv[0], client_p->name, 
 			client_p->user->oper->name);
 			
-	join_service(operbot_p, parv[0]);
+	join_service(operbot_p, parv[0], NULL);
 	service_error(operbot_p, client_p, 
 			"Operbot joined to %s", parv[0]);
 	return 1;

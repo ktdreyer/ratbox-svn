@@ -373,6 +373,9 @@ static int
 channel_db_callback(void *db, int argc, char **argv, char **colnames)
 {
 	struct chan_reg *reg_p;
+	struct chmode mode;
+	char *modev[MAXPARA + 1];
+	int modec;
 
 	if(argc < 7)
 		return 0;
@@ -380,13 +383,25 @@ channel_db_callback(void *db, int argc, char **argv, char **colnames)
 	if(EmptyString(argv[0]))
 		return 0;
 
+	memset(&mode, 0, sizeof(struct chmode));
+
 	reg_p = BlockHeapAlloc(channel_reg_heap);
 	reg_p->name = my_strdup(argv[0]);
 
 	if(!EmptyString(argv[1]))
 		reg_p->topic = my_strdup(argv[1]);
 
-	reg_p->modes = my_strdup(argv[2]);
+	modec = string_to_array(argv[2], modev);
+
+	if(parse_simple_mode(&mode, (const char **) modev, modec, 0))
+	{
+		reg_p->mode.mode = mode.mode;
+		reg_p->mode.limit = mode.limit;
+
+		if(mode.key[0])
+			strlcpy(reg_p->mode.key, mode.key,
+				sizeof(reg_p->mode.key));
+	}
 
 	reg_p->reg_time = atol(argv[3]);
 	reg_p->last_time = atol(argv[4]);
@@ -396,6 +411,10 @@ channel_db_callback(void *db, int argc, char **argv, char **colnames)
 		reg_p->suspender = my_strdup(argv[6]);
 
 	add_channel_reg(reg_p);
+
+	if(reg_p->flags & CS_FLAGS_AUTOJOIN)
+		join_service(chanserv_p, reg_p->name, &reg_p->mode);
+
 	return 0;
 }
 
@@ -1097,6 +1116,7 @@ s_chan_register(struct client *client_p, char *parv[], int parc)
 	reg_p = BlockHeapAlloc(channel_reg_heap);
 	reg_p->name = my_strdup(parv[0]);
 	reg_p->reg_time = reg_p->last_time = CURRENT_TIME;
+	reg_p->mode.mode = MODE_TOPIC|MODE_NOEXTERNAL;
 
 	add_channel_reg(reg_p);
 
@@ -1682,10 +1702,35 @@ s_chan_set(struct client *client_p, char *parv[], int parc)
 	{
 		if(!strcasecmp(parv[2], "ON"))
 		{
+			chreg_p->flags |= CS_FLAGS_AUTOJOIN;
+
+			join_service(chanserv_p, chreg_p->name, &chreg_p->mode);
+		}
+		else if(!strcasecmp(parv[2], "OFF"))
+		{
+			chreg_p->flags &= ~CS_FLAGS_AUTOJOIN;
+
+			part_service(chanserv_p, chreg_p->name);
 		}
 		else
 		{
+			service_error(chanserv_p, client_p,
+				"Channel %s AUTOJOIN is %s",
+				chreg_p->name,
+				(chreg_p->flags & CS_FLAGS_AUTOJOIN) ?
+				 "ON" : "OFF");
+			return 1;
 		}
+
+		service_error(chanserv_p, client_p,
+				"Channel %s AUTOJOIN set %s",
+				chreg_p->name,
+				(chreg_p->flags & CS_FLAGS_AUTOJOIN) ?
+				 "ON" : "OFF");
+
+		loc_sqlite_exec(NULL, "UPDATE channels SET flags = %d "
+				"WHERE chname = %Q",
+				chreg_p->flags, chreg_p->name);
 
 		return 1;
 	}
@@ -1699,8 +1744,7 @@ s_chan_set(struct client *client_p, char *parv[], int parc)
 			service_error(chanserv_p, client_p,
 				"Channel %s MODES are %s",
 				chreg_p->name,
-				EmptyString(chreg_p->modes) ? "<none>" : 
-				 chreg_p->modes);
+				chmode_to_string(&chreg_p->mode));
 			return 1;
 		}
 
@@ -1715,15 +1759,18 @@ s_chan_set(struct client *client_p, char *parv[], int parc)
 			return 1;
 		}
 
-		modestring = chmode_to_string(&mode);
+		chreg_p->mode.mode = mode.mode;
+		chreg_p->mode.limit = mode.limit;
 
-		my_free(chreg_p->modes);
-		chreg_p->modes = my_strdup(modestring);
+		if(mode.key[0])
+			strlcpy(chreg_p->mode.key, mode.key,
+				sizeof(chreg_p->mode.key));
+
+		modestring = chmode_to_string(&mode);
 
 		loc_sqlite_exec(NULL, "UPDATE channels SET modes = %Q "
 				"WHERE chname = %Q",
 				modestring, chreg_p->name);
-
 
 		service_error(chanserv_p, client_p,
 				"Channel %s MODES set %s",
@@ -1731,7 +1778,6 @@ s_chan_set(struct client *client_p, char *parv[], int parc)
 
 		return 1;
 	}
-
 
 	service_error(chanserv_p, client_p, "Set option invalid");
 	return 1;

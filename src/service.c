@@ -229,53 +229,11 @@ update_service_floodcount(void *unused)
 	}
 }
 
-static inline int
-string_to_array(char *string, char *parv[])
-{
-        char *p, *buf = string;
-        int x = 0;
-
-        parv[x] = NULL;
-
-        if(EmptyString(string))
-                return x;
-
-        while(*buf == ' ')
-		buf++;
-
-        if(*buf == '\0')
-                return x;
-
-        do
-        {
-                parv[x++] = buf;
-                parv[x] = NULL;
-
-                if((p = strchr(buf, ' ')) != NULL)
-                {
-                        *p++ = '\0';
-                        buf = p;
-                }
-                else
-                        return x;
-
-                while(*buf == ' ')
-			buf++;
-                if(*buf == '\0')
-                        return x;
-        }
-        while(x < MAXPARA - 1);
-
-        parv[x++] = p;
-        parv[x] = NULL;
-        return x;
-}
-
 void
 handle_service(struct client *service_p, struct client *client_p, char *text)
 {
         struct service_command *cmd_table;
-        char *parv[MAXPARA];
+        char *parv[MAXPARA+1];
         char *p;
         int parc;
         int retval;

@@ -21,6 +21,36 @@ struct scommand_handler mode_command = { "MODE", c_mode, 0, DLINK_EMPTY };
 dlink_list deopped_list;
 dlink_list opped_list;
 
+/* valid_key()
+ *   validates key, and transforms to lower ascii
+ *
+ * inputs  - key
+ * outputs - 'fixed' version of key, NULL if invalid
+ */
+static const char *
+valid_key(const char *data)
+{
+	static char buf[KEYLEN+1];
+	u_char *s, c;
+	u_char *fix = buf;
+
+	strlcpy(buf, data, sizeof(buf));
+
+	for(s = (u_char *) buf; (c = *s); s++)
+	{
+		c &= 0x7f;
+
+		if(c == ':' || c <= ' ')
+			return NULL;
+
+		*fix++ = c;
+	}
+
+	*fix = '\0';
+
+	return buf;
+}
+
 int
 parse_simple_mode(struct chmode *mode, const char *parv[], int parc, int start)
 {
@@ -85,8 +115,15 @@ parse_simple_mode(struct chmode *mode, const char *parv[], int parc, int start)
 					return 0;
 
 				if(dir)
-					strlcpy(mode->key, parv[start],
+				{
+					const char *fixed = valid_key(parv[start]);
+
+					if(fixed == NULL)
+						return 0;
+
+					strlcpy(mode->key, fixed,
 						sizeof(mode->key));
+				}
 				else
 					mode->key[0] = '\0';
 

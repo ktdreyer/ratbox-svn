@@ -781,7 +781,7 @@ read_client(struct connection_entry *conn_p)
 	/* n == 0 we can safely ignore */
 }
 
-/* string_to_array()
+/* io_to_array()
  *   Changes a given buffer into an array of parameters.
  *   Taken from ircd-ratbox.
  *
@@ -789,7 +789,7 @@ read_client(struct connection_entry *conn_p)
  * outputs	- number of parameters
  */
 static inline int
-string_to_array(char *string, char *parv[MAXPARA])
+io_to_array(char *string, char *parv[MAXPARA])
 {
 	char *p, *buf = string;
 	int x = 1;
@@ -903,7 +903,7 @@ parse_server(char *buf, int len)
         else
                 ch = NULL;
 
-	parc = string_to_array(ch, parv);
+	parc = io_to_array(ch, parv);
 
 	handle_scommand(command, (const char **) parv, parc);
 }
@@ -978,7 +978,7 @@ parse_client(struct connection_entry *conn_p, char *buf, int len)
         else
                 ch = NULL;
 
-	parc = string_to_array(ch, parv);
+	parc = io_to_array(ch, parv);
 
         /* pass it off to the handler */
 	handle_ucommand(conn_p, command, parv, parc);

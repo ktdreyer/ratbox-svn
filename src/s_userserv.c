@@ -11,6 +11,7 @@
 #ifdef ENABLE_USERSERV
 #include "service.h"
 #include "client.h"
+#include "channel.h"
 #include "rserv.h"
 #include "c_init.h"
 #include "log.h"

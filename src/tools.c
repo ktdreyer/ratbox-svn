@@ -170,6 +170,49 @@ strip_tabs(char *dest, const unsigned char *src, size_t len)
 	return dest;
 }
 
+inline int
+string_to_array(char *string, char *parv[])
+{
+        char *p, *buf = string;
+        int x = 0;
+
+        parv[x] = NULL;
+
+        if(EmptyString(string))
+                return x;
+
+        while(*buf == ' ')
+		buf++;
+
+        if(*buf == '\0')
+                return x;
+
+        do
+        {
+                parv[x++] = buf;
+                parv[x] = NULL;
+
+                if((p = strchr(buf, ' ')) != NULL)
+                {
+                        *p++ = '\0';
+                        buf = p;
+                }
+                else
+                        return x;
+
+                while(*buf == ' ')
+			buf++;
+                if(*buf == '\0')
+                        return x;
+        }
+        while(x < MAXPARA - 1);
+
+        parv[x++] = p;
+        parv[x] = NULL;
+        return x;
+}
+
+
 /*
  * strlcat and strlcpy were ripped from openssh 2.5.1p2
  * They had the following Copyright info: 

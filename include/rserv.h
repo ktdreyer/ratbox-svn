@@ -5,7 +5,6 @@
 #define BUFSIZE 512
 #define BUFSIZE_SAFE 450
 
-#define MAXPARA	15
 #define MAX_DATE_STRING	32
 
 int current_mark;

@@ -5,6 +5,7 @@
 #include "setup.h"
 
 #define EmptyString(x) (!(x) || (*(x) == '\0'))
+#define MAXPARA	15
 
 extern void init_tools(void);
 
@@ -18,6 +19,8 @@ extern const char *get_time(time_t when);
 
 extern const char *lcase(const char *);
 extern const char *ucase(const char *);
+
+inline int string_to_array(char *string, char *parv[]);
 
 #ifndef HAVE_STRLCAT
 extern size_t strlcat(char *dst, const char *src, size_t siz);

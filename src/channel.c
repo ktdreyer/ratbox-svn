@@ -256,7 +256,7 @@ count_topics(void)
 }
 
 void
-join_service(struct client *service_p, const char *chname)
+join_service(struct client *service_p, const char *chname, struct chmode *mode)
 {
 	struct channel *chptr;
 
@@ -268,7 +268,17 @@ join_service(struct client *service_p, const char *chname)
 		strlcpy(chptr->name, chname, sizeof(chptr->name));
 		chptr->tsinfo = CURRENT_TIME;
 
-		chptr->mode.mode = MODE_NOEXTERNAL|MODE_TOPIC;
+		if(mode != NULL)
+		{
+			chptr->mode.mode = mode->mode;
+			chptr->mode.limit = mode->limit;
+
+			if(mode->key[0])
+				strlcpy(chptr->mode.key, mode->key,
+					sizeof(chptr->mode.key));
+		}
+		else
+			chptr->mode.mode = MODE_NOEXTERNAL|MODE_TOPIC;
 
 		add_channel(chptr);
 	}
@@ -302,6 +312,10 @@ part_service(struct client *service_p, const char *chname)
 
 	if(finished_bursting)
 		sendto_server(":%s PART %s", service_p->name, chptr->name);
+
+	if(dlink_list_length(&chptr->users) == 0 &&
+	   dlink_list_length(&chptr->services) == 0)
+		free_channel(chptr);
 
 	return 1;
 }
