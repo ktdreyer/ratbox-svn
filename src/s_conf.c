@@ -1499,7 +1499,11 @@ validate_conf(void)
 
   /* Hasn't been set yet, so set it now */
   if(ConfigChannel.use_halfops == -1)
+#ifdef HALFOPS
     ConfigChannel.use_halfops = 1;
+#else
+    ConfigChannel.use_halfops = 0;
+#endif
 
   /* hasnt been set, disable it by default */
   if(ConfigChannel.use_anonops == -1)

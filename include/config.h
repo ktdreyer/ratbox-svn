@@ -276,6 +276,22 @@
 */
 #define HYBRID_SOMAXCONN 25
 
+/* CODE DISABLE SECTION
+ *
+ * If you have enabled efnet specific code these will be disabled automatically
+ * else they are here for anyone else.
+ */
+#define VCHANS
+#define ANONOPS
+#define HALFOPS
+
+/* disable them for efnet */
+#ifdef EFNET
+#undef VCHANS
+#undef ANONOPS
+#undef HALFOPS
+#endif
+
 /* 
  * Default pre-allocations for various things...
  */  

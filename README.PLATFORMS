@@ -29,5 +29,8 @@ Alpha        DEC C V6.0       OpenVMS 7.2   Edward Brocklesby
                                                 <ejb@sdf.lonestar.org>
 PA-RISC 2.0  cc		      HP-UX B.11    Yusuf Iskenderoglu 
 						<uhc0@stud.uni-karlsruhe.de>
+x86          NeXTGCC          NEXTSTEP      J. Mallett <jmallett@newgold.net>
+SPARC        NeXTGCC          NEXTSTEP      J. Mallett <jmallett@newgold.net>
+m68k         NeXTGCC          NEXTSTEP      J. Mallett <jmallett@newgold.net>
 
 $Id$

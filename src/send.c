@@ -548,8 +548,10 @@ sendto_channel_butone(struct Client *one, struct Client *from,
   sendto_list_anywhere(one, from, &chptr->voiced,
                        &local_linebuf, &remote_linebuf);
 
+#ifdef HALFOPS
   sendto_list_anywhere(one, from, &chptr->halfops,
                        &local_linebuf, &remote_linebuf);
+#endif
 
   sendto_list_anywhere(one, from, &chptr->peons,
                        &local_linebuf, &remote_linebuf);
@@ -737,7 +739,9 @@ sendto_common_channels_local(struct Client *user, const char *pattern, ...)
 #ifdef REQUIRE_OANDV
       sendto_list_local(&chptr->locchanops_voiced, &linebuf);
 #endif
+#ifdef HALFOPS
       sendto_list_local(&chptr->lochalfops, &linebuf);
+#endif
       sendto_list_local(&chptr->locvoiced, &linebuf);
       sendto_list_local(&chptr->locpeons, &linebuf);
     }
@@ -788,8 +792,10 @@ sendto_channel_local(int type,
       sendto_list_local(&chptr->locpeons, &linebuf);
     case ONLY_CHANOPS_HALFOPS_VOICED:
       sendto_list_local(&chptr->locvoiced, &linebuf);
+#ifdef HALFOPS
     case ONLY_CHANOPS_HALFOPS:
       sendto_list_local(&chptr->lochalfops, &linebuf);
+#endif
     case ONLY_CHANOPS:
       sendto_list_local(&chptr->locchanops, &linebuf);
 #ifdef REQUIRE_OANDV
@@ -842,8 +848,10 @@ sendto_channel_remote(struct Client *one,
       sendto_list_remote(one, from, &chptr->peons, caps, nocaps, &linebuf);
     case ONLY_CHANOPS_HALFOPS_VOICED:
       sendto_list_remote(one, from, &chptr->voiced, caps, nocaps, &linebuf);
+#ifdef HALFOPS
     case ONLY_CHANOPS_HALFOPS:
       sendto_list_remote(one, from, &chptr->halfops, caps, nocaps, &linebuf);
+#endif
     case ONLY_CHANOPS:
       sendto_list_remote(one, from, &chptr->chanops, caps, nocaps, &linebuf);
 #ifdef REQUIRE_OANDV

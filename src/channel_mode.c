@@ -51,8 +51,10 @@
 static int add_id(struct Client *, struct Channel *, char *, int);
 static int del_id(struct Channel *, char *, int);
 
+#ifdef HALFOPS
 static void send_oplist(const char *, struct Client *, dlink_list *,
                         char *, int);
+#endif
 
 static int change_channel_membership(struct Channel *chptr,
                                      dlink_list *to_list,
@@ -86,9 +88,11 @@ static void chm_op(struct Client *, struct Client *, struct Channel *, int,
                    int *, char **, int *, int, int, char, void *,
                    const char *chname);
 
+#ifdef HALFOPS
 static void chm_halfop(struct Client *, struct Client *, struct Channel *,
                        int, int *, char **, int *, int, int, char, void *,
                        const char *chname);
+#endif
 
 static void chm_voice(struct Client *, struct Client *, struct Channel *,
                       int, int *, char **, int *, int, int, char, void *,
@@ -106,9 +110,11 @@ static void chm_invex(struct Client *, struct Client *, struct Channel *,
                       int, int *, char **, int *, int, int, char, void *,
                       const char *chname);
 
+#ifdef ANONOPS
 static void chm_hideops(struct Client *, struct Client *, struct Channel *,
                         int, int *, char **, int *, int, int, char, void *,
                         const char *chname);
+#endif
 
 static void send_cap_mode_changes(struct Client *, struct Client *,
                                   struct Channel *, int, int);
@@ -127,8 +133,17 @@ static int mask_pos;
 static struct ChModeChange mode_changes_plus[BUFSIZE];
 static struct ChModeChange mode_changes_minus[BUFSIZE];
 static struct ChModeBounce mode_bounces[BUFSIZE];
+
+#ifdef ANONOPS
 static struct ChResyncOp resync_ops[BUFSIZE];
-static int mode_count_plus, mode_count_minus, bounce_count, resync_count;
+#endif
+
+static int mode_count_plus, mode_count_minus, bounce_count;
+
+#ifdef ANONOPS
+static int resync_count;
+#endif
+
 static int mode_limit;
 
 static int channel_capabs[] = { CAP_HOPS, CAP_AOPS, CAP_EX, CAP_IE, CAP_UID };
@@ -348,6 +363,7 @@ change_channel_membership(struct Channel *chptr,
         dlinkAdd(who, ptr, loc_to_list);
       }
     }
+#ifdef HALFOPS
     else if ((ptr = find_user_link(&chptr->lochalfops, who)))
     {
       if (to_list != &chptr->lochalfops)
@@ -356,6 +372,7 @@ change_channel_membership(struct Channel *chptr,
         dlinkAdd(who, ptr, loc_to_list);
       }
     }
+#endif
     else if ((ptr = find_user_link(&chptr->locchanops, who)))
     {
       if (to_list != &chptr->locchanops)
@@ -394,6 +411,7 @@ change_channel_membership(struct Channel *chptr,
       dlinkAdd(who, ptr, to_list);
     }
   }
+#ifdef HALFOPS
   else if ((ptr = find_user_link(&chptr->halfops, who)))
   {
     if (to_list != &chptr->halfops)
@@ -402,6 +420,7 @@ change_channel_membership(struct Channel *chptr,
       dlinkAdd(who, ptr, to_list);
     }
   }
+#endif
   else if ((ptr = find_user_link(&chptr->chanops, who)))
   {
     if (to_list != &chptr->chanops)
@@ -462,8 +481,10 @@ channel_modes(struct Channel *chptr, struct Client *client_p,
     *mbuf++ = 'i';
   if (chptr->mode.mode & MODE_NOPRIVMSGS)
     *mbuf++ = 'n';
+#ifdef ANONOPS
   if (chptr->mode.mode & MODE_HIDEOPS)
     *mbuf++ = 'a';
+#endif
   if (chptr->mode.limit)
   {
     *mbuf++ = 'l';
@@ -762,7 +783,7 @@ chm_simple(struct Client *client_p, struct Client *source_p,
   int i;
 
   mode_type = (long)d;
- 
+
   /* dont allow halfops to set +-p, as this controls whether they can set
    * +-h or not.. all other simple modes are ok
    */
@@ -821,6 +842,7 @@ chm_simple(struct Client *client_p, struct Client *source_p,
   }
 }
 
+#ifdef ANONOPS
 static void
 chm_hideops(struct Client *client_p, struct Client *source_p,
             struct Channel *chptr, int parc, int *parn,
@@ -917,6 +939,7 @@ chm_hideops(struct Client *client_p, struct Client *source_p,
     resync_ops[resync_count++].sync = 0;
   }
 }
+#endif
 
 static void
 chm_ban(struct Client *client_p, struct Client *source_p,
@@ -936,6 +959,7 @@ chm_ban(struct Client *client_p, struct Client *source_p,
       return;
     *errors |= SM_ERR_RPL_B;
 
+#ifdef ANONOPS
     if ((chptr->mode.mode & MODE_HIDEOPS) && (alev < CHACCESS_HALFOP))
       for (ptr = chptr->banlist.head; ptr; ptr = ptr->next)
       {
@@ -945,6 +969,7 @@ chm_ban(struct Client *client_p, struct Client *source_p,
                    banptr->banstr, me.name, banptr->when);
       }
     else
+#endif
       for (ptr = chptr->banlist.head; ptr; ptr = ptr->next)
       {
         banptr = ptr->data;
@@ -1303,10 +1328,13 @@ chm_op(struct Client *client_p, struct Client *source_p,
    * -A1kmm.
    */
 
-  int was_opped = 0, was_hopped = 0, was_voiced = 0, wasnt_opped = 0;
-  int wasnt_hopped = 0, wasnt_voiced = 0, t_op = 0, t_voice = 0, t_hop = 0;
+  int was_opped = 0, was_voiced = 0, wasnt_opped = 0;
+  int wasnt_voiced = 0, t_op = 0, t_voice = 0;
   char *opnick;
   struct Client *targ_p;
+#ifdef HALFOPS
+  int was_hopped = 0, wasnt_hopped = 0, t_hop = 0;
+#endif
 
   if (alev < CHACCESS_CHANOP)
   {
@@ -1353,8 +1381,10 @@ chm_op(struct Client *client_p, struct Client *source_p,
 
   if ((t_op = is_chan_op(chptr, targ_p)) != 0)
     ;
+#ifdef HALFOPS
   else if ((t_hop = is_half_op(chptr, targ_p)) != 0)
     ;
+#endif
 #ifndef REQUIRE_OANDV
   else
 #endif
@@ -1381,8 +1411,10 @@ chm_op(struct Client *client_p, struct Client *source_p,
     {
       if (mode_changes_plus[i].letter == 'o')
         wasnt_opped = 1;
+#ifdef HALFOPS
       else if (mode_changes_plus[i].letter == 'h')
         wasnt_hopped = 1;
+#endif
       else if (mode_changes_plus[i].letter == 'v')
         wasnt_voiced = 1;
 #ifdef REQUIRE_OANDV
@@ -1394,12 +1426,14 @@ chm_op(struct Client *client_p, struct Client *source_p,
 
   for (i = 0; i < mode_count_minus; i++)
   {
-    if ((mode_changes_minus[i].letter == 'o' ||
-         mode_changes_minus[i].letter == 'h'
+    if ((mode_changes_minus[i].letter == 'o'
+#ifdef HALFOPS
+         || mode_changes_minus[i].letter == 'h'
+#endif
 #ifndef REQUIRE_OANDV
          || mode_changes_minus[i].letter == 'v'
 #endif
-        )
+       )
         && !irccmp(mode_changes_minus[i].arg, opnick))
     {
       if (mode_changes_minus[i].letter == 'o')
@@ -1409,8 +1443,10 @@ chm_op(struct Client *client_p, struct Client *source_p,
       }
       else if (mode_changes_minus[i].letter == 'v')
         was_voiced = 1;
+#ifdef HALFOPS
       else if (mode_changes_minus[i].letter == 'h')
         was_hopped = 1;
+#endif
     }
   }
 
@@ -1428,6 +1464,7 @@ chm_op(struct Client *client_p, struct Client *source_p,
     }
     else
 #endif
+#ifdef HALFOPS
     if (!wasnt_hopped && t_hop)
     {
       mode_changes_minus[mode_count_minus].letter = 'h';
@@ -1437,6 +1474,7 @@ chm_op(struct Client *client_p, struct Client *source_p,
       mode_changes_minus[mode_count_minus].id = targ_p->user->id;
       mode_changes_minus[mode_count_minus++].arg = targ_p->name;
     }
+#endif
 
 #ifdef REQUIRE_OANDV
     if (t_voice)
@@ -1457,6 +1495,7 @@ chm_op(struct Client *client_p, struct Client *source_p,
       mode_changes_plus[mode_count_plus++].arg = targ_p->name;
     }
 
+#ifdef ANONOPS
     for (i = 0; i < resync_count; i++)
     {
       if (resync_ops[i].client_p == targ_p)
@@ -1480,9 +1519,11 @@ chm_op(struct Client *client_p, struct Client *source_p,
       /* -h+o or the implicit form of this shouldn't resync... */
       resync_ops[resync_count++].sync = (was_hopped || t_hop) ? 0 : 1;
     }
+#endif
   }
   else
   {
+#ifdef HALFOPS
     /* Converting -o to -h... */
     if (t_hop)
     {
@@ -1517,6 +1558,7 @@ chm_op(struct Client *client_p, struct Client *source_p,
       }
     }
     else
+#endif
     {
       /* check if this just canceled out an earlier mode we cleared */
       if (!wasnt_opped)
@@ -1531,14 +1573,22 @@ chm_op(struct Client *client_p, struct Client *source_p,
     }
 
 #ifdef REQUIRE_OANDV
+#ifdef HALFOPS
     if (!t_hop && t_voice)
       change_channel_membership(chptr, &chptr->voiced,
                                 &chptr->locvoiced, targ_p);
     else
+#else
+    if(t_voice)
+      change_channel_membership(chptr, &chptr->voiced,
+		                &chptr->locvoiced, targ_p);
+    else
+#endif
 #endif
       change_channel_membership(chptr, &chptr->peons,
                                 &chptr->locpeons, targ_p);
 
+#ifdef ANONOPS
     for (i = 0; i < resync_count; i++)
     {
       if (resync_ops[i].client_p == targ_p)
@@ -1554,9 +1604,11 @@ chm_op(struct Client *client_p, struct Client *source_p,
       resync_ops[resync_count].whole_chan = 0;
       resync_ops[resync_count++].sync = 1;
     }
+#endif
   }
 }
 
+#ifdef HALFOPS
 static void
 chm_halfop(struct Client *client_p, struct Client *source_p,
            struct Channel *chptr, int parc, int *parn,
@@ -1618,8 +1670,10 @@ chm_halfop(struct Client *client_p, struct Client *source_p,
 
   if ((t_op = is_chan_op(chptr, targ_p)))
     ;
+#ifdef HALFOPS
   else if ((t_hop = is_half_op(chptr, targ_p)))
     ;
+#endif
 #ifdef REQUIRE_OANDV
   else
 #endif
@@ -1735,6 +1789,7 @@ chm_halfop(struct Client *client_p, struct Client *source_p,
                                 &chptr->lochalfops, targ_p);
     }
 
+#ifdef ANONOPS
     for (i = 0; i < resync_count; i++)
     {
       if (resync_ops[i].client_p == targ_p)
@@ -1746,7 +1801,7 @@ chm_halfop(struct Client *client_p, struct Client *source_p,
         resync_ops[i].send = 0;
       }
     }
-
+    
     if (!was_hopped && MyClient(targ_p) && (chptr->mode.mode & MODE_HIDEOPS))
     {
       resync_ops[resync_count].client_p = targ_p;
@@ -1757,6 +1812,7 @@ chm_halfop(struct Client *client_p, struct Client *source_p,
       /* -o+h shouldn't send massdeop... */
       resync_ops[resync_count++].sync = was_opped ? 0 : 1;
     }
+#endif
   }
   else 
   { /* MODE_DEL */
@@ -1781,7 +1837,7 @@ chm_halfop(struct Client *client_p, struct Client *source_p,
 
     change_channel_membership(chptr, &chptr->peons, &chptr->locpeons, targ_p);
 
-
+#ifdef ANONOPS
     for (i = 0; i < resync_count; i++)
     {
       if (resync_ops[i].client_p == targ_p)
@@ -1797,8 +1853,10 @@ chm_halfop(struct Client *client_p, struct Client *source_p,
       resync_ops[resync_count].whole_chan = 0;
       resync_ops[resync_count++].sync = 1;
     }
+#endif
   }
 }
+#endif
 
 static void
 chm_voice(struct Client *client_p, struct Client *source_p,
@@ -1806,10 +1864,13 @@ chm_voice(struct Client *client_p, struct Client *source_p,
           char **parv, int *errors, int alev, int dir, char c, void *d,
           const char *chname)
 {
-  int i, was_hopped = 0, was_opped = 0, was_voiced = 0, wasnt_voiced = 0;
-  int t_op = 0, t_voice = 0, t_hop = 0;
+  int i, was_opped = 0, was_voiced = 0, wasnt_voiced = 0;
+  int t_op = 0, t_voice = 0;
   char *opnick;
   struct Client *targ_p;
+#ifdef HALFOPS
+  int was_hopped = 0, t_hop = 0;
+#endif
 
   if (alev < CHACCESS_HALFOP)
   {
@@ -1845,8 +1906,10 @@ chm_voice(struct Client *client_p, struct Client *source_p,
 
   if ((t_op = is_chan_op(chptr, targ_p)) != 0)
     t_op = 1;
+#ifdef HALFOPS
   else if ((t_hop = is_half_op(chptr, targ_p)) != 0)
     t_hop = 1;
+#endif
 #ifndef REQUIRE_OANDV
   else
 #endif
@@ -1859,7 +1922,9 @@ chm_voice(struct Client *client_p, struct Client *source_p,
 #ifndef REQUIRE_OANDV
       t_op ||
 #endif
+#ifdef HALFOPS
       t_hop ||
+#endif
       (dir == MODE_ADD && t_voice) ||
       (dir == MODE_DEL && !t_voice))
     return;
@@ -1869,7 +1934,9 @@ chm_voice(struct Client *client_p, struct Client *source_p,
   for (i = 0; i < mode_count_plus; i++)
   {
     if ((mode_changes_plus[i].letter == 'o' ||
+#ifdef HALFOPS
          mode_changes_plus[i].letter == 'h' ||
+#endif
          mode_changes_plus[i].letter == 'v')
         && !irccmp(mode_changes_plus[i].arg, opnick))
     {
@@ -1887,14 +1954,18 @@ chm_voice(struct Client *client_p, struct Client *source_p,
   for (i = 0; i < mode_count_minus; i++)
   {
     if ((mode_changes_minus[i].letter == 'o' ||
+#ifdef HALFOPS
          mode_changes_minus[i].letter == 'h' ||
+#endif
          mode_changes_minus[i].letter == 'v')
         && !irccmp(mode_changes_minus[i].arg, opnick))
     {
       if (mode_changes_minus[i].letter == 'o')
         was_opped = 1;
+#ifdef HALFOPS
       if (mode_changes_minus[i].letter == 'h')
         was_hopped = 1;
+#endif
       if (mode_changes_minus[i].letter == 'v')
       {
         mode_changes_minus[i].letter = 0;
@@ -1924,6 +1995,7 @@ chm_voice(struct Client *client_p, struct Client *source_p,
       mode_changes_plus[mode_count_plus++].arg = targ_p->name;
     }
 
+#ifdef ANONOPS
     for (i = 0; i < resync_count; i++)
     {
       if (resync_ops[i].client_p == targ_p)
@@ -1944,6 +2016,7 @@ chm_voice(struct Client *client_p, struct Client *source_p,
       /* voiced users don't see mode changes, so send even on +v... */
       resync_ops[resync_count++].send = 1;
     }
+#endif
   }
   else
   {
@@ -1968,6 +2041,7 @@ chm_voice(struct Client *client_p, struct Client *source_p,
       mode_changes_minus[mode_count_minus++].arg = targ_p->name;
     }
 
+#ifdef ANONOPS
     resync_ops[resync_count].sync = 0;
 
     for (i = 0; i < resync_count; i++)
@@ -1986,6 +2060,7 @@ chm_voice(struct Client *client_p, struct Client *source_p,
       resync_ops[resync_count].whole_chan = 0;
       resync_ops[resync_count++].sync = 0;
     }
+#endif
   }
 }
 
@@ -2179,14 +2254,22 @@ static ModeTable[255] =
   {chm_nosuch, NULL},
   {chm_nosuch, NULL},
   {chm_nosuch, NULL},
+#ifdef ANONOPS
   {chm_hideops, NULL},                            /* a */
+#else
+  {chm_nosuch, NULL},				  /* a */
+#endif
   {chm_ban, NULL},                                /* b */
   {chm_nosuch, NULL},                             /* c */
   {chm_nosuch, NULL},                             /* d */
   {chm_except, NULL},                             /* e */
   {chm_nosuch, NULL},                             /* f */
   {chm_nosuch, NULL},                             /* g */
+#ifdef HALFOPS
   {chm_halfop, NULL},                             /* h */
+#else
+  {chm_nosuch, NULL},				  /* h */
+#endif
   {chm_simple, (void *) MODE_INVITEONLY},         /* i */
   {chm_nosuch, NULL},                             /* j */
   {chm_key, NULL},                                /* k */
@@ -2226,8 +2309,10 @@ get_channel_access(struct Client *source_p, struct Channel *chptr)
   if (is_chan_op(chptr, source_p))
     return CHACCESS_CHANOP;
 
+#ifdef HALFOPS
   if (is_half_op(chptr, source_p))
     return CHACCESS_HALFOP;
+#endif
 
   return CHACCESS_PEON;
 }
@@ -2419,9 +2504,13 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
   int i, st, dir = MODE_QUERY;
 
   /* bail out if we have nothing to do... */
-  if (!(mode_count_plus || mode_count_minus || bounce_count || resync_count))
+  if (!(mode_count_plus || mode_count_minus || bounce_count))
     return;
-  
+
+#ifdef ANONOPS
+  if(!resync_count)
+    return;
+
   /* Send any resyncs that we need to send... */
   /* XXX - setting -a removes hideops, yet still needs a resync.. */
 
@@ -2446,11 +2535,16 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
         sendto_one(resync_ops[i].client_p, ":%s MODE %s -%c %s", me.name,
                    chname, resync_ops[i].c, resync_ops[i].client_p->name);
     }
+#endif
 
   /* Send all mode changes to the chanops/halfops, and even peons if
    * we are not +a...
    */
+#ifdef ANONOPS
   st = (chptr->mode.mode & MODE_HIDEOPS) ? ONLY_CHANOPS_HALFOPS : ALL_MEMBERS;
+#else
+  st = ALL_MEMBERS;
+#endif
 
   if (IsServer(source_p))
     mbl = ircsprintf(modebuf, ":%s MODE %s ", me.name, chname);
@@ -2571,6 +2665,7 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
   nc = 0;
   mc = 0;
 
+#ifdef ANONOPS
   /* If peons were missed out above, send to them now... */
   if (chptr->mode.mode & MODE_HIDEOPS)
   {
@@ -2676,6 +2771,7 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
     if (nc != 0)
       sendto_channel_local(st, chptr, "%s %s", modebuf, parabuf);
   }
+#endif
 
   /* Bounce modes to client_p */
   nc = 0;
@@ -2764,7 +2860,9 @@ set_channel_mode(struct Client *client_p, struct Client *source_p,
   mode_count_plus = 0;
   mode_count_minus = 0;
   bounce_count = 0;
+#ifdef ANONOPS
   resync_count = 0;
+#endif
   mode_limit = 0;
 
   alevel = get_channel_access(source_p, chptr);
@@ -2811,6 +2909,7 @@ void
 set_channel_mode_flags(char flags_ptr[NUMLISTS][2], struct Channel *chptr,
                        struct Client *source_p)
 {
+#ifdef ANONOPS
   if (chptr->mode.mode & MODE_HIDEOPS && !is_any_op(chptr, source_p))
   {
     flags_ptr[0][0] = '\0';
@@ -2822,6 +2921,7 @@ set_channel_mode_flags(char flags_ptr[NUMLISTS][2], struct Channel *chptr,
 #endif
   }
   else
+#endif
   {
     flags_ptr[0][0] = '@';
     flags_ptr[1][0] = '%';
@@ -2841,6 +2941,7 @@ set_channel_mode_flags(char flags_ptr[NUMLISTS][2], struct Channel *chptr,
 }
 
 
+#ifdef ANONOPS
 /*
  * sync_oplists
  *
@@ -2858,7 +2959,9 @@ sync_oplists(struct Channel *chptr, struct Client *target_p,
 #ifdef REQUIRE_OANDV
   send_oplist(name, target_p, &chptr->chanops_voiced, "o", dir);
 #endif
+#ifdef HALFOPS
   send_oplist(name, target_p, &chptr->halfops, "h", dir);
+#endif
   send_oplist(name, target_p, &chptr->voiced, "v", dir);
 #ifdef REQUIRE_OANDV
   send_oplist(name, target_p, &chptr->chanops_voiced, "v", dir);
@@ -2942,6 +3045,7 @@ sync_channel_oplists(struct Channel *chptr, int dir)
     sync_oplists(chptr, target_p, dir, RootChan(chptr)->chname);
   }
 }
+#endif
 
 #ifdef INTENSIVE_DEBUG
 /* void do_channel_integrity_check(void)
@@ -2988,7 +3092,9 @@ do_channel_integrity_check(void)
 #ifdef REQUIRE_OANDV
       SEARCH_LIST(chanops_voiced)
 #endif
+#ifdef HALFOPS
       SEARCH_LIST(halfops)
+#endif
       SEARCH_LIST(voiced)
       SEARCH_LIST(peons)
 #undef SEARCH_LIST
@@ -3013,7 +3119,9 @@ do_channel_integrity_check(void)
       assert(matched); \
     }
     SEARCH_LIST(chanops)
+#ifdef HALFOPS
     SEARCH_LIST(halfops)
+#endif
 #ifdef REQUIRE_OANDV
     SEARCH_LIST(chanops_voiced)
 #endif

@@ -266,8 +266,10 @@ void count_memory(struct Client *source_p)
 #endif
       for (dlink = chptr->voiced.head; dlink; dlink = dlink->next)
         channel_users++;
+#ifdef HALFOPS
       for (dlink = chptr->halfops.head; dlink; dlink = dlink->next)
         channel_users++;
+#endif
 
       for (dlink = chptr->invites.head; dlink; dlink = dlink->next)
         channel_invites++;

@@ -55,9 +55,12 @@
 extern void    set_channel_mode(struct Client *, struct Client *, 
                                 struct Channel *, int, char **, char *);
 
+#ifdef ANONOPS
 extern void sync_channel_oplists(struct Channel *, int);
 extern void sync_oplists(struct Channel *, struct Client *, int,
                          const char *);
+#endif
+
 extern void set_channel_mode_flags( char flags_ptr[4][2],
 				    struct Channel *chptr,
 				    struct Client *source_p);
@@ -138,12 +141,14 @@ struct ChModeBounce
   int dir;
 };
 
+#ifndef ANONOPS
 struct ChResyncOp
 {
  struct Client *client_p;
  int whole_chan, dir, sync, send;
  char c;
 };
+#endif
 
 struct ChCapCombo
 {
