@@ -606,26 +606,6 @@ register_remote_user(struct Client *client_p, struct Client *source_p,
   return (introduce_client(client_p, source_p, user, nick));
 }
 
-/*
- * burst_away
- * input	- server to burst to client to burst
- * output	- none
- * side effects - burst away message if client is away
- * XXX: always assumes server is server...you've been warned
- */
-
-static inline void
-burst_away(struct Client *server_p, struct Client *client_p)
-{
-   if(client_p->user->away == NULL) /* Not away..skip */
-     return;
-   
-    sendto_server(server_p, NULL, CAP_UID, NOCAPS,
-                   ":%s AWAY :%s", ID(client_p), client_p->user->away);
-    sendto_server(server_p, NULL, NOCAPS, CAP_UID,
-                   ":%s AWAY :%s", client_p->name, client_p->user->away);
-   
-}
 
 /*
  * introduce_clients
@@ -693,8 +673,6 @@ introduce_client(struct Client *client_p, struct Client *source_p,
 		       source_p->username, source_p->host, user->server,
 		       source_p->info);
 	
-          if(ConfigFileEntry.burst_away)
-             burst_away(server, source_p);
 	}
         
   
