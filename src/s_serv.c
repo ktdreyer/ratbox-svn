@@ -294,63 +294,46 @@ try_connections(void *unused)
         next = aconf->hold;
     }
 
-  if (0 == GlobalSetOptions.autoconn)
+
+    if(GlobalSetOptions.autoconn==0)
     {
-      /*
-       * auto connects disabled, send message to ops and bail
-       */
-      if (connecting)
-        sendto_realops_flags(FLAGS_ALL,
-			     "Connection to %s[%s] not activated.",
-			     con_conf->name, con_conf->host);
-      sendto_realops_flags(FLAGS_ALL,
-			   "WARNING AUTOCONNALL is 0, all autoconns are disabled");
-      Debug((DEBUG_NOTICE,"Next connection check : %s", myctime(next)));
+      /* auto connects disabled, bail */
       goto finish;
     }
-
-  if (connecting)
+     
+    if (connecting)
     {
       if (con_conf->next)  /* are we already last? */
-        {
-          struct ConfItem**  pconf;
-          for (pconf = &ConfigItemList; (aconf = *pconf);
-               pconf = &(aconf->next))
-            /* 
-             * put the current one at the end and
-             * make sure we try all connections
-             */
-            if (aconf == con_conf)
-              *pconf = aconf->next;
-          (*pconf = con_conf)->next = 0;
-        }
-
-      if (!(con_conf->flags & CONF_FLAGS_ALLOW_AUTO_CONN))
-        {
-          sendto_realops_flags(FLAGS_ALL,
-	             "Connection to %s[%s] not activated, autoconn is off.",
-                     con_conf->name, con_conf->host);
-          sendto_realops_flags(FLAGS_ALL,
-			       "WARNING AUTOCONN on %s[%s] is disabled",
-			       con_conf->name, con_conf->host);
-        }
-      else
-        {
-          /*
-           * We used to only print this if serv_connect() actually
-           * suceeded, but since comm_tcp_connect() can call the callback
-           * immediately if there is an error, we were getting error messages
-           * in the wrong order. SO, we just print out the activated line,
-           * and let serv_connect() / serv_connect_callback() print an
-           * error afterwards if it fails.
-           *   -- adrian
-           */
-          sendto_realops_flags(FLAGS_ALL,
-			       "Connection to %s[%s] activated.",
-			       con_conf->name, con_conf->host);
-          serv_connect(con_conf, 0);
-        }
+      {
+        struct ConfItem**  pconf;
+        for (pconf = &ConfigItemList; (aconf = *pconf);
+          pconf = &(aconf->next))
+        /* 
+         * put the current one at the end and
+         * make sure we try all connections
+         */
+        if (aconf == con_conf)
+          *pconf = aconf->next;
+        (*pconf = con_conf)->next = 0;
     }
+
+    if (con_conf->flags & CONF_FLAGS_ALLOW_AUTO_CONN)
+    {
+      /*
+       * We used to only print this if serv_connect() actually
+       * suceeded, but since comm_tcp_connect() can call the callback
+       * immediately if there is an error, we were getting error messages
+       * in the wrong order. SO, we just print out the activated line,
+       * and let serv_connect() / serv_connect_callback() print an
+       * error afterwards if it fails.
+       *   -- adrian
+       */
+       sendto_realops_flags(FLAGS_ALL,
+    		"Connection to %s[%s] activated.",
+	      	con_conf->name, con_conf->host);
+      serv_connect(con_conf, 0);
+    }
+  }
   Debug((DEBUG_NOTICE,"Next connection check : %s", myctime(next)));
 finish:
   eventAdd("try_connections", try_connections, NULL,
