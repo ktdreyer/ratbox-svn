@@ -217,7 +217,19 @@ static void m_topic(struct Client *client_p,
                              chptr->topic_info,
                              chptr->topic_time);
                 }
-	      else /* Hide from nonops */
+	      /* client on LL needing the topic - if we have serverhide, say
+	       * its the actual LL server that set the topic, not us the
+	       * uplink -- fl_
+	       */
+	      else if(ConfigServerHide.hide_servers && !MyClient(source_p)
+	             && IsCapable(client_p, CAP_LL) && ServerInfo.hub)
+	      {
+	        sendto_one(source_p, form_str(RPL_TOPICWHOTIME),
+		           me.name, parv[0], root_chan->chname,
+			   client_p->name, chptr->topic_time);
+              }
+	      /* just normal topic hiding.. */
+	      else
 		{
                   sendto_one(source_p, form_str(RPL_TOPICWHOTIME),
                              me.name, parv[0], root_chan->chname,
