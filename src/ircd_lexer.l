@@ -371,6 +371,10 @@ int ieof(void)
   if (--include_stack_ptr < 0)
   {
     /* log(L_NOTICE, "terminating lexer"); */
+    /* We will now exit the lexer - restore init values if we get /rehash
+     * later and reenter lexer -kre */
+    include_stack_ptr = 0;
+    lineno = 1;
     return 1;
   }
   /* switch buffer */
