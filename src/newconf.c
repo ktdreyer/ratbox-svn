@@ -1573,7 +1573,7 @@ conf_end_gecos(struct TopConf *tc)
 		return 0;
 	}
 
-	if(find_xline(yy_aconf->name) != NULL)
+	if(find_xline(yy_aconf->name, 0) != NULL)
 	{
 		conf_report_error("Ignoring gecos block %s -- already xlined.",
 					yy_aconf->name);

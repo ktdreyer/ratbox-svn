@@ -541,7 +541,7 @@ set_server_conf_autoconn(struct Client *source_p, char *name, int newval)
 }
 
 struct ConfItem *
-find_xline(const char *gecos)
+find_xline(const char *gecos, int counter)
 {
 	struct ConfItem *aconf;
 	dlink_node *ptr;
@@ -551,7 +551,11 @@ find_xline(const char *gecos)
 		aconf = ptr->data;
 
 		if(match_esc(aconf->name, gecos))
+		{
+			if(counter)
+				aconf->port++;
 			return aconf;
+		}
 	}
 
 	return NULL;

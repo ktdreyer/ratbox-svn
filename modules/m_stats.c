@@ -1053,7 +1053,7 @@ stats_gecos(struct Client *source_p)
 
 		sendto_one_numeric(source_p, RPL_STATSXLINE,
 				form_str(RPL_STATSXLINE),
-				aconf->hold ? 'x' : 'X',
+				aconf->hold ? 'x' : 'X', aconf->port,
 				aconf->name, aconf->passwd);
 	}
 }

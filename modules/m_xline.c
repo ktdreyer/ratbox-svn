@@ -122,7 +122,7 @@ mo_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	name = parv[loc];
 	loc++;
 
-	if((aconf = find_xline(name)) != NULL)
+	if((aconf = find_xline(name, 0)) != NULL)
 	{
 		sendto_one(source_p, ":%s NOTICE %s :[%s] already X-Lined by [%s] - %s",
 			   me.name, source_p->name, parv[1], aconf->name, aconf->passwd);
@@ -212,7 +212,7 @@ handle_remote_xline(struct Client *source_p, int temp_time,
 		return;
 
 	/* already xlined */
-	if((aconf = find_xline(name)) != NULL)
+	if((aconf = find_xline(name, 0)) != NULL)
 	{
 		sendto_one(source_p, ":%s NOTICE %s :[%s] already X-Lined by [%s] - %s",
 				me.name, source_p->name, name, 

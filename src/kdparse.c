@@ -177,7 +177,7 @@ parse_x_file(FBFILE * file)
 			continue;
 
 		/* sanity checking */
-		if((find_xline(gecos_field) != NULL) ||
+		if((find_xline(gecos_field, 0) != NULL) ||
 		   (strchr(reason_field, ':') != NULL))
 			continue;
 

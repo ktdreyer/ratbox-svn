@@ -490,7 +490,7 @@ check_banned_lines(void)
 			notify_banned_client(client_p, aconf, G_LINED);
 			continue;
 		}
-		else if((aconf = find_xline(client_p->info)) != NULL)
+		else if((aconf = find_xline(client_p->info, 1)) != NULL)
 		{
 			if(IsExemptKline(client_p))
 			{
@@ -698,7 +698,7 @@ check_xlines(void)
 		if(IsMe(client_p) || !IsPerson(client_p))
 			continue;
 
-		if((aconf = find_xline(client_p->info)) != NULL)
+		if((aconf = find_xline(client_p->info, 1)) != NULL)
 		{
 			if(IsExemptKline(client_p))
 			{

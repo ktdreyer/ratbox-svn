@@ -449,7 +449,7 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 
 	/* kline exemption extends to xline too */
 	if(!IsExemptKline(source_p) &&
-	   find_xline(source_p->info) != NULL)
+	   find_xline(source_p->info, 1) != NULL)
 	{
 		ServerStats->is_ref++;
 		add_reject(source_p);

@@ -210,7 +210,7 @@ extern void set_server_conf_autoconn(struct Client *source_p, char *name,
 					int newval);
 
 
-extern struct ConfItem *find_xline(const char *);
+extern struct ConfItem *find_xline(const char *, int);
 extern int find_channel_resv(const char *name);
 extern struct ConfItem *find_nick_resv(const char *name);
 
