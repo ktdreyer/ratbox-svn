@@ -689,7 +689,7 @@ static int valid_hostname(const char* hostname)
       if (!IsHostChar(*p))
         return NO;
 
-      if ('.' == *p)
+      if ('.' == *p || ':' == *p)
         ++dots;
       else
         ++chars;
