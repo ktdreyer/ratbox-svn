@@ -1,3 +1,9 @@
+*** 20000209_1 by db
+- fixed goof with removing of an #ifdef for TOPIC_INFO 
+  patch done by is- 
+
+
+
 *** 20000201_3 by db
 - synced up convertconf to current parser format
 
