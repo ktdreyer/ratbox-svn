@@ -1,3 +1,7 @@
+*** 20011204_5 by ejb
+- fix a bug where we always sent CAP_ZIP even if the link wasn't zipped.
+
+
 *** 20011204_4 by leeh
 - only for +s chans it is :P
 
