@@ -1,3 +1,15 @@
+leeh        2004/04/22 14:35:10 EDT	(20040422_0)
+
+  Modified files:
+    help/opers           list 
+  Log:
+  - remove some tabs from the list helpfile
+  
+  Revision  Changes    Path
+  1.3       +2 -2      ircd-ratbox/help/opers/list
+
+
+
 leeh        2004/04/21 17:19:38 EDT	(20040421_3)
 
   Modified files:
