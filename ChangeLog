@@ -1,3 +1,18 @@
+leeh        2005/01/30 19:52:18 EST	(20050131_1)
+
+  Modified files:
+    include              hook.h 
+    src                  s_chanserv.c s_userserv.c 
+  Log:
+  - patch via jilles to autoop/autovoice users when they login
+  
+  Revision  Changes    Path
+  1.7       +2 -1      rserv/include/hook.h
+  1.48      +52 -0     rserv/src/s_chanserv.c
+  1.42      +4 -0      rserv/src/s_userserv.c
+
+
+
 leeh        2005/01/30 19:42:15 EST	(20050131_0)
 
   Modified files:
