@@ -1,3 +1,10 @@
+*** 20001230_20 by davidt
+- Create a new capability: CAP_ANONOPS for servers that support +a
+- Fix +a so it's only sent to servers supporting it
+- Fix +a so that nonops still see modes they should, but as server modes.
+- Fix sendto_channel_local to send NONOPS messages to voiced users too.
+
+
 *** 20001230_19 by lusky
 - check for strings.h for bzero() on solaris
 
