@@ -1,3 +1,9 @@
+*** 20010524_9 by ejb
+- more VMS support.
+  ircd.exe now builds and runs, and accepts clients.
+  still servlink left to do.
+
+
 *** 20010524_8 by davidt
 - Fix core in HasID()
 
