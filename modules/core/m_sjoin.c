@@ -299,7 +299,7 @@ int     ms_sjoin(struct Client *cptr,
   ircsprintf(buf, ":%s SJOIN %lu %s %s %s :", parv[0], tstosend, parv[2],
           modebuf, parabuf);
 
-  mbuf = modebuf;
+  mbuf = modebuf + strlen(modebuf);
   para[0] = para[1] = para[2] = para[3] = "";
   pargs = 0;
   nick_pointer = sjbuf;
