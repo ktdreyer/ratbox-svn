@@ -1,3 +1,9 @@
+*** 20001201_8 by db
+- fixed m_who.c
+- optimized m_sjoin.c a bit
+
+
+
 *** 20001201_7 by db
 - fix to whois... this function needs review... it "feels" wrong... sigh
 
