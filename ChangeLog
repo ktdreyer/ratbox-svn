@@ -1,3 +1,15 @@
+androsyn    2003/02/14 04:37:27 UTC	(20030214_2)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  Add some hooks for exiting local and unknown clients..
+  
+  Revision  Changes    Path
+  7.369     +27 -3     ircd-ratbox/src/client.c
+
+
+
 androsyn    2003/02/14 04:24:45 UTC	(20030214_1)
 
   Added files:
