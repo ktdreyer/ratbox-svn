@@ -52,6 +52,9 @@
 #include "s_user.h"
 #include "send.h"
 
+static PF CompleteIAuthConnection;
+static PF ParseIAuth;
+
 /*
  * This structure will contain the information for the IAuth
  * server.
@@ -100,13 +103,16 @@ ConnectToIAuth()
 	iAuth.socket = comm_open(AF_INET, SOCK_STREAM, 0, "iAuth socket");
 	if (iAuth.socket < 0)
 	{
-		log(L_ERROR,
-			"ConnectToIAuth(): Unable to open stream socket: %s",
-			strerror(errno));
+    report_error("ConnectToIAuth(): Unable to open stream socket to %s: %s",
+      iAuth.hostname,
+      errno);
 		iAuth.socket = NOSOCK;
 		return(NOSOCK);
 	}
 
+  /*
+   * bingo - this is blocking :(
+   */
 	if ((hostptr = gethostbyname(iAuth.hostname)) == NULL)
 	{
 		log(L_ERROR,
@@ -149,6 +155,9 @@ ConnectToIAuth()
 
 	SetIAuthConnect(iAuth);
 
+  comm_setselect(iAuth.socket, FDLIST_SERVER, COMM_SELECT_WRITE,
+                 CompleteIAuthConnection, NULL, 0);
+
 	return(iAuth.socket);
 } /* ConnectToIAuth() */
 
@@ -159,8 +168,8 @@ Return: 1 if successful
         0 if unsuccessful
 */
 
-int
-CompleteIAuthConnection()
+static void
+CompleteIAuthConnection(int fd, void *notused)
 
 {
 	int errval,
@@ -170,12 +179,13 @@ CompleteIAuthConnection()
 
 	errval = 0;
 	errlen = sizeof(errval);
-	if (getsockopt(iAuth.socket, SOL_SOCKET, SO_ERROR, &errval, &errlen) < 0)
+	if (getsockopt(fd, SOL_SOCKET, SO_ERROR, &errval, &errlen) < 0)
 	{
 		log(L_ERROR,
 			"CompleteIAuthConnection(): getsockopt(SO_ERROR) failed: %s",
 			strerror(errno));
-		return 0;
+/*		return 0; */
+    return;
 	}
 
 	if (errval > 0)
@@ -185,10 +195,16 @@ CompleteIAuthConnection()
 			iAuth.hostname,
 			iAuth.port,
 			strerror(errval));
-		return 0;
+		/*return 0;*/
+    return;
 	}
 
-	return 1;
+  comm_connect_callback(fd, COMM_OK);
+
+  comm_setselect(fd, FDLIST_SERVER, COMM_SELECT_READ,
+                 ParseIAuth, NULL, 0);
+
+	/*return (1);*/
 } /* CompleteIAuthConnection() */
 
 /*
@@ -251,7 +267,7 @@ BeginAuthorization(struct Client *client)
 #endif
 		client->localClient->passwd);
 
-	send(iAuth.socket, buf, len, 0);
+  send(iAuth.socket, buf, len, 0);
 } /* BeginAuthorization() */
 
 /*
@@ -287,8 +303,8 @@ Return: 0 if connection closed
         2 if socket is ok, but there's nothing to read
 */
 
-int
-ParseIAuth()
+static void
+ParseIAuth(int fd, void *notused)
 
 {
 	int length; /* number of bytes we read */
@@ -296,16 +312,18 @@ ParseIAuth()
 	register char *linech;
 
 	/* read in a line */
-	length = recv(iAuth.socket, buffer, BUFSIZE, 0);
+	length = recv(fd, buffer, BUFSIZE, 0);
 
 	if ((length == (-1)) && ((errno == EWOULDBLOCK) || (errno == EAGAIN)))
-		return 2; /* no error - there's just nothing to read */
+/*		return 2; /* no error - there's just nothing to read */
+    return;
 
 	if (length <= 0)
 	{
 		log(L_ERROR, "Read error from server: %s",
 			strerror(errno));
-		return 0; /* the connection was closed */
+    return;
+		/* bingo return 0; /* the connection was closed */
 	}
 
 	/*
@@ -456,12 +474,16 @@ ParseIAuth()
 		++ch;
 	} /* while (*ch) */
 
-	return 1;
+  /*
+   * We need to register for another read
+   */
+  comm_setselect(fd, FDLIST_SERVER, COMM_SELECT_READ,
+                 ParseIAuth, NULL, 0);
 } /* ParseIAuth() */
 
 /*
 ProcessIAuthData()
- Process the data send by the IAuth server
+ Process the data sent by the IAuth server
 */
 
 static void
@@ -486,6 +508,8 @@ client access to the server
 parv[0] = "DoneAuth"
 parv[1] = client id
 parv[2] = username
+parv[3] = hostname
+parv[4] = class
 */
 
 static void
@@ -514,6 +538,11 @@ GoodAuth(int parc, char **parv)
 			 */
 			strncpy_irc(auth->client->username, parv[2], USERLEN);
 
+      /*
+       * Also use IAuth's hostname in case of SPOOF_FREEFORM
+       */
+      strncpy_irc(auth->client->host, parv[3], HOSTLEN);
+
 			/*
 			 * Register them
 			 */
@@ -531,7 +560,7 @@ GoodAuth(int parc, char **parv)
  * inputs	- pointer to client connecting
  * output	- NONE
  * side effects - Called after a user passes authorization
- *	          register them and send them the motd
+ *                register them and send them the motd
  */
 
 static void
@@ -557,8 +586,8 @@ GreetUser(struct Client *client)
     {
       Count.max_loc = Count.local;
       if (!(Count.max_loc % 10))
-	sendto_realops_flags(FLAGS_ALL,"New Max Local Clients: %d",
-			     Count.max_loc);
+        sendto_realops_flags(FLAGS_ALL,"New Max Local Clients: %d",
+                             Count.max_loc);
     }
 
   SetClient(client);
