@@ -74,8 +74,8 @@ char *_version = "20001122";
 
 char    modebuf[MODEBUFLEN];
 char    parabuf[MODEBUFLEN];
-char    *para[4];
-char    *server_nick[4];
+char    *para[MAXMODEPARAMS];
+char    *server_nick[MAXMODEPARAMS];
 char    *mbuf;
 int     pargs;
 int     server_nick_count;
@@ -380,16 +380,20 @@ int     ms_sjoin(struct Client *cptr,
 	      if(IsVchan(chptr) && top_chptr)
 		{
 		  sendto_channel_butserv(hide_or_not, chptr, sptr,
-					 ":%s MODE %s %s %s", parv[0],
-					 top_chptr->chname, modebuf,
-					 para[0],para[1],para[2],para[3] );
+					 ":%s MODE %s %s %s %s %s %s",
+					 parv[0],
+					 top_chptr->chname,
+					 modebuf,
+					 para[0],para[1],para[2],para[3]);
 		}
 	      else
 		{
 		  sendto_channel_butserv(hide_or_not, chptr, sptr,
-					 ":%s MODE %s %s %s", parv[0],
-					 chptr->chname, modebuf,
-					 para[0],para[1],para[2],para[3] );
+					 ":%s MODE %s %s %s %s %s %s",
+					 parv[0],
+					 chptr->chname,
+					 modebuf,
+					 para[0],para[1],para[2],para[3]);
 		}
               mbuf = modebuf;
               *mbuf++ = '+';
@@ -400,25 +404,27 @@ int     ms_sjoin(struct Client *cptr,
       else if (fl & MODE_VOICE)
         {
           *mbuf++ = 'v';
-          strcat(parabuf, s);
-          strcat(parabuf, " ");
-          pargs++;
+	  para[pargs++] = s;
           if (pargs >= MAXMODEPARAMS)
             {
               *mbuf = '\0';
 	      if(IsVchan(chptr) && top_chptr)
 		{
 		  sendto_channel_butserv(hide_or_not, chptr, sptr,
-					 ":%s MODE %s %s %s", parv[0],
-					 top_chptr->chname, modebuf,
-					 para[0],para[1],para[2],para[3] );
+					 ":%s MODE %s %s %s %s %s %s",
+					 parv[0],
+					 top_chptr->chname,
+					 modebuf,
+					 para[0],para[1],para[2],para[3]);
 		}
 	      else
 		{
 		  sendto_channel_butserv(hide_or_not, chptr, sptr,
-					 ":%s MODE %s %s %s", parv[0],
-					 chptr->chname, modebuf,
-					 para[0],para[1],para[2],para[3] );
+					 ":%s MODE %s %s %s %s %s %s",
+					 parv[0],
+					 chptr->chname,
+					 modebuf,
+					 para[0],para[1],para[2],para[3]);
 		}
               mbuf = modebuf;
               *mbuf++ = '+';
@@ -434,15 +440,19 @@ int     ms_sjoin(struct Client *cptr,
       if(IsVchan(chptr) && top_chptr)
 	{
 	  sendto_channel_butserv(hide_or_not, chptr, sptr,
-				 ":%s MODE %s %s %s", parv[0],
-				 top_chptr->chname, modebuf,
+				 ":%s MODE %s %s %s %s %s %s",
+				 parv[0],
+				 top_chptr->chname,
+				 modebuf,
 				 para[0],para[1],para[2],para[3] );
 	}
       else
 	{
 	  sendto_channel_butserv(hide_or_not, chptr, sptr,
-				 ":%s MODE %s %s %s", parv[0],
-				 chptr->chname, modebuf,
+				 ":%s MODE %s %s %s %s %s %s",
+				 parv[0],
+				 chptr->chname,
+				 modebuf,
 				 para[0],para[1],para[2],para[3] );
 	}
     }
@@ -674,22 +684,19 @@ void remove_a_mode( int hide_or_not,
 		    struct Channel *chptr, struct Channel *top_chptr,
 		    struct Client *sptr, dlink_list *list, char flag)
 {
-  dlink_node *l;
+  dlink_node *ptr;
   struct Client *acptr;
   char buf[BUFSIZE];
   char modebuf[MODEBUFLEN];
   char parabuf[MODEBUFLEN];
+  char *para[MAXMODEPARAMS];
   char *chname;
-  char *t;
-  int mlen;
-  int tlen;
-  int cur_len;
   int count = 0;
 
   mbuf = modebuf;
   *mbuf++ = '-';
-  *mbuf   = '\0';
-  t = parabuf;
+
+  para[0] = para[1] = para[2] = para[3] = "";
 
   chname = chptr->chname;
 
@@ -697,48 +704,41 @@ void remove_a_mode( int hide_or_not,
     chname = top_chptr->chname;
 
   ircsprintf(buf,":%s MODE %s ", sptr->name, chname);
-  mlen = strlen(buf);
-  cur_len = mlen + 3;	/* allow for `- ' */
 
-  for (l = list->head; l && l->data; l = l->next)
+  for (ptr = list->head; ptr && ptr->data; ptr = ptr->next)
     {
-      acptr = l->data;
-      ircsprintf(t,"%s ", acptr->name);
-      tlen = strlen(t);
-      cur_len += tlen;
-      t += tlen;
+      acptr = ptr->data;
+      para[count++] = acptr->name;
 
       *mbuf++ = flag;
-      *mbuf   = '\0';
-      cur_len++;
-      count++;
 
-      if ((count >= MAXMODEPARAMS) || ((cur_len + NICKLEN + 4) > BUFSIZE))
+      if (count >= MAXMODEPARAMS)
 	{
+	  *mbuf   = '\0';
 	  sendto_channel_butserv(hide_or_not, chptr, sptr,
-				 ":%s MODE %s %s %s",
+				 ":%s MODE %s %s %s %s %s %s",
 				 sptr->name,
 				 chname,
 				 modebuf,
-				 parabuf);
+				 para[0], para[1], para[2], para[3] );
 
 	  mbuf = modebuf;
 	  *mbuf++ = '-';
-	  *mbuf   = '\0';
-	  t = parabuf;
-	  cur_len = mlen + 3;	/* allow for `- ' */
 	  count = 0;
+	  para[0] = para[1] = para[2] = para[3] = "";
 	}
     }
 
   if(count != 0)
     {
+      *mbuf   = '\0';
       sendto_channel_butserv(hide_or_not, chptr, sptr,
-			     ":%s MODE %s %s %s",
+			     ":%s MODE %s %s %s %s %s %s",
 			     sptr->name,
 			     chname,
 			     modebuf,
-			     parabuf);
+			     para[0], para[1], para[2], para[3] );
+
     }
 }
 
