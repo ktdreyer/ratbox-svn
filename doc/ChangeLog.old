@@ -1,3 +1,11 @@
+*** 20001224_10 by adrian
+
+
+Change some of the comments which aren't applicable now that the old-school
+io loop is gone.
+
+
+
 *** 20001224_9 by adrian
 
 
