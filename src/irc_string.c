@@ -47,6 +47,10 @@
 #ifndef INADDRSZ 
 #define INADDRSZ sizeof(struct in_addr)
 #endif
+
+#ifndef IN6ADDRSZ
+#define IN6ADDRSZ sizeof(struct in6_addr)
+#endif
 /*
  * myctime - This is like standard ctime()-function, but it zaps away
  *   the newline from the end of that string. Also, it takes
