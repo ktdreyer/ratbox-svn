@@ -95,7 +95,6 @@ static unsigned long nextFreeMask();
 static unsigned long freeMask;
 static void server_burst(struct Client *cptr);
 static void burst_all(struct Client *cptr);
-static void do_lazy_link_burst(struct Client *cptr);
 static void cjoin_all(struct Client *cptr);
 
 static CNCB serv_connect_callback;
@@ -573,7 +572,7 @@ void client_burst_if_needed(struct Client *cptr, struct Client *acptr)
   if((acptr->lazyLinkClientExists & cptr->localClient->serverMask) == 0)
     {
       sendnick_TS( cptr, acptr );
-      add_lazylinkclient(cptr,acptr);
+      acptr->lazyLinkClientExists |= cptr->localClient->serverMask;
     }
 }
 
@@ -911,18 +910,12 @@ static void server_burst(struct Client *cptr)
   ** -orabidoo
   */
 
-  /* On a "lazy link" (version 1 at least) hubs only send the nicks.
+  /* On a "lazy link" hubs send nothing.
    * Leafs always have to send nicks plus channels
    */
   if( IsCapable(cptr, CAP_LL) )
     {
-      if(ConfigFileEntry.hub)
-	{
-#if 0
-	  do_lazy_link_burst(cptr);
-#endif
-	}
-      else
+      if(!ConfigFileEntry.hub)
 	{
 	  /* burst all our info */
 	  burst_all(cptr);
@@ -939,7 +932,7 @@ static void server_burst(struct Client *cptr)
   /* Always send a PING after connect burst is done */
   sendto_one(cptr, "PING :%s", me.name);
 
-  /* XXX maybe `EOB %d %d` where we send length of burst and time? */
+  /* XXX maybe `EOB %d %d` where length of burst and time are sent? */
   if(IsCapable(cptr, CAP_EOB))
     sendto_one(cptr, ":%s EOB %lu", me.name, CurrentTime - StartBurst ); 
 }
@@ -1004,23 +997,6 @@ burst_all(struct Client *cptr)
 	    sendnick_TS(cptr, acptr);
 	}
     }
-}
-
-/*
- * do_lazy_link_burst
- *
- * inputs       - pointer to server to send burst to 
- * output       - NONE
- * side effects - shortened burst from LazyLink capable hub
- */
-static  void
-do_lazy_link_burst(struct Client *cptr)
-{
-  struct Client *acptr;
-
-  for (acptr = &me; acptr; acptr = acptr->prev)
-    if (acptr->from != cptr)
-      sendnick_TS(cptr, acptr);
 }
 
 /*
@@ -1126,37 +1102,6 @@ add_lazylinkchannel(struct Client *cptr, struct Channel *chptr)
   m = make_dlink_node();
 
   dlinkAdd(chptr, m, &lazylink_channels);
-}
-
-/*
- * add_lazylinkclient
- *
- * inputs	- pointer to server being introduced to this hub
- *		- pointer to client being introduced
- * output	- NONE
- * side effects	- The client pointed to by sptr is now known
- *		  to be on lazyleaf server given by cptr.
- *		  mark that in the bit map and add to the list
- *		  of clients to examine after this newly introduced
- *		  server is squit off.
- */
-void
-add_lazylinkclient(struct Client *cptr, struct Client *sptr)
-{
-  dlink_node *m;
-
-  assert(cptr->localClient != NULL);
-
-  sptr->lazyLinkClientExists |= cptr->localClient->serverMask;
-
-  /* Now that I think about it, there is absolutely no need
-   * to keep track of these -db
-   */
-#if 0
-  m = make_dlink_node();
-
-  dlinkAdd(sptr, m, &lazylink_nicks);
-#endif
 }
 
 /*
@@ -1273,7 +1218,7 @@ void burst_ll_members(struct Client *cptr, dlink_list *list)
         {
           if (acptr->from != cptr)
 	    {
-	      add_lazylinkclient(cptr,acptr);
+	      acptr->lazyLinkClientExists |= cptr->localClient->serverMask;
 	      sendnick_TS(cptr, acptr);
 	    }
         }

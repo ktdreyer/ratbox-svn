@@ -117,7 +117,6 @@ extern int         serv_connect(struct ConfItem *, struct Client *);
 extern struct Client *uplink; /* NON NULL if leaf and is this servers uplink */
 
 void add_lazylinkchannel(struct Client *cptr, struct Channel *chptr);
-void add_lazylinkclient(struct Client *cptr, struct Client *sptr);
 void remove_lazylink_flags(unsigned long mask);
 void client_burst_if_needed(struct Client *cptr, struct Client *acptr);
 
