@@ -306,6 +306,9 @@ send_members(struct Client *client_p,
   int data_to_send = 0;
   char *t;                      /* temp char pointer */
 
+  /* XXX: This will spit out an extra space if lparabuf is zero length
+   *      its annoying but...oh well
+   */
   cur_len = mlen = ircsprintf(buf, ":%s SJOIN %lu %s %s %s :", me.name,
                    (unsigned long)chptr->channelts,
                    chptr->chname, lmodebuf, lparabuf);
