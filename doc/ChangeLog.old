@@ -1,3 +1,9 @@
+*** 19990906_1 by db
+- -k should remove key only if matching key or its a *
+  thats a bug. 
+
+
+
 *** 19990904_1 by tomh
 change (start < end && IsEol(*start)) to (start < end)
 
