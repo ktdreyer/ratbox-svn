@@ -23,10 +23,6 @@
 
 static struct client *operbot_p;
 
-dlink_list operbot_channels;
-
-static void add_operbot_conf(void);
-
 static int s_operbot_invite(struct client *, char *parv[], int parc);
 static int s_operbot_op(struct client *, char *parv[], int parc);
 
@@ -47,7 +43,6 @@ void
 init_s_operbot(void)
 {
 	operbot_p = add_service(&operbot_service);
-	add_operbot_conf();
 }
 
 static int
@@ -100,20 +95,6 @@ s_operbot_op(struct client *client_p, char *parv[], int parc)
 	sendto_server(":%s MODE %s +o %s",
 			operbot_p->name, chptr->name, client_p->name);
 	return 1;
-}
-
-static void
-conf_set_operbot_channel(void *data)
-{
-	join_service(operbot_p, data);
-}
-
-static void
-add_operbot_conf(void)
-{
-	add_top_conf("operbot", NULL, NULL, NULL);
-	add_conf_item("operbot", "channel", CF_QSTRING,
-			conf_set_operbot_channel);
 }
 
 #endif

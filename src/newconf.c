@@ -3,10 +3,11 @@
  */
 
 #include "stdinc.h"
+#include "tools.h"
 #include "newconf.h"
 #include "rserv.h"
 #include "client.h"
-#include "tools.h"
+#include "channel.h"
 #include "log.h"
 #include "conf.h"
 #include "service.h"
@@ -92,11 +93,29 @@ find_top_conf(const char *name)
 	return NULL;
 }
 
+static void
+add_conf_extension(const char *top, const char *name, struct ConfEntry *items)
+{
+	struct TopConf *tc;
+	struct ConfExtension *ext;
+
+	if((tc = find_top_conf(top)) == NULL)
+		return;
+
+	ext = my_malloc(sizeof(struct ConfExtension));
+
+	ext->name = my_strdup(name);
+	ext->items = items;
+
+	dlink_add_alloc(ext, &tc->extensions);
+}
+
 static struct ConfEntry *
 find_conf_item(const struct TopConf *top, const char *name)
 {
-	dlink_node *d;
+	dlink_node *ptr;
 	struct ConfEntry *cf;
+	struct ConfExtension *ext;
 
 	if(top->tc_entries)
 	{
@@ -109,11 +128,30 @@ find_conf_item(const struct TopConf *top, const char *name)
 		}
 	}
 
-	DLINK_FOREACH(d, top->tc_items.head)
+	DLINK_FOREACH(ptr, top->tc_items.head)
 	{
-		cf = d->data;
+		cf = ptr->data;
 		if(strcasecmp(cf->cf_name, name) == 0)
 			return cf;
+	}
+
+	if(EmptyString(conf_cur_block_name))
+		return NULL;
+
+	DLINK_FOREACH(ptr, top->extensions.head)
+	{
+		ext = ptr->data;
+
+		if(!strcasecmp(ext->name, conf_cur_block_name))
+		{
+			int i;
+
+			for(i = 0; ext->items[i].cf_type; i++)
+			{
+				if(!strcasecmp(ext->items[i].cf_name, name))
+					return &ext->items[i];
+			}
+		}
 	}
 
 	return NULL;
@@ -208,7 +246,13 @@ conf_end_block(struct TopConf *tc)
 static void
 conf_set_generic_int(void *data, void *location)
 {
+	int val = *((int *) data);
+
+	if(val >= 0)
+		*((int *) location) = val;
+#if 0
 	*((int *) location) = *((unsigned int *) data);
+#endif
 }
 
 static void
@@ -655,6 +699,15 @@ conf_set_service_realname(void *data)
 	yy_service->service->reintroduce = 1;
 }
 
+static void
+conf_set_operbot_channel(void *data)
+{
+	if(yy_service == NULL)
+		return;
+
+	join_service(yy_service, data);
+}
+
 static struct ConfEntry conf_serverinfo_table[] =
 {
 	{ "description",	CF_QSTRING, NULL, 0, &config_file.gecos		},
@@ -705,6 +758,33 @@ static struct ConfEntry conf_service_table[] =
 	{ "\0", 0, NULL, 0, NULL }
 };
 
+static struct ConfEntry conf_userserv_table[] =
+{
+	{ "disable_register",	CF_YESNO, NULL, 0, &config_file.disable_uregister	},
+	{ "\0", 0, NULL, 0, NULL }
+};
+
+static struct ConfEntry conf_chanserv_table[] =
+{
+	{ "disable_register",	CF_YESNO, NULL, 0, &config_file.disable_cregister	},
+	{ "\0", 0, NULL, 0, NULL }
+};
+
+static struct ConfEntry conf_jupeserv_table[] =
+{
+	{ "oper_score",		CF_INT, NULL, 0, &config_file.oper_score	},
+	{ "admin_score",	CF_INT, NULL, 0, &config_file.admin_score	},
+	{ "jupe_score",		CF_INT, NULL, 0, &config_file.jupe_score	},
+	{ "unjupe_score",	CF_INT, NULL, 0, &config_file.unjupe_score	},
+	{ "\0", 0, NULL, 0, NULL }
+};
+
+static struct ConfEntry conf_operbot_table[] =
+{
+	{ "channel",	CF_QSTRING, conf_set_operbot_channel,	0, NULL },
+	{ "\0", 0, NULL, 0, NULL }
+};
+
 void
 newconf_init()
 {
@@ -713,4 +793,9 @@ newconf_init()
         add_top_conf("connect", conf_begin_connect, conf_end_connect, conf_connect_table);
         add_top_conf("oper", conf_begin_oper, conf_end_oper, conf_oper_table);
 	add_top_conf("service", conf_begin_service, conf_end_service, conf_service_table);
+
+	add_conf_extension("service", "userserv", conf_userserv_table);
+	add_conf_extension("service", "chanserv", conf_chanserv_table);
+	add_conf_extension("service", "jupeserv", conf_jupeserv_table);
+	add_conf_extension("service", "operbot", conf_operbot_table);
 }

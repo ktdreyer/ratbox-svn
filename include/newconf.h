@@ -15,6 +15,12 @@ struct ConfEntry
 	void *cf_arg;
 };
 
+struct ConfExtension
+{
+	const char *name;
+	struct ConfEntry *items;
+};
+
 struct TopConf
 {
 	char *tc_name;
@@ -22,6 +28,7 @@ struct TopConf
 	int (*tc_efunc) (struct TopConf *);
 	dlink_list tc_items;
 	struct ConfEntry *tc_entries;
+	dlink_list extensions;
 };
 
 #define CF_QSTRING	0x01

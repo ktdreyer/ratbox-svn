@@ -136,6 +136,12 @@ s_userserv_register(struct client *client_p, char *parv[], int parc)
 	struct user_reg *reg_p;
 	const char *password;
 
+	if(config_file.disable_uregister)
+	{
+		service_error(userserv_p, client_p, "%s::REGISTER is disabled", userserv_p->name);
+		return 1;
+	}
+
 	if((reg_p = find_user_reg(NULL, parv[0])) != NULL)
 	{
 		service_error(userserv_p, client_p, "That username is already registered");

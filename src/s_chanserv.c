@@ -359,6 +359,12 @@ s_chanserv_register(struct client *client_p, char *parv[], int parc)
 	struct chan_reg *reg_p;
 	struct member_reg *mreg_p;
 
+	if(config_file.disable_cregister)
+	{
+		service_error(chanserv_p, client_p, "%s::REGISTER is disabled", chanserv_p->name);
+		return 1;
+	}
+
 	if((reg_p = find_channel_reg(NULL, parv[0])))
 	{
 		service_error(chanserv_p, client_p, "Channel %s is already registered", parv[0]);

@@ -25,6 +25,18 @@ struct _config_file
 	char *admin1;
 	char *admin2;
 	char *admin3;
+
+	/* userserv */
+	int disable_uregister;
+
+	/* chanserv */
+	int disable_cregister;
+
+	/* jupeserv */
+	int oper_score;
+	int admin_score;
+	int jupe_score;
+	int unjupe_score;
 };
 
 struct conf_server

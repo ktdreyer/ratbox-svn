@@ -130,10 +130,10 @@ s_jupeserv_jupe(struct client *client_p, char *parv[], int parc)
 		}
 	}
 
-	jupe_p->points += 3;
+	jupe_p->points += config_file.oper_score;
 	dlink_add_alloc(my_strdup(client_p->user->servername), &jupe_p->servers);
 
-	if(jupe_p->points >= 15)
+	if(jupe_p->points >= config_file.jupe_score)
 	{
 		struct client *target_p;
 
@@ -167,10 +167,10 @@ s_jupeserv_unjupe(struct client *client_p, char *parv[], int parc)
 	{
 		jupe_p = my_malloc(sizeof(struct server_jupe));
 		jupe_p->name = my_strdup(ajupe_p->name);
-		jupe_p->points = 15;
+		jupe_p->points = config_file.unjupe_score;
 	}
 
-	jupe_p->points -= 3;
+	jupe_p->points -= config_file.oper_score;
 
 	if(jupe_p->points <= 0)
 	{
