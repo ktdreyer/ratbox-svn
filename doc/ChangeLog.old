@@ -1,3 +1,6 @@
+*** 20011126_5 by davidt
+- Fix compile warnings in contrib modules
+
 *** 20011126_4 by a1kmm
 - Let's initialise the resolver in the right place...
 
