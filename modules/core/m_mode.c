@@ -169,9 +169,9 @@ static int
 add_id(struct Client *source_p, struct Channel *chptr, const char *banid,
        dlink_list *list)
 {
-	dlink_node *ban;
 	struct Ban *actualBan;
 	char *realban = LOCAL_COPY(banid);
+	dlink_node *ptr;
 
 	/* dont let local clients overflow the banlist */
 	if(MyClient(source_p))
@@ -186,15 +186,17 @@ add_id(struct Client *source_p, struct Channel *chptr, const char *banid,
 		collapse(realban);
 	}
 
-	DLINK_FOREACH(ban, list->head)
+	DLINK_FOREACH(ptr, list->head)
 	{
-		actualBan = ban->data;
+		actualBan = ptr->data;
 		if(match(actualBan->banstr, realban))
 			return 0;
 	}
 
 
 	actualBan = (struct Ban *) BlockHeapAlloc(ban_heap);
+	memset(actualBan, 0, sizeof(struct Ban));
+
 	strlcpy(actualBan->banstr, realban, sizeof(actualBan->banstr));
 	actualBan->when = CurrentTime;
 
@@ -204,7 +206,7 @@ add_id(struct Client *source_p, struct Channel *chptr, const char *banid,
 	else
 		strlcpy(actualBan->who, source_p->name, sizeof(actualBan->who));
 
-	dlinkAddAlloc(actualBan, list);
+	dlinkAdd(actualBan, &actualBan->node, list);
 	chptr->num_mask++;
 
 	return 1;
@@ -219,18 +221,19 @@ add_id(struct Client *source_p, struct Channel *chptr, const char *banid,
 static int
 del_id(struct Channel *chptr, const char *banid, dlink_list *list)
 {
-	dlink_node *ban;
+	dlink_node *ptr;
 	struct Ban *banptr;
 
 	if(EmptyString(banid))
 		return 0;
 
-	DLINK_FOREACH(ban, list->head)
+	DLINK_FOREACH(ptr, list->head)
 	{
-		banptr = ban->data;
+		banptr = ptr->data;
 
 		if(irccmp(banid, banptr->banstr) == 0)
 		{
+			dlinkDelete(&banptr->node, list);
 			BlockHeapFree(ban_heap, banptr);
 
 			/* num_mask should never be < 0 */
@@ -239,7 +242,6 @@ del_id(struct Channel *chptr, const char *banid, dlink_list *list)
 			else
 				chptr->num_mask = 0;
 
-			dlinkDestroy(ban, list);
 			return 1;
 		}
 	}

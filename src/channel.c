@@ -402,8 +402,6 @@ free_channel_list(dlink_list *list)
 	{
 		actualBan = ptr->data;
 		BlockHeapFree(ban_heap, actualBan);
-
-		free_dlink_node(ptr);
 	}
 
 	list->head = list->tail = NULL;

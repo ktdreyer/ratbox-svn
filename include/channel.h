@@ -88,6 +88,7 @@ struct Ban
 	char banstr[NICKLEN+USERLEN+HOSTLEN+6];
 	char who[NICKLEN+USERLEN+HOSTLEN+6];
 	time_t when;
+	dlink_node node;
 };
 
 struct ChModeChange
