@@ -1,3 +1,8 @@
+*** 19990909_3 by wnder
+everything seems to be working again - just took out iauth/
+from Makefile
+
+
 *** 19990909_2 by wnder
 more #ifdef USE_IAUTH stuff
 
