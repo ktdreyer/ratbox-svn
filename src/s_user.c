@@ -189,7 +189,7 @@ int user_modes_from_c_to_bitmask[] =
  */
 int show_lusers(struct Client *source_p) 
 {
-  if(!GlobalSetOptions.hide_server || IsOper(source_p))
+  if(!ConfigServerHide.hide_servers || IsOper(source_p))
     sendto_one(source_p, form_str(RPL_LUSERCLIENT), me.name, source_p->name,
               (Count.total-Count.invisi), Count.invisi, Count.server);
   else
@@ -207,7 +207,7 @@ int show_lusers(struct Client *source_p)
     sendto_one(source_p, form_str(RPL_LUSERCHANNELS),
                me.name, source_p->name, Count.chan);
 
-  if(!GlobalSetOptions.hide_server || IsOper(source_p))
+  if(!ConfigServerHide.hide_servers || IsOper(source_p))
     {
       sendto_one(source_p, form_str(RPL_LUSERME),
                  me.name, source_p->name, Count.local, Count.myserver);
@@ -218,7 +218,7 @@ int show_lusers(struct Client *source_p)
   sendto_one(source_p, form_str(RPL_GLOBALUSERS), me.name, source_p->name,
              Count.total, Count.max_tot);
 
-  if(!GlobalSetOptions.hide_server || IsOper(source_p))
+  if(!ConfigServerHide.hide_servers || IsOper(source_p))
     sendto_one(source_p, form_str(RPL_STATSCONN), me.name, source_p->name,
                MaxConnectionCount, MaxClientCount, Count.totalrestartcount);
 

@@ -485,7 +485,7 @@ static void do_who(struct Client *source_p,
 	     target_p->user->away ? 'G' : 'H',
 	     IsOper(target_p) ? "*" : "", op_flags );
 
-  if(GlobalSetOptions.hide_server)
+  if(ConfigServerHide.hide_servers)
     {
       sendto_one(source_p, form_str(RPL_WHOREPLY), me.name, source_p->name,
 		 (chname) ? (chname) : "*",

@@ -85,7 +85,6 @@ static void quote_max(struct Client *, int);
 static void quote_msglocale(struct Client *, char *);
 static void quote_spamnum(struct Client *, int);
 static void quote_spamtime(struct Client *, int);
-static void quote_shide(struct Client *, int);
 static void list_quote_commands(struct Client *);
 
 
@@ -110,7 +109,6 @@ static struct SetStruct set_cmd_table[] =
   { "MSGLOCALE",	quote_msglocale,	1,	0 },
   { "SPAMNUM",		quote_spamnum,		0,	1 },
   { "SPAMTIME",		quote_spamtime,		0,	1 },
-  { "SHIDE",		quote_shide,		0,	1 },
   /* -------------------------------------------------------- */
   { (char *) 0,		(void (*)()) 0,		0,	0 }
 };
@@ -369,25 +367,6 @@ static void quote_spamtime( struct Client *source_p, int newval )
     sendto_one(source_p, ":%s NOTICE %s :SPAMTIME is currently %i",
 		me.name,
 		source_p->name, GlobalSetOptions.spam_time);
-  }
-}
-
-static void quote_shide( struct Client *source_p, int newval )
-{
-  if(newval >= 0)
-  {
-    if(newval)
-      GlobalSetOptions.hide_server = 1;
-    else
-      GlobalSetOptions.hide_server = 0;
-
-    sendto_realops_flags(FLAGS_ALL, L_ALL,"%s has changed SHIDE to %i",
-                         source_p->name, GlobalSetOptions.hide_server);
-  }
-  else
-  {
-    sendto_one(source_p, ":%s NOTICE %s :SHIDE is currently %i",
-               me.name, source_p->name, GlobalSetOptions.hide_server);
   }
 }
 

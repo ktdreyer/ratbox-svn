@@ -27,6 +27,7 @@
 #include "ircd.h"
 #include "numeric.h"
 #include "s_serv.h"
+#include "s_conf.h"
 #include "send.h"
 #include "msg.h"
 #include "parse.h"
@@ -64,7 +65,7 @@ char *_version = "20001122";
 static void m_users(struct Client *client_p, struct Client *source_p,
                    int parc, char *parv[])
 {
-  if(!GlobalSetOptions.hide_server)
+  if(!ConfigServerHide.disable_remote)
     {
       if (hunt_server(client_p,source_p,":%s USERS :%s",1,parc,parv) != HUNTED_ISME)
         return;

@@ -1373,7 +1373,7 @@ const char* comment         /* Reason for the exit */
 
   if(IsServer(source_p))
     {        
-      if( GlobalSetOptions.hide_server )
+      if(ConfigServerHide.hide_servers)
 	{
           /* 
           ** Replaces the name of the splitting server with

@@ -66,7 +66,7 @@ static void m_time(struct Client *client_p, struct Client *source_p,
                   int parc, char *parv[])
 {
   /* This is safe enough to use during non hidden server mode */
-  if(!GlobalSetOptions.hide_server)
+  if(!ConfigServerHide.disable_remote)
     {
       if (hunt_server(client_p,source_p,":%s TIME :%s",1,parc,parv) != HUNTED_ISME)
         return;

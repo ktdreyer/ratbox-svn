@@ -139,7 +139,7 @@ static char* confopts(struct Client *source_p)
 
   /* might wanna hide this :P */
   if (ServerInfo.hub && 
-      (!GlobalSetOptions.hide_server || IsOper(source_p)) )
+      (!ConfigServerHide.disable_remote || IsOper(source_p)) )
     {
       strcat(result, "H");
     }

@@ -120,6 +120,7 @@ int   class_redirport_var;
 %token  DENY
 %token  DESCRIPTION
 %token  DIE
+%token  DISABLE_REMOTE_COMMANDS
 %token  DISABLE_VCHANS
 %token  DOTS_IN_IDENT
 %token  EGDPOOL_PATH
@@ -129,6 +130,7 @@ int   class_redirport_var;
 %token  EXEMPT
 %token  FAILED_OPER_NOTICE
 %token  FAKENAME
+%token  FLATTEN_LINKS
 %token  FNAME_FOPERLOG
 %token  FNAME_OPERLOG
 %token  FNAME_USERLOG
@@ -142,7 +144,7 @@ int   class_redirport_var;
 %token  GLOBAL_KILL
 %token  HAVE_IDENT
 %token	HAVENT_READ_CONF
-%token  HIDESERVER
+%token  HIDE_SERVERS
 %token  HOST
 %token  HUB
 %token  HUB_MASK
@@ -208,6 +210,7 @@ int   class_redirport_var;
 %token  SECONDS MINUTES HOURS DAYS WEEKS MONTHS YEARS DECADES CENTURIES MILLENNIA
 %token  SENDQ
 %token  SEND_PASSWORD
+%token  SERVERHIDE
 %token  SERVERINFO
 %token  SERVLINK_PATH
 %token  SHARED
@@ -293,6 +296,7 @@ conf_item:        admin_entry
                 | listen_entry
                 | auth_entry
                 | serverinfo_entry
+		| serverhide_entry;
                 | resv_entry
                 | shared_entry
                 | connect_entry
@@ -1915,13 +1919,13 @@ general_item:       general_failed_oper_notice |
                     general_iauth_port |
                     general_glines | general_gline_time |
                     general_idletime |
-                    general_hide_server | general_maximum_links |
+                    general_maximum_links |
                     general_message_locale | general_client_exit |
                     general_fname_userlog | general_fname_operlog |
                     general_fname_foperlog | general_oper_only_umodes |
                     general_max_targets |
                     general_use_egd | general_egdpool_path |
-                    general_links_delay | general_oper_umodes |
+                    general_oper_umodes |
                     general_caller_id_wait | general_default_floodcount |
                     general_min_nonwildcard |
                     general_servlink_path |
@@ -1978,11 +1982,6 @@ general_ts_warn_delta: TS_WARN_DELTA '=' timespec ';'
 general_ts_max_delta: TS_MAX_DELTA '=' timespec ';'
   {
     ConfigFileEntry.ts_max_delta = $3;
-  } ;
-
-general_links_delay:    LINKS_DELAY '=' timespec ';'
-  {
-    ConfigFileEntry.links_delay = $3;
   } ;
 
 general_havent_read_conf:  HAVENT_READ_CONF '=' expr ';'
@@ -2197,16 +2196,6 @@ general_dots_in_ident: DOTS_IN_IDENT '=' expr ';'
 general_maximum_links: MAXIMUM_LINKS '=' expr ';'
   {
     ConfigFileEntry.maximum_links = $3;
-  } ;
-
-general_hide_server: HIDESERVER '=' TYES ';'
-  {
-    ConfigFileEntry.hide_server = 1;
-  }
-    |
-    HIDESERVER '=' TNO ';'
-  {
-    ConfigFileEntry.hide_server = 0;
   } ;
 
 general_max_targets: MAX_TARGETS '=' expr ';'
@@ -2559,3 +2548,54 @@ channel_persist_time: PERSIST_TIME '=' timespec ';'
     ConfigChannel.persist_time = $3;
   } ;
 
+
+/***************************************************************************
+ *  section serverhide
+ ***************************************************************************/
+
+serverhide_entry:      SERVERHIDE
+  '{' serverhide_items '}' ';'
+
+serverhide_items:   serverhide_items serverhide_item |
+                    serverhide_item
+
+serverhide_item:    serverhide_flatten_links |
+		    serverhide_hide_servers |
+		    serverhide_disable_remote_commands |
+		    serverhide_links_delay |
+                    error
+
+serverhide_flatten_links: FLATTEN_LINKS '=' TYES ';'
+  {
+    ConfigServerHide.flatten_links = 1;
+  }
+    |
+    FLATTEN_LINKS '=' TNO ';'
+  {
+    ConfigServerHide.flatten_links = 0;
+  } ;
+
+serverhide_hide_servers: HIDE_SERVERS '=' TYES ';'
+  {
+    ConfigServerHide.hide_servers = 1;
+  }
+    |
+    HIDE_SERVERS '=' TNO ';'
+  {
+    ConfigServerHide.hide_servers = 0;
+  } ;
+
+serverhide_disable_remote_commands: DISABLE_REMOTE_COMMANDS '=' TYES ';'
+  {
+    ConfigServerHide.disable_remote = 1;
+  }
+    |
+    DISABLE_REMOTE_COMMANDS '=' TNO ';'
+  {
+    ConfigServerHide.disable_remote = 0;
+  } ;
+  
+serverhide_links_delay: LINKS_DELAY '=' timespec ';'
+  {
+    ConfigServerHide.links_delay = $3;
+  };

@@ -79,7 +79,7 @@ static void m_links(struct Client *client_p, struct Client *source_p,
                    int parc, char *parv[])
 {
 
-  if (!GlobalSetOptions.hide_server)
+  if (!ConfigServerHide.flatten_links)
     {
      mo_links(client_p, source_p, parc, parv);
      return;

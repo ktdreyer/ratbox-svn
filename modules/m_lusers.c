@@ -83,7 +83,7 @@ static void m_lusers(struct Client *client_p, struct Client *source_p,
   else
     last_used = CurrentTime;
 
-  if (parc > 2 && !GlobalSetOptions.hide_server)
+  if (parc > 2 && !ConfigServerHide.disable_remote)
     {   
        if (hunt_server(client_p, source_p, ":%s LUSERS %s :%s", 2, parc, parv) != HUNTED_ISME)
          return;

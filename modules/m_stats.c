@@ -210,7 +210,7 @@ static void m_stats(struct Client *client_p, struct Client *source_p,
     }
 
   /* Is the stats meant for us? */
-  if (!GlobalSetOptions.hide_server)
+  if (!ConfigServerHide.disable_remote)
     {
       if (hunt_server(client_p,source_p,":%s STATS %s :%s",2,parc,parv) != HUNTED_ISME)
         return;
@@ -606,7 +606,7 @@ static void stats_uptime(struct Client *client_p)
    now = CurrentTime - me.since;
    sendto_one(client_p, form_str(RPL_STATSUPTIME), me.name, client_p->name,
               now/86400, (now/3600)%24, (now/60)%60, now%60);
-   if(!GlobalSetOptions.hide_server || IsOper(client_p))
+   if(!ConfigServerHide.disable_remote || IsOper(client_p))
       sendto_one(client_p, form_str(RPL_STATSCONN), me.name, client_p->name,
                  MaxConnectionCount, MaxClientCount, Count.totalrestartcount);
 }

@@ -46,8 +46,6 @@ struct SetOptions
 
   int spam_num;
   int spam_time;
-
-  int hide_server;
 };
 
 struct Counter {

@@ -116,7 +116,7 @@ static void m_whois(struct Client *client_p,
        * server, or our server.. I dont see why they would need to ask
        * anything else for info about the client.. --fl_
        */
-      if(GlobalSetOptions.hide_server)
+      if(ConfigServerHide.disable_remote)
         parv[1] = parv[2];
 	
       if (hunt_server(client_p,source_p,":%s WHOIS %s :%s", 1, parc, parv) !=
@@ -437,7 +437,7 @@ static void whois_person(struct Client *source_p,struct Client *target_p, int gl
   if (reply_to_send)
     sendto_one(source_p, "%s", buf);
           
-  if ((IsOper(source_p) || !GlobalSetOptions.hide_server) || target_p == source_p)
+  if ((IsOper(source_p) || !ConfigServerHide.hide_servers) || target_p == source_p)
     sendto_one(source_p, form_str(RPL_WHOISSERVER),
 	       me.name, source_p->name, target_p->name, server_name,
 	       a2client_p?a2client_p->info:"*Not On This Net*");
@@ -461,9 +461,8 @@ static void whois_person(struct Client *source_p,struct Client *target_p, int gl
 		   me.name, source_p->name, target_p->name);
     }
 
-  if ( (glob == 1) ||
-       (MyConnect(target_p) && (IsOper(source_p) || !GlobalSetOptions.hide_server)) ||
-       (target_p == source_p) )
+  if ( (glob == 1) || (MyConnect(target_p) && (IsOper(source_p) ||
+       !ConfigServerHide.hide_servers)) || (target_p == source_p) )
     {
       sendto_one(source_p, form_str(RPL_WHOISIDLE),
                  me.name, source_p->name, target_p->name,

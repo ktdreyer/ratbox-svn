@@ -65,6 +65,8 @@
 #include "fileio.h"
 #include "memory.h"
 
+struct config_server_hide ConfigServerHide;
+
 extern int yyparse(); /* defined in y.tab.c */
 extern int lineno;
 extern char linebuf[];
@@ -1386,7 +1388,6 @@ static void set_default_conf(void)
   ConfigFileEntry.anti_spam_exit_message_time = 0;
   ConfigFileEntry.ts_warn_delta = TS_WARN_DELTA_DEFAULT;
   ConfigFileEntry.ts_max_delta = TS_MAX_DELTA_DEFAULT;
-  ConfigFileEntry.links_delay = LINKS_DELAY_DEFAULT;
   ConfigFileEntry.kline_with_reason = YES;
   ConfigFileEntry.client_exit = YES;
   ConfigFileEntry.kline_with_connection_closed = NO;
@@ -1411,7 +1412,6 @@ static void set_default_conf(void)
   ConfigFileEntry.idletime = 0;
   ConfigFileEntry.dots_in_ident = 0;
   ConfigFileEntry.maximum_links = MAXIMUM_LINKS_DEFAULT;
-  ConfigFileEntry.hide_server = 0;
   ConfigFileEntry.max_targets = MAX_TARGETS_DEFAULT;
   DupString(ConfigFileEntry.servlink_path, SLPATH);
   ConfigFileEntry.egdpool_path = NULL;
@@ -1448,6 +1448,11 @@ static void set_default_conf(void)
 
   /* 60 * 30 = 1800 = 30 minutes */
   ConfigChannel.persist_time = 1800;
+
+  ConfigServerHide.flatten_links = 0;
+  ConfigServerHide.hide_servers = 0;
+  ConfigServerHide.disable_remote = 0;
+  ConfigServerHide.links_delay = 1800;
 
   ConfigFileEntry.min_nonwildcard = 4;
   ConfigFileEntry.default_floodcount = 8;
@@ -1497,8 +1502,6 @@ static void validate_conf(void)
      ConfigFileEntry.client_flood = CLIENT_FLOOD_MAX;
 
   GlobalSetOptions.idletime = (ConfigFileEntry.idletime * 60);
-
-  GlobalSetOptions.hide_server = ConfigFileEntry.hide_server;
 }
 
 /*

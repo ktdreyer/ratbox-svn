@@ -124,6 +124,7 @@ default_floodcount  { return DEFAULT_FLOODCOUNT; }
 deny		{ return DENY; }
 description	{ return DESCRIPTION; }
 die		{ return DIE; }
+disable_remote_commands	{ return DISABLE_REMOTE_COMMANDS; }
 disable_vchans  { return DISABLE_VCHANS; }
 dots_in_ident   { return DOTS_IN_IDENT; }
 egdpool_path        { return EGDPOOL_PATH; }
@@ -132,6 +133,7 @@ encrypted       { return ENCRYPTED; }
 exceed_limit    { return EXCEED_LIMIT; }
 exempt		{ return EXEMPT; }
 fakename	{ return FAKENAME; }
+flatten_links	{ return FLATTEN_LINKS; }
 fname_foperlog  { return FNAME_FOPERLOG; }
 fname_operlog   { return FNAME_OPERLOG; }
 fname_userlog   { return FNAME_USERLOG; }
@@ -144,7 +146,7 @@ gline_time      { return GLINE_TIME; }
 global_kill	{ return GLOBAL_KILL; }
 have_ident	{ return HAVE_IDENT; }
 havent_read_conf { return HAVENT_READ_CONF; }
-hide_server	{ return HIDESERVER; }
+hide_servers	{ return HIDE_SERVERS; }
 host		{ return HOST; }
 hub		{ return HUB; }
 hub_mask	{ return HUB_MASK; }
@@ -205,6 +207,7 @@ rsa_private_key_file		{ return RSA_PRIVATE_KEY_FILE; }
 rsa_public_key_file		{ return RSA_PUBLIC_KEY_FILE; }
 send_password	{ return SEND_PASSWORD; }
 sendq		{ return SENDQ; }
+serverhide	{ return SERVERHIDE; }
 serverinfo	{ return SERVERINFO; }
 servlink_path   { return SERVLINK_PATH; }
 shared          { return SHARED; }
