@@ -1,3 +1,10 @@
+*** 20001202_8 by db
+- add code to move a list from one to the other, this makes
+  de-opping an entire channel a simple job of moving lists over from
+  the chanop list to the peon list.
+
+
+
 *** 20001202_7 by db
 - real fix for channel.c change_channel_membrship
 - fixed missing prototypes in tools.h that would have found previous bug
