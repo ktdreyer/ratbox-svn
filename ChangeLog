@@ -1,3 +1,17 @@
+androsyn    2002/12/16 08:02:46 UTC	(20021216_11)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  Seriously speed up exiting lots of local clients.  Added a dlink_node to the
+  LocalUser struct so that we can keep track of the node for that client and
+  thus saving us having to search through the local lists for things.
+  
+  Revision  Changes    Path
+  7.354     +4 -4      ircd-ratbox/src/client.c
+
+
+
 androsyn    2002/12/16 07:23:29 UTC	(20021216_10)
 
   Modified files:
