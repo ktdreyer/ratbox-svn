@@ -1,3 +1,7 @@
+*** 20010630_2 by androsyn
+Another shot at that dns patch..
+
+
 *** 20010630_1 by androsyn
 Added flags to adns_submit_reverse to make CNAME's in PTRs work a bit
 better. Patch submitted by EO.
