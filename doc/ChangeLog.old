@@ -1,3 +1,7 @@
+*** 20010524_12 by davidt
+- ick, commit _working_ IO logging support....
+
+
 *** 20010524_11 by davidt
 - use checkError instead of a bunch of tests against EAGAIN/-1/0/etc,
   the code should now: a) work on VMS, b) look slightly cleaner
