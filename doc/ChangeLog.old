@@ -1,3 +1,9 @@
+*** 20010524_15 by davidt
+- EVIL EVIL EVIL EVIL EVIL EVIL bug. I'm stupid.
+- I'll tidy up the mess i made of this code in a minute, but I can barely
+  beleive I found that bug, so I'm committing the fix now.
+
+
 *** 20010524_14 by davidt
 - erk, turn off slink-*-logs by default, since they could easily become
   huge...
