@@ -1,3 +1,62 @@
+leeh        2003/04/10 13:40:47 UTC	(20030410_1)
+
+  Modified files:
+    contrib              m_clearchan.c m_force.c m_jupe.c 
+                         m_ojoin.c m_okick.c m_olist.c m_omode.c 
+                         m_opme.c m_owho.c m_tburst.c 
+    include              hash.h 
+    modules              m_cryptlink.c m_invite.c m_join.c 
+                         m_knock.c m_list.c m_names.c m_topic.c 
+                         m_who.c 
+    modules/core         m_kick.c m_message.c m_mode.c m_nick.c 
+                         m_part.c m_server.c 
+    src                  channel.c client.c hash.c ircd.c parse.c 
+                         resv.c s_serv.c s_user.c 
+  Log:
+  - hash cleanups:
+    - made hash.c use EmptyString()
+    - added header comments to all functions
+    - hash_find_channel -> find_channel for consistency
+    - *_hash_table -> *_hash
+    - other minor cleanups
+  
+  Revision  Changes    Path
+  1.45      +2 -2      ircd-ratbox/contrib/m_clearchan.c
+  1.21      +3 -3      ircd-ratbox/contrib/m_force.c
+  1.45      +2 -2      ircd-ratbox/contrib/m_jupe.c
+  1.18      +2 -2      ircd-ratbox/contrib/m_ojoin.c
+  1.7       +2 -2      ircd-ratbox/contrib/m_okick.c
+  1.10      +2 -2      ircd-ratbox/contrib/m_olist.c
+  1.3       +2 -2      ircd-ratbox/contrib/m_omode.c
+  1.38      +2 -2      ircd-ratbox/contrib/m_opme.c
+  1.10      +2 -2      ircd-ratbox/contrib/m_owho.c
+  1.15      +2 -2      ircd-ratbox/contrib/m_tburst.c
+  7.30      +12 -12    ircd-ratbox/include/hash.h
+  1.62      +2 -2      ircd-ratbox/modules/core/m_kick.c
+  1.123     +3 -3      ircd-ratbox/modules/core/m_message.c
+  1.67      +2 -2      ircd-ratbox/modules/core/m_mode.c
+  1.115     +6 -6      ircd-ratbox/modules/core/m_nick.c
+  1.74      +2 -2      ircd-ratbox/modules/core/m_part.c
+  1.108     +3 -3      ircd-ratbox/modules/core/m_server.c
+  1.51      +3 -3      ircd-ratbox/modules/m_cryptlink.c
+  1.61      +2 -2      ircd-ratbox/modules/m_invite.c
+  1.118     +2 -2      ircd-ratbox/modules/m_join.c
+  1.71      +3 -3      ircd-ratbox/modules/m_knock.c
+  1.61      +2 -2      ircd-ratbox/modules/m_list.c
+  1.63      +2 -2      ircd-ratbox/modules/m_names.c
+  1.72      +3 -3      ircd-ratbox/modules/m_topic.c
+  1.83      +2 -2      ircd-ratbox/modules/m_who.c
+  7.371     +1 -1      ircd-ratbox/src/channel.c
+  7.379     +11 -11    ircd-ratbox/src/client.c
+  7.69      +173 -151  ircd-ratbox/src/hash.c
+  7.279     +1 -1      ircd-ratbox/src/ircd.c
+  7.155     +1 -1      ircd-ratbox/src/parse.c
+  7.28      +3 -3      ircd-ratbox/src/resv.c
+  7.327     +1 -1      ircd-ratbox/src/s_serv.c
+  7.258     +3 -3      ircd-ratbox/src/s_user.c
+
+
+
 leeh        2003/04/10 12:48:06 UTC	(20030410_0)
 
   Modified files:
