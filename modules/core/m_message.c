@@ -830,7 +830,7 @@ handle_opers(int p_or_n,
     sendto_match_butone(IsServer(client_p) ? client_p : NULL, source_p,
                         nick + 1,
                         (*nick == '#') ? MATCH_HOST : MATCH_SERVER,
-                        "PRIVMSG $%s :%s", nick, text);
+                        "%s $%s :%s", command, nick, text);
     return;
   }
 
