@@ -1520,41 +1520,22 @@ conf_set_deny_reason(void *data)
 	DupString(yy_aconf->passwd, data);
 }
 
-static int
-conf_begin_exempt(struct TopConf *tc)
-{
-	if(yy_aconf)
-		free_conf(yy_aconf);
-
-	yy_aconf = make_conf();
-	DupString(yy_aconf->passwd, "*");
-	yy_aconf->status = CONF_EXEMPTDLINE;
-
-	return 0;
-}
-
-static int
-conf_end_exempt(struct TopConf *tc)
-{
-	if(yy_aconf->host && parse_netmask(yy_aconf->host, NULL, NULL) != HM_HOST)
-	{
-		add_conf_by_address(yy_aconf->host, CONF_EXEMPTDLINE, NULL, yy_aconf);
-	}
-	else
-	{
-		conf_report_error("Ignoring exempt -- invalid exempt::ip.");
-		free_conf(yy_aconf);
-	}
-
-	yy_aconf = NULL;
-	return 0;
-}
-
 static void
 conf_set_exempt_ip(void *data)
 {
-	MyFree(yy_aconf->host);
-	DupString(yy_aconf->host, data);
+	struct ConfItem *yy_tmp;
+
+	if(parse_netmask(data, NULL, NULL) == HM_HOST)
+	{
+		conf_report_error("Ignoring exempt -- invalid exempt::ip.");
+		return;
+	}
+
+	yy_tmp = make_conf();
+	DupString(yy_tmp->passwd, "*");
+	DupString(yy_tmp->host, data);
+	yy_tmp->status = CONF_EXEMPTDLINE;
+	add_conf_by_address(yy_tmp->host, CONF_EXEMPTDLINE, NULL, yy_tmp);
 }
 
 static int
@@ -2570,7 +2551,7 @@ newconf_init()
 	add_conf_item("deny", "ip", CF_QSTRING, conf_set_deny_ip);
 	add_conf_item("deny", "reason", CF_QSTRING, conf_set_deny_reason);
 
-	add_top_conf("exempt", conf_begin_exempt, conf_end_exempt);
+	add_top_conf("exempt", NULL, NULL);
 	add_conf_item("exempt", "ip", CF_QSTRING, conf_set_exempt_ip);
 
 	add_top_conf("gecos", conf_begin_gecos, conf_end_gecos);
