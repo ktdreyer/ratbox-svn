@@ -71,6 +71,9 @@ load_help_file(const char *hfname, const char *helpname, int flags)
 	if(fbgets(line, sizeof(line), in) == NULL)
 		return;
 
+	if((p = strchr(line, '\n')) != NULL)
+		*p = '\0';
+
 	hptr = BlockHeapAlloc(helpfile_heap);
 	memset(hptr, 0, sizeof(struct helpfile));
 
@@ -80,7 +83,7 @@ load_help_file(const char *hfname, const char *helpname, int flags)
 
 	while(fbgets(line, sizeof(line), in) != NULL)
 	{
-		if((p = strchr(line, '\n')))
+		if((p = strchr(line, '\n')) != NULL)
 			*p = '\0';
 
 		if(!EmptyString(line))
@@ -108,7 +111,11 @@ load_help(void)
 	DIR *helpfile_dir = NULL;
 	struct dirent *ldirent= NULL;
 	char filename[MAXPATHLEN];
+#ifdef S_ISLNK
+	struct stat sb;
+#endif
 
+	/* opers must be done first */
 	helpfile_dir = opendir(HPATH);
 
 	if(helpfile_dir == NULL)
@@ -127,7 +134,27 @@ load_help(void)
 
 	while((ldirent = readdir(helpfile_dir)) != NULL)
 	{
-		snprintf(filename, sizeof(filename), "%s/%s", HPATH, ldirent->d_name);
+		snprintf(filename, sizeof(filename), "%s/%s", UHPATH, ldirent->d_name);
+
+#ifdef S_ISLNK
+		if(lstat(filename, &sb) < 0)
+			continue;
+
+		/* ok, if its a symlink, we work on the presumption if an
+		 * oper help exists of that name, its a symlink to that --fl
+		 */
+		if(S_ISLNK(sb.st_mode))
+		{
+			struct helpfile *hptr = hash_find_help(ldirent->d_name, HELP_OPER);
+
+			if(hptr != NULL)
+			{
+				hptr->flags |= HELP_USER;
+				continue;
+			}
+		}
+#endif
+
 		load_help_file(filename, ldirent->d_name, HELP_USER);
 	}
 
