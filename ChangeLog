@@ -1,3 +1,15 @@
+leeh        2005/02/01 11:20:03 EST	(20050201_2)
+
+  Modified files:
+    help/chanserv        moduser 
+  Log:
+  - there is no clearusers command..
+  
+  Revision  Changes    Path
+  1.5       +1 -1      rserv/help/chanserv/moduser
+
+
+
 leeh        2005/02/01 11:18:13 EST	(20050201_1)
 
   Modified files:
