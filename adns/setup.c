@@ -43,6 +43,12 @@
 #include "s_bsd.h"
 #include "internal.h"
 
+/* For some reason BSD/OS doesn't define INADDR_LOOPBACK */
+#ifndef INADDR_LOOPBACK
+#define INADDR_LOOPBACK inet_addr("127.0.0.1")
+#endif
+
+
 static void readconfig(adns_state ads, const char *filename, int warnmissing);
 
 static void addserver(adns_state ads, struct in_addr addr)
