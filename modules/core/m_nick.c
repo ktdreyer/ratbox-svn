@@ -326,8 +326,26 @@ static void ms_nick(struct Client *client_p, struct Client *source_p,
   }
 
   /* parc == 3 on nickchange, parc == 9 on new nick */
-  if((parc != 3) && (parc != 9))
+  if((IsClient(source_p) && (parc != 3)) || (IsServer(source_p) && (parc != 9)))
+  {
+    char tbuf[BUFSIZE] = { 0 };
+    int j;
+
+    for(j = 0; j < parc; j++)
+    {
+      strcat(tbuf, parv[j]);
+      strcat(tbuf, " ");
+    }
+
+    sendto_realops_flags(FLAGS_ALL, L_ALL,
+                         "Dropping server %s due to (invalid) command 'NICK' "
+                         "with only %d arguments.  (Buf: '%s')",
+                         client_p->name, parc, tbuf);
+    ilog(L_CRIT, "Insufficient parameters (%d) for command 'NICK' from %s.  Buf: %s",
+         parc, client_p->name, tbuf);
+    exit_client(client_p, client_p, client_p, "Not enough arguments to server command.");
     return;
+  }
 
   /* fix the length of the nick */
   strlcpy(nick, parv[1], NICKLEN);
