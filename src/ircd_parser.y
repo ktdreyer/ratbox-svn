@@ -1066,6 +1066,7 @@ connect_leaf_mask:       LEAF_MASK '=' QSTRING ';'
  
 connect_class:  CLASS '=' QSTRING ';'
   {
+    DupString(yy_cconf->className,yylval.string);
     DupString(yy_nconf->className,yylval.string);
   };
 
