@@ -848,7 +848,7 @@ static void send_mode_list(struct Client *cptr,
       tlen = strlen(banptr->banstr);
       tlen++;
 
-      if ((count >= MAXMODEPARAMS) || ((cur_len + tlen + 2) > BUFSIZE))
+      if ((count >= MAXMODEPARAMS) || ((cur_len + tlen + 2) > MODEBUFLEN))
         {
           sendto_one(cptr, "%s%s %s", buf, mbuf, pbuf);
           mp = mbuf;
