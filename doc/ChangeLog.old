@@ -1,3 +1,9 @@
+*** 20010502_1 by db
+- removed caching of channels for lazylinks in mode and topic
+  I think those were the two flame was complaining about.
+
+
+
 *** 20010501_3 by ejb
 - typo.
 
