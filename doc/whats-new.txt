@@ -78,7 +78,7 @@ more information.
 
 STATS e now shows events.
 
-STATS f now shows file descripters.
+STATS f now shows active file descriptors.
 
 List of CAPAB's:
 TS    - Support the TS protocol
