@@ -125,19 +125,12 @@ struct Client* make_client(struct Client* from)
   struct LocalUser *localClient;
   dlink_node *m;
 
-#if 1
-  client_p = (struct Client *)MyMalloc(sizeof(struct Client));
-#endif 
   client_p = BlockHeapAlloc(client_heap);
-         
   if (from == NULL)
     {
       client_p->from  = client_p; /* 'from' of local client is self! */
       client_p->since = client_p->lasttime = client_p->firsttime = CurrentTime;
 
-#if 0
-      localClient = (struct LocalUser *)MyMalloc(sizeof(struct LocalUser));
-#endif
       localClient = (struct LocalUser *)BlockHeapAlloc(lclient_heap);
       client_p->localClient = localClient;
 
