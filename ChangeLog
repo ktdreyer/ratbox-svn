@@ -1,3 +1,18 @@
+androsyn    2002/12/10 11:24:20 UTC	(20021210_11)
+
+  Modified files:
+    src                  confmatch.c 
+  Log:
+  Add back in the linear scan part of the host matching.  Basically this
+  happens when the hash fails us, and we just go crazy looking for what we
+  need.  Typically this ends up being things like IP addresses in 192.168.*.*
+  type form..I'll be adding code to fix that sort of thing.
+  
+  Revision  Changes    Path
+  7.6       +27 -9     ircd-ratbox/src/confmatch.c
+
+
+
 androsyn    2002/12/10 10:58:40 UTC	(20021210_10)
 
   Modified files:
