@@ -1,3 +1,12 @@
+*** 20001116_4 by davidt
+- Fixed a small bug in m_message.c, where @@<chan>, @+<chan>, +@<chan>,
+  and ++<chan> would all be treated as +<chan>.  Now @@ and ++ are treated
+  as invalid, @+ and @+ are treated as +
+- Made sendto_channel_type's check for MODE_VOICE before MODE_CHANOP.
+- m_notice.c and m_privmsg.c are obsolete (merged into m_message.c),
+  and weren't being built anyway.
+
+
 *** 20001116_3 by davidt
 - Figured out how to create a .so without the .tmp file..
 
