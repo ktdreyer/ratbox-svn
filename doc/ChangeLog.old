@@ -1,3 +1,7 @@
+*** 20001223_43 by ejb
+- fixed fname_* (oops, hi diane)
+
+
 *** 20001223_42 by ejb
 - support paths for module loading.
 
