@@ -1,3 +1,7 @@
+*** 20010626_9 by androsyn
+Needed an #undef for on certain platforms..
+
+
 *** 20010626_8 by androsyn
 Some definitions to support inlined versions of strcpy and MyMalloc() and friends...
 
