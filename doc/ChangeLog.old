@@ -1,3 +1,13 @@
+*** 20010918_1 by jdc
+* src/s_conf.c: Check for lack-of serverinfo {} description field in
+  configuration file.  Error out if conf lacks one.
+* Many cosmetical changes (I got bored).
+
+NOTE TO CODERS:  We should rename the "attach_iline" and "attach_Iline"
+functions soon.  Two function names which are identical except for case
+is not a good thing.  Look in s_conf.c for more info.
+
+
 *** 20010916_2 by jdc
 * src/listener.c: Fix for Hwy101's problems relating to IPv6 and FreeBSD.
   This _WILL_ break IPv6 support for Linux.  Linux-ers, please look around
