@@ -1,3 +1,7 @@
+*** 20010602_1 by ejb
+- removed last traces of CMDLINE_CONFIG.
+
+
 *** 20010601_2 by leeh
 - commented out the module="some_module.so", for the admins who dont
   realise..
