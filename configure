@@ -310,7 +310,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT MKDEP MAKEDEPEND STDOUT CPP EGREP SET_MAKE INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA RM CP MV LN SED AR LD YACC LEX LEXLIB LEX_OUTPUT_ROOT CRYPT_C CRYPT_LIB VICONF ALLOCA ENCSPEED ZLIB_LD SELECT_TYPE MODULES_LIBS MOD_TARGET SSL_SRCS_ENABLE SSL_INCLUDES SSL_LIBS PICFLAGS IRC_CFLAGS SEDOBJ LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT MKDEP MAKEDEPEND STDOUT CPP EGREP SET_MAKE INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA RM CP MV LN SED AR LD RANLIB YACC LEX LEXLIB LEX_OUTPUT_ROOT CRYPT_C CRYPT_LIB VICONF ALLOCA ENCSPEED ZLIB_LD SELECT_TYPE MODULES_LIBS MOD_TARGET SSL_SRCS_ENABLE SSL_INCLUDES SSL_LIBS PICFLAGS IRC_CFLAGS SEDOBJ LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -3322,6 +3322,45 @@ LD=$ac_cv_path_LD
 if test -n "$LD"; then
   echo "$as_me:$LINENO: result: $LD" >&5
 echo "${ECHO_T}$LD" >&6
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+
+# Extract the first word of "ranlib", so it can be a program name with args.
+set dummy ranlib; ac_word=$2
+echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
+if test "${ac_cv_path_RANLIB+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  case $RANLIB in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_RANLIB="$RANLIB" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_path_RANLIB="$as_dir/$ac_word$ac_exec_ext"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+
+  ;;
+esac
+fi
+RANLIB=$ac_cv_path_RANLIB
+
+if test -n "$RANLIB"; then
+  echo "$as_me:$LINENO: result: $RANLIB" >&5
+echo "${ECHO_T}$RANLIB" >&6
 else
   echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
@@ -9548,7 +9587,7 @@ _ACEOF
 
 fi
 
-                                                                      ac_config_files="$ac_config_files Makefile servlink/Makefile contrib/Makefile src/Makefile modules/Makefile tools/Makefile doc/Makefile"
+                                                                                          ac_config_files="$ac_config_files Makefile adns/Makefile servlink/Makefile contrib/Makefile src/Makefile modules/Makefile tools/Makefile doc/Makefile help/Makefile"
 
 
 cat >confcache <<\_ACEOF
@@ -10076,12 +10115,14 @@ do
   case "$ac_config_target" in
   # Handling of arguments.
   "Makefile" ) CONFIG_FILES="$CONFIG_FILES Makefile" ;;
+  "adns/Makefile" ) CONFIG_FILES="$CONFIG_FILES adns/Makefile" ;;
   "servlink/Makefile" ) CONFIG_FILES="$CONFIG_FILES servlink/Makefile" ;;
   "contrib/Makefile" ) CONFIG_FILES="$CONFIG_FILES contrib/Makefile" ;;
   "src/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
   "modules/Makefile" ) CONFIG_FILES="$CONFIG_FILES modules/Makefile" ;;
   "tools/Makefile" ) CONFIG_FILES="$CONFIG_FILES tools/Makefile" ;;
   "doc/Makefile" ) CONFIG_FILES="$CONFIG_FILES doc/Makefile" ;;
+  "help/Makefile" ) CONFIG_FILES="$CONFIG_FILES help/Makefile" ;;
   "include/setup.h" ) CONFIG_HEADERS="$CONFIG_HEADERS include/setup.h" ;;
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
 echo "$as_me: error: invalid argument: $ac_config_target" >&2;}
@@ -10190,6 +10231,7 @@ s,@LN@,$LN,;t t
 s,@SED@,$SED,;t t
 s,@AR@,$AR,;t t
 s,@LD@,$LD,;t t
+s,@RANLIB@,$RANLIB,;t t
 s,@YACC@,$YACC,;t t
 s,@LEX@,$LEX,;t t
 s,@LEXLIB@,$LEXLIB,;t t

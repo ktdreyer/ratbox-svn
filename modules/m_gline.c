@@ -155,7 +155,7 @@ mo_gline(struct Client *client_p, struct Client *source_p, int parc, const char 
 			"%s!%s@%s on %s is requesting gline for [%s@%s] [%s]",
 			source_p->name, source_p->username,
 			source_p->host, me.name, user, host, reason);
-	ilog(L_GLINE, "GLINE requested by %s!%s@%s on %s for %s@%s [%s]",
+	ilog(L_GLINE, "R %s %s %s %s %s %s %s",
 	     source_p->name, source_p->username, source_p->host, 
 	     source_p->user->server, user, host, reason);
 
@@ -232,7 +232,7 @@ mc_gline(struct Client *client_p, struct Client *source_p,
 			acptr->name, acptr->username, acptr->host,
 			acptr->user->server, user, host, reason);
 
-	ilog(L_GLINE, "GLINE requested by %s!%s@%s on %s for %s@%s [%s]",
+	ilog(L_GLINE, "R %s %s %s %s %s %s %s",
 	     source_p->name, source_p->username, source_p->host, 
 	     source_p->user->server, user, host, reason);
 
@@ -307,7 +307,7 @@ ms_gline(struct Client *client_p, struct Client *source_p, int parc, const char 
 			acptr->name, acptr->username, acptr->host,
 			acptr->user->server, user, host, reason);
 
-	ilog(L_GLINE, "GLINE requested by %s!%s@%s on %s for %s@%s [%s]",
+	ilog(L_GLINE, "R %s %s %s %s %s %s %s",
 	     source_p->name, source_p->username, source_p->host, 
 	     source_p->user->server, user, host, reason);
 
@@ -501,7 +501,7 @@ set_local_gline(struct Client *source_p, const char *user,
 			     source_p->name, source_p->username,
 			     source_p->host, source_p->user->server,
 			     user, host, reason);
-	ilog(L_GLINE, "GLINE triggered by %s!%s@%s on %s for %s@%s [%s]",
+	ilog(L_GLINE, "T %s %s %s %s %s %s %s",
 	     source_p->name, source_p->username, source_p->host, 
 	     source_p->user->server, user, host, reason);
 

@@ -30,7 +30,7 @@ ZIP_LIB		= @ZLIB_LD@
 
 IRCDLIBS        = @LIBS@ $(SSL_LIBS) $(ZIP_LIB)
 
-INCLUDES        = -I. $(SSL_INCLUDES)
+INCLUDES        = -I. -I../include $(SSL_INCLUDES)
 CPPFLAGS        = ${INCLUDES} @CPPFLAGS@
 
 PROGS		= servlink

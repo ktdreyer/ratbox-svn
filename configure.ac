@@ -202,6 +202,7 @@ AC_PATH_PROG(LN, ln)
 AC_PATH_PROG(SED, sed)
 AC_PATH_PROG(AR, ar)
 AC_PATH_PROG(LD, ld)
+AC_PATH_PROG(RANLIB, ranlib)
 AC_PROG_YACC
 
 dnl AC_PROG_YACC defaults to yacc unconditionally if nothing can be found
@@ -1035,12 +1036,14 @@ fi
 
 AC_CONFIG_FILES(		\
 	Makefile		\
+	adns/Makefile		\
 	servlink/Makefile	\
 	contrib/Makefile	\
 	src/Makefile		\
 	modules/Makefile	\
 	tools/Makefile		\
 	doc/Makefile		\
+	help/Makefile		\
 )
 
 AC_OUTPUT

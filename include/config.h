@@ -157,19 +157,6 @@
  */
 #define CLIENT_FLOOD 20
 
-/* NICKNAMEHISTORYLENGTH - size of WHOWAS array
- * this defines the length of the nickname history.  each time a user changes
- * nickname or signs off, their old nickname is added to the top of the list.
- * NOTE: this is directly related to the amount of memory ircd will use whilst
- *       resident and running - it hardly ever gets swapped to disk!  Memory
- *       will be preallocated for the entire whowas array when ircd is started.
- */
-#ifndef SMALL_NET
-#define NICKNAMEHISTORYLENGTH 15000
-#else
-#define NICKNAMEHISTORYLENGTH 1500
-#endif
-
 /* HANGONGOODLINK and HANGONGOODLINK
  * Often net breaks for a short time and it's useful to try to
  * establishing the same connection again faster than CONNECTFREQUENCY
