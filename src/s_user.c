@@ -229,13 +229,8 @@ void show_opers(struct Client *cptr)
  */
 int show_lusers(struct Client *sptr) 
 {
-  if (GlobalSetOptions.hide_server && !IsOper(sptr))
-    sendto_one(sptr, ":%s %d %s :There are %d users and %d invisible",
-               me.name, RPL_LUSERCLIENT, sptr->name,
-	       (Count.total-Count.invisi), Count.invisi);
-  else
-    sendto_one(sptr, form_str(RPL_LUSERCLIENT), me.name, sptr->name,
-               (Count.total-Count.invisi), Count.invisi, Count.server);
+  sendto_one(sptr, form_str(RPL_LUSERCLIENT), me.name, sptr->name,
+            (Count.total-Count.invisi), Count.invisi, Count.server);
 
   if (Count.oper > 0)
     sendto_one(sptr, form_str(RPL_LUSEROP), me.name, sptr->name,
@@ -259,19 +254,19 @@ int show_lusers(struct Client *sptr)
   else
     sendto_one(sptr, form_str(RPL_LOCALUSERS), me.name, sptr->name,
                  Count.total, Count.max_tot);
+
   sendto_one(sptr, form_str(RPL_GLOBALUSERS), me.name, sptr->name,
              Count.total, Count.max_tot);
+
   if(!GlobalSetOptions.hide_server || IsOper(sptr))
     sendto_one(sptr, form_str(RPL_STATSCONN), me.name, sptr->name,
                MaxConnectionCount, MaxClientCount, Count.totalrestartcount);
 
   if (Count.local > MaxClientCount)
-     MaxClientCount = Count.local;
+    MaxClientCount = Count.local;
 
   if ((Count.local + Count.myserver) > MaxConnectionCount)
-     {
-       MaxConnectionCount = Count.local + Count.myserver; 
-     }
+    MaxConnectionCount = Count.local + Count.myserver; 
 
   return 0;
 }
