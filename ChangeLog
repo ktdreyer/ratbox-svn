@@ -1,3 +1,15 @@
+leeh        2005/02/21 19:47:24 EST	(20050222_0)
+
+  Added files:
+    doc                  monitor.txt 
+  Log:
+  - add in my documentation on the upcoming MONITOR command
+  
+  Revision  Changes    Path
+  1.1       +100 -0    ircd-ratbox/doc/monitor.txt (new)
+
+
+
 leeh        2005/02/21 12:09:34 EST	(20050221_0)
 
   Modified files:
