@@ -36,10 +36,12 @@
 #include "irc_string.h"
 #include "sprintf_irc.h"
 #include "s_conf.h"
+#include "s_log.h"
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
 #include "packet.h"
+#include "s_newconf.h"
 
 static int m_who(struct Client *, struct Client *, int, const char **);
 
@@ -54,7 +56,7 @@ DECLARE_MODULE_AV1(who, NULL, NULL, who_clist, NULL, NULL, "$Revision$");
 static void do_who_on_channel(struct Client *source_p, struct Channel *chptr,
 			      int server_oper, int member);
 
-static void who_global(struct Client *source_p, const char *mask, int server_oper);
+static void who_global(struct Client *source_p, const char *mask, int server_oper, int operspy);
 
 static void do_who(struct Client *source_p,
 		   struct Client *target_p, const char *chname, const char *op_flags);
@@ -77,6 +79,7 @@ m_who(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 	struct Channel *chptr = NULL;
 	int server_oper = parc > 2 ? (*parv[2] == 'o') : 0;	/* Show OPERS only */
 	int member;
+	int operspy = 0;
 
 	mask = LOCAL_COPY(parv[1]);
 
@@ -99,6 +102,19 @@ m_who(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 		return 0;
 	}
 
+	if(IsOperSpy(source_p) && *mask == '!')
+	{
+		mask++;
+		operspy = 1;
+
+		if(EmptyString(mask))
+		{
+			sendto_one(source_p, form_str(RPL_ENDOFWHO),
+					me.name, source_p->name, parv[1]);
+			return 0;
+		}
+	}
+
 	/* '/who #some_channel' */
 	if(IsChannelName(mask))
 	{
@@ -106,7 +122,10 @@ m_who(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 		chptr = find_channel(mask);
 		if(chptr != NULL)
 		{
-			if(IsMember(source_p, chptr))
+			if(operspy)
+				report_operspy(source_p, "WHO", chptr->chname);
+
+			if(IsMember(source_p, chptr) || operspy)
 				do_who_on_channel(source_p, chptr, server_oper, YES);
 			else if(!SecretChannel(chptr))
 				do_who_on_channel(source_p, chptr, server_oper, NO);
@@ -175,9 +194,9 @@ m_who(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 	 * with "/who" ;) --fl
 	 */
 	if((*(mask + 1) == '\0') && (*mask == '0'))
-		who_global(source_p, NULL, server_oper);
+		who_global(source_p, NULL, server_oper, 0);
 	else
-		who_global(source_p, mask, server_oper);
+		who_global(source_p, mask, server_oper, operspy);
 
 	sendto_one(source_p, form_str(RPL_ENDOFWHO),
 		   me.name, source_p->name, mask);
@@ -247,7 +266,7 @@ who_common_channel(struct Client *source_p, struct Channel *chptr,
  *		  this is slightly expensive on EFnet ...
  */
 static void
-who_global(struct Client *source_p, const char *mask, int server_oper)
+who_global(struct Client *source_p, const char *mask, int server_oper, int operspy)
 {
 	struct membership *msptr;
 	struct Client *target_p;
@@ -255,11 +274,13 @@ who_global(struct Client *source_p, const char *mask, int server_oper)
 	int maxmatches = 500;
 
 	/* first, list all matching INvisible clients on common channels */
-
-	DLINK_FOREACH(lp, source_p->user->channel.head)
+	if(!operspy)
 	{
-		msptr = lp->data;
-		who_common_channel(source_p, msptr->chptr, mask, server_oper, &maxmatches);
+		DLINK_FOREACH(lp, source_p->user->channel.head)
+		{
+			msptr = lp->data;
+			who_common_channel(source_p, msptr->chptr, mask, server_oper, &maxmatches);
+		}
 	}
 
 	/* second, list all matching visible clients */
@@ -269,7 +290,7 @@ who_global(struct Client *source_p, const char *mask, int server_oper)
 		if(!IsPerson(target_p))
 			continue;
 
-		if(IsInvisible(target_p))
+		if(IsInvisible(target_p) && !operspy)
 		{
 			ClearMark(target_p);
 			continue;

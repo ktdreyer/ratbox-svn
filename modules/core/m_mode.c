@@ -36,12 +36,14 @@
 #include "s_user.h"
 #include "s_conf.h"
 #include "s_serv.h"
+#include "s_log.h"
 #include "send.h"
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
 #include "packet.h"
 #include "sprintf_irc.h"
+#include "s_newconf.h"
 
 static int m_mode(struct Client *, struct Client *, int, const char **);
 static int ms_mode(struct Client *, struct Client *, int, const char **);
@@ -88,6 +90,42 @@ static int mode_count;
 static int mode_limit;
 static int mask_pos;
 
+static void
+loc_channel_modes(struct Channel *chptr, struct Client *client_p, char *mbuf, char *pbuf)
+{
+	int len;
+	*mbuf++ = '+';
+	*pbuf = '\0';
+
+	if(chptr->mode.mode & MODE_SECRET)
+		*mbuf++ = 's';
+	if(chptr->mode.mode & MODE_PRIVATE)
+		*mbuf++ = 'p';
+	if(chptr->mode.mode & MODE_MODERATED)
+		*mbuf++ = 'm';
+	if(chptr->mode.mode & MODE_TOPICLIMIT)
+		*mbuf++ = 't';
+	if(chptr->mode.mode & MODE_INVITEONLY)
+		*mbuf++ = 'i';
+	if(chptr->mode.mode & MODE_NOPRIVMSGS)
+		*mbuf++ = 'n';
+
+	if(chptr->mode.limit)
+	{
+		*mbuf++ = 'l';
+		len = ircsprintf(pbuf, "%d ", chptr->mode.limit);
+		pbuf += len;
+	}
+	if(*chptr->mode.key)
+	{
+		*mbuf++ = 'k';
+		ircsprintf(pbuf, "%s ", chptr->mode.key);
+	}
+
+	*mbuf++ = '\0';
+	return;
+}
+
 /*
  * m_mode - MODE command handler
  * parv[0] - sender
@@ -101,24 +139,40 @@ m_mode(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	static char modebuf[BUFSIZE];
 	static char parabuf[BUFSIZE];
 	int n = 2;
+	const char *dest;
+	int operspy = 0;
+
+	dest = parv[1];
+
+	if(IsOperSpy(source_p) && *dest == '!')
+	{
+		dest++;
+		operspy = 1;
+
+		if(EmptyString(dest))
+		{
+			sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
+					me.name, source_p->name, "MODE");
+			return 0;
+		}
+	}
 
 	/* Now, try to find the channel in question */
-	if(!IsChanPrefix(parv[1][0]))
+	if(!IsChanPrefix(*dest))
 	{
 		/* if here, it has to be a non-channel name */
 		user_mode(client_p, source_p, parc, parv);
 		return 0;
 	}
 
-	if(!check_channel_name(parv[1]))
+	if(!check_channel_name(dest))
 	{
 		sendto_one_numeric(source_p, ERR_BADCHANNAME,
-				   form_str(ERR_BADCHANNAME),
-				   parv[1]);
+				   form_str(ERR_BADCHANNAME), parv[1]);
 		return 0;
 	}
 
-	chptr = find_channel(parv[1]);
+	chptr = find_channel(dest);
 
 	if(chptr == NULL)
 	{
@@ -130,7 +184,14 @@ m_mode(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	/* Now know the channel exists */
 	if(parc < n + 1)
 	{
-		channel_modes(chptr, source_p, modebuf, parabuf);
+		if(operspy)
+		{
+			report_operspy(source_p, "MODE", chptr->chname);
+			loc_channel_modes(chptr, source_p, modebuf, parabuf);
+		}
+		else
+			channel_modes(chptr, source_p, modebuf, parabuf);
+
 		sendto_one(source_p, form_str(RPL_CHANNELMODEIS),
 			   me.name, source_p->name, parv[1], modebuf, parabuf);
 

@@ -39,13 +39,15 @@
 #include "irc_string.h"
 #include "sprintf_irc.h"
 #include "s_conf.h"
+#include "s_log.h"
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
 #include "hook.h"
+#include "s_newconf.h"
 
 static void do_whois(struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
-static void single_whois(struct Client *source_p, struct Client *target_p);
+static void single_whois(struct Client *source_p, struct Client *target_p, int operspy);
 
 static int m_whois(struct Client *, struct Client *, int, const char **);
 static int ms_whois(struct Client *, struct Client *, int, const char **);
@@ -159,10 +161,17 @@ do_whois(struct Client *client_p, struct Client *source_p, int parc, const char 
 	struct Client *target_p;
 	char *nick;
 	char *p = NULL;
+	int operspy = 0;
 
 	nick = LOCAL_COPY(parv[1]);
 	if((p = strchr(parv[1], ',')))
 		*p = '\0';
+
+	if(IsOperSpy(source_p) && *nick == '!')
+	{
+		operspy = 1;
+		nick++;
+	}
 
 	if(MyClient(source_p))
 		target_p = find_named_person(nick);
@@ -170,11 +179,23 @@ do_whois(struct Client *client_p, struct Client *source_p, int parc, const char 
 		target_p = find_person(nick);
 
 	if(target_p != NULL)
-		single_whois(source_p, target_p);
+	{
+		if(operspy)
+		{
+			char buffer[BUFSIZE];
+
+			snprintf(buffer, sizeof(buffer), "%s!%s@%s %s",
+				target_p->name, target_p->username,
+				target_p->host, target_p->user->server);
+			report_operspy(source_p, "WHOIS", buffer);
+		}
+
+		single_whois(source_p, target_p, operspy);
+	}
 	else
 		sendto_one_numeric(source_p, ERR_NOSUCHNICK,
 				   form_str(ERR_NOSUCHNICK), 
-				   IsDigit(*nick) ? "*" : nick);
+				   IsDigit(*nick) ? "*" : parv[1]);
 
 	sendto_one_numeric(source_p, RPL_ENDOFWHOIS, 
 			   form_str(RPL_ENDOFWHOIS), parv[1]);
@@ -191,7 +212,7 @@ do_whois(struct Client *client_p, struct Client *source_p, int parc, const char 
  * 		  writing results to source_p
  */
 static void
-single_whois(struct Client *source_p, struct Client *target_p)
+single_whois(struct Client *source_p, struct Client *target_p, int operspy)
 {
 	char buf[BUFSIZE];
 	dlink_node *ptr;
@@ -205,6 +226,7 @@ single_whois(struct Client *source_p, struct Client *target_p)
 	struct hook_mfunc_data hd;
 	char *name;
 	char quest[] = "?";
+	int visible;
 
 	if(target_p->name[0] == '\0')
 		name = quest;
@@ -234,18 +256,21 @@ single_whois(struct Client *source_p, struct Client *target_p)
 		msptr = ptr->data;
 		chptr = msptr->chptr;
 
-		if(ShowChannel(source_p, chptr))
+		visible = ShowChannel(source_p, chptr);
+
+		if(visible || operspy)
 		{
-			if((cur_len + strlen(chptr->chname) + 3) > (BUFSIZE - 4))
+			if((cur_len + strlen(chptr->chname) + 3) > (BUFSIZE - 5))
 			{
 				sendto_one(source_p, "%s", buf);
 				cur_len = mlen;
 				t = buf + mlen;
 			}
 
-			tlen = ircsprintf(t, "%s%s ", 
-					  find_channel_status(msptr, 1),
-					  chptr->chname);
+			tlen = ircsprintf(t, "%s%s%s ",
+					visible ? "" : "!",
+					find_channel_status(msptr, 1),
+					chptr->chname);
 			t += tlen;
 			cur_len += tlen;
 		}
