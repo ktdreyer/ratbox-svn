@@ -1,3 +1,15 @@
+db          2001/12/10 22:09:39 EST	(20011211_0)
+
+  Modified files:
+    src                  fileio.c 
+  Log:
+  - formatting change only.
+  
+  Revision  Changes    Path
+  7.17      +30 -24    ircd-hybrid-7/src/fileio.c
+
+
+
 leeh        2001/12/10 18:21:36 EST	(20011210_12)
 
   Modified files:
