@@ -13,6 +13,8 @@ m_opme.c       - OPME - op yourself on an opless channel
                  Syntax:  OPME <#channel>
 m_nickinfo.c   - NICKINFO - provide info on a nick, for debugging purposes.
                  Syntax:  NICKINFO <nick>
+m_mkpasswd.c   - MKPASSWD - generate a DES encryption of a password
+                 Syntax:  MKPASSWD <plaintext>
 stats_notice.c - A Hook to provide the old STATS notice functionality
 whois_notice.c - A Hook to provide the old WHOIS notice functionality
 
