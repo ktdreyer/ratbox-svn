@@ -121,9 +121,12 @@ static void m_oper(struct Client *client_p, struct Client *source_p,
         -einride
       */
       ptr = source_p->localClient->confs.head;
-      oconf = ptr->data;
-      detach_conf(source_p,oconf);
-      
+      if (ptr)
+      {
+        oconf = ptr->data;
+        detach_conf(source_p,oconf);
+      }
+
       if( attach_conf(source_p, aconf) != 0 )
         {
           sendto_one(source_p,":%s NOTICE %s :Can't attach conf!",
