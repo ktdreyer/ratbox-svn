@@ -28,6 +28,7 @@
 #include <sys/types.h>
 #include <string.h>
 #include "s_conf.h"
+#include "s_log.h"
 #include "irc_string.h"
 
 int yyparse();
@@ -105,13 +106,25 @@ int   class_sendq_var;
 %token  SPOOF
 %token  QUARANTINE
 %token  VHOST
-
+%token  LOGGING
+%token  LOGPATH
+%token  OPER_LOG
+%token  GLINE_LOG
+%token  LOG_LEVEL
+%token  T_L_CRIT
+%token  T_L_ERROR
+%token  T_L_WARN
+%token  T_L_NOTICE
+%token  T_L_TRACE
+%token  T_L_INFO
+%token  T_L_DEBUG
 %%
 conf:   
         | conf conf_item
         ;
 
 conf_item:        admin_entry
+                | logging_entry
                 | oper_entry
                 | class_entry 
                 | listen_entry
@@ -223,6 +236,30 @@ admin_description:      DESCRIPTION '=' QSTRING ';'
   {
     DupString(yy_aconf->host,yylval.string);
   };
+
+/***************************************************************************
+ *  section logging
+ ***************************************************************************/
+
+logging_entry:          LOGGING  '{' logging_items '}' ';' 
+
+logging_items:          logging_items logging_item |
+                        logging_item 
+
+logging_item:           logging_path | logging_oper_log |
+                        logging_gline_log | logging_log_level
+
+logging_path:           LOGPATH '=' QSTRING ';' 
+logging_oper_log:	OPER_LOG '=' QSTRING ';'
+logging_gline_log:	GLINE_LOG '=' QSTRING ';'
+logging_log_level:	LOG_LEVEL '='
+                          T_L_CRIT { set_log_level(L_CRIT); };
+                        | T_L_ERROR { set_log_level(L_ERROR); };
+                        | T_L_WARN {set_log_level(L_WARN); };
+                        | T_L_NOTICE {set_log_level(L_NOTICE); };
+                        | T_L_TRACE {set_log_level(L_TRACE); };
+                        | T_L_INFO {set_log_level(L_INFO); };
+                        | T_L_DEBUG {set_log_level(L_DEBUG); }; ';'
 
 /***************************************************************************
  * oper section

@@ -123,6 +123,18 @@ have_ident	{ return HAVE_IDENT; }
 reason		{ return REASON; }
 spoof		{ return SPOOF; }
 vhost		{ return VHOST; }
+logging         { return LOGGING; }
+logpath         { return LOGPATH; }
+oper_log        { return OPER_LOG; }
+gline_log       { return GLINE_LOG; }
+log_level	{ return LOG_LEVEL; }
+l_crit		{ return T_L_CRIT; }
+l_error		{ return T_L_ERROR; }
+l_warn		{ return T_L_WARN; }
+l_notice 	{ return T_L_NOTICE; }
+l_trace		{ return T_L_TRACE; }
+l_info		{ return T_L_INFO; }
+l_debug		{ return T_L_DEBUG; }
 .		{ return yytext[0]; }
 
 %%
