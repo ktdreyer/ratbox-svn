@@ -1,3 +1,8 @@
+*** 20000402_4 by db
+- changed comment in res.c also trimmed if down to match undernet's
+
+
+
 *** 20000402_3 by db
 - changed CONFIG_H_LEVEL_6 to CONFIG_H_LEVEL_7
 - updated config.h.dist to match config.h
