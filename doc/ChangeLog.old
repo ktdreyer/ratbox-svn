@@ -1,3 +1,7 @@
+*** 20010127_12 by fl_
+- only reset idle on privmsg, not notice
+
+
 *** 20010127_11 by fl_
 - dont reset idle time from notices.. only privmsg
   I didnt alter notice #channel.. altho I spose we should so its
