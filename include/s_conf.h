@@ -215,7 +215,7 @@ struct config_file_entry
   int		stats_i_oper_only;
   int		stats_P_oper_only;
   int           pace_wait;
-  int           whois_wait;
+  int           pace_wait_simple;
   int           short_motd;
   int           no_oper_flood;
   int           glines;

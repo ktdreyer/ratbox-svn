@@ -201,6 +201,7 @@ int   class_redirport_var;
 %token  OPER_ONLY_UMODES
 %token  OPER_UMODES
 %token  PACE_WAIT
+%token	PACE_WAIT_SIMPLE
 %token  PASSWORD
 %token  PATH
 %token  PERSIST_TIME
@@ -284,7 +285,6 @@ int   class_redirport_var;
 %token  VHOST6
 %token  WARN
 %token  WARN_NO_NLINE
-%token  WHOIS_WAIT
 
 %type   <string>   QSTRING
 %type   <number>   NUMBER
@@ -1928,7 +1928,7 @@ general_item:       general_failed_oper_notice |
                     general_non_redundant_klines | general_dots_in_ident |
                     general_stats_o_oper_only | general_stats_k_oper_only |
                     general_pace_wait | general_stats_i_oper_only |
-                    general_whois_wait | general_stats_P_oper_only |
+                    general_pace_wait_simple | general_stats_P_oper_only |
                     general_short_motd | general_no_oper_flood |
                     general_iauth_server |
                     general_iauth_port |
@@ -2118,9 +2118,9 @@ general_caller_id_wait: CALLER_ID_WAIT '=' timespec ';'
     ConfigFileEntry.caller_id_wait = $3;
   } ;
 
-general_whois_wait: WHOIS_WAIT '=' timespec ';'
+general_pace_wait_simple: PACE_WAIT_SIMPLE '=' timespec ';'
   {
-    ConfigFileEntry.whois_wait = $3;
+    ConfigFileEntry.pace_wait_simple = $3;
   } ;
 
 general_short_motd: SHORT_MOTD '=' TYES ';'

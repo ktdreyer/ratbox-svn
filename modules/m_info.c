@@ -274,6 +274,12 @@ static struct InfoStruct info_table[] =
     "Minimum delay between uses of certain commands"
   },
   {
+    "pace_wait_simple",
+    OUTPUT_DECIMAL,
+    &ConfigFileEntry.pace_wait_simple,
+    "Minimum delay between less intensive commands"
+  },
+  {
     "ping_cookie",
     OUTPUT_BOOLEAN,
     &ConfigFileEntry.ping_cookie,
@@ -332,12 +338,6 @@ static struct InfoStruct info_table[] =
     OUTPUT_BOOLEAN,
     &ConfigFileEntry.warn_no_nline,
     "Display warning if connecting server lacks N-line"
-  },
-  {
-    "whois_wait",
-    OUTPUT_DECIMAL,
-    &ConfigFileEntry.whois_wait,
-    "Delay (in seconds) between remote WHOIS requests"
   },
   {
     "default_split_server_count",
