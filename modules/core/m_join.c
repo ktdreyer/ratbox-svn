@@ -54,6 +54,8 @@ DECLARE_MODULE_AV1(join, NULL, NULL, join_clist, NULL, NULL, "$Revision$");
 static void do_join_0(struct Client *client_p, struct Client *source_p);
 static int check_channel_name_loc(struct Client *source_p, const char *name);
 
+static int can_join(struct Client *source_p, struct Channel *chptr, char *key);
+
 static void set_final_mode(struct Mode *mode, struct Mode *oldmode);
 static void remove_our_modes(struct Channel *chptr, struct Client *source_p);
 
@@ -552,13 +554,75 @@ check_channel_name_loc(struct Client *source_p, const char *name)
 	return 1;
 }
 
-struct mode_letter
+/* can_join()
+ *
+ * input	- client to check, channel to check for, key
+ * output	- reason for not being able to join, else 0
+ * side effects -
+ */
+static int
+can_join(struct Client *source_p, struct Channel *chptr, char *key)
+{
+	dlink_node *lp;
+	dlink_node *ptr;
+	struct Ban *invex = NULL;
+	char src_host[NICKLEN + USERLEN + HOSTLEN + 6];
+	char src_iphost[NICKLEN + USERLEN + HOSTLEN + 6];
+
+	s_assert(source_p->localClient != NULL);
+
+	ircsprintf(src_host, "%s!%s@%s", 
+		   source_p->name, source_p->username, source_p->host);
+	ircsprintf(src_iphost, "%s!%s@%s",
+		   source_p->name, source_p->username, source_p->sockhost);
+
+	if((is_banned(chptr, source_p, NULL, src_host, src_iphost)) == CHFL_BAN)
+		return (ERR_BANNEDFROMCHAN);
+
+	if(chptr->mode.mode & MODE_INVITEONLY)
+	{
+		DLINK_FOREACH(lp, source_p->user->invited.head)
+		{
+			if(lp->data == chptr)
+				break;
+		}
+		if(lp == NULL)
+		{
+			if(!ConfigChannel.use_invex)
+				return (ERR_INVITEONLYCHAN);
+			DLINK_FOREACH(ptr, chptr->invexlist.head)
+			{
+				invex = ptr->data;
+				if(match(invex->banstr, src_host)
+				   || match(invex->banstr, src_iphost)
+				   || match_cidr(invex->banstr, src_iphost))
+					break;
+			}
+			if(ptr == NULL)
+				return (ERR_INVITEONLYCHAN);
+		}
+	}
+
+	if(*chptr->mode.key && (EmptyString(key) || irccmp(chptr->mode.key, key)))
+		return (ERR_BADCHANNELKEY);
+
+	if(chptr->mode.limit && 
+	   dlink_list_length(&chptr->members) >= (unsigned long)chptr->mode.limit)
+		return (ERR_CHANNELISFULL);
+
+#ifdef ENABLE_SERVICES
+	if(chptr->mode.mode & MODE_REGONLY && EmptyString(source_p->user->suser))
+		return ERR_NEEDREGGEDNICK;
+#endif
+
+	return 0;
+}
+
+static struct mode_letter
 {
 	int mode;
 	char letter;
-};
-
-static struct mode_letter flags[] = {
+} flags[] = {
 	{MODE_NOPRIVMSGS,	'n'},
 	{MODE_TOPICLIMIT,	't'},
 	{MODE_SECRET,		's'},
