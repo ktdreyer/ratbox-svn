@@ -29,7 +29,26 @@ i) Temp dline support and temp kline extensions.
    now handles them more efficiently by grouping them and checking their
    expiry as infrequently as possible.
 
-ii) Remote unkline support.
+ii) Oper flood exemption
+    This is the equivalent of hybrid6's TRUE_NO_OPER_FLOOD, and will
+    remove all flood limits for opers.  Note this is dangerous as an oper
+    will not get rate limited no matter how many lines they send to the
+    server.  Use with great precaution.  Unlike hybrid6 however this
+    is configured per oper and defaults to disabled.  
+    
+    To grant an oper this exemption add to their oper {} block:
+      flood_exempt = yes;
+
+    Note the exemption only takes effect whilst opered, but once a user
+    has opered with the flood exemption, the exemption will remain until
+    that user is disconnected from the ircd, even if the exemption is
+    removed from their oper block and they reoper.
+
+    Note that opers without this exemption still have increased flood limits
+    of about 20 lines per second which is controlled by no_oper_flood
+    in the general {} block.
+
+iii) Remote unkline support.
     This extends hybrid7s remote kline support to also allow unklines to
     be done on remote servers by authorised users.
 
@@ -48,7 +67,7 @@ ii) Remote unkline support.
     If you do not wish this to be supported, simply dont add any shared
     blocks with 'unkline = yes'.
 
-iii) /quote XLINE support
+iv) /quote XLINE support
      This gives opers who do not have ircd.conf access the ability to set
      XLINE's, or gecos bans.  These ban a user based on their realname, or
      gecos field.  They will be added to an xline.conf file in the etc/
@@ -75,7 +94,7 @@ iii) /quote XLINE support
      xlines are not checked for dupes and config access is required to
      remove a placed xline.
 
-iv) Global user@host limits.
+v) Global user@host limits.
     Taken from ircnets ircd.  Currently you may limit a certain host to n 
     number of connections to the ircd, however these do not stop a user
     loading large amounts of clones on multiple servers.  The global limits
