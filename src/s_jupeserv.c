@@ -312,10 +312,10 @@ s_jupeserv_jupe(struct client *client_p, char *parv[], int parc)
 	loc_sqlite_exec(NULL, "INSERT INTO jupes VALUES(%Q, %Q)",
 			jupe_p->name, jupe_p->reason);
 
-	sendto_server(":%s WALLOPS :JUPE %s by %s!%s@%s [%s]",
+	sendto_server(":%s WALLOPS :JUPE set on %s by %s!%s@%s on %s [%s]",
 			MYNAME, jupe_p->name, client_p->name,
-			client_p->user->username, client_p->user->host,
-			jupe_p->reason);
+			client_p->user->username, client_p->user->servername,
+			client_p->user->host, jupe_p->reason);
 
 	add_jupe(jupe_p);
 
@@ -343,7 +343,7 @@ s_jupeserv_unjupe(struct client *client_p, char *parv[], int parc)
 	loc_sqlite_exec(NULL, "DELETE FROM jupes WHERE servername = %Q",
 			jupe_p->name);
 
-	sendto_server(":%s WALLOPS :UNJUPE %s by %s!%s@%s",
+	sendto_server(":%s WALLOPS :UNJUPE set on %s by %s!%s@%s",
 			MYNAME, jupe_p->name, client_p->name,
 			client_p->user->username, client_p->user->host);
 
@@ -404,11 +404,21 @@ s_jupeserv_calljupe(struct client *client_p, char *parv[], int parc)
 
 	if(jupe_p->points >= config_file.jupe_score)
 	{
+		sendto_server(":%s WALLOPS :JUPE triggered on %s by %s!%s@%s on %s [%s]",
+				MYNAME, jupe_p->name, client_p->name,
+				client_p->user->username, client_p->user->host, 
+				client_p->user->servername, jupe_p->reason);
+
 		loc_sqlite_exec(NULL, "INSERT INTO jupes VALUES(%Q, %Q)",
 				jupe_p->name, jupe_p->reason);
 
 		add_jupe(jupe_p);
 	}
+	else
+		sendto_server(":%s WALLOPS :JUPE requested on %s by %s!%s@%s on %s [%s]",
+				MYNAME, jupe_p->name, client_p->name,
+				client_p->user->username, client_p->user->host, 
+				client_p->user->servername, jupe_p->reason);
 
 	return 0;
 }
@@ -442,6 +452,11 @@ s_jupeserv_callunjupe(struct client *client_p, char *parv[], int parc)
 
 	if(jupe_p->points <= 0)
 	{
+		sendto_server(":%s WALLOPS :UNJUPE triggered on %s by %s!%s@%s on %s",
+				MYNAME, jupe_p->name, client_p->name,
+				client_p->user->username, client_p->user->host, 
+				client_p->user->servername);
+
 		loc_sqlite_exec(NULL, "DELETE FROM jupes WHERE servername = %Q",
 				jupe_p->name);
 
@@ -451,6 +466,11 @@ s_jupeserv_callunjupe(struct client *client_p, char *parv[], int parc)
 		free_jupe(jupe_p);
 		free_jupe(ajupe_p);
 	}
+	else
+		sendto_server(":%s WALLOPS :UNJUPE requested on %s by %s!%s@%s on %s",
+				MYNAME, jupe_p->name, client_p->name,
+				client_p->user->username, client_p->user->host, 
+				client_p->user->servername);
 
 	return 0;
 }
