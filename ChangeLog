@@ -1,3 +1,23 @@
+leeh        2003/06/10 17:30:55 UTC	(20030610_4)
+
+  Modified files:
+    include              class.h 
+    modules              m_trace.c 
+    src                  Makefile.in class.c s_conf.c s_debug.c 
+  Log:
+  - moved classes over to a dlink_list
+  - added "default_class", a pointer to the default_class
+  
+  Revision  Changes    Path
+  7.19      +4 -3      ircd-ratbox/include/class.h
+  1.77      +11 -5     ircd-ratbox/modules/m_trace.c
+  7.128     +1 -1      ircd-ratbox/src/Makefile.in
+  7.50      +42 -23    ircd-ratbox/src/class.c
+  7.408     +8 -11     ircd-ratbox/src/s_conf.c
+  7.92      +1 -3      ircd-ratbox/src/s_debug.c
+
+
+
 leeh        2003/06/10 15:55:23 UTC	(20030610_3)
 
   Modified files:
