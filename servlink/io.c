@@ -22,7 +22,7 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <sys/poll.h>
+
 #include <assert.h>
 #include <errno.h>
 #include <string.h>
@@ -48,15 +48,11 @@ static int check_error(int, int, int);
 static const char *
 fd_name(int fd)
 {
-	if(fd == CONTROL_R.fd)
-		return "control read";
-	if(fd == CONTROL_W.fd)
-		return "control write";
-	if(fd == LOCAL_R.fd)
-		return "data read";
-	if(fd == LOCAL_W.fd)
-		return "data write";
-	if(fd == REMOTE_R.fd)
+	if(fd == CONTROL.fd)
+		return "control";
+	if(fd == LOCAL.fd)
+		return "data";
+	if(fd == REMOTE.fd)
 		return "network";
 
 	/* uh oh... */
@@ -77,28 +73,27 @@ static unsigned int ctrl_ofs = 0;
 void
 io_loop(int nfds)
 {
-	struct pollfd pfd[6];
+	fd_set rfds;
+	fd_set wfds;
 	int i, ret;
 
 	/* loop forever */
 	for (;;)
 	{
-		memset(&pfd,0, sizeof(pfd));
+		FD_ZERO(&rfds);
+		FD_ZERO(&wfds);
 
-		for (i = 0; i < 5; i++)
+		for (i = 0; i < 3; i++)
 		{
-			if(fds[i].read_cb) {
-				pfd[i].fd = fds[i].fd;
-				pfd[i].events |= POLLIN;
-			}
-
-			if(fds[i].write_cb) {
-				pfd[i].fd = fds[i].fd;
-				pfd[i].events |= POLLOUT;
-			}
+			if(fds[i].read_cb)
+				FD_SET(fds[i].fd, &rfds);
+			if(fds[i].write_cb)
+				FD_SET(fds[i].fd, &wfds);
 		}
 
-		ret = poll(pfd, 6, -1);
+		/* we have <3 fds ever, so I don't think select is too painful */
+		ret = select(nfds, &rfds, &wfds, NULL, NULL);
+
 		if(ret < 0)
 		{
 			check_error(ret, IO_SELECT, -1);	/* exit on fatal errors */
@@ -106,11 +101,11 @@ io_loop(int nfds)
 		else if(ret > 0)
 		{
 			/* call any callbacks */
-			for (i = 0; i < 5; i++)
+			for (i = 0; i < 3; i++)
 			{
-				if(fds[i].read_cb && pfd[i].revents & (POLLIN|POLLERR|POLLHUP)) 
+				if(FD_ISSET(fds[i].fd, &rfds) && fds[i].read_cb)
 					(*fds[i].read_cb) ();
-				if(fds[i].write_cb && pfd[i].revents & (POLLOUT|POLLERR|POLLHUP))
+				if(FD_ISSET(fds[i].fd, &wfds) && fds[i].write_cb)
 					(*fds[i].write_cb) ();
 			}
 		}
@@ -118,11 +113,11 @@ io_loop(int nfds)
 }
 
 void
-send_data_blocking(int fd, void *data, int datalen)
+send_data_blocking(int fd, unsigned char *data, int datalen)
 {
 	int ret;
-	struct pollfd pfd[1];
-	memset(pfd, 0, sizeof(&pfd));
+	fd_set wfds;
+
 	while (1)
 	{
 		ret = write(fd, data, datalen);
@@ -135,18 +130,22 @@ send_data_blocking(int fd, void *data, int datalen)
 			datalen -= ret;
 		}
 
-		check_error(ret, IO_WRITE, fd);
+		ret = check_error(ret, IO_WRITE, fd);
 
-		pfd[0].fd = fd;
-		pfd[0].events = POLLOUT|POLLERR|POLLHUP;
+		FD_ZERO(&wfds);
+		FD_SET(fd, &wfds);
 
 		/* sleep until we can write to the fd */
 		while (1)
 		{
-			if((ret = poll(pfd, 1, -1)) > 0)
+			ret = select(fd + 1, NULL, &wfds, NULL, NULL);
+
+			if(ret > 0)	/* break out so we can write */
 				break;
-			else
+
+			if(ret < 0)	/* error ? */
 				check_error(ret, IO_SELECT, fd);	/* exit on fatal errors */
+
 			/* loop on non-fatal errors */
 		}
 	}
@@ -161,7 +160,7 @@ send_data_blocking(int fd, void *data, int datalen)
 void
 process_sendq(struct ctrl_command *cmd)
 {
-	send_data_blocking(REMOTE_W.fd, cmd->data, cmd->datalen);
+	send_data_blocking(REMOTE.fd, cmd->data, cmd->datalen);
 }
 
 /*
@@ -215,7 +214,7 @@ process_recvq(struct ctrl_command *cmd)
 
 			if(in_state.zip_state.z_stream.avail_in)
 			{
-				send_data_blocking(LOCAL_W.fd, buf, blen);
+				send_data_blocking(LOCAL.fd, buf, blen);
 				blen = 0;
 				in_state.zip_state.z_stream.next_out = buf;
 				in_state.zip_state.z_stream.avail_out = BUFLEN;
@@ -227,7 +226,7 @@ process_recvq(struct ctrl_command *cmd)
 	}
 #endif
 
-	send_data_blocking(LOCAL_W.fd, buf, blen);
+	send_data_blocking(LOCAL.fd, buf, blen);
 }
 
 void
@@ -270,13 +269,13 @@ send_zipstats(struct ctrl_command *unused)
 	out_state.zip_state.z_stream.total_in = 0;
 	out_state.zip_state.z_stream.total_out = 0;
 
-	ret = check_error(write(CONTROL_W.fd, ctrl_buf, i), IO_WRITE, CONTROL_W.fd);
+	ret = check_error(write(CONTROL.fd, ctrl_buf, i), IO_WRITE, CONTROL.fd);
 	if(ret < i)
 	{
 		/* write incomplete, register write cb */
-		CONTROL_W.write_cb = write_ctrl;
+		CONTROL.write_cb = write_ctrl;
 		/*  deregister read_cb */
-		CONTROL_R.read_cb = NULL;
+		CONTROL.read_cb = NULL;
 		ctrl_ofs = ret;
 		ctrl_len = i - ret;
 		return;
@@ -306,7 +305,7 @@ send_error(const char *message, ...)
 
 	if(ctrl_len)		/* attempt to flush any data we have... */
 	{
-		send_data_blocking(CONTROL_W.fd, (ctrl_buf + ctrl_ofs), ctrl_len);
+		send_data_blocking(CONTROL.fd, (ctrl_buf + ctrl_ofs), ctrl_len);
 	}
 
 	/* prepare the message, in in_buf, since we won't be using it again.. */
@@ -323,11 +322,11 @@ send_error(const char *message, ...)
 	in_state.buf[2] = len & 0xFF;
 	len += 3;
 
-	send_data_blocking(CONTROL_W.fd, in_state.buf, len);
+	send_data_blocking(CONTROL.fd, in_state.buf, len);
 
 	/* XXX - is this portable?
 	 *       this obviously will fail on a non socket.. */
-	setsockopt(CONTROL_W.fd, SOL_SOCKET, SO_LINGER, &linger_opt, sizeof(struct linger));
+	setsockopt(CONTROL.fd, SOL_SOCKET, SO_LINGER, &linger_opt, sizeof(struct linger));
 
 	/* well, we've tried... */
 	exit(1);		/* now abort */
@@ -353,7 +352,7 @@ read_ctrl(void)
 		cmd.data = NULL;
 
 		/* read the command */
-		if(!(ret = check_error(read(CONTROL_R.fd, tmp, 1), IO_READ, CONTROL_R.fd)))
+		if(!(ret = check_error(read(CONTROL.fd, tmp, 1), IO_READ, CONTROL.fd)))
 			return;
 
 		cmd.command = tmp[0];
@@ -377,8 +376,8 @@ read_ctrl(void)
 		if(cmd.gotdatalen < 2)
 		{
 			len = tmp;
-			if(!(ret = check_error(read(CONTROL_R.fd, len,
-						    (2 - cmd.gotdatalen)), IO_READ, CONTROL_R.fd)))
+			if(!(ret = check_error(read(CONTROL.fd, len,
+						    (2 - cmd.gotdatalen)), IO_READ, CONTROL.fd)))
 				return;
 
 			if(cmd.gotdatalen == 0)
@@ -400,9 +399,9 @@ read_ctrl(void)
 
 	if(cmd.readdata < cmd.datalen)	/* try to get any remaining data */
 	{
-		if(!(ret = check_error(read(CONTROL_R.fd,
+		if(!(ret = check_error(read(CONTROL.fd,
 					    (cmd.data + cmd.readdata),
-					    cmd.datalen - cmd.readdata), IO_READ, CONTROL_R.fd)))
+					    cmd.datalen - cmd.readdata), IO_READ, CONTROL.fd)))
 			return;
 
 		cmd.readdata += ret;
@@ -425,8 +424,8 @@ write_ctrl(void)
 
 	assert(ctrl_len);
 
-	if(!(ret = check_error(write(CONTROL_W.fd, (ctrl_buf + ctrl_ofs),
-				     ctrl_len), IO_WRITE, CONTROL_W.fd)))
+	if(!(ret = check_error(write(CONTROL.fd, (ctrl_buf + ctrl_ofs),
+				     ctrl_len), IO_WRITE, CONTROL.fd)))
 		return;		/* no data waiting */
 
 	ctrl_len -= ret;
@@ -434,9 +433,9 @@ write_ctrl(void)
 	if(!ctrl_len)
 	{
 		/* write completed, de-register write cb */
-		CONTROL_W.write_cb = NULL;
+		CONTROL.write_cb = NULL;
 		/* reregister read_cb */
-		CONTROL_R.read_cb = read_ctrl;
+		CONTROL.read_cb = read_ctrl;
 		ctrl_ofs = 0;
 	}
 	else
@@ -457,7 +456,7 @@ read_data(void)
 		buf = tmp_buf;
 #endif
 
-	while ((ret = check_error(read(LOCAL_R.fd, buf, READLEN), IO_READ, LOCAL_R.fd)))
+	while ((ret = check_error(read(LOCAL.fd, buf, READLEN), IO_READ, LOCAL.fd)))
 	{
 		blen = ret;
 #ifdef HAVE_LIBZ
@@ -500,13 +499,13 @@ read_data(void)
 		}
 #endif
 
-		ret = check_error(write(REMOTE_W.fd, out_state.buf, blen), IO_WRITE, REMOTE_W.fd);
+		ret = check_error(write(REMOTE.fd, out_state.buf, blen), IO_WRITE, REMOTE.fd);
 		if(ret < blen)
 		{
 			/* write incomplete, register write cb */
-			REMOTE_W.write_cb = write_net;
+			REMOTE.write_cb = write_net;
 			/*  deregister read_cb */
-			LOCAL_R.read_cb = NULL;
+			LOCAL.read_cb = NULL;
 			out_state.ofs = ret;
 			out_state.len = blen - ret;
 			return;
@@ -526,9 +525,9 @@ write_net(void)
 
 	assert(out_state.len);
 
-	if(!(ret = check_error(write(REMOTE_W.fd,
+	if(!(ret = check_error(write(REMOTE.fd,
 				     (out_state.buf + out_state.ofs),
-				     out_state.len), IO_WRITE, REMOTE_W.fd)))
+				     out_state.len), IO_WRITE, REMOTE.fd)))
 		return;		/* no data waiting */
 
 	out_state.len -= ret;
@@ -536,9 +535,9 @@ write_net(void)
 	if(!out_state.len)
 	{
 		/* write completed, de-register write cb */
-		REMOTE_W.write_cb = NULL;
+		REMOTE.write_cb = NULL;
 		/* reregister read_cb */
-		LOCAL_R.read_cb = read_data;
+		LOCAL.read_cb = read_data;
 		out_state.ofs = 0;
 	}
 	else
@@ -560,7 +559,7 @@ read_net(void)
 		buf = tmp_buf;
 #endif
 
-	while ((ret = check_error(read(REMOTE_R.fd, buf, READLEN), IO_READ, REMOTE_R.fd)))
+	while ((ret = check_error(read(REMOTE.fd, buf, READLEN), IO_READ, REMOTE.fd)))
 	{
 		blen = ret;
 #ifdef HAVE_LIBCRYPTO
@@ -600,7 +599,7 @@ read_net(void)
 				{
 					if(blen)
 					{
-						send_data_blocking(LOCAL_W.fd, in_state.buf, blen);
+						send_data_blocking(LOCAL.fd, in_state.buf, blen);
 						blen = 0;
 					}
 
@@ -614,16 +613,16 @@ read_net(void)
 		}
 #endif
 
-		ret = check_error(write(LOCAL_W.fd, in_state.buf, blen), IO_WRITE, LOCAL_W.fd);
+		ret = check_error(write(LOCAL.fd, in_state.buf, blen), IO_WRITE, LOCAL.fd);
 
 		if(ret < blen)
 		{
 			in_state.ofs = ret;
 			in_state.len = blen - ret;
 			/* write incomplete, register write cb */
-			LOCAL_W.write_cb = write_data;
+			LOCAL.write_cb = write_data;
 			/* deregister read_cb */
-			REMOTE_R.read_cb = NULL;
+			REMOTE.read_cb = NULL;
 			return;
 		}
 #if defined(HAVE_LIBCRYPTO) || defined(HAVE_LIBZ)
@@ -640,9 +639,9 @@ write_data(void)
 
 	assert(in_state.len);
 
-	if(!(ret = check_error(write(LOCAL_W.fd,
+	if(!(ret = check_error(write(LOCAL.fd,
 				     (in_state.buf + in_state.ofs),
-				     in_state.len), IO_WRITE, LOCAL_W.fd)))
+				     in_state.len), IO_WRITE, LOCAL.fd)))
 		return;
 
 	in_state.len -= ret;
@@ -650,9 +649,9 @@ write_data(void)
 	if(!in_state.len)
 	{
 		/* write completed, de-register write cb */
-		LOCAL_W.write_cb = NULL;
+		LOCAL.write_cb = NULL;
 		/* reregister read_cb */
-		REMOTE_R.read_cb = read_net;
+		REMOTE.read_cb = read_net;
 		in_state.ofs = 0;
 	}
 	else

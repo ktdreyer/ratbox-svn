@@ -118,6 +118,7 @@ void
 timeout_adns(void *ptr)
 {
 	adns_processtimeouts(dns_state, &SystemTime);
+	dns_select();
 }
 
 /* void dns_writeable(int fd, void *ptr)
@@ -130,8 +131,8 @@ void
 dns_writeable(int fd, void *ptr)
 {
 	adns_processwriteable(dns_state, fd, &SystemTime);
-	dns_select();
 	dns_do_callbacks();
+	dns_select();
 }
 
 
@@ -167,7 +168,7 @@ dns_do_callbacks(void)
 
 		case EAGAIN:
 			/* Go into the queue again */
-			break;
+			continue;
 
 		default:
 			assert(query->callback != NULL);
@@ -180,6 +181,7 @@ dns_do_callbacks(void)
 			break;
 		}
 	}
+	dns_select();
 }
 
 /* void dns_readable(int fd, void *ptr)
@@ -192,8 +194,8 @@ void
 dns_readable(int fd, void *ptr)
 {
 	adns_processreadable(dns_state, fd, &SystemTime);
-	dns_select();
 	dns_do_callbacks();
+	dns_select();
 }
 
 /* void dns_select(void)

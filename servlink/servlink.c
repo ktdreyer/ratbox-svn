@@ -46,12 +46,10 @@ static void usage(void);
 struct slink_state in_state;
 struct slink_state out_state;
 
-struct fd_table fds[5] = {
-	{0, read_ctrl, NULL},
-	{0, NULL, NULL},
-	{0, NULL, NULL},
-	{0, NULL, NULL},
-	{0, NULL, NULL}
+struct fd_table fds[3] = {
+	{0, read_ctrl, NULL}, 	/* ctrl */
+	{0, NULL, NULL}, 	/* data */
+	{0, NULL, NULL},	/* net */
 };
 
 /* usage();
@@ -61,8 +59,8 @@ struct fd_table fds[5] = {
 static void
 usage(void)
 {
-	fprintf(stderr, "ircd-ratbox server link v1.0\n");
-	fprintf(stderr, "2001-06-04\n");
+	fprintf(stderr, "ircd-ratbox server link v1.1\n");
+	fprintf(stderr, "2003-09-25\n");
 	fprintf(stderr, "\n");
 	fprintf(stderr, "This program is called by the ircd-ratbox ircd.\n");
 	fprintf(stderr, "It cannot be used on its own.\n");
@@ -73,7 +71,7 @@ int
 main(int argc, char *argv[])
 {
 	int max_fd = 0;
-	int i;
+	int i, x;
 #ifdef SERVLINK_DEBUG
 	int GDBAttached = 0;
 
@@ -87,22 +85,45 @@ main(int argc, char *argv[])
 #endif
 
 	/* Make sure we are running under ircd.. */
-	if(argc != 6 || strcmp(argv[0], "-slink"))
+	
+	if(argc != 4 || strcmp(argv[0], "-slink"))
 		usage();	/* exits */
 
-	for (i = 0; i < 5; i++)
+
+	for (i = 0; i < 3; i++)
 	{
 		fds[i].fd = atoi(argv[i + 1]);
 		if(fds[i].fd < 0)
 			exit(1);
-		if(fds[i].fd > max_fd)
-			max_fd = fds[i].fd;
 	}
 
-	/* set file descriptors to nonblocking mode */
-	for (i = 0; i < 5; i++)
-	{
+	for (i = 0; i < 3; i++)
+	{		
+		/* XXX: Hack alert...we need to do dup2() here for some dumb
+		 * platforms (Solaris) that don't like select using fds > 255
+		 */
+
+		if(fds[i].fd >= 255)
+		{
+			for(x = 0; x < 255; x++)
+			{
+				if(x != fds[0].fd && x != fds[1].fd && x != fds[2].fd && x != fds[3].fd && x != fds[4].fd)
+				{
+					if(dup2(fds[i].fd, x) < 0)
+						exit(1);
+					close(fds[i].fd);
+					fds[i].fd = x;
+					break;
+				}
+			}
+		}		
 		fcntl(fds[i].fd, F_SETFL, O_NONBLOCK);
+	}
+	
+	for(i = 0; i < 3; i++)
+	{
+		if(fds[i].fd > max_fd)
+			max_fd = fds[i].fd;
 	}
 
 	/* enter io loop */

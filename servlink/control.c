@@ -70,7 +70,7 @@ void
 cmd_set_zip_out_level(struct ctrl_command *cmd)
 {
 #ifdef HAVE_LIBZ
-	out_state.zip_state.level = *((int *) cmd->data);
+	out_state.zip_state.level = *cmd->data;
 	if((out_state.zip_state.level < -1) || (out_state.zip_state.level > 9))
 		send_error("invalid compression level %d", out_state.zip_state.level);
 #else
@@ -131,7 +131,7 @@ void
 cmd_set_crypt_in_cipher(struct ctrl_command *cmd)
 {
 #ifdef HAVE_LIBCRYPTO
-	const unsigned int cipher = *((unsigned int *) cmd->data);
+	const unsigned int cipher = *cmd->data;
 
 	if(in_state.crypt_state.cipher)
 		send_error("can't set decryption cipher - already set!");
@@ -260,7 +260,7 @@ void
 cmd_set_crypt_out_cipher(struct ctrl_command *cmd)
 {
 #ifdef HAVE_LIBCRYPTO
-	const unsigned int cipher = *((unsigned int *) cmd->data);
+	const unsigned int cipher = *cmd->data;
 
 	if(out_state.crypt_state.cipher)
 		send_error("can't set encryption cipher - already set!");
@@ -393,10 +393,10 @@ cmd_init(struct ctrl_command *cmd)
 
 	in_state.active = 1;
 	out_state.active = 1;
-	CONTROL_R.read_cb = read_ctrl;
-	CONTROL_W.write_cb = NULL;
-	LOCAL_R.read_cb = read_data;
-	LOCAL_W.write_cb = NULL;
-	REMOTE_R.read_cb = read_net;
-	REMOTE_W.write_cb = NULL;
+	CONTROL.read_cb = read_ctrl;
+	CONTROL.write_cb = NULL;
+	LOCAL.read_cb = read_data;
+	LOCAL.write_cb = NULL;
+	REMOTE.read_cb = read_net;
+	REMOTE.write_cb = NULL;
 }

@@ -1323,45 +1323,32 @@ fork_server(struct Client *server)
 {
 	int ret;
 	int i;
-	int fd_temp[2];
-	int slink_fds[2][2][2] = { {{0, 0}, {0, 0}},
-	{{0, 0}, {0, 0}}
-	};
-	/* [0][y][z] - ctrl  | [1][y][z] - data  
-	 * [x][0][z] - child | [x][1][z] - parent
-	 * [x][y][0] - read  | [x][y][1] - write
-	 */
-	char fd_str[6][6];	/* store 5x '6' '5' '5' '3' '5' '7' '\0' */
+	int ctrl_fds[2];
+	int data_fds[2];
+
+	char fd_str[4][6];
 	char *kid_argv[7];
 	char slink[] = "-slink";
 
 
 	/* ctrl */
 #ifdef HAVE_SOCKETPAIR
-	if(socketpair(AF_UNIX, SOCK_STREAM, 0, fd_temp) < 0)
+	if(socketpair(AF_UNIX, SOCK_STREAM, 0, ctrl_fds) < 0)
 #else
-	if(inet_socketpair(AF_INET,SOCK_STREAM, 0, fd_temp) < 0)
+	if(inet_socketpair(AF_INET,SOCK_STREAM, 0, ctrl_fds) < 0)
 #endif
 		goto fork_error;
 
-	slink_fds[0][0][0] = fd_temp[0];
-	slink_fds[0][1][1] = fd_temp[1];
-	slink_fds[0][0][1] = fd_temp[0];
-	slink_fds[0][1][0] = fd_temp[1];
+	
 
 	/* data */
 #ifdef HAVE_SOCKETPAIR
-	if(socketpair(AF_UNIX, SOCK_STREAM, 0, fd_temp) < 0)
+	if(socketpair(AF_UNIX, SOCK_STREAM, 0, data_fds) < 0)
 #else
-	if(inet_socketpair(AF_INET,SOCK_STREAM, 0, fd_temp) < 0)
+	if(inet_socketpair(AF_INET,SOCK_STREAM, 0, data_fds) < 0)
 #endif
 		goto fork_error;
 
-
-	slink_fds[1][0][0] = fd_temp[0];
-	slink_fds[1][1][1] = fd_temp[1];
-	slink_fds[1][0][1] = fd_temp[0];
-	slink_fds[1][1][0] = fd_temp[1];
 
 #ifdef __CYGWIN__
 	if((ret = vfork()) < 0)
@@ -1374,12 +1361,9 @@ fork_server(struct Client *server)
 		/* set our fds as non blocking and close everything else */
 		for (i = 0; i < HARD_FDLIMIT; i++)
 		{
+				
 
-			if((i == slink_fds[0][0][0])
-			   || (i == slink_fds[0][0][1])
-			   || (i == slink_fds[0][0][0])
-			   || (i == slink_fds[1][0][1]) 
-			   || (i == server->localClient->fd))
+			if((i == ctrl_fds[1]) || (i == data_fds[1]) || (i == server->localClient->fd)) 
 			{
 				comm_set_nb(i);
 #ifdef USE_SIGIO		/* the servlink process doesn't need O_ASYNC */
@@ -1400,18 +1384,14 @@ fork_server(struct Client *server)
 			}
 		}
 
-		sprintf(fd_str[0], "%d", slink_fds[0][0][0]);	/* ctrl read */
-		sprintf(fd_str[1], "%d", slink_fds[0][0][1]);	/* ctrl write */
-		sprintf(fd_str[2], "%d", slink_fds[1][0][0]);	/* data read */
-		sprintf(fd_str[3], "%d", slink_fds[1][0][1]);	/* data write */
-		sprintf(fd_str[4], "%d", server->localClient->fd);	/* network read/write */
+		ircsnprintf(fd_str[0], sizeof(fd_str[0]), "%d", ctrl_fds[1]);
+		ircsnprintf(fd_str[1], sizeof(fd_str[1]), "%d", data_fds[1]);
+		ircsnprintf(fd_str[2], sizeof(fd_str[2]), "%d", server->localClient->fd);
 		kid_argv[0] = slink;
 		kid_argv[1] = fd_str[0];
 		kid_argv[2] = fd_str[1];
 		kid_argv[3] = fd_str[2];
-		kid_argv[4] = fd_str[3];
-		kid_argv[5] = fd_str[4];
-		kid_argv[6] = NULL;
+		kid_argv[4] = NULL;
 
 		/* exec servlink program */
 		execv(ConfigFileEntry.servlink_path, kid_argv);
@@ -1424,14 +1404,12 @@ fork_server(struct Client *server)
 		fd_close(server->localClient->fd);
 
 		/* close the childs end of the pipes */
-		close(slink_fds[0][0][0]);
-		close(slink_fds[0][0][1]);
-		close(slink_fds[1][0][0]);
-		close(slink_fds[1][0][1]);
+		close(ctrl_fds[1]);
+		close(data_fds[1]);
 		
 		s_assert(server->localClient);
-		server->localClient->ctrlfd = slink_fds[0][1][1];
-		server->localClient->fd = slink_fds[1][1][1];
+		server->localClient->ctrlfd = ctrl_fds[0];
+		server->localClient->fd = data_fds[0];
 
 		if(!comm_set_nb(server->localClient->fd))
 		{
@@ -1460,8 +1438,8 @@ fork_server(struct Client *server)
 		fd_open(server->localClient->ctrlfd, FD_SOCKET, NULL);
 		fd_open(server->localClient->fd, FD_SOCKET, NULL);
 
-		read_ctrl_packet(slink_fds[0][1][0], server);
-		read_packet(slink_fds[1][1][0], server);
+		read_ctrl_packet(server->localClient->ctrlfd, server);
+		read_packet(server->localClient->fd, server);
 	}
 
 	return 0;
@@ -1469,14 +1447,10 @@ fork_server(struct Client *server)
       fork_error:
 	/* this is ugly, but nicer than repeating
 	 * about 50 close() statements everywhre... */
-	close(slink_fds[0][0][0]);
-	close(slink_fds[0][0][1]);
-	close(slink_fds[0][1][0]);
-	close(slink_fds[0][1][1]);
-	close(slink_fds[1][0][0]);
-	close(slink_fds[1][0][1]);
-	close(slink_fds[1][1][0]);
-	close(slink_fds[1][1][1]);
+	close(data_fds[0]);
+	close(data_fds[1]);
+	close(ctrl_fds[0]);
+	close(ctrl_fds[1]);
 	return -1;
 }
 #endif

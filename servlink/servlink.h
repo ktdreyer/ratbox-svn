@@ -31,19 +31,16 @@
 #endif
 
 /* do not use stdin/out/err, as it seems to break on solaris */
-#define CONTROL_R               fds[0]
-#define CONTROL_W               fds[1]
-#define LOCAL_R                 fds[2]
-#define LOCAL_W                 fds[3]
-#define REMOTE_R                fds[4]
-#define REMOTE_W                REMOTE_R
+#define CONTROL               fds[0]
+#define LOCAL                 fds[1]
+#define REMOTE                 fds[2]
 
 #undef  SERVLINK_DEBUG
 
 #define READLEN                  16384
 
 #ifdef HAVE_LIBZ
-#define BUFLEN                   READLEN * 6 /* allow for decompression */
+#define BUFLEN                   READLEN * 6	/* allow for decompression */
 #else
 #define BUFLEN                   READLEN
 #endif
@@ -61,54 +58,54 @@
 
 struct crypt_state
 {
-  EVP_CIPHER_CTX       ctx;
-  const EVP_CIPHER           *cipher;
-  unsigned int          keylen;         /* bytes */
-  unsigned char        *key;
-  unsigned int          ivlen;          /* bytes */
-  unsigned char        *iv;
-  unsigned int          rounds;         /* rc5 only */
+	EVP_CIPHER_CTX ctx;
+	const EVP_CIPHER *cipher;
+	unsigned int keylen;	/* bytes */
+	unsigned char *key;
+	unsigned int ivlen;	/* bytes */
+	unsigned char *iv;
+	unsigned int rounds;	/* rc5 only */
 };
 #endif
 
 #ifdef HAVE_LIBZ
 struct zip_state
 {
-  z_stream             z_stream;
-  int                  level;           /* compression level */
+	z_stream z_stream;
+	int level;		/* compression level */
 };
 #endif
 
 struct slink_state
 {
-  unsigned int          crypt:1;
-  unsigned int          zip:1;
-  unsigned int          active:1;
+	unsigned int crypt:1;
+	unsigned int zip:1;
+	unsigned int active:1;
 
-  unsigned char         buf[BUFLEN*2];
-  unsigned int          ofs;
-  unsigned int          len;
+	unsigned char buf[BUFLEN * 2];
+	unsigned int ofs;
+	unsigned int len;
 
 #ifdef HAVE_LIBCRYPTO
-  struct crypt_state    crypt_state;
+	struct crypt_state crypt_state;
 #endif
 #ifdef HAVE_LIBZ
-  struct zip_state      zip_state;
+	struct zip_state zip_state;
 #endif
 };
 
 
-typedef void (io_callback)(void);
+typedef void (io_callback) (void);
 
 struct fd_table
 {
-  int           fd;
-  io_callback   *read_cb;
-  io_callback   *write_cb;
+	int fd;
+	io_callback *read_cb;
+	io_callback *write_cb;
 };
 
-extern struct slink_state       in_state;
-extern struct slink_state       out_state;
-extern struct fd_table          fds[5];
+extern struct slink_state in_state;
+extern struct slink_state out_state;
+extern struct fd_table fds[3];
 
 #endif /* INCLUDED_servlink_servlink_h */
