@@ -91,7 +91,7 @@ static inline int
 send_trim(char *lsendbuf, int len );
 
 /*
- * dead_link
+ * dead_lin
  *
  *      If 'notice' is not NULL, it is assumed to be a format
  *      for a message to local opers. I can contain only one
@@ -128,13 +128,7 @@ dead_link(struct Client *to, char *notice)
                          notice, get_client_name(to, MASK_IP));
   }
   Debug((DEBUG_ERROR, notice, get_client_name(to, HIDE_IP)));
-  /* Must do this know, can't try and send in exit_client... */
-  if (to->fd > -1)
-  {
-    fd_close(to->fd);
-    to->fd = -1;
-  }
-  /* fd is closed, this is now safe... */
+  SetDead(to);
   exit_client(to, to, &me, notice);
   return (-1);
 } /* dead_link() */
