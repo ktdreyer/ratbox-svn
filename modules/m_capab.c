@@ -31,7 +31,7 @@
 #include "parse.h"
 #include "modules.h"
 
-#include <assert.h>
+static int mr_capab(struct Client*, struct Client*, int, char**);
 
 struct Message capab_msgtab = {
   MSG_CAPAB, 0, 0, 0, MFLG_SLOW | MFLG_UNREG, 0,
@@ -58,7 +58,8 @@ char *_version = "20001122";
  *      parv[1] = space-separated list of capabilities
  *
  */
-int mr_capab(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int mr_capab(struct Client *cptr, struct Client *sptr,
+                    int parc, char *parv[])
 {
   struct Capability *cap;
   char* p;

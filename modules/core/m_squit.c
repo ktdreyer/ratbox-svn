@@ -36,8 +36,10 @@
 #include "parse.h"
 #include "modules.h"
 
-
 #include <assert.h>
+
+static int ms_squit(struct Client*, struct Client*, int, char**);
+static int mo_squit(struct Client*, struct Client*, int, char**);
 
 struct Message squit_msgtab = {
   MSG_SQUIT, 0, 1, 0, MFLG_SLOW, 0,
@@ -62,9 +64,9 @@ struct squit_parms
   struct Client *acptr;
 };
 
-struct squit_parms *find_squit(struct Client *cptr,
-			       struct Client *sptr,
-			       char *server);
+static struct squit_parms *find_squit(struct Client *cptr,
+                                      struct Client *sptr,
+                                      char *server);
 
 char *_version = "20001122";
 
@@ -74,7 +76,8 @@ char *_version = "20001122";
  *      parv[1] = server name
  *      parv[2] = comment
  */
-int mo_squit(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int mo_squit(struct Client *cptr, struct Client *sptr,
+                    int parc, char *parv[])
 {
   struct squit_parms *found_squit;
   char  *comment = (parc > 2 && parv[2]) ? parv[2] : cptr->name;
@@ -114,7 +117,8 @@ int mo_squit(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
  *      parv[1] = server name
  *      parv[2] = comment
  */
-int ms_squit(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int ms_squit(struct Client *cptr, struct Client *sptr,
+                    int parc, char *parv[])
 {
   struct squit_parms *found_squit;
   char  *comment = (parc > 2 && parv[2]) ? parv[2] : cptr->name;
@@ -159,8 +163,9 @@ int ms_squit(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
  * output	- pointer to struct containing found squit or none if not found
  * side effects	-
  */
-struct squit_parms *find_squit(struct Client *cptr, struct Client *sptr,
-			     char *server)
+static struct squit_parms *find_squit(struct Client *cptr,
+                                      struct Client *sptr,
+                                      char *server)
 {
   static struct squit_parms found_squit;
   static struct Client *acptr;

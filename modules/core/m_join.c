@@ -44,6 +44,9 @@
 #include <string.h>
 #include <assert.h>
 
+static int m_join(struct Client*, struct Client*, int, char**);
+static int ms_join(struct Client*, struct Client*, int, char**);
+
 struct Message join_msgtab = {
   MSG_JOIN, 0, 2, 0, MFLG_SLOW, 0,
   {m_unregistered, m_join, ms_join, m_join}
@@ -61,10 +64,10 @@ _moddeinit(void)
   mod_del_cmd(&join_msgtab);
 }
 
-void build_list_of_channels( struct Client *sptr,
-               				    char *jbuf, char *given_names);
-void do_join_0(struct Client *cptr, struct Client *sptr);
-void check_spambot_warning( struct Client *sptr, char *name );
+static void build_list_of_channels( struct Client *sptr,
+                                    char *jbuf, char *given_names);
+static void do_join_0(struct Client *cptr, struct Client *sptr);
+static void check_spambot_warning( struct Client *sptr, char *name );
 
 char *_version = "20001122";
 
@@ -75,10 +78,10 @@ char *_version = "20001122";
 **      parv[2] = channel password (key) (or vkey for vchans)
 **      parv[3] = vkey
 */
-int     m_join(struct Client *cptr,
-               struct Client *sptr,
-               int parc,
-               char *parv[])
+static int m_join(struct Client *cptr,
+                  struct Client *sptr,
+                  int parc,
+                  char *parv[])
 {
   static char   jbuf[BUFSIZE];
   struct Channel *chptr = NULL;
@@ -258,6 +261,7 @@ int     m_join(struct Client *cptr,
 	}
 #if 0
       /*
+       * XXX
        * This is broken.  We check if sptr has CAP_HOPS, instead
        * of the server.  Plus, if the server doesn't support
        * HOPS we should send halfops as ops -- we are the users server,
@@ -345,10 +349,10 @@ int     m_join(struct Client *cptr,
   return 0;
 }
 
-int     ms_join(struct Client *cptr,
-               struct Client *sptr,
-               int parc,
-               char *parv[])
+static int ms_join(struct Client *cptr,
+                   struct Client *sptr,
+                   int parc,
+                   char *parv[])
 {
   char *name;
   
@@ -384,7 +388,7 @@ int     ms_join(struct Client *cptr,
  * output	- NONE
  * side effects - jbuf is modified to contain valid list of channel names
  */
-void build_list_of_channels( struct Client *sptr,
+static void build_list_of_channels( struct Client *sptr,
 				    char *jbuf, char *given_names)
 {
   char *name;
@@ -442,7 +446,7 @@ void build_list_of_channels( struct Client *sptr,
  * 		  anti spambot code.
  */
 
-void do_join_0(struct Client *cptr, struct Client *sptr)
+static void do_join_0(struct Client *cptr, struct Client *sptr)
 {
   struct Channel *chptr=NULL;
   dlink_node   *lp;
@@ -469,7 +473,7 @@ void do_join_0(struct Client *cptr, struct Client *sptr)
  * side effects	- 
  */
 
-void check_spambot_warning( struct Client *sptr, char *name )
+static void check_spambot_warning( struct Client *sptr, char *name )
 {
   int t_delta;
   int decrement_count;

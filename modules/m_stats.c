@@ -52,6 +52,10 @@
 #include "modules.h"
 #include <string.h>
 
+static int m_stats(struct Client*, struct Client*, int, char**);
+static int ms_stats(struct Client*, struct Client*, int, char**);
+static int mo_stats(struct Client*, struct Client*, int, char**);
+
 struct Message stats_msgtab = {
   MSG_STATS, 0, 1, 0, MFLG_SLOW, 0,
   {m_unregistered, m_stats, ms_stats, mo_stats}
@@ -97,16 +101,18 @@ const char* Lformat = ":%s %d %s %s %u %u %u %u %u :%u %u %s";
 
 char *parse_stats_args(int, char **, int *, int *);
 
-void stats_L(struct Client *, char *, int, int, char);
-void stats_L_list(struct Client *s, char *, int, int, dlink_list *, char);
-void stats_spy(struct Client *, char);
-void stats_L_spy(struct Client *, char, char *);
-void stats_p_spy(struct Client *);
-void do_normal_stats(struct Client *, char *, char *, char, int, int);
-void do_non_priv_stats(struct Client *, char *, char *, char, int, int);
-void do_priv_stats(struct Client *, char *, char *, char, int, int);
+static void stats_L(struct Client *, char *, int, int, char);
+static void stats_L_list(struct Client *s, char *, int, int,
+                         dlink_list *, char);
+static void stats_spy(struct Client *, char);
+static void stats_L_spy(struct Client *, char, char *);
+static void stats_p_spy(struct Client *);
+static void do_normal_stats(struct Client *, char *, char *, char, int, int);
+static void do_non_priv_stats(struct Client *, char *, char *, char, int, int);
+static void do_priv_stats(struct Client *, char *, char *, char, int, int);
 
-int m_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int m_stats(struct Client *cptr, struct Client *sptr,
+                   int parc, char *parv[])
 {
   char            statchar = parc > 1 ? parv[1][0] : '\0';
   int             doall = 0;
@@ -164,8 +170,8 @@ int m_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
  *            it--not reversed as in ircd.conf!
  */
 
-
-int mo_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int mo_stats(struct Client *cptr, struct Client *sptr,
+                    int parc, char *parv[])
 {
   char            statchar = parc > 1 ? parv[1][0] : '\0';
   int             doall = 0;
@@ -187,7 +193,6 @@ int mo_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
   return 0;
 }
-
 
 /*
  * ms_stats - STATS message handler
@@ -211,7 +216,8 @@ int mo_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
  *            it--not reversed as in ircd.conf!
  */
 
-int ms_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int ms_stats(struct Client *cptr, struct Client *sptr,
+                    int parc, char *parv[])
 {
   if (hunt_server(cptr,sptr,":%s STATS %s :%s",2,parc,parv)!=HUNTED_ISME)
     return 0;
@@ -236,7 +242,7 @@ int ms_stats(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
  * output	- NONE
  * side effects - stats that either opers or non opers can see
  */
-void do_normal_stats(struct Client *sptr,
+static void do_normal_stats(struct Client *sptr,
 			    char *name, char *target,
 			    char statchar, int doall, int wilds)
 {
@@ -276,7 +282,7 @@ void do_normal_stats(struct Client *sptr,
  * output	- NONE
  * side effects - only stats that are allowed for non-opers etc. are done here
  */
-void do_non_priv_stats(struct Client *sptr, char *name, char *target,
+static void do_non_priv_stats(struct Client *sptr, char *name, char *target,
 			      char statchar, int doall, int wilds)
 {
   switch (statchar)
@@ -373,7 +379,7 @@ void do_non_priv_stats(struct Client *sptr, char *name, char *target,
  * output	- NONE
  * side effects - only stats that are allowed for opers etc. are done here
  */
-void do_priv_stats(struct Client *sptr, char *name, char *target,
+static void do_priv_stats(struct Client *sptr, char *name, char *target,
 			    char statchar, int doall, int wilds)
 { 
  switch (statchar)
@@ -518,15 +524,16 @@ void do_priv_stats(struct Client *sptr, char *name, char *target,
  * output	- NONE
  * side effects	-
  */
-void stats_L(struct Client *sptr,char *name,int doall, int wilds,char statchar)
+static void stats_L(struct Client *sptr,char *name,int doall,
+                    int wilds,char statchar)
 {
   stats_L_list(sptr, name, doall, wilds, &unknown_list, statchar);
   stats_L_list(sptr, name, doall, wilds, &lclient_list, statchar);
   stats_L_list(sptr, name, doall, wilds, &serv_list, statchar);
 }
 
-void stats_L_list(struct Client *sptr,char *name, int doall, int wilds,
-		  dlink_list *list,char statchar)
+static void stats_L_list(struct Client *sptr,char *name, int doall, int wilds,
+                         dlink_list *list,char statchar)
 {
   dlink_node *ptr;
   struct Client *acptr;
@@ -620,7 +627,7 @@ void stats_L_list(struct Client *sptr,char *name, int doall, int wilds,
  *
  * done --is
  */
-void stats_spy(struct Client *sptr,char statchar)
+static void stats_spy(struct Client *sptr,char statchar)
 {
   if (ConfigFileEntry.stats_notice)
     {
@@ -644,7 +651,7 @@ void stats_spy(struct Client *sptr,char statchar)
  * side effects	- a notice is sent to opers, IF spy mode is configured
  * 		  in the conf file.
  */
-void stats_L_spy(struct Client *sptr, char statchar, char *name)
+static void stats_L_spy(struct Client *sptr, char statchar, char *name)
 {
   if (ConfigFileEntry.stats_notice)
     {
@@ -678,7 +685,7 @@ void stats_L_spy(struct Client *sptr, char statchar, char *name)
  * side effects	- a notice is sent to opers, IF spy mode is configured
  * 		  in the conf file.
  */
-void stats_p_spy(struct Client *sptr)
+static void stats_p_spy(struct Client *sptr)
 {
   sendto_realops_flags(FLAGS_SPY,
 		       "STATS p requested by %s (%s@%s) [%s]",
@@ -698,7 +705,7 @@ void stats_p_spy(struct Client *sptr)
  * common parse routine for m_stats args
  * 
  */
-char *parse_stats_args(int parc,char *parv[],int *doall,int *wilds)
+static char *parse_stats_args(int parc,char *parv[],int *doall,int *wilds)
 {
   char *name;
 

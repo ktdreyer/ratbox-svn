@@ -33,11 +33,11 @@
 #include "parse.h"
 #include "modules.h"
 
-void do_eob( struct Client *sptr );
+static int ms_eob(struct Client*, struct Client*, int, char**);
 
 struct Message eob_msgtab = {
   MSG_EOB, 0, 0, 0, MFLG_SLOW | MFLG_UNREG, 0, 
-  {m_unregistered, m_error, ms_eob, m_error}
+  {m_unregistered, m_ignore, ms_eob, m_ignore}
 };
 
 void
@@ -59,7 +59,8 @@ char *_version = "20001202";
  *      parv[0] = sender prefix   
  *      parv[1] = servername   
  */
-int ms_eob(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int ms_eob(struct Client *cptr, struct Client *sptr,
+                  int parc, char *parv[])
 {
   if (parc > 1)
     sendto_realops_flags(FLAGS_ALL,"*** End of burst from %s (%d seconds)",

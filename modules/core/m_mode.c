@@ -39,6 +39,8 @@
 #include "parse.h"
 #include "modules.h"
 
+static int m_mode(struct Client*, struct Client*, int, char**);
+
 struct Message mode_msgtab = {
   MSG_MODE, 0, 2, 0, MFLG_SLOW, 0,
   {m_unregistered, m_mode, m_mode, m_mode}
@@ -64,7 +66,8 @@ char *_version = "20001122";
  * parv[0] - sender
  * parv[1] - channel
  */
-int m_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int m_mode(struct Client *cptr, struct Client *sptr,
+              int parc, char *parv[])
 {
   struct Channel* chptr=NULL;
   struct Channel* vchan;

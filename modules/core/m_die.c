@@ -36,6 +36,8 @@
 #include "parse.h"
 #include "modules.h"
 
+static int mo_die(struct Client*, struct Client*, int, char**);
+
 struct Message die_msgtab = {
   MSG_DIE, 0, 1, 0, MFLG_SLOW, 0,
   {m_unregistered, m_not_oper, m_ignore, mo_die}
@@ -58,7 +60,8 @@ char *_version = "20001122";
 /*
  * mo_die - DIE command handler
  */
-int mo_die(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int mo_die(struct Client *cptr, struct Client *sptr,
+                  int parc, char *parv[])
 {
   struct Client* acptr;
   dlink_node *ptr;

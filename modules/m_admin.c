@@ -33,7 +33,10 @@
 #include "parse.h"
 #include "modules.h"
 
-void do_admin( struct Client *sptr );
+static int m_admin(struct Client*, struct Client*, int, char**);
+static int mr_admin(struct Client*, struct Client*, int, char**);
+static int ms_admin(struct Client*, struct Client*, int, char**);
+static void do_admin( struct Client *sptr );
 
 struct Message admin_msgtab = {
   MSG_ADMIN, 0, 0, 0, MFLG_SLOW | MFLG_UNREG, 0, 
@@ -59,7 +62,8 @@ char *_version = "20001202";
  *      parv[0] = sender prefix   
  *      parv[1] = servername   
  */
-int mr_admin(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int mr_admin(struct Client *cptr, struct Client *sptr,
+                    int parc, char *parv[])
 {
   static time_t last_used=0L;
  
@@ -81,7 +85,8 @@ int mr_admin(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
  *      parv[0] = sender prefix
  *      parv[1] = servername
  */
-int m_admin(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int m_admin(struct Client *cptr, struct Client *sptr, int parc,
+                   char *parv[])
 {
   static time_t last_used=0L;
 
@@ -107,7 +112,8 @@ int m_admin(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
  *      parv[0] = sender prefix
  *      parv[1] = servername
  */
-int ms_admin(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int ms_admin(struct Client *cptr, struct Client *sptr,
+                    int parc, char *parv[])
 {
   if (hunt_server(cptr,sptr,":%s ADMIN :%s",1,parc,parv) != HUNTED_ISME)
     return 0;
@@ -125,7 +131,7 @@ int ms_admin(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
  * output	- none
  * side effects	- admin info is sent to client given
  */
-void do_admin( struct Client *sptr )
+static void do_admin( struct Client *sptr )
 {
   struct ConfItem *aconf;
 

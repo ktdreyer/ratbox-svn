@@ -49,51 +49,55 @@ struct entity {
   int flags;
 };
 
-int build_target_list(int p_or_n, char *command,
-		      struct Client *cptr, struct Client *sptr,
-		      char *nicks_channels, struct entity ***targets,
-		      char *text);
+static int build_target_list(int p_or_n, char *command,
+                             struct Client *cptr, struct Client *sptr,
+                             char *nicks_channels, struct entity ***targets,
+                             char *text);
 
-int flood_attack_client(struct Client *sptr, struct Client *acptr);
-int flood_attack_channel(struct Client *sptr, struct Channel *chptr,
-			 char *chname);
+static int flood_attack_client(struct Client *sptr, struct Client *acptr);
+static int flood_attack_channel(struct Client *sptr, struct Channel *chptr,
+                                char *chname);
 
 #define ENTITY_NONE    0
 #define ENTITY_CHANNEL 1
 #define ENTITY_CHANOPS_ON_CHANNEL 2
 #define ENTITY_CLIENT  3
 
-struct entity **target_table = NULL;
-int target_table_size = 0;
+static struct entity **target_table = NULL;
+static int target_table_size = 0;
 
-int duplicate_ptr( void *, struct entity **, int);
+static int duplicate_ptr( void *, struct entity **, int);
 
-int m_message(int, char *, struct Client *, struct Client *, int, char **);
+static int m_message(int, char *, struct Client *,
+                     struct Client *, int, char **);
 
-void msg_channel( int p_or_n, char *command,
-		  struct Client *cptr,
-		  struct Client *sptr,
-		  struct Channel *chptr,
-		  char *text);
+static int m_privmsg(struct Client *, struct Client *, int, char **);
+static int m_notice(struct Client *, struct Client *, int, char **);
 
-void msg_channel_flags( int p_or_n, char *command,
-			struct Client *cptr,
-			struct Client *sptr,
-			struct Channel *chptr,
-			int flags,
-			char *text);
+static void msg_channel( int p_or_n, char *command,
+                         struct Client *cptr,
+                         struct Client *sptr,
+                         struct Channel *chptr,
+                         char *text);
 
-void msg_client(int p_or_n, char *command,
-		struct Client *sptr, struct Client *acptr,
-		char *text);
+static void msg_channel_flags( int p_or_n, char *command,
+                               struct Client *cptr,
+                               struct Client *sptr,
+                               struct Channel *chptr,
+                               int flags,
+                               char *text);
 
-void handle_opers(int p_or_n, char *command,
-		  struct Client *cptr,
-		  struct Client *sptr,
-		  char *nick,
-		  char *text);
+static void msg_client(int p_or_n, char *command,
+                       struct Client *sptr, struct Client *acptr,
+                       char *text);
 
-void free_target_table(void);
+static void handle_opers(int p_or_n, char *command,
+                         struct Client *cptr,
+                         struct Client *sptr,
+                         char *nick,
+                         char *text);
+
+static void free_target_table(void);
 
 struct Message privmsg_msgtab = {
   MSG_PRIVMSG, 0, 1, 0, MFLG_SLOW | MFLG_UNREG, 0L,
@@ -125,7 +129,7 @@ char *_version = "20001122";
    free the target_table
 */
 
-void
+static void
 free_target_table(void)
 {
 	int i;
@@ -159,18 +163,18 @@ free_target_table(void)
 #define PRIVMSG 0
 #define NOTICE  1
 
-int     m_privmsg(struct Client *cptr,
-		  struct Client *sptr,
-		  int parc,
-		  char *parv[])
+static int m_privmsg(struct Client *cptr,
+                     struct Client *sptr,
+                     int parc,
+                     char *parv[])
 {
   return(m_message(PRIVMSG,"PRIVMSG",cptr,sptr,parc,parv));
 }
 
-int     m_notice(struct Client *cptr,
-		 struct Client *sptr,
-		 int parc,
-		 char *parv[])
+static int m_notice(struct Client *cptr,
+                    struct Client *sptr,
+                    int parc,
+                    char *parv[])
 {
   return(m_message(NOTICE,"NOTICE",cptr,sptr,parc,parv));
 }
@@ -182,12 +186,12 @@ int     m_notice(struct Client *cptr,
  *		- pointer to sptr
  *		- pointer to channel
  */
-int     m_message(int p_or_n,
-		  char *command,
-		  struct Client *cptr,
-		  struct Client *sptr,
-		  int parc,
-		  char *parv[])
+static int m_message(int p_or_n,
+                     char *command,
+                     struct Client *cptr,
+                     struct Client *sptr,
+                     int parc,
+                     char *parv[])
 {
   int i;
   int ntargets;
@@ -268,13 +272,13 @@ int     m_message(int p_or_n,
  *
  */
 
-int build_target_list(int p_or_n,
-		      char *command,
-		      struct Client *cptr,
-		      struct Client *sptr,
-		      char *nicks_channels,
-		      struct entity ***targets,
-		      char *text)
+static int build_target_list(int p_or_n,
+                             char *command,
+                             struct Client *cptr,
+                             struct Client *sptr,
+                             char *nicks_channels,
+                             struct entity ***targets,
+                             char *text)
 {
   int  i = 0;
   int  type;
@@ -418,7 +422,7 @@ int build_target_list(int p_or_n,
  *		  note, this does the canonize using pointers
  * side effects	- NONE
  */
-int duplicate_ptr( void *ptr, struct entity **ltarget_table, int n)
+static int duplicate_ptr( void *ptr, struct entity **ltarget_table, int n)
 {
   int i;
 
@@ -444,11 +448,11 @@ int duplicate_ptr( void *ptr, struct entity **ltarget_table, int n)
  * output	- NONE
  * side effects	- message given channel
  */
-void msg_channel( int p_or_n, char *command,
-		  struct Client *cptr,
-		  struct Client *sptr,
-		  struct Channel *chptr,
-		  char *text)
+static void msg_channel( int p_or_n, char *command,
+                         struct Client *cptr,
+                         struct Client *sptr,
+                         struct Channel *chptr,
+                         char *text)
 {
   struct Channel *vchan;
   char *chname=NULL;
@@ -506,12 +510,12 @@ void msg_channel( int p_or_n, char *command,
  * output	- NONE
  * side effects	- message given channel either chanop or voice
  */
-void msg_channel_flags( int p_or_n, char *command,
-			struct Client *cptr,
-			struct Client *sptr,
-			struct Channel *chptr,
-			int flags,
-			char *text)
+static void msg_channel_flags( int p_or_n, char *command,
+                               struct Client *cptr,
+                               struct Client *sptr,
+                               struct Channel *chptr,
+                               int flags,
+                               char *text)
 {
   struct Channel *vchan;
   char *chname=NULL;
@@ -519,6 +523,7 @@ void msg_channel_flags( int p_or_n, char *command,
 
   chname = chptr->chname;
 
+  /* XXX halfops ? */
   if (flags & MODE_VOICE)
     type = ONLY_CHANOPS_VOICED;
   else
@@ -567,9 +572,9 @@ void msg_channel_flags( int p_or_n, char *command,
  * output	- NONE
  * side effects	- message given channel either chanop or voice
  */
-void msg_client(int p_or_n, char *command,
-		struct Client *sptr, struct Client *acptr,
-		char *text)
+static void msg_client(int p_or_n, char *command,
+                       struct Client *sptr, struct Client *acptr,
+                       char *text)
 {
   if(MyClient(sptr))
     {
@@ -644,7 +649,7 @@ void msg_client(int p_or_n, char *command,
  * output	- 1 if target is under flood attack
  * side effects	- check for flood attack on target acptr
  */
-int flood_attack_client(struct Client *sptr,struct Client *acptr)
+static int flood_attack_client(struct Client *sptr,struct Client *acptr)
 {
   int delta;
 
@@ -696,8 +701,8 @@ int flood_attack_client(struct Client *sptr,struct Client *acptr)
  * output	- 1 if target is under flood attack
  * side effects	- check for flood attack on target chptr
  */
-int flood_attack_channel(struct Client *sptr,struct Channel *chptr,
-			 char *chname)
+static int flood_attack_channel(struct Client *sptr,struct Channel *chptr,
+                                char *chname)
 {
   int delta;
 
@@ -760,12 +765,12 @@ int flood_attack_channel(struct Client *sptr,struct Channel *chptr,
  *		  now becomes	  "/msg $$some.server.mask"
  *		  This disambiguates the syntax.
  */
-void handle_opers(int p_or_n,
-		  char *command,
-		  struct Client *cptr,
-		  struct Client *sptr,
-		  char *nick,
-		  char *text)
+static void handle_opers(int p_or_n,
+                         char *command,
+                         struct Client *cptr,
+                         struct Client *sptr,
+                         char *nick,
+                         char *text)
 {
   struct Client *acptr;
   char *host;
@@ -804,6 +809,7 @@ void handle_opers(int p_or_n,
 			  text);
       return;
     }
+
   /*
   ** user[%host]@server addressed?
   */

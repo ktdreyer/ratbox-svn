@@ -39,11 +39,15 @@
 
 #include <string.h>
 
-struct Channel *parse_knock_args(struct Client *,
-                                 struct Client *,
-                                 int, char **);
-void send_knock(struct Client *, struct Client *,
-                struct Channel *, char *);
+/* XXX LazyLinks */
+static int m_knock(struct Client*, struct Client*, int, char**);
+
+static struct Channel *parse_knock_args(struct Client *,
+                                        struct Client *,
+                                        int, char **);
+
+static void send_knock(struct Client *, struct Client *,
+                       struct Channel *, char *);
 
 struct Message knock_msgtab = {
   MSG_KNOCK, 0, 2, 0, MFLG_SLOW, 0,
@@ -81,10 +85,10 @@ char *_version = "20001122";
 ** KNOCK -Dianora
 **/
 
-int     m_knock(struct Client *cptr,
-               struct Client *sptr,
-               int parc,
-               char *parv[])
+static int m_knock(struct Client *cptr,
+                   struct Client *sptr,
+                   int parc,
+                   char *parv[])
 {
   struct Channel      *chptr;
 
@@ -134,7 +138,7 @@ int     m_knock(struct Client *cptr,
  *                or sends failure message to sptr
  */
 
-struct Channel *parse_knock_args(struct Client *cptr,
+static struct Channel *parse_knock_args(struct Client *cptr,
                                         struct Client *sptr,
                                         int parc, char *parv[])
 {
@@ -257,7 +261,7 @@ struct Channel *parse_knock_args(struct Client *cptr,
  * side effects -
  */
 
-void send_knock(struct Client *cptr, struct Client *sptr,
+static void send_knock(struct Client *cptr, struct Client *sptr,
                        struct Channel *chptr, char *name)
 {
   char message[NICKLEN*2+CHANNELLEN+USERLEN+HOSTLEN+30];

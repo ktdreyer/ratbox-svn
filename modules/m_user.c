@@ -38,6 +38,8 @@
 
 #define UFLAGS  (FLAGS_INVISIBLE|FLAGS_WALLOP|FLAGS_SERVNOTICE)
 
+static int m_user(struct Client*, struct Client*, int, char**);
+
 struct Message user_msgtab = {
   MSG_USER, 0, 5, 0, MFLG_SLOW, 0L,
   {m_user, m_registered, m_ignore, m_registered}
@@ -65,7 +67,8 @@ char *_version = "20001122";
 **      parv[3] = server host name (used only from other servers)
 **      parv[4] = users real name info
 */
-int m_user(struct Client* cptr, struct Client* sptr, int parc, char *parv[])
+static int m_user(struct Client* cptr, struct Client* sptr,
+                  int parc, char *parv[])
 {
   char* username;
   char* host;

@@ -41,6 +41,8 @@
 
 #include <stdlib.h>  /* atoi */
 
+static int mo_set(struct Client*, struct Client*, int, char**);
+
 struct Message set_msgtab = {
   MSG_SET, 0, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_not_oper, m_error, mo_set}
@@ -73,18 +75,17 @@ struct SetStruct
 };
 
 
-int quote_autoconn(struct Client *, char *, int);
-int quote_autoconnall(struct Client *, int);
-int quote_floodcount(struct Client *, int);
-int quote_floodtime(struct Client *, int);
-int quote_idletime(struct Client *, int);
-int quote_log(struct Client *, int);
-int quote_max(struct Client *, int);
-int quote_msglocale(struct Client *, char *);
-int quote_spamnum(struct Client *, int);
-int quote_spamtime(struct Client *, int);
-int quote_shide(struct Client *, int);
-int list_quote_commands(struct Client *);
+static int quote_autoconn(struct Client *, char *, int);
+static int quote_autoconnall(struct Client *, int);
+static int quote_floodcount(struct Client *, int);
+static int quote_idletime(struct Client *, int);
+static int quote_log(struct Client *, int);
+static int quote_max(struct Client *, int);
+static int quote_msglocale(struct Client *, char *);
+static int quote_spamnum(struct Client *, int);
+static int quote_spamtime(struct Client *, int);
+static int quote_shide(struct Client *, int);
+static int list_quote_commands(struct Client *);
 
 
 /* 
@@ -118,7 +119,7 @@ static struct SetStruct set_cmd_table[] =
  * list_quote_commands() sends the client all the available commands.
  * Four to a line for now.
  */
-int list_quote_commands(struct Client *sptr)
+static int list_quote_commands(struct Client *sptr)
 {
   int i;
   int j=0;
@@ -154,14 +155,14 @@ int list_quote_commands(struct Client *sptr)
 }
 
 /* SET AUTOCONN */
-int quote_autoconn( struct Client *sptr, char *arg, int newval)
+static int quote_autoconn( struct Client *sptr, char *arg, int newval)
 {
   set_autoconn(sptr, sptr->name, arg, newval);
   return(0);
 }
 
 /* SET AUTOCONNALL */
-int quote_autoconnall( struct Client *sptr, int newval)
+static int quote_autoconnall( struct Client *sptr, int newval)
 {
   if(newval >= 0)
   {
@@ -180,7 +181,7 @@ int quote_autoconnall( struct Client *sptr, int newval)
 
 
 /* SET FLOODCOUNT */
-int quote_floodcount( struct Client *sptr, int newval)
+static int quote_floodcount( struct Client *sptr, int newval)
 {
   if(newval >= 0)
   {
@@ -198,7 +199,7 @@ int quote_floodcount( struct Client *sptr, int newval)
 }
 
 /* SET IDLETIME */
-int quote_idletime( struct Client *sptr, int newval )
+static int quote_idletime( struct Client *sptr, int newval )
 {
   if(newval >= 0)
   {
@@ -225,9 +226,8 @@ int quote_idletime( struct Client *sptr, int newval )
   return(0);
 }
 
-
 /* SET LOG */
-int quote_log( struct Client *sptr, int newval )
+static int quote_log( struct Client *sptr, int newval )
 {
   const char *log_level_as_string;
 
@@ -260,7 +260,7 @@ int quote_log( struct Client *sptr, int newval )
 }
 
 /* SET MAX */
-int quote_max( struct Client *sptr, int newval )
+static int quote_max( struct Client *sptr, int newval )
 {
   if (newval > 0)
   {
@@ -301,7 +301,7 @@ int quote_max( struct Client *sptr, int newval )
 }
 
 /* SET MSGLOCALE */
-int quote_msglocale( struct Client *sptr, char *locale )
+static int quote_msglocale( struct Client *sptr, char *locale )
 {
 #ifdef USE_GETTEXT
   if(locale)
@@ -332,7 +332,7 @@ int quote_msglocale( struct Client *sptr, char *locale )
 }
 
 /* SET SPAMNUM */
-int quote_spamnum( struct Client *sptr, int newval )
+static int quote_spamnum( struct Client *sptr, int newval )
 {
   if (newval > 0)
   {
@@ -364,7 +364,7 @@ int quote_spamnum( struct Client *sptr, int newval )
 }
 
 /* SET SPAMTIME */
-int quote_spamtime( struct Client *sptr, int newval )
+static int quote_spamtime( struct Client *sptr, int newval )
 {
   if (newval > 0)
   {
@@ -388,7 +388,7 @@ int quote_spamtime( struct Client *sptr, int newval )
   return(0);
 }
 
-int quote_shide( struct Client *sptr, int newval )
+static int quote_shide( struct Client *sptr, int newval )
 {
   if(newval >= 0)
   {
@@ -410,10 +410,11 @@ int quote_shide( struct Client *sptr, int newval )
 }
 
 /*
- * m_set - SET command handler
+ * mo_set - SET command handler
  * set options while running
  */
-int mo_set(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int mo_set(struct Client *cptr, struct Client *sptr,
+                  int parc, char *parv[])
 {
   int newval;
   int i, n;

@@ -45,10 +45,16 @@
 #include <string.h>
 #include "memdebug.h"
 
-int do_whois(struct Client *cptr, struct Client *sptr, int parc, char *parv[]);
-int single_whois(struct Client *sptr, struct Client *acptr, int wilds, int glob);
-void whois_person(struct Client *sptr,struct Client *acptr,int glob);
-int global_whois(struct Client *sptr, char *nick, int wilds, int glob);
+static int do_whois(struct Client *cptr, struct Client *sptr,
+                    int parc, char *parv[]);
+static int single_whois(struct Client *sptr, struct Client *acptr,
+                        int wilds, int glob);
+static void whois_person(struct Client *sptr,struct Client *acptr,int glob);
+static int global_whois(struct Client *sptr, char *nick, int wilds, int glob);
+
+static int m_whois(struct Client*, struct Client*, int, char**);
+static int ms_whois(struct Client*, struct Client*, int, char**);
+static int mo_whois(struct Client*, struct Client*, int, char**);
 
 struct Message whois_msgtab = {
   MSG_WHOIS, 0, 0, 0, MFLG_SLOW, 0L,
@@ -74,10 +80,10 @@ char *_version = "20010101";
 **      parv[0] = sender prefix
 **      parv[1] = nickname masklist
 */
-int     m_whois(struct Client *cptr,
-                struct Client *sptr,
-                int parc,
-                char *parv[])
+static int m_whois(struct Client *cptr,
+                   struct Client *sptr,
+                   int parc,
+                   char *parv[])
 {
    struct Client *acptr;
   
@@ -107,11 +113,10 @@ int     m_whois(struct Client *cptr,
 **      parv[0] = sender prefix
 **      parv[1] = nickname masklist
 */
-int     mo_whois(struct Client *cptr,
-                struct Client *sptr,
-                int parc,
-                char *parv[])
-
+static int mo_whois(struct Client *cptr,
+                    struct Client *sptr,
+                    int parc,
+                    char *parv[])
 {
   if(parc < 2)
     {
@@ -140,7 +145,8 @@ int     mo_whois(struct Client *cptr,
  * output	- 
  * side effects -
  */
-int do_whois(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int do_whois(struct Client *cptr, struct Client *sptr,
+                    int parc, char *parv[])
 {
   struct Client *acptr;
   char  *nick;
@@ -220,7 +226,8 @@ int do_whois(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
  * Side Effects	- do a single whois on given client
  * 		  writing results to sptr
  */
-int global_whois(struct Client *sptr, char *nick, int wilds, int glob)
+static int global_whois(struct Client *sptr, char *nick,
+                        int wilds, int glob)
 {
   struct Client *acptr;
   int found = NO;
@@ -268,7 +275,8 @@ int global_whois(struct Client *sptr, char *nick, int wilds, int glob)
  * Side Effects	- do a single whois on given client
  * 		  writing results to sptr
  */
-int single_whois(struct Client *sptr,struct Client *acptr,int wilds, int glob)
+static int single_whois(struct Client *sptr,struct Client *acptr,
+                        int wilds, int glob)
 {
   dlink_node *ptr;
   struct Channel *chptr;
@@ -328,7 +336,7 @@ int single_whois(struct Client *sptr,struct Client *acptr,int wilds, int glob)
  * Output	- NONE
  * Side Effects	- 
  */
-void whois_person(struct Client *sptr,struct Client *acptr, int glob)
+static void whois_person(struct Client *sptr,struct Client *acptr, int glob)
 {
   char buf[BUFSIZE];
   char *chname;
@@ -436,10 +444,10 @@ void whois_person(struct Client *sptr,struct Client *acptr, int glob)
 **      parv[0] = sender prefix
 **      parv[1] = nickname masklist
 */
-int     ms_whois(struct Client *cptr,
-                struct Client *sptr,
-                int parc,
-                char *parv[])
+static int ms_whois(struct Client *cptr,
+                    struct Client *sptr,
+                    int parc,
+                    char *parv[])
 {
   if (parc < 2)
     {

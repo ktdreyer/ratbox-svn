@@ -35,7 +35,11 @@
 #include "parse.h"
 #include "modules.h"
 
-char* confopts(struct Client *sptr);
+static char* confopts(struct Client *sptr);
+
+static int m_version(struct Client*, struct Client*, int, char**);
+static int ms_version(struct Client*, struct Client*, int, char**);
+static int mo_version(struct Client*, struct Client*, int, char**);
 
 struct Message version_msgtab = {
   MSG_VERSION, 0, 0, 0, MFLG_SLOW, 0,
@@ -61,7 +65,8 @@ char *_version = "20001223";
  *      parv[0] = sender prefix
  *      parv[1] = remote server
  */
-int m_version(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
+static int m_version(struct Client* cptr, struct Client* sptr,
+                      int parc, char* parv[])
 {
   sendto_one(sptr, form_str(RPL_VERSION), me.name,
                 parv[0], version, serno, debugmode,
@@ -77,7 +82,8 @@ int m_version(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
  *      parv[0] = sender prefix
  *      parv[1] = remote server
  */
-int mo_version(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
+static int mo_version(struct Client* cptr, struct Client* sptr,
+                      int parc, char* parv[])
 {
   if (hunt_server(cptr, sptr, ":%s VERSION :%s", 
 		  1, parc, parv) != HUNTED_ISME)
@@ -96,7 +102,8 @@ int mo_version(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
  *      parv[0] = sender prefix
  *      parv[1] = remote server
  */
-int ms_version(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
+static int ms_version(struct Client* cptr, struct Client* sptr,
+                      int parc, char* parv[])
 {
   if (IsOper(sptr))
      {
@@ -119,7 +126,7 @@ int ms_version(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
  * output - ircd.conf option string
  * side effects - none
  */
-char* confopts(struct Client *sptr)
+static char* confopts(struct Client *sptr)
 {
   static char result[4];
 

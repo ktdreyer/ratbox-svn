@@ -57,46 +57,48 @@
 #include <fcntl.h>
 #include <errno.h>
 
-/* external variables */
-extern ConfigFileEntryType ConfigFileEntry; /* defined in ircd.c */
-
-
 /* internal functions */
-void set_local_gline(
-		     const char *oper_nick,
-		     const char *oper_user,
-		     const char *oper_host,
-		     const char *oper_server,
-		     const char *user,
-		     const char *host,
-		     const char *reason);
+static void set_local_gline(
+                            const char *oper_nick,
+                            const char *oper_user,
+                            const char *oper_host,
+                            const char *oper_server,
+                            const char *user,
+                            const char *host,
+                            const char *reason);
 
-void log_gline_request(const char*,const char*,const char*,
-		       const char* oper_server,
-		       const char *,const char *,const char *);
+static void log_gline_request(const char*,const char*,const char*,
+                              const char* oper_server,
+                              const char *,const char *,const char *);
 
-void log_gline(struct Client *,struct gline_pending *,
-	       const char *, const char *,const char *,
-	       const char* oper_server,
-	       const char *,const char *,const char *);
-
-
-
-void
-check_majority_gline(struct Client *sptr,
-		     const char *oper_nick, const char *oper_user,
-		     const char *oper_host, const char *oper_server,
-		     const char *user, const char *host, const char *reason);
-
-int majority_gline(struct Client *sptr,
-		   const char *oper_nick, const char *oper_username,
-		   const char *oper_host, 
-		   const char *oper_server,
-		   const char *user,
-		   const char *host,
-		   const char *reason); 
+static void log_gline(struct Client *,struct gline_pending *,
+                      const char *, const char *,const char *,
+                      const char* oper_server,
+                      const char *,const char *,const char *);
 
 
+static void check_majority_gline(struct Client *sptr,
+                                 const char *oper_nick,
+                                 const char *oper_user,
+                                 const char *oper_host,
+                                 const char *oper_server,
+                                 const char *user, const char *host,
+                                 const char *reason);
+
+static int majority_gline(struct Client *sptr,
+                          const char *oper_nick, const char *oper_username,
+                          const char *oper_host, 
+                          const char *oper_server,
+                          const char *user,
+                          const char *host,
+                          const char *reason); 
+
+static void add_new_majority_gline(const char *, const char *, const char *,
+                                   const char *, const char *, const char *,
+                                   const char *);
+
+static int ms_gline(struct Client*, struct Client*, int, char**);
+static int mo_gline(struct Client*, struct Client*, int, char**);
 
 struct Message gline_msgtab = {
     MSG_GLINE, 0, 3, 0, MFLG_SLOW, 0,
@@ -131,10 +133,10 @@ char *_version = "20001122";
  *
  */
 
-int mo_gline(struct Client *cptr,
-	     struct Client *sptr,
-	     int parc,
-	     char *parv[])
+static int mo_gline(struct Client *cptr,
+                    struct Client *sptr,
+                    int parc,
+                    char *parv[])
 {
   char *user = NULL;
   char *host = NULL;	              /* user and host of GLINE "victim" */
@@ -307,10 +309,10 @@ int mo_gline(struct Client *cptr,
  * GLINES is not defined.
  */
 
-int     ms_gline(struct Client *cptr,
-                struct Client *sptr,
-                int parc,
-                char *parv[])
+static int ms_gline(struct Client *cptr,
+                    struct Client *sptr,
+                    int parc,
+                    char *parv[])
 {
   struct Client *rcptr;
   const char *oper_nick = NULL;        /* nick of oper requesting GLINE */
@@ -395,7 +397,7 @@ int     ms_gline(struct Client *cptr,
  * output	- NONE
  * side effects	- if a majority agree, place the gline locally
  */
-void
+static void
 check_majority_gline(struct Client *sptr,
 		     const char *oper_nick,
 		     const char *oper_user,
@@ -424,13 +426,13 @@ check_majority_gline(struct Client *sptr,
  * output	- NONE
  * side effects	-
  */
-void set_local_gline(const char *oper_nick,
-		     const char *oper_user,
-		     const char *oper_host,
-		     const char *oper_server,
-		     const char *user,
-		     const char *host,
-		     const char *reason)
+static void set_local_gline(const char *oper_nick,
+                            const char *oper_user,
+                            const char *oper_host,
+                            const char *oper_server,
+                            const char *user,
+                            const char *host,
+                            const char *reason)
 {
   char buffer[IRCD_BUFSIZE];
   struct ConfItem *aconf;
@@ -467,7 +469,7 @@ void set_local_gline(const char *oper_nick,
  * log_gline_request()
  *
  */
-void
+static void
 log_gline_request(
 		  const char *oper_nick,
 		  const char *oper_user,
@@ -519,7 +521,7 @@ log_gline_request(
  * log_gline()
  *
  */
-void
+static void
 log_gline(struct Client *sptr,
 	  struct gline_pending *gline_pending_ptr,
 	  const char *oper_nick,
@@ -627,7 +629,7 @@ log_gline(struct Client *sptr,
  * side effects -
  *
  */
-void
+static void
 add_new_majority_gline(const char* oper_nick,
 		       const char* oper_user,
 		       const char* oper_host,
@@ -676,7 +678,7 @@ add_new_majority_gline(const char* oper_nick,
  *      There must be at least 3 different opers agreeing on this GLINE
  *
  */
-int
+static int
 majority_gline(struct Client *sptr,
 	       const char *oper_nick,
 	       const char *oper_user,

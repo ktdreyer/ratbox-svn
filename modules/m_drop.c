@@ -36,13 +36,14 @@
 #include "parse.h"
 #include "modules.h"
 
-#include <assert.h>
 #include <string.h>
 #include <stdlib.h>
 
+static int ms_drop(struct Client *,struct Client *,int,char **);
+
 struct Message drop_msgtab = {
   MSG_DROP, 0, 2, 0, MFLG_SLOW | MFLG_UNREG, 0L,
-  {m_unregistered, m_error, ms_drop, m_error}
+  {m_unregistered, m_ignore, ms_drop, m_ignore}
 };
 
 void
@@ -67,10 +68,10 @@ char *_version = "20001122";
 **
 **      "drop" a channel from consideration on a lazy link
 */
-int     ms_drop(struct Client *cptr,
-               struct Client *sptr,
-               int parc,
-               char *parv[])
+static int ms_drop(struct Client *cptr,
+                   struct Client *sptr,
+                  int parc,
+                  char *parv[])
 {
   char *name;
   struct Channel *chptr;

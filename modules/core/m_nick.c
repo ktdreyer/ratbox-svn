@@ -46,12 +46,19 @@
 #include <string.h>
 #include <assert.h>
 
-int nick_from_server(struct Client *, struct Client *, int, char **,
+static int mr_nick(struct Client*, struct Client*, int, char**);
+static int m_nick(struct Client*, struct Client*, int, char**);
+static int ms_nick(struct Client*, struct Client*, int, char**);
+
+static int nick_from_server(struct Client *, struct Client *, int, char **,
                             time_t, char *);
-int set_initial_nick(struct Client *cptr, struct Client *sptr,char *nick);
-int change_local_nick(struct Client *cptr, struct Client *sptr, char *nick);
-int nick_equal_server(struct Client *cptr, struct Client *sptr, char *nick);
-int clean_nick_name(char* nick);
+static int set_initial_nick(struct Client *cptr, struct Client *sptr,
+                            char *nick);
+static int change_local_nick(struct Client *cptr, struct Client *sptr,
+                             char *nick);
+static int nick_equal_server(struct Client *cptr, struct Client *sptr,
+                             char *nick);
+static int clean_nick_name(char* nick);
 
 
 struct Message nick_msgtab = {
@@ -78,7 +85,8 @@ char *_version = "20001122";
 **      parv[0] = sender prefix
 **      parv[1] = nickname
 */
-int mr_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int mr_nick(struct Client *cptr, struct Client *sptr, int parc,
+                   char *parv[])
 {
   struct   Client* acptr;
   char     nick[NICKLEN + 2];
@@ -130,7 +138,17 @@ int mr_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     }
 
   if ( (acptr = find_client(nick, NULL)) == NULL )
-    return(set_initial_nick(cptr, sptr, nick));
+    if (ConfigFileEntry.hub && uplink && IsCapable(uplink, CAP_LL))
+    {
+      /* Argh, the uplink might know someone by this name already.
+       * If we don't ask, everything will work out OK, but it'll
+       * involve killing someone, instead of just sending a
+       * NICKNAMEINUSE error
+       */
+      sendto_one(sptr, ":%s NBURST %s %s", me.name, nick);
+    }
+    else
+      return(set_initial_nick(cptr, sptr, nick));
   else
     sendto_one(sptr, form_str(ERR_NICKNAMEINUSE), me.name,
 	       BadPtr(parv[0]) ? "*" : parv[0], nick);
@@ -146,7 +164,8 @@ int mr_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
  * Any client seen here is guaranteed to be MyConnect()
  */
 
-int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int m_nick(struct Client *cptr, struct Client *sptr,
+                  int parc, char *parv[])
 {
   char     nick[NICKLEN + 2];
   struct   Client *acptr;
@@ -275,7 +294,8 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 **      parv[7] = server
 **      parv[8] = ircname
 */
-int ms_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int ms_nick(struct Client *cptr, struct Client *sptr,
+                   int parc, char *parv[])
 {
   struct Client* acptr;
   char     nick[NICKLEN + 2];
@@ -670,7 +690,7 @@ int ms_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
  * output       -
  * side effects -
  */
-int
+static int
 nick_from_server(struct Client *cptr, struct Client *sptr, int parc,
                  char *parv[], time_t newts,char *nick)
 {
@@ -761,7 +781,7 @@ nick_from_server(struct Client *cptr, struct Client *sptr, int parc,
  * This function is only called to set up an initially registering
  * client. 
  */
-int
+static int
 set_initial_nick(struct Client *cptr, struct Client *sptr,
                  char *nick)
 {
@@ -823,8 +843,8 @@ set_initial_nick(struct Client *cptr, struct Client *sptr,
  * side effects	- changes nick of a LOCAL user
  *
  */
-int change_local_nick(struct Client *cptr, struct Client *sptr,
-                       char *nick)
+static int change_local_nick(struct Client *cptr, struct Client *sptr,
+                             char *nick)
 {
   char nickbuf[NICKLEN + 10];
 
@@ -910,7 +930,7 @@ int change_local_nick(struct Client *cptr, struct Client *sptr,
  *  Note:
  *      '~'-character should be NOT be allowed.
  */
-int clean_nick_name(char* nick)
+static int clean_nick_name(char* nick)
 {
   char* ch   = nick;
   char* endp = ch + NICKLEN;
@@ -928,7 +948,4 @@ int clean_nick_name(char* nick)
 
   return (ch - nick);
 }
-
-
-
 

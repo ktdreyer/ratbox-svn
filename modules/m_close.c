@@ -34,6 +34,8 @@
 #include "parse.h"
 #include "modules.h"
 
+static int mo_close(struct Client*, struct Client*, int, char**);
+
 struct Message close_msgtab = {
   MSG_CLOSE, 0, 1, 0, MFLG_SLOW, 0,
   {m_unregistered, m_not_oper, m_ignore, mo_close}
@@ -57,7 +59,8 @@ char *_version = "20001122";
  * mo_close - CLOSE message handler
  *  - added by Darren Reed Jul 13 1992.
  */
-int mo_close(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int mo_close(struct Client *cptr, struct Client *sptr,
+                    int parc, char *parv[])
 {
   struct Client  *acptr;
   dlink_node     *ptr;

@@ -36,9 +36,10 @@
 #include "parse.h"
 #include "modules.h"
 
-#include <assert.h>
 #include <string.h>
 #include <stdlib.h>
+
+static int ms_cburst(struct Client*, struct Client*, int, char**);
 
 struct Message cburst_msgtab = {
   MSG_CBURST, 0, 1, 0, MFLG_SLOW | MFLG_UNREG, 0L,
@@ -71,10 +72,10 @@ char *_version = "20001122";
  * the given LL capable server.
  */
 
-int     ms_cburst(struct Client *cptr,
-                 struct Client *sptr,
-                 int parc,
-                 char *parv[])
+static int ms_cburst(struct Client *cptr,
+                     struct Client *sptr,
+                     int parc,
+                     char *parv[])
 {
   char *name;
   char *nick;

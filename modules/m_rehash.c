@@ -40,6 +40,8 @@
 #include "modules.h"
 #include "event.h"
 
+static int mo_rehash(struct Client*, struct Client*, int, char**);
+
 struct Message rehash_msgtab = {
   MSG_REHASH, 0, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_not_oper, m_ignore, mo_rehash}
@@ -63,7 +65,8 @@ char *_version = "20001122";
  * mo_rehash - REHASH message handler
  *
  */
-int mo_rehash(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int mo_rehash(struct Client *cptr, struct Client *sptr,
+                     int parc, char *parv[])
 {
   int found = NO;
 

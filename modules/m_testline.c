@@ -39,6 +39,8 @@
 
 #include <string.h>
 
+static int mo_testline(struct Client*, struct Client*, int, char**);
+
 struct Message testline_msgtab = {
   MSG_TESTLINE, 0, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_not_oper, m_ignore, mo_testline}
@@ -73,7 +75,8 @@ char *_version = "20001124";
  *
  */  
   
-int mo_testline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int mo_testline(struct Client *cptr, struct Client *sptr,
+                       int parc, char *parv[])
 {
   struct ConfItem *aconf;
   unsigned long ip;

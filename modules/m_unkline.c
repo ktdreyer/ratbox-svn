@@ -49,6 +49,10 @@
 #include <string.h>
 #include <unistd.h>
 
+static int mo_unkline(struct Client*, struct Client*, int, char**);
+static int mo_undline(struct Client*, struct Client*, int, char**);
+static int mo_ungline(struct Client*, struct Client*, int, char**);
+
 struct Message msgtabs[] = {
   {MSG_UNKLINE, 0, 2, 0, MFLG_SLOW, 0,
    {m_unregistered, m_not_oper, m_error, mo_unkline}},
@@ -74,8 +78,6 @@ _moddeinit(void)
   mod_del_cmd(&msgtabs[2]);
 }
 
-extern ConfigFileEntryType ConfigFileEntry; /* defined in ircd.c */
-
 static int flush_write(struct Client *, FBFILE* , char *, char *);
 static int remove_tkline_match(char *,char *);
 
@@ -91,7 +93,8 @@ char *_version = "20001122";
 *
 *
 */
-int mo_unkline (struct Client *cptr,struct Client *sptr,int parc,char *parv[])
+static int mo_unkline (struct Client *cptr,struct Client *sptr,
+                       int parc,char *parv[])
 {
   FBFILE* in;
   FBFILE* out;
@@ -429,7 +432,8 @@ static int remove_tkline_match(char *host, char *user)
 **      parv[0] = sender nick
 **      parv[1] = dline to remove
 */
-int mo_undline (struct Client *cptr, struct Client *sptr,int parc,char *parv[])
+static int mo_undline (struct Client *cptr, struct Client *sptr,
+                       int parc,char *parv[])
 {
   FBFILE* in;
   FBFILE* out;
@@ -623,7 +627,8 @@ Then just ignore the line
 **      parv[1] = gline to remove
 */
 
-int mo_ungline (struct Client *cptr, struct Client *sptr,int parc,char *parv[])
+static int mo_ungline(struct Client *cptr, struct Client *sptr,
+                      int parc,char *parv[])
 {
   char  *user,*host;
 

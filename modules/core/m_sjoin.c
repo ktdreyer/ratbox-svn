@@ -44,6 +44,7 @@
 #include <string.h>
 #include <assert.h>
 
+static int ms_sjoin(struct Client*, struct Client*, int, char**);
 
 struct Message sjoin_msgtab = {
   MSG_SJOIN, 0, 0, 0, MFLG_SLOW, 0,
@@ -77,26 +78,26 @@ char *_version = "20010102";
  * all the specified users while sending JOIN/MODEs to local clients
  */
 
-char    modebuf[MODEBUFLEN];
-char    parabuf[MODEBUFLEN];
-char    *para[MAXMODEPARAMS];
-char    *mbuf;
-int     pargs;
+static char    modebuf[MODEBUFLEN];
+static char    parabuf[MODEBUFLEN];
+static char    *para[MAXMODEPARAMS];
+static char    *mbuf;
+static int     pargs;
 
-void set_final_mode(struct Mode *mode,struct Mode *oldmode);
-void remove_our_modes(int type,
+static void set_final_mode(struct Mode *mode,struct Mode *oldmode);
+static void remove_our_modes(int type,
 		      struct Channel *chptr, struct Channel *top_chptr,
 		      struct Client *sptr);
 
-void remove_a_mode(int hide_or_not,
-		   struct Channel *chptr, struct Channel *top_chptr,
-		   struct Client *sptr, dlink_list *list, char flag);
+static void remove_a_mode(int hide_or_not,
+                          struct Channel *chptr, struct Channel *top_chptr,
+                          struct Client *sptr, dlink_list *list, char flag);
 
 
-int     ms_sjoin(struct Client *cptr,
-		 struct Client *sptr,
-		 int parc,
-		 char *parv[])
+static int ms_sjoin(struct Client *cptr,
+                    struct Client *sptr,
+                    int parc,
+                    char *parv[])
 {
   struct Channel *chptr;
   struct Channel *top_chptr=NULL;	/* XXX vchans */
@@ -580,7 +581,7 @@ int     ms_sjoin(struct Client *cptr,
  * side effects	- 
  */
 
-void set_final_mode(struct Mode *mode,struct Mode *oldmode)
+static void set_final_mode(struct Mode *mode,struct Mode *oldmode)
 {
   int what = 0;
   char numeric[16];
@@ -778,9 +779,9 @@ void set_final_mode(struct Mode *mode,struct Mode *oldmode)
  * side effects	- Go through the local members, remove all their
  *		  chanop modes etc., this side lost the TS.
  */
-void remove_our_modes( int hide_or_not,
-		       struct Channel *chptr, struct Channel *top_chptr,
-		       struct Client *sptr)
+static void remove_our_modes( int hide_or_not,
+                              struct Channel *chptr, struct Channel *top_chptr,
+                              struct Client *sptr)
 {
   remove_a_mode(hide_or_not, chptr, top_chptr, sptr, &chptr->chanops, 'o');
   remove_a_mode(hide_or_not, chptr, top_chptr, sptr, &chptr->halfops, 'h');
@@ -802,9 +803,9 @@ void remove_our_modes( int hide_or_not,
  * output	- NONE
  * side effects	- remove ONE mode from a channel
  */
-void remove_a_mode( int hide_or_not,
-		    struct Channel *chptr, struct Channel *top_chptr,
-		    struct Client *sptr, dlink_list *list, char flag)
+static void remove_a_mode( int hide_or_not,
+                           struct Channel *chptr, struct Channel *top_chptr,
+                           struct Client *sptr, dlink_list *list, char flag)
 {
   dlink_node *ptr;
   struct Client *acptr;

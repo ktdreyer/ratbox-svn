@@ -33,6 +33,8 @@
 #include "parse.h"
 #include "modules.h"
 
+static int m_accept(struct Client*, struct Client*, int, char**);
+
 struct Message accept_msgtab = {
   MSG_ACCEPT, 0, 2, 0, MFLG_SLOW | MFLG_UNREG, 0, 
   {m_unregistered, m_accept, m_ignore, m_accept}
@@ -57,7 +59,8 @@ char *_version = "20001122";
  *      parv[0] = sender prefix
  *      parv[1] = servername
  */
-int m_accept(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int m_accept(struct Client *cptr, struct Client *sptr,
+                    int parc, char *parv[])
 {
   char *nick;
   int  add=1;

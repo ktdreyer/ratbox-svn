@@ -44,12 +44,17 @@
 #include <unistd.h>
 
 
-struct ConfItem *find_password_aconf(char *name, struct Client *sptr);
-int match_oper_password(char *password, struct ConfItem *aconf);
-int oper_up( struct Client *sptr, struct ConfItem *aconf );
+static struct ConfItem *find_password_aconf(char *name, struct Client *sptr);
+static int match_oper_password(char *password, struct ConfItem *aconf);
+static int oper_up( struct Client *sptr, struct ConfItem *aconf );
 #ifdef CRYPT_OPER_PASSWORD
 extern        char *crypt();
 #endif /* CRYPT_OPER_PASSWORD */
+
+static int m_oper(struct Client*, struct Client*, int, char**);
+static int ms_oper(struct Client*, struct Client*, int, char**);
+static int mo_oper(struct Client*, struct Client*, int, char**);
+
 
 struct Message oper_msgtab = {
   MSG_OPER, 0, 3, 0, MFLG_SLOW, 0,
@@ -76,7 +81,8 @@ char *_version = "20001122";
 **      parv[1] = oper name
 **      parv[2] = oper password
 */
-int m_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int m_oper(struct Client *cptr, struct Client *sptr,
+                  int parc, char *parv[])
 {
   struct ConfItem *aconf, *oconf;
   char  *name;
@@ -159,7 +165,8 @@ int m_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 **      parv[1] = oper name
 **      parv[2] = oper password
 */
-int mo_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int mo_oper(struct Client *cptr, struct Client *sptr,
+                   int parc, char *parv[])
 {
 	sendto_one(sptr, form_str(RPL_YOUREOPER), me.name, parv[0]);
 	SendMessageFile(sptr, &ConfigFileEntry.opermotd);
@@ -172,7 +179,8 @@ int mo_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 **      parv[1] = oper name
 **      parv[2] = oper password
 */
-int ms_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int ms_oper(struct Client *cptr, struct Client *sptr,
+                   int parc, char *parv[])
 {
   /* if message arrived from server, trust it, and set to oper */
   
@@ -221,7 +229,8 @@ struct ConfItem *find_password_aconf(char *name, struct Client *sptr)
  * side effects	- none
  */
 
-int match_oper_password(char *password, struct ConfItem *aconf)
+static int match_oper_password(char *password,
+                               struct ConfItem *aconf)
 {
   char *encr;
 
@@ -263,7 +272,8 @@ int match_oper_password(char *password, struct ConfItem *aconf)
  * This could also be used by rsa oper routines. 
  */
 
-int oper_up( struct Client *sptr, struct ConfItem *aconf )
+static int oper_up( struct Client *sptr,
+                    struct ConfItem *aconf )
 {
   int old = (sptr->umodes & ALL_UMODES);
   char *operprivs=NULL;

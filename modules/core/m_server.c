@@ -46,6 +46,9 @@
 #include <string.h>
 #include <stdlib.h>
 
+static int mr_server(struct Client *, struct Client *, int, char **);
+static int ms_server(struct Client *, struct Client *, int, char **);
+
 struct Message server_msgtab = {
   MSG_SERVER, 0, 3, 0, MFLG_SLOW | MFLG_UNREG, 0,
   {mr_server, m_registered, ms_server, m_registered}
@@ -63,9 +66,9 @@ _moddeinit(void)
   mod_del_cmd(&server_msgtab);
 }
 
-char *parse_server_args(char *parv[], int parc, char *info, int *hop);
-int bogus_host(char *host);
-void write_links_file(void*);
+static char *parse_server_args(char *parv[], int parc, char *info, int *hop);
+static int bogus_host(char *host);
+static void write_links_file(void*);
 
 char *_version = "20001122";
 
@@ -78,7 +81,8 @@ static int       refresh_user_links=0;
  *      parv[2] = serverinfo/hopcount
  *      parv[3] = serverinfo
  */
-int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int mr_server(struct Client *cptr, struct Client *sptr,
+                     int parc, char *parv[])
 {
   char             info[REALLEN + 1];
   char*            host;
@@ -209,7 +213,8 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
  *      parv[2] = serverinfo/hopcount
  *      parv[3] = serverinfo
  */
-int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int ms_server(struct Client *cptr, struct Client *sptr,
+                     int parc, char *parv[])
 {
   char             info[REALLEN + 1];
   char             nbuf[HOSTLEN * 2 + USERLEN + 5];
@@ -395,7 +400,7 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
  *
  * 
  */
-void write_links_file(void* notused)
+static void write_links_file(void* notused)
 {
   MessageFileLine *next_mptr = 0;
   MessageFileLine *mptr = 0;
@@ -477,7 +482,7 @@ void write_links_file(void* notused)
  * side effects	- parv[1] is trimmed to HOSTLEN size if needed.
  */
 
-char *parse_server_args(char *parv[], int parc, char *info, int *hop)
+static char *parse_server_args(char *parv[], int parc, char *info, int *hop)
 {
   int i;
   char *host;
@@ -525,7 +530,7 @@ char *parse_server_args(char *parv[], int parc, char *info, int *hop)
  * output	- 1 if a bogus hostname input, 0 if its valid
  * side effects	- none
  */
-int bogus_host(char *host)
+static int bogus_host(char *host)
 {
   int bogus_server = 0;
   char *s;

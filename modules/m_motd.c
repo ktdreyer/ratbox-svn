@@ -39,6 +39,9 @@
 #include <stdlib.h>
 #include <time.h>
 
+static int m_motd(struct Client*, struct Client*, int, char**);
+static int mo_motd(struct Client*, struct Client*, int, char**);
+
 struct Message motd_msgtab = {
   MSG_MOTD, 0, 0, 1, MFLG_SLOW, 0,
   {m_unregistered, m_motd, mo_motd, mo_motd}
@@ -63,7 +66,8 @@ char *_version = "20001122";
 **      parv[0] = sender prefix
 **      parv[1] = servername
 */
-int m_motd(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int m_motd(struct Client *cptr, struct Client *sptr,
+                  int parc, char *parv[])
 {
   static time_t last_used = 0;
 
@@ -96,7 +100,8 @@ int m_motd(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 **      parv[0] = sender prefix
 **      parv[1] = servername
 */
-int mo_motd(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int mo_motd(struct Client *cptr, struct Client *sptr,
+                   int parc, char *parv[])
 {
   if (hunt_server(cptr, sptr, ":%s MOTD :%s", 1,parc,parv)!=HUNTED_ISME)
     return 0;

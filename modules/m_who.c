@@ -41,6 +41,9 @@
 #include "parse.h"
 #include "modules.h"
 
+static int m_who(struct Client*, struct Client*, int, char**);
+static int ms_who(struct Client*, struct Client*, int, char**);
+
 struct Message who_msgtab = {
   MSG_WHO, 0, 2, 0, MFLG_SLOW, 0,
   {m_unregistered, m_who, ms_who, m_who}
@@ -58,20 +61,20 @@ _moddeinit(void)
   mod_del_cmd(&who_msgtab);
 }
 
-void do_who_on_channel(struct Client *sptr,
+static void do_who_on_channel(struct Client *sptr,
 			      struct Channel *chptr, char *real_name,
 			      int oper, int member);
 
-void do_who_list(struct Client *sptr, struct Channel *chptr,
-		 dlink_list *list, char *chname, char *op_flags);
+static void do_who_list(struct Client *sptr, struct Channel *chptr,
+                        dlink_list *list, char *chname, char *op_flags);
 
-void who_global(struct Client *sptr, char *mask, int oper);
+static void who_global(struct Client *sptr, char *mask, int oper);
 
-void    do_who(struct Client *sptr,
-	       struct Client *acptr,
-	       struct Channel *chptr,
-	       char *repname,
-	       char *op_flags);
+static void do_who(struct Client *sptr,
+                   struct Client *acptr,
+                   struct Channel *chptr,
+                   char *repname,
+                   char *op_flags);
 
 char *_version = "20001122";
 
@@ -81,10 +84,10 @@ char *_version = "20001122";
 **      parv[1] = nickname mask list
 **      parv[2] = additional selection flag, only 'o' for now.
 */
-int     m_who(struct Client *cptr,
-              struct Client *sptr,
-              int parc,
-              char *parv[])
+static int m_who(struct Client *cptr,
+                 struct Client *sptr,
+                 int parc,
+                 char *parv[])
 {
   struct Client *acptr;
   char  *mask = parc > 1 ? parv[1] : NULL;
@@ -274,7 +277,7 @@ int     m_who(struct Client *cptr,
  *		  this is slightly expensive on EFnet ...
  */
 
-void who_global(struct Client *sptr,char *mask, int oper)
+static void who_global(struct Client *sptr,char *mask, int oper)
 {
   struct Channel *chptr=NULL;
   struct Channel *bchan;
@@ -365,7 +368,7 @@ void who_global(struct Client *sptr,char *mask, int oper)
  * side effects - do a who on given channel
  */
 
-void do_who_on_channel(struct Client *sptr,
+static void do_who_on_channel(struct Client *sptr,
 			      struct Channel *chptr,
 			      char *chname,
 			      int oper, int member)
@@ -376,8 +379,8 @@ void do_who_on_channel(struct Client *sptr,
   do_who_list(sptr, chptr, &chptr->peons,   chname, "");
 }
 
-void do_who_list(struct Client *sptr, struct Channel *chptr,
-		  dlink_list *list, char *chname, char *op_flags)
+static void do_who_list(struct Client *sptr, struct Channel *chptr,
+                        dlink_list *list, char *chname, char *op_flags)
 {
   dlink_node *ptr;
   struct Client *acptr;
@@ -401,11 +404,11 @@ void do_who_list(struct Client *sptr, struct Channel *chptr,
  * side effects - do a who on given person
  */
 
-void    do_who(struct Client *sptr,
-	       struct Client *acptr,
-	       struct Channel *chptr,
-	       char *chname,
-	       char *op_flags)
+static void do_who(struct Client *sptr,
+                   struct Client *acptr,
+                   struct Channel *chptr,
+                   char *chname,
+                   char *op_flags)
 {
   char  status[5];
 
@@ -445,10 +448,10 @@ void    do_who(struct Client *sptr,
 **      parv[1] = nickname mask list
 **      parv[2] = additional selection flag, only 'o' for now.
 */
-int     ms_who(struct Client *cptr,
-              struct Client *sptr,
-              int parc,
-              char *parv[])
+static int ms_who(struct Client *cptr,
+                  struct Client *sptr,
+                  int parc,
+                  char *parv[])
 {
   /* If its running as a hub, and linked with lazy links
    * then allow leaf to use normal client m_who()

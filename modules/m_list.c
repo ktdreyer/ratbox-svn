@@ -40,6 +40,10 @@
 #include <string.h>
 #include <stdlib.h>
 
+static int m_list(struct Client*, struct Client*, int, char**);
+static int ms_list(struct Client*, struct Client*, int, char**);
+static int mo_list(struct Client*, struct Client*, int, char**);
+
 struct Message list_msgtab = {
   MSG_LIST, 0, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_list, ms_list, mo_list}
@@ -57,8 +61,8 @@ _moddeinit(void)
   mod_del_cmd(&list_msgtab);
 }
 
-int list_all_channels(struct Client *sptr);
-int list_named_channel(struct Client *sptr,char *name);
+static int list_all_channels(struct Client *sptr);
+static int list_named_channel(struct Client *sptr,char *name);
 
 char *_version = "20001122";
 
@@ -67,10 +71,10 @@ char *_version = "20001122";
 **      parv[0] = sender prefix
 **      parv[1] = channel
 */
-int     m_list(struct Client *cptr,
-               struct Client *sptr,
-               int parc,
-               char *parv[])
+static int m_list(struct Client *cptr,
+                  struct Client *sptr,
+                  int parc,
+                  char *parv[])
 {
   static time_t last_used=0L;
 
@@ -114,10 +118,10 @@ int     m_list(struct Client *cptr,
 **      parv[0] = sender prefix
 **      parv[1] = channel
 */
-int     mo_list(struct Client *cptr,
-               struct Client *sptr,
-               int parc,
-               char *parv[])
+static int mo_list(struct Client *cptr,
+                   struct Client *sptr,
+                   int parc,
+                   char *parv[])
 {
 /* Opers don't get paced */
 
@@ -152,10 +156,10 @@ int     mo_list(struct Client *cptr,
 **      parv[0] = sender prefix
 **      parv[1] = channel
 */
-int     ms_list(struct Client *cptr,
-		struct Client *sptr,
-		int parc,
-		char *parv[])
+static int ms_list(struct Client *cptr,
+                   struct Client *sptr,
+                   int parc,
+                   char *parv[])
 {
   /* Only allow remote list if LazyLink request */
 
@@ -182,7 +186,7 @@ int     ms_list(struct Client *cptr,
  * output	- 0/1
  * side effects	- list all channels to sptr
  */
-int list_all_channels(struct Client *sptr)
+static int list_all_channels(struct Client *sptr)
 {
   struct Channel *chptr;
 
@@ -204,7 +208,7 @@ int list_all_channels(struct Client *sptr)
  * output       - 0/1
  * side effects	- list all channels to sptr
  */
-int list_named_channel(struct Client *sptr,char *name)
+static int list_named_channel(struct Client *sptr,char *name)
 {
   char  vname[CHANNELLEN+NICKLEN+4];
   dlink_node *ptr;
@@ -267,7 +271,7 @@ int list_named_channel(struct Client *sptr,char *name)
  * ouput	- none
  * side effects -
  */
-void list_one_channel(struct Client *sptr,struct Channel *chptr)
+static void list_one_channel(struct Client *sptr,struct Channel *chptr)
 {
   struct Channel *root_chptr;
   char  vname[CHANNELLEN+NICKLEN+5]; /* <!!>, and null */

@@ -39,9 +39,11 @@
 #include <time.h>
 #include <stdlib.h>
 
+static int ms_svinfo(struct Client*, struct Client*, int, char**);
+
 struct Message svinfo_msgtab = {
   MSG_SVINFO, 0, 4, 0, MFLG_SLOW, 0,
-  {m_unregistered, m_ignore, m_svinfo, m_ignore}
+  {m_unregistered, m_ignore, ms_svinfo, m_ignore}
 };
 
 void
@@ -59,14 +61,15 @@ _moddeinit(void)
 char *_version = "20001122";
 
 /*
- * m_svinfo - SVINFO message handler
+ * ms_svinfo - SVINFO message handler
  *      parv[0] = sender prefix
  *      parv[1] = TS_CURRENT for the server
  *      parv[2] = TS_MIN for the server
  *      parv[3] = server is standalone or connected to non-TS only
  *      parv[4] = server's idea of UTC time
  */
-int m_svinfo(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int ms_svinfo(struct Client *cptr, struct Client *sptr,
+                     int parc, char *parv[])
 {
   time_t deltat;
   time_t theirtime;

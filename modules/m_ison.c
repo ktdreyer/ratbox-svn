@@ -34,6 +34,9 @@
 
 #include <string.h>
 
+/* XXX lazylinks */
+static int m_ison(struct Client*, struct Client*, int, char**);
+
 struct Message ison_msgtab = {
   MSG_ISON, 0, 1, 1, MFLG_SLOW, 0,
   {m_unregistered, m_ison, m_ignore, m_ison}
@@ -64,7 +67,8 @@ char *_version = "20001122";
  * format:
  * ISON :nicklist
  */
-int m_ison(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int m_ison(struct Client *cptr, struct Client *sptr,
+                  int parc, char *parv[])
 {
   struct Client *acptr;
   char *nick;
@@ -107,7 +111,10 @@ int m_ison(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 	break;
     }
 
-/*  current_insert_point--; Do NOT take out the trailing space, it breaks ircII --Rodder */
+/*  current_insert_point--;
+ *  Do NOT take out the trailing space, it breaks ircII
+ *  --Rodder */
+
   *current_insert_point = '\0';
   sendto_one(sptr, "%s", buf);
   return 0;

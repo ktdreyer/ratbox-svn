@@ -40,9 +40,12 @@
 #include <stdlib.h>
 #include "memdebug.h"
 
+static int m_whowas(struct Client*, struct Client*, int, char**);
+static int mo_whowas(struct Client*, struct Client*, int, char**);
+
 struct Message whowas_msgtab = {
   MSG_WHOWAS, 0, 0, 0, MFLG_SLOW, 0L,
-  {m_unregistered, m_whowas, mo_whowas, m_whowas}
+  {m_unregistered, m_whowas, m_error, mo_whowas}
 };
 
 void
@@ -57,8 +60,8 @@ _moddeinit(void)
   mod_del_cmd(&whowas_msgtab);
 }
 
-int whowas_do(struct Client *cptr, struct Client *sptr,
-	      int parc, char *parv[]);
+static int whowas_do(struct Client *cptr, struct Client *sptr,
+                     int parc, char *parv[]);
 
 char *_version = "20001122";
 
@@ -67,10 +70,10 @@ char *_version = "20001122";
 **      parv[0] = sender prefix
 **      parv[1] = nickname queried
 */
-int     m_whowas(struct Client *cptr,
-                 struct Client *sptr,
-                 int parc,
-                 char *parv[])
+static int m_whowas(struct Client *cptr,
+                    struct Client *sptr,
+                    int parc,
+                    char *parv[])
 {
   static time_t last_used=0L;
 
@@ -93,10 +96,10 @@ int     m_whowas(struct Client *cptr,
   return(whowas_do(cptr,sptr,parc,parv));
 }
 
-int     mo_whowas(struct Client *cptr,
-                 struct Client *sptr,
-                 int parc,
-                 char *parv[])
+static int mo_whowas(struct Client *cptr,
+                     struct Client *sptr,
+                     int parc,
+                     char *parv[])
 {
   if (parc < 2)
     {
@@ -108,7 +111,8 @@ int     mo_whowas(struct Client *cptr,
   return(whowas_do(cptr,sptr,parc,parv));
 }
 
-int whowas_do(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int whowas_do(struct Client *cptr, struct Client *sptr,
+                     int parc, char *parv[])
 {
   struct Whowas *temp;
   int cur = 0;

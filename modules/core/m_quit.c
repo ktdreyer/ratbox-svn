@@ -33,6 +33,10 @@
 #include "modules.h"
 #include "s_conf.h"
 
+static int m_quit(struct Client*, struct Client*, int, char**);
+static int ms_quit(struct Client*, struct Client*, int, char**);
+static int mo_quit(struct Client*, struct Client*, int, char**);
+
 struct Message quit_msgtab = {
   MSG_QUIT, 0, 0, 0, MFLG_SLOW | MFLG_UNREG, 0,
   {m_quit, m_quit, ms_quit, mo_quit}
@@ -57,10 +61,10 @@ char *_version = "20001122";
 **      parv[0] = sender prefix
 **      parv[1] = comment
 */
-int     m_quit(struct Client *cptr,
-               struct Client *sptr,
-               int parc,
-               char *parv[])
+static int m_quit(struct Client *cptr,
+                  struct Client *sptr,
+                  int parc,
+                  char *parv[])
 {
   char *comment = (parc > 1 && parv[1]) ? parv[1] : cptr->name;
   char reason [TOPICLEN + 1];
@@ -87,10 +91,10 @@ int     m_quit(struct Client *cptr,
 **      parv[0] = sender prefix
 **      parv[1] = comment
 */
-int     ms_quit(struct Client *cptr,
-               struct Client *sptr,
-               int parc,
-               char *parv[])
+static int ms_quit(struct Client *cptr,
+                   struct Client *sptr,
+                   int parc,
+                   char *parv[])
 {
   char *comment = (parc > 1 && parv[1]) ? parv[1] : cptr->name;
 
@@ -101,10 +105,10 @@ int     ms_quit(struct Client *cptr,
   return exit_client(cptr, sptr, sptr, comment);
 }
 
-int     mo_quit(struct Client *cptr,
-               struct Client *sptr,
-               int parc,
-               char *parv[])
+static int mo_quit(struct Client *cptr,
+                   struct Client *sptr,
+                   int parc,
+                   char *parv[])
 {
   char *comment = (parc > 1 && parv[1]) ? parv[1] : cptr->name;
   char reason [TOPICLEN + 1];

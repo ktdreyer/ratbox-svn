@@ -32,6 +32,9 @@
 #include "parse.h"
 #include "modules.h"
 
+static int m_ping(struct Client*, struct Client*, int, char**);
+static int ms_ping(struct Client*, struct Client*, int, char**);
+
 struct Message ping_msgtab = {
   MSG_PING, 0, 1, 0, MFLG_SLOW, 0,
   {m_unregistered, m_ping, ms_ping, m_ping}
@@ -57,10 +60,10 @@ char *_version = "20001122";
 **      parv[1] = origin
 **      parv[2] = destination
 */
-int     m_ping(struct Client *cptr,
-               struct Client *sptr,
-               int parc,
-               char *parv[])
+static int m_ping(struct Client *cptr,
+                  struct Client *sptr,
+                  int parc,
+                  char *parv[])
 {
   struct Client *acptr;
   char  *origin, *destination;
@@ -96,10 +99,10 @@ int     m_ping(struct Client *cptr,
   return 0;
 }
 
-int     ms_ping(struct Client *cptr,
-               struct Client *sptr,
-               int parc,
-               char *parv[])
+static int ms_ping(struct Client *cptr,
+                   struct Client *sptr,
+                   int parc,
+                   char *parv[])
 {
   struct Client *acptr;
   char  *origin, *destination;

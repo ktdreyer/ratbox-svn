@@ -33,6 +33,9 @@
 #include "parse.h"
 #include "modules.h"
 
+static int mo_operwall(struct Client*, struct Client*, int, char**);
+static int ms_operwall(struct Client*, struct Client*, int, char**);
+
 struct Message operwall_msgtab = {
   MSG_OPERWALL, 0, 2, 0, MFLG_SLOW, 0,
   {m_unregistered, m_not_oper, ms_operwall, mo_operwall}
@@ -59,7 +62,8 @@ char *_version = "20001122";
  *      parv[1] = message text
  */
 
-int mo_operwall(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int mo_operwall(struct Client *cptr, struct Client *sptr,
+                       int parc, char *parv[])
 {
   char *message = parv[1];
 
@@ -83,7 +87,8 @@ int mo_operwall(struct Client *cptr, struct Client *sptr, int parc, char *parv[]
  *      parv[1] = message text
  */
 
-int ms_operwall(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int ms_operwall(struct Client *cptr, struct Client *sptr,
+                       int parc, char *parv[])
 {
   char *message = parv[1];
 

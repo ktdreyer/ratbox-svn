@@ -32,9 +32,11 @@
 #include "parse.h"
 #include "modules.h"
 
+static int mr_pass(struct Client*, struct Client*, int, char**);
+
 struct Message pass_msgtab = {
   MSG_PASS, 0, 2, 0, MFLG_SLOW | MFLG_UNREG, 0,
-  {m_pass, m_registered, m_ignore, m_registered}
+  {mr_pass, m_registered, m_ignore, m_registered}
 };
 
 void
@@ -55,12 +57,13 @@ char *_version = "20001122";
  * m_pass() - Added Sat, 4 March 1989
  *
  *
- * m_pass - PASS message handler
+ * mr_pass - PASS message handler
  *      parv[0] = sender prefix
  *      parv[1] = password
  *      parv[2] = optional extra version information
  */
-int m_pass(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int mr_pass(struct Client *cptr, struct Client *sptr,
+                   int parc, char *parv[])
 {
   char* password = parv[1];
 

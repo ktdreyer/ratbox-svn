@@ -60,6 +60,10 @@ static void increase_modlist(void);
 
 static dlink_list mod_paths;
 
+static int mo_modload(struct Client*, struct Client*, int, char**);
+static int mo_modlist(struct Client*, struct Client*, int, char**);
+static int mo_modunload(struct Client*, struct Client*, int, char**);
+
 struct Message modload_msgtab = {
   MSG_MODLOAD, 0, 2, 0, MFLG_SLOW, 0,
   {m_unregistered, m_not_oper, m_ignore, mo_modload}
@@ -75,18 +79,12 @@ struct Message modlist_msgtab = {
   {m_unregistered, m_not_oper, m_ignore, mo_modlist}
 };
 
-struct Message hash_msgtab = {
-  MSG_HASH, 0, 1, 0, MFLG_SLOW, 0,
-  {m_unregistered, m_not_oper, m_ignore, mo_hash}
-};
-
 void
 modules_init(void)
 {
 	mod_add_cmd(&modload_msgtab);
 	mod_add_cmd(&modunload_msgtab);
 	mod_add_cmd(&modlist_msgtab);
-	mod_add_cmd(&hash_msgtab);
 }
 
 static struct module_path *
@@ -350,7 +348,7 @@ static void increase_modlist(void)
 }
 
 /* load a module .. */
-int
+static int
 mo_modload (struct Client *cptr, struct Client *sptr, int parc, char **parv)
 {
   char *m_bn;
@@ -376,7 +374,7 @@ mo_modload (struct Client *cptr, struct Client *sptr, int parc, char **parv)
 
 
 /* unload a module .. */
-int
+static int
 mo_modunload (struct Client *cptr, struct Client *sptr, int parc, char **parv)
 {
   char *m_bn;
@@ -408,7 +406,7 @@ mo_modunload (struct Client *cptr, struct Client *sptr, int parc, char **parv)
 }
 
 /* list modules .. */
-int
+static int
 mo_modlist (struct Client *cptr, struct Client *sptr, int parc, char **parv)
 {
   int i;

@@ -1180,19 +1180,6 @@ static void dup_hostent(aHostent* new_hp, struct hostent* hp)
   *ap = 0;
 }
 
-/*
- * m_dns - dns status query
- */
-int m_dns(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
-{
-  if (parv[1] && *parv[1] == 'd')
-    {
-      sendto_one(sptr, "NOTICE %s :ResolverFileDescriptor = %d", parv[0], ResolverFileDescriptor);
-      return 0;
-    }
-  return 0;
-}
-
 static struct cache* make_cache(ResRQ* request)
 {
   struct cache* cp;

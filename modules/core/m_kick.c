@@ -37,6 +37,9 @@
 
 #include <string.h>
 
+static int m_kick(struct Client*, struct Client*, int, char**);
+static int ms_kick(struct Client*, struct Client*, int, char**);
+
 struct Message kick_msgtab = {
   MSG_KICK, 0, 3, 0, MFLG_SLOW, 0,
   {m_unregistered, m_kick, ms_kick, m_kick}
@@ -63,10 +66,10 @@ char *_version = "20001122";
 **      parv[2] = client to kick
 **      parv[3] = kick comment
 */
-int     m_kick(struct Client *cptr,
-               struct Client *sptr,
-               int parc,
-               char *parv[])
+static int m_kick(struct Client *cptr,
+                  struct Client *sptr,
+                  int parc,
+                  char *parv[])
 {
   struct Client *who;
   struct Channel *chptr;
@@ -217,10 +220,10 @@ int     m_kick(struct Client *cptr,
   return (0);
 }
 
-int     ms_kick(struct Client *cptr,
-               struct Client *sptr,
-               int parc,
-               char *parv[])
+static int ms_kick(struct Client *cptr,
+                   struct Client *sptr,
+                   int parc,
+                   char *parv[])
 {
   if (*parv[2] == '\0')
     {

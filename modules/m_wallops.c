@@ -34,6 +34,9 @@
 #include "parse.h"
 #include "modules.h"
 
+static int ms_wallops(struct Client*, struct Client*, int, char**);
+static int mo_wallops(struct Client*, struct Client*, int, char**);
+
 struct Message wallops_msgtab = {
   MSG_WALLOPS, 0, 2, 0, MFLG_SLOW, 0,
   {m_unregistered, m_not_oper, ms_wallops, mo_wallops}
@@ -58,7 +61,8 @@ char *_version = "20001122";
  *      parv[0] = sender prefix
  *      parv[1] = message text
  */
-int mo_wallops(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int mo_wallops(struct Client *cptr, struct Client *sptr,
+                      int parc, char *parv[])
 { 
   char* message;
 
@@ -83,7 +87,8 @@ int mo_wallops(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
  *      parv[0] = sender prefix
  *      parv[1] = message text
  */
-int ms_wallops(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int ms_wallops(struct Client *cptr, struct Client *sptr,
+                      int parc, char *parv[])
 { 
   char* message;
 

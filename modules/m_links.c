@@ -38,6 +38,10 @@
 #include <assert.h>
 #include <string.h>
 
+static int m_links(struct Client*, struct Client*, int, char**);
+static int mo_links(struct Client*, struct Client*, int, char**);
+static int ms_links(struct Client*, struct Client*, int, char**);
+
 struct Message links_msgtab = {
   MSG_LINKS, 0, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_links, ms_links, mo_links}
@@ -67,7 +71,8 @@ char *_version = "20001122";
  *      parv[2] = servername mask
  */
 
-int m_links(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int m_links(struct Client *cptr, struct Client *sptr,
+                   int parc, char *parv[])
 {
 
   if (!GlobalSetOptions.hide_server)
@@ -91,7 +96,8 @@ int m_links(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   return 0;
 }
 
-int mo_links(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int mo_links(struct Client *cptr, struct Client *sptr,
+                    int parc, char *parv[])
 {
   const char*    mask = "";
   struct Client* acptr;
@@ -177,7 +183,8 @@ int mo_links(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
  *      parv[1] = server to query 
  *      parv[2] = servername mask
  */
-int ms_links(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int ms_links(struct Client *cptr, struct Client *sptr,
+                    int parc, char *parv[])
 {
   if (hunt_server(cptr, sptr, ":%s LINKS %s :%s", 1, parc, parv)
       != HUNTED_ISME)

@@ -41,6 +41,9 @@
 #include <string.h>
 #include <stdlib.h>
 
+static int m_topic(struct Client*, struct Client*, int, char**);
+static int ms_topic(struct Client*, struct Client*, int, char**);
+
 struct Message topic_msgtab = {
   MSG_TOPIC, 0, 2, 0, MFLG_SLOW, 0,
   {m_unregistered, m_topic, ms_topic, m_topic}
@@ -66,10 +69,10 @@ char *_version = "20001122";
  *      parv[1] = channel name
  *	parv[2] = new topic, if setting topic
  */
-int     m_topic(struct Client *cptr,
-                struct Client *sptr,
-                int parc,
-                char *parv[])
+static int m_topic(struct Client *cptr,
+                   struct Client *sptr,
+                   int parc,
+                   char *parv[])
 {
   struct Channel *chptr = NullChn;
   struct Channel *vchan;
@@ -237,10 +240,10 @@ int     m_topic(struct Client *cptr,
  *
  * Let servers always set a topic
  */
-int     ms_topic(struct Client *cptr,
-                struct Client *sptr,
-                int parc,
-                char *parv[])
+static int ms_topic(struct Client *cptr,
+                    struct Client *sptr,
+                    int parc,
+                    char *parv[])
 {
   struct Channel *chptr = NULL;
   

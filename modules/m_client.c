@@ -47,13 +47,17 @@
 #include <string.h>
 #include <assert.h>
 
-int nick_from_server(struct Client *, struct Client *, int, char **,
+static int nick_from_server(struct Client *, struct Client *, int, char **,
                             time_t, char *);
-int set_initial_nick(struct Client *cptr, struct Client *sptr,char *nick);
-int change_local_nick(struct Client *cptr, struct Client *sptr, char *nick);
-int nick_equal_server(struct Client *cptr, struct Client *sptr, char *nick);
-int clean_nick_name(char* nick);
+static int set_initial_nick(struct Client *cptr,
+                            struct Client *sptr,char *nick);
+static int change_local_nick(struct Client *cptr, struct Client *sptr,
+                             char *nick);
+static int nick_equal_server(struct Client *cptr, struct Client *sptr,
+                             char *nick);
+static int clean_nick_name(char* nick);
 
+static int ms_client(struct Client*, struct Client*, int, char**);
 
 struct Message client_msgtab = {
   MSG_CLIENT, 0, 1, 0, MFLG_SLOW, 0,
@@ -90,7 +94,8 @@ char *_version = "20001122";
 **      parv[9] = ircname
 */
 
-int ms_client(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int ms_client(struct Client *cptr, struct Client *sptr,
+                     int parc, char *parv[])
 {
   struct Client* acptr;
   char     nick[NICKLEN + 2];
@@ -457,7 +462,7 @@ int ms_client(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
  * output       -
  * side effects -
  */
-int
+static int
 nick_from_server(struct Client *cptr, struct Client *sptr, int parc,
                  char *parv[], time_t newts,char *nick)
 {
@@ -520,7 +525,7 @@ nick_from_server(struct Client *cptr, struct Client *sptr, int parc,
  *  Note:
  *      '~'-character should be NOT be allowed.
  */
-int clean_nick_name(char* nick)
+static int clean_nick_name(char* nick)
 {
   char* ch   = nick;
   char* endp = ch + NICKLEN;

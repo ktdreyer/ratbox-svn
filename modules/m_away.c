@@ -35,6 +35,8 @@
 
 #include <stdlib.h>
 
+static int m_away(struct Client*, struct Client*, int, char**);
+
 struct Message away_msgtab = {
   MSG_AWAY, 0, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_away, m_away, m_away}
@@ -70,10 +72,10 @@ char *_version = "20001122";
 **      parv[0] = sender prefix
 **      parv[1] = away message
 */
-int     m_away(struct Client *cptr,
-               struct Client *sptr,
-               int parc,
-               char *parv[])
+static int m_away(struct Client *cptr,
+                  struct Client *sptr,
+                  int parc,
+                  char *parv[])
 {
   char  *away, *awy2 = parv[1];
   static time_t last_away;

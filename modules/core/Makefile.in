@@ -52,12 +52,14 @@ SRCS =                          \
   m_links.c \
   m_list.c \
   m_lljoin.c \
+  m_llnick.c \
   m_locops.c \
   m_lusers.c \
+  m_message.c \
   m_mode.c \
   m_motd.c \
   m_names.c \
-  m_message.c \
+  m_nburst.c \
   m_nick.c \
   m_oper.c \
   m_operwall.c \

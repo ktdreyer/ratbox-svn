@@ -40,9 +40,11 @@
 #include <string.h>
 #include <stdlib.h>
 
+static int ms_lljoin(struct Client *,struct Client *,int,char **);
+
 struct Message lljoin_msgtab = {
   MSG_LLJOIN, 0, 3, 0, MFLG_SLOW | MFLG_UNREG, 0L,
-  {m_unregistered, m_error, ms_lljoin, m_error}
+  {m_unregistered, m_ignore, ms_lljoin, m_ignore}
 };
 
 void
@@ -78,10 +80,10 @@ char *_version = "20001122";
  * this is now..
  *
  */
-int     ms_lljoin(struct Client *cptr,
-               struct Client *sptr,
-               int parc,
-               char *parv[])
+static int ms_lljoin(struct Client *cptr,
+                     struct Client *sptr,
+                     int parc,
+                     char *parv[])
 {
   char *chname = NULL;
   char *nick = NULL;

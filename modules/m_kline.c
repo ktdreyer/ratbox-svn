@@ -53,6 +53,10 @@
 #include <string.h>
 #include <errno.h>
 
+static int mo_kline(struct Client *,struct Client *,int,char **);
+static int ms_kline(struct Client *,struct Client *,int,char **);
+static int mo_dline(struct Client *,struct Client *,int,char **);
+
 struct Message kline_msgtab = {
   MSG_KLINE, 0, 2, 0, MFLG_SLOW, 0,
   {m_unregistered, m_not_oper, ms_kline, mo_kline}
@@ -77,29 +81,30 @@ _moddeinit(void)
   mod_del_cmd(&dline_msgtab);
 }
 
-extern ConfigFileEntryType ConfigFileEntry; /* defined in ircd.c */
-
 /* Local function prototypes */
 
-time_t  valid_tkline(struct Client *sptr, char *string);
-char *cluster(char *);
-int find_user_host(struct Client *sptr,
-                   char *user_host_or_nick, char *user, char *host);
+static time_t  valid_tkline(struct Client *sptr, char *string);
+static char *cluster(char *);
+static int find_user_host(struct Client *sptr,
+                          char *user_host_or_nick, char *user, char *host);
 
-int valid_comment(struct Client *sptr, char *comment);
-int valid_user_host(struct Client *sptr, char *user, char *host);
-int valid_wild_card(struct Client *sptr, char *user, char *host);
-int already_placed_kline(struct Client *sptr, char *user, char *host,
-                         time_t tkline_time, unsigned long ip);
+static int valid_comment(struct Client *sptr, char *comment);
+static int valid_user_host(struct Client *sptr, char *user, char *host);
+static int valid_wild_card(struct Client *sptr, char *user, char *host);
+static int already_placed_kline(struct Client *sptr, char *user, char *host,
+                                time_t tkline_time, unsigned long ip);
 
-int is_ip_kline(char *host,unsigned long *ip, unsigned long *ip_mask);
-void apply_kline(struct Client *sptr, struct ConfItem *aconf,
-		 const char *reason, const char *current_date,
-		 int ip_kline, unsigned long ip, unsigned long ip_mask);
+static int is_ip_kline(char *host,unsigned long *ip,
+                       unsigned long *ip_mask);
+static void apply_kline(struct Client *sptr, struct ConfItem *aconf,
+                        const char *reason, const char *current_date,
+                        int ip_kline, unsigned long ip,
+                        unsigned long ip_mask);
 
-void apply_tkline(struct Client *sptr, struct ConfItem *aconf,
-		  const char *current_date, int temporary_kline_time,
-		  int ip_kline, unsigned long ip, unsigned long ip_mask);
+static void apply_tkline(struct Client *sptr, struct ConfItem *aconf,
+                         const char *current_date, int temporary_kline_time,
+                         int ip_kline, unsigned long ip,
+                         unsigned long ip_mask);
 
 char *_version = "20001122";
 
@@ -120,10 +125,10 @@ char host[HOSTLEN+2];
  * side effects - k line is added
  *
  */
-int mo_kline(struct Client *cptr,
-                struct Client *sptr,
-                int parc,
-                char **parv)
+static int mo_kline(struct Client *cptr,
+                    struct Client *sptr,
+                    int parc,
+                    char **parv)
 {
   char *reason = "No Reason";
   const char* current_date;
@@ -255,10 +260,10 @@ int mo_kline(struct Client *cptr,
  *
  *
  */
-int ms_kline(struct Client *cptr,
-                struct Client *sptr,
-                int parc,
-                char *parv[])
+static int ms_kline(struct Client *cptr,
+                    struct Client *sptr,
+                    int parc,
+                    char *parv[])
 {
   const char *current_date;
   struct Client *rcptr=NULL;
@@ -351,9 +356,9 @@ int ms_kline(struct Client *cptr,
  * side effects	- kline as given, is added to apropriate tree
  *		  and conf file
  */
-void apply_kline(struct Client *sptr, struct ConfItem *aconf,
-                 const char *reason, const char *current_date,
-		 int ip_kline, unsigned long ip, unsigned long ip_mask)
+static void apply_kline(struct Client *sptr, struct ConfItem *aconf,
+                        const char *reason, const char *current_date,
+                        int ip_kline, unsigned long ip, unsigned long ip_mask)
 {
   if(ip_kline)
     {
@@ -382,9 +387,9 @@ void apply_kline(struct Client *sptr, struct ConfItem *aconf,
  * output	- NONE
  * side effects	- tkline as given is placed
  */
-void apply_tkline(struct Client *sptr, struct ConfItem *aconf,
-		  const char *current_date, int tkline_time,
-		  int ip_kline, unsigned long ip, unsigned long ip_mask)
+static void apply_tkline(struct Client *sptr, struct ConfItem *aconf,
+                         const char *current_date, int tkline_time,
+                         int ip_kline, unsigned long ip, unsigned long ip_mask)
 {
   aconf->hold = CurrentTime + tkline_time;
   add_temp_kline(aconf);
@@ -407,7 +412,7 @@ void apply_tkline(struct Client *sptr, struct ConfItem *aconf,
  *              - 0 if not an integer number, else the number
  * side effects - none
  */
-time_t valid_tkline(struct Client *sptr, char *p)
+static time_t valid_tkline(struct Client *sptr, char *p)
 {
   time_t result = 0;
 
@@ -447,7 +452,7 @@ time_t valid_tkline(struct Client *sptr, char *p)
  * side effects - NONE
  *
  */
-char *cluster(char *hostname)
+static char *cluster(char *hostname)
 {
   static char result[HOSTLEN + 1];      /* result to return */
   char        temphost[HOSTLEN + 1];    /* work place */
@@ -565,7 +570,8 @@ char *cluster(char *hostname)
  * side effects - D line is added
  *
  */
-int mo_dline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int mo_dline(struct Client *cptr, struct Client *sptr,
+                    int parc, char *parv[])
 {
   char *dlhost, *reason;
   char *p;
@@ -750,8 +756,8 @@ int mo_dline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
  * output	- 0 if not ok to kline, 1 to kline i.e. if valid user host
  * side effects -
  */
-int find_user_host(struct Client *sptr,
-		   char *user_host_or_nick, char *luser, char *lhost)
+static int find_user_host(struct Client *sptr,
+                          char *user_host_or_nick, char *luser, char *lhost)
 {
   struct Client *acptr;
   char *hostp;
@@ -824,7 +830,7 @@ int find_user_host(struct Client *sptr,
  * output	- 0 if not valid user or host, 1 if valid
  * side effects -
  */
-int valid_user_host( struct Client *sptr, char *luser, char *lhost)
+static int valid_user_host( struct Client *sptr, char *luser, char *lhost)
 {
   /*
    * Check for # in user@host
@@ -856,7 +862,7 @@ int valid_user_host( struct Client *sptr, char *luser, char *lhost)
  * output       - 0 if not valid, 1 if valid
  * side effects -
  */
-int valid_wild_card(struct Client *sptr, char *luser, char *lhost)
+static int valid_wild_card(struct Client *sptr, char *luser, char *lhost)
 {
   char *p;
   char tmpch;
@@ -930,7 +936,7 @@ int valid_wild_card(struct Client *sptr, char *luser, char *lhost)
  * output       - 0 if no valid comment, 1 if valid
  * side effects - NONE
  */
-int valid_comment(struct Client *sptr, char *comment)
+static int valid_comment(struct Client *sptr, char *comment)
 {
   if(strchr(comment, ':'))
     {
@@ -962,8 +968,8 @@ int valid_comment(struct Client *sptr, char *comment)
  * output	- 1 if already placed, 0 if not
  * side effects - NONE
  */
-int already_placed_kline(struct Client *sptr, char *luser, char *lhost,
-                         time_t tkline_time, unsigned long ip)
+static int already_placed_kline(struct Client *sptr, char *luser, char *lhost,
+                                time_t tkline_time, unsigned long ip)
 {
   char *reason;
   struct ConfItem *aconf;
@@ -1017,7 +1023,7 @@ int already_placed_kline(struct Client *sptr, char *luser, char *lhost,
  * output	- YES if valid ip_kline NO if not
  * side effects	- NONE
  */
-int is_ip_kline(char *lhost,unsigned long *ip, unsigned long *ip_mask)
+static int is_ip_kline(char *lhost,unsigned long *ip, unsigned long *ip_mask)
 {
   char *p;
 

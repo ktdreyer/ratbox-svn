@@ -42,6 +42,14 @@
 #include <time.h>
 #include <string.h>
 
+static void send_conf_options(struct Client *sptr);
+static void send_birthdate_online_time(struct Client *sptr);
+static void send_info_text(struct Client *sptr);
+
+static int m_info(struct Client*, struct Client*, int, char**);
+static int ms_info(struct Client*, struct Client*, int, char**);
+static int mo_info(struct Client*, struct Client*, int, char**);
+
 struct Message info_msgtab = {
   MSG_INFO, 0, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_info, ms_info, mo_info}
@@ -71,7 +79,8 @@ char *_version = "20010101";
 **  parv[1] = servername
 */
 
-int m_info(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int m_info(struct Client *cptr, struct Client *sptr,
+                  int parc, char *parv[])
 {
   static time_t last_used=0L;
 
@@ -104,7 +113,8 @@ int m_info(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 **  parv[0] = sender prefix
 **  parv[1] = servername
 */
-int mo_info(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int mo_info(struct Client *cptr, struct Client *sptr,
+                   int parc, char *parv[])
 
 {
   if (hunt_server(cptr,sptr,":%s INFO :%s",1,parc,parv) == HUNTED_ISME)
@@ -128,7 +138,8 @@ int mo_info(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 **  parv[0] = sender prefix
 **  parv[1] = servername
 */
-int ms_info(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int ms_info(struct Client *cptr, struct Client *sptr,
+                   int parc, char *parv[])
 
 {
   if (hunt_server(cptr,sptr,":%s INFO :%s",1,parc,parv) == HUNTED_ISME)
@@ -149,7 +160,7 @@ int ms_info(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
  * output	- none
  * side effects	- info text is sent to client
  */
-void send_info_text(struct Client *sptr)
+static void send_info_text(struct Client *sptr)
 {
   char **text = infotext;
 
@@ -166,7 +177,7 @@ void send_info_text(struct Client *sptr)
  * output	- none
  * side effects	- birthdate and online time are sent
  */
-void send_birthdate_online_time(struct Client *sptr)
+static void send_birthdate_online_time(struct Client *sptr)
 {
   sendto_one(sptr,
 	     ":%s %d %s :Birth Date: %s, compile # %s",
@@ -191,7 +202,7 @@ void send_birthdate_online_time(struct Client *sptr)
  * output	- none
  * side effects	- send config options to client
  */
-void send_conf_options(struct Client *sptr)
+static void send_conf_options(struct Client *sptr)
 {
   Info *infoptr;
 

@@ -35,8 +35,7 @@
 #include "parse.h"
 
 #ifndef OPENSSL
-
-/* Maybe this should be an error or something? -davidt */
+/* Maybe this should be an error or something?-davidt */
 
 void
 _modinit(void)
@@ -44,9 +43,17 @@ _modinit(void)
   return;
 }
 
+void
+_moddeinit(void)
+{
+  return;
+}
+
 char *_version = "20001122";
 
 #else
+
+static int m_challenge(struct Client*, struct Client*, int, char**);
 
 /* We have openssl support, so include /CHALLENGE */
 struct Message challenge_msgtab = {
@@ -76,7 +83,8 @@ char *_version = "20001122";
  * parv[0] = sender prefix
  *
  */
-int m_challenge( struct Client *cptr, struct Client *sptr, int parc, char *parv[] )
+static int m_challenge( struct Client *cptr, struct Client *sptr,
+                        int parc, char *parv[] )
 {
   char * challenge;
 

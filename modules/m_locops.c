@@ -35,6 +35,8 @@
 #include "parse.h"
 #include "modules.h"
 
+static int m_locops(struct Client *,struct Client *,int,char **);
+
 struct Message locops_msgtab = {
   MSG_LOCOPS, 0, 2, 0, MFLG_SLOW, 0,
   {m_unregistered, m_not_oper, m_ignore, m_locops}
@@ -60,7 +62,8 @@ char *_version = "20001122";
  *      parv[0] = sender prefix
  *      parv[1] = message text
  */
-int m_locops(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int m_locops(struct Client *cptr, struct Client *sptr,
+                    int parc, char *parv[])
 {
   char *message = NULL;
 

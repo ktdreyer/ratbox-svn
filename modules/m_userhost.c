@@ -37,6 +37,9 @@
 
 static char buf[BUFSIZE];
 
+/* XXX LazyLinks ? */
+static int m_userhost(struct Client*, struct Client*, int, char**);
+
 struct Message userhost_msgtab = {
   MSG_USERHOST, 0, 1, 0, MFLG_SLOW, 0,
   {m_unregistered, m_userhost, m_ignore, m_userhost}
@@ -61,10 +64,10 @@ char *_version = "20001122";
  * the need for complicated requests like WHOIS. It returns user/host
  * information only (no spurious AWAY labels or channels).
  */
-int     m_userhost(struct Client *cptr,
-                   struct Client *sptr,
-                   int parc,
-                   char *parv[])
+static int m_userhost(struct Client *cptr,
+                      struct Client *sptr,
+                      int parc,
+                      char *parv[])
 {
   struct Client *acptr;
   char response[NICKLEN*2+USERLEN+HOSTLEN+30];

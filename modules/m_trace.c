@@ -41,6 +41,9 @@
 #include <string.h>
 #include <time.h>
 
+static int ms_trace(struct Client*, struct Client*, int, char**);
+static int mo_trace(struct Client*, struct Client*, int, char**);
+
 struct Message trace_msgtab = {
   MSG_TRACE, 0, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_ignore, ms_trace, mo_trace}
@@ -58,8 +61,8 @@ _moddeinit(void)
   mod_del_cmd(&trace_msgtab);
 }
 
-int report_this_status(struct Client *sptr, struct Client *acptr,int dow,
-		       int link_u_p, int link_u_s);
+static int report_this_status(struct Client *sptr, struct Client *acptr,int dow,
+                              int link_u_p, int link_u_s);
 
 char *_version = "20001122";
 
@@ -68,7 +71,8 @@ char *_version = "20001122";
 **      parv[0] = sender prefix
 **      parv[1] = servername
 */
-int mo_trace(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int mo_trace(struct Client *cptr, struct Client *sptr,
+                    int parc, char *parv[])
 {
   int   i;
   struct Client       *acptr = NULL;
@@ -253,7 +257,8 @@ int mo_trace(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 **      parv[0] = sender prefix
 **      parv[1] = servername
 */
-int ms_trace(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int ms_trace(struct Client *cptr, struct Client *sptr,
+                    int parc, char *parv[])
 {
   if (hunt_server(cptr, sptr, ":%s TRACE %s :%s", 2, parc, parv))
     return 0;
@@ -272,8 +277,8 @@ int ms_trace(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
  * output	- counter of number of hits
  * side effects - NONE
  */
-int report_this_status(struct Client *sptr, struct Client *acptr,
-		       int dow, int link_u_p, int link_s_p)
+static int report_this_status(struct Client *sptr, struct Client *acptr,
+                              int dow, int link_u_p, int link_s_p)
 {
   const char* name;
   const char* class_name;

@@ -34,6 +34,11 @@
 #include "parse.h"
 #include "modules.h"
 
+/* XXX LazyLinks ? */
+
+static int m_lusers(struct Client*, struct Client*, int, char**);
+static int ms_lusers(struct Client*, struct Client*, int, char**);
+
 struct Message lusers_msgtab = {
   MSG_LUSERS, 0, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_lusers, ms_lusers, m_lusers}
@@ -62,7 +67,8 @@ char *_version = "20001122";
  * 199970918 JRL hacked to ignore parv[1] completely and require parc > 3
  * to cause a force
  */
-int m_lusers(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int m_lusers(struct Client *cptr, struct Client *sptr,
+                    int parc, char *parv[])
 {
   static time_t last_used = 0;
 
@@ -101,7 +107,8 @@ int m_lusers(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
  * 199970918 JRL hacked to ignore parv[1] completely and require parc > 3
  * to cause a force
  */
-int ms_lusers(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int ms_lusers(struct Client *cptr, struct Client *sptr,
+                     int parc, char *parv[])
 {
   static time_t last_used = 0;
 

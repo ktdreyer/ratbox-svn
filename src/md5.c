@@ -23,9 +23,9 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include "md5.h"
 #include "s_log.h"
 #include "client.h"
+#include "md5.h"
 
 /*
 ** how unique ID generation works:

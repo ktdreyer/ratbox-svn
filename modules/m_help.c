@@ -34,6 +34,9 @@
 #include "parse.h"
 #include "modules.h"
 
+static int m_help(struct Client*, struct Client*, int, char**);
+static int mo_help(struct Client*, struct Client*, int, char**);
+
 struct Message help_msgtab = {
   MSG_HELP, 0, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_help, m_ignore, mo_help}
@@ -57,7 +60,8 @@ char *_version = "20001122";
  * m_help - HELP message handler
  *      parv[0] = sender prefix
  */
-int m_help(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int m_help(struct Client *cptr, struct Client *sptr,
+                  int parc, char *parv[])
 {
   static time_t last_used = 0;
 
@@ -82,10 +86,10 @@ int m_help(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
  * mo_help - HELP message handler
  *      parv[0] = sender prefix
  */
-int mo_help(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int mo_help(struct Client *cptr, struct Client *sptr,
+                   int parc, char *parv[])
 {
   SendMessageFile(sptr, &ConfigFileEntry.helpfile);
   return 0;
 }
-
 

@@ -32,6 +32,8 @@
 #include "parse.h"
 #include "modules.h"
 
+static int m_users(struct Client*, struct Client*, int, char**);
+
 struct Message users_msgtab = {
   MSG_USERS, 0, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_users, m_users, m_users}
@@ -56,7 +58,8 @@ char *_version = "20001122";
  *      parv[0] = sender prefix
  *      parv[1] = servername
  */
-int m_users(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+static int m_users(struct Client *cptr, struct Client *sptr,
+                   int parc, char *parv[])
 {
   if (hunt_server(cptr,sptr,":%s USERS :%s",1,parc,parv) == HUNTED_ISME)
     {

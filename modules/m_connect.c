@@ -41,6 +41,9 @@
 #include <assert.h>
 #include <stdlib.h>     /* atoi */
 
+static int mo_connect(struct Client*, struct Client*, int, char**);
+static int ms_connect(struct Client*, struct Client*, int, char**);
+
 struct Message connect_msgtab = {
   MSG_CONNECT, 0, 2, 0, MFLG_SLOW, 0,
   {m_unregistered, m_not_oper, ms_connect, mo_connect}
@@ -71,7 +74,8 @@ char *_version = "20001122";
  *      parv[2] = port number
  *      parv[3] = remote server
  */
-int mo_connect(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
+static int mo_connect(struct Client* cptr, struct Client* sptr,
+                      int parc, char* parv[])
 {
   int              port;
   int              tmpport;
@@ -189,7 +193,8 @@ int mo_connect(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
  *      parv[2] = port number
  *      parv[3] = remote server
  */
-int ms_connect(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
+static int ms_connect(struct Client* cptr, struct Client* sptr,
+                      int parc, char* parv[])
 {
   int              port;
   int              tmpport;
