@@ -36,7 +36,7 @@
 
 struct Message help_msgtab = {
   MSG_HELP, 0, 0, MFLG_SLOW, 0,
-  {m_unregistered, m_help, m_ignore, m_help}
+  {m_unregistered, m_help, m_ignore, mo_help}
 };
 
 void
@@ -44,6 +44,8 @@ _modinit(void)
 {
   mod_add_cmd(MSG_HELP, &help_msgtab);
 }
+
+char *_version = "20001122";
 
 /*
  * m_help - HELP message handler
@@ -54,31 +56,29 @@ int m_help(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   int i;
   static time_t last_used = 0;
 
-  if (!IsAnyOper(sptr))
+  /* HELP is always local */
+  if ((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
     {
-      /* HELP is always local */
-      if ((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
-        {
-          /* safe enough to give this on a local connect only */
-          sendto_one(sptr,form_str(RPL_LOAD2HI),me.name,parv[0]);
-          return 0;
-        }
-      else
-        {
-          last_used = CurrentTime;
-        }
-    }
-
-  if (!IsAnyOper(sptr) )
-    {
-      for (i = 0; i < num_msgs; i++)
-        sendto_one(sptr,":%s NOTICE %s :%s",
-                   me.name, parv[0], msgtab[i]->cmd);
+      /* safe enough to give this on a local connect only */
+      sendto_one(sptr,form_str(RPL_LOAD2HI),me.name,parv[0]);
       return 0;
     }
   else
-    SendMessageFile(sptr, &ConfigFileEntry.helpfile);
+    {
+      last_used = CurrentTime;
+    }
 
+  for (i = 0; i < num_msgs; i++)
+    sendto_one(sptr,":%s NOTICE %s :%s",
+	       me.name, parv[0], msgtab[i]->cmd);
   return 0;
 }
 
+/*
+ * mo_help - HELP message handler
+ *      parv[0] = sender prefix
+ */
+int mo_help(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+{
+  SendMessageFile(sptr, &ConfigFileEntry.helpfile);
+}

@@ -35,7 +35,7 @@
 
 struct Message hash_msgtab = {
   MSG_HASH, 0, 1, MFLG_SLOW, 0,
-  {m_unregistered, m_not_oper, m_hash, m_hash}
+  {m_unregistered, m_not_oper, mo_hash, mo_hash}
 };
 
 void
@@ -43,6 +43,8 @@ _modinit(void)
 {
   mod_add_cmd(MSG_HASH, &hash_msgtab);
 }
+
+char *_version = "20001122";
 
 static void report_hash_stats(struct Client* client, const char* name, 
                               const struct HashStats* stats)
@@ -71,23 +73,27 @@ static void report_hash_stats(struct Client* client, const char* name,
  *       -avalon
  *
  */
-int m_hash(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
+int mo_hash(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
 {
   struct HashStats stats;
 
-  if (!MyClient(sptr) || !IsGlobalOper(sptr)) {
-    sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
-    return 0;
-  }
+  if (!MyClient(sptr))
+    {
+      sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
+      return 0;
+    }
 
-  if (parc < 2) {
-    sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS), me.name, parv[0], "HASH");
-    return 0;
-  }
-  if (0 == irccmp(parv[1], "iphash")) {
-    iphash_stats(cptr, sptr, parc, parv, -1);
-    return 0;
-  }
+  if (parc < 2)
+    {
+      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS), me.name, parv[0], "HASH");
+      return 0;
+    }
+
+  if (0 == irccmp(parv[1], "iphash"))
+    {
+      iphash_stats(cptr, sptr, parc, parv, -1);
+      return 0;
+    }
 
   switch (*parv[1]) {
   case 'V':     /* Verify and report channel hash table stats */

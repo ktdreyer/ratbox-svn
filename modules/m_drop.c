@@ -70,10 +70,6 @@ int     ms_drop(struct Client *cptr,
   if(parc < 2 || *parv[1] == '\0')
     return 0;
 
-  /* If not a server just ignore it */
-  if ( !IsServer(cptr) )
-    return 0;
-
   name = parv[1];
 
 #ifdef DEBUGLL

@@ -205,64 +205,7 @@ sendto_realops("ZZZ Creating top_chptr for %s", (parv[2] + 1));
 	}
     }
 
-  /*
-   * bogus ban removal code.
-   * If I see that this SJOIN will mean I keep my ops, but lose
-   * the ops from the joining server, I keep track of that in the channel
-   * structure. I set keep_their_modes to NO
-   * since the joining server will not be keeping their ops, I can
-   * ignore any of the bans sent from that server. The moment
-   * I see a chanop MODE being sent, I can set this flag back to YES.
-   *
-   * There is one degenerate case. Two servers connect bursting
-   * at the same time. It might cause a problem, or it might not.
-   * In the case that it becomes an issue, then a short list
-   * of servers having their modes ignored would have to be linked
-   * into the channel structure. This would be only an issue
-   * on hubs.
-   * Hopefully, it will be much of a problem.
-   *
-   * Bogus bans on the server losing its chanops is trivial. All
-   * bans placed on the local server during its split, with bogus chanops
-   * I can just remove.
-   *
-   * -Dianora
-   */
-  
-  chptr->keep_their_modes = YES;
-
-  /* locally created channels do not get created from SJOIN's
-   * any SJOIN destroys the locally_created flag
-   *
-   * -Dianora
-   */
-
-  chptr->locally_created = NO;
   oldts = chptr->channelts;
-
-  /* If the TS goes to 0 for whatever reason, flag it
-   * ya, I know its an invasion of privacy for those channels that
-   * want to keep TS 0 *shrug* sorry
-   * -Dianora
-   */
-
-  if(!isnew && !newts && oldts)
-    {
-      if(IsVchan(chptr) && top_chptr)
-	{
-	  sendto_channel_butserv(chptr, &me,
-	 ":%s NOTICE %s :*** Notice -- TS for %s changed from %lu to 0",
-              me.name, top_chptr->chname, top_chptr->chname, oldts);
-	}
-      else
-	{
-	  sendto_channel_butserv(chptr, &me,
-	 ":%s NOTICE %s :*** Notice -- TS for %s changed from %lu to 0",
-              me.name, chptr->chname, chptr->chname, oldts);
-	}
-      sendto_realops("Server %s changing TS on %s from %lu to 0",
-                     sptr->name,parv[2],oldts);
-    }
 
   doesop = (parv[4+args][0] == '@' || parv[4+args][1] == '@');
 
@@ -290,8 +233,6 @@ sendto_realops("ZZZ Creating top_chptr for %s", (parv[2] + 1));
     }
   else
     {
-      chptr->keep_their_modes = NO;
-
       if (chptr->opcount)
         keep_new_modes = NO;
       if (doesop && !chptr->opcount)
@@ -320,18 +261,6 @@ sendto_realops("ZZZ Creating top_chptr for %s", (parv[2] + 1));
   if (!keep_our_modes)
     {
       remove_our_modes(chptr,top_chptr,sptr);
-      if(IsVchan(chptr) && top_chptr)
-	{
-	  sendto_channel_butserv(chptr, &me,
-	  ":%s NOTICE %s :*** Notice -- TS for %s changed from %lu to %lu",
-          me.name, top_chptr->chname, top_chptr->chname, oldts, newts);
-	}
-      else
-	{
-	  sendto_channel_butserv(chptr, &me,
-	  ":%s NOTICE %s :*** Notice -- TS for %s changed from %lu to %lu",
-          me.name, chptr->chname, chptr->chname, oldts, newts);
-	}
     }
 
   *modebuf = *parabuf = '\0';
@@ -667,8 +596,8 @@ void set_final_mode(struct Mode *mode,struct Mode *oldmode)
  *
  * inputs	-
  * output	- NONE
- * side effects	- Go through our local members, remove all their
- *		  chanop modes etc. We've lost the TS.
+ * side effects	- Go through the local members, remove all their
+ *		  chanop modes etc., this side lost the TS.
  */
   
 void remove_our_modes( struct Channel *chptr, struct Channel *top_chptr,

@@ -317,7 +317,6 @@ int build_target_list(int p_or_n,
 	    }
 	}
 
-      /* anything else below needs global oper privs */
       if (IsGlobalOper(sptr) && (*nick == '$'))
 	{
 	  handle_opers(p_or_n, command, cptr,sptr,nick+1,text);
@@ -401,10 +400,10 @@ void msg_channel( int p_or_n, char *command,
     {
       if(sptr->user)
 	sptr->user->last = CurrentTime;
-
-      if(check_for_ctcp(text))
-	check_for_flud(sptr, NULL, chptr, 1);
     }
+
+  if(check_for_ctcp(text))
+    check_for_flud(sptr, NULL, chptr, 1);
 
   if (can_send(chptr, sptr) == 0)
     sendto_channel_butone(cptr, sptr, chptr,
@@ -453,10 +452,10 @@ void msg_channel_flags( int p_or_n, char *command,
     {
       if(sptr->user)
 	sptr->user->last = CurrentTime;
-
-      if(check_for_ctcp(text))
-	check_for_flud(sptr, NULL, chptr, 1);
     }
+
+  if(check_for_ctcp(text))
+    check_for_flud(sptr, NULL, chptr, 1);
 
   if (can_send(chptr, sptr) == 0)
     sendto_channel_type(cptr,
@@ -492,7 +491,10 @@ void msg_client(int n_or_p, char *command,
       /* reset idle time for message only if its not to self */
       if((sptr != acptr) && sptr->user)
 	sptr->user->last = CurrentTime;
+    }
 
+  if(MyClient(acptr))
+    {
       if(check_for_ctcp(text))
 	check_for_flud(sptr, acptr, NULL, 1);
     }
@@ -505,7 +507,6 @@ void msg_client(int n_or_p, char *command,
 
   sendto_prefix_one(acptr, sptr, ":%s %s %s :%s",
 		    sptr->name, command, acptr->name, text);
-
 
   return;
 }
