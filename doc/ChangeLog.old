@@ -1,3 +1,9 @@
+*** 20010816_8 by androsyn
+Added block heap allocation for struct Channel.  This ends up enabling us to
+return most all of the memory allocated while servers are joined back to the
+OS.  
+
+
 *** 20010816_7 by androsyn
 Yet another swing at this. This time we use memcpy().
 
