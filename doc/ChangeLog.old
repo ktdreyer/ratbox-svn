@@ -1,3 +1,8 @@
+*** 20010222_3 by wcampbel
+Fixed the German translation.  I WILL be renaming things in the repository
+as gettext appears to die with 'german' or 'swedish'
+
+
 *** 20010222_2 by androsyn
 I forgot to commit some stuff. Part of the /dns rehash fixes..well half-fix
 at least.
