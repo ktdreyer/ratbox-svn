@@ -1,3 +1,9 @@
+*** 20010307_4 by fl_
+- this fixes clearchan.. we do stuff in a certain order which unfortunately
+  means the channel is never really destroyed.. the oper can cycle if they
+  want that..
+
+
 *** 20010307_3 by androsyn
 Stuff to get ziplinks support in the config files at least...Adds a 
 compressed = YES/NO option to connect {} blocks.
