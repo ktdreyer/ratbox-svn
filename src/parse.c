@@ -59,7 +59,7 @@ static struct Message *tree_parse(char *);
 static char buffer[1024];  /* ZZZ must this be so big? must it be here? */
 
 static char xx_dummy = 0;
-static void* msgTreeSentinel = &xx_dummy;
+static char* msgTreeSentinel = &xx_dummy;
 
 /*
  * parse a buffer.
