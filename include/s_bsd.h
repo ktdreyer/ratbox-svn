@@ -70,8 +70,8 @@ extern int   comm_open(int family, int sock_type, int proto,
 extern int   comm_accept(int fd, struct sockaddr *pn, socklen_t *addrlen);
 
 /* These must be defined in the network IO loop code of your choice */
-extern void  comm_setselect(int fd, unsigned int type, PF *handler, 
-                 void *client_data, time_t timeout);
+extern void  comm_setselect(int fd, fdlist_t list, unsigned int type,
+                 PF *handler, void *client_data, time_t timeout);
 extern void  init_netio(void);
 extern int   read_message (time_t, unsigned char);
 extern int   comm_select(time_t);

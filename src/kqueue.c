@@ -154,12 +154,16 @@ void init_netio(void)
  * and deregister interest in a pending IO state for a given FD.
  */
 void
-comm_setselect(int fd, unsigned int type, PF * handler, void *client_data,
-    time_t timeout)
+comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
+    void *client_data, time_t timeout)
 {  
     fde_t *F = &fd_table[fd];
     assert(fd >= 0);
     assert(F->flags.open);
+
+    /* Update the list, even though we're not using it .. */
+    F->list = list;
+
     if (type & COMM_SELECT_READ) {
         kq_update_events(fd, EVFILT_READ, handler);
         F->read_handler = handler;

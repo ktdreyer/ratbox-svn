@@ -110,7 +110,8 @@ fd_close(int fd)
 #ifdef NOTYET
     debug(51, 3) ("fd_close FD %d %s\n", fd, F->desc);
 #endif
-    comm_setselect(fd, COMM_SELECT_WRITE|COMM_SELECT_READ, NULL, NULL, 0);
+    comm_setselect(fd, FDLIST_NONE, COMM_SELECT_WRITE|COMM_SELECT_READ,
+      NULL, NULL, 0);
     F->flags.open = 0;
     fdlist_update_biggest(fd, 0);
     number_fd--;

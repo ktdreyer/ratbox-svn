@@ -180,7 +180,8 @@ static void release_auth_client(struct Client* client)
    * us. This is what read_packet() does.
    *     -- adrian
    */
-  comm_setselect(client->fd, COMM_SELECT_READ, read_packet, client, 0);
+  comm_setselect(client->fd, FDLIST_BUSYCLIENT, COMM_SELECT_READ, read_packet,
+    client, 0);
   add_client_to_list(client);
 }
  
@@ -520,7 +521,9 @@ void auth_connect_callback(int fd, int error, void *data)
   }
   ClearAuthConnect(auth);
   SetAuthPending(auth);
-  comm_setselect(auth->fd, COMM_SELECT_READ, read_auth_reply, auth, 0);
+  /* Its idle, because we don't mind this taking a little time -- adrian */
+  comm_setselect(auth->fd, FDLIST_IDLECLIENT, COMM_SELECT_READ,
+    read_auth_reply, auth, 0);
 }
 
 

@@ -580,8 +580,15 @@ read_packet(int fd, void *data)
 finish:
 #endif
   /* If we get here, we need to register for another COMM_SELECT_READ */
-  if (cptr->fd > -1)
-      comm_setselect(cptr->fd, COMM_SELECT_READ, read_packet, cptr, 0);
+  if (cptr->fd > -1) {
+    if (PARSE_AS_SERVER(cptr)) {
+      comm_setselect(cptr->fd, FDLIST_SERVER, COMM_SELECT_READ,
+        read_packet, cptr, 0);
+    } else {
+      comm_setselect(cptr->fd, FDLIST_IDLECLIENT, COMM_SELECT_READ,
+        read_packet, cptr, 0);
+    }
+  }
 }
 
 void error_exit_client(struct Client* cptr, int error)
@@ -856,8 +863,8 @@ comm_connect_tryconnect(int fd, void *notused)
             comm_connect_callback(fd, COMM_OK);
         else if (ignoreErrno(errno))
             /* Ignore error? Reschedule */
-            comm_setselect(fd, COMM_SELECT_WRITE, comm_connect_tryconnect,
-              NULL, 0);
+            comm_setselect(fd, FDLIST_SERVER, COMM_SELECT_WRITE,
+              comm_connect_tryconnect, NULL, 0);
         else
             /* Error? Fail with COMM_ERR_CONNECT */
             comm_connect_callback(fd, COMM_ERR_CONNECT);

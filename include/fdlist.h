@@ -47,6 +47,15 @@ enum {
     COMM_ERR_MAX
 };
 
+typedef enum fdlist_t {
+    FDLIST_NONE,
+    FDLIST_SERVICE,
+    FDLIST_SERVER,
+    FDLIST_IDLECLIENT,
+    FDLIST_BUSYCLIENT,
+    FDLIST_MAX
+} fdlist_t;
+
 typedef struct _fde fde_t;
 
 /* Callback for completed IO events */
@@ -69,6 +78,7 @@ struct _fde {
      */
     int fd;		/* So we can use the fde_t as a callback ptr */
     int type;
+    fdlist_t list;	/* Which list this FD should sit on */
     char desc[FD_DESC_SZ];
     PF *read_handler;
     void *read_data;

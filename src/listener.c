@@ -224,7 +224,8 @@ static int inetport(struct Listener* listener)
   listener->fd = fd;
 
   /* Listen completion events are READ events .. */
-  comm_setselect(fd, COMM_SELECT_READ, accept_connection, listener, 0);
+  comm_setselect(fd, FDLIST_SERVICE, COMM_SELECT_READ, accept_connection,
+    listener, 0);
 
   return 1;
 }
@@ -411,6 +412,7 @@ static void accept_connection(int pfd, void *data)
   } while (0);
 
   /* Re-register a new IO request for the next accept .. */
-  comm_setselect(listener->fd, COMM_SELECT_READ, accept_connection, listener, 0);
+  comm_setselect(listener->fd, FDLIST_SERVICE, COMM_SELECT_READ,
+    accept_connection, listener, 0);
 }
 

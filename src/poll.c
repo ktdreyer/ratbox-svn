@@ -131,8 +131,8 @@ void init_netio(void)
  * and deregister interest in a pending IO state for a given FD.
  */
 void
-comm_setselect(int fd, unsigned int type, PF * handler, void *client_data,
-    time_t timeout)
+comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
+    void *client_data, time_t timeout)
 {  
     fde_t *F = &fd_table[fd];
     assert(fd >= 0);
@@ -141,6 +141,7 @@ comm_setselect(int fd, unsigned int type, PF * handler, void *client_data,
     debug(5, 5) ("commSetSelect: FD %d type %d, %s\n", fd, type, handler ? "SET"
  : "CLEAR");
 #endif
+    F->list = list;
     if (type & COMM_SELECT_READ) {
         F->read_handler = handler;
         F->read_data = client_data;

@@ -161,7 +161,8 @@ send_message(struct Client *to, char *msg, int len)
      * later.
      *     -- adrian
      */
-    comm_setselect(to->fd, COMM_SELECT_WRITE, send_queued_write, to, 0);
+    comm_setselect(to->fd, FDLIST_BUSYCLIENT, COMM_SELECT_WRITE,
+      send_queued_write, to, 0);
     return 0;
 } /* send_message() */
 
@@ -237,7 +238,8 @@ send_queued_write(int fd, void *data)
   /* return (IsDead(to)) ? -1 : 0; */
   /* If we have any more data, reschedule a write */
   if (more)
-      comm_setselect(fd, COMM_SELECT_WRITE, send_queued_write, to, 0);
+      comm_setselect(fd, FDLIST_BUSYCLIENT, COMM_SELECT_WRITE,
+        send_queued_write, to, 0);
 } /* send_queued_write() */
 
 /*
