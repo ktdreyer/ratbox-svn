@@ -1,3 +1,7 @@
+*** 20010126_9 by androsyn
+Fixed stupid /connect bug where hostname was not an IP address.
+
+
 *** 20010126_8 by jdc
 TYES/TNO flipped to make default value for spoof_notice 'yes'.  This
 keeps us "compatible" with hybrid-6.
