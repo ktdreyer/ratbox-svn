@@ -3,7 +3,8 @@ $Id$
 A directory of support programs for ircd.
 
 convertconf.c   - converts a Hybrid 5 or 6 conf file to the new
-                  style
+                  style.  will not convert I:
+convertilines.c - convert hybrid 5/6 I: to auth {};
 convertklines.c - convert Hybrid 5/6 and early 7beta kline.conf files
                   to the new spreadsheet like format.
 encspeed.c      - test the speed of various encryption algorithms used in
