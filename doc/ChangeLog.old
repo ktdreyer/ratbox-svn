@@ -1,3 +1,9 @@
+*** 20000113_1 by db
+- updated client/deny sections to use new IP_TYPE
+- fixed union to use struct ip_value
+
+
+
 *** 20000112_1 by db
 - returned to ';' at end of each section, this is actually easier to
   recover from errors; just scan for ';'
