@@ -67,6 +67,22 @@ struct Listener* make_listener(int port, struct in_addr addr)
 void free_listener(struct Listener* listener)
 {
   assert(0 != listener);
+  /*
+   * remove from listener list
+   */
+  if (listener == ListenerPollList)
+    ListenerPollList = listener->next;
+  else {
+    struct Listener* prev = ListenerPollList;
+    for ( ; prev; prev = prev->next) {
+      if (listener == prev->next) {
+        prev->next = listener->next;
+        break;
+      }
+    }
+  }
+
+  /* free */
   MyFree(listener);
 }
 
@@ -228,12 +244,21 @@ static int inetport(struct Listener* listener)
 
 static struct Listener* find_listener(int port, struct in_addr addr)
 {
-  struct Listener* listener;
-  for (listener = ListenerPollList; listener; listener = listener->next) {
+  struct Listener* listener = NULL;
+  struct Listener* last_closed = NULL;
+  
+  for (listener = ListenerPollList; listener; listener = listener->next)
+  {
     if (port == listener->port && addr.s_addr == listener->addr.s_addr)
-      return listener;
+    {
+      /* Try to return an open listener, otherwise reuse a closed one */
+      if (listener->fd == -1)
+        last_closed = listener;
+      else
+        return listener;
+    }
   }
-  return 0;
+  return last_closed;
 }
  
   
@@ -262,27 +287,24 @@ void add_listener(int port, const char* vhost_ip)
       return;
   }
 
-  if ((listener = find_listener(port, vaddr))) {
-    listener->active = 1;
-    return;
-  }
-
-  listener = make_listener(port, vaddr);
-
-  if (inetport(listener)) {
-    listener->active = 1;
-    listener->next   = ListenerPollList;
-    ListenerPollList = listener; 
+  if ((listener = find_listener(port, vaddr)))
+  {
+    if (listener->fd > -1)
+      return;
   }
   else
-    free_listener(listener);
-}
+  {
+    listener = make_listener(port, vaddr);
+    listener->next = ListenerPollList;
+    ListenerPollList = listener;
+  }
 
-void mark_listeners_closing(void)
-{
-  struct Listener* listener;
-  for (listener = ListenerPollList; listener; listener = listener->next)
-    listener->active = 0;
+  listener->fd = -1;
+
+  if (inetport(listener))
+    listener->active = 1;
+  else
+    close_listener(listener);
 }
 
 /*
@@ -291,23 +313,18 @@ void mark_listeners_closing(void)
 void close_listener(struct Listener* listener)
 {
   assert(0 != listener);
-  /*
-   * remove from listener list
-   */
-  if (listener == ListenerPollList)
-    ListenerPollList = listener->next;
-  else {
-    struct Listener* prev = ListenerPollList;
-    for ( ; prev; prev = prev->next) {
-      if (listener == prev->next) {
-        prev->next = listener->next;
-        break; 
-      }
-    }
-  }
+
   if (-1 < listener->fd)
-    /* This will also remove any pending IO interests  -- Adrian */
+  {
     fd_close(listener->fd);
+    listener->fd = -1;
+  }
+
+  listener->active = 0;
+
+  if (listener->ref_count)
+    return;
+
   free_listener(listener);
 }
  
@@ -323,8 +340,7 @@ void close_listeners()
    */
   for (listener = ListenerPollList; listener; listener = listener_next) {
     listener_next = listener->next;
-    if (0 == listener->active && 0 == listener->ref_count)
-      close_listener(listener);
+    close_listener(listener);
   }
 }
 
@@ -379,15 +395,6 @@ static void accept_connection(int pfd, void *data)
         last_oper_notice = CurrentTime;
       }
       send(fd, "ERROR :All connections in use\r\n", 32, 0);
-      fd_close(fd);
-      break;
-    }
-    /*
-     * check to see if listener is shutting down
-     */
-    if (!listener->active) {
-      ++ServerStats->is_ref;
-      send(fd, "ERROR :Use another port\r\n", 25, 0);
       fd_close(fd);
       break;
     }

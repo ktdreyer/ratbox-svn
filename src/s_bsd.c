@@ -299,7 +299,7 @@ void close_connection(struct Client *cptr)
       assert(0 < cptr->localClient->listener->ref_count);
       if (0 == --cptr->localClient->listener->ref_count &&
 	  !cptr->localClient->listener->active) 
-	close_listener(cptr->localClient->listener);
+	free_listener(cptr->localClient->listener);
       cptr->localClient->listener = 0;
     }
 

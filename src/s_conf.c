@@ -1372,8 +1372,8 @@ int rehash(struct Client *cptr,struct Client *sptr, int sig)
     sendto_realops_flags(FLAGS_ALL,
 			 "Got signal SIGHUP, reloading ircd conf. file");
 
-  read_conf_files(NO);
   close_listeners();
+  read_conf_files(NO);
   flush_deleted_I_P();
   return 0;
 }
