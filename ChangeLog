@@ -1,3 +1,38 @@
+leeh        2005/04/06 23:58:32 UTC	(20050406_3)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+    doc                  example.conf schema.txt 
+    include              c_init.h conf.h config.h s_userserv.h 
+                         setup.h.in 
+    src                  Makefile.in newconf.c rserv.c 
+                         s_userserv.c 
+  Added files:
+    include              s_nickserv.h 
+    src                  s_nickserv.c 
+  Log:
+  - beginnings of nickname services
+  
+  Revision  Changes    Path
+  1.22      +21 -0     rserv/autoconf/configure.in
+  1.21      +113 -80   rserv/configure
+  1.36      +21 -0     rserv/doc/example.conf
+  1.18      +9 -0      rserv/doc/schema.txt
+  1.18      +1 -0      rserv/include/c_init.h
+  1.40      +4 -0      rserv/include/conf.h
+  1.25      +1 -0      rserv/include/config.h
+  1.1       +27 -0     rserv/include/s_nickserv.h (new)
+  1.17      +1 -0      rserv/include/s_userserv.h
+  1.11      +3 -0      rserv/include/setup.h.in
+  1.32      +2 -2      rserv/src/Makefile.in
+  1.45      +7 -0      rserv/src/newconf.c
+  1.48      +3 -0      rserv/src/rserv.c
+  1.1       +181 -0    rserv/src/s_nickserv.c (new)
+  1.54      +6 -0      rserv/src/s_userserv.c
+
+
+
 leeh        2005/04/06 23:08:00 UTC	(20050406_2)
 
   Modified files:
