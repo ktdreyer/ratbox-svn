@@ -1,3 +1,11 @@
+*** 20010524_14 by davidt
+- erk, turn off slink-*-logs by default, since they could easily become
+  huge...
+- also select different data to be logged, since the problem seems to be
+  100% crypt related, now just log data pre/post encrypt/decrypt, instead of
+  as its read from the ircd, and as its written to the wire..
+
+
 *** 20010524_13 by davidt
 - Fix compiler warnings in servlink
 
