@@ -1,3 +1,29 @@
+leeh        2004/03/03 18:23:31 EST	(20040303_19)
+
+  Modified files:
+    include              msg.h 
+    modules              m_accept.c m_capab.c m_kline.c 
+                         m_operspy.c 
+    src                  parse.c 
+  Log:
+  - redid ENCAP handlers.  they now have their own entry in the Message
+    struct which is the function to call when we receive that command over
+    ENCAP.  This is particularily useful for KLINE and friends, which are now
+    being sent over ENCAP..
+  
+    This commit breaks any modules designed for 2.0b1.  To fix them, add
+    "mg_ignore," after the server handler in struct Message.
+  
+  Revision  Changes    Path
+  7.50      +0 -2      ircd-ratbox/include/msg.h
+  1.57      +2 -2      ircd-ratbox/modules/m_accept.c
+  1.46      +3 -3      ircd-ratbox/modules/m_capab.c
+  1.179     +3 -3      ircd-ratbox/modules/m_kline.c
+  1.3       +3 -3      ircd-ratbox/modules/m_operspy.c
+  7.175     +3 -4      ircd-ratbox/src/parse.c
+
+
+
 leeh        2004/03/03 18:03:09 EST	(20040303_18)
 
   Modified files:
