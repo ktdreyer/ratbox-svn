@@ -73,42 +73,45 @@ static char buffer[1024];
 static inline int
 string_to_array(char *string, char *parv[MAXPARA])
 {
-	char *p, *buf = string;
-	register int x = 1;
-	while(*buf == ' ') 
-		buf++;
-	if(*buf == '\0')
-		return x;
-	do 
-	{
-		if((p = strchr(buf, ' ')) != NULL)
-		{
-			if(*buf == ':') /* Last parameter */
-			{
-				buf++;
-			        parv[x++] = buf;
-		    		parv[x] = NULL;
-	                        return x;
-	                }
-	                parv[x] = buf;
-	    		*p++ = '\0';
-	         	buf = p;
- 		} else {
-          		if(*buf == ':')
-          			buf++;
-          		parv[x] = buf;
-	                if(*buf != '\0')
-	                	x++;
-	                parv[x] = NULL;
-			return x;
-	        }       
-	        while(*buf == ' ')
-	        	buf++;
-	        x++;
-	} while(x < MAXPARA - 1);
-	parv[x++] = p;
-	parv[x] = NULL;
-	return x;
+  char *p, *buf = string;
+  int x = 1;
+
+  parv[x] = NULL;
+  while(*buf == ' ') /* skip leading spaces */
+    buf++;
+  if(*buf == '\0') /* ignore all-space args */
+    return x;
+  
+  do 
+  {
+    if (*buf == ':') /* Last parameter */
+    {
+      buf++;
+      parv[x++] = buf;
+      parv[x] = NULL;
+      return x;
+    }
+    else
+    {
+      parv[x++] = buf;
+      parv[x] = NULL;
+      if((p = strchr(buf, ' ')) != NULL)
+      {
+        *p++ = '\0';
+        buf = p;
+      }
+      else
+        return x;
+    }       
+    while(*buf == ' ')
+      buf++;
+    if(*buf == '\0')
+      return x;
+  } while(x < MAXPARA - 1);
+  
+  parv[x++] = p;
+  parv[x] = NULL;
+  return x;
 }
 
 /*
