@@ -73,13 +73,6 @@ const char *channel_flags[NUMLISTS] = { "@", "@", "+", "\0" };
  *
  * Initializes the channel blockheap
  */
-static void
-channelheap_garbage_collect(void *unused)
-{
-	BlockHeapGarbageCollect(channel_heap);
-	BlockHeapGarbageCollect(ban_heap);
-	BlockHeapGarbageCollect(topic_heap);
-}
 
 void
 init_channels(void)
@@ -87,7 +80,6 @@ init_channels(void)
 	channel_heap = BlockHeapCreate(sizeof(struct Channel), CHANNEL_HEAP_SIZE);
 	ban_heap = BlockHeapCreate(sizeof(struct Ban), BAN_HEAP_SIZE);
 	topic_heap = BlockHeapCreate(TOPICLEN + 1 + USERHOST_REPLYLEN, TOPIC_HEAP_SIZE);
-	eventAddIsh("channelheap_garbage_collect", channelheap_garbage_collect, NULL, 45);
 }
 
 /*

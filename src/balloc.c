@@ -71,21 +71,26 @@
 #include "s_log.h"
 #include "client.h"
 #include "fdlist.h"
+#include "event.h"
 
 #ifdef HAVE_MMAP		/* We've got mmap() that is good */
 #include <sys/mman.h>
-
 /* HP-UX sucks */
 #ifdef MAP_ANONYMOUS
 #ifndef MAP_ANON
 #define MAP_ANON MAP_ANONYMOUS
 #endif
 #endif
-
+#endif
 
 
 static int newblock(BlockHeap * bh);
+static void block_heap_gc(void *unused);
+static dlink_list heap_lists;
 
+#if defined(HAVE_MMAP) && !defined(MAP_ANON)
+static int zero_fd = -1;
+#endif
 
 /*
  * static inline void free_block(void *ptr, size_t size)
@@ -97,37 +102,38 @@ static int newblock(BlockHeap * bh);
 static inline void
 free_block(void *ptr, size_t size)
 {
+#ifdef HAVE_MMAP
 	munmap(ptr, size);
+#else
+	free(ptr);
+#endif
 }
 
-#ifndef MAP_ANON		/* But we cannot mmap() anonymous pages */
-		 /* So we mmap() /dev/zero, which is just as good */
-static int zero_fd = -1;
 
 /*
  * void initBlockHeap(void)
- * Note: This is the /dev/zero version of getting pages 
  * 
  * Inputs: None
  * Outputs: None
- * Side Effects: Opens /dev/zero and saves the file handle for
- *		 future allocations.
+ * Side Effects: Initializes the block heap
  */
 
 void
 initBlockHeap(void)
 {
+#if defined(HAVE_MMAP) && !defined(MAP_ANON)
 	zero_fd = open("/dev/zero", O_RDWR);
 
 	if(zero_fd < 0)
 		outofmemory();
 	fd_open(zero_fd, FD_FILE, "Anonymous mmap()");
+#endif
+	eventAddIsh("block_heap_gc", block_heap_gc, NULL, 30);
 }
 
 /*
  * static inline void *get_block(size_t size)
  * 
- * Note: This is the /dev/zero version
  * Input: Size of block to allocate
  * Output: Pointer to new block
  * Side Effects: None
@@ -136,98 +142,32 @@ static inline void *
 get_block(size_t size)
 {
 	void *ptr;
-	ptr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE, zero_fd, 0);
-	if(ptr == MAP_FAILED)
-	{
-		ptr = NULL;
-	}
-	return (ptr);
-}
-#else /* MAP_ANON */
-
-/* 
- * void initBlockHeap(void)
- *
- * Note: This is the anonymous pages version: This is a placeholder
- * Input: None
- * Output: None
- */
-void
-initBlockHeap(void)
-{
-	return;
-}
-
-/*
- * static inline void *get_block(size_t size)
- * 
- * Note: This is the /dev/zero version
- * Input: Size of block to allocate
- * Output: Pointer to new block
- * Side Effects: None
- */
-
-static inline void *
-get_block(size_t size)
-{
-	void *ptr;
+#ifdef HAVE_MMAP
+#ifdef MAP_ANON
 	ptr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
+#else
+	ptr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE, zero_fd, 0);
+#endif
 	if(ptr == MAP_FAILED)
 	{
 		ptr = NULL;
 	}
+#else
+	ptr = malloc(size);
+#endif
 	return (ptr);
 }
 
-#endif /* MAP_ANON */
 
-#else /* HAVE_MMAP */
-/* Poor bastards don't even have mmap() */
-
-/* 
- * static inline void *get_block(size_t size)
- *
- * Note: This is the non-mmap() version
- * Input: Size of block
- * Output: Pointer to the memory
- */
-static inline void *
-get_block(size_t size)
+static void
+block_heap_gc(void *unused)
 {
-	return (malloc(size));
+	dlink_node *ptr;
+	DLINK_FOREACH(ptr, heap_lists.head)
+	{
+		BlockHeapGarbageCollect((BlockHeap *)ptr->data);
+	}
 }
-
-/*
- * static inline void free_block(void *ptr, size_t size)
- *
- * Inputs: The block and its size
- * Output: None
- * Side Effects: Returns memory for the block back to the malloc heap
- */
-
-static inline void
-free_block(void *ptr, size_t unused)
-{
-	free(ptr);
-}
-
-/* 
- * void initBlockHeap(void)
- *
- * Note: This is the malloc() version: This is a placeholder
- * Input: None
- * Output: None
- */
-
-void
-initBlockHeap()
-{
-	return;
-
-}
-#endif /* HAVE_MMAP */
-
-
 
 /* ************************************************************************ */
 /* FUNCTION DOCUMENTATION:                                                  */
@@ -346,7 +286,7 @@ BlockHeapCreate(size_t elemsize, int elemsperblock)
 	{
 		outofmemory();	/* die.. out of memory */
 	}
-
+	dlinkAddAlloc(bh, &heap_lists);
 	return (bh);
 }
 
@@ -546,7 +486,7 @@ BlockHeapDestroy(BlockHeap * bh)
 		if(walker != NULL)
 			free(walker);
 	}
-
+	dlinkFindDestroy(&heap_lists, bh);
 	free(bh);
 	return (0);
 }

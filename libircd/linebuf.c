@@ -59,18 +59,11 @@ static int bufline_count = 0;
  * Initialise the linebuf mechanism
  */
 
-static void
-linebuf_garbage_collect(void *unused)
-{
-	BlockHeapGarbageCollect(linebuf_heap);
-}
-
 
 void
 linebuf_init(void)
 {
 	linebuf_heap = BlockHeapCreate(sizeof(buf_line_t), LINEBUF_HEAP_SIZE);
-	eventAddIsh("linebuf_garbage_collect", linebuf_garbage_collect, NULL, 30);
 }
 
 static buf_line_t *
