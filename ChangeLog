@@ -1,3 +1,22 @@
+leeh        2005/03/21 17:09:08 UTC	(20050321_2)
+
+  Modified files:
+    include              client.h 
+    modules              m_dline.c m_gline.c m_xline.c 
+    src                  client.c 
+  Log:
+  - move check_xlines() -> m_xline.c, check_dlines() -> m_dline.c and
+    check_glines() -> m_gline.c
+  
+  Revision  Changes    Path
+  7.273     +5 -3      ircd-ratbox/include/client.h
+  1.56      +53 -1     ircd-ratbox/modules/m_dline.c
+  1.159     +50 -1     ircd-ratbox/modules/m_gline.c
+  1.75      +41 -1     ircd-ratbox/modules/m_xline.c
+  7.500     +10 -156   ircd-ratbox/src/client.c
+
+
+
 leeh        2005/03/21 14:38:16 UTC	(20050321_1)
 
   Modified files:
