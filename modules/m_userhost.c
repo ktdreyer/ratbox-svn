@@ -66,41 +66,48 @@ int     m_userhost(struct Client *cptr,
                    int parc,
                    char *parv[])
 {
-  char  *p;            /* scratch end pointer */
-  char  *cn;           /* current name */
   struct Client *acptr;
-  char response[4][NICKLEN*2+USERLEN+HOSTLEN+30];
+  char response[NICKLEN*2+USERLEN+HOSTLEN+30];
+  char *t;
   int i;               /* loop counter */
+  int cur_len;
+  int rl;
 
-  response[0][0] = response[1][0] = response[2][0] = 
-    response[3][0] = '\0';
+  ircsprintf(buf,form_str(RPL_USERHOST),me.name, parv[0], "");
+  cur_len = strlen(buf);
+  t = buf + cur_len;
 
-  for(cn = strtoken(&p, parv[1], ","), i=0; (i < 4) && cn; 
-      cn = strtoken(&p, (char *)NULL, ","), i++ )
+  for ( i = 0; i < 5; i++)
     {
-      if ((acptr = find_person(cn, NULL)))
+      if ((acptr = find_person(parv[i+1], NULL)))
 	{
 	  if (acptr == sptr) /* show real IP for USERHOST on yourself */
-            ircsprintf(response[i], "%s%s=%c%s@%s",
+            ircsprintf(response, "%s%s=%c%s@%s ",
 		       acptr->name,
 		       IsOper(acptr) ? "*" : "",
 		       (acptr->user->away) ? '-' : '+',
 		       acptr->username,
 		       acptr->localClient->sockhost);
           else
-            ircsprintf(response[i], "%s%s=%c%s@%s",
+            ircsprintf(response, "%s%s=%c%s@%s ",
 		       acptr->name,
 		       IsOper(acptr) ? "*" : "",
 		       (acptr->user->away) ? '-' : '+',
 		       acptr->username,
 		       acptr->host);
 
+	  if(((rl = strlen(response)) + cur_len) < (BUFSIZE-10))
+	    {
+	      ircsprintf(t,"%s",response);
+	      t += rl;
+	      cur_len += rl;
+	    }
+	  else
+	    break;
 	}
     }
 
-  ircsprintf(buf, "%s %s %s %s",
-    response[0], response[1], response[2], response[3] );
-  sendto_one(sptr, form_str(RPL_USERHOST), me.name, parv[0], buf);
+  sendto_one(sptr, "%s", buf);
 
   return 0;
 }
