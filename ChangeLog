@@ -1,3 +1,23 @@
+leeh        2004/01/02 17:59:45 EST	(20040102_1)
+
+  Modified files:
+    include              client.h service.h 
+    src                  Makefile.in c_message.c s_alis.c 
+                         service.c 
+  Log:
+  - reworked all the service handlers, now the error stuff is generic,
+    as is help and the commands..
+  
+  Revision  Changes    Path
+  1.9       +8 -2      rserv/include/client.h
+  1.5       +27 -1     rserv/include/service.h
+  1.10      +1 -1      rserv/src/Makefile.in
+  1.8       +4 -3      rserv/src/c_message.c
+  1.13      +141 -267  rserv/src/s_alis.c
+  1.6       +123 -4    rserv/src/service.c
+
+
+
 leeh        2004/01/02 17:04:11 EST	(20040102_0)
 
   Modified files:
