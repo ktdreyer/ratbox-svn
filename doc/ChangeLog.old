@@ -1,3 +1,7 @@
+*** 20010827_1 by jdc
+- Renamed hash_find_client() to find_client().  Oops.
+
+
 *** 20010826_6 by db
 - There was a bug in eventAdd which could lead to an infinite loop.
   I rewrote eventAdd and eventDelete. They actually look sane now.
