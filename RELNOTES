@@ -1,5 +1,17 @@
 -- ircd-ratbox-1.0 RELNOTES 
 
+-- ircd-ratbox-1.0-rc3
+- PRIVMSG was not giving ERR_NOSUCHNICK for non-existant chans/users
+- speed improvements to stats k
+- stats g fixed to show the real user@ portion of the gline
+- RPL_ISUPPORTV (105) will now be given on /version so its easier
+  for client coders.
+- +beI modes will be dropped on persistent channels when someone joins,
+  other modes will be burst to prevent desync.
+- fixed a bug allowing opped users to op themselves
+- the redundant mode code (what stopped multiple +o etc) has been 
+  removed
+
 -- ircd-ratbox-1.0-rc2
 - fixed a bug with internal channel structures that could core the ircd
 - flood_exempt can now be specified via flags=...; in auth {};
