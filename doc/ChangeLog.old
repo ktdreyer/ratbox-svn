@@ -1,3 +1,15 @@
+leeh        2002/07/31 14:17:44 EDT	(20020731_3)
+
+  Modified files:
+    modules              m_gline.c 
+  Log:
+  - trigger glines using the original reason.
+  
+  Revision  Changes    Path
+  1.81      +8 -3      ircd-hybrid-7/modules/m_gline.c
+
+
+
 leeh        2002/07/31 13:35:33 EDT	(20020731_2)
 
   Modified files:
