@@ -41,6 +41,7 @@ static BlockHeap *linebuf_heap;
 
 static int bufline_count = 0;
 
+
 /*
  * linebuf_init
  *
@@ -61,7 +62,7 @@ linebuf_init(void)
   eventAdd("linebuf_garbage_collect", linebuf_garbage_collect, NULL, 30, 0);
 }
 
-buf_line_t *
+inline buf_line_t *
 linebuf_allocate(void)
 {
   buf_line_t *t;
@@ -70,7 +71,7 @@ linebuf_allocate(void)
   return(t);
 }
 
-void
+inline void
 linebuf_free(buf_line_t *p)
 {
    BlockHeapFree(linebuf_heap, p);
@@ -145,11 +146,11 @@ linebuf_done_line(buf_head_t *bufhead, buf_line_t *bufline,
 /*
  * skip to end of line or the crlfs, return the number of bytes ..
  */
-static int
+static inline int
 linebuf_skip_crlf(char *ch, int len)
 {
-  int cpylen = 0;
-
+  register int cpylen = 0;
+  
   /* First, skip until the first non-CRLF */
   while (len && (*ch != '\n') && (*ch != '\r'))
     {
@@ -255,57 +256,38 @@ linebuf_donebuf(buf_head_t *bufhead)
  * This routine probably isn't as optimal as it could be, but hey .. :)
  *   -- adrian
  *
+ * if binary is non-zero assume the data may be compressed,
+ * so simply split up (keeping as many [\r\n]*'s in the first buffer)
  */
 static int
 linebuf_copy_line(buf_head_t *bufhead, buf_line_t *bufline,
   char *data, int len)
 {
-  int buflen = 0;		/* how many bytes copied to buf */
-  int buflen_allowed = 0;	/* how many bytes allowed to copy to buf */
-  int cpylen = len;             /* data remaining to be copied */
-  char *ch = data;	/* Pointer to where we are in the read data */
-  char *bufch = &bufline->buf[bufline->len];
-  /* Start of where to put new data */
-
-  bufline->terminated = 0;	/* should be 0 to start with */
-
-  buflen_allowed = BUF_DATA_SIZE - bufline->len;
-  assert(buflen_allowed > 0);
-
+  register int cpylen = 0;	/* how many bytes we've copied */
+  register char *ch = data;	/* Pointer to where we are in the read data */
+  register char *bufch = &bufline->buf[bufline->len];
+  
   /* If its full or terminated, ignore it */
-  if ((buflen_allowed == 0) || (bufline->terminated == 1))
+  if ((bufline->len == BUF_DATA_SIZE) || (bufline->terminated == 1))
     return 0;
 
-  /* Next, lets enter the copy loop */
-  while(cpylen && buflen_allowed && (*ch != '\r') && (*ch != '\n'))
-    {
-      *bufch++ = *ch++; 
-      --cpylen;
-      --buflen_allowed;
-    }
-
-  buflen = BUF_DATA_SIZE - buflen_allowed;
-
-  /* Did we complete the line? */
-  if ((buflen_allowed == 0) || (*ch == '\r') || (*ch == '\n'))
+  cpylen = linebuf_skip_crlf(ch, len);
+  memcpy(bufch, ch, BUF_DATA_SIZE - bufline->len);
+  bufline->len += cpylen;
+  bufch += cpylen;
+  bufch--;
+  if(*bufch == '\r' || *bufch == '\n')
   {
-    bufhead->len = bufline->len = buflen + 1;
-    
-    cpylen -= linebuf_skip_crlf(ch, len);
-    *bufch = '\0';
-   
-    if (buflen_allowed == 0)
-      bufline->overflow = 1;
-    
-    bufline->terminated = 1;
-    return(len - cpylen);
+  	while(*bufch == '\r' || *bufch == '\n')
+  	{
+		bufline->len--;
+  		*bufch = '\0';
+  		bufch--;
+  	}
+  	bufline->terminated = 1;
   }
-
-  bufhead->len = bufline->len = buflen;
- 
-  return(len - cpylen);
+  return cpylen;
 }
-
 
 
 /*
@@ -395,7 +377,7 @@ linebuf_get(buf_head_t *bufhead, char *buf, int buflen, int partial)
   assert(cpylen + 1 <= buflen);
 
   /* Copy it */
-  memcpy(buf, bufline->buf, cpylen);
+  memcpy(buf, bufline->buf, cpylen+1);
 
   /* Deallocate the line */
   linebuf_done_line(bufhead, bufline, bufhead->list.head);
