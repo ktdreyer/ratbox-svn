@@ -1,3 +1,28 @@
+leeh        2004/08/06 13:25:07 EDT	(20040806_0)
+
+  Modified files:
+    include              hostmask.h s_conf.h s_newconf.h 
+    modules              m_dline.c m_testline.c 
+    src                  client.c hostmask.c kdparse.c newconf.c 
+                         s_conf.c s_newconf.c 
+  Log:
+  - move dlines/exempts over to a patricia
+  
+  Revision  Changes    Path
+  1.37      +0 -2      ircd-ratbox/include/hostmask.h
+  7.288     +0 -3      ircd-ratbox/include/s_conf.h
+  7.38      +14 -1     ircd-ratbox/include/s_newconf.h
+  1.43      +44 -226   ircd-ratbox/modules/m_dline.c
+  1.52      +6 -7      ircd-ratbox/modules/m_testline.c
+  7.473     +4 -4      ircd-ratbox/src/client.c
+  7.102     +0 -15     ircd-ratbox/src/hostmask.c
+  7.39      +9 -1      ircd-ratbox/src/kdparse.c
+  7.167     +1 -1      ircd-ratbox/src/newconf.c
+  7.483     +3 -65     ircd-ratbox/src/s_conf.c
+  7.52      +161 -41   ircd-ratbox/src/s_newconf.c
+
+
+
 androsyn    2004/08/05 17:20:59 EDT	(20040805_1)
 
   Modified files:
