@@ -1044,10 +1044,18 @@ static void exit_one_client(struct Client *client_p,
   /* remove from global client list */
   remove_client_from_list(source_p);
 
+
+  /* Flush their sendq once and for all */
+  linebuf_donebuf(&client_p->localClient->buf_recvq);
+  linebuf_donebuf(&client_p->localClient->buf_sendq);
+
   /* Check to see if the client isn't already on the dead list */
   assert(dlinkFind(&dead_list, source_p) == NULL);
-  /* add to dead client dlist */
+      
   SetDead(source_p);
+
+  /* add to dead client dlist */
+
   dlinkAddAlloc(source_p, &dead_list);
 }
 
@@ -1281,9 +1289,6 @@ void dead_link(struct Client *client_p)
   if(IsClosing(client_p) || IsDead(client_p) || IsMe(client_p))
     return;
 
-  linebuf_donebuf(&client_p->localClient->buf_recvq);
-  linebuf_donebuf(&client_p->localClient->buf_sendq);
-  
   abt = MyMalloc(sizeof(struct abort_client));
   abt->client = client_p;
   
