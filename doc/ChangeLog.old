@@ -1,3 +1,16 @@
+androsyn    2002/02/04 01:07:59 EST	(20020204_3)
+
+  Modified files:
+    src                  s_bsd_sigio.c s_serv.c 
+  Log:
+  Minor bugfixes with fcntl()
+  
+  Revision  Changes    Path
+  7.16      +4 -6      ircd-hybrid-7/src/s_bsd_sigio.c
+  7.237     +2 -2      ircd-hybrid-7/src/s_serv.c
+
+
+
 androsyn    2002/02/04 00:17:32 EST	(20020204_2)
 
   Modified files:
