@@ -1,3 +1,15 @@
+db          2002/07/18 03:13:48 EDT	(20020718_3)
+
+  Modified files:
+    src                  modules.c 
+  Log:
+  - This adds (core) to any module listed that is a core module
+  
+  Revision  Changes    Path
+  7.104     +2 -2      ircd-hybrid-7/src/modules.c
+
+
+
 db          2002/07/18 03:12:53 EDT	(20020718_2)
 
   Modified files:
