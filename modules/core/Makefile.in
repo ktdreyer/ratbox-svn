@@ -67,6 +67,7 @@ SRCS =                          \
   m_pass.c \
   m_ping.c \
   m_pong.c \
+  m_post.c \
   m_quit.c \
   m_rehash.c \
   m_restart.c \
