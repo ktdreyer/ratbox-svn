@@ -1,3 +1,24 @@
+leeh        2004/01/15 14:10:46 EST	(20040115_10)
+
+  Modified files:
+    src                  .depend Makefile.in client.c rserv.c 
+                         service.c 
+  Log:
+  - added checks for ranlib/ar to configure
+  - added the initial user registration service, just stored in memory atm
+  - added the Makefile stuff for the service directories
+  - hash_nick() -> global hash_name()
+  - I need to stop just doing "*buf++;" :P
+  
+  Revision  Changes    Path
+  1.3       +49 -30    rserv/src/.depend
+  1.15      +20 -2     rserv/src/Makefile.in
+  1.17      +9 -9      rserv/src/client.c
+  1.21      +3 -0      rserv/src/rserv.c
+  1.11      +2 -2      rserv/src/service.c
+
+
+
 leeh        2004/01/15 14:10:43 EST	(20040115_9)
 
   Modified files:
