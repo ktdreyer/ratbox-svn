@@ -1,3 +1,7 @@
+*** 20010120_14 by fl_
+- ambiguous messages are bloody annoying..
+
+
 *** 20010120_13 by davidt
 Re-enable the warnings for servers sending us numerics, it shouldn't happen [except 'Register First' numerics, when we send a old server a NOTICE AUTH :*** ... message whilest it's connecting to us], and they indicate bugs..
 
