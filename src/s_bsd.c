@@ -313,6 +313,15 @@ close_connection(struct Client *client_p)
 		client_p->localClient->fd = -1;
 	}
 
+	if(HasServlink(client_p))
+	{
+		if(client_p->localClient->fd > -1)
+		{
+			fd_close(client_p->localClient->ctrlfd);
+			client_p->localClient->ctrlfd = -1;
+		}
+	}
+
 	linebuf_donebuf(&client_p->localClient->buf_sendq);
 	linebuf_donebuf(&client_p->localClient->buf_recvq);
 	memset(client_p->localClient->passwd, 0, sizeof(client_p->localClient->passwd));

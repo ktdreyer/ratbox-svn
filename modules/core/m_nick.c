@@ -715,6 +715,8 @@ perform_nickchange_collides(struct Client *source_p, struct Client *client_p,
 			    struct Client *target_p, int parc, 
 			    const char *parv[], time_t newts, const char *nick)
 {
+	int sameuser;
+
 	/* its a client changing nick and causing a collide */
 	if(!newts || !target_p->tsinfo || (newts == target_p->tsinfo) || !source_p->user)
 	{

@@ -92,6 +92,43 @@ struct Capability
 #define SetCapable(x, cap)      ((x)->localClient->caps |=  (cap))
 #define ClearCap(x, cap)        ((x)->localClient->caps &= ~(cap))
 
+#define SLINKCMD_SET_ZIP_OUT_LEVEL           1	/* data */
+#define SLINKCMD_START_ZIP_OUT               2
+#define SLINKCMD_START_ZIP_IN                3
+#define SLINKCMD_SET_CRYPT_IN_CIPHER         4	/* data */
+#define SLINKCMD_SET_CRYPT_IN_KEY            5	/* data */
+#define SLINKCMD_START_CRYPT_IN              6
+#define SLINKCMD_SET_CRYPT_OUT_CIPHER        7	/* data */
+#define SLINKCMD_SET_CRYPT_OUT_KEY           8	/* data */
+#define SLINKCMD_START_CRYPT_OUT             9
+#define SLINKCMD_INJECT_RECVQ                10	/* data */
+#define SLINKCMD_INJECT_SENDQ                11	/* data */
+#define SLINKCMD_INIT                        12
+#define SLINKCMD_ZIPSTATS                    13
+
+#ifndef HAVE_SOCKETPAIR
+#define LAST_SLINK_FD   7
+#else
+#define LAST_SLINK_FD   5
+#endif
+
+#define SLINKRPL_FLAG_DATA      0x0001	/* reply has data following */
+#define SLINKRPL_ERROR          1
+#define SLINKRPL_ZIPSTATS       2
+
+#define MAX_SLINKRPL            2
+
+typedef void SlinkRplHnd(unsigned int replyid, unsigned int datalen,
+			 unsigned char *data, struct Client *client_p);
+struct SlinkRplDef
+{
+	unsigned int replyid;
+	SlinkRplHnd *handler;
+	unsigned int flags;
+};
+
+extern struct SlinkRplDef slinkrpltab[];
+
 /*
  * Globals
  *
@@ -124,6 +161,9 @@ extern const char *show_capabilities(struct Client *client);
 extern void try_connections(void *unused);
 extern void start_collect_zipstats(void);
 extern void collect_zipstats(void *unused);
+
+extern int check_server(const char *name, struct Client *server);
+extern int server_estab(struct Client *client_p);
 
 extern int serv_connect(struct ConfItem *, struct Client *);
 

@@ -206,6 +206,69 @@ send_queued_write(int fd, void *data)
 			       send_queued_write, to, 0);
 }
 
+/* send_queued_slink_write()
+ *
+ * inputs	- fd to have queue sent, client we're sending to
+ * outputs	- contents of queue
+ * side effects - write is rescheduled if queue isnt emptied
+ */
+void
+send_queued_slink_write(int fd, void *data)
+{
+	struct Client *to = data;
+	int retlen;
+
+	/*
+	 ** Once socket is marked dead, we cannot start writing to it,
+	 ** even if the error is removed...
+	 */
+	if(IsDeadorAborted(to))
+		return;
+
+	/* Next, lets try to write some data */
+	if(to->localClient->slinkq)
+	{
+		retlen = send(to->localClient->ctrlfd,
+			      to->localClient->slinkq + to->localClient->slinkq_ofs,
+			      to->localClient->slinkq_len, SEND_FLAGS);
+
+		if(retlen < 0)
+		{
+			/* If we have a fatal error */
+			if(!ignoreErrno(errno))
+			{
+				dead_link(to);
+				return;
+			}
+		}
+		/* 0 bytes is an EOF .. */
+		else if(retlen == 0)
+		{
+			dead_link(to);
+			return;
+		}
+		else
+		{
+			to->localClient->slinkq_len -= retlen;
+
+			s_assert(to->localClient->slinkq_len >= 0);
+			if(to->localClient->slinkq_len)
+				to->localClient->slinkq_ofs += retlen;
+			else
+			{
+				to->localClient->slinkq_ofs = 0;
+				MyFree(to->localClient->slinkq);
+				to->localClient->slinkq = NULL;
+			}
+		}
+	}
+
+	/* if we have any more data, reschedule a write */
+	if(to->localClient->slinkq_len)
+		comm_setselect(to->localClient->ctrlfd, FDLIST_IDLECLIENT,
+			       COMM_SELECT_WRITE, send_queued_slink_write, to, 0);
+}
+
 /* sendto_one()
  *
  * inputs	- client to send to, va_args

@@ -142,6 +142,7 @@ make_client(struct Client *from)
 		client_p->localClient = localClient;
 
 		client_p->localClient->fd = -1;
+		client_p->localClient->ctrlfd = -1;
 
 		/* as good a place as any... */
 		dlinkAdd(client_p, &client_p->localClient->tnode, &unknown_list);
@@ -1366,6 +1367,12 @@ exit_local_server(struct Client *client_p, struct Client *source_p, struct Clien
 			   source_p->host, source_p->name, comment);
 	}
 	
+	if(source_p->localClient->ctrlfd >= 0)
+	{
+		fd_close(source_p->localClient->ctrlfd);
+		source_p->localClient->ctrlfd = -1;
+	}
+
 	if(source_p->servptr && source_p->servptr->serv)
 		dlinkDelete(&source_p->lnode, &source_p->servptr->serv->servers);
 	else

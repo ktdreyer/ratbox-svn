@@ -58,6 +58,8 @@
 #include "hook.h"
 #include "msg.h"
 
+extern char *crypt();
+
 #define MIN_CONN_FREQ 300
 
 #ifndef INADDR_NONE
@@ -70,6 +72,10 @@ int refresh_user_links = 0;
 
 static char buf[BUFSIZE];
 
+static void start_io(struct Client *server);
+
+static SlinkRplHnd slink_error;
+static SlinkRplHnd slink_zipstats;
 /*
  * list of recognized server capabilities.  "TS" is not on the list
  * because all servers that we talk to already do TS, and the kludged
@@ -93,9 +99,30 @@ struct Capability captab[] = {
 	{0, 0}
 };
 
+struct SlinkRplDef slinkrpltab[] = {
+	{SLINKRPL_ERROR, slink_error, SLINKRPL_FLAG_DATA},
+	{SLINKRPL_ZIPSTATS, slink_zipstats, SLINKRPL_FLAG_DATA},
+	{0, 0, 0},
+};
+
+#ifndef __VMS
+static int fork_server(struct Client *client_p);
+#endif
+
 static CNCB serv_connect_callback;
 
-#ifdef BROKEN_ZIPLINKS
+void
+slink_error(unsigned int rpl, unsigned int len, unsigned char *data, struct Client *server_p)
+{
+	s_assert(rpl == SLINKRPL_ERROR);
+
+	s_assert(len < 256);
+	data[len - 1] = '\0';
+
+	sendto_realops_flags(UMODE_ALL, L_ALL, "SlinkError for %s: %s", server_p->name, data);
+	exit_client(server_p, server_p, &me, "servlink error -- terminating link");
+}
+
 void
 slink_zipstats(unsigned int rpl, unsigned int len, unsigned char *data, struct Client *server_p)
 {
@@ -165,24 +192,29 @@ slink_zipstats(unsigned int rpl, unsigned int len, unsigned char *data, struct C
 
 	memcpy(&server_p->localClient->zipstats, &zipstats, sizeof(struct ZipStats));
 }
-#endif
 
 void
 collect_zipstats(void *unused)
 {
-#ifdef BROKEN_ZIPLINKS
 	dlink_node *ptr;
 	struct Client *target_p;
 
 	DLINK_FOREACH(ptr, serv_list.head)
 	{
 		target_p = ptr->data;
-		/* XXX - ZIP */
 		if(IsCapable(target_p, CAP_ZIP))
 		{
+			/* only bother if we haven't already got something queued... */
+			if(!target_p->localClient->slinkq)
+			{
+				target_p->localClient->slinkq = MyMalloc(1);	/* sigh.. */
+				target_p->localClient->slinkq[0] = SLINKCMD_ZIPSTATS;
+				target_p->localClient->slinkq_ofs = 0;
+				target_p->localClient->slinkq_len = 1;
+				send_queued_slink_write(target_p->localClient->ctrlfd, target_p);
+			}
 		}
 	}
-#endif
 }
 
 /*
@@ -406,6 +438,96 @@ try_connections(void *unused)
 	}
 }
 
+int
+check_server(const char *name, struct Client *client_p)
+{
+	struct ConfItem *aconf = NULL;
+	struct ConfItem *server_aconf = NULL;
+	int error = -1;
+
+	s_assert(NULL != client_p);
+
+	if(client_p == NULL)
+		return error;
+
+	if(!(client_p->localClient->passwd))
+		return -2;
+
+	if(strlen(name) > HOSTLEN)
+		return -4;
+
+	/* loop through looking for all possible connect items that might work */
+	for (aconf = ConfigItemList; aconf; aconf = aconf->next)
+	{
+		if((aconf->status & CONF_SERVER) == 0)
+			continue;
+
+		if(!match(name, aconf->name))
+			continue;
+
+		error = -3;
+
+		/* XXX: Fix me for IPv6 */
+		/* XXX sockhost is the IPv4 ip as a string */
+
+		if(match(aconf->host, client_p->host) ||
+		   match(aconf->host, client_p->sockhost))
+		{
+			error = -2;
+
+			if(IsConfEncrypted(aconf))
+			{
+				if(strcmp(aconf->passwd,
+					  crypt(client_p->
+						localClient->passwd, aconf->passwd)) == 0)
+					server_aconf = aconf;
+			}
+			else
+			{
+				if(strcmp
+				   (aconf->passwd, client_p->localClient->passwd) == 0)
+					server_aconf = aconf;
+			}
+		}
+	}
+
+	if(server_aconf == NULL)
+		return error;
+
+	/* XXX -- is this detach_conf() needed? --fl */
+	detach_conf(client_p);
+	attach_conf(client_p, server_aconf);
+
+#ifdef HAVE_LIBZ		/* otherwise, cleait unconditionally */
+	if(!(server_aconf->flags & CONF_FLAGS_COMPRESSED))
+#endif
+		ClearCap(client_p, CAP_ZIP);
+
+	if(aconf != NULL)
+	{
+#ifdef IPV6
+		if(client_p->localClient->ip.ss_family == AF_INET6)
+		{
+			if(IN6_IS_ADDR_UNSPECIFIED(&((struct sockaddr_in6 *)&aconf->ipnum)->sin6_addr))
+			{
+				memcpy(&((struct sockaddr_in6 *)&aconf->ipnum)->sin6_addr, 
+					&((struct sockaddr_in6 *)&client_p->localClient->ip)->sin6_addr, 
+					sizeof(struct in6_addr)); 
+			} 
+		} else
+#endif
+		{
+			if(((struct sockaddr_in *)&aconf->ipnum)->sin_addr.s_addr == INADDR_NONE)
+			{
+				((struct sockaddr_in *)&aconf->ipnum)->sin_addr.s_addr = 
+					((struct sockaddr_in *)&client_p->localClient->ip)->sin_addr.s_addr;
+			}
+
+		}
+	}
+	return 0;
+}
+
 /*
  * send_capabilities
  *
@@ -439,6 +561,362 @@ send_capabilities(struct Client *client_p, struct ConfItem *aconf,
 	*t = '\0';
 	sendto_one(client_p, "CAPAB :%s", msgbuf);
 }
+
+/* burst_modes_TS5()
+ *
+ * input	- client to burst to, channel name, list to burst, mode flag
+ * output	-
+ * side effects - client is sent a list of +b, or +e, or +I modes
+ */
+static void
+burst_modes_TS5(struct Client *client_p, char *chname, dlink_list *list, char flag)
+{
+	dlink_node *ptr;
+	struct Ban *banptr;
+	char mbuf[MODEBUFLEN];
+	char pbuf[BUFSIZE];
+	int tlen;
+	int mlen;
+	int cur_len;
+	char *mp;
+	char *pp;
+	int count = 0;
+
+	mlen = ircsprintf(buf, ":%s MODE %s +", me.name, chname);
+	cur_len = mlen;
+
+	mp = mbuf;
+	pp = pbuf;
+
+	DLINK_FOREACH(ptr, list->head)
+	{
+		banptr = ptr->data;
+		tlen = strlen(banptr->banstr) + 3;
+
+		/* uh oh */
+		if(tlen > MODEBUFLEN)
+			continue;
+
+		if((count >= MAXMODEPARAMS) || ((cur_len + tlen + 2) > (BUFSIZE - 3)))
+		{
+			sendto_one(client_p, "%s%s %s", buf, mbuf, pbuf);
+
+			mp = mbuf;
+			pp = pbuf;
+			cur_len = mlen;
+			count = 0;
+		}
+
+		*mp++ = flag;
+		*mp = '\0';
+		pp += ircsprintf(pp, "%s ", banptr->banstr);
+		cur_len += tlen;
+		count++;
+	}
+
+	if(count != 0)
+		sendto_one(client_p, "%s%s %s", buf, mbuf, pbuf);
+}
+
+/* burst_modes_TS6()
+ *
+ * input	- client to burst to, channel name, list to burst, mode flag
+ * output	-
+ * side effects - client is sent a list of +b, +e, or +I modes
+ */
+static void
+burst_modes_TS6(struct Client *client_p, struct Channel *chptr, 
+		dlink_list *list, char flag)
+{
+	dlink_node *ptr;
+	struct Ban *banptr;
+	char *t;
+	int tlen;
+	int mlen;
+	int cur_len;
+
+	cur_len = mlen = ircsprintf(buf, ":%s BMASK %lu %s %c :",
+				    me.id, chptr->channelts,
+				    chptr->chname, flag);
+	t = buf + mlen;
+
+	DLINK_FOREACH(ptr, list->head)
+	{
+		banptr = ptr->data;
+
+		tlen = strlen(banptr->banstr) + 1;
+
+		/* uh oh */
+		if(cur_len + tlen > BUFSIZE - 3)
+		{
+			/* the one we're trying to send doesnt fit at all! */
+			if(cur_len == mlen)
+			{
+				s_assert(0);
+				continue;
+			}
+
+			/* chop off trailing space and send.. */
+			*(t-1) = '\0';
+			sendto_one(client_p, "%s", buf);
+			cur_len = mlen;
+			t = buf + mlen;
+		}
+
+		ircsprintf(t, "%s ", banptr->banstr);
+		t += tlen;
+		cur_len += tlen;
+	}
+
+	/* cant ever exit the loop above without having modified buf,
+	 * chop off trailing space and send.
+	 */
+	*(t-1) = '\0';
+	sendto_one(client_p, "%s", buf);
+}
+
+/*
+ * burst_TS5
+ * 
+ * inputs	- client (server) to send nick towards
+ * 		- client to send nick for
+ * output	- NONE
+ * side effects	- NICK message is sent towards given client_p
+ */
+static void
+burst_TS5(struct Client *client_p)
+{
+	static char modebuf[MODEBUFLEN];
+	static char parabuf[MODEBUFLEN];
+	static char ubuf[12];
+	struct Client *target_p;
+	struct Channel *chptr;
+	struct membership *msptr;
+	struct hook_burst_channel hinfo;
+	dlink_node *ptr;
+	dlink_node *uptr;
+	char *t;
+	int tlen, mlen;
+	int cur_len = 0;
+
+	DLINK_FOREACH(ptr, global_client_list.head)
+	{
+		target_p = ptr->data;
+
+		if(!IsPerson(target_p))
+			continue;
+
+		send_umode(NULL, target_p, 0, SEND_UMODES, ubuf);
+		if(!*ubuf)
+		{
+			ubuf[0] = '+';
+			ubuf[1] = '\0';
+		}
+
+		sendto_one(client_p, "NICK %s %d %lu %s %s %s %s :%s",
+			   target_p->name, target_p->hopcount + 1,
+			   (unsigned long) target_p->tsinfo, ubuf,
+			   target_p->username, target_p->host,
+			   target_p->user->server, target_p->info);
+
+		if(ConfigFileEntry.burst_away && !EmptyString(target_p->user->away))
+			sendto_one(client_p, ":%s AWAY :%s",
+				   target_p->name, target_p->user->away);
+	}
+
+	DLINK_FOREACH(ptr, global_channel_list.head)
+	{
+		chptr = ptr->data;
+
+		s_assert(dlink_list_length(&chptr->members) > 0);
+		if(dlink_list_length(&chptr->members) <= 0)
+			continue;
+
+		if(*chptr->chname != '#')
+			return;
+
+		hinfo.chptr = chptr;
+		hinfo.client = client_p;
+		hook_call_event(h_burst_channel_id, &hinfo);
+
+		*modebuf = *parabuf = '\0';
+		channel_modes(chptr, client_p, modebuf, parabuf);
+
+		cur_len = mlen = ircsprintf(buf, ":%s SJOIN %lu %s %s %s:", me.name,
+				(unsigned long) chptr->channelts,
+				chptr->chname, modebuf, parabuf);
+
+		t = buf + mlen;
+
+		DLINK_FOREACH(uptr, chptr->members.head)
+		{
+			msptr = uptr->data;
+
+			tlen = strlen(msptr->client_p->name) + 1;
+			if(is_chanop(msptr))
+				tlen++;
+			if(is_voiced(msptr))
+				tlen++;
+
+			if(cur_len + tlen >= BUFSIZE - 3)
+			{
+				t--;
+				*t = '\0';
+				sendto_one(client_p, "%s", buf);
+				cur_len = mlen;
+				t = buf + mlen;
+			}
+
+			ircsprintf(t, "%s%s ", find_channel_status(msptr, 1), 
+				   msptr->client_p->name);
+
+			cur_len += tlen;
+			t += tlen;
+		}
+
+		/* remove trailing space */
+		t--;
+		*t = '\0';
+		sendto_one(client_p, "%s", buf);
+
+		burst_modes_TS5(client_p, chptr->chname, &chptr->banlist, 'b');
+
+		if(IsCapable(client_p, CAP_EX))
+			burst_modes_TS5(client_p, chptr->chname, &chptr->exceptlist, 'e');
+
+		if(IsCapable(client_p, CAP_IE))
+			burst_modes_TS5(client_p, chptr->chname, &chptr->invexlist, 'I');
+	}
+}
+
+/*
+ * burst_TS6
+ * 
+ * inputs	- client (server) to send nick towards
+ * 		- client to send nick for
+ * output	- NONE
+ * side effects	- NICK message is sent towards given client_p
+ */
+static void
+burst_TS6(struct Client *client_p)
+{
+	static char modebuf[MODEBUFLEN];
+	static char parabuf[MODEBUFLEN];
+	static char ubuf[12];
+	struct Client *target_p;
+	struct Channel *chptr;
+	struct membership *msptr;
+	struct hook_burst_channel hinfo;
+	dlink_node *ptr;
+	dlink_node *uptr;
+	char *t;
+	int tlen, mlen;
+	int cur_len = 0;
+
+	DLINK_FOREACH(ptr, global_client_list.head)
+	{
+		target_p = ptr->data;
+
+		if(!IsPerson(target_p))
+			continue;
+
+		send_umode(NULL, target_p, 0, SEND_UMODES, ubuf);
+		if(!*ubuf)
+		{
+			ubuf[0] = '+';
+			ubuf[1] = '\0';
+		}
+
+		if(has_id(target_p))
+			sendto_one(client_p, ":%s UID %s %d %lu %s %s %s %s %s :%s",
+				   target_p->servptr->id, target_p->name,
+				   target_p->hopcount + 1, 
+				   (unsigned long) target_p->tsinfo, ubuf,
+				   target_p->username, target_p->host,
+				   IsIPSpoof(target_p) ? "0" : target_p->sockhost,
+				   target_p->id, target_p->info);
+		else
+			sendto_one(client_p, "NICK %s %d %lu %s %s %s %s :%s",
+					target_p->name,
+					target_p->hopcount + 1,
+					(unsigned long) target_p->tsinfo,
+					ubuf,
+					target_p->username, target_p->host,
+					target_p->user->server, target_p->info);
+
+		if(ConfigFileEntry.burst_away && !EmptyString(target_p->user->away))
+			sendto_one(client_p, ":%s AWAY :%s",
+				   use_id(target_p),
+				   target_p->user->away);
+	}
+
+	DLINK_FOREACH(ptr, global_channel_list.head)
+	{
+		chptr = ptr->data;
+
+		s_assert(dlink_list_length(&chptr->members) > 0);
+		if(dlink_list_length(&chptr->members) <= 0)
+			continue;
+
+		if(*chptr->chname != '#')
+			return;
+
+		hinfo.chptr = chptr;
+		hinfo.client = client_p;
+		hook_call_event(h_burst_channel_id, &hinfo);
+
+		*modebuf = *parabuf = '\0';
+		channel_modes(chptr, client_p, modebuf, parabuf);
+
+		cur_len = mlen = ircsprintf(buf, ":%s SJOIN %lu %s %s %s:", me.name,
+				(unsigned long) chptr->channelts,
+				chptr->chname, modebuf, parabuf);
+
+		t = buf + mlen;
+
+		DLINK_FOREACH(uptr, chptr->members.head)
+		{
+			msptr = uptr->data;
+
+			tlen = strlen(use_id(msptr->client_p)) + 1;
+			if(is_chanop(msptr))
+				tlen++;
+			if(is_voiced(msptr))
+				tlen++;
+
+			if(cur_len + tlen >= BUFSIZE - 3)
+			{
+				*(t-1) = '\0';
+				sendto_one(client_p, "%s", buf);
+				cur_len = mlen;
+				t = buf + mlen;
+			}
+
+			ircsprintf(t, "%s%s ", find_channel_status(msptr, 1), 
+				   use_id(msptr->client_p));
+
+			cur_len += tlen;
+			t += tlen;
+		}
+
+		/* remove trailing space */
+		*(t-1) = '\0';
+		sendto_one(client_p, "%s", buf);
+
+		if(dlink_list_length(&chptr->banlist) > 0)
+			burst_modes_TS6(client_p, chptr, &chptr->banlist, 'b');
+
+		if(IsCapable(client_p, CAP_EX) &&
+		   dlink_list_length(&chptr->exceptlist) > 0)
+			burst_modes_TS6(client_p, chptr, &chptr->exceptlist, 'e');
+
+		if(IsCapable(client_p, CAP_IE) &&
+		   dlink_list_length(&chptr->invexlist) > 0)
+			burst_modes_TS6(client_p, chptr, &chptr->invexlist, 'I');
+	}
+}
+
+
 
 /*
  * show_capabilities - show current server capabilities
@@ -480,6 +958,524 @@ show_capabilities(struct Client *target_p)
 	return msgbuf;
 }
 
+/*
+ * server_estab
+ *
+ * inputs       - pointer to a struct Client
+ * output       -
+ * side effects -
+ */
+
+int
+server_estab(struct Client *client_p)
+{
+	struct Client *target_p;
+	struct ConfItem *aconf;
+	const char *inpath;
+	static char inpath_ip[HOSTLEN * 2 + USERLEN + 5];
+	char *host;
+	dlink_node *ptr;
+
+	s_assert(NULL != client_p);
+	if(client_p == NULL)
+		return -1;
+	ClearAccess(client_p);
+
+	strcpy(inpath_ip, get_client_name(client_p, SHOW_IP));
+	inpath = get_client_name(client_p, MASK_IP);	/* "refresh" inpath with host */
+	host = client_p->name;
+
+	aconf = client_p->localClient->att_conf;
+
+	if((aconf == NULL) || ((aconf->status & CONF_SERVER) == 0) ||
+	   irccmp(aconf->name, client_p->name) || !match(aconf->name, client_p->name))
+	{
+		/* This shouldn't happen, better tell the ops... -A1kmm */
+		sendto_realops_flags(UMODE_ALL, L_ALL,
+				     "Warning: Lost connect{} block for server %s!", host);
+		return exit_client(client_p, client_p, client_p, "Lost connect{} block!");
+	}
+
+	/* We shouldn't have to check this, it should already done before
+	 * server_estab is called. -A1kmm
+	 */
+	memset((void *) client_p->localClient->passwd, 0, sizeof(client_p->localClient->passwd));
+
+	/* Its got identd , since its a server */
+	SetGotId(client_p);
+
+	/* If there is something in the serv_list, it might be this
+	 * connecting server..
+	 */
+	if(!ServerInfo.hub && serv_list.head)
+	{
+		if(client_p != serv_list.head->data || serv_list.head->next)
+		{
+			ServerStats->is_ref++;
+			sendto_one(client_p, "ERROR :I'm a leaf not a hub");
+			return exit_client(client_p, client_p, client_p, "I'm a leaf");
+		}
+	}
+
+	if(IsUnknown(client_p))
+	{
+		/*
+		 * jdc -- 1.  Use EmptyString(), not [0] index reference.
+		 *        2.  Check aconf->spasswd, not aconf->passwd.
+		 */
+		if(!EmptyString(aconf->spasswd))
+		{
+			/* kludge, if we're not using TS6, dont ever send
+			 * ourselves as being TS6 capable.
+			 */
+			if(ServerInfo.use_ts6)
+				sendto_one(client_p, "PASS %s TS %d :%s", 
+					   aconf->spasswd, TS_CURRENT, me.id);
+			else
+				sendto_one(client_p, "PASS %s :TS",
+					   aconf->spasswd);
+		}
+
+		/*
+		 * Pass my info to the new server
+		 *
+		 */
+
+		send_capabilities(client_p, aconf, default_server_capabs
+				  | ((aconf->flags & CONF_FLAGS_COMPRESSED) ?
+				     CAP_ZIP_SUPPORTED : 0));
+
+		sendto_one(client_p, "SERVER %s 1 :%s%s",
+			   me.name,
+			   ConfigServerHide.hidden ? "(H) " : "",
+			   (me.info[0]) ? (me.info) : "IRCers United");
+	}
+
+	/*
+	 * XXX - this should be in s_bsd
+	 */
+	if(!set_sock_buffers(client_p->localClient->fd, READBUF_SIZE))
+		report_error(L_ALL, SETBUF_ERROR_MSG, get_client_name(client_p, SHOW_IP), errno);
+
+	/* Hand the server off to servlink now */
+
+#ifndef __VMS
+	if(IsCapable(client_p, CAP_ZIP))
+	{
+		if(fork_server(client_p) < 0)
+		{
+			sendto_realops_flags(UMODE_ALL, L_ADMIN,
+					     "Warning: fork failed for server %s -- check servlink_path (%s)",
+					     get_client_name(client_p,
+							     HIDE_IP),
+					     ConfigFileEntry.servlink_path);
+			sendto_realops_flags(UMODE_ALL, L_OPER,
+					     "Warning: fork failed for server "
+					     "%s -- check servlink_path (%s)",
+					     get_client_name(client_p,
+							     MASK_IP),
+					     ConfigFileEntry.servlink_path);
+			return exit_client(client_p, client_p, client_p, "Fork failed");
+		}
+		start_io(client_p);
+		SetServlink(client_p);
+	}
+#endif
+
+	sendto_one(client_p, "SVINFO %d %d 0 :%lu",
+		   TS_CURRENT, TS_MIN, (unsigned long) CurrentTime);
+
+	client_p->servptr = &me;
+
+	if(IsDeadorAborted(client_p))
+		return CLIENT_EXITED;
+
+	SetServer(client_p);
+
+	/* Update the capability combination usage counts */
+	set_chcap_usage_counts(client_p);
+
+	dlinkAdd(client_p, &client_p->lnode, &me.serv->servers);
+	dlinkMoveNode(&client_p->localClient->tnode, &unknown_list, &serv_list);
+	dlinkAddTailAlloc(client_p, &global_serv_list);
+
+	if(has_id(client_p))
+		add_to_id_hash(client_p->id, client_p);
+
+	add_to_client_hash(client_p->name, client_p);
+	/* doesnt duplicate client_p->serv if allocated this struct already */
+	make_server(client_p);
+	client_p->serv->up = me.name;
+	client_p->serv->upid = me.id;
+	/* add it to scache */
+	find_or_add(client_p->name);
+	client_p->firsttime = CurrentTime;
+	/* fixing eob timings.. -gnp */
+
+	/* Show the real host/IP to admins */
+	sendto_realops_flags(UMODE_ALL, L_ADMIN,
+			     "Link with %s established: (%s) link",
+			     inpath_ip, show_capabilities(client_p));
+
+	/* Now show the masked hostname/IP to opers */
+	sendto_realops_flags(UMODE_ALL, L_OPER,
+			     "Link with %s established: (%s) link",
+			     inpath, show_capabilities(client_p));
+
+	ilog(L_NOTICE, "Link with %s established: (%s) link",
+	     log_client_name(client_p, SHOW_IP), show_capabilities(client_p));
+
+	client_p->serv->sconf = aconf;
+
+	if(HasServlink(client_p))
+	{
+		/* we won't overflow FD_DESC_SZ here, as it can hold
+		 * client_p->name + 64
+		 */
+		fd_note(client_p->localClient->fd, "slink data: %s", client_p->name);
+		fd_note(client_p->localClient->ctrlfd, "slink ctrl: %s", client_p->name);
+	}
+	else
+		fd_note(client_p->localClient->fd, "Server: %s", client_p->name);
+
+	/*
+	 ** Old sendto_serv_but_one() call removed because we now
+	 ** need to send different names to different servers
+	 ** (domain name matching) Send new server to other servers.
+	 */
+	DLINK_FOREACH(ptr, serv_list.head)
+	{
+		target_p = ptr->data;
+
+		if(target_p == client_p)
+			continue;
+
+		if(DoesTS6(target_p) && has_id(client_p))
+			sendto_one(target_p, ":%s SID %s 2 %s :%s%s",
+				   me.id, client_p->name, client_p->id,
+				   IsHidden(client_p) ? "(H) " : "", client_p->info);
+		else
+			sendto_one(target_p, ":%s SERVER %s 2 :%s%s",
+				   me.name, client_p->name,
+				   IsHidden(client_p) ? "(H) " : "", client_p->info);
+	}
+
+	/*
+	 ** Pass on my client information to the new server
+	 **
+	 ** First, pass only servers (idea is that if the link gets
+	 ** cancelled beacause the server was already there,
+	 ** there are no NICK's to be cancelled...). Of course,
+	 ** if cancellation occurs, all this info is sent anyway,
+	 ** and I guess the link dies when a read is attempted...? --msa
+	 ** 
+	 ** Note: Link cancellation to occur at this point means
+	 ** that at least two servers from my fragment are building
+	 ** up connection this other fragment at the same time, it's
+	 ** a race condition, not the normal way of operation...
+	 **
+	 ** ALSO NOTE: using the get_client_name for server names--
+	 **    see previous *WARNING*!!! (Also, original inpath
+	 **    is destroyed...)
+	 */
+
+	DLINK_FOREACH(ptr, global_serv_list.head)
+	{
+		target_p = ptr->data;
+
+		/* target_p->from == target_p for target_p == client_p */
+		if(IsMe(target_p) || target_p->from == client_p)
+			continue;
+
+		/* presumption, if target has an id, so does its uplink */
+		if(DoesTS6(client_p) && has_id(target_p))
+			sendto_one(client_p, ":%s SID %s %d %s :%s%s",
+				   target_p->serv->upid, target_p->name,
+				   target_p->hopcount + 1, target_p->id,
+				   IsHidden(client_p) ? "(H) " : "", client_p->info);
+		else
+			sendto_one(client_p, ":%s SERVER %s %d :%s%s",
+				   target_p->serv->up,
+				   target_p->name, target_p->hopcount + 1,
+				   IsHidden(target_p) ? "(H) " : "", target_p->info);
+	}
+
+	if(DoesTS6(client_p))
+		burst_TS6(client_p);
+	else
+		burst_TS5(client_p);
+		
+	if(IsCapable(client_p, CAP_EOB))
+		sendto_one(client_p, ":%s EOB", get_id(&me, client_p));
+
+	/* Always send a PING after connect burst is done */
+	sendto_one(client_p, "PING :%s", get_id(&me, client_p));
+
+	return 0;
+}
+
+static void
+start_io(struct Client *server)
+{
+	unsigned char *iobuf;
+	int c = 0;
+	int linecount = 0;
+	int linelen;
+
+	iobuf = MyMalloc(256);
+
+	if(IsCapable(server, CAP_ZIP))
+	{
+		/* ziplink */
+		iobuf[c++] = SLINKCMD_SET_ZIP_OUT_LEVEL;
+		iobuf[c++] = 0;	/* |          */
+		iobuf[c++] = 1;	/* \ len is 1 */
+		iobuf[c++] = ConfigFileEntry.compression_level;
+		iobuf[c++] = SLINKCMD_START_ZIP_IN;
+		iobuf[c++] = SLINKCMD_START_ZIP_OUT;
+	}
+
+	while (MyConnect(server))
+	{
+		linecount++;
+
+		iobuf = MyRealloc(buf, (c + READBUF_SIZE + 64));
+
+		/* store data in c+3 to allow for SLINKCMD_INJECT_RECVQ and len u16 */
+		linelen = linebuf_get(&server->localClient->buf_recvq, (char *) (iobuf + c + 3), READBUF_SIZE, LINEBUF_PARTIAL, LINEBUF_RAW);	/* include partial lines & don't
+																		   parse data */
+
+		if(linelen)
+		{
+			iobuf[c++] = SLINKCMD_INJECT_RECVQ;
+			iobuf[c++] = (linelen >> 8);
+			iobuf[c++] = (linelen & 0xff);
+			c += linelen;
+		}
+		else
+			break;
+	}
+
+	while (MyConnect(server))
+	{
+		linecount++;
+
+		iobuf = MyRealloc(buf, (c + BUF_DATA_SIZE + 64));
+
+		/* store data in c+3 to allow for SLINKCMD_INJECT_RECVQ and len u16 */
+		linelen = linebuf_get(&server->localClient->buf_sendq, 
+				      (char *) (iobuf + c + 3), READBUF_SIZE, 
+				      LINEBUF_PARTIAL, LINEBUF_PARSED);	/* include partial lines */
+
+		if(linelen)
+		{
+			iobuf[c++] = SLINKCMD_INJECT_SENDQ;
+			iobuf[c++] = (linelen >> 8);
+			iobuf[c++] = (linelen & 0xff);
+			c += linelen;
+		}
+		else
+			break;
+	}
+
+	/* start io */
+	iobuf[c++] = SLINKCMD_INIT;
+
+	server->localClient->slinkq = iobuf;
+	server->localClient->slinkq_ofs = 0;
+	server->localClient->slinkq_len = c;
+
+	/* schedule a write */
+	send_queued_slink_write(server->localClient->ctrlfd, server);
+}
+
+#ifndef __VMS
+/*
+ * fork_server
+ *
+ * inputs       - struct Client *server
+ * output       - success: 0 / failure: -1
+ * side effect  - fork, and exec SERVLINK to handle this connection
+ */
+static int
+fork_server(struct Client *server)
+{
+	int ret;
+	int i;
+	int fd_temp[2];
+	int slink_fds[2][2][2] = { {{0, 0}, {0, 0}},
+	{{0, 0}, {0, 0}}
+	};
+	/* [0][y][z] - ctrl  | [1][y][z] - data  
+	 * [x][0][z] - child | [x][1][z] - parent
+	 * [x][y][0] - read  | [x][y][1] - write
+	 */
+	int flush_fd[2];
+
+	char fd_str[6][6];	/* store 5x '6' '5' '5' '3' '5' '7' '\0' */
+	char *kid_argv[8];
+	char slink[] = "-slink";
+
+
+	/* ctrl */
+	if(socketpair(AF_UNIX, SOCK_STREAM, 0, fd_temp) < 0)
+		goto fork_error;
+
+	slink_fds[0][0][0] = fd_temp[0];
+	slink_fds[0][1][1] = fd_temp[1];
+	slink_fds[0][0][1] = fd_temp[0];
+	slink_fds[0][1][0] = fd_temp[1];
+
+	/* data */
+	if(socketpair(AF_UNIX, SOCK_STREAM, 0, fd_temp) < 0)
+		goto fork_error;
+
+
+	slink_fds[1][0][0] = fd_temp[0];
+	slink_fds[1][1][1] = fd_temp[1];
+	slink_fds[1][0][1] = fd_temp[0];
+	slink_fds[1][1][0] = fd_temp[1];
+
+	/* linebuf flush */
+	if(socketpair(AF_UNIX, SOCK_STREAM, 0, flush_fd) < 0)
+		goto fork_error;
+
+
+#ifdef __CYGWIN__
+	if((ret = vfork()) < 0)
+#else
+	if((ret = fork()) < 0)
+#endif
+		goto fork_error;
+	else if(ret == 0)
+	{
+		/* set our fds as non blocking and close everything else */
+		for (i = 0; i < HARD_FDLIMIT; i++)
+		{
+
+			if((i == slink_fds[0][0][0])
+			   || (i == slink_fds[0][0][1])
+			   || (i == slink_fds[0][0][0])
+			   || (i == slink_fds[1][0][1]) 
+			   || (i == server->localClient->fd)
+			   || (i == flush_fd[0])
+			   )
+			{
+				set_non_blocking(i);
+#ifdef USE_SIGIO		/* the servlink process doesn't need O_ASYNC */
+				{
+					int flags;
+					flags = fcntl(i, F_GETFL, 0);
+					flags |= ~O_ASYNC;
+					fcntl(i, F_SETFL, flags);
+				}
+#endif
+			}
+			else
+			{
+#if defined(__VMS) || defined(__CYGWIN__)
+				if(i > 2)	/* don't close std* */
+#endif
+					close(i);
+			}
+		}
+
+		sprintf(fd_str[0], "%d", slink_fds[0][0][0]);	/* ctrl read */
+		sprintf(fd_str[1], "%d", slink_fds[0][0][1]);	/* ctrl write */
+		sprintf(fd_str[2], "%d", slink_fds[1][0][0]);	/* data read */
+		sprintf(fd_str[3], "%d", slink_fds[1][0][1]);	/* data write */
+		sprintf(fd_str[4], "%d", server->localClient->fd);	/* network read/write */
+		sprintf(fd_str[5], "%d", flush_fd[0]); /* flush out pending linebuf data */ 
+		kid_argv[0] = slink;
+		kid_argv[1] = fd_str[0];
+		kid_argv[2] = fd_str[1];
+		kid_argv[3] = fd_str[2];
+		kid_argv[4] = fd_str[3];
+		kid_argv[5] = fd_str[4];
+		kid_argv[6] = fd_str[5];
+		kid_argv[7] = NULL;
+
+		/* exec servlink program */
+		execv(ConfigFileEntry.servlink_path, kid_argv);
+
+		/* We're still here, abort. */
+		_exit(1);
+	}
+	else
+	{
+		fd_close(server->localClient->fd);
+
+		/* close the childs end of the pipes */
+		close(slink_fds[0][0][0]);
+		close(slink_fds[0][0][1]);
+		close(slink_fds[1][0][0]);
+		close(slink_fds[1][0][1]);
+		close(flush_fd[0]);
+		
+		s_assert(server->localClient);
+		server->localClient->ctrlfd = slink_fds[0][1][1];
+		server->localClient->fd = slink_fds[1][1][1];
+
+		while(1)
+		{
+			ret = linebuf_flush(flush_fd[1], &server->localClient->buf_recvq);
+			if(ret == 0 || (ret < 0 && !ignoreErrno(errno)))
+				goto fork_error;
+		}
+		close(flush_fd[1]);
+		
+
+		if(!set_non_blocking(server->localClient->fd))
+		{
+			report_error(L_ADMIN, NONB_ERROR_MSG,
+#ifdef HIDE_SERVERS_IPS
+				     get_client_name(server, MASK_IP),
+#else
+				     get_client_name(server, SHOW_IP),
+#endif
+				     errno);
+			report_error(L_OPER, NONB_ERROR_MSG,
+				     get_client_name(server, MASK_IP), errno);
+		}
+
+		if(!set_non_blocking(server->localClient->ctrlfd))
+		{
+			report_error(L_ADMIN, NONB_ERROR_MSG,
+#ifdef HIDE_SERVERS_IPS
+				     get_client_name(server, MASK_IP),
+#else
+				     get_client_name(server, SHOW_IP),
+#endif
+				     errno);
+			report_error(L_OPER, NONB_ERROR_MSG,
+				     get_client_name(server, MASK_IP), errno);
+		}
+
+		fd_open(server->localClient->ctrlfd, FD_SOCKET, NULL);
+		fd_open(server->localClient->fd, FD_SOCKET, NULL);
+
+		read_ctrl_packet(slink_fds[0][1][0], server);
+		read_packet(slink_fds[1][1][0], server);
+	}
+
+	return 0;
+
+      fork_error:
+	/* this is ugly, but nicer than repeating
+	 * about 50 close() statements everywhre... */
+	close(slink_fds[0][0][0]);
+	close(slink_fds[0][0][1]);
+	close(slink_fds[0][1][0]);
+	close(slink_fds[0][1][1]);
+	close(slink_fds[1][0][0]);
+	close(slink_fds[1][0][1]);
+	close(slink_fds[1][1][0]);
+	close(slink_fds[1][1][1]);
+	close(flush_fd[0]);
+	close(flush_fd[1]);
+	return -1;
+}
+#endif
 
 /*
  * set_autoconn - set autoconnect mode
