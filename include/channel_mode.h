@@ -107,8 +107,6 @@ extern void unset_chcap_usage_counts(struct Client *serv_p);
 /*
  * mode flags which take another parameter (With PARAmeterS)
  */
-#define MODE_WPARAS (MODE_CHANOP|MODE_VOICE|MODE_BAN|\
-                     MODE_EXCEPTION|MODE_INVEX)
 
 #define MODE_QUERY     0
 #define MODE_ADD       1
