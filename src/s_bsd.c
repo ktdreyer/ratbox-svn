@@ -386,14 +386,14 @@ void add_connection(struct Listener* listener, int fd)
 #endif
 
 #ifdef IPV6
-  if(new_client->localClient->sockhost == ':')
+  if(*new_client->localClient->sockhost == ':')
   {
     strlcat(new_client->host, "0",HOSTLEN+1);
   }
   if(new_client->localClient->aftype == AF_INET6 && ConfigFileEntry.dot_in_ip6_addr == 1)
   {
     strlcat(new_client->host, new_client->localClient->sockhost,sizeof(*new_client->host));
-    strlcat(new_client->host, ".",sizeof(*new_client->host);
+    strlcat(new_client->host, ".",sizeof(*new_client->host));
   } else
 #endif
     strlcat(new_client->host, new_client->localClient->sockhost,sizeof(*new_client->host));
