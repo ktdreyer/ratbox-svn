@@ -310,14 +310,9 @@ check_pings_list(dlink_list * list)
 			{
 				if(IsAnyServer(client_p))
 				{
-					sendto_realops_flags(UMODE_ALL,
-							     L_ADMIN,
+					sendto_realops_flags(UMODE_ALL, L_ALL,
 							     "No response from %s, closing link",
-							     get_client_name(client_p, HIDE_IP));
-					sendto_realops_flags(UMODE_ALL,
-							     L_OPER,
-							     "No response from %s, closing link",
-							     get_client_name(client_p, MASK_IP));
+							     get_server_name(client_p, HIDE_IP));
 					ilog(L_SERVER,
 					     "No response from %s, closing link",
 					     log_client_name(client_p, HIDE_IP));
@@ -1206,14 +1201,10 @@ exit_aborted_clients(void *unused)
 
 	 	 	
  	 	if(!IsPerson(abt->client) && !IsUnknown(abt->client))
- 	 	{
- 	 	 	sendto_realops_flags(UMODE_ALL, L_ADMIN,
+ 	 	 	sendto_realops_flags(UMODE_ALL, L_ALL,
   	 	 	                     "Closing link to %s: %s",
-   	 	 	                     get_client_name(abt->client, HIDE_IP), abt->notice);
-         	 	sendto_realops_flags(UMODE_ALL, L_OPER,
-                                             "Closing link to %s: %s",
- 		                             get_client_name(abt->client, MASK_IP), abt->notice);
- 	        }
+   	 	 	                     get_server_name(abt->client, HIDE_IP), abt->notice);
+
  	 	exit_client(abt->client, abt->client, &me, abt->notice);
  	 	MyFree(abt);
  	}
@@ -2132,15 +2123,9 @@ error_exit_client(struct Client *client_p, int error)
 
 		if(error == 0)
 		{
-			/* Admins get the real IP */
-			sendto_realops_flags(UMODE_ALL, L_ADMIN,
+			sendto_realops_flags(UMODE_ALL, L_ALL,
 					     "Server %s closed the connection",
-					     get_client_name(client_p, SHOW_IP));
-
-			/* Opers get a masked IP */
-			sendto_realops_flags(UMODE_ALL, L_OPER,
-					     "Server %s closed the connection",
-					     get_client_name(client_p, MASK_IP));
+					     get_server_name(client_p, SHOW_IP));
 
 			ilog(L_SERVER, "Server %s closed the connection",
 			     log_client_name(client_p, SHOW_IP));
@@ -2151,9 +2136,6 @@ error_exit_client(struct Client *client_p, int error)
 					get_server_name(client_p, SHOW_IP),
 					log_client_name(client_p, SHOW_IP),
 					current_error);
-			ilog(L_SERVER, "Lost connection to %s: %d",
-			     log_client_name(client_p, SHOW_IP), current_error);
-
 		}
 
 		sendto_realops_flags(UMODE_ALL, L_ALL,

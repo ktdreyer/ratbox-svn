@@ -1055,7 +1055,7 @@ server_estab(struct Client *client_p)
 
 	if(!comm_set_buffers(client_p->localClient->fd, READBUF_SIZE))
 		report_error(SETBUF_ERROR_MSG, 
-			     get_client_name(client_p, SHOW_IP), 
+			     get_server_name(client_p, SHOW_IP), 
 			     log_client_name(client_p, SHOW_IP), errno);
 
 	/* Hand the server off to servlink now */
@@ -1065,16 +1065,9 @@ server_estab(struct Client *client_p)
 	{
 		if(fork_server(client_p) < 0)
 		{
-			sendto_realops_flags(UMODE_ALL, L_ADMIN,
+			sendto_realops_flags(UMODE_ALL, L_ALL,
 					     "Warning: fork failed for server %s -- check servlink_path (%s)",
-					     get_client_name(client_p,
-							     HIDE_IP),
-					     ConfigFileEntry.servlink_path);
-			sendto_realops_flags(UMODE_ALL, L_OPER,
-					     "Warning: fork failed for server "
-					     "%s -- check servlink_path (%s)",
-					     get_client_name(client_p,
-							     MASK_IP),
+					     get_server_name(client_p, HIDE_IP),
 					     ConfigFileEntry.servlink_path);
 			return exit_client(client_p, client_p, client_p, "Fork failed");
 		}
@@ -1482,15 +1475,12 @@ serv_connect(struct server_conf *server_p, struct Client *by)
 	 */
 	if((client_p = find_server(NULL, server_p->name)))
 	{
-		sendto_realops_flags(UMODE_ALL, L_ADMIN,
+		sendto_realops_flags(UMODE_ALL, L_ALL,
 				     "Server %s already present from %s",
-				     server_p->name, get_client_name(client_p, SHOW_IP));
-		sendto_realops_flags(UMODE_ALL, L_OPER,
-				     "Server %s already present from %s",
-				     server_p->name, get_client_name(client_p, MASK_IP));
+				     server_p->name, get_server_name(client_p, SHOW_IP));
 		if(by && IsPerson(by) && !MyClient(by))
 			sendto_one_notice(by, ":Server %s already present from %s",
-					  server_p->name, get_client_name(client_p, MASK_IP));
+					  server_p->name, get_server_name(client_p, SHOW_IP));
 		return 0;
 	}
 

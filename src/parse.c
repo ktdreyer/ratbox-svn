@@ -571,33 +571,20 @@ cancel_clients(struct Client *client_p, struct Client *source_p, char *cmd)
 	 */
 	if(IsServer(source_p) || IsMe(source_p))
 	{
-		sendto_realops_flags(UMODE_DEBUG, L_ADMIN,
+		sendto_realops_flags(UMODE_DEBUG, L_ALL,
 				     "Message for %s[%s] from %s",
 				     source_p->name, source_p->from->name,
-				     get_client_name(client_p, SHOW_IP));
-
-		sendto_realops_flags(UMODE_DEBUG, L_OPER,
-				     "Message for %s[%s] from %s",
-				     source_p->name, source_p->from->name,
-				     get_client_name(client_p, MASK_IP));
+				     get_server_name(client_p, SHOW_IP));
 	}
 	else
 	{
-		sendto_realops_flags(UMODE_DEBUG, L_ADMIN,
+		sendto_realops_flags(UMODE_DEBUG, L_ALL,
 				     "Message for %s[%s@%s!%s] from %s (TS, ignored)",
 				     source_p->name,
 				     source_p->username,
 				     source_p->host,
 				     source_p->from->name,
-				     get_client_name(client_p, SHOW_IP));
-
-		sendto_realops_flags(UMODE_DEBUG, L_OPER,
-				     "Message for %s[%s@%s!%s] from %s (TS, ignored)",
-				     source_p->name,
-				     source_p->username,
-				     source_p->host,
-				     source_p->from->name,
-				     get_client_name(client_p, MASK_IP));
+				     get_server_name(client_p, SHOW_IP));
 	}
 }
 
@@ -620,13 +607,9 @@ remove_unknown(struct Client *client_p, char *lsender, char *lbuffer)
 	if((IsDigit(lsender[0]) && slen == 3) || 
 	   (strchr(lsender, '.') != NULL))
 	{
-		sendto_realops_flags(UMODE_DEBUG, L_ADMIN,
+		sendto_realops_flags(UMODE_DEBUG, L_ALL,
 				     "Unknown prefix (%s) from %s, Squitting %s",
-				     lbuffer, get_client_name(client_p, SHOW_IP), lsender);
-
-		sendto_realops_flags(UMODE_DEBUG, L_OPER,
-				     "Unknown prefix (%s) from %s, Squitting %s",
-				     lbuffer, client_p->name, lsender);
+				     lbuffer, get_server_name(client_p, SHOW_IP), lsender);
 
 		sendto_one(client_p,
 			   ":%s SQUIT %s :(Unknown prefix (%s) from %s)",
