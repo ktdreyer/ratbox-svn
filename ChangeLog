@@ -1,3 +1,17 @@
+androsyn    2002/11/27 15:15:01 UTC	(20021127_4)
+
+  Modified files:
+    src                  s_bsd_select.c 
+  Log:
+  Simple optimization here..Basically don't twiddle the fd sets until after
+  the handlers have been called, if we've got handlers that are null, then we
+  go ahead and update the set..
+  
+  Revision  Changes    Path
+  7.31      +5 -2      ircd-ratbox/src/s_bsd_select.c
+
+
+
 androsyn    2002/11/27 15:09:00 UTC	(20021127_3)
 
   Modified files:
