@@ -1,3 +1,9 @@
+*** 20010102_32 by db
+- UNTESTED ignore fd < 0 instead of failing an assert *FOR NOW*
+  adrian, might want to look at this one.
+
+
+
 *** 20010102_31 by davidt
 minor patch to stop BitchX coring over an extraneous space in /names output
 
