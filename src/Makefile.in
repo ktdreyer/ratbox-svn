@@ -13,7 +13,7 @@ LEX		= @LEX@
 LEXLIB		= @LEXLIB@
 CFLAGS		= @CFLAGS@ -DIRCD_PREFIX=\"@prefix@\"
 LDFLAGS   	= @LDFLAGS@
-MKDEP		= ${CC} -MM
+MKDEP		= ${CC} ${CFLAGS} -MM
 MV		= @MV@
 RM		= @RM@
 YACC		= @YACC@
