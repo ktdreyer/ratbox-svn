@@ -1,3 +1,8 @@
+*** 20010516_2 by leeh
+- optimised the sjoin table slightly.. +nt should really be first ;)
+- sendto_serv_butone -> sendto_cap_serv_butone() in m_gline..
+
+
 *** 20010516_1 by toot
 . some misc cosmetic cleanups
 . fixed CHANMODES token.
