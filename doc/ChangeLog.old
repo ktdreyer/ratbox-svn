@@ -1,3 +1,7 @@
+*** 20010105_26 by toot
+set a default knock_delay if its nto in ircd.conf
+
+
 *** 20010105_25 by db
 - you can't safely re-use bitmasks!
 
