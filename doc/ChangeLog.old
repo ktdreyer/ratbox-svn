@@ -1,3 +1,15 @@
+wcampbel    2001/12/15 11:32:12 EST	(20011215_9)
+
+  Added files:
+    help/opers           knockll 
+  Log:
+  This command was added recently, adding a generic help file for it.
+  
+  Revision  Changes    Path
+  1.1       +1 -0      ircd-hybrid-7/help/opers/knockll (new)
+
+
+
 a1kmm       2001/12/15 00:34:27 EST	(20011215_8)
 
   Modified files:
