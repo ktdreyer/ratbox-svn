@@ -124,9 +124,9 @@ hook_add_hook(char *event, hookfn *fn)
 	dlink_node *node;
 	
 	h = find_hook(event);
-	if (!h)
+	if (!h) 
 		return -1;
-	
+
 	node = make_dlink_node();
 	
 	dlinkAdd(fn, node, &h->hooks);
@@ -143,7 +143,7 @@ hook_call_event(char *event, void *data)
 	h = find_hook(event);
 	if (!h)
 		return -1;
-	
+
 	for (node = h->hooks.head; node; node = node->next)
 	{
 		fn = node->data;

@@ -522,6 +522,8 @@ int main(int argc, char *argv[])
   initwhowas();
   init_stats();
 
+  init_hooks();
+
   load_all_modules(1);
 
   initServerMask();
@@ -529,8 +531,6 @@ int main(int argc, char *argv[])
   init_resolver();
 
   init_auth();			/* Initialise the auth code */
-
-  init_hooks();
 
   read_conf_files(YES);         /* cold start init conf files */
 
