@@ -1,3 +1,15 @@
+androsyn    2004/09/21 14:24:38 EDT	(20040921_0)
+
+  Modified files:
+    modules/core         channels.c 
+  Log:
+  add a space between -b and the mask when removing bans
+  
+  Revision  Changes    Path
+  1.12      +4 -4      ircd-ratbox/modules/core/channels.c
+
+
+
 androsyn    2004/09/20 16:54:59 EDT	(20040920_3)
 
   Modified files:
