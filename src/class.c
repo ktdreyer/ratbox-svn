@@ -79,14 +79,14 @@ static  int     get_conf_ping(struct ConfItem *aconf)
  * output	- pointer to name of class
  * side effects - NONE
  */
-const char*     get_client_class(struct Client *aclient_p)
+const char*     get_client_class(struct Client *target_p)
 {
   dlink_node    *ptr;
   struct ConfItem *aconf;
   const char*   retc = (const char *)NULL;
 
-  if (aclient_p && !IsMe(aclient_p)  && (aclient_p->localClient->confs.head))
-    for (ptr = aclient_p->localClient->confs.head; ptr; ptr = ptr->next)
+  if (target_p && !IsMe(target_p)  && (target_p->localClient->confs.head))
+    for (ptr = target_p->localClient->confs.head; ptr; ptr = ptr->next)
       {
 	aconf = ptr->data;
 	if(aconf->className == NULL)
@@ -95,7 +95,7 @@ const char*     get_client_class(struct Client *aclient_p)
 	  retc= aconf->className;
       }
 
-  Debug((DEBUG_DEBUG,"Returning Class %s For %s",retc,aclient_p->name));
+  Debug((DEBUG_DEBUG,"Returning Class %s For %s",retc,target_p->name));
 
   return (retc);
 }
@@ -107,7 +107,7 @@ const char*     get_client_class(struct Client *aclient_p)
  * output	- ping frequency
  * side effects - NONE
  */
-int     get_client_ping(struct Client *aclient_p)
+int     get_client_ping(struct Client *target_p)
 {
   int   ping = 0;
   int   ping2;
@@ -115,9 +115,9 @@ int     get_client_ping(struct Client *aclient_p)
   dlink_node		*nlink;
 
 
-  if(aclient_p->localClient->confs.head != NULL)
+  if(target_p->localClient->confs.head != NULL)
     {
-      for(nlink = aclient_p->localClient->confs.head; nlink; nlink = nlink->next)
+      for(nlink = target_p->localClient->confs.head; nlink; nlink = nlink->next)
 	{
 	  aconf = nlink->data;
 	  if (aconf->status & (CONF_CLIENT|CONF_SERVER))
@@ -136,7 +136,7 @@ int     get_client_ping(struct Client *aclient_p)
 
   if (ping <= 0)
     ping = PINGFREQUENCY;
-  Debug((DEBUG_DEBUG,"Client %s Ping %d", aclient_p->name, ping));
+  Debug((DEBUG_DEBUG,"Client %s Ping %d", target_p->name, ping));
   return (ping);
 }
 

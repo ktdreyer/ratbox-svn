@@ -70,7 +70,7 @@ static void do_who_list(struct Client *source_p, struct Channel *chptr,
 static void who_global(struct Client *source_p, char *mask, int server_oper);
 
 static void do_who(struct Client *source_p,
-                   struct Client *aclient_p,
+                   struct Client *target_p,
                    char *chname,
                    char *op_flags);
 
@@ -87,7 +87,7 @@ static void m_who(struct Client *client_p,
                  int parc,
                  char *parv[])
 {
-  struct Client *aclient_p;
+  struct Client *target_p;
   char  *mask = parc > 1 ? parv[1] : NULL;
   dlink_node *lp;
   struct Channel *chptr=NULL;
@@ -196,18 +196,18 @@ static void m_who(struct Client *client_p,
 
   /* '/who nick' */
 
-  if (((aclient_p = find_client(mask, NULL)) != NULL) &&
-      IsPerson(aclient_p) && (!server_oper || IsOper(aclient_p)))
+  if (((target_p = find_client(mask, NULL)) != NULL) &&
+      IsPerson(target_p) && (!server_oper || IsOper(target_p)))
     {
       struct Channel *bchan;
       char *chname=NULL;
       int isinvis = 0;
 
       if(IsServer(client_p))
-	client_burst_if_needed(client_p,aclient_p);
+	client_burst_if_needed(client_p,target_p);
 
-      isinvis = IsInvisible(aclient_p);
-      for (lp = aclient_p->user->channel.head; lp; lp = lp->next)
+      isinvis = IsInvisible(target_p);
+      for (lp = target_p->user->channel.head; lp; lp = lp->next)
 	{
 	  chptr = lp->data;
 	  chname = chptr->chname;
@@ -246,19 +246,19 @@ static void m_who(struct Client *client_p,
 	      voiced_flag = "+";
 	    }
 
-	  if (is_chan_op(chptr,aclient_p))
-	    do_who(source_p, aclient_p, chname, chanop_flag);
-	  else if(is_half_op(chptr,aclient_p))
-	    do_who(source_p, aclient_p, chname, halfop_flag);
-	  else if(is_voiced(chptr,aclient_p))
-	    do_who(source_p, aclient_p, chname, voiced_flag);
+	  if (is_chan_op(chptr,target_p))
+	    do_who(source_p, target_p, chname, chanop_flag);
+	  else if(is_half_op(chptr,target_p))
+	    do_who(source_p, target_p, chname, halfop_flag);
+	  else if(is_voiced(chptr,target_p))
+	    do_who(source_p, target_p, chname, voiced_flag);
 	  else
-	    do_who(source_p, aclient_p, chname, "");
+	    do_who(source_p, target_p, chname, "");
 	}
       else
 	{
 	  if (!isinvis)
-	    do_who(source_p, aclient_p, NULL, "");
+	    do_who(source_p, target_p, NULL, "");
 	}
 
       sendto_one(source_p, form_str(RPL_ENDOFWHO), me.name, parv[0], mask );
@@ -285,7 +285,7 @@ static void who_global(struct Client *source_p,char *mask, int server_oper)
 {
   struct Channel *chptr=NULL;
   struct Channel *bchan;
-  struct Client *aclient_p;
+  struct Client *target_p;
   dlink_node  *lp;
   char  *chname=NULL;
   int   showperson;
@@ -296,11 +296,11 @@ static void who_global(struct Client *source_p,char *mask, int server_oper)
   char  *halfop_flag;
   char  *voiced_flag;
 
-  for (aclient_p = GlobalClientList; aclient_p; aclient_p = aclient_p->next)
+  for (target_p = GlobalClientList; target_p; target_p = target_p->next)
     {
-      if (!IsPerson(aclient_p))
+      if (!IsPerson(target_p))
         continue;
-      if (server_oper && !IsOper(aclient_p))
+      if (server_oper && !IsOper(target_p))
         continue;
       
       showperson = NO;
@@ -311,8 +311,8 @@ static void who_global(struct Client *source_p,char *mask, int server_oper)
        * since these are less cpu intensive (I hope :-) and should
        * provide better/more shortcuts - avalon
        */
-      isinvis = IsInvisible(aclient_p);
-      for (lp = aclient_p->user->channel.head; lp; lp = lp->next)
+      isinvis = IsInvisible(target_p);
+      for (lp = target_p->user->channel.head; lp; lp = lp->next)
         {
           chptr = lp->data;
 	  chname = chptr->chname;
@@ -329,16 +329,16 @@ static void who_global(struct Client *source_p,char *mask, int server_oper)
             showperson = YES;
         }
 
-      if ((aclient_p->user->channel.head == NULL) && !isinvis)
+      if ((target_p->user->channel.head == NULL) && !isinvis)
 	showperson = YES;
 
       if (showperson &&
 	  (!mask ||
-	   match(mask, aclient_p->name) ||
-	   match(mask, aclient_p->username) ||
-	   match(mask, aclient_p->host) ||
-	   match(mask, aclient_p->user->server) ||
-	   match(mask, aclient_p->info)))
+	   match(mask, target_p->name) ||
+	   match(mask, target_p->username) ||
+	   match(mask, target_p->host) ||
+	   match(mask, target_p->user->server) ||
+	   match(mask, target_p->info)))
 	{
 	  if (chptr != NULL)
 	    {
@@ -364,17 +364,17 @@ static void who_global(struct Client *source_p,char *mask, int server_oper)
 		  voiced_flag = "+";
 		}
 
-	      if (is_chan_op(chptr,aclient_p))
-		do_who(source_p, aclient_p, chname, chanop_flag);
-	      else if(is_half_op(chptr,aclient_p))
-		do_who(source_p, aclient_p, chname, halfop_flag);
-	      else if(is_voiced(chptr,aclient_p))
-		do_who(source_p, aclient_p, chname, voiced_flag);
+	      if (is_chan_op(chptr,target_p))
+		do_who(source_p, target_p, chname, chanop_flag);
+	      else if(is_half_op(chptr,target_p))
+		do_who(source_p, target_p, chname, halfop_flag);
+	      else if(is_voiced(chptr,target_p))
+		do_who(source_p, target_p, chname, voiced_flag);
 	      else 
-		do_who(source_p, aclient_p, chname, "");
+		do_who(source_p, target_p, chname, "");
 	    }
 	  else
-	    do_who(source_p, aclient_p, NULL, "");
+	    do_who(source_p, target_p, NULL, "");
 
 	  if (maxmatches > 0)
 	    {
@@ -434,12 +434,12 @@ static void do_who_list(struct Client *source_p, struct Channel *chptr,
                         dlink_list *list, char *chname, char *op_flags)
 {
   dlink_node *ptr;
-  struct Client *aclient_p;
+  struct Client *target_p;
 
   for(ptr = list->head; ptr; ptr = ptr->next)
     {
-      aclient_p = ptr->data;
-      do_who(source_p, aclient_p, chname, op_flags);
+      target_p = ptr->data;
+      do_who(source_p, target_p, chname, op_flags);
     }
 }
 
@@ -455,32 +455,32 @@ static void do_who_list(struct Client *source_p, struct Channel *chptr,
  */
 
 static void do_who(struct Client *source_p,
-                   struct Client *aclient_p,
+                   struct Client *target_p,
                    char *chname,
                    char *op_flags)
 {
   char  status[5];
 
   ircsprintf(status,"%c%s%s", 
-	     aclient_p->user->away ? 'G' : 'H',
-	     IsOper(aclient_p) ? "*" : "", op_flags );
+	     target_p->user->away ? 'G' : 'H',
+	     IsOper(target_p) ? "*" : "", op_flags );
 
   if(GlobalSetOptions.hide_server)
     {
       sendto_one(source_p, form_str(RPL_WHOREPLY), me.name, source_p->name,
 		 (chname) ? (chname) : "*",
-		 aclient_p->username,
-		 aclient_p->host, IsOper(source_p) ? aclient_p->user->server : "*",
-		 aclient_p->name,
-		 status, 0, aclient_p->info);
+		 target_p->username,
+		 target_p->host, IsOper(source_p) ? target_p->user->server : "*",
+		 target_p->name,
+		 status, 0, target_p->info);
     }
   else
     {
       sendto_one(source_p, form_str(RPL_WHOREPLY), me.name, source_p->name,
 		 (chname) ? (chname) : "*",
-		 aclient_p->username,
-		 aclient_p->host,  aclient_p->user->server, aclient_p->name,
-		 status, aclient_p->hopcount, aclient_p->info);
+		 target_p->username,
+		 target_p->host,  target_p->user->server, target_p->name,
+		 status, target_p->hopcount, target_p->info);
     }
 }
 

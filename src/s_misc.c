@@ -146,7 +146,7 @@ void serv_info(struct Client *client_p)
   static char Lformat[] = ":%s %d %s %s %u %u %u %u %u :%u %u %s";
   int        j;
   long        sendK, receiveK, uptime;
-  struct Client        *aclient_p;
+  struct Client        *target_p;
   dlink_node *ptr;
 
   sendK = receiveK = 0;
@@ -154,37 +154,37 @@ void serv_info(struct Client *client_p)
 
   for(ptr = serv_list.head; ptr; ptr = ptr->next)
     {
-      aclient_p = ptr->data;
+      target_p = ptr->data;
 
-      sendK += aclient_p->localClient->sendK;
-      receiveK += aclient_p->localClient->receiveK;
+      sendK += target_p->localClient->sendK;
+      receiveK += target_p->localClient->receiveK;
       /* There are no more non TS servers on this network, so that test has
        * been removed. Also, do not allow non opers to see the IP's of servers
        * on stats ?
        */
       if(IsOper(client_p))
         sendto_one(client_p, Lformat, me.name, RPL_STATSLINKINFO,
-                   client_p->name, get_client_name(aclient_p, SHOW_IP),
-                   (int)linebuf_len(&aclient_p->localClient->buf_sendq),
-                   (int)aclient_p->localClient->sendM,
-		   (int)aclient_p->localClient->sendK,
-                   (int)aclient_p->localClient->receiveM,
-		   (int)aclient_p->localClient->receiveK,
-                   CurrentTime - aclient_p->firsttime,
-                   (CurrentTime > aclient_p->since) ? (CurrentTime - aclient_p->since): 0,
-                   IsServer(aclient_p) ? show_capabilities(aclient_p) : "-" );
+                   client_p->name, get_client_name(target_p, SHOW_IP),
+                   (int)linebuf_len(&target_p->localClient->buf_sendq),
+                   (int)target_p->localClient->sendM,
+		   (int)target_p->localClient->sendK,
+                   (int)target_p->localClient->receiveM,
+		   (int)target_p->localClient->receiveK,
+                   CurrentTime - target_p->firsttime,
+                   (CurrentTime > target_p->since) ? (CurrentTime - target_p->since): 0,
+                   IsServer(target_p) ? show_capabilities(target_p) : "-" );
       else
         {
           sendto_one(client_p, Lformat, me.name, RPL_STATSLINKINFO,
-                     client_p->name, get_client_name(aclient_p, MASK_IP),
-                     (int)linebuf_len(&aclient_p->localClient->buf_sendq),
-                     (int)aclient_p->localClient->sendM,
-		     (int)aclient_p->localClient->sendK,
-                     (int)aclient_p->localClient->receiveM,
-		     (int)aclient_p->localClient->receiveK,
-                     CurrentTime - aclient_p->firsttime,
-                     (CurrentTime > aclient_p->since)?(CurrentTime - aclient_p->since): 0,
-                     IsServer(aclient_p) ? show_capabilities(aclient_p) : "-" );
+                     client_p->name, get_client_name(target_p, MASK_IP),
+                     (int)linebuf_len(&target_p->localClient->buf_sendq),
+                     (int)target_p->localClient->sendM,
+		     (int)target_p->localClient->sendK,
+                     (int)target_p->localClient->receiveM,
+		     (int)target_p->localClient->receiveK,
+                     CurrentTime - target_p->firsttime,
+                     (CurrentTime > target_p->since)?(CurrentTime - target_p->since): 0,
+                     IsServer(target_p) ? show_capabilities(target_p) : "-" );
         }
       j++;
     }

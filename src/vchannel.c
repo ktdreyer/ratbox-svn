@@ -397,35 +397,35 @@ vchan_show_ids(struct Client *source_p, struct Channel *chptr)
 char* pick_vchan_id(struct Channel *chptr)
 {
   dlink_node *lp;
-  struct Client *aclient_p;
+  struct Client *target_p;
   static char vchan_id[NICKLEN*2];
 
   for (lp = chptr->chanops.head; lp; lp = lp->next)
     if (!lp->next)
       { 
-	aclient_p = lp->data;
-	return aclient_p->name;
+	target_p = lp->data;
+	return target_p->name;
       }
 
   for (lp = chptr->halfops.head; lp; lp = lp->next)
     if (!lp->next)
       { 
-	aclient_p = lp->data;
-	return aclient_p->name;
+	target_p = lp->data;
+	return target_p->name;
       }
 
   for (lp = chptr->voiced.head; lp; lp = lp->next)
     if (!lp->next)
       { 
-	aclient_p = lp->data;
-	return aclient_p->name;
+	target_p = lp->data;
+	return target_p->name;
       }
 
   for (lp = chptr->peons.head; lp; lp = lp->next)
     if (!lp->next)
       {
-	aclient_p = lp->data;
-	return aclient_p->name;
+	target_p = lp->data;
+	return target_p->name;
       }
 
   /* all else failed, must be an empty channel, 
@@ -441,12 +441,12 @@ struct Channel* find_vchan(struct Channel *chptr, char *key)
 {
   dlink_node *ptr;
   struct Channel *chtmp;
-  struct Client *aclient_p;
+  struct Client *target_p;
 
   key++; /* go past the '!' */
 
-  if( (aclient_p = hash_find_client(key,(struct Client *)NULL)) )
-    if( (chtmp = map_vchan(chptr, aclient_p)) )
+  if( (target_p = hash_find_client(key,(struct Client *)NULL)) )
+    if( (chtmp = map_vchan(chptr, target_p)) )
       return chtmp;
 
   /* try and match vchan_id */

@@ -125,7 +125,7 @@ extern struct Client *uplink; /* NON NULL if leaf and is this servers uplink */
 void add_lazylinkchannel(struct Client *client_p, struct Channel *chptr);
 void add_lazylinkclient(struct Client *client_p, struct Client *source_p);
 void remove_lazylink_flags(unsigned long mask);
-void client_burst_if_needed(struct Client *client_p, struct Client *aclient_p);
+void client_burst_if_needed(struct Client *client_p, struct Client *target_p);
 
 #endif /* INCLUDED_s_serv_h */
 

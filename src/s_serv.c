@@ -144,7 +144,7 @@ const char* my_name_for_link(const char* name, struct ConfItem* aconf)
 int hunt_server(struct Client *client_p, struct Client *source_p, char *command,
                 int server, int parc, char *parv[])
 {
-  struct Client *aclient_p;
+  struct Client *target_p;
   int wilds;
 
   /*
@@ -159,12 +159,12 @@ int hunt_server(struct Client *client_p, struct Client *source_p, char *command,
    * message to go in the wrong direction while doing quick fast
    * non-matching lookups.
    */
-  if ((aclient_p = find_client(parv[server], NULL)))
-    if (aclient_p->from == source_p->from && !MyConnect(aclient_p))
-      aclient_p = NULL;
-  if (!aclient_p && (aclient_p = find_server(parv[server])))
-    if (aclient_p->from == source_p->from && !MyConnect(aclient_p))
-      aclient_p = NULL;
+  if ((target_p = find_client(parv[server], NULL)))
+    if (target_p->from == source_p->from && !MyConnect(target_p))
+      target_p = NULL;
+  if (!target_p && (target_p = find_server(parv[server])))
+    if (target_p->from == source_p->from && !MyConnect(target_p))
+      target_p = NULL;
 
   collapse(parv[server]);
   wilds = (strchr(parv[server], '?') || strchr(parv[server], '*'));
@@ -173,11 +173,11 @@ int hunt_server(struct Client *client_p, struct Client *source_p, char *command,
    * Again, if there are no wild cards involved in the server
    * name, use the hash lookup
    */
-  if (!aclient_p)
+  if (!target_p)
     {
       if (!wilds)
         {
-          if (!(aclient_p = find_server(parv[server])))
+          if (!(target_p = find_server(parv[server])))
             {
               sendto_one(source_p, form_str(ERR_NOSUCHSERVER), me.name,
                          parv[0], parv[server]);
@@ -186,33 +186,33 @@ int hunt_server(struct Client *client_p, struct Client *source_p, char *command,
         }
       else
         {
-          for (aclient_p = GlobalClientList;
-               (aclient_p = next_client(aclient_p, parv[server]));
-               aclient_p = aclient_p->next)
+          for (target_p = GlobalClientList;
+               (target_p = next_client(target_p, parv[server]));
+               target_p = target_p->next)
             {
-              if (aclient_p->from == source_p->from && !MyConnect(aclient_p))
+              if (target_p->from == source_p->from && !MyConnect(target_p))
                 continue;
               /*
                * Fix to prevent looping in case the parameter for
                * some reason happens to match someone from the from
                * link --jto
                */
-              if (IsRegistered(aclient_p) && (aclient_p != client_p))
+              if (IsRegistered(target_p) && (target_p != client_p))
                 break;
             }
         }
     }
 
-  if (aclient_p)
+  if (target_p)
     {
-      if (IsMe(aclient_p) || MyClient(aclient_p))
+      if (IsMe(target_p) || MyClient(target_p))
         return HUNTED_ISME;
-      if (!match(aclient_p->name, parv[server]))
-        parv[server] = aclient_p->name;
+      if (!match(target_p->name, parv[server]))
+        parv[server] = target_p->name;
 
       /* Deal with lazylinks */
-      client_burst_if_needed(aclient_p, source_p);
-      sendto_one(aclient_p, command, parv[0],
+      client_burst_if_needed(target_p, source_p);
+      sendto_one(target_p, command, parv[0],
                  parv[1], parv[2], parv[3], parv[4],
                  parv[5], parv[6], parv[7], parv[8]);
       return(HUNTED_PASS);
@@ -607,31 +607,31 @@ void send_capabilities(struct Client* client_p, int lcan_send)
  * output	- NONE
  * side effects	- NICK message is sent towards given client_p
  */
-void sendnick_TS(struct Client *client_p, struct Client *aclient_p)
+void sendnick_TS(struct Client *client_p, struct Client *target_p)
 {
   static char ubuf[12];
 
-  if (!IsPerson(aclient_p))
+  if (!IsPerson(target_p))
 	  return;
   
-  send_umode(NULL, aclient_p, 0, SEND_UMODES, ubuf);
+  send_umode(NULL, target_p, 0, SEND_UMODES, ubuf);
   if (!*ubuf)
   {
 	  ubuf[0] = '+';
 	  ubuf[1] = '\0';
   }
  
-  if (HasID(aclient_p) && IsCapable(client_p, CAP_UID))
+  if (HasID(target_p) && IsCapable(client_p, CAP_UID))
 	  sendto_one(client_p, "CLIENT %s %d %lu %s %s %s %s %s :%s",
-				 aclient_p->name, aclient_p->hopcount + 1, aclient_p->tsinfo, ubuf,
-				 aclient_p->username, aclient_p->host,
-				 aclient_p->user->server, aclient_p->user->id, aclient_p->info);
+				 target_p->name, target_p->hopcount + 1, target_p->tsinfo, ubuf,
+				 target_p->username, target_p->host,
+				 target_p->user->server, target_p->user->id, target_p->info);
   else
 	  sendto_one(client_p, "NICK %s %d %lu %s %s %s %s :%s",
-				 aclient_p->name, 
-				 aclient_p->hopcount + 1, aclient_p->tsinfo, ubuf,
-				 aclient_p->username, aclient_p->host,
-				 aclient_p->user->server, aclient_p->info);
+				 target_p->name, 
+				 target_p->hopcount + 1, target_p->tsinfo, ubuf,
+				 target_p->username, target_p->host,
+				 target_p->user->server, target_p->info);
 }
 
 /*
@@ -642,16 +642,16 @@ void sendnick_TS(struct Client *client_p, struct Client *aclient_p)
  * output	- NONE
  * side effects - If this client is not known by this lazyleaf, send it
  */
-void client_burst_if_needed(struct Client *client_p, struct Client *aclient_p)
+void client_burst_if_needed(struct Client *client_p, struct Client *target_p)
 {
   if (!ServerInfo.hub) return;
   if (!MyConnect(client_p)) return;
   if (!IsCapable(client_p,CAP_LL)) return;
 
-  if((aclient_p->lazyLinkClientExists & client_p->localClient->serverMask) == 0)
+  if((target_p->lazyLinkClientExists & client_p->localClient->serverMask) == 0)
     {
-      sendnick_TS( client_p, aclient_p );
-      add_lazylinkclient(client_p,aclient_p);
+      sendnick_TS( client_p, target_p );
+      add_lazylinkclient(client_p,target_p);
     }
 }
 
@@ -663,7 +663,7 @@ void client_burst_if_needed(struct Client *client_p, struct Client *aclient_p)
  * side effects - build up string representing capabilities of server listed
  */
 
-const char* show_capabilities(struct Client* aclient_p)
+const char* show_capabilities(struct Client* target_p)
 {
   static char        msgbuf[BUFSIZE];
   struct Capability* cap;
@@ -674,7 +674,7 @@ const char* show_capabilities(struct Client* aclient_p)
   tl = ircsprintf(msgbuf,"TS ");
   t += tl;
 
-  if (!aclient_p->localClient->caps)        /* short circuit if no caps */
+  if (!target_p->localClient->caps)        /* short circuit if no caps */
     {
       msgbuf[2] = '\0';
       return msgbuf;
@@ -682,7 +682,7 @@ const char* show_capabilities(struct Client* aclient_p)
 
   for (cap = captab; cap->cap; ++cap)
     {
-      if(cap->cap & aclient_p->localClient->caps)
+      if(cap->cap & target_p->localClient->caps)
         {
           tl = ircsprintf(t, "%s ", cap->name);
 	  t += tl;
@@ -705,7 +705,7 @@ const char* show_capabilities(struct Client* aclient_p)
 
 int server_estab(struct Client *client_p)
 {
-  struct Client*    aclient_p;
+  struct Client*    target_p;
   struct ConfItem*  aconf;
   const char*       inpath;
   static char       inpath_ip[HOSTLEN * 2 + USERLEN + 5];
@@ -878,15 +878,15 @@ int server_estab(struct Client *client_p)
   */
   for(ptr=serv_list.head;ptr;ptr=ptr->next)
     {
-      aclient_p = ptr->data;
+      target_p = ptr->data;
 
-      if (aclient_p == client_p)
+      if (target_p == client_p)
         continue;
 
-      if ((aconf = aclient_p->serv->sconf) &&
+      if ((aconf = target_p->serv->sconf) &&
           match(my_name_for_link(me.name, aconf), client_p->name))
         continue;
-      sendto_one(aclient_p,":%s SERVER %s 2 :%s", me.name, client_p->name,
+      sendto_one(target_p,":%s SERVER %s 2 :%s", me.name, client_p->name,
                  client_p->info);
     }
 
@@ -910,17 +910,17 @@ int server_estab(struct Client *client_p)
   */
 
   aconf = client_p->serv->sconf;
-  for (aclient_p = &me; aclient_p; aclient_p = aclient_p->prev)
+  for (target_p = &me; target_p; target_p = target_p->prev)
     {
-      /* aclient_p->from == aclient_p for aclient_p == client_p */
-      if (aclient_p->from == client_p)
+      /* target_p->from == target_p for target_p == client_p */
+      if (target_p->from == client_p)
         continue;
-      if (IsServer(aclient_p))
+      if (IsServer(target_p))
         {
-          if (match(my_name_for_link(me.name, aconf), aclient_p->name))
+          if (match(my_name_for_link(me.name, aconf), target_p->name))
             continue;
-          sendto_one(client_p, ":%s SERVER %s %d :%s", aclient_p->serv->up,
-                     aclient_p->name, aclient_p->hopcount+1, aclient_p->info);
+          sendto_one(client_p, ":%s SERVER %s %d :%s", target_p->serv->up,
+                     target_p->name, target_p->hopcount+1, target_p->info);
         }
     }
   
@@ -994,7 +994,7 @@ static void server_burst(struct Client *client_p)
 static void
 burst_all(struct Client *client_p)
 {
-  struct Client*    aclient_p;
+  struct Client*    target_p;
   struct Channel*   chptr;
   struct Channel*   vchan; 
   dlink_node *ptr;
@@ -1047,13 +1047,13 @@ burst_all(struct Client *client_p)
   /*
   ** also send out those that are not on any channel
   */
-  for (aclient_p = &me; aclient_p; aclient_p = aclient_p->prev)
+  for (target_p = &me; target_p; target_p = target_p->prev)
     {
-      if (aclient_p->serial != current_serial)
+      if (target_p->serial != current_serial)
 	{
-	  aclient_p->serial = current_serial;
-	  if (aclient_p->from != client_p)
-	    sendnick_TS(client_p, aclient_p);
+	  target_p->serial = current_serial;
+	  if (target_p->from != client_p)
+	    sendnick_TS(client_p, target_p);
 	}
     }
 
@@ -1219,7 +1219,7 @@ remove_lazylink_flags(unsigned long mask)
   dlink_node *ptr;
   dlink_node *next_ptr;
   struct Channel *chptr;
-  struct Client *aclient_p;
+  struct Client *target_p;
   unsigned long clear_mask;
 
   if(!mask) /* On 0 mask, don't do anything */
@@ -1247,10 +1247,10 @@ remove_lazylink_flags(unsigned long mask)
     {
       next_ptr = ptr->next;
 
-      aclient_p = ptr->data;
-      aclient_p->lazyLinkClientExists &= clear_mask;
+      target_p = ptr->data;
+      target_p->lazyLinkClientExists &= clear_mask;
 
-      if ( aclient_p->lazyLinkClientExists == 0 )
+      if ( target_p->lazyLinkClientExists == 0 )
         {
           dlinkDelete(ptr, &lazylink_nicks);
           free_dlink_node(ptr);
@@ -1268,17 +1268,17 @@ remove_lazylink_flags(unsigned long mask)
  */
 void burst_members(struct Client *client_p, dlink_list *list)
 {
-  struct Client *aclient_p;
+  struct Client *target_p;
   dlink_node *ptr;
 
   for (ptr = list->head; ptr; ptr = ptr->next)
     {
-      aclient_p = ptr->data;
-      if (aclient_p->serial != current_serial)
+      target_p = ptr->data;
+      if (target_p->serial != current_serial)
 	{
-	  aclient_p->serial = current_serial;
-	  if (aclient_p->from != client_p)
-	    sendnick_TS(client_p, aclient_p);
+	  target_p->serial = current_serial;
+	  if (target_p->from != client_p)
+	    sendnick_TS(client_p, target_p);
 	}
     }
 }
@@ -1293,18 +1293,18 @@ void burst_members(struct Client *client_p, dlink_list *list)
  */
 void burst_ll_members(struct Client *client_p, dlink_list *list)
 {
-  struct Client *aclient_p;
+  struct Client *target_p;
   dlink_node *ptr;
 
   for (ptr = list->head; ptr; ptr = ptr->next)
     {
-      aclient_p = ptr->data;
-      if ((aclient_p->lazyLinkClientExists & client_p->localClient->serverMask) == 0)
+      target_p = ptr->data;
+      if ((target_p->lazyLinkClientExists & client_p->localClient->serverMask) == 0)
         {
-          if (aclient_p->from != client_p)
+          if (target_p->from != client_p)
 	    {
-	      add_lazylinkclient(client_p,aclient_p);
-	      sendnick_TS(client_p, aclient_p);
+	      add_lazylinkclient(client_p,target_p);
+	      sendnick_TS(client_p, target_p);
 	    }
         }
     }
@@ -1370,10 +1370,10 @@ void show_servers(struct Client *client_p)
       client_p2 = ptr->data;
 
       ++j;
-      sendto_one(client_p, ":%s %d %s :%s (%s!%s@%s) Idle: %lu",
+      sendto_one(client_p, ":%s %d %s :%s (%s!%s@%s) Idle: %d",
                  me.name, RPL_STATSDEBUG, client_p->name, client_p2->name,
                  (client_p2->serv->by[0] ? client_p2->serv->by : "Remote."), 
-                 "*", "*", CurrentTime - client_p2->lasttime);
+                 "*", "*", (int)(CurrentTime - client_p2->lasttime));
 
       /*
        * NOTE: moving the username and host to the client struct

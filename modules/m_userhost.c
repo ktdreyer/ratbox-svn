@@ -69,7 +69,7 @@ static void m_userhost(struct Client *client_p,
                       int parc,
                       char *parv[])
 {
-  struct Client *aclient_p;
+  struct Client *target_p;
   char response[NICKLEN*2+USERLEN+HOSTLEN+30];
   char *t;
   int i, n;               /* loop counter */
@@ -84,7 +84,7 @@ static void m_userhost(struct Client *client_p,
       if (parv[i+1] == NULL)
         break;
 
-      if ((aclient_p = find_person(parv[i+1], NULL)))
+      if ((target_p = find_person(parv[i+1], NULL)))
 	{
 	  /*
 	   * Show real IP for USERHOST on yourself.
@@ -99,23 +99,23 @@ static void m_userhost(struct Client *client_p,
            * including your nick and the nick of someone not known to
            * the leaf, you'll get your spoofed IP.  tough.
            */
-	  if (MyClient(aclient_p) && (aclient_p == source_p))
+	  if (MyClient(target_p) && (target_p == source_p))
 	  {
             rl = ircsprintf(response, "%s%s=%c%s@%s ",
-			    aclient_p->name,
-			    IsOper(aclient_p) ? "*" : "",
-			    (aclient_p->user->away) ? '-' : '+',
-			    aclient_p->username,
-			    aclient_p->localClient->sockhost);
+			    target_p->name,
+			    IsOper(target_p) ? "*" : "",
+			    (target_p->user->away) ? '-' : '+',
+			    target_p->username,
+			    target_p->localClient->sockhost);
 	  }
           else
 	  {
             rl = ircsprintf(response, "%s%s=%c%s@%s ",
-			    aclient_p->name,
-			    IsOper(aclient_p) ? "*" : "",
-			    (aclient_p->user->away) ? '-' : '+',
-			    aclient_p->username,
-			    aclient_p->host);
+			    target_p->name,
+			    IsOper(target_p) ? "*" : "",
+			    (target_p->user->away) ? '-' : '+',
+			    target_p->username,
+			    target_p->host);
 	  }
 
 	  if((rl + cur_len) < (BUFSIZE-10))

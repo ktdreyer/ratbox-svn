@@ -175,7 +175,7 @@ void send_usage(struct Client *source_p)
 
 void count_memory(struct Client *source_p)
 {
-  struct Client *aclient_p;
+  struct Client *target_p;
   struct Channel *chptr;
   struct ConfItem *aconf;
   struct Class *cltmp;
@@ -239,30 +239,30 @@ void count_memory(struct Client *source_p)
 
   count_whowas_memory(&wwu, &wwm);      /* no more away memory to count */
 
-  for (aclient_p = GlobalClientList; aclient_p; aclient_p = aclient_p->next)
+  for (target_p = GlobalClientList; target_p; target_p = target_p->next)
     {
-      if (MyConnect(aclient_p))
+      if (MyConnect(target_p))
         {
           lc++;
-          for (dlink = aclient_p->localClient->confs.head;
+          for (dlink = target_p->localClient->confs.head;
 	       dlink; dlink = dlink->next)
             lcc++;
         }
       else
         rc++;
-      if (aclient_p->user)
+      if (target_p->user)
         {
           us++;
-          for (dlink = aclient_p->user->invited.head; dlink;
+          for (dlink = target_p->user->invited.head; dlink;
                dlink = dlink->next)
             usi++;
-          for (dlink = aclient_p->user->channel.head; dlink;
+          for (dlink = target_p->user->channel.head; dlink;
                dlink = dlink->next)
             usc++;
-          if (aclient_p->user->away)
+          if (target_p->user->away)
             {
               aw++;
-              awm += (strlen(aclient_p->user->away)+1);
+              awm += (strlen(target_p->user->away)+1);
             }
         }
     }

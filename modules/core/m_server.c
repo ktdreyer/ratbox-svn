@@ -85,7 +85,7 @@ static void mr_server(struct Client *client_p, struct Client *source_p,
 {
   char             info[REALLEN + 1];
   char             *name;
-  struct Client    *aclient_p;
+  struct Client    *target_p;
   int              hop;
 
   if ( (name = parse_server_args(parv, parc, info, &hop)) == NULL )
@@ -156,7 +156,7 @@ static void mr_server(struct Client *client_p, struct Client *source_p,
       break;
     }
     
-  if ((aclient_p = find_server(name)))
+  if ((target_p = find_server(name)))
     {
       /*
        * This link is trying feed me a server that I already have
@@ -237,7 +237,7 @@ static void ms_server(struct Client *client_p, struct Client *source_p,
   char             info[REALLEN + 1];
                    /* same size as in s_misc.c */
   char*            name;
-  struct Client*   aclient_p;
+  struct Client*   target_p;
   struct Client*   bclient_p;
   struct ConfItem* aconf;
   int              hop;
@@ -251,7 +251,7 @@ static void ms_server(struct Client *client_p, struct Client *source_p,
       return;
     }
 
-  if ((aclient_p = find_server(name)))
+  if ((target_p = find_server(name)))
     {
       /*
        * This link is trying feed me a server that I already have
@@ -268,7 +268,7 @@ static void ms_server(struct Client *client_p, struct Client *source_p,
       /* It is behind a host-masked server. Completely ignore the
        * server message(don't propagate or we will delink from whoever
        * we propagate to). -A1kmm */
-      if (irccmp(aclient_p->name, name) && aclient_p->from==client_p)
+      if (irccmp(target_p->name, name) && target_p->from==client_p)
         return;
       
       sendto_realops_flags(FLAGS_ALL,
@@ -403,21 +403,21 @@ static void ms_server(struct Client *client_p, struct Client *source_p,
         }
     }
 
-  aclient_p = make_client(client_p);
-  make_server(aclient_p);
-  aclient_p->hopcount = hop;
-  strncpy_irc(aclient_p->name, name, HOSTLEN);
-  strncpy_irc(aclient_p->info, info, REALLEN);
-  aclient_p->serv->up = find_or_add(parv[0]);
-  aclient_p->servptr = source_p;
+  target_p = make_client(client_p);
+  make_server(target_p);
+  target_p->hopcount = hop;
+  strncpy_irc(target_p->name, name, HOSTLEN);
+  strncpy_irc(target_p->info, info, REALLEN);
+  target_p->serv->up = find_or_add(parv[0]);
+  target_p->servptr = source_p;
 
-  SetServer(aclient_p);
+  SetServer(target_p);
 
   Count.server++;
 
-  add_client_to_list(aclient_p);
-  add_to_client_hash_table(aclient_p->name, aclient_p);
-  add_client_to_llist(&(aclient_p->servptr->serv->servers), aclient_p);
+  add_client_to_list(target_p);
+  add_to_client_hash_table(target_p->name, target_p);
+  add_client_to_llist(&(target_p->servptr->serv->servers), target_p);
 
 
   /*
@@ -438,16 +438,16 @@ static void ms_server(struct Client *client_p, struct Client *source_p,
 	  exit_client(client_p, client_p, client_p, "Lost N line");
           return;
 	}
-      if (match(my_name_for_link(me.name, aconf), aclient_p->name))
+      if (match(my_name_for_link(me.name, aconf), target_p->name))
 	continue;
 
       sendto_one(bclient_p, ":%s SERVER %s %d :%s",
-		 parv[0], aclient_p->name, hop + 1, aclient_p->info);
+		 parv[0], target_p->name, hop + 1, target_p->info);
                          
     }
       
   sendto_realops_flags(FLAGS_EXTERNAL, "Server %s being introduced by %s",
-		       aclient_p->name, source_p->name);
+		       target_p->name, source_p->name);
 
   if (!refresh_user_links)
     {
@@ -469,7 +469,7 @@ void write_links_file(void* notused)
   MessageFileLine *currentMessageLine = 0;
   MessageFileLine *newMessageLine = 0;
   MessageFile *MessageFileptr;
-  struct Client *aclient_p;
+  struct Client *target_p;
   char *p;
   FBFILE* file;
   char buff[512];
@@ -489,16 +489,16 @@ void write_links_file(void* notused)
   MessageFileptr->contentsOfFile = NULL;
   currentMessageLine = NULL;
 
-  for (aclient_p = GlobalClientList; aclient_p; aclient_p = aclient_p->next) 
+  for (target_p = GlobalClientList; target_p; target_p = target_p->next) 
     {
-      if(IsServer(aclient_p))
+      if(IsServer(target_p))
 	{
-          if(aclient_p->info[0])
+          if(target_p->info[0])
             {
-              if( (p = strchr(aclient_p->info,']')) )
+              if( (p = strchr(target_p->info,']')) )
                 p += 2; /* skip the nasty [IP] part */
               else
-                p = aclient_p->info;
+                p = target_p->info;
             }
           else
             p = "(Unknown Location)";
@@ -511,7 +511,7 @@ void write_links_file(void* notused)
  * - madmax
 */
 	  ircsprintf(newMessageLine->line,"%s %s :1 %s",
-		     aclient_p->name,me.name,p);
+		     target_p->name,me.name,p);
 	  newMessageLine->next = (MessageFileLine *)NULL;
 
 	  if (MessageFileptr->contentsOfFile)
@@ -526,7 +526,7 @@ void write_links_file(void* notused)
 	      currentMessageLine = newMessageLine;
 	    }
 	  ircsprintf(buff,"%s %s :1 %s\n",
-		     aclient_p->name,me.name,p);
+		     target_p->name,me.name,p);
 	  fbputs(buff,file);
 	}
     }

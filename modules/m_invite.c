@@ -73,7 +73,7 @@ static void m_invite(struct Client *client_p,
                     int parc,
                     char *parv[])
 {
-  struct Client *aclient_p;
+  struct Client *target_p;
   struct Channel *chptr;
   struct Channel *vchan;
   char   *chname;
@@ -90,7 +90,7 @@ static void m_invite(struct Client *client_p,
   if(!source_p->user)
     return;
 
-  if (!(aclient_p = find_person(parv[1], (struct Client *)NULL)))
+  if (!(target_p = find_person(parv[1], (struct Client *)NULL)))
     {
       sendto_one(source_p, form_str(ERR_NOSUCHNICK),
                  me.name, parv[0], parv[1]);
@@ -120,7 +120,7 @@ static void m_invite(struct Client *client_p,
    * always be true if parse() and such is working correctly --is
    */
 
-  if (!MyConnect(aclient_p) && (parv[2][0] == '&'))
+  if (!MyConnect(target_p) && (parv[2][0] == '&'))
     {
       sendto_one(source_p, form_str(ERR_USERNOTONSERV),
 		 me.name, parv[0], parv[1]);
@@ -139,7 +139,7 @@ static void m_invite(struct Client *client_p,
 
   if (HasVchans(chptr))
     {
-      if (map_vchan(chptr,aclient_p))
+      if (map_vchan(chptr,target_p))
 	{
 	  if (MyClient(source_p))
 	    sendto_one(source_p, form_str(ERR_USERONCHANNEL),
@@ -161,7 +161,7 @@ static void m_invite(struct Client *client_p,
       return;
     }
 
-  if (IsMember(aclient_p, chptr))
+  if (IsMember(target_p, chptr))
     {
       if (MyClient(source_p))
         sendto_one(source_p, form_str(ERR_USERONCHANNEL),
@@ -185,30 +185,30 @@ static void m_invite(struct Client *client_p,
   if (MyConnect(source_p))
     {
       sendto_one(source_p, form_str(RPL_INVITING), me.name, parv[0],
-                 aclient_p->name, ((chname) ? (chname) : parv[2]));
-      if (aclient_p->user->away)
+                 target_p->name, ((chname) ? (chname) : parv[2]));
+      if (target_p->user->away)
         sendto_one(source_p, form_str(RPL_AWAY), me.name, parv[0],
-                   aclient_p->name, aclient_p->user->away);
+                   target_p->name, target_p->user->away);
     }
 
-  if(MyConnect(aclient_p) && chop)
-    add_invite(chptr, aclient_p);
+  if(MyConnect(target_p) && chop)
+    add_invite(chptr, target_p);
 
   
-  if(!MyConnect(aclient_p) && ServerInfo.hub &&
-     IsCapable(aclient_p->from, CAP_LL))
+  if(!MyConnect(target_p) && ServerInfo.hub &&
+     IsCapable(target_p->from, CAP_LL))
   {
-    /* aclient_p is connected to a LL leaf, connected to us */
+    /* target_p is connected to a LL leaf, connected to us */
     if(IsPerson(source_p))
-      client_burst_if_needed(aclient_p->from, source_p);
+      client_burst_if_needed(target_p->from, source_p);
 
     if ( (chptr->lazyLinkChannelExists &
-          aclient_p->from->localClient->serverMask) == 0 )
-      burst_channel( aclient_p->from, chptr );
+          target_p->from->localClient->serverMask) == 0 )
+      burst_channel( target_p->from, chptr );
   }
 
-  sendto_anywhere(aclient_p, source_p, "INVITE %s :%s",
-		  aclient_p->name, parv[2]);
+  sendto_anywhere(target_p, source_p, "INVITE %s :%s",
+		  target_p->name, parv[2]);
 }
 
 /*

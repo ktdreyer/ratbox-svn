@@ -895,7 +895,7 @@ static void send_members(struct Client *client_p,
   int tlen;		/* length of t (temp pointer) */
   int mlen;		/* minimum length */
   int cur_len=0;	/* current length */
-  struct Client *aclient_p;
+  struct Client *target_p;
   int  data_to_send=0;
   char *t;		/* temp char pointer */
 
@@ -907,8 +907,8 @@ static void send_members(struct Client *client_p,
 
   for (ptr = list->head; ptr && ptr->data; ptr = ptr->next)
     {
-      aclient_p = ptr->data;
-      ircsprintf(t,"%s%s ",op_flag, aclient_p->name);
+      target_p = ptr->data;
+      ircsprintf(t,"%s%s ",op_flag, target_p->name);
 
       tlen = strlen(t);
       cur_len += tlen;
@@ -2988,13 +2988,13 @@ void del_invite(struct Channel *chptr, struct Client *who)
  *		  chanop, voiced, halfop or user
  * side effects	-
  */
-char *channel_chanop_or_voice(struct Channel *chptr, struct Client *aclient_p)
+char *channel_chanop_or_voice(struct Channel *chptr, struct Client *target_p)
 {
-  if(find_user_link(&chptr->chanops,aclient_p))
+  if(find_user_link(&chptr->chanops,target_p))
     return("@");
-  else if(find_user_link(&chptr->voiced,aclient_p))
+  else if(find_user_link(&chptr->voiced,target_p))
     return("+");
-  else if(find_user_link(&chptr->halfops,aclient_p))
+  else if(find_user_link(&chptr->halfops,target_p))
     return("%");
   return("");
 }
@@ -3008,12 +3008,12 @@ char *channel_chanop_or_voice(struct Channel *chptr, struct Client *aclient_p)
  * side effects - Sends MODE +o/+h/+v list to user
  *                (for +a channels)
  */
-void sync_oplists(struct Channel *chptr, struct Client *aclient_p,
+void sync_oplists(struct Channel *chptr, struct Client *target_p,
                          int clear, char *name)
 {
-  send_oplist(name, aclient_p, &chptr->chanops, "o", clear);
-  send_oplist(name, aclient_p, &chptr->halfops, "h", clear);
-  send_oplist(name, aclient_p, &chptr->voiced,  "v", clear);
+  send_oplist(name, target_p, &chptr->chanops, "o", clear);
+  send_oplist(name, target_p, &chptr->halfops, "h", clear);
+  send_oplist(name, target_p, &chptr->voiced,  "v", clear);
 }
 
 static void send_oplist(char *chname, struct Client *client_p,
@@ -3022,7 +3022,7 @@ static void send_oplist(char *chname, struct Client *client_p,
 {
   dlink_node *ptr;
   int cur_modes=0;      /* no of chars in modebuf */
-  struct Client *aclient_p;
+  struct Client *target_p;
   int  data_to_send=0;
   char mcbuf[6] = "";
   char opbuf[MODEBUFLEN];
@@ -3038,11 +3038,11 @@ static void send_oplist(char *chname, struct Client *client_p,
         mcbuf[cur_modes++] = (clear ? '-' : '+');
       }
       
-      aclient_p = ptr->data;
+      target_p = ptr->data;
       
       mcbuf[cur_modes++] = *prefix;
      
-      ircsprintf(t,"%s ", aclient_p->name);
+      ircsprintf(t,"%s ", target_p->name);
       t += strlen(t);
 
       data_to_send = 1;
@@ -3075,21 +3075,21 @@ void sync_channel_oplists(struct Channel *chptr,
 {
   dlink_node *ptr;
   dlink_list *list;
-  struct Client *aclient_p;
+  struct Client *target_p;
 
   list = &chptr->peons;
   for (ptr = list->head; ptr && ptr->data; ptr = ptr->next)
     {
-      aclient_p = ptr->data;
-      if(MyClient(aclient_p))
-        sync_oplists(chptr, aclient_p, clear, RootChan(chptr)->chname);
+      target_p = ptr->data;
+      if(MyClient(target_p))
+        sync_oplists(chptr, target_p, clear, RootChan(chptr)->chname);
     }
   list = &chptr->voiced;
   for (ptr = list->head; ptr && ptr->data; ptr = ptr->next)
     {
-      aclient_p = ptr->data;
-      if(MyClient(aclient_p))
-        sync_oplists(chptr, aclient_p, clear, RootChan(chptr)->chname);
+      target_p = ptr->data;
+      if(MyClient(target_p))
+        sync_oplists(chptr, target_p, clear, RootChan(chptr)->chname);
     }
 }
 

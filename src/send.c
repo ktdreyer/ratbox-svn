@@ -558,21 +558,21 @@ sendto_list_anywhere(struct Client *one, struct Client *from,
 		     )
 {
   dlink_node *ptr;
-  struct Client *aclient_p;
+  struct Client *target_p;
 
   for (ptr = list->head; ptr; ptr = ptr->next)
     {
-      aclient_p = ptr->data;
+      target_p = ptr->data;
       
-      if (aclient_p->from == one)
+      if (target_p->from == one)
         continue;
       
-      if (MyConnect(aclient_p) && IsRegisteredUser(aclient_p))
+      if (MyConnect(target_p) && IsRegisteredUser(target_p))
         {
-          if(aclient_p->serial != current_serial)
+          if(target_p->serial != current_serial)
 	    {
-	      send_message(aclient_p, (char *)llocal_sendbuf, llocal_len);
-	      aclient_p->serial = current_serial;
+	      send_message(target_p, (char *)llocal_sendbuf, llocal_len);
+	      target_p->serial = current_serial;
 	    }
         }
       else
@@ -581,11 +581,11 @@ sendto_list_anywhere(struct Client *one, struct Client *from,
            * Now check whether a message has been sent to this
            * remote link already
            */
-          if(aclient_p->from->serial != current_serial)
+          if(target_p->from->serial != current_serial)
             {
-	      send_message_remote(aclient_p, from, 
+	      send_message_remote(target_p, from, 
 				  (char *)lremote_sendbuf, lremote_len);
-              aclient_p->from->serial = current_serial;
+              target_p->from->serial = current_serial;
             }
         }
     }
@@ -861,23 +861,23 @@ static void
 sendto_list_local(dlink_list *list, const char *lsendbuf, int len)
 {
   dlink_node *ptr;
-  struct Client *aclient_p;
+  struct Client *target_p;
 
   for (ptr = list->head; ptr; ptr = ptr->next)
     {
-      if ( (aclient_p = ptr->data) == NULL )
+      if ( (target_p = ptr->data) == NULL )
 	continue;
 
-      if (!MyConnect(aclient_p) || (aclient_p->fd < 0))
+      if (!MyConnect(target_p) || (target_p->fd < 0))
 	continue;
 
-      if (aclient_p->serial == current_serial)
+      if (target_p->serial == current_serial)
 	continue;
       
-      aclient_p->serial = current_serial;
+      target_p->serial = current_serial;
 
-      if (aclient_p && MyConnect(aclient_p))
-	send_message(aclient_p, (char *)lsendbuf, len);
+      if (target_p && MyConnect(target_p))
+	send_message(target_p, (char *)lsendbuf, len);
     }  
 } /* sendto_list() */
 
@@ -1293,10 +1293,10 @@ sendto_match_butone(struct Client *one, struct Client *from,
        * server (client_p) has at least 1 client matching
        * the mask, using something like:
        *
-       * for (aclient_p = GlobalClientList; aclient_p; aclient_p = aclient_p->next)
-       *        if (IsRegisteredUser(aclient_p) &&
-       *                        match_it(aclient_p, mask, what) &&
-       *                        (aclient_p->from == client_p))
+       * for (target_p = GlobalClientList; target_p; target_p = target_p->next)
+       *        if (IsRegisteredUser(target_p) &&
+       *                        match_it(target_p, mask, what) &&
+       *                        (target_p->from == client_p))
        *   vsendto_prefix_one(client_p, from, pattern, args);
        *
        * That way, we wouldn't send the message to

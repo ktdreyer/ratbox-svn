@@ -510,7 +510,7 @@ int register_remote_user(struct Client *client_p, struct Client *source_p,
 			 char *nick, char *username)
 {
   struct User*     user = source_p->user;
-  struct Client *aclient_p;
+  struct Client *target_p;
   
   assert(0 != source_p);
   assert(source_p->username != username);
@@ -549,24 +549,24 @@ int register_remote_user(struct Client *client_p, struct Client *source_p,
 
   add_client_to_llist(&(source_p->servptr->serv->users), source_p);
 
-  if ((aclient_p = find_server(user->server)) && aclient_p->from != source_p->from)
+  if ((target_p = find_server(user->server)) && target_p->from != source_p->from)
     {
       sendto_realops_flags(FLAGS_DEBUG, 
 			   "Bad User [%s] :%s USER %s@%s %s, != %s[%s]",
 			   client_p->name, nick, source_p->username,
 			   source_p->host, user->server,
-			   aclient_p->name, aclient_p->from->name);
+			   target_p->name, target_p->from->name);
       kill_client(client_p, source_p,
 		 ":%s (%s != %s[%s] USER from wrong direction)",
 		  me.name,
 		  user->server,
-		  aclient_p->from->name, aclient_p->from->host);
+		  target_p->from->name, target_p->from->host);
 
 #if 0
       sendto_one(client_p,
 		 ":%s KILL %s :%s (%s != %s[%s] USER from wrong direction)",
 		 me.name, source_p->name, me.name, user->server,
-		 aclient_p->from->name, aclient_p->from->host);
+		 target_p->from->name, target_p->from->host);
 
 #endif
       source_p->flags |= FLAGS_KILLED;
@@ -579,7 +579,7 @@ int register_remote_user(struct Client *client_p, struct Client *source_p,
    * If we can't find the server the user is supposed to be on,
    * then simply blow the user away.        -Taner
    */
-  if (!aclient_p)
+  if (!target_p)
     {
       kill_client(client_p, source_p,
 		  "%s GHOST (no server %s on the net)",		  
@@ -928,7 +928,7 @@ int user_mode(struct Client *client_p, struct Client *source_p, int parc, char *
   int   flag;
   int   i;
   char  **p, *m;
-  struct Client *aclient_p;
+  struct Client *target_p;
   int   what, setflags;
   int   badflag = NO;		/* Only send one bad flag notice */
   char  buf[BUFSIZE];
@@ -944,7 +944,7 @@ int user_mode(struct Client *client_p, struct Client *source_p, int parc, char *
       return 0;
     }
 
-  if (!(aclient_p = find_person(parv[1], NULL)))
+  if (!(target_p = find_person(parv[1], NULL)))
     {
       if (MyConnect(source_p))
         sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
@@ -960,7 +960,7 @@ int user_mode(struct Client *client_p, struct Client *source_p, int parc, char *
        return 0;
     }
 
-  if (source_p != aclient_p || aclient_p->from != source_p->from)
+  if (source_p != target_p || target_p->from != source_p->from)
     {
        sendto_one(source_p, form_str(ERR_USERSDONTMATCH), me.name, parv[0]);
        return 0;
@@ -1183,7 +1183,7 @@ void send_umode_out(struct Client *client_p,
 		    struct Client *source_p,
 		    int old)
 {
-  struct Client *aclient_p;
+  struct Client *target_p;
   char buf[BUFSIZE];
   dlink_node *ptr;
 
@@ -1191,14 +1191,14 @@ void send_umode_out(struct Client *client_p,
 
   for(ptr = serv_list.head; ptr; ptr = ptr->next)
     {
-      aclient_p = ptr->data;
+      target_p = ptr->data;
 
-      if((aclient_p != client_p) && (aclient_p != source_p) && (*buf))
+      if((target_p != client_p) && (target_p != source_p) && (*buf))
         {
-          if((!(ServerInfo.hub && IsCapable(aclient_p, CAP_LL)))
-             || (aclient_p->localClient->serverMask &
+          if((!(ServerInfo.hub && IsCapable(target_p, CAP_LL)))
+             || (target_p->localClient->serverMask &
                  source_p->lazyLinkClientExists))
-            sendto_one(aclient_p, ":%s MODE %s :%s",
+            sendto_one(target_p, ":%s MODE %s :%s",
                        source_p->name, source_p->name, buf);
         }
     }

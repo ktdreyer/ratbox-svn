@@ -62,7 +62,7 @@ char *_version = "20001122";
 static void mo_close(struct Client *client_p, struct Client *source_p,
                     int parc, char *parv[])
 {
-  struct Client  *aclient_p;
+  struct Client  *target_p;
   dlink_node     *ptr;
   int            closed = 0;
 
@@ -70,17 +70,17 @@ static void mo_close(struct Client *client_p, struct Client *source_p,
 
   for (ptr = unknown_list.head; ptr; ptr = ptr->next)
     {
-      aclient_p = ptr->data;
+      target_p = ptr->data;
 
   /* Which list would connecting servers be found in? serv_list ? */
 #if 0
-      if (!IsUnknown(aclient_p) && !IsConnecting(aclient_p) &&
-          !IsHandshake(aclient_p))
+      if (!IsUnknown(target_p) && !IsConnecting(target_p) &&
+          !IsHandshake(target_p))
         continue;
 #endif
       sendto_one(source_p, form_str(RPL_CLOSING), me.name, parv[0],
-                 get_client_name(aclient_p, SHOW_IP), aclient_p->status);
-      (void)exit_client(aclient_p, aclient_p, aclient_p, "Oper Closing");
+                 get_client_name(target_p, SHOW_IP), target_p->status);
+      (void)exit_client(target_p, target_p, target_p, "Oper Closing");
       closed++;
     }
   sendto_one(source_p, form_str(RPL_CLOSEEND), me.name, parv[0], closed);

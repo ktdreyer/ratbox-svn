@@ -1030,11 +1030,11 @@ const char* get_client_host(struct Client* client)
 void free_exited_clients( void )
 {
   dlink_node *ptr, *next;
-  struct Client *aclient_p;
+  struct Client *target_p;
   
   for(ptr = dead_list.head; ptr; ptr = next)
   {
-    aclient_p = ptr->data;
+    target_p = ptr->data;
     next = ptr->next;
     if (ptr->data == NULL)
     {
@@ -1045,8 +1045,8 @@ void free_exited_clients( void )
       continue;
     }
 
-    release_client_state(aclient_p);
-    free_client(aclient_p);
+    release_client_state(target_p);
+    free_client(target_p);
     dlinkDelete(ptr, &dead_list);
     free_dlink_node(ptr);
   }
@@ -1060,7 +1060,7 @@ static void exit_one_client(struct Client *client_p, struct
 			    Client *source_p, struct Client *from,
                             const char* comment)
 {
-  struct Client* aclient_p;
+  struct Client* target_p;
   dlink_node *lp;
   dlink_node *next_lp;
 
@@ -1097,10 +1097,10 @@ static void exit_one_client(struct Client *client_p, struct
       ** The bulk of this is done in remove_dependents now, all
       ** we have left to do is send the SQUIT upstream.  -orabidoo
       */
-      aclient_p = source_p->from;
-      if (aclient_p && IsServer(aclient_p) && aclient_p != client_p && !IsMe(aclient_p) &&
+      target_p = source_p->from;
+      if (target_p && IsServer(target_p) && target_p != client_p && !IsMe(target_p) &&
           (source_p->flags & FLAGS_KILLED) == 0)
-        sendto_one(aclient_p, ":%s SQUIT %s :%s", from->name, source_p->name, comment);
+        sendto_one(target_p, ":%s SQUIT %s :%s", from->name, source_p->name, comment);
     }
   else if (!(IsPerson(source_p)))
       /* ...this test is *dubious*, would need
@@ -1183,7 +1183,7 @@ static void recurse_send_quits(struct Client *client_p, struct Client *source_p,
                                 const char* comment,  /* for servers */
                                 const char* myname)
 {
-  struct Client *aclient_p;
+  struct Client *target_p;
 
   /* If this server can handle quit storm (QS) removal
    * of dependents, just send the SQUIT
@@ -1193,20 +1193,20 @@ static void recurse_send_quits(struct Client *client_p, struct Client *source_p,
     {
       if (match(myname, source_p->name))
         {
-          for (aclient_p = source_p->serv->users; aclient_p; aclient_p = aclient_p->lnext)
-            sendto_one(to, ":%s QUIT :%s", aclient_p->name, comment);
-          for (aclient_p = source_p->serv->servers; aclient_p; aclient_p = aclient_p->lnext)
-            recurse_send_quits(client_p, aclient_p, to, comment, myname);
+          for (target_p = source_p->serv->users; target_p; target_p = target_p->lnext)
+            sendto_one(to, ":%s QUIT :%s", target_p->name, comment);
+          for (target_p = source_p->serv->servers; target_p; target_p = target_p->lnext)
+            recurse_send_quits(client_p, target_p, to, comment, myname);
         }
       else
         sendto_one(to, "SQUIT %s :%s", source_p->name, me.name);
     }
   else
     {
-      for (aclient_p = source_p->serv->users; aclient_p; aclient_p = aclient_p->lnext)
-        sendto_one(to, ":%s QUIT :%s", aclient_p->name, comment);
-      for (aclient_p = source_p->serv->servers; aclient_p; aclient_p = aclient_p->lnext)
-        recurse_send_quits(client_p, aclient_p, to, comment, myname);
+      for (target_p = source_p->serv->users; target_p; target_p = target_p->lnext)
+        sendto_one(to, ":%s QUIT :%s", target_p->name, comment);
+      for (target_p = source_p->serv->servers; target_p; target_p = target_p->lnext)
+        recurse_send_quits(client_p, target_p, to, comment, myname);
       if (!match(myname, source_p->name))
         sendto_one(to, "SQUIT %s :%s", source_p->name, me.name);
     }
@@ -1223,7 +1223,7 @@ static void recurse_send_quits(struct Client *client_p, struct Client *source_p,
  */
 static void recurse_remove_clients(struct Client* source_p, const char* comment)
 {
-  struct Client *aclient_p;
+  struct Client *target_p;
 
   if (IsMe(source_p))
     return;
@@ -1231,21 +1231,21 @@ static void recurse_remove_clients(struct Client* source_p, const char* comment)
   if (!source_p->serv)        /* oooops. uh this is actually a major bug */
     return;
 
-  while ( (aclient_p = source_p->serv->servers) )
+  while ( (target_p = source_p->serv->servers) )
     {
-      recurse_remove_clients(aclient_p, comment);
+      recurse_remove_clients(target_p, comment);
       /*
       ** a server marked as "KILLED" won't send a SQUIT 
       ** in exit_one_client()   -orabidoo
       */
-      aclient_p->flags |= FLAGS_KILLED;
-      exit_one_client(NULL, aclient_p, &me, me.name);
+      target_p->flags |= FLAGS_KILLED;
+      exit_one_client(NULL, target_p, &me, me.name);
     }
 
-  while ( (aclient_p = source_p->serv->users) )
+  while ( (target_p = source_p->serv->users) )
     {
-      aclient_p->flags |= FLAGS_KILLED;
-      exit_one_client(NULL, aclient_p, &me, comment);
+      target_p->flags |= FLAGS_KILLED;
+      exit_one_client(NULL, target_p, &me, comment);
     }
 }
 
@@ -1321,7 +1321,7 @@ struct Client* from,        /* Client firing off this Exit, never NULL! */
 const char* comment         /* Reason for the exit */
                    )
 {
-  struct Client        *aclient_p;
+  struct Client        *target_p;
   struct Client        *next;
   char comment1[HOSTLEN + HOSTLEN + 2];
   dlink_node *m;
@@ -1431,7 +1431,7 @@ const char* comment         /* Reason for the exit */
       ** so that no messages are attempted to send to it.
       ** (The following *must* make MyConnect(source_p) == FALSE!).
       ** It also makes source_p->from == NULL, thus it's unnecessary
-      ** to test whether "source_p != aclient_p" in the following loops.
+      ** to test whether "source_p != target_p" in the following loops.
       */
       
       close_connection(source_p);
@@ -1478,27 +1478,27 @@ const char* comment         /* Reason for the exit */
               ** to do it.    MyConnect(source_p) has been set to false,
               ** so we look at servptr, which should be ok  -orabidoo
               */
-              for (aclient_p = GlobalClientList; aclient_p; aclient_p = next)
+              for (target_p = GlobalClientList; target_p; target_p = next)
                 {
-                  next = aclient_p->next;
-                  if (!IsServer(aclient_p) && aclient_p->from == source_p)
+                  next = target_p->next;
+                  if (!IsServer(target_p) && target_p->from == source_p)
                     {
                       ts_warn("Dependent client %s not on llist!?",
-                              aclient_p->name);
-                      exit_one_client(NULL, aclient_p, &me, comment1);
+                              target_p->name);
+                      exit_one_client(NULL, target_p, &me, comment1);
                     }
                 }
               /*
               ** Second SQUIT all servers behind this link
               */
-              for (aclient_p = GlobalClientList; aclient_p; aclient_p = next)
+              for (target_p = GlobalClientList; target_p; target_p = next)
                 {
-                  next = aclient_p->next;
-                  if (IsServer(aclient_p) && aclient_p->from == source_p)
+                  next = target_p->next;
+                  if (IsServer(target_p) && target_p->from == source_p)
                     {
                       ts_warn("Dependent server %s not on llist!?", 
-                                     aclient_p->name);
-                      exit_one_client(NULL, aclient_p, &me, me.name);
+                                     target_p->name);
+                      exit_one_client(NULL, target_p, &me, me.name);
                     }
                 }
             }
@@ -1562,12 +1562,12 @@ void count_remote_client_memory(int *remote_client_memory_used,
 int accept_message(struct Client *source, struct Client *target)
 {
   dlink_node *ptr;
-  struct Client *aclient_p;
+  struct Client *target_p;
 
   for(ptr = target->allow_list.head; ptr; ptr = ptr->next )
     {
-      aclient_p = ptr->data;
-      if(source == aclient_p)
+      target_p = ptr->data;
+      if(source == target_p)
 	return 1;
     }
   return 0;
@@ -1626,14 +1626,14 @@ void del_from_accept(struct Client *source, struct Client *target)
   dlink_node *ptr2;
   dlink_node *next_ptr;
   dlink_node *next_ptr2;
-  struct Client *aclient_p;
+  struct Client *target_p;
 
   for (ptr = target->allow_list.head; ptr; ptr = next_ptr)
     {
       next_ptr = ptr->next;
 
-      aclient_p = ptr->data;
-      if(source == aclient_p)
+      target_p = ptr->data;
+      if(source == target_p)
 	{
 	  dlinkDelete(ptr, &target->allow_list);
 	  free_dlink_node(ptr);
@@ -1643,8 +1643,8 @@ void del_from_accept(struct Client *source, struct Client *target)
 	    {
 	      next_ptr2 = ptr2->next;
 
-	      aclient_p = ptr2->data;
-	      if (target == aclient_p)
+	      target_p = ptr2->data;
+	      if (target == target_p)
 		{
 		  dlinkDelete(ptr2, &source->on_allow_list);
 		  free_dlink_node(ptr2);
@@ -1666,22 +1666,22 @@ void del_all_accepts(struct Client *client_p)
 {
   dlink_node *ptr;
   dlink_node *next_ptr;
-  struct Client *aclient_p;
+  struct Client *target_p;
 
   for (ptr = client_p->allow_list.head; ptr; ptr = next_ptr)
     {
       next_ptr = ptr->next;
-      aclient_p = ptr->data;
-      if(aclient_p != NULL)
-        del_from_accept(aclient_p,client_p);
+      target_p = ptr->data;
+      if(target_p != NULL)
+        del_from_accept(target_p,client_p);
     }
 
   for (ptr = client_p->on_allow_list.head; ptr; ptr = next_ptr)
     {
       next_ptr = ptr->next;
-      aclient_p = ptr->data;
-      if(aclient_p != NULL)
-	del_from_accept(client_p, aclient_p);
+      target_p = ptr->data;
+      if(target_p != NULL)
+	del_from_accept(client_p, target_p);
     }
 }
 
@@ -1695,7 +1695,7 @@ void del_all_accepts(struct Client *client_p)
 void list_all_accepts(struct Client *source_p)
 {
   dlink_node *ptr;
-  struct Client *aclient_p;
+  struct Client *target_p;
   char *nicks[8];
   int j=0;
 
@@ -1707,11 +1707,11 @@ void list_all_accepts(struct Client *source_p)
 
   for (ptr = source_p->allow_list.head; ptr; ptr = ptr->next)
     {
-      aclient_p = ptr->data;
+      target_p = ptr->data;
 
-      if(aclient_p != NULL)
+      if(target_p != NULL)
 	{
-	  nicks[j++] = aclient_p->name;
+	  nicks[j++] = target_p->name;
 	}
 
       if(j > 7)

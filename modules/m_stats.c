@@ -495,7 +495,7 @@ static void stats_L_list(struct Client *source_p,char *name, int doall, int wild
                          dlink_list *list,char statchar)
 {
   dlink_node *ptr;
-  struct Client *aclient_p;
+  struct Client *target_p;
 
   /*
    * send info about connections which match, or all if the
@@ -505,15 +505,15 @@ static void stats_L_list(struct Client *source_p,char *name, int doall, int wild
    */
   for(ptr = list->head;ptr;ptr = ptr->next)
     {
-      aclient_p = ptr->data;
+      target_p = ptr->data;
 
-      if (IsInvisible(aclient_p) && (doall || wilds) &&
+      if (IsInvisible(target_p) && (doall || wilds) &&
 	  !(MyConnect(source_p) && IsOper(source_p)) &&
-	  !IsOper(aclient_p) && (aclient_p != source_p))
+	  !IsOper(target_p) && (target_p != source_p))
 	continue;
-      if (!doall && wilds && !match(name, aclient_p->name))
+      if (!doall && wilds && !match(name, target_p->name))
 	continue;
-      if (!(doall || wilds) && irccmp(name, aclient_p->name))
+      if (!(doall || wilds) && irccmp(name, target_p->name))
 	continue;
 
       if(MyClient(source_p) && IsOper(source_p))
@@ -521,45 +521,45 @@ static void stats_L_list(struct Client *source_p,char *name, int doall, int wild
 	  sendto_one(source_p, Lformat, me.name,
                      RPL_STATSLINKINFO, source_p->name,
                      (IsUpper(statchar)) ?
-                     get_client_name(aclient_p, SHOW_IP) :
-                     get_client_name(aclient_p, HIDE_IP),
-                     (int)linebuf_len(&aclient_p->localClient->buf_sendq),
-                     (int)aclient_p->localClient->sendM,
-		     (int)aclient_p->localClient->sendK,
-                     (int)aclient_p->localClient->receiveM,
-		     (int)aclient_p->localClient->receiveK,
-                     CurrentTime - aclient_p->firsttime,
-                     (CurrentTime > aclient_p->since) ? (CurrentTime - aclient_p->since):0,
-                     IsServer(aclient_p) ? show_capabilities(aclient_p) : "-");
+                     get_client_name(target_p, SHOW_IP) :
+                     get_client_name(target_p, HIDE_IP),
+                     (int)linebuf_len(&target_p->localClient->buf_sendq),
+                     (int)target_p->localClient->sendM,
+		     (int)target_p->localClient->sendK,
+                     (int)target_p->localClient->receiveM,
+		     (int)target_p->localClient->receiveK,
+                     CurrentTime - target_p->firsttime,
+                     (CurrentTime > target_p->since) ? (CurrentTime - target_p->since):0,
+                     IsServer(target_p) ? show_capabilities(target_p) : "-");
 	}
       else
 	{
-	  if(IsIPHidden(aclient_p) || IsServer(aclient_p))
+	  if(IsIPHidden(target_p) || IsServer(target_p))
 	    sendto_one(source_p, Lformat, me.name,
 		       RPL_STATSLINKINFO, source_p->name,
-		       get_client_name(aclient_p, MASK_IP),
-		       (int)linebuf_len(&aclient_p->localClient->buf_sendq),
-		       (int)aclient_p->localClient->sendM,
-		       (int)aclient_p->localClient->sendK,
-		       (int)aclient_p->localClient->receiveM,
-		       (int)aclient_p->localClient->receiveK,
-		       CurrentTime - aclient_p->firsttime,
-		       (CurrentTime > aclient_p->since) ? (CurrentTime - aclient_p->since):0,
-		       IsServer(aclient_p) ? show_capabilities(aclient_p) : "-");
+		       get_client_name(target_p, MASK_IP),
+		       (int)linebuf_len(&target_p->localClient->buf_sendq),
+		       (int)target_p->localClient->sendM,
+		       (int)target_p->localClient->sendK,
+		       (int)target_p->localClient->receiveM,
+		       (int)target_p->localClient->receiveK,
+		       CurrentTime - target_p->firsttime,
+		       (CurrentTime > target_p->since) ? (CurrentTime - target_p->since):0,
+		       IsServer(target_p) ? show_capabilities(target_p) : "-");
 	  else
 	    sendto_one(source_p, Lformat, me.name,
 		       RPL_STATSLINKINFO, source_p->name,
 		       (IsUpper(statchar)) ?
-		       get_client_name(aclient_p, SHOW_IP) :
-		       get_client_name(aclient_p, HIDE_IP),
-		       (int)linebuf_len(&aclient_p->localClient->buf_sendq),
-		       (int)aclient_p->localClient->sendM,
-		       (int)aclient_p->localClient->sendK,
-		       (int)aclient_p->localClient->receiveM,
-		       (int)aclient_p->localClient->receiveK,
-		       CurrentTime - aclient_p->firsttime,
-		       (CurrentTime > aclient_p->since) ? (CurrentTime - aclient_p->since):0,
-		       IsServer(aclient_p) ? show_capabilities(aclient_p) : "-");
+		       get_client_name(target_p, SHOW_IP) :
+		       get_client_name(target_p, HIDE_IP),
+		       (int)linebuf_len(&target_p->localClient->buf_sendq),
+		       (int)target_p->localClient->sendM,
+		       (int)target_p->localClient->sendK,
+		       (int)target_p->localClient->receiveM,
+		       (int)target_p->localClient->receiveK,
+		       CurrentTime - target_p->firsttime,
+		       (CurrentTime > target_p->since) ? (CurrentTime - target_p->since):0,
+		       IsServer(target_p) ? show_capabilities(target_p) : "-");
 	}
     }
 }

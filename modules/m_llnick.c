@@ -74,7 +74,7 @@ static void ms_llnick(struct Client *client_p,
 {
   char *nick;
   char *nick_old = NULL;
-  struct Client *aclient_p = NULL;
+  struct Client *target_p = NULL;
   int exists = 0;
   int new = 0;
   dlink_node *ptr;
@@ -107,34 +107,34 @@ static void ms_llnick(struct Client *client_p,
     {
       if( !strcmp(nick_old, ((struct Client *)ptr->data)->llname) )
       {
-        aclient_p = ptr->data;
-        *aclient_p->llname = '\0'; /* unset their temp-nick */
+        target_p = ptr->data;
+        *target_p->llname = '\0'; /* unset their temp-nick */
         break;
       }
     }
-    if (!aclient_p) /* Can't find them -- maybe they got a different nick */
+    if (!target_p) /* Can't find them -- maybe they got a different nick */
       return;
   }
   else
   {
     /* Existing user changing nickname */
-    aclient_p = hash_find_client(nick_old,(struct Client *)NULL);
+    target_p = hash_find_client(nick_old,(struct Client *)NULL);
   
-    if (!aclient_p) /* Can't find them -- maybe they got a different nick */
+    if (!target_p) /* Can't find them -- maybe they got a different nick */
       return;
   }
   
   if(hash_find_client(nick,(struct Client *)NULL) || exists)
   {
     /* The nick they want is in use. complain */
-    sendto_one(aclient_p, form_str(ERR_NICKNAMEINUSE), me.name,
+    sendto_one(target_p, form_str(ERR_NICKNAMEINUSE), me.name,
                new ? "*" : nick_old,
                nick);
     return;
   }
 
   if(new)
-    set_initial_nick(aclient_p, aclient_p, nick);
+    set_initial_nick(target_p, target_p, nick);
   else
-    change_local_nick(aclient_p, aclient_p, nick);
+    change_local_nick(target_p, target_p, nick);
 }

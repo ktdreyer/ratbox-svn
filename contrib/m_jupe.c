@@ -86,7 +86,7 @@ char *_version = "20010104";
 static void mo_jupe(struct Client *client_p, struct Client *source_p,
                     int parc, char *parv[])
 {
-  struct Client *aclient_p;
+  struct Client *target_p;
   struct Client *ajupe;
   dlink_node *m;
   char reason[REALLEN];
@@ -118,12 +118,12 @@ static void mo_jupe(struct Client *client_p, struct Client *source_p,
   log(L_NOTICE, "JUPE for %s requested by %s!%s@%s: %s",
                 parv[1], source_p->name, source_p->username, source_p->host, parv[2]);
 
-  aclient_p= find_server(parv[1]);
+  target_p= find_server(parv[1]);
 
-  if(aclient_p)
+  if(target_p)
     {
-      if(MyConnect(aclient_p))
-	exit_client(client_p, aclient_p, &me, parv[2]);
+      if(MyConnect(target_p))
+	exit_client(client_p, target_p, &me, parv[2]);
       else
 	sendto_serv_butone(&me, ":%s SQUIT %s :Juped: %s",
 			   me.name, parv[1], parv[2]);          

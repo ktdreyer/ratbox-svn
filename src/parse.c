@@ -669,7 +669,7 @@ static void do_numeric(char numeric[],
                        int parc,
                        char *parv[])
 {
-  struct Client *aclient_p;
+  struct Client *target_p;
   struct Channel *chptr;
 
   if (parc < 1 || !IsServer(source_p))
@@ -698,9 +698,9 @@ static void do_numeric(char numeric[],
         }
       ircsprintf(t," :%s", parv[parc-1]);
     }
-  if ((aclient_p = find_client(parv[1], (struct Client *)NULL)))
+  if ((target_p = find_client(parv[1], (struct Client *)NULL)))
     {
-      if (IsMe(aclient_p)) 
+      if (IsMe(target_p)) 
         {
           /*
            * We shouldn't get numerics sent to us,
@@ -711,7 +711,7 @@ static void do_numeric(char numeric[],
                                source_p->name, client_p->name, numeric);
           return;
         }
-      else if (aclient_p->from == client_p) 
+      else if (target_p->from == client_p) 
         {
           /* This message changed direction (nick collision?)
            * ignore it.
@@ -719,10 +719,10 @@ static void do_numeric(char numeric[],
           return;
         }
       /* Fake it for server hiding, if its our client */
-      if(GlobalSetOptions.hide_server && MyClient(aclient_p) && !IsOper(aclient_p))
-	sendto_one(aclient_p, ":%s %s %s%s", me.name, numeric, parv[1], buffer);
+      if(GlobalSetOptions.hide_server && MyClient(target_p) && !IsOper(target_p))
+	sendto_one(target_p, ":%s %s %s%s", me.name, numeric, parv[1], buffer);
       else
-        sendto_one(aclient_p, ":%s %s %s%s", source_p->name, numeric, parv[1], buffer);
+        sendto_one(target_p, ":%s %s %s%s", source_p->name, numeric, parv[1], buffer);
       return;
       }
       else if ((chptr = hash_find_channel(parv[1], (struct Channel *)NULL)))

@@ -61,7 +61,7 @@ static void ms_pong(struct Client *client_p,
                    int parc,
                    char *parv[])
 {
-  struct Client *aclient_p;
+  struct Client *target_p;
   char  *origin, *destination;
 
   if (parc < 2 || *parv[1] == '\0')
@@ -84,9 +84,9 @@ static void ms_pong(struct Client *client_p,
   if (!EmptyString(destination) && irccmp(destination, me.name) != 0
                 && IsRegistered(source_p))
     {
-      if ((aclient_p = find_client(destination, NULL)) ||
-          (aclient_p = find_server(destination)))
-        sendto_one(aclient_p,":%s PONG %s %s",
+      if ((target_p = find_client(destination, NULL)) ||
+          (target_p = find_server(destination)))
+        sendto_one(target_p,":%s PONG %s %s",
                    parv[0], origin, destination);
       else
         {
@@ -109,7 +109,7 @@ static void mr_pong(struct Client *client_p,
                     int parc,
                     char *parv[])
 {
-  struct Client *aclient_p;
+  struct Client *target_p;
   char  *origin, *destination;
 
   if (parc < 2 || *parv[1] == '\0')
@@ -132,9 +132,9 @@ static void mr_pong(struct Client *client_p,
   if (!EmptyString(destination) && irccmp(destination, me.name) != 0
                 && IsRegistered(source_p))
     {
-      if ((aclient_p = find_client(destination, NULL)) ||
-          (aclient_p = find_server(destination)))
-        sendto_one(aclient_p,":%s PONG %s %s",
+      if ((target_p = find_client(destination, NULL)) ||
+          (target_p = find_server(destination)))
+        sendto_one(target_p,":%s PONG %s %s",
                    parv[0], origin, destination);
       else
         {

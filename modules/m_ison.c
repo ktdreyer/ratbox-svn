@@ -102,7 +102,7 @@ static void ms_ison(struct Client *client_p, struct Client *source_p,
 static int do_ison(struct Client *up, struct Client *source_p,
                    int parc, char *parv[])
 {
-  struct Client *aclient_p;
+  struct Client *target_p;
   char *nick;
   char *p;
   char *current_insert_point, *current_insert_point2;
@@ -126,13 +126,13 @@ static int do_ison(struct Client *up, struct Client *source_p,
     for (nick = strtoken(&p, parv[i], " "); nick;
          nick = strtoken(&p, NULL, " "))
     {
-      if ((aclient_p = find_person(nick, NULL)))
+      if ((target_p = find_person(nick, NULL)))
       {
-        len = strlen(aclient_p->name);
+        len = strlen(target_p->name);
         if( (current_insert_point + (len + 5)) < (buf + sizeof(buf)) )
         {
           memcpy((void *)current_insert_point,
-                 (void *)aclient_p->name, len);
+                 (void *)target_p->name, len);
           current_insert_point += len;
           *current_insert_point++ = ' ';
         }
@@ -153,7 +153,7 @@ static int do_ison(struct Client *up, struct Client *source_p,
           current_insert_point2 += len;
           *current_insert_point2++ = ' ';
         }
-        if (!aclient_p)
+        if (!target_p)
         {
           /*
            * XXX Ick. we need to ask our hub if nick is online.

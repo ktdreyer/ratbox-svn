@@ -101,7 +101,7 @@ static void ms_sjoin(struct Client *client_p,
 {
   struct Channel *chptr;
   struct Channel *top_chptr=NULL;	/* XXX vchans */
-  struct Client  *aclient_p, *lclient_p;
+  struct Client  *target_p, *lclient_p;
   time_t         newts;
   time_t         oldts;
   time_t         tstosend;
@@ -437,11 +437,11 @@ static void ms_sjoin(struct Client *client_p,
           }
        }
 
-      if (!(aclient_p = find_chasing(source_p, s, NULL)))
+      if (!(target_p = find_chasing(source_p, s, NULL)))
         continue;
-      if (aclient_p->from != client_p)
+      if (target_p->from != client_p)
         continue;
-      if (!IsPerson(aclient_p))
+      if (!IsPerson(target_p))
         continue;
       
       people++;
@@ -466,38 +466,38 @@ static void ms_sjoin(struct Client *client_p,
                 lclient_p->localClient->serverMask) )
             continue;
 
-          /* Ignore servers that already know aclient_p */
-          if( !(aclient_p->lazyLinkClientExists &
+          /* Ignore servers that already know target_p */
+          if( !(target_p->lazyLinkClientExists &
                 lclient_p->localClient->serverMask) )
           {
             /* Tell LazyLink Leaf about client_p,
              * as the leaf is about to get a SJOIN */
-            sendnick_TS( lclient_p, aclient_p );
-            add_lazylinkclient(lclient_p,aclient_p);
+            sendnick_TS( lclient_p, target_p );
+            add_lazylinkclient(lclient_p,target_p);
           }
         }
       }
       
-      if (!IsMember(aclient_p, chptr))
+      if (!IsMember(target_p, chptr))
         {
-          add_user_to_channel(chptr, aclient_p, fl);
+          add_user_to_channel(chptr, target_p, fl);
 	  /* XXX vchan stuff */
 
 	  if( top_chptr )
 	    {
-	      add_vchan_to_client_cache(aclient_p,top_chptr, chptr);
+	      add_vchan_to_client_cache(target_p,top_chptr, chptr);
 	      sendto_channel_local(ALL_MEMBERS,chptr, ":%s!%s@%s JOIN :%s",
-				   aclient_p->name,
-				   aclient_p->username,
-				   aclient_p->host,
+				   target_p->name,
+				   target_p->username,
+				   target_p->host,
 				   top_chptr->chname);
 	    }
 	  else
 	    {
 	      sendto_channel_local(ALL_MEMBERS,chptr, ":%s!%s@%s JOIN :%s",
-				   aclient_p->name,
-				   aclient_p->username,
-				   aclient_p->host,
+				   target_p->name,
+				   target_p->username,
+				   target_p->host,
 				   parv[2]);
 	    }
         }
@@ -558,27 +558,27 @@ static void ms_sjoin(struct Client *client_p,
   /* relay the SJOIN to other servers */
   for(m = serv_list.head; m; m = m->next)
     {
-      aclient_p = m->data;
+      target_p = m->data;
 
-      if (aclient_p == client_p->from)
+      if (target_p == client_p->from)
         continue;
 
       /* skip lazylinks that don't know about this server */
-      if (ServerInfo.hub && IsCapable(aclient_p,CAP_LL))
+      if (ServerInfo.hub && IsCapable(target_p,CAP_LL))
       {
         if( !(RootChan(chptr)->lazyLinkChannelExists &
-              aclient_p->localClient->serverMask) )
+              target_p->localClient->serverMask) )
           continue;
       }
 
-      if (chptr->users == 0 && !IsCapable(aclient_p, CAP_VCHAN))
+      if (chptr->users == 0 && !IsCapable(target_p, CAP_VCHAN))
         continue;
 
       /* XXX - ids ? */
-      if (IsCapable(aclient_p,CAP_HOPS))
-        sendto_one(aclient_p, "%s %s", buf, sjbuf);
+      if (IsCapable(target_p,CAP_HOPS))
+        sendto_one(target_p, "%s %s", buf, sjbuf);
       else
-        sendto_one(aclient_p, "%s %s", buf, sjbuf_nh);
+        sendto_one(target_p, "%s %s", buf, sjbuf_nh);
     }
 }
 
@@ -730,7 +730,7 @@ static void remove_a_mode( int hide_or_not,
                            struct Client *source_p, dlink_list *list, char flag)
 {
   dlink_node *ptr;
-  struct Client *aclient_p;
+  struct Client *target_p;
   char buf[BUFSIZE];
   char lmodebuf[MODEBUFLEN];
   char *lpara[MAXMODEPARAMS];
@@ -751,8 +751,8 @@ static void remove_a_mode( int hide_or_not,
 
   for (ptr = list->head; ptr && ptr->data; ptr = ptr->next)
     {
-      aclient_p = ptr->data;
-      lpara[count++] = aclient_p->name;
+      target_p = ptr->data;
+      lpara[count++] = target_p->name;
 
       *mbuf++ = flag;
 

@@ -61,7 +61,7 @@ _moddeinit(void)
 struct squit_parms 
 {
   char *server_name;
-  struct Client *aclient_p;
+  struct Client *target_p;
 };
 
 static struct squit_parms *find_squit(struct Client *client_p,
@@ -97,17 +97,17 @@ static void mo_squit(struct Client *client_p, struct Client *source_p,
 
   if( (found_squit = find_squit(client_p,source_p,parv[1])) )
     {
-      if(MyConnect(found_squit->aclient_p))
+      if(MyConnect(found_squit->target_p))
 	{
 	  sendto_realops_flags(FLAGS_ALL,
 			       "Received SQUIT %s from %s (%s)",
-			       found_squit->aclient_p->name,
+			       found_squit->target_p->name,
 			       get_client_name(source_p, HIDE_IP), comment);
           log(L_NOTICE, "Received SQUIT %s from %s (%s)",
-              found_squit->aclient_p->name, get_client_name(source_p, HIDE_IP),
+              found_squit->target_p->name, get_client_name(source_p, HIDE_IP),
               comment);
 	}
-      exit_client(client_p, found_squit->aclient_p, source_p, comment);
+      exit_client(client_p, found_squit->target_p, source_p, comment);
       return;
     }
 }
@@ -132,7 +132,7 @@ static void ms_squit(struct Client *client_p, struct Client *source_p,
       /*
       **  Notify all opers, if my local link is remotely squitted
       */
-      if (MyConnect(found_squit->aclient_p))
+      if (MyConnect(found_squit->target_p))
 	{
 	  sendto_wallops_flags(FLAGS_WALLOP, &me,
 				 "Remote SQUIT %s from %s (%s)",
@@ -148,7 +148,7 @@ static void ms_squit(struct Client *client_p, struct Client *source_p,
 	      found_squit->server_name, comment);
 
 	}
-      exit_client(client_p, found_squit->aclient_p, source_p, comment);
+      exit_client(client_p, found_squit->target_p, source_p, comment);
       return;
     }
 }
@@ -167,10 +167,10 @@ static struct squit_parms *find_squit(struct Client *client_p,
                                       char *server)
 {
   static struct squit_parms found_squit;
-  static struct Client *aclient_p;
+  static struct Client *target_p;
   struct ConfItem *aconf;
 
-  found_squit.aclient_p = NULL;
+  found_squit.target_p = NULL;
   found_squit.server_name = NULL;
 
   /*
@@ -187,7 +187,7 @@ static struct squit_parms *find_squit(struct Client *client_p,
       if (!irccmp(server, my_name_for_link(me.name, aconf)))
 	{
 	  found_squit.server_name = client_p->name;
-	  found_squit.aclient_p = client_p;
+	  found_squit.target_p = client_p;
 	}
 
       break; /* WARNING is normal here */
@@ -198,23 +198,23 @@ static struct squit_parms *find_squit(struct Client *client_p,
   ** The following allows wild cards in SQUIT. Only useful
   ** when the command is issued by an oper.
   */
-  for (aclient_p = GlobalClientList; (aclient_p = next_client(aclient_p, server));
-       aclient_p = aclient_p->next)
+  for (target_p = GlobalClientList; (target_p = next_client(target_p, server));
+       target_p = target_p->next)
     {
-      if (IsServer(aclient_p) || IsMe(aclient_p))
+      if (IsServer(target_p) || IsMe(target_p))
 	break;
     }
 
-  found_squit.aclient_p = aclient_p;
+  found_squit.target_p = target_p;
   found_squit.server_name = server;
 
-  if (aclient_p && IsMe(aclient_p))
+  if (target_p && IsMe(target_p))
     {
-      found_squit.aclient_p = aclient_p;
+      found_squit.target_p = target_p;
       found_squit.server_name = client_p->host;
     }
 
-  if(found_squit.aclient_p != NULL)
+  if(found_squit.target_p != NULL)
     return &found_squit;
   else
     return( NULL );

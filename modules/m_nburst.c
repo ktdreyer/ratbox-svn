@@ -82,7 +82,7 @@ static void ms_nburst(struct Client *client_p,
   char *nick;
   char *nick_new = NULL;
   char *nick_old = NULL;
-  struct Client *aclient_p;
+  struct Client *target_p;
   char status;
 
   if( parc < 2 || *parv[1] == '\0' )
@@ -108,11 +108,11 @@ static void ms_nburst(struct Client *client_p,
 #endif
 
   status = 'N';
-  if ( (aclient_p = find_client(nick, NULL)) != NULL )
+  if ( (target_p = find_client(nick, NULL)) != NULL )
   {
     /* nick exists.  burst nick back to leaf */
     status = 'Y';
-    client_burst_if_needed(client_p, aclient_p);
+    client_burst_if_needed(client_p, target_p);
   }
 
   /* Send back LLNICK, if wanted */

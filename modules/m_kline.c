@@ -238,8 +238,8 @@ static void mo_kline(struct Client *client_p,
   if(tkline_time)
     {
       ircsprintf(buffer,
-		 "Temporary K-line %lu min. - %s (%s)",
-		 tkline_time/60,
+		 "Temporary K-line %d min. - %s (%s)",
+		 (int)(tkline_time/60),
 		 reason,
 		 current_date);
       DupString(aconf->passwd, buffer );
@@ -589,7 +589,7 @@ static void mo_dline(struct Client *client_p, struct Client *source_p,
 #else
   char *dlhost, *reason;
   char *p;
-  struct Client *aclient_p;
+  struct Client *target_p;
   char cidr_form_host[HOSTLEN + 1];
   unsigned long ip_host;
   unsigned long ip_mask;
@@ -620,13 +620,13 @@ static void mo_dline(struct Client *client_p, struct Client *source_p,
 
   if(!is_address(dlhost,&ip_host,&ip_mask))
     {
-      if (!(aclient_p = find_chasing(source_p, parv[1], NULL)))
+      if (!(target_p = find_chasing(source_p, parv[1], NULL)))
         return;
 
-      if(!aclient_p->user)
+      if(!target_p->user)
         return;
 
-      if (IsServer(aclient_p))
+      if (IsServer(target_p))
         {
           sendto_one(source_p,
                      ":%s NOTICE %s :Can't DLINE a server silly",
@@ -634,7 +634,7 @@ static void mo_dline(struct Client *client_p, struct Client *source_p,
           return;
         }
               
-      if(!MyConnect(aclient_p))
+      if(!MyConnect(target_p))
         {
           sendto_one(source_p,
                      ":%s NOTICE :%s :Can't DLINE nick on another server",
@@ -642,11 +642,11 @@ static void mo_dline(struct Client *client_p, struct Client *source_p,
           return;
         }
 
-      if(IsElined(aclient_p))
+      if(IsElined(target_p))
         {
           sendto_one(source_p,
                      ":%s NOTICE %s :%s is E-lined",me.name,parv[0],
-                     aclient_p->name);
+                     target_p->name);
           return;
         }
 
@@ -654,10 +654,10 @@ static void mo_dline(struct Client *client_p, struct Client *source_p,
        * XXX - this is always a fixed length output, we can get away
        * with strcpy here
        *
-       * strncpy_irc(cidr_form_host, inetntoa((char *)&aclient_p->ip), 32);
+       * strncpy_irc(cidr_form_host, inetntoa((char *)&target_p->ip), 32);
        * cidr_form_host[32] = '\0';
        */
-       strcpy(cidr_form_host, inetntoa((char*) &aclient_p->localClient->ip));
+       strcpy(cidr_form_host, inetntoa((char*) &target_p->localClient->ip));
       
       p = strchr(cidr_form_host,'.');
       if(!p)
@@ -686,7 +686,7 @@ static void mo_dline(struct Client *client_p, struct Client *source_p,
 
       ip_mask = 0xFFFFFF00L;
 /* XXX: Fix me for IPV6 */
-      ip_host = ntohl(IN_ADDR(aclient_p->localClient->ip));
+      ip_host = ntohl(IN_ADDR(target_p->localClient->ip));
     }
 
 
@@ -782,7 +782,7 @@ static void mo_dline(struct Client *client_p, struct Client *source_p,
 static int find_user_host(struct Client *source_p,
                           char *user_host_or_nick, char *luser, char *lhost)
 {
-  struct Client *aclient_p;
+  struct Client *target_p;
   char *hostp;
 
   if ( (hostp = strchr(user_host_or_nick, '@')) || *user_host_or_nick == '*' )
@@ -808,13 +808,13 @@ static int find_user_host(struct Client *source_p,
     {
       /* Try to find user@host mask from nick */
 
-      if (!(aclient_p = find_chasing(source_p, user_host_or_nick, NULL)))
+      if (!(target_p = find_chasing(source_p, user_host_or_nick, NULL)))
         return 0;
 
-      if(!aclient_p->user)
+      if(!target_p->user)
         return 0;
 
-      if (IsServer(aclient_p))
+      if (IsServer(target_p))
         {
 	  sendto_one(source_p,
 	     ":%s NOTICE %s :Can't KLINE a server, use @'s where appropriate",
@@ -822,12 +822,12 @@ static int find_user_host(struct Client *source_p,
           return 0;
         }
 
-      if(IsElined(aclient_p))
+      if(IsElined(target_p))
         {
           if(!IsServer(source_p))
             sendto_one(source_p,
                        ":%s NOTICE %s :%s is E-lined",me.name,source_p->name,
-                       aclient_p->name);
+                       target_p->name);
           return 0;
         }
 
@@ -835,11 +835,11 @@ static int find_user_host(struct Client *source_p,
        * if found in original user name (non-idented)
        */
 
-      strncpy_irc(luser, aclient_p->username, USERLEN);
-      if (*aclient_p->username == '~')
+      strncpy_irc(luser, target_p->username, USERLEN);
+      if (*target_p->username == '~')
         luser[0] = '*';
 
-      strncpy_irc(lhost,cluster(aclient_p->host),HOSTLEN);
+      strncpy_irc(lhost,cluster(target_p->host),HOSTLEN);
     }
 
   return 1;

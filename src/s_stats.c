@@ -57,7 +57,7 @@ void init_stats()
  */
 void tstats(struct Client *source_p)
 {
-  struct Client*           aclient_p;
+  struct Client*           target_p;
   struct ServerStatistics* sp;
   struct ServerStatistics  tmp;
   dlink_node *ptr;
@@ -67,13 +67,13 @@ void tstats(struct Client *source_p)
 
   for(ptr = serv_list.head; ptr; ptr = ptr->next)
     {
-      aclient_p = ptr->data;
+      target_p = ptr->data;
 
-      sp->is_sbs += aclient_p->localClient->sendB;
-      sp->is_sbr += aclient_p->localClient->receiveB;
-      sp->is_sks += aclient_p->localClient->sendK;
-      sp->is_skr += aclient_p->localClient->receiveK;
-      sp->is_sti += CurrentTime - aclient_p->firsttime;
+      sp->is_sbs += target_p->localClient->sendB;
+      sp->is_sbr += target_p->localClient->receiveB;
+      sp->is_sks += target_p->localClient->sendK;
+      sp->is_skr += target_p->localClient->receiveK;
+      sp->is_sti += CurrentTime - target_p->firsttime;
       sp->is_sv++;
       if (sp->is_sbs > 1023)
 	{
@@ -89,13 +89,13 @@ void tstats(struct Client *source_p)
 
   for(ptr = lclient_list.head; ptr; ptr = ptr->next)
     {
-      aclient_p = ptr->data;
+      target_p = ptr->data;
 
-      sp->is_cbs += aclient_p->localClient->sendB;
-      sp->is_cbr += aclient_p->localClient->receiveB;
-      sp->is_cks += aclient_p->localClient->sendK;
-      sp->is_ckr += aclient_p->localClient->receiveK;
-      sp->is_cti += CurrentTime - aclient_p->firsttime;
+      sp->is_cbs += target_p->localClient->sendB;
+      sp->is_cbr += target_p->localClient->receiveB;
+      sp->is_cks += target_p->localClient->sendK;
+      sp->is_ckr += target_p->localClient->receiveK;
+      sp->is_cti += CurrentTime - target_p->firsttime;
       sp->is_cl++;
       if (sp->is_cbs > 1023)
 	{

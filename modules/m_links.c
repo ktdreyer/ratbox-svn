@@ -102,7 +102,7 @@ static void mo_links(struct Client *client_p, struct Client *source_p,
                     int parc, char *parv[])
 {
   char*    mask = "";
-  struct Client* aclient_p;
+  struct Client* target_p;
   char           clean_mask[2 * HOSTLEN + 4];
   char*          p;
   struct hook_links_data hd;
@@ -130,19 +130,19 @@ static void mo_links(struct Client *client_p, struct Client *source_p,
   
   hook_call_event("doing_links", &hd);
   
-  for (aclient_p = GlobalClientList; aclient_p; aclient_p = aclient_p->next) 
+  for (target_p = GlobalClientList; target_p; target_p = target_p->next) 
     {
-      if (!IsServer(aclient_p) && !IsMe(aclient_p))
+      if (!IsServer(target_p) && !IsMe(target_p))
         continue;
-      if (*mask && !match(mask, aclient_p->name))
+      if (*mask && !match(mask, target_p->name))
         continue;
     
-      if(aclient_p->info[0])
+      if(target_p->info[0])
         {
-          if( (p = strchr(aclient_p->info,']')) )
+          if( (p = strchr(target_p->info,']')) )
             p += 2; /* skip the nasty [IP] part */
           else
-            p = aclient_p->info;
+            p = target_p->info;
         } 
       else
         p = "(Unknown Location)";
@@ -151,8 +151,8 @@ static void mo_links(struct Client *client_p, struct Client *source_p,
       * or theyre an oper..  
       */
       sendto_one(source_p, form_str(RPL_LINKS),
-		      me.name, parv[0], aclient_p->name, aclient_p->serv->up,
-                      aclient_p->hopcount, p);
+		      me.name, parv[0], target_p->name, target_p->serv->up,
+                      target_p->hopcount, p);
     }
   
   sendto_one(source_p, form_str(RPL_ENDOFLINKS), me.name, parv[0],

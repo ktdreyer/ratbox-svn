@@ -134,14 +134,14 @@ static void m_mode(struct Client *client_p, struct Client *source_p,
 
   if ((parc > 2) && parv[2][0] == '!')
     {
-     struct Client *aclient_p;
-     if (!(aclient_p = find_client(++parv[2], NULL)))
+     struct Client *target_p;
+     if (!(target_p = find_client(++parv[2], NULL)))
        {
         sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL), me.name,
                    parv[0], root->chname);
         return;
        }
-     if (!(chptr = map_vchan(root, aclient_p)))
+     if (!(chptr = map_vchan(root, target_p)))
        {
         sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL), me.name,
                    parv[0], root->chname);

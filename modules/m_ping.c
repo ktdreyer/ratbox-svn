@@ -65,7 +65,7 @@ static void m_ping(struct Client *client_p,
                   int parc,
                   char *parv[])
 {
-  struct Client *aclient_p;
+  struct Client *target_p;
   char  *origin, *destination;
 
   if (parc < 2 || *parv[1] == '\0')
@@ -76,15 +76,15 @@ static void m_ping(struct Client *client_p,
   origin = parv[1];
   destination = parv[2]; /* Will get NULL or pointer (parc >= 2!!) */
 
-  aclient_p = find_client(origin, NULL);
-  if (!aclient_p)
-    aclient_p = find_server(origin);
-  if (aclient_p && aclient_p != source_p)
+  target_p = find_client(origin, NULL);
+  if (!target_p)
+    target_p = find_server(origin);
+  if (target_p && target_p != source_p)
     origin = client_p->name;
   if (!EmptyString(destination) && irccmp(destination, me.name) != 0)
     {
-      if ((aclient_p = find_server(destination)))
-        sendto_one(aclient_p,":%s PING %s :%s", parv[0],
+      if ((target_p = find_server(destination)))
+        sendto_one(target_p,":%s PING %s :%s", parv[0],
                    origin, destination);
       else
         {
@@ -103,7 +103,7 @@ static void ms_ping(struct Client *client_p,
                    int parc,
                    char *parv[])
 {
-  struct Client *aclient_p;
+  struct Client *target_p;
   char  *origin, *destination;
 
   if (parc < 2 || *parv[1] == '\0')
@@ -114,15 +114,15 @@ static void ms_ping(struct Client *client_p,
   origin = parv[1];
   destination = parv[2]; /* Will get NULL or pointer (parc >= 2!!) */
 
-  aclient_p = find_client(origin, NULL);
-  if (!aclient_p)
-    aclient_p = find_server(origin);
-  if (aclient_p && aclient_p != source_p)
+  target_p = find_client(origin, NULL);
+  if (!target_p)
+    target_p = find_server(origin);
+  if (target_p && target_p != source_p)
     origin = client_p->name;
   if (!EmptyString(destination) && irccmp(destination, me.name) != 0)
     {
-      if ((aclient_p = find_server(destination)))
-        sendto_one(aclient_p,":%s PING %s :%s", parv[0],
+      if ((target_p = find_server(destination)))
+        sendto_one(target_p,":%s PING %s :%s", parv[0],
                    origin, destination);
       else
         {
