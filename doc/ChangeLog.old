@@ -1,3 +1,7 @@
+*** 20010813_6 by androsyn
+Block heap for struct User now..
+
+
 *** 20010813_5 by androsyn
 Getting pages via /dev/zero actually compiles and works now.
 
