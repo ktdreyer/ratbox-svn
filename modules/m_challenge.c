@@ -156,8 +156,7 @@ static void m_challenge( struct Client *client_p, struct Client *source_p,
      sendto_one (source_p, form_str(ERR_NOOPERHOST), me.name, parv[0]);
      return;
     }
-  /* XXX this should be a config flag.. */
-  if (!strchr(aconf->passwd, ' '))
+  if (!aconf->rsa_public_key)
     {
      sendto_one (source_p, ":%s NOTICE %s :I'm sorry, PK authentication "
                  "is not enabled for your oper{} block.", me.name,
@@ -165,7 +164,7 @@ static void m_challenge( struct Client *client_p, struct Client *source_p,
      return;
     }
   if (
-   !generate_challenge (&challenge, &(source_p->user->response), aconf->passwd)
+   !generate_challenge (&challenge, &(source_p->user->response), aconf->rsa_public_key)
      )
     {
      sendto_one (source_p, form_str(RPL_RSACHALLENGE), me.name, parv[0],

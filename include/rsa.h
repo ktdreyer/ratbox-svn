@@ -1,5 +1,5 @@
 /************************************************************************
- *   IRC - Internet Relay Chat, src/vchannel.c
+ *   IRC - Internet Relay Chat, include/rsa.h
  *   Copyright (C) 1990 Jarkko Oikarinen and
  *                      University of Oulu, Co Center
  *
@@ -21,10 +21,11 @@
  *
  * $Id$
  */
+#include <openssl/rsa.h>
 
 void report_crypto_errors(void);
 int verify_private_key(void);
-int generate_challenge( char ** r_challenge, char ** r_response, char * key );
+int generate_challenge( char ** r_challenge, char ** r_response, RSA * key );
 int crypt_data(char **out, char *in, int len, char *key);
 int decrypt_data(char **out, char *in, int len, char *key);
 int get_randomness( unsigned char * buf, int length );

@@ -41,8 +41,6 @@
 void report_crypto_errors(void);
 int verify_private_key(void);
 static void binary_to_hex( unsigned char * bin, char * hex, int length );
-static int absorb( char ** str, char lowest, char highest );
-static RSA * str_to_RSApublic( char * key );
 
 /* For some strange reason we can't include pem.h in here..why I don't know */
 /* But this is the correct prototype.. */
@@ -191,70 +189,14 @@ int get_randomness( unsigned char * buf, int length )
     return RAND_pseudo_bytes( buf, length );
 }
 
-static int absorb( char ** str, char lowest, char highest )
-{
-  char * start = *str;
-
-  while( **str >= lowest && **str <= highest )
-    (*str)++;
-
-  return *str - start;
-}
-
-static RSA * str_to_RSApublic( char * key )
-{
-  char * e, * n;
-  RSA * rsa;
-
-  /* bits */
-  if( !absorb( &key, '0', '9' ) )
-    return NULL;
-
-  /* space */
-  if( !absorb( &key, ' ', ' ' ) )
-    return NULL;
-
-  /* e */
-  e = key;
-  if( !absorb( &key, '0', '9' ) )
-    return NULL;
-  if( *key != ' ' )
-    return NULL;
-  *key = '\0';
-
-  /* n */
-  n = ++key;
-  if( !absorb( &key, '0', '9' ) )
-    return NULL;
-  if( *key != ' ' && *key != '\0' )
-    return NULL;
-  *key = '\0';
-
-  /* convert to RSA key structure */
-  rsa = RSA_new();
-  BN_dec2bn( &(rsa->e), e );
-  BN_dec2bn( &(rsa->n), n );
-
-  return rsa;
-}
-
-int generate_challenge( char **, char **, char*);
-int generate_challenge( char ** r_challenge, char ** r_response, char * key )
+int generate_challenge( char **, char **, RSA *);
+int generate_challenge( char ** r_challenge, char ** r_response, RSA *rsa )
 {
   unsigned char secret[32], *tmp;
   unsigned long length, ret;
-  char *nkey;
-  RSA *rsa;
-  DupString(nkey, key);
-  if (!(rsa = str_to_RSApublic(nkey)))
-  {
-    *r_challenge = NULL;
-    *r_response = NULL;
-    MyFree(nkey);
-    return -1;
-  }
-  MyFree(nkey);
 
+  if(!rsa)
+  	return -1;
   get_randomness(secret, 32);
   *r_response = MyMalloc(65);
   binary_to_hex(secret, *r_response, 32);

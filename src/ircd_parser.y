@@ -718,7 +718,7 @@ oper_items:     oper_items oper_item |
 oper_item:      oper_name  | oper_user | oper_password |
                 oper_class | oper_global_kill | oper_remote |
                 oper_kline | oper_unkline | oper_gline | oper_nick_changes |
-                oper_die | oper_rehash | oper_admin | error
+                oper_die | oper_rehash | oper_admin | oper_rsa_public_key_file | error
 
 oper_name:      NAME '=' QSTRING ';'
   {
@@ -767,6 +767,50 @@ oper_password:  PASSWORD '=' QSTRING ';'
       memset(yy_achead->passwd, 0, strlen(yy_achead->passwd));
     MyFree(yy_achead->passwd);
     DupString(yy_achead->passwd, yylval.string);
+  };
+
+oper_rsa_public_key_file: RSA_PUBLIC_KEY_FILE '=' QSTRING ';'
+  {
+#ifdef HAVE_LIBCRYPTO
+    BIO *file;
+
+    if (yy_aconf->rsa_public_key)
+    {
+      RSA_free(yy_aconf->rsa_public_key);
+      yy_aconf->rsa_public_key = NULL;
+    }
+
+    if (yy_aconf->rsa_public_key_file)
+    {
+      MyFree(yy_aconf->rsa_public_key_file);
+      yy_aconf->rsa_public_key_file = NULL;
+    }
+
+    DupString(yy_aconf->rsa_public_key_file, yylval.string);
+
+    file = BIO_new_file(yylval.string, "r");
+
+    if (file == NULL)
+    {
+      sendto_realops_flags(FLAGS_ALL, L_ALL,
+        "Ignoring rsa_public_key_file -- does %s exist?", yylval.string);
+      break;
+    }
+
+    yy_aconf->rsa_public_key = (RSA *) PEM_read_bio_RSA_PUBKEY(file,
+                                                    NULL, 0, NULL );
+
+    if (yy_aconf->rsa_public_key == NULL)
+    {
+      sendto_realops_flags(FLAGS_ALL, L_ALL,
+        "Ignoring rsa_public_key_file -- Key invalid; check key syntax.");
+      break;
+    }
+
+    BIO_set_close(file, BIO_CLOSE);
+    BIO_free(file);
+
+#endif /* HAVE_LIBCRYPTO */
   };
 
 oper_class:     CLASS '=' QSTRING ';'
