@@ -1,3 +1,34 @@
+*** 20011130_1 by a1kmm
+- Ran m_message.c and send.c through indent - they were unreadable
+  before because of tabs.
+- Cleaned up send.h - removed separate __GNUC__ and not gnuc prototypes
+  and made a single macro to give format attributes. Removed prototypes
+  for functions which no longer exist.
+- Made sendto_remote_list work and send a linebuf once to every remote
+  user on the list.
+- Don't require remote users to be in the channel to invite.
+- Fixed vchan naming and propagation issues.
+- Don't send error about a user being in channel if they are in another
+  vchan which is secret when you invite them(silently ignore).
+- Don't send error about a user being on a different server if server
+  hiding is on and they are invited to a local channel(silently ignore).
+- Propagate invite to all servers where there are chanops or halfops,
+  as well as to where the invited user resides.
+- Send a notice to all local chanops and halfops if a channel is +p
+  when someone invites.
+- Don't accept privmsg/notice for local channels from servers.
+- Don't send privmsg/notice for local channels to servers.
+- Only propagate @%+ channel messages to servers that have ops,
+  half-ops or ops, and halfops-ops-voiced respectively.
+- Allow privmsg from servers - it is stupid not to when we allow
+  notices from servers.
+- Killed the mallocs and reallocs in the message code - we now use a
+  static buffer.
+- Probably introduced a few bugs because I'm tired(but hopefully not).
+
+
+
+
 *** 20011129_7 by jdc
 - Updated Email address, as to welcome even more spam.  *rolls eyes*
 
