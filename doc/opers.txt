@@ -7,7 +7,7 @@ Usermodes: (* designates that the umode is oper only)
 
      USERMODE     DESCRIPTION
 -----------------------------------------------------------------
-         +o     - Designates this client is a global IRC Operator.
+         +o     - Designates this client is an IRC Operator.
                   Use the /oper command to attain this.
          +i     - Designates this client 'invisible'.
        * +w     - Can see server wallops.
@@ -37,13 +37,12 @@ COMMAND         - USAGE and DESCRIPTION
   SQUIT         - SQUIT <server> [reason]
                   Splits <server> away from your side of the net with
                   [reason].
+		- Requires Oper Priv: R for servers not connected to you
 
   KILL          - KILL <nick> <reason>
                   Disconnects user <nick> from the IRC server he/she
                   is connected to with reason <reason>.
-                  Local Opers can only kill clients on his/her server.
-                  Global Opers can kill clients on any server on the
-                  IRC network.
+		- Requires Oper Priv: O for users not on your IRC server
 
   STATS         - STATS <letter> [server|nick]
                   Queries server [server] (or your own server if no
@@ -81,10 +80,13 @@ COMMAND         - USAGE and DESCRIPTION
 
   CONNECT       - CONNECT <server_A> [port] [server_B]
                   When [server_B] is used, CONNECT asks [server_B] to
-                  connect to <server_A>.  Global Opers only.
+                  connect to <server_A>.  Requires Oper Priv: R
+		
+		  The [port] must be specified with [server_B], this is	
+		  usually 6667.
 
                   When [server_B] is not used, CONNECT tries to connect
-                  your server to <server_A>.  Local and Global Opers.
+                  your server to <server_A>.
 
                   When [port] is used, the connection will be attempted
                   to [port].
@@ -93,10 +95,9 @@ COMMAND         - USAGE and DESCRIPTION
 
 + WALLOPS       - WALLOPS :<message>
                   Sends a WALLOPS message of <message> to all opers
-                  who are umode +z (see above)
+                  who are umode +z.
 
-                  Server sent wallops go to all users who are umode
-                  +w, oper or not.
+		  Server sent WALLOPS go to all opers who are umode +w.
 
 + OPERWALL      - OPERWALL :<message>
                   Sends an OPERWALL message of <message> to all
@@ -130,8 +131,12 @@ COMMAND         - USAGE and DESCRIPTION
                     HELP     - Re-reads this HELP file
                     CHANNELS - Forces a channel cleanup
 
+		- Requires Oper Priv: H
+
   RESTART       - RESTART server.name :[reason]
                   Restarts the IRC server.
+
+		- Requires Oper Priv: D
 
 + CLOSE         - CLOSE
                   Close any connections from clients who have not fully
@@ -140,6 +145,8 @@ COMMAND         - USAGE and DESCRIPTION
   DIE           - DIE server.name :[reason]
                   Terminates the IRC server with optional reason 
                   [reason]
+
+		- Requires Oper Priv: D
 
 + KLINE         - KLINE <nick|user@host> :[reason]
                   Adds a KLINE to the ircd.conf or klines.conf file which
@@ -156,9 +163,17 @@ COMMAND         - USAGE and DESCRIPTION
                   minutes as the first parameter i.e.
                   KLINE 10 <nick|user@host> :cool off for 10 minutes
 
+		  KLINE <user@host ON irc.server :[reason]
+		  will kline the user on irc.server if irc.server accepts
+		  remote klines.
+
+		- Requires Oper Priv: K
+
 + UNKLINE       - UNKLINE <user@host>
                   Will attempt to unkline the given <user@host>
                   Will unkline a temporary kline.
+
+		- Requires Oper Priv: U
 
 + DLINE         - DLINE <nick|ip> :[reason]
                   Adds a DLINE to the ircd.conf or klines.conf file
@@ -169,8 +184,12 @@ COMMAND         - USAGE and DESCRIPTION
                   In order to use <nick> rather than <ip>, <nick> must
                   be on your server.
 
+		- Requires Oper Priv: K
+
 + UNDLINE       - UNDLINE <ip>
                   Will attempt to undline the given <ip>
+
+		- Requires Oper Priv: U
 
 + SET           - SET <option> <value>
                   <option> can be one of the following:
@@ -206,11 +225,15 @@ COMMAND         - USAGE and DESCRIPTION
                    servers to do the same GLINE within a short interval,
                    to have a GLINE triggered for a compiled time of hours.
 
+		 - Requires Oper Priv: G
+
 + UNGLINE        - UNGLINE <user@host>
                    -- if glines are enabled --
                    Will attempt to remove gline matching <user@host>
                    This will only remove the gline from YOUR server, it
                    does not try to remove it globally.
+
+		 - Requires Oper Privs: G and U
 
 + TESTLINE       - TESTLINE <user@host>|ip
                    -- Looks up given user@host or user@ip 
@@ -252,3 +275,7 @@ COMMAND         - USAGE and DESCRIPTION
                    All modules are unloaded, then those in modules/autoload 
                    are loaded
                    NOTE:  Restricted to admins only
+
+The Oper Privs are given on /oper: 
+
+-irc.server- *** Oper privs are GKORUHDA
