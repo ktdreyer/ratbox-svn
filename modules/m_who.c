@@ -41,12 +41,6 @@
 #include "parse.h"
 #include "modules.h"
 
-#ifdef REQUIRE_OANDV
-#define NUMLISTS 5
-#else
-#define NUMLISTS 4
-#endif
-
 static void m_who(struct Client*, struct Client*, int, char**);
 static void ms_who(struct Client*, struct Client*, int, char**);
 

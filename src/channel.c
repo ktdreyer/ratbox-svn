@@ -704,12 +704,6 @@ channel_member_names(struct Client *source_p,
                      struct Channel *chptr,
                      char *name_of_channel, int show_eon)
 {
-#ifdef REQUIRE_OANDV
-#define NUMLISTS 5
-#else
-#define NUMLISTS 4
-#endif
-
   int mlen;
   int sublists_done = 0;
   int tlen;

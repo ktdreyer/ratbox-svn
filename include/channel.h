@@ -180,7 +180,11 @@ struct Ban          /* also used for exceptions -orabidoo */
 #define CLEANUP_CHANNELS_TIME (30*60)
 #define MAX_VCHAN_TIME (60*60)
 /* Number of chanops, peon, voiced, halfops sublists */
-#define MAX_SUBLISTS 4
+#ifdef REQUIRE_OANDV
+#define NUMLISTS 5
+#else
+#define NUMLISTS 4
+#endif
 
 #ifdef INTENSIVE_DEBUG
 void do_channel_integrity_check(void);
