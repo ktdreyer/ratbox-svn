@@ -1,3 +1,8 @@
+*** 20001104_11 by db
+- fixed botch I introduced with vchans, when I rewrote m_names.c
+
+
+
 *** 20001104_10 by db
 - fixed m_who.c to be completely vchan aware
 
