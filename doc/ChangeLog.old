@@ -1,3 +1,15 @@
+androsyn    2002/07/04 12:07:25 EDT	(20020704_2)
+
+  Modified files:
+    modules/core         m_sjoin.c 
+  Log:
+  The second half of that goofy spaces in SJOIN bug..
+  
+  Revision  Changes    Path
+  1.140     +4 -4      ircd-hybrid-7/modules/core/m_sjoin.c
+
+
+
 androsyn    2002/07/04 09:32:57 EDT	(20020704_1)
 
   Modified files:
