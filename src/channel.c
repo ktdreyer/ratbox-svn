@@ -156,7 +156,7 @@ add_user_to_channel(struct Channel *chptr, struct Client *who, int flags)
     if (MyClient(who))
       chptr->locusers++;
 
-    dlinkAdd(chptr, &who->user->channel);
+    dlinkAddAlloc(chptr, &who->user->channel);
     who->user->joined++;
   }
 }
