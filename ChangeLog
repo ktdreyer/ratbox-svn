@@ -1,3 +1,16 @@
+androsyn    2002/08/11 04:51:17 EDT	(20020811_3)
+
+  Modified files:
+    src                  dynlink.c 
+  Log:
+  These are somewhat untested dlsym functions for hpux.  They make the code
+  just a bit more readable :P
+  
+  Revision  Changes    Path
+  7.4       +26 -49    ircd-ratbox/src/dynlink.c
+
+
+
 androsyn    2002/08/11 03:14:18 EDT	(20020811_2)
 
   Modified files:
