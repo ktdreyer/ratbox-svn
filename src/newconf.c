@@ -55,10 +55,6 @@ static struct cluster *yy_cconf = NULL;
 
 static char *resv_reason;
 
-static char *class_redirserv_var;
-static int class_redirport_var;
-
-
 static const char *
 conf_strtype(int type)
 {
