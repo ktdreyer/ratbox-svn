@@ -1,3 +1,18 @@
+androsyn    2004/08/16 11:42:57 EDT	(20040816_2)
+
+  Modified files:
+    modules              Makefile.in 
+    src                  modules.c 
+  Log:
+  Rename registration.c to users.c, the rename was done as a repo move as this
+  only exists on the HEAD branch
+  
+  Revision  Changes    Path
+  1.108     +1 -1      ircd-ratbox/modules/Makefile.in
+  7.148     +1 -1      ircd-ratbox/src/modules.c
+
+
+
 androsyn    2004/08/16 11:32:47 EDT	(20040816_1)
 
   Modified files:
