@@ -900,14 +900,6 @@ sendto_list_local_butone(struct Client *one, dlink_list *list,
  * Input: one  => Client not to send towards
  *	  from => The client who sent this to us.
  *        list => The list of clients to check.
-/*
- * sendto_list_remote(struct Client *one,
- *		      struct Client *from, dlink_list *list, int caps,
- *                    int nocaps, buf_head_t *linebuf)
- *
- * Input: one  => Client not to send towards
- *	  from => The client who sent this to us.
- *        list => The list of clients to check.
  *        caps => The capabilities servers we send this to must have.
  *      nocaps => The capabilities servers we send this to must lack.
  *     linebuf => The buffer to send.
