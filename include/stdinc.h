@@ -27,19 +27,28 @@
 #include "config.h"		/* Gotta pull in the autoconf stuff */
 
 /* AIX requires this to be the first thing in the file.  */
-#ifndef __GNUC__
-# if HAVE_ALLOCA_H
-#  include <alloca.h>
-# else
-#  ifdef _AIX
+#undef HAVE_ALLOCA_H
+
+#if defined (__CYGWIN__)
+/* We get complaints about redefinitions if we just use the __GNUC__
+   definition: stdlib.h also includes alloca.h, which defines it slightly
+   differently */
+#include <alloca.h>
+#elif defined (__GNUC__)
+#define alloca __builtin_alloca
+#elif defined __DECC
+#include <alloca.h>
+#pragma intrinsic(alloca)
+#elif defined HAVE_ALLOCA_H
+#include <alloca.h>
+#elif defined(_AIX)
++/* AIX requires this to be first in the file. */
+#if defined (_AIX) && ! defined (NOT_C_CODE)
  #pragma alloca
-#  else
-#   ifndef alloca /* predefined by HP cc +Olibcalls */
-char *alloca ();
-#   endif
-#  endif
-# endif
+#elif ! defined (alloca)
+void *alloca ();
 #endif
+#endif /* C code */
 
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
