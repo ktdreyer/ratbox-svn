@@ -1,3 +1,7 @@
+*** 20010821_10 by androsyn
+Okay so strspn() wasn't such a great idea...
+
+
 *** 20010821_9 by androsyn
 Changed the arguments and make string_to_array work right
 
