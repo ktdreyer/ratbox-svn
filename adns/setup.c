@@ -575,7 +575,11 @@ int adns_init(adns_state *ads_r, adns_initflags flags, FBFILE *diagfile) {
   ccf_options(ads,"RES_OPTIONS",-1,res_options);
   ccf_options(ads,"ADNS_RES_OPTIONS",-1,adns_res_options);
 
+#ifndef VMS
   readconfig(ads,"/etc/resolv.conf",0);
+#else
+  readconfig(ads,"DISK$USER[EBROCKLESBY.IRCD]RESOLV.CONF",0);
+#endif
   readconfig(ads,"/etc/resolv-adns.conf",0);
   readconfigenv(ads,"RES_CONF");
   readconfigenv(ads,"ADNS_RES_CONF");
@@ -685,7 +689,11 @@ int adns__rereadconfig(adns_state ads)
 {
   adns__consistency(ads,0,cc_entex);
   ads->nservers = 0;	
+#ifndef VMS
   readconfig(ads,"/etc/resolv.conf",0);
+#else
+  readconfig(ads,"resolv.conf",0);
+#endif
   adns__consistency(ads,0,cc_entex);
   return 0;
 }

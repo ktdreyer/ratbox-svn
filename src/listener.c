@@ -31,6 +31,7 @@
 #include "s_stats.h"
 #include "send.h"
 #include "memory.h"
+#include "setup.h"
 
 #ifdef HAVE_LIBCRYPTO
 #include <openssl/bio.h>

@@ -98,7 +98,13 @@ adns_status adns__mkquery(adns_state ads, vbuf *vb, int *id_r,
 	if (!(flags & adns_qf_quoteok_query)) return adns_s_querydomaininvalid;
 	if (ctype_digit(p[0])) {
 	  if (ctype_digit(p[1]) && ctype_digit(p[2])) {
+#ifdef VMS
+            c = (*p++ - '0')*100;
+            c += (*p++ - '0')*10;
+            c += (*p++ - '0');
+#else
 	    c= (*p++ - '0')*100 + (*p++ - '0')*10 + (*p++ - '0');
+#endif
 	    if (c >= 256) return adns_s_querydomaininvalid;
 	  } else {
 	    return adns_s_querydomaininvalid;
@@ -166,7 +172,7 @@ adns_status adns__mkquery_frdgram(adns_state ads, vbuf *vb, int *id_r,
 void adns__querysend_tcp(adns_query qu, struct timeval now) {
   byte length[2];
   struct iovec iov[2];
-  int wr, r;
+  int wr, wr2, r;
   adns_state ads;
 
   if (qu->ads->tcpstate != server_ok) return;
@@ -187,12 +193,18 @@ void adns__querysend_tcp(adns_query qu, struct timeval now) {
   if (ads->tcpsend.used) {
     wr= 0;
   } else {
+#if 0
     iov[0].iov_base= (char *)length;
     iov[0].iov_len= 2;
     iov[1].iov_base= (char *)qu->query_dgram;
     iov[1].iov_len= qu->query_dglen;
     wr= writev(qu->ads->tcpsocket,iov,2);
-    if (wr < 0) {
+#endif
+    wr = write(qu->ads->tcpsocket, (char *)length, 2);
+    if (wr > 0)
+        wr2 = write(qu->ads->tcpsocket, (char *)qu->query_dgram, qu->query_dglen);
+
+    if (wr < 0 || wr2 < 0) {
       if (!(errno == EAGAIN || errno == EINTR || errno == ENOSPC ||
 	    errno == ENOBUFS || errno == ENOMEM)) {
 	adns__tcp_broken(ads,"write",strerror(errno));

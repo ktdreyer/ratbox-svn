@@ -46,6 +46,8 @@
 #include "tvarith.h"
 #include "irc_string.h"
 #include "memory.h"
+#include "adns.h"
+
 /* TCP connection management. */
 
 static void tcp_close(adns_state ads) {

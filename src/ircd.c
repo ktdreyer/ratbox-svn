@@ -270,8 +270,8 @@ struct lgetopt myopts[] = {
   {"debug", NULL, 
    ENDEBUG, "Enable debugging for a certain value"},
 #endif
-  {"help", NULL, 
-   USAGE, "Print this text"},
+  {"help", NULL, USAGE, "Print this text"},
+  {NULL, NULL, STRING, NULL},
 };
 
 void
@@ -524,6 +524,7 @@ int main(int argc, char *argv[])
  init_log(logFileName);
  init_netio();		/* This needs to be setup early ! -- adrian */
  init_resolver();	/* Needs to be setup before the io loop */
+ printf("done some startup\n"); 
  initialize_message_files();
  linebuf_init();	/* set up some linebuf stuff to control paging */
  init_hash();
@@ -542,7 +543,6 @@ int main(int argc, char *argv[])
  init_auth();			/* Initialise the auth code */
  read_conf_files(YES);         /* cold start init conf files */
  initialize_global_set_options();
-  
  if (ServerInfo.name == NULL)
  {
   fprintf(stderr, "Error: No server name specified\n");

@@ -75,7 +75,16 @@ struct adns_pollfd { int fd; short events; short revents; };
 #define ADNS_POLLPRI 2
 #define ADNS_POLLOUT 4
 
+#ifndef timercmp
+#define timercmp(tvp, uvp, cmp)                                 \
+        (((tvp)->tv_sec == (uvp)->tv_sec) ?                             \
+            ((tvp)->tv_usec cmp (uvp)->tv_usec) :                       \
+            ((tvp)->tv_sec cmp (uvp)->tv_sec))
+#endif
 
+#ifndef timerclear
+#define timerclear(tvp)         (tvp)->tv_sec = (tvp)->tv_usec = 0
+#endif
 
 /* All struct in_addr anywhere in adns are in NETWORK byte order. */
 

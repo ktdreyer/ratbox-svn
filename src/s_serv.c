@@ -1122,7 +1122,7 @@ static void start_io(struct Client *server)
     
     /* store data in c+3 to allow for SLINKCMD_INJECT_RECVQ and len u16 */
     linelen = linebuf_get(&server->localClient->buf_recvq,
-                          (buf + c + 3),
+                          (char *)(buf + c + 3),
                           READBUF_SIZE, 1); /* include partial lines */
 
     if (linelen)
@@ -1144,7 +1144,7 @@ static void start_io(struct Client *server)
 
     /* store data in c+3 to allow for SLINKCMD_INJECT_RECVQ and len u16 */
     linelen = linebuf_get(&server->localClient->buf_sendq,
-                          (buf + c + 3),
+                          (char *)(buf + c + 3),
                           READBUF_SIZE, 1); /* include partial lines */
 
     if (linelen)

@@ -45,6 +45,10 @@
 #include <time.h>
 #include <arpa/nameser.h>
 
+#if defined(VMS) || defined(__CYGWIN32__)
+# define INADDRSZ 4
+#endif
+
 /*
  * myctime - This is like standard ctime()-function, but it zaps away
  *   the newline from the end of that string. Also, it takes

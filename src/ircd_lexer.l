@@ -349,7 +349,11 @@ void cinclude(void)
     FBFILE *tmp_fbfile_in;
     char filenamebuf[IRCD_BUFSIZE];
     
+#ifdef HAVE_SNPRINTF
     snprintf(filenamebuf, IRCD_BUFSIZE, "%s/%s", ETCPATH, c);
+#else
+    sprintf(filenamebuf, "%s/%s", ETCPATH, c);
+#endif
     tmp_fbfile_in = fbopen(filenamebuf, "r");
     
     if (tmp_fbfile_in == NULL)

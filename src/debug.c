@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "debug.h"
 #include "s_log.h"
@@ -60,10 +61,10 @@ add_mod_debug(char *what)
  *   supplied is written to stdout.  Otherwise no action is taken.
  */
 
-#ifdef DEBUGMODE
 void 
 deprintf(char *what, char *fmt, ...)
 {
+#ifdef DEBUGMODE
   va_list ap;
   char buffer[DEBUG_BUFSIZE];
 
@@ -78,15 +79,8 @@ deprintf(char *what, char *fmt, ...)
   vsnprintf(buffer, sizeof(buffer) - 1, fmt, ap);
   log(L_DEBUG, "%s", buffer);
   fflush(stdout);
-}
-#else
-void
-deprintf(a,b)
-     char *a,*b;
-{
-  return;
-}
 #endif
+}
 
 /*
  * FUNCTION
