@@ -1,3 +1,20 @@
+androsyn    2002/07/13 18:54:49 EDT	(20020713_3)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+    include              memory.h 
+  Log:
+  Disable asserts by default and fix a #endif in memory.h.  This should be
+  it before -rc1
+  
+  Revision  Changes    Path
+  7.145     +5 -2      ircd-hybrid-7/autoconf/configure.in
+  7.148     +55 -52    ircd-hybrid-7/configure
+  7.36      +1 -1      ircd-hybrid-7/include/memory.h
+
+
+
 leeh        2002/07/13 07:42:03 EDT	(20020713_2)
 
   Modified files:
