@@ -305,11 +305,6 @@ build_target_list(int p_or_n, char *command, struct Client *client_p,
           continue;
         }
       }
-      else if (IsOper(source_p))
-      {
-        handle_opers(p_or_n, command, client_p, source_p, nick, text);
-        continue;
-      }
       else
       {
         if (!ServerInfo.hub && uplink && IsCapable(uplink, CAP_LL))
@@ -813,8 +808,11 @@ handle_opers(int p_or_n,
      **
      ** Armin, 8Jun90 (gruner@informatik.tu-muenchen.de)
    */
-  if ((*nick == '$' || *nick == '#'))
+  if(*nick == '$')
   {
+    if((*(nick+1) == '$' || *(nick+1) == '#'))
+      nick++;
+      
     if (!(s = (char *)strrchr(nick, '.')))
     {
       sendto_one(source_p, form_str(ERR_NOTOPLEVEL),
@@ -830,10 +828,11 @@ handle_opers(int p_or_n,
                  me.name, source_p->name, nick);
       return;
     }
+    
     sendto_match_butone(IsServer(client_p) ? client_p : NULL, source_p,
                         nick + 1,
                         (*nick == '#') ? MATCH_HOST : MATCH_SERVER,
-                        "PRIVMSG %s :%s", nick, text);
+                        "PRIVMSG $%s :%s", nick, text);
     return;
   }
 
