@@ -98,6 +98,9 @@
  *                      non-NULL pointers.
  */
 
+static void log_fname( struct Client *sptr, char *name );
+static struct ConfItem *find_password_aconf(char *name, struct Client *sptr);
+
 /*
 ** m_oper
 **      parv[0] = sender prefix
@@ -112,60 +115,22 @@ int m_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   extern        char *crypt();
 #endif /* CRYPT_OPER_PASSWORD */
   char *operprivs;
-  static char buf[BUFSIZE];
 
   name = parc > 1 ? parv[1] : (char *)NULL;
   password = parc > 2 ? parv[2] : (char *)NULL;
 
-  if (!IsServer(cptr) && (EmptyString(name) || EmptyString(password)))
+  if ((EmptyString(name) || EmptyString(password)))
     {
       sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
                  me.name, parv[0], "OPER");
       return 0;
     }
-        
-  /* if message arrived from server, trust it, and set to oper */
-  
-  if ((IsServer(cptr) || IsMe(cptr)) && !IsGlobalOper(sptr))
-    {
-      if (sptr->status == STAT_CLIENT)
-	sptr->handler = OPER_HANDLER;
 
-      sptr->flags |= FLAGS_OPER;
-      Count.oper++;
-      sendto_serv_butone(cptr, ":%s MODE %s :+o", parv[0], parv[0]);
-      if (IsMe(cptr))
-        sendto_one(sptr, form_str(RPL_YOUREOPER),
-                   me.name, parv[0]);
-      return 0;
-    }
-  else if (IsAnyOper(sptr))
-    {
-      if (MyConnect(sptr))
-        {
-          sendto_one(sptr, form_str(RPL_YOUREOPER),
-                     me.name, parv[0]);
-          SendMessageFile(sptr, &ConfigFileEntry.opermotd);
-        }
-      return 0;
-    }
-  if (!(aconf = find_conf_exact(name, sptr->username, sptr->host,
-                                CONF_OPS)) &&
-      !(aconf = find_conf_exact(name, sptr->username,
-                                inetntoa((char *)&cptr->ip), CONF_OPS)))
-    {
-      sendto_one(sptr, form_str(ERR_NOOPERHOST), me.name, parv[0]);
-      if (ConfigFileEntry.failed_oper_notice && ConfigFileEntry.show_failed_oper_id) {
-        if (ConfigFileEntry.show_failed_oper_passwd) {
-          sendto_realops("Failed OPER attempt [%s(%s)] - identity mismatch: %s [%s@%s]",
-            name, password, sptr->name, sptr->username, sptr->host);
-        } else {
-          sendto_realops("Failed OPER attempt - host mismatch by %s (%s@%s)",
-                          parv[0], sptr->username, sptr->host);
-        } /* show_failed_oper_passwd */
-      } /* failed_oper_notice && show_failed_oper_id */
-      return 0;
-    }
+  aconf = find_password_aconf(name,sptr);
+
+  if(aconf == NULL)
+    return 0;
+
 #ifdef CRYPT_OPER_PASSWORD
   /* use first two chars of the password they send in as salt */
 
@@ -241,10 +206,10 @@ int m_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                  sptr->username, sptr->host,
                  IsGlobalOper(sptr) ? 'O' : 'o');
       send_umode_out(cptr, sptr, old);
+
       sendto_one(sptr, form_str(RPL_YOUREOPER), me.name, parv[0]);
       sendto_one(sptr, ":%s NOTICE %s :*** Oper privs are %s",me.name,parv[0],
                  operprivs);
-
       SendMessageFile(sptr, &ConfigFileEntry.opermotd);
 
 #if !defined(CRYPT_OPER_PASSWORD) && (defined(FNAME_OPERLOG) || defined(SYSLOG_OPER))
@@ -252,44 +217,18 @@ int m_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 #endif
         log(L_TRACE, "OPER %s by %s!%s@%s",
             name, parv[0], sptr->username, sptr->host);
-#ifdef FNAME_OPERLOG
-        {
-          int     logfile;
 
-          /*
-           * This conditional makes the logfile active only after
-           * it's been created - thus logging can be turned off by
-           * removing the file.
-           *
-           */
-
-          if (IsPerson(sptr) &&
-              (logfile = file_open(FNAME_OPERLOG, O_WRONLY|O_APPEND, 0644)) != -1)
-            {
-              /* (void)alarm(0); */
-              ircsprintf(buf, "%s OPER (%s) by (%s!%s@%s)\n",
-                               myctime(CurrentTime), name, 
-                               parv[0], sptr->username,
-                               sptr->host);
-              write(logfile, buf, strlen(buf));
-              file_close(logfile);
-            }
-        }
-#endif
+	log_fname(sptr, name);
     }
   else
     {
       detach_conf(sptr, aconf);
       sendto_one(sptr,form_str(ERR_PASSWDMISMATCH),me.name, parv[0]);
-      if (ConfigFileEntry.failed_oper_notice) {
-        if (ConfigFileEntry.show_failed_oper_passwd) {
-          sendto_realops("Failed OPER attempt [%s(%s)] - passwd mismatch: %s [%s@%s]",
-            name, password, sptr->name, sptr->username, sptr->host);
-        } else {
-          sendto_realops("Failed OPER attempt by %s (%s@%s)",
-                         parv[0], sptr->username, sptr->host);
-        } /* show_failed_oper_passwd */
-      }
+      if (ConfigFileEntry.failed_oper_notice)
+	{
+	  sendto_realops("Failed OPER attempt by %s (%s@%s)",
+			 parv[0], sptr->username, sptr->host);
+	}
     }
   return 0;
 }
@@ -302,192 +241,10 @@ int m_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 */
 int mo_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
-  struct ConfItem *aconf;
-  char  *name, *password, *encr;
-#ifdef CRYPT_OPER_PASSWORD
-  extern        char *crypt();
-#endif /* CRYPT_OPER_PASSWORD */
-  char *operprivs;
-  static char buf[BUFSIZE];
-
-  name = parc > 1 ? parv[1] : (char *)NULL;
-  password = parc > 2 ? parv[2] : (char *)NULL;
-
-  if (!IsServer(cptr) && (EmptyString(name) || EmptyString(password)))
-    {
-      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
-                 me.name, parv[0], "OPER");
-      return 0;
-    }
-        
-  /* if message arrived from server, trust it, and set to oper */
-  
-  if ((IsServer(cptr) || IsMe(cptr)) && !IsGlobalOper(sptr))
-    {
-      if (sptr->status == STAT_CLIENT)
-	sptr->handler = OPER_HANDLER;
-
-      sptr->flags |= FLAGS_OPER;
-      Count.oper++;
-      sendto_serv_butone(cptr, ":%s MODE %s :+o", parv[0], parv[0]);
-      if (IsMe(cptr))
-        sendto_one(sptr, form_str(RPL_YOUREOPER),
-                   me.name, parv[0]);
-      return 0;
-    }
-  else if (IsAnyOper(sptr))
-    {
-      if (MyConnect(sptr))
-        {
-          sendto_one(sptr, form_str(RPL_YOUREOPER),
-                     me.name, parv[0]);
-          SendMessageFile(sptr, &ConfigFileEntry.opermotd);
-        }
-      return 0;
-    }
-  if (!(aconf = find_conf_exact(name, sptr->username, sptr->host,
-                                CONF_OPS)) &&
-      !(aconf = find_conf_exact(name, sptr->username,
-                                inetntoa((char *)&cptr->ip), CONF_OPS)))
-    {
-      sendto_one(sptr, form_str(ERR_NOOPERHOST), me.name, parv[0]);
-      if (ConfigFileEntry.failed_oper_notice && ConfigFileEntry.show_failed_oper_id) {
-        if (ConfigFileEntry.show_failed_oper_passwd) {
-          sendto_realops("Failed OPER attempt [%s(%s)] - identity mismatch: %s [%s@%s]",
-            name, password, sptr->name, sptr->username, sptr->host);
-        } else {
-          sendto_realops("Failed OPER attempt - host mismatch by %s (%s@%s)",
-                          parv[0], sptr->username, sptr->host);
-        } /* show_failed_oper_passwd */
-      } /* failed_oper_notice && show_failed_oper_id */
-      return 0;
-    }
-#ifdef CRYPT_OPER_PASSWORD
-  /* use first two chars of the password they send in as salt */
-
-  /* passwd may be NULL pointer. Head it off at the pass... */
-  if (password && *aconf->passwd)
-    encr = crypt(password, aconf->passwd);
-  else
-    encr = "";
-#else
-  encr = password;
-#endif  /* CRYPT_OPER_PASSWORD */
-
-  if ((aconf->status & CONF_OPS) &&
-      0 == strcmp(encr, aconf->passwd) && !attach_conf(sptr, aconf))
-    {
-      int old = (sptr->umodes & ALL_UMODES);
-      
-      if (aconf->status == CONF_LOCOP)
-        {
-          SetLocOp(sptr);
-          if((int)aconf->hold)
-            {
-              sptr->umodes |= ((int)aconf->hold & ALL_UMODES); 
-              sendto_one(sptr, ":%s NOTICE %s :*** Oper flags set from conf",
-                         me.name,parv[0]);
-            }
-          else
-            {
-              sptr->umodes |= (LOCOP_UMODES);
-            }
-        }
-      else
-        {
-          SetOper(sptr);
-          if((int)aconf->hold)
-            {
-              sptr->umodes |= ((int)aconf->hold & ALL_UMODES); 
-              if( !IsSetOperN(sptr) )
-                sptr->umodes &= ~FLAGS_NCHANGE;
-              
-              sendto_one(sptr, ":%s NOTICE %s :*** Oper flags set from conf",
-                         me.name,parv[0]);
-            }
-          else
-            {
-              sptr->umodes |= (OPER_UMODES);
-            }
-        }
-      SetIPHidden(sptr);
-      Count.oper++;
-
-      SetElined(cptr);
-      
-      /* LINKLIST */  
-      /* add to oper link list -Dianora */
-      cptr->next_oper_client = oper_cptr_list;
-      oper_cptr_list = cptr;
-
-      if(cptr->confs)
-        {
-          struct ConfItem *aconf;
-          aconf = cptr->confs->value.aconf;
-          operprivs = oper_privs_as_string(cptr,aconf->port);
-        }
-      else
-        operprivs = "";
-
-#ifdef CUSTOM_ERR
-      sendto_ops("%s (%s@%s) has just acquired the personality of a petty megalomaniacal tyrant [IRC(%c)p]", parv[0],
-#else
-      sendto_ops("%s (%s@%s) is now operator (%c)", parv[0],
-#endif /* CUSTOM_ERR */
-                 sptr->username, sptr->host,
-                 IsGlobalOper(sptr) ? 'O' : 'o');
-      send_umode_out(cptr, sptr, old);
-      sendto_one(sptr, form_str(RPL_YOUREOPER), me.name, parv[0]);
-      sendto_one(sptr, ":%s NOTICE %s :*** Oper privs are %s",me.name,parv[0],
-                 operprivs);
-
-      SendMessageFile(sptr, &ConfigFileEntry.opermotd);
-
-#if !defined(CRYPT_OPER_PASSWORD) && (defined(FNAME_OPERLOG) || defined(SYSLOG_OPER))
-        encr = "";
-#endif
-        log(L_TRACE, "OPER %s by %s!%s@%s",
-            name, parv[0], sptr->username, sptr->host);
-#ifdef FNAME_OPERLOG
-        {
-          int     logfile;
-
-          /*
-           * This conditional makes the logfile active only after
-           * it's been created - thus logging can be turned off by
-           * removing the file.
-           *
-           */
-
-          if (IsPerson(sptr) &&
-              (logfile = file_open(FNAME_OPERLOG, O_WRONLY|O_APPEND, 0644)) != -1)
-            {
-              /* (void)alarm(0); */
-              ircsprintf(buf, "%s OPER (%s) by (%s!%s@%s)\n",
-                               myctime(CurrentTime), name, 
-                               parv[0], sptr->username,
-                               sptr->host);
-              write(logfile, buf, strlen(buf));
-              file_close(logfile);
-            }
-        }
-#endif
-    }
-  else
-    {
-      detach_conf(sptr, aconf);
-      sendto_one(sptr,form_str(ERR_PASSWDMISMATCH),me.name, parv[0]);
-      if (ConfigFileEntry.failed_oper_notice) {
-        if (ConfigFileEntry.show_failed_oper_passwd) {
-          sendto_realops("Failed OPER attempt [%s(%s)] - passwd mismatch: %s [%s@%s]",
-            name, password, sptr->name, sptr->username, sptr->host);
-        } else {
-          sendto_realops("Failed OPER attempt by %s (%s@%s)",
-                         parv[0], sptr->username, sptr->host);
-        } /* show_failed_oper_passwd */
-      }
-    }
-  return 0;
+  sendto_one(sptr, form_str(RPL_YOUREOPER),
+	     me.name, parv[0]);
+  SendMessageFile(sptr, &ConfigFileEntry.opermotd);
+  return 1;
 }
 
 /*
@@ -498,190 +255,82 @@ int mo_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 */
 int ms_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
-  struct ConfItem *aconf;
-  char  *name, *password, *encr;
-#ifdef CRYPT_OPER_PASSWORD
-  extern        char *crypt();
-#endif /* CRYPT_OPER_PASSWORD */
-  char *operprivs;
-  static char buf[BUFSIZE];
-
-  name = parc > 1 ? parv[1] : (char *)NULL;
-  password = parc > 2 ? parv[2] : (char *)NULL;
-
-  if (!IsServer(cptr) && (EmptyString(name) || EmptyString(password)))
-    {
-      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
-                 me.name, parv[0], "OPER");
-      return 0;
-    }
         
   /* if message arrived from server, trust it, and set to oper */
   
-  if ((IsServer(cptr) || IsMe(cptr)) && !IsGlobalOper(sptr))
+  if (IsMe(cptr) && !IsGlobalOper(sptr))
     {
       if (sptr->status == STAT_CLIENT)
 	sptr->handler = OPER_HANDLER;
-
+      
       sptr->flags |= FLAGS_OPER;
       Count.oper++;
       sendto_serv_butone(cptr, ":%s MODE %s :+o", parv[0], parv[0]);
       if (IsMe(cptr))
         sendto_one(sptr, form_str(RPL_YOUREOPER),
                    me.name, parv[0]);
-      return 0;
     }
-  else if (IsAnyOper(sptr))
+
+  return 0;
+}
+
+/*
+ * log_fname
+ *
+ * inputs	- pointer to client
+ * output	- none
+ * side effects - FNAME_OPERLOG is written to, if its present
+ */
+
+static void log_fname( struct Client *sptr, char *name )
+{
+#ifdef FNAME_OPERLOG
+  int     logfile;
+  static char buf[BUFSIZE];
+
+  /*
+   * This conditional makes the logfile active only after
+   * it's been created - thus logging can be turned off by
+   * removing the file.
+   *
+   */
+
+  if (IsPerson(sptr) &&
+      (logfile = file_open(FNAME_OPERLOG, O_WRONLY|O_APPEND, 0644)) != -1)
     {
-      if (MyConnect(sptr))
-        {
-          sendto_one(sptr, form_str(RPL_YOUREOPER),
-                     me.name, parv[0]);
-          SendMessageFile(sptr, &ConfigFileEntry.opermotd);
-        }
-      return 0;
+      ircsprintf(buf, "%s OPER (%s) by (%s!%s@%s)\n",
+		 myctime(CurrentTime), name, 
+		 sptr->name, sptr->username,
+		 sptr->host);
+      write(logfile, buf, strlen(buf));
+      file_close(logfile);
     }
+#endif
+}
+
+/*
+ * find_password_aconf
+ *
+ * inputs	-
+ * output	-
+ */
+
+static struct ConfItem *find_password_aconf(char *name, struct Client *sptr)
+{
+  struct ConfItem *aconf;
+
   if (!(aconf = find_conf_exact(name, sptr->username, sptr->host,
                                 CONF_OPS)) &&
       !(aconf = find_conf_exact(name, sptr->username,
-                                inetntoa((char *)&cptr->ip), CONF_OPS)))
+                                inetntoa((char *)&sptr->ip), CONF_OPS)))
     {
-      sendto_one(sptr, form_str(ERR_NOOPERHOST), me.name, parv[0]);
-      if (ConfigFileEntry.failed_oper_notice && ConfigFileEntry.show_failed_oper_id) {
-        if (ConfigFileEntry.show_failed_oper_passwd) {
-          sendto_realops("Failed OPER attempt [%s(%s)] - identity mismatch: %s [%s@%s]",
-            name, password, sptr->name, sptr->username, sptr->host);
-        } else {
-          sendto_realops("Failed OPER attempt - host mismatch by %s (%s@%s)",
-                          parv[0], sptr->username, sptr->host);
-        } /* show_failed_oper_passwd */
-      } /* failed_oper_notice && show_failed_oper_id */
+      sendto_one(sptr, form_str(ERR_NOOPERHOST), me.name, sptr->name);
+      if (ConfigFileEntry.failed_oper_notice && ConfigFileEntry.show_failed_oper_id)
+	{
+	  sendto_realops("Failed OPER attempt - host mismatch by %s (%s@%s)",
+			 sptr->name, sptr->username, sptr->host);
+	} /* failed_oper_notice && show_failed_oper_id */
       return 0;
     }
-#ifdef CRYPT_OPER_PASSWORD
-  /* use first two chars of the password they send in as salt */
-
-  /* passwd may be NULL pointer. Head it off at the pass... */
-  if (password && *aconf->passwd)
-    encr = crypt(password, aconf->passwd);
-  else
-    encr = "";
-#else
-  encr = password;
-#endif  /* CRYPT_OPER_PASSWORD */
-
-  if ((aconf->status & CONF_OPS) &&
-      0 == strcmp(encr, aconf->passwd) && !attach_conf(sptr, aconf))
-    {
-      int old = (sptr->umodes & ALL_UMODES);
-      
-      if (aconf->status == CONF_LOCOP)
-        {
-          SetLocOp(sptr);
-          if((int)aconf->hold)
-            {
-              sptr->umodes |= ((int)aconf->hold & ALL_UMODES); 
-              sendto_one(sptr, ":%s NOTICE %s :*** Oper flags set from conf",
-                         me.name,parv[0]);
-            }
-          else
-            {
-              sptr->umodes |= (LOCOP_UMODES);
-            }
-        }
-      else
-        {
-          SetOper(sptr);
-          if((int)aconf->hold)
-            {
-              sptr->umodes |= ((int)aconf->hold & ALL_UMODES); 
-              if( !IsSetOperN(sptr) )
-                sptr->umodes &= ~FLAGS_NCHANGE;
-              
-              sendto_one(sptr, ":%s NOTICE %s :*** Oper flags set from conf",
-                         me.name,parv[0]);
-            }
-          else
-            {
-              sptr->umodes |= (OPER_UMODES);
-            }
-        }
-      SetIPHidden(sptr);
-      Count.oper++;
-
-      SetElined(cptr);
-      
-      /* LINKLIST */  
-      /* add to oper link list -Dianora */
-      cptr->next_oper_client = oper_cptr_list;
-      oper_cptr_list = cptr;
-
-      if(cptr->confs)
-        {
-          struct ConfItem *aconf;
-          aconf = cptr->confs->value.aconf;
-          operprivs = oper_privs_as_string(cptr,aconf->port);
-        }
-      else
-        operprivs = "";
-
-#ifdef CUSTOM_ERR
-      sendto_ops("%s (%s@%s) has just acquired the personality of a petty megalomaniacal tyrant [IRC(%c)p]", parv[0],
-#else
-      sendto_ops("%s (%s@%s) is now operator (%c)", parv[0],
-#endif /* CUSTOM_ERR */
-                 sptr->username, sptr->host,
-                 IsGlobalOper(sptr) ? 'O' : 'o');
-      send_umode_out(cptr, sptr, old);
-      sendto_one(sptr, form_str(RPL_YOUREOPER), me.name, parv[0]);
-      sendto_one(sptr, ":%s NOTICE %s :*** Oper privs are %s",me.name,parv[0],
-                 operprivs);
-
-      SendMessageFile(sptr, &ConfigFileEntry.opermotd);
-
-#if !defined(CRYPT_OPER_PASSWORD) && (defined(FNAME_OPERLOG) || defined(SYSLOG_OPER))
-        encr = "";
-#endif
-        log(L_TRACE, "OPER %s by %s!%s@%s",
-            name, parv[0], sptr->username, sptr->host);
-#ifdef FNAME_OPERLOG
-        {
-          int     logfile;
-
-          /*
-           * This conditional makes the logfile active only after
-           * it's been created - thus logging can be turned off by
-           * removing the file.
-           *
-           */
-
-          if (IsPerson(sptr) &&
-              (logfile = file_open(FNAME_OPERLOG, O_WRONLY|O_APPEND, 0644)) != -1)
-            {
-              /* (void)alarm(0); */
-              ircsprintf(buf, "%s OPER (%s) by (%s!%s@%s)\n",
-                               myctime(CurrentTime), name, 
-                               parv[0], sptr->username,
-                               sptr->host);
-              write(logfile, buf, strlen(buf));
-              file_close(logfile);
-            }
-        }
-#endif
-    }
-  else
-    {
-      detach_conf(sptr, aconf);
-      sendto_one(sptr,form_str(ERR_PASSWDMISMATCH),me.name, parv[0]);
-      if (ConfigFileEntry.failed_oper_notice) {
-        if (ConfigFileEntry.show_failed_oper_passwd) {
-          sendto_realops("Failed OPER attempt [%s(%s)] - passwd mismatch: %s [%s@%s]",
-            name, password, sptr->name, sptr->username, sptr->host);
-        } else {
-          sendto_realops("Failed OPER attempt by %s (%s@%s)",
-                         parv[0], sptr->username, sptr->host);
-        } /* show_failed_oper_passwd */
-      }
-    }
-  return 0;
+  return(aconf);
 }
