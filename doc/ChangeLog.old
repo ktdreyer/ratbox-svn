@@ -1,3 +1,14 @@
+*** 20010924_1 by a1kmm
+- Some memset calls added.
+- A few more configure options added:
+   --enable-profile - makes a profile build.
+   --enable-efence - makes an ElectricFence build.
+   --enable-memdebug - make a memory debugging build.
+   --disable-block-alloc - makes a build without the balloc so buffer
+                           overruns always show up under efence.
+
+
+
 *** 20010923_7 by a1kmm
 - Fixed a _MyRealloc debug version bug.
 - Kludged the strncpy_irc for now so it doesn't core(someone please fix!)
