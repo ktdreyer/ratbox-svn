@@ -38,7 +38,8 @@
 typedef int socklen_t;
 #endif
 
-#define READBUF_SIZE    16384   /* used in s_bsd *AND* s_zip.c ! */
+/* Size of a read buffer */
+#define READBUF_SIZE    16384   /* used by src/packet.c and src/s_serv.c */
 
 /* Type of IO */
 #define	COMM_SELECT_READ		1
