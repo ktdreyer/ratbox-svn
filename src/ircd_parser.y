@@ -952,8 +952,6 @@ auth_entry:   AUTH
 
     yy_achead = yy_aprev = yy_aconf = make_conf();
     yy_aconf->status = CONF_CLIENT;
-    yy_achead->className = NULL;
-    yy_acount = 0;
   }
  '{' auth_items '}' ';' 
   {

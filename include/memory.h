@@ -3,9 +3,8 @@
 #ifndef _I_MEMORY_H
 #define _I_MEMORY_H
 
-#undef MEMDEBUG
-
 #include "ircd_defs.h"
+#include "setup.h"
 #include "balloc.h"
 #include <stdlib.h>
 #include <string.h>
@@ -38,12 +37,14 @@ extern void *	  _BlockHeapAlloc(BlockHeap *bh);
 #define MyRealloc(x,y) _MyRealloc(x, y, __FILE__, __LINE__)
 #define MyFree(x) _MyFree(x, __FILE__, __LINE__)
 #define DupString(x,y) _DupString(&x, y, __FILE__, __LINE__)
+#ifndef NOBALLOC
 #define BlockHeapAlloc(x) memlog(_BlockHeapAlloc(x), \
                                  x->elemSize-sizeof(MemoryEntry), \
                                  __FILE__, __LINE__)
 #define BlockHeapFree(x, y) memulog(y); \
                             _BlockHeapFree(x, \
                             ((char*)y)-sizeof(MemoryEntry))
+#endif
 void log_memory(void);
 
 
@@ -72,9 +73,16 @@ extern void *	  _BlockHeapAlloc(BlockHeap *bh);
 #define MyRealloc(x,y) _MyRealloc(x, y)
 #define MyFree(x) _MyFree(x)
 #define DupString(x,y) _DupString(&x, y)
+#ifndef NOBALLOC
 #define BlockHeapAlloc(x) _BlockHeapAlloc(x)
 #define BlockHeapFree(x, y) _BlockHeapFree(x, y)
+#endif
 #endif /* !MEMDEBUG */
+
+#ifdef NOBALLOC
+#define BlockHeapAlloc(x) MyMalloc((int)x)
+#define BlockHeapFree(x,y) MyFree(y)
+#endif
 
 #endif /* _I_MEMORY_H */
 

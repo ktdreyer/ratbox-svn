@@ -11,6 +11,7 @@
  * $Id$
  */
 #ifndef INCLUDED_blalloc_h
+#ifndef NOBALLOC
 #define INCLUDED_blalloc_h
 #ifndef INCLUDED_sys_types_h
 #include <sys/types.h>       /* size_t */
@@ -75,11 +76,13 @@ extern void *	  BlockHeapAlloc(BlockHeap *bh);
 #endif
 
 extern int        BlockHeapGarbageCollect(BlockHeap *);
-
-extern void       BlockHeapCountMemory(BlockHeap *bh,int *, int *);
-extern void       BlockHeapDump(BlockHeap *bh,int fd);
 extern void	  initBlockHeap(void);
-
-
+#else /* NOBALLOC */
+typedef struct BlockHeap BlockHeap;
+#define initBlockHeap()
+#define BlockHeapGarbageCollect(x)
+/* This is really kludgy, passing ints as pointers is always bad. */
+#define BlockHeapCreate(es, epb) ((BlockHeap*)(es))
+#define BlockHeapDestroy(x)
+#endif /* NOBALLOC */
 #endif /* INCLUDED_blalloc_h */
-

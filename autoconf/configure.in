@@ -292,6 +292,68 @@ case "$cf_enable_zlib" in
 		;;
 	esac
 
+AC_MSG_CHECKING(if you want to do a profile build)
+AC_ARG_ENABLE(profile,
+[  --enable-profile             Enable profiling.
+  --disable-profile            Disable profiling(default). ],
+[
+ if test "$enableval" != "no"; then
+ 	ac_cv_profile="yes"
+	IRC_CFLAGS="$IRC_CFLAGS -pg -static"
+ fi
+])
+if test "$ac_cv_profile" != "yes"; then
+	ac_cv_profile="no"
+fi
+AC_MSG_RESULT($ac_cv_profile)
+
+dnl Check if we want to enable the block allocator
+AC_MSG_CHECKING(if you want the block allocator)
+ac_cv_balloc="yes"
+AC_ARG_ENABLE(block-alloc,
+[  --enable-block-alloc         Enable the block allocator(default)
+  --disable-block-alloc        Disable the block allocator(Only useful if
+                               you are using ElectricFence).],
+[
+ if test "$enableval" = "no"; then
+	ac_cv_balloc="no"
+ fi
+])
+AC_MSG_RESULT($ac_cv_balloc)
+if test "$ac_cv_balloc" = "no"; then
+	AC_DEFINE(NOBALLOC)
+fi
+
+dnl Check if we want to use efence
+AC_MSG_CHECKING(if you want ElectricFence)
+AC_ARG_ENABLE(efence,
+[  --enable-efence              Enable ElectricFence(memory debugger).
+  --disable-efence             Disable ElectricFence(default).],
+[
+ if test "$enableval" != "no"; then
+	ac_cv_efence="yes"
+ fi
+])
+if test "$ac_cv_efence" != "yes"; then
+	ac_cv_efence="no"
+fi
+AC_MSG_RESULT($ac_cv_efence)
+if test "$ac_cv_efence" = "yes"; then
+	AC_CHECK_LIB(efence,malloc)
+fi
+
+AC_MSG_CHECKING(if you want memory debugging)
+ac_cv_memdebug="no"
+AC_ARG_ENABLE(memdebug,
+[  --enable-memdebug            Enable memory debugging.
+  --disable-memdebug           Diable memory debugging(default).],
+[
+ if test $enableval = "yes"; then
+	 AC_DEFINE(MEMDEBUG)
+	 ac_cv_memdebug="yes"
+ fi
+])
+AC_MSG_RESULT($ac_cv_memdebug)
 
 dnl check for netio plugin stuff
 dnl Enable poll()
@@ -463,12 +525,20 @@ AC_ARG_ENABLE(shared-modules,
   fi
 ])
 
+if test "$ac_cv_profile" = "yes" &&
+   test "$ac_cv_shared_modules" != "no"; then
+	echo "Shared modules and profiling don't work together."
+	echo "Disabling shared modules."
+	ac_cv_shared_modules="no"
+fi
+
 if test "$ac_cv_shared_modules" = "no"; then
 	echo "Not using shared modules.."
 	MODULES_DEFINE=""
 	MOD_TARGET="libmodules.a"
 	MODULES_LIBS="../modules/libmodules.a"
-	SEDOBJ=""
+dnl This is a kludge, but it should work...
+	SEDOBJ="-e s/.so:/.o:/"
 	AC_DEFINE(STATIC_MODULES)
 else
 	echo "Checking for shared module support"
@@ -616,6 +686,9 @@ AC_OUTPUT(                      \
  gnats/Makefile                 \
  gnats/send-pr                  \
 )
+
+echo "Building dependancies..."
+${MAKE-make} depend
 
 if test "X${cf_openssl_ciphers}" != "X"; then
   echo ""

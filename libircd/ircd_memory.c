@@ -63,7 +63,10 @@ memlog(void *d, int s, char *f, int l)
   mme->line = l;
  else
   *mme->file = 0;
- strncpy(mme->file, f, sizeof(mme->file)-1)[sizeof(mme->file)-1] = 0;
+ if (f != NULL)
+  strncpy(mme->file, f, sizeof(mme->file)-1)[sizeof(mme->file)-1] = 0;
+ else
+  *mme->file = 0;
  mme->ts = CurrentTime;
  mme->size = s;
  return d;
@@ -91,8 +94,9 @@ _MyMalloc(size_t size, char *file, int line)
  void *what = malloc(size + sizeof(MemoryEntry));
  if (what == NULL)
   outofmemory();
- /* XXX we should consider getting rid of this... */
- memset(what, 0, size + sizeof(MemoryEntry));
+#ifdef MEMDEBUG
+ mem_frob(what, size + sizeof(MemoryEntry));
+#endif
  return memlog(what, size, file, line);
 }
 
@@ -236,4 +240,3 @@ void outofmemory()
 #endif
   restart("Out of Memory");
 }
-

@@ -48,3 +48,9 @@
 
 /* static modules */
 #undef STATIC_MODULES
+
+/* memory debugging */
+#undef MEMDEBUG
+
+/* No block allocator */
+#undef NOBALLOC

@@ -11,6 +11,7 @@
  * $Id$
  */
 
+#ifndef NOBALLOC
 #include <stdio.h>
 #include <unistd.h>
 #include <assert.h>
@@ -82,6 +83,8 @@ static int newblock(BlockHeap * bh)
   if (b == NULL)
     return 1;
   b->freeElems = bh->elemsPerBlock;
+  b->free_list.head = b->free_list.tail = NULL;
+  b->used_list.head = b->used_list.tail = NULL;
   b->next = bh->base;
 
   b->alloc_size = (bh->elemsPerBlock + 1) * (bh->elemSize + sizeof(MemBlock));
@@ -91,8 +94,8 @@ static int newblock(BlockHeap * bh)
     {
       return 1;
     }
-#if 0
-  memset(b->elems, 0, b->alloc_size);
+#ifdef MEMDEBUG
+  mem_frob(b->elems, b->alloc_size);
 #endif
   offset = b->elems;
   /* Setup our blocks now */
@@ -209,7 +212,9 @@ void *_BlockHeapAlloc(BlockHeap * bh)
       dlinkDelete(new_node, &walker->free_list);
       dlinkAddTail(new_node->data, new_node, &walker->used_list);
       assert(new_node->data != NULL);
-      memset(new_node->data, 0, bh->elemSize);
+#ifdef MEMDEBUG
+      mem_frob(new_node->data, bh->elemSize);
+#endif
       return (new_node->data);
     }
 
@@ -223,7 +228,9 @@ void *_BlockHeapAlloc(BlockHeap * bh)
 	  dlinkDelete(new_node, &walker->free_list);
 	  dlinkAddTail(new_node->data, new_node, &walker->used_list);
 	  assert(new_node->data != NULL);
+#ifdef MEMDEBUG
 	  memset(new_node->data, 0, bh->elemSize);
+#endif
 	  return(new_node->data);
 	} 
     }
@@ -355,4 +362,4 @@ int BlockHeapDestroy(BlockHeap * bh)
   MyFree(bh);
   return 0;
 }
-
+#endif

@@ -45,6 +45,8 @@ struct Class *make_class()
   struct Class        *tmp;
 
   tmp = (struct Class *)MyMalloc(sizeof(struct Class));
+  tmp->className = NULL;
+  tmp->servname = NULL;
   return tmp;
 }
 

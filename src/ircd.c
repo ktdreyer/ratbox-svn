@@ -575,6 +575,7 @@ int main(int argc, char *argv[])
   setup_signals();
   /* We need this to initialise the fd array before anything else */
   fdlist_init();
+  init_netio();         /* This needs to be setup early ! -- adrian */
   /* Check if there is pidfile and daemon already running */
   check_pidfile(pidFileName);
   /* Init the event subsystem */
@@ -587,7 +588,6 @@ int main(int argc, char *argv[])
   init_log(logFileName);
   initBlockHeap();
   init_dlink_nodes();
-  init_netio();         /* This needs to be setup early ! -- adrian */
   init_resolver();      /* Needs to be setup before the io loop */
   initialize_message_files();
   linebuf_init();       /* set up some linebuf stuff to control paging */

@@ -106,16 +106,21 @@ void check_spambot_warning(struct Client *source_p, const char *name);
  *
  * Initializes the channel blockheap
  */
-static BlockHeap *channel_heap;
+static BlockHeap *channel_heap, *ban_heap;
 static void channelheap_garbage_collect(void *unused)
 {
-	BlockHeapGarbageCollect(channel_heap);
-	
+  BlockHeapGarbageCollect(channel_heap);
+  BlockHeapGarbageCollect(ban_heap);
 }
+
 void init_channels(void)
 {
-	channel_heap = BlockHeapCreate(sizeof(struct Channel), 2048);
-	eventAddIsh("channelheap_garbage_collect", channelheap_garbage_collect, NULL, 45);
+  channel_heap = BlockHeapCreate(sizeof(struct Channel), 2048);
+  /* Dianora and I agree that 4 banids to a channel is a good 
+   * rough guess. Actual stats anyone? -A1kmm. */
+  ban_heap = BlockHeapCreate(sizeof(struct Ban), 16384);
+  eventAddIsh("channelheap_garbage_collect", channelheap_garbage_collect,
+              NULL, 45);
 }
 
 /*
@@ -230,7 +235,7 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, int type)
 
   ban = make_dlink_node();
 
-  actualBan = (struct Ban *)MyMalloc(sizeof(struct Ban));
+  actualBan = (struct Ban *)BlockHeapAlloc(ban_heap);
   DupString(actualBan->banstr, banid);
 
   if (IsPerson(client_p))
@@ -299,7 +304,7 @@ del_id(struct Channel *chptr, char *banid, int type)
     {
       MyFree(banptr->banstr);
       MyFree(banptr->who);
-      MyFree(banptr);
+      BlockHeapFree(ban_heap, banptr);
 
       /* num_mask should never be < 0 */
       if (chptr->num_mask > 0)
@@ -4317,10 +4322,11 @@ get_channel(struct Client *client_p, char *chname, int flag)
 
   if (flag == CREATE)
   {
-#if 0    
+#if 0
     chptr = (struct Channel *)MyMalloc(sizeof(struct Channel) + len + 1);
 #endif
     chptr = BlockHeapAlloc(channel_heap);
+    memset(chptr, 0, sizeof(*chptr)-CHANNELLEN);
     /*
      * NOTE: strcpy ok here, we have allocated strlen + 1
      */

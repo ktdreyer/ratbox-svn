@@ -109,6 +109,7 @@ struct Server *make_server(struct Client *client_p)
   if (!serv)
     {
       serv = (struct Server *)MyMalloc(sizeof(struct Server));
+      memset(serv, 0, sizeof(*serv));
 
       /* The commented out lines here are
        * for documentation purposes only
