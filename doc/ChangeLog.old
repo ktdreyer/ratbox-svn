@@ -1,3 +1,8 @@
+*** 20000102_9 by db
+- key handling was broken in m_cburst
+
+
+
 *** 20000102_8 by db
 - oops got an if backwards key when NULL cores it
 
