@@ -31,8 +31,7 @@
 #include "s_debug.h"
 #include "msg.h"
 #include "memory.h"
-#include "debug.h"
-
+#include "s_log.h"
 
 struct Message error_msgtab = {
  "ERROR", 0, 0, 1, 0, MFLG_SLOW | MFLG_UNREG, 0,
@@ -55,7 +54,7 @@ void m_error(struct Client *client_p, struct Client *source_p,
 
   para = (parc > 1 && *parv[1] != '\0') ? parv[1] : "<>";
   
-  deprintf("error", "Received ERROR message from %s: %s",
+  ilog(L_ERROR, "Received ERROR message from %s: %s",
 	   source_p->name, para);
 
   if (client_p == source_p)
@@ -86,7 +85,7 @@ void ms_error(struct Client *client_p, struct Client *source_p,
 
   para = (parc > 1 && *parv[1] != '\0') ? parv[1] : "<>";
   
-  deprintf("error", "Received ERROR message from %s: %s",
+  ilog(L_ERROR, "Received ERROR message from %s: %s",
 	   source_p->name, para);
 
   if (client_p == source_p)

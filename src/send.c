@@ -435,7 +435,6 @@ sendto_one(struct Client *to, const char *pattern, ...)
 
   linebuf_donebuf(&linebuf);
 
-  deprintf("send", "Sending to %s", to->name);
 } /* sendto_one() */
 
 /*

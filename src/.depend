@@ -69,7 +69,7 @@ client.o: client.c ../include/tools.h ../include/client.h \
   ../include/s_misc.h ../include/s_serv.h ../include/send.h \
   ../include/whowas.h ../include/s_debug.h ../include/s_user.h \
   ../include/hostmask.h
-debug.o: debug.c ../include/debug.h ../include/s_log.h
+debug.o: debug.c  ../include/s_log.h
 event.o: event.c ../include/ircd.h ../include/config.h ../include/setup.h \
   ../include/defaults.h ../include/tools.h ../include/memory.h \
   ../include/ircd_defs.h ../include/balloc.h ../include/event.h \
@@ -91,7 +91,7 @@ fileio.o: fileio.c ../include/fileio.h ../include/irc_string.h \
   ../include/res.h ../adns/adns.h ../include/ircd.h ../include/memory.h \
   ../include/balloc.h ../include/sprintf_irc.h ../include/send.h \
   ../include/fdlist.h
-getopt.o: getopt.c ../include/ircd_getopt.h ../include/debug.h \
+getopt.o: getopt.c ../include/ircd_getopt.h  \
   ../include/config.h ../include/setup.h ../include/defaults.h
 hash.o: hash.c ../include/tools.h ../include/s_conf.h ../include/setup.h \
   ../include/config.h ../include/defaults.h ../include/fileio.h \
@@ -136,7 +136,7 @@ ircd.o: ircd.c ../include/setup.h ../include/config.h \
   ../include/s_log.h ../include/s_misc.h ../include/s_serv.h \
   ../include/s_stats.h ../include/scache.h ../include/send.h \
   ../include/whowas.h ../include/modules.h ../include/hook.h \
-  ../include/debug.h ../include/ircd_getopt.h
+   ../include/ircd_getopt.h
 ircd_signal.o: ircd_signal.c ../include/ircd_signal.h ../include/ircd.h \
   ../include/config.h ../include/setup.h ../include/defaults.h \
   ../include/tools.h ../include/memory.h ../include/ircd_defs.h \
@@ -185,7 +185,7 @@ m_error.o: m_error.c ../include/handlers.h ../include/client.h \
   ../include/memory.h ../include/balloc.h ../include/irc_string.h \
   ../include/sprintf_irc.h ../include/common.h ../include/numeric.h \
   ../include/send.h ../include/s_debug.h ../include/msg.h \
-  ../include/debug.h
+  
 match.o: match.c ../include/irc_string.h ../include/ircd_defs.h \
   ../include/config.h ../include/setup.h ../include/defaults.h \
   ../include/client.h ../include/ircd_handler.h ../include/linebuf.h \
@@ -467,7 +467,7 @@ send.o: send.c ../include/tools.h ../include/send.h ../include/config.h \
   ../include/numeric.h ../include/fdlist.h ../include/s_bsd.h \
   ../include/s_serv.h ../include/s_conf.h ../include/motd.h \
   ../include/list.h ../include/s_debug.h ../include/s_log.h \
-  ../include/vchannel.h ../include/debug.h ../include/hook.h
+  ../include/vchannel.h  ../include/hook.h
 sprintf_irc.o: sprintf_irc.c ../include/sprintf_irc.h \
   ../include/irc_string.h ../include/ircd_defs.h ../include/config.h \
   ../include/setup.h ../include/defaults.h
