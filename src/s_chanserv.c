@@ -46,6 +46,7 @@ static int o_chan_chanregister(struct client *, struct lconn *, const char **, i
 static int o_chan_chandrop(struct client *, struct lconn *, const char **, int);
 static int o_chan_chansuspend(struct client *, struct lconn *, const char **, int);
 static int o_chan_chanunsuspend(struct client *, struct lconn *, const char **, int);
+static int o_chan_chaninfo(struct client *, struct lconn *, const char **, int);
 
 static int s_chan_register(struct client *, struct lconn *, const char **, int);
 static int s_chan_set(struct client *, struct lconn *, const char **, int);
@@ -77,6 +78,7 @@ static struct service_command chanserv_command[] =
 	{ "CHANDROP",		&o_chan_chandrop,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CHANSERV, 0 },
 	{ "CHANSUSPEND",	&o_chan_chansuspend,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CHANSERV, 0 },
 	{ "CHANUNSUSPEND",	&o_chan_chanunsuspend,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CHANSERV, 0 },
+	{ "CHANINFO",		&o_chan_chaninfo,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CHANSERV, 0 },
 	{ "REGISTER",	&s_chan_register,	1, NULL, 1, 0L, 1, 0, 0, UMODE_REGISTER	},
 	{ "SET",	&s_chan_set,		2, NULL, 1, 0L, 1, 0, 0, 0 },
 	{ "ADDUSER",	&s_chan_adduser,	3, NULL, 1, 0L, 1, 0, 0, 0 },
@@ -108,6 +110,7 @@ static struct ucommand_handler chanserv_ucommand[] =
 	{ "chandrop",		o_chan_chandrop,	CONF_OPER_CHANSERV,	1, 1, NULL },
 	{ "chansuspend",	o_chan_chansuspend,	CONF_OPER_CHANSERV,	1, 1, NULL },
 	{ "chanunsuspend",	o_chan_chanunsuspend,	CONF_OPER_CHANSERV,	1, 1, NULL },
+	{ "chaninfo",		o_chan_chaninfo,	CONF_OPER_CHANSERV,	1, 1, NULL },
 	{ "\0",			NULL,			0,			0, 0, NULL }
 };
 
@@ -127,6 +130,9 @@ static int h_chanserv_user_login(void *client, void *unused);
 static void e_chanserv_expirechan(void *unused);
 static void e_chanserv_expireban(void *unused);
 static void e_chanserv_enforcetopic(void *unused);
+
+static void dump_info_extended(struct client *, struct lconn *, struct chan_reg *);
+static void dump_info_accesslist(struct client *, struct lconn *, struct chan_reg *);
 
 void
 init_s_chanserv(void)
@@ -1196,6 +1202,42 @@ o_chan_chanunsuspend(struct client *client_p, struct lconn *conn_p, const char *
 }
 
 static int
+o_chan_chaninfo(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+{
+	struct chan_reg *chreg_p;
+	const char *owner;
+
+	if((chreg_p = find_channel_reg(NULL, parv[0])) == NULL)
+	{
+		service_send(chanserv_p, client_p, conn_p,
+				"Channel %s is not registered", parv[0]);
+		return 0;
+	}
+
+	owner = find_owner(chreg_p);
+
+	service_send(chanserv_p, client_p, conn_p,
+			"[%s] Registered to %s for %s",
+			chreg_p->name, owner ?  owner : "?unknown?",
+			get_duration((time_t) (CURRENT_TIME - chreg_p->reg_time)));
+
+	if(chreg_p->flags & CS_FLAGS_SUSPENDED)
+		service_send(chanserv_p, client_p, conn_p,
+				"[%s] Suspended by %s",
+				chreg_p->name, chreg_p->suspender);
+	else
+		dump_info_extended(client_p, conn_p, chreg_p);
+
+	if(parc > 1 && !EmptyString(parv[1]))
+	{
+		if(!strcasecmp(parv[1], "-listusers"))
+			dump_info_accesslist(client_p, conn_p, chreg_p);
+	}
+
+	return 0;
+}
+
+static int
 s_chan_register(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct channel *chptr;
@@ -1797,6 +1839,48 @@ s_chan_clearbans(struct client *client_p, struct lconn *conn_p, const char *parv
 	return 3;
 }
 
+/* s_chan_set_flag()
+ *
+ * inputs	- client setting flag, channel reg, flag name,
+ * 		  argument (ON/OFF etc), flag bitmask
+ * outputs	- 1 if we add flag, -1 if we remove flag, 0 if unchanged
+ * side effects - 
+ */
+static int
+s_chan_set_flag(struct client *client_p, struct chan_reg *chreg_p,
+		const char *name, const char *arg, int flag)
+{
+	if(!strcasecmp(arg, "ON"))
+	{
+		service_error(chanserv_p, client_p,
+			"Channel %s %s set ON", chreg_p->name, name);
+
+		if(chreg_p->flags & flag)
+			return 0;
+
+		chreg_p->flags |= flag;
+		update_chreg_flags(chreg_p);
+		return 1;
+	}
+	else if(!strcasecmp(arg, "OFF"))
+	{
+		service_error(chanserv_p, client_p,
+			"Channel %s %s set OFF", chreg_p->name, name);
+
+		if((chreg_p->flags & flag) == 0)
+			return 0;
+
+		chreg_p->flags &= ~flag;
+		update_chreg_flags(chreg_p);
+		return -1;
+	}
+	
+	service_error(chanserv_p, client_p,
+			"Channel %s %s is %s",
+			chreg_p->name, (chreg_p->flags & flag) ? "ON" : "OFF");
+	return 0;
+}
+
 static int
 s_chan_set(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
@@ -1805,6 +1889,7 @@ s_chan_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 	struct channel *chptr;
 	static const char dummy[] = "\0";
 	const char *arg;
+	int retval;
 
 	if((mreg_p = verify_member_reg_name(client_p, NULL, parv[0], S_C_MANAGER)) == NULL)
 		return 1;
@@ -1816,132 +1901,48 @@ s_chan_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 
 	if(!strcasecmp(parv[1], "NOOPS"))
 	{
-		if(!strcasecmp(arg, "ON"))
-		{
-			chreg_p->flags |= CS_FLAGS_NOOPS;
+		retval = s_chan_set_flag(client_p, chreg_p, parv[1], arg, CS_FLAGS_NOOPS);
 
+		if(retval == 1)
+		{
 			if(!(chptr = find_channel(chreg_p->name)))
 				return 1;
 
 			/* hack! noone can match level S_C_OWNER+1 :) */
 			s_chan_clearops_loc(chptr, chreg_p, S_C_OWNER+1);
 		}
-		else if(!strcasecmp(arg, "OFF"))
-		{
-			chreg_p->flags &= ~CS_FLAGS_NOOPS;
-		}
-		else
-		{
-			service_error(chanserv_p, client_p,
-				"Channel %s NOOPS is %s",
-				chreg_p->name,
-				(chreg_p->flags & CS_FLAGS_NOOPS) ?
-				 "ON" : "OFF");
-			return 1;
-		}
 
-		service_error(chanserv_p, client_p,
-				"Channel %s NOOPS set %s",
-				chreg_p->name,
-				(chreg_p->flags & CS_FLAGS_NOOPS) ?
-				 "ON" : "OFF");
-
-		loc_sqlite_exec(NULL, "UPDATE channels SET flags = %d "
-				"WHERE chname = %Q",
-				chreg_p->flags, chreg_p->name);
 		return 1;
 	}
 	else if(!strcasecmp(parv[1], "RESTRICTOPS"))
 	{
-		if(!strcasecmp(arg, "ON"))
-		{
-			chreg_p->flags |= CS_FLAGS_RESTRICTOPS;
+		retval = s_chan_set_flag(client_p, chreg_p, parv[1], arg, CS_FLAGS_RESTRICTOPS);
 
+		if(retval == 1)
+		{
 			if(!(chptr = find_channel(chreg_p->name)))
 				return 1;
 
 			/* hack! */
 			s_chan_clearops_loc(chptr, chreg_p, S_C_OP);
 		}
-		else if(!strcasecmp(arg, "OFF"))
-		{
-			chreg_p->flags &= ~CS_FLAGS_RESTRICTOPS;
-		}
-		else
-		{
-			service_error(chanserv_p, client_p,
-				"Channel %s RESTRICTOPS is %s",
-				chreg_p->name,
-				(chreg_p->flags & CS_FLAGS_RESTRICTOPS) ?
-				 "ON" : "OFF");
-			return 1;
-		}
 
-		service_error(chanserv_p, client_p,
-				"Channel %s RESTRICTOPS set %s",
-				chreg_p->name,
-				(chreg_p->flags & CS_FLAGS_RESTRICTOPS) ?
-				 "ON" : "OFF");
-
-		loc_sqlite_exec(NULL, "UPDATE channels SET flags = %d "
-				"WHERE chname = %Q",
-				chreg_p->flags, chreg_p->name);
 		return 1;
 	}
 	else if(!strcasecmp(parv[1], "AUTOJOIN"))
 	{
-		if(!strcasecmp(arg, "ON"))
-		{
+		retval = s_chan_set_flag(client_p, chreg_p, parv[1], arg, CS_FLAGS_AUTOJOIN);
+
+		if(retval == 1)
 			enable_autojoin(chreg_p);
-		}
-		else if(!strcasecmp(arg, "OFF"))
-		{
-			chreg_p->flags &= ~CS_FLAGS_AUTOJOIN;
-
+		else if(retval == -1)
 			part_service(chanserv_p, chreg_p->name);
-		}
-		else
-		{
-			service_error(chanserv_p, client_p,
-				"Channel %s AUTOJOIN is %s",
-				chreg_p->name,
-				(chreg_p->flags & CS_FLAGS_AUTOJOIN) ?
-				 "ON" : "OFF");
-			return 1;
-		}
 
-		service_error(chanserv_p, client_p,
-				"Channel %s AUTOJOIN set %s",
-				chreg_p->name,
-				(chreg_p->flags & CS_FLAGS_AUTOJOIN) ?
-				 "ON" : "OFF");
-
-		update_chreg_flags(chreg_p);
 		return 1;
 	}
 	else if(!strcasecmp(parv[1], "WARNOVERRIDE"))
 	{
-		if(!strcasecmp(arg, "ON"))
-			chreg_p->flags |= CS_FLAGS_WARNOVERRIDE;
-		else if(!strcasecmp(arg, "OFF"))
-			chreg_p->flags &= ~CS_FLAGS_WARNOVERRIDE;
-		else
-		{
-			service_error(chanserv_p, client_p,
-				"Channel %s WARNOVERRIDE is %s",
-				chreg_p->name,
-				(chreg_p->flags & CS_FLAGS_WARNOVERRIDE) ?
-				  "ON" : "OFF");
-			return 1;
-		}
-
-		service_error(chanserv_p, client_p,
-				"Channel %s WARNOVERRIDE set %s",
-				chreg_p->name,
-				(chreg_p->flags & CS_FLAGS_WARNOVERRIDE) ?
-				  "ON" : "OFF");
-
-		update_chreg_flags(chreg_p);
+		s_chan_set_flag(client_p, chreg_p, parv[1], arg, CS_FLAGS_WARNOVERRIDE);
 		return 1;
 	}
 	else if(!strcasecmp(parv[1], "CREATEMODES"))
@@ -2092,8 +2093,8 @@ s_chan_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 
 		if(!irccmp(arg, "-none"))
 		{
-			my_free(chreg_p->topic);
-			chreg_p->topic = NULL;
+			my_free(chreg_p->url);
+			chreg_p->url = NULL;
 
 			loc_sqlite_exec(NULL, "UPDATE channels SET "
 					"url = NULL WHERE chname = %Q",
@@ -2692,6 +2693,55 @@ s_chan_unban(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 	return 3;
 }
 
+static void
+dump_info_extended(struct client *client_p, struct lconn *conn_p,
+			struct chan_reg *chreg_p)
+{
+	if(!EmptyString(chreg_p->url))
+		service_send(chanserv_p, client_p, conn_p,
+			"[%s] URL: %s",
+			chreg_p->name, chreg_p->url);
+
+	if(chreg_p->flags & CS_FLAGS_SHOW)
+		service_send(chanserv_p, client_p, conn_p,
+			"[%s] Settings: %s%s%s%s",
+			chreg_p->name,
+			(chreg_p->flags & CS_FLAGS_AUTOJOIN) ? "AUTOJOIN " : "",
+			(chreg_p->flags & CS_FLAGS_NOOPS) ? "NOOPS " : "",
+			(chreg_p->flags & CS_FLAGS_RESTRICTOPS) ? "RESTRICTOPS " : "",
+			(chreg_p->flags & CS_FLAGS_WARNOVERRIDE) ? "WARNOVERRIDE" : "");
+
+	if(!EmptyString(chreg_p->topic))
+		service_send(chanserv_p, client_p, conn_p,
+			"[%s] Topic: %s", chreg_p->name, chreg_p->topic);
+
+	if(chreg_p->emode.mode)
+		service_send(chanserv_p, client_p, conn_p,
+			"[%s] Enforced modes: %s",
+			chreg_p->name, chmode_to_string(&chreg_p->emode));
+}
+
+static void
+dump_info_accesslist(struct client *client_p, struct lconn *conn_p,
+			struct chan_reg *chreg_p)
+{
+	struct member_reg *mreg_p;
+	dlink_node *ptr;
+
+	service_send(chanserv_p, client_p, conn_p,
+			"[%s] Access list:", chreg_p->name);
+
+	DLINK_FOREACH(ptr, chreg_p->users.head)
+	{
+		mreg_p = ptr->data;
+
+		service_send(chanserv_p, client_p, conn_p,
+				"     %-10s %3d (%d) [mod: %s]",
+				mreg_p->user_reg->name, mreg_p->level,
+				mreg_p->suspend, mreg_p->lastmod);
+	}
+}
+
 static int
 s_chan_info(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
@@ -2710,38 +2760,11 @@ s_chan_info(struct client *client_p, struct lconn *conn_p, const char *parv[], i
 			get_duration((time_t) (CURRENT_TIME - reg_p->reg_time)));
 
 	if(reg_p->flags & CS_FLAGS_SUSPENDED)
-	{
-		service_error(chanserv_p, client_p, "[%s] Suspended by %s",
-				reg_p->name,
-				CliOperCSAdmin(client_p) ? reg_p->suspender :
-				 "services admin");
-	}
+		service_error(chanserv_p, client_p, "[%s] Suspended by services admin",
+				reg_p->name);
 	else if((mreg_p = find_member_reg(client_p->user->user_reg, reg_p)) &&
 		!mreg_p->suspend)
-	{
-		if(reg_p->flags & CS_FLAGS_SHOW)
-			service_error(chanserv_p, client_p,
-				"[%s] Settings: %s%s%s%s",
-				reg_p->name,
-				(reg_p->flags & CS_FLAGS_AUTOJOIN) ? 
-				 "AUTOJOIN " : "",
-				(reg_p->flags & CS_FLAGS_NOOPS) ? 
-				 "NOOPS " : "",
-				(reg_p->flags & CS_FLAGS_RESTRICTOPS) ?
-				  "RESTRICTOPS " : "",
-				(reg_p->flags & CS_FLAGS_WARNOVERRIDE) ?
-				 "WARNOVERRIDE" : "");
-
-		if(!EmptyString(reg_p->topic))
-			service_error(chanserv_p, client_p,
-				"[%s] Topic: %s", reg_p->name, reg_p->topic);
-
-		if(reg_p->emode.mode)
-			service_error(chanserv_p,  client_p,
-				"[%s] Enforced modes: %s",
-				reg_p->name,
-				chmode_to_string(&reg_p->emode));
-	}
+		dump_info_extended(client_p, NULL, reg_p);
 
 	return 1;
 }
