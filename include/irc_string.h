@@ -92,14 +92,6 @@ size_t strlcpy(char *dst, const char *src, size_t siz);
 size_t strlcat(char *dst, const char *src, size_t siz);
 #endif
 
-#ifndef HAVE_SNPRINTF
-int snprintf(char *str, size_t count, const char *fmt, ...);
-#endif
-
-#ifndef HAVE_VSNPRINTF
-int vsnprintf(char *str, size_t count, const char *fmt, va_list args);
-#endif
-
 /*
  * clean_string - cleanup control and high ascii characters
  * -Dianora
