@@ -1131,12 +1131,12 @@ vsendto_prefix_one(register struct Client *to, register struct Client *from,
 
       to->flags |= FLAGS_KILLED;
 
-      exit_client(NULL, to, &me, "Ghosted client");
-
       if (IsPerson(from))
         sendto_one(from, form_str(ERR_GHOSTEDCLIENT),
                    me.name, from->name, to->name, to->username,
                    to->host, to->from);
+
+      exit_client(NULL, to, &me, "Ghosted client");
       
       return;
     } /* if (!MyClient(from) && IsPerson(to) && (to->from == from->from)) */
@@ -1179,7 +1179,7 @@ vsendto_prefix_one(register struct Client *to, register struct Client *from,
 #endif
 
   *sendbuf = ':';
-  strncpy(sendbuf + 1, par, sizeof(sendbuf) - 1);
+  strncpy_irc(sendbuf + 1, par, sizeof(sendbuf) - 1);
 
   parlen = strlen(par) + 1;
   sendbuf[parlen++] = ' ';
