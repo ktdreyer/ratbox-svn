@@ -82,6 +82,7 @@ extern void remove_auth_request(struct AuthRequest *req);
 extern void free_auth_request(struct AuthRequest *);
 extern struct AuthRequest *FindAuthClient(long id);
 extern void init_auth(void);
+extern void delete_identd_queries(struct Client *);
 
 #endif /* INCLUDED_s_auth_h */
 

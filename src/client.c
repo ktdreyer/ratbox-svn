@@ -39,6 +39,7 @@
 #include "numeric.h"
 #include "packet.h"
 #include "res.h"
+#include "s_auth.h"
 #include "s_bsd.h"
 #include "s_conf.h"
 #include "s_log.h"
@@ -1306,6 +1307,7 @@ const char* comment         /* Reason for the exit */
 #endif
 
       delete_resolver_queries(sptr);
+      delete_identd_queries(sptr);
 
       /* This sptr could have status of one of STAT_UNKNOWN, STAT_CONNECTING
        * STAT_HANDSHAKE or STAT_UNKNOWN

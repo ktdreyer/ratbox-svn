@@ -418,13 +418,13 @@ sendto_one_prefix(struct Client *to, struct Client *prefix,
   va_list args;
   char ibuf[IRCD_BUFSIZE + 1];
   char lbuf[IRCD_BUFSIZE + 1];
-  struct Client *sendto;
+  struct Client *to_sendto;
   
   /* send remote if to->from non NULL */
   if (to->from)
-    sendto = to->from;
+    to_sendto = to->from;
   else
-    sendto = to;
+    to_sendto = to;
   
 #ifdef INVARIANTS
   if (to->fd < 0)
@@ -449,10 +449,10 @@ sendto_one_prefix(struct Client *to, struct Client *prefix,
   ilen = ircsprintf(ibuf, ":%s %s", ID(prefix), sendbuf);
   llen = ircsprintf(lbuf, ":%s %s", prefix->name, sendbuf);
   
-  if (IsServer(sendto) && IsCapable(to->from, CAP_UID))
-    send_message(sendto, ibuf, ilen);
+  if (IsServer(to_sendto) && IsCapable(to->from, CAP_UID))
+    send_message(to_sendto, ibuf, ilen);
   else
-    send_message(sendto, lbuf, llen);
+    send_message(to_sendto, lbuf, llen);
   
   Debug((DEBUG_SEND,"Sending [%s] to %s",sendbuf,to->name));
 } /* sendto_one() */
