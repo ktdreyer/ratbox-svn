@@ -767,7 +767,7 @@ static adns_status pa_ptr6(const parseinfo *pai, int dmstart, int max, void *dat
   adns_status st;
   adns_rr_addr *ap;
   findlabel_state fls;
-  char labbuf[4], ipv[34], ip6[71], *pt;
+  char labbuf[4], ipv[34], ip6[72], *pt;
   int cbyte, i, lablen, labstart, id, x, l;
   adns_query nqu;
   qcontext ctx;
