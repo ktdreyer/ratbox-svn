@@ -1,3 +1,39 @@
+androsyn    2005/01/14 17:28:07 EST	(20050114_7)
+
+  Modified files:        (Branch: RATBOX_2_0)
+    .                    INSTALL 
+  Log:
+  work
+  
+  Revision  Changes    Path
+  7.35.4.1  +0 -0      ircd-ratbox/INSTALL
+
+
+
+leeh        2005/01/14 19:29:33 EST	(20050115_0)
+
+  Modified files:        (Branch: RATBOX_2_0)
+    .                    INSTALL 
+  Log:
+  - test commit
+  
+  Revision  Changes    Path
+  7.35.4.2  +1 -1      ircd-ratbox/INSTALL
+
+
+
+androsyn    2005/01/15 23:24:21 EST	(20050116_0)
+
+  Modified files:
+    .                    CREDITS 
+  Log:
+  work kthx
+  
+  Revision  Changes    Path
+  1.19      +0 -0      ircd-ratbox/CREDITS
+
+
+
 androsyn    2005/01/14 17:27:28 EST	(20050114_6)
 
   Modified files:
