@@ -1,3 +1,19 @@
+db          2002/01/04 21:15:43 EST	(20020105_0)
+
+  Modified files:
+    servlink             servlink.h 
+    src                  channel.c 
+  Log:
+  - Two tiny portability changes suggested by Joseph Mallett
+    missing void * in channel.c check_splitmode()
+    moved order of externs in serverlink.h
+  
+  Revision  Changes    Path
+  1.20      +6 -4      ircd-hybrid-7/servlink/servlink.h
+  7.290     +1 -1      ircd-hybrid-7/src/channel.c
+
+
+
 leeh        2002/01/04 10:01:58 EST	(20020104_4)
 
   Modified files:
