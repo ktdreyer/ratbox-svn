@@ -1,3 +1,20 @@
+*** 20001213_5 by db
+- I had changed RTLD_LAZY to RTLD_NOW in modules.c thus insisting
+  on all names being resolved before loading. oops. should have done this
+  earlier. pile of undeffed at run time names, mostly typos;
+  but a few clear dependancies such as m_stats depending on stuff loaded
+  only by m_gline ... sooo moved much of that in s_gline.c since
+  s_conf.c is quite large enough thankyou.
+- also redid m_invite.c so it will show the right channel name on an 
+  invite to a vchan. removed the silly message to channel stuff on invites,
+  it was referring to a no longer defined function anyway... BLOAT
+  totally removed the need to be chanop before sending an invite, hence
+  modified the lexer/parser to remove that option totally BLOAT
+  removed the need to be +i before adding the invite block. who cares.
+  BLOAT
+
+
+
 *** 20001213_4 by db
 - typo, it should be "server" not "servers" in class
 
