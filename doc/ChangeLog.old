@@ -1,3 +1,15 @@
+leeh        2002/04/15 12:31:41 EDT	(20020415_5)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  - mistook an ifdef for an ifndef
+  
+  Revision  Changes    Path
+  7.250     +2 -2      ircd-hybrid-7/src/client.c
+
+
+
 db          2002/04/15 10:17:01 EDT	(20020415_4)
 
   Modified files:
