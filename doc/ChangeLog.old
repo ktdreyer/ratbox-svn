@@ -1,3 +1,11 @@
+*** 20010104_12 by a1kmm
+- Changed CLEARCHAN to work with vchans.
+- Fixed up server kicks to work better and not give away the server doing it.
+- Made CLEARCHAN make kicks come from a server.
+- We now join the person doing a clearchan to the channel after kicking everyone, set the TS down by
+  one, and set the modes to +ntsi.
+
+
 *** 20010104_11 by davidt
 oops, forgot to cvs add this..
 
