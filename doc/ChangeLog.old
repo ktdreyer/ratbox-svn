@@ -1,3 +1,15 @@
+androsyn    2002/03/25 10:57:32 EST	(20020325_0)
+
+  Modified files:
+    modules              m_knock.c 
+  Log:
+  Committed Lee's knock patch
+  
+  Revision  Changes    Path
+  1.48      +2 -2      ircd-hybrid-7/modules/m_knock.c
+
+
+
 androsyn    2002/03/18 15:06:56 EST	(20020318_0)
 
   Modified files:
