@@ -1,3 +1,8 @@
+*** 20001219_5 by db
+- removed goto in channel.c dealing with invex
+
+
+
 *** 20001219_4 by db
 - This completes most of the full LL nick implementation...
   nicks unknown to a leaf LL must not have information sent to that LL
