@@ -396,12 +396,15 @@ rebuild_params(const char **parv, int parc, int start)
 
 	buf[0] = '\0';
 
+	strlcat(buf, parv[start], sizeof(buf));
+	start++;
+
 	for(; start < parc; start++)
 	{
+		strlcat(buf, " ", sizeof(buf));
+
 		if(strlcat(buf, parv[start], sizeof(buf)) >= sizeof(buf))
 			break;
-
-		strlcat(buf, " ", sizeof(buf));
 	}
 
 	return buf;
