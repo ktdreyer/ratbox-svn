@@ -490,6 +490,7 @@ c_mode(struct client *client_p, const char *parv[], int parc)
 {
 	struct client *target_p;
 	struct channel *chptr;
+	struct chmember *msptr;
 	dlink_node *ptr;
 	dlink_node *next_ptr;
 	int oldmode;
@@ -520,6 +521,11 @@ c_mode(struct client *client_p, const char *parv[], int parc)
 		return;
 
 	if((chptr = find_channel(parv[0])) == NULL)
+		return;
+
+	/* user marked as being deopped, bounce mode changes */
+	if((msptr = find_chmember(chptr, client_p)) &&
+	   (msptr->flags & MODE_DEOPPED))
 		return;
 
 	oldmode = chptr->mode.mode;

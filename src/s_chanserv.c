@@ -965,6 +965,7 @@ h_chanserv_join(void *v_chptr, void *v_members)
 				sendto_server(":%s MODE %s +o %s",
 					chanserv_p->name, chptr->name,
 					member_p->client_p->name);
+				member_p->flags &= ~MODE_DEOPPED;
 				member_p->flags |= MODE_OPPED;
 				mreg_p->channel_reg->last_time = CURRENT_TIME;
 			}
@@ -1062,6 +1063,7 @@ h_chanserv_join(void *v_chptr, void *v_members)
 			{
 				modebuild_add(DIR_ADD, "o", 
 					member_p->client_p->name);
+				member_p->flags &= ~MODE_DEOPPED;
 				member_p->flags |= MODE_OPPED;
 				mreg_p->channel_reg->last_time = CURRENT_TIME;
 			}
@@ -1115,6 +1117,7 @@ h_chanserv_user_login(void *v_client_p, void *unused)
 			sendto_server(":%s MODE %s +o %s",
 					chanserv_p->name, chptr->name,
 					member->client_p->name);
+			member->flags &= ~MODE_DEOPPED;
 			member->flags |= MODE_OPPED;
 			mreg_p->channel_reg->last_time = CURRENT_TIME;
 		}
@@ -2355,6 +2358,7 @@ s_chan_op(struct client *client_p, const char *parv[], int parc)
 		client_p->user->mask, client_p->user->user_reg->name,
 		parv[0]);
 
+	msptr->flags &= ~MODE_DEOPPED;
 	msptr->flags |= MODE_OPPED;
 	sendto_server(":%s MODE %s +o %s",
 			chanserv_p->name, parv[0], client_p->name);
