@@ -75,7 +75,7 @@ main(int argc, char **argv)
  char ndata[257], ddata[257], *dds, *pass;
  int l, a=0;
  /* respond privatefile challenge */
- if (argc < 2)
+ if (argc < 3)
    {
     puts("Usage: respond privatefile challenge");
     return 0;
