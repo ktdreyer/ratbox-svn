@@ -111,6 +111,7 @@ extern int     is_banned (struct Channel *chptr, struct Client *who);
 extern int     is_chan_op (struct Channel *chptr,struct Client *who);
 extern int     is_any_op (struct Channel *chptr,struct Client *who);
 extern int     is_half_op (struct Channel *chptr,struct Client *who);
+extern int     is_voiced (struct Channel *chptr,struct Client *who);
 
 extern void    send_channel_modes (struct Client *, struct Channel *);
 extern int     check_channel_name(const char* name);
@@ -146,13 +147,19 @@ void channel_member_list(struct Client *sptr,
 ** Channel Related macros follow
 */
 
+/* can_send results */
+#define CAN_SEND_NO	0
+#define CAN_SEND_NONOP  1
+#define CAN_SEND_OPV	2
+
+
 /* Channel related flags */
 
 #define CHFL_PEON	0x0000 /* normal member of channel */
 #define CHFL_CHANOP     0x0001 /* Channel operator */
 #define CHFL_VOICE      0x0002 /* the power to speak */
 #define CHFL_DEOPPED    0x0004 /* deopped by us, modes need to be bounced */
-#define CHFL_HALFOP     0x0008 /* deopped by us, modes need to be bounced */
+#define CHFL_HALFOP     0x0008 /* Channel half op */
 #define CHFL_BAN        0x0010 /* ban channel flag */
 #define CHFL_EXCEPTION  0x0020 /* exception to ban channel flag */
 #define CHFL_DENY       0x0040 /* regular expression deny flag */

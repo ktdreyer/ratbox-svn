@@ -527,6 +527,7 @@ static int change_channel_membership(struct Channel *chptr,
   return 0;
 }
 
+/* small series of "helper" functions */
 /*
  * is_chan_op
  *
@@ -535,7 +536,7 @@ static int change_channel_membership(struct Channel *chptr,
  * output	- yes if chanop no if not
  * side effects -
  */
-int is_chan_op(struct Channel *chptr, struct Client *who )
+int is_chan_op(struct Channel *chptr, struct Client *who)
 {
   if (chptr)
     {
@@ -554,7 +555,7 @@ int is_chan_op(struct Channel *chptr, struct Client *who )
  * output	- yes if anyop no if not
  * side effects -
  */
-int is_any_op(struct Channel *chptr, struct Client *who )
+int is_any_op(struct Channel *chptr, struct Client *who)
 {
   if (chptr)
     {
@@ -575,7 +576,7 @@ int is_any_op(struct Channel *chptr, struct Client *who )
  * output	- yes if anyop no if not
  * side effects -
  */
-int is_half_op(struct Channel *chptr, struct Client *who )
+int is_half_op(struct Channel *chptr, struct Client *who)
 {
   if (chptr)
     {
@@ -587,25 +588,49 @@ int is_half_op(struct Channel *chptr, struct Client *who )
 }
 
 /*
+ * is_voiced
+ *
+ * inputs	- pointer to channel to check voice on
+ *		- pointer to client struct being checked
+ * output	- yes if voiced no if not
+ * side effects -
+ */
+int is_voiced(struct Channel *chptr, struct Client *who)
+{
+  if (chptr)
+    {
+      if ((find_user_link(&chptr->voiced, who)))
+	return (1);
+    }
+  
+  return 0;
+}
+
+/*
  * can_send
  *
- * inputs
- * outputs	- YES if can send to channel
+ * inputs	- pointer to channel
+ *		- pointer to client 
+ * outputs	- CHFL_CHANOP if op on channel
+ *		- CHFL_VOICE if can send to channel
+ *		  N.B. does not mean they are voiced,
+ *		  Just means they can send to channel.
+ * side effects	-
  */
 int can_send(struct Channel *chptr, struct Client *sptr)
 {
+  if(is_any_op(chptr,sptr))
+    return CAN_SEND_OPV;
+  else if(is_voiced(chptr,sptr))
+    return CAN_SEND_OPV;
+
   if (chptr->mode.mode & MODE_MODERATED)
-    {
-      if(is_any_op(chptr,sptr))
-	return 1;
-      else
-	return 0;
-    }
+    return CAN_SEND_NO;
   
   if (chptr->mode.mode & MODE_NOPRIVMSGS && !IsMember(sptr,chptr))
-    return (0);
+    return (CAN_SEND_NO);
 
-  return 1;
+  return CAN_SEND_NONOP;
 }
 
 /*

@@ -412,6 +412,7 @@ void msg_channel( int p_or_n, char *command,
 {
   struct Channel *vchan;
   char *channel_name=NULL;
+  int result;
 
   if (HasVchans(chptr))
     {
@@ -430,12 +431,22 @@ void msg_channel( int p_or_n, char *command,
 	sptr->user->last = CurrentTime;
     }
 
-  if(can_send(chptr,sptr))
+  /* chanops and voiced can flood their own channel with impunity */
+  if( (result = can_send(chptr,sptr)) )
     {
-      if(!flood_attack_channel(sptr, chptr))
-	sendto_channel_butone(cptr, sptr, chptr,
-			      ":%s %s %s :%s",
-			      sptr->name, command, channel_name, text);
+      if (result == CAN_SEND_OPV)
+	{
+	  sendto_channel_butone(cptr, sptr, chptr,
+				":%s %s %s :%s",
+				sptr->name, command, channel_name, text);
+	}
+      else
+	{
+	  if(!flood_attack_channel(sptr, chptr))
+	    sendto_channel_butone(cptr, sptr, chptr,
+				  ":%s %s %s :%s",
+				  sptr->name, command, channel_name, text);
+	}
     }
   else
     {
@@ -591,10 +602,10 @@ int flood_attack_client(struct Client *sptr,struct Client *acptr)
 	{
 	  delta = CurrentTime - acptr->localClient->first_received_message_time;
 	  acptr->localClient->received_number_of_privmsgs -= delta;
+	  acptr->localClient->first_received_message_time = CurrentTime;
 	  if(acptr->localClient->received_number_of_privmsgs <= 0)
 	    {
 	      acptr->localClient->received_number_of_privmsgs = 0;
-	      acptr->localClient->first_received_message_time = CurrentTime;
 	      acptr->localClient->flood_noticed = 0;
 	    }
 	}
@@ -610,6 +621,8 @@ int flood_attack_client(struct Client *sptr,struct Client *acptr)
 				   sptr->host,
 				   sptr->user->server, acptr->name);
 	      acptr->localClient->flood_noticed = 1;
+	      /* add a bit of penalty */
+	      acptr->localClient->received_number_of_privmsgs += 2;
 	    }
 	  if(MyClient(sptr))
 	    sendto_one(sptr, ":%s NOTICE %s :*** Message to %s throttled due to flooding",
@@ -640,10 +653,10 @@ int flood_attack_channel(struct Client *sptr,struct Channel *chptr)
 	{
 	  delta = CurrentTime - chptr->first_received_message_time;
 	  chptr->received_number_of_privmsgs -= delta;
+	  chptr->first_received_message_time = CurrentTime;
 	  if(chptr->received_number_of_privmsgs <= 0)
 	    {
 	      chptr->received_number_of_privmsgs=0;
-	      chptr->first_received_message_time = CurrentTime;
 	      chptr->flood_noticed = 0;
 	    }
 	}
@@ -659,6 +672,9 @@ int flood_attack_channel(struct Client *sptr,struct Channel *chptr)
 				   sptr->host,
 				   sptr->user->server, chptr->chname);
 	      chptr->flood_noticed = 1;
+
+	      /* Add a bit of penalty */
+	      chptr->received_number_of_privmsgs += 2;
 	    }
 	  if(MyClient(sptr))
 	    sendto_one(sptr, ":%s NOTICE %s :*** Message to %s throttled due to flooding",

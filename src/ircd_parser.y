@@ -211,7 +211,7 @@ modules_items:   modules_items modules_item |
 
 modules_item:    modules_module
 
-modules_module:  MODULE '=' QSTRING
+modules_module:  MODULE '=' QSTRING ';'
 {
   load_one_module (yylval.string);
 };
