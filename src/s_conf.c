@@ -2490,7 +2490,7 @@ conf_add_class_to_conf(struct ConfItem *aconf)
 			"Warning -- Using default class for missing class \"%s\" in auth{} for %s@%s",
 			aconf->className, aconf->user, aconf->host);
 	}
-	else if (aconf->status == CONF_SERVER)
+	else if (aconf->status == CONF_SERVER || aconf->status == CONF_OPERATOR)
 	{
 		sendto_realops_flags(FLAGS_ALL, L_ALL,
 			"Warning -- Using default class for missing class \"%s\" in auth{} for %s",
