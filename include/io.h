@@ -42,6 +42,7 @@ extern dlink_list connection_list;
 #define CONN_HANDSHAKE          0x0008
 #define CONN_DEAD		0x0010
 #define CONN_SENTPING           0x0020
+/* CONTINUES ... */
 
 #define ConnConnecting(x)	((x)->flags & CONN_CONNECTING)
 #define ConnDccIn(x)		((x)->flags & CONN_DCCIN)
@@ -64,8 +65,12 @@ extern dlink_list connection_list;
 /* server flags */
 #define FLAGS_UNTERMINATED	0x00100
 #define FLAGS_EOB               0x00200
+#define FLAGS_SENTBURST		0x00400
+
+#define SetConnSentBurst(x)	((x)->flags |= FLAGS_SENTBURST)
 
 #define finished_bursting	((server_p) && (server_p->flags & FLAGS_EOB))
+#define sent_burst		((server_p) && (server_p->flags & FLAGS_SENTBURST))
 
 /* user flags */
 #define FLAGS_AUTH		0x01000

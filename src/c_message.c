@@ -45,6 +45,9 @@ c_message(struct client *client_p, const char *parv[], int parc)
 		{
 			tmp_p = ptr->data;
 
+			if(ServiceDisabled(tmp_p))
+				continue;
+
 			if(!irccmp(target, tmp_p->service->username))
 			{
 				target_p = tmp_p;

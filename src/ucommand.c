@@ -323,10 +323,14 @@ u_service(struct connection_entry *conn_p, char *parv[], int parc)
         {
                 service_p = ptr->data;
 
-                sendto_one(conn_p, "  %s: Online as %s!%s@%s [%s]",
-                           service_p->service->id,service_p->name,
-                           service_p->service->username,
-                           service_p->service->host, service_p->info);
+		if(ServiceDisabled(service_p))
+			sendto_one(conn_p, "  %s: Disabled",
+					service_p->service->id);
+		else
+	                sendto_one(conn_p, "  %s: Online as %s!%s@%s [%s]",
+        	                   service_p->service->id, service_p->name,
+                	           service_p->service->username,
+                        	   service_p->service->host, service_p->info);
         }
 }
 

@@ -144,27 +144,33 @@ conf_parse(int cold)
         yyparse();
 	validate_conf();
 
-	DLINK_FOREACH(ptr, service_list.head)
+	/* if we havent sent our burst, the following will just break */
+	if(sent_burst)
 	{
-		target_p = ptr->data;
-
-		if(ServiceIntroduced(target_p))
+		DLINK_FOREACH(ptr, service_list.head)
 		{
-			if(ServiceDisabled(target_p))
+			target_p = ptr->data;
+
+			if(ServiceIntroduced(target_p))
 			{
-				deintroduce_service(target_p);
-				continue;
+				if(ServiceDisabled(target_p))
+				{
+					deintroduce_service(target_p);
+					continue;
+				}
+				else if(ServiceReintroduce(target_p))
+				{
+					reintroduce_service(target_p);
+					continue;
+				}
 			}
-			else if(ServiceReintroduce(target_p))
-			{
-				reintroduce_service(target_p);
-				continue;
-			}
-		}
-		else
+			else if(!ServiceDisabled(target_p))
+				introduce_service(target_p);
+
 			ClearServiceReintroduce(target_p);
+		}
 	}
-			
+
         fclose(conf_fbfile_in);
 }
 

@@ -247,6 +247,9 @@ c_trace(struct client *client_p, const char *parv[], int parc)
         {
                 service_p = ptr->data;
 
+		if(ServiceDisabled(service_p))
+			continue;
+
                 sendto_server(":%s %d %s %s service %s[%s@%s] (127.0.0.1) 0 0",
                               MYNAME, ServiceOpered(service_p) ? 204 : 205,
                               parv[0], ServiceOpered(service_p) ? "Oper" : "User",

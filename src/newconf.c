@@ -11,6 +11,7 @@
 #include "log.h"
 #include "conf.h"
 #include "service.h"
+#include "io.h"
 
 #define CF_TYPE(x) ((x) & CF_MTYPE)
 
@@ -187,6 +188,8 @@ find_umode(struct mode_table *tab, char *name)
 static void
 set_modes_from_table(int *modes, const char *whatis, struct mode_table *tab, conf_parm_t * args)
 {
+	*modes = 0;
+
 	for (; args; args = args->next)
 	{
 		int mode;
@@ -660,11 +663,17 @@ conf_set_service_nick(void *data)
 	if(yy_service == NULL || !strcmp(yy_service->name, (const char *) data))
 		return;
 
-	del_client(yy_service);
-	strlcpy(yy_service->name, (const char *) data,
-		sizeof(yy_service->name));
-	add_client(yy_service);
-	SetServiceReintroduce(yy_service);
+	if(sent_burst)
+	{
+		del_client(yy_service);
+		strlcpy(yy_service->name, (const char *) data,
+			sizeof(yy_service->name));
+		add_client(yy_service);
+		SetServiceReintroduce(yy_service);
+	}
+	else
+		strlcpy(yy_service->name, (const char *) data,
+			sizeof(yy_service->name));
 }
 
 static void
@@ -676,7 +685,9 @@ conf_set_service_username(void *data)
 
 	strlcpy(yy_service->service->username, (const char *) data,
 		sizeof(yy_service->service->username));
-	SetServiceReintroduce(yy_service);
+
+	if(sent_burst)
+		SetServiceReintroduce(yy_service);
 }
 
 static void
@@ -688,7 +699,9 @@ conf_set_service_host(void *data)
 
 	strlcpy(yy_service->service->host, (const char *) data,
 		sizeof(yy_service->service->host));
-	SetServiceReintroduce(yy_service);
+
+	if(sent_burst)
+		SetServiceReintroduce(yy_service);
 }
 
 static void
@@ -699,7 +712,9 @@ conf_set_service_realname(void *data)
 
 	strlcpy(yy_service->info, (const char *) data,
 		sizeof(yy_service->info));
-	SetServiceReintroduce(yy_service);
+
+	if(sent_burst)
+		SetServiceReintroduce(yy_service);
 }
 
 static void

@@ -77,7 +77,6 @@ add_service(struct service_handler *service)
         client_p->service->flood_max_ignore = service->flood_max_ignore;
 
 	dlink_add(client_p, &client_p->listnode, &service_list);
-	add_client(client_p);
 
 	open_service_logfile(client_p);
 
@@ -142,6 +141,7 @@ introduce_service(struct client *target_p)
 		      target_p->service->username,
 		      target_p->service->host, MYNAME, target_p->info);
 	SetServiceIntroduced(target_p);
+	add_client(target_p);
 }
 
 void
@@ -171,8 +171,10 @@ introduce_services()
 	{
 		service_p = ptr->data;
 
-		if(!ServiceDisabled(service_p))
-			introduce_service(ptr->data);
+		if(ServiceDisabled(service_p))
+			continue;
+
+		introduce_service(ptr->data);
 	}
 }
 
@@ -195,6 +197,7 @@ void
 reintroduce_service(struct client *target_p)
 {
 	sendto_server(":%s QUIT :Updating information", target_p->name);
+	del_client(target_p);
 	introduce_service(target_p);
 	introduce_service_channels(target_p);
 
@@ -206,6 +209,7 @@ deintroduce_service(struct client *target_p)
 {
 	sendto_server(":%s QUIT :Disabled", target_p->name);
 	ClearServiceIntroduced(target_p);
+	del_client(target_p);
 }
 
 void
@@ -582,6 +586,13 @@ service_stats(struct client *service_p, struct connection_entry *conn_p)
         int j = 0;
 
         sendto_one(conn_p, "%s Service:", service_p->service->id);
+
+	if(ServiceDisabled(service_p))
+	{
+		sendto_one(conn_p, " Disabled");
+		return;
+	}
+
         sendto_one(conn_p, " Online as %s!%s@%s [%s]",
                    service_p->name, service_p->service->username,
                    service_p->service->host, service_p->info);

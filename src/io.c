@@ -592,6 +592,8 @@ signon_server(struct connection_entry *conn_p)
 
         sendto_server("PING :%s", MYNAME);
 
+	SetConnSentBurst(conn_p);
+
 	return 1;
 }
 
@@ -695,6 +697,7 @@ signoff_server(struct connection_entry *conn_p)
 		service_p = ptr->data;
 
 		ClearServiceIntroduced(service_p);
+		del_client(service_p);
 	}
 
 	if(conn_p == server_p)
