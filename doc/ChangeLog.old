@@ -1,3 +1,9 @@
+*** 20010118_16 by db
+- added /stats K for IP and D lines as done by androsyn
+- corrected format bug in send.c found by bysin
+
+
+
 *** 20010118_15 by wcampbel
 Updated my TODO list (sorry for the extra commit, working in multiple 
 trees here)
