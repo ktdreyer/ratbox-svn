@@ -241,6 +241,7 @@ int     m_cjoin(struct Client *cptr,
 		     me.name, vchan_chptr->chname);
 
   del_invite(sptr, vchan_chptr);
+  (void)m_names(vchan_cptr, sptr, 2, parv);
 
   return 0;
 }
