@@ -1,3 +1,8 @@
+*** 20000101_1 by db
+- cleanup of LITTLE_I_LINES #ifdef
+
+
+
 *** 19991231_4 by db
 - renamed channel to GLobalChannelList in jupe channel code
 
