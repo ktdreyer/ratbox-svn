@@ -1,3 +1,9 @@
+*** 20001022_3 by db
+- removed chan_id
+- Can't reject long channels for interoperability reasons
+
+
+
 *** 20001022_2 by toot
 bysin's patch to check for a overly long channel name in /join too.
 or you could end up with a channel you couldn't /cjoin..
