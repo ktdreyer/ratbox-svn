@@ -431,8 +431,7 @@ static  char *  replies[] = {
 /* 404 ERR_CANNOTSENDTOCHAN, */ ":%s 404 %s %s :Cannot send to channel",
 /* 405 ERR_TOOMANYCHANNELS, */  ":%s 405 %s %s :You have joined too many channels",
 /* 406 ERR_WASNOSUCHNICK, */    ":%s 406 %s %s :There was no such nickname",
-/* 407 ERR_TOOMANYTARGETS, */
-                ":%s 407 %s %s :Too many recipients. Only %d processed",
+/* 407 ERR_TOOMANYTARGETS, */   ":%s 407 %s %s :Too many recipients.",
 /* 408 */       NULL,
 /* 409 ERR_NOORIGIN, */         ":%s 409 %s :No origin specified",
 /* 410 */       NULL,

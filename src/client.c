@@ -718,11 +718,11 @@ del_client_from_llist(struct Client **bucket, struct Client *client)
  *      the old. 'name' is now assumed to be a null terminated
  *      string and the search is the for server and user.
  */
-struct Client *find_userhost(char *user, char *host,
-			     struct Client *client_p, int *count)
+struct Client *
+find_userhost(char *user, char *host, struct Client *client_p, int *count)
 {
-  struct Client       *c2ptr;
-  struct Client       *res = client_p;
+  struct Client *c2ptr;
+  struct Client *res = client_p;
 
   *count = 0;
   if (collapse(user))
