@@ -26,6 +26,7 @@
 
 #include "stdinc.h"
 #include "client.h"
+#include "common.h"
 #include "irc_string.h"
 #include "ircd.h"
 #include "numeric.h"
@@ -83,7 +84,7 @@ sc_hash(const char *string)
  * existing, servername.  use the hash in list.c for those.  -orabidoo
  */
 
-char *
+const char *
 find_or_add(const char *name)
 {
 	int hash_index;

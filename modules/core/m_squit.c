@@ -26,6 +26,7 @@
 
 #include "stdinc.h"
 #include "client.h"
+#include "common.h"		/* FALSE bleah */
 #include "irc_string.h"
 #include "ircd.h"
 #include "numeric.h"
@@ -87,7 +88,7 @@ mo_squit(struct Client *client_p, struct Client *source_p, int parc, const char 
 		else if(!IsOperRemote(source_p))
 		{
 			sendto_one(source_p, form_str(ERR_NOPRIVS),
-					me.name, source_p->name, "remote");
+				   me.name, source_p->name, "remote");
 			return 0;
 		}
 

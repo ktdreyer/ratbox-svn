@@ -25,6 +25,12 @@
  */
 
 #ifndef PATCHLEVEL
-#define PATCHLEVEL   "ircd-ratbox-2.1.0beta"
+#ifndef __VMS
+# define PL_SUFFIX ""
+#else
+# define PL_SUFFIX "[vms]"
+#endif
+
+#define PATCHLEVEL   "ircd-ratbox-2.0.6" PL_SUFFIX
 
 #endif

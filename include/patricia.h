@@ -14,7 +14,31 @@
 
 #ifndef _PATRICIA_H
 #define _PATRICIA_H
+#include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <assert.h>
+#ifndef TESTING
+#include "class.h"
+#include "client.h"
+#include "common.h"
+#include "irc_string.h"
+#include "ircd.h"
+#include "numeric.h"
+#include "send.h"
+#include "memory.h"
+#include "config.h"
+#endif
 
+
+#ifndef FALSE
+#define FALSE 0
+#endif
+#ifndef TRUE
+#define TRUE !(FALSE)
+#endif
 #ifndef INET6_ADDRSTRLEN
 #define INET6_ADDRSTRLEN 46
 #endif
@@ -84,7 +108,7 @@ void init_patricia(void);
 #if 0
 prefix_t *ascii2prefix(int family, char *string);
 #endif
-patricia_node_t *make_and_lookup(patricia_tree_t * tree, const char *string);
+patricia_node_t *make_and_lookup(patricia_tree_t * tree, char *string);
 patricia_node_t *make_and_lookup_ip(patricia_tree_t * tree, struct sockaddr *, int bitlen);
 
 

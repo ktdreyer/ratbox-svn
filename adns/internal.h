@@ -535,18 +535,18 @@ typedef struct {
   int *dmend_r;
 } findlabel_state;
 
-void adns__findlabel_start(findlabel_state *fls, adns_state ads,
+void adns__findlabel_start(findlabel_state *flstate, adns_state ads,
 			   int serv, adns_query qu,
 			   const byte *dgram, int dglen, int max,
 			   int dmbegin, int *dmend_rlater);
 /* Finds labels in a domain in a datagram.
  *
  * Call this routine first.
- * dmend_rlater may be null.  ads (and of course fls) may not be.
+ * dmend_rlater may be null.  ads (and of course flstate) may not be.
  * serv may be -1, qu may be null - they are for error reporting.
  */
 
-adns_status adns__findlabel_next(findlabel_state *fls, int *lablen_r, int *labstart_r);
+adns_status adns__findlabel_next(findlabel_state *flstate, int *lablen_r, int *labstart_r);
 /* Then, call this one repeatedly.
  *
  * It will return adns_s_ok if all is well, and tell you the length
@@ -586,7 +586,7 @@ adns_status adns__parse_domain(adns_state ads, int serv, adns_query qu,
  * serv may be -1 and qu may be 0 - they are used for error reporting only.
  */
 
-adns_status adns__parse_domain_more(findlabel_state *fls, adns_state ads,
+adns_status adns__parse_domain_more(findlabel_state *flstate, adns_state ads,
 				    adns_query qu, vbuf *vb, parsedomain_flags flags,
 				    const byte *dgram);
 /* Like adns__parse_domain, but you pass it a pre-initialised findlabel_state,

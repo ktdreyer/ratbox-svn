@@ -29,6 +29,7 @@
 #include "s_conf.h"
 #include "s_serv.h"
 #include "client.h"
+#include "common.h"
 #include "ircd.h"
 #include "parse.h"
 #include "packet.h"
@@ -164,37 +165,43 @@ flood_endgrace(struct Client *client_p)
 	client_p->localClient->sent_parsed = 0;
 }
 
+/*
+ * flood_recalc
+ *
+ * recalculate the number of allowed flood lines. this should be called
+ * once a second on any given client. We then attempt to flush some data.
+ */
 void
-run_flood_recalc(void *unused)
+flood_recalc(int fd, void *data)
 {
-	dlink_node *ptr, *next;
-	struct Client *client_p;
-	struct LocalUser *lclient_p;
+	struct Client *client_p = data;
+	struct LocalUser *lclient_p = client_p->localClient;
 
-	DLINK_FOREACH_SAFE(ptr, next, lclient_list.head)
-	{
-		client_p = ptr->data;
-		lclient_p = client_p->localClient;
-		if(lclient_p == NULL || IsAnyDead(client_p))
-			continue;
+	/* This can happen in the event that the client detached. */
+	if(!lclient_p)
+		return;
 
-		/* allow a bursting client their allocation per second, allow
-		 * a client whos flooding an extra 2 per second
-		 */
-		if(IsFloodDone(client_p))
-			lclient_p->sent_parsed -= 2;
-		else
-			lclient_p->sent_parsed = 0;
-			
-		if(lclient_p->sent_parsed < 0)
-			lclient_p->sent_parsed = 0;
-			
-		if(--lclient_p->actually_read < 0)
-			lclient_p->actually_read = 0;
+	/* allow a bursting client their allocation per second, allow
+	 * a client whos flooding an extra 2 per second
+	 */
+	if(IsFloodDone(client_p))
+		lclient_p->sent_parsed -= 2;
+	else
+		lclient_p->sent_parsed = 0;
 
-		parse_client_queued(client_p);
-	}	
+	if(lclient_p->sent_parsed < 0)
+		lclient_p->sent_parsed = 0;
 
+	if(--lclient_p->actually_read < 0)
+		lclient_p->actually_read = 0;
+
+	parse_client_queued(client_p);
+
+	if(IsAnyDead(client_p))
+		return;
+
+	/* and finally, reset the flood check */
+	comm_setflush(fd, 1000, flood_recalc, client_p);
 }
 
 /*
@@ -212,8 +219,9 @@ read_ctrl_packet(int fd, void *data)
 	unsigned char *len = tmp;
 	struct SlinkRplDef *replydef;
 #ifdef USE_IODEBUG_HOOKS
-	hook_data_int hinfo;
+	struct hook_io_data hdata;
 #endif
+
 
 	s_assert(lserver != NULL);
 	if(IsAnyDead(server))
@@ -221,13 +229,14 @@ read_ctrl_packet(int fd, void *data)
 
 	reply = &lserver->slinkrpl;
 
+
 	if(!reply->command)
 	{
 		reply->gotdatalen = 0;
 		reply->readdata = 0;
 		reply->data = NULL;
 
-		length = recv(fd, tmp, 1, 0);
+		length = read(fd, tmp, 1);
 
 		if(length <= 0)
 		{
@@ -253,7 +262,7 @@ read_ctrl_packet(int fd, void *data)
 	if((replydef->flags & SLINKRPL_FLAG_DATA) && (reply->gotdatalen < 2))
 	{
 		/* we need a datalen u16 which we don't have yet... */
-		length = recv(fd, len, (2 - reply->gotdatalen), 0);
+		length = read(fd, len, (2 - reply->gotdatalen));
 		if(length <= 0)
 		{
 			if((length == -1) && ignoreErrno(errno))
@@ -283,8 +292,8 @@ read_ctrl_packet(int fd, void *data)
 
 	if(reply->readdata < reply->datalen)	/* try to get any remaining data */
 	{
-		length = recv(fd, (reply->data + reply->readdata),
-			      (reply->datalen - reply->readdata), 0);
+		length = read(fd, (reply->data + reply->readdata),
+			      (reply->datalen - reply->readdata));
 		if(length <= 0)
 		{
 			if((length == -1) && ignoreErrno(errno))
@@ -299,10 +308,10 @@ read_ctrl_packet(int fd, void *data)
 	}
 
 #ifdef USE_IODEBUG_HOOKS
-	hinfo.client = server;
-	hinfo.arg1 = NULL;
-	hinfo.arg2 = reply->command;
-	call_hook(h_iorecvctrl_id, &hinfo);
+	hdata.connection = server;
+	hdata.len = reply->command;
+	hdata.data = NULL;
+	hook_call_event(h_iorecvctrl_id, &hdata);
 #endif
 
 	/* we now have the command and any data, pass it off to the handler */
@@ -331,20 +340,21 @@ read_packet(int fd, void *data)
 	struct LocalUser *lclient_p = client_p->localClient;
 	int length = 0;
 	int lbuf_len;
+
 	int binary = 0;
 #ifdef USE_IODEBUG_HOOKS
-	hook_data_int hinfo;
+	struct hook_io_data hdata;
 #endif
-
 	if(IsAnyDead(client_p))
 		return;
+
 
 	/*
 	 * Read some data. We *used to* do anti-flood protection here, but
 	 * I personally think it makes the code too hairy to make sane.
 	 *     -- adrian
 	 */
-	length = recv(client_p->localClient->fd, readBuf, READBUF_SIZE, 0);
+	length = read(client_p->localClient->fd, readBuf, READBUF_SIZE);
 
 	if(length <= 0)
 	{
@@ -359,10 +369,10 @@ read_packet(int fd, void *data)
 	}
 
 #ifdef USE_IODEBUG_HOOKS
-	hinfo.client = client_p;
-	hinfo.arg1 = readBuf;
-	hinfo.arg2 = length;
-	call_hook(h_iorecv_id, &hinfo);
+	hdata.connection = client_p;
+	hdata.data = readBuf;
+	hdata.len = length;
+	hook_call_event(h_iorecv_id, &hdata);
 #endif
 
 	if(client_p->localClient->lasttime < CurrentTime)
@@ -413,6 +423,9 @@ read_packet(int fd, void *data)
 			       COMM_SELECT_READ, read_packet, client_p, 0);
 	}
 }
+
+
+
 
 /*
  * client_dopacket - copy packet to client buf and parse it

@@ -34,9 +34,10 @@
 
 #include "stdinc.h"
 #include "ircd_defs.h"
-#include "tools.h"
+#include "common.h"
 #include "s_conf.h"
 #include "s_newconf.h"
+#include "tools.h"
 #include "client.h"
 #include "memory.h"
 #include "s_serv.h"
@@ -56,57 +57,22 @@ dlink_list server_conf_list;
 dlink_list xline_conf_list;
 dlink_list resv_conf_list;	/* nicks only! */
 static dlink_list nd_list;	/* nick delay */
-dlink_list glines;
-dlink_list pending_glines;
-dlink_list dlines;
-dlink_list exempt_list;
-dlink_list tgchange_list;
-
-dlink_list temp_klines[LAST_TEMP_TYPE];
-dlink_list temp_dlines[LAST_TEMP_TYPE];
 
 static BlockHeap *nd_heap = NULL;
 
 static void expire_temp_rxlines(void *unused);
 static void expire_nd_entries(void *unused);
-static void expire_glines(void *unused);
-static void expire_temp_kd(void *list);
-static void reorganise_temp_kd(void *list);
-
-patricia_tree_t *dline_tree;
-patricia_tree_t *exempt_tree;
-patricia_tree_t *tgchange_tree;
 
 void
 init_s_newconf(void)
 {
 	nd_heap = BlockHeapCreate(sizeof(struct nd_entry), ND_HEAP_SIZE);
 	eventAddIsh("expire_nd_entries", expire_nd_entries, NULL, 30);
-	eventAddIsh("expire_temp_rxlines", expire_temp_rxlines, NULL, 300);
-	eventAddIsh("expire_glines", expire_glines, NULL, 300);
-	eventAddIsh("expire_temp_klines", expire_temp_kd, &temp_klines[TEMP_MIN], 60);
-	eventAddIsh("expire_temp_dlines", expire_temp_kd, &temp_dlines[TEMP_MIN], 60);
-	eventAddIsh("expire_temp_klines_hour", reorganise_temp_kd,
-			&temp_klines[TEMP_HOUR], 5);
-	eventAddIsh("expire_temp_dlines_hour", reorganise_temp_kd,
-			&temp_dlines[TEMP_HOUR], 3600);
-	eventAddIsh("expire_temp_klines_day", reorganise_temp_kd,
-			&temp_klines[TEMP_DAY], 86400);
-	eventAddIsh("expire_temp_dlines_day", reorganise_temp_kd,
-			&temp_dlines[TEMP_DAY], 86400);
-	eventAddIsh("expire_temp_klines_week", reorganise_temp_kd,
-			&temp_klines[TEMP_WEEK], 604800);
-	eventAddIsh("expire_temp_dlines_week", reorganise_temp_kd,
-			&temp_dlines[TEMP_WEEK], 604800);
-
-	dline_tree = New_Patricia(BITLEN);
-	exempt_tree = New_Patricia(BITLEN);
-	tgchange_tree = New_Patricia(BITLEN);
+	eventAddIsh("expire_temp_rxlines", expire_temp_rxlines, NULL, 60);
 }
 
-
 void
-clear_s_newconf_ircd(void)
+clear_s_newconf(void)
 {
 	struct server_conf *server_p;
 	struct ConfItem *aconf;
@@ -151,23 +117,6 @@ clear_s_newconf_ircd(void)
 			server_p->flags |= SERVER_ILLEGAL;
 	}
 
-	DLINK_FOREACH_SAFE(ptr, next_ptr, exempt_list.head)
-	{
-		aconf = ptr->data;
-
-		dlinkDelete(ptr, &exempt_list);
-		patricia_remove(exempt_tree, aconf->pnode);
-		free_conf(aconf);
-	}
-
-}
-
-void
-clear_s_newconf_bans(void)
-{
-	struct ConfItem *aconf;
-	dlink_node *ptr, *next_ptr;
-
 	DLINK_FOREACH_SAFE(ptr, next_ptr, xline_conf_list.head)
 	{
 		aconf = ptr->data;
@@ -175,8 +124,8 @@ clear_s_newconf_bans(void)
 		if(aconf->hold)
 			continue;
 
-		dlinkDelete(ptr, &xline_conf_list);
 		free_conf(aconf);
+		dlinkDestroy(ptr, &xline_conf_list);
 	}
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, resv_conf_list.head)
@@ -187,269 +136,12 @@ clear_s_newconf_bans(void)
 		if(aconf->hold)
 			continue;
 
-		dlinkDelete(ptr, &resv_conf_list);
 		free_conf(aconf);
+		dlinkDestroy(ptr, &resv_conf_list);
 	}
 
 	clear_resv_hash();
-	clear_dlines(&dlines);
 }
-
-void
-add_dline(struct ConfItem *aconf)
-{
-	patricia_node_t *pnode;
-
-	pnode = make_and_lookup(dline_tree, aconf->host);
-	pnode->data = aconf;
-	aconf->pnode = pnode;
-
-	if(aconf->flags & CONF_FLAGS_TEMPORARY)
-	{
-		if(aconf->hold >= CurrentTime + (10080 * 60))
-		{
-			dlinkAdd(aconf, &aconf->dnode, &temp_dlines[TEMP_WEEK]);
-			aconf->port = TEMP_WEEK;
-		}
-		else if(aconf->hold >= CurrentTime + (1440 * 60))
-		{
-			dlinkAdd(aconf, &aconf->dnode, &temp_dlines[TEMP_DAY]);
-			aconf->port = TEMP_DAY;
-		}
-		else if(aconf->hold >= CurrentTime + (60 * 60))
-		{
-			dlinkAdd(aconf, &aconf->dnode, &temp_dlines[TEMP_HOUR]);
-			aconf->port = TEMP_HOUR;
-		}
-		else
-		{
-			dlinkAdd(aconf, &aconf->dnode, &temp_dlines[TEMP_MIN]);
-			aconf->port = TEMP_MIN;
-		}
-
-		aconf->flags |= CONF_FLAGS_TEMPORARY;
-	}
-	else
-		dlinkAdd(aconf, &aconf->dnode, &dlines);
-}
-
-int
-remove_dline(const char *host)
-{
-	struct ConfItem *aconf;
-	patricia_node_t *pnode;
-
-	if((pnode = match_exact_string(dline_tree, host)) == NULL)
-		return 0;
-
-	aconf = pnode->data;
-
-	if((aconf->flags & CONF_FLAGS_TEMPORARY) == 0)
-	{
-		dlinkDelete(&aconf->dnode, &dlines);
-	}
-	else
-		dlinkDelete(&aconf->dnode, &temp_dlines[aconf->port]);
-		
-	free_conf(aconf);
-	patricia_remove(dline_tree, pnode);
-	return 1;
-}
-
-void
-clear_dlines(dlink_list *list)
-{
-	struct ConfItem *aconf;
-	dlink_node *ptr, *next_ptr;
-
-	DLINK_FOREACH_SAFE(ptr, next_ptr, list->head)
-	{
-		aconf = ptr->data;
-
-		patricia_remove(dline_tree, aconf->pnode);
-		dlinkDelete(ptr, list);
-		free_conf(aconf);
-	}
-}
-
-struct ConfItem *
-find_dline(struct sockaddr *addr)
-{
-	patricia_node_t *pnode;
-
-	if((pnode = match_ip(exempt_tree, addr)))
-		return pnode->data;
-
-	if((pnode = match_ip(dline_tree, addr)))
-		return pnode->data;
-
-	return NULL;
-}
-
-struct ConfItem *
-find_dline_string(const char *host)
-{
-	patricia_node_t *pnode;
-
-	if((pnode = match_string(exempt_tree, host)))
-		return pnode->data;
-
-	if((pnode = match_string(dline_tree, host)))
-		return pnode->data;
-
-	return NULL;
-}
-
-int
-already_dlined(const char *host)
-{
-	patricia_node_t *pnode;
-
-	if((pnode = match_exact_string(dline_tree, host)))
-		return 1;
-
-	return 0;
-}
-	
-void
-add_exempt(struct ConfItem *aconf)
-{
-	patricia_node_t *pnode;
-
-	pnode = make_and_lookup(exempt_tree, aconf->host);
-	pnode->data = aconf;
-	aconf->pnode = pnode;
-
-	dlinkAdd(aconf, &aconf->dnode, &exempt_list);
-}
-
-/* add_temp_kline()
- *
- * inputs        - pointer to struct ConfItem
- * output        - none
- * Side effects  - links in given struct ConfItem into 
- *                 temporary kline link list
- */
-void
-add_temp_kline(struct ConfItem *aconf)
-{
-	if(aconf->hold >= CurrentTime + (10080 * 60))
-	{
-		dlinkAdd(aconf, &aconf->dnode, &temp_klines[TEMP_WEEK]);
-		aconf->port = TEMP_WEEK;
-	}
-	else if(aconf->hold >= CurrentTime + (1440 * 60))
-	{
-		dlinkAdd(aconf, &aconf->dnode, &temp_klines[TEMP_DAY]);
-		aconf->port = TEMP_DAY;
-	}
-	else if(aconf->hold >= CurrentTime + (60 * 60))
-	{
-		dlinkAdd(aconf, &aconf->dnode, &temp_klines[TEMP_HOUR]);
-		aconf->port = TEMP_HOUR;
-	}
-	else
-	{
-		dlinkAdd(aconf, &aconf->dnode, &temp_klines[TEMP_MIN]);
-		aconf->port = TEMP_MIN;
-	}
-
-	aconf->flags |= CONF_FLAGS_TEMPORARY;
-	add_conf_by_address(aconf->host, CONF_KILL, aconf->user, aconf);
-}
-
-static void
-expire_temp_kd(void *list)
-{
-	dlink_node *ptr;
-	dlink_node *next_ptr;
-	struct ConfItem *aconf;
-
-	DLINK_FOREACH_SAFE(ptr, next_ptr, ((dlink_list *) list)->head)
-	{
-		aconf = ptr->data;
-
-		if(aconf->hold <= CurrentTime)
-		{
-			dlinkDelete(ptr, list);
-
-			if(aconf->status & CONF_KILL)
-			{
-				/* Alert opers that a TKline expired - Hwy */
-				if(ConfigFileEntry.tkline_expire_notices)
-					sendto_realops_flags(UMODE_ALL, L_ALL,
-							     "Temporary K-line for [%s@%s] expired",
-							     (aconf->user) ? aconf->
-							     user : "*", (aconf->host) ? aconf->host : "*");
-				delete_one_address_conf(aconf->host, aconf);
-			}
-			else
-			{
-				if(ConfigFileEntry.tkline_expire_notices)
-					sendto_realops_flags(UMODE_ALL, L_ALL,
-							"Temporary D-line for [%s] expired",
-							aconf->host);
-				patricia_remove(dline_tree, aconf->pnode);
-				free_conf(aconf);
-			}
-		}
-	}
-}
-
-static void
-reorganise_temp_kd(void *list)
-{
-	struct ConfItem *aconf;
-	dlink_node *ptr, *next_ptr;
-
-	DLINK_FOREACH_SAFE(ptr, next_ptr, ((dlink_list *) list)->head)
-	{
-		aconf = ptr->data;
-
-		if(aconf->hold < (CurrentTime + (60 * 60)))
-		{
-			dlinkMoveNode(ptr, list, (aconf->status == CONF_KILL) ? 
-					&temp_klines[TEMP_MIN] : &temp_dlines[TEMP_MIN]);
-			aconf->port = TEMP_MIN;
-		}
-		else if(aconf->port > TEMP_HOUR)
-		{
-			if(aconf->hold < (CurrentTime + (1440 * 60)))
-			{
-				dlinkMoveNode(ptr, list, (aconf->status == CONF_KILL) ? 
-						&temp_klines[TEMP_HOUR] : &temp_dlines[TEMP_HOUR]);
-				aconf->port = TEMP_HOUR;
-			}
-			else if(aconf->port > TEMP_DAY && 
-				(aconf->hold < (CurrentTime + (10080 * 60))))
-			{
-				dlinkMoveNode(ptr, list, (aconf->status == CONF_KILL) ? 
-						&temp_klines[TEMP_DAY] : &temp_dlines[TEMP_DAY]);
-				aconf->port = TEMP_DAY;
-			}
-		}
-	}
-}
-
-static void
-expire_glines(void *unused)
-{
-	struct ConfItem *aconf;
-	dlink_node *ptr, *next_ptr;
-
-	DLINK_FOREACH_SAFE(ptr, next_ptr, glines.head)
-	{
-		aconf = ptr->data;
-
-		/* these are in chronological order */
-		if(aconf->hold > CurrentTime)
-			break;
-
-		dlinkDelete(ptr, &glines);
-		delete_one_address_conf(aconf->host, aconf);
-	}
-}
-
 
 struct remote_conf *
 make_remote_conf(void)
@@ -809,6 +501,7 @@ attach_server_conf(struct Client *client_p, struct server_conf *server_p)
 	}
 
 	CurrUsers(server_p->class)++;
+
 	client_p->localClient->att_sconf = server_p;
 	server_p->servers++;
 }
@@ -1008,8 +701,8 @@ expire_temp_rxlines(void *unused)
 						"Temporary RESV for [%s] expired",
 						aconf->name);
 
-			dlinkDelete(ptr, &resvTable[i]);
 			free_conf(aconf);
+			dlinkDestroy(ptr, &resvTable[i]);
 		}
 	}
 	HASH_WALK_END
@@ -1024,8 +717,8 @@ expire_temp_rxlines(void *unused)
 				sendto_realops_flags(UMODE_ALL, L_ALL,
 						"Temporary RESV for [%s] expired",
 						aconf->name);
-			dlinkDelete(ptr, &resv_conf_list);
 			free_conf(aconf);
+			dlinkDestroy(ptr, &resv_conf_list);
 		}
 	}
 
@@ -1039,8 +732,8 @@ expire_temp_rxlines(void *unused)
 				sendto_realops_flags(UMODE_ALL, L_ALL,
 						"Temporary X-line for [%s] expired",
 						aconf->name);
-			dlinkDelete(ptr, &xline_conf_list);
 			free_conf(aconf);
+			dlinkDestroy(ptr, &xline_conf_list);
 		}
 	}
 }
@@ -1098,16 +791,4 @@ expire_nd_entries(void *unused)
 		free_nd_entry(nd);
 	}
 }
-
-tgchange *
-find_tgchange(struct sockaddr *ip)
-{
-	patricia_node_t *pnode;
-
-	if((pnode = match_ip(tgchange_tree, ip)))
-		return pnode->data;
-
-	return NULL;
-}
-
 

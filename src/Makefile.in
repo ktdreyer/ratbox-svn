@@ -54,7 +54,6 @@ lex.yy.c:	ircd_lexer.l
 BASE_SRCS =                     \
   adns.c                        \
   balloc.c			\
-  banconf.c			\
   cache.c			\
   channel.c                     \
   class.c                       \
@@ -68,6 +67,7 @@ BASE_SRCS =                     \
   irc_string.c                  \
   ircd.c                        \
   ircd_signal.c                 \
+  kdparse.c			\
   linebuf.c                     \
   listener.c                    \
   match.c                       \
@@ -83,8 +83,10 @@ BASE_SRCS =                     \
   s_auth.c                      \
   s_conf.c                      \
   s_newconf.c			\
+  s_gline.c                     \
   s_log.c                       \
   s_serv.c                      \
+  s_stats.c                     \
   s_user.c                      \
   scache.c                      \
   send.c                        \

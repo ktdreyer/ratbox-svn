@@ -138,7 +138,7 @@ adns_status adns__mkquery_frdgram(adns_state ads, vbuf *vb, int *id_r,
 				  const byte *qd_dgram, int qd_dglen, int qd_begin,
 				  adns_rrtype type, adns_queryflags flags) {
   byte *rqp;
-  findlabel_state fls;
+  findlabel_state flstate;
   int lablen, labstart;
   adns_status st;
 
@@ -146,9 +146,9 @@ adns_status adns__mkquery_frdgram(adns_state ads, vbuf *vb, int *id_r,
 
   MKQUERY_START(vb);
 
-  adns__findlabel_start(&fls,ads,-1,0,qd_dgram,qd_dglen,qd_dglen,qd_begin,0);
+  adns__findlabel_start(&flstate,ads,-1,0,qd_dgram,qd_dglen,qd_dglen,qd_begin,0);
   for (;;) {
-    st= adns__findlabel_next(&fls,&lablen,&labstart); assert(!st);
+    st= adns__findlabel_next(&flstate,&lablen,&labstart); assert(!st);
     if (!lablen) break;
     assert(lablen<255);
     MKQUERY_ADDB(lablen);

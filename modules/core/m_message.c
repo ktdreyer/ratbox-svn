@@ -27,10 +27,9 @@
 #include "stdinc.h"
 #include "client.h"
 #include "ircd.h"
-#include "patricia.h"
 #include "numeric.h"
+#include "common.h"
 #include "s_conf.h"
-#include "s_newconf.h"
 #include "s_serv.h"
 #include "msg.h"
 #include "parse.h"
@@ -42,29 +41,10 @@
 #include "msg.h"
 #include "packet.h"
 #include "send.h"
-#include "event.h"
-#include "hostmask.h"
 
 static int m_message(int, const char *, struct Client *, struct Client *, int, const char **);
 static int m_privmsg(struct Client *, struct Client *, int, const char **);
 static int m_notice(struct Client *, struct Client *, int, const char **);
-static int me_tgch(struct Client *, struct Client *, int, const char **);
-
-static void expire_tgchange(void *unused);
-
-static int
-modinit(void)
-{
-	eventAddIsh("expire_tgchange", expire_tgchange, NULL, 60);
-	expire_tgchange(NULL);
-	return 0;
-}
-
-static void
-moddeinit(void)
-{
-	eventDelete(expire_tgchange, NULL);
-}
 
 struct Message privmsg_msgtab = {
 	"PRIVMSG", 0, 0, 0, MFLG_SLOW | MFLG_UNREG,
@@ -74,13 +54,9 @@ struct Message notice_msgtab = {
 	"NOTICE", 0, 0, 0, MFLG_SLOW,
 	{mg_unreg, {m_notice, 0}, {m_notice, 0}, {m_notice, 0}, mg_ignore, {m_notice, 0}}
 };
-struct Message tgch_msgtab = {
-	"TGCH", 0, 0, 0, MFLG_SLOW,
-	{mg_ignore, mg_ignore, mg_ignore, mg_ignore, {me_tgch, 2}, mg_ignore}
-};
 
-mapi_clist_av1 message_clist[] = { &privmsg_msgtab, &notice_msgtab, &tgch_msgtab, NULL };
-DECLARE_MODULE_AV1(message, modinit, moddeinit, message_clist, NULL, NULL, "$Revision$");
+mapi_clist_av1 message_clist[] = { &privmsg_msgtab, &notice_msgtab, NULL };
+DECLARE_MODULE_AV1(message, NULL, NULL, message_clist, NULL, NULL, "$Revision$");
 
 struct entity
 {
@@ -385,9 +361,9 @@ build_target_list(int p_or_n, const char *command, struct Client *client_p,
 		{
 			if(IsDigit(*nick))
 				sendto_one(source_p, ":%s %d %s * :Target left IRC. "
-					"Failed to deliver: [%.20s]",
-					get_id(&me, source_p), ERR_NOSUCHNICK,
-					get_id(source_p, source_p), text);
+						"Failed to deliver: [%.20s]",
+						get_id(&me, source_p), ERR_NOSUCHNICK,
+						get_id(source_p, source_p), text);
 			else
 				sendto_one_numeric(source_p, ERR_NOSUCHNICK,
 						   form_str(ERR_NOSUCHNICK), nick);
@@ -503,146 +479,6 @@ msg_channel_flags(int p_or_n, const char *command, struct Client *client_p,
 			     command, c, chptr->chname, text);
 }
 
-static void
-add_tgchange(const char *host, struct sockaddr *addr, int bitlen)
-{
-	patricia_node_t *pnode;
-	tgchange *target;
-
-	target = MyMalloc(sizeof(tgchange));
-
-	pnode = make_and_lookup_ip(tgchange_tree, addr, bitlen);
-
-	pnode->data = target;
-	target->pnode = pnode;
-
-	DupString(target->host, host);
-	target->expiry = CurrentTime + ConfigFileEntry.tgchange_expiry;
-	target->last_global = CurrentTime;
-
-	dlinkAdd(target, &target->node, &tgchange_list);
-}
-
-static void
-expire_tgchange(void *unused)
-{
-	tgchange *target;
-	dlink_node *ptr, *next_ptr;
-
-	DLINK_FOREACH_SAFE(ptr, next_ptr, tgchange_list.head)
-	{
-		target = ptr->data;
-
-		if(target->expiry <= CurrentTime &&
-		   target->last_global <= CurrentTime)
-		{
-			dlinkDelete(ptr, &tgchange_list);
-			patricia_remove(tgchange_tree, target->pnode);
-			MyFree(target->host);
-			MyFree(target);
-		}
-	}
-}
-
-#define FREE_TARGET(x) ((x)->localClient->targinfo[0])		/* next free target slot */
-#define USED_TARGETS(x) ((x)->localClient->targinfo[1])		/* number of used targets */
-
-#define PREV_FREE_TARGET(x) ((FREE_TARGET(x) == 0) ? 9 : FREE_TARGET(x) - 1)
-#define PREV_TARGET(i) ((i == 0) ? i = 9 : --i)
-#define NEXT_TARGET(i) ((i == 9) ? i = 0 : ++i)
-				
-static int
-add_target(struct Client *source_p, struct Client *target_p)
-{
-	int i, j;
-
-	for(i = PREV_FREE_TARGET(source_p), j = USED_TARGETS(source_p);
-	    j;
-	    --j, PREV_TARGET(i))
-	{
-		if(source_p->localClient->targets[i] == target_p)
-			return 1;
-	}	
-	    
-
-	/* list is full */
-	if(USED_TARGETS(source_p) == 10)
-	{
-		if((i = (CurrentTime - source_p->localClient->target_last) / 60))
-		{
-			if(i > 10)
-				i = 10;
-
-			USED_TARGETS(source_p) -= i;
-			source_p->localClient->target_last = CurrentTime;
-		}
-		else
-		{
-			tgchange *target;
-			int send_tgchange = 0;
-
-			if((target = find_tgchange((struct sockaddr *)&source_p->localClient->ip)))
-			{
-				target->expiry = CurrentTime + ConfigFileEntry.tgchange_expiry;
-
-				if(target->last_global + ConfigFileEntry.tgchange_remote < CurrentTime)
-				{
-					target->last_global = CurrentTime;
-					send_tgchange++;
-				}
-			}
-			else
-			{
-				add_tgchange((const char *) source_p->sockhost, 
-						&source_p->localClient->ip,
-#ifdef IPV6
-					client_p->localClient->ip.ss_family == AF_INET6 ? 128 :
-#endif
-					32);
-				send_tgchange++;
-			}
-
-			if(send_tgchange && !IsIPSpoof(source_p) &&
-			   ConfigFileEntry.tgchange_remote)
-				sendto_match_servs(&me, "*", CAP_ENCAP, NOCAPS,
-						"ENCAP * TGCH %s",
-						source_p->sockhost);
-
-			return 0;
-		}
-	}
-
-	source_p->localClient->targets[FREE_TARGET(source_p)] = target_p;
-	NEXT_TARGET(FREE_TARGET(source_p));
-	++USED_TARGETS(source_p);
-	return 1;
-}
-
-static int
-me_tgch(struct Client *client_p, struct Client *source_p,
-	int parc, const char *parv[])
-{
-	tgchange *target;
-	struct irc_sockaddr_storage addr;
-	int bits;
-
-	/* CIDR? we shouldnt be getting this */
-	if(strchr(parv[1], '/'))
-		return 0;
-
-	if((parse_netmask(parv[1], (struct sockaddr *) &addr, &bits)) == HM_HOST)
-		return 0;
-
-	if((target = find_tgchange(&addr)))
-	{
-		target->expiry = CurrentTime + ConfigFileEntry.tgchange_expiry;
-		return 0;
-	}
-
-	add_tgchange(parv[1], (struct sockaddr *) &addr, bits);
-	return 0;
-}
-
 /*
  * msg_client
  *
@@ -665,20 +501,6 @@ msg_client(int p_or_n, const char *command,
 		 * and its not a notice */
 		if(p_or_n != NOTICE)
 			source_p->localClient->last = CurrentTime;
-
-		/* target change stuff, only if we're not dealing with a
-		 * ctcp reply (NOTICE)
-		 */
-		if((p_or_n != NOTICE || *text != '\001') && 
-		   ConfigFileEntry.target_change && !IsOper(source_p))
-		{
-			if(!add_target(source_p, target_p))
-			{
-				sendto_one(source_p, form_str(ERR_TARGCHANGE),
-					me.name, source_p->name, target_p->name);
-				return;
-			}
-		}
 	}
 	else if(source_p->from == target_p->from)
 	{
@@ -1040,5 +862,3 @@ find_userhost(const char *user, const char *host, int *count)
 	}
 	return (res);
 }
-
-

@@ -22,8 +22,7 @@
  * $Id$
  *
  */
-#ifndef INCLUDED_stdinc_h
-#define INCLUDED_stdinc_h
+
 
 #include "config.h"		/* Gotta pull in the autoconf stuff */
 
@@ -39,6 +38,13 @@
 char *alloca ();
 #   endif
 #  endif
+# endif
+#endif
+
+#ifdef __vms
+# include <builtins.h>
+# ifdef __vax
+#  define alloca __ALLOCA
 # endif
 #endif
 
@@ -76,6 +82,9 @@ char *alloca ();
 #include <dirent.h>
 #include <ctype.h>
 
+#ifdef __vms
+#define _XOPEN_SOURCE 1
+#endif
 #include <limits.h>
 
 #ifdef HAVE_UNISTD_H
@@ -111,6 +120,42 @@ extern int errno;
 #include <sys/uio.h>
 #endif
 
+#ifdef __vms
+#include <sys/ioctl.h>
+
+#include <sys/ioctl.h>
+#include <builtins.h>
+#include <timers.h>
+
+#include <clidef.h>
+#include <climsgdef.h>
+#include <dvidef.h>
+#include <efndef.h>
+#include <iodef.h>
+#include <jpidef.h>
+#include <lnmdef.h>
+#include <opcdef.h>
+#include <psldef.h>
+#include <rms.h>
+#include <smgdef.h>
+#include <ssdef.h>
+#include <stsdef.h>
+#include <syidef.h>
+#include <timers.h>
+#include <trmdef.h>
+#include <tt2def.h>
+#include <uaidef.h>
+
+#include <descrip.h>
+#include <starlet.h>
+
+#include <cli$routines.h>
+#include <smg$routines.h>
+#include <lib$routines.h>
+
+#include <starlet.h>
+#endif
+
 #if defined(__INTEL_COMPILER) || defined(__GNUC__)
 # ifdef __unused
 #  undef __unused
@@ -142,48 +187,3 @@ extern int errno;
 # define LOCAL_COPY(s) strcpy(alloca(strlen(s) + 1), s) /* XXX Is that allowed? */
 #endif /* defined(__INTEL_COMPILER) || defined(__GNUC__) */
 #endif /* strdupa */
-
-#ifndef NULL
-#define NULL 0
-#endif
-
-#ifdef TRUE
-#undef TRUE
-#endif
-
-#ifdef FALSE
-#undef FALSE
-#endif
-
-#define FALSE  0
-#define TRUE   1
-#define HIDEME 2
-
-/* Blah. I use these a lot. -Dianora */
-#ifdef YES
-#undef YES
-#endif
-
-#define YES 1
-
-#ifdef NO
-#undef NO
-#endif
-
-#define NO  0
-
-/* Just blindly define our own MIN/MAX macro */
-
-#define IRCD_MAX(a, b)  ((a) > (b) ? (a) : (b))
-#define IRCD_MIN(a, b)  ((a) < (b) ? (a) : (b))
-
-/* Right out of the RFC */
-#define IRCD_BUFSIZE 512
-
-#ifdef IPV6
-#define BITLEN 128
-#else
-#define BITLEN 32
-#endif
-
-#endif

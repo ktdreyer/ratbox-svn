@@ -30,6 +30,7 @@
 #include "channel.h"
 #include "class.h"
 #include "client.h"
+#include "common.h"
 #include "irc_string.h"
 #include "ircd.h"
 #include "numeric.h"
@@ -164,18 +165,15 @@ send_queued_write(int fd, void *data)
 	int retlen;
 	int flags;
 #ifdef USE_IODEBUG_HOOKS
-	hook_data_int hinfo;
+	struct hook_io_data hdata;
 #endif
-
 	/* cant write anything to a dead socket. */
 	if(IsIOError(to))
 		return;
-
 #ifdef USE_IODEBUG_HOOKS
-	hinfo.client = to;
-
+	hdata.connection = to;
 	if(to->localClient->buf_sendq.list.head)
-		hinfo.arg1 = ((buf_line_t *) to->localClient->buf_sendq.list.head->data)->buf +
+		hdata.data = ((buf_line_t *) to->localClient->buf_sendq.list.head->data)->buf +
 	                     to->localClient->buf_sendq.writeofs;
 #endif
 
@@ -186,11 +184,10 @@ send_queued_write(int fd, void *data)
 		{
 			/* We have some data written .. update counters */
 #ifdef USE_IODEBUG_HOOKS
-                        hinfo.arg2 = retlen;
-                        call_hook(h_iosend_id, &hinfo);
-
+                        hdata.len = retlen;
+                        hook_call_event(h_iosend_id, &hdata);
                         if(to->localClient->buf_sendq.list.head)
-                                hinfo.arg1 =
+                                hdata.data =
                                         ((buf_line_t *) to->localClient->buf_sendq.list.head->
                                          data)->buf + to->localClient->buf_sendq.writeofs;
 #endif
@@ -247,9 +244,9 @@ send_queued_slink_write(int fd, void *data)
 	/* Next, lets try to write some data */
 	if(to->localClient->slinkq)
 	{
-		retlen = send(to->localClient->ctrlfd,
+		retlen = write(to->localClient->ctrlfd,
 			      to->localClient->slinkq + to->localClient->slinkq_ofs,
-			      to->localClient->slinkq_len, 0);
+			      to->localClient->slinkq_len);
 
 		if(retlen < 0)
 		{
@@ -551,6 +548,9 @@ sendto_channel_flags(struct Client *one, int type, struct Client *source_p,
 			continue;
 
 		if(type && ((msptr->flags & type) == 0))
+			continue;
+
+		if(IsDeaf(target_p))
 			continue;
 
 		if(!MyClient(target_p))

@@ -38,49 +38,14 @@
 
 static int m_lusers(struct Client *, struct Client *, int, const char **);
 static int ms_lusers(struct Client *, struct Client *, int, const char **);
-static int m_users(struct Client *, struct Client *, int, const char **);
 
 struct Message lusers_msgtab = {
 	"LUSERS", 0, 0, 0, MFLG_SLOW,
 	{mg_unreg, {m_lusers, 0}, {ms_lusers, 0}, mg_ignore, mg_ignore, {ms_lusers, 0}}
 };
 
-struct Message users_msgtab = {
-	"USERS", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, {m_users, 0}, {m_users, 0}, mg_ignore, mg_ignore, {m_users, 0}}
-};
-
-mapi_clist_av1 lusers_clist[] = { &lusers_msgtab, &users_msgtab, NULL };
+mapi_clist_av1 lusers_clist[] = { &lusers_msgtab, NULL };
 DECLARE_MODULE_AV1(lusers, NULL, NULL, lusers_clist, NULL, NULL, "$Revision$");
-
-
-/*
- * m_users
- *      parv[0] = sender prefix
- *      parv[1] = servername
- */
-static int
-m_users(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
-{
-	if(hunt_server(client_p, source_p, ":%s USERS :%s", 1, parc, parv) == HUNTED_ISME)
-	{
-		sendto_one_numeric(source_p, RPL_LOCALUSERS,
-				   form_str(RPL_LOCALUSERS),
-				   dlink_list_length(&lclient_list),
-				   Count.max_loc,
-				   dlink_list_length(&lclient_list),
-				   Count.max_loc);
-
-		sendto_one_numeric(source_p, RPL_GLOBALUSERS, 
-				   form_str(RPL_GLOBALUSERS),
-				   Count.total, Count.max_tot,
-				   Count.total, Count.max_tot);
-	}
-
-	return 0;
-}
-
-
 
 /*
  * m_lusers - LUSERS message handler

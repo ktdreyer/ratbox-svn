@@ -62,13 +62,34 @@ sigterm_handler(int sig)
 	exit(-1);
 }
 
+#ifdef __vms
+static void
+ircd$rehash_conf(void)
+{
+	rehash(1);
+}
+
+static void
+ircd$rehash_motd(void)
+{
+	free_cachefile(user_motd);
+	user_motd = cache_file(MPATH, "ircd.motd", 0);
+	sendto_realops_flags(UMODE_ALL, L_ALL,
+		"Got signal SIGUSR1, reloading ircd motd file");
+}
+#endif
+
 /* 
  * sighup_handler - reread the server configuration
  */
 static void
 sighup_handler(int sig)
 {
+#ifndef __vms
 	dorehash = 1;
+#else
+	eventAdd("rehash motd", ircd$rehash_conf, NULL, 0);
+#endif
 }
 
 /*
@@ -77,13 +98,11 @@ sighup_handler(int sig)
 static void
 sigusr1_handler(int sig)
 {
+#ifndef __vms
 	doremotd = 1;
-}
-
-static void
-sigusr2_handler(int sig)
-{
-	dorehashban = 1;
+#else
+	eventAdd("rehash motd", ircd$rehash_motd, NULL, 0);
+#endif
 }
 
 /*
@@ -155,10 +174,6 @@ setup_signals()
 	act.sa_handler = sigusr1_handler;
 	sigaddset(&act.sa_mask, SIGUSR1);
 	sigaction(SIGUSR1, &act, 0);
-
-	act.sa_handler = sigusr2_handler;
-	sigaddset(&act.sa_mask, SIGUSR2);
-	sigaction(SIGUSR2, &act, 0);
 
 	act.sa_handler = sigchld_handler;
 	sigaddset(&act.sa_mask, SIGCHLD);

@@ -30,6 +30,7 @@
 #include "s_conf.h"
 #include "channel.h"
 #include "client.h"
+#include "common.h"
 #include "hash.h"
 #include "irc_string.h"
 #include "ircd.h"
@@ -289,7 +290,7 @@ add_to_resv_hash(const char *name, struct ConfItem *aconf)
 		return;
 
 	hashv = hash_resv(name);
-	dlinkAdd(aconf, &aconf->dnode, &resvTable[hashv]);
+	dlinkAddAlloc(aconf, &resvTable[hashv]);
 }
 
 void
@@ -326,7 +327,7 @@ del_from_id_hash(const char *id, struct Client *client_p)
 		return;
 
 	hashv = hash_id(id);
-	dlinkFindDestroy(client_p, &idTable[hashv]);
+	dlinkFindDestroy(&idTable[hashv], client_p);
 }
 
 /* del_from_client_hash()
@@ -345,7 +346,7 @@ del_from_client_hash(const char *name, struct Client *client_p)
 		return;
 
 	hashv = hash_nick(name);
-	dlinkFindDestroy(client_p, &clientTable[hashv]);
+	dlinkFindDestroy(&clientTable[hashv], client_p);
 }
 
 /* del_from_channel_hash()
@@ -364,7 +365,7 @@ del_from_channel_hash(const char *name, struct Channel *chptr)
 		return;
 
 	hashv = hash_channel(name);
-	dlinkFindDestroy(chptr, &channelTable[hashv]);
+	dlinkFindDestroy(&channelTable[hashv], chptr);
 }
 
 /* del_from_hostname_hash()
@@ -381,7 +382,7 @@ del_from_hostname_hash(const char *hostname, struct Client *client_p)
 
 	hashv = hash_hostname(hostname);
 
-	dlinkFindDestroy(client_p, &hostTable[hashv]);
+	dlinkFindDestroy(&hostTable[hashv], client_p);
 }
 
 /* del_from_resv_hash()
@@ -400,7 +401,7 @@ del_from_resv_hash(const char *name, struct ConfItem *aconf)
 
 	hashv = hash_resv(name);
 
-	dlinkDelete(&aconf->dnode, &resvTable[hashv]);
+	dlinkFindDestroy(&resvTable[hashv], aconf);
 }
 
 void
@@ -796,8 +797,8 @@ clear_resv_hash(void)
 		if(aconf->hold)
 			continue;
 
-		dlinkDelete(ptr, &resvTable[i]);
 		free_conf(ptr->data);
+		dlinkDestroy(ptr, &resvTable[i]);
 	}
 	HASH_WALK_END
 }

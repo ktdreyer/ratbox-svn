@@ -14,7 +14,7 @@ The <gecos> field contains certain special characters:
 
 To use a literal one of these characters, escape it with '\'.  A 
 literal '\' character must also be escaped.  You may also insert \s
-which will be converted to a space.
+which will be converted into a space.
 
 If the <gecos> field is purely numeric (ie "123") then the time
 field must be specified.  "0" must be used to denote a permanent 

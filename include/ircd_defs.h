@@ -146,7 +146,11 @@
 #define GET_SS_LEN(x) x.ss_len
 #else
 #define SET_SS_LEN(x, y)
+#ifdef IPV6
 #define GET_SS_LEN(x) x.ss_family == AF_INET ? sizeof(struct sockaddr_in) : sizeof(struct sockaddr_in6)
+#else
+#define GET_SS_LEN(x) sizeof(struct sockaddr_in)
+#endif
 #endif
 
 

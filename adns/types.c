@@ -771,7 +771,7 @@ static adns_status pa_ptr6_all(const parseinfo *pai, int dmstart, int max, void 
   char **rrp= datap;
   adns_status st;
   adns_rr_addr *ap;
-  findlabel_state fls;
+  findlabel_state flstate;
   char labbuf[4], ipv[34], ip6[40], *pt;
   int cbyte, i, lablen, labstart, id, l;
   adns_query nqu;
@@ -787,12 +787,12 @@ static adns_status pa_ptr6_all(const parseinfo *pai, int dmstart, int max, void 
   memset(ipv,0, sizeof(ipv));
   ap= &pai->qu->ctx.info.ptr_parent_addr;
   if (!ap->len) {
-    adns__findlabel_start(&fls, pai->ads, -1, pai->qu,
+    adns__findlabel_start(&flstate, pai->ads, -1, pai->qu,
 			  pai->qu->query_dgram, pai->qu->query_dglen,
 			  pai->qu->query_dglen, DNS_HDRSIZE, 0);
     for(i = 0; i < 32; i++)
     {
-    st= adns__findlabel_next(&fls,&lablen,&labstart); assert(!st);
+    st= adns__findlabel_next(&flstate,&lablen,&labstart); assert(!st);
     if (lablen<=0 || lablen > 1) return adns_s_querydomainwrong;
 	 
       memcpy(labbuf, pai->qu->query_dgram + labstart, lablen);  labbuf[lablen]= 0;
@@ -809,7 +809,7 @@ static adns_status pa_ptr6_all(const parseinfo *pai, int dmstart, int max, void 
     }    
     *pt = '\0';
     for (i=0; i<sizeof(expectdomain)/sizeof(*expectdomain); i++) {
-        st= adns__findlabel_next(&fls,&lablen,&labstart); assert(!st);
+        st= adns__findlabel_next(&flstate,&lablen,&labstart); assert(!st);
         l= strlen(expectdomain[i]);
         if (lablen != l || memcmp(pai->qu->query_dgram + labstart, expectdomain[i], l))
 	   return adns_s_querydomainwrong;
@@ -860,7 +860,7 @@ static adns_status pa_ptr(const parseinfo *pai, int dmstart, int max, void *data
   char **rrp= datap;
   adns_status st;
   adns_rr_addr *ap;
-  findlabel_state fls;
+  findlabel_state flstate;
   char *ep;
   byte ipv[4];
   char labbuf[4];
@@ -876,11 +876,11 @@ static adns_status pa_ptr(const parseinfo *pai, int dmstart, int max, void *data
 
   ap= &pai->qu->ctx.info.ptr_parent_addr;
   if (!ap->len) {
-    adns__findlabel_start(&fls, pai->ads, -1, pai->qu,
+    adns__findlabel_start(&flstate, pai->ads, -1, pai->qu,
 			  pai->qu->query_dgram, pai->qu->query_dglen,
 			  pai->qu->query_dglen, DNS_HDRSIZE, 0);
     for (i=0; i<4; i++) {
-      st= adns__findlabel_next(&fls,&lablen,&labstart); assert(!st);
+      st= adns__findlabel_next(&flstate,&lablen,&labstart); assert(!st);
       if (lablen<=0 || lablen>3) return adns_s_querydomainwrong;
       memcpy(labbuf, pai->qu->query_dgram + labstart, lablen);  labbuf[lablen]= 0;
       ipv[3-i]= strtoul(labbuf,&ep,10);  if (*ep) return adns_s_querydomainwrong;
@@ -888,12 +888,12 @@ static adns_status pa_ptr(const parseinfo *pai, int dmstart, int max, void *data
 	return adns_s_querydomainwrong;
     }
     for (i=0; i<sizeof(expectdomain)/sizeof(*expectdomain); i++) {
-      st= adns__findlabel_next(&fls,&lablen,&labstart); assert(!st);
+      st= adns__findlabel_next(&flstate,&lablen,&labstart); assert(!st);
       l= strlen(expectdomain[i]);
       if (lablen != l || memcmp(pai->qu->query_dgram + labstart, expectdomain[i], l))
 	return adns_s_querydomainwrong;
     }
-    st= adns__findlabel_next(&fls,&lablen,0); assert(!st);
+    st= adns__findlabel_next(&flstate,&lablen,0); assert(!st);
     if (lablen) return adns_s_querydomainwrong;
     
     ap->len= sizeof(struct sockaddr_in);
@@ -971,17 +971,17 @@ static adns_status pap_mailbox822(const parseinfo *pai, int *cbyte_io, int max,
   int lablen, labstart, i, needquote, c, r, neednorm;
   const unsigned char *p;
   char *str;
-  findlabel_state fls;
+  findlabel_state flstate;
   adns_status st;
   vbuf *vb;
 
   vb= &pai->qu->vb;
   vb->used= 0;
-  adns__findlabel_start(&fls, pai->ads,
+  adns__findlabel_start(&flstate, pai->ads,
 			-1, pai->qu,
 			pai->dgram, pai->dglen, max,
 			*cbyte_io, cbyte_io);
-  st= adns__findlabel_next(&fls,&lablen,&labstart);
+  st= adns__findlabel_next(&flstate,&lablen,&labstart);
   if (!lablen) {
     adns__vbuf_appendstr(vb,".");
     goto x_ok;
@@ -1011,7 +1011,7 @@ static adns_status pap_mailbox822(const parseinfo *pai, int *cbyte_io, int max,
 
   r= adns__vbuf_appendstr(vb,"@"); if (!r) R_NOMEM;
 
-  st= adns__parse_domain_more(&fls,pai->ads, pai->qu,vb,0, pai->dgram);
+  st= adns__parse_domain_more(&flstate,pai->ads, pai->qu,vb,0, pai->dgram);
   if (st) return st;
 
  x_ok:

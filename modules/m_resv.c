@@ -275,7 +275,7 @@ parse_resv(struct Client *source_p, const char *name,
 		aconf->status = CONF_RESV_NICK;
 		DupString(aconf->name, name);
 		DupString(aconf->passwd, reason);
-		dlinkAdd(aconf, &aconf->dnode, &resv_conf_list);
+		dlinkAddAlloc(aconf, &resv_conf_list);
 
 		if(temp_time > 0)
 		{
@@ -483,7 +483,7 @@ remove_temp_resv(struct Client *source_p, const char *name)
 			return 0;
 
 		/* already have ptr from the loop above.. */
-		dlinkDelete(ptr, &resv_conf_list);
+		dlinkDestroy(ptr, &resv_conf_list);
 		free_conf(aconf);
 	}
 
@@ -506,4 +506,99 @@ remove_temp_resv(struct Client *source_p, const char *name)
 static void
 remove_resv(struct Client *source_p, const char *name)
 {
+	FBFILE *in, *out;
+	char buf[BUFSIZE];
+	char buff[BUFSIZE];
+	char temppath[BUFSIZE];
+	const char *filename;
+	mode_t oldumask;
+	char *p;
+	int error_on_write = 0;
+	int found_resv = 0;
+
+	ircsprintf(temppath, "%s.tmp", ConfigFileEntry.resvfile);
+	filename = get_conf_name(RESV_TYPE);
+
+	if((in = fbopen(filename, "r")) == NULL)
+	{
+		sendto_one_notice(source_p, ":Cannot open %s", filename);
+		return;
+	}
+
+	oldumask = umask(0);
+
+	if((out = fbopen(temppath, "w")) == NULL)
+	{
+		sendto_one_notice(source_p, ":Cannot open %s", temppath);
+		fbclose(in);
+		umask(oldumask);
+		return;
+	}
+
+	umask(oldumask);
+
+	while (fbgets(buf, sizeof(buf), in))
+	{
+		const char *resv_name;
+
+		if(error_on_write)
+		{
+			if(temppath != NULL)
+				(void) unlink(temppath);
+
+			break;
+		}
+
+		strlcpy(buff, buf, sizeof(buff));
+
+		if((p = strchr(buff, '\n')) != NULL)
+			*p = '\0';
+
+		if((*buff == '\0') || (*buff == '#'))
+		{
+			error_on_write = (fbputs(buf, out) < 0) ? YES : NO;
+			continue;
+		}
+
+		if((resv_name = getfield(buff)) == NULL)
+		{
+			error_on_write = (fbputs(buf, out) < 0) ? YES : NO;
+			continue;
+		}
+
+		if(irccmp(resv_name, name) == 0)
+		{
+			found_resv++;
+		}
+		else
+		{
+			error_on_write = (fbputs(buf, out) < 0) ? YES : NO;
+		}
+	}
+
+	fbclose(in);
+	fbclose(out);
+
+	if(error_on_write)
+	{
+		sendto_one_notice(source_p, ":Couldn't write temp resv file, aborted");
+		return;
+	}
+	else if(!found_resv)
+	{
+		sendto_one_notice(source_p, ":No RESV for %s", name);
+
+		if(temppath != NULL)
+			(void) unlink(temppath);
+
+		return;
+	}
+
+	(void) rename(temppath, filename);
+	rehash(0);
+
+	sendto_one_notice(source_p, ":RESV for [%s] is removed", name);
+	sendto_realops_flags(UMODE_ALL, L_ALL,
+			     "%s has removed the RESV for: [%s]", get_oper_name(source_p), name);
+	ilog(L_KLINE, "UR %s %s", get_oper_name(source_p), name);
 }

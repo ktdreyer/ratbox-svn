@@ -27,6 +27,8 @@
 #ifndef INCLUDED_msg_h
 #define INCLUDED_msg_h
 
+#include "config.h"
+
 struct Client;
 
 /* MessageHandler */

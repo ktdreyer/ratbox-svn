@@ -39,6 +39,7 @@
 #include "s_auth.h"
 #include "s_conf.h"
 #include "client.h"
+#include "common.h"
 #include "event.h"
 #include "irc_string.h"
 #include "sprintf_irc.h"
@@ -48,6 +49,7 @@
 #include "res.h"
 #include "commio.h"
 #include "s_log.h"
+#include "s_stats.h"
 #include "send.h"
 #include "memory.h"
 #include "hook.h"
@@ -88,6 +90,7 @@ static EVH timeout_auth_queries_event;
 
 static PF read_auth_reply;
 static CNCB auth_connect_callback;
+static int h_new_local_client;
 /*
  * init_auth()
  *
@@ -97,6 +100,7 @@ void
 init_auth(void)
 {
 	/* This hook takes a struct Client for its argument */
+	hook_add_event("new_local_client", &h_new_local_client);
 	memset(&auth_poll_list, 0, sizeof(auth_poll_list));
 	eventAddIsh("timeout_auth_queries_event", timeout_auth_queries_event, NULL, 1);
 	auth_heap = BlockHeapCreate(sizeof(struct AuthRequest), LCLIENT_HEAP_SIZE);
@@ -150,7 +154,9 @@ release_auth_client(struct AuthRequest *auth)
 	 *     -- adrian
 	 */
 	client->localClient->allow_read = MAX_FLOOD;
+	comm_setflush(client->localClient->fd, 1000, flood_recalc, client);
 	dlinkAddTail(client, &client->node, &global_client_list);
+	hook_call_event(h_new_local_client, client);
 	read_packet(client->localClient->fd, client);
 }
 
@@ -164,43 +170,45 @@ release_auth_client(struct AuthRequest *auth)
 static void
 auth_dns_callback(void *vptr, adns_answer * reply)
 {
-	struct AuthRequest *auth = (struct AuthRequest *) vptr;
-	ClearDNSPending(auth);
+        struct AuthRequest *auth = (struct AuthRequest *) vptr;
+        ClearDNSPending(auth);
 
-	if(reply && (reply->status == adns_s_ok))
-	{
-		if(strlen(*reply->rrs.str) <= HOSTLEN)
-		{
-			strlcpy(auth->client->host, *reply->rrs.str, sizeof(auth->client->host));
-			sendheader(auth->client, REPORT_FIN_DNS);
-		}
-		else {
-			sendheader(auth->client, REPORT_HOST_TOOLONG);
-		}
-		MyFree(reply);
-	} else
-#ifdef IPV6
-	if(ConfigFileEntry.fallback_to_ip6_int && auth->client->localClient->ip.ss_family == AF_INET6 
-		&& auth->ip6_int == 0)
-	{
-		MyFree(reply);
-		if(adns_getaddr((struct sockaddr *)&auth->client->localClient->ip, 
-				auth->client->localClient->ip.ss_family, 
-				&auth->dns_query, 0)) 
-		{
-			sendheader(auth->client, REPORT_FAIL_DNS);
-		} else {
-			SetDNSPending(auth);
-			auth->ip6_int = 1;
-			return;
-		}
-	} else
+        if(reply && (reply->status == adns_s_ok))
+        {
+                if(strlen(*reply->rrs.str) <= HOSTLEN)
+                {
+                        strlcpy(auth->client->host, *reply->rrs.str, sizeof(auth->client->host));
+                        sendheader(auth->client, REPORT_FIN_DNS);
+                }
+                else {
+                        sendheader(auth->client, REPORT_HOST_TOOLONG);
+                }
+                MyFree(reply);
+        } else
+#ifdef IPV6   
+        if(ConfigFileEntry.fallback_to_ip6_int && auth->client->localClient->ip.ss_family == AF_INET6
+                && auth->ip6_int == 0)
+        {
+                MyFree(reply);
+                reply = NULL;
+                if(adns_getaddr((struct sockaddr *)&auth->client->localClient->ip,
+                                auth->client->localClient->ip.ss_family, 
+                                &auth->dns_query, 0)) 
+                {
+                        sendheader(auth->client, REPORT_FAIL_DNS);
+                } else {
+                        SetDNSPending(auth);
+                        auth->ip6_int = 1;  
+                        return;
+                }
+        } else   
 #endif
 	{
-		sendheader(auth->client, REPORT_FAIL_DNS);
-		MyFree(reply);
-	}
-	release_auth_client(auth);
+                sendheader(auth->client, REPORT_FAIL_DNS);
+                MyFree(reply);
+	}      
+        release_auth_client(auth);
+
 }
 
 /*
@@ -209,9 +217,9 @@ auth_dns_callback(void *vptr, adns_answer * reply)
 static void
 auth_error(struct AuthRequest *auth)
 {
-	++ServerStats.is_abad;
+	++ServerStats->is_abad;
 
-	comm_close(auth->fd);
+	fd_close(auth->fd);
 	auth->fd = -1;
 
 	ClearAuth(auth);
@@ -240,12 +248,12 @@ start_auth_query(struct AuthRequest *auth)
 		return 0;
 	
 	family = auth->client->localClient->ip.ss_family;
-	if((fd = comm_socket(family, SOCK_STREAM, 0, "ident")) == -1)
+	if((fd = comm_open(family, SOCK_STREAM, 0, "ident")) == -1)
 	{
 		report_error("creating auth stream socket %s:%s",
 			     get_client_name(auth->client, SHOW_IP), 
 			     log_client_name(auth->client, SHOW_IP), errno);
-		++ServerStats.is_abad;
+		++ServerStats->is_abad;
 		return 0;
 	}
 	if((MAXCONNECTIONS - 10) < fd)
@@ -253,7 +261,7 @@ start_auth_query(struct AuthRequest *auth)
 		sendto_realops_flags(UMODE_ALL, L_ALL,
 				     "Can't allocate fd for auth on %s",
 				     get_client_name(auth->client, SHOW_IP));
-		comm_close(fd);
+		fd_close(fd);
 		return 0;
 	}
 
@@ -371,14 +379,14 @@ start_auth(struct Client *client)
 	/* No DNS cache now, remember? -- adrian */
 	if(adns_getaddr((struct sockaddr *)&client->localClient->ip, client->localClient->ip.ss_family,
 		     &auth->dns_query, 1))
-	{
+        {
 #ifdef IPV6
-		if(ConfigFileEntry.fallback_to_ip6_int && auth->client->localClient->ip.ss_family == AF_INET6 &&
-		   !adns_getaddr((struct sockaddr *)&auth->client->localClient->ip, client->localClient->ip.ss_family,
-			         &auth->dns_query, 0))
+                if(ConfigFileEntry.fallback_to_ip6_int && auth->client->localClient->ip.ss_family == AF_INET6 &&
+                  !adns_getaddr((struct sockaddr *)&auth->client->localClient->ip, client->localClient->ip.ss_family,
+                                &auth->dns_query, 0))
 		{
-			SetDNSPending(auth);
-		} else		
+                	SetDNSPending(auth);
+            	} else            
 #endif
 		sendheader(client, REPORT_FAIL_DNS);
 	}
@@ -409,7 +417,7 @@ timeout_auth_queries_event(void *notused)
 		if(auth->timeout < CurrentTime)
 		{
 			if(auth->fd >= 0)
-				comm_close(auth->fd);
+				fd_close(auth->fd);
 
 			if(IsDoingAuth(auth))
 			{
@@ -475,7 +483,7 @@ auth_connect_callback(int fd, int error, void *data)
 	ircsnprintf(authbuf, sizeof(authbuf), "%u , %u\r\n",
 		   (unsigned int) ntohs(them.sin_port), (unsigned int) ntohs(us.sin_port));
 
-	if(send(auth->fd, authbuf, strlen(authbuf), 0) == -1)
+	if(write(auth->fd, authbuf, strlen(authbuf)) == -1)
 	{
 		auth_error(auth);
 		return;
@@ -504,7 +512,7 @@ read_auth_reply(int fd, void *data)
 	int count;
 	char buf[AUTH_BUFSIZ + 1];	/* buffer to read auth reply into */
 
-	len = recv(auth->fd, buf, AUTH_BUFSIZ, 0);
+	len = read(auth->fd, buf, AUTH_BUFSIZ);
 
 	if(len < 0 && ignoreErrno(errno))
 	{
@@ -539,20 +547,20 @@ read_auth_reply(int fd, void *data)
 		}
 	}
 
-	comm_close(auth->fd);
+	fd_close(auth->fd);
 	auth->fd = -1;
 	ClearAuth(auth);
 
 	if(s == NULL)
 	{
-		++ServerStats.is_abad;
+		++ServerStats->is_abad;
 		strcpy(auth->client->username, "unknown");
 		sendheader(auth->client, REPORT_FAIL_ID);
 	}
 	else
 	{
 		sendheader(auth->client, REPORT_FIN_ID);
-		++ServerStats.is_asuc;
+		++ServerStats->is_asuc;
 		SetGotId(auth->client);
 	}
 
@@ -581,7 +589,7 @@ delete_auth_queries(struct Client *target_p)
 		delete_adns_queries(&auth->dns_query);
 
 	if(auth->fd >= 0)
-		comm_close(auth->fd);
+		fd_close(auth->fd);
 		
 	dlinkDelete(&auth->node, &auth_poll_list);
 	free_auth_request(auth);

@@ -1,12 +1,120 @@
 
-This is the current beta release version of the 'devel' tree of ircd-ratbox.
+This is the current release version of the 'stable' tree of ircd-ratbox.
 
-NOTE: THIS IS BETA CODE.  It is run at your own risk.  By running this
-      code you assume FULL responsibility for any problems it may cause.  We
-      do NOT recommend this code is run on production servers. 
-
-doc/whats-new.txt contains important lists of changes between 2.0 and 1.4 -
+doc/whats-new.txt contains important lists of changes between 2.0 and 1.5 -
 it is important you read this file before upgrading.
+
+-- ircd-ratbox-2.0.6
+- tack the kline/gline/xline a user matches onto the end of the exempt
+  notice
+- fix misleading xline documentation on spaces
+- fix the +k-k bug in channels
+- added new operator {}; flag, "remoteban", controls whether oper can
+  issue remote klines etc
+- added the negation of flags, via ~flag.  Default oper flags modified to be
+  operwall and remoteban.
+- propagate upto MAXMODEPARAMSSERV (10) modes in one go, rather than
+  splitting it up into 4,4,2
+- rework buffer length tracking when building outbound mode buffers.
+- added 'Z' to umodes in 002
+- tack our SID onto the end of RPL_VERSION
+- remove encrypted=yes|no; from auth {}; and operator {};, its now in flags
+  in both.  Defaults to off for auth {}, on for operator {} which requires
+  the negation of ~encrypted to disable it.
+- properly close opers helpfile dir
+- add unreject, to remove one ip from the reject cache
+- fix klines/glines against user@1.2.3.* etc.
+- properly substitute logdir into the Makefile so its created on make
+  install
+- speed up unkline for perm klines, its still slow as hell, but less so
+- dont change the ts of a client whos nick flooding, or one changing case of
+  nick
+- added "Failed to deliver: [%.20s]" to the ERR_NOSUCHNICK we send out
+  when relaying a PRIVMSG to a UID
+- fix ungline
+- keep the two fields sent in USER
+- added etrace -v4, etrace -v6 and etrace -full.  First two list ipv4/ipv6,
+  latter gives the two fields sent in USER, via numeric 708 (RPL_ETRACEFULL)
+- Expire temp r/x lines around every 60 seconds instead of every 5 minutes
+
+-- ircd-ratbox-2.0.5
+- reenable oneshot, really fix the IO errors.
+
+-- ircd-ratbox-2.0.4
+- fix a core when an oper did /quote uid
+- revert kqueue code to that from 1.x 
+- allow remote xlines that match existing xlines to propagate
+- fix an adns compile error
+- allow local opers to squit local servers
+- new config option in general {}; default_invisible = yes|no; default no.
+  controls whether users are made +i by default on connect
+- move stats A to RPL_STATSDEBUG, removing RPL_STATSALINE
+- fix a memory leak in the auth code
+- disable oneshot with kqueue, it appears to fix the IO errors
+
+-- ircd-ratbox-2.0.3
+- disable '"' as a valid char in xline/resv reasons 
+- disable "\"," in an xline - it makes it unparsable
+- add translation of \s in an xline to a space
+- invite_ops_only = yes|no; default yes
+  controls whether unopped users may issue invites to a -i channel
+- default reject cache to on
+- various unkline related cleanups
+- tweak memory allocation sizes for large networks, this increases
+  startup memory by quite a bit, so unless you are on a 5000+ user
+  network pass --enable-small-net
+- merge upstream version of adns
+- fix another possible double exit of clients
+- new format of RPL_LOCALUSERS and RPL_GLOBALUSERS (265/266) which makes
+  them parsable, in coordination with ircnet:
+  :%s 265 %s %d %d :Current local users %d, max %d
+ 
+-- ircd-ratbox-2.0.2
+- fix a possible overflow with SJOIN when converting nicks -> ids
+- new flags in shared {};, tkline, txline and tresv, allowing temp only of
+  kline, xline and resv respectively.
+- new flags in cluster {}; tkline, txline and tresv which will cluster
+  only the temp of each type.  kline, xline and resv will now *only*
+  cluster the permanent ones of each type.
+- enforce top-down ordering of shared {}; blocks.  The first one that
+  matches on server and user@host will be used.  The users access will then
+  depend on that shared blocks privs and we will NOT fallback to another
+  that matches and has the right privs.
+- cluster {}; no longer allows remote opers to apply remote klines etc, it
+  simply dictates who we send our bans to.  To allow remote servers to
+  cluster to a server it must have its own shared {}; block.
+- fix possible server exists issue whilst waiting for connect callback
+- exempt users messaging themselves from +g
+- fix a core with removing accepts
+- fix connect {}; to refcount classes properly
+- memleak fixes with operator {}; passwords, conf parser and dns code
+- fix some padding issues with ipv6
+- added umode +C, an extended version of +c thats machine parsable and gives
+  the two other fields given in the USER command
+- add some debugging code to help track down a problem with the abort_list
+- fix a problem with --with-nicklen in configure
+
+-- ircd-ratbox-2.0.1
+- fix sending UIDs out on modes for voiced users
+- fix a core with the patricia and ipv4 builds
+- memory cleanups
+  - dynamically allocate channel name
+  - dynamically allocate channel bans
+  - cleanups to struct LocalUser
+  - stuff moved from struct Client -> struct LocalUser
+  - build defaulted to ipv4, ip storage cleanups
+
+-- ircd-ratbox-2.0.0
+- fix another memleak with capab
+- fix a core when exiting an unknown client and generating an io error
+- check for auth {}; not having any valid user@host's, so we dont add an
+  empty ConfItem to lists
+- make servermodes come from actual server, not local server
+- new conf option to general {};, disable_fake_channels which disallows
+  creation/joining of channels with bold, underline, reverse, mirc colour
+  and hard space.  Note, this may impact some non-english charsets.
+- fix location of pid path back to etc/
+- fix autoconf msg result on --enable-profile
 
 -- ircd-ratbox-2.0rc9
 - fixed default module dirs being removed on rehash

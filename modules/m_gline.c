@@ -29,6 +29,7 @@
 #include "s_gline.h"
 #include "channel.h"
 #include "client.h"
+#include "common.h"
 #include "config.h"
 #include "irc_string.h"
 #include "sprintf_irc.h"
@@ -46,14 +47,11 @@
 #include "parse.h"
 #include "modules.h"
 #include "s_log.h"
-#include "event.h"
 
 static int mo_gline(struct Client *, struct Client *, int, const char **);
 static int mc_gline(struct Client *, struct Client *, int, const char **);
 static int ms_gline(struct Client *, struct Client *, int, const char **);
 static int mo_ungline(struct Client *, struct Client *, int, const char **);
-
-static void expire_pending_glines(void *unused);
 
 struct Message gline_msgtab = {
 	"GLINE", 0, 0, 0, MFLG_SLOW,
@@ -63,19 +61,6 @@ struct Message ungline_msgtab = {
 	"UNGLINE", 0, 0, 0, MFLG_SLOW,
 	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, mg_ignore, {mo_ungline, 2}}
 };
-
-static int
-modinit(void)
-{
-	eventAddIsh("expire_pending_glines", expire_pending_glines, NULL, 300);
-	return 0;
-}
-
-static void
-moddeinit(void)
-{
-	eventDelete(expire_pending_glines, NULL);
-}
 
 mapi_clist_av1 gline_clist[] = { &gline_msgtab, &ungline_msgtab, NULL };
 DECLARE_MODULE_AV1(gline, modinit, moddeinit, gline_clist, NULL, NULL, "$Revision$");
@@ -100,7 +85,6 @@ static int remove_temp_gline(const char *, const char *);
 static int
 mo_gline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	char *h = LOCAL_COPY(parv[1]);
 	const char *user = NULL;
 	char *host = NULL;	/* user and host of GLINE "victim" */
 	char *reason = NULL;	/* reason for "victims" demise */
@@ -121,20 +105,17 @@ mo_gline(struct Client *client_p, struct Client *source_p, int parc, const char 
 		return 0;
 	}
 
+	host = strchr(parv[1], '@');
+
 	/* specific user@host */
-	if((host = strchr(h, '@')))
+	if(host != NULL)
 	{
-		*host++ = '\0';
+		user = parv[1];
+		*(host++) = '\0';
 
-		/* check for @host */
-		if(*h)
-			user = h;
-		else
+		/* gline for "@host", use *@host */
+		if(*user == '\0')
 			user = splat;
-
-		/* check for user@ */
-		if(!*host)
-			host = splat;
 	}
 	/* just a host? */
 	else
@@ -149,7 +130,7 @@ mo_gline(struct Client *client_p, struct Client *source_p, int parc, const char 
 		}
 
 		user = splat;
-		host = h;
+		host = LOCAL_COPY(parv[1]);
 	}
 
 	reason = LOCAL_COPY(parv[2]);
@@ -428,14 +409,22 @@ mo_ungline(struct Client *client_p, struct Client *source_p, int parc, const cha
 	{
 		/* Explicit user@host mask given */
 
-		if(host)	/* Found user@host */
+		if(host)
 		{
-			user = parv[1];	/* here is user part */
-			*(host++) = '\0';	/* and now here is host */
+			*host++ = '\0';
+	
+			/* check for @host */
+			if(*h)
+				user = h;
+			else
+				user = splat;
+
+			if(!*host)
+				host = splat;
 		}
 		else
 		{
-			user = splat;	/* no @ found, assume its *@somehost */
+			user = splat;
 			host = h;
 		}
 	}
@@ -533,24 +522,6 @@ invalid_gline(struct Client *source_p, const char *luser,
 	return 0;
 }
 
-static int
-find_existing_gline(const char *user, const char *host)
-{
-	struct ConfItem *aconf;
-	dlink_node *ptr;
-
-	DLINK_FOREACH(ptr, glines.head)
-	{
-		aconf = ptr->data;
-
-		if((aconf->user && match(aconf->user, user)) &&
-		   (aconf->host && match(aconf->host, host)))
-			return 1;
-	}
-
-	return 0;
-}
-
 /*
  * set_local_gline
  *
@@ -595,8 +566,7 @@ set_local_gline(struct Client *source_p, const char *user,
 	DupString(aconf->user, user);
 	DupString(aconf->host, host);
 	aconf->hold = CurrentTime + ConfigFileEntry.gline_time;
-	dlinkAddTail(aconf, &aconf->dnode, &glines);
-	add_conf_by_address(aconf->host, CONF_GLINE, aconf->user, aconf);
+	add_gline(aconf);
 
 	sendto_realops_flags(UMODE_ALL, L_ALL,
 			     "%s!%s@%s on %s has triggered gline for [%s@%s] [%s]",
@@ -624,10 +594,10 @@ majority_gline(struct Client *source_p, const char *user,
 	struct gline_pending *pending;
 
 	/* to avoid desync.. --fl */
-	expire_pending_glines(NULL);
+	cleanup_glines(NULL);
 
 	/* if its already glined, why bother? :) -- fl_ */
-	if(find_existing_gline(user, host))
+	if(find_is_glined(host, user))
 		return NO;
 
 	DLINK_FOREACH(pending_node, pending_glines.head)
@@ -671,8 +641,7 @@ majority_gline(struct Client *source_p, const char *user,
 				set_local_gline(source_p, user, host,
 						pending->reason1);
 
-				/* XXX - simply remove this gline. */
-				expire_pending_glines(NULL);
+				cleanup_glines(NULL);
 				return YES;
 			}
 			else
@@ -741,7 +710,7 @@ remove_temp_gline(const char *user, const char *host)
 
 		gtype = parse_netmask(aconf->host, (struct sockaddr *)&caddr, &cbits);
 
-		if(mtype != gtype || (user && irccmp(user, aconf->user)))
+		if(gtype != mtype || (user && irccmp(user, aconf->user)))
 			continue;
 
 		if(gtype == HM_HOST)
@@ -751,35 +720,13 @@ remove_temp_gline(const char *user, const char *host)
 		}
 		else if(bits != cbits ||
 			!comp_with_mask_sock((struct sockaddr *)&addr, 
-					(struct sockaddr *)&caddr, bits))
+						(struct sockaddr *)&caddr, bits))
 			continue;
 
-		dlinkDelete(ptr, &glines);
+		dlinkDestroy(ptr, &glines);
 		delete_one_address_conf(aconf->host, aconf);
 		return YES;
 	}
 
 	return NO;
-}
-
-static void
-expire_pending_glines(void *unused)
-{
-	dlink_node *ptr, *next_ptr;
-	struct gline_pending *glp_ptr;
-
-	DLINK_FOREACH_SAFE(ptr, next_ptr, pending_glines.head)
-	{
-		glp_ptr = ptr->data;
-
-		if(((glp_ptr->last_gline_time + GLINE_PENDING_EXPIRE) <=
-		    CurrentTime))
-
-		{
-			MyFree(glp_ptr->reason1);
-			MyFree(glp_ptr->reason2);
-			MyFree(glp_ptr);
-			dlinkDestroy(ptr, &pending_glines);
-		}
-	}
 }

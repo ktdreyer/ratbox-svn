@@ -52,41 +52,8 @@ extern dlink_list server_conf_list;
 extern dlink_list xline_conf_list;
 extern dlink_list resv_conf_list;
 
-extern dlink_list pending_glines;
-extern dlink_list glines;
-extern dlink_list dlines;
-extern dlink_list exempt_list;
-
-struct _patricia_tree_t;
-extern struct _patricia_tree_t *dline_tree;
-extern struct _patricia_tree_t *exempt_tree;
-
-typedef enum temp_list
-{
-	TEMP_MIN,
-	TEMP_HOUR,
-	TEMP_DAY,
-	TEMP_WEEK,
-	LAST_TEMP_TYPE
-} temp_list;
-
-extern dlink_list temp_klines[LAST_TEMP_TYPE];
-extern dlink_list temp_dlines[LAST_TEMP_TYPE];
-
 extern void init_s_newconf(void);
-extern void clear_s_newconf_ircd(void);
-extern void clear_s_newconf_bans(void);
-
-extern void add_dline(struct ConfItem *aconf);
-extern int remove_dline(const char *host);
-extern void clear_dlines(dlink_list *list);
-extern struct ConfItem *find_dline(struct sockaddr *addr);
-extern struct ConfItem *find_dline_string(const char *host);
-int already_dlined(const char *host);
-
-extern void add_exempt(struct ConfItem *aconf);
-
-extern void add_temp_kline(struct ConfItem *);
+extern void clear_s_newconf(void);
 
 /* shared/cluster/hub/leaf confs */
 struct remote_conf
@@ -270,20 +237,6 @@ struct nd_entry
 extern void add_nd_entry(const char *name);
 extern void free_nd_entry(struct nd_entry *);
 extern unsigned long get_nd_count(void);
-
-typedef struct
-{
-	char *host;
-	time_t expiry;
-	time_t last_global;
-	patricia_node_t *pnode;
-	dlink_node node;
-} tgchange;
-
-extern patricia_tree_t *tgchange_tree;
-extern dlink_list tgchange_list;
-
-tgchange *find_tgchange(struct sockaddr *);
 
 #endif
 

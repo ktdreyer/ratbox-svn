@@ -54,51 +54,51 @@ int vbuf__append_quoted1035(vbuf *vb, const byte *buf, int len) {
   return 1;
 }
 
-void adns__findlabel_start(findlabel_state *fls, adns_state ads,
+void adns__findlabel_start(findlabel_state *flstate, adns_state ads,
 			   int serv, adns_query qu,
 			   const byte *dgram, int dglen, int max,
 			   int dmbegin, int *dmend_rlater) {
-  fls->ads= ads;
-  fls->qu= qu;
-  fls->serv= serv;
-  fls->dgram= dgram;
-  fls->dglen= dglen;
-  fls->max= max;
-  fls->cbyte= dmbegin;
-  fls->namelen= 0;
-  fls->dmend_r= dmend_rlater;
+  flstate->ads= ads;
+  flstate->qu= qu;
+  flstate->serv= serv;
+  flstate->dgram= dgram;
+  flstate->dglen= dglen;
+  flstate->max= max;
+  flstate->cbyte= dmbegin;
+  flstate->namelen= 0;
+  flstate->dmend_r= dmend_rlater;
 }
 
-adns_status adns__findlabel_next(findlabel_state *fls,
+adns_status adns__findlabel_next(findlabel_state *flstate,
 				 int *lablen_r, int *labstart_r) {
   int lablen, jumpto;
   const char *dgram;
 
-  dgram= fls->dgram;
+  dgram= flstate->dgram;
   for (;;) {
-    if (fls->cbyte >= fls->dglen) goto x_truncated;
-    if (fls->cbyte >= fls->max) goto x_badresponse;
-    GET_B(fls->cbyte,lablen);
+    if (flstate->cbyte >= flstate->dglen) goto x_truncated;
+    if (flstate->cbyte >= flstate->max) goto x_badresponse;
+    GET_B(flstate->cbyte,lablen);
     if (!(lablen & 0x0c0)) break;
     if ((lablen & 0x0c0) != 0x0c0) return adns_s_unknownformat;
-    if (fls->cbyte >= fls->dglen) goto x_truncated;
-    if (fls->cbyte >= fls->max) goto x_badresponse;
-    GET_B(fls->cbyte,jumpto);
+    if (flstate->cbyte >= flstate->dglen) goto x_truncated;
+    if (flstate->cbyte >= flstate->max) goto x_badresponse;
+    GET_B(flstate->cbyte,jumpto);
     jumpto |= (lablen&0x3f)<<8;
-    if (fls->dmend_r) *(fls->dmend_r)= fls->cbyte;
-    fls->cbyte= jumpto;
-    fls->dmend_r= 0; fls->max= fls->dglen+1;
+    if (flstate->dmend_r) *(flstate->dmend_r)= flstate->cbyte;
+    flstate->cbyte= jumpto;
+    flstate->dmend_r= 0; flstate->max= flstate->dglen+1;
   }
-  if (labstart_r) *labstart_r= fls->cbyte;
+  if (labstart_r) *labstart_r= flstate->cbyte;
   if (lablen) {
-    if (fls->namelen) fls->namelen++;
-    fls->namelen+= lablen;
-    if (fls->namelen > DNS_MAXDOMAIN) return adns_s_answerdomaintoolong;
-    fls->cbyte+= lablen;
-    if (fls->cbyte > fls->dglen) goto x_truncated;
-    if (fls->cbyte > fls->max) goto x_badresponse;
+    if (flstate->namelen) flstate->namelen++;
+    flstate->namelen+= lablen;
+    if (flstate->namelen > DNS_MAXDOMAIN) return adns_s_answerdomaintoolong;
+    flstate->cbyte+= lablen;
+    if (flstate->cbyte > flstate->dglen) goto x_truncated;
+    if (flstate->cbyte > flstate->max) goto x_badresponse;
   } else {
-    if (fls->dmend_r) *(fls->dmend_r)= fls->cbyte;
+    if (flstate->dmend_r) *(flstate->dmend_r)= flstate->cbyte;
   }
   *lablen_r= lablen;
   return adns_s_ok;
@@ -108,21 +108,21 @@ adns_status adns__findlabel_next(findlabel_state *fls,
   return adns_s_ok;
 
  x_badresponse: 
-  adns__diag(fls->ads,fls->serv,fls->qu,"label in domain runs beyond end of domain");
+  adns__diag(flstate->ads,flstate->serv,flstate->qu,"label in domain runs beyond end of domain");
   return adns_s_invalidresponse;
 }
 
 adns_status adns__parse_domain(adns_state ads, int serv, adns_query qu,
 			       vbuf *vb, parsedomain_flags flags,
 			       const byte *dgram, int dglen, int *cbyte_io, int max) {
-  findlabel_state fls;
+  findlabel_state flstate;
   
-  adns__findlabel_start(&fls,ads, serv,qu, dgram,dglen,max, *cbyte_io,cbyte_io);
+  adns__findlabel_start(&flstate,ads, serv,qu, dgram,dglen,max, *cbyte_io,cbyte_io);
   vb->used= 0;
-  return adns__parse_domain_more(&fls,ads,qu, vb,flags,dgram);
+  return adns__parse_domain_more(&flstate,ads,qu, vb,flags,dgram);
 }
 
-adns_status adns__parse_domain_more(findlabel_state *fls, adns_state ads,
+adns_status adns__parse_domain_more(findlabel_state *flstate, adns_state ads,
 				    adns_query qu, vbuf *vb, parsedomain_flags flags,
 				    const byte *dgram) {
   int lablen, labstart, i, ch, first;
@@ -130,7 +130,7 @@ adns_status adns__parse_domain_more(findlabel_state *fls, adns_state ads,
 
   first= 1;
   for (;;) {
-    st= adns__findlabel_next(fls,&lablen,&labstart);
+    st= adns__findlabel_next(flstate,&lablen,&labstart);
     if (st) return st;
     if (lablen<0) { vb->used=0; return adns_s_ok; }
     if (!lablen) break;
@@ -164,7 +164,7 @@ adns_status adns__findrr_anychk(adns_query qu, int serv,
 				int *rdlen_r, int *rdstart_r,
 				const byte *eo_dgram, int eo_dglen, int eo_cbyte,
 				int *eo_matched_r) {
-  findlabel_state fls, eo_fls;
+  findlabel_state flstate, eo_fls;
   int cbyte;
   
   int tmp, rdlen, mismatch;
@@ -175,7 +175,7 @@ adns_status adns__findrr_anychk(adns_query qu, int serv,
 
   cbyte= *cbyte_io;
 
-  adns__findlabel_start(&fls,qu->ads, serv,qu, dgram,dglen,dglen,cbyte,&cbyte);
+  adns__findlabel_start(&flstate,qu->ads, serv,qu, dgram,dglen,dglen,cbyte,&cbyte);
   if (eo_dgram) {
     adns__findlabel_start(&eo_fls,qu->ads, -1,0, eo_dgram,eo_dglen,eo_dglen,eo_cbyte,0);
     mismatch= 0;
@@ -184,7 +184,7 @@ adns_status adns__findrr_anychk(adns_query qu, int serv,
   }
   
   for (;;) {
-    st= adns__findlabel_next(&fls,&lablen,&labstart);
+    st= adns__findlabel_next(&flstate,&lablen,&labstart);
     if (st) return st;
     if (lablen<0) goto x_truncated;
 

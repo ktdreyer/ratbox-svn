@@ -27,6 +27,14 @@
 #ifndef INCLUDED_numeric_h
 #define INCLUDED_numeric_h
 
+#include "config.h"
+
+/*
+ * form_str - return a format string for a message number
+ * messages are defined below
+ */
+extern const char *form_str(int);
+
 /*
  * Reserve numerics 000-099 for server-client connections where the client
  * is local to the server. If any server is passed a numeric in this range
@@ -142,6 +150,7 @@
 #define RPL_CHANNELMODEIS    324
 
 #define RPL_CREATIONTIME     329
+#define RPL_WHOISLOGGEDIN    330
 
 #define RPL_NOTOPIC          331
 #define RPL_TOPIC            332
@@ -251,13 +260,14 @@
 #define ERR_BANNEDFROMCHAN   474
 #define ERR_BADCHANNELKEY    475
 #define ERR_BADCHANMASK      476
-#define ERR_MODELESS         477	/* ircu numeric -db */
+#define ERR_NEEDREGGEDNICK   477
 #define ERR_BANLISTFULL      478	/* I stole the numeric from ircu -db */
 #define ERR_BADCHANNAME      479
 
 #define ERR_NOPRIVILEGES     481
 #define ERR_CHANOPRIVSNEEDED 482
 #define ERR_CANTKILLSERVER   483
+#define ERR_ISCHANSERVICE    484
 /* #define ERR_RESTRICTED       484 	- hyb derived, no longer here */
 #define ERR_BANNEDNICK       485
 
@@ -274,6 +284,7 @@
  * moved to 999
  */
 #define ERR_TOOMANYWATCH     512
+
 #define ERR_WRONGPONG	     513
 
 #define ERR_HELPNOTFOUND     524
@@ -287,15 +298,12 @@
 #define RPL_WATCHLIST        606
 #define RPL_ENDOFWATCHLIST   607
 
-
 #define RPL_MODLIST          702
 #define RPL_ENDOFMODLIST     703
 
 #define RPL_HELPSTART        704
 #define RPL_HELPTXT          705
 #define RPL_ENDOFHELP        706
-
-#define ERR_TARGCHANGE	     707
 
 #define RPL_ETRACEFULL	     708
 #define RPL_ETRACE	     709
@@ -323,9 +331,5 @@
 #define RPL_NOTESTLINE		726
 
 #define ERR_LAST_ERR_MSG     999
-
-extern const char *numeric_replies[];
-#define form_str(x) numeric_replies[x] == NULL ? numeric_replies[ERR_LAST_ERR_MSG] : numeric_replies[x]
-
 
 #endif /* INCLUDED_numeric_h */

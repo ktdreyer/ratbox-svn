@@ -35,6 +35,7 @@
 #include "send.h"
 #include "channel.h"
 #include "client.h"
+#include "common.h"
 #include "config.h"
 #include "class.h"
 #include "ircd.h"
@@ -328,12 +329,12 @@ apply_xline(struct Client *source_p, const char *name, const char *reason,
 		sendto_realops_flags(UMODE_ALL, L_ALL,
 			     "%s added temporary %d min. X-Line for [%s] [%s]",
 			     get_oper_name(source_p), temp_time / 60,
-			     name, reason);
+			     aconf->name, reason);
 		ilog(L_KLINE, "X %s %d %s %s",
 			get_oper_name(source_p), temp_time / 60,
 			name, reason);
 		sendto_one_notice(source_p, ":Added temporary %d min. X-Line [%s]",
-				temp_time / 60, name);
+				temp_time / 60, aconf->name);
 	}
 	else
 	{
@@ -348,7 +349,7 @@ apply_xline(struct Client *source_p, const char *name, const char *reason,
 			get_oper_name(source_p), name, reason);
 	}
 
-	dlinkAdd(aconf, &aconf->dnode, &xline_conf_list);
+	dlinkAddAlloc(aconf, &xline_conf_list);
 	check_xlines();
 }
 
@@ -362,12 +363,12 @@ static void
 write_xline(struct Client *source_p, struct ConfItem *aconf)
 {
 	char buffer[BUFSIZE * 2];
-	FILE *out;
+	FBFILE *out;
 	const char *filename;
 
-	filename = XLINEPATH;
+	filename = ConfigFileEntry.xlinefile;
 
-	if((out = fopen(filename, "a")) == NULL)
+	if((out = fbopen(filename, "a")) == NULL)
 	{
 		sendto_realops_flags(UMODE_ALL, L_ALL, "*** Problem opening %s ", filename);
 		free_conf(aconf);
@@ -378,17 +379,15 @@ write_xline(struct Client *source_p, struct ConfItem *aconf)
 		   aconf->name, aconf->passwd,
 		   get_oper_name(source_p), CurrentTime);
 
-	if(fputs(buffer, out) == -1)
+	if(fbputs(buffer, out) == -1)
 	{
 		sendto_realops_flags(UMODE_ALL, L_ALL, "*** Problem writing to %s", filename);
 		free_conf(aconf);
-		fclose(out);
+		fbclose(out);
 		return;
 	}
-	else
-		fflush(out);
 
-	fclose(out);
+	fbclose(out);
 }
 
 static void 
@@ -559,8 +558,8 @@ remove_temp_xline(struct Client *source_p, const char *name)
 			ilog(L_KLINE, "UX %s %s", 
 				get_oper_name(source_p), name);
 			
-			dlinkDelete(ptr, &xline_conf_list);
 			free_conf(aconf);
+			dlinkDestroy(ptr, &xline_conf_list);
 			return 1;
 		}
 	}
@@ -577,4 +576,97 @@ remove_temp_xline(struct Client *source_p, const char *name)
 static void
 remove_xline(struct Client *source_p, const char *huntgecos)
 {
+	FBFILE *in, *out;
+	char buf[BUFSIZE];
+	char buff[BUFSIZE];
+	char temppath[BUFSIZE];
+	const char *filename;
+	const char *gecos;
+	mode_t oldumask;
+	char *p;
+	int error_on_write = 0;
+	int found_xline = 0;
+
+	filename = ConfigFileEntry.xlinefile;
+	ircsnprintf(temppath, sizeof(temppath),
+		 "%s.tmp", ConfigFileEntry.xlinefile);
+
+	if((in = fbopen(filename, "r")) == NULL)
+	{
+		sendto_one_notice(source_p, ":Cannot open %s", filename);
+		return;
+	}
+
+	oldumask = umask(0);
+
+	if((out = fbopen(temppath, "w")) == NULL)
+	{
+		sendto_one_notice(source_p, ":Cannot open %s", temppath);
+		fbclose(in);
+		umask(oldumask);
+		return;
+	}
+
+	umask(oldumask);
+
+	while (fbgets(buf, sizeof(buf), in))
+	{
+		if(error_on_write)
+		{
+			if(temppath != NULL)
+				(void) unlink(temppath);
+
+			break;
+		}
+
+		strlcpy(buff, buf, sizeof(buff));
+
+		if((p = strchr(buff, '\n')) != NULL)
+			*p = '\0';
+
+		if((*buff == '\0') || (*buff == '#'))
+		{
+			error_on_write = (fbputs(buf, out) < 0) ? YES : NO;
+			continue;
+		}
+
+		if((gecos = getfield(buff)) == NULL)
+		{
+			error_on_write = (fbputs(buf, out) < 0) ? YES : NO;
+			continue;
+		}
+
+		/* matching.. */
+		if(irccmp(gecos, huntgecos) == 0)
+			found_xline++;
+		else
+			error_on_write = (fbputs(buf, out) < 0) ? YES : NO;
+	}
+
+	fbclose(in);
+	fbclose(out);
+
+	if(error_on_write)
+	{
+		sendto_one_notice(source_p,
+				  ":Couldn't write temp xline file, aborted");
+		return;
+	}
+	else if(found_xline == 0)
+	{
+		sendto_one_notice(source_p, ":No X-Line for %s", huntgecos);
+
+		if(temppath != NULL)
+			(void) unlink(temppath);
+		return;
+	}
+
+	(void) rename(temppath, filename);
+	rehash(0);
+
+	sendto_one_notice(source_p, ":X-Line for [%s] is removed", huntgecos);
+	sendto_realops_flags(UMODE_ALL, L_ALL,
+			     "%s has removed the X-Line for: [%s]",
+			     get_oper_name(source_p), huntgecos);
+	ilog(L_KLINE, "UX %s %s", get_oper_name(source_p), huntgecos);
 }

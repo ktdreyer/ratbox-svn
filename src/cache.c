@@ -34,8 +34,9 @@
 
 #include "stdinc.h"
 #include "ircd_defs.h"
-#include "tools.h"
+#include "common.h"
 #include "s_conf.h"
+#include "tools.h"
 #include "client.h"
 #include "memory.h"
 #include "balloc.h"
@@ -43,7 +44,6 @@
 #include "hash.h"
 #include "cache.h"
 #include "sprintf_irc.h"
-#include "numeric.h"
 
 static BlockHeap *cachefile_heap = NULL;
 static BlockHeap *cacheline_heap = NULL;
@@ -51,6 +51,7 @@ static BlockHeap *cacheline_heap = NULL;
 struct cachefile *user_motd = NULL;
 struct cachefile *oper_motd = NULL;
 struct cacheline *emptyline = NULL;
+dlink_list links_cache_list;
 char user_motd_changed[MAX_DATE_STRING];
 
 /* init_cache()
@@ -73,6 +74,7 @@ init_cache(void)
 
 	user_motd = cache_file(MPATH, "ircd.motd", 0);
 	oper_motd = cache_file(OPATH, "opers.motd", 0);
+	memset(&links_cache_list, 0, sizeof(links_cache_list));
 }
 
 /* cache_file()
@@ -84,13 +86,13 @@ init_cache(void)
 struct cachefile *
 cache_file(const char *filename, const char *shortname, int flags)
 {
-	FILE *in;
+	FBFILE *in;
 	struct cachefile *cacheptr;
 	struct cacheline *lineptr;
 	char line[BUFSIZE];
 	char *p;
 
-	if((in = fopen(filename, "r")) == NULL)
+	if((in = fbopen(filename, "r")) == NULL)
 		return NULL;
 
 	if(strcmp(shortname, "ircd.motd") == 0)
@@ -98,7 +100,7 @@ cache_file(const char *filename, const char *shortname, int flags)
 		struct stat sb;
 		struct tm *local_tm;
 
-		if(fstat(fileno(in), &sb) < 0)
+		if(fbstat(&sb, in) < 0)
 			return NULL;
 
 		local_tm = localtime(&sb.st_mtime);
@@ -117,7 +119,7 @@ cache_file(const char *filename, const char *shortname, int flags)
 	cacheptr->flags = flags;
 
 	/* cache the file... */
-	while(fgets(line, sizeof(line), in) != NULL)
+	while(fbgets(line, sizeof(line), in) != NULL)
 	{
 		if((p = strchr(line, '\n')) != NULL)
 			*p = '\0';
@@ -132,8 +134,45 @@ cache_file(const char *filename, const char *shortname, int flags)
 			dlinkAddTailAlloc(emptyline, &cacheptr->contents);
 	}
 
-	fclose(in);
+	fbclose(in);
 	return cacheptr;
+}
+
+void
+cache_links(void *unused)
+{
+	struct Client *target_p;
+	dlink_node *ptr;
+	dlink_node *next_ptr;
+	char *links_line;
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, links_cache_list.head)
+	{
+		MyFree(ptr->data);
+		free_dlink_node(ptr);
+	}
+
+	links_cache_list.head = links_cache_list.tail = NULL;
+	links_cache_list.length = 0;
+
+	DLINK_FOREACH(ptr, global_serv_list.head)
+	{
+		target_p = ptr->data;
+
+		/* skip ourselves (done in /links) and hidden servers */
+		if(IsMe(target_p) ||
+		   (IsHidden(target_p) && !ConfigServerHide.disable_hidden))
+			continue;
+
+		/* if the below is ever modified, change LINKSLINELEN */
+		links_line = MyMalloc(LINKSLINELEN);
+		ircsnprintf(links_line, LINKSLINELEN, "%s %s :1 %s",
+			   target_p->name, me.name, 
+			   target_p->info[0] ? target_p->info : 
+			    "(Unknown Location)");
+
+		dlinkAddTailAlloc(links_line, &links_cache_list);
+	}
 }
 
 /* free_cachefile()
@@ -256,5 +295,34 @@ send_user_motd(struct Client *source_p)
 	}
 
 	sendto_one(source_p, form_str(RPL_ENDOFMOTD), myname, nick);
+}
+
+/* send_oper_motd()
+ *
+ * inputs	- client to send motd to
+ * outputs	- client is sent oper motd if exists
+ * side effects -
+ */
+void
+send_oper_motd(struct Client *source_p)
+{
+	struct cacheline *lineptr;
+	dlink_node *ptr;
+
+	if(oper_motd == NULL || dlink_list_length(&oper_motd->contents) == 0)
+		return;
+
+	sendto_one(source_p, form_str(RPL_OMOTDSTART), 
+		   me.name, source_p->name);
+
+	DLINK_FOREACH(ptr, oper_motd->contents.head)
+	{
+		lineptr = ptr->data;
+		sendto_one(source_p, form_str(RPL_OMOTD),
+			   me.name, source_p->name, lineptr->data);
+	}
+
+	sendto_one(source_p, form_str(RPL_ENDOFOMOTD), 
+		   me.name, source_p->name);
 }
 

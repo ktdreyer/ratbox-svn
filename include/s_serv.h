@@ -70,9 +70,10 @@ struct Capability
 #define CAP_CLUSTER     0x02000	/* supports cluster stuff */
 #define CAP_ENCAP	0x04000	/* supports ENCAP */
 #define CAP_TS6		0x08000 /* supports TS6 or above */
+#define CAP_SERVICE	0x10000
 
 #define CAP_MASK        (CAP_QS  | CAP_EX   | CAP_CHW  | \
-                         CAP_IE  | CAP_KLN  | \
+                         CAP_IE  | CAP_KLN  | CAP_SERVICE |\
                          CAP_GLN | CAP_CLUSTER | CAP_ENCAP | \
                          CAP_ZIP  | CAP_KNOCK  | CAP_UNKLN)
 
@@ -133,6 +134,8 @@ extern struct Capability captab[];
 extern int MaxClientCount;	/* GLOBAL - highest number of clients */
 extern int MaxConnectionCount;	/* GLOBAL - highest number of connections */
 
+extern int refresh_user_links;
+
 /*
  * return values for hunt_server() 
  */
@@ -149,6 +152,9 @@ extern const char *show_capabilities(struct Client *client);
 extern void try_connections(void *unused);
 extern void start_collect_zipstats(void);
 extern void collect_zipstats(void *unused);
+
+extern int check_server(const char *name, struct Client *server);
+extern int server_estab(struct Client *client_p);
 
 extern int serv_connect(struct server_conf *, struct Client *);
 

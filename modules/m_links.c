@@ -36,27 +36,10 @@
 #include "parse.h"
 #include "modules.h"
 #include "hook.h"
-#include "event.h"
-#include "sprintf_irc.h"
+#include "cache.h"
 
 static int m_links(struct Client *, struct Client *, int, const char **);
 static int mo_links(struct Client *, struct Client *, int, const char **);
-
-static void cache_links(void *unused);
-
-static int
-modinit(void)
-{
-	eventAddIsh("cache_links", cache_links, NULL, 300);
-	cache_links(NULL);
-	return 0;
-}
-
-static void
-moddeinit(void)
-{
-	eventDelete(cache_links, NULL);
-}
 
 struct Message links_msgtab = {
 	"LINKS", 0, 0, 0, MFLG_SLOW,
@@ -71,9 +54,8 @@ mapi_hlist_av1 links_hlist[] = {
 	{ NULL, NULL }
 };
 
-DECLARE_MODULE_AV1(links, modinit, moddeinit, links_clist, links_hlist, NULL, "$Revision$");
-
 static dlink_list links_cache_list;
+DECLARE_MODULE_AV1(links, NULL, NULL, links_clist, links_hlist, NULL, "$Revision$");
 
 static void send_links_cache(struct Client *source_p);
 
@@ -100,10 +82,10 @@ m_links(struct Client *client_p, struct Client *source_p, int parc, const char *
 static int
 mo_links(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	const char *mask = LOCAL_COPY("");
+	const char *mask = "";
 	struct Client *target_p;
 	char clean_mask[2 * HOSTLEN + 4];
-	hook_data hd;
+	struct hook_spy_data hd;
 
 	dlink_node *ptr;
 
@@ -122,11 +104,11 @@ mo_links(struct Client *client_p, struct Client *source_p, int parc, const char 
 		mask = collapse(clean_string
 				(clean_mask, (const unsigned char *) mask, 2 * HOSTLEN));
 
-	hd.client = source_p;
-	hd.arg1 = (const void *) mask;
-	hd.arg2 = NULL;
+	hd.source_p = source_p;
+	hd.name = mask;
+	hd.statchar = '\0';
 
-	call_hook(doing_links_hook, &hd);
+	hook_call_event(doing_links_hook, &hd);
 
 	DLINK_FOREACH(ptr, global_serv_list.head)
 	{
@@ -172,42 +154,4 @@ send_links_cache(struct Client *source_p)
 
 	sendto_one_numeric(source_p, RPL_ENDOFLINKS, form_str(RPL_ENDOFLINKS), "*");
 }
-
-static void
-cache_links(void *unused)
-{
-	static char buf[BUFSIZE];
-	struct Client *target_p;
-	dlink_node *ptr;
-	dlink_node *next_ptr;
-	char *links_line;
-
-	DLINK_FOREACH_SAFE(ptr, next_ptr, links_cache_list.head)
-	{
-		MyFree(ptr->data);
-		free_dlink_node(ptr);
-	}
-
-	links_cache_list.head = links_cache_list.tail = NULL;
-	links_cache_list.length = 0;
-
-	DLINK_FOREACH(ptr, global_serv_list.head)
-	{
-		target_p = ptr->data;
-
-		/* skip ourselves (done in /links) and hidden servers */
-		if(IsMe(target_p) ||
-		   (IsHidden(target_p) && !ConfigServerHide.disable_hidden))
-			continue;
-
-		ircsnprintf(buf, sizeof(buf), "%s %s :1 %s",
-				target_p->name, me.name,
-				EmptyString(target_p->info) ? "(Unknown Location)" :
-				 target_p->info);
-		DupString(links_line, buf);
-
-		dlinkAddTailAlloc(links_line, &links_cache_list);
-	}
-}
-
 

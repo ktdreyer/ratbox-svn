@@ -77,8 +77,6 @@ DECLARE_MODULE_AV1(mode, NULL, NULL, mode_clist, NULL, NULL, "$Revision$");
 #define SM_ERR_RPL_I            0x00000100
 #define SM_ERR_RPL_D            0x00000200
 
-static int user_mode(struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
-
 static void set_channel_mode(struct Client *, struct Client *,
 			     struct Channel *, struct membership *,
 			     int, const char **);
@@ -91,6 +89,46 @@ static int mode_count;
 static int mode_limit;
 static int mask_pos;
 
+static void
+loc_channel_modes(struct Channel *chptr, struct Client *client_p, char *mbuf, char *pbuf)
+{
+	int len;
+	*mbuf++ = '+';
+	*pbuf = '\0';
+
+	if(chptr->mode.mode & MODE_SECRET)
+		*mbuf++ = 's';
+	if(chptr->mode.mode & MODE_PRIVATE)
+		*mbuf++ = 'p';
+	if(chptr->mode.mode & MODE_MODERATED)
+		*mbuf++ = 'm';
+	if(chptr->mode.mode & MODE_TOPICLIMIT)
+		*mbuf++ = 't';
+	if(chptr->mode.mode & MODE_INVITEONLY)
+		*mbuf++ = 'i';
+	if(chptr->mode.mode & MODE_NOPRIVMSGS)
+		*mbuf++ = 'n';
+#ifdef ENABLE_SERVICES
+	if(chptr->mode.mode & MODE_REGONLY)
+		*mbuf++ = 'r';
+#endif
+
+	if(chptr->mode.limit)
+	{
+		*mbuf++ = 'l';
+		len = ircsprintf(pbuf, "%d ", chptr->mode.limit);
+		pbuf += len;
+	}
+	if(*chptr->mode.key)
+	{
+		*mbuf++ = 'k';
+		ircsprintf(pbuf, "%s ", chptr->mode.key);
+	}
+
+	*mbuf++ = '\0';
+	return;
+}
+
 /*
  * m_mode - MODE command handler
  * parv[0] - sender
@@ -101,6 +139,8 @@ m_mode(struct Client *client_p, struct Client *source_p, int parc, const char *p
 {
 	struct Channel *chptr = NULL;
 	struct membership *msptr;
+	static char modebuf[BUFSIZE];
+	static char parabuf[BUFSIZE];
 	int n = 2;
 	const char *dest;
 	int operspy = 0;
@@ -147,18 +187,16 @@ m_mode(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	/* Now know the channel exists */
 	if(parc < n + 1)
 	{
-		const char *mbuf;
-
 		if(operspy)
 		{
 			report_operspy(source_p, "MODE", chptr->chname);
-			mbuf = channel_modes(chptr, &me);
+			loc_channel_modes(chptr, source_p, modebuf, parabuf);
 		}
 		else
-			mbuf = channel_modes(chptr, source_p);
+			channel_modes(chptr, source_p, modebuf, parabuf);
 
 		sendto_one(source_p, form_str(RPL_CHANNELMODEIS),
-			   me.name, source_p->name, parv[1], mbuf);
+			   me.name, source_p->name, parv[1], modebuf, parabuf);
 
 		sendto_one(source_p, form_str(RPL_CREATIONTIME),
 			   me.name, source_p->name, parv[1], chptr->channelts);
@@ -374,193 +412,6 @@ ms_bmask(struct Client *client_p, struct Client *source_p, int parc, const char 
 		      source_p->id, (long) chptr->channelts, chptr->chname, parv[3], parv[4]);
 	return 0;
 }
-
-/*
- * user_mode - set get current users mode
- *
- * m_umode() added 15/10/91 By Darren Reed.
- * parv[0] - sender
- * parv[1] - username to change mode for
- * parv[2] - modes to change
- */
-static int
-user_mode(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
-{
-	int flag;
-	int i;
-	const char **p;
-	char *m;
-	const char *pm;
-	struct Client *target_p;
-	int what, setflags;
-	int badflag = NO;	/* Only send one bad flag notice */
-	char buf[BUFSIZE];
-
-	what = MODE_ADD;
-
-	if(parc < 2)
-	{
-		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), me.name, source_p->name, "MODE");
-		return 0;
-	}
-
-	if((target_p = find_person(parv[1])) == NULL)
-	{
-		if(MyConnect(source_p))
-			sendto_one_numeric(source_p, ERR_NOSUCHCHANNEL,
-					   form_str(ERR_NOSUCHCHANNEL), parv[1]);
-		return 0;
-	}
-
-	/* Dont know why these were commented out..
-	 * put them back using new sendto() funcs
-	 */
-
-	if(IsServer(source_p))
-	{
-		sendto_realops_flags(UMODE_ALL, L_ADMIN,
-				     "*** Mode for User %s from %s", parv[1], source_p->name);
-		return 0;
-	}
-
-	if(source_p != target_p || target_p->from != source_p->from)
-	{
-		sendto_one(source_p, form_str(ERR_USERSDONTMATCH), me.name, source_p->name);
-		return 0;
-	}
-
-
-	if(parc < 3)
-	{
-		m = buf;
-		*m++ = '+';
-
-		for (i = 0; user_modes[i].letter && (m - buf < BUFSIZE - 4); i++)
-			if(source_p->umodes & user_modes[i].mode)
-				*m++ = user_modes[i].letter;
-		*m = '\0';
-		sendto_one(source_p, form_str(RPL_UMODEIS), me.name, source_p->name, buf);
-		return 0;
-	}
-
-	/* find flags already set for user */
-	setflags = source_p->umodes;
-
-	/*
-	 * parse mode change string(s)
-	 */
-	for (p = &parv[2]; p && *p; p++)
-		for (pm = *p; *pm; pm++)
-			switch (*pm)
-			{
-			case '+':
-				what = MODE_ADD;
-				break;
-			case '-':
-				what = MODE_DEL;
-				break;
-
-			case 'o':
-				if(what == MODE_ADD)
-				{
-					if(IsServer(client_p) && !IsOper(source_p))
-					{
-						++Count.oper;
-						SetOper(source_p);
-					}
-				}
-				else
-				{
-					/* Only decrement the oper counts if an oper to begin with
-					 * found by Pat Szuta, Perly , perly@xnet.com 
-					 */
-
-					if(!IsOper(source_p))
-						break;
-
-					ClearOper(source_p);
-					source_p->umodes &= ~ConfigFileEntry.oper_only_umodes;
-
-					Count.oper--;
-
-					if(MyConnect(source_p))
-					{
-						source_p->flags2 &= ~OPER_FLAGS;
-
-						MyFree(source_p->localClient->opername);
-						source_p->localClient->opername = NULL;
-
-						dlinkFindDestroy(source_p, &oper_list);
-					}
-				}
-				break;
-
-				/* we may not get these,
-				 * but they shouldnt be in default
-				 */
-			case ' ':
-			case '\n':
-			case '\r':
-			case '\t':
-				break;
-
-			default:
-				if((flag = user_modes_from_c_to_bitmask[(unsigned char) *pm]))
-				{
-					if(MyConnect(source_p)
-					   && !IsOper(source_p)
-					   && (ConfigFileEntry.oper_only_umodes & flag))
-					{
-						badflag = YES;
-					}
-					else
-					{
-						if(what == MODE_ADD)
-							source_p->umodes |= flag;
-						else
-							source_p->umodes &= ~flag;
-					}
-				}
-				else
-				{
-					if(MyConnect(source_p))
-						badflag = YES;
-				}
-				break;
-			}
-
-	if(badflag)
-		sendto_one(source_p, form_str(ERR_UMODEUNKNOWNFLAG), me.name, source_p->name);
-
-	if((source_p->umodes & UMODE_NCHANGE) && !IsOperN(source_p))
-	{
-		sendto_one(source_p,
-			   ":%s NOTICE %s :*** You need oper and N flag for +n", me.name, parv[0]);
-		source_p->umodes &= ~UMODE_NCHANGE;	/* only tcm's really need this */
-	}
-
-	if(MyConnect(source_p) && (source_p->umodes & UMODE_ADMIN) &&
-	   (!IsOperAdmin(source_p) || IsOperHiddenAdmin(source_p)))
-	{
-		sendto_one(source_p,
-			   ":%s NOTICE %s :*** You need oper and A flag for +a", me.name, parv[0]);
-		source_p->umodes &= ~UMODE_ADMIN;
-	}
-
-
-	if(!(setflags & UMODE_INVISIBLE) && IsInvisible(source_p))
-		++Count.invisi;
-	if((setflags & UMODE_INVISIBLE) && !IsInvisible(source_p))
-		--Count.invisi;
-	/*
-	 * compare new flags with old flags and send string which
-	 * will cause servers to update correctly.
-	 */
-	send_umode_out(client_p, source_p, setflags);
-
-	return (0);
-}
-
 
 /* add_id()
  *
@@ -1144,6 +995,16 @@ chm_op(struct Client *source_p, struct Channel *chptr,
 	}
 	else
 	{
+#ifdef ENABLE_SERVICES
+		if(MyClient(source_p) && IsService(targ_p))
+		{
+			sendto_one(source_p, form_str(ERR_ISCHANSERVICE),
+					me.name, source_p->name, targ_p->name,
+					chptr->chname);
+			return;
+		}
+#endif
+
 		mode_changes[mode_count].letter = c;
 		mode_changes[mode_count].dir = MODE_DEL;
 		mode_changes[mode_count].caps = 0;
@@ -1370,6 +1231,43 @@ chm_key(struct Client *source_p, struct Channel *chptr,
 	}
 }
 
+#ifdef ENABLE_SERVICES
+static void
+chm_regonly(struct Client *source_p, struct Channel *chptr,
+		int alevel, int parc, int *parn,
+		const char **parv, int *errors, int dir, char c, long mode_type)
+{
+	if(alevel != CHFL_CHANOP)
+	{
+		if(!(*errors & SM_ERR_NOOPS))
+			sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
+				   me.name, source_p->name, chptr->chname);
+		*errors |= SM_ERR_NOOPS;
+		return;
+	}
+
+	if(dir == MODE_QUERY)
+		return;
+
+	if(((dir == MODE_ADD) && (chptr->mode.mode & MODE_REGONLY)) ||
+	   ((dir == MODE_DEL) && !(chptr->mode.mode & MODE_REGONLY)))
+		return;
+
+	if(dir == MODE_ADD)
+		chptr->mode.mode |= MODE_REGONLY;
+	else
+		chptr->mode.mode &= ~MODE_REGONLY;
+
+	mode_changes[mode_count].letter = c;
+	mode_changes[mode_count].dir = dir;
+	mode_changes[mode_count].caps = CAP_SERVICE;
+	mode_changes[mode_count].nocaps = 0;
+	mode_changes[mode_count].mems = ALL_MEMBERS;
+	mode_changes[mode_count].id = NULL;
+	mode_changes[mode_count++].arg = NULL;
+}
+#endif
+
 struct ChannelMode
 {
 	void (*func) (struct Client *source_p, struct Channel *chptr,
@@ -1432,7 +1330,11 @@ static struct ChannelMode ModeTable[255] =
   {chm_op,	0 },			/* o */
   {chm_simple,	MODE_PRIVATE },		/* p */
   {chm_nosuch,	0 },			/* q */
+#ifdef ENABLE_SERVICES
+  {chm_regonly, 0 },			/* r */
+#else
   {chm_nosuch,	0 },			/* r */
+#endif
   {chm_simple,	MODE_SECRET },		/* s */
   {chm_simple,	MODE_TOPICLIMIT },	/* t */
   {chm_nosuch,	0 },			/* u */

@@ -25,6 +25,7 @@
  */
 #include "stdinc.h"
 #include "client.h"
+#include "common.h"		/* TRUE bleah */
 #include "irc_string.h"
 #include "ircd.h"
 #include "numeric.h"

@@ -23,6 +23,9 @@
 /* Size of the dlink_node heap. */
 #undef DNODE_HEAP_SIZE
 
+/* ratbox-services compatibility code */
+#undef ENABLE_SERVICES
+
 /* Prefix where config files are installed. */
 #undef ETC_DIR
 

@@ -111,8 +111,8 @@ m_away(struct Client *client_p, struct Client *source_p, int parc, const char *p
 				   me.name, source_p->name, "AWAY");
 			return 0;
 		}
-		else
-			source_p->localClient->last_away = CurrentTime;
+
+		source_p->localClient->last_away = CurrentTime;
 	}
 
 	awy2 = LOCAL_COPY(parv[1]);

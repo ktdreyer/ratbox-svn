@@ -28,6 +28,7 @@
 #define INCLUDED_channel_h
 #include "config.h"		/* config settings */
 #include "ircd_defs.h"		/* buffer sizes */
+
 #define MODEBUFLEN      200
 
 /* Maximum mode changes allowed per client, per server is different */
@@ -35,9 +36,6 @@
 #define MAXMODEPARAMSSERV 10
 
 struct Client;
-struct BlockHeap;
-
-extern struct BlockHeap *topic_heap;
 
 /* mode structure for channels */
 struct Mode
@@ -146,9 +144,10 @@ struct ChCapCombo
 #define MODE_TOPICLIMIT 0x0008
 #define MODE_INVITEONLY 0x0010
 #define MODE_NOPRIVMSGS 0x0020
-#define CHFL_BAN        0x0040	/* ban channel flag */
-#define CHFL_EXCEPTION  0x0080	/* exception to ban channel flag */
-#define CHFL_INVEX      0x0100
+#define MODE_REGONLY	0x0040
+#define CHFL_BAN        0x0100	/* ban channel flag */
+#define CHFL_EXCEPTION  0x0200	/* exception to ban channel flag */
+#define CHFL_INVEX      0x0400
 
 /* mode flags for direction indication */
 #define MODE_QUERY     0
@@ -168,12 +167,6 @@ struct ChCapCombo
 
 #define IsChannelName(name) ((name) && (*(name) == '#' || *(name) == '&'))
 
-
-#define del_invite(chptr, who) do { \
-			dlinkFindDestroy(who, &((struct Channel *)chptr)->invites); \
-			dlinkFindDestroy(chptr, &((struct Client *)who)->user->invited); } while(0)
-
-
 extern dlink_list global_channel_list;
 void init_channels(void);
 
@@ -181,9 +174,7 @@ struct Channel *allocate_channel(const char *chname);
 void free_channel(struct Channel *chptr);
 struct Ban *allocate_ban(const char *, const char *);
 void free_ban(struct Ban *bptr);
-struct membership *allocate_membership(void);
-void free_membership(struct membership *);
-void free_topic(struct Channel *chptr);
+
 
 extern void destroy_channel(struct Channel *);
 
@@ -191,20 +182,31 @@ extern int can_send(struct Channel *chptr, struct Client *who,
 		    struct membership *);
 extern int is_banned(struct Channel *chptr, struct Client *who,
 		     struct membership *msptr, const char *, const char *);
+extern int can_join(struct Client *source_p, struct Channel *chptr, char *key);
 
 extern struct membership *find_channel_membership(struct Channel *, struct Client *);
 extern const char *find_channel_status(struct membership *msptr, int combine);
+extern void add_user_to_channel(struct Channel *, struct Client *, int flags);
+extern void remove_user_from_channel(struct membership *);
 extern void remove_user_from_channels(struct Client *);
 
 extern void free_channel_list(dlink_list *);
 
 extern int check_channel_name(const char *name);
 
-extern const char *channel_modes(struct Channel *chptr, struct Client *who);
+extern void channel_member_names(struct Channel *chptr, struct Client *,
+				 int show_eon);
+
+extern void del_invite(struct Channel *chptr, struct Client *who);
+
+extern void channel_modes(struct Channel *chptr, struct Client *who, char *, char *);
 
 extern void check_spambot_warning(struct Client *source_p, const char *name);
 
 extern void check_splitmode(void *);
+
+void set_channel_topic(struct Channel *chptr, const char *topic,
+		       const char *topic_info, time_t topicts);
 
 extern void init_chcap_usage_counts(void);
 extern void set_chcap_usage_counts(struct Client *serv_p);

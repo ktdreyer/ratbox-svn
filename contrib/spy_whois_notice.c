@@ -28,7 +28,7 @@
 #include "ircd.h"
 #include "send.h"
 
-void show_whois(hook_data *data);
+int show_whois(struct hook_mfunc_data *);
 
 mapi_hfn_list_av1 whois_hfnlist[] = {
 	{"doing_whois", (hookfn) show_whois},
@@ -37,20 +37,19 @@ mapi_hfn_list_av1 whois_hfnlist[] = {
 
 DECLARE_MODULE_AV1(whois_spy, NULL, NULL, NULL, NULL, whois_hfnlist, "$Revision$");
 
-void
-show_whois(hook_data *data)
+int
+show_whois(struct hook_mfunc_data *data)
 {
-	struct Client *source_p = data->client;
-	struct Client *target_p = data->arg1;
-
-	/* source_p being MyConnect() is implicit here from m_whois.c --fl */
-	if(MyConnect(target_p) && IsOper(target_p) &&
-	   (source_p != target_p) && (target_p->umodes & UMODE_SPY))
+	if(MyConnect(data->source_p) && MyConnect(data->client_p) &&
+	   IsOper(data->client_p) && (data->client_p != data->source_p)
+	   && data->client_p->umodes & UMODE_SPY)
 	{
-		sendto_one(target_p,
-			":%s NOTICE %s :*** Notice -- %s (%s@%s) is doing a whois on you [%s]",
-			me.name, target_p->name, source_p->name, 
-			source_p->username, source_p->host,
-			source_p->user->server);
+		sendto_one(data->client_p,
+			   ":%s NOTICE %s :*** Notice -- %s (%s@%s) is doing a whois on you [%s]",
+			   me.name, data->client_p->name, data->source_p->name,
+			   data->source_p->username, data->source_p->host,
+			   data->source_p->user->server);
 	}
+
+	return 0;
 }

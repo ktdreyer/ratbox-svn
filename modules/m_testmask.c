@@ -36,6 +36,7 @@
 /* List of ircd includes from ../include/ */
 #include "stdinc.h"
 #include "client.h"
+#include "common.h"     /* FALSE bleah */
 #include "ircd.h"
 #include "irc_string.h"
 #include "numeric.h"

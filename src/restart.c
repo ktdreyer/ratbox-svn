@@ -27,6 +27,7 @@
 #include "stdinc.h"
 #include "tools.h"
 #include "restart.h"
+#include "common.h"
 #include "ircd.h"
 #include "send.h"
 #include "s_log.h"

@@ -40,6 +40,12 @@ Info;
 
 Info MyInformation[] = {
 
+#ifdef CLIENT_FLOOD
+	{"CLIENT_FLOOD", "", CLIENT_FLOOD, "Client Excess Flood Threshold"},
+#else
+	{"CLIENT_FLOOD", "OFF", 0, "Client Excess Flood Threshold"},
+#endif /* CLIENT_FLOOD */
+
 #ifdef CMDLINE_CONFIG
 	{"CMDLINE_CONFIG", "ON", 0,
 	 "Allow Command Line Specification of Config File"},
@@ -60,11 +66,11 @@ Info MyInformation[] = {
 	{"DPATH", "NONE", 0, "Directory Containing Configuration Files"},
 #endif /* DPATH */
 
-#ifdef DLINEPATH
-	{"DLINEPATH", DLINEPATH, 0, "Path to D-line File"},
+#ifdef DLPATH
+	{"DLPATH", DLPATH, 0, "Path to D-line File"},
 #else
-	{"DLINEPATH", "NONE", 0, "Path to D-line File"},
-#endif /* DLINEPATH */
+	{"DLPATH", "NONE", 0, "Path to D-line File"},
+#endif /* DLPATH */
 
 #ifdef RESVPATH
 	{"RESVPATH", RESVPATH, 0, "Path to resv file"},
@@ -109,11 +115,11 @@ Info MyInformation[] = {
 	{"KILLCHASETIMELIMIT", "", KILLCHASETIMELIMIT,
 	 "Nick Change Tracker for KILL"},
 
-#ifdef KLINEPATH
-	{"KLINEPATH", KLINEPATH, 0, "Path to K-line File"},
+#ifdef KPATH
+	{"KPATH", KPATH, 0, "Path to K-line File"},
 #else
-	{"KLINEPATH", "NONE", 0, "Path to K-line File"},
-#endif /* KLINEPATH */
+	{"KPATH", "NONE", 0, "Path to K-line File"},
+#endif /* KPATH */
 
 #ifdef LPATH
 	{"LPATH", LPATH, 0, "Path to Log File"},

@@ -103,8 +103,7 @@ void mem_frob(void *data, int len);
  */
 
 /* I hate C sometimes */
-#if __GNUC_PREREQ (2, 7) && defined __OPTIMIZE__ \
-    && !defined __OPTIMIZE_SIZE__ && !defined __NO_INLINE__
+#if defined __OPTIMIZE__ && !defined __OPTIMIZE_SIZE__ && !defined __NO_INLINE__
 #define INLINE_FUNC extern inline
 #define NEED_INLINES
 #else
@@ -116,17 +115,18 @@ void mem_frob(void *data, int len);
 #undef INLINE_FUNC
 #define INLINE_FUNC
 #endif 
-
+    
 void dlinkMoveNode(dlink_node * m, dlink_list * oldlist, dlink_list * newlist);
 void dlinkAdd(void *data, dlink_node * m, dlink_list * list);
 void dlinkAddBefore(dlink_node * b, void *data, dlink_node * m, dlink_list * list);
 void dlinkMoveTail(dlink_node *m, dlink_list *list);
 void dlinkAddTail(void *data, dlink_node * m, dlink_list * list);
 void dlinkDelete(dlink_node * m, dlink_list * list);
-dlink_node *dlinkFindDelete(void *data, dlink_list *list);
-int dlinkFindDestroy(void *data, dlink_list *list);
-dlink_node *dlinkFind(void *data, dlink_list *list);
+dlink_node *dlinkFindDelete(dlink_list * list, void *data);
+int dlinkFindDestroy(dlink_list * list, void *data);
+dlink_node *dlinkFind(dlink_list * list, void *data);
 void dlinkMoveList(dlink_list * from, dlink_list * to);
+
 
 #if defined(NEED_INLINES) || defined(TOOLS_C)
 INLINE_FUNC void
@@ -274,7 +274,7 @@ dlinkDelete(dlink_node * m, dlink_list * list)
 }
 
 INLINE_FUNC dlink_node *
-dlinkFindDelete(void *data, dlink_list *list)
+dlinkFindDelete(dlink_list * list, void *data)
 {
 	dlink_node *m;
 	assert(list != NULL);
@@ -304,14 +304,14 @@ dlinkFindDelete(void *data, dlink_list *list)
 }
 
 INLINE_FUNC int
-dlinkFindDestroy(void *data, dlink_list *list)
+dlinkFindDestroy(dlink_list * list, void *data)
 {
 	void *ptr;
 
 	assert(list != NULL);
 	assert(data != NULL);
 
-	ptr = dlinkFindDelete(data, list);
+	ptr = dlinkFindDelete(list, data);
 
 	if(ptr != NULL)
 	{
@@ -329,7 +329,7 @@ dlinkFindDestroy(void *data, dlink_list *list)
  * side effects	- Look for ptr in the linked listed pointed to by link.
  */
 INLINE_FUNC dlink_node *
-dlinkFind(void *data, dlink_list *list)
+dlinkFind(dlink_list * list, void *data)
 {
 	dlink_node *ptr;
 	assert(list != NULL);

@@ -33,6 +33,7 @@
 #include "channel.h"
 #include "class.h"
 #include "client.h"
+#include "common.h"
 #include "event.h"
 #include "hash.h"
 #include "irc_string.h"
@@ -50,6 +51,7 @@
 #include "s_conf.h"
 #include "s_log.h"
 #include "s_serv.h"		/* try_connections */
+#include "s_stats.h"
 #include "scache.h"
 #include "send.h"
 #include "whowas.h"
@@ -65,7 +67,6 @@
 #include "s_conf.h"
 #include "s_newconf.h"
 #include "cache.h"
-#include "packet.h"
 
 /*
  * Try and find the correct name to use with getrlimit() for setting the max.
@@ -83,7 +84,6 @@ struct server_info ServerInfo;
 struct admin_info AdminInfo;
 
 struct Counter Count;
-struct ServerStatistics ServerStats;
 
 struct timeval SystemTime;
 int ServerRunning;		/* GLOBAL - server execution state */
@@ -105,7 +105,6 @@ const char *pidFileName = PPATH;
 
 char **myargv;
 int dorehash = 0;
-int dorehashban = 0;
 int doremotd = 0;
 time_t nextconnect = 1;		/* time for next try_connections call */
 int kline_queued = 0;
@@ -141,8 +140,12 @@ get_vm_top(void)
 	 * offset from 0 (NULL), so the result of sbrk is cast to a size_t and 
 	 * returned. We really shouldn't be using it here but...
 	 */
+#ifndef __VMS
 	void *vptr = sbrk(0);
 	return (unsigned long) vptr;
+#else
+	return 0;
+#endif
 }
 
 /*
@@ -177,7 +180,7 @@ print_startup(int pid)
 static void
 init_sys(void)
 {
-#if defined(RLIMIT_FD_MAX) && defined(HAVE_SYS_RLIMIT_H)
+#if defined(RLIMIT_FD_MAX) && !defined(__VMS) && defined(HAVE_SYS_RLIMIT_H)
 	struct rlimit limit;
 
 	if(!getrlimit(RLIMIT_FD_MAX, &limit))
@@ -205,6 +208,7 @@ init_sys(void)
 static int
 make_daemon(void)
 {
+#ifndef __VMS
 	int pid;
 
 	if((pid = fork()) < 0)
@@ -222,14 +226,28 @@ make_daemon(void)
 	/*  fclose(stdin);
 	   fclose(stdout);
 	   fclose(stderr); */
+#else
+	/* if we get here, assume we've been detached.
+	   better set a process name. */
+	$DESCRIPTOR(myname, "IRCD-RATBOX");
+	SYS$SETPRN(&myname);
+#endif
 	return 0;
 }
 
 static int printVersion = 0;
 
 struct lgetopt myopts[] = {
+	{"dlinefile", &ConfigFileEntry.dlinefile,
+	 STRING, "File to use for dlines.conf"},
 	{"configfile", &ConfigFileEntry.configfile,
 	 STRING, "File to use for ircd.conf"},
+	{"klinefile", &ConfigFileEntry.klinefile,
+	 STRING, "File to use for klines.conf"},
+	{"xlinefile", &ConfigFileEntry.xlinefile,
+	 STRING, "File to use for xlines.conf"},
+	{"resvfile", &ConfigFileEntry.resvfile,
+	 STRING, "File to use for resv.conf"},
 	{"logfile", &logFileName,
 	 STRING, "File to use for ircd.log"},
 	{"pidfile", &pidFileName,
@@ -274,7 +292,7 @@ static void
 io_loop(void)
 {
 	time_t delay;
-
+#ifndef __vms
 	while (ServerRunning)
 
 	{
@@ -297,13 +315,6 @@ io_loop(void)
 			rehash(1);
 			dorehash = 0;
 		}
-
-		if(dorehashban)
-		{
-			rehash_ban(1);
-			dorehashban = 0;
-		}
-
 		if(doremotd)
 		{
 			sendto_realops_flags(UMODE_ALL, L_ALL,
@@ -313,6 +324,9 @@ io_loop(void)
 			doremotd = 0;
 		}
 	}
+#else
+	comm_select(0);
+#endif
 }
 
 /*
@@ -388,22 +402,19 @@ initialize_server_capabs(void)
 static void
 write_pidfile(const char *filename)
 {
-	FILE *fb;
+	FBFILE *fb;
 	char buff[32];
-	if((fb = fopen(filename, "w")))
+	if((fb = fbopen(filename, "w")))
 	{
 		unsigned int pid = (unsigned int) getpid();
 
 		ircsnprintf(buff, sizeof(buff), "%u\n", pid);
-		if((fputs(buff, fb) == -1))
+		if((fbputs(buff, fb) == -1))
 		{
 			ilog(L_MAIN, "Error writing %u to pid file %s (%s)",
 			     pid, filename, strerror(errno));
 		}
-		else
-			fflush(fb);
-
-		fclose(fb);
+		fbclose(fb);
 		return;
 	}
 	else
@@ -455,7 +466,7 @@ check_pidfile(const char *filename)
 static void
 setup_corefile(void)
 {
-#if defined(HAVE_SYS_RESOURCE_H)
+#if !defined(__VMS) && defined(HAVE_SYS_RESOURCE_H)
 	struct rlimit rlim;	/* resource limits */
 
 	/* Set corefilesize to maximum */
@@ -470,9 +481,6 @@ setup_corefile(void)
 int
 main(int argc, char *argv[])
 {
-	static char empty_name[] = "";
-	int rfd;
-	unsigned int rnum;
 	/* Check to see if the user is running us as root, which is a nono */
 	if(geteuid() == 0)
 	{
@@ -495,20 +503,8 @@ main(int argc, char *argv[])
 	initialVMTop = get_vm_top();
 
 	ServerRunning = 0;
-
 	/* It ain't random, but it ought to be a little harder to guess */
-	rnum = SystemTime.tv_sec ^ (SystemTime.tv_usec | (getpid() << 20));
-	
-	/* Let's try /dev/random  */
-	if((rfd = open("/dev/random", O_RDONLY)) >= 0)  
-	{
-		unsigned int xrnum;
-		if(read(rfd, &xrnum, sizeof(xrnum)) == sizeof(xrnum))
-			rnum = xrnum;
-		close(rfd);
-	} 
-	srand(rnum);
-	
+	srand(SystemTime.tv_sec ^ (SystemTime.tv_usec | (getpid() << 20)));
 	memset(&me, 0, sizeof(me));
 	memset(&meLocalUser, 0, sizeof(meLocalUser));
 	me.localClient = &meLocalUser;
@@ -525,16 +521,16 @@ main(int argc, char *argv[])
 	memset((void *) &Count, 0, sizeof(Count));
 	memset((void *) &ServerInfo, 0, sizeof(ServerInfo));
 	memset((void *) &AdminInfo, 0, sizeof(AdminInfo));
-	memset(&ServerStats, 0, sizeof(ServerStats));
-	/* XXX lots of stupid code in the init relies on me.name being there
-	 *  even if its empty *dumb* 
-	 */  
-	me.name = empty_name;
+
 	/* Initialise the channel capability usage counts... */
 	init_chcap_usage_counts();
 
 	ConfigFileEntry.dpath = DPATH;
 	ConfigFileEntry.configfile = CPATH;	/* Server configuration file */
+	ConfigFileEntry.klinefile = KPATH;	/* Server kline file */
+	ConfigFileEntry.dlinefile = DLPATH;	/* dline file */
+	ConfigFileEntry.xlinefile = XPATH;
+	ConfigFileEntry.resvfile = RESVPATH;
 	ConfigFileEntry.connect_timeout = 30;	/* Default to 30 */
 	myargv = argv;
 	umask(077);		/* better safe than sorry --SRB */
@@ -573,7 +569,9 @@ main(int argc, char *argv[])
 	/* Check if there is pidfile and daemon already running */
 	if(!testing_conf)
 	{
+#ifndef __vms
 		check_pidfile(pidFileName);
+#endif
 
 		if(!server_state_foreground)
 			make_daemon();
@@ -605,7 +603,8 @@ main(int argc, char *argv[])
 	initclass();
 	initwhowas();
 	initwatch();
-	init_hook();
+	init_stats();
+	init_hooks();
 	init_reject();
 	init_cache();
 	load_all_modules(1);
@@ -617,10 +616,7 @@ main(int argc, char *argv[])
 
 	if (testing_conf)
 		fprintf(stderr, "\nBeginning config test\n");
-
-	read_ircd_conf(YES);	/* cold start init conf files */
-	read_ban_confs(YES);
-
+	read_conf_files(YES);	/* cold start init conf files */
 #ifndef STATIC_MODULES
 
 	mod_add_path(MODULE_DIR); 
@@ -636,7 +632,7 @@ main(int argc, char *argv[])
 		ilog(L_MAIN, "No server name specified in serverinfo block.");
 		exit(EXIT_FAILURE);
 	}
-	me.name = find_or_add(ServerInfo.name);
+	strlcpy(me.name, ServerInfo.name, sizeof(me.name));
 
 	if(ServerInfo.sid[0] == '\0')
 	{
@@ -681,6 +677,13 @@ main(int argc, char *argv[])
 
 	ilog(L_MAIN, "Server Ready");
 
+	eventAddIsh("cleanup_glines", cleanup_glines, NULL, CLEANUP_GLINES_TIME);
+
+	eventAddIsh("cleanup_temps_min", cleanup_temps_min, NULL, 60);
+	eventAddIsh("cleanup_temps_hour", cleanup_temps_hour, NULL, 3600);
+	eventAddIsh("cleanup_temps_day", cleanup_temps_day, NULL, 86400);
+	eventAddIsh("cleanup_temps_week", cleanup_temps_week, NULL, 604800);
+
 	/* We want try_connections to be called as soon as possible now! -- adrian */
 	/* No, 'cause after a restart it would cause all sorts of nick collides */
 	/* um.  by waiting even longer, that just means we have even *more*
@@ -690,10 +693,15 @@ main(int argc, char *argv[])
 	eventAddOnce("try_connections_startup", try_connections, NULL, 0);
 
 	eventAddIsh("collect_zipstats", collect_zipstats, NULL, ZIPSTATS_TIME);
-	eventAddIsh("run_flood_recalc", run_flood_recalc, NULL, 1);
 
 	/* Setup the timeout check. I'll shift it later :)  -- adrian */
 	eventAddIsh("comm_checktimeouts", comm_checktimeouts, NULL, 1);
+
+	if(ConfigServerHide.links_delay > 0)
+		eventAddIsh("cache_links", cache_links, NULL,
+			    ConfigServerHide.links_delay);
+	else
+		ConfigServerHide.links_disabled = 1;
 
 	if(splitmode)
 		eventAddIsh("check_splitmode", check_splitmode, NULL, 60);

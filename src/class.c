@@ -30,6 +30,7 @@
 #include "tools.h"
 #include "class.h"
 #include "client.h"
+#include "common.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "s_conf.h"
@@ -59,8 +60,11 @@ make_class(void)
 	MaxSendq(tmp) = DEFAULT_SENDQ;
 	MaxSendqEob(tmp) = 0;
 
-	tmp->ip_limits = New_Patricia(BITLEN);
-
+#ifdef IPV6
+	tmp->ip_limits = New_Patricia(128);
+#else
+	tmp->ip_limits = New_Patricia(32);
+#endif
 	return tmp;
 }
 
@@ -280,6 +284,42 @@ initclass()
 	DupString(ClassName(default_class), "default");
 }
 
+/*
+ * report_classes
+ *
+ * inputs	- pointer to client to report to
+ * output	- NONE
+ * side effects	- class report is done to this client
+ */
+void
+report_classes(struct Client *source_p)
+{
+	struct Class *cltmp;
+	dlink_node *ptr;
+
+	DLINK_FOREACH(ptr, class_list.head)
+	{
+		cltmp = ptr->data;
+
+		sendto_one_numeric(source_p, RPL_STATSYLINE, 
+				form_str(RPL_STATSYLINE),
+				ClassName(cltmp), PingFreq(cltmp), 
+				ConFreq(cltmp), MaxUsers(cltmp), 
+				MaxSendq(cltmp), MaxSendqEob(cltmp),
+				MaxLocal(cltmp), MaxIdent(cltmp),
+				MaxGlobal(cltmp), MaxIdent(cltmp),
+				CurrUsers(cltmp));
+	}
+
+	/* also output the default class */
+	sendto_one_numeric(source_p, RPL_STATSYLINE, form_str(RPL_STATSYLINE),
+			ClassName(default_class), PingFreq(default_class), 
+			ConFreq(default_class), MaxUsers(default_class), 
+			MaxSendq(default_class), MaxSendqEob(default_class),
+			MaxLocal(default_class), MaxIdent(default_class),
+			MaxGlobal(default_class), MaxIdent(default_class),
+			CurrUsers(default_class));
+}
 
 /*
  * get_sendq

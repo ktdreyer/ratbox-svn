@@ -25,11 +25,11 @@
  */
 
 #include "stdinc.h"
-#include "tools.h"
 #include "class.h"
 #include "hook.h"
 #include "client.h"
 #include "hash.h"
+#include "common.h"
 #include "hash.h"
 #include "irc_string.h"
 #include "ircd.h"
@@ -44,34 +44,26 @@
 #include "modules.h"
 
 static int m_trace(struct Client *, struct Client *, int, const char **);
-static int m_etrace(struct Client *, struct Client *, int, const char **);
 
-static void trace_spy(struct Client *, struct Client *);
+static void trace_spy(struct Client *, const char *);
 
 struct Message trace_msgtab = {
 	"TRACE", 0, 0, 0, MFLG_SLOW,
 	{mg_unreg, {m_trace, 0}, {m_trace, 0}, mg_ignore, mg_ignore, {m_trace, 0}}
 };
-struct Message etrace_msgtab = {
-	"ETRACE", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, mg_ignore, {m_etrace, 0}}
-};
 
 int doing_trace_hook;
 
-mapi_clist_av1 trace_clist[] = { &trace_msgtab, &etrace_msgtab,  NULL };
+mapi_clist_av1 trace_clist[] = { &trace_msgtab, NULL };
 mapi_hlist_av1 trace_hlist[] = {
 	{ "doing_trace",	&doing_trace_hook },
 	{ NULL, NULL }
 };
 DECLARE_MODULE_AV1(trace, NULL, NULL, trace_clist, trace_hlist, NULL, "$Revision$");
 
-
 static int report_this_status(struct Client *source_p, struct Client *target_p, int dow,
 			      int link_u_p, int link_u_s);
 
-static void do_etrace(struct Client *, int ipv4, int ipv6);
-static void do_etrace_full(struct Client *);
 
 /*
  * m_trace
@@ -179,7 +171,7 @@ m_trace(struct Client *client_p, struct Client *source_p, int parc, const char *
 			tname = target_p->name;
 		}
 
-		trace_spy(source_p, target_p);
+		trace_spy(source_p, tname);
 
 		sendto_one_numeric(source_p, RPL_ENDOFTRACE, 
 				   form_str(RPL_ENDOFTRACE), tname);
@@ -379,8 +371,7 @@ report_this_status(struct Client *source_p, struct Client *target_p,
 		sendto_one_numeric(source_p, RPL_TRACEUNKNOWN,
 				   form_str(RPL_TRACEUNKNOWN),
 				   class_name, name, ip,
-				   target_p->localClient->firsttime ? 
-				    CurrentTime - target_p->localClient->firsttime : -1);
+				   CurrentTime - target_p->localClient->firsttime);
 		cnt++;
 		break;
 
@@ -443,97 +434,13 @@ report_this_status(struct Client *source_p, struct Client *target_p,
  * side effects - hook event doing_trace is called
  */
 static void
-trace_spy(struct Client *source_p, struct Client *target_p)
+trace_spy(struct Client *source_p, const char *target)
 {
-	hook_data data;
+	struct hook_spy_data data;
 
-	data.client = source_p;
-	data.arg1 = target_p;
-	data.arg2 = NULL;
+	data.source_p = source_p;
+	data.name = target;
+	data.statchar = '\0';
 
-	call_hook(doing_trace_hook, &data);
+	hook_call_event(doing_trace_hook, &data);
 }
-
-
-/*
- * m_etrace
- *      parv[0] = sender prefix
- *      parv[1] = servername
- */
-static int
-m_etrace(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
-{
-	if(parc > 1 && !EmptyString(parv[1]))
-	{
-		if(!irccmp(parv[1], "-full"))
-			do_etrace_full(source_p);
-#ifdef IPV6
-		else if(!irccmp(parv[1], "-v6"))
-			do_etrace(source_p, 0, 1);
-		else if(!irccmp(parv[1], "-v4"))
-			do_etrace(source_p, 1, 0);
-#endif
-		else
-			do_etrace(source_p, 1, 1);
-	}
-	else
-		do_etrace(source_p, 1, 1);
-
-	sendto_one_numeric(source_p, RPL_ENDOFTRACE, form_str(RPL_ENDOFTRACE), me.name);
-
-	return 0;
-}
-
-static void
-do_etrace(struct Client *source_p, int ipv4, int ipv6)
-{
-	struct Client *target_p;
-	dlink_node *ptr;
-
-	/* report all direct connections */
-	DLINK_FOREACH(ptr, lclient_list.head)
-	{
-		target_p = ptr->data;
-
-#ifdef IPV6
-		if((!ipv4 && target_p->localClient->ip.ss_family == AF_INET) ||
-		   (!ipv6 && target_p->localClient->ip.ss_family == AF_INET6))
-			continue;
-#endif
-
-		sendto_one(source_p, form_str(RPL_ETRACE),
-			   me.name, source_p->name, 
-			   IsOper(target_p) ? "Oper" : "User", 
-			   get_client_class(target_p),
-			   target_p->name, target_p->username, target_p->host,
-#ifdef HIDE_SPOOF_IPS
-			   IsIPSpoof(target_p) ? "255.255.255.255" :
-#endif
-			    target_p->sockhost, target_p->info);
-	}
-}
-
-static void
-do_etrace_full(struct Client *source_p)
-{
-	struct Client *target_p;
-	dlink_node *ptr;
-
-	/* report all direct connections */
-	DLINK_FOREACH(ptr, lclient_list.head)
-	{
-		target_p = ptr->data;
-
-		sendto_one(source_p, form_str(RPL_ETRACE),
-			   me.name, source_p->name, 
-			   IsOper(target_p) ? "Oper" : "User", 
-			   get_client_class(target_p),
-			   target_p->name, target_p->username, target_p->host,
-#ifdef HIDE_SPOOF_IPS
-			   IsIPSpoof(target_p) ? "255.255.255.255" :
-#endif
-			    target_p->sockhost, 
-			    target_p->localClient->fullcaps, target_p->info);
-	}
-}
-

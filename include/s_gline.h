@@ -30,6 +30,14 @@
 #include "config.h"
 #include "ircd_defs.h"
 
+struct Client;
+struct ConfItem;
+
+extern struct ConfItem *find_is_glined(const char *host, const char *name);
+extern void cleanup_glines(void *unused);
+extern void add_gline(struct ConfItem *);
+
+
 typedef struct gline_pending
 {
 	char oper_nick1[NICKLEN + 1];
@@ -57,5 +65,9 @@ gline_pending_t;
  */
 
 #define GLINE_PENDING_EXPIRE 600
+#define CLEANUP_GLINES_TIME  300
+
+dlink_list pending_glines;
+extern dlink_list glines;
 
 #endif

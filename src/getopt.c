@@ -28,7 +28,11 @@
 
 #include "ircd_getopt.h"
 
+#ifndef __VMS
 # define OPTCHAR '-'
+#else
+# define OPTCHAR '/'
+#endif
 
 void
 parseargs(int *argc, char ***argv, struct lgetopt *opts)

@@ -22,9 +22,24 @@ Config File
 - support for individual auth flags "kline_exempt = yes"; etc removed, now
   must use flags = ...; method
 - support for individual oper flags "kline = yes;" etc removed, now must use
-  flags = ...; method -- NOTE, this means an oper gets *no* flags by
-  default, including operwall.
-- to reiterate, an oper gets *no flags at all by default*
+  flags = ...; method.
+- extended flags = ...; method to allow negation, so you may prefix a flag
+  with '~' to negate it.  Default oper flags are operwall, remoteban and
+  encrypted (indicates password is encrypted with mkpasswd)
+- new flags in shared {};, tkline, txline and tresv, allowing temp only of
+  kline, xline and resv respectively.
+- new flags in cluster {}; tkline, txline and tresv which will cluster
+  only the temp of each type.  kline, xline and resv will now only
+  cluster the permanent ones of each type.
+- cluster {}; no longer allows a server to place klines etc locally, it
+  simply dictates who we send to.
+- shared {}; is now ordered top-down and the first one that matches the
+  user@host and server will be used, and the flags taken from this.  This
+  means if a remote oper matches a shared block without kline privs, even
+  though there is a shared {}; block they match under it with kline privs 
+  they will not be able to place klines.
+- added invite_ops_only to channel {}; which will restrict the use of INVITE
+  to chanops on that channel always, rather than just to +i chans.
 
 Client
 ------
@@ -33,6 +48,7 @@ Client
 - default CHANNELLEN for local clients is now 50
 - AWAYLEN added to 005, default is 90
 - kick/part/quit now use REASONLEN (120) rather than TOPICLEN
+- umode +g now exempts users messaging themselves
 
 Oper
 ----
@@ -48,6 +64,8 @@ Oper
 - trace spy now contains target param if its against a single user
 - the old "you need xline=yes;" notices have been replaced by ERR_NOPRIVS
   (numeric 723)
+- umode +C, machine parsable client connect/exit notices which includes the
+  two unused fields sent in the USER command
 
 Channels
 --------

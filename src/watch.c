@@ -129,7 +129,7 @@ add_to_watch_hash_table(const char *nick, struct Client *client_p)
 	}
 	else
 	{
-		lp = dlinkFind(client_p, &awptr->watched_by);
+		lp = dlinkFind(&awptr->watched_by, client_p);
 	}
 
 	if(!lp)
@@ -176,10 +176,10 @@ del_from_watch_hash_table(const char *nick, struct Client *client_p)
 	if(!awptr)
 		return 0;	/* No such watch */
 
-	if(!dlinkFindDestroy(client_p, &awptr->watched_by))
+	if(!dlinkFindDestroy(&awptr->watched_by, client_p))
 		return 0;
 
-	dlinkFindDestroy(awptr, &client_p->localClient->watchlist);
+	dlinkFindDestroy(&client_p->localClient->watchlist, awptr);
 
 	/*
 	 * In case this header is now empty of notices, remove it 
@@ -211,7 +211,7 @@ hash_del_watch_list(struct Client *client_p)
 		awptr = ptr->data;
 		if(awptr)
 		{
-			dlinkFindDestroy(client_p, &awptr->watched_by);
+			dlinkFindDestroy(&awptr->watched_by, client_p);
 
 			if(!dlink_list_length(&awptr->watched_by))
 			{

@@ -10,7 +10,7 @@ AC_PREREQ(2.57)
 dnl Sneaky way to get an Id tag into the configure script
 AC_COPYRIGHT([$Id$])
 
-AC_INIT([ircd-ratbox],[devel])
+AC_INIT([ircd-ratbox],[testing])
 
 AC_CONFIG_HEADER(include/setup.h)
 
@@ -121,7 +121,7 @@ if test "$ac_cv_c_compiler_gnu" = yes; then
 	;;
 	esac
 
-	IRC_CFLAGS="$IRC_CFLAGS -O0"
+	IRC_CFLAGS="$IRC_CFLAGS -O2 -Wall"
 fi
 
 dnl If we support -g, use it!
@@ -855,6 +855,19 @@ AC_HELP_STRING([--enable-warnings],[Enable all sorts of warnings for debugging.]
 dnl Server Tweaks
 dnl =============
 
+AC_ARG_ENABLE(services,
+AC_HELP_STRING([--enable-services],[Enable ratbox-services compatibility code.]),
+[ratbox_services=$enableval], [ratbox_services=no])
+
+M_SERVICES=""
+
+if test "x$ratbox_services" = "xyes"; then
+	AC_DEFINE([ENABLE_SERVICES], 1, [ratbox-services compatibility code])
+	M_SERVICES="m_services.c"
+fi
+
+AC_SUBST(M_SERVICES)
+
 AC_ARG_ENABLE(small-net,
 AC_HELP_STRING([--enable-small-net],[Enable small network support.]),
 [small_net=$enableval], [small_net=no])
@@ -877,26 +890,26 @@ dnl	AC_DEFINE([HASHSIZE], 4096, [Max number of buckets in hash tables.])
 else
 dnl These settings are for a large network like efnet..they will use lots of memory
 dnl so enable small net unless you really need this much support
-	AC_DEFINE([NICKNAMEHISTORYLENGTH], 15000, [Size of the WHOWAS array.])
-	AC_DEFINE([CHANNEL_HEAP_SIZE], 8192, [Size of the channel heap.])
-	AC_DEFINE([BAN_HEAP_SIZE], 4096, [Size of the ban heap.])
-	AC_DEFINE([CLIENT_HEAP_SIZE], 8192, [Size of the client heap.])
-	AC_DEFINE([LCLIENT_HEAP_SIZE], 1024, [Size of the local client heap.])
-	AC_DEFINE([USER_HEAP_SIZE], 8192, [Size of the user heap.])
-	AC_DEFINE([DNODE_HEAP_SIZE], 8192, [Size of the dlink_node heap.])
-	AC_DEFINE([TOPIC_HEAP_SIZE], 4096, [Size of the topic heap.])
-	AC_DEFINE([LINEBUF_HEAP_SIZE], 2048, [Size of the linebuf heap.])
-	AC_DEFINE([MEMBER_HEAP_SIZE], 32768, [Sizeof member heap.])
-	AC_DEFINE([ND_HEAP_SIZE], 512, [Size of the nick delay heap.])
-	AC_DEFINE([CONFITEM_HEAP_SIZE], 256, [Size of the confitem heap.])
+        AC_DEFINE([NICKNAMEHISTORYLENGTH], 15000, [Size of the WHOWAS array.])
+        AC_DEFINE([CHANNEL_HEAP_SIZE], 8192, [Size of the channel heap.])
+        AC_DEFINE([BAN_HEAP_SIZE], 4096, [Size of the ban heap.])
+        AC_DEFINE([CLIENT_HEAP_SIZE], 8192, [Size of the client heap.])
+        AC_DEFINE([LCLIENT_HEAP_SIZE], 1024, [Size of the local client heap.])
+        AC_DEFINE([USER_HEAP_SIZE], 8192, [Size of the user heap.])
+        AC_DEFINE([DNODE_HEAP_SIZE], 8192, [Size of the dlink_node heap.])
+        AC_DEFINE([TOPIC_HEAP_SIZE], 4096, [Size of the topic heap.])
+        AC_DEFINE([LINEBUF_HEAP_SIZE], 2048, [Size of the linebuf heap.])
+        AC_DEFINE([MEMBER_HEAP_SIZE], 32768, [Sizeof member heap.])
+        AC_DEFINE([ND_HEAP_SIZE], 512, [Size of the nick delay heap.])
+        AC_DEFINE([CONFITEM_HEAP_SIZE], 256, [Size of the confitem heap.])
 	AC_DEFINE([WATCH_HEAP_SIZE], 8192, [Size of the watch heap.])
 fi
 
 AC_ARG_WITH(nicklen,
-AC_HELP_STRING([--with-nicklen=LENGTH],[Set the nick length to LENGTH (default 9)]),
+AC_HELP_STRING([--with-nicklen=LENGTH],[Set the nick length to LENGTH (default 9, max 50)]),
 [
   if test $withval -ge 50; then
-  	NICKLEN=50
+	NICKLEN=50
 	AC_MSG_WARN([NICKLEN has a hard limit of 50. Setting NICKLEN=50])
   else
 	NICKLEN="$withval"
@@ -1184,9 +1197,9 @@ echo
 
 echo "Installing into: $prefix"
 
-echo "Ziplinks ................ $zlib"
+echo "Ziplinks ....................... $zlib"
 
-echo "OpenSSL ................. $cf_enable_openssl"
+echo "OpenSSL ........................ $cf_enable_openssl"
 
 if test "$shared_modules" = yes; then
 	tmpresult=shared
@@ -1194,18 +1207,13 @@ else
 	tmpresult=static
 fi
 
-echo  "Modules ................. $tmpresult"
-echo  "IPv6 support ............ $have_v6"
-echo  "Net I/O implementation .. $SELECT_TYPE"
-echo  "IO Debugging hooks ...... $iodebug"
-echo  "Assert debugging ........ $assert"
-if test "$efnet" = "yes"; then
-	tmpresult="yes (use example.efnet.conf)"
-else
-	tmpresult="no (use example.conf)"
-fi
-
-echo "Small network ........... $small_net"
+echo "Modules ........................ $tmpresult"
+echo "IPv6 support ................... $have_v6"
+echo "Net I/O implementation ......... $SELECT_TYPE"
+echo "IO Debugging hooks ............. $iodebug"
+echo "Assert debugging ............... $assert"
+echo "Small network .................. $small_net"
+echo "ratbox-services compatibility .. $ratbox_services"
 echo
 echo "Configured limits:"
 echo "NICKLEN ................. $NICKLEN"

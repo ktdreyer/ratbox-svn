@@ -33,7 +33,6 @@
 
 #include "stdinc.h"
 #include "ircd_defs.h"
-#include "tools.h"
 #include "s_log.h"
 #include "s_conf.h"
 #include "sprintf_irc.h"
@@ -41,44 +40,44 @@
 #include "client.h"
 #include "s_serv.h"
 
-static FILE *log_main;
-static FILE *log_user;
-static FILE *log_fuser;
-static FILE *log_oper;
-static FILE *log_foper;
-static FILE *log_server;
-static FILE *log_kill;
-static FILE *log_gline;
-static FILE *log_kline;
-static FILE *log_operspy;
-static FILE *log_ioerror;
+static FBFILE *log_main;
+static FBFILE *log_user;
+static FBFILE *log_fuser;
+static FBFILE *log_oper;
+static FBFILE *log_foper;
+static FBFILE *log_server;
+static FBFILE *log_kill;
+static FBFILE *log_gline;
+static FBFILE *log_kline;
+static FBFILE *log_operspy;
+static FBFILE *log_ioerror;
 
 struct log_struct
 {
-	char **name;
-	FILE **logfile;
+	const char *name;
+	FBFILE **logfile;
 };
 
 static struct log_struct log_table[LAST_LOGFILE] =
 {
 	{ NULL, 				&log_main	},
-	{ &ConfigFileEntry.fname_userlog,	&log_user	},
-	{ &ConfigFileEntry.fname_fuserlog,	&log_fuser	},
-	{ &ConfigFileEntry.fname_operlog,	&log_oper	},
-	{ &ConfigFileEntry.fname_foperlog,	&log_foper	},
-	{ &ConfigFileEntry.fname_serverlog,	&log_server	},
-	{ &ConfigFileEntry.fname_killlog,	&log_kill	},
-	{ &ConfigFileEntry.fname_klinelog,	&log_kline	},
-	{ &ConfigFileEntry.fname_glinelog,	&log_gline	},
-	{ &ConfigFileEntry.fname_operspylog,	&log_operspy	},
-	{ &ConfigFileEntry.fname_ioerrorlog,	&log_ioerror	}
+	{ ConfigFileEntry.fname_userlog,	&log_user	},
+	{ ConfigFileEntry.fname_fuserlog,	&log_fuser	},
+	{ ConfigFileEntry.fname_operlog,	&log_oper	},
+	{ ConfigFileEntry.fname_foperlog,	&log_foper	},
+	{ ConfigFileEntry.fname_serverlog,	&log_server	},
+	{ ConfigFileEntry.fname_killlog,	&log_kill	},
+	{ ConfigFileEntry.fname_klinelog,	&log_kline	},
+	{ ConfigFileEntry.fname_glinelog,	&log_gline	},
+	{ ConfigFileEntry.fname_operspylog,	&log_operspy	},
+	{ ConfigFileEntry.fname_ioerrorlog,	&log_ioerror	}
 };
 
 void
 init_main_logfile(void)
 {
 	if(log_main == NULL)
-		log_main = fopen(LPATH, "a");
+		log_main = fbopen(LPATH, "a");
 }
 
 void
@@ -87,9 +86,9 @@ open_logfiles(void)
 	int i;
 
 	if(log_main != NULL)
-		fclose(log_main);
+		fbclose(log_main);
 
-	log_main = fopen(LPATH, "a");
+	log_main = fbopen(LPATH, "a");
 
 	/* log_main is handled above, so just do the rest */
 	for(i = 1; i < LAST_LOGFILE; i++)
@@ -97,20 +96,20 @@ open_logfiles(void)
 		/* close open logfiles */
 		if(*log_table[i].logfile != NULL)
 		{
-			fclose(*log_table[i].logfile);
+			fbclose(*log_table[i].logfile);
 			*log_table[i].logfile = NULL;
 		}
 
 		/* reopen those with paths */
-		if(!EmptyString(*log_table[i].name))
-			*log_table[i].logfile = fopen(*log_table[i].name, "a");
+		if(!EmptyString(log_table[i].name))
+			*log_table[i].logfile = fbopen(log_table[i].name, "a");
 	}
 }			
 
 void
 ilog(ilogfile dest, const char *format, ...)
 {
-	FILE *logfile = *log_table[dest].logfile;
+	FBFILE *logfile = *log_table[dest].logfile;
 	char buf[BUFSIZE];
 	char buf2[BUFSIZE];
 	va_list args;
@@ -124,13 +123,11 @@ ilog(ilogfile dest, const char *format, ...)
 
 	ircsnprintf(buf2, sizeof(buf2), "%s %s\n", smalldate(), buf);
 
-	if(fputs(buf2, logfile) < 0)
+	if(fbputs(buf2, logfile) < 0)
 	{
-		fclose(logfile);
+		fbclose(logfile);
 		*log_table[dest].logfile = NULL;
 	}
-	else
-		fflush(logfile);
 }
 
 void

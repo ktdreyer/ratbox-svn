@@ -16,6 +16,10 @@
 
 #define MD5_SIZE 16
 
+#ifdef __VMS__
+typedef unsigned int u_int32_t;
+#endif
+
 /* MD5 context. */
 typedef struct MD5Context
 {

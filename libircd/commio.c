@@ -26,10 +26,10 @@
 
 #include "stdinc.h"
 #include "config.h"
-#include "tools.h"
 #include "commio.h"
 #include "class.h"
 #include "client.h"
+#include "common.h"
 #include "event.h"
 #include "irc_string.h"
 #include "sprintf_irc.h"
@@ -44,6 +44,7 @@
 #include "s_conf.h"
 #include "s_log.h"
 #include "s_serv.h"
+#include "s_stats.h"
 #include "send.h"
 #include "reject.h"
 #include "memory.h"
@@ -80,28 +81,6 @@ static PF comm_connect_timeout;
 static void comm_connect_dns_callback(void *vptr, adns_answer * reply);
 static PF comm_connect_tryconnect;
 
-/* 32bit solaris is kinda slow and stdio only supports fds < 256
- * so we got to do this crap below.
- * (BTW Fuck you Sun, I hate your guts and I hope you go bankrupt soon)
- */
-#if defined (__SVR4) && defined (__sun) 
-static void comm_fd_hack(int *fd)
-{
-	int newfd;
-	if(*fd > 256 || *fd < 0)
-		return;
-	if((newfd = fcntl(*fd, F_DUPFD, 256)) != -1)
-	{
-		close(*fd);
-		*fd = newfd;
-	} 
-	return;
-}
-#else
-#define comm_fd_hack(fd) 
-#endif
-
-
 /* close_all_connections() can be used *before* the system come up! */
 
 void
@@ -115,13 +94,17 @@ comm_close_all(void)
 	/* XXX someone tell me why we care about 4 fd's ? */
 	/* XXX btw, fd 3 is used for profiler ! */
 #if 0
+#ifndef __VMS
 	for (i = 0; i < MAXCONNECTIONS; ++i)
+#else
+	for (i = 3; i < MAXCONNECTIONS; ++i)
+#endif
 #endif
 
 		for (i = 4; i < MAXCONNECTIONS; ++i)
 		{
 			if(fd_table[i].flags.open)
-				comm_close(i);
+				fd_close(i);
 			else
 				close(i);
 		}
@@ -193,6 +176,7 @@ comm_set_buffers(int fd, int size)
 int
 comm_set_nb(int fd)
 {
+#ifndef __VMS
 	int nonb = 0;
 	int res;
 
@@ -203,6 +187,17 @@ comm_set_nb(int fd)
 
 	fd_table[fd].flags.nonblocking = 1;
 	return 1;
+#else
+	int val = 1;
+	int res;
+
+	res = ioctl(fd, FIONBIO, &val);
+	if(res == -1)
+		return 0;
+
+	fd_table[fd].flags.nonblocking = 1;
+	return 1;
+#endif
 }
 
 
@@ -254,6 +249,30 @@ comm_settimeout(int fd, time_t timeout, PF * callback, void *cbdata)
 
 
 /*
+ * comm_setflush() - set a flush function
+ *
+ * A flush function is simply a function called if found during
+ * comm_timeouts(). Its basically a second timeout, except in this case
+ * I'm too lazy to implement multiple timeout functions! :-)
+ * its kinda nice to have it seperate, since this is designed for
+ * flush functions, and when comm_close() is implemented correctly
+ * with close functions, we _actually_ don't call comm_close() here ..
+ */
+void
+comm_setflush(int fd, time_t timeout, PF * callback, void *cbdata)
+{
+	fde_t *F;
+	s_assert(fd >= 0);
+	F = &fd_table[fd];
+	s_assert(F->flags.open);
+
+	F->flush_timeout = CurrentTime + (timeout / 1000);
+	F->flush_handler = callback;
+	F->flush_data = cbdata;
+}
+
+
+/*
  * comm_checktimeouts() - check the socket timeouts
  *
  * All this routine does is call the given callback/cbdata, without closing
@@ -274,6 +293,16 @@ comm_checktimeouts(void *notused)
 			continue;
 		if(F->flags.closing)
 			continue;
+
+		/* check flush functions */
+		if(F->flush_handler &&
+		   F->flush_timeout > 0 && F->flush_timeout < CurrentTime)
+		{
+			hdl = F->flush_handler;
+			data = F->flush_data;
+			comm_setflush(F->fd, 0, NULL, NULL);
+			hdl(F->fd, data);
+		}
 
 		/* check timeouts */
 		if(F->timeout_handler &&
@@ -517,14 +546,14 @@ comm_errstr(int error)
 
 
 /*
- * comm_socket() - open a socket
+ * comm_open() - open a socket
  *
- * This is a highly highly cut down version of squid's comm_socket() which
+ * This is a highly highly cut down version of squid's comm_open() which
  * for the most part emulates socket(), *EXCEPT* it fails if we're about
  * to run out of file descriptors.
  */
 int
-comm_socket(int family, int sock_type, int proto, const char *note)
+comm_open(int family, int sock_type, int proto, const char *note)
 {
 	int fd;
 	/* First, make sure we aren't going to run out of file descriptors */
@@ -540,7 +569,6 @@ comm_socket(int family, int sock_type, int proto, const char *note)
 	 * XXX !!! -- adrian
 	 */
 	fd = socket(family, sock_type, proto);
-	comm_fd_hack(&fd);
 	if(fd < 0)
 		return -1;	/* errno will be passed through, yay.. */
 
@@ -555,7 +583,7 @@ comm_socket(int family, int sock_type, int proto, const char *note)
 		if(setsockopt(fd, IPPROTO_IPV6, IPV6_V6ONLY, &off, sizeof(off)) == -1)
 		{
 			ilog(L_IOERROR,
-			     "comm_socket: Could not set IPV6_V6ONLY option to 1 on FD %d: %s",
+			     "comm_open: Could not set IPV6_V6ONLY option to 1 on FD %d: %s",
 			     fd, strerror(errno));
 			close(fd);
 			return -1;
@@ -566,13 +594,17 @@ comm_socket(int family, int sock_type, int proto, const char *note)
 	/* Set the socket non-blocking, and other wonderful bits */
 	if(!comm_set_nb(fd))
 	{
-		ilog(L_IOERROR, "comm_socket: Couldn't set FD %d non blocking: %s", fd, strerror(errno));
+		ilog(L_IOERROR, "comm_open: Couldn't set FD %d non blocking: %s", fd, strerror(errno));
+		/* if VMS, we might be opening a file (ircd.conf, resolv.conf).
+		   VMS doesn't let us set non-blocking on a file, so it might fail. */
+#ifndef __VMS
 		close(fd);
 		return -1;
+#endif
 	}
 
 	/* Next, update things in our fd tracking */
-	comm_open(fd, FD_SOCKET, note);
+	fd_open(fd, FD_SOCKET, note);
 	return fd;
 }
 
@@ -581,7 +613,7 @@ comm_socket(int family, int sock_type, int proto, const char *note)
  * comm_accept() - accept an incoming connection
  *
  * This is a simple wrapper for accept() which enforces FD limits like
- * comm_socket() does.
+ * comm_open() does.
  */
 int
 comm_accept(int fd, struct sockaddr *pn, socklen_t *addrlen)
@@ -595,14 +627,12 @@ comm_accept(int fd, struct sockaddr *pn, socklen_t *addrlen)
 
 	/*
 	 * Next, do the accept(). if we get an error, we should drop the
-	 * reserved fd limit, but we can deal with that when comm_socket()
+	 * reserved fd limit, but we can deal with that when comm_open()
 	 * also does it. XXX -- adrian
 	 */
 	newfd = accept(fd, (struct sockaddr *) pn, addrlen);
-	comm_fd_hack(&newfd);
 	if(newfd < 0)
 		return -1;
-	
 
 	/* Set the socket non-blocking, and other wonderful bits */
 	if(!comm_set_nb(newfd))
@@ -613,7 +643,7 @@ comm_accept(int fd, struct sockaddr *pn, socklen_t *addrlen)
 	}
 
 	/* Next, tag the FD as an incoming connection */
-	comm_open(newfd, FD_SOCKET, "Incoming connection");
+	fd_open(newfd, FD_SOCKET, "Incoming connection");
 
 	/* .. and return */
 	return newfd;
@@ -689,19 +719,24 @@ fdlist_init(void)
 
 /* Called to open a given filedescriptor */
 void
-comm_open(int fd, unsigned int type, const char *desc)
+fd_open(int fd, unsigned int type, const char *desc)
 {
 	fde_t *F = &fd_table[fd];
 	s_assert(fd >= 0);
 
 	if(F->flags.open)
 	{
-		comm_close(fd);
+		fd_close(fd);
 	}
 	s_assert(!F->flags.open);
 	F->fd = fd;
 	F->type = type;
 	F->flags.open = 1;
+#ifdef NOTYET
+	F->defer.until = 0;
+	F->defer.n = 0;
+	F->defer.handler = NULL;
+#endif
 	fdlist_update_biggest(fd, 1);
 	F->comm_index = -1;
 	F->list = FDLIST_NONE;
@@ -713,7 +748,7 @@ comm_open(int fd, unsigned int type, const char *desc)
 
 /* Called to close a given filedescriptor */
 void
-comm_close(int fd)
+fd_close(int fd)
 {
 	fde_t *F = &fd_table[fd];
 	s_assert(F->flags.open);
@@ -725,6 +760,7 @@ comm_close(int fd)
 		s_assert(F->write_handler == NULL);
 	}
 	comm_setselect(F->fd, FDLIST_NONE, COMM_SELECT_WRITE | COMM_SELECT_READ, NULL, NULL, 0);
+	comm_setflush(F->fd, 0, NULL, NULL);
 	
 	if (F->dns_query != NULL)
 	{
@@ -744,10 +780,10 @@ comm_close(int fd)
 
 
 /*
- * comm_dump() - dump the list of active filedescriptors
+ * fd_dump() - dump the list of active filedescriptors
  */
 void
-comm_dump(struct Client *source_p)
+fd_dump(struct Client *source_p)
 {
 	int i;
 
@@ -763,13 +799,13 @@ comm_dump(struct Client *source_p)
 }
 
 /*
- * comm_note() - set the fd note
+ * fd_note() - set the fd note
  *
  * Note: must be careful not to overflow fd_table[fd].desc when
  *       calling.
  */
 void
-comm_note(int fd, const char *format, ...)
+fd_note(int fd, const char *format, ...)
 {
 	va_list args;
 
@@ -784,3 +820,273 @@ comm_note(int fd, const char *format, ...)
 }
 
 
+/*
+ * Wrappers around open() / close() for fileio, since a whole bunch of
+ * code that should be using the fbopen() / fbclose() code isn't.
+ * Grr. -- adrian
+ */
+
+static int
+file_open(const char *filename, int mode, int fmode)
+{
+	int fd;
+	fd = open(filename, mode, fmode);
+	if(fd == MASTER_MAX)
+	{
+		fd_close(fd);	/* Too many FDs! */
+		errno = ENFILE;
+		fd = -1;
+	}
+	else if(fd >= 0)
+		fd_open(fd, FD_FILE, filename);
+
+	return fd;
+}
+
+static void
+file_close(int fd)
+{
+	/*
+	 * Debug - we set type to FD_FILECLOSE so we can get trapped
+	 * in fd_close() with type == FD_FILE. This will allow us to
+	 * convert all abusers of fd_close() of a FD_FILE fd over
+	 * to file_close() .. mwahaha!
+	 */
+	s_assert(fd_table[fd].type == FD_FILE);
+	fd_table[fd].type = FD_FILECLOSE;
+	fd_close(fd);
+}
+
+FBFILE *
+fbopen(const char *filename, const char *mode)
+{
+	int openmode = 0;
+	int pmode = 0;
+	FBFILE *fb = NULL;
+	int fd;
+	s_assert(filename);
+	s_assert(mode);
+
+	if(filename == NULL || mode == NULL)
+	{
+		errno = EINVAL;
+		return NULL;
+	}
+	while (*mode)
+	{
+		switch (*mode)
+		{
+		case 'r':
+			openmode = O_RDONLY;
+			break;
+		case 'w':
+			openmode = O_WRONLY | O_CREAT | O_TRUNC;
+			pmode = 0644;
+			break;
+		case 'a':
+			openmode = O_WRONLY | O_CREAT | O_APPEND;
+			pmode = 0644;
+			break;
+		case '+':
+			openmode &= ~(O_RDONLY | O_WRONLY);
+			openmode |= O_RDWR;
+			break;
+		default:
+			break;
+		}
+		++mode;
+	}
+
+	if((fd = file_open(filename, openmode, pmode)) == -1)
+	{
+		return fb;
+	}
+
+	if(NULL == (fb = fdbopen(fd, NULL)))
+		file_close(fd);
+	return fb;
+}
+
+FBFILE *
+fdbopen(int fd, const char *mode)
+{
+	/*
+	 * ignore mode, if file descriptor hasn't been opened with the
+	 * correct mode, the first use will fail
+	 */
+	FBFILE *fb = (FBFILE *) MyMalloc(sizeof(FBFILE));
+	if(NULL != fb)
+	{
+		fb->ptr = fb->endp = fb->buf;
+		fb->fd = fd;
+		fb->flags = 0;
+		fb->pbptr = NULL;
+	}
+	return fb;
+}
+
+void
+fbclose(FBFILE * fb)
+{
+	s_assert(fb);
+	if(fb != NULL)
+	{
+		file_close(fb->fd);
+		MyFree(fb);
+	}
+	else
+		errno = EINVAL;
+
+}
+
+static int
+fbfill(FBFILE * fb)
+{
+	int n;
+	s_assert(fb);
+	if(fb == NULL)
+	{
+		errno = EINVAL;
+		return -1;
+	}
+	if(fb->flags)
+		return -1;
+	n = read(fb->fd, fb->buf, BUFSIZ);
+	if(0 < n)
+	{
+		fb->ptr = fb->buf;
+		fb->endp = fb->buf + n;
+	}
+	else if(n < 0)
+		fb->flags |= FB_FAIL;
+	else
+		fb->flags |= FB_EOF;
+	return n;
+}
+
+int
+fbgetc(FBFILE * fb)
+{
+	s_assert(fb);
+	if(fb == NULL)
+	{
+		errno = EINVAL;
+		return -1;
+	}
+	if(fb->pbptr)
+	{
+		if((fb->pbptr == (fb->pbuf + BUFSIZ)) || (!*fb->pbptr))
+			fb->pbptr = NULL;
+	}
+
+	if(fb->ptr < fb->endp || fbfill(fb) > 0)
+		return *fb->ptr++;
+	return EOF;
+}
+
+void
+fbungetc(char c, FBFILE * fb)
+{
+	s_assert(fb);
+	if(fb == NULL)
+	{
+		errno = EINVAL;
+		return;
+	}
+	if(!fb->pbptr)
+	{
+		fb->pbptr = fb->pbuf + BUFSIZ;
+	}
+
+	if(fb->pbptr != fb->pbuf)
+	{
+		fb->pbptr--;
+		*fb->pbptr = c;
+	}
+}
+
+char *
+fbgets(char *buf, size_t len, FBFILE * fb)
+{
+	char *p = buf;
+	s_assert(buf);
+	s_assert(fb);
+	s_assert(0 < len);
+
+	if(fb == NULL || buf == NULL)
+	{
+		errno = EINVAL;
+		return NULL;
+	}
+	if(fb->pbptr)
+	{
+		strlcpy(buf, fb->pbptr, len);
+		fb->pbptr = NULL;
+		return (buf);
+	}
+
+	if(fb->ptr == fb->endp && fbfill(fb) < 1)
+		return 0;
+	--len;
+	while (len--)
+	{
+		*p = *fb->ptr++;
+		if('\n' == *p)
+		{
+			++p;
+			break;
+		}
+		/*
+		 * deal with CR's
+		 */
+		else if('\r' == *p)
+		{
+			if(fb->ptr < fb->endp || fbfill(fb) > 0)
+			{
+				if('\n' == *fb->ptr)
+					++fb->ptr;
+			}
+			*p++ = '\n';
+			break;
+		}
+		++p;
+		if(fb->ptr == fb->endp && fbfill(fb) < 1)
+			break;
+	}
+	*p = '\0';
+	return buf;
+}
+
+int
+fbputs(const char *str, FBFILE * fb)
+{
+	int n = -1;
+	s_assert(str);
+	s_assert(fb);
+
+	if(str == NULL || fb == NULL)
+	{
+		errno = EINVAL;
+		return -1;
+	}
+	if(0 == fb->flags)
+	{
+		n = write(fb->fd, str, strlen(str));
+		if(-1 == n)
+			fb->flags |= FB_FAIL;
+	}
+	return n;
+}
+
+int
+fbstat(struct stat *sb, FBFILE * fb)
+{
+	s_assert(sb);
+	s_assert(fb);
+	if(sb == NULL || fb == NULL)
+	{
+		errno = EINVAL;
+		return -1;
+	}
+	return fstat(fb->fd, sb);
+}

@@ -28,10 +28,11 @@
 #include "config.h"
 #include "stdinc.h"
 #include <sys/poll.h>
-#include "tools.h"
+
 #include "commio.h"
 #include "class.h"
 #include "client.h"
+#include "common.h"
 #include "irc_string.h"
 #include "ircd.h"
 #include "listener.h"
@@ -43,6 +44,7 @@
 #include "s_conf.h"
 #include "s_log.h"
 #include "s_serv.h"
+#include "s_stats.h"
 #include "send.h"
 #include "memory.h"
 

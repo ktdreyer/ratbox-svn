@@ -22,10 +22,8 @@
 #include "stdinc.h"
 #include "config.h"
 #include "ircd_defs.h"
-#include "tools.h"
 #include "patricia.h"
 #include "balloc.h"
-#include "irc_string.h"
 
 static BlockHeap *prefix_heap;
 static BlockHeap *node_heap;
@@ -214,7 +212,7 @@ ascii2prefix(int family, const char *string)
 		memcpy(save, string, cp - string);
 		save[cp - string] = '\0';
 		string = save;
-		if(bitlen < 0 || bitlen > maxbitlen)
+		if(bitlen <= 0 || bitlen > maxbitlen)
 			bitlen = maxbitlen;
 	}
 	else
@@ -953,7 +951,7 @@ make_and_lookup_ip(patricia_tree_t * tree, struct sockaddr *in, int bitlen)
 
 
 patricia_node_t *
-make_and_lookup(patricia_tree_t * tree, const char *string)
+make_and_lookup(patricia_tree_t * tree, char *string)
 {
 	prefix_t *prefix;
 	patricia_node_t *node;

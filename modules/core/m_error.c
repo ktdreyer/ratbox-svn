@@ -26,6 +26,7 @@
 
 #include "stdinc.h"
 #include "client.h"
+#include "common.h"		/* FALSE */
 #include "ircd.h"
 #include "numeric.h"
 #include "send.h"

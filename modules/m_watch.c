@@ -53,7 +53,6 @@ mapi_clist_av1 watch_clist[] = { &watch_msgtab, NULL };
 
 DECLARE_MODULE_AV1(watch, NULL, NULL, watch_clist, NULL, NULL, "$Revision$");
 
-
 /*
  * RPL_NOWON   - Online at the moment (Succesfully added to WATCH-list)
  * RPL_NOWOFF  - Offline at the moement (Succesfully added to WATCH-list)

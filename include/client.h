@@ -68,7 +68,11 @@ struct User
 	char *away;		/* pointer to away message */
 	int refcnt;		/* Number of times this block is referenced */
 	const char *server;	/* pointer to scached server name */
-	char name[NICKLEN];	/* users nickname */
+
+#ifdef ENABLE_SERVICES
+	char suser[NICKLEN+1];
+#endif
+
 };
 
 struct Server
@@ -126,10 +130,8 @@ struct Client
 	unsigned char handler;	/* Handler index */
 	unsigned long serial;	/* used to enforce 1 send per nick */
 
-	/* client->name is the unique name for a client nick or host 
-	 * this is now a pointer to either User->name or the server scache
-	 */
-	char *name;
+	/* client->name is the unique name for a client nick or host */
+	char name[HOSTLEN + 1];
 
 	/* 
 	 * client->username is the username from ident or the USER message, 
@@ -151,10 +153,11 @@ struct Client
 
 	char id[IDLEN + 1];	/* UID/SID, unique on the network */
 
-	/* list of who has this client on their allow list,
-	 * its counterpart is in LocalUser
+	/* list of who has this client on their allow list, its counterpart
+	 * is in LocalUser
 	 */
-	dlink_list on_allow_list;	/* clients that have =me= on their allow list */
+	dlink_list on_allow_list;
+
 
 	struct LocalUser *localClient;
 };
@@ -180,7 +183,7 @@ struct LocalUser
 	int received_number_of_privmsgs;
 	int flood_noticed;
 
-	time_t lasttime;	/* last time they sent data */
+	time_t lasttime;	/* last time we parsed something */
 	time_t firsttime;	/* time client was created */
 
 	/* Send and receive linebuf queues .. */
@@ -233,17 +236,14 @@ struct LocalUser
 	struct ZipStats zipstats;
 
 	time_t last_away;	/* Away since... */
-	time_t last;		/* last time they sent a PRIVMSG */
+	time_t last;
 
 	/* challenge stuff */
 	char *response;
 	char *auth_oper;
 
-	/* list of clients allowed to talk through +g */
+	/* clients allowed to talk through +g */
 	dlink_list allow_list;
-	
-	/* watch list */
-	dlink_list watchlist;   
 
 	/*
 	 * Anti-flood stuff. We track how many messages were parsed and how
@@ -257,11 +257,9 @@ struct LocalUser
 	time_t last_knock;	/* time of last knock */
 	unsigned long random_ping;
 	struct AuthRequest	*auth_request;
-
-	/* message target change stuff */
-	void *targets[10];		/* targets we're aware of */
-	u_int16_t targinfo[2];		/* for cyclic array and number in use */
-	time_t target_last;		/* last time we cleared a slot */
+        /* watch list */
+        dlink_list watchlist;   
+	                
 };
 
 struct exit_client_hook
@@ -355,10 +353,11 @@ struct exit_client_hook
 #define FLAGS_PINGSENT     0x0001	/* Unreplied ping sent */
 #define FLAGS_DEAD	   0x0002	/* Local socket is dead--Exiting soon */
 #define FLAGS_KILLED       0x0004	/* Prevents "QUIT" from being sent for this */
-#define FLAGS_SENTUSER     0x0008	/* client has sent the "USER" command */
 #define FLAGS_CLOSING      0x0020	/* set when closing to suppress errors */
+#define FLAGS_CHKACCESS    0x0040	/* ok to check clients access if set */
 #define FLAGS_GOTID        0x0080	/* successful ident lookup achieved */
 #define FLAGS_NEEDID       0x0100	/* I-lines say must use ident return */
+#define FLAGS_NORMALEX     0x0400	/* Client exited normally */
 #define FLAGS_SENDQEX      0x0800	/* Sendq exceeded */
 #define FLAGS_SERVLINK     0x10000	/* servlink has servlink process */
 #define FLAGS_MARK	   0x20000	/* marked client */
@@ -366,6 +365,7 @@ struct exit_client_hook
 #define FLAGS_EOB          0x80000	/* EOB */
 #define FLAGS_MYCONNECT	   0x100000	/* MyConnect */
 #define FLAGS_IOERROR      0x200000	/* IO error */
+#define FLAGS_SERVICE	   0x400000
 /* umodes, settable flags */
 
 #define UMODE_SERVNOTICE   0x0001	/* server notices such as kill */
@@ -385,11 +385,13 @@ struct exit_client_hook
 #define UMODE_UNAUTH       0x4000	/* show unauth connects here */
 #define UMODE_LOCOPS       0x8000	/* show locops */
 #define UMODE_OPERSPY	   0x10000
-#define UMODE_CCONNEXT     0x20000
+#define UMODE_CCONNEXT     0x20000	/* extended client connections */
+#define UMODE_SERVICE      0x40000
+#define UMODE_DEAF	   0x80000
 
 /* user information flags, only settable by remote mode or local oper */
-#define UMODE_OPER         0x40000	/* Operator */
-#define UMODE_ADMIN        0x80000	/* Admin on server */
+#define UMODE_OPER         0x100000	/* Operator */
+#define UMODE_ADMIN        0x200000	/* Admin on server */
 
 #define UMODE_ALL	   UMODE_SERVNOTICE
 
@@ -407,7 +409,7 @@ struct exit_client_hook
 #define FLAGS2_EXEMPTSHIDE	0x40000000
 
 #define SEND_UMODES  (UMODE_INVISIBLE | UMODE_OPER | UMODE_WALLOP | \
-                      UMODE_ADMIN)
+                      UMODE_ADMIN | UMODE_SERVICE | UMODE_DEAF)
 #define DEFAULT_OPER_UMODES (UMODE_SERVNOTICE | UMODE_OPERWALL | \
                              UMODE_WALLOP | UMODE_LOCOPS)
 #define ALL_UMODES   (SEND_UMODES | UMODE_SERVNOTICE | UMODE_CCONN | \
@@ -415,7 +417,8 @@ struct exit_client_hook
                       UMODE_NCHANGE | UMODE_OPERWALL | UMODE_DEBUG | \
                       UMODE_BOTS | UMODE_EXTERNAL | UMODE_LOCOPS | \
  		      UMODE_ADMIN | UMODE_UNAUTH | UMODE_CALLERID | \
-		      UMODE_OPERSPY | UMODE_CCONNEXT)
+		      UMODE_OPERSPY | UMODE_CCONNEXT | UMODE_SERVICE | \
+		      UMODE_DEAF)
 
 #define FLAGS_ID     (FLAGS_NEEDID | FLAGS_GOTID)
 
@@ -423,6 +426,9 @@ struct exit_client_hook
  * flags macros.
  */
 #define IsPerson(x)             (IsClient(x) && (x)->user)
+#define DoAccess(x)             ((x)->flags & FLAGS_CHKACCESS)
+#define SetAccess(x)            ((x)->flags |= FLAGS_CHKACCESS)
+#define ClearAccess(x)          ((x)->flags &= ~FLAGS_CHKACCESS)
 #define HasServlink(x)          ((x)->flags &  FLAGS_SERVLINK)
 #define SetServlink(x)          ((x)->flags |= FLAGS_SERVLINK)
 #define MyConnect(x)		((x)->flags & FLAGS_MYCONNECT)
@@ -445,9 +451,6 @@ struct exit_client_hook
 #define SetClosing(x)		((x)->flags |= FLAGS_CLOSING)
 #define IsIOError(x)		((x)->flags & FLAGS_IOERROR)
 #define SetIOError(x)		((x)->flags |= FLAGS_IOERROR)
-#define HasSentUser(x)		((x)->flags & FLAGS_SENTUSER)
-#define SetSentUser(x)		((x)->flags |= FLAGS_SENTUSER)
-
 #define IsAnyDead(x)		(IsIOError(x) || IsDead(x) || IsClosing(x))
 
 /* oper flags */
@@ -481,6 +484,8 @@ struct exit_client_hook
 #define SetWallops(x)           ((x)->umodes |= UMODE_WALLOP)
 #define SetCallerId(x)		((x)->umodes |= UMODE_CALLERID)
 #define IsSetCallerId(x)	((x)->umodes & UMODE_CALLERID)
+#define IsService(x)		((x)->umodes & UMODE_SERVICE)
+#define IsDeaf(x)		((x)->umodes & UMODE_DEAF)
 
 #define SetNeedId(x)            ((x)->flags |= FLAGS_NEEDID)
 #define IsNeedId(x)             (((x)->flags & FLAGS_NEEDID) != 0)
@@ -545,6 +550,7 @@ extern void count_remote_client_memory(size_t * count, size_t * memory);
 extern struct Client *find_chasing(struct Client *, const char *, int *);
 extern struct Client *find_person(const char *);
 extern struct Client *find_named_person(const char *);
+extern struct Client *next_client(struct Client *, const char *);
 extern int accept_message(struct Client *source, struct Client *target);
 extern void del_from_accept(struct Client *source, struct Client *target);
 extern void del_all_accepts(struct Client *client_p);

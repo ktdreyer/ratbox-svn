@@ -226,7 +226,7 @@ initBlockHeap(void)
 
 	if(zero_fd < 0)
 		blockheap_fail("Failed opening /dev/zero");
-	comm_open(zero_fd, FD_FILE, "Anonymous mmap()");
+	fd_open(zero_fd, FD_FILE, "Anonymous mmap()");
 #endif
 	eventAddIsh("block_heap_gc", block_heap_gc, NULL, 30);
 }

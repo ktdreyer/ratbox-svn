@@ -27,8 +27,8 @@
 #include "stdinc.h"
 #include "client.h"
 #include "channel.h"
+#include "common.h"
 #include "irc_string.h"
-#include "sprintf_irc.h"
 #include "ircd.h"
 #include "s_gline.h"
 #include "numeric.h"
@@ -62,12 +62,19 @@ struct hash_commands
 };
 
 static void
-rehash_banconfs(struct Client *source_p)
+clear_temps(dlink_list * tlist)
 {
-	sendto_realops_flags(UMODE_ALL, L_ALL, "%s is rehashing ban configs",
-			get_oper_name(source_p));
+	dlink_node *ptr;
+	dlink_node *next_ptr;
+	struct ConfItem *aconf;
 
-	rehash_ban(0);
+	DLINK_FOREACH_SAFE(ptr, next_ptr, tlist->head)
+	{
+		aconf = ptr->data;
+
+		delete_one_address_conf(aconf->host, aconf);
+		dlinkDestroy(ptr, tlist);
+	}
 }
 
 static void
@@ -105,21 +112,9 @@ rehash_omotd(struct Client *source_p)
 static void
 rehash_glines(struct Client *source_p)
 {
-	struct ConfItem *aconf;
-	dlink_node *ptr;
-	dlink_node *next_ptr;
-
 	sendto_realops_flags(UMODE_ALL, L_ALL, "%s is clearing G-lines",
 				get_oper_name(source_p));
-
-	DLINK_FOREACH_SAFE(ptr, next_ptr, glines.head)
-	{
-		aconf = ptr->data;
-
-		dlinkDelete(ptr, &glines);
-		delete_one_address_conf(aconf->host, aconf);
-	}
-
+	clear_temps(&glines);
 }
 
 static void
@@ -146,46 +141,23 @@ rehash_pglines(struct Client *source_p)
 static void
 rehash_tklines(struct Client *source_p)
 {
-	struct ConfItem *aconf;
-	dlink_node *ptr, *next_ptr;
-	int i;
-
 	sendto_realops_flags(UMODE_ALL, L_ALL, "%s is clearing temp klines",
 				get_oper_name(source_p));
-
-	for(i = 0; i < LAST_TEMP_TYPE; i++)
-	{
-		DLINK_FOREACH_SAFE(ptr, next_ptr, temp_klines[i].head)
-		{
-			aconf = ptr->data;
-
-			dlinkDelete(ptr, &temp_klines[i]);
-			delete_one_address_conf(aconf->host, aconf);
-		}
-	}
+	clear_temps(&tkline_min);
+	clear_temps(&tkline_hour);
+	clear_temps(&tkline_day);
+	clear_temps(&tkline_week);
 }
 
 static void
 rehash_tdlines(struct Client *source_p)
 {
-	struct ConfItem *aconf;
-	dlink_node *ptr, *next_ptr;
-	int i;
-
 	sendto_realops_flags(UMODE_ALL, L_ALL, "%s is clearing temp dlines",
 				get_oper_name(source_p));
-
-	for(i = 0; i < LAST_TEMP_TYPE; i++)
-	{
-		DLINK_FOREACH_SAFE(ptr, next_ptr, temp_dlines[i].head)
-		{
-			aconf = ptr->data;
-
-			dlinkDelete(ptr, &temp_dlines[i]);
-			delete_one_address_conf(aconf->host, aconf);
-		}
-	}
-
+	clear_temps(&tdline_min);
+	clear_temps(&tdline_hour);
+	clear_temps(&tdline_day);
+	clear_temps(&tdline_week);
 }
 
 static void
@@ -205,8 +177,8 @@ rehash_txlines(struct Client *source_p)
 		if(!aconf->hold)
 			continue;
 
-		dlinkDelete(ptr, &xline_conf_list);
 		free_conf(aconf);
+		dlinkDestroy(ptr, &xline_conf_list);
 	}
 }
 
@@ -228,8 +200,8 @@ rehash_tresvs(struct Client *source_p)
 		if(!aconf->hold)
 			continue;
 
-		dlinkDelete(ptr, &resvTable[i]);
 		free_conf(aconf);
+		dlinkDestroy(ptr, &resvTable[i]);
 	}
 	HASH_WALK_END
 
@@ -240,8 +212,8 @@ rehash_tresvs(struct Client *source_p)
 		if(!aconf->hold)
 			continue;
 
-		dlinkDelete(ptr, &resv_conf_list);
 		free_conf(aconf);
+		dlinkDestroy(ptr, &resv_conf_list);
 	}
 }
 
@@ -267,7 +239,6 @@ rehash_help(struct Client *source_p)
 /* *INDENT-OFF* */
 static struct hash_commands rehash_commands[] =
 {
-	{"BANCONFS",	rehash_banconfs		},
 	{"DNS", 	rehash_dns		},
 	{"MOTD", 	rehash_motd		},
 	{"OMOTD", 	rehash_omotd		},
@@ -300,8 +271,8 @@ mo_rehash(struct Client *client_p, struct Client *source_p, int parc, const char
 	if(parc > 1)
 	{
 		int x;
-		char cmdbuf[BUFSIZ];
-		
+		char cmdbuf[100];
+
 		for (x = 0; rehash_commands[x].cmd != NULL && rehash_commands[x].handler != NULL;
 		     x++)
 		{
@@ -317,12 +288,15 @@ mo_rehash(struct Client *client_p, struct Client *source_p, int parc, const char
 		}
 
 		/* We are still here..we didn't match */
-		ircsnprintf(cmdbuf, sizeof(cmdbuf), "%s NOTICE %s :rehash one of:", me.name, source_p->name);
-		for (x = 0; rehash_commands[x].cmd != NULL && rehash_commands[x].handler != NULL; x++)
+		cmdbuf[0] = '\0';
+		for (x = 0; rehash_commands[x].cmd != NULL && rehash_commands[x].handler != NULL;
+		     x++)
 		{
-			ircsnprintf_append(cmdbuf, sizeof(cmdbuf), " %s", rehash_commands[x].cmd);
+			strlcat(cmdbuf, " ", sizeof(cmdbuf));
+			strlcat(cmdbuf, rehash_commands[x].cmd, sizeof(cmdbuf));
 		}
-		sendto_one(source_p, "%s", cmdbuf);
+		sendto_one(source_p, ":%s NOTICE %s :rehash one of:%s", me.name, source_p->name,
+			   cmdbuf);
 	}
 	else
 	{

@@ -37,6 +37,7 @@
 #include "ircd_defs.h"
 #include "class.h"
 #include "client.h"
+#include "common.h"
 #include "patricia.h"
 
 struct Client;
@@ -53,7 +54,7 @@ struct ip_value
 	int type;
 };
 
-extern FILE *conf_fbfile_in;
+extern FBFILE *conf_fbfile_in;
 extern char conf_line_in[256];
 extern struct ConfItem *yy_aconf;
 
@@ -73,7 +74,6 @@ struct ConfItem
 	char *className;	/* Name of class */
 	struct Class *c_class;	/* Class of connection */
 	patricia_node_t *pnode;	/* Our patricia node */
-	dlink_node dnode;
 };
 
 #define CONF_ILLEGAL            0x80000000
@@ -100,9 +100,11 @@ struct ConfItem
 /* Generic flags... */
 /* access flags... */
 #define CONF_FLAGS_DO_IDENTD            0x00000001
-#define CONF_FLAGS_PERMANENT		0x00000002	/* perm kline */
+#define CONF_FLAGS_LIMIT_IP             0x00000002
 #define CONF_FLAGS_NO_TILDE             0x00000004
 #define CONF_FLAGS_NEED_IDENTD          0x00000008
+#define CONF_FLAGS_PASS_IDENTD          0x00000010
+#define CONF_FLAGS_NOMATCH_IP           0x00000020
 #define CONF_FLAGS_EXEMPTKLINE          0x00000040
 #define CONF_FLAGS_NOLIMIT              0x00000080
 #define CONF_FLAGS_IDLE_LINED           0x00000100
@@ -115,6 +117,7 @@ struct ConfItem
 #define CONF_FLAGS_EXEMPTSHIDE		0x00010000
 /* server flags */
 #define CONF_FLAGS_ALLOW_AUTO_CONN      0x00040000
+#define CONF_FLAGS_LAZY_LINK            0x00080000
 #define CONF_FLAGS_ENCRYPTED            0x00100000
 #define CONF_FLAGS_COMPRESSED           0x00200000
 #define CONF_FLAGS_TEMPORARY            0x00400000
@@ -123,8 +126,11 @@ struct ConfItem
 
 
 /* Macros for struct ConfItem */
+#define IsLimitIp(x)            ((x)->flags & CONF_FLAGS_LIMIT_IP)
 #define IsNoTilde(x)            ((x)->flags & CONF_FLAGS_NO_TILDE)
 #define IsNeedIdentd(x)         ((x)->flags & CONF_FLAGS_NEED_IDENTD)
+#define IsPassIdentd(x)         ((x)->flags & CONF_FLAGS_PASS_IDENTD)
+#define IsNoMatchIp(x)          ((x)->flags & CONF_FLAGS_NOMATCH_IP)
 #define IsConfExemptKline(x)    ((x)->flags & CONF_FLAGS_EXEMPTKLINE)
 #define IsConfExemptLimits(x)   ((x)->flags & CONF_FLAGS_NOLIMIT)
 #define IsConfExemptGline(x)    ((x)->flags & CONF_FLAGS_EXEMPTGLINE)
@@ -146,24 +152,28 @@ struct config_file_entry
 {
 	const char *dpath;	/* DPATH if set from command line */
 	const char *configfile;
+	const char *klinefile;
+	const char *dlinefile;
+	const char *xlinefile;
+	const char *resvfile;
 
 	char *servlink_path;
 	char *egdpool_path;
 
-	char *default_operstring;
-	char *default_adminstring;
-	char *kline_reason;
+	char default_operstring[REALLEN];
+	char default_adminstring[REALLEN];
+	char kline_reason[REALLEN];
 	
-	char *fname_userlog;
-	char *fname_fuserlog;
-	char *fname_operlog;
-	char *fname_foperlog;
-	char *fname_serverlog;
-	char *fname_killlog;
-	char *fname_glinelog;
-	char *fname_klinelog;
-	char *fname_operspylog;
-	char *fname_ioerrorlog;
+	char fname_userlog[MAXPATHLEN];
+	char fname_fuserlog[MAXPATHLEN];
+	char fname_operlog[MAXPATHLEN];
+	char fname_foperlog[MAXPATHLEN];
+	char fname_serverlog[MAXPATHLEN];
+	char fname_killlog[MAXPATHLEN];
+	char fname_glinelog[MAXPATHLEN];
+	char fname_klinelog[MAXPATHLEN];
+	char fname_operspylog[MAXPATHLEN];
+	char fname_ioerrorlog[MAXPATHLEN];
 
 	unsigned char compression_level;
 	int disable_fake_channels;
@@ -201,6 +211,7 @@ struct config_file_entry
 	int gline_time;
 	int gline_min_cidr;
 	int gline_min_cidr6;
+	int idletime;
 	int hide_server;
 	int hide_error_messages;
 	int client_exit;
@@ -212,7 +223,6 @@ struct config_file_entry
 	int min_nonwildcard_simple;
 	int default_floodcount;
 	int client_flood;
-	int target_change;
 	int use_egd;
 	int ping_cookie;
 	int tkline_expire_notices;
@@ -223,10 +233,6 @@ struct config_file_entry
 	int reject_ban_time;
 	int reject_after_count;
 	int reject_duration;
-
-	int tgchange_expiry;
-	int tgchange_remote;
-	int tgchange_reconnect;
 	int max_watch;
 #ifdef IPV6
 	int fallback_to_ip6_int;
@@ -256,6 +262,8 @@ struct config_channel_entry
 struct config_server_hide
 {
 	int flatten_links;
+	int links_delay;
+	int links_disabled;
 	int hidden;
 	int disable_hidden;
 };
@@ -296,23 +304,49 @@ extern struct server_info ServerInfo;	/* defined in ircd.c */
 extern struct admin_info AdminInfo;	/* defined in ircd.c */
 /* End GLOBAL section */
 
+#ifdef ENABLE_SERVICES
+dlink_list service_list;
+#endif
+
+#define TEMP_MIN	1
+#define TEMP_HOUR	2
+#define TEMP_DAY	3
+#define TEMP_WEEK	4
+
+extern dlink_list tkline_min;
+extern dlink_list tkline_hour;
+extern dlink_list tkline_day;
+extern dlink_list tkline_week;
+
+extern dlink_list tdline_min;
+extern dlink_list tdline_hour;
+extern dlink_list tdline_day;
+extern dlink_list tdline_week;
+
 extern void init_s_conf(void);
 
 extern struct ConfItem *make_conf(void);
 extern void free_conf(struct ConfItem *);
 
-extern void read_ircd_conf(int cold);
-extern void read_ban_confs(int cold);
+extern void read_conf_files(int cold);
+
+extern int attach_conf(struct Client *, struct ConfItem *);
+extern int check_client(struct Client *client_p, struct Client *source_p, const char *);
 
 extern int detach_conf(struct Client *);
 
 extern int conf_connect_allowed(struct sockaddr *addr, int);
 
+extern struct ConfItem *find_tkline(const char *, const char *, struct sockaddr *);
 extern char *show_iline_prefix(struct Client *, struct ConfItem *, char *);
+extern void get_printable_conf(struct ConfItem *,
+			       char **, char **, char **, char **, int *, char **);
+extern void get_printable_kline(struct Client *, struct ConfItem *,
+				char **, char **, char **, char **);
 
 extern void yyerror(const char *);
 extern int conf_yy_fatal_error(const char *);
-extern int conf_fgets(char *, int, FILE *);
+extern int conf_fbgets(char *, int, FBFILE *);
 
 typedef enum
 {
@@ -325,19 +359,40 @@ KlineType;
 
 extern void write_confitem(KlineType, struct Client *, char *, char *,
 			   const char *, const char *, const char *, int);
+extern void add_temp_kline(struct ConfItem *);
+extern void add_temp_dline(struct ConfItem *);
+extern void report_temp_klines(struct Client *);
+extern void show_temp_klines(struct Client *, dlink_list *);
+
+extern void cleanup_temps_min(void *);
+extern void cleanup_temps_hour(void *);
+extern void cleanup_temps_day(void *);
+extern void cleanup_temps_week(void *);
+
 
 extern const char *get_conf_name(KlineType);
 extern int rehash(int);
-extern int rehash_ban(int);
 
+extern int conf_add_server(struct ConfItem *, int);
 extern void conf_add_class_to_conf(struct ConfItem *);
+extern void conf_add_me(struct ConfItem *);
 extern void conf_add_class(struct ConfItem *, int);
+extern void conf_add_d_conf(struct ConfItem *);
+extern void flush_expired_ips(void *);
 
+
+/* XXX consider moving these into kdparse.h */
+extern void parse_k_file(FBFILE * fb);
+extern void parse_d_file(FBFILE * fb);
+extern void parse_x_file(FBFILE * fb);
+extern void parse_resv_file(FBFILE *);
 extern char *getfield(char *newline);
 
 extern char *get_oper_name(struct Client *client_p);
 
 extern int yylex(void);
+
+extern unsigned long cidr_to_bitmask[];
 
 extern char conffilebuf[IRCD_BUFSIZE + 1];
 extern int lineno;

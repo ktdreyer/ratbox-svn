@@ -60,14 +60,17 @@
 struct module **modlist = NULL;
 
 static const char *core_module_table[] = {
-	"channels",
-	"users",
 	"m_die",
+	"m_join",
+	"m_kick",
 	"m_kill",
 	"m_message",
 	"m_mode",
+	"m_nick",
+	"m_part",
 	"m_quit",
 	"m_server",
+	"m_sjoin",
 	"m_squit",
 	NULL
 };
@@ -724,15 +727,18 @@ unload_one_module(const char *name, int warn)
 					mod_del_cmd(*m);
 			}
 
-			/* hook events are never removed, we simply lose the
-			 * ability to call them --fl
-			 */
+			if(mheader->mapi_hook_list)
+			{
+				mapi_hlist_av1 *m;
+				for (m = mheader->mapi_hook_list; m->hapi_name; ++m)
+					hook_del_event(m->hapi_name);
+			}
 
 			if(mheader->mapi_hfn_list)
 			{
 				mapi_hfn_list_av1 *m;
 				for (m = mheader->mapi_hfn_list; m->hapi_name; ++m)
-					remove_hook(m->hapi_name, m->fn);
+					hook_del_hook(m->hapi_name, m->fn);
 			}
 
 			if(mheader->mapi_unregister)
@@ -847,14 +853,14 @@ load_a_module(const char *path, int warn, int core)
 			{
 				mapi_hlist_av1 *m;
 				for (m = mheader->mapi_hook_list; m->hapi_name; ++m)
-					*m->hapi_id = register_hook(m->hapi_name);
+					hook_add_event(m->hapi_name, m->hapi_id);
 			}
 
 			if(mheader->mapi_hfn_list)
 			{
 				mapi_hfn_list_av1 *m;
 				for (m = mheader->mapi_hfn_list; m->hapi_name; ++m)
-					add_hook(m->hapi_name, m->fn);
+					hook_add_hook(m->hapi_name, m->fn);
 			}
 
 			ver = mheader->mapi_module_version;
@@ -934,6 +940,9 @@ increase_modlist(void)
 void
 load_all_modules(int warn)
 {
+#ifdef __vms
+	load_core_static_modules();
+#endif
 	load_static_modules();
 }
 

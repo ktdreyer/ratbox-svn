@@ -29,6 +29,7 @@
 #include "channel.h"
 #include "class.h"
 #include "client.h"
+#include "common.h"
 #include "irc_string.h"
 #include "sprintf_irc.h"
 #include "ircd.h"
@@ -83,6 +84,7 @@ static int already_placed_kline(struct Client *, const char *, const char *, int
 static void handle_remote_unkline(struct Client *source_p, 
 			const char *user, const char *host);
 static void remove_permkline_match(struct Client *, const char *, const char *);
+static int flush_write(struct Client *, FBFILE *, const char *, const char *);
 static int remove_temp_kline(const char *, const char *);
 
 /* mo_kline()
@@ -357,6 +359,7 @@ mo_unkline(struct Client *client_p, struct Client *source_p, int parc, const cha
 			else
 				user = splat;
 
+			/* check for user@ */
 			if(!*host)
 				host = splat;
 		}
@@ -708,7 +711,150 @@ already_placed_kline(struct Client *source_p, const char *luser, const char *lho
 static void
 remove_permkline_match(struct Client *source_p, const char *host, const char *user)
 {
+	FBFILE *in, *out;
+	int pairme = 0;
+	int error_on_write = NO;
+	char buf[BUFSIZE];
+	char matchbuf[BUFSIZE];
+	char temppath[BUFSIZE];
+	const char *filename;
+	mode_t oldumask;
+	int matchlen;
+
+	ircsnprintf(temppath, sizeof(temppath),
+		 "%s.tmp", ConfigFileEntry.klinefile);
+
+	filename = get_conf_name(KLINE_TYPE);
+
+	if((in = fbopen(filename, "r")) == 0)
+	{
+		sendto_one_notice(source_p, ":Cannot open %s", filename);
+		return;
+	}
+
+	oldumask = umask(0);
+	if((out = fbopen(temppath, "w")) == 0)
+	{
+		sendto_one_notice(source_p, ":Cannot open %s", temppath);
+		fbclose(in);
+		umask(oldumask);
+		return;
+	}
+
+	umask(oldumask);
+
+	snprintf(matchbuf, sizeof(matchbuf), "\"%s\",\"%s\"", user, host);
+	matchlen = strlen(matchbuf);
+
+	while (fbgets(buf, sizeof(buf), in))
+	{
+		if(error_on_write)
+			break;
+
+		if(!strncasecmp(buf, matchbuf, matchlen))
+		{
+			pairme++;
+			break;
+		}
+		else
+			error_on_write = flush_write(source_p, out, buf, temppath);
+	}
+
+	/* we dropped out of the loop early because we found a match,
+	 * to drop into this somewhat faster loop as we presume we'll never
+	 * have two matching klines --anfl
+	 */
+	if(pairme && !error_on_write)
+	{
+		while(fbgets(buf, sizeof(buf), in))
+		{
+			if(error_on_write)
+				break;
+
+			error_on_write = flush_write(source_p, out, buf, temppath);
+		}
+	}
+
+	fbclose(in);
+	fbclose(out);
+
+	/* The result of the rename should be checked too... oh well */
+	/* If there was an error on a write above, then its been reported
+	 * and I am not going to trash the original kline /conf file
+	 */
+	if(error_on_write)
+	{
+		sendto_one_notice(source_p, ":Couldn't write temp kline file, aborted");
+		return;
+	}
+	else if(!pairme)
+	{
+		sendto_one_notice(source_p, ":No K-Line for %s@%s",
+				  user, host);
+
+		if(temppath != NULL)
+			(void) unlink(temppath);
+
+		return;
+	}
+		
+	(void) rename(temppath, filename);
+	rehash(0);
+
+	sendto_one_notice(source_p, ":K-Line for [%s@%s] is removed",
+			  user, host);
+
+	sendto_realops_flags(UMODE_ALL, L_ALL,
+			     "%s has removed the K-Line for: [%s@%s]",
+			     get_oper_name(source_p), user, host);
+
+	ilog(L_KLINE, "UK %s %s %s",
+		get_oper_name(source_p), user, host);
+	return;
 }
+
+/*
+ * flush_write()
+ *
+ * inputs       - pointer to client structure of oper requesting unkline
+ *              - out is the file descriptor
+ *              - buf is the buffer to write
+ *              - ntowrite is the expected number of character to be written
+ *              - temppath is the temporary file name to be written
+ * output       - YES for error on write
+ *              - NO for success
+ * side effects - if successful, the buf is written to output file
+ *                if a write failure happesn, and the file pointed to
+ *                by temppath, if its non NULL, is removed.
+ *
+ * The idea here is, to be as robust as possible when writing to the 
+ * kline file.
+ *
+ * -Dianora
+ */
+
+static int
+flush_write(struct Client *source_p, FBFILE * out, const char *buf, const char *temppath)
+{
+	int error_on_write = (fbputs(buf, out) < 0) ? YES : NO;
+
+	if(error_on_write)
+	{
+		sendto_one_notice(source_p, ":Unable to write to %s",
+				  temppath);
+		if(temppath != NULL)
+			(void) unlink(temppath);
+	}
+	return (error_on_write);
+}
+
+static dlink_list *tkline_list[] = {
+	&tkline_hour,
+	&tkline_day,
+	&tkline_min,
+	&tkline_week,
+	NULL
+};
 
 /* remove_temp_kline()
  *
@@ -719,6 +865,7 @@ remove_permkline_match(struct Client *source_p, const char *host, const char *us
 static int
 remove_temp_kline(const char *user, const char *host)
 {
+	dlink_list *tklist;
 	struct ConfItem *aconf;
 	dlink_node *ptr;
 	struct irc_sockaddr_storage addr, caddr;
@@ -728,9 +875,11 @@ remove_temp_kline(const char *user, const char *host)
 
 	mtype = parse_netmask(host, (struct sockaddr *)&addr, &bits);
 
-	for (i = 0; i < LAST_TEMP_TYPE; i++)
+	for (i = 0; tkline_list[i] != NULL; i++)
 	{
-		DLINK_FOREACH(ptr, temp_klines[i].head)
+		tklist = tkline_list[i];
+
+		DLINK_FOREACH(ptr, tklist->head)
 		{
 			aconf = ptr->data;
 
@@ -744,12 +893,12 @@ remove_temp_kline(const char *user, const char *host)
 				if(irccmp(aconf->host, host))
 					continue;
 			}
-			else if(bits != cbits ||
+			else if(bits != cbits || 
 				!comp_with_mask_sock((struct sockaddr *)&addr,
 						(struct sockaddr *)&caddr, bits))
 				continue;
 
-			dlinkDelete(ptr, &temp_klines[i]);
+			dlinkDestroy(ptr, tklist);
 			delete_one_address_conf(aconf->host, aconf);
 			return YES;
 		}

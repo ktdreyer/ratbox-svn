@@ -35,15 +35,26 @@ enum
 #endif
 };
 
+struct HostMaskEntry
+{
+	int type, subtype;
+	unsigned long precedence;
+	char *hostmask;
+	void *data;
+	struct HostMaskEntry *next, *nexthash;
+};
+
 int parse_netmask(const char *, struct sockaddr *, int *);
 struct ConfItem *find_conf_by_address(const char *host, const char *sockhost,
-				struct sockaddr *, int, int, const char *);
+					struct sockaddr *, int, int, const char *);
 void add_conf_by_address(const char *, int, const char *, struct ConfItem *);
 void delete_one_address_conf(const char *, struct ConfItem *);
-void clear_out_address_conf(int type);
+void clear_out_address_conf(void);
 void init_host_hash(void);
 struct ConfItem *find_address_conf(const char *host, const char *sockhost, 
 				const char *, struct sockaddr *, int);
+
+struct ConfItem *find_dline(struct sockaddr *, int);
 
 #define find_kline(x)	(find_conf_by_address((x)->host, (x)->sockhost,\
 			 (struct sockaddr *)&(x)->localClient->ip, CONF_KILL,\
@@ -52,6 +63,8 @@ struct ConfItem *find_address_conf(const char *host, const char *sockhost,
 			 (struct sockaddr *)&(x)->localClient->ip, CONF_GLINE,\
 			 (x)->localClient->ip.ss_family, (x)->username))
 
+void report_Klines(struct Client *);
+void report_auth(struct Client *);
 #ifdef IPV6
 int match_ipv6(struct sockaddr *, struct sockaddr *, int);
 #endif

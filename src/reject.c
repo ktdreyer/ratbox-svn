@@ -25,12 +25,13 @@
 
 #include "stdinc.h"
 #include "config.h"
-#include "tools.h"
 #include "patricia.h"
 #include "client.h"
 #include "s_conf.h"
 #include "event.h"
+#include "tools.h"
 #include "reject.h"
+#include "s_stats.h"
 #include "msg.h"
 
 static patricia_tree_t *reject_tree;
@@ -96,7 +97,11 @@ reject_expires(void *unused)
 void
 init_reject(void)
 {
-	reject_tree = New_Patricia(BITLEN);
+#ifdef IPV6
+	reject_tree = New_Patricia(128);
+#else
+	reject_tree = New_Patricia(32);
+#endif
 	eventAdd("reject_exit", reject_exit, NULL, DELAYED_EXIT_TIME);
 	eventAdd("reject_expires", reject_expires, NULL, 60);
 }
@@ -152,7 +157,7 @@ check_reject(struct Client *client_p)
 		rdata->time = CurrentTime;
 		if(rdata->count > ConfigFileEntry.reject_after_count)
 		{
-			ServerStats.is_rej++;
+			ServerStats->is_rej++;
 			SetReject(client_p);
 			comm_setselect(client_p->localClient->fd, FDLIST_NONE, COMM_SELECT_WRITE | COMM_SELECT_READ, NULL, NULL, 0);
 			SetClosing(client_p);

@@ -39,6 +39,8 @@ struct SetOptions
 	int maxclients;		/* max clients allowed */
 	int autoconn;		/* autoconn enabled for all servers? */
 
+	int idletime;
+
 	int floodcount;		/* Number of messages in 1 second */
 	int ident_timeout;	/* timeout for identd lookups */
 
@@ -62,45 +64,16 @@ struct Counter
 
 extern struct SetOptions GlobalSetOptions;	/* defined in ircd.c */
 
-struct ServerStatistics
-{
-	unsigned int is_cl;	/* number of client connections */
-	unsigned int is_sv;	/* number of server connections */
-	unsigned int is_ni;	/* connection but no idea who it was */
-	unsigned short is_cbs;	/* bytes sent to clients */
-	unsigned short is_cbr;	/* bytes received to clients */
-	unsigned short is_sbs;	/* bytes sent to servers */
-	unsigned short is_sbr;	/* bytes received to servers */
-	unsigned long is_cks;	/* k-bytes sent to clients */
-	unsigned long is_ckr;	/* k-bytes received to clients */
-	unsigned long is_sks;	/* k-bytes sent to servers */
-	unsigned long is_skr;	/* k-bytes received to servers */
-	time_t is_cti;		/* time spent connected by clients */
-	time_t is_sti;		/* time spent connected by servers */
-	unsigned int is_ac;	/* connections accepted */
-	unsigned int is_ref;	/* accepts refused */
-	unsigned int is_unco;	/* unknown commands */
-	unsigned int is_wrdi;	/* command going in wrong direction */
-	unsigned int is_unpf;	/* unknown prefix */
-	unsigned int is_empt;	/* empty message */
-	unsigned int is_num;	/* numeric message */
-	unsigned int is_kill;	/* number of kills generated on collisions */
-	unsigned int is_asuc;	/* successful auth requests */
-	unsigned int is_abad;	/* bad auth requests */
-	unsigned int is_rej;	/* rejected from cache */
-};
-
-extern struct ServerStatistics ServerStats;
-
 extern const char *creation;
 extern const char *generation;
+extern const char *platform;
 extern const char *infotext[];
 extern const char *serno;
 extern const char *ircd_version;
 extern const char *logFileName;
 extern const char *pidFileName;
+extern int cold_start;
 extern int dorehash;
-extern int dorehashban;
 extern int doremotd;
 extern int kline_queued;
 extern int server_state_foreground;
@@ -131,6 +104,8 @@ extern dlink_list global_serv_list;
 extern dlink_list oper_list;
 extern dlink_list dead_list;
 extern dlink_list abort_list;
+
+extern void get_current_bandwidth(struct Client *source_p, struct Client *target_p);
 
 extern unsigned long get_maxrss(void);
 extern void set_time(void);

@@ -28,7 +28,7 @@
 #include "ircd.h"
 #include "send.h"
 
-void show_stats(hook_data_int *);
+int show_stats(struct hook_spy_data *);
 
 mapi_hfn_list_av1 stats_hfnlist[] = {
 	{"doing_stats", (hookfn) show_stats},
@@ -37,34 +37,34 @@ mapi_hfn_list_av1 stats_hfnlist[] = {
 
 DECLARE_MODULE_AV1(stats_spy, NULL, NULL, NULL, NULL, stats_hfnlist, "$Revision$");
 
-void
-show_stats(hook_data_int *data)
+int
+show_stats(struct hook_spy_data *data)
 {
-	char statchar = (char) data->arg2;
-
-	if(statchar == 'L' || statchar == 'l')
+	if((data->statchar == 'L') || (data->statchar == 'l'))
 	{
-		const char *name = data->arg1;
-
-		if(!EmptyString(name))
+		if(data->name != NULL)
 			sendto_realops_flags(UMODE_SPY, L_ALL,
-					"STATS %c requested by %s (%s@%s) [%s] on %s",
-					statchar, data->client->name,
-					data->client->username,	data->client->host,
-					data->client->user->server, name);
+					     "STATS %c requested by %s (%s@%s) [%s] on %s",
+					     data->statchar,
+					     data->source_p->name,
+					     data->source_p->username,
+					     data->source_p->host,
+					     data->source_p->user->server, data->name);
 		else
 			sendto_realops_flags(UMODE_SPY, L_ALL,
-					"STATS %c requested by %s (%s@%s) [%s]",
-					statchar, data->client->name,
-					data->client->username,	data->client->host,
-					data->client->user->server);
+					     "STATS %c requested by %s (%s@%s) [%s]",
+					     data->statchar,
+					     data->source_p->name,
+					     data->source_p->username,
+					     data->source_p->host, data->source_p->user->server);
 	}
 	else
 	{
 		sendto_realops_flags(UMODE_SPY, L_ALL,
-				"STATS %c requested by %s (%s@%s) [%s]",
-				statchar, data->client->name,
-				data->client->username, data->client->host,
-				data->client->user->server);
+				     "STATS %c requested by %s (%s@%s) [%s]",
+				     data->statchar, data->source_p->name, data->source_p->username,
+				     data->source_p->host, data->source_p->user->server);
 	}
+
+	return 0;
 }

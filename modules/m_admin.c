@@ -169,10 +169,11 @@ do_admin(struct Client *source_p)
 static void
 admin_spy(struct Client *source_p)
 {
-	hook_data hinfo;
+	struct hook_spy_data data;
 
-	hinfo.client = source_p;
-	hinfo.arg1 = hinfo.arg2 = NULL;
+	data.source_p = source_p;
+	data.name = NULL;
+	data.statchar = '\0';
 
-	call_hook(doing_admin_hook, &hinfo);
+	hook_call_event(doing_admin_hook, &data);
 }

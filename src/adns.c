@@ -54,7 +54,8 @@ report_adns_servers(struct Client *source_p)
 	for (x = 0; x < dns_state->nservers; x++)
 	{
 		inetntop(AF_INET, &dns_state->servers[x].addr.s_addr, buf, 16);
-		sendto_one_numeric(source_p, RPL_STATSDEBUG, "A %s", buf);
+		sendto_one_numeric(source_p, RPL_STATSDEBUG,
+				"A %s", buf);
 	}
 }
 
@@ -264,9 +265,8 @@ int
 adns_getaddr(struct sockaddr *addr, int aftype, struct DNSQuery *req, int arpa_type)
 {
 	int result;
-	int flags = adns_r_ptr; 
+	int flags = adns_r_ptr;
 	assert(dns_state->nservers > 0);
-
 #ifdef IPV6
 	if(addr->sa_family == AF_INET6)
 	{
@@ -275,12 +275,12 @@ adns_getaddr(struct sockaddr *addr, int aftype, struct DNSQuery *req, int arpa_t
 		else
 			flags = adns_r_ptr_ip6_old;
 	}
-#endif	
+#endif
 	result = adns_submit_reverse(dns_state,
 				    (struct sockaddr *) addr,
 				    flags,
 				    adns_qf_owner | adns_qf_cname_loose |
- 				    adns_qf_quoteok_anshost, req, &req->query);
+				    adns_qf_quoteok_anshost, req, &req->query);
 	dns_select();
 	return result;
 }

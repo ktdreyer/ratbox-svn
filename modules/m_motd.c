@@ -115,10 +115,11 @@ mo_motd(struct Client *client_p, struct Client *source_p, int parc, const char *
 static void
 motd_spy(struct Client *source_p)
 {
-	hook_data data;
+	struct hook_spy_data data;
 
-	data.client = source_p;
-	data.arg1 = data.arg2 = NULL;
+	data.source_p = source_p;
+	data.name = NULL;
+	data.statchar = '\0';
 
-	call_hook(doing_motd_hook, &data);
+	hook_call_event(doing_motd_hook, &data);
 }

@@ -29,10 +29,11 @@
 #include "config.h"
 #include "stdinc.h"
 #include <sys/epoll.h>
-#include "tools.h"
+
 #include "commio.h"
 #include "class.h"
 #include "client.h"
+#include "common.h"
 #include "irc_string.h"
 #include "ircd.h"
 #include "listener.h"
@@ -44,6 +45,7 @@
 #include "s_conf.h"
 #include "s_log.h"
 #include "s_serv.h"
+#include "s_stats.h"
 #include "send.h"
 #include "commio.h"
 #include "memory.h"
@@ -58,12 +60,6 @@ static int pfd_size;
 #ifndef HAVE_EPOLL_CTL /* bah..glibc doesn't support epoll yet.. */
 #include <sys/epoll.h>
 #include <sys/syscall.h>
-#include <linux/unistd.h>
-#ifndef __NR_epoll_create
-#define __NR_epoll_create       254
-#define __NR_epoll_ctl          255
-#define __NR_epoll_wait         256
-#endif
 
 _syscall1(int, epoll_create, int, maxfds);
 _syscall4(int, epoll_ctl, int, epfd, int, op, int, fd, struct epoll_event *, events);
@@ -90,7 +86,7 @@ init_netio(void)
 		fprintf(stderr, "init_netio: Couldn't open epoll fd!\n");
 		exit(115);	/* Whee! */
 	}
-	comm_note(ep, "epoll file descriptor");
+	fd_note(ep, "epoll file descriptor");
 }
 
 /*

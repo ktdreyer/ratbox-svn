@@ -29,6 +29,7 @@
 #include "m_info.h"
 #include "channel.h"
 #include "client.h"
+#include "common.h"
 #include "irc_string.h"
 #include "ircd.h"
 #include "hook.h"
@@ -129,21 +130,33 @@ static struct InfoStruct info_table[] = {
 	},
 	{
 		"default_adminstring",
-		OUTPUT_STRING,
+		OUTPUT_STRING_PTR,
 		&ConfigFileEntry.default_adminstring,
 		"Default adminstring at startup.",
 	},
 	{
 		"default_operstring",
-		OUTPUT_STRING,
+		OUTPUT_STRING_PTR,
 		&ConfigFileEntry.default_operstring,
 		"Default operstring at startup.",
+	},
+	{
+		"default_invisible",
+		OUTPUT_BOOLEAN_YN,
+		&ConfigFileEntry.default_invisible,
+		"Clients are set +i on connect"
 	},
 	{
 		"disable_auth",
 		OUTPUT_BOOLEAN_YN,
 		&ConfigFileEntry.disable_auth,
 		"Controls whether auth checking is disabled or not"
+	},
+	{
+		"disable_fake_channels",
+		OUTPUT_BOOLEAN_YN,
+		&ConfigFileEntry.disable_fake_channels,
+		"Controls whether bold etc are disabled for JOIN"
 	},
 	{
 		"dot_in_ip6_addr",
@@ -166,13 +179,13 @@ static struct InfoStruct info_table[] = {
 	{
 		/* fname_userlog is a char [] */
 		"fname_userlog",
-		OUTPUT_STRING,
+		OUTPUT_STRING_PTR,
 		&ConfigFileEntry.fname_userlog,
 		"User log file"
 	},
 	{
 		"fname_fuserlog",
-		OUTPUT_STRING,
+		OUTPUT_STRING_PTR,
 		&ConfigFileEntry.fname_fuserlog,
 		"Failed user log file"
 	},
@@ -180,44 +193,44 @@ static struct InfoStruct info_table[] = {
 	{
 		/* fname_operlog is a char [] */
 		"fname_operlog",
-		OUTPUT_STRING,
+		OUTPUT_STRING_PTR,
 		&ConfigFileEntry.fname_operlog,
 		"Operator log file"
 	},
 	{
 		/* fname_foperlog is a char [] */
 		"fname_foperlog",
-		OUTPUT_STRING,
+		OUTPUT_STRING_PTR,
 		&ConfigFileEntry.fname_foperlog,
 		"Failed operator log file"
 	},
 	{
 		"fname_serverlog",
-		OUTPUT_STRING,
+		OUTPUT_STRING_PTR,
 		&ConfigFileEntry.fname_serverlog,
 		"Server connect/disconnect log file"
 	},
 	{
 		"fname_klinelog",
-		OUTPUT_STRING,
+		OUTPUT_STRING_PTR,
 		&ConfigFileEntry.fname_klinelog,
 		"KLINE etc log file"
 	},
 	{
 		"fname_glinelog",
-		OUTPUT_STRING,
+		OUTPUT_STRING_PTR,
 		&ConfigFileEntry.fname_glinelog,
 		"GLINE log file"
 	},
 	{
 		"fname_operspylog",
-		OUTPUT_STRING,
+		OUTPUT_STRING_PTR,
 		&ConfigFileEntry.fname_operspylog,
 		"Oper spy log file"
 	},
 	{
 		"fname_ioerrorlog",
-		OUTPUT_STRING,
+		OUTPUT_STRING_PTR,
 		&ConfigFileEntry.fname_ioerrorlog,
 		"IO error log file"
 	},
@@ -258,6 +271,12 @@ static struct InfoStruct info_table[] = {
 		"Server is a hub"
 	},
 	{
+		"idletime",
+		OUTPUT_DECIMAL,
+		&ConfigFileEntry.idletime,
+		"Number of minutes before a client is considered idle"
+	},
+	{
 		"kline_delay",
 		OUTPUT_DECIMAL,
 		&ConfigFileEntry.kline_delay,
@@ -265,7 +284,7 @@ static struct InfoStruct info_table[] = {
 	},
 	{
 		"kline_reason",
-		OUTPUT_STRING,
+		OUTPUT_STRING_PTR,
 		&ConfigFileEntry.kline_reason,
 		"K-lined clients sign off with this reason"
 	},
@@ -438,34 +457,10 @@ static struct InfoStruct info_table[] = {
 		"STATS Y is only shown to operators",
 	},
 	{
-		"target_change",
-		OUTPUT_BOOLEAN_YN,
-		&ConfigFileEntry.target_change,
-		"Target change anti-spam protection",
-	},
-	{
-		"tgchange_expiry",
-		OUTPUT_DECIMAL,
-		&ConfigFileEntry.tgchange_expiry,
-		"Expiry time for target change",
-	},
-	{
-		"tgchange_remote",
-		OUTPUT_DECIMAL,
-		&ConfigFileEntry.tgchange_remote,
-		"Time duration between remote tgchange notices",
-	},
-	{
-		"tgchange_reconnect",
-		OUTPUT_DECIMAL,
-		&ConfigFileEntry.tgchange_reconnect,
-		"Number of slots removed from clients on reconnect",
-	},
-	{
 		"tkline_expire_notices",
 		OUTPUT_BOOLEAN,
 		&ConfigFileEntry.tkline_expire_notices,
-		"Notices given to opers when tklines expire",
+		"Notices given to opers when tklines expire"
 	},
 	{
 		"ts_max_delta",
@@ -508,6 +503,12 @@ static struct InfoStruct info_table[] = {
 		OUTPUT_DECIMAL,
 		&ConfigChannel.knock_delay_channel,
 		"Delay between KNOCK attempts to a channel",
+	},
+	{
+		"invite_ops_only",
+		OUTPUT_BOOLEAN_YN,
+		&ConfigChannel.invite_ops_only,
+		"INVITE is restricted to channelops only"
 	},
 	{
 		"max_bans",
@@ -580,6 +581,12 @@ static struct InfoStruct info_table[] = {
 		OUTPUT_BOOLEAN_YN,
 		&ConfigServerHide.hidden,
 		"Hide this server from a flattened /links on remote servers",
+	},
+	{
+		"links_delay",
+		OUTPUT_DECIMAL,
+		&ConfigServerHide.links_delay,
+		"Links rehash delay"
 	},
 	/* --[  END OF TABLE  ]---------------------------------------------- */
 	{ (char *) 0, (unsigned int) 0, (void *) 0, (char *) 0}
@@ -839,10 +846,11 @@ send_conf_options(struct Client *source_p)
 static void
 info_spy(struct Client *source_p)
 {
-	hook_data data;
+	struct hook_spy_data data;
 
-	data.client = source_p;
-	data.arg1 = data.arg2 = NULL;
+	data.source_p = source_p;
+	data.name = NULL;
+	data.statchar = '\0';
 
-	call_hook(doing_info_hook, &data);
+	hook_call_event(doing_info_hook, &data);
 }
