@@ -762,12 +762,13 @@ auth_passwd:  PASSWORD '=' QSTRING ';'
     DupString(yy_aconf->passwd,yylval.string);
   };
 
-auth_spoof_notice:   SPOOF_NOTICE '=' TYES ';'
+/* TYES/TNO are flipped to change the default value to YES */
+auth_spoof_notice:   SPOOF_NOTICE '=' TNO ';'
   {
     yy_aconf->flags |= CONF_FLAGS_SPOOF_NOTICE;
   }
     |
-    SPOOF_NOTICE '=' TNO ';'
+    SPOOF_NOTICE '=' TYES ';'
   {
     yy_aconf->flags &= ~CONF_FLAGS_SPOOF_NOTICE;
   };
