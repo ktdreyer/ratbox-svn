@@ -120,11 +120,11 @@ handle_scommand_client(struct client *client_p, const char *command,
 }
 
 void
-handle_scommand(const char *command, const char *parv[], int parc)
+handle_scommand(const char *source, const char *command, const char *parv[], int parc)
 {
 	struct client *client_p;
 
-	client_p = find_client(parv[0]);
+	client_p = find_client(source);
 
 	if(client_p != NULL)
 		handle_scommand_client(client_p, command, parv, parc);
@@ -136,7 +136,7 @@ handle_scommand(const char *command, const char *parv[], int parc)
 		handle_scommand_unknown(command, parv, parc);
 
         else
-                mlog("unknown prefix %s for command %s", parv[0], command);
+                mlog("unknown prefix %s for command %s", source, command);
 }
 
 void
@@ -194,24 +194,24 @@ del_scommand_hook(scommand_func hook, const char *command)
 static void
 c_admin(struct client *client_p, const char *parv[], int parc)
 {
-	if(parc < 2 || EmptyString(parv[1]))
+	if(parc < 1 || EmptyString(parv[0]))
 		return;
 
 	if(!IsUser(client_p))
 		return;
 
 	sendto_server(":%s 256 %s :Administrative info about %s",
-		      MYNAME, parv[0], MYNAME);
+		      MYNAME, client_p->name, MYNAME);
 
 	if(!EmptyString(config_file.admin1))
 		sendto_server(":%s 257 %s :%s",
-                              MYNAME, parv[0], config_file.admin1);
+                              MYNAME, client_p->name, config_file.admin1);
 	if(!EmptyString(config_file.admin2))
 		sendto_server(":%s 258 %s :%s",
-                              MYNAME, parv[0], config_file.admin2);
+                              MYNAME, client_p->name, config_file.admin2);
 	if(!EmptyString(config_file.admin3))
 		sendto_server(":%s 259 %s :%s",
-                              MYNAME, parv[0], config_file.admin3);
+                              MYNAME, client_p->name, config_file.admin3);
 }
 
 static struct capab_entry
@@ -230,14 +230,14 @@ c_capab(struct client *client_p, const char *parv[], int parc)
 	char *data, *p;
 	int i;
 
-	if(parc < 2)
+	if(parc < 1)
 		return;
 
 	/* unregistered server only */
 	if(client_p != NULL)
 		return;
 
-	strlcpy(buf, parv[1], sizeof(buf));
+	strlcpy(buf, parv[0], sizeof(buf));
 
 	if((p = strchr(buf, ' ')))
 		*p++ = '\0';
@@ -262,26 +262,26 @@ c_capab(struct client *client_p, const char *parv[], int parc)
 static void
 c_encap(struct client *client_p, const char *parv[], int parc)
 {
-	if(parc < 3)
+	if(parc < 2)
 		return;
 
-	if(!match(parv[1], MYNAME))
+	if(!match(parv[0], MYNAME))
 		return;
 
-	if(!irccmp(parv[2], "LOGIN"))
+	if(!irccmp(parv[1], "LOGIN"))
 	{
 		/* this is only accepted from users */
-		if(EmptyString(parv[3]) || !IsUser(client_p))
+		if(EmptyString(parv[2]) || !IsUser(client_p))
 			return;
 
-		hook_call(HOOK_BURST_LOGIN, client_p, (void *) parv[3]);
+		hook_call(HOOK_BURST_LOGIN, client_p, (void *) parv[2]);
 	}
 }
 
 static void
 c_pass(struct client *client_p, const char *parv[], int parc)
 {
-	if(parc < 3)
+	if(parc < 2)
 		return;
 
 	/* we shouldnt get this when the link is established.. */
@@ -289,7 +289,7 @@ c_pass(struct client *client_p, const char *parv[], int parc)
 		return;
 
 	/* password is wrong */
-	if(strcmp(server_p->pass, parv[1]))
+	if(strcmp(server_p->pass, parv[0]))
 	{
 		mlog("Connection to server %s failed: "
 			"(Password mismatch)",
@@ -298,7 +298,7 @@ c_pass(struct client *client_p, const char *parv[], int parc)
 		return;
 	}
 
-	if(strcasecmp(parv[2], "TS"))
+	if(strcasecmp(parv[1], "TS"))
 	{
 		mlog("Connection to server %s failed: "
 			"(Protocol mismatch)",
@@ -313,16 +313,16 @@ c_pass(struct client *client_p, const char *parv[], int parc)
 static void
 c_ping(struct client *client_p, const char *parv[], int parc)
 {
-	if(parc < 2 || EmptyString(parv[1]))
+	if(parc < 1 || EmptyString(parv[0]))
 		return;
 
-	sendto_server(":%s PONG %s :%s", MYNAME, MYNAME, parv[0]);
+	sendto_server(":%s PONG %s :%s", MYNAME, MYNAME, client_p->name);
 }
 
 static void
 c_pong(struct client *client_p, const char *parv[], int parc)
 {
-        if(parc < 2 || EmptyString(parv[1]) || !IsServer(client_p))
+        if(parc < 1 || EmptyString(parv[0]) || !IsServer(client_p))
                 return;
 
         if(!finished_bursting)
@@ -345,7 +345,7 @@ c_trace(struct client *client_p, const char *parv[], int parc)
         struct client *service_p;
         dlink_node *ptr;
 
-	if(parc < 2 || EmptyString(parv[1]))
+	if(parc < 1 || EmptyString(parv[0]))
 		return;
 
 	if(!IsUser(client_p))
@@ -360,26 +360,27 @@ c_trace(struct client *client_p, const char *parv[], int parc)
 
                 sendto_server(":%s %d %s %s service %s[%s@%s] (127.0.0.1) 0 0",
                               MYNAME, ServiceOpered(service_p) ? 204 : 205,
-                              parv[0], ServiceOpered(service_p) ? "Oper" : "User",
+                              client_p->name, 
+			      ServiceOpered(service_p) ? "Oper" : "User",
                               service_p->name, service_p->service->username,
                               service_p->service->host);
         }
 
         sendto_server(":%s 206 %s Serv uplink 1S 1C %s *!*@%s 0",
-                      MYNAME, parv[0], server_p->name, MYNAME);
+                      MYNAME, client_p->name, server_p->name, MYNAME);
         sendto_server(":%s 262 %s %s :End of /TRACE",
-                      MYNAME, parv[0], MYNAME);
+                      MYNAME, client_p->name, MYNAME);
 }
 	
 static void
 c_version(struct client *client_p, const char *parv[], int parc)
 {
-	if(parc < 2 || EmptyString(parv[1]))
+	if(parc < 1 || EmptyString(parv[0]))
 		return;
 
 	if(IsUser(client_p))
 		sendto_server(":%s 351 %s ratbox-services-%s(%s). %s A TS",
-			      MYNAME, parv[0], RSERV_VERSION,
+			      MYNAME, client_p->name, RSERV_VERSION,
                               SERIALNUM, MYNAME);
 }
 
@@ -388,37 +389,37 @@ c_whois(struct client *client_p, const char *parv[], int parc)
 {
         struct client *target_p;
 
-        if(parc < 3 || EmptyString(parv[2]))
+        if(parc < 2 || EmptyString(parv[1]))
                 return;
 
         if(!IsUser(client_p))
                 return;
 
-        if((target_p = find_client(parv[2])) == NULL ||
+        if((target_p = find_client(parv[1])) == NULL ||
            IsServer(target_p))
         {
                 sendto_server(":%s 401 %s %s :No such nick/channel",
-                              MYNAME, parv[0], parv[2]);
+                              MYNAME, client_p->name, parv[1]);
         }
         else if(IsUser(target_p))
         {
                 sendto_server(":%s 311 %s %s %s %s * :%s",
-                              MYNAME, parv[0], target_p->name,
+                              MYNAME, client_p->name, target_p->name,
                               target_p->user->username, target_p->user->host,
                               target_p->info);
                 sendto_server(":%s 312 %s %s %s :%s",
-                              MYNAME, parv[0], target_p->name,
+                              MYNAME, client_p->name, target_p->name,
                               target_p->user->servername,
                               target_p->uplink->info);
 
                 if(ClientOper(target_p))
                         sendto_server(":%s 313 %s %s :is an IRC Operator",
-                                      MYNAME, parv[0], target_p->name);
+                                      MYNAME, client_p->name, target_p->name);
 
 #ifdef ENABLE_USERSERV
 		if(target_p->user->user_reg)
 			sendto_server(":%s 330 %s %s %s :is logged in as",
-					MYNAME, parv[0], target_p->name,
+					MYNAME, client_p->name, target_p->name,
 					target_p->user->user_reg->name);
 #endif
         }
@@ -426,20 +427,20 @@ c_whois(struct client *client_p, const char *parv[], int parc)
         else
         {
                 sendto_server(":%s 311 %s %s %s %s * :%s",
-                              MYNAME, parv[0], target_p->name,
+                              MYNAME, client_p->name, target_p->name,
                               target_p->service->username,
                               target_p->service->host, target_p->info);
                 sendto_server(":%s 312 %s %s %s :%s",
-                              MYNAME, parv[0], target_p->name, MYNAME,
+                              MYNAME, client_p->name, target_p->name, MYNAME,
                               config_file.gecos);
 
                 if(ServiceOpered(target_p))
                         sendto_server(":%s 313 %s %s :is an IRC Operator",
-                                      MYNAME, parv[0], target_p->name);
+                                      MYNAME, client_p->name, target_p->name);
         }
 
         sendto_server(":%s 318 %s %s :End of /WHOIS list.",
-                      MYNAME, parv[0], target_p->name);
+                      MYNAME, client_p->name, target_p->name);
 }
 
 static void
@@ -447,13 +448,13 @@ c_stats(struct client *client_p, const char *parv[], int parc)
 {
 	char statchar;
 
-	if(parc < 2 || EmptyString(parv[1]))
+	if(parc < 1 || EmptyString(parv[0]))
 		return;
 
 	if(!IsUser(client_p))
 		return;
 
-	statchar = parv[1][0];
+	statchar = parv[0][0];
 	switch(statchar)
 	{
 		case 'c': case 'C':
@@ -467,7 +468,7 @@ c_stats(struct client *client_p, const char *parv[], int parc)
 				conf_p = ptr->data;
 
 				sendto_server(":%s 213 %s C *@%s %s %s %d uplink",
-					      MYNAME, parv[0], conf_p->name,
+					      MYNAME, client_p->name, conf_p->name,
                                               (conf_p->defport > 0) ? "A" : "*",
 					      conf_p->name, 
                                               abs(conf_p->defport));
@@ -485,14 +486,14 @@ c_stats(struct client *client_p, const char *parv[], int parc)
 				conf_p = ptr->data;
 
 				sendto_server(":%s 244 %s H * * %s",
-					      MYNAME, parv[0], conf_p->name);
+					      MYNAME, client_p->name, conf_p->name);
 			}
 		}
 			break;
 
 		case 'u':
 			sendto_server(":%s 242 %s :Server Up %s",
-				      MYNAME, parv[0],
+				      MYNAME, client_p->name,
                                       get_duration(CURRENT_TIME -
                                                    first_time));
 			break;
@@ -500,7 +501,7 @@ c_stats(struct client *client_p, const char *parv[], int parc)
 		case 'v': case 'V':
 			sendto_server(":%s 249 %s V :%s (AutoConn.!*@*) Idle: "
                                       "%d SendQ: %d Connected %s",
-				      MYNAME, parv[0], server_p->name, 
+				      MYNAME, client_p->name, server_p->name, 
 				      (CURRENT_TIME - server_p->last_time), 
                                       get_sendq(server_p),
                                       get_duration(CURRENT_TIME -
@@ -512,5 +513,5 @@ c_stats(struct client *client_p, const char *parv[], int parc)
 	}
 
 	sendto_server(":%s 219 %s %c :End of /STATS report",
-		      MYNAME, parv[0], statchar);
+		      MYNAME, client_p->name, statchar);
 }

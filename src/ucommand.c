@@ -45,9 +45,9 @@ static void u_who(struct connection_entry *, char *parv[], int parc);
 
 static struct ucommand_handler ucommands[] =
 {
-	{ "boot",	u_boot,		CONF_OPER_ADMIN,	2, 1, NULL },
-	{ "connect",	u_connect,	CONF_OPER_ROUTE,	2, 1, NULL },
-	{ "die",	u_die,		CONF_OPER_ADMIN,	2, 1, NULL },
+	{ "boot",	u_boot,		CONF_OPER_ADMIN,	1, 1, NULL },
+	{ "connect",	u_connect,	CONF_OPER_ROUTE,	1, 1, NULL },
+	{ "die",	u_die,		CONF_OPER_ADMIN,	1, 1, NULL },
 	{ "events",	u_events,	CONF_OPER_ADMIN,	0, 1, NULL },
 	{ "flags",	u_flags,	0,			0, 0, NULL },
 	{ "help",	u_help,		0,			0, 0, NULL },
@@ -184,16 +184,16 @@ u_login(struct connection_entry *conn_p, char *parv[], int parc)
 	struct conf_oper *oper_p = conn_p->oper;
         char *crpass;
 
-        if(parc < 3 || EmptyString(parv[2]))
+        if(parc < 2 || EmptyString(parv[1]))
         {
                 sendto_one(conn_p, "Usage: .login <username> <password>");
                 return;
         }
 
         if(ConfOperEncrypted(oper_p))
-                crpass = crypt(parv[2], oper_p->pass);
+                crpass = crypt(parv[1], oper_p->pass);
         else
-                crpass = parv[2];
+                crpass = parv[1];
 
         if(strcmp(oper_p->pass, crpass))
         {
@@ -227,7 +227,7 @@ u_boot(struct connection_entry *conn_p, char *parv[], int parc)
 	{
 		target_p = ptr->data;
 
-		if(!irccmp(target_p->user->oper->name, parv[1]))
+		if(!irccmp(target_p->user->oper->name, parv[0]))
 		{
 			count++;
 
@@ -244,7 +244,7 @@ u_boot(struct connection_entry *conn_p, char *parv[], int parc)
 	{
 		dcc_p = ptr->data;
 
-		if(!irccmp(dcc_p->name, parv[1]))
+		if(!irccmp(dcc_p->name, parv[0]))
 		{
 			count++;
 
@@ -262,17 +262,17 @@ u_connect(struct connection_entry *conn_p, char *parv[], int parc)
         struct conf_server *conf_p;
         int port = 0;
 
-        if((conf_p = find_conf_server(parv[1])) == NULL)
+        if((conf_p = find_conf_server(parv[0])) == NULL)
         {
-                sendto_one(conn_p, "No such server %s", parv[1]);
+                sendto_one(conn_p, "No such server %s", parv[0]);
                 return;
         }
 
-        if(parc > 2)
+        if(parc > 1)
         {
-                if((port = atoi(parv[2])) <= 0)
+                if((port = atoi(parv[1])) <= 0)
                 {
-                        sendto_one(conn_p, "Invalid port %s", parv[2]);
+                        sendto_one(conn_p, "Invalid port %s", parv[1]);
                         return;
                 }
 
@@ -302,7 +302,7 @@ u_connect(struct connection_entry *conn_p, char *parv[], int parc)
 static void
 u_die(struct connection_entry *conn_p, char *parv[], int parc)
 {
-        if(strcasecmp(MYNAME, parv[1]))
+        if(strcasecmp(MYNAME, parv[0]))
         {
                 sendto_one(conn_p, "Usage: .die <servername>");
                 return;
@@ -341,11 +341,11 @@ u_service(struct connection_entry *conn_p, char *parv[], int parc)
         struct client *service_p;
         dlink_node *ptr;
 
-        if(parc > 1)
+        if(parc > 0)
         {
-                if((service_p = find_service_id(parv[1])) == NULL)
+                if((service_p = find_service_id(parv[0])) == NULL)
                 {
-                        sendto_one(conn_p, "No such service %s", parv[1]);
+                        sendto_one(conn_p, "No such service %s", parv[0]);
                         return;
                 }
 
@@ -490,7 +490,7 @@ u_help(struct connection_entry *conn_p, char *parv[], int parc)
         struct ucommand_handler *handler;
 	dlink_node *ptr;
 
-        if(parc < 2 || EmptyString(parv[1]))
+        if(parc < 1 || EmptyString(parv[0]))
         {
 		struct client *service_p;
 
@@ -507,7 +507,7 @@ u_help(struct connection_entry *conn_p, char *parv[], int parc)
                 return;
         }
 
-        if((handler = find_ucommand(parv[1])) != NULL)
+        if((handler = find_ucommand(parv[0])) != NULL)
         {
                 if(handler->helpfile == NULL)
                         sendto_one(conn_p, "No help available on %s", parv[1]);
@@ -517,7 +517,7 @@ u_help(struct connection_entry *conn_p, char *parv[], int parc)
                 return;
         }
 
-        sendto_one(conn_p, "Unknown help topic: %s", parv[1]);
+        sendto_one(conn_p, "Unknown help topic: %s", parv[0]);
 }
 
 struct _flags_table
@@ -570,13 +570,13 @@ u_flags(struct connection_entry *conn_p, char *parv[], int parc)
         int i;
         int j;
 
-        if(parc < 2)
+        if(parc < 1)
         {
                 show_flags(conn_p);
                 return;
         }
 
-        for(i = 1; i < parc; i++)
+        for(i = 0; i < parc; i++)
         {
                 param = parv[i];
 

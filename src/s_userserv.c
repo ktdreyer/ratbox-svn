@@ -59,10 +59,10 @@ static struct service_command userserv_command[] =
 
 static struct ucommand_handler userserv_ucommand[] =
 {
-	{ "userregister",	u_user_userregister,	CONF_OPER_UREGISTER,	3, 1, NULL },
-	{ "userdrop",		u_user_userdrop,	CONF_OPER_USERSERV,	2, 1, NULL },
-	{ "usersuspend",	u_user_usersuspend,	CONF_OPER_USERSERV,	2, 1, NULL },
-	{ "userunsuspend",	u_user_userunsuspend,	CONF_OPER_USERSERV,	2, 1, NULL },
+	{ "userregister",	u_user_userregister,	CONF_OPER_UREGISTER,	2, 1, NULL },
+	{ "userdrop",		u_user_userdrop,	CONF_OPER_USERSERV,	1, 1, NULL },
+	{ "usersuspend",	u_user_usersuspend,	CONF_OPER_USERSERV,	1, 1, NULL },
+	{ "userunsuspend",	u_user_userunsuspend,	CONF_OPER_USERSERV,	1, 1, NULL },
 	{ "\0",			NULL,			0,			0, 0, NULL }
 };
 
@@ -291,30 +291,30 @@ u_user_userregister(struct connection_entry *conn_p, char *parv[], int parc)
 	struct user_reg *reg_p;
 	const char *password;
 
-	if((reg_p = find_user_reg(NULL, parv[1])) != NULL)
+	if((reg_p = find_user_reg(NULL, parv[0])) != NULL)
 	{
-		sendto_one(conn_p, "Username %s is already registered", parv[1]);
+		sendto_one(conn_p, "Username %s is already registered", parv[0]);
 		return;
 	}
 
-	if(!valid_username(parv[1]))
+	if(!valid_username(parv[0]))
 	{
-		sendto_one(conn_p, "Username %s invalid", parv[1]);
+		sendto_one(conn_p, "Username %s invalid", parv[0]);
 		return;
 	}
 
 	slog(userserv_p, 2, "%s - USERREGISTER %s %s",
-		conn_p->name, parv[1], 
-		EmptyString(parv[3]) ? "" : parv[3]);
+		conn_p->name, parv[0], 
+		EmptyString(parv[2]) ? "" : parv[2]);
 
 	reg_p = BlockHeapAlloc(user_reg_heap);
-	strcpy(reg_p->name, parv[1]);
+	strcpy(reg_p->name, parv[0]);
 
-	password = get_crypt(parv[2], NULL);
+	password = get_crypt(parv[1], NULL);
 	reg_p->password = my_strdup(password);
 
-	if(!EmptyString(parv[3]))
-		reg_p->email = my_strdup(parv[3]);
+	if(!EmptyString(parv[2]))
+		reg_p->email = my_strdup(parv[2]);
 
 	reg_p->reg_time = reg_p->last_time = CURRENT_TIME;
 
@@ -326,9 +326,7 @@ u_user_userregister(struct connection_entry *conn_p, char *parv[], int parc)
 			EmptyString(reg_p->email) ? "" : reg_p->email, 
 			reg_p->reg_time, reg_p->last_time, reg_p->flags);
 
-	sendto_one(conn_p, "Username %s registered", parv[1]);
-
-	return;
+	sendto_one(conn_p, "Username %s registered", parv[0]);
 }
 
 static void
@@ -336,10 +334,10 @@ u_user_userdrop(struct connection_entry *conn_p, char *parv[], int parc)
 {
 	struct user_reg *ureg_p;
 
-	if((ureg_p = find_user_reg(NULL, parv[1])) == NULL)
+	if((ureg_p = find_user_reg(NULL, parv[0])) == NULL)
 	{
 		sendto_one(conn_p, "Username %s is not registered",
-				parv[1]);
+				parv[0]);
 		return;
 	}
 
@@ -358,10 +356,10 @@ u_user_usersuspend(struct connection_entry *conn_p, char *parv[], int parc)
 {
 	struct user_reg *reg_p;
 
-	if((reg_p = find_user_reg(NULL, parv[1])) == NULL)
+	if((reg_p = find_user_reg(NULL, parv[0])) == NULL)
 	{
 		sendto_one(conn_p, "Username %s is not registered",
-				parv[1]);
+				parv[0]);
 		return;
 	}
 
@@ -389,7 +387,7 @@ u_user_userunsuspend(struct connection_entry *conn_p, char *parv[], int parc)
 {
 	struct user_reg *reg_p;
 
-	if((reg_p = find_user_reg(NULL, parv[1])) == NULL)
+	if((reg_p = find_user_reg(NULL, parv[0])) == NULL)
 	{
 		sendto_one(conn_p, "Username %s is not registered",
 				parv[1]);

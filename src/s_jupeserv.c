@@ -58,9 +58,9 @@ static struct service_command jupeserv_command[] =
 
 static struct ucommand_handler jupeserv_ucommand[] =
 {
-	{ "jupe",	u_jupeserv_jupe,	CONF_OPER_JUPESERV, 3, 1, NULL },
-	{ "unjupe",	u_jupeserv_unjupe,	CONF_OPER_JUPESERV, 2, 1, NULL },
-	{ "\0",		NULL,			0,			0, 0, NULL }
+	{ "jupe",	u_jupeserv_jupe,	CONF_OPER_JUPESERV, 2, 1, NULL },
+	{ "unjupe",	u_jupeserv_unjupe,	CONF_OPER_JUPESERV, 1, 1, NULL },
+	{ "\0",	NULL, 0, 0, 0, NULL }
 };
 
 static struct service_handler jupe_service = {
@@ -234,13 +234,13 @@ u_jupeserv_jupe(struct connection_entry *conn_p, char *parv[], int parc)
 	struct server_jupe *jupe_p;
 	char *reason;
 
-	if(!valid_jupe(parv[1]))
+	if(!valid_jupe(parv[0]))
 	{
-		sendto_one(conn_p, "Servername %s is invalid", parv[1]);
+		sendto_one(conn_p, "Servername %s is invalid", parv[0]);
 		return;
 	}
 
-	if((jupe_p = find_jupe(parv[1], &active_jupes)))
+	if((jupe_p = find_jupe(parv[0], &active_jupes)))
 	{
 		sendto_one(conn_p, "Server %s is already juped", jupe_p->name);
 		return;
@@ -249,19 +249,19 @@ u_jupeserv_jupe(struct connection_entry *conn_p, char *parv[], int parc)
 	/* if theres a pending oper jupe, cancel it because we're gunna
 	 * place a proper one.. --fl
 	 */
-	if((jupe_p = find_jupe(parv[1], &pending_jupes)))
+	if((jupe_p = find_jupe(parv[0], &pending_jupes)))
 	{
 		dlink_delete(&jupe_p->node, &pending_jupes);
 		free_jupe(jupe_p);
 	}
 
-	jupe_p = make_jupe(parv[1]);
-	reason = rebuild_params((const char **) parv, parc, 2);
+	jupe_p = make_jupe(parv[0]);
+	reason = rebuild_params((const char **) parv, parc, 1);
 
 	if(strlen(reason) > REASONLEN)
 		reason[REASONLEN] = '\0';
 
-	slog(jupeserv_p, 1, "%s - JUPE %s %s", conn_p->oper, parv[1], reason);
+	slog(jupeserv_p, 1, "%s - JUPE %s %s", conn_p->oper, parv[0], reason);
 
 	if(EmptyString(reason))
 		jupe_p->reason = my_strdup("No Reason");
@@ -281,19 +281,19 @@ u_jupeserv_unjupe(struct connection_entry *conn_p, char *parv[], int parc)
 {
 	struct server_jupe *ajupe_p, *jupe_p;
 
-	if((jupe_p = find_jupe(parv[1], &active_jupes)) == NULL)
+	if((jupe_p = find_jupe(parv[0], &active_jupes)) == NULL)
 	{
 		sendto_one(conn_p, "Server %s is not juped", parv[1]);
 		return;
 	}
 
-	if((ajupe_p = find_jupe(parv[1], &pending_jupes)))
+	if((ajupe_p = find_jupe(parv[0], &pending_jupes)))
 	{
 		dlink_delete(&ajupe_p->node, &pending_jupes);
 		free_jupe(ajupe_p);
 	}
 
-	slog(jupeserv_p, 1, "%s - UNJUPE %s", conn_p->oper, parv[1]);
+	slog(jupeserv_p, 1, "%s - UNJUPE %s", conn_p->oper, parv[0]);
 
 	loc_sqlite_exec(NULL, "DELETE FROM jupes WHERE servername = %Q",
 			jupe_p->name);

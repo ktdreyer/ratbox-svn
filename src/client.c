@@ -466,17 +466,17 @@ c_nick(struct client *client_p, const char *parv[], int parc)
 	struct client *uplink_p;
 	time_t newts;
 
-        s_assert((parc == 3) || (parc == 9));
+        s_assert((parc == 2) || (parc == 8));
 
-        if(parc != 9 && parc != 3)
+        if(parc != 8 && parc != 2)
                 return;
 
         /* new client being introduced */
-	if(parc == 9)
+	if(parc == 8)
 	{
-		target_p = find_client(parv[1]);
-		uplink_p = find_server(parv[7]);
-		newts = atol(parv[2]);
+		target_p = find_client(parv[0]);
+		uplink_p = find_server(parv[6]);
+		newts = atol(parv[1]);
 
                 /* something already exists with this nick */
 		if(target_p != NULL)
@@ -517,16 +517,16 @@ c_nick(struct client *client_p, const char *parv[], int parc)
 
 		target_p->uplink = uplink_p;
 
-		strlcpy(target_p->name, parv[1], sizeof(target_p->name));
-		strlcpy(target_p->user->username, parv[5], 
+		strlcpy(target_p->name, parv[0], sizeof(target_p->name));
+		strlcpy(target_p->user->username, parv[4],
 			sizeof(target_p->user->username));
-		strlcpy(target_p->user->host, parv[6], 
+		strlcpy(target_p->user->host, parv[5], 
                         sizeof(target_p->user->host));
-                strlcpy(target_p->info, parv[8], sizeof(target_p->info));
+                strlcpy(target_p->info, parv[7], sizeof(target_p->info));
 
 		target_p->user->servername = uplink_p->name;
 		target_p->user->tsinfo = newts;
-		target_p->user->umode = string_to_umode(parv[4], 0);
+		target_p->user->umode = string_to_umode(parv[3], 0);
 
 		snprintf(buf, sizeof(buf), "%s!%s@%s",
 			target_p->name, target_p->user->username, 
@@ -539,7 +539,7 @@ c_nick(struct client *client_p, const char *parv[], int parc)
 	}
 
         /* client changing nicks */
-	else if(parc == 3)
+	else if(parc == 2)
 	{
 		s_assert(IsUser(client_p));
 
@@ -547,10 +547,10 @@ c_nick(struct client *client_p, const char *parv[], int parc)
                         return;
 
 		del_client(client_p);
-		strlcpy(client_p->name, parv[1], sizeof(client_p->name));
+		strlcpy(client_p->name, parv[0], sizeof(client_p->name));
 		add_client(client_p);
 
-		client_p->user->tsinfo = atol(parv[2]);
+		client_p->user->tsinfo = atol(parv[1]);
 	}
 }
 
@@ -579,10 +579,10 @@ c_kill(struct client *client_p, const char *parv[], int parc)
 	static int num_kill = 0;
 	struct client *target_p;
 
-	if(parc < 2 || EmptyString(parv[1]))
+	if(parc < 1 || EmptyString(parv[0]))
 		return;
 
-	if((target_p = find_client(parv[1])) == NULL)
+	if((target_p = find_client(parv[0])) == NULL)
 		return;
 
 	if(IsServer(target_p))
@@ -638,7 +638,7 @@ c_server(struct client *client_p, const char *parv[], int parc)
 	struct client *target_p;
 	static char default_gecos[] = "(Unknown Location)";
 
-	if(parc < 4)
+	if(parc < 3)
 		return;
 
         /* our uplink introducing themselves */
@@ -653,7 +653,7 @@ c_server(struct client *client_p, const char *parv[], int parc)
 			return;
 		}
 
-                if(irccmp(server_p->name, parv[1]))
+                if(irccmp(server_p->name, parv[0]))
                 {
                         mlog("Connection to server %s failed: "
                              "(Servername mismatch)",
@@ -669,11 +669,11 @@ c_server(struct client *client_p, const char *parv[], int parc)
 	target_p = BlockHeapAlloc(client_heap);
 	target_p->server = BlockHeapAlloc(server_heap);
 
-	strlcpy(target_p->name, parv[1], sizeof(target_p->name));
-	strlcpy(target_p->info, EmptyString(parv[3]) ? default_gecos : parv[3],
+	strlcpy(target_p->name, parv[0], sizeof(target_p->name));
+	strlcpy(target_p->info, EmptyString(parv[2]) ? default_gecos : parv[2],
 		sizeof(target_p->info));
 
-	target_p->server->hops = atoi(parv[2]);
+	target_p->server->hops = atoi(parv[1]);
 
 	/* this server has an uplink */
 	if(client_p != NULL)
@@ -701,19 +701,19 @@ c_squit(struct client *client_p, const char *parv[], int parc)
 	struct client *target_p;
 
 	/* malformed squit, byebye. */
-	if(parc < 2 || EmptyString(parv[1]))
+	if(parc < 1 || EmptyString(parv[0]))
 	{
 		exit_client(server_p->client_p);
 		return;
 	}
 
-	target_p = find_server(parv[1]);
+	target_p = find_server(parv[0]);
 
 	if(target_p == NULL)
 	{
 		/* returns -1 if it handled it */
-		if(hook_call(HOOK_SQUIT_UNKNOWN, (void *) parv[1], NULL) == 0)
-			mlog("PROTO: SQUIT for unknown server %s", parv[1]);
+		if(hook_call(HOOK_SQUIT_UNKNOWN, (void *) parv[0], NULL) == 0)
+			mlog("PROTO: SQUIT for unknown server %s", parv[0]);
 
 		return;
 	}

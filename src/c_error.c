@@ -19,13 +19,13 @@ struct scommand_handler error_command = { "ERROR", c_error, FLAGS_UNKNOWN, DLINK
 static void
 c_error(struct client *client_p, const char *parv[], int parc)
 {
-        if(parc < 2 || EmptyString(parv[1]))
+        if(parc < 1 || EmptyString(parv[0]))
                 return;
 
         mlog("Connection to server %s error: (%s)",
-             server_p->name, parv[1]);
+             server_p->name, parv[0]);
         sendto_all(UMODE_SERVER, "Connection to server %s error: (%s)",
-                   server_p->name, parv[1]);
+                   server_p->name, parv[0]);
 
         (server_p->io_close)(server_p);
 }

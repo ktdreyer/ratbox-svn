@@ -91,7 +91,7 @@ u_stats(struct connection_entry *conn_p, char *parv[], int parc)
 {
         int i;
 
-	if(parc < 2)
+	if(parc < 1)
 	{
 		char buf[BUFSIZE];
 
@@ -110,13 +110,13 @@ u_stats(struct connection_entry *conn_p, char *parv[], int parc)
 
         for(i = 0; stats_table[i].type[0] != '\0'; i++)
         {
-                if(!strcasecmp(stats_table[i].type, parv[1]))
+                if(!strcasecmp(stats_table[i].type, parv[0]))
                 {
                         (stats_table[i].func)(conn_p);
                         return;
                 }
         }
 
-        sendto_one(conn_p, "Unknown stats type: %s", parv[1]);
+        sendto_one(conn_p, "Unknown stats type: %s", parv[0]);
 };
         

@@ -30,7 +30,7 @@ static struct service_command global_command[] =
 
 static struct ucommand_handler global_ucommand[] =
 {
-	{ "netmsg", u_global_netmsg, CONF_OPER_GLOBAL, 2, 1, NULL },
+	{ "netmsg", u_global_netmsg, CONF_OPER_GLOBAL, 1, 1, NULL },
 	{ "\0", NULL, 0, 0, 0, NULL }
 };
 
@@ -58,7 +58,7 @@ u_global_netmsg(struct connection_entry *conn_p, char *parv[], int parc)
 	dlink_node *ptr;
 	const char *data;
 
-	data = rebuild_params((const char **) parv, parc, 1);
+	data = rebuild_params((const char **) parv, parc, 0);
 
 	DLINK_FOREACH(ptr, server_list.head)
 	{

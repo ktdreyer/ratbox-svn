@@ -108,10 +108,10 @@ static struct service_command chanserv_command[] =
 
 static struct ucommand_handler chanserv_ucommand[] =
 {
-	{ "chanregister",	u_chan_chanregister,	CONF_OPER_CREGISTER,	3, 1, NULL },
-	{ "chandrop",		u_chan_chandrop,	CONF_OPER_CHANSERV,	2, 1, NULL },
-	{ "chansuspend",	u_chan_chansuspend,	CONF_OPER_CHANSERV,	2, 1, NULL },
-	{ "chanunsuspend",	u_chan_chanunsuspend,	CONF_OPER_CHANSERV,	2, 1, NULL },
+	{ "chanregister",	u_chan_chanregister,	CONF_OPER_CREGISTER,	2, 1, NULL },
+	{ "chandrop",		u_chan_chandrop,	CONF_OPER_CHANSERV,	1, 1, NULL },
+	{ "chansuspend",	u_chan_chansuspend,	CONF_OPER_CHANSERV,	1, 1, NULL },
+	{ "chanunsuspend",	u_chan_chanunsuspend,	CONF_OPER_CHANSERV,	1, 1, NULL },
 	{ "\0",			NULL,			0,			0, 0, NULL }
 };
 
@@ -1087,27 +1087,27 @@ u_chan_chanregister(struct connection_entry *conn_p, char *parv[], int parc)
 	struct user_reg *ureg_p;
 	struct member_reg *mreg_p;
 
-	if((reg_p = find_channel_reg(NULL, parv[1])))
+	if((reg_p = find_channel_reg(NULL, parv[0])))
 	{
-		sendto_one(conn_p, "Channel %s is already registered", parv[1]);
+		sendto_one(conn_p, "Channel %s is already registered", parv[0]);
 		return;
 	}
 
-	if((ureg_p = find_user_reg_nick(NULL, parv[2])) == NULL)
+	if((ureg_p = find_user_reg_nick(NULL, parv[1])) == NULL)
 	{
-		if(*parv[2] == '=')
-			sendto_one(conn_p, "Nickname %s is not logged in", parv[2]);
+		if(*parv[1] == '=')
+			sendto_one(conn_p, "Nickname %s is not logged in", parv[1]);
 		else
-			sendto_one(conn_p, "Username %s is not registered", parv[2]);
+			sendto_one(conn_p, "Username %s is not registered", parv[1]);
 
 		return;
 	}
 
 	slog(chanserv_p, 1, "%s - CHANREGISTER %s %s",
-		conn_p->name, parv[1], ureg_p->name);
+		conn_p->name, parv[0], ureg_p->name);
 
 	reg_p = BlockHeapAlloc(channel_reg_heap);
-	init_channel_reg(reg_p, parv[1]);
+	init_channel_reg(reg_p, parv[0]);
 
 	mreg_p = make_member_reg(ureg_p, reg_p, conn_p->name, 200);
 	write_member_db_entry(mreg_p);
@@ -1121,17 +1121,17 @@ u_chan_chandrop(struct connection_entry *conn_p, char *parv[], int parc)
 {
 	struct chan_reg *reg_p;
 
-	if((reg_p = find_channel_reg(NULL, parv[1])) == NULL)
+	if((reg_p = find_channel_reg(NULL, parv[0])) == NULL)
 	{
-		sendto_one(conn_p, "Channel %s is not registered", parv[1]);
+		sendto_one(conn_p, "Channel %s is not registered", parv[0]);
 		return;
 	}
 
-	slog(chanserv_p, 1, "%s - CHANDROP %s", conn_p->name, parv[1]);
+	slog(chanserv_p, 1, "%s - CHANDROP %s", conn_p->name, parv[0]);
 
 	destroy_channel_reg(reg_p);
 
-	sendto_one(conn_p, "Channel %s registration dropped", parv[1]);
+	sendto_one(conn_p, "Channel %s registration dropped", parv[0]);
 }
 
 static void
@@ -1139,19 +1139,19 @@ u_chan_chansuspend(struct connection_entry *conn_p, char *parv[], int parc)
 {
 	struct chan_reg *reg_p;
 
-	if((reg_p = find_channel_reg(NULL, parv[1])) == NULL)
+	if((reg_p = find_channel_reg(NULL, parv[0])) == NULL)
 	{
-		sendto_one(conn_p, "Channel %s is not registered", parv[1]);
+		sendto_one(conn_p, "Channel %s is not registered", parv[0]);
 		return;
 	}
 
 	if(reg_p->flags & CS_FLAGS_SUSPENDED)
 	{
-		sendto_one(conn_p, "Channel %s is already suspended", parv[1]);
+		sendto_one(conn_p, "Channel %s is already suspended", parv[0]);
 		return;
 	}
 
-	slog(chanserv_p, 1, "%s - CHANSUSPEND %s", conn_p->name, parv[1]);
+	slog(chanserv_p, 1, "%s - CHANSUSPEND %s", conn_p->name, parv[0]);
 
 	reg_p->flags |= CS_FLAGS_SUSPENDED;
 	reg_p->suspender = my_strdup(conn_p->name);
@@ -1159,7 +1159,7 @@ u_chan_chansuspend(struct connection_entry *conn_p, char *parv[], int parc)
 	loc_sqlite_exec(NULL, "UPDATE channels SET flags=%d, suspender=%Q WHERE chname = %Q",
 			reg_p->flags, reg_p->suspender, reg_p->name);
 
-	sendto_one(conn_p, "Channel %s suspended", parv[1]);
+	sendto_one(conn_p, "Channel %s suspended", parv[0]);
 }
 
 static void
@@ -1167,19 +1167,19 @@ u_chan_chanunsuspend(struct connection_entry *conn_p, char *parv[], int parc)
 {
 	struct chan_reg *reg_p;
 
-	if((reg_p = find_channel_reg(NULL, parv[1])) == NULL)
+	if((reg_p = find_channel_reg(NULL, parv[0])) == NULL)
 	{
-		sendto_one(conn_p, "Channel %s is not registered", parv[1]);
+		sendto_one(conn_p, "Channel %s is not registered", parv[0]);
 		return;
 	}
 
 	if((reg_p->flags & CS_FLAGS_SUSPENDED) == 0)
 	{
-		sendto_one(conn_p, "Channel %s is not suspended", parv[1]);
+		sendto_one(conn_p, "Channel %s is not suspended", parv[0]);
 		return;
 	}
 
-	slog(chanserv_p, 1, "%s - CHANUNSUSPEND %s", conn_p->name, parv[1]);
+	slog(chanserv_p, 1, "%s - CHANUNSUSPEND %s", conn_p->name, parv[0]);
 
 	reg_p->flags &= ~CS_FLAGS_SUSPENDED;
 	my_free(reg_p->suspender);
@@ -1188,7 +1188,7 @@ u_chan_chanunsuspend(struct connection_entry *conn_p, char *parv[], int parc)
 	loc_sqlite_exec(NULL, "UPDATE channels SET flags = %d, suspender = NULL WHERE chname = %Q",
 			reg_p->flags, reg_p->name);
 
-	sendto_one(conn_p, "Channel %s unsuspended", parv[1]);
+	sendto_one(conn_p, "Channel %s unsuspended", parv[0]);
 }
 
 static int

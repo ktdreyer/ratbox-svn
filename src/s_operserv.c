@@ -42,10 +42,10 @@ static struct service_command operserv_command[] =
 
 static struct ucommand_handler operserv_ucommand[] =
 {
-	{ "osjoin",	u_oper_osjoin,	CONF_OPER_OPERSERV, 2, 1, NULL },
-	{ "ospart",	u_oper_ospart,	CONF_OPER_OPERSERV, 2, 1, NULL },
-	{ "takeover",	u_oper_takeover,CONF_OPER_OPERSERV, 2, 1, NULL },
-	{ "omode",	u_oper_omode,	CONF_OPER_OPERSERV, 3, 1, NULL },
+	{ "osjoin",	u_oper_osjoin,	CONF_OPER_OPERSERV, 1, 1, NULL },
+	{ "ospart",	u_oper_ospart,	CONF_OPER_OPERSERV, 1, 1, NULL },
+	{ "takeover",	u_oper_takeover,CONF_OPER_OPERSERV, 1, 1, NULL },
+	{ "omode",	u_oper_omode,	CONF_OPER_OPERSERV, 2, 1, NULL },
 	{ "\0", NULL, 0, 0, 0, NULL }
 };
 
@@ -151,23 +151,23 @@ u_oper_takeover(struct connection_entry *conn_p, char *parv[], int parc)
 {
 	struct channel *chptr;
 
-	if((chptr = find_channel(parv[1])) == NULL)
+	if((chptr = find_channel(parv[0])) == NULL)
 	{
 		sendto_one(conn_p, "Channel %s does not exist",
-				parv[1]);
+				parv[0]);
 		return;
 	}
 
 	if(chptr->tsinfo < 2)
 	{
 		sendto_one(conn_p, "Channel %s TS too low for takeover",
-				parv[1]);
+				parv[0]);
 		return;
 	}
 
-	if(parc > 2 && !EmptyString(parv[2]))
+	if(parc > 1 && !EmptyString(parv[1]))
 	{
-		if(!irccmp(parv[2], "-clearall"))
+		if(!irccmp(parv[1], "-clearall"))
 		{
 			otakeover(chptr, 1);
 			otakeover_full(chptr);
@@ -177,13 +177,13 @@ u_oper_takeover(struct connection_entry *conn_p, char *parv[], int parc)
 			 */
 			otakeover_clear(chptr, operserv_p);
 		}
-		else if(!irccmp(parv[2], "-clear"))
+		else if(!irccmp(parv[1], "-clear"))
 		{
 			otakeover(chptr, 1);
 			otakeover_full(chptr);
 			otakeover_clear(chptr, NULL);
 		}
-		else if(!irccmp(parv[2], "-full"))
+		else if(!irccmp(parv[1], "-full"))
 		{
 			otakeover(chptr, 0);
 			otakeover_full(chptr);
@@ -248,38 +248,38 @@ u_oper_osjoin(struct connection_entry *conn_p, char *parv[], int parc)
 {
 	struct channel *chptr;
 
-	if((chptr = find_channel(parv[1])) &&
+	if((chptr = find_channel(parv[0])) &&
 	   dlink_find(operserv_p, &chptr->services))
 	{
 		sendto_one(conn_p, "%s already in %s",
-			operserv_p->name, parv[1]);
+			operserv_p->name, parv[0]);
 		return;
 	}
 
-	slog(operserv_p, 1, "%s - OSJOIN %s", conn_p->name, parv[1]);
+	slog(operserv_p, 1, "%s - OSJOIN %s", conn_p->name, parv[0]);
 
 	loc_sqlite_exec(NULL, "INSERT INTO operserv VALUES(%Q, %Q)",
-			parv[1], conn_p->name);
+			parv[0], conn_p->name);
 
-	join_service(operserv_p, parv[1], NULL);
-	sendto_one(conn_p, "%s joined to %s", operserv_p->name, parv[1]);
+	join_service(operserv_p, parv[0], NULL);
+	sendto_one(conn_p, "%s joined to %s", operserv_p->name, parv[0]);
 }
 
 static void
 u_oper_ospart(struct connection_entry *conn_p, char *parv[], int parc)
 {
-	if(part_service(operserv_p, parv[1]))
+	if(part_service(operserv_p, parv[0]))
 	{
-		slog(operserv_p, 1, "%s - OSPART %s", conn_p->name, parv[1]);
+		slog(operserv_p, 1, "%s - OSPART %s", conn_p->name, parv[0]);
 
 		loc_sqlite_exec(NULL, "DELETE FROM operserv WHERE "
-				"chname = %Q", parv[1]);
+				"chname = %Q", parv[0]);
 		sendto_one(conn_p, "%s removed from %s",
-				operserv_p->name, parv[1]);
+				operserv_p->name, parv[0]);
 	}
 	else
 		sendto_one(conn_p, "%s not in channel %s", 
-				operserv_p->name, parv[1]);
+				operserv_p->name, parv[0]);
 }
 
 static int
@@ -333,13 +333,13 @@ u_oper_omode(struct connection_entry *conn_p, char *parv[], int parc)
 {
 	struct channel *chptr;
 
-	if((chptr = find_channel(parv[1])) == NULL)
+	if((chptr = find_channel(parv[0])) == NULL)
 	{
-		sendto_one(conn_p, "Channel %s does not exist",	parv[1]);
+		sendto_one(conn_p, "Channel %s does not exist",	parv[0]);
 		return;
 	}
 
-	parse_full_mode(chptr, operserv_p, (const char **) parv, parc, 2);
+	parse_full_mode(chptr, operserv_p, (const char **) parv, parc, 1);
 
 	sendto_one(conn_p, "OMODE issued");
 }

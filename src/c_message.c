@@ -28,10 +28,10 @@ c_message(struct client *client_p, const char *parv[], int parc)
 	char *text;
 	char *p;
 
-	if(parc < 3 || EmptyString(parv[2]))
+	if(parc < 2 || EmptyString(parv[1]))
 		return;
 
-	target = LOCAL_COPY(parv[1]);
+	target = LOCAL_COPY(parv[0]);
 
 	/* username@server messaged? */
 	if((p = strchr(target, '@')) != NULL)
@@ -63,13 +63,13 @@ c_message(struct client *client_p, const char *parv[], int parc)
 		return;
 
 	/* ctcp.. doesnt matter who its addressed to. */
-	if(parv[2][0] == '\001')
+	if(parv[1][0] == '\001')
 	{
 		struct conf_oper *oper_p;
 
 		/* some ctcp we dont care about */
-		if(strncasecmp(parv[2], "\001CHAT\001", 6) &&
-		   strncasecmp(parv[2], "\001DCC CHAT ", 10))
+		if(strncasecmp(parv[1], "\001CHAT\001", 6) &&
+		   strncasecmp(parv[1], "\001DCC CHAT ", 10))
 			return;
 
 		oper_p = find_conf_oper(client_p->user->username,
@@ -84,21 +84,21 @@ c_message(struct client *client_p, const char *parv[], int parc)
 		}
 
 		/* request for us to dcc them.. */
-		if(!strncasecmp(parv[2], "\001CHAT\001", 6))
+		if(!strncasecmp(parv[1], "\001CHAT\001", 6))
 		{
 			connect_from_client(client_p, oper_p, target_p->name);
 			return;
 		}
 
 		/* dcc request.. \001DCC CHAT chat <HOST> <IP>\001 */
-		else if(!strncasecmp(parv[2], "\001DCC CHAT ", 10))
+		else if(!strncasecmp(parv[1], "\001DCC CHAT ", 10))
 		{
 			/* skip the first bit.. */
 			char *host;
 			char *cport;
 			int port;
 
-			p = LOCAL_COPY(parv[2]);
+			p = LOCAL_COPY(parv[1]);
 			p += 10;
 
 			/* skip the 'chat' */
@@ -151,7 +151,7 @@ c_message(struct client *client_p, const char *parv[], int parc)
 		return;
 	}
 
-	text = LOCAL_COPY(parv[2]);
+	text = LOCAL_COPY(parv[1]);
 	handle_service(target_p, client_p, text);
 }
 

@@ -40,8 +40,8 @@ static struct service_command operbot_command[] =
 
 static struct ucommand_handler operbot_ucommand[] =
 {
-	{ "objoin",	u_operbot_objoin,	CONF_OPER_OPERBOT, 2, 1, NULL },
-	{ "obpart",	u_operbot_obpart,	CONF_OPER_OPERBOT, 2, 1, NULL },
+	{ "objoin",	u_operbot_objoin,	CONF_OPER_OPERBOT, 1, 1, NULL },
+	{ "obpart",	u_operbot_obpart,	CONF_OPER_OPERBOT, 1, 1, NULL },
 	{ "\0",		NULL,			0, 0, 0, NULL }
 };
 
@@ -73,35 +73,35 @@ u_operbot_objoin(struct connection_entry *conn_p, char *parv[], int parc)
 {
 	struct channel *chptr;
 
-	if((chptr = find_channel(parv[1])) && 
+	if((chptr = find_channel(parv[0])) && 
 	   dlink_find(operbot_p, &chptr->services))
 	{
-		sendto_one(conn_p, "%s already in %s", operbot_p->name, parv[1]);
+		sendto_one(conn_p, "%s already in %s", operbot_p->name, parv[0]);
 		return;
 	}
 
-	slog(operbot_p, 1, "%s - OBJOIN %s", conn_p->name, parv[1]);
+	slog(operbot_p, 1, "%s - OBJOIN %s", conn_p->name, parv[0]);
 
 	loc_sqlite_exec(NULL, "INSERT INTO operbot VALUES(%Q, %Q)",
-			parv[1], conn_p->name);
+			parv[0], conn_p->name);
 
-	join_service(operbot_p, parv[1], NULL);
-	sendto_one(conn_p, "%s joined to %s", operbot_p->name, parv[1]);
+	join_service(operbot_p, parv[0], NULL);
+	sendto_one(conn_p, "%s joined to %s", operbot_p->name, parv[0]);
 }
 
 static void
 u_operbot_obpart(struct connection_entry *conn_p, char *parv[], int parc)
 {
-	if(part_service(operbot_p, parv[1]))
+	if(part_service(operbot_p, parv[0]))
 	{
-		slog(operbot_p, 1, "%s - OBPART %s", conn_p->name, parv[1]);
+		slog(operbot_p, 1, "%s - OBPART %s", conn_p->name, parv[0]);
 
 		loc_sqlite_exec(NULL, "DELETE FROM operbot WHERE chname = %Q",
-				parv[1]);
-		sendto_one(conn_p, "%s removed from %s", operbot_p->name, parv[1]);
+				parv[0]);
+		sendto_one(conn_p, "%s removed from %s", operbot_p->name, parv[0]);
 	}
 	else
-		sendto_one(conn_p, "%s not in channel %s", operbot_p->name, parv[1]);
+		sendto_one(conn_p, "%s not in channel %s", operbot_p->name, parv[0]);
 }
 
 static int

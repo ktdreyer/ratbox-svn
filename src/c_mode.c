@@ -494,37 +494,37 @@ c_mode(struct client *client_p, const char *parv[], int parc)
 	dlink_node *next_ptr;
 	int oldmode;
 
-	if(parc < 2 || EmptyString(parv[1]))
+	if(parc < 1 || EmptyString(parv[0]))
 		return;
 
 	/* user setting mode:
 	 * :<user> MODE <user> +<modes>
 	 */
-	if(!IsChanPrefix(parv[1][0]))
+	if(!IsChanPrefix(parv[0][0]))
 	{
-		if(parc < 3 || EmptyString(parv[2]))
+		if(parc < 2 || EmptyString(parv[1]))
 			return;
 
-		if((target_p = find_user(parv[1])) == NULL)
+		if((target_p = find_user(parv[0])) == NULL)
 			return;
 
 		if(target_p != client_p)
 			return;
 
-		target_p->user->umode = string_to_umode(parv[2], target_p->user->umode);
+		target_p->user->umode = string_to_umode(parv[1], target_p->user->umode);
 		return;
 	}
 
 	/* channel mode, need 3 params */
-	if(parc < 3 || EmptyString(parv[2]))
+	if(parc < 2 || EmptyString(parv[1]))
 		return;
 
-	if((chptr = find_channel(parv[1])) == NULL)
+	if((chptr = find_channel(parv[0])) == NULL)
 		return;
 
 	oldmode = chptr->mode.mode;
 
-	parse_full_mode(chptr, NULL, (const char **) parv, parc, 2);
+	parse_full_mode(chptr, NULL, (const char **) parv, parc, 1);
 
 	if(dlink_list_length(&opped_list))
 		hook_call(HOOK_MODE_OP, chptr, &opped_list);

@@ -790,7 +790,7 @@ static inline int
 io_to_array(char *string, char *parv[MAXPARA])
 {
 	char *p, *buf = string;
-	int x = 1;
+	int x = 0;
 
 	parv[x] = NULL;
 
@@ -849,6 +849,7 @@ parse_server(char *buf, int len)
 {
 	static char *parv[MAXPARA + 1];
 	const char *command;
+	const char *source;
 	char *s;
 	char *ch;
 	int parc;
@@ -866,13 +867,13 @@ parse_server(char *buf, int len)
 	for(ch = buf; *ch == ' '; ch++)
 		;
 
-	parv[0] = server_p->name;
+	source = server_p->name;
 
 	if(*ch == ':')
 	{
 		ch++;
 
-		parv[0] = ch;
+		source = ch;
 
 		if((s = strchr(ch, ' ')) != NULL)
 		{
@@ -903,7 +904,7 @@ parse_server(char *buf, int len)
 
 	parc = io_to_array(ch, parv);
 
-	handle_scommand(command, (const char **) parv, parc);
+	handle_scommand(source, command, (const char **) parv, parc);
 }
 
 /* parse_client()
@@ -933,8 +934,6 @@ parse_client(struct connection_entry *conn_p, char *buf, int len)
 	/* skip leading spaces.. */
 	for(ch = buf; *ch == ' '; ch++)
 		;
-
-	parv[0] = conn_p->name;
 
         /* partyline */
 	if(*ch != '.')

@@ -351,14 +351,14 @@ c_join(struct client *client_p, const char *parv[], int parc)
 	dlink_node *ptr;
 	dlink_node *next_ptr;
 
-	if(parc < 2 || EmptyString(parv[1]))
+	if(parc < 0 || EmptyString(parv[0]))
 		return;
 
 	if(!IsUser(client_p))
 		return;
 
 	/* only thing we should ever get here is join 0 */
-	if(parv[1][0] == '0')
+	if(parv[0][0] == '0')
 	{
 		DLINK_FOREACH_SAFE(ptr, next_ptr, client_p->user->channels.head)
 		{
@@ -377,19 +377,19 @@ c_kick(struct client *client_p, const char *parv[], int parc)
 	struct channel *chptr;
 	struct chmember *mptr;
 
-	if(parc < 3 || EmptyString(parv[2]))
+	if(parc < 2 || EmptyString(parv[1]))
 		return;
 
-	if((chptr = find_channel(parv[1])) == NULL)
+	if((chptr = find_channel(parv[0])) == NULL)
 		return;
 
-	if((target_p = find_service(parv[2])) != NULL)
+	if((target_p = find_service(parv[1])) != NULL)
 	{
 		rejoin_service(target_p, chptr, 0);
 		return;
 	}
 
-	if((target_p = find_user(parv[2])) == NULL)
+	if((target_p = find_user(parv[1])) == NULL)
 		return;
 
 	if((mptr = find_chmember(chptr, target_p)) == NULL)
@@ -407,13 +407,13 @@ c_part(struct client *client_p, const char *parv[], int parc)
 	struct chmember *mptr;
 	struct channel *chptr;
 
-	if(parc < 2 || EmptyString(parv[1]))
+	if(parc < 1 || EmptyString(parv[0]))
 		return;
 
 	if(!IsUser(client_p))
 		return;
 
-	if((chptr = find_channel(parv[1])) == NULL)
+	if((chptr = find_channel(parv[0])) == NULL)
 		return;
 
 	if((mptr = find_chmember(chptr, client_p)) == NULL)
@@ -430,20 +430,20 @@ c_topic(struct client *client_p, const char *parv[], int parc)
 {
 	struct channel *chptr;
 
-	if(parc < 3)
+	if(parc < 2)
 		return;
 
-	if((chptr = find_channel(parv[1])) == NULL)
+	if((chptr = find_channel(parv[0])) == NULL)
 		return;
 
-	if(EmptyString(parv[2]))
+	if(EmptyString(parv[1]))
 	{
 		chptr->topic[0] = '\0';
 		chptr->topicwho[0] = '\0';
 	}
 	else
 	{
-		strlcpy(chptr->topic, parv[2], sizeof(chptr->topic));
+		strlcpy(chptr->topic, parv[1], sizeof(chptr->topic));
 
 		if(IsUser(client_p))
 			snprintf(chptr->topicwho, sizeof(chptr->topicwho), "%s!%s@%s", 
@@ -462,28 +462,28 @@ c_tb(struct client *client_p, const char *parv[], int parc)
 {
 	struct channel *chptr;
 
-	if(parc < 4 || !IsServer(client_p))
+	if(parc < 3 || !IsServer(client_p))
 		return;
 
-	if((chptr = find_channel(parv[1])) == NULL)
+	if((chptr = find_channel(parv[0])) == NULL)
 		return;
 
 	/* :<server> TB <#channel> <topicts> <topicwho> :<topic> */
-	if(parc == 5)
-	{
-		if(EmptyString(parv[4]))
-			return;
-
-		strlcpy(chptr->topic, parv[4], sizeof(chptr->topic));
-		strlcpy(chptr->topicwho, parv[3], sizeof(chptr->topicwho));
-	}
-	/* :<server> TB <#channel> <topicts> :<topic> */
-	else
+	if(parc == 4)
 	{
 		if(EmptyString(parv[3]))
 			return;
 
 		strlcpy(chptr->topic, parv[3], sizeof(chptr->topic));
+		strlcpy(chptr->topicwho, parv[2], sizeof(chptr->topicwho));
+	}
+	/* :<server> TB <#channel> <topicts> :<topic> */
+	else
+	{
+		if(EmptyString(parv[2]))
+			return;
+
+		strlcpy(chptr->topic, parv[2], sizeof(chptr->topic));
 		strlcpy(chptr->topicwho, client_p->name, sizeof(chptr->topicwho));
 	}
 }
@@ -627,22 +627,22 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 	memset(&joined_members, 0, sizeof(dlink_list));
 
 	/* :<server> SJOIN <TS> <#channel> +[modes [key][limit]] :<nicks> */
-	if(parc < 5 || EmptyString(parv[4]))
+	if(parc < 4 || EmptyString(parv[3]))
 		return;
 
-	if((chptr = find_channel(parv[2])) == NULL)
+	if((chptr = find_channel(parv[1])) == NULL)
 	{
 		chptr = BlockHeapAlloc(channel_heap);
 
-		strlcpy(chptr->name, parv[2], sizeof(chptr->name));
-		newts = chptr->tsinfo = atol(parv[1]);
+		strlcpy(chptr->name, parv[1], sizeof(chptr->name));
+		newts = chptr->tsinfo = atol(parv[0]);
 		add_channel(chptr);
 
 		keep_old_modes = 0;
 	}
 	else
 	{
-		newts = atol(parv[1]);
+		newts = atol(parv[0]);
 
 		if(newts == 0 || chptr->tsinfo == 0)
 			chptr->tsinfo = 0;
@@ -656,7 +656,7 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 	newmode.key[0] = '\0';
 	newmode.limit = 0;
 
-	s = parv[3];
+	s = parv[2];
 
 	while(*s)
 	{
@@ -687,14 +687,14 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 			newmode.mode |= MODE_REGONLY;
 			break;
 		case 'k':
-			strlcpy(newmode.key, parv[4+args], sizeof(newmode.key));
+			strlcpy(newmode.key, parv[3+args], sizeof(newmode.key));
 			args++;
 			
 			if(parc < 5+args)
 				return;
 			break;
 		case 'l':
-			newmode.limit = atoi(parv[4+args]);
+			newmode.limit = atoi(parv[3+args]);
 			args++;
 
 			if(parc < 5+args)
@@ -737,10 +737,10 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 
 	}
 
-	if(EmptyString(parv[4+args]))
+	if(EmptyString(parv[3+args]))
 		return;
 
-	nicks = LOCAL_COPY(parv[4+args]);
+	nicks = LOCAL_COPY(parv[3+args]);
 
         /* now parse the nicklist */
 	for(s = nicks; !EmptyString(s); s = p)
