@@ -1,3 +1,14 @@
+*** 20010413_2 by davidt
+- Add CRYPTLINK (formerly KSERVER) support.
+  It seems to be mostly working, however:
+  * The protocol will probably change next week, to be compatable with
+    hybrid 6, etc..
+  * There's a few possible bugs I can see in the code, but there's no
+    sane way of fixing them until I (or someone else, hint hint :),
+    creates a 'helper' process for server<->server links, which
+    handles ziplinks/cryptlinks etc.
+
+
 *** 20010413_1 by fl_
 - added a warning about the order of auth blocks
 
