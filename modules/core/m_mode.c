@@ -127,11 +127,29 @@ int m_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
   root = chptr;
 
-  if (HasVchans(chptr))
+  if (HasVchans(chptr) || IsVchan(chptr))
+  {
+    if(HasVchans(chptr))
     {
-      if( (vchan = map_vchan(chptr,sptr)) != NULL )
-	chptr = vchan;
+      if ((vchan = map_vchan(chptr,sptr)) != NULL)
+        chptr = vchan; /* root = chptr, chptr = vchan */
+
+      /* XXX - else? the user isn't on any vchan, so we
+       *       end up giving them the mode of the root
+       *       channel.  MODE #vchan !nick ? (ugh)
+       */
     }
+    else
+    {
+      if ((vchan = map_bchan(chptr,sptr)) != NULL)
+        root = vchan;  /* root = vchan, chptr = chptr */
+
+      /* XXX - else? the user isn't on any vchan,
+       *       but they asked for MODE ##vchan_12345
+       *       we send MODE #vchan
+       */
+    }
+  }
 
   if(parc < 3)
     {
@@ -153,7 +171,8 @@ int m_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 		   parv[1], chptr->channelts);
     }
   else
-    set_channel_mode(cptr, sptr, chptr, parc - 2, parv + 2, parv[1]);
+    set_channel_mode(cptr, sptr, chptr, parc - 2, parv + 2, 
+                     root->chname);
   
   return 0;
 }
