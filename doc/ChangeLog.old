@@ -1,3 +1,8 @@
+*** 20010822_7 by leeh
+- added back the second buffer, this time it actually does something and
+  is less complex
+
+
 *** 20010822_6 by leeh
 - theres no need to make two sjoin bufs at all, especially when theyre
   *identical* and one of them isnt even done properly..
