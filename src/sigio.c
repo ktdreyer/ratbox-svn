@@ -121,6 +121,24 @@ void setup_sigio_fd(int fd)
 	flags |= O_ASYNC|O_NONBLOCK;
 	fcntl(fd, F_SETFL, flags);
 }
+
+static void set_sigio(int fd)
+{
+	int flags;
+	fcntl(fd, F_GETFL, &flags);
+	flags |= O_ASYNC|O_NONBLOCK;
+	fcntl(fd, F_SETFL, flags);
+}
+
+static void clear_sigio(int fd)
+{
+	int flags;
+	fcntl(fd, F_GETFL, &flags);
+	flags &= ~O_ASYNC;
+	flags |= O_NONBLOCK;
+	fcntl(fd, F_SETFL, flags);
+}
+
 /*
  * find a spare slot in the fd list. We can optimise this out later!
  *   -- adrian
@@ -150,6 +168,7 @@ poll_update_pollfds(int fd, short event, PF * handler)
 
     if(F->comm_index < 0)
     {    
+    	set_sigio(fd);
     	F->comm_index = poll_findslot();
     }
     comm_index = F->comm_index;
@@ -171,11 +190,12 @@ poll_update_pollfds(int fd, short event, PF * handler)
 	    pollfd_list.pollfds[comm_index].events &= ~event;
 	    if (pollfd_list.pollfds[comm_index].events == 0)
 	      {
+		clear_sigio(fd);
 		pollfd_list.pollfds[comm_index].fd = -1;
 		pollfd_list.pollfds[comm_index].revents = 0;
 		F->comm_index = -1;
 		F->list = FDLIST_NONE;
-
+		
 		/* update pollfd_list.maxindex here */
 		if (comm_index == pollfd_list.maxindex)
 		  while (pollfd_list.maxindex >= 0 &&
@@ -268,7 +288,7 @@ comm_select(unsigned long delay)
  timeout.tv_nsec = 1000000 * delay;
  for (;;)
  {
-  if(!sigio_is_screwed < ++loop_count <= 4)
+  if(!sigio_is_screwed < loop_count <= 4)
   {
   	if((sig = sigtimedwait(&our_sigset, &si, &timeout)) > 0)
   	{
