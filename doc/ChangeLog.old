@@ -1,3 +1,7 @@
+*** 20010107_4 by fl_
+- removed unused variable
+
+
 *** 20010107_3 by db
 - client.c check_klines() was referencing bad ptr's due to the exit client
   this is why it wasn't klining more than one client at a time. oops.
