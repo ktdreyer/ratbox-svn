@@ -859,22 +859,16 @@ do_local_user(char* nick, struct Client* client_p, struct Client* source_p,
   user->server = me.name;
 
   strlcpy(source_p->info, realname, sizeof(source_p->info));
+  if(!IsGotId(source_p))
+  {
+    strlcpy(source_p->username, username, sizeof(source_p->username));
+  }
  
   if (source_p->name[0])
   { 
     /* NICK already received, now I have USER... */
-    	return register_local_user(client_p, source_p, source_p->name, username);
+    return register_local_user(client_p, source_p, source_p->name, source_p->username);
   }
-  else
-    {
-      if (!IsGotId(source_p)) 
-        {
-          /*
-           * save the username in the client
-           */
-          strlcpy(source_p->username, username, sizeof(source_p->username));
-        }
-    }
   return 0;
 }
 
