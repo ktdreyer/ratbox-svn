@@ -1301,6 +1301,12 @@ int exit_client(
   dlink_node *m;
   if (MyConnect(source_p))
     {
+      /* DO NOT REMOVE. exit_client can be called twice after a failed
+       * read/write.
+       */
+      if(IsClosing(source_p))
+        return;
+
       SetClosing(source_p);
       
       /* Attempt to flush any queued data */
