@@ -1,3 +1,7 @@
+*** 20010618_6 by leeh
+- disallow ! in klines/glines.. 
+
+
 *** 20010618_5 by jdc
 - Mentioned the implicit decl. and warning messages during compile-time,
   which pertain to OpenSSL.  People like Jamie will bitch and whine, so
