@@ -1,3 +1,12 @@
+*** 20010504_1 by fl_
+- dont burst persistant channels
+- destroy_channel() if the user is parting.. persistant chans should only
+  be for splits imo, else users are just gunna break their channels ;)
+
+  ideally this should be extended to quits which arent a netsplit.. but
+  ill see about that another day :P
+
+
 *** 20010502_10 by androsyn
 I think I really found the source of fl_'s cores.  Basically what was
 happening was we were not resetting the callback to NULL like we do 
