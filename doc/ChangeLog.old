@@ -1,3 +1,9 @@
+*** 20010604_4 by ejb
+- change src/ to use ilog() rather than log().
+  this is needed for systems which put the math library
+  in the main C RTL.
+
+
 *** 20010604_3 by davidt
 - Check select() return value for errors.
 - Minor fixes for errors introduced with the new servlink code to avoid
