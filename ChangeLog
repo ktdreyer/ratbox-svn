@@ -1,3 +1,15 @@
+androsyn    2002/12/09 21:43:52 UTC	(20021209_2)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  Bogus asserts..
+  
+  Revision  Changes    Path
+  7.344     +0 -1      ircd-ratbox/src/client.c
+
+
+
 androsyn    2002/12/09 21:25:53 UTC	(20021209_1)
 
   Modified files:
