@@ -1,3 +1,15 @@
+androsyn    2003/04/06 21:43:35 UTC	(20030406_3)
+
+  Modified files:
+    src                  s_auth.c 
+  Log:
+  Fix the case inversion for the adns tests
+  
+  Revision  Changes    Path
+  7.144     +10 -6     ircd-ratbox/src/s_auth.c
+
+
+
 androsyn    2003/04/06 21:04:14 UTC	(20030406_2)
 
   Modified files:
