@@ -1,3 +1,23 @@
+androsyn    2003/09/10 11:39:32 EDT	(20030910_4)
+
+  Modified files:
+    adns                 check.c event.c general.c parse.c query.c 
+                         reply.c transmit.c types.c 
+  Log:
+  Removed unncessary fdlist.h includes
+  
+  Revision  Changes    Path
+  1.8       +0 -1      ircd-ratbox/adns/check.c
+  1.22      +0 -1      ircd-ratbox/adns/event.c
+  1.15      +0 -1      ircd-ratbox/adns/general.c
+  1.9       +0 -1      ircd-ratbox/adns/parse.c
+  1.20      +0 -1      ircd-ratbox/adns/query.c
+  1.11      +0 -1      ircd-ratbox/adns/reply.c
+  1.13      +0 -1      ircd-ratbox/adns/transmit.c
+  1.14      +0 -1      ircd-ratbox/adns/types.c
+
+
+
 androsyn    2003/09/10 11:23:26 EDT	(20030910_3)
 
   Modified files:
