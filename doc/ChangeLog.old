@@ -1,3 +1,7 @@
+*** 20010418_5 by a1kmm
+- Fixed hostmask code to work with exempt{} blocks.
+
+
 *** 20010418_4 by fl_
 - we now have stats e.. admittedly it doesnt actually do anything yet,
   but ill sort that later
