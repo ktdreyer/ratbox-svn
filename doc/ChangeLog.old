@@ -1,3 +1,14 @@
+*** 20001217_5 by db
+- added vhost support, should work now
+  in doing, removed an extern not needed any more in s_bsd_kqueue.c
+  s_bsd_poll.c and s_bsd_select.c... thats when I noticed... local[]
+
+- first crack at cleaning up s_bsd_select.c so it will compile. I just
+  removed local[] from it for now, the rest is adrian's MUAHHAHAHH!
+  It still won't compile, but ... its a start
+
+
+
 *** 20001217_4 by bill
 
 - added _k9_ (jeremy, wowsers.) to credits as a contributer
