@@ -1,3 +1,19 @@
+leeh        2005/03/04 13:27:05 EST	(20050304_1)
+
+  Modified files:
+    doc                  whats-new-2.1.txt 
+    src                  channel.c 
+  Log:
+  - update whats-new-2.1
+  - when we're handling global NAMES, dont output channels if there are no
+    members within them we can show.
+  
+  Revision  Changes    Path
+  7.3       +9 -2      ircd-ratbox/doc/whats-new-2.1.txt
+  7.436     +12 -2     ircd-ratbox/src/channel.c
+
+
+
 androsyn    2005/03/04 12:38:07 EST	(20050304_0)
 
   Modified files:
