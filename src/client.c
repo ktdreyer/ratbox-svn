@@ -2106,6 +2106,7 @@ close_connection(struct Client *client_p)
 
 	client_p->from = NULL;	/* ...this should catch them! >:) --msa */
 	ClearMyConnect(client_p);
+	SetIOError(client_p);
 }
 
 
