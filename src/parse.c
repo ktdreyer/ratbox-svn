@@ -340,8 +340,8 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
 
   handler = mptr->handlers[handle_idx];
   /* check right amount of params is passed... --is */
-  
-  if (i < mptr->parameters) {
+
+  if (i - 1 < mptr->parameters) {
 	  sendto_one(cptr, form_str(ERR_NEEDMOREPARAMS),
                  me.name, para[0], mptr->cmd);
 	  return 0;
