@@ -222,3 +222,20 @@ COMMAND         - USAGE and DESCRIPTION
                    returns info on any found I line or K line for that user,
                    or D-line on ip.
 
++ MODLOAD        - MODLOAD <path/module.so>
+                   -- Load a module into the ircd
+                   the path can be an absolute path from / or from the
+                   IRCD_PREFIX (ie modules/autoload/m_users.so)
+                   NOTE:  Restricted to admins only
+
++ MODLIST        - MODLIST
+                   -- List the modules that are currently loaded into the
+                   ircd, along with their address and version.
+                   NOTE:  Restricted to admins only
+
++ MODUNLOAD      - MODUNLOAD <module.so>
+                   -- Unload a module from the ircd
+                   Use just the module name, the path is not needed.
+                   When a module is unloaded, all commands associated 
+                   with it are unloaded as well.
+                   NOTE:  Restricted to admins only
