@@ -76,7 +76,10 @@ void mem_frob(void *data, int len);
  * hopefully this will speed up things just a bit
  * 
  */
-
+/* forte (and maybe others) dont like these being declared twice,
+ * so we dont declare the inlines unless GNUC.
+ */
+#ifdef __GNUC__
 
 /* 
  * dlink_ routines are stolen from squid, except for dlinkAddBefore,
@@ -211,6 +214,6 @@ dlinkMoveList(dlink_list *from, dlink_list *to)
 
   /* I think I got that right */
 }
-
+#endif /* __GNUC__ */
 
 #endif /* __TOOLS_H__ */
