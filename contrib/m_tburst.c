@@ -1,5 +1,5 @@
 /*  contrib/m_tburst.c
- *  Copyright (C) 2002 Hybrid Develompent Team
+ *  Copyright (C) 2002 Hybrid Development Team
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are
