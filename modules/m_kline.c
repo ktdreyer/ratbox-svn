@@ -66,7 +66,6 @@ mapi_clist_av1 kline_clist[] = { &kline_msgtab, &unkline_msgtab, NULL };
 DECLARE_MODULE_AV1(kline, NULL, NULL, kline_clist, NULL, NULL, "$Revision$");
 
 /* Local function prototypes */
-static time_t valid_tkline(struct Client *source_p, const char *string);
 static int find_user_host(struct Client *source_p, const char *userhost, char *user, char *host);
 static int valid_comment(struct Client *source_p, char *comment);
 static int valid_user_host(struct Client *source_p, const char *user, const char *host);
@@ -104,6 +103,7 @@ mo_kline(struct Client *client_p, struct Client *source_p,
 	const char *target_server = NULL;
 	struct ConfItem *aconf;
 	time_t tkline_time = 0;
+	int loc = 1;
 
 	if(!IsOperK(source_p))
 	{
@@ -112,50 +112,28 @@ mo_kline(struct Client *client_p, struct Client *source_p,
 		return 0;
 	}
 
-	parv++;
-	parc--;
+	if((tkline_time = valid_temp_time(parv[loc])) >= 0)
+		loc++;
 
-	tkline_time = valid_tkline(source_p, *parv);
+	if(find_user_host(source_p, parv[loc], user, host) == 0)
+		return 0;
 
-	if(tkline_time > 0)
+	loc++;
+
+	if(parc >= loc+2 && !irccmp(parv[loc], "ON"))
 	{
-		parv++;
-		parc--;
+		target_server = parv[loc+1];
+		loc += 2;
 	}
 
-	if(parc == 0)
+	if(parc <= loc || EmptyString(parv[loc]))
 	{
 		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
 			   me.name, source_p->name, "KLINE");
 		return 0;
 	}
 
-	if(find_user_host(source_p, *parv, user, host) == 0)
-		return 0;
-
-	parc--;
-	parv++;
-
-	if(parc != 0)
-	{
-		if(irccmp(*parv, "ON") == 0)
-		{
-			parc--;
-			parv++;
-			if(parc == 0)
-			{
-				sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-					   me.name, source_p->name, "KLINE");
-				return 0;
-			}
-			target_server = *parv;
-			parc--;
-			parv++;
-		}
-	}
-
-	if(parc != 0)
-		reason = LOCAL_COPY(*parv);
+	reason = LOCAL_COPY(parv[loc]);
 
 	if(target_server != NULL)
 	{
@@ -201,7 +179,7 @@ mo_kline(struct Client *client_p, struct Client *source_p,
 			DupString(aconf->spasswd, oper_reason);
 	}
 
-	if(tkline_time)
+	if(tkline_time > 0)
 	{
 		ircsnprintf(buffer, sizeof(buffer),
 			   "Temporary K-line %d min. - %s (%s)",
@@ -494,43 +472,6 @@ apply_tkline(struct Client *source_p, struct ConfItem *aconf,
 
 	sendto_one_notice(source_p, ":Added temporary %d min. K-Line [%s@%s]",
 			  tkline_time / 60, aconf->user, aconf->host);
-}
-
-/* valid_tkline()
- * 
- * inputs	- client requesting kline, kline time
- * outputs	- 0 if not an integer number, else the number
- * side effects -
- */
-static time_t
-valid_tkline(struct Client *source_p, const char *p)
-{
-	time_t result = 0;
-
-	while(*p)
-	{
-		if(IsDigit(*p))
-		{
-			result *= 10;
-			result += ((*p) & 0xF);
-			p++;
-		}
-		else
-			return (0);
-	}
-
-	/* if they /quote kline 0 user@host :reason, set it to one minute */
-	if(result == 0)
-		result = 1;
-
-	/* max at 4 weeks */
-	if(result > (60 * 24 * 7 * 4))
-		result = (24 * 60 * 7 * 4);
-
-	/* turn into seconds.. */
-	result *= 60;
-
-	return (result);
 }
 
 /* find_user_host()

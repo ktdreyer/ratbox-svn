@@ -61,7 +61,6 @@ struct Message undline_msgtab = {
 mapi_clist_av1 dline_clist[] = { &dline_msgtab, &undline_msgtab, NULL };
 DECLARE_MODULE_AV1(dline, NULL, NULL, dline_clist, NULL, NULL, "$Revision$");
 
-static time_t valid_tkline(struct Client *source_p, const char *string);
 static int valid_comment(char *comment);
 static int flush_write(struct Client *, FBFILE *, char *, char *);
 static int remove_temp_dline(const char *);
@@ -86,7 +85,7 @@ mo_dline(struct Client *client_p, struct Client *source_p,
 	char dlbuffer[IRCD_BUFSIZE];
 	const char *current_date;
 	int tdline_time = 0;
-	int loc = 0;
+	int loc = 1;
 
 	if(!IsOperK(source_p))
 	{
@@ -94,11 +93,7 @@ mo_dline(struct Client *client_p, struct Client *source_p,
 		return 0;
 	}
 
-	loc++;
-
-	tdline_time = valid_tkline(source_p, parv[loc]);
-
-	if(tdline_time)
+	if((tdline_time = valid_temp_time(parv[loc])) >= 0)
 		loc++;
 
 	if(parc < loc + 1)
@@ -199,7 +194,7 @@ mo_dline(struct Client *client_p, struct Client *source_p,
 			DupString(aconf->spasswd, oper_reason);
 	}
 
-	if(tdline_time)
+	if(tdline_time > 0)
 	{
 		ircsnprintf(dlbuffer, sizeof(dlbuffer), 
 			 "Temporary D-line %d min. - %s (%s)",
@@ -363,48 +358,6 @@ mo_undline(struct Client *client_p, struct Client *source_p, int parc, const cha
 	ilog(L_KLINE, "%s removed D-Line for [%s]", get_oper_name(source_p), cidr);
 
 	return 0;
-}
-
-/*
- * valid_tkline()
- * 
- * inputs       - pointer to client requesting kline
- *              - argument count
- *              - pointer to ascii string in
- * output       - -1 not enough parameters
- *              - 0 if not an integer number, else the number
- * side effects - none
- */
-static time_t
-valid_tkline(struct Client *source_p, const char *p)
-{
-	time_t result = 0;
-
-	while (*p)
-	{
-		if(IsDigit(*p))
-		{
-			result *= 10;
-			result += ((*p) & 0xF);
-			p++;
-		}
-		else
-			return (0);
-	}
-	/* in the degenerate case where oper does a /quote kline 0 user@host :reason 
-	 * i.e. they specifically use 0, I am going to return 1 instead
-	 * as a return value of non-zero is used to flag it as a temporary kline
-	 */
-
-	if(result == 0)
-		result = 1;
-
-	if(result > (24 * 60 * 7 * 4))
-		result = (24 * 60 * 7 * 4);	/* Max it at 4 weeks */
-
-	result = (time_t) result *(time_t) 60;	/* turn it into seconds */
-
-	return (result);
 }
 
 /*
