@@ -70,6 +70,8 @@ struct adns_pollfd { int fd; short events; short revents; };
 #define ADNS_POLLOUT 4
 #define sprintf ircsprintf
 #define vsnprintf ircvsnprintf
+#undef inet_ntop
+#undef inet_pton
 #define inet_ntop inetntop
 #define inet_pton inetpton
 
