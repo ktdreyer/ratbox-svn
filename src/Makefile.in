@@ -26,9 +26,9 @@ SRCS = 			\
 	s_alis.c	\
 	scommand.c	\
 	service.c	\
-        stats.c         \
 	tools.c		\
         u_help.c        \
+        u_stats.c       \
 	ucommand.c
 
 OBJS=$(SRCS:.c=.o)

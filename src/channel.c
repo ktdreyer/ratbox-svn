@@ -198,6 +198,30 @@ find_chmember(struct channel *chptr, struct client *target_p)
 	return NULL;
 }
 
+/* count_topics()
+ *   counts the number of channels which have a topic
+ *
+ * inputs       -
+ * outputs      - number of channels with topics
+ */
+unsigned long
+count_topics(void)
+{
+        struct channel *chptr;
+        dlink_node *ptr;
+        unsigned long topic_count = 0;
+
+        DLINK_FOREACH(ptr, channel_list.head)
+        {
+                chptr = ptr->data;
+
+                if(chptr->topic[0] != '\0')
+                        topic_count++;
+        }
+
+        return topic_count;
+}
+
 /* c_join()
  *   the JOIN handler
  */

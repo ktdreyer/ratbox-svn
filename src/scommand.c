@@ -13,7 +13,6 @@
 #include "conf.h"
 #include "client.h"
 #include "serno.h"
-#include "stats.h"
 #include "service.h"
 
 static dlink_list scommand_table[MAX_SCOMMAND_HASH];
@@ -303,7 +302,8 @@ c_stats(struct client *client_p, char *parv[], int parc)
 			sendto_server(":%s 249 %s V :%s (AutoConn.!*@*) Idle: "
                                       "%d SendQ: %d Connected %s",
 				      MYNAME, parv[0], server_p->name, 
-				      (CURRENT_TIME - server_p->last_time), 0,
+				      (CURRENT_TIME - server_p->last_time), 
+                                      get_sendq(server_p),
                                       get_duration(CURRENT_TIME -
                                                    server_p->first_time));
 			break;

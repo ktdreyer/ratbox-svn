@@ -39,6 +39,7 @@ extern dlink_list connection_list;
 
 #define CONN_CONNECTING		0x001
 #define CONN_DEAD		0x002
+#define CONN_SENTPING           0x004
 #define FLAGS_UNTERMINATED	0x010
 
 extern void read_io(void);
@@ -53,5 +54,7 @@ extern void sendto_connections(const char *format, ...);
 extern int sock_open(const char *host, int port, const char *vhost, int type);
 extern void sock_close(struct connection_entry *conn_p);
 extern int sock_write(struct connection_entry *conn_p, const char *buf, int len);
+
+extern unsigned long get_sendq(struct connection_entry *conn_p);
 
 #endif

@@ -68,4 +68,6 @@ extern void del_chmember(struct chmember *mptr);
 extern struct chmember *find_chmember(struct channel *chptr, struct client *target_p);
 #define is_member(chptr, target_p) ((find_chmember(chptr, target_p)) ? 1 : 0)
 
+extern unsigned long count_topics(void);
+
 #endif

@@ -8,6 +8,8 @@
 
 #define RECONNECT_DELAY 30
 
+#define PING_TIME       300
+
 #define MAX_FD		1000
 
 #define RSERV_VERSION		"1.0beta"

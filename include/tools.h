@@ -6,12 +6,12 @@
 
 #define EmptyString(x) (!(x) || (*(x) == '\0'))
 
-extern char *getfield(char *newline);
-
 #define my_malloc(x) (my_calloc(1, x))
 extern void *my_calloc(int, size_t);
 extern void my_free(void *);
 extern char *my_strdup(const char *s);
+
+extern const char *get_duration(time_t seconds);
 
 #ifndef HAVE_STRLCAT
 extern size_t strlcat(char *dst, const char *src, size_t siz);

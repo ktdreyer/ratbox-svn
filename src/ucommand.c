@@ -15,8 +15,8 @@
 #include "event.h"
 #include "service.h"
 #include "client.h"
+#include "channel.h"
 #include "serno.h"
-#include "stats.h"
 
 static dlink_list ucommand_table[MAX_UCOMMAND_HASH];
 
@@ -105,54 +105,6 @@ add_ucommand_handler(struct ucommand_handler *chandler)
 
 	hashv = hash_command(chandler->cmd);
 	dlink_add_alloc(chandler, &ucommand_table[hashv]);
-}
-
-#define MAX_HELP_ROW 8
-
-void
-list_ucommand(struct connection_entry *conn_p)
-{
-        struct ucommand_handler *uhandler;
-        const char *hparv[MAX_HELP_ROW];
-        char buf[BUFSIZE];
-        dlink_node *ptr;
-        char *p;
-        int i;
-        int j = 0;
-
-        for(i = 0; i < MAX_UCOMMAND_HASH; i++)
-        {
-                DLINK_FOREACH(ptr, ucommand_table[i].head)
-                {
-                        uhandler = ptr->data;
-                        hparv[j] = uhandler->cmd;
-                        j++;
-
-                        if(j >= MAX_HELP_ROW)
-                        {
-                                sendto_connection(conn_p,
-                                        "   %-8s %-8s %-8s %-8s "
-                                        "%-8s %-8s %-8s %-8s",
-                                        hparv[0], hparv[1], hparv[2],
-                                        hparv[3], hparv[4], hparv[5],
-                                        hparv[6], hparv[7]);
-                                j = 0;
-                        }
-                }
-        }
-
-        if(!j)
-                return;
-
-        /* rebuild a buffer of the remaining ones.. */
-        p = buf;
-
-        for(; j > 0; j--)
-        {
-                p += sprintf(p, "%-8s ", hparv[j-1]);
-        }
-
-        sendto_connection(conn_p, "   %s", buf);
 }
 
 static void
@@ -314,4 +266,15 @@ u_status(struct connection_entry *conn_p, char *parv[], int parc)
                                   server_p->name);
         else
                 sendto_connection(conn_p, "Currently disconnected");
+
+        sendto_connection(conn_p, "Services: Clients: %lu Services: %lu",
+                          dlink_list_length(&connection_list),
+                          dlink_list_length(&service_list));
+        sendto_connection(conn_p, "Network: Users: %lu Servers: %lu",
+                          dlink_list_length(&user_list),
+                          dlink_list_length(&server_list));
+        sendto_connection(conn_p, "         Channels: %lu Topics: %lu",
+                          dlink_list_length(&channel_list),
+                          count_topics());
+                          
 }

@@ -1,6 +1,5 @@
 /* $Id$ */
 #include "stdinc.h"
-#include "stats.h"
 #include "c_init.h"
 #include "rserv.h"
 #include "conf.h"
@@ -9,26 +8,6 @@
 
 static void u_stats(struct connection_entry *, char *parv[], int parc);
 struct ucommand_handler stats_ucommand = { "stats", u_stats, 0 };
-
-const char *
-get_duration(time_t seconds)
-{
-        static char buf[BUFSIZE];
-        int days, hours, minutes;
-
-        days = (int) (seconds / 86400);
-        seconds %= 86400;
-        hours = (int) (seconds / 3600);
-        hours %= 3600;
-        minutes = (int) (seconds / 60);
-        seconds %= 60;
-
-        snprintf(buf, sizeof(buf), "%d day%s, %d:%02d:%02ld",
-                 days, (days == 1) ? "" : "s", hours,
-                 minutes, seconds);
-
-        return buf;
-}
 
 struct _stats_table
 {
@@ -73,9 +52,10 @@ stats_uplink(struct connection_entry *conn_p)
 {
         if(server_p != NULL)
                 sendto_connection(conn_p, "Currently connected to %s Idle: %d "
-                                  "Sendq: %d Connected: %s",
+                                  "SendQ: %d Connected: %s",
                                   server_p->name,
-                                  (CURRENT_TIME - server_p->last_time), 0,
+                                  (CURRENT_TIME - server_p->last_time),
+                                  get_sendq(server_p),
                                   get_duration(CURRENT_TIME -
                                                server_p->first_time));
         else
@@ -85,7 +65,8 @@ stats_uplink(struct connection_entry *conn_p)
 static void
 stats_uptime(struct connection_entry *conn_p)
 {
-        sendto_connection(conn_p, "Up %s",
+        sendto_connection(conn_p, "%s up %s",
+                          MYNAME,
                           get_duration(CURRENT_TIME - config_file.first_time));
 }
 

@@ -173,6 +173,26 @@ read_io(void)
 						server_p->name);
 					(server_p->io_close)(server_p);
 				}
+
+                                /* pinged out */
+                                else if((server_p->flags & CONN_SENTPING) &&
+                                        ((server_p->last_time + PING_TIME*2) <=
+                                                        CURRENT_TIME))
+                                {
+                                        slog_send("Connection to server %s "
+                                                  "lost: (Ping timeout)",
+                                                  server_p->name);
+                                        (server_p->io_close)(server_p);
+                                }
+
+                                /* no data for a while.. send ping */
+                                else if(!(server_p->flags & CONN_SENTPING) &&
+                                        ((server_p->last_time + PING_TIME) <=
+                                                        CURRENT_TIME))
+                                {
+                                        sendto_server("PING :%s", MYNAME);
+                                        server_p->flags |= CONN_SENTPING;
+                                }
 			}
 
 			if(server_p->flags & CONN_DEAD)
@@ -262,6 +282,7 @@ read_io(void)
 				   server_p->io_read != NULL)
 				{
 					server_p->last_time = CURRENT_TIME;
+                                        server_p->flags &= ~CONN_SENTPING;
 					(server_p->io_read)(server_p);
 				}
 
@@ -733,6 +754,23 @@ sendto_connections(const char *format, ...)
 
                 sendto_connection(conn_p, "%s", buf);
         }
+}
+
+unsigned long
+get_sendq(struct connection_entry *conn_p)
+{
+        struct send_queue *sendq_ptr;
+        dlink_node *ptr;
+        unsigned long sendq = 0;
+
+        DLINK_FOREACH(ptr, conn_p->sendq.head)
+        {
+                sendq_ptr = ptr->data;
+
+                sendq += sendq_ptr->len;
+        }
+
+        return sendq;
 }
 
 /* write_sendq()

@@ -24,6 +24,37 @@ static void parse_connect(char *line);
 static void parse_service(char *line);
 static void parse_oper(char *line);
 
+static char *
+getfield(char *newline)
+{
+	static char *line = NULL;
+	char *end, *field;
+
+	if(newline != NULL)
+		line = newline;
+
+	if(line == NULL)
+		return NULL;
+
+	field = line;
+
+	end = strchr(line, ':');
+
+	/* no trailing delim - last field */
+	if(end == NULL)
+	{
+		line = NULL;
+		return field;
+	}
+	else
+	{
+		line = end + 1;
+		*end = '\0';
+		return field;
+	}
+}
+
+
 static void
 conf_error_fatal(const char *format, ...)
 {

@@ -17,8 +17,8 @@
 #define ALIS_MAX_MATCH	60
 #define ALIS_MAX_PARC	10
 
-#define ALIS_FLOOD_MAX		10	/* at what point we stop parsing queries */
-#define ALIS_FLOOD_MAX_SILENT	20	/* at what point we silently drop messages */
+#define ALIS_FLOOD_MAX		40	/* limit we stop parsing queries */
+#define ALIS_FLOOD_MAX_SILENT	55	/* limit we silently drop messages */
 
 #define ALIS_FLOOD_HELP		1	/* normal help */
 #define ALIS_FLOOD_EHELP	2	/* specific extended help */

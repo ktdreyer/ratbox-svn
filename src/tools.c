@@ -1,3 +1,4 @@
+/* $Id$ */
 #include "stdinc.h"
 #include "rserv.h"
 
@@ -31,34 +32,24 @@ char *my_strdup(const char *s)
     return n;
 }
 
-char *
-getfield(char *newline)
+const char *
+get_duration(time_t seconds)
 {
-	static char *line = NULL;
-	char *end, *field;
+        static char buf[BUFSIZE];
+        int days, hours, minutes;
 
-	if(newline != NULL)
-		line = newline;
+        days = (int) (seconds / 86400);
+        seconds %= 86400;
+        hours = (int) (seconds / 3600);
+        hours %= 3600;
+        minutes = (int) (seconds / 60);
+        seconds %= 60;
 
-	if(line == NULL)
-		return NULL;
+        snprintf(buf, sizeof(buf), "%d day%s, %d:%02d:%02ld",
+                 days, (days == 1) ? "" : "s", hours,
+                 minutes, seconds);
 
-	field = line;
-
-	end = strchr(line, ':');
-
-	/* no trailing delim - last field */
-	if(end == NULL)
-	{
-		line = NULL;
-		return field;
-	}
-	else
-	{
-		line = end + 1;
-		*end = '\0';
-		return field;
-	}
+        return buf;
 }
 
 /*
