@@ -35,6 +35,8 @@
 /* Efnet wanted this... Maybe we should do this from configure? */
 #define REQUIRE_OANDV
 
+#define INTENSIVE_DEBUG
+
 struct Client;
 
 /* mode structure for channels */
@@ -177,5 +179,9 @@ struct Ban          /* also used for exceptions -orabidoo */
 #define MAX_VCHAN_TIME (60*60)
 /* Number of chanops, peon, voiced, halfops sublists */
 #define MAX_SUBLISTS 4
+
+#ifdef INTENSIVE_DEBUG
+void do_channel_integrity_check(void);
+#endif
 
 #endif  /* INCLUDED_channel_h */

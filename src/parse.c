@@ -295,6 +295,9 @@ void parse(struct Client *client_p, char *pbuffer, char *bufend)
     }
 
   handle_command(mptr, client_p, from, i, para);
+#ifdef INTENSIVE_DEBUG
+  do_channel_integrity_check();
+#endif
 }
 
 static void 

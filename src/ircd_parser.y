@@ -106,6 +106,7 @@ int   class_redirport_var;
 %token  ANTI_SPAM_EXIT_MESSAGE_TIME
 %token  AUTH
 %token  AUTOCONN
+%token  BIND_ADDRESS
 %token  BYTES KBYTES MBYTES GBYTES TBYTES
 %token  CALLER_ID_WAIT
 %token  CHANNEL
