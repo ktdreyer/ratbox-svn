@@ -74,9 +74,11 @@ static int  ms_llnick(struct Client *cptr,
 {
   char *nick;
   char *nick_old = NULL;
-  struct Client *acptr;
+  struct Client *acptr = NULL;
   int exists = 0;
-
+  int new = 0;
+  dlink_node *ptr;
+  
   if(!IsCapable(cptr,CAP_LL))
     {
       sendto_realops_flags(FLAGS_ALL,
@@ -94,19 +96,44 @@ static int  ms_llnick(struct Client *cptr,
   nick = parv[2];
   nick_old = parv[3];
 
-  /* Existing user changing nickname */
-  acptr = hash_find_client(nick_old,(struct Client *)NULL);
+  if (*nick_old == '!')
+    new = 1;
+
+  if (new)
+  {
+    /* New user -- find them */
+    for( ptr = unknown_list.head; ptr; ptr = ptr->next )
+    {
+      if( !strcmp(nick_old, ((struct Client *)ptr->data)->name) )
+      {
+        acptr = ptr->data;
+        *acptr->name = '\0'; /* unset their peudo-nick */
+        break;
+      }
+    }
+    if (!acptr) /* Can't find them -- maybe they got a different nick */
+      return 0;
+  }
+  else
+  {
+    /* Existing user changing nickname */
+    acptr = hash_find_client(nick_old,(struct Client *)NULL);
   
-  if (!acptr)
-    return 0;
+    if (!acptr) /* Can't find them -- maybe they got a different nick */
+      return 0;
+  }
   
   if(hash_find_client(nick,(struct Client *)NULL) || exists)
   {
+    /* The nick they want is in use. complain */
     sendto_one(acptr, form_str(ERR_NICKNAMEINUSE), me.name, nick_old, nick);
     return 0;
   }
 
-  change_local_nick(acptr, acptr, nick);
+  if(new)
+    return(set_initial_nick(acptr, acptr, nick));
+  else
+    return(change_local_nick(acptr, acptr, nick));
 
   return 0;
 }

@@ -80,9 +80,15 @@ char *_version = "20001122";
 static int mr_nick(struct Client *cptr, struct Client *sptr, int parc,
                    char *parv[])
 {
-  struct   Client* acptr;
-  char     nick[NICKLEN + 2];
+  struct   Client *acptr, *ucptr;
+  char     nickbuf[NICKLEN + 2];
+  char*    nick;
   char*    s;
+  dlink_node *ptr;
+  
+
+  nickbuf[0] = '!';
+  nick = nickbuf+1;
 
   if (parc < 2)
     {
@@ -133,15 +139,31 @@ static int mr_nick(struct Client *cptr, struct Client *sptr, int parc,
   if ( (acptr = find_client(nick, NULL)) == NULL )
     if (!ConfigFileEntry.hub && uplink && IsCapable(uplink, CAP_LL))
     {
-      /* XXX !!! XXX !!! XXX !!! */
-      /* What if hub already knows someone called nick?!? */
-      return(set_initial_nick(cptr, sptr, nick));
+      /* We don't know anyone called nick, but our hub might */
+      for( ptr = unknown_list.head; ptr; ptr = ptr->next )
+      {
+        ucptr = ptr->data;
+
+        if( !strcmp(nickbuf, ucptr->name) )
+        {
+          /* We're already waiting for a reply about this nick
+           * for someone else. */
+          sendto_one(sptr, form_str(ERR_NICKNAMEINUSE), me.name, "*", nick);
+          return 0;
+        }
+      }
+      /* Set their nick to "!nick" so we can find them later */
+      strcpy(sptr->name, nickbuf);
+
+      /* Ask the hub about "nick" */
+      sendto_one(uplink, ":%s NBURST %s %s %s", me.name, nick,
+                 nick, nickbuf);
+      return 0;
     }
     else
       return(set_initial_nick(cptr, sptr, nick));
   else
-    sendto_one(sptr, form_str(ERR_NICKNAMEINUSE), me.name,
-	       BadPtr(parv[0]) ? "*" : parv[0], nick);
+    sendto_one(sptr, form_str(ERR_NICKNAMEINUSE), me.name, "*", nick);
 
   return 0; /* NICK message ignored */
 }
