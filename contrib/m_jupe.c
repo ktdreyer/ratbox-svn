@@ -105,16 +105,15 @@ static void mo_jupe(struct Client *client_p, struct Client *source_p,
     }
     
   sendto_wallops_flags(FLAGS_WALLOP, &me,
-                       "JUPE for %s requested by %s!%s@%s: %s",
-			 parv[1], source_p->name, source_p->username,
-                         source_p->host, parv[2]);
+                       "JUPE for %s requested by %s: %s",
+			 parv[1], get_oper_name(source_p), parv[2]);
+
   sendto_server(NULL, source_p, NULL, NOCAPS, NOCAPS, LL_ICLIENT,
                 ":%s WALLOPS :JUPE for %s requested by %s!%s@%s: %s",
                 parv[0], parv[1], source_p->name, 
                 source_p->username, source_p->host, parv[2]);
-  ilog(L_NOTICE, "JUPE for %s requested by %s!%s@%s: %s",
-                parv[1], source_p->name, source_p->username,
-                source_p->host, parv[2]);
+  ilog(L_NOTICE, "JUPE for %s requested by %s: %s",
+                parv[1], get_oper_name(source_p), parv[2]);
 
   target_p= find_server(parv[1]);
 
