@@ -64,7 +64,6 @@ void dns_do_callbacks(void)
 	adns_forallqueries_begin(dns_state);
 	while((q = adns_forallqueries_next(dns_state, (void **)&r)) != NULL)
 	{
-		q->ads = dns_state;
 		switch(adns_check(dns_state, &q, &answer, (void **)&query))
 		{
 			case 0:
