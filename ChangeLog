@@ -1,3 +1,16 @@
+androsyn    2002/12/16 07:16:39 UTC	(20021216_8)
+
+  Modified files:
+    src                  linebuf.c 
+  Log:
+  Change these two calls to vsnprintf to irc_sprintf() as vsnprintf is just
+  being *way* too slow
+  
+  Revision  Changes    Path
+  7.102     +2 -2      ircd-ratbox/src/linebuf.c
+
+
+
 androsyn    2002/12/16 07:07:24 UTC	(20021216_7)
 
   Modified files:
