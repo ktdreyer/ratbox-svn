@@ -550,6 +550,7 @@ verify_access(struct Client* client_p, const char* username)
   struct ConfItem* aconf;
   struct ConfItem* gkill_conf;
   char       non_ident[USERLEN + 1];
+  char       *oper_reason;
   if (IsGotId(client_p))
     {
       aconf = find_address_conf(client_p->host,client_p->username,
@@ -584,12 +585,26 @@ verify_access(struct Client* client_p, const char* username)
 		    gkill_conf = find_gkill(client_p, client_p->username);
 		  else
 		    gkill_conf = find_gkill(client_p, non_ident);
+
 		  if (gkill_conf)
 		    {
 		      sendto_one(client_p, ":%s NOTICE %s :*** G-lined", me.name,
 				 client_p->name);
-		      sendto_one(client_p, ":%s NOTICE %s :*** Banned %s",
-				 me.name, client_p->name, gkill_conf->passwd);
+                      if ((oper_reason=strchr(gkill_conf->passwd, '|')) ==
+                          NULL)
+                        {
+		          sendto_one(client_p, ":%s NOTICE %s :*** Banned %s",
+				     me.name, client_p->name, 
+                                     gkill_conf->passwd);
+                        }
+                      else
+                        {
+			  *oper_reason = '\0';
+		          sendto_one(client_p, ":%s NOTICE %s :*** Banned %s",
+				     me.name, client_p->name, 
+                                     gkill_conf->passwd);
+			  *oper_reason = '|';
+                        }
 		      return(BANNED_CLIENT);
 		    }
 		}
@@ -617,8 +632,20 @@ verify_access(struct Client* client_p, const char* username)
 	{
 	  if (ConfigFileEntry.kline_with_reason)
 	    {
-	      sendto_one(client_p, ":%s NOTICE %s :*** Banned %s",
-			 me.name,client_p->name,aconf->passwd);
+	      /* There is probably a better way of doing this,
+               * but does it really matter?  I don't think so. */
+	      if ((oper_reason=strchr(aconf->passwd, '|')) == NULL)
+                {
+	          sendto_one(client_p, ":%s NOTICE %s :*** Banned %s",
+			     me.name,client_p->name,aconf->passwd);
+                }
+              else
+                {
+		  *oper_reason = '\0';
+	          sendto_one(client_p, ":%s NOTICE %s :*** Banned %s",
+			     me.name,client_p->name,aconf->passwd);
+                  *oper_reason = '|';
+                }
 	    }
 	  return(BANNED_CLIENT);
 	}
