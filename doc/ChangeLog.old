@@ -1,3 +1,10 @@
+*** 20010424_4 by db
+- this fixes kqueue. over-ride low water with a NOTE_LOWAT
+  setting low water to 1 as in the man page. (thanks to adrian for
+  pointing me to this)
+
+
+
 *** 20010424_3 by jdc
 * Fixed implicit decl. of kill(2) (lacked signal.h include)
 
