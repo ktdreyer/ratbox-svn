@@ -69,7 +69,18 @@ static struct clicap
 	int flags;
 	int namelen;
 } clicap_list[] = {
-	_CLICAP("x-names-ov", CLICAP_NAMESOV, 0, 0)
+#if 0
+	_CLICAP("x-names-ov", CLICAP_NAMESOV, 0, 0),
+#endif
+	_CLICAP("ircd-ratbox.org/dummy-sticky", 0x001, 0, CLICAP_FLAGS_STICKY),
+	_CLICAP("ircd-ratbox.org/dummy-needack", 0x002, 0x004, 0),
+	_CLICAP("ircd-ratbox.org/dummy-sticky-needack", 0x008, 0x010, CLICAP_FLAGS_STICKY),
+	_CLICAP("ircd-ratbox.org/dummy-normal", 0x020, 0, 0),
+	_CLICAP("ircd-ratbox.org/dummy-thisisareallylongcapabilitynamethatshouldtesthowithandlesbeingreallyreallylong", 0x040, 0, 0),
+	_CLICAP("ircd-ratbox.org/dummy-hisisareallylongcapabilitynamethatshouldtesthowithandlesbeingreallyreallylong", 0x080, 0, 0),
+	_CLICAP("ircd-ratbox.org/dummy-isisareallylongcapabilitynamethatshouldtesthowithandlesbeingreallyreallylong", 0x100, 0, 0),
+	_CLICAP("ircd-ratbox.org/dummy-sisareallylongcapabilitynamethatshouldtesthowithandlesbeingreallyreallylong", 0x200, 0, 0),
+	_CLICAP("ircd-ratbox.org/dummy-isareallylongcapabilitynamethatshouldtesthowithandlesbeingreallyreallylong", 0x400, 0, 0),
 };
 
 #define CLICAP_LIST_LEN (sizeof(clicap_list) / sizeof(struct clicap))
@@ -177,7 +188,9 @@ clicap_generate(struct Client *source_p, const char *subcmd, int flags, int clea
 	int i;
 
 	mlen = ircsprintf(buf, ":%s CAP %s %s",
-				me.name, source_p->name, subcmd);
+			me.name, 
+			EmptyString(source_p->name) ? "*" : source_p->name, 
+			subcmd);
 
 	p = capbuf;
 	buflen = mlen;
@@ -220,6 +233,14 @@ clicap_generate(struct Client *source_p, const char *subcmd, int flags, int clea
 		{
 			*p++ = '-';
 			buflen++;
+
+			/* needs a client ack */
+			if(clicap_list[i].cap_cli && 
+			   IsCapable(source_p, clicap_list[i].cap_cli))
+			{
+				*p++ = '~';
+				buflen++;
+			}
 		}
 		else
 		{
@@ -232,7 +253,8 @@ clicap_generate(struct Client *source_p, const char *subcmd, int flags, int clea
 			/* if we're doing an LS, then we only send this if
 			 * they havent ack'd
 			 */
-			if(clicap_list[i].cap_cli)
+			if(clicap_list[i].cap_cli &&
+			   (!flags || !IsCapable(source_p, clicap_list[i].cap_cli)))
 			{
 				*p++ = '~';
 				buflen++;
@@ -261,9 +283,7 @@ cap_ack(struct Client *source_p, const char *arg)
 	int finished = 0, negate;
 
 	if(EmptyString(arg))
-	{
 		return;
-	}
 
 	for(cap = clicap_find(arg, &negate, &finished); cap;
 	    cap = clicap_find(NULL, &negate, &finished))
@@ -273,7 +293,13 @@ cap_ack(struct Client *source_p, const char *arg)
 			continue;
 
 		if(negate)
+		{
+			/* dont let them ack something sticky off */
+			if(cap->flags & CLICAP_FLAGS_STICKY)
+				continue;
+
 			capdel |= cap->cap_cli;
+		}
 		else
 			capadd |= cap->cap_cli;
 	}
@@ -287,6 +313,8 @@ cap_clear(struct Client *source_p, const char *arg)
 {
 	clicap_generate(source_p, "ACK", 
 			source_p->localClient->caps ? source_p->localClient->caps : -1, 1);
+
+	/* XXX - sticky capabs */
 	source_p->localClient->caps = 0;
 }
 
@@ -323,7 +351,11 @@ cap_ls(struct Client *source_p, const char *arg)
 static void
 cap_req(struct Client *source_p, const char *arg)
 {
+	char buf[BUFSIZE];
+	char pbuf[2][BUFSIZE];
 	struct clicap *cap;
+	int buflen, plen;
+	int i = 0;
 	int capadd = 0, capdel = 0;
 	int finished = 0, negate;
 
@@ -331,13 +363,28 @@ cap_req(struct Client *source_p, const char *arg)
 		source_p->flags2 |= FLAGS2_CLICAP;
 
 	if(EmptyString(arg))
-	{
 		return;
-	}
+
+	buflen = ircsnprintf(buf, sizeof(buf), ":%s CAP %s ACK",
+			me.name, EmptyString(source_p->name) ? "*" : source_p->name);
+
+	pbuf[0][0] = '\0';
+	plen = 0;
 
 	for(cap = clicap_find(arg, &negate, &finished); cap;
 	    cap = clicap_find(NULL, &negate, &finished))
 	{
+		/* filled the first array, but cant send it in case the
+		 * request fails.  one REQ should never fill more than two
+		 * buffers --fl
+		 */
+		if(buflen + plen + cap->namelen + 6 >= BUFSIZE)
+		{
+			pbuf[1][0] = '\0';
+			plen = 0;
+			i = 1;
+		}
+
 		if(negate)
 		{
 			if(cap->flags & CLICAP_FLAGS_STICKY)
@@ -346,21 +393,47 @@ cap_req(struct Client *source_p, const char *arg)
 				break;
 			}
 
+			strcat(pbuf[i], "-");
+			plen++;
+
 			capdel |= cap->cap_serv;
 		}
 		else
+		{
+			if(cap->flags & CLICAP_FLAGS_STICKY)
+			{
+				strcat(pbuf[i], "=");
+				plen++;
+			}
+
 			capadd |= cap->cap_serv;
+		}
+
+		if(cap->cap_cli)
+		{
+			strcat(pbuf[i], "~");
+			plen++;
+		}
+
+		strcat(pbuf[i], cap->name);
+		strcat(pbuf[i], " ");
+		plen += (cap->namelen + 1);
 	}
 
 	if(!finished)
 	{
 		sendto_one(source_p, ":%s CAP %s NAK :%s",
-				me.name, source_p->name, arg);
+			me.name, EmptyString(source_p->name) ? "*" : source_p->name, arg);
 		return;
 	}
 
-	sendto_one(source_p, ":%s CAP %s ACK :%s",
-			me.name, source_p->name, arg);
+	if(i)
+	{
+		sendto_one(source_p, "%s * :%s", buf, pbuf[0]);
+		sendto_one(source_p, "%s :%s", buf, pbuf[1]);
+	}
+	else
+		sendto_one(source_p, "%s :%s", buf, pbuf[0]);
 
 	source_p->localClient->caps |= capadd;
 	source_p->localClient->caps &= ~capdel;
