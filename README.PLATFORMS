@@ -16,12 +16,12 @@ MIPS         gcc              IRIX          J. Mallett <jmallett@newgold.net>
 MIPS         MIPSPro          IRIX          J. Mallett <jmallett@newgold.net>
 PowerPC      Apple gcc        Darwin        J. Mallett <jmallett@newgold.net>
 PowerPC      Apple gcc        Mac OS X      J. Mallett <jmallett@newgold.net>
-*SPARC       gcc              OpenBSD       J. Mallett <jmallett@newgold.net>
-*SPARC       gcc              NetBSD        J. Mallett <jmallett@newgold.net>
+SPARC        gcc              OpenBSD       J. Mallett <jmallett@newgold.net>
+SPARC        gcc              NetBSD        J. Mallett <jmallett@newgold.net>
 x86          gcc              FreeBSD       J. Mallett <jmallett@newgold.net>
 x86          TenDRA           FreeBSD       J. Mallett <jmallett@newgold.net>
 SPARC        Forte C v6,v7    Solaris       Joan Touzet <joant@ieee.org>
-*SPARC       gcc              Solaris       Joan Touzet <joant@ieee.org>
+SPARC        gcc              Solaris       Joan Touzet <joant@ieee.org>
 x86          Cygwin gcc       Windows       W. Campbell <wcampbel@botbay.net>
 x86          gcc              Linux         Aaron Sethman <androsyn@ratbox.org>
 SPARC        gcc              Linux         Aaron Sethman <androsyn@ratbox.org>

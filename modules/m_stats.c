@@ -751,14 +751,16 @@ static void stats_ziplinks(struct Client *source_p)
     target_p = ptr->data;
     if (IsCapable(target_p, CAP_ZIP))
     {
+      /* we use memcpy(3) and a local copy of the structure to
+       * work around a register use bug on GCC on the SPARC.
+       * -jmallett, 04/27/2002
+       */
+      struct ZipStats zipstats;
+      memcpy(&zipstats, &target_p->localClient->zipstats, sizeof (struct ZipStats));
       sendto_one(source_p, ":%s %d %s :ZipLinks stats for %s send[%.2f%% compression (%lu bytes data/%lu bytes wire)] recv[%.2f%% compression (%lu bytes data/%lu bytes wire)]",
                  me.name, RPL_STATSDEBUG, source_p->name, target_p->name,
-                 target_p->localClient->zipstats.out_ratio,
-                 target_p->localClient->zipstats.out,
-                 target_p->localClient->zipstats.out_wire,
-                 target_p->localClient->zipstats.in_ratio,
-                 target_p->localClient->zipstats.in,
-                 target_p->localClient->zipstats.in_wire);
+		 zipstats.out_ratio, zipstats.out, zipstats.out_wire,
+		 zipstats.in_ratio,  zipstats.in,  zipstats.in_wire);
       sent_data++;
     }
   }

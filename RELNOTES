@@ -12,6 +12,8 @@ o) a core with clearchan was fixed
 o) more double free fixes
 o) a flaw in serverhide relating to /who was fixed
 o) protection against users flooding has been re-enabled.
+o) found a workaround for a gcc bug on sparc32, ircd-hybrid-7 should work
+   on sparc systems using 32-bit gcc now.
 
 --------------------------------------------------------------------------------
 

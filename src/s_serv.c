@@ -181,13 +181,23 @@ void slink_error(unsigned int rpl, unsigned int len, unsigned char *data,
 void slink_zipstats(unsigned int rpl, unsigned int len, unsigned char *data,
                     struct Client *server_p)
 {
-  struct ZipStats *zipstats = &server_p->localClient->zipstats;
+  struct ZipStats zipstats;
   unsigned long in = 0, in_wire = 0, out = 0, out_wire = 0;
   int i = 0;
 
   assert(rpl == SLINKRPL_ZIPSTATS);
   assert(len == 16);
   assert(IsCapable(server_p, CAP_ZIP));
+
+  /* Yes, it needs to be done this way, no we cannot let the compiler
+   * work with the pointer to the structure.  This works around a GCC
+   * bug on SPARC that affects all versions at the time of this writing.
+   * I will feed you to the creatures living in RMS's beard if you do
+   * not leave this as is, without being sure that you are not causing
+   * regression for most of our installed SPARC base.
+   * -jmallett, 04/27/2002
+   */
+  memcpy(&zipstats, &server_p->localClient->zipstats, sizeof (struct ZipStats));
 
   in |= (data[i++] << 24);
   in |= (data[i++] << 16);
@@ -209,38 +219,31 @@ void slink_zipstats(unsigned int rpl, unsigned int len, unsigned char *data,
   out_wire |= (data[i++] <<  8);
   out_wire |= (data[i++]      );
 
-  if (!(((in       + zipstats->in)       >= zipstats->in) &&
-        ((out      + zipstats->out)      >= zipstats->out) &&
-        ((in_wire  + zipstats->in_wire)  >= zipstats->in_wire) &&
-        ((out_wire + zipstats->out_wire) >= zipstats->out_wire)))
-    {
-      /* overflow, so start again */
-      zipstats->in = 0;
-      zipstats->out = 0;
-      zipstats->in_wire = 0;
-      zipstats->out_wire = 0;
-    }
+  /* This macro adds b to a if a plus b is not an overflow, and sets the
+   * value of a to b if it is.
+   * Add and Set if No Overflow.
+   */
+#define	ASNO(a,b)	\
+	a = (a + b >= a? a + b: b)
 
-  zipstats->in += in;
-  zipstats->out += out;
-  zipstats->in_wire += in_wire;
-  zipstats->out_wire += out_wire;
+  ASNO(zipstats.in, in);
+  ASNO(zipstats.out, out);
+  ASNO(zipstats.in_wire, in_wire);
+  ASNO(zipstats.out_wire, out_wire);
 
-  zipstats->in_ratio = 0;
-  zipstats->out_ratio = 0;
+  if (zipstats.in > 0)
+    zipstats.in_ratio = (((double)(zipstats.in - zipstats.in_wire) /
+                         (double)zipstats.in) * 100.00);
+  else
+    zipstats.in_ratio = 0;
 
-  if (zipstats->in)
-  {
-    zipstats->in_ratio =
-      (((double)(zipstats->in - zipstats->in_wire) /
-        (double)zipstats->in) * 100.00);
-  }
-  if (zipstats->out)
-  {
-    zipstats->out_ratio =
-      (((double)(zipstats->out - zipstats->out_wire) /
-        (double)zipstats->out) * 100.00);
-  }
+  if (zipstats.out > 0)
+    zipstats.out_ratio = (((double)(zipstats.out - zipstats.out_wire) /
+                          (double)zipstats.out) * 100.00);
+  else
+    zipstats.out_ratio = 0;
+
+  memcpy(&server_p->localClient->zipstats, &zipstats, sizeof (struct ZipStats));
 }
 
 void collect_zipstats(void *unused)
@@ -264,7 +267,6 @@ void collect_zipstats(void *unused)
             }
         }
     }
-
 }
 
 
