@@ -310,6 +310,10 @@ send_queued_write(int fd, void *data)
 #ifndef NDEBUG
       hdata.len = retlen;
       hook_call_event("iosend", &hdata);
+      if (to->localClient->buf_sendq.list.head)
+        hdata.data = 
+          ((buf_line_t *)to->localClient->buf_sendq.list.head->data)->buf +
+          to->localClient->buf_sendq.writeofs;
 #endif
       to->localClient->sendB += retlen;
       me.localClient->sendB += retlen;
