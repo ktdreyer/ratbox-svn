@@ -1,3 +1,15 @@
+leeh        2002/02/25 17:52:17 EST	(20020225_7)
+
+  Modified files:
+    src                  packet.c 
+  Log:
+  - cleaned up some k+r and single space indenting
+  
+  Revision  Changes    Path
+  7.72      +90 -76    ircd-hybrid-7/src/packet.c
+
+
+
 leeh        2002/02/25 16:01:27 EST	(20020225_6)
 
   Modified files:
