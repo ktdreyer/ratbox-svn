@@ -32,6 +32,7 @@
 #include "ircd.h"
 #include "numeric.h"
 #include "s_conf.h"
+#include "s_newconf.h"
 #include "restart.h"
 #include "s_log.h"
 #include "send.h"

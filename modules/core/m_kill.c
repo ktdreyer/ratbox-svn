@@ -39,6 +39,7 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
+#include "s_newconf.h"
 
 static char buf[BUFSIZE];
 

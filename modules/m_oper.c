@@ -33,6 +33,7 @@
 #include "numeric.h"
 #include "commio.h"
 #include "s_conf.h"
+#include "s_newconf.h"
 #include "s_log.h"
 #include "s_user.h"
 #include "send.h"
@@ -52,9 +53,7 @@ struct Message oper_msgtab = {
 mapi_clist_av1 oper_clist[] = { &oper_msgtab, NULL };
 DECLARE_MODULE_AV1(oper, NULL, NULL, oper_clist, NULL, NULL, "$Revision$");
 
-static struct ConfItem *find_password_aconf(const char *name, struct Client *source_p);
-static int match_oper_password(const char *password, struct ConfItem *aconf);
-
+static int match_oper_password(const char *password, struct oper_conf *oper_p);
 extern char *crypt();
 
 /*
@@ -66,7 +65,7 @@ extern char *crypt();
 static int
 m_oper(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	struct ConfItem *aconf;
+	struct oper_conf *oper_p;
 	const char *name;
 	const char *password;
 
@@ -84,7 +83,10 @@ m_oper(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	if(!IsFloodDone(source_p))
 		flood_endgrace(source_p);
 
-	if((aconf = find_password_aconf(name, source_p)) == NULL)
+	oper_p = find_oper_conf(source_p->username, source_p->host, 
+				source_p->sockhost, name);
+
+	if(oper_p == NULL)
 	{
 		sendto_one(source_p, form_str(ERR_NOOPERHOST), me.name, source_p->name);
 		ilog(L_FOPER, "FAILED OPER (%s) by (%s!%s@%s)",
@@ -101,9 +103,9 @@ m_oper(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		return 0;
 	}
 
-	if(match_oper_password(password, aconf))
+	if(match_oper_password(password, oper_p))
 	{
-		oper_up(source_p, aconf);
+		oper_up(source_p, oper_p);
 
 		ilog(L_OPERED, "OPER %s by %s!%s@%s",
 		     name, source_p->name, source_p->username, source_p->host);
@@ -129,27 +131,6 @@ m_oper(struct Client *client_p, struct Client *source_p, int parc, const char *p
 }
 
 /*
- * find_password_aconf
- *
- * inputs       -
- * output       -
- */
-static struct ConfItem *
-find_password_aconf(const char *name, struct Client *source_p)
-{
-	struct ConfItem *aconf;
-
-	if(!(aconf = find_conf_exact(name, source_p->username, source_p->host,
-				     CONF_OPERATOR)) &&
-	   !(aconf = find_conf_exact(name, source_p->username,
-				     source_p->sockhost, CONF_OPERATOR)))
-	{
-		return 0;
-	}
-	return (aconf);
-}
-
-/*
  * match_oper_password
  *
  * inputs       - pointer to given password
@@ -157,20 +138,16 @@ find_password_aconf(const char *name, struct Client *source_p)
  * output       - YES or NO if match
  * side effects - none
  */
-
 static int
-match_oper_password(const char *password, struct ConfItem *aconf)
+match_oper_password(const char *password, struct oper_conf *oper_p)
 {
 	const char *encr;
 
-	if(!aconf->status & CONF_OPERATOR)
-		return NO;
-
 	/* passwd may be NULL pointer. Head it off at the pass... */
-	if(aconf->passwd == NULL)
+	if(EmptyString(oper_p->passwd))
 		return NO;
 
-	if(IsConfEncrypted(aconf))
+	if(IsOperConfEncrypted(oper_p))
 	{
 		/* use first two chars of the password they send in as salt */
 		/* If the password in the conf is MD5, and ircd is linked   
@@ -178,17 +155,15 @@ match_oper_password(const char *password, struct ConfItem *aconf)
 		 * glibc Linux, then this code will work fine on generating
 		 * the proper encrypted hash for comparison.
 		 */
-		if(password && *aconf->passwd)
-			encr = crypt(password, aconf->passwd);
+		if(!EmptyString(password))
+			encr = crypt(password, oper_p->passwd);
 		else
 			encr = "";
 	}
 	else
-	{
 		encr = password;
-	}
 
-	if(strcmp(encr, aconf->passwd) == 0)
+	if(strcmp(encr, oper_p->passwd) == 0)
 		return YES;
 	else
 		return NO;

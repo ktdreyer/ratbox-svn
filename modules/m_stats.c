@@ -48,6 +48,7 @@
 #include "parse.h"
 #include "modules.h"
 #include "hook.h"
+#include "s_newconf.h"
 #include "s_oldnewconf.h"
 #include "hash.h"
 
@@ -638,13 +639,28 @@ stats_messages(struct Client *source_p)
 }
 
 static void
-stats_oper (struct Client *source_p)
+stats_oper(struct Client *source_p)
 {
+	struct oper_conf *oper_p;
+	dlink_node *ptr;
+
 	if(!IsOper(source_p) && ConfigFileEntry.stats_o_oper_only)
+	{
 		sendto_one_numeric(source_p, ERR_NOPRIVILEGES,
 				   form_str (ERR_NOPRIVILEGES));
-	else
-		report_configured_links(source_p, CONF_OPERATOR);
+		return;
+	}
+
+	DLINK_FOREACH(ptr, oper_conf_list.head)
+	{
+		oper_p = ptr->data;
+		
+		sendto_one_numeric(source_p, RPL_STATSOLINE, 
+				form_str(RPL_STATSOLINE),
+				oper_p->username, oper_p->host, oper_p->name,
+				IsOper(source_p) ? get_oper_privs(oper_p->flags) : "0", 
+				"opers");
+	}
 }
 
 
@@ -674,7 +690,7 @@ stats_operedup (struct Client *source_p)
 			sendto_one_numeric(source_p, RPL_STATSDEBUG,
 					   "p :[%c][%s] %s (%s@%s) Idle: %d",
 					   IsAdmin (target_p) ? 'A' : 'O',
-					   oper_privs_as_string(target_p->flags2),
+					   get_oper_privs(target_p->flags2),
 					   target_p->name, target_p->username, target_p->host,
 					   (int) (CurrentTime - target_p->user->last));
 		}
@@ -843,7 +859,7 @@ stats_shared (struct Client *source_p)
 	char *p;
 	int i;
 
-	DLINK_FOREACH(ptr, shared_list.head)
+	DLINK_FOREACH(ptr, shared_conf_list.head)
 	{
 		shared_p = ptr->data;
 
@@ -867,7 +883,7 @@ stats_shared (struct Client *source_p)
 					shared_p->host, buf);
 	}
 
-	DLINK_FOREACH(ptr, cluster_list.head)
+	DLINK_FOREACH(ptr, cluster_conf_list.head)
 	{
 		shared_p = ptr->data;
 

@@ -374,40 +374,19 @@ struct exit_client_hook
 
 #define UMODE_ALL	   UMODE_SERVNOTICE
 
-
 /* overflow flags */
-#define OPER_GLOBAL_KILL        0x000001
-#define OPER_REMOTE             0x000002
-#define OPER_UNKLINE            0x000004
-#define OPER_GLINE              0x000008
-#define OPER_N                  0x000010
-#define OPER_K                  0x000020
-#define OPER_DIE                0x000040
-#define OPER_REHASH             0x000080
-#define OPER_ADMIN              0x000100
-#define OPER_XLINE              0x000200
-#define OPER_SPY		0x000400
-#define OPER_RESV		0x000800 /* XXX - only here for shared {}; */
-#define OPER_OPERWALL		0x001000
-#define OPER_HIDDENADMIN        0x002000
-#define OPER_INVIS		0x004000
-#define OPER_LOCAL_KILL		0x008000
-#define OPER_FLAGS      (OPER_GLOBAL_KILL | OPER_REMOTE | OPER_UNKLINE |\
-                         OPER_GLINE | OPER_N | OPER_K | OPER_DIE |\
-                         OPER_REHASH | OPER_ADMIN | OPER_XLINE | OPER_OPERWALL|\
-                         OPER_SPY | OPER_LOCAL_KILL | OPER_HIDDENADMIN)
-
-#define FLAGS2_EXEMPTGLINE      0x010000
-#define FLAGS2_EXEMPTKLINE      0x020000
-#define FLAGS2_EXEMPTFLOOD      0x040000
-#define FLAGS2_NOLIMIT          0x080000
-#define FLAGS2_IDLE_LINED       0x100000
-#define FLAGS2_RESTRICTED       0x200000
-#define FLAGS2_PING_COOKIE      0x400000
-#define FLAGS2_IP_SPOOFING      0x800000
-#define FLAGS2_FLOODDONE        0x1000000
-#define FLAGS2_EXEMPTSPAMBOT	0x2000000
-#define FLAGS2_EXEMPTSHIDE	0x4000000
+/* EARLIER FLAGS ARE IN s_newconf.h */
+#define FLAGS2_EXEMPTGLINE      0x0100000
+#define FLAGS2_EXEMPTKLINE      0x0200000
+#define FLAGS2_EXEMPTFLOOD      0x0400000
+#define FLAGS2_NOLIMIT          0x0800000
+#define FLAGS2_IDLE_LINED       0x1000000
+#define FLAGS2_RESTRICTED       0x2000000
+#define FLAGS2_PING_COOKIE      0x4000000
+#define FLAGS2_IP_SPOOFING      0x8000000
+#define FLAGS2_FLOODDONE        0x10000000
+#define FLAGS2_EXEMPTSPAMBOT	0x20000000
+#define FLAGS2_EXEMPTSHIDE	0x40000000
 
 #define SEND_UMODES  (UMODE_INVISIBLE | UMODE_OPER | UMODE_WALLOP | \
                       UMODE_ADMIN)
@@ -512,25 +491,6 @@ struct exit_client_hook
 
 #define IsRestricted(x)         ((x)->flags2 &  FLAGS2_RESTRICTED)
 #define SetRestricted(x)        ((x)->flags2 |= FLAGS2_RESTRICTED)
-
-#define IsOperGlobalKill(x)     ((x)->flags2 & OPER_GLOBAL_KILL)
-#define IsOperLocalKill(x)	((x)->flags2 & OPER_LOCAL_KILL)
-#define IsOperRemote(x)         ((x)->flags2 & OPER_REMOTE)
-#define IsOperUnkline(x)        ((x)->flags2 & OPER_UNKLINE)
-#define IsOperGline(x)          ((x)->flags2 & OPER_GLINE)
-#define IsOperN(x)              ((x)->flags2 & OPER_N)
-#define IsOperK(x)              ((x)->flags2 & OPER_K)
-#define IsOperXline(x)          ((x)->flags2 & OPER_XLINE)
-#define IsOperDie(x)            ((x)->flags2 & OPER_DIE)
-#define IsOperRehash(x)         ((x)->flags2 & OPER_REHASH)
-#define IsOperHiddenAdmin(x)    ((x)->flags2 & OPER_HIDDENADMIN)
-#define IsOperAdmin(x)          (((x)->flags2 & OPER_ADMIN) || \
-                                 ((x)->flags2 & OPER_HIDDENADMIN))
-#define IsOperOperwall(x)	((x)->flags2 & OPER_OPERWALL)
-#define IsOperSpy(x)		((x)->flags2 & OPER_SPY)
-
-#define IsOperInvis(x)		((x)->flags2 & OPER_INVIS)
-#define SetOperInvis(x)		((x)->flags2 |= OPER_INVIS)
 
 #define IsFloodDone(x)          ((x)->flags2 & FLAGS2_FLOODDONE)
 #define SetFloodDone(x)         ((x)->flags2 |= FLAGS2_FLOODDONE)

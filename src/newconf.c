@@ -18,6 +18,7 @@
 #include "s_log.h"
 #include "s_conf.h"
 #include "s_user.h"
+#include "s_newconf.h"
 #include "s_oldnewconf.h"
 #include "send.h"
 #include "setup.h"
@@ -53,7 +54,10 @@ static struct Class *yy_class = NULL;
 
 static struct rxconf *yy_rxconf = NULL;
 
-static struct shared_conf *yy_uconf = NULL;
+static struct shared_conf *yy_shared = NULL;
+
+static dlink_list yy_oper_list;
+static struct oper_conf *yy_oper = NULL;
 
 static char *resv_reason;
 
@@ -408,17 +412,17 @@ static struct mode_table umode_table[] = {
 };
 
 static struct mode_table flag_table[] = {
-	{"local_kill",		OPER_LOCAL_KILL		},
-	{"global_kill",		OPER_GLOBAL_KILL|OPER_LOCAL_KILL	},
+	{"local_kill",		OPER_LOCKILL		},
+	{"global_kill",		OPER_GLOBKILL|OPER_LOCKILL	},
 	{"remote",		OPER_REMOTE		},
-	{"kline",		OPER_K			},
+	{"kline",		OPER_KLINE		},
 	{"unkline",		OPER_UNKLINE		},
 	{"gline",		OPER_GLINE		},
-	{"nick_changes",	OPER_N			},
+	{"nick_changes",	OPER_NICKS		},
 	{"rehash",		OPER_REHASH		},
 	{"die",			OPER_DIE		},
 	{"admin",		OPER_ADMIN		},
-	{"hidden_admin",	OPER_HIDDENADMIN	},
+	{"hidden_admin",	OPER_HADMIN		},
 	{"xline",		OPER_XLINE		},
 	{"operwall",		OPER_OPERWALL		},
 	{"oper_spy",		OPER_SPY		},
@@ -508,86 +512,108 @@ set_modes_from_table(int *modes, const char *whatis, struct mode_table *tab, con
 static int
 conf_begin_oper(struct TopConf *tc)
 {
-	struct ConfItem *yy_tmp;
+	dlink_node *ptr;
+	dlink_node *next_ptr;
 
-	yy_tmp = yy_achead;
-	while (yy_tmp)
+	if(yy_oper != NULL)
 	{
-		yy_aconf = yy_tmp;
-		yy_tmp = yy_tmp->next;
-		yy_aconf->next = NULL;
-		free_conf(yy_aconf);
+		free_oper_conf(yy_oper);
+		yy_oper = NULL;
 	}
-	yy_acount = 0;
-	yy_achead = yy_aconf = make_conf();
-	yy_aconf->status = CONF_OPERATOR;
-	yy_aconf->flags |= CONF_FLAGS_ENCRYPTED;
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, yy_oper_list.head)
+	{
+		free_oper_conf(ptr->data);
+		dlinkDestroy(ptr, &yy_oper_list);
+	}
+
+	yy_oper = make_oper_conf();
+	yy_oper->flags |= OPER_ENCRYPTED;
+
 	return 0;
 }
 
 static int
 conf_end_oper(struct TopConf *tc)
 {
-	struct ConfItem *yy_tmp;
-	struct ConfItem *yy_next;
+	struct oper_conf *yy_tmpoper;
+	dlink_node *ptr;
+	dlink_node *next_ptr;
 
 	if(conf_cur_block_name != NULL)
 	{
-		MyFree(yy_achead->name);
-		DupString(yy_achead->name, conf_cur_block_name);
+		if(strlen(conf_cur_block_name) > OPERNICKLEN)
+			conf_cur_block_name[OPERNICKLEN] = '\0';
+
+		DupString(yy_oper->name, conf_cur_block_name);
 	}
-	/* copy over settings from first struct */
-	for (yy_tmp = yy_achead->next; yy_tmp; yy_tmp = yy_tmp->next)
+
+	if(EmptyString(yy_oper->name))
 	{
-		if(yy_achead->className)
-			DupString(yy_tmp->className, yy_achead->className);
-		if(yy_achead->name)
-			DupString(yy_tmp->name, yy_achead->name);
-		if(yy_achead->passwd)
-			DupString(yy_tmp->passwd, yy_achead->passwd);
-		yy_tmp->port = yy_achead->port;
-		yy_tmp->flags = yy_achead->flags;
+		conf_report_error("Ignoring operator block -- missing name.");
+		return 0;
+	}
 
 #ifdef HAVE_LIBCRYPTO
-		if(yy_achead->rsa_public_key_file)
-			DupString(yy_tmp->rsa_public_key_file, yy_achead->rsa_public_key_file);
+	if(EmptyString(yy_oper->passwd) && EmptyString(yy_oper->rsa_pubkey_file))
+#else
+	if(EmptyString(yy_oper->passwd))
+#endif
+	{
+		conf_report_error("Ignoring operator block for %s -- missing password",
+					yy_oper->name);
+		return 0;
+	}
 
-		if(yy_achead->rsa_public_key)
+	/* now, yy_oper_list contains a stack of oper_conf's with just user
+	 * and host in, yy_oper contains the rest of the information which
+	 * we need to copy into each element in yy_oper_list
+	 */
+	DLINK_FOREACH_SAFE(ptr, next_ptr, yy_oper_list.head)
+	{
+		yy_tmpoper = ptr->data;
+
+		DupString(yy_tmpoper->name, yy_oper->name);
+		DupString(yy_tmpoper->passwd, yy_oper->passwd);
+
+		yy_tmpoper->flags = yy_oper->flags;
+
+#ifdef HAVE_LIBCRYPTO
+		if(yy_oper->rsa_pubkey_file)
 		{
 			BIO *file;
 
-			file = BIO_new_file(yy_achead->rsa_public_key_file, "r");
-			yy_tmp->rsa_public_key =
+			if((file = BIO_new_file(yy_oper->rsa_pubkey_file, "r")) == NULL)
+			{
+				conf_report_error("Ignoring operator block for %s -- "
+						"rsa_public_key_file cant be opened",
+						yy_tmpoper->name);
+				return 0;
+			}
+				
+			yy_tmpoper->rsa_pubkey =
 				(RSA *) PEM_read_bio_RSA_PUBKEY(file, NULL, 0, NULL);
+
 			BIO_set_close(file, BIO_CLOSE);
 			BIO_free(file);
+
+			if(yy_tmpoper->rsa_pubkey == NULL)
+			{
+				conf_report_error("Ignoring operator block for %s -- "
+						"rsa_public_key_file key invalid; check syntax",
+						yy_tmpoper->name);
+
+				return 0;
+			}
 		}
 #endif
+
+		/* all is ok, put it on oper_conf_list */
+		dlinkMoveNode(ptr, &yy_oper_list, &oper_conf_list);
 	}
 
-	for (yy_tmp = yy_achead; yy_tmp; yy_tmp = yy_next)
-	{
-		yy_next = yy_tmp->next;
-
-#ifdef HAVE_LIBCRYPTO
-		if(yy_tmp->name && (yy_tmp->passwd || yy_aconf->rsa_public_key) && yy_tmp->host)
-#else
-		if(yy_tmp->name && yy_tmp->passwd && yy_tmp->host)
-#endif
-		{
-			conf_add_class_to_conf(yy_tmp);
-			conf_add_conf(yy_tmp);
-		}
-		else
-		{
-			free_conf(yy_tmp);
-		}
-	}
-
-	yy_achead = NULL;
-	yy_aconf = NULL;
-	yy_aprev = NULL;
-	yy_acount = 0;
+	free_oper_conf(yy_oper);
+	yy_oper = NULL;
 
 	return 0;
 }
@@ -597,104 +623,60 @@ conf_set_oper_flags(void *data)
 {
 	conf_parm_t *args = data;
 
-	set_modes_from_table(&yy_achead->port, "flag", flag_table, args);
-}
-
-static void
-conf_set_oper_name(void *data)
-{
-	int oname_len;
-
-	MyFree(yy_achead->name);
-
-	if((oname_len = strlen((char *) data)) > OPERNICKLEN)
-		((char *) data)[OPERNICKLEN] = 0;
-
-	DupString(yy_achead->name, (char *) data);
+	set_modes_from_table(&yy_oper->flags, "flag", flag_table, args);
 }
 
 static void
 conf_set_oper_user(void *data)
 {
+	struct oper_conf *yy_tmpoper;
 	char *p;
-	char *new_user;
-	char *new_host;
 	char *host = (char *) data;
 
-	/* The first user= line doesn't allocate a new conf */
-	if(yy_acount++)
-	{
-		yy_aconf = (yy_aconf->next = make_conf());
-		yy_aconf->status = CONF_OPERATOR;
-	}
+	yy_tmpoper = make_oper_conf();
 
 	if((p = strchr(host, '@')))
 	{
-		*p = '\0';
-		DupString(new_user, host);
-		MyFree(yy_aconf->user);
-		yy_aconf->user = new_user;
-		p++;
-		DupString(new_host, p);
-		MyFree(yy_aconf->host);
-		yy_aconf->host = new_host;
+		*p++ = '\0';
+
+		DupString(yy_tmpoper->username, host);
+		DupString(yy_tmpoper->host, p);
 	}
 	else
 	{
-		MyFree(yy_aconf->host);
-		DupString(yy_aconf->host, host);
-		DupString(yy_aconf->user, "*");
+
+		DupString(yy_tmpoper->username, "*");
+		DupString(yy_tmpoper->host, host);
 	}
+
+	if(EmptyString(yy_tmpoper->username) || EmptyString(yy_tmpoper->host))
+	{
+		conf_report_error("Ignoring user -- missing username/host");
+		free_oper_conf(yy_tmpoper);
+		return;
+	}
+
+	dlinkAddAlloc(yy_tmpoper, &yy_oper_list);
 }
 
 static void
 conf_set_oper_password(void *data)
 {
-	if(yy_achead->passwd)
-		memset(yy_achead->passwd, 0, strlen(yy_achead->passwd));
+	if(yy_oper->passwd)
+	{
+		memset(yy_oper->passwd, 0, strlen(yy_oper->passwd));
+		MyFree(yy_oper->passwd);
+	}
 
-	MyFree(yy_achead->passwd);
-	DupString(yy_achead->passwd, (char *) data);
+	DupString(yy_oper->passwd, (char *) data);
 }
 
 static void
 conf_set_oper_rsa_public_key_file(void *data)
 {
 #ifdef HAVE_LIBCRYPTO
-	BIO *file;
-
-	if(yy_achead->rsa_public_key)
-	{
-		RSA_free(yy_achead->rsa_public_key);
-		yy_achead->rsa_public_key = NULL;
-	}
-
-	if(yy_achead->rsa_public_key_file)
-	{
-		MyFree(yy_achead->rsa_public_key_file);
-		yy_achead->rsa_public_key_file = NULL;
-	}
-
-	DupString(yy_achead->rsa_public_key_file, (char *) data);
-
-	file = BIO_new_file((char *) data, "r");
-
-	if(file == NULL)
-	{
-		conf_report_error("Ignoring rsa_public_key_file -- does %s exist?", (char *) data);
-		return;
-	}
-
-	yy_achead->rsa_public_key = (RSA *) PEM_read_bio_RSA_PUBKEY(file, NULL, 0, NULL);
-
-	if(yy_achead->rsa_public_key == NULL)
-	{
-		conf_report_error("Ignoring rsa_public_key_file -- Key invalid; check key syntax.");
-		return;
-	}
-
-	BIO_set_close(file, BIO_CLOSE);
-	BIO_free(file);
+	MyFree(yy_oper->rsa_pubkey_file);
+	DupString(yy_oper->rsa_pubkey_file, (char *) data);
 #else
 	conf_report_error("Warning -- ignoring rsa_public_key_file (OpenSSL support not available");
 #endif
@@ -706,9 +688,9 @@ conf_set_oper_encrypted(void *data)
 	int yesno = *(unsigned int *) data;
 
 	if(yesno)
-		yy_achead->flags |= CONF_FLAGS_ENCRYPTED;
+		yy_oper->flags |= OPER_ENCRYPTED;
 	else
-		yy_achead->flags &= ~CONF_FLAGS_ENCRYPTED;
+		yy_oper->flags &= ~OPER_ENCRYPTED;
 }
 
 static int
@@ -1164,27 +1146,27 @@ conf_set_resv_nick(void *data)
 static int
 conf_begin_shared(struct TopConf *tc)
 {
-	if(yy_uconf != NULL)
-		free_shared_conf(yy_uconf);
+	if(yy_shared != NULL)
+		free_shared_conf(yy_shared);
 
-	yy_uconf = make_shared_conf();
+	yy_shared = make_shared_conf();
 	return 0;
 }
 
 static int
 conf_end_shared(struct TopConf *tc)
 {
-	if(EmptyString(yy_uconf->server))
-		DupString(yy_uconf->server, "*");
+	if(EmptyString(yy_shared->server))
+		DupString(yy_shared->server, "*");
 
-	if(EmptyString(yy_uconf->username))
-		DupString(yy_uconf->username, "*");
+	if(EmptyString(yy_shared->username))
+		DupString(yy_shared->username, "*");
 
-	if(EmptyString(yy_uconf->host))
-		DupString(yy_uconf->host, "*");
+	if(EmptyString(yy_shared->host))
+		DupString(yy_shared->host, "*");
 
-	dlinkAddAlloc(yy_uconf, &shared_list);
-	yy_uconf = NULL;
+	dlinkAddAlloc(yy_shared, &shared_conf_list);
+	yy_shared = NULL;
 
 	return 0;
 }
@@ -1192,8 +1174,8 @@ conf_end_shared(struct TopConf *tc)
 static void
 conf_set_shared_name(void *data)
 {
-	MyFree(yy_uconf->server);
-	DupString(yy_uconf->server, data);
+	MyFree(yy_shared->server);
+	DupString(yy_shared->server, data);
 }
 
 static void
@@ -1204,11 +1186,11 @@ conf_set_shared_user(void *data)
 	if((p = strchr(data, '@')))
 	{
 		*p++ = '\0';
-		MyFree(yy_uconf->username);
-		DupString(yy_uconf->username, data);
+		MyFree(yy_shared->username);
+		DupString(yy_shared->username, data);
 
-		MyFree(yy_uconf->host);
-		DupString(yy_uconf->host, p);
+		MyFree(yy_shared->host);
+		DupString(yy_shared->host, p);
 	}
 }
 
@@ -1218,8 +1200,8 @@ conf_set_shared_type(void *data)
 	conf_parm_t *args = data;
 
 	/* if theyre setting a type, remove the 'kline' default */
-	yy_uconf->flags = 0;
-	set_modes_from_table(&yy_uconf->flags, "flag", shared_table, args);
+	yy_shared->flags = 0;
+	set_modes_from_table(&yy_shared->flags, "flag", shared_table, args);
 }
 
 static int
@@ -1769,33 +1751,33 @@ conf_set_gecos_action(void *data)
 static int
 conf_begin_cluster(struct TopConf *tc)
 {
-	if(yy_uconf != NULL)
-		free_shared_conf(yy_uconf);
+	if(yy_shared != NULL)
+		free_shared_conf(yy_shared);
 
-	yy_uconf = make_shared_conf();
+	yy_shared = make_shared_conf();
 	return 0;
 }
 
 static int
 conf_end_cluster(struct TopConf *tc)
 {
-	if(EmptyString(yy_uconf->server))
+	if(EmptyString(yy_shared->server))
 	{
 		conf_report_error("Ignoring cluster -- invalid cluster::server");
-		free_shared_conf(yy_uconf);
+		free_shared_conf(yy_shared);
 	}
 	else
-		dlinkAddAlloc(yy_uconf, &cluster_list);
+		dlinkAddAlloc(yy_shared, &cluster_conf_list);
 
-	yy_uconf = NULL;
+	yy_shared = NULL;
 	return 0;
 }
 
 static void
 conf_set_cluster_name(void *data)
 {
-	MyFree(yy_uconf->server);
-	DupString(yy_uconf->server, data);
+	MyFree(yy_shared->server);
+	DupString(yy_shared->server, data);
 }
 
 static void
@@ -1803,7 +1785,7 @@ conf_set_cluster_type(void *data)
 {
 	conf_parm_t *args = data;
 
-	set_modes_from_table(&yy_uconf->flags, "flag", cluster_table, args);
+	set_modes_from_table(&yy_shared->flags, "flag", cluster_table, args);
 }
 
 static void
@@ -2601,7 +2583,6 @@ newconf_init()
 	add_conf_item("log", "fname_ioerrorlog", CF_QSTRING, conf_set_log_fname_ioerrorlog);
 
 	add_top_conf("operator", conf_begin_oper, conf_end_oper);
-	add_conf_item("operator", "name", CF_QSTRING, conf_set_oper_name);
 	add_conf_item("operator", "user", CF_QSTRING, conf_set_oper_user);
 	add_conf_item("operator", "password", CF_QSTRING, conf_set_oper_password);
 	add_conf_item("operator", "encrypted", CF_YESNO, conf_set_oper_encrypted);

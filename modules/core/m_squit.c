@@ -38,6 +38,7 @@
 #include "parse.h"
 #include "modules.h"
 #include "hash.h"
+#include "s_newconf.h"
 
 static int ms_squit(struct Client *, struct Client *, int, const char **);
 static int mo_squit(struct Client *, struct Client *, int, const char **);

@@ -88,7 +88,6 @@ struct ConfItem
 #define CONF_QUARANTINED_NICK   0x0001
 #define CONF_CLIENT             0x0002
 #define CONF_SERVER             0x0004
-#define CONF_OPERATOR           0x0010
 #define CONF_KILL               0x0040
 
 #define CONF_CLASS              0x0400
@@ -102,7 +101,7 @@ struct ConfItem
 #define CONF_EXEMPTDLINE      0x100000
 
 #define CONF_SERVER_MASK       CONF_SERVER
-#define CONF_CLIENT_MASK       (CONF_CLIENT | CONF_OPERATOR | CONF_SERVER_MASK)
+#define CONF_CLIENT_MASK       (CONF_CLIENT | CONF_SERVER_MASK)
 
 #define IsIllegal(x)    ((x)->status & CONF_ILLEGAL)
 
@@ -353,7 +352,6 @@ extern struct ConfItem *find_conf_by_name(const char *name, int status);
 extern struct ConfItem *find_conf_by_host(const char *host, int status);
 extern struct ConfItem *find_kill(struct Client *);
 extern int conf_connect_allowed(struct sockaddr_storage *addr, int);
-extern char *oper_privs_as_string(int);
 
 extern struct ConfItem *find_tkline(const char *, const char *, struct sockaddr_storage *);
 extern char *show_iline_prefix(struct Client *, struct ConfItem *, char *);

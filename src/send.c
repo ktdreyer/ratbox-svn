@@ -38,6 +38,7 @@
 #include "s_serv.h"
 #include "sprintf_irc.h"
 #include "s_conf.h"
+#include "s_newconf.h"
 #include "linebuf.h"
 #include "s_log.h"
 #include "memory.h"

@@ -38,6 +38,7 @@
 #include "numeric.h"
 #include "commio.h"
 #include "s_conf.h"
+#include "s_newconf.h"
 #include "scache.h"
 #include "send.h"
 #include "msg.h"

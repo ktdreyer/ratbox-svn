@@ -32,6 +32,7 @@
 #include "send.h"
 #include "s_user.h"
 #include "s_conf.h"
+#include "s_newconf.h"
 #include "hash.h"
 #include "msg.h"
 #include "parse.h"
@@ -61,7 +62,7 @@ m_locops(struct Client *client_p, struct Client *source_p, int parc, const char 
 	sendto_wallops_flags(UMODE_LOCOPS, source_p, "LOCOPS - %s", parv[1]);
 
 #ifdef XXX_BROKEN_CLUSTER
-	if(dlink_list_length(&cluster_list) > 0)
+	if(dlink_list_length(&cluster_conf_list) > 0)
 		cluster_locops(source_p, parv[1]);
 #endif
 

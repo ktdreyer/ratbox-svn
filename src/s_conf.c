@@ -28,6 +28,7 @@
 #include "ircd_defs.h"
 #include "tools.h"
 #include "s_conf.h"
+#include "s_newconf.h"
 #include "s_oldnewconf.h"
 #include "s_serv.h"
 #include "s_stats.h"
@@ -224,7 +225,6 @@ report_array[] =
 {
 	{ CONF_SERVER,	 RPL_STATSCLINE, 'C'},
 	{ CONF_LEAF,	 RPL_STATSLLINE, 'L'},
-	{ CONF_OPERATOR, RPL_STATSOLINE, 'O'},
 	{ CONF_HUB,	 RPL_STATSHLINE, 'H'},
 	{ 0, 0, '\0'}
 };
@@ -294,14 +294,6 @@ report_configured_links(struct Client *source_p, int mask)
 						   classname);
 
 			}
-			/* Don't allow non opers to see oper privs */
-			else if(mask & (CONF_OPERATOR))
-				sendto_one_numeric(source_p, p->rpl_stats,
-						   form_str(p->rpl_stats),
-						   user, host, name,
-						   IsOper(source_p) ? 
-						    oper_privs_as_string(port) : "0", 
-						    classname);
 			else
 				sendto_one_numeric(source_p, p->rpl_stats,
 						   form_str(p->rpl_stats),
@@ -729,30 +721,25 @@ attach_conf(struct Client *client_p, struct ConfItem *aconf)
 	if(IsIllegal(aconf))
 		return (NOT_AUTHORISED);
 
-	if((aconf->status & CONF_OPERATOR) == 0)
+	if(ClassPtr(aconf))
 	{
-		if(ClassPtr(aconf))
+		if(!add_ip_limit(client_p, aconf))
+			return (TOO_MANY_LOCAL);
+	}
+
+	if((aconf->status & CONF_CLIENT) &&
+	   ConfCurrUsers(aconf) >= ConfMaxUsers(aconf) && ConfMaxUsers(aconf) > 0)
+	{
+		if(!IsConfExemptLimits(aconf))
 		{
-			if(!add_ip_limit(client_p, aconf))
-			{
-				return (TOO_MANY_LOCAL);
-			}
+			return (I_LINE_FULL);
+		}
+		else
+		{
+			sendto_one(client_p, "NOTICE FLINE :I: line is full, but you have an >I: line!");
+			SetExemptLimits(client_p);
 		}
 
-		if((aconf->status & CONF_CLIENT) &&
-		   ConfCurrUsers(aconf) >= ConfMaxUsers(aconf) && ConfMaxUsers(aconf) > 0)
-		{
-			if(!IsConfExemptLimits(aconf))
-			{
-				return (I_LINE_FULL);
-			}
-			else
-			{
-				sendto_one(client_p, "NOTICE FLINE :I: line is full, but you have an >I: line!");
-				SetExemptLimits(client_p);
-			}
-
-		}
 	}
 
 	if(aconf->status & FLAGS2_RESTRICTED)
@@ -847,15 +834,7 @@ find_conf_exact(const char *name, const char *user, const char *host, int statma
 			continue;
 		}
 
-		if(tmp->status & CONF_OPERATOR)
-		{
-			if(tmp->clients < ConfMaxUsers(tmp))
-				return (tmp);
-			else
-				continue;
-		}
-		else
-			return (tmp);
+		return (tmp);
 	}
 	return (NULL);
 }
@@ -1426,91 +1405,6 @@ expire_tdline(dlink_list * tdlist, int type)
 	}
 }
 
-/*
- * oper_privs_as_string
- *
- * inputs        - pointer to client_p or NULL
- * output        - pointer to static string showing oper privs
- * side effects  -
- * return as string, the oper privs as derived from port
- * also, set the oper privs if given client_p non NULL
- */
-char *
-oper_privs_as_string(int port)
-{
-	static char privs_out[17];
-	char *privs_ptr;
-
-	privs_ptr = privs_out;
-	*privs_ptr = '\0';
-
-	if(port & OPER_GLINE)
-		*privs_ptr++ = 'G';
-	else
-		*privs_ptr++ = 'g';
-
-	if(port & OPER_K)
-		*privs_ptr++ = 'K';
-	else
-		*privs_ptr++ = 'k';
-
-	if(port & OPER_XLINE)
-		*privs_ptr++ = 'X';
-	else
-		*privs_ptr++ = 'x';
-
-	if(port & OPER_GLOBAL_KILL)
-		*privs_ptr++ = 'O';
-	else
-		*privs_ptr++ = 'o';
-
-	if(port & OPER_LOCAL_KILL)
-		*privs_ptr++ = 'C';
-	else
-		*privs_ptr++ = 'c';
-
-	if(port & OPER_REMOTE)
-		*privs_ptr++ = 'R';
-	else
-		*privs_ptr++ = 'r';
-
-	if(port & OPER_UNKLINE)
-		*privs_ptr++ = 'U';
-	else
-		*privs_ptr++ = 'u';
-
-	if(port & OPER_REHASH)
-		*privs_ptr++ = 'H';
-	else
-		*privs_ptr++ = 'h';
-
-	if(port & OPER_DIE)
-		*privs_ptr++ = 'D';
-	else
-		*privs_ptr++ = 'd';
-
-	if(port & OPER_ADMIN)
-		*privs_ptr++ = 'A';
-	else
-		*privs_ptr++ = 'a';
-
-	if(port & OPER_N)
-		*privs_ptr++ = 'N';
-	else
-		*privs_ptr++ = 'n';
-
-	if(port & OPER_OPERWALL)
-		*privs_ptr++ = 'L';
-	else
-		*privs_ptr++ = 'l';
-
-	*privs_ptr = '\0';
-
-	return (privs_out);
-}
-
-
-
 /* const char* get_oper_name(struct Client *client_p)
  * Input: A client to find the active oper{} name for.
  * Output: The nick!user@host{oper} of the oper.
@@ -1773,6 +1667,7 @@ clear_out_old_conf(void)
 	clear_resvs();
 	clear_xlines();
 	clear_shared_conf();
+	clear_oper_conf();
 
 	/* clean out module paths */
 #ifndef STATIC_MODULES
@@ -2015,13 +1910,11 @@ conf_add_class_to_conf(struct ConfItem *aconf)
 					     "Warning -- Using default class for missing class \"%s\" in auth{} for %s@%s",
 					     aconf->className, aconf->user, aconf->host);
 		}
-		else if(aconf->status == CONF_SERVER || aconf->status == CONF_OPERATOR)
+		else if(aconf->status == CONF_SERVER)
 		{
 			sendto_realops_flags(UMODE_ALL, L_ALL,
-					     "Warning -- Using default class for missing class \"%s\" in %s{} for %s",
-					     aconf->className,
-					     aconf->status ==
-					     CONF_SERVER ? "connect" : "operator", aconf->name);
+					     "Warning -- Using default class for missing class \"%s\" in connect{} for %s",
+					     aconf->className, aconf->name);
 		}
 
 		MyFree(aconf->className);

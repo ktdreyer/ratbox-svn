@@ -37,6 +37,7 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
+#include "s_newconf.h"
 
 static int mo_die(struct Client *, struct Client *, int, const char **);
 

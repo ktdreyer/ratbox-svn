@@ -40,6 +40,7 @@
 #include "numeric.h"
 #include "commio.h"
 #include "s_conf.h"
+#include "s_newconf.h"
 #include "s_oldnewconf.h"
 #include "s_log.h"
 #include "s_serv.h"
@@ -1114,7 +1115,7 @@ check_X_line(struct Client *client_p, struct Client *source_p)
  * side effects	- opers up source_p using aconf for reference
  */
 int
-oper_up(struct Client *source_p, struct ConfItem *aconf)
+oper_up(struct Client *source_p, struct oper_conf *oper_p)
 {
 	int old = (source_p->umodes & ALL_UMODES);
 
@@ -1128,8 +1129,8 @@ oper_up(struct Client *source_p, struct ConfItem *aconf)
 
 	SetExemptKline(source_p);
 
-	source_p->flags2 |= aconf->port;
-	DupString(source_p->localClient->opername, aconf->name);
+	source_p->flags2 |= oper_p->flags;
+	DupString(source_p->localClient->opername, oper_p->name);
 
 	dlinkAddAlloc(source_p, &oper_list);
 
@@ -1144,7 +1145,7 @@ oper_up(struct Client *source_p, struct ConfItem *aconf)
 	send_umode_out(source_p, source_p, old);
 	sendto_one(source_p, form_str(RPL_YOUREOPER), me.name, source_p->name);
 	sendto_one(source_p, ":%s NOTICE %s :*** Oper privs are %s", me.name,
-		   source_p->name, oper_privs_as_string(aconf->port));
+		   source_p->name, get_oper_privs(oper_p->flags));
 	send_oper_motd(source_p);
 
 	return (1);

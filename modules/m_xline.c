@@ -154,7 +154,7 @@ mo_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 			return 0;
 	}
 #ifdef XXX_BROKEN_CLUSTER
-	else if(dlink_list_length(&cluster_list) > 0)
+	else if(dlink_list_length(&cluster_conf_list) > 0)
 		cluster_xline(source_p, parv[1], xtype, reason);
 #endif
 

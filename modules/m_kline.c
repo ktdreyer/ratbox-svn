@@ -169,7 +169,7 @@ mo_kline(struct Client *client_p, struct Client *source_p,
 	}
 #ifdef XXX_BROKEN_CLUSTER
 	/* if we have cluster servers, send it to them.. */
-	else if(dlink_list_length(&cluster_list) > 0)
+	else if(dlink_list_length(&cluster_conf_list) > 0)
 	{
 		cluster_kline(source_p, tkline_time, user, host, reason);
 	}
@@ -369,7 +369,7 @@ mo_unkline(struct Client *client_p, struct Client *source_p, int parc, const cha
 			return 0;
 	}
 #ifdef XXX_BROKEN_CLUSTER
-	else if(dlink_list_length(&cluster_list) > 0)
+	else if(dlink_list_length(&cluster_conf_list) > 0)
 	{
 		cluster_unkline(source_p, user, host);
 	}

@@ -116,9 +116,9 @@ ircd.o: ircd.c ../include/stdinc.h ../include/config.h ../include/setup.h \
   ../include/numeric.h ../include/parse.h ../include/restart.h \
   ../include/s_auth.h ../include/s_conf.h ../include/patricia.h \
   ../include/s_serv.h ../include/s_stats.h ../include/scache.h \
-  ../include/whowas.h ../include/modules.h ../include/s_newconf.h \
-  ../include/hook.h ../include/ircd_getopt.h ../include/newconf.h \
-  ../include/s_oldnewconf.h ../include/reject.h ../include/cache.h
+  ../include/whowas.h ../include/modules.h ../include/hook.h \
+  ../include/ircd_getopt.h ../include/newconf.h ../include/s_oldnewconf.h \
+  ../include/reject.h ../include/cache.h
 ircd_signal.o: ircd_signal.c ../include/stdinc.h ../include/config.h \
   ../include/setup.h ../include/defaults.h ../include/ircd_signal.h \
   ../include/ircd.h ../include/tools.h ../include/memory.h \
@@ -152,8 +152,8 @@ listener.o: listener.c ../include/stdinc.h ../include/config.h \
   ../include/commio.h ../include/ircd.h ../include/memory.h \
   ../include/balloc.h ../include/irc_string.h ../include/sprintf_irc.h \
   ../include/numeric.h ../include/s_conf.h ../include/class.h \
-  ../include/common.h ../include/patricia.h ../include/s_stats.h \
-  ../include/s_auth.h ../include/reject.h
+  ../include/common.h ../include/patricia.h ../include/s_newconf.h \
+  ../include/s_stats.h ../include/s_auth.h ../include/reject.h
 match.o: match.c ../include/stdinc.h ../include/config.h \
   ../include/setup.h ../include/defaults.h ../include/client.h \
   ../include/ircd_defs.h ../include/s_log.h ../include/send.h \
@@ -169,14 +169,14 @@ memory.o: memory.c ../include/stdinc.h ../include/config.h \
   ../include/commio.h ../include/restart.h
 modules.o: modules.c ../include/stdinc.h ../include/config.h \
   ../include/setup.h ../include/defaults.h ../include/modules.h \
-  ../include/parse.h ../include/s_newconf.h ../include/tools.h \
-  ../include/msg.h ../include/memory.h ../include/ircd_defs.h \
-  ../include/s_log.h ../include/send.h ../include/balloc.h \
-  ../include/hook.h ../include/ircd.h ../include/client.h \
-  ../include/linebuf.h ../include/channel.h ../include/res.h \
-  ../adns/adns.h ../include/commio.h ../include/irc_string.h \
-  ../include/s_conf.h ../include/class.h ../include/common.h \
-  ../include/patricia.h ../include/numeric.h ../include/sprintf_irc.h
+  ../include/parse.h ../include/msg.h ../include/memory.h \
+  ../include/ircd_defs.h ../include/s_log.h ../include/send.h \
+  ../include/balloc.h ../include/tools.h ../include/hook.h \
+  ../include/ircd.h ../include/client.h ../include/linebuf.h \
+  ../include/channel.h ../include/res.h ../adns/adns.h \
+  ../include/commio.h ../include/irc_string.h ../include/s_conf.h \
+  ../include/class.h ../include/common.h ../include/patricia.h \
+  ../include/numeric.h ../include/s_newconf.h ../include/sprintf_irc.h
 newconf.o: newconf.c ../include/stdinc.h ../include/config.h \
   ../include/setup.h ../include/defaults.h ../include/memory.h \
   ../include/ircd_defs.h ../include/s_log.h ../include/send.h \
@@ -185,8 +185,8 @@ newconf.o: newconf.c ../include/stdinc.h ../include/config.h \
   ../include/res.h ../adns/adns.h ../include/commio.h ../include/ircd.h \
   ../include/irc_string.h ../include/sprintf_irc.h ../include/common.h \
   ../include/s_conf.h ../include/class.h ../include/patricia.h \
-  ../include/numeric.h ../include/s_user.h ../include/s_oldnewconf.h \
-  ../include/modules.h ../include/parse.h ../include/s_newconf.h \
+  ../include/numeric.h ../include/s_user.h ../include/s_newconf.h \
+  ../include/s_oldnewconf.h ../include/modules.h ../include/parse.h \
   ../include/msg.h ../include/hook.h ../include/listener.h \
   ../include/hostmask.h ../include/s_serv.h ../include/event.h \
   ../include/hash.h ../include/cache.h
@@ -261,12 +261,21 @@ s_conf.o: s_conf.c ../include/stdinc.h ../include/config.h \
   ../adns/adns.h ../include/commio.h ../include/ircd.h \
   ../include/memory.h ../include/balloc.h ../include/irc_string.h \
   ../include/common.h ../include/patricia.h ../include/numeric.h \
-  ../include/s_oldnewconf.h ../include/s_serv.h ../include/s_stats.h \
-  ../include/event.h ../include/hash.h ../include/sprintf_irc.h \
-  ../include/listener.h ../include/hostmask.h ../include/modules.h \
-  ../include/parse.h ../include/s_newconf.h ../include/msg.h \
+  ../include/s_newconf.h ../include/s_oldnewconf.h ../include/s_serv.h \
+  ../include/s_stats.h ../include/event.h ../include/hash.h \
+  ../include/sprintf_irc.h ../include/listener.h ../include/hostmask.h \
+  ../include/modules.h ../include/parse.h ../include/msg.h \
   ../include/hook.h ../include/s_gline.h ../include/reject.h \
   ../include/cache.h
+s_newconf.o: s_newconf.c ../include/stdinc.h ../include/config.h \
+  ../include/setup.h ../include/defaults.h ../include/ircd_defs.h \
+  ../include/s_log.h ../include/send.h ../include/common.h \
+  ../include/s_conf.h ../include/class.h ../include/tools.h \
+  ../include/client.h ../include/linebuf.h ../include/channel.h \
+  ../include/res.h ../adns/adns.h ../include/commio.h ../include/ircd.h \
+  ../include/memory.h ../include/balloc.h ../include/irc_string.h \
+  ../include/patricia.h ../include/numeric.h ../include/s_newconf.h \
+  ../include/s_serv.h ../include/hostmask.h
 s_oldnewconf.o: s_oldnewconf.c ../include/stdinc.h ../include/config.h \
   ../include/setup.h ../include/defaults.h ../include/ircd_defs.h \
   ../include/s_log.h ../include/send.h ../include/common.h \
@@ -326,10 +335,10 @@ s_user.o: s_user.c ../include/stdinc.h ../include/config.h \
   ../include/memory.h ../include/balloc.h ../include/irc_string.h \
   ../include/common.h ../include/hash.h ../include/sprintf_irc.h \
   ../include/listener.h ../include/msg.h ../include/numeric.h \
-  ../include/s_conf.h ../include/patricia.h ../include/s_oldnewconf.h \
-  ../include/s_serv.h ../include/s_stats.h ../include/scache.h \
-  ../include/supported.h ../include/whowas.h ../include/packet.h \
-  ../include/reject.h ../include/cache.h
+  ../include/s_conf.h ../include/patricia.h ../include/s_newconf.h \
+  ../include/s_oldnewconf.h ../include/s_serv.h ../include/s_stats.h \
+  ../include/scache.h ../include/supported.h ../include/whowas.h \
+  ../include/packet.h ../include/reject.h ../include/cache.h
 scache.o: scache.c ../include/stdinc.h ../include/config.h \
   ../include/setup.h ../include/defaults.h ../include/client.h \
   ../include/ircd_defs.h ../include/s_log.h ../include/send.h \
@@ -345,7 +354,7 @@ send.o: send.c ../include/stdinc.h ../include/config.h ../include/setup.h \
   ../include/memory.h ../include/balloc.h ../include/irc_string.h \
   ../include/common.h ../include/numeric.h ../include/s_serv.h \
   ../include/sprintf_irc.h ../include/s_conf.h ../include/patricia.h \
-  ../include/hook.h
+  ../include/s_newconf.h ../include/hook.h
 snprintf.o: snprintf.c ../include/setup.h ../include/sprintf_irc.h
 tools.o: tools.c ../include/stdinc.h ../include/config.h \
   ../include/setup.h ../include/defaults.h ../include/tools.h \

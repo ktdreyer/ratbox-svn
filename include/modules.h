@@ -29,7 +29,6 @@
 #include "config.h"
 #include "setup.h"
 #include "parse.h"
-#include "s_newconf.h"
 
 #define MAPI_RATBOX 1
 

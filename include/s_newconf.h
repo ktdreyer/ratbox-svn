@@ -36,6 +36,11 @@
 #define INCLUDED_s_newconf_h
 
 #include "tools.h"
+#include "setup.h"
+
+#ifdef HAVE_LIBCRYPTO
+#include <openssl/rsa.h>
+#endif
 
 #define SHARED_KLINE	0x0001
 #define SHARED_UNKLINE	0x0002
@@ -57,8 +62,69 @@ struct shared_conf
 	int flags;
 };
 
-extern dlink_list cluster_list;
-extern dlink_list shared_list;
+#define OPER_ENCRYPTED	0x00001
+#define OPER_KLINE	0x00002
+#define OPER_UNKLINE	0x00004
+#define OPER_LOCKILL	0x00008
+#define OPER_GLOBKILL	0x00010
+#define OPER_REMOTE	0x00020
+#define OPER_GLINE	0x00040
+#define OPER_XLINE	0x00080
+#define OPER_RESV	0x00100
+#define OPER_NICKS	0x00200
+#define OPER_REHASH	0x00400
+#define OPER_DIE	0x00800
+#define OPER_ADMIN	0x01000
+#define OPER_HADMIN	0x02000
+#define OPER_OPERWALL	0x04000
+#define OPER_INVIS	0x08000
+#define OPER_SPY	0x10000
+/*			.. 	*/
+/*			0x80000 */
+/* 0x100000 and above are in client.h */
+
+#define OPER_FLAGS	(OPER_KLINE|OPER_UNKLINE|OPER_LOCKILL|OPER_GLOBKILL|\
+			 OPER_REMOTE|OPER_GLINE|OPER_XLINE|OPER_RESV|\
+			 OPER_NICKS|OPER_REHASH|OPER_DIE|OPER_ADMIN|\
+			 OPER_HADMIN|OPER_OPERWALL|OPER_INVIS|OPER_SPY)
+
+#define IsOperConfEncrypted(x)	((x)->flags & OPER_ENCRYPTED)
+
+#define IsOperGlobalKill(x)     ((x)->flags2 & OPER_GLOBKILL)
+#define IsOperLocalKill(x)      ((x)->flags2 & OPER_LOCKILL)
+#define IsOperRemote(x)         ((x)->flags2 & OPER_REMOTE)
+#define IsOperUnkline(x)        ((x)->flags2 & OPER_UNKLINE)
+#define IsOperGline(x)          ((x)->flags2 & OPER_GLINE)
+#define IsOperN(x)              ((x)->flags2 & OPER_NICKS)
+#define IsOperK(x)              ((x)->flags2 & OPER_KLINE)
+#define IsOperXline(x)          ((x)->flags2 & OPER_XLINE)
+#define IsOperDie(x)            ((x)->flags2 & OPER_DIE)
+#define IsOperRehash(x)         ((x)->flags2 & OPER_REHASH)
+#define IsOperHiddenAdmin(x)    ((x)->flags2 & OPER_HADMIN)
+#define IsOperAdmin(x)          (((x)->flags2 & OPER_ADMIN) || \
+					((x)->flags2 & OPER_HADMIN))
+#define IsOperOperwall(x)       ((x)->flags2 & OPER_OPERWALL)
+#define IsOperSpy(x)            ((x)->flags2 & OPER_SPY)
+#define IsOperInvis(x)          ((x)->flags2 & OPER_INVIS)
+
+struct oper_conf
+{
+	char *name;
+	char *username;
+	char *host;
+	char *passwd;
+
+	int flags;
+
+#ifdef HAVE_LIBCRYPTO
+	char *rsa_pubkey_file;
+	RSA *rsa_pubkey;
+#endif
+};
+
+extern dlink_list cluster_conf_list;
+extern dlink_list shared_conf_list;
+extern dlink_list oper_conf_list;
 
 extern struct shared_conf *make_shared_conf(void);
 extern void free_shared_conf(struct shared_conf *);
@@ -66,5 +132,15 @@ extern void clear_shared_conf(void);
 
 extern int find_shared_conf(const char *username, const char *host,
 			const char *server, int flags);
+
+extern struct oper_conf *make_oper_conf(void);
+extern void free_oper_conf(struct oper_conf *);
+extern void clear_oper_conf(void);
+
+extern struct oper_conf *find_oper_conf(const char *username, const char *host,
+					const char *locip, const char *oname);
+
+extern const char *get_oper_privs(int flags);
+
 #endif
 

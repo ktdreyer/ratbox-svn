@@ -49,6 +49,7 @@
 #include "s_log.h"
 #include "s_user.h"
 #include "cache.h"
+#include "s_newconf.h"
 
 #ifndef HAVE_LIBCRYPTO
 /* Maybe this should be an error or something?-davidt */
@@ -90,8 +91,8 @@ static int generate_challenge(char **r_challenge, char **r_response, RSA * key);
 static int
 m_challenge(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
+	struct oper_conf *oper_p;
 	char *challenge;
-	struct ConfItem *aconf;
 
 	/* if theyre an oper, reprint oper motd and ignore */
 	if(IsOper(source_p))
@@ -122,7 +123,11 @@ m_challenge(struct Client *client_p, struct Client *source_p, int parc, const ch
 			return 0;
 		}
 
-		if((aconf = find_conf_by_name(source_p->user->auth_oper, CONF_OPERATOR)) == NULL)
+		oper_p = find_oper_conf(source_p->username, source_p->host, 
+					source_p->sockhost, 
+					source_p->user->auth_oper);
+
+		if(oper_p == NULL)
 		{
 			sendto_one(source_p, form_str(ERR_NOOPERHOST), 
 				   me.name, source_p->name);
@@ -138,7 +143,7 @@ m_challenge(struct Client *client_p, struct Client *source_p, int parc, const ch
 			return 0;
 		}
 
-		oper_up(source_p, aconf);
+		oper_up(source_p, oper_p);
 
 		ilog(L_OPERED, "OPER %s by %s!%s@%s",
 		     source_p->user->auth_oper, source_p->name, 
@@ -156,13 +161,12 @@ m_challenge(struct Client *client_p, struct Client *source_p, int parc, const ch
 	source_p->user->response = NULL;
 	source_p->user->auth_oper = NULL;
 
-	if(!(aconf = find_conf_exact(parv[1], source_p->username, source_p->host,
-				     CONF_OPERATOR)) &&
-	   !(aconf = find_conf_exact(parv[1], source_p->username,
-				     source_p->sockhost, CONF_OPERATOR)))
+	oper_p = find_oper_conf(source_p->username, source_p->host, 
+				source_p->sockhost, parv[1]);
+
+	if(oper_p == NULL)
 	{
 		sendto_one(source_p, form_str(ERR_NOOPERHOST), me.name, source_p->name);
-
 		ilog(L_FOPER, "FAILED OPER (%s) by (%s!%s@%s)",
 		     parv[1], source_p->name,
 		     source_p->username, source_p->host);
@@ -174,20 +178,20 @@ m_challenge(struct Client *client_p, struct Client *source_p, int parc, const ch
 		return 0;
 	}
 
-	if(!aconf->rsa_public_key)
+	if(!oper_p->rsa_pubkey)
 	{
 		sendto_one(source_p, ":%s NOTICE %s :I'm sorry, PK authentication "
 			   "is not enabled for your oper{} block.", me.name, parv[0]);
 		return 0;
 	}
 
-	if(!generate_challenge(&challenge, &(source_p->user->response), aconf->rsa_public_key))
+	if(!generate_challenge(&challenge, &(source_p->user->response), oper_p->rsa_pubkey))
 	{
 		sendto_one(source_p, form_str(RPL_RSACHALLENGE), 
 			   me.name, source_p->name, challenge);
 	}
 
-	DupString(source_p->user->auth_oper, aconf->name);
+	DupString(source_p->user->auth_oper, oper_p->name);
 	MyFree(challenge);
 	return 0;
 }
