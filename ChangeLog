@@ -1,3 +1,18 @@
+androsyn    2003/01/20 19:41:45 UTC	(20030120_4)
+
+  Modified files:
+    src                  Makefile.in 
+  Removed files:
+    src                  iplines.c 
+  Log:
+  Remove iplines.c
+  
+  Revision  Changes    Path
+  7.126     +0 -1      ircd-ratbox/src/Makefile.in
+  7.9       +0 -306    ircd-ratbox/src/iplines.c (dead)
+
+
+
 androsyn    2003/01/20 17:09:22 UTC	(20030120_3)
 
   Modified files:
