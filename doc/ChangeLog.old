@@ -1,3 +1,8 @@
+*** 20010517_6 by jdc
+* Admins permitted to do Dlines with bitmasks as small as /8.
+
+
+
 *** 20010517_5 by leeh
 - theres no reasons why glines cant use the opers nick.. it simplifies
   things massively.. well, if we didnt support hyb6 that is ;)
