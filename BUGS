@@ -62,9 +62,6 @@
 9.  MODRESTART only reloads modules in modules/autoload, it does not load
     anything in a modules block in the conf.
 
-10. Specific auth lines will not work.  If a user=""; line does not contain
-    a * or a ?, it will never be matched.
-
 BUG REPORTS: If you run this code and encounter problems, you must report
  the bug in by E-MAIL to ircd-hybrid@the-project.org.
 
