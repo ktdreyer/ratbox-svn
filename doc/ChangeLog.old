@@ -1,3 +1,9 @@
+*** 20010102_1 by db
+- removed some faulty logic in m_cburst.c, this cored us
+  when the nick wasnt' present..
+
+
+
 *** 20010101_56 by db
 - our new parse.c splits everything up thats separated by a space
   unlike the old parse.c which stopped parsing into separate parv[]
