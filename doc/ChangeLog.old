@@ -1,3 +1,17 @@
+a1kmm       2002/02/17 03:02:21 EST	(20020217_16)
+
+  Modified files:
+    src                  client.c s_bsd.c 
+  Log:
+  - Don't clean up the listener until the get to free_client. This fixes
+    the coredump in user_welcome() when the user has exited.
+  
+  Revision  Changes    Path
+  7.229     +13 -0     ircd-hybrid-7/src/client.c
+  7.163     +0 -12     ircd-hybrid-7/src/s_bsd.c
+
+
+
 db          2002/02/17 02:29:59 EST	(20020217_15)
 
   Modified files:
