@@ -1,3 +1,15 @@
+leeh        2003/07/18 19:46:46 EDT	(20030718_0)
+
+  Modified files:
+    modules              m_who.c 
+  Log:
+  - ported the who fix
+  
+  Revision  Changes    Path
+  1.99      +4 -4      ircd-ratbox/modules/m_who.c
+
+
+
 leeh        2003/07/17 18:39:31 EDT	(20030717_0)
 
   Modified files:
