@@ -580,7 +580,15 @@ serverinfo_vhost6:	VHOST6 '=' QSTRING ';'
    
 serverinfo_max_clients: T_MAX_CLIENTS '=' expr ';'
   {
-    ServerInfo.max_clients = $3;
+    if (MAX_CLIENTS >= $3)
+    {
+      ServerInfo.max_clients = $3;
+    }
+    else
+    {
+      ilog(L_ERROR, "Setting serverinfo_max_clients to MAX_CLIENTS");
+      ServerInfo.max_clients = MAX_CLIENTS;
+    }
   };
 
 serverinfo_max_buffer: T_MAX_BUFFER '=' expr ';'
