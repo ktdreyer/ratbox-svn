@@ -1,3 +1,18 @@
+androsyn    2002/10/31 00:15:38 UTC	(20021031_0)
+
+  Modified files:
+    autoconf             configure.in 
+    .                    configure 
+  Log:
+  It seems that -ggdb causes problems for newer versions of gcc..lets get rid
+  of it then :)
+  
+  Revision  Changes    Path
+  7.154     +2 -2      ircd-ratbox/autoconf/configure.in
+  7.161     +2 -2      ircd-ratbox/configure
+
+
+
 androsyn    2002/10/30 21:52:05 UTC	(20021030_12)
 
   Modified files:
