@@ -59,7 +59,6 @@ SRCS =                          \
   m_gline.c \
   m_help.c \
   m_info.c \
-  m_invite.c \
   m_ison.c \
   m_kline.c \
   m_knock.c \

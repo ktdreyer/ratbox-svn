@@ -49,6 +49,8 @@ static int ms_sjoin(struct Client *, struct Client *, int, const char **);
 static int m_kick(struct Client *, struct Client *, int, const char **);
 static int m_part(struct Client *, struct Client *, int, const char **);
 static int m_names(struct Client *, struct Client *, int, const char **);
+static int m_invite(struct Client *, struct Client *, int, const char **);
+
 
 #define mg_kick { m_kick, 3 }
 
@@ -77,7 +79,14 @@ struct Message names_msgtab = {
 	{mg_unreg, {m_names, 0}, mg_ignore, mg_ignore, mg_ignore, {m_names, 0}}
 };
 
-mapi_clist_av1 channels_clist[] = { &join_msgtab, &sjoin_msgtab, &kick_msgtab, &part_msgtab, &names_msgtab, NULL };
+struct Message invite_msgtab = {
+	"INVITE", 0, 0, 0, MFLG_SLOW,
+	{mg_unreg, {m_invite, 3}, {m_invite, 3}, mg_ignore, mg_ignore, {m_invite, 3}}
+};
+
+mapi_clist_av1 channels_clist[] = { &join_msgtab, &sjoin_msgtab, &kick_msgtab, &part_msgtab, &names_msgtab, 
+				    &invite_msgtab, 
+				    NULL };
 DECLARE_MODULE_AV1(channels, NULL, NULL, channels_clist, NULL, NULL, "$Revision$");
 
 static void do_join_0(struct Client *client_p, struct Client *source_p);
@@ -1101,6 +1110,146 @@ m_names(struct Client *client_p, struct Client *source_p, int parc, const char *
 
 	return 0;
 }
+
+
+/* m_invite()
+ *      parv[0] - sender prefix
+ *      parv[1] - user to invite
+ *      parv[2] - channel name
+ */
+static int
+m_invite(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
+{
+	struct Client *target_p;
+	struct Channel *chptr;
+	struct membership *msptr;
+	int store_invite = 0;
+
+	if(MyClient(source_p) && !IsFloodDone(source_p))
+		flood_endgrace(source_p);
+
+	if((target_p = find_person(parv[1])) == NULL)
+	{
+		sendto_one_numeric(source_p, ERR_NOSUCHNICK, 
+				   form_str(ERR_NOSUCHNICK), 
+				   IsDigit(parv[1][0]) ? "*" : parv[1]);
+		return 0;
+	}
+
+	if(check_channel_name(parv[2]) == 0)
+	{
+		sendto_one_numeric(source_p, ERR_BADCHANNAME,
+				   form_str(ERR_BADCHANNAME),
+				   parv[2]);
+		return 0;
+	}
+
+	if(!IsChannelName(parv[2]))
+	{
+		if(MyClient(source_p))
+			sendto_one_numeric(source_p, ERR_NOSUCHCHANNEL,
+					   form_str(ERR_NOSUCHCHANNEL), parv[2]);
+		return 0;
+	}
+
+	/* Do not send local channel invites to users if they are not on the
+	 * same server as the person sending the INVITE message. 
+	 */
+	if(parv[2][0] == '&' && !MyConnect(target_p))
+	{
+		sendto_one(source_p, form_str(ERR_USERNOTONSERV),
+			   me.name, source_p->name, parv[1]);
+		return 0;
+	}
+
+	if((chptr = find_channel(parv[2])) == NULL)
+	{
+		sendto_one_numeric(source_p, ERR_NOSUCHCHANNEL,
+				   form_str(ERR_NOSUCHCHANNEL), parv[2]);
+		return 0;
+	}
+
+	msptr = find_channel_membership(chptr, source_p);
+	if(MyClient(source_p) && (msptr == NULL))
+	{
+		sendto_one_numeric(source_p, ERR_NOTONCHANNEL,
+				   form_str(ERR_NOTONCHANNEL), parv[2]);
+		return 0;
+	}
+
+	if(IsMember(target_p, chptr))
+	{
+		sendto_one_numeric(source_p, ERR_USERONCHANNEL,
+				   form_str(ERR_USERONCHANNEL), parv[1], parv[2]);
+		return 0;
+	}
+
+	/* only store invites for +i channels */
+	if(chptr && (chptr->mode.mode & MODE_INVITEONLY))
+	{
+		/* treat remote clients as chanops */
+		if(MyClient(source_p) && !is_chanop(msptr))
+		{
+			sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
+				   me.name, source_p->name, parv[2]);
+			return 0;
+		}
+
+		store_invite = 1;
+	}
+
+	if(MyConnect(source_p))
+	{
+		sendto_one(source_p, form_str(RPL_INVITING), 
+			   me.name, source_p->name,
+			   target_p->name, parv[2]);
+		if(target_p->user->away)
+			sendto_one_numeric(source_p, RPL_AWAY, form_str(RPL_AWAY),
+					   target_p->name, target_p->user->away);
+	}
+
+	if(MyConnect(target_p))
+	{
+		sendto_one(target_p, ":%s!%s@%s INVITE %s :%s", 
+			   source_p->name, source_p->username, source_p->host, 
+			   target_p->name, chptr->chname);
+
+		if(store_invite)
+		{
+			dlink_node *ptr;
+			/* already invited? */
+			DLINK_FOREACH(ptr, target_p->user->invited.head)
+			{
+				if(ptr->data == chptr)
+					return 0;
+			}
+
+			/* ok, if their invite list is too long, remove the tail */
+			if((int)dlink_list_length(&target_p->user->invited) >= 
+			   ConfigChannel.max_chans_per_user)
+			{
+				ptr = target_p->user->invited.tail;
+				del_invite(ptr->data, target_p);
+			}
+			
+			/* add user to channel invite list */
+			dlinkAddAlloc(target_p, &chptr->invites);
+				
+			/* add channel to user invite list */
+			dlinkAddAlloc(chptr, &target_p->user->invited);
+				
+		}
+	}
+	else if(target_p->from != client_p)
+	{
+		sendto_one_prefix(target_p, source_p, "INVITE", ":%s",
+				  chptr->chname);
+	}
+
+	return 0;
+}
+
+
 
 /* channel_pub_or_secret()
  *

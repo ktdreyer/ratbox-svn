@@ -254,19 +254,6 @@ destroy_channel(struct Channel *chptr)
 	free_channel(chptr);
 }
 
-/* del_invite()
- *
- * input	- channel to remove invite from, client to remove
- * output	-
- * side effects - user is removed from invite list, if exists
- */
-void
-del_invite(struct Channel *chptr, struct Client *who)
-{
-	dlinkFindDestroy(who, &chptr->invites);
-	dlinkFindDestroy(chptr, &who->user->invited);
-}
-
 /* is_banned()
  *
  * input	- channel to check bans for, user to check bans against

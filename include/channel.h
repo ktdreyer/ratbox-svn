@@ -167,6 +167,12 @@ struct ChCapCombo
 
 #define IsChannelName(name) ((name) && (*(name) == '#' || *(name) == '&'))
 
+
+#define del_invite(chptr, who) do { \
+			dlinkFindDestroy(who, &((struct Channel *)chptr)->invites); \
+			dlinkFindDestroy(chptr, &((struct Client *)who)->user->invited); } while(0)
+
+
 extern dlink_list global_channel_list;
 void init_channels(void);
 
@@ -192,8 +198,6 @@ extern void remove_user_from_channels(struct Client *);
 extern void free_channel_list(dlink_list *);
 
 extern int check_channel_name(const char *name);
-
-extern void del_invite(struct Channel *chptr, struct Client *who);
 
 extern const char *channel_modes(struct Channel *chptr, struct Client *who);
 
