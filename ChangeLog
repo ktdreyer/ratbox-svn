@@ -1,3 +1,17 @@
+androsyn    2002/08/25 22:11:45 EDT	(20020826_4)
+
+  Modified files:
+    .                    configure 
+    include              setup.h.in 
+  Log:
+  Update configure to be built with autoconf 2.13
+  
+  Revision  Changes      Path
+  7.155     +3074 -7082  ircd-ratbox/configure
+  7.58      +2 -2        ircd-ratbox/include/setup.h.in
+
+
+
 leeh        2002/08/25 22:08:17 EDT	(20020826_3)
 
   Modified files:
