@@ -1,3 +1,36 @@
+leeh        2003/12/12 17:44:45 EST	(20031212_1)
+
+  Modified files:
+    include              conf.h stdinc.h tools.h 
+    src                  conf.c io.c 
+  Added files:
+    .                    Makefile.in configure 
+    autoconf             configure.in install-sh 
+    include              setup.h.in 
+    src                  Makefile.in 
+  Removed files:
+    src                  Makefile 
+  Log:
+  - added autoconf stuff
+  - made includes and functions use configure output
+  - added support for vhosting
+  
+  Revision  Changes    Path
+  1.1       +45 -0     rserv/Makefile.in (new)
+  1.1       +27 -0     rserv/autoconf/configure.in (new)
+  1.1       +253 -0    rserv/autoconf/install-sh (new)
+  1.1       +1752 -0   rserv/configure (new)
+  1.3       +2 -0      rserv/include/conf.h
+  1.1       +43 -0     rserv/include/setup.h.in (new)
+  1.3       +25 -1     rserv/include/stdinc.h
+  1.3       +2 -0      rserv/include/tools.h
+  1.3       +0 -60     rserv/src/Makefile (dead)
+  1.1       +51 -0     rserv/src/Makefile.in (new)
+  1.3       +13 -5     rserv/src/conf.c
+  1.4       +5 -1      rserv/src/io.c
+
+
+
 leeh        2003/12/12 17:38:44 EST	(20031212_0)
 
   rserv/autoconf - New directory
