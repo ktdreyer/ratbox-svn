@@ -63,6 +63,7 @@ static void mr_capab(struct Client *client_p, struct Client *source_p,
                     int parc, char *parv[])
 {
   struct Capability *cap;
+  int i;
   char* p;
   char* s;
 #ifdef HAVE_LIBCRYPTO
@@ -82,49 +83,52 @@ static void mr_capab(struct Client *client_p, struct Client *source_p,
   else
     client_p->localClient->caps |= CAP_CAP;
 
-  for (s = strtoken(&p, parv[1], " "); s; s = strtoken(&p, NULL, " "))
+  for (i=1; i<parc; i++)
   {
-#ifdef HAVE_LIBCRYPTO
-    if ( (strncmp(s, "ENC:", 4) == 0) )
+    for (s = strtoken(&p, parv[i], " "); s; s = strtoken(&p, NULL, " "))
     {
-      /* Skip the "ENC:" portion */
-      s += 4;
+#ifdef HAVE_LIBCRYPTO
+      if ( (strncmp(s, "ENC:", 4) == 0) )
+      {
+        /* Skip the "ENC:" portion */
+        s += 4;
 
-      /* Check the remaining portion against the list of ciphers we
-       * have available (CipherTable).
-       */
-      for (ecap = CipherTable; ecap->name; ecap++)
-      {
-        if ( (!irccmp(ecap->name, s)) && (ecap->cap & CAP_ENC_MASK))
+        /* Check the remaining portion against the list of ciphers we
+         * have available (CipherTable).
+         */
+        for (ecap = CipherTable; ecap->name; ecap++)
         {
-          cipher = ecap->cap;
-          break;
+          if ( (!irccmp(ecap->name, s)) && (ecap->cap & CAP_ENC_MASK))
+          {
+            cipher = ecap->cap;
+            break;
+          }
+        }
+        /* Since the name and capabilities matched, use it. */
+        if (cipher != 0)
+        {
+          SetCapable(client_p, CAP_ENC);
+          client_p->localClient->enc_caps |= cipher;
+        }
+        else
+        {
+          /* cipher is still zero; we didn't find a matching entry. */
+          exit_client(client_p, client_p, client_p,
+                      "Cipher selected is not available here.");
+          return;
         }
       }
-      /* Since the name and capabilities matched, use it. */
-      if (cipher != 0)
-      {
-        SetCapable(client_p, CAP_ENC);
-        client_p->localClient->enc_caps |= cipher;
-      }
-      else
-      {
-        /* cipher is still zero; we didn't find a matching entry. */
-        exit_client(client_p, client_p, client_p,
-                    "Cipher selected is not available here.");
-        return;
-      }
-    }
-    else /* normal capab */
+      else /* normal capab */
 #endif
-      for (cap = captab; cap->name; cap++)
-      {
-        if (!irccmp(cap->name, s))
+        for (cap = captab; cap->name; cap++)
         {
-          client_p->localClient->caps |= cap->cap;
-          break;
+          if (!irccmp(cap->name, s))
+          {
+            client_p->localClient->caps |= cap->cap;
+            break;
+          }
         }
-      }
+    } /* for */
   } /* for */
 }
 
