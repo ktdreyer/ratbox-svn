@@ -1,3 +1,7 @@
+*** 20010426_2 by toot
+added max_accept to ircd.conf.. to replace hard coded MAX_ALLOW
+
+
 *** 20010426_1 by kreator
 - no need to ask for getopt() in README.FIRST, since we provide one (ejb-s
   fix)
