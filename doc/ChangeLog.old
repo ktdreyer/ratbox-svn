@@ -1,3 +1,20 @@
+leeh        2002/06/14 13:20:00 EDT	(20020614_0)
+
+  Modified files:
+    include              channel_mode.h 
+    src                  channel_mode.c 
+  Log:
+  - adxs patch to fix +a and numerous channel_mode.c bugs
+  
+    as far as im aware, this fixes all of the problems with +a, but we need
+    more testing.
+  
+  Revision  Changes    Path
+  7.10      +1 -11     ircd-hybrid-7/include/channel_mode.h
+  7.41      +380 -523  ircd-hybrid-7/src/channel_mode.c
+
+
+
 db          2002/06/12 15:29:39 EDT	(20020612_3)
 
   Modified files:
