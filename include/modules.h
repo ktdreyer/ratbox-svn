@@ -97,7 +97,7 @@ struct mapi_mheader_av1
 #else
 # define DECLARE_MODULE_AV1(name,reg,unreg,cl,hl,hfnlist, v) \
 	struct mapi_mheader_av1 name ## _mheader = { MAPI_V1, reg, unreg, cl, hl, hfnlist, v}
-void load_static_modules();
+void load_static_modules(void);
 #endif
 
 /* add a path */
