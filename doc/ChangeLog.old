@@ -1,3 +1,29 @@
+*** 20010525_13 by davidt
+- refcounts for outgoing sendbufs
+  send.c now creates linebufs, which send_linebuf attaches to the
+  clients sendq (increasing the refcount).  The same linebuf may
+  be attached multiple times to different clents.
+  As usual, send_queued_write will then call linebuf_flush,
+  which will attempt to write the data to the net, and call
+  linebuf_done_line (which now only frees the buf if the refcount
+  is zero) if successful.
+
+  We still do some weird stuff in send.c, and I'd be a lot happier if
+  we adjusted sprintf_irc.c to contain a vsnprintf function, instead
+  of relying on IRCD_BUFSIZE*2.  It might also be useful to create
+  a varargs linebuf_put function to avoid vsnprintf'ing into a buffer,
+  then copying that into a linebuf.
+
+- Add dlink_list locchanops, lochalfops, locvoiced, locpeons; to
+  struct Channel;
+  I'm not sure if this should stay...
+  On the one hand: it speeds up sendto_channel_local/sendto_common_channels
+  on channels with a large number of remote users.
+  On the other hand: it uses an extra 32bytes/channel + 48bytes/member,
+  and also slows down MODE +ovh/-ovh slightly on channels with lots of
+  local users.
+
+
 *** 20010525_12 by ejb
 - make version.c for vms actually work..
 
