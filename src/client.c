@@ -571,7 +571,7 @@ static void update_client_exit_stats(struct Client* client_p)
     }
 
   if(splitchecking && !splitmode)
-    check_splitmode();
+    check_splitmode(NULL);
 }
 
 /*

@@ -155,7 +155,7 @@ extern void    channel_modes(struct Channel *chptr, struct Client *who,
 extern void    check_spambot_warning(struct Client *source_p, const
                                      char *name);
 
-extern void check_splitmode();
+extern void check_splitmode(void *);
 
 /*
 ** Channel Related macros follow
