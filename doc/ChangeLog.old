@@ -1,3 +1,11 @@
+*** 20001203_8 by adrian
+
+
+* ziplinks is gone for the time being
+* david-t tidied up calling fd_note() in the right places
+
+
+
 *** 20001203_7 by adrian
 
 
