@@ -1,3 +1,7 @@
+*** 20001014_6 by toot
+forgot to change that parv to parc>2
+
+
 *** 20001014_5 by toot
 . don't allow CJOIN to a non-base channel
 . don't list sub-channels if they try to /join a sub-channel's
