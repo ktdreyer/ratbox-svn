@@ -1,3 +1,8 @@
+*** 20001224_8 by toot
+. tkline expiry kept crashing.. redid it so it won't
+. added VCHANS to 005 numeric
+
+
 *** 20001224_7 by db
 - tidied up isomer's parse.c mods... Then noted that someone was
   sending a numeric to "me" which led to...
