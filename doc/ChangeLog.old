@@ -1,3 +1,6 @@
+*** 20010106_28 by davidt
+Sigh, I was right.. fix %@+#chan stuff
+
 *** 20010106_27 by davidt
 Fixes for lazylinks kill
 Fixes for privmsg/notice for vchans
