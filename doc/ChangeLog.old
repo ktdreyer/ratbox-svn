@@ -1,3 +1,20 @@
+ejb         2002/07/18 12:24:09 EDT	(20020718_7)
+
+  Modified files:
+    modules/core         m_server.c 
+    src                  parse.c 
+  Log:
+  - print more verbose notice for servers which send less arguments
+    to a command than is required.
+  - drop local servers which do this.
+  - make m_server require 4 arguments, not 3.
+  
+  Revision  Changes    Path
+  1.87      +2 -2      ircd-hybrid-7/modules/core/m_server.c
+  7.132     +23 -7     ircd-hybrid-7/src/parse.c
+
+
+
 db          2002/07/18 11:43:18 EDT	(20020718_6)
 
   Modified files:
