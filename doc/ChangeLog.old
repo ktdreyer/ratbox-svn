@@ -1,3 +1,16 @@
+db          2002/03/31 23:52:44 EST	(20020401_0)
+
+  Modified files:
+    include              patchlevel.h 
+  Log:
+  enough goofing around children.
+  Ok folks. this is the penultimate one before the rc's
+  
+  Revision  Changes    Path
+  7.25      +1 -1      ircd-hybrid-7/include/patchlevel.h
+
+
+
 db          2002/03/30 12:04:28 EST	(20020330_0)
 
   Modified files:
