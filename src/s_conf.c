@@ -1545,6 +1545,9 @@ static int SplitUserHost(struct ConfItem *aconf)
  */
 static void lookup_confhost(struct ConfItem* aconf)
 {
+  unsigned long    ip;
+  unsigned long    mask;
+
   if (BadPtr(aconf->host) || BadPtr(aconf->name))
     {
       log(L_ERROR, "Host/server name error: (%s) (%s)",
@@ -1558,11 +1561,13 @@ static void lookup_confhost(struct ConfItem* aconf)
   ** Do name lookup now on hostnames given and store the
   ** ip numbers in conf structure.
   */
-
-  if (inetpton(DEF_FAM, aconf->host, &IN_ADDR(aconf->ipnum)) == 0)
+  if (is_address(aconf->host, &ip, &mask))
     {
-      conf_dns_lookup(aconf);
+      /* XXX IPV6 silliness to finish */
+/*      aconf->ipnum.s_addr = htonl(ip); */
     }
+  else 
+    conf_dns_lookup(aconf);
 }
 
 /*
