@@ -389,7 +389,7 @@ struct LocalUser
 #define FLAGS_IPHASH       0x1000 /* iphashed this client */
 #define FLAGS_CRYPTIN      0x2000 /* incoming data must be decrypted */
 #define FLAGS_CRYPTOUT     0x4000 /* outgoing data must be encrypted */
-#define FLAGS_WAITAUTH     0x8000 /* waiting for CRYPTAUTH command */
+#define FLAGS_WAITAUTH     0x8000 /* waiting for CRYPTLINK AUTH command */
 #define FLAGS_SERVLINK     0x10000 /* servlink has servlink process */
 
 /* umodes, settable flags */

@@ -1531,8 +1531,7 @@ connect_rsa_public_key_file: RSA_PUBLIC_KEY_FILE '=' QSTRING ';'
     if (file == NULL)
     {
       sendto_realops_flags(FLAGS_ALL,
-        "Ignoring config file entry rsa_public_key -- BIO open failed"
-        " (%s)", yylval.string);
+        "Ignoring rsa_public_key_file -- does %s exist?", yylval.string);
       break;
     }
 
@@ -1542,7 +1541,7 @@ connect_rsa_public_key_file: RSA_PUBLIC_KEY_FILE '=' QSTRING ';'
     if (yy_aconf->rsa_public_key == NULL)
     {
       sendto_realops_flags(FLAGS_ALL,
-        "Ignoring config file entry rsa_public_key -- couldn't extract key");
+        "Ignoring rsa_public_key_file -- Key invalid; check key syntax.");
       break;
     }
 
@@ -1641,47 +1640,36 @@ connect_cipher_preference: CIPHER_PREFERENCE '=' QSTRING ';'
   {
 #ifdef HAVE_LIBCRYPTO
     struct EncCapability *ecap;
-    struct EncPreference *epref;
-    char *s, *p;
-    int cipher_count = 0;
+    char *cipher_name;
     int found = 0;
-    int i = 0;
 
-    MyFree(yy_aconf->cipher_preference);
-    yy_aconf->cipher_preference = MyMalloc(sizeof(struct EncPreference)
-                                   * (NUM_CAP_ENC+1));
+    yy_aconf->cipher_preference = NULL;
 
-    for(i = 0; i < NUM_CAP_ENC; i++)
+    cipher_name = yylval.string;
+
+    for (ecap = CipherTable; ecap->name; ecap++)
     {
-      yy_aconf->cipher_preference[i].ecap = &enccaptab[i];
-      yy_aconf->cipher_preference[i].priority = 0; /* disabled by default */
+      if ( (!strcasecmp(ecap->name, cipher_name)) &&
+           (ecap->cap & CAP_ENC_MASK))
+      {
+        yy_aconf->cipher_preference = ecap;
+        found = 1;
+      }
     }
 
-    /* set marker for end of array */
-    yy_aconf->cipher_preference[NUM_CAP_ENC].ecap = NULL;
-
-    for (s = strtoken(&p, yylval.string, ", "); s; s = strtoken(&p, NULL, ", "))
+    if (!found)
     {
-      found = 0;
-      for(epref = yy_aconf->cipher_preference; (ecap = epref->ecap); epref++)
-      {
-        if (!strcasecmp(s, ecap->name))
-        {
-          epref->priority = ++cipher_count;
-          found = 1;
-        }
-      }
-      if (!found)
-      {
-        sendto_realops_flags(FLAGS_ALL,
-			     "Invalid cipher '%s' ignored",
-			     s);
-      }
+      sendto_realops_flags(FLAGS_ALL, "Invalid cipher '%s' for %s",
+                           cipher_name, yy_aconf->name);
+      ilog(L_ERROR, "Invalid cipher '%s' for %s",
+                    cipher_name, yy_aconf->name);
     }
 #else
-    sendto_realops_flags(FLAGS_ALL,
-      "Ignoring 'cipher_preference' line for %s -- no OpenSSL support",
-       yy_aconf->name);
+      sendto_realops_flags(FLAGS_ALL,
+        "Ignoring 'cipher_preference' line for %s -- no OpenSSL support",
+         yy_aconf->name);
+      ilog(L_ERROR, "Ignoring 'cipher_preference' line for %s -- "
+                    "no OpenSSL support", yy_aconf->name);
 #endif
   };
 
@@ -2212,53 +2200,40 @@ general_default_cipher_preference: DEFAULT_CIPHER_PREFERENCE '=' QSTRING ';'
   {
 #ifdef HAVE_LIBCRYPTO
     struct EncCapability *ecap;
-    struct EncPreference *epref;
-    char *s, *p;
-    int cipher_count = 0;
+    char *cipher_name;
     int found = 0;
-    int i = 0;
 
-    MyFree(ConfigFileEntry.default_cipher_preference);
-    epref = ConfigFileEntry.default_cipher_preference
-      = MyMalloc(sizeof(struct EncPreference) * (NUM_CAP_ENC+1));
+    ConfigFileEntry.default_cipher_preference = NULL;
 
-    for(i = 0; i < NUM_CAP_ENC; i++)
+    cipher_name = yylval.string;
+
+    for (ecap = CipherTable; ecap->name; ecap++)
     {
-      epref[i].ecap = &enccaptab[i];
-      epref[i].priority = 0; /* disabled by default */
+      if ( (!strcasecmp(ecap->name, cipher_name)) &&
+           (ecap->cap & CAP_ENC_MASK))
+      {
+        ConfigFileEntry.default_cipher_preference = ecap;
+        found = 1;
+        break;
+      }
     }
 
-    /* set marker for end of array */
-    epref[NUM_CAP_ENC].ecap = NULL;
-
-    for (s = strtoken(&p, yylval.string, ", "); s; s = strtoken(&p, NULL, ", "))
+    if (!found)
     {
-      found = 0;
-      for(epref = ConfigFileEntry.default_cipher_preference;
-          (ecap = epref->ecap); epref++)
-      {
-        if (!strcasecmp(s, ecap->name))
-        {
-          epref->priority = ++cipher_count;
-          found = 1;
-        }
-      }
-      if (!found)
-      {
-        sendto_realops_flags(FLAGS_ALL,
-			     "Invalid cipher '%s' ignored",
-			     s);
-      }
+      sendto_realops_flags(FLAGS_ALL, "Invalid cipher '%s'", cipher_name);
+      ilog(L_ERROR, "Invalid cipher '%s'", cipher_name);
     }
 #else
-    sendto_realops_flags(FLAGS_ALL,
-      "Ignoring 'default_cipher_preference' -- no OpenSSL support");
+    sendto_realops_flags(FLAGS_ALL, "Ignoring 'default_cipher_preference' "
+                                    "-- no OpenSSL support");
+    ilog(L_ERROR, "Ignoring 'default_cipher_preference' "
+                  "-- no OpenSSL support");
 #endif
   } ;
 
 general_compression_level: COMPRESSION_LEVEL '=' expr ';'
   {
-    ConfigFileEntry.compression_level = $3;                                     
+    ConfigFileEntry.compression_level = $3;
 #ifndef HAVE_LIBZ
     sendto_realops_flags(FLAGS_ALL,
       "Ignoring compression_level = %d; -- no zlib support",

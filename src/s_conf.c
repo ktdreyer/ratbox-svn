@@ -80,7 +80,7 @@ static void lookup_confhost(struct ConfItem* aconf);
 static int  SplitUserHost( struct ConfItem * );
 
 static void     set_default_conf(void);
-static void     check_conf(void);
+static void     validate_conf(void);
 static void     read_conf(FBFILE*);
 static void     clear_out_old_conf(void);
 static void     flush_deleted_I_P(void);
@@ -227,7 +227,6 @@ void free_conf(struct ConfItem* aconf)
 #ifdef HAVE_LIBCRYPTO
   if (aconf->rsa_public_key)        { RSA_free(aconf->rsa_public_key); }
   if (aconf->rsa_public_key_file)   { MyFree(aconf->rsa_public_key_file); }
-  if (aconf->cipher_preference)     { MyFree(aconf->cipher_preference); }
 #endif
   MyFree((char*) aconf);
 }
@@ -1370,12 +1369,18 @@ int rehash(struct Client *client_p,struct Client *source_p, int sig)
   return 0;
 }
 
+/*
+ * set_default_conf()
+ *   - Set default values here.  This is called **PRIOR** to parsing the
+ *     configuration file.  If you want to do some validation of values
+ *     later, put them in validate_conf().
+ */
 #define YES     1
 #define NO      0
 static void set_default_conf(void)
 {
   class0 = find_class("default");       /* which one is the default class ? */
-  
+
 #ifdef HAVE_LIBCRYPTO
   ServerInfo.rsa_private_key = NULL;
   ServerInfo.rsa_private_key_file = NULL;
@@ -1394,11 +1399,11 @@ static void set_default_conf(void)
   ServerInfo.max_buffer = MAX_BUFFER;    /*       actually do anything! */
   /* Don't reset hub, as that will break lazylinks */
   /* ServerInfo.hub = NO; */
-  
+
   AdminInfo.name = NULL;
   AdminInfo.email = NULL;
   AdminInfo.description = NULL;
-  
+
   set_log_level(L_NOTICE);
 
   ConfigFileEntry.failed_oper_notice = YES;
@@ -1438,7 +1443,15 @@ static void set_default_conf(void)
   DupString(ConfigFileEntry.servlink_path, SLPATH);
   ConfigFileEntry.egdpool_path = NULL;
 #ifdef HAVE_LIBCRYPTO
-  ConfigFileEntry.default_cipher_preference = NULL;
+  /* jdc -- This is our default value for a cipher.  According to the
+   *        CRYPTLINK document (doc/cryptlink.txt), BF/128 must be supported
+   *        under all circumstances if cryptlinks are enabled.  So,
+   *        this will be our default.
+   *
+   *        NOTE: I apologise for the hard-coded value of "1" (BF/128).
+   *              This should be moved into a find_cipher() routine.
+   */
+  ConfigFileEntry.default_cipher_preference = &CipherTable[1];
 #endif
 #ifdef HAVE_LIBZ
   ConfigFileEntry.compression_level = 0;
@@ -1457,8 +1470,8 @@ static void set_default_conf(void)
   ConfigChannel.use_invex = NO;
   ConfigChannel.use_except= YES;
   ConfigChannel.use_knock= YES;
-  ConfigChannel.knock_delay = 30;
-  ConfigChannel.max_chans_per_user = 10;
+  ConfigChannel.knock_delay = 300;
+  ConfigChannel.max_chans_per_user = 15;
   ConfigChannel.maxbans = 25;
 
   ConfigFileEntry.persist_expire = 30 * 60;
@@ -1481,18 +1494,15 @@ static void read_conf(FBFILE* file)
 {
   scount = lineno = 0;
 
-  set_default_conf(); /* preset defaults */
-  yyparse(); /* wheee! */
-  check_conf();  /* make sure config items are valid */
-  check_class(); /* make sure classes are valid */
+  set_default_conf(); /* Set default values prior to conf parsing */
+  yyparse();          /* Load the values from the conf */
+  validate_conf();    /* Check to make sure some values are still okay. */
+                      /* Some global values are also loaded here. */
+  check_class();      /* Make sure classes are valid */
 }
 
-static void check_conf(void)
+static void validate_conf(void)
 {
-#ifdef HAVE_LIBCRYPTO
-  int i;
-#endif
-
   if(ConfigFileEntry.ts_warn_delta < TS_WARN_DELTA_MIN)
     ConfigFileEntry.ts_warn_delta = TS_WARN_DELTA_DEFAULT;
 
@@ -1501,33 +1511,12 @@ static void check_conf(void)
 
   if(ConfigFileEntry.servlink_path == NULL)
     DupString(ConfigFileEntry.servlink_path, SLPATH);
-  
+
   if(ServerInfo.network_name == NULL)
     DupString(ServerInfo.network_name,NETWORK_NAME_DEFAULT);
 
   if(ServerInfo.network_desc == NULL)
     DupString(ServerInfo.network_desc,NETWORK_DESC_DEFAULT);
-
-  if (!ConfigFileEntry.maximum_links)
-    ConfigFileEntry.maximum_links = MAXIMUM_LINKS_DEFAULT;
-
-  if (!ConfigFileEntry.max_targets)
-    ConfigFileEntry.max_targets = MAX_TARGETS_DEFAULT;
-
-  if (!ConfigChannel.knock_delay)
-    ConfigChannel.knock_delay = 300;
-
-  if (!ConfigFileEntry.caller_id_wait)
-    ConfigFileEntry.caller_id_wait = 60;
-  
-  if (!ConfigFileEntry.max_accept)
-     ConfigFileEntry.max_accept = 20;
-
-  if (!ConfigChannel.max_chans_per_user)
-     ConfigChannel.max_chans_per_user = 15;
-
-  if (!ConfigChannel.maxbans)
-     ConfigChannel.maxbans = 25;
 
   if ((ConfigFileEntry.client_flood < CLIENT_FLOOD_MIN) ||
       (ConfigFileEntry.client_flood > CLIENT_FLOOD_MAX))
@@ -1535,25 +1524,7 @@ static void check_conf(void)
 
   GlobalSetOptions.idletime = (ConfigFileEntry.idletime * 60);
 
-  if (!ConfigFileEntry.links_delay)
-        ConfigFileEntry.links_delay = LINKS_DELAY_DEFAULT;
-
   GlobalSetOptions.hide_server = ConfigFileEntry.hide_server;
-
-#ifdef HAVE_LIBCRYPTO
-  if (!ConfigFileEntry.default_cipher_preference)
-  {
-    ConfigFileEntry.default_cipher_preference
-      = MyMalloc(sizeof(struct EncPreference) * (NUM_CAP_ENC+1));
-
-    for(i = 0; i < NUM_CAP_ENC; i++)
-    {
-      ConfigFileEntry.default_cipher_preference[i].ecap = &enccaptab[i];
-      ConfigFileEntry.default_cipher_preference[i].priority = i+1;
-    }
-    ConfigFileEntry.default_cipher_preference[NUM_CAP_ENC].ecap = NULL;
-  }
-#endif
 }
 
 /*
@@ -2152,7 +2123,6 @@ static void clear_out_old_conf(void)
   MyFree(ConfigFileEntry.servlink_path);
   ConfigFileEntry.servlink_path = NULL;
 #ifdef HAVE_LIBCRYPTO
-  MyFree(ConfigFileEntry.default_cipher_preference);
   ConfigFileEntry.default_cipher_preference = NULL;
 #endif /* HAVE_LIBCRYPTO */
 

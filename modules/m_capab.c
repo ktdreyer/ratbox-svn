@@ -50,7 +50,7 @@ _moddeinit(void)
   mod_del_cmd(&capab_msgtab);
 }
 
-char *_version = "20001122";
+char *_version = "20010702";
 #endif
 
 /*
@@ -67,8 +67,7 @@ static void mr_capab(struct Client *client_p, struct Client *source_p,
   char* s;
 #ifdef HAVE_LIBCRYPTO
   struct EncCapability *ecap;
-  char* enc_s;
-  char* enc_p;
+  unsigned int cipher = 0;
 #endif
 
   /* ummm, this shouldn't happen. Could argue this should be logged etc. */
@@ -76,46 +75,56 @@ static void mr_capab(struct Client *client_p, struct Client *source_p,
     return;
 
   if (client_p->localClient->caps)
-    {
-      exit_client(client_p, client_p, client_p, "CAPAB received twice");
-      return;
-    }
+  {
+    exit_client(client_p, client_p, client_p, "CAPAB received twice");
+    return;
+  }
   else
     client_p->localClient->caps |= CAP_CAP;
 
   for (s = strtoken(&p, parv[1], " "); s; s = strtoken(&p, NULL, " "))
-    {
+  {
 #ifdef HAVE_LIBCRYPTO
-      if (0 == strncmp(s, "ENC:", 4))
+    if ( (strncmp(s, "ENC:", 4) == 0) )
+    {
+      /* Skip the "ENC:" portion */
+      s += 4;
+
+      /* Check the remaining portion against the list of ciphers we
+       * have available (CipherTable).
+       */
+      for (ecap = CipherTable; ecap->name; ecap++)
       {
-        s += 4; /* skip ENC: */
-        SetCapable(client_p, CAP_ENC);
-        /* parse list of ciphers */
-        for (enc_s = strtoken(&enc_p, s, ","); enc_s;
-             enc_s = strtoken(&enc_p, NULL, ","))
+        if ( (!strcasecmp(ecap->name, s)) && (ecap->cap & CAP_ENC_MASK))
         {
-          /* parse 'ENC:C1,C2,C3,C4' */
-          for (ecap = enccaptab; ecap->name; ecap++)
-          {
-            if ((0 == strcmp(ecap->name, enc_s)) &&
-                (ecap->cap & CAP_ENC_MASK))
-            {
-              client_p->localClient->enc_caps |= ecap->cap;
-              break;
-            }
-          }
+          cipher = ecap->cap;
+          break;
         }
       }
-      else /* normal capab */
-#endif
-        for (cap = captab; cap->name; cap++)
-        {
-          if (0 == strcmp(cap->name, s))
-          {
-            client_p->localClient->caps |= cap->cap;
-            break;
-          }
-        }
+      /* Since the name and capabilities matched, use it. */
+      if (cipher != 0)
+      {
+        SetCapable(client_p, CAP_ENC);
+        client_p->localClient->enc_caps |= cipher;
+      }
+      else
+      {
+        /* cipher is still zero; we didn't find a matching entry. */
+        exit_client(client_p, client_p, client_p,
+                    "Cipher selected is not available here.");
+        return;
+      }
     }
+    else /* normal capab */
+#endif
+      for (cap = captab; cap->name; cap++)
+      {
+        if (!irccmp(cap->name, s))
+        {
+          client_p->localClient->caps |= cap->cap;
+          break;
+        }
+      }
+  } /* for */
 }
 

@@ -83,7 +83,7 @@ struct ConfItem
 #ifdef HAVE_LIBCRYPTO
   char *           rsa_public_key_file;
   RSA *            rsa_public_key;
-  struct EncPreference *cipher_preference;
+  struct EncCapability *cipher_preference;
 #endif
 };
 
@@ -235,7 +235,7 @@ struct config_file_entry
   int           client_flood;
   int           use_egd;
 #ifdef HAVE_LIBCRYPTO
-  struct EncPreference *default_cipher_preference;
+  struct EncCapability *default_cipher_preference;
 #endif
 };
 

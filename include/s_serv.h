@@ -57,25 +57,26 @@ struct Capability
   unsigned int cap;       /* mask value */
 };
 
-#define CAP_CAP         0x00000001      /* received a CAP to begin with */
-#define CAP_QS          0x00000002      /* Can handle quit storm removal */
-#define CAP_EX          0x00000008      /* Can do channel +e exemptions */
-#define CAP_CHW         0x00000010      /* Can do channel wall @# */
-#define CAP_LL          0x00000020      /* Can do lazy links */
-#define CAP_IE          0x00000040      /* Can do invite exceptions */
-#define CAP_EOB	        0x00000100      /* Can do EOB message */
-#define CAP_KLN	        0x00000200      /* Can do KLINE message */
-#define CAP_GLN	        0x00000400      /* Can do GLINE message */
-#define CAP_HOPS        0x00000800      /* can do half ops (+h) */
-#define CAP_HUB         0x00001000      /* This server is a HUB */
-#define CAP_AOPS        0x00002000      /* Can do anon ops (+a) */
-#define CAP_UID         0x00004000      /* Can do UIDs */
-#define CAP_ZIP		0x00008000	/* Can do ZIPlinks */
-#define CAP_ENC         0x00010000      /* Can do ENCrypted links */
+#define CAP_CAP         0x00000001   /* received a CAP to begin with */
+#define CAP_QS          0x00000002   /* Can handle quit storm removal */
+#define CAP_EX          0x00000008   /* Can do channel +e exemptions */
+#define CAP_CHW         0x00000010   /* Can do channel wall @# */
+#define CAP_LL          0x00000020   /* Can do lazy links */
+#define CAP_IE          0x00000040   /* Can do invite exceptions */
+#define CAP_EOB	        0x00000100   /* Can do EOB message */
+#define CAP_KLN	        0x00000200   /* Can do KLINE message */
+#define CAP_GLN	        0x00000400   /* Can do GLINE message */
+#define CAP_HOPS        0x00000800   /* can do half ops (+h) */
+#define CAP_HUB         0x00001000   /* This server is a HUB */
+#define CAP_AOPS        0x00002000   /* Can do anon ops (+a) */
+#define CAP_UID         0x00004000   /* Can do UIDs */
+#define CAP_ZIP         0x00008000   /* Can do ZIPlinks */
+#define CAP_ENC         0x00010000   /* Can do ENCrypted links */
 
-#define CAP_MASK        (CAP_QS|CAP_EX|CAP_CHW|\
-                        CAP_IE|CAP_EOB|CAP_KLN|CAP_GLN|\
-                        CAP_HOPS|CAP_AOPS|CAP_UID)
+#define CAP_MASK        (CAP_QS  | CAP_EX   | CAP_CHW  | \
+                         CAP_IE  | CAP_EOB  | CAP_KLN  | \
+                         CAP_GLN | CAP_HOPS | CAP_AOPS | \
+                         CAP_UID)
 
 #ifdef HAVE_LIBZ
 #define CAP_ZIP_SUPPORTED       CAP_ZIP
@@ -86,19 +87,18 @@ struct Capability
 #ifdef HAVE_LIBCRYPTO
 struct EncCapability
 {
-  char*         name;     /* name of capability */
+  char *        name;     /* name of capability (cipher name) */
   unsigned int  cap;      /* mask value */
   int           keylen;   /* keylength (bytes) */
-  int           cipherid; /* cipher id */
+  int           cipherid; /* ID number of cipher type (BF, IDEA, etc.) */
 };
 
-struct EncPreference
-{
-  struct EncCapability  *ecap;
-  int           priority;
-};
-
-/* Ciphers */
+/*
+ * Cipher ID numbers
+ *   - DO NOT CHANGE THESE!  Otherwise you break backwards compatibility
+ *     If you wish to add a new cipher, append it to the list.  Do not
+ *     have it's value replace another.
+ */
 #define CIPHER_BF       1
 #define CIPHER_CAST     2
 #define CIPHER_DES      3
@@ -119,11 +119,10 @@ struct EncPreference
 #define CAP_ENC_RC5_12_128      0x00000080
 #define CAP_ENC_RC5_16_128      0x00000100
 
-#define CAP_ENC_ALL     0xFFFFFFFF                                              
+#define CAP_ENC_ALL             0xFFFFFFFF
 
-#define NUM_CAP_ENC     9
 
-/* Blowfish */                        
+/* */
 #ifdef HAVE_EVP_BF_CFB
 #define USE_CIPHER_BF       1
 /* Check for bug handling variable length blowfish keys */
@@ -166,6 +165,7 @@ struct EncPreference
 #else
 #define USE_CIPHER_RC5      0
 #endif
+
 
 /* Only enable ciphers supported by available version of OpenSSL */
 #define CAP_ENC_MASK    \
@@ -244,7 +244,7 @@ extern struct SlinkRplDef slinkrpltab[];
  */
 extern struct Capability captab[];
 #ifdef HAVE_LIBCRYPTO
-extern struct EncCapability enccaptab[NUM_CAP_ENC+1];
+extern struct EncCapability CipherTable[];
 #endif
 
 extern int MaxClientCount;     /* GLOBAL - highest number of clients */
@@ -281,8 +281,9 @@ extern int         serv_connect(struct ConfItem *, struct Client *);
 extern unsigned long nextFreeMask(void);
 extern void        cryptlink_init(struct Client *client_p,
                                   struct ConfItem *aconf, int fd);
-extern void        cryptlink_regen_key(void *);
-extern void        cryptlink_error( struct Client *client_p, char *reason );    
+extern void cryptlink_regen_key(void *);
+extern void cryptlink_error(struct Client *client_p, char *type,
+                            char *reason, char *client_reason);
 
 extern struct Client *uplink; /* NON NULL if leaf and is this servers uplink */
 
@@ -290,8 +291,8 @@ void add_lazylinkchannel(struct Client *client_p, struct Channel *chptr);
 void add_lazylinkclient(struct Client *client_p, struct Client *source_p);
 void remove_lazylink_flags(unsigned long mask);
 void client_burst_if_needed(struct Client *client_p, struct Client *target_p);
-struct EncCapability *select_cipher(struct Client *client_p,
-                                    struct ConfItem *aconf);
+struct EncCapability *check_cipher(struct Client *client_p,
+                                   struct ConfItem *aconf);
 
 #endif /* INCLUDED_s_serv_h */
 

@@ -574,16 +574,13 @@ load_all_modules(int check)
 	mod_add_cmd(&away_msgtab);
 	mod_add_cmd(&capab_msgtab);
 	mod_add_cmd(&cburst_msgtab);
-#ifdef HAVE_LIBCRYPTO
-	mod_add_cmd(&challenge_msgtab);
-#endif
 	mod_add_cmd(&cjoin_msgtab);
 	mod_add_cmd(&client_msgtab);
 	mod_add_cmd(&close_msgtab);
 	mod_add_cmd(&connect_msgtab);
 #ifdef HAVE_LIBCRYPTO
-        mod_add_cmd(&cryptserv_msgtab);
-        mod_add_cmd(&cryptauth_msgtab);
+	mod_add_cmd(&challenge_msgtab);
+        mod_add_cmd(&cryptlink_msgtab);
 #endif
         mod_add_cmd(&die_msgtab);
 	mod_add_cmd(&dmem_msgtab);
