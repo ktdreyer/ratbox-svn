@@ -40,9 +40,8 @@
 #include "balloc.h"
 
 
-/* XXX assummed 32 bit ints */
-int links_count=0;
-int user_count=0;
+u_int32_t links_count=0;
+u_int32_t user_count=0;
 
 /*
  * initUser
