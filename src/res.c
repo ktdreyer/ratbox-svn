@@ -1105,7 +1105,7 @@ res_readreply(int fd, void *data)
            * callback was being called with a value of 0x2C != NULL
 	   *
 	   */
-	  /*cp = make_cache(request);*/
+	  cp = make_cache(request);
 	  (*request->query.callback)(request->query.vptr,
 				     (cp) ? &cp->reply : 0);
 	  rem_request(request);
