@@ -1,3 +1,7 @@
+*** 19990910_4 by tomh
+type cleanups
+
+
 *** 19990910_3 by tomh
 change poll.h to sys/poll.h
 
