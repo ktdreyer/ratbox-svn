@@ -41,6 +41,7 @@
 #include "tools.h"
 #include "s_conf.h"
 #include "s_serv.h"
+#include "resv.h"
 #include "s_stats.h"
 #include "channel.h"
 #include "class.h"

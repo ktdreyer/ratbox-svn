@@ -221,7 +221,7 @@ void report_resv(struct Client *source_p)
 	       resv_np->name, resv_np->reason, "*", "*");
 }	       
 
-clean_resv_nick(char *nick)
+int clean_resv_nick(char *nick)
 {
   char tmpch;
   int as=0;
@@ -231,7 +231,7 @@ clean_resv_nick(char *nick)
   if(*nick == '-' || IsDigit(*nick))
     return 0;
     
-  while(tmpch = *nick++)
+  while((tmpch = *nick++))
   {
     if(tmpch == '?')
       q++;
