@@ -318,6 +318,7 @@ AC_OUTPUT(                   \
  adns/Makefile		     \
  include/Makefile            \
  messages/Makefile           \
+ messages/translations/Makefile \
  modules/Makefile            \
  tools/Makefile              \
  doc/Makefile                \

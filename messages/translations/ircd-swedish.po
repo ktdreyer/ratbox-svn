@@ -760,7 +760,6 @@ msgstr	":%s 485 %s :Kan inte byta smeknamn när man är bannad eller "
 
 #: ../src/messages.tab:524
 #, c-format
-msgid	""
 msgid	":%s 491 %s :Only few of mere mortals may try to enter the twilight "
 	"zone"
 msgstr	":%s 491 %s :Tyvärr, du har inte vad som krävs för att vara en "
