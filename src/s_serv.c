@@ -1011,11 +1011,10 @@ int server_estab(struct Client *client_p)
 
   SetServer(client_p);
 
- /* Update the capability combination usage counts. -A1kmm */
+ /* Update the capability combination usage counts */
   set_chcap_usage_counts(client_p);
 
-  /* Some day, all these lists will be consolidated *sigh* */
-  add_client_to_llist(&(me.serv->servers), client_p);
+  dlinkAdd(client_p, &client_p->lnode, &me.serv->servers);
 
   m = dlinkFind(&unknown_list, client_p);
   assert(m != NULL);

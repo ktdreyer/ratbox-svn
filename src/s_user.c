@@ -472,7 +472,7 @@ register_local_user(struct Client *client_p, struct Client *source_p,
 
   /* XXX source_p->servptr is &me, since local client */
   source_p->servptr = find_server(user->server);
-  add_client_to_llist(&(source_p->servptr->serv->users), source_p);
+  dlinkAdd(source_p, &source_p->lnode, &source_p->servptr->serv->users);
 
   /* Increment our total user count here */
   if (++Count.total > Count.max_tot)
@@ -547,7 +547,7 @@ register_remote_user(struct Client *client_p, struct Client *source_p,
       return exit_client(NULL, source_p, &me, "Ghosted Client");
     }
 
-  add_client_to_llist(&(source_p->servptr->serv->users), source_p);
+  dlinkAdd(source_p, &source_p->lnode, &source_p->servptr->serv->users);
 
   if ((target_p = find_server(user->server)) && target_p->from != source_p->from)
     {

@@ -628,38 +628,6 @@ remove_client_from_list(struct Client* client_p)
 }
 
 
-/* Functions taken from +CSr31, paranoified to check that the client
-** isn't on a llist already when adding, and is there when removing -orabidoo
-*/
-void add_client_to_llist(struct Client **bucket, struct Client *client)
-{
-  if (!client->lprev && !client->lnext)
-    {
-      client->lprev = NULL;
-      if ((client->lnext = *bucket) != NULL)
-        client->lnext->lprev = client;
-      *bucket = client;
-    }
-}
-
-void
-del_client_from_llist(struct Client **bucket, struct Client *client)
-{
-  if (client->lprev)
-    {
-      client->lprev->lnext = client->lnext;
-    }
-  else if (*bucket == client)
-    {
-      *bucket = client->lnext;
-    }
-  if (client->lnext)
-    {
-      client->lnext->lprev = client->lprev;
-    }
-  client->lnext = client->lprev = NULL;
-}
-
 /*
  * find_person	- find person by (nick)name.
  * inputs	- pointer to name
@@ -809,8 +777,7 @@ static void exit_one_client(struct Client *client_p,
   if (IsServer(source_p))
     {
       if (source_p->servptr && source_p->servptr->serv)
-        del_client_from_llist(&(source_p->servptr->serv->servers),
-                                    source_p);
+        dlinkDelete(&source_p->lnode, &source_p->servptr->serv->servers);
       else
         ts_warn("server %s without servptr!", source_p->name);
 
@@ -819,7 +786,7 @@ static void exit_one_client(struct Client *client_p,
     }
   else if (source_p->servptr && source_p->servptr->serv)
     {
-      del_client_from_llist(&(source_p->servptr->serv->users), source_p);
+      dlinkDelete(&source_p->lnode, &source_p->servptr->serv->users);
     }
   /* there are clients w/o a servptr: unregistered ones */
 
@@ -948,7 +915,7 @@ static void recurse_send_quits(struct Client *client_p, struct Client *source_p,
                                 const char* myname)
 {
   struct Client *target_p;
-
+  dlink_node *ptr, *ptr_next;
   /* If this server can handle quit storm (QS) removal
    * of dependents, just send the SQUIT
    */
@@ -957,20 +924,32 @@ static void recurse_send_quits(struct Client *client_p, struct Client *source_p,
     {
       if (match(myname, source_p->name))
         {
-          for (target_p = source_p->serv->users; target_p; target_p = target_p->lnext)
+          DLINK_FOREACH_SAFE(ptr, ptr_next, source_p->serv->users.head)
+          {
+            target_p = (struct Client *)ptr->data;
             sendto_one(to, ":%s QUIT :%s", target_p->name, comment);
-          for (target_p = source_p->serv->servers; target_p; target_p = target_p->lnext)
+          }
+          DLINK_FOREACH_SAFE(ptr, ptr_next, source_p->serv->servers.head)
+          {
+            target_p = (struct Client *)ptr->data;
             recurse_send_quits(client_p, target_p, to, comment, myname);
+          }
         }
       else
         sendto_one(to, "SQUIT %s :%s", source_p->name, me.name);
     }
   else
     {
-      for (target_p = source_p->serv->users; target_p; target_p = target_p->lnext)
+      DLINK_FOREACH_SAFE(ptr, ptr_next, source_p->serv->users.head)
+      {
+        target_p = (struct Client *)ptr->data;
         sendto_one(to, ":%s QUIT :%s", target_p->name, comment);
-      for (target_p = source_p->serv->servers; target_p; target_p = target_p->lnext)
+      }
+      DLINK_FOREACH_SAFE(ptr, ptr_next, source_p->serv->servers.head)
+      {
+        target_p = (struct Client *)ptr->data;
         recurse_send_quits(client_p, target_p, to, comment, myname);
+      }
       if (!match(myname, source_p->name))
         sendto_one(to, "SQUIT %s :%s", source_p->name, me.name);
     }
@@ -987,27 +966,25 @@ static void recurse_send_quits(struct Client *client_p, struct Client *source_p,
  */
 static void recurse_remove_clients(struct Client* source_p, const char* comment)
 {
-  struct Client *target_p;
-
+  struct Client *target_p; 
+  dlink_node *ptr, *ptr_next;
   if (IsMe(source_p))
     return;
 
   if (source_p->serv == NULL)     /* oooops. uh this is actually a major bug */
     return;
 
-  while ((target_p = source_p->serv->users))
+  DLINK_FOREACH_SAFE(ptr, ptr_next, source_p->serv->users.head)
     {
+      target_p = (struct Client *)ptr->data;
       target_p->flags |= FLAGS_KILLED;
       exit_one_client(NULL, target_p, &me, comment);
     }
 
-  while ((target_p = source_p->serv->servers))
+  DLINK_FOREACH_SAFE(ptr, ptr_next, source_p->serv->servers.head)
     {
+      target_p = (struct Client *)ptr->data;
       recurse_remove_clients(target_p, comment);
-      /*
-      ** a server marked as "KILLED" won't send a SQUIT 
-      ** in exit_one_client()   -orabidoo
-      */
       target_p->flags |= FLAGS_KILLED;
       exit_one_client(NULL, target_p, &me, me.name);
     }

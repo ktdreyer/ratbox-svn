@@ -176,12 +176,11 @@ static struct squit_parms *find_squit(struct Client *client_p,
                                       char *server)
 {
   static struct squit_parms found_squit;
-  static struct Client *target_p;
+  static struct Client *target_p = NULL, *p;
   struct ConfItem *aconf;
   dlink_node *ptr;
   found_squit.target_p = NULL;
   found_squit.server_name = NULL;
-
   /*
   ** To accomodate host masking, a squit for a masked server
   ** name is expanded if the incoming mask is the same as
@@ -206,15 +205,15 @@ static struct squit_parms *find_squit(struct Client *client_p,
   */
   DLINK_FOREACH(ptr, GlobalClientList.head)
     {
-      target_p = (struct Client *)ptr->data;
-
-      if(!IsServer(target_p) || !IsMe(target_p))
-        continue;
-
-      if(match(server, target_p->name))
-        break;  	        
-      else
-        target_p = NULL;
+      p = (struct Client *)ptr->data;
+      if(IsServer(p) && !IsMe(p) )
+      {
+        if(match(server, p->name))
+        {
+          target_p = p;
+          break;  	        
+        }
+      }
     }
 
   
@@ -242,3 +241,4 @@ static struct squit_parms *find_squit(struct Client *client_p,
   else
     return( NULL );
 }
+

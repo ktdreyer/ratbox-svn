@@ -88,8 +88,8 @@ struct Server
   const char*      up;          /* Pointer to scache name */
   char             by[NICKLEN];
   struct ConfItem* sconf;       /* connect{} pointer for this server */
-  struct Client*   servers;     /* Servers on this server */
-  struct Client*   users;       /* Users on this server */
+  dlink_list       servers;
+  dlink_list       users;
 };
 
 struct SlinkRpl
@@ -114,9 +114,7 @@ struct ZipStats
 struct Client
 {
   dlink_node        node;
-
-  struct Client*    lnext;      /* Used for Server->servers/users */
-  struct Client*    lprev;      /* Used for Server->servers/users */
+  dlink_node        lnode;
 
   struct User*      user;       /* ...defined, if this is a User */
   struct Server*    serv;       /* ...defined, if this is a server */
@@ -578,10 +576,6 @@ extern void           free_client(struct Client* client);
 #define add_client_to_list(client) dlinkAdd(client, &client->node, &GlobalClientList)
 
 extern void           remove_client_from_list(struct Client *);
-extern void           add_client_to_llist(struct Client** list, 
-                                          struct Client* client);
-extern void           del_client_from_llist(struct Client** list, 
-                                            struct Client* client);
 extern int            exit_client(struct Client*, struct Client*, 
                                   struct Client*, const char*);
 
