@@ -1,3 +1,17 @@
+leeh        2002/07/11 11:01:58 EDT	(20020711_5)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+  Log:
+  - Joans configure fixes for forte
+  
+  Revision  Changes    Path
+  7.141     +5 -1      ircd-hybrid-7/autoconf/configure.in
+  7.144     +216 -212  ircd-hybrid-7/configure
+
+
+
 leeh        2002/07/11 09:26:58 EDT	(20020711_4)
 
   Modified files:
