@@ -498,9 +498,6 @@ static int init_finish(adns_state ads) {
     addserver(ads,ia);
   }
 
-//  proto= getprotobyname("udp"); if (!proto) { r= ENOPROTOOPT; goto x_free; }
-//  ads->udpsocket= socket(AF_INET,SOCK_DGRAM,proto->p_proto);
-
   ads->udpsocket = comm_open(AF_INET, SOCK_DGRAM, 0, "UDP Resolver socket");
   if (ads->udpsocket<0) { r= errno; goto x_free; }
 
