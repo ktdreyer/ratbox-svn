@@ -38,19 +38,17 @@ static dlink_list active_jupes;
 
 static struct client *jupeserv_p;
 
-static int u_jupeserv_jupe(struct client *, struct lconn *, const char **, int);
-static int u_jupeserv_unjupe(struct client *, struct lconn *, const char **, int);
+static int o_jupeserv_jupe(struct client *, struct lconn *, const char **, int);
+static int o_jupeserv_unjupe(struct client *, struct lconn *, const char **, int);
 
-static int s_jupeserv_jupe(struct client *, struct lconn *, const char **, int);
-static int s_jupeserv_unjupe(struct client *, struct lconn *, const char **, int);
 static int s_jupeserv_calljupe(struct client *, struct lconn *, const char **, int);
 static int s_jupeserv_callunjupe(struct client *, struct lconn *, const char **, int);
 static int s_jupeserv_pending(struct client *, struct lconn *, const char **, int);
 
 static struct service_command jupeserv_command[] =
 {
-	{ "JUPE",	&s_jupeserv_jupe,	2, NULL, 1, 0L, 0, 0, CONF_OPER_JUPESERV, 0 },
-	{ "UNJUPE",	&s_jupeserv_unjupe,	1, NULL, 1, 0L, 0, 0, CONF_OPER_JUPESERV, 0 },
+	{ "JUPE",	&o_jupeserv_jupe,	2, NULL, 1, 0L, 0, 0, CONF_OPER_JUPESERV, 0 },
+	{ "UNJUPE",	&o_jupeserv_unjupe,	1, NULL, 1, 0L, 0, 0, CONF_OPER_JUPESERV, 0 },
 	{ "CALLJUPE",	&s_jupeserv_calljupe,	1, NULL, 1, 0L, 0, 1, 0, UMODE_JUPES },
 	{ "CALLUNJUPE",	&s_jupeserv_callunjupe,	1, NULL, 1, 0L, 0, 1, 0, UMODE_JUPES },
 	{ "PENDING",	&s_jupeserv_pending,	0, NULL, 1, 0L, 0, 1, 0, UMODE_JUPES }
@@ -58,8 +56,8 @@ static struct service_command jupeserv_command[] =
 
 static struct ucommand_handler jupeserv_ucommand[] =
 {
-	{ "jupe",	u_jupeserv_jupe,	CONF_OPER_JUPESERV, 2, 1, NULL },
-	{ "unjupe",	u_jupeserv_unjupe,	CONF_OPER_JUPESERV, 1, 1, NULL },
+	{ "jupe",	o_jupeserv_jupe,	CONF_OPER_JUPESERV, 2, 1, NULL },
+	{ "unjupe",	o_jupeserv_unjupe,	CONF_OPER_JUPESERV, 1, 1, NULL },
 	{ "\0",	NULL, 0, 0, 0, NULL }
 };
 
@@ -229,20 +227,22 @@ valid_jupe(const char *servername)
 }
 
 static int
-u_jupeserv_jupe(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+o_jupeserv_jupe(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct server_jupe *jupe_p;
 	char *reason;
 
 	if(!valid_jupe(parv[0]))
 	{
-		sendto_one(conn_p, "Servername %s is invalid", parv[0]);
+		service_send(jupeserv_p, client_p, conn_p,
+				"Servername %s is invalid", parv[0]);
 		return 0;
 	}
 
 	if((jupe_p = find_jupe(parv[0], &active_jupes)))
 	{
-		sendto_one(conn_p, "Server %s is already juped", jupe_p->name);
+		service_send(jupeserv_p, client_p, conn_p,
+				"Server %s is already juped", jupe_p->name);
 		return 0;
 	}
 
@@ -261,7 +261,8 @@ u_jupeserv_jupe(struct client *client_p, struct lconn *conn_p, const char *parv[
 	if(strlen(reason) > REASONLEN)
 		reason[REASONLEN] = '\0';
 
-	slog(jupeserv_p, 1, "%s - JUPE %s %s", conn_p->oper, parv[0], reason);
+	slog(jupeserv_p, 1, "%s - JUPE %s %s", 
+		OPER_NAME(client_p, conn_p), jupe_p->name, reason);
 
 	if(EmptyString(reason))
 		jupe_p->reason = my_strdup("No Reason");
@@ -271,108 +272,28 @@ u_jupeserv_jupe(struct client *client_p, struct lconn *conn_p, const char *parv[
 	loc_sqlite_exec(NULL, "INSERT INTO jupes VALUES(%Q, %Q)",
 			jupe_p->name, jupe_p->reason);
 
-	sendto_server(":%s WALLOPS :JUPE %s by %s [%s]",
-			MYNAME, jupe_p->name, conn_p->name, jupe_p->reason);
-	add_jupe(jupe_p);
-	return 0;
-}
-
-static int
-u_jupeserv_unjupe(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
-{
-	struct server_jupe *ajupe_p, *jupe_p;
-
-	if((jupe_p = find_jupe(parv[0], &active_jupes)) == NULL)
-	{
-		sendto_one(conn_p, "Server %s is not juped", parv[1]);
-		return 0;
-	}
-
-	if((ajupe_p = find_jupe(parv[0], &pending_jupes)))
-	{
-		dlink_delete(&ajupe_p->node, &pending_jupes);
-		free_jupe(ajupe_p);
-	}
-
-	slog(jupeserv_p, 1, "%s - UNJUPE %s", conn_p->oper, parv[0]);
-
-	loc_sqlite_exec(NULL, "DELETE FROM jupes WHERE servername = %Q",
-			jupe_p->name);
-
-	sendto_server(":%s WALLOPS :UNJUPE %s by %s",
-			MYNAME, jupe_p->name, conn_p->name);
-
-	sendto_server("SQUIT %s :Unjuped", jupe_p->name);
-	dlink_delete(&jupe_p->node, &active_jupes);
-	free_jupe(jupe_p);
-	return 0;
-}
-
-static int
-s_jupeserv_jupe(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
-{
-	struct server_jupe *jupe_p;
-	char *reason;
-
-	if(!valid_jupe(parv[0]))
-	{
-		service_error(jupeserv_p, client_p, "Servername %s is invalid",
-				parv[0]);
-		return 0;
-	}
-
-	if((jupe_p = find_jupe(parv[0], &active_jupes)))
-	{
-		service_error(jupeserv_p, client_p, "Server %s is already juped",
-				jupe_p->name);
-		return 0;
-	}
-
-	/* if theres a pending oper jupe, cancel it because we're gunna
-	 * place a proper one.. --fl
-	 */
-	if((jupe_p = find_jupe(parv[0], &pending_jupes)))
-	{
-		dlink_delete(&jupe_p->node, &pending_jupes);
-		free_jupe(jupe_p);
-	}
-
-	jupe_p = make_jupe(parv[0]);
-	reason = rebuild_params(parv, parc, 1);
-
-	if(strlen(reason) > REASONLEN)
-		reason[REASONLEN] = '\0';
-
-	slog(jupeserv_p, 1, "%s - JUPE %s %s",
-		client_p->user->oper->name, parv[0], reason);
-
-	if(EmptyString(reason))
-		jupe_p->reason = my_strdup("No Reason");
+	if(client_p)
+		sendto_server(":%s WALLOPS :JUPE set on %s by %s!%s@%s on %s [%s]",
+				MYNAME, jupe_p->name, client_p->name,
+				client_p->user->username, client_p->user->servername,
+				client_p->user->host, jupe_p->reason);
 	else
-		jupe_p->reason = my_strdup(reason);
-
-	loc_sqlite_exec(NULL, "INSERT INTO jupes VALUES(%Q, %Q)",
-			jupe_p->name, jupe_p->reason);
-
-	sendto_server(":%s WALLOPS :JUPE set on %s by %s!%s@%s on %s [%s]",
-			MYNAME, jupe_p->name, client_p->name,
-			client_p->user->username, client_p->user->servername,
-			client_p->user->host, jupe_p->reason);
+		sendto_server(":%s WALLOPS :JUPE %s by %s [%s]",
+				MYNAME, jupe_p->name, conn_p->name, jupe_p->reason);
 
 	add_jupe(jupe_p);
-
 	return 0;
 }
 
 static int
-s_jupeserv_unjupe(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+o_jupeserv_unjupe(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct server_jupe *ajupe_p, *jupe_p;
 
 	if((jupe_p = find_jupe(parv[0], &active_jupes)) == NULL)
 	{
-		service_error(jupeserv_p, client_p, "Server %s is not juped",
-				parv[0]);
+		service_send(jupeserv_p, client_p, conn_p,
+				"Server %s is not juped", parv[0]);
 		return 0;
 	}
 
@@ -382,20 +303,23 @@ s_jupeserv_unjupe(struct client *client_p, struct lconn *conn_p, const char *par
 		free_jupe(ajupe_p);
 	}
 
-	slog(jupeserv_p, 1, "%s - UNJUPE %s",
-		client_p->user->oper->name, parv[0]);
+	slog(jupeserv_p, 1, "%s - UNJUPE %s", 
+		OPER_NAME(client_p, conn_p), jupe_p->name);
 
 	loc_sqlite_exec(NULL, "DELETE FROM jupes WHERE servername = %Q",
 			jupe_p->name);
 
-	sendto_server(":%s WALLOPS :UNJUPE set on %s by %s!%s@%s",
-			MYNAME, jupe_p->name, client_p->name,
-			client_p->user->username, client_p->user->host);
+	if(client_p)
+		sendto_server(":%s WALLOPS :UNJUPE set on %s by %s!%s@%s",
+				MYNAME, jupe_p->name, client_p->name,
+				client_p->user->username, client_p->user->host);
+	else
+		sendto_server(":%s WALLOPS :UNJUPE %s by %s",
+				MYNAME, jupe_p->name, conn_p->name);
 
 	sendto_server("SQUIT %s :Unjuped", jupe_p->name);
 	dlink_delete(&jupe_p->node, &active_jupes);
 	free_jupe(jupe_p);
-
 	return 0;
 }
 

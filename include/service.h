@@ -45,7 +45,7 @@ struct service_handler
 
 extern dlink_list service_list;
 
-#define OPER_NAME(conn_p, client_p) ((conn_p) ? (conn_p)->name : (client_p)->user->oper->name)
+#define OPER_NAME(client_p, conn_p) ((conn_p) ? (conn_p)->name : (client_p)->user->oper->name)
 
 extern struct client *add_service();
 extern struct client *find_service_id(const char *name);

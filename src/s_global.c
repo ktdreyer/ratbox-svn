@@ -68,7 +68,7 @@ o_global_netmsg(struct client *client_p, struct lconn *conn_p, const char *parv[
 	}
 
 	slog(global_p, 1, "%s - NETMSG %s", 
-		OPER_NAME(conn_p, client_p), data);
+		OPER_NAME(client_p, conn_p), data);
 
 	return 0;
 }
