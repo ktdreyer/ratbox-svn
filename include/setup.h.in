@@ -228,7 +228,7 @@
 /* Suffix for shared libraries on this platform. */
 #undef SHARED_SUFFIX
 
-/* Define to 1 if sockaddr_in has a 'sin_len' member. */
+/* Define to 1 if sockaddr has a 'sa_len' member. */
 #undef SOCKADDR_IN_HAS_LEN
 
 /* Define this to enable soft asserts. */
