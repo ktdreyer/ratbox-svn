@@ -2544,7 +2544,6 @@ static void do_include_conf(void)
 /*
  * lookup_confhost - start DNS lookups of all hostnames in the conf
  * line and convert an IP addresses in a.b.c.d number for to IP#s.
- *
  */
 static void lookup_confhost(struct ConfItem* aconf)
 {
@@ -2552,28 +2551,28 @@ static void lookup_confhost(struct ConfItem* aconf)
   unsigned long    ip;
   unsigned long    mask;
 
-  if (BadPtr(aconf->host) || BadPtr(aconf->name))
+  if (EmptyString(aconf->host) || EmptyString(aconf->name))
     {
       log(L_ERROR, "Host/server name error: (%s) (%s)",
-          aconf->host, aconf->name);
+          (EmptyString(aconf->host)) ? "none" : aconf->host, 
+          (EmptyString(aconf->name)) ? "none" : aconf->name);
       return;
     }
 
   /*
-  ** Do name lookup now on hostnames given and store the
-  ** ip numbers in conf structure.
-  */
+   * Do name lookup now on hostnames given and store the
+   * ip numbers in conf structure.
+   */
   if (is_address(aconf->host, &ip, &mask))
     {
       aconf->ipnum.s_addr = htonl(ip);
     }
   else if (0 != (dns_reply = conf_dns_lookup(aconf)))
     memcpy(&aconf->ipnum, dns_reply->hp->h_addr, sizeof(struct in_addr));
-  
-  if (INADDR_NONE == aconf->ipnum.s_addr) {
-    log(L_ERROR, "Host/server name error: (%s) (%s)",
-        aconf->host, aconf->name);
-  }
+  /*
+   * it is entirely possible to get here without having a valid ip
+   * address in aconf->ipnum since dns lookups are asynchronus
+   */
 }
 
 /*
