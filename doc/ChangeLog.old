@@ -1,3 +1,16 @@
+jmallett    2002/01/13 02:19:27 EST	(20020113_3)
+
+  Modified files:
+    src                  hostmask.c 
+  Log:
+  Fixing some comments, since they'll get fixed eventually anyway:
+  - "an possible" -> "a possible"
+  
+  Revision  Changes    Path
+  7.63      +2 -2      ircd-hybrid-7/src/hostmask.c
+
+
+
 jmallett    2002/01/13 02:11:13 EST	(20020113_2)
 
   Modified files:
