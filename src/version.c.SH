@@ -87,6 +87,7 @@ char *infotext[] =
   "Bleep               Thomas Helvey       tomh@inxpress.net",
   "CBongo              Chris Bongaarts     cab@tc.umn.edu",
   "comstud             Chris Behrens       cbehrens@concentric.net",
+  "David-T             David Taylor        davidt@yadt.co.uk",
   "desrt               Ryan Lortie         desertangel@mindless.com",
   "echo                Adam J. Durana      adam@caca.com",
   "FlashMan            Craig A. Huegen     chuegen@quadrunner.com",

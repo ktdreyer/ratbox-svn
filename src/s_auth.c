@@ -96,7 +96,6 @@ struct AuthRequest* AuthPollList = 0; /* GLOBAL - auth queries pending io */
  */
 struct AuthRequest *AuthClientList = NULL;
 
-static struct AuthRequest* AuthIncompleteList = 0;
 static EVH timeout_auth_queries_event;
 static BlockHeap *auth_bl = NULL;
 
@@ -228,7 +227,7 @@ static void auth_dns_callback(void* vptr, struct DNSReply* reply)
   auth->client->host[HOSTLEN] = '\0';
   if (!IsDoingAuth(auth)) {
     release_auth_client(auth->client);
-    unlink_auth_request(auth, &AuthIncompleteList);
+    unlink_auth_request(auth, &AuthPollList);
     link_auth_request(auth, &AuthClientList);
     /*free_auth_request(auth);*/
   }
@@ -247,11 +246,9 @@ static void auth_error(struct AuthRequest* auth)
   ClearAuth(auth);
   sendheader(auth->client, REPORT_FAIL_ID);
 
-  unlink_auth_request(auth, &AuthPollList);
-
-  if (IsDNSPending(auth))
-    link_auth_request(auth, &AuthIncompleteList);
-  else {
+  if (!IsDNSPending(auth))
+  {
+    unlink_auth_request(auth, &AuthPollList);
     release_auth_client(auth->client);
     link_auth_request(auth, &AuthClientList);
     /*free_auth_request(auth);*/
@@ -432,10 +429,10 @@ void start_auth(struct Client* client)
   else
     SetDNSPending(auth);
 
-  if (start_auth_query(auth))
+  if (start_auth_query(auth) || IsDNSPending(auth))
+  {
     link_auth_request(auth, &AuthPollList);
-  else if (IsDNSPending(auth))
-    link_auth_request(auth, &AuthIncompleteList);
+  }
   else {
   #ifdef USE_IAUTH
   	link_auth_request(auth, &AuthClientList);
@@ -462,7 +459,8 @@ timeout_auth_queries_event(void *notused)
       if (-1 < auth->fd)
         fd_close(auth->fd);
 
-      sendheader(auth->client, REPORT_FAIL_ID);
+      if (IsDoingAuth(auth))
+        sendheader(auth->client, REPORT_FAIL_ID);
       if (IsDNSPending(auth)) {
         delete_resolver_queries(auth);
         sendheader(auth->client, REPORT_FAIL_DNS);
@@ -473,23 +471,6 @@ timeout_auth_queries_event(void *notused)
       auth->client->since = CurrentTime;
       release_auth_client(auth->client);
       unlink_auth_request(auth, &AuthPollList);
-  #ifdef USE_IAUTH
-  	link_auth_request(auth, &AuthClientList);
-  #else
-    free_auth_request(auth);
-  #endif
-    }
-  }
-  for (auth = AuthIncompleteList; auth; auth = auth_next) {
-    auth_next = auth->next;
-    if (auth->timeout < CurrentTime) {
-      delete_resolver_queries(auth);
-      sendheader(auth->client, REPORT_FAIL_DNS);
-      log(L_INFO, "DNS timeout %s", get_client_name(auth->client, SHOW_IP));
-
-      auth->client->since = CurrentTime;
-      release_auth_client(auth->client);
-      unlink_auth_request(auth, &AuthIncompleteList);
   #ifdef USE_IAUTH
   	link_auth_request(auth, &AuthClientList);
   #else
@@ -608,11 +589,10 @@ read_auth_reply(int fd, void *data)
     ++ServerStats->is_asuc;
     SetGotId(auth->client);
   }
-  unlink_auth_request(auth, &AuthPollList);
 
-  if (IsDNSPending(auth))
-    link_auth_request(auth, &AuthIncompleteList);
-  else {
+  if (!IsDNSPending(auth))
+  {
+    unlink_auth_request(auth, &AuthPollList);
     release_auth_client(auth->client);
   #ifdef USE_IAUTH
   	link_auth_request(auth, &AuthClientList);
