@@ -1,3 +1,8 @@
+*** 20010302_3 by fl_
+- dont pass received sjoins on for persistant chans, to those not using
+  CAP_VCHAN.. do we need another cap?
+
+
 *** 20010302_2 by davidt
 - Reset buf/sjbuf/sjbuf_nh to "" in m_sjoin, so we don't accidentaly
   reuse previous nicks....
