@@ -1,3 +1,18 @@
+leeh        2002/07/11 09:26:58 EDT	(20020711_4)
+
+  Modified files:
+    doc                  example.conf 
+    include              memory.h tools.h 
+  Log:
+  - wrap the inlines in #ifdef __GNUC__, this should fix forte.
+  
+  Revision  Changes    Path
+  7.165     +1 -1      ircd-hybrid-7/doc/example.conf
+  7.34      +36 -0     ircd-hybrid-7/include/memory.h
+  1.12      +5 -2      ircd-hybrid-7/include/tools.h
+
+
+
 leeh        2002/07/11 07:04:38 EDT	(20020711_3)
 
   Modified files:
