@@ -216,7 +216,7 @@ static void cryptlink_auth(struct Client *client_p, struct Client *source_p,
 
   key = MyMalloc(RSA_size(ServerInfo.rsa_private_key));
 
-  len = RSA_private_decrypt( enc_len, enc, key,
+  len = RSA_private_decrypt( enc_len, (unsigned char *)enc,(unsigned char *)key,
                              ServerInfo.rsa_private_key,
                              RSA_PKCS1_PADDING );
 
@@ -452,8 +452,8 @@ static void cryptlink_serv(struct Client *client_p, struct Client *source_p,
   encrypted = MyMalloc(RSA_size(ServerInfo.rsa_private_key));
 
   enc_len = RSA_public_encrypt(client_p->localClient->out_cipher->keylen,
-                               key,
-                               encrypted,
+                               (unsigned char *)key,
+                               (unsigned char *)encrypted,
                                aconf->rsa_public_key,
                                RSA_PKCS1_PADDING);
 

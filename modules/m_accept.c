@@ -85,7 +85,7 @@ static void m_accept(struct Client *client_p, struct Client *source_p,
   build_nicklist(source_p, addbuf, delbuf, parv[1]);
 
   /* parse the delete list */
-  for(nick = strtoken(&p, delbuf, ","); nick;
+  for(nick = strtoken(&p, delbuf, ","); nick != NULL;
       nick = strtoken(&p, NULL, ","))
   {
     /* shouldnt happen, but lets be paranoid */

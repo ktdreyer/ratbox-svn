@@ -2388,7 +2388,7 @@ void cryptlink_init(struct Client *client_p,
     return;
   }
 
-  if (get_randomness(randkey, CIPHERKEYLEN) != 1)
+  if (get_randomness((unsigned char *)randkey, CIPHERKEYLEN) != 1)
   {
     cryptlink_error(client_p, "SERV", "Couldn't generate keyphrase",
                                       "Couldn't generate keyphrase");
@@ -2398,8 +2398,8 @@ void cryptlink_init(struct Client *client_p,
   encrypted = MyMalloc(RSA_size(ServerInfo.rsa_private_key));
 
   enc_len = RSA_public_encrypt(CIPHERKEYLEN,
-                               randkey,
-                               encrypted,
+                               (unsigned char *)randkey,
+                               (unsigned char *)encrypted,
                                aconf->rsa_public_key,
                                RSA_PKCS1_PADDING);
 
