@@ -1,3 +1,8 @@
+*** 20001223_32 by toot
+disable SYSLOG by default
+updated .depends
+
+
 *** 20001223_31 by toot
 made local kills look like global kills to users (flame)
 -- they were already suposed to.. but wern't quite right :)
