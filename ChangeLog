@@ -1,3 +1,22 @@
+leeh        2004/04/14 11:25:19 EDT	(20040414_1)
+
+  Modified files:
+    help/opers           stats 
+    include              hash.h 
+    modules              m_stats.c 
+    src                  hash.c 
+  Log:
+  - removed print_resv_hash(), shoved it into m_stats.c: stats_resv()
+  - split stats q/Q and x/X up to show temp/perm.
+  
+  Revision  Changes    Path
+  1.3       +16 -12    ircd-ratbox/help/opers/stats
+  7.51      +0 -1      ircd-ratbox/include/hash.h
+  1.217     +97 -39    ircd-ratbox/modules/m_stats.c
+  7.105     +0 -21     ircd-ratbox/src/hash.c
+
+
+
 leeh        2004/04/14 11:00:46 EDT	(20040414_0)
 
   Modified files:
