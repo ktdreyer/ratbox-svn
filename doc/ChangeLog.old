@@ -1,3 +1,16 @@
+jdc         2001/12/09 22:15:04 EST	(20011210_1)
+
+  Modified files:
+    iauth/source         misc.c sock.c 
+  Log:
+  - More 'register' declaration removals.
+  
+  Revision  Changes    Path
+  7.5       +3 -3      ircd-hybrid-7/iauth/source/misc.c
+  7.9       +6 -6      ircd-hybrid-7/iauth/source/sock.c
+
+
+
 db          2001/12/09 21:59:49 EST	(20011210_0)
 
   Modified files:
