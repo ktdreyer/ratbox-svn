@@ -259,7 +259,7 @@ check_pings_list(dlink_list *list)
         }
       if (IsPerson(client_p))
         {
-          if( !IsElined(client_p) &&
+          if( !IsExemptKline(client_p) &&
               GlobalSetOptions.idletime && 
               !IsOper(client_p) &&
               !IsIdlelined(client_p) && 
@@ -400,7 +400,7 @@ check_klines(void)
                               client_p->localClient->aftype)))
 	/* if there is a returned struct ConfItem then kill it */
 	{
-	  if(IsConfElined(aconf))
+	  if(IsConfExemptKline(aconf))
 	    {
 	      sendto_realops_flags(FLAGS_ALL,
 			   "DLINE over-ruled for %s, client is kline_exempt",
@@ -435,7 +435,7 @@ check_klines(void)
 	{
 	  if( ConfigFileEntry.glines && (aconf = find_gkill(client_p, client_p->username)) )
 	    {
-	      if(IsElined(client_p))
+	      if(IsExemptKline(client_p))
 		{
 		  sendto_realops_flags(FLAGS_ALL,
 		       "GLINE over-ruled for %s, client is kline_exempt",
@@ -483,7 +483,7 @@ check_klines(void)
 	    if((aconf = find_kill(client_p))) /* if there is a returned
 					     struct ConfItem.. then kill it */
 	      {
-		if(aconf->status & CONF_ELINE)
+		if(aconf->status & CONF_EXEMPTKLINE)
 		  {
 		    sendto_realops_flags(FLAGS_ALL,
 			 "KLINE over-ruled for %s, client is kline_exmpt",

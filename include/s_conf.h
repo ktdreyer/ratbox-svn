@@ -94,8 +94,10 @@ struct ConfItem
 #define CONF_LEAF               0x0800
 #define CONF_LISTEN_PORT        0x1000
 #define CONF_HUB                0x2000
-#define CONF_ELINE              0x4000
-#define CONF_FLINE              0x8000
+#define CONF_EXEMPTKLINE            0x4000
+/* define CONF_ELINE              0x4000*/
+#define CONF_NOLIMIT            0x8000
+/* define CONF_FLINE              0x8000*/
 #define CONF_DLINE             0x20000
 #define CONF_XLINE             0x40000
 #define CONF_ULINE             0x80000
@@ -116,8 +118,10 @@ struct ConfItem
 #define CONF_FLAGS_NEED_IDENTD          0x00000008
 #define CONF_FLAGS_PASS_IDENTD          0x00000010
 #define CONF_FLAGS_NOMATCH_IP           0x00000020
-#define CONF_FLAGS_E_LINED              0x00000040
-#define CONF_FLAGS_F_LINED              0x00000080
+#define CONF_FLAGS_EXEMPTKLINE          0x00000040
+/* #define CONF_FLAGS_E_LINED              0x00000040 */
+#define CONF_FLAGS_NOLIMIT              0x00000080
+/* #define CONF_FLAGS_F_LINED              0x00000080 */
 #define CONF_FLAGS_IDLE_LINED           0x00000100
 #define CONF_FLAGS_SPOOF_IP             0x00000200
 #define CONF_FLAGS_SPOOF_NOTICE         0x00000400
@@ -139,8 +143,8 @@ struct ConfItem
 #define IsNeedIdentd(x)         ((x)->flags & CONF_FLAGS_NEED_IDENTD)
 #define IsPassIdentd(x)         ((x)->flags & CONF_FLAGS_PASS_IDENTD)
 #define IsNoMatchIp(x)          ((x)->flags & CONF_FLAGS_NOMATCH_IP)
-#define IsConfElined(x)         ((x)->flags & CONF_FLAGS_E_LINED)
-#define IsConfFlined(x)         ((x)->flags & CONF_FLAGS_F_LINED)
+#define IsConfExemptKline(x)    ((x)->flags & CONF_FLAGS_EXEMPTKLINE)
+#define IsConfExemptLimits(x)   ((x)->flags & CONF_FLAGS_NOLIMIT)
 #define IsConfExemptGline(x)    ((x)->flags & CONF_FLAGS_EXEMPTGLINE)
 #define IsConfIdlelined(x)      ((x)->flags & CONF_FLAGS_IDLE_LINED)
 #define IsConfDoIdentd(x)       ((x)->flags & CONF_FLAGS_DO_IDENTD)

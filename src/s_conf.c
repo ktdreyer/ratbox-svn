@@ -504,7 +504,7 @@ int attach_Iline(struct Client* client_p, const char* username)
    }
    if (ConfigFileEntry.glines)
    {
-    if (!IsConfElined(aconf))
+    if (!IsConfExemptKline(aconf))
     {
      if (IsGotId(client_p))
       gkill_conf = find_gkill(client_p, client_p->username);
@@ -573,7 +573,7 @@ static int attach_iline(struct Client *client_p, struct ConfItem *aconf)
   if ( aconf->c_class /* This should never non NULL *grin* */ &&
        ConfConFreq(aconf) && ip_found->count > ConfConFreq(aconf))
     {
-      if(!IsConfFlined(aconf))
+      if(!IsConfExemptLimits(aconf))
         return TOO_MANY; /* Already at maximum allowed ip#'s */
       else
         {
@@ -943,7 +943,7 @@ int attach_conf(struct Client *client_p,struct ConfItem *aconf)
       if ((aconf->status & CONF_CLIENT) &&
           ConfLinks(aconf) >= ConfMaxLinks(aconf) && ConfMaxLinks(aconf) > 0)
         {
-          if (!IsConfFlined(aconf))
+          if (!IsConfExemptLimits(aconf))
             {
               return(I_LINE_FULL); 
             }
@@ -952,7 +952,7 @@ int attach_conf(struct Client *client_p,struct ConfItem *aconf)
               send(client_p->fd,
                    "NOTICE FLINE :I: line is full, but you have an >I: line!\n",
                    56, 0);
-              SetFlined(client_p);
+              SetExemptLimits(client_p);
             }
 
         }
@@ -1546,7 +1546,7 @@ int conf_connect_allowed(struct irc_inaddr *addr, int aftype)
 {
   struct ConfItem *aconf = find_dline(addr, aftype);
 
-  if (aconf && !IsConfElined(aconf))
+  if (aconf && !IsConfExemptKline(aconf))
     return 0;
   return 1;
 }

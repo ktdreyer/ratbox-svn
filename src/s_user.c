@@ -423,7 +423,7 @@ int register_local_user(struct Client *client_p, struct Client *source_p,
 	 ||
 	 (Count.local +1) >= (GlobalSetOptions.maxclients - 5) )
        &&
-       !(IsFlined(source_p)) )
+       !(IsExemptLimits(source_p)) )
     {
       sendto_realops_flags(FLAGS_FULL,
 			   "Too many clients, rejecting %s[%s].",
@@ -801,18 +801,18 @@ report_and_set_user_flags(struct Client *source_p,struct ConfItem *aconf)
     }
 
   /* If this user is in the exception class, Set it "E lined" */
-  if(IsConfElined(aconf))
+  if(IsConfExemptKline(aconf))
     {
-      SetElined(source_p);
+      SetExemptKline(source_p);
       sendto_one(source_p,
          ":%s NOTICE %s :*** You are exempt from K/D/G lines. congrats.",
                  me.name,source_p->name);
     }
 
   /* If this user is exempt from user limits set it F lined" */
-  if(IsConfFlined(aconf))
+  if(IsConfExemptLimits(aconf))
     {
-      SetFlined(source_p);
+      SetExemptLimits(source_p);
       sendto_one(source_p,
                  ":%s NOTICE %s :*** You are exempt from user limits. congrats.",
                  me.name,source_p->name);
@@ -1394,7 +1394,7 @@ int oper_up( struct Client *source_p,
   SetIPHidden(source_p);
   Count.oper++;
 
-  SetElined(source_p);
+  SetExemptKline(source_p);
       
   m = make_dlink_node();
   dlinkAdd(source_p,m,&oper_list);

@@ -455,7 +455,7 @@ find_address_conf(const char *host, const char *user,
  if (!(iconf = find_conf_by_address(host, ip, CONF_CLIENT, aftype, user)))
   return NULL;
  /* If they are exempt from K-lines, return the best I-line. -A1kmm */
- if (IsConfElined(iconf))
+ if (IsConfExemptKline(iconf))
   return iconf;
  /* Find the best K-line... -A1kmm */
  kconf = find_conf_by_address(host, ip, CONF_KILL, aftype, user);
@@ -477,7 +477,7 @@ find_dline(struct irc_inaddr *addr, int aftype)
  struct ConfItem *econf, *dconf;
  econf = find_conf_by_address(NULL, addr, CONF_CLIENT|1, aftype, NULL);
  dconf = find_conf_by_address(NULL, addr, CONF_DLINE|1, aftype, NULL);
- if (econf && IsConfElined(econf))
+ if (econf && IsConfExemptKline(econf))
   return econf;
  return dconf;
 }
@@ -659,9 +659,9 @@ show_iline_prefix(struct Client *sptr,struct ConfItem *aconf,char *name)
   *prefix_ptr++ = '%';
  if (IsConfDoSpoofIp(aconf))
   *prefix_ptr++ = '=';
- if (IsOper(sptr) && IsConfElined(aconf))
+ if (IsOper(sptr) && IsConfExemptKline(aconf))
   *prefix_ptr++ = '^';
- if (IsOper(sptr) && IsConfFlined(aconf))
+ if (IsOper(sptr) && IsConfExemptLimits(aconf))
   *prefix_ptr++ = '>';
  if (IsOper(sptr) && IsConfIdlelined(aconf))
   *prefix_ptr++ = '<';

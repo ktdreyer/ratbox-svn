@@ -102,7 +102,7 @@ void oldParseOneLine(char* line)
     {
     case 'd':
       aconf->status = CONF_DLINE;
-      aconf->flags = CONF_FLAGS_E_LINED;
+      aconf->flags = CONF_FLAGS_EXEMPTKLINE;
       conf_add_fields(aconf,host_field,pass_field,user_field,
 		      port_field,class_field);
       conf_add_d_conf(aconf);

@@ -391,8 +391,8 @@ struct LocalUser
 
 /* overflow flags */
 #define FLAGS2_EXEMPTGLINE  0x0001	/* client can't be G-lined */
-#define FLAGS2_E_LINED      0x0002      /* client is exempt from kline */
-#define FLAGS2_F_LINED      0x0004      /* client is exempt from limits */
+#define FLAGS2_EXEMPTKLINE  0x0002      /* client is exempt from kline */
+#define FLAGS2_NOLIMIT      0x0004      /* client is exempt from limits */
 #define FLAGS2_RESTRICTED   0x0008      /* client cannot op others */
 
 /* oper priv flags */
@@ -500,10 +500,10 @@ struct LocalUser
 /*
  * flags2 macros.
  */
-#define IsElined(x)             ((x)->flags2 & FLAGS2_E_LINED)
-#define SetElined(x)            ((x)->flags2 |= FLAGS2_E_LINED)
-#define IsFlined(x)             ((x)->flags2 & FLAGS2_F_LINED)
-#define SetFlined(x)            ((x)->flags2 |= FLAGS2_F_LINED)
+#define IsExemptKline(x)        ((x)->flags2 & FLAGS2_EXEMPTKLINE)
+#define SetExemptKline(x)       ((x)->flags2 |= FLAGS2_EXEMPTKLINE)
+#define IsExemptLimits(x)       ((x)->flags2 & FLAGS2_NOLIMIT)
+#define SetExemptLimits(x)      ((x)->flags2 |= FLAGS2_NOLIMIT)
 #define IsExemptGline(x)        ((x)->flags2 & FLAGS2_EXEMPTGLINE)
 #define SetExemptGline(x)       ((x)->flags2 |= FLAGS2_EXEMPTGLINE)
 #define SetIPSpoof(x)           ((x)->flags2 |= FLAGS2_IP_SPOOFING)

@@ -84,7 +84,7 @@ struct ConfItem*
 find_gkill(struct Client* client_p, char* username)
 {
   assert(0 != client_p);
-  return (IsElined(client_p)) ? 0 : find_is_glined(client_p->host, username);
+  return (IsExemptKline(client_p)) ? 0 : find_is_glined(client_p->host, username);
 }
 
 /*

@@ -608,7 +608,7 @@ static void mo_dline(struct Client *client_p, struct Client *source_p,
           return;
         }
 
-      if(IsElined(target_p))
+      if(IsExemptKline(target_p))
         {
           sendto_one(source_p,
                      ":%s NOTICE %s :%s is E-lined",me.name,parv[0],
@@ -682,7 +682,7 @@ static void mo_dline(struct Client *client_p, struct Client *source_p,
      {
        char *creason;
        creason = aconf->passwd ? aconf->passwd : "<No Reason>";
-       if(IsConfElined(aconf))
+       if(IsConfExemptKline(aconf))
          sendto_one(source_p, ":%s NOTICE %s :[%s] is (E)d-lined by [%s] - %s",
                     me.name,
                     parv[0],
@@ -768,7 +768,7 @@ static int find_user_host(struct Client *source_p,
           return 0;
         }
 
-      if(IsElined(target_p))
+      if(IsExemptKline(target_p))
         {
           if(!IsServer(source_p))
             sendto_one(source_p,

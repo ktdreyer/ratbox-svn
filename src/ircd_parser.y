@@ -1052,12 +1052,12 @@ auth_spoof:   SPOOF '=' QSTRING ';'
 
 auth_exceed_limit:    EXCEED_LIMIT '=' TYES ';'
   {
-    yy_achead->flags |= CONF_FLAGS_F_LINED;
+    yy_achead->flags |= CONF_FLAGS_NOLIMIT;
   }
                       |
                       EXCEED_LIMIT '=' TNO ';'
   {
-    yy_achead->flags &= ~CONF_FLAGS_F_LINED;
+    yy_achead->flags &= ~CONF_FLAGS_NOLIMIT;
   };
 
 auth_is_restricted:    RESTRICTED '=' TYES ';'
@@ -1072,12 +1072,12 @@ auth_is_restricted:    RESTRICTED '=' TYES ';'
 
 auth_kline_exempt:    KLINE_EXEMPT '=' TYES ';'
   {
-    yy_achead->flags |= CONF_FLAGS_E_LINED;
+    yy_achead->flags |= CONF_FLAGS_EXEMPTKLINE;
   }
                       |
                       KLINE_EXEMPT '=' TNO ';'
   {
-    yy_achead->flags &= ~CONF_FLAGS_E_LINED;
+    yy_achead->flags &= ~CONF_FLAGS_EXEMPTKLINE;
   };
 
 auth_have_ident:      HAVE_IDENT '=' TYES ';'
