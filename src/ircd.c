@@ -121,9 +121,6 @@
 # endif
 #endif
 
-/* LazyLinks code */
-time_t lastCleanup;
-
 /* /quote set variables */
 struct SetOptions GlobalSetOptions;
 
@@ -142,6 +139,10 @@ struct Client me;               /* That's me */
 struct LocalUser meLocalUser;	/* That's also part of me */
 
 struct Client* GlobalClientList = 0; /* Pointer to beginning of Client list */
+
+/* Virtual host */
+struct sockaddr_in vserv;
+int                specific_virtual_host = 0;
 
 /* unknown/client pointer lists */ 
 dlink_list unknown_list;        /* unknown clients ON this server only */
@@ -563,6 +564,17 @@ int main(int argc, char *argv[])
   if(ServerInfo.description != NULL)
     {
       strncpy_irc(me.info, ServerInfo.description, REALLEN);
+    }
+
+  /* Do virtual host setup here */
+  /* XXX Not yet IPV6 */
+
+  if(ServerInfo.ip != 0)
+    {
+      memset(&vserv,0, sizeof(vserv));
+      vserv.sin_family = AF_INET;
+      vserv.sin_addr.s_addr = htonl(ServerInfo.ip);
+      specific_virtual_host = 1;
     }
 
 #ifdef USE_GETTEXT

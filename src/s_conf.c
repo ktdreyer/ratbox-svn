@@ -71,8 +71,6 @@ extern char linebuf[];
 #define INADDR_NONE ((unsigned int) 0xffffffff)
 #endif
 
-struct sockaddr_in vserv;
-int                specific_virtual_host = 0;
 
 /* internally defined functions */
 
@@ -373,9 +371,6 @@ void report_specials(struct Client* sptr, int flags, int numeric)
  * side effects - Ordinary client access check.
  *		  Look for conf lines which have the same
  * 		  status as the flags passed.
- *
- * outputs
- *
  */
 int check_client(struct Client *cptr, struct Client *sptr, char *username)
 {
@@ -2498,51 +2493,6 @@ struct ConfItem *conf_add_server(struct ConfItem *aconf, int lcount)
     }
   lookup_confhost(aconf);
   return aconf;
-}
-
-/*
- * conf_add_me
- * inputs       - pointer to config item
- * output       - NONE
- * side effects - Add the M line
- */
-void conf_add_me(struct ConfItem *aconf)
-{
-  /*
-  ** Own port and name cannot be changed after the startup.
-  ** (or could be allowed, but only if all links are closed
-  ** first).
-  ** Configuration info does not override the name and port
-  ** if previously defined. Note, that "info"-field can be
-  ** changed by "/rehash".
-  ** Can't change vhost mode/address either 
-  **
-  ** host ip to connect is given either from IP field as filled in
-  ** or from passwd field as string...
-  */
-  /*  if (aconf->status == CONF_ME) */
-
-  strncpy_irc(me.info, aconf->user, REALLEN);
-
-  if (me.name[0] == '\0' && aconf->host[0])
-    {
-      strncpy_irc(me.name, aconf->host, HOSTLEN);
-      if(aconf->ip)
-	{
-	  memset(&vserv,0, sizeof(vserv));
-	  vserv.sin_family = AF_INET;
-	  vserv.sin_addr.s_addr = htonl(aconf->ip);
-	  specific_virtual_host = 1;
-	}
-      else if (aconf->passwd && 
-	       (aconf->passwd[0] != '\0') && (aconf->passwd[0] != '*'))
-	{
-	  memset(&vserv,0, sizeof(vserv));
-	  vserv.sin_family = AF_INET;
-	  vserv.sin_addr.s_addr = inet_addr(aconf->passwd);
-	  specific_virtual_host = 1;
-	}
-    }
 }
 
 /*
