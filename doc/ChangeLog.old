@@ -1,3 +1,28 @@
+leeh        2002/07/20 11:51:55 EDT	(20020720_3)
+
+  Modified files:
+    include              packet.h 
+    modules              m_invite.c m_oper.c m_time.c 
+    modules/core         m_kick.c m_mode.c 
+    src                  packet.c 
+  Log:
+  - commited the first half of the floodcode fixes.
+    - end the grace period in a few more places
+    - raise the rate at which we parse commands above the level of flooding
+      to 2 per second
+    - raise the burst level slightly
+  
+  Revision  Changes    Path
+  7.17      +1 -1      ircd-hybrid-7/include/packet.h
+  1.46      +5 -1      ircd-hybrid-7/modules/core/m_kick.c
+  1.54      +7 -2      ircd-hybrid-7/modules/core/m_mode.c
+  1.46      +5 -1      ircd-hybrid-7/modules/m_invite.c
+  1.47      +6 -1      ircd-hybrid-7/modules/m_oper.c
+  1.26      +6 -1      ircd-hybrid-7/modules/m_time.c
+  7.85      +1 -7      ircd-hybrid-7/src/packet.c
+
+
+
 leeh        2002/07/20 11:47:55 EDT	(20020720_2)
 
   Modified files:
