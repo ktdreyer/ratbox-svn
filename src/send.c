@@ -341,7 +341,7 @@ send_queued_slink_write(int fd, void *data)
 	{
 		retlen = send(to->localClient->ctrlfd,
 			      to->localClient->slinkq +
-			      to->localClient->slinkq_ofs, to->localClient->slinkq_len, 0);
+			      to->localClient->slinkq_ofs, to->localClient->slinkq_len, SEND_FLAGS);
 		if(retlen < 0)
 		{
 			/* If we have a fatal error */

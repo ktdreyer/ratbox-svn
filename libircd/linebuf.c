@@ -32,6 +32,7 @@
 #include "event.h"
 #include "balloc.h"
 #include "hook.h"
+#include "s_bsd.h"
 #include "sprintf_irc.h"
 
 #ifdef STRING_WITH_STRINGS
@@ -656,7 +657,7 @@ linebuf_flush(int fd, buf_head_t * bufhead)
 	}
 
 	/* Now, try writing data */
-	retval = send(fd, bufline->buf + bufhead->writeofs, bufline->len - bufhead->writeofs, 0);
+	retval = send(fd, bufline->buf + bufhead->writeofs, bufline->len - bufhead->writeofs, SEND_FLAGS);
 
 	if(retval <= 0)
 		return retval;

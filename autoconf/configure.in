@@ -248,6 +248,16 @@ AC_CHECK_FUNCS(strlcat strlcpy)
 dnl check for socketpair
 AC_CHECK_FUNCS(socketpair)
 
+dnl check for MSG_NOSIGNAL
+AC_MSG_CHECKING(for MSG_NOSIGNAL)
+AC_TRY_COMPILE([#include <sys/socket.h>], 
+		[ int f = MSG_NOSIGNAL; ], 
+		[ AC_DEFINE(HAVE_MSG_NOSIGNAL) 
+		  AC_MSG_RESULT(yes)  
+		], 
+		[ AC_MSG_RESULT(no)   ]
+	)
+
 dnl check for snprintf
 AC_CHECK_FUNCS(snprintf, [have_snprintf=1])
 dnl check for vsnprintf

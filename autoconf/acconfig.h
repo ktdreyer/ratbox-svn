@@ -78,3 +78,6 @@
 
 /* struct sockaddr_storage */
 #undef HAVE_STRUCT_SOCKADDR_STORAGE
+
+/* MSG_NOSIGNAL */
+#undef HAVE_MSG_NOSIGNAL

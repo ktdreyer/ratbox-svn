@@ -89,6 +89,9 @@
 /* struct sockaddr_storage */
 #undef HAVE_STRUCT_SOCKADDR_STORAGE
 
+/* MSG_NOSIGNAL */
+#undef HAVE_MSG_NOSIGNAL
+
 /* Define if you have the EVP_bf_cfb function.  */
 #undef HAVE_EVP_BF_CFB
 

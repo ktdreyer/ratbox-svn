@@ -773,7 +773,7 @@ attach_conf(struct Client *client_p, struct ConfItem *aconf)
 			{
 				send(client_p->localClient->fd,
 				     "NOTICE FLINE :I: line is full, but you have an >I: line!\n",
-				     56, 0);
+				     56, SEND_FLAGS);
 				SetExemptLimits(client_p);
 			}
 

@@ -110,7 +110,7 @@ typedef enum
 }
 ReportType;
 
-#define sendheader(c, r) send(c->localClient->fd, HeaderMessages[(r)].message, HeaderMessages[(r)].length, 0)
+#define sendheader(c, r) send(c->localClient->fd, HeaderMessages[(r)].message, HeaderMessages[(r)].length, SEND_FLAGS)
 
 /*
  */
@@ -524,7 +524,7 @@ auth_connect_callback(int fd, int error, void *data)
 	ircsprintf(authbuf, "%u , %u\r\n",
 		   (unsigned int) ntohs(them.sin_port), (unsigned int) ntohs(us.sin_port));
 
-	if(send(auth->fd, authbuf, strlen(authbuf), 0) == -1)
+	if(send(auth->fd, authbuf, strlen(authbuf), SEND_FLAGS) == -1)
 	{
 		auth_error(auth);
 		return;
@@ -553,7 +553,7 @@ read_auth_reply(int fd, void *data)
 	int count;
 	char buf[AUTH_BUFSIZ + 1];	/* buffer to read auth reply into */
 
-	len = recv(auth->fd, buf, AUTH_BUFSIZ, 0);
+	len = recv(auth->fd, buf, AUTH_BUFSIZ, RECV_FLAGS);
 
 	if(len < 0 && ignoreErrno(errno))
 	{

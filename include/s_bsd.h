@@ -91,4 +91,13 @@ void do_sigio(int);
 void setup_sigio_fd(int);
 #endif
 
+#ifdef HAVE_MSG_NOSIGNAL
+#define SEND_FLAGS MSG_NOSIGNAL
+#define RECV_FLAGS MSG_NOSIGNAL
+#else
+#define SEND_FLAGS 0
+#define RECV_FLAGS 0
+#endif
+
+
 #endif /* INCLUDED_s_bsd_h */
