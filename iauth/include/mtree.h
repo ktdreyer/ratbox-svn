@@ -75,6 +75,7 @@ struct Level
   int numptrs;             /* number of pointers in typeptrs */
 
   unsigned int flags;
+  long serial;
 };
 
 struct UnsortableIline
@@ -96,9 +97,11 @@ struct UnsortableKline
 #define LV_WILDCARD   (1 << 0) /* node contains a wild host piece */
 #define LV_CHECKED    (1 << 1) /* node has been checked during a search */
 
+#if 0
 #define SetChecked(x)   ((x)->flags |= LV_CHECKED)
 #define WasChecked(x)   ((x)->flags &  LV_CHECKED)
 #define ClearChecked(x) ((x)->flags &= ~LV_CHECKED)
+#endif
 
 /*
  * Prototypes

@@ -154,22 +154,31 @@
 /*
  * Beginning of our Iline tree
  */
-static struct Level          *IlineTree = NULL;
+static struct Level           *IlineTree = NULL;
 
 /*
  * Beginning of our Kline tree
  */
-static struct Level          *KlineTree = NULL;
+static struct Level           *KlineTree = NULL;
 
 /*
  * List of unsortable Ilines
  */
-struct UnsortableIline       *UnsortableIlines = NULL;
+static struct UnsortableIline *UnsortableIlines = NULL;
 
 /*
  * List of unsortable Klines
  */
-struct UnsortableKline       *UnsortableKlines = NULL;
+static struct UnsortableKline *UnsortableKlines = NULL;
+
+/*
+ * This is a nifty trick suggested by Dianora - instead of
+ * flagging each node with a bitmask after it has been searched,
+ * set it to the current serial number and increment. That way,
+ * we won't need to "reset" the tree after every search - only
+ * when our serial number gets larger than 32 bits.
+ */
+static long                   SerialNumber = 0;
 
 /*
  * Local functions
@@ -462,10 +471,17 @@ SearchIlineTree(char *username, char *hostname)
    * because it cannot find a username match, even though
    * there is another I: line that matches. Therefore, this
    * loop will continue searching the tree until absolutely
-   * no more hostname matches are found. We can be sure
-   * it will not return the same I: line twice because the
-   * nodes are marked with LV_CHECKED when they are checked.
+   * no more hostname matches are found.
+   *
+   * We can be sure it will not return the same I: line twice
+   * because the variable SerialNumber gets continually
+   * incremented. When a node has been searched, it's
+   * serial is set to the current SerialNumber variable, so
+   * we know it has been searched if it's serial matches
+   * SerialNumber.
    */
+  ++SerialNumber;
+
   while ((ret = SearchSubTree(&IlineTree, hostc, hostv)))
   {
     if (!ret->numptrs)
@@ -473,7 +489,7 @@ SearchIlineTree(char *username, char *hostname)
       log(L_ERROR,
         "SearchIlineTree(): search result has 0 Iline pointers");
       MyFree(hostv);
-      ResetTree(&IlineTree);
+      /*ResetTree(&IlineTree);*/
       return (NULL);
     }
 
@@ -486,13 +502,13 @@ SearchIlineTree(char *username, char *hostname)
       if (match(tmp->username, username))
       {
         MyFree(hostv);
-        ResetTree(&IlineTree);
+        /*ResetTree(&IlineTree);*/
         return (tmp);
       }
     }
   }
 
-  ResetTree(&IlineTree);
+  /*ResetTree(&IlineTree);*/
 
   /*
    * We failed to locate the Iline in our tree - search
@@ -525,6 +541,8 @@ SearchKlineTree(char *username, char *hostname)
 
   hostc = BreakupHost(host, &hostv);
 
+  ++SerialNumber;
+
   while ((ret = SearchSubTree(&KlineTree, hostc, hostv)))
   {
     if (!ret->numptrs)
@@ -532,7 +550,7 @@ SearchKlineTree(char *username, char *hostname)
       log(L_ERROR,
         "SearchKlineTree(): search result has 0 Kline pointers");
       MyFree(hostv);
-      ResetTree(&KlineTree);
+      /*ResetTree(&KlineTree);*/
       return (NULL);
     }
 
@@ -545,16 +563,16 @@ SearchKlineTree(char *username, char *hostname)
       if (match(tmp->username, username))
       {
         MyFree(hostv);
-        ResetTree(&KlineTree);
+        /*ResetTree(&KlineTree);*/
         return (tmp);
       }
     }
   }
 
-  ResetTree(&KlineTree);
+  /*ResetTree(&KlineTree);*/
 
   /*
-   * We failed to locate the Iline in our tree - search
+   * We failed to locate the Kline in our tree - search
    * the unsortable list
    */
   tmp = FindUnsortableKline(username, hostname);
@@ -859,7 +877,8 @@ ResetTree(struct Level **tree)
   {
     for (tmpnode = tmplev; tmpnode; tmpnode = tmpnode->nextpiece)
     {
-      ClearChecked(tmpnode);
+      /*ClearChecked(tmpnode);*/
+      tmpnode->serial = 0;
       tmpnode->UnsearchedSubNodes = tmpnode->SubNodes;
     }
   }
@@ -878,7 +897,8 @@ static void
 MarkNodeSearched(struct Level *node)
 
 {
-  SetChecked(node);
+  node->serial = SerialNumber;
+  /*SetChecked(node);*/
   if (node->prevlevel)
   {
     if (--node->prevlevel->UnsearchedSubNodes == 0)
@@ -957,8 +977,13 @@ IsOnLevel(struct Level *level, char *piece)
     /*
      * Don't check the same node twice
      */
+    if (tmpnode->serial == SerialNumber)
+      continue;
+
+  #if 0
     if (WasChecked(tmpnode))
       continue;
+  #endif
 
     if (match(tmpnode->name, piece))
     {
