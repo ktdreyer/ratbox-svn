@@ -676,11 +676,21 @@ set_default_conf(void)
 	AdminInfo.email = NULL;
 	AdminInfo.description = NULL;
 
-	strlcpy(ConfigFileEntry.default_operstring, "is an IRC operator",
-		sizeof(ConfigFileEntry.default_operstring));
-	strlcpy(ConfigFileEntry.default_adminstring, "is a Server Administrator",
-		sizeof(ConfigFileEntry.default_adminstring));
-	
+	DupString(ConfigFileEntry.default_operstring, "is an IRC operator");
+	DupString(ConfigFileEntry.default_adminstring, "is a Server Administrator");
+	ConfigFileEntry.kline_reason = NULL;
+
+	ConfigFileEntry.fname_userlog = NULL;
+	ConfigFileEntry.fname_fuserlog = NULL;
+	ConfigFileEntry.fname_operlog = NULL;
+	ConfigFileEntry.fname_foperlog = NULL;
+	ConfigFileEntry.fname_serverlog = NULL;
+	ConfigFileEntry.fname_glinelog = NULL;
+	ConfigFileEntry.fname_klinelog = NULL;
+	ConfigFileEntry.fname_killlog = NULL;
+	ConfigFileEntry.fname_operspylog = NULL;
+	ConfigFileEntry.fname_ioerrorlog = NULL;
+
 	ConfigFileEntry.failed_oper_notice = YES;
 	ConfigFileEntry.anti_nick_flood = NO;
 	ConfigFileEntry.disable_fake_channels = NO;
@@ -711,15 +721,6 @@ set_default_conf(void)
 	ConfigFileEntry.pace_wait_simple = 1;
 	ConfigFileEntry.short_motd = NO;
 	ConfigFileEntry.no_oper_flood = NO;
-	ConfigFileEntry.fname_userlog[0] = '\0';
-	ConfigFileEntry.fname_fuserlog[0] = '\0';
-	ConfigFileEntry.fname_operlog[0] = '\0';
-	ConfigFileEntry.fname_foperlog[0] = '\0';
-	ConfigFileEntry.fname_serverlog[0] = '\0';
-	ConfigFileEntry.fname_glinelog[0] = '\0';
-	ConfigFileEntry.fname_klinelog[0] = '\0';
-	ConfigFileEntry.fname_operspylog[0] = '\0';
-	ConfigFileEntry.fname_ioerrorlog[0] = '\0';
 	ConfigFileEntry.glines = NO;
 	ConfigFileEntry.use_egd = NO;
 	ConfigFileEntry.gline_time = 12 * 3600;
@@ -1140,6 +1141,28 @@ clear_ircd_conf(void)
 	MyFree(AdminInfo.description);
 	AdminInfo.description = NULL;
 
+	/* clear out log {}; */
+	MyFree(ConfigFileEntry.fname_userlog);
+	MyFree(ConfigFileEntry.fname_fuserlog);
+	MyFree(ConfigFileEntry.fname_operlog);
+	MyFree(ConfigFileEntry.fname_foperlog);
+	MyFree(ConfigFileEntry.fname_serverlog);
+	MyFree(ConfigFileEntry.fname_glinelog);
+	MyFree(ConfigFileEntry.fname_klinelog);
+	MyFree(ConfigFileEntry.fname_killlog);
+	MyFree(ConfigFileEntry.fname_operspylog);
+	MyFree(ConfigFileEntry.fname_ioerrorlog);
+	ConfigFileEntry.fname_userlog = NULL;
+	ConfigFileEntry.fname_fuserlog = NULL;
+	ConfigFileEntry.fname_operlog = NULL;
+	ConfigFileEntry.fname_foperlog = NULL;
+	ConfigFileEntry.fname_serverlog = NULL;
+	ConfigFileEntry.fname_glinelog = NULL;
+	ConfigFileEntry.fname_klinelog = NULL;
+	ConfigFileEntry.fname_killlog = NULL;
+	ConfigFileEntry.fname_operspylog = NULL;
+	ConfigFileEntry.fname_ioerrorlog = NULL;
+
 	/* operator{} and class{} blocks are freed above */
 	/* clean out listeners */
 	close_listeners();
@@ -1151,6 +1174,15 @@ clear_ircd_conf(void)
 	/* clean out general */
 	MyFree(ConfigFileEntry.servlink_path);
 	ConfigFileEntry.servlink_path = NULL;
+	MyFree(ConfigFileEntry.egdpool_path);
+	ConfigFileEntry.egdpool_path = NULL;
+
+	MyFree(ConfigFileEntry.default_operstring);
+	ConfigFileEntry.default_operstring = NULL;
+	MyFree(ConfigFileEntry.default_adminstring);
+	ConfigFileEntry.default_adminstring = NULL;
+	MyFree(ConfigFileEntry.kline_reason);
+	ConfigFileEntry.kline_reason = NULL;
 
 	/* OK, that should be everything... */
 }

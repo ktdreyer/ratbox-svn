@@ -164,20 +164,20 @@ struct config_file_entry
 	char *servlink_path;
 	char *egdpool_path;
 
-	char default_operstring[REALLEN];
-	char default_adminstring[REALLEN];
-	char kline_reason[REALLEN];
+	char *default_operstring;
+	char *default_adminstring;
+	char *kline_reason;
 	
-	char fname_userlog[MAXPATHLEN];
-	char fname_fuserlog[MAXPATHLEN];
-	char fname_operlog[MAXPATHLEN];
-	char fname_foperlog[MAXPATHLEN];
-	char fname_serverlog[MAXPATHLEN];
-	char fname_killlog[MAXPATHLEN];
-	char fname_glinelog[MAXPATHLEN];
-	char fname_klinelog[MAXPATHLEN];
-	char fname_operspylog[MAXPATHLEN];
-	char fname_ioerrorlog[MAXPATHLEN];
+	char *fname_userlog;
+	char *fname_fuserlog;
+	char *fname_operlog;
+	char *fname_foperlog;
+	char *fname_serverlog;
+	char *fname_killlog;
+	char *fname_glinelog;
+	char *fname_klinelog;
+	char *fname_operspylog;
+	char *fname_ioerrorlog;
 
 	unsigned char compression_level;
 	int disable_fake_channels;

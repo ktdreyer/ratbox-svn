@@ -54,23 +54,23 @@ static FILE *log_ioerror;
 
 struct log_struct
 {
-	const char *name;
+	char **name;
 	FILE **logfile;
 };
 
 static struct log_struct log_table[LAST_LOGFILE] =
 {
 	{ NULL, 				&log_main	},
-	{ ConfigFileEntry.fname_userlog,	&log_user	},
-	{ ConfigFileEntry.fname_fuserlog,	&log_fuser	},
-	{ ConfigFileEntry.fname_operlog,	&log_oper	},
-	{ ConfigFileEntry.fname_foperlog,	&log_foper	},
-	{ ConfigFileEntry.fname_serverlog,	&log_server	},
-	{ ConfigFileEntry.fname_killlog,	&log_kill	},
-	{ ConfigFileEntry.fname_klinelog,	&log_kline	},
-	{ ConfigFileEntry.fname_glinelog,	&log_gline	},
-	{ ConfigFileEntry.fname_operspylog,	&log_operspy	},
-	{ ConfigFileEntry.fname_ioerrorlog,	&log_ioerror	}
+	{ &ConfigFileEntry.fname_userlog,	&log_user	},
+	{ &ConfigFileEntry.fname_fuserlog,	&log_fuser	},
+	{ &ConfigFileEntry.fname_operlog,	&log_oper	},
+	{ &ConfigFileEntry.fname_foperlog,	&log_foper	},
+	{ &ConfigFileEntry.fname_serverlog,	&log_server	},
+	{ &ConfigFileEntry.fname_killlog,	&log_kill	},
+	{ &ConfigFileEntry.fname_klinelog,	&log_kline	},
+	{ &ConfigFileEntry.fname_glinelog,	&log_gline	},
+	{ &ConfigFileEntry.fname_operspylog,	&log_operspy	},
+	{ &ConfigFileEntry.fname_ioerrorlog,	&log_ioerror	}
 };
 
 void
@@ -101,8 +101,8 @@ open_logfiles(void)
 		}
 
 		/* reopen those with paths */
-		if(!EmptyString(log_table[i].name))
-			*log_table[i].logfile = fopen(log_table[i].name, "a");
+		if(!EmptyString(*log_table[i].name))
+			*log_table[i].logfile = fopen(*log_table[i].name, "a");
 	}
 }			
 

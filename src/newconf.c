@@ -337,69 +337,6 @@ conf_set_admin_description(void *data)
 	DupString(AdminInfo.description, (char *) data);
 }
 
-static void
-conf_set_log_fname_userlog(void *data)
-{
-	strlcpy(ConfigFileEntry.fname_userlog, data, sizeof(ConfigFileEntry.fname_userlog));
-}
-
-static void
-conf_set_log_fname_fuserlog(void *data)
-{
-	strlcpy(ConfigFileEntry.fname_fuserlog, data, sizeof(ConfigFileEntry.fname_fuserlog));
-}
-
-static void
-conf_set_log_fname_foperlog(void *data)
-{
-	strlcpy(ConfigFileEntry.fname_foperlog, data, sizeof(ConfigFileEntry.fname_foperlog));
-}
-
-static void
-conf_set_log_fname_operlog(void *data)
-{
-	strlcpy(ConfigFileEntry.fname_operlog, data, sizeof(ConfigFileEntry.fname_operlog));
-}
-
-static void
-conf_set_log_fname_serverlog(void *data)
-{
-	strlcpy(ConfigFileEntry.fname_serverlog, data, sizeof(ConfigFileEntry.fname_serverlog));
-}
-
-static void
-conf_set_log_fname_killlog(void *data)
-{
-	strlcpy(ConfigFileEntry.fname_killlog, data,
-		sizeof(ConfigFileEntry.fname_klinelog));
-}
-
-static void
-conf_set_log_fname_glinelog(void *data)
-{
-	strlcpy(ConfigFileEntry.fname_glinelog, data, sizeof(ConfigFileEntry.fname_glinelog));
-}
-
-static void
-conf_set_log_fname_klinelog(void *data)
-{
-	strlcpy(ConfigFileEntry.fname_klinelog, data, sizeof(ConfigFileEntry.fname_klinelog));
-}
-
-static void
-conf_set_log_fname_operspylog(void *data)
-{
-	strlcpy(ConfigFileEntry.fname_operspylog, data,
-		sizeof(ConfigFileEntry.fname_operspylog));
-}
-
-static void
-conf_set_log_fname_ioerrorlog(void *data)
-{
-	strlcpy(ConfigFileEntry.fname_ioerrorlog, data,
-		sizeof(ConfigFileEntry.fname_ioerrorlog));
-}
-
 struct mode_table
 {
 	const char *name;
@@ -1393,38 +1330,6 @@ conf_set_cluster_type(void *data)
 }
 
 static void
-conf_set_general_default_operstring(void *data)
-{
-	if(EmptyString((char *) data))
-	{
-		conf_report_error("Warning -- operstring must exist");
-		strlcpy(ConfigFileEntry.default_operstring, "is an IRC operator",
-			sizeof(ConfigFileEntry.default_operstring));
-	}
-	else
-	{
-		strlcpy(ConfigFileEntry.default_operstring, data,
-			sizeof(ConfigFileEntry.default_operstring));
-	}
-}
-
-static void
-conf_set_general_default_adminstring(void *data)
-{
-	if(EmptyString((char *) data))
-	{
-		conf_report_error("Warning -- adminstring must exist");
-		strlcpy(ConfigFileEntry.default_adminstring, "is a Server Administrator",
-			sizeof(ConfigFileEntry.default_adminstring));
-	}
-	else
-	{
-		strlcpy(ConfigFileEntry.default_adminstring, data,
-			sizeof(ConfigFileEntry.default_adminstring));
-	}
-}
-
-static void
 conf_set_general_havent_read_conf(void *data)
 {
 	if(*(unsigned int *) data)
@@ -1452,14 +1357,6 @@ conf_set_general_hide_error_messages(void *data)
 		ConfigFileEntry.hide_error_messages = 0;
 	else
 		conf_report_error("Invalid setting '%s' for general::hide_error_messages.", val);
-}
-
-static void
-conf_set_general_kline_reason(void *data)
-{
-	strlcpy(ConfigFileEntry.kline_reason, data,
-			sizeof(ConfigFileEntry.kline_reason));
-	
 }
 
 static void
@@ -1502,13 +1399,6 @@ conf_set_general_stats_i_oper_only(void *data)
 }
 
 static void
-conf_set_general_servlink_path(void *data)
-{
-	MyFree(ConfigFileEntry.servlink_path);
-	DupString(ConfigFileEntry.servlink_path, data);
-}
-
-static void
 conf_set_general_compression_level(void *data)
 {
 #ifdef HAVE_LIBZ
@@ -1524,13 +1414,6 @@ conf_set_general_compression_level(void *data)
 #else
 	conf_report_error("Ignoring general::compression_level -- zlib not available.");
 #endif
-}
-
-static void
-conf_set_general_egdpool_path(void *data)
-{
-	MyFree(ConfigFileEntry.egdpool_path);
-	DupString(ConfigFileEntry.egdpool_path, data);
 }
 
 static void
@@ -1603,6 +1486,19 @@ static void
 conf_set_generic_int(void *data, void *location)
 {
 	*((int *) location) = *((unsigned int *) data);
+}
+
+static void
+conf_set_generic_string(void *data, int len, void *location)
+{
+	char **loc = location;
+	char *input = data;
+
+	if(strlen(input) > len)
+		input[len] = '\0';
+
+	MyFree(*loc);
+	DupString(*loc, input);
 }
 
 int
@@ -1687,11 +1583,9 @@ conf_call_set(struct TopConf *tc, char *item, conf_parm_t * value, int type)
 			break;
 		case CF_STRING:
 		case CF_QSTRING:
-#if 0
 			if(cf->cf_arg)
-				conf_set_generic_string(cp->v.string, cf->cf_arg);
+				conf_set_generic_string(cp->v.string, cf->cf_len, cf->cf_arg);
 			else
-#endif
 				cf->cf_func(cp->v.string);
 			break;
 		}
@@ -1750,90 +1644,112 @@ remove_conf_item(const char *topconf, const char *name)
 }
 #endif
 
+static struct ConfEntry conf_log_table[] =
+{
+	{ "fname_userlog", 	CF_QSTRING, NULL, MAXPATHLEN, &ConfigFileEntry.fname_userlog	},
+	{ "fname_fuserlog", 	CF_QSTRING, NULL, MAXPATHLEN, &ConfigFileEntry.fname_fuserlog	},
+	{ "fname_operlog", 	CF_QSTRING, NULL, MAXPATHLEN, &ConfigFileEntry.fname_operlog	},
+	{ "fname_foperlog", 	CF_QSTRING, NULL, MAXPATHLEN, &ConfigFileEntry.fname_foperlog	},
+	{ "fname_serverlog", 	CF_QSTRING, NULL, MAXPATHLEN, &ConfigFileEntry.fname_serverlog	},
+	{ "fname_killlog", 	CF_QSTRING, NULL, MAXPATHLEN, &ConfigFileEntry.fname_killlog	},
+	{ "fname_glinelog", 	CF_QSTRING, NULL, MAXPATHLEN, &ConfigFileEntry.fname_glinelog	},
+	{ "fname_klinelog", 	CF_QSTRING, NULL, MAXPATHLEN, &ConfigFileEntry.fname_klinelog	},
+	{ "fname_operspylog", 	CF_QSTRING, NULL, MAXPATHLEN, &ConfigFileEntry.fname_operspylog	},
+	{ "fname_ioerrorlog", 	CF_QSTRING, NULL, MAXPATHLEN, &ConfigFileEntry.fname_ioerrorlog },
+	{ "\0",			0,	    NULL, 0,          NULL },
+};
+
 static struct ConfEntry conf_general_table[] =
 {
-	{ "anti_spam_exit_message_time", CF_TIME,  NULL, &ConfigFileEntry.anti_spam_exit_message_time },
-	{ "disable_fake_channels",	 CF_YESNO, NULL, &ConfigFileEntry.disable_fake_channels },
-	{ "min_nonwildcard_simple",	 CF_INT,   NULL, &ConfigFileEntry.min_nonwildcard_simple },
-	{ "non_redundant_klines",	 CF_YESNO, NULL, &ConfigFileEntry.non_redundant_klines },
-	{ "tkline_expire_notices",	 CF_YESNO, NULL, &ConfigFileEntry.tkline_expire_notices },
-	{ "anti_nick_flood",	CF_YESNO, NULL, &ConfigFileEntry.anti_nick_flood	},
-	{ "burst_away",		CF_YESNO, NULL, &ConfigFileEntry.burst_away		},
-	{ "caller_id_wait",	CF_TIME,  NULL, &ConfigFileEntry.caller_id_wait	},
-	{ "client_exit",	CF_YESNO, NULL, &ConfigFileEntry.client_exit		},
-	{ "client_flood",	CF_INT,   NULL, &ConfigFileEntry.client_flood		},
-	{ "connect_timeout",	CF_TIME,  NULL, &ConfigFileEntry.connect_timeout	},
-	{ "default_floodcount", CF_INT,   NULL, &ConfigFileEntry.default_floodcount	},
-	{ "disable_auth",	CF_YESNO, NULL, &ConfigFileEntry.disable_auth		},
-	{ "dot_in_ip6_addr",	CF_YESNO, NULL, &ConfigFileEntry.dot_in_ip6_addr	},
-	{ "dots_in_ident",	CF_INT,   NULL, &ConfigFileEntry.dots_in_ident		},
-	{ "failed_oper_notice",	CF_YESNO, NULL, &ConfigFileEntry.failed_oper_notice	},
+	{ "default_operstring",	CF_QSTRING, NULL, REALLEN,    &ConfigFileEntry.default_operstring },
+	{ "default_adminstring",CF_QSTRING, NULL, REALLEN,    &ConfigFileEntry.default_adminstring },
+	{ "egdpool_path",	CF_QSTRING, NULL, MAXPATHLEN, &ConfigFileEntry.egdpool_path },
+	{ "kline_reason",	CF_QSTRING, NULL, REALLEN, &ConfigFileEntry.kline_reason },
+	{ "servlink_path",	CF_QSTRING, NULL, MAXPATHLEN, &ConfigFileEntry.servlink_path },
+
+	{ "anti_spam_exit_message_time", CF_TIME,  NULL, 0, &ConfigFileEntry.anti_spam_exit_message_time },
+	{ "disable_fake_channels",	 CF_YESNO, NULL, 0, &ConfigFileEntry.disable_fake_channels },
+	{ "min_nonwildcard_simple",	 CF_INT,   NULL, 0, &ConfigFileEntry.min_nonwildcard_simple },
+	{ "non_redundant_klines",	 CF_YESNO, NULL, 0, &ConfigFileEntry.non_redundant_klines },
+	{ "tkline_expire_notices",	 CF_YESNO, NULL, 0, &ConfigFileEntry.tkline_expire_notices },
+
+	{ "anti_nick_flood",	CF_YESNO, NULL, 0, &ConfigFileEntry.anti_nick_flood	},
+	{ "burst_away",		CF_YESNO, NULL, 0, &ConfigFileEntry.burst_away		},
+	{ "caller_id_wait",	CF_TIME,  NULL, 0, &ConfigFileEntry.caller_id_wait	},
+	{ "client_exit",	CF_YESNO, NULL, 0, &ConfigFileEntry.client_exit		},
+	{ "client_flood",	CF_INT,   NULL, 0, &ConfigFileEntry.client_flood	},
+	{ "connect_timeout",	CF_TIME,  NULL, 0, &ConfigFileEntry.connect_timeout	},
+	{ "default_floodcount", CF_INT,   NULL, 0, &ConfigFileEntry.default_floodcount	},
+	{ "disable_auth",	CF_YESNO, NULL, 0, &ConfigFileEntry.disable_auth	},
+	{ "dot_in_ip6_addr",	CF_YESNO, NULL, 0, &ConfigFileEntry.dot_in_ip6_addr	},
+	{ "dots_in_ident",	CF_INT,   NULL, 0, &ConfigFileEntry.dots_in_ident	},
+	{ "failed_oper_notice",	CF_YESNO, NULL, 0, &ConfigFileEntry.failed_oper_notice	},
 #ifdef IPV6
-	{ "fallback_to_ip6_int",CF_YESNO, NULL, &ConfigFileEntry.fallback_to_ip6_int	},
+	{ "fallback_to_ip6_int",CF_YESNO, NULL, 0, &ConfigFileEntry.fallback_to_ip6_int	},
 #endif
-	{ "glines",		CF_YESNO, NULL, &ConfigFileEntry.glines			},
-	{ "gline_min_cidr",	CF_INT,   NULL, &ConfigFileEntry.gline_min_cidr		},
-	{ "gline_min_cidr6",	CF_INT,   NULL, &ConfigFileEntry.gline_min_cidr6	},
-	{ "gline_time",		CF_TIME,  NULL, &ConfigFileEntry.gline_time		},
-	{ "idletime",		CF_TIME,  NULL, &ConfigFileEntry.idletime		},
-	{ "kline_with_reason",	CF_YESNO, NULL, &ConfigFileEntry.kline_with_reason	},
-	{ "map_oper_only",	CF_YESNO, NULL, &ConfigFileEntry.map_oper_only		},
-	{ "max_accept",		CF_INT,   NULL, &ConfigFileEntry.max_accept		},
-	{ "max_nick_time",	CF_TIME,  NULL, &ConfigFileEntry.max_nick_time		},
-	{ "max_nick_changes",	CF_INT,   NULL, &ConfigFileEntry.max_nick_changes	},
-	{ "max_targets",	CF_INT,   NULL, &ConfigFileEntry.max_targets		},
-	{ "min_nonwildcard",	CF_INT,   NULL, &ConfigFileEntry.min_nonwildcard	},
-	{ "nick_delay",		CF_TIME,  NULL, &ConfigFileEntry.nick_delay		},
-	{ "no_oper_flood",	CF_YESNO, NULL, &ConfigFileEntry.no_oper_flood		},
-	{ "operspy_admin_only",	CF_YESNO, NULL, &ConfigFileEntry.operspy_admin_only	},
-	{ "pace_wait",		CF_TIME,  NULL, &ConfigFileEntry.pace_wait		},
-	{ "pace_wait_simple",	CF_TIME,  NULL, &ConfigFileEntry.pace_wait_simple	},
-	{ "ping_cookie",	CF_YESNO, NULL, &ConfigFileEntry.ping_cookie		},
-	{ "reject_after_count",	CF_INT,   NULL, &ConfigFileEntry.reject_after_count	},
-	{ "reject_ban_time",	CF_TIME,  NULL, &ConfigFileEntry.reject_ban_time	},
-	{ "reject_duration",	CF_TIME,  NULL, &ConfigFileEntry.reject_duration	},
-	{ "short_motd",		CF_YESNO, NULL, &ConfigFileEntry.short_motd		},
-	{ "stats_c_oper_only",	CF_YESNO, NULL, &ConfigFileEntry.stats_c_oper_only	},
-	{ "stats_e_disabled",	CF_YESNO, NULL, &ConfigFileEntry.stats_e_disabled	},
-	{ "stats_h_oper_only",	CF_YESNO, NULL, &ConfigFileEntry.stats_h_oper_only	},
-	{ "stats_o_oper_only",	CF_YESNO, NULL, &ConfigFileEntry.stats_o_oper_only	},
-	{ "stats_P_oper_only",	CF_YESNO, NULL, &ConfigFileEntry.stats_P_oper_only	},
-	{ "stats_y_oper_only",	CF_YESNO, NULL, &ConfigFileEntry.stats_y_oper_only	},
-	{ "ts_max_delta",	CF_TIME,  NULL, &ConfigFileEntry.ts_max_delta		},
-	{ "use_egd",		CF_YESNO, NULL, &ConfigFileEntry.use_egd		},
-	{ "ts_warn_delta",	CF_TIME,  NULL, &ConfigFileEntry.ts_warn_delta		},
-	{ "use_whois_actually", CF_YESNO, NULL, &ConfigFileEntry.use_whois_actually	},
-	{ "warn_no_nline",	CF_YESNO, NULL, &ConfigFileEntry.warn_no_nline	},
-	{ "\0", 		  0, 	    NULL, NULL }
+	{ "glines",		CF_YESNO, NULL, 0, &ConfigFileEntry.glines		},
+	{ "gline_min_cidr",	CF_INT,   NULL, 0, &ConfigFileEntry.gline_min_cidr	},
+	{ "gline_min_cidr6",	CF_INT,   NULL, 0, &ConfigFileEntry.gline_min_cidr6	},
+	{ "gline_time",		CF_TIME,  NULL, 0, &ConfigFileEntry.gline_time		},
+	{ "idletime",		CF_TIME,  NULL, 0, &ConfigFileEntry.idletime		},
+	{ "kline_with_reason",	CF_YESNO, NULL, 0, &ConfigFileEntry.kline_with_reason	},
+	{ "map_oper_only",	CF_YESNO, NULL, 0, &ConfigFileEntry.map_oper_only	},
+	{ "max_accept",		CF_INT,   NULL, 0, &ConfigFileEntry.max_accept		},
+	{ "max_nick_time",	CF_TIME,  NULL, 0, &ConfigFileEntry.max_nick_time	},
+	{ "max_nick_changes",	CF_INT,   NULL, 0, &ConfigFileEntry.max_nick_changes	},
+	{ "max_targets",	CF_INT,   NULL, 0, &ConfigFileEntry.max_targets		},
+	{ "min_nonwildcard",	CF_INT,   NULL, 0, &ConfigFileEntry.min_nonwildcard	},
+	{ "nick_delay",		CF_TIME,  NULL, 0, &ConfigFileEntry.nick_delay		},
+	{ "no_oper_flood",	CF_YESNO, NULL, 0, &ConfigFileEntry.no_oper_flood	},
+	{ "operspy_admin_only",	CF_YESNO, NULL, 0, &ConfigFileEntry.operspy_admin_only	},
+	{ "pace_wait",		CF_TIME,  NULL, 0, &ConfigFileEntry.pace_wait		},
+	{ "pace_wait_simple",	CF_TIME,  NULL, 0, &ConfigFileEntry.pace_wait_simple	},
+	{ "ping_cookie",	CF_YESNO, NULL, 0, &ConfigFileEntry.ping_cookie		},
+	{ "reject_after_count",	CF_INT,   NULL, 0, &ConfigFileEntry.reject_after_count	},
+	{ "reject_ban_time",	CF_TIME,  NULL, 0, &ConfigFileEntry.reject_ban_time	},
+	{ "reject_duration",	CF_TIME,  NULL, 0, &ConfigFileEntry.reject_duration	},
+	{ "short_motd",		CF_YESNO, NULL, 0, &ConfigFileEntry.short_motd		},
+	{ "stats_c_oper_only",	CF_YESNO, NULL, 0, &ConfigFileEntry.stats_c_oper_only	},
+	{ "stats_e_disabled",	CF_YESNO, NULL, 0, &ConfigFileEntry.stats_e_disabled	},
+	{ "stats_h_oper_only",	CF_YESNO, NULL, 0, &ConfigFileEntry.stats_h_oper_only	},
+	{ "stats_o_oper_only",	CF_YESNO, NULL, 0, &ConfigFileEntry.stats_o_oper_only	},
+	{ "stats_P_oper_only",	CF_YESNO, NULL, 0, &ConfigFileEntry.stats_P_oper_only	},
+	{ "stats_y_oper_only",	CF_YESNO, NULL, 0, &ConfigFileEntry.stats_y_oper_only	},
+	{ "ts_max_delta",	CF_TIME,  NULL, 0, &ConfigFileEntry.ts_max_delta	},
+	{ "use_egd",		CF_YESNO, NULL, 0, &ConfigFileEntry.use_egd		},
+	{ "ts_warn_delta",	CF_TIME,  NULL, 0, &ConfigFileEntry.ts_warn_delta	},
+	{ "use_whois_actually", CF_YESNO, NULL, 0, &ConfigFileEntry.use_whois_actually	},
+	{ "warn_no_nline",	CF_YESNO, NULL, 0, &ConfigFileEntry.warn_no_nline	},
+	{ "\0", 		0, 	  NULL, 0, NULL }
 };
 
 static struct ConfEntry conf_channel_table[] =
 {
-	{ "default_split_user_count",	CF_INT,  NULL, &ConfigChannel.default_split_user_count	 },
-	{ "default_split_server_count",	CF_INT,	 NULL, &ConfigChannel.default_split_server_count },
-	{ "default_split_delay",	CF_TIME, NULL, &ConfigChannel.default_split_delay	 },
-	{ "burst_topicwho",	CF_YESNO, NULL, &ConfigChannel.burst_topicwho		},
-	{ "knock_delay",	CF_TIME,  NULL, &ConfigChannel.knock_delay		},
-	{ "knock_delay_channel",CF_TIME,  NULL, &ConfigChannel.knock_delay_channel	},
-	{ "max_bans",		CF_INT,   NULL, &ConfigChannel.max_bans			},
-	{ "max_chans_per_user", CF_INT,   NULL, &ConfigChannel.max_chans_per_user 	},
-	{ "no_create_on_split", CF_YESNO, NULL, &ConfigChannel.no_create_on_split 	},
-	{ "no_join_on_split",	CF_YESNO, NULL, &ConfigChannel.no_join_on_split		},
-	{ "no_oper_resvs",	CF_YESNO, NULL, &ConfigChannel.no_oper_resvs		},
-	{ "quiet_on_ban",	CF_YESNO, NULL, &ConfigChannel.quiet_on_ban		},
-	{ "use_except",		CF_YESNO, NULL, &ConfigChannel.use_except		},
-	{ "use_invex",		CF_YESNO, NULL, &ConfigChannel.use_invex		},
-	{ "use_knock",		CF_YESNO, NULL, &ConfigChannel.use_knock		},
-	{ "\0", 		0, 	  NULL, NULL }
+	{ "default_split_user_count",	CF_INT,  NULL, 0, &ConfigChannel.default_split_user_count	 },
+	{ "default_split_server_count",	CF_INT,	 NULL, 0, &ConfigChannel.default_split_server_count },
+	{ "default_split_delay",	CF_TIME, NULL, 0, &ConfigChannel.default_split_delay	 },
+	{ "burst_topicwho",	CF_YESNO, NULL, 0, &ConfigChannel.burst_topicwho		},
+	{ "knock_delay",	CF_TIME,  NULL, 0, &ConfigChannel.knock_delay		},
+	{ "knock_delay_channel",CF_TIME,  NULL, 0, &ConfigChannel.knock_delay_channel	},
+	{ "max_bans",		CF_INT,   NULL, 0, &ConfigChannel.max_bans			},
+	{ "max_chans_per_user", CF_INT,   NULL, 0, &ConfigChannel.max_chans_per_user 	},
+	{ "no_create_on_split", CF_YESNO, NULL, 0, &ConfigChannel.no_create_on_split 	},
+	{ "no_join_on_split",	CF_YESNO, NULL, 0, &ConfigChannel.no_join_on_split		},
+	{ "no_oper_resvs",	CF_YESNO, NULL, 0, &ConfigChannel.no_oper_resvs		},
+	{ "quiet_on_ban",	CF_YESNO, NULL, 0, &ConfigChannel.quiet_on_ban		},
+	{ "use_except",		CF_YESNO, NULL, 0, &ConfigChannel.use_except		},
+	{ "use_invex",		CF_YESNO, NULL, 0, &ConfigChannel.use_invex		},
+	{ "use_knock",		CF_YESNO, NULL, 0, &ConfigChannel.use_knock		},
+	{ "\0", 		0, 	  NULL, 0, NULL }
 };
 
 static struct ConfEntry conf_serverhide_table[] =
 {
-	{ "disable_hidden",	CF_YESNO, NULL, &ConfigServerHide.disable_hidden },
-	{ "flatten_links",	CF_YESNO, NULL, &ConfigServerHide.flatten_links	},
-	{ "hidden",		CF_YESNO, NULL, &ConfigServerHide.hidden	},
-	{ "links_delay",	CF_TIME,  NULL, &ConfigServerHide.links_delay	},
-	{ "\0", 		0, 	  NULL, NULL }
+	{ "disable_hidden",	CF_YESNO, NULL, 0, &ConfigServerHide.disable_hidden },
+	{ "flatten_links",	CF_YESNO, NULL, 0, &ConfigServerHide.flatten_links	},
+	{ "hidden",		CF_YESNO, NULL, 0, &ConfigServerHide.hidden	},
+	{ "links_delay",	CF_TIME,  NULL, 0, &ConfigServerHide.links_delay	},
+	{ "\0", 		0, 	  NULL, 0, NULL }
 };
 
 void
@@ -1859,17 +1775,7 @@ newconf_init()
 	add_conf_item("admin", "description", CF_QSTRING, conf_set_admin_description);
 	add_conf_item("admin", "email", CF_QSTRING, conf_set_admin_email);
 
-	add_top_conf("log", NULL, NULL, NULL);
-	add_conf_item("log", "fname_userlog", CF_QSTRING, conf_set_log_fname_userlog);
-	add_conf_item("log", "fname_fuserlog", CF_QSTRING, conf_set_log_fname_fuserlog);
-	add_conf_item("log", "fname_operlog", CF_QSTRING, conf_set_log_fname_operlog);
-	add_conf_item("log", "fname_foperlog", CF_QSTRING, conf_set_log_fname_foperlog);
-	add_conf_item("log", "fname_serverlog", CF_QSTRING, conf_set_log_fname_serverlog);
-	add_conf_item("log", "fname_killlog", CF_QSTRING, conf_set_log_fname_killlog);
-	add_conf_item("log", "fname_glinelog", CF_QSTRING, conf_set_log_fname_glinelog);
-	add_conf_item("log", "fname_klinelog", CF_QSTRING, conf_set_log_fname_klinelog);
-	add_conf_item("log", "fname_operspylog", CF_QSTRING, conf_set_log_fname_operspylog);
-	add_conf_item("log", "fname_ioerrorlog", CF_QSTRING, conf_set_log_fname_ioerrorlog);
+	add_top_conf("log", NULL, NULL, conf_log_table);
 
 	add_top_conf("operator", conf_begin_oper, conf_end_oper, NULL);
 	add_conf_item("operator", "user", CF_QSTRING, conf_set_oper_user);
@@ -1933,12 +1839,7 @@ newconf_init()
 	add_conf_item("cluster", "type", CF_STRING | CF_FLIST, conf_set_cluster_type);
 
 	add_top_conf("general", NULL, NULL, conf_general_table);
-	add_conf_item("general", "default_operstring", CF_QSTRING,
-		      conf_set_general_default_operstring);
-	add_conf_item("general", "default_adminstring", CF_QSTRING,
-		      conf_set_general_default_adminstring);
-	add_conf_item("general", "kline_reason", CF_QSTRING,
-		      conf_set_general_kline_reason);
+
 	add_conf_item("general", "stats_k_oper_only", CF_STRING,
 		      conf_set_general_stats_k_oper_only);
 	add_conf_item("general", "stats_i_oper_only", CF_STRING,
@@ -1947,9 +1848,7 @@ newconf_init()
 		      conf_set_general_hide_error_messages);
 	add_conf_item("general", "oper_only_umodes", CF_STRING | CF_FLIST,
 		      conf_set_general_oper_only_umodes);
-	add_conf_item("general", "egdpool_path", CF_QSTRING, conf_set_general_egdpool_path);
 	add_conf_item("general", "oper_umodes", CF_STRING | CF_FLIST, conf_set_general_oper_umodes);
-	add_conf_item("general", "servlink_path", CF_QSTRING, conf_set_general_servlink_path);
 	add_conf_item("general", "compression_level", CF_INT, conf_set_general_compression_level);
 	add_conf_item("general", "havent_read_conf", CF_YESNO, conf_set_general_havent_read_conf);
 	add_conf_item("general", "kline_delay", CF_TIME, conf_set_general_kline_delay);

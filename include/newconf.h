@@ -18,6 +18,7 @@ struct ConfEntry
 	const char *cf_name;
 	int cf_type;
 	void (*cf_func) (void *);
+	int cf_len;
 	void *cf_arg;
 };
 
