@@ -246,8 +246,6 @@ send_linebuf_remote(struct Client *to, struct Client *from,
     return;
   } /* if (!MyClient(from) && IsPerson(to) && (to->from == from->from)) */
 
-  /* deprintf("send", "Sending [%s] to %s", sendbuf, to->name); */
-
   _send_linebuf(to, linebuf);
   return;
 } /* send_linebuf_remote() */
