@@ -33,7 +33,7 @@ extern struct DNSReply* gethost_byaddr(const char* name,
                                        const struct DNSQuery* req);
 extern int             init_resolver(void);
 extern void            restart_resolver(void);
-extern time_t          timeout_resolver(time_t now);
+extern void            timeout_resolver(void *);
 extern void            delete_resolver_queries(const void* vptr);
 extern unsigned long   cres_mem(struct Client* cptr);
 

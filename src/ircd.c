@@ -456,7 +456,6 @@ static time_t io_loop(time_t delay)
   /*
    * DNS checks, use smaller of resolver delay or next ping
    */
-  delay = IRCD_MIN(delay, (timeout_resolver(CurrentTime) - CurrentTime));
   delay = IRCD_MIN(delay, (nextping - CurrentTime));
   /*
   ** take the smaller of the two 'timed' event times as
@@ -836,6 +835,7 @@ int main(int argc, char *argv[])
 
   initServerMask();
 
+  init_resolver();
   init_netio();
 
   read_conf_files(YES);         /* cold start init conf files */

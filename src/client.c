@@ -35,6 +35,7 @@
 #include "list.h"
 #include "m_gline.h"
 #include "numeric.h"
+#include "event.h"
 #include "res.h"
 #include "s_bsd.h"
 #include "s_conf.h"

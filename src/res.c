@@ -10,9 +10,10 @@
  *     added callbacks and reference counting of returned hostents.
  *     --Bleep (Thomas Helvey <tomh@inxpress.net>)
  */
-#include "res.h"
 #include "client.h"
 #include "common.h"
+#include "event.h"
+#include "res.h"
 #include "irc_string.h"
 #include "ircd.h"
 #include "numeric.h"
@@ -42,6 +43,8 @@
 #if (CHAR_BIT != 8)
 #error this code needs to be able to address individual octets 
 #endif
+
+static PF res_readreply;
 
 #undef  DEBUG  /* because there is a lot of debug code in here :-) */
 
@@ -299,6 +302,10 @@ static void start_resolver(void)
       ResolverFileDescriptor = socket(AF_INET, SOCK_DGRAM, 0);
       fd_open(ResolverFileDescriptor, FD_SOCKET, "Resolver");
       set_non_blocking(ResolverFileDescriptor);
+      /* At the moment, the resolver FD data is global .. */
+      comm_setselect(ResolverFileDescriptor, COMM_SELECT_READ, res_readreply,
+          NULL, 0);
+      eventAdd("timeout_resolver", timeout_resolver, NULL, 1, 0);
     }
 }
 
@@ -490,11 +497,15 @@ static time_t timeout_query_list(time_t now)
 /*
  * timeout_resolver - check request list
  */
-time_t timeout_resolver(time_t now)
+void
+timeout_resolver(void *notused)
 {
-  if (nextDNSCheck < now)
-    nextDNSCheck = timeout_query_list(now);
-  return nextDNSCheck;
+  timeout_query_list(CurrentTime);
+  /*
+   * This is now an event. We schedule this event once a second because
+   * I think thats good enough granularity for now.
+   */
+  eventAdd("timeout_resolver", timeout_resolver, NULL, 1, 0);
 }
 
 
@@ -953,9 +964,10 @@ static int proc_answer(ResRQ* request, HEADER* header,
 }
 
 /*
- * get_res - read a dns reply from the nameserver and process it.
+ * res_readreply - read a dns reply from the nameserver and process it.
  */
-void get_res(void)
+static void
+res_readreply(int fd, void *data)
 {
   char               buf[sizeof(HEADER) + MAXPACKET];
   HEADER*            header;
@@ -966,8 +978,16 @@ void get_res(void)
   int                len = sizeof(struct sockaddr_in);
   struct sockaddr_in sin;
 
+  assert(fd == ResolverFileDescriptor);
   rc = recvfrom(ResolverFileDescriptor, buf, sizeof(buf), 0, 
                 (struct sockaddr*) &sin, &len);
+  /*
+   * Re-schedule a read *after* recvfrom, or we'll be registering
+   * interest where it'll instantly be ready for read :-) -- adrian
+   */
+  comm_setselect(ResolverFileDescriptor, COMM_SELECT_READ, res_readreply,
+    NULL, 0);
+
   if (rc <= sizeof(HEADER))
     return;
   /*

@@ -25,6 +25,7 @@
 #include "client.h"
 #include "common.h"
 #include "config.h"
+#include "event.h"
 #include "irc_string.h"
 #include "ircdauth.h"
 #include "ircd.h"

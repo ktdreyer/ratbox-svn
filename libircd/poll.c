@@ -128,7 +128,7 @@ poll_update_pollfds(int fd, short event, PF * handler)
  */
 void init_netio(void)
 {
-  init_resolver();
+	/* Nothing to do here yet .. */
 }
 
 /*
@@ -254,13 +254,6 @@ int read_message(time_t delay, unsigned char mask)
     auth = 0;
 
     /*
-     * set resolver descriptor
-     */
-    if (ResolverFileDescriptor >= 0) {
-      PFD_SETR(ResolverFileDescriptor);
-      res_pfd = pfd;
-    }
-    /*
      * set auth descriptors
      */
     for (auth = AuthPollList; auth; auth = auth->next) {
@@ -335,13 +328,6 @@ int read_message(time_t delay, unsigned char mask)
     if (res > 5)
       restart("too many poll errors");
     sleep(10);
-  }
-  /*
-   * check resolver descriptor
-   */
-  if (res_pfd && (res_pfd->revents & (POLLREADFLAGS | POLLERRORS))) {
-    get_res();
-    --nfds;
   }
   /*
    * check auth descriptors
