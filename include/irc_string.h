@@ -30,7 +30,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-
+#undef strcpy
 extern inline 
 char *strcpy(char * s1, const char *s2)
 {
