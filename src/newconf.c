@@ -897,6 +897,13 @@ conf_end_auth(struct TopConf *tc)
 	if(EmptyString(yy_aconf->name))
 		DupString(yy_aconf->name, "NOMATCH");
 
+	/* didnt even get one ->host? */
+	if(EmptyString(yy_aconf->host))
+	{
+		conf_report_error("Ignoring auth block -- missing user@host");
+		return 0;
+	}
+
 	/* so the stacking works in order.. */
 	collapse(yy_aconf->user);
 	collapse(yy_aconf->host);
