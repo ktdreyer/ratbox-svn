@@ -305,7 +305,7 @@ struct Client
 #define FLAGS_BLOCKED      0x0008 /* socket is in a blocked condition */
 #define FLAGS_REJECT_HOLD  0x0010 /* client has been klined */
 #define FLAGS_CLOSING      0x0020 /* set when closing to suppress errors */
-#define FLAGS_CHKACCESS    0x0040 /* ok to check clients access if set */
+/* #define FLAGS_CHKACCESS 0x0040 UNUSED */
 #define FLAGS_GOTID        0x0080 /* successful ident lookup achieved */
 #define FLAGS_NEEDID       0x0100 /* I-lines say must use ident return */
 #define FLAGS_NONL         0x0200 /* No \n in buffer */
@@ -394,12 +394,9 @@ struct Client
  * flags macros.
  */
 #define IsPerson(x)             (IsClient(x) && (x)->user)
-#define DoAccess(x)             ((x)->flags & FLAGS_CHKACCESS)
 #define IsLocal(x)              ((x)->flags & FLAGS_LOCAL)
 #define IsDead(x)               ((x)->flags & FLAGS_DEADSOCKET)
-#define SetAccess(x)            ((x)->flags |= FLAGS_CHKACCESS)
 #define NoNewLine(x)            ((x)->flags & FLAGS_NONL)
-#define ClearAccess(x)          ((x)->flags &= ~FLAGS_CHKACCESS)
 #define MyConnect(x)            ((x)->local_flag != 0)
 #define MyClient(x)             (MyConnect(x) && IsClient(x))
 
