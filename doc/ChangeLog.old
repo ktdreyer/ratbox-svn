@@ -1,3 +1,9 @@
+*** 20011121_6 by androsyn
+Added dns_host and dns_port to server info.  Modified set_time() to use
+gettimeofday() and store the result in struct timeval SystemTime. 
+CurrentTime is now a macro to SystemTime.tv_sec.  
+
+
 *** 20011121_5 by androsyn
 I hate mailx on solaris..did i ever tell you this?
 
