@@ -1,3 +1,8 @@
+*** 20010117_3 by db
+- ping time out should use %d not %lu, cast it to int
+
+
+
 *** 20010117_2 by ejb
 - fix problem with hooks, need init_hooks() *before* load_all_modules().
 
