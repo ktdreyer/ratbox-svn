@@ -588,7 +588,7 @@ mo_dline(struct Client *client_p, struct Client *source_p,
   int bits, t;
   char dlbuffer[1024];
   const char* current_date;
-  time_t tdline_time = 0;
+  int tdline_time = 0;
   int loc = 0;
 
   if (!IsOperK(source_p))

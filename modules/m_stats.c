@@ -826,7 +826,7 @@ static void stats_servers(struct Client *source_p)
 	       (target_p->serv->by[0] ? target_p->serv->by : "Remote."),
 	       "*", "*", (int)(CurrentTime - target_p->lasttime),
                (int)linebuf_len(&target_p->localClient->buf_sendq),
-               days, (days == 1) ? "" : "s", hours, minutes, seconds);
+               days, (days == 1) ? "" : "s", hours, minutes, (int)seconds);
   }
 
   sendto_one(source_p, ":%s %d %s :%d Server(s)", me.name, RPL_STATSDEBUG,
