@@ -603,7 +603,7 @@ clean_resv_nick(const char *nick)
 
 	while ((tmpch = *nick++))
 	{
-		if(tmpch == '?')
+		if(tmpch == '?' || tmpch == '@' || tmpch == '#')
 			q++;
 		else if(tmpch == '*')
 			as++;
