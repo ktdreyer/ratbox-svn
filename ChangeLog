@@ -1,3 +1,34 @@
+leeh        2003/12/26 16:41:00 EST	(20031226_5)
+
+  Modified files:
+    .                    LICENSE Makefile.in configure 
+    autoconf             configure.in 
+    include              config.h 
+    src                  Makefile.in conf.c 
+  Added files:
+    .                    INSTALL 
+  Removed files:
+    .                    ASSUMPTIONS 
+  Log:
+  - added a CREDITS file
+  - added an INSTALL file
+  - added make install, and support for --prefix on configure
+  - die() when we cant open the conf file
+  - remove old unused ASSUMPTIONS file
+  
+  Revision  Changes    Path
+  1.3       +0 -3      rserv/ASSUMPTIONS (dead)
+  1.1       +21 -0     rserv/INSTALL (new)
+  1.2       +3 -0      rserv/LICENSE
+  1.2       +8 -0      rserv/Makefile.in
+  1.3       +1 -0      rserv/autoconf/configure.in
+  1.3       +128 -32   rserv/configure
+  1.5       +27 -1     rserv/include/config.h
+  1.6       +8 -6      rserv/src/Makefile.in
+  1.10      +4 -1      rserv/src/conf.c
+
+
+
 leeh        2003/12/26 16:39:48 EST	(20031226_4)
 
   Modified files:
