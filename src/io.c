@@ -30,7 +30,7 @@
 #define IO_IP	1
 
 dlink_list connection_list;
-struct connection_entry *server_p;
+struct lconn *server_p;
 
 time_t last_connect_time;
 time_t current_time;
@@ -38,18 +38,18 @@ time_t current_time;
 fd_set readfds;
 fd_set writefds;
 
-static int signon_server(struct connection_entry *conn_p);
-static void signon_client_in(struct connection_entry *conn_p);
-static int signon_client_out(struct connection_entry *conn_p);
+static int signon_server(struct lconn *conn_p);
+static void signon_client_in(struct lconn *conn_p);
+static int signon_client_out(struct lconn *conn_p);
 
-static void signoff_server(struct connection_entry *conn_p);
-static void signoff_client(struct connection_entry *conn_p);
+static void signoff_server(struct lconn *conn_p);
+static void signoff_client(struct lconn *conn_p);
 
-static void read_server(struct connection_entry *conn_p);
-static void read_client(struct connection_entry *conn_p);
-static int write_sendq(struct connection_entry *conn_p);
+static void read_server(struct lconn *conn_p);
+static void read_client(struct lconn *conn_p);
+static int write_sendq(struct lconn *conn_p);
 static void parse_server(char *buf, int len);
-static void parse_client(struct connection_entry *conn_p, char *buf, int len);
+static void parse_client(struct lconn *conn_p, char *buf, int len);
 #ifdef HAVE_GETADDRINFO
 static struct addrinfo *gethostinfo(char const *host, int port);
 #endif
@@ -84,7 +84,7 @@ ignore_errno(int ierrno)
  * outputs	- characters read
  */
 static int
-get_line(struct connection_entry *conn_p, char *buf, int bufsize)
+get_line(struct lconn *conn_p, char *buf, int bufsize)
 {
 	char *p;
 	int n;
@@ -147,7 +147,7 @@ get_line(struct connection_entry *conn_p, char *buf, int bufsize)
 void
 read_io(void)
 {
-	struct connection_entry *conn_p;
+	struct lconn *conn_p;
 	dlink_node *ptr;
 	dlink_node *next_ptr;
 	struct timeval read_time_out;
@@ -409,7 +409,7 @@ void
 connect_to_server(void *target_server)
 {
 	struct conf_server *conf_p;
-	struct connection_entry *conn_p;
+	struct lconn *conn_p;
 	int serv_fd;
 
 	if(server_p != NULL)
@@ -435,7 +435,7 @@ connect_to_server(void *target_server)
 	if(serv_fd < 0)
 		return;
 
-	conn_p = my_malloc(sizeof(struct connection_entry));
+	conn_p = my_malloc(sizeof(struct lconn));
 	conn_p->name = my_strdup(conf_p->name);
 	conn_p->fd = serv_fd;
 	conn_p->first_time = conn_p->last_time = CURRENT_TIME;
@@ -460,7 +460,7 @@ void
 connect_to_client(struct client *client_p, struct conf_oper *oper_p,
 			const char *host, int port)
 {
-	struct connection_entry *conn_p;
+	struct lconn *conn_p;
 	int client_fd;
 
 	client_fd = sock_open(host, port, config_file.dcc_vhost, IO_IP);
@@ -468,7 +468,7 @@ connect_to_client(struct client *client_p, struct conf_oper *oper_p,
 	if(client_fd < 0)
 		return;
 
-	conn_p = my_malloc(sizeof(struct connection_entry));
+	conn_p = my_malloc(sizeof(struct lconn));
 	conn_p->name = my_strdup(oper_p->name);
 
 	conn_p->oper = oper_p;
@@ -494,7 +494,7 @@ void
 connect_from_client(struct client *client_p, struct conf_oper *oper_p,
 			const char *servicenick)
 {
-	struct connection_entry *conn_p;
+	struct lconn *conn_p;
 	struct sockaddr_in addr;
 	struct hostent *local_addr;
 	unsigned long local_ip;
@@ -540,7 +540,7 @@ connect_from_client(struct client *client_p, struct conf_oper *oper_p,
 		return;
 	}
 
-	conn_p = my_malloc(sizeof(struct connection_entry));
+	conn_p = my_malloc(sizeof(struct lconn));
 	conn_p->name = my_strdup(oper_p->name);
         conn_p->oper = oper_p;
 
@@ -572,7 +572,7 @@ connect_from_client(struct client *client_p, struct conf_oper *oper_p,
  * outputs      - 1 on success, -1 on failure
  */
 static int
-signon_server(struct connection_entry *conn_p)
+signon_server(struct lconn *conn_p)
 {
         ClearConnConnecting(conn_p);
         SetConnHandshake(conn_p);
@@ -602,7 +602,7 @@ signon_server(struct connection_entry *conn_p)
 }
 
 static void
-signon_client_in(struct connection_entry *conn_p)
+signon_client_in(struct lconn *conn_p)
 {
 	struct sockaddr_in addr;
 	int sock;
@@ -652,7 +652,7 @@ signon_client_in(struct connection_entry *conn_p)
  * outputs      - 1 on success, -1 on failure
  */
 static int
-signon_client_out(struct connection_entry *conn_p)
+signon_client_out(struct lconn *conn_p)
 {
 	ClearConnConnecting(conn_p);
 	conn_p->io_read = read_client;
@@ -671,7 +671,7 @@ signon_client_out(struct connection_entry *conn_p)
 }
 
 static void
-signoff_client(struct connection_entry *conn_p)
+signoff_client(struct lconn *conn_p)
 {
 	if(ConnDead(conn_p))
 		return;
@@ -687,7 +687,7 @@ signoff_client(struct connection_entry *conn_p)
 }
 
 static void
-signoff_server(struct connection_entry *conn_p)
+signoff_server(struct lconn *conn_p)
 {
 	struct client *service_p;
 	dlink_node *ptr;
@@ -725,7 +725,7 @@ signoff_server(struct connection_entry *conn_p)
  * outputs      -
  */
 static void
-read_server(struct connection_entry *conn_p)
+read_server(struct lconn *conn_p)
 {
 	static char buf[BUFSIZE*2];
 	int n;
@@ -765,7 +765,7 @@ read_server(struct connection_entry *conn_p)
  * outputs      -
  */
 static void
-read_client(struct connection_entry *conn_p)
+read_client(struct lconn *conn_p)
 {
 	static char buf[BUFSIZE*2];
 	int n;
@@ -914,7 +914,7 @@ parse_server(char *buf, int len)
  * outputs      -
  */
 void
-parse_client(struct connection_entry *conn_p, char *buf, int len)
+parse_client(struct lconn *conn_p, char *buf, int len)
 {
 	static char *parv[MAXPARA + 1];
 	const char *command;
@@ -1020,7 +1020,7 @@ sendto_server(const char *format, ...)
  * outputs      -
  */
 void
-sendto_one(struct connection_entry *conn_p, const char *format, ...)
+sendto_one(struct lconn *conn_p, const char *format, ...)
 {
 	char buf[BUFSIZE];
 	va_list args;
@@ -1047,7 +1047,7 @@ sendto_one(struct connection_entry *conn_p, const char *format, ...)
 void
 sendto_all(int umode, const char *format, ...)
 {
-        struct connection_entry *conn_p;
+        struct lconn *conn_p;
         char buf[BUFSIZE];
         dlink_node *ptr;
         va_list args;
@@ -1077,10 +1077,10 @@ sendto_all(int umode, const char *format, ...)
  * outputs      -
  */
 void
-sendto_all_butone(struct connection_entry *one, int umode,
+sendto_all_butone(struct lconn *one, int umode,
                   const char *format, ...)
 {
-        struct connection_entry *conn_p;
+        struct lconn *conn_p;
         char buf[BUFSIZE];
         dlink_node *ptr;
         va_list args;
@@ -1114,7 +1114,7 @@ sendto_all_butone(struct connection_entry *one, int umode,
  * outputs      - sendq
  */
 unsigned long
-get_sendq(struct connection_entry *conn_p)
+get_sendq(struct lconn *conn_p)
 {
         struct send_queue *sendq_ptr;
         dlink_node *ptr;
@@ -1137,7 +1137,7 @@ get_sendq(struct connection_entry *conn_p)
  * outputs	- -1 on fatal error, 0 on partial write, otherwise 1
  */
 static int
-write_sendq(struct connection_entry *conn_p)
+write_sendq(struct lconn *conn_p)
 {
 	struct send_queue *sendq;
 	dlink_node *ptr;
@@ -1183,7 +1183,7 @@ write_sendq(struct connection_entry *conn_p)
  * outputs	-
  */
 static void
-sendq_add(struct connection_entry *conn_p, const char *buf, int len, int offset)
+sendq_add(struct lconn *conn_p, const char *buf, int len, int offset)
 {
 	struct send_queue *sendq = my_calloc(1, sizeof(struct send_queue));
 	sendq->buf = my_strdup(buf);
@@ -1410,7 +1410,7 @@ sock_open(const char *host, int port, const char *vhost, int type)
  * outputs	- -1 on fatal error, 0 on partial write, otherwise 1
  */
 int
-sock_write(struct connection_entry *conn_p, const char *buf, int len)
+sock_write(struct lconn *conn_p, const char *buf, int len)
 {
 	int n;
 
@@ -1449,7 +1449,7 @@ sock_write(struct connection_entry *conn_p, const char *buf, int len)
 }
 
 void
-sock_close(struct connection_entry *conn_p)
+sock_close(struct lconn *conn_p)
 {
 	close(conn_p->fd);
 	conn_p->fd = -1;

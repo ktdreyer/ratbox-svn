@@ -12,7 +12,7 @@ struct send_queue
 	int pos;
 };
 
-struct connection_entry
+struct lconn
 {
 	struct client *client_p;
 	char *name;
@@ -26,14 +26,14 @@ struct connection_entry
 
         struct conf_oper *oper;
 
-	void (*io_read)(struct connection_entry *);
-	int (*io_write)(struct connection_entry *);
-	void (*io_close)(struct connection_entry *);
+	void (*io_read)(struct lconn *);
+	int (*io_write)(struct lconn *);
+	void (*io_close)(struct lconn *);
 
 	dlink_list sendq;
 };
 
-extern struct connection_entry *server_p;
+extern struct lconn *server_p;
 extern dlink_list connection_list;
 
 #define CONN_CONNECTING		0x0001
@@ -109,16 +109,16 @@ extern void connect_from_client(struct client *client_p, struct conf_oper *oper_
 				const char *servicenick);
 
 extern void sendto_server(const char *format, ...);
-extern void sendto_one(struct connection_entry *, const char *format, ...);
+extern void sendto_one(struct lconn *, const char *format, ...);
 extern void sendto_all(int umode, const char *format, ...);
-extern void sendto_all_butone(struct connection_entry *, int umode, 
+extern void sendto_all_butone(struct lconn *, int umode, 
                               const char *format, ...);
 
 extern int sock_create(int);
 extern int sock_open(const char *host, int port, const char *vhost, int type);
-extern void sock_close(struct connection_entry *conn_p);
-extern int sock_write(struct connection_entry *conn_p, const char *buf, int len);
+extern void sock_close(struct lconn *conn_p);
+extern int sock_write(struct lconn *conn_p, const char *buf, int len);
 
-extern unsigned long get_sendq(struct connection_entry *conn_p);
+extern unsigned long get_sendq(struct lconn *conn_p);
 
 #endif

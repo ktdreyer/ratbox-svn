@@ -256,7 +256,7 @@ eventFind(EVH * func, void *arg)
 }
 
 void
-event_show(struct connection_entry *conn_p)
+event_show(struct lconn *conn_p)
 {
         int i;
 

@@ -13,17 +13,17 @@
 #include "ucommand.h"
 #include "io.h"
 
-static void u_stats(struct connection_entry *, const char **, int);
+static void u_stats(struct lconn *, const char **, int);
 struct ucommand_handler stats_ucommand = { "stats", u_stats, 0, 0, 1, NULL };
 
 struct _stats_table
 {
         const char *type;
-        void (*func)(struct connection_entry *);
+        void (*func)(struct lconn *);
 };
 
 static void
-stats_opers(struct connection_entry *conn_p)
+stats_opers(struct lconn *conn_p)
 {
         struct conf_oper *conf_p;
         dlink_node *ptr;
@@ -40,7 +40,7 @@ stats_opers(struct connection_entry *conn_p)
 }
 
 static void
-stats_servers(struct connection_entry *conn_p)
+stats_servers(struct lconn *conn_p)
 {
         struct conf_server *conf_p;
         dlink_node *ptr;
@@ -56,7 +56,7 @@ stats_servers(struct connection_entry *conn_p)
 }
 
 static void
-stats_uplink(struct connection_entry *conn_p)
+stats_uplink(struct lconn *conn_p)
 {
         if(server_p != NULL)
                 sendto_one(conn_p, "Currently connected to %s Idle: %d "
@@ -70,7 +70,7 @@ stats_uplink(struct connection_entry *conn_p)
 }
 
 static void
-stats_uptime(struct connection_entry *conn_p)
+stats_uptime(struct lconn *conn_p)
 {
         sendto_one(conn_p, "%s up %s",
                    MYNAME,
@@ -87,7 +87,7 @@ static struct _stats_table stats_table[] =
 };
 
 static void
-u_stats(struct connection_entry *conn_p, const char *parv[], int parc)
+u_stats(struct lconn *conn_p, const char *parv[], int parc)
 {
         int i;
 

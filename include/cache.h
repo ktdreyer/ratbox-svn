@@ -5,7 +5,7 @@
 #define CACHELINELEN	81
 #define CACHEFILELEN	30
 
-struct connection_entry;
+struct lconn;
 
 struct cachefile
 {
@@ -25,7 +25,7 @@ extern void init_cache(void);
 extern struct cachefile *cache_file(const char *, const char *);
 extern void free_cachefile(struct cachefile *);
 
-extern void send_cachefile(struct cachefile *, struct connection_entry *);
+extern void send_cachefile(struct cachefile *, struct lconn *);
 
 #endif
 

@@ -102,7 +102,7 @@ free_cachefile(struct cachefile *cacheptr)
 }
 
 void
-send_cachefile(struct cachefile *cacheptr, struct connection_entry *conn_p)
+send_cachefile(struct cachefile *cacheptr, struct lconn *conn_p)
 {
         struct cacheline *lineptr;
         dlink_node *ptr;

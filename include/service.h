@@ -3,7 +3,7 @@
 #define INCLUDED_service_h
 
 struct client;
-struct connection_entry;
+struct lconn;
 struct ucommand_handler;
 struct cachefile;
 
@@ -40,7 +40,7 @@ struct service_handler
 	unsigned long command_size;
         struct ucommand_handler *ucommand;
 
-        void (*stats)(struct connection_entry *, const char **, int);
+        void (*stats)(struct lconn *, const char **, int);
 };
 
 extern dlink_list service_list;
@@ -61,6 +61,6 @@ extern void handle_service(struct client *service_p, struct client *client_p,
 extern void service_error(struct client *service_p, struct client *client_p,
                           const char *, ...);
 
-extern void service_stats(struct client *service_p, struct connection_entry *);
+extern void service_stats(struct client *service_p, struct lconn *);
 
 #endif

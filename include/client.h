@@ -15,7 +15,7 @@ extern dlink_list oper_list;
 extern dlink_list server_list;
 extern dlink_list exited_list;
 
-struct connection_entry;
+struct lconn;
 struct service_command;
 struct ucommand_handler;
 struct cachefile;
@@ -95,7 +95,7 @@ struct service
 
 	struct cachefile *help;
 	struct cachefile *helpadmin;
-        void (*stats)(struct connection_entry *, const char **, int);
+        void (*stats)(struct lconn *, const char **, int);
 };
 
 struct host_entry

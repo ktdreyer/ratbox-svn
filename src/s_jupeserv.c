@@ -38,8 +38,8 @@ static dlink_list active_jupes;
 
 static struct client *jupeserv_p;
 
-static void u_jupeserv_jupe(struct connection_entry *conn_p, const char **, int);
-static void u_jupeserv_unjupe(struct connection_entry *conn_p, const char **, int);
+static void u_jupeserv_jupe(struct lconn *conn_p, const char **, int);
+static void u_jupeserv_unjupe(struct lconn *conn_p, const char **, int);
 
 static int s_jupeserv_jupe(struct client *, const char **, int);
 static int s_jupeserv_unjupe(struct client *, const char **, int);
@@ -229,7 +229,7 @@ valid_jupe(const char *servername)
 }
 
 static void
-u_jupeserv_jupe(struct connection_entry *conn_p, const char *parv[], int parc)
+u_jupeserv_jupe(struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct server_jupe *jupe_p;
 	char *reason;
@@ -277,7 +277,7 @@ u_jupeserv_jupe(struct connection_entry *conn_p, const char *parv[], int parc)
 }
 
 static void
-u_jupeserv_unjupe(struct connection_entry *conn_p, const char *parv[], int parc)
+u_jupeserv_unjupe(struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct server_jupe *ajupe_p, *jupe_p;
 

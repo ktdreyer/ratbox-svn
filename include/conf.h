@@ -2,7 +2,7 @@
 #ifndef INCLUDED_conf_h
 #define INCLUDED_conf_h
 
-struct connection_entry;
+struct lconn;
 struct FileBuf;
 
 #define MYNAME config_file.name

@@ -22,8 +22,8 @@
 
 static struct client *operbot_p;
 
-static void u_operbot_objoin(struct connection_entry *, const char **, int);
-static void u_operbot_obpart(struct connection_entry *, const char **, int);
+static void u_operbot_objoin(struct lconn *, const char **, int);
+static void u_operbot_obpart(struct lconn *, const char **, int);
 
 static int s_operbot_objoin(struct client *, const char **, int);
 static int s_operbot_obpart(struct client *, const char **, int);
@@ -69,7 +69,7 @@ operbot_db_callback(void *db, int argc, char **argv, char **colnames)
 }
 
 static void
-u_operbot_objoin(struct connection_entry *conn_p, const char *parv[], int parc)
+u_operbot_objoin(struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct channel *chptr;
 
@@ -90,7 +90,7 @@ u_operbot_objoin(struct connection_entry *conn_p, const char *parv[], int parc)
 }
 
 static void
-u_operbot_obpart(struct connection_entry *conn_p, const char *parv[], int parc)
+u_operbot_obpart(struct lconn *conn_p, const char *parv[], int parc)
 {
 	if(part_service(operbot_p, parv[0]))
 	{
