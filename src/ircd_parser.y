@@ -131,7 +131,6 @@ int   class_sendq_var;
 %token  WARN
 %token  GENERAL
 %token  QUIET_ON_BAN
-%token  BAN_CIDR
 %token  FAILED_OPER_NOTICE
 %token  SHOW_FAILED_OPER_ID
 %token  SHOW_FAILED_OPER_PASSWD
@@ -1084,16 +1083,6 @@ general_quiet_on_ban:   QUIET_ON_BAN '=' TYES ';'
                         QUIET_ON_BAN '=' TNO ';'
   {
     ConfigFileEntry.quiet_on_ban = 0;
-  } ;
-
-general_ban_cidr:   BAN_CIDR '=' TYES ';'
-  {
-    ConfigFileEntry.ban_cidr = 1;
-  }
-                        |
-                        BAN_CIDR '=' TNO ';'
-  {
-    ConfigFileEntry.ban_cidr = 0;
   } ;
 
 general_failed_oper_notice:   FAILED_OPER_NOTICE '=' TYES ';'
