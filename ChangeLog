@@ -1,3 +1,18 @@
+leeh        2003/12/18 13:03:04 EST	(20031218_2)
+
+  Modified files:
+    src                  io.c 
+  Log:
+  - fix so when we connect() somewhere, we test we can write to it, not read
+    to it
+  - make signon_to_server() a write function, which checks for the connect()
+    having gone wrong.
+  
+  Revision  Changes    Path
+  1.8       +22 -7     rserv/src/io.c
+
+
+
 leeh        2003/12/18 09:08:02 EST	(20031218_1)
 
   Modified files:
