@@ -1,3 +1,19 @@
+androsyn    2002/02/16 21:48:20 EST	(20020217_3)
+
+  Modified files:
+    include              client.h 
+    src                  client.c packet.c send.c 
+  Log:
+  Fixed the double exit_client() stuff I think...
+  
+  Revision  Changes    Path
+  7.139     +2 -0      ircd-hybrid-7/include/client.h
+  7.227     +1 -1      ircd-hybrid-7/src/client.c
+  7.69      +0 -9      ircd-hybrid-7/src/packet.c
+  7.173     +1 -1      ircd-hybrid-7/src/send.c
+
+
+
 androsyn    2002/02/16 20:27:37 EST	(20020217_2)
 
   Modified files:
