@@ -1350,7 +1350,7 @@ set_channel_mode(struct Client *client_p, struct Client *source_p,
 
 	if(IsServer(source_p))
 		mlen = ircsprintf(modebuf, ":%s MODE %s ", 
-				  me.name, chptr->chname);
+				  source_p->name, chptr->chname);
 	else
 		mlen = ircsprintf(modebuf, ":%s!%s@%s MODE %s ",
 				  source_p->name, source_p->username, 
