@@ -134,21 +134,21 @@ conf_parm_t *	cur_list = NULL;
 %token <number> NUMBER
 
 %type <string> qstring string
-%type <number> number
-%type <number> timespec
-%type <conf_parm> itemlist oneitem
+%type <number> number timespec 
+%type <conf_parm> itemlist oneitem 
 
 %start conf
 
 %%
 
 conf: 
-    | conf conf_item
+    | conf conf_item | error
     ;
 
 conf_item:
          | block
 	 | loadmodule
+	 | error
          ;
 
 block: string 
@@ -169,10 +169,12 @@ block: string
 	   if (conf_cur_block)
            	conf_end_block(conf_cur_block);
          }
+     | error
      ;
 
 block_items: block_items block_item 
            | block_item 
+	   | error
            ;
 
 block_item:	string '=' itemlist ';'
@@ -265,6 +267,7 @@ loadmodule:
 	      load_one_module($2);
 	    }
 	  ';'
+	| error
           ;
 
 qstring: QSTRING { strcpy($$, $1); } ;
