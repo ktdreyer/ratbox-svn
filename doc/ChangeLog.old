@@ -1,3 +1,11 @@
+*** 20010323_7 by ejb
+- added cpp support to the parser.
+  we now pass ircd.conf through 'cpp -P' before we pass it
+  to lex.  this could possibly be implemented slightly better
+  (esp. error checking).
+
+
+
 *** 20010323_6 by ejb
 - add support for decades, centuries, millannia,
   and terabytes in the parser.
