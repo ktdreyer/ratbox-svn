@@ -1,3 +1,15 @@
+leeh        2004/03/10 12:41:53 EST	(20040310_0)
+
+  Modified files:
+    modules              m_join.c 
+  Log:
+  - ms_join() shouldve been using parv[4+args], not parv[5+args]
+  
+  Revision  Changes    Path
+  1.147     +3 -3      ircd-ratbox/modules/m_join.c
+
+
+
 leeh        2004/03/08 14:51:11 EST	(20040308_10)
 
   Modified files:
