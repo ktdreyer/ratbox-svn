@@ -261,14 +261,15 @@ static void auth_dns_callback(void* vptr, adns_answer* reply)
   auth->client->localClient->dns_query = NULL;
   if (!IsDoingAuth(auth))
     {
+      struct Client *client_p = auth->client;
       unlink_auth_request(auth, &auth_poll_list);
-      release_auth_client(auth->client);
 #ifdef USE_IAUTH
       ilog(L_ERROR, "Linking to auth client list");
       link_auth_request(auth, &auth_client_list);
 #else
       free_auth_request(auth);
 #endif
+      release_auth_client(client_p);
     }
 
 }
@@ -475,9 +476,9 @@ timeout_auth_queries_event(void *notused)
 	      get_client_name(auth->client, SHOW_IP));
 
 	  auth->client->since = CurrentTime;
-	  release_auth_client(auth->client);
 	  dlinkDelete(ptr, &auth_poll_list);
 	  free_dlink_node(ptr);
+	  release_auth_client(auth->client);
 #ifdef USE_IAUTH
     ilog(L_ERROR, "linking to auth client list 3");
 	  link_auth_request(auth, &auth_client_list);
