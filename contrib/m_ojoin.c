@@ -102,6 +102,9 @@ static void mo_ojoin(struct Client *client_p, struct Client *source_p,
     }
 #endif
 
+  if (move_me == 1)
+    parv[1]--;
+
   if( chptr == NULL )
     {
       sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
@@ -115,9 +118,6 @@ static void mo_ojoin(struct Client *client_p, struct Client *source_p,
                  me.name, source_p->name, parv[1]);
       return;
     }
-
-  if (move_me == 1)
-    parv[1]--;
 
   if (*parv[1] == '@') 
     {
