@@ -78,6 +78,6 @@ MyRealloc(void *x, size_t y)
 #endif /* __GNUC__ */
 #endif /* __APPLE__ */
 
-#define MyFree(x) do { if(x) free(x); x = 0; } while (0)
+#define MyFree(x) do { if(x) free(x); } while (0)
 
 #endif /* _I_MEMORY_H */
