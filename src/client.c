@@ -164,7 +164,7 @@ free_local_client(struct Client *client_p)
 	s_assert(NULL != client_p);
 	s_assert(&me != client_p);
 
-	if(!MyConnect(client_p))
+	if(client_p->localClient == NULL)
 		return;
 
 	/*
