@@ -1,3 +1,15 @@
+leeh        2003/05/15 14:13:57 UTC	(20030515_4)
+
+  Modified files:
+    modules              m_stats.c 
+  Log:
+  - fixed the style of the stats table.
+  
+  Revision  Changes    Path
+  1.156     +49 -48    ircd-ratbox/modules/m_stats.c
+
+
+
 leeh        2003/05/15 14:10:33 UTC	(20030515_3)
 
   Modified files:
