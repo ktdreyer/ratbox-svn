@@ -232,7 +232,7 @@ comm_select(unsigned long delay)
          *   -- Adrian
          */
         poll_time.tv_sec = 0;
-        poll_time.tv_nsec = delay * 1000;
+        poll_time.tv_nsec = delay * 1000000;
         for (;;) {
             num = kevent(kq, kqlst, kqoff, ke,  KE_LENGTH, &poll_time);
 	    kqoff = 0;

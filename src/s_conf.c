@@ -112,6 +112,9 @@ typedef struct ip_entry
   struct irc_inaddr ip;
 #endif
   int        count;
+#ifdef PACE_CONNECT
+  time_t last_attempt;
+#endif
   struct ip_entry *next;
 }IP_ENTRY;
 
@@ -119,7 +122,7 @@ static IP_ENTRY *ip_hash_table[IP_HASH_SIZE];
 
 static int hash_ip(struct irc_inaddr *);
 
-static IP_ENTRY *find_or_add_ip(struct Client *);
+static IP_ENTRY *find_or_add_ip(struct irc_inaddr*);
 
 /* general conf items link list root */
 struct ConfItem* ConfigItemList = NULL;
@@ -573,8 +576,7 @@ int attach_Iline(struct Client* client_p, const char* username)
 static int attach_iline(struct Client *client_p, struct ConfItem *aconf)
 {
   IP_ENTRY *ip_found;
-
-  ip_found = find_or_add_ip(client_p);
+  ip_found = find_or_add_ip(&client_p->localClient->ip);
 
   SetIpHash(client_p);
   ip_found->count++;
@@ -652,24 +654,19 @@ void clear_ip_hash_table()
  */
 
 static IP_ENTRY *
-find_or_add_ip(struct Client *client_p)
+find_or_add_ip(struct irc_inaddr *ip_in)
 {
-  struct irc_inaddr ip_in;
-  
   int hash_index;
   IP_ENTRY *ptr, *newptr;
 
-  
-  copy_s_addr(IN_ADDR(ip_in), IN_ADDR(client_p->localClient->ip));
-
-  for(ptr = ip_hash_table[hash_index = hash_ip(&ip_in)]; ptr; ptr = ptr->next )
-    {
-      if(!memcmp(&ptr->ip, &ip_in, sizeof(ip_in)))
-        {
-          return(ptr);
-        }
-    }
-
+  for(ptr = ip_hash_table[hash_index = hash_ip(ip_in)]; ptr;
+      ptr = ptr->next)
+  {
+   if(!memcmp(&ptr->ip, ip_in, sizeof(*ip_in)))
+   {
+    return(ptr);
+   }
+  }
   if ( (ptr = ip_hash_table[hash_index]) != (IP_ENTRY *)NULL )
     {
       if( free_ip_entries == (IP_ENTRY *)NULL)
@@ -678,8 +675,9 @@ find_or_add_ip(struct Client *client_p)
       newptr = ip_hash_table[hash_index] = free_ip_entries;
       free_ip_entries = newptr->next;
 
-      memcpy(&newptr->ip, &ip_in, sizeof(ip_in));
+      memcpy(&newptr->ip, ip_in, sizeof(*ip_in));
       newptr->count = 0;
+      newptr->last_attempt = 0;
       newptr->next = ptr;
       return(newptr);
     }
@@ -689,7 +687,7 @@ find_or_add_ip(struct Client *client_p)
 
   ptr = ip_hash_table[hash_index] = free_ip_entries;
   free_ip_entries = ptr->next;
-  memcpy(&ptr->ip, &ip_in, sizeof(ip_in));
+  memcpy(&ptr->ip, ip_in, sizeof(*ip_in));
   ptr->count = 0;
   ptr->next = (IP_ENTRY *)NULL;
   return (ptr);
@@ -726,8 +724,12 @@ void remove_one_ip(struct irc_inaddr *ip_in)
         {
           if(ptr->count != 0)
             ptr->count--;
-
+#ifndef PACE_CONNECT
           if(ptr->count == 0)
+#else
+          if(ptr->count == 0 &&
+             (CurrentTime-ptr->last_attempt)<RECONNECT_TIME)
+#endif
             {
               if(ip_hash_table[hash_index] == ptr)
                 ip_hash_table[hash_index] = ptr->next;
@@ -1660,11 +1662,28 @@ static void lookup_confhost(struct ConfItem* aconf)
  */
 int conf_connect_allowed(struct irc_inaddr *addr, int aftype)
 {
-  struct ConfItem *aconf = find_dline(addr, aftype);
-
-  if (aconf && !(aconf->status & CONF_EXEMPTDLINE))
-    return 0;
-  return 1;
+#ifdef PACE_CONNECT
+ IP_ENTRY *ip_found;
+#endif
+ struct ConfItem *aconf = find_dline(addr, aftype);
+ 
+ /* DLINE exempt also gets you out of static limits/pacing... */
+ if (aconf && aconf->status & CONF_EXEMPTDLINE)
+  return 0;
+ 
+ if (aconf)
+  return BANNED_CLIENT;
+#ifdef PACE_CONNECT
+ ip_found = find_or_add_ip(addr);
+ if ((CurrentTime - ip_found->last_attempt) < RECONNECT_TIME)
+ {
+  ip_found->last_attempt = CurrentTime;
+  ip_found->count--;
+  return TOO_FAST;
+ }
+ ip_found->last_attempt = CurrentTime;
+#endif
+ return 0;
 }
 
 /*
@@ -2581,3 +2600,33 @@ int conf_yy_fatal_error(char *msg)
   return 0;
 }
 
+#ifdef PACE_CONNECT
+/* void flush_expired_ips(void *unused)
+ * Input: None.
+ * Output: None.
+ * Side-effects: Deletes all IP address entries which should have expired.
+ */
+void
+flush_expired_ips(void *unused)
+{
+ int i;
+ time_t expire_before = CurrentTime - RECONNECT_TIME;
+ IP_ENTRY *ie, **iee;
+ for (i=0; i<IP_HASH_SIZE; i++)
+ {
+  for (iee=ip_hash_table+i, ie=*iee; ie; ie=*iee)
+  {
+   if (ie->count == 0 && ie->last_attempt <= expire_before)
+   {
+    *iee=ie->next;
+    ie->next = free_ip_entries;
+    free_ip_entries = ie;
+   }
+   else
+    iee = &ie->next;
+  }
+  *iee = NULL;
+ }
+ eventAdd("flush_expired_ips", flush_expired_ips, NULL, 30, 0);
+}
+#endif

@@ -33,6 +33,8 @@
 #include <openssl/rsa.h>
 #endif
 
+#define PACE_CONNECT
+
 #include "config.h"             /* defines */
 #include "fileio.h"             /* FBFILE */
 #include "ircd_defs.h"
@@ -383,6 +385,9 @@ extern void conf_add_u_conf(struct ConfItem *);
 extern void conf_add_q_conf(struct ConfItem *);
 extern void conf_add_fields(struct ConfItem*, char*, char *, char*, char *,char *);
 extern void conf_add_conf(struct ConfItem *);
+#ifdef PACE_CONNECT
+extern void flush_expired_ips(void *);
+#endif
 
 /* XXX consider moving these into kdparse.h */
 extern void parse_k_file(FBFILE *fb);
@@ -400,6 +405,10 @@ extern unsigned long cidr_to_bitmask[];
 #define I_LINE_FULL     (-3)
 #define TOO_MANY        (-4)
 #define BANNED_CLIENT   (-5)
+#define TOO_FAST        (-6)
+
+#define RECONNECT_TIME 30
+#define MAXCONNS_PER_IP 20
 
 #define CLEANUP_TKLINES_TIME 60
 
