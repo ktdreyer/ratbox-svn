@@ -1017,8 +1017,22 @@ static void exit_one_client(struct Client *client_p,
       ** The bulk of this is done in remove_dependents now, all
       ** we have left to do is send the SQUIT upstream.  -orabidoo
       */
-      if (source_p->localClient && (source_p->localClient->ctrlfd > -1))
-        fd_close(source_p->localClient->ctrlfd);
+      if (source_p->localClient)
+      {
+	if(source_p->localClient->ctrlfd > -1))
+	{
+          fd_close(source_p->localClient->ctrlfd);
+	  source_p->localClient->ctrlfd = -1;
+
+#ifdef HAVE_SOCKETPAIR
+          fd_close(source_p->localClient->ctrlfd_r);
+	  fd_close(source_p->localClient->fd_r);
+	  
+	  source_p->localClient->ctrlfd_r = -1;
+	  source_p->localClient->fd_r = -1;
+#endif
+	}
+      }
 
       target_p = source_p->from;
       if (target_p && IsServer(target_p) && target_p != client_p && !IsMe(target_p) &&
