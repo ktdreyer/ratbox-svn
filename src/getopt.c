@@ -30,10 +30,12 @@ parseargs(int *argc, char ***argv, struct lgetopt *opts)
 	  return;
 	}
       
+      (*argv)[0]++;
+
       /* search through our argument list, and see if it matches */
       for (i = 0; opts[i].opt; i++) 
 	{
-	  if (!strcmp(opts[i].opt, (*argv)[0] + 1))
+	  if (!strcmp(opts[i].opt, (*argv)[0]))
 	    {
 	      /* found our argument */
 	      found = 1;
@@ -94,12 +96,12 @@ parseargs(int *argc, char ***argv, struct lgetopt *opts)
 		  exit(EXIT_FAILURE);
 		}
 	    }
-	  if (!found)
-	    {
-	      fprintf(stderr, "error: unknown argument '-%s'\n", (*argv)[0]);
-	      usage(progname);
-	    }
 	}
+	if (!found)
+	  {
+	    fprintf(stderr, "error: unknown argument '-%s'\n", (*argv)[0]);
+	    usage(progname);
+	  }
     }
 }
 
