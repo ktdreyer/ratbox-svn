@@ -1,3 +1,19 @@
+leeh        2002/05/02 12:58:14 EDT	(20020502_0)
+
+  Modified files:
+    doc                  example.conf example.conf.efnet kline.txt 
+                         whats-new.txt 
+  Log:
+  - misc documentation fixes and updates
+  
+  Revision  Changes    Path
+  7.160     +2 -3      ircd-hybrid-7/doc/example.conf
+  7.13      +4 -5      ircd-hybrid-7/doc/example.conf.efnet
+  1.5       +69 -56    ircd-hybrid-7/doc/kline.txt
+  7.36      +39 -17    ircd-hybrid-7/doc/whats-new.txt
+
+
+
 leeh        2002/05/01 13:24:05 EDT	(20020501_1)
 
   Modified files:
