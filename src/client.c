@@ -425,9 +425,11 @@ check_klines(void)
   struct ConfItem     *aconf = (struct ConfItem *)NULL;
   char          *reason;                /* pointer to reason string */
   dlink_node    *ptr;
+  dlink_node    *next_ptr;
 
-  for (ptr = lclient_list.head; ptr; ptr = ptr->next)
+  for (ptr = lclient_list.head; ptr; ptr = next_ptr)
     {
+      next_ptr = ptr->next;
       cptr = ptr->data;
 
       if(IsMe(cptr))

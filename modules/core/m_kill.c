@@ -38,7 +38,7 @@
 
 #include <string.h>
 
-static char buf[BUFSIZE], buf2[BUFSIZE];
+static char buf[BUFSIZE];
 
 static int ms_kill(struct Client*, struct Client*, int, char**);
 static int mo_kill(struct Client*, struct Client*, int, char**);
@@ -83,7 +83,7 @@ int mo_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   user = parv[1];
   path = parv[2]; /* Either defined or NULL (parc >= 2!!) */
 
-  if (MyClient(sptr) && !IsSetOperK(sptr))
+  if (!IsSetOperK(sptr))
     {
       sendto_one(sptr,":%s NOTICE %s :You have no K flag",me.name,parv[0]);
       return 0;
@@ -116,7 +116,7 @@ int mo_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       return 0;
     }
 
-  if (MyOper(sptr) && !MyConnect(acptr) && (!IsOperGlobalKill(sptr)))
+  if (!MyConnect(acptr) && (!IsOperGlobalKill(sptr)))
     {
       sendto_one(sptr, ":%s NOTICE %s :Nick %s isnt on your server",
                  me.name, parv[0], acptr->name);
@@ -203,43 +203,16 @@ int mo_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       if (chasing && IsServer(cptr))
         sendto_one(cptr, ":%s KILL %s :%s!%s",
                    me.name, acptr->name, inpath, path);
+
+      /*
+      ** Set FLAGS_KILLED. This prevents exit_one_client from sending
+      ** the unnecessary QUIT for this. (This flag should never be
+      ** set in any other place)
+      */
       acptr->flags |= FLAGS_KILLED;
     }
 
-  /*
-  ** Tell the victim she/he has been zapped, but *only* if
-  ** the victim is on current server--no sense in sending the
-  ** notification chasing the above kill, it won't get far
-  ** anyway (as this user don't exist there any more either)
-  */
-  if (MyConnect(acptr))
-    sendto_one(acptr, ":%s KILL %s :%s",
-	       sptr->name, acptr->name, reason);
-
-  /*
-  ** Set FLAGS_KILLED. This prevents exit_one_client from sending
-  ** the unnecessary QUIT for this. (This flag should never be
-  ** set in any other place)
-  */
-  if (MyConnect(acptr) && MyConnect(sptr) && IsOper(sptr))
-    ircsprintf(buf2, "Killed by %s (%s)", sptr->name,
-                     BadPtr(parv[2]) ? sptr->name : parv[2]);
-  else
-    {
-      if ((killer = strchr(path, ' ')))
-        {
-          while (*killer && *killer != '!')
-            killer--;
-          if (!*killer)
-            killer = path;
-          else
-            killer++;
-        }
-      else
-        killer = path;
-      ircsprintf(buf2, "Killed by %s", killer);
-    }
-  return exit_client(cptr, acptr, sptr, buf2);
+  return exit_client(cptr, acptr, sptr, "Disconnected");
 }
 
 /*
@@ -312,28 +285,7 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       return 0;
     }
 
-  if (!IsServer(cptr))
-    {
-      /*
-      ** The kill originates from this server, initialize path.
-      ** (In which case the 'path' may contain user suplied
-      ** explanation ...or some nasty comment, sigh... >;-)
-      **
-      **        ...!operhost!oper
-      **        ...!operhost!oper (comment)
-      */
-      inpath = cptr->host;
-      if (!BadPtr(path))
-        {
-          ircsprintf(buf, "%s!%s (%s)",
-                     cptr->username, cptr->name, path);
-          path = buf;
-          reason = path;
-        }
-      else
-        path = cptr->name;
-    }
-  else if (BadPtr(path))
+  if (BadPtr(path))
     path = "*no-path*"; /* Bogus server sending??? */
   /*
   ** Notify all *local* opers about the KILL (this includes the one
@@ -391,45 +343,15 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       if (chasing && IsServer(cptr))
         sendto_one(cptr, ":%s KILL %s :%s!%s",
                    me.name, acptr->name, inpath, path);
+      /*
+      ** Set FLAGS_KILLED. This prevents exit_one_client from sending
+      ** the unnecessary QUIT for this. (This flag should never be
+      ** set in any other place)
+      */
       acptr->flags |= FLAGS_KILLED;
     }
 
-  /*
-  ** Tell the victim she/he has been zapped, but *only* if
-  ** the victim is on current server--no sense in sending the
-  ** notification chasing the above kill, it won't get far
-  ** anyway (as this user don't exist there any more either)
-  */
-  if (MyConnect(acptr))
-    {
-      sendto_one(acptr, ":%s KILL %s :%s",
-		 sptr->name, acptr->name, reason);
-    }
-
-  /*
-  ** Set FLAGS_KILLED. This prevents exit_one_client from sending
-  ** the unnecessary QUIT for this. (This flag should never be
-  ** set in any other place)
-  */
-  if (MyConnect(acptr) && MyConnect(sptr) && IsOper(sptr))
-    ircsprintf(buf2, "Killed by %s (%s)", sptr->name,
-                     BadPtr(parv[2]) ? sptr->name : parv[2]);
-  else
-    {
-      if ((killer = strchr(path, ' ')))
-        {
-          while (*killer && *killer != '!')
-            killer--;
-          if (!*killer)
-            killer = path;
-          else
-            killer++;
-        }
-      else
-        killer = path;
-      ircsprintf(buf2, "Killed by %s", killer);
-    }
-  return exit_client(cptr, acptr, sptr, buf2);
+  return exit_client(cptr, acptr, sptr, "Disconnected");
 }
 
 static void relay_kill(struct Client *one, struct Client *sptr,
