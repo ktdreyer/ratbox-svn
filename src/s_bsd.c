@@ -96,7 +96,6 @@ void close_all_connections(void)
         fd_close(i);
     else
         close(i);
-    local[i] = 0;
   }
 }
 
@@ -298,7 +297,6 @@ void close_connection(struct Client *cptr)
       /* attempt to flush any pending dbufs. Evil, but .. -- adrian */
       if (!IsDead(cptr))
         send_queued_write(cptr->fd, cptr);
-      local[cptr->fd] = NULL;
       fd_close(cptr->fd);
       cptr->fd = -1;
     }

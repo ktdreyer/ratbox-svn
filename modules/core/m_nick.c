@@ -878,3 +878,7 @@ int clean_nick_name(char* nick)
 
   return (ch - nick);
 }
+
+
+
+

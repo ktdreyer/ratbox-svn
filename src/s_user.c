@@ -486,6 +486,7 @@ int register_user(struct Client *cptr, struct Client *sptr,
     }
 
   send_umode(NULL, sptr, 0, SEND_UMODES, ubuf);
+
   if (!*ubuf)
     {
       ubuf[0] = '+';
@@ -494,11 +495,15 @@ int register_user(struct Client *cptr, struct Client *sptr,
 
   if (MyConnect(sptr))
     {
-      m = make_dlink_node();
+      m = dlinkFind(&unknown_list, sptr);
+
+      assert(m != NULL);
+      dlinkDelete(m, &unknown_list);
       dlinkAdd(sptr, m, &lclient_list);
     }
   
-  sendto_serv_butone(cptr, "NICK %s %d %lu %s %s %s %s :%s",
+  sendto_serv_butone(cptr, ":%s NICK %s %d %lu %s %s %s %s :%s",
+		     me.name,
                      nick, sptr->hopcount+1, sptr->tsinfo, ubuf,
                      sptr->username, sptr->host, user->server,
                      sptr->info);
@@ -947,8 +952,8 @@ void send_umode(struct Client *cptr, struct Client *sptr, int old,
  * extra argument evenTS no longer needed with TS only th+hybrid server
  */
 void send_umode_out(struct Client *cptr,
-                       struct Client *sptr,
-                       int old)
+		    struct Client *sptr,
+		    int old)
 {
   struct Client *acptr;
   char buf[BUFSIZE];

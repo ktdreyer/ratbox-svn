@@ -95,10 +95,10 @@ extern time_t         CurrentTime;
 extern time_t         LCF;
 extern time_t         nextconnect;
 
-
+extern dlink_list unknown_list;
 extern dlink_list lclient_list;
-extern dlink_list oper_list;
 extern dlink_list serv_list;
+extern dlink_list oper_list;
 
 #ifdef REJECT_HOLD
 extern int reject_held_fds;

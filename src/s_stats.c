@@ -50,56 +50,60 @@ void tstats(struct Client *cptr, const char *name)
   int                      i;
   struct ServerStatistics* sp;
   struct ServerStatistics  tmp;
+  dlink_node *ptr;
 
   sp = &tmp;
   memcpy(sp, ServerStats, sizeof(struct ServerStatistics));
-  for (i = 0; i < highest_fd; i++)
+
+  for(ptr = serv_list.head; ptr; ptr = ptr->next)
     {
-      if (!(acptr = local[i]))
-        continue;
-      if (IsServer(acptr))
-        {
-          sp->is_sbs += acptr->localClient->sendB;
-          sp->is_sbr += acptr->localClient->receiveB;
-          sp->is_sks += acptr->localClient->sendK;
-          sp->is_skr += acptr->localClient->receiveK;
-          sp->is_sti += CurrentTime - acptr->firsttime;
-          sp->is_sv++;
-          if (sp->is_sbs > 1023)
-            {
-              sp->is_sks += (sp->is_sbs >> 10);
-              sp->is_sbs &= 0x3ff;
-            }
-          if (sp->is_sbr > 1023)
-            {
-              sp->is_skr += (sp->is_sbr >> 10);
-              sp->is_sbr &= 0x3ff;
-            }
-          
-        }
-      else if (IsClient(acptr))
-        {
-          sp->is_cbs += acptr->localClient->sendB;
-          sp->is_cbr += acptr->localClient->receiveB;
-          sp->is_cks += acptr->localClient->sendK;
-          sp->is_ckr += acptr->localClient->receiveK;
-          sp->is_cti += CurrentTime - acptr->firsttime;
-          sp->is_cl++;
-          if (sp->is_cbs > 1023)
-            {
-              sp->is_cks += (sp->is_cbs >> 10);
-              sp->is_cbs &= 0x3ff;
-            }
-          if (sp->is_cbr > 1023)
-            {
-              sp->is_ckr += (sp->is_cbr >> 10);
-              sp->is_cbr &= 0x3ff;
-            }
-          
-        }
+      acptr = ptr->data;
+
+      sp->is_sbs += acptr->localClient->sendB;
+      sp->is_sbr += acptr->localClient->receiveB;
+      sp->is_sks += acptr->localClient->sendK;
+      sp->is_skr += acptr->localClient->receiveK;
+      sp->is_sti += CurrentTime - acptr->firsttime;
+      sp->is_sv++;
+      if (sp->is_sbs > 1023)
+	{
+	  sp->is_sks += (sp->is_sbs >> 10);
+	  sp->is_sbs &= 0x3ff;
+	}
+      if (sp->is_sbr > 1023)
+	{
+	  sp->is_skr += (sp->is_sbr >> 10);
+	  sp->is_sbr &= 0x3ff;
+	}
+    }
+
+  for(ptr = lclient_list.head; ptr; ptr = ptr->next)
+    {
+      acptr = ptr->data;
+
+      sp->is_cbs += acptr->localClient->sendB;
+      sp->is_cbr += acptr->localClient->receiveB;
+      sp->is_cks += acptr->localClient->sendK;
+      sp->is_ckr += acptr->localClient->receiveK;
+      sp->is_cti += CurrentTime - acptr->firsttime;
+      sp->is_cl++;
+      if (sp->is_cbs > 1023)
+	{
+	  sp->is_cks += (sp->is_cbs >> 10);
+	  sp->is_cbs &= 0x3ff;
+	}
+      if (sp->is_cbr > 1023)
+	{
+	  sp->is_ckr += (sp->is_cbr >> 10);
+	  sp->is_cbr &= 0x3ff;
+	}
+      
+    }
+
+#if 0
       else if (IsUnknown(acptr))
         sp->is_ni++;
-    }
+#endif
 
   sendto_one(cptr, ":%s %d %s :accepts %u refused %u",
              me.name, RPL_STATSDEBUG, name, sp->is_ac, sp->is_ref);

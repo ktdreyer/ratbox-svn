@@ -712,7 +712,9 @@ int server_estab(struct Client *cptr)
   if (!set_sock_buffers(cptr->fd, READBUF_SIZE))
     report_error(SETBUF_ERROR_MSG, get_client_name(cptr, TRUE), errno);
 
-  m = make_dlink_node();
+  m = dlinkFind(&unknown_list, cptr);
+  assert(m != NULL);
+  dlinkDelete(m, &unknown_list);
   dlinkAdd(cptr, m, &serv_list);
   
   sendto_realops_flags(FLAGS_ALL,
@@ -990,7 +992,7 @@ void set_autoconn(struct Client *sptr,char *parv0,char *name,int newval)
  * inputs        - struct Client pointer to client to show server list to
  *               - name of client
  * output        - NONE
- * side effects        -
+ * side effects  - NONE
  */
 void show_servers(struct Client *cptr)
 {

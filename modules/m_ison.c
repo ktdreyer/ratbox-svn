@@ -81,8 +81,8 @@ int m_ison(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   len = strlen(buf);
   current_insert_point = buf + len;
 
-  for (nick = strtoken(&p, parv[1], ","); nick;
-       nick = strtoken(&p, NULL, ","))
+  for (nick = strtoken(&p, parv[1], " "); nick;
+       nick = strtoken(&p, NULL, " "))
     {
       if ((acptr = find_person(nick, NULL)))
 	{

@@ -130,11 +130,12 @@ struct Client me;               /* That's me */
 struct LocalUser meLocalUser;	/* That's also part of me */
 
 struct Client* GlobalClientList = 0; /* Pointer to beginning of Client list */
-/* client pointer lists */ 
 
-dlink_list oper_list;
-dlink_list serv_list;
+/* unknown/client pointer lists */ 
+dlink_list unknown_list;
 dlink_list lclient_list;
+dlink_list serv_list;
+dlink_list oper_list;
 
 static size_t      initialVMTop = 0;   /* top of virtual memory at init */
 static const char* logFileName = LPATH;

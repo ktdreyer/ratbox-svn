@@ -174,7 +174,6 @@ static void release_auth_client(struct Client* client)
 {
   if (client->fd > highest_fd)
     highest_fd = client->fd;
-  local[client->fd] = client;
 
   /*
    * When a client has auth'ed, we want to start reading what it sends

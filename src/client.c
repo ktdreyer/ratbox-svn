@@ -82,8 +82,9 @@ struct die_client {
   int  fake_kill;
 };
 
-static struct die_client dying_clients[MAXCONNECTIONS];
-static void exit_marked_for_death_clients(struct die_client dying_clients[]);
+static void exit_marked_for_death_clients();
+static void check_pings_list(dlink_list *list);
+void check_unknowns_list(dlink_list *list);
 
 static EVH check_pings;
 
@@ -137,6 +138,7 @@ struct Client* make_client(struct Client* from)
 {
   struct Client* cptr = NULL;
   struct LocalUser *localClient;
+  dlink_node *m;
 
   if (!from)
     {
@@ -157,6 +159,10 @@ struct Client* make_client(struct Client* from)
         outofmemory();
       assert(0 != localClient);
       cptr->localClient = localClient;
+
+      /* as good a place as any... */
+      m = make_dlink_node();
+      dlinkAdd(cptr, m, &unknown_list);
     }
   else
     { /* from is not NULL */
@@ -253,44 +259,59 @@ void _free_client(struct Client* cptr)
  * tidying up other network IO evilnesses.
  *     -- adrian
  */
-/* Instead of rescanning the local[] array and calling exit_client()
- * right away, mark the client thats dying by placing a pointer to its
- * struct Client into dying_clients[]. When all have examined  in local[],
- * then examine the dying_clients[] for struct Client's to exit.
- * This saves the rescan on k-lines, also greatly simplifies the code,
- *
- * This is done in both check_pings and check_klines.
- */
+
+dlink_list    dying_list;
+
 static void
 check_pings(void *notused)
 {               
+  memset(&dying_list,0,sizeof(dying_list));
+
+  check_pings_list(&lclient_list);
+  check_pings_list(&serv_list);
+  check_unknowns_list(&unknown_list);
+
+  exit_marked_for_death_clients(&dying_list);
+
+  /* Reschedule a new address */
+  eventAdd("check_pings", check_pings, NULL, 30, 0);
+}
+
+/*
+ * check_pings_list()
+ *
+ * inputs	- pointer to list to check
+ * output	- NONE
+ * side effects	- builds up dying_list
+ */
+static void
+check_pings_list(dlink_list *list)
+{
   struct Client *cptr;          /* current local cptr being examined */
-  int           ping = 0;               /* ping time value from client */
-  int           i;                      /* used to index through fd/cptr's */
-  time_t        timeout;                /* found necessary ping time */
-  int           die_index=0;            /* index into list */
+  int           ping = 0;       /* ping time value from client */
+  time_t        timeout;        /* found necessary ping time */
+  dlink_node    *m;
+  dlink_node    *ptr;
+  struct die_client *dying_ptr;
 
-  /* mark first client empty */
-  dying_clients[0].client = (struct Client *)NULL;
-
-
-  for (i = 0; i <= highest_fd; i++)
+  for (ptr = list->head; ptr; ptr = ptr->next)
     {
-      if (!(cptr = local[i]) || IsMe(cptr))
-        continue;               /* and go examine next fd/cptr */
+      cptr = ptr->data;
       /*
       ** Note: No need to notify opers here. It's
       ** already done when "FLAGS_DEADSOCKET" is set.
       */
       if (cptr->flags & FLAGS_DEADSOCKET)
         {
-          dying_clients[die_index].client = cptr;
-          dying_clients[die_index].fake_kill = 0;
-          dying_clients[die_index++].reason =
-            ((cptr->flags & FLAGS_SENDQEX) ?
-             "SendQ exceeded" : "Dead socket");
-          dying_clients[die_index].client = (struct Client *)NULL;
-          continue;             /* and go examine next fd/cptr */
+          dying_ptr = (struct die_client *)MyMalloc(sizeof(struct die_client));
+          dying_ptr->client = cptr;
+          dying_ptr->fake_kill = 0;
+          dying_ptr->reason = ((cptr->flags & FLAGS_SENDQEX) ?
+			       "SendQ exceeded" : "Dead socket");
+
+	  m = make_dlink_node();
+	  dlinkAdd(dying_ptr,m,&dying_list);
+          continue; 
         }
       
       if (IsPerson(cptr))
@@ -303,13 +324,14 @@ check_pings(void *notused)
             {
               struct ConfItem *aconf;
 
-              dying_clients[die_index].client = cptr;
-              dying_clients[die_index].fake_kill = 0;
-              dying_clients[die_index++].reason = "Idle time limit exceeded";
-              dying_clients[die_index].client = (struct Client *)NULL;
+	      dying_ptr = (struct die_client *)MyMalloc(sizeof(struct die_client));
+              dying_ptr->client = cptr;
+              dying_ptr->fake_kill = 0;
+              dying_ptr->reason = "Idle time limit exceeded";
 
               aconf = make_conf();
               aconf->status = CONF_KILL;
+
               DupString(aconf->host, cptr->host);
               DupString(aconf->passwd, "idle exceeder" );
               DupString(aconf->name, cptr->username);
@@ -319,7 +341,10 @@ check_pings(void *notused)
               sendto_realops_flags(FLAGS_ALL,
 			   "Idle time limit exceeded for %s - temp k-lining",
 				   get_client_name(cptr,FALSE));
-              continue;         /* and go examine next fd/cptr */
+
+	      m = make_dlink_node();
+	      dlinkAdd(dying_ptr,m,&dying_list);
+              continue;
             }
         }
 
@@ -331,10 +356,8 @@ check_pings(void *notused)
       if (ping < (CurrentTime - cptr->lasttime))
         {
           /*
-           * If the server hasnt talked to us in 2*ping seconds
+           * If the client/server hasnt talked to us in 2*ping seconds
            * and it has a ping time, then close its connection.
-           * If the client is a user and a KILL line was found
-           * to be active, close this connection too.
            */
           if (((CurrentTime - cptr->lasttime) >= (2 * ping) &&
                (cptr->flags & FLAGS_PINGSENT)))
@@ -348,19 +371,11 @@ check_pings(void *notused)
                 }
 
               cptr->flags2 |= FLAGS2_PING_TIMEOUT;
-              dying_clients[die_index].fake_kill = 0;
-              dying_clients[die_index++].client = cptr;
-              /* the reason is taken care of at exit time */
-      /*      dying_clients[die_index++].reason = "Ping timeout"; */
-              dying_clients[die_index].client = (struct Client *)NULL;
-
-              /*
-               * need to start loop over because the close can
-               * affect the ordering of the local[] array.- avalon
-               *
-               ** Not if you do it right - db
-               */
-
+	      dying_ptr = (struct die_client *)MyMalloc(sizeof(struct die_client));
+              dying_ptr->fake_kill = 0;
+              dying_ptr->client = cptr;
+	      m = make_dlink_node();
+	      dlinkAdd(dying_ptr,m,&dying_list);
               continue;
             }
           else if ((cptr->flags & FLAGS_PINGSENT) == 0)
@@ -381,31 +396,36 @@ check_pings(void *notused)
       while (timeout <= CurrentTime)
         timeout += ping;
 
+    }
+}
+
+void check_unknowns_list(dlink_list *list)
+{
+  dlink_node *ptr;
+  struct Client *cptr;
+  dlink_node *m;
+  struct die_client *dying_ptr;
+
+  for(ptr = list->head; ptr; ptr = ptr->next)
+    {
+      cptr = ptr->data;
+
       /*
        * Check UNKNOWN connections - if they have been in this state
        * for > 100s, close them.
        */
 
-      if (IsUnknown(cptr))
-        {
-          if (cptr->firsttime ? ((CurrentTime - cptr->firsttime) > 100) : 0)
-            {
-              dying_clients[die_index].client = cptr;
-              dying_clients[die_index].fake_kill = 0;
-              dying_clients[die_index++].reason =
-		"Connection Timed Out";
-              dying_clients[die_index].client = (struct Client *)NULL;
-              continue;
-            }
-        }
+      if (cptr->firsttime ? ((CurrentTime - cptr->firsttime) > 100) : 0)
+	{
+	  dying_ptr = (struct die_client *)MyMalloc(sizeof(struct die_client));
+	  dying_ptr->client = cptr;
+	  dying_ptr->fake_kill = 0;
+	  dying_ptr->reason = "Connection Timed Out";
+	  m = make_dlink_node();
+	  dlinkAdd(dying_ptr,m,&dying_list);
+	}
     }
-
-  exit_marked_for_death_clients(dying_clients);
-
-  /* Reschedule a new address */
-  eventAdd("check_pings", check_pings, NULL, 30, 0);
 }
-
 
 /*
  * check_klines
@@ -419,31 +439,20 @@ void check_klines(void)
 {               
   struct Client *cptr;          /* current local cptr being examined */
   struct ConfItem     *aconf = (struct ConfItem *)NULL;
-  int           i;                      /* used to index through fd/cptr's */
   char          *reason;                /* pointer to reason string */
-  int           die_index=0;            /* index into list */
+  dlink_node    *m;
+  dlink_node    *ptr;
+  struct die_client *dying_ptr;
 
-  dying_clients[0].client = (struct Client *)NULL;   /* mark first one empty */
+  memset(&dying_list,0,sizeof(dying_list));
 
-  for (i = 0; i <= highest_fd; i++)
+  for (ptr = lclient_list.head; ptr; ptr = ptr->next)
     {
-      if (!(cptr = local[i]) || IsMe(cptr))
-        continue;               /* and go examine next fd/cptr */
-      /*
-      ** Note: No need to notify opers here. It's
-      ** already done when "FLAGS_DEADSOCKET" is set.
-      */
-      if (cptr->flags & FLAGS_DEADSOCKET)
-        {
-          dying_clients[die_index].client = cptr;
-          dying_clients[die_index].fake_kill = 0;
-          dying_clients[die_index++].reason =
-            ((cptr->flags & FLAGS_SENDQEX) ?
-             "SendQ exceeded" : "Dead socket");
-          dying_clients[die_index].client = (struct Client *)NULL;
-          continue;             /* and go examine next fd/cptr */
-        }
-      
+      cptr = ptr->data;
+
+      if(IsMe(cptr))
+	continue;
+
 #ifndef IPV6 /* XXX No dlines in IPv6 yet */
       if ( (aconf = match_Dline(ntohl(cptr->localClient->ip.s_addr))) )
 	/* if there is a returned struct ConfItem then kill it */
@@ -458,42 +467,29 @@ void check_klines(void)
 	  sendto_realops_flags(FLAGS_ALL,"D-line active for %s",
 			 get_client_name(cptr, FALSE));
 	      
-	  dying_clients[die_index].client = cptr;
-	  dying_clients[die_index].fake_kill = 0;
-	  /* Wintrhawk */
+          dying_ptr = (struct die_client *)MyMalloc(sizeof(struct die_client));
+	  dying_ptr->client = cptr;
+	  dying_ptr->fake_kill = 0;
+
 	  if(ConfigFileEntry.kline_with_connection_closed)
-	    {
-	      /*
-	       * We use a generic non-descript message here on 
-	       * purpose so as to prevent other users seeing the
-	       * client disconnect from harassing the IRCops
-	       */
-	      reason = "Connection closed";
-	    }
+	    reason = "Connection closed";
 	  else
 	    {
 	      if (ConfigFileEntry.kline_with_reason)
-		{
-		  reason = aconf->passwd ? aconf->passwd : "D-lined";
-		}
+		reason = aconf->passwd ? aconf->passwd : "D-lined";
 	      else
-		{
-		  reason = "D-lined";
-		}
+		reason = "D-lined";
 	    }
 	  if (IsPerson(cptr)) 
 	    {
-	      dying_clients[die_index++].reason = reason;
-	      dying_clients[die_index].client = (struct Client *)NULL;
+	      dying_ptr->reason = reason;
 	      sendto_one(cptr, form_str(ERR_YOUREBANNEDCREEP),
 			 me.name, cptr->name, reason);
 	    }
-#ifdef REPORT_DLINE_TO_USER
-	  else
-	    {
-	      sendto_one(cptr, "NOTICE DLINE :*** You have been D-lined");
-	    }
-#endif
+
+	  m = make_dlink_node();
+	  dlinkAdd(dying_ptr,m,&dying_list);
+
 	  continue; /* and go examine next fd/cptr */
 #endif /* ifndef IPV6 */
 	}
@@ -514,8 +510,9 @@ void check_klines(void)
 				   "G-line active for %s",
 				   get_client_name(cptr, FALSE));
 		  
-	      dying_clients[die_index].client = cptr;
-	      dying_clients[die_index].fake_kill = 0;
+	      dying_ptr = (struct die_client *)MyMalloc(sizeof(struct die_client));
+	      dying_ptr->client = cptr;
+	      dying_ptr->fake_kill = 0;
 
 	      /* Wintrhawk */
 	      if (ConfigFileEntry.kline_with_connection_closed)
@@ -530,17 +527,15 @@ void check_klines(void)
 	      else
 		{
 		  if (ConfigFileEntry.kline_with_reason)
-		    {
-		      reason = aconf->passwd ? aconf->passwd : "G-lined";
-		    }
+		    reason = aconf->passwd ? aconf->passwd : "G-lined";
 		  else
-		    {
-		      reason = "G-lined";
-		    }
+		    reason = "G-lined";
 		}
 		  
-	      dying_clients[die_index++].reason = reason;
-	      dying_clients[die_index].client = (struct Client *)NULL;
+	      dying_ptr->reason = reason;
+	      m = make_dlink_node();
+	      dlinkAdd(dying_ptr,m,&dying_list);
+
 	      sendto_one(cptr, form_str(ERR_YOUREBANNEDCREEP),
 			 me.name, cptr->name, reason);
 	      continue;         /* and go examine next fd/cptr */
@@ -560,73 +555,34 @@ void check_klines(void)
 		sendto_realops_flags(FLAGS_ALL,
 				     "K-line active for %s",
 				     get_client_name(cptr, FALSE));
-		dying_clients[die_index].client = cptr;
-		dying_clients[die_index].fake_kill = 0;
+
+		dying_ptr = (struct die_client *)MyMalloc(sizeof(struct die_client));
+		dying_ptr->client = cptr;
+		dying_ptr->fake_kill = 0;
 		    
 		/* Wintrhawk */
 		if (ConfigFileEntry.kline_with_connection_closed)
-		  {
-		    /*
-		     * We use a generic non-descript message here on 
-		     * purpose so as to prevent other users seeing the
-		     * client disconnect from harassing the IRCops
-		     */
-		    reason = "Connection closed";
-		  }
+		  reason = "Connection closed";
 		else
 		  {
 		    if (ConfigFileEntry.kline_with_reason)
-		      {
-			reason = aconf->passwd ? aconf->passwd : "K-lined";
-		      }
+		      reason = aconf->passwd ? aconf->passwd : "K-lined";
 		    else
-		      {
-			reason = "K-lined";
-		      }
+		      reason = "K-lined";
 		  }
 
-		dying_clients[die_index++].reason = reason;
-		dying_clients[die_index].client = (struct Client *)NULL;
+		dying_ptr->reason = reason;
+		m = make_dlink_node();
+		dlinkAdd(dying_ptr,m,&dying_list);
+
 		sendto_one(cptr, form_str(ERR_YOUREBANNEDCREEP),
 			   me.name, cptr->name, reason);
 		continue;         /* and go examine next fd/cptr */
 	      }
 	}
-
-      if (IsPerson(cptr))
-        {
-          if( !IsElined(cptr) &&
-              GlobalSetOptions.idletime && 
-              !IsAnyOper(cptr) &&
-              !IsIdlelined(cptr) && 
-              ((CurrentTime - cptr->user->last) > GlobalSetOptions.idletime))
-            {
-              struct ConfItem *aconf;
-
-              dying_clients[die_index].client = cptr;
-              dying_clients[die_index].fake_kill = 0; 
-              dying_clients[die_index++].reason =
-		"Idle time limit exceeded";
-              dying_clients[die_index].client = (struct Client *)NULL;
-
-              aconf = make_conf();
-              aconf->status = CONF_KILL;
-              DupString(aconf->host, cptr->host);
-              DupString(aconf->passwd, "idle exceeder" );
-              DupString(aconf->name, cptr->username);
-              aconf->port = 0;
-              aconf->hold = CurrentTime + 60;
-              add_temp_kline(aconf);
-              sendto_realops_flags(FLAGS_ALL,
-			   "Idle time limit exceeded for %s - temp k-lining",
-				   get_client_name(cptr,FALSE));
-              continue;         /* and go examine next fd/cptr */
-            }
-        }
-
     }
 
-  exit_marked_for_death_clients(dying_clients);
+  exit_marked_for_death_clients(&dying_list);
 }
 
 /* exit_marked_for_death_clients
@@ -636,14 +592,21 @@ void check_klines(void)
  *
  */
 
-static void exit_marked_for_death_clients(struct die_client dying_clients[])
+static void exit_marked_for_death_clients(dlink_list *list)
 {
   struct Client *cptr;
-  int    die_index;
   char   ping_time_out_buffer[64];   /* blech that should be a define */
+  dlink_node *ptr;
+  dlink_node *next_ptr;
+  struct die_client *dying_ptr;
 
-  for(die_index = 0; (cptr = dying_clients[die_index].client); die_index++)
+  for(ptr = list->head; ptr; ptr = next_ptr)
     {
+      next_ptr = ptr->next;
+
+      dying_ptr = ptr->data;
+      cptr = dying_ptr->client;
+
       if(cptr->flags2 & FLAGS2_PING_TIMEOUT)
         {
           (void)ircsprintf(ping_time_out_buffer,
@@ -679,9 +642,13 @@ static void exit_marked_for_death_clients(struct die_client dying_clients[])
 				   "Client already exited %X",cptr);
             }
           else
-            (void)exit_client(cptr, cptr, &me, dying_clients[die_index].reason);
+            (void)exit_client(cptr, cptr, &me, dying_ptr->reason);
           cptr->flags2 |= FLAGS2_ALREADY_EXITED;          
 	}
+
+      MyFree(dying_ptr);
+      dlinkDelete(ptr,list);
+      free_dlink_node(ptr);
     }
 }
 
@@ -1343,29 +1310,22 @@ static void remove_dependents(struct Client* cptr,
   int i;
   struct ConfItem *aconf;
   static char myname[HOSTLEN+1];
+  dlink_node *ptr;
 
-  for (i=0; i<=highest_fd; i++)
+  for(ptr = serv_list.head; ptr; ptr=ptr->next)
     {
-      if (!(to = local[i]) || !IsServer(to) || IsMe(to) ||
-          to == sptr->from || (to == cptr && IsCapable(to,CAP_QS)))
+      to = ptr->data;
+
+      if (IsMe(to) ||to == sptr->from || (to == cptr && IsCapable(to,CAP_QS)))
         continue;
+
       /* MyConnect(sptr) is rotten at this point: if sptr
-       * was mine, ->from is NULL.  we need to send a 
-       * WALLOPS here only if we're "deflecting" a SQUIT
-       * that hasn't hit its target  -orabidoo
+       * was mine, ->from is NULL. 
        */
       /* The WALLOPS isn't needed here as pointed out by
        * comstud, since m_squit already does the notification.
        */
-#if 0
-      if (to != cptr &&        /* not to the originator */
-          to != sptr->from && /* not to the destination */
-          cptr != sptr->from        /* hasn't reached target */
-          && sptr->servptr != &me) /* not mine [done in m_squit] */
-        sendto_one(to, ":%s WALLOPS :Received SQUIT %s from %s (%s)",
-                   me.name, sptr->name, get_client_name(from, FALSE), comment);
 
-#endif
       if ((aconf = to->serv->nline))
         strncpy_irc(myname, my_name_for_link(me.name, aconf), HOSTLEN);
       else
