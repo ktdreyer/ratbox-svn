@@ -1,3 +1,18 @@
+leeh        2002/04/28 09:03:45 EDT	(20020428_5)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+  Log:
+  - set nicklen to (n+1) so nicklen*2 works.
+    reported by adx
+  
+  Revision  Changes      Path
+  7.132     +2 -2        ircd-hybrid-7/autoconf/configure.in
+  7.135     +7081 -3077  ircd-hybrid-7/configure
+
+
+
 androsyn    2002/04/28 04:14:28 EDT	(20020428_4)
 
   Modified files:
