@@ -1,3 +1,10 @@
+*** 20010127_4 by toot
+. removed a redundant if/else in stats
+. added aftype to localClient, which s_serv.c wanted..
+  i this is right?
+. updated .depend
+
+
 *** 20010127_3 by androsyn
 Fixed vhosts for outgoing connections finally.
 
