@@ -1,3 +1,10 @@
+*** 19990805_2 by db
+- botch in client.h, umodes were moved to umodes in client, forgot
+  to redefine the macros for SetInvisible etc. this broke remote
+  setting of +i on clients. major bug.
+
+
+
 *** 19990805_1 by db
 - bug in stats Q line found by Dustin Marquess (Jailbird)
 
