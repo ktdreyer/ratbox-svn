@@ -18,14 +18,6 @@ options that were in config.h, to be changed with a /rehash.
   this is a nick!user@host mask of somebody who can join an invite-only (+i)
   channel without having to be invited first.
 
-- Half Ops are added.  This gives a user most of the power of a chanop (@)
-  but without the ability to take over the channel.  Half-ops can kick
-  unopped users, voiced users, set channel modes including +v, but not kick
-  ops, or deop ops.   This leads to greater security on channels.  This is
-  the mode (+h) and is seen as % on the channel list.
-
-  NOTE:  Half ops are optional and enabled by default.
-
 - Channel Op Hiding is now included as a channel mode.  By setting the
   mode +a when a user joins the channel, they will not see who is opped,
   voiced, or halfopped.  They will see mode changes except +ohv but will
@@ -34,28 +26,11 @@ options that were in config.h, to be changed with a /rehash.
        *** irc.server sets mode +b nick!user@host on #channel
 
   When a user is opped, the user will see a server generated "massmode"
-  showing them the real list of who is opped/halfopped/voiced to keep
+  showing them the real list of who is opped/voiced to keep
   clients in sync.
 
   NOTE: Anonymous ops are optional and disabled by default.
   
-- The infamous VChans are included.  This allows multiple channels with the
-  same name.  When joining a channel with vchans, a simple JOIN #channel
-  will show a message saying which channels are available.  The user will
-  then have to JOIN #channel !key with one of the provided keys.  Creating
-  a new vchan is easy as well.  Part the channel and do /quote CJOIN #channel.
-  A new view of the channel is created.   A legitimate op can just CJOIN a
-  new vchan and get all of the old users over to the new vchan.  The takeover
-  people will then be sitting opped by themselves in a vchan while the
-  original users are back the way they were before in another vchan.
-
-  The command CJOIN and vchans are configurable in the config file:
-       vchans_oper_only=yes; will make CJOIN oper only
-       use_vchans=no;        will stop vchans from being recognised on
-                             this server
-
-  See doc/vchans.txt for more information.
-
 - Persistent channels are included.  With TS5 the only reason to enable
   no_join_on_split is to prevent people gaining access to +ik channels on
   a netsplit.  Persistent channels in combination with no_create_on_split
@@ -69,6 +44,9 @@ options that were in config.h, to be changed with a /rehash.
   Persistent channels are configurable via:
       persist_time = 30 minutes;   will persist channels for at least 30 mins.
 
+- CIDR matching for bans, ban exceptions, and invite exceptions.  The ban will
+  be matched regardless of whether the users hostname is resolved or not.
+  This works for both IPv4 and IPv6 addresses.
 
 
 --------------
@@ -91,6 +69,13 @@ options that were in config.h, to be changed with a /rehash.
   user through NICK changes and the like.  When a user is placed on the ACCEPT
   list, the user will be notified.  More information is available in the
   modeg.txt document in this directory.
+
+- Remote whois or whois of a local user will return the real IP address of
+  the user in a 338 response.  The user would see something like the
+  following:
+
+  AndroSyn is actually androsyn@spoofed.user [127.0.0.1]
+
 
 
 ------------------
@@ -187,12 +172,6 @@ options that were in config.h, to be changed with a /rehash.
 
   See serverhide.txt for more information.
 
-- LazyLinks are now included.  These enable a leaf server to only need
-  information about channels that it's local users are on, and nicks that have
-  been used (in a channel, in a private message, or in a WHO or WHOIS by a user
-  or channel on the leaf).  Read the LazyLinks.as.implemented.txt document for
-  more information.
-
 - Nearly all commands are now modules.  MODLIST will list all loaded modules,
   MODUNLOAD will remove a module from the ircd, and MODLOAD will load a new
   module into the ircd.  MODRELOAD will unload then load the module in one
@@ -230,7 +209,6 @@ options that were in config.h, to be changed with a /rehash.
   server will support, and what commands:
 
     KNOCK          - Support KNOCK
-    VCHANS         - Support Virtual Channels
     EXCEPTS        - Support ban exceptions (+e)
     INVEX          - Support invite exceptions (+I)
     WALLCHOPS      - /notice @#channel will notice only ops
