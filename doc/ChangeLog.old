@@ -1,3 +1,8 @@
+*** 20000117_1 by db
+- continuing with new parser code... listen/operator tested
+
+
+
 *** 20000116_7 by db
 - bunch of changes in order to have class names not numbers. *sigh*
   I toyed with the idea of keeping class #'s and having class_names
