@@ -28,6 +28,7 @@
  *     --Bleep  Thomas Helvey <tomh@inxpress.net>
  */
 #include "s_auth.h"
+#include "blalloc.h"
 #include "client.h"
 #include "common.h"
 #include "event.h"
@@ -97,6 +98,7 @@ struct AuthRequest *AuthClientList = NULL;
 
 static struct AuthRequest* AuthIncompleteList = 0;
 static EVH timeout_auth_queries_event;
+static BlockHeap *auth_bl = NULL;
 
 /*
  * init_auth()
@@ -108,6 +110,7 @@ init_auth(void)
 {
   eventAdd("timeout_auth_queries_event", timeout_auth_queries_event, NULL,
     1, 0);
+  auth_bl = BlockHeapCreate(sizeof(struct AuthRequest), AUTH_BLOCK_SIZE);
 }
 
 /*
@@ -115,11 +118,7 @@ init_auth(void)
  */
 static struct AuthRequest* make_auth_request(struct Client* client)
 {
-  /*
-   * XXX - use blalloc here?
-   */
-  struct AuthRequest* request = 
-               (struct AuthRequest*) MyMalloc(sizeof(struct AuthRequest));
+  struct AuthRequest* request = BlockHeapAlloc(auth_bl);
   assert(0 != request);
   memset(request, 0, sizeof(struct AuthRequest));
   request->fd      = -1;
@@ -133,10 +132,7 @@ static struct AuthRequest* make_auth_request(struct Client* client)
  */
 void free_auth_request(struct AuthRequest* request)
 {
-  /*
-   * XXX - use blfree here?
-   */
-  MyFree(request);
+    BlockHeapFree(auth_bl, request);
 }
 
 /*
