@@ -193,6 +193,7 @@ Little things to be done given enough time and initiative -Hwy
    Notice -- 77: syntax error on line:         e_lines_oper_only=yes;
    When e_lines_oper_only=yes; is on line 78. (fixed...)
 .  <Riedel> walter : have you implemented the motd= thing in the auth block ?
+.  <mopi> still haven't made default chan flags configurable, eh? :/
 
 -- Rodder's list
 .  Add scalable database-based authentication.  Probably part of Iauth.
