@@ -61,7 +61,7 @@
 		" WALLCHOPS"		\
 		" ETRACE"		\
 		" SAFELIST"		\
-		" ELIST=<>"
+		" ELIST=U"
 
 #define FEATURES2VALUES LOC_CHANNELLEN, \
 			ConfigChannel.use_except ? "e" : "", \
@@ -104,5 +104,12 @@
  *
  *  All unknown/unlisted modes are treated as type D.
  */
-
+/* ELIST=[tokens]:
+ *
+ * M = mask search
+ * N = !mask search
+ * U = user count search (< >)
+ * C = creation time search (C> C<)
+ * T = topic search (T> T<)
+ */
 #endif /* INCLUDED_supported_h */
