@@ -408,6 +408,7 @@ struct exit_client_hook
 #define FLAGS2_FLOODDONE        0x10000000
 #define FLAGS2_EXEMPTSPAMBOT	0x20000000
 #define FLAGS2_EXEMPTSHIDE	0x40000000
+#define FLAGS2_EXEMPTJUPE	0x80000000
 
 #define SEND_UMODES  (UMODE_INVISIBLE | UMODE_OPER | UMODE_WALLOP | \
                       UMODE_ADMIN | UMODE_SERVICE | UMODE_DEAF)
@@ -511,6 +512,8 @@ struct exit_client_hook
 #define SetExemptSpambot(x)	((x)->flags2 |= FLAGS2_EXEMPTSPAMBOT)
 #define IsExemptShide(x)	((x)->flags2 & FLAGS2_EXEMPTSHIDE)
 #define SetExemptShide(x)	((x)->flags2 |= FLAGS2_EXEMPTSHIDE)
+#define IsExemptJupe(x)		((x)->flags2 & FLAGS2_EXEMPTJUPE)
+#define SetExemptJupe(x)	((x)->flags2 |= FLAGS2_EXEMPTJUPE)
 #define IsIPSpoof(x)            ((x)->flags2 & FLAGS2_IP_SPOOFING)
 #define SetIPSpoof(x)           ((x)->flags2 |= FLAGS2_IP_SPOOFING)
 

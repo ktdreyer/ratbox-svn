@@ -122,7 +122,10 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		{
 			sendto_one_numeric(source_p, ERR_BADCHANNAME,
 					form_str(ERR_BADCHANNAME), name);
-			sendto_realops_flags(UMODE_SPY, L_ALL,
+
+			if(!IsExemptJupe(source_p) && 
+			   (!IsOper(source_p) || !ConfigChannel.no_oper_resvs))
+				sendto_realops_flags(UMODE_SPY, L_ALL,
 					     "User %s (%s@%s) is attempting to join locally juped channel %s (%s)",
 					     source_p->name, source_p->username, source_p->host,
 					     name, aconf->passwd);

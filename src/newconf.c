@@ -344,6 +344,7 @@ static struct mode_table auth_table[] = {
 	{"flood_exempt",	CONF_FLAGS_EXEMPTFLOOD	},
 	{"spambot_exempt",	CONF_FLAGS_EXEMPTSPAMBOT },
 	{"shide_exempt",	CONF_FLAGS_EXEMPTSHIDE	},
+	{"jupe_exempt",		CONF_FLAGS_EXEMPTJUPE	},
 	{"no_tilde",		CONF_FLAGS_NO_TILDE	},
 	{"need_ident",		CONF_FLAGS_NEED_IDENTD	},
 	{"have_ident",		CONF_FLAGS_NEED_IDENTD	},
