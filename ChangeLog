@@ -1,3 +1,15 @@
+leeh        2004/04/01 06:12:06 EST	(20040401_0)
+
+  Modified files:
+    src                  channel.c 
+  Log:
+  - fix broken parsing of +ov, if id doesnt exist its \0 and not NULL.
+  
+  Revision  Changes    Path
+  7.409     +2 -3      ircd-ratbox/src/channel.c
+
+
+
 leeh        2004/03/31 17:02:19 EST	(20040331_4)
 
   Modified files:
