@@ -1,3 +1,18 @@
+leeh        2005/01/25 07:44:37 EST	(20050125_1)
+
+  Modified files:
+    doc                  example.conf example.efnet.conf 
+    src                  newconf.c 
+  Log:
+  - implement stacking of shared {}; blocks, documented in example.conf
+  
+  Revision  Changes    Path
+  7.255     +26 -13    ircd-ratbox/doc/example.conf
+  7.84      +27 -14    ircd-ratbox/doc/example.efnet.conf
+  7.193     +51 -36    ircd-ratbox/src/newconf.c
+
+
+
 leeh        2005/01/24 19:08:29 EST	(20050125_0)
 
   Modified files:
