@@ -469,7 +469,9 @@ static void ms_sjoin(struct Client *client_p,
       /* if the client doesnt exist, backtrack over the prefix (@%+) that we
        * just added and skip to the next nick
        */
-      if (!(target_p = find_client(s)))
+      /* also do this if its fake direction or a server */
+      if (!(target_p = find_client(s)) ||
+         (target_p->from != client_p) || !IsPerson(target_p))
       {
         sendto_one(source_p, form_str(ERR_NOSUCHNICK), me.name,
 	           source_p->name, s);
@@ -483,8 +485,6 @@ static void ms_sjoin(struct Client *client_p,
         goto nextnick;
       }
 
-      target_p = NULL;
-      
       /* copy the nick to the two buffers */
       hops += ircsprintf(hops, "%s ", s);
       nhops += ircsprintf(nhops, "%s ", s);
@@ -503,13 +503,6 @@ static void ms_sjoin(struct Client *client_p,
 	    }
 	}
 
-      if (!(target_p = find_chasing(source_p, s, NULL)))
-        goto nextnick;
-      if (target_p->from != client_p)
-        goto nextnick;
-      if (!IsPerson(target_p))
-        goto nextnick;
-      
       people++;
 
       /* LazyLinks - Introduce unknown clients before sending the sjoin */
