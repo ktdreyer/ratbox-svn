@@ -1,3 +1,19 @@
+leeh        2004/01/15 15:38:23 EST	(20040115_14)
+
+  Modified files:
+    src                  .depend 
+    src/s_userserv       .depend Makefile.in s_u_db.c 
+  Log:
+  - fix .depend, make it compile properly
+  
+  Revision  Changes    Path
+  1.4       +18 -19    rserv/src/.depend
+  1.2       +5 -4      rserv/src/s_userserv/.depend
+  1.3       +3 -5      rserv/src/s_userserv/Makefile.in
+  1.2       +3 -5      rserv/src/s_userserv/s_u_db.c
+
+
+
 leeh        2004/01/15 15:31:05 EST	(20040115_13)
 
   Modified files:
