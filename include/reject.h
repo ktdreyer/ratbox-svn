@@ -32,7 +32,7 @@
 void init_reject(void);
 int check_reject(struct Client *);
 void add_reject(struct Client *);
-void flush_reject(struct Client *);
+void flush_reject(void);
 
 #endif
 

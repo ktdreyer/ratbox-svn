@@ -140,8 +140,16 @@ check_reject(struct Client *client_p)
 	return 0;
 }
 
-void flush_reject(struct Client *source_p)
+void flush_reject(void)
 {
-	Clear_Patricia(reject_tree, MyFree);
+	patricia_node_t *pnode;
+	struct reject_data *rdata;
+	
+	PATRICIA_WALK(reject_tree->head, pnode)
+	{
+		rdata = pnode->data;
+		MyFree(rdata);
+		patricia_remove(reject_tree, pnode);
+	}
+	PATRICIA_WALK_END;
 }
-

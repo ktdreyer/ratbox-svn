@@ -161,7 +161,7 @@ static void
 rehash_rejectcache(struct Client *source_p)
 {
 	sendto_realops_flags(UMODE_ALL, L_ALL, "%s is clearing reject cache", source_p->name);
-	flush_reject(source_p);
+	flush_reject();
 
 }
 
