@@ -109,48 +109,12 @@ static void mr_pong(struct Client *client_p,
                     int parc,
                     char *parv[])
 {
-#if 0
-  struct Client *target_p;
-  char  *origin, *destination;
-#endif
   if (parc < 2 || *parv[1] == '\0')
     {
       sendto_one(source_p, form_str(ERR_NOORIGIN), me.name, parv[0]);
       return;
     }
-#if 0
-  origin = parv[1];
-  destination = parv[2];
-#endif
-  client_p->flags &= ~FLAGS_PINGSENT;
+  
   source_p->flags &= ~FLAGS_PINGSENT;
-
-  /* Now attempt to route the PONG, comstud pointed out routable PING
-   * is used for SPING.  routable PING should also probably be left in
-   *        -Dianora
-   * That being the case, we will route, but only for registered clients (a
-   * case can be made to allow them only from servers). -Shadowfax
-   */
-  /* mr_pong == unregistered.. unregistered clients shouldnt ever get
-   * messages apart from their uplink, which is us.. I dont see why we need
-   * this at all -- fl_ 
-   */
-#if 0
- if (!EmptyString(destination) && irccmp(destination, me.name) != 0
-                && IsRegistered(source_p))
-    {
-      if ((target_p = find_client(destination, NULL)) ||
-          (target_p = find_server(destination)))
-        sendto_one(target_p,":%s PONG %s %s",
-                   parv[0], origin, destination);
-      else
-        {
-          sendto_one(source_p, form_str(ERR_NOSUCHSERVER),
-                     me.name, parv[0], destination);
-          return;
-        }
-    }
-#endif
-  return;
 }
 
