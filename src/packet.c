@@ -61,7 +61,7 @@ parse_client_queued(struct Client *client_p)
         client_dopacket(client_p, readBuf, dolen);
       else
       {
-        if (client_p->localClient)
+        if (MyClient(client_p))
         {
           linebuf_donebuf(&client_p->localClient->buf_recvq);
           linebuf_donebuf(&client_p->localClient->buf_sendq);
