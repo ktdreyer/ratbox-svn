@@ -53,6 +53,10 @@
 #define IN6ADDRSZ sizeof(struct in6_addr)
 #endif
 #endif
+
+#ifndef INT16SZ
+#define INT16SZ sizeof(unsigned int)
+#endif
 /*
  * myctime - This is like standard ctime()-function, but it zaps away
  *   the newline from the end of that string. Also, it takes
