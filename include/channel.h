@@ -33,7 +33,7 @@
 #endif
 
 /* XXX until debugged and verified thoroughly */
-#undef USE_TABLE_MODE
+#define USE_TABLE_MODE
 
 struct Client;
 
@@ -156,7 +156,8 @@ extern void    channel_member_list(struct Client *source_p,
 				   int *reply_to_send);
 
 extern void sync_channel_oplists(struct Channel *, int);
-extern void sync_oplists(struct Channel *, struct Client *, int, char *);
+extern void sync_oplists(struct Channel *, struct Client *, int,
+                         const char *);
 extern void set_channel_mode_flags( char flags_ptr[4][2],
 				    struct Channel *chptr,
 				    struct Client *source_p);

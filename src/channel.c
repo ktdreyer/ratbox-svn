@@ -34,7 +34,6 @@
 #include "send.h"
 #include "whowas.h"
 #include "s_conf.h"             /* ConfigFileEntry, ConfigChannel */
-#include "vchannel.h"
 #include "event.h"
 #include "memory.h"
 
@@ -57,7 +56,8 @@ static void destroy_channel(struct Channel *);
 
 static void send_mode_list(struct Client *, char *, dlink_list *, char, int);
 
-static void send_oplist(char *, struct Client *, dlink_list *, char *, int);
+static void send_oplist(const char *, struct Client *, dlink_list *,
+                        char *, int);
 
 
 static void send_members(struct Client *client_p,
@@ -1211,27 +1211,37 @@ int mode_count_plus, mode_count_minus;
 int mode_limit;
 static void chm_nosuch(struct Client *, struct Client *,
                        struct Channel *, int, int *, char **, int *, int,
-                       int, char, void *);
+                       int, char, void *, const char *chname);
 static void chm_simple(struct Client *, struct Client *, struct Channel *,
-                       int, int *, char **, int *, int, int, char, void *);
+                       int, int *, char **, int *, int, int, char, void *,
+                       const char *chname);
 static void chm_limit(struct Client *, struct Client *, struct Channel *,
-                      int, int *, char **, int *, int, int, char, void *);
-static void chm_key(struct Client *, struct Client *, struct Channel *, int,
-                    int *, char **, int *, int, int, char, void *);
+                      int, int *, char **, int *, int, int, char, void *,
+                      const char *chname);
+static void chm_key(struct Client *, struct Client *, struct Channel *,
+                    int, int *, char **, int *, int, int, char, void *,
+                    const char *chname);
 static void chm_op(struct Client *, struct Client *, struct Channel *, int,
-                   int *, char **, int *, int, int, char, void *);
+                   int *, char **, int *, int, int, char, void *,
+                   const char *chname);
 static void chm_halfop(struct Client *, struct Client *, struct Channel *,
-                       int, int *, char **, int *, int, int, char, void *);
+                       int, int *, char **, int *, int, int, char, void *,
+                       const char *chname);
 static void chm_voice(struct Client *, struct Client *, struct Channel *,
-                      int, int *, char **, int *, int, int, char, void *);
+                      int, int *, char **, int *, int, int, char, void *,
+                      const char *chname);
 static void chm_ban(struct Client *, struct Client *, struct Channel *, int,
-                    int *, char **, int *, int, int, char, void *);
+                    int *, char **, int *, int, int, char, void *,
+                    const char *chname);
 static void chm_except(struct Client *, struct Client *, struct Channel *,
-                       int, int *, char **, int *, int, int, char, void *);
+                       int, int *, char **, int *, int, int, char, void *,
+                       const char *chname);
 static void chm_invex(struct Client *, struct Client *, struct Channel *,
-                      int, int *, char **, int *, int, int, char, void *);
+                      int, int *, char **, int *, int, int, char, void *,
+                      const char *chname);
 static void chm_hideops(struct Client *, struct Client *, struct Channel *,
-                        int, int *, char **, int *, int, int, char, void *);
+                        int, int *, char **, int *, int, int, char, void *,
+                        const char *chname);
 static void send_cap_mode_changes(struct Client *, struct Client *,
                                   struct Channel *, int, int);
 static void send_mode_changes(struct Client *, struct Client *,
@@ -1243,18 +1253,21 @@ static int get_channel_access(struct Client *, struct Channel *);
 static void
 chm_nosuch(struct Client *client_p, struct Client *source_p,
            struct Channel *chptr, int parc, int *parn,
-           char **parv, int *errors, int alev, int dir, char c, void *d)
+           char **parv, int *errors, int alev, int dir, char c, void *d,
+           const char *chname)
 {
   if (*errors & SM_ERR_UNKNOWN)
     return;
   *errors |= SM_ERR_UNKNOWN;
-  sendto_one(source_p, form_str(ERR_UNKNOWNMODE), me.name, source_p->name, c);
+  sendto_one(source_p, form_str(ERR_UNKNOWNMODE), me.name, source_p->name,
+             c);
 }
 
 static void
 chm_simple(struct Client *client_p, struct Client *source_p,
            struct Channel *chptr, int parc, int *parn,
-           char **parv, int *errors, int alev, int dir, char c, void *d)
+           char **parv, int *errors, int alev, int dir, char c, void *d,
+           const char *chname)
 {
   int mode_type;
   int i;
@@ -1263,7 +1276,7 @@ chm_simple(struct Client *client_p, struct Client *source_p,
     {
       if (!(*errors & SM_ERR_NOOPS))
         sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED), me.name,
-                   source_p->name, chptr->chname);
+                   source_p->name, chname);
       *errors |= SM_ERR_NOOPS;
       return;
     }
@@ -1315,7 +1328,8 @@ chm_simple(struct Client *client_p, struct Client *source_p,
 static void
 chm_hideops(struct Client *client_p, struct Client *source_p,
             struct Channel *chptr, int parc, int *parn,
-            char **parv, int *errors, int alev, int dir, char c, void *d)
+            char **parv, int *errors, int alev, int dir, char c, void *d,
+            const char *chname)
 {
   int i;
 
@@ -1323,7 +1337,7 @@ chm_hideops(struct Client *client_p, struct Client *source_p,
     {
       if (!(*errors & SM_ERR_NOOPS))
         sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED), me.name,
-                   source_p->name, chptr->chname);
+                   source_p->name, chname);
       *errors |= SM_ERR_NOOPS;
       return;
     }
@@ -1368,7 +1382,8 @@ chm_hideops(struct Client *client_p, struct Client *source_p,
 static void
 chm_ban(struct Client *client_p, struct Client *source_p,
         struct Channel *chptr, int parc, int *parn,
-        char **parv, int *errors, int alev, int dir, char c, void *d)
+        char **parv, int *errors, int alev, int dir, char c, void *d,
+        const char *chname)
 {
   int i;
   char *mask;
@@ -1386,7 +1401,7 @@ chm_ban(struct Client *client_p, struct Client *source_p,
           {
             banptr = ptr->data;
             sendto_one(client_p, form_str(RPL_BANLIST),
-                       me.name, client_p->name, chptr->chname,
+                       me.name, client_p->name, chname,
                        banptr->banstr, me.name, banptr->when);
           }
       else
@@ -1394,11 +1409,11 @@ chm_ban(struct Client *client_p, struct Client *source_p,
           {
             banptr = ptr->data;
             sendto_one(client_p, form_str(RPL_BANLIST),
-                       me.name, client_p->name, chptr->chname,
+                       me.name, client_p->name, chname,
                        banptr->banstr, banptr->who, banptr->when);
           }
       sendto_one(source_p, form_str(RPL_ENDOFBANLIST), me.name,
-                 source_p->name, chptr->chname);
+                 source_p->name, chname);
       return;
     }
 
@@ -1406,7 +1421,7 @@ chm_ban(struct Client *client_p, struct Client *source_p,
     {
       if (!(*errors & SM_ERR_NOOPS))
         sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED), me.name,
-                   source_p->name, chptr->chname);
+                   source_p->name, chname);
       *errors |= SM_ERR_NOOPS;
       return;
     }
@@ -1453,7 +1468,8 @@ chm_ban(struct Client *client_p, struct Client *source_p,
 static void
 chm_except(struct Client *client_p, struct Client *source_p,
            struct Channel *chptr, int parc, int *parn,
-           char **parv, int *errors, int alev, int dir, char c, void *d)
+           char **parv, int *errors, int alev, int dir, char c, void *d,
+           const char *chname)
 {
   int i;
   dlink_node *ptr;
@@ -1464,7 +1480,7 @@ chm_except(struct Client *client_p, struct Client *source_p,
     {
       if (!(*errors & SM_ERR_NOOPS))
         sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED), me.name,
-                   source_p->name, chptr->chname);
+                   source_p->name, chname);
       *errors |= SM_ERR_NOOPS;
       return;
     }
@@ -1479,11 +1495,11 @@ chm_except(struct Client *client_p, struct Client *source_p,
         {
           banptr = ptr->data;
           sendto_one(client_p, form_str(RPL_EXCEPTLIST),
-                     me.name, client_p->name, chptr->chname,
+                     me.name, client_p->name, chname,
                      banptr->banstr, banptr->who, banptr->when);
         }
       sendto_one(source_p, form_str(RPL_ENDOFEXCEPTLIST), me.name,
-                 source_p->name, chptr->chname);
+                 source_p->name, chname);
       return;
     }
 
@@ -1529,7 +1545,8 @@ chm_except(struct Client *client_p, struct Client *source_p,
 static void
 chm_invex(struct Client *client_p, struct Client *source_p,
           struct Channel *chptr, int parc, int *parn,
-          char **parv, int *errors, int alev, int dir, char c, void *d)
+          char **parv, int *errors, int alev, int dir, char c, void *d,
+          const char *chname)
 {
   int i;
   char *mask;
@@ -1540,7 +1557,7 @@ chm_invex(struct Client *client_p, struct Client *source_p,
     {
       if (!(*errors & SM_ERR_NOOPS))
         sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED), me.name,
-                   source_p->name, chptr->chname);
+                   source_p->name, chname);
       *errors |= SM_ERR_NOOPS;
       return;
     }
@@ -1555,11 +1572,11 @@ chm_invex(struct Client *client_p, struct Client *source_p,
         {
           banptr = ptr->data;
           sendto_one(client_p, form_str(RPL_INVITELIST), me.name,
-                     client_p->name, chptr->chname, banptr->banstr,
+                     client_p->name, chname, banptr->banstr,
                      banptr->who, banptr->when);
         }
       sendto_one(source_p, form_str(RPL_ENDOFINVITELIST), me.name,
-                 source_p->name, chptr->chname);
+                 source_p->name, chname);
       return;
     }
 
@@ -1606,7 +1623,8 @@ chm_invex(struct Client *client_p, struct Client *source_p,
 static void
 chm_op(struct Client *client_p, struct Client *source_p,
        struct Channel *chptr, int parc, int *parn,
-       char **parv, int *errors, int alev, int dir, char c, void *d)
+       char **parv, int *errors, int alev, int dir, char c, void *d,
+       const char *chname)
 {
   int i;
   /* Note on was_opped etc...
@@ -1628,7 +1646,7 @@ chm_op(struct Client *client_p, struct Client *source_p,
     {
       if (!(*errors & SM_ERR_NOOPS))
         sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED), me.name,
-                   source_p->name, chptr->chname);
+                   source_p->name, chname);
       *errors |= SM_ERR_NOOPS;
       return;
     }
@@ -1651,7 +1669,7 @@ chm_op(struct Client *client_p, struct Client *source_p,
     {
       if (!(*errors & SM_ERR_NOTONCHANNEL))
         sendto_one(source_p, form_str(ERR_USERNOTINCHANNEL), me.name,
-                   source_p->name, chptr->chname, opnick);
+                   source_p->name, chname, opnick);
       *errors |= SM_ERR_NOTONCHANNEL;
       return;
     }
@@ -1732,7 +1750,7 @@ chm_op(struct Client *client_p, struct Client *source_p,
         }
 
       if (MyConnect(targ_p) && chptr->mode.mode & MODE_HIDEOPS)
-        sync_oplists(chptr, targ_p, 0, chptr->chname);
+        sync_oplists(chptr, targ_p, 0, chname);
     }
   else
     {
@@ -1773,9 +1791,9 @@ chm_op(struct Client *client_p, struct Client *source_p,
 
       if (MyConnect(targ_p) && chptr->mode.mode & MODE_HIDEOPS)
         {
-          sendto_one(targ_p, ":%s MODE %s -o %s", me.name, chptr->chname,
+          sendto_one(targ_p, ":%s MODE %s -o %s", me.name, chname,
                      targ_p->name);
-          sync_oplists(chptr, targ_p, 1, chptr->chname);
+          sync_oplists(chptr, targ_p, 1, chname);
         }
     }
 }
@@ -1783,7 +1801,8 @@ chm_op(struct Client *client_p, struct Client *source_p,
 static void
 chm_halfop(struct Client *client_p, struct Client *source_p,
            struct Channel *chptr, int parc, int *parn,
-           char **parv, int *errors, int alev, int dir, char c, void *d)
+           char **parv, int *errors, int alev, int dir, char c, void *d,
+           const char *chname)
 {
   int i, was_opped = 0, was_hopped = 0, was_voiced = 0, wasnt_hopped = 0;
   int t_voice, t_op, t_hop;
@@ -1795,7 +1814,7 @@ chm_halfop(struct Client *client_p, struct Client *source_p,
     {
       if (!(*errors & SM_ERR_NOOPS))
         sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED), me.name,
-                   source_p->name, chptr->chname);
+                   source_p->name, chname);
       *errors |= SM_ERR_NOOPS;
       return;
     }
@@ -1835,7 +1854,7 @@ chm_halfop(struct Client *client_p, struct Client *source_p,
     {
       if (!(*errors & SM_ERR_NOTONCHANNEL))
         sendto_one(source_p, form_str(ERR_USERNOTINCHANNEL), me.name,
-                   source_p->name, chptr->chname, opnick);
+                   source_p->name, chname, opnick);
       *errors |= SM_ERR_NOTONCHANNEL;
       return;
     }
@@ -1877,7 +1896,7 @@ chm_halfop(struct Client *client_p, struct Client *source_p,
           change_channel_membership(chptr, &chptr->halfops,
                                     &chptr->lochalfops, targ_p);
           if (MyConnect(targ_p) && chptr->mode.mode & MODE_HIDEOPS)
-            sync_oplists(chptr, targ_p, 0, chptr->chname);
+            sync_oplists(chptr, targ_p, 0, chname);
 
           mode_changes_minus[mode_count_minus].letter = 'v';
           mode_changes_minus[mode_count_minus].caps = 0;
@@ -1918,14 +1937,15 @@ chm_halfop(struct Client *client_p, struct Client *source_p,
                                 targ_p);
 
       if (MyConnect(targ_p) && chptr->mode.mode & MODE_HIDEOPS)
-        sync_oplists(chptr, targ_p, 1, chptr->chname);
+        sync_oplists(chptr, targ_p, 1, chname);
     }
 }
 
 static void
 chm_voice(struct Client *client_p, struct Client *source_p,
           struct Channel *chptr, int parc, int *parn,
-          char **parv, int *errors, int alev, int dir, char c, void *d)
+          char **parv, int *errors, int alev, int dir, char c, void *d,
+          const char *chname)
 {
   int i, was_hopped = 0, was_opped = 0, was_voiced = 0, wasnt_voiced = 0;
   int t_op, t_voice, t_hop;
@@ -1936,7 +1956,7 @@ chm_voice(struct Client *client_p, struct Client *source_p,
     {
       if (!(*errors & SM_ERR_NOOPS))
         sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED), me.name,
-                   source_p->name, chptr->chname);
+                   source_p->name, chname);
       *errors |= SM_ERR_NOOPS;
       return;
     }
@@ -1959,7 +1979,7 @@ chm_voice(struct Client *client_p, struct Client *source_p,
     {
       if (!(*errors & SM_ERR_NOTONCHANNEL))
         sendto_one(source_p, form_str(ERR_USERNOTINCHANNEL), me.name,
-                   source_p->name, chptr->chname, opnick);
+                   source_p->name, chname, opnick);
       *errors |= SM_ERR_NOTONCHANNEL;
       return;
     }
@@ -2020,7 +2040,7 @@ chm_voice(struct Client *client_p, struct Client *source_p,
                                     targ_p);
           if (MyConnect(targ_p) && chptr->mode.mode & MODE_HIDEOPS)
             sendto_one(targ_p, ":%s MODE %s -h+v %s %s", me.name,
-                       chptr->chname, targ_p->name, targ_p->name);
+                       chname, targ_p->name, targ_p->name);
           mode_changes_minus[mode_count_minus].letter = 'h';
           mode_changes_minus[mode_count_minus].caps = CAP_HOPS;
           mode_changes_minus[mode_count_minus].nocaps = 0;
@@ -2033,7 +2053,7 @@ chm_voice(struct Client *client_p, struct Client *source_p,
                                     targ_p);
           if (MyConnect(targ_p) && chptr->mode.mode & MODE_HIDEOPS)
             sendto_one(targ_p, ":%s MODE %s -o+v %s %s", me.name,
-                       chptr->chname, targ_p->name, targ_p->name);
+                       chname, targ_p->name, targ_p->name);
           mode_changes_minus[mode_count_minus].letter = 'o';
           mode_changes_minus[mode_count_minus].caps = 0;
           mode_changes_minus[mode_count_minus].nocaps = 0;
@@ -2041,7 +2061,7 @@ chm_voice(struct Client *client_p, struct Client *source_p,
           mode_changes_minus[mode_count_minus++].arg = targ_p->name;
         }
       else if (MyConnect(targ_p) && chptr->mode.mode & MODE_HIDEOPS)
-        sendto_one(targ_p, ":%s MODE %s +v %s", me.name, chptr->chname,
+        sendto_one(targ_p, ":%s MODE %s +v %s", me.name, chname,
                    targ_p->name);
       change_channel_membership(chptr, &chptr->voiced, &chptr->locvoiced,
                                 targ_p);
@@ -2060,7 +2080,7 @@ chm_voice(struct Client *client_p, struct Client *source_p,
       change_channel_membership(chptr, &chptr->peons, &chptr->locpeons,
                                 targ_p);
       if (MyConnect(targ_p) && chptr->mode.mode & MODE_HIDEOPS)
-        sendto_one(targ_p, ":%s MODE %s -v %s", me.name, chptr->chname,
+        sendto_one(targ_p, ":%s MODE %s -v %s", me.name, chname,
                    targ_p->name);
 
       /* Don't send redundant modes on +v-v nick nick */
@@ -2078,7 +2098,8 @@ chm_voice(struct Client *client_p, struct Client *source_p,
 static void
 chm_limit(struct Client *client_p, struct Client *source_p,
           struct Channel *chptr, int parc, int *parn,
-          char **parv, int *errors, int alev, int dir, char c, void *d)
+          char **parv, int *errors, int alev, int dir, char c, void *d,
+          const char *chname)
 {
   int i, limit;
   char *lstr;
@@ -2087,7 +2108,7 @@ chm_limit(struct Client *client_p, struct Client *source_p,
     {
       if (!(*errors & SM_ERR_NOOPS))
         sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED), me.name,
-                   source_p->name, chptr->chname);
+                   source_p->name, chname);
       *errors |= SM_ERR_NOOPS;
       return;
     }
@@ -2146,7 +2167,8 @@ chm_limit(struct Client *client_p, struct Client *source_p,
 static void
 chm_key(struct Client *client_p, struct Client *source_p,
         struct Channel *chptr, int parc, int *parn,
-        char **parv, int *errors, int alev, int dir, char c, void *d)
+        char **parv, int *errors, int alev, int dir, char c, void *d,
+        const char *chname)
 {
   int i;
   char *key;
@@ -2155,7 +2177,7 @@ chm_key(struct Client *client_p, struct Client *source_p,
     {
       if (!(*errors & SM_ERR_NOOPS))
         sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED), me.name,
-                   source_p->name, chptr->chname);
+                   source_p->name, chname);
       *errors |= SM_ERR_NOOPS;
       return;
     }
@@ -2205,9 +2227,9 @@ chm_key(struct Client *client_p, struct Client *source_p,
 
 struct ChannelMode
 {
-  void (*func) (struct Client *, struct Client *, struct Channel *, int parc,
-                int *parn, char **parv, int *errors, int alev, int dir,
-                char c, void *d);
+  void (*func) (struct Client *, struct Client *, struct Channel *,
+                int parc, int *parn, char **parv, int *errors, int alev,
+                int dir, char c, void *d, const char *chname);
   void *d;
 }
 /* *INDENT-OFF* */
@@ -2431,7 +2453,7 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
   st = (chptr->mode.mode & MODE_HIDEOPS) ? ONLY_CHANOPS_HALFOPS : ALL_MEMBERS;
 
   if (IsServer(source_p))
-    ircsprintf(modebuf, ":%s MODE %s ", me.name, chptr->chname);
+    ircsprintf(modebuf, ":%s MODE %s ", me.name, chname);
   else
     ircsprintf(modebuf, ":%s!%s@%s MODE %s ", source_p->name,
                source_p->username, source_p->host, chname);
@@ -2467,7 +2489,7 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
           nc = 0;
 
           if (IsServer(source_p))
-            ircsprintf(modebuf, ":%s MODE %s -", me.name, chptr->chname);
+            ircsprintf(modebuf, ":%s MODE %s -", me.name, chname);
           else
             ircsprintf(modebuf, ":%s!%s@%s MODE %s -", source_p->name,
                        source_p->username, source_p->host, chname);
@@ -2517,7 +2539,7 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
           nc = 0;
 
           if (IsServer(source_p))
-            ircsprintf(modebuf, ":%s MODE %s +", me.name, chptr->chname);
+            ircsprintf(modebuf, ":%s MODE %s +", me.name, chname);
           else
             ircsprintf(modebuf, ":%s!%s@%s MODE %s +", source_p->name,
                        source_p->username, source_p->host, chname);
@@ -2622,7 +2644,7 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
                 sendto_channel_local(st, chptr, "%s %s", modebuf, parabuf);
 
               nc = 0;
-              ircsprintf(modebuf, ":%s MODE %s +", me.name, >chname);
+              ircsprintf(modebuf, ":%s MODE %s +", me.name, chname);
               mbl = strlen(modebuf);
               pbl = 0;
               parabuf[0] = '\0';
@@ -2697,7 +2719,8 @@ set_channel_mode(struct Client *client_p, struct Client *source_p,
         ModeTable[(int)table_position].func(client_p, source_p, chptr,
                                             parc, &parn,
                                             parv, &errors, alevel, dir, c,
-                                            ModeTable[(int)table_position].d);
+                                            ModeTable[(int)table_position].d,
+                                            chname);
         break;
       }
 
@@ -4634,7 +4657,7 @@ channel_chanop_or_voice(struct Channel *chptr, struct Client *target_p)
  */
 void
 sync_oplists(struct Channel *chptr, struct Client *target_p,
-             int clear, char *name)
+             int clear, const char *name)
 {
   send_oplist(name, target_p, &chptr->chanops, "o", clear);
   send_oplist(name, target_p, &chptr->halfops, "h", clear);
@@ -4642,7 +4665,7 @@ sync_oplists(struct Channel *chptr, struct Client *target_p,
 }
 
 static void
-send_oplist(char *chname, struct Client *client_p,
+send_oplist(const char *chname, struct Client *client_p,
             dlink_list * list, char *prefix, int clear)
 {
   dlink_node *ptr;
