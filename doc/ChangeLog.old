@@ -1,3 +1,15 @@
+*** 20001129_4 by db
+- redid luser code, removed cache, if this is still needed after all the
+  bug fixes done (!) then add an event to recalculate luser counts.
+
+- added user_welcome() function to s_user.c to start factoring this up
+  I hate monolithic functions...
+
+  What evil functions lurks in the heart of ircd?, the shad0w knows.
+
+
+
+
 *** 20001129_3 by db
 - cleaned up user and oper file logging. use fbopen etc.
   use eventAdd to close user log for resync
