@@ -164,12 +164,6 @@ Info MyInformation[] = {
   { "PPATH", "NONE", 0, "Path to Pid File" },
 #endif /* PPATH */
 
-#ifdef REPORT_DLINE_TO_USER
-  { "REPORT_DLINE_TO_USER", "ON", 0, "Inform Clients They are D-lined" },
-#else
-  { "REPORT_DLINE_TO_USER", "OFF", 0, "Inform Clients They are D-lined" },
-#endif /* REPORT_DLINE_TO_USER */
-
   { "SELECT_TYPE", SELECT_TYPE, 0, "Method of Multiplexed I/O" },
 
 #ifdef SPATH

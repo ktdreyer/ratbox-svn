@@ -399,6 +399,7 @@ static void accept_connection(int pfd, void *data)
      */
     if (!conf_connect_allowed(addr.sin_addr)) {
       ServerStats->is_ref++;
+      send(fd, "NOTICE DLINE :*** You have been D-lined\r\n", 41, 0);
       fd_close(fd);
       break;
     }
