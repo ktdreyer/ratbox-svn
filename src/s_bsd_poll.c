@@ -348,7 +348,10 @@ int read_message(time_t delay, unsigned char mask)
       if (rw)
         {
           if (IsConnecting(cptr)) {
-            if (!completed_connection(cptr)) {
+            if (completed_connection(cptr)) {
+              comm_setselect(cptr->fd, COMM_SELECT_READ, read_packet, cptr, 0);
+              continue;
+            } else {
               exit_client(cptr, cptr, &me, "Lost C/N Line");
               continue;
             }
