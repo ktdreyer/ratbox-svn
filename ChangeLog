@@ -1,3 +1,18 @@
+androsyn    2004/09/20 10:56:50 EDT	(20040920_0)
+
+  Modified files:
+    adns                 general.c internal.h query.c types.c 
+  Log:
+  Fix some shadowed variables
+  
+  Revision  Changes    Path
+  1.17      +12 -12    ircd-ratbox/adns/general.c
+  1.16      +4 -4      ircd-ratbox/adns/internal.h
+  1.23      +17 -17    ircd-ratbox/adns/query.c
+  1.17      +1 -1      ircd-ratbox/adns/types.c
+
+
+
 androsyn    2004/09/16 15:17:53 EDT	(20040916_0)
 
   Modified files:
