@@ -1,3 +1,15 @@
+androsyn    2003/08/11 11:47:27 EDT	(20030811_5)
+
+  Modified files:
+    src                  send.c 
+  Log:
+  Somebody forgot a linebuf_newbuf
+  
+  Revision  Changes    Path
+  7.250     +2 -0      ircd-ratbox/src/send.c
+
+
+
 androsyn    2003/08/11 10:54:48 EDT	(20030811_4)
 
   Modified files:
