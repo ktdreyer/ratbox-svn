@@ -116,6 +116,22 @@ struct Channel* map_vchan(struct Channel *chptr, struct Client *sptr)
   return NullChn;
 }
 
+/* return matching bchan given vchan and sptr */
+struct Channel* map_bchan(struct Channel *chptr, struct Client *sptr)
+{
+  int i;
+
+  assert(sptr != NULL);
+
+  for(i=0;sptr->vchan_map[i].base_chan;i++)
+    {
+      if( sptr->vchan_map[i].vchan == chptr )
+	return (sptr->vchan_map[i].base_chan);
+    }
+
+  return NullChn;
+}
+
 /* show info on vchans, XXXX this needs to be improved! */
 void show_vchans(struct Client *cptr,
                         struct Client *sptr,

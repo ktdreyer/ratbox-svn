@@ -26,6 +26,7 @@
 #include "handlers.h"
 #include "client.h"
 #include "channel.h"
+#include "vchannel.h"
 #include "hash.h"
 #include "ircd.h"
 #include "numeric.h"
@@ -121,8 +122,9 @@ int     m_whois(struct Client *cptr,
   struct User        *user;
   struct Client *acptr, *a2cptr;
   struct Channel *chptr;
+  struct Channel *bchan;
   char  *nick, *name;
-  /* char  *tmp; */
+  char  *channame;
   char  *p = NULL;
   int   found, len, mlen;
   static time_t last_used=0L;
@@ -232,9 +234,21 @@ int     m_whois(struct Client *cptr,
                lp = lp->next)
             {
               chptr = lp->value.chptr;
+
               if (ShowChannel(sptr, chptr))
                 {
-                  if (len + strlen(chptr->chname)
+		  if (IsVchan(chptr))
+		    {
+		      bchan = map_bchan(chptr,acptr);
+		      if(bchan != 0)
+			channame = bchan->chname;
+		      else
+			channame = chptr->chname;
+		    }
+		  else
+		    channame = chptr->chname;
+
+                  if (len + strlen(channame)
                       > (size_t) BUFSIZE - 4 - mlen)
                     {
                       sendto_one(sptr,
@@ -253,8 +267,8 @@ int     m_whois(struct Client *cptr,
                     *(buf + len++) = '+';
                   if (len)
                     *(buf + len) = '\0';
-                  (void)strcpy(buf + len, chptr->chname);
-                  len += strlen(chptr->chname);
+                  (void)strcpy(buf + len, channame);
+                  len += strlen(channame);
                   (void)strcat(buf + len, " ");
                   len++;
                 }
