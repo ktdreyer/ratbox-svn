@@ -1,3 +1,16 @@
+*** 20001219_2 by db
+- nick LL are almost there...
+  Now, nick changes for nicks that the hub does not know about on a leaf
+  ll server are not sent on to that leaf.
+  This still means a /msg nick where nick is not known yet
+  will fail, but a /whois will "burst" that nick onto the ll server...
+  So, privmsg/notify should do a nick burst... ditto on ison
+  Basically what now happens is, the ll server begins to become "aware"
+  of nicks it needs to know about, just not all of them unless it asks
+  the uplink...
+
+
+
 *** 20001219_1 by ejb
 - make invex code actually work.
 
