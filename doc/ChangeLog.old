@@ -1,3 +1,8 @@
+*** 20001211_15 by db
+- fixed m_die.c to not use local[]
+
+
+
 *** 20001211_14 by db
 - not sure if I am closing all the fd's that should be closed here..
   the original code refers to connecting servers as well as unknown_clients
