@@ -1,3 +1,17 @@
+androsyn    2004/03/29 14:07:40 EST	(20040329_4)
+
+  Modified files:
+    include              balloc.h 
+    src                  balloc.c 
+  Log:
+  Add some debugging code in there..
+  
+  Revision  Changes    Path
+  1.26      +10 -0     ircd-ratbox/include/balloc.h
+  7.69      +10 -0     ircd-ratbox/src/balloc.c
+
+
+
 leeh        2004/03/29 12:49:42 EST	(20040329_3)
 
   Modified files:
