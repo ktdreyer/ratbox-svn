@@ -1,3 +1,45 @@
+leeh        2003/06/15 16:12:35 UTC	(20030615_0)
+
+  Modified files:
+    include              config.h hash.h s_newconf.h 
+    modules              .depend m_join.c m_resv.c m_stats.c 
+                         m_xline.c 
+    modules/core         m_nick.c 
+    src                  .depend Makefile.in channel.c client.c 
+                         hash.c kdparse.c newconf.c s_conf.c 
+                         s_newconf.c s_user.c 
+  Removed files:
+    include              resv.h 
+    src                  resv.c 
+  Log:
+  - merged struct ResvEntry and struct xline -> struct rxconf
+  - added some generic functions to handle allocation etc.
+  
+  Revision  Changes    Path
+  7.158     +2 -2      ircd-ratbox/include/config.h
+  7.32      +8 -9      ircd-ratbox/include/hash.h
+  1.20      +0 -58     ircd-ratbox/include/resv.h (dead)
+  7.11      +27 -9     ircd-ratbox/include/s_newconf.h
+  1.25      +15 -16    ircd-ratbox/modules/.depend
+  1.122     +1 -2      ircd-ratbox/modules/core/m_nick.c
+  1.127     +1 -2      ircd-ratbox/modules/m_join.c
+  1.37      +7 -6      ircd-ratbox/modules/m_resv.c
+  1.166     +6 -6      ircd-ratbox/modules/m_stats.c
+  1.29      +15 -16    ircd-ratbox/modules/m_xline.c
+  7.26      +33 -45    ircd-ratbox/src/.depend
+  7.129     +0 -1      ircd-ratbox/src/Makefile.in
+  7.376     +1 -3      ircd-ratbox/src/channel.c
+  7.382     +2 -2      ircd-ratbox/src/client.c
+  7.71      +12 -13    ircd-ratbox/src/hash.c
+  7.27      +13 -6     ircd-ratbox/src/kdparse.c
+  7.87      +22 -23    ircd-ratbox/src/newconf.c
+  7.30      +0 -269    ircd-ratbox/src/resv.c (dead)
+  7.414     +1 -4      ircd-ratbox/src/s_conf.c
+  7.10      +247 -65   ircd-ratbox/src/s_newconf.c
+  7.265     +1 -1      ircd-ratbox/src/s_user.c
+
+
+
 leeh        2003/06/14 18:33:02 UTC	(20030614_0)
 
   Modified files:
