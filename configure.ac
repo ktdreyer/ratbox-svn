@@ -104,7 +104,7 @@ case "$OSNAME" in
 	;;
 	AIX*)
 		AC_MSG_RESULT(AIX - Sorry you poor bastard..really we are)
-		IRC_CFLAGS="$IRC_CFLAGS -Wl,-brtl"
+		IRC_CFLAGS="$IRC_CFLAGS -Wl,-brtl -Wl,-G"
 	;;
 	*)
 		AC_MSG_RESULT(no)
@@ -1027,8 +1027,8 @@ if test "$shared_modules" = yes; then
 	fi
 	
 	if expr "`uname -s`" : ^AIX >/dev/null 2>&1; then
-		found="no, AIX ld uses -G"
-		LDFLAGS="${LDFLAGS} -Wl,-G"
+		found="no, AIX ld uses -G -brtl"
+		LDFLAGS="${LDFLAGS} -Wl,-G,-brtl"
 	fi
 
 	AC_MSG_RESULT($found)

@@ -2376,7 +2376,7 @@ _ACEOF
 	AIX*)
 		echo "$as_me:$LINENO: result: AIX - Sorry you poor bastard..really we are" >&5
 echo "${ECHO_T}AIX - Sorry you poor bastard..really we are" >&6
-		IRC_CFLAGS="$IRC_CFLAGS -Wl,-brtl"
+		IRC_CFLAGS="$IRC_CFLAGS -Wl,-brtl -Wl,-G"
 	;;
 	*)
 		echo "$as_me:$LINENO: result: no" >&5
@@ -9554,8 +9554,8 @@ rm -f conftest.err conftest.$ac_objext \
 	fi
 
 	if expr "`uname -s`" : ^AIX >/dev/null 2>&1; then
-		found="no, AIX ld uses -G"
-		LDFLAGS="${LDFLAGS} -Wl,-G"
+		found="no, AIX ld uses -G -brtl"
+		LDFLAGS="${LDFLAGS} -Wl,-G,-brtl"
 	fi
 
 	echo "$as_me:$LINENO: result: $found" >&5
