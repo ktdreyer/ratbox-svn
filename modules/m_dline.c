@@ -272,6 +272,13 @@ mo_undline(struct Client *client_p, struct Client *source_p, int parc, const cha
 
 	cidr = parv[1];
 
+	if(parse_netmask(cidr, NULL, NULL) == HM_HOST)
+	{
+		sendto_one(source_p, ":%s NOTICE %s :Invalid D-Line",
+			   me.name, source_p->name);
+		return 0;
+	}
+
 	if(remove_temp_dline(cidr))
 	{
 		sendto_one(source_p,

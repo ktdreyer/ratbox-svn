@@ -55,7 +55,7 @@
 	ConfigChannel.max_bans, ServerInfo.network_name, \
 	MAXMODEPARAMS, ConfigChannel.use_knock ? " KNOCK" : "", NICKLEN-1
 
-#define FEATURES2 " SAFELIST"		\
+#define FEATURES2 "SAFELIST"		\
 		" ELIST=U"		\
 		" CASEMAPPING=rfc1459"	\
 		" CHARSET=ascii"	\
