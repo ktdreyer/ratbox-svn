@@ -1,3 +1,16 @@
+androsyn    2002/08/11 10:46:22 EDT	(20020811_8)
+
+  Modified files:
+    src                  send.c 
+  Log:
+  Fixed a off by one error in send_trim().  If you are using indexes remember
+  you start counting at 0 NOT 1
+  
+  Revision  Changes    Path
+  7.209     +3 -3      ircd-ratbox/src/send.c
+
+
+
 androsyn    2002/08/11 09:44:44 EDT	(20020811_7)
 
   Removed files:
