@@ -196,7 +196,7 @@ int bogus_host(char *host)
         ++dots;
     }
      
-  if (!dots || bogus_server )
+  if (!dots || bogus_server || strlen(host) > HOSTLEN)
     return 1;
      
   return 0;
