@@ -8,6 +8,8 @@ then the bug number should appear in brackets (ie (#15)) - madmax
 - trie' channel name list
 - SSL support
 - finish RFC'ing m_message.c
+- add dns_query_host and dns_query_port options to serverinfo {} block;
+  dns_query_port would be similar to query-port in BIND-8.
 
 ----
 is-'s TODO list
