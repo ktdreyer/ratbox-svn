@@ -1,3 +1,25 @@
+androsyn    2005/03/23 03:33:14 UTC	(20050323_3)
+
+  Modified files:
+    .                    Makefile.in configure configure.ac 
+    adns                 Makefile.in 
+    modules              Makefile.in 
+    src                  Makefile.in 
+    tools                Makefile.in 
+  Log:
+  fix a typo in configure.ac
+  
+  Revision  Changes    Path
+  7.57      +0 -0      ircd-ratbox/Makefile.in
+  1.19      +0 -0      ircd-ratbox/adns/Makefile.in
+  7.256     +3 -3      ircd-ratbox/configure
+  7.68      +3 -3      ircd-ratbox/configure.ac
+  1.127     +0 -0      ircd-ratbox/modules/Makefile.in
+  7.163     +0 -0      ircd-ratbox/src/Makefile.in
+  7.45      +0 -0      ircd-ratbox/tools/Makefile.in
+
+
+
 androsyn    2005/03/23 02:49:02 UTC	(20050323_2)
 
   Removed files:
