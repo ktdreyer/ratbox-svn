@@ -1,3 +1,7 @@
+*** 20010613_4 by androsyn
+Cleaned up more abuses of inetntoa() 
+
+
 *** 20010613_3 by androsyn
 sockhost is the string version of the IP..duh :P
 
