@@ -341,13 +341,11 @@ linebuf_copy_binary(buf_head_t *bufhead, buf_line_t *bufline,
   else
     remaining = BUF_DATA_SIZE - bufline->len - 1;
 
-  while (remaining)
+  while (remaining && *ch != '\r' && *ch != '\n')
   {
     *bufch++ = *ch++;
     clen++;
     remaining--;
-    if (*ch == '\r' || *ch == '\n')
-      break;
   }
 
   if (*ch == '\r' || *ch == '\n' || !remaining)
