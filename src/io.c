@@ -469,7 +469,7 @@ connect_to_client(struct client *client_p, struct conf_oper *oper_p,
 		return;
 
 	conn_p = my_malloc(sizeof(struct connection_entry));
-	conn_p->name = my_strdup(client_p->name);
+	conn_p->name = my_strdup(oper_p->name);
 
 	conn_p->oper = oper_p;
 	oper_p->refcount++;
@@ -485,6 +485,9 @@ connect_to_client(struct client *client_p, struct conf_oper *oper_p,
 	SetConnDccOut(conn_p);
 
 	dlink_add_alloc(conn_p, &connection_list);
+
+	sendto_all(UMODE_AUTH, "%s:%s has initiated a DCC",
+			oper_p->name, client_p->user->mask);
 }
 
 void
@@ -538,7 +541,7 @@ connect_from_client(struct client *client_p, struct conf_oper *oper_p,
 	}
 
 	conn_p = my_malloc(sizeof(struct connection_entry));
-	conn_p->name = my_strdup(client_p->name);
+	conn_p->name = my_strdup(oper_p->name);
         conn_p->oper = oper_p;
 
 	conn_p->fd = client_fd;
@@ -557,6 +560,9 @@ connect_from_client(struct client *client_p, struct conf_oper *oper_p,
 
 	sendto_server(":%s PRIVMSG %s :\001DCC CHAT chat %lu %d\001",
 		      servicenick, client_p->name, local_ip, port);
+
+	sendto_all(UMODE_AUTH, "%s:%s has requested a DCC",
+			oper_p->name, client_p->user->mask);
 }
 
 /* signon_server()
@@ -673,7 +679,7 @@ signoff_client(struct connection_entry *conn_p)
 		return;
 
 	if(UserAuth(conn_p))
-                sendto_all(UMODE_AUTH, "%s has disconnected", conn_p->name);
+                sendto_all(UMODE_AUTH, "%s has logged out", conn_p->name);
 
 	if(conn_p->oper != NULL)
 		deallocate_conf_oper(conn_p->oper);

@@ -32,9 +32,10 @@ stats_opers(struct connection_entry *conn_p)
         {
                 conf_p = ptr->data;
 
-                sendto_one(conn_p, "Oper %s %s@%s %s",
+                sendto_one(conn_p, "Oper %s %s@%s %s %s",
                            conf_p->name, conf_p->username, conf_p->host,
-			   conf_p->server ? conf_p->server : "");
+			   conf_p->server ? conf_p->server : "-",
+			   conf_oper_flags(conf_p->flags));
         }
 }
 

@@ -33,6 +33,7 @@ dlink_list ucommand_list;
 
 static void u_login(struct connection_entry *, char *parv[], int parc);
 
+static void u_boot(struct connection_entry *, char *parv[], int parc);
 static void u_connect(struct connection_entry *, char *parv[], int parc);
 static void u_die(struct connection_entry *, char *parv[], int parc);
 static void u_events(struct connection_entry *, char *parv[], int parc);
@@ -42,9 +43,11 @@ static void u_quit(struct connection_entry *, char *parv[], int parc);
 static void u_rehash(struct connection_entry *, char *parv[], int parc);
 static void u_service(struct connection_entry *, char *parv[], int parc);
 static void u_status(struct connection_entry *, char *parv[], int parc);
+static void u_who(struct connection_entry *, char *parv[], int parc);
 
 static struct ucommand_handler ucommands[] =
 {
+	{ "boot",	u_boot,		CONF_OPER_ADMIN,	2, 1, NULL },
 	{ "connect",	u_connect,	CONF_OPER_ROUTE,	2, 1, NULL },
 	{ "die",	u_die,		CONF_OPER_ADMIN,	2, 1, NULL },
 	{ "events",	u_events,	CONF_OPER_ADMIN,	0, 1, NULL },
@@ -54,6 +57,7 @@ static struct ucommand_handler ucommands[] =
 	{ "rehash",	u_rehash,	CONF_OPER_ADMIN,	0, 1, NULL },
 	{ "service",	u_service,	0,			0, 1, NULL },
 	{ "status",	u_status,	0,			0, 1, NULL },
+	{ "who",	u_who,		0,			0, 0, NULL },
 	{ "\0",         NULL,		0,			0, 0, NULL }
 };
 
@@ -199,10 +203,6 @@ u_login(struct connection_entry *conn_p, char *parv[], int parc)
                 return;
         }
 
-        /* update our name with them from one in O: */
-        my_free(conn_p->name);
-        conn_p->name = my_strdup(oper_p->name);
-
         /* newly opered user wont get this. */
         sendto_all(UMODE_AUTH, "%s has logged in", conn_p->name);
 
@@ -216,6 +216,47 @@ u_login(struct connection_entry *conn_p, char *parv[], int parc)
 	deallocate_conf_oper(oper_p);
 	conn_p->oper = NULL;
 }
+
+static void
+u_boot(struct connection_entry *conn_p, char *parv[], int parc)
+{
+	struct client *target_p;
+	struct connection_entry *dcc_p;
+	dlink_node *ptr, *next_ptr;
+	unsigned int count = 0;
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, oper_list.head)
+	{
+		target_p = ptr->data;
+
+		if(!irccmp(target_p->user->oper->name, parv[1]))
+		{
+			count++;
+
+			deallocate_conf_oper(target_p->user->oper);
+			target_p->user->oper = NULL;
+			dlink_destroy(ptr, &oper_list);
+
+			sendto_server(":%s NOTICE %s :Logged out by %s",
+					MYNAME, target_p->name, conn_p->name);
+		}
+	}
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, connection_list.head)
+	{
+		dcc_p = ptr->data;
+
+		if(!irccmp(dcc_p->name, parv[1]))
+		{
+			count++;
+
+			sendto_one(dcc_p, "Logged out by %s", conn_p->name);
+			(dcc_p->io_close)(dcc_p);
+		}
+	}
+
+	sendto_one(conn_p, "%u users booted", count);
+}	
 
 static void
 u_connect(struct connection_entry *conn_p, char *parv[], int parc)
@@ -338,23 +379,60 @@ static void
 u_status(struct connection_entry *conn_p, char *parv[], int parc)
 {
         sendto_one(conn_p, "%s, version ratbox-services-%s(%s), up %s",
-                   MYNAME, RSERV_VERSION, SERIALNUM,
-                   get_duration(CURRENT_TIME - first_time));
+			MYNAME, RSERV_VERSION, SERIALNUM,
+			get_duration(CURRENT_TIME - first_time));
 
         if(server_p != NULL)
                 sendto_one(conn_p, "Currently connected to %s", server_p->name);
         else
                 sendto_one(conn_p, "Currently disconnected");
 
-        sendto_one(conn_p, "Services: Clients: %lu Services: %lu",
-                   dlink_list_length(&connection_list),
-                   dlink_list_length(&service_list));
+	sendto_one(conn_p, "Services: %lu",
+			dlink_list_length(&service_list));
+	sendto_one(conn_p, "Clients: DCC: %lu IRC: %lu",
+			dlink_list_length(&connection_list),
+			dlink_list_length(&oper_list));
         sendto_one(conn_p, "Network: Users: %lu Servers: %lu",
-                   dlink_list_length(&user_list),
-                   dlink_list_length(&server_list));
+			dlink_list_length(&user_list),
+			dlink_list_length(&server_list));
         sendto_one(conn_p, "         Channels: %lu Topics: %lu",
-                   dlink_list_length(&channel_list), count_topics());
+			dlink_list_length(&channel_list), count_topics());
                           
+}
+
+static void
+u_who(struct connection_entry *conn_p, char *parv[], int parc)
+{
+	struct client *target_p;
+	struct connection_entry *dcc_p;
+	dlink_node *ptr;
+
+	if(dlink_list_length(&connection_list))
+	{
+		sendto_one(conn_p, "DCC Connections:");
+
+		DLINK_FOREACH(ptr, connection_list.head)
+		{
+			dcc_p = ptr->data;
+
+			sendto_one(conn_p, "  %s - %s",
+				dcc_p->name, conf_oper_flags(dcc_p->privs));
+		}
+	}
+
+	if(dlink_list_length(&oper_list))
+	{
+		sendto_one(conn_p, "IRC Connections:");
+
+		DLINK_FOREACH(ptr, oper_list.head)
+		{
+			target_p = ptr->data;
+
+			sendto_one(conn_p, "  %s %s %s",
+				target_p->user->oper->name, target_p->user->mask,
+				conf_oper_flags(target_p->user->oper->flags));
+		}
+	}
 }
 
 static void

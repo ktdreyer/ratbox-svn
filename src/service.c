@@ -469,13 +469,15 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
 			return;
 		}
 
-		sendto_all(UMODE_AUTH, "%s (%s) has logged in [IRC]",
-				client_p->name, oper_p->name);
+		sendto_all(UMODE_AUTH, "%s:%s has logged in [IRC]",
+				oper_p->name, client_p->user->mask);
 		sendto_server(":%s NOTICE %s :Oper login successful",
 				MYNAME, client_p->name);
 
 		client_p->user->oper = oper_p;
 		oper_p->refcount++;
+		dlink_add_alloc(client_p, &oper_list);
+
 		return;
 	}
 	else if(!strcasecmp(text, "OPERLOGOUT") || !strcasecmp(text, "OLOGOUT"))
@@ -488,8 +490,12 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
 			return;
 		}
 
+		sendto_all(UMODE_AUTH, "%s:%s has logged out [IRC]",
+				client_p->user->oper->name, client_p->user->mask);
+
 		deallocate_conf_oper(client_p->user->oper);
 		client_p->user->oper = NULL;
+		dlink_find_destroy(client_p, &oper_list);
 
 		sendto_server(":%s NOTICE %s :Oper logout successful",
 				MYNAME, client_p->name);

@@ -134,6 +134,7 @@ extern void rehash(int sig);
 
 extern void free_conf_oper(struct conf_oper *conf_p);
 extern void deallocate_conf_oper(struct conf_oper *conf_p);
+extern const char *conf_oper_flags(int flags);
 
 extern void free_conf_server(struct conf_server *conf_p);
 

@@ -18,10 +18,12 @@
 #include "event.h"
 #include "hook.h"
 #include "s_userserv.h"
+#include "conf.h"
 
 static dlink_list name_table[MAX_NAME_HASH];
 
 dlink_list user_list;
+dlink_list oper_list;
 dlink_list server_list;
 dlink_list exited_list;
 
@@ -199,6 +201,12 @@ exit_user(struct client *target_p)
 	if(target_p->user->user_reg)
 		target_p->user->user_reg->refcount--;
 #endif
+
+	if(target_p->user->oper)
+	{
+		dlink_find_destroy(target_p, &oper_list);
+		deallocate_conf_oper(target_p->user->oper);
+	}
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, target_p->user->channels.head)
 	{

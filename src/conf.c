@@ -254,6 +254,42 @@ find_conf_oper(const char *username, const char *host, const char *server)
         return NULL;
 }
 
+struct flag_table
+{
+	char mode;
+	int flag;
+};
+
+static struct flag_table oper_flags[] =
+{
+	{ 'D', CONF_OPER_DCC		},
+	{ 'A', CONF_OPER_ADMIN		},
+	{ 'C', CONF_OPER_CS_ADMIN	},
+	{ 'c', CONF_OPER_CS_REGISTER	},
+	{ 'U', CONF_OPER_US_ADMIN	},
+	{ 'u', CONF_OPER_US_REGISTER	},
+	{ 'O', CONF_OPER_OPERBOT_ADMIN	},
+	{ 'J', CONF_OPER_JUPE_ADMIN	},
+	{ '\0',0 }
+};
+
+const char *
+conf_oper_flags(int flags)
+{
+	static char buf[20];
+	char *p = buf;
+	int i;
+
+	for(i = 0; oper_flags[i].mode; i++)
+	{
+		if(flags & oper_flags[i].flag)
+			*p++ = oper_flags[i].mode;
+	}
+
+	*p = '\0';
+	return buf;
+}
+
 /*
  * yyerror
  *

@@ -18,6 +18,7 @@
 #define MAX_NAME_HASH 65536
 
 extern dlink_list user_list;
+extern dlink_list oper_list;
 extern dlink_list server_list;
 extern dlink_list exited_list;
 
