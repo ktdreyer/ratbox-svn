@@ -1,3 +1,13 @@
+*** 20010525_3 by davidt
+- Make fd_note take (int fd, char *format, ...), to avoid using sprintf
+  every single place we call fd_note.
+- add support for reading from the servlink control fd in ircd.
+- add error messages to servlink, which are displayed to all opers on the
+  local ircd...
+- add zipstats (/stats Z, updated every time collect_zipstats is called
+  [see /stats E]).
+
+
 *** 20010525_2 by leeh
 - hide ips in stats ? from opers..
   we also need to do this in trace
