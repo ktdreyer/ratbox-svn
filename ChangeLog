@@ -1,3 +1,15 @@
+leeh        2004/09/04 06:16:29 EDT	(20040904_3)
+
+  Modified files:
+    src                  banconf.c 
+  Log:
+  - whoops, initialise p to line
+  
+  Revision  Changes    Path
+  7.3       +1 -1      ircd-ratbox/src/banconf.c
+
+
+
 leeh        2004/09/03 20:59:40 EDT	(20040904_2)
 
   Modified files:
