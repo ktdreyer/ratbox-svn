@@ -1,3 +1,7 @@
+*** 20011021_5 by leeh
+- MODE_QUERY -> MODE_ADD
+
+
 *** 20011021_4 by leeh
 - dont allow bans > NICKLEN/USERLEN/HOSTLEN
 - dont ignore bans > NICKLEN+USERLEN+HOSTLEN, youll cause desync
