@@ -1,3 +1,20 @@
+leeh        2004/01/15 10:13:19 EST	(20040115_3)
+
+  Modified files:
+    include              config.h tools.h 
+    src                  rserv.c tools.c 
+  Log:
+  - made dlink_nodes use a balloc
+  - add some comments as to which things need to be init'd before what
+  
+  Revision  Changes    Path
+  1.13      +2 -0      rserv/include/config.h
+  1.10      +3 -1      rserv/include/tools.h
+  1.20      +11 -3     rserv/src/rserv.c
+  1.7       +24 -8     rserv/src/tools.c
+
+
+
 leeh        2004/01/15 09:50:52 EST	(20040115_2)
 
   Modified files:
