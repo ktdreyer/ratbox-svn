@@ -54,25 +54,6 @@ void free_dlink_node(dlink_node * lp);
 void init_dlink_nodes(void);
 
 
-void dlinkMoveNode(dlink_node * m, dlink_list * oldlist, dlink_list * newlist);
-
-void dlinkAdd(void *data, dlink_node * m, dlink_list * list);
-
-void dlinkAddBefore(dlink_node * b, void *data, dlink_node * m, dlink_list * list);
-
-void dlinkAddTail(void *data, dlink_node * m, dlink_list * list);
-
-void dlinkDelete(dlink_node * m, dlink_list * list);
-
-void dlinkMoveList(dlink_list * from, dlink_list * to);
-
-dlink_node *dlinkFind(dlink_list * m, void *data);
-
-dlink_node *dlinkFindDelete(dlink_list *, void *);
-
-int dlinkFindDestroy(dlink_list *, void *data);
-
-
 #ifndef NDEBUG
 void mem_frob(void *data, int len);
 #else
@@ -115,12 +96,6 @@ void mem_frob(void *data, int len);
  * hopefully this will speed up things just a bit
  * 
  */
-/* forte (and maybe others) dont like these being declared twice,
- * so we dont declare the inlines unless GNUC.
- */
-/* darwin doesnt like these.. */
-#ifndef __APPLE__
-#ifdef __GNUC__
 
 /* 
  * dlink_ routines are stolen from squid, except for dlinkAddBefore,
@@ -128,7 +103,7 @@ void mem_frob(void *data, int len);
  *   -- adrian
  */
 
-extern inline void
+static inline void
 dlinkMoveNode(dlink_node * m, dlink_list * oldlist, dlink_list * newlist)
 {
 	/* Assumption: If m->next == NULL, then list->tail == m
@@ -160,7 +135,7 @@ dlinkMoveNode(dlink_node * m, dlink_list * oldlist, dlink_list * newlist)
 	newlist->length++;
 }
 
-extern inline void
+static inline void
 dlinkAdd(void *data, dlink_node * m, dlink_list * list)
 {
 	assert(data != NULL);
@@ -179,7 +154,7 @@ dlinkAdd(void *data, dlink_node * m, dlink_list * list)
 	list->length++;
 }
 
-extern inline void
+static inline void
 dlinkAddBefore(dlink_node * b, void *data, dlink_node * m, dlink_list * list)
 {
 	assert(b != NULL);
@@ -203,7 +178,7 @@ dlinkAddBefore(dlink_node * b, void *data, dlink_node * m, dlink_list * list)
 	}
 }
 
-extern inline void
+static inline void
 dlinkAddTail(void *data, dlink_node * m, dlink_list * list)
 {
 	assert(m != NULL);
@@ -226,7 +201,7 @@ dlinkAddTail(void *data, dlink_node * m, dlink_list * list)
 /* Execution profiles show that this function is called the most
  * often of all non-spontaneous functions. So it had better be
  * efficient. */
-extern inline void
+static inline void
 dlinkDelete(dlink_node * m, dlink_list * list)
 {
 	assert(m != NULL);
@@ -249,7 +224,7 @@ dlinkDelete(dlink_node * m, dlink_list * list)
 	list->length--;
 }
 
-extern inline dlink_node *
+static inline dlink_node *
 dlinkFindDelete(dlink_list * list, void *data)
 {
 	dlink_node *m;
@@ -279,7 +254,7 @@ dlinkFindDelete(dlink_list * list, void *data)
 	return NULL;
 }
 
-extern inline int
+static inline int
 dlinkFindDestroy(dlink_list * list, void *data)
 {
 	extern void free_dlink_node(dlink_node * ptr);
@@ -305,7 +280,7 @@ dlinkFindDestroy(dlink_list * list, void *data)
  * output	- pointer to link or NULL if not found
  * side effects	- Look for ptr in the linked listed pointed to by link.
  */
-extern inline dlink_node *
+static inline dlink_node *
 dlinkFind(dlink_list * list, void *data)
 {
 	dlink_node *ptr;
@@ -320,7 +295,7 @@ dlinkFind(dlink_list * list, void *data)
 	return (NULL);
 }
 
-extern inline void
+static inline void
 dlinkMoveList(dlink_list * from, dlink_list * to)
 {
 	assert(from != NULL);
@@ -350,7 +325,5 @@ dlinkMoveList(dlink_list * from, dlink_list * to)
 	to->length += from->length;
 	from->length = 0;
 }
-#endif /* __GNUC__ */
-#endif /* __APPLE__ */
 
 #endif /* __TOOLS_H__ */
