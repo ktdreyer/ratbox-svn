@@ -1,3 +1,17 @@
+leeh        2002/06/15 08:54:51 EDT	(20020615_5)
+
+  Modified files:
+    contrib              lmh.diff 
+  Log:
+  - patching in .orig files is bad
+  - added a kludge to install xline.conf, as diff doesnt want to add a 0
+    byte file.
+  
+  Revision  Changes    Path
+  1.2       +78 -2587  ircd-hybrid-7/contrib/lmh.diff
+
+
+
 leeh        2002/06/15 08:33:28 EDT	(20020615_4)
 
   Modified files:
