@@ -1370,8 +1370,8 @@ int fork_server(struct Client *server)
         set_non_blocking(i);
 #ifdef USE_SIGIO /* the servlink process doesn't need O_ASYNC */
 	{
-		int flags = 0;
-		fcntl(i, F_GETFL, &flags);
+		int flags;
+		flags = fcntl(i, F_GETFL, 0);
 		flags |= ~O_ASYNC;
 		fcntl(i, F_SETFL, flags);
 	}

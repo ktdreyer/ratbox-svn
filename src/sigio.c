@@ -99,8 +99,8 @@ static void poll_update_pollfds(int, short, PF *);
 static void set_sigio(int fd)
 {
     int flags;
-    fcntl(fd, F_GETFL, &flags);
-    flags |= O_ASYNC | O_NONBLOCK;
+    flags = fcntl(fd, F_GETFL, 0);
+    flags |= O_ASYNC;
     fcntl(fd, F_SETFL, flags);
 }
 
@@ -114,10 +114,8 @@ static void set_sigio(int fd)
 static void clear_sigio(int fd)
 {
     int flags;
-    fcntl(fd, F_GETFL, &flags);
+    flags = fcntl(fd, F_GETFL, 0);
     flags &= ~O_ASYNC;
-    /* This _is_ needed... */
-    flags |= O_NONBLOCK;
     fcntl(fd, F_SETFL, flags);
 }
 
@@ -234,7 +232,7 @@ void setup_sigio_fd(int fd)
     int flags;
     fcntl(fd, F_SETOWN, getpid());
     fcntl(fd, F_SETSIG, sigio_signal);
-    fcntl(fd, F_GETFL, &flags);
+    flags = fcntl(fd, F_GETFL, 0);
     flags |= O_ASYNC | O_NONBLOCK;
     fcntl(fd, F_SETFL, flags);
 }
