@@ -176,8 +176,11 @@ m_message(int p_or_n,
 		return;
 	}
 
-	/* Finish the flood grace period... */
-	if(MyClient(source_p) && !IsFloodDone(source_p))
+	/* Finish the flood grace period if theyre not messaging themselves
+	 * as some clients (ircN) do this as a "lag check"
+	 */
+	if(MyClient(source_p) && !IsFloodDone(source_p) &&
+	   irccmp(source_p->name, parv[1]))
 		flood_endgrace(source_p);
 
 	if(build_target_list(p_or_n, command, client_p, source_p, parv[1], parv[2]) < 0)

@@ -38,6 +38,7 @@
 #include "resv.h"
 #include "hash.h"
 #include "ircd_defs.h"
+#include "s_conf.h"
 
 dlink_list resv_channel_list;
 dlink_list resv_nick_list;
@@ -242,3 +243,27 @@ clean_resv_nick(const char *nick)
 
 	return 1;
 }
+
+int
+valid_wild_card_simple(const char *data)
+{
+	const char *p;
+	char tmpch;
+	int nonwild = 0;
+
+	/* check the string for minimum number of nonwildcard chars */
+	p = data;
+
+	while((tmpch = *p++))
+	{
+		if(!IsMWildChar(tmpch))
+		{
+			/* if we have enough nonwildchars, return */
+			if(++nonwild >= ConfigFileEntry.min_nonwildcard_simple)
+				return 1;
+		}
+	}
+
+	return 0;
+}
+

@@ -150,12 +150,14 @@ extern const unsigned int CharAttrs[];
 #define NONEOS_C 0x1000
 #define SERV_C   0x2000
 #define EOL_C    0x4000
+#define MWILD_C  0x8000
 
 #define IsHostChar(c)   (CharAttrs[(unsigned char)(c)] & HOST_C)
 #define IsUserChar(c)   (CharAttrs[(unsigned char)(c)] & USER_C)
 #define IsChanPrefix(c) (CharAttrs[(unsigned char)(c)] & CHANPFX_C)
 #define IsChanChar(c)   (CharAttrs[(unsigned char)(c)] & CHAN_C)
 #define IsKWildChar(c)  (CharAttrs[(unsigned char)(c)] & KWILD_C)
+#define IsMWildChar(c)  (CharAttrs[(unsigned char)(c)] & MWILD_C)
 #define IsNickChar(c)   (CharAttrs[(unsigned char)(c)] & NICK_C)
 #define IsServChar(c)   (CharAttrs[(unsigned char)(c)] & (NICK_C | SERV_C))
 #define IsCntrl(c)      (CharAttrs[(unsigned char)(c)] & CNTRL_C)

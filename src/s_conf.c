@@ -1100,6 +1100,7 @@ set_default_conf(void)
 	ConfigServerHide.disable_hidden = 0;
 
 	ConfigFileEntry.min_nonwildcard = 4;
+	ConfigFileEntry.min_nonwildcard_simple = 3;
 	ConfigFileEntry.default_floodcount = 8;
 	ConfigFileEntry.client_flood = CLIENT_FLOOD_DEFAULT;
 	ConfigFileEntry.use_help = 0;

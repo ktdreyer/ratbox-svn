@@ -53,6 +53,7 @@
 #include "modules.h"
 #include "s_conf.h"
 #include "s_newconf.h"
+#include "resv.h"
 
 static void mo_xline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
 static void mo_unxline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
@@ -98,7 +99,7 @@ mo_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	xconf = find_xline(parv[1]);
 	if(xconf != NULL)
 	{
-		sendto_one(source_p, ":%s NOTICE %s :[%s] already X-lined by [%s] - %s",
+		sendto_one(source_p, ":%s NOTICE %s :[%s] already X-Lined by [%s] - %s",
 			   me.name, source_p->name, parv[1], xconf->gecos, xconf->reason);
 		return;
 	}
@@ -117,6 +118,15 @@ mo_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 		}
 		else
 			reason = parv[2];
+	}
+
+	if(!valid_wild_card_simple(parv[1]))
+	{
+		sendto_one(source_p,
+			   ":%s NOTICE %s :Please include at least %d non-wildcard characters with the xline",
+			   me.name, source_p->name,
+			   ConfigFileEntry.min_nonwildcard_simple);
+		return;
 	}
 
 	xconf = make_xline(parv[1], reason, xtype);
@@ -144,14 +154,15 @@ mo_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	fbclose(out);
 
-	sendto_realops_flags(UMODE_ALL, L_ALL, "%s added X-line for [%s] [%s]",
+	sendto_realops_flags(UMODE_ALL, L_ALL, "%s added X-Line for [%s] [%s]",
 			     get_oper_name(source_p), xconf->gecos, xconf->reason);
-	sendto_one(source_p, ":%s NOTICE %s :Added X-line for [%s] [%s]",
+	sendto_one(source_p, ":%s NOTICE %s :Added X-Line for [%s] [%s]",
 		   me.name, source_p->name, xconf->gecos, xconf->reason);
-	ilog(L_TRACE, "%s added X-line for [%s] [%s]",
+	ilog(L_TRACE, "%s added X-Line for [%s] [%s]",
 	     get_oper_name(source_p), xconf->gecos, xconf->reason);
 
 	add_xline(xconf);
+	check_xlines();
 }
 
 /* mo_unxline()
@@ -261,15 +272,15 @@ mo_unxline(struct Client *client_p, struct Client *source_p, int parc, const cha
 
 	if(found_xline == 0)
 	{
-		sendto_one(source_p, ":%s NOTICE %s :No XLINE for %s",
+		sendto_one(source_p, ":%s NOTICE %s :No X-Line for %s",
 			   me.name, source_p->name, parv[1]);
 		return;
 	}
 
-	sendto_one(source_p, ":%s NOTICE %s :XLINE for [%s] is removed",
+	sendto_one(source_p, ":%s NOTICE %s :X-Line for [%s] is removed",
 		   me.name, source_p->name, parv[1]);
 	sendto_realops_flags(UMODE_ALL, L_ALL,
-			     "%s has removed the XLINE for: [%s]",
+			     "%s has removed the X-Line for: [%s]",
 			     get_oper_name(source_p), parv[1]);
-	ilog(L_NOTICE, "%s has removed the XLINE for [%s]", get_oper_name(source_p), parv[1]);
+	ilog(L_NOTICE, "%s has removed the X-Line for [%s]", get_oper_name(source_p), parv[1]);
 }

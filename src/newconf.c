@@ -2415,6 +2415,12 @@ conf_set_general_min_nonwildcard(void *data)
 }
 
 static void
+conf_set_general_min_nonwildcard_simple(void *data)
+{
+	ConfigFileEntry.min_nonwildcard_simple = *(unsigned int *) data;
+}
+
+static void
 conf_set_general_default_floodcount(void *data)
 {
 	ConfigFileEntry.default_floodcount = *(unsigned int *) data;
@@ -2935,6 +2941,8 @@ newconf_init()
 	add_conf_item("general", "caller_id_wait", CF_TIME, conf_set_general_caller_id_wait);
 	add_conf_item("general", "default_floodcount", CF_INT, conf_set_general_default_floodcount);
 	add_conf_item("general", "min_nonwildcard", CF_INT, conf_set_general_min_nonwildcard);
+	add_conf_item("general", "min_nonwildcard_simple", CF_INT,
+		      conf_set_general_min_nonwildcard_simple);
 	add_conf_item("general", "servlink_path", CF_QSTRING, conf_set_general_servlink_path);
 	add_conf_item("general", "tkline_expire_notices", CF_YESNO,
 		      conf_set_general_tkline_expire_notices);

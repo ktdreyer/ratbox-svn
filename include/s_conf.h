@@ -227,6 +227,7 @@ struct config_file_entry
 	int max_targets;
 	int caller_id_wait;
 	int min_nonwildcard;
+	int min_nonwildcard_simple;
 	int default_floodcount;
 	int client_flood;
 	int use_egd;

@@ -56,6 +56,7 @@
 #include "balloc.h"
 #include "listener.h"
 #include "hook.h"
+#include "s_newconf.h"
 
 static void check_pings_list(dlink_list * list);
 static void check_unknowns_list(dlink_list * list);
@@ -446,6 +447,7 @@ check_banned_lines(void)
 {
 	struct Client *client_p;	/* current local client_p being examined */
 	struct ConfItem *aconf = NULL;
+	struct xline *xconf;
 	dlink_node *ptr, *next_ptr;
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, lclient_list.head)
@@ -471,54 +473,72 @@ check_banned_lines(void)
 
 		if(IsPerson(client_p))
 		{
-			if((aconf = find_kill(client_p)) == NULL)
-				continue;
-
-			if(aconf->status & CONF_GLINE)
+			if((aconf = find_kill(client_p)) != NULL)
 			{
-				if(IsExemptKline(client_p))
+				if(aconf->status & CONF_GLINE)
 				{
-					sendto_realops_flags(UMODE_ALL,
-							     L_ALL,
-							     "GLINE over-ruled for %s, client is kline_exempt",
-							     get_client_name(client_p, HIDE_IP));
+					if(IsExemptKline(client_p))
+					{
+						sendto_realops_flags(UMODE_ALL,
+								L_ALL,
+								"GLINE over-ruled for %s, client is kline_exempt",
+								get_client_name(client_p, HIDE_IP));
+						continue;
+					}
+
+					if(IsExemptGline(client_p))
+					{
+						sendto_realops_flags(UMODE_ALL,
+								L_ALL,
+								"GLINE over-ruled for %s, client is gline_exempt",
+								get_client_name(client_p, HIDE_IP));
+						continue;
+					}
+
+					sendto_realops_flags(UMODE_ALL, L_ALL,
+							"GLINE active for %s",
+							get_client_name(client_p, HIDE_IP));
+
+					notify_banned_client(client_p, aconf, G_LINED);
 					continue;
 				}
-
-				if(IsExemptGline(client_p))
+				else if(aconf->status & CONF_KILL)
 				{
-					sendto_realops_flags(UMODE_ALL,
-							     L_ALL,
-							     "GLINE over-ruled for %s, client is gline_exempt",
-							     get_client_name(client_p, HIDE_IP));
-					continue;
-				}
-
-				sendto_realops_flags(UMODE_ALL, L_ALL,
-						     "GLINE active for %s",
-						     get_client_name(client_p, HIDE_IP));
-
-				notify_banned_client(client_p, aconf, G_LINED);
-				continue;
-			}
-			else if(aconf->status & CONF_KILL)
-			{
-				/* if there is a returned struct ConfItem.. then kill it */
-				if(IsExemptKline(client_p))
-				{
-					sendto_realops_flags(UMODE_ALL,
-							     L_ALL,
+					/* if there is a returned struct ConfItem.. then kill it */
+					if(IsExemptKline(client_p))
+					{
+						sendto_realops_flags(UMODE_ALL, L_ALL,
 							     "KLINE over-ruled for %s, client is kline_exempt",
 							     get_client_name(client_p, HIDE_IP));
+						continue;
+					}
+
+					sendto_realops_flags(UMODE_ALL, L_ALL,
+							"KLINE active for %s",
+							get_client_name(client_p, HIDE_IP));
+					notify_banned_client(client_p, aconf, K_LINED);
+					continue;
+				}
+			}
+			else if(((xconf = find_xline(client_p->info)) != NULL) &&
+				(xconf->type != 0))
+			{
+				if(IsExemptKline(client_p))
+				{
+					sendto_realops_flags(UMODE_ALL, L_ALL,
+							"XLINE over-ruled for %s, client is kline_exempt",
+							get_client_name(client_p, HIDE_IP));
 					continue;
 				}
 
-				sendto_realops_flags(UMODE_ALL, L_ALL,
-						     "KLINE active for %s",
-						     get_client_name(client_p, HIDE_IP));
-				notify_banned_client(client_p, aconf, K_LINED);
+				sendto_realops_flags(UMODE_ALL, L_ALL, "XLINE active for %s",
+						get_client_name(client_p, HIDE_IP));
+
+				(void) exit_client(client_p, client_p, &me, "Bad user info");
 				continue;
 			}
+			
+			
 		}
 	}
 
@@ -687,6 +707,50 @@ check_dlines(void)
 				continue;
 
 			notify_banned_client(client_p, aconf, D_LINED);
+		}
+	}
+}
+
+/* check_xlines
+ *
+ * inputs       -
+ * outputs      -
+ * side effects - all clients will be checked for xlines
+ */
+void
+check_xlines(void)
+{
+	struct Client *client_p;
+	struct xline *xconf;
+	dlink_node *ptr;
+	dlink_node *next_ptr;
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, lclient_list.head)
+	{
+		client_p = ptr->data;
+
+		if(IsMe(client_p) || !IsPerson(client_p))
+			continue;
+
+		if((xconf = find_xline(client_p->info)) != NULL)
+		{
+			/* xline that just warns, ignore it */
+			if(xconf->type == 0)
+				continue;
+
+			if(IsExemptKline(client_p))
+			{
+				sendto_realops_flags(UMODE_ALL, L_ALL,
+						     "XLINE over-ruled for %s, client is kline_exempt",
+						     get_client_name(client_p, HIDE_IP));
+				continue;
+			}
+
+			sendto_realops_flags(UMODE_ALL, L_ALL, "XLINE active for %s",
+					     get_client_name(client_p, HIDE_IP));
+
+			(void) exit_client(client_p, client_p, &me, "Bad user info");
+			continue;
 		}
 	}
 }

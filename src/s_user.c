@@ -463,7 +463,9 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 
 	/* end of valid user name check */
 
-	if((status = check_X_line(client_p, source_p)) < 0)
+	/* kline exemption extends to xline too */
+	if(!IsExemptKline(source_p) &&
+	   ((status = check_X_line(client_p, source_p)) < 0))
 		return status;
 
 	if(IsDeadorAborted(client_p))
@@ -784,7 +786,7 @@ report_and_set_user_flags(struct Client *source_p, struct ConfItem *aconf)
 	{
 		SetExemptKline(source_p);
 		sendto_one(source_p,
-			   ":%s NOTICE %s :*** You are exempt from K/D/G lines. congrats.",
+			   ":%s NOTICE %s :*** You are exempt from K/D/G/X lines. congrats.",
 			   me.name, source_p->name);
 	}
 

@@ -558,6 +558,7 @@ extern void check_klines_event(void *unused);
 extern void check_klines(void);
 extern void check_glines(void);
 extern void check_dlines(void);
+extern void check_xlines(void);
 
 extern const char *get_client_name(struct Client *client, int show_ip);
 extern const char *log_client_name(struct Client *, int);

@@ -189,6 +189,7 @@ add_class(struct Class *classptr)
 		MaxIdent(tmpptr) = MaxIdent(classptr);
 		PingFreq(tmpptr) = PingFreq(classptr);
 		MaxSendq(tmpptr) = MaxSendq(classptr);
+		ConFreq(tmpptr) = ConFreq(classptr);
 
 		free_class(classptr);
 	}

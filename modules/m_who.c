@@ -41,6 +41,7 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
+#include "packet.h"
 
 static void m_who(struct Client *, struct Client *, int, const char **);
 
@@ -98,6 +99,9 @@ m_who(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 	}
 	else
 	{
+		if(!IsFloodDone(source_p))
+			flood_endgrace(source_p);
+
 		who_global(source_p, mask, server_oper);
 		sendto_one(source_p, form_str(RPL_ENDOFWHO), me.name, parv[0], "*");
 		return;
@@ -189,6 +193,9 @@ m_who(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 		sendto_one(source_p, form_str(RPL_ENDOFWHO), me.name, parv[0], mask);
 		return;
 	}
+
+	if(!IsFloodDone(source_p))
+		flood_endgrace(source_p);
 
 	/* '/who 0' */
 	if((*(mask + 1) == '\0') && (*mask == '0'))

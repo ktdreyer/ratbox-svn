@@ -69,70 +69,49 @@ void check_spambot_warning(struct Client *source_p, const char *name);
 static void
 m_join(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
+	static char jbuf[BUFSIZE];
 	struct Channel *chptr = NULL;
-	char *name, *key = NULL;
+	char *name;
+	char *key = NULL;
 	int i, flags = 0;
 	char *p = NULL, *p2 = NULL;
 	int successful_join_count = 0;	/* Number of channels successfully joined */
 
-	if(*parv[1] == '\0')
+	if(EmptyString(parv[1]))
 	{
 		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), me.name, parv[0], "JOIN");
 		return;
 	}
 
-	if(parc > 2)
-	{
-		key = strtoken(&p2, LOCAL_COPY(parv[2]), ",");
-	}
+	jbuf[0] = '\0';
 
-	for (name = strtoken(&p, LOCAL_COPY(parv[1]), ","); name;
-	     key = (key) ? strtoken(&p2, NULL, ",") : NULL, name = strtoken(&p, NULL, ","))
+	/* rebuild the list of channels theyre supposed to be joining.
+	 * this code has a side effect of losing keys, but..
+	 */
+	for(i = 0, name = strtoken(&p, LOCAL_COPY(parv[1]), ","); name;
+	    name = strtoken(&p, (char *)NULL, ","))
 	{
 
-		if(!check_channel_name(name))
+		/* check the length and name of channel is ok */
+		if(!check_channel_name(name) || (strlen(name) > CHANNELLEN))
 		{
 			sendto_one(source_p, form_str(ERR_BADCHANNAME),
 				   me.name, source_p->name, (unsigned char *) name);
 			continue;
 		}
 
-		/*
-		 ** JOIN 0 sends out a part for all channels a user
-		 ** has joined.
-		 **
-		 ** this should be either disabled or selectable in
-		 ** config file .. it's abused a lot more than it's
-		 ** used these days :/ --is
-		 */
+		/* join 0 parts all channels */
 		if(*name == '0' && !atoi(name))
 		{
-			if(source_p->user->channel.head == NULL)
-				continue;
-
-			do_join_0(&me, source_p);
+			(void) strcpy(jbuf, "0");
 			continue;
 		}
 
-		/* check it begins with # or & */
-		else if(!IsChannelName(name))
+		/* check it begins with # or &, and local chans are disabled */
+		else if(!IsChannelName(name) ||
+			(ConfigServerHide.disable_local_channels && (*name == '&')))
 		{
 			sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
-				   me.name, source_p->name, name);
-			continue;
-		}
-
-		if(ConfigServerHide.disable_local_channels && (*name == '&'))
-		{
-			sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
-				   me.name, source_p->name, name);
-			continue;
-		}
-
-		/* check the length */
-		if(strlen(name) > CHANNELLEN)
-		{
-			sendto_one(source_p, form_str(ERR_BADCHANNAME),
 				   me.name, source_p->name, name);
 			continue;
 		}
@@ -149,20 +128,42 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 			continue;
 		}
 
+		if(splitmode && !IsOper(source_p) && (*name != '&') &&
+		   ConfigChannel.no_join_on_split)
+		{
+			sendto_one(source_p, form_str(ERR_UNAVAILRESOURCE),
+				   me.name, source_p->name, name);
+			continue;
+		}
+
+		if(*jbuf)
+			(void) strcat(jbuf, ",");
+		(void) strlcat(jbuf, name, sizeof(jbuf) - i - 1);
+		i += strlen(name)+1;
+	}
+
+	if(parc > 2)
+		key = strtoken(&p2, LOCAL_COPY(parv[2]), ",");
+
+	for(name = strtoken(&p, jbuf, ","); name;
+	    key = (key) ? strtoken(&p2, NULL, ",") : NULL, name = strtoken(&p, NULL, ","))
+	{
+		/* JOIN 0 simply parts all channels the user is in */
+		if(*name == '0' && !atoi(name))
+		{
+			if(source_p->user->channel.head == NULL)
+				continue;
+
+			do_join_0(&me, source_p);
+			continue;
+		}
+
 		/* look for the channel */
 		if((chptr = find_channel(name)) != NULL)
 		{
 			if(IsMember(source_p, chptr))
-				return;
-
-			if(splitmode && !IsOper(source_p) && (*name != '&') &&
-			   ConfigChannel.no_join_on_split)
-			{
-				sendto_one(source_p, form_str(ERR_UNAVAILRESOURCE),
-					   me.name, source_p->name, name);
 				continue;
-			}
-
+		
 			if(chptr->users == 0)
 				flags = CHFL_CHANOP;
 			else
@@ -171,7 +172,7 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		else
 		{
 			if(splitmode && !IsOper(source_p) && (*name != '&') &&
-			   (ConfigChannel.no_create_on_split || ConfigChannel.no_join_on_split))
+			   ConfigChannel.no_create_on_split)
 			{
 				sendto_one(source_p, form_str(ERR_UNAVAILRESOURCE),
 					   me.name, source_p->name, name);
@@ -197,14 +198,14 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		if(chptr == NULL)	/* If I already have a chptr, no point doing this */
 		{
 			chptr = get_or_create_channel(source_p, name, NULL);
-		}
 
-		if(chptr == NULL)
-		{
-			sendto_one(source_p, form_str(ERR_UNAVAILRESOURCE), me.name, parv[0], name);
-			if(successful_join_count > 0)
-				successful_join_count--;
-			continue;
+			if(chptr == NULL)
+			{
+				sendto_one(source_p, form_str(ERR_UNAVAILRESOURCE), me.name, parv[0], name);
+				if(successful_join_count > 0)
+					successful_join_count--;
+				continue;
+			}
 		}
 
 		if(!IsOper(source_p))

@@ -297,6 +297,9 @@ log_oper(struct Client *source_p, const char *name)
 	if(ConfigFileEntry.fname_operlog[0] == '\0')
 		return;
 
+	if(EmptyString(name))
+		return;
+
 	if(IsPerson(source_p))
 	{
 		if((oper_fb = fbopen(ConfigFileEntry.fname_operlog, "r")) != NULL)
@@ -330,6 +333,9 @@ log_foper(struct Client *source_p, const char *name)
 	char linebuf[BUFSIZE];
 
 	if(ConfigFileEntry.fname_foperlog[0] == '\0')
+		return;
+
+	if(EmptyString(name))
 		return;
 
 	if(IsPerson(source_p))

@@ -93,11 +93,12 @@ mo_resv(struct Client *client_p, struct Client *source_p, int parc, const char *
 	{
 		struct ResvEntry *resv_p;
 
-		if(!IsOperAdmin(source_p) && (strchr(parv[1], '*') || strchr(parv[1], '?')))
+		if(!valid_wild_card_simple(parv[1]))
 		{
 			sendto_one(source_p,
-				   ":%s NOTICE %s :You must be an admin to perform a wildcard RESV",
-				   me.name, source_p->name);
+				   ":%s NOTICE %s :Please include at least %d non-wildcard characters with the resv",
+				   me.name, source_p->name,
+				   ConfigFileEntry.min_nonwildcard_simple);
 			return;
 		}
 
