@@ -24,6 +24,7 @@
  */
 #include "handlers.h"
 #include "channel.h"
+#include "vchannel.h"
 #include "client.h"
 #include "hash.h"
 #include "irc_string.h"
@@ -60,6 +61,7 @@ int     ms_sjoin(struct Client *cptr,
                 char *parv[])
 {
   struct Channel *chptr;
+  struct Channel *top_chptr;	/* ZZZ vchans */
   struct Client       *acptr;
   time_t        newts;
   time_t        oldts;
@@ -138,10 +140,11 @@ int     ms_sjoin(struct Client *cptr,
   /* ZZZ vchan cruft */
   /* vchans are encoded as "##mainchanname_timestamp" */
 
+  top_chptr = NULL;
+
   if(parv[2][1] == '#')
     {
       char *p;
-      struct Channel *top_chptr;
 
       /* possible sub vchan being sent along ? */
       if((p = strchr(parv[2],'_')))
@@ -218,9 +221,18 @@ int     ms_sjoin(struct Client *cptr,
 
   if(!isnew && !newts && oldts)
     {
-      sendto_channel_butserv(chptr, &me,
-             ":%s NOTICE %s :*** Notice -- TS for %s changed from %lu to 0",
+      if(IsVchan(chptr) && top_chptr)
+	{
+	  sendto_channel_butserv(chptr, &me,
+	 ":%s NOTICE %s :*** Notice -- TS for %s changed from %lu to 0",
+              me.name, top_chptr->chname, top_chptr->chname, oldts);
+	}
+      else
+	{
+	  sendto_channel_butserv(chptr, &me,
+	 ":%s NOTICE %s :*** Notice -- TS for %s changed from %lu to 0",
               me.name, chptr->chname, chptr->chname, oldts);
+	}
       sendto_realops("Server %s changing TS on %s from %lu to 0",
                      sptr->name,parv[2],oldts);
     }
@@ -463,9 +475,19 @@ int     ms_sjoin(struct Client *cptr,
               if (pargs >= MAXMODEPARAMS)
                 {
                   *mbuf = '\0';
-                  sendto_channel_butserv(chptr, sptr,
-                    ":%s MODE %s %s %s", parv[0],
-                    chptr->chname, modebuf, parabuf );
+		  if(IsVchan(chptr) && top_chptr)
+		    {
+		      sendto_channel_butserv(chptr, sptr,
+					     ":%s MODE %s %s %s", parv[0],
+					     top_chptr->chname,
+					     modebuf, parabuf );
+		    }
+		  else
+		    {
+		      sendto_channel_butserv(chptr, sptr,
+					     ":%s MODE %s %s %s", parv[0],
+					     chptr->chname, modebuf, parabuf );
+		    }
                   mbuf = modebuf;
                   *mbuf = parabuf[0] = '\0';
                   pargs = what = 0;
@@ -486,9 +508,19 @@ int     ms_sjoin(struct Client *cptr,
               if (pargs >= MAXMODEPARAMS)
                 {
                   *mbuf = '\0';
-                  sendto_channel_butserv(chptr, sptr,
-                    ":%s MODE %s %s %s", parv[0],
-                    chptr->chname, modebuf, parabuf );
+		  if(IsVchan(chptr) && top_chptr)
+		    {
+		      sendto_channel_butserv(chptr, sptr,
+					     ":%s MODE %s %s %s", parv[0],
+					     top_chptr->chname,
+					     modebuf, parabuf );
+		    }
+		  else
+		    {
+		      sendto_channel_butserv(chptr, sptr,
+					     ":%s MODE %s %s %s", parv[0],
+					     chptr->chname, modebuf, parabuf );
+		    }
                   mbuf = modebuf;
                   *mbuf = parabuf[0] = '\0';
                   pargs = what = 0;
@@ -496,16 +528,34 @@ int     ms_sjoin(struct Client *cptr,
               l->flags &= ~MODE_VOICE;
             }
         }
-        sendto_channel_butserv(chptr, &me,
-            ":%s NOTICE %s :*** Notice -- TS for %s changed from %lu to %lu",
+      if(IsVchan(chptr) && top_chptr)
+	{
+	  sendto_channel_butserv(chptr, &me,
+	 ":%s NOTICE %s :*** Notice -- TS for %s changed from %lu to %lu",
+            me.name, top_chptr->chname, top_chptr->chname, oldts, newts);
+	}
+      else
+	{
+	  sendto_channel_butserv(chptr, &me,
+	 ":%s NOTICE %s :*** Notice -- TS for %s changed from %lu to %lu",
             me.name, chptr->chname, chptr->chname, oldts, newts);
+	}
     }
   if (mbuf != modebuf)
     {
       *mbuf = '\0';
-      sendto_channel_butserv(chptr, sptr,
-        ":%s MODE %s %s %s", parv[0],
-        chptr->chname, modebuf, parabuf );
+      if(IsVchan(chptr) && top_chptr)
+	{
+	  sendto_channel_butserv(chptr, sptr,
+				 ":%s MODE %s %s %s", parv[0],
+				 top_chptr->chname, modebuf, parabuf );
+	}
+      else
+	{
+	  sendto_channel_butserv(chptr, sptr,
+				 ":%s MODE %s %s %s", parv[0],
+				 chptr->chname, modebuf, parabuf );
+	}
     }
 
   *modebuf = *parabuf = '\0';
@@ -557,8 +607,16 @@ int     ms_sjoin(struct Client *cptr,
       if (!IsMember(acptr, chptr))
         {
           add_user_to_channel(chptr, acptr, fl);
-          sendto_channel_butserv(chptr, acptr, ":%s JOIN :%s",
-                                 s, parv[2]);
+	  if(IsVchan(chptr) && top_chptr)
+	    {
+	      sendto_channel_butserv(chptr, acptr, ":%s JOIN :%s",
+				     s, top_chptr->chname);
+	    }
+	  else
+	    {
+	      sendto_channel_butserv(chptr, acptr, ":%s JOIN :%s",
+				     s, parv[2]);
+	    }
         }
       if (keep_new_modes)
         strcpy(t, s0);
@@ -575,9 +633,18 @@ int     ms_sjoin(struct Client *cptr,
           if (pargs >= MAXMODEPARAMS)
             {
               *mbuf = '\0';
-              sendto_channel_butserv(chptr, sptr,
-                ":%s MODE %s %s %s", parv[0],
-                chptr->chname, modebuf, parabuf );
+	      if(IsVchan(chptr) && top_chptr)
+		{
+		  sendto_channel_butserv(chptr, sptr,
+					 ":%s MODE %s %s %s", parv[0],
+					 top_chptr->chname, modebuf, parabuf );
+		}
+	      else
+		{
+		  sendto_channel_butserv(chptr, sptr,
+					 ":%s MODE %s %s %s", parv[0],
+					 chptr->chname, modebuf, parabuf );
+		}
               mbuf = modebuf;
               *mbuf++ = '+';
               parabuf[0] = '\0';
@@ -593,9 +660,18 @@ int     ms_sjoin(struct Client *cptr,
           if (pargs >= MAXMODEPARAMS)
             {
               *mbuf = '\0';
-              sendto_channel_butserv(chptr, sptr,
-                ":%s MODE %s %s %s", parv[0],
-                chptr->chname, modebuf, parabuf );
+	      if(IsVchan(chptr) && top_chptr)
+		{
+		  sendto_channel_butserv(chptr, sptr,
+					 ":%s MODE %s %s %s", parv[0],
+					 top_chptr->chname, modebuf, parabuf );
+		}
+	      else
+		{
+		  sendto_channel_butserv(chptr, sptr,
+					 ":%s MODE %s %s %s", parv[0],
+					 chptr->chname, modebuf, parabuf );
+		}
               mbuf = modebuf;
               *mbuf++ = '+';
               parabuf[0] = '\0';
@@ -606,9 +682,21 @@ int     ms_sjoin(struct Client *cptr,
   
   *mbuf = '\0';
   if (pargs)
-    sendto_channel_butserv(chptr, sptr,
-      ":%s MODE %s %s %s", parv[0],
-      chptr->chname, modebuf, parabuf );
+    {
+      if(IsVchan(chptr) && top_chptr)
+	{
+	  sendto_channel_butserv(chptr, sptr,
+				 ":%s MODE %s %s %s", parv[0],
+				 top_chptr->chname, modebuf, parabuf );
+	}
+      else
+	{
+	  sendto_channel_butserv(chptr, sptr,
+				 ":%s MODE %s %s %s", parv[0],
+				 chptr->chname, modebuf, parabuf );
+	}
+    }
+
   if (people)
     {
       if (t[-1] == ' ')
