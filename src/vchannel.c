@@ -29,6 +29,7 @@
 #include "irc_string.h"
 #include "ircd.h"
 #include "list.h"
+#include "send.h"
 
 #include <assert.h>
 #include <string.h>

@@ -292,8 +292,9 @@ int     m_join(struct Client *cptr,
            
            if((chptr = hash_find_channel(name, NullChn)))
              {
-               /* there's subchans so check those */
-               if (chptr->next_vchan)
+               /* there's subchans so check those 
+                * but not if it was a subchan's realname they specified */
+               if (chptr->next_vchan && !chptr->prev_vchan)
                  {
                    if (key && key[0] == '!')
                      {

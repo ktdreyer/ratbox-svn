@@ -178,6 +178,14 @@ int     m_cjoin(struct Client *cptr,
       return 0;
     }
 
+  /* it's not a root channel, don't CJOIN */
+  if (chptr->prev_vchan)
+    {
+      sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL),
+                 me.name, parv[0], name);
+      return 0;
+    }
+
   /* "root" channel name exists, now create a new copy of it */
   /* ZZZ XXX N.B. 
    * Following to be added 
@@ -244,8 +252,10 @@ int     m_cjoin(struct Client *cptr,
 		     me.name, vchan_chptr->chname);
 
   del_invite(sptr, vchan_chptr);
+
   parv[1] = vchan_chptr->chname;
-  (void)m_names(cptr, sptr, 2, parv);
+  parv[2] = chptr->chname;
+  (void)m_names(cptr, sptr, 3, parv);
 
   return 0;
 }
