@@ -12,7 +12,8 @@
 #include <netdb.h>
 
 #include "stdinc.h"
-#include "command.h"
+#include "scommand.h"
+#include "ucommand.h"
 #include "tools.h"
 #include "rserv.h"
 #include "io.h"
@@ -23,7 +24,12 @@
 #include "log.h"
 #include "service.h"
 
+#define IO_HOST	0
+#define IO_IP	1
+
+dlink_list connection_list;
 struct connection_entry *server_p;
+
 time_t last_connect_time;
 time_t current_time;
 
@@ -31,9 +37,12 @@ fd_set readfds;
 fd_set writefds;
 
 static int signon_server(struct connection_entry *conn_p);
+static int signon_client(struct connection_entry *conn_p);
 static void read_server(struct connection_entry *conn_p);
+static void read_client(struct connection_entry *conn_p);
 static int write_sendq(struct connection_entry *conn_p);
 static void parse_server(char *buf, int len);
+static void parse_client(struct connection_entry *conn_p, char *buf, int len);
 
 /* stolen from squid */
 static int
@@ -125,6 +134,7 @@ get_line(struct connection_entry *conn_p, char *buf, int bufsize)
 void
 read_io(void)
 {
+	struct connection_entry *conn_p;
 	dlink_node *ptr;
 	dlink_node *next_ptr;
 	struct timeval read_time_out;
@@ -176,6 +186,24 @@ read_io(void)
 			}
 		}
 
+		/* remove any timed out/dead connections */
+		DLINK_FOREACH_SAFE(ptr, next_ptr, connection_list.head)
+		{
+			conn_p = ptr->data;
+
+			/* connection timed out.. */
+			if(conn_p->flags & CONN_CONNECTING &&
+			   ((conn_p->first_time + 30) <= CURRENT_TIME))
+				(conn_p->io_close)(conn_p);
+
+			if(conn_p->flags & CONN_DEAD)
+			{
+				my_free(conn_p->name);
+				my_free(conn_p);
+				dlink_delete(ptr, &connection_list);
+			}
+		}
+
 		/* we can safely exit anything thats dead at this point */
 		DLINK_FOREACH_SAFE(ptr, next_ptr, exited_list.head)
 		{
@@ -198,6 +226,22 @@ read_io(void)
 			}
 		}
 
+		DLINK_FOREACH(ptr, connection_list.head)
+		{
+			conn_p = ptr->data;
+
+			if(conn_p->flags & CONN_CONNECTING)
+			{
+				FD_SET(conn_p->fd, &writefds);
+			}
+			else
+			{
+				if(dlink_list_length(&conn_p->sendq) > 0)
+					FD_SET(conn_p->fd, &writefds);
+				FD_SET(conn_p->fd, &readfds);
+			}
+		}
+
 		set_time();
 		eventRun();
 
@@ -210,22 +254,44 @@ read_io(void)
 		/* have data to parse */
 		if(select_result > 0)
 		{
-			/* data from server to read */
-			if(FD_ISSET(server_p->fd, &readfds))
+			if(server_p != NULL && (server_p->flags & CONN_DEAD) == 0)
 			{
-				if(server_p->io_read != NULL)
+				/* data from server to read */
+				if(FD_ISSET(server_p->fd, &readfds) &&
+				   server_p->io_read != NULL)
 				{
 					server_p->last_time = CURRENT_TIME;
 					(server_p->io_read)(server_p);
 				}
+
+				/* couldve died during read.. */
+				if((server_p->flags & CONN_DEAD) == 0 &&
+				   FD_ISSET(server_p->fd, &writefds) &&
+				   server_p->io_write != NULL)
+				{
+					(server_p->io_write)(server_p);
+				}
 			}
 
-			if(server_p != NULL && (server_p->flags & CONN_DEAD) == 0)
+			DLINK_FOREACH(ptr, connection_list.head)
 			{
-				if(FD_ISSET(server_p->fd, &writefds))
+				conn_p = ptr->data;
+
+				if(conn_p->flags & CONN_DEAD)
+					continue;
+
+				if(FD_ISSET(conn_p->fd, &readfds) &&
+				   conn_p->io_read != NULL)
 				{
-					if(server_p->io_write != NULL)
-						(server_p->io_write)(server_p);
+					conn_p->last_time = CURRENT_TIME;
+					(conn_p->io_read)(conn_p);
+				}
+
+				if((conn_p->flags & CONN_DEAD) == 0 &&
+				   FD_ISSET(conn_p->fd, &writefds) &&
+				   conn_p->io_write != NULL)
+				{
+					(conn_p->io_write)(conn_p);
 				}
 			}
 		}
@@ -251,7 +317,7 @@ connect_to_server(void *unused)
 
 	slog("Connection to server %s activated", conf_p->name);
 
-	serv_fd = sock_open(conf_p->host, conf_p->port, conf_p->vhost);
+	serv_fd = sock_open(conf_p->host, conf_p->port, conf_p->vhost, IO_HOST);
 
 	if(serv_fd < 0)
 		return;
@@ -267,6 +333,30 @@ connect_to_server(void *unused)
 	conn_p->io_close = sock_close;
 
 	server_p = conn_p;
+}
+
+void
+connect_to_client(const char *name, const char *host, int port)
+{
+	struct connection_entry *conn_p;
+	int client_fd;
+
+	client_fd = sock_open(host, port, config_file.vhost, IO_IP);
+
+	if(client_fd < 0)
+		return;
+
+	conn_p = my_malloc(sizeof(struct connection_entry));
+	conn_p->name = my_strdup(name);
+	conn_p->fd = client_fd;
+	conn_p->flags = CONN_CONNECTING;
+	conn_p->first_time = conn_p->last_time = CURRENT_TIME;
+
+	conn_p->io_read = NULL;
+	conn_p->io_write = signon_client;
+	conn_p->io_close = sock_close;
+
+	dlink_add_alloc(conn_p, &connection_list);
 }
 
 static int
@@ -292,6 +382,22 @@ signon_server(struct connection_entry *conn_p)
 	return 1;
 }
 
+static int
+signon_client(struct connection_entry *conn_p)
+{
+	conn_p->flags &= ~CONN_CONNECTING;
+	conn_p->io_read = read_client;
+	conn_p->io_write = write_sendq;
+
+	/* ok, if connect() failed, this will cause an error.. */
+	sendto_connection(conn_p, "Welcome to ratbox-services.");
+
+	if(conn_p->flags & CONN_DEAD)
+		return -1;
+
+	return 1;
+}
+
 static void
 read_server(struct connection_entry *conn_p)
 {
@@ -314,6 +420,19 @@ read_server(struct connection_entry *conn_p)
 
 		(conn_p->io_close)(conn_p);
 	}
+	/* n == 0 we can safely ignore */
+}
+
+static void
+read_client(struct connection_entry *conn_p)
+{
+	char buf[BUFSIZE*2];
+	int n;
+
+	if((n = get_line(conn_p, buf, sizeof(buf))) > 0)
+		parse_client(conn_p, buf, n);
+	else if(n < 0)
+		(conn_p->io_close)(conn_p);
 	/* n == 0 we can safely ignore */
 }
 
@@ -437,7 +556,56 @@ parse_server(char *buf, int len)
 
 	parc = string_to_array(ch, parv);
 
-	handle_command(command, parv, parc);
+	handle_scommand(command, parv, parc);
+}
+
+void
+parse_client(struct connection_entry *conn_p, char *buf, int len)
+{
+	static char *parv[MAXPARA + 1];
+	const char *command;
+	char *s;
+	char *ch;
+	int parc;
+
+	if(len > BUFSIZE)
+		buf[BUFSIZE-1] = '\0';
+
+	if((s = strchr(buf, '\n')) != NULL)
+		*s = '\0';
+
+	if((s = strchr(buf, '\r')) != NULL)
+		*s = '\0';
+
+	/* skip leading spaces.. */
+	for(ch = buf; *ch == ' '; ch++)
+		;
+
+	parv[0] = conn_p->name;
+
+	if(*ch == '.')
+		ch++;
+
+	if(EmptyString(ch))
+		return;
+
+	command = ch;
+
+	if((s = strchr(ch, ' ')) != NULL)
+	{
+		*s++ = '\0';
+		ch = s;
+	}
+
+	while(*ch == ' ')
+		ch++;
+
+	if(EmptyString(ch))
+		return;
+
+	parc = string_to_array(ch, parv);
+
+	handle_ucommand(conn_p, command, parv, parc);
 }
 
 /* sendto_server()
@@ -467,6 +635,25 @@ sendto_server(const char *format, ...)
 			server_p->name, strerror(errno));
 		(server_p->io_close)(server_p);
 	}
+}
+
+void
+sendto_connection(struct connection_entry *conn_p, const char *format, ...)
+{
+	char buf[BUFSIZE];
+	va_list args;
+
+	if(conn_p == NULL || conn_p->flags & CONN_DEAD)
+		return;
+
+	va_start(args, format);
+	vsnprintf(buf, sizeof(buf)-3, format, args);
+	va_end(args);
+
+	strcat(buf, "\r\n");
+
+	if(sock_write(conn_p, buf, strlen(buf)) < 0)
+		(conn_p->io_close)(conn_p);
 }
 
 /* write_sendq()
@@ -538,7 +725,7 @@ sendq_add(struct connection_entry *conn_p, const char *buf, int len, int offset)
  * outputs	- fd of socket, -1 on error
  */
 int
-sock_open(const char *host, int port, const char *vhost)
+sock_open(const char *host, int port, const char *vhost, int type)
 {
 	struct sockaddr_in raddr;
 	struct hostent *host_addr;
@@ -592,17 +779,26 @@ sock_open(const char *host, int port, const char *vhost)
 		}
 	}
 
-	if((host_addr = gethostbyname(host)) == NULL)
-	{
-		slog("Connection to %s/%d failed: (unable to resolve: %s)",
-			host, port, host);
-		return -1;
-	}
-
 	memset(&raddr, 0, sizeof(struct sockaddr_in));
-	memcpy(&raddr.sin_addr, host_addr->h_addr, host_addr->h_length);
 	raddr.sin_family = AF_INET;
 	raddr.sin_port = htons(port);
+
+	if(type == IO_HOST)
+	{
+		if((host_addr = gethostbyname(host)) == NULL)
+		{
+			slog("Connection to %s/%d failed: (unable to resolve: %s)",
+				host, port, host);
+			return -1;
+		}
+
+		memcpy(&raddr.sin_addr, host_addr->h_addr, host_addr->h_length);
+	}
+	else
+	{
+		unsigned long hl = strtoul(host, NULL, 10);
+		raddr.sin_addr.s_addr = htonl(hl);
+	}
 
 	connect(fd, (struct sockaddr *)&raddr, sizeof(struct sockaddr_in));
 	return fd;

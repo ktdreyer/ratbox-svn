@@ -75,9 +75,9 @@ struct service
 #define CLIENT_OPER	0x002
 #define CLIENT_ADMIN	0x004
 
-#define ClientInvis(x)	 ((x)->user && (x)->user->flags & CLIENT_INVIS)
-#define ClientOper(x)	 ((x)->user && (x)->user->flags & CLIENT_OPER)
-#define ClientAdmin(x)	 ((x)->user && (x)->user->flags & CLIENT_ADMIN)
+#define ClientInvis(x)	 ((x)->user && (x)->user->umode & CLIENT_INVIS)
+#define ClientOper(x)	 ((x)->user && (x)->user->umode & CLIENT_OPER)
+#define ClientAdmin(x)	 ((x)->user && (x)->user->umode & CLIENT_ADMIN)
 
 extern void init_client(void);
 

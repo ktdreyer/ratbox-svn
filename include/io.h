@@ -28,6 +28,7 @@ struct connection_entry
 };
 
 extern struct connection_entry *server_p;
+extern dlink_list connection_list;
 
 #define CONN_CONNECTING		0x001
 #define CONN_DEAD		0x002
@@ -36,9 +37,12 @@ extern struct connection_entry *server_p;
 extern void read_io(void);
 
 extern void connect_to_server(void *unused);
-extern void sendto_server(const char *format, ...);
+extern void connect_to_client(const char *name, const char *host, int port);
 
-extern int sock_open(const char *host, int port, const char *vhost);
+extern void sendto_server(const char *format, ...);
+extern void sendto_connection(struct connection_entry *, const char *format, ...);
+
+extern int sock_open(const char *host, int port, const char *vhost, int type);
 extern void sock_close(struct connection_entry *conn_p);
 extern int sock_write(struct connection_entry *conn_p, const char *buf, int len);
 

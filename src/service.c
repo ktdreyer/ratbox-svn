@@ -8,7 +8,7 @@
 #include "stdinc.h"
 #include "service.h"
 #include "client.h"
-#include "command.h"
+#include "scommand.h"
 #include "rserv.h"
 #include "conf.h"
 #include "io.h"

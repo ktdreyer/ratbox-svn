@@ -8,9 +8,10 @@
 #include "stdinc.h"
 #include "service.h"
 #include "client.h"
-#include "command.h"
+#include "scommand.h"
 #include "c_init.h"
 #include "log.h"
+#include "io.h"
 
 static void c_message(struct client *, char *parv[], int parc);
 
@@ -25,6 +26,51 @@ c_message(struct client *client_p, char *parv[], int parc)
 
 	if(parc < 3 || EmptyString(parv[2]))
 		return;
+
+	/* ctcp.. doesnt matter who its addressed to. */
+	if(parv[2][0] == '\001')
+	{
+		if(!ClientOper(client_p))
+			return;
+
+		/* dcc request.. \001DCC CHAT chat <HOST> <IP>\001 */
+		if(!strncasecmp(parv[2], "\001DCC CHAT ", 10))
+		{
+			/* skip the first bit.. */
+			char *p = parv[2]+10;
+			char *host;
+			char *cport;
+			int port;
+
+			/* skip the 'chat' */
+			if((host = strchr(p, ' ')) == NULL)
+				return;
+
+			*host++ = '\0';
+
+			/* <host> <port>\001 */
+			if((cport = strchr(host, ' ')) == NULL)
+				return;
+
+			*cport++ = '\0';
+
+			/* another space? hmm. */
+			if(strchr(cport, ' ') != NULL)
+				return;
+
+			if((p = strchr(cport, '\001')) == NULL)
+				return;
+
+			*p = '\0';
+
+			if((port = atoi(cport)) <= 1024)
+				return;
+
+			connect_to_client(client_p->name, host, port);
+		}
+
+		return;
+	}
 
 	/* username@server messaged? */
 	if((p = strchr(parv[1], '@')) != NULL)

@@ -10,7 +10,7 @@
 #include "c_init.h"
 #include "client.h"
 #include "channel.h"
-#include "command.h"
+#include "scommand.h"
 #include "log.h"
 
 static void c_mode(struct client *, char *parv[], int parc);

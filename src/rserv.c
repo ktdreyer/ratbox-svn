@@ -25,7 +25,8 @@
 #include "conf.h"
 #include "io.h"
 #include "event.h"
-#include "command.h"
+#include "scommand.h"
+#include "ucommand.h"
 #include "client.h"
 #include "channel.h"
 #include "log.h"
@@ -190,7 +191,8 @@ main(int argc, char *argv[])
 	slog("ratbox-services started");
 
 	init_events();
-	init_command();
+	init_scommand();
+	init_ucommand();
 	init_client();
 	init_channel();
 

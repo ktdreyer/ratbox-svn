@@ -6,7 +6,7 @@
  *  $Id$
  */
 #include "stdinc.h"
-#include "command.h"
+#include "scommand.h"
 #include "rserv.h"
 #include "tools.h"
 #include "io.h"
@@ -29,7 +29,7 @@ static struct scommand_handler trace_command = { "TRACE", c_trace, 0 };
 static struct scommand_handler version_command = { "VERSION", c_version, 0 };
 
 void
-init_command(void)
+init_scommand(void)
 {
 	add_scommand_handler(&admin_command);
 	add_scommand_handler(&ping_command);
@@ -53,7 +53,7 @@ hash_command(const char *p)
 }
 
 static void
-handle_command_unknown(const char *command, char *parv[], int parc)
+handle_scommand_unknown(const char *command, char *parv[], int parc)
 {
 	struct scommand_handler *handler;
 	dlink_node *ptr;
@@ -72,7 +72,7 @@ handle_command_unknown(const char *command, char *parv[], int parc)
 }
 
 static void
-handle_command_client(struct client *client_p, const char *command, 
+handle_scommand_client(struct client *client_p, const char *command, 
 			char *parv[], int parc)
 {
 	struct scommand_handler *handler;
@@ -91,16 +91,16 @@ handle_command_client(struct client *client_p, const char *command,
 }
 
 void
-handle_command(const char *command, char *parv[], int parc)
+handle_scommand(const char *command, char *parv[], int parc)
 {
 	struct client *client_p;
 
 	client_p = find_client(parv[0]);
 
 	if(client_p != NULL)
-		handle_command_client(client_p, command, parv, parc);
+		handle_scommand_client(client_p, command, parv, parc);
 	else
-		handle_command_unknown(command, parv, parc);
+		handle_scommand_unknown(command, parv, parc);
 }
 
 void

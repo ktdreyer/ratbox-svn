@@ -9,7 +9,7 @@
 #include "rserv.h"
 #include "client.h"
 #include "channel.h"
-#include "command.h"
+#include "scommand.h"
 #include "io.h"
 #include "log.h"
 #include "service.h"

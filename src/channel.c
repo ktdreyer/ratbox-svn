@@ -9,7 +9,7 @@
 #include "client.h"
 #include "tools.h"
 #include "channel.h"
-#include "command.h"
+#include "scommand.h"
 #include "log.h"
 
 static dlink_list channel_table[MAX_CHANNEL_TABLE];

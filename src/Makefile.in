@@ -15,7 +15,6 @@ SRCS = 			\
 	c_mode.c	\
 	channel.c	\
 	client.c	\
-	command.c	\
 	conf.c		\
 	event.c		\
 	fileio.c	\
@@ -24,8 +23,10 @@ SRCS = 			\
 	io.c		\
 	rserv.c		\
 	s_alis.c	\
+	scommand.c	\
 	service.c	\
-	tools.c
+	tools.c		\
+	ucommand.c
 
 OBJS=$(SRCS:.c=.o)
 
