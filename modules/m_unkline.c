@@ -142,7 +142,7 @@ static void mo_unkline (struct Client *client_p,struct Client *source_p,
 		 me.name, parv[0],user, host);
       sendto_realops_flags(FLAGS_ALL, L_ALL,
 			   "%s has removed the temporary K-Line for: [%s@%s]",
-			   get_oper_name(source_p), user, host);
+			   source_p->name, user, host);
       ilog(L_NOTICE, "%s removed temporary K-Line for [%s@%s]", parv[0], user,
 	   host);
       return;
@@ -238,7 +238,7 @@ static void mo_unkline (struct Client *client_p,struct Client *source_p,
              me.name, source_p->name, user,host);
   sendto_realops_flags(FLAGS_ALL, L_ALL,
 		       "%s has removed the K-Line for: [%s@%s]",
-		       get_oper_name(source_p), user, host);
+		       source_p->name, user, host);
 
   ilog(L_NOTICE, "%s removed K-Line for [%s@%s]",
        source_p->name, user, host);
