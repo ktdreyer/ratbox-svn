@@ -292,9 +292,7 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 	char ipaddr[HOSTIPLEN];
 	char myusername[USERLEN+1];
 	int status;
-#ifdef BROKEN_TS6
-	char *id;
-#endif
+
 	s_assert(NULL != source_p);
 	s_assert(MyConnect(source_p));
 	s_assert(source_p->username != username);
@@ -469,16 +467,6 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 	if(IsDeadorAborted(client_p))
 		return CLIENT_EXITED;
 
-#ifdef BROKEN_TS6
-	if(source_p->id[0] == '\0')
-	{
-		for (id = id_get(); find_id(id); id = id_get())
-			;
-		strcpy(source_p->user->id, id);
-		add_to_id_hash(id, source_p);
-	}
-#endif
-
 	inetntop_sock(&source_p->localClient->ip, ipaddr, sizeof(ipaddr));
 
 	sendto_realops_flags(UMODE_CCONN, L_ALL,
@@ -494,6 +482,9 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 		return CLIENT_EXITED;
 
 	add_to_hostname_hash(source_p->host, source_p);
+
+	strcpy(source_p->id, generate_uid());
+	add_to_id_hash(source_p->id, source_p);
 
 	source_p->umodes |= UMODE_INVISIBLE;
 
@@ -656,22 +647,19 @@ introduce_client(struct Client *client_p, struct Client *source_p, struct User *
 		if(server == client_p)
 			continue;
 
-#ifdef BROKEN_TS6
-		if(IsCapable(server, CAP_UID) && HasID(source_p))
-			sendto_one(server,
-				   "CLIENT %s %d %lu %s %s %s %s %s :%s",
-				   nick, source_p->hopcount + 1,
+		if(IsTS6(server) && has_id(source_p))
+			sendto_one(server, 
+				   ":%s UID %s %d %lu %s %s %s %s %s :%s",
+				   me.id, nick, source_p->hopcount + 1,
 				   (unsigned long) source_p->tsinfo, ubuf,
 				   source_p->username, source_p->host,
-				   user->server, user->id, source_p->info);
+				   IsIPSpoof(source_p) ? "0" : source_p->sockhost,
+				   source_p->id, source_p->info);
 		else
-#endif
 			sendto_one(server, "NICK %s %d %lu %s %s %s %s :%s",
-				   nick,
-				   source_p->hopcount + 1,
+				   nick, source_p->hopcount + 1,
 				   (unsigned long) source_p->tsinfo,
-				   ubuf,
-				   source_p->username, source_p->host,
+				   ubuf, source_p->username, source_p->host,
 				   user->server, source_p->info);
 
 	}

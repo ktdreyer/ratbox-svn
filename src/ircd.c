@@ -711,6 +711,7 @@ main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 	strcpy(me.id, ServerInfo.sid);
+	init_uid();
 
 	/* serverinfo{} description must exist.  If not, error out. */
 	if(ServerInfo.description == NULL)

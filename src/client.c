@@ -75,7 +75,7 @@ static EVH check_pings;
 static BlockHeap *client_heap = NULL;
 static BlockHeap *lclient_heap = NULL;
 
-
+static char current_uid[IDLEN];
 
 enum
 {
@@ -1973,4 +1973,52 @@ free_user(struct User *user, struct Client *client_p)
 
 		BlockHeapFree(user_heap, user);
 	}
+}
+
+void
+init_uid(void)
+{
+	int i;
+
+	for(i = 0; i < 3; i++)
+		current_uid[i] = me.id[i];
+
+	for(i = 3; i < 9; i++)
+		current_uid[i] = 'A';
+
+	current_uid[9] = '\0';
+}
+
+
+char *
+generate_uid(void)
+{
+	int i;
+
+	for(i = 8; i > 3; i--)
+	{
+		if(current_uid[i] == 'Z')
+		{
+			current_uid[i] = '0';
+			return current_uid;
+		}
+		else if(current_uid[i] != '9')
+		{
+			current_uid[i]++;
+			return current_uid;
+		}
+		else
+			current_uid[i] = 'A';
+	}
+
+	/* if this next if() triggers, we're fucked. */
+	if(current_uid[3] == 'Z')
+	{
+		current_uid[i] = 'A';
+		s_assert(0);
+	}
+	else
+		current_uid[i]++;
+
+	return current_uid;
 }

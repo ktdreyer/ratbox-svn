@@ -599,4 +599,7 @@ extern void free_user(struct User *, struct Client *);
 extern struct User *make_user(struct Client *);
 extern struct Server *make_server(struct Client *);
 
+extern void init_uid(void);
+extern char *generate_uid(void);
+
 #endif /* INCLUDED_client_h */
