@@ -1,3 +1,7 @@
+*** 20001214_8 by toot
+undid accidental config.h change :P
+
+
 *** 20001214_7 by toot
 removed some unused things (quiet_on_ban, and moderate_nick_change left overs)
 
