@@ -1,3 +1,10 @@
+*** 20001101_2 by adrian
+
+
+tidy up the auth code to use the block allocator rather than mymalloc/myfree
+
+
+
 *** 20001101_1 by adrian
 
 
