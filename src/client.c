@@ -180,15 +180,15 @@ exit_server(struct client *target_p)
 void
 exit_client(struct client *target_p)
 {
+        s_assert(!IsService(target_p));
+
+        if(IsService(target_p))
+                return;
+
 	if(IsServer(target_p))
 		exit_server(target_p);
 	else if(IsUser(target_p))
 		exit_user(target_p);
-	else if(IsService(target_p))
-	{
-		slog("EEK: Tried to exit one of my own services. damn.");
-		return;
-	}
 
 	del_client(target_p);
 }
@@ -196,9 +196,13 @@ exit_client(struct client *target_p)
 void
 free_client(struct client *target_p)
 {
-	my_free(target_p->user);
-	my_free(target_p->server);
-	my_free(target_p);
+        if(target_p->user != NULL)
+                BlockHeapFree(user_heap, target_p->user);
+
+	if(target_p->server != NULL)
+	        BlockHeapFree(server_heap, target_p->server);
+
+	BlockHeapFree(client_heap, target_p);
 };
 
 int
@@ -278,11 +282,10 @@ c_nick(struct client *client_p, char *parv[], int parc)
 	struct client *uplink_p;
 	time_t newts;
 
-	if(parc != 3 && parc != 9)
-	{
-		slog("PROTO: NICK command received with invalid params");
-		return;
-	}
+        s_assert((parc == 3) || (parc == 9));
+
+        if(parc != 9 && parc != 3)
+                return;
 
 	if(parc == 9)
 	{
@@ -290,20 +293,14 @@ c_nick(struct client *client_p, char *parv[], int parc)
 		uplink_p = find_server(parv[7]);
 		newts = atol(parv[2]);
 
-		if(uplink_p == NULL)
-		{
-			slog("PROTO: Ghost killed on invalid server %s", parv[7]);
-			return;
-		}
-
 		if(target_p != NULL)
 		{
-			if(IsServer(target_p))
-			{
-				slog("PROTO: NICK introduced a server %s", parv[1]);
-				return;
-			}
-			else if(IsUser(target_p))
+                        s_assert(!IsServer(target_p));
+
+                        if(IsServer(target_p))
+                                return;
+
+			if(IsUser(target_p))
 			{
 				if(target_p->user->tsinfo < newts)
 				{
@@ -351,10 +348,12 @@ c_nick(struct client *client_p, char *parv[], int parc)
 		dlink_add(target_p, &target_p->listnode, &user_list);
 		dlink_add(target_p, &target_p->upnode, &uplink_p->server->users);
 	}
-	else
+	else if(parc == 3)
 	{
-		if(!IsUser(client_p))
-			return;
+		s_assert(IsUser(client_p));
+
+                if(!IsUser(client_p))
+                        return;
 
 		del_client(client_p);
 		strlcpy(client_p->name, parv[1], sizeof(client_p->name));

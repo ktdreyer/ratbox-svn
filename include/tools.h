@@ -100,4 +100,28 @@ extern int dlink_find_destroy(dlink_list *, void *data);
 #define dlink_add_tail_alloc(data, list) dlink_add_tail(data, make_dlink_node(), list)
 #define dlink_destroy(node, list) do { dlink_delete(node, list); my_free(node); } while(0)
 
+#ifndef HARD_ASSERT
+#ifdef __GNUC__
+#define s_assert(expr)	do						\
+	if(!(expr)) {							\
+		slog("file: %s line: %d (%s): Assertion failed: (%s)",	\
+			__FILE__, __LINE__, __PRETTY_FUNCTION__, #expr); \
+		sendto_all(0, "file: %s line: %d (%s): Assertion failed: (%s)",\
+			__FILE__, __LINE__, __PRETTY_FUNCTION__, #expr); \
+	}								\
+	while(0)
+#else
+#define s_assert(expr)	do						\
+	if(!(expr)) {							\
+		slog("file: %s line: %d: Assertion failed: (%s)",	\
+			__FILE__, __LINE__, #expr);                     \
+		sendto_all(0, "file: %s line: %d: Assertion failed: (%s)",\
+			__FILE__, __LINE__, #expr);                     \
+	}								\
+	while(0)
+#endif
+#else
+#define s_assert(expr)	assert(expr)
+#endif
+
 #endif

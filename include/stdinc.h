@@ -42,6 +42,8 @@ extern int errno;
 #include <time.h>
 #include <sys/time.h>
 
+#include <assert.h>
+
 #include "config.h"
 #include "tools.h"
 

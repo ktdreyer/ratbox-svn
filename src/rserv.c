@@ -33,6 +33,7 @@
 #include "c_init.h"
 #include "service.h"
 #include "fileio.h"
+#include "balloc.h"
 #include "serno.h"
 
 struct timeval system_time;
@@ -86,7 +87,7 @@ check_pidfile(void)
 			if(!kill(filepid, 0))
 			{
 				printf("ratbox-services: daemon already running\n");
-//				exit(-1);
+				exit(-1);
 			}
 		}
 
@@ -155,7 +156,12 @@ main(int argc, char *argv[])
 	set_time();
 	init_log();
 
-	check_pidfile();
+#ifdef __CYGWIN__
+        nofork = 1;
+#endif
+
+        if(!nofork)
+        	check_pidfile();
 
 	printf("ratbox-services: version %s(%s)\n",
 		RSERV_VERSION, SERIALNUM);
@@ -184,11 +190,13 @@ main(int argc, char *argv[])
 		}
 	}
 
-	write_pidfile();
+        if(!nofork)
+        	write_pidfile();
 
 	slog("ratbox-services started");
 
 	init_events();
+        init_blockheap();
 	init_scommand();
 	init_ucommand();
 	init_client();

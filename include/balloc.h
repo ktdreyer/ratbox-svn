@@ -27,8 +27,6 @@
 #ifndef INCLUDED_blalloc_h
 #define INCLUDED_blalloc_h
 
-#include "setup.h"
-
 /* 
  * Block contains status information for an allocated block in our
  * heap.
@@ -71,7 +69,7 @@ extern void *BlockHeapAlloc(BlockHeap * bh);
 extern BlockHeap *BlockHeapCreate(size_t elemsize, int elemsperblock);
 extern int BlockHeapDestroy(BlockHeap * bh);
 
-extern void initBlockHeap(void);
+extern void init_blockheap(void);
 extern void BlockHeapUsage(BlockHeap * bh, size_t * bused, size_t * bfree, size_t * bmemusage);
 
 #endif /* INCLUDED_blalloc_h */

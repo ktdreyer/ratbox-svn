@@ -133,7 +133,7 @@ free_channel(struct channel *chptr)
 
 	del_channel(chptr);
 
-	my_free(chptr);
+	BlockHeapFree(channel_heap, chptr);
 }
 
 /* add_chmember()
@@ -180,7 +180,7 @@ del_chmember(struct chmember *mptr)
 	if(dlink_list_length(&chptr->users) == 0)
 		free_channel(chptr);
 
-	my_free(mptr);
+	BlockHeapFree(chmember_heap, mptr);
 }
 
 /* find_chmember()
