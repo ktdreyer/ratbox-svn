@@ -32,6 +32,7 @@
 #include "send.h"
 
 #include "channel.h"
+#include "vchannel.h"
 #include "irc_string.h"
 #include "hash.h"
 #include "class.h"
@@ -115,6 +116,7 @@ int     m_notice(struct Client *cptr,
   struct Client *acptr;
   char *nick, *server, *host;
   struct Channel *chptr;
+  struct Channel *vchan;
   int type=0;
 
 /* not needed now --is */
@@ -168,11 +170,36 @@ int     m_notice(struct Client *cptr,
       if(MyClient(sptr) && sptr->user)
         sptr->user->last = CurrentTime;
 #endif
+#ifdef FLUD
+      if(check_for_ctcp(parv[2]))
+	check_for_flud(sptr, NULL, chptr, 1);
+#endif /* FLUD */
+
+      if (HasVchans(chptr))
+	{
+	  if( vchan = map_vchan(chptr,sptr) )
+	    {
+	      if (can_send(sptr, vchan) == 0)
+		sendto_channel_butone(cptr, sptr, vchan,
+				      ":%s %s %s :%s",
+				      parv[0], "NOTICE", nick,
+				      parv[2]);
+	      else
+		sendto_one(sptr, form_str(ERR_CANNOTSENDTOCHAN),
+			   me.name, parv[0], nick);
+	      return 0;
+	    }
+	}
+
       if (can_send(sptr, chptr) == 0)
-        sendto_channel_butone(cptr, sptr, chptr,
-                              ":%s %s %s :%s",
-                              parv[0], "NOTICE", nick,
-                              parv[2]);
+	sendto_channel_butone(cptr, sptr, chptr,
+			      ":%s %s %s :%s",
+			      parv[0], "NOTICE", nick,
+			      parv[2]);
+      else
+	sendto_one(sptr, form_str(ERR_CANNOTSENDTOCHAN),
+		   me.name, parv[0], nick);
+
       return 0;
     }
       
