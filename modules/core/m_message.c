@@ -522,7 +522,8 @@ static void msg_channel( int p_or_n, char *command,
      
   if(MyClient(sptr))
     {
-      if(sptr->user)
+      /* idle time shouldnt be reset by notices --fl */
+      if ((p_or_n != NOTICE) && sptr->user)
 	sptr->user->last = CurrentTime;
     }
 
@@ -596,7 +597,8 @@ static void msg_channel_flags( int p_or_n, char *command,
       
   if(MyClient(sptr))
     {
-      if(sptr->user)
+      /* idletime shouldnt be reset by notice --fl */
+      if((p_or_n != NOTICE) && sptr->user)
 	sptr->user->last = CurrentTime;
     }
 
@@ -638,7 +640,8 @@ static void msg_client(int p_or_n, char *command,
 {
   if(MyClient(sptr))
     {
-      /* reset idle time for message only if its not to self */
+      /* reset idle time for message only if its not to self 
+       * and its not a notice */
       if((p_or_n != NOTICE) && (sptr != acptr) && sptr->user)
 	sptr->user->last = CurrentTime;
     }
