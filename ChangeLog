@@ -1,3 +1,15 @@
+leeh        2004/11/19 07:28:37 EST	(20041119_1)
+
+  Modified files:
+    src                  s_jupeserv.c 
+  Log:
+  - disable wildcard jupes, and jupes matching our uplink
+  
+  Revision  Changes    Path
+  1.13      +17 -3     rserv/src/s_jupeserv.c
+
+
+
 leeh        2004/11/18 19:57:02 EST	(20041119_0)
 
   Modified files:
