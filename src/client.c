@@ -75,16 +75,9 @@ BlockHeap*        localUserFreeList;
 static const char* const BH_FREE_ERROR_MESSAGE = \
         "client.c BlockHeapFree failed for cptr = %p";
 
-/* reworked client kline/ping */
-struct die_client {
-  struct Client *client;
-  char *reason;
-  int  fake_kill;
-};
-
 static void exit_marked_for_death_clients();
 static void check_pings_list(dlink_list *list);
-void check_unknowns_list(dlink_list *list);
+static void check_unknowns_list(dlink_list *list);
 
 static EVH check_pings;
 
@@ -257,18 +250,12 @@ void _free_client(struct Client* cptr)
  *     -- adrian
  */
 
-dlink_list    dying_list;
-
 static void
 check_pings(void *notused)
 {               
-  memset(&dying_list,0,sizeof(dying_list));
-
   check_pings_list(&lclient_list);
   check_pings_list(&serv_list);
   check_unknowns_list(&unknown_list);
-
-  exit_marked_for_death_clients(&dying_list);
 
   /* Reschedule a new address */
   eventAdd("check_pings", check_pings, NULL, 30, 0);
@@ -279,7 +266,7 @@ check_pings(void *notused)
  *
  * inputs	- pointer to list to check
  * output	- NONE
- * side effects	- builds up dying_list
+ * side effects	- 
  */
 static void
 check_pings_list(dlink_list *list)
@@ -287,9 +274,8 @@ check_pings_list(dlink_list *list)
   struct Client *cptr;          /* current local cptr being examined */
   int           ping = 0;       /* ping time value from client */
   time_t        timeout;        /* found necessary ping time */
-  dlink_node    *m;
+  char          *reason;
   dlink_node    *ptr;
-  struct die_client *dying_ptr;
 
   for (ptr = list->head; ptr; ptr = ptr->next)
     {
@@ -300,14 +286,10 @@ check_pings_list(dlink_list *list)
       */
       if (cptr->flags & FLAGS_DEADSOCKET)
         {
-          dying_ptr = (struct die_client *)MyMalloc(sizeof(struct die_client));
-          dying_ptr->client = cptr;
-          dying_ptr->fake_kill = 0;
-          dying_ptr->reason = ((cptr->flags & FLAGS_SENDQEX) ?
-			       "SendQ exceeded" : "Dead socket");
+          reason = ((cptr->flags & FLAGS_SENDQEX) ?
+		    "SendQ exceeded" : "Dead socket");
 
-	  m = make_dlink_node();
-	  dlinkAdd(dying_ptr,m,&dying_list);
+	  (void)exit_client(cptr, cptr, &me, reason );
           continue; 
         }
       
@@ -320,11 +302,6 @@ check_pings_list(dlink_list *list)
               ((CurrentTime - cptr->user->last) > GlobalSetOptions.idletime))
             {
               struct ConfItem *aconf;
-
-	      dying_ptr = (struct die_client *)MyMalloc(sizeof(struct die_client));
-              dying_ptr->client = cptr;
-              dying_ptr->fake_kill = 0;
-              dying_ptr->reason = "Idle time limit exceeded";
 
               aconf = make_conf();
               aconf->status = CONF_KILL;
@@ -339,8 +316,8 @@ check_pings_list(dlink_list *list)
 			   "Idle time limit exceeded for %s - temp k-lining",
 				   get_client_name(cptr,FALSE));
 
-	      m = make_dlink_node();
-	      dlinkAdd(dying_ptr,m,&dying_list);
+
+	      (void)exit_client(cptr, cptr, &me, aconf->passwd);
               continue;
             }
         }
@@ -368,11 +345,7 @@ check_pings_list(dlink_list *list)
                 }
 
               cptr->flags2 |= FLAGS2_PING_TIMEOUT;
-	      dying_ptr = (struct die_client *)MyMalloc(sizeof(struct die_client));
-              dying_ptr->fake_kill = 0;
-              dying_ptr->client = cptr;
-	      m = make_dlink_node();
-	      dlinkAdd(dying_ptr,m,&dying_list);
+	      (void)exit_client(cptr, cptr, &me, "ping timeout" );
               continue;
             }
           else if ((cptr->flags & FLAGS_PINGSENT) == 0)
@@ -392,7 +365,6 @@ check_pings_list(dlink_list *list)
       timeout = cptr->lasttime + ping;
       while (timeout <= CurrentTime)
         timeout += ping;
-
     }
 }
 
@@ -403,13 +375,12 @@ check_pings_list(dlink_list *list)
  * output	- NONE
  * side effects	- unknown clients get marked for termination after n seconds
  */
-
-void check_unknowns_list(dlink_list *list)
+static void
+check_unknowns_list(dlink_list *list)
 {
   dlink_node *ptr;
   struct Client *cptr;
   dlink_node *m;
-  struct die_client *dying_ptr;
 
   for(ptr = list->head; ptr; ptr = ptr->next)
     {
@@ -417,17 +388,12 @@ void check_unknowns_list(dlink_list *list)
 
       /*
        * Check UNKNOWN connections - if they have been in this state
-       * for > 100s, close them.
+       * for > 30s, close them.
        */
 
-      if (cptr->firsttime ? ((CurrentTime - cptr->firsttime) > 100) : 0)
+      if (cptr->firsttime ? ((CurrentTime - cptr->firsttime) > 30) : 0)
 	{
-	  dying_ptr = (struct die_client *)MyMalloc(sizeof(struct die_client));
-	  dying_ptr->client = cptr;
-	  dying_ptr->fake_kill = 0;
-	  dying_ptr->reason = "Connection Timed Out";
-	  m = make_dlink_node();
-	  dlinkAdd(dying_ptr,m,&dying_list);
+	  (void)exit_client(cptr, cptr, &me, "Connection timed out");
 	}
     }
 }
@@ -439,17 +405,13 @@ void check_unknowns_list(dlink_list *list)
  * side effects - Check all connections for a pending kline against the
  * 		  client, exit the client if a kline matches.
  */
-
-void check_klines(void)
+void 
+check_klines(void)
 {               
   struct Client *cptr;          /* current local cptr being examined */
   struct ConfItem     *aconf = (struct ConfItem *)NULL;
   char          *reason;                /* pointer to reason string */
-  dlink_node    *m;
   dlink_node    *ptr;
-  struct die_client *dying_ptr;
-
-  memset(&dying_list,0,sizeof(dying_list));
 
   for (ptr = lclient_list.head; ptr; ptr = ptr->next)
     {
@@ -472,10 +434,6 @@ void check_klines(void)
 	  sendto_realops_flags(FLAGS_ALL,"D-line active for %s",
 			 get_client_name(cptr, FALSE));
 	      
-          dying_ptr = (struct die_client *)MyMalloc(sizeof(struct die_client));
-	  dying_ptr->client = cptr;
-	  dying_ptr->fake_kill = 0;
-
 	  if(ConfigFileEntry.kline_with_connection_closed)
 	    reason = "Connection closed";
 	  else
@@ -487,13 +445,12 @@ void check_klines(void)
 	    }
 	  if (IsPerson(cptr)) 
 	    {
-	      dying_ptr->reason = reason;
 	      sendto_one(cptr, form_str(ERR_YOUREBANNEDCREEP),
 			 me.name, cptr->name, reason);
 	    }
 
-	  m = make_dlink_node();
-	  dlinkAdd(dying_ptr,m,&dying_list);
+          cptr->flags2 |= FLAGS2_ALREADY_EXITED;
+	  (void)exit_client(cptr, cptr, &me, reason );
 
 	  continue; /* and go examine next fd/cptr */
 	}
@@ -515,11 +472,6 @@ void check_klines(void)
 				   "G-line active for %s",
 				   get_client_name(cptr, FALSE));
 		  
-	      dying_ptr = (struct die_client *)MyMalloc(sizeof(struct die_client));
-	      dying_ptr->client = cptr;
-	      dying_ptr->fake_kill = 0;
-
-	      /* Wintrhawk */
 	      if (ConfigFileEntry.kline_with_connection_closed)
 		{
 		  /*
@@ -536,13 +488,12 @@ void check_klines(void)
 		  else
 		    reason = "G-lined";
 		}
-		  
-	      dying_ptr->reason = reason;
-	      m = make_dlink_node();
-	      dlinkAdd(dying_ptr,m,&dying_list);
 
 	      sendto_one(cptr, form_str(ERR_YOUREBANNEDCREEP),
 			 me.name, cptr->name, reason);
+
+	      (void)exit_client(cptr, cptr, &me, reason);
+
 	      continue;         /* and go examine next fd/cptr */
 	    }
 	  else
@@ -561,11 +512,6 @@ void check_klines(void)
 				     "K-line active for %s",
 				     get_client_name(cptr, FALSE));
 
-		dying_ptr = (struct die_client *)MyMalloc(sizeof(struct die_client));
-		dying_ptr->client = cptr;
-		dying_ptr->fake_kill = 0;
-		    
-		/* Wintrhawk */
 		if (ConfigFileEntry.kline_with_connection_closed)
 		  reason = "Connection closed";
 		else
@@ -576,87 +522,12 @@ void check_klines(void)
 		      reason = "K-lined";
 		  }
 
-		dying_ptr->reason = reason;
-		m = make_dlink_node();
-		dlinkAdd(dying_ptr,m,&dying_list);
-
 		sendto_one(cptr, form_str(ERR_YOUREBANNEDCREEP),
 			   me.name, cptr->name, reason);
-		continue;         /* and go examine next fd/cptr */
+		(void)exit_client(cptr, cptr, &me, reason);
+		continue; 
 	      }
 	}
-    }
-
-  exit_marked_for_death_clients(&dying_list);
-}
-
-/*
- * exit_marked_for_death_clients
- *
- * inputs	- array of marked for death clients
- * output	- NONE
- * side effects	- Now exit clients marked for exit above.
- *
- */
-
-static void exit_marked_for_death_clients(dlink_list *list)
-{
-  struct Client *cptr;
-  char   ping_time_out_buffer[64];   /* blech that should be a define */
-  dlink_node *ptr;
-  dlink_node *next_ptr;
-  struct die_client *dying_ptr;
-
-  for(ptr = list->head; ptr; ptr = next_ptr)
-    {
-      next_ptr = ptr->next;
-
-      dying_ptr = ptr->data;
-      cptr = dying_ptr->client;
-
-      if(cptr->flags2 & FLAGS2_PING_TIMEOUT)
-        {
-          (void)ircsprintf(ping_time_out_buffer,
-                            "Ping timeout: %d seconds",
-                            CurrentTime - cptr->lasttime);
-
-          /* ugh. this is horrible.
-           * but I can get away with this hack because of the
-           * block allocator, and right now,I want to find out
-           * just exactly why occasional already bit cleared errors
-           * are still happening
-           */
-          if(cptr->flags2 & FLAGS2_ALREADY_EXITED)
-            {
-              sendto_realops_flags(FLAGS_ALL,
-			   "Client already exited doing ping timeout %X",cptr);
-            }
-          else
-            (void)exit_client(cptr, cptr, &me, ping_time_out_buffer );
-          cptr->flags2 |= FLAGS2_ALREADY_EXITED;
-        }
-      else
-	{
-          /* ugh. this is horrible.
-           * but I can get away with this hack because of the
-           * block allocator, and right now,I want to find out
-           * just exactly why occasional already bit cleared errors
-           * are still happening
-           */
-          if(cptr->flags2 & FLAGS2_ALREADY_EXITED)
-            {
-              sendto_realops_flags(FLAGS_ALL,
-				   "Client already exited %X [%s]",
-				   cptr,cptr->name);
-            }
-          else
-            (void)exit_client(cptr, cptr, &me, dying_ptr->reason);
-          cptr->flags2 |= FLAGS2_ALREADY_EXITED;          
-	}
-
-      MyFree(dying_ptr);
-      dlinkDelete(ptr,list);
-      free_dlink_node(ptr);
     }
 }
 
@@ -692,7 +563,8 @@ static void update_client_exit_stats(struct Client* cptr)
  * output	- NONE
  * side effects	- 
  */
-static void release_client_state(struct Client* cptr)
+static void
+release_client_state(struct Client* cptr)
 {
   if (cptr->user)
     {
@@ -718,7 +590,8 @@ static void release_client_state(struct Client* cptr)
  * side effects - taken the code from ExitOneClient() for this
  *		  and placed it here. - avalon
  */
-void remove_client_from_list(struct Client* cptr)
+void
+remove_client_from_list(struct Client* cptr)
 {
   assert(0 != cptr);
   
@@ -764,7 +637,8 @@ void remove_client_from_list(struct Client* cptr)
  *		  this is list.c, isnt it ? (no
  *		  -avalon
  */
-void add_client_to_list(struct Client *cptr)
+void
+add_client_to_list(struct Client *cptr)
 {
   /*
    * since we always insert new clients to the top of the list,
@@ -791,7 +665,8 @@ void add_client_to_llist(struct Client **bucket, struct Client *client)
     }
 }
 
-void del_client_from_llist(struct Client **bucket, struct Client *client)
+void
+del_client_from_llist(struct Client **bucket, struct Client *client)
 {
   if (client->lprev)
     {

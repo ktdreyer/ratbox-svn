@@ -1257,6 +1257,11 @@ static unsigned long nextFreeMask()
 /*
  * serv_connect() - initiate a server connection
  *
+ * inputs	- pointer to conf 
+ *		- pointer to client doing the connet
+ * output	-
+ * side effects	-
+ *
  * This code initiates a connection to a server. It first checks to make
  * sure the given server exists. If this is the case, it creates a socket,
  * creates a client, saves the socket information in the client, and

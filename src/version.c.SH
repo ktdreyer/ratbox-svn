@@ -91,6 +91,7 @@ char *infotext[] =
   "desrt               Ryan Lortie         desertangel@mindless.com",
   "echo                Adam J. Durana      adam@caca.com",
   "FlashMan            Craig A. Huegen     chuegen@quadrunner.com",
+  "Hwy101              Walter Campbell     wcampbel@botbay.net",
   "jailbird            Dustin Marquess     jailbird@alcatraz.fdf.net",
   "johan               Johannes Erdfelt    jerdfelt@eng.mindspring.net",
   "LarZ                Matthew Ramsey      mjr@blackened.com",
