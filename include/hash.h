@@ -40,8 +40,8 @@ extern dlink_list *ndTable;
 #define U_MAX 65536 /* 2^16 */
 
 /* Channel hash table size, hash.c/s_debug.c */
-#define CH_MAX_BITS (32-14)
-#define CH_MAX 16384 /* 2^14 */
+#define CH_MAX_BITS (32-15)
+#define CH_MAX 32768 /* 2^15 */
 
 /* hostname hash table size */
 #define HOST_MAX_BITS (32-17)
