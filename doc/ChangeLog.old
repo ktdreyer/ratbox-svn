@@ -1,3 +1,9 @@
+*** 20010818_1 by leeh
+- doc updates
+- added a blank dline.conf
+  (should we just use touch instead?)
+
+
 *** 20010817_3 by jdc
 - Flipped order of CFLAGS addition (at the end, not at the beginning).
 
