@@ -1,3 +1,15 @@
+leeh        2004/04/06 20:47:09 EDT	(20040407_0)
+
+  Modified files:
+    include              supported.h 
+  Log:
+  - add SAFELIST to 005
+  
+  Revision  Changes    Path
+  1.39      +15 -14    ircd-ratbox/include/supported.h
+
+
+
 leeh        2004/04/06 19:01:38 EDT	(20040406_4)
 
   Modified files:
