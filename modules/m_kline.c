@@ -773,8 +773,14 @@ find_user_host(struct Client *source_p,
       if(hostp != NULL)                            /* I'm a little user@host */
         {
           *(hostp++) = '\0';                       /* short and squat */
-          strlcpy(luser,user_host_or_nick,USERLEN); /* here is my user */
-          strlcpy(lhost,hostp,HOSTLEN);             /* here is my host */
+	  if (*user_host_or_nick)
+            strlcpy(luser,user_host_or_nick,USERLEN); /* here is my user */
+	  else
+	    strcpy(luser,"*");
+	  if (*hostp)
+            strlcpy(lhost,hostp,HOSTLEN);             /* here is my host */
+	  else
+	    strcpy(lhost,"*");
         }
       else
         {

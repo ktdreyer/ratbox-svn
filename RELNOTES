@@ -3,7 +3,8 @@
 o) RPL_ISUPPORT will now report the correct status of +eIha
 o) convertilines wasnt adding a ';' to the end of auth blocks
 o) convertconf fixes
-o) local admins were able to see IPs in stats C when HIDE_SERVERS_IPS, fixed.
+o) local admins were able to see IPs in stats C when HIDE_SERVERS_IPS,
+   spoofed ips were also being shown in contrib/ltrace, both fixed.
 o) servers sending an invalid number of arguments to a command will now
    have their link terminated.
 o) fixed the path in kill messages for bitchx
@@ -13,8 +14,11 @@ o) when a user deopers if they have no matching auth {} they will just be
    left where they are now, not removed from the server.
 o) floodcode fixes to cope with bitchx, raised some defaults.
 o) bugfix so users cannot set bans such as !@ which couldnt be removed
-   on hyb6.
+   on hyb6, or klines/glines such as @foo
 o) fixes to help work against desync behaviour with +eI
+o) glines will now be triggered with the reason of the first request
+o) desync fixes to allow +b-b of a non-existant ban and -b+b of an existing
+   ban.  all ban modes will be allowed if they originate remotely.
 
 --------------------------------------------------------------------------------
 
