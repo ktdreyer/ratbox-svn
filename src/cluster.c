@@ -46,10 +46,7 @@ struct cluster *
 make_cluster(void)
 {
 	struct cluster *clptr;
-
 	clptr = (struct cluster *) MyMalloc(sizeof(struct cluster));
-	memset(clptr, 0, sizeof(struct cluster));
-
 	return clptr;
 }
 

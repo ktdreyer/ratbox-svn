@@ -53,7 +53,6 @@
 #include "hook.h"
 #include "s_newconf.h"
 #include "hash.h"
-#include "reject.h"
 
 static int m_stats (struct Client *, struct Client *, int, const char **);
 static int mo_stats (struct Client *, struct Client *, int, const char **);
@@ -127,7 +126,6 @@ static void stats_memory (struct Client *);
 static void stats_servlinks (struct Client *);
 static void stats_ltrace (struct Client *, int, const char **);
 static void stats_ziplinks (struct Client *);
-static void stats_reject (struct Client *);
 
 static void report_tklines (struct Client *, dlink_list *);
 
@@ -180,7 +178,6 @@ static struct StatsStruct stats_cmd_table[] = {
 	{'z', stats_memory,		1, 0, },
 	{'Z', stats_ziplinks,		1, 0, },
 	{'?', stats_servlinks,		0, 0, },
-	{'+', stats_reject,		1, 0, },
 	{(char) 0, (void (*)()) 0, 	0, 0, }
 };
 
@@ -1300,16 +1297,5 @@ parse_stats_args (int parc, const char *parv[], int *doall, int *wilds)
 	}
 	else
 		return (NULL);
-}
-
-/*
- * stats_reject
- * inputs: client requesting stats
- * output: reject cache stats
- */
-void
-stats_reject(struct Client *client)
-{
-	display_reject_stats(client);	
 }
 

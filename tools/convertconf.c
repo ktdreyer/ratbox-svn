@@ -390,7 +390,6 @@ static void oldParseOneLine(FILE *out,char* line)
       /* Also print a default servername/netname */
       fprintf(out, "\tnetwork_name=\"EFNet\";\n");
       fprintf(out, "\tnetwork_desc=\"Eris Free Network\";\n");
-      fprintf(out, "\tmax_clients=1024;\n");
       fprintf(out,"};\n\n");
       break;
 

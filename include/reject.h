@@ -33,6 +33,8 @@ void init_reject(void);
 int check_reject(struct Client *);
 void add_reject(struct Client *);
 void flush_reject(struct Client *);
-void display_reject_stats(struct Client *);
+
+extern unsigned long reject_count;
+
 #endif
 

@@ -274,28 +274,6 @@ conf_set_serverinfo_vhost6(void *data)
 }
 
 static void
-conf_set_serverinfo_max_clients(void *data)
-{
-	int max = *(int *) data;
-
-	if(MAX_CLIENTS >= max)
-		ServerInfo.max_clients = max;
-	else
-	{
-		conf_report_error
-			("Compile-time MAX_CLIENTS (%d) is less than serverinfo::max_clients (%d) -- using %d",
-			 MAX_CLIENTS, max, MAX_CLIENTS);
-		ServerInfo.max_clients = MAX_CLIENTS;
-	}
-}
-
-static void
-conf_set_serverinfo_max_buffer(void *data)
-{
-	ServerInfo.max_buffer = *(int *) data;
-}
-
-static void
 conf_set_serverinfo_hub(void *data)
 {
 	int hub = *(int *) data;
@@ -2713,8 +2691,6 @@ newconf_init()
 	add_conf_item("serverinfo", "network_desc", CF_QSTRING, conf_set_serverinfo_network_desc);
 	add_conf_item("serverinfo", "vhost", CF_QSTRING, conf_set_serverinfo_vhost);
 	add_conf_item("serverinfo", "vhost6", CF_QSTRING, conf_set_serverinfo_vhost6);
-	add_conf_item("serverinfo", "max_clients", CF_INT, conf_set_serverinfo_max_clients);
-	add_conf_item("serverinfo", "max_buffer", CF_INT, conf_set_serverinfo_max_buffer);
 	add_conf_item("serverinfo", "hub", CF_YESNO, conf_set_serverinfo_hub);
 
 	add_top_conf("admin", NULL, NULL);

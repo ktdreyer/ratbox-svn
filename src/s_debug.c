@@ -44,6 +44,7 @@
 #include "whowas.h"
 #include "linebuf.h"
 #include "memory.h"
+#include "reject.h"
 
 /*
  * Option string.  Must be before #ifdef DEBUGMODE.
@@ -353,6 +354,9 @@ count_memory(struct Client *source_p)
 	sendto_one(source_p, ":%s %d %s z :scache %ld(%ld)",
 		   me.name, RPL_STATSDEBUG, source_p->name,
 		   (long)number_servers_cached, (long)mem_servers_cached);
+
+	sendto_one(source_p, ":%s %d %s z :rejected from cache %lu",
+		   me.name, RPL_STATSDEBUG, source_p->name, reject_count);
 
 	sendto_one(source_p, ":%s %d %s z :hostname hash %d(%ld)",
 		   me.name, RPL_STATSDEBUG, source_p->name,

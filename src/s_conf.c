@@ -172,7 +172,6 @@ make_conf()
 	struct ConfItem *aconf;
 
 	aconf = (struct ConfItem *) MyMalloc(sizeof(struct ConfItem));
-	memset(aconf, 0, sizeof(struct ConfItem));
 	aconf->status = CONF_ILLEGAL;
 	aconf->aftype = AF_INET;
 	return (aconf);
@@ -1016,12 +1015,8 @@ set_default_conf(void)
 	memset(&ServerInfo.ip6, 0, sizeof(ServerInfo.ip6));
 	ServerInfo.specific_ipv6_vhost = 0;
 #endif
-	ServerInfo.max_clients = MAX_CLIENTS;	/* XXX - these don't seem to */
-	ServerInfo.max_buffer = MAX_BUFFER;	/*       actually do anything! */
 	/* Don't reset hub, as that will break lazylinks */
 	/* ServerInfo.hub = NO; */
-	ServerInfo.dns_host.sin_addr.s_addr = 0;
-	ServerInfo.dns_host.sin_port = 0;
 	AdminInfo.name = NULL;
 	AdminInfo.email = NULL;
 	AdminInfo.description = NULL;

@@ -34,15 +34,13 @@
 
 static patricia_tree_t *reject_tree;
 static dlink_list delay_exit;
-static unsigned long reject_count;
-
+unsigned long reject_count;
 
 struct reject_data
 {
 	time_t time;
 	unsigned int count;
 };
-
 
 static void
 reject_exit(void *unused)
@@ -145,11 +143,5 @@ check_reject(struct Client *client_p)
 void flush_reject(struct Client *source_p)
 {
 	Clear_Patricia(reject_tree, MyFree);
-}
-
-void display_reject_stats(struct Client *source_p)
-{
-   	sendto_one(source_p, ":%s %d %s + :rejected %lu",
-   			   me.name, RPL_STATSDEBUG, source_p->name, reject_count);
 }
 

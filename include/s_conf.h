@@ -302,14 +302,10 @@ struct server_info
 #ifdef IPV6
 	struct sockaddr_in6 ip6;
 #endif
-	int max_clients;
-	int max_buffer;
-	int no_hack_ops;
 	int specific_ipv4_vhost;
 #ifdef IPV6
 	int specific_ipv6_vhost;
 #endif
-	struct sockaddr_in dns_host;
 };
 
 struct admin_info
