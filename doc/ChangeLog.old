@@ -1,3 +1,15 @@
+ejb         2002/07/19 00:34:26 EDT	(20020719_0)
+
+  Modified files:
+    src                  parse.c 
+  Log:
+  - reworded invalid arguments message.
+  
+  Revision  Changes    Path
+  7.133     +3 -3      ircd-hybrid-7/src/parse.c
+
+
+
 ejb         2002/07/18 12:24:09 EDT	(20020718_7)
 
   Modified files:
