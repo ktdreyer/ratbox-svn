@@ -242,12 +242,17 @@ static void ms_connect(struct Client* client_p, struct Client* source_p,
   tmpport = port = aconf->port;
   if (parc > 2 && !EmptyString(parv[2]))
     {
-      if ((port = atoi(parv[2])) <= 0)
-        {
-          sendto_one(source_p, ":%s NOTICE %s :Connect: Illegal port number",
-                     me.name, parv[0]);
-          return;
-        }
+      port = atoi(parv[2]);
+
+      /* if someone sends port 0, and we have a config port.. use it */
+      if(port == 0 && aconf->port)
+        port = aconf->port;
+      else if(port <= 0)
+      {
+        sendto_one(source_p, ":%s NOTICE %s :Connect: Illegal port number",
+                   me.name, parv[0]);
+        return;
+      }
     }
   else if (port <= 0 && (port = PORTNUM) <= 0)
     {
@@ -259,17 +264,17 @@ static void ms_connect(struct Client* client_p, struct Client* source_p,
    * Notify all operators about remote connect requests
    */
   sendto_wallops_flags(FLAGS_WALLOP, &me,
-			  "Remote CONNECT %s %s from %s",
-			  parv[1], parv[2] ? parv[2] : "",
+			  "Remote CONNECT %s %d from %s",
+			  parv[1], port,
 			  get_client_name(source_p, MASK_IP));
   sendto_server(NULL, NULL, NULL, NOCAPS, NOCAPS, NOFLAGS,
-                ":%s WALLOPS :Remote CONNECT %s %s from %s",
-                me.name, parv[1], parv[2] ? parv[2] : "",
+                ":%s WALLOPS :Remote CONNECT %s %d from %s",
+                me.name, parv[1], port,
                 get_client_name(source_p, MASK_IP));
 
 
-  ilog(L_TRACE, "CONNECT From %s : %s %s", 
-       parv[0], parv[1], parv[2] ? parv[2] : "");
+  ilog(L_TRACE, "CONNECT From %s : %s %d", 
+       parv[0], parv[1], port);
 
   aconf->port = port;
   /*
