@@ -1,3 +1,15 @@
+leeh        2002/05/16 15:38:02 EDT	(20020516_7)
+
+  Modified files:
+    contrib              m_opme.c 
+  Log:
+  - *cough*cough* that was a locptr, in my head..
+  
+  Revision  Changes    Path
+  1.24      +6 -6      ircd-hybrid-7/contrib/m_opme.c
+
+
+
 leeh        2002/05/16 15:14:49 EDT	(20020516_6)
 
   Modified files:
