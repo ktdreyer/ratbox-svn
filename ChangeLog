@@ -1,3 +1,15 @@
+leeh        2005/02/07 10:41:16 EST	(20050207_0)
+
+  Modified files:
+    src                  newconf.c 
+  Log:
+  - patch via jilles to fix encrypted passwords in operator {};
+  
+  Revision  Changes    Path
+  1.41      +4 -0      rserv/src/newconf.c
+
+
+
 leeh        2005/02/04 07:04:17 EST	(20050204_0)
 
   Modified files:
