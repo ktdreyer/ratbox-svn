@@ -89,36 +89,6 @@ typedef struct _pollfd_list pollfd_list_t;
 pollfd_list_t pollfd_list;
 static void poll_update_pollfds(int, short, PF *);
 
-/*
- * static void set_sigio(int fd)
- *
- * Input: File descriptor to modify
- * Output: None
- * Side Effects:  Sets O_ASYNC on the said descriptor
- */
-static void set_sigio(int fd)
-{
-    int flags;
-    flags = fcntl(fd, F_GETFL, 0);
-    flags |= O_ASYNC;
-    fcntl(fd, F_SETFL, flags);
-}
-
-/*
- * static void clear_sigio(int fd)
- *
- * Input: File descriptor to modify
- * Output: None
- * Side Effects: Removes O_ASYNC from the fd
- */
-static void clear_sigio(int fd)
-{
-    int flags;
-    flags = fcntl(fd, F_GETFL, 0);
-    flags &= ~O_ASYNC;
-    fcntl(fd, F_SETFL, flags);
-}
-
 /* 
  * static void mask_our_signal(int s)
  *
@@ -163,7 +133,6 @@ static void poll_update_pollfds(int fd, short event, PF * handler)
 
     if (F->comm_index < 0)
     {
-        set_sigio(fd);
         F->comm_index = poll_findslot();
     }
     comm_index = F->comm_index;
@@ -184,7 +153,6 @@ static void poll_update_pollfds(int fd, short event, PF * handler)
             pollfd_list.pollfds[comm_index].events &= ~event;
             if (pollfd_list.pollfds[comm_index].events == 0)
             {
-                clear_sigio(fd);
                 pollfd_list.pollfds[comm_index].fd = -1;
                 pollfd_list.pollfds[comm_index].revents = 0;
                 F->comm_index = -1;
