@@ -40,8 +40,6 @@
 #include "hostmask.h"
 #include "numeric.h"
 #include "parse.h"
-#include "adns.h"
-#include "res.h"
 #include "restart.h"
 #include "s_auth.h"
 #include "commio.h"
@@ -64,6 +62,7 @@
 #include "s_newconf.h"
 #include "cache.h"
 #include "monitor.h"
+#include "res.h"
 
 /*
  * Try and find the correct name to use with getrlimit() for setting the max.

@@ -53,8 +53,6 @@
 #include "patricia.h"
 #include "reject.h"
 #include "cache.h"
-#include "adns.h"
-#include "res.h"
 
 struct config_server_hide ConfigServerHide;
 

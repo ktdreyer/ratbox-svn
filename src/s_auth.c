@@ -36,8 +36,6 @@
 #include "stdinc.h"
 #include "tools.h"
 #include "struct.h"
-#include "adns.h"
-#include "res.h"
 #include "s_auth.h"
 #include "s_conf.h"
 #include "client.h"
@@ -54,6 +52,7 @@
 #include "memory.h"
 #include "hook.h"
 #include "balloc.h"
+#include "res.h"
 
 /*
  * a bit different approach

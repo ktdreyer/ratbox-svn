@@ -39,8 +39,6 @@
 #include "s_stats.h"
 #include "send.h"
 #include "memory.h"
-#include "adns.h"
-#include "res.h"
 #include "s_auth.h"
 #include "reject.h"
 #include "s_log.h"

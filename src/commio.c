@@ -36,8 +36,6 @@
 #include "listener.h"
 #include "numeric.h"
 #include "packet.h"
-#include "adns.h"
-#include "res.h"
 #include "restart.h"
 #include "s_auth.h"
 #include "s_conf.h"
@@ -47,7 +45,7 @@
 #include "send.h"
 #include "reject.h"
 #include "memory.h"
-
+#include "res.h"
 
 #ifndef IN_LOOPBACKNET
 #define IN_LOOPBACKNET        0x7f

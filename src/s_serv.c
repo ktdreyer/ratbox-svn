@@ -41,8 +41,6 @@
 #include "sprintf_irc.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "adns.h"
-#include "res.h"
 #include "commio.h"
 #include "packet.h"
 #include "s_conf.h"

@@ -35,8 +35,6 @@
 #include "listener.h"
 #include "numeric.h"
 #include "packet.h"
-#include "adns.h"
-#include "res.h"
 #include "restart.h"
 #include "s_auth.h"
 #include "s_conf.h"

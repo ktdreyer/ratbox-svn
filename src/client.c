@@ -38,8 +38,6 @@
 #include "numeric.h"
 #include "commio.h"
 #include "packet.h"
-#include "adns.h"
-#include "res.h"
 #include "s_auth.h"
 #include "s_conf.h"
 #include "s_newconf.h"

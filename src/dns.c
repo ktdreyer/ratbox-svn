@@ -26,11 +26,11 @@
 #include "stdinc.h"
 #include "parse.h"
 #include "commio.h"
+#include "res.h"
 #include "irc_string.h"
 #include "sprintf_irc.h"
 #include "event.h"
 #include "s_log.h"
-#include "res.h"
 
 
 #define IDTABLE 0xffff

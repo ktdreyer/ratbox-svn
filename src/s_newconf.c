@@ -35,6 +35,7 @@
 #include "stdinc.h"
 #include "tools.h"
 #include "struct.h"
+#include "res.h"
 #include "s_conf.h"
 #include "s_newconf.h"
 #include "client.h"
@@ -51,8 +52,6 @@
 #include "patricia.h"
 #include "ircd.h"
 #include "class.h"
-#include "adns.h"
-#include "res.h"
 #include "s_gline.h"
 
 dlink_list shared_conf_list;

@@ -156,7 +156,6 @@ send_linebuf_remote(struct Client *to, struct Client *from, buf_head_t *linebuf)
  *
  * inputs	- fd to have queue sent, client we're sending to
  * outputs	- contents of queue
- * side effects - write is rescheduled if queue isnt emptied
  */
 void
 send_queued_write(int fd, void *data)
@@ -228,7 +227,6 @@ send_queued_write(int fd, void *data)
  *
  * inputs	- fd to have queue sent, client we're sending to
  * outputs	- contents of queue
- * side effects - write is rescheduled if queue isnt emptied
  */
 void
 send_queued_slink_write(int fd, void *data)
@@ -281,7 +279,6 @@ send_queued_slink_write(int fd, void *data)
 		}
 	}
 
-	/* if we have any more data, reschedule a write */
 	if(to->localClient->slinkq_len)
 		comm_setselect(to->localClient->ctrlfd, FDLIST_IDLECLIENT,
 			       COMM_SELECT_WRITE|COMM_SELECT_RETRY, send_queued_slink_write, to, 0);
