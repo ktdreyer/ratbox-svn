@@ -232,12 +232,6 @@ unload_one_module(char *name, int warn)
 			for (m = mheader->mapi_command_list; *m; ++m)
 				mod_del_cmd(*m);
 		}
-		if (mheader->mapi_hook_list)
-		{
-			mapi_hlist_av1 *m;
-			for (m = mheader->mapi_hook_list; m->hapi_name; ++m)
-				hook_add_event(m->hapi_name, m->hapi_id);
-		}
 		if (mheader->mapi_unregister)
 			mheader->mapi_unregister();
 		break;
@@ -343,7 +337,13 @@ load_a_module(char *path, int warn, int core)
 			for (m = mheader->mapi_command_list; *m; ++m)
 				mod_add_cmd(*m);
 		}
-		/* XXX implement hook_list		-larne */
+
+		if (mheader->mapi_hook_list)
+		{
+			mapi_hlist_av1 *m;
+			for (m = mheader->mapi_hook_list; m->hapi_name; ++m)
+				hook_add_event(m->hapi_name, m->hapi_id);
+		}
 		
 		ver = mheader->mapi_module_version;
 		break;
@@ -372,9 +372,6 @@ load_a_module(char *path, int warn, int core)
 	DupString(modlist[num_mods]->name, mod_basename);
 	modlist[num_mods]->mapi_header = mapi_version;
 	num_mods++;
-
-	if (initfunc)
-		initfunc();
 
 	if(warn == 1)
 	{
