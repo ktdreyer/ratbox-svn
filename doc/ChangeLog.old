@@ -1,3 +1,32 @@
+*** 20010531_4 by davidt
+- Pass 2 of config file cleanup.
+  * default ConfigFileEntry stuff is now set in s_conf.c:set_default_conf().
+  * default stuff for blocks using yy_aconfs is done at the start of
+    the ircd_parser.y code, where make_conf() is called. 
+  * any validation of config stuff is now done in s_conf.c:check_conf().
+  * validation of yy_aconf blocks is done at the end of the code,
+    before add_conf*() is called.
+  * we free anything we might have allocated in the config file _BOTH_
+    in s_conf.c:clean_out_old_conf(), and ircd_parser.y.
+    - ircd_parser.y incase a line is duplicated in a block.
+    - clean_out_old_conf() incase a line is removed from the config file.
+  * we no longer close listeners until we are about to call yyparse(),
+    so if we abort, we don't end up with no open ports.
+
+- Work remaining (someone else can do this if they want):
+  * tidy up example.conf/simple.conf/ircd_parser.y/ircd_lexer.y
+    -- rename some of the hideous options we have, like the
+    double negative 'warn_no_nlines = no;' or 'non_redundant_klines = no;'.
+  * clean up include/defaults.h - do we want a define for default
+    options for every option??
+  * clean up include/config.h - it'd be nice if we could make the remaining
+    stuff configuarable through autoconf/ircd.conf too...
+  * clean up set_default_conf()/check_conf() - the defaults are reasonably
+    sane I think, but could do with tweaking -- example.conf should probably
+    either match these, or include (default: ...) in a comment for each
+    option.
+
+
 *** 20010531_3 by davidt
 - Pass one of config file cleanup.
   * config.h[.dist] is now a little cleaner, still some stuff to sort out[1]
