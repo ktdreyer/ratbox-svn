@@ -1,3 +1,15 @@
+androsyn    2004/03/01 13:09:25 EST	(20040301_1)
+
+  Modified files:
+    src                  ircd.c 
+  Log:
+  Don't close your kqueue/epoll fds after you opened them :P
+  
+  Revision  Changes    Path
+  7.327     +6 -4      ircd-ratbox/src/ircd.c
+
+
+
 leeh        2004/02/29 20:29:22 EST	(20040301_0)
 
   Modified files:
