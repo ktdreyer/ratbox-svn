@@ -208,7 +208,7 @@ static void auth_dns_callback(void* vptr, adns_answer* reply)
   struct AuthRequest* auth = (struct AuthRequest*) vptr;
   char *str = auth->client->host;
   ClearDNSPending(auth);
-
+  *auth->client->host = '\0';
   if(reply && (reply->status == adns_s_ok))
     {
       if(strlen(*reply->rrs.str) < HOSTLEN)
@@ -220,15 +220,16 @@ static void auth_dns_callback(void* vptr, adns_answer* reply)
         {
 #ifdef IPV6
           if(*auth->client->localClient->sockhost == ':')
-            *str++  = '0';
-
+          {
+            strcat(str, "0");
+	  }
           if(auth->client->localClient->aftype == AF_INET6 && ConfigFileEntry.dot_in_ip6_addr == 1)
 	  {
-            strcpy(str, auth->client->localClient->sockhost);
+            strcat(str, auth->client->localClient->sockhost);
             strcat(str, ".");
           } else
 #endif
-            strcpy(str, auth->client->localClient->sockhost);
+            strcat(str, auth->client->localClient->sockhost);
           sendheader(auth->client, REPORT_HOST_TOOLONG);
         }
     }
@@ -236,15 +237,17 @@ static void auth_dns_callback(void* vptr, adns_answer* reply)
     {
 #ifdef IPV6
       if(*auth->client->localClient->sockhost == ':')
-        *str++ = '0';
-
+      {
+	strcat(str, "0");
+      }
       if(auth->client->localClient->aftype == AF_INET6 && ConfigFileEntry.dot_in_ip6_addr == 1)
       {
-        strcpy(str, auth->client->localClient->sockhost);
+        strcat(str, auth->client->localClient->sockhost);
         strcat(str, ".");
+        sendheader(auth->client, REPORT_FAIL_DNS);
       } else 
 #endif
-      strcpy(str, auth->client->localClient->sockhost); 
+      strcat(str, auth->client->localClient->sockhost); 
       sendheader(auth->client, REPORT_FAIL_DNS);
     }
 
@@ -263,6 +266,7 @@ static void auth_dns_callback(void* vptr, adns_answer* reply)
       free_auth_request(auth);
 #endif
     }
+
 }
 
 /*

@@ -664,8 +664,6 @@ introduce_client(struct Client *client_p, struct Client *source_p,
  */
 static int valid_hostname(const char* hostname)
 {
-  int         dots  = 0;
-  int         chars = 0;
   const char* p     = hostname;
 
   assert(0 != p);
@@ -677,19 +675,9 @@ static int valid_hostname(const char* hostname)
     {
       if (!IsHostChar(*p))
         return NO;
-
-      if ('.' == *p || ':' == *p)
-        ++dots;
-      else
-        ++chars;
-
       p++;
     }
-
-  if( dots == 0 )
-    return NO;
-
-  return ( (dots > chars) ? NO : YES);
+  return (YES);
 }
 
 /* 
