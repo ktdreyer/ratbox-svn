@@ -1,3 +1,8 @@
+*** 20010531_5 by toot
+. added call to set_default_conf before parsing the conf
+. fixed a few compile warnings
+
+
 *** 20010531_4 by davidt
 - Pass 2 of config file cleanup.
   * default ConfigFileEntry stuff is now set in s_conf.c:set_default_conf().
