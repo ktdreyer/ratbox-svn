@@ -146,7 +146,6 @@ struct Client* make_client(struct Client* from)
       assert(0 != cptr);
 
       memset(cptr, 0, sizeof(struct Client));
-      cptr->local_flag = 1;
 
       cptr->from  = cptr; /* 'from' of local client is self! */
       cptr->since = cptr->lasttime = cptr->firsttime = CurrentTime;
@@ -182,10 +181,6 @@ struct Client* make_client(struct Client* from)
   cptr->idhnext = NULL;
   cptr->lnext   = NULL;
   cptr->lprev   = NULL;
-  cptr->next_local_client     = NULL;
-  cptr->previous_local_client = NULL;
-  cptr->next_server_client    = NULL;
-  cptr->next_oper_client      = NULL;
   cptr->user    = NULL;
   cptr->serv    = NULL;
   cptr->servptr = NULL;
@@ -203,7 +198,8 @@ void _free_client(struct Client* cptr)
   assert(0 == cptr->prev);
   assert(0 == cptr->next);
 
-  if (cptr->local_flag)
+  /* If localClient is non NULL, its a local client */
+  if (cptr->localClient)
     {
       if (-1 < cptr->fd)
 	fd_close(cptr->fd);
