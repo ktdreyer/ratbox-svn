@@ -1,3 +1,15 @@
+leeh        2003/09/07 08:52:14 EDT	(20030907_0)
+
+  Modified files:
+    modules/core         m_mode.c 
+  Log:
+  - made remote clients use the m_mode handler instead
+  
+  Revision  Changes    Path
+  1.92      +5 -19     ircd-ratbox/modules/core/m_mode.c
+
+
+
 leeh        2003/09/06 16:04:53 EDT	(20030906_6)
 
   Modified files:
