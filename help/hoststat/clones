@@ -1,3 +1,0 @@
-CLONES [limit]
-Lists user@host clones on the network.
-  [limit]: Minimum number of clones to report.  Lowest value 3.

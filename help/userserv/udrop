@@ -1,0 +1,3 @@
+UDROP <username>
+Drops registration of the given username
+  <username>: Username to drop
