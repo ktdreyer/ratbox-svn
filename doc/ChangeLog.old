@@ -1,3 +1,12 @@
+*** 20001109_5 by ejb
+modules appear to be mostly working now, apart from a small problem with
+the mtree that means it won't recognise any commands.
+m_error and m_list are now built as part of the core for now..
+still no make install for modules/
+
+
+
+
 *** 20001109_4 by db
 - only ctcp flud check if local client *oops* This was a side effect
   of combinging ms_privmsg/ms_notice back into one...
