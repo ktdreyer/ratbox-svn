@@ -1,3 +1,18 @@
+androsyn    2002/08/20 21:56:22 EDT	(20020821_2)
+
+  Modified files:
+    include              tools.h 
+    src                  channel.c tools.c 
+  Log:
+  Pretty up remove_user_from_channel() add some new functions to tools.c
+  
+  Revision  Changes    Path
+  1.26      +32 -0     ircd-ratbox/include/tools.h
+  7.340     +43 -41    ircd-ratbox/src/channel.c
+  7.29      +27 -0     ircd-ratbox/src/tools.c
+
+
+
 androsyn    2002/08/20 21:34:26 EDT	(20020821_1)
 
   Modified files:
