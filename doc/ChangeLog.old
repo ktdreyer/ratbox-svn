@@ -1,3 +1,8 @@
+*** 20010619_2 by db
+- redid m_gline to write kline.conf compatible files
+
+
+
 *** 20010619_1 by a1kmm
 - Finished off Diane's USE_TABLE_MODE patch.
 
