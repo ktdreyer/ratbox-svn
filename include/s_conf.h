@@ -243,8 +243,9 @@ struct config_file_entry
 
 struct config_channel_entry
 {
-  int		use_invex;
   int           use_except;
+  int           use_halfops;
+  int           use_invex;
   int           use_knock;
   int           knock_delay;
   int           vchans_oper_only;

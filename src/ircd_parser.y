@@ -267,6 +267,7 @@ int   class_redirport_var;
 %token  USER
 %token  USE_EGD
 %token  USE_EXCEPT
+%token  USE_HALFOPS
 %token  USE_INVEX
 %token  USE_KNOCK
 %token  VCHANS_OPER_ONLY
@@ -2403,8 +2404,9 @@ channel_entry:      CHANNEL
 channel_items:      channel_items channel_item |
                     channel_item
 
-channel_item:       channel_use_invex |
-                    channel_use_except|
+channel_item:       channel_use_except |
+                    channel_use_halfops |
+                    channel_use_invex |
                     channel_use_knock |
 		    channel_vchans_oper_only |
 		    channel_disable_vchans |
@@ -2414,6 +2416,24 @@ channel_item:       channel_use_invex |
                     channel_quiet_on_ban |
 		    channel_persist_time |
                     error
+
+channel_use_except:   USE_EXCEPT '=' TYES ';'
+  {
+    ConfigChannel.use_except = 1;
+  }
+                        |
+                      USE_EXCEPT '=' TNO ';'
+  {
+    ConfigChannel.use_except = 0;
+  } ;
+
+
+channel_use_halfops:   USE_HALFOPS '=' TYES ';'
+  { ConfigChannel.use_halfops = 1; }
+    |
+    USE_HALFOPS '=' TNO ';'
+  { ConfigChannel.use_halfops = 0; };
+
 
 channel_use_invex:   USE_INVEX '=' TYES ';'
   {
@@ -2425,15 +2445,6 @@ channel_use_invex:   USE_INVEX '=' TYES ';'
     ConfigChannel.use_invex = 0;
   } ;
 
-channel_use_except:   USE_EXCEPT '=' TYES ';'
-  {
-    ConfigChannel.use_except = 1;
-  }
-                        |
-                      USE_EXCEPT '=' TNO ';'
-  {
-    ConfigChannel.use_except = 0;
-  } ;
 
 channel_use_knock:   USE_KNOCK '=' TYES ';'
   {

@@ -221,6 +221,7 @@ spoof_notice	{ return SPOOF_NOTICE; }
 unkline		{ return UNKLINE; }
 use_egd { return USE_EGD; }
 use_except	{ return USE_EXCEPT; }
+use_halfops     { return USE_HALFOPS; }
 use_invex	{ return USE_INVEX; }
 use_knock	{ return USE_KNOCK; }
 throttle_time { return THROTTLE_TIME; }
