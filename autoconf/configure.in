@@ -49,6 +49,17 @@ case `$CC -V 2>&1` in
     SunWorkShop=no
     ;;
 esac
+AC_MSG_CHECKING(if we are using Apple GCC)
+case `$CC -v 2>&1 | tail -1` in
+  *Apple*)
+    AC_MSG_RESULT(success! We are using GCC from Apple.)
+    AppleGCC=yes
+    ;;
+  *)
+    AC_MSG_RESULT(no)
+    AppleGCC=no
+    ;;
+esac
 
 dnl SVR4 SGS based on what we know about the compiler -jmallett
 AC_MSG_CHECKING(if your compiler supports the SVR4 Software Generation System interfaces)
@@ -690,34 +701,25 @@ else
 	fi
 
 	AC_MSG_CHECKING(for compiler option to produce PIC)
-	dnl Check if we are using GCC. If we are set up some generic PICFLAGS.
-	dnl Check the operating system, if the system compiler is GCC but not
-	dnl compatible with GCC's regular flags, override what we set, else
-	dnl set the system compiler values for PIC shared modules if we have
-	dnl not already set PICFLAGS some other way (checks for odd compilers
-	dnl can thus be thrown before the OS checks making this very moduluar)
-	dnl We now check for compilers supporting the SVR4 Software Generation
-	dnl System interfaces, and set up generic PICFLAGS for those.
-	dnl -jmallett
-	if test "$ac_cv_prog_gcc" = "yes"; then
-		AC_MSG_RESULT(gcc: -fPIC -DPIC -shared)
-		PICFLAGS="-fPIC -DPIC -shared"
-	fi
+	dnl The order should be here to check for groups of compilers,
+	dnl then for odd compilers, then if no PICFLAGS were set up,
+	dnl check for GCC and set defaults, or else error. -jmallett
 	if test "$SGS" = "yes"; then
 		AC_MSG_RESULT(SVR4 Software Generation System interfaces: -KPIC -DPIC -G)
 		PICFLAGS="-KPIC -DPIC -G"
 	fi
-	case `uname -s` in
-	Darwin*)
-		if test "$ac_cv_prog_gcc" = "yes"; then
-			AC_MSG_RESULT(Darwin or Mac OS X - Assuming you want to make Mach-O bundles: -fno-common -bundle -flat_namespace -undefined suppress)
-			PICFLAGS="-fno-common -bundle -flat_namespace -undefined suppress"
-		fi
-		;;
-	esac
+	if test "$AppleGCC" = "yes"; then
+		AC_MSG_RESULT(Darwin or Mac OS X - Assuming you want to make Mach-O bundles: -fno-common -bundle -flat_namespace -undefined suppress)
+		PICFLAGS="-fno-common -bundle -flat_namespace -undefined suppress"
+	fi
 	if test -z "$PICFLAGS"; then
-		AC_MSG_RESULT(no)
-		AC_MSG_ERROR(could not find a way to produce position independent code. Try ./configure  --disable-shared-modules)
+		if test "$ac_cv_prog_gcc" = "yes"; then
+			AC_MSG_RESULT(gcc: -fPIC -DPIC -shared)
+			PICFLAGS="-fPIC -DPIC -shared"
+		else
+			AC_MSG_RESULT(no)
+			AC_MSG_ERROR(could not find a way to produce position independent code. Try ./configure  --disable-shared-modules)
+		fi
 	fi
 	AC_SUBST(PICFLAGS)
 
@@ -787,7 +789,7 @@ cat << EOF > conftest.c
         }
         void _modinit(void) { return; }
 EOF
-		$CC $IRC_CFLAGS -o conftest conftest.c $nlist_lib >/dev/null 2>&1
+		$CC $CPPFLAGS $IRC_CFLAGS -o conftest conftest.c $nlist_lib >/dev/null 2>&1
 		symbol_underscores=`./conftest conftest`
 		AC_MSG_RESULT($symbol_underscores)
 		$RM -f conftest conftest.c
