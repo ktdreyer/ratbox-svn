@@ -46,9 +46,10 @@ static struct mode_table privs_table[] = {
 };
 
 static struct mode_table service_flags_table[] = {
-	{ "opered",	SERVICE_OPERED	},
-	{ "msg_self",	SERVICE_MSGSELF	},
-	{ "\0",		0		}
+	{ "opered",	SERVICE_OPERED		},
+	{ "msg_self",	SERVICE_MSGSELF		},
+	{ "disabled",	SERVICE_DISABLED	},
+	{ "\0",		0			}
 };
 
 static const char *
@@ -662,7 +663,7 @@ conf_set_service_nick(void *data)
 	strlcpy(yy_service->name, (const char *) data,
 		sizeof(yy_service->name));
 	add_client(yy_service);
-	yy_service->service->reintroduce = 1;
+	SetServiceReintroduce(yy_service);
 }
 
 static void
@@ -674,7 +675,7 @@ conf_set_service_username(void *data)
 
 	strlcpy(yy_service->service->username, (const char *) data,
 		sizeof(yy_service->service->username));
-	yy_service->service->reintroduce = 1;
+	SetServiceReintroduce(yy_service);
 }
 
 static void
@@ -686,7 +687,7 @@ conf_set_service_host(void *data)
 
 	strlcpy(yy_service->service->host, (const char *) data,
 		sizeof(yy_service->service->host));
-	yy_service->service->reintroduce = 1;
+	SetServiceReintroduce(yy_service);
 }
 
 static void
@@ -697,7 +698,7 @@ conf_set_service_realname(void *data)
 
 	strlcpy(yy_service->info, (const char *) data,
 		sizeof(yy_service->info));
-	yy_service->service->reintroduce = 1;
+	SetServiceReintroduce(yy_service);
 }
 
 static void

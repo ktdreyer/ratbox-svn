@@ -139,14 +139,21 @@ conf_parse(int cold)
 	{
 		target_p = ptr->data;
 
-		if(target_p->service->reintroduce)
+		if(ServiceIntroduced(target_p))
 		{
-			/* not linked anywhere.. so dont have to! */
-			if(finished_bursting)
-				reintroduce_service(ptr->data);
-
-			target_p->service->reintroduce = 0;
+			if(ServiceDisabled(target_p))
+			{
+				deintroduce_service(target_p);
+				continue;
+			}
+			else if(ServiceReintroduce(target_p))
+			{
+				reintroduce_service(target_p);
+				continue;
+			}
 		}
+		else
+			ClearServiceReintroduce(target_p);
 	}
 			
         fclose(conf_fbfile_in);

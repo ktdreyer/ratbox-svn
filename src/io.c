@@ -683,8 +683,19 @@ signoff_client(struct connection_entry *conn_p)
 static void
 signoff_server(struct connection_entry *conn_p)
 {
+	struct client *service_p;
+	dlink_node *ptr;
+
 	if(ConnDead(conn_p))
 		return;
+
+	/* clear any introduced status */
+	DLINK_FOREACH(ptr, service_list.head)
+	{
+		service_p = ptr->data;
+
+		ClearServiceIntroduced(service_p);
+	}
 
 	if(conn_p == server_p)
 	{

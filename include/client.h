@@ -84,8 +84,6 @@ struct service
         int flood_max;
         int flood_max_ignore;
 
-	int reintroduce;		/* needs reintroducing */
-
 	struct service_command *command;
         struct ucommand_handler *ucommand;
 
@@ -117,11 +115,22 @@ struct service
 #define is_oper(x)       ((x)->user && (x)->user->umode & CLIENT_OPER)
 #define ClientAdmin(x)	 ((x)->user && (x)->user->umode & CLIENT_ADMIN)
 
-#define SERVICE_OPERED	0x001
-#define SERVICE_MSGSELF	0x002
+#define SERVICE_OPERED		0x001 /* service is opered */
+#define SERVICE_MSGSELF		0x002 /* messages come from services nick */
+#define SERVICE_DISABLED	0x004 /* should this service be disabled? */
+#define SERVICE_INTRODUCED	0x008 /* service has been introduced */
+#define SERVICE_REINTRODUCE	0x010 /* service needs reintroducing */
 
-#define ServiceOpered(x)	((x)->service && (x)->service->flags & SERVICE_OPERED)
-#define ServiceMsgSelf(x)	((x)->service && (x)->service->flags & SERVICE_MSGSELF)
+#define ServiceOpered(x)	((x)->service->flags & SERVICE_OPERED)
+#define ServiceMsgSelf(x)	((x)->service->flags & SERVICE_MSGSELF)
+#define ServiceDisabled(x)	((x)->service->flags & SERVICE_DISABLED)
+#define ServiceIntroduced(x)	((x)->service->flags & SERVICE_INTRODUCED)
+#define ServiceReintroduce(x)	((x)->service->flags & SERVICE_REINTRODUCE)
+
+#define SetServiceIntroduced(x)	((x)->service->flags |= SERVICE_INTRODUCED)
+#define SetServiceReintroduce(x) ((x)->service->flags |= SERVICE_REINTRODUCE)
+#define ClearServiceIntroduced(x)  ((x)->service->flags &= ~SERVICE_INTRODUCED)
+#define ClearServiceReintroduce(x) ((x)->service->flags &= ~SERVICE_REINTRODUCE)
 
 extern void init_client(void);
 

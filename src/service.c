@@ -130,6 +130,7 @@ introduce_service(struct client *target_p)
 		      target_p->name, ServiceOpered(target_p) ? "o" : "",
 		      target_p->service->username,
 		      target_p->service->host, MYNAME, target_p->info);
+	SetServiceIntroduced(target_p);
 }
 
 void
@@ -152,22 +153,30 @@ introduce_service_channels(struct client *target_p)
 void
 introduce_services()
 {
+	struct client *service_p;
 	dlink_node *ptr;
 
 	DLINK_FOREACH(ptr, service_list.head)
 	{
-		introduce_service(ptr->data);
+		service_p = ptr->data;
+
+		if(!ServiceDisabled(service_p))
+			introduce_service(ptr->data);
 	}
 }
 
 void
 introduce_services_channels()
 {
+	struct client *service_p;
 	dlink_node *ptr;
 
 	DLINK_FOREACH(ptr, service_list.head)
 	{
-		introduce_service_channels(ptr->data);
+		service_p = ptr->data;
+
+		if(!ServiceDisabled(service_p))
+			introduce_service_channels(ptr->data);
 	}
 }
 
@@ -177,6 +186,15 @@ reintroduce_service(struct client *target_p)
 	sendto_server(":%s QUIT :Updating information", target_p->name);
 	introduce_service(target_p);
 	introduce_service_channels(target_p);
+
+	ClearServiceReintroduce(target_p);
+}
+
+void
+deintroduce_service(struct client *target_p)
+{
+	sendto_server(":%s QUIT :Disabled", target_p->name);
+	ClearServiceIntroduced(target_p);
 }
 
 void

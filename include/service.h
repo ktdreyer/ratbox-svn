@@ -46,6 +46,7 @@ extern void introduce_service_channels(struct client *client_p);
 extern void introduce_services(void);
 extern void introduce_services_channels(void);
 extern void reintroduce_service(struct client *client_p);
+extern void deintroduce_service(struct client *client_p);
 
 extern void update_service_floodcount(void *unused);
 
