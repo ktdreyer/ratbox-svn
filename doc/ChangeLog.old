@@ -1,3 +1,11 @@
+*** 20010101_27 by davidt
+Add message_locale to doc/example.conf
+Add vchans_oper_only to doc/example.conf, doc/whats-new.txt and
+actually add the code to do it.
+Fix modload, et all to send error messages if used by non ircops
+(instead of just silently ignoring the command) 
+
+
 *** 20010101_26 by madmax
 The last patch broke /whois
 (You could only whois people on the same server if your uplink didnt forward
