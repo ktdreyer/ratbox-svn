@@ -1,3 +1,32 @@
+leeh        2002/12/07 13:42:29 UTC	(20021207_0)
+
+  Modified files:
+    include              send.h 
+    modules              m_kline.c m_unkline.c 
+    src                  Makefile.in newconf.c send.c 
+  Added files:
+    include              cluster.h 
+    src                  cluster.c 
+  Log:
+  - added sendto_match_servs(), this will walk the global server list
+    looking for matching servers we need to send data to.
+  - made remote kline/unkline use sendto_match_servs(), instead of just
+    propagating netwide.
+  - added the first half of my clustering code for sharing klines, unklines
+    and locops by default -- this is just the conf stuff.
+  
+  Revision  Changes    Path
+  7.1       +54 -0     ircd-ratbox/include/cluster.h (new)
+  7.66      +3 -0      ircd-ratbox/include/send.h
+  1.135     +13 -16    ircd-ratbox/modules/m_kline.c
+  1.69      +7 -7      ircd-ratbox/modules/m_unkline.c
+  7.121     +1 -0      ircd-ratbox/src/Makefile.in
+  7.1       +63 -0     ircd-ratbox/src/cluster.c (new)
+  7.62      +47 -1     ircd-ratbox/src/newconf.c
+  7.228     +45 -0     ircd-ratbox/src/send.c
+
+
+
 androsyn    2002/12/06 03:47:00 UTC	(20021206_0)
 
   Removed files:
