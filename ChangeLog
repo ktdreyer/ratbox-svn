@@ -1,3 +1,16 @@
+androsyn    2002/12/10 07:24:49 UTC	(20021210_0)
+
+  Modified files:
+    src                  s_bsd_sigio.c 
+  Log:
+  Remember that with SIGIO its possible for it to have multiple events queued
+  for a signal FD, causing weird problems.
+  
+  Revision  Changes    Path
+  7.33      +1 -1      ircd-ratbox/src/s_bsd_sigio.c
+
+
+
 androsyn    2002/12/09 21:51:41 UTC	(20021209_3)
 
   Modified files:
