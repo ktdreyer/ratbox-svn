@@ -1,3 +1,18 @@
+jdc         2001/12/09 22:52:05 EST	(20011210_2)
+
+  Modified files:
+    modules              m_knock.c 
+    src                  channel.c 
+  Log:
+  - Renamed s_host to src_host; s_host is reserved on Solaris 8, apparently.
+    s_ipaddr also renamed to src_ipaddr to keep consistency.
+  
+  Revision  Changes    Path
+  1.42      +6 -6      ircd-hybrid-7/modules/m_knock.c
+  7.283     +12 -16    ircd-hybrid-7/src/channel.c
+
+
+
 jdc         2001/12/09 22:15:04 EST	(20011210_1)
 
   Modified files:
