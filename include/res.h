@@ -11,10 +11,6 @@
 #define INCLUDED_sys_types_h
 #endif
 
-#ifdef VMS
-#include "nameser_compat.h"
-#endif
-
 struct Client;
 struct hostent;
 
