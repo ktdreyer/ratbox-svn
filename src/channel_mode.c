@@ -875,8 +875,6 @@ chm_hideops(struct Client *client_p, struct Client *source_p,
     resync_ops[resync_count].send = 0;
     resync_ops[resync_count].whole_chan = 1;
     resync_ops[resync_count++].sync = 0;
-
-    sendto_realops_flags(FLAGS_ALL, L_ALL, "%c", c);
   }
 }
 

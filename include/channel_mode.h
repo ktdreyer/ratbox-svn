@@ -43,7 +43,7 @@
  * of CAP_HOPS will also send a notice to the user performing the mode
  * (if it is indeed a user) informing them why.
  */
-#define BOUNCE_BAD_HOPS
+#undef BOUNCE_BAD_HOPS
 
 #define MODEBUFLEN      200
 
