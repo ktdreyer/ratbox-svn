@@ -5339,4 +5339,10 @@ if test "X${cf_openssl_ciphers}" != "X"; then
   echo ""
 fi
 
+if test "$ac_cv_efnet" = "yes"; then
+        echo "This server is configured for EFNet usage.  You should NOT use the"
+        echo "example.conf that will be installed.  Use example.efnet.conf instead."
+        echo ""
+fi
+
 echo "$ac_t"""Server is configured with NICKLEN=$ac_cv_nicklen and MAX_CLIENTS=$ac_cv_maxclients"" 1>&6
