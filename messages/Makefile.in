@@ -4,7 +4,8 @@ RM=	@RM@
 default: all
 
 SRCS = \
-  custom.po
+  custom.po \
+  custom_ejb.po
 
 OBJS = ${SRCS:.po=.mo}
 all: ${OBJS}

@@ -51,19 +51,19 @@ all: $(PROGS)
 build: all
 
 mkpasswd: $(mkpasswd_OBJECTS)
-	$(CC) $(LDFLAGS) -o mkpasswd $(mkpasswd_OBJECTS) $(IRCDLIBS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o mkpasswd $(mkpasswd_OBJECTS) $(IRCDLIBS)
 
 md5mkpasswd: $(md5mkpasswd_OBJECTS)
-	$(CC) $(LDFLAGS) -o md5mkpasswd $(md5mkpasswd_OBJECTS) $(IRCDLIBS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o md5mkpasswd $(md5mkpasswd_OBJECTS) $(IRCDLIBS)
 
 viconf: $(viconf_OBJECTS)
-	$(CC) $(LDFLAGS) -o viconf $(viconf_OBJECTS) $(IRCDLIBS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o viconf $(viconf_OBJECTS) $(IRCDLIBS)
 
 fixklines: fixklines.o $(IRCDLIBS)
-	$(CC) $(LDFLAGS) -o fixklines $(fixklines_OBJECTS) $(IRCDLIBS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o fixklines $(fixklines_OBJECTS) $(IRCDLIBS)
 
 convertconf: convertconf.o $(IRCDLIBS)
-	$(CC) $(LDFLAGS) -o convertconf $(convertconf_OBJECTS) $(IRCDLIBS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o convertconf $(convertconf_OBJECTS) $(IRCDLIBS)
 
 clean:
 	$(RM) -f $(all_OBJECTS) convertconf fixklines viconf chkconf mkpasswd md5mkpasswd *~ core *.exe

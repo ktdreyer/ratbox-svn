@@ -108,7 +108,7 @@ all: ircd
 build: all
 
 ircd: ${OBJS} y.tab.o lex.yy.o version.o
-	${CC} ${LDFLAGS} -o $@ ${OBJS} lex.yy.o y.tab.o version.o ${IRCDLIBS} ${LEXLIB}
+	${CC} $(CFLAGS) ${LDFLAGS} -o $@ ${OBJS} lex.yy.o y.tab.o version.o ${IRCDLIBS} ${LEXLIB}
 	mv version.c version.c.last
 
 install-mkdirs:

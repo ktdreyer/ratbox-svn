@@ -55,12 +55,72 @@ static  void    remove_unknown (struct Client *, char *, char *);
 static int do_numeric (char [], struct Client *,
                          struct Client *, int, char **);
 
+static int handle_command(struct Message *mptr, struct Client *cptr, struct Client *from, int i, char *para[MAXPARA]);
+
 static int hash(char *p);
 static struct Message *hash_parse(char *);
 
 struct MessageHash *msg_hash_table[MAX_MSG_HASH+10];
 
 static char buffer[1024];
+
+/* turn a string into a parc/parv pair
+ */
+
+static void
+string_to_array(char *string, int mpara, int paramcount, char *end, int *parc, char *parv[MAXPARA])
+{
+	char *ap;
+	
+	/*
+	** Must the following loop really be so devious? On
+	** surface it splits the message to parameters from
+	** blank spaces. But, if paramcount has been reached,
+	** the rest of the message goes into this last parameter
+	** (about same effect as ":" has...) --msa
+	**
+	** changed how this works - now paramcount is simply the
+	** required number of arguments for a command.  imo the
+	** previous behavior isn't needed --is
+	** ok, now we do support it, for ISON brokenness among
+	** other things. --is
+	*/
+	
+	/* Note initially true: s==NULL || *(s-1) == '\0' !! */
+
+	/* redone by is, aug 2000 */
+	if (paramcount > MAXPARA)
+		paramcount = MAXPARA;
+	
+	while((ap = strsep(&string, " ")) != NULL) 
+		if(*ap != '\0') 
+		{
+			parv[(*parc)] = ap;
+			
+			if (ap[0] == ':' || (mpara && (*parc >= mpara))) {
+				char *tendp = ap;
+				
+				while (*tendp++)
+					;
+				
+				if ( tendp < end ) /* more tokens to follow */
+					ap [ strlen (ap) ] = ' '; 
+				
+				if (ap[0] == ':')
+					ap++;
+				
+				parv[(*parc)++] = ap;
+				break;
+			}
+			
+			if(*parc < MAXPARA)
+				++(*parc);
+			else
+				break;
+		}
+	
+	parv[(*parc)] = NULL;
+}
 
 /*
  * parse a buffer.
@@ -85,7 +145,7 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
 
   if (IsDead(cptr))
     return -1;
-
+  
   for (ch = buffer; *ch == ' '; ch++)   /* skip spaces */
     /* null statement */ ;
 
@@ -102,12 +162,12 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
       sender = ch;
 
       if( (s = strchr(ch, ' ')))
-	{
-	  *s = '\0';
-	  s++;
-	  ch = s;
-	}
-
+	  {
+		  *s = '\0';
+		  s++;
+		  ch = s;
+	  }
+		  
       i = 0;
 
       if (*sender && IsServer(cptr))
@@ -217,119 +277,55 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
       i = bufend - ((s) ? s : ch);
       mptr->bytes += i;
     }
-  /*
-  ** Must the following loop really be so devious? On
-  ** surface it splits the message to parameters from
-  ** blank spaces. But, if paramcount has been reached,
-  ** the rest of the message goes into this last parameter
-  ** (about same effect as ":" has...) --msa
-  **
-  ** changed how this works - now paramcount is simply the
-  ** required number of arguments for a command.  imo the
-  ** previous behavior isn't needed --is
-  ** ok, now we do support it, for ISON brokenness among
-  ** other things. --is
-  */
 
-  /* Note initially true: s==NULL || *(s-1) == '\0' !! */
+  end = bufend - 1;
+  
+  /* XXX this should be done before parse() is called */
+  if(*end == '\n') *end-- = '\0';
+  if(*end == '\r') *end = '\0';
 
   i = 1;
-
-  end = bufend-1;
-
-  if(*end == '\n')*end-- = '\0';
-  if(*end == '\r')*end = '\0';
-
-  if (s)   /* redone by is, aug 2000 */
-  {
-      if (paramcount > MAXPARA)
-		  paramcount = MAXPARA;
-	  
-	  while((ap = strsep(&s, " ")) != NULL) 
-		  if(*ap != '\0') 
-		  {
-			  para[i] = ap;
-			  
-			  if (ap[0] == ':' || (mpara && (i >= mpara))) {
-				  char *tendp = ap;
-				  
-				  while (*tendp++)
-					  ;
-				  
-				  if ( tendp < end ) /* more tokens to follow */
-					  ap [ strlen (ap) ] = ' '; 
-				  
-				  if (ap[0] == ':')
-					  ap++;
-				  
-				  para[i++] = ap;
-				  break;
-			  }
-			  
-			  if(i < MAXPARA)
-				  ++i;
-			  else
-				  break;
-		  }
-  }
   
-  para[i] = NULL;
-  
+  if (s)
+	  string_to_array(s, mpara, paramcount, end, &i, para);
+   
   if (mptr == (struct Message *)NULL)
-    return (do_numeric(numeric, cptr, from, i, para));
+	  return do_numeric(numeric, cptr, from, i, para);
+  else
+	  return handle_command(mptr, cptr, from, i, para);
+}
 
-  mptr->count++;
-
-  /* New patch to avoid server flooding from unregistered connects
-     - Pie-Man 07/27/2000 */
-
-  if (!IsRegistered(cptr))
-  {
-      /* if its from a possible server connection
-       * ignore it.. more than likely its a header thats sneaked through
-       */
-
-      if((IsHandshake(cptr) || IsConnecting(cptr) || IsServer(cptr))
-	   && !(mptr->flags & MFLG_UNREG))
-        return -1;
-  }
-
-  /* Determine the class of this connection and assign it one of
-   * four handler types to fit in with the handler table - Pie-Man 07/24/2000
-   */
-  switch (cptr->status)
-  { 
-     case STAT_CONNECTING:
-     case STAT_HANDSHAKE:
-     case STAT_ME:
-     case STAT_UNKNOWN:
-       handle_idx = UNREGISTERED_HANDLER;
-       break;
-     case STAT_SERVER:
-       handle_idx = SERVER_HANDLER;
-       break;
-     case STAT_CLIENT:
-       handle_idx = IsOper(cptr) ? OPER_HANDLER : CLIENT_HANDLER;
-       break;
-     default:
-  /* Todo: An error should be logged here, unable to determine the class of connection.
-     Should never happen and something we need to fix if it does - Pie-Man */
-       return -1;
-  }
-
- if (handle_idx != cptr->handler)
-        log(L_ERROR,"Handler for client '%s' performing '%s' is incorrect"
-         ,cptr->name,mptr->cmd);             
-
-  handler = mptr->handlers[handle_idx];
-  /* check right amount of params is passed... --is */
-
-  if (i - 1 < mptr->parameters) {
-	  sendto_one(cptr, form_str(ERR_NEEDMOREPARAMS),
-                 me.name, para[0], mptr->cmd);
-	  return 0;
-  }
-  return (*handler)(cptr, from, i, para);
+static int
+handle_command(struct Message *mptr, struct Client *cptr, struct Client *from, int i, char *para[MAXPARA])
+{
+	MessageHandler handler = 0;
+	
+	mptr->count++;
+	
+	/* New patch to avoid server flooding from unregistered connects
+	   - Pie-Man 07/27/2000 */
+	
+	if (!IsRegistered(cptr))
+	{
+		/* if its from a possible server connection
+		 * ignore it.. more than likely its a header thats sneaked through
+		 */
+		
+		if((IsHandshake(cptr) || IsConnecting(cptr) || IsServer(cptr))
+		   && !(mptr->flags & MFLG_UNREG))
+			return -1;
+	}
+	
+	handler = mptr->handlers[cptr->handler];
+	
+/* check right amount of params is passed... --is */
+	
+	if (i - 1 < mptr->parameters) {
+		sendto_one(cptr, form_str(ERR_NEEDMOREPARAMS),
+				   me.name, para[0], mptr->cmd);
+		return 0;
+	}
+	return (*handler)(cptr, from, i, para);
 }
 
 
