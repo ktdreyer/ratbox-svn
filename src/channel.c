@@ -723,6 +723,9 @@ void channel_modes(struct Channel *chptr, struct Client *cptr,
     *mbuf++ = 'i';
   if (chptr->mode.mode & MODE_NOPRIVMSGS)
     *mbuf++ = 'n';
+  if (chptr->mode.mode & MODE_HIDEOPS)
+	  *mbuf++ = 'z';
+  
   if (chptr->mode.limit)
     {
       *mbuf++ = 'l';
@@ -1032,6 +1035,8 @@ void set_channel_mode(struct Client *cptr,
   int   whatt = MODE_ADD, the_mode = 0;
   int   done_s = NO, done_p = NO;
   int   done_i = NO, done_m = NO, done_n = NO, done_t = NO;
+  int   done_z = NO;
+  
   struct Client *who;
   char  *curr = parv[0], c, *arg, plus = '+', *tmpc;
   char  numeric[16];
@@ -1211,7 +1216,7 @@ void set_channel_mode(struct Client *cptr,
               break;
             }
 
-	  if(GlobalSetOptions.hide_chanops)
+	  if(chptr->mode.mode & MODE_HIDEOPS)
 	    {
 	      if(the_mode == MODE_CHANOP && whatt == MODE_DEL)
 		sendto_one(who,":%s MODE %s -o %s",
@@ -1304,7 +1309,7 @@ void set_channel_mode(struct Client *cptr,
               if(!strcmp(chptr->mode.key,arg))
                 break;
 
-	      if(GlobalSetOptions.hide_chanops)
+	      if(chptr->mode.mode & MODE_HIDEOPS)
 		{
 		  sendto_channel_local(ONLY_CHANOPS,
 				       chptr,
@@ -1600,7 +1605,7 @@ void set_channel_mode(struct Client *cptr,
               if (errsent(SM_ERR_RPL_B, &errors_sent))
                 break;
 
-	      if(!GlobalSetOptions.hide_chanops || isok_c)
+	      if(!(chptr->mode.mode & MODE_HIDEOPS) || isok_c)
 		{
 		  for (ptr = chptr->banlist.head; ptr; ptr = ptr->next)
 		    {
@@ -1882,6 +1887,49 @@ void set_channel_mode(struct Client *cptr,
             }
           break;
 
+			case 'z':
+				if (!isok_c)
+				{
+					if (MyClient(sptr) && !errsent(SM_ERR_NOOPS, &errors_sent))
+						sendto_one(sptr, form_str(ERR_CHANOPRIVSNEEDED), me.name,
+								   sptr->name, chname);
+					break;
+					
+				}
+
+				if(MyClient(sptr))
+				{
+					if(done_z)
+						break;
+					else
+						done_z = YES;
+					
+					/*              if ( opcnt >= MAXMODEPARAMS)
+									break; */
+				}
+				
+				if(whatt == MODE_ADD)
+				{
+              if (len + 2 >= MODEBUFLEN)
+				  break;
+              chptr->mode.mode |= MODE_HIDEOPS;
+              *mbufw++ = '+';
+              *mbufw++ = 'z';
+              len += 2;
+				}
+				else
+				{
+					if (len + 2 >= MODEBUFLEN)
+						break;
+					
+					chptr->mode.mode &= ~MODE_HIDEOPS;
+					*mbufw++ = '-';
+					*mbufw++ = 'z';
+					len += 2;
+				}
+				break;
+				
+				
         case 'p' :
           if (!isok_c)
             {
@@ -2027,7 +2075,7 @@ void set_channel_mode(struct Client *cptr,
   collapse_signs(modebuf_ex);
   collapse_signs(modebuf_de);
 
-  if(GlobalSetOptions.hide_chanops)
+  if(chptr->mode.mode & MODE_HIDEOPS)
     type = ONLY_CHANOPS;
   else
     type = ALL_MEMBERS;
@@ -2229,7 +2277,7 @@ void clear_bans_exceptions_denies(struct Client *sptr, struct Channel *chptr)
   char *mp;
   int type;
 
-  if(GlobalSetOptions.hide_chanops)
+  if(chptr->mode.mode & MODE_HIDEOPS)
     type = ONLY_CHANOPS;
   else
     type = ALL_MEMBERS;
@@ -2575,7 +2623,7 @@ void channel_member_names( struct Client *sptr,
   mlen = strlen(buf);
   cur_len = mlen;
 
-  if(GlobalSetOptions.hide_chanops && !is_any_op(chptr,sptr))
+  if(chptr->mode.mode & MODE_HIDEOPS && !is_any_op(chptr,sptr))
     {
       show_ops_flag = "";
       show_halfops_flag = "";
