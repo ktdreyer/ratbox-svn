@@ -1,5 +1,21 @@
 -- ircd-ratbox-1.0 RELNOTES 
 
+-- ircd-ratbox-1.0-rc5
+- Added ISON support for servers.  This is only allowed for irc operators
+  but only if serverhide is disabled.
+- Added a operator flag to allow or disallow operators from doing /operwall
+- Fix a bug in WHO that would leak a channel the user was in regardless of
+  +s/+p or +i modes.
+- With hide_servers=yes and disable_remote=no, the servername is removed
+  from the 312 numeric when you /whois nick, but you can just do /motd 
+  nick and see the server they are on. This has been fixed
+- Added hidden admin support
+- Fixed a bug where bare modes could be sent to local users, that is without
+  a + or - before the mode
+- Fixed a bug in foperlog that would cause a core dump
+- Added support for ip6.arpa and added a configuration option to fallback to
+  ip6.int
+
 -- ircd-ratbox-1.0-rc4
 - RESVs are now written to a file and will be kept through a restart.
   By default they are written to IRCD_PREFIX/etc/resv.conf which 
