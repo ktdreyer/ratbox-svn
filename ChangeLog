@@ -1,3 +1,15 @@
+androsyn    2003/09/22 08:49:08 EDT	(20030922_0)
+
+  Modified files:
+    include              irc_string.h 
+  Log:
+  Remove a cast that was breaking the sparc64 build
+  
+  Revision  Changes    Path
+  7.53      +1 -1      ircd-ratbox/include/irc_string.h
+
+
+
 androsyn    2003/09/17 13:03:55 EDT	(20030917_2)
 
   Modified files:
