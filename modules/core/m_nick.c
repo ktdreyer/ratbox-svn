@@ -286,7 +286,6 @@ static void ms_nick(struct Client *client_p, struct Client *source_p,
   struct Client* target_p;
   char     nick[NICKLEN + 2];
   time_t   newts = 0;
-  int      newnick = 0;
 
   if(parc < 2)
   {
@@ -331,8 +330,6 @@ static void ms_nick(struct Client *client_p, struct Client *source_p,
     newts = atol(parv[2]);
   else if(IsServer(source_p) && (parc == 9))
     newts = atol(parv[3]);
-
-  newnick = (parc == 9);
 
   /* if the nick doesnt exist, allow it and process like normal */
   if (!(target_p = find_client(nick, NULL)))
