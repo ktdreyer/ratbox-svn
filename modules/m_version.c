@@ -131,6 +131,7 @@ static void ms_version(struct Client* client_p, struct Client* source_p,
     sendto_one(source_p, form_str(RPL_VERSION), me.name,
                parv[0], ircd_version, serno, debugmode,
                me.name, confopts(source_p), serveropts);
+    show_isupport(source_p);
   }
 
   return;
