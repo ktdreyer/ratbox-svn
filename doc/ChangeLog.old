@@ -1,3 +1,11 @@
+*** 20001129_6 by db
+- renamed misnamed log_user_connect -> log_user_exit
+- move X line check into separate function (LIKE IT SHOULD HAVE BEEN
+  ALL ALONG)
+ 
+
+
+
 *** 20001129_5 by db
 - reworked register_user
   moved all check for conf/kline notification etc. back into s_conf.c
