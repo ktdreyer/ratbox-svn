@@ -13,6 +13,7 @@ LDFLAGS   	= @LDFLAGS@
 MKDEP		= ${CC} -MM
 MV		= @MV@
 RM		= @RM@
+LN              = @LN@
 
 SSL_LIBS	= @SSL_LIBS@
 SSL_INCLUDES	= @SSL_INCLUDES@
@@ -137,5 +138,8 @@ install: install-mkdirs build
 		fi; \
 		echo $(INSTALL_BIN) $$i $(bindir); \
 		$(INSTALL_BIN) $$i $(bindir); \
-	done
+	done; \
+        $(RM) -f $(bindir)/vimotd $(bindir)/viklines; \
+        $(LN) $(bindir)/viconf $(bindir)/vimotd; \
+        $(LN) $(bindir)/viconf $(bindir)/viklines
 
