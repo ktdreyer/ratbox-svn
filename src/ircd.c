@@ -65,6 +65,7 @@
 #include "s_conf.h"
 #include "s_newconf.h"
 #include "cache.h"
+#include "packet.h"
 
 /*
  * Try and find the correct name to use with getrlimit() for setting the max.
@@ -680,10 +681,10 @@ main(int argc, char *argv[])
 	eventAddOnce("try_connections_startup", try_connections, NULL, 0);
 
 	eventAddIsh("collect_zipstats", collect_zipstats, NULL, ZIPSTATS_TIME);
+	eventAddIsh("run_flood_recalc", run_flood_recalc, NULL, 1);
 
 	/* Setup the timeout check. I'll shift it later :)  -- adrian */
 	eventAddIsh("comm_checktimeouts", comm_checktimeouts, NULL, 1);
-
 	eventAddIsh("cache_links", cache_links, NULL, 300);
 
 	if(splitmode)

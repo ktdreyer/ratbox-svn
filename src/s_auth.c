@@ -154,7 +154,6 @@ release_auth_client(struct AuthRequest *auth)
 	 *     -- adrian
 	 */
 	client->localClient->allow_read = MAX_FLOOD;
-	comm_setflush(client->localClient->fd, 1000, flood_recalc, client);
 	dlinkAddTail(client, &client->node, &global_client_list);
 	hook_call_event(h_new_local_client, client);
 	read_packet(client->localClient->fd, client);

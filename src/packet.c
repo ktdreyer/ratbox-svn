@@ -165,43 +165,37 @@ flood_endgrace(struct Client *client_p)
 	client_p->localClient->sent_parsed = 0;
 }
 
-/*
- * flood_recalc
- *
- * recalculate the number of allowed flood lines. this should be called
- * once a second on any given client. We then attempt to flush some data.
- */
 void
-flood_recalc(int fd, void *data)
+run_flood_recalc(void *unused)
 {
-	struct Client *client_p = data;
-	struct LocalUser *lclient_p = client_p->localClient;
+	dlink_node *ptr, *next;
+	struct Client *client_p;
+	struct LocalUser *lclient_p;
 
-	/* This can happen in the event that the client detached. */
-	if(!lclient_p)
-		return;
+	DLINK_FOREACH_SAFE(ptr, next, lclient_list.head)
+	{
+		client_p = ptr->data;
+		lclient_p = client_p->localClient;
+		if(lclient_p == NULL || IsAnyDead(client_p))
+			continue;
 
-	/* allow a bursting client their allocation per second, allow
-	 * a client whos flooding an extra 2 per second
-	 */
-	if(IsFloodDone(client_p))
-		lclient_p->sent_parsed -= 2;
-	else
-		lclient_p->sent_parsed = 0;
+		/* allow a bursting client their allocation per second, allow
+		 * a client whos flooding an extra 2 per second
+		 */
+		if(IsFloodDone(client_p))
+			lclient_p->sent_parsed -= 2;
+		else
+			lclient_p->sent_parsed = 0;
+			
+		if(lclient_p->sent_parsed < 0)
+			lclient_p->sent_parsed = 0;
+			
+		if(--lclient_p->actually_read < 0)
+			lclient_p->actually_read = 0;
 
-	if(lclient_p->sent_parsed < 0)
-		lclient_p->sent_parsed = 0;
+		parse_client_queued(client_p);
+	}	
 
-	if(--lclient_p->actually_read < 0)
-		lclient_p->actually_read = 0;
-
-	parse_client_queued(client_p);
-
-	if(IsAnyDead(client_p))
-		return;
-
-	/* and finally, reset the flood check */
-	comm_setflush(fd, 1000, flood_recalc, client_p);
 }
 
 /*
