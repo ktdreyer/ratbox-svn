@@ -181,6 +181,7 @@ void _free_client(struct Client* client_p)
   assert(&me != client_p);
   assert(NULL == client_p->prev);
   assert(NULL == client_p->next);
+  assert(dlinkFind(&lclient_list, client_p) == NULL);
 
   if (MyConnect(client_p))
     {
