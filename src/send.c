@@ -744,18 +744,26 @@ sendto_match_butone(struct Client *one, struct Client *from, char *mask,
 
 /*
 ** send_operwall -- Send Wallop to All Opers on this server
-**
+**  now va'ified  -bill
 */
 
 void
-send_operwall(struct Client *from, char *type_message, char *message)
+send_operwall(struct Client *from, char *type_message, ...)
 
 {
   char sender[NICKLEN + USERLEN + HOSTLEN + 5];
+  char message[514];
+  char *format;
+  va_list va;
   struct Client *acptr;
   struct User *user;
   
-  if (!from || !message)
+  va_start(va, type_message);
+  format = va_arg(va, char *);
+  vsnprintf(message, sizeof(message)-2, format, va);
+  if (message[strlen(message)-1] != '\n') strncat(message, "\n\0", 2);
+
+  if (!from || !message[0])
     return;
 
   user = from->user;

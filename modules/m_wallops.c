@@ -63,7 +63,7 @@ int mo_wallops(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       return 0;
     }
 
-  send_operwall(sptr, "WALLOPS", message);
+  send_operwall(sptr, "WALLOPS", "%s", message);
   sendto_serv_butone( NULL, ":%s WALLOPS :%s", parv[0], message);
 
   return 0;
@@ -89,12 +89,12 @@ int ms_wallops(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
   if(IsServer(sptr))
     {
-      send_operwall(sptr, NULL, message);
+      send_operwall(sptr, NULL, "%s", message);
       sendto_serv_butone(cptr, ":%s WALLOPS :%s", parv[0], message);
     }
   else
     {
-      send_operwall(sptr, "WALLOPS", message);
+      send_operwall(sptr, "WALLOPS", "%s", message);
       sendto_serv_butone( cptr, ":%s WALLOPS :%s", parv[0], message);
     }
 

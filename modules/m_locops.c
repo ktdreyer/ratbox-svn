@@ -85,10 +85,7 @@ int m_locops(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
             return 0;
 
           if(parv[1])
-            {
-              message = parv[1];
-              send_operwall(acptr, "SLOCOPS", message);
-            }
+              send_operwall(acptr, "SLOCOPS", "%s", parv[1]);
           else
             return 0;
 
@@ -120,7 +117,7 @@ int m_locops(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 #ifdef SLAVE_SERVERS
       sendto_slaves(NULL,"LOCOPS",sptr->name,parc,parv);
 #endif
-      send_operwall(sptr, "LOCOPS", message);
+      send_operwall(sptr, "LOCOPS", "%s", message);
     }
   else
     {
