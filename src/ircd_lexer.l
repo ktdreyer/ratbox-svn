@@ -216,6 +216,7 @@ use_egd { return USE_EGD; }
 use_except	{ return USE_EXCEPT; }
 use_invex	{ return USE_INVEX; }
 use_knock	{ return USE_KNOCK; }
+throttle_time { return THROTTLE_TIME; }
 user		{ return USER;} 
 vchans_oper_only { return VCHANS_OPER_ONLY; }
 vhost	{ return VHOST; }

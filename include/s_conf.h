@@ -29,7 +29,7 @@
 #include <sys/param.h>
 #endif
 
-#undef PACE_CONNECT
+#define PACE_CONNECT
 
 #ifdef HAVE_LIBCRYPTO
 #include <openssl/rsa.h>
@@ -231,6 +231,8 @@ struct config_file_entry
   int           min_nonwildcard;
   int           default_floodcount;
   int           client_flood;
+  /* 0 == don't use throttle... */
+  int           throttle_time;
   int           use_egd;
 #ifdef HAVE_LIBCRYPTO
   struct EncCapability *default_cipher_preference;
@@ -401,9 +403,6 @@ extern unsigned long cidr_to_bitmask[];
 #define TOO_MANY        (-4)
 #define BANNED_CLIENT   (-5)
 #define TOO_FAST        (-6)
-
-#define RECONNECT_TIME 30
-#define MAXCONNS_PER_IP 20
 
 #define CLEANUP_TKLINES_TIME 60
 

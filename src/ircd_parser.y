@@ -254,6 +254,7 @@ int   class_redirport_var;
 %token  T_SPY
 %token  T_UNAUTH
 %token  T_WALLOP
+%token  THROTTLE_TIME
 %token  UNKLINE
 %token  USER
 %token  USE_EGD
@@ -1927,6 +1928,7 @@ general_item:       general_failed_oper_notice |
                     general_servlink_path |
                     general_default_cipher_preference |
                     general_compression_level | general_client_flood |
+                    general_throttle_time |
                     error
 
 general_failed_oper_notice:   FAILED_OPER_NOTICE '=' TYES ';'
@@ -2269,6 +2271,11 @@ general_egdpool_path: EGDPOOL_PATH '=' QSTRING ';'
     MyFree(ConfigFileEntry.egdpool_path);
     DupString(ConfigFileEntry.egdpool_path, yylval.string);
   } ;
+
+general_throttle_time: THROTTLE_TIME '=' timespec ';'
+{
+ ConfigFileEntry.throttle_time = yylval.number;
+} ;
 
 general_oper_umodes: OPER_UMODES
   {

@@ -742,7 +742,7 @@ void remove_one_ip(struct irc_inaddr *ip_in)
    continue;
 #else
   if (ptr->count != 0 ||
-      (CurrentTime-ptr->last_attempt)<=RECONNECT_TIME)
+      (CurrentTime-ptr->last_attempt)<=ConfigFileEntry.throttle_time)
    continue;
 #endif
   *lptr = ptr->next;
@@ -1588,7 +1588,8 @@ int conf_connect_allowed(struct irc_inaddr *addr, int aftype)
   return BANNED_CLIENT;
 #ifdef PACE_CONNECT
  ip_found = find_or_add_ip(addr);
- if ((CurrentTime - ip_found->last_attempt) < RECONNECT_TIME)
+ if ((CurrentTime - ip_found->last_attempt) <
+     ConfigFileEntry.throttle_time)
  {
   ip_found->last_attempt = CurrentTime;
   ip_found->count--;
@@ -2514,7 +2515,7 @@ void
 flush_expired_ips(void *unused)
 {
  int i;
- time_t expire_before = CurrentTime - RECONNECT_TIME;
+ time_t expire_before = CurrentTime - ConfigFileEntry.throttle_time;
  IP_ENTRY *ie, **iee;
  for (i=0; i<IP_HASH_SIZE; i++)
  {
@@ -2531,6 +2532,12 @@ flush_expired_ips(void *unused)
   }
   *iee = NULL;
  }
- eventAdd("flush_expired_ips", flush_expired_ips, NULL, 30, 0);
+ /* This is just so we don't mess up if the throttle_time is set to 0 to
+  * turn connect pacing off, then turned back on. */
+ if (ConfigFileEntry.throttle_time > 0)
+  eventAdd("flush_expired_ips", flush_expired_ips, NULL,
+           ConfigFileEntry.throttle_time, 0);
+ else
+  eventAdd("flush_expired_ips", flush_expired_ips, NULL, 300, 0);
 }
 #endif
