@@ -8,9 +8,7 @@ CFLAGS = @CFLAGS@
 #CFLAGS = -g -Wall
 
 all: source
-	@echo '** Building iauth/source **'
 	@cd source ; $(MAKE) "CC=$(CC)" "CFLAGS=$(CFLAGS)"
-	@echo
 
 build: all
 
