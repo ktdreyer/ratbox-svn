@@ -771,7 +771,7 @@ release_client_state(struct Client *client_p)
 	{
 		if(client_p->serv->user != NULL)
 			free_user(client_p->serv->user, client_p);
-		MyFree((char *) client_p->serv);
+		MyFree(client_p->serv);
 	}
 }
 

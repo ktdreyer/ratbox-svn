@@ -73,7 +73,7 @@ free_class(struct Class *tmp)
 {
 	Destroy_Patricia(tmp->ip_limits, NULL);
 	MyFree(tmp->class_name);
-	MyFree((char *) tmp);
+	MyFree(tmp);
 
 }
 
