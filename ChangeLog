@@ -1,3 +1,24 @@
+leeh        2004/05/25 12:39:35 EDT	(20040525_1)
+
+  Modified files:
+    modules              m_dline.c m_kline.c m_resv.c m_xline.c 
+    src                  s_conf.c 
+  Added files:
+    doc                  logfiles.txt 
+  Log:
+  - rewrote the kline log to be machine parsable
+  - added a doc describing the format of the new logfiles
+  
+  Revision  Changes    Path
+  1.1       +36 -0     ircd-ratbox/doc/logfiles.txt (new)
+  1.34      +9 -7      ircd-ratbox/modules/m_dline.c
+  1.183     +13 -10    ircd-ratbox/modules/m_kline.c
+  1.58      +11 -20    ircd-ratbox/modules/m_resv.c
+  1.52      +6 -6      ircd-ratbox/modules/m_xline.c
+  7.465     +25 -20    ircd-ratbox/src/s_conf.c
+
+
+
 leeh        2004/05/25 06:50:00 EDT	(20040525_0)
 
   Modified files:
