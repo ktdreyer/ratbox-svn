@@ -164,7 +164,6 @@ struct Client* make_client(struct Client* from)
   cptr->next    = NULL;
   cptr->prev    = NULL;
   cptr->hnext   = NULL;
-  cptr->idhnext = NULL;
   cptr->lnext   = NULL;
   cptr->lprev   = NULL;
   cptr->next_local_client     = NULL;
@@ -755,8 +754,8 @@ void add_client_to_list(struct Client *cptr)
 }
 
 /* Functions taken from +CSr31, paranoified to check that the client
-** isn't on a llist already when adding, and is there when removing -orabidoo
-*/
+ * isn't on a llist already when adding, and is there when removing -orabidoo
+ */
 void add_client_to_llist(struct Client **bucket, struct Client *client)
 {
   if (!client->lprev && !client->lnext)

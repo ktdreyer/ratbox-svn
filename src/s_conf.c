@@ -2451,8 +2451,8 @@ static void initconf(FBFILE* file, int use_include)
 
       if (!dontadd)
         {
-          (void)collapse(aconf->host);
-          (void)collapse(aconf->user);
+          collapse(aconf->host);
+          collapse(aconf->user);
           Debug((DEBUG_NOTICE,
                  "Read Init: (%d) (%s) (%s) (%s) (%d) (%d)",
                  aconf->status, aconf->host, aconf->passwd,
