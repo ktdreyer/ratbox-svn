@@ -1,3 +1,30 @@
+leeh        2002/08/14 12:06:39 EDT	(20020814_2)
+
+  Modified files:
+    contrib              m_olist.c m_owho.c m_owhois.c 
+    include              client.h newconf.h s_conf.h 
+    modules              m_kline.c m_unkline.c 
+    src                  newconf.c s_conf.c s_user.c 
+  Log:
+  - merged CONF_OPER_* and FLAGS2_OPER_* into OPER_*
+  - removed the multiple config option stuff, now just return -1; if found,
+    its broken.
+  
+  Revision  Changes    Path
+  1.3       +13 -4     ircd-ratbox/contrib/m_olist.c
+  1.3       +13 -5     ircd-ratbox/contrib/m_owho.c
+  1.3       +13 -5     ircd-ratbox/contrib/m_owhois.c
+  7.163     +37 -54    ircd-ratbox/include/client.h
+  7.8       +0 -1      ircd-ratbox/include/newconf.h
+  7.191     +1 -13     ircd-ratbox/include/s_conf.h
+  1.112     +2 -2      ircd-ratbox/modules/m_kline.c
+  1.53      +2 -2      ircd-ratbox/modules/m_unkline.c
+  7.19      +36 -46    ircd-ratbox/src/newconf.c
+  7.331     +27 -62    ircd-ratbox/src/s_conf.c
+  7.214     +1 -1      ircd-ratbox/src/s_user.c
+
+
+
 leeh        2002/08/13 20:23:24 EDT	(20020814_1)
 
   Modified files:
