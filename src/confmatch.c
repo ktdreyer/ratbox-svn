@@ -171,7 +171,6 @@ find_conf_by_address (const char *hostname,
 			}
 		}
 	}
-	return NULL;
 
 	if(addr != NULL)
 	{
@@ -182,6 +181,7 @@ find_conf_by_address (const char *hostname,
 				return aconf;
 		}
 	}
+	return NULL;
 
 }
 
