@@ -25,6 +25,7 @@
 #include "tools.h"
 #include "handlers.h"
 #include "channel.h"
+#include "channel_mode.h"
 #include "client.h"
 #include "ircd.h"
 #include "numeric.h"
@@ -93,7 +94,7 @@ static void mo_clearchan(struct Client *client_p, struct Client *source_p,
   int on_vchan = 0;
 
   /* admins only */
-  if (!IsSetOperAdmin(source_p))
+  if (!IsOperAdmin(source_p))
     {
       sendto_one(source_p, ":%s NOTICE %s :You have no A flag", me.name, parv[0]);
       return;
@@ -101,7 +102,7 @@ static void mo_clearchan(struct Client *client_p, struct Client *source_p,
 
   /* XXX - we might not have CBURSTed this channel if we are a lazylink
    * yet. */
-  chptr= hash_find_channel(parv[1], NULL);
+  chptr= hash_find_channel(parv[1]);
   root_chptr = chptr;
   if (chptr && parc > 2 && parv[2][0] == '!')
     {
@@ -179,10 +180,9 @@ static void mo_clearchan(struct Client *client_p, struct Client *source_p,
     add_vchan_to_client_cache(source_p,root_chptr,chptr);
   chptr->mode.mode =
     MODE_SECRET | MODE_TOPICLIMIT | MODE_INVITEONLY | MODE_NOPRIVMSGS;
-  MyFree(chptr->topic_info);
-  chptr->topic_info = 0;
-  *chptr->topic = 0;
-  *chptr->mode.key = 0;
+  chptr->topic_info[0] = '\0';
+  chptr->topic[0] = '\0';
+  chptr->mode.key[0] = 0;
 
   /* Kick the users out and join the oper */
   kick_list(client_p, source_p, chptr, &chptr->peons, chptr->chname);
@@ -206,7 +206,7 @@ void kick_list(struct Client *client_p, struct Client *source_p, struct Channel 
       sendto_server(NULL, source_p, chptr, NOCAPS, NOCAPS, LL_ICLIENT,
                     ":%s KICK %s %s :CLEARCHAN", source_p->name,
                     chname, who->name);
-      remove_user_from_channel(chptr, who, 0);
+      remove_user_from_channel(chptr, who);
     }
 
   /* Join the user themselves to the channel down here, so they dont see a nicklist 
@@ -238,14 +238,28 @@ static void remove_our_modes( int hide_or_not,
                               struct Client *source_p)
 {
   remove_a_mode(hide_or_not, chptr, top_chptr, source_p, &chptr->chanops, 'o');
+#ifdef REQUIRE_OANDV
+  remove_a_mode(hide_or_not, chptr, top_chptr, source_p, &chptr->chanops_voiced, 'o');
+#endif
   remove_a_mode(hide_or_not, chptr, top_chptr, source_p, &chptr->halfops, 'h');
   remove_a_mode(hide_or_not, chptr, top_chptr, source_p, &chptr->voiced, 'v');
+#ifdef REQUIRE_OANDV
+  remove_a_mode(hide_or_not, chptr, top_chptr, source_p, &chptr->chanops_voiced, 'v');
+#endif
 
   /* Move all voice/ops etc. to non opped list */
   dlinkMoveList(&chptr->chanops, &chptr->peons);
   dlinkMoveList(&chptr->halfops, &chptr->peons);
   dlinkMoveList(&chptr->voiced, &chptr->peons);
-  chptr->opcount = 0;
+#ifdef REQUIRE_OANDV
+  dlinkMoveList(&chptr->chanops_voiced, &chptr->peons);
+#endif
+  dlinkMoveList(&chptr->locchanops, &chptr->locpeons);
+  dlinkMoveList(&chptr->lochalfops, &chptr->locpeons);
+  dlinkMoveList(&chptr->locvoiced, &chptr->locpeons);
+#ifdef REQUIRE_OANDV
+  dlinkMoveList(&chptr->locchanops_voiced, &chptr->locpeons);
+#endif
 
   /* Clear all +beI modes */
   free_channel_list(&chptr->banlist);
@@ -253,7 +267,6 @@ static void remove_our_modes( int hide_or_not,
   free_channel_list(&chptr->invexlist);
   chptr->banlist.head = chptr->exceptlist.head = chptr->invexlist.head = NULL;
   chptr->banlist.tail = chptr->exceptlist.tail = chptr->invexlist.tail = NULL;
-
 }
 
 

@@ -151,7 +151,7 @@ static void mo_forcepart(struct Client *client_p, struct Client *source_p,
                            target_p->name, target_p->username,
 	  	           target_p->host,chptr->chname,
 		           target_p->name);
-      remove_user_from_channel(chptr, target_p, 0);
+      remove_user_from_channel(chptr, target_p);
     }
   }
 }
