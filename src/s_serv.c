@@ -313,20 +313,14 @@ void add_server_to_list(struct Client *client_p)
 void remove_server_from_list(struct Client *client_p)
 {
   dlink_node *ptr;
-  struct Client *target_p;
 
-  DLINK_FOREACH(ptr, global_serv_list.head)
+  ptr = dlinkFind(&global_serv_list, client_p);
+
+  if(ptr != NULL)
   {
-    target_p = ptr->data;
-
-    if (client_p == target_p)
-    {
-      dlinkDelete(ptr,&global_serv_list);
-      free_dlink_node(ptr);
-      break;
-    }
-  }    
-  return; 
+    dlinkDelete(ptr, &global_serv_list);
+    free_dlink_node(ptr);
+  }
 }
 
 /*
