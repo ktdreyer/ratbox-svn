@@ -1,3 +1,15 @@
+leeh        2004/03/02 17:10:42 EST	(20040302_18)
+
+  Modified files:
+    include              patchlevel.h 
+  Log:
+  - revved patchlevel to 2.0b1
+  
+  Revision  Changes    Path
+  7.52      +1 -1      ircd-ratbox/include/patchlevel.h
+
+
+
 leeh        2004/03/02 16:32:15 EST	(20040302_17)
 
   Modified files:
