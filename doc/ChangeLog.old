@@ -1,3 +1,8 @@
+*** 20010424_6 by habeeb
+Changed daemon() to make_daemon() to fix printing of startup messages,
+removed code to check for daemon() in configure, cleaned up a few things.
+
+
 *** 20010424_5 by jdc
 * Removed kqueue bug; recent cvs seems to have fixed it.
 
