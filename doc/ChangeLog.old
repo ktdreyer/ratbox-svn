@@ -1,3 +1,8 @@
+*** 20010128_11 by wcampbel
+Applied the OpenBSD a.out fix
+Someone test this to make sure it still runs right on BSD/Linux/Solaris...
+
+
 *** 20010128_10 by ejb
 OOH
 YES YES YES
