@@ -1,3 +1,20 @@
+leeh        2002/05/27 08:14:54 EDT	(20020527_0)
+
+  Modified files:
+    doc                  example.conf.efnet 
+    src                  ircd_parser.y 
+  Log:
+  - removed the havent_read_conf from efnets example config, we know theyre
+    not gunna read the conf anyway and thisll just make it worse
+  - dont enable compressed links by default, only when someone sets
+    compressed=yes;
+  
+  Revision  Changes    Path
+  7.15      +0 -3      ircd-hybrid-7/doc/example.conf.efnet
+  1.251     +0 -3      ircd-hybrid-7/src/ircd_parser.y
+
+
+
 leeh        2002/05/26 18:49:58 EDT	(20020526_10)
 
   Modified files:
