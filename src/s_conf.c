@@ -3377,7 +3377,7 @@ void read_conf_files(int cold)
 
   /* ZZZ have to deal with single ircd.conf situations */
 
-#ifdef KLINE_PATH
+#ifdef KPATH
   filename = get_conf_name(KLINE_TYPE);
 
   if ((file = openconf(filename)) == 0)
