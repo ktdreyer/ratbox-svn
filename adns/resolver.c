@@ -93,20 +93,9 @@ fd_set readfds;
 fd_set writefds;
 fd_set exceptfds;
 
-dlink_list sendq_list;
 adns_state dns_state;
 int fd = -1;
 
-struct send_queue
-{
-        const char *buf;
-        int len;
-        int pos;
-};
-                        
-
-static int write_sendq(void);
-static int sock_write(const char *buf, int len);
 
 static void
 restart_resolver(int sig)
@@ -340,7 +329,7 @@ static void send_answer(struct dns_request *req, adns_answer *reply)
 			if(result != 0)
 			{
 				snprintf(buf, sizeof(buf), "REV %s 0 FAILED\n", req->reqid);
-				sock_write(buf, strlen(buf));	
+				send(fd, buf, strlen(buf));
 				MyFree(reply);
 				MyFree(req);
 
@@ -364,7 +353,8 @@ static void send_answer(struct dns_request *req, adns_answer *reply)
 		result = 0;
 	}
 	snprintf(buf, sizeof(buf), "%s %s %d %s\n", rtype, req->reqid, result, response);
-	sock_write(buf, strlen(buf));	
+	if(send(fd, buf, strlen(buf), 0) == -1)
+		report_error("send failure");
 	MyFree(reply);
 	MyFree(req);
 }
@@ -404,11 +394,10 @@ static void process_adns_incoming(void)
 static void
 read_io(void)
 {
-//	dlink_node *ptr;
-//	dlink_node *next_ptr;
-	struct timeval *tv, tvbuf, tvx;
+	struct timeval *tv, tvbuf, tvx, now;
 	int select_result;
 	int maxfd = -1;
+	
 	while(1)
 	{
 		FD_ZERO(&readfds);
@@ -416,12 +405,10 @@ read_io(void)
 		FD_ZERO(&exceptfds);
 
 		FD_SET(fd, &readfds);
-		if(dlink_list_length(&sendq_list) > 0)
-			FD_SET(fd, &writefds);
 		tv = &tvx;
 		maxfd = fd;
-
-		adns_beforeselect(dns_state, &maxfd, &readfds, &writefds, &exceptfds, &tv, &tvbuf, 0);
+		gettimeofday(&now, NULL);
+		adns_beforeselect(dns_state, &maxfd, &readfds, &writefds, &exceptfds, &tv, &tvbuf, &now);
 
 		tvx.tv_sec = 1L;
 		tvx.tv_usec = 0L;
@@ -435,7 +422,8 @@ read_io(void)
 		/* have data to parse */
 		if(select_result > 0)
 		{
-			adns_afterselect(dns_state, maxfd, &readfds,&writefds,&exceptfds, 0);
+			gettimeofday(&now, NULL);
+			adns_afterselect(dns_state, maxfd, &readfds,&writefds,&exceptfds, &now);
 			
 			process_adns_incoming();
 			
@@ -444,12 +432,6 @@ read_io(void)
 				process_request();
 				/* incoming requests */
 			}
-			if(FD_ISSET(fd, &writefds))
-			{
-				/* process outgoing */
-				write_sendq();
-			}
-
 		}
 	}
 }
@@ -515,139 +497,6 @@ io_to_array(char *string, char *parv[MAXPARA])
 }
 
 
-/* get_sendq()
- *   gets the sendq of a given connection
- *
- * inputs       - connection entry to get sendq for
- * outputs      - sendq
- */
-unsigned long
-get_sendq(void)
-{
-        struct send_queue *sendq_ptr;
-        dlink_node *ptr;
-        unsigned long sendq = 0;
-
-        DLINK_FOREACH(ptr, sendq_list.head)
-        {
-                sendq_ptr = ptr->data;
-
-                sendq += sendq_ptr->len;
-        }
-
-        return sendq;
-}
-
-/* write_sendq()
- *   write()'s as much of a given users sendq as possible
- *
- * inputs	- connection to flush sendq of
- * outputs	- -1 on fatal error, 0 on partial write, otherwise 1
- */
-static int
-write_sendq(void)
-{
-	struct send_queue *sendq;
-	dlink_node *ptr;
-	dlink_node *next_ptr;
-	int n;
-
-	DLINK_FOREACH_SAFE(ptr, next_ptr, sendq_list.head)
-	{
-		sendq = ptr->data;
-
-		/* write, starting at the offset */
-		if((n = write(fd, sendq->buf + sendq->pos, sendq->len)) < 0)
-		{
-			if(n == -1 && ignore_errno(errno))
-				return 0;
-
-			return -1;
-		}
-
-		/* wrote full sendq? */
-		if(n == sendq->len)
-		{
-			dlink_destroy(ptr, &sendq_list);
-			MyFree((void *)sendq->buf);
-			MyFree(sendq);
-		}
-		else
-		{
-			sendq->pos += n;
-			sendq->len -= n;
-			return 0;
-		}
-	}
-
-	return 1;
-}
-
-/* sendq_add()
- *   adds a given buffer to a connections sendq
- *
- * inputs	- connection to add to, buffer to add, length of buffer,
- *		  offset at where to start writing
- * outputs	-
- */
-static void
-sendq_add(const char *buf, int len, int offset)
-{
-	struct send_queue *sendq;
-	sendq = MyMalloc(sizeof(struct send_queue));
-	sendq->buf = MyStrdup(buf);
-	sendq->len = len - offset;
-	sendq->pos = offset;
-	dlink_add_tail_alloc(sendq, &sendq_list);
-}
-
-
-/* sock_write()
- *   Writes a buffer to a given user, flushing sendq first.
- *
- * inputs	- connection to write to, buffer, length of buffer
- * outputs	- -1 on fatal error, 0 on partial write, otherwise 1
- */
-static int
-sock_write(const char *buf, int len)
-{
-	int n;
-
-	if(dlink_list_length(&sendq_list) > 0)
-	{
-		n = write_sendq();
-
-		/* got a partial write, add the new line to the sendq */
-		if(n == 0)
-		{
-			sendq_add(buf, len, 0);
-			return 0;
-		}
-		else if(n == -1)
-			return -1;
-	}
-
-	if((n = write(fd, buf, len)) < 0)
-	{
-		if(!ignore_errno(errno))
-			return -1;
-
-		/* write wouldve blocked so wasnt done, we didnt write
-		 * anything so reset n to zero and carry on.
-		 */
-		n = 0;
-	}
-
-	/* partial write.. add this line to sendq with offset of however
-	 * much we wrote
-	 */
-	if(n != len)
-		sendq_add(buf, len, n);
-
-	return 1;
-}
-
-
 /*
 request protocol:
 
@@ -679,18 +528,15 @@ process_request(void)
 
 	if(get_line(buf, sizeof(buf)) <= 0)
 	{
-		if(!ignore_errno(errno))
-			report_error("Failed reading line");
-		else
-			return;
+		report_error("Failed reading line");
 	}
 	parc = io_to_array(buf, parv);
-#if 0
-	if(parc != 3)
+
+	if(parc != 4)
 	{
 		report_error("Server didn't send me the right amount of arguments, I quit");
 	}
-#endif	
+
 	switch(*parv[0])
 	{
 	
