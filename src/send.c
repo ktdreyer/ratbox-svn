@@ -443,8 +443,11 @@ sendto_one_prefix(struct Client *to, struct Client *prefix,
   va_end(args);
 
   ilen = ircsprintf(ibuf, ":%s %s", ID(prefix), sendbuf);
+  ilen = send_trim(ibuf, ilen);
+
   llen = ircsprintf(lbuf, ":%s %s", prefix->name, sendbuf);
-  
+  llen = send_trim(lbuf, llen);
+
   if (IsServer(to_sendto) && IsCapable(to->from, CAP_UID))
     send_message(to_sendto, ibuf, ilen);
   else
@@ -457,7 +460,7 @@ sendto_one_prefix(struct Client *to, struct Client *prefix,
  * sendto_channel_butone
  *
  * inputs	- pointer to client(server) to NOT send message to
- *		- pointer to cient that is sending this message
+ *		- pointer to client that is sending this message
  *		- pointer to channel being sent to
  *		- vargs message
  * output	- NONE
@@ -1531,6 +1534,20 @@ send_format(char *lsendbuf, const char *pattern, va_list args)
 
   len = vsprintf_irc(lsendbuf, pattern, args);
 
+  return (send_trim(lsendbuf,len));
+}
+
+/*
+ * send_trim
+ *
+ * inputs	- pointer to buffer to trim
+ *		- length of buffer
+ * output	- new length of buffer if modified otherwise original len
+ * side effects	- input buffer is trimmed if needed
+ */
+static int
+send_trim(char *lsendbuf,int len)
+{
   /*
    * from rfc1459
    *
@@ -1558,34 +1575,7 @@ send_format(char *lsendbuf, const char *pattern, va_list args)
    * of an overflow.
    * -wnder
    */
-  if (len > 510)
-    {
-      lsendbuf[IRCD_BUFSIZE-2] = '\r';
-      lsendbuf[IRCD_BUFSIZE-1] = '\n';
-      lsendbuf[IRCD_BUFSIZE] = '\0';
-      len = IRCD_BUFSIZE;
-    }
-  else
-    {
-      lsendbuf[len++] = '\r';
-      lsendbuf[len++] = '\n';
-      lsendbuf[len] = '\0';
-    }
 
-  return(len);
-}
-
-/*
- * send_trim
- *
- * inputs	- pointer to buffer to trim
- *		- length of buffer
- * output	- new length of buffer if modified otherwise original len
- * side effects	- input buffer is trimmed if needed
- */
-static int
-send_trim(char *lsendbuf,int len)
-{
   if(len > 510)
     {
       lsendbuf[IRCD_BUFSIZE-2] = '\r';
@@ -1594,4 +1584,52 @@ send_trim(char *lsendbuf,int len)
       return(IRCD_BUFSIZE);
     }
   return len;
+}
+
+/*
+ * kill_client
+ *
+ * inputs	- client to send kill towards
+ * 		- pointer to client to kill
+ * 		- reason for kill
+ * output	- NONE
+ * side effects	- NONE
+ */
+
+void
+kill_client(struct Client *cptr,
+	    struct Client *diedie, const char *pattern, ...)
+{
+  va_list args;
+  int len = 0;
+  int len_uid=0;
+  int len_nick=0;
+  int have_uid;
+  char sendbuf_uid[IRCD_BUFSIZE*2];
+  char sendbuf_nick[IRCD_BUFSIZE*2];
+  char reason[IRCD_BUFSIZE*2];
+
+  va_start(args, pattern);
+  len = send_format(reason,"%s",args);
+  va_end(args);
+  
+  have_uid = 0;
+  if(HasID(diedie))
+    {
+      len_nick = ircsprintf(sendbuf_nick,"%s KILL %s :%s",
+			    me.name, diedie->user->id, reason);
+      len_nick = send_trim(sendbuf_nick, len_nick);
+      have_uid = 1;
+    }		    
+  else
+    {
+      len_uid  = ircsprintf(sendbuf_uid,":%s KILL %s :%s",
+			    me.name,diedie->name, reason);
+      len_uid  = send_trim(sendbuf_uid, len_uid);
+    }
+
+  if (have_uid && IsCapable(cptr, CAP_UID))
+    send_message(cptr, (char *)sendbuf_uid, len_uid);
+  else
+    send_message(cptr, (char *)sendbuf_nick, len_nick);
 }

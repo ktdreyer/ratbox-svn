@@ -162,6 +162,10 @@ extern  void sendto_anywhere(struct Client *, struct Client *,
 	    __attribute__((format (printf, 3, 4)));
 #endif
 
+extern void
+kill_client(struct Client *cptr, struct Client *diedie,
+	    const char *pattern, ... );
+
 /* used when sending to #mask or $mask */
 
 #define MATCH_SERVER  1
