@@ -1,3 +1,7 @@
+*** 20010110_2 by wcampbel
+Added the documentation for the new mkpasswd
+
+
 *** 20010110_1 by db
 - cleanups to client.c and channel.c
   removed unnecessary function call, reformatted some code blocks
