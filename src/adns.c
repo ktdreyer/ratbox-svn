@@ -83,6 +83,7 @@ void dns_do_callbacks(void)
 		{
 			case 0:
 				/* Looks like we got a winner */			
+				assert(query->callback != NULL);
 				query->query = NULL;
 				query->callback(query->ptr, answer);
 				break;
@@ -90,6 +91,7 @@ void dns_do_callbacks(void)
 				/* Go into the queue again */
 				break;;
 			default:
+				assert(query->callback != NULL);
 				/* Awww we failed, what a shame */
 				query->query = NULL;
 				query->callback(query->ptr, NULL);		
