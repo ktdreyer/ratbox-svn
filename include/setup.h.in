@@ -112,9 +112,6 @@
 /* Define if we have socklen_t */
 #undef HAVE_SOCKLEN_T
 
-/* Define if we have a long time_t */
-#undef HAVE_LONG_TIME_T
-
 /* Define based upon RLIMIT value is found in sys/resource.h */
 /* By default, we assume nothing is found. */
 #undef RLIMIT_FD_MAX
