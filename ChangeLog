@@ -1,3 +1,17 @@
+leeh        2005/01/04 19:31:00 EST	(20050105_0)
+
+  Modified files:
+    src                  s_operbot.c scommand.c 
+  Log:
+  - change "Operbot" to operbots actual nick in objoin/obpart
+  - make whois output RPL_WHOISACCOUNT for logged in users
+  
+  Revision  Changes    Path
+  1.23      +8 -8      rserv/src/s_operbot.c
+  1.22      +8 -0      rserv/src/scommand.c
+
+
+
 leeh        2005/01/04 18:32:19 EST	(20050104_19)
 
   Modified files:
