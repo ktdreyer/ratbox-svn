@@ -181,7 +181,7 @@ void *_MyRealloc(void *x, size_t y)
 {
     void *ret = realloc(x, y);
 
-    if (!ret)
+    if (ret == NULL)
 	outofmemory();
     return ret;
 }
@@ -194,7 +194,7 @@ void _MyFree(void *x)
 
 void _DupString(char **x, const char *y)
 {
-    (*x) = MyMalloc(strlen(y) + 1);
+    (*x) = malloc(strlen(y) + 1);
     strcpy((*x), y);
 }
 
