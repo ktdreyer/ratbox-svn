@@ -6,6 +6,12 @@
 #include "debug.h"
 #include "config.h"
 
+#ifndef VMS
+# define OPTCHAR '-'
+#else
+# define OPTCHAR '/'
+#endif
+
 void
 parseargs(int *argc, char ***argv, struct lgetopt *opts)
 {
@@ -26,7 +32,7 @@ parseargs(int *argc, char ***argv, struct lgetopt *opts)
 	}
       
       /* check if it *is* an arg.. */
-      if ((*argv)[0][0] != '-')
+      if ((*argv)[0][0] != OPTCHAR)
 	{
 	  return;
 	}
@@ -49,8 +55,8 @@ parseargs(int *argc, char ***argv, struct lgetopt *opts)
 		case INTEGER:
 		  if (*argc < 2)
 		    {
-		      fprintf(stderr, "Error: option '-%s' requires an argument\n",
-			      opts[i].opt);
+		      fprintf(stderr, "Error: option '%c%s' requires an argument\n",
+			      OPTCHAR, opts[i].opt);
 		      usage((*argv)[0]);
 		    }
 		  
@@ -59,8 +65,8 @@ parseargs(int *argc, char ***argv, struct lgetopt *opts)
 		case STRING:
 		  if (*argc < 2)
 		    {
-		      fprintf(stderr, "error: option '-%s' requires an argument\n",
-			      opts[i].opt);
+		      fprintf(stderr, "error: option '%c%s' requires an argument\n",
+			      OPTCHAR, opts[i].opt);
 		      usage(progname);
 		    }
 		  
@@ -76,8 +82,8 @@ parseargs(int *argc, char ***argv, struct lgetopt *opts)
 		case ENDEBUG:
 		  if (*argc < 2)
 		    {
-		      fprintf(stderr, "error: option '-%s' requires an argument\n",
-			      opts[i].opt);
+		      fprintf(stderr, "error: option '%c%s' requires an argument\n",
+			      OPTCHAR, opts[i].opt);
 		      usage(progname);
 		    }
 
@@ -100,7 +106,7 @@ parseargs(int *argc, char ***argv, struct lgetopt *opts)
 	}
 	if (!found)
 	  {
-	    fprintf(stderr, "error: unknown argument '-%s'\n", (*argv)[0]);
+	    fprintf(stderr, "error: unknown argument '%c%s'\n", OPTCHAR, (*argv)[0]);
 	    usage(progname);
 	  }
     }
@@ -116,7 +122,7 @@ usage(char *name)
   
   for (i = 0; myopts[i].opt; i++)
     {
-      fprintf(stderr, "\t-%-10s %-20s%s\n", myopts[i].opt, 
+      fprintf(stderr, "\t%c%-10s %-20s%s\n", OPTCHAR, myopts[i].opt, 
 	      (myopts[i].argtype == YESNO || myopts[i].argtype == USAGE) ? "" : 
 	      myopts[i].argtype == INTEGER ? "<number>" : "<string>",
 	      myopts[i].desc);
