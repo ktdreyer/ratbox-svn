@@ -1,3 +1,25 @@
+leeh        2002/08/24 19:27:41 EDT	(20020824_6)
+
+  Modified files:
+    doc                  example.conf example.efnet.conf 
+    include              newconf.h s_conf.h 
+    modules              m_info.c 
+    src                  newconf.c s_conf.c 
+  Log:
+  - added ConfigFileEntry.tkline_expire_notices
+  - updated m_info.c
+  
+  Revision  Changes    Path
+  7.176     +5 -0      ircd-ratbox/doc/example.conf
+  7.11      +7 -2      ircd-ratbox/doc/example.efnet.conf
+  7.11      +1 -0      ircd-ratbox/include/newconf.h
+  7.197     +1 -0      ircd-ratbox/include/s_conf.h
+  1.63      +31 -1     ircd-ratbox/modules/m_info.c
+  7.27      +7 -0      ircd-ratbox/src/newconf.c
+  7.345     +13 -11    ircd-ratbox/src/s_conf.c
+
+
+
 androsyn    2002/08/24 17:10:09 EDT	(20020824_5)
 
   Modified files:
