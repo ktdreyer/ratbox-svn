@@ -1,3 +1,8 @@
+*** 20010604_1 by db
+- fixed core on /rehash
+
+
+
 *** 20010603_7 by ejb
 - VMS fixes to motd.h.
 - support for port = 1, 2; and port =1 .. 5; in ircd.conf.
