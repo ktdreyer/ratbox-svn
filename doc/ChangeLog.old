@@ -1,3 +1,7 @@
+*** 20010104_29 by davidt
+Fix ISON for lazylinks.  cosmetic fix for LLNICK.
+
+
 *** 20010104_28 by fl_
 - gave contrib/ a makefile..
 
