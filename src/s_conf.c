@@ -107,7 +107,7 @@ static void clear_special_conf(struct ConfItem **);
 typedef struct ip_entry
 {
 #ifndef IPV6
-  unsigned long ip;
+  u_int32_t ip;
 #else
   struct irc_inaddr ip;
 #endif
@@ -769,7 +769,7 @@ static int hash_ip(struct irc_inaddr *addr)
 {
 #ifndef IPV6
   int hash;
-  unsigned long ip;
+  u_int32_t ip;
 
   ip = ntohl(PIN_ADDR(addr));
   hash = ((ip >> 12) + ip) & (IP_HASH_SIZE-1);
