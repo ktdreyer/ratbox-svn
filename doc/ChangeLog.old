@@ -1,3 +1,8 @@
+*** 20001229_4 by toot
+. hide H in version with hide_server
+. use MAXMODEPARAMS rather than 4 in the +a sync stuff
+
+
 *** 20001229_3 by db
 - increased MessageFileLine length this should be malloced ;-/
 - added server info to user seen /links
