@@ -63,7 +63,6 @@
 
 static void check_pings_list(dlink_list *list);
 static void check_unknowns_list(dlink_list *list);
-static void free_exited_clients(void *unused);
 
 static EVH check_pings;
 
