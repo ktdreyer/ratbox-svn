@@ -1,3 +1,15 @@
+db          2001/12/11 23:58:36 EST	(20011212_1)
+
+  Modified files:
+    src                  s_conf.c 
+  Log:
+  - "forward" ported hwy101's tkline expire notify from 6 to 7
+  
+  Revision  Changes    Path
+  7.279     +7 -1      ircd-hybrid-7/src/s_conf.c
+
+
+
 androsyn    2001/12/11 23:13:49 EST	(20011212_0)
 
   Removed files:
