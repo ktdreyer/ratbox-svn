@@ -2107,12 +2107,15 @@ void set_channel_mode(struct Client *cptr,
   */
 
   *mbufw = *mbuf2w = *pbufw = *pbuf2w = *mbufw_ex = *pbufw_ex = 
-  *mbufw_de = *pbufw_de = *mbufw_invex = *pbufw_invex = '\0';
+  *mbufw_de = *pbufw_de = *mbufw_invex = *pbufw_invex = 
+  *mbufw_hops = *pbufw_hops = '\0';
 
   collapse_signs(modebuf);
   collapse_signs(modebuf_ex);
   collapse_signs(modebuf_de);
-
+  collapse_signs(modebuf_invex);
+  collapse_signs(modebuf_hops);
+  
   if(chptr->mode.mode & MODE_HIDEOPS)
     type = ONLY_CHANOPS;
   else
@@ -2142,6 +2145,7 @@ void set_channel_mode(struct Client *cptr,
 			    sptr->name, chptr->chname,
 			    modebuf, parabuf);
     }
+
   if(*modebuf_ex)
     {
       if(IsServer(sptr))
@@ -2212,6 +2216,30 @@ void set_channel_mode(struct Client *cptr,
 			     modebuf_invex, parabuf_invex);
     }	
                      
+  if(*modebuf_hops)
+    {
+      if(IsServer(sptr))
+	sendto_channel_local(type,
+			     chptr,
+			     ":%s MODE %s %s %s",
+			     me.name,
+			     chname,
+			     modebuf_hops, parabuf_hops);
+      else
+	sendto_channel_local(type,
+			     chptr,
+			     ":%s!%s@%s MODE %s %s %s",
+			     sptr->name,
+			     sptr->username,
+			     sptr->host,
+			     chname,
+			     modebuf_hops, parabuf_hops);
+
+      sendto_match_cap_servs(chptr, cptr, CAP_HOPS, ":%s MODE %s %s %s",
+			     sptr->name, chptr->chname,
+			     modebuf_hops, parabuf_hops);
+    }	
+
   return;
 }
 

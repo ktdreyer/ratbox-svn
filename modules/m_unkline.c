@@ -49,11 +49,11 @@
 #include <unistd.h>
 
 struct Message msgtabs[] = {
-  {MSG_UNKLINE, 0, 2, 0, MFLG_SLOW, 0,
+  {MSG_UNKLINE, 0, 1, 0, MFLG_SLOW, 0,
    {m_unregistered, m_not_oper, m_error, mo_unkline}},
-  {MSG_UNDLINE, 0, 2, 0, MFLG_SLOW, 0,
+  {MSG_UNDLINE, 0, 1, 0, MFLG_SLOW, 0,
    {m_unregistered, m_not_oper, m_error, mo_undline}}, 
-  {MSG_UNGLINE, 0, 2, 0, MFLG_SLOW, 0,
+  {MSG_UNGLINE, 0, 1, 0, MFLG_SLOW, 0,
    {m_unregistered, m_not_oper, m_error, mo_ungline}}
 };
 
