@@ -52,7 +52,6 @@
 #include "md5.h"
 #include "msg.h"		/* msgtab */
 #include "hostmask.h"
-#include "iplines.h"
 #include "numeric.h"
 #include "parse.h"
 #include "res.h"
