@@ -226,7 +226,7 @@ read_packet(int fd, void *data)
     }
 
   /* Attempt to parse what we have */
-  if (parse_client_queued(cptr) == CLIENT_OK) {
+  if (parse_client_queued(cptr) != CLIENT_EXITED) {
     /* If we get here, we need to register for another COMM_SELECT_READ */
     if (PARSE_AS_SERVER(cptr)) {
       comm_setselect(cptr->fd, FDLIST_SERVER, COMM_SELECT_READ,
