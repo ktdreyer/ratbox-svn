@@ -1935,7 +1935,7 @@ general_item:       general_failed_oper_notice |
                     general_default_cipher_preference |
                     general_compression_level | general_client_flood |
                     general_throttle_time | general_havent_read_conf |
-                    general_dot_in_ip6_addr
+                    general_dot_in_ip6_addr |
                     error
 
 general_failed_oper_notice:   FAILED_OPER_NOTICE '=' TYES ';'
