@@ -1,3 +1,15 @@
+leeh        2004/03/01 18:58:33 EST	(20040301_17)
+
+  Modified files:
+    src                  s_serv.c 
+  Log:
+  - s/client_p/target_p
+  
+  Revision  Changes    Path
+  7.378     +1 -1      ircd-ratbox/src/s_serv.c
+
+
+
 androsyn    2004/03/01 18:48:07 EST	(20040301_16)
 
   Modified files:
