@@ -65,10 +65,12 @@
 		" ETRACE"		\
 		" CPRIVMSG"		\
 		" CNOTICE"		\
-		" DEAF=D"
+		" DEAF=D"		\
+		" MONITOR=%d"
 
 #define FEATURES2VALUES \
-	LOC_CHANNELLEN, TOPICLEN, REASONLEN
+	LOC_CHANNELLEN, TOPICLEN, REASONLEN, \
+	ConfigFileEntry.max_monitor
 
 /*
  * - from mirc's versions.txt

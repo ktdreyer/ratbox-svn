@@ -754,6 +754,7 @@ set_default_conf(void)
 	ConfigFileEntry.max_nick_time = 20;
 	ConfigFileEntry.max_nick_changes = 5;
 	ConfigFileEntry.max_accept = 20;
+	ConfigFileEntry.max_monitor = 60;
 	ConfigFileEntry.nick_delay = 900;	/* 15 minutes */
 	ConfigFileEntry.target_change = YES;
 	ConfigFileEntry.anti_spam_exit_message_time = 0;

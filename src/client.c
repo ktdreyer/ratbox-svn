@@ -1550,6 +1550,7 @@ exit_local_client(struct Client *client_p, struct Client *source_p, struct Clien
 	unsigned long on_for;
 
 	exit_generic_client(client_p, source_p, from, comment);
+	clear_monitor(source_p);
 
 	s_assert(IsPerson(source_p));
 	client_flush_input(source_p);
