@@ -109,6 +109,9 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 			     get_client_name(cptr, TRUE), host);
       return exit_client(cptr, cptr, cptr, "No connect block.");
     }
+
+  /* XXX B0RKED leave until beta-2 */
+#if 0
   /* We have to do this to prevent recently connected servers being
    * dropped by kiddies below by a dormat unregistered connection...
    * Also stops probes to find out which servers are connected.
@@ -124,6 +127,7 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                  get_client_name(cptr, TRUE), host);
     return exit_client(cptr, cptr, cptr, "Invalid host.");
    }
+#endif
   
   if ((acptr = find_server(host)))
     {
