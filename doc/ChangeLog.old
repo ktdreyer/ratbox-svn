@@ -1,3 +1,9 @@
+*** 20010602_7 by jdc
+* Fixed output so that --disable-openssl doesn't bother checking for
+  include directories and the like.  Minor fix (mainly cosmetical).
+
+
+
 *** 20010602_6 by davidt
 make STATIC_MODULES compile again
 
