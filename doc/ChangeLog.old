@@ -1,3 +1,21 @@
+db          2002/03/30 12:04:28 EST	(20020330_0)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+    include              modules.h setup.h.in 
+  Log:
+  configure problems patched by juli pointed out by jusuf
+  to do with sharable modules
+  
+  Revision  Changes    Path
+  7.126     +1 -1      ircd-hybrid-7/autoconf/configure.in
+  7.129     +1 -1      ircd-hybrid-7/configure
+  7.29      +1 -1      ircd-hybrid-7/include/modules.h
+  7.49      +3 -0      ircd-hybrid-7/include/setup.h.in
+
+
+
 androsyn    2002/03/25 12:01:12 EST	(20020325_1)
 
   Modified files:
