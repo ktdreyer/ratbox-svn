@@ -1,3 +1,8 @@
+*** 20001230_13 by lusky
+- eradicated setenv(), it's not portable.  specifically sol2.6 doesn't
+  have it.
+
+
 *** 20001230_12 by fl_
 - Fix for IP klines 
 - We now check to see if remote klines exist locally, before applying them
