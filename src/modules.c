@@ -132,8 +132,8 @@ extern struct Message error_msgtab;
 #include <mach-o/dyld.h>
 
 #ifndef HAVE_DLOPEN
-#ifndef	RTLD_NOW
-#define RTLD_NOW 2185 /* built-in dl*(3) don't care */
+#ifndef	RTLD_LAZY
+#define RTLD_LAZY 2185 /* built-in dl*(3) don't care */
 #endif
 
 void undefinedErrorHandler(const char *);
@@ -171,9 +171,9 @@ NSModule multipleErrorHandler(NSSymbol s, NSModule old, NSModule new)
   ** module, maybe?
   */
   sendto_realops_flags(FLAGS_ALL, L_ALL, "Symbol `%s' found in `%s' and `%s'",
-                       NSNameOfSymbol(s), NSNameOfMdoule(old), NSNameOfMdoule(new));
+                       NSNameOfSymbol(s), NSNameOfModule(old), NSNameOfModule(new));
   ilog(L_WARN, "Symbol `%s' found in `%s' and `%s'", NSNameOfSymbol(s),
-       NSNameOfMdoule(old), NSNameOfMdoule(new));
+       NSNameOfModule(old), NSNameOfModule(new));
   /* We return which module should be considered valid, I believe */
   return new;
 }
