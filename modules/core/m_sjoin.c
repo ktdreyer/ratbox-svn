@@ -174,7 +174,8 @@ static void ms_sjoin(struct Client *client_p,
         mode.mode |= MODE_TOPICLIMIT;
         break;
       case 'a':
-        mode.mode |= MODE_HIDEOPS;
+	if(ConfigChannel.use_anonops)
+          mode.mode |= MODE_HIDEOPS;
         break;
       case 'k':
         strlcpy(mode.key, parv[4 + args], KEYLEN);
