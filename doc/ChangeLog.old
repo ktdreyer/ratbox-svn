@@ -1,3 +1,7 @@
+*** 20010127_2 by lusky
+- fixed some more sol26 compile warnings
+
+
 *** 20010127_1 by lusky
 - removed lex/yacc output
 - put socklen_t's back in
