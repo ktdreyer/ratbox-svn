@@ -44,14 +44,13 @@
 #include <string.h>
 #include <assert.h>
 
-int nick_from_server(struct Client *, struct Client *, int, char **, time_t, char *);
-
-static int set_initial_nick(struct Client *cptr, struct Client *sptr,
-			    char *nick);
-int change_nick( struct Client *cptr, struct Client *sptr,
-			char *nick);
-
+int nick_from_server(struct Client *, struct Client *, int, char **,
+		     time_t, char *);
+int set_initial_nick(struct Client *cptr, struct Client *sptr,char *nick);
+int change_nick( struct Client *cptr, struct Client *sptr, char *nick);
+int nick_equal_server( struct, Client *cptr, struct Client *sptr, char *nick);
 int clean_nick_name(char* nick);
+
 
 struct Message nick_msgtab = {
   MSG_NICK, 0, 1, MFLG_SLOW, 0,
@@ -317,8 +316,7 @@ int ms_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
   if (parc < 2)
     {
-      sendto_one(sptr, form_str(ERR_NONICKNAMEGIVEN),
-                 me.name, parv[0]);
+      sendto_one(sptr, form_str(ERR_NONICKNAMEGIVEN), me.name, parv[0]);
       return 0;
     }
 
@@ -340,10 +338,6 @@ int ms_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       /*
        * We got the wrong number of params. Someone is trying
        * to trick us. Kill it. -ThemBones
-       * As discussed with ThemBones, not much point to this code now
-       * sending a whack of global kills would also be more annoying
-       * then its worth, just note the problem, and continue
-       * -Dianora
        */
       ts_warn("BAD NICK: %s[%s@%s] on %s (from %s)", parv[1],
                      (parc >= 6) ? parv[5] : "-",
@@ -415,31 +409,11 @@ int ms_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
    * a nick can never be the same as a server name - Dianora
    */
 
-  if ((acptr = find_server(nick)))
+  if ( nick_equal_server(sptr,nick) )
     {
-      /*
-      ** We have a nickname trying to use the same name as
-      ** a server. Send out a nick collision KILL to remove
-      ** the nickname. As long as only a KILL is sent out,
-      ** there is no danger of the server being disconnected.
-      ** Ultimate way to jupiter a nick ? >;-). -avalon
-      */
-      sendto_realops("Nick collision on %s(%s <- %s)",
-		     sptr->name, acptr->from->name,
-		     get_client_name(cptr, HIDE_IP));
-      ServerStats->is_kill++;
-      sendto_one(cptr, ":%s KILL %s :%s (%s <- %s)",
-                 me.name, sptr->name, me.name, acptr->from->name,
-                 /* NOTE: Cannot use get_client_name
-                 ** twice here, it returns static
-                 ** string pointer--the other info
-                 ** would be lost
-                 */
-                 get_client_name(cptr, HIDE_IP));
-      sptr->flags |= FLAGS_KILLED;
+      sptr->flags |= FLAGS_KILLED;      
       return exit_client(cptr, sptr, &me, "Nick/Server collision");
     }
-  
 
   if (!(acptr = find_client(nick, NULL)))
     return(nick_from_server(cptr,sptr,parc,parv,newts,nick));
@@ -453,19 +427,9 @@ int ms_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   if (acptr == sptr)
    {
     if (strcmp(acptr->name, nick) != 0)
-      /*
-      ** Allows change of case in his/her nick
-      */
-      return(nick_from_server(cptr,sptr,parc,parv,newts,nick)); /* -- go and process change */
+      return(nick_from_server(cptr,sptr,parc,parv,newts,nick));
     else
       {
-        /*
-        ** This is just ':old NICK old' type thing.
-        ** Just forget the whole thing here. There is
-        ** no point forwarding it to anywhere,
-        ** especially since servers prior to this
-        ** version would treat it as nick collision.
-        */
         return 0; /* NICK Message ignored */
       }
    }
@@ -982,3 +946,43 @@ int clean_nick_name(char* nick)
 
   return (ch - nick);
 }
+
+/*
+ * nick_equal_server
+ *
+ * inputs	- cptr
+ * 		- sptr
+ *		- nick to check
+ * output	- 1 if equal 0 if not
+ * side effects	-
+ */
+int
+nick_equal_server( struct, Client *cptr, struct Client *sptr, char *nick )
+{
+  struct Client *acptr;
+
+  if ((acptr = find_server(nick)))
+    {
+      /*
+      ** We have a nickname trying to use the same name as
+      ** a server. Send out a nick collision KILL to remove
+      ** the nickname. As long as only a KILL is sent out,
+      ** there is no danger of the server being disconnected.
+      ** Ultimate way to jupiter a nick ? >;-). -avalon
+      */
+      sendto_realops("Nick collision on %s(%s <- %s)",
+		     sptr->name, acptr->from->name,
+		     get_client_name(cptr, HIDE_IP));
+      ServerStats->is_kill++;
+      sendto_one(cptr, ":%s KILL %s :%s (%s <- %s)",
+                 me.name, sptr->name, me.name, acptr->from->name,
+                 /* NOTE: Cannot use get_client_name
+                 ** twice here, it returns static
+                 ** string pointer--the other info
+                 ** would be lost
+                 */
+                 get_client_name(cptr, HIDE_IP));
+      return 1;
+    }
+  return 0;
+}  

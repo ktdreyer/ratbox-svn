@@ -276,6 +276,9 @@ static  int     del_id(struct Channel *chptr, char *banid, int type)
 
 	  dlinkDelete(ban, list);
 
+	  if( ban == list->head )
+	    list->head = list->tail = NULL;
+
 	  MyFree(ban);
 
           break;
@@ -525,7 +528,7 @@ static int change_channel_membership(struct Channel *chptr,
 	{
 	  dlinkDelete(who, ptr, &chptr->peons);
 	  if( ptr == chptr->peons.head )
-	    chptr->peons.head = NULL;
+	    chptr->peons.head = chptr->peons.tail = NULL;
 	  dlinkAdd(who, ptr, to_list);
 	  return(1);
 	}
@@ -537,7 +540,7 @@ static int change_channel_membership(struct Channel *chptr,
 	{
 	  dlinkDelete(who, ptr, &chptr->voiced);
 	  if( ptr == chptr->voiced.head )
-	    chptr->peons.head = NULL;
+	    chptr->voiced.head = chptr->voiced.tail = NULL;
 	  dlinkAdd(who, ptr, to_list);
 	  return(1);
 	}
@@ -549,7 +552,7 @@ static int change_channel_membership(struct Channel *chptr,
 	{
 	  dlinkDelete(who, ptr, &chptr->halfops);
 	  if( ptr == chptr->halfops.head )
-	    chptr->peons.head = NULL;
+	    chptr->halfops.head = chptr->halfops.tail = NULL;
 	  dlinkAdd(who, ptr, to_list);
 	  return(1);
 	}
@@ -561,7 +564,7 @@ static int change_channel_membership(struct Channel *chptr,
 	{
 	  dlinkDelete(who, ptr, &chptr->chanops);
 	  if( ptr == chptr->chanops.head )
-	    chptr->peons.head = NULL;
+	    chptr->chanops.head = chptr->chanops.tail = NULL;
 	  dlinkAdd(who, ptr, to_list);
 	  return(1);
 	}

@@ -408,29 +408,31 @@ int register_user(struct Client *cptr, struct Client *sptr,
 	    sendto_realops("New Max Local Clients: %d",
 			   Count.max_loc);
 	}
+    }
+  else
+    strncpy_irc(sptr->username, username, USERLEN);
 
-      SetClient(sptr);
+  SetClient(sptr);
 
-      sptr->servptr = find_server(user->server);
-      if (!sptr->servptr)
-	{
-	  sendto_realops("Ghost killed: %s on invalid server %s",
-			 sptr->name, sptr->user->server);
-	  sendto_one(cptr,":%s KILL %s :%s (Ghosted, %s doesn't exist)",
-		     me.name, sptr->name, me.name, user->server);
-	  sptr->flags |= FLAGS_KILLED;
-	  return exit_client(NULL, sptr, &me, "Ghost");
-	}
-      add_client_to_llist(&(sptr->servptr->serv->users), sptr);
+  sptr->servptr = find_server(user->server);
+  if (!sptr->servptr)
+    {
+      sendto_realops("Ghost killed: %s on invalid server %s",
+		     sptr->name, sptr->user->server);
+      sendto_one(cptr,":%s KILL %s :%s (Ghosted, %s doesn't exist)",
+		 me.name, sptr->name, me.name, user->server);
+      sptr->flags |= FLAGS_KILLED;
+      return exit_client(NULL, sptr, &me, "Ghost");
+    }
+  add_client_to_llist(&(sptr->servptr->serv->users), sptr);
 
-      /* Increment our total user count here */
-      if (++Count.total > Count.max_tot)
-	Count.max_tot = Count.total;
+  /* Increment our total user count here */
+  if (++Count.total > Count.max_tot)
+    Count.max_tot = Count.total;
 
-      if (MyConnect(sptr))
-	{
-	  user_welcome(sptr);
-	}
+  if (MyConnect(sptr))
+    {
+      user_welcome(sptr);
     }
   else if (IsServer(cptr))
     {
@@ -887,8 +889,8 @@ int user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
  * send the MODE string for user (user) to connection cptr
  * -avalon
  */
-void send_umode(struct Client *cptr, struct Client *sptr, int old, int sendmask,
-                char *umode_buf)
+void send_umode(struct Client *cptr, struct Client *sptr, int old, 
+		int sendmask,  char *umode_buf)
 {
   int   i;
   int flag;
