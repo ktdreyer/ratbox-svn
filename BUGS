@@ -46,18 +46,14 @@
     ircd.conf, and then rehash to make it take effect.  A rehash after startup
     will also need to be performed to set the locale.
 
-5.  Modules loaded via 'module="..."' in the modules {} block do not get
-    loaded on start-up.  They must be manually MODLOAD'd after the server
-    starts.
-
-6.  IPv6 Address ::1 is not supported.  Weird things can happen, including
+5.  IPv6 Address ::1 is not supported.  Weird things can happen, including
     numeric 461 errors (ERR_NEEDMOREPARAMS) and KILL's for the clients with
     that IP.
 
-7.  /etc/resolv.conf MUST be readable to the user that the ircd runs under.
+6.  /etc/resolv.conf MUST be readable to the user that the ircd runs under.
     Currently if it is not readable, it will core on startup.
 
-8. When updating a message file, in certain unknown situations it will core
+7. When updating a message file, in certain unknown situations it will core
    if the file in use is being accessed.  To prevent this from happening,
    use '/quote SET MSGLOCALE standard' BEFORE issuing make install.  When
    the file is installed, you can SET MSGLOCALE back to the language that
