@@ -86,6 +86,7 @@ static void m_whowas(struct Client *client_p,
 
   if((last_used + ConfigFileEntry.whois_wait) > CurrentTime)
     {
+      sendto_one(source_p,form_str(RPL_LOAD2HI),me.name,source_p->name);
       return;
     }
   else

@@ -95,8 +95,11 @@ static void m_admin(struct Client *client_p, struct Client *source_p, int parc,
   else
     last_used = CurrentTime;
 
-  if (hunt_server(client_p,source_p,":%s ADMIN :%s",1,parc,parv) != HUNTED_ISME)
-    return;
+  if (!GlobalSetOptions.hide_server)
+    {
+      if (hunt_server(client_p,source_p,":%s ADMIN :%s",1,parc,parv) != HUNTED_ISME)
+        return;
+    }
 
   do_admin(source_p);
 }

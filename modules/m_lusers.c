@@ -41,7 +41,7 @@ static void ms_lusers(struct Client*, struct Client*, int, char**);
 
 struct Message lusers_msgtab = {
   "LUSERS", 0, 0, 0, MFLG_SLOW, 0,
-  {m_unregistered, m_lusers, ms_lusers, m_lusers}
+  {m_unregistered, m_lusers, ms_lusers, ms_lusers}
 };
 #ifndef STATIC_MODULES
 
@@ -73,34 +73,27 @@ static void m_lusers(struct Client *client_p, struct Client *source_p,
 {
   static time_t last_used = 0;
 
-  if (!IsOper(source_p))
+  if ((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
     {
-      if ((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
-        {
-          /* safe enough to give this on a local connect only */
-          if (MyClient(source_p))
-            sendto_one(source_p, form_str(RPL_LOAD2HI), me.name, parv[0]);
-          return;
-        }
-      else
-        {
-          last_used = CurrentTime;
-        }
+      /* safe enough to give this on a local connect only */
+      if (MyClient(source_p))
+        sendto_one(source_p, form_str(RPL_LOAD2HI), me.name, parv[0]);
+      return;
+    }
+  else
+    last_used = CurrentTime;
+
+  if (parc > 2 && !GlobalSetOptions.hide_server)
+    {   
+       if (hunt_server(client_p, source_p, ":%s LUSERS %s :%s", 2, parc, parv) != HUNTED_ISME)
+         return;
     }
 
-  if (parc > 2)
-    {
-      if(hunt_server(client_p, source_p, ":%s LUSERS %s :%s", 2, parc, parv)
-       != HUNTED_ISME)
-        {
-          return;
-        }
-    }
   show_lusers(source_p);
 }
 
 /*
- * ms_lusers - LUSERS message handler
+ * ms_lusers - LUSERS message handler for servers and opers
  * parv[0] = sender
  * parv[1] = host/server mask.
  * parv[2] = server to query

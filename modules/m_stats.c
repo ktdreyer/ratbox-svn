@@ -136,8 +136,11 @@ static void m_stats(struct Client *client_p, struct Client *source_p,
       last_used = CurrentTime;
     }
 
-  if (hunt_server(client_p,source_p,":%s STATS %s :%s",2,parc,parv)!=HUNTED_ISME)
-    return;
+  if (!GlobalSetOptions.hide_server)
+    {
+      if (hunt_server(client_p,source_p,":%s STATS %s :%s",2,parc,parv) != HUNTED_ISME)
+        return;
+    }
 
   name = parse_stats_args(parc,parv,&doall,&wilds);
 

@@ -40,7 +40,7 @@ static void mo_time(struct Client*, struct Client*, int, char**);
 
 struct Message time_msgtab = {
   "TIME", 0, 0, 0, MFLG_SLOW, 0,
-  {m_unregistered, m_time, ms_time, mo_time}
+  {m_unregistered, m_time, mo_time, mo_time}
 };
 
 #ifndef STATIC_MODULES
@@ -66,6 +66,15 @@ char *_version = "20001202";
 static void m_time(struct Client *client_p, struct Client *source_p,
                   int parc, char *parv[])
 {
+  static time_t last_used = 0;
+
+  /* This is safe enough to use during non hidden server mode */
+  if(!GlobalSetOptions.hide_server)
+    {
+      if (hunt_server(client_p,source_p,":%s TIME :%s",1,parc,parv) != HUNTED_ISME)
+        return;
+    }
+
   sendto_one(source_p, form_str(RPL_TIME), me.name,
              parv[0], me.name, date(0));
 }
@@ -82,20 +91,3 @@ static void mo_time(struct Client *client_p, struct Client *source_p,
     sendto_one(source_p, form_str(RPL_TIME), me.name,
                parv[0], me.name, date(0));
 }
-
-/*
- * ms_time
- *      parv[0] = sender prefix
- *      parv[1] = servername
- */
-static void ms_time(struct Client *client_p, struct Client *source_p,
-                   int parc, char *parv[])
-{
-  if (hunt_server(client_p,source_p,":%s TIME :%s",1,parc,parv) == HUNTED_ISME)
-    {
-      if(!GlobalSetOptions.hide_server || IsOper(source_p))
-	sendto_one(source_p, form_str(RPL_TIME), me.name,
-		   parv[0], me.name, date(0));
-    }
-}
-

@@ -33,10 +33,11 @@
 #include "modules.h"
 
 static void m_users(struct Client*, struct Client*, int, char**);
+static void mo_users(struct Client*, struct Client*, int, char**);
 
 struct Message users_msgtab = {
   "USERS", 0, 0, 0, MFLG_SLOW, 0,
-  {m_unregistered, m_users, m_users, m_users}
+  {m_unregistered, m_users, mo_users, mo_users}
 };
 
 #ifndef STATIC_MODULES
@@ -54,6 +55,7 @@ _moddeinit(void)
 
 char *_version = "20001122";
 #endif
+
 /*
  * m_users
  *      parv[0] = sender prefix
@@ -62,13 +64,32 @@ char *_version = "20001122";
 static void m_users(struct Client *client_p, struct Client *source_p,
                    int parc, char *parv[])
 {
+  if(!GlobalSetOptions.hide_server)
+    {
+      if (hunt_server(client_p,source_p,":%s USERS :%s",1,parc,parv) != HUNTED_ISME)
+        return;
+  
+      sendto_one(source_p, form_str(RPL_LOCALUSERS), me.name, parv[0],
+                 Count.local, Count.max_loc);
+    }
+
+  sendto_one(source_p, form_str(RPL_GLOBALUSERS), me.name, parv[0],
+                 Count.total, Count.max_tot);
+}
+
+/*
+ * mo_users
+ *      parv[0] = sender prefix
+ *      parv[1] = servername
+ */
+static void mo_users(struct Client *client_p, struct Client *source_p,
+                   int parc, char *parv[])
+{
   if (hunt_server(client_p,source_p,":%s USERS :%s",1,parc,parv) == HUNTED_ISME)
     {
       /* No one uses this any more... so lets remap it..   -Taner */
-      
-      if (!GlobalSetOptions.hide_server || IsOper(source_p))
-        sendto_one(source_p, form_str(RPL_LOCALUSERS), me.name, parv[0],
-                   Count.local, Count.max_loc);
+      sendto_one(source_p, form_str(RPL_LOCALUSERS), me.name, parv[0],
+                 Count.local, Count.max_loc);
 
       sendto_one(source_p, form_str(RPL_GLOBALUSERS), me.name, parv[0],
                  Count.total, Count.max_tot);
