@@ -683,7 +683,6 @@ main(int argc, char *argv[])
 #ifndef STATIC_MODULES
 	load_core_modules(1);
 #endif
-	initServerMask();
 	init_auth();		/* Initialise the auth code */
 	init_resolver();	/* Needs to be setup before the io loop */
 	read_conf_files(YES);	/* cold start init conf files */

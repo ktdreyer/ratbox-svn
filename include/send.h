@@ -38,7 +38,6 @@ struct dlink_list;
 extern unsigned long current_serial;
 
 extern void send_queued_write(int fd, void *data);
-extern void send_queued_slink_write(int fd, void *data);
 
 extern void sendto_one(struct Client *target_p, const char *, ...) AFP(2, 3);
 extern void sendto_one_notice(struct Client *target_p,const char *, ...) AFP(2, 3);
