@@ -1,3 +1,22 @@
+leeh        2002/06/16 12:31:30 EDT	(20020616_2)
+
+  Modified files:
+    modules              .cvsignore .depend Makefile.in 
+    src                  .depend Makefile.in 
+  Log:
+  - patch via hwy:
+    Id is not needed in .depends, when you lose the dependency files (from
+    that .cvsignore) you'll have problems recreating them.
+  
+  Revision  Changes    Path
+  1.3       +0 -1      ircd-hybrid-7/modules/.cvsignore
+  1.8       +0 -1      ircd-hybrid-7/modules/.depend
+  1.69      +1 -3      ircd-hybrid-7/modules/Makefile.in
+  7.7       +0 -1      ircd-hybrid-7/src/.depend
+  7.112     +1 -4      ircd-hybrid-7/src/Makefile.in
+
+
+
 leeh        2002/06/16 10:55:20 EDT	(20020616_1)
 
   Modified files:
