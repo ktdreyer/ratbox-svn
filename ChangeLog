@@ -1,3 +1,17 @@
+androsyn    2002/12/10 14:19:04 UTC	(20021210_17)
+
+  Modified files:
+    include              confmatch.h 
+    src                  s_conf.c 
+  Log:
+  Added support for CIDR masks in operator {} blocks.
+  
+  Revision  Changes    Path
+  7.4       +0 -2      ircd-ratbox/include/confmatch.h
+  7.383     +18 -6     ircd-ratbox/src/s_conf.c
+
+
+
 androsyn    2002/12/10 14:00:40 UTC	(20021210_16)
 
   Modified files:
