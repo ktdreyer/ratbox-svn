@@ -1,3 +1,17 @@
+leeh        2004/10/05 18:08:07 EDT	(20041005_2)
+
+  Modified files:
+    src                  s_chanserv.c service.c 
+  Log:
+  - add chanserv commands "CREGISTER" and "CDROP" for admins
+  - make handle_service() check the oper privs of a command
+  
+  Revision  Changes    Path
+  1.6       +95 -1     rserv/src/s_chanserv.c
+  1.21      +11 -4     rserv/src/service.c
+
+
+
 leeh        2004/10/05 16:12:43 EDT	(20041005_1)
 
   Modified files:
