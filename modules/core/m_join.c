@@ -626,11 +626,13 @@ remove_our_modes(struct Channel *chptr, struct Client *source_p)
 	char lmodebuf[MODEBUFLEN];
 	char *lpara[MAXMODEPARAMS];
 	int count = 0;
+	int i;
 
 	mbuf = lmodebuf;
 	*mbuf++ = '-';
 
-	lpara[0] = lpara[1] = lpara[2] = lpara[3] = NULL;
+	for(i = 0; i < MAXMODEPARAMS; i++)
+		lpara[i] = NULL;
 
 	DLINK_FOREACH(ptr, chptr->members.head)
 	{
@@ -658,7 +660,9 @@ remove_our_modes(struct Channel *chptr, struct Client *source_p)
 					mbuf = lmodebuf;
 					*mbuf++ = '-';
 					count = 0;
-					lpara[0] = lpara[1] = lpara[2] = lpara[3] = NULL;
+
+					for(i = 0; i < MAXMODEPARAMS; i++)
+						lpara[i] = NULL;
 				}
 
 				msptr->flags &= ~CHFL_VOICE;
@@ -685,7 +689,9 @@ remove_our_modes(struct Channel *chptr, struct Client *source_p)
 			mbuf = lmodebuf;
 			*mbuf++ = '-';
 			count = 0;
-			lpara[0] = lpara[1] = lpara[2] = lpara[3] = NULL;
+
+			for(i = 0; i < MAXMODEPARAMS; i++)
+				lpara[i] = NULL;
 		}
 	}
 

@@ -566,11 +566,13 @@ remove_our_modes(struct Channel *chptr, struct Client *source_p)
 	char lmodebuf[MODEBUFLEN];
 	char *lpara[MAXMODEPARAMS];
 	int count = 0;
+	int i;
 
 	mbuf = lmodebuf;
 	*mbuf++ = '-';
 
-	lpara[0] = lpara[1] = lpara[2] = lpara[3] = NULL;
+	for(i = 0; i < MAXMODEPARAMS; i++)
+		lpara[i] = NULL;
 
 	DLINK_FOREACH(ptr, chptr->members.head)
 	{
@@ -598,7 +600,9 @@ remove_our_modes(struct Channel *chptr, struct Client *source_p)
 					mbuf = lmodebuf;
 					*mbuf++ = '-';
 					count = 0;
-					lpara[0] = lpara[1] = lpara[2] = lpara[3] = NULL;
+
+					for(i = 0; i < MAXMODEPARAMS; i++)
+						lpara[i] = NULL;
 				}
 
 				msptr->flags &= ~CHFL_VOICE;
@@ -625,7 +629,9 @@ remove_our_modes(struct Channel *chptr, struct Client *source_p)
 			mbuf = lmodebuf;
 			*mbuf++ = '-';
 			count = 0;
-			lpara[0] = lpara[1] = lpara[2] = lpara[3] = NULL;
+
+			for(i = 0; i < MAXMODEPARAMS; i++)
+				lpara[i] = NULL;
 		}
 	}
 
@@ -654,7 +660,7 @@ static void
 remove_ban_list(struct Channel *chptr, struct Client *source_p,
 		dlink_list *list, char c, int cap)
 {
-	static char lmodebuf[MODEBUFLEN];
+	static char lmodebuf[BUFSIZE];
 	static char lparabuf[BUFSIZE];
 	struct Ban *banptr;
 	dlink_node *ptr;
@@ -673,7 +679,8 @@ remove_ban_list(struct Channel *chptr, struct Client *source_p,
 	{
 		banptr = ptr->data;
 
-		plen = strlen(banptr->banstr) + 1;
+		/* trailing space, and the mode letter itself */
+		plen = strlen(banptr->banstr) + 2;
 
 		if(count >= MAXMODEPARAMS || (cur_len + plen) > BUFSIZE - 4)
 		{
