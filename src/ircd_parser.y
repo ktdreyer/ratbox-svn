@@ -48,6 +48,7 @@
 #include "hostmask.h"
 #include "send.h"
 #include "listener.h"
+#include "resv.h"
 
 #ifdef HAVE_LIBCRYPTO
 #include <openssl/rsa.h>
@@ -81,6 +82,8 @@ int   class_max_number_var;
 int   class_sendq_var;
 
 static char  *listener_address;
+
+char *resv_reason;
 
 char  *class_redirserv_var;
 int   class_redirport_var;
@@ -173,6 +176,7 @@ int   class_redirport_var;
 %token  NAME
 %token  NETWORK_DESC
 %token  NETWORK_NAME
+%token	NICK
 %token  NICK_CHANGES
 %token  NON_REDUNDANT_KLINES
 %token  NO_HACK_OPS
@@ -192,7 +196,6 @@ int   class_redirport_var;
 %token  PING_TIME
 %token  PORT
 %token  QSTRING
-%token  QUARANTINE
 %token  QUIET_ON_BAN
 %token  REASON
 %token  REDIRPORT
@@ -202,6 +205,7 @@ int   class_redirport_var;
 %token  RESTRICTED
 %token  RSA_PRIVATE_KEY_FILE
 %token  RSA_PUBLIC_KEY_FILE
+%token	RESV
 %token  SECONDS MINUTES HOURS DAYS WEEKS MONTHS YEARS DECADES CENTURIES MILLENNIA
 %token  SENDQ
 %token  SEND_PASSWORD
@@ -288,7 +292,7 @@ conf_item:        admin_entry
                 | listen_entry
                 | auth_entry
                 | serverinfo_entry
-                | quarantine_entry
+                | resv_entry
                 | shared_entry
                 | connect_entry
                 | kill_entry
@@ -1224,41 +1228,56 @@ auth_persistant: PERSISTANT '=' TYES ';'
   };
 
 /***************************************************************************
- *  section quarantine
+ *  section resv
  ***************************************************************************/
 
-quarantine_entry:       QUARANTINE
+resv_entry:	RESV
   {
-    if(yy_aconf)
-      {
-        free_conf(yy_aconf);
-        yy_aconf = (struct ConfItem *)NULL;
-      }
-    yy_aconf=make_conf();
-    yy_aconf->status = CONF_QUARANTINED_NICK;
+    resv_reason = NULL;
   }
- '{' quarantine_items '}' ';'
+  '{' resv_items '}' ';'
   {
-    conf_add_q_conf(yy_aconf);
-    yy_aconf = (struct ConfItem *)NULL;
-  }; 
-
-quarantine_items:       quarantine_items quarantine_item |
-			quarantine_item
-
-quarantine_item:        quarantine_name | quarantine_reason | error
-
-quarantine_name:        NAME '=' QSTRING ';'
-  {
-    MyFree(yy_aconf->name);
-    DupString(yy_aconf->name, yylval.string);
+    MyFree(resv_reason);
+    resv_reason = NULL;
   };
 
-quarantine_reason:      REASON '=' QSTRING ';' 
+resv_items:	resv_items resv_item |
+                resv_item
+
+resv_item:	resv_creason | resv_channel | resv_nick | error
+
+resv_creason:	REASON '=' QSTRING ';'
+{
+  MyFree(resv_reason);
+  DupString(resv_reason, yylval.string);
+};
+
+resv_channel:	CHANNEL '=' QSTRING ';'
+{
+  if(IsChannelName(yylval.string))
   {
-    MyFree(yy_aconf->passwd);
-    DupString(yy_aconf->passwd, yylval.string);
-  };
+    if(resv_reason)
+      create_resv(yylval.string, resv_reason, RESV_CHANNEL, 1);
+    else
+      create_resv(yylval.string, "No Reason", RESV_CHANNEL, 1);
+  }
+  /* ignore it for now.. but we really should make a warning if
+   * its an erroneous name --fl_ */
+};
+
+resv_nick:	NICK '=' QSTRING ';'
+{
+  if(clean_nick_name(yylval.string))
+  {
+    if(resv_reason)
+      create_resv(yylval.string, resv_reason, RESV_NICK, 1);
+    else
+      create_resv(yylval.string, "No Reason", RESV_NICK, 1);
+  }
+
+  /* otherwise its erroneous, but ignore it for now */
+};
+
 
 /***************************************************************************
  *  section shared, for sharing remote klines etc.

@@ -2076,6 +2076,9 @@ static void clear_out_old_conf(void)
   }
 #endif
 
+  /* clean out old resvs from the conf */
+  clear_conf_resv();
+  
   /* clean out AdminInfo */
   MyFree(AdminInfo.name);
   AdminInfo.name = NULL;

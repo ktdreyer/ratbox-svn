@@ -175,6 +175,7 @@ min_nonwildcard { return MIN_NONWILDCARD; }
 name		{ return NAME; }
 network_desc    { return NETWORK_DESC; }
 network_name    { return NETWORK_NAME; }
+nick		{ return NICK; }
 nick_changes	{ return NICK_CHANGES; }
 no		{ return TNO; }
 no_hack_ops     { return NO_HACK_OPS; }
@@ -190,7 +191,6 @@ persistant     { return PERSISTANT; }
 persistant_expire_time { return PERSISTANT_EXPIRE_TIME; }
 ping_time	{ return PING_TIME; }
 port		{ return PORT; }
-quarantine	{ return QUARANTINE; }
 quiet_on_ban    { return QUIET_ON_BAN; }
 reason		{ return REASON; }
 redirport       { return REDIRPORT; }
@@ -199,6 +199,7 @@ rehash		{ return REHASH; }
 reject		{ return TREJECT; }
 remote		{ return REMOTE; }
 restricted      { return RESTRICTED; }
+resv		{ return RESV; }
 rsa_private_key_file		{ return RSA_PRIVATE_KEY_FILE; }
 rsa_public_key_file		{ return RSA_PUBLIC_KEY_FILE; }
 send_password	{ return SEND_PASSWORD; }
