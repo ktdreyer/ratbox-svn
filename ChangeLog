@@ -1,3 +1,15 @@
+androsyn    2002/11/27 15:24:55 UTC	(20021127_5)
+
+  Modified files:
+    src                  s_bsd_sigio.c 
+  Log:
+  Optimizations similiar to those done on s_bsd_poll
+  
+  Revision  Changes    Path
+  7.29      +67 -82    ircd-ratbox/src/s_bsd_sigio.c
+
+
+
 androsyn    2002/11/27 15:15:01 UTC	(20021127_4)
 
   Modified files:
