@@ -47,6 +47,9 @@ static void check_rehash(void *);
 void
 die(const char *reason)
 {
+	if(rserv_db)
+		sqlite_close(rserv_db);
+
 	sendto_all(0, "Services terminated: (%s)", reason);
 	slog("ratbox-services terminated: (%s)", reason);
 	exit(1);
@@ -255,9 +258,6 @@ main(int argc, char *argv[])
 #ifdef ALIS_SERVICE
 	init_s_alis();
 #endif
-#ifdef HOSTSTAT_SERVICE
-	init_s_hoststat();
-#endif
 #ifdef OPERBOT_SERVICE
 	init_s_operbot();
 #endif
@@ -267,6 +267,8 @@ main(int argc, char *argv[])
 #ifdef CHANNEL_SERVICE
 	init_s_chanserv();
 #endif
+
+	init_s_jupeserv();
 
 	first_time = CURRENT_TIME;
 
@@ -320,4 +322,23 @@ loc_sqlite_exec(db_callback cb, const char *format, ...)
 	va_end(args);
 }
 
+char *
+rebuild_params(const char **parv, int parc, int start)
+{
+	static char buf[BUFSIZE];
 
+	buf[0] = '\0';
+
+	while(start < parc)
+	{
+		if(strlcat(buf, parv[start], sizeof(buf)) >= REASONLEN)
+		{
+			buf[REASONLEN] = '\0';
+			break;
+		}
+
+		start++;
+	}
+
+	return buf;
+}

@@ -3,6 +3,7 @@
 #define USERLEN 10
 #define HOSTLEN 63
 #define REALLEN 50
+#define REASONLEN 50
 
 #include "config.h"
 

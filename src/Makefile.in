@@ -42,7 +42,7 @@ BSRCS = 		\
         u_stats.c       \
 	ucommand.c
 
-SRCS = ${BSRCS} s_userserv.c s_chanserv.c s_alis.c s_operbot.c
+SRCS = ${BSRCS} s_userserv.c s_chanserv.c s_alis.c s_operbot.c s_jupeserv.c
 
 OBJS=$(SRCS:.c=.o)
 
