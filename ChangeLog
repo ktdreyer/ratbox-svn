@@ -1,3 +1,23 @@
+leeh        2003/07/08 06:21:10 EDT	(20030708_2)
+
+  Modified files:
+    include              client.h s_conf.h s_log.h 
+    src                  newconf.c s_conf.c s_log.c s_user.c 
+  Log:
+  - ported the operspy stuff to -devel.  I havent added the encap handler,
+    because they should be done properly first.
+  
+  Revision  Changes    Path
+  7.207     +6 -3      ircd-ratbox/include/client.h
+  7.244     +3 -0      ircd-ratbox/include/s_conf.h
+  7.20      +1 -0      ircd-ratbox/include/s_log.h
+  7.98      +37 -23    ircd-ratbox/src/newconf.c
+  7.420     +6 -2      ircd-ratbox/src/s_conf.c
+  7.55      +51 -2     ircd-ratbox/src/s_log.c
+  7.271     +36 -49    ircd-ratbox/src/s_user.c
+
+
+
 leeh        2003/07/08 05:56:10 EDT	(20030708_1)
 
   Modified files:
