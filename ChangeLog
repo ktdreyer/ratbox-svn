@@ -1,3 +1,15 @@
+leeh        2004/03/29 16:35:57 EST	(20040329_9)
+
+  Modified files:
+    include              hash.h 
+  Log:
+  - make the channel hash 2^15 instead of 2^14
+  
+  Revision  Changes    Path
+  7.50      +2 -2      ircd-ratbox/include/hash.h
+
+
+
 leeh        2004/03/29 16:14:58 EST	(20040329_8)
 
   Modified files:
