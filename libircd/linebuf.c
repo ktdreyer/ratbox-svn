@@ -258,12 +258,14 @@ linebuf_copy_line(buf_head_t *bufhead, buf_line_t *bufline,
 	   * ok, we CR/LF/NUL terminate, set overflow, and loop until the
 	   * next CRLF. We then skip that, and return.
 	   */
-	  bufline->overflow = 1;
-	  cpylen += linebuf_skip_crlf(ch, len);
-	  linebuf_terminate_crlf(bufhead, bufline);
+          if (!binary)
+          {
+            bufline->overflow = 1;
+            cpylen += linebuf_skip_crlf(ch, len);
+            linebuf_terminate_crlf(bufhead, bufline);
+          }
 	  /* NOTE: We're finishing, so ignore updating len */
 	  bufline->terminated = 1;
-          assert(!binary); /* XXX - what do we do here!? */
 	  break;
 	}
 
