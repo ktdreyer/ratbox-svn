@@ -495,7 +495,7 @@ static int check_clean_user(struct Client *client_p, struct Client *source_p,
 
   if(!clean_user_name(user))
     sendto_realops_flags(FLAGS_DEBUG, L_ALL,
-                         "Bad sername: %s Nickname: %s From: %s %s",
+                         "Bad Username: %s Nickname: %s From: %s %s",
 			 user, nick, source_p->name, client_p->name);
 			 
   return 0;
