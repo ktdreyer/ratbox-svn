@@ -1,3 +1,8 @@
+*** 20001204_9 by db
+- had logic wrong in can_send
+
+
+
 *** 20001204_8 by db
 This is a patch which implements client send flood protection.
 This is the type of flood where someone goes
