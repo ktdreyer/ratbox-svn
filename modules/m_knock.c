@@ -34,7 +34,6 @@
 #include "numeric.h"
 #include "send.h"
 #include "s_conf.h"
-#include "vchannel.h"
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
