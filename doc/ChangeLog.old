@@ -1,3 +1,11 @@
+*** 20010828_3 by wcampbel
+Added two scripts, one to build a single module in contrib based upon
+what is present in the Makefile, another to build a single message file.
+Both depend on a sucessful configure run.
+
+They are not perfect, but they work on my system.
+
+
 *** 20010828_2 by wcampbel
 Completed the repo-move/reorganization of the doc tree, updated the index
 files.
