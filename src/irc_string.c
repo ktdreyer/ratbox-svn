@@ -419,8 +419,10 @@ inetpton_sock(const char *src, struct sockaddr_storage *dst)
 	{
 		((struct sockaddr_in6 *)dst)->sin6_port = 0;
 		((struct sockaddr_in6 *)dst)->sin6_family = AF_INET6;
+		return 1;
 	}
 #endif
+	return 0;
 }
 
 const char *
