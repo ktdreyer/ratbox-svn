@@ -1,3 +1,7 @@
+*** 20010605_7 by leeh
+- log() -> ilog()
+
+
 *** 20010605_6 by leeh
 - it seems to be give fl_ annoying code to fix hour..
 - removed mr_error(), as it err.. didnt do a lot.. it got called, then
