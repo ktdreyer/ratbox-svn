@@ -1,3 +1,15 @@
+db          2001/12/14 21:31:31 EST	(20011215_2)
+
+  Modified files:
+    modules              m_unkline.c 
+  Log:
+  - cleanups of extraneous spaces
+  
+  Revision  Changes    Path
+  1.40      +3 -3      ircd-hybrid-7/modules/m_unkline.c
+
+
+
 db          2001/12/14 21:24:51 EST	(20011215_1)
 
   Modified files:
