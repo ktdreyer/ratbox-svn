@@ -1,3 +1,9 @@
+*** 20010328_5 by androsyn
+Fixed adns core.  Somebody accidently forgot to set the callback for
+auth_dns_callback().  -Wall caught this rather easily. BTW -Wall should
+probably be turned on for gcc by default.
+
+
 *** 20010328_4 by fl_
 - changed lots of include ".depend" into include .depend.. 
 
