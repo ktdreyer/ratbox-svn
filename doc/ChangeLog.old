@@ -1,3 +1,8 @@
+*** 20010721_1 by androsyn
+Added a --enable-assert/--disable-assert option.  Currently it defaults to
+enable-assert, but this should be changed for the release.
+
+
 *** 20010720_6 by androsyn
 I think i this should be the right way to do the inline stuff :)
 
