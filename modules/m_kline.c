@@ -92,9 +92,7 @@ static int find_user_host(struct Client *source_p,
                           char *user_host_or_nick, char *user, char *host);
 
 /* needed to remove unused definition warning */
-#ifndef IPV6
 static int valid_comment(struct Client *source_p, char *comment);
-#endif
 static int valid_user_host(char *user, char *host);
 static int valid_wild_card(char *user, char *host);
 static int already_placed_kline(struct Client*, char*, char*);
@@ -878,7 +876,6 @@ static int valid_wild_card(char *luser, char *lhost)
  * output       - 0 if no valid comment, 1 if valid
  * side effects - NONE
  */
-#ifndef IPV6
 static int valid_comment(struct Client *source_p, char *comment)
 {
   if(strchr(comment, ':'))
@@ -900,7 +897,6 @@ static int valid_comment(struct Client *source_p, char *comment)
     }
   return 1;
 }
-#endif
 
 /* static int already_placed_kline(source_p, luser, lhost)
  * Input: user to complain to, username & host to check for.
