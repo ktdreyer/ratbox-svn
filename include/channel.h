@@ -234,7 +234,7 @@ typedef struct Ban      /* also used for exceptions -orabidoo */
   time_t when;
 } aBan;
 
-#define CLEANUP_CHANNELS_TIME (15*60)
+#define CLEANUP_CHANNELS_TIME (30*60)
 #define MAX_VCHAN_TIME (60*60)
 
 #endif  /* INCLUDED_channel_h */
