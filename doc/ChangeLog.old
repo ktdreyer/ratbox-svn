@@ -1,3 +1,15 @@
+androsyn    2001/12/16 05:15:20 EST	(20011216_13)
+
+  Modified files:
+    src                  irc_string.c 
+  Log:
+  Yet another stupid commit...
+  
+  Revision  Changes    Path
+  7.49      +2 -2      ircd-hybrid-7/src/irc_string.c
+
+
+
 a1kmm       2001/12/16 05:13:51 EST	(20011216_12)
 
   Modified files:
