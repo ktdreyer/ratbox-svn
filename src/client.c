@@ -368,6 +368,8 @@ c_quit(struct client *client_p, char *parv[], int parc)
 void
 c_kill(struct client *client_p, char *parv[], int parc)
 {
+	static time_t first_kill = 0;
+	static int num_kill = 0;
 	struct client *target_p;
 
 	if(parc < 2 || EmptyString(parv[1]))
@@ -385,6 +387,25 @@ c_kill(struct client *client_p, char *parv[], int parc)
 	/* grmbl. */
 	if(IsService(target_p))
 	{
+		if(IsUser(client_p))
+			slog("SERVICE: service %s killed by %s!%s@%s{%s}",
+				target_p->name, client_p->name, 
+				client_p->user->username, client_p->user->host,
+				client_p->user->servername);
+		else
+			slog("SERVICE: service %s killed by %s",
+				target_p->name, client_p->name);
+
+		/* no kill in the last 30 seconds, reset. */
+		if((first_kill + 20) < CURRENT_TIME)
+		{
+			first_kill = CURRENT_TIME;
+			num_kill = 1;
+		}
+		else if(num_kill > 10)
+			die("service kill fight!");
+
+		num_kill++;
 		introduce_service(target_p);
 		return;
 	}

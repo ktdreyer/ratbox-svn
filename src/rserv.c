@@ -39,6 +39,7 @@ struct timeval system_time;
 void
 die(const char *reason)
 {
+	sendto_server(":%s WALLOPS :DIED: %s", MYNAME, reason);
 	slog("DIED: %s", reason);
 	exit(1);
 }
@@ -126,6 +127,7 @@ main(int argc, char *argv[])
 {
 	char c;
 	int nofork = 0;
+	int childpid;
 
 	setup_corefile();
 
@@ -156,11 +158,12 @@ main(int argc, char *argv[])
 
 	printf("ratbox-services: version %s(%s)\n",
 		RSERV_VERSION, SERIALNUM);
-	printf("ratbox-services: pid %d\n", getpid());
 
 	if(!nofork)
 	{
-		switch (fork())
+		childpid = fork();
+
+		switch (childpid)
 		{
 			case -1:
 				perror("fork()");
@@ -176,6 +179,7 @@ main(int argc, char *argv[])
 				}
 				break;
 			default:
+				printf("ratbox-services: pid %d\n", childpid);
 				printf("ratbox-services: running in background\n");
 				return 0;
 		}
