@@ -430,15 +430,16 @@ m_ping.o: m_ping.c ../include/handlers.h ../include/client.h \
   ../include/msg.h ../include/parse.h ../include/modules.h \
   ../include/hash.h ../include/s_conf.h ../include/motd.h \
   ../include/class.h
-m_pong.o: m_pong.c ../include/handlers.h ../include/client.h \
-  ../include/config.h ../include/setup.h ../include/defaults.h \
-  ../include/ircd_defs.h ../include/ircd_handler.h ../include/linebuf.h \
-  ../include/tools.h ../include/channel.h ../include/res.h \
-  ../include/fileio.h ../adns/adns.h ../include/ircd.h \
-  ../include/memory.h ../include/balloc.h ../include/irc_string.h \
-  ../include/sprintf_irc.h ../include/hash.h ../include/numeric.h \
-  ../include/send.h ../include/s_debug.h ../include/msg.h \
-  ../include/parse.h ../include/modules.h
+m_pong.o: m_pong.c ../include/ircd.h ../include/config.h \
+  ../include/setup.h ../include/defaults.h ../include/tools.h \
+  ../include/memory.h ../include/ircd_defs.h ../include/balloc.h \
+  ../include/handlers.h ../include/s_user.h ../include/client.h \
+  ../include/ircd_handler.h ../include/linebuf.h ../include/channel.h \
+  ../include/res.h ../include/fileio.h ../adns/adns.h \
+  ../include/irc_string.h ../include/sprintf_irc.h ../include/hash.h \
+  ../include/numeric.h ../include/s_conf.h ../include/motd.h \
+  ../include/class.h ../include/send.h ../include/s_debug.h \
+  ../include/msg.h ../include/parse.h ../include/modules.h
 m_post.o: m_post.c ../include/handlers.h ../include/client.h \
   ../include/config.h ../include/setup.h ../include/defaults.h \
   ../include/ircd_defs.h ../include/ircd_handler.h ../include/linebuf.h \

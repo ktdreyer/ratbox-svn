@@ -361,6 +361,16 @@ change_channel_membership(struct Channel *chptr,
         dlinkAdd(who, ptr, loc_to_list);
       }
     }
+#ifdef REQUIRE_OANDV
+    else if ((ptr = find_user_link(&chptr->locchanops_voiced, who)))
+    {
+      if (to_list != &chptr->locchanops_voiced)
+      {
+        dlinkDelete(ptr, &chptr->locchanops_voiced);
+        dlinkAdd(who, ptr, loc_to_list);
+      }
+    }
+#endif
     else
       ok = 0;
   }
@@ -397,6 +407,16 @@ change_channel_membership(struct Channel *chptr,
       dlinkAdd(who, ptr, to_list);
     }
   }
+#ifdef REQUIRE_OANDV
+  else if ((ptr = find_user_link(&chptr->chanops_voiced, who)))
+  {
+    if (to_list != &chptr->chanops_voiced)
+    {
+      dlinkDelete(ptr, &chptr->chanops_voiced);
+      dlinkAdd(who, ptr, to_list);
+    }
+  }
+#endif
   else
     ok = 0;
 
@@ -732,7 +752,9 @@ chm_simple(struct Client *client_p, struct Client *source_p,
   long mode_type;
   int i;
 
-  if (alev < CHACCESS_HALFOP)
+  if (alev <
+       ((chptr->mode.mode & MODE_PRIVATE) ?
+         CHACCESS_CHANOP : CHACCESS_HALFOP))
   {
     if (!(*errors & SM_ERR_NOOPS))
       sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED), me.name,
@@ -1266,7 +1288,9 @@ chm_op(struct Client *client_p, struct Client *source_p,
     ;
   else if ((t_hop = is_half_op(chptr, targ_p)) != 0)
     ;
+#ifndef REQUIRE_OANDV
   else
+#endif
     t_voice = is_voiced(chptr, targ_p);
 
   if (((dir == MODE_ADD) && t_op) ||
@@ -1281,8 +1305,11 @@ chm_op(struct Client *client_p, struct Client *source_p,
   for (i = 0; i < mode_count_plus; i++)
   {
     if ((mode_changes_plus[i].letter == 'o' ||
-         mode_changes_plus[i].letter == 'h' ||
-         mode_changes_plus[i].letter == 'v')
+         mode_changes_plus[i].letter == 'h'
+#ifndef REQUIRE_OANDV
+         || mode_changes_plus[i].letter == 'v'
+#endif
+       )
         && !irccmp(mode_changes_plus[i].arg, opnick))
     {
       if (mode_changes_plus[i].letter == 'o')
@@ -1291,15 +1318,21 @@ chm_op(struct Client *client_p, struct Client *source_p,
         wasnt_hopped = 1;
       else if (mode_changes_plus[i].letter == 'v')
         wasnt_voiced = 1;
-      mode_changes_plus[i].letter = 0;
+#ifdef REQUIRE_OANDV
+      if (mode_changes_plus[i].letter != 'v')
+#endif
+        mode_changes_plus[i].letter = 0;
     }
   }
 
   for (i = 0; i < mode_count_minus; i++)
   {
     if ((mode_changes_minus[i].letter == 'o' ||
-         mode_changes_minus[i].letter == 'h' ||
-         mode_changes_minus[i].letter == 'v')
+         mode_changes_minus[i].letter == 'h'
+#ifndef REQUIRE_OANDV
+         || mode_changes_minus[i].letter == 'v'
+#endif
+        )
         && !irccmp(mode_changes_minus[i].arg, opnick))
     {
       if (mode_changes_minus[i].letter == 'o')
@@ -1316,6 +1349,7 @@ chm_op(struct Client *client_p, struct Client *source_p,
 
   if (dir == MODE_ADD)
   {
+#ifndef REQUIRE_OANDV
     if (!wasnt_voiced && t_voice)
     {
       mode_changes_minus[mode_count_minus].letter = 'v';
@@ -1325,7 +1359,9 @@ chm_op(struct Client *client_p, struct Client *source_p,
       mode_changes_minus[mode_count_minus].id = targ_p->user->id;
       mode_changes_minus[mode_count_minus++].arg = targ_p->name;
     }
-    else if (!wasnt_hopped && t_hop)
+    else
+#endif
+    if (!wasnt_hopped && t_hop)
     {
       mode_changes_minus[mode_count_minus].letter = 'h';
       mode_changes_minus[mode_count_minus].caps = CAP_HOPS;
@@ -1335,8 +1371,14 @@ chm_op(struct Client *client_p, struct Client *source_p,
       mode_changes_minus[mode_count_minus++].arg = targ_p->name;
     }
 
-    change_channel_membership(chptr, &chptr->chanops,
-                              &chptr->locchanops, targ_p);
+#ifdef REQUIRE_OANDV
+    if (t_voice)
+      change_channel_membership(chptr, &chptr->chanops_voiced,
+                                &chptr->locchanops_voiced, targ_p);
+    else
+#endif
+      change_channel_membership(chptr, &chptr->chanops,
+                                &chptr->locchanops, targ_p);
 
     if (!was_opped)
     {
@@ -1421,8 +1463,14 @@ chm_op(struct Client *client_p, struct Client *source_p,
       }
     }
 
-    change_channel_membership(chptr, &chptr->peons,
-                              &chptr->locpeons, targ_p);
+#ifdef REQUIRE_OANDV
+    if (!t_hop && t_voice)
+      change_channel_membership(chptr, &chptr->voiced,
+                                &chptr->locvoiced, targ_p);
+    else
+#endif
+      change_channel_membership(chptr, &chptr->peons,
+                                &chptr->locpeons, targ_p);
 
     for (i = 0; i < resync_count; i++)
     {
@@ -1453,19 +1501,22 @@ chm_halfop(struct Client *client_p, struct Client *source_p,
   char *opnick;
   struct Client *targ_p;
 
-#if 0
-  if (alev <
-      ((chptr->mode.mode & MODE_PRIVATE) ? CHACCESS_CHANOP : CHACCESS_HALFOP))
-#endif
-
 /* *sigh* - dont allow halfops to set +/-h, they could fully control a
  * channel if there were no ops - it doesnt solve anything.. MODE_PRIVATE
  * when used with MODE_SECRET is paranoid - cant use +p
  *
  * it needs to be optional per channel - but not via +p, that or remove
  * paranoid.. -- fl_
+ *
+ * +p means paranoid, it is useless for anything else on modern IRC, as
+ * list isn't really usable. If you want to have a private channel these
+ * days, you set it +s. Halfops can no longer remove simple modes when
+ * +p is set(although they can set +p) so it is safe to use this to
+ * control whether they can (de)halfop...
  */
-  if (alev < CHACCESS_CHANOP)
+  if (alev <
+      ((chptr->mode.mode & MODE_PRIVATE) ?
+        CHACCESS_CHANOP : CHACCESS_HALFOP))
   {
     if (!(*errors & SM_ERR_NOOPS))
       sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED), me.name,
@@ -1477,7 +1528,7 @@ chm_halfop(struct Client *client_p, struct Client *source_p,
   if ((dir == MODE_QUERY) || parc <= *parn)
     return;
 
-  if (MyClient(source_p) && mode_limit++ > 4)
+  if (MyClient(source_p) && alev < CHACCESS_CHANOP && mode_limit++ > 4)
     return;
 
   opnick = parv[(*parn)++];
@@ -1495,7 +1546,9 @@ chm_halfop(struct Client *client_p, struct Client *source_p,
     ;
   else if ((t_hop = is_half_op(chptr, targ_p)))
     ;
+#ifdef REQUIRE_OANDV
   else
+#endif
     t_voice = is_voiced(chptr, targ_p);
 
   /* Ignore +/-h on ops, from local clients.. */
@@ -1515,6 +1568,26 @@ chm_halfop(struct Client *client_p, struct Client *source_p,
       ((dir == MODE_DEL) && !t_hop))
     return;
 
+#ifdef BOUNCE_BAD_HOPS
+  if (!MyClient(targ_p) && !IsCapable(targ_p->from, CAP_HOPS))
+  {
+    if (IsServer(client_p))
+    {
+      mode_bounces[bounce_count].letter = 'h';
+      mode_bounces[bounce_count].dir = MODE_DEL;
+      mode_bounces[bounce_count].id = targ_p->user->id;
+      mode_bounces[bounce_count++].arg = targ_p->name;
+    }
+
+    if (IsClient(source_p))
+      sendto_one(source_p,
+                 ":%s NOTICE %s :Unable to halfop %s"
+                 " - server does not support halfops.",
+                 me.name, source_p->name, targ_p->name);
+    return;
+  }
+#endif
+
   /* Cancel out all other mode changes... */
   for (i = 0; i < mode_count_plus; i++)
   {
@@ -1524,7 +1597,11 @@ chm_halfop(struct Client *client_p, struct Client *source_p,
         && !irccmp(mode_changes_plus[i].arg, opnick))
     {
       if (mode_changes_plus[i].letter == 'h')
+      {
         wasnt_hopped = 1;
+        if (dir == MODE_ADD)
+          mode_changes_plus[i].letter = 0;
+      }
       if (mode_changes_plus[i].letter == 'v')
         wasnt_voiced = 1;
       /* +h-h is the only case we should get here, wipe it... */
@@ -1553,25 +1630,6 @@ chm_halfop(struct Client *client_p, struct Client *source_p,
 
   if (dir == MODE_ADD)
   {
-#ifdef BOUNCE_BAD_HOPS
-    if (!MyClient(targ_p) && !IsCapable(targ_p->from, CAP_HOPS))
-    {
-      if (IsServer(client_p))
-      {
-        mode_bounces[bounce_count].letter = 'h';
-        mode_bounces[bounce_count].dir = MODE_DEL;
-        mode_bounces[bounce_count].id = targ_p->user->id;
-        mode_bounces[bounce_count++].arg = targ_p->name;
-      }
-
-      if (IsClient(source_p))
-        sendto_one(source_p,
-                   ":%s NOTICE %s :Unable to halfop %s"
-                   " - server does not support halfops.",
-                   me.name, source_p->name, targ_p->name);
-      return;
-    }
-#endif
     if (!wasnt_voiced && t_voice)
     {
       mode_changes_minus[mode_count_minus].letter = 'v';
@@ -1715,17 +1773,24 @@ chm_voice(struct Client *client_p, struct Client *source_p,
     t_op = 1;
   else if ((t_hop = is_half_op(chptr, targ_p)) != 0)
     t_hop = 1;
+#ifndef REQUIRE_OANDV
   else
+#endif
     t_voice = is_voiced(chptr, targ_p);
 
   /* Ignore +/-v on op... Now we need not worry about limiting the
    * number of +/-v...
    */
-
+#if 0
   if (MyClient(source_p) && mode_limit++ > 4)
     return;
+#endif
 
-  if (t_op || t_hop ||
+  if (
+#ifndef REQUIRE_OANDV
+      t_op ||
+#endif
+      t_hop ||
       (dir == MODE_ADD && t_voice) ||
       (dir == MODE_DEL && !t_voice))
     return;
@@ -1740,8 +1805,13 @@ chm_voice(struct Client *client_p, struct Client *source_p,
         && !irccmp(mode_changes_plus[i].arg, opnick))
     {
       if (mode_changes_plus[i].letter == 'v')
+      {
         wasnt_voiced = 1;
-      mode_changes_plus[i].letter = 0;
+      }
+#ifdef REQUIRE_OANDV
+      if (mode_changes_plus[i].letter != 'o')
+#endif
+        mode_changes_plus[i].letter = 0;
     }
   }
 
@@ -1757,15 +1827,24 @@ chm_voice(struct Client *client_p, struct Client *source_p,
       if (mode_changes_minus[i].letter == 'h')
         was_hopped = 1;
       if (mode_changes_minus[i].letter == 'v')
+      {
+        mode_changes_minus[i].letter = 0;
         was_voiced = 1;
+      }
       /* No assignment to 0 here needed... -A1kmm */
     }
   }
 
   if (dir == MODE_ADD)
   {
-    change_channel_membership(chptr, &chptr->voiced, &chptr->locvoiced,
-                              targ_p);
+#ifdef REQUIRE_OANDV
+    if (t_op)
+      change_channel_membership(chptr, &chptr->chanops_voiced,
+                                &chptr->locchanops_voiced, targ_p);
+    else
+#endif
+      change_channel_membership(chptr, &chptr->voiced,
+                                &chptr->voiced, targ_p);
     if (was_voiced == 0)
     {
       mode_changes_plus[mode_count_plus].letter = c;
@@ -1799,7 +1878,14 @@ chm_voice(struct Client *client_p, struct Client *source_p,
   }
   else
   {
-    change_channel_membership(chptr, &chptr->peons, &chptr->locpeons, targ_p);
+#ifdef REQUIRE_OANDV
+    if (t_op)
+      change_channel_membership(chptr, &chptr->chanops,&chptr->locchanops,
+                                targ_p);
+    else
+#endif
+      change_channel_membership(chptr, &chptr->peons, &chptr->locpeons,
+                                targ_p);
 
     /* Don't send redundant modes on +v-v nick nick */
 
