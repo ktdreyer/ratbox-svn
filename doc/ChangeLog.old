@@ -1,3 +1,7 @@
+*** 19990901_9 by wnder
+ircd module to allow communication with iauth
+
+
 *** 19990901_8 by wnder
 IAuth needs a makefile too!
 
