@@ -1,3 +1,10 @@
+*** 20010804_5 by leeh
+- added ConfigChannel.persist time to determine the minimum length of time a
+  channel will remain when its last user quits from it
+
+  Its minimum, because it will exist until the next cleanup_channels()
+
+
 *** 20010804_4 by wcampbel
 Updated server-version-info from Lee's changes last night
 
