@@ -1,3 +1,11 @@
+*** 20010703_3 by leeh
+- report_qlines -> report_resv
+  (s_conf.c)    -> (resv.c)
+
+- stats Q now lists resv's.. I think I need to add the letter Q on the
+  beginning of the reply tho :P
+
+
 *** 20010703_2 by leeh
 - added reasons to resv
 
