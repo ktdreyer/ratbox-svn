@@ -297,7 +297,7 @@ who_global(struct Client *source_p, const char *mask, int server_oper)
 	/* second, list all matching visible clients */
 	DLINK_FOREACH(ptr, global_client_list.head)
 	{
-		target_p = (struct Client *) ptr->data;
+		target_p = ptr->data;
 		if(!IsPerson(target_p))
 			continue;
 

@@ -750,7 +750,7 @@ remove_temp_gline(const char *user, const char *host)
 
 	DLINK_FOREACH(ptr, glines.head)
 	{
-		aconf = (struct ConfItem *) ptr->data;
+		aconf = ptr->data;
 
 		parse_netmask(aconf->host, &caddr, &cbits);
 

@@ -471,7 +471,7 @@ hunt_server(struct Client *client_p, struct Client *source_p,
 				target_p = NULL;
 				if(match(parv[server], ((struct Client *) (ptr->data))->name))
 				{
-					target_p = (struct Client *) ptr->data;
+					target_p = ptr->data;
 					break;
 				}
 			}
@@ -900,7 +900,6 @@ server_estab(struct Client *client_p)
 	static char inpath_ip[HOSTLEN * 2 + USERLEN + 5];
 	char *host;
 	dlink_node *ptr;
-	dlink_node *cptr;
 
 	s_assert(NULL != client_p);
 	if(client_p == NULL)
@@ -1110,9 +1109,9 @@ server_estab(struct Client *client_p)
 	 */
 
 	aconf = client_p->serv->sconf;
-	DLINK_FOREACH(cptr, global_client_list.head)
+	DLINK_FOREACH(ptr, global_client_list.head)
 	{
-		target_p = (struct Client *) cptr->data;
+		target_p = ptr->data;
 		/* target_p->from == target_p for target_p == client_p */
 		if(target_p->from == client_p)
 			continue;

@@ -621,7 +621,7 @@ register_remote_user(struct Client *client_p, struct Client *source_p, const cha
 static int
 introduce_client(struct Client *client_p, struct Client *source_p, struct User *user, const char *nick)
 {
-	dlink_node *server_node;
+	dlink_node *ptr;
 	struct Client *server;
 	static char ubuf[12];
 
@@ -650,9 +650,9 @@ introduce_client(struct Client *client_p, struct Client *source_p, struct User *
 	 * rewritten to cope with UIDs .. eww eww eww --is
 	 */
 
-	DLINK_FOREACH(server_node, serv_list.head)
+	DLINK_FOREACH(ptr, serv_list.head)
 	{
-		server = (struct Client *) server_node->data;
+		server = ptr->data;
 
 		if(server == client_p)
 			continue;

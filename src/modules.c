@@ -137,12 +137,12 @@ modules_init(void)
 static struct module_path *
 mod_find_path(const char *path)
 {
-	dlink_node *pathst;
+	dlink_node *ptr;
 	struct module_path *mpath;
 
-	DLINK_FOREACH(pathst, mod_paths.head)
+	DLINK_FOREACH(ptr, mod_paths.head)
 	{
-		mpath = (struct module_path *) pathst->data;
+		mpath = ptr->data;
 
 		if(!strcmp(path, mpath->path))
 			return mpath;
@@ -180,15 +180,16 @@ mod_add_path(const char *path)
 void
 mod_clear_paths(void)
 {
-	struct module_path *pathst;
-	dlink_node *node, *next;
+	dlink_node *ptr, *next_ptr;
 
-	DLINK_FOREACH_SAFE(node, next, mod_paths.head)
+	DLINK_FOREACH_SAFE(ptr, next_ptr, mod_paths.head)
 	{
-		pathst = (struct module_path *) node->data;
-		dlinkDestroy(node, &mod_paths);
-		MyFree(pathst);
+		MyFree(ptr->data);
+		free_dlink_node(ptr);
 	}
+
+	mod_paths.head = mod_paths.tail = NULL;
+	mod_paths.length = 0;
 }
 
 /* irc_basename
@@ -327,7 +328,7 @@ load_one_module(const char *path, int coremodule)
 
 	DLINK_FOREACH(pathst, mod_paths.head)
 	{
-		mpath = (struct module_path *) pathst->data;
+		mpath = pathst->data;
 
 		sprintf(modpath, "%s/%s", mpath->path, path);
 		if((strstr(modpath, "../") == NULL) && (strstr(modpath, "/..") == NULL))

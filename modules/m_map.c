@@ -123,7 +123,7 @@ dump_map(struct Client *client_p, struct Client *root_p, char *pbuf)
 	i = 1;
 	DLINK_FOREACH(ptr, root_p->serv->servers.head)
 	{
-		server_p = (struct Client *) ptr->data;
+		server_p = ptr->data;
 		*pbuf = ' ';
 		if(i < cnt)
 			*(pbuf + 1) = '|';

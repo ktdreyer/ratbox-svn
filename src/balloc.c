@@ -175,7 +175,7 @@ block_heap_gc(void *unused)
 	dlink_node *ptr;
 	DLINK_FOREACH(ptr, heap_lists.head)
 	{
-		BlockHeapGarbageCollect((BlockHeap *)ptr->data);
+		BlockHeapGarbageCollect(ptr->data);
 	}
 }
 

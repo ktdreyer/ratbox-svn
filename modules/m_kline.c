@@ -991,7 +991,7 @@ remove_temp_kline(const char *user, const char *host)
 
 		DLINK_FOREACH(ptr, tklist->head)
 		{
-			aconf = (struct ConfItem *) ptr->data;
+			aconf = ptr->data;
 
 			parse_netmask(aconf->host, &caddr, &cbits);
 

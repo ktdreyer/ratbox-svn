@@ -1031,12 +1031,12 @@ recurse_send_quits(struct Client *client_p, struct Client *source_p, struct Clie
 		{
 			DLINK_FOREACH_SAFE(ptr, ptr_next, source_p->serv->users.head)
 			{
-				target_p = (struct Client *) ptr->data;
+				target_p = ptr->data;
 				sendto_one(to, ":%s QUIT :%s", target_p->name, comment);
 			}
 			DLINK_FOREACH_SAFE(ptr, ptr_next, source_p->serv->servers.head)
 			{
-				target_p = (struct Client *) ptr->data;
+				target_p = ptr->data;
 				recurse_send_quits(client_p, target_p, to, comment, myname);
 			}
 		}
@@ -1047,12 +1047,12 @@ recurse_send_quits(struct Client *client_p, struct Client *source_p, struct Clie
 	{
 		DLINK_FOREACH_SAFE(ptr, ptr_next, source_p->serv->users.head)
 		{
-			target_p = (struct Client *) ptr->data;
+			target_p = ptr->data;
 			sendto_one(to, ":%s QUIT :%s", target_p->name, comment);
 		}
 		DLINK_FOREACH_SAFE(ptr, ptr_next, source_p->serv->servers.head)
 		{
-			target_p = (struct Client *) ptr->data;
+			target_p = ptr->data;
 			recurse_send_quits(client_p, target_p, to, comment, myname);
 		}
 		if(!match(myname, source_p->name))
@@ -1082,7 +1082,7 @@ recurse_remove_clients(struct Client *source_p, const char *comment)
 
 	DLINK_FOREACH_SAFE(ptr, ptr_next, source_p->serv->users.head)
 	{
-		target_p = (struct Client *) ptr->data;
+		target_p = ptr->data;
 
 		/* XXX - this next line can probably go now --fl */
 		target_p->flags |= FLAGS_KILLED;
@@ -1091,7 +1091,7 @@ recurse_remove_clients(struct Client *source_p, const char *comment)
 
 	DLINK_FOREACH_SAFE(ptr, ptr_next, source_p->serv->servers.head)
 	{
-		target_p = (struct Client *) ptr->data;
+		target_p = ptr->data;
 		recurse_remove_clients(target_p, comment);
 		target_p->flags |= FLAGS_KILLED;
 		exit_remote_server(NULL, target_p, &me, comment);

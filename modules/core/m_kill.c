@@ -296,7 +296,7 @@ relay_kill(struct Client *one, struct Client *source_p,
 
 	DLINK_FOREACH(ptr, serv_list.head)
 	{
-		client_p = (struct Client *) ptr->data;
+		client_p = ptr->data;
 
 		if(!client_p || client_p == one)
 			continue;

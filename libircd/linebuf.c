@@ -516,15 +516,13 @@ linebuf_get(buf_head_t * bufhead, char *buf, int buflen, int partial, int raw)
 void
 linebuf_attach(buf_head_t * bufhead, buf_head_t * new)
 {
-	dlink_node *new_node;
-	dlink_node *node;
+	dlink_node *ptr;
 	buf_line_t *line;
 
-	DLINK_FOREACH(node, new->list.head)
+	DLINK_FOREACH(ptr, new->list.head)
 	{
-		line = (buf_line_t *) node->data;
-		new_node = make_dlink_node();
-		dlinkAddTail(line, new_node, &bufhead->list);
+		line = ptr->data;
+		dlinkAddAlloc(line, &bufhead->list);
 
 		/* Update the allocated size */
 		bufhead->alloclen++;

@@ -50,7 +50,7 @@ reject_exit(void *unused)
 
 	DLINK_FOREACH_SAFE(ptr, ptr_next, delay_exit.head)
 	{
-		client_p = (struct Client *)ptr->data;
+		client_p = ptr->data;
 		dlinkDestroy(ptr, &delay_exit);
 		exit_client(client_p, client_p, &me, "*** Banned (cached)");
 	}

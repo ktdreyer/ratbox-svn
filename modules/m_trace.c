@@ -118,7 +118,7 @@ m_trace(struct Client *client_p, struct Client *source_p, int parc, const char *
 			{
 				DLINK_FOREACH(ptr, global_client_list.head)
 				{
-					ac2ptr = (struct Client *) ptr->data;
+					ac2ptr = ptr->data;
 					if(match(tname, ac2ptr->name) || match(ac2ptr->name, tname))
 					{
 						break;
