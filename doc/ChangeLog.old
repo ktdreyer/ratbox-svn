@@ -1,3 +1,7 @@
+*** 20011005_1 by wcampbel
+Removed the "value of NOFILE" message
+
+
 *** 20011004_15 by db
 - three eventAdds() completely missing in latest... oops
   missing cleanup_channels, cleanup_glines and cleanup_tklines
