@@ -120,7 +120,7 @@ int     m_sjoin(struct Client *cptr,
         mode.mode |= MODE_TOPICLIMIT;
         break;
       case 'k':
-        strncpy_irc(mode.key, parv[4 + args], KEYLEN);
+         strncpy_irc(mode.key, parv[4 + args], KEYLEN);
         args++;
         if (parc < 5+args) return 0;
         break;
@@ -136,6 +136,15 @@ int     m_sjoin(struct Client *cptr,
   isnew = ChannelExists(parv[2]) ? 0 : 1;
   chptr = get_channel(sptr, parv[2], CREATE);
 
+#ifdef HUB
+  if(IsCapable(cptr,CAP_LL) &&
+     ! (chptr->lazyLinkChannelExists & cptr->serverMask) )
+    {
+#ifdef DEBUGLL
+      sendto_realops("m_sjoin: remote server doesn't know about us yet");
+#endif
+    }
+#endif
 
   /*
    * bogus ban removal code.

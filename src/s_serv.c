@@ -973,6 +973,10 @@ void restoreUnusedServerMask(unsigned long mask)
   struct Channel*   chptr;
   unsigned long clear_mask;
 
+#ifdef DEBUGLL
+  sendto_realops("restoreUnusedServerMask: Returning mask %X", mask);
+#endif
+
   freeMask |= mask;
 
   clear_mask = ~mask;
@@ -995,6 +999,9 @@ static unsigned long nextFreeMask()
       if( mask & freeMask )
         {
           freeMask &= ~mask;
+#ifdef DEBUGLL
+          sendto_realops("nextFreeMask: Returning mask %X", mask);
+#endif
           return(mask);
         }
       mask <<= 1;

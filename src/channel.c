@@ -1028,16 +1028,27 @@ int     m_cburst(struct Client *cptr,
   if( parc > 2 )
     nick = parv[2];
 
+#ifdef DEBUGLL
   sendto_realops("CBURST locally called for %s nick %s", name,
     nick ? nick : "<NULL>" );
+#endif
 
   if(!(chptr=hash_find_channel(name, NullChn)))
     {
+#ifdef DEBUGLL
       sendto_realops(
         "CBURST %s does not exist",
         name );
+#endif
       return -1;
     }
+
+#ifdef DEBUGLL
+   if(chptr->lazyLinkChannelExists & cptr->serverMask )
+     {
+        sendto_realops("CBURST bit already set for %s", name );
+     }
+#endif
 
    chptr->lazyLinkChannelExists = cptr->serverMask;
 
@@ -1066,17 +1077,16 @@ int     m_cburst(struct Client *cptr,
     }
 #endif
   if(IsCapable(cptr,CAP_LL))
-  {
-    send_channel_modes(cptr, chptr);
-     /* Send the topic */
-    sendto_one(cptr, ":%s TOPIC %s :%s",
-       chptr->topic_nick, chptr->chname, chptr->topic);
-  }
+    {
+      send_channel_modes(cptr, chptr);
+       /* Send the topic */
+      sendto_one(cptr, ":%s TOPIC %s :%s",
+         chptr->topic_nick, chptr->chname, chptr->topic);
+    }
   else
     {
-      sendto_realops("CBURST request received from non LL capable server!");
+      sendto_realops("*** CBURST request received from non LL capable server!");
     }
-
   return 0;
 }
 
@@ -1102,13 +1112,17 @@ int     m_drop(struct Client *cptr,
 
   name = parv[1];
 
+#ifdef DEBUGLL
   sendto_realops("DROP locally called for %s nick %s", name);
+#endif
 
   if(!(chptr=hash_find_channel(name, NullChn)))
     {
+#ifdef DEBUGLL
       sendto_realops(
         "DROP %s does not exist",
         name );
+#endif
       return -1;
     }
   chptr->lazyLinkChannelExists &= ~cptr->serverMask;
