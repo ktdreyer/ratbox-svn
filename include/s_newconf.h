@@ -277,8 +277,8 @@ typedef struct
 	dlink_node node;
 } tgchange;
 
-patricia_tree_t *tgchange_tree;
-dlink_list tgchange_list;
+extern patricia_tree_t *tgchange_tree;
+extern dlink_list tgchange_list;
 
 tgchange *find_tgchange(struct sockaddr *);
 

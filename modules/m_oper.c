@@ -82,7 +82,6 @@ DECLARE_MODULE_AV1(oper, NULL, NULL, oper_clist, NULL, NULL, "$Revision$");
 static int match_oper_password(const char *password, struct oper_conf *oper_p);
 static void oper_up(struct Client *source_p, struct oper_conf *oper_p);
 static void send_oper_motd(struct Client *source_p);
-extern char *crypt();
 
 /*
  * m_oper

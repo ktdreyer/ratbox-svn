@@ -294,7 +294,7 @@ extern struct server_info ServerInfo;	/* defined in ircd.c */
 extern struct admin_info AdminInfo;	/* defined in ircd.c */
 /* End GLOBAL section */
 
-extern void init_s_conf();
+extern void init_s_conf(void);
 
 extern struct ConfItem *make_conf(void);
 extern void free_conf(struct ConfItem *);

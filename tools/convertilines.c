@@ -83,7 +83,7 @@ static struct AuthBlock *auth_restricted = NULL;
 
 static void ConvertConf(FILE* file,FILE *out);
 static void set_flags(struct AuthBlock *, const char *, const char *);
-static void usage();
+static void usage(void);
 static char *getfield(char *);
 static struct AuthBlock *find_matching_conf(struct AuthBlock *);
 static void ReplaceQuotes(char *out, char *in);

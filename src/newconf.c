@@ -1607,7 +1607,8 @@ remove_conf_item(const char *topconf, const char *name)
 			/* this has been malloc()'d, but its const for the
 			 * tables.. --fl
 			 */
-			MyFree((char *) cf->cf_name);
+		
+			MyFree((void *)(unsigned long)cf->cf_name);
 			MyFree(cf);
 			return 0;
 		}

@@ -30,28 +30,29 @@
 extern char *getpass();
 extern char *crypt();
 
-char *make_des_salt();
-char *make_ext_salt(int);
-char *make_ext_salt_para(int, char *);
-char *make_md5_salt(int);
-char *make_md5_salt_para(char *);
-char *make_bf_salt(int, int);
-char *make_bf_salt_para(int, char *);
-char *int_to_base64(int);
-char *generate_random_salt(char *, int);
-char *generate_poor_salt(char *, int);
+static char *make_des_salt(void);
+static char *make_ext_salt(int);
+static char *make_ext_salt_para(int, char *);
+static char *make_md5_salt(int);
+static char *make_md5_salt_para(char *);
+static char *make_bf_salt(int, int);
+static char *make_bf_salt_para(int, char *);
+static char *int_to_base64(int);
+static char *generate_random_salt(char *, int);
+static char *generate_poor_salt(char *, int);
 
-void full_usage();
-void brief_usage();
+static void full_usage(void);
+static void brief_usage(void);
 
 static char saltChars[] =
        "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
        /* 0 .. 63, ascii - 64 */
 
+extern char *optarg;
+
 int main(int argc, char *argv[])
 {
   char *plaintext = NULL;
-  extern char *optarg;
   int c;
   char *saltpara = NULL;
   char *salt;
@@ -183,7 +184,7 @@ int main(int argc, char *argv[])
   return 0;
 }
 
-char *make_des_salt()
+static char *make_des_salt()
 {
   static char salt[3];
   generate_random_salt(salt, 2);

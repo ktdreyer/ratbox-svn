@@ -282,7 +282,7 @@ static const struct configcommandinfo {
   { "options",           ccf_options     },
   { "clearnameservers",  ccf_clearnss    },
   { "include",           ccf_include     },
-  {  0                                   }
+  {  0,			 NULL            }
 };
 
 typedef union {

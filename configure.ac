@@ -121,7 +121,7 @@ if test "$ac_cv_c_compiler_gnu" = yes; then
 	;;
 	esac
 
-	IRC_CFLAGS="$IRC_CFLAGS -O0 -Wall -Werror -Wunused -Wmissing-declarations -Wwrite-strings -Wshadow"
+	IRC_CFLAGS="$IRC_CFLAGS -O0"
 fi
 
 dnl If we support -g, use it!
@@ -850,7 +850,7 @@ fi
 
 AC_ARG_ENABLE(warnings,
 AC_HELP_STRING([--enable-warnings],[Enable all sorts of warnings for debugging.]),
-[IRC_CFLAGS="$IRC_CFLAGS -Wcast-qual -Wmissing-declarations -Wmissing-prototypes -Wnested-externs -Wredundant-decls -Wshadow -Wwrite-strings -W -Wno-unused"],[])
+[IRC_CFLAGS="$IRC_CFLAGS -Wall -Werror -Wcast-qual -Wmissing-declarations -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -W -Wno-unused -Wno-sign-compare"],[])
 
 dnl Server Tweaks
 dnl =============

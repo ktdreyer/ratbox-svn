@@ -214,7 +214,7 @@ ascii2prefix(int family, const char *string)
 		memcpy(save, string, cp - string);
 		save[cp - string] = '\0';
 		string = save;
-		if(bitlen < 0 || bitlen > maxbitlen)
+		if(bitlen <= 0 || bitlen > maxbitlen)
 			bitlen = maxbitlen;
 	}
 	else

@@ -1754,7 +1754,7 @@ stats_spy(struct Client *source_p, char statchar, const char *name)
 	hook_data_int data;
 
 	data.client = source_p;
-	data.arg1 = (void *) name;
+	data.arg1 = (const void *) name;
 	data.arg2 = (int) statchar;
 
 	call_hook(doing_stats_hook, &data);

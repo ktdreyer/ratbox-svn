@@ -113,10 +113,10 @@ get_listener_name(const struct Listener *listener)
 
 #ifdef IPV6
 	if(listener->addr.ss_family == AF_INET6)
-		port = ntohs(((struct sockaddr_in6 *)&listener->addr)->sin6_port);
+		port = ntohs(((const struct sockaddr_in6 *)&listener->addr)->sin6_port);
 	else
 #endif
-		port = ntohs(((struct sockaddr_in *)&listener->addr)->sin_port);	
+		port = ntohs(((const struct sockaddr_in *)&listener->addr)->sin_port);	
 
 	ircsnprintf(buf, sizeof(buf), "%s[%s/%u]", me.name, listener->name, port);
 	return buf;

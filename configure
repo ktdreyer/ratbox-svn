@@ -2395,7 +2395,7 @@ echo "${ECHO_T}no" >&6
 	;;
 	esac
 
-	IRC_CFLAGS="$IRC_CFLAGS -O0 -Wall -Werror -Wunused -Wmissing-declarations -Wwrite-strings -Wshadow"
+	IRC_CFLAGS="$IRC_CFLAGS -O0"
 fi
 
 if test "$ac_cv_prog_cc_g" = yes; then
@@ -8439,7 +8439,7 @@ fi
 # Check whether --enable-warnings or --disable-warnings was given.
 if test "${enable_warnings+set}" = set; then
   enableval="$enable_warnings"
-  IRC_CFLAGS="$IRC_CFLAGS -Wcast-qual -Wmissing-declarations -Wmissing-prototypes -Wnested-externs -Wredundant-decls -Wshadow -Wwrite-strings -W -Wno-unused"
+  IRC_CFLAGS="$IRC_CFLAGS -Wall -Werror -Wcast-qual -Wmissing-declarations -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -W -Wno-unused -Wno-sign-compare"
 fi;
 
 

@@ -15,11 +15,11 @@ typedef struct
 
 typedef void (*hookfn) (void *data);
 
-int h_iosend_id;
-int h_iorecv_id;
-int h_iorecvctrl_id;
-int h_burst_channel_id;
-int h_client_auth_id;
+extern int h_iosend_id;
+extern int h_iorecv_id;
+extern int h_iorecvctrl_id;
+extern int h_burst_channel_id;
+extern int h_client_auth_id;
 
 void init_hook(void);
 int register_hook(const char *name);
@@ -30,14 +30,14 @@ void call_hook(int id, void *arg);
 typedef struct
 {
 	struct Client *client;
-	void *arg1;
-	void *arg2;
+	const void *arg1;
+	const void *arg2;
 } hook_data;
 
 typedef struct
 {
 	struct Client *client;
-	void *arg1;
+	const void *arg1;
 	int arg2;
 } hook_data_int;
 

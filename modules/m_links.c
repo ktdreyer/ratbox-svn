@@ -100,7 +100,7 @@ m_links(struct Client *client_p, struct Client *source_p, int parc, const char *
 static int
 mo_links(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	const char *mask = "";
+	const char *mask = LOCAL_COPY("");
 	struct Client *target_p;
 	char clean_mask[2 * HOSTLEN + 4];
 	hook_data hd;
@@ -123,7 +123,7 @@ mo_links(struct Client *client_p, struct Client *source_p, int parc, const char 
 				(clean_mask, (const unsigned char *) mask, 2 * HOSTLEN));
 
 	hd.client = source_p;
-	hd.arg1 = (void *) mask;
+	hd.arg1 = (const void *) mask;
 	hd.arg2 = NULL;
 
 	call_hook(doing_links_hook, &hd);
