@@ -1,3 +1,7 @@
+*** 20010105_31 by wcampbel
+Updated .depend's WITHOUT -DOPENSSL
+
+
 *** 20010105_30 by cosine
 another DEBUGMODE bandaid
 
