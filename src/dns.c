@@ -24,6 +24,9 @@
 
 
 #include "stdinc.h"
+#include "tools.h"
+#include "struct.h"
+#include "ircd_defs.h"
 #include "parse.h"
 #include "commio.h"
 #include "res.h"
@@ -31,9 +34,9 @@
 #include "sprintf_irc.h"
 #include "event.h"
 #include "s_log.h"
-#include "tools.h"
 #include "s_conf.h"
-
+#include "client.h"
+#include "send.h"
 
 #define IDTABLE 0xffff
 
@@ -41,6 +44,8 @@
 #define DNS_REVERSE 	((char)'I')
 
 static void submit_dns(const char, int id, int aftype, const char *addr);
+static void fork_resolver(void);
+
 static pid_t res_pid;
 
 struct dnsreq
@@ -159,6 +164,23 @@ results_callback(const char *id, const char *status, const char *aftype, const c
 }
 
 static int fork_count = 0;
+static int spin_restart = 0;
+static void
+restart_spinning_resolver(void *unused)
+{
+	if(spin_restart > 10)
+	{
+		ilog(L_MAIN, "Tried to wait and restart the resolver %d times, giving up", spin_restart);
+		sendto_realops_flags(UMODE_ALL, L_ALL, "Tried to wait and restart the resolver %d times, giving up", spin_restart);
+		sendto_realops_flags(UMODE_ALL, L_ALL, "Try a manual restart with /rehash dns");
+		spin_restart = 0;
+		fork_count = 0;
+		return;
+	}
+	fork_count = 0; /* reset the fork_count to 0 to let it try again */
+	spin_restart++;
+	fork_resolver();
+}
 
 static void
 fork_resolver(void)
@@ -168,9 +190,14 @@ fork_resolver(void)
 	pid_t pid;
 	char fx[5];
 	char fy[5];
+
 	if(fork_count > 10)
 	{
-		ilog(L_MAIN, "Resolver is really hosed and is looping");
+		ilog(L_MAIN, "Resolver has forked %d times, waiting 15 seconds to restart it again", fork_count);
+		ilog(L_MAIN, "DNS resolution will be unavailable during this time");
+		sendto_realops_flags(UMODE_ALL, L_ALL, "Resolver has forked %d times waiting 30 seconds to restart it again", fork_count);
+		sendto_realops_flags(UMODE_ALL, L_ALL, "DNS resolution will be unavailable during this time");
+		eventAddOnce("restart_spinning_resolver", restart_spinning_resolver, NULL, 30);		
 		return;
 	}
 	fork_count++;
@@ -298,7 +325,10 @@ init_resolver(void)
 void 
 restart_resolver(void)
 {
-	kill(res_pid, SIGHUP);
+	if(res_pid > 0)
+		kill(res_pid, SIGHUP);
+	else 
+		fork_resolver();
 }
 
 void
