@@ -14,7 +14,6 @@
 #include "tools.h"
 #include "ircd_defs.h"
 #include "sprintf_irc.h"
-#include "common.h"
 #include "s_log.h"
 #include "s_conf.h"
 #include "s_user.h"

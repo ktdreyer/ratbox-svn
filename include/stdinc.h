@@ -22,7 +22,8 @@
  * $Id$
  *
  */
-
+#ifndef INCLUDED_stdinc_h
+#define INCLUDED_stdinc_h
 
 #include "config.h"		/* Gotta pull in the autoconf stuff */
 
@@ -141,3 +142,42 @@ extern int errno;
 # define LOCAL_COPY(s) strcpy(alloca(strlen(s) + 1), s) /* XXX Is that allowed? */
 #endif /* defined(__INTEL_COMPILER) || defined(__GNUC__) */
 #endif /* strdupa */
+
+#ifndef NULL
+#define NULL 0
+#endif
+
+#ifdef TRUE
+#undef TRUE
+#endif
+
+#ifdef FALSE
+#undef FALSE
+#endif
+
+#define FALSE  0
+#define TRUE   1
+#define HIDEME 2
+
+/* Blah. I use these a lot. -Dianora */
+#ifdef YES
+#undef YES
+#endif
+
+#define YES 1
+
+#ifdef NO
+#undef NO
+#endif
+
+#define NO  0
+
+/* Just blindly define our own MIN/MAX macro */
+
+#define IRCD_MAX(a, b)  ((a) > (b) ? (a) : (b))
+#define IRCD_MIN(a, b)  ((a) < (b) ? (a) : (b))
+
+/* Right out of the RFC */
+#define IRCD_BUFSIZE 512
+
+#endif

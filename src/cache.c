@@ -35,7 +35,6 @@
 #include "stdinc.h"
 #include "ircd_defs.h"
 #include "tools.h"
-#include "common.h"
 #include "s_conf.h"
 #include "client.h"
 #include "memory.h"

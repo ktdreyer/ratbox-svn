@@ -37,7 +37,6 @@
 #include "ircd_defs.h"
 #include "class.h"
 #include "client.h"
-#include "common.h"
 #include "patricia.h"
 
 struct Client;

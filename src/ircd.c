@@ -33,7 +33,6 @@
 #include "channel.h"
 #include "class.h"
 #include "client.h"
-#include "common.h"
 #include "event.h"
 #include "hash.h"
 #include "irc_string.h"

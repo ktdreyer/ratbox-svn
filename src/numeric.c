@@ -24,7 +24,7 @@
  *  $Id$
  */
 
-#include "common.h"		/* NULL cripes */
+#include "stdinc.h"
 #include "numeric.h"
 
 const char *  numeric_replies[] = {

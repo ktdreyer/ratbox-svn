@@ -36,7 +36,6 @@
 
 #include "stdinc.h"
 #include "ircd_defs.h"
-#include "common.h"
 #include "tools.h"
 #include "config.h"
 #include "s_log.h"
