@@ -48,9 +48,6 @@
 #define BUFLEN                   READLEN
 #endif
 
-extern struct slink_state       in_state;
-extern struct slink_state       out_state;
-extern struct fd_table          fds[5];
 
 #ifdef HAVE_LIBCRYPTO
 #define CIPHER_BF       1
@@ -109,4 +106,9 @@ struct fd_table
   io_callback   *read_cb;
   io_callback   *write_cb;
 };
+
+extern struct slink_state       in_state;
+extern struct slink_state       out_state;
+extern struct fd_table          fds[5];
+
 #endif /* INCLUDED_servlink_servlink_h */

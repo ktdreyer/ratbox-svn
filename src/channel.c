@@ -1230,7 +1230,7 @@ check_spambot_warning(struct Client *source_p, const char *name)
  * side effects - compares usercount and servercount against their split
  *                values and adjusts splitmode accordingly
  */
-void check_splitmode()
+void check_splitmode(void *unused)
 {
   if(splitmode)
   {
