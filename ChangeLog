@@ -1,3 +1,18 @@
+leeh        2005/02/08 11:56:27 EST	(20050208_0)
+
+  Modified files:
+    include              s_userserv.h 
+    src                  s_userserv.c 
+  Log:
+  - via jilles, patch to make sure the expiry time is properly updated
+    within the db.
+  
+  Revision  Changes    Path
+  1.16      +4 -0      rserv/include/s_userserv.h
+  1.50      +17 -5     rserv/src/s_userserv.c
+
+
+
 leeh        2005/02/07 17:52:42 EST	(20050207_2)
 
   Modified files:
