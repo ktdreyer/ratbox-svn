@@ -1,3 +1,16 @@
+*** 20001230_22 by db
+- quick hack for now (adrian, forgive me, for I have sinned)
+
+    /* XXX NOT the right "solution" */
+#if 0
+    assert(fd >= 0);
+#endif
+    if(fd < 0)
+      return;
+
+
+
+
 *** 20001230_21 by davidt
 Only resync the channel if required..
 
