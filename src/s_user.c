@@ -852,10 +852,13 @@ int do_remote_user(char* nick, struct Client* cptr, struct Client* sptr,
   strncpy_irc(sptr->host, host, HOSTLEN); 
   strncpy_irc(sptr->info, realname, REALLEN);
 
+#if 0
+  /* XXX dont do this (talk to is-) */
   /* if it has no ID, set the ID to the nick just in case */
   if (!id)
 	  strcpy(sptr->user->id, nick);
-	
+#endif
+
   return register_remote_user(cptr, sptr, sptr->name, username);
 }
 

@@ -136,11 +136,14 @@ static  unsigned int
 hash_id(const char *nname)
 {
 	unsigned int h = 0;
+	char *n = nname;
 	
 	while (*nname) {
 		h = (h << 4) - (h + (unsigned char)*nname++);
 	}
 
+	sendto_realops_flags(FLAGS_ALL, "Hashed %s to %d", n, h & (U_MAX - 1));
+	
 	return (h & (U_MAX - 1));
 }
 /*
@@ -180,6 +183,7 @@ static void clear_client_hash_table()
 #endif
   memset(clientTable, 0, sizeof(struct HashEntry) * U_MAX);
 }
+
 /*
  * clear_client_hash_table
  *
