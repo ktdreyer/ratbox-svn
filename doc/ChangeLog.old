@@ -1,3 +1,7 @@
+*** 20010704_4 by leeh
+- removed two pointless defines :P
+
+
 *** 20010704_3 by leeh
 - stats m doesnt need to be oper only.. we send it to a user on /help
   anyway
