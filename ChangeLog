@@ -1,3 +1,16 @@
+leeh        2004/02/27 08:04:16 EST	(20040227_0)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  - if ND is going in its own hash, then itll be quicker to have the old
+    client.c code and just add an ND entry in recurse_remove_clients()
+  
+  Revision  Changes    Path
+  7.426     +11 -31    ircd-ratbox/src/client.c
+
+
+
 leeh        2004/02/26 17:43:57 EST	(20040226_6)
 
   Modified files:
