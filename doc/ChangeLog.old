@@ -1,3 +1,11 @@
+*** 20001025_9 by adrian
+
+
+ResolverFileDescriptor isn't a global FD anymore, so don't declare it
+as one.
+
+
+
 *** 20001025_8 by adrian
 
 
