@@ -1,3 +1,16 @@
+leeh        2003/02/13 21:46:55 UTC	(20030213_3)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  - fixed exit_client() to take account of all unknowns (IsConnecting !=
+    IsUnknown)
+  
+  Revision  Changes    Path
+  7.368     +7 -4      ircd-ratbox/src/client.c
+
+
+
 leeh        2003/02/13 21:44:02 UTC	(20030213_2)
 
   Modified files:
