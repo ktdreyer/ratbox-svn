@@ -60,7 +60,8 @@
 		" CALLERID"		\
 		" WALLCHOPS"		\
 		" ETRACE"		\
-		" SAFELIST"
+		" SAFELIST"		\
+		" ELIST=<>"
 
 #define FEATURES2VALUES LOC_CHANNELLEN, \
 			ConfigChannel.use_except ? "e" : "", \
