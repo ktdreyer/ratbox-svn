@@ -1,3 +1,7 @@
+*** 20010104_13 by a1kmm
+- Okay, fixed the 'random' data bug - just a forgotten arg to sendto_realops_flags.
+
+
 *** 20010104_12 by a1kmm
 - Changed CLEARCHAN to work with vchans.
 - Fixed up server kicks to work better and not give away the server doing it.
