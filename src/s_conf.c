@@ -850,9 +850,9 @@ static int
 hash_ip(struct irc_inaddr *addr)
 {
   int hash;
-  unsigned long *ip = (unsigned long *)&PIN_ADDR(addr); 
+  u_int32_t *ip = (u_int32_t *)&PIN_ADDR(addr); 
 
-  if(IN6_IS_ADDR_V4MAPPED(ip))
+  if(IN6_IS_ADDR_V4MAPPED((struct in6_addr *)ip))
   {
      hash = ((ip[3] >> 12) + ip[3]) & (IP_HASH_SIZE-1);
      return(hash);
