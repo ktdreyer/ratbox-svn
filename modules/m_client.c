@@ -51,7 +51,7 @@ static int nick_from_server(struct Client *, struct Client *, int, char **,
                             time_t, char *);
 static int nick_equal_server(struct Client *cptr, struct Client *sptr,
                              char *nick);
-static int clean_nick_name(char* nick);
+int clean_nick_name(char* nick);
 
 static int ms_client(struct Client*, struct Client*, int, char**);
 
