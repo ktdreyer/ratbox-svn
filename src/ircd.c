@@ -814,6 +814,9 @@ int main(int argc, char *argv[])
   /* We need this to initialise the fd array before anything else */
   fdlist_init();
 
+  /* Init the event subsystem */
+  eventInit();
+
   init_sys(bootDaemon);
   init_log(logFileName);
 
