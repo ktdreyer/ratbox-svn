@@ -1,3 +1,6 @@
+*** 20001227_4 by davidt
+Fix up messages/ to work with the new install stuff
+
 *** 20001227_3 by db
 - notify target if source is a half-op and target is an op
 
