@@ -1,3 +1,9 @@
+*** 20011202_5 by leeh
+- fixed up the hostname/username checking, we dont need to pass source_p
+  (its always gunna be the same as client_p anyway) and due to the fact we
+  dont prefix nick - source_p isnt always where the nick originated..
+
+
 *** 20011202_4 by leeh
 - cleanups
 
