@@ -1658,9 +1658,6 @@ struct User* make_user(struct Client *client_p)
   if (!user)
     {
       user = (struct User *)BlockHeapAlloc(user_heap);
-
-      ++user_count;
-
       memset(user, 0, sizeof(struct User));
       user->refcnt = 1;
       client_p->user = user;
@@ -1740,5 +1737,4 @@ void free_user(struct User* user, struct Client* client_p)
 
 
 
-}
 
