@@ -1,3 +1,7 @@
+*** 20001202_4 by toot
+fixed some compile errors/typos
+
+
 *** 20001202_3 by db
 - recoded send_members in channel.c so it actually works
   its still a dogs breakfast... but =better=
