@@ -1,3 +1,7 @@
+*** 20001221_21 by ejb
+- moved maximum_links to ircd.conf
+
+
 *** 20001221_20 by ejb
 - RFC1035_ANAL is always defined now.
 
