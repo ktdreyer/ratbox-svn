@@ -456,7 +456,7 @@ int mo_hash(struct Client *cptr, struct Client *sptr,int parc,char *parv[])
   int   totlink = 0;
   int   size = U_MAX;
   char        ch;
-  FBFILE*    out;
+  FBFILE*    out=NULL;
   int        link_pop[10];
   char  result_buf[256];
   char  hash_log_file[256];

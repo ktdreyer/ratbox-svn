@@ -68,5 +68,16 @@ extern void       BlockHeapDump(BlockHeap *bh,int fd);
 
 #define BlockHeapALLOC(bh, type)  ((type*) BlockHeapAlloc(bh))
 
+#ifdef DEBUGMEM
+extern void * _BlockHeapAlloc(BlockHeap *, char *, int);
+#else
+extern void * _BlockHeapAlloc(BlockHeap *);
+#endif
+#ifdef DEBUGMEM
+extern int _BlockHeapFree(BlockHeap *, void *, char *, int);
+#else
+extern int _BlockHeapFree(BlockHeap *, void *);
+#endif
+
 #endif /* INCLUDED_blalloc_h */
 

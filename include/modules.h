@@ -48,7 +48,7 @@ void mod_add_path(char *path);
 extern void load_module(char *path);
 
 /* load all modules */
-extern void load_all_module(void);
+extern void load_all_modules(void);
 
 extern void _modinit(void);
 extern void _moddeinit(void);

@@ -123,7 +123,7 @@ void _MyFree(void *x)
 void DupStringNoDbg(char **x, char *y) {
   (*x) = MyMalloc(strlen(y) + 1);
   strcpy((*x), y);
-};
+}
 
 /*
  * clean_string - clean up a string possibly containing garbage

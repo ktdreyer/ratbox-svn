@@ -53,5 +53,7 @@ extern void        close_listeners(void);
 extern const char* get_listener_name(const struct Listener* listener);
 extern void        mark_listeners_closing(void);
 extern void        show_ports(struct Client* client);
+extern struct Listener* make_listener(int, struct in_addr);
+extern void free_listener(struct Listener * );
 
 #endif /* INCLUDED_listener_h */

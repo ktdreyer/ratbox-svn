@@ -37,6 +37,7 @@ struct Ban;
 
 
 extern void count_user_memory(int *, int *);
+extern void count_links_memory(int *, int *);
 extern void     outofmemory(void);
 extern  void    _free_user (struct User *, struct Client *);
 extern  dlink_node *make_dlink_node (void);
