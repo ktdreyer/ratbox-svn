@@ -28,7 +28,7 @@ ratbox-services installation guide
       2. tar -zxf sqlite-2.8.x.tar.gz
       3. cd sqlite
       
-      If you have root access and want to install in /usr/local/ratbox-services
+      If you have root access and want to install sqlite in /usr/local
         4a. ./configure --prefix=/usr/local
         4b. make
         4c. su to root user
@@ -80,12 +80,12 @@ ratbox-services installation guide
 
 8. Edit example.conf and save it as services.conf.
 
-9. Initialise your database.  If you are not converting from hybserv, then
-   build the initial services database by:
+9. Initialise your database, this must be done even if you are converting
+   from hybserv:
 	sqlite services.db < schema.txt
 
-   If you are converting from hybserv, see the website for more information.
-   http://services.ircd-ratbox.org/
+   If you are converting from hybserv, see the website for further
+   instructions: http://services.ircd-ratbox.org/
 
 10. Run ./ratbox-services
 
