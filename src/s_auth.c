@@ -559,13 +559,17 @@ read_auth_reply(int fd, void *data)
       if( (s = GetValidIdent(buf)) )
 	{
 	  t = auth->client->username;
+
+	  while(*s == '~' || *s == '^')
+            s++;
+
 	  for (count = USERLEN; *s && count; s++)
 	    {
 	      if(*s == '@')
 		{
 		  break;
 		}
-	      if ( !IsSpace(*s) && *s != ':' )
+	      if ( !IsSpace(*s) && *s != ':' && *s != '[')
 		{
 		  *t++ = *s;
 		  count--;
