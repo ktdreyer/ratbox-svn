@@ -322,10 +322,12 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     {
      if (!(aconf->status == CONF_LEAF || aconf->status == CONF_HUB))
        continue;
-     if (irccmp(aconf->host,
-          (aconf->status == CONF_LEAF) ? parv[0] : cptr->name))
+
+     if (match(aconf->name,
+	       (aconf->status == CONF_LEAF) ? parv[0] : cptr->name))
        continue;
-     if (match(aconf->name, host))
+
+     if (match(aconf->host, host))
        {
         if (aconf->status == CONF_HUB)
           hlined++;

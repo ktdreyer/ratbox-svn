@@ -930,24 +930,24 @@ connect_entry:  CONNECT
         yy_aconf = NULL;
       }
         
-        for (yy_hconf=hub_confs;yy_hconf;yy_hconf=yy_aconf_next)
-          {
-           yy_aconf_next = yy_hconf->next;
-           if (yy_aconf)
-             {
-              DupString(yy_hconf->host, yy_aconf->name);
-              conf_add_hub_or_leaf(yy_hconf);
-              conf_add_conf(yy_hconf);
-             }
-           else
-             free_conf(yy_hconf);
-          }
+    for (yy_hconf=hub_confs;yy_hconf;yy_hconf=yy_aconf_next)
+      {
+	yy_aconf_next = yy_hconf->next;
+	if (yy_aconf)
+	  {
+	    DupString(yy_hconf->name, yy_aconf->name);
+	    conf_add_conf(yy_hconf);
+	  }
+	else
+	  free_conf(yy_hconf);
+      }
+
     for (yy_lconf=leaf_confs;yy_lconf;yy_lconf=yy_aconf_next)
       {
        yy_aconf_next = yy_lconf->next;
        if (yy_aconf)
          {
-          DupString(yy_lconf->host, yy_aconf->name);
+          DupString(yy_lconf->name, yy_aconf->name);
           conf_add_conf(yy_lconf);
          }
        else
@@ -1030,19 +1030,20 @@ connect_hub_mask:       HUB_MASK '=' QSTRING ';'
   {
     if(yylval.string != NULL)
       {
-	if(!hub_confs)
+	if(hub_confs == NULL)
 	  {
 	    hub_confs = make_conf();
 	    hub_confs->status = CONF_HUB;
 	    DupString(hub_confs->host,yylval.string);
+	    DupString(hub_confs->user, "*");
 	  }
 	else
 	  {
 	    yy_hconf = make_conf();
 	    yy_hconf->status = CONF_HUB;
-	    DupString(yy_hconf->name, yylval.string);
-        DupString(yy_hconf->user, "*");
-        yy_hconf->next = hub_confs;
+	    DupString(yy_hconf->host, yylval.string);
+	    DupString(yy_hconf->user, "*");
+	    yy_hconf->next = hub_confs;
 	    hub_confs = yy_hconf;
 	  }
       }
@@ -1052,17 +1053,19 @@ connect_leaf_mask:       LEAF_MASK '=' QSTRING ';'
   {
     if(yylval.string != NULL)
       {
-	if(!leaf_confs)
+	if(leaf_confs == NULL)
 	  {
 	    leaf_confs = make_conf();
 	    leaf_confs->status = CONF_LEAF;
 	    DupString(leaf_confs->host,yylval.string);
+	    DupString(leaf_confs->user, "*");
 	  }
 	else
 	  {
 	    yy_lconf = make_conf();
 	    yy_lconf->status = CONF_LEAF;
-	    DupString(yy_lconf->host,yylval.string);
+	    DupString(yy_lconf->name,yylval.string);
+	    DupString(yy_lconf->user, "*");
 	    yy_lconf->next = leaf_confs;
 	    leaf_confs = yy_lconf;
 	  }
