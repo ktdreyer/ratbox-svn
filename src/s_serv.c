@@ -1568,7 +1568,7 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
 	copy_s_addr(S_ADDR(ipn), htonl(IN_ADDR(vserv)));
 #endif
 	comm_connect_tcp(cptr->fd, aconf->host, aconf->port,
-3			 (struct sockaddr *)&SOCKADDR(ipn), sizeof(struct irc_sockaddr), 
+			 (struct sockaddr *)&SOCKADDR(ipn), sizeof(struct irc_sockaddr), 
 			 serv_connect_callback, cptr, aconf->aftype);
       }
     else
