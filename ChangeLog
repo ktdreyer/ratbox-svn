@@ -1,3 +1,15 @@
+leeh        2004/07/08 13:24:07 EDT	(20040708_0)
+
+  Modified files:
+    src                  s_conf.c 
+  Log:
+  - add the MODULE_DIR back to mod_paths on rehash
+  
+  Revision  Changes    Path
+  7.468     +2 -0      ircd-ratbox/src/s_conf.c
+
+
+
 leeh        2004/07/03 15:57:46 EDT	(20040703_2)
 
   Modified files:
