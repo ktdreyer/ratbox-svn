@@ -1,3 +1,18 @@
+leeh        2002/02/02 10:57:02 EST	(20020202_2)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+  Log:
+  - patch to fix HAVE_SNPRINTF HAVE_VSNPRINTF via Giorgos Keramidas
+    <keramida@freebsd.org>
+  
+  Revision  Changes    Path
+  7.114     +2 -2      ircd-hybrid-7/autoconf/configure.in
+  7.117     +231 -228  ircd-hybrid-7/configure
+
+
+
 leeh        2002/02/02 10:35:01 EST	(20020202_1)
 
   Modified files:
