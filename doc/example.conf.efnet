@@ -609,6 +609,12 @@ channel {
 	 */
 	use_except = no;
 
+	/* allows the use of +a, anonops.  We do not recommend this is
+	 * used on efnet in its current state, as it can generate modefloods
+	 * via the need to resync a clients internal oplist.
+	 */
+	use_anonops = no;
+
 	/* This allows you to /quote knock #channel, when you are unsure
 	 * who is in the channel. If the channel is +p or you are banned
 	 * the knock will not be sent.

@@ -229,7 +229,8 @@ silent          { return SILENT; }
 spoof		{ return SPOOF; }
 spoof_notice	{ return SPOOF_NOTICE; }
 unkline		{ return UNKLINE; }
-use_egd { return USE_EGD; }
+use_anonops	{ return USE_ANONOPS; }
+use_egd 	{ return USE_EGD; }
 use_except	{ return USE_EXCEPT; }
 use_halfops     { return USE_HALFOPS; }
 use_invex	{ return USE_INVEX; }

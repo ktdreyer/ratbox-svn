@@ -446,6 +446,10 @@ static void initialize_server_capabs(void)
   {
     default_server_capabs &= ~CAP_HOPS;
   }
+
+  if(ConfigChannel.use_anonops == 0)
+    default_server_capabs &= ~CAP_AOPS;
+  
   default_server_capabs &= ~CAP_ZIP;
 }
 

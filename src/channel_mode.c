@@ -829,6 +829,13 @@ chm_hideops(struct Client *client_p, struct Client *source_p,
 {
   int i;
 
+  /* if we dont support it, dont send it anywhere.  well only
+   * have the capab if we support it, so we should never get
+   * here for a remote server if we dont support it..
+   */
+  if(!ConfigChannel.use_anonops)
+    return;
+
   if (alev < CHACCESS_HALFOP)
   {
     if (!(*errors & SM_ERR_NOOPS))
@@ -1039,6 +1046,9 @@ chm_except(struct Client *client_p, struct Client *source_p,
   struct Ban *banptr;
   char *mask, *raw_mask;
 
+  if(!ConfigChannel.use_except && MyClient(source_p))
+    return;
+
   if (alev < CHACCESS_HALFOP)
   {
     if (!(*errors & SM_ERR_NOOPS))
@@ -1075,12 +1085,6 @@ chm_except(struct Client *client_p, struct Client *source_p,
   else
     mask = pretty_mask(raw_mask);
 
-  /* will cause a desync, cant be done */
-#if 0
-  if (strlen(mask) > NICKLEN+USERLEN+HOSTLEN)
-    return;
-#endif    
-
   /* If we're adding a NEW id */
   if ((dir == MODE_ADD) && add_id(source_p, chptr, mask, CHFL_EXCEPTION) == 0)
   {
@@ -1097,7 +1101,12 @@ chm_except(struct Client *client_p, struct Client *source_p,
     mode_changes_plus[mode_count_plus].letter = c;
     mode_changes_plus[mode_count_plus].caps = CAP_EX;
     mode_changes_plus[mode_count_plus].nocaps = 0;
-    mode_changes_plus[mode_count_plus].mems = ONLY_CHANOPS_HALFOPS;
+
+    if(ConfigChannel.use_except)
+      mode_changes_plus[mode_count_plus].mems = ONLY_CHANOPS_HALFOPS;
+    else
+      mode_changes_plus[mode_count_plus].mems = ONLY_SERVERS;
+
     mode_changes_plus[mode_count_plus].id = NULL;
     mode_changes_plus[mode_count_plus++].arg = mask;
   }
@@ -1143,6 +1152,10 @@ chm_invex(struct Client *client_p, struct Client *source_p,
   char *mask, *raw_mask;
   dlink_node *ptr;
   struct Ban *banptr;
+
+  /* if its our client setting a +I, drop it. */
+  if(!ConfigChannel.use_invex && MyClient(source_p))
+    return;
 
   if (alev < CHACCESS_HALFOP)
   {
@@ -1202,7 +1215,12 @@ chm_invex(struct Client *client_p, struct Client *source_p,
     mode_changes_plus[mode_count_plus].letter = c;
     mode_changes_plus[mode_count_plus].caps = CAP_IE;
     mode_changes_plus[mode_count_plus].nocaps = 0;
-    mode_changes_plus[mode_count_plus].mems = ONLY_CHANOPS_HALFOPS;
+    
+    if(ConfigChannel.use_invex)
+      mode_changes_plus[mode_count_plus].mems = ONLY_CHANOPS_HALFOPS;
+    else
+      mode_changes_plus[mode_count_plus].mems = ONLY_SERVERS;
+
     mode_changes_plus[mode_count_plus].id = NULL;
     mode_changes_plus[mode_count_plus++].arg = mask;
   }
@@ -1233,7 +1251,12 @@ chm_invex(struct Client *client_p, struct Client *source_p,
     mode_changes_minus[mode_count_minus].letter = c;
     mode_changes_minus[mode_count_minus].caps = CAP_IE;
     mode_changes_minus[mode_count_minus].nocaps = 0;
-    mode_changes_minus[mode_count_minus].mems = ONLY_CHANOPS_HALFOPS;
+
+    if(ConfigChannel.use_invex)
+      mode_changes_minus[mode_count_minus].mems = ONLY_CHANOPS_HALFOPS;
+    else
+      mode_changes_minus[mode_count_minus].mems = ONLY_SERVERS;
+
     mode_changes_minus[mode_count_minus].id = NULL;
     mode_changes_minus[mode_count_minus++].arg = mask;
   }
@@ -1511,6 +1534,13 @@ chm_halfop(struct Client *client_p, struct Client *source_p,
   int wasnt_voiced = 0, t_voice = 0, t_op = 0, t_hop = 0;
   char *opnick;
   struct Client *targ_p;
+
+  /* halfops have been disabled.. disallow local users to set,
+   * remote is taken care of via BOUNCE_BAD_HOPS, and we shouldnt
+   * get halfops because we unset CAP_HOPS anyway..
+   */
+  if(!ConfigChannel.use_halfops && MyClient(source_p))
+    return;
 
 /* *sigh* - dont allow halfops to set +/-h, they could fully control a
  * channel if there were no ops - it doesnt solve anything.. MODE_PRIVATE

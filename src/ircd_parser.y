@@ -274,6 +274,7 @@ int   class_redirport_var;
 %token  THROTTLE_TIME
 %token  UNKLINE
 %token  USER
+%token	USE_ANONOPS
 %token  USE_EGD
 %token  USE_EXCEPT
 %token  USE_HALFOPS
@@ -2502,6 +2503,7 @@ channel_item:       channel_use_except |
                     channel_use_invex |
                     channel_use_knock |
                     channel_use_vchans |
+		    channel_use_anonops |
 		    channel_vchans_oper_only |
                     channel_max_bans |
                     channel_knock_delay |
@@ -2531,9 +2533,8 @@ channel_use_halfops:   USE_HALFOPS '=' TYES ';'
     /* Set to -1 on boot */
     if (ConfigChannel.use_halfops == 0)
     {
-      sendto_realops_flags(FLAGS_ALL, L_ALL,
-        "Ignoring config file entry 'use_halfops = yes' "
-        "-- can only be changed on boot");
+      ilog(L_ERROR, "Ignoring config file entry 'use_halfops = yes' "
+                    "-- can only be changed on boot");
       break;
     }
     else
@@ -2545,14 +2546,38 @@ channel_use_halfops:   USE_HALFOPS '=' TYES ';'
     /* Set to -1 on boot */
     if (ConfigChannel.use_halfops == 1)
     {
-      sendto_realops_flags(FLAGS_ALL, L_ALL,
-        "Ignoring config file entry 'use_halfops = no' "
-        "-- can only be changed on boot");
+      ilog(L_ERROR, "Ignoring config file entry 'use_halfops = no' "
+                    "-- can only be changed on boot");
       break;
     }
     else
       ConfigChannel.use_halfops = 0;
   };
+
+
+channel_use_anonops: USE_ANONOPS '=' TYES ';'
+  {
+    if(ConfigChannel.use_anonops)
+    {
+      ilog(L_ERROR, "Ignoring config file entry 'use_anonops = yes' "
+                    "-- can only be changed on boot");
+      break;
+    }
+    else
+      ConfigChannel.use_anonops = 1;
+  }
+    |
+    USE_ANONOPS '=' TNO ';'
+  {
+    if(ConfigChannel.use_anonops == 1)
+    {
+      ilog(L_ERROR, "Ignoring config file entry 'use_anonops = no' "
+                    "-- can only be changed on boot");
+      break;
+    }
+    else
+      ConfigChannel.use_anonops = 0;
+  } ;
 
 
 channel_use_invex:   USE_INVEX '=' TYES ';'
