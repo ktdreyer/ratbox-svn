@@ -71,8 +71,6 @@ extern int BlockHeapDestroy(BlockHeap * bh);
 extern void initBlockHeap(void);
 extern void BlockHeapUsage(BlockHeap * bh, size_t * bused, size_t * bfree, size_t * bmemusage);
 
-#define RXCONF_HEAP_SIZE        64
-#define SHARED_HEAP_SIZE        8
 #define CACHEFILE_HEAP_SIZE	32
 #define CACHELINE_HEAP_SIZE	64
 

@@ -327,6 +327,8 @@ extern dlink_list tdline_hour;
 extern dlink_list tdline_day;
 extern dlink_list tdline_week;
 
+extern void init_s_conf();
+
 extern struct ConfItem *make_conf(void);
 extern void free_conf(struct ConfItem *);
 

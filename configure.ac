@@ -785,6 +785,7 @@ dnl	AC_DEFINE([HASHSIZE], 4096, [Max number of buckets in hash tables.])
 	AC_DEFINE([LINEBUF_HEAP_SIZE], 128, [Size of the linebuf heap.])
 	AC_DEFINE([MEMBER_HEAP_SIZE], 256, [Sizeof member heap.])
 	AC_DEFINE([ND_HEAP_SIZE], 128, [Size of the nick delay heap.])
+	AC_DEFINE([CONFITEM_HEAP_SIZE], 128, [Size of the confitem heap.])
 else
 dnl	AC_DEFINE([HASHSIZE], 32768, [Max number of buckets in hash tables.])
 	AC_DEFINE([NICKNAMEHISTORYLENGTH], 15000, [Size of the WHOWAS array.])
@@ -798,6 +799,7 @@ dnl	AC_DEFINE([HASHSIZE], 32768, [Max number of buckets in hash tables.])
 	AC_DEFINE([LINEBUF_HEAP_SIZE], 1024, [Size of the linebuf heap.])
 	AC_DEFINE([MEMBER_HEAP_SIZE], 1024, [Sizeof member heap.])
 	AC_DEFINE([ND_HEAP_SIZE], 512, [Size of the nick delay heap.])
+	AC_DEFINE([CONFITEM_HEAP_SIZE], 256, [Size of the confitem heap.])
 fi
 
 AC_ARG_WITH(nicklen,

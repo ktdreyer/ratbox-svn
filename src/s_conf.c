@@ -63,6 +63,8 @@ extern char linebuf[];
 #define INADDR_NONE ((unsigned int) 0xffffffff)
 #endif
 
+static BlockHeap *confitem_heap = NULL;
+
 dlink_list tkline_min;
 dlink_list tkline_hour;
 dlink_list tkline_day;
@@ -88,6 +90,12 @@ extern char yytext[];
 static int verify_access(struct Client *client_p, const char *username);
 static int attach_iline(struct Client *, struct ConfItem *);
 
+void
+init_s_conf(void)
+{
+	confitem_heap = BlockHeapCreate(sizeof(struct ConfItem), CONFITEM_HEAP_SIZE);
+}
+
 /*
  * make_conf
  *
@@ -100,7 +108,7 @@ make_conf()
 {
 	struct ConfItem *aconf;
 
-	aconf = (struct ConfItem *) MyMalloc(sizeof(struct ConfItem));
+	aconf = BlockHeapAlloc(confitem_heap);
 	aconf->status = CONF_ILLEGAL;
 	return (aconf);
 }
@@ -135,7 +143,7 @@ free_conf(struct ConfItem *aconf)
 	MyFree(aconf->user);
 	MyFree(aconf->host);
 
-	MyFree((char *) aconf);
+	BlockHeapFree(confitem_heap, aconf);
 }
 
 /*
