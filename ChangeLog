@@ -1,3 +1,18 @@
+androsyn    2002/09/04 22:26:09 EDT	(20020905_3)
+
+  Modified files:
+    modules              Makefile.in 
+  Removed files:
+    modules              m_dmem.c 
+  Log:
+  Remove m_dmem.c as it is useless now..
+  
+  Revision  Changes    Path
+  1.74      +0 -1      ircd-ratbox/modules/Makefile.in
+  1.17      +0 -83     ircd-ratbox/modules/m_dmem.c (dead)
+
+
+
 androsyn    2002/09/04 22:24:12 EDT	(20020905_2)
 
   Modified files:
