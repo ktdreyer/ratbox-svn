@@ -1,3 +1,31 @@
+leeh        2003/06/20 16:13:19 UTC	(20030620_6)
+
+  Modified files:
+    include              channel.h help.h 
+    modules              m_help.c m_join.c m_who.c 
+    modules/core         m_kick.c m_part.c 
+    src                  channel.c client.c help.c 
+  Log:
+  - make remove_user_from_channel take a struct membership, we end up
+    having it anyway, its far more efficient.
+  - slight cleanup to /who *
+  - added struct helpline, so we allocate the help buffer and the dlink
+    at the same time
+  
+  Revision  Changes    Path
+  7.139     +1 -1      ircd-ratbox/include/channel.h
+  1.2       +6 -0      ircd-ratbox/include/help.h
+  1.68      +5 -3      ircd-ratbox/modules/core/m_kick.c
+  1.80      +2 -2      ircd-ratbox/modules/core/m_part.c
+  1.55      +12 -2     ircd-ratbox/modules/m_help.c
+  1.129     +7 -5      ircd-ratbox/modules/m_join.c
+  1.92      +2 -10     ircd-ratbox/modules/m_who.c
+  7.379     +6 -5      ircd-ratbox/src/channel.c
+  7.383     +5 -5      ircd-ratbox/src/client.c
+  1.3       +4 -5      ircd-ratbox/src/help.c
+
+
+
 leeh        2003/06/20 15:25:43 UTC	(20030620_5)
 
   Modified files:
