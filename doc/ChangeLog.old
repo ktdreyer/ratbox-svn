@@ -1,3 +1,8 @@
+*** 20010102_33 by db
+- committed cstone's contributed patch to fix modules under openbsd
+
+
+
 *** 20010102_32 by db
 - UNTESTED ignore fd < 0 instead of failing an assert *FOR NOW*
   adrian, might want to look at this one.
