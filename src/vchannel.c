@@ -137,7 +137,8 @@ struct Channel* map_bchan(struct Channel *chptr, struct Client *sptr)
   return NullChn;
 }
 
-/* return the base chan of a vchan */
+/* return the base chan from a vchan, this is less efficient than
+ * map_bchan, but only needs a chan pointer. */
 struct Channel* find_bchan(struct Channel *chptr)
 {
   struct Channel *chtmp;
@@ -169,7 +170,9 @@ void show_vchans(struct Client *cptr,
 
    sendto_one(sptr, form_str(RPL_VCHANEXIST),
               me.name, sptr->name, chptr->chname, no_of_vchans);
-       
+
+   len = ( strlen(me.name) + NICKLEN + strlen(chptr->chname) + 8 );
+
    for (chtmp = chptr; chtmp; chtmp = chtmp->next_vchan)
      {
        /* Obey the rules of /list */
@@ -182,10 +185,7 @@ void show_vchans(struct Client *cptr,
 	   strcat(key_list, pick_vchan_id(chtmp));
 	   strcat(key_list, " ");
 
-	   len = ( strlen(me.name) + NICKLEN + strlen(chptr->chname) 
-		   + strlen(key_list) + 8 );
-
-	   if (len > (BUFSIZE - NICKLEN - 3))
+	   if ((len + strlen(key_list)) > (BUFSIZE - NICKLEN - 3))
 	     {
 	       sendto_one(sptr, form_str(RPL_VCHANLIST),
 			  me.name, sptr->name, chptr->chname, key_list);
@@ -206,17 +206,35 @@ void show_vchans(struct Client *cptr,
               me.name, sptr->name, command, chptr->chname);
 }
 
-/* pick a name from the channel.  we'll chose who's been there 
- * longest today */
+/* pick a name from the channel.  the topic setters nick if available,
+ * otherwise we use who's been there longest according to the server */
 char* pick_vchan_id(struct Channel *chptr)
 {
   struct SLink *lp;
+  struct Client *acptr;
+  char *topic_nick, *p;
+
+  /* see if we can use the nick of who set the topic */
+  if (chptr->topic_info)
+    {
+      topic_nick = (char *)MyMalloc(strlen(chptr->topic_info));
+      strcpy(topic_nick, chptr->topic_info);
+
+      /* cut off anything after a '!' */
+      p = strchr(topic_nick, '!');
+      if (p)
+        *p = '\0';
+
+      if ( (acptr = hash_find_client(topic_nick,(struct Client *)NULL)) &&
+           IsMember(acptr, chptr) )
+        {
+          return topic_nick;
+        }
+    }
 
   for (lp = chptr->members; lp; lp = lp->next)
-    {
-      if (!lp->next)
-        return lp->value.cptr->name;
-    }
+    if (!lp->next)
+      return lp->value.cptr->name;
 
   /* shouldn't get here! */
   return NULL;
