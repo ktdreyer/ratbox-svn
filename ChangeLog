@@ -1,3 +1,15 @@
+androsyn    2004/07/30 12:25:43 EDT	(20040730_3)
+
+  Modified files:
+    modules              m_oper.c 
+  Log:
+  Wrap the prototype for m_challenge in an #ifdef
+  
+  Revision  Changes    Path
+  1.84      +3 -2      ircd-ratbox/modules/m_oper.c
+
+
+
 androsyn    2004/07/30 12:20:39 EDT	(20040730_2)
 
   Modified files:
