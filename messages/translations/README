@@ -7,6 +7,9 @@ is well apreciated.
 At the present time, the following languages are supported
 
 swedish - maintained by trbz - Chris C <chris@mircscripter.com>
-croation - in progress
+croation - maintained by Martin - Vid Strpic <strpic@bofhlet.net>
 french - in progress
-german - in progress
+german - maintained by dmalloc - Darian Lanx <bio@gmx.net>
+
+Note:  the german.po is broken at the present time, do not use it
+Note:  the swedish.po compiles but does not run, do not use it
