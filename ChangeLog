@@ -1,3 +1,24 @@
+androsyn    2004/03/06 23:08:06 EST	(20040307_0)
+
+  Modified files:
+    include              hash.h hostmask.h 
+    src                  hash.c hostmask.c parse.c scache.c 
+                         whowas.c 
+  Log:
+  Sort out the hash functions to be mostly using the same function, and rename
+  a few functions aptly named hash() that reside in various places
+  
+  Revision  Changes    Path
+  7.46      +5 -0      ircd-ratbox/include/hash.h
+  1.32      +2 -1      ircd-ratbox/include/hostmask.h
+  7.99      +64 -56    ircd-ratbox/src/hash.c
+  7.92      +2 -8      ircd-ratbox/src/hostmask.c
+  7.176     +5 -5      ircd-ratbox/src/parse.c
+  7.23      +3 -5      ircd-ratbox/src/scache.c
+  7.29      +1 -9      ircd-ratbox/src/whowas.c
+
+
+
 leeh        2004/03/06 15:50:45 EST	(20040306_6)
 
   Modified files:
