@@ -1,3 +1,31 @@
+leeh        2003/06/23 09:12:59 UTC	(20030623_0)
+
+  Modified files:
+    include              channel.h client.h hash.h 
+    modules              m_help.c m_join.c m_knock.c m_list.c 
+    modules/core         m_sjoin.c 
+    src                  channel.c client.c hash.c s_serv.c 
+  Log:
+  - removed chptr->users, use dlink_list_length(&chptr->members)
+  - removed sptr->user->joined, use dlink_list_length(sptr->user->channel)
+  - removed my help debug code
+  
+  Revision  Changes    Path
+  7.140     +0 -1      ircd-ratbox/include/channel.h
+  7.205     +0 -1      ircd-ratbox/include/client.h
+  7.36      +0 -4      ircd-ratbox/include/hash.h
+  1.174     +3 -3      ircd-ratbox/modules/core/m_sjoin.c
+  1.57      +2 -25     ircd-ratbox/modules/m_help.c
+  1.130     +7 -5      ircd-ratbox/modules/m_join.c
+  1.76      +6 -4      ircd-ratbox/modules/m_knock.c
+  1.66      +8 -20     ircd-ratbox/modules/m_list.c
+  7.380     +6 -18     ircd-ratbox/src/channel.c
+  7.384     +6 -7      ircd-ratbox/src/client.c
+  7.75      +0 -31     ircd-ratbox/src/hash.c
+  7.333     +1 -1      ircd-ratbox/src/s_serv.c
+
+
+
 leeh        2003/06/22 09:28:11 UTC	(20030622_1)
 
   Modified files:
