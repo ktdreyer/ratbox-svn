@@ -1,3 +1,15 @@
+androsyn    2002/12/10 09:42:10 UTC	(20021210_5)
+
+  Modified files:
+    src                  listener.c 
+  Log:
+  Comment out an unnecessary memmove()
+  
+  Revision  Changes    Path
+  7.77      +2 -1      ircd-ratbox/src/listener.c
+
+
+
 androsyn    2002/12/10 09:37:02 UTC	(20021210_4)
 
   Modified files:
