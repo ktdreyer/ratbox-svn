@@ -91,8 +91,8 @@ void oldParseOneLine(char* line)
       /* class field */
       if ((class_field = getfield(NULL)) == NULL)
 	break;
-      
-      break;
+
+         break;
       /* NOTREACHED */
     }
 
