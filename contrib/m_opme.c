@@ -45,7 +45,7 @@ int mo_opme(struct Client *cptr, struct Client *sptr,
 		 int parc, char *parv[]);
 
 struct Message opme_msgtab = {
-  "OPME", 0, 1, 0, MFLG_SLOW, 0,
+  "OPME", 0, 2, 0, MFLG_SLOW, 0,
   {m_unregistered, m_not_oper, m_ignore, mo_opme}
 };
 
@@ -82,6 +82,12 @@ int mo_opme(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   int on_vchan = 0;
   dlink_node *ptr;
   
+  if (parc < 2)
+    {
+
+      return 0;
+    }
+
   /* admins only */
   if (!IsSetOperAdmin(sptr))
     {
