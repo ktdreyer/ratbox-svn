@@ -1,3 +1,9 @@
+*** 20010210_2 by db
+- This should fix the pesky asserts once and for all.
+  Remember the client struct hasnt' been freed yet, so its cool here.
+
+
+
 *** 20010210_1 by a1kmm
 - Reverted back to scanning forward in hostmask.c - the idea of scanning backwards and not hashing the string
   seems to take more clockcycles on the average hostname to get everything right than just rehashing the
