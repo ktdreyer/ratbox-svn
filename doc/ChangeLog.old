@@ -1,3 +1,16 @@
+jmallett    2002/02/12 08:48:06 EST	(20020212_1)
+
+  Modified files:
+    .                    README.FIRST 
+  Log:
+  Add a note about the version of the OSX DevTools required to build ircd-hybrid
+  with shared module support properly.
+  
+  Revision  Changes    Path
+  7.28      +4 -5      ircd-hybrid-7/README.FIRST
+
+
+
 jmallett    2002/02/12 08:45:28 EST	(20020212_0)
 
   Modified files:
