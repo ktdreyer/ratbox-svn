@@ -226,6 +226,7 @@ struct config_file_entry
   int           throttle_time;
   int           use_egd;
   int		ping_cookie;
+  int           tkline_expire_notices;
   int           use_global_limits;
   int           use_help;
   int           use_whois_actually;

@@ -277,6 +277,7 @@ extern 	char *		conf_cur_block_name;
 	void	conf_set_general_throttle_time			(void *data);
 	void	conf_set_general_oper_umodes			(void *data);
 	void	conf_set_general_oper_only_umodes		(void *data);
+        void    conf_set_general_tkline_expire_notices          (void *data);
 	void	conf_set_general_min_nonwildcard		(void *data);
 	void	conf_set_general_default_floodcount		(void *data);
 	void	conf_set_general_client_flood			(void *data);

@@ -504,6 +504,8 @@ void	newconf_init()
 			conf_set_general_min_nonwildcard);
 	add_conf_item("general", "servlink_path", CF_QSTRING,
 			conf_set_general_servlink_path);
+        add_conf_item("general", "tkline_expire_notices", CF_YESNO,
+                        conf_set_general_tkline_expire_notices);
 	add_conf_item("general", "use_global_limits", CF_YESNO,
 			conf_set_general_use_global_limits);
 	add_conf_item("general", "use_help", CF_YESNO,
@@ -2520,6 +2522,11 @@ void	conf_set_general_use_help(void *data)
 void    conf_set_general_use_whois_actually(void *data)
 {
         ConfigFileEntry.use_whois_actually = *(unsigned int*)data;
+}
+
+void    conf_set_general_tkline_expire_notices(void *data)
+{
+        ConfigFileEntry.tkline_expire_notices = *(unsigned int*)data;
 }
 
 void	conf_set_general_throttle_time(void *data)

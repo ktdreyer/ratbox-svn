@@ -1473,6 +1473,7 @@ set_default_conf(void)
   ConfigFileEntry.client_flood = CLIENT_FLOOD_DEFAULT;
 
   ConfigFileEntry.use_help = 0;
+  ConfigFileEntry.tkline_expire_notices = 0;
 }
 #undef YES
 #undef NO
@@ -1752,17 +1753,18 @@ expire_temps(dlink_list *tklist, int type)
       if (kill_ptr->hold <= CurrentTime)
 	{
           /* Alert opers that a TKline expired - Hwy */
-          if(kill_ptr->status & CONF_KILL)
-            sendto_realops_flags(UMODE_ALL, L_ALL,
-			       "Temporary K-line for [%s@%s] expired",
-			       (kill_ptr->user) ? kill_ptr->user : "*",
-			       (kill_ptr->host) ? kill_ptr->host : "*");
-
-	  /* temp dline */
-	  else
-            sendto_realops_flags(UMODE_ALL, L_ALL,
-			       "Temporary D-line for [%s] expired",
-			       kill_ptr->host);
+          if(ConfigFileEntry.tkline_expire_notices)
+          {
+            if(kill_ptr->status & CONF_KILL)
+              sendto_realops_flags(UMODE_ALL, L_ALL,
+			           "Temporary K-line for [%s@%s] expired",
+			           (kill_ptr->user) ? kill_ptr->user : "*",
+			           (kill_ptr->host) ? kill_ptr->host : "*");
+  	    else
+              sendto_realops_flags(UMODE_ALL, L_ALL,
+			           "Temporary D-line for [%s] expired",
+			           kill_ptr->host);
+          }
 
 	  delete_one_address_conf(kill_ptr->host, kill_ptr);
 	  dlinkDestroy(kill_node, tklist);

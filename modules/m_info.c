@@ -124,10 +124,22 @@ static struct InfoStruct info_table[] =
     "Number of lines before a client Excess Flood's",
   },
   {
+    "connect_timeout",
+    OUTPUT_DECIMAL,
+    &ConfigFileEntry.connect_timeout,
+    "Connect timeout for connections to servers"
+  },
+  {
     "default_floodcount",
     OUTPUT_DECIMAL,
     &ConfigFileEntry.default_floodcount,
     "Startup value of FLOODCOUNT",
+  },
+  {
+    "disable_auth",
+    OUTPUT_BOOLEAN_YN,
+    &ConfigFileEntry.disable_auth,
+    "Controls whether auth checking is disabled or not"
   },
   {
     "dot_in_ip6_addr",
@@ -319,6 +331,12 @@ static struct InfoStruct info_table[] =
     "Minimum time between client reconnects",
   },
   {
+    "tkline_expire_notices",
+    OUTPUT_BOOLEAN,
+    &ConfigFileEntry.tkline_expire_notices,
+    "Notices given to opers when tklines expire"
+  },
+  {
     "ts_max_delta",
     OUTPUT_DECIMAL,
     &ConfigFileEntry.ts_max_delta,
@@ -329,6 +347,18 @@ static struct InfoStruct info_table[] =
     OUTPUT_DECIMAL,
     &ConfigFileEntry.ts_warn_delta,
     "Maximum permitted TS delta before displaying a warning"
+  },
+  {
+    "use_global_limits",
+    OUTPUT_BOOLEAN_YN,
+    &ConfigFileEntry.use_global_limits,
+    "Global user@host limits applied to connections"
+  },
+  {
+    "use_help",
+    OUTPUT_BOOLEAN_YN,
+    &ConfigFileEntry.use_help,
+    "HELP is only allowed for opers"
   },
   {
     "warn_no_nline",
