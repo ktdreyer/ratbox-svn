@@ -1,3 +1,8 @@
+*** 20010404_3 by androsyn
+Additional changes for static modules.  We just need to make the build
+system deal with this now.
+
+
 *** 20010404_2 by androsyn
 First half of my attempt to do statically loaded modules.  I suppose that
 either all or none with static/dynamic modules, for the sake of simlicity.
