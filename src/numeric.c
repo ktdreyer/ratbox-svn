@@ -24,12 +24,6 @@
 
 #include <assert.h>
 
-#ifdef CUSTOM_ERR            /* ZZZZ ick */
-#include "messages_cust.tab"
-#else
-#include "messages.tab"
-#endif
-
 /*
  * form_str
  *

@@ -80,20 +80,8 @@ struct User
   time_t         last;
   int            refcnt;        /* Number of times this block is referenced */
   int            joined;        /* number of channels joined */
-  char           id[IDLEN + 1]; /* for future use *hint* */
   const char*    server;        /* pointer to scached server name */
   char*          RSA_response;  /* expected response from client */
-  /*
-  ** In a perfect world the 'server' name
-  ** should not be needed, a pointer to the
-  ** client describing the server is enough.
-  ** Unfortunately, in reality, server may
-  ** not yet be in links while USER is
-  ** introduced... --msa
-  */
-  /* with auto-removal of dependent links, this may no longer be the
-  ** case, but it's already fixed by the scache anyway  -orabidoo
-  */
 };
 
 struct Server
@@ -512,18 +500,6 @@ struct LocalUser
 #define SetOperAdmin(x)         ((x)->flags2 |= FLAGS2_OPER_ADMIN)
 #define IsSetOperAdmin(x)       ((x)->flags2 & FLAGS2_OPER_ADMIN)
 #define CBurst(x)               ((x)->flags2 & FLAGS2_CBURST)
-/*
- * 'offsetof' is defined in ANSI-C. The following definition
- * is not absolutely portable (I have been told), but so far
- * it has worked on all machines I have needed it. The type
- * should be size_t but...  --msa
- */
-#ifndef offsetof
-#define offsetof(t, m) (size_t)((&((t *)0L)->m))
-#endif
-
-#define CLIENT_LOCAL_SIZE sizeof(struct Client)
-#define CLIENT_REMOTE_SIZE offsetof(struct Client, count)
 
 /*
  * definitions for get_client_name
@@ -567,3 +543,4 @@ extern struct Client* next_client_double(struct Client* next,
 extern int accept_message(struct Client *source, struct Client *target);
 
 #endif /* INCLUDED_client_h */
+
