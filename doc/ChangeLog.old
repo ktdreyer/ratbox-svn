@@ -1,3 +1,7 @@
+*** 20011202_2 by leeh
+- dont give out ips on fake direction of NICK
+
+
 *** 20011202_1 by leeh
 - if serverhide is on and a LL forwards us a topic request - if we're
   masking who set the topic, mask it to the LLs servername, not ours..
