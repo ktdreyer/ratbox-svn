@@ -44,7 +44,7 @@
 
 /*
  * This structure will contain the information for the IAuth
- * server
+ * server.
  */
 struct IrcdAuthentication iAuth;
 
