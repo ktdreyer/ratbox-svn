@@ -1,3 +1,17 @@
+androsyn    2003/09/10 13:44:09 EDT	(20030910_6)
+
+  Added files:
+    include              commio.h 
+    src                  commio.c 
+  Log:
+  Add commio.c and commio.h
+  
+  Revision  Changes    Path
+  1.1       +251 -0    ircd-ratbox/include/commio.h (new)
+  1.1       +1087 -0   ircd-ratbox/src/commio.c (new)
+
+
+
 androsyn    2003/09/10 13:41:52 EDT	(20030910_5)
 
   Modified files:
