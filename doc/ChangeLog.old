@@ -1,3 +1,13 @@
+*** 20000113_2 by db
+- externalized the old parser, unfortunately, this means a lot
+  more of the s_conf interface is visible ;-(, can do better in the future...
+  This is in preparation for new parser inclusion.
+  This will (ick) allow us to use both old conf files and new format conf files
+  for backwards compatibility. (I'm not terribly happy about this, but...
+  Hi Tom!)
+
+
+
 *** 20000113_1 by db
 - updated client/deny sections to use new IP_TYPE
 - fixed union to use struct ip_value
