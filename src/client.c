@@ -770,6 +770,8 @@ release_client_state(struct Client *client_p)
 	{
 		if(client_p->serv->user != NULL)
 			free_user(client_p->serv->user, client_p);
+		if(client_p->serv->fullcaps)
+			MyFree(client_p->serv->fullcaps);
 		MyFree(client_p->serv);
 	}
 }
