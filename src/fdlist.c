@@ -58,7 +58,7 @@ void fdlist_init(void)
   assert(0 == initialized);
   if (!initialized) {
     /* Since we're doing this once .. */
-    fd_table = calloc(MAXCONNECTIONS + 1, sizeof(fde_t));
+    fd_table = MyMalloc((MAXCONNECTIONS + 1) * sizeof(fde_t));
     /* XXXX I HATE THIS CHECK. Can someone please fix? */
     if (!fd_table)
         exit(69);

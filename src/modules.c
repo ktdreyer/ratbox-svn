@@ -130,7 +130,7 @@ mod_add_path(char *path)
   if (mod_find_path(path))
     return;
 
-  pathst = malloc (sizeof (struct module_path));
+  pathst = MyMalloc (sizeof (struct module_path));
   node = make_dlink_node();
   
   strcpy(pathst->path, path);

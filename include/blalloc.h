@@ -17,6 +17,7 @@
 #include <stddef.h>
 #define INCLUDED_stddef_h
 #endif
+#include "memory.h"
 #include "ircd_defs.h"
 
 

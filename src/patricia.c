@@ -95,7 +95,7 @@ static prefix_t *New_Prefix2(int family, void *dest, int bitlen,
 	if (family == AF_INET6) {
 		default_bitlen = 128;
 		if (prefix == NULL) {
-			prefix = calloc(1, sizeof(prefix_t));
+			prefix = MyMalloc(sizeof(prefix_t));
 			dynamic_allocated++;
 		}
 		memcpy(&prefix->add.sin6, dest, 16);
@@ -103,7 +103,7 @@ static prefix_t *New_Prefix2(int family, void *dest, int bitlen,
 #endif				/* IPV6 */
 	if (family == AF_INET) {
 		if (prefix == NULL) {
-			prefix = calloc(1, sizeof(prefix_t));
+			prefix = MyMalloc(sizeof(prefix_t));
 			dynamic_allocated++;
 		}
 		memcpy(&prefix->add.sin, dest, 4);
@@ -212,7 +212,7 @@ static void Deref_Prefix(prefix_t * prefix)
 	prefix->ref_count--;
 	assert(prefix->ref_count >= 0);
 	if (prefix->ref_count <= 0) {
-		free(prefix);
+		MyFree(prefix);
 		return;
 	}
 }
@@ -227,7 +227,7 @@ static int num_active_patricia = 0;
 
 patricia_tree_t *New_Patricia(int maxbits)
 {
-	patricia_tree_t *patricia = calloc(1, sizeof *patricia);
+	patricia_tree_t *patricia = MyMalloc(sizeof *patricia);
 
 	patricia->maxbits = maxbits;
 	patricia->head = NULL;
@@ -263,7 +263,7 @@ void Clear_Patricia(patricia_tree_t * patricia, void_fn_t func)
 			} else {
 				assert(Xrn->data == NULL);
 			}
-			free(Xrn);
+			MyFree(Xrn);
 			patricia->num_active_node--;
 
 			if (l) {
@@ -281,14 +281,14 @@ void Clear_Patricia(patricia_tree_t * patricia, void_fn_t func)
 		}
 	}
 	assert(patricia->num_active_node == 0);
-	/* free (patricia); */
+	MyFree (patricia);
 }
 
 
 void Destroy_Patricia(patricia_tree_t * patricia, void_fn_t func)
 {
 	Clear_Patricia(patricia, func);
-	free(patricia);
+	MyFree(patricia);
 	num_active_patricia--;
 }
 
@@ -508,7 +508,7 @@ patricia_node_t *patricia_lookup(patricia_tree_t * patricia,
 	assert(prefix->bitlen <= patricia->maxbits);
 
 	if (patricia->head == NULL) {
-		node = calloc(1, sizeof *node);
+		node = MyMalloc(sizeof *node);
 		node->bit = prefix->bitlen;
 		node->prefix = Ref_Prefix(prefix);
 		node->parent = NULL;
@@ -632,7 +632,7 @@ patricia_node_t *patricia_lookup(patricia_tree_t * patricia,
 		return (node);
 	}
 
-	new_node = calloc(1, sizeof *new_node);
+	new_node = MyMalloc(sizeof *new_node);
 	new_node->bit = prefix->bitlen;
 	new_node->prefix = Ref_Prefix(prefix);
 	new_node->parent = NULL;
@@ -683,7 +683,7 @@ patricia_node_t *patricia_lookup(patricia_tree_t * patricia,
 			prefix_toa(prefix), prefix->bitlen);
 #endif				/* PATRICIA_DEBUG */
 	} else {
-		glue = calloc(1, sizeof *glue);
+		glue = MyMalloc(sizeof *glue);
 		glue->bit = differ_bit;
 		glue->prefix = NULL;
 		glue->parent = node->parent;
@@ -749,7 +749,7 @@ void patricia_remove(patricia_tree_t * patricia, patricia_node_t * node)
 #endif				/* PATRICIA_DEBUG */
 		parent = node->parent;
 		Deref_Prefix(node->prefix);
-		free(node);
+		MyFree(node);
 		patricia->num_active_node--;
 
 		if (parent == NULL) {
@@ -782,7 +782,7 @@ void patricia_remove(patricia_tree_t * patricia, patricia_node_t * node)
 			parent->parent->l = child;
 		}
 		child->parent = parent->parent;
-		free(parent);
+		MyFree(parent);
 		patricia->num_active_node--;
 		return;
 	}
@@ -800,7 +800,7 @@ void patricia_remove(patricia_tree_t * patricia, patricia_node_t * node)
 	child->parent = parent;
 
 	Deref_Prefix(node->prefix);
-	free(node);
+	MyFree(node);
 	patricia->num_active_node--;
 
 	if (parent == NULL) {

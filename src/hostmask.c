@@ -207,6 +207,7 @@ void clear_conf(void)
       conf->status |= CONF_ILLEGAL;
     else
       free_conf(conf);
+    MyFree(hme->hostmask);
     MyFree(hme);
    }
  first_mask = NULL;

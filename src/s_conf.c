@@ -2170,7 +2170,7 @@ void read_conf_files(int cold)
         }
     }
 
-  if(!cold)
+  if (!cold)
     clear_out_old_conf();
 
   read_conf(conf_fbfile_in);

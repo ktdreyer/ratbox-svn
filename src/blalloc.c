@@ -11,12 +11,12 @@
 #include <assert.h>
 #include "ircd_defs.h"      /* DEBUG_BLOCK_ALLOCATOR */
 #include "ircd.h"
+#include "memory.h"
 #include "blalloc.h"
 #include "irc_string.h"     /* MyMalloc */
 #include "tools.h"
 #include "s_log.h"
 #include "client.h"
-#include "memory.h"
 
 #include <string.h>
 #include <stdlib.h>

@@ -1320,9 +1320,9 @@ const char* comment         /* Reason for the exit */
 
   if (MyConnect(sptr))
     {
-      if(sptr->flags & FLAGS_IPHASH)
-      remove_one_ip(&sptr->localClient->ip);
-
+      if (sptr->flags & FLAGS_IPHASH)
+        remove_one_ip(&sptr->localClient->ip);
+      
       if(sptr->localClient->dns_query.query != NULL)
 	      adns_cancel(sptr->localClient->dns_query.query);
       delete_identd_queries(sptr);

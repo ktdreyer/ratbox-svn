@@ -30,6 +30,7 @@
 #include "tools.h"
 #include "list.h"
 #include "hook.h"
+#include "memory.h"
 
 dlink_list hooks;
 
@@ -44,11 +45,8 @@ new_hook(char *name)
 {
 	hook *h;
 	
-	h = malloc(sizeof(hook));
-	memset(h, 0, sizeof(hook));
-
-	h->name = malloc(strlen(name) + 1);
-	strcpy(h->name, name);
+	h = MyMalloc(sizeof(hook));
+    DupString(h->name, name);
 	return h;
 }
 
@@ -77,7 +75,7 @@ hook_del_event(char *name)
 		
 		if (!strcmp(h->name, name)) {
 			dlinkDelete(node, &hooks);
-			free(h);
+			MyFree(h);
 			return 0;
 		}
 	}
