@@ -484,6 +484,7 @@ static void cleanup_zombies(void *unused)
 {
   int status;
   waitpid(-1, &status, WNOHANG);
+  eventAdd("cleanup_zombies", cleanup_zombies, NULL, 30, 0);
 }
 
 int main(int argc, char *argv[])
