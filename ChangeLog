@@ -1,3 +1,25 @@
+leeh        2005/01/24 12:59:57 EST	(20050124_1)
+
+  Modified files:
+    include              tools.h 
+    src                  channel.c client.c hash.c hook.c 
+                         newconf.c s_user.c watch.c 
+  Log:
+  - moved dlinkFind*() to be (node, list) rather than (list, node) so its
+    consistent with the rest of the dlink code.
+  
+  Revision  Changes    Path
+  1.54      +7 -7      ircd-ratbox/include/tools.h
+  7.430     +2 -2      ircd-ratbox/src/channel.c
+  7.487     +6 -6      ircd-ratbox/src/client.c
+  7.113     +5 -5      ircd-ratbox/src/hash.c
+  7.35      +1 -1      ircd-ratbox/src/hook.c
+  7.188     +2 -2      ircd-ratbox/src/newconf.c
+  7.337     +1 -1      ircd-ratbox/src/s_user.c
+  1.5       +4 -4      ircd-ratbox/src/watch.c
+
+
+
 leeh        2005/01/24 12:47:13 EST	(20050124_0)
 
   Modified files:
