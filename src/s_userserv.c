@@ -687,6 +687,7 @@ s_user_login(struct client *client_p, char *parv[], int parc)
 {
 	struct user_reg *reg_p;
 	const char *password;
+	dlink_node *ptr;
 
 	if(client_p->user->user_reg != NULL)
 	{
@@ -715,6 +716,13 @@ s_user_login(struct client *client_p, char *parv[], int parc)
 	}
 
 	slog(userserv_p, 5, "%s - LOGIN %s", client_p->user->mask, parv[0]);
+
+	DLINK_FOREACH(ptr, reg_p->users.head)
+	{
+		service_error(userserv_p, ptr->data,
+				"%s has just authenticated as you (%s)",
+				client_p->user->mask, reg_p->name);
+	}
 
 	if(ConnCapService(server_p))
 		sendto_server(":%s ENCAP * SU %s %s",
@@ -923,6 +931,23 @@ s_user_info(struct client *client_p, char *parv[], int parc)
 		if(buflen)
 			service_error(userserv_p, client_p,
 					"[%s] Access to: %s", parv[0], buf);
+	}
+
+	if(ureg_p == client_p->user->user_reg || CliOperUSAdmin(client_p))
+	{
+		struct Client *target_p;
+		dlink_node *ptr;
+
+		service_error(userserv_p, client_p,
+				"Currently logged on via:");
+
+		DLINK_FOREACH(ptr, ureg_p->users.head)
+		{
+			target_p = ptr->data;
+
+			service_error(userserv_p, client_p,
+					"  %s", target_p->user->mask);
+		}
 	}
 
 	return 1;
