@@ -1,3 +1,24 @@
+leeh        2001/12/16 07:04:03 EST	(20011216_16)
+
+  Modified files:
+    include              s_gline.h 
+    modules              m_gline.c m_stats.c 
+    src                  s_gline.c 
+  Log:
+  - if something is glined, cleanup_glines() will now remove it from the
+    pending list
+  - call cleanup_glines() after we add a gline
+  - check find_is_glined() earlier in majority_gline - why check for duplicate
+    votes when its not going to matter anyway? :)
+  
+  Revision  Changes    Path
+  7.9       +2 -2      ircd-hybrid-7/include/s_gline.h
+  1.70      +7 -17     ircd-hybrid-7/modules/m_gline.c
+  1.98      +1 -0      ircd-hybrid-7/modules/m_stats.c
+  1.17      +5 -3      ircd-hybrid-7/src/s_gline.c
+
+
+
 leeh        2001/12/16 06:36:48 EST	(20011216_15)
 
   Modified files:
