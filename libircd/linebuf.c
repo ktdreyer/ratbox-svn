@@ -46,7 +46,6 @@ static int bufline_count = 0;
  *
  * Initialise the linebuf mechanism
  */
-buf_line_t *linebuf_freelist;
 
 static void linebuf_garbage_collect(void *unused)
 {
