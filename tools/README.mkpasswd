@@ -9,6 +9,7 @@ either randomly generated or user provided salts.
 Options:
 -m - Create an MD5 password
 -d - Create a DES password
+-l - Specify the length of a random MD5 salt
 -p - Specify the plaintext password at the command line
 -s - Specify the salt at the command line
 -h - Get help
@@ -27,6 +28,8 @@ Known bugs:
 Blowfish (on OpenBSD) is not yet supported
 The encryption algorithms supported depend on your system's crypt()
   implementation.
+The maximum length of an MD5 salt is limited to your systems crypt()
+  implementation, typically 8.
 
 Supported Platforms (Known and tested):
 Linux glibc (DES and MD5)
@@ -36,5 +39,6 @@ Solaris 2.5-2.6 (DES only)
 Cygwin 1.1.4 (DES only)
 Prior Cygwin with the MD5 libcrypt (MD5 only)
 OpenBSD 2.7 (don't link with -crypt) (DES and MD5, no Blowfish support)
+Mac OS-X (Darwin) (don't link with -crypt) (DES only)
 
 Other systems probably work, but they haven't been amply tested.
