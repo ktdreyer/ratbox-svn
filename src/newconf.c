@@ -622,8 +622,10 @@ conf_set_service_nick(void *data)
 	if(yy_service == NULL)
 		return;
 
+	del_client(yy_service);
 	strlcpy(yy_service->name, (const char *) data,
 		sizeof(yy_service->name));
+	add_client(yy_service);
 }
 
 static void
