@@ -1,3 +1,11 @@
+*** 20010301_8 by fl_
+- this fixes the 403 stuff.. we now actually burst userless channels
+  (could help stop desyncs), which stops us sending +b's for non-existant
+  channels..
+
+  this doesnt break hyb6, but its revertable if it causes serious problems
+
+
 *** 20010301_7 by davidt
 - Fix for a core on /rehash when removing in-use I lines.
 
