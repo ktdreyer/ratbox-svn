@@ -364,14 +364,15 @@ int     ms_gline(struct Client *cptr,
       log_gline_request(oper_nick,oper_user,oper_host,oper_server,
 			user,host,reason);
 
-      sendto_realops("%s!%s@%s on %s is requesting gline for [%s@%s] [%s]",
-		     oper_nick,
-		     oper_user,
-		     oper_host,
-		     oper_server,
-		     user,
-		     host,
-		     reason);
+      sendto_realops_flags(FLAGS_ALL,
+			   "%s!%s@%s on %s is requesting gline for [%s@%s] [%s]",
+			   oper_nick,
+			   oper_user,
+			   oper_host,
+			   oper_server,
+			   user,
+			   host,
+			   reason);
 
       /* If at least 3 opers agree this user should be G lined then do it */
       check_majority_gline(sptr,
@@ -448,15 +449,15 @@ void set_local_gline(const char *oper_nick,
   aconf->hold = CurrentTime + ConfigFileEntry.gline_time;
   add_gline(aconf);
       
-  sendto_realops("%s!%s@%s on %s has triggered gline for [%s@%s] [%s]",
-		 oper_nick,
-		 oper_user,
-		 oper_host,
-		 oper_server,
-		 user,
-		 host,
-		 reason);
-      
+  sendto_realops_flags(FLAGS_ALL,
+		       "%s!%s@%s on %s has triggered gline for [%s@%s] [%s]",
+		       oper_nick,
+		       oper_user,
+		       oper_host,
+		       oper_server,
+		       user,
+		       host,
+		       reason);
   check_klines();
 }
 
@@ -485,7 +486,7 @@ log_gline_request(
              ConfigFileEntry.glinefile, small_file_date((time_t)0));
   if ((out = file_open(filenamebuf, O_RDWR|O_APPEND|O_CREAT,0644))==-1)
     {
-      sendto_realops("*** Problem opening %s",filenamebuf);
+      sendto_realops_flags(FLAGS_ALL,"*** Problem opening %s",filenamebuf);
       return;
     }
 
@@ -500,7 +501,7 @@ log_gline_request(
 
   if (write(out, buffer, strlen(buffer)) <= 0)
     {
-      sendto_realops("*** Problem writing to %s",filenamebuf);
+      sendto_realops_flags(FLAGS_ALL,"*** Problem writing to %s",filenamebuf);
     }
   file_close(out);
 }
@@ -933,7 +934,8 @@ majority_gline(struct Client *sptr,
               (irccmp(gline_pending_ptr->oper_server1,oper_server) == 0) )
             {
               /* This oper or server has already "voted" */
-              sendto_realops("oper or server has already voted");
+              sendto_realops_flags(FLAGS_ALL,
+				   "oper or server has already voted");
               return NO;
             }
 
@@ -946,7 +948,8 @@ majority_gline(struct Client *sptr,
                   (irccmp(gline_pending_ptr->oper_server2,oper_server)==0))
                 {
                   /* This oper or server has already "voted" */
-                  sendto_realops("oper or server has already voted");
+                  sendto_realops_flags(FLAGS_ALL,
+				       "oper or server has already voted");
                   return NO;
                 }
 

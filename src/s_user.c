@@ -416,8 +416,8 @@ int register_user(struct Client *cptr, struct Client *sptr,
 	{
 	  Count.max_loc = Count.local;
 	  if (!(Count.max_loc % 10))
-	    sendto_realops("New Max Local Clients: %d",
-			   Count.max_loc);
+	    sendto_realops_flags(FLAGS_ALL,"New Max Local Clients: %d",
+				 Count.max_loc);
 	}
     }
   else
@@ -428,8 +428,8 @@ int register_user(struct Client *cptr, struct Client *sptr,
   sptr->servptr = find_server(user->server);
   if (!sptr->servptr)
     {
-      sendto_realops("Ghost killed: %s on invalid server %s",
-		     sptr->name, sptr->user->server);
+      sendto_realops_flags(FLAGS_ALL,"Ghost killed: %s on invalid server %s",
+			   sptr->name, sptr->user->server);
       sendto_one(cptr,":%s KILL %s :%s (Ghosted, %s doesn't exist)",
 		 me.name, sptr->name, me.name, user->server);
       sptr->flags |= FLAGS_KILLED;
@@ -476,9 +476,10 @@ int register_user(struct Client *cptr, struct Client *sptr,
                      ":%s KILL %s :%s GHOST (no server %s on the net)",
                      me.name,
                      sptr->name, me.name, user->server);
-          sendto_realops("No server %s for user %s[%s@%s] from %s",
-                          user->server, sptr->name, sptr->username,
-                          sptr->host, sptr->from->name);
+          sendto_realops_flags(FLAGS_ALL,
+			       "No server %s for user %s[%s@%s] from %s",
+			       user->server, sptr->name, sptr->username,
+			       sptr->host, sptr->from->name);
           sptr->flags |= FLAGS_KILLED;
           return exit_client(sptr, sptr, &me, "Ghosted Client");
         }

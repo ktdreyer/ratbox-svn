@@ -320,7 +320,7 @@ static DOMAIN_PIECE *find_or_add_host_piece(DOMAIN_LEVEL *level_ptr,
     }
   else
     {
-      sendto_realops("Bug: in find_or_add_host_piece. yay.");
+      sendto_realops_flags(FLAGS_ALL,"Bug: in find_or_add_host_piece. yay.");
       return(NULL);
     }
   /* NOT REACHED */
@@ -480,7 +480,7 @@ static void find_or_add_user_piece(DOMAIN_PIECE *piece_ptr,
     {
       /*
        */
-      sendto_realops("Bug in mtrie_conf.c last_ptr found NULL");
+      sendto_realops_flags(FLAGS_ALL,"Bug in mtrie_conf.c last_ptr found NULL");
     }
 
   return;
@@ -1655,6 +1655,6 @@ static void report_dup(char type,struct ConfItem *aconf)
 
   get_printable_conf(aconf, &name, &host, &pass, &user, &port, &classname);
 
-  sendto_realops("DUP: %c: (%s@%s) pass %s name %s port %d",
+  sendto_realops_flags(FLAGS_ALL,"DUP: %c: (%s@%s) pass %s name %s port %d",
                  type,user,host,pass,name,port);
 }

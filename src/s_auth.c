@@ -290,8 +290,8 @@ static int start_auth_query(struct AuthRequest* auth)
     return 0;
   }
   if ((MAXCONNECTIONS - 10) < fd) {
-    sendto_realops("Can't allocate fd for auth on %s",
-                get_client_name(auth->client, TRUE));
+    sendto_realops_flags(FLAGS_ALL,"Can't allocate fd for auth on %s",
+			 get_client_name(auth->client, TRUE));
 
     fd_close(fd);
     return 0;

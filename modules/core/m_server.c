@@ -98,15 +98,15 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   if (find_conf_by_name(host, CONF_NOCONNECT_SERVER) == NULL)
     {
       if (ConfigFileEntry.warn_no_nline)
-	sendto_realops("Link %s Server %s dropped, no N: line",
-		       get_client_name(cptr, TRUE), host);
+	sendto_realops_flags(FLAGS_ALL,"Link %s Server %s dropped, no N: line",
+			     get_client_name(cptr, TRUE), host);
       return exit_client(cptr, cptr, cptr, "NO N line");
     }
 
   if (GlobalSetOptions.autoconn == 0)
     {
-      sendto_realops("WARNING AUTOCONN is 0, Closing %s",
-                 get_client_name(cptr, TRUE));
+      sendto_realops_flags(FLAGS_ALL,"WARNING AUTOCONN is 0, Closing %s",
+			   get_client_name(cptr, TRUE));
       return exit_client(cptr, cptr, cptr, "AUTOCONNS off");
     }
 
@@ -126,8 +126,9 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       sendto_one(bcptr,"ERROR :Server %s already exists", host);
       if (bcptr == cptr)
       {
-        sendto_realops("Link %s cancelled, server %s already exists",
-                   get_client_name(bcptr, TRUE), host);
+        sendto_realops_flags(FLAGS_ALL,
+			     "Link %s cancelled, server %s already exists",
+			     get_client_name(bcptr, TRUE), host);
         return exit_client(bcptr, bcptr, &me, "Server Exists");
       }
       /*
@@ -141,8 +142,9 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
        *  - comstud
        */
       strcpy(nbuf, get_client_name(bcptr, TRUE));
-      sendto_realops("Link %s cancelled, server %s reintroduced by %s",
-                nbuf, host, get_client_name(cptr, TRUE));
+      sendto_realops_flags(FLAGS_ALL,
+			   "Link %s cancelled, server %s reintroduced by %s",
+			   nbuf, host, get_client_name(cptr, TRUE));
       exit_client(bcptr, bcptr, &me, "Server Exists");
     }
 
@@ -154,8 +156,9 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
        * for a while and servers to send stuff to the wrong place.
        */
       sendto_one(cptr,"ERROR :Nickname %s already exists!", host);
-      sendto_realops("Link %s cancelled: Server/nick collision on %s",
-		     get_client_name(cptr,FALSE), host);
+      sendto_realops_flags(FLAGS_ALL,
+			   "Link %s cancelled: Server/nick collision on %s",
+			   get_client_name(cptr,FALSE), host);
       return exit_client(cptr, cptr, cptr, "Nick as Server");
     }
 
@@ -172,8 +175,8 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
    */
   if (!DoesTS(cptr))
     {
-      sendto_realops("Link %s dropped, non-TS server",
-                 get_client_name(cptr, TRUE));
+      sendto_realops_flags(FLAGS_ALL,"Link %s dropped, non-TS server",
+			   get_client_name(cptr, TRUE));
       return exit_client(cptr, cptr, cptr, "Non-TS server");
     }
 
@@ -189,8 +192,8 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     return server_estab(cptr);
 
   ++ServerStats->is_ref;
-  sendto_realops("Received unauthorized connection from %s.",
-              get_client_host(cptr));
+  sendto_realops_flags(FLAGS_ALL,"Received unauthorized connection from %s.",
+		       get_client_host(cptr));
   return exit_client(cptr, cptr, cptr, "No C/N conf lines");
 }
 
@@ -239,8 +242,9 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       sendto_one(bcptr,"ERROR :Server %s already exists", host);
       if (bcptr == cptr)
 	{
-	  sendto_realops("Link %s cancelled, server %s already exists",
-			 get_client_name(bcptr, TRUE), host);
+	  sendto_realops_flags(FLAGS_ALL,
+			       "Link %s cancelled, server %s already exists",
+			       get_client_name(bcptr, TRUE), host);
 	  return exit_client(bcptr, bcptr, &me, "Server Exists");
 	}
       /*
@@ -254,8 +258,9 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
        *  - comstud
        */
       strcpy(nbuf, get_client_name(bcptr, TRUE));
-      sendto_realops("Link %s cancelled, server %s reintroduced by %s",
-                nbuf, host, get_client_name(cptr, TRUE));
+      sendto_realops_flags(FLAGS_ALL,
+			   "Link %s cancelled, server %s reintroduced by %s",
+			   nbuf, host, get_client_name(cptr, TRUE));
       exit_client(bcptr, bcptr, &me, "Server Exists");
     }
 
@@ -271,8 +276,9 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
        * for a while and servers to send stuff to the wrong place.
        */
       sendto_one(cptr,"ERROR :Nickname %s already exists!", host);
-      sendto_realops("Link %s cancelled: Server/nick collision on %s",
-                 /* inpath */ get_client_name(cptr,FALSE), host);
+      sendto_realops_flags(FLAGS_ALL,
+			   "Link %s cancelled: Server/nick collision on %s",
+			   /* inpath */ get_client_name(cptr,FALSE), host);
       return exit_client(cptr, cptr, cptr, "Nick as Server");
     }
 
@@ -295,9 +301,9 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   if ((aconf = find_conf_host(&cptr->localClient->confs, host, CONF_LEAF)) &&
       (!aconf->port || (hop > aconf->port)))
     {
-      sendto_realops("Leaf-only link %s->%s - Closing",
-                     get_client_name(cptr,  TRUE),
-                     aconf->host ? aconf->host : "*");
+      sendto_realops_flags(FLAGS_ALL,"Leaf-only link %s->%s - Closing",
+			   get_client_name(cptr,  TRUE),
+			   aconf->host ? aconf->host : "*");
       sendto_one(cptr, "ERROR :Leaf-only link, sorry.");
       return exit_client(cptr, cptr, cptr, "Leaf Only");
     }
@@ -305,9 +311,9 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   if (!(aconf = find_conf_host(&cptr->localClient->confs, host, CONF_HUB)) ||
       (aconf->port && (hop > aconf->port)) )
     {
-      sendto_realops("Non-Hub link %s introduced %s(%s).",
-                     get_client_name(cptr,  TRUE), host,
-                     aconf ? (aconf->host ? aconf->host : "*") : "!");
+      sendto_realops_flags(FLAGS_ALL,"Non-Hub link %s introduced %s(%s).",
+			   get_client_name(cptr,  TRUE), host,
+			   aconf ? (aconf->host ? aconf->host : "*") : "!");
       sendto_one(cptr, "ERROR :%s has no H: line for %s.",
 		 get_client_name(cptr,  TRUE), host);
       return exit_client(cptr, cptr, cptr, "Too many servers");
@@ -342,8 +348,8 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 	continue;
       if (!(aconf = bcptr->serv->nline))
 	{
-	  sendto_realops("Lost N-line for %s on %s. Closing",
-                         get_client_name(cptr, TRUE), host);
+	  sendto_realops_flags(FLAGS_ALL,"Lost N-line for %s on %s. Closing",
+			       get_client_name(cptr, TRUE), host);
 	  return exit_client(cptr, cptr, cptr, "Lost N line");
 	}
       if (match(my_name_for_link(me.name, aconf), acptr->name))

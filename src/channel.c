@@ -175,7 +175,8 @@ static  int     add_id(struct Client *cptr, struct Channel *chptr,
       list = &chptr->invexlist;
       break;
     default:
-      sendto_realops("add_id() called with unknown ban type %d!", type);
+      sendto_realops_flags(FLAGS_ALL,
+			   "add_id() called with unknown ban type %d!", type);
       return -1;
     }
 
@@ -246,7 +247,8 @@ static int del_id(struct Channel *chptr, char *banid, int type)
       list = &chptr->invexlist;
       break;
     default:
-      sendto_realops("del_id() called with unknown ban type %d!", type);
+      sendto_realops_flags(FLAGS_ALL,
+			   "del_id() called with unknown ban type %d!", type);
       return -1;
     }
 

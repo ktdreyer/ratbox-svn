@@ -285,9 +285,11 @@ time_t try_connections(time_t currenttime)
        * auto connects disabled, send message to ops and bail
        */
       if (connecting)
-        sendto_realops("Connection to %s[%s] not activated.",
-		       con_conf->name, con_conf->host);
-      sendto_realops("WARNING AUTOCONN is 0, autoconns are disabled");
+        sendto_realops_flags(FLAGS_ALL,
+			     "Connection to %s[%s] not activated.",
+			     con_conf->name, con_conf->host);
+      sendto_realops_flags(FLAGS_ALL,
+			   "WARNING AUTOCONNALL is 0, all autoconns are disabled");
       Debug((DEBUG_NOTICE,"Next connection check : %s", myctime(next)));
       return next;
     }
@@ -310,10 +312,12 @@ time_t try_connections(time_t currenttime)
 
       if (!(con_conf->flags & CONF_FLAGS_ALLOW_AUTO_CONN))
         {
-          sendto_realops("Connection to %s[%s] not activated, autoconn is off.",
+          sendto_realops_flags(FLAGS_ALL,
+	             "Connection to %s[%s] not activated, autoconn is off.",
                      con_conf->name, con_conf->host);
-          sendto_realops("WARNING AUTOCONN on %s[%s] is disabled",
-                     con_conf->name, con_conf->host);
+          sendto_realops_flags(FLAGS_ALL,
+			       "WARNING AUTOCONN on %s[%s] is disabled",
+			       con_conf->name, con_conf->host);
         }
       else
         {
@@ -326,8 +330,9 @@ time_t try_connections(time_t currenttime)
            * error afterwards if it fails.
            *   -- adrian
            */
-          sendto_realops("Connection to %s[%s] activated.",
-                     con_conf->name, con_conf->host);
+          sendto_realops_flags(FLAGS_ALL,
+			       "Connection to %s[%s] activated.",
+			       con_conf->name, con_conf->host);
           serv_connect(con_conf, 0);
         }
     }
@@ -449,7 +454,8 @@ int check_server(struct Client* cptr)
             {
               /* n line with an H line, must be a typo */
               ClearCap(cptr,CAP_LL);
-              sendto_realops("n line with H oops lets not do LazyLink" );
+              sendto_realops_flags(FLAGS_ALL,
+				   "n line with H oops lets not do LazyLink" );
             }
           else
             {
@@ -460,7 +466,8 @@ int check_server(struct Client* cptr)
 
               if(!cptr->localClient->serverMask)
                 {
-                  sendto_realops("serverMask is full!");
+                  sendto_realops_flags(FLAGS_ALL,
+				       "serverMask is full!");
                   /* try and negotiate a non LL connect */
                   ClearCap(cptr,CAP_LL);
                 }
@@ -589,7 +596,8 @@ int server_estab(struct Client *cptr)
       ServerStats->is_ref++;
        sendto_one(cptr,
                  "ERROR :Access denied. No N line for server %s", inpath_ip);
-      sendto_realops("Access denied. No N line for server %s", inpath);
+      sendto_realops_flags(FLAGS_ALL,
+			   "Access denied. No N line for server %s", inpath);
       log(L_NOTICE, "Access denied. No N line for server %s", inpath_ip);
       return exit_client(cptr, cptr, cptr, "No N line for server");
     }
@@ -598,7 +606,8 @@ int server_estab(struct Client *cptr)
     {
       ServerStats->is_ref++;
       sendto_one(cptr, "ERROR :Only N (no C) field for server %s", inpath);
-      sendto_realops("Only N (no C) field for server %s",inpath);
+      sendto_realops_flags(FLAGS_ALL,
+			   "Only N (no C) field for server %s",inpath);
       log(L_NOTICE, "Only N (no C) field for server %s", inpath_ip);
       return exit_client(cptr, cptr, cptr, "No C line for server");
     }
@@ -622,7 +631,8 @@ int server_estab(struct Client *cptr)
       ServerStats->is_ref++;
       sendto_one(cptr, "ERROR :No Access (passwd mismatch) %s",
                  inpath);
-      sendto_realops("Access denied (passwd mismatch) %s", inpath);
+      sendto_realops_flags(FLAGS_ALL,
+			   "Access denied (passwd mismatch) %s", inpath);
       return exit_client(cptr, cptr, cptr, "Bad Password");
     }
   memset((void *)cptr->localClient->passwd, 0,sizeof(cptr->localClient->passwd));
@@ -664,9 +674,10 @@ int server_estab(struct Client *cptr)
       if (!match(n_conf->user, cptr->username))
         {
           ServerStats->is_ref++;
-          sendto_realops("Username mismatch [%s]v[%s] : %s",
-                     n_conf->user, cptr->username,
-                     get_client_name(cptr, TRUE));
+          sendto_realops_flags(FLAGS_ALL,
+			       "Username mismatch [%s]v[%s] : %s",
+			       n_conf->user, cptr->username,
+			       get_client_name(cptr, TRUE));
           sendto_one(cptr, "ERROR :No Username Match");
           return exit_client(cptr, cptr, cptr, "Bad User");
         }
@@ -704,8 +715,9 @@ int server_estab(struct Client *cptr)
   m = make_dlink_node();
   dlinkAdd(cptr, m, &serv_list);
   
-  sendto_realops("Link with %s established: (%s) link",
-             inpath,show_capabilities(cptr));
+  sendto_realops_flags(FLAGS_ALL,
+		       "Link with %s established: (%s) link",
+		       inpath,show_capabilities(cptr));
   log(L_NOTICE, "Link with %s established: (%s) link",
       inpath_ip, show_capabilities(cptr));
 
@@ -957,9 +969,9 @@ void set_autoconn(struct Client *sptr,char *parv0,char *name,int newval)
       else
         aconf->flags &= ~CONF_FLAGS_ALLOW_AUTO_CONN;
 
-      sendto_realops(
-                 "%s has changed AUTOCONN for %s to %i",
-                 parv0, name, newval);
+      sendto_realops_flags(FLAGS_ALL,
+			   "%s has changed AUTOCONN for %s to %i",
+			   parv0, name, newval);
       sendto_one(sptr,
                  ":%s NOTICE %s :AUTOCONN for %s is now set to %i",
                  me.name, parv0, name, newval);
@@ -1092,8 +1104,9 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
      */
     if ((cptr = find_server(aconf->name)))
       { 
-        sendto_realops("Server %s already present from %s",
-		       aconf->name, get_client_name(cptr, TRUE));
+        sendto_realops_flags(FLAGS_ALL,
+			     "Server %s already present from %s",
+			     aconf->name, get_client_name(cptr, TRUE));
         if (by && IsPerson(by) && !MyClient(by))
 	  sendto_one(by, ":%s NOTICE %s :Server %s already present from %s",
 		     me.name, by->name, aconf->name,
@@ -1147,8 +1160,9 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
      */
     if (!attach_cn_lines(cptr, aconf->host))
       {
-        sendto_realops("Host %s is not enabled for connecting:no C/N-line",
-          aconf->host);
+        sendto_realops_flags(FLAGS_ALL,
+			   "Host %s is not enabled for connecting:no C/N-line",
+			     aconf->host);
         if (by && IsPerson(by) && !MyClient(by))  
             sendto_one(by, ":%s NOTICE %s :Connect to host %s failed.",
               me.name, by->name, cptr);
@@ -1218,8 +1232,9 @@ serv_connect_callback(int fd, int status, void *data)
     if (status != COMM_OK)
       {
         /* We have an error, so report it and quit */
-        sendto_realops("Error connecting to %s[%s]: %s\n", cptr->name,
-		       cptr->host, comm_errstr(status));
+        sendto_realops_flags(FLAGS_ALL,
+			     "Error connecting to %s[%s]: %s\n", cptr->name,
+			     cptr->host, comm_errstr(status));
         exit_client(cptr, cptr, &me, comm_errstr(status));
         return;
       }
@@ -1230,7 +1245,8 @@ serv_connect_callback(int fd, int status, void *data)
 			    cptr->name, CONF_CONNECT_SERVER);
     if (!c_conf)
       { 
-        sendto_realops("Lost C-Line for %s", get_client_name(cptr,FALSE));
+        sendto_realops_flags(FLAGS_ALL,
+		     "Lost C-Line for %s", get_client_name(cptr,FALSE));
         exit_client(cptr, cptr, &me, "Lost C-line");
         return;
       }
@@ -1238,7 +1254,8 @@ serv_connect_callback(int fd, int status, void *data)
 			    cptr->name, CONF_NOCONNECT_SERVER);
     if (!n_conf)
       { 
-        sendto_realops("Lost N-Line for %s", get_client_name(cptr,FALSE));
+        sendto_realops_flags(FLAGS_ALL,
+		     "Lost N-Line for %s", get_client_name(cptr,FALSE));
         exit_client(cptr, cptr, &me, "Lost N-Line");
       }
 
@@ -1259,8 +1276,9 @@ serv_connect_callback(int fd, int status, void *data)
      * here now and save everyone the trouble of us ever existing.
      */
     if (IsDead(cptr)) {
-        sendto_realops("%s[%s] went dead during handshake", cptr->name,
-          cptr->host);
+        sendto_realops_flags(FLAGS_ALL,
+			     "%s[%s] went dead during handshake", cptr->name,
+			     cptr->host);
         exit_client(cptr, cptr, &me, "Went dead during handshake");
         return;
     }

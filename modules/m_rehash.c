@@ -74,7 +74,7 @@ int mo_rehash(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       if (irccmp(parv[1],"DNS") == 0)
         {
           sendto_one(sptr, form_str(RPL_REHASHING), me.name, parv[0], "DNS");
-          sendto_realops("%s is rehashing DNS", parv[0]);
+          sendto_realops_flags(FLAGS_ALL,"%s is rehashing DNS", parv[0]);
           restart_resolver();   /* re-read /etc/resolv.conf AGAIN?
                                    and close/re-open res socket */
           found = YES;
@@ -83,24 +83,27 @@ int mo_rehash(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         {
           sendto_one(sptr, form_str(RPL_REHASHING), me.name, parv[0], "garbage collecting");
           block_garbage_collect();
-          sendto_realops("%s is garbage collecting", parv[0]);
+          sendto_realops_flags(FLAGS_ALL,"%s is garbage collecting", parv[0]);
           found = YES;
         }
       else if(irccmp(parv[1],"MOTD") == 0)
         {
-          sendto_realops("%s is forcing re-reading of MOTD file",parv[0]);
+          sendto_realops_flags(FLAGS_ALL,
+		       "%s is forcing re-reading of MOTD file",parv[0]);
           ReadMessageFile( &ConfigFileEntry.motd );
           found = YES;
         }
       else if(irccmp(parv[1],"OMOTD") == 0)
         {
-          sendto_realops("%s is forcing re-reading of OPER MOTD file",parv[0]);
+          sendto_realops_flags(FLAGS_ALL,
+		       "%s is forcing re-reading of OPER MOTD file",parv[0]);
           ReadMessageFile( &ConfigFileEntry.opermotd );
           found = YES;
         }
       else if(irccmp(parv[1],"HELP") == 0)
         {
-          sendto_realops("%s is forcing re-reading of oper help file",parv[0]);
+          sendto_realops_flags(FLAGS_ALL,
+		       "%s is forcing re-reading of oper help file",parv[0]);
           ReadMessageFile( &ConfigFileEntry.helpfile );
           found = YES;
         }
@@ -124,7 +127,8 @@ int mo_rehash(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     {
       sendto_one(sptr, form_str(RPL_REHASHING), me.name, parv[0],
                  ConfigFileEntry.configfile);
-      sendto_realops("%s is rehashing server config file", parv[0]);
+      sendto_realops_flags(FLAGS_ALL,
+			   "%s is rehashing server config file", parv[0]);
       log(L_NOTICE, "REHASH From %s\n", get_client_name(sptr, SHOW_IP));
       return rehash(cptr, sptr, 0);
     }

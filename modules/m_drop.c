@@ -79,7 +79,7 @@ int     ms_drop(struct Client *cptr,
   name = parv[1];
 
 #ifdef DEBUGLL
-  sendto_realops("DROP called by %s for %s", cptr->name, name );
+  sendto_realops(FLAGS_ALL, "DROP called by %s for %s", cptr->name, name );
 #endif
 
   if(!(chptr=hash_find_channel(name, NullChn)))

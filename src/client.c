@@ -216,9 +216,11 @@ void _free_client(struct Client* cptr)
   assert(0 == result);
   if (result)
     {
-      sendto_realops(BH_FREE_ERROR_MESSAGE, cptr);
-      sendto_realops("Please report to the hybrid team!" \
-                 "ircd-hybrid@the-project.org");
+      sendto_realops_flags(FLAGS_ALL,
+			   BH_FREE_ERROR_MESSAGE, cptr);
+      sendto_realops_flags(FLAGS_ALL,
+			   "Please report to the hybrid team!" \
+			   "ircd-hybrid@the-project.org");
 
       log(L_WARN, BH_FREE_ERROR_MESSAGE, cptr);
     }
@@ -314,8 +316,9 @@ check_pings(void *notused)
               aconf->port = 0;
               aconf->hold = CurrentTime + 60;
               add_temp_kline(aconf);
-              sendto_realops("Idle time limit exceeded for %s - temp k-lining",
-                         get_client_name(cptr,FALSE));
+              sendto_realops_flags(FLAGS_ALL,
+			   "Idle time limit exceeded for %s - temp k-lining",
+				   get_client_name(cptr,FALSE));
               continue;         /* and go examine next fd/cptr */
             }
         }
@@ -339,8 +342,9 @@ check_pings(void *notused)
               if (IsServer(cptr) || IsConnecting(cptr) ||
                   IsHandshake(cptr))
                 {
-                  sendto_realops("No response from %s, closing link",
-				 get_client_name(cptr, FALSE));
+                  sendto_realops_flags(FLAGS_ALL,
+				       "No response from %s, closing link",
+				       get_client_name(cptr, FALSE));
                 }
 
               cptr->flags2 |= FLAGS2_PING_TIMEOUT;
@@ -446,11 +450,12 @@ void check_klines(void)
 	{
 	  if(IsConfElined(aconf))
 	    {
-	      sendto_realops("D-line over-ruled for %s client is E-lined",
-			     get_client_name(cptr, FALSE));
+	      sendto_realops_flags(FLAGS_ALL,
+			   "D-line over-ruled for %s client is E-lined",
+				   get_client_name(cptr, FALSE));
 	      continue;
 	    }
-	  sendto_realops("D-line active for %s",
+	  sendto_realops_flags(FLAGS_ALL,"D-line active for %s",
 			 get_client_name(cptr, FALSE));
 	      
 	  dying_clients[die_index].client = cptr;
@@ -499,13 +504,15 @@ void check_klines(void)
 	    {
 	      if(IsElined(cptr))
 		{
-		  sendto_realops("G-line over-ruled for %s client is E-lined",
-				 get_client_name(cptr,FALSE));
+		  sendto_realops_flags(FLAGS_ALL,
+			       "G-line over-ruled for %s client is E-lined",
+				       get_client_name(cptr,FALSE));
 		  continue;
 		}
 	      
-	      sendto_realops("G-line active for %s",
-			     get_client_name(cptr, FALSE));
+	      sendto_realops_flags(FLAGS_ALL,
+				   "G-line active for %s",
+				   get_client_name(cptr, FALSE));
 		  
 	      dying_clients[die_index].client = cptr;
 	      dying_clients[die_index].fake_kill = 0;
@@ -544,13 +551,15 @@ void check_klines(void)
 	      {
 		if(aconf->status & CONF_ELINE)
 		  {
-		    sendto_realops("K-line over-ruled for %s client is E-lined",
-				   get_client_name(cptr,FALSE));
+		    sendto_realops_flags(FLAGS_ALL,
+				 "K-line over-ruled for %s client is E-lined",
+					 get_client_name(cptr,FALSE));
 		    continue;
 		  }
 		    
-		sendto_realops("K-line active for %s",
-			       get_client_name(cptr, FALSE));
+		sendto_realops_flags(FLAGS_ALL,
+				     "K-line active for %s",
+				     get_client_name(cptr, FALSE));
 		dying_clients[die_index].client = cptr;
 		dying_clients[die_index].fake_kill = 0;
 		    
@@ -608,8 +617,9 @@ void check_klines(void)
               aconf->port = 0;
               aconf->hold = CurrentTime + 60;
               add_temp_kline(aconf);
-              sendto_realops("Idle time limit exceeded for %s - temp k-lining",
-                         get_client_name(cptr,FALSE));
+              sendto_realops_flags(FLAGS_ALL,
+			   "Idle time limit exceeded for %s - temp k-lining",
+				   get_client_name(cptr,FALSE));
               continue;         /* and go examine next fd/cptr */
             }
         }
@@ -648,7 +658,8 @@ static void exit_marked_for_death_clients(struct die_client dying_clients[])
            */
           if(cptr->flags2 & FLAGS2_ALREADY_EXITED)
             {
-              sendto_realops("Client already exited doing ping timeout %X",cptr);
+              sendto_realops_flags(FLAGS_ALL,
+			   "Client already exited doing ping timeout %X",cptr);
             }
           else
             (void)exit_client(cptr, cptr, &me, ping_time_out_buffer );
@@ -664,7 +675,8 @@ static void exit_marked_for_death_clients(struct die_client dying_clients[])
            */
           if(cptr->flags2 & FLAGS2_ALREADY_EXITED)
             {
-              sendto_realops("Client already exited %X",cptr);
+              sendto_realops_flags(FLAGS_ALL,
+				   "Client already exited %X",cptr);
             }
           else
             (void)exit_client(cptr, cptr, &me, dying_clients[die_index].reason);
@@ -1152,7 +1164,8 @@ static void exit_one_client(struct Client *cptr, struct Client *sptr, struct Cli
   */
   if (IsMe(sptr))
     {
-      sendto_realops("ERROR: tried to exit me! : %s", comment);
+      sendto_realops_flags(FLAGS_ALL,
+			   "ERROR: tried to exit me! : %s", comment);
       return;        /* ...must *never* exit self!! */
     }
   else if (IsServer(sptr))
@@ -1501,9 +1514,11 @@ const char* comment         /* Reason for the exit */
 
       if (sptr->servptr == &me)
         {
-          sendto_realops("%s was connected for %d seconds.  %d/%d sendK/recvK.",
-                     sptr->name,CurrentTime - sptr->firsttime,
-                     sptr->localClient->sendK, sptr->localClient->receiveK);
+          sendto_realops_flags(FLAGS_ALL,
+		       "%s was connected for %d seconds.  %d/%d sendK/recvK.",
+			       sptr->name,CurrentTime - sptr->firsttime,
+			       sptr->localClient->sendK,
+			       sptr->localClient->receiveK);
           log(L_NOTICE, "%s was connected for %d seconds.  %d/%d sendK/recvK.",
               sptr->name, CurrentTime - sptr->firsttime, 
               sptr->localClient->sendK, sptr->localClient->receiveK);

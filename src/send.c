@@ -55,10 +55,6 @@ static  int     send_message (struct Client *, char *, int);
 static  void vsendto_prefix_one(register struct Client *,
 				register struct Client *,
 				const char *, va_list);
-static  void
-vsendto_one(struct Client *, const char *, va_list);
-static  void
-vsendto_realops(const char *, va_list);
 
 /* global for now *sigh* */
 unsigned long current_serial=0L;
@@ -70,6 +66,9 @@ void
 send_channel_members(struct Client *one, struct Client *from,
 		     dlink_list *list,
 		     const char *pattern, va_list args);
+
+static int
+send_format(char *sendbuf, const char *pattern, va_list args);
 
 /*
 ** dead_link
@@ -100,7 +99,8 @@ dead_link(struct Client *to, char *notice)
   linebuf_donebuf(&to->localClient->buf_recvq);
   linebuf_donebuf(&to->localClient->buf_sendq);
   if (!IsPerson(to) && !IsUnknown(to) && !(to->flags & FLAGS_CLOSING))
-    sendto_realops(notice, get_client_name(to, FALSE));
+    sendto_realops_flags(FLAGS_ALL,
+			 notice, get_client_name(to, FALSE));
   
   Debug((DEBUG_ERROR, notice, get_client_name(to, FALSE)));
 
@@ -124,7 +124,8 @@ send_message(struct Client *to, char *msg, int len)
 
   if (IsMe(to))
     {
-      sendto_realops("Trying to send to myself! [%s]", msg);
+      sendto_realops_flags(FLAGS_ALL,
+			   "Trying to send to myself! [%s]", msg);
       return 0;
     }
 
@@ -137,8 +138,9 @@ send_message(struct Client *to, char *msg, int len)
   if (linebuf_len(&to->localClient->buf_sendq) > get_sendq(to))
     {
       if (IsServer(to))
-        sendto_realops("Max SendQ limit exceeded for %s: %d > %d",
-          get_client_name(to, FALSE),
+        sendto_realops_flags(FLAGS_ALL,
+			     "Max SendQ limit exceeded for %s: %d > %d",
+			     get_client_name(to, FALSE),
           linebuf_len(&to->localClient->buf_sendq), get_sendq(to));
       if (IsClient(to))
         to->flags |= FLAGS_SENDQEX;
@@ -235,28 +237,9 @@ void
 sendto_one(struct Client *to, const char *pattern, ...)
 
 {
-  va_list       args;
+  int len;
+  va_list args;
 
-  va_start(args, pattern);
-
-  vsendto_one(to, pattern, args);
-
-  va_end(args);
-} /* sendto_one() */
-
-/*
- * vsendto_one()
- * Backend for sendto_one() - send string with variable
- * arguments to client 'to'
- * -wnder
-*/
-
-static void
-vsendto_one(struct Client *to, const char *pattern, va_list args)
-
-{
-  int len; /* used for the length of the current message */
-  
   if (to->from)
     to = to->from;
   
@@ -268,63 +251,23 @@ vsendto_one(struct Client *to, const char *pattern, va_list args)
     }
   else if (IsMe(to))
     {
-      sendto_realops("Trying to send [%s] to myself!", sendbuf);
+      sendto_realops_flags(FLAGS_ALL,
+			   "Trying to send [%s] to myself!", sendbuf);
       return;
     }
 
-  len = vsprintf_irc(sendbuf, pattern, args);
+  va_start(args, pattern);
+  len = send_format(sendbuf, pattern, args);
+  va_end(args);
 
-  /*
-   * from rfc1459
-   *
-   * IRC messages are always lines of characters terminated with a CR-LF
-   * (Carriage Return - Line Feed) pair, and these messages shall not
-   * exceed 512 characters in length,  counting all characters 
-   * including the trailing CR-LF.
-   * Thus, there are 510 characters maximum allowed
-   * for the command and its parameters.  There is no provision for
-   * continuation message lines.  See section 7 for more details about
-   * current implementations.
-   */
-
-  /*
-   * We have to get a \r\n\0 onto sendbuf[] somehow to satisfy
-   * the rfc. We must assume sendbuf[] is defined to be 513
-   * bytes - a maximum of 510 characters, the CR-LF pair, and
-   * a trailing \0, as stated in the rfc. Now, if len is greater
-   * than the third-to-last slot in the buffer, an overflow will
-   * occur if we try to add three more bytes, if it has not
-   * already occured. In that case, simply set the last three
-   * bytes of the buffer to \r\n\0. Otherwise, we're ok. My goal
-   * is to get some sort of vsnprintf() function operational
-   * for this routine, so we never again have a possibility
-   * of an overflow.
-   * -wnder
-   */
-        if (len > 510)
-        {
-                sendbuf[IRCD_BUFSIZE-2] = '\r';
-                sendbuf[IRCD_BUFSIZE-1] = '\n';
-                sendbuf[IRCD_BUFSIZE] = '\0';
-                len = IRCD_BUFSIZE;
-        }
-        else
-        {
-                sendbuf[len++] = '\r';
-                sendbuf[len++] = '\n';
-                sendbuf[len] = '\0';
-        }
-
-        Debug((DEBUG_SEND,"Sending [%s] to %s",sendbuf,to->name));
-
-        (void)send_message(to, sendbuf, len);
-} /* vsendto_one() */
+  (void)send_message(to, sendbuf, len);
+  Debug((DEBUG_SEND,"Sending [%s] to %s",sendbuf,to->name));
+} /* sendto_one() */
 
 void
 sendto_channel_butone(struct Client *one, struct Client *from,
 		      struct Channel *chptr, 
                       const char *pattern, ...)
-
 {
   va_list    args;
   dlink_node *lp;
@@ -388,13 +331,15 @@ send_channel_members(struct Client *one, struct Client *from,
  */
 void
 sendto_serv_butone(struct Client *one, const char *pattern, ...)
-
 {
+  int len;
   va_list args;
   register struct Client *cptr;
   dlink_node *ptr;
 
   va_start(args, pattern);
+  len = send_format(sendbuf,pattern,args);
+  va_end(args);
   
   for(ptr = serv_list.head; ptr; ptr = ptr->next)
     {
@@ -403,10 +348,8 @@ sendto_serv_butone(struct Client *one, const char *pattern, ...)
       if (one && (cptr == one->from))
         continue;
       
-      vsendto_one(cptr, pattern, args);
+      send_message(cptr, sendbuf, len);
     }
-
-  va_end(args);
 } /* sendto_serv_butone() */
 
 /*
@@ -416,13 +359,15 @@ sendto_serv_butone(struct Client *one, const char *pattern, ...)
  */
 void
 sendto_cap_serv_butone(int cap, struct Client *one, const char *pattern, ...)
-
 {
+  int len;
   va_list args;
   register struct Client *cptr;
   dlink_node *ptr;
 
   va_start(args, pattern);
+  len = send_format(sendbuf,pattern,args);
+  va_end(args);
   
   for(ptr = serv_list.head; ptr; ptr = ptr->next)
     {
@@ -432,10 +377,8 @@ sendto_cap_serv_butone(int cap, struct Client *one, const char *pattern, ...)
         continue;
       
       if (IsCapable(cptr,cap))
-	vsendto_one(cptr, pattern, args);
+	send_message(cptr, sendbuf, len);
     }
-
-  va_end(args);
 } /* sendto_cap_serv_butone() */
 
 /*
@@ -452,30 +395,15 @@ void
 sendto_common_channels_local(struct Client *user, const char *pattern, ...)
 
 {
-  static char sendbuf[1024];
   int len;
   va_list args;
   dlink_node *ptr;
   struct Channel *chptr;
 
   va_start(args, pattern);
-  len = vsprintf_irc(sendbuf, pattern, args);
+  len = send_format(sendbuf, pattern, args);
   va_end(args);
 
-  if (len > 510)
-    {
-      sendbuf[IRCD_BUFSIZE-2] = '\r';
-      sendbuf[IRCD_BUFSIZE-1] = '\n';
-      sendbuf[IRCD_BUFSIZE] = '\0';
-      len = IRCD_BUFSIZE;
-    }
-  else
-    {
-      sendbuf[len++] = '\r';
-      sendbuf[len++] = '\n';
-      sendbuf[len] = '\0';
-    }
-  
   ++current_serial;
 
   if (user->user)
@@ -505,27 +433,12 @@ sendto_channel_local(int type,
 		     struct Channel *chptr,
 		     const char *pattern, ...)
 {
-  static char sendbuf[1024];
   int len;
   va_list args;
 
   va_start(args, pattern);
-  len = vsprintf_irc(sendbuf, pattern, args);
+  len = send_format(sendbuf, pattern, args);
   va_end(args);
-
-  if (len > 510)
-    {
-      sendbuf[IRCD_BUFSIZE-2] = '\r';
-      sendbuf[IRCD_BUFSIZE-1] = '\n';
-      sendbuf[IRCD_BUFSIZE] = '\0';
-      len = IRCD_BUFSIZE;
-    }
-  else
-    {
-      sendbuf[len++] = '\r';
-      sendbuf[len++] = '\n';
-      sendbuf[len] = '\0';
-    }
 
   /* Serial number checking isn't strictly necessary, but won't hurt */
   ++current_serial;
@@ -624,11 +537,14 @@ sendto_channel_remote(struct Channel *chptr,
 		      const char *pattern, ...)
 
 {
+  int len;
   va_list args;
   struct Client *cptr;
   dlink_node *ptr;
 
   va_start(args, pattern);
+  len = send_format(sendbuf,pattern,args);
+  va_end(args);
 
   if (chptr)
     {
@@ -649,10 +565,8 @@ sendto_channel_remote(struct Channel *chptr,
              continue;
         }
 
-      vsendto_one(cptr, pattern, args);
+      send_message (cptr, sendbuf, len);
     }
-
-  va_end(args);
 } /* sendto_channel_remote() */
 
 /*
@@ -667,17 +581,20 @@ sendto_match_cap_servs(struct Channel *chptr, struct Client *from, int cap,
                        const char *pattern, ...)
 
 {
+  int len;
   va_list args;
   register struct Client *cptr;
   dlink_node *ptr;
-
-  va_start(args, pattern);
 
   if (chptr)
     {
       if (*chptr->chname == '&')
         return;
     }
+
+  va_start(args, pattern);
+  len = send_format(sendbuf,pattern,args);
+  va_end(args);
 
   for(ptr = serv_list.head; ptr; ptr = ptr->next)
     {
@@ -689,10 +606,8 @@ sendto_match_cap_servs(struct Channel *chptr, struct Client *from, int cap,
       if(!IsCapable(cptr, cap))
         continue;
       
-      vsendto_one(cptr, pattern, args);
+      send_message (cptr, sendbuf, len);
     }
-
-  va_end(args);
 } /* sendto_match_cap_servs() */
 
 /*
@@ -868,7 +783,6 @@ vsendto_prefix_one(register struct Client *to, register struct Client *from,
   char* par = 0;
   register int parlen;
   register int len;
-  static char sendbuf[1024];
 
   assert(0 != to);
   assert(0 != from);
@@ -878,18 +792,17 @@ vsendto_prefix_one(register struct Client *to, register struct Client *from,
     {
       if (IsServer(from))
         {
-          vsprintf_irc(sendbuf, pattern, args);
-          
-          sendto_realops(
-                     "Send message (%s) to %s[%s] dropped from %s(Fake Dir)",
-                     sendbuf, to->name, to->from->name, from->name);
+          sendto_realops_flags(FLAGS_ALL,
+		      "Send message to %s[%s] dropped from %s(Fake Dir)",
+			      to->name, to->from->name, from->name);
           return;
         }
 
-      sendto_realops("Ghosted: %s[%s@%s] from %s[%s@%s] (%s)",
-		     to->name, to->username, to->host,
-		     from->name, from->username, from->host,
-		     to->from->name);
+      sendto_realops_flags(FLAGS_ALL,
+			   "Ghosted: %s[%s@%s] from %s[%s@%s] (%s)",
+			   to->name, to->username, to->host,
+			   from->name, from->username, from->host,
+			   to->from->name);
       
       sendto_serv_butone(NULL, ":%s KILL %s :%s (%s[%s@%s] Ghosted %s)",
                          me.name, to->name, me.name, to->name,
@@ -956,84 +869,67 @@ vsendto_prefix_one(register struct Client *to, register struct Client *from,
 } /* vsendto_prefix_one() */
 
 /*
- * sendto_realops
- *
- *    Send to *local* ops only but NOT +s nonopers.
- */
-
-void
-sendto_realops(const char *pattern, ...)
-
-{
-  va_list args;
-
-  va_start(args, pattern);
-
-  vsendto_realops(pattern, args);
-
-  va_end(args);
-} /* sendto_realops() */
-
-/*
-vsendto_realops()
- Send the given string to local operators (not +s)
-*/
-
-static void
-vsendto_realops(const char *pattern, va_list args)
-
-{
-  register struct Client *cptr;
-  char nbuf[1024];
-  dlink_node *ptr;
-
-  for (ptr = oper_list.head; ptr; ptr = ptr->next)
-    {
-      cptr = ptr->data;
-
-      if (SendServNotice(cptr))
-        {
-          (void)ircsprintf(nbuf, ":%s NOTICE %s :*** Notice -- ",
-                           me.name, cptr->name);
-          (void)strncat(nbuf, pattern, sizeof(nbuf) - strlen(nbuf));
-          
-          vsendto_one(cptr, nbuf, args);
-        }
-    }
-} /* vsendto_realops() */
-
-/*
  * sendto_realops_flags
  *
- *    Send to *local* ops with matching flags
+ *    Send to *local* ops only but NOT +s nonopers.
  */
 
 void
 sendto_realops_flags(int flags, const char *pattern, ...)
 
 {
-  va_list args;
-  register struct Client *cptr;
+  int len;
+  struct Client *cptr;
   char nbuf[1024];
   dlink_node *ptr;
+  va_list args;
 
   va_start(args, pattern);
-
-  for (ptr = oper_list.head; ptr; ptr = ptr->next)
-    {
-      cptr = ptr->data;
-
-      if(cptr->umodes & flags)
-        {
-          (void)ircsprintf(nbuf, ":%s NOTICE %s :*** Notice -- ",
-                           me.name, cptr->name);
-          (void)strncat(nbuf, pattern, sizeof(nbuf) - strlen(nbuf));
-          
-          vsendto_one(cptr, nbuf, args);
-        }
-    } 
-
+  len = send_format(nbuf, pattern, args);
   va_end(args);
+
+  if(len > (512-60))
+    {
+      nbuf[512-60] = '\r';
+      nbuf[512-59] = '\n';
+      nbuf[512-58] = '\0';
+    }
+
+  if (flags == FLAGS_ALL)
+    {
+      for (ptr = oper_list.head; ptr; ptr = ptr->next)
+	{
+	  cptr = ptr->data;
+
+	  if (SendServNotice(cptr))
+	    {
+	      (void)ircsprintf(sendbuf, ":%s NOTICE %s :*** Notice -- %s",
+			       me.name,
+			       cptr->name,
+			       nbuf);
+
+	      len = strlen(sendbuf);	/* XXX *sigh* */
+	      send_message(cptr,sendbuf,len);
+	    }
+	}
+    }
+  else 
+    {
+      for (ptr = oper_list.head; ptr; ptr = ptr->next)
+	{
+	  cptr = ptr->data;
+
+	  if(cptr->umodes & flags)
+	    {
+	      (void)ircsprintf(sendbuf, ":%s NOTICE %s :*** Notice -- %s",
+			       me.name,
+			       cptr->name,
+			       nbuf);
+
+	      send_message(cptr,sendbuf,len);
+	    }
+	}
+    }
 } /* sendto_realops_flags() */
 
 /*
@@ -1051,8 +947,6 @@ ts_warn(const char *pattern, ...)
   static time_t last = 0;
   static int warnings = 0;
   time_t now;
-
-  va_start(args, pattern);
  
   /*
   ** if we're running with TS_WARNINGS enabled and someone does
@@ -1073,10 +967,62 @@ ts_warn(const char *pattern, ...)
       warnings = 0;
     }
 
-  vsendto_realops(pattern, args);
-  vsprintf(buf, pattern, args);
-  log(L_CRIT, buf);
+  va_start(args, pattern);
+  (void)send_format(buf, pattern, args);
   va_end(args);
+
+  sendto_realops_flags(FLAGS_ALL,"%s",buf);
+  log(L_CRIT, buf);
 } /* ts_warn() */
 
 
+static int
+send_format(char *sendbuf, const char *pattern, va_list args)
+{
+  int len; /* used for the length of the current message */
+
+  len = vsprintf_irc(sendbuf, pattern, args);
+
+  /*
+   * from rfc1459
+   *
+   * IRC messages are always lines of characters terminated with a CR-LF
+   * (Carriage Return - Line Feed) pair, and these messages shall not
+   * exceed 512 characters in length,  counting all characters 
+   * including the trailing CR-LF.
+   * Thus, there are 510 characters maximum allowed
+   * for the command and its parameters.  There is no provision for
+   * continuation message lines.  See section 7 for more details about
+   * current implementations.
+   */
+
+  /*
+   * We have to get a \r\n\0 onto sendbuf[] somehow to satisfy
+   * the rfc. We must assume sendbuf[] is defined to be 513
+   * bytes - a maximum of 510 characters, the CR-LF pair, and
+   * a trailing \0, as stated in the rfc. Now, if len is greater
+   * than the third-to-last slot in the buffer, an overflow will
+   * occur if we try to add three more bytes, if it has not
+   * already occured. In that case, simply set the last three
+   * bytes of the buffer to \r\n\0. Otherwise, we're ok. My goal
+   * is to get some sort of vsnprintf() function operational
+   * for this routine, so we never again have a possibility
+   * of an overflow.
+   * -wnder
+   */
+  if (len > 510)
+    {
+      sendbuf[IRCD_BUFSIZE-2] = '\r';
+      sendbuf[IRCD_BUFSIZE-1] = '\n';
+      sendbuf[IRCD_BUFSIZE] = '\0';
+      len = IRCD_BUFSIZE;
+    }
+  else
+    {
+      sendbuf[len++] = '\r';
+      sendbuf[len++] = '\n';
+      sendbuf[len] = '\0';
+    }
+
+  return(len);
+}

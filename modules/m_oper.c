@@ -93,10 +93,12 @@ int m_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   if( (aconf = find_password_aconf(name,sptr)) == NULL)
     {
       sendto_one(sptr, form_str(ERR_NOOPERHOST), me.name, sptr->name);
-      if (ConfigFileEntry.failed_oper_notice && ConfigFileEntry.show_failed_oper_id)
+      if (ConfigFileEntry.failed_oper_notice &&
+	  ConfigFileEntry.show_failed_oper_id)
 	{
-	  sendto_realops("Failed OPER attempt - host mismatch by %s (%s@%s)",
-			 sptr->name, sptr->username, sptr->host);
+	  sendto_realops_flags(FLAGS_ALL,
+                          "Failed OPER attempt - host mismatch by %s (%s@%s)",
+                          sptr->name, sptr->username, sptr->host);
 	}
       return 0;
     }
@@ -107,7 +109,8 @@ int m_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 	{
 	  sendto_one(sptr,":%s NOTICE %s :Can't attach conf!",
 		     me.name,sptr->name);
-	  sendto_realops("Failed OPER attempt by %s (%s@%s) can't attach conf!",
+	  sendto_realops_flags(FLAGS_ALL,
+                       "Failed OPER attempt by %s (%s@%s) can't attach conf!",
 			 sptr->name, sptr->username, sptr->host);
 	  return 0;
 	}
@@ -124,8 +127,9 @@ int m_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       sendto_one(sptr,form_str(ERR_PASSWDMISMATCH),me.name, parv[0]);
       if (ConfigFileEntry.failed_oper_notice)
 	{
-	  sendto_realops("Failed OPER attempt by %s (%s@%s)",
-			 sptr->name, sptr->username, sptr->host);
+	  sendto_realops_flags(FLAGS_ALL,
+			       "Failed OPER attempt by %s (%s@%s)",
+			       sptr->name, sptr->username, sptr->host);
 	}
     }
   return 0;
@@ -296,15 +300,10 @@ int oper_up( struct Client *sptr, struct ConfItem *aconf )
   else
     operprivs = "";
 
-#ifdef CUSTOM_ERR
-  sendto_realops("%s (%s@%s) has just acquired the personality of a petty megalomaniacal tyrant [IRC(%c)p]", sptr->name,
-		 sptr->username, sptr->host,
-		 IsGlobalOper(sptr) ? 'O' : 'o');
-#else
-  sendto_realops("%s (%s@%s) is now operator (%c)", sptr->name,
-		 sptr->username, sptr->host,
-		 IsGlobalOper(sptr) ? 'O' : 'o');
-#endif /* CUSTOM_ERR */
+  sendto_realops_flags(FLAGS_ALL,
+		       "%s (%s@%s) is now operator (%c)", sptr->name,
+		       sptr->username, sptr->host,
+		       IsGlobalOper(sptr) ? 'O' : 'o');
 
   send_umode_out(sptr, sptr, old);
 

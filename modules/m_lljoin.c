@@ -201,7 +201,8 @@ int     ms_lljoin(struct Client *cptr,
     }
   else
     {
-      sendto_realops("*** LLJOIN request received from non LL capable server!");
+      sendto_realops_flags(FLAGS_ALL,
+		   "*** LLJOIN request received from non LL capable server!");
     }
   return 0;
 }

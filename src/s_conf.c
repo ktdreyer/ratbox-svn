@@ -518,8 +518,9 @@ int attach_Iline(struct Client* cptr, const char* username)
 	  /* Thanks for spoof idea amm */
 	  if(IsConfDoSpoofIp(aconf))
 	    {
-	      sendto_realops("%s spoofing: %s as %s", cptr->name,
-			   cptr->host, aconf->name);
+	      sendto_realops_flags(FLAGS_ADMIN,
+				   "%s spoofing: %s as %s", cptr->name,
+				   cptr->host, aconf->name);
 	      strncpy_irc(cptr->host, aconf->name, HOSTLEN);
 	      SetIPSpoof(cptr);
 	      SetIPHidden(cptr);
@@ -1515,7 +1516,8 @@ static void clear_special_conf(struct ConfItem **this_conf)
 int rehash(struct Client *cptr,struct Client *sptr, int sig)
 {
   if (sig)
-    sendto_realops("Got signal SIGHUP, reloading ircd conf. file");
+    sendto_realops_flags(FLAGS_ALL,
+			 "Got signal SIGHUP, reloading ircd conf. file");
 
   read_conf_files(NO);
   close_listeners();
@@ -2399,7 +2401,9 @@ void read_conf_files(int cold)
         }
       else
         {
-          sendto_realops("Can't open %s file aborting rehash!", filename );
+          sendto_realops_flags(FLAGS_ALL,
+			       "Can't open %s file aborting rehash!",
+			       filename );
           return;
         }
     }
@@ -2418,8 +2422,9 @@ void read_conf_files(int cold)
 	  if (cold)
 	    log(L_ERROR, "Failed reading kline file %s", filename);
 	  else
-	    sendto_realops("Can't open %s file klines could be missing!",
-			   kfilename);
+	    sendto_realops_flags(FLAGS_ALL,
+				 "Can't open %s file klines could be missing!",
+				 kfilename);
 	}
       else
 	{
@@ -2436,8 +2441,9 @@ void read_conf_files(int cold)
 	  if(cold)
 	    log(L_ERROR, "Failed reading dline file %s", dfilename);
 	  else
-	    sendto_realops("Can't open %s file dlines could be missing!",
-			   dfilename);
+	    sendto_realops_flags(FLAGS_ALL,
+				 "Can't open %s file dlines could be missing!",
+				 dfilename);
 	}
       else
 	{
@@ -2565,8 +2571,9 @@ void WriteKlineOrDline( KlineType type,
 
   if(type == DLINE_TYPE)
     {
-      sendto_realops("%s added D-Line for [%s] [%s]",
-		     sptr->name, host, reason);
+      sendto_realops_flags(FLAGS_ALL,
+			   "%s added D-Line for [%s] [%s]",
+			   sptr->name, host, reason);
       sendto_one(sptr, ":%s NOTICE %s :Added D-Line [%s] to %s",
 		 me.name, sptr->name, host, filename);
 
@@ -2575,8 +2582,9 @@ void WriteKlineOrDline( KlineType type,
     }
   else
     {
-      sendto_realops("%s added K-Line for [%s@%s] [%s]",
-		     sptr->name, user, host, reason);
+      sendto_realops_flags(FLAGS_ALL,
+			   "%s added K-Line for [%s@%s] [%s]",
+			   sptr->name, user, host, reason);
       sendto_one(sptr, ":%s NOTICE %s :Added K-Line [%s@%s] to %s",
 		 me.name, sptr->name, user, host, filename);
       log(L_TRACE, "%s added K-Line for [%s] [%s@%s]", 
@@ -2585,7 +2593,8 @@ void WriteKlineOrDline( KlineType type,
 
   if ( (out = fbopen(filename, "a")) == NULL )
     {
-      sendto_realops("*** Problem opening %s ", filename);
+      sendto_realops_flags(FLAGS_ALL,
+			   "*** Problem opening %s ", filename);
       return;
     }
 
@@ -2695,8 +2704,9 @@ void conf_add_hub_or_leaf(struct ConfItem *aconf)
       
       if(ps || pt)
 	{
-	  sendto_realops("H: or L: line trailing whitespace [%s]",
-			 aconf->user);
+	  sendto_realops_flags(FLAGS_ALL,
+			       "H: or L: line trailing whitespace [%s]",
+			       aconf->user);
 	  if(ps)*ps = '\0';
 	  if(pt)*pt = '\0';
 	}
@@ -2758,7 +2768,8 @@ void conf_add_class_to_conf(struct ConfItem *aconf)
 {
   if(!aconf->className)
     {
-      sendto_realops("Warning *** Missing class field");
+      sendto_realops_flags(FLAGS_ALL,
+			   "Warning *** Missing class field");
       DupString(aconf->className,"default");
       ClassPtr(aconf) = class0;
       return;
@@ -2768,8 +2779,9 @@ void conf_add_class_to_conf(struct ConfItem *aconf)
 
   if(ClassPtr(aconf) == class0)
     {
-      sendto_realops("Warning *** Defaulting to default class for missing class \"%s\"",
-	     aconf->className);
+      sendto_realops_flags(FLAGS_ALL,
+	   "Warning *** Defaulting to default class for missing class \"%s\"",
+			   aconf->className);
       MyFree(aconf->className);
       DupString(aconf->className,"default");
       return;
@@ -2915,21 +2927,21 @@ struct ConfItem *conf_add_server(struct ConfItem *aconf,
   if (ncount > MAXCONFLINKS || ccount > MAXCONFLINKS ||
       !aconf->host || !aconf->user)
     {
-      sendto_realops("Bad C/N line");
+      sendto_realops_flags(FLAGS_ALL,"Bad C/N line");
       free_conf(aconf);
       return NULL;
     }
 
   if (BadPtr(aconf->passwd))
     {
-      sendto_realops("Bad C/N line host %s", aconf->host);
+      sendto_realops_flags(FLAGS_ALL,"Bad C/N line host %s", aconf->host);
       free_conf(aconf);
       return NULL;
     }
           
   if( SplitUserHost(aconf) < 0 )
     {
-      sendto_realops("Bad C/N line host %s", aconf->host);
+      sendto_realops_flags(FLAGS_ALL,"Bad C/N line host %s", aconf->host);
       free_conf(aconf);
       return NULL;
     }
@@ -2950,7 +2962,7 @@ struct ConfItem *conf_add_o_line(struct ConfItem *aconf)
 
   if(SplitUserHost(aconf) < 0)
     {
-      sendto_realops("Bad O/o line host %s", aconf->host);
+      sendto_realops_flags(FLAGS_ALL,"Bad O/o line host %s", aconf->host);
       free_conf(aconf);
       return NULL;
     }
@@ -3145,8 +3157,8 @@ void conf_add_fields(struct ConfItem *aconf,
 
 void yyerror(char *msg)
 {
-  sendto_realops("%d: %s in this line %s",
-		 lineno, msg, linebuf);
+  sendto_realops_flags(FLAGS_ALL,"%d: %s in this line %s",
+		       lineno, msg, linebuf);
 }
 
 int conf_fbgets(char *buf,int max_size, FBFILE *fb)
@@ -3164,7 +3176,8 @@ int conf_fbgets(char *buf,int max_size, FBFILE *fb)
 int conf_yy_fatal_error(char *msg)
 {
 #if 0
-  sendto_realops("lexer barfed. lets leave it at that for now");
+  sendto_realops_flags(FLAGS_ALL,
+		       "lexer barfed. lets leave it at that for now");
 #endif
   return 0;
 }

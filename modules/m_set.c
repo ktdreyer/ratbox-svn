@@ -1,7 +1,6 @@
 /************************************************************************
- *   IRC - Internet Relay Chat, modules/m_set.c
- *   Copyright (C) 1990 Jarkko Oikarinen and
- *                      University of Oulu, Computing Center
+ *   IRC - Internet Relay Chat, modules/m_set.c Copyright (C) 1990
+ *   Jarkko Oikarinen and University of Oulu, Computing Center
  *
  *   See file AUTHORS in IRC package for additional names of
  *   the programmers. 
@@ -20,8 +19,7 @@
  *   along with this program; if not, write to the Free Software
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- *   $Id$
- */
+ *   $Id$ */
 
 /* rewritten by jdc */
 
@@ -155,8 +153,8 @@ int quote_autoconnall( struct Client *sptr, int newval)
 {
   if(newval >= 0)
     {
-      sendto_realops("%s has changed AUTOCONNALL to %i",
-		     sptr->name, newval);
+      sendto_realops_flags(FLAGS_ALL,"%s has changed AUTOCONNALL to %i",
+			   sptr->name, newval);
 
       GlobalSetOptions.autoconn = newval;
     }
@@ -175,8 +173,9 @@ int quote_floodcount( struct Client *sptr, int newval)
   if(newval >= 0)
     {
       GlobalSetOptions.floodcount = newval;
-      sendto_realops("%s has changed FLOODCOUNT to %i", sptr->name,
-		     GlobalSetOptions.floodcount);
+      sendto_realops_flags(FLAGS_ALL,
+			   "%s has changed FLOODCOUNT to %i", sptr->name,
+			   GlobalSetOptions.floodcount);
     }
   else
     {
@@ -193,12 +192,16 @@ int quote_idletime( struct Client *sptr, int newval )
     {
       if (newval == 0)
 	{
-	  sendto_realops("%s has disabled idletime checking", sptr->name);
+	  sendto_realops_flags(FLAGS_ALL,
+			       "%s has disabled idletime checking",
+			       sptr->name);
 	  GlobalSetOptions.idletime = 0;
 	}
       else 
 	{
-	  sendto_realops("%s has changed IDLETIME to %i", sptr->name, newval);
+	  sendto_realops_flags(FLAGS_ALL,
+			       "%s has changed IDLETIME to %i",
+			       sptr->name, newval);
 	  GlobalSetOptions.idletime = (newval*60);
 	}
     }
@@ -232,8 +235,8 @@ int quote_log( struct Client *sptr, int newval )
 
       set_log_level(newval);
       log_level_as_string = get_log_level_as_string(newval);
-      sendto_realops("%s has changed LOG level to %i (%s)",
-		     sptr->name, newval, log_level_as_string);
+      sendto_realops_flags(FLAGS_ALL,"%s has changed LOG level to %i (%s)",
+			   sptr->name, newval, log_level_as_string);
     }
   else 
     {
@@ -268,8 +271,9 @@ int quote_max( struct Client *sptr, int newval )
 
       GlobalSetOptions.maxclients = newval;
 
-      sendto_realops("%s!%s@%s set new MAXCLIENTS to %d (%d current)",
-		     sptr->name, sptr->username, sptr->host,
+      sendto_realops_flags(FLAGS_ALL,
+			   "%s!%s@%s set new MAXCLIENTS to %d (%d current)",
+			   sptr->name, sptr->username, sptr->host,
 		     GlobalSetOptions.maxclients, Count.local);
 
       return(0);
@@ -291,7 +295,8 @@ int quote_spamnum( struct Client *sptr, int newval )
     {
       if (newval == 0)
 	{
-	  sendto_realops("%s has disabled ANTI_SPAMBOT", sptr->name);
+	  sendto_realops_flags(FLAGS_ALL,
+			       "%s has disabled ANTI_SPAMBOT", sptr->name);
 	  GlobalSetOptions.spam_num = newval;
 	  return(0);
 	}
@@ -303,8 +308,8 @@ int quote_spamnum( struct Client *sptr, int newval )
 	{
 	  GlobalSetOptions.spam_num = newval;
 	}
-      sendto_realops("%s has changed SPAMNUM to %i",
-		     sptr->name, GlobalSetOptions.spam_num);
+      sendto_realops_flags(FLAGS_ALL,"%s has changed SPAMNUM to %i",
+			   sptr->name, GlobalSetOptions.spam_num);
     }
   else
     {
@@ -328,8 +333,8 @@ int quote_spamtime( struct Client *sptr, int newval )
 	{
 	  GlobalSetOptions.spam_time = newval;
 	}
-      sendto_realops("%s has changed SPAMTIME to %i",
-		     sptr->name, GlobalSetOptions.spam_time);
+      sendto_realops_flags(FLAGS_ALL,"%s has changed SPAMTIME to %i",
+			   sptr->name, GlobalSetOptions.spam_time);
     }
   else
     {
@@ -348,8 +353,8 @@ int quote_chide( struct Client *sptr, int newval )
       else
 	GlobalSetOptions.hide_chanops = 0;
 
-      sendto_realops("%s has changed CHIDE to %i",
-		     sptr->name, GlobalSetOptions.hide_chanops);
+      sendto_realops_flags(FLAGS_ALL,"%s has changed CHIDE to %i",
+			   sptr->name, GlobalSetOptions.hide_chanops);
     }
   else
     {
@@ -369,8 +374,8 @@ int quote_shide( struct Client *sptr, int newval )
       else
 	GlobalSetOptions.hide_server = 0;
 
-      sendto_realops("%s has changed SHIDE to %i",
-		     sptr->name, GlobalSetOptions.hide_server);
+      sendto_realops_flags(FLAGS_ALL,"%s has changed SHIDE to %i",
+			   sptr->name, GlobalSetOptions.hide_server);
     }
   else
     {

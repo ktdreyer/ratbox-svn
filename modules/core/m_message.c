@@ -775,13 +775,6 @@ void handle_opers(int p_or_n,
 	}
 
       *server = '\0';
-
-      /* special case opers@server */
-      if(!irccmp(nick,"opers"))
-	{
-	  sendto_realops("To opers: From %s: %s",sptr->name,sptr->name);
-	  return;
-	}
         
       if ((host = (char *)strchr(nick, '%')))
 	*host++ = '\0';

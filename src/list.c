@@ -159,16 +159,22 @@ void _free_user(struct User* user, struct Client* cptr)
        */
       if (user->joined || user->refcnt < 0 ||
           user->invited.head || user->channel.head)
-      sendto_realops("* %#x user (%s!%s@%s) %#x %#x %#x %d %d *",
-                 cptr, cptr ? cptr->name : "<noname>",
-                 cptr->username, cptr->host, user,
-                 user->invited.head, user->channel.head, user->joined,
-                 user->refcnt);
+      sendto_realops_flags(FLAGS_ALL,
+			   "* %#x user (%s!%s@%s) %#x %#x %#x %d %d *",
+			   cptr, cptr ? cptr->name : "<noname>",
+			   cptr->username, cptr->host, user,
+			   user->invited.head, user->channel.head,
+			   user->joined,
+			   user->refcnt);
 
       if(BlockHeapFree(free_anUsers,user))
         {
-          sendto_realops("list.c couldn't BlockHeapFree(free_anUsers,user) user = %lX", user );
-          sendto_realops("Please report to the hybrid team! ircd-hybrid@the-project.org");
+          sendto_realops_flags(FLAGS_ALL,
+	       "list.c couldn't BlockHeapFree(free_anUsers,user) user = %lX",
+			       user );
+          sendto_realops_flags(FLAGS_ALL,
+       "Please report to the hybrid team! ircd-hybrid@the-project.org");
+
 #ifdef SYSLOG_BLOCK_ALLOCATOR 
           log(L_DEBUG,"list.c couldn't BlockHeapFree(free_anUsers,user) user = %lX", (long unsigned int) user);
 #endif
@@ -200,7 +206,9 @@ void _free_dlink_node(dlink_node *ptr)
 {
   if(BlockHeapFree(free_dlink_nodes,ptr))
     {
-      sendto_realops("list.c couldn't BlockHeapFree(free_dlink_nodes,ptr) ptr = %lX", ptr );
+      sendto_realops_flags(FLAGS_ALL,
+	   "list.c couldn't BlockHeapFree(free_dlink_nodes,ptr) ptr = %lX",
+			   ptr );
     }
 }
 

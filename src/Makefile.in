@@ -54,7 +54,6 @@ SRCS =                          \
   motd.c                        \
   mtrie_conf.c                  \
   oldparse.c			\
-  oratime.c                     \
   numeric.c                     \
   packet.c                      \
   parse.c                       \

@@ -93,9 +93,10 @@ int mo_squit(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     {
       if(MyConnect(found_squit->acptr))
 	{
-	  sendto_realops("Received SQUIT %s from %s (%s)",
-			 found_squit->acptr->name,
-			 get_client_name(sptr,FALSE), comment);
+	  sendto_realops_flags(FLAGS_ALL,
+			       "Received SQUIT %s from %s (%s)",
+			       found_squit->acptr->name,
+			       get_client_name(sptr,FALSE), comment);
 	}
       else
 	{
@@ -153,9 +154,10 @@ int ms_squit(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 	      found_squit->server_name, comment);
 	}
       else if (MyConnect(found_squit->acptr))
-	sendto_realops("Received SQUIT %s from %s (%s)",
-		       found_squit->acptr->name,
-		       get_client_name(sptr,FALSE), comment);
+	sendto_realops_flags(FLAGS_ALL,
+			     "Received SQUIT %s from %s (%s)",
+			     found_squit->acptr->name,
+			     get_client_name(sptr,FALSE), comment);
   
       return exit_client(cptr, found_squit->acptr, sptr, comment);
     }

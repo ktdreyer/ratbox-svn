@@ -22,6 +22,7 @@
  */
 #include "fileio.h"
 #include "irc_string.h"
+#include "client.h"	/* for FLAGS_ALL */
 
 /* The following are to get the fd manipulation routines. eww. */
 #include "fdlist.h"
@@ -281,7 +282,7 @@ int safe_write(struct Client *sptr, const char *filename,
 
   if (fbputs(buffer, out) <= 0)
     {
-      sendto_realops("*** Problem writing to %s",filename);
+      sendto_realops_flags(FLAGS_ALL,"*** Problem writing to %s",filename);
       return -1;
     }
   return 0;

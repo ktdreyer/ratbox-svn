@@ -99,7 +99,7 @@ int     ms_cburst(struct Client *cptr,
     key = parv[3];
 
 #ifdef DEBUGLL
-  sendto_realops("CBURST called by %s for %s %s %s",
+  sendto_realops_flags(FLAGS_ALL, "CBURST called by %s for %s %s %s",
     cptr->name,
     name,
     nick ? nick : "",
@@ -136,7 +136,8 @@ int     ms_cburst(struct Client *cptr,
     }
   else
     {
-      sendto_realops("*** CBURST request received from non LL capable server!");
+      sendto_realops(FLAGS_ALL,
+	     "*** CBURST request received from non LL capable server!");
       return 0;
     }
 

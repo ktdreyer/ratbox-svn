@@ -207,7 +207,8 @@ int mo_kline(struct Client *cptr,
 	  aconf->ip_mask = ip_mask;
 	}
       add_temp_kline(aconf);
-      sendto_realops("%s added temporary %d min. K-Line for [%s@%s] [%s]",
+      sendto_realops_flags(FLAGS_ALL,
+		   "%s added temporary %d min. K-Line for [%s@%s] [%s]",
         parv[0],
         temporary_kline_time/60,
         user,
@@ -267,7 +268,8 @@ int ms_kline(struct Client *cptr,
 
   if(!find_special_conf(sptr->name,CONF_ULINE))
     {
-      sendto_realops("*** Received Unauthorized kline from %s",sptr->name);
+      sendto_realops_flags(FLAGS_ALL,
+		   "*** Received Unauthorized kline from %s",sptr->name);
     }
   else
     {
@@ -277,11 +279,12 @@ int ms_kline(struct Client *cptr,
       if( rcptr->host == NULL )
 	return 0;
 
-      sendto_realops("*** Received kline from %s!%s@%s on %s",
-		     slave_oper,
-		     rcptr->user,
-		     rcptr->host,
-		     sptr->name);
+      sendto_realops_flags(FLAGS_ALL,
+			   "*** Received kline from %s!%s@%s on %s",
+			   slave_oper,
+			   rcptr->user,
+			   rcptr->host,
+			   sptr->name);
       aconf = make_conf();
 
       aconf->status = CONF_KILL;

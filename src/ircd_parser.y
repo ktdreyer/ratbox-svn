@@ -30,6 +30,7 @@
 #include "tools.h"
 #include "s_conf.h"
 #include "s_log.h"
+#include "client.h"	/* for FLAGS_ALL only */
 #include "irc_string.h"
 #include "ircdauth.h"
 
@@ -873,7 +874,7 @@ connect_name:   NAME '=' QSTRING ';'
   {
     if(yy_cconf->user)
       {
-	sendto_realops("*** Multiple connect entry");
+	sendto_realops_flags(FLAGS_ALL,"*** Multiple connect entry");
       }
     else
       {
@@ -882,7 +883,7 @@ connect_name:   NAME '=' QSTRING ';'
 
     if(yy_nconf->user)
       {
-	sendto_realops("*** Multiple connect accept entry");
+	sendto_realops_flags(FLAGS_ALL,"*** Multiple connect accept entry");
       }
     else
       {

@@ -13,6 +13,7 @@
 #include "irc_string.h"     /* MyMalloc */
 #include "tools.h"
 #include "s_log.h"
+#include "client.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -279,11 +280,13 @@ int BlockHeapFree(BlockHeap *bh, void *ptr)
 #ifdef DEBUG_BLOCK_ALLOCATOR
       log(L_WARN, "blalloc.c bit already clear in map caller %s %d",
           BH_CurrentFile, BH_CurrentLine);
-      sendto_realops("blalloc.c bit already clear in map elemSize %d caller %s %d",
+      sendto_realops_flags(FLAGS_ALL,
+              "blalloc.c bit already clear in map elemSize %d caller %s %d",
                          bh->elemSize,
                          BH_CurrentFile,
                          BH_CurrentLine);
-              sendto_realops("Please report to the hybrid team! ircd-hybrid@the-project.org");
+              sendto_realops_flags(FLAGS_ALL,
+             "Please report to the hybrid team! ircd-hybrid@the-project.org");
 #endif /* DEBUG_BLOCK_ALLOCATOR */
             }
           else

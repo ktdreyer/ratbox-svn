@@ -81,7 +81,8 @@ int m_svinfo(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
        * TS_ONLY we can't fall back to the non-TS protocol so
        * we drop the link  -orabidoo
        */
-      sendto_realops("Link %s dropped, wrong TS protocol version (%s,%s)",
+      sendto_realops_flags(FLAGS_ALL,
+	         "Link %s dropped, wrong TS protocol version (%s,%s)",
                  get_client_name(sptr, TRUE), parv[1], parv[2]);
       return exit_client(sptr, sptr, sptr, "Incompatible TS version");
     }
@@ -95,7 +96,7 @@ int m_svinfo(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
   if (deltat > ConfigFileEntry.ts_max_delta)
     {
-      sendto_realops(
+      sendto_realops_flags(FLAGS_ALL,
        "Link %s dropped, excessive TS delta (my TS=%d, their TS=%d, delta=%d)",
                  get_client_name(sptr, TRUE), CurrentTime, theirtime,deltat);
       return exit_client(sptr, sptr, sptr, "Excessive TS delta");
@@ -103,7 +104,7 @@ int m_svinfo(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
   if (deltat > ConfigFileEntry.ts_warn_delta)
     { 
-      sendto_realops(
+      sendto_realops_flags(FLAGS_ALL,
                  "Link %s notable TS delta (my TS=%d, their TS=%d, delta=%d)",
                  get_client_name(sptr, TRUE), CurrentTime, theirtime, deltat);
     }

@@ -547,8 +547,8 @@ GreetUser(struct Client *client)
     {
       Count.max_loc = Count.local;
       if (!(Count.max_loc % 10))
-	sendto_realops("New Max Local Clients: %d",
-		       Count.max_loc);
+	sendto_realops_flags(FLAGS_ALL,"New Max Local Clients: %d",
+			     Count.max_loc);
     }
 
   SetClient(client);
@@ -556,9 +556,9 @@ GreetUser(struct Client *client)
   client->servptr = find_server(client->user->server);
   if (!client->servptr)
     {
-      sendto_realops("Ghost killed: %s on invalid server %s",
-		     client->name,
-		     client->user->server);
+      sendto_realops_flags(FLAGS_ALL,"Ghost killed: %s on invalid server %s",
+			   client->name,
+			   client->user->server);
 
       sendto_one(client, ":%s KILL %s: %s (Ghosted, %s doesn't exist)",
 		 me.name,
