@@ -10,7 +10,7 @@ Type enter when prompted for a password.
 
 From there you can checkout the stable tree as follows:
 
-cvs -z3 -d :pserver:cvs@cvs.ratbox.org:/cvsroot co ircd-ratbox-1
+cvs -z3 -d :pserver:cvs@cvs.ratbox.org:/cvsroot co -r STABLE ircd-ratbox
 
 Or if you prefer the bleeding edge stuff:
 
