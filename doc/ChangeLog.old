@@ -1,3 +1,8 @@
+*** 20010710_1 by jdc
+- Typo fix.
+
+
+
 *** 20010708_3 by androsyn
 Forgot the msgtab stuff in modules.h for static builds..
 
