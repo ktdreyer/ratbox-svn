@@ -1,3 +1,10 @@
+*** 20001106_6 by adrian
+
+
+Thanks to is- for pointing out the *correct* fix: default: <build target>
+Reverted the previous patch, and set default:    all
+
+
 *** 20001106_5 by adrian
 
 
