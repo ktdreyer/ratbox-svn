@@ -1,3 +1,16 @@
+androsyn    2002/07/07 20:10:33 EDT	(20020708_0)
+
+  Added files:
+    contrib              README.disable_identd disable_identd.diff 
+  Log:
+  Patch to disable identd requests
+  
+  Revision  Changes    Path
+  1.1       +17 -0     ircd-hybrid-7/contrib/README.disable_identd (new)
+  1.1       +87 -0     ircd-hybrid-7/contrib/disable_identd.diff (new)
+
+
+
 leeh        2002/07/07 06:30:19 EDT	(20020707_1)
 
   Modified files:
