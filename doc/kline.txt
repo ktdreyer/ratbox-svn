@@ -26,14 +26,25 @@ us completely EFnet compatible.
   For a remote kline
   Oper wishes to kline user@host on server irc.xyz.net
 
-  /quote kline [nick|user@host] ON irc.xyz.net :reason
+  /quote kline [nick|user@host] on irc.xyz.net :reason
 
   and the tkline version
 
   /quote kline n [nick|user@host] on irc.xyz.net :reason
 
+
+  For a masked-net kline
+  Oper wishes to kline user@host on all servers within uk: *.uk
+
+  /quote kline [nick|user@host] on *.uk :reason
+
+  and the tkline version
+
+  /quote kline n [nick|user@host] on *.uk :reason
+
   
   For a network wide kline
+  Oper wishes to kline user@host on all shared servers, and the local server
 
   /quote kline [nick|user@host] on * :reason
 
@@ -76,7 +87,7 @@ some bandwidth.
 
    oper is the nick of the oper placing the kline
 
-   target.server.name is the target name or *
+   target.server.name is the target name, *.mask or *
    N is 0 for a perm kline, some value > 0 for a tkline
 
    user,host,reason should be obvious..
