@@ -1,3 +1,9 @@
+*** 20000404_1 by db
+- fixed memory leak in parser code. strdup in lexer never freed
+  found by Krome from ircnet
+
+
+
 *** 20000402_10 by db
 - MAX_SETBACK_TIME added
 
