@@ -1,3 +1,7 @@
+*** 20010226_8 by androsyn
+Half a fix for Sun's CC.
+
+
 *** 20010226_7 by androsyn
 Fixes for Sun's CC. Things actually compile now with it.
 
