@@ -1,3 +1,9 @@
+*** 20010526_2 by davidt
+- Doh. hopefully fix the endianness issue with the servlink io code,
+  which I missed when cleaning up the code (i fixed the code to read
+  data lengths, but not commands, oops).
+
+
 *** 20010526_1 by leeh
 - PING origin :destination
   why would the origin ever be anything but a clients nick, or a servers
