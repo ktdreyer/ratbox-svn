@@ -306,7 +306,7 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 	if(source_p == NULL)
 		return -1;
 
-	if(!MyConnect(source_p))
+	if(IsDeadorAborted(source_p))
 		return -1;
 
 	if(ConfigFileEntry.ping_cookie)
@@ -466,7 +466,7 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 	if((status = check_X_line(client_p, source_p)) < 0)
 		return status;
 
-	if(!MyConnect(client_p))
+	if(IsDeadorAborted(client_p))
 		return CLIENT_EXITED;
 
 	if(source_p->user->id[0] == '\0')
@@ -488,7 +488,7 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 			     ipaddr, get_client_class(source_p), source_p->info);
 
 	/* If they have died in send_* don't do anything. */
-	if(!MyConnect(source_p))
+	if(IsDeadorAborted(source_p))
 		return CLIENT_EXITED;
 
 	add_to_hostname_hash_table(source_p->host, source_p);
@@ -1198,15 +1198,14 @@ user_welcome(struct Client *source_p)
 {
 	sendto_one(source_p, form_str(RPL_WELCOME), me.name, source_p->name,
 		   ServerInfo.network_name, source_p->name);
-	if(!MyConnect(source_p))
-		return;
 	sendto_one(source_p, form_str(RPL_YOURHOST), me.name,
 		   source_p->name,
 		   get_listener_name(source_p->localClient->listener), ircd_version);
 
 	sendto_one(source_p, form_str(RPL_CREATED), me.name, source_p->name, creation);
 	sendto_one(source_p, form_str(RPL_MYINFO), me.name, source_p->name, me.name, ircd_version);
-
+	
+		
 	show_isupport(source_p);
 
 	show_lusers(source_p);

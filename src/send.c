@@ -151,7 +151,7 @@ _send_linebuf(struct Client *to, buf_head_t * linebuf)
 		return 0;
 	}
 
-	if(!MyConnect(to))
+	if(!MyConnect(to) || IsDeadorAborted(to))
 		return 0;
 
 	if(linebuf_len(&to->localClient->buf_sendq) > get_sendq(to))
@@ -264,7 +264,7 @@ send_queued_write(int fd, void *data)
 	 ** Once socket is marked dead, we cannot start writing to it,
 	 ** even if the error is removed...
 	 */
-	if(!MyConnect(to))
+	if(IsDeadorAborted(to))
 		return;
 
 	/* Next, lets try to write some data */
@@ -333,7 +333,7 @@ send_queued_slink_write(int fd, void *data)
 	 ** Once socket is marked dead, we cannot start writing to it,
 	 ** even if the error is removed...
 	 */
-	if(!MyConnect(to))
+	if(IsDeadorAborted(to))
 		return;
 
 	/* Next, lets try to write some data */
@@ -398,7 +398,7 @@ sendto_one(struct Client *to, const char *pattern, ...)
 	if(to->from)
 		to = to->from;
 
-	if(!MyConnect(to))
+	if(IsDeadorAborted(to))
 		return;		/* This socket has already been marked as dead */
 	
 	linebuf_newbuf(&linebuf);
@@ -436,7 +436,7 @@ sendto_one_prefix(struct Client *to, struct Client *prefix, const char *pattern,
 	else
 		to_sendto = to;
 
-	if(!MyConnect(to))
+	if(IsDeadorAborted(to))
 		return;		/* This socket has already been marked as dead */
 
 	if(IsMe(to))
@@ -842,7 +842,7 @@ sendto_list_local(dlink_list * list, buf_head_t * linebuf_ptr)
 		if((target_p = ptr->data) == NULL)
 			continue;
 
-		if(!MyConnect(target_p))
+		if(IsDeadorAborted(target_p))
 			continue;
 
 		if(target_p->serial == current_serial)
@@ -878,7 +878,7 @@ sendto_list_local_butone(struct Client *one, dlink_list * list, buf_head_t * lin
 		if((target_p = ptr->data) == NULL)
 			continue;
 
-		if(!MyConnect(target_p))
+		if(IsDeadorAborted(target_p))
 			continue;
 
 		if(target_p == one)

@@ -1108,10 +1108,10 @@ exit_aborted_clients(void *unused)
  	DLINK_FOREACH_SAFE(ptr, next, abort_list.head)
  	{
  	 	abt = ptr->data;
-
  	 	dlinkDelete(ptr, &abort_list);
  	 	if(!IsPerson(abt->client) && !IsUnknown(abt->client))
  	 	{
+ 	 		
  	 	 	sendto_realops_flags(UMODE_ALL, L_ADMIN,
   	 	 	                     "Closing link to %s: %s",
    	 	 	                     get_client_name(abt->client, HIDE_IP), abt->notice);
@@ -1133,7 +1133,8 @@ void
 dead_link(struct Client *client_p)
 {
 	struct abort_client *abt;
-	if(!MyConnect(client_p) || IsMe(client_p))
+	assert(!IsMe(client_p));
+	if(IsDeadorAborted(client_p) || IsMe(client_p) || !MyConnect(client_p))
 		return;
 
 	abt = (struct abort_client *) MyMalloc(sizeof(struct abort_client));
@@ -1144,8 +1145,9 @@ dead_link(struct Client *client_p)
 		ircsprintf(abt->notice, "Write error: %s", strerror(errno));
 	}
 
-	Debug((DEBUG_ERROR, "Closing link to %s: %s", get_client_name(client_p, HIDE_IP), notice));
     	abt->client = client_p;
+	assert(dlinkFind(&abort_list, client_p) == NULL);
+	SetAborted(client_p);
 	dlinkAdd(abt, &abt->node, &abort_list);
 }
 
@@ -1156,8 +1158,9 @@ exit_generic_client(struct Client *client_p, struct Client *source_p, struct Cli
 		   const char *comment)
 {
 	dlink_node *lp, *next_lp;
-	
-
+	if(IsDead(source_p))
+		return;
+		
 	sendto_common_channels_local(source_p, ":%s!%s@%s QUIT :%s",
 				     source_p->name,
 				     source_p->username, source_p->host, comment);
@@ -1189,10 +1192,10 @@ exit_generic_client(struct Client *client_p, struct Client *source_p, struct Cli
 	del_from_client_hash_table(source_p->name, source_p);
 	remove_client_from_list(source_p);
 	assert(dlinkFind(&dead_list, source_p) == NULL);
-	
+	SetDead(source_p);
 	dlinkAddAlloc(source_p, &dead_list);
-
 }
+
 /* 
  * Assumes IsPerson(source_p) && !MyConnect(source_p)
  */
@@ -1201,8 +1204,9 @@ static int
 exit_remote_client(struct Client *client_p, struct Client *source_p, struct Client *from,
 		   const char *comment)
 {
-	if(IsDeadLocal(source_p))
+	if(IsDead(source_p))
 		return -1;
+		
 	if(source_p->servptr && source_p->servptr->serv)
 	{
 		dlinkDelete(&source_p->lnode, &source_p->servptr->serv->users);
@@ -1221,7 +1225,9 @@ static int
 exit_unknown_client(struct Client *client_p, struct Client *source_p, struct Client *from,
 		  const char *comment)
 {
-	SetDeadLocal(source_p);
+	if(IsDead(source_p))
+		return -1;
+		
 	delete_adns_queries(source_p->localClient->dns_query);
 	delete_identd_queries(source_p);
 	client_flush_input(source_p);
@@ -1243,6 +1249,7 @@ exit_unknown_client(struct Client *client_p, struct Client *source_p, struct Cli
 	remove_client_from_list(source_p);
 	assert(dlinkFind(&dead_list, source_p) == NULL);
 
+	SetDead(source_p);
 	dlinkAddAlloc(source_p, &dead_list);
 
 	/* Note that we don't need to add unknowns to the dead_list */
@@ -1255,9 +1262,10 @@ exit_remote_server(struct Client *client_p, struct Client *source_p, struct Clie
 {
 	static char comment1[(HOSTLEN*2)+2];
 	struct Client *target_p;
-	if(IsDeadLocal(source_p))
-		return -1;
 	
+	if(IsDead(source_p))
+		return -1;
+
 	if(ConfigServerHide.hide_servers)
 	{
 		ircsprintf(comment1, "%s *.split", me.name);
@@ -1292,6 +1300,7 @@ exit_remote_server(struct Client *client_p, struct Client *source_p, struct Clie
 	remove_client_from_list(source_p);  
 	assert(dlinkFind(&dead_list, source_p) == NULL);
 
+	SetDead(source_p);
 	dlinkAddAlloc(source_p, &dead_list);	
 	return 0;
 }
@@ -1303,8 +1312,9 @@ exit_local_server(struct Client *client_p, struct Client *source_p, struct Clien
 	static char comment1[(HOSTLEN*2)+2];
 	unsigned int sendk, recvk;
 	
-	SetDeadLocal(source_p);
-
+	if(IsDead(source_p))
+		return -1;
+	
 	dlinkDelete(&source_p->localClient->tnode, &serv_list);
 	remove_server_from_list(source_p);
 	
@@ -1365,6 +1375,7 @@ exit_local_server(struct Client *client_p, struct Client *source_p, struct Clien
 	remove_client_from_list(source_p);  
 	assert(dlinkFind(&dead_list, source_p) == NULL);
 
+	SetDead(source_p);
 	dlinkAddAlloc(source_p, &dead_list);
 	return 0;
 }
@@ -1378,11 +1389,12 @@ static int
 exit_local_client(struct Client *client_p, struct Client *source_p, struct Client *from,
 		  const char *comment)
 {
-	
+	if(IsDead(source_p))
+		return -1;
+			
 	assert(IsPerson(source_p));
 	client_flush_input(source_p);
 	Count.local--;
-	SetDeadLocal(source_p);
 	dlinkDelete(&source_p->localClient->tnode, &lclient_list);
 	if(IsOper(source_p))
 		dlinkFindDestroy(&oper_list, source_p);
@@ -1445,9 +1457,8 @@ exit_client(struct Client *client_p,	/* The local client originating the
 	    const char *comment	/* Reason for the exit */
 	)
 {
-	if(IsDeadLocal(source_p))
+	if(IsDead(source_p))
 		return -1;
-
 	if(MyConnect(source_p))
 	{
 		/* Local clients of various types */

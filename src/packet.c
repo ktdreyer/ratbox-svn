@@ -52,7 +52,7 @@ parse_client_queued(struct Client *client_p)
 	int dolen = 0;
 	int checkflood = 1;
 
-	if(!MyConnect(client_p))
+	if(IsDeadorAborted(client_p))
 		return;
 
 	if(IsUnknown(client_p))
@@ -76,7 +76,7 @@ parse_client_queued(struct Client *client_p)
 			i++;
 
 			/* He's dead cap'n */
-			if(!MyConnect(client_p))
+			if(IsDeadorAborted(client_p))
 				return;
 			/* if theyve dropped out of the unknown state, break and move
 			 * to the parsing for their appropriate status.  --fl
@@ -222,9 +222,8 @@ read_ctrl_packet(int fd, void *data)
 
 
 	assert(lserver != NULL);
-	if(!MyConnect(server))
+	if(IsDeadorAborted(server))
 		return;
-
 
 	reply = &lserver->slinkrpl;
 
@@ -321,7 +320,7 @@ read_ctrl_packet(int fd, void *data)
 		MyFree(reply->data);
 	reply->command = 0;
 
-	if(!MyConnect(server))
+	if(IsDeadorAborted(server))
 		return;
 
       nodata:
@@ -344,7 +343,7 @@ read_packet(int fd, void *data)
 #ifndef NDEBUG
 	struct hook_io_data hdata;
 #endif
-	if(!MyConnect(client_p))
+	if(IsDeadorAborted(client_p))
 		return;
 
 	fd_r = client_p->localClient->fd;
@@ -401,13 +400,13 @@ read_packet(int fd, void *data)
 
 	lclient_p->actually_read += lbuf_len;
 
-	if(!MyConnect(client_p))
+	if(IsDeadorAborted(client_p))
 		return;
 		
 	/* Attempt to parse what we have */
 	parse_client_queued(client_p);
 
-	if(!MyConnect(client_p))
+	if(IsDeadorAborted(client_p))
 		return;
 		
 	/* Check to make sure we're not flooding */
@@ -469,7 +468,7 @@ client_dopacket(struct Client *client_p, char *buffer, size_t length)
 
 	if(client_p == NULL || buffer == NULL)
 		return;
-	if(!MyConnect(client_p))
+	if(IsDeadorAborted(client_p))
 		return;
 	/* 
 	 * Update messages received

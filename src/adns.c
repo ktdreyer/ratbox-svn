@@ -68,7 +68,10 @@ void
 delete_adns_queries(struct DNSQuery *q)
 {
 	if(q != NULL && q->query != NULL)
+	{
 		adns_cancel(q->query);
+		q->callback = NULL;
+	}
 }
 
 /* void restart_resolver(void)

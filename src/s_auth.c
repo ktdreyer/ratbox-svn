@@ -134,13 +134,10 @@ free_auth_request(struct AuthRequest *request)
 /*
  * unlink_auth_request - remove auth request from a list
  */
-static void *last;
 static void
 unlink_auth_request(struct AuthRequest *request, dlink_list * list)
 {
-	assert(last != request);
-	last = request;
-	dlinkFindDestroy(list, request);
+	assert(dlinkFindDestroy(list, request) == 1);
 }
 
 /*
@@ -195,13 +192,9 @@ auth_dns_callback(void *vptr, adns_answer * reply)
 		{
 			strlcpy(auth->client->host, *reply->rrs.str, sizeof(auth->client->host));
 			sendheader(auth->client, REPORT_FIN_DNS);
-			if(!MyConnect(auth->client))
-				return;
 		}
 		else {
 			sendheader(auth->client, REPORT_HOST_TOOLONG);
-			if(!MyConnect(auth->client))
-				return;
 		}
 	}
 	else
@@ -221,8 +214,6 @@ auth_dns_callback(void *vptr, adns_answer * reply)
 		}
 #endif
 		sendheader(auth->client, REPORT_FAIL_DNS);
-		if(!MyConnect(auth->client))
-			return;
 	}
 
 	MyFree(reply);
@@ -253,8 +244,6 @@ auth_error(struct AuthRequest *auth)
 
 	ClearAuth(auth);
 	sendheader(auth->client, REPORT_FAIL_ID);
-	if(!MyConnect(auth->client))
-		return;
 		
 	if(!IsDNSPending(auth))
 	{
@@ -281,7 +270,7 @@ start_auth_query(struct AuthRequest *auth)
 	int fd;
 	int family;
 	
-	if(!MyConnect(auth->client))
+	if(IsDeadorAborted(auth->client))
 		return 0;
 	
 	family = auth->client->localClient->ip.ss_family;
@@ -304,11 +293,7 @@ start_auth_query(struct AuthRequest *auth)
 	}
 
 	sendheader(auth->client, REPORT_DO_ID);
-	if(!MyConnect(auth->client))
-	{
-		fd_close(fd);
-		return 0;
-	}
+
 	if(!set_non_blocking(fd))
 	{
 		report_error(L_ALL, NONB_ERROR_MSG, get_client_name(auth->client, SHOW_IP), errno);
@@ -424,13 +409,11 @@ start_auth(struct Client *client)
 	client->localClient->dns_query->callback = auth_dns_callback;
 
 	sendheader(client, REPORT_DO_DNS);
-	if(!MyConnect(client))
-		return;
 
 	/* No DNS cache now, remember? -- adrian */
+	SetDNSPending(auth);
 	adns_getaddr(&client->localClient->ip, client->localClient->ip.ss_family,
 		     client->localClient->dns_query, 0);
-	SetDNSPending(auth);
 
 	if(ConfigFileEntry.disable_auth == 0)
 		start_auth_query(auth);
@@ -462,16 +445,12 @@ timeout_auth_queries_event(void *notused)
 			{
 				sendheader(auth->client, REPORT_FAIL_ID);
 				auth->client->localClient->auth_request = NULL;
-				if(!MyConnect(auth->client))
-					return;
 			}
 			if(IsDNSPending(auth))
 			{
 				delete_adns_queries(auth->client->localClient->dns_query);
 				auth->client->localClient->dns_query->query = NULL;
 				sendheader(auth->client, REPORT_FAIL_DNS);
-				if(!MyConnect(auth->client))
-					return;
 			}
 			ilog(L_INFO, "DNS/AUTH timeout %s", log_client_name(auth->client, SHOW_IP));
 
@@ -599,15 +578,10 @@ read_auth_reply(int fd, void *data)
 		++ServerStats->is_abad;
 		strcpy(auth->client->username, "unknown");
 		sendheader(auth->client, REPORT_FAIL_ID);
-		if(!MyConnect(auth->client))
-			return;
 	}
 	else
 	{
 		sendheader(auth->client, REPORT_FIN_ID);
-		if(!MyConnect(auth->client))
-			return;
-			
 		++ServerStats->is_asuc;
 		SetGotId(auth->client);
 	}

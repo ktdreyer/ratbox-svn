@@ -350,7 +350,7 @@ struct exit_client_hook
 /* housekeeping flags */
 
 #define FLAGS_PINGSENT     0x0001	/* Unreplied ping sent */
-#define FLAGS_DEADLOCAL   0x0002	/* Local socket is dead--Exiting soon */
+#define FLAGS_DEAD	   0x0002	/* Local socket is dead--Exiting soon */
 #define FLAGS_KILLED       0x0004	/* Prevents "QUIT" from being sent for this */
 #define FLAGS_CLOSING      0x0020	/* set when closing to suppress errors */
 #define FLAGS_CHKACCESS    0x0040	/* ok to check clients access if set */
@@ -366,6 +366,7 @@ struct exit_client_hook
 #define FLAGS_HIDDEN       0x40000	/* hidden server */
 #define FLAGS_EOB          0x80000	/* EOB */
 #define FLAGS_MYCONNECT	   0x100000	/* MyConnect */
+#define FLAGS_ABORTED	   0x200000	/* IsAborted */
 /* umodes, settable flags */
 
 #define UMODE_SERVNOTICE   0x0001	/* server notices such as kill */
@@ -464,9 +465,11 @@ struct exit_client_hook
 #define ClearEob(x)		((x)->flags &= ~FLAGS_EOB)
 #define SetEob(x)		((x)->flags |= FLAGS_EOB)
 #define HasSentEob(x)		((x)->flags & FLAGS_EOB)
-#define IsDeadLocal(x)           	((x)->flags &  FLAGS_DEADLOCAL)
-#define SetDeadLocal(x)          	((x)->flags |= FLAGS_DEADLOCAL)
-
+#define IsDead(x)          	((x)->flags &  FLAGS_DEAD)
+#define SetDead(x)         	((x)->flags |= FLAGS_DEAD)
+#define IsAborted(x)		((x)->flags & FLAGS_ABORTED)
+#define SetAborted(x)		((x)->flags |= FLAGS_ABORTED)
+#define IsDeadorAborted(x)	(IsAborted(x) || IsDead(x))
 
 /* oper flags */
 #define MyOper(x)               (MyConnect(x) && IsOper(x))

@@ -234,7 +234,7 @@ void
 close_connection(struct Client *client_p)
 {
 	struct ConfItem *aconf;
-	assert(NULL != client_p);
+	assert(client_p != NULL);
 	if(client_p == NULL)
 		return;
 

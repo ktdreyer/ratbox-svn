@@ -137,7 +137,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
 
 	assert(MyConnect(client_p));
 	assert(client_p->localClient->fd >= 0);
-	if(!MyConnect(client_p))
+	if(IsDeadorAborted(client_p))
 		return;
 
 	assert((bufend - pbuffer) < 512);
@@ -345,8 +345,8 @@ handle_command(struct Message *mptr, struct Client *client_p,
 {
 	MessageHandler handler = 0;
 
-	if(!MyConnect(client_p))
-		return 1;
+	if(IsDeadorAborted(client_p))
+		return -1;
 
 	if(IsServer(client_p))
 		mptr->rcount++;
