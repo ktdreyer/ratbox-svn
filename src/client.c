@@ -236,12 +236,10 @@ void _free_client(struct Client* cptr)
  * check_pings - go through the local client list and check activity
  * kill off stuff that should die
  *
- * inputs       - current time
+ * inputs       - NOT USED (from event)
  * output       - next time_t when check_pings() should be called again
  * side effects - 
  *
- * Clients can be k-lined/d-lined/g-lined/r-lined and exit_client
- * called for each of these.
  *
  * A PING can be sent to clients as necessary.
  *
