@@ -1938,6 +1938,7 @@ chm_key(struct Client *client_p, struct Client *source_p,
     else
       fix_key_old(key);
 
+    assert(key[0] != ' ');
     strncpy_irc(chptr->mode.key, key, KEYLEN - 1)[KEYLEN - 1] = 0;
 
     for (i = 0; i < mode_count_minus; i++)
@@ -2173,10 +2174,11 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
     mc++;
 
     if (arg != NULL)
+    {
       pbl = strlcat(parabuf, arg, MODEBUFLEN);
-
-    parabuf[pbl++] = ' ';
-    parabuf[pbl] = 0;
+      parabuf[pbl++] = ' ';
+      parabuf[pbl] = '\0';
+    }
   }
 
   if (mode_count_plus > 0)
@@ -2233,10 +2235,11 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
     mc++;
 
     if (mode_changes_plus[i].arg != NULL)
+    {
       pbl = strlcat(parabuf, mode_changes_plus[i].arg, MODEBUFLEN);
-
-    parabuf[pbl++] = ' ';
-    parabuf[pbl] = 0;
+      parabuf[pbl++] = ' ';
+      parabuf[pbl] = '\0';
+    }
   }
 
   if (mbl && modebuf[mbl - 1] == '+')
@@ -2355,10 +2358,11 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
     mc++;
 
     if (mode_changes_minus[i].arg != NULL)
+    {
       pbl = strlen(strcat(parabuf, mode_changes_minus[i].arg));
-
-    parabuf[pbl++] = ' ';
-    parabuf[pbl] = '\0';
+      parabuf[pbl++] = ' ';
+      parabuf[pbl] = '\0';
+    }
   }
 
   if (mode_count_plus > 0)
@@ -2405,10 +2409,11 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
     mc++;
 
     if (mode_changes_plus[i].arg != NULL)
+    {
       pbl = strlen(strcat(parabuf, mode_changes_plus[i].arg));
-
-    parabuf[pbl++] = ' ';
-    parabuf[pbl] = '\0';
+      parabuf[pbl++] = ' ';
+      parabuf[pbl] = '\0';
+    }
   }
 
   if (pbl && parabuf[pbl - 1] == '+')
@@ -2466,10 +2471,11 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
       mc++;
 
       if (mode_changes_minus[i].arg != NULL)
+      {
         pbl = strlen(strcat(parabuf, mode_changes_minus[i].arg));
-
-      parabuf[pbl++] = ' ';
-      parabuf[pbl] = '\0';
+        parabuf[pbl++] = ' ';
+        parabuf[pbl] = '\0';
+      }
     }
 
     if (mode_count_plus > 0)
@@ -2513,10 +2519,11 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
       mc++;
 
       if (mode_changes_plus[i].arg != NULL)
+      {
         pbl = strlen(strcat(parabuf, mode_changes_plus[i].arg));
-
-      parabuf[pbl++] = ' ';
-      parabuf[pbl] = '\0';
+        parabuf[pbl++] = ' ';
+        parabuf[pbl] = '\0';
+      }
     }
 
     if (pbl && parabuf[pbl - 1] == '+')
@@ -2570,10 +2577,11 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
     mc++;
 
     if (mode_bounces[i].arg != NULL)
+    {
       pbl = strlen(strcat(parabuf, mode_bounces[i].arg));
-
-    parabuf[pbl++] = ' ';
-    parabuf[pbl] = '\0';
+      parabuf[pbl++] = ' ';
+      parabuf[pbl] = '\0';
+    }
   }
 
   if (nc != 0)
