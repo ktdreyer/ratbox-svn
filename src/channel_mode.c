@@ -2235,7 +2235,6 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
       arg = mode_changes_minus[i].id;
     if (!*arg)
       arg = mode_changes_minus[i].arg;
-    nc++;
     /* if we're creeping past the buf size, we need to send it and make
      * another line for the other modes
      * XXX - this could give away server topology with uids being
@@ -2265,6 +2264,7 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
     modebuf[mbl++] = mode_changes_minus[i].letter;
     modebuf[mbl] = 0;
     mc++;
+    nc++;
 
     if (arg != NULL)
     {
@@ -2299,7 +2299,6 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
     arg = mode_changes_plus[i].arg;
     if ((cap & CAP_UID) && mode_changes_plus[i].id != NULL)
       arg = mode_changes_plus[i].id;
-    nc++;
 
     if ((arg != NULL) && ((mc == MAXMODEPARAMS) || 
                           ((strlen(arg) + mbl + pbl + 2) > BUFSIZE)))
@@ -2326,6 +2325,7 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
     modebuf[mbl++] = mode_changes_plus[i].letter;
     modebuf[mbl] = 0;
     mc++;
+    nc++;
 
     if (mode_changes_plus[i].arg != NULL)
     {
@@ -2417,7 +2417,6 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
         mode_changes_minus[i].mems == NON_CHANOPS ||
         mode_changes_minus[i].mems == ONLY_SERVERS)
       continue;
-    nc++;
     if (mode_changes_minus[i].arg != NULL &&
         ((mc == MAXMODEPARAMS)  || 
         ((strlen(mode_changes_minus[i].arg) + mbl + pbl + 2) > BUFSIZE)))
@@ -2444,6 +2443,7 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
     modebuf[mbl++] = mode_changes_minus[i].letter;
     modebuf[mbl] = '\0';
     mc++;
+    nc++;
 
     if (mode_changes_minus[i].arg != NULL)
     {
@@ -2468,7 +2468,6 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
         mode_changes_plus[i].mems == NON_CHANOPS ||
         mode_changes_plus[i].mems == ONLY_SERVERS)
       continue;
-    nc++;
     if (mode_changes_plus[i].arg != NULL &&
         ((mc == MAXMODEPARAMS) ||
          ((strlen(mode_changes_plus[i].arg) + mbl + pbl + 2) > BUFSIZE)))
@@ -2495,6 +2494,7 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
     modebuf[mbl++] = mode_changes_plus[i].letter;
     modebuf[mbl] = '\0';
     mc++;
+    nc++;
 
     if (mode_changes_plus[i].arg != NULL)
     {
