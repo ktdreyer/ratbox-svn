@@ -239,7 +239,9 @@ linebuf_copy_line(buf_head_t *bufhead, buf_line_t *bufline,
   char *bufch = &bufline->buf[bufline->len];
   char *data_to_read;
 /*  char *zip_buf; */
+#ifdef OPENSSL
   char *crypt_buf;
+#endif
   int   read_len;
   int   proclen = 0;
 
@@ -677,8 +679,10 @@ static int linebuf_write(int fd, buf_head_t *bufhead, buf_line_t *bufline)
   int   buffered = 1;
   int   retval = 0;
   int   try_write = 1;
+#ifdef OPENSSL
   char *crypt_buf;
-/*  char *zip_buf;*/
+#endif
+  /*  char *zip_buf;*/
 
   if (!((bufline->flags & LINEBUF_ZIP) ||
 #ifdef OPENSSL

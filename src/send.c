@@ -176,12 +176,13 @@ _send_message(struct Client *to, char *msg, int len)
     }
   else
     {
+#ifdef OPENSSL
       if (IsCryptOut(to))
       {
         linebuf_flags |= LINEBUF_CRYPT;
         linebuf_key = to->localClient->out_key;
       }
-      /* XXX - ziplinks */
+#endif
       if (len)
           linebuf_put(&to->localClient->buf_sendq, msg, len,
                       linebuf_flags, linebuf_key);

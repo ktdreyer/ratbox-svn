@@ -177,16 +177,17 @@ read_packet(int fd, void *data)
   int lbuf_len;
   int linebuf_flags = 0;
   char *linebuf_key = NULL;
-
+  
   assert(lclient_p != NULL);
   assert(lclient_p->allow_read <= MAX_FLOOD_PER_SEC);
 
+#ifdef OPENSSL
   if (IsCryptIn(client_p))
   {
     linebuf_flags |= LINEBUF_CRYPT;
     linebuf_key = lclient_p->in_key;
   }
-  /* XXX - ziplinks */
+#endif
 
   /*
    * Read some data. We *used to* do anti-flood protection here, but
