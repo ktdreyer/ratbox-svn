@@ -124,19 +124,19 @@ void ReportAllocated(struct Client*);
 void ReportBlockHeap(struct Client*);
 
 void
-ReportAllocated(struct Client *cptr)
+ReportAllocated(struct Client *client_p)
 {
  MemoryEntry *mme;
- sendto_one(cptr, ":%s NOTICE %s :*** -- Memory Allocation Report",
-   me.name, cptr->name);
+ sendto_one(client_p, ":%s NOTICE %s :*** -- Memory Allocation Report",
+   me.name, client_p->name);
  for (mme = first_mem_entry; mme; mme=mme->next)
-   sendto_one(cptr,
+   sendto_one(client_p,
      ":%s NOTICE %s :*** -- %u bytes allocated for %lus at %s:%d",
-     me.name, cptr->name, mme->size, CurrentTime-mme->ts, mme->file,
+     me.name, client_p->name, mme->size, CurrentTime-mme->ts, mme->file,
      mme->line);
- sendto_one(cptr, ":%s NOTICE %s :*** -- End Memory Allocation Report",
-   me.name, cptr->name);
- ReportBlockHeap(cptr);
+ sendto_one(client_p, ":%s NOTICE %s :*** -- End Memory Allocation Report",
+   me.name, client_p->name);
+ ReportBlockHeap(client_p);
 }
 #else /* MEMDEBUG */
 /*

@@ -107,7 +107,7 @@ extern void    remove_user_from_channel(struct Channel *chptr,
 extern int     can_send (struct Channel *chptr, struct Client *who);
 extern int     is_banned (struct Channel *chptr, struct Client *who);
 
-extern int     can_join(struct Client *sptr, struct Channel *chptr, char *key);
+extern int     can_join(struct Client *server_p, struct Channel *chptr, char *key);
 extern int     is_chan_op (struct Channel *chptr,struct Client *who);
 extern int     is_any_op (struct Channel *chptr,struct Client *who);
 extern int     is_half_op (struct Channel *chptr,struct Client *who);
@@ -122,7 +122,7 @@ extern void    set_channel_mode(struct Client *, struct Client *,
                                 struct Channel *, int, char **, char *);
 extern struct  Channel* get_channel(struct Client *,char*,int );
 
-extern void    channel_member_names( struct Client *sptr,
+extern void    channel_member_names( struct Client *server_p,
 				     struct Channel *chptr,
 				     char *name_of_channel);
 extern char    *channel_pub_or_secret(struct Channel *chptr);
@@ -131,7 +131,7 @@ extern char    *channel_chanop_or_voice(struct Channel *, struct Client *);
 extern void    add_invite(struct Channel *chptr, struct Client *who);
 extern void    del_invite(struct Channel *chptr, struct Client *who);
 
-extern void    channel_member_list(struct Client *sptr,
+extern void    channel_member_list(struct Client *server_p,
                                    struct Channel *chptr,
 				   dlink_list *list,
 				   char *show_flag,

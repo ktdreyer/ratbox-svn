@@ -67,18 +67,18 @@ char *_version = "20001122";
  * 199970918 JRL hacked to ignore parv[1] completely and require parc > 3
  * to cause a force
  */
-static void m_lusers(struct Client *cptr, struct Client *sptr,
+static void m_lusers(struct Client *client_p, struct Client *server_p,
                     int parc, char *parv[])
 {
   static time_t last_used = 0;
 
-  if (!IsOper(sptr))
+  if (!IsOper(server_p))
     {
       if ((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
         {
           /* safe enough to give this on a local connect only */
-          if (MyClient(sptr))
-            sendto_one(sptr, form_str(RPL_LOAD2HI), me.name, parv[0]);
+          if (MyClient(server_p))
+            sendto_one(server_p, form_str(RPL_LOAD2HI), me.name, parv[0]);
           return;
         }
       else
@@ -89,13 +89,13 @@ static void m_lusers(struct Client *cptr, struct Client *sptr,
 
   if (parc > 2)
     {
-      if(hunt_server(cptr, sptr, ":%s LUSERS %s :%s", 2, parc, parv)
+      if(hunt_server(client_p, server_p, ":%s LUSERS %s :%s", 2, parc, parv)
        != HUNTED_ISME)
         {
           return;
         }
     }
-  show_lusers(sptr);
+  show_lusers(server_p);
 }
 
 /*
@@ -107,17 +107,17 @@ static void m_lusers(struct Client *cptr, struct Client *sptr,
  * 199970918 JRL hacked to ignore parv[1] completely and require parc > 3
  * to cause a force
  */
-static void ms_lusers(struct Client *cptr, struct Client *sptr,
+static void ms_lusers(struct Client *client_p, struct Client *server_p,
                      int parc, char *parv[])
 {
   if (parc > 2)
     {
-      if(hunt_server(cptr, sptr, ":%s LUSERS %s :%s", 2, parc, parv)
+      if(hunt_server(client_p, server_p, ":%s LUSERS %s :%s", 2, parc, parv)
        != HUNTED_ISME)
         {
           return;
         }
     }
-  show_lusers(sptr);
+  show_lusers(server_p);
 }
 

@@ -39,10 +39,10 @@
 #include <stdlib.h>
 
 static void
-vchan_show_ids(struct Client *sptr, struct Channel *chptr);
+vchan_show_ids(struct Client *server_p, struct Channel *chptr);
 
 struct Channel* cjoin_channel(struct Channel *root,
-                  struct Client *sptr,
+                  struct Client *server_p,
                   char *name)
 {
   char  vchan_name[CHANNELLEN];
@@ -56,17 +56,17 @@ struct Channel* cjoin_channel(struct Channel *root,
     /* could send a notice here, but on a vchan aware server
      * they shouldn't see the sub chans anyway
      */
-    sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL),
-               me.name, sptr->name, name);
+    sendto_one(server_p, form_str(ERR_NOSUCHCHANNEL),
+               me.name, server_p->name, name);
     return NULL;
   }
 
-  if(on_sub_vchan(root,sptr))
+  if(on_sub_vchan(root,server_p))
   {
-    sendto_one(sptr,":%s NOTICE %s :*** You are on a sub chan of %s already",
-               me.name, sptr->name, name);
-    sendto_one(sptr, form_str(ERR_BADCHANNAME),
-               me.name, sptr->name, name);
+    sendto_one(server_p,":%s NOTICE %s :*** You are on a sub chan of %s already",
+               me.name, server_p->name, name);
+    sendto_one(server_p, form_str(ERR_BADCHANNAME),
+               me.name, server_p->name, name);
     return NULL;
   }
 
@@ -74,15 +74,15 @@ struct Channel* cjoin_channel(struct Channel *root,
 
   if (strlen(name) > CHANNELLEN-15)
   {
-    sendto_one(sptr, form_str(ERR_BADCHANNAME),me.name, sptr->name, name);
+    sendto_one(server_p, form_str(ERR_BADCHANNAME),me.name, server_p->name, name);
     return NULL;
   }
 
-  if ((sptr->user->joined >= MAXCHANNELSPERUSER) &&
-      (!IsOper(sptr) || (sptr->user->joined >= MAXCHANNELSPERUSER*3)))
+  if ((server_p->user->joined >= MAXCHANNELSPERUSER) &&
+      (!IsOper(server_p) || (server_p->user->joined >= MAXCHANNELSPERUSER*3)))
   {
-    sendto_one(sptr, form_str(ERR_TOOMANYCHANNELS),
-               me.name, sptr->name, name);
+    sendto_one(server_p, form_str(ERR_TOOMANYCHANNELS),
+               me.name, server_p->name, name);
     return NULL;
   }
 
@@ -99,8 +99,8 @@ struct Channel* cjoin_channel(struct Channel *root,
      */
     if ( vchan_ts > ( CurrentTime + ConfigFileEntry.ts_max_delta ) )
     {
-      sendto_one(sptr, form_str(ERR_UNAVAILRESOURCE),
-                 me.name, sptr->name, name);
+      sendto_one(server_p, form_str(ERR_UNAVAILRESOURCE),
+                 me.name, server_p->name, name);
       return NULL;
     }
 
@@ -108,12 +108,12 @@ struct Channel* cjoin_channel(struct Channel *root,
     vchan_chptr = hash_find_channel( vchan_name, NULL );
   } while (vchan_chptr);
   
-  vchan_chptr = get_channel(sptr, vchan_name, CREATE);
+  vchan_chptr = get_channel(server_p, vchan_name, CREATE);
 
   if( vchan_chptr == NULL )
   {
-    sendto_one(sptr, form_str(ERR_BADCHANNAME),
-               me.name, sptr->name, (unsigned char*) name);
+    sendto_one(server_p, form_str(ERR_BADCHANNAME),
+               me.name, server_p->name, (unsigned char*) name);
     return NULL;
   }
 
@@ -121,17 +121,17 @@ struct Channel* cjoin_channel(struct Channel *root,
   dlinkAdd(vchan_chptr, m, &root->vchan_list);
   vchan_chptr->root_chptr = root;
 
-  add_vchan_to_client_cache(sptr,root,vchan_chptr);
+  add_vchan_to_client_cache(server_p,root,vchan_chptr);
 
   vchan_chptr->channelts = vchan_ts;
 
-  del_invite(vchan_chptr, sptr);
+  del_invite(vchan_chptr, server_p);
   return vchan_chptr;
 }
 
 struct Channel* select_vchan(struct Channel *root,
-                             struct Client *cptr,
-                             struct Client *sptr,
+                             struct Client *client_p,
+                             struct Client *server_p,
                              char *vkey,
                              char *name)
 {
@@ -139,7 +139,7 @@ struct Channel* select_vchan(struct Channel *root,
 
   if (IsVchanTop(root))
   {
-    if (on_sub_vchan(root,sptr))
+    if (on_sub_vchan(root,server_p))
       return NULL;
     if (vkey && vkey[0] == '!')
     {
@@ -147,7 +147,7 @@ struct Channel* select_vchan(struct Channel *root,
          (this prevents join-invited-chan voodoo) */
       if (!vkey[1])
       {
-        show_vchans(cptr, sptr, root, "join");
+        show_vchans(client_p, server_p, root, "join");
         return NULL;
       }
 
@@ -156,20 +156,20 @@ struct Channel* select_vchan(struct Channel *root,
         return chptr;
       else
       {
-        sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL),
-                   me.name, sptr->name, name);
+        sendto_one(server_p, form_str(ERR_NOSUCHCHANNEL),
+                   me.name, server_p->name, name);
         return NULL;
       }
     }
     else
     {
       /* voodoo to auto-join channel invited to */
-      if ((chptr=vchan_invites(root, sptr)))
+      if ((chptr=vchan_invites(root, server_p)))
         return chptr;
       /* otherwise, they get a list of channels */
       else
       {
-        show_vchans(cptr, sptr, root, "join");
+        show_vchans(client_p, server_p, root, "join");
         return NULL;
       }
     }
@@ -179,8 +179,8 @@ struct Channel* select_vchan(struct Channel *root,
    */
   else if (IsVchan(root))
   {
-    sendto_one(sptr, form_str(ERR_BADCHANNAME),
-               me.name, sptr->name, name);
+    sendto_one(server_p, form_str(ERR_BADCHANNAME),
+               me.name, server_p->name, name);
     return NULL;
   }
   return root;
@@ -190,14 +190,14 @@ struct Channel* select_vchan(struct Channel *root,
 /* Given base chan pointer and vchan pointer add to
  * translation table cache for this client
  */
-void    add_vchan_to_client_cache(struct Client *sptr,
+void    add_vchan_to_client_cache(struct Client *server_p,
                                   struct Channel *base_chan,
                                   struct Channel *vchan)
 {
   dlink_node *vchanmap_node;
   struct Vchan_map *vchan_info;
 
-  assert(sptr != NULL);
+  assert(server_p != NULL);
 
   /* oops its the top channel of the subchans */
   if( base_chan == vchan )
@@ -208,45 +208,45 @@ void    add_vchan_to_client_cache(struct Client *sptr,
   vchan_info->vchan = vchan;
 
   vchanmap_node = make_dlink_node();
-  dlinkAdd(vchan_info, vchanmap_node, &sptr->vchan_map);
+  dlinkAdd(vchan_info, vchanmap_node, &server_p->vchan_map);
 }
 
 /* Given vchan pointer remove from translation table cache */
-void del_vchan_from_client_cache(struct Client *sptr, struct Channel *vchan)
+void del_vchan_from_client_cache(struct Client *server_p, struct Channel *vchan)
 {
   dlink_node *vchanmap_node;
   struct Vchan_map *vchan_info;
 
-  assert(sptr != NULL);
+  assert(server_p != NULL);
 
-  for (vchanmap_node = sptr->vchan_map.head; vchanmap_node;
+  for (vchanmap_node = server_p->vchan_map.head; vchanmap_node;
        vchanmap_node = vchanmap_node->next)
     {
       vchan_info = vchanmap_node->data;     
       if (vchan_info->vchan == vchan)
         {
           MyFree(vchan_info);
-          dlinkDelete(vchanmap_node, &sptr->vchan_map);
+          dlinkDelete(vchanmap_node, &server_p->vchan_map);
           free_dlink_node(vchanmap_node);
           return;
         }
     }
 }
 
-/* see if this client given by sptr is on a subchan already */
-int on_sub_vchan(struct Channel *chptr, struct Client *sptr)
+/* see if this client given by server_p is on a subchan already */
+int on_sub_vchan(struct Channel *chptr, struct Client *server_p)
 {
   dlink_node *vchanmap_node;
   struct Vchan_map *vchan_info;
 
-  assert(sptr != NULL);
+  assert(server_p != NULL);
 
   /* they are in the root chan */
-  if (IsMember(sptr, chptr))
+  if (IsMember(server_p, chptr))
     return YES;
 
   /* check to see if this chptr maps to a sub vchan */
-  for (vchanmap_node = sptr->vchan_map.head; vchanmap_node;
+  for (vchanmap_node = server_p->vchan_map.head; vchanmap_node;
        vchanmap_node = vchanmap_node->next)
     {
       vchan_info = vchanmap_node->data;
@@ -257,20 +257,20 @@ int on_sub_vchan(struct Channel *chptr, struct Client *sptr)
   return NO;
 }
 
-/* return matching vchan given base chan and sptr */
-struct Channel* map_vchan(struct Channel *chptr, struct Client *sptr)
+/* return matching vchan given base chan and server_p */
+struct Channel* map_vchan(struct Channel *chptr, struct Client *server_p)
 {
   dlink_node *vchanmap_node;
   struct Vchan_map *vchan_info;
 
-  assert(sptr != NULL);
+  assert(server_p != NULL);
 
   /* they're in the root chan */
-  if (IsMember(sptr, chptr))
+  if (IsMember(server_p, chptr))
     return chptr;
 
   /* check to see if this chptr maps to a sub vchan */
-  for (vchanmap_node = sptr->vchan_map.head; vchanmap_node;
+  for (vchanmap_node = server_p->vchan_map.head; vchanmap_node;
        vchanmap_node = vchanmap_node->next)
     {
       vchan_info = vchanmap_node->data;
@@ -288,8 +288,8 @@ struct Channel* find_bchan(struct Channel *chptr)
 }
 
 /* show available vchans */
-void show_vchans(struct Client *cptr,
-                        struct Client *sptr,
+void show_vchans(struct Client *client_p,
+                        struct Client *server_p,
                         struct Channel *chptr,
                         char *command)
 {
@@ -298,13 +298,13 @@ void show_vchans(struct Client *cptr,
    /* include the root itself in the count */
    no_of_vchans = dlink_list_length(&chptr->vchan_list) + 1;
 
-   sendto_one(sptr, form_str(RPL_VCHANEXIST),
-              me.name, sptr->name, chptr->chname, no_of_vchans);
+   sendto_one(server_p, form_str(RPL_VCHANEXIST),
+              me.name, server_p->name, chptr->chname, no_of_vchans);
 
-   vchan_show_ids(sptr, chptr);
+   vchan_show_ids(server_p, chptr);
 
-   sendto_one(sptr, form_str(RPL_VCHANHELP),
-              me.name, sptr->name, command, chptr->chname);
+   sendto_one(server_p, form_str(RPL_VCHANHELP),
+              me.name, server_p->name, command, chptr->chname);
 }
 
 /*
@@ -317,7 +317,7 @@ void show_vchans(struct Client *cptr,
  *                
  */
 static void
-vchan_show_ids(struct Client *sptr, struct Channel *chptr)
+vchan_show_ids(struct Client *server_p, struct Channel *chptr)
 {
   char buf[BUFSIZE];
   char *t;
@@ -328,7 +328,7 @@ vchan_show_ids(struct Client *sptr, struct Channel *chptr)
   struct Channel *chtmp;
   int reply_to_send = 0;
 
-  ircsprintf(buf, form_str(RPL_VCHANLIST), me.name, sptr->name,
+  ircsprintf(buf, form_str(RPL_VCHANLIST), me.name, server_p->name,
 	     chptr->chname);
 
   mlen = strlen(buf);
@@ -375,7 +375,7 @@ vchan_show_ids(struct Client *sptr, struct Channel *chptr)
 
        if (cur_len > (BUFSIZE - NICKLEN - 3))
          {
-           sendto_one(sptr, "%s", buf );
+           sendto_one(server_p, "%s", buf );
            cur_len = mlen;
            t = buf + mlen;
            reply_to_send = 0;
@@ -383,7 +383,7 @@ vchan_show_ids(struct Client *sptr, struct Channel *chptr)
      }
 
    if (reply_to_send)
-     sendto_one(sptr, "%s", buf);
+     sendto_one(server_p, "%s", buf);
 }
 
 /*
@@ -397,35 +397,35 @@ vchan_show_ids(struct Client *sptr, struct Channel *chptr)
 char* pick_vchan_id(struct Channel *chptr)
 {
   dlink_node *lp;
-  struct Client *acptr;
+  struct Client *aclient_p;
   static char vchan_id[NICKLEN*2];
 
   for (lp = chptr->chanops.head; lp; lp = lp->next)
     if (!lp->next)
       { 
-	acptr = lp->data;
-	return acptr->name;
+	aclient_p = lp->data;
+	return aclient_p->name;
       }
 
   for (lp = chptr->halfops.head; lp; lp = lp->next)
     if (!lp->next)
       { 
-	acptr = lp->data;
-	return acptr->name;
+	aclient_p = lp->data;
+	return aclient_p->name;
       }
 
   for (lp = chptr->voiced.head; lp; lp = lp->next)
     if (!lp->next)
       { 
-	acptr = lp->data;
-	return acptr->name;
+	aclient_p = lp->data;
+	return aclient_p->name;
       }
 
   for (lp = chptr->peons.head; lp; lp = lp->next)
     if (!lp->next)
       {
-	acptr = lp->data;
-	return acptr->name;
+	aclient_p = lp->data;
+	return aclient_p->name;
       }
 
   /* all else failed, must be an empty channel, 
@@ -441,12 +441,12 @@ struct Channel* find_vchan(struct Channel *chptr, char *key)
 {
   dlink_node *ptr;
   struct Channel *chtmp;
-  struct Client *acptr;
+  struct Client *aclient_p;
 
   key++; /* go past the '!' */
 
-  if( (acptr = hash_find_client(key,(struct Client *)NULL)) )
-    if( (chtmp = map_vchan(chptr, acptr)) )
+  if( (aclient_p = hash_find_client(key,(struct Client *)NULL)) )
+    if( (chtmp = map_vchan(chptr, aclient_p)) )
       return chtmp;
 
   /* try and match vchan_id */
@@ -470,7 +470,7 @@ struct Channel* find_vchan(struct Channel *chptr, char *key)
 /* return the first found invite matching a subchannel of chptr
  * or NULL if no invites are found
  */
-struct Channel* vchan_invites(struct Channel *chptr, struct Client *sptr)
+struct Channel* vchan_invites(struct Channel *chptr, struct Client *server_p)
 {
   dlink_node *lp;
   dlink_node *vptr;
@@ -480,7 +480,7 @@ struct Channel* vchan_invites(struct Channel *chptr, struct Client *sptr)
    * in the vchan list
    */
 
-  for (lp = sptr->user->invited.head; lp; lp = lp->next)
+  for (lp = server_p->user->invited.head; lp; lp = lp->next)
     {
       for (vptr = chptr->vchan_list.head; vptr; vptr = vptr->next)
 	{

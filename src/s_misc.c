@@ -141,12 +141,12 @@ char* small_file_date(time_t lclock)
 #define _GMKv(x)  ( (x > _1TER) ? (float)(x/_1TER) : ((x > _1GIG) ? \
                (float)(x/_1GIG) : ((x > _1MEG) ? (float)(x/_1MEG) : (float)x)))
 
-void serv_info(struct Client *cptr)
+void serv_info(struct Client *client_p)
 {
   static char Lformat[] = ":%s %d %s %s %u %u %u %u %u :%u %u %s";
   int        j;
   long        sendK, receiveK, uptime;
-  struct Client        *acptr;
+  struct Client        *aclient_p;
   dlink_node *ptr;
 
   sendK = receiveK = 0;
@@ -154,56 +154,56 @@ void serv_info(struct Client *cptr)
 
   for(ptr = serv_list.head; ptr; ptr = ptr->next)
     {
-      acptr = ptr->data;
+      aclient_p = ptr->data;
 
-      sendK += acptr->localClient->sendK;
-      receiveK += acptr->localClient->receiveK;
+      sendK += aclient_p->localClient->sendK;
+      receiveK += aclient_p->localClient->receiveK;
       /* There are no more non TS servers on this network, so that test has
        * been removed. Also, do not allow non opers to see the IP's of servers
        * on stats ?
        */
-      if(IsOper(cptr))
-        sendto_one(cptr, Lformat, me.name, RPL_STATSLINKINFO,
-                   cptr->name, get_client_name(acptr, SHOW_IP),
-                   (int)linebuf_len(&acptr->localClient->buf_sendq),
-                   (int)acptr->localClient->sendM,
-		   (int)acptr->localClient->sendK,
-                   (int)acptr->localClient->receiveM,
-		   (int)acptr->localClient->receiveK,
-                   CurrentTime - acptr->firsttime,
-                   (CurrentTime > acptr->since) ? (CurrentTime - acptr->since): 0,
-                   IsServer(acptr) ? show_capabilities(acptr) : "-" );
+      if(IsOper(client_p))
+        sendto_one(client_p, Lformat, me.name, RPL_STATSLINKINFO,
+                   client_p->name, get_client_name(aclient_p, SHOW_IP),
+                   (int)linebuf_len(&aclient_p->localClient->buf_sendq),
+                   (int)aclient_p->localClient->sendM,
+		   (int)aclient_p->localClient->sendK,
+                   (int)aclient_p->localClient->receiveM,
+		   (int)aclient_p->localClient->receiveK,
+                   CurrentTime - aclient_p->firsttime,
+                   (CurrentTime > aclient_p->since) ? (CurrentTime - aclient_p->since): 0,
+                   IsServer(aclient_p) ? show_capabilities(aclient_p) : "-" );
       else
         {
-          sendto_one(cptr, Lformat, me.name, RPL_STATSLINKINFO,
-                     cptr->name, get_client_name(acptr, MASK_IP),
-                     (int)linebuf_len(&acptr->localClient->buf_sendq),
-                     (int)acptr->localClient->sendM,
-		     (int)acptr->localClient->sendK,
-                     (int)acptr->localClient->receiveM,
-		     (int)acptr->localClient->receiveK,
-                     CurrentTime - acptr->firsttime,
-                     (CurrentTime > acptr->since)?(CurrentTime - acptr->since): 0,
-                     IsServer(acptr) ? show_capabilities(acptr) : "-" );
+          sendto_one(client_p, Lformat, me.name, RPL_STATSLINKINFO,
+                     client_p->name, get_client_name(aclient_p, MASK_IP),
+                     (int)linebuf_len(&aclient_p->localClient->buf_sendq),
+                     (int)aclient_p->localClient->sendM,
+		     (int)aclient_p->localClient->sendK,
+                     (int)aclient_p->localClient->receiveM,
+		     (int)aclient_p->localClient->receiveK,
+                     CurrentTime - aclient_p->firsttime,
+                     (CurrentTime > aclient_p->since)?(CurrentTime - aclient_p->since): 0,
+                     IsServer(aclient_p) ? show_capabilities(aclient_p) : "-" );
         }
       j++;
     }
 
-  sendto_one(cptr, ":%s %d %s :%u total server%s",
-             me.name, RPL_STATSDEBUG, cptr->name, --j, (j==1)?"":"s");
+  sendto_one(client_p, ":%s %d %s :%u total server%s",
+             me.name, RPL_STATSDEBUG, client_p->name, --j, (j==1)?"":"s");
 
-  sendto_one(cptr, ":%s %d %s :Sent total : %7.2f %s",
-             me.name, RPL_STATSDEBUG, cptr->name, _GMKv(sendK), _GMKs(sendK));
-  sendto_one(cptr, ":%s %d %s :Recv total : %7.2f %s",
-             me.name, RPL_STATSDEBUG, cptr->name, _GMKv(receiveK), _GMKs(receiveK));
+  sendto_one(client_p, ":%s %d %s :Sent total : %7.2f %s",
+             me.name, RPL_STATSDEBUG, client_p->name, _GMKv(sendK), _GMKs(sendK));
+  sendto_one(client_p, ":%s %d %s :Recv total : %7.2f %s",
+             me.name, RPL_STATSDEBUG, client_p->name, _GMKv(receiveK), _GMKs(receiveK));
 
   uptime = (CurrentTime - me.since);
-  sendto_one(cptr, ":%s %d %s :Server send: %7.2f %s (%4.1f K/s)",
-             me.name, RPL_STATSDEBUG, cptr->name, _GMKv(me.localClient->sendK),
+  sendto_one(client_p, ":%s %d %s :Server send: %7.2f %s (%4.1f K/s)",
+             me.name, RPL_STATSDEBUG, client_p->name, _GMKv(me.localClient->sendK),
 	     _GMKs(me.localClient->sendK),
              (float)((float)me.localClient->sendK / (float)uptime));
-  sendto_one(cptr, ":%s %d %s :Server recv: %7.2f %s (%4.1f K/s)",
-             me.name, RPL_STATSDEBUG, cptr->name,
+  sendto_one(client_p, ":%s %d %s :Server recv: %7.2f %s (%4.1f K/s)",
+             me.name, RPL_STATSDEBUG, client_p->name,
 	     _GMKv(me.localClient->receiveK),
 	     _GMKs(me.localClient->receiveK),
              (float)((float)me.localClient->receiveK / (float)uptime));

@@ -132,9 +132,9 @@ string_to_array(char *string, int mpara, int paramcount,
  *
  * NOTE: parse() should not be called recusively by any other functions!
  */
-void parse(struct Client *cptr, char *pbuffer, char *bufend)
+void parse(struct Client *client_p, char *pbuffer, char *bufend)
 {
-  struct Client*  from = cptr;
+  struct Client*  from = client_p;
   char*           ch;
   char*           s;
   char*           end;
@@ -145,8 +145,8 @@ void parse(struct Client *cptr, char *pbuffer, char *bufend)
 
   Debug((DEBUG_DEBUG, "Parsing %s:", pbuffer));
 
-  assert(!IsDead(cptr));
-  assert(cptr->fd >= 0);
+  assert(!IsDead(client_p));
+  assert(client_p->fd >= 0);
 
   for (ch = pbuffer; *ch == ' '; ch++)   /* skip spaces */
     /* null statement */ ;
@@ -172,7 +172,7 @@ void parse(struct Client *cptr, char *pbuffer, char *bufend)
 		  
       i = 0;
 
-      if (*sender && IsServer(cptr))
+      if (*sender && IsServer(client_p))
         {
           from = find_client(sender, (struct Client *) NULL);
           if (from == NULL)
@@ -189,20 +189,20 @@ void parse(struct Client *cptr, char *pbuffer, char *bufend)
           if (!from)
             {
               Debug((DEBUG_ERROR, "Unknown prefix (%s)(%s) from (%s)",
-                     sender, pbuffer, cptr->name));
+                     sender, pbuffer, client_p->name));
               ServerStats->is_unpf++;
 
-              remove_unknown(cptr, sender, pbuffer);
+              remove_unknown(client_p, sender, pbuffer);
 
               return;
             }
-          if (from->from != cptr)
+          if (from->from != client_p)
             {
               ServerStats->is_wrdi++;
               Debug((DEBUG_ERROR, "Message (%s) coming from (%s)",
-                     pbuffer, cptr->name));
+                     pbuffer, client_p->name));
 
-              cancel_clients(cptr, from, pbuffer);
+              cancel_clients(client_p, from, pbuffer);
               return;
             }
         }
@@ -214,7 +214,7 @@ void parse(struct Client *cptr, char *pbuffer, char *bufend)
     {
       ServerStats->is_empt++;
       Debug((DEBUG_NOTICE, "Empty message from host %s:%s",
-             cptr->name, from->name));
+             client_p->name, from->name));
       return;
     }
 
@@ -270,7 +270,7 @@ void parse(struct Client *cptr, char *pbuffer, char *bufend)
                            me.name, ERR_UNKNOWNCOMMAND,
                            from->name, ch);
               Debug((DEBUG_ERROR,"Unknown (%s) from %s",
-                     ch, get_client_name(cptr, SHOW_IP)));
+                     ch, get_client_name(client_p, SHOW_IP)));
             }
           ServerStats->is_unco++;
           return;
@@ -296,11 +296,11 @@ void parse(struct Client *cptr, char *pbuffer, char *bufend)
    
   if (mptr == (struct Message *)NULL)
   {
-    do_numeric(numeric, cptr, from, i, para);
+    do_numeric(numeric, client_p, from, i, para);
     return;
   }
 
-  handle_command(mptr, cptr, from, i, para);
+  handle_command(mptr, client_p, from, i, para);
   /* handle_command may have called exit_client, which sets the socket
    * as dead. We _CANNOT_ call exit_client twice! We should never set
    * a socket as dead without calling exit_client, so this check is
@@ -315,7 +315,7 @@ void parse(struct Client *cptr, char *pbuffer, char *bufend)
 }
 
 static void 
-handle_command(struct Message *mptr, struct Client *cptr,
+handle_command(struct Message *mptr, struct Client *client_p,
                struct Client *from, int i, char *hpara[MAXPARA])
 {
   MessageHandler handler = 0;
@@ -325,32 +325,32 @@ handle_command(struct Message *mptr, struct Client *cptr,
   /* New patch to avoid server flooding from unregistered connects
      - Pie-Man 07/27/2000 */
 	
-  if (!IsRegistered(cptr))
+  if (!IsRegistered(client_p))
     {
       /* if its from a possible server connection
        * ignore it.. more than likely its a header thats sneaked through
        */
 		
-      if((IsHandshake(cptr) || IsConnecting(cptr) || IsServer(cptr))
+      if((IsHandshake(client_p) || IsConnecting(client_p) || IsServer(client_p))
 	 && !(mptr->flags & MFLG_UNREG))
 	return;
     }
 	
-  handler = mptr->handlers[cptr->handler];
+  handler = mptr->handlers[client_p->handler];
 	
   /* check right amount of params is passed... --is */
   if (i < mptr->parameters)
     {
-      if(IsServer(cptr))
+      if(IsServer(client_p))
          sendto_realops_flags(FLAGS_ALL, 
                 "Not enough parameters for command %s from servers %s! (%d < %d)",
-                mptr->cmd, cptr->name, i, mptr->parameters);
-       sendto_one(cptr, form_str(ERR_NEEDMOREPARAMS),
+                mptr->cmd, client_p->name, i, mptr->parameters);
+       sendto_one(client_p, form_str(ERR_NEEDMOREPARAMS),
                   me.name, BadPtr(hpara[0]) ? "*" : hpara[0], mptr->cmd);
        return;
     }
 
-  (*handler)(cptr, from, i, hpara);
+  (*handler)(client_p, from, i, hpara);
   return;
 }
 
@@ -496,7 +496,7 @@ hash(char *p)
  * output	- NONE
  * side effects	- NONE
  */
-void report_messages(struct Client *sptr)
+void report_messages(struct Client *server_p)
 {
   int i;
   struct MessageHash *ptr;
@@ -508,8 +508,8 @@ void report_messages(struct Client *sptr)
 	  assert(ptr->msg != NULL);
 	  assert(ptr->cmd != NULL);
 	  
-	  sendto_one(sptr, form_str(RPL_STATSCOMMANDS),
-		     me.name, sptr->name, ptr->cmd,
+	  sendto_one(server_p, form_str(RPL_STATSCOMMANDS),
+		     me.name, server_p->name, ptr->cmd,
 		     ptr->msg->count, ptr->msg->bytes);
 	}
     }
@@ -522,8 +522,8 @@ void report_messages(struct Client *sptr)
  * output	- 
  * side effects	- 
  */
-static  int     cancel_clients(struct Client *cptr,
-                               struct Client *sptr,
+static  int     cancel_clients(struct Client *client_p,
+                               struct Client *server_p,
                                char *cmd)
 {
   /*
@@ -549,28 +549,28 @@ static  int     cancel_clients(struct Client *cptr,
    * client trying to be annoying, just QUIT them, if it is a server
    * then the same deal.
    */
-  if (IsServer(sptr) || IsMe(sptr))
+  if (IsServer(server_p) || IsMe(server_p))
     {
       sendto_realops_flags(FLAGS_DEBUG, "Message for %s[%s] from %s",
-                         sptr->name, sptr->from->name,
-                         get_client_name(cptr, SHOW_IP));
-      if (IsServer(cptr))
+                         server_p->name, server_p->from->name,
+                         get_client_name(client_p, SHOW_IP));
+      if (IsServer(client_p))
         {
           sendto_realops_flags(FLAGS_DEBUG,
                              "Not dropping server %s (%s) for Fake Direction",
-                             cptr->name, sptr->name);
+                             client_p->name, server_p->name);
           return -1;
         }
 
-      if (IsClient(cptr))
+      if (IsClient(client_p))
         sendto_realops_flags(FLAGS_DEBUG,
                            "Would have dropped client %s (%s@%s) [%s from %s]",
-                           cptr->name, cptr->username, cptr->host,
-                           cptr->user->server, cptr->from->name);
+                           client_p->name, client_p->username, client_p->host,
+                           client_p->user->server, client_p->from->name);
       return -1;
 
       /*
-        return exit_client(cptr, cptr, &me, "Fake Direction");
+        return exit_client(client_p, client_p, &me, "Fake Direction");
         */
     }
   /*
@@ -578,7 +578,7 @@ static  int     cancel_clients(struct Client *cptr,
    * confused.  If we got the wrong prefix from a server, send out a
    * kill, else just exit the lame client.
    */
-  if (IsServer(cptr))
+  if (IsServer(client_p))
    {
     /*
     ** If the fake prefix is coming from a TS server, discard it
@@ -586,14 +586,14 @@ static  int     cancel_clients(struct Client *cptr,
     **
     ** all servers must be TS these days --is
     */
-	   if (sptr->user)
+	   if (server_p->user)
 		   sendto_realops_flags(FLAGS_DEBUG,
 			"Message for %s[%s@%s!%s] from %s (TS, ignored)",
-			sptr->name, sptr->username, sptr->host,
-			sptr->from->name, get_client_name(cptr, SHOW_IP));
+			server_p->name, server_p->username, server_p->host,
+			server_p->from->name, get_client_name(client_p, SHOW_IP));
 	   return 0;
    }
-  return exit_client(cptr, cptr, &me, "Fake prefix");
+  return exit_client(client_p, client_p, &me, "Fake prefix");
 }
 
 /*
@@ -603,26 +603,26 @@ static  int     cancel_clients(struct Client *cptr,
  * output	- 
  * side effects	- 
  */
-static  void    remove_unknown(struct Client *cptr,
+static  void    remove_unknown(struct Client *client_p,
                                char *lsender,
                                char *lbuffer)
 {
-  if (!IsRegistered(cptr))
+  if (!IsRegistered(client_p))
     return;
 
-  if (IsClient(cptr))
+  if (IsClient(client_p))
     {
       sendto_realops_flags(FLAGS_DEBUG,
                  "Weirdness: Unknown client prefix (%s) from %s, Ignoring %s",
                          lbuffer,
-                         get_client_name(cptr, HIDE_IP), lsender);
+                         get_client_name(client_p, HIDE_IP), lsender);
       return;
     }
 
   /*
    * Not from a server so don't need to worry about it.
    */
-  if (!IsServer(cptr))
+  if (!IsServer(client_p))
     return;
   /*
    * Do kill if it came from a server because it means there is a ghost
@@ -634,16 +634,16 @@ static  void    remove_unknown(struct Client *cptr,
    * 'no.dot.at.start' is a server   (SQUIT)
    */
   if ((lsender[0] == '.') || !strchr(lsender, '.'))
-    sendto_one(cptr, ":%s KILL %s :%s (%s(?) <- %s)",
+    sendto_one(client_p, ":%s KILL %s :%s (%s(?) <- %s)",
                me.name, lsender, me.name, lsender,
-               get_client_name(cptr, HIDE_IP));
+               get_client_name(client_p, HIDE_IP));
   else
     {
       sendto_realops_flags(FLAGS_DEBUG,
                            "Unknown prefix (%s) from %s, Squitting %s",
-                           lbuffer, get_client_name(cptr, HIDE_IP), lsender);
-      sendto_one(cptr, ":%s SQUIT %s :(Unknown prefix (%s) from %s)",
-                 me.name, lsender, lbuffer, get_client_name(cptr, HIDE_IP));
+                           lbuffer, get_client_name(client_p, HIDE_IP), lsender);
+      sendto_one(client_p, ":%s SQUIT %s :(Unknown prefix (%s) from %s)",
+                 me.name, lsender, lbuffer, get_client_name(client_p, HIDE_IP));
     }
 }
 
@@ -664,15 +664,15 @@ static  void    remove_unknown(struct Client *cptr,
 **      a ping pong error message...
 */
 static void do_numeric(char numeric[],
-                       struct Client *cptr,
-                       struct Client *sptr,
+                       struct Client *client_p,
+                       struct Client *server_p,
                        int parc,
                        char *parv[])
 {
-  struct Client *acptr;
+  struct Client *aclient_p;
   struct Channel *chptr;
 
-  if (parc < 1 || !IsServer(sptr))
+  if (parc < 1 || !IsServer(server_p))
     return;
 
   /* Remap low number numerics. */
@@ -698,9 +698,9 @@ static void do_numeric(char numeric[],
         }
       ircsprintf(t," :%s", parv[parc-1]);
     }
-  if ((acptr = find_client(parv[1], (struct Client *)NULL)))
+  if ((aclient_p = find_client(parv[1], (struct Client *)NULL)))
     {
-      if (IsMe(acptr)) 
+      if (IsMe(aclient_p)) 
         {
           /*
            * We shouldn't get numerics sent to us,
@@ -708,10 +708,10 @@ static void do_numeric(char numeric[],
            */
           sendto_realops_flags(FLAGS_ALL,
                                "*** %s(via %s) sent a %s numeric to me?!?",
-                               sptr->name, cptr->name, numeric);
+                               server_p->name, client_p->name, numeric);
           return;
         }
-      else if (acptr->from == cptr) 
+      else if (aclient_p->from == client_p) 
         {
           /* This message changed direction (nick collision?)
            * ignore it.
@@ -719,16 +719,16 @@ static void do_numeric(char numeric[],
           return;
         }
       /* Fake it for server hiding, if its our client */
-      if(GlobalSetOptions.hide_server && MyClient(acptr) && !IsOper(acptr))
-	sendto_one(acptr, ":%s %s %s%s", me.name, numeric, parv[1], buffer);
+      if(GlobalSetOptions.hide_server && MyClient(aclient_p) && !IsOper(aclient_p))
+	sendto_one(aclient_p, ":%s %s %s%s", me.name, numeric, parv[1], buffer);
       else
-        sendto_one(acptr, ":%s %s %s%s", sptr->name, numeric, parv[1], buffer);
+        sendto_one(aclient_p, ":%s %s %s%s", server_p->name, numeric, parv[1], buffer);
       return;
       }
       else if ((chptr = hash_find_channel(parv[1], (struct Channel *)NULL)))
         sendto_channel_local(ALL_MEMBERS, chptr,
                              ":%s %s %s %s",
-                              sptr->name,
+                              server_p->name,
                               numeric, RootChan(chptr)->chname, buffer);
 }
 
@@ -739,13 +739,13 @@ static void do_numeric(char numeric[],
  * output	-
  * side effects	- just returns a nastyogram to given user
  */
-void m_not_oper(struct Client* cptr, struct Client* sptr,
+void m_not_oper(struct Client* client_p, struct Client* server_p,
                 int parc, char* parv[])
 {
-  sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
+  sendto_one(server_p, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
 }
 
-void m_unregistered(struct Client* cptr, struct Client* sptr,
+void m_unregistered(struct Client* client_p, struct Client* server_p,
                     int parc, char* parv[])
 {
   /* bit of a hack.
@@ -754,22 +754,22 @@ void m_unregistered(struct Client* cptr, struct Client* sptr,
    * is fully registered..
    */
 
-  if( cptr->localClient->number_of_nick_changes == 0 )
+  if( client_p->localClient->number_of_nick_changes == 0 )
     {
-      sendto_one(cptr, ":%s %d * %s :Register first.",
+      sendto_one(client_p, ":%s %d * %s :Register first.",
 		 me.name, ERR_NOTREGISTERED, parv[0]);
-      cptr->localClient->number_of_nick_changes++;
+      client_p->localClient->number_of_nick_changes++;
     }
 }
 
-void m_registered(struct Client* cptr, struct Client* sptr,
+void m_registered(struct Client* client_p, struct Client* server_p,
                   int parc, char* parv[])
 {
-  sendto_one(cptr, form_str(ERR_ALREADYREGISTRED),   
+  sendto_one(client_p, form_str(ERR_ALREADYREGISTRED),   
              me.name, parv[0]); 
 }
 
-void m_ignore(struct Client* cptr, struct Client* sptr,
+void m_ignore(struct Client* client_p, struct Client* server_p,
               int parc, char* parv[])
 {
   return;

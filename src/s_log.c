@@ -193,22 +193,22 @@ static EVH user_log_resync;
  * side effects - Current exiting client is logged to
  *		  either SYSLOG or to file.
  */
-void log_user_exit(struct Client *sptr)
+void log_user_exit(struct Client *server_p)
 {
   time_t        on_for;
 
-  on_for = CurrentTime - sptr->firsttime;
+  on_for = CurrentTime - server_p->firsttime;
 
 #ifdef SYSLOG_USERS
 
-  if (IsPerson(sptr))
+  if (IsPerson(server_p))
     {
       log(L_INFO, "%s (%3ld:%02ld:%02ld): %s!%s@%s %ld/%ld\n",
-	  myctime(sptr->firsttime),
+	  myctime(server_p->firsttime),
 	  on_for / 3600, (on_for % 3600)/60,
-	  on_for % 60, sptr->name,
-	  sptr->username, sptr->host,
-	  sptr->localClient->sendK, sptr->localClient->receiveK);
+	  on_for % 60, server_p->name,
+	  server_p->username, server_p->host,
+	  server_p->localClient->sendK, server_p->localClient->receiveK);
     }
 
 #else
@@ -223,7 +223,7 @@ void log_user_exit(struct Client *sptr)
      * Keep the logfile open, syncing it every 10 seconds
      * -Taner
      */
-    if (IsPerson(sptr))
+    if (IsPerson(server_p))
       {
 	if (user_log_fb == NULL)
 	  {
@@ -239,13 +239,13 @@ void log_user_exit(struct Client *sptr)
 	  {
 	    ircsprintf(linebuf,
 		       "%s (%lu:%lu:%lu): %s!%s@%s %u/%u\n",
-		       myctime(sptr->firsttime), on_for / 3600,
+		       myctime(server_p->firsttime), on_for / 3600,
 		       (on_for % 3600)/60, on_for % 60,
-		       sptr->name,
-		       sptr->username,
-		       sptr->host,
-		       sptr->localClient->sendK,
-		       sptr->localClient->receiveK);
+		       server_p->name,
+		       server_p->username,
+		       server_p->host,
+		       server_p->localClient->sendK,
+		       server_p->localClient->receiveK);
 
 	    fbputs(linebuf, user_log_fb);
 
@@ -285,7 +285,7 @@ user_log_resync(void *notused)
  * side effects - FNAME_OPERLOG is written to, if its present
  */
 
-void log_oper( struct Client *sptr, char *name )
+void log_oper( struct Client *server_p, char *name )
 {
   FBFILE *oper_fb;
   char linebuf[BUFSIZE];
@@ -293,7 +293,7 @@ void log_oper( struct Client *sptr, char *name )
   if (!ConfigFileEntry.fname_operlog)
 	  return;
   
-  if (IsPerson(sptr))
+  if (IsPerson(server_p))
     {
       if( (oper_fb = fbopen(ConfigFileEntry.fname_operlog, "r")) != NULL )
 	{
@@ -305,8 +305,8 @@ void log_oper( struct Client *sptr, char *name )
 	{
 	  ircsprintf(linebuf, "%s OPER (%s) by (%s!%s@%s)\n",
 		     myctime(CurrentTime), name, 
-		     sptr->name, sptr->username,
-		     sptr->host);
+		     server_p->name, server_p->username,
+		     server_p->host);
 
 	  fbputs(linebuf,oper_fb);
 	  fbclose(oper_fb);

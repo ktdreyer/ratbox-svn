@@ -35,7 +35,7 @@
 #include "parse.h"
 #include "modules.h"
 
-static char* confopts(struct Client *sptr);
+static char* confopts(struct Client *server_p);
 
 static void m_version(struct Client*, struct Client*, int, char**);
 static void ms_version(struct Client*, struct Client*, int, char**);
@@ -65,14 +65,14 @@ char *_version = "20001223";
  *      parv[0] = sender prefix
  *      parv[1] = remote server
  */
-static void m_version(struct Client* cptr, struct Client* sptr,
+static void m_version(struct Client* client_p, struct Client* server_p,
                       int parc, char* parv[])
 {
-  sendto_one(sptr, form_str(RPL_VERSION), me.name,
+  sendto_one(server_p, form_str(RPL_VERSION), me.name,
                 parv[0], version, serno, debugmode,
-                me.name, confopts(sptr), serveropts);
+                me.name, confopts(server_p), serveropts);
                 
-  show_isupport(sptr);
+  show_isupport(server_p);
 }
 
 /*
@@ -80,17 +80,17 @@ static void m_version(struct Client* cptr, struct Client* sptr,
  *      parv[0] = sender prefix
  *      parv[1] = remote server
  */
-static void mo_version(struct Client* cptr, struct Client* sptr,
+static void mo_version(struct Client* client_p, struct Client* server_p,
                       int parc, char* parv[])
 {
-  if (hunt_server(cptr, sptr, ":%s VERSION :%s", 
+  if (hunt_server(client_p, server_p, ":%s VERSION :%s", 
 		  1, parc, parv) != HUNTED_ISME)
     return;
     
-  sendto_one(sptr, form_str(RPL_VERSION), me.name, parv[0], version, 
-  	     serno, debugmode, me.name, confopts(sptr), serveropts);
+  sendto_one(server_p, form_str(RPL_VERSION), me.name, parv[0], version, 
+  	     serno, debugmode, me.name, confopts(server_p), serveropts);
 	       
-  show_isupport(sptr);
+  show_isupport(server_p);
   
   return;
 }
@@ -100,21 +100,21 @@ static void mo_version(struct Client* cptr, struct Client* sptr,
  *      parv[0] = sender prefix
  *      parv[1] = remote server
  */
-static void ms_version(struct Client* cptr, struct Client* sptr,
+static void ms_version(struct Client* client_p, struct Client* server_p,
                       int parc, char* parv[])
 {
-  if (IsOper(sptr))
+  if (IsOper(server_p))
      {
-       if (hunt_server(cptr, sptr, ":%s VERSION :%s", 
+       if (hunt_server(client_p, server_p, ":%s VERSION :%s", 
                        1, parc, parv) == HUNTED_ISME)
-         sendto_one(sptr, form_str(RPL_VERSION), me.name,
+         sendto_one(server_p, form_str(RPL_VERSION), me.name,
                     parv[0], version, serno, debugmode,
-                    me.name, confopts(sptr), serveropts);
+                    me.name, confopts(server_p), serveropts);
      }
    else
-     sendto_one(sptr, form_str(RPL_VERSION), me.name,
+     sendto_one(server_p, form_str(RPL_VERSION), me.name,
                 parv[0], version, serno, debugmode,
-                me.name, confopts(sptr), serveropts);
+                me.name, confopts(server_p), serveropts);
 }
 
 /* confopts()
@@ -122,7 +122,7 @@ static void ms_version(struct Client* cptr, struct Client* sptr,
  * output - ircd.conf option string
  * side effects - none
  */
-static char* confopts(struct Client *sptr)
+static char* confopts(struct Client *server_p)
 {
   static char result[4];
 
@@ -133,7 +133,7 @@ static char* confopts(struct Client *sptr)
 
   /* might wanna hide this :P */
   if (ServerInfo.hub && 
-      (!GlobalSetOptions.hide_server || IsOper(sptr)) )
+      (!GlobalSetOptions.hide_server || IsOper(server_p)) )
     {
       strcat(result, "H");
     }

@@ -37,7 +37,7 @@
 #include "irc_string.h"
 #include "s_log.h"
 
-int oper_up( struct Client *sptr, struct ConfItem *aconf );
+int oper_up( struct Client *server_p, struct ConfItem *aconf );
 
 #ifndef OPENSSL
 /* Maybe this should be an error or something?-davidt */
@@ -87,73 +87,73 @@ char *_version = "20001122";
  * parv[1] = operator to challenge for, or +response
  *
  */
-static void m_challenge( struct Client *cptr, struct Client *sptr,
+static void m_challenge( struct Client *client_p, struct Client *server_p,
                         int parc, char *parv[] )
 {
   char * challenge;
   struct ConfItem *aconf;
-  if(!(sptr->user) || !sptr->localClient)
+  if(!(server_p->user) || !server_p->localClient)
     return;
   
   if (*parv[1] == '+')
     {
      /* Ignore it if we aren't expecting this... -A1kmm */
-     if (!sptr->user->response)
+     if (!server_p->user->response)
        return;
      
-     if (strcasecmp(sptr->user->response, ++parv[1]))
+     if (strcasecmp(server_p->user->response, ++parv[1]))
        {
-         sendto_one(sptr, form_str(ERR_PASSWDMISMATCH), me.name,
-                    sptr->name);
+         sendto_one(server_p, form_str(ERR_PASSWDMISMATCH), me.name,
+                    server_p->name);
          return;
        }
      
-     if (!(aconf = find_conf_by_name(sptr->user->auth_oper, CONF_OPERATOR)))
+     if (!(aconf = find_conf_by_name(server_p->user->auth_oper, CONF_OPERATOR)))
        {
-         sendto_one (sptr, form_str(ERR_NOOPERHOST), me.name, parv[0]);
+         sendto_one (server_p, form_str(ERR_NOOPERHOST), me.name, parv[0]);
          return;
        }
      
      /* Now make them an oper and tell the realops... */
-     oper_up(sptr, aconf);
+     oper_up(server_p, aconf);
      log(L_TRACE, "OPER %s by %s!%s@%s",
-	     sptr->user->auth_oper, sptr->name, sptr->username, sptr->host);
-     log_oper(sptr, sptr->user->auth_oper);
-     MyFree(sptr->user->response);
-     MyFree(sptr->user->auth_oper);
-     sptr->user->response = NULL;
-     sptr->user->auth_oper = NULL;
+	     server_p->user->auth_oper, server_p->name, server_p->username, server_p->host);
+     log_oper(server_p, server_p->user->auth_oper);
+     MyFree(server_p->user->response);
+     MyFree(server_p->user->auth_oper);
+     server_p->user->response = NULL;
+     server_p->user->auth_oper = NULL;
      return;
     }
   
-  if (sptr->user->response)
-    MyFree(sptr->user->response);
-  if (sptr->user->auth_oper)
-    MyFree(sptr->user->auth_oper);
+  if (server_p->user->response)
+    MyFree(server_p->user->response);
+  if (server_p->user->auth_oper)
+    MyFree(server_p->user->auth_oper);
   /* XXX - better get the host matching working sometime... */
   if (!(aconf = find_conf_by_name (parv[1], CONF_OPERATOR))
-      /*|| !(match(sptr->host, aconf->host) ||
-           memcmp(&sptr->localClient->ip, &aconf->ip,
+      /*|| !(match(server_p->host, aconf->host) ||
+           memcmp(&server_p->localClient->ip, &aconf->ip,
                   sizeof(struct irc_inaddr)))*/)
     {
-     sendto_one (sptr, form_str(ERR_NOOPERHOST), me.name, parv[0]);
+     sendto_one (server_p, form_str(ERR_NOOPERHOST), me.name, parv[0]);
      return;
     }
   if (!strchr(aconf->passwd, ' '))
     {
-     sendto_one (sptr, ":%s NOTICE %s :I'm sorry, PK authentication "
+     sendto_one (server_p, ":%s NOTICE %s :I'm sorry, PK authentication "
                  "is not enabled for your oper{} block.", me.name,
                  parv[0]);
      return;
     }
   if (
-   !generate_challenge (&challenge, &(sptr->user->response), aconf->passwd)
+   !generate_challenge (&challenge, &(server_p->user->response), aconf->passwd)
      )
     {
-     sendto_one (sptr, form_str(RPL_RSACHALLENGE), me.name, parv[0],
+     sendto_one (server_p, form_str(RPL_RSACHALLENGE), me.name, parv[0],
                  challenge);
     }
-  DupString(sptr->user->auth_oper, aconf->name);
+  DupString(server_p->user->auth_oper, aconf->name);
   MyFree(challenge);
   return;
 }

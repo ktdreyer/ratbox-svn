@@ -59,10 +59,10 @@ char *_version = "20001122";
  * mo_close - CLOSE message handler
  *  - added by Darren Reed Jul 13 1992.
  */
-static void mo_close(struct Client *cptr, struct Client *sptr,
+static void mo_close(struct Client *client_p, struct Client *server_p,
                     int parc, char *parv[])
 {
-  struct Client  *acptr;
+  struct Client  *aclient_p;
   dlink_node     *ptr;
   int            closed = 0;
 
@@ -70,19 +70,19 @@ static void mo_close(struct Client *cptr, struct Client *sptr,
 
   for (ptr = unknown_list.head; ptr; ptr = ptr->next)
     {
-      acptr = ptr->data;
+      aclient_p = ptr->data;
 
   /* Which list would connecting servers be found in? serv_list ? */
 #if 0
-      if (!IsUnknown(acptr) && !IsConnecting(acptr) &&
-          !IsHandshake(acptr))
+      if (!IsUnknown(aclient_p) && !IsConnecting(aclient_p) &&
+          !IsHandshake(aclient_p))
         continue;
 #endif
-      sendto_one(sptr, form_str(RPL_CLOSING), me.name, parv[0],
-                 get_client_name(acptr, SHOW_IP), acptr->status);
-      (void)exit_client(acptr, acptr, acptr, "Oper Closing");
+      sendto_one(server_p, form_str(RPL_CLOSING), me.name, parv[0],
+                 get_client_name(aclient_p, SHOW_IP), aclient_p->status);
+      (void)exit_client(aclient_p, aclient_p, aclient_p, "Oper Closing");
       closed++;
     }
-  sendto_one(sptr, form_str(RPL_CLOSEEND), me.name, parv[0], closed);
+  sendto_one(server_p, form_str(RPL_CLOSEEND), me.name, parv[0], closed);
 }
 

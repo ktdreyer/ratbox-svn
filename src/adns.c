@@ -21,14 +21,14 @@
 adns_state dns_state;
 BlockHeap *dns_blk;
 
-void report_adns_servers(struct Client *sptr)
+void report_adns_servers(struct Client *server_p)
 {
 	int x;
 	char buf[16]; /* XXX: adns only deals with ipv4 dns servers so this is okay */
 	for(x = 0; x < dns_state->nservers; x++)	
 	{
 		inetntop(AF_INET, &dns_state->servers[x].addr.s_addr, buf, 16);
- 		sendto_one(sptr, form_str(RPL_STATSALINE), me.name, sptr->name, buf); 
+ 		sendto_one(server_p, form_str(RPL_STATSALINE), me.name, server_p->name, buf); 
 	}
 }
 

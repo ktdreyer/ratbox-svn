@@ -72,8 +72,8 @@ char *_version = "20010128";
 **      parv[0] = sender prefix
 **      parv[1] = away message
 */
-static void m_away(struct Client *cptr,
-                  struct Client *sptr,
+static void m_away(struct Client *client_p,
+                  struct Client *server_p,
                   int parc,
                   char *parv[])
 {
@@ -81,14 +81,14 @@ static void m_away(struct Client *cptr,
   static time_t last_away;
 
   /* make sure the user exists */
-  if (!(sptr->user))
+  if (!(server_p->user))
     {
       sendto_realops_flags(FLAGS_DEBUG,
                            "Got AWAY from nil user, from %s (%s)\n",
-			   cptr->name,sptr->name);
+			   client_p->name,server_p->name);
       return;
     }
-  away = sptr->user->away;
+  away = server_p->user->away;
 
   if (parc < 2 || !*awy2)
     {
@@ -97,36 +97,36 @@ static void m_away(struct Client *cptr,
       if (away)
         {
 	  /* we now send this only if they were away before --is */
-	  sendto_ll_serv_butone(cptr, sptr, 0, ":%s AWAY", parv[0]);
+	  sendto_ll_serv_butone(client_p, server_p, 0, ":%s AWAY", parv[0]);
 	  
           MyFree(away);
-          sptr->user->away = NULL;
+          server_p->user->away = NULL;
         }
-      if (MyConnect(sptr))
-        sendto_one(sptr, form_str(RPL_UNAWAY),
+      if (MyConnect(server_p))
+        sendto_one(server_p, form_str(RPL_UNAWAY),
                    me.name, parv[0]);
       return;
     }
 
   /* Marking as away */
   
-  if (MyConnect(sptr) && !IsOper(sptr) &&
+  if (MyConnect(server_p) && !IsOper(server_p) &&
       ((CurrentTime-last_away) < 2 ||
-       (CurrentTime-sptr->user->last_away)<ConfigFileEntry.pace_wait))
+       (CurrentTime-server_p->user->last_away)<ConfigFileEntry.pace_wait))
     {
-     sendto_one(sptr, form_str(RPL_LOAD2HI), me.name, parv[0]);
+     sendto_one(server_p, form_str(RPL_LOAD2HI), me.name, parv[0]);
      return;
     }
 
   last_away = CurrentTime;
-  sptr->user->last_away = CurrentTime;
+  server_p->user->last_away = CurrentTime;
 
   if (strlen(awy2) > (size_t) TOPICLEN)
     awy2[TOPICLEN] = '\0';
 
   /* we now send this only if they weren't away already --is */
   if (!away)
-    sendto_ll_serv_butone(cptr, sptr, 0, ":%s AWAY :%s", parv[0], awy2); 
+    sendto_ll_serv_butone(client_p, server_p, 0, ":%s AWAY :%s", parv[0], awy2); 
 
   if (away)
     MyFree(away);
@@ -134,9 +134,9 @@ static void m_away(struct Client *cptr,
   away = (char *)MyMalloc(strlen(awy2)+1);
   strcpy(away,awy2);
 
-  sptr->user->away = away;
+  server_p->user->away = away;
 
-  if (MyConnect(sptr))
-    sendto_one(sptr, form_str(RPL_NOWAWAY), me.name, parv[0]);
+  if (MyConnect(server_p))
+    sendto_one(server_p, form_str(RPL_NOWAWAY), me.name, parv[0]);
 }
 

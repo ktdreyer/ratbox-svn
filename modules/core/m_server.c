@@ -80,83 +80,83 @@ static int       refresh_user_links=0;
  *      parv[2] = serverinfo/hopcount
  *      parv[3] = serverinfo
  */
-static void mr_server(struct Client *cptr, struct Client *sptr,
+static void mr_server(struct Client *client_p, struct Client *server_p,
                       int parc, char *parv[])
 {
   char             info[REALLEN + 1];
   char             *name;
-  struct Client    *acptr;
+  struct Client    *aclient_p;
   int              hop;
 
   if ( (name = parse_server_args(parv, parc, info, &hop)) == NULL )
     {
-      sendto_one(cptr,"ERROR :No servername");
+      sendto_one(client_p,"ERROR :No servername");
       return;
     }
   /* 
    * Reject a direct nonTS server connection if we're TS_ONLY -orabidoo
    */
-  if (!DoesTS(cptr))
+  if (!DoesTS(client_p))
     {
       sendto_realops_flags(FLAGS_ADMIN,"Link %s dropped, non-TS server",
-			   get_client_name(cptr, HIDE_IP));
+			   get_client_name(client_p, HIDE_IP));
       sendto_realops_flags(FLAGS_NOTADMIN,"Link %s dropped, non-TS server",
-			   get_client_name(cptr, MASK_IP));
-      exit_client(cptr, cptr, cptr, "Non-TS server");
+			   get_client_name(client_p, MASK_IP));
+      exit_client(client_p, client_p, client_p, "Non-TS server");
       return;
     }
 
   if (bogus_host(name))
   {
-    exit_client(cptr, cptr, cptr, "Bogus server name");
+    exit_client(client_p, client_p, client_p, "Bogus server name");
     return;
   }
 
   /* Now we just have to call check_server and everything should be
    * check for us... -A1kmm. */
-  switch (check_server(name, cptr))
+  switch (check_server(name, client_p))
     {
      case -1:
       if (ConfigFileEntry.warn_no_nline)
         {
          sendto_realops_flags(FLAGS_ADMIN,
            "Unauthorized server connection attempt from %s: No entry for "
-           "servername %s", get_client_name(cptr, HIDE_IP), name);
+           "servername %s", get_client_name(client_p, HIDE_IP), name);
 
          sendto_realops_flags(FLAGS_NOTADMIN,
            "Unauthorized server connection attempt from %s: No entry for "
-           "servername %s", get_client_name(cptr, MASK_IP), name);
+           "servername %s", get_client_name(client_p, MASK_IP), name);
         }
-      exit_client(cptr, cptr, cptr, "Invalid servername.");
+      exit_client(client_p, client_p, client_p, "Invalid servername.");
       return;
       break;
      case -2:
       sendto_realops_flags(FLAGS_ADMIN,
         "Unauthorized server connection attempt from %s: Bad password "
-        "for server %s", get_client_name(cptr, HIDE_IP), name);
+        "for server %s", get_client_name(client_p, HIDE_IP), name);
 
       sendto_realops_flags(FLAGS_NOTADMIN,
         "Unauthorized server connection attempt from %s: Bad password "
-        "for server %s", get_client_name(cptr, MASK_IP), name);
+        "for server %s", get_client_name(client_p, MASK_IP), name);
 
-      exit_client(cptr, cptr, cptr, "Invalid password.");
+      exit_client(client_p, client_p, client_p, "Invalid password.");
       return;
       break;
      case -3:
       sendto_realops_flags(FLAGS_ADMIN,
         "Unauthorized server connection attempt from %s: Invalid host "
-        "for server %s", get_client_name(cptr, HIDE_IP), name);
+        "for server %s", get_client_name(client_p, HIDE_IP), name);
 
       sendto_realops_flags(FLAGS_NOTADMIN,
         "Unauthorized server connection attempt from %s: Invalid host "
-        "for server %s", get_client_name(cptr, MASK_IP), name);
+        "for server %s", get_client_name(client_p, MASK_IP), name);
 
-      exit_client(cptr, cptr, cptr, "Invalid host.");
+      exit_client(client_p, client_p, client_p, "Invalid host.");
       return;
       break;
     }
     
-  if ((acptr = find_server(name)))
+  if ((aclient_p = find_server(name)))
     {
       /*
        * This link is trying feed me a server that I already have
@@ -171,43 +171,43 @@ static void mr_server(struct Client *cptr, struct Client *sptr,
        */
       sendto_realops_flags(FLAGS_ADMIN,
          "Attempt to re-introduce server %s from %s", name,
-         get_client_name(cptr, HIDE_IP));
+         get_client_name(client_p, HIDE_IP));
 
       sendto_realops_flags(FLAGS_NOTADMIN,
          "Attempt to re-introduce server %s from %s", name,
-         get_client_name(cptr, MASK_IP));
+         get_client_name(client_p, MASK_IP));
 
-      sendto_one(cptr, "ERROR :Server already exists.");
-      exit_client(cptr, cptr, cptr, "Server Exists");
+      sendto_one(client_p, "ERROR :Server already exists.");
+      exit_client(client_p, client_p, client_p, "Server Exists");
       return;
     }
 
-  if(ServerInfo.hub && IsCapable(cptr, CAP_LL))
+  if(ServerInfo.hub && IsCapable(client_p, CAP_LL))
     {
-      if(IsCapable(cptr, CAP_HUB))
+      if(IsCapable(client_p, CAP_HUB))
         {
-          ClearCap(cptr,CAP_LL);
+          ClearCap(client_p,CAP_LL);
           sendto_realops_flags(FLAGS_ALL,
                "*** LazyLinks to a hub from a hub, thats a no-no.");
         }
       else
         {
-          cptr->localClient->serverMask = nextFreeMask();
+          client_p->localClient->serverMask = nextFreeMask();
 
-          if(!cptr->localClient->serverMask)
+          if(!client_p->localClient->serverMask)
             {
               sendto_realops_flags(FLAGS_ALL,
                                    "serverMask is full!");
               /* try and negotiate a non LL connect */
-              ClearCap(cptr,CAP_LL);
+              ClearCap(client_p,CAP_LL);
             }
         }
     }
-  else if (IsCapable(cptr, CAP_LL))
+  else if (IsCapable(client_p, CAP_LL))
     {
-      if(!IsCapable(cptr, CAP_HUB))
+      if(!IsCapable(client_p, CAP_HUB))
         {
-          ClearCap(cptr,CAP_LL);
+          ClearCap(client_p,CAP_LL);
           sendto_realops_flags(FLAGS_ALL,
                "*** LazyLinks to a leaf from a leaf, thats a no-no.");
         }
@@ -215,13 +215,13 @@ static void mr_server(struct Client *cptr, struct Client *sptr,
 
   /*
    * if we are connecting (Handshake), we already have the name from the
-   * C:line in cptr->name
+   * C:line in client_p->name
    */
-  strncpy_irc(cptr->name, name, HOSTLEN);
-  strncpy_irc(cptr->info, info[0] ? info : me.name, REALLEN);
-  cptr->hopcount = hop;
+  strncpy_irc(client_p->name, name, HOSTLEN);
+  strncpy_irc(client_p->info, info[0] ? info : me.name, REALLEN);
+  client_p->hopcount = hop;
 
-  server_estab(cptr);
+  server_estab(client_p);
 }
 
 /*
@@ -231,14 +231,14 @@ static void mr_server(struct Client *cptr, struct Client *sptr,
  *      parv[2] = serverinfo/hopcount
  *      parv[3] = serverinfo
  */
-static void ms_server(struct Client *cptr, struct Client *sptr,
+static void ms_server(struct Client *client_p, struct Client *server_p,
                       int parc, char *parv[])
 {
   char             info[REALLEN + 1];
                    /* same size as in s_misc.c */
   char*            name;
-  struct Client*   acptr;
-  struct Client*   bcptr;
+  struct Client*   aclient_p;
+  struct Client*   bclient_p;
   struct ConfItem* aconf;
   int              hop;
   int              hlined = 0;
@@ -247,11 +247,11 @@ static void ms_server(struct Client *cptr, struct Client *sptr,
 
   if ( (name = parse_server_args(parv, parc, info, &hop)) == NULL )
     {
-      sendto_one(cptr,"ERROR :No servername");
+      sendto_one(client_p,"ERROR :No servername");
       return;
     }
 
-  if ((acptr = find_server(name)))
+  if ((aclient_p = find_server(name)))
     {
       /*
        * This link is trying feed me a server that I already have
@@ -268,13 +268,13 @@ static void ms_server(struct Client *cptr, struct Client *sptr,
       /* It is behind a host-masked server. Completely ignore the
        * server message(don't propagate or we will delink from whoever
        * we propagate to). -A1kmm */
-      if (irccmp(acptr->name, name) && acptr->from==cptr)
+      if (irccmp(aclient_p->name, name) && aclient_p->from==client_p)
         return;
       
       sendto_realops_flags(FLAGS_ALL,
                            "Server %s(via %s) introduced an existing server %s.",
-                           sptr->name, cptr->name, name);
-      exit_client(NULL, sptr, &me, "Server Exists");
+                           server_p->name, client_p->name, name);
+      exit_client(NULL, server_p, &me, "Server Exists");
       return;
     }
 
@@ -289,12 +289,12 @@ static void ms_server(struct Client *cptr, struct Client *sptr,
        * cause a fair bit of confusion. Enough to make it hellish
        * for a while and servers to send stuff to the wrong place.
        */
-      sendto_one(cptr,"ERROR :Nickname %s already exists!", name);
+      sendto_one(client_p,"ERROR :Nickname %s already exists!", name);
       sendto_realops_flags(FLAGS_ALL,
 			   "Link %s cancelled: Server/nick collision on %s",
-		/* inpath */ get_client_name(cptr, HIDE_IP),
+		/* inpath */ get_client_name(client_p, HIDE_IP),
 				name);
-      exit_client(cptr, cptr, cptr, "Nick as Server");
+      exit_client(client_p, client_p, client_p, "Nick as Server");
       return;
     }
 
@@ -306,7 +306,7 @@ static void ms_server(struct Client *cptr, struct Client *sptr,
    */
   if (parc == 1 || info[0] == '\0')
     {
-      sendto_one(cptr, "ERROR :No server info specified for %s", name);
+      sendto_one(client_p, "ERROR :No server info specified for %s", name);
       return;
     }
 
@@ -321,7 +321,7 @@ static void ms_server(struct Client *cptr, struct Client *sptr,
      if (!(aconf->status == CONF_LEAF || aconf->status == CONF_HUB))
        continue;
 
-     if (match(aconf->name, cptr->name))
+     if (match(aconf->name, client_p->name))
        {
         if (aconf->status == CONF_HUB)
 	  {
@@ -359,23 +359,23 @@ static void ms_server(struct Client *cptr, struct Client *sptr,
    * .edu's
    */
 
-  /* Ok, check cptr can hub the new server, and make sure it's not a LL */
-  if (!hlined || (IsCapable(cptr, CAP_LL) && !IsCapable(cptr, CAP_HUB)))
+  /* Ok, check client_p can hub the new server, and make sure it's not a LL */
+  if (!hlined || (IsCapable(client_p, CAP_LL) && !IsCapable(client_p, CAP_HUB)))
     {
       /* OOOPs nope can't HUB */
       sendto_realops_flags(FLAGS_ALL,"Non-Hub link %s introduced %s.",
-                get_client_name(cptr, HIDE_IP), name);
+                get_client_name(client_p, HIDE_IP), name);
       /* If it is new, we are probably misconfigured, so split the
        * non-hub server introducing this. Otherwise, split the new
        * server. -A1kmm. */
-      if ((CurrentTime - sptr->firsttime) < 20)
+      if ((CurrentTime - server_p->firsttime) < 20)
         {
-          exit_client(NULL, sptr, &me, "No H-line.");
+          exit_client(NULL, server_p, &me, "No H-line.");
           return;
         }
       else
         {
-          sendto_one(sptr, ":%s SQUIT %s :Sorry, no H-line.",
+          sendto_one(server_p, ":%s SQUIT %s :Sorry, no H-line.",
                      me.name, name);
           return;
         }
@@ -386,38 +386,38 @@ static void ms_server(struct Client *cptr, struct Client *sptr,
     {
       /* OOOPs nope can't HUB this leaf */
       sendto_realops_flags(FLAGS_ALL,"link %s introduced leafed %s.",
-                get_client_name(cptr, HIDE_IP), name);
+                get_client_name(client_p, HIDE_IP), name);
       /* If it is new, we are probably misconfigured, so split the
        * non-hub server introducing this. Otherwise, split the new
        * server. -A1kmm. */
-      if ((CurrentTime - sptr->firsttime) < 20)
+      if ((CurrentTime - server_p->firsttime) < 20)
         {
-          exit_client(NULL, sptr, &me, "Leafed Server.");
+          exit_client(NULL, server_p, &me, "Leafed Server.");
           return;
         }
       else
         {
-          sendto_one(sptr, ":%s SQUIT %s :Sorry, Leafed server.",
+          sendto_one(server_p, ":%s SQUIT %s :Sorry, Leafed server.",
                      me.name, name);
           return;
         }
     }
 
-  acptr = make_client(cptr);
-  make_server(acptr);
-  acptr->hopcount = hop;
-  strncpy_irc(acptr->name, name, HOSTLEN);
-  strncpy_irc(acptr->info, info, REALLEN);
-  acptr->serv->up = find_or_add(parv[0]);
-  acptr->servptr = sptr;
+  aclient_p = make_client(client_p);
+  make_server(aclient_p);
+  aclient_p->hopcount = hop;
+  strncpy_irc(aclient_p->name, name, HOSTLEN);
+  strncpy_irc(aclient_p->info, info, REALLEN);
+  aclient_p->serv->up = find_or_add(parv[0]);
+  aclient_p->servptr = server_p;
 
-  SetServer(acptr);
+  SetServer(aclient_p);
 
   Count.server++;
 
-  add_client_to_list(acptr);
-  add_to_client_hash_table(acptr->name, acptr);
-  add_client_to_llist(&(acptr->servptr->serv->servers), acptr);
+  add_client_to_list(aclient_p);
+  add_to_client_hash_table(aclient_p->name, aclient_p);
+  add_client_to_llist(&(aclient_p->servptr->serv->servers), aclient_p);
 
 
   /*
@@ -427,27 +427,27 @@ static void ms_server(struct Client *cptr, struct Client *sptr,
    */
   for (ptr = serv_list.head; ptr; ptr = ptr->next)
     {
-      bcptr = ptr->data;
+      bclient_p = ptr->data;
 
-      if (bcptr == cptr)
+      if (bclient_p == client_p)
 	continue;
-      if (!(aconf = bcptr->serv->sconf))
+      if (!(aconf = bclient_p->serv->sconf))
 	{
 	  sendto_realops_flags(FLAGS_ALL,"Lost N-line for %s on %s. Closing",
-			       get_client_name(cptr, HIDE_IP), name);
-	  exit_client(cptr, cptr, cptr, "Lost N line");
+			       get_client_name(client_p, HIDE_IP), name);
+	  exit_client(client_p, client_p, client_p, "Lost N line");
           return;
 	}
-      if (match(my_name_for_link(me.name, aconf), acptr->name))
+      if (match(my_name_for_link(me.name, aconf), aclient_p->name))
 	continue;
 
-      sendto_one(bcptr, ":%s SERVER %s %d :%s",
-		 parv[0], acptr->name, hop + 1, acptr->info);
+      sendto_one(bclient_p, ":%s SERVER %s %d :%s",
+		 parv[0], aclient_p->name, hop + 1, aclient_p->info);
                          
     }
       
   sendto_realops_flags(FLAGS_EXTERNAL, "Server %s being introduced by %s",
-		       acptr->name, sptr->name);
+		       aclient_p->name, server_p->name);
 
   if (!refresh_user_links)
     {
@@ -469,7 +469,7 @@ void write_links_file(void* notused)
   MessageFileLine *currentMessageLine = 0;
   MessageFileLine *newMessageLine = 0;
   MessageFile *MessageFileptr;
-  struct Client *acptr;
+  struct Client *aclient_p;
   char *p;
   FBFILE* file;
   char buff[512];
@@ -489,16 +489,16 @@ void write_links_file(void* notused)
   MessageFileptr->contentsOfFile = NULL;
   currentMessageLine = NULL;
 
-  for (acptr = GlobalClientList; acptr; acptr = acptr->next) 
+  for (aclient_p = GlobalClientList; aclient_p; aclient_p = aclient_p->next) 
     {
-      if(IsServer(acptr))
+      if(IsServer(aclient_p))
 	{
-          if(acptr->info[0])
+          if(aclient_p->info[0])
             {
-              if( (p = strchr(acptr->info,']')) )
+              if( (p = strchr(aclient_p->info,']')) )
                 p += 2; /* skip the nasty [IP] part */
               else
-                p = acptr->info;
+                p = aclient_p->info;
             }
           else
             p = "(Unknown Location)";
@@ -511,7 +511,7 @@ void write_links_file(void* notused)
  * - madmax
 */
 	  ircsprintf(newMessageLine->line,"%s %s :1 %s",
-		     acptr->name,me.name,p);
+		     aclient_p->name,me.name,p);
 	  newMessageLine->next = (MessageFileLine *)NULL;
 
 	  if (MessageFileptr->contentsOfFile)
@@ -526,7 +526,7 @@ void write_links_file(void* notused)
 	      currentMessageLine = newMessageLine;
 	    }
 	  ircsprintf(buff,"%s %s :1 %s\n",
-		     acptr->name,me.name,p);
+		     aclient_p->name,me.name,p);
 	  fbputs(buff,file);
 	}
     }

@@ -62,11 +62,11 @@ unsigned int hash_whowas_name(const char* name)
   return(h & (WW_MAX - 1));
 }
 
-void add_history(struct Client* cptr, int online)
+void add_history(struct Client* client_p, int online)
 {
   struct Whowas* who = &WHOWAS[whowas_next];
 
-  assert(0 != cptr);
+  assert(0 != client_p);
 
   if (who->hashv != -1)
     {
@@ -74,24 +74,24 @@ void add_history(struct Client* cptr, int online)
         del_whowas_from_clist(&(who->online->whowas),who);
       del_whowas_from_list(&WHOWASHASH[who->hashv], who);
     }
-  who->hashv = hash_whowas_name(cptr->name);
+  who->hashv = hash_whowas_name(client_p->name);
   who->logoff = CurrentTime;
   /*
    * NOTE: strcpy ok here, the sizes in the client struct MUST
    * match the sizes in the whowas struct
    */
-  strncpy_irc(who->name, cptr->name, NICKLEN);
+  strncpy_irc(who->name, client_p->name, NICKLEN);
   who->name[NICKLEN] = '\0';
-  strcpy(who->username, cptr->username);
-  strcpy(who->hostname, cptr->host);
-  strcpy(who->realname, cptr->info);
+  strcpy(who->username, client_p->username);
+  strcpy(who->hostname, client_p->host);
+  strcpy(who->realname, client_p->info);
 
-  who->servername = cptr->user->server;
+  who->servername = client_p->user->server;
 
   if (online)
     {
-      who->online = cptr;
-      add_whowas_to_clist(&(cptr->whowas), who);
+      who->online = client_p;
+      add_whowas_to_clist(&(client_p->whowas), who);
     }
   else
     who->online = NULL;
@@ -101,15 +101,15 @@ void add_history(struct Client* cptr, int online)
     whowas_next = 0;
 }
 
-void off_history(struct Client *cptr)
+void off_history(struct Client *client_p)
 {
   struct Whowas *temp, *next;
 
-  for(temp=cptr->whowas;temp;temp=next)
+  for(temp=client_p->whowas;temp;temp=next)
     {
       next = temp->cnext;
       temp->online = NULL;
-      del_whowas_from_clist(&(cptr->whowas), temp);
+      del_whowas_from_clist(&(client_p->whowas), temp);
     }
 }
 

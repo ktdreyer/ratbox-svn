@@ -130,7 +130,7 @@ fd_close(int fd)
  * fd_dump() - dump the list of active filedescriptors
  */
 void
-fd_dump(struct Client *sptr)
+fd_dump(struct Client *server_p)
 {
     int i;
 
@@ -138,10 +138,10 @@ fd_dump(struct Client *sptr)
         if (!fd_table[i].flags.open)
             continue;
 
-        sendto_one(sptr, ":%s NOTICE %s :*** fd %d, desc '%s'", me.name,
-          sptr->name, i, fd_table[i].desc);
+        sendto_one(server_p, ":%s NOTICE %s :*** fd %d, desc '%s'", me.name,
+          server_p->name, i, fd_table[i].desc);
     }
-    sendto_one(sptr, ":%s NOTICE %s :*** Finished", me.name, sptr->name);
+    sendto_one(server_p, ":%s NOTICE %s :*** Finished", me.name, server_p->name);
 }
 
 

@@ -558,21 +558,21 @@ sendto_list_anywhere(struct Client *one, struct Client *from,
 		     )
 {
   dlink_node *ptr;
-  struct Client *acptr;
+  struct Client *aclient_p;
 
   for (ptr = list->head; ptr; ptr = ptr->next)
     {
-      acptr = ptr->data;
+      aclient_p = ptr->data;
       
-      if (acptr->from == one)
+      if (aclient_p->from == one)
         continue;
       
-      if (MyConnect(acptr) && IsRegisteredUser(acptr))
+      if (MyConnect(aclient_p) && IsRegisteredUser(aclient_p))
         {
-          if(acptr->serial != current_serial)
+          if(aclient_p->serial != current_serial)
 	    {
-	      send_message(acptr, (char *)llocal_sendbuf, llocal_len);
-	      acptr->serial = current_serial;
+	      send_message(aclient_p, (char *)llocal_sendbuf, llocal_len);
+	      aclient_p->serial = current_serial;
 	    }
         }
       else
@@ -581,11 +581,11 @@ sendto_list_anywhere(struct Client *one, struct Client *from,
            * Now check whether a message has been sent to this
            * remote link already
            */
-          if(acptr->from->serial != current_serial)
+          if(aclient_p->from->serial != current_serial)
             {
-	      send_message_remote(acptr, from, 
+	      send_message_remote(aclient_p, from, 
 				  (char *)lremote_sendbuf, lremote_len);
-              acptr->from->serial = current_serial;
+              aclient_p->from->serial = current_serial;
             }
         }
     }
@@ -606,7 +606,7 @@ sendto_serv_butone(struct Client *one, const char *pattern, ...)
   int len;
   va_list args;
   char sendbuf[IRCD_BUFSIZE*2];
-  struct Client *cptr;
+  struct Client *client_p;
   dlink_node *ptr;
 
   va_start(args, pattern);
@@ -615,12 +615,12 @@ sendto_serv_butone(struct Client *one, const char *pattern, ...)
   
   for(ptr = serv_list.head; ptr; ptr = ptr->next)
     {
-      cptr = ptr->data;
+      client_p = ptr->data;
 
-      if (one && (cptr == one->from))
+      if (one && (client_p == one->from))
         continue;
       
-      send_message(cptr, (char *)sendbuf, len);
+      send_message(client_p, (char *)sendbuf, len);
     }
 } /* sendto_serv_butone() */
 
@@ -635,13 +635,13 @@ sendto_serv_butone(struct Client *one, const char *pattern, ...)
  *		  client being unknown to leaf, as in lazylink...
  */
 void
-sendto_ll_serv_butone(struct Client *one, struct Client *sptr, int add,
+sendto_ll_serv_butone(struct Client *one, struct Client *server_p, int add,
 		      const char *pattern, ...)
 {
   int len;
   va_list args;
   char sendbuf[IRCD_BUFSIZE*2];
-  struct Client *cptr;
+  struct Client *client_p;
   dlink_node *ptr;
 
   va_start(args, pattern);
@@ -650,27 +650,27 @@ sendto_ll_serv_butone(struct Client *one, struct Client *sptr, int add,
   
   for(ptr = serv_list.head; ptr; ptr = ptr->next)
     {
-      cptr = ptr->data;
+      client_p = ptr->data;
 
-      if (one && (cptr == one->from))
+      if (one && (client_p == one->from))
         continue;
       
-      if (IsCapable(cptr,CAP_LL) && ServerInfo.hub)
+      if (IsCapable(client_p,CAP_LL) && ServerInfo.hub)
 	{
-	  if( ( sptr->lazyLinkClientExists &
-		cptr->localClient->serverMask) == 0)
+	  if( ( server_p->lazyLinkClientExists &
+		client_p->localClient->serverMask) == 0)
 	    {
 	      if(add)
 		{
-                  client_burst_if_needed(cptr,sptr);
-		  send_message(cptr, (char *)sendbuf, len);
+                  client_burst_if_needed(client_p,server_p);
+		  send_message(client_p, (char *)sendbuf, len);
 		}
 	    }
 	  else
-	    send_message(cptr, (char *)sendbuf, len);
+	    send_message(client_p, (char *)sendbuf, len);
 	}
       else
-	send_message(cptr, (char *)sendbuf, len);
+	send_message(client_p, (char *)sendbuf, len);
     }
 } /* sendto_ll_serv_butone() */
 
@@ -690,7 +690,7 @@ sendto_cap_serv_butone(int cap, struct Client *one, const char *pattern, ...)
   int len;
   va_list args;
   char sendbuf[IRCD_BUFSIZE*2];
-  struct Client *cptr;
+  struct Client *client_p;
   dlink_node *ptr;
 
   va_start(args, pattern);
@@ -699,13 +699,13 @@ sendto_cap_serv_butone(int cap, struct Client *one, const char *pattern, ...)
   
   for(ptr = serv_list.head; ptr; ptr = ptr->next)
     {
-      cptr = ptr->data;
+      client_p = ptr->data;
 
-      if (one && (cptr == one->from))
+      if (one && (client_p == one->from))
         continue;
       
-      if (IsCapable(cptr,cap))
-	send_message(cptr, (char *)sendbuf, len);
+      if (IsCapable(client_p,cap))
+	send_message(client_p, (char *)sendbuf, len);
     }
 } /* sendto_cap_serv_butone() */
 
@@ -725,7 +725,7 @@ sendto_nocap_serv_butone(int cap, struct Client *one, const char *pattern, ...)
   int len;
   va_list args;
   char sendbuf[IRCD_BUFSIZE*2];
-  struct Client *cptr;
+  struct Client *client_p;
   dlink_node *ptr;
 
   va_start(args, pattern);
@@ -734,13 +734,13 @@ sendto_nocap_serv_butone(int cap, struct Client *one, const char *pattern, ...)
 
   for(ptr = serv_list.head; ptr; ptr = ptr->next)
     {
-      cptr = ptr->data;
+      client_p = ptr->data;
 
-      if (one && (cptr == one->from))
+      if (one && (client_p == one->from))
         continue;
 
-      if (!IsCapable(cptr,cap))
-        send_message(cptr, (char *)sendbuf, len);
+      if (!IsCapable(client_p,cap))
+        send_message(client_p, (char *)sendbuf, len);
     }
 } /* sendto_cap_serv_butone() */
 
@@ -861,23 +861,23 @@ static void
 sendto_list_local(dlink_list *list, const char *lsendbuf, int len)
 {
   dlink_node *ptr;
-  struct Client *acptr;
+  struct Client *aclient_p;
 
   for (ptr = list->head; ptr; ptr = ptr->next)
     {
-      if ( (acptr = ptr->data) == NULL )
+      if ( (aclient_p = ptr->data) == NULL )
 	continue;
 
-      if (!MyConnect(acptr) || (acptr->fd < 0))
+      if (!MyConnect(aclient_p) || (aclient_p->fd < 0))
 	continue;
 
-      if (acptr->serial == current_serial)
+      if (aclient_p->serial == current_serial)
 	continue;
       
-      acptr->serial = current_serial;
+      aclient_p->serial = current_serial;
 
-      if (acptr && MyConnect(acptr))
-	send_message(acptr, (char *)lsendbuf, len);
+      if (aclient_p && MyConnect(aclient_p))
+	send_message(aclient_p, (char *)lsendbuf, len);
     }  
 } /* sendto_list() */
 
@@ -898,7 +898,7 @@ sendto_channel_remote(struct Channel *chptr,
   int len;
   char sendbuf[IRCD_BUFSIZE*2];
   va_list args;
-  struct Client *cptr;
+  struct Client *client_p;
   dlink_node *ptr;
 
   if (chptr != NULL)
@@ -915,19 +915,19 @@ sendto_channel_remote(struct Channel *chptr,
 
   for(ptr = serv_list.head; ptr; ptr = ptr->next)
     {
-      cptr = ptr->data;
+      client_p = ptr->data;
 
-      if (cptr == from)
+      if (client_p == from)
         continue;
 
-      if (ServerInfo.hub && IsCapable(cptr,CAP_LL))
+      if (ServerInfo.hub && IsCapable(client_p,CAP_LL))
 	{
 	  if( !(RootChan(chptr)->lazyLinkChannelExists &
-		cptr->localClient->serverMask) )
+		client_p->localClient->serverMask) )
 	    continue;
 	}
 
-      send_message (cptr, (char *)sendbuf, len);
+      send_message (client_p, (char *)sendbuf, len);
     }
 } /* sendto_channel_remote() */
 
@@ -949,7 +949,7 @@ sendto_channel_remote_prefix(struct Channel *chptr,
 {
   int ilen, llen;
   va_list args;
-  struct Client *cptr;
+  struct Client *client_p;
   dlink_node *ptr;
   char sendbuf[IRCD_BUFSIZE*2];
   char lbuf[IRCD_BUFSIZE + 1];
@@ -974,21 +974,21 @@ sendto_channel_remote_prefix(struct Channel *chptr,
   
   for(ptr = serv_list.head; ptr; ptr = ptr->next)
     {
-      cptr = ptr->data;
+      client_p = ptr->data;
 
-      if (cptr == from)
+      if (client_p == from)
         continue;
 
-      if (ServerInfo.hub && IsCapable(cptr,CAP_LL))
+      if (ServerInfo.hub && IsCapable(client_p,CAP_LL))
 	{
 	  if( !(RootChan(chptr)->lazyLinkChannelExists &
-		cptr->localClient->serverMask) )
+		client_p->localClient->serverMask) )
 	    continue;
 	}
-	  if (IsCapable(cptr, CAP_UID)) 
-	    send_message (cptr, ibuf, ilen);
+	  if (IsCapable(client_p, CAP_UID)) 
+	    send_message (client_p, ibuf, ilen);
 	  else
-	    send_message (cptr, lbuf, llen);
+	    send_message (client_p, lbuf, llen);
 	  
     }
 } /* sendto_channel_remote() */
@@ -1002,18 +1002,18 @@ sendto_channel_remote_prefix(struct Channel *chptr,
  * output       - NONE
  * side effects - send to all servers the channel given, except for "from"
  *		  This code is only used in m_join.c,m_sjoin.c
- *		  It will introduce the client 'sptr' if it is unknown
+ *		  It will introduce the client 'server_p' if it is unknown
  *		  to the leaf.
  */
 void
 sendto_ll_channel_remote(struct Channel *chptr,
-			 struct Client *from, struct Client *sptr,
+			 struct Client *from, struct Client *server_p,
 			 const char *pattern, ...)
 {
   int len;
   va_list args;
   char sendbuf[IRCD_BUFSIZE*2];
-  struct Client *cptr;
+  struct Client *client_p;
   dlink_node *ptr;
 
   if (chptr != NULL)
@@ -1030,32 +1030,32 @@ sendto_ll_channel_remote(struct Channel *chptr,
 
   for(ptr = serv_list.head; ptr; ptr = ptr->next)
     {
-      cptr = ptr->data;
+      client_p = ptr->data;
 
-      if (cptr == from)
+      if (client_p == from)
         continue;
 
-      if (IsCapable(cptr,CAP_LL))
+      if (IsCapable(client_p,CAP_LL))
 	{
 	  if(ServerInfo.hub)
 	    {
               /* Only tell leafs that already know about the channel */
               if ((RootChan(chptr)->lazyLinkChannelExists &
-                   cptr->localClient->serverMask) == 0)
+                   client_p->localClient->serverMask) == 0)
               {
                 continue;
               }
-	      if (sptr &&
-                  ((sptr->lazyLinkClientExists &
-                   cptr->localClient->serverMask) == 0))
+	      if (server_p &&
+                  ((server_p->lazyLinkClientExists &
+                   client_p->localClient->serverMask) == 0))
               {
-                sendnick_TS(cptr,sptr);
-                add_lazylinkclient(cptr,sptr);
+                sendnick_TS(client_p,server_p);
+                add_lazylinkclient(client_p,server_p);
               }
 	    }
 	}
 
-      send_message (cptr, (char *)sendbuf, len);
+      send_message (client_p, (char *)sendbuf, len);
     }
 } /* sendto_channel_remote() */
 
@@ -1079,7 +1079,7 @@ sendto_match_cap_servs(struct Channel *chptr, struct Client *from, int cap,
   int len;
   char sendbuf[IRCD_BUFSIZE*2];
   va_list args;
-  struct Client *cptr;
+  struct Client *client_p;
   dlink_node *ptr;
 
   if (chptr)
@@ -1094,22 +1094,22 @@ sendto_match_cap_servs(struct Channel *chptr, struct Client *from, int cap,
 
   for(ptr = serv_list.head; ptr; ptr = ptr->next)
     {
-      cptr = ptr->data;
+      client_p = ptr->data;
 
-      if (cptr == from)
+      if (client_p == from)
         continue;
       
-      if(!IsCapable(cptr, cap))
+      if(!IsCapable(client_p, cap))
         continue;
 
-      if (ServerInfo.hub && IsCapable(cptr,CAP_LL))
+      if (ServerInfo.hub && IsCapable(client_p,CAP_LL))
         {
           if( !(RootChan(chptr)->lazyLinkChannelExists &
-                cptr->localClient->serverMask) )
+                client_p->localClient->serverMask) )
             continue;
         }
       
-      send_message (cptr, (char *)sendbuf, len);
+      send_message (client_p, (char *)sendbuf, len);
     }
 } /* sendto_match_cap_servs() */
 /*
@@ -1132,7 +1132,7 @@ sendto_match_cap_servs_nocap(struct Channel *chptr, struct Client *from,
   int len;
   char sendbuf[IRCD_BUFSIZE*2];
   va_list args;
-  struct Client *cptr;
+  struct Client *client_p;
   dlink_node *ptr;
 
   if (chptr)
@@ -1147,22 +1147,22 @@ sendto_match_cap_servs_nocap(struct Channel *chptr, struct Client *from,
 
   for(ptr = serv_list.head; ptr; ptr = ptr->next)
     {
-      cptr = ptr->data;
+      client_p = ptr->data;
 
-      if (cptr == from)
+      if (client_p == from)
         continue;
       
-      if(!IsCapable(cptr, cap) || IsCapable(cptr, nocap))
+      if(!IsCapable(client_p, cap) || IsCapable(client_p, nocap))
         continue;
 
-      if (ServerInfo.hub && IsCapable(cptr,CAP_LL))
+      if (ServerInfo.hub && IsCapable(client_p,CAP_LL))
         {
           if( !(RootChan(chptr)->lazyLinkChannelExists &
-                cptr->localClient->serverMask) )
+                client_p->localClient->serverMask) )
             continue;
         }
       
-      send_message (cptr, (char *)sendbuf, len);
+      send_message (client_p, (char *)sendbuf, len);
     }
 } /* sendto_match_cap_servs() */
 
@@ -1173,7 +1173,7 @@ sendto_match_nocap_servs(struct Channel *chptr, struct Client *from, int cap,
   int len;
   va_list args;
   char sendbuf[IRCD_BUFSIZE*2];
-  struct Client *cptr;
+  struct Client *client_p;
   dlink_node *ptr;
 
   if (chptr)
@@ -1188,22 +1188,22 @@ sendto_match_nocap_servs(struct Channel *chptr, struct Client *from, int cap,
 
   for(ptr = serv_list.head; ptr; ptr = ptr->next)
     {
-      cptr = ptr->data;
+      client_p = ptr->data;
 
-      if (cptr == from)
+      if (client_p == from)
         continue;
       
-      if(IsCapable(cptr, cap))
+      if(IsCapable(client_p, cap))
         continue;
 
-      if (ServerInfo.hub && IsCapable(cptr,CAP_LL))
+      if (ServerInfo.hub && IsCapable(client_p,CAP_LL))
         {
           if( !(RootChan(chptr)->lazyLinkChannelExists &
-                cptr->localClient->serverMask) )
+                client_p->localClient->serverMask) )
             continue;
         }
       
-      send_message (cptr, (char *)sendbuf, len);
+      send_message (client_p, (char *)sendbuf, len);
     }
 } /* sendto_match_cap_servs() */
 
@@ -1251,7 +1251,7 @@ sendto_match_butone(struct Client *one, struct Client *from,
 {
   int len;
   va_list args;
-  struct Client *cptr;
+  struct Client *client_p;
   dlink_node *ptr;
   char sendbuf[IRCD_BUFSIZE*2];
   char lbuf[IRCD_BUFSIZE*2];
@@ -1269,35 +1269,35 @@ sendto_match_butone(struct Client *one, struct Client *from,
   /* scan the local clients */
   for(ptr = lclient_list.head; ptr; ptr = ptr->next)
     {
-      cptr = ptr->data;
+      client_p = ptr->data;
 
-      if (cptr == one)  /* must skip the origin !! */
+      if (client_p == one)  /* must skip the origin !! */
         continue;
       
-      if (match_it(cptr, mask, what))
-	send_message(cptr, (char *)lbuf, len);
+      if (match_it(client_p, mask, what))
+	send_message(client_p, (char *)lbuf, len);
     }
 
   /* Now scan servers */
   len = ircsprintf(lbuf,":%s %s", from->name, sendbuf);
   for (ptr = serv_list.head; ptr; ptr = ptr->next)
     {
-      cptr = ptr->data;
+      client_p = ptr->data;
 
-      if (cptr == one) /* must skip the origin !! */
+      if (client_p == one) /* must skip the origin !! */
         continue;
 
       /*
        * The old code looped through every client on the
        * network for each server to check if the
-       * server (cptr) has at least 1 client matching
+       * server (client_p) has at least 1 client matching
        * the mask, using something like:
        *
-       * for (acptr = GlobalClientList; acptr; acptr = acptr->next)
-       *        if (IsRegisteredUser(acptr) &&
-       *                        match_it(acptr, mask, what) &&
-       *                        (acptr->from == cptr))
-       *   vsendto_prefix_one(cptr, from, pattern, args);
+       * for (aclient_p = GlobalClientList; aclient_p; aclient_p = aclient_p->next)
+       *        if (IsRegisteredUser(aclient_p) &&
+       *                        match_it(aclient_p, mask, what) &&
+       *                        (aclient_p->from == client_p))
+       *   vsendto_prefix_one(client_p, from, pattern, args);
        *
        * That way, we wouldn't send the message to
        * a server who didn't have a matching client.
@@ -1312,7 +1312,7 @@ sendto_match_butone(struct Client *one, struct Client *from,
        * -wnder
        */
 
-      send_message_remote(cptr, from, lbuf, len);
+      send_message_remote(client_p, from, lbuf, len);
     }
 
 
@@ -1386,7 +1386,7 @@ sendto_realops_flags(int flags, const char *pattern, ...)
 
 {
   int len;
-  struct Client *cptr;
+  struct Client *client_p;
   char sendbuf[IRCD_BUFSIZE*2];
   char nbuf[IRCD_BUFSIZE*2];
   dlink_node *ptr;
@@ -1398,19 +1398,19 @@ sendto_realops_flags(int flags, const char *pattern, ...)
 
   for (ptr = oper_list.head; ptr; ptr = ptr->next)
     {
-      cptr = ptr->data;
+      client_p = ptr->data;
 
-      if((flags == FLAGS_NOTADMIN) && IsAdmin(cptr)) 
+      if((flags == FLAGS_NOTADMIN) && IsAdmin(client_p)) 
         continue;
-      if(cptr->umodes & flags)
+      if(client_p->umodes & flags)
 	{
 	  len =ircsprintf(sendbuf, ":%s NOTICE %s :*** Notice -- %s",
 			  me.name,
-			  cptr->name,
+			  client_p->name,
 			  nbuf);
 
 	  len = send_trim(sendbuf,len);
-	  send_message(cptr, (char *)sendbuf, len);
+	  send_message(client_p, (char *)sendbuf, len);
 	}
     }
 } /* sendto_realops_flags() */
@@ -1426,12 +1426,12 @@ sendto_realops_flags(int flags, const char *pattern, ...)
  */
 
 void
-sendto_wallops_flags(int flags, struct Client *sptr,
+sendto_wallops_flags(int flags, struct Client *server_p,
                            const char *pattern, ...)
 {
   char prefix[NICKLEN + USERLEN + HOSTLEN + 5];
   int len;
-  struct Client *cptr;
+  struct Client *client_p;
   char nbuf[IRCD_BUFSIZE*2];
   char sendbuf[IRCD_BUFSIZE*2];
   dlink_node *ptr;
@@ -1441,21 +1441,21 @@ sendto_wallops_flags(int flags, struct Client *sptr,
   len = send_format(nbuf, pattern, args);
   va_end(args);
 
-  if(IsPerson(sptr))
+  if(IsPerson(server_p))
     (void)ircsprintf(prefix, ":%s!%s@%s",
-                     sptr->name, sptr->username, sptr->host);
+                     server_p->name, server_p->username, server_p->host);
   else
-    (void)ircsprintf(prefix, ":%s", sptr->name);
+    (void)ircsprintf(prefix, ":%s", server_p->name);
 
   for (ptr = oper_list.head; ptr; ptr = ptr->next)
     {
-      cptr = ptr->data;
+      client_p = ptr->data;
 
-      if(cptr->umodes & flags)
+      if(client_p->umodes & flags)
         {
           len =ircsprintf(sendbuf, "%s WALLOPS :%s", prefix, nbuf);
           len = send_trim(sendbuf,len);
-          send_message(cptr, (char *)sendbuf, len);
+          send_message(client_p, (char *)sendbuf, len);
         }
      }
 }
@@ -1583,7 +1583,7 @@ send_trim(char *lsendbuf,int len)
  */
 
 void
-kill_client(struct Client *cptr,
+kill_client(struct Client *client_p,
 	    struct Client *diedie, const char *pattern, ...)
 {
   va_list args;
@@ -1596,7 +1596,7 @@ kill_client(struct Client *cptr,
   len = send_format(reason,"%s",args);
   va_end(args);
   
-  if(HasID(diedie) && IsCapable(cptr, CAP_UID))
+  if(HasID(diedie) && IsCapable(client_p, CAP_UID))
     {
       len_buf = ircsprintf(sendbuf, ":%s KILL %s :%s",
                            me.name, ID(diedie), reason);
@@ -1609,7 +1609,7 @@ kill_client(struct Client *cptr,
       len_buf = send_trim(sendbuf, len_buf);
     }
 
-  send_message(cptr, sendbuf, len_buf);
+  send_message(client_p, sendbuf, len_buf);
 }
 
 
@@ -1625,7 +1625,7 @@ kill_client(struct Client *cptr,
  *		  client being unknown to leaf, as in lazylink...
  */
 void
-kill_client_ll_serv_butone(struct Client *one, struct Client *sptr,
+kill_client_ll_serv_butone(struct Client *one, struct Client *server_p,
 			   const char *pattern, ...)
 {
   va_list args;
@@ -1633,7 +1633,7 @@ kill_client_ll_serv_butone(struct Client *one, struct Client *sptr,
   int len_uid=0;
   int len_nick=0;
   int have_uid;
-  struct Client *cptr;
+  struct Client *client_p;
   dlink_node *ptr;
   char sendbuf_uid[IRCD_BUFSIZE*2];
   char sendbuf_nick[IRCD_BUFSIZE*2];
@@ -1644,44 +1644,44 @@ kill_client_ll_serv_butone(struct Client *one, struct Client *sptr,
   va_end(args);
   
   have_uid = 0;
-  if(HasID(sptr))
+  if(HasID(server_p))
     {
       len_uid = ircsprintf(sendbuf_uid,":%s KILL %s :%s",
-			    me.name, ID(sptr), reason);
+			    me.name, ID(server_p), reason);
       len_uid = send_trim(sendbuf_uid, len_uid);
       have_uid = 1;
     }		    
   else
     {
       len_nick  = ircsprintf(sendbuf_nick,":%s KILL %s :%s",
-			    me.name, sptr->name, reason);
+			    me.name, server_p->name, reason);
       len_nick  = send_trim(sendbuf_nick, len_nick);
     }
   
   for(ptr = serv_list.head; ptr; ptr = ptr->next)
     {
-      cptr = ptr->data;
+      client_p = ptr->data;
 
-      if (one && (cptr == one->from))
+      if (one && (client_p == one->from))
         continue;
       
-      if (IsCapable(cptr,CAP_LL) && ServerInfo.hub)
+      if (IsCapable(client_p,CAP_LL) && ServerInfo.hub)
 	{
-	  if( ( sptr->lazyLinkClientExists &
-		cptr->localClient->serverMask) != 0)
+	  if( ( server_p->lazyLinkClientExists &
+		client_p->localClient->serverMask) != 0)
 	    {
-	      if (have_uid && IsCapable(cptr, CAP_UID))
-		send_message(cptr, (char *)sendbuf_uid, len_uid);
+	      if (have_uid && IsCapable(client_p, CAP_UID))
+		send_message(client_p, (char *)sendbuf_uid, len_uid);
 	      else
-		send_message(cptr, (char *)sendbuf_nick, len_nick);
+		send_message(client_p, (char *)sendbuf_nick, len_nick);
 	    }
 	}
       else
 	{
-	  if (have_uid && IsCapable(cptr, CAP_UID))
-	    send_message(cptr, (char *)sendbuf_uid, len_uid);
+	  if (have_uid && IsCapable(client_p, CAP_UID))
+	    send_message(client_p, (char *)sendbuf_uid, len_uid);
 	  else
-	    send_message(cptr, (char *)sendbuf_nick, len_nick);
+	    send_message(client_p, (char *)sendbuf_nick, len_nick);
 	}
     }
 } 

@@ -38,8 +38,8 @@ typedef enum HandlerType {
 /*
  * MessageHandler function
  * Params:
- * struct Client* cptr   - connection message originated from
- * struct Client* sptr   - source of message, may be different from cptr
+ * struct Client* client_p   - connection message originated from
+ * struct Client* server_p   - source of message, may be different from client_p
  * int            parc   - parameter count
  * char*          parv[] - parameter vector
  */

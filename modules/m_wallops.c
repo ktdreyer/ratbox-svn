@@ -62,7 +62,7 @@ char *_version = "20001122";
  *      parv[0] = sender prefix
  *      parv[1] = message text
  */
-static void mo_wallops(struct Client *cptr, struct Client *sptr,
+static void mo_wallops(struct Client *client_p, struct Client *server_p,
                       int parc, char *parv[])
 { 
   char* message;
@@ -71,13 +71,13 @@ static void mo_wallops(struct Client *cptr, struct Client *sptr,
   
   if (EmptyString(message))
     {
-      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
+      sendto_one(server_p, form_str(ERR_NEEDMOREPARAMS),
                  me.name, parv[0], "WALLOPS");
       return;
     }
 
-  sendto_wallops_flags(FLAGS_OPERWALL, sptr, "%s", message);
-  sendto_ll_serv_butone(NULL, sptr, 1,
+  sendto_wallops_flags(FLAGS_OPERWALL, server_p, "%s", message);
+  sendto_ll_serv_butone(NULL, server_p, 1,
                         ":%s WALLOPS :%s", parv[0], message);
 }
 
@@ -86,7 +86,7 @@ static void mo_wallops(struct Client *cptr, struct Client *sptr,
  *      parv[0] = sender prefix
  *      parv[1] = message text
  */
-static void ms_wallops(struct Client *cptr, struct Client *sptr,
+static void ms_wallops(struct Client *client_p, struct Client *server_p,
                       int parc, char *parv[])
 { 
   char* message;
@@ -95,17 +95,17 @@ static void ms_wallops(struct Client *cptr, struct Client *sptr,
   
   if (EmptyString(message))
     {
-      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
+      sendto_one(server_p, form_str(ERR_NEEDMOREPARAMS),
                  me.name, parv[0], "WALLOPS");
       return;
     }
 
-  if(IsClient(sptr))
-    sendto_wallops_flags(FLAGS_OPERWALL, sptr, "%s", message);
+  if(IsClient(server_p))
+    sendto_wallops_flags(FLAGS_OPERWALL, server_p, "%s", message);
   else
-    sendto_wallops_flags(FLAGS_WALLOP, sptr, "%s", message); 
+    sendto_wallops_flags(FLAGS_WALLOP, server_p, "%s", message); 
 
-  sendto_ll_serv_butone(cptr, sptr, 1,
+  sendto_ll_serv_butone(client_p, server_p, 1,
                         ":%s WALLOPS :%s", parv[0], message);
 }
 

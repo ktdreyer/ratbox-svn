@@ -65,14 +65,14 @@ char *_version = "20001122";
  * mo_rehash - REHASH message handler
  *
  */
-static void mo_rehash(struct Client *cptr, struct Client *sptr,
+static void mo_rehash(struct Client *client_p, struct Client *server_p,
                      int parc, char *parv[])
 {
   int found = NO;
 
-  if ( !IsOperRehash(sptr) )
+  if ( !IsOperRehash(server_p) )
     {
-      sendto_one(sptr,":%s NOTICE %s :You have no H flag", me.name, parv[0]);
+      sendto_one(server_p,":%s NOTICE %s :You have no H flag", me.name, parv[0]);
       return;
     }
 
@@ -88,7 +88,7 @@ static void mo_rehash(struct Client *cptr, struct Client *sptr,
         }
       else if(irccmp(parv[1],"DNS") == 0)
         {
-          sendto_one(sptr, form_str(RPL_REHASHING), me.name, parv[0], "DNS");
+          sendto_one(server_p, form_str(RPL_REHASHING), me.name, parv[0], "DNS");
           sendto_realops_flags(FLAGS_ALL,"%s is rehashing DNS", parv[0]);
           restart_resolver();   /* re-read /etc/resolv.conf AGAIN?
                                    and close/re-open res socket */
@@ -96,7 +96,7 @@ static void mo_rehash(struct Client *cptr, struct Client *sptr,
         }
       else if(irccmp(parv[1],"GC") == 0)
         {
-          sendto_one(sptr, form_str(RPL_REHASHING), me.name, parv[0], "garbage collecting");
+          sendto_one(server_p, form_str(RPL_REHASHING), me.name, parv[0], "garbage collecting");
           block_garbage_collect();
           sendto_realops_flags(FLAGS_ALL,"%s is garbage collecting", parv[0]);
           found = YES;
@@ -125,23 +125,23 @@ static void mo_rehash(struct Client *cptr, struct Client *sptr,
       if(found)
         {
           log(L_NOTICE, "REHASH %s From %s\n", parv[1], 
-              get_client_name(sptr, HIDE_IP));
+              get_client_name(server_p, HIDE_IP));
           return;
         }
       else
         {
-          sendto_one(sptr,":%s NOTICE %s :rehash one of :CHANNELS DNS GC HELP MOTD OMOTD" ,me.name,sptr->name);
+          sendto_one(server_p,":%s NOTICE %s :rehash one of :CHANNELS DNS GC HELP MOTD OMOTD" ,me.name,server_p->name);
           return;
         }
     }
   else
     {
-      sendto_one(sptr, form_str(RPL_REHASHING), me.name, parv[0],
+      sendto_one(server_p, form_str(RPL_REHASHING), me.name, parv[0],
                  ConfigFileEntry.configfile);
       sendto_realops_flags(FLAGS_ALL,
 			   "%s is rehashing server config file", parv[0]);
-      log(L_NOTICE, "REHASH From %s", get_client_name(sptr, SHOW_IP));
-      rehash(cptr, sptr, 0);
+      log(L_NOTICE, "REHASH From %s", get_client_name(server_p, SHOW_IP));
+      rehash(client_p, server_p, 0);
       return;
     }
 }

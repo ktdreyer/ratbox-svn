@@ -60,7 +60,7 @@ char *_version = "20001122";
  * m_help - HELP message handler
  *      parv[0] = sender prefix
  */
-static void m_help(struct Client *cptr, struct Client *sptr,
+static void m_help(struct Client *client_p, struct Client *server_p,
                   int parc, char *parv[])
 {
   static time_t last_used = 0;
@@ -69,7 +69,7 @@ static void m_help(struct Client *cptr, struct Client *sptr,
   if ((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
     {
       /* safe enough to give this on a local connect only */
-      sendto_one(sptr,form_str(RPL_LOAD2HI),me.name,parv[0]);
+      sendto_one(server_p,form_str(RPL_LOAD2HI),me.name,parv[0]);
       return;
     }
   else
@@ -77,16 +77,16 @@ static void m_help(struct Client *cptr, struct Client *sptr,
       last_used = CurrentTime;
     }
 
-  report_messages(sptr);
+  report_messages(server_p);
 }
 
 /*
  * mo_help - HELP message handler
  *      parv[0] = sender prefix
  */
-static void mo_help(struct Client *cptr, struct Client *sptr,
+static void mo_help(struct Client *client_p, struct Client *server_p,
                    int parc, char *parv[])
 {
-  SendMessageFile(sptr, &ConfigFileEntry.helpfile);
+  SendMessageFile(server_p, &ConfigFileEntry.helpfile);
 }
 

@@ -45,35 +45,35 @@ static char               readBuf[READBUF_SIZE];
  * parse_client_queued - parse client queued messages
  */
 static
-void parse_client_queued(struct Client *cptr)
+void parse_client_queued(struct Client *client_p)
 { 
     int dolen  = 0;
 #if 0
-    struct LocalUser *lcptr = cptr->localClient;
+    struct LocalUser *lclient_p = client_p->localClient;
     int checkflood = 1; /* Whether we're checking or not */
 #endif
 
 #if 0
-    if (IsServer(cptr))
+    if (IsServer(client_p))
 #endif
       {
-	while ((dolen = linebuf_get(&cptr->localClient->buf_recvq,
+	while ((dolen = linebuf_get(&client_p->localClient->buf_recvq,
 				    readBuf, READBUF_SIZE)) > 0)
         {
-          if (IsDead(cptr))
+          if (IsDead(client_p))
 	    {
-	      linebuf_donebuf(&cptr->localClient->buf_recvq);
-	      linebuf_donebuf(&cptr->localClient->buf_sendq);
+	      linebuf_donebuf(&client_p->localClient->buf_recvq);
+	      linebuf_donebuf(&client_p->localClient->buf_sendq);
 	      return;
 	    }
-	  client_dopacket(cptr, readBuf, dolen);
+	  client_dopacket(client_p, readBuf, dolen);
 	}
       }
 #if 0
     else
       {
 	checkflood = 0;
-	if (ConfigFileEntry.no_oper_flood && IsOper(cptr))
+	if (ConfigFileEntry.no_oper_flood && IsOper(client_p))
 	  checkflood = 0;
 
 	/*
@@ -83,15 +83,15 @@ void parse_client_queued(struct Client *cptr)
 	 */
 
 	for (;;) {
-	  if (checkflood && (lcptr->sent_parsed > lcptr->allow_read))
+	  if (checkflood && (lclient_p->sent_parsed > lclient_p->allow_read))
             break;
-	  assert(lcptr->sent_parsed <= lcptr->allow_read);
-	  dolen = linebuf_get(&cptr->localClient->buf_recvq, readBuf,
+	  assert(lclient_p->sent_parsed <= lclient_p->allow_read);
+	  dolen = linebuf_get(&client_p->localClient->buf_recvq, readBuf,
 			      READBUF_SIZE);
 	  if (!dolen)
             break;
-	  client_dopacket(cptr, readBuf, dolen);
-	  lcptr->sent_parsed++;
+	  client_dopacket(client_p, readBuf, dolen);
+	  lclient_p->sent_parsed++;
 	}
       }
 #endif
@@ -106,18 +106,18 @@ void parse_client_queued(struct Client *cptr)
 void
 flood_recalc(int fd, void *data)
 {
-    struct Client *cptr = data;
-    struct LocalUser *lcptr = cptr->localClient;
+    struct Client *client_p = data;
+    struct LocalUser *lclient_p = client_p->localClient;
 
-    assert(cptr != NULL);
-    assert(lcptr != NULL);
+    assert(client_p != NULL);
+    assert(lclient_p != NULL);
 
     /* 
      * If we're a server, skip to the end. Realising here that this call is
      * cheap and it means that if a op is downgraded they still get considered
      * for anti-flood protection ..
      */
-    if (!IsPrivileged(cptr))
+    if (!IsPrivileged(client_p))
       {
 	/*
 	 * ok, we have to recalculate the number of messages we can receive
@@ -127,33 +127,33 @@ flood_recalc(int fd, void *data)
 	 *   -- adrian
 	 */
 
-	if (lcptr->allow_read == 0)
+	if (lclient_p->allow_read == 0)
 	  /* Give the poor person a go! */
-	  lcptr->allow_read = 1;
-	else if (lcptr->actually_read < lcptr->allow_read)
+	  lclient_p->allow_read = 1;
+	else if (lclient_p->actually_read < lclient_p->allow_read)
 	  /* Raise the allowed messages if we flooded under the limit */
-	  lcptr->allow_read++;
+	  lclient_p->allow_read++;
 	else
 	  /* Drop the limit to avoid flooding .. */
-	  lcptr->allow_read--;
+	  lclient_p->allow_read--;
 
 	/* Enforce floor/ceiling restrictions */
-	if (lcptr->allow_read < 1)
-	  lcptr->allow_read = 1;
-	else if (lcptr->allow_read > MAX_FLOOD_PER_SEC)
-	  lcptr->allow_read = MAX_FLOOD_PER_SEC;
+	if (lclient_p->allow_read < 1)
+	  lclient_p->allow_read = 1;
+	else if (lclient_p->allow_read > MAX_FLOOD_PER_SEC)
+	  lclient_p->allow_read = MAX_FLOOD_PER_SEC;
       }
 
     /* Reset the sent-per-second count */
-    lcptr->sent_parsed = 0;
-    lcptr->actually_read = 0;
+    lclient_p->sent_parsed = 0;
+    lclient_p->actually_read = 0;
 
-    parse_client_queued(cptr);
+    parse_client_queued(client_p);
     /* And now, try flushing .. */
-    if (!IsDead(cptr))
+    if (!IsDead(client_p))
     {
         /* and finally, reset the flood check */
-        comm_setflush(fd, 1, flood_recalc, cptr);
+        comm_setflush(fd, 1, flood_recalc, client_p);
     }
 }
 
@@ -163,19 +163,19 @@ flood_recalc(int fd, void *data)
 void
 read_packet(int fd, void *data)
 {
-  struct Client *cptr = data;
-  struct LocalUser *lcptr = cptr->localClient;
+  struct Client *client_p = data;
+  struct LocalUser *lclient_p = client_p->localClient;
   int length = 0;
 
-  assert(lcptr != NULL);
-  assert(lcptr->allow_read <= MAX_FLOOD_PER_SEC);
+  assert(lclient_p != NULL);
+  assert(lclient_p->allow_read <= MAX_FLOOD_PER_SEC);
 
   /*
    * Read some data. We *used to* do anti-flood protection here, but
    * I personally think it makes the code too hairy to make sane.
    *     -- adrian
    */
-  length = recv(cptr->fd, readBuf, READBUF_SIZE, 0);
+  length = recv(client_p->fd, readBuf, READBUF_SIZE, 0);
 
   /* XXX If the client is actually dead, read the buffer but throw it out
    * a suggested more optimum fix will be to mark the fd as -1 and close it in 
@@ -183,38 +183,38 @@ read_packet(int fd, void *data)
    * -Dianora
    */
 
-  if(IsDead(cptr))return;
+  if(IsDead(client_p))return;
 
   if (length <= 0) {
     /*
      * We only get called when data is waiting,
      * so EOF/any error is fatal.
      */
-    error_exit_client(cptr, length);
+    error_exit_client(client_p, length);
     return;
   }
 
-  if (cptr->lasttime < CurrentTime)
-    cptr->lasttime = CurrentTime;
-  if (cptr->lasttime > cptr->since)
-    cptr->since = CurrentTime;
-  cptr->flags &= ~FLAGS_PINGSENT;
+  if (client_p->lasttime < CurrentTime)
+    client_p->lasttime = CurrentTime;
+  if (client_p->lasttime > client_p->since)
+    client_p->since = CurrentTime;
+  client_p->flags &= ~FLAGS_PINGSENT;
 
   /*
    * Before we even think of parsing what we just read, stick
    * it on the end of the receive queue and do it when its
    * turn comes around.
    */
-  lcptr->actually_read += linebuf_parse(&cptr->localClient->buf_recvq,
+  lclient_p->actually_read += linebuf_parse(&client_p->localClient->buf_recvq,
       readBuf, length);
 
   /* Check to make sure we're not flooding */
-  if (IsPerson(cptr) &&
-     (linebuf_alloclen(&cptr->localClient->buf_recvq) > CLIENT_FLOOD)) {
-      if (!(ConfigFileEntry.no_oper_flood && IsOper(cptr))) {
+  if (IsPerson(client_p) &&
+     (linebuf_alloclen(&client_p->localClient->buf_recvq) > CLIENT_FLOOD)) {
+      if (!(ConfigFileEntry.no_oper_flood && IsOper(client_p))) {
 
 #if 0
-        exit_client(cptr, cptr, cptr, "Excess Flood");
+        exit_client(client_p, client_p, client_p, "Excess Flood");
         return;
 #endif
 
@@ -222,17 +222,17 @@ read_packet(int fd, void *data)
     }
 
   /* Attempt to parse what we have */
-  parse_client_queued(cptr);
+  parse_client_queued(client_p);
 
-  if (!IsDead(cptr))
+  if (!IsDead(client_p))
   {
     /* If we get here, we need to register for another COMM_SELECT_READ */
-    if (PARSE_AS_SERVER(cptr)) {
-      comm_setselect(cptr->fd, FDLIST_SERVER, COMM_SELECT_READ,
-        read_packet, cptr, 0);
+    if (PARSE_AS_SERVER(client_p)) {
+      comm_setselect(client_p->fd, FDLIST_SERVER, COMM_SELECT_READ,
+        read_packet, client_p, 0);
     } else {
-      comm_setselect(cptr->fd, FDLIST_IDLECLIENT, COMM_SELECT_READ,
-        read_packet, cptr, 0);
+      comm_setselect(client_p->fd, FDLIST_IDLECLIENT, COMM_SELECT_READ,
+        read_packet, client_p, 0);
     }
   }
 }
@@ -242,35 +242,35 @@ read_packet(int fd, void *data)
 
 /*
  * client_dopacket - copy packet to client buf and parse it
- *      cptr - pointer to client structure for which the buffer data
+ *      client_p - pointer to client structure for which the buffer data
  *             applies.
  *      buffer - pointr to the buffer containing the newly read data
  *      length - number of valid bytes of data in the buffer
  *
  * Note:
  *      It is implicitly assumed that dopacket is called only
- *      with cptr of "local" variation, which contains all the
+ *      with client_p of "local" variation, which contains all the
  *      necessary fields (buffer etc..)
  */
-void client_dopacket(struct Client *cptr, char *buffer, size_t length)
+void client_dopacket(struct Client *client_p, char *buffer, size_t length)
 {
-  assert(cptr != NULL);
+  assert(client_p != NULL);
   assert(buffer != NULL);
 
   /* 
    * Update messages received
    */
   ++me.localClient->receiveM;
-  ++cptr->localClient->receiveM;
+  ++client_p->localClient->receiveM;
 
   /* 
    * Update bytes received
    */
-  cptr->localClient->receiveB += length;
+  client_p->localClient->receiveB += length;
 
-  if (cptr->localClient->receiveB > 1023) {
-    cptr->localClient->receiveK += (cptr->localClient->receiveB >> 10);
-    cptr->localClient->receiveB &= 0x03ff; /* 2^10 = 1024, 3ff = 1023 */
+  if (client_p->localClient->receiveB > 1023) {
+    client_p->localClient->receiveK += (client_p->localClient->receiveB >> 10);
+    client_p->localClient->receiveB &= 0x03ff; /* 2^10 = 1024, 3ff = 1023 */
   }
 
   me.localClient->receiveB += length;
@@ -281,7 +281,7 @@ void client_dopacket(struct Client *cptr, char *buffer, size_t length)
       me.localClient->receiveB &= 0x03ff;
     }
 
-  parse(cptr, buffer, buffer + length);
+  parse(client_p, buffer, buffer + length);
 }
 
 

@@ -102,11 +102,11 @@ void outofmemory()
  * side effects - add's an User information block to a client
  *                if it was not previously allocated.
  */
-struct User* make_user(struct Client *cptr)
+struct User* make_user(struct Client *client_p)
 {
   struct User        *user;
 
-  user = cptr->user;
+  user = client_p->user;
   if (!user)
     {
       user = BlockHeapALLOC(free_anUsers,struct User);
@@ -131,7 +131,7 @@ struct User* make_user(struct Client *cptr)
       user->id[0] = '\0';
 #endif
       user->refcnt = 1;
-      cptr->user = user;
+      client_p->user = user;
     }
   return user;
 }
@@ -144,9 +144,9 @@ struct User* make_user(struct Client *cptr)
  * side effects - add's an Server information block to a client
  *                if it was not previously allocated.
  */
-struct Server *make_server(struct Client *cptr)
+struct Server *make_server(struct Client *client_p)
 {
-  struct Server* serv = cptr->serv;
+  struct Server* serv = client_p->serv;
 
   if (!serv)
     {
@@ -165,9 +165,9 @@ struct Server *make_server(struct Client *cptr)
       *serv->by = '\0'; 
       serv->up = (char *)NULL;
 #endif
-      cptr->serv = serv;
+      client_p->serv = serv;
     }
-  return cptr->serv;
+  return client_p->serv;
 }
 
 /*
@@ -179,7 +179,7 @@ struct Server *make_server(struct Client *cptr)
  * side effects - Decrease user reference count by one and release block,
  *                if count reaches 0
  */
-void _free_user(struct User* user, struct Client* cptr)
+void _free_user(struct User* user, struct Client* client_p)
 {
   if (--user->refcnt <= 0)
     {
@@ -193,8 +193,8 @@ void _free_user(struct User* user, struct Client* cptr)
       {
         sendto_realops_flags(FLAGS_ALL,
 			   "* %#lx user (%s!%s@%s) %#lx %#lx %#lx %d %d *",
-			   (unsigned long)cptr, cptr ? cptr->name : "<noname>",
-			   cptr->username, cptr->host, (unsigned long)user,
+			   (unsigned long)client_p, client_p ? client_p->name : "<noname>",
+			   client_p->username, client_p->host, (unsigned long)user,
 			   (unsigned long)user->invited.head,
 			   (unsigned long)user->channel.head, user->joined,
 			   user->refcnt);

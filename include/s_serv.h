@@ -103,29 +103,29 @@ extern int MaxConnectionCount; /* GLOBAL - highest number of connections */
 
 
 extern int         check_server(const char* name, struct Client* server);
-extern int         hunt_server(struct Client* cptr, struct Client* sptr,
+extern int         hunt_server(struct Client* client_pt, struct Client* server_pt,
                                char* command, int server, 
                                int parc, char** parv);
 extern const char* my_name_for_link(const char* name, struct ConfItem* conf);
 extern void        send_capabilities(struct Client*, int);
-extern int         server_estab(struct Client* cptr);
+extern int         server_estab(struct Client* client_p);
 extern void        set_autoconn(struct Client *,char *,char *,int);
 extern const char* show_capabilities(struct Client* client);
 extern void        show_servers(struct Client *);
 extern void        try_connections(void *unused);
 
 extern void        initServerMask(void);
-extern void        burst_channel(struct Client *cptr, struct Channel *chptr);
+extern void        burst_channel(struct Client *client_p, struct Channel *chptr);
 extern void	   sendnick_TS(struct Client*, struct Client* );
 extern int         serv_connect(struct ConfItem *, struct Client *);
 extern unsigned long nextFreeMask(void);
 
 extern struct Client *uplink; /* NON NULL if leaf and is this servers uplink */
 
-void add_lazylinkchannel(struct Client *cptr, struct Channel *chptr);
-void add_lazylinkclient(struct Client *cptr, struct Client *sptr);
+void add_lazylinkchannel(struct Client *client_p, struct Channel *chptr);
+void add_lazylinkclient(struct Client *client_p, struct Client *server_p);
 void remove_lazylink_flags(unsigned long mask);
-void client_burst_if_needed(struct Client *cptr, struct Client *acptr);
+void client_burst_if_needed(struct Client *client_p, struct Client *aclient_p);
 
 #endif /* INCLUDED_s_serv_h */
 

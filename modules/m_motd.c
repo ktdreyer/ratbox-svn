@@ -66,7 +66,7 @@ char *_version = "20001122";
 **      parv[0] = sender prefix
 **      parv[1] = servername
 */
-static void m_motd(struct Client *cptr, struct Client *sptr,
+static void m_motd(struct Client *client_p, struct Client *server_p,
                   int parc, char *parv[])
 {
   static time_t last_used = 0;
@@ -74,25 +74,25 @@ static void m_motd(struct Client *cptr, struct Client *sptr,
   /* This is safe enough to use during non hidden server mode */
   if(!GlobalSetOptions.hide_server)
     {
-      if (hunt_server(cptr, sptr, ":%s MOTD :%s", 1,parc,parv)!=HUNTED_ISME)
+      if (hunt_server(client_p, server_p, ":%s MOTD :%s", 1,parc,parv)!=HUNTED_ISME)
 	return;
     }
 
   if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
     {
       /* safe enough to give this on a local connect only */
-      if(MyClient(sptr))
-	sendto_one(sptr,form_str(RPL_LOAD2HI),me.name,sptr->name);
+      if(MyClient(server_p))
+	sendto_one(server_p,form_str(RPL_LOAD2HI),me.name,server_p->name);
       return;
     }
   else
     last_used = CurrentTime;
 
   sendto_realops_flags(FLAGS_SPY, "motd requested by %s (%s@%s) [%s]",
-                     sptr->name, sptr->username, sptr->host,
-                     sptr->user->server);
+                     server_p->name, server_p->username, server_p->host,
+                     server_p->user->server);
 
-  SendMessageFile(sptr,&ConfigFileEntry.motd);
+  SendMessageFile(server_p,&ConfigFileEntry.motd);
 }
 
 /*
@@ -100,16 +100,16 @@ static void m_motd(struct Client *cptr, struct Client *sptr,
 **      parv[0] = sender prefix
 **      parv[1] = servername
 */
-static void mo_motd(struct Client *cptr, struct Client *sptr,
+static void mo_motd(struct Client *client_p, struct Client *server_p,
                    int parc, char *parv[])
 {
-  if (hunt_server(cptr, sptr, ":%s MOTD :%s", 1,parc,parv)!=HUNTED_ISME)
+  if (hunt_server(client_p, server_p, ":%s MOTD :%s", 1,parc,parv)!=HUNTED_ISME)
     return;
 
   sendto_realops_flags(FLAGS_SPY, "motd requested by %s (%s@%s) [%s]",
-                     sptr->name, sptr->username, sptr->host,
-                     sptr->user->server);
+                     server_p->name, server_p->username, server_p->host,
+                     server_p->user->server);
 
-  SendMessageFile(sptr,&ConfigFileEntry.motd);
+  SendMessageFile(server_p,&ConfigFileEntry.motd);
 }
 

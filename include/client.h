@@ -274,9 +274,9 @@ struct LocalUser
 
 
 #define HasID(x) (!IsServer(x) && (x)->user->id[0] != '\0')
-#define ID(sptr) (HasID(sptr) ? sptr->user->id : sptr->name)
+#define ID(server_p) (HasID(server_p) ? server_p->user->id : server_p->name)
 
-#define ID_or_name(x,cptr) (IsCapable(cptr,CAP_UID)?(x)->user->id:(x)->name)
+#define ID_or_name(x,client_p) (IsCapable(client_p,CAP_UID)?(x)->user->id:(x)->name)
 
 #define IsRegisteredUser(x)     ((x)->status == STAT_CLIENT)
 #define IsRegistered(x)         ((x)->status  > STAT_UNKNOWN)
@@ -551,13 +551,13 @@ extern struct Client* next_client_double(struct Client* next,
 extern int accept_message(struct Client *source, struct Client *target);
 extern void add_to_accept(struct Client *source, struct Client *target);
 extern void del_from_accept(struct Client *source, struct Client *target);
-extern void del_all_accepts(struct Client *cptr);
-extern void list_all_accepts(struct Client *sptr);
+extern void del_all_accepts(struct Client *client_p);
+extern void list_all_accepts(struct Client *server_p);
 
 extern void free_exited_clients(void);
-extern int set_initial_nick(struct Client *cptr, struct Client *sptr,
+extern int set_initial_nick(struct Client *client_p, struct Client *server_p,
                             char *nick);
-extern int change_local_nick(struct Client *cptr, struct Client *sptr,
+extern int change_local_nick(struct Client *client_p, struct Client *server_p,
                              char *nick);
 extern int clean_nick_name(char* nick);
 

@@ -141,10 +141,10 @@ int get_sockerr(int fd)
  *
  *        text        is a *format* string for outputing error. It must
  *                contain only two '%s', the first will be replaced
- *                by the sockhost from the cptr, and the latter will
+ *                by the sockhost from the client_p, and the latter will
  *                be taken from sys_errlist[errno].
  *
- *        cptr        if not NULL, is the *LOCAL* client associated with
+ *        client_p        if not NULL, is the *LOCAL* client associated with
  *                the error.
  *
  * Cannot use perror() within daemon. stderr is closed in
@@ -221,21 +221,21 @@ int set_non_blocking(int fd)
 /*
  * close_connection
  *        Close the physical connection. This function must make
- *        MyConnect(cptr) == FALSE, and set cptr->from == NULL.
+ *        MyConnect(client_p) == FALSE, and set client_p->from == NULL.
  */
-void close_connection(struct Client *cptr)
+void close_connection(struct Client *client_p)
 {
   struct ConfItem *aconf;
-  assert(0 != cptr);
+  assert(0 != client_p);
 
-  if (IsServer(cptr))
+  if (IsServer(client_p))
     {
       ServerStats->is_sv++;
-      ServerStats->is_sbs += cptr->localClient->sendB;
-      ServerStats->is_sbr += cptr->localClient->receiveB;
-      ServerStats->is_sks += cptr->localClient->sendK;
-      ServerStats->is_skr += cptr->localClient->receiveK;
-      ServerStats->is_sti += CurrentTime - cptr->firsttime;
+      ServerStats->is_sbs += client_p->localClient->sendB;
+      ServerStats->is_sbr += client_p->localClient->receiveB;
+      ServerStats->is_sks += client_p->localClient->sendK;
+      ServerStats->is_skr += client_p->localClient->receiveK;
+      ServerStats->is_sti += CurrentTime - client_p->firsttime;
       if (ServerStats->is_sbs > 2047)
         {
           ServerStats->is_sks += (ServerStats->is_sbs >> 10);
@@ -250,8 +250,8 @@ void close_connection(struct Client *cptr)
        * If the connection has been up for a long amount of time, schedule
        * a 'quick' reconnect, else reset the next-connect cycle.
        */
-      if ((aconf = find_conf_exact(cptr->name, cptr->username,
-                                   cptr->host, CONF_SERVER)))
+      if ((aconf = find_conf_exact(client_p->name, client_p->username,
+                                   client_p->host, CONF_SERVER)))
         {
           /*
            * Reschedule a faster reconnect, if this was a automatically
@@ -260,21 +260,21 @@ void close_connection(struct Client *cptr)
            * CONF_ILLEGAL). But only do this if it was a "good" link.
            */
           aconf->hold = time(NULL);
-          aconf->hold += (aconf->hold - cptr->since > HANGONGOODLINK) ?
+          aconf->hold += (aconf->hold - client_p->since > HANGONGOODLINK) ?
             HANGONRETRYDELAY : ConfConFreq(aconf);
           if (nextconnect > aconf->hold)
             nextconnect = aconf->hold;
         }
 
     }
-  else if (IsClient(cptr))
+  else if (IsClient(client_p))
     {
       ServerStats->is_cl++;
-      ServerStats->is_cbs += cptr->localClient->sendB;
-      ServerStats->is_cbr += cptr->localClient->receiveB;
-      ServerStats->is_cks += cptr->localClient->sendK;
-      ServerStats->is_ckr += cptr->localClient->receiveK;
-      ServerStats->is_cti += CurrentTime - cptr->firsttime;
+      ServerStats->is_cbs += client_p->localClient->sendB;
+      ServerStats->is_cbr += client_p->localClient->receiveB;
+      ServerStats->is_cks += client_p->localClient->sendK;
+      ServerStats->is_ckr += client_p->localClient->receiveK;
+      ServerStats->is_cti += CurrentTime - client_p->firsttime;
       if (ServerStats->is_cbs > 2047)
         {
           ServerStats->is_cks += (ServerStats->is_cbs >> 10);
@@ -290,38 +290,38 @@ void close_connection(struct Client *cptr)
     ServerStats->is_ni++;
   
 #if 0
-  if (cptr->localClient->dns_reply)
+  if (client_p->localClient->dns_reply)
     {
-      --cptr->localClient->dns_reply->ref_count;
-      cptr->localClient->dns_reply = 0;
+      --client_p->localClient->dns_reply->ref_count;
+      client_p->localClient->dns_reply = 0;
     }
 #endif
-  if (-1 < cptr->fd)
+  if (-1 < client_p->fd)
     {
       /* attempt to flush any pending dbufs. Evil, but .. -- adrian */
-      if (!IsDead(cptr))
-        send_queued_write(cptr->fd, cptr);
-      fd_close(cptr->fd);
-      cptr->fd = -1;
+      if (!IsDead(client_p))
+        send_queued_write(client_p->fd, client_p);
+      fd_close(client_p->fd);
+      client_p->fd = -1;
     }
 
-  linebuf_donebuf(&cptr->localClient->buf_sendq);
-  linebuf_donebuf(&cptr->localClient->buf_recvq);
-  memset(cptr->localClient->passwd, 0, sizeof(cptr->localClient->passwd));
+  linebuf_donebuf(&client_p->localClient->buf_sendq);
+  linebuf_donebuf(&client_p->localClient->buf_recvq);
+  memset(client_p->localClient->passwd, 0, sizeof(client_p->localClient->passwd));
   /*
    * clean up extra sockets from P-lines which have been discarded.
    */
-  if (cptr->localClient->listener)
+  if (client_p->localClient->listener)
     {
-      assert(0 < cptr->localClient->listener->ref_count);
-      if (0 == --cptr->localClient->listener->ref_count &&
-	  !cptr->localClient->listener->active) 
-	free_listener(cptr->localClient->listener);
-      cptr->localClient->listener = 0;
+      assert(0 < client_p->localClient->listener->ref_count);
+      if (0 == --client_p->localClient->listener->ref_count &&
+	  !client_p->localClient->listener->active) 
+	free_listener(client_p->localClient->listener);
+      client_p->localClient->listener = 0;
     }
 
-  det_confs_butmask(cptr, 0);
-  cptr->from = NULL; /* ...this should catch them! >:) --msa */
+  det_confs_butmask(client_p, 0);
+  client_p->from = NULL; /* ...this should catch them! >:) --msa */
 }
 
 /*
@@ -397,7 +397,7 @@ void add_connection(struct Listener* listener, int fd)
 }
 
 
-void error_exit_client(struct Client* cptr, int error)
+void error_exit_client(struct Client* client_p, int error)
 {
   /*
    * ...hmm, with non-blocking sockets we might get
@@ -409,38 +409,38 @@ void error_exit_client(struct Client* cptr, int error)
    * for reading even though it ends up being an EOF. -avalon
    */
   char errmsg[255];
-  int  current_error = get_sockerr(cptr->fd);
+  int  current_error = get_sockerr(client_p->fd);
 
   Debug((DEBUG_ERROR, "READ ERROR: fd = %d %d %d",
-         cptr->fd, current_error, error));
-  if (IsServer(cptr) || IsHandshake(cptr))
+         client_p->fd, current_error, error));
+  if (IsServer(client_p) || IsHandshake(client_p))
     {
-      int connected = CurrentTime - cptr->firsttime;
+      int connected = CurrentTime - client_p->firsttime;
       
       if (error == 0)
         {
 	  /* Admins get the real IP */
 	  sendto_realops_flags(FLAGS_ADMIN,
 				"Server %s closed the connection",
-				get_client_name(cptr, SHOW_IP));
+				get_client_name(client_p, SHOW_IP));
 
 	  /* Opers get a masked IP */
 	  sendto_realops_flags(FLAGS_NOTADMIN,
 				"Server %s closed the connection",
-				get_client_name(cptr, MASK_IP));
+				get_client_name(client_p, MASK_IP));
 
 	  log(L_NOTICE, "Server %s closed the connection",
-		get_client_name(cptr, SHOW_IP));
+		get_client_name(client_p, SHOW_IP));
         }
       else
 	{
           report_error("Lost connection to %s:%s", 
-		get_client_name(cptr, SHOW_IP), current_error);
+		get_client_name(client_p, SHOW_IP), current_error);
 	}
 
       sendto_realops_flags(FLAGS_ALL,
 			   "%s had been connected for %d day%s, %2d:%02d:%02d",
-			   cptr->name, connected/86400,
+			   client_p->name, connected/86400,
 			   (connected/86400 == 1) ? "" : "s",
 			   (connected % 86400) / 3600, (connected % 3600) / 60,
 			   connected % 60);
@@ -455,8 +455,8 @@ void error_exit_client(struct Client* cptr, int error)
                current_error, strerror(current_error));
   }
 
-  SetDead(cptr); /* mark the socket dead so it doesn't get any error msgs */
-  exit_client(cptr, cptr, &me, errmsg);
+  SetDead(client_p); /* mark the socket dead so it doesn't get any error msgs */
+  exit_client(client_p, client_p, &me, errmsg);
 }
 
 /*

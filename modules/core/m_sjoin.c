@@ -87,21 +87,21 @@ static int     pargs;
 static void set_final_mode(struct Mode *mode,struct Mode *oldmode);
 static void remove_our_modes(int type,
 		      struct Channel *chptr, struct Channel *top_chptr,
-		      struct Client *sptr);
+		      struct Client *server_p);
 
 static void remove_a_mode(int hide_or_not,
                           struct Channel *chptr, struct Channel *top_chptr,
-                          struct Client *sptr, dlink_list *list, char flag);
+                          struct Client *server_p, dlink_list *list, char flag);
 
 
-static void ms_sjoin(struct Client *cptr,
-                    struct Client *sptr,
+static void ms_sjoin(struct Client *client_p,
+                    struct Client *server_p,
                     int parc,
                     char *parv[])
 {
   struct Channel *chptr;
   struct Channel *top_chptr=NULL;	/* XXX vchans */
-  struct Client  *acptr, *lcptr;
+  struct Client  *aclient_p, *lclient_p;
   time_t         newts;
   time_t         oldts;
   time_t         tstosend;
@@ -128,7 +128,7 @@ static void ms_sjoin(struct Client *cptr,
   *sjbuf = '\0';
   *sjbuf_nh = '\0';
   
-  if (IsClient(sptr) || parc < 5)
+  if (IsClient(server_p) || parc < 5)
     return;
   if (!IsChannelName(parv[2]))
     return;
@@ -190,7 +190,7 @@ static void ms_sjoin(struct Client *cptr,
   *parabuf = '\0';
 
   isnew = ChannelExists(parv[2]) ? 0 : 1;
-  chptr = get_channel(sptr, parv[2], CREATE);
+  chptr = get_channel(server_p, parv[2], CREATE);
 
   /* XXX vchan cruft */
   /* vchans are encoded as "##mainchanname_timestamp" */
@@ -235,7 +235,7 @@ static void ms_sjoin(struct Client *cptr,
           /* check TS before creating a root channel */
 	  else if(newts == vc_ts)
 	    {
-	      top_chptr = get_channel(sptr, (parv[2] + 1), CREATE);
+	      top_chptr = get_channel(server_p, (parv[2] + 1), CREATE);
 	      m = make_dlink_node();
 	      dlinkAdd(chptr, m, &top_chptr->vchan_list);
 	      chptr->root_chptr=top_chptr;
@@ -257,7 +257,7 @@ static void ms_sjoin(struct Client *cptr,
   if (newts < 800000000)
     {
       sendto_realops_flags(FLAGS_ALL,"*** Bogus TS %lu on %s ignored from %s",
-			   newts, chptr->chname, cptr->name);
+			   newts, chptr->chname, client_p->name);
       newts = oldts;
     }
 
@@ -353,7 +353,7 @@ static void ms_sjoin(struct Client *cptr,
   /* Lost the TS, other side wins, so remove modes on this side */
   if (!keep_our_modes)
     {
-      remove_our_modes(hide_or_not, chptr, top_chptr, sptr);
+      remove_our_modes(hide_or_not, chptr, top_chptr, server_p);
     }
 
   if(*modebuf != '\0')
@@ -374,7 +374,7 @@ static void ms_sjoin(struct Client *cptr,
 
   *modebuf = *parabuf = '\0';
   if (parv[3][0] != '0' && keep_new_modes)
-    channel_modes(chptr, sptr, modebuf, parabuf);
+    channel_modes(chptr, server_p, modebuf, parabuf);
   else
     {
       modebuf[0] = '0';
@@ -437,11 +437,11 @@ static void ms_sjoin(struct Client *cptr,
           }
        }
 
-      if (!(acptr = find_chasing(sptr, s, NULL)))
+      if (!(aclient_p = find_chasing(server_p, s, NULL)))
         continue;
-      if (acptr->from != cptr)
+      if (aclient_p->from != client_p)
         continue;
-      if (!IsPerson(acptr))
+      if (!IsPerson(aclient_p))
         continue;
       
       people++;
@@ -451,53 +451,53 @@ static void ms_sjoin(struct Client *cptr,
       {
         for (m = serv_list.head; m; m = m->next)
         {
-          lcptr = m->data;
+          lclient_p = m->data;
 
           /* Hopefully, the server knows about it's own clients. */
-          if (cptr == lcptr)
+          if (client_p == lclient_p)
             continue;
 
           /* Ignore non lazylinks */
-          if (!IsCapable(lcptr,CAP_LL))
+          if (!IsCapable(lclient_p,CAP_LL))
             continue;
 
           /* Ignore servers we won't tell anyway */
           if( !(RootChan(chptr)->lazyLinkChannelExists &
-                lcptr->localClient->serverMask) )
+                lclient_p->localClient->serverMask) )
             continue;
 
-          /* Ignore servers that already know acptr */
-          if( !(acptr->lazyLinkClientExists &
-                lcptr->localClient->serverMask) )
+          /* Ignore servers that already know aclient_p */
+          if( !(aclient_p->lazyLinkClientExists &
+                lclient_p->localClient->serverMask) )
           {
-            /* Tell LazyLink Leaf about cptr,
+            /* Tell LazyLink Leaf about client_p,
              * as the leaf is about to get a SJOIN */
-            sendnick_TS( lcptr, acptr );
-            add_lazylinkclient(lcptr,acptr);
+            sendnick_TS( lclient_p, aclient_p );
+            add_lazylinkclient(lclient_p,aclient_p);
           }
         }
       }
       
-      if (!IsMember(acptr, chptr))
+      if (!IsMember(aclient_p, chptr))
         {
-          add_user_to_channel(chptr, acptr, fl);
+          add_user_to_channel(chptr, aclient_p, fl);
 	  /* XXX vchan stuff */
 
 	  if( top_chptr )
 	    {
-	      add_vchan_to_client_cache(acptr,top_chptr, chptr);
+	      add_vchan_to_client_cache(aclient_p,top_chptr, chptr);
 	      sendto_channel_local(ALL_MEMBERS,chptr, ":%s!%s@%s JOIN :%s",
-				   acptr->name,
-				   acptr->username,
-				   acptr->host,
+				   aclient_p->name,
+				   aclient_p->username,
+				   aclient_p->host,
 				   top_chptr->chname);
 	    }
 	  else
 	    {
 	      sendto_channel_local(ALL_MEMBERS,chptr, ":%s!%s@%s JOIN :%s",
-				   acptr->name,
-				   acptr->username,
-				   acptr->host,
+				   aclient_p->name,
+				   aclient_p->username,
+				   aclient_p->host,
 				   parv[2]);
 	    }
         }
@@ -558,27 +558,27 @@ static void ms_sjoin(struct Client *cptr,
   /* relay the SJOIN to other servers */
   for(m = serv_list.head; m; m = m->next)
     {
-      acptr = m->data;
+      aclient_p = m->data;
 
-      if (acptr == cptr->from)
+      if (aclient_p == client_p->from)
         continue;
 
       /* skip lazylinks that don't know about this server */
-      if (ServerInfo.hub && IsCapable(acptr,CAP_LL))
+      if (ServerInfo.hub && IsCapable(aclient_p,CAP_LL))
       {
         if( !(RootChan(chptr)->lazyLinkChannelExists &
-              acptr->localClient->serverMask) )
+              aclient_p->localClient->serverMask) )
           continue;
       }
 
-      if (chptr->users == 0 && !IsCapable(acptr, CAP_VCHAN))
+      if (chptr->users == 0 && !IsCapable(aclient_p, CAP_VCHAN))
         continue;
 
       /* XXX - ids ? */
-      if (IsCapable(acptr,CAP_HOPS))
-        sendto_one(acptr, "%s %s", buf, sjbuf);
+      if (IsCapable(aclient_p,CAP_HOPS))
+        sendto_one(aclient_p, "%s %s", buf, sjbuf);
       else
-        sendto_one(acptr, "%s %s", buf, sjbuf_nh);
+        sendto_one(aclient_p, "%s %s", buf, sjbuf_nh);
     }
 }
 
@@ -703,11 +703,11 @@ static void set_final_mode(struct Mode *mode,struct Mode *oldmode)
  */
 static void remove_our_modes( int hide_or_not,
                               struct Channel *chptr, struct Channel *top_chptr,
-                              struct Client *sptr)
+                              struct Client *server_p)
 {
-  remove_a_mode(hide_or_not, chptr, top_chptr, sptr, &chptr->chanops, 'o');
-  remove_a_mode(hide_or_not, chptr, top_chptr, sptr, &chptr->halfops, 'h');
-  remove_a_mode(hide_or_not, chptr, top_chptr, sptr, &chptr->voiced, 'v');
+  remove_a_mode(hide_or_not, chptr, top_chptr, server_p, &chptr->chanops, 'o');
+  remove_a_mode(hide_or_not, chptr, top_chptr, server_p, &chptr->halfops, 'h');
+  remove_a_mode(hide_or_not, chptr, top_chptr, server_p, &chptr->voiced, 'v');
 
   /* Move all voice/ops etc. to non opped list */
   dlinkMoveList(&chptr->chanops, &chptr->peons);
@@ -727,10 +727,10 @@ static void remove_our_modes( int hide_or_not,
  */
 static void remove_a_mode( int hide_or_not,
                            struct Channel *chptr, struct Channel *top_chptr,
-                           struct Client *sptr, dlink_list *list, char flag)
+                           struct Client *server_p, dlink_list *list, char flag)
 {
   dlink_node *ptr;
-  struct Client *acptr;
+  struct Client *aclient_p;
   char buf[BUFSIZE];
   char lmodebuf[MODEBUFLEN];
   char *lpara[MAXMODEPARAMS];
@@ -751,8 +751,8 @@ static void remove_a_mode( int hide_or_not,
 
   for (ptr = list->head; ptr && ptr->data; ptr = ptr->next)
     {
-      acptr = ptr->data;
-      lpara[count++] = acptr->name;
+      aclient_p = ptr->data;
+      lpara[count++] = aclient_p->name;
 
       *mbuf++ = flag;
 

@@ -68,12 +68,12 @@ char *_version = "20001122";
 **      parv[1] - user to invite
 **      parv[2] - channel number
 */
-static void m_invite(struct Client *cptr,
-                    struct Client *sptr,
+static void m_invite(struct Client *client_p,
+                    struct Client *server_p,
                     int parc,
                     char *parv[])
 {
-  struct Client *acptr;
+  struct Client *aclient_p;
   struct Channel *chptr;
   struct Channel *vchan;
   char   *chname;
@@ -81,33 +81,33 @@ static void m_invite(struct Client *cptr,
 
   if (*parv[2] == '\0')
     {
-      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
+      sendto_one(server_p, form_str(ERR_NEEDMOREPARAMS),
                  me.name, parv[0], "INVITE");
       return;
     }
 
   /* A little sanity test here */
-  if(!sptr->user)
+  if(!server_p->user)
     return;
 
-  if (!(acptr = find_person(parv[1], (struct Client *)NULL)))
+  if (!(aclient_p = find_person(parv[1], (struct Client *)NULL)))
     {
-      sendto_one(sptr, form_str(ERR_NOSUCHNICK),
+      sendto_one(server_p, form_str(ERR_NOSUCHNICK),
                  me.name, parv[0], parv[1]);
       return;
     }
 
   if (!check_channel_name(parv[2]))
     { 
-      sendto_one(sptr, form_str(ERR_BADCHANNAME),
+      sendto_one(server_p, form_str(ERR_BADCHANNAME),
                  me.name, parv[0], (unsigned char *)parv[2]);
       return;
     }
 
   if (!IsChannelName(parv[2]))
     {
-      if (MyClient(sptr))
-        sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL),
+      if (MyClient(server_p))
+        sendto_one(server_p, form_str(ERR_NOSUCHCHANNEL),
                    me.name, parv[0], parv[2]);
       return;
     }
@@ -115,22 +115,22 @@ static void m_invite(struct Client *cptr,
   /* Do not send local channel invites to users if they are not on the
    * same server as the person sending the INVITE message. 
    */
-  /* Possibly should be an error sent to sptr */
-  /* done .. there should be no problem because MyConnect(sptr) should
+  /* Possibly should be an error sent to server_p */
+  /* done .. there should be no problem because MyConnect(server_p) should
    * always be true if parse() and such is working correctly --is
    */
 
-  if (!MyConnect(acptr) && (parv[2][0] == '&'))
+  if (!MyConnect(aclient_p) && (parv[2][0] == '&'))
     {
-      sendto_one(sptr, form_str(ERR_USERNOTONSERV),
+      sendto_one(server_p, form_str(ERR_USERNOTONSERV),
 		 me.name, parv[0], parv[1]);
       return;
     }
 	  
   if (!(chptr = hash_find_channel(parv[2], NullChn)))
     {
-      if (MyClient(sptr))
-        sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL),
+      if (MyClient(server_p))
+        sendto_one(server_p, form_str(ERR_NOSUCHCHANNEL),
                    me.name, parv[0], parv[2]);
       return;
     }
@@ -139,76 +139,76 @@ static void m_invite(struct Client *cptr,
 
   if (HasVchans(chptr))
     {
-      if (map_vchan(chptr,acptr))
+      if (map_vchan(chptr,aclient_p))
 	{
-	  if (MyClient(sptr))
-	    sendto_one(sptr, form_str(ERR_USERONCHANNEL),
+	  if (MyClient(server_p))
+	    sendto_one(server_p, form_str(ERR_USERONCHANNEL),
 		       me.name, parv[0], parv[1], parv[2]);
 	  return;
 	}
 
-      if ((vchan = map_vchan(chptr,sptr)))
+      if ((vchan = map_vchan(chptr,server_p)))
 	chptr = vchan;
     }
 
   chname = chptr->chname;
 
-  if (!IsMember(sptr, chptr))
+  if (!IsMember(server_p, chptr))
     {
-      if (MyClient(sptr))
-        sendto_one(sptr, form_str(ERR_NOTONCHANNEL),
+      if (MyClient(server_p))
+        sendto_one(server_p, form_str(ERR_NOTONCHANNEL),
                    me.name, parv[0], parv[2]);
       return;
     }
 
-  if (IsMember(acptr, chptr))
+  if (IsMember(aclient_p, chptr))
     {
-      if (MyClient(sptr))
-        sendto_one(sptr, form_str(ERR_USERONCHANNEL),
+      if (MyClient(server_p))
+        sendto_one(server_p, form_str(ERR_USERONCHANNEL),
                    me.name, parv[0], parv[1], parv[2]);
       return;
     }
 
-  chop = is_chan_op(chptr, sptr);
+  chop = is_chan_op(chptr, server_p);
 
   if (chptr && (chptr->mode.mode & MODE_INVITEONLY))
     {
       if (!chop)
         {
-          if (MyClient(sptr))
-            sendto_one(sptr, form_str(ERR_CHANOPRIVSNEEDED),
+          if (MyClient(server_p))
+            sendto_one(server_p, form_str(ERR_CHANOPRIVSNEEDED),
                        me.name, parv[0], parv[2]);
           return;
         }
     }
 
-  if (MyConnect(sptr))
+  if (MyConnect(server_p))
     {
-      sendto_one(sptr, form_str(RPL_INVITING), me.name, parv[0],
-                 acptr->name, ((chname) ? (chname) : parv[2]));
-      if (acptr->user->away)
-        sendto_one(sptr, form_str(RPL_AWAY), me.name, parv[0],
-                   acptr->name, acptr->user->away);
+      sendto_one(server_p, form_str(RPL_INVITING), me.name, parv[0],
+                 aclient_p->name, ((chname) ? (chname) : parv[2]));
+      if (aclient_p->user->away)
+        sendto_one(server_p, form_str(RPL_AWAY), me.name, parv[0],
+                   aclient_p->name, aclient_p->user->away);
     }
 
-  if(MyConnect(acptr) && chop)
-    add_invite(chptr, acptr);
+  if(MyConnect(aclient_p) && chop)
+    add_invite(chptr, aclient_p);
 
   
-  if(!MyConnect(acptr) && ServerInfo.hub &&
-     IsCapable(acptr->from, CAP_LL))
+  if(!MyConnect(aclient_p) && ServerInfo.hub &&
+     IsCapable(aclient_p->from, CAP_LL))
   {
-    /* acptr is connected to a LL leaf, connected to us */
-    if(IsPerson(sptr))
-      client_burst_if_needed(acptr->from, sptr);
+    /* aclient_p is connected to a LL leaf, connected to us */
+    if(IsPerson(server_p))
+      client_burst_if_needed(aclient_p->from, server_p);
 
     if ( (chptr->lazyLinkChannelExists &
-          acptr->from->localClient->serverMask) == 0 )
-      burst_channel( acptr->from, chptr );
+          aclient_p->from->localClient->serverMask) == 0 )
+      burst_channel( aclient_p->from, chptr );
   }
 
-  sendto_anywhere(acptr, sptr, "INVITE %s :%s",
-		  acptr->name, parv[2]);
+  sendto_anywhere(aclient_p, server_p, "INVITE %s :%s",
+		  aclient_p->name, parv[2]);
 }
 
 /*
@@ -217,10 +217,10 @@ static void m_invite(struct Client *cptr,
 **      parv[1] - user to invite
 **      parv[2] - channel number
 */
-static void ms_invite(struct Client *cptr,
-                     struct Client *sptr,
+static void ms_invite(struct Client *client_p,
+                     struct Client *server_p,
                      int parc,
                      char *parv[])
 {
-  m_invite(cptr,sptr,parc,parv);
+  m_invite(client_p,server_p,parc,parv);
 }

@@ -172,14 +172,14 @@ linebuf_newbuf(buf_head_t *bufhead)
  * side effects - all input line bufs are flushed 
  */
 void
-client_flush_input(struct Client *cptr)
+client_flush_input(struct Client *client_p)
 {
   /* This way, it can be called for remote client as well */
 
-  if(cptr->localClient == NULL)
+  if(client_p->localClient == NULL)
     return;
 
-  linebuf_donebuf(&cptr->localClient->buf_recvq);
+  linebuf_donebuf(&client_p->localClient->buf_recvq);
 }
 
 

@@ -69,8 +69,8 @@ char *_version = "20001122";
  *      parv[1] = channel name
  *	parv[2] = new topic, if setting topic
  */
-static void m_topic(struct Client *cptr,
-                   struct Client *sptr,
+static void m_topic(struct Client *client_p,
+                   struct Client *server_p,
                    int parc,
                    char *parv[])
 {
@@ -106,13 +106,13 @@ static void m_topic(struct Client *cptr,
                       me.name, parv[1]);
 
           sendto_one(uplink, ":%s TOPIC %s %s",
-                     sptr->name, parv[1],
+                     server_p->name, parv[1],
                      ((parc > 2) ? parv[2] : ""));
           return;
         }
         else
         {
-          sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL),
+          sendto_one(server_p, form_str(ERR_NOSUCHCHANNEL),
                      me.name, parv[0], parv[1]);
           return;
         }
@@ -120,7 +120,7 @@ static void m_topic(struct Client *cptr,
 
       if (HasVchans(chptr))
 	{
-	  vchan = map_vchan(chptr,sptr);
+	  vchan = map_vchan(chptr,server_p);
 	  if(vchan != NULL)
 	    chptr = vchan;
 	}
@@ -128,14 +128,14 @@ static void m_topic(struct Client *cptr,
       if (parc > 2)
 	{ /* setting topic */
 
-	  if (!IsMember(sptr, chptr))
+	  if (!IsMember(server_p, chptr))
 	    {
-	      sendto_one(sptr, form_str(ERR_NOTONCHANNEL), me.name, parv[0],
+	      sendto_one(server_p, form_str(ERR_NOTONCHANNEL), me.name, parv[0],
 			 parv[1]);
 	      return;
 	    }
 	  if ((chptr->mode.mode & MODE_TOPICLIMIT) == 0 ||
-	      is_any_op(chptr,sptr))
+	      is_any_op(chptr,server_p))
 	    {
 	      /* setting a topic */
 	      /*
@@ -146,24 +146,24 @@ static void m_topic(struct Client *cptr,
               MyFree(chptr->topic_info);
 	      
 	      chptr->topic_info = 
-		(char *)MyMalloc(strlen(sptr->name)+
-				 strlen(sptr->username)+
-				 strlen(sptr->host)+3);
+		(char *)MyMalloc(strlen(server_p->name)+
+				 strlen(server_p->username)+
+				 strlen(server_p->host)+3);
 	      ircsprintf(chptr->topic_info, "%s!%s@%s",
-			 sptr->name, sptr->username, sptr->host);
+			 server_p->name, server_p->username, server_p->host);
 
 	      chptr->topic_time = CurrentTime;
 	      
-	      sendto_channel_remote(chptr, cptr,":%s TOPIC %s :%s",
+	      sendto_channel_remote(chptr, client_p,":%s TOPIC %s :%s",
 				 parv[0], parv[1],
 				 chptr->topic);
 	      if(chptr->mode.mode & MODE_HIDEOPS)
 		{
 		  sendto_channel_local(ONLY_CHANOPS_HALFOPS,
 				       chptr, ":%s!%s@%s TOPIC %s :%s",
-				       sptr->name,
-				       sptr->username,
-				       sptr->host,
+				       server_p->name,
+				       server_p->username,
+				       server_p->host,
 				       parv[1],
 				       chptr->topic);
 
@@ -177,43 +177,43 @@ static void m_topic(struct Client *cptr,
 		{
 		  sendto_channel_local(ALL_MEMBERS,
 				       chptr, ":%s!%s@%s TOPIC %s :%s",
-				       sptr->name,
-				       sptr->username,
-				       sptr->host,
+				       server_p->name,
+				       server_p->username,
+				       server_p->host,
 				       parv[1], chptr->topic);
 		}
 	    }
 	  else
-            sendto_one(sptr, form_str(ERR_CHANOPRIVSNEEDED),
+            sendto_one(server_p, form_str(ERR_CHANOPRIVSNEEDED),
                        me.name, parv[0], parv[1]);
 	}
       else  /* only asking  for topic  */
 	{
-	  if (!IsMember(sptr, chptr) && SecretChannel(chptr))
+	  if (!IsMember(server_p, chptr) && SecretChannel(chptr))
 	    {
-	      sendto_one(sptr, form_str(ERR_NOTONCHANNEL), me.name, parv[0],
+	      sendto_one(server_p, form_str(ERR_NOTONCHANNEL), me.name, parv[0],
 			 parv[1]);
 	      return;
 	    }
           if (chptr->topic[0] == '\0')
-	    sendto_one(sptr, form_str(RPL_NOTOPIC),
+	    sendto_one(server_p, form_str(RPL_NOTOPIC),
 		       me.name, parv[0], parv[1]);
           else
 	    {
-              sendto_one(sptr, form_str(RPL_TOPIC),
+              sendto_one(server_p, form_str(RPL_TOPIC),
                          me.name, parv[0],
                          parv[1], chptr->topic);
               if (!(chptr->mode.mode & MODE_HIDEOPS) ||
-                  is_any_op(chptr,sptr))
+                  is_any_op(chptr,server_p))
                 {
-                  sendto_one(sptr, form_str(RPL_TOPICWHOTIME),
+                  sendto_one(server_p, form_str(RPL_TOPICWHOTIME),
                              me.name, parv[0], parv[1],
                              chptr->topic_info,
                              chptr->topic_time);
                 }
 	      else /* Hide from nonops */
 		{
-                  sendto_one(sptr, form_str(RPL_TOPICWHOTIME),
+                  sendto_one(server_p, form_str(RPL_TOPICWHOTIME),
                              me.name, parv[0], parv[1],
                              me.name,
                              chptr->topic_time);
@@ -223,7 +223,7 @@ static void m_topic(struct Client *cptr,
     }
   else
     {
-      sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL),
+      sendto_one(server_p, form_str(ERR_NOSUCHCHANNEL),
                  me.name, parv[0], parv[1]);
     }
 }
@@ -238,16 +238,16 @@ static void m_topic(struct Client *cptr,
  *
  * Let servers always set a topic
  */
-static void ms_topic(struct Client *cptr,
-                    struct Client *sptr,
+static void ms_topic(struct Client *client_p,
+                    struct Client *server_p,
                     int parc,
                     char *parv[])
 {
   struct Channel *chptr = NULL;
   
-  if (!IsServer(sptr))
+  if (!IsServer(server_p))
   {
-    m_topic(cptr, sptr, parc, parv);
+    m_topic(client_p, server_p, parc, parv);
     return;
   }
 
@@ -272,8 +272,8 @@ static void ms_topic(struct Client *cptr,
 	  sendto_channel_local(ONLY_CHANOPS_HALFOPS,
 			       chptr, ":%s!%s@%s TOPIC %s :%s",
 			       me.name,
-			       sptr->username,
-			       sptr->host,
+			       server_p->username,
+			       server_p->host,
 			       parv[1],
 			       chptr->topic);
 
@@ -289,8 +289,8 @@ static void ms_topic(struct Client *cptr,
 	  sendto_channel_local(ALL_MEMBERS,
 			       chptr, ":%s!%s@%s TOPIC %s :%s",
 			       me.name,
-			       sptr->username,
-			       sptr->host,
+			       server_p->username,
+			       server_p->host,
 			       parv[1], chptr->topic);
 	}
     }

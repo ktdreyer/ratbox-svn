@@ -82,10 +82,10 @@ add_gline(struct ConfItem *aconf)
  * side effects - none
  */
 struct ConfItem*
-find_gkill(struct Client* cptr, char* username)
+find_gkill(struct Client* client_p, char* username)
 {
-  assert(0 != cptr);
-  return (IsElined(cptr)) ? 0 : find_is_glined(cptr->host, username);
+  assert(0 != client_p);
+  return (IsElined(client_p)) ? 0 : find_is_glined(client_p->host, username);
 }
 
 /*
@@ -125,7 +125,7 @@ find_is_glined(const char* host, const char* name)
  * report pending glines, and placed glines.
  */
 void
-report_glines(struct Client *sptr)
+report_glines(struct Client *server_p)
 {
   dlink_node *pending_node;
   dlink_node *gline_node;
@@ -138,8 +138,8 @@ report_glines(struct Client *sptr)
   char *reason;
 
   if (dlink_list_length(&pending_glines) > 0)
-    sendto_one(sptr,":%s NOTICE %s :Pending G-lines",
-               me.name, sptr->name);
+    sendto_one(server_p,":%s NOTICE %s :Pending G-lines",
+               me.name, server_p->name);
 
   for(pending_node = pending_glines.head; pending_node; pending_node = pending_node->next)
     {
@@ -147,9 +147,9 @@ report_glines(struct Client *sptr)
       tmptr = localtime(&glp_ptr->time_request1);
       strftime(timebuffer, MAX_DATE_STRING, "%Y/%m/%d %H:%M:%S", tmptr);
 
-      sendto_one(sptr,
+      sendto_one(server_p,
        ":%s NOTICE %s :1) %s!%s@%s on %s requested gline at %s for %s@%s [%s]",
-		 me.name,sptr->name,
+		 me.name,server_p->name,
 		 glp_ptr->oper_nick1,
 		 glp_ptr->oper_user1,
 		 glp_ptr->oper_host1,
@@ -163,9 +163,9 @@ report_glines(struct Client *sptr)
 	{
 	  tmptr = localtime(&glp_ptr->time_request2);
 	  strftime(timebuffer, MAX_DATE_STRING, "%Y/%m/%d %H:%M:%S", tmptr);
-	  sendto_one(sptr,
+	  sendto_one(server_p,
      ":%s NOTICE %s :2) %s!%s@%s on %s requested gline at %s for %s@%s [%s]",
-		     me.name,sptr->name,
+		     me.name,server_p->name,
 		     glp_ptr->oper_nick2,
 		     glp_ptr->oper_user2,
 		     glp_ptr->oper_host2,
@@ -178,8 +178,8 @@ report_glines(struct Client *sptr)
     }
 
   if (dlink_list_length(&pending_glines) > 0)
-    sendto_one(sptr,":%s NOTICE %s :End of Pending G-lines",
-               me.name, sptr->name);
+    sendto_one(server_p,":%s NOTICE %s :End of Pending G-lines",
+               me.name, server_p->name);
 
   for(gline_node = glines.head; gline_node; gline_node = gline_node->next)
     {
@@ -199,8 +199,8 @@ report_glines(struct Client *sptr)
       else
 	reason = "No Reason";
 
-      sendto_one(sptr,form_str(RPL_STATSKLINE), me.name,
-		 sptr->name, 'G' , host, name, reason);
+      sendto_one(server_p,form_str(RPL_STATSKLINE), me.name,
+		 server_p->name, 'G' , host, name, reason);
     }
 }
 

@@ -50,8 +50,8 @@ struct  Message
 			     */
   unsigned long bytes;  /* bytes received for this message */
   /*
-   * cptr = Connected client ptr
-   * sptr = Source client ptr
+   * client_p = Connected client ptr
+   * server_p = Source client ptr
    * parc = parameter count
    * parv = parameter variable array
    */

@@ -68,19 +68,19 @@ char *_version = "20001122";
  *      parv[3] = server is standalone or connected to non-TS only
  *      parv[4] = server's idea of UTC time
  */
-static void ms_svinfo(struct Client *cptr, struct Client *sptr,
+static void ms_svinfo(struct Client *client_p, struct Client *server_p,
                      int parc, char *parv[])
 {
   time_t deltat;
   time_t theirtime;
 
-  if (MyConnect(sptr) && IsUnknown(sptr))
+  if (MyConnect(server_p) && IsUnknown(server_p))
   {
-    exit_client(sptr, sptr, sptr, "Need SERVER before SVINFO");
+    exit_client(server_p, server_p, server_p, "Need SERVER before SVINFO");
     return;
   }
 
-  if (!IsServer(sptr) || !MyConnect(sptr) || parc < 5)
+  if (!IsServer(server_p) || !MyConnect(server_p) || parc < 5)
     return;
 
   if (TS_CURRENT < atoi(parv[2]) || atoi(parv[1]) < TS_MIN)
@@ -92,8 +92,8 @@ static void ms_svinfo(struct Client *cptr, struct Client *sptr,
        */
       sendto_realops_flags(FLAGS_ALL,
 	         "Link %s dropped, wrong TS protocol version (%s,%s)",
-                 get_client_name(sptr, SHOW_IP), parv[1], parv[2]);
-      exit_client(sptr, sptr, sptr, "Incompatible TS version");
+                 get_client_name(server_p, SHOW_IP), parv[1], parv[2]);
+      exit_client(server_p, server_p, server_p, "Incompatible TS version");
       return;
     }
 
@@ -108,14 +108,14 @@ static void ms_svinfo(struct Client *cptr, struct Client *sptr,
     {
       sendto_realops_flags(FLAGS_ALL,
        "Link %s dropped, excessive TS delta (my TS=%lu, their TS=%lu, delta=%lu)",
-                 get_client_name(sptr, SHOW_IP),
+                 get_client_name(server_p, SHOW_IP),
                  CurrentTime, theirtime,deltat);
 
       log(L_NOTICE,
        "Link %s dropped, excessive TS delta (my TS=%lu, their TS=%lu, delta=%lu)",
-                 get_client_name(sptr, SHOW_IP),
+                 get_client_name(server_p, SHOW_IP),
                  CurrentTime, theirtime,deltat);
-      exit_client(sptr, sptr, sptr, "Excessive TS delta");
+      exit_client(server_p, server_p, server_p, "Excessive TS delta");
       return;
     }
 
@@ -123,7 +123,7 @@ static void ms_svinfo(struct Client *cptr, struct Client *sptr,
     { 
       sendto_realops_flags(FLAGS_ALL,
                  "Link %s notable TS delta (my TS=%lu, their TS=%lu, delta=%lu)",
-			   get_client_name(sptr, MASK_IP),
+			   get_client_name(server_p, MASK_IP),
 			   CurrentTime, theirtime, deltat);
     }
 }

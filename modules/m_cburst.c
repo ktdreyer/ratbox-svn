@@ -72,8 +72,8 @@ char *_version = "20001122";
  * the given LL capable server.
  */
 
-static void ms_cburst(struct Client *cptr,
-                     struct Client *sptr,
+static void ms_cburst(struct Client *client_p,
+                     struct Client *server_p,
                      int parc,
                      char *parv[])
 {
@@ -99,7 +99,7 @@ static void ms_cburst(struct Client *cptr,
 
 #ifdef DEBUGLL
   sendto_realops_flags(FLAGS_ALL, "CBURST called by %s for %s %s %s",
-    cptr->name,
+    client_p->name,
     name,
     nick ? nick : "",
     key ? key : "" );
@@ -109,31 +109,31 @@ static void ms_cburst(struct Client *cptr,
   {
     if((!nick) || (nick && *nick!='!'))
     {
-      chptr = get_channel(sptr, name, CREATE);
+      chptr = get_channel(server_p, name, CREATE);
       chptr->channelts = (time_t)(-1); /* ! highest possible TS so its always-                                          * over-ruled
                                         */
       chptr->users_last = CurrentTime;
     }
     else if(nick && *nick=='!')
     {
-      sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL),
+      sendto_one(server_p, form_str(ERR_NOSUCHCHANNEL),
                  me.name, nick+1, name);
       return;
     }
   }
 
-  if(IsCapable(cptr,CAP_LL))
+  if(IsCapable(client_p,CAP_LL))
     {
-      burst_channel(cptr,chptr);
+      burst_channel(client_p,chptr);
 
       if(nick)
-	sendto_one(cptr,":%s LLJOIN %s %s %s", me.name, name,
+	sendto_one(client_p,":%s LLJOIN %s %s %s", me.name, name,
                    nick, key);
     }
   else
     {
       sendto_realops_flags(FLAGS_ALL,
 		   "*** CBURST request received from non LL capable server! [%s]",
-			   cptr->name);
+			   client_p->name);
     }
 }

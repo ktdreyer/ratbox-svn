@@ -25,9 +25,9 @@ extern struct ConfItem *match_Dline(struct irc_inaddr *ip);
 extern struct ConfItem* match_ip_Kline(struct irc_inaddr *ip, const char* name);
 extern struct ConfItem* match_ip_Iline(struct irc_inaddr *ip, const char *name);
 
-extern void report_dlines(struct Client *sptr);
-extern void report_ip_Klines(struct Client *sptr);
-extern void report_ip_Ilines(struct Client *sptr);
+extern void report_dlines(struct Client *server_p);
+extern void report_ip_Klines(struct Client *server_p);
+extern void report_ip_Ilines(struct Client *server_p);
 
 #endif /* INCLUDED_dline_conf_h */
 

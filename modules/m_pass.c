@@ -62,19 +62,19 @@ char *_version = "20001122";
  *      parv[1] = password
  *      parv[2] = optional extra version information
  */
-static void mr_pass(struct Client *cptr, struct Client *sptr,
+static void mr_pass(struct Client *client_p, struct Client *server_p,
                    int parc, char *parv[])
 {
   const char *password = parv[1];
 
   if (EmptyString(password))
     {
-      sendto_one(cptr, form_str(ERR_NEEDMOREPARAMS),
+      sendto_one(client_p, form_str(ERR_NEEDMOREPARAMS),
                  me.name, BadPtr(parv[0]) ? "*" : parv[0], "PASS");
       return;
     }
 
-  strncpy_irc(cptr->localClient->passwd, password, PASSWDLEN);
+  strncpy_irc(client_p->localClient->passwd, password, PASSWDLEN);
 
   if (parc > 2)
     {
@@ -87,7 +87,7 @@ static void mr_pass(struct Client *cptr, struct Client *sptr,
        * -Dianora
        */
       if (0 == irccmp(parv[2], "TS"))
-        cptr->tsinfo = TS_DOESTS;
+        client_p->tsinfo = TS_DOESTS;
     }
 }
 

@@ -74,16 +74,16 @@ char *_version = "20001122";
  *      parv[2] = servername mask
  */
 
-static void m_links(struct Client *cptr, struct Client *sptr,
+static void m_links(struct Client *client_p, struct Client *server_p,
                    int parc, char *parv[])
 {
 
   if (!GlobalSetOptions.hide_server)
     {
-     mo_links(cptr, sptr, parc, parv);
+     mo_links(client_p, server_p, parc, parv);
      return;
     }
-  SendMessageFile(sptr, &ConfigFileEntry.linksfile);
+  SendMessageFile(server_p, &ConfigFileEntry.linksfile);
 
     
 /*
@@ -91,25 +91,25 @@ static void m_links(struct Client *cptr, struct Client *sptr,
  * then print out the file (which may or may not be empty)
  */
   
-  sendto_one(sptr, form_str(RPL_LINKS),
+  sendto_one(server_p, form_str(RPL_LINKS),
                            me.name, parv[0], me.name, me.name,
                            0, me.info);
       
-  sendto_one(sptr, form_str(RPL_ENDOFLINKS), me.name, parv[0], "*");
+  sendto_one(server_p, form_str(RPL_ENDOFLINKS), me.name, parv[0], "*");
 }
 
-static void mo_links(struct Client *cptr, struct Client *sptr,
+static void mo_links(struct Client *client_p, struct Client *server_p,
                     int parc, char *parv[])
 {
   char*    mask = "";
-  struct Client* acptr;
+  struct Client* aclient_p;
   char           clean_mask[2 * HOSTLEN + 4];
   char*          p;
   struct hook_links_data hd;
   
   if (parc > 2)
     {
-      if (hunt_server(cptr, sptr, ":%s LINKS %s :%s", 1, parc, parv)
+      if (hunt_server(client_p, server_p, ":%s LINKS %s :%s", 1, parc, parv)
           != HUNTED_ISME)
         return;
       mask = parv[2];
@@ -122,27 +122,27 @@ static void mo_links(struct Client *cptr, struct Client *sptr,
   if (*mask)       /* only necessary if there is a mask */
     mask = collapse(clean_string(clean_mask, (const unsigned char*) mask, 2 * HOSTLEN));
 
-  hd.cptr = cptr;
-  hd.sptr = sptr;
+  hd.client_p = client_p;
+  hd.server_p = server_p;
   hd.mask = mask;
   hd.parc = parc;
   hd.parv = parv;
   
   hook_call_event("doing_links", &hd);
   
-  for (acptr = GlobalClientList; acptr; acptr = acptr->next) 
+  for (aclient_p = GlobalClientList; aclient_p; aclient_p = aclient_p->next) 
     {
-      if (!IsServer(acptr) && !IsMe(acptr))
+      if (!IsServer(aclient_p) && !IsMe(aclient_p))
         continue;
-      if (*mask && !match(mask, acptr->name))
+      if (*mask && !match(mask, aclient_p->name))
         continue;
     
-      if(acptr->info[0])
+      if(aclient_p->info[0])
         {
-          if( (p = strchr(acptr->info,']')) )
+          if( (p = strchr(aclient_p->info,']')) )
             p += 2; /* skip the nasty [IP] part */
           else
-            p = acptr->info;
+            p = aclient_p->info;
         } 
       else
         p = "(Unknown Location)";
@@ -150,12 +150,12 @@ static void mo_links(struct Client *cptr, struct Client *sptr,
      /* We just send the reply, as if theyre here theres either no SHIDE,
       * or theyre an oper..  
       */
-      sendto_one(sptr, form_str(RPL_LINKS),
-		      me.name, parv[0], acptr->name, acptr->serv->up,
-                      acptr->hopcount, p);
+      sendto_one(server_p, form_str(RPL_LINKS),
+		      me.name, parv[0], aclient_p->name, aclient_p->serv->up,
+                      aclient_p->hopcount, p);
     }
   
-  sendto_one(sptr, form_str(RPL_ENDOFLINKS), me.name, parv[0],
+  sendto_one(server_p, form_str(RPL_ENDOFLINKS), me.name, parv[0],
              EmptyString(mask) ? "*" : mask);
 }
 
@@ -168,14 +168,14 @@ static void mo_links(struct Client *cptr, struct Client *sptr,
  *      parv[1] = server to query 
  *      parv[2] = servername mask
  */
-static void ms_links(struct Client *cptr, struct Client *sptr,
+static void ms_links(struct Client *client_p, struct Client *server_p,
                     int parc, char *parv[])
 {
-  if (hunt_server(cptr, sptr, ":%s LINKS %s :%s", 1, parc, parv)
+  if (hunt_server(client_p, server_p, ":%s LINKS %s :%s", 1, parc, parv)
       != HUNTED_ISME)
     return;
 
-  if(IsOper(sptr))
-    m_links(cptr,sptr,parc,parv);
+  if(IsOper(server_p))
+    m_links(client_p,server_p,parc,parv);
 }
 

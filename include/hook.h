@@ -18,23 +18,23 @@ typedef int (*hookfn)(void *data);
    stand data you'd need in that situation */
 struct hook_mfunc_data 
 {
-	struct Client *cptr;
-	struct Client *sptr;
+	struct Client *client_p;
+	struct Client *server_p;
 	int parc;
 	char **parv;
 };
 
 struct hook_stats_data 
 {
-	struct Client *sptr;
+	struct Client *server_p;
 	char statchar;
 	char *name;
 };
 
 struct hook_links_data
 {
-	struct Client *cptr;
-	struct Client *sptr;
+	struct Client *client_p;
+	struct Client *server_p;
 	int parc;
 	char **parv;
 	char statchar;

@@ -40,7 +40,7 @@ extern int   user_mode(struct Client* , struct Client* , int, char** );
 extern void  send_umode (struct Client* , struct Client* ,
                          int, int, char* );
 extern void  send_umode_out(struct Client* , struct Client* , int);
-extern int   show_lusers(struct Client* sptr);
+extern int   show_lusers(struct Client* server_p);
 extern void  show_opers(struct Client* client);
 extern int   register_local_user(struct Client* ,struct Client* ,
 				 char* ,char* );

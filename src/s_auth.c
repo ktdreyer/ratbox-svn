@@ -659,7 +659,7 @@ FindAuthClient(long id)
  *
  */
 void 
-delete_identd_queries(struct Client *acptr)
+delete_identd_queries(struct Client *aclient_p)
 {
   dlink_node *ptr;
   dlink_node *next_ptr;
@@ -670,7 +670,7 @@ delete_identd_queries(struct Client *acptr)
       auth = ptr->data;
       next_ptr = ptr->next;
 
-      if(auth->client == acptr)
+      if(auth->client == aclient_p)
 	{
 	  if (auth->fd >= 0)
 	    fd_close(auth->fd);
@@ -685,7 +685,7 @@ delete_identd_queries(struct Client *acptr)
       auth = ptr->data;
       next_ptr = ptr->next;
 
-      if(auth->client == acptr)
+      if(auth->client == aclient_p)
 	{
 	  if (auth->fd >= 0)
 	    fd_close(auth->fd);

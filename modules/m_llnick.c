@@ -67,23 +67,23 @@ char *_version = "20001122";
  *      parv[3] = old nick
  *
  */
-static void ms_llnick(struct Client *cptr,
-                      struct Client *sptr,
+static void ms_llnick(struct Client *client_p,
+                      struct Client *server_p,
                       int parc,
                       char *parv[])
 {
   char *nick;
   char *nick_old = NULL;
-  struct Client *acptr = NULL;
+  struct Client *aclient_p = NULL;
   int exists = 0;
   int new = 0;
   dlink_node *ptr;
   
-  if(!IsCapable(cptr,CAP_LL))
+  if(!IsCapable(client_p,CAP_LL))
     {
       sendto_realops_flags(FLAGS_ALL,
 			   "*** LLNICK requested from non LL server %s",
-			   cptr->name);
+			   client_p->name);
       return;
     }
 
@@ -107,34 +107,34 @@ static void ms_llnick(struct Client *cptr,
     {
       if( !strcmp(nick_old, ((struct Client *)ptr->data)->llname) )
       {
-        acptr = ptr->data;
-        *acptr->llname = '\0'; /* unset their temp-nick */
+        aclient_p = ptr->data;
+        *aclient_p->llname = '\0'; /* unset their temp-nick */
         break;
       }
     }
-    if (!acptr) /* Can't find them -- maybe they got a different nick */
+    if (!aclient_p) /* Can't find them -- maybe they got a different nick */
       return;
   }
   else
   {
     /* Existing user changing nickname */
-    acptr = hash_find_client(nick_old,(struct Client *)NULL);
+    aclient_p = hash_find_client(nick_old,(struct Client *)NULL);
   
-    if (!acptr) /* Can't find them -- maybe they got a different nick */
+    if (!aclient_p) /* Can't find them -- maybe they got a different nick */
       return;
   }
   
   if(hash_find_client(nick,(struct Client *)NULL) || exists)
   {
     /* The nick they want is in use. complain */
-    sendto_one(acptr, form_str(ERR_NICKNAMEINUSE), me.name,
+    sendto_one(aclient_p, form_str(ERR_NICKNAMEINUSE), me.name,
                new ? "*" : nick_old,
                nick);
     return;
   }
 
   if(new)
-    set_initial_nick(acptr, acptr, nick);
+    set_initial_nick(aclient_p, aclient_p, nick);
   else
-    change_local_nick(acptr, acptr, nick);
+    change_local_nick(aclient_p, aclient_p, nick);
 }

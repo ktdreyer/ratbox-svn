@@ -59,7 +59,7 @@ char *_version = "20001122";
  *      parv[0] = sender prefix
  *      parv[1] = servername
  */
-static void m_accept(struct Client *cptr, struct Client *sptr,
+static void m_accept(struct Client *client_p, struct Client *server_p,
                     int parc, char *parv[])
 {
   char *nick;
@@ -77,53 +77,53 @@ static void m_accept(struct Client *cptr, struct Client *sptr,
     }
   else if(*nick == '*')
     {
-      list_all_accepts(sptr);
+      list_all_accepts(server_p);
       return;
     }
 
   if ((source = find_client(nick,NULL)) == NULL)
     {
-      sendto_one(sptr, form_str(ERR_NOSUCHNICK), me.name, parv[0], nick);
+      sendto_one(server_p, form_str(ERR_NOSUCHNICK), me.name, parv[0], nick);
       return;
     }
 
   if (!IsPerson(source))
     {
-      sendto_one(sptr, form_str(ERR_NOSUCHNICK), me.name, parv[0], nick);
+      sendto_one(server_p, form_str(ERR_NOSUCHNICK), me.name, parv[0], nick);
       return;
     }
 
   if (add == 1)
     {
-      if (accept_message(source, sptr)) {
+      if (accept_message(source, server_p)) {
 	/* already on list */
-	sendto_one(sptr, ":%s NOTICE %s :%s is already on your accept list",
+	sendto_one(server_p, ":%s NOTICE %s :%s is already on your accept list",
 		   me.name, parv[0], source->name);
 	return;
       }
 		
-      del_from_accept(source,sptr);
-      add_to_accept(source,sptr);
-      sendto_one(sptr, ":%s NOTICE %s :Now allowing %s", 
+      del_from_accept(source,server_p);
+      add_to_accept(source,server_p);
+      sendto_one(server_p, ":%s NOTICE %s :Now allowing %s", 
 		 me.name, parv[0], source->name);
-      sendto_anywhere(source, sptr,
+      sendto_anywhere(source, server_p,
 		      "NOTICE %s :*** I've put you on my accept list.",
 		      source->name);
     }
   else if(add == -1)
     {
-		if (!accept_message(source, sptr)) 
+		if (!accept_message(source, server_p)) 
 		{
 			/* not on list */
-			sendto_one(sptr, ":%s NOTICE %s :%s is not on your accept list",
+			sendto_one(server_p, ":%s NOTICE %s :%s is not on your accept list",
 					   me.name, parv[0], source->name);
 			return;
 		}
 		
-      del_from_accept(source,sptr);
-      sendto_one(sptr, ":%s NOTICE %s :Now removed %s from allow list", 
+      del_from_accept(source,server_p);
+      sendto_one(server_p, ":%s NOTICE %s :Now removed %s from allow list", 
 		 me.name, parv[0], source->name);
-      sendto_anywhere(source, sptr,
+      sendto_anywhere(source, server_p,
 		      "NOTICE %s :*** I've taken you off my accept list.",
 		      source->name);
     }

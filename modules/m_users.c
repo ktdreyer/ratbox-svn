@@ -58,18 +58,18 @@ char *_version = "20001122";
  *      parv[0] = sender prefix
  *      parv[1] = servername
  */
-static void m_users(struct Client *cptr, struct Client *sptr,
+static void m_users(struct Client *client_p, struct Client *server_p,
                    int parc, char *parv[])
 {
-  if (hunt_server(cptr,sptr,":%s USERS :%s",1,parc,parv) == HUNTED_ISME)
+  if (hunt_server(client_p,server_p,":%s USERS :%s",1,parc,parv) == HUNTED_ISME)
     {
       /* No one uses this any more... so lets remap it..   -Taner */
       
-      if (!GlobalSetOptions.hide_server || IsOper(sptr))
-        sendto_one(sptr, form_str(RPL_LOCALUSERS), me.name, parv[0],
+      if (!GlobalSetOptions.hide_server || IsOper(server_p))
+        sendto_one(server_p, form_str(RPL_LOCALUSERS), me.name, parv[0],
                    Count.local, Count.max_loc);
 
-      sendto_one(sptr, form_str(RPL_GLOBALUSERS), me.name, parv[0],
+      sendto_one(server_p, form_str(RPL_GLOBALUSERS), me.name, parv[0],
                  Count.total, Count.max_tot);
     }
 }

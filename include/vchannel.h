@@ -39,18 +39,18 @@
 struct Client;
 struct Channel;
 
-extern void	add_vchan_to_client_cache(struct Client *sptr,
+extern void	add_vchan_to_client_cache(struct Client *server_p,
 					  struct Channel *base_chan,
 					  struct Channel *vchan);
 
-extern void	del_vchan_from_client_cache(struct Client *sptr,
+extern void	del_vchan_from_client_cache(struct Client *server_p,
 					    struct Channel *vchan);
 
-extern struct Channel* map_vchan(struct Channel *chptr, struct Client *sptr);
+extern struct Channel* map_vchan(struct Channel *chptr, struct Client *server_p);
 extern struct Channel* find_bchan(struct Channel *chptr);
 
-extern void	show_vchans(struct Client *cptr,
-			    struct Client *sptr,
+extern void	show_vchans(struct Client *client_p,
+			    struct Client *server_p,
 			    struct Channel *chptr,
                             char *command);
 
@@ -61,22 +61,22 @@ extern char* pick_vchan_id(struct Channel *chptr);
 extern struct Channel* find_vchan(struct Channel *, char *);
 
 /* See if this client is on a sub chan already */
-extern int on_sub_vchan(struct Channel *chptr, struct Client *sptr);
+extern int on_sub_vchan(struct Channel *chptr, struct Client *server_p);
 
 /* Check for an invite to any of the vchans */
 extern struct Channel* vchan_invites(struct Channel *chptr,
-                                     struct Client *sptr);
+                                     struct Client *server_p);
 
 /* Select which vchan to use for JOIN */
 extern struct Channel* select_vchan(struct Channel *root,
-                                    struct Client *cptr,
-                                    struct Client *sptr,
+                                    struct Client *client_p,
+                                    struct Client *server_p,
                                     char *vkey,
                                     char *name);
 
 /* Create a new vchan for cjoin */
 extern struct Channel* cjoin_channel(struct Channel *root,
-                                     struct Client *sptr,
+                                     struct Client *server_p,
                                      char *name);
 
 /* Valid to verify a channel is a subchan */

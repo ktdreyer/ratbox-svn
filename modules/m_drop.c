@@ -68,8 +68,8 @@ char *_version = "20001122";
 **
 **      "drop" a channel from consideration on a lazy link
 */
-static void ms_drop(struct Client *cptr,
-                   struct Client *sptr,
+static void ms_drop(struct Client *client_p,
+                   struct Client *server_p,
                   int parc,
                   char *parv[])
 {
@@ -82,13 +82,13 @@ static void ms_drop(struct Client *cptr,
   name = parv[1];
 
 #ifdef DEBUGLL
-  sendto_realops(FLAGS_ALL, "DROP called by %s for %s", cptr->name, name );
+  sendto_realops(FLAGS_ALL, "DROP called by %s for %s", client_p->name, name );
 #endif
 
   if(!(chptr=hash_find_channel(name, NullChn)))
     return;
 
-  if(cptr->localClient->serverMask) /* JIC */
-    chptr->lazyLinkChannelExists &= ~cptr->localClient->serverMask;
+  if(client_p->localClient->serverMask) /* JIC */
+    chptr->lazyLinkChannelExists &= ~client_p->localClient->serverMask;
   return;
 }

@@ -64,8 +64,8 @@ _moddeinit(void)
   mod_del_cmd(&part_msgtab);
 }
 
-static void part_one_client(struct Client *cptr,
-			    struct Client *sptr,
+static void part_one_client(struct Client *client_p,
+			    struct Client *server_p,
 			    char *name, char *reason);
 
 char *_version = "20001122";
@@ -76,8 +76,8 @@ char *_version = "20001122";
 **      parv[1] = channel
 **      parv[2] = reason
 */
-static void m_part(struct Client *cptr,
-                  struct Client *sptr,
+static void m_part(struct Client *client_p,
+                  struct Client *server_p,
                   int parc,
                   char *parv[])
 {
@@ -88,7 +88,7 @@ static void m_part(struct Client *cptr,
 
   if (*parv[1] == '\0')
     {
-      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
+      sendto_one(server_p, form_str(ERR_NEEDMOREPARAMS),
                  me.name, parv[0], "PART");
       return;
     }
@@ -105,40 +105,40 @@ static void m_part(struct Client *cptr,
   if (name)
     {
       if(GlobalSetOptions.spam_num &&
-	 (sptr->localClient->join_leave_count >= GlobalSetOptions.spam_num))
+	 (server_p->localClient->join_leave_count >= GlobalSetOptions.spam_num))
 	{
 	  sendto_realops_flags(FLAGS_BOTS,
 			       "User %s (%s@%s) is a possible spambot",
-			       sptr->name,
-			       sptr->username, sptr->host);
-	  sptr->localClient->oper_warn_count_down = OPER_SPAM_COUNTDOWN;
+			       server_p->name,
+			       server_p->username, server_p->host);
+	  server_p->localClient->oper_warn_count_down = OPER_SPAM_COUNTDOWN;
 	}
       else
 	{
-	  if( (t_delta = (CurrentTime - sptr->localClient->last_leave_time)) >
+	  if( (t_delta = (CurrentTime - server_p->localClient->last_leave_time)) >
 	      JOIN_LEAVE_COUNT_EXPIRE_TIME)
 	    {
 	      decrement_count = (t_delta/JOIN_LEAVE_COUNT_EXPIRE_TIME);
 	      
-	      if(decrement_count > sptr->localClient->join_leave_count)
-		sptr->localClient->join_leave_count = 0;
+	      if(decrement_count > server_p->localClient->join_leave_count)
+		server_p->localClient->join_leave_count = 0;
 	      else
-		sptr->localClient->join_leave_count -= decrement_count;
+		server_p->localClient->join_leave_count -= decrement_count;
 	    }
 	  else
 	    {
-	      if( (CurrentTime - (sptr->localClient->last_join_time)) < 
+	      if( (CurrentTime - (server_p->localClient->last_join_time)) < 
 		  GlobalSetOptions.spam_time)
 		{
-		  sptr->localClient->join_leave_count++;
+		  server_p->localClient->join_leave_count++;
 		}
 	    }
-	  sptr->localClient->last_leave_time = CurrentTime;
+	  server_p->localClient->last_leave_time = CurrentTime;
 	}
      
       while(name)
 	{
-	  part_one_client(cptr, sptr, name, reason);
+	  part_one_client(client_p, server_p, name, reason);
 	  name = strtoken(&p, (char *)NULL, ",");
 	}
       return;
@@ -154,19 +154,19 @@ static void m_part(struct Client *cptr,
  * output	- none
  * side effects	- remove ONE client given the channel name 
  */
-static void part_one_client(struct Client *cptr,
-			    struct Client *sptr,
+static void part_one_client(struct Client *client_p,
+			    struct Client *server_p,
 			    char *name,
                             char *reason)
 {
   struct Channel *chptr;
   struct Channel *bchan;
 
-  chptr = get_channel(sptr, name, 0);
+  chptr = get_channel(server_p, name, 0);
   if (!chptr)
     {
-      sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL),
-		 me.name, sptr->name, name);
+      sendto_one(server_p, form_str(ERR_NOSUCHCHANNEL),
+		 me.name, server_p->name, name);
       return;
     }
 
@@ -176,7 +176,7 @@ static void part_one_client(struct Client *cptr,
         {
           /* Set chptr to actual channel, bchan to the base channel */
           bchan = chptr;
-          chptr = map_vchan(bchan,sptr);
+          chptr = map_vchan(bchan,server_p);
         }
       else
         {
@@ -187,10 +187,10 @@ static void part_one_client(struct Client *cptr,
   else
     bchan = chptr; /* not a vchan */
 
-  if (!chptr || !bchan || !IsMember(sptr, chptr))
+  if (!chptr || !bchan || !IsMember(server_p, chptr))
     {
-      sendto_one(sptr, form_str(ERR_NOTONCHANNEL),
-                 me.name, sptr->name, name);
+      sendto_one(server_p, form_str(ERR_NOTONCHANNEL),
+                 me.name, server_p->name, name);
       return;
     }
 
@@ -198,31 +198,31 @@ static void part_one_client(struct Client *cptr,
    *  Remove user from the old channel (if any)
    *  only allow /part reasons in -m chans
    */
-  if (reason[0] && (can_send(chptr, sptr) > 0))
+  if (reason[0] && (can_send(chptr, server_p) > 0))
     {
-      sendto_channel_remote_prefix(chptr, cptr, sptr, "PART %s :%s",
+      sendto_channel_remote_prefix(chptr, client_p, server_p, "PART %s :%s",
                               chptr->chname,
                               reason);
       sendto_channel_local(ALL_MEMBERS,
                            chptr, ":%s!%s@%s PART %s :%s",
-                           sptr->name,
-                           sptr->username,
-                           sptr->host,
+                           server_p->name,
+                           server_p->username,
+                           server_p->host,
                            bchan->chname,
                            reason);
     }
   else
     {
-      sendto_channel_remote_prefix(chptr, cptr, sptr, "PART %s",
+      sendto_channel_remote_prefix(chptr, client_p, server_p, "PART %s",
                                    chptr->chname);
       sendto_channel_local(ALL_MEMBERS,
                            chptr, ":%s!%s@%s PART %s",
-                           sptr->name,
-                           sptr->username,
-                           sptr->host,
+                           server_p->name,
+                           server_p->username,
+                           server_p->host,
                            bchan->chname);
     }
-  remove_user_from_channel(chptr, sptr);
+  remove_user_from_channel(chptr, server_p);
 }
 
 
@@ -233,8 +233,8 @@ static void part_one_client(struct Client *cptr,
  * but no spam checks
  */
 
-static void ms_part(struct Client *cptr,
-                   struct Client *sptr,
+static void ms_part(struct Client *client_p,
+                   struct Client *server_p,
                    int parc,
                    char *parv[])
 {
@@ -255,7 +255,7 @@ static void ms_part(struct Client *cptr,
 
   while(name)
     {
-      part_one_client(cptr, sptr, name, reason);
+      part_one_client(client_p, server_p, name, reason);
       name = strtoken(&p, (char *)NULL, ",");
     }
 }
@@ -267,8 +267,8 @@ static void ms_part(struct Client *cptr,
  * but no spam checks
  */
 
-static void mo_part(struct Client *cptr,
-                   struct Client *sptr,
+static void mo_part(struct Client *client_p,
+                   struct Client *server_p,
                    int parc,
                    char *parv[])
 {
@@ -277,7 +277,7 @@ static void mo_part(struct Client *cptr,
 
   if (*parv[1] == '\0')
     {
-      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
+      sendto_one(server_p, form_str(ERR_NEEDMOREPARAMS),
                  me.name, parv[0], "PART");
       return;
     }
@@ -291,7 +291,7 @@ static void mo_part(struct Client *cptr,
 
   while ( name )
     {
-      part_one_client(cptr, sptr, name, reason);
+      part_one_client(client_p, server_p, name, reason);
       name = strtoken(&p, (char *)NULL, ",");
     }
 }

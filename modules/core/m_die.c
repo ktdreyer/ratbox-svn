@@ -60,60 +60,60 @@ char *_version = "20001122";
 /*
  * mo_die - DIE command handler
  */
-static void mo_die(struct Client *cptr, struct Client *sptr,
+static void mo_die(struct Client *client_p, struct Client *server_p,
                   int parc, char *parv[])
 {
-  struct Client* acptr;
+  struct Client* aclient_p;
   dlink_node *ptr;
 
-  if (!IsOperDie(sptr))
+  if (!IsOperDie(server_p))
     {
-      sendto_one(sptr,":%s NOTICE %s :You have no D flag", me.name, parv[0]);
+      sendto_one(server_p,":%s NOTICE %s :You have no D flag", me.name, parv[0]);
       return;
     }
 
   if (parc < 2)
     {
-      sendto_one(sptr,":%s NOTICE %s :Need server name /die %s",
-                 me.name,sptr->name,me.name);
+      sendto_one(server_p,":%s NOTICE %s :Need server name /die %s",
+                 me.name,server_p->name,me.name);
       return;
     }
   else
     {
       if (irccmp(parv[1], me.name))
         {
-          sendto_one(sptr,":%s NOTICE %s :Mismatch on /die %s",
-                     me.name,sptr->name,me.name);
+          sendto_one(server_p,":%s NOTICE %s :Mismatch on /die %s",
+                     me.name,server_p->name,me.name);
           return;
         }
     }
 
   for(ptr = lclient_list.head; ptr; ptr = ptr->next)
     {
-      acptr = ptr->data;
+      aclient_p = ptr->data;
 
-      sendto_one(acptr,
+      sendto_one(aclient_p,
 		 ":%s NOTICE %s :Server Terminating. %s",
-		 me.name, acptr->name,
-		 get_client_name(sptr, MASK_IP));
+		 me.name, aclient_p->name,
+		 get_client_name(server_p, MASK_IP));
     }
 
   for(ptr = lclient_list.head; ptr; ptr = ptr->next)
     {
-      acptr = ptr->data;
+      aclient_p = ptr->data;
 
-      sendto_one(acptr,
+      sendto_one(aclient_p,
 		 ":%s NOTICE %s :Server Terminating. %s",
-		 me.name, acptr->name,
-		 get_client_name(sptr, HIDE_IP));
+		 me.name, aclient_p->name,
+		 get_client_name(server_p, HIDE_IP));
     }
 
   for(ptr = serv_list.head; ptr; ptr = ptr->next)
     {
-      acptr = ptr->data;
+      aclient_p = ptr->data;
 
-      sendto_one(acptr, ":%s ERROR :Terminated by %s",
-		 me.name, get_client_name(sptr, MASK_IP));
+      sendto_one(aclient_p, ":%s ERROR :Terminated by %s",
+		 me.name, get_client_name(server_p, MASK_IP));
     }
 
   /*
@@ -121,7 +121,7 @@ static void mo_die(struct Client *cptr, struct Client *sptr,
    * for an explanation as to what we should do.
    *     -- adrian
    */
-  log(L_NOTICE, "Server terminated by %s", get_client_name(sptr, HIDE_IP));
+  log(L_NOTICE, "Server terminated by %s", get_client_name(server_p, HIDE_IP));
   /* 
    * this is a normal exit, tell the os it's ok 
    */

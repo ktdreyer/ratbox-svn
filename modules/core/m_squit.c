@@ -61,11 +61,11 @@ _moddeinit(void)
 struct squit_parms 
 {
   char *server_name;
-  struct Client *acptr;
+  struct Client *aclient_p;
 };
 
-static struct squit_parms *find_squit(struct Client *cptr,
-                                      struct Client *sptr,
+static struct squit_parms *find_squit(struct Client *client_p,
+                                      struct Client *server_p,
                                       char *server);
 
 char *_version = "20001122";
@@ -76,38 +76,38 @@ char *_version = "20001122";
  *      parv[1] = server name
  *      parv[2] = comment
  */
-static void mo_squit(struct Client *cptr, struct Client *sptr,
+static void mo_squit(struct Client *client_p, struct Client *server_p,
                     int parc, char *parv[])
 {
   struct squit_parms *found_squit;
-  char  *comment = (parc > 2 && parv[2]) ? parv[2] : cptr->name;
+  char  *comment = (parc > 2 && parv[2]) ? parv[2] : client_p->name;
 
-  if (!IsOperRemote(sptr))
+  if (!IsOperRemote(server_p))
     {
-      sendto_one(sptr,":%s NOTICE %s :You have no R flag",me.name,parv[0]);
+      sendto_one(server_p,":%s NOTICE %s :You have no R flag",me.name,parv[0]);
       return;
     }
 
   if(parc < 2)
     {
-      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
+      sendto_one(server_p, form_str(ERR_NEEDMOREPARAMS),
                  me.name, parv[0], "SQUIT");
       return;
     }
 
-  if( (found_squit = find_squit(cptr,sptr,parv[1])) )
+  if( (found_squit = find_squit(client_p,server_p,parv[1])) )
     {
-      if(MyConnect(found_squit->acptr))
+      if(MyConnect(found_squit->aclient_p))
 	{
 	  sendto_realops_flags(FLAGS_ALL,
 			       "Received SQUIT %s from %s (%s)",
-			       found_squit->acptr->name,
-			       get_client_name(sptr, HIDE_IP), comment);
+			       found_squit->aclient_p->name,
+			       get_client_name(server_p, HIDE_IP), comment);
           log(L_NOTICE, "Received SQUIT %s from %s (%s)",
-              found_squit->acptr->name, get_client_name(sptr, HIDE_IP),
+              found_squit->aclient_p->name, get_client_name(server_p, HIDE_IP),
               comment);
 	}
-      exit_client(cptr, found_squit->acptr, sptr, comment);
+      exit_client(client_p, found_squit->aclient_p, server_p, comment);
       return;
     }
 }
@@ -118,37 +118,37 @@ static void mo_squit(struct Client *cptr, struct Client *sptr,
  *      parv[1] = server name
  *      parv[2] = comment
  */
-static void ms_squit(struct Client *cptr, struct Client *sptr,
+static void ms_squit(struct Client *client_p, struct Client *server_p,
                     int parc, char *parv[])
 {
   struct squit_parms *found_squit;
-  char  *comment = (parc > 2 && parv[2]) ? parv[2] : cptr->name;
+  char  *comment = (parc > 2 && parv[2]) ? parv[2] : client_p->name;
 
   if(parc < 2)
     return;
 
-  if( (found_squit = find_squit(cptr, sptr, parv[1])) )
+  if( (found_squit = find_squit(client_p, server_p, parv[1])) )
     {
       /*
       **  Notify all opers, if my local link is remotely squitted
       */
-      if (MyConnect(found_squit->acptr))
+      if (MyConnect(found_squit->aclient_p))
 	{
 	  sendto_wallops_flags(FLAGS_WALLOP, &me,
 				 "Remote SQUIT %s from %s (%s)",
 				 found_squit->server_name,
-				 get_client_name(sptr, HIDE_IP), comment);
+				 get_client_name(server_p, HIDE_IP), comment);
 
           sendto_serv_butone(&me,
 			     ":%s WALLOPS :Remote SQUIT %s from %s (%s)",
 			     me.name, found_squit->server_name,
-			     get_client_name(sptr, HIDE_IP),comment);
+			     get_client_name(server_p, HIDE_IP),comment);
 
 	  log(L_TRACE, "SQUIT From %s : %s (%s)", parv[0],
 	      found_squit->server_name, comment);
 
 	}
-      exit_client(cptr, found_squit->acptr, sptr, comment);
+      exit_client(client_p, found_squit->aclient_p, server_p, comment);
       return;
     }
 }
@@ -162,15 +162,15 @@ static void ms_squit(struct Client *cptr, struct Client *sptr,
  * output	- pointer to struct containing found squit or none if not found
  * side effects	-
  */
-static struct squit_parms *find_squit(struct Client *cptr,
-                                      struct Client *sptr,
+static struct squit_parms *find_squit(struct Client *client_p,
+                                      struct Client *server_p,
                                       char *server)
 {
   static struct squit_parms found_squit;
-  static struct Client *acptr;
+  static struct Client *aclient_p;
   struct ConfItem *aconf;
 
-  found_squit.acptr = NULL;
+  found_squit.aclient_p = NULL;
   found_squit.server_name = NULL;
 
   /*
@@ -178,16 +178,16 @@ static struct squit_parms *find_squit(struct Client *cptr,
   ** name is expanded if the incoming mask is the same as
   ** the server name for that link to the name of link.
   */
-  while ((*server == '*') && IsServer(cptr))
+  while ((*server == '*') && IsServer(client_p))
     {
-      aconf = cptr->serv->sconf;
+      aconf = client_p->serv->sconf;
       if (!aconf)
 	break;
 
       if (!irccmp(server, my_name_for_link(me.name, aconf)))
 	{
-	  found_squit.server_name = cptr->name;
-	  found_squit.acptr = cptr;
+	  found_squit.server_name = client_p->name;
+	  found_squit.aclient_p = client_p;
 	}
 
       break; /* WARNING is normal here */
@@ -198,23 +198,23 @@ static struct squit_parms *find_squit(struct Client *cptr,
   ** The following allows wild cards in SQUIT. Only useful
   ** when the command is issued by an oper.
   */
-  for (acptr = GlobalClientList; (acptr = next_client(acptr, server));
-       acptr = acptr->next)
+  for (aclient_p = GlobalClientList; (aclient_p = next_client(aclient_p, server));
+       aclient_p = aclient_p->next)
     {
-      if (IsServer(acptr) || IsMe(acptr))
+      if (IsServer(aclient_p) || IsMe(aclient_p))
 	break;
     }
 
-  found_squit.acptr = acptr;
+  found_squit.aclient_p = aclient_p;
   found_squit.server_name = server;
 
-  if (acptr && IsMe(acptr))
+  if (aclient_p && IsMe(aclient_p))
     {
-      found_squit.acptr = acptr;
-      found_squit.server_name = cptr->host;
+      found_squit.aclient_p = aclient_p;
+      found_squit.server_name = client_p->host;
     }
 
-  if(found_squit.acptr != NULL)
+  if(found_squit.aclient_p != NULL)
     return &found_squit;
   else
     return( NULL );

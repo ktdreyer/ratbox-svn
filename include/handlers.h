@@ -24,46 +24,46 @@
 
 /*
  * m_functions execute protocol messages on this server:
- * int m_func(struct Client* cptr, struct Client* sptr, int parc, char* parv[]);
+ * int m_func(struct Client* client_p, struct Client* server_p, int parc, char* parv[]);
  *
- *    cptr    is always NON-NULL, pointing to a *LOCAL* client
+ *    client_p    is always NON-NULL, pointing to a *LOCAL* client
  *            structure (with an open socket connected!). This
  *            identifies the physical socket where the message
  *            originated (or which caused the m_function to be
  *            executed--some m_functions may call others...).
  *
- *    sptr    is the source of the message, defined by the
+ *    server_p    is the source of the message, defined by the
  *            prefix part of the message if present. If not
- *            or prefix not found, then sptr==cptr.
+ *            or prefix not found, then server_p==client_p.
  *
- *            (!IsServer(cptr)) => (cptr == sptr), because
+ *            (!IsServer(client_p)) => (client_p == server_p), because
  *            prefixes are taken *only* from servers...
  *
- *            (IsServer(cptr))
- *                    (sptr == cptr) => the message didn't
+ *            (IsServer(client_p))
+ *                    (server_p == client_p) => the message didn't
  *                    have the prefix.
  *
- *                    (sptr != cptr && IsServer(sptr) means
+ *                    (server_p != client_p && IsServer(server_p) means
  *                    the prefix specified servername. (?)
  *
- *                    (sptr != cptr && !IsServer(sptr) means
+ *                    (server_p != client_p && !IsServer(server_p) means
  *                    that message originated from a remote
  *                    user (not local).
  *
  *
  *            combining
  *
- *            (!IsServer(sptr)) means that, sptr can safely
+ *            (!IsServer(server_p)) means that, server_p can safely
  *            taken as defining the target structure of the
  *            message in this server.
  *
  *    *Always* true (if 'parse' and others are working correct):
  *
- *    1)      sptr->from == cptr  (note: cptr->from == cptr)
+ *    1)      server_p->from == client_p  (note: client_p->from == client_p)
  *
- *    2)      MyConnect(sptr) <=> sptr == cptr (e.g. sptr
+ *    2)      MyConnect(server_p) <=> server_p == client_p (e.g. server_p
  *            *cannot* be a local connection, unless it's
- *            actually cptr!). [MyConnect(x) should probably
+ *            actually client_p!). [MyConnect(x) should probably
  *            be defined as (x == x->from) --msa ]
  *
  *    parc    number of variable parameter strings (if zero,

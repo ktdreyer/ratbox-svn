@@ -76,7 +76,7 @@ char *_version = "20001124";
  *
  */  
   
-static void mo_testline(struct Client *cptr, struct Client *sptr,
+static void mo_testline(struct Client *client_p, struct Client *server_p,
                        int parc, char *parv[])
 {
   struct ConfItem *aconf;
@@ -100,18 +100,18 @@ static void mo_testline(struct Client *cptr, struct Client *sptr,
               if( aconf )
                 {
                   get_printable_conf(aconf, &name, &host, &pass, &user, &port,&classname);
-                  sendto_one(sptr,
+                  sendto_one(server_p,
                          ":%s NOTICE %s :D-line host [%s] pass [%s]",
                          me.name, parv[0],
                          host,
                          pass);
                 }
               else
-                sendto_one(sptr, ":%s NOTICE %s :No aconf found",
+                sendto_one(server_p, ":%s NOTICE %s :No aconf found",
                          me.name, parv[0]);
             }
           else
-          sendto_one(sptr, ":%s NOTICE %s :usage: user@host|ip",
+          sendto_one(server_p, ":%s NOTICE %s :usage: user@host|ip",
                      me.name, parv[0]);
   
           return;
@@ -135,7 +135,7 @@ static void mo_testline(struct Client *cptr, struct Client *sptr,
               
           if(aconf->status & CONF_KILL)
             {
-              sendto_one(sptr,
+              sendto_one(server_p,
                          ":%s NOTICE %s :K-line name [%s] host [%s] pass [%s]",
                          me.name, parv[0],
                          user,
@@ -144,11 +144,11 @@ static void mo_testline(struct Client *cptr, struct Client *sptr,
             }
           else if(aconf->status & CONF_CLIENT)
             {
-              sendto_one(sptr,
+              sendto_one(server_p,
 ":%s NOTICE %s :I-line mask [%s] prefix [%s] name [%s] host [%s] port [%d] class [%s]",
                          me.name, parv[0],
                          name,
-                         show_iline_prefix(sptr,aconf,user),
+                         show_iline_prefix(server_p,aconf,user),
                          user,
                          host,
                          port,
@@ -157,7 +157,7 @@ static void mo_testline(struct Client *cptr, struct Client *sptr,
               aconf = find_tkline(given_host, given_name, 0);
               if(aconf)
                 {
-                  sendto_one(sptr,
+                  sendto_one(server_p,
                      ":%s NOTICE %s :k-line name [%s] host [%s] pass [%s]",
                              me.name, parv[0],
                              aconf->user,
@@ -167,10 +167,10 @@ static void mo_testline(struct Client *cptr, struct Client *sptr,
             }
         }
       else
-        sendto_one(sptr, ":%s NOTICE %s :No aconf found",
+        sendto_one(server_p, ":%s NOTICE %s :No aconf found",
                    me.name, parv[0]);
     }
   else
-    sendto_one(sptr, ":%s NOTICE %s :usage: user@host|ip",
+    sendto_one(server_p, ":%s NOTICE %s :usage: user@host|ip",
                me.name, parv[0]);
 }

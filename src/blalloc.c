@@ -379,19 +379,19 @@ int _BlockHeapFree(BlockHeap *bh, void *ptr)
 
 #ifdef MEMDEBUG
 void ReportBlockHeap(struct Client *);
-void ReportBlockHeap(struct Client *cptr)
+void ReportBlockHeap(struct Client *client_p)
 {
  MemoryEntry *mme;
- sendto_one(cptr, ":%s NOTICE %s :*** -- Block memory Allocation Report",
-   me.name, cptr->name);
+ sendto_one(client_p, ":%s NOTICE %s :*** -- Block memory Allocation Report",
+   me.name, client_p->name);
  for (mme = first_block_mem_entry; mme; mme=mme->next)
    if ((CurrentTime-mme->ts))
-     sendto_one(cptr,
+     sendto_one(client_p,
        ":%s NOTICE %s :*** -- %u bytes allocated for %lus at %s:%d",
-       me.name, cptr->name, mme->size, CurrentTime-mme->ts, mme->file,
+       me.name, client_p->name, mme->size, CurrentTime-mme->ts, mme->file,
        mme->line);
- sendto_one(cptr, ":%s NOTICE %s :*** -- End Block memory Allocation Report",
-   me.name, cptr->name);
+ sendto_one(client_p, ":%s NOTICE %s :*** -- End Block memory Allocation Report",
+   me.name, client_p->name);
 }
 #endif
 

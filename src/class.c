@@ -79,14 +79,14 @@ static  int     get_conf_ping(struct ConfItem *aconf)
  * output	- pointer to name of class
  * side effects - NONE
  */
-const char*     get_client_class(struct Client *acptr)
+const char*     get_client_class(struct Client *aclient_p)
 {
   dlink_node    *ptr;
   struct ConfItem *aconf;
   const char*   retc = (const char *)NULL;
 
-  if (acptr && !IsMe(acptr)  && (acptr->localClient->confs.head))
-    for (ptr = acptr->localClient->confs.head; ptr; ptr = ptr->next)
+  if (aclient_p && !IsMe(aclient_p)  && (aclient_p->localClient->confs.head))
+    for (ptr = aclient_p->localClient->confs.head; ptr; ptr = ptr->next)
       {
 	aconf = ptr->data;
 	if(aconf->className == NULL)
@@ -95,7 +95,7 @@ const char*     get_client_class(struct Client *acptr)
 	  retc= aconf->className;
       }
 
-  Debug((DEBUG_DEBUG,"Returning Class %s For %s",retc,acptr->name));
+  Debug((DEBUG_DEBUG,"Returning Class %s For %s",retc,aclient_p->name));
 
   return (retc);
 }
@@ -107,7 +107,7 @@ const char*     get_client_class(struct Client *acptr)
  * output	- ping frequency
  * side effects - NONE
  */
-int     get_client_ping(struct Client *acptr)
+int     get_client_ping(struct Client *aclient_p)
 {
   int   ping = 0;
   int   ping2;
@@ -115,9 +115,9 @@ int     get_client_ping(struct Client *acptr)
   dlink_node		*nlink;
 
 
-  if(acptr->localClient->confs.head != NULL)
+  if(aclient_p->localClient->confs.head != NULL)
     {
-      for(nlink = acptr->localClient->confs.head; nlink; nlink = nlink->next)
+      for(nlink = aclient_p->localClient->confs.head; nlink; nlink = nlink->next)
 	{
 	  aconf = nlink->data;
 	  if (aconf->status & (CONF_CLIENT|CONF_SERVER))
@@ -136,7 +136,7 @@ int     get_client_ping(struct Client *acptr)
 
   if (ping <= 0)
     ping = PINGFREQUENCY;
-  Debug((DEBUG_DEBUG,"Client %s Ping %d", acptr->name, ping));
+  Debug((DEBUG_DEBUG,"Client %s Ping %d", aclient_p->name, ping));
   return (ping);
 }
 
@@ -285,12 +285,12 @@ void    initclass()
  * output	- NONE
  * side effects	- class report is done to this client
  */
-void    report_classes(struct Client *sptr)
+void    report_classes(struct Client *server_p)
 {
   struct Class *cltmp;
 
   for (cltmp = ClassList; cltmp; cltmp = cltmp->next)
-    sendto_one(sptr, form_str(RPL_STATSYLINE), me.name, sptr->name,
+    sendto_one(server_p, form_str(RPL_STATSYLINE), me.name, server_p->name,
                'Y', ClassName(cltmp), PingFreq(cltmp), ConFreq(cltmp),
                MaxLinks(cltmp), MaxSendq(cltmp));
 }
@@ -302,15 +302,15 @@ void    report_classes(struct Client *sptr)
  * output	- sendq for this client as found from its class
  * side effects	- NONE
  */
-long    get_sendq(struct Client *cptr)
+long    get_sendq(struct Client *client_p)
 {
   int   sendq = MAXSENDQLENGTH, retc = BAD_CLIENT_CLASS;
   dlink_node      *ptr;
   struct Class    *cl;
   struct ConfItem *aconf;
 
-  if (cptr && !IsMe(cptr)  && (cptr->localClient->confs.head))
-    for (ptr = cptr->localClient->confs.head; ptr; ptr = ptr->next)
+  if (client_p && !IsMe(client_p)  && (client_p->localClient->confs.head))
+    for (ptr = client_p->localClient->confs.head; ptr; ptr = ptr->next)
       {
 	aconf = ptr->data;
 	if(aconf == NULL)

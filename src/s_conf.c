@@ -226,19 +226,19 @@ void free_conf(struct ConfItem* aconf)
  * remove all conf entries from the client except those which match
  * the status field mask.
  */
-void det_confs_butmask(struct Client* cptr, int mask)
+void det_confs_butmask(struct Client* client_p, int mask)
 {
   dlink_node *dlink;
   dlink_node *link_next;
   struct ConfItem *aconf;
 
-  for (dlink = cptr->localClient->confs.head; dlink; dlink = link_next)
+  for (dlink = client_p->localClient->confs.head; dlink; dlink = link_next)
     {
       link_next = dlink->next;
       aconf = dlink->data;
 
       if ((aconf->status & mask) == 0)
-        detach_conf(cptr, aconf);
+        detach_conf(client_p, aconf);
     }
 }
 
@@ -262,7 +262,7 @@ static struct LinkReport {
  * output	- NONE
  * side effects	-
  */
-void report_configured_links(struct Client* sptr, int mask)
+void report_configured_links(struct Client* server_p, int mask)
 {
   struct ConfItem*   tmp;
   struct LinkReport* p;
@@ -292,17 +292,17 @@ void report_configured_links(struct Client* sptr, int mask)
               c = 'c';
 
             /* Allow admins to see actual ips */
-            if(IsSetOperAdmin(sptr))
-              sendto_one(sptr, form_str(p->rpl_stats), me.name,
-                         sptr->name, c,
+            if(IsSetOperAdmin(server_p))
+              sendto_one(server_p, form_str(p->rpl_stats), me.name,
+                         server_p->name, c,
                          host,
                          name,
                          port,
                          classname,
                          oper_flags_as_string((int)tmp->hold));
             else
-              sendto_one(sptr, form_str(p->rpl_stats), me.name,
-                         sptr->name, c,
+              sendto_one(server_p, form_str(p->rpl_stats), me.name,
+                         server_p->name, c,
                          "*@127.0.0.1",
                          name,
                          port,
@@ -312,25 +312,25 @@ void report_configured_links(struct Client* sptr, int mask)
         else if(mask & (CONF_OPERATOR))
           {
             /* Don't allow non opers to see oper privs */
-            if(IsOper(sptr))
-              sendto_one(sptr, form_str(p->rpl_stats), me.name,
-                         sptr->name,
+            if(IsOper(server_p))
+              sendto_one(server_p, form_str(p->rpl_stats), me.name,
+                         server_p->name,
                          p->conf_char,
                          user, host, name,
                          oper_privs_as_string((struct Client *)NULL,port),
                          classname,
                          oper_flags_as_string((int)tmp->hold));
             else
-              sendto_one(sptr, form_str(p->rpl_stats), me.name,
-                         sptr->name, p->conf_char,
+              sendto_one(server_p, form_str(p->rpl_stats), me.name,
+                         server_p->name, p->conf_char,
                          user, host, name,
                          "0",
                          classname,
                          "");
           }
         else
-          sendto_one(sptr, form_str(p->rpl_stats), me.name,
-                     sptr->name, p->conf_char,
+          sendto_one(server_p, form_str(p->rpl_stats), me.name,
+                     server_p->name, p->conf_char,
                      host, name, port,
                      classname);
       }
@@ -346,7 +346,7 @@ void report_configured_links(struct Client* sptr, int mask)
  * output       - none
  * side effects -
  */
-void report_specials(struct Client* sptr, int flags, int numeric)
+void report_specials(struct Client* server_p, int flags, int numeric)
 {
   struct ConfItem* this_conf;
   struct ConfItem* aconf;
@@ -368,9 +368,9 @@ void report_specials(struct Client* sptr, int flags, int numeric)
       {
         get_printable_conf(aconf, &name, &host, &pass, &user, &port, &classname);
 
-        sendto_one(sptr, form_str(numeric),
+        sendto_one(server_p, form_str(numeric),
                    me.name,
-                   sptr->name,
+                   server_p->name,
                    name,
                    pass);
       }
@@ -390,41 +390,41 @@ void report_specials(struct Client* sptr, int flags, int numeric)
  *		  Look for conf lines which have the same
  * 		  status as the flags passed.
  */
-int check_client(struct Client *cptr, struct Client *sptr, char *username)
+int check_client(struct Client *client_p, struct Client *server_p, char *username)
 {
   static char     sockname[HOSTLEN + 1];
   int             i;
  
-  ClearAccess(sptr);
+  ClearAccess(server_p);
 
-  if ((i = attach_Iline(sptr, username)))
+  if ((i = attach_Iline(server_p, username)))
     {
-      log(L_INFO, "Access denied: %s[%s]", sptr->name, sockname);
+      log(L_INFO, "Access denied: %s[%s]", server_p->name, sockname);
     }
 
   switch( i )
     {
     case SOCKET_ERROR:
-      (void)exit_client(cptr, sptr, &me, "Socket Error");
+      (void)exit_client(client_p, server_p, &me, "Socket Error");
       break;
 
     case TOO_MANY:
       sendto_realops_flags(FLAGS_FULL, "%s for %s (%s).",
-			   "Too many on IP", get_client_host(sptr),
-			   sptr->localClient->sockhost);
-      log(L_INFO,"Too many connections on IP from %s.", get_client_host(sptr));
+			   "Too many on IP", get_client_host(server_p),
+			   server_p->localClient->sockhost);
+      log(L_INFO,"Too many connections on IP from %s.", get_client_host(server_p));
       ServerStats->is_ref++;
-      (void)exit_client(cptr, sptr, &me, 
+      (void)exit_client(client_p, server_p, &me, 
 			"No more connections allowed on that IP" );
       break;
 
     case I_LINE_FULL:
       sendto_realops_flags(FLAGS_FULL, "%s for %s (%s).",
-			   "I-line is full", get_client_host(sptr),
-			   sptr->localClient->sockhost);
-      log(L_INFO,"Too many connections from %s.", get_client_host(sptr));
+			   "I-line is full", get_client_host(server_p),
+			   server_p->localClient->sockhost);
+      log(L_INFO,"Too many connections from %s.", get_client_host(server_p));
       ServerStats->is_ref++;
-      (void)exit_client(cptr, sptr, &me, 
+      (void)exit_client(client_p, server_p, &me, 
 		"No more connections allowed in your connection class" );
       break;
 
@@ -434,28 +434,28 @@ int check_client(struct Client *cptr, struct Client *sptr, char *username)
       ServerStats->is_ref++;
       /* jdc - lists server name & port connections are on */
       /*       a purely cosmetical change */
-      inetntop(sptr->localClient->aftype, &IN_ADDR(sptr->localClient->ip), ipaddr, HOSTIPLEN);
+      inetntop(server_p->localClient->aftype, &IN_ADDR(server_p->localClient->ip), ipaddr, HOSTIPLEN);
       sendto_realops_flags(FLAGS_UNAUTH,
 			   "%s from %s [%s] on [%s/%u].",
 			   "Unauthorized client connection",
-			   get_client_host(sptr),
+			   get_client_host(server_p),
 			   ipaddr,
-			   sptr->localClient->listener->name,
-			   sptr->localClient->listener->port
+			   server_p->localClient->listener->name,
+			   server_p->localClient->listener->port
 			   );
       log(L_INFO,
 	  "Unauthorized client connection from %s on [%s/%u].",
-	  get_client_host(sptr),
-	  sptr->localClient->listener->name,
-	  sptr->localClient->listener->port
+	  get_client_host(server_p),
+	  server_p->localClient->listener->name,
+	  server_p->localClient->listener->port
 	  );
 	  
-      (void)exit_client(cptr, sptr, &me,
+      (void)exit_client(client_p, server_p, &me,
 			"You are not authorized to use this server");
       break;
     }
     case BANNED_CLIENT:
-      (void)exit_client(cptr,cptr, &me, "*** Banned ");
+      (void)exit_client(client_p,client_p, &me, "*** Banned ");
       ServerStats->is_ref++;
       break;
 
@@ -473,22 +473,22 @@ int check_client(struct Client *cptr, struct Client *sptr, char *username)
  * output	-
  * side effect	- find the first (best) I line to attach.
  */
-int attach_Iline(struct Client* cptr, const char* username)
+int attach_Iline(struct Client* client_p, const char* username)
 {
   struct ConfItem* aconf;
   struct ConfItem* gkill_conf;
   struct ConfItem* tkline_conf;
   char       non_ident[USERLEN + 1];
 
-  if (IsGotId(cptr))
+  if (IsGotId(client_p))
     {
-      aconf = find_matching_conf(cptr->host,cptr->username,
-                                       &cptr->localClient->ip);
+      aconf = find_matching_conf(client_p->host,client_p->username,
+                                       &client_p->localClient->ip);
       if(aconf && !IsConfElined(aconf))
         {
-          if( (tkline_conf = find_tkline(cptr->host,
-					 cptr->username,
-					 &cptr->localClient->ip)))
+          if( (tkline_conf = find_tkline(client_p->host,
+					 client_p->username,
+					 &client_p->localClient->ip)))
             aconf = tkline_conf;
         }
     }
@@ -497,13 +497,13 @@ int attach_Iline(struct Client* cptr, const char* username)
       non_ident[0] = '~';
       strncpy_irc(&non_ident[1],username, USERLEN - 1);
       non_ident[USERLEN] = '\0';
-      aconf = find_matching_conf(cptr->host,non_ident,
-                                 &cptr->localClient->ip);
+      aconf = find_matching_conf(client_p->host,non_ident,
+                                 &client_p->localClient->ip);
       if(aconf && !IsConfElined(aconf))
         {
-          if((tkline_conf = find_tkline(cptr->host,
+          if((tkline_conf = find_tkline(client_p->host,
 					non_ident,
-					&cptr->localClient->ip)))
+					&client_p->localClient->ip)))
             aconf = tkline_conf;
         }
     }
@@ -514,8 +514,8 @@ int attach_Iline(struct Client* cptr, const char* username)
         {
 	  if (aconf->flags & CONF_FLAGS_REDIR)
 	    {
-	      sendto_one(cptr, form_str(RPL_REDIR),
-			 me.name, cptr->name,
+	      sendto_one(client_p, form_str(RPL_REDIR),
+			 me.name, client_p->name,
 			 aconf->name ? aconf->name : "", aconf->port);
 	      return(NOT_AUTHORIZED);
 	    }
@@ -525,16 +525,16 @@ int attach_Iline(struct Client* cptr, const char* username)
 	    {
 	      if (!IsConfElined(aconf))
 		{
-		  if (IsGotId(cptr))
-		    gkill_conf = find_gkill(cptr, cptr->username);
+		  if (IsGotId(client_p))
+		    gkill_conf = find_gkill(client_p, client_p->username);
 		  else
-		    gkill_conf = find_gkill(cptr, non_ident);
+		    gkill_conf = find_gkill(client_p, non_ident);
 		  if (gkill_conf)
 		    {
-		      sendto_one(cptr, ":%s NOTICE %s :*** G-lined", me.name,
-				 cptr->name);
-		      sendto_one(cptr, ":%s NOTICE %s :*** Banned %s",
-				 me.name, cptr->name,
+		      sendto_one(client_p, ":%s NOTICE %s :*** G-lined", me.name,
+				 client_p->name);
+		      sendto_one(client_p, ":%s NOTICE %s :*** Banned %s",
+				 me.name, client_p->name,
 				 gkill_conf->passwd);
 		      return(BANNED_CLIENT);
 		    }
@@ -542,10 +542,10 @@ int attach_Iline(struct Client* cptr, const char* username)
 	    }
 
 	  if(IsConfDoIdentd(aconf))
-	    SetNeedId(cptr);
+	    SetNeedId(client_p);
 
 	  if(IsConfRestricted(aconf))
-	    SetRestricted(cptr);
+	    SetRestricted(client_p);
 
 	  /* Thanks for spoof idea amm */
 	  if(IsConfDoSpoofIp(aconf))
@@ -553,22 +553,22 @@ int attach_Iline(struct Client* cptr, const char* username)
 	      if(IsConfSpoofNotice(aconf))
 	      {
 	        sendto_realops_flags(FLAGS_ADMIN,
-				   "%s spoofing: %s as %s", cptr->name,
-				   cptr->host, aconf->name);
+				   "%s spoofing: %s as %s", client_p->name,
+				   client_p->host, aconf->name);
 	      }
-	      strncpy_irc(cptr->host, aconf->name, HOSTLEN);
-	      SetIPSpoof(cptr);
-	      SetIPHidden(cptr);
+	      strncpy_irc(client_p->host, aconf->name, HOSTLEN);
+	      SetIPSpoof(client_p);
+	      SetIPHidden(client_p);
 	    }
 
-	  return(attach_iline(cptr, aconf));
+	  return(attach_iline(client_p, aconf));
         }
       else if(aconf->status & CONF_KILL)
         {
 	  if(ConfigFileEntry.kline_with_reason)
 	    {
-	      sendto_one(cptr, ":%s NOTICE %s :*** Banned %s",
-			 me.name,cptr->name,aconf->passwd);
+	      sendto_one(client_p, ":%s NOTICE %s :*** Banned %s",
+			 me.name,client_p->name,aconf->passwd);
 	    }
           return(BANNED_CLIENT);
         }
@@ -585,13 +585,13 @@ int attach_Iline(struct Client* cptr, const char* username)
  * output	-
  * side effects	-
  */
-static int attach_iline(struct Client *cptr, struct ConfItem *aconf)
+static int attach_iline(struct Client *client_p, struct ConfItem *aconf)
 {
   IP_ENTRY *ip_found;
 
-  ip_found = find_or_add_ip(cptr);
+  ip_found = find_or_add_ip(client_p);
 
-  SetIpHash(cptr);
+  SetIpHash(client_p);
   ip_found->count++;
 
   /* only check it if its non zero */
@@ -602,13 +602,13 @@ static int attach_iline(struct Client *cptr, struct ConfItem *aconf)
         return TOO_MANY; /* Already at maximum allowed ip#'s */
       else
         {
-          sendto_one(cptr,
+          sendto_one(client_p,
        ":%s NOTICE %s :*** :I: line is full, but you have an >I: line!",
-                     me.name,cptr->name);
+                     me.name,client_p->name);
         }
     }
 
-  return (attach_conf(cptr, aconf) );
+  return (attach_conf(client_p, aconf) );
 }
 
 /* link list of free IP_ENTRY's */
@@ -655,7 +655,7 @@ void clear_ip_hash_table()
 /* 
  * find_or_add_ip()
  *
- * inputs       - cptr
+ * inputs       - client_p
  *              - name
  *
  * output       - pointer to an IP_ENTRY element
@@ -667,7 +667,7 @@ void clear_ip_hash_table()
  */
 
 static IP_ENTRY *
-find_or_add_ip(struct Client *cptr)
+find_or_add_ip(struct Client *client_p)
 {
   struct irc_inaddr ip_in;
   
@@ -675,7 +675,7 @@ find_or_add_ip(struct Client *cptr)
   IP_ENTRY *ptr, *newptr;
 
   
-  copy_s_addr(IN_ADDR(ip_in), IN_ADDR(cptr->localClient->ip));
+  copy_s_addr(IN_ADDR(ip_in), IN_ADDR(client_p->localClient->ip));
 
   for(ptr = ip_hash_table[hash_index = hash_ip(&ip_in)]; ptr; ptr = ptr->next )
     {
@@ -843,7 +843,7 @@ void count_ip_hash(int *number_ips_stored,u_long *mem_ips_stored)
  * output        -
  * side effects        -
  */
-void iphash_stats(struct Client *cptr, struct Client *sptr,
+void iphash_stats(struct Client *client_p, struct Client *server_p,
 		  int parc, char *parv[],FBFILE* out)
 {
   IP_ENTRY *ip_hash_ptr;
@@ -852,8 +852,8 @@ void iphash_stats(struct Client *cptr, struct Client *sptr,
   char result_buf[256];
 
   if(out == NULL)
-    sendto_one(sptr,":%s NOTICE %s :*** hash stats for iphash",
-               me.name,cptr->name);
+    sendto_one(server_p,":%s NOTICE %s :*** hash stats for iphash",
+               me.name,client_p->name);
   else
     {
       (void)sprintf(result_buf,"*** hash stats for iphash\n");
@@ -874,8 +874,8 @@ void iphash_stats(struct Client *cptr, struct Client *sptr,
         {
           if(out == NULL)
             {
-              sendto_one(sptr,":%s NOTICE %s :Entry %d (0x%X) Collisions %d",
-                         me.name,cptr->name,i,i,collision_count);
+              sendto_one(server_p,":%s NOTICE %s :Entry %d (0x%X) Collisions %d",
+                         me.name,client_p->name,i,i,collision_count);
             }
           else
             {
@@ -892,14 +892,14 @@ void iphash_stats(struct Client *cptr, struct Client *sptr,
 **        Disassociate configuration from the client.
 **      Also removes a class from the list if marked for deleting.
 */
-int detach_conf(struct Client* cptr,struct ConfItem* aconf)
+int detach_conf(struct Client* client_p,struct ConfItem* aconf)
 {
   dlink_node *ptr;
 
   if(aconf == NULL)
     return -1;
 
-  for( ptr = cptr->localClient->confs.head; ptr; ptr = ptr->next )
+  for( ptr = client_p->localClient->confs.head; ptr; ptr = ptr->next )
     {
       if (ptr->data == aconf)
         {
@@ -920,7 +920,7 @@ int detach_conf(struct Client* cptr,struct ConfItem* aconf)
             {
               free_conf(aconf);
             }
-	  dlinkDelete(ptr, &cptr->localClient->confs);
+	  dlinkDelete(ptr, &client_p->localClient->confs);
           free_dlink_node(ptr);
           return 0;
         }
@@ -928,11 +928,11 @@ int detach_conf(struct Client* cptr,struct ConfItem* aconf)
   return -1;
 }
 
-static int is_attached(struct ConfItem *aconf,struct Client *cptr)
+static int is_attached(struct ConfItem *aconf,struct Client *client_p)
 {
   dlink_node *ptr=NULL;
 
-  for (ptr = cptr->localClient->confs.head; ptr; ptr = ptr->next)
+  for (ptr = client_p->localClient->confs.head; ptr; ptr = ptr->next)
     if (ptr->data == aconf)
       break;
   
@@ -950,11 +950,11 @@ static int is_attached(struct ConfItem *aconf,struct Client *cptr)
  *                connection). Note, that this automatically changes the
  *                attachment if there was an old one...
  */
-int attach_conf(struct Client *cptr,struct ConfItem *aconf)
+int attach_conf(struct Client *client_p,struct ConfItem *aconf)
 {
   dlink_node *lp;
 
-  if (is_attached(aconf, cptr))
+  if (is_attached(aconf, client_p))
     {
       return 1;
     }
@@ -974,10 +974,10 @@ int attach_conf(struct Client *cptr,struct ConfItem *aconf)
             }
           else
             {
-              send(cptr->fd,
+              send(client_p->fd,
                    "NOTICE FLINE :I: line is full, but you have an >I: line!\n",
                    56, 0);
-              SetFlined(cptr);
+              SetFlined(client_p);
             }
 
         }
@@ -985,7 +985,7 @@ int attach_conf(struct Client *cptr,struct ConfItem *aconf)
 
   lp = make_dlink_node();
 
-  dlinkAdd(aconf, lp, &cptr->localClient->confs);
+  dlinkAdd(aconf, lp, &client_p->localClient->confs);
 
   aconf->clients++;
   if (aconf->status & CONF_CLIENT_MASK)
@@ -1003,7 +1003,7 @@ int attach_conf(struct Client *cptr,struct ConfItem *aconf)
  * NOTE: this will allow C:::* and N:::* because the match mask is the
  * conf line and not the name
  */
-int attach_confs(struct Client* cptr, const char* name, int statmask)
+int attach_confs(struct Client* client_p, const char* name, int statmask)
 {
   struct ConfItem* tmp;
   int              conf_counter = 0;
@@ -1013,13 +1013,13 @@ int attach_confs(struct Client* cptr, const char* name, int statmask)
       if ((tmp->status & statmask) && !IsIllegal(tmp) &&
           tmp->name && match(tmp->name, name))
         {
-          if (-1 < attach_conf(cptr, tmp))
+          if (-1 < attach_conf(client_p, tmp))
             ++conf_counter;
         }
       else if ((tmp->status & statmask) && !IsIllegal(tmp) &&
                tmp->name && !irccmp(tmp->name, name))
         {
-          if (-1 < attach_conf(cptr, tmp))
+          if (-1 < attach_conf(client_p, tmp))
             ++conf_counter;
         }
     }
@@ -1040,11 +1040,11 @@ int attach_confs(struct Client* cptr, const char* name, int statmask)
  * C/N lines are completely gone now, the name exists only for historical
  * reasons - A1kmm.
  */
-int attach_cn_lines(struct Client *cptr, const char* name, const char* host)
+int attach_cn_lines(struct Client *client_p, const char* name, const char* host)
 {
   struct ConfItem* ptr;
 
-  assert(0 != cptr);
+  assert(0 != client_p);
   assert(0 != host);
 
   for (ptr = ConfigItemList; ptr; ptr = ptr->next)
@@ -1055,7 +1055,7 @@ int attach_cn_lines(struct Client *cptr, const char* name, const char* host)
        continue;
      if (irccmp(name, ptr->name)/* || irccmp(host, ptr->host)*/)
        continue;
-     attach_conf(cptr, ptr);
+     attach_conf(client_p, ptr);
      return -1;
     }
   return 0;
@@ -1335,7 +1335,7 @@ int find_q_conf(char *nickToFind,char *user,char *host)
  * side effects - all Q lines are listed to client 
  */
 
-void report_qlines(struct Client *sptr)
+void report_qlines(struct Client *server_p)
 {
   struct ConfItem *aconf;
   char *host;
@@ -1349,8 +1349,8 @@ void report_qlines(struct Client *sptr)
     {
       get_printable_conf(aconf, &name, &host, &pass, &user, &port,&classname);
           
-      sendto_one(sptr, form_str(RPL_STATSQLINE),
-		 me.name, sptr->name, name, pass, user, host);
+      sendto_one(server_p, form_str(RPL_STATSQLINE),
+		 me.name, server_p->name, name, pass, user, host);
     }
 }
 
@@ -1382,7 +1382,7 @@ static void clear_special_conf(struct ConfItem **this_conf)
  * as a result of an operator issuing this command, else assume it has been
  * called as a result of the server receiving a HUP signal.
  */
-int rehash(struct Client *cptr,struct Client *sptr, int sig)
+int rehash(struct Client *client_p,struct Client *server_p, int sig)
 {
   if (sig)
   {
@@ -1583,15 +1583,15 @@ int conf_connect_allowed(struct irc_inaddr *addr)
  * side effects	- See if this user is klined already,
  *		  and if so, return struct ConfItem pointer
  */
-struct ConfItem *find_kill(struct Client* cptr)
+struct ConfItem *find_kill(struct Client* client_p)
 {
-  assert(0 != cptr);
+  assert(0 != client_p);
 
   /* If client is e-lined, then its not k-linable */
   /* opers get that flag automatically, normal users do not */
-  return (IsElined(cptr)) ? 0 : find_is_klined(cptr->host, 
-                                               cptr->username, 
-                                               &cptr->localClient->ip);
+  return (IsElined(client_p)) ? 0 : find_is_klined(client_p->host, 
+                                               client_p->username, 
+                                               &client_p->localClient->ip);
 }
 
 /*
@@ -1705,10 +1705,10 @@ void add_temp_kline(struct ConfItem *aconf)
  * side effects  - NONE
  *                  
  */
-void report_temp_klines(struct Client *sptr)
+void report_temp_klines(struct Client *server_p)
 {
-  show_temp_klines(sptr, &temporary_klines);
-  show_temp_klines(sptr, &temporary_ip_klines);
+  show_temp_klines(server_p, &temporary_klines);
+  show_temp_klines(server_p, &temporary_ip_klines);
 }
 
 /* show_temp_klines
@@ -1719,7 +1719,7 @@ void report_temp_klines(struct Client *sptr)
  * side effects   - NONE
  */
 void
-show_temp_klines(struct Client *sptr, dlink_list *tklist)
+show_temp_klines(struct Client *server_p, dlink_list *tklist)
 {
   dlink_node *kill_node;
   struct ConfItem *kill_list_ptr;
@@ -1746,8 +1746,8 @@ show_temp_klines(struct Client *sptr, dlink_list *tklist)
       else
         reason = "No Reason";
 
-      sendto_one(sptr, form_str(RPL_STATSKLINE), me.name,
-                 sptr->name, 'k', host, user, reason);
+      sendto_one(server_p, form_str(RPL_STATSKLINE), me.name,
+                 server_p->name, 'k', host, user, reason);
     }
 }
 
@@ -1800,14 +1800,14 @@ expire_tklines(dlink_list *tklist)
 /*
  * oper_privs_as_string
  *
- * inputs        - pointer to cptr or NULL
+ * inputs        - pointer to client_p or NULL
  * output        - pointer to static string showing oper privs
  * side effects  -
  * return as string, the oper privs as derived from port
- * also, set the oper privs if given cptr non NULL
+ * also, set the oper privs if given client_p non NULL
  */
 
-char *oper_privs_as_string(struct Client *cptr,int port)
+char *oper_privs_as_string(struct Client *client_p,int port)
 {
   static char privs_out[16];
   char *privs_ptr;
@@ -1817,8 +1817,8 @@ char *oper_privs_as_string(struct Client *cptr,int port)
 
   if(port & CONF_OPER_GLINE)
     {
-      if(cptr)
-        SetOperGline(cptr);
+      if(client_p)
+        SetOperGline(client_p);
       *privs_ptr++ = 'G';
     }
   else
@@ -1826,8 +1826,8 @@ char *oper_privs_as_string(struct Client *cptr,int port)
 
   if(port & CONF_OPER_K)
     {
-      if(cptr)
-        SetOperK(cptr);
+      if(client_p)
+        SetOperK(client_p);
       *privs_ptr++ = 'K';
     }
   else
@@ -1835,15 +1835,15 @@ char *oper_privs_as_string(struct Client *cptr,int port)
 
   if(port & CONF_OPER_N)
     {
-      if(cptr)
-        SetOperN(cptr);
+      if(client_p)
+        SetOperN(client_p);
       *privs_ptr++ = 'N';
     }
 
   if(port & CONF_OPER_GLOBAL_KILL)
     {
-      if(cptr)
-        SetOperGlobalKill(cptr);
+      if(client_p)
+        SetOperGlobalKill(client_p);
       *privs_ptr++ = 'O';
     }
   else
@@ -1851,8 +1851,8 @@ char *oper_privs_as_string(struct Client *cptr,int port)
 
   if(port & CONF_OPER_REMOTE)
     {
-      if(cptr)
-        SetOperRemote(cptr);
+      if(client_p)
+        SetOperRemote(client_p);
       *privs_ptr++ = 'R';
     }
   else
@@ -1860,8 +1860,8 @@ char *oper_privs_as_string(struct Client *cptr,int port)
   
   if(port & CONF_OPER_UNKLINE)
     {
-      if(cptr)
-        SetOperUnkline(cptr);
+      if(client_p)
+        SetOperUnkline(client_p);
       *privs_ptr++ = 'U';
     }
   else
@@ -1869,8 +1869,8 @@ char *oper_privs_as_string(struct Client *cptr,int port)
 
   if(port & CONF_OPER_REHASH)
     {
-      if(cptr)
-        SetOperRehash(cptr);
+      if(client_p)
+        SetOperRehash(client_p);
       *privs_ptr++ = 'H';
     }
   else
@@ -1878,8 +1878,8 @@ char *oper_privs_as_string(struct Client *cptr,int port)
 
   if(port & CONF_OPER_DIE)
     {
-      if(cptr)
-        SetOperDie(cptr);
+      if(client_p)
+        SetOperDie(client_p);
       *privs_ptr++ = 'D';
     }
   else
@@ -1887,8 +1887,8 @@ char *oper_privs_as_string(struct Client *cptr,int port)
 
   if (port & CONF_OPER_ADMIN)
     {
-      if (cptr)
-	SetOperAdmin(cptr);
+      if (client_p)
+	SetOperAdmin(client_p);
       *privs_ptr++ = 'A';
     }
   else
@@ -2321,7 +2321,7 @@ static void flush_deleted_I_P(void)
  *                
  */
 void WriteKlineOrDline( KlineType type,
-			struct Client *sptr,
+			struct Client *server_p,
 			char *user,
 			char *host,
 			const char *reason,
@@ -2337,22 +2337,22 @@ void WriteKlineOrDline( KlineType type,
     {
       sendto_realops_flags(FLAGS_ALL,
 			   "%s added D-Line for [%s] [%s]",
-			   sptr->name, host, reason);
-      sendto_one(sptr, ":%s NOTICE %s :Added D-Line [%s] to %s",
-		 me.name, sptr->name, host, filename);
+			   server_p->name, host, reason);
+      sendto_one(server_p, ":%s NOTICE %s :Added D-Line [%s] to %s",
+		 me.name, server_p->name, host, filename);
 
       log(L_TRACE, "%s added D-Line for [%s] [%s]", 
-	  sptr->name, host, reason);
+	  server_p->name, host, reason);
     }
   else
     {
       sendto_realops_flags(FLAGS_ALL,
 			   "%s added K-Line for [%s@%s] [%s]",
-			   sptr->name, user, host, reason);
-      sendto_one(sptr, ":%s NOTICE %s :Added K-Line [%s@%s]",
-		 me.name, sptr->name, user, host);
+			   server_p->name, user, host, reason);
+      sendto_one(server_p, ":%s NOTICE %s :Added K-Line [%s@%s]",
+		 me.name, server_p->name, user, host);
       log(L_TRACE, "%s added K-Line for [%s] [%s@%s]", 
-	  sptr->name, user, host, reason);
+	  server_p->name, user, host, reason);
     }
 
   if ( (out = fbopen(filename, "a")) == NULL )
@@ -2364,23 +2364,23 @@ void WriteKlineOrDline( KlineType type,
 
   if(type==KLINE_TYPE)
     {
-      if (MyClient(sptr))
+      if (MyClient(server_p))
 	{
 	  ircsprintf(buffer, "#%s!%s@%s K'd: %s@%s:%s\n",
-		     sptr->name, sptr->username, sptr->host,
+		     server_p->name, server_p->username, server_p->host,
 		     user, host, reason);
 	}
       else
 	{
 	  ircsprintf(buffer, "#%s!%s@%s on %s K'd: %s@%s:%s\n",
-		     sptr->name, sptr->username, sptr->host,
-		     sptr->servptr?sptr->servptr->name:"<Unknown>",
+		     server_p->name, server_p->username, server_p->host,
+		     server_p->servptr?server_p->servptr->name:"<Unknown>",
 		     user, host, reason);
 	}
     }
   else
     ircsprintf(buffer, "#%s!%s@%s D'd: %s:%s\n",
-	       sptr->name, sptr->username, sptr->host,
+	       server_p->name, server_p->username, server_p->host,
 	       host, reason);
   
   if (fbputs(buffer,out) == -1)
@@ -2414,10 +2414,10 @@ void WriteKlineOrDline( KlineType type,
 
   if(type==KLINE_TYPE)
     log(L_TRACE, "%s added K-Line for [%s@%s] [%s]",
-        sptr->name, user, host, reason);
+        server_p->name, user, host, reason);
   else
     log(L_TRACE, "%s added D-Line for [%s] [%s]",
-           sptr->name, host, reason);
+           server_p->name, host, reason);
 }
 
 /* get_conf_name

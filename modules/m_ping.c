@@ -60,79 +60,79 @@ char *_version = "20001122";
 **      parv[1] = origin
 **      parv[2] = destination
 */
-static void m_ping(struct Client *cptr,
-                  struct Client *sptr,
+static void m_ping(struct Client *client_p,
+                  struct Client *server_p,
                   int parc,
                   char *parv[])
 {
-  struct Client *acptr;
+  struct Client *aclient_p;
   char  *origin, *destination;
 
   if (parc < 2 || *parv[1] == '\0')
     {
-      sendto_one(sptr, form_str(ERR_NOORIGIN), me.name, parv[0]);
+      sendto_one(server_p, form_str(ERR_NOORIGIN), me.name, parv[0]);
       return;
     }
   origin = parv[1];
   destination = parv[2]; /* Will get NULL or pointer (parc >= 2!!) */
 
-  acptr = find_client(origin, NULL);
-  if (!acptr)
-    acptr = find_server(origin);
-  if (acptr && acptr != sptr)
-    origin = cptr->name;
+  aclient_p = find_client(origin, NULL);
+  if (!aclient_p)
+    aclient_p = find_server(origin);
+  if (aclient_p && aclient_p != server_p)
+    origin = client_p->name;
   if (!EmptyString(destination) && irccmp(destination, me.name) != 0)
     {
-      if ((acptr = find_server(destination)))
-        sendto_one(acptr,":%s PING %s :%s", parv[0],
+      if ((aclient_p = find_server(destination)))
+        sendto_one(aclient_p,":%s PING %s :%s", parv[0],
                    origin, destination);
       else
         {
-          sendto_one(sptr, form_str(ERR_NOSUCHSERVER),
+          sendto_one(server_p, form_str(ERR_NOSUCHSERVER),
                      me.name, parv[0], destination);
           return;
         }
     }
   else
-    sendto_one(sptr,":%s PONG %s :%s", me.name,
+    sendto_one(server_p,":%s PONG %s :%s", me.name,
                (destination) ? destination : me.name, origin);
 }
 
-static void ms_ping(struct Client *cptr,
-                   struct Client *sptr,
+static void ms_ping(struct Client *client_p,
+                   struct Client *server_p,
                    int parc,
                    char *parv[])
 {
-  struct Client *acptr;
+  struct Client *aclient_p;
   char  *origin, *destination;
 
   if (parc < 2 || *parv[1] == '\0')
     {
-      sendto_one(sptr, form_str(ERR_NOORIGIN), me.name, parv[0]);
+      sendto_one(server_p, form_str(ERR_NOORIGIN), me.name, parv[0]);
       return;
     }
   origin = parv[1];
   destination = parv[2]; /* Will get NULL or pointer (parc >= 2!!) */
 
-  acptr = find_client(origin, NULL);
-  if (!acptr)
-    acptr = find_server(origin);
-  if (acptr && acptr != sptr)
-    origin = cptr->name;
+  aclient_p = find_client(origin, NULL);
+  if (!aclient_p)
+    aclient_p = find_server(origin);
+  if (aclient_p && aclient_p != server_p)
+    origin = client_p->name;
   if (!EmptyString(destination) && irccmp(destination, me.name) != 0)
     {
-      if ((acptr = find_server(destination)))
-        sendto_one(acptr,":%s PING %s :%s", parv[0],
+      if ((aclient_p = find_server(destination)))
+        sendto_one(aclient_p,":%s PING %s :%s", parv[0],
                    origin, destination);
       else
         {
-          sendto_one(sptr, form_str(ERR_NOSUCHSERVER),
+          sendto_one(server_p, form_str(ERR_NOSUCHSERVER),
                      me.name, parv[0], destination);
           return;
         }
     }
   else
-    sendto_one(sptr,":%s PONG %s :%s", me.name,
+    sendto_one(server_p,":%s PONG %s :%s", me.name,
                (destination) ? destination : me.name, origin);
 }
 

@@ -225,13 +225,13 @@ void init_hash(void)
 /*
  * add_to_id_hash_table
  */
-int     add_to_id_hash_table(char *name, struct Client *cptr)
+int     add_to_id_hash_table(char *name, struct Client *client_p)
 {
 	unsigned int     hashv;
 
 	hashv = hash_id(name);
-	cptr->idhnext = (struct Client *)idTable[hashv].list;
-	idTable[hashv].list = (void *)cptr;
+	client_p->idhnext = (struct Client *)idTable[hashv].list;
+	idTable[hashv].list = (void *)client_p;
 	idTable[hashv].links++;
 	idTable[hashv].hits++;
 	return 0;
@@ -240,15 +240,15 @@ int     add_to_id_hash_table(char *name, struct Client *cptr)
 /*
  * add_to_client_hash_table
  */
-void add_to_client_hash_table(const char* name, struct Client* cptr)
+void add_to_client_hash_table(const char* name, struct Client* client_p)
 {
   unsigned int hashv;
   assert(0 != name);
-  assert(0 != cptr);
+  assert(0 != client_p);
 
   hashv = hash_nick_name(name);
-  cptr->hnext = (struct Client*) clientTable[hashv].list;
-  clientTable[hashv].list = (void*) cptr;
+  client_p->hnext = (struct Client*) clientTable[hashv].list;
+  clientTable[hashv].list = (void*) client_p;
   ++clientTable[hashv].links;
   ++clientTable[hashv].hits;
 }
@@ -273,21 +273,21 @@ void add_to_channel_hash_table(const char* name, struct Channel* chptr)
  * del_from_client_hash_table - remove a client/server from the client
  * hash table
  */
-void del_from_id_hash_table(const char* id, struct Client* cptr)
+void del_from_id_hash_table(const char* id, struct Client* client_p)
 {
   struct Client* tmp;
   struct Client* prev = NULL;
   unsigned int   hashv;
 
   assert(0 != id);
-  assert(0 != cptr);
+  assert(0 != client_p);
 
   hashv = hash_id(id);
   tmp = (struct Client*) idTable[hashv].list;
 
   for ( ; tmp; tmp = tmp->idhnext)
     {
-      if (tmp == cptr)
+      if (tmp == client_p)
         {
           if (prev)
             prev->idhnext = tmp->idhnext;
@@ -303,29 +303,29 @@ void del_from_id_hash_table(const char* id, struct Client* cptr)
       prev = tmp;
     }
   Debug((DEBUG_ERROR, "%#x !in tab %s[%s] %#x %#x %#x %d %d %#x",
-         cptr, cptr->name, cptr->from ? cptr->from->host : "??host",
-         cptr->from, cptr->next, cptr->prev, cptr->fd, 
-         cptr->status, cptr->user));
+         client_p, client_p->name, client_p->from ? client_p->from->host : "??host",
+         client_p->from, client_p->next, client_p->prev, client_p->fd, 
+         client_p->status, client_p->user));
 }
 
 /*
  * del_from_client_hash_table - remove a client/server from the client
  * hash table
  */
-void del_from_client_hash_table(const char* name, struct Client* cptr)
+void del_from_client_hash_table(const char* name, struct Client* client_p)
 {
   struct Client* tmp;
   struct Client* prev = NULL;
   unsigned int   hashv;
   assert(0 != name);
-  assert(0 != cptr);
+  assert(0 != client_p);
 
   hashv = hash_nick_name(name);
   tmp = (struct Client*) clientTable[hashv].list;
 
   for ( ; tmp; tmp = tmp->hnext)
     {
-      if (tmp == cptr)
+      if (tmp == client_p)
         {
           if (prev)
             prev->hnext = tmp->hnext;
@@ -341,9 +341,9 @@ void del_from_client_hash_table(const char* name, struct Client* cptr)
       prev = tmp;
     }
   Debug((DEBUG_ERROR, "%#x !in tab %s[%s] %#x %#x %#x %d %d %#x",
-         cptr, cptr->name, cptr->from ? cptr->from->host : "??host",
-         cptr->from, cptr->next, cptr->prev, cptr->fd, 
-         cptr->status, cptr->user));
+         client_p, client_p->name, client_p->from ? client_p->from->host : "??host",
+         client_p->from, client_p->next, client_p->prev, client_p->fd, 
+         client_p->status, client_p->user));
 }
 
 /*
@@ -383,7 +383,7 @@ void del_from_channel_hash_table(const char* name, struct Channel* chptr)
  * hash_find_id
  */
 struct Client *
-hash_find_id(const char *name, struct Client *cptr)
+hash_find_id(const char *name, struct Client *client_p)
 {
 	struct Client *tmp;
 	unsigned int   hashv;
@@ -404,21 +404,21 @@ hash_find_id(const char *name, struct Client *cptr)
 		}
 	}
 	
-	return (cptr);
+	return (client_p);
 }
 
 
 /*
  * hash_find_client
  */
-struct Client* hash_find_client(const char* name, struct Client* cptr)
+struct Client* hash_find_client(const char* name, struct Client* client_p)
 {
   struct Client* tmp;
   unsigned int   hashv;
   assert(0 != name);
 
   if (*name == '.') /* it's an ID .. */
-	  return hash_find_id(name, cptr);
+	  return hash_find_id(name, client_p);
 
   hashv = hash_nick_name(name);
   tmp = (struct Client*) clientTable[hashv].list;
@@ -437,7 +437,7 @@ struct Client* hash_find_client(const char* name, struct Client* cptr)
   ++clmiss;
 #endif
   
-return cptr;
+return client_p;
 
   /*
    * If the member of the hashtable we found isnt at the top of its

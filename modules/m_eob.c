@@ -60,7 +60,7 @@ char *_version = "20001202";
  *      parv[0] = sender prefix   
  *      parv[1] = servername   
  */
-static void ms_eob(struct Client *cptr, struct Client *sptr,
+static void ms_eob(struct Client *client_p, struct Client *server_p,
                   int parc, char *parv[])
 {
   unsigned long TheirTime;
@@ -77,11 +77,11 @@ static void ms_eob(struct Client *cptr, struct Client *sptr,
 
       sendto_realops_flags(
        FLAGS_ALL,"*** End of burst from %s (%lu seconds)",
-       sptr->name, DeltaTime );
+       server_p->name, DeltaTime );
     }
   else
     sendto_realops_flags(FLAGS_ALL,"*** End of burst from %s",
-			 sptr->name);
+			 server_p->name);
 
-  SetEob(cptr);
+  SetEob(client_p);
 }

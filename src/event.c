@@ -244,27 +244,27 @@ eventFind(EVH * func, void *arg)
 
 #ifndef SQUID
 int
-show_events(struct Client *sptr)
+show_events(struct Client *server_p)
 {
   struct ev_entry *e = tasks;
   if (last_event_ran)
-    sendto_one(sptr,":%s NOTICE %s :*** Last event to run: %s",
-               me.name,sptr->name,
+    sendto_one(server_p,":%s NOTICE %s :*** Last event to run: %s",
+               me.name,server_p->name,
                last_event_ran);
 
-  sendto_one(sptr,
+  sendto_one(server_p,
      ":%s NOTICE %s :*** Operation            Next Execution  Weight",
-     me.name,sptr->name);
+     me.name,server_p->name);
 
   while (e != NULL)
     {
-      sendto_one(sptr,
+      sendto_one(server_p,
                  ":%s NOTICE %s :*** %-20s %-3d seconds     %d",
-                 me.name,sptr->name,
+                 me.name,server_p->name,
                  e->name, (int)(e->when - CurrentTime), e->weight);
       e = e->next;
     }
-  sendto_one(sptr,":%s NOTICE %s :*** Finished",me.name,sptr->name);
+  sendto_one(server_p,":%s NOTICE %s :*** Finished",me.name,server_p->name);
   return 0;
 }
 #endif
