@@ -1,3 +1,16 @@
+androsyn    2003/03/20 00:27:30 UTC	(20030320_0)
+
+  Modified files:
+    src                  s_auth.c s_serv.c 
+  Log:
+  Bug that stopped us from being able to connect to servers
+  
+  Revision  Changes    Path
+  7.142     +1 -1      ircd-ratbox/src/s_auth.c
+  7.326     +1 -1      ircd-ratbox/src/s_serv.c
+
+
+
 androsyn    2003/03/19 22:52:07 UTC	(20030319_4)
 
   Modified files:
