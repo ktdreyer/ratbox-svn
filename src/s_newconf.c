@@ -474,25 +474,15 @@ find_shared_conf(const char *username, const char *host,
 	{
 		shared_p = ptr->data;
 
-		if((shared_p->flags & flags) == 0)
-			continue;
-
 		if(match(shared_p->username, username) &&
 		   match(shared_p->host, host) &&
 		   match(shared_p->server, server))
-			return YES;
-
-	}
-
-	DLINK_FOREACH(ptr, cluster_conf_list.head)
-	{
-		shared_p = ptr->data;
-
-		if((shared_p->flags & flags) == 0)
-			continue;
-
-		if(match(shared_p->server, server))
-			return YES;
+		{
+			if(shared_p->flags & flags)
+				return YES;
+			else
+				return NO;
+		}
 	}
 
 	return NO;
@@ -563,6 +553,12 @@ free_oper_conf(struct oper_conf *oper_p)
 	MyFree(oper_p->username);
 	MyFree(oper_p->host);
 	MyFree(oper_p->name);
+
+	if(oper_p->passwd)
+	{
+		memset(oper_p->passwd, 0, strlen(oper_p->passwd));
+		MyFree(oper_p->passwd);
+	}
 
 #ifdef HAVE_LIBCRYPTO
 	MyFree(oper_p->rsa_pubkey_file);
@@ -803,6 +799,7 @@ attach_server_conf(struct Client *client_p, struct server_conf *server_p)
 		detach_server_conf(client_p);
 	}
 
+	CurrUsers(server_p->class)++;
 	client_p->localClient->att_sconf = server_p;
 	server_p->servers++;
 }
@@ -817,9 +814,14 @@ detach_server_conf(struct Client *client_p)
 
 	client_p->localClient->att_sconf = NULL;
 	server_p->servers--;
+	CurrUsers(server_p->class)--;
 
 	if(ServerConfIllegal(server_p) && !server_p->servers)
 	{
+		/* the class this one is using may need destroying too */
+		if(MaxUsers(server_p->class) < 0 && CurrUsers(server_p->class) <= 0)
+			free_class(server_p->class);
+
 		dlinkDelete(&server_p->node, &server_conf_list);
 		free_server_conf(server_p);
 	}

@@ -71,7 +71,9 @@ make_class(void)
 void
 free_class(struct Class *tmp)
 {
-	Destroy_Patricia(tmp->ip_limits, NULL);
+	if(tmp->ip_limits)
+		Destroy_Patricia(tmp->ip_limits, NULL);
+
 	MyFree(tmp->class_name);
 	MyFree(tmp);
 

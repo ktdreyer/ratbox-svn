@@ -379,6 +379,7 @@ static struct mode_table shared_table[] =
 	{ "unxline",	SHARED_UNXLINE	},
 	{ "tresv",	SHARED_TRESV	},
 	{ "unresv",	SHARED_UNRESV	},
+	{ "locops",	SHARED_LOCOPS	},
 	{ "all",	SHARED_ALL	},
 	{NULL, 0}
 };
@@ -619,6 +620,9 @@ conf_set_oper_umodes(void *data)
 static int
 conf_begin_class(struct TopConf *tc)
 {
+	if(yy_class)
+		free_class(yy_class);
+
 	yy_class = make_class();
 	return 0;
 }
@@ -636,6 +640,7 @@ conf_end_class(struct TopConf *tc)
 	}
 
 	add_class(yy_class);
+	yy_class = NULL;
 	return 0;
 }
 
@@ -746,7 +751,8 @@ conf_set_listen_port(void *data)
 #ifdef IPV6
 			add_listener(args->v.number, listener_address, AF_INET6);
 #endif
-                } else
+                }
+		else
                 {
 			int family;
 #ifdef IPV6
@@ -1010,7 +1016,7 @@ conf_end_shared(struct TopConf *tc)
 	if(EmptyString(yy_shared->host))
 		DupString(yy_shared->host, "*");
 
-	dlinkAdd(yy_shared, &yy_shared->node, &shared_conf_list);
+	dlinkAddTail(yy_shared, &yy_shared->node, &shared_conf_list);
 	yy_shared = NULL;
 
 	return 0;
@@ -1053,10 +1059,7 @@ static int
 conf_begin_connect(struct TopConf *tc)
 {
 	if(yy_server)
-	{
 		free_server_conf(yy_server);
-		yy_server = NULL;
-	}
 
 	yy_server = make_server_conf();
 	yy_server->port = PORTNUM;
