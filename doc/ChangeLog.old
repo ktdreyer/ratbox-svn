@@ -1,3 +1,29 @@
+*** 20000813_1 by ejb
+Large commit, folding in a number of changes i made over the weekend.
+- add n!u@h for topic_info ala ircnet.
+- stats p notice.
+- removed some old non-TS cruft.
+- unreg users can't send version.
+- added +a umode, shows oper is admin in whois 
+  if they are 'admin=yes'.
+- users can see the topic of a -s channel they aren't
+  on (but can't set it even if it is -t, to prevent
+  topic floods *sigh*)
+- many changes in parse.c .. fixed a few bugs, rewrote
+  the argument parser code, added support for catching
+  users passing not enough parms before the m_ function
+  is even called.
+- you can now set in ircd.conf whether channels have to
+  be +i for an invite to work.
+- added a numeric (504) for sending to users trying to
+  invite remote users to +i channels.
+- started changing m_* functions to not check parc anymore,
+  in most cases parse() has already handled this.
+- move glines from config.h to ircd.conf
+plus a lot of other stuff i probably forgot.
+
+
+
 *** 20000731_1 by db
 - Added Pie-Man changes, added him to list of contributors
 
