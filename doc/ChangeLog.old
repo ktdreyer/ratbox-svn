@@ -1,3 +1,31 @@
+leeh        2001/12/15 15:35:23 EST	(20011215_10)
+
+  Modified files:
+    messages             ayb.po custom.po 
+    messages/translations ircd-croatian.po ircd-danish.po 
+                          ircd-dutch.po ircd-german.po 
+                          ircd-norwegian.po ircd-spanish.po 
+                          ircd-swedish.po 
+    modules              m_knock.c 
+    src                  messages.tab 
+  Log:
+  - updates to knock numerics
+  
+  Revision  Changes    Path
+  1.13      +30 -0     ircd-hybrid-7/messages/ayb.po
+  1.32      +30 -0     ircd-hybrid-7/messages/custom.po
+  1.14      +30 -0     ircd-hybrid-7/messages/translations/ircd-croatian.po
+  1.12      +30 -0     ircd-hybrid-7/messages/translations/ircd-danish.po
+  1.13      +30 -0     ircd-hybrid-7/messages/translations/ircd-dutch.po
+  1.14      +30 -0     ircd-hybrid-7/messages/translations/ircd-german.po
+  1.13      +30 -0     ircd-hybrid-7/messages/translations/ircd-norwegian.po
+  1.12      +30 -0     ircd-hybrid-7/messages/translations/ircd-spanish.po
+  1.15      +30 -0     ircd-hybrid-7/messages/translations/ircd-swedish.po
+  1.43      +1 -0      ircd-hybrid-7/modules/m_knock.c
+  7.64      +2 -2      ircd-hybrid-7/src/messages.tab
+
+
+
 wcampbel    2001/12/15 11:32:12 EST	(20011215_9)
 
   Added files:
