@@ -1,3 +1,6 @@
+*** 20010101_8 by davidt
+Fix vchan part to work properly with LazyLinks too... (oops)
+
 *** 20010101_7 by davidt
 Fix vchan part to work properly
 
