@@ -1,3 +1,15 @@
+db          2001/12/16 17:25:01 EST	(20011216_20)
+
+  Modified files:
+    include              channel.h 
+  Log:
+  - typedef aBan no longer used. GOOD! DIE DIE DIE!
+  
+  Revision  Changes    Path
+  7.96      +2 -2      ircd-hybrid-7/include/channel.h
+
+
+
 leeh        2001/12/16 17:22:48 EST	(20011216_19)
 
   Modified files:
