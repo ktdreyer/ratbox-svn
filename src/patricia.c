@@ -55,7 +55,7 @@ static char *prefix_toa2x(prefix_t * prefix, char *buf, int buf_len, int with_le
 		strcpy(buf, "(NULL)");
 		return (buf);
 	}
-	inet_ntop(prefix->family, &prefix->add.sin, buf, buf_len);
+	inetntop(prefix->family, &prefix->add.sin, buf, buf_len);
 	if (with_len) {
 		sprintf(tmp, "/%d", prefix->bitlen);
 		strcat(buf, tmp);
@@ -173,13 +173,13 @@ static prefix_t *ascii2prefix(int family, const char *string)
 	}
 
 	if (family == AF_INET) {
-		if ((result = inet_pton(AF_INET, string, &sinaddr)) <= 0)
+		if ((result = inetpton(AF_INET, string, &sinaddr)) <= 0)
 			return (NULL);
 		return (New_Prefix(AF_INET, &sinaddr, bitlen));
 	}
 #ifdef IPV6
 	else if (family == AF_INET6) {
-		if ((result = inet_pton(AF_INET6, string, &sinaddr6)) <= 0)
+		if ((result = inetpton(AF_INET6, string, &sinaddr6)) <= 0)
 			return (NULL);
 		return (New_Prefix(AF_INET6, &sinaddr6, bitlen));
 	}
