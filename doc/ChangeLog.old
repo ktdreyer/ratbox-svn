@@ -1,3 +1,8 @@
+*** 20001220_15 by wcampbel
+example.conf is now correct for the current state of the parser.
+All that is needed now is more documentation on the options
+
+
 *** 20001220_14 by db
 - patched m_gline.c from fl_
 - patched ircd_parser from Walter Campbell
