@@ -114,6 +114,8 @@ int mo_jupe(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 			":%s WALLOPS :JUPE for %s requested by %s!%s@%s: %s",
 			parv[0], parv[1], sptr->name, 
                         sptr->username, sptr->host, parv[2]);
+  log(L_NOTICE, "JUPE for %s requested by %s!%s@%s: %s",
+                parv[1], sptr->name, sptr->username, sptr->host, parv[2]);
 
   acptr= find_server(parv[1]);
 
