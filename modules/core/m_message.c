@@ -207,8 +207,9 @@ m_message(int p_or_n,
                         parv[2]) < 0)
   {
     /* Sigh.  We need to relay this command to the hub */
-    sendto_one(uplink, ":%s %s %s :%s",
-               source_p->name, command, parv[1], parv[2]);
+    if (!ServerInfo.hub && (uplink != NULL))
+      sendto_one(uplink, ":%s %s %s :%s",
+		 source_p->name, command, parv[1], parv[2]);
     return;
   }
 
@@ -264,7 +265,7 @@ build_target_list(int p_or_n, char *command, struct Client *client_p,
   struct Client *target_p;
 
   /* Sigh, we can't mutilate parv[1] incase we need it to send to a hub */
-  if (!ServerInfo.hub && uplink && IsCapable(uplink, CAP_LL))
+  if (!ServerInfo.hub && (uplink != NULL) && IsCapable(uplink, CAP_LL))
   {
     strncpy(ncbuf, nicks_channels, BUFSIZE);
     target_list = ncbuf;
@@ -306,7 +307,7 @@ build_target_list(int p_or_n, char *command, struct Client *client_p,
       }
       else
       {
-        if (!ServerInfo.hub && uplink && IsCapable(uplink, CAP_LL))
+        if (!ServerInfo.hub && (uplink != NULL) && IsCapable(uplink, CAP_LL))
           return -1;
         else if (p_or_n != NOTICE)
           sendto_one(source_p, form_str(ERR_NOSUCHNICK), me.name,
@@ -354,14 +355,6 @@ build_target_list(int p_or_n, char *command, struct Client *client_p,
 
     if (type != 0)
     {
-      if(!is_any_op(chptr, source_p) && !is_voiced(chptr, source_p))
-        {
-	  sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED), me.name,
-		     source_p->name, with_prefix);
-	  return(-1);
-          continue;
-        }
-
       /* suggested by Mortiis */
       if (*nick == '\0')      /* if its a '\0' dump it, there is no recipient */
 	{
@@ -376,6 +369,13 @@ build_target_list(int p_or_n, char *command, struct Client *client_p,
 
       if ((chptr = hash_find_channel(nick)) != NULL)
 	{
+	  if(!is_any_op(chptr, source_p) && !is_voiced(chptr, source_p))
+	    {
+	      sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED), me.name,
+			 source_p->name, with_prefix);
+	      return(-1);
+	    }
+
 	  if (!duplicate_ptr(chptr))
 	    {
 	      targets[ntargets].ptr = (void *)chptr;
@@ -392,7 +392,7 @@ build_target_list(int p_or_n, char *command, struct Client *client_p,
 	}
       else
 	{
-	  if (!ServerInfo.hub && uplink && IsCapable(uplink, CAP_LL))
+	  if (!ServerInfo.hub && (uplink != NULL) && IsCapable(uplink, CAP_LL))
 	    return -1;
 	  else if (p_or_n != NOTICE)
 	    sendto_one(source_p, form_str(ERR_NOSUCHNICK), me.name,
@@ -404,19 +404,18 @@ build_target_list(int p_or_n, char *command, struct Client *client_p,
     if(IsOper(source_p) && ((*nick == '$') || strchr(nick, '@')))
     {
       handle_opers(p_or_n, command, client_p, source_p, nick, text);
-      continue;
     }
     else
     {
-      if (!ServerInfo.hub && uplink && IsCapable(uplink, CAP_LL))
+      if (!ServerInfo.hub && (uplink != NULL) && IsCapable(uplink, CAP_LL))
         return -1;
       else if(p_or_n != NOTICE)
         sendto_one(source_p, form_str(ERR_NOSUCHNICK),
 	           me.name, source_p->name, nick);
-      continue;
     }
+    /* continue; */
   }
-  return ntargets;
+  return (1);
 }
 
 /*
