@@ -1,3 +1,13 @@
+*** 20010104_8 by wcampbel
+Cleaned up the logic of STATS p
+1. SHIDE on, non oper - currently will only notify opers if either
+   stats_p_notice is on, or stats_notice is on, sends nothing back to
+   the user
+   COMMENTS PLEASE
+2. SHIDE off, non oper - Act as before
+For opers...act as before
+
+
 *** 20010104_7 by adrian
 
 
