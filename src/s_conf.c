@@ -67,6 +67,21 @@ static void do_include_conf(void);
 static int  SplitUserHost( struct ConfItem * );
 static char *getfield(char *newline);
 
+
+static struct ConfItem* conf_add_server(struct ConfItem *,char *,int ,int );
+static struct ConfItem* conf_add_o_line(struct ConfItem *,char *);
+static void conf_add_port(struct ConfItem *);
+static void conf_add_class_to_conf(struct ConfItem *,char *);
+static void conf_add_i_line(struct ConfItem *,char *);
+static void conf_add_me(struct ConfItem *);
+static void conf_add_hub_or_leaf(struct ConfItem *);
+static void conf_add_class(struct ConfItem *,int );
+static void conf_add_k_line(struct ConfItem *);
+static void conf_add_d_line(struct ConfItem *);
+static void conf_add_x_line(struct ConfItem *);
+static void conf_add_u_line(struct ConfItem *);
+static void conf_add_q_line(struct ConfItem *);
+
 static FBFILE*  openconf(const char* filename);
 static void     initconf(FBFILE*, int);
 static void     clear_out_old_conf(void);
@@ -835,7 +850,6 @@ void count_ip_hash(int *number_ips_stored,u_long *mem_ips_stored)
         }
     }
 }
-
 
 /*
  * iphash_stats()
@@ -1816,22 +1830,22 @@ static void initconf(FBFILE* file, int use_include)
     };
 
   char*            tmp;
+  char*            user_field;  /* user field portion of line */
+  char*            host_field;  /* host field portion of line */
+  char*            port_field;  /* port field portion of line */
+  char*            class_field; /* class field portion of line */
+  char             conf_letter;
   char*            s;
-  int              dontadd;
   char             line[BUFSIZE];
   int              ccount = 0;
   int              ncount = 0;
   struct ConfItem* aconf = NULL;
   struct ConfItem* include_conf = NULL;
-  unsigned long    ip;
-  unsigned long    ip_mask;
   int              sendq = 0;
-  struct Class*    class0;
-
-  class0 = find_class(0);        /* which one is class 0 ? */
 
   while (fbgets(line, sizeof(line), file))
     {
+      user_field = host_field = port_field = class_field = (char *)NULL;
       if ((tmp = strchr(line, '\n')))
         *tmp = '\0';
 
@@ -1907,135 +1921,13 @@ static void initconf(FBFILE* file, int use_include)
       tmp = getfield(line);
       if (!tmp)
         continue;
-      dontadd = 0;
-      switch (*tmp)
-        {
-        case 'A': /* Name, e-mail address of administrator */
-        case 'a': /* of this server. */
-          aconf->status = CONF_ADMIN;
-          break;
-
-        case 'C': /* Server where I should try to connect */
-                    /* in case of lp failures             */
-          ccount++;
-          aconf->status = CONF_CONNECT_SERVER;
-          aconf->flags = CONF_FLAGS_ALLOW_AUTO_CONN;
-          break;
-
-        case 'c':
-          ccount++;
-          aconf->status = CONF_CONNECT_SERVER;
-          aconf->flags = CONF_FLAGS_ALLOW_AUTO_CONN|CONF_FLAGS_ZIP_LINK;
-          break;
-
-        case 'd':
-          aconf->status = CONF_DLINE;
-          aconf->flags = CONF_FLAGS_E_LINED;
-          break;
-        case 'D': /* Deny lines (immediate refusal) */
-          aconf->status = CONF_DLINE;
-          break;
-
-        case 'H': /* Hub server line */
-        case 'h':
-          aconf->status = CONF_HUB;
-          break;
-
-#ifdef LITTLE_I_LINES
-        case 'i': /* Just plain normal irc client trying  */
-                  /* to connect to me */
-          aconf->status = CONF_CLIENT;
-          aconf->flags |= CONF_FLAGS_LITTLE_I_LINE;
-          break;
-
-        case 'I': /* Just plain normal irc client trying  */
-                  /* to connect to me */
-          aconf->status = CONF_CLIENT;
-          break;
-#else
-        case 'i': /* Just plain normal irc client trying  */
-        case 'I': /* to connect to me */
-          aconf->status = CONF_CLIENT;
-          break;
-#endif
-        case 'K': /* Kill user line on irc.conf           */
-        case 'k':
-          aconf->status = CONF_KILL;
-          break;
-
-        case 'L': /* guaranteed leaf server */
-        case 'l':
-          aconf->status = CONF_LEAF;
-          break;
-
-          /* Me. Host field is name used for this host */
-          /* and port number is the number of the port */
-        case 'M':
-        case 'm':
-          aconf->status = CONF_ME;
-          break;
-
-        case 'N': /* Server where I should NOT try to     */
-        case 'n': /* connect in case of lp failures     */
-          /* but which tries to connect ME        */
-          ++ncount;
-          aconf->status = CONF_NOCONNECT_SERVER;
-          break;
-
-          /* Operator. Line should contain at least */
-          /* password and host where connection is  */
-
-        case 'O':
-          aconf->status = CONF_OPERATOR;
-          break;
-          /* Local Operator, (limited privs --SRB) */
-
-        case 'o':
-          aconf->status = CONF_LOCOP;
-          break;
-
-        case 'P': /* listen port line */
-        case 'p':
-          aconf->status = CONF_LISTEN_PORT;
-          break;
-
-        case 'Q': /* reserved nicks */
-        case 'q': 
-          aconf->status = CONF_QUARANTINED_NICK;
-          break;
-
-        case 'U': /* Uphost, ie. host where client reading */
-        case 'u': /* this should connect.                  */
-          aconf->status = CONF_ULINE;
-          break;
-
-        case 'X': /* rejected gecos */
-        case 'x': 
-          aconf->status = CONF_XLINE;
-          break;
-
-        case 'Y':
-        case 'y':
-          aconf->status = CONF_CLASS;
-          sendq = 0;
-          break;
-
-        default:
-          log(L_ERROR, "Error in config file: %s", line);
-          break;
-        }
-      if (IsIllegal(aconf))
-        continue;
+      conf_letter = *tmp;
 
       for (;;) /* Fake loop, that I can use break here --msa */
         {
 	  /* host field */
-          if ((tmp = getfield(NULL)) == NULL)
+          if ((host_field = getfield(NULL)) == NULL)
             break;
-          /*from comstud*/
-          if(aconf->status & CONF_CLIENT)
-            tmp = set_conf_flags(aconf, tmp);
-          DupString(aconf->host, tmp);
 
 	  /* pass field */
           if ((tmp = getfield(NULL)) == NULL)
@@ -2043,412 +1935,294 @@ static void initconf(FBFILE* file, int use_include)
           DupString(aconf->passwd, tmp);
 
 	  /* user field */
-          if ((tmp = getfield(NULL)) == NULL)
+          if ((user_field = getfield(NULL)) == NULL)
             break;
-          /*from comstud */
 
-          if(aconf->status & CONF_CLIENT)
-            tmp = set_conf_flags(aconf, tmp);
-          DupString(aconf->user, tmp);
-
-	  /* port field */
-          if(aconf->status & CONF_OPERATOR)
-            {
-              /* defaults */
-              aconf->port = 
-                CONF_OPER_GLOBAL_KILL|CONF_OPER_REMOTE|CONF_OPER_UNKLINE|
-                CONF_OPER_K|CONF_OPER_GLINE|CONF_OPER_REHASH;
-              if ((tmp = getfield(NULL)) == NULL)
+          /* port field */
+          if ((port_field = getfield(NULL)) == NULL)
                 break;
-              aconf->port = oper_privs_from_string(aconf->port,tmp);
-            }
-          else if(aconf->status & CONF_LOCOP)
-            {
-              aconf->port = CONF_OPER_UNKLINE|CONF_OPER_K;
-              if ((tmp = getfield(NULL)) == NULL)
-                break;
-              aconf->port = oper_privs_from_string(aconf->port,tmp);
-            }
-          else
-            {
-              if ((tmp = getfield(NULL)) == NULL)
-                break;
-              aconf->port = atoi(tmp);
-            }
-
-          Debug((DEBUG_DEBUG,"aconf->port %x",aconf->port));
 
 	  /* class field */
-          if ((tmp = getfield(NULL)) == NULL)
+          if ((class_field = getfield(NULL)) == NULL)
             break;
-          Debug((DEBUG_DEBUG,"class tmp = %s",tmp));
-
-          if(aconf->status & CONF_CLASS)
-            {
-              sendq = atoi(tmp);
-            }
-          else
-            {
-              int classToFind;
-
-              classToFind = atoi(tmp);
-
-              ClassPtr(aconf) = find_class(classToFind);
-
-              if(classToFind && (ClassPtr(aconf) == class0))
-                {
-                  sendto_realops(
-                           "Warning *** Defaulting to class 0 for class %d",
-                         classToFind);
-                }
-            }
-
-          if(aconf->status & (CONF_LOCOP|CONF_OPERATOR))
-            {
-              if ((tmp = getfield(NULL)) == NULL)
-                break;
-              aconf->hold = oper_flags_from_string(tmp);
-            }
 
           break;
           /* NOTREACHED */
         }
 
-      /* For Gersh
-       * make sure H: lines don't have trailing spaces!
-       * BUG: This code will fail if there is leading whitespace.
-       */
+      switch( conf_letter )
+	{
+        case 'A':case 'a': /* Name, e-mail address of administrator */
+          aconf->status = CONF_ADMIN;
+          if(host_field)
+            DupString(aconf->host, host_field);
+          if(user_field)
+            DupString(aconf->user, user_field);
+          break;
 
-      if( aconf->status & (CONF_HUB|CONF_LEAF) )
-        {
-          char *ps;        /* space finder */
-          char *pt;        /* tab finder */
+        case 'C':
+          ccount++;
+          aconf->status = CONF_CONNECT_SERVER;
+          aconf->flags = CONF_FLAGS_ALLOW_AUTO_CONN;
+          if(host_field)
+            DupString(aconf->host, host_field);
+          if(user_field)
+            DupString(aconf->user, user_field);
+          if(port_field)
+            aconf->port = atoi(port_field);
+          aconf = conf_add_server(aconf,class_field,ncount,ccount);
+          break;
 
-	  if(!aconf->user)
-	    {
-	      DupString(aconf->name, "*");
-	      DupString(aconf->user, "*");
+        case 'c':
+          ccount++;
+          aconf->status = CONF_CONNECT_SERVER;
+          aconf->flags = CONF_FLAGS_ALLOW_AUTO_CONN|CONF_FLAGS_ZIP_LINK;
+          if(host_field)
+            DupString(aconf->host, host_field);
+          if(user_field)
+            DupString(aconf->user, user_field);
+          if(port_field)
+            aconf->port = atoi(port_field);
+          aconf = conf_add_server(aconf,class_field,ncount,ccount);
+          break;
+
+        case 'd':
+          aconf->status = CONF_DLINE;
+          aconf->flags = CONF_FLAGS_E_LINED;
+          if(host_field)
+            DupString(aconf->host, host_field);
+          if(user_field)
+            DupString(aconf->user, user_field);
+          conf_add_d_line(aconf);
+          aconf = NULL;
+          break;
+
+        case 'D': /* Deny lines (immediate refusal) */
+          aconf->status = CONF_DLINE;
+          if(host_field)
+            DupString(aconf->host, host_field);
+          if(user_field)
+            DupString(aconf->user, user_field);
+          conf_add_d_line(aconf);
+          aconf = NULL;
+          break;
+
+        case 'H': /* Hub server line */
+        case 'h':
+          if(host_field)
+            DupString(aconf->host, host_field);
+          aconf->status = CONF_HUB;
+          if(user_field)
+            DupString(aconf->user, user_field);
+          conf_add_hub_or_leaf(aconf);
+	  break;
+
+#ifdef LITTLE_I_LINES
+        case 'i': /* Just plain normal irc client trying  */
+                  /* to connect to me */
+          aconf->status = CONF_CLIENT;
+          aconf->flags |= CONF_FLAGS_LITTLE_I_LINE;
+
+          if(host_field)
+            {
+              host_field = set_conf_flags(aconf, host_field);
+              DupString(aconf->host, host_field);
+            }
+
+          if(user_field)
+            {
+              user_field = set_conf_flags(aconf, user_field);
+              DupString(aconf->user, user_field);
 	    }
-	  else
-	    {
-	      ps = strchr(aconf->user,' ');
-	      pt = strchr(aconf->user,'\t');
 
-	      if(ps || pt)
-		{
-		  sendto_realops("H: or L: line trailing whitespace [%s]",
-				 aconf->user);
-		  if(ps)*ps = '\0';
-		  if(pt)*pt = '\0';
-		}
-	      aconf->name = aconf->user;
-	      DupString(aconf->user, "*");
+          conf_add_i_line(aconf,class_field);
+          aconf = NULL;
+          break;
+
+        case 'I': /* Just plain normal irc client trying  */
+                  /* to connect to me */
+          aconf->status = CONF_CLIENT;
+
+          if(host_field)
+            {
+              host_field = set_conf_flags(aconf, host_field);
+              DupString(aconf->host, host_field);
+            }
+
+          if(user_field)
+            {
+              user_field = set_conf_flags(aconf, user_field);
+              DupString(aconf->user, user_field);
 	    }
-        }
 
-      /*
-      ** If conf line is a class definition, create a class entry
-      ** for it and make the conf_line illegal and delete it.
-      ** Negative class numbers are not accepted.
-      */
-      if (aconf->status & CONF_CLASS && atoi(aconf->host) > -1)
-        {
-          add_class(atoi(aconf->host), atoi(aconf->passwd),
-                    atoi(aconf->user), aconf->port,
-                    sendq );
-          continue;
-        }
-      /*
-      ** associate each conf line with a class by using a pointer
-      ** to the correct class record. -avalon
-      */
+          conf_add_i_line(aconf,class_field);
+          aconf = NULL;
+          break;
+#else
+        case 'i': /* Just plain normal irc client trying  */
+        case 'I': /* to connect to me */
+          aconf->status = CONF_CLIENT;
 
-      /*
-       * P: line - listener port
-       */
-      if ( aconf->status & CONF_LISTEN_PORT)
-        {
-          dontadd = 1;
-          if((aconf->passwd[0] == '\0') || (aconf->passwd[0] == '*'))
-            add_listener(aconf->port, NULL );
-          else
-            add_listener(aconf->port, (const char *)aconf->passwd);
-        }
-      else if(aconf->status & CONF_CLIENT_MASK)
-        {
-          if (0 == ClassPtr(aconf))
-            ClassPtr(aconf) = find_class(0);
-          if (ConfMaxLinks(aconf) < 0)
-            ClassPtr(aconf) = find_class(0);
-        }
-
-      /* I: line */
-      if (aconf->status & CONF_CLIENT)
-        {
-          struct ConfItem *bconf;
-          
-          if ((bconf = find_conf_entry(aconf, aconf->status)))
+          if(host_field)
             {
-              delist_conf(bconf);
-              bconf->status &= ~CONF_ILLEGAL;
-              if (aconf->status == CONF_CLIENT)
-                {
-                  ConfLinks(bconf) -= bconf->clients;
-                  ClassPtr(bconf) = ClassPtr(aconf);
-                  ConfLinks(bconf) += bconf->clients;
-                  /*
-                   * still... I've munged the flags possibly
-                   * so update the found struct ConfItem for now 
-                   * -Dianora
-                   */
-                  bconf->flags = aconf->flags;
-                  if(bconf->flags & (CONF_LOCOP|CONF_OPERATOR))
-                    bconf->port = aconf->port;
-                }
-              free_conf(aconf);
-              aconf = bconf;
-            }
-        }
-
-      if (aconf->status & CONF_SERVER_MASK)
-        {
-          if (ncount > MAXCONFLINKS || ccount > MAXCONFLINKS ||
-              !aconf->host || !aconf->user)
-            {
-              sendto_realops("Bad C/N line");
-              continue;
+              host_field = set_conf_flags(aconf, host_field);
+              DupString(aconf->host, host_field);
             }
 
-          if (BadPtr(aconf->passwd))
+          if(user_field)
             {
-              sendto_realops("Bad C/N line host %s", aconf->host);
-              continue;
-            }
-          
-          if( SplitUserHost(aconf) < 0 )
-            {
-              sendto_realops("Bad C/N line host %s", aconf->host);
-              free_conf(aconf);
-              aconf = NULL;
-              continue;
-            }
+              user_field = set_conf_flags(aconf, user_field);
+              DupString(aconf->user, user_field);
+	    }
 
-          lookup_confhost(aconf);
-        }
-      
-      /* o: or O: line */
-
-      if (aconf->status & (CONF_LOCOP|CONF_OPERATOR))
-        {
-          if(SplitUserHost(aconf) < 0)
-            {
-              sendto_realops("Bad O/o line host %s", aconf->host);
-              free_conf(aconf);
-              aconf = NULL;
-            }
-        }
-
-      /*
-      ** Own port and name cannot be changed after the startup.
-      ** (or could be allowed, but only if all links are closed
-      ** first).
-      ** Configuration info does not override the name and port
-      ** if previously defined. Note, that "info"-field can be
-      ** changed by "/rehash".
-      ** Can't change vhost mode/address either 
-      */
-      if (aconf->status == CONF_ME)
-        {
-          strncpy_irc(me.info, aconf->user, REALLEN);
-
-          if (me.name[0] == '\0' && aconf->host[0])
-          {
-            strncpy_irc(me.name, aconf->host, HOSTLEN);
-            if ((aconf->passwd[0] != '\0') && (aconf->passwd[0] != '*'))
-            {
-                memset(&vserv,0, sizeof(vserv));
-                vserv.sin_family = AF_INET;
-                vserv.sin_addr.s_addr = inet_addr(aconf->passwd);
-                specific_virtual_host = 1;
-            }
-          }
-        }
-      else if (aconf->host && (aconf->status & CONF_CLIENT))
-        {
-          char *p;
-          unsigned long ip_host;
-          unsigned long ip_mask;
-          dontadd = 1;
-          
-          if(!aconf->host)
-            DupString(aconf->host,"*");
-          else
-            (void)collapse(aconf->host);
-
-          if(!aconf->user)
-            DupString(aconf->user,"*");
-          else
-            (void)collapse(aconf->user);
-
-          /* The idea here is, to separate a name@host part
-           * into aconf->host part and aconf->user part
-           * If the user@host part is found in the aconf->host field
-           * from conf file, then it has to be an IP I line.
-           */
-
-          MyFree(aconf->name); /* should be already NULL here */
-
-          /* Keep a copy of the original host part in "name" */
-          DupString(aconf->name,aconf->host);
-
-          /* see if the user@host part is on the 'left side'
-           * in the aconf->host field. If it is, then it should be
-           * an IP I line only, but I won't enforce it here. 
-           */
-
-          if( (p = strchr(aconf->host,'@')))
-            {
-              char* x;
-              aconf->flags |= CONF_FLAGS_DO_IDENTD;
-              *p++ = '\0';
-              MyFree(aconf->user);
-              DupString(aconf->user, aconf->host);
-              DupString(x, p);
-              MyFree(aconf->host);
-              aconf->host = x;
-            }
-
-           if( is_address(aconf->host,&ip_host,&ip_mask) )
-	     {
-               aconf->ip = ip_host & ip_mask;
-               aconf->ip_mask = ip_mask;
-               add_ip_Iline( aconf );
-             }
-           else
-	     {
-	       /* See if there is a name@host part on the 'right side'
-		* in the aconf->name field.
-		*/
-
-	       if( ( p = strchr(aconf->user,'@')) )
-		 {
-		   aconf->flags |= CONF_FLAGS_DO_IDENTD;
-		   *p = '\0';
-		   p++;
-		   MyFree(aconf->host);
-		   DupString(aconf->host,p);
-		 }
-	       else
-		 {
-		   MyFree(aconf->host);
-		   aconf->host = aconf->user;
-		   DupString(aconf->user,"*");
-		 }
-	       add_mtrie_conf_entry(aconf,CONF_CLIENT);
-	     }
-        }
-      else if (aconf->host && (aconf->status & CONF_KILL))
-        {
-          dontadd = 1;
-          if(is_address(aconf->host,&ip,&ip_mask))
-            {
-              ip &= ip_mask;
-              aconf->ip = ip;
-              aconf->ip_mask = ip_mask;
-              add_ip_Kline(aconf);
-            }
-          else
-            {
-              (void)collapse(aconf->host);
-              (void)collapse(aconf->user);
-              add_mtrie_conf_entry(aconf,CONF_KILL);
-            }
-        }
-      else if (aconf->host && (aconf->status & CONF_DLINE))
-        {
-          dontadd = 1;
-          DupString(aconf->user,aconf->host);
-          (void)is_address(aconf->host,&ip,&ip_mask);
-          ip &= ip_mask;
-          aconf->ip = ip;
-          aconf->ip_mask = ip_mask;
-
-          if(aconf->flags & CONF_FLAGS_E_LINED)
-            add_dline(aconf);
-          else
-            add_Dline(aconf);
-        }
-      else if (aconf->status & CONF_XLINE)
-        {
-          dontadd = 1;
-          MyFree(aconf->user);
-          aconf->user = NULL;
-          aconf->name = aconf->host;
-          aconf->host = (char *)NULL;
-          aconf->next = x_conf;
-          x_conf = aconf;
-        }
-      else if (aconf->status & CONF_ULINE)
-        {
-          dontadd = 1;
-          MyFree(aconf->user);
-          aconf->user = (char *)NULL;
-          aconf->name = aconf->host;
-          aconf->host = (char *)NULL;
-          aconf->next = u_conf;
-          u_conf = aconf;
-        }
-      else if (aconf->status & CONF_QUARANTINED_NICK)
-        {
-          dontadd = 1;
-          aconf->name = aconf->host;
-          DupString(aconf->host, "*");
-
-#ifdef JUPE_CHANNEL
-          if(aconf->name[0] == '#')
-            {
-              struct Channel *chptr;
-              int len;
-
-              if( (chptr = hash_find_channel(aconf->name, (struct Channel *)NULL)) )
-                chptr->mode.mode |= MODE_JUPED;
-              else
-                {
-                  /* create a zero user channel, marked as MODE_JUPED
-                   * which just place holds the channel down.
-                   */
-
-                  len = strlen(aconf->name);
-                  chptr = (struct Channel*) MyMalloc(sizeof(struct Channel) + len + 1);
-                  memset(chptr, 0, sizeof(struct Channel));
-                  /*
-                   * NOTE: strcpy ok since we already know the length
-                   */
-                  strcpy(chptr->chname, aconf->name);
-                  chptr->mode.mode = MODE_JUPED;
-                  if (channel)
-                    channel->prevch = chptr;
-                  chptr->prevch = NULL;
-                  chptr->nextch = channel;
-                  channel = chptr;
-                  /* JIC */
-                  chptr->channelts = CurrentTime;
-                  (void)add_to_channel_hash_table(aconf->name, chptr);
-                  Count.chan++;
-                }
-
-              if(aconf->passwd)
-                strncpy_irc(chptr->topic, aconf->passwd, TOPICLEN);
-            }
+          conf_add_i_line(aconf,class_field);
+          aconf = NULL;
+          break;
 #endif
+        case 'K': /* Kill user line on irc.conf           */
+        case 'k':
+          aconf->status = CONF_KILL;
+          if(host_field)
+            DupString(aconf->host, host_field);
+          if(user_field)
+            DupString(aconf->user, user_field);
+          conf_add_k_line(aconf);
+          aconf = NULL;
+          break;
 
-          /* host, password, name, port, class */
-          /* nick, reason, user@host */
-          
-          add_q_line(aconf);
+        case 'L': /* guaranteed leaf server */
+        case 'l':
+          aconf->status = CONF_LEAF;
+          if(host_field)
+            DupString(aconf->host, host_field);
+          if(user_field)
+            DupString(aconf->user, user_field);
+          conf_add_hub_or_leaf(aconf);
+	  break;
+
+        /* Me. Host field is name used for this host */
+        /* and port number is the number of the port */
+        case 'M':
+        case 'm':
+          aconf->status = CONF_ME;
+          if(host_field)
+            DupString(aconf->host, host_field);
+          if(user_field)
+            DupString(aconf->user, user_field);
+          conf_add_me(aconf);
+          break;
+
+        case 'N': /* Server where I should NOT try to     */
+        case 'n': /* connect in case of lp failures     */
+          /* but which tries to connect ME        */
+          ++ncount;
+          aconf->status = CONF_NOCONNECT_SERVER;
+          if(host_field)
+            DupString(aconf->host, host_field);
+          if(user_field)
+            DupString(aconf->user, user_field);
+          aconf = conf_add_server(aconf,class_field,ncount,ccount);
+          break;
+
+        /* Operator. Line should contain at least */
+        /* password and host where connection is  */
+        case 'O':
+          aconf->status = CONF_OPERATOR;
+          if(host_field)
+            DupString(aconf->host, host_field);
+          if(user_field)
+            DupString(aconf->user, user_field);
+          /* defaults */
+          aconf->port = 
+            CONF_OPER_GLOBAL_KILL|CONF_OPER_REMOTE|CONF_OPER_UNKLINE|
+            CONF_OPER_K|CONF_OPER_GLINE|CONF_OPER_REHASH;
+          if(port_field)
+              aconf->port = oper_privs_from_string(aconf->port,port_field);
+          if ((tmp = getfield(NULL)) != NULL)
+            aconf->hold = oper_flags_from_string(tmp);
+          aconf = conf_add_o_line(aconf,class_field);
+          break;
+
+        /* Local Operator, (limited privs --SRB) */
+        case 'o':
+          aconf->status = CONF_LOCOP;
+          if(host_field)
+            DupString(aconf->host, host_field);
+          if(user_field)
+            DupString(aconf->user, user_field);
+          aconf->port = CONF_OPER_UNKLINE|CONF_OPER_K;
+          if(port_field)
+            aconf->port = oper_privs_from_string(aconf->port,port_field);
+          if ((tmp = getfield(NULL)) != NULL)
+            aconf->hold = oper_flags_from_string(tmp);
+          aconf = conf_add_o_line(aconf,class_field);
+          break;
+
+        case 'P': /* listen port line */
+        case 'p':
+          aconf->status = CONF_LISTEN_PORT;
+          if(host_field)
+            DupString(aconf->host, host_field);
+          if(user_field)
+            DupString(aconf->user, user_field);
+          if(port_field)
+            aconf->port = atoi(port_field);
+          conf_add_port(aconf);
+          break;
+
+        case 'Q': /* reserved nicks */
+        case 'q': 
+          aconf->status = CONF_QUARANTINED_NICK;
+          if(host_field)
+            DupString(aconf->host, host_field);
+          if(user_field)
+            DupString(aconf->user, user_field);
+          conf_add_q_line(aconf);
+          aconf = NULL;
+          break;
+
+        case 'U': /* Uphost, ie. host where client reading */
+        case 'u': /* this should connect.                  */
+          aconf->status = CONF_ULINE;
+          if(host_field)
+            DupString(aconf->host, host_field);
+          if(user_field)
+            DupString(aconf->user, user_field);
+          conf_add_u_line(aconf);
+          aconf = NULL;
+          break;
+
+        case 'X': /* rejected gecos */
+        case 'x': 
+          aconf->status = CONF_XLINE;
+          if(host_field)
+            DupString(aconf->host, host_field);
+          if(user_field)
+            DupString(aconf->user, user_field);
+          conf_add_x_line(aconf);
+          aconf = NULL;
+          break;
+
+        case 'Y':
+        case 'y':
+          aconf->status = CONF_CLASS;
+          if(host_field)
+            DupString(aconf->host, host_field);
+          if(user_field)
+            DupString(aconf->user, user_field);
+          if(port_field)
+            aconf->port = atoi(port_field);
+          if(class_field)
+            sendq = atoi(class_field);
+          conf_add_class(aconf,sendq);
+          break;
+
+        default:
+          log(L_ERROR, "Error in config file: %s", line);
+          break;
         }
 
-      if (!dontadd)
+      if (aconf)
         {
           (void)collapse(aconf->host);
           (void)collapse(aconf->user);
@@ -2458,9 +2232,10 @@ static void initconf(FBFILE* file, int use_include)
                  aconf->user, aconf->port, Class(aconf)));
           aconf->next = ConfigItemList;
           ConfigItemList = aconf;
+          aconf = NULL;
         }
-      aconf = NULL;
     }
+
   if (aconf)
     free_conf(aconf);
   aconf = NULL;
@@ -3705,4 +3480,471 @@ static char *getfield(char *newline)
     line = end + 1;
   *end = '\0';
   return(field);
+}
+
+/*
+ * conf_add_hub_or_leaf
+ * inputs       - pointer to config item
+ * output       - NONE
+ * side effects -
+ * Add a hub or leaf
+ */
+static void conf_add_hub_or_leaf(struct ConfItem *aconf)
+{
+  char *ps;        /* space finder */
+  char *pt;        /* tab finder */
+
+  /* For Gersh
+   * make sure H: lines don't have trailing spaces!
+   * BUG: This code will fail if there is leading whitespace.
+   */
+
+  if(!aconf->user)
+    {
+      DupString(aconf->name, "*");
+      DupString(aconf->user, "*");
+    }
+  else
+    {
+      ps = strchr(aconf->user,' ');
+      pt = strchr(aconf->user,'\t');
+      
+      if(ps || pt)
+	{
+	  sendto_realops("H: or L: line trailing whitespace [%s]",
+			 aconf->user);
+	  if(ps)*ps = '\0';
+	  if(pt)*pt = '\0';
+	}
+      aconf->name = aconf->user;
+      DupString(aconf->user, "*");
+    }
+}
+
+/*
+ * conf_add_class
+ * inputs       - pointer to config item
+ * output       - NONE
+ * side effects - Add a class
+ */
+
+static void conf_add_class(struct ConfItem *aconf,int sendq)
+{
+  /*
+  ** If conf line is a class definition, create a class entry
+  ** for it and make the conf_line illegal and delete it.
+  ** Negative class numbers are not accepted.
+  */
+    /*
+    ** associate each conf line with a class by using a pointer
+    ** to the correct class record. -avalon
+    */
+  if (atoi(aconf->host) > -1)
+    {
+      add_class(atoi(aconf->host), atoi(aconf->passwd),
+		atoi(aconf->user), aconf->port,
+		sendq );
+    }
+}
+
+/*
+ * conf_add_port
+ * inputs       - pointer to config item
+ * output       - NONE
+ * side effects - Add a port
+ */
+
+static void conf_add_port(struct ConfItem *aconf)
+{
+  /*
+   * P: line - listener port
+   */
+  if((aconf->passwd[0] == '\0') || (aconf->passwd[0] == '*'))
+    add_listener(aconf->port, NULL );
+  else
+    add_listener(aconf->port, (const char *)aconf->passwd);
+}
+
+/*
+ * conf_add_class_to_conf
+ * inputs       - pointer to config item
+ * output       - NONE
+ * side effects - Add a class pointer to a conf 
+ */
+
+static void conf_add_class_to_conf(struct ConfItem *aconf,char *class_field)
+{
+  int classToFind;
+
+  if(class_field)
+    classToFind = atoi(class_field);
+  else
+    classToFind = 0;
+
+  ClassPtr(aconf) = find_class(classToFind);
+
+  if(ClassPtr(aconf) == 0)
+    {
+      if(classToFind)
+        {
+          sendto_realops(
+		     "Warning *** Defaulting to class 0 for missing class %d",
+		     classToFind);
+	}
+
+      ClassPtr(aconf) = find_class(0);
+    }
+
+  if (ConfMaxLinks(aconf) < 0)
+    ClassPtr(aconf) = find_class(0);
+}
+
+/*
+ * conf_add_i_line
+ * inputs       - pointer to config item
+ * output       - NONE
+ * side effects - Add an I line
+ */
+
+static void conf_add_i_line(struct ConfItem *aconf,char *class_field)
+{
+  struct ConfItem *bconf;
+
+  conf_add_class_to_conf(aconf,class_field);          
+
+  if ((bconf = find_conf_entry(aconf, aconf->status)))
+    {
+      delist_conf(bconf);
+      bconf->status &= ~CONF_ILLEGAL;
+      if (aconf->status == CONF_CLIENT)
+	{
+	  ConfLinks(bconf) -= bconf->clients;
+	  ClassPtr(bconf) = ClassPtr(aconf);
+	  ConfLinks(bconf) += bconf->clients;
+	  /*
+	   * still... I've munged the flags possibly
+	   * so update the found struct ConfItem for now 
+	   * -Dianora
+	   */
+	  bconf->flags = aconf->flags;
+	  if(bconf->flags & (CONF_LOCOP|CONF_OPERATOR))
+	    bconf->port = aconf->port;
+	}
+      free_conf(aconf);
+      aconf = bconf;
+    }
+
+  if (aconf->host)
+    {
+      char *p;
+      unsigned long ip_host;
+      unsigned long ip_mask;
+          
+      if(!aconf->host)
+	DupString(aconf->host,"*");
+      else
+	(void)collapse(aconf->host);
+
+      if(!aconf->user)
+	DupString(aconf->user,"*");
+      else
+	(void)collapse(aconf->user);
+
+      /* The idea here is, to separate a name@host part
+       * into aconf->host part and aconf->user part
+       * If the user@host part is found in the aconf->host field
+       * from conf file, then it has to be an IP I line.
+       */
+
+      MyFree(aconf->name); /* should be already NULL here */
+
+      /* Keep a copy of the original host part in "name" */
+      DupString(aconf->name,aconf->host);
+
+      /* see if the user@host part is on the 'left side'
+       * in the aconf->host field. If it is, then it should be
+       * an IP I line only, but I won't enforce it here. 
+       */
+
+      if( (p = strchr(aconf->host,'@')))
+	{
+	  char* x;
+	  aconf->flags |= CONF_FLAGS_DO_IDENTD;
+	  *p++ = '\0';
+	  MyFree(aconf->user);
+	  DupString(aconf->user, aconf->host);
+	  DupString(x, p);
+	  MyFree(aconf->host);
+	  aconf->host = x;
+	}
+
+      if( is_address(aconf->host,&ip_host,&ip_mask) )
+	{
+	  aconf->ip = ip_host & ip_mask;
+	  aconf->ip_mask = ip_mask;
+	  add_ip_Iline( aconf );
+	}
+      else
+	{
+	  /* See if there is a name@host part on the 'right side'
+	   * in the aconf->name field.
+	   */
+
+	  if( ( p = strchr(aconf->user,'@')) )
+	    {
+	      aconf->flags |= CONF_FLAGS_DO_IDENTD;
+	      *p = '\0';
+	      p++;
+	      MyFree(aconf->host);
+	      DupString(aconf->host,p);
+	    }
+	  else
+	    {
+	      MyFree(aconf->host);
+	      aconf->host = aconf->user;
+	      DupString(aconf->user,"*");
+	    }
+	  add_mtrie_conf_entry(aconf,CONF_CLIENT);
+	}
+    }
+}
+
+/*
+ * conf_add_server
+ * inputs       - pointer to config item
+ * output       - NONE
+ * side effects - Add a C or N line
+ */
+
+static struct ConfItem *conf_add_server(struct ConfItem *aconf,
+                                        char* class_field,
+                                        int ncount, int ccount )
+{
+  conf_add_class_to_conf(aconf,class_field);
+
+  if (ncount > MAXCONFLINKS || ccount > MAXCONFLINKS ||
+      !aconf->host || !aconf->user)
+    {
+      sendto_realops("Bad C/N line");
+      free_conf(aconf);
+      return NULL;
+    }
+
+  if (BadPtr(aconf->passwd))
+    {
+      sendto_realops("Bad C/N line host %s", aconf->host);
+      free_conf(aconf);
+      return NULL;
+    }
+          
+  if( SplitUserHost(aconf) < 0 )
+    {
+      sendto_realops("Bad C/N line host %s", aconf->host);
+      free_conf(aconf);
+      return NULL;
+    }
+  lookup_confhost(aconf);
+  return aconf;
+}
+
+/*
+ * conf_add_o_line
+ * inputs       - pointer to config item
+ * output       - NONE
+ * side effects - Add an o/O line
+ */
+
+static struct ConfItem *conf_add_o_line(struct ConfItem *aconf,char *class_field)
+{
+  conf_add_class_to_conf(aconf,class_field);
+
+  if(SplitUserHost(aconf) < 0)
+    {
+      sendto_realops("Bad O/o line host %s", aconf->host);
+      free_conf(aconf);
+      return NULL;
+    }
+  return aconf;
+}
+
+/*
+ * conf_add_me
+ * inputs       - pointer to config item
+ * output       - NONE
+ * side effects - Add the M line
+ */
+
+static void conf_add_me(struct ConfItem *aconf)
+{
+  /*
+  ** Own port and name cannot be changed after the startup.
+  ** (or could be allowed, but only if all links are closed
+  ** first).
+  ** Configuration info does not override the name and port
+  ** if previously defined. Note, that "info"-field can be
+  ** changed by "/rehash".
+  ** Can't change vhost mode/address either 
+  */
+  /*  if (aconf->status == CONF_ME) */
+
+  strncpy_irc(me.info, aconf->user, REALLEN);
+
+  if (me.name[0] == '\0' && aconf->host[0])
+    {
+      strncpy_irc(me.name, aconf->host, HOSTLEN);
+      if ((aconf->passwd[0] != '\0') && (aconf->passwd[0] != '*'))
+	{
+	  memset(&vserv,0, sizeof(vserv));
+	  vserv.sin_family = AF_INET;
+	  vserv.sin_addr.s_addr = inet_addr(aconf->passwd);
+	  specific_virtual_host = 1;
+	}
+    }
+}
+
+/*
+ * conf_add_k_line
+ * inputs       - pointer to config item
+ * output       - NONE
+ * side effects - Add a K line
+ */
+
+static void conf_add_k_line(struct ConfItem *aconf)
+{
+  unsigned long    ip;
+  unsigned long    ip_mask;
+
+  if (aconf->host) /* && (aconf->status & CONF_KILL)) */
+    {
+      if(is_address(aconf->host,&ip,&ip_mask))
+	{
+	  ip &= ip_mask;
+	  aconf->ip = ip;
+	  aconf->ip_mask = ip_mask;
+	  add_ip_Kline(aconf);
+	}
+      else
+	{
+	  (void)collapse(aconf->host);
+	  (void)collapse(aconf->user);
+	  add_mtrie_conf_entry(aconf,CONF_KILL);
+	}
+    }
+}
+
+/*
+ * conf_add_d_line
+ * inputs       - pointer to config item
+ * output       - NONE
+ * side effects - Add a d/D line
+ */
+
+static void conf_add_d_line(struct ConfItem *aconf)
+{
+  unsigned long    ip;
+  unsigned long    ip_mask;
+
+  if (aconf->host) /* && (aconf->status & CONF_DLINE)) */
+    {
+      DupString(aconf->user,aconf->host);
+      (void)is_address(aconf->host,&ip,&ip_mask);
+      ip &= ip_mask;
+      aconf->ip = ip;
+      aconf->ip_mask = ip_mask;
+
+      if(aconf->flags & CONF_FLAGS_E_LINED)
+	add_dline(aconf);
+      else
+	add_Dline(aconf);
+    }
+}
+
+/*
+ * conf_add_x_line
+ * inputs       - pointer to config item
+ * output       - NONE
+ * side effects - Add a X line
+ */
+
+static void conf_add_x_line(struct ConfItem *aconf)
+{
+  MyFree(aconf->user);
+  aconf->user = NULL;
+  aconf->name = aconf->host;
+  aconf->host = (char *)NULL;
+  aconf->next = x_conf;
+  x_conf = aconf;
+}
+
+/*
+ * conf_add_x_line
+ * inputs       - pointer to config item
+ * output       - NONE
+ * side effects - Add an U line
+ */
+
+static void conf_add_u_line(struct ConfItem *aconf)
+{
+  MyFree(aconf->user);
+  aconf->user = (char *)NULL;
+  aconf->name = aconf->host;
+  aconf->host = (char *)NULL;
+  aconf->next = u_conf;
+  u_conf = aconf;
+}
+
+/*
+ * conf_add_q_line
+ * inputs       - pointer to config item
+ * output       - NONE
+ * side effects - Add a Q line
+ */
+
+static void conf_add_q_line(struct ConfItem *aconf)
+{
+  aconf->name = aconf->host;
+  DupString(aconf->host, "*");
+
+#ifdef JUPE_CHANNEL
+  if(aconf->name[0] == '#')
+    {
+      struct Channel *chptr;
+      int len;
+
+      if( (chptr = hash_find_channel(aconf->name, (struct Channel *)NULL)) )
+	chptr->mode.mode |= MODE_JUPED;
+      else
+	{
+	  /* create a zero user channel, marked as MODE_JUPED
+	   * which just place holds the channel down.
+	   */
+
+	  len = strlen(aconf->name);
+	  chptr = (struct Channel*) MyMalloc(sizeof(struct Channel) + len + 1);
+	  memset(chptr, 0, sizeof(struct Channel));
+	  /*
+	   * NOTE: strcpy ok since we already know the length
+	   */
+	  strcpy(chptr->chname, aconf->name);
+	  chptr->mode.mode = MODE_JUPED;
+	  if (channel)
+	    channel->prevch = chptr;
+	  chptr->prevch = NULL;
+	  chptr->nextch = channel;
+	  channel = chptr;
+	  /* JIC */
+	  chptr->channelts = CurrentTime;
+	  (void)add_to_channel_hash_table(aconf->name, chptr);
+	  Count.chan++;
+	}
+
+      if(aconf->passwd)
+	strncpy_irc(chptr->topic, aconf->passwd, TOPICLEN);
+    }
+#endif
+
+  /* host, password, name, port, class */
+  /* nick, reason, user@host */
+          
+  add_q_line(aconf);
 }
