@@ -1,3 +1,7 @@
+*** 20010616_8 by toot
+more formating fixes in channel.c
+
+
 *** 20010616_7 by toot
 started reformatting some code in channel.c.. it was hell to read
 commited it so far so as not to get out of sync :)
