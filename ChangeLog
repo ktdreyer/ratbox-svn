@@ -1,3 +1,26 @@
+leeh        2002/09/13 23:03:30 UTC	(20020913_5)
+
+  Modified files:
+    doc                  example.conf example.efnet.conf 
+    include              newconf.h s_log.h 
+    modules              m_challenge.c m_oper.c 
+    src                  newconf.c s_log.c 
+  Log:
+  - ported the foperlog code back from hybrid
+  - moved the fname_* directives in the conf to logging {};
+  
+  Revision  Changes    Path
+  7.180     +7 -7      ircd-ratbox/doc/example.conf
+  7.18      +7 -7      ircd-ratbox/doc/example.efnet.conf
+  7.15      +3 -3      ircd-ratbox/include/newconf.h
+  7.11      +1 -0      ircd-ratbox/include/s_log.h
+  1.38      +7 -4      ircd-ratbox/modules/m_challenge.c
+  1.52      +6 -1      ircd-ratbox/modules/m_oper.c
+  7.39      +21 -21    ircd-ratbox/src/newconf.c
+  7.45      +42 -10    ircd-ratbox/src/s_log.c
+
+
+
 leeh        2002/09/13 22:20:51 UTC	(20020913_4)
 
   Modified files:
