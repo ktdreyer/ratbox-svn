@@ -1,3 +1,15 @@
+androsyn    2002/07/11 19:42:01 EDT	(20020712_2)
+
+  Modified files:
+    modules              m_accept.c 
+  Log:
+  Missing semicolon
+  
+  Revision  Changes    Path
+  1.32      +2 -2      ircd-hybrid-7/modules/m_accept.c
+
+
+
 leeh        2002/07/11 19:40:29 EDT	(20020712_1)
 
   Modified files:
