@@ -97,9 +97,11 @@ mo_testline(struct Client *client_p, struct Client *source_p, int parc, const ch
 	/* parses as an IP, check for a dline */
 	if((type = parse_netmask(host, &ip, &host_mask)) != HM_HOST)
 	{
+#ifdef IPV6
 		if(type == HM_IPV6)
 			aconf = find_dline(&ip, AF_INET6);
 		else
+#endif
 			aconf = find_dline(&ip, AF_INET);
 
 		if(aconf && aconf->status & CONF_DLINE)
@@ -118,8 +120,11 @@ mo_testline(struct Client *client_p, struct Client *source_p, int parc, const ch
 	/* now look for a matching I/K/G */
 	if((aconf = find_address_conf(host, username ? username : "dummy",
 				(type != HM_HOST) ? &ip : NULL,
-				(type != HM_HOST) ? 
-				 ((type == HM_IPV6) ? AF_INET6 : AF_INET) : 0)))
+				(type != HM_HOST) ? (
+#ifdef IPV6
+				 (type == HM_IPV6) ? AF_INET6 : 
+#endif
+				  AF_INET) : 0)))
 	{
 		static char buf[HOSTLEN+USERLEN+2];
 
