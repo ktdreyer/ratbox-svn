@@ -1,3 +1,29 @@
+leeh        2004/10/16 09:43:31 EDT	(20041016_0)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+    include              channel.h 
+    src                  c_mode.c channel.c s_chanserv.c 
+                         s_userserv.c service.c 
+  Log:
+  - remove an extra $ in configure code
+  - make rejoin_service() take a part param
+  - handle -o+o on a service properly so we dont rejoin
+  - make chanserv/userserv compile
+  
+  Revision  Changes    Path
+  1.13      +1 -1      rserv/autoconf/configure.in
+  1.13      +1 -1      rserv/configure
+  1.15      +1 -1      rserv/include/channel.h
+  1.16      +11 -10    rserv/src/c_mode.c
+  1.27      +16 -3     rserv/src/channel.c
+  1.11      +1 -0      rserv/src/s_chanserv.c
+  1.8       +1 -1      rserv/src/s_userserv.c
+  1.22      +1 -1      rserv/src/service.c
+
+
+
 leeh        2004/10/15 19:57:04 EDT	(20041015_0)
 
   Modified files:
