@@ -1,3 +1,17 @@
+androsyn    2003/02/14 05:42:58 UTC	(20030214_4)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+  Log:
+  Minor nitpick cleanup of configure
+  
+  Revision  Changes    Path
+  7.171     +2 -10     ircd-ratbox/autoconf/configure.in
+  7.178     +136 -303  ircd-ratbox/configure
+
+
+
 androsyn    2003/02/14 04:40:37 UTC	(20030214_3)
 
   Modified files:
