@@ -301,7 +301,7 @@ AC_ARG_ENABLE(profile,
   case "$enableval" in
   yes)
     ac_cv_profile="yes"
-    IRC_CFLAGS="$IRC_CFLAGS -pg -static"
+    IRC_CFLAGS="$IRC_CFLAGS -pg -a -static"
     ;;
   no)
     ac_cv_profile="no"
@@ -319,7 +319,6 @@ AC_ARG_ENABLE(efence,
 [
   case "$enableval" in
   yes)
-    AC_CHECK_LIB(efence, malloc)
     ac_cv_efence="yes"
     ;;
   no)
@@ -327,7 +326,6 @@ AC_ARG_ENABLE(efence,
     ;;
   *)
     LIBS="$LIBS -L$enableval"
-    AC_CHECK_LIB(efence, malloc)
     ac_cv_efence="yes"
     ;;
   esac
@@ -339,20 +337,17 @@ dnl Check if we want to enable the block allocator
 AC_MSG_CHECKING(if you want the block allocator)
 AC_ARG_ENABLE(block-alloc,
 [  --enable-block-alloc         Enable the block allocator(default)
-  --disable-block-alloc        Disable the block allocator(Only for use
+  --disable-block-alloc        Disable the block allocator(Only useful
                                with ElectricFence).],
 [
   case "$enableval" in
   yes)
-    if test "X$ac_cv_efence" = "Xyes"; then
-      AC_DEFINE(NOBALLOC)
-      ac_cv_balloc="yes"
-    else
-      ac_cv_balloc="no"
-    fi
+    ac_cv_balloc="yes"
     ;;
   no)
+dnl If they want this, give it to them, even they don't want efence.
     ac_cv_balloc="no"
+    AC_DEFINE(NOBALLOC)
     ;;
   esac
 ])
@@ -675,6 +670,12 @@ EOF
 		AC_DEFINE_UNQUOTED(SYMBOL_PREFIX, "${symbol_underscores}")
 	fi
 fi
+
+dnl This needs to be near the end for it to work right...
+if test "$ac_cv_efence" = "yes"; then
+	AC_CHECK_LIB(efence,malloc)
+fi
+
 AC_SUBST(MODULES_DEFINE)
 AC_SUBST(MODULES_LIBS)
 AC_SUBST(MOD_TARGET)
@@ -709,7 +710,7 @@ AC_OUTPUT(                      \
  gnats/send-pr                  \
 )
 
-echo "Building dependancies..."
+echo "Building dependencies..."
 ${MAKE-make} depend
 
 if test "X${cf_openssl_ciphers}" != "X"; then

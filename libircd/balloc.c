@@ -1,365 +1,190 @@
-/*
- * balloc.c - Based roughly on Wohali's old block allocator.
+/************************************************************************
+ *  ircd hybrid - Internet Relay Chat Daemon, src/balloc.c
+ *  balloc.c: The block allocator.
+ *  Copyright(C) 2001 by the past and present ircd-hybrid teams.
  *
- * Mangled by Aaron Sethman <androsyn@ratbox.org>
- * Below is the original header found on this file
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
  *
- * File:   blalloc.c
- * Owner:  Wohali (Joan Touzet)
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
  *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
  * $Id$
  */
 
-#ifndef NOBALLOC
-#include <stdio.h>
-#include <unistd.h>
-#include <assert.h>
-#include <fcntl.h>
-#include "ircd_defs.h"		/* DEBUG_BLOCK_ALLOCATOR */
-#include "ircd.h"
-#include "memory.h"
-#include "balloc.h"
-#include "irc_string.h"
+/* A note on the algorithm:
+ *  - Unlike past block allocators, this one uses a single linked list
+ *    for block segments. This makes garbage collection much slower but
+ *    should drastically increase allocation and de-allocation times.
+ *    This is okay, because garbage collection occurs much less
+ *    frequently than allocation and de-allocation.
+ * The following table is a rough guideline only...
+ * n = number of blocks, m = elements per block.
+ *|     Action      |  Estimated rel. freq. | Worst case bit complexity
+ *|   Heap setup    |             1         |       O(1) + block alloc
+ *|Block allocation |            10^3       |       O(n)
+ *|Element allocate |            10^6       |       O(1)
+ *|  Element free   |            10^6       |       O(1)
+ *| Garbage collect |            10^3       |       O(nm)
+ * - A1kmm
+ */
+
 #include "tools.h"
-#include "s_log.h"
-#include "client.h"
-#include "fdlist.h"
+#include "memory.h"
+#include <assert.h>
 
-#include <string.h>
-#include <stdlib.h>
-#include <sys/mman.h>
-static int newblock(BlockHeap * bh);
-
-#ifndef MAP_ANON
-int zero_fd = -1;
-void initBlockHeap(void)
+#ifndef NOBALLOC
+/* First some structures. I put them here and not in balloc.h because
+ * I didn't want them to be exposed outside this file, and I also don't
+ * really want to add another header... -A1kmm
+ */
+struct BlockHeap
 {
-  zero_fd = open("/dev/zero", O_RDWR);
-  if(zero_fd < 0)
-    outofmemory();
-  fd_open(zero_fd, FD_FILE, "Anonymous mmap()");
+ dlink_list f_elements, blocks;
+ int elsize, elsperblock, blocksize;
+};
+
+/*
+psuedo-struct BHElement
+{
+ dlink_node elementn;
+ char data[elsize];
+};
+*/
+
+struct BHBlock
+{
+ dlink_node blockn;
+ int usedcount;
+ /*
+ pseudo-struct BHElement elements[elsperblock];
+ */
+};
+
+void BlockHeapAddBlock(BlockHeap *bh);
+
+/* Called once to setup the blockheap code... */
+void
+initBlockHeap(void)
+{
+ /* The old block-heap did weird stuff with /dev/zero here which I think
+  * we could and probably should avoid, and just use MyMalloc to get
+  * blocks(it shouldn't happen too often anyway). -A1kmm */
 }
 
-static inline void *get_block(size_t size)
+/* Add a block to the blockheap... */
+void
+BlockHeapAddBlock(BlockHeap *bh)
 {
-  return(mmap(NULL, size, PROT_READ|PROT_WRITE, MAP_PRIVATE, zero_fd, 0));
+ char *d;
+ int i;
+ struct BHBlock *bhb = MyMalloc(bh->blocksize);
+ dlinkAdd(bhb, &bhb->blockn, &bh->blocks);
+ d = ((char*)bhb) + sizeof(struct BHBlock);
+ bhb->usedcount = 0;
+ /* On the front is the best because of memory caches/swap/paging. */
+ for (i=0; i<bh->elsperblock; i++)
+ {
+  dlinkAdd(bhb,
+           (dlink_node*)d, &bh->f_elements);
+  d += sizeof(dlink_node) + bh->elsize;
+ }
 }
-#else
-void initBlockHeap(void)
+
+/* Create a blockheap... */
+BlockHeap*
+BlockHeapCreate(int elsize, int elsperblock)
 {
-	return;
-}
-
-static inline void *get_block(size_t size)
-{
-  return(mmap(NULL,size,PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANON, -1, 0));
-}
-#endif
-
-
-
-
-/* ************************************************************************ */
-/* FUNCTION DOCUMENTATION:                                                  */
-/*    newblock                                                              */
-/* Description:                                                             */
-/*    mallocs a new block for addition to a blockheap                       */
-/* Parameters:                                                              */
-/*    bh (IN): Pointer to parent blockheap.                                 */
-/* Returns:                                                                 */
-/*    0 if successful, 1 if not                                             */
-/* ************************************************************************ */
-
-static int newblock(BlockHeap * bh)
-{
-  MemBlock *newblk;
-  Block *b;
-  int i;
-  void *offset;
-
-  /* Setup the initial data structure. */
-  b = (Block *) MyMalloc(sizeof(Block));
-  if (b == NULL)
-    return 1;
-  b->freeElems = bh->elemsPerBlock;
-  b->free_list.head = b->free_list.tail = NULL;
-  b->used_list.head = b->used_list.tail = NULL;
-  b->next = bh->base;
-
-  b->alloc_size = (bh->elemsPerBlock + 1) * (bh->elemSize + sizeof(MemBlock));
-	
-  b->elems = get_block(b->alloc_size);
-  if(b->elems == NULL)
-    {
-      return 1;
-    }
+ BlockHeap *bh = MyMalloc(sizeof(*bh));
 #ifdef MEMDEBUG
-  mem_frob(b->elems, b->alloc_size);
+ /* Squeeze in the memory header too... -A1kmm */
+ elsize += sizeof(MemoryEntry);
 #endif
-  offset = b->elems;
-  /* Setup our blocks now */
-  for (i = 0; i < bh->elemsPerBlock; i++)
-    {
-      void *data;
-      newblk = offset;
-      newblk->block = b;
-      data = offset+sizeof(MemBlock);
-      newblk->block = b;
-      newblk->data = data;
-      dlinkAddTail(data, &newblk->self, &b->free_list);
-      offset += bh->elemSize + sizeof(MemBlock);
-    }
-
-  ++bh->blocksAllocated;
-  bh->freeElems += bh->elemsPerBlock;
-  bh->base = b;
-
-  return 0;
+ memset(bh, 0, 2*sizeof(dlink_list));
+ bh->elsize = elsize;
+ bh->elsperblock = elsperblock;
+ bh->blocksize = elsperblock * (elsize + sizeof(dlink_node)) +
+                 sizeof(struct BHBlock);
+ return bh;
 }
 
-
-/* ************************************************************************ */
-/* FUNCTION DOCUMENTATION:                                                  */
-/*    BlockHeapCreate                                                       */
-/* Description:                                                             */
-/*   Creates a new blockheap from which smaller blocks can be allocated.    */
-/*   Intended to be used instead of multiple calls to malloc() when         */
-/*   performance is an issue.                                               */
-/* Parameters:                                                              */
-/*   elemsize (IN):  Size of the basic element to be stored                 */
-/*   elemsperblock (IN):  Number of elements to be stored in a single block */
-/*         of memory.  When the blockheap runs out of free memory, it will  */
-/*         allocate elemsize * elemsperblock more.                          */
-/* Returns:                                                                 */
-/*   Pointer to new BlockHeap, or NULL if unsuccessful                      */
-/* ************************************************************************ */
-BlockHeap *BlockHeapCreate(size_t elemsize, int elemsperblock)
+/* Allocate an element from the free pool, making new blocks if needed.
+ */
+void*
+_BlockHeapAlloc(BlockHeap *bh)
 {
-  BlockHeap *bh;
-  assert(elemsize > 0 && elemsperblock > 0);
-  /* Catch idiotic requests up front */
-  if ((elemsize <= 0) || (elemsperblock <= 0))
-    {
-      outofmemory();	/* die.. out of memory */
-    }
+ char *d;
+ if (bh->f_elements.head == NULL)
+   BlockHeapAddBlock(bh);
+ d = (char*)(bh->f_elements.head + 1);
+ ((struct BHBlock*)bh->f_elements.head->data)->usedcount++;
+ bh->f_elements.head = bh->f_elements.head->next;
+ if (bh->f_elements.head == NULL)
+  bh->f_elements.tail = NULL;
+ else 
+  bh->f_elements.head->prev = NULL;
+ /* No need to "frob" when debugging here, it is done on initial
+  * MyMalloc and after each free. -A1kmm */
+ return d;
+}
 
-  /* Allocate our new BlockHeap */
-  bh = (BlockHeap *) MyMalloc(sizeof(BlockHeap));
-  if (bh == NULL)
-    {
-      outofmemory();	/* die.. out of memory */
-    }
-
+/* Release an element back into the pool... */
+void
+_BlockHeapFree(BlockHeap *bh, void *el)
+{
+ dlink_node *dln = (el-sizeof(dlink_node));
 #ifdef MEMDEBUG
-  elemsize += sizeof(MemoryEntry);
+ mem_frob(el, bh->elsize);
 #endif
-
-  bh->elemSize = elemsize;
-  bh->elemsPerBlock = elemsperblock;
-  bh->blocksAllocated = 0;
-  bh->freeElems = 0;
-  bh->base = NULL;
-
-  /* Be sure our malloc was successful */
-  if (newblock(bh))
-    {
-      MyFree(bh);
-      outofmemory();	/* die.. out of memory */
-    }
-
-  if (bh == NULL)
-    {
-      outofmemory();	/* die.. out of memory */
-    }
-  
-  return bh;
+ ((struct BHBlock*)dln->data)->usedcount--;
+ /* On the front is the best because of memory caches/swap/paging. 
+  * It also should make garbage collection work better... -A1kmm */
+ dlinkAdd(dln->data, dln, &bh->f_elements);
 }
 
-/* ************************************************************************ */
-/* FUNCTION DOCUMENTATION:                                                  */
-/*    BlockHeapAlloc                                                        */
-/* Description:                                                             */
-/*    Returns a pointer to a struct within our BlockHeap that's free for    */
-/*    the taking.                                                           */
-/* Parameters:                                                              */
-/*    bh (IN):  Pointer to the Blockheap.                                   */
-/* Returns:                                                                 */
-/*    Pointer to a structure (void *), or NULL if unsuccessful.             */
-/* ************************************************************************ */
-
-void *_BlockHeapAlloc(BlockHeap * bh)
+/* Destroy a blockheap... */
+void
+BlockHeapDestroy(BlockHeap *bh)
 {
-  Block *walker;
-  dlink_node *new_node;
-
-  assert(bh != NULL);
-  if (bh == NULL)
-    return ((void *) NULL);
-
-  if (bh->freeElems == 0) /* Allocate new block and assign */
-    {	
-      /* newblock returns 1 if unsuccessful, 0 if not */
-
-      if (newblock(bh))
-	{
-	  return ((void *) NULL);
-	}
-      walker = bh->base;
-      walker->freeElems--;
-      bh->freeElems--;
-      new_node = walker->free_list.head;
-      dlinkDelete(new_node, &walker->free_list);
-      dlinkAddTail(new_node->data, new_node, &walker->used_list);
-      assert(new_node->data != NULL);
-#ifdef MEMDEBUG
-      mem_frob(new_node->data, bh->elemSize);
-#endif
-      return (new_node->data);
-    }
-
-  for (walker = bh->base; walker != NULL; walker = walker->next)
-    {
-      if (walker->freeElems > 0)
-	{
-	  bh->freeElems--;
-	  walker->freeElems--;
-	  new_node = walker->free_list.head;
-	  dlinkDelete(new_node, &walker->free_list);
-	  dlinkAddTail(new_node->data, new_node, &walker->used_list);
-	  assert(new_node->data != NULL);
-#ifdef MEMDEBUG
-	  memset(new_node->data, 0, bh->elemSize);
-#endif
-	  return(new_node->data);
-	} 
-    }
-  assert(0 == 1);
-  return ((void *) NULL);	/* If you get here, something bad happened ! */
+ struct BHBlock *bhb;
+ for (bhb = (struct BHBlock*)bh->blocks.head; bhb;
+      bhb = (struct BHBlock*)bhb->blockn.next)
+   MyFree(bhb);
 }
 
-
-/* ************************************************************************ */
-/* FUNCTION DOCUMENTATION:                                                  */
-/*    BlockHeapFree                                                         */
-/* Description:                                                             */
-/*    Returns an element to the free pool, does not free()                  */
-/* Parameters:                                                              */
-/*    bh (IN): Pointer to BlockHeap containing element                      */
-/*    ptr (in):  Pointer to element to be "freed"                           */
-/* Returns:                                                                 */
-/*    0 if successful, 1 if element not contained within BlockHeap.         */
-/* ************************************************************************ */
-int _BlockHeapFree(BlockHeap * bh, void *ptr)
+/* Destroy empty blocks. Note that this is slow because we put off all
+ * processing until this late to save speed in the frequently called
+ * routines.
+ * Okay, that is not really the case any more, so now the garbage
+ * collector doesn't take 10s...
+ **/
+void
+BlockHeapGarbageCollect(BlockHeap *bh)
 {
-  Block *block;
-  struct MemBlock *memblock;
-	
-  assert(bh != NULL);
-  assert(ptr != NULL);
-  if(bh == NULL)
-    {
-	
-      ilog(L_NOTICE, "blalloc.c:BlockHeapFree() bh == NULL");
-      return 1;
-    }
-	
-  if(ptr == NULL)
-    {
-      ilog(L_NOTICE, "blalloc.BlockHeapFree() ptr == NULL");
-      return 1;
-    }
-
-  memblock = ptr - sizeof(MemBlock);
-  assert(memblock->block != NULL);
-  /* XXX: Should check that the block is really our block */
-  block = memblock->block;
-  bh->freeElems++;
-  block->freeElems++;
-  dlinkDelete(&memblock->self, &block->used_list);
-  dlinkAddTail(memblock->data, &memblock->self, &block->free_list);
-  return 0;
-}
-
-/* ************************************************************************ */
-/* FUNCTION DOCUMENTATION:                                                  */
-/*    BlockHeapGarbageCollect                                               */
-/* Description:                                                             */
-/*    Performs garbage collection on the block heap.  Any blocks that are   */
-/*    completely unallocated are removed from the heap.  Garbage collection */
-/*    will never remove the root node of the heap.                          */
-/* Parameters:                                                              */
-/*    bh (IN):  Pointer to the BlockHeap to be cleaned up                   */
-/* Returns:                                                                 */
-/*   0 if successful, 1 if bh == NULL                                       */
-/* ************************************************************************ */
-int BlockHeapGarbageCollect(BlockHeap * bh)
-{
-  Block *walker, *last;
-
-  if (bh == NULL)
-    return 1;
-
-  if (bh->freeElems < bh->elemsPerBlock || bh->blocksAllocated == 1)
-    {
-      /* There couldn't possibly be an entire free block.  Return. */
-      return 0;
-    }
-
-  last = NULL;
-  walker = bh->base;
-
-  while (walker)
-    {
-      if(walker->freeElems == bh->elemsPerBlock)
-	{
-	  munmap(walker->elems, walker->alloc_size);
-	  if (last)
-	    {
-	      last->next = walker->next;
-	      MyFree(walker);
-	      walker = last->next;
-	    }
-	  else
-	    {
-	      bh->base = walker->next;
-	      MyFree(walker);
-	      walker = bh->base;
-	    }
-	  bh->blocksAllocated--;
-	  bh->freeElems -= bh->elemsPerBlock;
-	}
-      else
-	{
-	  last = walker;
-	  walker = walker->next;
-	}
-    }
-  return 0;
-}
-
-/* ************************************************************************ */
-/* FUNCTION DOCUMENTATION:                                                  */
-/*    BlockHeapDestroy                                                      */
-/* Description:                                                             */
-/*    Completely free()s a BlockHeap.  Use for cleanup.                     */
-/* Parameters:                                                              */
-/*    bh (IN):  Pointer to the BlockHeap to be destroyed.                   */
-/* Returns:                                                                 */
-/*   0 if successful, 1 if bh == NULL                                       */
-/* ************************************************************************ */
-int BlockHeapDestroy(BlockHeap * bh)
-{
-  Block *walker, *next;
-  if (bh == NULL)
-    return 1;
-  for (walker = bh->base; walker != NULL; walker = next)
-    {
-      next = walker->next;
-      munmap(walker->elems, walker->alloc_size);
-      MyFree(walker);
-    }
-  MyFree(bh);
-  return 0;
+ struct BHBlock *bhb, *bhbn;
+ char *d;
+ int i;
+ for (bhb=(struct BHBlock*)bh->blocks.head; bhb; bhb=bhbn)
+ {
+   bhbn = (struct BHBlock*)bhb->blockn.next;
+   if (bhb->usedcount != 0)
+     continue;
+   d = (char*)(bhb+1);
+   for (i=0; i<bh->elsperblock; i++)
+   {
+    dlinkDelete((dlink_node*)d, &bh->f_elements);
+    d += sizeof(dlink_node) + bh->elsize;
+   }
+   dlinkDelete(&bhb->blockn, &bh->blocks);
+   MyFree(bhb);
+ }
 }
 #endif

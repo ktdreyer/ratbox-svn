@@ -210,7 +210,11 @@ _make_dlink_node(const char *file, int line)
  strcpy(nambuf, DLINK_DBG_PREFIX);
  strncpy_irc(nambuf+sizeof(DLINK_DBG_PREFIX)-1, file,
              sizeof(nambuf)-sizeof(DLINK_DBG_PREFIX));
+#ifdef NOBALLOC
+ lp = _MyMalloc(sizeof(*lp), nambuf, line);
+#else
  lp = memlog(_BlockHeapAlloc(dnode_heap), sizeof(*lp), nambuf, line);
+#endif
  lp->next = NULL;
  lp->prev = NULL;
  ++links_count;
@@ -227,7 +231,11 @@ _make_dlink_node(const char *file, int line)
  */
 void _free_dlink_node(dlink_node *ptr)
 {
+#ifdef NOBALLOC
+  MyFree(ptr);
+#else
   BlockHeapFree(dnode_heap, ptr);
+#endif
   --links_count;
   assert(links_count >= 0);
 }

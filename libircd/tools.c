@@ -42,14 +42,15 @@ mem_frob(void *data, int len)
 void
 dlinkAdd(void *data, dlink_node * m, dlink_list * list)
 {
-    m->data = data;
-    m->prev = NULL;
-    m->next = list->head;
-    if (list->head)
-        list->head->prev = m;
-    list->head = m;
-    if (list->tail == NULL)
-        list->tail = m;
+ m->data = data;
+ m->next = NULL;
+ m->next = list->head;
+ /* Assumption: If list->tail != NULL, list->head != NULL */
+ if (list->head != NULL)
+   list->head->prev = m;
+ else if (list->tail == NULL)
+   list->tail = m;
+ list->head = m;
 }
 
 void
@@ -70,30 +71,36 @@ dlinkAddBefore(dlink_node *b, void *data, dlink_node *m, dlink_list *list)
 void
 dlinkAddTail(void *data, dlink_node *m, dlink_list *list)
 {
-    m->data = data;
-    m->next = NULL;
-    m->prev = list->tail;
-    if (list->tail)
-        list->tail->next = m;
-    list->tail = m;
-    if (list->head == NULL)
-        list->head = m;
+ m->data = data;
+ m->next = NULL;
+ m->prev = list->tail;
+ /* Assumption: If list->tail != NULL, list->head != NULL */
+ if (list->tail != NULL)
+   list->tail->next = m;
+ else if (list->head == NULL)
+   list->head = m;
+ list->tail = m;
 }
 
+/* Execution profiles show that this function is called the most
+ * often of all non-spontaneous functions. So it had better be
+ * efficient. */
 void
 dlinkDelete(dlink_node *m, dlink_list *list)
 {
-    if (m->next)
-        m->next->prev = m->prev;
-    if (m->prev)
-        m->prev->next = m->next;
-
-    if (m == list->head)
-        list->head = m->next;
-    if (m == list->tail)
-        list->tail = m->prev;
-        
-    m->next = m->prev = NULL;
+ /* Assumption: If m->next == NULL, then list->tail == m
+  *      and:   If m->prev == NULL, then list->head == m
+  */
+ if (m->next)
+   m->next->prev = m->prev;
+ else
+   list->tail = m->prev;
+ if (m->prev)
+   m->prev->next = m->next;
+ else
+   list->head = m->next;
+ /* XXX - does this ever matter? */
+ m->next = m->prev = NULL;
 }
 
 
