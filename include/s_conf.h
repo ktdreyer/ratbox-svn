@@ -423,7 +423,7 @@ extern unsigned long cidr_to_bitmask[];
 extern char conffilebuf[IRCD_BUFSIZE + 1];
 extern int lineno;
 
-#define NOT_AUTHORIZED  (-1)
+#define NOT_AUTHORISED  (-1)
 #define SOCKET_ERROR    (-2)
 #define I_LINE_FULL     (-3)
 #define BANNED_CLIENT   (-4)

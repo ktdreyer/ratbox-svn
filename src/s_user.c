@@ -365,7 +365,7 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 
 	if(aconf == NULL)
 	{
-		exit_client(client_p, source_p, &me, "*** Not Authorized");
+		exit_client(client_p, source_p, &me, "*** Not Authorised");
 		return (CLIENT_EXITED);
 	}
 
@@ -849,13 +849,13 @@ do_local_user(const char *nick, struct Client *client_p, struct Client *source_p
 	if(source_p == NULL)
 		return 0;
 
-	user = make_user(source_p);
-
 	if(!IsUnknown(source_p))
 	{
 		sendto_one(source_p, form_str(ERR_ALREADYREGISTRED), me.name, nick);
 		return 0;
 	}
+
+	user = make_user(source_p);
 
 	/*
 	 * don't take the clients word for it, ever

@@ -84,19 +84,20 @@ static SlinkRplHnd slink_zipstats;
  */
 struct Capability captab[] = {
 /*  name     cap     */
-	{"QS", CAP_QS},
-	{"EX", CAP_EX},
-	{"CHW", CAP_CHW},
-	{"IE", CAP_IE},
-	{"EOB", CAP_EOB},
-	{"KLN", CAP_KLN},
-	{"GLN", CAP_GLN},
-	{"KNOCK", CAP_KNOCK},
-	{"UID", CAP_UID},
-	{"ZIP", CAP_ZIP},
-	{"TBURST", CAP_TBURST},
-	{"UNKLN", CAP_UNKLN},
-	{"CLUSTER", CAP_CLUSTER},
+	{ "QS",		CAP_QS },
+	{ "EX",		CAP_EX },
+	{ "CHW",	CAP_CHW},
+	{ "IE", 	CAP_IE},
+	{ "EOB",	CAP_EOB},
+	{ "KLN",	CAP_KLN},
+	{ "GLN",	CAP_GLN},
+	{ "KNOCK",	CAP_KNOCK},
+	{ "UID",	CAP_UID},
+	{ "ZIP",	CAP_ZIP},
+	{ "TBURST",	CAP_TBURST},
+	{ "UNKLN",	CAP_UNKLN},
+	{ "CLUSTER",	CAP_CLUSTER},
+	{ "ENCAP",	CAP_ENCAP },
 	{0, 0}
 };
 

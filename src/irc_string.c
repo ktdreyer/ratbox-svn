@@ -732,7 +732,7 @@ strlcat(char *dst, const char *src, size_t siz)
 	const char *s = src;
 	size_t n = siz, dlen;
 
-	while (*d != '\0' && n-- != 0)
+	while (n-- != 0 && *d != '\0')
 		d++;
 	dlen = d - dst;
 	n = siz - dlen;

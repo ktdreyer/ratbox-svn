@@ -73,10 +73,11 @@ struct Capability
 #define CAP_TBURST	0x00040000	/* supports TBURST */
 #define CAP_UNKLN       0x00100000	/* supports remote unkline */
 #define CAP_CLUSTER     0x00200000	/* supports cluster stuff */
+#define CAP_ENCAP	0x00400000	/* supports ENCAP */
 
 #define CAP_MASK        (CAP_QS  | CAP_EX   | CAP_CHW  | \
                          CAP_IE  | CAP_EOB  | CAP_KLN  | \
-                         CAP_GLN | CAP_CLUSTER | \
+                         CAP_GLN | CAP_CLUSTER | CAP_ENCAP | \
                          CAP_UID | CAP_ZIP  | CAP_ENC | \
                          CAP_KNOCK  | CAP_UNKLN)
 

@@ -2887,6 +2887,7 @@ newconf_init()
 	add_conf_item("shared", "user", CF_QSTRING, conf_set_shared_user);
 	add_conf_item("shared", "kline", CF_YESNO, conf_set_shared_kline);
 	add_conf_item("shared", "unkline", CF_YESNO, conf_set_shared_unkline);
+	add_conf_item("shared", "type", CF_STRING | CF_FLIST, conf_set_shared_type);
 
 	add_top_conf("connect", conf_begin_connect, conf_end_connect);
 	add_conf_item("connect", "name", CF_QSTRING, conf_set_connect_name);

@@ -776,6 +776,10 @@ chm_ban(struct Client *client_p, struct Client *source_p,
 	raw_mask = LOCAL_COPY(parv[(*parn)]);
 	(*parn)++;
 
+	/* empty ban, ignore it */
+	if(EmptyString(raw_mask))
+		return;
+
 	if(IsServer(client_p))
 		mask = raw_mask;
 	else
@@ -788,7 +792,12 @@ chm_ban(struct Client *client_p, struct Client *source_p,
 	/* if we're adding a NEW id */
 	if(dir == MODE_ADD)
 	{
-		if(!add_id(source_p, chptr, mask, CHFL_BAN) && MyClient(source_p))
+		/* dont allow local clients to overflow the banlist, and dont
+		 * let servers do redundant +b's, as it wastes bandwidth on
+		 * a netjoin.
+		 */
+		if(!add_id(source_p, chptr, mask, CHFL_BAN) &&
+		   (MyClient(source_p) || IsServer(source_p)))
 			return;
 
 		mode_changes[mode_count].letter = c;
@@ -873,6 +882,10 @@ chm_except(struct Client *client_p, struct Client *source_p,
 	raw_mask = LOCAL_COPY(parv[(*parn)]);
 	(*parn)++;
 
+	/* empty ban, ignore it */
+	if(EmptyString(raw_mask))
+		return;
+
 	if(IsServer(client_p))
 		mask = raw_mask;
 	else
@@ -884,8 +897,14 @@ chm_except(struct Client *client_p, struct Client *source_p,
 	/* If we're adding a NEW id */
 	if(dir == MODE_ADD)
 	{
-		if(!add_id(source_p, chptr, mask, CHFL_EXCEPTION) && MyClient(source_p))
+		/* dont allow local clients to overflow the banlist, and dont
+		 * let servers do redundant +b's, as it wastes bandwidth on
+		 * a netjoin.
+		 */
+		if(!add_id(source_p, chptr, mask, CHFL_EXCEPTION) &&
+		   (MyClient(source_p) || IsServer(source_p)))
 			return;
+
 		mode_changes[mode_count].letter = c;
 		mode_changes[mode_count].dir = MODE_ADD;
 		mode_changes[mode_count].caps = CAP_EX;
@@ -973,6 +992,10 @@ chm_invex(struct Client *client_p, struct Client *source_p,
 	raw_mask = LOCAL_COPY(parv[(*parn)]);
 	(*parn)++;
 
+	/* empty ban, ignore it */
+	if(EmptyString(raw_mask))
+		return;
+
 	if(IsServer(client_p))
 		mask = raw_mask;
 	else
@@ -983,7 +1006,12 @@ chm_invex(struct Client *client_p, struct Client *source_p,
 
 	if(dir == MODE_ADD)
 	{
-		if(!add_id(source_p, chptr, mask, CHFL_INVEX) && MyClient(source_p))
+		/* dont allow local clients to overflow the banlist, and dont
+		 * let servers do redundant +b's, as it wastes bandwidth on
+		 * a netjoin.
+		 */
+		if(!add_id(source_p, chptr, mask, CHFL_INVEX) &&
+		   (MyClient(source_p) || IsServer(source_p)))
 			return;
 
 		mode_changes[mode_count].letter = c;
@@ -1057,6 +1085,14 @@ chm_op(struct Client *client_p, struct Client *source_p,
 	opnick = LOCAL_COPY(parv[(*parn)]);
 	(*parn)++;
 
+	/* empty nick */
+	if(EmptyString(opnick))
+	{
+		sendto_one(source_p, form_str(ERR_NOSUCHNICK),
+			   me.name, source_p->name, "*");
+		return;
+	}
+
 	if((targ_p = find_chasing(source_p, opnick, NULL)) == NULL)
 	{
 		return;
@@ -1124,6 +1160,14 @@ chm_voice(struct Client *client_p, struct Client *source_p,
 	opnick = LOCAL_COPY(parv[(*parn)]);
 	(*parn)++;
 
+	/* empty nick */
+	if(EmptyString(opnick))
+	{
+		sendto_one(source_p, form_str(ERR_NOSUCHNICK),
+			   me.name, source_p->name, "*");
+		return;
+	}
+
 	if((targ_p = find_chasing(source_p, opnick, NULL)) == NULL)
 	{
 		return;
@@ -1190,7 +1234,7 @@ chm_limit(struct Client *client_p, struct Client *source_p,
 		lstr = LOCAL_COPY(parv[(*parn)]);
 		(*parn)++;
 
-		if((limit = strtoul(lstr, NULL, 10)) <= 0)
+		if(EmptyString(lstr) || (limit = atoi(lstr)) <= 0)
 			return;
 
 		ircsprintf(lstr, "%d", limit);
@@ -1246,6 +1290,9 @@ chm_key(struct Client *client_p, struct Client *source_p,
 		key = LOCAL_COPY(parv[(*parn)]);
 		(*parn)++;
 
+		if(EmptyString(key))
+			return;
+
 		if(MyClient(source_p))
 			fix_key(key);
 		else
@@ -1264,11 +1311,11 @@ chm_key(struct Client *client_p, struct Client *source_p,
 	}
 	else if(dir == MODE_DEL)
 	{
-		if(!(*chptr->mode.key))
-			return;
-
 		if (parc > *parn)
 			(*parn)++;
+
+		if(!(*chptr->mode.key))
+			return;
 
 		*chptr->mode.key = 0;
 

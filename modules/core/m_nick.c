@@ -298,7 +298,8 @@ ms_nick(struct Client *client_p, struct Client *source_p, int parc, const char *
 	/* fix the length of the nick */
 	strlcpy(nick, parv[1], sizeof(nick));
 
-	if(check_clean_nick(client_p, source_p, nick, parv[1], parv[7]))
+	if(check_clean_nick(client_p, source_p, nick, parv[1],
+			    (parc == 9 ? parv[7] : (char *)source_p->user->server)))
 		return;
 
 	if(parc == 9)

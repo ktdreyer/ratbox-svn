@@ -115,12 +115,12 @@ mr_server(struct Client *client_p, struct Client *source_p, int parc, const char
 		if(ConfigFileEntry.warn_no_nline)
 		{
 			sendto_realops_flags(UMODE_ALL, L_ADMIN,
-					     "Unauthorized server connection attempt from %s: No entry for "
+					     "Unauthorised server connection attempt from %s: No entry for "
 					     "servername %s", get_client_name(client_p, HIDE_IP),
 					     name);
 
 			sendto_realops_flags(UMODE_ALL, L_OPER,
-					     "Unauthorized server connection attempt from %s: No entry for "
+					     "Unauthorised server connection attempt from %s: No entry for "
 					     "servername %s", get_client_name(client_p, MASK_IP),
 					     name);
 
@@ -135,11 +135,11 @@ mr_server(struct Client *client_p, struct Client *source_p, int parc, const char
 
 	case -2:
 		sendto_realops_flags(UMODE_ALL, L_ADMIN,
-				     "Unauthorized server connection attempt from %s: Bad password "
+				     "Unauthorised server connection attempt from %s: Bad password "
 				     "for server %s", get_client_name(client_p, HIDE_IP), name);
 
 		sendto_realops_flags(UMODE_ALL, L_OPER,
-				     "Unauthorized server connection attempt from %s: Bad password "
+				     "Unauthorised server connection attempt from %s: Bad password "
 				     "for server %s", get_client_name(client_p, MASK_IP), name);
 
 		ilog(L_NOTICE, "Access denied, invalid password for server %s",
@@ -152,11 +152,11 @@ mr_server(struct Client *client_p, struct Client *source_p, int parc, const char
 
 	case -3:
 		sendto_realops_flags(UMODE_ALL, L_ADMIN,
-				     "Unauthorized server connection attempt from %s: Invalid host "
+				     "Unauthorised server connection attempt from %s: Invalid host "
 				     "for server %s", get_client_name(client_p, HIDE_IP), name);
 
 		sendto_realops_flags(UMODE_ALL, L_OPER,
-				     "Unauthorized server connection attempt from %s: Invalid host "
+				     "Unauthorised server connection attempt from %s: Invalid host "
 				     "for server %s", get_client_name(client_p, MASK_IP), name);
 
 		ilog(L_NOTICE, "Access denied, invalid host for server %s",

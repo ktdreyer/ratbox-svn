@@ -58,7 +58,9 @@ SRCS =                          \
   m_connect.c \
   m_cryptlink.c \
   m_dline.c \
+  m_encap.c \
   m_eob.c \
+  m_etrace.c \
   m_gline.c \
   m_help.c \
   m_htm.c \

@@ -357,7 +357,7 @@ report_configured_links(struct Client *source_p, int mask)
  *
  * inputs	- pointer to client
  * output	- 0 = Success
- * 		  NOT_AUTHORIZED (-1) = Access denied (no I line match)
+ * 		  NOT_AUTHORISED (-1) = Access denied (no I line match)
  * 		  SOCKET_ERROR   (-2) = Bad socket.
  * 		  I_LINE_FULL    (-3) = I-line is full
  *		  TOO_MANY       (-4) = Too many connections from hostname
@@ -432,7 +432,7 @@ check_client(struct Client *client_p, struct Client *source_p, const char *usern
 			    "No more connections allowed in your connection class");
 		break;
 
-	case NOT_AUTHORIZED:
+	case NOT_AUTHORISED:
 		{
 			static char ipaddr[HOSTIPLEN];
 			int port = -1;
@@ -513,7 +513,7 @@ verify_access(struct Client *client_p, const char *username)
 				sendto_one(client_p, form_str(RPL_REDIR),
 					   me.name, client_p->name,
 					   aconf->name ? aconf->name : "", aconf->port);
-				return (NOT_AUTHORIZED);
+				return (NOT_AUTHORISED);
 			}
 
 
@@ -562,7 +562,7 @@ verify_access(struct Client *client_p, const char *username)
 			return (BANNED_CLIENT);
 		}
 	}
-	return (NOT_AUTHORIZED);
+	return (NOT_AUTHORISED);
 }
 
 
@@ -749,7 +749,7 @@ int
 attach_conf(struct Client *client_p, struct ConfItem *aconf)
 {
 	if(IsIllegal(aconf))
-		return (NOT_AUTHORIZED);
+		return (NOT_AUTHORISED);
 
 	if((aconf->status & CONF_OPERATOR) == 0)
 	{

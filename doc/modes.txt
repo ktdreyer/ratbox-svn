@@ -17,7 +17,7 @@ User Modes:
 +o - oper       - Operator status
 +r - rej        - See rejected client notices
 +s - servnotice - See general server notices
-+u - unauth     - See unauthorized client notices
++u - unauth     - See unauthorised client notices
 +w - wallop     - See server generated WALLOPS
 +x - external   - See remote server connection and split notices
 +y - spy        - See LINKS, STATS (if configured), TRACE notices
