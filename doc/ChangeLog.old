@@ -1,3 +1,10 @@
+*** 20010609_6 by a1kmm
+More mode table stuff:
+- Implement +I/+e
+- Fix -v+o sort of case.
+- Send nothing on +n-n sort of thing.
+
+
 *** 20010609_5 by db
 - allow opers to always send through a +g
 
