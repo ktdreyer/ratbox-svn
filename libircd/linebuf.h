@@ -21,8 +21,9 @@ typedef struct _buf_head buf_head_t;
 
 struct _buf_line {
     char buf[BUF_DATA_SIZE+2];
-    int  terminated;		/* Whether we've terminated the buffer */
-    int  flushing;		/* Whether we're flushing .. */
+    unsigned int  terminated;	/* Whether we've terminated the buffer */
+    unsigned int  flushing;     /* Whether we're flushing .. */
+    unsigned int  binary;       /* Whether this linebuf may hold 8-bit data */
     int  len;			/* How much data we've got */
     int  refcount;              /* how many linked lists are we in? */
     struct _buf_line *next;     /* next in free list */
@@ -52,8 +53,8 @@ extern void linebuf_free(buf_line_t *);
 extern void linebuf_newbuf(buf_head_t *);
 extern void client_flush_input(struct Client *);
 extern void linebuf_donebuf(buf_head_t *);
-extern int linebuf_parse(buf_head_t *, char *, int);
-extern int linebuf_get(buf_head_t *, char *, int, int);
+extern int linebuf_parse(buf_head_t *, char *, int, int);
+extern int linebuf_get(buf_head_t *, char *, int, int, int);
 extern void linebuf_put(buf_head_t *, char *, int);
 extern void linebuf_putmsg(buf_head_t *, const char *, va_list,
                            const char *, ...);

@@ -51,10 +51,11 @@ parse_client_queued(struct Client *client_p)
 { 
  int dolen = 0, checkflood = 1;
  struct LocalUser *lclient_p = client_p->localClient;
+
  if (IsServer(client_p))
  {
   while ((dolen = linebuf_get(&client_p->localClient->buf_recvq,
-                              readBuf, READBUF_SIZE, 0)) > 0)
+                              readBuf, READBUF_SIZE, 0, 0)) > 0)
   {
    if (!IsDead(client_p))
     client_dopacket(client_p, readBuf, dolen);
@@ -82,7 +83,7 @@ parse_client_queued(struct Client *client_p)
    if (checkflood && (lclient_p->sent_parsed > lclient_p->allow_read))
     break;
    dolen = linebuf_get(&client_p->localClient->buf_recvq, readBuf,
-                       READBUF_SIZE, 0);
+                       READBUF_SIZE, 0, 0);
    if (!dolen)
     break;
    client_dopacket(client_p, readBuf, dolen);
@@ -291,6 +292,7 @@ read_packet(int fd, void *data)
   int length = 0;
   int lbuf_len;
   int fd_r = client_p->fd;
+  int binary = 0;
 #ifndef NDEBUG
   struct hook_io_data hdata;
 #endif
@@ -347,8 +349,11 @@ read_packet(int fd, void *data)
    * it on the end of the receive queue and do it when its
    * turn comes around.
    */
+  if (IsHandshake(client_p) || IsUnknown(client_p))
+    binary = 1;
+
   lbuf_len = linebuf_parse(&client_p->localClient->buf_recvq,
-      readBuf, length);
+      readBuf, length, binary);
 
   if (lbuf_len < 0)
   {
