@@ -1,3 +1,15 @@
+androsyn    2002/08/11 02:35:13 EDT	(20020811_0)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  Add a IsMe() check
+  
+  Revision  Changes    Path
+  7.302     +1 -1      ircd-ratbox/src/client.c
+
+
+
 leeh        2002/08/10 18:41:19 EDT	(20020810_39)
 
   Modified files:
