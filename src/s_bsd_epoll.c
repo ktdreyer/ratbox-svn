@@ -228,6 +228,12 @@ comm_select(unsigned long delay)
       else
         ilog(L_WARN, "s_bsd_epoll.c: NULL read handler called");
     }
+
+    if(F->flags.open == 0)
+    {
+       /* Read handler closed us..go on and do something useful */
+       continue;
+    }    
     if(pfd[i].events & (EPOLLOUT | EPOLLHUP | EPOLLERR))
     {
       callbacks_called++;
