@@ -83,7 +83,7 @@ static void m_quit(struct Client *client_p,
       comment = reason;
     }
   
-  if( !IsServer(source_p) && MyConnect(source_p) && !IsOper(source_p) && 
+  if(!IsOper(source_p) && 
      (source_p->firsttime + ConfigFileEntry.anti_spam_exit_message_time)
      > CurrentTime)
     {
