@@ -32,16 +32,16 @@ all: $(PROGS)
 
 build: all
 
-mkpasswd:
+mkpasswd: mkpasswd.c
 	$(CC) $(CFLAGS) $(LDFLAGS) $(INCLUDES) mkpasswd.c -o mkpasswd $(IRCDLIBS)
 
-viconf:
+viconf: viconf.c
 	$(CC) $(CFLAGS) $(LDFLAGS) $(INCLUDES) viconf.c -o viconf $(IRCDLIBS)
 
-convertilines:
+convertilines: convertilines.c
 	$(CC) $(CFLAGS) $(LDFLAGS) $(INCLUDES) convertilines.c -o convertilines $(IRCDLIBS)
 
-convertklines:
+convertklines: convertklines.c
 	$(CC) $(CFLAGS) $(LDFLAGS) $(INCLUDES) convertklines.c -o convertklines $(IRCDLIBS)
 
 clean:
