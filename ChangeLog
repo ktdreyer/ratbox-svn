@@ -1,3 +1,64 @@
+leeh        2004/09/03 12:53:34 EDT	(20040903_0)
+
+  Modified files:
+    contrib              example_module.c spy_admin_notice.c 
+                         spy_info_notice.c spy_links_notice.c 
+                         spy_motd_notice.c spy_stats_notice.c 
+                         spy_stats_p_notice.c spy_trace_notice.c 
+                         spy_whois_notice.c 
+                         spy_whois_notice_global.c 
+    include              hook.h hostmask.h 
+    modules              m_admin.c m_info.c m_links.c m_motd.c 
+                         m_stats.c m_trace.c m_whois.c 
+                         static_modules.c.SH 
+    modules/core         m_server.c users.c 
+    src                  client.c hook.c ircd.c modules.c packet.c 
+                         s_auth.c send.c 
+  Removed files:
+    modules              static_modules_c.com 
+  Log:
+  - new hook system
+  
+    Basically, this is a slow leaking array, events can be added but never
+    removed. When an event in registered, the return value is its position in
+    the array. When hooks are added, the events are also added if they do not
+    exist. As events are never removed, reloading a module with an event will
+    not lose any hooks attached to it.
+  
+  Revision  Changes    Path
+  1.11      +6 -7      ircd-ratbox/contrib/example_module.c
+  1.12      +7 -9      ircd-ratbox/contrib/spy_admin_notice.c
+  1.12      +7 -9      ircd-ratbox/contrib/spy_info_notice.c
+  1.18      +9 -9      ircd-ratbox/contrib/spy_links_notice.c
+  1.12      +7 -9      ircd-ratbox/contrib/spy_motd_notice.c
+  1.19      +22 -22    ircd-ratbox/contrib/spy_stats_notice.c
+  1.11      +6 -8      ircd-ratbox/contrib/spy_stats_p_notice.c
+  1.13      +12 -12    ircd-ratbox/contrib/spy_trace_notice.c
+  1.18      +15 -14    ircd-ratbox/contrib/spy_whois_notice.c
+  1.7       +14 -14    ircd-ratbox/contrib/spy_whois_notice_global.c
+  1.26      +27 -71    ircd-ratbox/include/hook.h
+  1.38      +0 -9      ircd-ratbox/include/hostmask.h
+  1.147     +8 -7      ircd-ratbox/modules/core/m_server.c
+  1.15      +2 -2      ircd-ratbox/modules/core/users.c
+  1.60      +5 -6      ircd-ratbox/modules/m_admin.c
+  1.116     +5 -6      ircd-ratbox/modules/m_info.c
+  1.67      +6 -6      ircd-ratbox/modules/m_links.c
+  1.56      +5 -6      ircd-ratbox/modules/m_motd.c
+  1.233     +11 -12    ircd-ratbox/modules/m_stats.c
+  1.102     +9 -9      ircd-ratbox/modules/m_trace.c
+  1.144     +10 -9     ircd-ratbox/modules/m_whois.c
+  1.8       +2 -2      ircd-ratbox/modules/static_modules.c.SH
+  1.4       +0 -125    ircd-ratbox/modules/static_modules_c.com (dead)
+  7.480     +0 -25     ircd-ratbox/src/client.c
+  7.31      +133 -129  ircd-ratbox/src/hook.c
+  7.360     +1 -1      ircd-ratbox/src/ircd.c
+  7.149     +6 -9      ircd-ratbox/src/modules.c
+  7.134     +11 -17    ircd-ratbox/src/packet.c
+  7.180     +0 -3      ircd-ratbox/src/s_auth.c
+  7.281     +10 -6     ircd-ratbox/src/send.c
+
+
+
 androsyn    2004/08/30 15:42:07 EDT	(20040830_4)
 
   Modified files:
