@@ -1,3 +1,11 @@
+*** 20001224_19 by db
+- removed unneeded match()
+  and removed quite obsolete comments... 
+  *sigh* This isn't an historical paper folks, those belong in museums
+  not a modern ircd.
+
+
+
 *** 20001224_18 by toot
 reworded total recieved connections message.  and fixed it in /stats u
 
