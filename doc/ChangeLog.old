@@ -1,3 +1,8 @@
+*** 20001102_3 by toot
+. fixed a possible over flow when listing available vchans
+. have it show the nickname of who's been there longest
+
+
 *** 20001102_2 by adrian
 
 
