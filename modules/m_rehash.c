@@ -29,6 +29,7 @@
 #include "channel.h"
 #include "common.h"
 #include "irc_string.h"
+#include "sprintf_irc.h"
 #include "ircd.h"
 #include "s_gline.h"
 #include "numeric.h"
@@ -300,8 +301,8 @@ mo_rehash(struct Client *client_p, struct Client *source_p, int parc, const char
 	if(parc > 1)
 	{
 		int x;
-		char cmdbuf[100];
-
+		char cmdbuf[BUFSIZ];
+		
 		for (x = 0; rehash_commands[x].cmd != NULL && rehash_commands[x].handler != NULL;
 		     x++)
 		{
@@ -317,15 +318,12 @@ mo_rehash(struct Client *client_p, struct Client *source_p, int parc, const char
 		}
 
 		/* We are still here..we didn't match */
-		cmdbuf[0] = '\0';
-		for (x = 0; rehash_commands[x].cmd != NULL && rehash_commands[x].handler != NULL;
-		     x++)
+		ircsnprintf(cmdbuf, sizeof(cmdbuf), "%s NOTICE %s :rehash one of:", me.name, source_p->name);
+		for (x = 0; rehash_commands[x].cmd != NULL && rehash_commands[x].handler != NULL; x++)
 		{
-			strlcat(cmdbuf, " ", sizeof(cmdbuf));
-			strlcat(cmdbuf, rehash_commands[x].cmd, sizeof(cmdbuf));
+			ircsnprintf_append(cmdbuf, sizeof(cmdbuf), " %s", rehash_commands[x].cmd);
 		}
-		sendto_one(source_p, ":%s NOTICE %s :rehash one of:%s", me.name, source_p->name,
-			   cmdbuf);
+		sendto_one(source_p, "%s", cmdbuf);
 	}
 	else
 	{
