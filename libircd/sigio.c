@@ -225,12 +225,12 @@ comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
     if (type & COMM_SELECT_READ) {
         F->read_handler = handler;
         F->read_data = client_data;
-        poll_update_pollfds(fd, POLLRDNORM, handler);
+        poll_update_pollfds(fd, POLLIN, handler);
     }
     if (type & COMM_SELECT_WRITE) {
         F->write_handler = handler;
         F->write_data = client_data;
-        poll_update_pollfds(fd, POLLWRNORM|POLLOUT, handler);
+        poll_update_pollfds(fd, POLLOUT, handler);
     }
     if (timeout)
         F->timeout = CurrentTime + (timeout / 1000);
@@ -263,10 +263,10 @@ comm_select(unsigned long delay)
  struct siginfo si;
  struct timespec timeout;
  timeout.tv_sec = 0;
- timeout.tv_nsec = 50000000; 
+ timeout.tv_nsec = 1000000 * delay;
  for (;;)
  {
-  if(!sigio_is_screwed && ++loop_count <= 3 )
+  if(!sigio_is_screwed && loop_count <= 3 )
   {
   	if((sig = sigtimedwait(&our_sigset, &si, &timeout)) > 0)
   	{
@@ -279,21 +279,22 @@ comm_select(unsigned long delay)
   		pollfd_list.pollfds[fd].revents |= si.si_band; 
   		revents = pollfd_list.pollfds[fd].revents;
   		num++;
-  		callbacks_called++;
   		F = &fd_table[fd];
   	        if (revents & (POLLRDNORM | POLLIN | POLLHUP | POLLERR))
   	        {
+	  		callbacks_called++;
   	      		hdl = F->read_handler;
 			F->read_handler = NULL;
-			poll_update_pollfds(fd, POLLRDNORM, NULL);
+			poll_update_pollfds(fd, POLLIN, NULL);
 			if (hdl)
 				hdl(fd, F->read_data);
 		}
 		if (revents & (POLLWRNORM | POLLOUT | POLLHUP | POLLERR))
 		{
+			callbacks_called++;
 			hdl = F->write_handler;
 			F->write_handler = NULL;
-			poll_update_pollfds(fd, POLLWRNORM, NULL);
+			poll_update_pollfds(fd, POLLOUT, NULL);
 			if (hdl)
 				hdl(fd, F->write_data);
 		}
@@ -327,7 +328,6 @@ comm_select(unsigned long delay)
   
  /* update current time again, eww.. */
  set_time();
- callbacks_called += num;
  
  if (num == 0)
   return 0;
@@ -341,17 +341,19 @@ comm_select(unsigned long delay)
   F = &fd_table[fd];
   if (revents & (POLLRDNORM | POLLIN | POLLHUP | POLLERR))
   {
+   callbacks_called++;
    hdl = F->read_handler;
    F->read_handler = NULL;
-   poll_update_pollfds(fd, POLLRDNORM, NULL);
+   poll_update_pollfds(fd, POLLIN, NULL);
    if (hdl)
     hdl(fd, F->read_data);
   }
   if (revents & (POLLWRNORM | POLLOUT | POLLHUP | POLLERR))
   {
+   callbacks_called++;
    hdl = F->write_handler;
    F->write_handler = NULL;
-   poll_update_pollfds(fd, POLLWRNORM, NULL);
+   poll_update_pollfds(fd, POLLOUT, NULL);
    if (hdl)
     hdl(fd, F->write_data);
   }
