@@ -1,3 +1,31 @@
+leeh        2003/08/10 21:08:42 EDT	(20030811_2)
+
+  Modified files:
+    include              client.h hash.h md5.h 
+    modules              m_svinfo.c 
+    modules/core         m_kill.c m_mode.c 
+    src                  channel.c client.c hash.c md5.c s_serv.c 
+                         s_user.c send.c 
+  Log:
+  - more TS6 fixes, ircd compiles now (some stuff is under BROKEN_TS6)
+  
+  Revision  Changes    Path
+  7.211     +3 -2      ircd-ratbox/include/client.h
+  7.40      +1 -0      ircd-ratbox/include/hash.h
+  1.12      +0 -4      ircd-ratbox/include/md5.h
+  1.86      +3 -3      ircd-ratbox/modules/core/m_kill.c
+  1.85      +5 -5      ircd-ratbox/modules/core/m_mode.c
+  1.50      +2 -2      ircd-ratbox/modules/m_svinfo.c
+  7.393     +10 -8     ircd-ratbox/src/channel.c
+  7.396     +2 -2      ircd-ratbox/src/client.c
+  7.83      +40 -41    ircd-ratbox/src/hash.c
+  1.21      +0 -18     ircd-ratbox/src/md5.c
+  7.343     +7 -5      ircd-ratbox/src/s_serv.c
+  7.277     +9 -1      ircd-ratbox/src/s_user.c
+  7.249     +17 -13    ircd-ratbox/src/send.c
+
+
+
 leeh        2003/08/10 20:39:12 EDT	(20030811_1)
 
   Modified files:
