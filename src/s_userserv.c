@@ -555,20 +555,6 @@ s_user_register(struct client *client_p, char *parv[], int parc)
 		return 1;
 	}
 
-	if(config_file.uregister_email && (parc < 3 || EmptyString(parv[2])))
-	{
-		service_error(userserv_p, client_p, "Insufficient parameters to %s::REGISTER",
-				userserv_p->name);
-		return 1;
-	}
-
-	if(!valid_email(parv[2]))
-	{
-		service_error(userserv_p, client_p, "Email %s invalid",
-				parv[2]);
-		return 1;
-	}
-
 	if(client_p->user->user_reg != NULL)
 	{
 		service_error(userserv_p, client_p, "You are already logged in");
@@ -591,6 +577,23 @@ s_user_register(struct client *client_p, char *parv[], int parc)
 	if(!valid_username(parv[0]))
 	{
 		service_error(userserv_p, client_p, "Username %s invalid", parv[0]);
+		return 1;
+	}
+
+	if(parc < 3 || EmptyString(parv[2]))
+	{
+		if(config_file.uregister_email)
+		{
+			service_error(userserv_p, client_p, 
+					"Insufficient parameters to %s::REGISTER",
+					userserv_p->name);
+			return 1;
+		}
+	}
+	else if(!valid_email(parv[2]))
+	{
+		service_error(userserv_p, client_p, "Email %s invalid",
+				parv[2]);
 		return 1;
 	}
 
@@ -688,6 +691,10 @@ s_user_login(struct client *client_p, char *parv[], int parc)
 
 	slog(userserv_p, 5, "%s - LOGIN %s", client_p->user->mask, parv[0]);
 
+	if(ConnCapService(server_p))
+		sendto_server(":%s ENCAP * SU %s %s",
+				MYNAME, client_p->name, reg_p->name);
+
 	client_p->user->user_reg = reg_p;
 	reg_p->last_time = CURRENT_TIME;
 	dlink_add_alloc(client_p, &reg_p->users);
@@ -702,6 +709,9 @@ s_user_logout(struct client *client_p, char *parv[], int parc)
 	dlink_find_destroy(client_p, &client_p->user->user_reg->users);
 	client_p->user->user_reg = NULL;
 	service_error(userserv_p, client_p, "Logout successful");
+
+	if(ConnCapService(server_p))
+		sendto_server(":%s ENCAP * SU %s", MYNAME, client_p->name);
 
 	return 1;
 }

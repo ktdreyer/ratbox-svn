@@ -22,6 +22,7 @@
 static dlink_list scommand_table[MAX_SCOMMAND_HASH];
 
 static void c_admin(struct client *, const char *parv[], int parc);
+static void c_capab(struct client *, const char *parv[], int parc);
 static void c_pass(struct client *, const char *parv[], int parc);
 static void c_ping(struct client *, const char *parv[], int parc);
 static void c_pong(struct client *, const char *parv[], int parc);
@@ -31,6 +32,7 @@ static void c_version(struct client *, const char *parv[], int parc);
 static void c_whois(struct client *, const char *parv[], int parc);
 
 static struct scommand_handler admin_command = { "ADMIN", c_admin, 0, DLINK_EMPTY };
+static struct scommand_handler capab_command = { "CAPAB", c_capab, FLAGS_UNKNOWN, DLINK_EMPTY };
 static struct scommand_handler pass_command = { "PASS", c_pass, FLAGS_UNKNOWN, DLINK_EMPTY };
 static struct scommand_handler ping_command = { "PING", c_ping, 0, DLINK_EMPTY };
 static struct scommand_handler pong_command = { "PONG", c_pong, 0, DLINK_EMPTY };
@@ -43,6 +45,7 @@ void
 init_scommand(void)
 {
 	add_scommand_handler(&admin_command);
+	add_scommand_handler(&capab_command);
 	add_scommand_handler(&pass_command);
 	add_scommand_handler(&ping_command);
 	add_scommand_handler(&pong_command);
@@ -206,6 +209,51 @@ c_admin(struct client *client_p, const char *parv[], int parc)
 	if(!EmptyString(config_file.admin3))
 		sendto_server(":%s 259 %s :%s",
                               MYNAME, parv[0], config_file.admin3);
+}
+
+static struct capab_entry
+{
+	const char *name;
+	int flag;
+} capab_table[] = {
+	{ "SERVICE",	CONN_CAP_SERVICE	},
+	{ "\0", 0 }
+};
+
+static void
+c_capab(struct client *client_p, const char *parv[], int parc)
+{
+	char buf[BUFSIZE];
+	char *data, *p;
+	int i;
+
+	if(parc < 2)
+		return;
+
+	/* unregistered server only */
+	if(client_p != NULL)
+		return;
+
+	strlcpy(buf, parv[1], sizeof(buf));
+
+	if((p = strchr(buf, ' ')))
+		*p++ = '\0';
+
+	for(data = buf; data; )
+	{
+		for(i = 0; capab_table[i].flag; i++)
+		{
+			if(!irccmp(capab_table[i].name, data))
+			{
+				server_p->flags |= capab_table[i].flag;
+				break;
+			}
+		}
+
+		data = p;
+		if(p && (p = strchr(data, ' ')))
+			*p++ = '\0';
+	}
 }
 
 static void

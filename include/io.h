@@ -43,6 +43,7 @@ extern dlink_list connection_list;
 #define CONN_DEAD		0x0010
 #define CONN_SENTPING           0x0020
 #define CONN_TS			0x0040
+#define CONN_CAP_SERVICE	0x0080
 /* CONTINUES ... */
 
 #define ConnConnecting(x)	((x)->flags & CONN_CONNECTING)
@@ -52,6 +53,7 @@ extern dlink_list connection_list;
 #define ConnDead(x)		((x)->flags & CONN_DEAD)
 #define ConnSentPing(x)		((x)->flags & CONN_SENTPING)
 #define ConnTS(x)		((x)->flags & CONN_TS)
+#define ConnCapService(x)	((x)->flags & CONN_CAP_SERVICE)
 
 #define SetConnConnecting(x)	((x)->flags |= CONN_CONNECTING)
 #define SetConnDccIn(x)		((x)->flags |= CONN_DCCIN)
