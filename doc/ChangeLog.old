@@ -1,3 +1,6 @@
+*** 20010111_10 by davidt
+report errors freeing localClient too
+
 *** 20010111_9 by a1kmm
 - Fixed a bug where we frob and then use something.
 - Initialise the last to NULL, since we don't MemSet...
