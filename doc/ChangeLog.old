@@ -1,3 +1,11 @@
+*** 20010618_5 by jdc
+- Mentioned the implicit decl. and warning messages during compile-time,
+  which pertain to OpenSSL.  People like Jamie will bitch and whine, so
+  might as well be precautious.  *grin*
+- Reformatted some stuff (purely cosmetical).
+
+
+
 *** 20010618_4 by jdc
 - Fixes compile issues with prior update for OpenSSL error logging.
   One small note:  There is no way I know of to get around the
