@@ -87,12 +87,6 @@ BASE_SRCS =                     \
   restart.c                     \
   s_auth.c                      \
   s_bsd.c                       \
-  s_bsd_kqueue.c                \
-  s_bsd_poll.c                  \
-  s_bsd_select.c                \
-  s_bsd_devpoll.c               \
-  s_bsd_sigio.c			\
-  s_bsd_epoll.c			\
   s_conf.c                      \
   s_newconf.c                   \
   s_gline.c                     \
@@ -106,7 +100,7 @@ BASE_SRCS =                     \
   tools.c                       \
   whowas.c
 
-SRCS = ${BASE_SRCS}
+SRCS = ${BASE_SRCS}   @SELECT_TYPE@.c
 
 OBJS = ${SRCS:.c=.o}
 
@@ -160,7 +154,7 @@ version.c: version.c.SH
 
 .PHONY: depend clean distclean
 depend:
-	${MKDEP} ${CPPFLAGS} ${BASE_SRCS} ${EXTRA_SRCS} > .depend
+	${MKDEP} ${CPPFLAGS} ${BASE_SRCS} > .depend
 
 clean:
 	${RM} -f *.o *.exe *~ y.tab.* lex.yy.c ircd.core core ircd 
