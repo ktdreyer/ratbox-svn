@@ -1,3 +1,15 @@
+androsyn    2004/07/20 11:47:31 EDT	(20040720_1)
+
+  Modified files:
+    src                  s_user.c 
+  Log:
+  Missed another case where passwd needed to be set to NULL
+  
+  Revision  Changes    Path
+  7.323     +1 -0      ircd-ratbox/src/s_user.c
+
+
+
 androsyn    2004/07/20 10:18:40 EDT	(20040720_0)
 
   Modified files:
