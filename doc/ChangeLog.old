@@ -1,3 +1,6 @@
+*** 20001230_21 by davidt
+Only resync the channel if required..
+
 *** 20001230_20 by davidt
 - Create a new capability: CAP_ANONOPS for servers that support +a
 - Fix +a so it's only sent to servers supporting it
