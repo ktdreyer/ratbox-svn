@@ -119,14 +119,12 @@ static void dns_cancel_all(void)
  adns_forallqueries_begin(dns_state);
  while((q = adns_forallqueries_next(dns_state, (void **)&r)) != NULL)
  {
-//	dns_kill_state(q);
 	adns_cancel(q);
 	adns__query_done(q);
  	adns_check(dns_state, &q, &answer, (void **)&query);
  	assert(query->callback != NULL);
 	query->query = NULL;
  	query->callback(query->ptr, NULL);
-//	adns_cancel(q);
  }
 }
 
