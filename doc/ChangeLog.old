@@ -1,3 +1,18 @@
+leeh        2002/05/23 12:52:21 EDT	(20020523_0)
+
+  Modified files:
+    include              setup.h_vms 
+    src                  s_debug.c 
+  Log:
+  - fixes for memory count
+  - vms fixes for larne
+  
+  Revision  Changes    Path
+  7.10      +6 -0      ircd-hybrid-7/include/setup.h_vms
+  7.66      +4 -6      ircd-hybrid-7/src/s_debug.c
+
+
+
 leeh        2002/05/22 09:52:45 EDT	(20020522_0)
 
   Modified files:
