@@ -1,3 +1,7 @@
+*** 20010106_5 by toot
+it doesn't break them :P  a missing blank line hardly matters
+
+
 *** 20010106_4 by fl_
 - we always need a local users reply, it breaks clients not to have one,
   we just spoof it as the global reply
