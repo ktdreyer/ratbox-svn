@@ -1,3 +1,7 @@
+*** 20010616_10 by a1kmm
+- Changed an irccmp to a match so we don't break host = "*.blah";
+
+
 *** 20010616_9 by db
 - same fix needed in hybrid-7 in attach_cn_lines
   both the servers irc name has to match and the host/ip
