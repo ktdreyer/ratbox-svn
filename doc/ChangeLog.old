@@ -1,3 +1,15 @@
+androsyn    2002/07/11 20:55:16 EDT	(20020712_5)
+
+  Modified files:
+    src                  send.c 
+  Log:
+  Reorder some code so it will get inlined.
+  
+  Revision  Changes    Path
+  7.200     +66 -68    ircd-hybrid-7/src/send.c
+
+
+
 androsyn    2002/07/11 20:51:11 EDT	(20020712_4)
 
   Modified files:
