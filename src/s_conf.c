@@ -73,7 +73,7 @@ static void     clear_out_old_conf(void);
 static void     flush_deleted_I_P(void);
 
 #ifdef LIMIT_UH
-static  int     attach_iline(struct Client *, struct ConfItem *,char *);
+static  int     attach_iline(struct Client *, struct ConfItem *,const char *);
 #else
 static  int     attach_iline(struct Client *, struct ConfItem *);
 #endif
@@ -119,8 +119,8 @@ static IP_ENTRY *ip_hash_table[IP_HASH_SIZE];
 static int hash_ip(unsigned long);
 
 #ifdef LIMIT_UH
-static IP_ENTRY *find_or_add_ip(struct Client *,char *);
-static int count_users_on_this_ip(IP_ENTRY *,struct Client *,char *);
+static IP_ENTRY *find_or_add_ip(struct Client *,const char *);
+static int count_users_on_this_ip(IP_ENTRY *,struct Client *,const char *);
 #else
 static IP_ENTRY *find_or_add_ip(struct Client *);
 #endif
@@ -472,7 +472,7 @@ int attach_Iline(struct Client* cptr, const char* username, char **preason)
  */
 
 #ifdef LIMIT_UH
-static int attach_iline(struct Client *cptr, struct ConfItem *aconf,char *username)
+static int attach_iline(struct Client *cptr, struct ConfItem *aconf,const char *username)
 #else
 static int attach_iline(struct Client *cptr, struct ConfItem *aconf)
 #endif
@@ -493,8 +493,8 @@ static int attach_iline(struct Client *cptr, struct ConfItem *aconf)
   ip_found->count++;
 
 #ifdef LIMIT_UH
-  if ((aconf->class->conFreq) && (ip_found->count_of_idented_users_on_this_ip
-                                  > aconf->class->conFreq))
+  if (ConfConFreq(aconf) && (ip_found->count_of_idented_users_on_this_ip
+                                  > ConfConFreq(aconf)))
     {
       if(!IsConfFlined(aconf))
         return -4; /* Already at maximum allowed ip#'s */
@@ -587,7 +587,7 @@ void clear_ip_hash_table()
 
 #ifdef LIMIT_UH
 static IP_ENTRY *
-find_or_add_ip(struct Client *cptr,char *username)
+find_or_add_ip(struct Client *cptr,const char *username)
 #else
 static IP_ENTRY *
 find_or_add_ip(struct Client *cptr)
@@ -595,7 +595,7 @@ find_or_add_ip(struct Client *cptr)
 {
   unsigned long ip_in=cptr->ip.s_addr;        
 #ifdef LIMIT_UH
-  Link *new_link;
+  struct SLink *new_link;
 #endif
 
   int hash_index;
@@ -637,7 +637,7 @@ find_or_add_ip(struct Client *cptr)
       newptr->count_of_idented_users_on_this_ip = 0;
       new_link = make_link();
       new_link->value.cptr = cptr;
-      new_link->next = (Link *)NULL;
+      new_link->next = (struct SLink *)NULL;
       newptr->ptr_clients_on_this_ip = new_link;
 #endif
       return(newptr);
@@ -660,7 +660,7 @@ find_or_add_ip(struct Client *cptr)
       ptr->count_of_idented_users_on_this_ip = 0;
       new_link = make_link();
       new_link->value.cptr = cptr;
-      new_link->next = (Link *)NULL;
+      new_link->next = (struct SLink *)NULL;
       ptr->ptr_clients_on_this_ip = new_link;
 #endif
      return (ptr);
@@ -669,10 +669,10 @@ find_or_add_ip(struct Client *cptr)
 
 #ifdef LIMIT_UH
 static int count_users_on_this_ip(IP_ENTRY *ip_list,
-                           struct Client *this_client,char *username)
+                           struct Client *this_client,const char *username)
 {
   int count=0;
-  Link *ptr;
+  struct SLink *ptr;
   
   for( ptr = ip_list->ptr_clients_on_this_ip; ptr; ptr = ptr->next )
     {
@@ -680,7 +680,7 @@ static int count_users_on_this_ip(IP_ENTRY *ip_list,
         {
           if (IsGotId(this_client))
             {
-              if(!irccmp(ptr->value.cptr->user->username,username))
+              if(!irccmp(ptr->value.cptr->username,username))
                   count++;
             }
           else
@@ -688,7 +688,7 @@ static int count_users_on_this_ip(IP_ENTRY *ip_list,
               if(this_client == ptr->value.cptr)
                 count++;
               else
-                if(ptr->value.cptr->user->username[0] == '~')
+                if(ptr->value.cptr->username[0] == '~')
                   count++;
             }
         }
@@ -720,8 +720,8 @@ void remove_one_ip(unsigned long ip_in)
   IP_ENTRY *old_free_ip_entries;
 #ifdef LIMIT_UH
   unsigned long ip_in=cptr->ip.s_addr;
-  Link *prev_link;
-  Link *cur_link;
+  struct SLink *prev_link;
+  struct SLink *cur_link;
 #endif
 
   last_ptr = ptr = ip_hash_table[hash_index = hash_ip(ip_in)];
@@ -734,7 +734,7 @@ void remove_one_ip(unsigned long ip_in)
 #ifdef LIMIT_UH
 
           /* remove the corresponding pointer to this cptr as well */
-          prev_link = (Link *)NULL;
+          prev_link = (struct SLink *)NULL;
           cur_link = ptr->ptr_clients_on_this_ip;
 
           while(cur_link)
