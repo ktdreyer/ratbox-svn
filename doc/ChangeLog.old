@@ -1,3 +1,10 @@
+*** 20001021_2 by bill
+
+
+fixed bug in MODE (MODE #non-existant-chan caused segfault)
+made attempted JOIN to a juped channel specify between user or oper
+
+
 *** 20001021_1 by lusky
 fix for duplicate 401's for kick #validchan invalnick
 ServerStats->is_ref is incremented twice on an X-line
