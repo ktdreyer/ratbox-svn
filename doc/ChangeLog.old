@@ -1,3 +1,17 @@
+androsyn    2002/06/10 19:56:48 EDT	(20020611_0)
+
+  Modified files:
+    include              balloc.h 
+    src                  balloc.c 
+  Log:
+  Remove an unnecessary member of struct MemBlock
+  
+  Revision  Changes    Path
+  1.10      +0 -1      ircd-hybrid-7/include/balloc.h
+  7.35      +2 -3      ircd-hybrid-7/src/balloc.c
+
+
+
 leeh        2002/06/09 08:03:28 EDT	(20020609_1)
 
   Modified files:
