@@ -26,7 +26,6 @@ static  char *  replies[] = {
 /* 003  RPL_CREATED, */ ":%s 003 %s :This server was created %s",
 /* 004  RPL_MYINFO, */ ":%s 004 %s %s %s oiwszcerkfydnxbaugl biklmnopstveIha bkloveIh",
 /* 005  RPL_ISUPPORT, */ ":%s 005 %s %s :are supported by this server",
-/*      NOTE: if this numeric changes, RPL_ISUPPORTV must also be modified */
 /* 006 */       NULL,
 /* 007 */       NULL,
 /* 008 */       NULL,
@@ -126,7 +125,7 @@ static  char *  replies[] = {
 /* 102 */       NULL,
 /* 103 */       NULL,
 /* 104 */       NULL,
-/* 105  RPL_ISUPPORTV, */ ":%s 105 %s %s :are supported by this server",
+/* 105 */       NULL,
 /* 106 */       NULL,
 /* 107 */       NULL,
 /* 108 */       NULL,
