@@ -345,7 +345,7 @@ handle_command(struct Message *mptr, struct Client *client_p,
 
 		sendto_realops_flags(UMODE_ALL, L_ALL,
 				     "Dropping server %s due to (invalid) command '%s'"
-				     "with only %d arguments (expecting %d).",
+				     " with only %d arguments (expecting %d).",
 				     client_p->name, mptr->cmd, i, ehandler.min_para);
 		ilog(L_SERVER,
 		     "Insufficient parameters (%d) for command '%s' from %s.",
