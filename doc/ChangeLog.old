@@ -1,3 +1,9 @@
+*** 19990825_1 by db
+- fixed stupid in s_conf.c
+- reconciled -7 with -6 tree
+
+
+
 *** 19990821_2 by tomh
 removed unused struct member
 
