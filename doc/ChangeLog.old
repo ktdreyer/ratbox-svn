@@ -1,3 +1,10 @@
+*** 20010228_5 by fl_
+- put back the 502 numeric (cant change modes for other users)
+- put back the warning about servers changing our usermodes
+
+these were commented out.. but I dont see why: noticed by jv
+
+
 *** 20010228_4 by androsyn
 Doh..i'm a tard
 
