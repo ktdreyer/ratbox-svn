@@ -1,3 +1,9 @@
+*** 20001228_10 by bill
+
+- added hyb6 compatibility checks for halfops (best solution is to tell remote s  ervers that they're regular ops)
+- updated dependancy file accordingly
+
+
 *** 20001228_9 by davidt
 It would also core sending the failure message.. bleh.
 
