@@ -1,3 +1,7 @@
+*** 20011004_3 by androsyn
+Okay..I *think* I've fixed that core dump..
+
+
 *** 20011004_2 by androsyn
 That would be dns_state->nservers not nserver
 
