@@ -1,3 +1,20 @@
+*** 20001024_1 by adrian
+
+
+Commit the fd state tidyup and new IO loop code.
+
+* I've killed GlobalFDList and replaced it with an array of fd structs.         
+  (fde_t). This has the fd state (opened, closed, pending io requests,          
+  type, description, etc).                                                      
+* I've added fd state tracking stuff (fd_open / fd_close).                      
+* I've added file fd state tracking stuff (file_open / file_close)              
+* I've tidied up logfile permissions in a place or two                          
+
+There's a little weirdness - if you want to include s_bsd.h, you need
+to include fdlist.h as well. This will go away eventually ..
+
+
+
 *** 20001023_7 by ryan
 
 changed around order things are done to prevent non-base channel pointer
