@@ -152,7 +152,6 @@ extern void start_collect_zipstats(void);
 extern void collect_zipstats(void *unused);
 
 extern int check_server(const char *name, struct Client *server);
-extern int server_estab(struct Client *client_p);
 
 extern int serv_connect(struct server_conf *, struct Client *);
 
