@@ -1,3 +1,15 @@
+androsyn    2003/03/19 07:20:37 UTC	(20030319_0)
+
+  Modified files:
+    src                  s_bsd_poll.c 
+  Log:
+  Somehow i goofed up s_bsd_poll.c revert back to the version in stable.
+  
+  Revision  Changes    Path
+  7.67      +61 -45    ircd-ratbox/src/s_bsd_poll.c
+
+
+
 androsyn    2003/03/17 18:28:29 UTC	(20030317_1)
 
   Modified files:
