@@ -1,3 +1,16 @@
+db          2002/04/04 14:29:46 EST	(20020404_1)
+
+  Modified files:
+    src                  channel.c 
+  Log:
+  Pointed out by Lee. Two backward tests meant we never expired persistent
+  channels nor dropped them. oops.
+  
+  Revision  Changes    Path
+  7.303     +2 -2      ircd-hybrid-7/src/channel.c
+
+
+
 androsyn    2002/04/04 08:24:19 EST	(20020404_0)
 
   Modified files:
