@@ -1,3 +1,15 @@
+androsyn    2002/04/14 18:10:42 EDT	(20020414_8)
+
+  Modified files:
+    src                  adns.c 
+  Log:
+  Put back my original copyright line....
+  
+  Revision  Changes    Path
+  7.40      +1 -0      ircd-hybrid-7/src/adns.c
+
+
+
 leeh        2002/04/14 17:50:17 EDT	(20020414_7)
 
   Modified files:
