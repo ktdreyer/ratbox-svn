@@ -45,10 +45,8 @@ struct Message htm_msgtab = {
 	"HTM", 0, 0, 0, 0, MFLG_SLOW, 0,
 	{m_unregistered, m_ignore, m_ignore, m_htm}
 };
-#ifndef STATIC_MODULES
 mapi_clist_av1 htm_clist[] = { &htm_msgtab, NULL };
 DECLARE_MODULE_AV1(NULL, NULL, htm_clist, NULL, NULL, "$Revision$");
-#endif
 
 /*
 ** m_htm

@@ -49,10 +49,8 @@ struct Message invite_msgtab = {
 	"INVITE", 0, 0, 3, 0, MFLG_SLOW, 0,
 	{m_unregistered, m_invite, m_invite, m_invite}
 };
-#ifndef STATIC_MODULES
 mapi_clist_av1 invite_clist[] = { &invite_msgtab, NULL };
 DECLARE_MODULE_AV1(NULL, NULL, invite_clist, NULL, NULL, "$Revision$");
-#endif
 
 /*
 ** m_invite

@@ -41,10 +41,8 @@ struct Message map_msgtab = {
 	{m_unregistered, m_map, m_ignore, mo_map}
 };
 
-#ifndef STATIC_MODULES
 mapi_clist_av1 map_clist[] = { &map_msgtab, NULL };
 DECLARE_MODULE_AV1(NULL, NULL, map_clist, NULL, NULL, "$Revision$");
-#endif
 
 static char buf[BUFSIZE];
 

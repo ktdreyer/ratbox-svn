@@ -50,10 +50,8 @@ struct Message part_msgtab = {
 	{m_unregistered, m_part, m_part, m_part}
 };
 
-#ifndef STATIC_MODULES
 mapi_clist_av1 part_clist[] = { &part_msgtab, NULL };
 DECLARE_MODULE_AV1(NULL, NULL, part_clist, NULL, NULL, "$Revision$");
-#endif
 
 static void part_one_client(struct Client *client_p,
 			    struct Client *source_p, char *name, char *reason);

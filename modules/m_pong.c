@@ -49,10 +49,8 @@ struct Message pong_msgtab = {
 	{mr_pong, m_ignore, ms_pong, m_ignore}
 };
 
-#ifndef STATIC_MODULES
 mapi_clist_av1 pong_clist[] = { &pong_msgtab, NULL };
 DECLARE_MODULE_AV1(NULL, NULL, pong_clist, NULL, NULL, "$Revision$");
-#endif
 
 static void
 ms_pong(struct Client *client_p, struct Client *source_p, int parc, char *parv[])

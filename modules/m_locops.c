@@ -48,10 +48,8 @@ struct Message locops_msgtab = {
 	{m_unregistered, m_not_oper, ms_locops, m_locops}
 };
 
-#ifndef STATIC_MODULES
 mapi_clist_av1 locops_clist[] = { &locops_msgtab, NULL };
 DECLARE_MODULE_AV1(NULL, NULL, locops_clist, NULL, NULL, "$Revision$");
-#endif
 
 /*
  * m_locops - LOCOPS message handler

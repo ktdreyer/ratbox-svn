@@ -44,10 +44,8 @@ struct Message close_msgtab = {
 	{m_unregistered, m_not_oper, m_ignore, mo_close}
 };
 
-#ifndef STATIC_MODULES
 mapi_clist_av1 close_clist[] = { &close_msgtab, NULL };
 DECLARE_MODULE_AV1(NULL, NULL, close_clist, NULL, NULL, "$Revision$");
-#endif
 
 /*
  * mo_close - CLOSE message handler

@@ -58,10 +58,8 @@ struct Message kline_msgtab = {
 	{m_unregistered, m_not_oper, ms_kline, mo_kline}
 };
 
-#ifndef STATIC_MODULES
 mapi_clist_av1 kline_clist[] = { &kline_msgtab, NULL };
 DECLARE_MODULE_AV1(NULL, NULL, kline_clist, NULL, NULL, "$Revision$");
-#endif
 
 /* Local function prototypes */
 

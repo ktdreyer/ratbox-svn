@@ -63,7 +63,6 @@ struct Message whois_msgtab = {
 int doing_whois_local_hook;
 int doing_whois_global_hook;
 
-#ifndef STATIC_MODULES
 mapi_clist_av1 whois_clist[] = { &whois_msgtab, NULL };
 mapi_hlist_av1 whois_hlist[] = {
 	{ "doing_whois_local",	&doing_whois_local_hook },
@@ -72,7 +71,6 @@ mapi_hlist_av1 whois_hlist[] = {
 };
 
 DECLARE_MODULE_AV1(NULL, NULL, whois_clist, whois_hlist, NULL, "$Revision$");
-#endif
 
 /*
 ** m_whois

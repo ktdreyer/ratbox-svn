@@ -51,7 +51,6 @@ struct Message admin_msgtab = {
 
 int doing_admin_hook;
 
-#ifndef STATIC_MODULES
 mapi_clist_av1 admin_clist[] = { &admin_msgtab, NULL };
 mapi_hlist_av1 admin_hlist[] = { 
 	{ "doing_admin",	&doing_admin_hook },
@@ -59,7 +58,6 @@ mapi_hlist_av1 admin_hlist[] = {
 };
 
 DECLARE_MODULE_AV1(NULL, NULL, admin_clist, admin_hlist, NULL, "$Revision$");
-#endif
 
 /*
  * mr_admin - ADMIN command handler

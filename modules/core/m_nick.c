@@ -80,12 +80,10 @@ struct Message client_msgtab = {
 	{m_ignore, m_ignore, ms_client, m_ignore}
 };
 
-#ifndef STATIC_MODULES
 mapi_clist_av1 nick_clist[] = {
 	&nick_msgtab, &client_msgtab, NULL
 };
 DECLARE_MODULE_AV1(NULL, NULL, nick_clist, NULL, NULL, "$Revision$");
-#endif
 
 /*
  * mr_nick()

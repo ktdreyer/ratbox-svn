@@ -46,10 +46,8 @@ struct Message away_msgtab = {
 	{m_unregistered, m_away, m_away, m_away}
 };
 
-#ifndef STATIC_MODULES
 mapi_clist_av1 away_clist[] = { &away_msgtab, NULL };
 DECLARE_MODULE_AV1(NULL, NULL, away_clist, NULL, NULL, "$Revision$");
-#endif
 
 /***********************************************************************
  * m_away() - Added 14 Dec 1988 by jto. 

@@ -51,7 +51,6 @@ struct Message links_msgtab = {
 
 int doing_links_hook;
 
-#ifndef STATIC_MODULES
 mapi_clist_av1 links_clist[] = { &links_msgtab, NULL };
 mapi_hlist_av1 links_hlist[] = {
 	{ "doing_links",	&doing_links_hook },
@@ -59,7 +58,6 @@ mapi_hlist_av1 links_hlist[] = {
 };
 
 DECLARE_MODULE_AV1(NULL, NULL, links_clist, NULL, NULL, "$Revision$");
-#endif
 
 /*
  * m_links - LINKS message handler

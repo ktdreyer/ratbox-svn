@@ -54,10 +54,8 @@ struct Message set_msgtab = {
 	{m_unregistered, m_not_oper, m_error, mo_set}
 };
 
-#ifndef STATIC_MODULES
 mapi_clist_av1 set_clist[] = { &set_msgtab, NULL };
 DECLARE_MODULE_AV1(NULL, NULL, set_clist, NULL, NULL, "$Revision$");
-#endif
 
 /* Structure used for the SET table itself */
 struct SetStruct

@@ -44,7 +44,6 @@
 #ifndef HAVE_LIBCRYPTO
 /* Maybe this should be an error or something?-davidt */
 /* now it is	-larne	*/
-#ifndef STATIC_MODULES
 int	challenge_load
 {
 	sendto_realops_flags(UMODE_ALL, L_ALL, 
@@ -54,7 +53,6 @@ int	challenge_load
 }
 
 DECLARE_MODULE_AV1(challenge_load, NULL, NULL, NULL, NULL, "$Revision$");
-#endif
 #else
 
 static void m_challenge(struct Client *, struct Client *, int, char **);
@@ -66,10 +64,8 @@ struct Message challenge_msgtab = {
 	{m_unregistered, m_challenge, m_ignore, m_challenge}
 };
 
-#ifndef STATIC_MODULES
 mapi_clist_av1 challenge_clist[] = { &challenge_msgtab, NULL };
 DECLARE_MODULE_AV1(NULL, NULL, challenge_clist, NULL, NULL, "$Revision$");
-#endif
 
 /*
  * m_challenge - generate RSA challenge for wouldbe oper

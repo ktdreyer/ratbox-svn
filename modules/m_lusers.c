@@ -45,10 +45,8 @@ struct Message lusers_msgtab = {
 	{m_unregistered, m_lusers, ms_lusers, ms_lusers}
 };
 
-#ifndef STATIC_MODULES
 mapi_clist_av1 lusers_clist[] = { &lusers_msgtab, NULL };
 DECLARE_MODULE_AV1(NULL, NULL, lusers_clist, NULL, NULL, "$Revision$");
-#endif
 
 /*
  * m_lusers - LUSERS message handler

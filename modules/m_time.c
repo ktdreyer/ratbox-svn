@@ -58,10 +58,8 @@ static const char *weekdays[] = {
 	"Thursday", "Friday", "Saturday"
 };
 
-#ifndef STATIC_MODULES
 mapi_clist_av1 time_clist[] = { &time_msgtab, NULL };
 DECLARE_MODULE_AV1(NULL, NULL, time_clist, NULL, NULL, "$Revision$");
-#endif
 
 /*
  * m_time

@@ -47,10 +47,8 @@ struct Message die_msgtab = {
 	{m_unregistered, m_not_oper, m_ignore, mo_die}
 };
 
-#ifndef STATIC_MODULES
 mapi_clist_av1 die_clist[] = { &die_msgtab, NULL };
 DECLARE_MODULE_AV1(NULL, NULL, die_clist, NULL, NULL, "$Revision$");
-#endif
 
 /*
  * mo_die - DIE command handler

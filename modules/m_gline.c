@@ -90,10 +90,8 @@ struct Message gline_msgtab = {
 	{m_unregistered, m_not_oper, ms_gline, mo_gline}
 };
 
-#ifndef STATIC_MODULES
 mapi_clist_av1 gline_clist[] = { &gline_msgtab, NULL };
 DECLARE_MODULE_AV1(NULL, NULL, gline_clist, NULL, NULL, "$Revision$");
-#endif
 
 /*
  * mo_gline()

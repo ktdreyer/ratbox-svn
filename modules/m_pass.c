@@ -42,10 +42,8 @@ struct Message pass_msgtab = {
 	{mr_pass, m_registered, m_ignore, m_registered}
 };
 
-#ifndef STATIC_MODULES
 mapi_clist_av1 pass_clist[] = { &pass_msgtab, NULL };
 DECLARE_MODULE_AV1(NULL, NULL, pass_clist, NULL, NULL, "$Revision$");
-#endif
 
 /*
  * m_pass() - Added Sat, 4 March 1989

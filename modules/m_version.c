@@ -48,10 +48,8 @@ struct Message version_msgtab = {
 	{m_unregistered, m_version, ms_version, mo_version}
 };
 
-#ifndef STATIC_MODULES
 mapi_clist_av1 version_clist[] = { &version_msgtab, NULL };
 DECLARE_MODULE_AV1(NULL, NULL, version_clist, NULL, NULL, "$Revision$");
-#endif
 
 /*
  * m_version - VERSION command handler

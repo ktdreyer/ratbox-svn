@@ -53,10 +53,8 @@ struct Message gline_msgtab = {
 	{m_unregistered, m_not_oper, m_error, mo_ungline}
 };
 
-#ifndef STATIC_MODULES
 mapi_clist_av1 gline_clist[] = { &gline_msgtab, NULL };
 DECLARE_MODULE_AV1(NULL, NULL, gline_clist, NULL, NULL, "$Revision$");
-#endif
 
 /* m_ungline()
  *

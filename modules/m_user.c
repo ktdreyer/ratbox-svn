@@ -47,10 +47,8 @@ struct Message user_msgtab = {
 	{mr_user, m_registered, m_ignore, m_registered}
 };
 
-#ifndef STATIC_MODULES
 mapi_clist_av1 user_clist[] = { &user_msgtab, NULL };
 DECLARE_MODULE_AV1(NULL, NULL, user_clist, NULL, NULL, "$Revision$");
-#endif
 
 /*
 ** mr_user

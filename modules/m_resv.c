@@ -53,12 +53,10 @@ struct Message unresv_msgtab = {
 	{m_ignore, m_not_oper, m_ignore, mo_unresv}
 };
 
-#ifndef STATIC_MODULES
 mapi_clist_av1 resv_clist[] = {
 	&resv_msgtab, &unresv_msgtab, NULL
 };
 DECLARE_MODULE_AV1(NULL, NULL, resv_clist, NULL, NULL, "$Revision$");
-#endif
 
 /*
  * mo_resv()

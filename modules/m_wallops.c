@@ -45,10 +45,8 @@ struct Message wallops_msgtab = {
 	{m_unregistered, m_not_oper, ms_wallops, mo_wallops}
 };
 
-#ifndef STATIC_MODULES
 mapi_clist_av1 wallops_clist[] = { &wallops_msgtab, NULL };
 DECLARE_MODULE_AV1(NULL, NULL, wallops_clist, NULL, NULL, "$Revision$");
-#endif
 
 /*
  * mo_wallops (write to *all* opers currently online)

@@ -49,10 +49,8 @@ struct Message kick_msgtab = {
 	{m_unregistered, m_kick, ms_kick, m_kick}
 };
 
-#ifndef STATIC_MODULES
 mapi_clist_av1 kick_clist[] = { &kick_msgtab, NULL };
 DECLARE_MODULE_AV1(NULL, NULL, kick_clist, NULL, NULL, "$Revision$");
-#endif
 
 /*
 ** m_kick

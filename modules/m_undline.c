@@ -52,10 +52,8 @@ struct Message undline_msgtab = {
 	{m_unregistered, m_not_oper, m_error, mo_undline}
 };
 
-#ifndef STATIC_MODULES
 mapi_clist_av1 undline_clist[] = { &undline_msgtab, NULL };
 DECLARE_MODULE_AV1(NULL, NULL, undline_clist, NULL, NULL, "$Revision$");
-#endif
 
 static int flush_write(struct Client *, FBFILE *, char *, char *);
 static int remove_temp_dline(char *);

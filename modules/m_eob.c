@@ -43,10 +43,8 @@ struct Message eob_msgtab = {
 	"EOB", 0, 0, 0, 0, MFLG_SLOW | MFLG_UNREG, 0,
 	{m_unregistered, m_ignore, ms_eob, m_ignore}
 };
-#ifndef STATIC_MODULES
 mapi_clist_av1 eob_clist[] = { &eob_msgtab, NULL };
 DECLARE_MODULE_AV1(NULL, NULL, eob_clist, NULL, NULL, "$Revision$");
-#endif
 
 /*
  * ms_eob - EOB command handler

@@ -53,12 +53,11 @@ struct Message uhelp_msgtab = {
 	"UHELP", 0, 0, 0, 0, MFLG_SLOW, 0,
 	{m_unregistered, m_help, m_ignore, mo_uhelp}
 };
-#ifndef STATIC_MODULES
+
 mapi_clist_av1 help_clist[] = { 
 	&help_msgtab, &uhelp_msgtab, NULL 
 };
 DECLARE_MODULE_AV1(NULL, NULL, help_clist, NULL, NULL, "$Revision$");
-#endif
 
 /*
  * m_help - HELP message handler

@@ -44,10 +44,8 @@ struct Message quit_msgtab = {
 	{m_quit, m_quit, ms_quit, m_quit}
 };
 
-#ifndef STATIC_MODULES
 mapi_clist_av1 quit_clist[] = { &quit_msgtab, NULL };
 DECLARE_MODULE_AV1(NULL, NULL, quit_clist, NULL, NULL, "$Revision$");
-#endif
 
 /*
 ** m_quit

@@ -49,10 +49,8 @@ struct Message rehash_msgtab = {
 	{m_unregistered, m_not_oper, m_ignore, mo_rehash}
 };
 
-#ifndef STATIC_MODULES
 mapi_clist_av1 rehash_clist[] = { &rehash_msgtab, NULL };
 DECLARE_MODULE_AV1(NULL, NULL, rehash_clist, NULL, NULL, "$Revision$");
-#endif
 
 struct hash_commands
 {

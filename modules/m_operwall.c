@@ -44,10 +44,8 @@ struct Message operwall_msgtab = {
 	{m_unregistered, m_not_oper, ms_operwall, mo_operwall}
 };
 
-#ifndef STATIC_MODULES
 mapi_clist_av1 operwall_clist[] = { &operwall_msgtab, NULL };
 DECLARE_MODULE_AV1(NULL, NULL, operwall_clist, NULL, NULL, "$Revision$");
-#endif
 
 /*
  * mo_operwall - OPERWALL message handler

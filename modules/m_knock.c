@@ -58,10 +58,8 @@ struct Message knock_msgtab = {
 	{m_unregistered, m_knock, ms_knock, m_knock}
 };
 
-#ifndef STATIC_MODULES
 mapi_clist_av1 knock_clist[] = { &knock_msgtab, NULL };
 DECLARE_MODULE_AV1(NULL, NULL, knock_clist, NULL, NULL, "$Revision$");
-#endif
 
 /* m_knock
  *    parv[0] = sender prefix

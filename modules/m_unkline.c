@@ -54,10 +54,8 @@ struct Message unkline_msgtab = {
 	{m_unregistered, m_not_oper, ms_unkline, mo_unkline}
 };
 
-#ifndef STATIC_MODULES
 mapi_clist_av1 unkline_clist[] = { &unkline_msgtab, NULL };
 DECLARE_MODULE_AV1(NULL, NULL, unkline_clist, NULL, NULL, "$Revision$");
-#endif
 
 static void remove_permkline_match(struct Client *, char *, char *, int);
 static int flush_write(struct Client *, FBFILE *, char *, char *);

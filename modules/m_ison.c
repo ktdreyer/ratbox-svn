@@ -48,10 +48,8 @@ struct Message ison_msgtab = {
 	{m_unregistered, m_ison, m_ignore, m_ison}
 };
 
-#ifndef STATIC_MODULES
 mapi_clist_av1 ison_clist[] = { &ison_msgtab, NULL };
 DECLARE_MODULE_AV1(NULL, NULL, ison_clist, NULL, NULL, "$Revision$");
-#endif
 
 static char buf[BUFSIZE];
 static char buf2[BUFSIZE];

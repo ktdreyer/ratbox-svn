@@ -51,10 +51,8 @@ struct Message whowas_msgtab = {
 	{m_unregistered, m_whowas, m_error, mo_whowas}
 };
 
-#ifndef STATIC_MODULES
 mapi_clist_av1 whowas_clist[] = { &whowas_msgtab, NULL };
 DECLARE_MODULE_AV1(NULL, NULL, whowas_clist, NULL, NULL, "$Revision$");
-#endif
 
 static int whowas_do(struct Client *client_p, struct Client *source_p, int parc, char *parv[]);
 

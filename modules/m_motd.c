@@ -53,7 +53,6 @@ struct Message motd_msgtab = {
 
 int doing_motd_hook;
 
-#ifndef STATIC_MODULES
 mapi_clist_av1 motd_clist[] = { &motd_msgtab, NULL };
 mapi_hlist_av1 motd_hlist[] = {
 	{ "doing_motd",	&doing_motd_hook },
@@ -61,7 +60,6 @@ mapi_hlist_av1 motd_hlist[] = {
 };
 
 DECLARE_MODULE_AV1(NULL, NULL, motd_clist, NULL, NULL, "$Revision$");
-#endif
 
 /* mr_motd()
  *

@@ -50,10 +50,8 @@ struct Message mode_msgtab = {
 	{m_unregistered, m_mode, m_mode, m_mode}
 };
 
-#ifndef STATIC_MODULES
 mapi_clist_av1 mode_clist[] = { &mode_msgtab, NULL };
 DECLARE_MODULE_AV1(NULL, NULL, mode_clist, NULL, NULL, "$Revision$");
-#endif
 
 /*
  * m_mode - MODE command handler

@@ -54,10 +54,8 @@ struct Message names_msgtab = {
 	{m_unregistered, m_names, m_ignore, m_names}
 };
 
-#ifndef STATIC_MODULES
 mapi_clist_av1 names_clist[] = { &names_msgtab, NULL };
 DECLARE_MODULE_AV1(NULL, NULL, names_clist, NULL, NULL, "$Revision$");
-#endif
 
 /************************************************************************
  * m_names() - Added by Jto 27 Apr 1989

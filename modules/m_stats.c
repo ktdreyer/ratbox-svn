@@ -68,7 +68,6 @@ int doing_stats_hook;
 int doing_stats_p_hook;
 int doing_stats_L_hook;
 
-#ifndef STATIC_MODULES
 mapi_clist_av1 stats_clist[] = { &stats_msgtab, NULL };
 mapi_hlist_av1 stats_hlist[] = {
 	{ "doing_stats",	&doing_stats_hook },
@@ -78,7 +77,6 @@ mapi_hlist_av1 stats_hlist[] = {
 };
 
 DECLARE_MODULE_AV1(NULL, NULL, stats_clist, stats_hlist, NULL, "$Revision$");
-#endif
 
 const char *Lformat = ":%s %d %s %s %u %u %u %u %u :%u %u %s";
 

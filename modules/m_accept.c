@@ -49,12 +49,11 @@ struct Message accept_msgtab = {
 	{m_unregistered, m_accept, m_ignore, m_accept}
 };
 
-#ifndef STATIC_MODULES
 mapi_clist_av1 accept_clist[] = {
 	&accept_msgtab, NULL
 };
 DECLARE_MODULE_AV1(NULL, NULL, accept_clist, NULL, NULL, "$Revision$");
-#endif
+
 /*
  * m_accept - ACCEPT command handler
  *      parv[0] = sender prefix

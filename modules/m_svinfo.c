@@ -45,10 +45,8 @@ struct Message svinfo_msgtab = {
 	{m_unregistered, m_ignore, ms_svinfo, m_ignore}
 };
 
-#ifndef STATIC_MODULES
 mapi_clist_av1 svinfo_clist[] = { &svinfo_msgtab, NULL };
 DECLARE_MODULE_AV1(NULL, NULL, svinfo_clist, NULL, NULL, "$Revision$");
-#endif
 
 /*
  * ms_svinfo - SVINFO message handler

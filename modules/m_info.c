@@ -59,7 +59,6 @@ struct Message info_msgtab = {
 
 int doing_info_hook;
 
-#ifndef STATIC_MODULES
 mapi_clist_av1 info_clist[] = { &info_msgtab, NULL };
 mapi_hlist_av1 info_hlist[] = {
 	{ "doing_hook",		&doing_info_hook },
@@ -67,7 +66,6 @@ mapi_hlist_av1 info_hlist[] = {
 };
 
 DECLARE_MODULE_AV1(NULL, NULL, info_clist, NULL, NULL, "$Revision$");
-#endif
 
 /*
  * jdc -- Structure for our configuration value table

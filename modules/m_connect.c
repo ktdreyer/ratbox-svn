@@ -50,10 +50,8 @@ struct Message connect_msgtab = {
 	{m_unregistered, m_not_oper, ms_connect, mo_connect}
 };
 
-#ifndef STATIC_MODULES
 mapi_clist_av1 connect_clist[] = { &connect_msgtab, NULL };
 DECLARE_MODULE_AV1(NULL, NULL, connect_clist, NULL, NULL, "$Revision$");
-#endif
 
 /*
  * mo_connect - CONNECT command handler

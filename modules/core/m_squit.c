@@ -47,10 +47,8 @@ struct Message squit_msgtab = {
 	{m_unregistered, m_not_oper, ms_squit, mo_squit}
 };
 
-#ifndef STATIC_MODULES
 mapi_clist_av1 squit_clist[] = { &squit_msgtab, NULL };
 DECLARE_MODULE_AV1(NULL, NULL, squit_clist, NULL, NULL, "$Revision$");
-#endif
 
 struct squit_parms
 {

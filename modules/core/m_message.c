@@ -102,12 +102,10 @@ struct Message notice_msgtab = {
 	{m_unregistered, m_notice, m_notice, m_notice}
 };
 
-#ifndef STATIC_MODULES
 mapi_clist_av1 message_clist[] = {
 	&privmsg_msgtab, &notice_msgtab, NULL
 };
 DECLARE_MODULE_AV1(NULL, NULL, message_clist, NULL, NULL, "$Revision$");
-#endif
 
 /*
 ** m_privmsg

@@ -66,12 +66,10 @@ struct Message unxline_msgtab = {
 	{m_unregistered, m_not_oper, m_ignore, mo_unxline}
 };
 
-#ifndef STATIC_MODULES
 mapi_clist_av1 xline_clist[] =  {
 	&xline_msgtab, &unxline_msgtab, NULL
 };
 DECLARE_MODULE_AV1(NULL, NULL, xline_clist, NULL, NULL, "$Revision$");
-#endif
 
 /* m_xline()
  *

@@ -40,10 +40,9 @@ struct Message capab_msgtab = {
 	"CAPAB", 0, 0, 0, 0, MFLG_SLOW | MFLG_UNREG, 0,
 	{mr_capab, m_ignore, m_ignore, m_ignore}
 };
-#ifndef STATIC_MODULES
+
 mapi_clist_av1 capab_clist[] = { &capab_msgtab, NULL };
 DECLARE_MODULE_AV1(NULL, NULL, capab_clist, NULL, NULL, "$Revision$");
-#endif
 
 /*
  * mr_capab - CAPAB message handler

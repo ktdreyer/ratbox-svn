@@ -48,10 +48,8 @@ struct Message testline_msgtab = {
 	{m_unregistered, m_not_oper, m_ignore, mo_testline}
 };
 
-#ifndef STATIC_MODULES
 mapi_clist_av1 testline_clist[] = { &testline_msgtab, NULL };
 DECLARE_MODULE_AV1(NULL, NULL, testline_clist, NULL, NULL, "$Revision$");
-#endif
 
 /*
  * mo_testline

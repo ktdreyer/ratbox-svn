@@ -51,10 +51,8 @@ struct Message sjoin_msgtab = {
 	{m_unregistered, m_ignore, ms_sjoin, m_ignore}
 };
 
-#ifndef STATIC_MODULES
 mapi_clist_av1 sjoin_clist[] = { &sjoin_msgtab, NULL };
 DECLARE_MODULE_AV1(NULL, NULL, sjoin_clist, NULL, NULL, "$Revision$");
-#endif
 
 /*
  * ms_sjoin
