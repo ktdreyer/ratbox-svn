@@ -1,3 +1,15 @@
+androsyn    2002/05/19 20:26:09 EDT	(20020520_1)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  Add a sanity check.
+  
+  Revision  Changes    Path
+  7.265     +1 -0      ircd-hybrid-7/src/client.c
+
+
+
 androsyn    2002/05/19 20:22:45 EDT	(20020520_0)
 
   Modified files:
