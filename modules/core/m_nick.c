@@ -206,6 +206,9 @@ static void mr_nick(struct Client *client_p, struct Client *source_p,
     return;
   }
 
+  /* mark end of grace period, to prevent nickflooding */
+  SetFloodDone(source_p);
+
   /* terminate nick to NICKLEN */
   strlcpy(nick, parv[1], NICKLEN);
 
