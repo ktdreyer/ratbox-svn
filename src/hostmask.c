@@ -47,17 +47,30 @@ static unsigned long hash_ipv4(struct sockaddr_storage *, int);
  * Side effects: None
  */
 int
-parse_netmask(const char *text, struct sockaddr_storage *addr, int *b)
+parse_netmask(const char *text, struct sockaddr_storage *naddr, int *nb)
 {
 	char *ip = LOCAL_COPY(text);
 	char *ptr;
+	struct sockaddr_storage *addr, xaddr;
+	int *b, xb;
+	if(nb == NULL)
+		b = &xb;
+	else
+		b = nb;
+	
+	if(naddr == NULL)
+		addr = &xaddr;
+	else
+		addr = naddr;
+	
 #ifdef IPV6
 	if(strchr(ip, ':'))
 	{	
 		if((ptr = strchr(ip, '/')))
 		{
-			ptr = '\0';
-			*b = atoi(++ptr);
+			*ptr = '\0';
+			ptr++;
+			*b = atoi(ptr);
 		} else
 			*b = 128;
 		if(inetpton_sock(ip, addr) > 0)
@@ -70,8 +83,9 @@ parse_netmask(const char *text, struct sockaddr_storage *addr, int *b)
 	{
 		if((ptr = strchr(ip, '/')))
 		{
-			ptr = '\0';
-			*b = atoi(++ptr);
+			*ptr = '\0';
+			ptr++;
+			*b = atoi(ptr);
 		} else
 			*b = 32;
 		if(inetpton_sock(ip, addr) > 0)
