@@ -1,3 +1,16 @@
+leeh        2003/10/14 17:22:07 EDT	(20031014_2)
+
+  Modified files:
+    modules/core         m_sjoin.c 
+  Log:
+  - as pointed out by bill, when removing bans we should probably use a
+    '-' and not a '+'.. ;)
+  
+  Revision  Changes    Path
+  1.190     +2 -2      ircd-ratbox/modules/core/m_sjoin.c
+
+
+
 androsyn    2003/10/14 12:34:24 EDT	(20031014_1)
 
   Modified files:
