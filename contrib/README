@@ -2,14 +2,8 @@ This directory contains modules that have been contributed
 by other people, or aren't suitable for including into the 
 hybrid tree.
 
-m_clearchan.c  - CLEARCHAN - clear a channel of all users and lock modes
-                 Syntax:  CLEARCHAN <#channel>
-		 
 m_flags.c      - FLAGS - csircd like support of changing usermodes
                  Syntax:  FLAGS :+OWALLOPS -SWALLOPS
-		 
-m_jupe.c       - JUPE - Jupe a server, preventing it linking to the network
-                 Syntax:  JUPE <juped-server> :<Reason>
 		 
 m_map.c        - MAP - Display the server routing graph in a visually pleasing
                        format
@@ -18,12 +12,6 @@ m_map.c        - MAP - Display the server routing graph in a visually pleasing
 m_mkpasswd.c   - MKPASSWD - generate a DES or MD5 encryption of a password
                  Syntax:  MKPASSWD <plaintext> [MD5|DES]
 		 
-m_nickinfo.c   - NICKINFO - provide info on a nick, for debugging purposes.
-                 Syntax:  NICKINFO <nick>
-		 
-m_opme.c       - OPME - allows opers to op themselves in opless channels
-                 Syntax: OPME <#channel>
-
 example_module.c - An example module to be used for creating your own.
                    Syntax: TEST
 
