@@ -710,9 +710,9 @@ static int     do_numeric(
         }
       /* Fake it for server hiding, if its our client */
       if(GlobalSetOptions.hide_server && MyClient(acptr) && !IsOper(acptr))
-	sendto_one(acptr, ":%s %s %s %s", me.name, numeric, parv[1], buffer);
+	sendto_one(acptr, ":%s %s %s%s", me.name, numeric, parv[1], buffer);
       else
-        sendto_one(acptr, ":%s %s %s %s", sptr->name, numeric, parv[1], buffer);
+        sendto_one(acptr, ":%s %s %s%s", sptr->name, numeric, parv[1], buffer);
       return 0;
       }
       else if ((chptr = hash_find_channel(parv[1], (struct Channel *)NULL)))
