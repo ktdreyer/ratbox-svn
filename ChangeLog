@@ -1,3 +1,28 @@
+leeh        2004/11/28 17:21:32 EST	(20041128_0)
+
+  Modified files:
+    include              client.h io.h 
+    src                  c_message.c client.c conf.c io.c 
+                         newconf.c scommand.c service.c ucommand.c 
+  Log:
+  - fix set_modes_from_table() not resetting, which was screwing up service
+    flags
+  - fixed up some bugs with services introduction
+  
+  Revision  Changes    Path
+  1.30      +12 -9     rserv/include/client.h
+  1.17      +5 -0      rserv/include/io.h
+  1.16      +3 -0      rserv/src/c_message.c
+  1.25      +6 -0      rserv/src/client.c
+  1.29      +21 -15    rserv/src/conf.c
+  1.27      +3 -0      rserv/src/io.c
+  1.30      +23 -8     rserv/src/newconf.c
+  1.20      +3 -0      rserv/src/scommand.c
+  1.33      +14 -3     rserv/src/service.c
+  1.20      +8 -4      rserv/src/ucommand.c
+
+
+
 leeh        2004/11/24 20:26:09 EST	(20041125_0)
 
   Modified files:
