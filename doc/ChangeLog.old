@@ -1,3 +1,8 @@
+*** 20010106_9 by db
+- full prefix is needed for JOIN
+
+
+
 *** 20010106_8 by fl_
 - didnt know we had a whois_wait.. which was set too high anyway so its
   now 1 (same as hyb6?)
