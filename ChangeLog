@@ -1,3 +1,21 @@
+leeh        2003/09/09 18:41:41 EDT	(20030909_7)
+
+  Modified files:
+    include              config.h config.h.dist s_conf.h 
+    modules              m_gline.c 
+    src                  ircd.c 
+  Log:
+  - fixed gline logs, theyre no longer dated per day, use logrotate.
+  
+  Revision  Changes    Path
+  7.169     +0 -2      ircd-ratbox/include/config.h
+  7.72      +0 -2      ircd-ratbox/include/config.h.dist
+  7.257     +0 -2      ircd-ratbox/include/s_conf.h
+  1.131     +16 -172   ircd-ratbox/modules/m_gline.c
+  7.314     +0 -1      ircd-ratbox/src/ircd.c
+
+
+
 leeh        2003/09/09 18:12:15 EDT	(20030909_6)
 
   Modified files:
