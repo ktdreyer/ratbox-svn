@@ -1,3 +1,10 @@
+*** 20001223_2 by db
+- fixed stupid bug in m_sjoin.c, lost a sendto_local_channel in the
+  rewrite, which meant no MODE's were being sent... I "fixed" it previously
+  in the wrong way, which resulted in weird five mode ops etc.
+
+
+
 *** 20001223_1 by toot
 . removed that pointless s_conf.h log
 . changed +z to +a.. it's anonymous ops ;)
