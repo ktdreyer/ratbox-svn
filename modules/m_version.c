@@ -34,7 +34,7 @@
 
 struct Message version_msgtab = {
   MSG_VERSION, 0, 0, 0, MFLG_SLOW, 0,
-  {m_unregistered, m_version, ms_version, m_version}
+  {m_unregistered, m_version, ms_version, mo_version}
 };
 
 void
@@ -49,7 +49,7 @@ _moddeinit(void)
   mod_del_cmd(&version_msgtab);
 }
 
-char *_version = "20001122";
+char *_version = "20001223";
 
 /*
  * m_version - VERSION command handler

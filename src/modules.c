@@ -136,6 +136,8 @@ int unload_one_module (char *name)
       deinitfunc ();
     }
 
+  dlclose(modlist[index]->address);
+  
   MyFree(modlist[index]->name);
   memcpy( &modlist[index], &modlist[index+1],
 	  sizeof(struct module) * ((num_mods-1) - index) );
