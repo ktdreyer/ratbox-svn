@@ -126,6 +126,7 @@ static int h_chanserv_join(void *members, void *unused);
 static int h_chanserv_mode_op(void *members, void *unused);
 static void e_chanserv_expirechan(void *unused);
 static void e_chanserv_expireban(void *unused);
+static void e_chanserv_enforcetopic(void *unused);
 
 void
 init_s_chanserv(void)
@@ -140,9 +141,15 @@ init_s_chanserv(void)
 	hook_add(h_chanserv_join, HOOK_JOIN_CHANNEL);
 	hook_add(h_chanserv_mode_op, HOOK_MODE_OP);
 
-	eventAdd("chanserv_expirechan", e_chanserv_expirechan, NULL, 43200);
+	eventAdd("chanserv_expirechan", e_chanserv_expirechan, NULL, 43205);
+
+	/* we add these with defaults, then update the timers when we parse
+	 * the conf..
+	 */
 	eventAdd("chanserv_expireban", e_chanserv_expireban, NULL,
-		config_file.cbanexpire_frequency);
+		DEFAULT_EXPIREBAN_FREQUENCY);
+	eventAdd("chanserv_enforcetopic", e_chanserv_enforcetopic, NULL,
+		DEFAULT_ENFORCETOPIC_FREQUENCY);
 }
 
 void
@@ -590,11 +597,11 @@ e_chanserv_expireban(void *unused)
 {
 	struct chan_reg *chreg_p;
 	struct ban_reg *banreg_p;
-	dlink_node *hptr, *hnext_ptr;
+	dlink_node *hptr;
 	dlink_node *ptr, *next_ptr;
 	int i;
 
-	HASH_WALK_SAFE(i, MAX_CHANNEL_TABLE, hptr, hnext_ptr, chan_reg_table)
+	HASH_WALK(i, MAX_CHANNEL_TABLE, hptr, chan_reg_table)
 	{
 		chreg_p = hptr->data;
 
@@ -610,6 +617,38 @@ e_chanserv_expireban(void *unused)
 					chreg_p->name, banreg_p->mask);
 			free_ban_reg(chreg_p, banreg_p);
 		}
+	}
+	HASH_WALK_END
+}
+
+static void
+e_chanserv_enforcetopic(void *unused)
+{
+	struct channel *chptr;
+	struct chan_reg *chreg_p;
+	dlink_node *ptr;
+	int i;
+
+	HASH_WALK(i, MAX_CHANNEL_TABLE, ptr, chan_reg_table)
+	{
+		chreg_p = ptr->data;
+
+		/* we must be joined to set a topic.. */
+		if(EmptyString(chreg_p->topic) ||
+		   !(chreg_p->flags & CS_FLAGS_AUTOJOIN))
+			continue;
+
+		if((chptr = find_channel(chreg_p->name)) == NULL)
+			continue;
+
+		/* already has this topic set.. */
+		if(!irccmp(chreg_p->topic, chptr->topic))
+			continue;
+
+		sendto_server(":%s TOPIC %s :%s",
+				chanserv_p->name, chptr->name, chreg_p->topic);
+		strlcpy(chptr->topic, chreg_p->topic, sizeof(chptr->topic));
+		strlcpy(chptr->topicwho, MYNAME, sizeof(chptr->topicwho));
 	}
 	HASH_WALK_END
 }
@@ -681,32 +720,51 @@ h_chanserv_join(void *v_chptr, void *v_members)
 	{
 		member_p = members->head->data;
 
+		mreg_p = find_member_reg(member_p->client_p->user->user_reg,
+					chreg_p);
+
 		DLINK_FOREACH(bptr, chreg_p->bans.head)
 		{
 			banreg_p = bptr->data;
 
-			if(match(banreg_p->mask, member_p->client_p->user->mask))
-			{
-				if(find_exempt(chptr, member_p->client_p))
-					break;
+			if(!match(banreg_p->mask, member_p->client_p->user->mask))
+				continue;
 
-				if(is_opped(member_p))
-					sendto_server(":%s MODE %s -o+b %s %s",
-						chanserv_p->name, chptr->name,
-						member_p->client_p->name, banreg_p->mask);
-				else
-					sendto_server(":%s MODE %s +b %s",
-						chanserv_p->name, chptr->name,
-						banreg_p->mask);
+			/* if the banlevel is less than their access level,
+			 * dont place it as they can just do an unban.
+			 */
+			if(mreg_p && mreg_p->level >= banreg_p->level &&
+			   !mreg_p->suspend)
+				continue;
 
-				sendto_server(":%s KICK %s %s :%s",
-						chanserv_p->name, chptr->name,
-						member_p->client_p->name, banreg_p->reason);
+			if(find_exempt(chptr, member_p->client_p))
+				break;
 
-				dlink_destroy(members->head, members);
-				del_chmember(member_p);
-				return 0;
-			}
+			/* explained in delban */
+			if(mreg_p)
+				mreg_p->bants = chreg_p->bants;
+
+			if(is_opped(member_p))
+				sendto_server(":%s MODE %s -o+b %s %s",
+					chanserv_p->name, chptr->name,
+					member_p->client_p->name, 
+					banreg_p->mask);
+			else
+				sendto_server(":%s MODE %s +b %s",
+					chanserv_p->name, chptr->name,
+					banreg_p->mask);
+
+			sendto_server(":%s KICK %s %s :%s",
+					chanserv_p->name, chptr->name,
+					member_p->client_p->name,
+					banreg_p->reason);
+
+			if(!dlink_find_string(banreg_p->mask, &chptr->bans))
+				dlink_add_alloc(my_strdup(banreg_p->mask), &chptr->bans);
+
+			dlink_destroy(members->head, members);
+			del_chmember(member_p);
+			return 0;
 		}
 
 		if(is_opped(member_p))
@@ -722,8 +780,7 @@ h_chanserv_join(void *v_chptr, void *v_members)
 			return 0;
 		}
 
-		if((mreg_p = find_member_reg(member_p->client_p->user->user_reg,
-					chreg_p)))
+		if(mreg_p)
 		{
 			if(mreg_p->suspend)
 				return 0;
@@ -760,31 +817,45 @@ h_chanserv_join(void *v_chptr, void *v_members)
 		member_p = ptr->data;
 		hit = 0;
 
+		mreg_p = find_member_reg(member_p->client_p->user->user_reg,
+					chreg_p);
+
 		DLINK_FOREACH(bptr, chreg_p->bans.head)
 		{
 			banreg_p = bptr->data;
 
-			if(match(banreg_p->mask, member_p->client_p->user->mask))
-			{
-				if(find_exempt(member_p->chptr, member_p->client_p))
-					break;
+			if(!match(banreg_p->mask, member_p->client_p->user->mask))
+				continue;
 
-				if(is_opped(member_p))
-					modebuild_add(DIR_DEL, "o", member_p->client_p->name);
+			if(mreg_p && mreg_p->level >= banreg_p->level &&
+			   !mreg_p->suspend)
+				continue;
 
-				if(banreg_p->marked != current_mark)
-				{
-					modebuild_add(DIR_ADD, "b", banreg_p->mask);
-					banreg_p->marked = current_mark;
-				}
-
-				kickbuild_add(member_p->client_p->name, banreg_p->reason);
-
-				dlink_destroy(ptr, members);
-				del_chmember(member_p);
-				hit++;
+			if(find_exempt(member_p->chptr, member_p->client_p))
 				break;
+
+			/* explained in delban */
+			if(mreg_p)
+				mreg_p->bants = chreg_p->bants;
+
+			if(is_opped(member_p))
+				modebuild_add(DIR_DEL, "o", member_p->client_p->name);
+
+			if(banreg_p->marked != current_mark)
+			{
+				if(!dlink_find_string(banreg_p->mask, &chptr->bans))
+					dlink_add_alloc(my_strdup(banreg_p->mask), &chptr->bans);
+
+				modebuild_add(DIR_ADD, "b", banreg_p->mask);
+				banreg_p->marked = current_mark;
 			}
+
+			kickbuild_add(member_p->client_p->name, banreg_p->reason);
+
+			dlink_destroy(ptr, members);
+			del_chmember(member_p);
+			hit++;
+			break;
 		}
 
 		if(hit)
@@ -1700,13 +1771,13 @@ s_chan_set(struct client *client_p, char *parv[], int parc)
 	}
 	else if(!strcasecmp(parv[1], "AUTOJOIN"))
 	{
-		if(!strcasecmp(parv[2], "ON"))
+		if(!strcasecmp(arg, "ON"))
 		{
 			chreg_p->flags |= CS_FLAGS_AUTOJOIN;
 
 			join_service(chanserv_p, chreg_p->name, &chreg_p->mode);
 		}
-		else if(!strcasecmp(parv[2], "OFF"))
+		else if(!strcasecmp(arg, "OFF"))
 		{
 			chreg_p->flags &= ~CS_FLAGS_AUTOJOIN;
 
@@ -1776,6 +1847,51 @@ s_chan_set(struct client *client_p, char *parv[], int parc)
 				"Channel %s MODES set %s",
 				chreg_p->name, modestring);
 
+		return 1;
+	}
+	else if(!strcasecmp(parv[1], "TOPIC"))
+	{
+		char *data;
+
+		if(EmptyString(arg))
+		{
+			service_error(chanserv_p, client_p,
+				"Channel %s TOPIC is '%s'",
+				chreg_p->name, EmptyString(chreg_p->topic) ?
+				 "<none>" : chreg_p->topic);
+			return 1;
+		}
+
+		data = rebuild_params((const char **) parv, parc, 2);
+
+		if(!irccmp(data, "-none"))
+		{
+			my_free(chreg_p->topic);
+			chreg_p->topic = NULL;
+
+			loc_sqlite_exec(NULL, "UPDATE channels SET "
+					"topic = NULL WHERE chname = %Q",
+					chreg_p->name);
+
+			service_error(chanserv_p, client_p,
+					"Channel %s TOPIC unset",
+					chreg_p->name);
+			return 1;
+		}
+
+		if(strlen(data) > TOPICLEN)
+			data[TOPICLEN] = '\0';
+
+		my_free(chreg_p->topic);
+		chreg_p->topic = my_strdup(data);
+
+		loc_sqlite_exec(NULL, "UPDATE channels SET topic=%Q "
+				"WHERE chname=%Q",
+				data, chreg_p->name);
+
+		service_error(chanserv_p, client_p,
+				"Channel %s TOPIC set '%s'",
+				chreg_p->name, data);
 		return 1;
 	}
 
@@ -2048,39 +2164,41 @@ s_chan_addban(struct client *client_p, char *parv[], int parc)
 	{
 		msptr = ptr->data;
 
-		if(match(mask, msptr->client_p->user->mask))
+		if(!match(mask, msptr->client_p->user->mask))
+			continue;
+
+		/* matching +e */
+		if(find_exempt(chptr, msptr->client_p))
+			continue;
+
+		/* dont kick people who have access to the channel,
+		 * this prevents an unban, join, ban cycle.
+		 */
+		if((mreg_tp = find_member_reg(msptr->client_p->user->user_reg,
+					      mreg_p->channel_reg)))
 		{
-			/* matching +e */
-			if(find_exempt(chptr, msptr->client_p))
+			if(mreg_tp->level >= level && !mreg_tp->suspend)
 				continue;
 
-			/* dont kick people who have access to the channel,
-			 * this prevents an unban, join, ban cycle.
-			 */
-			if(msptr->client_p->user->user_reg &&
-			   (mreg_tp = find_member_reg(msptr->client_p->user->user_reg,
-						      mreg_p->channel_reg)))
-			{
-				if(!mreg_tp->suspend)
-					continue;
-			}
-
-			if(is_opped(msptr))
-				modebuild_add(DIR_DEL, "o", msptr->client_p->name);
-
-			kickbuild_add(msptr->client_p->name, reason);
-			del_chmember(msptr);
-			loc++;
+			mreg_tp->bants = mreg_tp->channel_reg->bants;
 		}
-	}
 
-	dlink_add_alloc(my_strdup(mask), &chptr->bans);
+		if(is_opped(msptr))
+			modebuild_add(DIR_DEL, "o", msptr->client_p->name);
+
+		kickbuild_add(msptr->client_p->name, reason);
+		del_chmember(msptr);
+		loc++;
+	}
 
 	/* only issue the +b if theres someone there it will
 	 * actually match..
 	 */
 	if(loc)
 	{
+		if(!dlink_find_string(mask, &chptr->bans))
+			dlink_add_alloc(my_strdup(mask), &chptr->bans);
+
 		modebuild_add(DIR_ADD, "b", mask);
 		modebuild_finish();
 		kickbuild_finish(chanserv_p, chptr);
@@ -2125,6 +2243,17 @@ s_chan_delban(struct client *client_p, char *parv[], int parc)
 			mreg_p->channel_reg->name, parv[1]);
 
 	free_ban_reg(mreg_p->channel_reg, banreg_p);
+
+	/* Everytime a user who has access to unban has a higher level ban
+	 * placed against them, we cache the fact theyre banned in bants.
+	 * This makes unban quicker, as it doesnt have to check the level of
+	 * bans - it doesnt check them at all.
+	 *
+	 * We need to invalidate this cache on DELBAN/MODBAN.  Not needed on
+	 * ADDBAN, as that cannot mean a previously banned user can now
+	 * possibly join.
+	 */
+	mreg_p->channel_reg->bants++;
 
 	if(chptr == NULL)
 		return 1;
@@ -2192,6 +2321,8 @@ s_chan_modban(struct client *client_p, char *parv[], int parc)
 			level, mreg_p->user_reg->name,
 			mreg_p->channel_reg->name, parv[1]);
 
+	mreg_p->channel_reg->bants++;
+
 	return 1;
 }
 
@@ -2232,13 +2363,24 @@ s_chan_unban(struct client *client_p, char *parv[], int parc)
 {
 	struct channel *chptr;
 	struct member_reg *mreg_p;
-	struct ban_reg *banreg_p;
 	dlink_node *ptr, *next_ptr;
-	dlink_node *bptr;
-	int found;
+	int found = 0;
 
 	if((mreg_p = verify_member_reg_name(client_p, &chptr, parv[0], S_C_REGULAR)) == NULL)
 		return 1;
+
+	slog(chanserv_p, 6, "%s %s UNBAN %s",
+		client_p->user->mask, client_p->user->user_reg->name,
+		parv[0]);
+
+	/* cached ban of higher level */
+	if(mreg_p->bants == mreg_p->channel_reg->bants)
+	{
+		service_error(chanserv_p, client_p,
+			"Channel %s has a higher level ban",
+			chptr->name);
+		return 1;
+	}
 
 	if(find_exempt(chptr, client_p))
 	{
@@ -2247,37 +2389,27 @@ s_chan_unban(struct client *client_p, char *parv[], int parc)
 		return 1;
 	}
 
-	slog(chanserv_p, 6, "%s %s UNBAN %s",
-		client_p->user->mask, client_p->user->user_reg->name,
-		parv[0]);
-
 	modebuild_start(chanserv_p, chptr);
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, chptr->bans.head)
 	{
 		if(match((const char *) ptr->data, client_p->user->mask))
 		{
-			DLINK_FOREACH(bptr, mreg_p->channel_reg->bans.head)
-			{
-				banreg_p = bptr->data;
-
-				if(!irccmp(banreg_p->mask, (const char *) ptr->data))
-				{
-					service_error(chanserv_p, client_p,
-						"Ban %s on %s higher level",
-						banreg_p->mask, chptr->name);
-					return 2;
-				}
-			}
-
 			modebuild_add(DIR_DEL, "b", (const char *) ptr->data);
+			my_free(ptr->data);
+			dlink_destroy(ptr, &chptr->bans);
 			found++;
 		}
 	}
 
 	modebuild_finish();
 
-	service_error(chanserv_p, client_p, "Channel %s matching bans cleared", chptr->name);
+	if(found)
+		service_error(chanserv_p, client_p, 
+			"Channel %s matching bans cleared", chptr->name);
+	else
+		service_error(chanserv_p, client_p,
+			"Channel %s has no +b for you", chptr->name);
 
 	return 3;
 }

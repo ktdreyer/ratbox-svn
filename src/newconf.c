@@ -12,6 +12,7 @@
 #include "conf.h"
 #include "service.h"
 #include "io.h"
+#include "event.h"
 
 #define CF_TYPE(x) ((x) & CF_MTYPE)
 
@@ -738,6 +739,44 @@ conf_set_service_loglevel(void *data)
 	yy_service->service->loglevel = *(unsigned int *) data;
 }
 
+static void
+conf_set_chanserv_expireban(void *data)
+{
+	unsigned int val = *(unsigned int *) data;
+
+	if(val < 60)
+	{
+		conf_report_error("Ignoring chanserv::expireban_frequency "
+			"-- invalid duration");
+		return;
+	}
+
+	if(config_file.cexpireban_frequency == val)
+		return;
+
+	config_file.cexpireban_frequency = val;
+	eventUpdate("chanserv_expireban", val);
+}
+
+static void
+conf_set_chanserv_enforcetopic(void *data)
+{
+	unsigned int val = *(unsigned int *) data;
+
+	if(val < 60)
+	{
+		conf_report_error("Ignoring chanserv::enforcetopic_frequency "
+			"-- invalid duration");
+		return;
+	}
+
+	if(config_file.cenforcetopic_frequency == val)
+		return;
+
+	config_file.cenforcetopic_frequency = val;
+	eventUpdate("chanserv_enforcetopic", val);
+}
+
 static struct ConfEntry conf_serverinfo_table[] =
 {
 	{ "description",	CF_QSTRING, NULL, 0, &config_file.gecos		},
@@ -811,7 +850,8 @@ static struct ConfEntry conf_chanserv_table[] =
 	{ "register_amount",	CF_INT,   NULL, 0, &config_file.cregister_amount	},
 	{ "expire_time",	CF_TIME,  NULL, 0, &config_file.cexpire_time		},
 	{ "max_bans",		CF_INT,	  NULL, 0, &config_file.cmax_bans		},
-	{ "banexpire_frequency",CF_TIME,  NULL, 0, &config_file.cbanexpire_frequency	},
+	{ "expireban_frequency", CF_TIME,	conf_set_chanserv_expireban, 0, NULL	},
+	{ "enforcetopic_frequency", CF_TIME,	conf_set_chanserv_enforcetopic, 0, NULL },
 	{ "\0", 0, NULL, 0, NULL }
 };
 

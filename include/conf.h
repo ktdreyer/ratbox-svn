@@ -7,6 +7,9 @@ struct FileBuf;
 
 #define MYNAME config_file.name
 
+#define DEFAULT_ENFORCETOPIC_FREQUENCY	3600
+#define DEFAULT_EXPIREBAN_FREQUENCY	900
+
 extern time_t first_time;
 
 struct _config_file
@@ -44,7 +47,8 @@ struct _config_file
 	int cregister_amount;
 	int cexpire_time;
 	int cmax_bans;
-	int cbanexpire_frequency;
+	int cexpireban_frequency;
+	int cenforcetopic_frequency;
 
 	/* jupeserv */
 	int oper_score;

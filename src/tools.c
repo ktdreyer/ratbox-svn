@@ -475,6 +475,19 @@ dlink_find_destroy(void *data, dlink_list *list)
 	return 0;
 }
 
+dlink_node *
+dlink_find_string(const char *data, dlink_list *list)
+{
+	dlink_node *ptr;
+
+	DLINK_FOREACH(ptr, list->head)
+	{
+		if(!irccmp((const char *) ptr->data, data))
+			return ptr;
+	}
+
+	return NULL;
+}
 
 void
 dlink_move_node(dlink_node * m, dlink_list * oldlist, dlink_list * newlist)

@@ -277,13 +277,6 @@ main(int argc, char *argv[])
 	/* tools requires balloc */
 	init_tools();
 
-	if(testing_conf)
-		fprintf(stderr, "Conf check started\n");
-
-	/* conf requires log is opened */
-        newconf_init();
-
-
 #ifndef ANFL_LAPTOP
 	if((rserv_db = sqlite_open(DB_PATH, 0, &errmsg)) == NULL)
 	{
@@ -330,6 +323,11 @@ main(int argc, char *argv[])
 
 	first_time = CURRENT_TIME;
 
+	if(testing_conf)
+		fprintf(stderr, "Conf check started\n");
+
+	/* conf requires log is opened */
+        newconf_init();
 	/* must be done after adding services. */
 	conf_parse(1);
 

@@ -26,6 +26,7 @@ struct chan_reg
 
 	time_t reg_time;
 	time_t last_time;
+	unsigned long bants;
 
 	dlink_node node;
 
@@ -41,6 +42,7 @@ struct member_reg
 	int level;
 	int flags;
 	int suspend;
+	unsigned long bants;
 
 	char *lastmod;			/* last user to modify this membership */
 

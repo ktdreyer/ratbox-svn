@@ -105,6 +105,7 @@ extern void dlink_move_list(dlink_list * from, dlink_list * to);
 dlink_node *dlink_find(void *data, dlink_list *list);
 dlink_node *dlink_find_delete(void *data, dlink_list *list);
 int dlink_find_destroy(void *data, dlink_list *list);
+dlink_node *dlink_find_string(const char *data, dlink_list *list);
 
 #define DLINK_FOREACH(pos, head) for (pos = (head); pos != NULL; pos = pos->next)
 #define DLINK_FOREACH_SAFE(pos, n, head) for (pos = (head), n = pos ? pos->next : NULL; pos != NULL; pos = n, n = pos ? pos->next : NULL)

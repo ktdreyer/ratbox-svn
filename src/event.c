@@ -197,6 +197,29 @@ eventNextTime(void)
 	return event_time_min;
 }
 
+void
+eventUpdate(const char *name, time_t freq)
+{
+	int i;
+
+	for(i = 0; i < MAX_EVENTS; i++)
+	{
+		if(event_table[i].active && 
+		   !irccmp(event_table[i].name, name))
+		{
+			event_table[i].frequency = freq;
+
+			/* update when its scheduled to run if its higher
+			 * than the new frequency
+			 */
+			if((CURRENT_TIME + freq) < event_table[i].when)
+				event_table[i].when = CURRENT_TIME + freq;
+
+			return;
+		}
+	}
+}
+
 /*
  * void eventInit(void)
  *

@@ -26,6 +26,7 @@ extern time_t eventNextTime(void);
 extern void init_events(void);
 extern void eventDelete(EVH * func, void *);
 extern int eventFind(EVH * func, void *);
+void eventUpdate(const char *name, time_t when);
 
 extern void event_show(struct connection_entry *conn_p);
 

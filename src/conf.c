@@ -54,7 +54,8 @@ set_default_conf(void)
 	config_file.cregister_amount = 5;
 	config_file.cexpire_time = 2419200; 	/* 4 weeks */
 	config_file.cmax_bans = 50;
-	config_file.cbanexpire_frequency = 900;
+	config_file.cexpireban_frequency = DEFAULT_EXPIREBAN_FREQUENCY;
+	config_file.cenforcetopic_frequency = DEFAULT_ENFORCETOPIC_FREQUENCY;
 
 	config_file.oper_score = 3;
 	config_file.jupe_score = 15;
@@ -92,9 +93,6 @@ validate_conf(void)
 		config_file.max_matches = 250;
 	else if(config_file.max_matches <= 0)
 		config_file.max_matches = 250;
-
-	if(config_file.cbanexpire_frequency < 60)
-		config_file.cbanexpire_frequency = 60;
 
 	if(config_file.umax_logins < 0)
 		config_file.umax_logins = 0;
