@@ -583,14 +583,6 @@ serv_connect(struct server_conf *server_p, struct Client *by)
 	 *   -- adrian
 	 */
 
-	if(!comm_set_nb(client_p->localClient->fd))
-	{
-		report_error(NONB_ERROR_MSG,
-				get_server_name(client_p, SHOW_IP),
-				log_client_name(client_p, SHOW_IP),
-				errno);
-	}
-
 	if(!comm_set_buffers(client_p->localClient->fd, READBUF_SIZE))
 	{
 		report_error(SETBUF_ERROR_MSG,

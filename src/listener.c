@@ -245,11 +245,6 @@ inetport(struct Listener *listener)
 		return 0;
 	}
 
-	if(!comm_set_nb(fd))
-		report_error(NONB_ERROR_MSG, 
-			     get_listener_name(listener), 
-			     get_listener_name(listener), errno);
-
 	listener->fd = fd;
 
 	/* Listen completion events are READ events .. */
@@ -482,9 +477,6 @@ add_connection(struct Listener *listener, int fd, struct sockaddr *sai)
 	new_client->localClient->listener = listener;
 	++listener->ref_count;
 
-	if(!comm_set_nb(new_client->localClient->fd))
-		report_error(NONB_ERROR_MSG, get_client_name(new_client, SHOW_IP), 
-			     log_client_name(new_client, SHOW_IP), errno);
 	if(check_reject(new_client))
 		return; 
 	start_auth(new_client);

@@ -257,14 +257,6 @@ start_auth_query(struct AuthRequest *auth)
 
 	sendheader(auth->client, REPORT_DO_ID);
 
-	if(!comm_set_nb(fd))
-	{
-		report_error(NONB_ERROR_MSG, get_client_name(auth->client, SHOW_IP), 
-				log_client_name(auth->client, SHOW_IP), errno);
-		comm_close(fd);
-		return 0;
-	}
-
 	/* 
 	 * get the local address of the client and bind to that to
 	 * make the auth request.  This used to be done only for
