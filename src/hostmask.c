@@ -71,6 +71,8 @@ parse_netmask(const char *text, struct sockaddr_storage *naddr, int *nb)
 			*ptr = '\0';
 			ptr++;
 			*b = atoi(ptr);
+			if(*b > 128)
+				*b = 128;
 		} else
 			*b = 128;
 		if(inetpton_sock(ip, addr) > 0)
@@ -86,6 +88,8 @@ parse_netmask(const char *text, struct sockaddr_storage *naddr, int *nb)
 			*ptr = '\0';
 			ptr++;
 			*b = atoi(ptr);
+			if(*b > 32)
+				*b = 32;
 		} else
 			*b = 32;
 		if(inetpton_sock(ip, addr) > 0)
