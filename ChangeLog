@@ -1,3 +1,29 @@
+alz         2005/01/25 18:09:18 EST	(20050125_5)
+
+  Modified files:
+    doc                  example.conf example.efnet.conf 
+    include              s_conf.h 
+    modules              m_info.c 
+    src                  listener.c newconf.c s_conf.c 
+  Log:
+  Added dline_with_reason config option (default yes):
+  
+  /* dline reason: show the user the dline reason when they connect
+   * and are dlined.
+   */
+  dline_with_reason = yes;
+  
+  Revision  Changes    Path
+  7.257     +6 -1      ircd-ratbox/doc/example.conf
+  7.85      +6 -1      ircd-ratbox/doc/example.efnet.conf
+  7.308     +1 -0      ircd-ratbox/include/s_conf.h
+  1.122     +7 -1      ircd-ratbox/modules/m_info.c
+  7.124     +1 -1      ircd-ratbox/src/listener.c
+  7.196     +1 -0      ircd-ratbox/src/newconf.c
+  7.500     +1 -0      ircd-ratbox/src/s_conf.c
+
+
+
 leeh        2005/01/25 13:21:17 EST	(20050125_4)
 
   Modified files:
