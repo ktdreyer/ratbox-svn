@@ -140,9 +140,6 @@ mod_find_path(char *path)
   dlink_node *pathst;
   struct module_path *mpath;
   
-  if (!pathst)
-    return NULL;
-
   DLINK_FOREACH(pathst, mod_paths.head)
   {
     mpath = (struct module_path *)pathst->data;
@@ -188,7 +185,7 @@ mod_clear_paths(void)
   struct module_path *pathst;
   dlink_node *node, *next;
 
-  DLINK_FOREACH_SAVE(node, next, mod_paths.head)
+  DLINK_FOREACH_SAFE(node, next, mod_paths.head)
     {
       pathst = (struct module_path *)node->data;
       dlinkDelete(node, &mod_paths);
