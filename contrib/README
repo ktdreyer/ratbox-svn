@@ -15,3 +15,5 @@ m_nickinfo.c   - NICKINFO - provide info on a nick, for debugging purposes.
                  Syntax:  NICKINFO <nick>
 stats_notice.c - A Hook to provide the old STATS notice functionality
 whois_notice.c - A Hook to provide the old WHOIS notice functionality
+
+vms_*.c        - Misc files needed for VMS support.
