@@ -1,3 +1,15 @@
+androsyn    2005/02/11 17:11:57 EST	(20050211_1)
+
+  Modified files:
+    modules              m_watch.c 
+  Log:
+  remove stupid memory leak
+  
+  Revision  Changes    Path
+  1.7       +1 -2      ircd-ratbox/modules/m_watch.c
+
+
+
 leeh        2005/02/11 06:42:48 EST	(20050211_0)
 
   Modified files:
