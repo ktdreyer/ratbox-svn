@@ -61,7 +61,7 @@ _moddeinit(void)
   mod_del_cmd(&nburst_msgtab);
 }
 
-char *_version = "20010104";
+char *_version = "$Revision$";
 #endif
 /*
 ** m_nburst

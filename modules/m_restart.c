@@ -56,7 +56,7 @@ _moddeinit(void)
   mod_del_cmd(&restart_msgtab);
 }
 
-char *_version = "20001122";
+char *_version = "$Revision$";
 #endif
 /*
  * mo_restart

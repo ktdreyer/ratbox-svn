@@ -59,7 +59,7 @@ _moddeinit(void)
   mod_del_cmd(&rehash_msgtab);
 }
 
-char *_version = "20001122";
+char *_version = "$Revision$";
 #endif
 /*
  * mo_rehash - REHASH message handler

@@ -62,7 +62,7 @@ _moddeinit(void)
 }
 
 
-char *_version = "20001122";
+char *_version = "$Revision$";
 #endif
 /*
  * m_mode - MODE command handler

@@ -64,7 +64,7 @@ _moddeinit(void)
 {
   mod_del_cmd(&list_msgtab);
 }
-char *_version = "20010522";
+char *_version = "$Revision$";
 #endif
 static int list_all_channels(struct Client *source_p);
 static int list_named_channel(struct Client *source_p,char *name);

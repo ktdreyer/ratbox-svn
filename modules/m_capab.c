@@ -50,7 +50,7 @@ _moddeinit(void)
   mod_del_cmd(&capab_msgtab);
 }
 
-char *_version = "20010702";
+char *_version = "$Revision$";
 #endif
 
 /*

@@ -61,7 +61,7 @@ _moddeinit(void)
   mod_del_cmd(&invite_msgtab);
 }
 
-char *_version = "20010407";
+char *_version = "$Revision$";
 #endif
 
 /*

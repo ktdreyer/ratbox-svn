@@ -65,7 +65,7 @@ _moddeinit(void)
 {
   mod_del_cmd(&part_msgtab);
 }
-char *_version = "20001122";
+char *_version = "$Revision$";
 #endif
 
 static void part_one_client(struct Client *client_p,

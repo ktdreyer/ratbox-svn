@@ -63,7 +63,7 @@ _moddeinit(void)
   mod_del_cmd(&set_msgtab);
 }
 
-char *_version = "20001122";
+char *_version = "$Revision$";
 #endif
 /* Structure used for the SET table itself */
 struct SetStruct

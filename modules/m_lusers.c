@@ -57,7 +57,7 @@ _moddeinit(void)
   mod_del_cmd(&lusers_msgtab);
 }
 
-char *_version = "20001122";
+char *_version = "$Revision$";
 #endif
 /*
  * m_lusers - LUSERS message handler

@@ -55,7 +55,7 @@ _moddeinit(void)
   mod_del_cmd(&locops_msgtab);
 }
 
-char *_version = "20001122";
+char *_version = "$Revision$";
 #endif
 /*
  * m_locops - LOCOPS message handler

@@ -46,7 +46,7 @@ _moddeinit(void)
   mod_del_cmd(&unresv_msgtab);
 }
 
-char *_version = "20010626";
+char *_version = "$Revision$";
 #endif
 
 /*

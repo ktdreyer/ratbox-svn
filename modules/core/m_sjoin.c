@@ -65,7 +65,7 @@ _moddeinit(void)
   mod_del_cmd(&sjoin_msgtab);
 }
 
-char *_version = "20010821";
+char *_version = "$Revision$";
 #endif
 /*
  * ms_sjoin

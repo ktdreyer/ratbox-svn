@@ -77,7 +77,7 @@ _moddeinit(void)
   mod_del_cmd(&msgtabs[1]);
   mod_del_cmd(&msgtabs[2]);
 }
-char *_version = "20001122";
+char *_version = "$Revision$";
 #endif
 
 static int flush_write(struct Client *, FBFILE* , char *, char *);

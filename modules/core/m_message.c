@@ -122,7 +122,7 @@ _moddeinit(void)
   mod_del_cmd(&notice_msgtab);
 }
 
-char *_version = "20010519";
+char *_version = "$Revision$";
 #endif
 
 /*

@@ -59,7 +59,7 @@ _moddeinit(void)
   hook_del_event("doing_admin");
   mod_del_cmd(&admin_msgtab);
 }
-char *_version = "20001202";
+char *_version = "$Revision$";
 #endif
 /*
  * mr_admin - ADMIN command handler

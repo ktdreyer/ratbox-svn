@@ -80,7 +80,7 @@ _moddeinit(void)
   mod_del_cmd(&whois_msgtab);
 }
 
-char *_version = "20010105";
+char *_version = "$Revision$";
 #endif
 /*
 ** m_whois

@@ -64,7 +64,7 @@ _moddeinit(void)
   mod_del_cmd(&kill_msgtab);
 }
 
-char *_version = "20010428";
+char *_version = "$Revision$";
 #endif
 /*
 ** mo_kill

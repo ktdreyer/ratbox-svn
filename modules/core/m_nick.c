@@ -81,7 +81,7 @@ _moddeinit(void)
   mod_del_cmd(&client_msgtab);
 }
 
-char *_version = "20010718";
+char *_version = "$Revision$";
 #endif
 
 /*

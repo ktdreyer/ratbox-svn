@@ -73,7 +73,7 @@ _moddeinit(void)
   hook_del_event("doing_info");
   mod_del_cmd(&info_msgtab);
 }
-char *_version = "20010530";
+char *_version = "$Revision$";
 #endif
 
 void send_info_text(struct Client *source_p);

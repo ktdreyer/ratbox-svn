@@ -56,7 +56,7 @@ _moddeinit(void)
   return;
 }
 
-char *_version = "20001122";
+char *_version = "$Revision$";
 #endif
 #else
 
@@ -81,7 +81,7 @@ _moddeinit(void)
   mod_del_cmd(&challenge_msgtab);
 }
 
-char *_version = "20001122";
+char *_version = "$Revision$";
 #endif
 /*
  * m_challenge - generate RSA challenge for wouldbe oper
