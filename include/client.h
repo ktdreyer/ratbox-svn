@@ -366,10 +366,11 @@ struct LocalUser
 #define FLAGS_ADMIN        0x80000 /* Admin on server */
 
 
-/* *sigh* overflow flags */
+/* overflow flags */
 #define FLAGS2_EXEMPTGLINE  0x0001	/* client can't be G-lined */
-#define FLAGS2_E_LINED      0x0002      /* client is graced with E line */
-#define FLAGS2_F_LINED      0x0004      /* client is graced with F line */
+#define FLAGS2_E_LINED      0x0002      /* client is exempt from kline */
+#define FLAGS2_F_LINED      0x0004      /* client is exempt from limits */
+#define FLAGS2_RESTRICTED   0x0008      /* client cannot op others */
 
 /* oper priv flags */
 #define FLAGS2_OPER_GLOBAL_KILL 0x0020  /* oper can global kill */
@@ -484,6 +485,8 @@ struct LocalUser
 #define SetIdlelined(x)         ((x)->flags2 |= FLAGS2_IDLE_LINED)
 #define IsIdlelined(x)          ((x)->flags2 & FLAGS2_IDLE_LINED)
 
+#define IsRestricted(x)         ((x)->flags2 &  FLAGS2_RESTRICTED)
+#define SetRestricted(x)        ((x)->flags2 |= FLAGS2_RESTRICTED)
 #define SetOperGlobalKill(x)    ((x)->flags2 |= FLAGS2_OPER_GLOBAL_KILL)
 #define IsOperGlobalKill(x)     ((x)->flags2 & FLAGS2_OPER_GLOBAL_KILL)
 #define SetOperRemote(x)        ((x)->flags2 |= FLAGS2_OPER_REMOTE)

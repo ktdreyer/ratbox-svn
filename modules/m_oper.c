@@ -237,6 +237,7 @@ static int match_oper_password(char *password,
   if (!aconf->status & CONF_OPERATOR)
     return NO;
 
+  /* XXX another #ifdef that should go */
 #ifdef CRYPT_OPER_PASSWORD
   /* use first two chars of the password they send in as salt */
   /* If the password in the conf is MD5, and ircd is linked   

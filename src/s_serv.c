@@ -61,6 +61,7 @@
 #include "s_debug.h"
 #include "memory.h"
 
+extern char *crypt();
 
 #define MIN_CONN_FREQ 300
 
@@ -380,9 +381,20 @@ int check_server(const char *name, struct Client* cptr)
        {
 	 error = -2;
 	   
-	 if (strcmp(aconf->passwd, cptr->localClient->passwd) == 0)
+	 if (IsConfEncrypted(aconf))
 	   {
-	     server_aconf = aconf;
+	     if (strcmp(aconf->passwd, 
+			crypt(cptr->localClient->passwd, aconf->passwd)) == 0)
+	       {
+		 server_aconf = aconf;
+	       }
+	   }
+	 else
+	   {
+	     if (strcmp(aconf->passwd, cptr->localClient->passwd) == 0)
+	       {
+		 server_aconf = aconf;
+	       }
 	   }
        }
     }

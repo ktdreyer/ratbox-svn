@@ -529,6 +529,9 @@ int attach_Iline(struct Client* cptr, const char* username)
 	  if(IsConfDoIdentd(aconf))
 	    SetNeedId(cptr);
 
+	  if(IsConfRestricted(aconf))
+	    SetRestricted(cptr);
+
 	  /* Thanks for spoof idea amm */
 	  if(IsConfDoSpoofIp(aconf))
 	    {

@@ -89,6 +89,7 @@ int   class_redirport_var;
 %token  DIE
 %token  DOTS_IN_IDENT
 %token  EMAIL
+%token  ENCRYPTED
 %token  EXCEED_LIMIT
 %token  FNAME_USERLOG
 %token  FNAME_OPERLOG
@@ -141,6 +142,7 @@ int   class_redirport_var;
 %token  REDIRPORT
 %token  REHASH
 %token  REMOTE
+%token  RESTRICTED
 %token  SENDQ
 %token  SEND_PASSWORD
 %token  SERVERINFO
@@ -712,7 +714,7 @@ auth_items:     auth_items auth_item |
                 auth_item
 
 auth_item:      auth_user | auth_passwd | auth_class |
-                auth_kline_exempt | auth_have_ident |
+                auth_kline_exempt | auth_have_ident | auth_is_restricted |
                 auth_exceed_limit | auth_no_tilde | auth_gline_exempt |
                 auth_spoof | auth_redir_serv | auth_redir_port | error
 
@@ -773,6 +775,16 @@ auth_exceed_limit:    EXCEED_LIMIT '=' TYES ';'
                       EXCEED_LIMIT '=' TNO ';'
   {
     yy_aconf->flags &= ~CONF_FLAGS_F_LINED;
+  };
+
+auth_is_restricted:    RESTRICTED '=' TYES ';'
+  {
+    yy_aconf->flags |= CONF_FLAGS_RESTRICTED;
+  }
+                      |
+                      RESTRICTED '=' TNO ';'
+  {
+    yy_aconf->flags &= ~CONF_FLAGS_RESTRICTED;
   };
 
 auth_kline_exempt:    KLINE_EXEMPT '=' TYES ';'
@@ -1017,7 +1029,7 @@ connect_items:  connect_items connect_item |
 connect_item:   connect_name | connect_host | connect_send_password |
                 connect_accept_password | connect_port |
                 connect_lazylink | connect_hub_mask | connect_leaf_mask |
-                connect_class | connect_auto |
+                connect_class | connect_auto | connect_encrypted |
                 error
 
 connect_name:   NAME '=' QSTRING ';'
@@ -1061,6 +1073,16 @@ connect_lazylink:       LAZYLINK '=' TYES ';'
                         LAZYLINK '=' TNO ';'
   {
     yy_aconf->flags &= ~CONF_FLAGS_LAZY_LINK;
+  };
+
+connect_encrypted:       ENCRYPTED '=' TYES ';'
+  {
+    yy_aconf->flags |= CONF_FLAGS_ENCRYPTED;
+  }
+                        |
+                        ENCRYPTED '=' TNO ';'
+  {
+    yy_aconf->flags &= ~ENCRYPTED;
   };
 
 connect_auto:           AUTOCONN '=' TYES ';'
