@@ -1,3 +1,19 @@
+leeh        2005/02/19 06:27:58 EST	(20050219_0)
+
+  Modified files:
+    modules              m_etrace.c 
+    src                  newconf.c s_conf.c s_newconf.c 
+  Log:
+  - removed some unused vars/functions
+  
+  Revision  Changes    Path
+  1.15      +1 -2      ircd-ratbox/modules/m_etrace.c
+  7.200     +0 -15     ircd-ratbox/src/newconf.c
+  7.508     +0 -1      ircd-ratbox/src/s_conf.c
+  7.67      +0 -1      ircd-ratbox/src/s_newconf.c
+
+
+
 leeh        2005/02/16 12:58:24 EST	(20050216_2)
 
   Modified files:
