@@ -548,10 +548,10 @@ static void stats_tklines(struct Client *source_p)
   /* Theyre opered, or allowed to see all klines */
   else
   {
-    report_tklines(source_p, &temporary_min);
-    report_tklines(source_p, &temporary_hour);
-    report_tklines(source_p, &temporary_day);
-    report_tklines(source_p, &temporary_week);
+    report_tklines(source_p, &tkline_min);
+    report_tklines(source_p, &tkline_hour);
+    report_tklines(source_p, &tkline_day);
+    report_tklines(source_p, &tkline_week);
   }
 }
 

@@ -80,9 +80,10 @@ const char *_version = "$Revision$";
 
 static void remove_permkline_match(struct Client *, char *, char *);
 static int flush_write(struct Client *, FBFILE* , char *, char *);
-static int remove_temp_match(char *,char *);
-static int remove_temp_match_list(char *, char *, dlink_list *);
 
+static int remove_temp_kline(char *, char *);
+static int remove_temp_dline(char *);
+static int remove_temp_gline(char *, char *);
 
 /*
 ** mo_unkline
@@ -148,7 +149,7 @@ static void mo_unkline (struct Client *client_p,struct Client *source_p,
     }
   }
 
-  if(remove_temp_match(host, user))
+  if(remove_temp_kline(user, host))
     {
       sendto_one(source_p,
 		 ":%s NOTICE %s :Un-klined [%s@%s] from temporary k-lines",
@@ -200,7 +201,7 @@ static void ms_unkline(struct Client *client_p, struct Client *source_p,
   if(find_u_conf((char *)source_p->user->server, source_p->username,
                  source_p->host, OPER_UNKLINE))
   {
-    if(remove_temp_match(khost, kuser))
+    if(remove_temp_kline(kuser, khost))
     {
       sendto_realops_flags(UMODE_ALL, L_ALL,
  	            "*** Received Un-kline for [%s@%s], from %s",
@@ -383,33 +384,38 @@ static int flush_write(struct Client *source_p, FBFILE* out, char *buf,
   return(error_on_write);
 }
 
-/* static int remove_tkline_match(char *host, char *user)
- * Input: A hostname, a username to unkline.
- * Output: returns YES on success, NO if no tkline removed.
- * Side effects: Any matching tklines are removed.
+static dlink_list *tkline_list[] =
+{
+  &tkline_hour,
+  &tkline_day,
+  &tkline_min,
+  &tkline_week,
+  NULL
+};
+
+/* remove_temp_kline()
+ *
+ * inputs       - username, hostname to unkline
+ * outputs      -
+ * side effects - tries to unkline anything that matches
  */
 static int
-remove_temp_match(char *host, char *user)
+remove_temp_kline(char *user, char *host)
 {
-  if(remove_temp_match_list(host, user, &temporary_hour) ||
-     remove_temp_match_list(host, user, &temporary_day) ||
-     remove_temp_match_list(host, user, &temporary_min) ||
-     remove_temp_match_list(host, user, &temporary_week))
-    return YES;
-
-  return NO;
-}
-
-static int
-remove_temp_match_list(char *host, char *user, dlink_list *temp_list)
-{
+  dlink_list *tklist;
   struct ConfItem *aconf;
   dlink_node *ptr;
   struct irc_inaddr addr, caddr;
   int nm_t, cnm_t, bits, cbits;
+  int i;
+
   nm_t = parse_netmask(host, &addr, &bits);
 
-  DLINK_FOREACH(ptr, temp_list->head)
+  for(i = 0; tkline_list[i] != NULL; i++)
+  {
+    tklist = tkline_list[i];
+
+    DLINK_FOREACH(ptr, tklist->head)
     {
       aconf = (struct ConfItem*)ptr->data;
 
@@ -425,11 +431,111 @@ remove_temp_match_list(char *host, char *user, dlink_list *temp_list)
 #endif
 	  )
 	{
-	  dlinkDestroy(ptr, temp_list);
+	  dlinkDestroy(ptr, tklist);
 	  delete_one_address_conf(aconf->host, aconf);
 	  return YES;
 	}
     }
+  }
+
+  return NO;
+}
+
+static dlink_list *tdline_list[] =
+{
+  &tdline_hour,
+  &tdline_day,
+  &tdline_min,
+  &tdline_week,
+  NULL
+};
+
+/* remove_temp_dline()
+ *
+ * inputs       - hostname to undline
+ * outputs      -
+ * side effects - tries to undline anything that matches
+ */
+static int
+remove_temp_dline(char *host)
+{
+  dlink_list *tdlist;
+  struct ConfItem *aconf;
+  dlink_node *ptr;
+  struct irc_inaddr addr, caddr;
+  int nm_t, cnm_t, bits, cbits;
+  int i;
+
+  nm_t = parse_netmask(host, &addr, &bits);
+
+  for(i = 0; tdline_list[i] != NULL; i++)
+  {
+    tdlist = tdline_list[i];
+
+    DLINK_FOREACH(ptr, tdlist->head)
+    {
+      aconf = ptr->data;
+
+      cnm_t = parse_netmask(aconf->host, &caddr, &cbits);
+
+      if (cnm_t != nm_t)
+	continue;
+
+      if ((nm_t==HM_HOST && !irccmp(aconf->host, host)) ||
+	  (nm_t==HM_IPV4 && bits==cbits && comp_with_mask(&IN_ADDR(addr), &IN_ADDR(caddr), bits))
+#ifdef IPV6
+	  || (nm_t==HM_IPV6 && bits==cbits && comp_with_mask(&IN_ADDR(addr), &IN_ADDR(caddr), bits))
+#endif
+	  )
+	{
+	  dlinkDestroy(ptr, tdlist);
+	  delete_one_address_conf(aconf->host, aconf);
+	  return YES;
+	}
+    }
+  }
+
+  return NO;
+}
+
+/* remove_temp_gline()
+ *
+ * inputs       - username, hostname to ungline
+ * outputs      -
+ * side effects - tries to ungline anything that matches
+ */
+static int
+remove_temp_gline(char *user, char *host)
+{
+  struct ConfItem *aconf;
+  dlink_node *ptr;
+  struct irc_inaddr addr, caddr;
+  int nm_t, cnm_t, bits, cbits;
+
+  nm_t = parse_netmask(host, &addr, &bits);
+
+  DLINK_FOREACH(ptr, glines.head)
+  {
+    aconf = (struct ConfItem*)ptr->data;
+
+    cnm_t = parse_netmask(aconf->host, &caddr, &cbits);
+
+    if (cnm_t != nm_t || (user && irccmp(user, aconf->user)))
+      continue;
+
+    if ((nm_t==HM_HOST && !irccmp(aconf->host, host)) ||
+	  (nm_t==HM_IPV4 && bits==cbits && comp_with_mask(&IN_ADDR(addr), &IN_ADDR(caddr), bits))
+#ifdef IPV6
+	  || (nm_t==HM_IPV6 && bits==cbits && comp_with_mask(&IN_ADDR(addr), &IN_ADDR(caddr), bits))
+#endif
+	  )
+    {
+      dlinkDestroy(ptr, &glines);
+      delete_one_address_conf(aconf->host, aconf);
+      return YES;
+    }
+  }
+
   return NO;
 }
 
@@ -474,7 +580,7 @@ mo_undline (struct Client *client_p, struct Client *source_p,
     }
 #endif
 
-  if(remove_temp_match(cidr, NULL))
+  if(remove_temp_dline(cidr))
   {
     sendto_one(source_p,
 	       ":%s NOTICE %s :Un-dlined [%s] from temporary D-lines",
@@ -621,7 +727,7 @@ static void mo_ungline(struct Client *client_p, struct Client *source_p,
       return;
     }
 
-  if(remove_temp_match_list(host, user, &glines))
+  if(remove_temp_gline(user, host))
     {
       sendto_one(source_p, ":%s NOTICE %s :Un-glined [%s@%s]",
                  me.name, parv[0],user, host);

@@ -41,7 +41,7 @@
 #include "hostmask.h"
 
 static void mo_rehash(struct Client*, struct Client*, int, char**);
-static void clear_temps(dlink_list *, int);
+static void clear_temps(dlink_list *);
 static void clear_pending_glines(void);
 
 struct Message rehash_msgtab = {
@@ -112,7 +112,7 @@ static void mo_rehash(struct Client *client_p, struct Client *source_p,
         sendto_realops_flags(UMODE_ALL, L_ALL,
                              "%s is clearing G-lines",
                              source_p->name);
-        clear_temps(&glines, CONF_GLINE);
+        clear_temps(&glines);
       }
       else if(irccmp(parv[1], "PGLINES") == 0)
       {
@@ -126,20 +126,20 @@ static void mo_rehash(struct Client *client_p, struct Client *source_p,
         sendto_realops_flags(UMODE_ALL, L_ALL,
                              "%s is clearing temp klines",
                              source_p->name);
-        clear_temps(&temporary_min, CONF_KILL);
-        clear_temps(&temporary_hour, CONF_KILL);
-        clear_temps(&temporary_day, CONF_KILL);
-        clear_temps(&temporary_week, CONF_KILL);
+        clear_temps(&tkline_min);
+        clear_temps(&tkline_hour);
+        clear_temps(&tkline_day);
+        clear_temps(&tkline_week);
       }
       else if(irccmp(parv[1], "TDLINES") == 0)
       {
         sendto_realops_flags(UMODE_ALL, L_ALL,
                              "%s is clearing temp dlines",
                              source_p->name);
-        clear_temps(&temporary_min, CONF_DLINE);
-        clear_temps(&temporary_hour, CONF_DLINE);
-        clear_temps(&temporary_day, CONF_DLINE);
-        clear_temps(&temporary_week, CONF_DLINE);
+        clear_temps(&tdline_min);
+        clear_temps(&tdline_hour);
+        clear_temps(&tdline_day);
+        clear_temps(&tdline_week);
       }
       else
       {
@@ -168,7 +168,7 @@ static void mo_rehash(struct Client *client_p, struct Client *source_p,
 }
 
 static void
-clear_temps(dlink_list *tlist, int type)
+clear_temps(dlink_list *tlist)
 {
   dlink_node *ptr;
   dlink_node *next_ptr;
@@ -177,9 +177,6 @@ clear_temps(dlink_list *tlist, int type)
   DLINK_FOREACH_SAFE(ptr, next_ptr, tlist->head)
   {
     aconf = ptr->data;
-
-    if(aconf->status != type)
-      continue;
 
     delete_one_address_conf(aconf->host, aconf);
     dlinkDestroy(ptr, tlist);

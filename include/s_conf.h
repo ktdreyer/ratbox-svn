@@ -322,10 +322,15 @@ extern struct admin_info  AdminInfo;        /* defined in ircd.c */
 #define TEMP_DAY	3
 #define TEMP_WEEK	4
 
-dlink_list temporary_min;
-dlink_list temporary_hour;
-dlink_list temporary_day;
-dlink_list temporary_week;
+dlink_list tkline_min;
+dlink_list tkline_hour;
+dlink_list tkline_day;
+dlink_list tkline_week;
+
+dlink_list tdline_min;
+dlink_list tdline_hour;
+dlink_list tdline_day;
+dlink_list tdline_week;
 
 extern void clear_ip_hash_table(void);
 extern void iphash_stats(struct Client *,struct Client *,int,char **,FBFILE*);
