@@ -1,3 +1,7 @@
+*** 19990816_2 by lusky
+removed redundant "New highest connections" server notice
+
+
 *** 19990816_1 by tomh
 bullet proof resolver against bogus replies
 
