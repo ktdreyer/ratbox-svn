@@ -1,3 +1,7 @@
+*** 20010815_1 by androsyn
+Missing prototype for init_dlink_nodes() or whatever the function is called :)
+
+
 *** 20010814_2 by davidt
 - Use free_dlink_node(node) not MyFree(node), since node is from balloc,
   and is inside a chunk of memory from mmap, not something free()able.
