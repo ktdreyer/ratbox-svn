@@ -69,6 +69,7 @@ static char *core_module_table[] =
   "m_mode.so",
   "m_nick.so",
   "m_part.so",
+  "m_quit.so",
   "m_server.so",
   "m_sjoin.so",
   "m_squit.so",

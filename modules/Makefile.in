@@ -41,6 +41,7 @@ CORE_SRCS = \
   core/m_mode.c \
   core/m_nick.c \
   core/m_part.c \
+  core/m_quit.c \
   core/m_server.c \
   core/m_sjoin.c \
   core/m_squit.c
@@ -83,7 +84,6 @@ SRCS =                          \
   m_ping.c \
   m_pong.c \
   m_post.c \
-  m_quit.c \
   m_rehash.c \
   m_restart.c \
   m_resv.c \
