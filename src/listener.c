@@ -25,7 +25,7 @@
  */
 
 #include "stdinc.h"
-#include "config.h"
+#include "setup.h"
 #include "listener.h"
 #include "client.h"
 #include "fdlist.h"
@@ -39,7 +39,8 @@
 #include "s_stats.h"
 #include "send.h"
 #include "memory.h"
-#include "setup.h"
+#include "s_auth.h"
+#include "reject.h"
 
 #ifdef HAVE_LIBCRYPTO
 #include <openssl/bio.h>
@@ -436,6 +437,61 @@ close_listeners()
 }
 
 #define DLINE_WARNING "ERROR :You have been D-lined.\r\n"
+
+/*
+ * add_connection - creates a client which has just connected to us on 
+ * the given fd. The sockhost field is initialized with the ip# of the host.
+ * The client is sent to the auth module for verification, and not put in
+ * any client list yet.
+ */
+static void
+add_connection(struct Listener *listener, int fd, struct sockaddr_storage *sai)
+{
+	struct Client *new_client;
+	s_assert(NULL != listener);
+
+	/* 
+	 * get the client socket name from the socket
+	 * the client has already been checked out in accept_connection
+	 */
+	new_client = make_client(NULL);
+
+	memcpy(&new_client->localClient->ip, sai, sizeof(struct sockaddr_storage));
+
+	/* 
+	 * copy address to 'sockhost' as a string, copy it to host too
+	 * so we have something valid to put into error messages...
+	 */
+	inetntop_sock(&new_client->localClient->ip, new_client->sockhost, 
+		sizeof(new_client->sockhost));
+
+	*new_client->host = '\0';
+#ifdef IPV6
+	if(*new_client->sockhost == ':')
+		strlcat(new_client->host, "0", sizeof(new_client->host));
+
+	if(new_client->localClient->ip.ss_family == AF_INET6 && ConfigFileEntry.dot_in_ip6_addr == 1)
+	{
+		strlcat(new_client->host, new_client->sockhost, sizeof(new_client->host));
+		strlcat(new_client->host, ".", sizeof(new_client->host));
+	}
+	else
+#endif
+		strlcat(new_client->host, new_client->sockhost, sizeof(new_client->host));
+
+	new_client->localClient->fd = fd;
+
+	new_client->localClient->listener = listener;
+	++listener->ref_count;
+
+	if(!set_non_blocking(new_client->localClient->fd))
+		report_error(NONB_ERROR_MSG, get_client_name(new_client, SHOW_IP), 
+			     log_client_name(new_client, SHOW_IP), errno);
+	if(check_reject(new_client))
+		return; 
+	start_auth(new_client);
+}
+
 
 static void
 accept_connection(int pfd, void *data)
