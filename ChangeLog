@@ -1,3 +1,18 @@
+androsyn    2004/01/21 15:30:01 EST	(20040121_2)
+
+  Added files:
+    include              db.h 
+    src                  db-pgsql.c db-sqlite.c 
+  Log:
+  Add the db interface wrappers.
+  
+  Revision  Changes    Path
+  1.1       +21 -0     rserv/include/db.h (new)
+  1.1       +89 -0     rserv/src/db-pgsql.c (new)
+  1.1       +46 -0     rserv/src/db-sqlite.c (new)
+
+
+
 androsyn    2004/01/21 14:48:39 EST	(20040121_1)
 
   Modified files:
