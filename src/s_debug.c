@@ -151,25 +151,26 @@ void send_usage(struct Client *source_p)
 
 
   sendto_one(source_p,
-             ":%s %d %s :CPU Secs %lu:%lu User %lu:%lu System %lu:%lu",
-             me.name, RPL_STATSDEBUG, source_p->name, secs/60, secs%60,
-             rus.ru_utime.tv_sec/60, rus.ru_utime.tv_sec%60,
-             rus.ru_stime.tv_sec/60, rus.ru_stime.tv_sec%60);
-  sendto_one(source_p, ":%s %d %s :RSS %lu ShMem %lu Data %lu Stack %lu",
-             me.name, RPL_STATSDEBUG, source_p->name, rus.ru_maxrss,
-             rus.ru_ixrss / rup, rus.ru_idrss / rup,
-             rus.ru_isrss / rup);
-  sendto_one(source_p, ":%s %d %s :Swaps %lu Reclaims %lu Faults %lu",
-             me.name, RPL_STATSDEBUG, source_p->name, rus.ru_nswap,
-             rus.ru_minflt, rus.ru_majflt);
-  sendto_one(source_p, ":%s %d %s :Block in %lu out %lu",
-             me.name, RPL_STATSDEBUG, source_p->name, rus.ru_inblock,
-             rus.ru_oublock);
-  sendto_one(source_p, ":%s %d %s :Msg Rcv %lu Send %lu",
-             me.name, RPL_STATSDEBUG, source_p->name, rus.ru_msgrcv, rus.ru_msgsnd);
-  sendto_one(source_p, ":%s %d %s :Signals %lu Context Vol. %lu Invol %lu",
-             me.name, RPL_STATSDEBUG, source_p->name, rus.ru_nsignals,
-             rus.ru_nvcsw, rus.ru_nivcsw);
+             ":%s %d %s :CPU Secs %d:%d User %d:%d System %d:%d",
+             me.name, RPL_STATSDEBUG, source_p->name, (int)(secs/60), (int)(secs%60),
+             (int)(rus.ru_utime.tv_sec/60), (int)(rus.ru_utime.tv_sec%60),
+             (int)(rus.ru_stime.tv_sec/60), (int)(rus.ru_stime.tv_sec%60));
+  sendto_one(source_p, ":%s %d %s :RSS %d ShMem %d Data %d Stack %d",
+             me.name, RPL_STATSDEBUG, source_p->name, (int)rus.ru_maxrss,
+             (int)(rus.ru_ixrss / rup), (int)(rus.ru_idrss / rup),
+             (int)(rus.ru_isrss / rup));
+  sendto_one(source_p, ":%s %d %s :Swaps %d Reclaims %d Faults %d",
+             me.name, RPL_STATSDEBUG, source_p->name, (int)rus.ru_nswap,
+             (int)rus.ru_minflt, (int)rus.ru_majflt);
+  sendto_one(source_p, ":%s %d %s :Block in %d out %d",
+             me.name, RPL_STATSDEBUG, source_p->name, (int)rus.ru_inblock,
+             (int)rus.ru_oublock);
+  sendto_one(source_p, ":%s %d %s :Msg Rcv %d Send %d",
+             me.name, RPL_STATSDEBUG, source_p->name, (int)rus.ru_msgrcv,
+             (int)rus.ru_msgsnd);
+  sendto_one(source_p, ":%s %d %s :Signals %d Context Vol. %d Invol %d",
+             me.name, RPL_STATSDEBUG, source_p->name, (int)rus.ru_nsignals,
+             (int)rus.ru_nvcsw, (int)rus.ru_nivcsw);
 #endif /* VMS */
 }
 
@@ -330,29 +331,29 @@ void count_memory(struct Client *source_p)
   dbuf_used_count  = DBufUsedCount;
 #endif
 
-  sendto_one(source_p, ":%s %d %s :Client Local %u(%lu) Remote %u(%lu)",
-             me.name, RPL_STATSDEBUG, source_p->name, lc, lcm, rc, rcm);
+  sendto_one(source_p, ":%s %d %s :Client Local %u(%d) Remote %u(%d)",
+             me.name, RPL_STATSDEBUG, source_p->name, lc, (int)lcm, rc, (int)rcm);
   sendto_one(source_p, ":%s %d %s :Users %u(%u) Invites %u(%u)",
              me.name, RPL_STATSDEBUG, source_p->name,
 	     us, us*sizeof(struct User), usi,
              usi * sizeof(dlink_node));
-  sendto_one(source_p, ":%s %d %s :User channels %u(%u) Aways %u(%lu)",
+  sendto_one(source_p, ":%s %d %s :User channels %u(%u) Aways %u(%d)",
              me.name, RPL_STATSDEBUG, source_p->name, usc, usc*sizeof(dlink_node),
-             aw, awm);
+             aw, (int)awm);
   sendto_one(source_p, ":%s %d %s :Attached confs %u(%u)",
              me.name, RPL_STATSDEBUG, source_p->name, lcc, lcc*sizeof(dlink_node));
 
   totcl = lcm + rcm + us*sizeof(struct User) + usc*sizeof(dlink_node) + awm;
   totcl += lcc*sizeof(dlink_node) + usi*sizeof(dlink_node);
 
-  sendto_one(source_p, ":%s %d %s :Conflines %u(%lu)",
-             me.name, RPL_STATSDEBUG, source_p->name, co, com);
+  sendto_one(source_p, ":%s %d %s :Conflines %u(%d)",
+             me.name, RPL_STATSDEBUG, source_p->name, co, (int)com);
 
   sendto_one(source_p, ":%s %d %s :Classes %u(%u)",
              me.name, RPL_STATSDEBUG, source_p->name, cl, cl*sizeof(struct Class));
 
-  sendto_one(source_p, ":%s %d %s :Channels %u(%lu) Bans %u(%lu)",
-             me.name, RPL_STATSDEBUG, source_p->name, ch, chm, chb, chbm);
+  sendto_one(source_p, ":%s %d %s :Channels %u(%d) Bans %u(%d)",
+             me.name, RPL_STATSDEBUG, source_p->name, ch, (int)chm, chb, (int)chbm);
   sendto_one(source_p, ":%s %d %s :Channel members %u(%u) invite %u(%u)",
              me.name, RPL_STATSDEBUG, source_p->name, chu, chu*sizeof(dlink_node),
              chi, chi*sizeof(dlink_node));
@@ -363,8 +364,8 @@ void count_memory(struct Client *source_p)
              me.name, RPL_STATSDEBUG, source_p->name,
 	     wwu, wwu*sizeof(struct User));
 
-  sendto_one(source_p, ":%s %d %s :Whowas array %u(%lu)",
-             me.name, RPL_STATSDEBUG, source_p->name, NICKNAMEHISTORYLENGTH, wwm);
+  sendto_one(source_p, ":%s %d %s :Whowas array %u(%d)",
+             me.name, RPL_STATSDEBUG, source_p->name, NICKNAMEHISTORYLENGTH, (int)wwm);
 
   totww = wwu * sizeof(struct User) + wwm;
 
@@ -388,16 +389,16 @@ void count_memory(struct Client *source_p)
 #endif
   count_scache(&number_servers_cached,&mem_servers_cached);
 
-  sendto_one(source_p, ":%s %d %s :scache %u(%lu)",
+  sendto_one(source_p, ":%s %d %s :scache %u(%d)",
              me.name, RPL_STATSDEBUG, source_p->name,
              number_servers_cached,
-             mem_servers_cached);
+             (int)mem_servers_cached);
 
   count_ip_hash(&number_ips_stored,&mem_ips_stored);
-  sendto_one(source_p, ":%s %d %s :iphash %u(%lu)",
+  sendto_one(source_p, ":%s %d %s :iphash %u(%d)",
              me.name, RPL_STATSDEBUG, source_p->name,
              number_ips_stored,
-             mem_ips_stored);
+             (int)mem_ips_stored);
 
   tot = totww + totch + totcl + com + cl*sizeof(struct Class) +
     dbuf_allocated + rm;
@@ -405,49 +406,49 @@ void count_memory(struct Client *source_p)
   tot += channel_hash_table_size;
 
   tot += mem_servers_cached;
-  sendto_one(source_p, ":%s %d %s :Total: ww %lu ch %lu cl %lu co %lu db %u",
-             me.name, RPL_STATSDEBUG, source_p->name, totww, totch, totcl, com, 
-             dbuf_allocated);
+  sendto_one(source_p, ":%s %d %s :Total: ww %d ch %d cl %d co %d db %u",
+             me.name, RPL_STATSDEBUG, source_p->name, (int)totww, (int)totch,
+             (int)totcl, (int)com, dbuf_allocated);
 
 
   count_local_client_memory((int *)&local_client_memory_used,
                             (int *)&local_client_memory_allocated);
   tot += local_client_memory_allocated;
-  sendto_one(source_p, ":%s %d %s :Local client Memory in use: %lu Local "
-                   "client Memory allocated: %lu",
+  sendto_one(source_p, ":%s %d %s :Local client Memory in use: %d Local "
+                   "client Memory allocated: %d",
              me.name, RPL_STATSDEBUG, source_p->name,
-             local_client_memory_used, local_client_memory_allocated);
+             (int)local_client_memory_used, (int)local_client_memory_allocated);
 
 
   count_remote_client_memory( (int *)&remote_client_memory_used,
                               (int *)&remote_client_memory_allocated);
   tot += remote_client_memory_allocated;
-  sendto_one(source_p, ":%s %d %s :Remote client Memory in use: %lu Remote "
-                   "client Memory allocated: %lu",
+  sendto_one(source_p, ":%s %d %s :Remote client Memory in use: %d Remote "
+                   "client Memory allocated: %d",
              me.name, RPL_STATSDEBUG, source_p->name,
-             remote_client_memory_used, remote_client_memory_allocated);
+             (int)remote_client_memory_used, (int)remote_client_memory_allocated);
 
 
   count_user_memory( (int *)&user_memory_used,
                     (int *)&user_memory_allocated);
   tot += user_memory_allocated;
-  sendto_one(source_p, ":%s %d %s :struct User Memory in use: %lu struct User "
-                   "Memory allocated: %lu",
+  sendto_one(source_p, ":%s %d %s :struct User Memory in use: %d struct User "
+                   "Memory allocated: %d",
              me.name, RPL_STATSDEBUG, source_p->name,
-             user_memory_used,
-             user_memory_allocated);
+             (int)user_memory_used,
+             (int)user_memory_allocated);
 
 
   count_links_memory( (int *)&links_memory_used,
 		      (int *)&links_memory_allocated);
-  sendto_one(source_p, ":%s %d %s :Links Memory in use: %lu Links Memory "
-                   "allocated: %lu",
+  sendto_one(source_p, ":%s %d %s :Links Memory in use: %d Links Memory "
+                   "allocated: %d",
              me.name, RPL_STATSDEBUG, source_p->name,
-             links_memory_used,
-             links_memory_allocated);
+             (int)links_memory_used,
+             (int)links_memory_allocated);
 
   sendto_one(source_p, 
-             ":%s %d %s :TOTAL: %lu Available:  Current max RSS: %u",
-             me.name, RPL_STATSDEBUG, source_p->name, tot, get_maxrss());
+             ":%s %d %s :TOTAL: %d Available:  Current max RSS: %u",
+             me.name, RPL_STATSDEBUG, source_p->name, (int)tot, get_maxrss());
 
 }

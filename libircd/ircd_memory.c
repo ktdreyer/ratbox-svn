@@ -33,6 +33,8 @@
 #include "send.h"
 #include "tools.h"
 #include "s_log.h"
+#include "restart.h"
+
 #ifdef MEMDEBUG
 /* Hopefully this debugger will work better than the existing one...
  * -A1kmm. */
