@@ -1,3 +1,8 @@
+*** 20001013_2 by db
+- cleaner sub1 fix for vchans
+
+
+
 *** 20001013_1 by bill
 
 Added null chptr checking to set_channel_modes()
