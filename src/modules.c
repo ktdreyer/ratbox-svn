@@ -138,7 +138,7 @@ mod_add_path(char *path)
 }
 
 
-static char *
+char *
 irc_basename(char *path)
 {
   char *mod_basename = MyMalloc (strlen (path) + 1);

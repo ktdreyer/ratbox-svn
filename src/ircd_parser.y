@@ -270,10 +270,18 @@ modules_item:    modules_module | modules_path |
 
 modules_module:  MODULE '=' QSTRING ';'
 {
+  char *m_bn;
+
+  m_bn = irc_basename(yylval.string);
+
   /* I suppose we should just ignore it if it is already loaded(since
    * otherwise we would flood the opers on rehash) -A1kmm. */
-  if (!findmodule_byname(yylval.string))
-    load_one_module (yylval.string);
+  if (findmodule_byname(m_bn) != -1)
+    return;
+
+  load_one_module (yylval.string);
+
+  MyFree(m_bn);
 };
 
 modules_path: PATH '=' QSTRING ';'
