@@ -393,7 +393,7 @@ void add_connection(struct Listener* listener, int fd)
   	new_client->localClient->aftype = AF_INET6;
   else
   {
-	memmove(&new_client->localClient->ip.sins.sin.s_addr,&IN_ADDR(new_client->localClient->ip)[12], sizeof(unsigned long));
+	memmove(&new_client->localClient->ip.sins.sin.s_addr,&IN_ADDR(new_client->localClient->ip)[12], sizeof(struct in_addr));
 	new_client->localClient->aftype = AF_INET;  	
   }
   strcat(new_client->localClient->sockhost, ".");
@@ -513,7 +513,7 @@ ignoreErrno(int ierrno)
  * Set the timeout for the fd
  */
 void
-comm_settimeout(int fd, unsigned long timeout, PF *callback, void *cbdata)
+comm_settimeout(int fd, time_t timeout, PF *callback, void *cbdata)
 {
     assert(fd > -1);
     assert(fd_table[fd].flags.open);
@@ -535,7 +535,7 @@ comm_settimeout(int fd, unsigned long timeout, PF *callback, void *cbdata)
  * with close functions, we _actually_ don't call comm_close() here ..
  */
 void
-comm_setflush(int fd, unsigned long timeout, PF *callback, void *cbdata)
+comm_setflush(int fd, time_t timeout, PF *callback, void *cbdata)
 {
     assert(fd > -1);
     assert(fd_table[fd].flags.open);
