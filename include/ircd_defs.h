@@ -74,14 +74,12 @@
 #error "AF_INET6 not defined"
 #endif
 
-#define DEF_FAM AF_INET6
 
 #else /* #ifdef IPV6 */
 
 #ifndef AF_INET6
-#define AF_INET6 10		/* Dummy AF_INET6 declaration */
+#define AF_INET6 AF_MAX		/* Dummy AF_INET6 declaration */
 #endif
-#define DEF_FAM AF_INET
 #endif /* #ifdef IPV6 */
 
 
