@@ -1,3 +1,10 @@
+*** 20011008_2 by davidt
+- Reword the /MODUNLOAD core entry to be more accurate, and include
+  a simpler workaround.  We should perhaps default to
+  --disable-shared-modules, but with some way to easily add additional
+  contrib modules automagically.
+
+
 *** 20011008_1 by androsyn
 Removed the macro for strtoken()
 
