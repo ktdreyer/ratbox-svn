@@ -1,3 +1,15 @@
+leeh        2002/09/01 18:28:38 EDT	(20020901_2)
+
+  Modified files:
+    modules              m_whois.c 
+  Log:
+  - fixed up whois.
+  
+  Revision  Changes    Path
+  1.93      +3 -3      ircd-ratbox/modules/m_whois.c
+
+
+
 androsyn    2002/09/01 18:19:03 EDT	(20020901_1)
 
   Modified files:
