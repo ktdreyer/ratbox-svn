@@ -1166,7 +1166,7 @@ start_io(struct Client *server)
 	}
 #endif
 
-	while (1)
+	while (MyConnect(server))
 	{
 		linecount++;
 
@@ -1187,7 +1187,7 @@ start_io(struct Client *server)
 			break;
 	}
 
-	while (1)
+	while (MyConnect(server))
 	{
 		linecount++;
 
