@@ -1,3 +1,16 @@
+leeh        2002/04/29 15:59:07 EDT	(20020429_1)
+
+  Modified files:
+    include              hostmask.h 
+  Log:
+  - a 25 line single space indented struct with no linebreaks doesnt
+    follow the normal coding style of ircd-hybrid.
+  
+  Revision  Changes    Path
+  1.20      +27 -19    ircd-hybrid-7/include/hostmask.h
+
+
+
 leeh        2002/04/29 12:58:07 EDT	(20020429_0)
 
   Modified files:
