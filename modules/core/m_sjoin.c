@@ -334,7 +334,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 		if(fl & CHFL_CHANOP)
 		{
 			*mbuf++ = 'o';
-			para[pargs++] = s;
+			para[pargs++] = target_p->name;
 
 			/* a +ov user.. bleh */
 			if(fl & CHFL_VOICE)
