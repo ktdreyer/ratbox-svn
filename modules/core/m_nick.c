@@ -325,11 +325,12 @@ int ms_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       return 0;
     }
 
-  if (strchr(nick,'.') != NULL)
-    {
-      sptr->flags |= FLAGS_KILLED;      
-      return exit_client(cptr, sptr, &me, "Nick/Server collision");
-    }
+  if (!IsServer(sptr) && parc > 2)
+    newts = atol(parv[2]);
+  else if (IsServer(sptr) && parc > 3)
+    newts = atol(parv[3]);
+
+  fromTS = (parc > 6);
 
   if (!(acptr = find_client(nick, NULL)))
     return(nick_from_server(cptr,sptr,parc,parv,newts,nick));
@@ -349,13 +350,6 @@ int ms_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         return 0; /* NICK Message ignored */
       }
    }
-
-  if (!IsServer(sptr) && parc > 2)
-    newts = atol(parv[2]);
-  else if (IsServer(sptr) && parc > 3)
-    newts = atol(parv[3]);
-
-  fromTS = (parc > 6);
 
   /*
   ** Note: From this point forward it can be assumed that
@@ -423,16 +417,6 @@ int ms_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
   if (IsServer(sptr))
     {
-      /* As discussed with chris (comstud) nick kills can
-       * be handled locally, provided all NICK's are propogated
-       * globally. Just like channel joins are handled.
-       *
-       * I think I got this right.
-       * -Dianora
-       * There are problems with this, due to lag it looks like.
-       * backed out for now...
-       */
-
 #ifdef LOCAL_NICK_COLLIDE
       /* just propogate it through */
       sendto_serv_butone(cptr, ":%s NICK %s :%lu",
