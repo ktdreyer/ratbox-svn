@@ -62,7 +62,7 @@ static void check_unknowns_list(dlink_list * list);
 static void free_exited_clients(void *unused);
 static void exit_aborted_clients(void *unused);
 
-static int exit_remote_client(struct Client *, struct Client *, struct Client *,const char *, int qs);
+static int exit_remote_client(struct Client *, struct Client *, struct Client *,const char *);
 static int exit_remote_server(struct Client *, struct Client *, struct Client *,const char *);
 static int exit_local_client(struct Client *, struct Client *, struct Client *,const char *);
 static int exit_unknown_client(struct Client *, struct Client *, struct Client *,const char *);
@@ -1068,9 +1068,10 @@ recurse_remove_clients(struct Client *source_p, const char *comment)
 	{
 		target_p = ptr->data;
 
-		/* XXX - this next line can probably go now --fl */
 		target_p->flags |= FLAGS_KILLED;
-		exit_remote_client(NULL, target_p, &me, comment, 1);		
+
+		/* ADD ND ENTRY */
+		exit_remote_client(NULL, target_p, &me, comment);		
 	}
 
 	DLINK_FOREACH_SAFE(ptr, ptr_next, source_p->serv->servers.head)
@@ -1243,10 +1244,13 @@ exit_generic_client(struct Client *client_p, struct Client *source_p, struct Cli
 	dlinkAddAlloc(source_p, &dead_list);
 }
 
+/* 
+ * Assumes IsPerson(source_p) && !MyConnect(source_p)
+ */
 
 static int
 exit_remote_client(struct Client *client_p, struct Client *source_p, struct Client *from,
-		   const char *comment, int qs)
+		   const char *comment)
 {
 	if(IsDead(source_p))
 		return -1;
@@ -1256,41 +1260,17 @@ exit_remote_client(struct Client *client_p, struct Client *source_p, struct Clie
 		dlinkDelete(&source_p->lnode, &source_p->servptr->serv->users);
 	}
 
-
 	if((source_p->flags & FLAGS_KILLED) == 0)
 	{
 		sendto_server(client_p, NULL, CAP_TS6, NOCAPS,
 			      ":%s QUIT :%s", use_id(source_p), comment);
 		sendto_server(client_p, NULL, NOCAPS, CAP_TS6,
 			      ":%s QUIT :%s", source_p->name, comment);
-	} 
+	}
 
-	sendto_common_channels_local(source_p, ":%s!%s@%s QUIT :%s",
-				     source_p->name,
-				     source_p->username, source_p->host, comment);
-
-	remove_user_from_channels(source_p);
-
-	/* Should not be in any channels now */
-	s_assert(source_p->user->channel.head == NULL);
-
-	add_history(source_p, 0);
-	off_history(source_p);
-
-	if(has_id(source_p))
-		del_from_id_hash(source_p->id, source_p);
-
-	del_from_hostname_hash(source_p->host, source_p);
-	del_from_client_hash(source_p->name, source_p);
-	remove_client_from_list(source_p);
-	s_assert(dlinkFind(&dead_list, source_p) == NULL);
-	s_assert(dlinkFind(&abort_list, source_p) == NULL);
-	
-	SetDead(source_p);
-	dlinkAddAlloc(source_p, &dead_list);
+	exit_generic_client(client_p, source_p, from, comment);
 	return(CLIENT_EXITED);
 }
-
 
 /*
  * This assumes IsUnknown(source_p) == TRUE and MyConnect(source_p) == TRUE
@@ -1539,7 +1519,7 @@ exit_client(struct Client *client_p,	/* The local client originating the
 	{
 		/* Remotes */
 		if(IsPerson(source_p))
-			return exit_remote_client(client_p, source_p, from, comment, 0);
+			return exit_remote_client(client_p, source_p, from, comment);
 		else if(IsServer(source_p))
 			return exit_remote_server(client_p, source_p, from, comment);
 	}
