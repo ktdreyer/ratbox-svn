@@ -1,3 +1,8 @@
+*** 20010105_33 by toot
+fixed vchans for /knock.. still needs to send a notice to remote
+chan members though
+
+
 *** 20010105_32 by db
 - This finally fixes host server masks.. though the match loop in here
   probably should move into s_conf.c
