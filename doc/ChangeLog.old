@@ -1,3 +1,16 @@
+db          2002/07/16 18:30:22 EDT	(20020716_3)
+
+  Modified files:
+    tools                convertilines.c 
+  Log:
+  - end of an auth{} block should have a trailing ';'
+    uncovered in the rc1
+  
+  Revision  Changes    Path
+  7.3       +1 -1      ircd-hybrid-7/tools/convertilines.c
+
+
+
 leeh        2002/07/16 16:26:49 EDT	(20020716_2)
 
   Modified files:
