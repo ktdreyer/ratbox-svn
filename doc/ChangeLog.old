@@ -1,3 +1,15 @@
+*** 20001102_12 by adrian
+
+
+Add in the initial kqueue implementation. Note that DNS breaks under anything
+before 4.1-REL because of a bug in kqueue() (if I remember right).
+
+This code is very simple, and has no debugging. I'll be (ab)using it
+in about a week after I've tidied up some other bits of code, but I thought
+I'd give you guys something to play with. :)
+
+
+
 *** 20001102_11 by adrian
 
 
