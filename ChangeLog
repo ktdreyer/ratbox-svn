@@ -1,3 +1,17 @@
+leeh        2004/03/19 20:41:59 EST	(20040320_2)
+
+  Modified files:
+    .                    RELNOTES 
+    src                  newconf.c 
+  Log:
+  - disallow servernames beginning with a digit, they break TS6
+  
+  Revision  Changes    Path
+  1.87      +2 -0      ircd-ratbox/RELNOTES
+  7.146     +9 -1      ircd-ratbox/src/newconf.c
+
+
+
 leeh        2004/03/19 20:31:16 EST	(20040320_1)
 
   Modified files:
