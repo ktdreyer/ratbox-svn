@@ -29,14 +29,9 @@
 
    1. 
 
-       Read doc/whats-new.txt to read about the new features in
-       ircd-hybrid-7 since ircd-hybrid-6.  The file BUGS contains a list of 
-       known bugs at this time, README.FIRST contains useful 
-       information whether you are upgrading or installing from scratch.
-
-       The file RELNOTES is updated every release with information about
-       changes that have occured between releases, such as config options
-       that were removed/added in the latest beta.
+       Read the ChangeLog file to find out about the exciting new features in
+       this version. Other good reads are doc/whats-new.txt, BUGS,
+       doc/example.conf, and README.FIRST.
 
        An example.conf for EFnet is in doc/ with the values "approved" on 12
        December 2001.
@@ -67,12 +62,9 @@
 
           * 
 
-            --enable-rtsigio - Enable the experimental Linux RealTime Signal
-            I/O system. This code works, but is still considered experimental
-            and therefore not for use on production servers.
-
-              Note: The Hybrid Team would like feedback from people who are
-              willing to test this option.
+            --enable-rtsigio - Enable the superior Linux RealTime Signal I/O
+            system. This is currently only available on 2.4 Linux kernel
+            versions or later.
 
           * 
 
