@@ -1,3 +1,15 @@
+androsyn    2002/05/30 20:08:43 EDT	(20020531_1)
+
+  Modified files:
+    src                  packet.c 
+  Log:
+  Macros is your friend
+  
+  Revision  Changes    Path
+  7.83      +1 -1      ircd-hybrid-7/src/packet.c
+
+
+
 androsyn    2002/05/30 19:55:50 EDT	(20020531_0)
 
   Modified files:
