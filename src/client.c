@@ -1096,7 +1096,7 @@ void
 dead_link(struct Client *client_p)
 {
 	char notice[TOPICLEN]; 
-	if(!MyConnect(client_p)|| IsMe(client_p))
+	if(!MyConnect(client_p) || IsMe(client_p) || IsDeadLocal(client_p))
 		return;
 
 	if(client_p->flags & FLAGS_SENDQEX)
@@ -1205,7 +1205,6 @@ exit_unknown_client(struct Client *client_p, struct Client *source_p, struct Cli
 
 	dlinkAddAlloc(source_p, &dead_list);
 
-	/* Note that we don't need to add unknowns to the dead_list */
 	return(CLIENT_EXITED);
 }
 
