@@ -1,3 +1,10 @@
+*** 20010106_29 by db
+- removed a major memory leak I introduced. *sigh*
+  I had forgotten yylval.string is memory duplicated already in the lexer.
+- also removed a rule no longer used  (leaf_block)
+
+
+
 *** 20010106_28 by davidt
 Sigh, I was right.. fix %@+#chan stuff
 
