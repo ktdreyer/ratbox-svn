@@ -1,3 +1,15 @@
+leeh        2002/07/13 07:42:03 EDT	(20020713_2)
+
+  Modified files:
+    modules/core         m_server.c 
+  Log:
+  - squitting leaves when a non-hub introduces one is bad.
+  
+  Revision  Changes    Path
+  1.86      +4 -15     ircd-hybrid-7/modules/core/m_server.c
+
+
+
 androsyn    2002/07/13 02:56:39 EDT	(20020713_1)
 
   Modified files:
