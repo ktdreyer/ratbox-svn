@@ -602,9 +602,6 @@ load_all_modules(int warn)
 	mod_add_cmd(&time_msgtab);
 	mod_add_cmd(&topic_msgtab);
 	mod_add_cmd(&trace_msgtab);
-	mod_add_cmd(&msgtabs[0]);
-	mod_add_cmd(&msgtabs[1]);
-	mod_add_cmd(&msgtabs[2]);
 	mod_add_cmd(&unresv_msgtab);
 	mod_add_cmd(&user_msgtab);
 	mod_add_cmd(&userhost_msgtab);
