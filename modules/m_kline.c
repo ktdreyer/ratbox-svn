@@ -204,6 +204,9 @@ static void mo_kline(struct Client *client_p,
        return;
     }
 
+  if(!valid_comment(source_p, reason))
+    return;
+    
   cur_time = time(NULL);
   current_date = smalldate(cur_time);
   aconf = make_conf();
@@ -310,6 +313,9 @@ static void ms_kline(struct Client *client_p,
              ConfigFileEntry.min_nonwildcard, kuser, khost, kreason);
        return;
      }
+
+  if(!valid_comment(source_p, kreason))
+    return;
 
   tkline_time = atoi(parv[2]);
 
