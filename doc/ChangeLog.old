@@ -1,3 +1,8 @@
+*** 20010409_2 by a1kmm
+- Always reply locally when a non-oper tries to use PING to ping a server
+  and hide_server is on.
+
+
 *** 20010409_1 by a1kmm
 - Did my hashtable lookup code for hosts/addresses properly - now replaces
   patricia tries too, and provides proper IP parsing to replace is_address
