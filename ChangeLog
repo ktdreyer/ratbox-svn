@@ -1,3 +1,17 @@
+leeh        2004/11/17 19:05:13 EST	(20041118_0)
+
+  Modified files:
+    .                    INSTALL 
+    src                  rserv.c 
+  Log:
+  - dont allow running as root
+  
+  Revision  Changes    Path
+  1.3       +1 -1      rserv/INSTALL
+  1.35      +7 -1      rserv/src/rserv.c
+
+
+
 leeh        2004/11/17 18:58:16 EST	(20041117_4)
 
   Modified files:
