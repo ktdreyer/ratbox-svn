@@ -96,6 +96,8 @@ EOB   - End of Burst - Servers with this enabled cannot issue burst commands
 KLN   - Support remote K-lines
 GLN   - Support G-lines
 HOPS  - Support half-ops
+HUB   - Is a hub server (used to prevent two LL hubs from linking in that 
+        state)
 
 K-lines can now be sent to and accepted from other servers.  The shared {}
 block in the conf file is used to specify which servers are trusted.
