@@ -1,3 +1,8 @@
+*** 20001223_57 by wcampbel
+Dependencies again....these need either manually done every time someone
+changes a header, or automatically done.
+
+
 *** 20001223_56 by isomer
 * added 'show_isupport' and added to m_version (local only).
 
