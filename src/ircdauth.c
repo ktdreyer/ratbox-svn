@@ -173,8 +173,8 @@ static void
 CompleteIAuthConnection(int fd, void *notused)
 
 {
-	int errval,
-	    errlen;
+	int errval;
+	socklen_t errlen;
 
 	ClearIAuthConnect(iAuth);
 

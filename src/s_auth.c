@@ -278,7 +278,7 @@ static int start_auth_query(struct AuthRequest* auth)
 {
   struct sockaddr_in sock;
   struct sockaddr_in localaddr;
-  size_t             locallen = sizeof(struct sockaddr_in);
+  socklen_t          locallen = sizeof(struct sockaddr_in);
   int                fd;
 
   if ((fd = comm_open(AF_INET, SOCK_STREAM, 0, "ident")) == -1) {
@@ -312,7 +312,7 @@ static int start_auth_query(struct AuthRequest* auth)
    * and machines with multiple IP addresses are common now
    */
   memset(&localaddr, 0, locallen);
-  getsockname(auth->client->fd, (struct sockaddr*) &localaddr, (int *)&locallen);
+  getsockname(auth->client->fd, (struct sockaddr*) &localaddr, &locallen);
   localaddr.sin_port = htons(0);
 
   memcpy(&sock.sin_addr, &auth->client->localClient->ip,
@@ -502,8 +502,8 @@ void auth_connect_callback(int fd, int error, void *data)
   struct sockaddr_in us;
   struct sockaddr_in them;
   char            authbuf[32];
-  size_t          ulen = sizeof(struct sockaddr_in);
-  size_t          tlen = sizeof(struct sockaddr_in);
+  socklen_t       ulen = sizeof(struct sockaddr_in);
+  socklen_t       tlen = sizeof(struct sockaddr_in);
 
   /* Check the error */
   if (error != COMM_OK) {
@@ -512,8 +512,8 @@ void auth_connect_callback(int fd, int error, void *data)
     return;
   }
 
-  if (getsockname(auth->client->fd, (struct sockaddr *)&us,   (int *) &ulen) ||
-      getpeername(auth->client->fd, (struct sockaddr *)&them, (int *) &tlen)) {
+  if (getsockname(auth->client->fd, (struct sockaddr *)&us,   &ulen) ||
+      getpeername(auth->client->fd, (struct sockaddr *)&them, &tlen)) {
 
     log(L_INFO, "auth get{sock,peer}name error for %s:%m",
         get_client_name(auth->client, SHOW_IP));

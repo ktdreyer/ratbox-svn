@@ -108,7 +108,7 @@ int get_sockerr(int fd)
   int errtmp = errno;
 #ifdef SO_ERROR
   int err = 0;
-  int len = sizeof(err);
+  socklen_t len = sizeof(err);
 
   if (-1 < fd && !getsockopt(fd, SOL_SOCKET, SO_ERROR, (char*) &err, &len)) {
     if (err)
@@ -315,9 +315,9 @@ void close_connection(struct Client *cptr)
  */
 void add_connection(struct Listener* listener, int fd)
 {
-  struct Client*           new_client;
+  struct Client*     new_client;
   struct sockaddr_in addr;
-  int                len = sizeof(struct sockaddr_in);
+  socklen_t          len = sizeof(struct sockaddr_in);
 
   assert(0 != listener);
 

@@ -969,7 +969,7 @@ res_readreply(int fd, void *data)
   struct cache	     *cp = NULL;
   int                rc;
   int                answer_count;
-  int                len = sizeof(struct sockaddr_in);
+  socklen_t          len = sizeof(struct sockaddr_in);
   struct sockaddr_in lsin;
 
   assert(fd == ResolverFileDescriptor);
