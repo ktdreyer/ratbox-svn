@@ -704,7 +704,7 @@ oper_entry:     OPERATOR
         yy_next = yy_tmp->next;
         yy_tmp->next = NULL;
 
-        if(yy_tmp->name && yy_tmp->passwd && yy_tmp->host)
+        if(yy_tmp->name && (yy_tmp->passwd || yy_aconf->rsa_public_key) && yy_tmp->host)
           {
             conf_add_class_to_conf(yy_tmp);
             conf_add_conf(yy_tmp);
