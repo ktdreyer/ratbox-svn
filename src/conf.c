@@ -15,6 +15,7 @@ struct _config_file config_file;
 dlink_list conf_server_list;
 
 static void parse_servinfo(char *line);
+static void parse_admin(char *line);
 static void parse_connect(char *line);
 
 static void
@@ -72,11 +73,12 @@ conf_parse(void)
 			case 'S':
 				parse_servinfo(line+2);
 				break;
-
+			case 'A':
+				parse_admin(line+2);
+				break;
 			case 'C':
 				parse_connect(line+2);
 				break;
-
 			default:
 				conf_error("%c: unknown configuration type", line[0]);
 				break;
@@ -90,8 +92,8 @@ static void
 parse_servinfo(char *line)
 {
 	static char default_gecos[] = "services";
-	char *my_name = getfield(line);
-	char *my_gecos = getfield(NULL);
+	const char *my_name = getfield(line);
+	const char *my_gecos = getfield(NULL);
 
 	if(EmptyString(my_name))
 		conf_error_fatal("S: Missing servername");
@@ -107,6 +109,21 @@ parse_servinfo(char *line)
 
 	config_file.my_name = my_strdup(my_name);
 	config_file.my_gecos = my_strdup(my_gecos);
+}
+
+static void
+parse_admin(char *line)
+{
+	const char *admin1 = getfield(line);
+	const char *admin2 = getfield(NULL);
+	const char *admin3 = getfield(NULL);
+
+	if(!EmptyString(admin1))
+		config_file.admin1 = my_strdup(admin1);
+	if(!EmptyString(admin2))
+		config_file.admin2 = my_strdup(admin2);
+	if(!EmptyString(admin3))
+		config_file.admin3 = my_strdup(admin3);
 }
 
 static void
