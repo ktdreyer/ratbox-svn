@@ -1,3 +1,8 @@
+*** 20010105_9 by db
+- fixed m_jupe.c so it works now. /squit jupe when done
+
+
+
 *** 20010105_8 by spookey
  - adds match string to modlist
 
