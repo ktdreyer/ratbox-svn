@@ -1,3 +1,28 @@
+leeh        2005/01/04 13:36:54 EST	(20050104_2)
+
+  Modified files:
+    autoconf             configure.in 
+    doc                  example.conf 
+    include              c_init.h conf.h setup.h.in 
+    src                  Makefile.in newconf.c rserv.c 
+  Added files:
+    src                  s_global.c 
+  Log:
+  - added the global service, to do netwide messages
+  
+  Revision  Changes    Path
+  1.18      +16 -0     rserv/autoconf/configure.in
+  1.21      +14 -0     rserv/doc/example.conf
+  1.16      +2 -0      rserv/include/c_init.h
+  1.28      +3 -0      rserv/include/conf.h
+  1.7       +2 -0      rserv/include/setup.h.in
+  1.30      +2 -1      rserv/src/Makefile.in
+  1.31      +1 -0      rserv/src/newconf.c
+  1.40      +3 -0      rserv/src/rserv.c
+  1.1       +92 -0     rserv/src/s_global.c (new)
+
+
+
 leeh        2005/01/04 13:34:41 EST	(20050104_1)
 
   Modified files:
