@@ -99,66 +99,77 @@ void init_channels(void)
  * side effects - adds a user to a channel by adding another link to the
  *                channels member chain.
  */
+
+struct _add_table { int mode; dlink_list *list; };
+
 void
 add_user_to_channel(struct Channel *chptr, struct Client *who, int flags)
 {
-  dlink_node *ptr;
-  dlink_node *lptr = NULL;
-
-  if (who->user)
+  int x, ok = 0;
+  
+  struct _add_table add_list[] = 
   {
-    ptr = make_dlink_node();
-    if (MyClient(who))
-      lptr = make_dlink_node();
-    switch (flags)
-    {
-      default:
-      case MODE_PEON:
-        dlinkAdd(who, ptr, &chptr->peons);
-        if (MyClient(who))
-          dlinkAdd(who, lptr, &chptr->locpeons);
-        break;
-
-      case MODE_CHANOP:
-        dlinkAdd(who, ptr, &chptr->chanops);
-        if (MyClient(who))
-          dlinkAdd(who, lptr, &chptr->locchanops);
-        break;
-
-      case MODE_VOICE:
-        dlinkAdd(who, ptr, &chptr->voiced);
-        if (MyClient(who))
-          dlinkAdd(who, lptr, &chptr->locvoiced);
-        break;
-
+     { MODE_PEON, &chptr->peons },
+     { MODE_CHANOP, &chptr->chanops },
+     { MODE_VOICE, &chptr->voiced },
 #ifdef REQUIRE_OANDV
-      case MODE_CHANOP|MODE_VOICE:
-        dlinkAdd(who, ptr, &chptr->chanops_voiced);
-	if (MyClient(who))
-	  dlinkAdd(who, lptr, &chptr->locchanops_voiced);
-        break;
-#else
-      case MODE_CHANOP|MODE_VOICE:
-	dlinkAdd(who, ptr, &chptr->chanops);
-	if (MyClient(who))
-	  dlinkAdd(who, lptr, &chptr->locchanops);
-	break;
+     { MODE_CHANOP|MODE_VOICE, &chptr->chanops_voiced },
 #endif
-    }
+     { 0, NULL }  
+  };  
 
-    if(flags & MODE_DEOPPED)
-    {
-      dlinkAddAlloc(who, &chptr->deopped);
-    }
-
-    chptr->users++;
-
-    if (MyClient(who))
-      chptr->locusers++;
-
-    dlinkAddAlloc(chptr, &who->user->channel);
-    who->user->joined++;
+  struct _add_table add_loclist[] = 
+  {
+     { MODE_PEON, &chptr->locpeons },
+     { MODE_CHANOP, &chptr->locchanops },
+     { MODE_VOICE, &chptr->locvoiced },
+#ifdef REQUIRE_OANDV
+     { MODE_CHANOP|MODE_VOICE, &chptr->locchanops_voiced },
+#endif
+     { 0, NULL }  
+  };  
+  
+  if(who->user == NULL)
+     return;
+  
+  for(x = 0; add_list[x].list != NULL; x++)
+  {
+     if(add_list[x].mode == flags)
+     {
+        dlinkAddAlloc(who, add_list[x].list);
+        ok++;
+        break; 
+     }
   }
+
+  for(x = 0; add_loclist[x].list != NULL; x++)
+  {
+     if(add_loclist[x].mode == flags)
+     {
+        dlinkAddAlloc(who, add_loclist[x].list);
+        ok++;
+        break; 
+     }
+  }
+
+  if(flags & MODE_DEOPPED)
+  {
+     dlinkAddAlloc(who, &chptr->deopped);
+  }
+  
+  if(!ok)
+  {
+    dlinkAddAlloc(who, &chptr->peons);
+    if(MyClient(who))
+      dlinkAddAlloc(who, &chptr->locpeons);
+  }
+
+  chptr->users++;
+  if(MyClient(who))
+     chptr->locusers++;
+
+  dlinkAddAlloc(chptr, &who->user->channel);
+  who->user->joined++;
 }
 
 /*
