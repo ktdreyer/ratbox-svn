@@ -203,7 +203,8 @@ void log_user_exit(struct Client *source_p)
 
   if (IsPerson(source_p))
     {
-      log(L_INFO, "%s (%3ld:%02ld:%02ld): %s!%s@%s %ld/%ld\n",
+
+      ilog(L_INFO, "%s (%3ld:%02ld:%02ld): %s!%s@%s %ld/%ld\n",
 	  myctime(source_p->firsttime),
 	  (signed long) on_for / 3600,
 	  (signed long) (on_for % 3600)/60,
