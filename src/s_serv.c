@@ -97,6 +97,8 @@ struct Capability captab[] = {
   { "HUB",      CAP_HUB },
   { "AOPS",     CAP_AOPS },
   { "UID",      CAP_UID },
+  { "ZIP",	CAP_ZIP },
+
   { 0,   0 }
 };
 
@@ -797,7 +799,9 @@ int server_estab(struct Client *client_p)
 			|
 			((aconf->flags & CONF_FLAGS_LAZY_LINK) ? CAP_LL : 0)
 			|
-			(ServerInfo.hub ? CAP_HUB : 0) );
+			(ServerInfo.hub ? CAP_HUB : 0)
+			|
+			((aconf->flags & CONF_FLAGS_COMPRESSED) ? CAP_ZIP : 0));
 
       sendto_one(client_p, "SERVER %s 1 :%s",
                  my_name_for_link(me.name, aconf), 

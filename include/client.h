@@ -129,6 +129,10 @@ struct Client
   unsigned int      flags;      /* client flags */
   unsigned int      flags2;     /* ugh. overflow */
   int               fd;         /* >= 0, for local clients */
+  int 		    zipfd;	/* For ZipLinks. This is actually the network fd, rather than the fd to the zip
+  				 * process. This way all of the code just reads and writes from the ziplink process.
+  				 * Kinda sick but it works.
+  				 */
   int               hopcount;   /* number of servers to this 0 = local */
   unsigned short    status;     /* Client type */
   unsigned char     handler;    /* Handler index */
