@@ -57,7 +57,7 @@ int     m_list(struct Client *cptr,
   /* If its a LazyLinks connection, allow a list on its behalf */
   if( ConfigFileEntry.hub )
     {
-      if(!IsCapable(sptr->from,CAP_LL) && !MyConnect(sptr))
+      if(!IsCapable(cptr->from,CAP_LL) && !MyConnect(sptr))
 	return 0;
     }
   else
