@@ -42,7 +42,7 @@
 **
 */
 
-static	uint32_t seed[MD5_BLOCK_SIZE] = {
+static	u_int32_t seed[MD5_BLOCK_SIZE] = {
 	0x67452301 , 0xefcdab89 , 0x98badcfe , 0x10325476 ,
 	0, 0, 0, 0,
 	0, 0, 0, 0,
@@ -51,7 +51,7 @@ static	uint32_t seed[MD5_BLOCK_SIZE] = {
 
 static	unsigned char *seed_char = (unsigned char *)seed;
 
-static	uint32_t databuf_int[MD5_HASH_SIZE];
+static	u_int32_t databuf_int[MD5_HASH_SIZE];
 static	char *databuf = (char *)databuf_int;
 
 static int ork[64] = {
@@ -68,7 +68,7 @@ static int ors[64] = {
 	6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21
 };
 
-static	uint32_t t[64] = {
+static	u_int32_t t[64] = {
 	0xd76aa478, 0xe8c7b756, 0x242070db, 0xc1bdceee,
 	0xf57c0faf, 0x4787c62a, 0xa8304613, 0xfd469501,
 	0x698098d8, 0x8b44f7af, 0xffff5bb1, 0x895cd7be,
@@ -151,9 +151,9 @@ void	save_random()
 #endif
 }
 
-void	md5_block(uint32_t *in, uint32_t *out, uint32_t *x) 
+void	md5_block(u_int32_t *in, u_int32_t *out, u_int32_t *x) 
 {
-  uint32_t a, b, c, d;
+  u_int32_t a, b, c, d;
   int i, j;
 
   a = in[0];

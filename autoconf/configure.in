@@ -325,6 +325,8 @@ else
 	INCLUDE=include
 fi
 
+AC_CHECK_TYPE(u_int32_t, unsigned long)
+
 rm -f conftest conftest.f
 dnl check for poll() call
 AC_CHECK_FUNC(poll, ac_cv_func_poll='yes',)

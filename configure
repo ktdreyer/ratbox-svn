@@ -2632,14 +2632,48 @@ else
 	INCLUDE=include
 fi
 
+echo $ac_n "checking for u_int32_t""... $ac_c" 1>&6
+echo "configure:2637: checking for u_int32_t" >&5
+if eval "test \"`echo '$''{'ac_cv_type_u_int32_t'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 2642 "configure"
+#include "confdefs.h"
+#include <sys/types.h>
+#if STDC_HEADERS
+#include <stdlib.h>
+#include <stddef.h>
+#endif
+EOF
+if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
+  egrep "(^|[^a-zA-Z_0-9])u_int32_t[^a-zA-Z_0-9]" >/dev/null 2>&1; then
+  rm -rf conftest*
+  ac_cv_type_u_int32_t=yes
+else
+  rm -rf conftest*
+  ac_cv_type_u_int32_t=no
+fi
+rm -f conftest*
+
+fi
+echo "$ac_t""$ac_cv_type_u_int32_t" 1>&6
+if test $ac_cv_type_u_int32_t = no; then
+  cat >> confdefs.h <<\EOF
+#define u_int32_t unsigned long
+EOF
+
+fi
+
+
 rm -f conftest conftest.f
 echo $ac_n "checking for poll""... $ac_c" 1>&6
-echo "configure:2638: checking for poll" >&5
+echo "configure:2672: checking for poll" >&5
 if eval "test \"`echo '$''{'ac_cv_func_poll'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 2643 "configure"
+#line 2677 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char poll(); below.  */
@@ -2662,7 +2696,7 @@ poll();
 
 ; return 0; }
 EOF
-if { (eval echo configure:2666: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:2700: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_func_poll=yes"
 else
