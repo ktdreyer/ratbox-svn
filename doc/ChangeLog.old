@@ -1,3 +1,8 @@
+*** 20010314_2 by androsyn
+Fixed devpoll support so it would actually compile on Solaris.  I'm not sure
+if it works yet or not though.
+
+
 *** 20010314_1 by toot
 . let halfops set +v and +k
 . removed some unused variables, and moved one of trhe PERSISTANT_CLIENT
