@@ -1,3 +1,18 @@
+leeh        2002/12/04 00:03:11 UTC	(20021204_0)
+
+  Modified files:
+    modules/core         m_quit.c 
+    src                  resv.c 
+  Log:
+  - if we cant find a valid resv reason, DupString() "No Reason" across.
+  - make a quit within 5 mins return "Client Quit", for consistency
+  
+  Revision  Changes    Path
+  1.29      +2 -2      ircd-ratbox/modules/core/m_quit.c
+  7.23      +8 -6      ircd-ratbox/src/resv.c
+
+
+
 leeh        2002/12/03 21:29:55 UTC	(20021203_4)
 
   Modified files:
