@@ -63,21 +63,26 @@ m_error(struct Client *client_p, struct Client *source_p, int parc, const char *
 {
 	const char *para;
 
+
 	para = (parc > 1 && *parv[1] != '\0') ? parv[1] : "<>";
+
 
 	ilog(L_SERVER, "Received ERROR message from %s: %s", source_p->name, para);
 
 	if(client_p == source_p)
 	{
-		sendto_realops_flags(UMODE_ALL, L_ADMIN,
-				     "ERROR :from %s -- %s",
-				     get_client_name(client_p, HIDE_IP), para);
+		if(IsHandshake(client_p) || IsConnecting(client_p))
+		{
+			sendto_realops_flags(UMODE_ALL, L_ADMIN,
+					     "ERROR :from %s -- %s",
+					     get_client_name(client_p, HIDE_IP), para);
 
 #ifndef HIDE_SERVERS_IPS
-		sendto_realops_flags(UMODE_ALL, L_OPER,
-				     "ERROR :from %s -- %s",
-				     get_client_name(client_p, MASK_IP), para);
+			sendto_realops_flags(UMODE_ALL, L_OPER,
+					     "ERROR :from %s -- %s",
+					     get_client_name(client_p, MASK_IP), para);
 #endif
+		}
 	}
 	else
 	{
