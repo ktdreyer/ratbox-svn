@@ -1,3 +1,15 @@
+androsyn    2004/04/11 16:15:56 EDT	(20040411_0)
+
+  Modified files:
+    src                  match.c 
+  Log:
+  Short circuit match() is we are using a mask of "*"
+  
+  Revision  Changes    Path
+  7.38      +4 -0      ircd-ratbox/src/match.c
+
+
+
 leeh        2004/04/10 17:40:59 EDT	(20040410_0)
 
   Modified files:
