@@ -18,14 +18,19 @@
 
 Adrian's TODO list
 
+* make the reserved FD limit run-time tuneable, esp from comm_open()
+  This involves making fd_table[] a dynamically growing/(don't bother with
+  shrinking) list.. have the max fd list configurable in the conf file..
+
+* Fix the anti-client flood code to not be so anal when people connect -
+  I've counted all lines from a client as being a flood, so if a client
+  connects and issues JOIN's to a whole bunch of channels the flood
+  protection stops everything coming through at once .. (not that I mind.. :)
+
 * PLEASE redo all dlink_list management with the stuff in src/tools.c
 
 * In the server outbound connection code, make the sendto_realops()
   logging more sane. Ie, if there's an error, also log the errno string.
-
-* check out what the hell safe_write() is, why its in s_conf.c but being
-  used in other places, and why its closing the fd for people. It should
-  be moved out of there, and *not* close fds (forcing its users to instead!)
 
 * look at timeout_resolver() and the actual work function, remove needing
   to track the time for the next dns timeout, see if we can make them
@@ -54,8 +59,6 @@ Adrian's TODO list
 
 db-->>ummm aconf->ipnum is used for IP based klines only, not for DNS
 
-* make the reserved FD limit run-time tuneable, esp from comm_open()
-
 * What the _FUCK_ is IsLocal() and FLAGS_LOCAL and why the *smeg* is it
   not defined ?
 
@@ -68,9 +71,6 @@ thats INADDR_NONE. Find, fix.
 
 * Add the ircnet(?) split logic for nick collisions - on a nick collision,
   change to "%d-%s", random, nick
-
-* ok, this sucks. search for cptr->since, and esp in src/parse.c .
-  All this flood protection has to come out and reappear in *one* place!
 
 * Hrm. Since diane changed the user->channel code to use dlink_lists,
   she's made some things faster (deopping lists of people in a net.join,
@@ -101,6 +101,16 @@ Done things:
 
 * make sure we've fd_note()d on all the fd's as they change state
   eg a listen socket becoming a client or server, etc ...
+
+* check out what the hell safe_write() is, why its in s_conf.c but being
+  used in other places, and why its closing the fd for people. It should
+  be moved out of there, and *not* close fds (forcing its users to instead!)
+  (Its been deleted now.. thanks dianora)
+
+* ok, this sucks. search for cptr->since, and esp in src/parse.c .
+  All this flood protection has to come out and reappear in *one* place!
+  (Adrian rewrote the line buffering code and client flood code..)
+
 
 ------------------------------------------------------------------------------
 Little things to be done given enough time and initiative
