@@ -70,13 +70,6 @@
 #define MAX_CLIENTS     200
 #define MAX_BUFFER      60
 
-/* Ignore bogus timestamps from other servers. Yes this will desync
- * the network, but it will allow chanops to resync with a valid non TS 0
- *
- * This should be enabled network wide, or not at all.
- */
-#undef  IGNORE_BOGUS_TS
-
 #ifdef VMS
 /* *PATH - directory locations and filenames for VMS.
  *
@@ -167,6 +160,26 @@
  */
 #define WANT_GETTEXT    1
  
+/* Ignore bogus timestamps from other servers. Yes this will desync
+ * the network, but it will allow chanops to resync with a valid non TS 0
+ *
+ * This should be enabled network wide, or not at all.
+ */
+#undef  IGNORE_BOGUS_TS
+
+/* HIDE_SERVERS_IPS
+ *
+ * If this is undefined, opers will be unable to see servers ips and will be
+ * shown a masked ip, admins will be shown the real ip.
+ *
+ * If this is defined, nobody can see a servers ip.  *This is a kludge*, it
+ * has the side effect of hiding the ips everywhere, including logfiles.
+ *
+ * We recommend you leave this undefined, and just take care with who you
+ * give admin=yes; to.
+ */
+#undef HIDE_SERVERS_IPS
+
 /* USE_LOGFILE - log errors and such to LPATH
  * If you wish to have the server send 'vital' messages about server
  * to a logfile, define USE_LOGFILE.

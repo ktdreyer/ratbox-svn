@@ -944,6 +944,10 @@ get_client_name(struct Client* client, int showip)
       if (!irccmp(client->name, client->host))
         return client->name;
 
+#ifdef HIDE_SERVERS_IPS
+      showip = MASK_IP;
+#endif
+
       /* And finally, let's get the host information, ip or name */
       switch (showip)
         {
