@@ -1,3 +1,18 @@
+androsyn    2004/08/17 18:16:52 EDT	(20040817_0)
+
+  Modified files:
+    modules              .depend 
+    src                  .depend epoll.c 
+  Log:
+  Update depend and fix epoll for busted glibcs..
+  
+  Revision  Changes    Path
+  1.42      +31 -130   ircd-ratbox/modules/.depend
+  7.45      +2 -3      ircd-ratbox/src/.depend
+  1.29      +6 -0      ircd-ratbox/src/epoll.c
+
+
+
 androsyn    2004/08/16 15:43:09 EDT	(20040816_6)
 
   Modified files:
