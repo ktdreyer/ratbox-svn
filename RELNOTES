@@ -20,6 +20,9 @@
 - encrypted passwords in auth {}; are now supported.  To use them
   encrypt your password (DES or MD5) and set "encrypted = yes;"
 - fixed notice @#channel to not echo back to sender
+- Hwys rsa_respond-insecure.diff has been added to tools/rsa_respond/.
+  This diff will allow rsa_respond to be called from a script, read
+  the top of the diff for more information.
 
 
 -- ircd-ratbox-1.0-rc3
