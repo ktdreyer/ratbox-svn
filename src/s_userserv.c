@@ -29,15 +29,11 @@ static BlockHeap *user_reg_heap;
 
 dlink_list user_reg_table[MAX_NAME_HASH];
 
-static int u_user_userregister(struct client *, struct lconn *, const char **, int);
-static int u_user_userdrop(struct client *, struct lconn *, const char **, int);
-static int u_user_usersuspend(struct client *, struct lconn *, const char **, int);
-static int u_user_userunsuspend(struct client *, struct lconn *, const char **, int);
+static int o_user_userregister(struct client *, struct lconn *, const char **, int);
+static int o_user_userdrop(struct client *, struct lconn *, const char **, int);
+static int o_user_usersuspend(struct client *, struct lconn *, const char **, int);
+static int o_user_userunsuspend(struct client *, struct lconn *, const char **, int);
 
-static int s_user_userregister(struct client *, struct lconn *, const char **, int);
-static int s_user_userdrop(struct client *, struct lconn *, const char **, int);
-static int s_user_usersuspend(struct client *, struct lconn *, const char **, int);
-static int s_user_userunsuspend(struct client *, struct lconn *, const char **, int);
 static int s_user_register(struct client *, struct lconn *, const char **, int);
 static int s_user_login(struct client *, struct lconn *, const char **, int);
 static int s_user_logout(struct client *, struct lconn *, const char **, int);
@@ -46,10 +42,10 @@ static int s_user_info(struct client *, struct lconn *, const char **, int);
 
 static struct service_command userserv_command[] =
 {
-	{ "USERREGISTER",	&s_user_userregister,	2, NULL, 1, 0L, 0, 0, CONF_OPER_UREGISTER, 0 },
-	{ "USERDROP",		&s_user_userdrop,	1, NULL, 1, 0L, 0, 0, CONF_OPER_USERSERV, 0 },
-	{ "USERSUSPEND",	&s_user_usersuspend,	1, NULL, 1, 0L, 0, 0, CONF_OPER_USERSERV, 0 },
-	{ "USERUNSUSPEND",	&s_user_userunsuspend,	1, NULL, 1, 0L, 0, 0, CONF_OPER_USERSERV, 0 },
+	{ "USERREGISTER",	&o_user_userregister,	2, NULL, 1, 0L, 0, 0, CONF_OPER_UREGISTER, 0 },
+	{ "USERDROP",		&o_user_userdrop,	1, NULL, 1, 0L, 0, 0, CONF_OPER_USERSERV, 0 },
+	{ "USERSUSPEND",	&o_user_usersuspend,	1, NULL, 1, 0L, 0, 0, CONF_OPER_USERSERV, 0 },
+	{ "USERUNSUSPEND",	&o_user_userunsuspend,	1, NULL, 1, 0L, 0, 0, CONF_OPER_USERSERV, 0 },
 	{ "REGISTER",	&s_user_register,	2, NULL, 1, 0L, 0, 0, 0, 0 },
 	{ "LOGIN",	&s_user_login,		2, NULL, 1, 0L, 0, 0, 0, 0 },
 	{ "LOGOUT",	&s_user_logout,		0, NULL, 1, 0L, 1, 0, 0, 0 },
@@ -59,10 +55,10 @@ static struct service_command userserv_command[] =
 
 static struct ucommand_handler userserv_ucommand[] =
 {
-	{ "userregister",	u_user_userregister,	CONF_OPER_UREGISTER,	2, 1, NULL },
-	{ "userdrop",		u_user_userdrop,	CONF_OPER_USERSERV,	1, 1, NULL },
-	{ "usersuspend",	u_user_usersuspend,	CONF_OPER_USERSERV,	1, 1, NULL },
-	{ "userunsuspend",	u_user_userunsuspend,	CONF_OPER_USERSERV,	1, 1, NULL },
+	{ "userregister",	o_user_userregister,	CONF_OPER_UREGISTER,	2, 1, NULL },
+	{ "userdrop",		o_user_userdrop,	CONF_OPER_USERSERV,	1, 1, NULL },
+	{ "usersuspend",	o_user_usersuspend,	CONF_OPER_USERSERV,	1, 1, NULL },
+	{ "userunsuspend",	o_user_userunsuspend,	CONF_OPER_USERSERV,	1, 1, NULL },
 	{ "\0",			NULL,			0,			0, 0, NULL }
 };
 
@@ -286,26 +282,28 @@ e_user_expire(void *unused)
 }
 
 static int
-u_user_userregister(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+o_user_userregister(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct user_reg *reg_p;
 	const char *password;
 
 	if((reg_p = find_user_reg(NULL, parv[0])) != NULL)
 	{
-		sendto_one(conn_p, "Username %s is already registered", parv[0]);
+		service_send(userserv_p, client_p, conn_p,
+				"Username %s is already registered", reg_p->name);
 		return 0;
 	}
 
 	if(!valid_username(parv[0]))
 	{
-		sendto_one(conn_p, "Username %s invalid", parv[0]);
+		service_send(userserv_p, client_p, conn_p,
+				"Username %s invalid", parv[0]);
 		return 0;
 	}
 
 	slog(userserv_p, 2, "%s - USERREGISTER %s %s",
-		conn_p->name, parv[0], 
-		EmptyString(parv[2]) ? "" : parv[2]);
+		OPER_NAME(client_p, conn_p), parv[0], 
+		EmptyString(parv[2]) ? "-" : parv[2]);
 
 	reg_p = BlockHeapAlloc(user_reg_heap);
 	strcpy(reg_p->name, parv[0]);
@@ -326,212 +324,91 @@ u_user_userregister(struct client *client_p, struct lconn *conn_p, const char *p
 			EmptyString(reg_p->email) ? "" : reg_p->email, 
 			reg_p->reg_time, reg_p->last_time, reg_p->flags);
 
-	sendto_one(conn_p, "Username %s registered", parv[0]);
+	service_send(userserv_p, client_p, conn_p,
+			"Username %s registered", parv[0]);
 	return 0;
 }
 
 static int
-u_user_userdrop(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+o_user_userdrop(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct user_reg *ureg_p;
 
 	if((ureg_p = find_user_reg(NULL, parv[0])) == NULL)
 	{
-		sendto_one(conn_p, "Username %s is not registered",
-				parv[0]);
+		service_send(userserv_p, client_p, conn_p,
+				"Username %s is not registered", parv[0]);
 		return 0;
 	}
-
-	slog(userserv_p, 1, "%s - USERDROP %s", conn_p->name, ureg_p->name);
-
-	logout_user_reg(ureg_p);
-
-	sendto_one(conn_p, "Username %s registration dropped",
-			ureg_p->name);
-
-	free_user_reg(ureg_p);
-	return 0;
-}
-
-static int
-u_user_usersuspend(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
-{
-	struct user_reg *reg_p;
-
-	if((reg_p = find_user_reg(NULL, parv[0])) == NULL)
-	{
-		sendto_one(conn_p, "Username %s is not registered",
-				parv[0]);
-		return 0;
-	}
-
-	if(reg_p->flags & US_FLAGS_SUSPENDED)
-	{
-		sendto_one(conn_p, "Username %s is already suspended", reg_p->name);
-		return 0;
-	}
-
-	slog(userserv_p, 1, "%s - USERSUSPEND %s", conn_p->name, reg_p->name);
-
-	logout_user_reg(reg_p);
-
-	reg_p->flags |= US_FLAGS_SUSPENDED;
-	reg_p->suspender = my_strdup(conn_p->name);
-
-	loc_sqlite_exec(NULL, "UPDATE users SET flags=%d, suspender=%Q WHERE username=%Q",
-			reg_p->flags, conn_p->name, reg_p->name);
-
-	sendto_one(conn_p, "Username %s suspended", reg_p->name);
-	return 0;
-}
-
-static int
-u_user_userunsuspend(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
-{
-	struct user_reg *reg_p;
-
-	if((reg_p = find_user_reg(NULL, parv[0])) == NULL)
-	{
-		sendto_one(conn_p, "Username %s is not registered",
-				parv[1]);
-		return 0;
-	}
-
-	if((reg_p->flags & US_FLAGS_SUSPENDED) == 0)
-	{
-		sendto_one(conn_p, "Username %s is not suspended", reg_p->name);
-		return 0;
-	}
-
-	slog(userserv_p, 1, "%s - USERUNSUSPEND %s", conn_p->name, reg_p->name);
-
-	reg_p->flags &= ~US_FLAGS_SUSPENDED;
-	my_free(reg_p->suspender);
-	reg_p->suspender = NULL;
-
-	loc_sqlite_exec(NULL, "UPDATE users SET flags=%d, suspender=NULL WHERE username=%Q",
-			reg_p->flags, reg_p->name);
-
-	sendto_one(conn_p, "Username %s unsuspended", reg_p->name);
-	return 0;
-}
-
-static int
-s_user_userregister(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
-{
-	struct user_reg *reg_p;
-	const char *password;
-
-	if((reg_p = find_user_reg(NULL, parv[0])) != NULL)
-	{
-		service_error(userserv_p, client_p, 
-			"Username %s is already registered", parv[0]);
-		return 0;
-	}
-
-	if(!valid_username(parv[0]))
-	{
-		service_error(userserv_p, client_p, "Username %s invalid", parv[0]);
-		return 0;
-	}
-
-	slog(userserv_p, 2, "%s - USERREGISTER %s %s",
-		client_p->user->oper->name, parv[0], 
-		EmptyString(parv[2]) ? "" : parv[2]);
-
-	reg_p = BlockHeapAlloc(user_reg_heap);
-	strcpy(reg_p->name, parv[0]);
-
-	password = get_crypt(parv[1], NULL);
-	reg_p->password = my_strdup(password);
-
-	if(!EmptyString(parv[2]))
-		reg_p->email = my_strdup(parv[2]);
-
-	reg_p->reg_time = reg_p->last_time = CURRENT_TIME;
-
-	add_user_reg(reg_p);
-
-	loc_sqlite_exec(NULL, "INSERT INTO users (username, password, email, reg_time, last_time, flags) "
-			"VALUES(%Q, %Q, %Q, %lu, %lu, %u)",
-			reg_p->name, reg_p->password, 
-			EmptyString(reg_p->email) ? "" : reg_p->email, 
-			reg_p->reg_time, reg_p->last_time, reg_p->flags);
-
-	service_error(userserv_p, client_p, "Username %s registered", parv[0]);
-
-	return 0;
-}
-
-static int
-s_user_userdrop(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
-{
-	struct user_reg *ureg_p;
-
-	if((ureg_p = find_user_reg(client_p, parv[0])) == NULL)
-		return 1;
 
 	slog(userserv_p, 1, "%s - USERDROP %s", 
-		client_p->user->oper->name, ureg_p->name);
+		OPER_NAME(client_p, conn_p), ureg_p->name);
 
 	logout_user_reg(ureg_p);
 
-	service_error(userserv_p, client_p, "Username %s registration dropped",
-			ureg_p->name);
+	service_send(userserv_p, client_p, conn_p,
+			"Username %s registration dropped", ureg_p->name);
 
 	free_user_reg(ureg_p);
-	return 1;
+	return 0;
 }
 
 static int
-s_user_usersuspend(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+o_user_usersuspend(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct user_reg *reg_p;
 
-	if((reg_p = find_user_reg(client_p, parv[0])) == NULL)
+	if((reg_p = find_user_reg(NULL, parv[0])) == NULL)
+	{
+		service_send(userserv_p, client_p, conn_p,
+				"Username %s is not registered", parv[0]);
 		return 0;
+	}
 
 	if(reg_p->flags & US_FLAGS_SUSPENDED)
 	{
-		service_error(userserv_p, client_p, 
+		service_send(userserv_p, client_p, conn_p,
 				"Username %s is already suspended", reg_p->name);
 		return 0;
 	}
 
 	slog(userserv_p, 1, "%s - USERSUSPEND %s",
-		client_p->user->oper->name, reg_p->name);
+		OPER_NAME(client_p, conn_p), reg_p->name);
 
 	logout_user_reg(reg_p);
 
 	reg_p->flags |= US_FLAGS_SUSPENDED;
-	reg_p->suspender = my_strdup(client_p->user->oper->name);
+	reg_p->suspender = my_strdup(OPER_NAME(client_p, conn_p));
 
 	loc_sqlite_exec(NULL, "UPDATE users SET flags=%d, suspender=%Q WHERE username=%Q",
-			reg_p->flags, reg_p->suspender, reg_p->name);
+			reg_p->flags, OPER_NAME(client_p, conn_p), reg_p->name);
 
-	service_error(userserv_p, client_p,
+	service_send(userserv_p, client_p, conn_p,
 			"Username %s suspended", reg_p->name);
-
 	return 0;
 }
 
 static int
-s_user_userunsuspend(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+o_user_userunsuspend(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct user_reg *reg_p;
 
-	if((reg_p = find_user_reg(client_p, parv[0])) == NULL)
+	if((reg_p = find_user_reg(NULL, parv[0])) == NULL)
+	{
+		service_send(userserv_p, client_p, conn_p,
+				"Username %s is not registered", parv[0]);
 		return 0;
+	}
 
 	if((reg_p->flags & US_FLAGS_SUSPENDED) == 0)
 	{
-		service_error(userserv_p, client_p,
+		service_send(userserv_p, client_p, conn_p,
 				"Username %s is not suspended", reg_p->name);
 		return 0;
 	}
 
-	slog(userserv_p, 1, "%s - USERUNSUSPEND %s", 
-		client_p->user->oper->name, reg_p->name);
+	slog(userserv_p, 1, "%s - USERUNSUSPEND %s",
+		OPER_NAME(client_p, conn_p), reg_p->name);
 
 	reg_p->flags &= ~US_FLAGS_SUSPENDED;
 	my_free(reg_p->suspender);
@@ -540,9 +417,8 @@ s_user_userunsuspend(struct client *client_p, struct lconn *conn_p, const char *
 	loc_sqlite_exec(NULL, "UPDATE users SET flags=%d, suspender=NULL WHERE username=%Q",
 			reg_p->flags, reg_p->name);
 
-	service_error(userserv_p, client_p,
+	service_send(userserv_p, client_p, conn_p,
 			"Username %s unsuspended", reg_p->name);
-
 	return 0;
 }
 
