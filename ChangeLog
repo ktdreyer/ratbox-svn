@@ -1,3 +1,16 @@
+androsyn    2003/01/26 19:47:22 UTC	(20030126_0)
+
+  Modified files:
+    src                  s_bsd.c 
+  Log:
+  Work around the fact that on some platforms we might not be able to disable
+  IPv4 in IPv6 sockets..
+  
+  Revision  Changes    Path
+  7.194     +19 -0     ircd-ratbox/src/s_bsd.c
+
+
+
 leeh        2003/01/23 10:37:09 UTC	(20030123_0)
 
   Modified files:
