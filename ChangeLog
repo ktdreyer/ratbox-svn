@@ -1,3 +1,16 @@
+leeh        2003/06/30 14:59:17 EDT	(20030630_4)
+
+  Modified files:
+    modules/core         m_mode.c 
+  Log:
+  - made chm_ban() generic so it can handle +beI.  a simple switch/case
+    that set some variables is much better. :)
+  
+  Revision  Changes    Path
+  1.77      +75 -276   ircd-ratbox/modules/core/m_mode.c
+
+
+
 leeh        2003/06/30 14:28:04 EDT	(20030630_3)
 
   Modified files:
