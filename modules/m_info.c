@@ -441,7 +441,7 @@ static struct InfoStruct info_table[] = {
 	{
 		"target_change",
 		OUTPUT_BOOLEAN_YN,
-		&ConfigFileEntry.targeT_change,
+		&ConfigFileEntry.target_change,
 		"Target change anti-spam protection",
 	},
 	{

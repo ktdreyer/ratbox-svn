@@ -504,8 +504,11 @@ add_target(struct Client *source_p, struct Client *target_p)
 	{
 		if((i = (CurrentTime - source_p->localClient->target_last) / 60))
 		{
+			if(i > 10)
+				i = 10;
+
 			USED_TARGETS(source_p) -= i;
-			source_p->localClient->target_last += (60 * i);
+			source_p->localClient->target_last = CurrentTime;
 		}
 		else
 			return 0;
@@ -547,7 +550,8 @@ msg_client(int p_or_n, const char *command,
 		{
 			if(!add_target(source_p, target_p))
 			{
-				/* error */
+				sendto_one(source_p, form_str(ERR_TARGCHANGE),
+					me.name, source_p->name, target_p->name);
 				return;
 			}
 		}

@@ -1553,6 +1553,7 @@ register_local_user(struct Client *client_p, struct Client *source_p)
 	if(++Count.total > Count.max_tot)
 		Count.max_tot = Count.total;
 	source_p->localClient->allow_read = MAX_FLOOD_BURST;
+	source_p->localClient->target_last = CurrentTime;
 
 	Count.totalrestartcount++;
 
