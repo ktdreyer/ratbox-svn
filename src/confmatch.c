@@ -100,6 +100,7 @@ parse_netmask(const char *address, struct irc_inaddr *addr, int *bits)
 
 	if(p != NULL)
 	{
+		p = '\0';
 		*bits = strtol(++p, NULL, 10);
 		if(*bits == 0 && errno == EINVAL)
 			return 0;
@@ -110,6 +111,7 @@ parse_netmask(const char *address, struct irc_inaddr *addr, int *bits)
 #endif
 		
 	}
+	
 	if(inetpton(DEF_FAM, address, addr) == 0)
 	{
 		return 0;
