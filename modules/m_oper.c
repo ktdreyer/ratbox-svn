@@ -312,7 +312,7 @@ int oper_up( struct Client *sptr, struct ConfItem *aconf )
   sendto_realops_flags(FLAGS_ALL,
 		       "%s (%s@%s) is now operator (%c)", sptr->name,
 		       sptr->username, sptr->host,
-		       IsGlobalOper(sptr) ? 'O' : 'o');
+		       IsOper(sptr) ? 'O' : 'o');
 	
   send_umode_out(sptr, sptr, old);
 

@@ -76,8 +76,8 @@ static int  SplitUserHost( struct ConfItem * );
 
 static void ReplaceQuotes(char* quotedLine,char* line);
 
-static FBFILE*  openconf(const char* filename);
-static void     initconf(FBFILE*);
+static void     read_conf(FBFILE*);
+static void     read_kd_lines(FBFILE*);
 static void     clear_out_old_conf(void);
 static void     flush_deleted_I_P(void);
 
@@ -1598,19 +1598,7 @@ int rehash(struct Client *cptr,struct Client *sptr, int sig)
 }
 
 /*
- * openconf
- *
- * returns 0 (NULL) on any error or else the fd opened from which to read the
- * configuration file from.  
- */
-static FBFILE* openconf(const char *filename)
-{
-  return fbopen(filename, "r");
-}
-
-
-/*
-** initconf() 
+** read_conf() 
 **    Read configuration file.
 **
 *
@@ -1627,52 +1615,13 @@ static FBFILE* openconf(const char *filename)
 int              ccount = 0;
 int              ncount = 0;
 
-static void initconf(FBFILE* file)
+static void read_conf(FBFILE* file)
 {
-  char             line[BUFSIZE];
-  char             quotedLine[BUFSIZE];
-  char*            p;
   struct ConfItem* aconf;
-
   ccount = ncount = 0;
 
   class0 = find_class("default");       /* which one is the default class ? */
-  aconf = NULL;
-
-  while (fbgets(line, sizeof(line), file))
-    {
-      if ((p = strchr(line, '\n')))
-        *p = '\0';
-
-      if (!*line || line[0] == '#')
-        continue;
-
-      if(line[1] != ':')
-	{
-	  if(p == NULL)
-	    p = strchr(line, '\0');
-
-	  while (p != line)
-	    {
-	      fbungetc(*p,file);
-	      p--;
-	    }
-	  fbungetc(*p,file);
-
-	  yy_aconf = NULL;
-	  lineno = 1;
-	  yyparse(); /* wheee! */
-	  return;
-	}
-
-      ReplaceQuotes(quotedLine,line);
-
-      aconf = make_conf();
-
-      /* Could we test if it's conf line at all?        -Vesa */
-      if (quotedLine[1] == ':')
-        oldParseOneLine(quotedLine,aconf,&ccount,&ncount);
-    }
+  yyparse(); /* wheee! */
 
   check_class();
 
@@ -1699,6 +1648,37 @@ static void initconf(FBFILE* file)
       log(L_CRIT, "Server has no M:/serverinfo line");
       exit(-1);
     }
+}
+
+static void read_kd_lines(FBFILE* file)
+{
+  char             line[BUFSIZE];
+  char             quotedLine[BUFSIZE];
+  char*            p;
+  struct ConfItem* aconf;
+
+  ccount = ncount = 0;
+
+  class0 = find_class("default");       /* which one is the default class ? */
+  aconf = NULL;
+
+  while (fbgets(line, sizeof(line), file))
+    {
+      if ((p = strchr(line, '\n')))
+        *p = '\0';
+
+      if (!*line || line[0] == '#')
+        continue;
+
+      ReplaceQuotes(quotedLine,line);
+
+      aconf = make_conf();
+
+      /* Could we test if it's conf line at all?        -Vesa */
+      if (quotedLine[1] == ':')
+        oldParseOneLine(quotedLine,aconf,&ccount,&ncount);
+    }
+
 }
 
 /*
@@ -2461,7 +2441,6 @@ void recheck_clients()
  * output       - none
  * side effects - read all conf files needed, ircd.conf kline.conf etc.
  */
-
 void read_conf_files(int cold)
 {
   FBFILE *file;
@@ -2471,7 +2450,7 @@ void read_conf_files(int cold)
 
   filename = get_conf_name(CONF_TYPE);
 
-  if ((conf_fbfile_in = openconf(filename)) == 0)
+  if ((conf_fbfile_in = fbopen(filename,"r")) == NULL)
     {
       if(cold)
         {
@@ -2490,13 +2469,13 @@ void read_conf_files(int cold)
   if(!cold)
     clear_out_old_conf();
 
-  initconf(conf_fbfile_in);
+  read_conf(conf_fbfile_in);
   fbclose(conf_fbfile_in);
 
   kfilename = get_conf_name(KLINE_TYPE);
   if (irccmp(filename, kfilename))
     {
-      if((file = openconf(kfilename)) == 0)
+      if((file = fbopen(kfilename,"r")) == NULL)
         {
 	  if (cold)
 	    log(L_ERROR, "Failed reading kline file %s", filename);
@@ -2507,7 +2486,7 @@ void read_conf_files(int cold)
 	}
       else
 	{
-	  initconf(file);
+	  read_kd_lines(file);
 	  fbclose(file);
 	}
     }
@@ -2515,7 +2494,7 @@ void read_conf_files(int cold)
   dfilename = get_conf_name(DLINE_TYPE);
   if (irccmp(filename, dfilename) && irccmp(kfilename, dfilename))
     {
-      if ((file = openconf(dfilename)) == 0)
+      if ((file = fbopen(dfilename,"r")) == NULL)
 	{
 	  if(cold)
 	    log(L_ERROR, "Failed reading dline file %s", dfilename);
@@ -2526,7 +2505,7 @@ void read_conf_files(int cold)
 	}
       else
 	{
-	  initconf(file);
+	  read_kd_lines(file);
 	  fbclose(file);
 	}
    }
