@@ -25,6 +25,10 @@
  *
  *  $Id$
  */
+
+#error "s_bsd_select.c hasn't been rewritten yet. use poll or contact \
+adrian chadd <adrian@creative.net.au>."
+
 #include "tools.h"
 #include "s_bsd.h"
 #include "class.h"
