@@ -176,9 +176,10 @@ if test "X$cf_enable_openssl" != "Xno"; then
     dnl what exists.
     for incdir in /usr/include/openssl \
                   /usr/local/openssl/include \
-                  /usr/local/ssl/include; do
-      if test -d "$incdir"; then
+                  /usr/local/ssl/include ; do
+      if test -f "${incdir}/opensslv.h"; then
         cf_openssl_incl="$incdir"
+        break
       fi
     done
     unset incdir
