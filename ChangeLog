@@ -1,3 +1,31 @@
+leeh        2005/01/04 15:01:26 EST	(20050104_13)
+
+  Modified files:
+    doc                  example.conf 
+    help                 Makefile.in 
+    include              client.h conf.h s_userserv.h 
+    src                  client.c conf.c newconf.c s_userserv.c 
+                         service.c 
+  Log:
+  - added stealth to service flags, to make it ignore messages from lusers
+  - track the clients logged into a username properly
+  - added max_logins to userserv conf, controlling how many nicks may be
+    logged into a given username at one time
+  
+  Revision  Changes    Path
+  1.28      +9 -4      rserv/doc/example.conf
+  1.5       +2 -2      rserv/help/Makefile.in
+  1.32      +2 -0      rserv/include/client.h
+  1.34      +1 -0      rserv/include/conf.h
+  1.14      +1 -1      rserv/include/s_userserv.h
+  1.28      +1 -1      rserv/src/client.c
+  1.36      +5 -1      rserv/src/conf.c
+  1.38      +2 -0      rserv/src/newconf.c
+  1.27      +18 -16    rserv/src/s_userserv.c
+  1.37      +5 -0      rserv/src/service.c
+
+
+
 leeh        2005/01/04 14:58:51 EST	(20050104_12)
 
   Modified files:
