@@ -93,7 +93,6 @@ int     m_whois(struct Client *cptr,
   /* Don't break old clients... -A1kmm. */
   /* Okay, after discussion with other coders we have to always route,
    * and always show idle times... -A1kmm */
-
   /* 
    * The other coders didnt agree :>
    * This as is breaks /whois of clients on non compatable servers
@@ -114,6 +113,7 @@ int     m_whois(struct Client *cptr,
  
  
 
+>>>>>>> 1.39
 }
 
 /*
