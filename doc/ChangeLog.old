@@ -1,3 +1,17 @@
+leeh        2002/01/02 17:08:34 EST	(20020102_6)
+
+  Modified files:
+    include              modules.h 
+    src                  modules.c 
+  Log:
+  - finished protected modules (raaaah!)
+  
+  Revision  Changes    Path
+  7.26      +3 -3      ircd-hybrid-7/include/modules.h
+  7.82      +37 -16    ircd-hybrid-7/src/modules.c
+
+
+
 leeh        2002/01/02 16:43:32 EST	(20020102_5)
 
   Modified files:
