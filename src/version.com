@@ -79,7 +79,7 @@ $ WRITE FILE "  ""modify it under the terms of the GNU General Public License as
 $ WRITE FILE "  ""published by the Free Software Foundation; either version 1, or"","
 $ WRITE FILE "  ""(at your option) any later version."","
 $ WRITE FILE "  """","
-$ WRITE FILE "}"
+$ WRITE FILE "};"
 $!
 $! Close The Output File.
 $!
