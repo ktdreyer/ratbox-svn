@@ -299,20 +299,20 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		}
 		else
 		{
-			channel_modes(chptr, source_p, modebuf, parabuf);
+			/* shortcut to &me here, save us checking member
+			 * lists because we've just joined the thing.. --fl
+			 */
+			const char *mbuf = channel_modes(chptr, &me);
 
 			sendto_server(client_p, chptr, CAP_TS6, NOCAPS,
-				      ":%s JOIN %ld %s %s %s",
+				      ":%s JOIN %ld %s %s",
 				      use_id(source_p), (long) chptr->channelts,
-				      chptr->chname, modebuf,
-				      parabuf[0] == '\0' ? "" : parabuf);
+				      chptr->chname, mbuf);
 
 			sendto_server(client_p, chptr, NOCAPS, CAP_TS6,
-				      ":%s SJOIN %ld %s %s %s:%s",
+				      ":%s SJOIN %ld %s %s :%s",
 				      me.name, (long) chptr->channelts,
-				      chptr->chname, modebuf,
-				      parabuf[0] == '\0' ? "" : parabuf, 
-				      source_p->name);
+				      chptr->chname, mbuf, source_p->name);
 		}
 
 		del_invite(chptr, source_p);
@@ -353,6 +353,7 @@ ms_join(struct Client *client_p, struct Client *source_p, int parc, const char *
 	struct Channel *chptr;
 	static struct Mode mode, *oldmode;
 	const char *s;
+	const char *mbuf;
 	time_t oldts;
 	time_t newts;
 	int isnew;
@@ -488,8 +489,7 @@ ms_join(struct Client *client_p, struct Client *source_p, int parc, const char *
 
 	chptr->mode = mode;
 
-	*modebuf = *parabuf = '\0';
-	channel_modes(chptr, client_p, modebuf, parabuf);
+	mbuf = channel_modes(chptr, client_p);
 
 	if(!IsMember(source_p, chptr))
 	{
@@ -500,13 +500,12 @@ ms_join(struct Client *client_p, struct Client *source_p, int parc, const char *
 	}
 
 	sendto_server(client_p, chptr, CAP_TS6, NOCAPS,
-		      ":%s JOIN %ld %s %s %s",
-		      source_p->id, (long) chptr->channelts, chptr->chname,
-		      modebuf, parabuf);
+		      ":%s JOIN %ld %s %s",
+		      source_p->id, (long) chptr->channelts, chptr->chname, mbuf);
 	sendto_server(client_p, chptr, NOCAPS, CAP_TS6,
-		      ":%s SJOIN %ld %s %s %s:%s",
+		      ":%s SJOIN %ld %s %s :%s",
 		      source_p->user->server, (long) chptr->channelts,
-		      chptr->chname, modebuf, parabuf, source_p->name);
+		      chptr->chname, mbuf, source_p->name);
 	return 0;
 }
 
@@ -685,27 +684,12 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	*modebuf = *parabuf = '\0';
 
-	if(parv[3][0] != '0' && keep_new_modes)
-	{
-		channel_modes(chptr, source_p, modebuf, parabuf);
-	}
-	else
-	{
-		modebuf[0] = '0';
-		modebuf[1] = '\0';
-	}
-
-	mlen = ircsprintf(buf_nick, ":%s SJOIN %ld %s %s %s:",
+	mlen = ircsprintf(buf_nick, ":%s SJOIN %ld %s %s :",
 			  source_p->name, (long) chptr->channelts,
-			  parv[2], modebuf, parabuf);
-	ptr_nick = buf_nick + mlen;
-
-	/* working on the presumption eventually itll be more efficient to
-	 * build a TS6 buffer without checking its needed..
-	 */
-	mlen = ircsprintf(buf_uid, ":%s SJOIN %ld %s %s %s:",
-			  use_id(source_p), (long) chptr->channelts,
-			  parv[2], modebuf, parabuf);
+			  parv[2], 
+			  (parv[3][0] != '0' && keep_new_modes) ? channel_modes(chptr, source_p) : "0");
+	strlcpy(buf_uid, buf_nick, sizeof(buf_uid));
+	ptr_nick = buf_nick + mlen;;
 	ptr_uid = buf_uid + mlen;
 
 	mbuf = modebuf;

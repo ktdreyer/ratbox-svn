@@ -195,7 +195,7 @@ extern int check_channel_name(const char *name);
 
 extern void del_invite(struct Channel *chptr, struct Client *who);
 
-extern void channel_modes(struct Channel *chptr, struct Client *who, char *, char *);
+extern const char *channel_modes(struct Channel *chptr, struct Client *who);
 
 extern void check_spambot_warning(struct Client *source_p, const char *name);
 

@@ -1162,8 +1162,6 @@ static void
 burst_TS5(struct Client *client_p)
 {
 	static char buf[BUFSIZE];
-	static char modebuf[MODEBUFLEN];
-	static char parabuf[MODEBUFLEN];
 	static char ubuf[12];
 	struct Client *target_p;
 	struct Channel *chptr;
@@ -1215,11 +1213,9 @@ burst_TS5(struct Client *client_p)
 		hinfo.client = client_p;
 		hook_call_event(h_burst_channel_id, &hinfo);
 
-		*modebuf = *parabuf = '\0';
-		channel_modes(chptr, client_p, modebuf, parabuf);
-
-		cur_len = mlen = ircsprintf(buf, ":%s SJOIN %ld %s %s %s:", me.name,
-				(long) chptr->channelts, chptr->chname, modebuf, parabuf);
+		cur_len = mlen = ircsprintf(buf, ":%s SJOIN %ld %s %s :", me.name,
+				(long) chptr->channelts, chptr->chname,
+				channel_modes(chptr, client_p));
 
 		t = buf + mlen;
 
@@ -1283,8 +1279,6 @@ static void
 burst_TS6(struct Client *client_p)
 {
 	static char buf[BUFSIZE];
-	static char modebuf[MODEBUFLEN];
-	static char parabuf[MODEBUFLEN];
 	static char ubuf[12];
 	struct Client *target_p;
 	struct Channel *chptr;
@@ -1348,11 +1342,8 @@ burst_TS6(struct Client *client_p)
 		hinfo.client = client_p;
 		hook_call_event(h_burst_channel_id, &hinfo);
 
-		*modebuf = *parabuf = '\0';
-		channel_modes(chptr, client_p, modebuf, parabuf);
-
-		cur_len = mlen = ircsprintf(buf, ":%s SJOIN %ld %s %s %s:", me.name,
-				(long) chptr->channelts, chptr->chname, modebuf, parabuf);
+		cur_len = mlen = ircsprintf(buf, ":%s SJOIN %ld %s %s :", me.name,
+				(long) chptr->channelts, chptr->chname, channel_modes(chptr, client_p));
 
 		t = buf + mlen;
 
