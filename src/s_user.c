@@ -328,7 +328,6 @@ int register_local_user(struct Client *client_p, struct Client *source_p,
     {
       sendto_one(source_p,":%s NOTICE %s :*** Notice -- You have an illegal character in your hostname", 
 		 me.name, source_p->name );
-
       strncpy(source_p->host,source_p->localClient->sockhost,HOSTIPLEN+1);
     }
 
@@ -442,11 +441,15 @@ int register_local_user(struct Client *client_p, struct Client *source_p,
 		       nick, source_p->username, source_p->host,
 		       ipaddr,
 		       get_client_class(source_p), source_p->info);
+
+  /* If they have died in send_* don't do anything. */
+  if (IsDead(source_p))
+    return CLIENT_EXITED;
   
   source_p->umodes |= FLAGS_INVISIBLE;
 
   Count.invisi++;
-    
+
   if ((++Count.local) > Count.max_loc)
     {
       Count.max_loc = Count.local;

@@ -1055,6 +1055,9 @@ int server_estab(struct Client *client_p)
   SetServer(client_p);
   client_p->servptr = &me;
 
+  if (IsDead(client_p))
+    return CLIENT_EXITED;
+
  /* Update the capability combination usage counts. -A1kmm */
   set_chcap_usage_counts(client_p);
 
