@@ -1,3 +1,8 @@
+*** 20001214_4 by db
+- YOU missed an #endif toot! ;)
+
+
+
 *** 20001214_3 by db
 - trivial move of basename() to save a free() if not an admin
 
