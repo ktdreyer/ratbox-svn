@@ -1,3 +1,15 @@
+androsyn    2004/09/15 14:35:29 EDT	(20040915_1)
+
+  Modified files:
+    modules/core         m_message.c 
+  Log:
+  missed a few casts here
+  
+  Revision  Changes    Path
+  1.154     +3 -3      ircd-ratbox/modules/core/m_message.c
+
+
+
 androsyn    2004/09/15 14:32:24 EDT	(20040915_0)
 
   Modified files:
