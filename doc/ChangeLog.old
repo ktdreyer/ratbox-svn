@@ -1,3 +1,6 @@
+*** 20010102_31 by davidt
+minor patch to stop BitchX coring over an extraneous space in /names output
+
 *** 20010102_30 by a1kmm
 Fixed a core causing bug in fdlist code.
 
