@@ -948,7 +948,7 @@ int server_estab(struct Client *cptr)
  */
 static void server_burst(struct Client *cptr)
 {
-  time_t StartBurst=CurrentTime;
+
   /*
   ** Send it in the shortened format with the TS, if
   ** it's a TS server; walk the list of channels, sending
@@ -979,12 +979,11 @@ static void server_burst(struct Client *cptr)
     }
   cptr->flags2 &= ~FLAGS2_CBURST;
 
+  /* EOB stuff is now in burst_all */
+
   /* Always send a PING after connect burst is done */
   sendto_one(cptr, "PING :%s", me.name);
 
-  /* XXX maybe `EOB %d %d` where length of burst and time are sent? */
-  if(IsCapable(cptr, CAP_EOB))
-    sendto_one(cptr, ":%s EOB %lu", me.name, CurrentTime - StartBurst ); 
 }
 
 /*
@@ -1001,6 +1000,7 @@ burst_all(struct Client *cptr)
   struct Channel*   chptr;
   struct Channel*   vchan; 
   dlink_node *ptr;
+  time_t StartBurst=CurrentTime;
 
   /* serial counter borrowed from send.c */
   current_serial++;
@@ -1047,6 +1047,13 @@ burst_all(struct Client *cptr)
 	    sendnick_TS(cptr, acptr);
 	}
     }
+
+  /* We send the time we started the burst, and let the remote host determine an EOB time,
+  ** as otherwise we end up sending a EOB of 0   Sending here means it gets sent last -- fl
+  */
+
+  if(IsCapable(cptr, CAP_EOB))
+    sendto_one(cptr, ":%s EOB %lu", me.name, StartBurst);
 }
 
 /*
