@@ -1,3 +1,15 @@
+leeh        2002/08/09 08:49:55 EDT	(20020809_4)
+
+  Modified files:
+    src                  s_gline.c 
+  Log:
+  - call delete_one_address_conf() to expire glines, not free_conf()
+  
+  Revision  Changes    Path
+  1.24      +1 -1      ircd-ratbox/src/s_gline.c
+
+
+
 leeh        2002/08/09 07:44:12 EDT	(20020809_3)
 
   Modified files:
