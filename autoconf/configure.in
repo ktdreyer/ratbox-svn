@@ -4,6 +4,7 @@ AC_INIT(include/class.h)
 
 AC_CONFIG_AUX_DIR(autoconf)
 AC_CONFIG_HEADER(include/setup.h)
+AC_PREFIX_DEFAULT(/usr/local/ircd)
 
 PACKAGE=ircd-hybrid
 VERSION=7.0
@@ -17,8 +18,16 @@ AC_CANONICAL_SYSTEM
 AC_PROG_MAKE_SET
 AC_PATH_PROG(RM,rm)
 AC_PATH_PROG(CP,cp)
+AC_PATH_PROG(MV, mv)
 AC_PROG_INSTALL
 AC_PROG_LEX
+
+dnl use directory structure of cached as default (hack)
+if test "$libexecdir" = '${exec_prefix}/libexec' &&
+   test "$localstatedir" = '${prefix}/var'; then
+        libexecdir='${bindir}'
+        localstatedir='${prefix}'
+fi 
 
 dnl Checks for libraries.
 dnl Replace `main' with a function in -lnsl:
@@ -283,4 +292,5 @@ AC_OUTPUT(                   \
  messages/Makefile           \
  modules/Makefile            \
  tools/Makefile              \
+ doc/Makefile                \
 )

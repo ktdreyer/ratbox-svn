@@ -1,4 +1,4 @@
-/* include/setup.h.in.  Generated automatically from configure.in by autoheader.  */
+/* include/setup.h.in.  Generated automatically from autoconf/configure.in by autoheader.  */
 
 /* Define if you need to in order for stat and other things to work.  */
 #undef _POSIX_SOURCE
@@ -15,27 +15,8 @@
 /* Define if you have the ANSI C header files.  */
 #undef STDC_HEADERS
 
-/* Chose only one of NBLOCK_POSIX, NBLOCK_BSD, and NBLOCK_SYSV */
-/* Define if you have posix non-blocking sockets (O_NONBLOCK) */
-#undef NBLOCK_POSIX
-
-/* Define if you have BSD non-blocking sockets (O_NDELAY) */
-#undef NBLOCK_BSD
-
-/* Define if you have SYSV non-blocking sockets (FIONBIO) */
-#undef NBLOCK_SYSV
-
-/* Define if you have the mmap() function.  */
-#undef USE_MMAP
-
-/* Define if you are running SOLARIS2.  */
-#undef OS_SOLARIS2
-
-/* Define with our select type */
-#undef SELECT_TYPE
-
-/* Define if we are going to use /dev/poll for network IO */
-#undef HAVE_DEVPOLL
+/* Define if you have the gettext function.  */
+#undef HAVE_GETTEXT
 
 /* Define if you have the <errno.h> header file.  */
 #undef HAVE_ERRNO_H
@@ -64,6 +45,9 @@
 /* Define if you have the descrypt library (-ldescrypt).  */
 #undef HAVE_LIBDESCRYPT
 
+/* Define if you have the dl library (-ldl).  */
+#undef HAVE_LIBDL
+
 /* Define if you have the nsl library (-lnsl).  */
 #undef HAVE_LIBNSL
 
@@ -72,13 +56,3 @@
 
 /* Define if you have the socket library (-lsocket).  */
 #undef HAVE_LIBSOCKET
-
-/* Define if you have the dl library (-ldl).  */
-#undef HAVE_LIBDL
-
-/* Define if you have the intl library (-lintl).  */
-#undef HAVE_LIBINTL
-
-/* Define if you have the gettext function */
-#undef HAVE_GETTEXT
-

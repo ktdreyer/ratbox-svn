@@ -9,6 +9,12 @@ LEX		= @LEX@
 LEXLIB		= @LEXLIB@
 CFLAGS		= @CFLAGS@
 MKDEP		= ${CC} -MM
+INSTALL		= @INSTALL@
+INSTALL_PROGRAM	= @INSTALL_PROGRAM@
+INSTALL_DATA	= @INSTALL_DATA@
+INSTALL_SUID    = @INSTALL_PROGRAM@ -o root -m 4755
+SHELL		= /bin/sh
+AUTOMODULEDIR	= @prefix@/modules/autoload
 
 IRCDLIBS	= @LIBS@ @SSL_LIBS@
 
@@ -85,7 +91,10 @@ build: all
 all: $(OBJS)
 
 install: all
-	@echo "Please do a make install from the top level directory"
+	@echo "Installing modules into $(AUTOMODULEDIR) .."
+	@for file in $(OBJS); do \
+		$(INSTALL_DATA) $$file $(AUTOMODULEDIR); \
+	done
 
 .SUFFIXES: .so
 

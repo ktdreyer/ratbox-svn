@@ -1,10 +1,37 @@
 # $Id$
 # $Id$
 
-CC=@CC@
-RM=@RM@
-IRCDLIBS=@LIBS@
-INCLUDEDIR=-I../include
+CC		= @CC@
+INSTALL		= @INSTALL@
+INSTALL_BIN	= @INSTALL_PROGRAM@
+INSTALL_DATA	= @INSTALL_DATA@
+INSTALL_SUID	= @INSTALL_PROGRAM@ -o root -m 4755
+RM		= @RM@
+LEX		= @LEX@
+LEXLIB		= @LEXLIB@
+CFLAGS		= @CFLAGS@
+LDFLAGS   	= -Wl,-export-dynamic
+MKDEP		= ${CC} -MM
+MV		= @MV@
+RM		= @RM@
+
+IRCDLIBS	= @LIBS@ @SSL_LIBS@
+INCLUDES	= -I../include
+CPPFLAGS	= ${INCLUDES} @SSL_DEFINE@ @CPPFLAGS@
+
+prefix		= @prefix@
+exec_prefix	= @exec_prefix@
+exec_suffix	= @exec_suffix@
+bindir		= @bindir@
+libexecdir	= @libexecdir@
+sysconfdir	= @sysconfdir@
+localstatedir	= @localstatedir@
+# Change this later! -- adrian
+moduledir	= @prefix@/modules
+automoduledir	= @prefix@/modules/autoload
+
+PROGS		= viconf mkpasswd fixklines convertconf
+CONFS		=
 
 mkpasswd_SOURCES = mkpasswd.c
 mkpasswd_OBJECTS = mkpasswd.o
@@ -18,7 +45,7 @@ convertconf_OBJECTS = convertconf.o
 all_OBJECTS = $(viconf_OBJECTS) $(mkpasswd_OBJECTS) $(fixklines_OBJECTS)\
 	$(convertconf_OBJECTS)
 
-all: viconf mkpasswd fixklines convertconf
+all: $(PROGS)
 
 build: all
 
@@ -41,10 +68,7 @@ distclean: clean
 	$(RM) -f Makefile
 
 .c.o:
-	$(CC) $(CFLAGS) $(INCLUDEDIR) -c $<
-
-install: build
-	@echo "Please do a make install from the top level directory"
+	$(CC) $(CFLAGS) $(INCLUDES) $(CPPFLAGS) -c $<
 
 # DO NOT DELETE
 
@@ -52,3 +76,67 @@ mkpasswd.o: ../include/setup.h
 mkpasswd.o:
 viconf.o: ../include/config.h ../include/setup.h
 viconf.o:
+
+
+prefix		= @prefix@
+exec_prefix	= @exec_prefix@
+exec_suffix	= @exec_suffix@
+bindir		= @bindir@
+libexecdir	= @libexecdir@
+sysconfdir	= @sysconfdir@
+localstatedir	= @localstatedir@
+# Change this later! -- adrian
+moduledir	= @prefix@/modules
+automoduledir	= @prefix@/modules/autoload
+
+
+ 
+install-mkdirs:
+	-@if test ! -d $(prefix); then \
+		echo "mkdir $(prefix)"; \
+		mkdir $(prefix); \
+	fi
+	-@if test ! -d $(exec_prefix); then \
+		echo "mkdir $(exec_prefix)"; \
+		mkdir $(exec_prefix); \
+	fi
+	-@if test ! -d $(bindir); then \
+		echo "mkdir $(bindir)"; \
+		mkdir $(bindir); \
+	fi
+	-@if test ! -d $(moduledir); then \
+		echo "mkdir $(moduledir)"; \
+		mkdir $(moduledir); \
+	fi
+	-@if test ! -d $(automoduledir); then \
+		echo "mkdir $(automoduledir)"; \
+		mkdir $(automoduledir); \
+	fi
+	-@if test ! -d $(sysconfdir); then \
+		echo "mkdir $(sysconfdir)"; \
+		mkdir $(sysconfdir); \
+	fi
+	-@if test ! -d $(localstatedir)/logs; then \
+		echo "mkdir $(localstatedir)/logs"; \
+		mkdir $(localstatedir)/logs; \
+	fi
+
+install: install-mkdirs build
+	@for i in $(PROGS); do \
+		if test -f $(bindir)/$$i; then \
+			echo $(MV) $(bindir)/$$i $(bindir)/$$i.old; \
+			$(MV) $(bindir)/$$i $(bindir)/$$i.old; \
+		fi; \
+		echo $(INSTALL_BIN) $$i $(bindir); \
+		$(INSTALL_BIN) $$i $(bindir); \
+	done
+
+	@for i in $(CONFS); do \
+		if test -f $(sysconfdir)/$$i; then \
+			echo $(MV) $(sysconfdir)/$$i $(sysconfdir)/$$i.old; \
+			$(MV) $(sysconfdir)/$$i $(sysconfdir)/$$i.old; \
+		fi; \
+		echo $(INSTALL_DATA) $$i $(sysconfdir); \
+		$(INSTALL_DATA) $$i $(sysconfdir); \
+	done
+
