@@ -728,14 +728,20 @@ int is_voiced(struct Channel *chptr, struct Client *who)
  */
 int can_send(struct Channel *chptr, struct Client *sptr)
 {
-  if(is_any_op(chptr,sptr))
+  if (is_any_op(chptr,sptr))
     return CAN_SEND_OPV;
-  else if(is_voiced(chptr,sptr))
+  if (is_voiced(chptr,sptr))
     return CAN_SEND_OPV;
 
   if (chptr->mode.mode & MODE_MODERATED)
     return CAN_SEND_NO;
   
+  if (ConfigFileEntry.quiet_on_ban && MyClient(sptr) &&
+     (is_banned(chptr, sptr) == CHFL_BAN))
+    {
+      return (CAN_SEND_NO);
+    }
+
   if (chptr->mode.mode & MODE_NOPRIVMSGS && !IsMember(sptr,chptr))
     return (CAN_SEND_NO);
 

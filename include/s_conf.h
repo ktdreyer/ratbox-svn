@@ -220,6 +220,7 @@ typedef struct
   int         links_notice;
   int         links_delay;
   int         vchans_oper_only;
+  int         quiet_on_ban;
 } ConfigFileEntryType;
 
 /* bleh. have to become global. */

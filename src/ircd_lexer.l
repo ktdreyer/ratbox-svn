@@ -151,6 +151,7 @@ password	{ return PASSWORD; }
 ping_time	{ return PING_TIME; }
 port		{ return PORT; }
 quarantine	{ return QUARANTINE; }
+quiet_on_ban    { return QUIET_ON_BAN; }
 reason		{ return REASON; }
 rehash		{ return REHASH; }
 redirserv       { return REDIRSERV; }
