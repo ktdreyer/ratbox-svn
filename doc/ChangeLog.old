@@ -1,3 +1,8 @@
+*** 20010102_34 by db
+- updated configure setup.h.in
+
+
+
 *** 20010102_33 by db
 - committed cstone's contributed patch to fix modules under openbsd
 
