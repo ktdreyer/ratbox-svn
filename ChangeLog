@@ -1,3 +1,19 @@
+leeh        2004/03/04 11:08:12 EST	(20040304_1)
+
+  Modified files:
+    modules              m_stats.c 
+    src                  s_newconf.c 
+  Log:
+  - find_server_conf() wasnt testing if a confitem was illegal or not
+  - fix stats c to not output illegal connect blocks
+    NOTE TO SELF: remove #ifndef LEEH round this when its verified as fixed
+  
+  Revision  Changes    Path
+  1.201     +6 -1      ircd-ratbox/modules/m_stats.c
+  7.34      +3 -0      ircd-ratbox/src/s_newconf.c
+
+
+
 leeh        2004/03/03 19:14:08 EST	(20040304_0)
 
   Modified files:
