@@ -1,3 +1,8 @@
+*** 20010307_9 by jdc
+* Lacking list.h include; _free_dlink_node was implicit.
+
+
+
 *** 20010307_8 by db
 - We had forgotten to send RPL_LISTSTART
 
