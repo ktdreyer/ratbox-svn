@@ -1,3 +1,15 @@
+leeh        2005/01/31 10:39:52 EST	(20050131_3)
+
+  Modified files:
+    help/chanserv        set 
+  Log:
+  - note in help enforcing +ik needs autojoin to work properly
+  
+  Revision  Changes    Path
+  1.2       +2 -1      rserv/help/chanserv/set
+
+
+
 leeh        2005/01/31 07:57:29 EST	(20050131_2)
 
   Modified files:
