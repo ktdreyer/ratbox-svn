@@ -1,3 +1,7 @@
+*** 20010323_8 by ejb
+- updated example.conf to match the new parser.
+
+
 *** 20010323_7 by ejb
 - added cpp support to the parser.
   we now pass ircd.conf through 'cpp -P' before we pass it
