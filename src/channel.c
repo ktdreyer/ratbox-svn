@@ -50,7 +50,7 @@ struct config_channel_entry ConfigChannel;
 dlink_list global_channel_list;
 static BlockHeap *channel_heap;
 static BlockHeap *ban_heap;
-static BlockHeap *topic_heap;
+BlockHeap *topic_heap;
 static BlockHeap *member_heap;
 
 static int channel_capabs[] = { CAP_EX, CAP_IE, CAP_TS6 };
@@ -59,7 +59,6 @@ static int channel_capabs[] = { CAP_EX, CAP_IE, CAP_TS6 };
 
 static struct ChCapCombo chcap_combos[NCHCAP_COMBOS];
 
-static void free_topic(struct Channel *chptr);
 
 /* init_channels()
  *
@@ -761,40 +760,13 @@ check_splitmode(void *unused)
 	}
 }
 
-
-/* allocate_topic()
- *
- * input	- channel to allocate topic for
- * output	- 1 on success, else 0
- * side effects - channel gets a topic allocated
- */
-static void
-allocate_topic(struct Channel *chptr)
-{
-	void *ptr;
-
-	if(chptr == NULL)
-		return;
-
-	ptr = BlockHeapAlloc(topic_heap);
-
-	/* Basically we allocate one large block for the topic and
-	 * the topic info.  We then split it up into two and shove it
-	 * in the chptr 
-	 */
-	chptr->topic = ptr;
-	chptr->topic_info = (char *) ptr + TOPICLEN + 1;
-	*chptr->topic = '\0';
-	*chptr->topic_info = '\0';
-}
-
 /* free_topic()
  *
  * input	- channel which has topic to free
  * output	-
  * side effects - channels topic is free'd
  */
-static void
+void
 free_topic(struct Channel *chptr)
 {
 	void *ptr;
@@ -809,32 +781,6 @@ free_topic(struct Channel *chptr)
 	BlockHeapFree(topic_heap, ptr);
 	chptr->topic = NULL;
 	chptr->topic_info = NULL;
-}
-
-/* set_channel_topic()
- *
- * input	- channel, topic to set, topic info and topic ts
- * output	-
- * side effects - channels topic, topic info and TS are set.
- */
-void
-set_channel_topic(struct Channel *chptr, const char *topic,
-		  const char *topic_info, time_t topicts)
-{
-	if(strlen(topic) > 0)
-	{
-		if(chptr->topic == NULL)
-			allocate_topic(chptr);
-		strlcpy(chptr->topic, topic, TOPICLEN + 1);
-		strlcpy(chptr->topic_info, topic_info, USERHOST_REPLYLEN);
-		chptr->topic_time = topicts;
-	}
-	else
-	{
-		if(chptr->topic != NULL)
-			free_topic(chptr);
-		chptr->topic_time = 0;
-	}
 }
 
 /* channel_modes()

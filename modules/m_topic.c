@@ -26,6 +26,7 @@
 
 #include "stdinc.h"
 #include "tools.h"
+#include "balloc.h"
 #include "channel.h"
 #include "client.h"
 #include "hash.h"
@@ -57,6 +58,9 @@ struct Message tb_msgtab = {
 
 mapi_clist_av1 topic_clist[] = { &topic_msgtab, &tb_msgtab, NULL };
 DECLARE_MODULE_AV1(topic, NULL, NULL, topic_clist, NULL, NULL, "$Revision$");
+
+static void set_channel_topic(struct Channel *chptr, const char *topic,
+				const char *topic_info, time_t topicts);
 
 /*
  * m_topic
@@ -245,3 +249,57 @@ ms_tb(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 
 	return 0;
 }
+
+/* allocate_topic()
+ *
+ * input	- channel to allocate topic for
+ * output	- 1 on success, else 0
+ * side effects - channel gets a topic allocated
+ */
+static void
+allocate_topic(struct Channel *chptr)
+{
+	void *ptr;
+
+	if(chptr == NULL)
+		return;
+
+	ptr = BlockHeapAlloc(topic_heap);
+
+	/* Basically we allocate one large block for the topic and
+	 * the topic info.  We then split it up into two and shove it
+	 * in the chptr 
+	 */
+	chptr->topic = ptr;
+	chptr->topic_info = (char *) ptr + TOPICLEN + 1;
+	*chptr->topic = '\0';
+	*chptr->topic_info = '\0';
+}
+
+/* set_channel_topic()
+ *
+ * input	- channel, topic to set, topic info and topic ts
+ * output	-
+ * side effects - channels topic, topic info and TS are set.
+ */
+static void
+set_channel_topic(struct Channel *chptr, const char *topic,
+		  const char *topic_info, time_t topicts)
+{
+	if(strlen(topic) > 0)
+	{
+		if(chptr->topic == NULL)
+			allocate_topic(chptr);
+		strlcpy(chptr->topic, topic, TOPICLEN + 1);
+		strlcpy(chptr->topic_info, topic_info, USERHOST_REPLYLEN);
+		chptr->topic_time = topicts;
+	}
+	else
+	{
+		if(chptr->topic != NULL)
+			free_topic(chptr);
+		chptr->topic_time = 0;
+	}
+}
+
+

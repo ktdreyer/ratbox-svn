@@ -35,6 +35,9 @@
 #define MAXMODEPARAMS   4
 
 struct Client;
+struct BlockHeap;
+
+extern struct BlockHeap *topic_heap;
 
 /* mode structure for channels */
 struct Mode
@@ -172,6 +175,7 @@ void free_channel(struct Channel *chptr);
 struct Ban *allocate_ban(void);
 void free_ban(struct Ban *bptr);
 
+void free_topic(struct Channel *chptr);
 
 extern void destroy_channel(struct Channel *);
 
@@ -201,9 +205,6 @@ extern void channel_modes(struct Channel *chptr, struct Client *who, char *, cha
 extern void check_spambot_warning(struct Client *source_p, const char *name);
 
 extern void check_splitmode(void *);
-
-void set_channel_topic(struct Channel *chptr, const char *topic,
-		       const char *topic_info, time_t topicts);
 
 extern void init_chcap_usage_counts(void);
 extern void set_chcap_usage_counts(struct Client *serv_p);
