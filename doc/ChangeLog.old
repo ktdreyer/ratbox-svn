@@ -1,3 +1,8 @@
+*** 20000109_4 by db
+- forgot to remove now unused m_message.c
+
+
+
 *** 20000109_3 by db
 - split m_privmsg and m_notice into two files. My rationale for doing this
   is: slightly faster, no more if(notice) in code, m_privmsg/m_notice
