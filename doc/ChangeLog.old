@@ -1,3 +1,15 @@
+androsyn    2002/01/12 19:41:46 EST	(20020113_0)
+
+  Modified files:
+    src                  adns.c 
+  Log:
+  Fixed yet another wacky and weird /rehash dns bug..
+  
+  Revision  Changes    Path
+  7.35      +12 -6     ircd-hybrid-7/src/adns.c
+
+
+
 a1kmm       2002/01/12 18:06:07 EST	(20020112_3)
 
   Modified files:
