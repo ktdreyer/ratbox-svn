@@ -736,6 +736,11 @@ static void do_numeric(char numeric[],
        */
       return;
     }
+
+    /* csircd will send out unknown umode flag for +a (admin), drop it here. */
+    if((numeric == ERR_UMODEUNKNOWNFLAG) && MyClient(target_p))
+      return;
+    
     /* Fake it for server hiding, if its our client */
     if(ConfigServerHide.hide_servers &&
        MyClient(target_p) && !IsOper(target_p))
