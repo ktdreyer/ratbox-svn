@@ -13,6 +13,7 @@
 #include "client.h"
 #include "channel.h"
 #include "io.h"
+#include "rserv.h"
 #include "c_init.h"
 #include "log.h"
 #include "conf.h"
@@ -23,27 +24,124 @@
 
 static struct client *operbot_p;
 
+static void u_operbot_ojoin(struct connection_entry *, char *parv[], int parc);
+static void u_operbot_opart(struct connection_entry *, char *parv[], int parc);
+
+static int s_operbot_ojoin(struct client *, char *parv[], int parc);
+static int s_operbot_opart(struct client *, char *parv[], int parc);
 static int s_operbot_invite(struct client *, char *parv[], int parc);
 static int s_operbot_op(struct client *, char *parv[], int parc);
 
 static struct service_command operbot_command[] =
 {
+	{ "OJOIN",	&s_operbot_ojoin,	1, NULL, 1, 0L, 0, 0, CONF_OPER_OPERBOT_ADMIN },
+	{ "OPART",	&s_operbot_opart,	1, NULL, 1, 0L, 0, 0, CONF_OPER_OPERBOT_ADMIN },
 	{ "INVITE",	&s_operbot_invite,	1, NULL, 1, 0L, 0, 1, 0 },
 	{ "OP",		&s_operbot_op,		1, NULL, 1, 0L, 0, 1, 0 },
 	{ "\0",		NULL,			0, NULL, 0, 0L, 0, 0, 0 }
 };
 
+static struct ucommand_handler operbot_ucommand[] =
+{
+	{ "ojoin",	u_operbot_ojoin,	CONF_OPER_OPERBOT_ADMIN, 2, NULL },
+	{ "opart",	u_operbot_opart,	CONF_OPER_OPERBOT_ADMIN, 2, NULL },
+	{ "\0",		NULL,			0, 0, NULL }
+};
+
 static struct service_handler operbot_service = {
 	"OPERBOT", "operbot", "operbot", "services.operbot",
 	"Oper invitation/op services", 1, 60, 80, 
-	operbot_command, NULL, NULL
+	operbot_command, operbot_ucommand, NULL
 };
+
+static int operbot_db_callback(void *db, int, char **, char **);
 
 void
 init_s_operbot(void)
 {
 	operbot_p = add_service(&operbot_service);
+
+	loc_sqlite_exec(operbot_db_callback, "SELECT * FROM operbot");
 }
+
+static int
+operbot_db_callback(void *db, int argc, char **argv, char **colnames)
+{
+	join_service(operbot_p, argv[0]);
+	return 0;
+}
+
+static void
+u_operbot_ojoin(struct connection_entry *conn_p, char *parv[], int parc)
+{
+	struct channel *chptr;
+
+	if((chptr = find_channel(parv[1])) && 
+	   dlink_find(&chptr->services, operbot_p))
+	{
+		sendto_one(conn_p, "Operbot already in %s", parv[1]);
+		return;
+	}
+
+	loc_sqlite_exec(NULL, "INSERT INTO operbot VALUES(%Q, %Q)",
+			parv[0], conn_p->name);
+
+	join_service(operbot_p, parv[1]);
+	sendto_one(conn_p, "Operbot joined to %s", parv[1]);
+}
+
+static void
+u_operbot_opart(struct connection_entry *conn_p, char *parv[], int parc)
+{
+	if(part_service(operbot_p, parv[1]))
+	{
+		loc_sqlite_exec(NULL, "DELETE FROM operbot WHERE chname = %Q",
+				parv[1]);
+		sendto_one(conn_p, "Operbot removed from %s", parv[1]);
+	}
+	else
+		sendto_one(conn_p, "Operbot not in channel %s", parv[1]);
+}
+
+static int
+s_operbot_ojoin(struct client *client_p, char *parv[], int parc)
+{
+	struct channel *chptr;
+
+	if((chptr = find_channel(parv[0])) && 
+	   dlink_find(&chptr->services, operbot_p))
+	{
+		service_error(operbot_p, client_p, 
+				"Operbot already in %s", parv[0]);
+		return 1;
+	}
+
+	loc_sqlite_exec(NULL, "INSERT INTO operbot VALUES(%Q, %Q)",
+			parv[0], client_p->name, 
+			client_p->user->oper->name);
+			
+	join_service(operbot_p, parv[0]);
+	service_error(operbot_p, client_p, 
+			"Operbot joined to %s", parv[0]);
+	return 1;
+}
+
+static int
+s_operbot_opart(struct client *client_p, char *parv[], int parc)
+{
+	if(part_service(operbot_p, parv[0]))
+	{
+		loc_sqlite_exec(NULL, "DELETE FROM operbot WHERE chname = %Q",
+				parv[0]);
+		service_error(operbot_p, client_p, 
+				"Operbot removed from %s", parv[0]);
+	}
+	else
+		service_error(operbot_p, client_p, 
+				"Operbot not in channel %s", parv[0]);
+	return 1;
+}
+
 
 static int
 s_operbot_invite(struct client *client_p, char *parv[], int parc)

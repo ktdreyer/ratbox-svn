@@ -40,6 +40,7 @@ static struct mode_table privs_table[] = {
 	{ "cs_register",CONF_OPER_CS_REGISTER	},
 	{ "us_admin",	CONF_OPER_US_ADMIN	},
 	{ "us_register",CONF_OPER_US_REGISTER	},
+	{ "operbot_admin", CONF_OPER_OPERBOT_ADMIN },
 	{ "\0",		0			}
 };
 
@@ -684,15 +685,6 @@ conf_set_service_realname(void *data)
 	yy_service->service->reintroduce = 1;
 }
 
-static void
-conf_set_operbot_channel(void *data)
-{
-	if(yy_service == NULL)
-		return;
-
-	join_service(yy_service, data);
-}
-
 static struct ConfEntry conf_serverinfo_table[] =
 {
 	{ "description",	CF_QSTRING, NULL, 0, &config_file.gecos		},
@@ -763,12 +755,6 @@ static struct ConfEntry conf_jupeserv_table[] =
 	{ "\0", 0, NULL, 0, NULL }
 };
 
-static struct ConfEntry conf_operbot_table[] =
-{
-	{ "channel",	CF_QSTRING, conf_set_operbot_channel,	0, NULL },
-	{ "\0", 0, NULL, 0, NULL }
-};
-
 void
 newconf_init()
 {
@@ -781,5 +767,4 @@ newconf_init()
 	add_conf_extension("service", "userserv", conf_userserv_table);
 	add_conf_extension("service", "chanserv", conf_chanserv_table);
 	add_conf_extension("service", "jupeserv", conf_jupeserv_table);
-	add_conf_extension("service", "operbot", conf_operbot_table);
 }
