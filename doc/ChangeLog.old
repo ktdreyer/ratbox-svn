@@ -1,3 +1,8 @@
+*** 20010918_5 by db
+- 3 line functions are silly, so removed one.
+
+
+
 *** 20010918_4 by davidt
 - Fix src/send.c to send the correct data to io_debug
 - Add eventDelete to event.c, prototype to event.h
