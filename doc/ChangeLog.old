@@ -1,3 +1,15 @@
+androsyn    2002/01/13 19:56:05 EST	(20020114_0)
+
+  Modified files:
+    src                  balloc.c 
+  Log:
+  I will compile before I commit.  I will compile before I commit.
+  
+  Revision  Changes    Path
+  7.23      +1 -1      ircd-hybrid-7/src/balloc.c
+
+
+
 leeh        2002/01/13 18:50:00 EST	(20020113_13)
 
   Modified files:
