@@ -652,6 +652,13 @@ int mo_ungline (struct Client *cptr, struct Client *sptr,int parc,char *parv[])
       return 0;
     }
 
+  if ( parc < 2 )
+    {
+      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
+                 me.name, parv[0], "UNGLINE");
+      return 0;
+    }
+
   if ( (host = strchr(parv[1], '@')) || *parv[1] == '*' )
     {
       /* Explicit user@host mask given */
