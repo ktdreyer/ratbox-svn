@@ -1,3 +1,8 @@
+*** 20010108_5 by db
+- added FLAGS_DRONE to ALL_UMODES
+
+
+
 *** 20010108_4 by wcampbel
 Added action=silent; to gecos blocks, like old X:...:2
 
