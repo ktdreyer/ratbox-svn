@@ -297,7 +297,7 @@ const char* my_name_for_link(const char* name, struct ConfItem* aconf)
 void add_server_to_list(struct Client *client_p)
 {
   dlink_node *ptr;
- 
+  SetServer(client_p);
   ptr = make_dlink_node();
   dlinkAdd(client_p, ptr, &global_serv_list);
 
