@@ -1,3 +1,8 @@
+*** 20010106_25 by db
+- added missing prototype for sendto_one_prefix, prettied the code slightly
+
+
+
 *** 20010106_24 by wcampbel
 Removed whois_notice and topic_uh from the ConfigFileEntry struct, one no
 longer exists, the other is always enabled, neither variable is used 
