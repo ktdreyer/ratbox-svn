@@ -1,3 +1,12 @@
+*** 20010213_2 by db
+- fixed IP in conf when ip is used for host = ""; in connect block
+  use inetpton() on given string, if returns 0 use dns... otherwise
+  its a valid IP to use. s_conf.c
+
+- open fd to stderr.log, dup it to fd 2 s_bsd.c
+
+
+
 *** 20010213_1 by androsyn
 Made server hostmasking work again.  Well, at least in theory. 
 Added a fakename= option to the connect block for this.
