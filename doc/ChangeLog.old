@@ -1,3 +1,11 @@
+*** 20010117_11 by wcampbel
+1. Updated documentation
+2. Added 'locops' to the oper only umodes in the conf parser
+3. Updated the oper_flags_as_string() function (which will be used again
+   once the ability to specify usermodes set by default in an oper block
+   is added in (NOTE:  if you add to this function, watch the buffer size)
+
+
 *** 20010117_10 by fl_
 - you can now specify a path in /modload and have it work :)
 
