@@ -1,3 +1,8 @@
+*** 20011015_1 by davidt
+- Improved binary code for linebuf_get/parse, hoepfully this will fix the
+  compression/encryption problems.
+
+
 *** 20011014_1 by db
 - Wrong flag was being tested in m_kill.c, never noticed since
   usually kline = yes; is set.
