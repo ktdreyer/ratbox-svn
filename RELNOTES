@@ -1,0 +1,17 @@
+ircd-hybrid-7(alpha) Release Notes
+----------------------------------
+$Id$
+
+This is an alpha release (pre-beta).  This means there is still a large 
+amount of untested and experimental code. 
+
+Please read doc/whats-new.txt for information about what is in this release
+
+Known bugs are listed in TODO and at http://bugs.efnow.net
+
+Please fill in the forms at http://bugs.efnow.net if you discover new bugs; include a gdb
+backtrace and a copy of your config.h and ircd.conf.
+
+README.FIRST may have more information.
+
+You should find it all compiles pretty neatly for a pre-beta ;)
