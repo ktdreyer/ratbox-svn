@@ -119,8 +119,9 @@ struct User* make_user(struct Client *cptr)
       user->channel.tail = NULL;
       user->invited.head = NULL;
       user->invited.tail = NULL;
+	  user->id[0] = '\0';
       cptr->user = user;
-    }
+	}
   return user;
 }
 
