@@ -1,3 +1,15 @@
+androsyn    2003/02/03 21:52:08 UTC	(20030203_2)
+
+  Modified files:
+    modules              .depend 
+  Log:
+  Update .depend
+  
+  Revision  Changes    Path
+  1.22      +646 -648  ircd-ratbox/modules/.depend
+
+
+
 androsyn    2003/02/03 21:45:34 UTC	(20030203_1)
 
   Modified files:
