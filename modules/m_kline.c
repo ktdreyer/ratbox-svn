@@ -162,11 +162,11 @@ int mo_kline(struct Client *cptr,
   else
     argv = parv[2];
 
-  if (parc > 2) 
+  if ((parc > 2) && argv) 
     if ( valid_comment(sptr, argv) == 0 )
       return 0;
 
-  if(*argv)
+  if(argv && *argv)
     reason = argv;
   else
     reason = "No reason";
@@ -179,18 +179,10 @@ int mo_kline(struct Client *cptr,
 
   ip_kline = is_ip_kline(host,&ip,&ip_mask);
 
-/* ZZZ */
-sendto_realops("ip_kline %d host %s\n", ip_kline,host);
-
-  if ( already_placed(sptr, user, host, ip) )
+  if ( already_placed_kline(sptr, user, host, ip) )
     return 0;
 
-/* ZZZ */
-sendto_realops("About to call smalldate\n");
-
   current_date = smalldate((time_t) 0);
-
-sendto_realops("current_date %s\n",current_date);
 
   aconf = make_conf();
   aconf->status = CONF_KILL;
@@ -249,6 +241,8 @@ sendto_realops("current_date %s\n",current_date);
 
   log(L_TRACE, "%s added K-Line for [%s@%s] [%s]",
       sptr->name, user, host, reason );
+
+  kconf = get_conf_name(KLINE_TYPE);
 
   sendto_one(sptr,
     ":%s NOTICE %s :Added K-Line [%s@%s] to %s",
