@@ -1,3 +1,15 @@
+androsyn    2002/08/21 20:44:59 EDT	(20020822_2)
+
+  Modified files:
+    src                  channel.c 
+  Log:
+  Cleanup add_user_to_channel()
+  
+  Revision  Changes    Path
+  7.345     +60 -49    ircd-ratbox/src/channel.c
+
+
+
 androsyn    2002/08/21 20:06:00 EDT	(20020822_1)
 
   Modified files:
