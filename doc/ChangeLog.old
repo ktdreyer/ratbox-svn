@@ -1,3 +1,7 @@
+*** 20010718_3 by leeh
+- make install will rm m_client.so if it exists
+
+
 *** 20010718_2 by androsyn
 A stray log() still needed to be converted to ilog()
 
