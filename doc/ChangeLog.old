@@ -1,3 +1,7 @@
+*** 19990816_3 by tomh
+clean up dn_expand result checks
+
+
 *** 19990816_2 by lusky
 removed redundant "New highest connections" server notice
 
