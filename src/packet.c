@@ -106,8 +106,6 @@ flood_recalc(int fd, void *data)
  /* This can happen in the event that the client detached. */
  if (!lclient_p)
   return;
- assert(client_p != NULL);
- assert(lclient_p != NULL);
  /* If we're a server, skip to the end. Realising here that this call is
   * cheap and it means that if a op is downgraded they still get considered
   * for anti-flood protection ..
