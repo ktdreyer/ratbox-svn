@@ -1,3 +1,16 @@
+androsyn    2005/02/26 19:38:35 EST	(20050227_4)
+
+  Modified files:
+    include              stdinc.h 
+  Log:
+  sort out some alloca related stupidness.  if we have gcc just use the builtin for it
+  otherwise..the other macros might work????
+  
+  Revision  Changes    Path
+  1.19      +15 -6     ircd-ratbox/include/stdinc.h
+
+
+
 androsyn    2005/02/26 19:26:04 EST	(20050227_3)
 
   Modified files:
