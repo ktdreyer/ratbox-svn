@@ -44,7 +44,7 @@ ac_help="$ac_help
   --enable-devpoll             Enable /dev/poll support.
   --disable-devpoll            Disable /dev/poll support. "
 ac_help="$ac_help
-  --enable-rtsigio             Enable SIGIO with RT Signals(Linux only) *experimental*.
+  --enable-rtsigio             Enable SIGIO with RT Signals(Linux only).
   --disable-rtsigio            Disable SIGIO with RT Signals(Linux only). "
 ac_help="$ac_help
   --enable-ipv6                Enable IPV6 support.
