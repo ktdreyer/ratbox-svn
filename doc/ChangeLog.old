@@ -1,3 +1,12 @@
+*** 20001204_15 by db
+- fixed bug in parse_client_queued to do with opered clients.
+  code was nver resetting lcptr->sent_parsed = 0 and actually_read = 0
+  so poor oper would no longer be listened to after a while...
+  Replaced goto with a if (!IsPrivileged... macro... 
+- removed last remnants of USER_UH defines ... GONE
+
+
+
 *** 20001204_14 by db
 - don't devoice/voice if chanop
 
