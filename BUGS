@@ -22,8 +22,26 @@
       this breaks stuff :)
 
 4.  Unconfirmed reports of /modunload coring on certain platforms.
-    - We think we have caught most of them, please let us know if you get a 
-      problem.
+    - There is an issue here with unloading a different module to that what
+      is loaded.  For example, you have m_vanity.so as a loaded module, and
+      you add 4 new commands to it, replace the module, then try to unload it.
+      
+      If you have made the module correctly, when unloading the module, you
+      would have also coded it to remove the 4 new commands, which it cant do
+      as they dont exist.  This could cause the server to core.  It also cannot
+      realistically be fixed, as you remove the whole point of dynamic modules.
+
+      This could also happen if you have a modules { path="x"; }; statement in
+      your config, with an old, or different copy of the module in.  It may
+      try to unload this version of the module, instead of the one that is 
+      actually loaded.
+
+      So:
+      - Minor changes are normally ok, such as adding a couple of lines to code.
+      If you do a major change to the module, including adding new commands, it
+      is recommended that you unload the module FIRST, replace the module file
+      and then /modload the module.
+      - Dont have multiple copies of the same module in your paths.
 
 5.  opers@server and user@server PRIVMSG/NOTICE broken
     - eg PRIVMSG opers@irc.monkie.org :test
