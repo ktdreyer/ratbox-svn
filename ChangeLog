@@ -1,3 +1,24 @@
+leeh        2005/02/09 14:39:13 EST	(20050209_2)
+
+  Modified files:
+    include              s_conf.h 
+    modules              m_dline.c m_kline.c m_rehash.c m_stats.c 
+    src                  ircd.c s_conf.c 
+  Log:
+  - move temp dlines and temp klines over to an array, rather than completely
+    seperate dlinks.
+  
+  Revision  Changes    Path
+  7.311     +11 -20    ircd-ratbox/include/s_conf.h
+  1.47      +4 -15     ircd-ratbox/modules/m_dline.c
+  1.199     +4 -15     ircd-ratbox/modules/m_kline.c
+  1.88      +42 -26    ircd-ratbox/modules/m_rehash.c
+  1.243     +22 -31    ircd-ratbox/modules/m_stats.c
+  7.369     +0 -5      ircd-ratbox/src/ircd.c
+  7.505     +78 -104   ircd-ratbox/src/s_conf.c
+
+
+
 leeh        2005/02/09 14:02:13 EST	(20050209_1)
 
   Modified files:
