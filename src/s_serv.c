@@ -1277,7 +1277,7 @@ void set_autoconn(struct Client *sptr,char *parv0,char *name,int newval)
 {
   struct ConfItem *aconf;
 
-  if((aconf= find_conf_by_name(name, CONF_CONNECT_SERVER)))
+  if(name && (aconf= find_conf_by_name(name, CONF_CONNECT_SERVER)))
     {
       if (newval)
         aconf->flags |= CONF_FLAGS_ALLOW_AUTO_CONN;
