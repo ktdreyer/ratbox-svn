@@ -77,9 +77,12 @@ const char *_version = "$Revision$";
 static void mo_resv(struct Client *client_p, struct Client *source_p,
                     int parc, char *parv[])
 {
-  /* XXX - error? */
   if(BadPtr(parv[1]) || BadPtr(parv[2]))
+  {
+    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
+               me.name, source_p->name, "RESV");
     return;
+  }
 
   if(IsChannelName(parv[1]))
   {
@@ -147,9 +150,12 @@ static void mo_unresv(struct Client *client_p, struct Client *source_p,
   int error_on_write = 0;
   int found_resv = 0;
 
-  /* XXX - error */
   if(BadPtr(parv[1]))
+  {
+    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
+               me.name, source_p->name, "RESV");
     return;
+  }
 
   ircsprintf(temppath, "%s.tmp", ConfigFileEntry.resvfile);
   filename = get_conf_name(RESV_TYPE);

@@ -38,16 +38,6 @@ struct ResvEntry
 extern dlink_list resv_channel_list;
 extern dlink_list resv_nick_list;
 
-#if 0
-extern struct ResvChannel *create_channel_resv(char *, char *, int);
-extern struct ResvNick *create_nick_resv(char *, char *, int);
-
-extern int delete_channel_resv(struct ResvChannel *);
-extern int delete_nick_resv(struct ResvNick *);
-
-extern void clear_conf_resv();
-#endif
-
 extern struct ResvEntry *create_resv(char *, char *, int);
 
 extern int delete_resv(struct ResvEntry *);
