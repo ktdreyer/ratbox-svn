@@ -853,8 +853,10 @@ general {
 	/* time between notifications of ignored messages in +g mode */
 	caller_id_wait = 1 minute;
 
-	/* time between uses (server wide) of /whois and /whowas */
-	whois_wait = 5 seconds;
+	/* time between uses of the less intensive commands:
+	 * HELP/WHOIS/WHOWAS
+	 */
+	pace_wait_simple = 2 seconds;
 
 	/* time between uses of various commands such as INFO */
 	pace_wait = 10 seconds;

@@ -29,9 +29,14 @@
 
    1. 
 
-       Read the ChangeLog file to find out about the exciting new features in
-       this version. Other good reads are doc/whats-new.txt, BUGS,
-       doc/example.conf, and README.FIRST.
+       Read doc/whats-new.txt to read about the new features in
+       ircd-hybrid-7 since ircd-hybrid-6.  The file BUGS contains a list of 
+       known bugs at this time, README.FIRST contains useful 
+       information whether you are upgrading or installing from scratch.
+
+       The file RELNOTES is updated every release with information about
+       changes that have occured between releases, such as config options
+       that were removed/added in the latest beta.
 
        An example.conf for EFnet is in doc/ with the values "approved" on 12
        December 2001.

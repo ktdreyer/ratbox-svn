@@ -2004,7 +2004,9 @@ general_havent_read_conf:  HAVENT_READ_CONF '=' NUMBER ';'
 {
   if($3 > 0)
   {
-    ilog(L_CRIT, "You haven't read your config file properly.  There is a line to check youve been paying attention.");
+    ilog(L_CRIT, "You haven't read your config file properly.");
+    ilog(L_CRIT, "There is a line in the example conf that will kill your server if not removed.");
+    ilog(L_CRIT, "Consider actually reading/editing the conf file, and removing this line.");
     exit(0);
   }
 }
