@@ -158,6 +158,21 @@ find_user_reg_nick(struct client *client_p, const char *name)
 		return find_user_reg(client_p, name);
 }
 
+static int
+valid_username(const char *name)
+{
+	if(strlen(name) > USERREGNAME_LEN)
+		return 0;
+
+	for(; *name; name++)
+	{
+		if(!IsNickChar(*name))
+			return 0;
+	}
+
+	return 1;
+}
+
 static void
 u_userserv_udrop(struct connection_entry *conn_p, char *parv[], int parc)
 {
@@ -256,13 +271,19 @@ s_userserv_register(struct client *client_p, char *parv[], int parc)
 		return 1;
 	}
 
+	if(ClientRegister(client_p))
+	{
+		service_error(userserv_p, client_p, "You have already registered a username");
+		return 1;
+	}
+
 	if((reg_p = find_user_reg(NULL, parv[0])) != NULL)
 	{
 		service_error(userserv_p, client_p, "That username is already registered");
 		return 1;
 	}
 
-	if(strlen(parv[0]) > USERREGNAME_LEN)
+	if(!valid_username(parv[0]))
 	{
 		service_error(userserv_p, client_p, "Invalid username");
 		return 1;
@@ -314,6 +335,8 @@ s_userserv_register(struct client *client_p, char *parv[], int parc)
 
 	client_p->user->user_reg = reg_p;
 	add_user_reg(reg_p);
+
+	SetClientRegister(client_p);
 
 	loc_sqlite_exec(NULL, "INSERT INTO users VALUES(%Q, %Q, %Q, %lu, %lu, %u)",
 			reg_p->name, reg_p->password, 
