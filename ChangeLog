@@ -1,3 +1,15 @@
+androsyn    2003/05/26 15:01:08 UTC	(20030526_2)
+
+  Modified files:
+    src                  ircd.c 
+  Log:
+  Rip out irc_sleep if we aren't using it
+  
+  Revision  Changes    Path
+  7.287     +0 -16     ircd-ratbox/src/ircd.c
+
+
+
 ejb         2003/05/26 14:45:33 UTC	(20030526_1)
 
   Modified files:
