@@ -1,3 +1,11 @@
+*** 20001127_1 by db
+- fixed modules code to use version string as well
+- fixed parse to use prefix tree code
+- modload modunload hooks in place, need admin flags 
+- fixed m_help to use original msgtab 
+
+
+
 *** 20001126_10 by db
 - got tired of a compile warning
 
