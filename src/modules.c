@@ -245,7 +245,7 @@ static void increase_modlist(void)
 {
   struct module **new_modlist = NULL;
 
-  if(num_mods < max_mods)
+  if((num_mods + 1) < max_mods)
     return;
 
   new_modlist = (struct module **)MyMalloc ( sizeof (struct module) *
