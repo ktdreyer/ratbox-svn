@@ -340,7 +340,7 @@ int register_user(struct Client *cptr, struct Client *sptr,
   if (MyConnect(sptr))
     {
       if( ( status = check_client(cptr, sptr, username )) < 0 )
-	return status;
+	return(CLIENT_EXITED);
 
       if(!valid_hostname(sptr->host))
         {
