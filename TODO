@@ -26,6 +26,9 @@ is-'s TODO list
 
 Adrian's TODO list
 
+* Check to make sure a SIGHUP actually causes a rehash. The last time I tried
+  it, the server stayed running, but the ircd stopped listening on ports.
+
 * make the reserved FD limit run-time tuneable, esp from comm_open()
   This involves making fd_table[] a dynamically growing/(don't bother with
   shrinking) list.. have the max fd list configurable in the conf file..
