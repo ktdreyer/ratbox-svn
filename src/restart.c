@@ -40,7 +40,7 @@ void server_reboot(void)
   int i;
 
   sendto_realops_flags(FLAGS_ALL, L_ALL,
-                       Restarting server...");
+                       "Restarting server...");
 
   ilog(L_NOTICE, "Restarting server...");
   /*
