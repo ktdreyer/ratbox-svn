@@ -1,3 +1,8 @@
+*** 20010919_1 by androsyn
+Fixed the 0::1 stuff for IPv6 support and removed stupid check as well.
+
+
+
 *** 20010918_5 by db
 - 3 line functions are silly, so removed one.
 
