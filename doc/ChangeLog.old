@@ -1,3 +1,21 @@
+a1kmm       2001/12/30 04:11:30 EST	(20011230_5)
+
+  Modified files:
+    modules              m_sjoin.c m_who.c 
+    src                  s_debug.c s_serv.c vchannel.c 
+  Log:
+  - Fixed a few missing references to chanops_voiced. This time I found
+    where they should be with grep, so I hopefully did not miss any again.
+  
+  Revision  Changes    Path
+  1.124     +7 -1      ircd-hybrid-7/modules/m_sjoin.c
+  1.48      +34 -12    ircd-hybrid-7/modules/m_who.c
+  7.63      +4 -0      ircd-hybrid-7/src/s_debug.c
+  7.230     +12 -0     ircd-hybrid-7/src/s_serv.c
+  7.60      +10 -1     ircd-hybrid-7/src/vchannel.c
+
+
+
 a1kmm       2001/12/30 02:49:50 EST	(20011230_4)
 
   Modified files:
