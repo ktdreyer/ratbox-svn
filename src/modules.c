@@ -53,7 +53,6 @@ struct module **modlist = NULL;
 int num_mods = 0;
 int max_mods = MODS_INCREMENT;
 static void increase_modlist(void);
-static int findmodule_byname (char *name);
 
 static struct module_path *mod_paths = NULL;
 
@@ -108,7 +107,7 @@ irc_basename(char *path)
 }
 
 
-static int 
+int 
 findmodule_byname (char *name)
 {
   int i;
@@ -202,7 +201,6 @@ load_all_modules (void)
 	   system_module_dir_name, strerror (errno));
       return;
     }
-
   system_module_dir = opendir (".");
   if (system_module_dir == NULL)
     {

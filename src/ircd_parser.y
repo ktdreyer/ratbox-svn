@@ -34,6 +34,7 @@
 #include "irc_string.h"
 #include "ircdauth.h"
 #include "memdebug.h"
+#include "modules.h"
 extern char *ip_string;
 
 int yyparse();
@@ -243,7 +244,10 @@ modules_item:    modules_module | modules_path |
 
 modules_module:  MODULE '=' QSTRING ';'
 {
-  load_one_module (yylval.string);
+  /* I suppose we should just ignore it if it is already loaded(since
+   * otherwise we would flood the opers on rehash) -A1kmm. */
+  if (!findmodule_byname(yylval.string))
+    load_one_module (yylval.string);
 };
 
 modules_path: PATH '=' QSTRING ';'
