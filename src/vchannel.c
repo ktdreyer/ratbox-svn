@@ -158,6 +158,7 @@ void show_vchans(struct Client *cptr,
    struct Channel *chtmp;
    int no_of_vchans = 0;
    int reply_to_send = 1;
+   int len;
    char key_list[BUFSIZE];
 
    *key_list = '\0';
@@ -173,10 +174,13 @@ void show_vchans(struct Client *cptr,
      if (chtmp->members)
        {
          strcat(key_list, "!");
-         strcat(key_list, chtmp->members->value.cptr->name);
+         strcat(key_list, pick_vchan_id(chtmp));
          strcat(key_list, " ");
 
-         if (strlen(key_list) > (BUFSIZE - NICKLEN - 3))
+         len = ( strlen(me.name) + NICKLEN + strlen(chptr->chname) 
+               + strlen(key_list) + 8 );
+
+         if (len > (BUFSIZE - NICKLEN - 3))
            {
              sendto_one(sptr, form_str(RPL_VCHANLIST),
                         me.name, sptr->name, chptr->chname, key_list);
@@ -194,6 +198,22 @@ void show_vchans(struct Client *cptr,
 
    sendto_one(sptr, form_str(RPL_VCHANHELP),
               me.name, sptr->name, command, chptr->chname);
+}
+
+/* pick a name from the channel.  we'll chose who's been there 
+ * longest today */
+char* pick_vchan_id(struct Channel *chptr)
+{
+  struct SLink *lp;
+
+  for (lp = chptr->members; lp; lp = lp->next)
+    {
+      if (!lp->next)
+        return lp->value.cptr->name;
+    }
+
+  /* shouldn't get here! */
+  return NULL;
 }
 
 /* return matching vchan, from root and !key (nick)

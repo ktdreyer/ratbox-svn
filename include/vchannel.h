@@ -55,6 +55,9 @@ extern void	show_vchans(struct Client *cptr,
 			    struct Channel *chptr,
                             char *command);
 
+/* pick a nickname from the channel, to show as an ID */
+extern char* pick_vchan_id(struct Channel *chptr);
+
 /* find a matching vchan with a !key (nick) */ 
 extern struct Channel* find_vchan(struct Channel *, char *);
 

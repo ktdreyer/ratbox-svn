@@ -103,7 +103,7 @@ int     m_list(struct Client *cptr,
                   (root_chptr->members || root_chptr->next_vchan->next_vchan) )
                 {
                   ircsprintf(vname, "%s<!%s>", root_chptr->chname,
-                             chptr->members->value.cptr->name);
+                             pick_vchan_id(chptr));
                 }
               else
                 ircsprintf(vname, "%s", root_chptr->chname);
@@ -158,7 +158,7 @@ int     m_list(struct Client *cptr,
                   (root_chptr->members || root_chptr->next_vchan->next_vchan) )
                 {
                   ircsprintf(vname, "%s<!%s>", root_chptr->chname,  
-                             chptr->members->value.cptr->name);
+                             pick_vchan_id(chptr));
                 }
               else
                 ircsprintf(vname, "%s", root_chptr->chname);
@@ -205,7 +205,7 @@ int     m_list(struct Client *cptr,
                 (root_chptr->members || root_chptr->next_vchan->next_vchan) )
               {
                 ircsprintf(vname, "%s<!%s>", root_chptr->chname,
-                           tmpchptr->members->value.cptr->name);
+                           pick_vchan_id(tmpchptr));
               }
             else
               ircsprintf(vname, "%s", root_chptr->chname);
