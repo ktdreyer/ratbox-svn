@@ -65,6 +65,7 @@ static int s_chan_clearops(struct client *, char *parv[], int parc);
 static int s_chan_clearallops(struct client *, char *parv[], int parc);
 static int s_chan_clearbans(struct client *, char *parv[], int parc);
 static int s_chan_invite(struct client *, char *parv[], int parc);
+static int s_chan_getkey(struct client *, char *parv[], int parc);
 static int s_chan_op(struct client *, char *parv[], int parc);
 static int s_chan_voice(struct client *, char *parv[], int parc);
 static int s_chan_addban(struct client *, char *parv[], int parc);
@@ -94,6 +95,7 @@ static struct service_command chanserv_command[] =
 	{ "CLEARALLOPS",&s_chan_clearallops,	1, NULL, 1, 0L, 1, 0, 0, 0 },
 	{ "CLEARBANS",	&s_chan_clearbans,	1, NULL, 1, 0L, 1, 0, 0, 0 },
 	{ "INVITE",	&s_chan_invite,		1, NULL, 1, 0L, 1, 0, 0, 0 },
+	{ "GETKEY",	&s_chan_getkey,		1, NULL, 1, 0L, 1, 0, 0, 0 },
 	{ "OP",		&s_chan_op,		1, NULL, 1, 0L, 1, 0, 0, 0 },
 	{ "VOICE",	&s_chan_voice,		1, NULL, 1, 0L, 1, 0, 0, 0 },
 	{ "ADDBAN",	&s_chan_addban,		4, NULL, 1, 0L, 1, 0, 0, 0 },
@@ -1185,7 +1187,7 @@ s_chan_register(struct client *client_p, char *parv[], int parc)
 		client_p->user->mask, client_p->user->user_reg->name, parv[0]);
 
 	reg_p = BlockHeapAlloc(channel_reg_heap);
-	reg_p->name = my_strdup(parv[0]);
+	reg_p->name = my_strdup(lcase(parv[0]));
 	reg_p->reg_time = reg_p->last_time = CURRENT_TIME;
 	reg_p->mode.mode = MODE_TOPIC|MODE_NOEXTERNAL;
 
@@ -1802,7 +1804,33 @@ s_chan_set(struct client *client_p, char *parv[], int parc)
 		loc_sqlite_exec(NULL, "UPDATE channels SET flags = %d "
 				"WHERE chname = %Q",
 				chreg_p->flags, chreg_p->name);
+		return 1;
+	}
+	else if(!strcasecmp(parv[1], "WARNOVERRIDE"))
+	{
+		if(!strcasecmp(arg, "ON"))
+			chreg_p->flags |= CS_FLAGS_WARNOVERRIDE;
+		else if(!strcasecmp(arg, "OFF"))
+			chreg_p->flags &= ~CS_FLAGS_WARNOVERRIDE;
+		else
+		{
+			service_error(chanserv_p, client_p,
+				"Channel %s WARNOVERRIDE is %s",
+				chreg_p->name,
+				(chreg_p->flags & CS_FLAGS_WARNOVERRIDE) ?
+				  "ON" : "OFF");
+			return 1;
+		}
 
+		service_error(chanserv_p, client_p,
+				"Channel %s WARNOVERRIDE set %s",
+				chreg_p->name,
+				(chreg_p->flags & CS_FLAGS_WARNOVERRIDE) ?
+				  "ON" : "OFF");
+
+		loc_sqlite_exec(NULL, "UPDATE channels SET flags = %d "
+				"WHERE chname = %Q",
+				chreg_p->flags, chreg_p->name);
 		return 1;
 	}
 	else if(!strcasecmp(parv[1], "MODES"))
@@ -2013,7 +2041,7 @@ s_chan_invite(struct client *client_p, char *parv[], int parc)
 	struct member_reg *reg_p;
 	struct channel *chptr;
 
-	if((reg_p = verify_member_reg_name(client_p, &chptr, parv[0], S_C_OP)) == NULL)
+	if((reg_p = verify_member_reg_name(client_p, &chptr, parv[0], S_C_USER)) == NULL)
 		return 1;
 
 	if((chptr->mode.mode & MODE_INVITEONLY) == 0)
@@ -2034,6 +2062,52 @@ s_chan_invite(struct client *client_p, char *parv[], int parc)
 
 	sendto_server(":%s INVITE %s %s",
 			chanserv_p->name, client_p->name, chptr->name);
+
+	if(reg_p->channel_reg->flags & CS_FLAGS_WARNOVERRIDE &&
+	   reg_p->channel_reg->flags & CS_FLAGS_AUTOJOIN)
+		sendto_server(":%s NOTICE @%s :INVITE requested by %s:%s",
+				chanserv_p->name, chptr->name,
+				reg_p->user_reg->name, client_p->user->mask);
+
+	return 1;
+}
+
+static int
+s_chan_getkey(struct client *client_p, char *parv[], int parc)
+{
+	struct member_reg *mreg_p;
+	struct channel *chptr;
+
+	if((mreg_p = verify_member_reg_name(client_p, &chptr, parv[0], S_C_USER)) == NULL)
+		return 1;
+
+	if(!chptr->mode.key[0])
+	{
+		service_error(chanserv_p, client_p,
+			"Channel %s is not keyed", parv[0]);
+		return 1;
+	}
+
+	if(find_chmember(chptr, client_p))
+	{
+		service_error(chanserv_p, client_p,
+				"You are already on %s", parv[0]);
+		return 1;
+	}
+
+	slog(chanserv_p, 6, "%s %s GETKEY %s",
+		client_p->user->mask, client_p->user->user_reg->name,
+		parv[0]);
+
+	service_error(chanserv_p, client_p,
+			"Channel %s key is: %s", parv[0], chptr->mode.key);
+
+	if(mreg_p->channel_reg->flags & CS_FLAGS_WARNOVERRIDE &&
+	   mreg_p->channel_reg->flags & CS_FLAGS_AUTOJOIN)
+		sendto_server(":%s NOTICE @%s :GETKEY requested by %s:%s",
+				chanserv_p->name, chptr->name,
+				mreg_p->user_reg->name, client_p->user->mask);
+
 	return 1;
 }
 
@@ -2418,6 +2492,7 @@ static int
 s_chan_info(struct client *client_p, char *parv[], int parc)
 {
 	struct chan_reg *reg_p;
+	struct member_reg *mreg_p;
 	const char *owner;
 	time_t seconds;
 	int minutes, hours, days, weeks;
@@ -2431,7 +2506,6 @@ s_chan_info(struct client *client_p, char *parv[], int parc)
 			reg_p->name, owner ? owner : "???");
 
 	seconds = (CURRENT_TIME - reg_p->reg_time);
-	minutes = (seconds / 60);
 
 	weeks = (int) (seconds / 604800);
 	seconds %= 604800;
@@ -2451,6 +2525,23 @@ s_chan_info(struct client *client_p, char *parv[], int parc)
 		if(CliOperCSAdmin(client_p))
 			service_error(chanserv_p, client_p, "Suspended by %s",
 					reg_p->suspender);
+	}
+	else if((mreg_p = find_member_reg(client_p->user->user_reg, reg_p)) &&
+		!mreg_p->suspend)
+	{
+		if(reg_p->flags & CS_FLAGS_SHOW)
+			service_error(chanserv_p, client_p,
+				"Settings: %s%s%s",
+				(reg_p->flags & CS_FLAGS_AUTOJOIN) ? 
+				 "AUTOJOIN " : "",
+				(reg_p->flags & CS_FLAGS_NOOPS) ? 
+				 "NOOPS " : "",
+				(reg_p->flags & CS_FLAGS_WARNOVERRIDE) ?
+				 "WARNOVERRIDE" : "");
+
+		if(!EmptyString(reg_p->topic))
+			service_error(chanserv_p, client_p,
+				"Topic: %s", reg_p->topic);
 	}
 
 	return 1;

@@ -40,8 +40,8 @@ static int s_user_userunsuspend(struct client *, char *parv[], int parc);
 static int s_user_register(struct client *, char *parv[], int parc);
 static int s_user_login(struct client *, char *parv[], int parc);
 static int s_user_logout(struct client *, char *parv[], int parc);
-static int s_user_setpass(struct client *, char *parv[], int parc);
-static int s_user_setemail(struct client *, char *parv[], int parc);
+static int s_user_set(struct client *, char **, int);
+static int s_user_info(struct client *, char *parv[], int parc);
 
 static struct service_command userserv_command[] =
 {
@@ -52,8 +52,8 @@ static struct service_command userserv_command[] =
 	{ "REGISTER",	&s_user_register,	2, NULL, 1, 0L, 0, 0, 0, 0 },
 	{ "LOGIN",	&s_user_login,		2, NULL, 1, 0L, 0, 0, 0, 0 },
 	{ "LOGOUT",	&s_user_logout,		0, NULL, 1, 0L, 1, 0, 0, 0 },
-	{ "SETPASS",	&s_user_setpass,	2, NULL, 1, 0L, 1, 0, 0, 0 },
-	{ "SETEMAIL",	&s_user_setemail,	1, NULL, 1, 0L, 1, 0, 0, 0 },
+	{ "SET",	&s_user_set,		1, NULL, 1, 0L, 1, 0, 0, 0 },
+	{ "INFO",	&s_user_info,		1, NULL, 1, 0L, 1, 0, 0, 0 },
 	{ "\0",		NULL,			0, NULL, 0, 0L, 0, 0, 0, 0 }
 };
 
@@ -704,58 +704,189 @@ s_user_logout(struct client *client_p, char *parv[], int parc)
 }
 
 static int
-s_user_setpass(struct client *client_p, char *parv[], int parc)
+s_user_set(struct client *client_p, char *parv[], int parc)
 {
-	const char *password;
+	struct user_reg *ureg_p;
+	const char *arg;
 
-	if(!config_file.allow_setpass)
+	ureg_p = client_p->user->user_reg;
+
+	arg = EmptyString(parv[1]) ? "" : parv[1];
+
+	if(!strcasecmp(parv[0], "PASSWORD"))
 	{
-		service_error(userserv_p, client_p, "%s::SETPASS is disabled", userserv_p->name);
+		const char *password;
+
+		if(!config_file.allow_set_password)
+		{
+			service_error(userserv_p, client_p,
+				"%s::SET::PASS is disabled", userserv_p->name);
+			return 1;
+		}
+
+		if(EmptyString(parv[1]) || EmptyString(parv[2]))
+		{
+			service_error(userserv_p, client_p,
+				"Insufficient parameters to %s::SET::PASSWORD",
+				userserv_p->name);
+			return 1;
+		}
+
+		password = get_crypt(parv[1], ureg_p->password);
+
+		if(strcmp(password, ureg_p->password))
+		{
+			service_error(userserv_p, client_p, "Invalid password");
+			return 1;
+		}
+
+		slog(userserv_p, 3, "%s %s SET PASS",
+			client_p->user->mask, ureg_p->name);
+
+		password = get_crypt(parv[2], NULL);
+		my_free(ureg_p->password);
+		ureg_p->password = my_strdup(password);
+
+		loc_sqlite_exec(NULL, "UPDATE users SET password=%Q "
+				"WHERE username=%Q", password, ureg_p->name);
+
+		service_error(userserv_p, client_p,
+				"Username %s PASSWORD set", ureg_p->name);
+		return 1;
+	}
+	else if(!strcasecmp(parv[0], "EMAIL"))
+	{
+		if(!config_file.allow_set_email)
+		{
+			service_error(userserv_p, client_p,
+				"%s::SET::EMAIL is disabled", userserv_p->name);
+			return 1;
+		}
+
+		if(EmptyString(arg))
+		{
+			service_error(userserv_p, client_p,
+				"Insufficient parameters to %s::SET::EMAIL",
+				userserv_p->name);
+			return 1;
+		}
+
+		if(!valid_email(arg))
+		{
+			service_error(userserv_p, client_p, "Email %s invalid",
+					arg);
+			return 1;
+		}
+
+		slog(userserv_p, 3, "%s %s SET EMAIL %s",
+			client_p->user->mask, ureg_p->name, arg);
+
+		my_free(ureg_p->email);
+		ureg_p->email = my_strdup(arg);
+
+		loc_sqlite_exec(NULL, "UPDATE users SET email=%Q "
+				"WHERE username=%Q", arg, ureg_p->name);
+
+		service_error(userserv_p, client_p,
+				"Username %s EMAIL set %s",
+				ureg_p->name, arg);
+		return 1;
+	}
+	else if(!strcasecmp(parv[0], "PRIVATE"))
+	{
+		if(!strcasecmp(arg, "ON"))
+			ureg_p->flags |= US_FLAGS_PRIVATE;
+		else if(!strcasecmp(arg, "OFF"))
+			ureg_p->flags &= ~US_FLAGS_PRIVATE;
+		else
+		{
+			service_error(userserv_p, client_p,
+				"Username %s PRIVATE is %s",
+				ureg_p->name,
+				(ureg_p->flags & US_FLAGS_PRIVATE) ?
+				 "ON" : "OFF");
+			return 1;
+		}
+
+		service_error(userserv_p, client_p,
+			"Username %s PRIVATE set %s",
+			ureg_p->name,
+			(ureg_p->flags & US_FLAGS_PRIVATE) ? "ON" : "OFF");
+
+		loc_sqlite_exec(NULL, "UPDATE users SET flags=%d "
+				"WHERE username=%Q",
+				ureg_p->flags, ureg_p->name);
 		return 1;
 	}
 
-	password = get_crypt(parv[0], client_p->user->user_reg->password);
-
-	if(strcmp(password, client_p->user->user_reg->password))
-	{
-		service_error(userserv_p, client_p, "Invalid password");
-		return 1;
-	}
-
-	slog(userserv_p, 3, "%s %s SETPASS",
-		client_p->user->mask, client_p->user->user_reg->name);
-
-	password = get_crypt(parv[1], NULL);
-	my_free(client_p->user->user_reg->password);
-	client_p->user->user_reg->password = my_strdup(password);
-
-	loc_sqlite_exec(NULL, "UPDATE users SET password = %Q WHERE username = %Q",
-			password, client_p->user->user_reg->name);
-
-	service_error(userserv_p, client_p, "Password change successful");
+	service_error(userserv_p, client_p, "Set option invalid");
 	return 1;
 }
 
 static int
-s_user_setemail(struct client *client_p, char *parv[], int parc)
+s_user_info(struct client *client_p, char *parv[], int parc)
 {
-	if(!config_file.allow_setemail)
-	{
-		service_error(userserv_p, client_p, "%s::SETEMAIL is disabled", userserv_p->name);
+	struct user_reg *ureg_p;
+	time_t seconds;
+	int minutes, hours, days, weeks;
+
+	if((ureg_p = find_user_reg_nick(client_p, parv[0])) == NULL)
 		return 1;
+
+	seconds = (CURRENT_TIME - ureg_p->reg_time);
+	minutes = (seconds / 60);
+	weeks = (int) (seconds / 604800);
+	seconds %= 604800;
+	days = (int) (seconds / 86400);
+	seconds %= 86400;
+	hours = (int) (seconds / 3600);
+	seconds %= 3600;
+	minutes = (int) (seconds / 60);
+	
+	service_error(userserv_p, client_p, 
+			"[%s] Username %s registered for %dw %dd %d%dm",
+			parv[0], ureg_p->name, weeks, days, hours, minutes);
+
+	if(ureg_p == client_p->user->user_reg)
+	{
+		char buf[BUFSIZE];
+		struct member_reg *mreg_p;
+		dlink_node *ptr;
+		char *p;
+		int buflen = 0;
+		int mlen;
+
+		p = buf;
+
+		DLINK_FOREACH(ptr, ureg_p->channels.head)
+		{
+			mreg_p = ptr->data;
+
+			/* "Access to: " + ":200 " */
+			if((buflen + strlen(mreg_p->channel_reg->name) + 16) >=
+				(BUFSIZE - 3))
+			{
+				service_error(userserv_p, client_p,
+						"[%s] Access to: %s", 
+						parv[0], buf);
+				p = buf;
+				buflen = 0;
+			}
+
+			mlen = sprintf(p, "%s:%d ",
+					mreg_p->channel_reg->name,
+					mreg_p->level);
+
+			buflen += mlen;
+			p += mlen;
+		}
+
+		/* could have access to no channels.. */
+		if(buflen)
+			service_error(userserv_p, client_p,
+					"[%s] Access to: %s", parv[0], buf);
 	}
 
-	slog(userserv_p, 3, "%s %s SETEMAIL %s",
-		client_p->user->mask, client_p->user->user_reg->name,
-		parv[0]);
-
-	my_free(client_p->user->user_reg->email);
-	client_p->user->user_reg->email = my_strdup(parv[0]);
-
-	loc_sqlite_exec(NULL, "UPDATE users SET email = %Q WHERE username = %Q",
-			parv[0], client_p->user->user_reg->name);
-
-	service_error(userserv_p, client_p, "Email change successful");
 	return 1;
 }
 

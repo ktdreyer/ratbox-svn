@@ -25,6 +25,7 @@ struct user_reg
 };
 
 #define US_FLAGS_SUSPENDED	0x0001
+#define US_FLAGS_PRIVATE	0x0002
 
 extern struct user_reg *find_user_reg(struct client *, const char *name);
 extern struct user_reg *find_user_reg_nick(struct client *, const char *name);

@@ -837,8 +837,8 @@ static struct ConfEntry conf_userserv_table[] =
 	{ "register_amount",	CF_INT,   NULL, 0, &config_file.uregister_amount	},
 	{ "register_email",	CF_YESNO, NULL, 0, &config_file.uregister_email		},
 	{ "expire_time",	CF_TIME,  NULL, 0, &config_file.uexpire_time		},
-	{ "allow_setpass",	CF_YESNO, NULL, 0, &config_file.allow_setpass		},
-	{ "allow_setemail",	CF_YESNO, NULL, 0, &config_file.allow_setemail		},
+	{ "allow_set_password",	CF_YESNO, NULL, 0, &config_file.allow_set_password	},
+	{ "allow_set_email",	CF_YESNO, NULL, 0, &config_file.allow_set_email		},
 	{ "max_logins",		CF_INT,   NULL, 0, &config_file.umax_logins		},
 	{ "\0", 0, NULL, 0, NULL }
 };

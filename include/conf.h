@@ -37,8 +37,8 @@ struct _config_file
 	int uregister_amount;
 	int uregister_email;
 	int uexpire_time;
-	int allow_setpass;
-	int allow_setemail;
+	int allow_set_password;
+	int allow_set_email;
 	int umax_logins;
 
 	/* chanserv */
