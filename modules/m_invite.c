@@ -91,7 +91,7 @@ static void m_invite(struct Client *client_p,
   if(source_p->user == NULL)
     return;
 
-  if ((target_p = find_person(parv[1])) != NULL)
+  if ((target_p = find_person(parv[1])) == NULL)
     {
       sendto_one(source_p, form_str(ERR_NOSUCHNICK),
                  me.name, parv[0], parv[1]);
