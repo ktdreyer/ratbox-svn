@@ -51,19 +51,21 @@ struct Message invite_msgtab = {
 mapi_clist_av1 invite_clist[] = { &invite_msgtab, NULL };
 DECLARE_MODULE_AV1(invite, NULL, NULL, invite_clist, NULL, NULL, NULL, "$Revision$");
 
-/*
-** m_invite
-**      parv[0] - sender prefix
-**      parv[1] - user to invite
-**      parv[2] - channel number
-*/
+static void add_invite(struct Channel *, struct Client *);
+
+/* m_invite()
+ *      parv[0] - sender prefix
+ *      parv[1] - user to invite
+ *      parv[2] - channel name
+ */
 static int
 m_invite(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Client *target_p;
 	struct Channel *chptr;
 	struct membership *msptr;
-	int chop = 1;
+	dlink_node *ptr;
+	int store_invite = 0;
 
 	if(EmptyString(parv[2]))
 	{
@@ -79,7 +81,8 @@ m_invite(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	if((target_p = find_person(parv[1])) == NULL)
 	{
-		sendto_one(source_p, form_str(ERR_NOSUCHNICK), me.name, parv[0], parv[1]);
+		sendto_one(source_p, form_str(ERR_NOSUCHNICK),
+			   me.name, parv[0], parv[1]);
 		return 0;
 	}
 
@@ -101,17 +104,18 @@ m_invite(struct Client *client_p, struct Client *source_p, int parc, const char 
 	/* Do not send local channel invites to users if they are not on the
 	 * same server as the person sending the INVITE message. 
 	 */
-	/* Possibly should be an error sent to source_p */
-	/* done .. there should be no problem because MyConnect(source_p) should
-	 * always be true if parse() and such is working correctly --is
-	 */
-
-	if(!MyConnect(target_p) && (parv[2][0] == '&'))
+	if(parv[2][0] == '&')
 	{
-		if(ConfigServerHide.hide_servers == 0)
+		if(ConfigServerHide.disable_local_channels)
+			return 0;
+
+		/* if we're in shide, we're buggered anyway, because they
+		 * could just test for RPL_INVITED to determine whether a
+		 * user is local or not.  rely on disable_local_channels --fl
+		 */
+		if(!MyConnect(target_p))
 			sendto_one(source_p, form_str(ERR_USERNOTONSERV),
 				   me.name, parv[0], parv[1]);
-		return 0;
 	}
 
 	if((chptr = find_channel(parv[2])) == NULL)
@@ -135,21 +139,19 @@ m_invite(struct Client *client_p, struct Client *source_p, int parc, const char 
 		return 0;
 	}
 
-	/* remote clients are always 'chop' */
-	if(MyClient(source_p))
-		chop = is_chanop(msptr);
-
+	/* only store invites for +i channels */
 	if(chptr && (chptr->mode.mode & MODE_INVITEONLY))
 	{
-		if(!chop)
+		/* treat remote clients as chanops */
+		if(MyClient(source_p) && !is_chanop(msptr))
 		{
 			sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
 				   me.name, parv[0], parv[2]);
 			return 0;
 		}
+
+		store_invite = 1;
 	}
-	else
-		chop = 0;
 
 	if(MyConnect(source_p))
 	{
@@ -162,10 +164,12 @@ m_invite(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	if(MyConnect(target_p))
 	{
-		if(chop)
+		sendto_one(target_p, ":%s!%s@%s INVITE %s :%s", 
+			   source_p->name, source_p->username, source_p->host, 
+			   target_p->name, chptr->chname);
+
+		if(store_invite)
 			add_invite(chptr, target_p);
-		sendto_one(target_p, ":%s!%s@%s INVITE %s :%s", source_p->name,
-			   source_p->username, source_p->host, target_p->name, chptr->chname);
 	}
 	else if(target_p->from != client_p)
 	{
@@ -175,3 +179,36 @@ m_invite(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	return 0;
 }
+
+/* add_invite()
+ *
+ * input	- channel to add invite to, client to add
+ * output	-
+ * side effects - client is added to invite list.
+ */
+static void
+add_invite(struct Channel *chptr, struct Client *who)
+{
+	/* already invited? */
+	DLINK_FOREACH(ptr, who->user->invited.head)
+	{
+		if(ptr->data == chptr)
+			return 0;
+	}
+
+	/* ok, if their invite list is too long, remove the tail */
+	if((int)dlink_list_length(&who->user->invited) >= 
+	   ConfigChannel.max_chans_per_user)
+	{
+		dlink_node *ptr = who->user->invited.tail;
+		del_invite(ptr->data, who);
+	}
+
+	/* add user to channel invite list */
+	dlinkAddAlloc(who, &chptr->invites);
+
+	/* add channel to user invite list */
+	dlinkAddAlloc(chptr, &who->user->invited);
+}
+
+

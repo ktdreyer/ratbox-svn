@@ -533,34 +533,6 @@ channel_member_names(struct Channel *chptr, struct Client *client_p, int show_eo
 			   me.name, client_p->name, chptr->chname);
 }
 
-/* add_invite()
- *
- * input	- channel to add invite to, client to add
- * output	-
- * side effects - client is added to invite list
- */
-void
-add_invite(struct Channel *chptr, struct Client *who)
-{
-	del_invite(chptr, who);
-	/*
-	 * delete last link in chain if the list is max length
-	 */
-	if((int)dlink_list_length(&who->user->invited) >= ConfigChannel.max_chans_per_user)
-	{
-		del_invite(chptr, who);
-	}
-	/*
-	 * add client to channel invite list
-	 */
-	dlinkAddAlloc(who, &chptr->invites);
-
-	/*
-	 * add channel to the end of the client invite list
-	 */
-	dlinkAddAlloc(chptr, &who->user->invited);
-}
-
 /* del_invite()
  *
  * input	- channel to remove invite from, client to remove
