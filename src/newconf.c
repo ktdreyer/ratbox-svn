@@ -55,6 +55,7 @@ static struct mode_table service_flags_table[] = {
 	{ "disabled",	SERVICE_DISABLED	},
 	{ "short_help",	SERVICE_SHORTHELP	},
 	{ "stealth",	SERVICE_STEALTH		},
+	{ "login_help",	SERVICE_LOGINHELP	},
 	{ "\0",		0			}
 };
 

@@ -136,12 +136,14 @@ struct host_entry
 #define SERVICE_DISABLED	0x004 /* should this service be disabled? */
 #define SERVICE_SHORTHELP	0x008 /* service gives short help */
 #define SERVICE_STEALTH		0x010 /* ignores non-opers */
+#define SERVICE_LOGINHELP	0x020 /* needs to be logged in with userserv */
 
 #define ServiceOpered(x)	((x)->service->flags & SERVICE_OPERED)
 #define ServiceMsgSelf(x)	((x)->service->flags & SERVICE_MSGSELF)
 #define ServiceDisabled(x)	((x)->service->flags & SERVICE_DISABLED)
 #define ServiceShortHelp(x)	((x)->service->flags & SERVICE_SHORTHELP)
 #define ServiceStealth(x)	((x)->service->flags & SERVICE_STEALTH)
+#define ServiceLoginHelp(x)	((x)->service->flags & SERVICE_LOGINHELP)
 
 #define SERVICE_INTRODUCED	0x001 /* service has been introduced */
 #define SERVICE_REINTRODUCE	0x002 /* service needs reintroducing */

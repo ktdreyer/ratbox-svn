@@ -404,8 +404,19 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
 
         if(!strcasecmp(text, "HELP"))
         {
-		if(ServiceStealth(service_p) && !client_p->user->oper)
+		if(ServiceStealth(service_p) && !client_p->user->oper && !is_oper(client_p))
 			return;
+
+#ifdef ENABLE_USERSERV
+		if(ServiceLoginHelp(service_p) && !client_p->user->user_reg &&
+		   !client_p->user->oper && !is_oper(client_p))
+		{
+			service_error(service_p, client_p, 
+					"You must be logged in for %s::HELP",
+					service_p->name);
+			return;
+		}
+#endif
 
                 service_p->service->flood++;
 
@@ -490,7 +501,7 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
 		return;
 	}
 
-	if(ServiceStealth(service_p) && !client_p->user->oper)
+	if(ServiceStealth(service_p) && !client_p->user->oper && !is_oper(client_p))
 		return;
 
 	if((cmd_entry = bsearch(text, service_p->service->command, 
