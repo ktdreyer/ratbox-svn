@@ -1,3 +1,11 @@
+*** 20010625_1 by a1kmm
+- Fixed redundant ops/voices etc... removal
+- Added redundant sync_oplists removal. Note that there is still a bug I am
+  looking for: /mode #chan +o-o on a non-opped user still seems to sync_oplists
+  and give away the oplist by deopping all the ops for some reason. I will fix
+  this later.
+
+
 *** 20010624_1 by a1kmm
 - Committing jv's patch for the SQUIT bug.
 - Fixed IPv4 dlines/exempts for IPv6 boxes.
