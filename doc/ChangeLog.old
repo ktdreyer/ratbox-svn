@@ -1,3 +1,7 @@
+*** 19990821_1 by tomh
+break out m_hash from hash.c
+
+
 *** 19990820_1 by tomh
 client struct rearangements
 
