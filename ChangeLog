@@ -1,3 +1,16 @@
+androsyn    2002/11/26 04:34:38 UTC	(20021126_4)
+
+  Modified files:
+    modules              m_admin.c m_info.c 
+  Log:
+  Missed a few const char
+  
+  Revision  Changes    Path
+  1.37      +2 -2      ircd-ratbox/modules/m_admin.c
+  1.70      +2 -2      ircd-ratbox/modules/m_info.c
+
+
+
 androsyn    2002/11/26 04:33:25 UTC	(20021126_3)
 
   Modified files:
