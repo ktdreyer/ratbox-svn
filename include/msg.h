@@ -141,44 +141,44 @@ struct Message msgtab[] = {
 
   /*                                        |-- allow use even when unreg.
                                             v   yes/no                  */
-  { MSG_PRIVATE, m_private,  0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_PRIVATE,  m_private,  0, MAXPARA, 1, 0, 0, 0 },
 #else
-  { MSG_PRIVATE, m_private,  0, MAXPARA, 1, 0, 1, 0 },
+  { MSG_PRIVATE,  m_private,  0, MAXPARA, 1, 0, 1, 0 },
 #endif
 
   /*                                           ^
                                                |__ reset idle time when 1 */
 #else   /* IDLE_FROM_MSG */
 #ifdef  IDLE_CHECK      /* reset idle time on anything but privmsg */
-  { MSG_PRIVATE, m_private,  0, MAXPARA, 1, 0, 1, 0 },
+  { MSG_PRIVATE,  m_private,  0, MAXPARA, 1, 0, 1, 0 },
 #else
-  { MSG_PRIVATE, m_private,  0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_PRIVATE,  m_private,  0, MAXPARA, 1, 0, 0, 0 },
   /*                                           ^
                                                |__ reset idle time when 0 */
 #endif  /* IDLE_CHECK */
 #endif  /* IDLE_FROM_MSG */
 
-  { MSG_NICK,    m_nick,     0, MAXPARA, 1, 1, 0, 0 },
-  { MSG_NOTICE,  m_notice,   0, MAXPARA, 1, 0, 0, 0 },
-  { MSG_JOIN,    m_join,     0, MAXPARA, 1, 0, 0, 0 },
-  { MSG_MODE,    m_mode,     0, MAXPARA, 1, 0, 0, 0 },
-  { MSG_QUIT,    m_quit,     0, MAXPARA, 1, 1, 0, 0 },
-  { MSG_PART,    m_part,     0, MAXPARA, 1, 0, 0, 0 },
-  { MSG_KNOCK,   m_knock,    0, MAXPARA, 1, 0, 0, 0 },
-  { MSG_TOPIC,   m_topic,    0, MAXPARA, 1, 0, 0, 0 },
-  { MSG_INVITE,  m_invite,   0, MAXPARA, 1, 0, 0, 0 },
-  { MSG_KICK,    m_kick,     0, MAXPARA, 1, 0, 0, 0 },
-  { MSG_WALLOPS, m_wallops,  0, MAXPARA, 1, 0, 0, 0 },
-  { MSG_LOCOPS,  m_locops,   0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_NICK,     m_nick,     0, MAXPARA, 1, 1, 0, 0 },
+  { MSG_NOTICE,   m_notice,   0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_JOIN,     m_join,     0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_MODE,     m_mode,     0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_QUIT,     m_quit,     0, MAXPARA, 1, 1, 0, 0 },
+  { MSG_PART,     m_part,     0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_KNOCK,    m_knock,    0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_TOPIC,    m_topic,    0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_INVITE,   m_invite,   0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_KICK,     m_kick,     0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_WALLOPS,  m_wallops,  0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_LOCOPS,   m_locops,   0, MAXPARA, 1, 0, 0, 0 },
 #ifdef LWALLOPS
-  { MSG_LWALLOPS,m_locops,   0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_LWALLOPS, m_locops,   0, MAXPARA, 1, 0, 0, 0 },
 #endif /* LWALLOPS */
 
 #ifdef IDLE_FROM_MSG
 
   /* Only m_private has reset idle flag set */
-  { MSG_PONG,    m_pong,     0, MAXPARA, 1, 0, 0, 0 },
-  { MSG_PING,    m_ping,     0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_PONG,     m_pong,     0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_PING,     m_ping,     0, MAXPARA, 1, 0, 0, 0 },
 
 #else
 
@@ -187,65 +187,65 @@ struct Message msgtab[] = {
    * when its 0, for IDLE_FROM_MSG ping/pong do not reset idle time
    */
 
-  { MSG_PONG,    m_pong,     0, MAXPARA, 1, 0, 1, 0 },
-  { MSG_PING,    m_ping,     0, MAXPARA, 1, 0, 1, 0 },
+  { MSG_PONG,     m_pong,     0, MAXPARA, 1, 0, 1, 0 },
+  { MSG_PING,     m_ping,     0, MAXPARA, 1, 0, 1, 0 },
 
 #endif  /* IDLE_FROM_MSG */
 
-  { MSG_ERROR,   m_error,    0, MAXPARA, 1, 1, 0, 0 },
-  { MSG_KILL,    m_kill,     0, MAXPARA, 1, 0, 0, 0 },
-  { MSG_USER,    m_user,     0, MAXPARA, 1, 1, 0, 0 },
-  { MSG_AWAY,    m_away,     0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_ERROR,    m_error,    0, MAXPARA, 1, 1, 0, 0 },
+  { MSG_KILL,     m_kill,     0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_USER,     m_user,     0, MAXPARA, 1, 1, 0, 0 },
+  { MSG_AWAY,     m_away,     0, MAXPARA, 1, 0, 0, 0 },
 #ifdef IDLE_FROM_MSG
-  { MSG_ISON,    m_ison,     0, 1,       1, 0, 0, 0 },
+  { MSG_ISON,     m_ison,     0, 1,       1, 0, 0, 0 },
 #else
   /* ISON should not reset idle time ever
    * remember idle flag sense is reversed when IDLE_FROM_MSG is undefined
    */
-  { MSG_ISON,    m_ison,     0, 1,       1, 0, 1, 0 },
+  { MSG_ISON,     m_ison,     0, 1,       1, 0, 1, 0 },
 #endif /* !IDLE_FROM_MSG */
-  { MSG_SERVER,  m_server,   0, MAXPARA, 1, 1, 0, 0 },
-  { MSG_SQUIT,   m_squit,    0, MAXPARA, 1, 0, 0, 0 },
-  { MSG_WHOIS,   m_whois,    0, MAXPARA, 1, 0, 0, 0 },
-  { MSG_WHO,     m_who,      0, MAXPARA, 1, 0, 0, 0 },
-  { MSG_WHOWAS,  m_whowas,   0, MAXPARA, 1, 0, 0, 0 },
-  { MSG_LIST,    m_list,     0, MAXPARA, 1, 0, 0, 0 },
-  { MSG_NAMES,   m_names,    0, MAXPARA, 1, 0, 0, 0 },
-  { MSG_USERHOST,m_userhost, 0, 1,       1, 0, 0, 0 },
-  { MSG_TRACE,   m_trace,    0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_SERVER,   m_server,   0, MAXPARA, 1, 1, 0, 0 },
+  { MSG_SQUIT,    m_squit,    0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_WHOIS,    m_whois,    0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_WHO,      m_who,      0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_WHOWAS,   m_whowas,   0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_LIST,     m_list,     0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_NAMES,    m_names,    0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_USERHOST, m_userhost, 0, 1,       1, 0, 0, 0 },
+  { MSG_TRACE,    m_trace,    0, MAXPARA, 1, 0, 0, 0 },
 #ifdef LTRACE
-  { MSG_LTRACE,  m_ltrace,   0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_LTRACE,   m_ltrace,   0, MAXPARA, 1, 0, 0, 0 },
 #endif /* LTRACE */
-  { MSG_PASS,    m_pass,     0, MAXPARA, 1, 1, 0, 0 },
-  { MSG_LUSERS,  m_lusers,   0, MAXPARA, 1, 0, 0, 0 },
-  { MSG_TIME,    m_time,     0, MAXPARA, 1, 0, 0, 0 },
-  { MSG_OPER,    m_oper,     0, MAXPARA, 1, 0, 0, 0 },
-  { MSG_CONNECT, m_connect,  0, MAXPARA, 1, 0, 0, 0 },
-  { MSG_VERSION, m_version,  0, MAXPARA, 1, 1, 0, 0 },
-  { MSG_STATS,   m_stats,    0, MAXPARA, 1, 0, 0, 0 },
-  { MSG_LINKS,   m_links,    0, MAXPARA, 1, 0, 0, 0 },
-  { MSG_ADMIN,   m_admin,    0, MAXPARA, 1, 1, 0, 0 },
-  { MSG_USERS,   m_users,    0, MAXPARA, 1, 0, 0, 0 },
-  { MSG_HELP,    m_help,     0, MAXPARA, 1, 0, 0, 0 },
-  { MSG_INFO,    m_info,     0, MAXPARA, 1, 0, 0, 0 },
-  { MSG_MOTD,    m_motd,     0, MAXPARA, 1, 0, 0, 0 },
-  { MSG_SVINFO,  m_svinfo,   0, MAXPARA, 1, 1, 0, 0 },
-  { MSG_SJOIN,   m_sjoin,    0, MAXPARA, 1, 0, 0, 0 },
-  { MSG_CAPAB,   m_capab,    0, MAXPARA, 1, 1, 0, 0 },
-  { MSG_OPERWALL, m_operwall,0, MAXPARA, 1, 0, 0, 0 },
-  { MSG_CLOSE,   m_close,    0, MAXPARA, 1, 0, 0, 0 },
-  { MSG_KLINE,   m_kline,    0, MAXPARA, 1, 0, 0, 0 },
-  { MSG_UNKLINE, m_unkline,  0, MAXPARA, 1, 0, 0, 0 },
-  { MSG_DLINE,   m_dline,    0, MAXPARA, 1, 0, 0, 0 },
-  { MSG_GLINE,   m_gline,    0, MAXPARA, 1, 0, 0, 0 },
-  { MSG_HASH,    m_hash,     0, MAXPARA, 1, 0, 0, 0 },
-  { MSG_DNS,     m_dns,      0, MAXPARA, 1, 0, 0, 0 },
-  { MSG_REHASH,  m_rehash,   0, MAXPARA, 1, 0, 0, 0 },
-  { MSG_RESTART, m_restart,  0, MAXPARA, 1, 0, 0, 0 },
-  { MSG_DIE, m_die,          0, MAXPARA, 1, 0, 0, 0 },
-  { MSG_HTM,    m_htm,       0, MAXPARA, 1, 0, 0, 0 },
-  { MSG_SET,    m_set,       0, MAXPARA, 1, 0, 0, 0 },
-  { MSG_TESTLINE,       m_testline,          0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_PASS,     m_pass,     0, MAXPARA, 1, 1, 0, 0 },
+  { MSG_LUSERS,   m_lusers,   0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_TIME,     m_time,     0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_OPER,     m_oper,     0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_CONNECT,  m_connect,  0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_VERSION,  m_version,  0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_STATS,    m_stats,    0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_LINKS,    m_links,    0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_ADMIN,    m_admin,    0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_USERS,    m_users,    0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_HELP,     m_help,     0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_INFO,     m_info,     0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_MOTD,     m_motd,     0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_SVINFO,   m_svinfo,   0, MAXPARA, 1, 1, 0, 0 },
+  { MSG_SJOIN,    m_sjoin,    0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_CAPAB,    m_capab,    0, MAXPARA, 1, 1, 0, 0 },
+  { MSG_OPERWALL, m_operwall, 0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_CLOSE,    m_close,    0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_KLINE,    m_kline,    0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_UNKLINE,  m_unkline,  0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_DLINE,    m_dline,    0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_GLINE,    m_gline,    0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_HASH,     m_hash,     0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_DNS,      m_dns,      0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_REHASH,   m_rehash,   0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_RESTART,  m_restart,  0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_DIE,      m_die,      0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_HTM,      m_htm,      0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_SET,      m_set,      0, MAXPARA, 1, 0, 0, 0 },
+  { MSG_TESTLINE, m_testline, 0, MAXPARA, 1, 0, 0, 0 },
   { 0, 0 , 0, 0, 0, 0, 0, 0 }
 };
 
