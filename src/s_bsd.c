@@ -77,7 +77,8 @@ const char* const SETBUF_ERROR_MSG = "set_sock_buffers failed for server %s:%s";
 
 struct Client* local[MAXCONNECTIONS];
 
-int            highest_fd = 0;
+/* Its -1 because at startup, we don't have any FDs opened -- adrian */
+int            highest_fd = -1;
 
 static struct sockaddr_in mysk;
 static char               readBuf[READBUF_SIZE];
@@ -574,8 +575,6 @@ int connect_server(struct ConfItem* aconf,
     }
   cptr->serv->up = me.name;
 
-  if (cptr->fd > highest_fd)
-    highest_fd = cptr->fd;
   local[cptr->fd] = cptr;
 
   SetConnecting(cptr);
@@ -688,11 +687,6 @@ void close_connection(struct Client *cptr)
     if (0 == --cptr->listener->ref_count && !cptr->listener->active) 
       close_listener(cptr->listener);
     cptr->listener = 0;
-  }
-
-  for (; highest_fd > 0; --highest_fd) {
-    if (local[highest_fd])
-      break;
   }
 
   det_confs_butmask(cptr, 0);

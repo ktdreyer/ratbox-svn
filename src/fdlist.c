@@ -16,6 +16,34 @@
 
 fde_t *fd_table = NULL;
 
+static void fdlist_update_biggest(int fd, int opening);
+
+static void
+fdlist_update_biggest(int fd, int opening)
+{ 
+    if (fd < highest_fd)
+        return;
+    assert(fd < MAXCONNECTIONS);
+    if (fd > highest_fd) {
+        /*  
+         * assert that we are not closing a FD bigger than
+         * our known biggest FD
+         */
+        assert(opening);
+        highest_fd = fd;
+        return;
+    }
+    /* if we are here, then fd == Biggest_FD */
+    /*
+     * assert that we are closing the biggest FD; we can't be
+     * re-opening it
+     */
+    assert(!opening);
+    while (!fd_table[highest_fd].flags.open)
+        highest_fd--;
+}
+
+
 void fdlist_init(void)
 {
   static int initialized = 0;
@@ -122,8 +150,8 @@ fd_open(int fd, unsigned int type, const char *desc)
     F->defer.until = 0;
     F->defer.n = 0;
     F->defer.handler = NULL;
-    fdUpdateBiggest(fd, 1);
 #endif
+    fdlist_update_biggest(fd, 1);
     if (desc)
         strncpy(F->desc, desc, FD_DESC_SZ);
 #ifdef NOTYET
@@ -148,8 +176,8 @@ fd_close(int fd)
 #endif
     comm_setselect(fd, COMM_SELECT_WRITE|COMM_SELECT_READ, NULL, NULL, 0);
     F->flags.open = 0;
+    fdlist_update_biggest(fd, 0);
 #if NOTYET
-    fdUpdateBiggest(fd, 0);
     Number_FD--;
 #endif
     memset(F, '\0', sizeof(fde_t));
