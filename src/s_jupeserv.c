@@ -38,8 +38,8 @@ static dlink_list active_jupes;
 
 static struct client *jupeserv_p;
 
-static void u_jupeserv_jupe(struct client *, struct lconn *, const char **, int);
-static void u_jupeserv_unjupe(struct client *, struct lconn *, const char **, int);
+static int u_jupeserv_jupe(struct client *, struct lconn *, const char **, int);
+static int u_jupeserv_unjupe(struct client *, struct lconn *, const char **, int);
 
 static int s_jupeserv_jupe(struct client *, struct lconn *, const char **, int);
 static int s_jupeserv_unjupe(struct client *, struct lconn *, const char **, int);
@@ -228,7 +228,7 @@ valid_jupe(const char *servername)
 	return 1;
 }
 
-static void
+static int
 u_jupeserv_jupe(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct server_jupe *jupe_p;
@@ -237,13 +237,13 @@ u_jupeserv_jupe(struct client *client_p, struct lconn *conn_p, const char *parv[
 	if(!valid_jupe(parv[0]))
 	{
 		sendto_one(conn_p, "Servername %s is invalid", parv[0]);
-		return;
+		return 0;
 	}
 
 	if((jupe_p = find_jupe(parv[0], &active_jupes)))
 	{
 		sendto_one(conn_p, "Server %s is already juped", jupe_p->name);
-		return;
+		return 0;
 	}
 
 	/* if theres a pending oper jupe, cancel it because we're gunna
@@ -274,9 +274,10 @@ u_jupeserv_jupe(struct client *client_p, struct lconn *conn_p, const char *parv[
 	sendto_server(":%s WALLOPS :JUPE %s by %s [%s]",
 			MYNAME, jupe_p->name, conn_p->name, jupe_p->reason);
 	add_jupe(jupe_p);
+	return 0;
 }
 
-static void
+static int
 u_jupeserv_unjupe(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct server_jupe *ajupe_p, *jupe_p;
@@ -284,7 +285,7 @@ u_jupeserv_unjupe(struct client *client_p, struct lconn *conn_p, const char *par
 	if((jupe_p = find_jupe(parv[0], &active_jupes)) == NULL)
 	{
 		sendto_one(conn_p, "Server %s is not juped", parv[1]);
-		return;
+		return 0;
 	}
 
 	if((ajupe_p = find_jupe(parv[0], &pending_jupes)))
@@ -304,6 +305,7 @@ u_jupeserv_unjupe(struct client *client_p, struct lconn *conn_p, const char *par
 	sendto_server("SQUIT %s :Unjuped", jupe_p->name);
 	dlink_delete(&jupe_p->node, &active_jupes);
 	free_jupe(jupe_p);
+	return 0;
 }
 
 static int

@@ -22,8 +22,8 @@
 
 static struct client *operbot_p;
 
-static void u_operbot_objoin(struct client *, struct lconn *, const char **, int);
-static void u_operbot_obpart(struct client *, struct lconn *, const char **, int);
+static int u_operbot_objoin(struct client *, struct lconn *, const char **, int);
+static int u_operbot_obpart(struct client *, struct lconn *, const char **, int);
 
 static int s_operbot_objoin(struct client *, struct lconn *, const char **, int);
 static int s_operbot_obpart(struct client *, struct lconn *, const char **, int);
@@ -68,7 +68,7 @@ operbot_db_callback(void *db, int argc, char **argv, char **colnames)
 	return 0;
 }
 
-static void
+static int
 u_operbot_objoin(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct channel *chptr;
@@ -77,7 +77,7 @@ u_operbot_objoin(struct client *client_p, struct lconn *conn_p, const char *parv
 	   dlink_find(operbot_p, &chptr->services))
 	{
 		sendto_one(conn_p, "%s already in %s", operbot_p->name, parv[0]);
-		return;
+		return 0;
 	}
 
 	slog(operbot_p, 1, "%s - OBJOIN %s", conn_p->name, parv[0]);
@@ -87,9 +87,10 @@ u_operbot_objoin(struct client *client_p, struct lconn *conn_p, const char *parv
 
 	join_service(operbot_p, parv[0], NULL);
 	sendto_one(conn_p, "%s joined to %s", operbot_p->name, parv[0]);
+	return 0;
 }
 
-static void
+static int
 u_operbot_obpart(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	if(part_service(operbot_p, parv[0]))
@@ -102,6 +103,8 @@ u_operbot_obpart(struct client *client_p, struct lconn *conn_p, const char *parv
 	}
 	else
 		sendto_one(conn_p, "%s not in channel %s", operbot_p->name, parv[0]);
+
+	return 0;
 }
 
 static int

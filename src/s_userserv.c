@@ -29,10 +29,10 @@ static BlockHeap *user_reg_heap;
 
 dlink_list user_reg_table[MAX_NAME_HASH];
 
-static void u_user_userregister(struct client *, struct lconn *, const char **, int);
-static void u_user_userdrop(struct client *, struct lconn *, const char **, int);
-static void u_user_usersuspend(struct client *, struct lconn *, const char **, int);
-static void u_user_userunsuspend(struct client *, struct lconn *, const char **, int);
+static int u_user_userregister(struct client *, struct lconn *, const char **, int);
+static int u_user_userdrop(struct client *, struct lconn *, const char **, int);
+static int u_user_usersuspend(struct client *, struct lconn *, const char **, int);
+static int u_user_userunsuspend(struct client *, struct lconn *, const char **, int);
 
 static int s_user_userregister(struct client *, struct lconn *, const char **, int);
 static int s_user_userdrop(struct client *, struct lconn *, const char **, int);
@@ -285,7 +285,7 @@ e_user_expire(void *unused)
 	HASH_WALK_END
 }
 
-static void
+static int
 u_user_userregister(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct user_reg *reg_p;
@@ -294,13 +294,13 @@ u_user_userregister(struct client *client_p, struct lconn *conn_p, const char *p
 	if((reg_p = find_user_reg(NULL, parv[0])) != NULL)
 	{
 		sendto_one(conn_p, "Username %s is already registered", parv[0]);
-		return;
+		return 0;
 	}
 
 	if(!valid_username(parv[0]))
 	{
 		sendto_one(conn_p, "Username %s invalid", parv[0]);
-		return;
+		return 0;
 	}
 
 	slog(userserv_p, 2, "%s - USERREGISTER %s %s",
@@ -327,9 +327,10 @@ u_user_userregister(struct client *client_p, struct lconn *conn_p, const char *p
 			reg_p->reg_time, reg_p->last_time, reg_p->flags);
 
 	sendto_one(conn_p, "Username %s registered", parv[0]);
+	return 0;
 }
 
-static void
+static int
 u_user_userdrop(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct user_reg *ureg_p;
@@ -338,7 +339,7 @@ u_user_userdrop(struct client *client_p, struct lconn *conn_p, const char *parv[
 	{
 		sendto_one(conn_p, "Username %s is not registered",
 				parv[0]);
-		return;
+		return 0;
 	}
 
 	slog(userserv_p, 1, "%s - USERDROP %s", conn_p->name, ureg_p->name);
@@ -349,9 +350,10 @@ u_user_userdrop(struct client *client_p, struct lconn *conn_p, const char *parv[
 			ureg_p->name);
 
 	free_user_reg(ureg_p);
+	return 0;
 }
 
-static void
+static int
 u_user_usersuspend(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct user_reg *reg_p;
@@ -360,13 +362,13 @@ u_user_usersuspend(struct client *client_p, struct lconn *conn_p, const char *pa
 	{
 		sendto_one(conn_p, "Username %s is not registered",
 				parv[0]);
-		return;
+		return 0;
 	}
 
 	if(reg_p->flags & US_FLAGS_SUSPENDED)
 	{
 		sendto_one(conn_p, "Username %s is already suspended", reg_p->name);
-		return;
+		return 0;
 	}
 
 	slog(userserv_p, 1, "%s - USERSUSPEND %s", conn_p->name, reg_p->name);
@@ -380,9 +382,10 @@ u_user_usersuspend(struct client *client_p, struct lconn *conn_p, const char *pa
 			reg_p->flags, conn_p->name, reg_p->name);
 
 	sendto_one(conn_p, "Username %s suspended", reg_p->name);
+	return 0;
 }
 
-static void
+static int
 u_user_userunsuspend(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct user_reg *reg_p;
@@ -391,13 +394,13 @@ u_user_userunsuspend(struct client *client_p, struct lconn *conn_p, const char *
 	{
 		sendto_one(conn_p, "Username %s is not registered",
 				parv[1]);
-		return;
+		return 0;
 	}
 
 	if((reg_p->flags & US_FLAGS_SUSPENDED) == 0)
 	{
 		sendto_one(conn_p, "Username %s is not suspended", reg_p->name);
-		return;
+		return 0;
 	}
 
 	slog(userserv_p, 1, "%s - USERUNSUSPEND %s", conn_p->name, reg_p->name);
@@ -410,6 +413,7 @@ u_user_userunsuspend(struct client *client_p, struct lconn *conn_p, const char *
 			reg_p->flags, reg_p->name);
 
 	sendto_one(conn_p, "Username %s unsuspended", reg_p->name);
+	return 0;
 }
 
 static int

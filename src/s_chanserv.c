@@ -42,10 +42,10 @@ static BlockHeap *ban_reg_heap;
 
 static dlink_list chan_reg_table[MAX_CHANNEL_TABLE];
 
-static void u_chan_chanregister(struct client *, struct lconn *, const char **, int);
-static void u_chan_chandrop(struct client *, struct lconn *, const char **, int);
-static void u_chan_chansuspend(struct client *, struct lconn *, const char **, int);
-static void u_chan_chanunsuspend(struct client *, struct lconn *, const char **, int);
+static int u_chan_chanregister(struct client *, struct lconn *, const char **, int);
+static int u_chan_chandrop(struct client *, struct lconn *, const char **, int);
+static int u_chan_chansuspend(struct client *, struct lconn *, const char **, int);
+static int u_chan_chanunsuspend(struct client *, struct lconn *, const char **, int);
 
 static int s_chan_chanregister(struct client *, struct lconn *, const char **, int);
 static int s_chan_chandrop(struct client *, struct lconn *, const char **, int);
@@ -1143,7 +1143,7 @@ h_chanserv_user_login(void *v_client_p, void *unused)
 	return 0;
 }
 
-static void
+static int
 u_chan_chanregister(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct chan_reg *reg_p;
@@ -1153,7 +1153,7 @@ u_chan_chanregister(struct client *client_p, struct lconn *conn_p, const char *p
 	if((reg_p = find_channel_reg(NULL, parv[0])))
 	{
 		sendto_one(conn_p, "Channel %s is already registered", parv[0]);
-		return;
+		return 0;
 	}
 
 	if((ureg_p = find_user_reg_nick(NULL, parv[1])) == NULL)
@@ -1163,7 +1163,7 @@ u_chan_chanregister(struct client *client_p, struct lconn *conn_p, const char *p
 		else
 			sendto_one(conn_p, "Username %s is not registered", parv[1]);
 
-		return;
+		return 0;
 	}
 
 	slog(chanserv_p, 1, "%s - CHANREGISTER %s %s",
@@ -1177,9 +1177,10 @@ u_chan_chanregister(struct client *client_p, struct lconn *conn_p, const char *p
 
 	sendto_one(conn_p, "Channel %s registered to %s",
 			reg_p->name, ureg_p->name);
+	return 0;
 }
 
-static void
+static int
 u_chan_chandrop(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct chan_reg *reg_p;
@@ -1187,7 +1188,7 @@ u_chan_chandrop(struct client *client_p, struct lconn *conn_p, const char *parv[
 	if((reg_p = find_channel_reg(NULL, parv[0])) == NULL)
 	{
 		sendto_one(conn_p, "Channel %s is not registered", parv[0]);
-		return;
+		return 0;
 	}
 
 	slog(chanserv_p, 1, "%s - CHANDROP %s", conn_p->name, parv[0]);
@@ -1195,9 +1196,10 @@ u_chan_chandrop(struct client *client_p, struct lconn *conn_p, const char *parv[
 	destroy_channel_reg(reg_p);
 
 	sendto_one(conn_p, "Channel %s registration dropped", parv[0]);
+	return 0;
 }
 
-static void
+static int
 u_chan_chansuspend(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct chan_reg *reg_p;
@@ -1205,13 +1207,13 @@ u_chan_chansuspend(struct client *client_p, struct lconn *conn_p, const char *pa
 	if((reg_p = find_channel_reg(NULL, parv[0])) == NULL)
 	{
 		sendto_one(conn_p, "Channel %s is not registered", parv[0]);
-		return;
+		return 0;
 	}
 
 	if(reg_p->flags & CS_FLAGS_SUSPENDED)
 	{
 		sendto_one(conn_p, "Channel %s is already suspended", parv[0]);
-		return;
+		return 0;
 	}
 
 	slog(chanserv_p, 1, "%s - CHANSUSPEND %s", conn_p->name, parv[0]);
@@ -1223,9 +1225,10 @@ u_chan_chansuspend(struct client *client_p, struct lconn *conn_p, const char *pa
 			reg_p->flags, reg_p->suspender, reg_p->name);
 
 	sendto_one(conn_p, "Channel %s suspended", parv[0]);
+	return 0;
 }
 
-static void
+static int
 u_chan_chanunsuspend(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct chan_reg *reg_p;
@@ -1233,13 +1236,13 @@ u_chan_chanunsuspend(struct client *client_p, struct lconn *conn_p, const char *
 	if((reg_p = find_channel_reg(NULL, parv[0])) == NULL)
 	{
 		sendto_one(conn_p, "Channel %s is not registered", parv[0]);
-		return;
+		return 0;
 	}
 
 	if((reg_p->flags & CS_FLAGS_SUSPENDED) == 0)
 	{
 		sendto_one(conn_p, "Channel %s is not suspended", parv[0]);
-		return;
+		return 0;
 	}
 
 	slog(chanserv_p, 1, "%s - CHANUNSUSPEND %s", conn_p->name, parv[0]);
@@ -1252,6 +1255,7 @@ u_chan_chanunsuspend(struct client *client_p, struct lconn *conn_p, const char *
 			reg_p->flags, reg_p->name);
 
 	sendto_one(conn_p, "Channel %s unsuspended", parv[0]);
+	return 0;
 }
 
 static int

@@ -20,7 +20,7 @@
 
 static struct client *global_p;
 
-static void u_global_netmsg(struct client *, struct lconn *, const char **, int);
+static int u_global_netmsg(struct client *, struct lconn *, const char **, int);
 static int s_global_netmsg(struct client *, struct lconn *, const char **, int);
 
 static struct service_command global_command[] =
@@ -51,7 +51,7 @@ init_s_global(void)
 	global_p->service->flags |= SERVICE_OPERED;
 }
 
-static void
+static int
 u_global_netmsg(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct client *target_p;
@@ -69,6 +69,7 @@ u_global_netmsg(struct client *client_p, struct lconn *conn_p, const char *parv[
 	}
 
 	slog(global_p, 1, "%s - NETMSG %s", conn_p->name, data);
+	return 0;
 }
 
 static int

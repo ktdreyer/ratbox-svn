@@ -13,7 +13,7 @@ extern dlink_list ucommand_list;
 struct ucommand_handler
 {
 	const char *cmd;
-	void (*func)(struct client *, struct lconn *, const char **, int);
+	int (*func)(struct client *, struct lconn *, const char **, int);
 	int flags;
 	int minpara;
 	int spy;

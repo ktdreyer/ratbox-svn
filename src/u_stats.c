@@ -13,7 +13,7 @@
 #include "ucommand.h"
 #include "io.h"
 
-static void u_stats(struct client *, struct lconn *, const char **, int);
+static int u_stats(struct client *, struct lconn *, const char **, int);
 struct ucommand_handler stats_ucommand = { "stats", u_stats, 0, 0, 1, NULL };
 
 struct _stats_table
@@ -86,7 +86,7 @@ static struct _stats_table stats_table[] =
         { "\0",         NULL,           }
 };
 
-static void
+static int
 u_stats(struct client *unused, struct lconn *conn_p, const char *parv[], int parc)
 {
         int i;
@@ -105,7 +105,7 @@ u_stats(struct client *unused, struct lconn *conn_p, const char *parv[], int par
 
 		sendto_one(conn_p, "Stats types: %s", buf);
 
-		return;
+		return 0;
 	}
 
         for(i = 0; stats_table[i].type[0] != '\0'; i++)
@@ -113,10 +113,11 @@ u_stats(struct client *unused, struct lconn *conn_p, const char *parv[], int par
                 if(!strcasecmp(stats_table[i].type, parv[0]))
                 {
                         (stats_table[i].func)(conn_p);
-                        return;
+                        return 0;
                 }
         }
 
         sendto_one(conn_p, "Unknown stats type: %s", parv[0]);
+	return 0;
 };
         

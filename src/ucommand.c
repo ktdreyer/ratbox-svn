@@ -29,19 +29,19 @@
 static dlink_list ucommand_table[MAX_UCOMMAND_HASH];
 dlink_list ucommand_list;
 
-static void u_login(struct client *, struct lconn *, const char **, int);
+static int u_login(struct client *, struct lconn *, const char **, int);
 
-static void u_boot(struct client *, struct lconn *, const char **, int);
-static void u_connect(struct client *, struct lconn *, const char **, int);
-static void u_die(struct client *, struct lconn *, const char **, int);
-static void u_events(struct client *, struct lconn *, const char **, int);
-static void u_flags(struct client *, struct lconn *conn_p, const char **, int);
-static void u_help(struct client *, struct lconn *, const char **, int);
-static void u_quit(struct client *, struct lconn *, const char **, int);
-static void u_rehash(struct client *, struct lconn *, const char **, int);
-static void u_service(struct client *, struct lconn *, const char **, int);
-static void u_status(struct client *, struct lconn *, const char **, int);
-static void u_who(struct client *, struct lconn *, const char **, int);
+static int u_boot(struct client *, struct lconn *, const char **, int);
+static int u_connect(struct client *, struct lconn *, const char **, int);
+static int u_die(struct client *, struct lconn *, const char **, int);
+static int u_events(struct client *, struct lconn *, const char **, int);
+static int u_flags(struct client *, struct lconn *conn_p, const char **, int);
+static int u_help(struct client *, struct lconn *, const char **, int);
+static int u_quit(struct client *, struct lconn *, const char **, int);
+static int u_rehash(struct client *, struct lconn *, const char **, int);
+static int u_service(struct client *, struct lconn *, const char **, int);
+static int u_status(struct client *, struct lconn *, const char **, int);
+static int u_who(struct client *, struct lconn *, const char **, int);
 
 static struct ucommand_handler ucommands[] =
 {
@@ -178,7 +178,7 @@ add_ucommands(struct client *service_p,
         }
 }
 
-static void
+static int
 u_login(struct client *unused, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct conf_oper *oper_p = conn_p->oper;
@@ -187,7 +187,7 @@ u_login(struct client *unused, struct lconn *conn_p, const char *parv[], int par
         if(parc < 2 || EmptyString(parv[1]))
         {
                 sendto_one(conn_p, "Usage: .login <username> <password>");
-                return;
+                return 0;
         }
 
         if(ConfOperEncrypted(oper_p))
@@ -198,7 +198,7 @@ u_login(struct client *unused, struct lconn *conn_p, const char *parv[], int par
         if(strcmp(oper_p->pass, crpass))
         {
                 sendto_one(conn_p, "Invalid password");
-                return;
+                return 0;
         }
 
         /* newly opered user wont get this. */
@@ -213,9 +213,10 @@ u_login(struct client *unused, struct lconn *conn_p, const char *parv[], int par
 
 	deallocate_conf_oper(oper_p);
 	conn_p->oper = NULL;
+	return 0;
 }
 
-static void
+static int
 u_boot(struct client *unused, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct client *target_p;
@@ -254,9 +255,10 @@ u_boot(struct client *unused, struct lconn *conn_p, const char *parv[], int parc
 	}
 
 	sendto_one(conn_p, "%u users booted", count);
+	return 0;
 }	
 
-static void
+static int
 u_connect(struct client *unused, struct lconn *conn_p, const char *parv[], int parc)
 {
         struct conf_server *conf_p;
@@ -265,7 +267,7 @@ u_connect(struct client *unused, struct lconn *conn_p, const char *parv[], int p
         if((conf_p = find_conf_server(parv[0])) == NULL)
         {
                 sendto_one(conn_p, "No such server %s", parv[0]);
-                return;
+                return 0;
         }
 
         if(parc > 1)
@@ -273,7 +275,7 @@ u_connect(struct client *unused, struct lconn *conn_p, const char *parv[], int p
                 if((port = atoi(parv[1])) <= 0)
                 {
                         sendto_one(conn_p, "Invalid port %s", parv[1]);
-                        return;
+                        return 0;
                 }
 
                 conf_p->port = port;
@@ -297,45 +299,50 @@ u_connect(struct client *unused, struct lconn *conn_p, const char *parv[], int p
         eventDelete(connect_to_server, NULL);
 
         eventAddOnce("connect_to_server", connect_to_server, conf_p, 2);
+	return 0;
 }
 
-static void
+static int
 u_die(struct client *unused, struct lconn *conn_p, const char *parv[], int parc)
 {
         if(strcasecmp(MYNAME, parv[0]))
         {
                 sendto_one(conn_p, "Usage: .die <servername>");
-                return;
+                return 0;
         }
 
         sendto_all(0, "Services terminated by %s", conn_p->name);
         mlog("ratbox-services terminated by %s", conn_p->name);
         die("Services terminated");
+	return 0;
 }
 
-static void
+static int
 u_events(struct client *unused, struct lconn *conn_p, const char *parv[], int parc)
 {
         event_show(conn_p);
+	return 0;
 }
 
-static void
+static int
 u_quit(struct client *unused, struct lconn *conn_p, const char *parv[], int parc)
 {
 	sendto_one(conn_p, "Goodbye.");
 	(conn_p->io_close)(conn_p);
+	return 0;
 }
 
-static void
+static int
 u_rehash(struct client *unused, struct lconn *conn_p, const char *parv[], int parc)
 {
 	mlog("services rehashing: %s reloading config file", conn_p->name);
 	sendto_all(0, "services rehashing: %s reloading config file", conn_p->name);
 
 	rehash(0);
+	return 0;
 }
 
-static void
+static int
 u_service(struct client *unused, struct lconn *conn_p, const char *parv[], int parc)
 {
         struct client *service_p;
@@ -346,14 +353,14 @@ u_service(struct client *unused, struct lconn *conn_p, const char *parv[], int p
                 if((service_p = find_service_id(parv[0])) == NULL)
                 {
                         sendto_one(conn_p, "No such service %s", parv[0]);
-                        return;
+                        return 0;
                 }
 
                 service_stats(service_p, conn_p);
 
                 if(service_p->service->stats != NULL)
                         (service_p->service->stats)(conn_p, parv, parc);
-                return;
+                return 0;
         }
 
         sendto_one(conn_p, "Services:");
@@ -371,9 +378,11 @@ u_service(struct client *unused, struct lconn *conn_p, const char *parv[], int p
                 	           service_p->service->username,
                         	   service_p->service->host, service_p->info);
         }
+
+	return 0;
 }
 
-static void
+static int
 u_status(struct client *unused, struct lconn *conn_p, const char *parv[], int parc)
 {
         sendto_one(conn_p, "%s, version ratbox-services-%s(%s), up %s",
@@ -395,10 +404,10 @@ u_status(struct client *unused, struct lconn *conn_p, const char *parv[], int pa
 			dlink_list_length(&server_list));
         sendto_one(conn_p, "         Channels: %lu Topics: %lu",
 			dlink_list_length(&channel_list), count_topics());
-                          
+	return 0;
 }
 
-static void
+static int
 u_who(struct client *unused, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct client *target_p;
@@ -431,6 +440,8 @@ u_who(struct client *unused, struct lconn *conn_p, const char *parv[], int parc)
 				conf_oper_flags(target_p->user->oper->flags));
 		}
 	}
+
+	return 0;
 }
 
 static void
@@ -484,7 +495,7 @@ dump_commands(struct lconn *conn_p, struct client *service_p, dlink_list *list)
 	}
 }
 
-static void
+static int
 u_help(struct client *unused, struct lconn *conn_p, const char *parv[], int parc)
 {
         struct ucommand_handler *handler;
@@ -504,7 +515,7 @@ u_help(struct client *unused, struct lconn *conn_p, const char *parv[], int parc
 		}
 
                 sendto_one(conn_p, "For more information see .help <command>");
-                return;
+                return 0;
         }
 
         if((handler = find_ucommand(parv[0])) != NULL)
@@ -514,10 +525,11 @@ u_help(struct client *unused, struct lconn *conn_p, const char *parv[], int parc
                 else
                         send_cachefile(handler->helpfile, conn_p);
 
-                return;
+                return 0;
         }
 
         sendto_one(conn_p, "Unknown help topic: %s", parv[0]);
+	return 0;
 }
 
 struct _flags_table
@@ -562,7 +574,7 @@ show_flags(struct lconn *conn_p)
         sendto_one(conn_p, "Current flags: %s", buf);
 }
 
-static void
+static int
 u_flags(struct client *unused, struct lconn *conn_p, const char *parv[], int parc)
 {
         const char *param;
@@ -573,7 +585,7 @@ u_flags(struct client *unused, struct lconn *conn_p, const char *parv[], int par
         if(parc < 1)
         {
                 show_flags(conn_p);
-                return;
+                return 0;
         }
 
         for(i = 0; i < parc; i++)
@@ -607,4 +619,5 @@ u_flags(struct client *unused, struct lconn *conn_p, const char *parv[], int par
         }
 
         show_flags(conn_p);
+	return 0;
 }
