@@ -313,6 +313,11 @@ timespec:	expr
 			/* a year has 365 days, *not* 12 months */
 			$$ = $1 * 60 * 60 * 24 * 365;
 		}
+		| timespec timespec
+		= {
+			/* 2 years 3 days */
+			$$ = $1 + $2;
+		}
 		;
 
 sizespec:	expr	
