@@ -1,3 +1,12 @@
+*** 20001225_17 by db
+- I'm not sure how this ever worked before..
+  yylval.string should be DupString'ed in MOST cases before adding to conf
+  link list
+
+  UNTESTED folks, sorry have to do the Christmas day family visiting thing NOW
+
+
+
 *** 20001225_16 by ejb
 - allow remote whois.
 
