@@ -55,7 +55,7 @@ static FILE *log_ioerror;
 struct log_struct
 {
 	const char *name;
-	FBFILE **logfile;
+	FILE **logfile;
 };
 
 static struct log_struct log_table[LAST_LOGFILE] =
@@ -109,7 +109,7 @@ open_logfiles(void)
 void
 ilog(ilogfile dest, const char *format, ...)
 {
-	FBFILE *logfile = *log_table[dest].logfile;
+	FILE *logfile = *log_table[dest].logfile;
 	char buf[BUFSIZE];
 	char buf2[BUFSIZE];
 	va_list args;

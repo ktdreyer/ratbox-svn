@@ -253,8 +253,8 @@ mo_dline(struct Client *client_p, struct Client *source_p,
 static int
 mo_undline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	FBFILE *in;
-	FBFILE *out;
+	FILE *in;
+	FILE *out;
 	char buf[BUFSIZE], buff[BUFSIZE], temppath[BUFSIZE], *p;
 	const char *filename, *found_cidr;
 	const char *cidr;

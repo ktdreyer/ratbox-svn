@@ -78,12 +78,12 @@ dlink_list tdline_week;
 /* internally defined functions */
 static void set_default_conf(void);
 static void validate_conf(void);
-static void read_conf(FBFILE *);
+static void read_conf(FILE *);
 
 static void expire_tkline(dlink_list *, int);
 static void expire_tdline(dlink_list *, int);
 
-FBFILE *conf_fbfile_in;
+FILE *conf_fbfile_in;
 extern char yytext[];
 
 static int verify_access(struct Client *client_p, const char *username);
@@ -786,7 +786,7 @@ set_default_conf(void)
  * side effects	- Read configuration file.
  */
 static void
-read_conf(FBFILE * file)
+read_conf(FILE * file)
 {
 	lineno = 0;
 
@@ -1212,7 +1212,7 @@ read_ircd_conf(int cold)
 void
 read_ban_confs(int cold)
 {
-	FBFILE *file;
+	FILE *file;
 	const char *filename;
 
 	if(!cold)
@@ -1307,7 +1307,7 @@ write_confitem(KlineType type, struct Client *source_p, char *user,
 	       const char *current_date, int xtype)
 {
 	char buffer[1024];
-	FBFILE *out;
+	FILE *out;
 	const char *filename;	/* filename to use for kline */
 
 	filename = get_conf_name(type);

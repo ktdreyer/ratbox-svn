@@ -381,10 +381,10 @@ extern void flush_expired_ips(void *);
 
 
 /* XXX consider moving these into kdparse.h */
-extern void parse_k_file(FBFILE * fb);
-extern void parse_d_file(FBFILE * fb);
-extern void parse_x_file(FBFILE * fb);
-extern void parse_resv_file(FBFILE *);
+extern void parse_k_file(FILE * fb);
+extern void parse_d_file(FILE * fb);
+extern void parse_x_file(FILE * fb);
+extern void parse_resv_file(FILE *);
 extern char *getfield(char *newline);
 
 extern char *get_oper_name(struct Client *client_p);

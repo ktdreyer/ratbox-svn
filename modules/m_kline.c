@@ -686,7 +686,7 @@ already_placed_kline(struct Client *source_p, const char *luser, const char *lho
 static void
 remove_permkline_match(struct Client *source_p, const char *host, const char *user)
 {
-	FBFILE *in, *out;
+	FILE *in, *out;
 	int pairme = 0;
 	int error_on_write = NO;
 	char buf[BUFSIZE];

@@ -86,7 +86,7 @@ init_cache(void)
 struct cachefile *
 cache_file(const char *filename, const char *shortname, int flags)
 {
-	FBFILE *in;
+	FILE *in;
 	struct cachefile *cacheptr;
 	struct cacheline *lineptr;
 	char line[BUFSIZE];

@@ -64,7 +64,7 @@ conf_add_fields(struct ConfItem *aconf,	const char *host_field,
  */
 
 void
-parse_k_file(FBFILE * file)
+parse_k_file(FILE * file)
 {
 	struct ConfItem *aconf;
 	char *user_field = NULL;
@@ -114,7 +114,7 @@ parse_k_file(FBFILE * file)
  */
 
 void
-parse_d_file(FBFILE * file)
+parse_d_file(FILE * file)
 {
 	struct ConfItem *aconf;
 	char *reason_field = NULL;
@@ -149,7 +149,7 @@ parse_d_file(FBFILE * file)
 }
 
 void
-parse_x_file(FBFILE * file)
+parse_x_file(FILE * file)
 {
 	struct ConfItem *aconf;
 	char *gecos_field = NULL;
@@ -192,7 +192,7 @@ parse_x_file(FBFILE * file)
 }
 
 void
-parse_resv_file(FBFILE * file)
+parse_resv_file(FILE * file)
 {
 	struct ConfItem *aconf;
 	char *reason_field;

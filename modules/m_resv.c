@@ -482,7 +482,7 @@ remove_temp_resv(struct Client *source_p, const char *name)
 static void
 remove_resv(struct Client *source_p, const char *name)
 {
-	FBFILE *in, *out;
+	FILE *in, *out;
 	char buf[BUFSIZE];
 	char buff[BUFSIZE];
 	char temppath[BUFSIZE];

@@ -314,7 +314,7 @@ static void
 write_xline(struct Client *source_p, struct ConfItem *aconf)
 {
 	char buffer[BUFSIZE * 2];
-	FBFILE *out;
+	FILE *out;
 	const char *filename;
 
 	filename = ConfigFileEntry.xlinefile;
@@ -520,7 +520,7 @@ remove_temp_xline(struct Client *source_p, const char *name)
 static void
 remove_xline(struct Client *source_p, const char *huntgecos)
 {
-	FBFILE *in, *out;
+	FILE *in, *out;
 	char buf[BUFSIZE];
 	char buff[BUFSIZE];
 	char temppath[BUFSIZE];
