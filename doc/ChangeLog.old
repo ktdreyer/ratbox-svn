@@ -1,3 +1,8 @@
+*** 20001201_5 by db
+- tidy up LITTLE_I_LINE code remove #ifdef's
+
+
+
 *** 20001201_4 by db
 - massive commit, this removes ALL SLink's ick
   NOTE that not everything is working yet, notably server link..
