@@ -73,6 +73,11 @@ extern char* strncpy_irc(char* s1, const char* s2, size_t n);
  * -Dianora
  */
 extern char* clean_string(char* dest, const unsigned char* src, size_t len);
+/*
+ * strip_tabs - convert tabs to spaces
+ * - jdc
+ */
+extern char *strip_tabs(char *dest, const unsigned char *src, size_t len);
 
 extern const char* myctime(time_t);
 extern char*       strtoken(char** save, char* str, char* fs);
