@@ -1,3 +1,18 @@
+leeh        2003/08/12 17:34:23 EDT	(20030812_4)
+
+  Modified files:
+    modules/core         m_mode.c 
+    src                  channel.c 
+  Log:
+  - implemented the BMASK and TMODE handlers
+  - fixed it so servers can set modes again
+  
+  Revision  Changes    Path
+  1.86      +201 -8    ircd-ratbox/modules/core/m_mode.c
+  7.395     +12 -10    ircd-ratbox/src/channel.c
+
+
+
 androsyn    2003/08/12 15:07:56 EDT	(20030812_3)
 
   Modified files:
