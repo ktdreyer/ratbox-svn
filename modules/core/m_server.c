@@ -70,6 +70,7 @@ char *_version = "20001122";
 
 char *parse_server_args(char *parv[], int parc, char *info, int *hop);
 int bogus_host(char *host);
+struct Client *server_exists(char *);
 void write_links_file(void*);
 
 
@@ -161,7 +162,7 @@ static void mr_server(struct Client *client_p, struct Client *source_p,
       break;
   }
     
-  if ((target_p = find_server(name)))
+  if ((target_p = server_exists(name)))
     {
       /*
        * This link is trying feed me a server that I already have
@@ -260,7 +261,7 @@ static void ms_server(struct Client *client_p, struct Client *source_p,
       return;
     }
 
-  if ((target_p = find_server(name)))
+  if ((target_p = server_exists(name)))
     {
       /*
        * This link is trying feed me a server that I already have
@@ -667,4 +668,24 @@ int bogus_host(char *host)
     return 1;
 
   return 0;
+}
+
+/*
+ * server_exists()
+ * 
+ * inputs	- servername
+ * output	- 1 if server exists, 0 if doesnt exist
+ */
+struct Client *server_exists(char *servername)
+{
+  struct Client *target_p;
+
+  for(target_p = GlobalServerList; target_p; target_p = target_p->servnext)
+  {
+    if(match(target_p->name, servername) || 
+         match(servername, target_p->name))
+      return target_p;
+  }
+
+  return NULL;
 }
