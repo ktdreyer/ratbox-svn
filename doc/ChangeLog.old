@@ -1,3 +1,9 @@
+*** 20010425_1 by androsyn
+Fix so that kqueue will compile on FreeBSD 4.2 which doesn't have
+NOTE_LOWAT.
+
+
+
 *** 20010424_14 by habeeb
 Adding me, because I'm bored.
 
