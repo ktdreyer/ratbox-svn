@@ -1,3 +1,15 @@
+androsyn    2004/09/24 10:04:53 EDT	(20040924_0)
+
+  Modified files:
+    src                  newconf.c 
+  Log:
+  fix typo
+  
+  Revision  Changes    Path
+  7.183     +1 -1      ircd-ratbox/src/newconf.c
+
+
+
 androsyn    2004/09/22 13:21:17 EDT	(20040922_2)
 
   Modified files:
