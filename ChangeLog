@@ -1,3 +1,26 @@
+leeh        2004/03/03 13:45:16 EST	(20040303_9)
+
+  Modified files:
+    .                    configure configure.ac 
+    include              balloc.h s_conf.h setup.h.in 
+    src                  ircd.c s_conf.c s_serv.c 
+  Log:
+  - fix an shide leak
+  - remove two unused defines in balloc.h
+  - move ConfItem to a balloc
+  
+  Revision  Changes    Path
+  7.209     +12 -2     ircd-ratbox/configure
+  7.22      +4 -2      ircd-ratbox/configure.ac
+  1.24      +0 -2      ircd-ratbox/include/balloc.h
+  7.271     +2 -0      ircd-ratbox/include/s_conf.h
+  7.79      +3 -0      ircd-ratbox/include/setup.h.in
+  7.331     +1 -0      ircd-ratbox/src/ircd.c
+  7.451     +10 -2     ircd-ratbox/src/s_conf.c
+  7.380     +4 -0      ircd-ratbox/src/s_serv.c
+
+
+
 androsyn    2004/03/03 13:19:17 EST	(20040303_8)
 
   Modified files:
