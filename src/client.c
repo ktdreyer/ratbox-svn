@@ -1256,7 +1256,7 @@ void exit_aborted_clients(void)
           continue;
         }
       dlinkDelete(ptr, &abort_list);
-      exit_client(target_p, target_p, &me, "Dead link");  
+      exit_client(target_p, target_p, &me, "Write error: connection closed");  
       free_dlink_node(ptr);
     }
 }
@@ -1445,6 +1445,13 @@ int exit_client(
               source_p->localClient->sendK, source_p->localClient->receiveK);
         }
     }
+  /* The client *better* be off all of the lists */
+  assert(dlinkFind(&unknown_list, client_p) == NULL);
+  assert(dlinkFind(&lclient_list, client_p) == NULL);
+  assert(dlinkFind(&serv_list, client_p) == NULL);
+  assert(dlinkFind(&oper_list, client_p) == NULL);
+  
+    
   exit_one_client(client_p, source_p, from, comment);
   return client_p == source_p ? CLIENT_EXITED : 0;
 }
