@@ -360,11 +360,6 @@
  */
 #define CLIENT_FLOOD    2560
 
-/* NOISY_HTM - should HTM be noisy by default
- * should be YES or NO
- */
-#define NOISY_HTM YES
-
 /*
  * LITTLE_I_LINE support
  * clients with a little i instead of an I in their I line

@@ -396,7 +396,6 @@ static void initialize_global_set_options(void)
   memset( &GlobalSetOptions, 0, sizeof(GlobalSetOptions));
 
   GlobalSetOptions.maxclients = MAX_CLIENTS;
-  GlobalSetOptions.noisy_htm = NOISY_HTM;
   GlobalSetOptions.autoconn = 1;
 
   GlobalSetOptions.fludnum = FLUD_NUM;
