@@ -1,3 +1,16 @@
+androsyn    2003/10/06 17:02:39 EDT	(20031006_3)
+
+  Modified files:
+    .                    configure configure.ac 
+  Log:
+  Missed a fi removing sigio checks
+  
+  Revision  Changes    Path
+  7.192     +2 -6      ircd-ratbox/configure
+  7.6       +2 -6      ircd-ratbox/configure.ac
+
+
+
 androsyn    2003/10/06 16:58:16 EDT	(20031006_2)
 
   Modified files:
