@@ -741,6 +741,7 @@ void
 channel_member_names(struct Client *source_p,
                      struct Channel *chptr,
                      char *name_of_channel, int show_eon)
+#ifdef ANONOPS
 {
   int mlen;
   int sublists_done = 0;
@@ -837,6 +838,86 @@ channel_member_names(struct Client *source_p,
     sendto_one(source_p, form_str(RPL_ENDOFNAMES), me.name,
                source_p->name, name_of_channel);
 }
+#else
+{
+  struct Client *target_p;
+  dlink_node *ptr_list[NUMLISTS];
+  dlink_node *ptr;
+  char ptr_flags[NUMLISTS][2];
+  char lbuf[BUFSIZE];
+  char *t;
+  int mlen;
+  int tlen;
+  int cur_len;
+  int reply_to_send = NO;
+  int is_member;
+  int i;
+
+  if(ShowChannel(source_p, chptr))
+  {
+    ptr_list[0] = chptr->chanops.head;
+#ifdef HALFOPS
+    ptr_list[1] = chptr->halfops.head;
+#else
+    ptr_list[1] = NULL;
+#endif
+    ptr_list[2] = chptr->voiced.head;
+    ptr_list[3] = chptr->peons.head;
+#ifdef REQUIRE_OANDV
+    ptr_list[4] = chptr->chanops_voiced.head;
+#endif
+
+    set_channel_mode_flags(ptr_flags, chptr, source_p);
+
+    is_member = IsMember(source_p, chptr);
+
+    ircsprintf(lbuf, form_str(RPL_NAMREPLY),
+	       me.name, source_p->name, channel_pub_or_secret(chptr));
+
+    mlen = strlen(lbuf);
+    
+    ircsprintf(lbuf + mlen, " %s :", name_of_channel);
+    cur_len = mlen = strlen(lbuf);
+
+    t = lbuf + cur_len;
+
+    for(i = 0; i < NUMLISTS; i++)
+    {
+      for(ptr = ptr_list[i]; ptr; ptr = ptr->next)
+      {
+        target_p = ptr->data;
+
+        if(IsInvisible(target_p) && !is_member)
+          continue;
+
+        reply_to_send = YES;
+
+        ircsprintf(t, "%s%s ", ptr_flags[i], target_p->name);
+
+        tlen = strlen(t);
+        cur_len += tlen;
+        t += tlen;
+
+        if ((cur_len + NICKLEN) > (BUFSIZE - 3))
+        {
+          sendto_one(source_p, "%s", lbuf);
+  	  reply_to_send = NO;
+	  cur_len = mlen;
+	  t = lbuf + mlen;
+        }
+      }
+    }
+
+    if(reply_to_send)
+      sendto_one(source_p, "%s", lbuf);
+  }
+
+  if(show_eon)
+    sendto_one(source_p, form_str(RPL_ENDOFNAMES), me.name,
+	       source_p->name, name_of_channel);
+}
+#endif /* ANONOPS */     
+      
 
 /*
  * channel_pub_or_secret
