@@ -1,3 +1,17 @@
+leeh        2004/11/17 18:37:29 EST	(20041117_3)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+  Log:
+  - add help text in configure to --with-sqlite
+  
+  Revision  Changes    Path
+  1.16      +3 -1      rserv/autoconf/configure.in
+  1.16      +1 -1      rserv/configure
+
+
+
 leeh        2004/11/17 17:22:53 EST	(20041117_2)
 
   Modified files:
