@@ -1,3 +1,15 @@
+androsyn    2004/09/08 21:02:20 EDT	(20040909_2)
+
+  Modified files:
+    src                  s_conf.c 
+  Log:
+  default the reject cache to on
+  
+  Revision  Changes    Path
+  7.493     +4 -1      ircd-ratbox/src/s_conf.c
+
+
+
 leeh        2004/09/08 20:34:04 EDT	(20040909_1)
 
   Modified files:
