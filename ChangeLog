@@ -1,3 +1,26 @@
+leeh        2005/02/19 09:02:34 EST	(20050219_2)
+
+  Modified files:
+    doc                  example.conf example.efnet.conf 
+    include              ircd.h s_conf.h 
+    modules              m_set.c 
+    src                  channel.c ircd.c newconf.c s_conf.c 
+  Log:
+  - remove split_delay
+  
+  Revision  Changes    Path
+  7.259     +0 -5      ircd-ratbox/doc/example.conf
+  7.87      +0 -5      ircd-ratbox/doc/example.efnet.conf
+  7.82      +0 -1      ircd-ratbox/include/ircd.h
+  7.314     +0 -1      ircd-ratbox/include/s_conf.h
+  1.81      +1 -20     ircd-ratbox/modules/m_set.c
+  7.434     +2 -7      ircd-ratbox/src/channel.c
+  7.372     +0 -1      ircd-ratbox/src/ircd.c
+  7.201     +0 -1      ircd-ratbox/src/newconf.c
+  7.509     +0 -1      ircd-ratbox/src/s_conf.c
+
+
+
 leeh        2005/02/19 08:48:05 EST	(20050219_1)
 
   Modified files:
