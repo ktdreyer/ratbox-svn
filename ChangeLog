@@ -1,3 +1,34 @@
+leeh        2002/11/24 01:04:30 UTC	(20021124_0)
+
+  Modified files:
+    contrib              m_owho.c m_owhois.c 
+    include              channel_mode.h config.h config.h.dist 
+    modules              m_info.c m_join.c m_names.c m_topic.c 
+                         m_who.c m_whois.c 
+    modules/core         m_kick.c m_sjoin.c 
+    src                  channel.c channel_mode.c 
+  Log:
+  - removed anonops
+  
+  Revision  Changes    Path
+  1.8       +27 -99    ircd-ratbox/contrib/m_owho.c
+  1.12      +3 -10     ircd-ratbox/contrib/m_owhois.c
+  7.14      +0 -5      ircd-ratbox/include/channel_mode.h
+  7.152     +1 -9      ircd-ratbox/include/config.h
+  7.65      +1 -9      ircd-ratbox/include/config.h.dist
+  1.53      +6 -30     ircd-ratbox/modules/core/m_kick.c
+  1.154     +2 -28     ircd-ratbox/modules/core/m_sjoin.c
+  1.67      +1 -9      ircd-ratbox/modules/m_info.c
+  1.110     +5 -16     ircd-ratbox/modules/m_join.c
+  1.54      +3 -6      ircd-ratbox/modules/m_names.c
+  1.64      +9 -42     ircd-ratbox/modules/m_topic.c
+  1.73      +31 -113   ircd-ratbox/modules/m_who.c
+  1.98      +3 -10     ircd-ratbox/modules/m_whois.c
+  7.360     +0 -92     ircd-ratbox/src/channel.c
+  7.84      +9 -416    ircd-ratbox/src/channel_mode.c
+
+
+
 leeh        2002/11/23 18:38:29 UTC	(20021123_2)
 
   Modified files:
