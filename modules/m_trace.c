@@ -370,16 +370,24 @@ static int report_this_status(struct Client *source_p, struct Client *target_p,
           if (IsOper(target_p))
 	    sendto_one(source_p, form_str(RPL_TRACEOPERATOR),
 		       me.name, source_p->name, class_name, name, 
-		       MyOper(source_p) ? ip : 
+#ifdef HIDE_SPOOF_IPS
+		       IsIPSpoof(target_p) ? "255.255.255.255" : ip,
+#else
+                       MyOper(source_p) ? ip :
 		       (IsIPSpoof(target_p) ? "255.255.255.255" : ip),
+#endif
 		       CurrentTime - target_p->lasttime,
 		       (target_p->user)?(CurrentTime - target_p->user->last):0);
 		       
 	  else
 	    sendto_one(source_p, form_str(RPL_TRACEUSER),
 		       me.name, source_p->name, class_name, name,
+#ifdef HIDE_SPOOF_IPS
+                       IsIPSpoof(target_p) ? "255.255.255.255" : ip,
+#else
 		       MyOper(source_p) ? ip : 
 		       (IsIPSpoof(target_p) ? "255.255.255.255" : ip),
+#endif
 		       CurrentTime - target_p->lasttime,
 		       (target_p->user)?(CurrentTime - target_p->user->last):0);
 	  cnt++;
