@@ -1,3 +1,15 @@
+androsyn    2002/08/20 14:01:26 EDT	(20020820_3)
+
+  Modified files:
+    src                  hostmask.c 
+  Log:
+  Set the default ipv6 bitmask to 128
+  
+  Revision  Changes    Path
+  7.75      +1 -1      ircd-ratbox/src/hostmask.c
+
+
+
 androsyn    2002/08/20 13:08:54 EDT	(20020820_2)
 
   Modified files:
