@@ -459,6 +459,7 @@ int check_server(struct Client* cptr)
   attach_conf(cptr, c_conf);
   attach_confs(cptr, cptr->name, CONF_HUB | CONF_LEAF);
 
+  
   if( !(n_conf->flags & CONF_FLAGS_LAZY_LINK) )
     ClearCap(cptr,CAP_LL);
 

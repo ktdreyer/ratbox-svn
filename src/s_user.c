@@ -1016,8 +1016,19 @@ void send_umode_out(struct Client *cptr,
 
       if((acptr != cptr) && (acptr != sptr) && (*buf))
         {
-	  sendto_one(acptr, ":%s MODE %s :%s",
-		     sptr->name, sptr->name, buf);
+          log(L_DEBUG, "About to send umode to %s\n", acptr->name);
+          log(L_DEBUG, "hub: %d, LL: %d, SM: %d, CEM: %d, MATCH: %d",
+              ConfigFileEntry.hub, IsCapable(acptr, CAP_LL),
+              acptr->localClient->serverMask,
+              sptr->lazyLinkClientExists,
+              (acptr->localClient->serverMask &
+               sptr->lazyLinkClientExists));
+            
+          if((!(ConfigFileEntry.hub && IsCapable(acptr, CAP_LL)))
+             || (acptr->localClient->serverMask &
+                 sptr->lazyLinkClientExists))
+            sendto_one(acptr, ":%s MODE %s :%s",
+                       sptr->name, sptr->name, buf);
         }
     }
 

@@ -567,7 +567,7 @@ int can_join(struct Client *sptr, struct Channel *chptr, char *key)
     {
       for (lp = sptr->user->invited.head; lp; lp = lp->next)
         if (lp->data == chptr)
-          break;
+         break;
       if (!lp)
         {
 	  for (ptr = chptr->invexlist.head; ptr; ptr = ptr->next)

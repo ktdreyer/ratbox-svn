@@ -842,6 +842,18 @@ sendto_ll_channel_remote(struct Channel *chptr,
 	{
 	  if(ConfigFileEntry.hub)
 	    {
+              /* Only tell leafs that already know about the channel */
+              if ((chptr->lazyLinkChannelExists &
+                   cptr->localClient->serverMask) == 0)
+              {
+                continue;
+              }
+              /* Uhm.  We shouldn't get here.
+               * Since the server obviously knows about the channel,
+               * it really should know about all the nicks that exist
+               * on the channel...
+               */
+              assert( 0 ); /* XXX -dt */
 	      if ((sptr->lazyLinkClientExists & cptr->localClient->serverMask)
 		  == 0)
 		{

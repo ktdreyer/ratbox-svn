@@ -497,7 +497,7 @@ int     ms_sjoin(struct Client *cptr,
 	}
     }
 
-  sendto_channel_remote(chptr, cptr, "%s %s", buf, sjbuf);
+  sendto_ll_channel_remote(chptr, cptr, "%s %s", buf, sjbuf);
 
   return 0;
 }
