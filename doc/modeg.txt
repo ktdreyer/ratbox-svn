@@ -25,6 +25,7 @@ your accept list, issue the raw command ACCEPT <nick>,<nick>,<nick>,...
 You will not receive a reply from the ACCEPT command if it is succesful,
 only if an error has occured.  There are three possible errors, shown by
 numerics:
+
    ERR_ACCEPTFULL (456): :irc.server 456 client :Accept list is full
      - This is sent when an accept list is full.
    ERR_ACCEPTEXIST (457): :irc.server 457 client target :already exists
@@ -34,8 +35,8 @@ numerics:
      - This is sent when a client tries to remove a user from their accept
        list who is not on the accept list.
 
-That user will now be able to send messages to your client until the association 
-is broken.
+That user will now be able to send messages to your client until the
+association is broken.
 
 Associations break in one of the following situations:  when an accepted user
 QUIT's (or is on the other side of a split), you QUIT, or the accepted user
@@ -65,6 +66,9 @@ Hwy101 will see:  -Hwy-LL- *** I'm in +g mode (server side ignore).
 
 Hwy-LL will see:  Client Hwy101 [wcampbel@admin.irc.monkie.org] is messaging
                     you and you are +g
+
+The sender will receive the NOTICE from the target of the message, while
+the recipient will receive the NOTICE from the server.
 
 --
 
@@ -132,5 +136,5 @@ spamming, and to provide users with a means to keep their privacy.
 We hope that these goals are obtained.
 
 --
-Walter Campbell
+W. Campbell
 $Id$
