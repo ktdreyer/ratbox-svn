@@ -45,9 +45,7 @@ struct SLink
     struct Client   *cptr;
     struct Channel  *chptr;
     struct ConfItem *aconf;
-#ifdef BAN_INFO
     struct Ban   *banptr;
-#endif
     char      *cp;
   } value;
   int   flags;

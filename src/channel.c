@@ -194,13 +194,10 @@ static  int     add_banid(struct Client *cptr, struct Channel *chptr, char *bani
   ban->flags = CHFL_BAN;
   ban->next = chptr->banlist;
 
-#ifdef BAN_INFO
-
   ban->value.banptr = (aBan *)MyMalloc(sizeof(aBan));
   ban->value.banptr->banstr = (char *)MyMalloc(strlen(banid)+1);
   (void)strcpy(ban->value.banptr->banstr, banid);
 
-#ifdef USE_UH
   if (IsPerson(cptr))
     {
       ban->value.banptr->who =
@@ -212,21 +209,11 @@ static  int     add_banid(struct Client *cptr, struct Channel *chptr, char *bani
     }
   else
     {
-#endif
       ban->value.banptr->who = (char *)MyMalloc(strlen(cptr->name)+1);
       (void)strcpy(ban->value.banptr->who, cptr->name);
-#ifdef USE_UH
     }
-#endif
 
   ban->value.banptr->when = CurrentTime;
-
-#else
-
-  ban->value.cp = (char *)MyMalloc(strlen(banid)+1);
-  (void)strcpy(ban->value.cp, banid);
-
-#endif  /* #ifdef BAN_INFO */
 
   chptr->banlist = ban;
   chptr->num_bed++;
@@ -264,13 +251,10 @@ static  int     add_exceptid(struct Client *cptr, struct Channel *chptr, char *e
   ex->flags = CHFL_EXCEPTION;
   ex->next = chptr->exceptlist;
 
-#ifdef BAN_INFO
-
   ex->value.banptr = (aBan *)MyMalloc(sizeof(aBan));
   ex->value.banptr->banstr = (char *)MyMalloc(strlen(eid)+1);
   (void)strcpy(ex->value.banptr->banstr, eid);
 
-#ifdef USE_UH
   if (IsPerson(cptr))
     {
       ex->value.banptr->who =
@@ -282,21 +266,11 @@ static  int     add_exceptid(struct Client *cptr, struct Channel *chptr, char *e
     }
   else
     {
-#endif
       ex->value.banptr->who = (char *)MyMalloc(strlen(cptr->name)+1);
       (void)strcpy(ex->value.banptr->who, cptr->name);
-#ifdef USE_UH
     }
-#endif
 
   ex->value.banptr->when = CurrentTime;
-
-#else
-
-  ex->value.cp = (char *)MyMalloc(strlen(eid)+1);
-  (void)strcpy(ex->value.cp, eid);
-
-#endif  /* #ifdef BAN_INFO */
 
   chptr->exceptlist = ex;
   chptr->num_bed++;
@@ -337,13 +311,10 @@ static  int     add_denyid(struct Client *cptr, struct Channel *chptr, char *ban
   ban->flags = CHFL_DENY;
   ban->next = chptr->denylist;
 
-#ifdef BAN_INFO
-
   ban->value.banptr = (aBan *)MyMalloc(sizeof(aBan));
   ban->value.banptr->banstr = (char *)MyMalloc(strlen(banid)+1);
   (void)strcpy(ban->value.banptr->banstr, banid);
 
-#ifdef USE_UH
   if (IsPerson(cptr))
     {
       ban->value.banptr->who =
@@ -355,21 +326,11 @@ static  int     add_denyid(struct Client *cptr, struct Channel *chptr, char *ban
     }
    else
     {
-#endif
       ban->value.banptr->who = (char *)MyMalloc(strlen(cptr->name)+1);
       (void)strcpy(ban->value.banptr->who, cptr->name);
-#ifdef USE_UH
     }
-#endif
 
   ban->value.banptr->when = CurrentTime;
-
-#else
-
-  ban->value.cp = (char *)MyMalloc(strlen(banid)+1);
-  (void)strcpy(ban->value.cp, banid);
-
-#endif  /* #ifdef BAN_INFO */
 
   chptr->denylist = ban;
   chptr->num_bed++;
@@ -392,22 +353,16 @@ static  int     del_banid(struct Channel *chptr, char *banid)
 
   if (!banid)
     return -1;
+
   for (ban = &(chptr->banlist); *ban; ban = &((*ban)->next))
-#ifdef BAN_INFO
-    if (irccmp(banid, (*ban)->value.banptr->banstr)==0)
-#else
-      if (irccmp(banid, (*ban)->value.cp)==0)
-#endif
+    {
+      if (irccmp(banid, (*ban)->value.banptr->banstr)==0)
         {
           tmp = *ban;
           *ban = tmp->next;
-#ifdef BAN_INFO
           MyFree(tmp->value.banptr->banstr);
           MyFree(tmp->value.banptr->who);
           MyFree(tmp->value.banptr);
-#else
-          MyFree(tmp->value.cp);
-#endif
           free_link(tmp);
 	  /* num_bed should never be < 0 */
 	  if(chptr->num_bed > 0)
@@ -416,6 +371,7 @@ static  int     del_banid(struct Channel *chptr, char *banid)
 	    chptr->num_bed = 0;
           break;
         }
+    }
   return 0;
 }
 
@@ -436,13 +392,9 @@ static  int     del_exceptid(struct Channel *chptr, char *eid)
       {
         tmp = *ex;
         *ex = tmp->next;
-#ifdef BAN_INFO
         MyFree(tmp->value.banptr->banstr);
         MyFree(tmp->value.banptr->who);
         MyFree(tmp->value.banptr);
-#else
-        MyFree(tmp->value.cp);
-#endif
         free_link(tmp);
 	/* num_bed should never be < 0 */
 	if(chptr->num_bed > 0)
@@ -469,21 +421,14 @@ static  int     del_denyid(struct Channel *chptr, char *banid)
   if (!banid)
     return -1;
   for (ban = &(chptr->denylist); *ban; ban = &((*ban)->next))
-#ifdef BAN_INFO
-    if (strcasecmp(banid, (*ban)->value.banptr->banstr)==0) 
-#else
-      if (strcasecmp(banid, (*ban)->value.cp)==0)
-#endif
+    {
+      if (strcasecmp(banid, (*ban)->value.banptr->banstr)==0) 
         {
           tmp = *ban;
           *ban = tmp->next;
-#ifdef BAN_INFO
           MyFree(tmp->value.banptr->banstr);
           MyFree(tmp->value.banptr->who);
           MyFree(tmp->value.banptr);
-#else
-          MyFree(tmp->value.cp);
-#endif
           free_link(tmp);
 
 	  /* num_bed should never be < 0 */
@@ -493,6 +438,7 @@ static  int     del_denyid(struct Channel *chptr, char *banid)
 	    chptr->num_bed = 0;
           break;
         }
+    }
   return 0;
 }
 
@@ -551,13 +497,9 @@ static void del_matching_exception(struct Client *cptr,struct Channel *chptr)
                                  BANSTR(tmp));
 
           *ex = tmp->next;
-#ifdef BAN_INFO
           MyFree(tmp->value.banptr->banstr);
           MyFree(tmp->value.banptr->who);
           MyFree(tmp->value.banptr);
-#else
-          MyFree(tmp->value.cp);
-#endif
           free_link(tmp);
 	  /* num_bed should never be < 0 */
 	  if(chptr->num_bed > 0)
@@ -710,7 +652,6 @@ void    remove_user_from_channel(struct Client *sptr,struct Channel *chptr,int w
     if (tmp->value.chptr == chptr)
       {
         *curr = tmp->next;
-	/* ZZZZZZZZ blalloc elemsize 12 already free bug here */
         free_link(tmp);
         break;
       }
@@ -1511,7 +1452,6 @@ void set_channel_mode(struct Client *cptr,
                */
               if(isok)
                 {
-#ifdef BAN_INFO
                   for (lp = chptr->exceptlist; lp; lp = lp->next)
                     sendto_one(cptr, form_str(RPL_EXCEPTLIST),
                                me.name, cptr->name,
@@ -1519,13 +1459,7 @@ void set_channel_mode(struct Client *cptr,
                                lp->value.banptr->banstr,
                                lp->value.banptr->who,
                                lp->value.banptr->when);
-#else 
-                  for (lp = chptr->exceptlist; lp; lp = lp->next)
-                    sendto_one(cptr, form_str(RPL_EXCEPTLIST),
-                               me.name, cptr->name,
-                               chptr->chname,
-                               lp->value.cp);
-#endif
+
                   sendto_one(sptr, form_str(RPL_ENDOFEXCEPTLIST),
                              me.name, sptr->name, 
                              chptr->chname);
@@ -1617,7 +1551,6 @@ void set_channel_mode(struct Client *cptr,
                 break;
               if (errsent(SM_ERR_RPL_E, &errors_sent))
                 break;
-#ifdef BAN_INFO
                   for (lp = chptr->denylist; lp; lp = lp->next)
                     sendto_one(cptr, form_str(RPL_BANLIST),
                                me.name, cptr->name,
@@ -1625,13 +1558,6 @@ void set_channel_mode(struct Client *cptr,
                                lp->value.banptr->banstr,
                                lp->value.banptr->who,
                                lp->value.banptr->when);
-#else 
-                  for (lp = chptr->denylist; lp; lp = lp->next)
-                    sendto_one(cptr, form_str(RPL_BANLIST),
-                               me.name, cptr->name,
-                               chptr->chname,
-                               lp->value.cp);
-#endif
                   sendto_one(sptr, form_str(RPL_ENDOFBANLIST),
                              me.name, sptr->name, 
                              chptr->chname);
@@ -1705,7 +1631,6 @@ void set_channel_mode(struct Client *cptr,
 
               if (errsent(SM_ERR_RPL_B, &errors_sent))
                 break;
-#ifdef BAN_INFO
               for (lp = chptr->banlist; lp; lp = lp->next)
                 sendto_one(cptr, form_str(RPL_BANLIST),
                            me.name, cptr->name,
@@ -1713,13 +1638,7 @@ void set_channel_mode(struct Client *cptr,
                            lp->value.banptr->banstr,
                            lp->value.banptr->who,
                            lp->value.banptr->when);
-#else 
-              for (lp = chptr->banlist; lp; lp = lp->next)
-                sendto_one(cptr, form_str(RPL_BANLIST),
-                           me.name, cptr->name,
-                           chptr->chname,
-                           lp->value.cp);
-#endif
+
               sendto_one(sptr, form_str(RPL_ENDOFBANLIST),
                          me.name, sptr->name, 
                          chptr->chname);
@@ -2747,39 +2666,27 @@ static void free_bans_exceptions_denies(struct Channel *chptr)
   for(ban = chptr->banlist; ban; ban = next_ban)
     {
       next_ban = ban->next;
-#ifdef BAN_INFO
       MyFree(ban->value.banptr->banstr);
       MyFree(ban->value.banptr->who);
       MyFree(ban->value.banptr);
-#else
-      MyFree(ban->value.cp);
-#endif
       free_link(ban);
     }
 
   for(ban = chptr->exceptlist; ban; ban = next_ban)
     {
       next_ban = ban->next;
-#ifdef BAN_INFO
       MyFree(ban->value.banptr->banstr);
       MyFree(ban->value.banptr->who);
       MyFree(ban->value.banptr);
-#else
-      MyFree(ban->value.cp);
-#endif
       free_link(ban);
     }
 
   for(ban = chptr->denylist; ban; ban = next_ban)
     {
       next_ban = ban->next;
-#ifdef BAN_INFO
       MyFree(ban->value.banptr->banstr);
       MyFree(ban->value.banptr->who);
       MyFree(ban->value.banptr);
-#else
-      MyFree(ban->value.cp);
-#endif
       free_link(ban);
     }
 
@@ -2886,13 +2793,9 @@ void remove_empty_channels()
         {
           obtmp = tmp;
           tmp = tmp->next;
-#ifdef BAN_INFO
           MyFree(obtmp->value.banptr->banstr);
           MyFree(obtmp->value.banptr->who);
           MyFree(obtmp->value.banptr);
-#else
-          MyFree(obtmp->value.cp);
-#endif
           free_link(obtmp);
         }
 
@@ -2901,13 +2804,9 @@ void remove_empty_channels()
         {
           obtmp = tmp;
           tmp = tmp->next;
-#ifdef BAN_INFO
           MyFree(obtmp->value.banptr->banstr);
           MyFree(obtmp->value.banptr->who);
           MyFree(obtmp->value.banptr);
-#else
-          MyFree(obtmp->value.cp);
-#endif
           free_link(obtmp);
         }
       empty_channel_list->banlist = empty_channel_list->exceptlist = NULL;
@@ -2994,7 +2893,8 @@ int     m_cburst(struct Client *cptr,
     key = parv[3];
 
 #ifdef DEBUGLL
-  sendto_realops("CBURST locally called for %s %s %s",
+  sendto_realops("CBURST called by %s for %s %s %s",
+    cptr->name,
     name,
     nick ? nick : "",
     key ? key : "" );
@@ -3002,11 +2902,6 @@ int     m_cburst(struct Client *cptr,
 
   if(!(chptr=hash_find_channel(name, NullChn)))
     {
-#ifdef DEBUGLL
-      sendto_realops(
-        "CBURST %s does not exist",
-        name );
-#endif
      /* I don't know about this channel here, let leaf deal with it */
      if(nick)
        sendto_one(cptr,":%s LLJOIN %s %s :J",
@@ -3017,13 +2912,6 @@ int     m_cburst(struct Client *cptr,
   if(IsCapable(cptr,CAP_LL))
     {
       chptr->lazyLinkChannelExists = cptr->serverMask;
-
-#ifdef DEBUGLL
-      sendto_realops("cburst: IsCapable(cptr,CAP_LL) ");
-      sendto_realops("cburst: chptr->lazyLinkChannelExists %X cptr->serverMask %X",
-                     chptr->lazyLinkChannelExists,cptr->serverMask );
-#endif
- 
       send_channel_modes(cptr, chptr);
        /* Send the topic */
       sendto_one(cptr, ":%s TOPIC %s :%s",
@@ -3123,21 +3011,12 @@ int     m_drop(struct Client *cptr,
   name = parv[1];
 
 #ifdef DEBUGLL
-  sendto_realops("DROP locally called for %s", name);
+  sendto_realops("DROP called by %s for %s", cptr->name, name );
 #endif
 
   if(!(chptr=hash_find_channel(name, NullChn)))
-    {
-#ifdef DEBUGLL
-      sendto_realops("DROP %s does not exist", name );
-#endif
-      return -1;
-    }
-#ifdef DEBUGLL
-      sendto_realops(
-     "DROP about to clear chptr->lazyLinkChannelExists %X cptr->serverMask %X",
-        chptr->lazyLinkChannelExists, cptr->serverMask );
-#endif
+    return -1;
+
   if(cptr->serverMask) /* JIC */
     chptr->lazyLinkChannelExists &= ~cptr->serverMask;
   return 0;
@@ -3150,6 +3029,10 @@ int     m_drop(struct Client *cptr,
 ** m_lljoin
 **      parv[0] = sender prefix
 **      parv[1] = channel
+*
+* If a lljoin is received, from our uplink, join
+* the requested client to the given channel, or ignore it
+* if there is an error.
 */
 int     m_lljoin(struct Client *cptr,
                struct Client *sptr,
@@ -3163,49 +3046,20 @@ int     m_lljoin(struct Client *cptr,
   struct Client *acptr;
   struct Channel *chptr;
 
-#ifdef DEBUGLL
-  sendto_realops("LLJOIN received");
-#endif
-
   if( parc < 4 )
-    {
-#ifdef DEBUGLL
-       sendto_realops("LLJOIN parc < 4");
-#endif
-      return 0;
-    }
-
-#ifdef DEBUGLL
-   sendto_realops("parv[0] %s parv[1] %s parv[2] %s parv[3] %s",
-     parv[0], parv[1], parv[2], parv[3]);
-#endif
+    return 0;
 
   /* If not a server just ignore it */
   if ( !IsServer(cptr) )
-    {
-#ifdef DEBUGLL
-       sendto_realops("LLJOIN received LLJOIN from non server");
-#endif
-      return 0;
-    }
+    return 0;
 
   name = parv[1];
   if(!name)
-    {
-#ifdef DEBUGLL
-       sendto_realops("LLJOIN NULL name");
-#endif
-       return 0;
-    }
+    return 0;
 
   nick = parv[2];
   if(!nick)
-    {
-#ifdef DEBUGLL
-       sendto_realops("LLJOIN NULL nick");
-#endif
-       return 0;
-    }
+    return 0;
 
   can_join_flag = parv[3][0];
 
@@ -3213,29 +3067,14 @@ int     m_lljoin(struct Client *cptr,
 
   acptr = hash_find_client(nick,(struct Client *)NULL);
 
-  if( !acptr )
-    {
-#ifdef DEBUGLL
-      sendto_realops("nonexistent client ");
-#endif
-      return 0;
-    }
+  if( !acptr && !acptr->user )
+    return 0;
 
   if( !MyClient(acptr) )
-    {
-#ifdef DEBUGLL
-      sendto_realops("attempted to LLJOIN non local client ");
-#endif
-      return 0;
-    }
+    return 0;
 
   if(!(chptr=hash_find_channel(name, NullChn)))
     {
-#ifdef DEBUGLL
-      sendto_realops(
-        "LLJOIN %s does not exist creating it",
-        name );
-#endif
       flags = CHFL_CHANOP;
       chptr = get_channel( acptr, name, CREATE );
     }
@@ -3245,6 +3084,15 @@ int     m_lljoin(struct Client *cptr,
       switch(can_join_flag)
         {
         case 'J':
+
+          if ((acptr->user->joined >= MAXCHANNELSPERUSER) &&
+             (!IsAnOper(acptr) || (acptr->user->joined >= MAXCHANNELSPERUSER*3)))
+            {
+              sendto_one(acptr, form_str(ERR_TOOMANYCHANNELS),
+                         me.name, parv[0], name );
+              return 0;
+            }
+
           if(flags == CHFL_CHANOP)
             {
               sendto_one(serv_cptr_list,
@@ -3299,10 +3147,6 @@ int     m_lljoin(struct Client *cptr,
         break;
       
         default:
-#ifdef DEBUGLL
-          sendto_realops("Unknown LLJOIN flag %c [%s]", 
-                           can_join_flag, parv[3] );
-#endif
         break;
 	}
     }
@@ -3315,8 +3159,6 @@ int     m_lljoin(struct Client *cptr,
 
 /* Only leaves need to remove channels that have no local members */
 
-#define CLEANUP_CHANNELS_TIME 30
-
 void cleanup_channels(void)
 {
    struct Channel *chptr;
@@ -3324,19 +3166,15 @@ void cleanup_channels(void)
  
    if(!serv_cptr_list)
      {
-       sendto_ops("Cannot clean channels, waiting to link to my uplink.");
+       sendto_ops_flags(FLAGS_DEBUG,
+          "**** Cannot clean channels, waiting to link to my uplink.");
        return;
      }
 
    if(!IsCapable(serv_cptr_list, CAP_LL))
-     {
-       sendto_ops("Uplink is not LL capable.");
-       return;
-     }
+     return;
 
-#ifdef DEBUGLL
-   sendto_ops("Cleaning up local channels...");
-#endif
+   sendto_ops_flags(FLAGS_DEBUG, "*** Cleaning up local channels...");
    
    next_chptr = NULL;
 
@@ -3346,9 +3184,6 @@ void cleanup_channels(void)
 
        if((CurrentTime - chptr->locusers_last >= CLEANUP_CHANNELS_TIME) && !chptr->locusers)
          {
-#ifdef DEBUGLL
-           sendto_ops("Deleting %s", chptr->chname);
-#endif
            sendto_one(serv_cptr_list,":%s DROP %s",
                   me.name, chptr->chname);
            if(!chptr->locusers)
@@ -3423,6 +3258,7 @@ static void destroy_channel(struct Channel *chptr)
 #ifdef FLUD
   free_fluders(NULL, chptr);
 #endif
+
   del_from_channel_hash_table(chptr->chname, chptr);
   MyFree((char*) chptr);
   Count.chan--;

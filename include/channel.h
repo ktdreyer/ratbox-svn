@@ -130,11 +130,9 @@ extern void    add_invite (struct Client *, struct Channel *);
 extern void    clear_bans_exceptions_denies(struct Client *,struct Channel *);
 
 /* this should eliminate a lot of ifdef's in the main code... -orabidoo */
-#ifdef BAN_INFO
-#  define BANSTR(l)  ((l)->value.banptr->banstr)
-#else
-#  define BANSTR(l)  ((l)->value.cp)
-#endif
+
+#define BANSTR(l)  ((l)->value.banptr->banstr)
+
 
 /*
 ** Channel Related macros follow
@@ -224,25 +222,24 @@ extern int got_server_pong;
 
 #define IsChannelName(name) ((name) && (*(name) == '#' || *(name) == '&'))
 
-#ifdef BAN_INFO
 /*
-  Move BAN_INFO information out of the SLink struct
-  its _only_ used for bans, no use wasting the memory for it
-  in any other type of link. Keep in mind, doing this that
-  it makes it slower as more Malloc's/Free's have to be done, 
-  on the plus side bans are a smaller percentage of SLink usage.
-  Over all, the th+hybrid coding team came to the conclusion
-  it was worth the effort.
-
-  - Dianora
-*/
+ * Move BAN_INFO information out of the SLink struct
+ * its _only_ used for bans, no use wasting the memory for it
+ * in any other type of link. Keep in mind, doing this that
+ * it makes it slower as more Malloc's/Free's have to be done, 
+ * on the plus side bans are a smaller percentage of SLink usage.
+ * Over all, the hybrid coding team came to the conclusion
+ * it was worth the effort.
+ *
+ *  - Dianora
+ */
 typedef struct Ban      /* also used for exceptions -orabidoo */
 {
   char *banstr;
   char *who;
   time_t when;
 } aBan;
-#endif
+
 
 #ifdef NEED_SPLITCODE
 

@@ -331,6 +331,7 @@ struct Client
 #define FLAGS_INVISIBLE    0x0400 /* makes user invisible */
 #define FLAGS_BOTS         0x0800 /* shows bots */
 #define FLAGS_EXTERNAL     0x1000 /* show servers introduced */
+#define FLAGS_LOCOPS       0x2000 /* show locops */
 /* user information flags, only settable by remote mode or local oper */
 #define FLAGS_OPER         0x4000 /* Operator */
 #define FLAGS_LOCOP        0x8000 /* Local operator -- SRB */

@@ -318,12 +318,10 @@ void count_memory(struct Client *cptr,char *nick)
         {
           chb++;
           chbm += (strlen(link->value.cp)+1+sizeof(struct SLink));
-        #ifdef BAN_INFO
-        	if (link->value.banptr->banstr)
-        		chbm += strlen(link->value.banptr->banstr);
-        	if (link->value.banptr->who)
-        		chbm += strlen(link->value.banptr->who);
-        #endif /* BAN_INFO */
+          if (link->value.banptr->banstr)
+            chbm += strlen(link->value.banptr->banstr);
+          if (link->value.banptr->who)
+            chbm += strlen(link->value.banptr->who);
         }
     }
 

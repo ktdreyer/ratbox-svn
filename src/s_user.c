@@ -149,7 +149,7 @@ static int user_modes_from_c_to_bitmask[] =
   FLAGS_INVISIBLE, /* i */
   0,            /* j */
   FLAGS_SKILL,  /* k */
-  0,            /* l */
+  FLAGS_LOCOPS, /* l */
   0,            /* m */
   FLAGS_NCHANGE, /* n */
   FLAGS_OPER,   /* o */

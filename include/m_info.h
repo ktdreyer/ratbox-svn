@@ -81,12 +81,6 @@ Info MyInformation[] = {
   { "B_LINES_OPER_ONLY", "OFF", 0, "Allow only Operators to use STATS B" },
 #endif /* B_LINES_OPER_ONLY */
 
-#ifdef BAN_INFO
-  { "BAN_INFO", "ON", 0, "Displays who set a ban and when" },
-#else
-  { "BAN_INFO", "OFF", 0, "Displays who set a ban and when" },
-#endif /* BAN_INFO */
-
 #ifdef BOTCHECK
   { "BOTCHECK", "ON", 0, "Rudimentary Bot Checking" },
 #else
@@ -566,12 +560,6 @@ Info MyInformation[] = {
 #else
   { "USE_SYSLOG", "OFF", 0, "Log Errors to syslog file" },
 #endif /* USE_SYSLOG */
-
-#ifdef USE_UH
-  { "USE_UH", "ON", 0, "Include user@host for BAN_INFO" },
-#else
-  { "USE_UH", "OFF", 0, "Include user@host for BAN_INFO" },
-#endif /* USE_UH */
 
 #ifdef WALLOPS_WAIT
   { "WALLOPS_WAIT", "", WALLOPS_WAIT, "Delay between successive uses of the WALLOPS command" },

@@ -183,15 +183,6 @@
  */
 #undef SHOW_FAILED_OPER_PASSWD
 
-/* BAN_INFO - Shows you who and when someone did a ban
- */
-#define BAN_INFO
-
-/* USE_UH - include user@host for BAN_INFO
- * define this if you want to use n!u@h for BAN_INFO
- */
-#define USE_UH
-
 /* ANTI_NICK_FLOOD - prevents nick flooding
  * define if you want to block local clients from nickflooding
  */
