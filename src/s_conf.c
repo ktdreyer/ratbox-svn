@@ -2544,7 +2544,6 @@ conf_add_d_conf(struct ConfItem *aconf)
  * output       - NONE
  * side effects - Add a X line
  */
-
 void 
 conf_add_x_conf(struct ConfItem *aconf)
 {
@@ -2556,13 +2555,12 @@ conf_add_x_conf(struct ConfItem *aconf)
   x_conf = aconf;
 }
 
-/*
- * conf_add_x_conf
+/* conf_add_u_conf()
+ * 
  * inputs       - pointer to config item
  * output       - NONE
  * side effects - Add an U line
  */
-
 void 
 conf_add_u_conf(struct ConfItem *aconf)
 {

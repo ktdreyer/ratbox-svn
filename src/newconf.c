@@ -1612,9 +1612,6 @@ int	conf_begin_shared(struct TopConf *tc)
 	}
 	yy_aconf=make_conf();
 	yy_aconf->status = CONF_ULINE;
-	yy_aconf->name = NULL;
-	yy_aconf->user = NULL;
-	yy_aconf->host = NULL;
 	yy_aconf->port = OPER_K;
 	return 0;
 }

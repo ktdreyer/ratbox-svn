@@ -729,15 +729,29 @@ static void stats_shared(struct Client *source_p)
   {
     if(aconf->status & CONF_ULINE)
     {
+      char buf[3];
+      char *p = buf;
+
       get_printable_conf(aconf, &name, &host, &pass,
                          &user, &port, &classname);
 
+      if(port & OPER_K)
+        *p++ = 'K';
+      else
+        *p++ = 'k';
+
+      if(port & OPER_UNKLINE)
+        *p++ = 'U';
+      else
+        *p++ = 'u';
+
+      *p++ = '\0';
+
       sendto_one(source_p, form_str(RPL_STATSULINE), me.name,
-                 source_p->name, name, pass);
+                 source_p->name, name, user, host, buf);
     }
   }
 }
-
 
 /* stats_servers()
  *

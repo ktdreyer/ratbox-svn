@@ -8,6 +8,10 @@
 - added rehash tdlines, fixed behaviour of rehash tklines to not
   clear temp dlines too
 - added rehash pglines to clear pending glines
+- foperlog code has been fixed
+- the directives fname_userlog, fname_operlog and fname_foperlog
+  have been moved from general {}; to logging {};
+- stats U will now show the user@host and privs
 
 -- ircd-ratbox-1.0-rc3
 - PRIVMSG was not giving ERR_NOSUCHNICK for non-existant chans/users
