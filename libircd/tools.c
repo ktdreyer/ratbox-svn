@@ -122,22 +122,18 @@ dlinkMoveList(dlink_list *from, dlink_list *to)
   /* case two, nothing in to list */
   /* actually if to->head is NULL and to->tail isn't, thats a bug */
 
-    if((to->head == NULL) && (to->tail == NULL)) {
+    if(to->head == NULL) {
        to->head = from->head;
        to->tail = from->tail;
-       from->head = NULL;
-       from->tail = NULL;
+       from->head = from->tail = NULL;
        return;
     }
 
   /* third case play with the links */
 
-    if(from->tail != NULL)
-      from->tail->next = to->head;
-    if((from->head !=NULL) && (to->head != NULL))
-      from->head->prev = to->head->prev;
-    if(to->head != NULL)
-      to->head->prev = from->tail;
+    from->tail->next = to->head;
+    from->head->prev = to->head->prev;
+    to->head->prev = from->tail;
     to->head = from->head;
     from->head = from->tail = NULL;
 
