@@ -250,8 +250,11 @@ int     m_who(struct Client *cptr,
 	      break;
 	    }
 	}
-      lp = find_user_link(ch2ptr->members, acptr);
-      do_who(sptr, acptr, ch2ptr->chname, lp);
+      if (ch2ptr != NULL)
+	{
+	  lp = find_user_link(ch2ptr->members, acptr);
+	  do_who(sptr, acptr, ch2ptr->chname, lp);
+	}
       sendto_one(sptr, form_str(RPL_ENDOFWHO), me.name, parv[0], mask );
       return 0;
     }

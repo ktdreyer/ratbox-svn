@@ -114,7 +114,7 @@ int     m_privmsg(struct Client *cptr,
                           char *parv[])
 {
   struct Client *acptr;
-  char *nick, *server, *host;
+  char *nick;
   struct Channel *chptr;
   struct Channel *vchan;
   int type=0;
@@ -249,30 +249,32 @@ int     m_privmsg(struct Client *cptr,
 	    check_for_flud(sptr, NULL, chptr, 1);
 #endif /* FLUD */
 
-          if (!is_chan_op(sptr,chptr))
-            {
-	      sendto_one(sptr, form_str(ERR_CANNOTSENDTOCHAN),
+	  if (HasVchans(chptr))
+	    {
+	      if( (vchan = map_vchan(chptr,sptr)) )
+		{
+		  if (can_send(sptr, vchan) == 0)
+		    sendto_channel_type(cptr,
+					sptr,
+					vchan,
+					type,
+					nick+1,
+					"PRIVMSG",
+					parv[2]);
+		  else
+		    sendto_one(sptr, form_str(ERR_CANNOTSENDTOCHAN),
+			       me.name, parv[0], nick);
+		  return -1;
+		}
+	    }
+	  else
+	    {
+	      sendto_one(sptr, form_str(ERR_NOSUCHNICK),
 			 me.name, parv[0], nick);
-              return -1;
-            }
-          else
-            {
-              sendto_channel_type(cptr,
-                                  sptr,
-                                  chptr,
-                                  type,
-                                  nick+1,
-                                  "PRIVMSG",
-                                  parv[2]);
-            }
-        }
-      else
-        {
-          sendto_one(sptr, form_str(ERR_NOSUCHNICK),
-                     me.name, parv[0], nick);
-          return -1;
-        }
-      return 0;
+	      return -1;
+	    }
+	  return 0;
+	}
     }
 
   /*
@@ -385,87 +387,6 @@ int     m_privmsg(struct Client *cptr,
 #endif
       return 0;
     }
-
-  /* Everything below here should be reserved for opers 
-   * as pointed out by Mortiis, user%host.name@server.name 
-   * syntax could be used to flood without FLUD protection
-   * its also a delightful way for non-opers to find users who
-   * have changed nicks -Dianora
-   *
-   * Grrr it was pointed out to me that x@service is valid
-   * for non-opers too, and wouldn't allow for flooding/stalking
-   * -Dianora
-   */
-
-  if ((*nick == '$' || *nick == '#'))
-    {
-		sendto_one(sptr, form_str(ERR_NOSUCHNICK),
-				   me.name, parv[0], nick);
-		return -1;
-	}
-        
-  /*
-  ** user[%host]@server addressed?
-  */
-  if ((server = (char *)strchr(nick, '@')) &&
-      (acptr = find_server(server + 1)))
-    {
-      int count = 0;
-
-      /* Disable the user%host@server form for non-opers
-       * -Dianora
-       */
-
-      if( (char *)strchr(nick,'%'))
-        {
-          sendto_one(sptr, form_str(ERR_NOSUCHNICK),
-                     me.name, parv[0], nick);
-          return -1;
-        }
-        
-      /*
-      ** Not destined for a user on me :-(
-      */
-      if (!IsMe(acptr))
-        {
-          sendto_one(acptr,":%s %s %s :%s", parv[0],
-                     "PRIVMSG", nick, parv[2]);
-          return 0;
-        }
-
-      *server = '\0';
-
-      if ((host = (char *)strchr(nick, '%')))
-        *host++ = '\0';
-
-      /*
-      ** Look for users which match the destination host
-      ** (no host == wildcard) and if one and one only is
-      ** found connected to me, deliver message!
-      */
-      acptr = find_userhost(nick, host, NULL, &count);
-      if (server)
-        *server = '@';
-      if (host)
-        *--host = '%';
-      if (acptr)
-        {
-          if (count == 1)
-            sendto_prefix_one(acptr, sptr,
-                              ":%s %s %s :%s",
-                              parv[0], "PRIVMSG",
-                              nick, parv[2]);
-          else 
-            sendto_one(sptr,
-                       form_str(ERR_TOOMANYTARGETS),
-                       me.name, parv[0], nick);
-        }
-      if (acptr)
-          return 0;
-    }
-  sendto_one(sptr, form_str(ERR_NOSUCHNICK), me.name,
-             parv[0], nick);
-
   return 0;
 }
 
