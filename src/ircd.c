@@ -389,19 +389,19 @@ initialize_server_capabs(void)
 static void
 write_pidfile(const char *filename)
 {
-	FBFILE *fb;
+	FILE *fb;
 	char buff[32];
-	if((fb = fbopen(filename, "w")))
+	if((fb = fopen(filename, "w")))
 	{
 		unsigned int pid = (unsigned int) getpid();
 
 		ircsnprintf(buff, sizeof(buff), "%u\n", pid);
-		if((fbputs(buff, fb) == -1))
+		if((fputs(buff, fb) == -1))
 		{
 			ilog(L_MAIN, "Error writing %u to pid file %s (%s)",
 			     pid, filename, strerror(errno));
 		}
-		fbclose(fb);
+		fclose(fb);
 		return;
 	}
 	else

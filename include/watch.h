@@ -43,9 +43,9 @@ struct Watch {
 #define WATCHHASHSIZE 65536
 
 extern void initwatch(void);
-void add_to_watch_hash_table(const char *nick, struct Client * cptr);
+int add_to_watch_hash_table(const char *nick, struct Client * cptr);
 struct Watch * hash_get_watch(const char *name);
-void del_from_watch_hash_table(const char *nick, struct Client * cptr);
+int del_from_watch_hash_table(const char *nick, struct Client * cptr);
 void hash_del_watch_list(struct Client * client_p);
 void hash_check_watch(struct Client *client_p, int reply);
 

@@ -82,13 +82,13 @@ dlink_list service_list;
 /* internally defined functions */
 static void set_default_conf(void);
 static void validate_conf(void);
-static void read_conf(FBFILE *);
+static void read_conf(FILE *);
 static void clear_out_old_conf(void);
 
 static void expire_tkline(dlink_list *, int);
 static void expire_tdline(dlink_list *, int);
 
-FBFILE *conf_fbfile_in;
+FILE *conf_fbfile_in;
 extern char yytext[];
 
 static int verify_access(struct Client *client_p, const char *username);
@@ -791,7 +791,7 @@ set_default_conf(void)
  * side effects	- Read configuration file.
  */
 static void
-read_conf(FBFILE * file)
+read_conf(FILE * file)
 {
 	lineno = 0;
 
@@ -1113,7 +1113,7 @@ get_printable_kline(struct Client *source_p, struct ConfItem *aconf,
 void
 read_conf_files(int cold)
 {
-	FBFILE *file;
+	FILE *file;
 	const char *filename, *kfilename, *dfilename;	/* kline or conf filename */
 	const char *xfilename;
 	const char *resvfilename;
@@ -1130,7 +1130,7 @@ read_conf_files(int cold)
 	 */
 	strlcpy(conffilebuf, filename, sizeof(conffilebuf));
 
-	if((conf_fbfile_in = fbopen(filename, "r")) == NULL)
+	if((conf_fbfile_in = fopen(filename, "r")) == NULL)
 	{
 		if(cold)
 		{
@@ -1151,12 +1151,12 @@ read_conf_files(int cold)
 	}
 
 	read_conf(conf_fbfile_in);
-	fbclose(conf_fbfile_in);
+	fclose(conf_fbfile_in);
 
 	kfilename = get_conf_name(KLINE_TYPE);
 	if(irccmp(filename, kfilename))
 	{
-		if((file = fbopen(kfilename, "r")) == NULL)
+		if((file = fopen(kfilename, "r")) == NULL)
 		{
 			if(cold)
 				ilog(L_MAIN, "Failed reading kline file %s", filename);
@@ -1168,14 +1168,14 @@ read_conf_files(int cold)
 		else
 		{
 			parse_k_file(file);
-			fbclose(file);
+			fclose(file);
 		}
 	}
 
 	dfilename = get_conf_name(DLINE_TYPE);
 	if(irccmp(filename, dfilename) && irccmp(kfilename, dfilename))
 	{
-		if((file = fbopen(dfilename, "r")) == NULL)
+		if((file = fopen(dfilename, "r")) == NULL)
 		{
 			if(cold)
 				ilog(L_MAIN, "Failed reading dline file %s", dfilename);
@@ -1187,7 +1187,7 @@ read_conf_files(int cold)
 		else
 		{
 			parse_d_file(file);
-			fbclose(file);
+			fclose(file);
 		}
 	}
 
@@ -1196,7 +1196,7 @@ read_conf_files(int cold)
 	if(irccmp(filename, xfilename) && irccmp(kfilename, xfilename) &&
 	   irccmp(dfilename, xfilename))
 	{
-		if((file = fbopen(xfilename, "r")) == NULL)
+		if((file = fopen(xfilename, "r")) == NULL)
 		{
 			if(cold)
 				ilog(L_MAIN, "Failed reading xline file %s", xfilename);
@@ -1208,14 +1208,14 @@ read_conf_files(int cold)
 		else
 		{
 			parse_x_file(file);
-			fbclose(file);
+			fclose(file);
 		}
 	}
 
 	resvfilename = get_conf_name(RESV_TYPE);
 	if(irccmp(filename, resvfilename))
 	{
-		if((file = fbopen(resvfilename, "r")) == NULL)
+		if((file = fopen(resvfilename, "r")) == NULL)
 		{
 			if(cold)
 				ilog(L_MAIN, "Failed reading resv file %s", resvfilename);
@@ -1227,7 +1227,7 @@ read_conf_files(int cold)
 		else
 		{
 			parse_resv_file(file);
-			fbclose(file);
+			fclose(file);
 		}
 	}
 }
@@ -1328,13 +1328,13 @@ write_confitem(KlineType type, struct Client *source_p, char *user,
 	       const char *current_date, int xtype)
 {
 	char buffer[1024];
-	FBFILE *out;
+	FILE *out;
 	const char *filename;	/* filename to use for kline */
 
 	filename = get_conf_name(type);
 
 
-	if((out = fbopen(filename, "a")) == NULL)
+	if((out = fopen(filename, "a")) == NULL)
 	{
 		sendto_realops_flags(UMODE_ALL, L_ALL, "*** Problem opening %s ", filename);
 		return;
@@ -1362,14 +1362,14 @@ write_confitem(KlineType type, struct Client *source_p, char *user,
 			   host, reason, get_oper_name(source_p), CurrentTime);
 	}
 
-	if(fbputs(buffer, out) == -1)
+	if(fputs(buffer, out) == -1)
 	{
 		sendto_realops_flags(UMODE_ALL, L_ALL, "*** Problem writing to %s", filename);
-		fbclose(out);
+		fclose(out);
 		return;
 	}
 
-	fbclose(out);
+	fclose(out);
 
 	if(type == KLINE_TYPE)
 	{
@@ -1553,11 +1553,11 @@ yyerror(const char *msg)
 }
 
 int
-conf_fbgets(char *lbuf, int max_size, FBFILE * fb)
+conf_fgets(char *lbuf, int max_size, FILE * fb)
 {
 	char *buff;
 
-	if((buff = fbgets(lbuf, max_size, fb)) == NULL)
+	if((buff = fgets(lbuf, max_size, fb)) == NULL)
 		return (0);
 
 	return (strlen(lbuf));

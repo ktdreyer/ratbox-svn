@@ -588,7 +588,7 @@ set_initial_nick(struct Client *client_p, struct Client *source_p, char *nick)
 	add_to_client_hash(nick, source_p);
 
 	/* fd_desc is long enough */
-	fd_note(client_p->localClient->fd, "Nick: %s", nick);
+	comm_note(client_p->localClient->fd, "Nick: %s", nick);
 
 	if(source_p->user)
 	{
@@ -661,7 +661,7 @@ change_local_nick(struct Client *client_p, struct Client *source_p, char *nick)
 	del_all_accepts(source_p);
 
 	/* fd_desc is long enough */
-	fd_note(client_p->localClient->fd, "Nick: %s", nick);
+	comm_note(client_p->localClient->fd, "Nick: %s", nick);
 
 	return;
 }

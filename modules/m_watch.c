@@ -41,6 +41,11 @@
 
 
 static char buf[BUFSIZE];
+struct watch_table
+{
+	char *nick;
+	char flag;
+};
 
 static int m_watch(struct Client *, struct Client *, int, const char **);
 
@@ -70,6 +75,7 @@ show_watch(struct Client * client_p, char *name, int rpl1, int rpl2)
 	else
 		sendto_one(client_p, form_str(rpl2), me.name, client_p->name, name, "*", "*", 0);
 }
+
 
 /*
  * m_watch
@@ -197,38 +203,71 @@ m_watch(struct Client * client_p, struct Client * source_p, int parc, const char
 		case '+':
 		case '-':
 		{
-			for(x = 1; x < parc; x++)
+			struct watch_table *watchn;
+			char **w_nicks;
+			int z = 0;
+			watchn = MyMalloc(sizeof(struct watch_table)*ConfigFileEntry.max_watch);
+			w_nicks = MyMalloc(ConfigFileEntry.max_watch * sizeof(char *));			
+			for(x = 1; x < parc && z < ConfigFileEntry.max_watch; x++)
 			{	 
 				tmp = LOCAL_COPY(parv[x]);
-				for(p = NULL, s = strtoken(&p, tmp, ", "); s; s = strtoken(&p, NULL, ", "))
+				for(p = NULL, s = strtoken(&p, tmp, ", "); s && z < ConfigFileEntry.max_watch; s = strtoken(&p, NULL, ", "))
 				{
 					if((user = (char *) strchr(s, '!')))
 						*user++ = '\0';	/* Not used */
-					
-					if(*s == '+')
-					{
-						if(*(s + 1))
-						{
-							if(dlink_list_length(&source_p->localClient->watchlist) >= ConfigFileEntry.max_watch)
-							{
-								sendto_one(source_p, form_str(ERR_TOOMANYWATCH), me.name, client_p->name, s + 1, ConfigFileEntry.max_watch);
-								continue;
-							}
-							add_to_watch_hash_table(s + 1, source_p);
-						}
-						show_watch(source_p, s + 1, RPL_NOWON, RPL_NOWOFF);
-						continue;
-					} 
-					else if(*s == '-')
-					{
-						del_from_watch_hash_table(s + 1, source_p);
-						show_watch(source_p, s + 1, RPL_WATCHOFF, RPL_WATCHOFF);
-						continue;
-					} else
-						continue;
+					if(*s == '+' || *s == '-')
+						w_nicks[z++] = s;
 				}
-			}			
-		}
+			}	
+
+			if(w_nicks[0] != NULL)
+			{
+				int last = 0, y;
+				watchn = MyMalloc(sizeof(struct watch_table) * z);
+				watchn[last].nick = (w_nicks[0])+1;
+				watchn[last].flag = *w_nicks[0];
+
+				/* x should never exceed our bounds because z shouldn't from the checks above */
+				for(x = 1; x < z; x++)
+				{
+					for(y = 0; watchn[y].nick != NULL; y++)
+					{
+						if(!irccmp((w_nicks[x])+1, watchn[y].nick))
+						{
+							watchn[y].flag = *w_nicks[x];
+							break;
+						}
+					}
+					if(watchn[y].nick == NULL)
+					{
+						last++;
+						watchn[last].nick = (w_nicks[x])+1;
+						watchn[last].flag = *w_nicks[x];
+						
+					}
+				} 
+			}				
+			MyFree(w_nicks);
+			for(x = 0; watchn[x].nick != NULL; x++)
+			{
+				if(watchn[x].flag == '+')
+				{
+					if(add_to_watch_hash_table(watchn[x].nick, source_p))
+					{
+						show_watch(source_p, watchn[x].nick, RPL_NOWON, RPL_NOWOFF);
+						continue;
+					}
+				} else 
+				{
+					if(del_from_watch_hash_table(watchn[x].nick, source_p))
+					{
+						show_watch(source_p, watchn[x].nick, RPL_NOWON, RPL_NOWOFF);
+						continue;
+					}					
+				}
+			}
+			MyFree(watchn);
+		} 
 	}
 	return 0;
 }

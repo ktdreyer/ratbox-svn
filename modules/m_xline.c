@@ -363,12 +363,12 @@ static void
 write_xline(struct Client *source_p, struct ConfItem *aconf)
 {
 	char buffer[BUFSIZE * 2];
-	FBFILE *out;
+	FILE *out;
 	const char *filename;
 
 	filename = ConfigFileEntry.xlinefile;
 
-	if((out = fbopen(filename, "a")) == NULL)
+	if((out = fopen(filename, "a")) == NULL)
 	{
 		sendto_realops_flags(UMODE_ALL, L_ALL, "*** Problem opening %s ", filename);
 		free_conf(aconf);
@@ -379,15 +379,15 @@ write_xline(struct Client *source_p, struct ConfItem *aconf)
 		   aconf->name, aconf->passwd,
 		   get_oper_name(source_p), CurrentTime);
 
-	if(fbputs(buffer, out) == -1)
+	if(fputs(buffer, out) == -1)
 	{
 		sendto_realops_flags(UMODE_ALL, L_ALL, "*** Problem writing to %s", filename);
 		free_conf(aconf);
-		fbclose(out);
+		fclose(out);
 		return;
 	}
 
-	fbclose(out);
+	fclose(out);
 }
 
 static void 
@@ -576,7 +576,7 @@ remove_temp_xline(struct Client *source_p, const char *name)
 static void
 remove_xline(struct Client *source_p, const char *huntgecos)
 {
-	FBFILE *in, *out;
+	FILE *in, *out;
 	char buf[BUFSIZE];
 	char buff[BUFSIZE];
 	char temppath[BUFSIZE];
@@ -591,7 +591,7 @@ remove_xline(struct Client *source_p, const char *huntgecos)
 	ircsnprintf(temppath, sizeof(temppath),
 		 "%s.tmp", ConfigFileEntry.xlinefile);
 
-	if((in = fbopen(filename, "r")) == NULL)
+	if((in = fopen(filename, "r")) == NULL)
 	{
 		sendto_one_notice(source_p, ":Cannot open %s", filename);
 		return;
@@ -599,17 +599,17 @@ remove_xline(struct Client *source_p, const char *huntgecos)
 
 	oldumask = umask(0);
 
-	if((out = fbopen(temppath, "w")) == NULL)
+	if((out = fopen(temppath, "w")) == NULL)
 	{
 		sendto_one_notice(source_p, ":Cannot open %s", temppath);
-		fbclose(in);
+		fclose(in);
 		umask(oldumask);
 		return;
 	}
 
 	umask(oldumask);
 
-	while (fbgets(buf, sizeof(buf), in))
+	while (fgets(buf, sizeof(buf), in))
 	{
 		if(error_on_write)
 		{
@@ -626,13 +626,13 @@ remove_xline(struct Client *source_p, const char *huntgecos)
 
 		if((*buff == '\0') || (*buff == '#'))
 		{
-			error_on_write = (fbputs(buf, out) < 0) ? YES : NO;
+			error_on_write = (fputs(buf, out) < 0) ? YES : NO;
 			continue;
 		}
 
 		if((gecos = getfield(buff)) == NULL)
 		{
-			error_on_write = (fbputs(buf, out) < 0) ? YES : NO;
+			error_on_write = (fputs(buf, out) < 0) ? YES : NO;
 			continue;
 		}
 
@@ -640,11 +640,11 @@ remove_xline(struct Client *source_p, const char *huntgecos)
 		if(irccmp(gecos, huntgecos) == 0)
 			found_xline++;
 		else
-			error_on_write = (fbputs(buf, out) < 0) ? YES : NO;
+			error_on_write = (fputs(buf, out) < 0) ? YES : NO;
 	}
 
-	fbclose(in);
-	fbclose(out);
+	fclose(in);
+	fclose(out);
 
 	if(error_on_write)
 	{

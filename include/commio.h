@@ -146,36 +146,17 @@ extern fde_t *fd_table;
 
 void fdlist_init(void);
 
-extern void fd_open(int, unsigned int, const char *);
-extern void fd_close(int);
-extern void fd_dump(struct Client *source_p);
+extern void comm_open(int, unsigned int, const char *);
+extern void comm_close(int);
+extern void comm_dump(struct Client *source_p);
 #ifndef __GNUC__
-extern void fd_note(int fd, const char *format, ...);
+extern void comm_note(int fd, const char *format, ...);
 #else
-extern void fd_note(int fd, const char *format, ...) __attribute__ ((format(printf, 2, 3)));
+extern void comm_note(int fd, const char *format, ...) __attribute__ ((format(printf, 2, 3)));
 #endif
 
 #define FB_EOF  0x01
 #define FB_FAIL 0x02
-
-struct FileBuf
-{
-	int fd;			/* file descriptor */
-	char *endp;		/* one past the end */
-	char *ptr;		/* current read pos */
-	char *pbptr;		/* pointer to push back char */
-	int flags;		/* file state */
-	char buf[BUFSIZ];	/* buffer */
-	char pbuf[BUFSIZ + 1];	/* push back buffer */
-};
-
-/*
- * FileBuf is a mirror of the ANSI FILE struct, but it works for any
- * file descriptor. FileBufs are allocated when a file is opened with
- * fbopen, and they are freed when the file is closed using fbclose.
- */
-typedef struct FileBuf FBFILE;
-
 
 
 /* Size of a read buffer */
@@ -202,7 +183,7 @@ extern void comm_checktimeouts(void *);
 extern void comm_connect_tcp(int fd, const char *, u_short,
 			     struct sockaddr *, int, CNCB *, void *, int, int);
 extern const char *comm_errstr(int status);
-extern int comm_open(int family, int sock_type, int proto, const char *note);
+extern int comm_socket(int family, int sock_type, int proto, const char *note);
 extern int comm_accept(int fd, struct sockaddr *pn, socklen_t *addrlen);
 
 /* These must be defined in the network IO loop code of your choice */
@@ -217,18 +198,6 @@ extern void mangle_mapped_sockaddr(struct sockaddr *in);
 #else
 #define mangle_mapped_sockaddr(x) 
 #endif
-
-
-extern FBFILE *fbopen(const char *filename, const char *mode);
-extern FBFILE *fdbopen(int fd, const char *mode);
-extern void fbclose(FBFILE * fb);
-extern int fbgetc(FBFILE * fb);
-extern char *fbgets(char *buf, size_t len, FBFILE * fb);
-extern void fbungetc(char c, FBFILE * fb);
-extern int fbputs(const char *str, FBFILE * fb);
-extern int fbstat(struct stat *sb, FBFILE * fb);
-extern FBFILE *fbpopen(const char *, const char *);
-
 
 
 #endif /* INCLUDED_commio_h */

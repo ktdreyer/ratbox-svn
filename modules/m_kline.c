@@ -84,7 +84,7 @@ static int already_placed_kline(struct Client *, const char *, const char *, int
 static void handle_remote_unkline(struct Client *source_p, 
 			const char *user, const char *host);
 static void remove_permkline_match(struct Client *, const char *, const char *);
-static int flush_write(struct Client *, FBFILE *, const char *, const char *);
+static int flush_write(struct Client *, FILE *, const char *, const char *);
 static int remove_temp_kline(const char *, const char *);
 
 /* mo_kline()
@@ -718,7 +718,7 @@ already_placed_kline(struct Client *source_p, const char *luser, const char *lho
 static void
 remove_permkline_match(struct Client *source_p, const char *host, const char *user)
 {
-	FBFILE *in, *out;
+	FILE *in, *out;
 	int pairme = 0;
 	int error_on_write = NO;
 	char buf[BUFSIZE];
@@ -733,17 +733,17 @@ remove_permkline_match(struct Client *source_p, const char *host, const char *us
 
 	filename = get_conf_name(KLINE_TYPE);
 
-	if((in = fbopen(filename, "r")) == 0)
+	if((in = fopen(filename, "r")) == 0)
 	{
 		sendto_one_notice(source_p, ":Cannot open %s", filename);
 		return;
 	}
 
 	oldumask = umask(0);
-	if((out = fbopen(temppath, "w")) == 0)
+	if((out = fopen(temppath, "w")) == 0)
 	{
 		sendto_one_notice(source_p, ":Cannot open %s", temppath);
-		fbclose(in);
+		fclose(in);
 		umask(oldumask);
 		return;
 	}
@@ -753,7 +753,7 @@ remove_permkline_match(struct Client *source_p, const char *host, const char *us
 	snprintf(matchbuf, sizeof(matchbuf), "\"%s\",\"%s\"", user, host);
 	matchlen = strlen(matchbuf);
 
-	while (fbgets(buf, sizeof(buf), in))
+	while (fgets(buf, sizeof(buf), in))
 	{
 		if(error_on_write)
 			break;
@@ -773,7 +773,7 @@ remove_permkline_match(struct Client *source_p, const char *host, const char *us
 	 */
 	if(pairme && !error_on_write)
 	{
-		while(fbgets(buf, sizeof(buf), in))
+		while(fgets(buf, sizeof(buf), in))
 		{
 			if(error_on_write)
 				break;
@@ -782,8 +782,8 @@ remove_permkline_match(struct Client *source_p, const char *host, const char *us
 		}
 	}
 
-	fbclose(in);
-	fbclose(out);
+	fclose(in);
+	fclose(out);
 
 	/* The result of the rename should be checked too... oh well */
 	/* If there was an error on a write above, then its been reported
@@ -841,9 +841,9 @@ remove_permkline_match(struct Client *source_p, const char *host, const char *us
  */
 
 static int
-flush_write(struct Client *source_p, FBFILE * out, const char *buf, const char *temppath)
+flush_write(struct Client *source_p, FILE * out, const char *buf, const char *temppath)
 {
-	int error_on_write = (fbputs(buf, out) < 0) ? YES : NO;
+	int error_on_write = (fputs(buf, out) < 0) ? YES : NO;
 
 	if(error_on_write)
 	{

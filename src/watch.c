@@ -101,22 +101,27 @@ hash_check_watch(struct Client *client_p, int reply)
 }
 
 
-void
+int
 add_to_watch_hash_table(const char *nick, struct Client *client_p)
 {
 	int hashv;
 	struct Watch *awptr;
+	dlink_node *lp;
 
 	if(strlen(nick)+1 >  NICKLEN)
-		return;
+		return -1;
+
+	if(dlink_list_length(&client_p->localClient->watchlist) >= ConfigFileEntry.max_watch)
+		return 0;
+
 	hashv = watch_hash_nick(nick);
 	if(hashv <= 0)
-		return;
+		return -1;
 	if((awptr = (struct Watch *) watchTable[hashv]))
 		while(awptr && irccmp(awptr->watchnick, nick))
 			awptr = awptr->hnext;
 
-	if(!awptr)
+	if(awptr == NULL)
 	{
 		awptr = BlockHeapAlloc(watch_heap);
 		awptr->lasttime = CurrentTime;
@@ -124,16 +129,17 @@ add_to_watch_hash_table(const char *nick, struct Client *client_p)
 
 		awptr->hnext = watchTable[hashv];
 		watchTable[hashv] = awptr;
+		dlinkAddAlloc(client_p, &awptr->watched_by);
+		dlinkAddAlloc(awptr, &client_p->localClient->watchlist);
+		return 1;
 	}
-	else
+
+	if((lp = dlinkFind(client_p, &awptr->watched_by)) == NULL)
 	{
-		dlink_node *lp;
-		if((lp = dlinkFind(client_p, &awptr->watched_by)) == NULL)
-		{
-			dlinkAddAlloc(client_p, &awptr->watched_by);
-			dlinkAddAlloc(awptr, &client_p->localClient->watchlist);
-		}
+		dlinkAddAlloc(client_p, &awptr->watched_by);
+		dlinkAddAlloc(awptr, &client_p->localClient->watchlist);
 	}
+	return 1;
 }
 
 struct Watch *
@@ -152,7 +158,7 @@ hash_get_watch(const char *name)
 	return awptr;
 }
 
-void
+int
 del_from_watch_hash_table(const char *nick, struct Client *client_p)
 {
 	int hashv;
@@ -160,7 +166,7 @@ del_from_watch_hash_table(const char *nick, struct Client *client_p)
 
 	hashv = watch_hash_nick(nick);
 	if(hashv <= 0)
-		return;
+		return -1;
 	if((awptr = (struct Watch *) watchTable[hashv]))
 		while(awptr && irccmp(awptr->watchnick, nick))
 		{
@@ -169,10 +175,10 @@ del_from_watch_hash_table(const char *nick, struct Client *client_p)
 		}
 
 	if(!awptr)
-		return;	/* No such watch */
+		return 0; /* No such watch */
 
 	if(!dlinkFindDestroy(client_p, &awptr->watched_by))
-		return;
+		return 0;
 
 	dlinkFindDestroy(awptr, &client_p->localClient->watchlist);
 
@@ -187,6 +193,7 @@ del_from_watch_hash_table(const char *nick, struct Client *client_p)
 			nlast->hnext = awptr->hnext;
 		BlockHeapFree(watch_heap, awptr);
 	}
+	return 1;
 }
 
 void

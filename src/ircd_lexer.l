@@ -78,7 +78,7 @@ char conffile_stack[MAX_INCLUDE_DEPTH][IRCD_BUFSIZE];
 char conffilebuf[IRCD_BUFSIZE+1];
 char *current_file = conffilebuf;
 
-FBFILE *inc_fbfile_in[MAX_INCLUDE_DEPTH];
+FILE *inc_fbfile_in[MAX_INCLUDE_DEPTH];
 
 char linebuf[512];
 
@@ -87,7 +87,7 @@ char linebuf[512];
 #define YY_FATAL_ERROR(msg) conf_yy_fatal_error(msg)
 
 #define YY_INPUT(buf,result,max_size) \
-  if (!(result = conf_fbgets(buf, max_size, conf_fbfile_in))) \
+  if (!(result = conf_fgets(buf, max_size, conf_fbfile_in))) \
     YY_FATAL_ERROR("input in flex scanner failed"); 
 %}
 
@@ -208,9 +208,9 @@ void cinclude(void)
     conf_report_error("Includes nested too deep (max is %d)", MAX_INCLUDE_DEPTH);
   else
   {
-    FBFILE *tmp_fbfile_in;
+    FILE *tmp_fbfile_in;
     
-    tmp_fbfile_in = fbopen(c, "r");
+    tmp_fbfile_in = fopen(c, "r");
     
     if (tmp_fbfile_in == NULL)
     {
@@ -218,7 +218,7 @@ void cinclude(void)
       char fnamebuf[IRCD_BUFSIZE];
 
       snprintf(fnamebuf, sizeof(fnamebuf), "%s/%s", ETCPATH, c);
-      tmp_fbfile_in = fbopen(fnamebuf, "r");
+      tmp_fbfile_in = fopen(fnamebuf, "r");
 
       /* wasnt found there either.. error. */
       if(tmp_fbfile_in == NULL)
@@ -241,7 +241,7 @@ void cinclude(void)
 int ieof(void)
 {
   if (include_stack_ptr)
-    fbclose(conf_fbfile_in);
+    fclose(conf_fbfile_in);
   if (--include_stack_ptr < 0)
   {
     /* We will now exit the lexer - restore init values if we get /rehash

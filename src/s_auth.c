@@ -216,7 +216,7 @@ auth_error(struct AuthRequest *auth)
 {
 	++ServerStats->is_abad;
 
-	fd_close(auth->fd);
+	comm_close(auth->fd);
 	auth->fd = -1;
 
 	ClearAuth(auth);
@@ -245,7 +245,7 @@ start_auth_query(struct AuthRequest *auth)
 		return 0;
 	
 	family = auth->client->localClient->ip.ss_family;
-	if((fd = comm_open(family, SOCK_STREAM, 0, "ident")) == -1)
+	if((fd = comm_socket(family, SOCK_STREAM, 0, "ident")) == -1)
 	{
 		report_error("creating auth stream socket %s:%s",
 			     get_client_name(auth->client, SHOW_IP), 
@@ -258,7 +258,7 @@ start_auth_query(struct AuthRequest *auth)
 		sendto_realops_flags(UMODE_ALL, L_ALL,
 				     "Can't allocate fd for auth on %s",
 				     get_client_name(auth->client, SHOW_IP));
-		fd_close(fd);
+		comm_close(fd);
 		return 0;
 	}
 
@@ -414,7 +414,7 @@ timeout_auth_queries_event(void *notused)
 		if(auth->timeout < CurrentTime)
 		{
 			if(auth->fd >= 0)
-				fd_close(auth->fd);
+				comm_close(auth->fd);
 
 			if(IsDoingAuth(auth))
 			{
@@ -544,7 +544,7 @@ read_auth_reply(int fd, void *data)
 		}
 	}
 
-	fd_close(auth->fd);
+	comm_close(auth->fd);
 	auth->fd = -1;
 	ClearAuth(auth);
 
@@ -586,7 +586,7 @@ delete_auth_queries(struct Client *target_p)
 		delete_adns_queries(&auth->dns_query);
 
 	if(auth->fd >= 0)
-		fd_close(auth->fd);
+		comm_close(auth->fd);
 		
 	dlinkDelete(&auth->node, &auth_poll_list);
 	free_auth_request(auth);

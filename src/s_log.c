@@ -40,22 +40,22 @@
 #include "client.h"
 #include "s_serv.h"
 
-static FBFILE *log_main;
-static FBFILE *log_user;
-static FBFILE *log_fuser;
-static FBFILE *log_oper;
-static FBFILE *log_foper;
-static FBFILE *log_server;
-static FBFILE *log_kill;
-static FBFILE *log_gline;
-static FBFILE *log_kline;
-static FBFILE *log_operspy;
-static FBFILE *log_ioerror;
+static FILE *log_main;
+static FILE *log_user;
+static FILE *log_fuser;
+static FILE *log_oper;
+static FILE *log_foper;
+static FILE *log_server;
+static FILE *log_kill;
+static FILE *log_gline;
+static FILE *log_kline;
+static FILE *log_operspy;
+static FILE *log_ioerror;
 
 struct log_struct
 {
 	char **name;
-	FBFILE **logfile;
+	FILE **logfile;
 };
 
 static struct log_struct log_table[LAST_LOGFILE] =
@@ -77,7 +77,7 @@ void
 init_main_logfile(void)
 {
 	if(log_main == NULL)
-		log_main = fbopen(LPATH, "a");
+		log_main = fopen(LPATH, "a");
 }
 
 void
@@ -86,9 +86,9 @@ open_logfiles(void)
 	int i;
 
 	if(log_main != NULL)
-		fbclose(log_main);
+		fclose(log_main);
 
-	log_main = fbopen(LPATH, "a");
+	log_main = fopen(LPATH, "a");
 
 	/* log_main is handled above, so just do the rest */
 	for(i = 1; i < LAST_LOGFILE; i++)
@@ -96,20 +96,20 @@ open_logfiles(void)
 		/* close open logfiles */
 		if(*log_table[i].logfile != NULL)
 		{
-			fbclose(*log_table[i].logfile);
+			fclose(*log_table[i].logfile);
 			*log_table[i].logfile = NULL;
 		}
 
 		/* reopen those with paths */
 		if(!EmptyString(*log_table[i].name))
-			*log_table[i].logfile = fbopen(*log_table[i].name, "a");
+			*log_table[i].logfile = fopen(*log_table[i].name, "a");
 	}
 }			
 
 void
 ilog(ilogfile dest, const char *format, ...)
 {
-	FBFILE *logfile = *log_table[dest].logfile;
+	FILE *logfile = *log_table[dest].logfile;
 	char buf[BUFSIZE];
 	char buf2[BUFSIZE];
 	va_list args;
@@ -123,9 +123,9 @@ ilog(ilogfile dest, const char *format, ...)
 
 	ircsnprintf(buf2, sizeof(buf2), "%s %s\n", smalldate(), buf);
 
-	if(fbputs(buf2, logfile) < 0)
+	if(fputs(buf2, logfile) < 0)
 	{
-		fbclose(logfile);
+		fclose(logfile);
 		*log_table[dest].logfile = NULL;
 	}
 }

@@ -62,7 +62,7 @@ mapi_clist_av1 dline_clist[] = { &dline_msgtab, &undline_msgtab, NULL };
 DECLARE_MODULE_AV1(dline, NULL, NULL, dline_clist, NULL, NULL, "$Revision$");
 
 static int valid_comment(char *comment);
-static int flush_write(struct Client *, FBFILE *, char *, char *);
+static int flush_write(struct Client *, FILE *, char *, char *);
 static int remove_temp_dline(const char *);
 
 /* mo_dline()
@@ -253,8 +253,8 @@ mo_dline(struct Client *client_p, struct Client *source_p,
 static int
 mo_undline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	FBFILE *in;
-	FBFILE *out;
+	FILE *in;
+	FILE *out;
 	char buf[BUFSIZE], buff[BUFSIZE], temppath[BUFSIZE], *p;
 	const char *filename, *found_cidr;
 	const char *cidr;
@@ -286,24 +286,24 @@ mo_undline(struct Client *client_p, struct Client *source_p, int parc, const cha
 
 	filename = get_conf_name(DLINE_TYPE);
 
-	if((in = fbopen(filename, "r")) == 0)
+	if((in = fopen(filename, "r")) == 0)
 	{
 		sendto_one(source_p, ":%s NOTICE %s :Cannot open %s", me.name, parv[0], filename);
 		return 0;
 	}
 
 	oldumask = umask(0);
-	if((out = fbopen(temppath, "w")) == 0)
+	if((out = fopen(temppath, "w")) == 0)
 	{
 		sendto_one(source_p, ":%s NOTICE %s :Cannot open %s", me.name, parv[0], temppath);
-		fbclose(in);
+		fclose(in);
 		umask(oldumask);
 		return 0;
 	}
 
 	umask(oldumask);
 
-	while (fbgets(buf, sizeof(buf), in))
+	while (fgets(buf, sizeof(buf), in))
 	{
 		strlcpy(buff, buf, sizeof(buff));
 
@@ -336,8 +336,8 @@ mo_undline(struct Client *client_p, struct Client *source_p, int parc, const cha
 		}
 	}
 
-	fbclose(in);
-	fbclose(out);
+	fclose(in);
+	fclose(out);
 
 	if(error_on_write)
 	{
@@ -408,15 +408,15 @@ valid_comment(char *comment)
  * -Dianora
  */
 static int
-flush_write(struct Client *source_p, FBFILE * out, char *buf, char *temppath)
+flush_write(struct Client *source_p, FILE * out, char *buf, char *temppath)
 {
-	int error_on_write = (fbputs(buf, out) < 0) ? YES : NO;
+	int error_on_write = (fputs(buf, out) < 0) ? YES : NO;
 
 	if(error_on_write)
 	{
 		sendto_one(source_p, ":%s NOTICE %s :Unable to write to %s",
 			   me.name, source_p->name, temppath);
-		fbclose(out);
+		fclose(out);
 		if(temppath != NULL)
 			(void) unlink(temppath);
 	}

@@ -54,7 +54,7 @@ struct ip_value
 	int type;
 };
 
-extern FBFILE *conf_fbfile_in;
+extern FILE *conf_fbfile_in;
 extern char conf_line_in[256];
 extern struct ConfItem *yy_aconf;
 
@@ -349,7 +349,7 @@ extern void get_printable_kline(struct Client *, struct ConfItem *,
 
 extern void yyerror(const char *);
 extern int conf_yy_fatal_error(const char *);
-extern int conf_fbgets(char *, int, FBFILE *);
+extern int conf_fgets(char *, int, FILE *);
 
 typedef enum
 {
@@ -385,10 +385,10 @@ extern void flush_expired_ips(void *);
 
 
 /* XXX consider moving these into kdparse.h */
-extern void parse_k_file(FBFILE * fb);
-extern void parse_d_file(FBFILE * fb);
-extern void parse_x_file(FBFILE * fb);
-extern void parse_resv_file(FBFILE *);
+extern void parse_k_file(FILE * fb);
+extern void parse_d_file(FILE * fb);
+extern void parse_x_file(FILE * fb);
+extern void parse_resv_file(FILE *);
 extern char *getfield(char *newline);
 
 extern char *get_oper_name(struct Client *client_p);

@@ -172,7 +172,7 @@ inetport(struct Listener *listener)
 	 * At first, open a new socket
 	 */
 	
-	fd = comm_open(listener->addr.ss_family, SOCK_STREAM, 0, "Listener socket");
+	fd = comm_socket(listener->addr.ss_family, SOCK_STREAM, 0, "Listener socket");
 
 #ifdef IPV6
 	if(listener->addr.ss_family == AF_INET6)
@@ -207,7 +207,7 @@ inetport(struct Listener *listener)
 		report_error("no more connections left for listener %s:%s",
 			     get_listener_name(listener), 
 			     get_listener_name(listener), errno);
-		fd_close(fd);
+		comm_close(fd);
 		return 0;
 	}
 	/*
@@ -219,7 +219,7 @@ inetport(struct Listener *listener)
 		report_error("setting SO_REUSEADDR for listener %s:%s",
 			     get_listener_name(listener), 
 			     get_listener_name(listener), errno);
-		fd_close(fd);
+		comm_close(fd);
 		return 0;
 	}
 
@@ -233,7 +233,7 @@ inetport(struct Listener *listener)
 		report_error("binding listener socket %s:%s",
 			     get_listener_name(listener), 
 			     get_listener_name(listener), errno);
-		fd_close(fd);
+		comm_close(fd);
 		return 0;
 	}
 
@@ -242,7 +242,7 @@ inetport(struct Listener *listener)
 		report_error("listen failed for %s:%s", 
 			     get_listener_name(listener), 
 			     get_listener_name(listener), errno);
-		fd_close(fd);
+		comm_close(fd);
 		return 0;
 	}
 
@@ -404,7 +404,7 @@ close_listener(struct Listener *listener)
 		return;
 	if(listener->fd >= 0)
 	{
-		fd_close(listener->fd);
+		comm_close(listener->fd);
 		listener->fd = -1;
 	}
 
@@ -541,7 +541,7 @@ accept_connection(int pfd, void *data)
 		}
 
 		write(fd, "ERROR :All connections in use\r\n", 32);
-		fd_close(fd);
+		comm_close(fd);
 		/* Re-register a new IO request for the next accept .. */
 		comm_setselect(listener->fd, FDLIST_SERVICE,
 			       COMM_SELECT_READ, accept_connection, listener, 0);
@@ -567,7 +567,7 @@ accept_connection(int pfd, void *data)
            ircsprintf(buf, "ERROR :You have been D-lined.\r\n");
         
         write(fd, buf, strlen(buf));
-		fd_close(fd);
+		comm_close(fd);
 
 		/* Re-register a new IO request for the next accept .. */
 		comm_setselect(listener->fd, FDLIST_SERVICE,
