@@ -752,7 +752,7 @@ AC_ARG_WITH(nicklen,
   fi
 ])
 AC_MSG_RESULT("Setting NICKLEN to $ac_cv_nicklen")
-AC_DEFINE_UNQUOTED(NICKLEN, ${ac_cv_nicklen}+1)
+AC_DEFINE_UNQUOTED(NICKLEN, (${ac_cv_nicklen}+1))
 
 dnl Max support clients
 AC_ARG_WITH(maxclients,
