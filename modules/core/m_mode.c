@@ -112,17 +112,9 @@ static void m_mode(struct Client *client_p, struct Client *source_p,
 		 me.name, parv[0], parv[1],
 		 modebuf, parabuf);
       
-      /* Let opers see the "true" TS everyone else see's
-       * the top root chan TS
-       */
-      if (!IsOper(source_p))
-	sendto_one(source_p, form_str(RPL_CREATIONTIME),
-		   me.name, parv[0],
-		   parv[1], chptr->channelts);
-      else
-	sendto_one(source_p, form_str(RPL_CREATIONTIME),
-		   me.name, parv[0],
-		   parv[1], chptr->channelts);
+      sendto_one(source_p, form_str(RPL_CREATIONTIME),
+		 me.name, parv[0],
+		 parv[1], chptr->channelts);
     }
   /* bounce all modes from people we deop on sjoin */
   else if((ptr = find_user_link(&chptr->deopped, source_p)) == NULL)
