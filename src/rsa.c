@@ -32,19 +32,24 @@
 #include "client.h" /* CIPHERKEYLEN .. eww */
 
 #ifdef HAVE_LIBCRYPTO
-
 #include <openssl/rand.h>
 #include <openssl/rsa.h>
 #include <openssl/md5.h>
 #include <openssl/bn.h>
 #include <openssl/evp.h>
 #include <openssl/err.h>
-
 void report_crypto_errors(void);
 int verify_private_key(void);
 static void binary_to_hex( unsigned char * bin, char * hex, int length );
 static int absorb( char ** str, char lowest, char highest );
 static RSA * str_to_RSApublic( char * key );
+
+/* For some strange reason we can't include pem.h in here..why I don't know */
+/* But this is the correct prototype.. */
+typedef int pem_password_cb(char *buf, int size, int rwflag, void *userdata);
+extern RSA *PEM_read_bio_RSAPrivateKey(BIO *bp, char **x, pem_password_cb *cb, void *u);
+
+        
 
 /*
  * report_crypto_errors - Dump crypto error list to log
@@ -105,6 +110,8 @@ int verify_private_key(void)
    * P.S. -- I have no idea why the key= assignment has to be typecasted.
    *         For some reason the system thinks PEM_read_bio_RSAPrivateKey
    *         is returning an int, not a RSA *.
+   * androsyn -- Thats because you didn't have a prototype and including
+   * 		 pem.h breaks things for some reason..
    */
   key = (RSA *) PEM_read_bio_RSAPrivateKey(file, NULL, 0, NULL);
 
