@@ -173,7 +173,7 @@ del_scommand_hook(scommand_func hook, const char *command)
 		handler = ptr->data;
 		if(!strcasecmp(command, handler->cmd))
 		{
-			dlink_find_destroy(&handler->hooks, hook);
+			dlink_find_destroy(hook, &handler->hooks);
 			return;
 		}
 	}

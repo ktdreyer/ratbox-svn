@@ -43,9 +43,9 @@ change_chmember_status(struct channel *chptr, const char *nick,
 
 		/* handle -o+o */
 		if(dir)
-			dlink_find_destroy(&deopped_list, target_p);
+			dlink_find_destroy(target_p, &deopped_list);
 		/* this is a -o */
-		else if(dlink_find(&deopped_list, target_p) == NULL)
+		else if(dlink_find(target_p, &deopped_list) == NULL)
 			dlink_add_alloc(target_p, &deopped_list);
 
 		return;

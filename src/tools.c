@@ -353,7 +353,7 @@ dlink_delete(dlink_node * m, dlink_list * list)
 }
 
 dlink_node *
-dlink_find(dlink_list * list, void *data)
+dlink_find(void *data, dlink_list *list)
 {
 	dlink_node *ptr;
 
@@ -394,7 +394,7 @@ dlink_move_list(dlink_list * from, dlink_list * to)
 }
 
 dlink_node *
-dlink_find_delete(dlink_list * list, void *data)
+dlink_find_delete(void *data, dlink_list *list)
 {
 	dlink_node *m;
 
@@ -421,9 +421,9 @@ dlink_find_delete(dlink_list * list, void *data)
 }
 
 int
-dlink_find_destroy(dlink_list * list, void *data)
+dlink_find_destroy(void *data, dlink_list *list)
 {
-	void *ptr = dlink_find_delete(list, data);
+	void *ptr = dlink_find_delete(data, list);
 	if(ptr != NULL)
 	{
 		free_dlink_node(ptr);

@@ -273,7 +273,7 @@ join_service(struct client *service_p, const char *chname)
 		add_channel(chptr);
 	}
 	/* may already be joined.. */
-	else if(dlink_find(&chptr->services, service_p) != NULL)
+	else if(dlink_find(service_p, &chptr->services) != NULL)
 		return;
 
 	dlink_add_alloc(service_p, &chptr->services);
@@ -294,11 +294,11 @@ part_service(struct client *service_p, const char *chname)
 	if((chptr = find_channel(chname)) == NULL)
 		return 0;
 
-	if(dlink_find(&chptr->services, service_p) == NULL)
+	if(dlink_find(service_p, &chptr->services) == NULL)
 		return 0;
 
-	dlink_find_destroy(&chptr->services, service_p);
-	dlink_find_destroy(&service_p->service->channels, chptr);
+	dlink_find_destroy(service_p, &chptr->services);
+	dlink_find_destroy(chptr, &service_p->service->channels);
 
 	if(finished_bursting)
 		sendto_server(":%s PART %s", service_p->name, chptr->name);

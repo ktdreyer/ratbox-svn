@@ -77,7 +77,7 @@ u_operbot_ojoin(struct connection_entry *conn_p, char *parv[], int parc)
 	struct channel *chptr;
 
 	if((chptr = find_channel(parv[1])) && 
-	   dlink_find(&chptr->services, operbot_p))
+	   dlink_find(operbot_p, &chptr->services))
 	{
 		sendto_one(conn_p, "Operbot already in %s", parv[1]);
 		return;
@@ -109,7 +109,7 @@ s_operbot_ojoin(struct client *client_p, char *parv[], int parc)
 	struct channel *chptr;
 
 	if((chptr = find_channel(parv[0])) && 
-	   dlink_find(&chptr->services, operbot_p))
+	   dlink_find(operbot_p, &chptr->services))
 	{
 		service_error(operbot_p, client_p, 
 				"Operbot already in %s", parv[0]);
@@ -154,7 +154,7 @@ s_operbot_invite(struct client *client_p, char *parv[], int parc)
 		return 1;
 	}
 
-	if(dlink_find(&operbot_p->service->channels, chptr) == NULL)
+	if(dlink_find(chptr, &operbot_p->service->channels) == NULL)
 	{
 		service_error(operbot_p, client_p, "Invalid channel");
 		return 1;
@@ -180,7 +180,7 @@ s_operbot_op(struct client *client_p, char *parv[], int parc)
 		return 1;
 	}
 
-	if(dlink_find(&operbot_p->service->channels, chptr) == NULL)
+	if(dlink_find(chptr, &operbot_p->service->channels) == NULL)
 	{
 		service_error(operbot_p, client_p, "Invalid channel");
 		return 1;
