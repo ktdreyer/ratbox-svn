@@ -1,3 +1,20 @@
+leeh        2002/07/10 06:35:08 EDT	(20020710_5)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+    doc                  example.efnet.conf 
+  Log:
+  - but my autoconf changes back :P
+  - fixed typo
+  
+  Revision  Changes    Path
+  7.140     +6 -0      ircd-hybrid-7/autoconf/configure.in
+  7.143     +6 -0      ircd-hybrid-7/configure
+  7.2       +1 -1      ircd-hybrid-7/doc/example.efnet.conf
+
+
+
 androsyn    2002/07/10 04:35:14 EDT	(20020710_4)
 
   Modified files:
