@@ -1,3 +1,9 @@
+*** 20010509_1 by a1kmm
+- Added a graduated delay system to stop the idle or lowly loaded ircd from
+  soaking up too many clockcycles, and removed some of the unneccessary
+  calls to set_time/time.
+
+
 *** 20010508_3 by db
 - removed more inflammatory language from comments.
 
