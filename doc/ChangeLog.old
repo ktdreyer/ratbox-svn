@@ -1,3 +1,6 @@
+*** 20010128_3 by davidt
+Fix kill for certain LL situations...
+
 *** 20010128_2 by fl_
 - this renders kill_client() redundant, but basically we werent sending
   kills to every server, which was causing problems with hyb6 as we
