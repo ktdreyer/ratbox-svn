@@ -1,3 +1,25 @@
+leeh        2004/01/13 14:44:16 EST	(20040113_0)
+
+  Modified files:
+    include              channel.h 
+    src                  c_mode.c cache.c channel.c client.c 
+                         tools.c 
+  Log:
+  - make services rejoining just issue an SJOIN with the client opped
+  - added memset()'s where we BlockHeapAlloc()
+  - fixed the hosthash
+  - made dlink_add() set m->prev = NULL
+  
+  Revision  Changes    Path
+  1.7       +1 -2      rserv/include/channel.h
+  1.12      +1 -1      rserv/src/c_mode.c
+  1.2       +3 -1      rserv/src/cache.c
+  1.16      +4 -6      rserv/src/channel.c
+  1.15      +14 -0     rserv/src/client.c
+  1.5       +1 -0      rserv/src/tools.c
+
+
+
 leeh        2004/01/12 18:40:07 EST	(20040112_0)
 
   Modified files:
