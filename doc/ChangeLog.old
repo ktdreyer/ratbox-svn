@@ -1,3 +1,7 @@
+*** 20010621_4 by leeh
+- added a missing #ifdef PACE_CONNECT
+
+
 *** 20010621_3 by leeh
 - fixed serverhide bug in squit
 
