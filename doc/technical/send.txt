@@ -212,16 +212,16 @@ sendto_realops_flags()
                   sendto_realops_flags(FLAGS_ALL,
                                  "Don't eat the yellow snow");
 
-sendto_realops_flags_opers()
-                - sends specified message to opers locally only
+sendto_wallops_flags()
+                - sends specified message to opers locally, 
                   depending on flags.  used for messages that need
-                  to know who was sending the message.
+                  to be in wallops form
 
-                  usage - sendto_realops_flags_opers(int flags,
+                  usage - sendto_wall_flags(int flags,
                                     struct Client *, const char *patterm ...);
 
                   e.g.
-                  sendto_realops_flags_opers(FLAGS_LOCOPS,
+                  sendto_wallops_flags(FLAGS_LOCOPS,
                                       sptr, "Message");
 
 ts_warn()       - Only used to send warning messages to all opers
