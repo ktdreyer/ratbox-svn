@@ -123,6 +123,7 @@ int     m_names( struct Client *cptr,
                  char *parv[])
 { 
   struct Channel *chptr;
+  struct Channel *vchan;
   struct Client *c2ptr;
   struct SLink  *lp;
   struct Channel *ch2ptr = NULL;
@@ -196,7 +197,18 @@ int     m_names( struct Client *cptr,
       ch2ptr = hash_find_channel(para, NULL);
       if( ch2ptr )
 	{
-	  names_on_this_channel( sptr, ch2ptr, ch2ptr->chname );
+	  if (HasVchans(ch2ptr))
+	    {
+	      vchan = map_vchan(ch2ptr,sptr);
+	      if(vchan == 0)
+		names_on_this_channel( sptr, ch2ptr, ch2ptr->chname );
+	      else
+		names_on_this_channel( sptr, vchan, ch2ptr->chname );
+	    }
+	  else
+	    {
+	      names_on_this_channel( sptr, ch2ptr, ch2ptr->chname );
+	    }
 	  return 0;
 	}
     }
