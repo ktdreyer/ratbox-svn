@@ -1,3 +1,9 @@
+*** 20001109_4 by db
+- only ctcp flud check if local client *oops* This was a side effect
+  of combinging ms_privmsg/ms_notice back into one...
+
+
+
 *** 20001109_3 by ejb
 finished converting modules/*, just some work to do in src/ to make
 it compile and stuff now.
