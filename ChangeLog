@@ -1,3 +1,15 @@
+androsyn    2003/08/06 15:02:16 EDT	(20030806_1)
+
+  Modified files:
+    src                  s_auth.c 
+  Log:
+  Fixed a shadowed variable
+  
+  Revision  Changes    Path
+  7.152     +2 -3      ircd-ratbox/src/s_auth.c
+
+
+
 androsyn    2003/08/06 12:01:53 EDT	(20030806_0)
 
   Modified files:
