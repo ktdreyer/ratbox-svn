@@ -1,3 +1,18 @@
+leeh        2004/04/07 22:21:46 EDT	(20040408_0)
+
+  Modified files:
+    .                    RELNOTES 
+    src                  ircd.c 
+  Log:
+  - god knows how long this "struct JupedChannel JupedChannelList" has been
+    there.. or why gcc didnt error about it.
+  
+  Revision  Changes    Path
+  1.97      +6 -0      ircd-ratbox/RELNOTES
+  7.336     +0 -2      ircd-ratbox/src/ircd.c
+
+
+
 ejb         2004/04/07 18:28:22 EDT	(20040407_4)
 
   ircd-ratbox/rpi - New directory
