@@ -97,9 +97,7 @@ static void m_who(struct Client *client_p,
   struct Channel *chptr=NULL;
   struct Channel *vchan;
   struct Channel *mychannel = NULL;
-  char  *chanop_flag;
-  char  *halfop_flag;
-  char  *voiced_flag;
+  char  flags[MAX_SUBLISTS][2];
   int   server_oper = parc > 2 ? (*parv[2] == 'o' ): 0; /* Show OPERS only */
   int   member;
 
@@ -236,26 +234,14 @@ static void m_who(struct Client *client_p,
 
 	  /* XXX globalize this inside m_who.c ? */
 	  /* jdc -- Check is_any_op() for +o > +h > +v priorities */
-	  if( (chptr->mode.mode & MODE_HIDEOPS) &&
-	      (!is_any_op(chptr,source_p)) )
-	    {
-	      chanop_flag = "";
-	      halfop_flag = "";
-	      voiced_flag = "";
-	    }
-	  else
-	    {
-	      chanop_flag = "@";
-	      halfop_flag = "%";
-	      voiced_flag = "+";
-	    }
+	  set_channel_mode_flags( flags, chptr, source_p );
 
 	  if (is_chan_op(chptr,target_p))
-	    do_who(source_p, target_p, chname, chanop_flag);
+	    do_who(source_p, target_p, chname, flags[0]);
 	  else if(is_half_op(chptr,target_p))
-	    do_who(source_p, target_p, chname, halfop_flag);
+	    do_who(source_p, target_p, chname, flags[1]);
 	  else if(is_voiced(chptr,target_p))
-	    do_who(source_p, target_p, chname, voiced_flag);
+	    do_who(source_p, target_p, chname, flags[2]);
 	  else
 	    do_who(source_p, target_p, chname, "");
 	}
@@ -296,9 +282,7 @@ static void who_global(struct Client *source_p,char *mask, int server_oper)
   int   member;
   int   isinvis;
   int   maxmatches = 500;
-  char  *chanop_flag;
-  char  *halfop_flag;
-  char  *voiced_flag;
+  char  flags[MAX_SUBLISTS][2];
 
   for (target_p = GlobalClientList; target_p; target_p = target_p->next)
     {
@@ -354,26 +338,14 @@ static void who_global(struct Client *source_p,char *mask, int server_oper)
 		}
 
 	      /* jdc -- Check is_any_op() for +o > +h > +v priorities */
-	      if( (chptr->mode.mode & MODE_HIDEOPS) &&
-	          (!is_any_op(chptr,source_p)) )
-		{
-		  chanop_flag = "";
-		  halfop_flag = "";
-		  voiced_flag = "";
-		}
-	      else
-		{
-		  chanop_flag = "@";
-		  halfop_flag = "%";
-		  voiced_flag = "+";
-		}
+	      set_channel_mode_flags( flags, chptr, source_p );
 
 	      if (is_chan_op(chptr,target_p))
-		do_who(source_p, target_p, chname, chanop_flag);
+		do_who(source_p, target_p, chname, flags[0]);
 	      else if(is_half_op(chptr,target_p))
-		do_who(source_p, target_p, chname, halfop_flag);
+		do_who(source_p, target_p, chname, flags[1]);
 	      else if(is_voiced(chptr,target_p))
-		do_who(source_p, target_p, chname, voiced_flag);
+		do_who(source_p, target_p, chname, flags[2]);
 	      else 
 		do_who(source_p, target_p, chname, "");
 	    }
@@ -408,34 +380,19 @@ static void do_who_on_channel(struct Client *source_p,
 			      char *chname,
 			      int server_oper, int member)
 {
-  char *chanop_flag;
-  char *halfop_flag;
-  char *voiced_flag;
-
+  char flags[MAX_SUBLISTS][2];
 
   /* jdc -- Check is_any_op() for +o > +h > +v priorities */
-  if( (chptr->mode.mode & MODE_HIDEOPS) &&
-      (!is_any_op(chptr,source_p)) )
-    {
-      chanop_flag = "";
-      halfop_flag = "";
-      voiced_flag = "";
-    }
-  else
-    {
-      chanop_flag = "@";
-      halfop_flag = "%";
-      voiced_flag = "+";
-    }
+  set_channel_mode_flags( flags, chptr, source_p );
 
   do_who_list(source_p, chptr,
               &chptr->peons,
               &chptr->chanops,
               &chptr->halfops,
               &chptr->voiced,
-              chanop_flag,
-              halfop_flag,
-              voiced_flag,
+              flags[0],
+              flags[1],
+              flags[2],
               chname);
 
 }

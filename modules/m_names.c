@@ -139,16 +139,9 @@ static void m_names( struct Client *client_p,
 
 static void names_all_visible_channels(struct Client *source_p)
 {
-  int mlen;
-  int cur_len;
-  int reply_to_send;
   struct Channel *chptr;
   struct Channel *bchan;
-  char buf[BUFSIZE];
   char *chname=NULL;
-  char *show_ops_flag;
-  char *show_voiced_flag;
-  char *show_halfop_flag;
 
   /* 
    * First, do all visible channels (public and the one user self is)
@@ -156,52 +149,18 @@ static void names_all_visible_channels(struct Client *source_p)
 
   for (chptr = GlobalChannelList; chptr; chptr = chptr->nextch)
     {
-      if (ShowChannel(source_p, chptr))
+      if (IsVchan(chptr))
 	{
-	  /* Find users on same channel (defined by chptr) */
-	  if (IsVchan(chptr))
-	    {
-	      bchan = find_bchan (chptr);
-	      if (bchan != NULL)
-		chname = bchan->chname;
-	    }
-	  else
-	    chname = chptr->chname;
-
-	  if(chptr->mode.mode & MODE_HIDEOPS && !is_any_op(chptr,source_p))
-	    {
-	      show_ops_flag = "";
-	      show_voiced_flag = "";
-	      show_halfop_flag = "";
-	    }
-	  else
-	    {
-	      show_ops_flag = "@";
-	      show_voiced_flag = "+";
-	      show_halfop_flag = "%";
-	    }
-
-	  ircsprintf(buf,form_str(RPL_NAMREPLY),
-		     me.name, source_p->name,channel_pub_or_secret(chptr));
-	  mlen = strlen(buf);
-	  ircsprintf(buf + mlen," %s :", chname);
-	  mlen = strlen(buf);
-	  cur_len = mlen;
-
-	  channel_member_list(source_p,
-                              chptr,
-			      &chptr->chanops,
-			      &chptr->voiced,
-			      &chptr->halfops,
-			      &chptr->peons,
-			      show_ops_flag,
-			      show_voiced_flag,
-			      show_halfop_flag,
-			      buf, mlen, &cur_len, &reply_to_send);
-
-	  if (reply_to_send)
-	    sendto_one(source_p, "%s", buf);
+	  bchan = find_bchan (chptr);
+	  if (bchan != NULL)
+	    chname = bchan->chname;
 	}
+      else
+	chname = chptr->chname;
+
+      /* Find users on same channel (defined by chptr) */
+      
+      channel_member_names( source_p, chptr, chname );
     }
 }
 

@@ -59,9 +59,6 @@ static void send_mode_list(struct Client *, char *, dlink_list *,
 static void send_oplist(char *, struct Client *,
                         dlink_list *, char *, int);
 
-static void set_channel_mode_flags( char flags_ptr[4][2],
-				    struct Channel *chptr,
-				    struct Client *source_p);
 
 static void send_members(struct Client *client_p,
 			 char *modebuf, char *parabuf,
@@ -2781,7 +2778,7 @@ static void delete_members(struct Channel * chptr, dlink_list *list)
  * output	- none
  * side effects	-
  */
-static void
+void
 set_channel_mode_flags( char flags_ptr[4][2],
 			struct Channel *chptr,
 			struct Client *source_p)
@@ -2818,7 +2815,7 @@ set_channel_mode_flags( char flags_ptr[4][2],
  */
 void channel_member_names( struct Client *source_p,
 			   struct Channel *chptr,
-			   char *name_of_channel)
+			   char *name_of_channel )
 {
   int mlen;
   int tlen;
@@ -2826,8 +2823,8 @@ void channel_member_names( struct Client *source_p,
   char lbuf[BUFSIZE];
   char *t;
   int reply_to_send = NO;
-  dlink_node *members_ptr[4];
-  char show_flags[4][2];
+  dlink_node *members_ptr[MAX_SUBLISTS];
+  char show_flags[MAX_SUBLISTS][2];
   struct Client *who;
   int done=0;		/* flag when done */
   int is_member;
@@ -2838,8 +2835,7 @@ void channel_member_names( struct Client *source_p,
   if (ShowChannel(source_p, chptr))
     {
       ircsprintf(lbuf, form_str(RPL_NAMREPLY),
-                 me.name, source_p->name,
-                 channel_pub_or_secret(chptr));
+                 me.name, source_p->name, channel_pub_or_secret(chptr));
       mlen = strlen(lbuf);
       ircsprintf(lbuf + mlen, " %s :", name_of_channel);
       mlen = strlen(lbuf);
@@ -2857,10 +2853,10 @@ void channel_member_names( struct Client *source_p,
 
       is_member = IsMember(source_p, chptr);
 
-      while(done != 4)
+      while(done != MAX_SUBLISTS)
 	{
 	  done = 0;
-	  for(i = 0; i < 4; i++)
+	  for(i = 0; i < MAX_SUBLISTS; i++)
 	    {
 	      if(members_ptr[i] != NULL)
 		{
