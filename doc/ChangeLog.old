@@ -1,3 +1,8 @@
+*** 20010608_6 by db
+- can't have a " inside a " duh
+
+
+
 *** 20010608_5 by db
 - renamed KParseFile to parse_k_file DParseFile to parse_d_file
 
