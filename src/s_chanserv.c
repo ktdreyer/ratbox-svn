@@ -541,6 +541,28 @@ s_chanserv_register(struct client *client_p, char *parv[], int parc)
 		return 1;
 	}
 
+	/* apply timed registration limits */
+	if(config_file.cregister_time && config_file.cregister_amount)
+	{
+		static time_t last_time = 0;
+		static int last_count = 0;
+
+		if((last_time + config_file.cregister_time) < CURRENT_TIME)
+		{
+			last_time = CURRENT_TIME;
+			last_count = 1;
+		}
+		else if(last_count >= config_file.cregister_amount)
+		{
+			service_error(chanserv_p, client_p, 
+				"%s::REGISTER rate-limited, try again shortly",
+				chanserv_p->name);
+			return 1;
+		}
+		else
+			last_count++;
+	}
+
 	reg_p = BlockHeapAlloc(channel_reg_heap);
 	reg_p->name = my_strdup(parv[0]);
 	reg_p->reg_time = reg_p->last_time = CURRENT_TIME;

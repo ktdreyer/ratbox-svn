@@ -28,9 +28,13 @@ struct _config_file
 
 	/* userserv */
 	int disable_uregister;
+	int uregister_time;
+	int uregister_amount;
 
 	/* chanserv */
 	int disable_cregister;
+	int cregister_time;
+	int cregister_amount;
 
 	/* jupeserv */
 	int oper_score;

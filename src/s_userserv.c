@@ -160,6 +160,29 @@ s_userserv_register(struct client *client_p, char *parv[], int parc)
 		return 1;
 	}
 
+	/* apply timed registration limits */
+	if(config_file.uregister_time && config_file.uregister_amount)
+	{
+		static time_t last_time = 0;
+		static int last_count = 0;
+
+		if((last_time + config_file.uregister_time) < CURRENT_TIME)
+		{
+			last_time = CURRENT_TIME;
+			last_count = 1;
+		}
+		else if(last_count >= config_file.uregister_amount)
+		{
+			service_error(userserv_p, client_p, 
+				"%s::REGISTER rate-limited, try again shortly",
+				userserv_p->name);
+			return 1;
+		}
+		else
+			last_count++;
+	}
+
+
 	reg_p = BlockHeapAlloc(user_reg_heap);
 	strcpy(reg_p->name, parv[0]);
 

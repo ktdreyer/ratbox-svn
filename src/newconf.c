@@ -737,12 +737,16 @@ static struct ConfEntry conf_service_table[] =
 static struct ConfEntry conf_userserv_table[] =
 {
 	{ "disable_register",	CF_YESNO, NULL, 0, &config_file.disable_uregister	},
+	{ "register_time",	CF_TIME,  NULL, 0, &config_file.uregister_time		},
+	{ "register_amount",	CF_INT,   NULL, 0, &config_file.uregister_amount	},
 	{ "\0", 0, NULL, 0, NULL }
 };
 
 static struct ConfEntry conf_chanserv_table[] =
 {
 	{ "disable_register",	CF_YESNO, NULL, 0, &config_file.disable_cregister	},
+	{ "register_time",	CF_TIME,  NULL, 0, &config_file.cregister_time		},
+	{ "register_amount",	CF_INT,   NULL, 0, &config_file.cregister_amount	},
 	{ "\0", 0, NULL, 0, NULL }
 };
 
