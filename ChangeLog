@@ -1,3 +1,15 @@
+androsyn    2003/10/03 07:07:35 EDT	(20031003_0)
+
+  Added files:
+    .                    install-sh 
+  Log:
+  configure needs this..
+  
+  Revision  Changes    Path
+  1.1       +270 -0    ircd-ratbox/install-sh (new)
+
+
+
 androsyn    2003/10/01 11:42:30 EDT	(20031001_1)
 
   Modified files:
