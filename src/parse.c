@@ -648,6 +648,8 @@ static int     do_numeric(
   struct Channel *chptr;
   char  *nick, *p;
   int   i;
+  char  *t;	/* current position inside buffer */
+  int   tl;	/* current length of presently being built string in t */
 
   if (parc < 1 || !IsServer(sptr))
     return 0;
@@ -663,16 +665,15 @@ static int     do_numeric(
   ** assumptions--bets are off, if these are changed --msa)
   ** Note: if buffer is non-empty, it will begin with SPACE.
   */
-  buffer[0] = '\0';
+  t = buffer;
   if (parc > 1)
     {
       for (i = 2; i < (parc - 1); i++)
         {
-          (void)strcat(buffer, " ");
-          (void)strcat(buffer, parv[i]);
+          tl = ircsprintf(t," %s", parv[i]);
+	  t += tl;
         }
-      (void)strcat(buffer, " :");
-      (void)strcat(buffer, parv[parc-1]);
+      ircsprintf(t," :%s", parv[parc-1]);
     }
   for (; (nick = strtoken(&p, parv[1], ",")); parv[1] = NULL)
     {
@@ -691,23 +692,23 @@ static int     do_numeric(
           */
           if (!IsMe(acptr) && IsPerson(acptr))
 	    {
-	      sendto_anywhere(acptr, sptr,"%s %s :%s",
+	      sendto_anywhere(acptr, sptr,"%s %s%s",
 			      numeric, nick, buffer);
 	    }
           else if (IsServer(acptr) && acptr->from != cptr)
 	    {
-	      sendto_anywhere(acptr, sptr,"%s %s :%s",
+	      sendto_anywhere(acptr, sptr,"%s %s %s",
 			      numeric, nick, buffer);
 	    }
         }
       else if ((acptr = find_server(nick)))
         {
           if (!IsMe(acptr) && acptr->from != cptr)
-		sendto_anywhere(acptr, sptr,"%s %s :%s",
+		sendto_anywhere(acptr, sptr,"%s %s%s",
 				numeric, nick, buffer);
         }
       else if ((chptr = hash_find_channel(nick, (struct Channel *)NULL)))
-        sendto_channel_butone(cptr,sptr,chptr,":%s %s %s :%s",
+        sendto_channel_butone(cptr,sptr,chptr,":%s %s %s%s",
                               sptr->name,
                               numeric, chptr->chname, buffer);
     }
