@@ -271,20 +271,22 @@ AC_COMPILE_IFELSE(
 fi
 
 
-dnl 32-bit time_t can use the PRIu32 formatting macro, if available.
-dnl 64-bit time_t can use the PRIu64 formatting macro, if available.
+dnl 32-bit time_t can use the PRId32 formatting macro, if available.
+dnl 64-bit time_t can use the PRId64 formatting macro, if available.
 dnl If these macros don't exist, use a legitimate default.
 dnl ================================================================
 AC_CHECK_SIZEOF(time_t)
 
 if test "$ac_cv_sizeof_time_t" = "4"; then
-AC_CHECK_DECL(PRIu32,
-        AC_DEFINE(IRCD_TIME_FMT, ["%" PRIu32], [Formatting for time_t strings]),
-        AC_DEFINE(IRCD_TIME_FMT, ["%u"], [Formatting for time_t strings]))
+AC_CHECK_DECL(PRId32,
+        AC_DEFINE(IRCD_TIME_FMT, ["%l" PRId32], [Formatting for time_t strings]),
+        AC_DEFINE(IRCD_TIME_FMT, ["%ld"], [Formatting for time_t strings]), [
+		#include <inttypes.h> ] )
 elif test "$ac_cv_sizeof_time_t" = "8"; then
-AC_CHECK_DECL(PRIu64,
-        AC_DEFINE(IRCD_TIME_FMT, ["%" PRIu64], [Formatting for time_t strings]),
-        AC_DEFINE(IRCD_TIME_FMT, ["%llu"], [Formatting for time_t strings]))
+AC_CHECK_DECL(PRId64,
+        AC_DEFINE(IRCD_TIME_FMT, ["%l" PRId64], [Formatting for time_t strings]),
+        AC_DEFINE(IRCD_TIME_FMT, ["%lld"], [Formatting for time_t strings]), [ 
+		#include <inttypes.h> ] )
 fi
 
 
