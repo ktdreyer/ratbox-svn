@@ -26,6 +26,7 @@ struct _buf_line {
     int  overflow;
     int  len;			/* How much data we've got */
     int  refcount;              /* how many linked lists are we in? */
+    struct _buf_line *next;     /* next in free list */
 };
 
 struct _buf_head {

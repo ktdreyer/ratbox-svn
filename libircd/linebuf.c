@@ -42,15 +42,47 @@ static int bufline_count = 0;
  *
  * Initialise the linebuf mechanism
  */
-void
-linebuf_init(void)
-{
-  assert(!linebuf_initialised);
+buf_line_t *linebuf_freelist;
+#define MAXLINEBUFS 10000
 
-  linebuf_initialised = 1;
-  bufline_count = 0;
+void
+linebuf_init()
+{
+  int i;
+  buf_line_t *new;
+
+  for(i=0; i < MAXLINEBUFS; i++)
+    {
+      new = (buf_line_t *)MyMalloc(sizeof(buf_line_t));
+      new->next = linebuf_freelist;
+      linebuf_freelist = new;
+    }
 }
 
+buf_line_t *
+linebuf_allocate()
+{
+  buf_line_t *new;
+
+  if (linebuf_freelist != NULL)
+    {
+      new = linebuf_freelist;
+      linebuf_freelist = linebuf_freelist->next;
+      new->next = NULL;
+    }
+  else
+    {
+       new = (buf_line_t *)MyMalloc(sizeof(buf_line_t));
+    }
+  return new;
+}
+
+void
+linebuf_free(buf_line_t *p)
+{
+   p->next = linebuf_freelist;
+   linebuf_freelist = p;
+}
 
 /*
  * linebuf_new_line
@@ -64,17 +96,18 @@ linebuf_new_line(buf_head_t *bufhead)
   buf_line_t *bufline;
   dlink_node *node;
 
+#if 0
   bufline = (buf_line_t *)MyMalloc(sizeof(buf_line_t));
+#endif
+  bufline = linebuf_allocate();
   ++bufline_count;
 
   node = MyMalloc(sizeof(dlink_node));
   
-#if 0
   bufline->len = 0;
   bufline->terminated = 0;
   bufline->overflow = 0;
   bufline->flushing = 0;
-#endif
 
   /* Stick it at the end of the buf list */
   dlinkAddTail(bufline, node, &bufhead->list);
@@ -115,7 +148,10 @@ linebuf_done_line(buf_head_t *bufhead, buf_line_t *bufline,
     /* and finally, deallocate the buf */
     --bufline_count;
     assert(bufline_count >= 0);
+#if 0
     MyFree(bufline);
+#endif
+    linebuf_free(bufline);
   }
 }
 
