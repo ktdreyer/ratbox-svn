@@ -916,8 +916,6 @@ user_mode(struct Client *client_p, struct Client *source_p, int parc, char *parv
   int   what, setflags;
   int   badflag = NO;		/* Only send one bad flag notice */
   char  buf[BUFSIZE];
-  dlink_node *ptr;
-  struct ConfItem *aconf;
 
   what = MODE_ADD;
 
@@ -1011,9 +1009,6 @@ user_mode(struct Client *client_p, struct Client *source_p, int parc, char *parv
                 {
                   dlink_node *dm;
 
-		  ptr = source_p->localClient->confs.head;
-		  aconf = ptr->data;
-                  detach_conf(source_p,aconf);
 		  source_p->flags2 &= ~FLAGS2_OPER_FLAGS;
 		  dm = dlinkFind(&oper_list,source_p);
 		  if(dm != NULL)
@@ -1288,7 +1283,7 @@ check_X_line(struct Client *client_p, struct Client *source_p)
 			     get_client_name(client_p, HIDE_IP));
     }
 
-  return 0);
+  return (0);
 }
 
 /*
