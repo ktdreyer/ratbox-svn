@@ -718,7 +718,7 @@ oper_entry:     OPERATOR
       {
         BIO *file;
 
-	file = BIO_new_file(yy_achead->rsa_public_key_file);
+	file = BIO_new_file(yy_achead->rsa_public_key_file, "r");
 	yy_tmp->rsa_public_key = (RSA *)PEM_read_bio_RSA_PUBKEY(file,
 	                                           NULL, 0, NULL);
         BIO_set_close(file, BIO_CLOSE);
