@@ -1,3 +1,9 @@
+*** 19990908_1 by wnder
+IAuth changes:
+ * put dns and ident back into s_auth.c
+ * added kline check to iauth
+
+
 *** 19990907_2 by tomh
 move dbuf cleanup to free_client, fix send.c bug
 
