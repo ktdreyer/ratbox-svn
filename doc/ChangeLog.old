@@ -1,3 +1,7 @@
+*** 20010829_2 by leeh
+- reverted the linebuf changes, they caused more problems than they fixed
+
+
 *** 20010829_1 by leeh
 - added stats_P_oper_only
 
