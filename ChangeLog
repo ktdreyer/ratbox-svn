@@ -1,3 +1,15 @@
+leeh        2005/03/27 01:09:17 UTC	(20050327_2)
+
+  Modified files:
+    modules/core         m_message.c 
+  Log:
+  - disallow clients messaging uids
+  
+  Revision  Changes    Path
+  1.173     +11 -3     ircd-ratbox/modules/core/m_message.c
+
+
+
 leeh        2005/03/27 01:05:55 UTC	(20050327_1)
 
   Modified files:
