@@ -203,6 +203,19 @@ free_client(struct Client *client_p)
 {
 	s_assert(NULL != client_p);
 	s_assert(&me != client_p);
+
+	if(client_p->user != NULL)
+		free_user(client_p->user, client_p);
+
+	if(client_p->serv)
+	{
+		if(client_p->serv->user != NULL)
+			free_user(client_p->serv->user, client_p);
+		if(client_p->serv->fullcaps)
+			MyFree(client_p->serv->fullcaps);
+		MyFree(client_p->serv);
+	}
+
 	free_local_client(client_p);
 	BlockHeapFree(client_heap, client_p);
 }
@@ -697,59 +710,6 @@ check_xlines(void)
 }
 
 /*
- * update_client_exit_stats
- *
- * input	- pointer to client
- * output	- NONE
- * side effects	- 
- */
-static void
-update_client_exit_stats(struct Client *client_p)
-{
-	if(IsServer(client_p))
-	{
-		sendto_realops_flags(UMODE_EXTERNAL, L_ALL,
-				     "Server %s split from %s",
-				     client_p->name, client_p->servptr->name);
-	}
-	else if(IsClient(client_p))
-	{
-		--Count.total;
-		if(IsOper(client_p))
-			--Count.oper;
-		if(IsInvisible(client_p))
-			--Count.invisi;
-	}
-
-	if(splitchecking && !splitmode)
-		check_splitmode(NULL);
-}
-
-/*
- * release_client_state
- *
- * input	- pointer to client to release
- * output	- NONE
- * side effects	- 
- */
-static void
-release_client_state(struct Client *client_p)
-{
-	if(client_p->user != NULL)
-	{
-		free_user(client_p->user, client_p);	/* try this here */
-	}
-	if(client_p->serv)
-	{
-		if(client_p->serv->user != NULL)
-			free_user(client_p->serv->user, client_p);
-		if(client_p->serv->fullcaps)
-			MyFree(client_p->serv->fullcaps);
-		MyFree(client_p->serv);
-	}
-}
-
-/*
  * remove_client_from_list
  * inputs	- point to client to remove
  * output	- NONE
@@ -775,7 +735,23 @@ remove_client_from_list(struct Client *client_p)
 
 	dlinkDelete(&client_p->node, &global_client_list);
 
-	update_client_exit_stats(client_p);
+	if(IsServer(client_p))
+	{
+		sendto_realops_flags(UMODE_EXTERNAL, L_ALL,
+				     "Server %s split from %s",
+				     client_p->name, client_p->servptr->name);
+	}
+	else if(IsClient(client_p))
+	{
+		--Count.total;
+		if(IsOper(client_p))
+			--Count.oper;
+		if(IsInvisible(client_p))
+			--Count.invisi;
+	}
+
+	if(splitchecking && !splitmode)
+		check_splitmode(NULL);
 }
 
 
@@ -1005,7 +981,6 @@ free_exited_clients(void *unused)
 			dlinkDestroy(ptr, &dead_list);
 			continue;
 		}
-		release_client_state(target_p);
 		free_client(target_p);
 		dlinkDestroy(ptr, &dead_list);
 	}
