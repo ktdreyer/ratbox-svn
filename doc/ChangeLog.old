@@ -1,3 +1,10 @@
+*** 20010128_5 by jdc
+Commented out code which returns the actual IP when a user/client
+does a USERHOST on itself.  Seems pointless to me.  Return whatever
+the server says your host is.
+
+
+
 *** 20010128_4 by fl_
 - more minor fixes :)
 
