@@ -1,3 +1,7 @@
+*** 20010127_15 by androsyn
+Typo fix in the last vhost= change fixed.
+
+
 *** 20010127_14 by androsyn
 Finally fixed that damn /connect bug with vhosts...Now will somebody else
 test it :).
