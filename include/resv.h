@@ -27,6 +27,7 @@
 
 #define RESV_CHANNEL    0x0001
 #define RESV_NICK       0x0002
+#define RESV_NICKWILD   0x0004
 
 struct ResvEntry
 {

@@ -61,6 +61,9 @@ create_resv(char *name, char *reason, int flags)
 
     if(strlen(name) > NICKLEN*2)
       name[NICKLEN*2] = '\0';
+
+    if((strchr(name, '*') != NULL) || (strchr(name, '?') != NULL))
+      flags |= RESV_NICKWILD;
   }
 
   if(strlen(reason) > TOPICLEN)
@@ -171,8 +174,16 @@ find_nick_resv(char *name)
   {
     resv_p = ptr->data;
 
-    if(match(resv_p->name, name))
-      return 1;
+    if(resv_p->flags & RESV_NICKWILD)
+    {
+      if(match(resv_p->name, name))
+        return 1;
+    }
+    else
+    {
+      if(irccmp(resv_p->name, name) == 0)
+        return 1;
+    }
   }
 
   return 0;
