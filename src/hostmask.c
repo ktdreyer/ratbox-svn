@@ -44,7 +44,7 @@ static unsigned long hash_ipv4(struct irc_inaddr*, int);
  * Side effects: None
  * Comments: Called from parse_netmask
  */
-#if IPV6
+#ifdef IPV6
 static int
 try_parse_v6_netmask(const char *text, struct irc_inaddr *addr, int *b)
 {

@@ -22,7 +22,7 @@ enum
 {
  HM_HOST,
  HM_IPV4
-#if IPV6
+#ifdef IPV6
  ,HM_IPV6
 #endif
 };
