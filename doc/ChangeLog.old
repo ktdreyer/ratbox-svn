@@ -1,3 +1,8 @@
+*** 20010424_3 by jdc
+* Fixed implicit decl. of kill(2) (lacked signal.h include)
+
+
+
 *** 20010424_2 by androsyn
 /dev/poll now works.  Somebody should check and see if this fixes kqueue as well     
 
