@@ -36,7 +36,6 @@ SRCS =                          \
   vchannel.c                    \
   class.c                       \
   client.c                      \
-  dbuf.c                        \
   dline_conf.c                  \
   event.c                       \
   fdlist.c                      \

@@ -47,7 +47,6 @@
 #include "send.h"
 #include "whowas.h"
 #include "flud.h"
-#include "dbuf.h"
 
 #include <string.h>
 #include <stdlib.h>

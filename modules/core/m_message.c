@@ -554,7 +554,7 @@ int drone_attack(struct Client *sptr,struct Client *acptr)
 	       * DoS the client.
 	       * -Dianora
 	       */
-	      if(DBufLength(&acptr->sendQ) > (get_sendq(acptr)/2L))
+	      if(linebuf_len(&acptr->buf_sendq) > (get_sendq(acptr)/2L))
 		{
 		  if(acptr->drone_noticed == 1) /* tiny FSM */
 		    {
@@ -569,7 +569,7 @@ int drone_attack(struct Client *sptr,struct Client *acptr)
 		    }
 		}
 
-	      if(DBufLength(&acptr->sendQ) <= (get_sendq(acptr)/4L))
+	      if(linebuf_len(&acptr->buf_sendq) <= (get_sendq(acptr)/4L))
 		{
 		  if(acptr->drone_noticed == 2)
 		    {

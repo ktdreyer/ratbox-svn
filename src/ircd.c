@@ -612,8 +612,7 @@ int main(int argc, char *argv[])
 
   initialize_message_files();
 
-  dbuf_init();  /* set up some dbuf stuff to control paging */
-  linebuf_init();
+  linebuf_init();	/* set up some linebuf stuff to control paging */
   init_hash();
 
   clear_scache_hash_table();    /* server cache name table */

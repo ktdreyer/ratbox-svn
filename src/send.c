@@ -43,6 +43,7 @@
 #include <stdarg.h>
 #include <time.h>
 #include <assert.h>
+#include <sys/errno.h>
 
 #define NEWLINE "\r\n"
 #define LOG_BUFSIZE 2048
@@ -83,8 +84,8 @@ dead_link(struct Client *to, char *notice)
    * If because of BUFFERPOOL problem then clean dbuf's now so that
    * notices don't hurt operators below.
    */
-  DBufClear(&to->recvQ);
-  DBufClear(&to->sendQ);
+  linebuf_donebuf(&to->buf_recvq);
+  linebuf_donebuf(&to->buf_sendq);
   if (!IsPerson(to) && !IsUnknown(to) && !(to->flags & FLAGS_CLOSING))
     sendto_realops(notice, get_client_name(to, FALSE));
   
@@ -120,21 +121,20 @@ send_message(struct Client *to, char *msg, int len)
   if (IsDead(to))
     return 0; /* This socket has already been marked as dead */
 
-  if (DBufLength(&to->sendQ) > get_sendq(to))
+  if (linebuf_len(&to->buf_sendq) > get_sendq(to))
     {
       if (IsServer(to))
         sendto_realops("Max SendQ limit exceeded for %s: %d > %d",
-		       get_client_name(to, FALSE),
-		       DBufLength(&to->sendQ), get_sendq(to));
-
+          get_client_name(to, FALSE),
+          linebuf_len(&to->buf_sendq), get_sendq(to));
       if (IsClient(to))
         to->flags |= FLAGS_SENDQEX;
       return dead_link(to, "Max Sendq exceeded");
     }
   else
     {
-      if (len && !dbuf_put(&to->sendQ, msg, len))
-        return dead_link(to, "Buffer allocation error for %s");
+      if (len)
+          linebuf_put(&to->buf_sendq, msg, len);
     }
     /*
     ** Update statistics. The following is slightly incorrect
@@ -166,8 +166,7 @@ send_queued_write(int fd, void *data)
 {
   struct Client *to = data;
   const char *msg;
-  int len, rlen;
-  int more = NO;
+  int retlen;
 
   /*
   ** Once socket is marked dead, we cannot start writing to it,
@@ -182,39 +181,35 @@ send_queued_write(int fd, void *data)
     return;
   } /* if (IsDead(to)) */
 
-  while (DBufLength(&to->sendQ) > 0) {
-    msg = dbuf_map(&to->sendQ, &len);
-
-    /* Returns always len > 0 */
-    if ((rlen = deliver_it(to, msg, len)) < 0) {
-      dead_link(to,"Write error to %s, closing link");
+  /* Next, lets try to write some data */
+  if (linebuf_len(&to->buf_sendq)) {
+    retlen = linebuf_flush(to->fd, &to->buf_sendq);
+    if ((retlen < 0) && (ignoreErrno(errno))) {
+      /* we have a non-fatal error, so just continue */
+    } else if (retlen < 0) {
+      /* We have a fatal error */
+      dead_link(to, "Write error to %s, closing link");
       return;
-    }
-
-    dbuf_delete(&to->sendQ, rlen);
-    to->lastsq = DBufLength(&to->sendQ) / 1024;
-    if (rlen < len) {    
-      /* ..or should I continue until rlen==0? */
-      /* no... rlen==0 means the send returned EWOULDBLOCK... */
-      break;
-    }
-
-    if (DBufLength(&to->sendQ) == 0 && more) {
-      /*
-       * The sendQ is now emptry, to try send whats left
-       * XXX uhm, huh? :-) This is a leftover from ziplinks .. :(
-       *   -- adrian
-       */
-      if (!dbuf_put(&to->sendQ, msg, len)) {
-        dead_link(to, "Buffer allocation error for %s");
-        return;
+    } else if (retlen == 0) {
+      /* 0 bytes is an EOF .. */
+      dead_link(to, "EOF during write to %s, closing link");
+      return;
+    } else {
+      /* We have some data written .. update counters */
+      to->sendB += retlen;
+      me.sendB += retlen;
+      if (to->sendB > 1023) { 
+        to->sendK += (to->sendB >> 10);
+        to->sendB &= 0x03ff;        /* 2^10 = 1024, 3ff = 1023 */
+      } else if (me.sendB > 1023) { 
+        me.sendK += (me.sendB >> 10);
+        me.sendB &= 0x03ff;
       }
-    } /* if (DBufLength(&to->sendQ) == 0 && more) */
-  } /* while (DBufLength(&to->sendQ) > 0) */
+    }
+  }
 
-  /* return (IsDead(to)) ? -1 : 0; */
-  /* If we have any more data, reschedule a write */
-  if (more)
+  /* Finally, if we have any more data, reschedule a write */
+  if (linebuf_len(&to->buf_sendq))
       comm_setselect(fd, FDLIST_BUSYCLIENT, COMM_SELECT_WRITE,
         send_queued_write, to, 0);
 } /* send_queued_write() */

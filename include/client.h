@@ -44,12 +44,11 @@
 #ifndef INCLUDED_ircd_defs_h
 # include "ircd_defs.h"
 #endif
-#ifndef INCLUDED_dbuf_h
-#include "dbuf.h"
-#endif
 #ifndef INCLUDED_ircd_handler_h
 #include "ircd_handler.h"
 #endif
+
+#include "linebuf.h"
 
 #define HOSTIPLEN       16      /* Length of dotted quad form of IP        */
                                 /* - Dianora                               */
@@ -217,8 +216,10 @@ struct Client
   int               drone_noticed;
   char  buffer[CLIENT_BUFSIZE]; /* Incoming message buffer */
   short             lastsq;     /* # of 2k blocks when sendqueued called last*/
-  struct DBuf       sendQ;      /* Outgoing message queue--if socket full */
-  struct DBuf       recvQ;      /* Hold for data incoming yet to be parsed */
+
+  /* Send and recieve linebuf queues .. */
+  buf_head_t        buf_sendq;
+  buf_head_t        buf_recvq;
   /*
    * we want to use unsigned int here so the sizes have a better chance of
    * staying the same on 64 bit machines. The current trend is to use
@@ -328,7 +329,6 @@ struct Client
 #define FLAGS_PINGSENT     0x0001 /* Unreplied ping sent */
 #define FLAGS_DEADSOCKET   0x0002 /* Local socket is dead--Exiting soon */
 #define FLAGS_KILLED       0x0004 /* Prevents "QUIT" from being sent for this*/
-#define FLAGS_BLOCKED      0x0008 /* socket is in a blocked condition */
 #define FLAGS_REJECT_HOLD  0x0010 /* client has been klined */
 #define FLAGS_CLOSING      0x0020 /* set when closing to suppress errors */
 #define FLAGS_CHKACCESS    0x0040 /* ok to check clients access if set */

@@ -159,7 +159,7 @@ void serv_info(struct Client *cptr,char *name)
       if(IsAnyOper(cptr))
         sendto_one(cptr, Lformat, me.name, RPL_STATSLINKINFO,
                    name, get_client_name(acptr, TRUE),
-                   (int)DBufLength(&acptr->sendQ),
+                   (int)linebuf_len(&acptr->buf_sendq),
                    (int)acptr->sendM, (int)acptr->sendK,
                    (int)acptr->receiveM, (int)acptr->receiveK,
                    CurrentTime - acptr->firsttime,
@@ -169,7 +169,7 @@ void serv_info(struct Client *cptr,char *name)
         {
           sendto_one(cptr, Lformat, me.name, RPL_STATSLINKINFO,
                      name, get_client_name(acptr, HIDEME),
-                     (int)DBufLength(&acptr->sendQ),
+                     (int)linebuf_len(&acptr->buf_sendq),
                      (int)acptr->sendM, (int)acptr->sendK,
                      (int)acptr->receiveM, (int)acptr->receiveK,
                      CurrentTime - acptr->firsttime,

@@ -31,7 +31,6 @@
 
 struct Client;
 
-extern int dopacket(struct Client* client, char* buf, size_t len);
 extern int client_dopacket(struct Client* client, char* buf, size_t len);
 
 #endif /* INCLUDED_packet_h */

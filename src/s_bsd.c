@@ -29,6 +29,7 @@
 #include "irc_string.h"
 #include "ircdauth.h"
 #include "ircd.h"
+#include "linebuf.h"
 #include "list.h"
 #include "listener.h"
 #include "numeric.h"
@@ -217,66 +218,6 @@ int set_non_blocking(int fd)
   return 1;
 }
 
-/*
- * deliver_it
- *      Attempt to send a sequence of bytes to the connection.
- *      Returns
- *
- *      < 0     Some fatal error occurred, (but not EWOULDBLOCK).
- *              This return is a request to close the socket and
- *              clean up the link.
- *      
- *      >= 0    No real error occurred, returns the number of
- *              bytes actually transferred. EWOULDBLOCK and other
- *              possibly similar conditions should be mapped to
- *              zero return. Upper level routine will have to
- *              decide what to do with those unwritten bytes...
- *
- *      *NOTE*  alarm calls have been preserved, so this should
- *              work equally well whether blocking or non-blocking
- *              mode is used...
- */
-int deliver_it(struct Client* cptr, const char* str, int len)
-{
-  int   retval;
-
-  retval = send(cptr->fd, str, len, 0);
-  /*
-  ** Convert WOULDBLOCK to a return of "0 bytes moved". This
-  ** should occur only if socket was non-blocking. Note, that
-  ** all is Ok, if the 'write' just returns '0' instead of an
-  ** error and errno=EWOULDBLOCK.
-  **
-  */
-  if (retval < 0 && (errno == EWOULDBLOCK || errno == EAGAIN ||
-                     errno == ENOBUFS))
-    {
-      retval = 0;
-      cptr->flags |= FLAGS_BLOCKED;
-      return(retval);  /* Just get out now... */
-    }
-  else if (retval > 0)
-    {
-      cptr->flags &= ~FLAGS_BLOCKED;
-    }
-
-  if (retval > 0)
-    {
-      cptr->sendB += retval;
-      me.sendB += retval;
-      if (cptr->sendB > 1023)
-        {
-          cptr->sendK += (cptr->sendB >> 10);
-          cptr->sendB &= 0x03ff;        /* 2^10 = 1024, 3ff = 1023 */
-        }
-      else if (me.sendB > 1023)
-        {
-          me.sendK += (me.sendB >> 10);
-          me.sendB &= 0x03ff;
-        }
-    }
-  return(retval);
-}
 
 /*
  * close_connection
@@ -362,8 +303,8 @@ void close_connection(struct Client *cptr)
     cptr->fd = -1;
   }
 
-  DBufClear(&cptr->sendQ);
-  DBufClear(&cptr->recvQ);
+  linebuf_donebuf(&cptr->buf_sendq);
+  linebuf_donebuf(&cptr->buf_recvq);
   memset(cptr->passwd, 0, sizeof(cptr->passwd));
   /*
    * clean up extra sockets from P-lines which have been discarded.
@@ -447,41 +388,8 @@ int parse_client_queued(struct Client* cptr)
 {
   int dolen  = 0;
 
-  while (DBufLength(&cptr->recvQ) && !NoNewLine(cptr) &&
-         ((cptr->status < STAT_UNKNOWN) || (cptr->since - CurrentTime < 10))) {
-    /*
-     * If it has become registered as a Server
-     * then skip the per-message parsing below.
-     */
-    if (IsServer(cptr)) {
-      /* 
-       * This is actually useful, but it needs the ZIP_FIRST
-       * kludge or it will break zipped links  -orabidoo
-       */
-      dolen = dbuf_get(&cptr->recvQ, readBuf, READBUF_SIZE);
-
-      if (0 == dolen)
-        break;
-      return dopacket(cptr, readBuf, dolen);
-    }
-    dolen = dbuf_getmsg(&cptr->recvQ, readBuf, READBUF_SIZE);
-    /*
-     * Devious looking...whats it do ? well..if a client
-     * sends a *long* message without any CR or LF, then
-     * dbuf_getmsg fails and we pull it out using this
-     * loop which just gets the next 512 bytes and then
-     * deletes the rest of the buffer contents.
-     * -avalon
-     */
-    if (0 == dolen) {
-      if (DBufLength(&cptr->recvQ) < 510) {
-        cptr->flags |= FLAGS_NONL;
-        break;
-      }
-      DBufClear(&cptr->recvQ);
-      break;
-    }
-    else if (CLIENT_EXITED == client_dopacket(cptr, readBuf, dolen))
+  while ((dolen = linebuf_get(&cptr->buf_recvq, readBuf, READBUF_SIZE)) > 0) {
+    if (CLIENT_EXITED == client_dopacket(cptr, readBuf, dolen))
       return CLIENT_EXITED;
   }
   return 1;
@@ -551,30 +459,19 @@ read_packet(int fd, void *data)
   cptr->flags &= ~(FLAGS_PINGSENT | FLAGS_NONL);
 
   /*
-   * For server connections, we process as many as we can without
-   * worrying about the time of day or anything :)
+   * Before we even think of parsing what we just read, stick
+   * it on the end of the receive queue and do it when its
+   * turn comes around.
    */
-  if (PARSE_AS_SERVER(cptr)) {
-    done = dopacket(cptr, readBuf, length);
-  } else {
-    /*
-     * Before we even think of parsing what we just read, stick
-     * it on the end of the receive queue and do it when its
-     * turn comes around.
-     */
-    if (!dbuf_put(&cptr->recvQ, readBuf, length)) {
-      exit_client(cptr, cptr, cptr, "dbuf_put fail");
-      return;
-    }
-    
-    if (IsPerson(cptr) &&
-        (ConfigFileEntry.no_oper_flood && !IsAnyOper(cptr)) &&
-        DBufLength(&cptr->recvQ) > CLIENT_FLOOD) {
-      exit_client(cptr, cptr, cptr, "Excess Flood");
-      return;
-    }
-    parse_client_queued(cptr);
+  linebuf_parse(&cptr->buf_recvq, readBuf, length);
+   
+  if (IsPerson(cptr) &&
+      (ConfigFileEntry.no_oper_flood && !IsAnyOper(cptr)) &&
+      linebuf_len(&cptr->buf_recvq) > CLIENT_FLOOD) {
+    exit_client(cptr, cptr, cptr, "Excess Flood");
+    return;
   }
+  parse_client_queued(cptr);
 #ifdef REJECT_HOLD
   /* Silence compiler warnings -- adrian */
 finish:
