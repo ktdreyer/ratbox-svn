@@ -44,6 +44,7 @@
 #include "msg.h"
 #include "fileio.h"
 #include "s_serv.h"
+#include "hash.h"
 
 #include <assert.h>
 #include <string.h>
@@ -61,23 +62,40 @@ extern struct ConfItem *glines;
 static GLINE_PENDING *pending_glines;
 
 /* internal functions */
-static void add_gline(struct ConfItem *);
-static void log_gline_request(const char*,const char*,const char*,
-                              const char* oper_server,
-                              const char *,const char *,const char *);
+void set_local_gline(
+		     const char *oper_nick,
+		     const char *oper_user,
+		     const char *oper_host,
+		     const char *oper_server,
+		     const char *user,
+		     const char *host,
+		     const char *reason);
+void add_gline(struct ConfItem *);
+void log_gline_request(const char*,const char*,const char*,
+		       const char* oper_server,
+		       const char *,const char *,const char *);
 
-static void log_gline(struct Client *,const char *,GLINE_PENDING *,
-                      const char *, const char *,const char *,
-                      const char* oper_server,
-                      const char *,const char *,const char *);
+void log_gline(struct Client *,GLINE_PENDING *,
+	       const char *, const char *,const char *,
+	       const char* oper_server,
+	       const char *,const char *,const char *);
 
 
-static void expire_pending_glines();
+void expire_pending_glines();
 
-static int majority_gline(struct Client*, const char *,const char *,
-			  const char *, 
-                          const char* serv_name,
-                          const char *,const char *,const char *); 
+void
+check_majority_gline(struct Client *sptr,
+		     const char *oper_nick, const char *oper_user,
+		     const char *oper_host, const char *oper_server,
+		     const char *user, const char *host, const char *reason);
+
+int majority_gline(struct Client *sptr,
+		   const char *oper_nick, const char *oper_username,
+		   const char *oper_host, 
+		   const char *oper_server,
+		   const char *user,
+		   const char *host,
+		   const char *reason); 
 
 struct Message gline_msgtab = {
     MSG_GLINE, 0, 1, MFLG_SLOW, 0,
@@ -112,25 +130,19 @@ char *_version = "20001122";
  * GLINES is not defined.
  */
 
-int     mo_gline(struct Client *cptr,
-                struct Client *sptr,
-                int parc,
-                char *parv[])
+int mo_gline(struct Client *cptr,
+	     struct Client *sptr,
+	     int parc,
+	     char *parv[])
 {
-  char *oper_name = NULL;              /* nick of oper requesting GLINE */
-  char *oper_username = NULL;          /* username of oper requesting GLINE */
-  char *oper_host = NULL;              /* hostname of oper requesting GLINE */
-  const char* oper_server = NULL;      /* server of oper requesting GLINE */
-  char *user = NULL, *host = NULL;     /* user and host of GLINE "victim" */
-  char *reason = NULL;                 /* reason for "victims" demise */
+  char *user = NULL;
+  char *host = NULL;	              /* user and host of GLINE "victim" */
+  const char *reason = NULL;          /* reason for "victims" demise */
   char *p;
-  register char tmpch;
-  register int nonwild;
-  char buffer[IRCD_BUFSIZE];
-  const char *current_date;
+  char tmpch;
+  int nonwild;
   char tempuser[USERLEN + 2];
   char temphost[HOSTLEN + 1];
-  struct ConfItem *aconf;
 
   if (ConfigFileEntry.glines)
     {
@@ -254,24 +266,21 @@ int     mo_gline(struct Client *cptr,
 	}
 			
       reason = parv[2];
+
+      /* If at least 3 opers agree this user should be G lined then do it */
+      check_majority_gline(sptr,
+			   sptr->name,
+			   (const char *)sptr->user,
+			   sptr->host,
+			   me.name,
+			   user,
+			   host,
+			   reason);
 	  
-      if (sptr->user && sptr->user->server)
-	oper_server = sptr->user->server;
-      else
-	return 0;
-	  
-      oper_name     = sptr->name;
-      oper_username = sptr->username;
-      oper_host     = sptr->host;
-			
-			
       sendto_cap_serv_butone(CAP_GLN,
-			     NULL, ":%s GLINE %s %s %s %s %s %s :%s",
+			     NULL, ":%s GLINE %s %s %s :%s",
 			     me.name,
-			     oper_name,
-			     oper_username,
-			     oper_host,
-			     oper_server,
+			     sptr->name,
 			     user,
 			     host,
 			     reason);
@@ -303,52 +312,61 @@ int     ms_gline(struct Client *cptr,
                 int parc,
                 char *parv[])
 {
-  char *oper_name = NULL;              /* nick of oper requesting GLINE */
-  char *oper_username = NULL;          /* username of oper requesting GLINE */
-  char *oper_host = NULL;              /* hostname of oper requesting GLINE */
-  const char* oper_server = NULL;      /* server of oper requesting GLINE */
-  char *user = NULL, *host = NULL;     /* user and host of GLINE "victim" */
-  char *reason = NULL;                 /* reason for "victims" demise */
-  char *p;
-  register char tmpch;
-  register int nonwild;
-  char buffer[IRCD_BUFSIZE];
-  const char *current_date;
-  char tempuser[USERLEN + 2];
-  char temphost[HOSTLEN + 1];
-  struct ConfItem *aconf;
-
+  struct Client *rcptr;
+  const char *oper_nick = NULL;        /* nick of oper requesting GLINE */
+  const char *oper_user = NULL;        /* username of oper requesting GLINE */
+  const char *oper_host = NULL;        /* hostname of oper requesting GLINE */
+  const char *oper_server = NULL;      /* server of oper requesting GLINE */
+  const char *user = NULL;
+  const char *host = NULL;             /* user and host of GLINE "victim" */
+  const char *reason = NULL;           /* reason for "victims" demise */
 
   if(!IsServer(sptr))
     return(0);
 
   /* Always good to be paranoid about arguments */
-  if(parc < 8)
+  if(parc < 5)
     return 0;
 
-  oper_name = parv[1];
-  oper_username = parv[2];
-  oper_host = parv[3];
-  oper_server = parv[4];
-  user = parv[5];
-  host = parv[6];
-  reason = parv[7];
+  oper_nick = parv[1];
+  user = parv[2];
+  host = parv[3];
+  reason = parv[4];
 
-  sendto_serv_butone(sptr, ":%s GLINE %s %s %s %s %s %s :%s",
+  if ((rcptr = hash_find_client(oper_nick,(struct Client *)NULL)))
+    {
+      if(!IsPerson(rcptr))
+	return 0;
+    }
+  else
+    return 0;
+
+  if ((oper_user = (const char *)rcptr->user) == NULL)
+    return 0;
+
+  if ((oper_host = rcptr->host) == NULL)
+    return 0;
+
+  if (rcptr->user && rcptr->user->server)
+    oper_server = rcptr->user->server;
+  else
+    return 0;
+
+  sendto_serv_butone(sptr, ":%s GLINE %s %s %s :%s",
 		     sptr->name,
-		     oper_name,oper_username,oper_host,oper_server,
+		     oper_nick,
 		     user,
 		     host,
 		     reason);
 
   if (ConfigFileEntry.glines)
     {
-      log_gline_request(oper_name,oper_username,oper_host,oper_server,
+      log_gline_request(oper_nick,oper_user,oper_host,oper_server,
 			user,host,reason);
 
       sendto_realops("%s!%s@%s on %s is requesting gline for [%s@%s] [%s]",
-		     oper_name,
-		     oper_username,
+		     oper_nick,
+		     oper_user,
 		     oper_host,
 		     oper_server,
 		     user,
@@ -356,43 +374,90 @@ int     ms_gline(struct Client *cptr,
 		     reason);
 
       /* If at least 3 opers agree this user should be G lined then do it */
-      if(majority_gline(sptr,
-			oper_name,
-			oper_username,
-			oper_host,
-			oper_server,
-			user,
-			host,
-			reason))
-	{
-	  current_date = smalldate((time_t) 0);
-          
-	  aconf = make_conf();
-	  aconf->status = CONF_KILL;
-	  DupString(aconf->host, host);
-
-	  ircsprintf(buffer, "%s (%s)",reason,current_date);
-      
-	  DupString(aconf->passwd, buffer);
-	  DupString(aconf->name, user);
-	  aconf->hold = CurrentTime + ConfigFileEntry.gline_time;
-	  add_gline(aconf);
-      
-	  sendto_realops("%s!%s@%s on %s has triggered gline for [%s@%s] [%s]",
-			 oper_name,
-			 oper_username,
-			 oper_host,
-			 oper_server,
-			 user,
-			 host,
-			 reason);
-      
-	  check_klines();
-
-	  return 0;
-	}
+      check_majority_gline(sptr,
+			   oper_nick,
+			   oper_user,
+			   oper_host,
+			   oper_server,
+			   user,
+			   host,
+			   reason);
     }
   return 0;
+}
+
+/*
+ * check_majority_gline
+ *
+ * inputs	- ...
+ * output	- NONE
+ * side effects	- if a majority agree, place the gline locally
+ */
+void
+check_majority_gline(struct Client *sptr,
+		     const char *oper_nick,
+		     const char *oper_user,
+		     const char *oper_host,
+		     const char *oper_server,
+		     const char *user,
+		     const char *host,
+		     const char *reason)
+{
+  if(majority_gline(sptr,oper_nick,oper_user, oper_host,
+		    oper_server, user, host, reason))
+    set_local_gline(oper_nick,oper_user,oper_host,oper_server,
+		    user,host,reason);
+}
+
+/*
+ * set_local_gline
+ *
+ * inputs	- pointer to oper nick
+ * 		- pointer to oper username
+ * 		- pointer to oper host
+ *		- pointer to oper server
+ *		- pointer to victim user
+ *		- pointer to victim host
+ *		- pointer reason
+ * output	- NONE
+ * side effects	-
+ */
+void set_local_gline(const char *oper_nick,
+		     const char *oper_user,
+		     const char *oper_host,
+		     const char *oper_server,
+		     const char *user,
+		     const char *host,
+		     const char *reason)
+{
+  char buffer[IRCD_BUFSIZE];
+  struct ConfItem *aconf;
+  const char *current_date;
+
+  current_date = smalldate((time_t) 0);
+          
+  aconf = make_conf();
+  aconf->status = CONF_KILL;
+  DupString(aconf->host, host);
+
+  ircsprintf(buffer, "%s (%s)",reason,current_date);
+      
+  DupString(aconf->passwd, buffer);
+  DupString(aconf->name, (char *)user);
+  DupString(aconf->host, (char *)host);
+  aconf->hold = CurrentTime + ConfigFileEntry.gline_time;
+  add_gline(aconf);
+      
+  sendto_realops("%s!%s@%s on %s has triggered gline for [%s@%s] [%s]",
+		 oper_nick,
+		 oper_user,
+		 oper_host,
+		 oper_server,
+		 user,
+		 host,
+		 reason);
+      
+  check_klines();
 }
 
 
@@ -400,14 +465,15 @@ int     ms_gline(struct Client *cptr,
  * log_gline_request()
  *
  */
-static void log_gline_request(
-                      const char *oper_nick,
-                      const char *oper_user,
-                      const char *oper_host,
-                      const char* oper_server,
-                      const char *user,
-                      const char *host,
-                      const char *reason)
+void
+log_gline_request(
+		  const char *oper_nick,
+		  const char *oper_user,
+		  const char *oper_host,
+		  const char* oper_server,
+		  const char *user,
+		  const char *host,
+		  const char *reason)
 {
   char        buffer[1024];
   char        filenamebuf[PATH_MAX + 1];
@@ -443,16 +509,16 @@ static void log_gline_request(
  * log_gline()
  *
  */
-static void log_gline(struct Client *sptr,
-                      const char *parv0,
-                      GLINE_PENDING *gline_pending_ptr,
-                      const char *oper_nick,
-                      const char *oper_user,
-                      const char *oper_host,
-                      const char *oper_server,
-                      const char *user,
-                      const char *host,
-                      const char *reason)
+void
+log_gline(struct Client *sptr,
+	  GLINE_PENDING *gline_pending_ptr,
+	  const char *oper_nick,
+	  const char *oper_user,
+	  const char *oper_host,
+	  const char *oper_server,
+	  const char *user,
+	  const char *host,
+	  const char *reason)
 {
   char         buffer[1024];
   char         filenamebuf[PATH_MAX + 1];
@@ -474,8 +540,6 @@ static void log_gline(struct Client *sptr,
   ircsprintf(buffer,"#Gline for %s@%s %s added by the following\n",
                    user,host,timebuffer);
 
-  /*
-   */
   if (safe_write(sptr, filenamebuf, out, buffer))
     {
       fbclose(out);
@@ -569,8 +633,6 @@ struct ConfItem *find_gkill(struct Client* cptr, char* username)
  *              - username
  * output       - pointer to struct ConfItem if user@host glined
  * side effects -
- *  WARNING, no sanity checking on length of name,host etc.
- * thats expected to be done by caller.... *sigh* -Dianora
  */
 
 struct ConfItem* find_is_glined(const char* host, const char* name)
@@ -582,8 +644,7 @@ struct ConfItem* find_is_glined(const char* host, const char* name)
   /* gline handling... exactly like temporary klines 
    * I expect this list to be very tiny. (crosses fingers) so CPU
    * time in this, should be minimum.
-   * -Dianora
-  */
+   */
 
   if(glines)
     {
@@ -633,8 +694,6 @@ struct ConfItem* find_is_glined(const char* host, const char* name)
  * side effects - 
  *
  * report pending glines, and placed glines.
- * 
- * - Dianora              
  */
 void report_glines(struct Client *sptr)
 {
@@ -753,7 +812,8 @@ void report_glines(struct Client *sptr)
  * enough "votes" in the time period allowed
  */
 
-static void expire_pending_glines()
+void
+expire_pending_glines()
 {
   GLINE_PENDING *gline_pending_ptr;
   GLINE_PENDING *last_gline_pending_ptr;
@@ -788,13 +848,14 @@ static void expire_pending_glines()
     }
 }
 
-static void add_new_majority_gline(const char* oper_nick,
-                             const char* oper_user,
-                             const char* oper_host,
-                             const char* oper_server,
-                             const char* user,
-                             const char* host,
-                             const char* reason)
+void
+add_new_majority_gline(const char* oper_nick,
+		       const char* oper_user,
+		       const char* oper_host,
+		       const char* oper_server,
+		       const char* user,
+		       const char* host,
+		       const char* reason)
 {
   GLINE_PENDING* pending = (GLINE_PENDING*) MyMalloc(sizeof(GLINE_PENDING));
   assert(0 != pending);
@@ -838,15 +899,15 @@ static void add_new_majority_gline(const char* oper_nick,
  *
  *      Expire old entries.
  */
-
-static int majority_gline(struct Client *sptr,
-                          const char *oper_nick,
-                          const char *oper_user,
-                          const char *oper_host,
-                          const char* oper_server,
-                          const char *user,
-                          const char *host,
-                          const char *reason)
+int
+majority_gline(struct Client *sptr,
+	       const char *oper_nick,
+	       const char *oper_user,
+	       const char *oper_host,
+	       const char* oper_server,
+	       const char *user,
+	       const char *host,
+	       const char *reason)
 {
   GLINE_PENDING* gline_pending_ptr;
 
@@ -895,7 +956,7 @@ static int majority_gline(struct Client *sptr,
               if(find_is_klined(host, user, 0))
                 return NO;
 
-              log_gline(sptr,sptr->name,gline_pending_ptr,
+              log_gline(sptr,gline_pending_ptr,
                         oper_nick,oper_user,oper_host,oper_server,
                         user,host,reason);
               return YES;
@@ -926,13 +987,10 @@ static int majority_gline(struct Client *sptr,
  * inputs       - pointer to struct ConfItem
  * output       - none
  * Side effects - links in given struct ConfItem into gline link list
- *
- * Identical to add_temp_kline code really.
- *
- * -Dianora
  */
 
-static void add_gline(struct ConfItem *aconf)
+void
+add_gline(struct ConfItem *aconf)
 {
   aconf->next = glines;
   glines = aconf;
@@ -945,7 +1003,8 @@ static void add_gline(struct ConfItem *aconf)
  * output       - 1 if successfully removed, otherwise 0
  * side effects -
  */
-int remove_gline_match(const char* user, const char* host)
+int
+remove_gline_match(const char* user, const char* host)
 {
   struct ConfItem *kill_list_ptr;     /* used for the link list only */
   struct ConfItem *last_list_ptr;
