@@ -193,7 +193,7 @@ extern void set_channel_mode_flags( char flags_ptr[4][2],
 #define MODE_EXCEPTION  0x0800
 #define MODE_INVEX	0x2000
 #define MODE_HIDEOPS    0x4000
-#define MODE_LIMIT      0x8000  /* was 0x8000 */
+#define MODE_LIMIT      0x8000
 
 /*
  * mode flags which take another parameter (With PARAmeterS)
@@ -226,8 +226,8 @@ extern void set_channel_mode_flags( char flags_ptr[4][2],
 #define PubChannel(x)           ((!x) || ((x)->mode.mode &\
                                  (MODE_PRIVATE | MODE_SECRET)) == 0)
 
-#define IsMember(blah,chan) ((blah && blah->user && \
-                dlinkFind(&blah->user->channel, chan)) ? 1 : 0)
+#define IsMember(who, chan) ((who && who->user && \
+                dlinkFind(&who->user->channel, chan)) ? 1 : 0)
 
 #define IsChannelName(name) ((name) && (*(name) == '#' || *(name) == '&'))
 

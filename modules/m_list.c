@@ -3,8 +3,6 @@
  *   Copyright (C) 1990 Jarkko Oikarinen and
  *                      University of Oulu, Co Center
  *
- * $Id$ 
- *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
  *   the Free Software Foundation; either version 1, or (at your option)
@@ -18,6 +16,8 @@
  *   You should have received a copy of the GNU General Public License
  *   along with this program; if not, write to the Free Software
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *
+ *  $Id$
  */
 #include "tools.h"
 #include "handlers.h"
@@ -63,7 +63,7 @@ _moddeinit(void)
 {
   mod_del_cmd(&list_msgtab);
 }
-char *_version = "20001122";
+char *_version = "20010522";
 #endif
 static int list_all_channels(struct Client *source_p);
 static int list_named_channel(struct Client *source_p,char *name);
@@ -210,7 +210,7 @@ static int list_all_channels(struct Client *source_p)
  */
 static int list_named_channel(struct Client *source_p,char *name)
 {
-  char  vname[CHANNELLEN+NICKLEN+4];
+  char id_and_topic[TOPICLEN+NICKLEN+6]; /* <!!>, space and null */
   dlink_node *ptr;
   struct Channel *chptr;
   struct Channel *root_chptr;
@@ -224,7 +224,7 @@ static int list_named_channel(struct Client *source_p,char *name)
       
   if(*name == '\0')
     {
-      sendto_one(source_p,form_str(ERR_NOSUCHNICK),me.name, source_p->name, name);
+      sendto_one(source_p, form_str(ERR_NOSUCHNICK),me.name, source_p->name, name);
       sendto_one(source_p, form_str(RPL_LISTEND), me.name, source_p->name);
       return 0;
     }
@@ -233,20 +233,19 @@ static int list_named_channel(struct Client *source_p,char *name)
 
   if (chptr == NULL)
     {
-      sendto_one(source_p,form_str(ERR_NOSUCHNICK),me.name, source_p->name, name);
+      sendto_one(source_p, form_str(ERR_NOSUCHNICK),me.name, source_p->name, name);
       sendto_one(source_p, form_str(RPL_LISTEND), me.name, source_p->name);
       return 0;
     }
 
   if (HasVchans(chptr))
-    ircsprintf(vname, "%s<!%s>", chptr->chname,
-               pick_vchan_id(chptr));
+    ircsprintf(id_and_topic, "<!%s> %s", pick_vchan_id(chptr), chptr->topic);
   else
-    ircsprintf(vname, "%s", chptr->chname);
-               
+    ircsprintf(id_and_topic, "%s", chptr->topic);
+
   if (ShowChannel(source_p, chptr))
     sendto_one(source_p, form_str(RPL_LIST), me.name, source_p->name,
-               vname, chptr->users, chptr->topic);
+               chptr->chname, chptr->users, id_and_topic);
       
   /* Deal with subvchans */
   
@@ -257,11 +256,9 @@ static int list_named_channel(struct Client *source_p,char *name)
       if (ShowChannel(source_p, tmpchptr))
 	{
           root_chptr = find_bchan(tmpchptr);
-          if(root_chptr != NULL)
-            ircsprintf(vname, "%s<!%s>", root_chptr->chname,
-                       pick_vchan_id(tmpchptr));
+          ircsprintf(id_and_topic, "<!%s> %s", pick_vchan_id(tmpchptr), tmpchptr->topic);
           sendto_one(source_p, form_str(RPL_LIST), me.name, source_p->name,
-                     vname, tmpchptr->users, tmpchptr->topic);
+                     root_chptr->chname, tmpchptr->users, id_and_topic);
         }
     }
   
@@ -277,28 +274,30 @@ static int list_named_channel(struct Client *source_p,char *name)
  * ouput	- none
  * side effects -
  */
-static void list_one_channel(struct Client *source_p,struct Channel *chptr)
+static void list_one_channel(struct Client *source_p, struct Channel *chptr)
 {
   struct Channel *root_chptr;
-  char  vname[CHANNELLEN+NICKLEN+5]; /* <!!>, and null */
+  char  id_and_topic[TOPICLEN+NICKLEN+6]; /* <!!>, plus space and null */
 
-  if( (IsVchan(chptr) || HasVchans(chptr)) )
+  if(IsVchan(chptr) || HasVchans(chptr))
     {
       root_chptr = find_bchan(chptr);
       if(root_chptr != NULL)
-	{
-	  ircsprintf(vname, "%s<!%s>", root_chptr->chname,
-		     pick_vchan_id(chptr));
-	}
+        {
+          ircsprintf(id_and_topic, "<!%s> %s", pick_vchan_id(chptr), root_chptr->topic);
+          sendto_one(source_p, form_str(RPL_LIST), me.name, source_p->name,
+                     root_chptr->chname, chptr->users, id_and_topic);
+        }
       else
-	ircsprintf(vname, "%s<!%s>", chptr->chname, pick_vchan_id(chptr));
+        {
+          ircsprintf(id_and_topic, "<!%s> %s", pick_vchan_id(chptr), chptr->topic);
+          sendto_one(source_p, form_str(RPL_LIST), me.name, source_p->name,
+                     chptr->chname, chptr->users, id_and_topic);     
+        }
     }
   else
-    ircsprintf(vname, "%s", chptr->chname);
-
-
-  sendto_one(source_p, form_str(RPL_LIST), me.name, source_p->name,
-	     vname, chptr->users, chptr->topic);
+    {
+      sendto_one(source_p, form_str(RPL_LIST), me.name, source_p->name,
+                 chptr->chname, chptr->users, chptr->topic);
+    }
 }
-
-
