@@ -61,9 +61,9 @@ reject_exit(void *unused)
 		 * sendto_one() generates a write error, and then a client
 		 * ends up on the dead_list and the abort_list --fl
 		 */
-		SetClosing(client_p);
 		if(!IsIOError(client_p))
-			sendto_one(client_p, "ERROR :Closing Link: %s (%s)", client_p->host, "*** Banned (cache)");
+			sendto_one(client_p, "ERROR :Closing Link: %s (*** Banned (cache))", client_p->host);
+
  	  	close_connection(client_p);
         	SetDead(client_p);
         	dlinkAddAlloc(client_p, &dead_list);
@@ -159,6 +159,7 @@ check_reject(struct Client *client_p)
 		{
 			ServerStats->is_rej++;
 			SetReject(client_p);
+			SetClosing(client_p);
 			dlinkMoveNode(&client_p->localClient->tnode, &unknown_list, &delay_exit);
 			return 1;
 		}

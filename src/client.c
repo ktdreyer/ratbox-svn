@@ -1567,7 +1567,7 @@ exit_client(struct Client *client_p,	/* The local client originating the
 		else if(IsServer(source_p))
 			return exit_local_server(client_p, source_p, from, comment);
 		/* IsUnknown || IsConnecting || IsHandShake */
-		else
+		else if(!IsReject(source_p))
 			return exit_unknown_client(client_p, source_p, from, comment);
 	} 
 	else 
