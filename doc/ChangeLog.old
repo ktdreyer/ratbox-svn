@@ -1,3 +1,12 @@
+*** 20001103_3 by adrian
+
+Call init_netio() earlier than anything which could
+call comm_setselect(). This is why the resolver wasn't
+working with kqueue, because we didn't have the kqueue fd open
+at the time the resolver fd was comm_setselect()ed .
+
+
+
 *** 20001103_2 by adrian
 
 
