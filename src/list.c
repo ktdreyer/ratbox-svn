@@ -250,15 +250,15 @@ void _free_link(struct SLink *lp)
     }
 }
 
-aClass *make_class()
+struct Class *make_class()
 {
-  aClass        *tmp;
+  struct Class        *tmp;
 
-  tmp = (aClass *)MyMalloc(sizeof(aClass));
+  tmp = (struct Class *)MyMalloc(sizeof(struct Class));
   return tmp;
 }
 
-void free_class(aClass *tmp)
+void free_class(struct Class *tmp)
 {
   MyFree((char *)tmp);
 }
