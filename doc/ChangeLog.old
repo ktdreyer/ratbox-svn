@@ -1,3 +1,12 @@
+*** 20010128_2 by fl_
+- this renders kill_client() redundant, but basically we werent sending
+  kills to every server, which was causing problems with hyb6 as we
+  could introduce a nick twice..
+- we now use sendto_cap_serv_butone() and sendto_nocap_serv_butone()
+- we still use IDs where its possible
+- im tired now :P
+
+
 *** 20010128_1 by davidt
 - Fix m_client.c / m_nick.c to mark clients introduced by a lazylink as known
   by that lazylink (caused all kills of lazylink clients to be replaced by
