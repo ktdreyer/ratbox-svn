@@ -1,3 +1,10 @@
+*** 20010420_8 by jdc
+* Added dns_query_host and dns_query_port options to TODO list.
+  These would be fantastic; some of us always wish to query on
+  port 53 on a certain IP, ya know.  :-)
+
+
+
 *** 20010420_7 by a1kmm
 - Removed wrong log message that was in with the real one.
 
