@@ -114,6 +114,7 @@ make_auth_request(struct Client *client)
 	client->localClient->auth_request = request;
 	request->fd = -1;
 	request->client = client;
+	request->dns_query = 0;
 	request->timeout = CurrentTime + ConfigFileEntry.connect_timeout;
 	return request;
 }
@@ -349,8 +350,8 @@ start_auth(struct Client *client)
 
 	sendheader(client, REPORT_DO_DNS);
 
-	auth->dns_query = lookup_ip(client->sockhost, client->localClient->ip.ss_family, auth_dns_callback, auth);
 	SetDNSPending(auth);
+	auth->dns_query = lookup_ip(client->sockhost, client->localClient->ip.ss_family, auth_dns_callback, auth);
 
 	if(ConfigFileEntry.disable_auth == 0)
 		start_auth_query(auth);
