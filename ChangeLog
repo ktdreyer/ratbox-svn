@@ -1,3 +1,17 @@
+androsyn    2004/09/21 15:05:26 EDT	(20040921_1)
+
+  Modified files:
+    adns                 query.c 
+    src                  s_auth.c 
+  Log:
+  minor cosmetic cleanups
+  
+  Revision  Changes    Path
+  1.25      +2 -4      ircd-ratbox/adns/query.c
+  7.186     +0 -4      ircd-ratbox/src/s_auth.c
+
+
+
 androsyn    2004/09/21 14:24:38 EDT	(20040921_0)
 
   Modified files:
