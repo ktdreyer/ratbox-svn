@@ -135,7 +135,6 @@ dlink_list oper_list;           /* our opers, duplicated in lclient_list */
 dlink_list dead_list;           /* clients that have exited, to be freed */
 
 dlink_list lazylink_channels;   /* known about lazylink channels on HUB */
-dlink_list lazylink_nicks;	/* known about lazylink nicks on HUB */
 
 int callbacks_called;          /* A measure of server load... */
 
@@ -253,7 +252,7 @@ init_sys(void)
 #endif        /* RLIMIT_FD_MAX */
 }
 
-int
+static int
 make_daemon(void)
 {
 #ifndef VMS
@@ -599,7 +598,6 @@ int main(int argc, char *argv[])
   memset(&global_serv_list, 0, sizeof(global_serv_list));
   memset(&oper_list, 0, sizeof(oper_list));
   memset(&lazylink_channels, 0, sizeof(lazylink_channels));
-  memset(&lazylink_nicks, 0, sizeof(lazylink_nicks));
 
   lclient_list.head = lclient_list.tail = NULL;
   oper_list.head = oper_list.tail = NULL;

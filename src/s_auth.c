@@ -139,7 +139,7 @@ static struct AuthRequest* make_auth_request(struct Client* client)
 /*
  * free_auth_request - cleanup auth request allocations
  */
-void free_auth_request(struct AuthRequest* request)
+static void free_auth_request(struct AuthRequest* request)
 {
   MyFree(request);
 }

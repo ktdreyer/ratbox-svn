@@ -334,7 +334,6 @@ extern void             free_conf(struct ConfItem*);
 
 extern void             read_conf_files(int cold);
 
-extern void             conf_dns_lookup(struct ConfItem* aconf);
 extern int              attach_conf(struct Client*, struct ConfItem *);
 extern int              attach_confs(struct Client* client, 
                                      const char* name, int statmask);
@@ -345,7 +344,6 @@ extern int              check_client(struct Client* client_p, struct Client *sou
 extern void             det_confs_butmask (struct Client *, int);
 extern int              detach_conf (struct Client *, struct ConfItem *);
 extern struct ConfItem* det_confs_butone (struct Client *, struct ConfItem *);
-extern struct ConfItem *find_conf_entry(struct ConfItem *, int);
 extern struct ConfItem* find_conf_exact(const char* name, const char* user, const char* host, int statmask);
 extern struct ConfItem* find_conf_name(dlink_list *list, const char* name, int statmask);
 extern struct ConfItem* find_conf_host(dlink_list *list, const char* host, int statmask);
@@ -392,7 +390,6 @@ extern  int     rehash (int);
 
 extern int  conf_add_server(struct ConfItem *,int);
 extern void conf_add_class_to_conf(struct ConfItem *);
-extern void conf_delist_old_conf(struct ConfItem *);
 extern void conf_add_me(struct ConfItem *);
 extern void conf_add_class(struct ConfItem *,int );
 extern void conf_add_d_conf(struct ConfItem *);

@@ -44,7 +44,7 @@
 
 struct Class* ClassList;
 
-struct Class *make_class()
+static struct Class *make_class()
 {
   struct Class        *tmp;
 

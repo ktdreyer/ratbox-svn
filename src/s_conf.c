@@ -174,7 +174,7 @@ conf_dns_callback(void* vptr, adns_answer *reply)
  * if the conf entry is currently doing a ns lookup do nothing, otherwise
  * allocate a dns_query and start ns lookup.
  */
-void
+static void
 conf_dns_lookup(struct ConfItem* aconf)
 {
   if (aconf->dns_query == NULL)
@@ -203,35 +203,6 @@ make_conf()
   aconf->status       = CONF_ILLEGAL;
   aconf->aftype       = AF_INET;
   return (aconf);
-}
-
-/*
- * delist_conf
- *
- * inputs	- pointer to conf item to delist
- * output	- none
- * side effects	- remove conf item from ConfigItemList
- */
-static void 
-delist_conf(struct ConfItem* aconf)
-{
-  if (aconf == ConfigItemList)
-  {
-    ConfigItemList = ConfigItemList->next;
-  }
-  else
-    {
-      struct ConfItem* bconf;
-
-      /* jdc -- "for ();" is evil; Semicolon-o-Death.  Use while(). */
-      bconf = ConfigItemList;
-      while (aconf != bconf->next)
-      {
-        bconf = bconf->next;
-      }
-      bconf->next = aconf->next;
-    }
-  aconf->next = NULL;
 }
 
 /*
@@ -1187,66 +1158,6 @@ find_conf_name(dlink_list *list, const char* name, int statmask)
   return NULL;
 }
 
-/*
- * find_conf_host
- *
- * inputs	- pointer to conf link list to search
- *		- pointer to host to find
- *		- int mask of type of conf to find
- * output	- NULL or pointer to conf found
- * side effects	- find a conf entry which matches the name
- *		  and has the given mask.
- */
-struct ConfItem* 
-find_conf_host(dlink_list *list, const char* host, int statmask)
-{
-  dlink_node *ptr;
-  struct ConfItem *aconf;
-  
-  for (ptr = list->head; ptr; ptr = ptr->next)
-    {
-      aconf = ptr->data;
-      if (aconf->status & statmask && aconf->host && match(aconf->host, host))
-        return aconf;
-    }
-  return NULL;
-}
-
-/*
- * find_conf_ip
- *
- * inputs	- pointer to conf link list to search
- *		- pointer to ip to match on
- *		- pointer to username to match on
- *		- int mask of type of conf to find
- * output	- NULL or pointer to conf found
- * side effects	- find a conf entry which matches the ip/name
- *		  and has the given mask.
- *
- */
-struct ConfItem *
-find_conf_ip(dlink_list *list, char *ip, char *user, int statmask)
-{
-  dlink_node *ptr;
-  struct ConfItem *aconf;
-  
-  for (ptr = list->head; ptr; ptr = ptr->next)
-    {
-      aconf = ptr->data;
-
-      if (!(aconf->status & statmask))
-        continue;
-
-      if (!match(aconf->user, user))
-        {
-          continue;
-        }
-/* XXX: broken for IPv6 */
-      if (!memcmp((void *)&IN_ADDR(aconf->ipnum), (void *)ip, sizeof(struct in_addr)))
-        return aconf;
-    }
-  return ((struct ConfItem *)NULL);
-}
 
 /*
  * find_conf_by_name
@@ -1296,51 +1207,6 @@ find_conf_by_host(const char* host, int status)
         return conf;
     }
   return NULL;
-}
-
-/*
- * find_conf_entry
- *
- * inputs	- pointer to conf item to search on
- *		- int mask of type of conf to find
- * output	- NULL or pointer to conf found
- * side effects - looks for a match on all given fields.
- */
-struct ConfItem *
-find_conf_entry(struct ConfItem *aconf, int mask)
-{
-  struct ConfItem *bconf;
-
-  for (bconf = ConfigItemList, mask &= ~CONF_ILLEGAL; bconf; 
-       bconf = bconf->next)
-    {
-      if (!(bconf->status & mask) || (bconf->port != aconf->port))
-        continue;
-      
-      if ((BadPtr(bconf->host) && !BadPtr(aconf->host)) ||
-          (BadPtr(aconf->host) && !BadPtr(bconf->host)))
-        continue;
-
-      if (!BadPtr(bconf->host) && irccmp(bconf->host, aconf->host))
-        continue;
-
-      if ((BadPtr(bconf->passwd) && !BadPtr(aconf->passwd)) ||
-          (BadPtr(aconf->passwd) && !BadPtr(bconf->passwd)))
-        continue;
-
-      if (!BadPtr(bconf->passwd) &&
-          irccmp(bconf->passwd, aconf->passwd))
-      continue;
-
-      if ((BadPtr(bconf->name) && !BadPtr(aconf->name)) ||
-          (BadPtr(aconf->name) && !BadPtr(bconf->name)))
-        continue;
-
-      if (!BadPtr(bconf->name) && irccmp(bconf->name, aconf->name))
-        continue;
-      break;
-    }
-  return bconf;
 }
 
 /*
@@ -2473,36 +2339,6 @@ conf_add_class_to_conf(struct ConfItem *aconf)
       MyFree(aconf->className);
       DupString(aconf->className,"default");
       return;
-    }
-}
-
-/*
- * conf_delist_old_conf
- * inputs       - pointer to config item
- * output       - NONE
- * side effects - delist old conf (if present)
- */
-
-void 
-conf_delist_old_conf(struct ConfItem *aconf)
-{
-  struct ConfItem *bconf;
-
-  if ((bconf = find_conf_entry(aconf, aconf->status)))
-    {
-      delist_conf(bconf);
-      bconf->status &= ~CONF_ILLEGAL;
-      if (aconf->status == CONF_CLIENT)
-	{
-	  ConfLinks(bconf) -= bconf->clients;
-	  ClassPtr(bconf) = ClassPtr(aconf);
-	  ConfLinks(bconf) += bconf->clients;
-	  bconf->flags = aconf->flags;
-	  if(bconf->flags & CONF_OPERATOR)
-	    bconf->port = aconf->port;
-	}
-      free_conf(aconf);
-      aconf = bconf;
     }
 }
 

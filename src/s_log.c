@@ -102,18 +102,6 @@ static int open_log(const char* filename)
 }
 #endif
 
-void close_log(void)
-{
-#if defined(USE_LOGFILE) 
-  if (logFile != NULL) {
-    fbclose(logFile);
-    logFile = NULL;
-  }
-#endif
-#ifdef USE_SYSLOG  
-  closelog();
-#endif
-}
 
 #if defined(USE_LOGFILE) 
 static void write_log(const char* message)

@@ -77,8 +77,6 @@ extern void   add_to_client_hash_table(const char* name,
 extern void   del_from_client_hash_table(const char* name, 
                                          struct Client* client);
 extern void   del_from_id_hash_table(const char *name, struct Client *client);
-
-extern void   add_to_channel_hash_table(const char* name, struct Channel* chan);
 extern void   del_from_channel_hash_table(const char* name, 
                                           struct Channel* chan);
 extern struct Channel* hash_find_channel(const char* name);

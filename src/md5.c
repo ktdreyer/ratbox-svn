@@ -57,6 +57,9 @@ static	u_int32_t seed[MD5_BLOCK_SIZE] = {
 };
 
 static	unsigned char *seed_char = (unsigned char *)seed;
+static void	id_reseed(char *in, int len);
+static void	md5_block(u_int32_t *in, u_int32_t *out, u_int32_t *x);
+
 
 static	u_int32_t databuf_int[MD5_HASH_SIZE];
 static	char *databuf = (char *)databuf_int;
@@ -104,9 +107,6 @@ static	u_int32_t t[64] = {
 static	char printable7[] =
 	"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789[\\]{|}^ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏĞÑÒÓÔÕÖØÙÚÛÜİŞßàáâãäåæçèéêëìíîïğñòóôõöøùúûüı";
  
-static	char printable6[] = 
-	"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789[]{}";
-
 static  char base64_chars[] =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
@@ -175,7 +175,7 @@ void	save_random()
 #endif
 }
 
-void	md5_block(u_int32_t *in, u_int32_t *out, u_int32_t *x) 
+static void	md5_block(u_int32_t *in, u_int32_t *out, u_int32_t *x) 
 {
   u_int32_t a, b, c, d;
   int i, j;
@@ -331,7 +331,7 @@ int unbase64_block(char **output, char *data, int len)
   return count;
 }
 
-void	id_reseed(char *in, int len)
+static void	id_reseed(char *in, int len)
 {
   int i;
 
@@ -355,17 +355,3 @@ char	*id_get()
   return id;
 }
 
-char	*cookie_get()
-{
-  static char cookie[COOKIELEN+1];
-  int i;
-
-  databuf_int[0]++;
-  md5_block(databuf_int, seed, seed);
-
-  for (i=0; i<COOKIELEN; i++)
-    cookie[i] = printable6[seed_char[i] & 63];
-
-  cookie[COOKIELEN] = '\0';
-  return cookie;
-}

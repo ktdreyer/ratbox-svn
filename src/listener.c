@@ -58,7 +58,7 @@ static PF accept_connection;
 
 static struct Listener* ListenerPollList = NULL;
 
-struct Listener* 
+static struct Listener* 
 make_listener(int port, struct irc_inaddr *addr)
 {
   struct Listener* listener =

@@ -310,23 +310,6 @@ add_to_client_hash_table(const char* name, struct Client* client_p)
 }
 
 /*
- * add_to_channel_hash_table
- */
-void
-add_to_channel_hash_table(const char* name, struct Channel* chptr)
-{
-  unsigned int hashv;
-  assert(name != NULL);
-  assert(chptr != NULL);
-
-  hashv = hash_channel_name(name);
-  chptr->hnextch = (struct Channel*) channelTable[hashv].list;
-  channelTable[hashv].list = (void*) chptr;
-  ++channelTable[hashv].links;
-  ++channelTable[hashv].hits;
-}
-
-/*
  * add_to_resv_hash_table
  */
 void

@@ -107,10 +107,8 @@ extern dlink_list oper_list;
 extern dlink_list dead_list;
 
 extern dlink_list lazylink_channels;
-extern dlink_list lazylink_nicks;
 extern int callbacks_called;
 
-extern int make_daemon(void);
 extern unsigned long get_maxrss(void);
 extern void set_time(void);
 

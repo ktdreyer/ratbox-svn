@@ -191,20 +191,6 @@ void _free_client(struct Client* client_p)
   assert(dlinkFind(&oper_list, client_p) == NULL);
 #endif
 
-  /*
-   * clean up extra sockets from P-lines which have been discarded.
-   */
-#if 0
-  if (client_p->localClient->listener)
-  {
-    assert(0 < client_p->localClient->listener->ref_count);
-    if (0 == --client_p->localClient->listener->ref_count &&
-        !client_p->localClient->listener->active) 
-      free_listener(client_p->localClient->listener);
-    client_p->localClient->listener = 0;
-  }
-#endif
-
   if (MyConnect(client_p))
     {
       assert(IsClosing(client_p) && IsDead(client_p));

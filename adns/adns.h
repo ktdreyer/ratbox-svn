@@ -697,7 +697,7 @@ void adns_globalsystemfailure(adns_state ads);
 /*
  * Entrypoints for select-loop based asynch io:
  */
-
+#if 0
 void adns_beforeselect(adns_state ads, int *maxfd, fd_set *readfds,
 		       fd_set *writefds, fd_set *exceptfds,
 		       struct timeval **tv_mod, struct timeval *tv_buf,
@@ -713,7 +713,6 @@ void adns_beforeselect(adns_state ads, int *maxfd, fd_set *readfds,
  * it won't block, and it will set the timeout to zero if a query
  * finishes in _beforeselect.
  */
-
 void adns_afterselect(adns_state ads, int maxfd, const fd_set *readfds,
 		      const fd_set *writefds, const fd_set *exceptfds,
 		      const struct timeval *now);
@@ -722,7 +721,7 @@ void adns_afterselect(adns_state ads, int maxfd, const fd_set *readfds,
  * writeable/timeouts as appropriate, as if select had returned the
  * data being passed.  Always succeeds.
  */
-
+#endif
 /*
  * Example calling sequence:
  *

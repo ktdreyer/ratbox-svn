@@ -75,7 +75,7 @@ linebuf_init(void)
   eventAddIsh("linebuf_garbage_collect", linebuf_garbage_collect, NULL, 30);
 }
 
-buf_line_t *
+static buf_line_t *
 linebuf_allocate(void)
 {
   buf_line_t *t;
@@ -85,7 +85,7 @@ linebuf_allocate(void)
   return(t);
 }
 
-void
+static void
 linebuf_free(buf_line_t *p)
 {
    BlockHeapFree(linebuf_heap, p);
@@ -184,18 +184,6 @@ linebuf_skip_crlf(char *ch, int len)
   return(orig_len - len);
 }
 
-
-/*
- * attach a CR/LF/NUL to the end of the line, and update the length.
- */
-static void
-linebuf_terminate_crlf(buf_head_t *bufhead, buf_line_t *bufline)
-{
-  bufline->buf[bufline->len++] = '\r';
-  bufline->buf[bufline->len++] = '\n';
-  bufline->buf[bufline->len] = '\0';
-  bufhead->len += 2;
-}
 
 
 /*
@@ -610,61 +598,6 @@ linebuf_putmsg(buf_head_t *bufhead, const char *format, va_list va_args,
 
   bufline->terminated = 1;
 }
-
-/*
- * linebuf_put
- *
- * put some *unparsed* data in a buffer. This is used when linebufs are
- * being utilised for outbound messages, where you don't want to worry
- * about the overhead in linebuf_parse() which is a little much when you
- * DO know you are getting a single line.
- */
-void
-linebuf_put(buf_head_t *bufhead, char *buf, int buflen)
-{
-  buf_line_t *bufline;
-
-  /* make sure the previous line is terminated */
-  if (bufhead->list.tail)
-    {
-      bufline = bufhead->list.tail->data;
-      assert(bufline->terminated);
-    }
-
-  /* Create a new line */
-  bufline = linebuf_new_line(bufhead);
-
-  /* Truncate the data if required */
-  if (buflen > BUF_DATA_SIZE)
-    buflen = BUF_DATA_SIZE;
-
-  /* Chop trailing CRLF's .. */
-  assert(buf[buflen] == '\0');
-  buflen--;
-  while ((buf[buflen] == '\r') || (buf[buflen] == '\n'))
-    buflen--;
-
-  /*
-   * Bump up the length to be the real length, not the pointer to the last
-   * char ..
-   */
-  buflen++;
-
-  /* Copy the data */
-  memcpy(bufline->buf, buf, buflen);
-
-  /* Make sure we terminate it! */
-  bufline->buf[buflen + 1] = '\0';
-  bufline->len = buflen;
-  bufline->terminated = 1;
-
-  /* update the line length */
-  bufhead->len += buflen;
-
-  /* And now, CRLF-NUL terminate it .. */
-  linebuf_terminate_crlf(bufhead, bufline);
-}
-
 
 /*
  * linebuf_flush
