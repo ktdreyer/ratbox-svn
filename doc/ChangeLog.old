@@ -1,3 +1,7 @@
+*** 20001223_54 by ejb
+- finally fix the annoying parse error bug in ircd_parser.y
+
+
 *** 20001223_53 by wcampbel
 1. Updated .depend's
 2. Added blank depend rules in doc, gnats, and tools Makefile.in's
