@@ -24,6 +24,9 @@ extern void free_user_reg(struct user_reg *);
 
 extern void add_user_reg(struct user_reg *);
 
+extern struct user_reg *find_user_reg(const char *name);
+extern struct user_reg *find_user_reg_nick(const char *name);
+
 extern void load_user_db(void);
 extern void save_user_db(void);
 

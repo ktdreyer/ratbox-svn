@@ -27,10 +27,10 @@ static int s_hoststat_testmask(struct client *, char *parv[], int parc);
 
 static struct service_command hoststat_command[] =
 {
-	{ "CLONES",	&s_hoststat_clones,	0, NULL, 0, 1, 0L },
-	{ "HOST",	&s_hoststat_host,	1, NULL, 0, 1, 0L },
-	{ "TESTMASK",	&s_hoststat_testmask,	1, NULL, 1, 1, 0L },
-	{ "\0",		NULL,			0, NULL, 0, 0, 0L }
+	{ "CLONES",	&s_hoststat_clones,	0, NULL, 0, 0, 1, 0L },
+	{ "HOST",	&s_hoststat_host,	1, NULL, 0, 0, 1, 0L },
+	{ "TESTMASK",	&s_hoststat_testmask,	1, NULL, 1, 0, 1, 0L },
+	{ "\0",		NULL,			0, NULL, 0, 0, 0, 0L }
 };
 
 static struct service_handler hoststat_service = {

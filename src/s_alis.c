@@ -37,8 +37,8 @@ static int s_alis_list(struct client *, char *parv[], int parc);
 
 static struct service_command alis_command[] =
 {
-	{ "LIST",	&s_alis_list,	1, NULL, 0, 1, 0L },
-        { "\0",		NULL,		0, NULL, 0, 0, 0 }
+	{ "LIST",	&s_alis_list,	1, NULL, 0, 0, 1, 0L },
+        { "\0",		NULL,		0, NULL, 0, 0, 0, 0 }
 };
 
 static struct service_error alis_error[] =

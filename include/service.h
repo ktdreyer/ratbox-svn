@@ -14,6 +14,7 @@ struct service_command
 	int minparc;
         struct cachefile *helpfile;
         int operonly;
+	int userreg;
         int help_penalty;
         unsigned long cmd_use;
 };

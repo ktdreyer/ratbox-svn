@@ -32,9 +32,9 @@ static int s_operbot_op(struct client *, char *parv[], int parc);
 
 static struct service_command operbot_command[] =
 {
-	{ "INVITE",	&s_operbot_invite,	1, NULL, 1, 1, 0L },
-	{ "OP",		&s_operbot_op,		1, NULL, 1, 1, 0L },
-	{ "\0",		NULL,			0, NULL, 0, 0, 0L }
+	{ "INVITE",	&s_operbot_invite,	1, NULL, 1, 0, 1, 0L },
+	{ "OP",		&s_operbot_op,		1, NULL, 1, 0, 1, 0L },
+	{ "\0",		NULL,			0, NULL, 0, 0, 0, 0L }
 };
 
 static struct service_error operbot_message[] =

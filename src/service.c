@@ -345,6 +345,16 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
                                 return;
                         }
 
+#ifdef USER_SERVICE
+			if(cmd_table[i].userreg && client_p->user->user_reg == NULL)
+			{
+				sendto_server(":%s NOTICE %s :You must be logged in for %s::%s",
+						MYNAME, client_p->name, 
+						service_p->name, cmd_table[i].cmd);
+				return;
+			}
+#endif
+
 			if(parc < cmd_table[i].minparc)
 			{
 				sendto_server(":%s NOTICE %s :Insufficient parameters to %s::%s",
