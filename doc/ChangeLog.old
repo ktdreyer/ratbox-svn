@@ -1,3 +1,8 @@
+*** 20001208_2 by db
+- missing ':' in sent KLINE would break up reason field in parser
+
+
+
 *** 20001208_1 by db
 - quick #ifdef of excess flood for tonight. its late
 - redid send_modelist
