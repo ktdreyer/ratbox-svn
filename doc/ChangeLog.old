@@ -1,3 +1,8 @@
+*** 20010213_7 by a1kmm
+- Finally that ConfItem memory leak seems to have gone - we now free ip_ilines and even the associated conf
+  items.
+
+
 *** 20010213_6 by androsyn
 Fixed adns for non gcc compilers.
 
