@@ -58,8 +58,15 @@ c_message(struct client *client_p, char *parv[], int parc)
 	/* ctcp.. doesnt matter who its addressed to. */
 	if(parv[2][0] == '\001')
 	{
-		if(!is_conf_oper(client_p->user->username, client_p->user->host))
+		struct conf_oper *oper_p = find_conf_oper(client_p->user->username,
+							  client_p->user->host);
+
+		if(oper_p == NULL || !ConfOperDcc(oper_p))
+		{
+			sendto_server(":%s NOTICE %s :No access.",
+					MYNAME, client_p->name);
 			return;
+		}
 
 		/* request for us to dcc them.. */
 		if(!strncasecmp(parv[2], "\001CHAT\001", 6))

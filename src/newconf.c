@@ -483,7 +483,7 @@ conf_begin_oper(struct TopConf *tc)
         }
 
         yy_oper = my_malloc(sizeof(struct conf_oper));
-        yy_oper->flags |= CONF_OPER_ENCRYPTED;
+        yy_oper->flags |= CONF_OPER_ENCRYPTED|CONF_OPER_DCC;
 
         return 0;
 }
@@ -577,6 +577,18 @@ conf_set_oper_encrypted(void *data)
                 yy_oper->flags &= ~CONF_OPER_ENCRYPTED;
 }
 
+static void
+conf_set_oper_dcc(void *data)
+{
+        int yesno = *(unsigned int *) data;
+
+        if(yesno)
+                yy_oper->flags |= CONF_OPER_DCC;
+        else
+                yy_oper->flags &= ~CONF_OPER_DCC;
+}
+
+
 void
 newconf_init()
 {
@@ -625,4 +637,6 @@ newconf_init()
                       conf_set_oper_password);
         add_conf_item("oper", "encrypted", CF_YESNO,
                       conf_set_oper_encrypted);
+        add_conf_item("oper", "dcc", CF_YESNO,
+                      conf_set_oper_dcc);
 }

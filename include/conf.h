@@ -50,8 +50,10 @@ struct conf_oper
 };
 
 #define CONF_OPER_ENCRYPTED     0x0001
+#define CONF_OPER_DCC		0x0002
 
 #define ConfOperEncrypted(x)	((x)->flags & CONF_OPER_ENCRYPTED)
+#define ConfOperDcc(x)		((x)->flags & CONF_OPER_DCC)
 
 #define CONF_SERVER_AUTOCONN	0x0001
 
@@ -69,6 +71,6 @@ extern int conf_fbgets(char *lbuf, int max_size);
 extern struct conf_server *find_conf_server(const char *name);
 
 extern struct conf_oper *find_oper(struct connection_entry *conn_p, const char *name);
-extern int is_conf_oper(const char *username, const char *host);
+extern struct conf_oper *find_conf_oper(const char *username, const char *host);
 
 #endif

@@ -100,8 +100,8 @@ find_oper(struct connection_entry *conn_p, const char *name)
         return NULL;
 }
 
-int
-is_conf_oper(const char *username, const char *host)
+struct conf_oper *
+find_conf_oper(const char *username, const char *host)
 {
         struct conf_oper *oper_p;
         dlink_node *ptr;
@@ -112,10 +112,10 @@ is_conf_oper(const char *username, const char *host)
 
                 if(!strcasecmp(username, oper_p->username) &&
                    !strcasecmp(host, oper_p->host))
-                        return 1;
+                        return oper_p;
         }
 
-        return 0;
+        return NULL;
 }
 
 /*

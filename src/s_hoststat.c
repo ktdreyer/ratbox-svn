@@ -23,11 +23,13 @@ static struct client *hoststat_p;
 
 static int s_hoststat_clones(struct client *, char *parv[], int parc);
 static int s_hoststat_host(struct client *, char *parv[], int parc);
+static int s_hoststat_testmask(struct client *, char *parv[], int parc);
 
 static struct service_command hoststat_command[] =
 {
 	{ "CLONES",	&s_hoststat_clones,	NULL, 0, 1, 0L },
 	{ "HOST",	&s_hoststat_host,	NULL, 0, 1, 0L },
+	{ "TESTMASK",	&s_hoststat_testmask,	NULL, 1, 1, 0L },
 	{ "\0",		NULL,			NULL, 0, 0, 0L }
 };
 
@@ -154,3 +156,38 @@ s_hoststat_host(struct client *client_p, char *parv[], int parc)
 	return 1;
 }
 
+static int
+s_hoststat_testmask(struct client *client_p, char *parv[], int parc)
+{
+	struct client *target_p;
+	const char *username = parv[0];
+	char *host;
+	dlink_node *ptr;
+	int count = 0;
+
+	if(parc < 1 || EmptyString(parv[0]))
+	{
+		service_error(hoststat_p, client_p, HOSTSTAT_ERR_PARAM);
+		return 1;
+	}
+
+	if((host = strchr(parv[0], '@')) == NULL)
+	{
+		return 1;
+	}
+
+	*host++ = '\0';
+
+	DLINK_FOREACH(ptr, user_list.head)
+	{
+		target_p = ptr->data;
+
+		if(match(username, target_p->user->username) &&
+		   match(host, target_p->user->host))
+			count++;
+	}
+
+	sendto_server(":%s NOTICE %s :%d clients match %s@%s",
+			MYNAME, client_p->name, count, username, host);
+	return 1;
+}
