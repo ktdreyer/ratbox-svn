@@ -171,7 +171,7 @@ ms_unkline(struct Client *client_p, struct Client *source_p, int parc, char *par
 
 	/* parv[0]  parv[1]        parv[2]  parv[3]
 	 * oper     target server  user     host    */
-	sendto_match_servs(client_p, parv[1], CAP_UNKLN,
+	sendto_match_servs(source_p, parv[1], CAP_UNKLN,
 			   "UNKLINE %s %s %s", parv[1], parv[2], parv[3]);
 
 	kuser = parv[2];

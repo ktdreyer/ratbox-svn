@@ -267,7 +267,7 @@ ms_kline(struct Client *client_p, struct Client *source_p, int parc, char *parv[
 
 	/* parv[0]  parv[1]        parv[2]      parv[3]  parv[4]  parv[5] */
 	/* oper     target_server  tkline_time  user     host     reason */
-	sendto_match_servs(client_p, parv[1], CAP_KLN,
+	sendto_match_servs(source_p, parv[1], CAP_KLN,
 			   "KLINE %s %s %s %s :%s", parv[1], parv[2], parv[3], parv[4], parv[5]);
 
 	if(!match(parv[1], me.name))
