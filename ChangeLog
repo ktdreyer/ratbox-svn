@@ -1,3 +1,69 @@
+leeh        2003/01/22 22:28:28 UTC	(20030122_0)
+
+  Modified files:
+    contrib              Makefile.in 
+    doc                  example.conf example.efnet.conf 
+    include              client.h event.h ircd.h s_conf.h 
+                         supported.h 
+    modules              m_help.c m_info.c m_kline.c m_lusers.c 
+                         m_post.c m_stats.c m_version.c 
+                         m_wallops.c 
+    modules/core         m_message.c m_sjoin.c m_squit.c 
+    src                  client.c event.c ircd.c messages.tab 
+                         modules.c newconf.c s_conf.c s_serv.c 
+                         s_user.c 
+  Log:
+  various things backported from -stable:
+  
+  - connect { vhost="foo"; };
+  - ip hiding leak in autoconnects
+  - fixed an squit core
+  - allow messaging user@server for non-opers
+  - update RPL_ISUPPORT
+  - the kludge for the [ in username kline bug
+  - added stats_c_oper_only
+  - stats v no longer oper only except during serverhiding
+  - delayed klines
+  - removed pacing on local version/lusers
+  - make the hiding of serverops on sjoin dependent on shide
+  - msgtab in m_post.c fixes
+  - leak fixes in modules/help/fakename
+  - some variables added to /info
+  - unauth client logging fix
+  - missing ':' in ERR_WRONGPONG
+  
+  Revision  Changes    Path
+  1.40      +1 -0      ircd-ratbox/contrib/Makefile.in
+  7.200     +11 -0     ircd-ratbox/doc/example.conf
+  7.36      +11 -0     ircd-ratbox/doc/example.efnet.conf
+  7.194     +1 -0      ircd-ratbox/include/client.h
+  1.18      +1 -0      ircd-ratbox/include/event.h
+  7.62      +2 -0      ircd-ratbox/include/ircd.h
+  7.229     +5 -1      ircd-ratbox/include/s_conf.h
+  1.29      +12 -8     ircd-ratbox/include/supported.h
+  1.118     +60 -52    ircd-ratbox/modules/core/m_message.c
+  1.161     +8 -16     ircd-ratbox/modules/core/m_sjoin.c
+  1.59      +14 -10    ircd-ratbox/modules/core/m_squit.c
+  1.41      +2 -1      ircd-ratbox/modules/m_help.c
+  1.74      +23 -3     ircd-ratbox/modules/m_info.c
+  1.147     +24 -5     ircd-ratbox/modules/m_kline.c
+  1.29      +11 -11    ircd-ratbox/modules/m_lusers.c
+  1.17      +5 -1      ircd-ratbox/modules/m_post.c
+  1.144     +18 -6     ircd-ratbox/modules/m_stats.c
+  1.47      +12 -12    ircd-ratbox/modules/m_version.c
+  1.38      +1 -2      ircd-ratbox/modules/m_wallops.c
+  7.362     +13 -0     ircd-ratbox/src/client.c
+  7.35      +40 -1     ircd-ratbox/src/event.c
+  7.276     +1 -0      ircd-ratbox/src/ircd.c
+  7.81      +1 -1      ircd-ratbox/src/messages.tab
+  7.123     +1 -0      ircd-ratbox/src/modules.c
+  7.73      +39 -7     ircd-ratbox/src/newconf.c
+  7.392     +18 -12    ircd-ratbox/src/s_conf.c
+  7.315     +10 -2     ircd-ratbox/src/s_serv.c
+  7.253     +19 -0     ircd-ratbox/src/s_user.c
+
+
+
 androsyn    2003/01/21 01:51:57 UTC	(20030121_4)
 
   Removed files:
