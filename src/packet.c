@@ -49,10 +49,10 @@
  *      with cptr of "local" variation, which contains all the
  *      necessary fields (buffer etc..)
  */
-int dopacket(struct Client *cptr, char *buffer, size_t length)
+int dopacket(struct Client* cptr, char* buffer, size_t length)
 {
-  char* ch1;
-  char* ch2;
+  char* dest;
+  char* src;
   char* cptrbuf;
   char* endp;
   int   zipped = NO;
@@ -77,12 +77,12 @@ int dopacket(struct Client *cptr, char *buffer, size_t length)
   cptrbuf = cptr->buffer;
   endp    = cptr->buffer + BUFSIZE - 1;
 
-  ch1 = cptrbuf + cptr->count;
-  ch2 = buffer;
+  dest = cptrbuf + cptr->count;
+  src = buffer;
 
   if (cptr->flags2 & FLAGS2_ZIPFIRST) {
-    if (IsEol(*ch2)) {
-      ++ch2;
+    if (IsEol(*src)) {
+      ++src;
       --length;
     }
     cptr->flags2 &= ~FLAGS2_ZIPFIRST;
@@ -101,7 +101,7 @@ int dopacket(struct Client *cptr, char *buffer, size_t length)
     cptr->zip->inbuf[0] = '\0';
     cptr->zip->incount = 0;
 
-    ch2 = unzip_packet(cptr, ch2, &zipped);
+    src = unzip_packet(cptr, src, &zipped);
 
     if (zipped == -1)
       return exit_client(cptr, cptr, &me,
@@ -115,19 +115,19 @@ int dopacket(struct Client *cptr, char *buffer, size_t length)
    */
   do {
     while (length-- > 0) {
-      *ch1 = *ch2++;
+      *dest = *src++;
 
-      if (ch1 < endp && !IsEol(*ch1))
-        ++ch1; /* There is always room for the null */
+      if (dest < endp && !IsEol(*dest))
+        ++dest; /* There is always room for the null */
 
-      else {
-        if (ch1 == cptrbuf) {
+      else if (dest < endp) {
+        if (dest == cptrbuf) {
            /* 
             * Skip extra LF/CR's
             */
            continue;
         }
-        *ch1 = '\0';
+        *dest = '\0';
         /* 
          * Update messages received
          */
@@ -136,7 +136,7 @@ int dopacket(struct Client *cptr, char *buffer, size_t length)
 
         cptr->count = 0; 
 
-        if (CLIENT_EXITED == parse(cptr, cptr->buffer, ch1)) {
+        if (CLIENT_EXITED == parse(cptr, cptr->buffer, dest)) {
           /*
            * CLIENT_EXITED means actually that cptr
            * structure *does* not exist anymore!!! --msa
@@ -161,20 +161,20 @@ int dopacket(struct Client *cptr, char *buffer, size_t length)
            */
 
           zipped = length;
-          if (zipped > 0 && IsEol(*ch2)) {
-            ++ch2;
+          if (zipped > 0 && IsEol(*src)) {
+            ++src;
             --zipped;
           }
 
           cptr->flags2 &= ~FLAGS2_ZIPFIRST;
-          ch2 = unzip_packet(cptr, ch2, &zipped);
+          src = unzip_packet(cptr, src, &zipped);
           if (zipped == -1)
             return exit_client(cptr, cptr, &me,
                                "fatal error in unzip_packet(2)");
           length = zipped;
           zipped = 1;
         }
-        ch1 = cptrbuf;
+        dest = cptrbuf;
       }
     }
     /* Now see if anything is left uncompressed in the input
@@ -182,24 +182,26 @@ int dopacket(struct Client *cptr, char *buffer, size_t length)
      * -Dianora
      */
     if ((cptr->flags2 & FLAGS2_ZIP) && cptr->zip->incount) {
-      /* This call simply finishes unzipping whats left
+      /*
+       * This call simply finishes unzipping whats left
        * second parameter is not used. -Dianora
        */
-      ch2 = unzip_packet(cptr, 0, &zipped);
+      src = unzip_packet(cptr, 0, &zipped);
       if (zipped == -1)
 	return exit_client(cptr, cptr, &me,
 			   "fatal error in unzip_packet(1)");
       length = zipped;
       zipped = 1;
 
-      ch1 = ch2 + length;
+      dest = src + length;
       done_unzip = NO;
     }
     else
       done_unzip = YES;
 
-  } while(!done_unzip);
-  cptr->count = ch1 - cptrbuf;
+  } while (!done_unzip);
+ 
+  cptr->count = dest - cptrbuf;
   return 0;
 }
 
