@@ -326,11 +326,11 @@ handle_command(struct Message *mptr, struct Client *client_p,
 			return (1);
 	}
 
-	entry_handler = mptr->handlers[client_p->handler];
+	entry_handler = mptr->handlers[from->handler];
 	handler = entry_handler.handler;
 
 	/* check right amount of params is passed... --is */
-	if(i < entry_handler.min_para)
+	if(i < entry_handler.min_para || EmptyString(hpara[entry_handler.min_para - 1]))
 	{
 		if(!IsServer(client_p))
 		{
@@ -380,7 +380,7 @@ handle_encap(struct Client *client_p, struct Client *source_p,
 	ehandler = mptr->handlers[client_p->handler];
 	handler = ehandler.handler;
 
-	if(parc < ehandler.min_para)
+	if(parc < ehandler.min_para || EmptyString(parv[ehandler.min_para - 1]))
 		return;
 
 	(*handler) (client_p, source_p, parc, parv);
