@@ -1,3 +1,20 @@
+leeh        2004/09/04 06:37:31 EDT	(20040904_4)
+
+  Modified files:
+    include              s_conf.h 
+    src                  banconf.c s_conf.c 
+  Log:
+  - initialise p to line in getfields()
+  - add CONF_FLAGS_PERMANENT, set on everything we read when parsing a
+    permanent file.
+  
+  Revision  Changes    Path
+  7.295     +1 -0      ircd-ratbox/include/s_conf.h
+  7.4       +24 -8     ircd-ratbox/src/banconf.c
+  7.489     +8 -8      ircd-ratbox/src/s_conf.c
+
+
+
 leeh        2004/09/04 06:16:29 EDT	(20040904_3)
 
   Modified files:
