@@ -1,3 +1,11 @@
+*** 20001223_21 by ejb
+- slightly neater fix for ISON, still has a bug:
+  ISON a b :is-
+  will still return is- is NOT on because of the :, which
+  is blindly copied to the output .. can fix this if its a problem,
+  is it likely to be ?
+
+
 *** 20001223_20 by ejb
 - slightly ugly fix to ISON problem committed.  someone might want to take a look
   at the code in parse.c..
