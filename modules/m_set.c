@@ -34,65 +34,20 @@
 #include "common.h"   /* for NO */
 #include "channel.h"  /* for server_was_split */
 #include "s_log.h"
+#include "msg.h"
 
 #include <stdlib.h>  /* atoi */
 
-/*
- * m_functions execute protocol messages on this server:
- *
- *      cptr    is always NON-NULL, pointing to a *LOCAL* client
- *              structure (with an open socket connected!). This
- *              identifies the physical socket where the message
- *              originated (or which caused the m_function to be
- *              executed--some m_functions may call others...).
- *
- *      sptr    is the source of the message, defined by the
- *              prefix part of the message if present. If not
- *              or prefix not found, then sptr==cptr.
- *
- *              (!IsServer(cptr)) => (cptr == sptr), because
- *              prefixes are taken *only* from servers...
- *
- *              (IsServer(cptr))
- *                      (sptr == cptr) => the message didn't
- *                      have the prefix.
- *
- *                      (sptr != cptr && IsServer(sptr) means
- *                      the prefix specified servername. (?)
- *
- *                      (sptr != cptr && !IsServer(sptr) means
- *                      that message originated from a remote
- *                      user (not local).
- *
- *              combining
- *
- *              (!IsServer(sptr)) means that, sptr can safely
- *              taken as defining the target structure of the
- *              message in this server.
- *
- *      *Always* true (if 'parse' and others are working correct):
- *
- *      1)      sptr->from == cptr  (note: cptr->from == cptr)
- *
- *      2)      MyConnect(sptr) <=> sptr == cptr (e.g. sptr
- *              *cannot* be a local connection, unless it's
- *              actually cptr!). [MyConnect(x) should probably
- *              be defined as (x == x->from) --msa ]
- *
- *      parc    number of variable parameter strings (if zero,
- *              parv is allowed to be NULL)
- *
- *      parv    a NULL terminated list of parameter pointers,
- *
- *                      parv[0], sender (prefix string), if not present
- *                              this points to an empty string.
- *                      parv[1]...parv[parc-1]
- *                              pointers to additional parameters
- *                      parv[parc] == NULL, *always*
- *
- *              note:   it is guaranteed that parv[0]..parv[parc-1] are all
- *                      non-NULL pointers.
- */
+struct Message set_msgtab = {
+  MSG_SET, 0, 0, MFLG_SLOW, 0,
+  {m_unregistered, m_not_oper, m_error, mo_set}
+};
+
+void
+_modinit(void)
+{
+  mod_add_cmd(MSG_SET, &set_msgtab);
+}
 
 /*
  * set_parser - find the correct int. to return 
@@ -124,7 +79,7 @@
 #define TOKEN_LOG 10
 #define TOKEN_BAD 11
 
-static char *set_token_table[] = {
+char *set_token_table[] = {
   "MAX",
   "AUTOCONN",
   "IDLETIME",
@@ -139,7 +94,7 @@ static char *set_token_table[] = {
   NULL
 };
 
-static int set_parser(const char* parsethis)
+int set_parser(const char* parsethis)
 {
   int i;
 

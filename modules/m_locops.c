@@ -33,6 +33,17 @@
 #include "hash.h"
 #include "msg.h"
 
+struct locops_msgtab = {
+  MSG_LOCOPS, 0, 1, MFLG_SLOW, 0,
+  {m_unregistered, m_not_oper, m_ignore, mo_locops}
+};
+
+void
+_modinit(void)
+{
+  mod_add_cmd(MSG_LOCOPS, &locops_msgtab);
+}
+
 /*
  * m_locops - LOCOPS message handler
  * (write to *all* local opers currently online)

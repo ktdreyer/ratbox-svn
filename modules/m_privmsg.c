@@ -38,89 +38,44 @@
 #include "m_privmsg.h"
 #include "hash.h"
 #include "class.h"
+#include "msg.h"
 
 #include <string.h>
 
-/*
- * m_functions execute protocol messages on this server:
- *
- *      cptr    is always NON-NULL, pointing to a *LOCAL* client
- *              structure (with an open socket connected!). This
- *              identifies the physical socket where the message
- *              originated (or which caused the m_function to be
- *              executed--some m_functions may call others...).
- *
- *      sptr    is the source of the message, defined by the
- *              prefix part of the message if present. If not
- *              or prefix not found, then sptr==cptr.
- *
- *              (!IsServer(cptr)) => (cptr == sptr), because
- *              prefixes are taken *only* from servers...
- *
- *              (IsServer(cptr))
- *                      (sptr == cptr) => the message didn't
- *                      have the prefix.
- *
- *                      (sptr != cptr && IsServer(sptr) means
- *                      the prefix specified servername. (?)
- *
- *                      (sptr != cptr && !IsServer(sptr) means
- *                      that message originated from a remote
- *                      user (not local).
- *
- *              combining
- *
- *              (!IsServer(sptr)) means that, sptr can safely
- *              taken as defining the target structure of the
- *              message in this server.
- *
- *      *Always* true (if 'parse' and others are working correct):
- *
- *      1)      sptr->from == cptr  (note: cptr->from == cptr)
- *
- *      2)      MyConnect(sptr) <=> sptr == cptr (e.g. sptr
- *              *cannot* be a local connection, unless it's
- *              actually cptr!). [MyConnect(x) should probably
- *              be defined as (x == x->from) --msa ]
- *
- *      parc    number of variable parameter strings (if zero,
- *              parv is allowed to be NULL)
- *
- *      parv    a NULL terminated list of parameter pointers,
- *
- *                      parv[0], sender (prefix string), if not present
- *                              this points to an empty string.
- *                      parv[1]...parv[parc-1]
- *                              pointers to additional parameters
- *                      parv[parc] == NULL, *always*
- *
- *              note:   it is guaranteed that parv[0]..parv[parc-1] are all
- *                      non-NULL pointers.
- */
-
 struct entity target_table[MAX_MULTI_MESSAGES];
 
-static int duplicate_ptr( void *ptr,
+int duplicate_ptr( void *ptr,
 			  struct entity target_table[], int n);
 
-static void privmsg_channel( struct Client *cptr,
+void privmsg_channel( struct Client *cptr,
 			     struct Client *sptr,
 			     struct Channel *chptr,
 			     char *text);
 
-static void privmsg_channel_flags( struct Client *cptr,
+void privmsg_channel_flags( struct Client *cptr,
 				   struct Client *sptr,
 				   struct Channel *chptr,
 				   int flags,
 				   char *text);
 
-static void privmsg_client(struct Client *sptr, struct Client *acptr,
+void privmsg_client(struct Client *sptr, struct Client *acptr,
 			   char *text);
 
-static void handle_opers(struct Client *cptr,
+void handle_opers(struct Client *cptr,
 			 struct Client *sptr,
 			 char *nick,
 			 char *text);
+
+struct Message privmsg_msgtab = {
+  {MSG_PRIVMSG, 0, 1, MFLG_SLOW | MFLG_UNREG, 0L,
+  {m_unregistered, m_privmsg, ms_privmsg, mo_privmsg}
+};
+
+void
+_modinit(void)
+{
+  mod_add_cmd(MSG_PRIVMSG, &privmsg_msgtab);
+}
 
 /*
 ** m_privmsg
@@ -324,7 +279,7 @@ int build_target_list(struct Client *cptr,
  * side effects	- NONE
  */
 
-static int duplicate_ptr( void *ptr,
+int duplicate_ptr( void *ptr,
 			  struct entity target_table[], int n)
 {
   int i;
@@ -347,7 +302,7 @@ static int duplicate_ptr( void *ptr,
  *		  note, this is canonilization
  * side effects	- message given channel
  */
-static void privmsg_channel( struct Client *cptr,
+void privmsg_channel( struct Client *cptr,
 			     struct Client *sptr,
 			     struct Channel *chptr,
 			     char *text)
@@ -391,7 +346,7 @@ static void privmsg_channel( struct Client *cptr,
  * output	- NONE
  * side effects	- message given channel either chanop or voice
  */
-static void privmsg_channel_flags( struct Client *cptr,
+void privmsg_channel_flags( struct Client *cptr,
 				   struct Client *sptr,
 				   struct Channel *chptr,
 				   int flags,
@@ -439,7 +394,7 @@ static void privmsg_channel_flags( struct Client *cptr,
  * output	- NONE
  * side effects	- message given channel either chanop or voice
  */
-static void privmsg_client(struct Client *sptr, struct Client *acptr,
+void privmsg_client(struct Client *sptr, struct Client *acptr,
 			   char *text)
 {
   /* reset idle time for message only if its not to self */
@@ -604,7 +559,7 @@ int drone_attack(struct Client *sptr,struct Client *acptr)
  *		  for the moment, oper NOTICE to this icky stuff
  *		  is translated to privmsg. deal for now.
  */
-static void handle_opers(struct Client *cptr,
+void handle_opers(struct Client *cptr,
 			       struct Client *sptr,
 			       char *nick,
 			       char *text)

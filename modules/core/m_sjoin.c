@@ -33,10 +33,22 @@
 #include "numeric.h"
 #include "send.h"
 #include "common.h"
+#include "msg.h"
 
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+
+struct Message sjoin_msgtab = {
+  MSG_SJOIN, 0, 0, MFLG_SLOW, 0,
+  {m_unregistered, m_ignore, ms_sjoin, m_ignore}
+};
+
+void
+_modinit(void)
+{
+  mod_add_cmd(MSG_SJOIN, &sjoin_msgtab);
+}
 
 /*
  * ms_sjoin
@@ -55,13 +67,13 @@
  * hot sun for 2 weeks, coated with flies. -db
  */
 
-static  char    modebuf[MODEBUFLEN];
-static  char    parabuf[MODEBUFLEN];
-static  char    *mbuf;
-static  int     pargs;
+char    modebuf[MODEBUFLEN];
+char    parabuf[MODEBUFLEN];
+char    *mbuf;
+int     pargs;
 
 void set_final_mode(struct Mode *mode,struct Mode *oldmode);
-static void remove_our_modes( struct Channel *chptr, struct Channel *top_chptr,
+void remove_our_modes( struct Channel *chptr, struct Channel *top_chptr,
 			      struct Client *sptr);
 
 
