@@ -62,9 +62,6 @@ struct Channel
 #ifdef REQUIRE_OANDV
   dlink_list	  chanops_voiced;	/* UGH I'm sorry */
 #endif
-#ifdef HALFOPS
-  dlink_list      halfops;
-#endif
   dlink_list      voiced;
   dlink_list      peons;                /* non ops, just members */
   dlink_list	  deopped;              /* users deopped on sjoin */
@@ -72,9 +69,6 @@ struct Channel
   dlink_list      locchanops;           /* local versions of the above */
 #ifdef REQUIRE_OANDV
   dlink_list	  locchanops_voiced;	/* UGH I'm sorry */
-#endif
-#ifdef HALFOPS
-  dlink_list      lochalfops;
 #endif
   dlink_list      locvoiced;
   dlink_list      locpeons;             /* ... */
@@ -104,10 +98,6 @@ extern int     is_banned (struct Channel *chptr, struct Client *who);
 extern int     can_join(struct Client *source_p, struct Channel *chptr,
                         char *key);
 extern int     is_chan_op (struct Channel *chptr,struct Client *who);
-extern int     is_any_op (struct Channel *chptr,struct Client *who);
-#ifdef HALFOPS
-extern int     is_half_op (struct Channel *chptr,struct Client *who);
-#endif
 extern int     is_voiced (struct Channel *chptr,struct Client *who);
 
 extern dlink_node *find_user_link (dlink_list *, struct Client *);
@@ -158,11 +148,11 @@ struct Ban          /* also used for exceptions -orabidoo */
 };
 
 #define CLEANUP_CHANNELS_TIME (30*60)
-/* Number of chanops, peon, voiced, halfops sublists */
+/* Number of chanops, peon, voiced sublists */
 #ifdef REQUIRE_OANDV
-#define NUMLISTS 5
-#else
 #define NUMLISTS 4
+#else
+#define NUMLISTS 3
 #endif
 
 #ifdef INTENSIVE_DEBUG

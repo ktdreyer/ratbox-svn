@@ -385,7 +385,7 @@ static void whois_person(struct Client *source_p,struct Client *target_p, int gl
               t = buf + mlen;
             }
 
-	  if (chptr->mode.mode & MODE_HIDEOPS && !is_any_op(chptr,source_p))
+	  if (chptr->mode.mode & MODE_HIDEOPS && !is_chan_op(chptr,source_p))
             {
               ircsprintf(t,"%s ",chname);
             }

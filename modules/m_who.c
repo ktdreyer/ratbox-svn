@@ -70,12 +70,8 @@ static void do_who_list(struct Client *source_p, struct Channel *chptr,
 #ifdef REQUIRE_OANDV
                         dlink_list *chanops_voiced_list,
 #endif
-#ifdef HALFOPS
-                        dlink_list *halfops_list, 
-#endif
 			dlink_list *voiced_list,
                         char *chanop_flag,
-			char *halfop_flag,
 			char *voiced_flag,
                         char *chname, int member);
 
@@ -199,10 +195,6 @@ static void m_who(struct Client *client_p,
 
 	  if (is_chan_op(chptr,target_p))
 	    do_who(source_p, target_p, chname, flags[0]);
-#ifdef HALFOPS
-	  else if(is_half_op(chptr,target_p))
-	    do_who(source_p, target_p, chname, flags[1]);
-#endif
 	  else if(is_voiced(chptr,target_p))
 	    do_who(source_p, target_p, chname, flags[2]);
 	  else
@@ -304,9 +296,6 @@ static void who_global(struct Client *source_p,char *mask, int server_oper)
 #ifdef REQUIRE_OANDV
      who_common_channel(source_p,chptr->chanops_voiced,mask,server_oper,&maxmatches);
 #endif
-#ifdef HALFOPS
-     who_common_channel(source_p,chptr->halfops,mask,server_oper,&maxmatches);
-#endif
      who_common_channel(source_p,chptr->voiced,mask,server_oper,&maxmatches);
      who_common_channel(source_p,chptr->peons,mask,server_oper,&maxmatches);
   }
@@ -375,13 +364,9 @@ static void do_who_on_channel(struct Client *source_p,
 #ifdef REQUIRE_OANDV
               &chptr->chanops_voiced,
 #endif
-#ifdef HALFOPS
-              &chptr->halfops,
-#endif
               &chptr->voiced,
               flags[0],
               flags[1],
-              flags[2],
               chname, member);
 
 }
@@ -392,12 +377,8 @@ static void do_who_list(struct Client *source_p, struct Channel *chptr,
 #ifdef REQUIRE_OANDV
                         dlink_list *chanops_voiced_list,
 #endif
-#ifdef HALFOPS
-			dlink_list *halfops_list,
-#endif
 			dlink_list *voiced_list,
 			char *chanop_flag,
-			char *halfop_flag,
 			char *voiced_flag,
 			char *chname, int member)
 {
@@ -410,17 +391,11 @@ static void do_who_list(struct Client *source_p, struct Channel *chptr,
 #ifdef REQUIRE_OANDV
   dlink_node *chanops_voiced_ptr;
 #endif
-#ifdef HALFOPS
-  dlink_node *halfops_ptr;
-#endif
   int done=0;
 
   peons_ptr   = peons_list->head;
   chanops_ptr = chanops_list->head;
   voiced_ptr  = voiced_list->head;
-#ifdef HALFOPS
-  halfops_ptr = halfops_list->head;
-#endif
 #ifdef REQUIRE_OANDV
   chanops_voiced_ptr = chanops_voiced_list->head;
 #endif
@@ -450,21 +425,6 @@ static void do_who_list(struct Client *source_p, struct Channel *chptr,
         }
       else
         done++;
-
-#ifdef HALFOPS
-      if(halfops_ptr != NULL)
-        {
-          target_p = halfops_ptr->data;
-
-          if(member || !IsInvisible(target_p))
-            do_who(source_p, target_p, chname, halfop_flag);
-          halfops_ptr = halfops_ptr->next;
-        }
-      else
-        done++;
-#else
-      done++;
-#endif
 
       if(voiced_ptr != NULL)
         {

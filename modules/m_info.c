@@ -409,12 +409,6 @@ static struct InfoStruct info_table[] =
     "Enable chanmode +e (ban exceptions)",
   },
   {
-    "use_halfops",
-    OUTPUT_BOOLEAN_YN,
-    &ConfigChannel.use_halfops,
-    "Enable chanmode +h (halfops)",
-  },
-  {
     "use_invex",
     OUTPUT_BOOLEAN_YN,
     &ConfigChannel.use_invex,

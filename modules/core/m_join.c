@@ -289,16 +289,12 @@ m_join(struct Client *client_p,
 	  chptr->mode.mode |= MODE_TOPICLIMIT;
 	  chptr->mode.mode |= MODE_NOPRIVMSGS;
 
-	  sendto_channel_local(ONLY_CHANOPS_HALFOPS,chptr,
-			       ":%s MODE %s +nt",
-			       me.name,
-			       chptr->chname);
+	  sendto_channel_local(ONLY_CHANOPS, chptr, ":%s MODE %s +nt",
+			       me.name, chptr->chname);
 	  
-	  sendto_server(client_p, source_p, chptr, NOCAPS, NOCAPS,
-                        LL_ICLIENT,
-                        ":%s MODE %s +nt",
-                        me.name,
-                        chptr->chname);
+	  sendto_server(client_p, source_p, chptr, NOCAPS, NOCAPS, LL_ICLIENT,
+                        ":%s MODE %s +nt", 
+                        me.name, chptr->chname);
 	}
 
       del_invite(chptr, source_p);
@@ -309,7 +305,7 @@ m_join(struct Client *client_p,
 		     parv[0], chptr->chname, chptr->topic);
 
           if (!(chptr->mode.mode & MODE_HIDEOPS) ||
-              (flags & CHFL_CHANOP) || (flags & CHFL_HALFOP))
+              (flags & CHFL_CHANOP))
             {
               sendto_one(source_p, form_str(RPL_TOPICWHOTIME),
                          me.name, parv[0], chptr->chname,

@@ -485,7 +485,6 @@ void	newconf_init()
 			
 	add_top_conf("channel", NULL, NULL);
 	add_conf_item("channel", "use_except", CF_YESNO, conf_set_channel_use_except);
-	add_conf_item("channel", "use_halfops", CF_YESNO, conf_set_channel_use_halfops);
 	add_conf_item("channel", "use_invex", CF_YESNO, conf_set_channel_use_invex);
 	add_conf_item("channel", "use_knock", CF_YESNO, conf_set_channel_use_knock);
 	add_conf_item("channel", "use_anonops", CF_YESNO, conf_set_channel_use_anonops);
@@ -2503,18 +2502,6 @@ void	conf_set_general_dot_in_ip6_addr(void *data)
 void	conf_set_channel_use_except(void *data)
 {
 	ConfigChannel.use_except = *(unsigned int*)data;
-}
-
-void	conf_set_channel_use_halfops(void *data)
-{
-	if (ConfigChannel.use_halfops != -1)
-	{
-		ilog(L_ERROR, "Ignoring config file entry general::use_halfops "
-			"-- can only be changed on boot.");
-		return;
-	}
-
-	ConfigChannel.use_halfops = *(unsigned int*)data;
 }
 
 void	conf_set_channel_use_anonops(void *data)

@@ -227,9 +227,6 @@ static void remove_our_modes( int hide_or_not,
 #ifdef REQUIRE_OANDV
   remove_a_mode(hide_or_not, chptr, top_chptr, source_p, &chptr->chanops_voiced, 'o');
 #endif
-#ifdef HALFOPS
-  remove_a_mode(hide_or_not, chptr, top_chptr, source_p, &chptr->halfops, 'h');
-#endif
   remove_a_mode(hide_or_not, chptr, top_chptr, source_p, &chptr->voiced, 'v');
 #ifdef REQUIRE_OANDV
   remove_a_mode(hide_or_not, chptr, top_chptr, source_p, &chptr->chanops_voiced, 'v');
@@ -237,17 +234,11 @@ static void remove_our_modes( int hide_or_not,
 
   /* Move all voice/ops etc. to non opped list */
   dlinkMoveList(&chptr->chanops, &chptr->peons);
-#ifdef HALFOPS
-  dlinkMoveList(&chptr->halfops, &chptr->peons);
-#endif
   dlinkMoveList(&chptr->voiced, &chptr->peons);
 #ifdef REQUIRE_OANDV
   dlinkMoveList(&chptr->chanops_voiced, &chptr->peons);
 #endif
   dlinkMoveList(&chptr->locchanops, &chptr->locpeons);
-#ifdef HALFOPS
-  dlinkMoveList(&chptr->lochalfops, &chptr->locpeons);
-#endif
   dlinkMoveList(&chptr->locvoiced, &chptr->locpeons);
 #ifdef REQUIRE_OANDV
   dlinkMoveList(&chptr->locchanops_voiced, &chptr->locpeons);

@@ -240,9 +240,6 @@ void count_memory(struct Client *source_p)
       channel_users += dlink_list_length(&chptr->chanops_voiced);
 #endif
       channel_users += dlink_list_length(&chptr->voiced);
-#ifdef HALFOPS
-      channel_users += dlink_list_length(&chptr->halfops);
-#endif
       channel_invites += dlink_list_length(&chptr->invites);
 
       DLINK_FOREACH(dlink, chptr->banlist.head)

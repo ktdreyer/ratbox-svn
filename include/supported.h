@@ -53,14 +53,13 @@
         ConfigFileEntry.max_targets,NICKLEN-1,TOPICLEN,TOPICLEN
 
 #define FEATURES2 "CHANTYPES=%s" \
-                  " PREFIX=%s" \
+                  " PREFIX=(ov)@+" \
 		  " CHANMODES=%s%s%s%s" \
 		  " NETWORK=%s" \
 		  " CASEMAPPING=%s" \
 		  " CALLERID"
 
 #define FEATURES2VALUES ConfigServerHide.disable_local_channels ? "#" : "#&", \
-                        ConfigChannel.use_halfops ? "(ohv)@%+" : "(ov)@+", \
                         ConfigChannel.use_except ? "e" : "", \
                         ConfigChannel.use_invex ? "I" : "", \
                         "b,k,l,imnpst", \

@@ -294,7 +294,7 @@ static void send_knock(struct Client *client_p, struct Client *source_p,
   if(source_p->user != NULL)
     {
       if(ConfigChannel.use_knock)
-        sendto_channel_local(ONLY_CHANOPS_HALFOPS,
+        sendto_channel_local(ONLY_CHANOPS,
   			     chptr,
   			     form_str(RPL_KNOCK),
 			     me.name,

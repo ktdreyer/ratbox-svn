@@ -103,10 +103,9 @@ kill_client_serv_butone(struct Client *one, struct Client *source_p,
 
 #define ALL_MEMBERS  0
 #define NON_CHANOPS  1
-#define ONLY_CHANOPS_HALFOPS_VOICED 2
-#define ONLY_CHANOPS_HALFOPS 3
-#define ONLY_CHANOPS 4
-#define ONLY_SERVERS 5 /* for channel_mode.c */
+#define ONLY_CHANOPS_VOICED 2
+#define ONLY_CHANOPS 3
+#define ONLY_SERVERS 4 /* for channel_mode.c */
 
 #define L_ALL 	0
 #define L_OPER 	1

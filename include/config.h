@@ -311,14 +311,12 @@
  * else they are here for anyone else.
  */
 #define ANONOPS
-#define HALFOPS
 
 /* END OF CONFIGURABLE OPTIONS */
 
 /* disable them for efnet */
 #ifdef EFNET
 #undef ANONOPS
-#undef HALFOPS
 #ifndef HIDE_SERVERS_IPS
 #define HIDE_SERVERS_IPS
 #endif

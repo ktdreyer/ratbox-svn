@@ -91,7 +91,6 @@ struct Capability captab[] = {
   { "KLN",   CAP_KLN },
   { "GLN",   CAP_GLN },
   { "KNOCK", CAP_KNOCK },
-  { "HOPS",  CAP_HOPS },
   { "AOPS",  CAP_AOPS },
   { "UID",   CAP_UID },
   { "ZIP",   CAP_ZIP },
@@ -1504,9 +1503,6 @@ burst_all(struct Client *client_p)
           burst_members(client_p,&chptr->chanops_voiced);
 #endif
           burst_members(client_p,&chptr->voiced);
-#ifdef HALFOPS
-          burst_members(client_p,&chptr->halfops);
-#endif
           burst_members(client_p,&chptr->peons);
           send_channel_modes(client_p, chptr);
           hinfo.chptr = chptr;

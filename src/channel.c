@@ -124,14 +124,6 @@ add_user_to_channel(struct Channel *chptr, struct Client *who, int flags)
           dlinkAdd(who, lptr, &chptr->locchanops);
         break;
 
-#ifdef HALFOPS
-      case MODE_HALFOP:
-        dlinkAdd(who, ptr, &chptr->halfops);
-        if (MyClient(who))
-          dlinkAdd(who, lptr, &chptr->lochalfops);
-        break;
-#endif
-
       case MODE_VOICE:
         dlinkAdd(who, ptr, &chptr->voiced);
         if (MyClient(who))
@@ -198,11 +190,8 @@ remove_user_from_channel(struct Channel *chptr, struct Client *who)
 #endif
   else if ((ptr = find_user_link(&chptr->voiced, who)))
     dlinkDelete(ptr, &chptr->voiced);
-#ifdef HALFOPS
-  else if ((ptr = find_user_link(&chptr->halfops, who)))
-    dlinkDelete(ptr, &chptr->halfops);
-#endif
-  else {
+  else 
+  {
     assert(0 == 1); /* This ain't supposed to happen */
   }
 
@@ -222,10 +211,6 @@ remove_user_from_channel(struct Channel *chptr, struct Client *who)
       dlinkDelete(ptr, &chptr->locchanops);
     else if ((ptr = find_user_link(&chptr->locvoiced, who)))
       dlinkDelete(ptr, &chptr->locvoiced);
-#ifdef HALFOPS
-    else if ((ptr = find_user_link(&chptr->lochalfops, who)))
-      dlinkDelete(ptr, &chptr->lochalfops);
-#endif
 #ifdef REQUIRE_OANDV
     else if ((ptr = find_user_link(&chptr->locchanops_voiced, who)))
       dlinkDelete(ptr, &chptr->locchanops_voiced);
@@ -344,18 +329,6 @@ send_channel_modes(struct Client *client_p, struct Channel *chptr)
 
 #ifdef REQUIRE_OANDV
   send_members(client_p, modebuf, parabuf, chptr, &chptr->chanops_voiced, "@+");
-#endif
-
-#ifdef HALFOPS
-  if (IsCapable(client_p, CAP_HOPS))
-  {
-    send_members(client_p, modebuf, parabuf, chptr, &chptr->halfops, "%");
-  }
-  else
-  {
-    /* Ok, halfops can still generate a kick, they'll just looked opped */
-    send_members(client_p, modebuf, parabuf, chptr, &chptr->halfops, "@");
-  }
 #endif
 
   send_members(client_p, modebuf, parabuf, chptr, &chptr->voiced, "+");
@@ -561,9 +534,6 @@ destroy_channel(struct Channel *chptr)
 #endif
   delete_members(chptr, &chptr->voiced);
   delete_members(chptr, &chptr->peons);
-#ifdef HALFOPS
-  delete_members(chptr, &chptr->halfops);
-#endif
 
   delete_members(chptr, &chptr->locchanops);
 #ifdef REQUIRE_OANDV
@@ -571,9 +541,6 @@ destroy_channel(struct Channel *chptr)
 #endif
   delete_members(chptr, &chptr->locvoiced);
   delete_members(chptr, &chptr->locpeons);
-#ifdef HALFOPS
-  delete_members(chptr, &chptr->lochalfops);
-#endif
 
   DLINK_FOREACH_SAFE(ptr, next, chptr->invites.head)
   {
@@ -680,22 +647,18 @@ channel_member_names(struct Client *source_p,
     mlen = strlen(lbuf);
     cur_len = mlen;
     t = lbuf + cur_len;
+
     set_channel_mode_flags(show_flags, chptr, source_p);
     members_ptr[0] = chptr->chanops.head;
-#ifdef HALFOPS
-    members_ptr[1] = chptr->halfops.head;
-#else
-    members_ptr[1] = NULL;
-#endif
-    members_ptr[2] = chptr->voiced.head;
-    members_ptr[3] = chptr->peons.head;
+    members_ptr[1] = chptr->voiced.head;
+    members_ptr[2] = chptr->peons.head;
 #ifdef REQUIRE_OANDV
-    members_ptr[4] = chptr->chanops_voiced.head;
+    members_ptr[3] = chptr->chanops_voiced.head;
 #endif
     is_member = IsMember(source_p, chptr);
 
     /* Note: This code will show one chanop followed by one voiced followed
-     *  by one halfop followed by one peon followed by one chanop...
+     * followed by one peon followed by one chanop...
      * XXX - this is very predictable, randomise it later.
      */
 
@@ -770,15 +733,10 @@ channel_member_names(struct Client *source_p,
   if(ShowChannel(source_p, chptr))
   {
     ptr_list[0] = chptr->chanops.head;
-#ifdef HALFOPS
-    ptr_list[1] = chptr->halfops.head;
-#else
-    ptr_list[1] = NULL;
-#endif
-    ptr_list[2] = chptr->voiced.head;
-    ptr_list[3] = chptr->peons.head;
+    ptr_list[1] = chptr->voiced.head;
+    ptr_list[2] = chptr->peons.head;
 #ifdef REQUIRE_OANDV
-    ptr_list[4] = chptr->chanops_voiced.head;
+    ptr_list[3] = chptr->chanops_voiced.head;
 #endif
 
     set_channel_mode_flags(ptr_flags, chptr, source_p);
@@ -928,7 +886,7 @@ del_invite(struct Channel *chptr, struct Client *who)
  * inputs       - pointer to channel
  *              - pointer to client
  * output       - string either @,+% or"" depending on whether
- *                chanop, voiced, halfop or user
+ *                chanop, voiced or user
  * side effects -
  */
 char *
@@ -936,10 +894,6 @@ channel_chanop_or_voice(struct Channel *chptr, struct Client *target_p)
 {
   if (find_user_link(&chptr->chanops, target_p))
     return ("@");
-#ifdef HALFOPS
-  else if (find_user_link(&chptr->halfops, target_p))
-    return ("%");
-#endif
   else if (find_user_link(&chptr->voiced, target_p))
     return ("+");
 #ifdef REQUIRE_OANDV
@@ -1114,55 +1068,6 @@ is_chan_op(struct Channel *chptr, struct Client *who)
 }
 
 /*
- * is_any_op
- *
- * inputs       - pointer to channel to check for chanop or halfops on
- *              - pointer to client struct being checked
- * output       - yes if anyop no if not
- * side effects -
- */
-int
-is_any_op(struct Channel *chptr, struct Client *who)
-{
-  if (chptr)
-  {
-    if (find_user_link(&chptr->chanops, who) != NULL)
-      return 1;
-#ifdef HALFOPS
-    if (find_user_link(&chptr->halfops, who) != NULL)
-      return 1;
-#endif
-#ifdef REQUIRE_OANDV
-    if (find_user_link(&chptr->chanops_voiced, who) != NULL)
-      return 1;
-#endif
-  }
-  return 0;
-}
-
-/*
- * is_half_op
- *
- * inputs       - pointer to channel to check for chanop or halfops on
- *              - pointer to client struct being checked
- * output       - yes if anyop no if not
- * side effects -
- */
-#ifdef HALFOPS
-int
-is_half_op(struct Channel *chptr, struct Client *who)
-{
-  if (chptr)
-  {
-    if ((find_user_link(&chptr->halfops, who)))
-      return (1);
-  }
-
-  return 0;
-}
-#endif
-
-/*
  * is_voiced
  *
  * inputs       - pointer to channel to check voice on
@@ -1203,7 +1108,7 @@ can_send(struct Channel *chptr, struct Client *source_p)
   if(MyClient(source_p) && find_channel_resv(chptr->chname))
     return CAN_SEND_NO;
     
-  if (is_any_op(chptr, source_p))
+  if (is_chan_op(chptr, source_p))
     return CAN_SEND_OPV;
   if (is_voiced(chptr, source_p))
     return CAN_SEND_OPV;

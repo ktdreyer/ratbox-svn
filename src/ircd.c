@@ -411,12 +411,6 @@ static void initialize_message_files(void)
  */
 static void initialize_server_capabs(void)
 {
-  /* If halfops support is disabled, remove the capab from the list. */
-  if (ConfigChannel.use_halfops == 0)
-  {
-    default_server_capabs &= ~CAP_HOPS;
-  }
-
   if(ConfigChannel.use_anonops == 0)
     default_server_capabs &= ~CAP_AOPS;
   

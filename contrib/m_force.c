@@ -126,14 +126,6 @@ static void mo_forcejoin(struct Client *client_p, struct Client *source_p,
     mode = 'o';
     sjmode = '@';
   }
-#ifdef HALFOPS
-  else if(*parv[2] == '%')
-  {
-    type = CHFL_HALFOP;
-    mode = 'h';
-    sjmode = '%';
-  }
-#endif
   else if(*parv[2] == '+')
   {
     type = CHFL_VOICE;

@@ -195,7 +195,7 @@ m_invite(struct Client *client_p,
   if(ParanoidChannel(chptr))
   {
     sendto_channel_remote(source_p, client_p,
-  		  	  ONLY_CHANOPS_HALFOPS, CAP_PARA, NOCAPS,
+  		  	  ONLY_CHANOPS, CAP_PARA, NOCAPS,
                           chptr, ":%s INVITE %s :%s", parv[0], 
                           target_p->name, chptr->chname);
 			  
@@ -204,7 +204,7 @@ m_invite(struct Client *client_p,
       sendto_one(target_p->from, ":%s INVITE %s :%s", parv[0],
                  target_p->name, chptr->chname);
 
-    sendto_channel_local(ONLY_CHANOPS_HALFOPS, chptr,
+    sendto_channel_local(ONLY_CHANOPS, chptr,
                          ":%s NOTICE %s :%s is inviting %s to %s.",
 			 me.name, chptr->chname, source_p->name,
 			 target_p->name, chptr->chname);

@@ -121,23 +121,6 @@ static void mo_ojoin(struct Client *client_p, struct Client *source_p,
                        me.name, chptr->chname, source_p->name);
 
     }
-#ifdef HALFOPS
-  else if (*parv[1] == '%')
-    {
-       add_user_to_channel(chptr, source_p, CHFL_HALFOP);
-       if (chptr->chname[0] != '&')
-         sendto_server(client_p, source_p, chptr, NOCAPS, NOCAPS, LL_ICLIENT, 
-                 ":%s SJOIN %lu %s + :%%%s", me.name, chptr->channelts,
-                 chptr->chname, source_p->name);
-       sendto_channel_local(ALL_MEMBERS, chptr, ":%s!%s@%s JOIN %s",
-                       source_p->name,
-                       source_p->username,
-                       source_p->host,
-                       chptr->chname);
-       sendto_channel_local(ALL_MEMBERS, chptr, ":%s MODE %s +h %s",
-                       me.name, chptr->chname, source_p->name);
-    }
-#endif
   else if (*parv[1] == '+')
     {
        add_user_to_channel(chptr, source_p, CHFL_VOICE);

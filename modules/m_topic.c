@@ -103,7 +103,7 @@ static void m_topic(struct Client *client_p,
 	      return;
 	    }
 	  if ((chptr->mode.mode & MODE_TOPICLIMIT) == 0 ||
-	      is_any_op(chptr,source_p))
+	      is_chan_op(chptr,source_p))
 	    {
 	      char topic_info[USERHOST_REPLYLEN]; 
               ircsprintf(topic_info, "%s!%s@%s",
@@ -116,7 +116,7 @@ static void m_topic(struct Client *client_p,
                             chptr->topic == NULL ? "" : chptr->topic);
 	      if(chptr->mode.mode & MODE_HIDEOPS)
 		{
-		  sendto_channel_local(ONLY_CHANOPS_HALFOPS,
+		  sendto_channel_local(ONLY_CHANOPS,
 				       chptr, ":%s!%s@%s TOPIC %s :%s",
 				       source_p->name,
 				       source_p->username,
@@ -162,7 +162,7 @@ static void m_topic(struct Client *client_p,
                          chptr->chname, chptr->topic);
 
                 if(!(chptr->mode.mode & MODE_HIDEOPS) ||
-                  is_any_op(chptr,source_p))
+                  is_chan_op(chptr,source_p))
                 {
                   sendto_one(source_p, form_str(RPL_TOPICWHOTIME),
                              me.name, parv[0], chptr->chname,
