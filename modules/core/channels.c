@@ -1583,8 +1583,9 @@ set_final_mode(struct Channel *chptr, const char *name,
 	if(*pbuf)
 		*(pbuf-1) = '\0';
 
-	sendto_channel_local(ALL_MEMBERS, chptr, ":%s MODE %s %s %s",
-			     name, chptr->chname, lmodebuf, lparabuf);
+	if(lmodebuf[0])
+		sendto_channel_local(ALL_MEMBERS, chptr, ":%s MODE %s %s %s",
+				     name, chptr->chname, lmodebuf, lparabuf);
 }
 
 /*
