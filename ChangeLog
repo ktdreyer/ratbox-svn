@@ -1,3 +1,21 @@
+androsyn    2002/08/08 04:33:36 EDT	(20020808_6)
+
+  Modified files:
+    src                  .depend channel.c channel_mode.c parse.c 
+                         s_serv.c send.c 
+  Log:
+  Now it really compiles :P
+  
+  Revision  Changes    Path
+  7.8       +29 -42    ircd-ratbox/src/.depend
+  7.328     +0 -1      ircd-ratbox/src/channel.c
+  7.53      +9 -10     ircd-ratbox/src/channel_mode.c
+  7.138     +1 -2      ircd-ratbox/src/parse.c
+  7.270     +0 -1      ircd-ratbox/src/s_serv.c
+  7.203     +2 -3      ircd-ratbox/src/send.c
+
+
+
 androsyn    2002/08/08 04:29:19 EDT	(20020808_5)
 
   Modified files:
