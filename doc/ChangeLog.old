@@ -1,3 +1,21 @@
+androsyn    2002/07/10 03:06:25 EDT	(20020710_2)
+
+  Modified files:
+    .                    configure 
+    autoconf             acconfig.h configure.in 
+    include              ircd_defs.h setup.h.in 
+  Log:
+  Make TOPICLEN configurable via autoconf
+  
+  Revision  Changes    Path
+  7.23      +3 -0      ircd-hybrid-7/autoconf/acconfig.h
+  7.139     +15 -0     ircd-hybrid-7/autoconf/configure.in
+  7.142     +244 -223  ircd-hybrid-7/configure
+  7.29      +0 -1      ircd-hybrid-7/include/ircd_defs.h
+  7.55      +3 -0      ircd-hybrid-7/include/setup.h.in
+
+
+
 androsyn    2002/07/10 02:48:25 EDT	(20020710_1)
 
   Modified files:
