@@ -25,6 +25,7 @@
 #include "common.h"
 #include "config.h"
 #include "fdlist.h"
+#include "ircdauth.h"
 #include "irc_string.h"
 #include "ircd.h"
 #include "list.h"
@@ -103,7 +104,7 @@ fd_set*  write_set = &writeSet;
 void close_all_connections(void)
 {
   int i;
-  for (i = 0; i < MAXCONNECTIONS; ++i) {
+  for (i = 3; i < MAXCONNECTIONS; ++i) {
     close(i);
     local[i] = 0;
   }
@@ -740,6 +741,16 @@ void add_connection(struct Listener* listener, int fd)
 
   assert(0 != listener);
 
+	if (iAuth.socket == NOSOCK)
+	{
+		send(fd,
+			"NOTICE AUTH :*** Ircd Authentication Server is temporarily down, please connect later\r\n",
+			87,
+			0);
+		close(fd);
+		return;
+	}
+
   /* 
    * get the client socket name from the socket
    * the client has already been checked out in accept_connection
@@ -772,6 +783,7 @@ void add_connection(struct Listener* listener, int fd)
     report_error(NONB_ERROR_MSG, get_client_name(new_client, TRUE), errno);
   if (!disable_sock_options(new_client->fd))
     report_error(OPT_ERROR_MSG, get_client_name(new_client, TRUE), errno);
+
   start_auth(new_client);
 }
 
@@ -976,6 +988,10 @@ int read_message(time_t delay, unsigned char mask)        /* mika */
       FD_ZERO(read_set);
       FD_ZERO(write_set);
 
+			if (iAuth.socket != NOSOCK)
+				FD_SET(iAuth.socket, read_set);
+
+		#ifdef bingo
       for (auth = AuthPollList; auth; auth = auth->next) {
         assert(-1 < auth->fd);
         if (IsAuthConnect(auth))
@@ -983,6 +999,8 @@ int read_message(time_t delay, unsigned char mask)        /* mika */
         else /* if(IsAuthPending(auth)) */
           FD_SET(auth->fd, read_set);
       }
+    #endif /* bingo */
+
       for (listener = ListenerPollList; listener; listener = listener->next) {
         assert(-1 < listener->fd);
         FD_SET(listener->fd, read_set);
@@ -1048,6 +1066,8 @@ int read_message(time_t delay, unsigned char mask)        /* mika */
     do_dns_async();
     --nfds;
   }
+
+#ifdef bingo
   /*
    * Check the auth fd's
    */
@@ -1065,11 +1085,29 @@ int read_message(time_t delay, unsigned char mask)        /* mika */
         break;
     }
   }
+#endif /* bingo */
+
   for (listener = ListenerPollList; listener; listener = listener->next) {
     assert(-1 < listener->fd);
     if (FD_ISSET(listener->fd, read_set))
       accept_connection(listener);
   }
+
+	/*
+	 * Check IAuth
+	 */
+	if (iAuth.socket != NOSOCK)
+		if (FD_ISSET(iAuth.socket, read_set))
+		{
+			if (!ParseIAuth())
+			{
+				/*
+				 * IAuth server closed the connection
+				 */
+				close(iAuth.socket);
+				iAuth.socket = NOSOCK;
+			}
+		}
 
   for (i = 0; i <= highest_fd; i++) {
     if (!(GlobalFDList[i] & mask) || !(cptr = local[i]))
@@ -1221,6 +1259,8 @@ int read_message(time_t delay, unsigned char mask)
       PFD_SETR(ResolverFileDescriptor);
       res_pfd = pfd;
     }
+
+  #ifdef bingo
     /*
      * set auth descriptors
      */
@@ -1232,6 +1272,8 @@ int read_message(time_t delay, unsigned char mask)
       else
         PFD_SETR(auth->fd);
     }
+  #endif /* bingo */
+
     /*
      * set listener descriptors
      */
@@ -1303,6 +1345,8 @@ int read_message(time_t delay, unsigned char mask)
     do_dns_async();
     --nfds;
   }
+
+#ifdef bingo
   /*
    * check auth descriptors
    */
@@ -1321,6 +1365,8 @@ int read_message(time_t delay, unsigned char mask)
         break;
     }
   }
+#endif /* bingo */
+
   /*
    * check listeners
    */

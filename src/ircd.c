@@ -27,6 +27,7 @@
 #include "dline_conf.h"
 #include "fdlist.h"
 #include "hash.h"
+#include "ircdauth.h"
 #include "irc_string.h"
 #include "ircd_signal.h"
 #include "list.h"
@@ -159,7 +160,6 @@ time_t  nextping = 1;           /* same as above for check_pings() */
 int    LRV = LOADRECV;
 time_t LCF = LOADCFREQ;
 float currlife = 0.0;
-
 
 /*
  * get_vm_top - get the operating systems notion of the resident set size
@@ -807,6 +807,18 @@ int main(int argc, char *argv[])
   if (EmptyString(me.name))
     strncpy_irc(me.name, aconf->host, HOSTLEN);
   strncpy_irc(me.host, aconf->host, HOSTLEN);
+
+	/* bingo - hardcoded for now - will be changed later */
+	strcpy(iAuth.hostname, "127.0.0.1");
+	iAuth.port = 4444;
+
+	ConnectToIAuth();
+
+	if (iAuth.socket == NOSOCK)
+	{
+		fprintf(stderr, "Unable to connect to IAuth server\n");
+		exit (-1);
+	}
 
   SetMe(&me);
   make_server(&me);
