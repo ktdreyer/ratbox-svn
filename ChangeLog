@@ -1,3 +1,18 @@
+androsyn    2005/03/28 18:45:34 UTC	(20050328_8)
+
+  Modified files:
+    adns                 resolver.c 
+    src                  dns.c s_auth.c 
+  Log:
+  apparently i screwed stuff up somehow. this works on flamed anyways..
+  
+  Revision  Changes    Path
+  1.7       +2 -2      ircd-ratbox/adns/resolver.c
+  7.5       +8 -2      ircd-ratbox/src/dns.c
+  7.204     +4 -3      ircd-ratbox/src/s_auth.c
+
+
+
 androsyn    2005/03/28 18:14:34 UTC	(20050328_7)
 
   Modified files:
