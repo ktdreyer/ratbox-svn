@@ -398,8 +398,9 @@ inet_ntop6(const unsigned char *src, char *dst, unsigned int size)
 	    (IN6ADDRSZ / INT16SZ))
 		*tp++ = ':';
 /* XXX: This is probably broken */
-	*tp++ = '.';
 #if 0
+	*tp++ = '.';
+
 	*tp++ = 'i';
 	*tp++ = 'p';
 	*tp++ = '6';
