@@ -200,7 +200,7 @@ static void ms_oper(struct Client *client_p, struct Client *source_p,
       
       source_p->flags |= FLAGS_OPER;
       Count.oper++;
-      sendto_server(client_p, source_p, NULL, NOCAPS, NOCAPS, NOFLAGS,
+      sendto_server(client_p, source_p, NULL, NOCAPS, NOCAPS, 
                     ":%s MODE %s :+o", parv[0], parv[0]);
     }
 }

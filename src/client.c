@@ -842,7 +842,7 @@ static void exit_one_client(struct Client *client_p,
       if ((source_p->flags & FLAGS_KILLED) == 0)
         {
           sendto_server(client_p, source_p, NULL, NOCAPS, NOCAPS,
-                        NOFLAGS, ":%s QUIT :%s", source_p->name, comment);
+                         ":%s QUIT :%s", source_p->name, comment);
         }
       /*
       ** If a person is on a channel, send a QUIT notice
@@ -1486,7 +1486,7 @@ int change_local_nick(struct Client *client_p, struct Client *source_p,
 	  add_history(source_p, 1);
 	  
           sendto_server(client_p, source_p, NULL, NOCAPS, NOCAPS,
-                        NOFLAGS, ":%s NICK %s :%lu", source_p->name,
+                         ":%s NICK %s :%lu", source_p->name,
                         nick, (unsigned long) source_p->tsinfo);
 	}
     }

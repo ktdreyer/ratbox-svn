@@ -150,10 +150,10 @@ static void part_one_client(struct Client *client_p,
       (source_p->firsttime + ConfigFileEntry.anti_spam_exit_message_time)
       < CurrentTime))))
     {
-      sendto_server(client_p, NULL, chptr, CAP_UID, NOCAPS, NOFLAGS,
+      sendto_server(client_p, NULL, chptr, CAP_UID, NOCAPS,
                     ":%s PART %s :%s", ID(source_p), chptr->chname,
                     reason);
-      sendto_server(client_p, NULL, chptr, NOCAPS, CAP_UID, NOFLAGS,
+      sendto_server(client_p, NULL, chptr, NOCAPS, CAP_UID, 
                     ":%s PART %s  :%s", source_p->name, chptr->chname,
                     reason);
       sendto_channel_local(ALL_MEMBERS,
@@ -166,9 +166,9 @@ static void part_one_client(struct Client *client_p,
     }
   else
     {
-      sendto_server(client_p, NULL, chptr, CAP_UID, NOCAPS, NOFLAGS,
+      sendto_server(client_p, NULL, chptr, CAP_UID, NOCAPS, 
                     ":%s PART %s", ID(source_p), chptr->chname);
-      sendto_server(client_p, NULL, chptr, NOCAPS, CAP_UID, NOFLAGS,
+      sendto_server(client_p, NULL, chptr, NOCAPS, CAP_UID, 
                     ":%s PART %s", source_p->name, chptr->chname);
       sendto_channel_local(ALL_MEMBERS,
                            chptr, ":%s!%s@%s PART %s",

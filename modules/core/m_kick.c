@@ -209,7 +209,7 @@ static void m_kick(struct Client *client_p,
 			       name, who->name, comment);
 	}
 
-      sendto_server(client_p, NULL, chptr, NOCAPS, NOCAPS, NOFLAGS,
+      sendto_server(client_p, NULL, chptr, NOCAPS, NOCAPS,
                     ":%s KICK %s %s :%s",
                     parv[0], chptr->chname,
                     who->name, comment);

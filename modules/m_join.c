@@ -257,7 +257,7 @@ m_join(struct Client *client_p,
 	  chptr->channelts = CurrentTime;
 
 	  sendto_server(client_p, source_p, chptr, NOCAPS, NOCAPS,
-                        LL_ICLIENT,
+                        
                         ":%s SJOIN %lu %s + :@%s",
                         me.name,
                         (unsigned long) chptr->channelts,
@@ -267,7 +267,7 @@ m_join(struct Client *client_p,
       else
 	{
 	  sendto_server(client_p, source_p, chptr, NOCAPS, NOCAPS,
-                        LL_ICLIENT,
+                        
                         ":%s SJOIN %lu %s + :%s",
                         me.name,
                         (unsigned long) chptr->channelts,
@@ -292,7 +292,7 @@ m_join(struct Client *client_p,
 	  sendto_channel_local(ONLY_CHANOPS, chptr, ":%s MODE %s +nt",
 			       me.name, chptr->chname);
 	  
-	  sendto_server(client_p, source_p, chptr, NOCAPS, NOCAPS, LL_ICLIENT,
+	  sendto_server(client_p, source_p, chptr, NOCAPS, NOCAPS, 
                         ":%s MODE %s +nt", 
                         me.name, chptr->chname);
 	}
@@ -388,7 +388,7 @@ static void do_join_0(struct Client *client_p, struct Client *source_p)
   struct Channel *chptr=NULL;
   dlink_node   *lp;
 
-  sendto_server(client_p, source_p, NULL, NOCAPS, NOCAPS, NOFLAGS,
+  sendto_server(client_p, source_p, NULL, NOCAPS, NOCAPS, 
                 ":%s JOIN 0", source_p->name);
 
   if (source_p->user->channel.head &&

@@ -304,7 +304,7 @@ static void send_knock(struct Client *client_p, struct Client *source_p,
 			     source_p->username,
 			     source_p->host);
       
-      sendto_server(client_p, source_p, chptr, CAP_KNOCK, NOCAPS, LL_ICLIENT,
+      sendto_server(client_p, source_p, chptr, CAP_KNOCK, NOCAPS, 
                     ":%s KNOCK %s",
 		    source_p->name, name);
     }

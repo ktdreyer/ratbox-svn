@@ -139,7 +139,7 @@ static void mo_unkline (struct Client *client_p,struct Client *source_p,
   {
     if(irccmp(parv[2], "ON") == 0)
     {
-      sendto_server(NULL, source_p, NULL, CAP_UNKLN, NOCAPS, LL_ICLIENT,
+      sendto_server(NULL, source_p, NULL, CAP_UNKLN, NOCAPS, 
 		    ":%s UNKLINE %s %s %s",
 		    source_p->name, parv[3], user, host);
       
@@ -184,7 +184,7 @@ static void ms_unkline(struct Client *client_p, struct Client *source_p,
 
   /* parv[0]  parv[1]        parv[2]  parv[3]
    * oper     target server  user     host    */
-  sendto_server(client_p, source_p, NULL, CAP_UNKLN, NOCAPS, LL_ICLIENT,
+  sendto_server(client_p, source_p, NULL, CAP_UNKLN, NOCAPS, 
 		":%s UNKLINE %s %s %s",
 		parv[0], parv[1], parv[2], parv[3]);
 

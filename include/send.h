@@ -75,8 +75,8 @@ extern void sendto_channel_remote(struct Client *one,
 
 extern void sendto_server(struct Client *one, struct Client *source_p,
                           struct Channel *chptr, unsigned long caps,
-                          unsigned long nocaps, unsigned long llflags,
-                          const char *format, ...) AFP(7, 8);
+                          unsigned long nocaps,
+                          const char *format, ...) AFP(6, 7);
 
 extern  void sendto_match_butone(struct Client *, struct Client *, 
                                  char *, int, const char *, ...)
@@ -112,10 +112,6 @@ kill_client_serv_butone(struct Client *one, struct Client *source_p,
 #define L_ADMIN	2
 
 #define NOCAPS          0               /* no caps */
-#define NOFLAGS         0               /* no flags */
-
-#define LL_ICLIENT      0x00000001      /* introduce unknown clients */
-#define LL_ICHAN        0x00000002      /* introduce unknown chans */
 
 /* used when sending to #mask or $mask */
 #define MATCH_SERVER  1

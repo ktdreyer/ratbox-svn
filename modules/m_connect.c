@@ -266,7 +266,7 @@ static void ms_connect(struct Client* client_p, struct Client* source_p,
 			  "Remote CONNECT %s %d from %s",
 			  parv[1], port,
 			  get_client_name(source_p, MASK_IP));
-  sendto_server(NULL, NULL, NULL, NOCAPS, NOCAPS, NOFLAGS,
+  sendto_server(NULL, NULL, NULL, NOCAPS, NOCAPS, 
                 ":%s WALLOPS :Remote CONNECT %s %d from %s",
                 me.name, parv[1], port,
                 get_client_name(source_p, MASK_IP));

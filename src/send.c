@@ -222,7 +222,7 @@ send_linebuf_remote(struct Client *to, struct Client *from,
                          from->name, from->username, from->host,
                          to->from->name);
 
-    sendto_server(NULL, to, NULL, NOCAPS, NOCAPS, NOFLAGS,
+    sendto_server(NULL, to, NULL, NOCAPS, NOCAPS,
                   ":%s KILL %s :%s (%s[%s@%s] Ghosted %s)",
                   me.name, to->name, me.name, to->name,
                   to->username, to->host, to->from->name);
@@ -601,20 +601,12 @@ sendto_list_anywhere(struct Client *one, struct Client *from,
  *              - pointer to channel required by LL (if any)
  *              - caps or'd together which must ALL be present
  *              - caps or'd together which must ALL NOT be present
- *              - LL flags: LL_ICLIENT | LL_ICHAN
  *              - printf style format string
  *              - args to format string
  * output       - NONE
  * side effects - Send a message to all connected servers, except the
  *                client 'one' (if non-NULL), as long as the servers
  *                support ALL capabs in 'caps', and NO capabs in 'nocaps'.
- *                If the server is a lazylink client, then it must know
- *                about source_p if non-NULL (unless LL_ICLIENT is specified,
- *                when source_p will be introduced where required) and
- *                chptr if non-NULL (unless LL_ICHANNEL is specified, when
- *                chptr will be introduced where required).
- *                Note: nothing will be introduced to a LazyLeaf unless
- *                the message is actually sent.
  *            
  * This function was written in an attempt to merge together the other
  * billion sendto_*serv*() functions, which sprung up with capabs,
@@ -624,8 +616,7 @@ sendto_list_anywhere(struct Client *one, struct Client *from,
 void 
 sendto_server(struct Client *one, struct Client *source_p,
                    struct Channel *chptr, unsigned long caps,
-                   unsigned long nocaps, unsigned long llflags,
-                   const char *format, ...)
+                   unsigned long nocaps, const char *format, ...)
 {
   va_list args;
   struct Client *client_p;

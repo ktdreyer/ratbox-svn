@@ -142,7 +142,7 @@ static void mo_opme(struct Client *client_p, struct Client *source_p,
                        "OPME called for [%s] by %s!%s@%s",
                        parv[1], source_p->name, source_p->username,
                        source_p->host);
-  sendto_server(NULL, source_p, NULL, NOCAPS, NOCAPS, LL_ICLIENT,
+  sendto_server(NULL, source_p, NULL, NOCAPS, NOCAPS, 
                 ":%s WALLOPS :OPME called for [%s] by %s!%s@%s",
                 me.name, parv[1], source_p->name, source_p->username,
                 source_p->host);
@@ -150,16 +150,16 @@ static void mo_opme(struct Client *client_p, struct Client *source_p,
                 parv[1], source_p->name, source_p->username,
                 source_p->host);
 
-  sendto_server(NULL, source_p, chptr, CAP_UID, NOCAPS, NOFLAGS,
+  sendto_server(NULL, source_p, chptr, CAP_UID, NOCAPS, 
                  ":%s PART %s", ID(source_p), parv[1]);
-  sendto_server(NULL, source_p, chptr, NOCAPS, CAP_UID, NOFLAGS,
+  sendto_server(NULL, source_p, chptr, NOCAPS, CAP_UID, 
                 ":%s PART %s", source_p->name, parv[1]);
-  sendto_server(NULL, source_p, chptr, CAP_UID, NOCAPS, NOFLAGS,
+  sendto_server(NULL, source_p, chptr, CAP_UID, NOCAPS, 
                 ":%s SJOIN %ld %s + :@%s",
                 me.name, (signed long) chptr->channelts,
                 parv[1],
                 source_p->name /* XXX ID(source_p) */ );
-  sendto_server(NULL, source_p, chptr, NOCAPS, CAP_UID, NOFLAGS,
+  sendto_server(NULL, source_p, chptr, NOCAPS, CAP_UID, 
                 ":%s SJOIN %ld %s + :@%s",
                 me.name, (signed long) chptr->channelts,
                 parv[1], source_p->name);
