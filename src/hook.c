@@ -38,6 +38,11 @@ void
 init_hooks(void)
 {
 	memset(&hooks, 0, sizeof(hooks));
+#ifndef NDEBUG
+        hook_add_event("iosend");
+        hook_add_event("iorecv");
+        hook_add_event("iorecvctrl");
+#endif
 }
 
 static hook *
