@@ -1,3 +1,18 @@
+leeh        2002/08/16 06:02:19 EDT	(20020816_6)
+
+  Modified files:
+    include              client.h 
+    src                  client.c s_user.c 
+  Log:
+  - removed some things from the structs..
+  
+  Revision  Changes    Path
+  7.170     +3 -15     ircd-ratbox/include/client.h
+  7.311     +0 -3      ircd-ratbox/src/client.c
+  7.217     +0 -2      ircd-ratbox/src/s_user.c
+
+
+
 leeh        2002/08/16 05:44:08 EDT	(20020816_5)
 
   Modified files:
