@@ -498,9 +498,21 @@ static struct mode_table auth_table[] = {
 };
 
 static struct mode_table cluster_table[] = {
-	{"kline", CLUSTER_KLINE},
-	{"unkline", CLUSTER_UNKLINE},
-	{"locops", CLUSTER_LOCOPS},
+	{ "kline",	CLUSTER_KLINE	},
+	{ "unkline",	CLUSTER_UNKLINE	},
+	{ "locops",	CLUSTER_LOCOPS	},
+	{ "xline",	CLUSTER_XLINE	},
+	{ "unxline",	CLUSTER_UNXLINE	},
+	{ "all",	CLUSTER_ALL	},
+	{NULL}
+};
+
+static struct mode_table shared_table[] =
+{
+	{ "kline",	OPER_K		},
+	{ "unkline",	OPER_UNKLINE	},
+	{ "xline",	OPER_XLINE	},
+	{NULL}
 };
 
 static int
@@ -1185,8 +1197,13 @@ conf_set_auth_spoof(void *data)
 	MyFree(yy_achead->name);
 	if(strlen(data) < HOSTLEN)
 	{
-		DupString(yy_achead->name, data);
-		yy_achead->flags |= CONF_FLAGS_SPOOF_IP;
+		if(strchr(data, '.') != NULL)
+		{
+			DupString(yy_achead->name, data);
+			yy_achead->flags |= CONF_FLAGS_SPOOF_IP;
+		}
+		else
+			conf_report_error("Warning -- spoof must contain a '.'; ignoring.");
 	}
 	else
 		conf_report_error
@@ -1420,6 +1437,16 @@ conf_set_shared_unkline(void *data)
 		yy_uconf->flags |= OPER_UNKLINE;
 	else
 		yy_uconf->flags &= ~OPER_UNKLINE;
+}
+
+static void
+conf_set_shared_type(void *data)
+{
+	conf_parm_t *args = data;
+
+	/* if theyre setting a type, remove the 'kline' default */
+	yy_uconf->flags = 0;
+	set_modes_from_table(&yy_uconf->flags, "flag", shared_table, args);
 }
 
 static int

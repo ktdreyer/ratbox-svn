@@ -160,7 +160,7 @@ fd_dump(struct Client *source_p)
 		if(!fd_table[i].flags.open)
 			continue;
 
-		sendto_one(source_p, ":%s %d %s :fd %-3d desc '%s'",
+		sendto_one(source_p, ":%s %d %s F :fd %-3d desc '%s'",
 			   me.name, RPL_STATSDEBUG, source_p->name, i, fd_table[i].desc);
 	}
 }

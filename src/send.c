@@ -1042,6 +1042,10 @@ sendto_match_servs(struct Client *source_p, const char *mask, int cap, const cha
 	dlink_node *ptr;
 	struct Client *target_p;
 	buf_head_t linebuf_ptr;
+	int found = 0;
+
+	if(EmptyString(mask))
+		return;
 
 	linebuf_newbuf(&linebuf_ptr);
 
@@ -1055,24 +1059,37 @@ sendto_match_servs(struct Client *source_p, const char *mask, int cap, const cha
 	{
 		target_p = ptr->data;
 
-		if(target_p->from->serial == current_serial)
-			continue;
-
 		/* dont send to ourselves, or back to where it came from.. */
 		if(IsMe(target_p) || target_p->from == source_p->from)
 			continue;
 
-		if(!IsCapable(target_p->from, cap))
+		if(target_p->from->serial == current_serial)
 			continue;
 
 		if(match(mask, target_p->name))
 		{
-			send_linebuf(target_p->from, &linebuf_ptr);
+			/* if we set the serial here, then we'll never do
+			 * a match() again if !IsCapable()
+			 */
 			target_p->from->serial = current_serial;
+			found++;
+
+			if(!IsCapable(target_p->from, cap))
+				continue;
+
+			send_linebuf(target_p->from, &linebuf_ptr);
 		}
 	}
 
 	linebuf_donebuf(&linebuf_ptr);
+
+	/* didnt find any matching servers to send to, if the target
+	 * doesnt include us, error.
+	 */
+	if(found == 0 && IsClient(source_p) &&
+	  (match(mask, me.name) == 0))
+		sendto_one(source_p, form_str(ERR_NOSUCHSERVER),
+			   me.name, source_p->name, mask);
 }
 
 /*

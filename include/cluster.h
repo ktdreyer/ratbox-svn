@@ -49,6 +49,11 @@ struct cluster
 #define CLUSTER_KLINE   0x0001
 #define CLUSTER_UNKLINE 0x0002
 #define CLUSTER_LOCOPS  0x0004
+#define CLUSTER_XLINE	0x0008
+#define CLUSTER_UNXLINE	0x0010
+
+#define CLUSTER_ALL   (CLUSTER_KLINE | CLUSTER_UNKLINE | CLUSTER_LOCOPS |\
+			CLUSTER_XLINE | CLUSTER_UNXLINE)
 
 extern struct cluster *make_cluster(void);
 extern void free_cluster(struct cluster *clptr);
@@ -60,5 +65,9 @@ extern void cluster_kline(struct Client *source_p, int tkline_time,
 			  const char *user, const char *host, const char *reason);
 extern void cluster_unkline(struct Client *source_p, const char *user, const char *host);
 extern void cluster_locops(struct Client *source_p, const char *message);
+
+extern void cluster_xline(struct Client *source_p, const char *gecos,
+			  int xtype, const char *reason);
+extern void cluster_unxline(struct Client *source_p, const char *gecos);
 
 #endif

@@ -199,7 +199,7 @@ getfield(char *newline)
 	static char *line = NULL;
 	char *end, *field;
 
-	if(newline)
+	if(newline != NULL)
 		line = newline;
 
 	if(line == NULL)
@@ -213,24 +213,40 @@ getfield(char *newline)
 	else
 		return (NULL);	/* mal-formed field */
 
-	if((end = strchr(line, ',')) == NULL)
+	end = strchr(line, ',');
+
+	while(1)
 	{
-		end = line + strlen(line);
-		line = NULL;
-		/* XXX verify properly terminating " */
-		if(*end == '"')
-			*end = '\0';
+		/* no trailing , - last field */
+		if(end == NULL)
+		{
+			end = line + strlen(line);
+			line = NULL;
+
+			if(*end == '"')
+			{
+				*end = '\0';
+				return field;
+			}
+			else
+				return NULL;
+		}
 		else
-			return (NULL);
+		{
+			/* look for a ", to mark the end of a field.. */
+			if(*(end - 1) == '"')
+			{
+				line = end + 1;
+				end--;
+				*end = '\0';
+				return field;
+			}
+
+			/* search for the next ',' */
+			end++;
+			end = strchr(end, ',');
+		}
 	}
-	else
-	{
-		line = end + 1;
-		--end;
-		if(*end == '"')
-			*end = '\0';
-		else
-			return (NULL);
-	}
-	return (field);
+
+	return NULL;
 }

@@ -139,7 +139,43 @@ cluster_locops(struct Client *source_p, const char *message)
 		clptr = ptr->data;
 
 		if(clptr->type & CLUSTER_LOCOPS)
-			sendto_match_servs(source_p, clptr->name,
-					   CAP_CLUSTER, "LOCOPS %s :%s", clptr->name, message);
+			sendto_match_servs(source_p, clptr->name, CAP_CLUSTER,
+					   "LOCOPS %s :%s", clptr->name, message);
 	}
 }
+
+void
+cluster_xline(struct Client *source_p, const char *gecos,
+	      int xtype, const char *reason)
+{
+	struct cluster *clptr;
+	dlink_node *ptr;
+
+	DLINK_FOREACH(ptr, cluster_list.head)
+	{
+		clptr = ptr->data;
+
+		if(clptr->type & CLUSTER_XLINE)
+			sendto_match_servs(source_p, clptr->name, CAP_CLUSTER,
+					   "XLINE %s %s %d :%s",
+					   clptr->name, gecos, xtype, reason);
+	}
+}
+
+void
+cluster_unxline(struct Client *source_p, const char *gecos)
+{
+	struct cluster *clptr;
+	dlink_node *ptr;
+
+	DLINK_FOREACH(ptr, cluster_list.head)
+	{
+		clptr = ptr->data;
+
+		if(clptr->type & CLUSTER_UNXLINE)
+			sendto_match_servs(source_p, clptr->name, CAP_CLUSTER,
+					   "UNXLINE %s %s",
+					   clptr->name, gecos);
+	}
+}
+

@@ -64,7 +64,8 @@
 		  " CASEMAPPING=%s" \
 		  " CHARSET=ascii" \
 		  " CALLERID" \
-		  " WALLCHOPS"
+		  " WALLCHOPS" \
+		  " ETRACE"
 
 #define FEATURES2VALUES ConfigServerHide.disable_local_channels ? "#" : "#&", \
                         ConfigChannel.use_except ? "e" : "", \

@@ -288,18 +288,18 @@ show_events(struct Client *source_p)
 	int i;
 
 	if(last_event_ran)
-		sendto_one(source_p, ":%s %d %s :Last event to run: %s",
+		sendto_one(source_p, ":%s %d %s E :Last event to run: %s",
 			   me.name, RPL_STATSDEBUG, source_p->name, last_event_ran);
 
 	sendto_one(source_p,
-		   ":%s %d %s :Operation                    Next Execution",
+		   ":%s %d %s E :Operation                    Next Execution",
 		   me.name, RPL_STATSDEBUG, source_p->name);
 
 	for (i = 0; i < MAX_EVENTS; i++)
 	{
 		if(event_table[i].active)
 		{
-			sendto_one(source_p, ":%s %d %s :%-28s %-4d seconds",
+			sendto_one(source_p, ":%s %d %s E :%-28s %-4d seconds",
 				   me.name, RPL_STATSDEBUG, source_p->name,
 				   event_table[i].name, (int) (event_table[i].when - CurrentTime));
 		}

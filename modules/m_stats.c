@@ -704,7 +704,7 @@ stats_operedup (struct Client *source_p)
 		{
 			aconf = target_p->localClient->att_conf;
 
-			sendto_one (source_p, ":%s %d %s :[%c][%s] %s (%s@%s) Idle: %d",
+			sendto_one (source_p, ":%s %d %s p :[%c][%s] %s (%s@%s) Idle: %d",
 				    me.name, RPL_STATSDEBUG, source_p->name,
 				    IsAdmin (target_p) ? 'A' : 'O',
 				    oper_privs_as_string (target_p, aconf->port),
@@ -713,7 +713,7 @@ stats_operedup (struct Client *source_p)
 		}
 		else
 		{
-			sendto_one (source_p, ":%s %d %s :[%c] %s (%s@%s) Idle: %d",
+			sendto_one (source_p, ":%s %d %s p :[%c] %s (%s@%s) Idle: %d",
 				    me.name, RPL_STATSDEBUG, source_p->name,
 				    IsAdmin (target_p) ? 'A' : 'O',
 				    target_p->name, target_p->username, target_p->host,
@@ -721,7 +721,7 @@ stats_operedup (struct Client *source_p)
 		}
 	}
 
-	sendto_one (source_p, ":%s %d %s :%ld OPER(s)",
+	sendto_one (source_p, ":%s %d %s p :%ld OPER(s)",
 		    me.name, RPL_STATSDEBUG, source_p->name, dlink_list_length (&oper_list));
 
 	stats_p_spy (source_p);
@@ -772,7 +772,7 @@ stats_shared (struct Client *source_p)
 {
 	struct shared *uconf;
 	dlink_node *ptr;
-	char buf[3];
+	char buf[5];
 	char *p;
 
 	DLINK_FOREACH (ptr, shared_list.head)
@@ -790,6 +790,11 @@ stats_shared (struct Client *source_p)
 			*p++ = 'U';
 		else
 			*p++ = 'u';
+
+		if(uconf->flags & OPER_XLINE)
+			*p++ = 'X';
+		else
+			*p++ = 'x';
 
 		*p++ = '\0';
 
@@ -837,7 +842,7 @@ stats_servers (struct Client *source_p)
 		minutes = (int) (seconds / 60);
 		seconds %= 60;
 
-		sendto_one (source_p, ":%s %d %s :%s (%s!%s@%s) Idle: %d SendQ: %d "
+		sendto_one (source_p, ":%s %d %s V :%s (%s!%s@%s) Idle: %d SendQ: %d "
 			    "Connected: %d day%s, %d:%02d:%02d",
 			    me.name, RPL_STATSDEBUG, source_p->name,
 			    target_p->name,
@@ -847,7 +852,7 @@ stats_servers (struct Client *source_p)
 			    days, (days == 1) ? "" : "s", hours, minutes, (int) seconds);
 	}
 
-	sendto_one (source_p, ":%s %d %s :%d Server(s)", me.name, RPL_STATSDEBUG,
+	sendto_one (source_p, ":%s %d %s V :%d Server(s)", me.name, RPL_STATSDEBUG,
 		    source_p->name, j);
 }
 
@@ -906,14 +911,14 @@ stats_ziplinks (struct Client *source_p)
 			memcpy (&zipstats, &target_p->localClient->zipstats,
 				sizeof (struct ZipStats));
 			sendto_one (source_p,
-				    ":%s %d %s :ZipLinks stats for %s send[%.2f%% compression (%lu bytes data/%lu bytes wire)] recv[%.2f%% compression (%lu bytes data/%lu bytes wire)]",
+				    ":%s %d %s Z :ZipLinks stats for %s send[%.2f%% compression (%lu bytes data/%lu bytes wire)] recv[%.2f%% compression (%lu bytes data/%lu bytes wire)]",
 				    me.name, RPL_STATSDEBUG, source_p->name, target_p->name,
 				    zipstats.out_ratio, zipstats.out, zipstats.out_wire,
 				    zipstats.in_ratio, zipstats.in, zipstats.in_wire);
 			sent_data++;
 		}
 	}
-	sendto_one (source_p, ":%s %d %s :%u ziplink(s)",
+	sendto_one (source_p, ":%s %d %s Z :%u ziplink(s)",
 		    me.name, RPL_STATSDEBUG, source_p->name, sent_data);
 }
 
@@ -957,21 +962,21 @@ stats_servlinks (struct Client *source_p)
 			    IsOper (source_p) ? show_capabilities (target_p) : "TS");
 	}
 
-	sendto_one (source_p, ":%s %d %s :%u total server(s)",
+	sendto_one (source_p, ":%s %d %s ? :%u total server(s)",
 		    me.name, RPL_STATSDEBUG, source_p->name, j);
 
-	sendto_one (source_p, ":%s %d %s :Sent total : %7.2f %s",
+	sendto_one (source_p, ":%s %d %s ? :Sent total : %7.2f %s",
 		    me.name, RPL_STATSDEBUG, source_p->name, _GMKv (sendK), _GMKs (sendK));
-	sendto_one (source_p, ":%s %d %s :Recv total : %7.2f %s",
+	sendto_one (source_p, ":%s %d %s ? :Recv total : %7.2f %s",
 		    me.name, RPL_STATSDEBUG, source_p->name, _GMKv (receiveK), _GMKs (receiveK));
 
 	uptime = (CurrentTime - me.since);
 
-	sendto_one (source_p, ":%s %d %s :Server send: %7.2f %s (%4.1f K/s)",
+	sendto_one (source_p, ":%s %d %s ? :Server send: %7.2f %s (%4.1f K/s)",
 		    me.name, RPL_STATSDEBUG, source_p->name,
 		    _GMKv (me.localClient->sendK), _GMKs (me.localClient->sendK),
 		    (float) ((float) me.localClient->sendK / (float) uptime));
-	sendto_one (source_p, ":%s %d %s :Server recv: %7.2f %s (%4.1f K/s)",
+	sendto_one (source_p, ":%s %d %s ? :Server recv: %7.2f %s (%4.1f K/s)",
 		    me.name, RPL_STATSDEBUG, source_p->name,
 		    _GMKv (me.localClient->receiveK),
 		    _GMKs (me.localClient->receiveK),
