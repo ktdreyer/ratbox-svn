@@ -81,7 +81,7 @@ void* MyMalloc(size_t x)
  */
 void* MyRealloc(void* x, size_t y)
 {
-  char *ret = realloc(x, y);
+  void* ret = realloc(x, y);
 
   if (!ret)
     outofmemory();

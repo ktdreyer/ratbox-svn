@@ -108,16 +108,24 @@
  */
 int m_sjoin(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
-  struct Channel*     chptr;
+  struct Channel*     chptr = 0;
   struct Client*      acptr;
   time_t              newts;
-  time_t              oldts;
+  time_t              oldts = 0;
   time_t              tstosend;
   static struct Mode  mode;
   static struct Mode* oldmode;
   struct SLink*       l;
-  int   args = 0, haveops = 0, keep_our_modes = 1, keep_new_modes = 1;
-  int   doesop = 0, what = 0, pargs = 0, fl, people = 0, isnew;
+  int   args = 0;
+  int   haveops = 0;
+  int   keep_our_modes = 1;
+  int   keep_new_modes = 1;
+  int   doesop = 0;
+  int   what = 0;
+  int   pargs = 0;
+  int   fl;
+  int   people = 0;
+  int   isnew = 0;
   /* loop unrolled this is now redundant */
   /*  int ip; */
   char *s;
@@ -126,7 +134,9 @@ int m_sjoin(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   static char sjbuf[BUFSIZE];
   char        modebuf[MODEBUFLEN];
   char        parabuf[MODEBUFLEN];
-  char  *mbuf = modebuf, *t = sjbuf, *p;
+  char  *mbuf = modebuf;
+  char  *t = sjbuf;
+  char  *p;
 
   if (IsClient(sptr) || parc < 5)
     return 0;

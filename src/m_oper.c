@@ -23,6 +23,8 @@
  *   $Id$
  */
 
+#define _XOPEN_SOURCE
+
 #include "m_commands.h"
 #include "client.h"
 #include "fdlist.h"
@@ -36,7 +38,6 @@
 #include "list.h"
 
 #include <fcntl.h>
-#define _XOPEN_SOURCE
 #include <unistd.h>
 
 
