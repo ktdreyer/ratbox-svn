@@ -43,6 +43,7 @@
 #include "send.h"
 #include "msg.h"
 #include "fileio.h"
+#include "s_serv.h"
 
 #include <assert.h>
 #include <string.h>
@@ -73,7 +74,8 @@ static void log_gline(struct Client *,const char *,GLINE_PENDING *,
 
 static void expire_pending_glines();
 
-static int majority_gline(struct Client*, const char *,const char *, const char *, 
+static int majority_gline(struct Client*, const char *,const char *,
+			  const char *, 
                           const char* serv_name,
                           const char *,const char *,const char *); 
 
@@ -119,7 +121,7 @@ int     mo_gline(struct Client *cptr,
   char *oper_username = NULL;          /* username of oper requesting GLINE */
   char *oper_host = NULL;              /* hostname of oper requesting GLINE */
   const char* oper_server = NULL;      /* server of oper requesting GLINE */
-  char *user = NULL, *host = NULL;            /* user and host of GLINE "victim" */
+  char *user = NULL, *host = NULL;     /* user and host of GLINE "victim" */
   char *reason = NULL;                 /* reason for "victims" demise */
   char *p;
   register char tmpch;
@@ -130,228 +132,155 @@ int     mo_gline(struct Client *cptr,
   char temphost[HOSTLEN + 1];
   struct ConfItem *aconf;
 
-  if(!IsServer(sptr)) /* allow remote opers to apply g lines */
+  if (ConfigFileEntry.glines)
     {
-		if (ConfigFileEntry.glines) {
-			/* Only globals can apply Glines */
-			if (!IsGlobalOper(sptr))
-			{
-				sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
-				return 0;
-			}
+      /* Only globals can apply Glines */
+      if (!IsGlobalOper(sptr))
+	{
+	  sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
+	  return 0;
+	}
 
-			if (!IsSetOperGline(sptr))
-			{
-				sendto_one(sptr,":%s NOTICE %s :You have no G flag",me.name,parv[0]);
-				return 0;
-			}
+      if (!IsSetOperGline(sptr))
+	{
+	  sendto_one(sptr,":%s NOTICE %s :You have no G flag",me.name,parv[0]);
+	  return 0;
+	}
 			
-			if ( parc < 3 )
-			{
-				sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
-						   me.name, parv[0], "GLINE");
-				return 0;
-			}
+      if ( parc < 3 )
+	{
+	  sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
+		     me.name, parv[0], "GLINE");
+	  return 0;
+	}
 			
-			if ( (host = strchr(parv[1], '@')) || *parv[1] == '*' )
-			{
-				/* Explicit user@host mask given */
-				
-				if(host)                      /* Found user@host */
-				{
-					user = parv[1];   /* here is user part */
-					*(host++) = '\0'; /* and now here is host */
-				}
-				else
-				{
-					user = "*";               /* no @ found, assume its *@somehost */
-					host = parv[1];
-				}
-				
-				if (!*host)           /* duh. no host found, assume its '*' host */
-					host = "*";
-
-				strncpy_irc(tempuser, user, USERLEN + 1);     /* allow for '*' */
-				tempuser[USERLEN + 1] = '\0';
-				strncpy_irc(temphost, host, HOSTLEN);
-				temphost[HOSTLEN] = '\0';
-				user = tempuser;
-				host = temphost;
-			}
-			else
-			{
-				sendto_one(sptr, ":%s NOTICE %s :Can't G-Line a nick use user@host",
-						   me.name,
-						   parv[0]);
-				return 0;
-			}
+      if ( (host = strchr(parv[1], '@')) || *parv[1] == '*' )
+	{
+	  /* Explicit user@host mask given */
+	      
+	  if(host)                      /* Found user@host */
+	    {
+	      user = parv[1];   /* here is user part */
+	      *(host++) = '\0'; /* and now here is host */
+	    }
+	  else
+	    {
+	      user = "*";               /* no @ found, assume its *@somehost */
+	      host = parv[1];
+	    }
+	      
+	  if (!*host)           /* duh. no host found, assume its '*' host */
+	    host = "*";
+	      
+	  strncpy_irc(tempuser, user, USERLEN + 1);     /* allow for '*' */
+	  tempuser[USERLEN + 1] = '\0';
+	  strncpy_irc(temphost, host, HOSTLEN);
+	  temphost[HOSTLEN] = '\0';
+	  user = tempuser;
+	  host = temphost;
+	}
+      else
+	{
+	  sendto_one(sptr, ":%s NOTICE %s :Can't G-Line a nick use user@host",
+		     me.name,
+		     parv[0]);
+	  return 0;
+	}
 			
-			if(strchr(parv[2], ':'))
-			{
-				sendto_one(sptr,
-						   ":%s NOTICE %s :Invalid character ':' in comment",
-						   me.name, parv[2]);
-				return 0;
-			}
+      if(strchr(parv[2], ':'))
+	{
+	  sendto_one(sptr,
+		     ":%s NOTICE %s :Invalid character ':' in comment",
+		     me.name, parv[2]);
+	  return 0;
+	}
+	  
+      /*
+       * Now we must check the user and host to make sure there
+       * are at least NONWILDCHARS non-wildcard characters in
+       * them, otherwise assume they are attempting to gline
+       * *@* or some variant of that. This code will also catch
+       * people attempting to gline *@*.tld, as long as NONWILDCHARS
+       * is greater than 3. In that case, there are only 3 non-wild
+       * characters (tld), so if NONWILDCHARS is 4, the gline will
+       * be disallowed.
+       * -wnder
+       */
 			
-			/*
-			 * Now we must check the user and host to make sure there
-			 * are at least NONWILDCHARS non-wildcard characters in
-			 * them, otherwise assume they are attempting to gline
-			 * *@* or some variant of that. This code will also catch
-			 * people attempting to gline *@*.tld, as long as NONWILDCHARS
-			 * is greater than 3. In that case, there are only 3 non-wild
-			 * characters (tld), so if NONWILDCHARS is 4, the gline will
-			 * be disallowed.
-			 * -wnder
-			 */
+      nonwild = 0;
+      p = user;
+      while ((tmpch = *p++))
+	{
+	  if (!IsKWildChar(tmpch))
+	    {
+	      /*
+	       * If we find enough non-wild characters, we can
+	       * break - no point in searching further.
+	       */
+	      if (++nonwild >= NONWILDCHARS)
+		break;
+	    }
+	}
 			
-			nonwild = 0;
-			p = user;
-			while ((tmpch = *p++))
-			{
-				if (!IsKWildChar(tmpch))
-				{
-					/*
-					 * If we find enough non-wild characters, we can
-					 * break - no point in searching further.
-					 */
-					if (++nonwild >= NONWILDCHARS)
-						break;
-				}
-			}
+      if (nonwild < NONWILDCHARS)
+	{
+	  /*
+	   * The user portion did not contain enough non-wild
+	   * characters, try the host.
+	   */
+	  p = host;
+	  while ((tmpch = *p++))
+	    {
+	      if (!IsKWildChar(tmpch))
+		if (++nonwild >= NONWILDCHARS)
+		  break;
+	    }
+	}
+	  
+      if (nonwild < NONWILDCHARS)
+	{
+	  /*
+	   * Not enough non-wild characters were found, assume
+	   * they are trying to gline *@*.
+	   */
+	  if (MyClient(sptr))
+	    sendto_one(sptr,
+		       ":%s NOTICE %s :Please include at least %d non-wildcard characters with the user@host",
+		       me.name,
+		       parv[0],
+		       NONWILDCHARS);
+	  
+	  return 0;
+	}
 			
-			if (nonwild < NONWILDCHARS)
-			{
-				/*
-				 * The user portion did not contain enough non-wild
-				 * characters, try the host.
-				 */
-				p = host;
-				while ((tmpch = *p++))
-				{
-					if (!IsKWildChar(tmpch))
-						if (++nonwild >= NONWILDCHARS)
-							break;
-				}
-			}
-			
-			if (nonwild < NONWILDCHARS)
-			{
-				/*
-				 * Not enough non-wild characters were found, assume
-				 * they are trying to gline *@*.
-				 */
-				if (MyClient(sptr))
-					sendto_one(sptr,
-							   ":%s NOTICE %s :Please include at least %d non-wildcard characters with the user@host",
-							   me.name,
-							   parv[0],
-							   NONWILDCHARS);
-				
-				return 0;
-			}
-			
-			reason = parv[2];
-			
-			if (sptr->user && sptr->user->server)
-				oper_server = sptr->user->server;
-			else
-				return 0;
-			
-			oper_name     = sptr->name;
-			oper_username = sptr->username;
-			oper_host     = sptr->host;
+      reason = parv[2];
+	  
+      if (sptr->user && sptr->user->server)
+	oper_server = sptr->user->server;
+      else
+	return 0;
+	  
+      oper_name     = sptr->name;
+      oper_username = sptr->username;
+      oper_host     = sptr->host;
 			
 			
-			sendto_serv_butone(NULL, ":%s GLINE %s %s %s %s %s %s :%s",
-							   me.name,
-							   oper_name,
-							   oper_username,
-							   oper_host,
-							   oper_server,
-							   user,
-							   host,
-							   reason);
-		}
-		else
-		{
-			sendto_one(sptr,":%s NOTICE %s :GLINE disabled",me.name,parv[0]);  
-		}
+      sendto_cap_serv_butone(CAP_GLN,
+			     NULL, ":%s GLINE %s %s %s %s %s %s :%s",
+			     me.name,
+			     oper_name,
+			     oper_username,
+			     oper_host,
+			     oper_server,
+			     user,
+			     host,
+			     reason);
     }
   else
     {
-      if(!IsServer(sptr))
-        return(0);
-
-      /* Always good to be paranoid about arguments */
-      if(parc < 8)
-        return 0;
-
-      oper_name = parv[1];
-      oper_username = parv[2];
-      oper_host = parv[3];
-      oper_server = parv[4];
-      user = parv[5];
-      host = parv[6];
-      reason = parv[7];
-
-      sendto_serv_butone(sptr, ":%s GLINE %s %s %s %s %s %s :%s",
-                         sptr->name,
-                         oper_name,oper_username,oper_host,oper_server,
-                         user,
-                         host,
-                         reason);
+      sendto_one(sptr,":%s NOTICE %s :GLINE disabled",me.name,parv[0]);  
     }
-  if (ConfigFileEntry.glines) {
-   log_gline_request(oper_name,oper_username,oper_host,oper_server,
-                     user,host,reason);
 
-   sendto_realops("%s!%s@%s on %s is requesting gline for [%s@%s] [%s]",
-                  oper_name,
-                  oper_username,
-                  oper_host,
-                  oper_server,
-                  user,
-                  host,
-                  reason);
-
-  /* If at least 3 opers agree this user should be G lined then do it */
-  if(majority_gline(sptr,
-                    oper_name,
-                    oper_username,
-                    oper_host,
-                    oper_server,
-                    user,
-                    host,
-                    reason))
-    {
-      current_date = smalldate((time_t) 0);
-          
-      aconf = make_conf();
-      aconf->status = CONF_KILL;
-      DupString(aconf->host, host);
-
-      ircsprintf(buffer, "%s (%s)",reason,current_date);
-      
-      DupString(aconf->passwd, buffer);
-      DupString(aconf->name, user);
-      aconf->hold = CurrentTime + ConfigFileEntry.gline_time;
-      add_gline(aconf);
-      
-      sendto_realops("%s!%s@%s on %s has triggered gline for [%s@%s] [%s]",
-                     oper_name,
-                     oper_username,
-                     oper_host,
-                     oper_server,
-                     user,
-                     host,
-                     reason);
-      
-      check_klines();
-      return 0;
-    }
-  }
   return 0;
 }
 
@@ -378,7 +307,7 @@ int     ms_gline(struct Client *cptr,
   char *oper_username = NULL;          /* username of oper requesting GLINE */
   char *oper_host = NULL;              /* hostname of oper requesting GLINE */
   const char* oper_server = NULL;      /* server of oper requesting GLINE */
-  char *user = NULL, *host = NULL;            /* user and host of GLINE "victim" */
+  char *user = NULL, *host = NULL;     /* user and host of GLINE "victim" */
   char *reason = NULL;                 /* reason for "victims" demise */
   char *p;
   register char tmpch;
@@ -389,229 +318,80 @@ int     ms_gline(struct Client *cptr,
   char temphost[HOSTLEN + 1];
   struct ConfItem *aconf;
 
-  if(!IsServer(sptr)) /* allow remote opers to apply g lines */
-  {
-	  if (ConfigFileEntry.glines) {
-/* Only globals can apply Glines */
-      if (!IsGlobalOper(sptr))
-        {
-          sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
-          return 0;
-        }
 
-      if (!IsSetOperGline(sptr))
-        {
-          sendto_one(sptr,":%s NOTICE %s :You have no G flag",me.name,parv[0]);
-          return 0;
-        }
+  if(!IsServer(sptr))
+    return(0);
 
-      if ( parc < 3 )
-        {
-          sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
-                     me.name, parv[0], "GLINE");
-          return 0;
-        }
-      
-      if ( (host = strchr(parv[1], '@')) || *parv[1] == '*' )
-        {
-          /* Explicit user@host mask given */
-          
-          if(host)                      /* Found user@host */
-            {
-              user = parv[1];   /* here is user part */
-              *(host++) = '\0'; /* and now here is host */
-            }
-          else
-            {
-              user = "*";               /* no @ found, assume its *@somehost */
-              host = parv[1];
-            }
-
-          if (!*host)           /* duh. no host found, assume its '*' host */
-            host = "*";
-
-          strncpy_irc(tempuser, user, USERLEN + 1);     /* allow for '*' */
-          tempuser[USERLEN + 1] = '\0';
-          strncpy_irc(temphost, host, HOSTLEN);
-          temphost[HOSTLEN] = '\0';
-          user = tempuser;
-          host = temphost;
-        }
-      else
-        {
-          sendto_one(sptr, ":%s NOTICE %s :Can't G-Line a nick use user@host",
-                     me.name,
-                     parv[0]);
-          return 0;
-        }
-
-      if(strchr(parv[2], ':'))
-        {
-          sendto_one(sptr,
-                     ":%s NOTICE %s :Invalid character ':' in comment",
-                     me.name, parv[2]);
-          return 0;
-        }
-
-  /*
-   * Now we must check the user and host to make sure there
-   * are at least NONWILDCHARS non-wildcard characters in
-   * them, otherwise assume they are attempting to gline
-   * *@* or some variant of that. This code will also catch
-   * people attempting to gline *@*.tld, as long as NONWILDCHARS
-   * is greater than 3. In that case, there are only 3 non-wild
-   * characters (tld), so if NONWILDCHARS is 4, the gline will
-   * be disallowed.
-   * -wnder
-   */
-
-  nonwild = 0;
-  p = user;
-  while ((tmpch = *p++))
-  {
-    if (!IsKWildChar(tmpch))
-    {
-      /*
-       * If we find enough non-wild characters, we can
-       * break - no point in searching further.
-       */
-      if (++nonwild >= NONWILDCHARS)
-        break;
-    }
-  }
-
-  if (nonwild < NONWILDCHARS)
-  {
-    /*
-     * The user portion did not contain enough non-wild
-     * characters, try the host.
-     */
-    p = host;
-    while ((tmpch = *p++))
-    {
-      if (!IsKWildChar(tmpch))
-        if (++nonwild >= NONWILDCHARS)
-          break;
-    }
-  }
-
-  if (nonwild < NONWILDCHARS)
-  {
-    /*
-     * Not enough non-wild characters were found, assume
-     * they are trying to gline *@*.
-     */
-    if (MyClient(sptr))
-      sendto_one(sptr,
-        ":%s NOTICE %s :Please include at least %d non-wildcard characters with the user@host",
-        me.name,
-        parv[0],
-        NONWILDCHARS);
-
+  /* Always good to be paranoid about arguments */
+  if(parc < 8)
     return 0;
-  }
 
-      reason = parv[2];
+  oper_name = parv[1];
+  oper_username = parv[2];
+  oper_host = parv[3];
+  oper_server = parv[4];
+  user = parv[5];
+  host = parv[6];
+  reason = parv[7];
 
-      if (sptr->user && sptr->user->server)
-        oper_server = sptr->user->server;
-      else
-        return 0;
+  sendto_serv_butone(sptr, ":%s GLINE %s %s %s %s %s %s :%s",
+		     sptr->name,
+		     oper_name,oper_username,oper_host,oper_server,
+		     user,
+		     host,
+		     reason);
 
-      oper_name     = sptr->name;
-      oper_username = sptr->username;
-      oper_host     = sptr->host;
-
-
-      sendto_serv_butone(NULL, ":%s GLINE %s %s %s %s %s %s :%s",
-                         me.name,
-                         oper_name,
-                         oper_username,
-                         oper_host,
-                         oper_server,
-                         user,
-                         host,
-                         reason);
-	  }
-	  else 
-	  {
-		  sendto_one(sptr,":%s NOTICE %s :GLINE disabled",me.name,parv[0]);  
-	  }
-    }
-  else
+  if (ConfigFileEntry.glines)
     {
-      if(!IsServer(sptr))
-        return(0);
+      log_gline_request(oper_name,oper_username,oper_host,oper_server,
+			user,host,reason);
 
-      /* Always good to be paranoid about arguments */
-      if(parc < 8)
-        return 0;
+      sendto_realops("%s!%s@%s on %s is requesting gline for [%s@%s] [%s]",
+		     oper_name,
+		     oper_username,
+		     oper_host,
+		     oper_server,
+		     user,
+		     host,
+		     reason);
 
-      oper_name = parv[1];
-      oper_username = parv[2];
-      oper_host = parv[3];
-      oper_server = parv[4];
-      user = parv[5];
-      host = parv[6];
-      reason = parv[7];
-
-      sendto_serv_butone(sptr, ":%s GLINE %s %s %s %s %s %s :%s",
-                         sptr->name,
-                         oper_name,oper_username,oper_host,oper_server,
-                         user,
-                         host,
-                         reason);
-    }
-  if (ConfigFileEntry.glines) {
-   log_gline_request(oper_name,oper_username,oper_host,oper_server,
-                     user,host,reason);
-
-   sendto_realops("%s!%s@%s on %s is requesting gline for [%s@%s] [%s]",
-                  oper_name,
-                  oper_username,
-                  oper_host,
-                  oper_server,
-                  user,
-                  host,
-                  reason);
-
-  /* If at least 3 opers agree this user should be G lined then do it */
-  if(majority_gline(sptr,
-                    oper_name,
-                    oper_username,
-                    oper_host,
-                    oper_server,
-                    user,
-                    host,
-                    reason))
-    {
-      current_date = smalldate((time_t) 0);
+      /* If at least 3 opers agree this user should be G lined then do it */
+      if(majority_gline(sptr,
+			oper_name,
+			oper_username,
+			oper_host,
+			oper_server,
+			user,
+			host,
+			reason))
+	{
+	  current_date = smalldate((time_t) 0);
           
-      aconf = make_conf();
-      aconf->status = CONF_KILL;
-      DupString(aconf->host, host);
+	  aconf = make_conf();
+	  aconf->status = CONF_KILL;
+	  DupString(aconf->host, host);
 
-      ircsprintf(buffer, "%s (%s)",reason,current_date);
+	  ircsprintf(buffer, "%s (%s)",reason,current_date);
       
-      DupString(aconf->passwd, buffer);
-      DupString(aconf->name, user);
-      aconf->hold = CurrentTime + ConfigFileEntry.gline_time;
-      add_gline(aconf);
+	  DupString(aconf->passwd, buffer);
+	  DupString(aconf->name, user);
+	  aconf->hold = CurrentTime + ConfigFileEntry.gline_time;
+	  add_gline(aconf);
       
-      sendto_realops("%s!%s@%s on %s has triggered gline for [%s@%s] [%s]",
-                     oper_name,
-                     oper_username,
-                     oper_host,
-                     oper_server,
-                     user,
-                     host,
-                     reason);
+	  sendto_realops("%s!%s@%s on %s has triggered gline for [%s@%s] [%s]",
+			 oper_name,
+			 oper_username,
+			 oper_host,
+			 oper_server,
+			 user,
+			 host,
+			 reason);
       
-      check_klines();
+	  check_klines();
 
-      return 0;
+	  return 0;
+	}
     }
-  }
   return 0;
 }
 
