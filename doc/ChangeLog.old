@@ -1,3 +1,8 @@
+*** 20010803_2 by leeh
+- undeffed USE_TABLE_MODE, theres a bug in chcap stuff which will core
+  when removing jupes
+
+
 *** 20010803_1 by leeh
 - added a new param to sendto_realops_flags()
   this is an indication of what level the opers need:
