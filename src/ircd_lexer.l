@@ -22,15 +22,12 @@
  */
 
 %option case-insensitive
+%option noyywrap
+
 %{
 /* XXX - No we aren't but lex calls malloc :(. It is even worse that it
    doesn't call free! */
 #define WE_ARE_MEMORY_C
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <string.h>
-#include <ctype.h>
 #include "tools.h"
 #include "irc_string.h"
 #include "common.h"
@@ -38,40 +35,66 @@
 #include "y.tab.h"
 #include "memory.h"
 #include "hostmask.h"
-
-char *ip_string;
+#include "setup.h"
+#include "config.h"
+#include "s_log.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <string.h>
+#ifdef STRING_WITH_STRINGS
+# include <string.h>
+# include <strings.h>
+#else
+# ifdef HAVE_STRING_H
+#  include <string.h>
+# else
+#  ifdef HAVE_STRINGS_H
+#   include <strings.h>
+#  endif
+# endif
+#endif
+#include <ctype.h>
 
 #undef YY_INPUT
-#define YY_FATAL_ERROR(msg) conf_yy_fatal_error( msg )
+#define YY_FATAL_ERROR(msg) conf_yy_fatal_error(msg)
 #define YY_INPUT(buf,result,max_size) \
-	   if ((result = conf_fbgets( buf, max_size, conf_fbfile_in )) == 0) \
-		YY_FATAL_ERROR( "input in flex scanner failed" ); 
+  if (!(result = conf_fbgets(buf, max_size, conf_fbfile_in))) \
+    YY_FATAL_ERROR("input in flex scanner failed"); 
+#define MAX_INCLUDE_DEPTH 10
 
-
-int  lineno;
+int lineno=1;
 char linebuf[IRCD_BUFSIZE];
+int include_stack_ptr=0;
+YY_BUFFER_STATE include_stack[MAX_INCLUDE_DEPTH];
+int lineno_stack[MAX_INCLUDE_DEPTH];
+FBFILE* inc_fbfile_in[MAX_INCLUDE_DEPTH];
 void ccomment(void);
+void cinclude(void);
+int ieof(void);
 %}
 
-ws		[ \t]*
-comment		#.*
-qstring		\"[^\"\n]*[\"\n]
+ws        [ \t]*
+digit     [0-9]
+comment   #.*
+qstring   \"[^\"\n]*[\"\n]
+include   \.include{ws}(\<.*\>|\".*\")
 
 %%
-"/*"		{ ccomment(); }
-\n.*		{ 
-		  strcpy(linebuf, yytext+1); 
-		  lineno++;
-                  yyless(1);
-                }
-{ws}		;
-{comment}	;
 
-[0-9]+          { yylval.number = atoi(yytext); return NUMBER; }
+{include}   { cinclude(); }
+"/*"	      { ccomment(); }
+
+\n.*	      { strcpy(linebuf, yytext+1); lineno++; yyless(1); }
+
+{ws}		    ;
+{comment}	  ;
+
+{digit}+          { yylval.number = atoi(yytext); return NUMBER; }
 
 {qstring}	{ yylval.string = yytext+1;
 		  if(yylval.string[yyleng-2] != '"')
-		    fprintf(stderr,"Unterminated character string\n");
+		    log(L_ERROR, "Unterminated character string");
 		  else
 		    yylval.string[yyleng-2] = '\0'; /* remove close quote */
 		  return QSTRING;
@@ -271,27 +294,90 @@ terabyte		{ return TBYTES; }
 tbytes			{ return TBYTES; }
 tbyte			{ return TBYTES; }
 tb			{ return TBYTES; }
+
 .		        { return yytext[0]; }
+<<EOF>>     { if (ieof()) yyterminate(); }
 
 %%
 
-/* -kre*/
+/* C-comment ignoring routine -kre*/
 void ccomment(void)
 {
   int c;
 
+  /* log(L_NOTICE, "got comment"); */
   while (1)
   {
-    while ((c=input())!='*' && c!=EOF);
-    if (c=='*')
+    while ((c = input()) != '*' && c != EOF)
+      if (c == '\n') ++lineno;
+    if (c == '*')
     {
-      while ((c=input())=='*');
-      if (c=='/') break;
+      while ((c = input()) == '*');
+      if (c == '/') break;
     }
-    if (c==EOF)
+    if (c == EOF)
     {
       YY_FATAL_ERROR("EOF in comment");
       break;
     }
   }
+}
+
+/* C-style .includes. This function will properly swap input conf buffers,
+ * and lineno -kre */
+void cinclude(void)
+{
+  char *c;
+  if ((c = index(yytext, '<')) == NULL)
+    *index(c = index(yytext, '"') + 1, '"') = 0;
+  else
+    *index(++c, '>') = 0;
+
+  /* log(L_NOTICE, "got include %s!", c); */
+
+  /* do stacking and co. */ 
+  if (include_stack_ptr >= MAX_INCLUDE_DEPTH)
+    log(L_ERROR, "Includes nested too deep in %s", c);
+  else
+  {
+    FBFILE *tmp_fbfile_in;
+    char filenamebuf[IRCD_BUFSIZE];
+    
+    snprintf(filenamebuf, IRCD_BUFSIZE, "%s/%s", ETCPATH, c);
+    tmp_fbfile_in = fbopen(filenamebuf, "r");
+    
+    if (tmp_fbfile_in == NULL)
+    {
+      log(L_ERROR, "Cannot include %s", filenamebuf);
+      return;
+    }
+    lineno_stack[include_stack_ptr] = lineno;
+    lineno = 1;
+    inc_fbfile_in[include_stack_ptr] = conf_fbfile_in;
+    include_stack[include_stack_ptr++] = YY_CURRENT_BUFFER;
+    conf_fbfile_in = tmp_fbfile_in;
+    yy_switch_to_buffer(yy_create_buffer(yyin, YY_BUF_SIZE));
+  }
+}
+
+/* This is function that will be called on EOF in conf file. It will
+ * apropriately close conf if it not main conf and swap input buffers -kre
+ * */
+int ieof(void)
+{
+  /* log(L_NOTICE, "return from include stack!"); */
+  if (include_stack_ptr)
+    fbclose(conf_fbfile_in);
+  if (--include_stack_ptr < 0)
+  {
+    /* log(L_NOTICE, "terminating lexer"); */
+    return 1;
+  }
+  /* switch buffer */
+  /* log(L_NOTICE, "deleting include_stack_ptr=%d", include_stack_ptr); */
+  yy_delete_buffer(YY_CURRENT_BUFFER);
+  lineno = lineno_stack[include_stack_ptr];
+  conf_fbfile_in = inc_fbfile_in[include_stack_ptr];
+  yy_switch_to_buffer(include_stack[include_stack_ptr]);
+  return 0;
 }

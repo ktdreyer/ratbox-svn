@@ -48,7 +48,7 @@ y.tab.c:	ircd_parser.y
 	${YACC} -d ircd_parser.y
 
 lex.yy.o:	lex.yy.c ircd_lexer.l
-	${CC} -g -I ../include -c lex.yy.c
+	${CC} ${CFLAGS} -I ../include -c lex.yy.c
 
 lex.yy.c:	ircd_lexer.l
 	${LEX} ircd_lexer.l
