@@ -7,7 +7,7 @@ fixed some formatting in m_whois
 
 *** 20001231_26 by toot
 it didn't :P
-char *_version = "$Revision$"; looks a bit poo
+char *_version = "<dollar>Revision: 1.35 <dollar>"; looks a bit poo
 
 
 *** 20001231_25 by toot
@@ -104,7 +104,7 @@ Attempt to fix various issues with channel modes.. although there are still a fe
 *** 20001231_6 by toot
 . fixed a possible overflow in m_list with persistant vchans
 . moved the vchan_id setting into remove_user_from_chan so the user
-  is still in a dlist_list :P
+  is still in a dlink_list :P
 
 
 *** 20001231_5 by lusky
@@ -549,7 +549,7 @@ I dunno.
 *** 20001228_15 by toot
 . started adding the ircd.conf options to /info (same order
   as in example.conf)  got as far as max_nick_changes.
-. put back a "Your are Dlined" notice that had run off 
+. put back a "You are Dlined" notice that had run off 
 . removed a couple of unused settings
 
 
@@ -908,7 +908,7 @@ replaced some ConfigFileEntry.hide_server with GlobalSetOptions.hide_server
 
 
 *** 20001225_12 by toot
-. fixed soem paramcounts in modules
+. fixed some paramcounts in modules
 . make GLINE_CLEANUP_TIME a bit more frequent
 
 
