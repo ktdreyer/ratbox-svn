@@ -1,3 +1,8 @@
+*** 19991013_1 by db
+- botched wild card matching fixed
+
+
+
 *** 19991011_1 by db
   It turns out, that cptr->fd is <0 in some cases when its being used, just
 as Q described. I was confused at first, because it sounded like he
