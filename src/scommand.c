@@ -23,6 +23,7 @@ static dlink_list scommand_table[MAX_SCOMMAND_HASH];
 
 static void c_admin(struct client *, const char *parv[], int parc);
 static void c_capab(struct client *, const char *parv[], int parc);
+static void c_encap(struct client *, const char *parv[], int parc);
 static void c_pass(struct client *, const char *parv[], int parc);
 static void c_ping(struct client *, const char *parv[], int parc);
 static void c_pong(struct client *, const char *parv[], int parc);
@@ -33,6 +34,7 @@ static void c_whois(struct client *, const char *parv[], int parc);
 
 static struct scommand_handler admin_command = { "ADMIN", c_admin, 0, DLINK_EMPTY };
 static struct scommand_handler capab_command = { "CAPAB", c_capab, FLAGS_UNKNOWN, DLINK_EMPTY };
+static struct scommand_handler encap_command = { "ENCAP", c_encap, 0, DLINK_EMPTY };
 static struct scommand_handler pass_command = { "PASS", c_pass, FLAGS_UNKNOWN, DLINK_EMPTY };
 static struct scommand_handler ping_command = { "PING", c_ping, 0, DLINK_EMPTY };
 static struct scommand_handler pong_command = { "PONG", c_pong, 0, DLINK_EMPTY };
@@ -253,6 +255,25 @@ c_capab(struct client *client_p, const char *parv[], int parc)
 		data = p;
 		if(p && (p = strchr(data, ' ')))
 			*p++ = '\0';
+	}
+}
+
+static void
+c_encap(struct client *client_p, const char *parv[], int parc)
+{
+	if(parc < 3)
+		return;
+
+	if(!match(parv[1], MYNAME))
+		return;
+
+	if(!irccmp(parv[2], "LOGIN"))
+	{
+		/* this is only accepted from users */
+		if(EmptyString(parv[3]) || !IsUser(client_p))
+			return;
+
+		hook_call(HOOK_BURST_LOGIN, client_p, parv[3]);
 	}
 }
 

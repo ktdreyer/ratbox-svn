@@ -72,6 +72,7 @@ static struct service_handler userserv_service = {
 };
 
 static int user_db_callback(void *db, int argc, char **argv, char **colnames);
+static int h_user_burst_login(void *, void *);
 static void e_user_expire(void *unused);
 
 void
@@ -82,6 +83,8 @@ init_s_userserv(void)
 	userserv_p = add_service(&userserv_service);
 
 	loc_sqlite_exec(user_db_callback, "SELECT * FROM users");
+
+	hook_add(h_user_burst_login, HOOK_BURST_LOGIN);
 
 	eventAdd("userserv_expire", e_user_expire, NULL, 43200);
 }
@@ -224,6 +227,25 @@ logout_user_reg(struct user_reg *ureg_p)
 		target_p->user->user_reg = NULL;
 		dlink_destroy(ptr, &ureg_p->users);
 	}
+}
+
+static int
+h_user_burst_login(void *v_client_p, void *v_username)
+{
+	struct client *client_p = v_client_p;
+	struct user_reg *ureg_p;
+	const char *username = v_username;
+
+	/* XXX - log them out? */
+	if((ureg_p = find_user_reg(username)) == NULL)
+		return 0;
+
+	/* already logged in.. hmm, this shouldnt really happen */
+	if(client_p->user->user_reg)
+		dlink_find_destroy(client_p, &client_p->user->user_reg->users);
+
+	client_p->user->user_reg = ureg_p;
+	dlink_add_alloc(client_p, &ureg_p->users);
 }
 
 static void

@@ -8,7 +8,8 @@
 #define HOOK_SQUIT_UNKNOWN	3	/* squit an unknown server */
 #define HOOK_FINISHED_BURSTING	4
 #define HOOK_SJOIN_LOWERTS	5
-#define HOOK_LAST_HOOK		6
+#define HOOK_BURST_LOGIN	6
+#define HOOK_LAST_HOOK		7
 
 typedef int (*hook_func)(void *, void *);
 
