@@ -1,3 +1,15 @@
+androsyn    2003/02/08 07:14:54 UTC	(20030208_6)
+
+  Modified files:
+    modules              Makefile.in 
+  Log:
+  Actually add static_modules.o to the library
+  
+  Revision  Changes    Path
+  1.80      +2 -2      ircd-ratbox/modules/Makefile.in
+
+
+
 androsyn    2003/02/08 07:14:03 UTC	(20030208_5)
 
   Modified files:
