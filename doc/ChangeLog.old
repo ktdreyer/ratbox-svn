@@ -1,3 +1,8 @@
+*** 20010120_4 by db
+- removed CONF_ADMIN dumb dumb dumb, now its just AdminInfo struct
+  
+
+
 *** 20010120_3 by db
 - removed CONF_OPS from s_conf.h , its all CONF_OPERATOR now,
   removed CONF_LOCOP while at it.
