@@ -170,14 +170,20 @@ read_packet(int fd, void *data)
   assert(lcptr != NULL);
   assert(lcptr->allow_read <= MAX_FLOOD_PER_SEC);
 
-  assert(!IsDead(cptr));
-
   /*
    * Read some data. We *used to* do anti-flood protection here, but
    * I personally think it makes the code too hairy to make sane.
    *     -- adrian
    */
   length = recv(cptr->fd, readBuf, READBUF_SIZE, 0);
+
+  /* XXX If the client is actually dead, read the buffer but throw it out
+   * a suggested more optimum fix will be to mark the fd as -1 and close it in 
+   * dead_link() in send.c  
+   * -Dianora
+   */
+
+  if(IsDead(cptr))return;
 
   if (length <= 0) {
     /*

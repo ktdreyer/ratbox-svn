@@ -112,17 +112,27 @@ struct User* make_user(struct Client *cptr)
       user = BlockHeapALLOC(free_anUsers,struct User);
       if( user == (struct User *)NULL)
         outofmemory();
+
+      memset((void *)user, 0, sizeof(struct User));
+
+      /* The commented out lines here are
+       * for documentation purposes only
+       * as they are zeroed by memset above
+       */
+
+#if 0
       user->away = NULL;
       user->server = (char *)NULL;      /* scache server name */
-      user->refcnt = 1;
       user->joined = 0;
       user->channel.head = NULL;
       user->channel.tail = NULL;
       user->invited.head = NULL;
       user->invited.tail = NULL;
-	  user->id[0] = '\0';
+      user->id[0] = '\0';
+#endif
+      user->refcnt = 1;
       cptr->user = user;
-	}
+    }
   return user;
 }
 
@@ -142,16 +152,19 @@ struct Server *make_server(struct Client *cptr)
     {
       serv = (struct Server *)MyMalloc(sizeof(struct Server));
 
-      /* The commented out lines before are
+      memset((void *)serv, 0, sizeof(struct Server));
+
+      /* The commented out lines here are
        * for documentation purposes only
        * as they are zeroed by memset above
        */
-      /*      serv->user = NULL; */
-      /*      serv->users = NULL; */
-      /*      serv->servers = NULL; */
-      /*      *serv->by = '\0'; */
-      /*      serv->up = (char *)NULL; */
-
+#if 0
+      serv->user = NULL;
+      serv->users = NULL;
+      serv->servers = NULL;
+      *serv->by = '\0'; 
+      serv->up = (char *)NULL;
+#endif
       cptr->serv = serv;
     }
   return cptr->serv;

@@ -301,6 +301,12 @@ void parse(struct Client *cptr, char *pbuffer, char *bufend)
   }
 
   handle_command(mptr, cptr, from, i, para);
+
+  if(IsDead(from))
+    exit_client(from, from, &me,
+		(from->flags & FLAGS_SENDQEX) ?
+		"SendQ exceeded" : "Dead socket");
+
 }
 
 static void 

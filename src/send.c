@@ -95,24 +95,27 @@ send_trim(char *lsendbuf, int len );
 **      like Persons and yet unknown connections...
 */
 /*
- * this code now _does_ call exit_client, which disconnects the
- * client immediately, but doesn't destroy it until the next go
- * around the main loop.  This solves various problems where
- * we were actually accessing freed memory.
- * -davidt
+ * Can't call exit_client right away. This client might be in the middle
+ * of a /list and sendq's out. exiting the client during that list
+ * would thoroughly confuse things (and did). Best we can do, is mark
+ * the client as known to be thoroughly dead, treat it like a pariah
+ * and exit in the main loop at the earliest opportunity. ugh.
+ * - Dianora
+ * 
  */
 
 static int
 dead_link(struct Client *to, char *notice)
 {
-  /* XXX is this the =right= thing to do? or anyone have a better idea? */
 
   SetDead(to);
 
+#if 0
   exit_client(to, to, &me,
               (to->flags & FLAGS_SENDQEX) ?
               "SendQ exceeded" : "Dead socket");
 
+#endif
   /*
    * If because of buffer problem then clean linebuf's now so that
    * notices don't hurt operators below.
