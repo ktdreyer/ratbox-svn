@@ -1,3 +1,16 @@
+androsyn    2005/02/26 19:13:45 EST	(20050227_1)
+
+  Modified files:
+    .                    configure configure.ac 
+  Log:
+  doh
+  
+  Revision  Changes    Path
+  7.246     +6 -6      ircd-ratbox/configure
+  7.60      +4 -4      ircd-ratbox/configure.ac
+
+
+
 androsyn    2005/02/26 19:10:17 EST	(20050227_0)
 
   Modified files:
