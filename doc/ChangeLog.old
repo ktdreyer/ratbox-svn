@@ -1,3 +1,6 @@
+*** 20001231_21 by davidt
+Add missing prototypes to stop gcc moaning.
+
 *** 20001231_20 by db
 - added spookey to Hybrid-team. 
 
