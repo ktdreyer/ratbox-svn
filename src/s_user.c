@@ -295,8 +295,11 @@ int register_local_user(struct Client *client_p, struct Client *source_p,
   assert(NULL != source_p->localClient);
   assert(source_p->username != username);
 
+  if(ConfigFileEntry.ping_cookie && source_p->flags & FLAGS_PINGSENT && !(source_p->flags2 & FLAGS2_PING_COOKIE) )
+  {
+ 	return 0;
+  }
 
-  /* If the user  */
   if(ConfigFileEntry.ping_cookie && !(source_p->flags2 & FLAGS2_PING_COOKIE) && !source_p->random_ping)
   {
     source_p->random_ping = (unsigned long)random();
@@ -304,6 +307,7 @@ int register_local_user(struct Client *client_p, struct Client *source_p,
     source_p->flags |= FLAGS_PINGSENT;
     return 0;
   } 
+
 
   user->last = CurrentTime;
   /* Straight up the maximum rate of flooding... */
