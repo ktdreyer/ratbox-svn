@@ -1303,9 +1303,6 @@ int exit_client(
         return 0;
 
       SetClosing(source_p);
-      /* Attempt to flush any queued data */
-      if (source_p->localClient->fd > -1 && !IsDead(source_p))
-        send_queued_write(source_p->localClient->fd, source_p);
       if (source_p->flags & FLAGS_IPHASH)
         remove_one_ip(&source_p->localClient->ip);
 
@@ -1407,7 +1404,6 @@ int exit_client(
       ** It also makes source_p->from == NULL, thus it's unnecessary
       ** to test whether "source_p != target_p" in the following loops.
       */
-     SetDead(source_p);
      close_connection(source_p);
     }
 
