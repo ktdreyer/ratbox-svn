@@ -567,6 +567,55 @@ find_is_glined(const char *host, const char *user)
 	return NULL;
 }
 
+/* check_glines()
+ *
+ * inputs       -
+ * outputs      -
+ * side effects - all clients will be checked for glines
+ */
+static void
+check_glines(void)
+{
+	struct Client *client_p;
+	struct ConfItem *aconf;
+	dlink_node *ptr;
+	dlink_node *next_ptr;
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, lclient_list.head)
+	{
+		client_p = ptr->data;
+
+		if(IsMe(client_p) || !IsPerson(client_p))
+			continue;
+
+		if((aconf = find_gline(client_p)) != NULL)
+		{
+			if(IsExemptKline(client_p))
+			{
+				sendto_realops_flags(UMODE_ALL, L_ALL,
+						     "GLINE over-ruled for %s, client is kline_exempt",
+						     get_client_name(client_p, HIDE_IP));
+				continue;
+			}
+
+			if(IsExemptGline(client_p))
+			{
+				sendto_realops_flags(UMODE_ALL, L_ALL,
+						     "GLINE over-ruled for %s, client is gline_exempt",
+						     get_client_name(client_p, HIDE_IP));
+				continue;
+			}
+
+			sendto_realops_flags(UMODE_ALL, L_ALL,
+					     "GLINE active for %s",
+					     get_client_name(client_p, HIDE_IP));
+
+			notify_banned_client(client_p, aconf, NOTIFY_BANNED_GLINE);
+			continue;
+		}
+	}
+}
+
 /*
  * set_local_gline
  *

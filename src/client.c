@@ -80,13 +80,6 @@ static BlockHeap *lclient_heap = NULL;
 
 static char current_uid[IDLEN];
 
-enum
-{
-	D_LINED,
-	K_LINED,
-	G_LINED
-};
-
 dlink_list dead_list;
 #ifdef DEBUG_EXITED_CLIENTS
 static dlink_list dead_remote_list;
@@ -385,7 +378,7 @@ check_unknowns_list(dlink_list * list)
 	}
 }
 
-static void
+void
 notify_banned_client(struct Client *client_p, struct ConfItem *aconf, int ban)
 {
 	static const char conn_closed[] = "Connection closed";
@@ -402,12 +395,12 @@ notify_banned_client(struct Client *client_p, struct ConfItem *aconf, int ban)
 	}
 	else
 	{
-		switch (aconf->status)
+		switch (ban)
 		{
-		case D_LINED:
+		case NOTIFY_BANNED_DLINE:
 			reason = d_lined;
 			break;
-		case G_LINED:
+		case NOTIFY_BANNED_GLINE:
 			reason = g_lined;
 			break;
 		default:
@@ -416,7 +409,7 @@ notify_banned_client(struct Client *client_p, struct ConfItem *aconf, int ban)
 		}
 	}
 
-	if(ban == D_LINED && !IsPerson(client_p))
+	if(ban == NOTIFY_BANNED_DLINE && !IsPerson(client_p))
 		sendto_one(client_p, "NOTICE DLINE :*** You have been D-lined");
 	else
 		sendto_one(client_p, form_str(ERR_YOUREBANNEDCREEP),
@@ -458,7 +451,7 @@ check_banned_lines(void)
 					     "DLINE active for %s",
 					     get_client_name(client_p, HIDE_IP));
 
-			notify_banned_client(client_p, aconf, D_LINED);
+			notify_banned_client(client_p, aconf, NOTIFY_BANNED_DLINE);
 			continue;	/* and go examine next fd/client_p */
 		}
 
@@ -479,7 +472,7 @@ check_banned_lines(void)
 			sendto_realops_flags(UMODE_ALL, L_ALL,
 					"KLINE active for %s",
 					get_client_name(client_p, HIDE_IP));
-			notify_banned_client(client_p, aconf, K_LINED);
+			notify_banned_client(client_p, aconf, NOTIFY_BANNED_KLINE);
 			continue;
 		}
 		else if((aconf = find_gline(client_p)) != NULL)
@@ -506,7 +499,7 @@ check_banned_lines(void)
 					"GLINE active for %s",
 					get_client_name(client_p, HIDE_IP));
 
-			notify_banned_client(client_p, aconf, G_LINED);
+			notify_banned_client(client_p, aconf, NOTIFY_BANNED_GLINE);
 			continue;
 		}
 		else if((aconf = find_xline(client_p->info, 1)) != NULL)
@@ -538,7 +531,7 @@ check_banned_lines(void)
 			if(aconf->status & CONF_EXEMPTDLINE)
 				continue;
 
-			notify_banned_client(client_p, aconf, D_LINED);
+			notify_banned_client(client_p, aconf, NOTIFY_BANNED_DLINE);
 		}
 	}
 
@@ -592,146 +585,7 @@ check_klines(void)
 					     "KLINE active for %s",
 					     get_client_name(client_p, HIDE_IP));
 
-			notify_banned_client(client_p, aconf, K_LINED);
-			continue;
-		}
-	}
-}
-
-/* check_glines()
- *
- * inputs       -
- * outputs      -
- * side effects - all clients will be checked for glines
- */
-void
-check_glines(void)
-{
-	struct Client *client_p;
-	struct ConfItem *aconf;
-	dlink_node *ptr;
-	dlink_node *next_ptr;
-
-	DLINK_FOREACH_SAFE(ptr, next_ptr, lclient_list.head)
-	{
-		client_p = ptr->data;
-
-		if(IsMe(client_p) || !IsPerson(client_p))
-			continue;
-
-		if((aconf = find_gline(client_p)) != NULL)
-		{
-			if(IsExemptKline(client_p))
-			{
-				sendto_realops_flags(UMODE_ALL, L_ALL,
-						     "GLINE over-ruled for %s, client is kline_exempt",
-						     get_client_name(client_p, HIDE_IP));
-				continue;
-			}
-
-			if(IsExemptGline(client_p))
-			{
-				sendto_realops_flags(UMODE_ALL, L_ALL,
-						     "GLINE over-ruled for %s, client is gline_exempt",
-						     get_client_name(client_p, HIDE_IP));
-				continue;
-			}
-
-			sendto_realops_flags(UMODE_ALL, L_ALL,
-					     "GLINE active for %s",
-					     get_client_name(client_p, HIDE_IP));
-
-			notify_banned_client(client_p, aconf, K_LINED);
-			continue;
-		}
-	}
-}
-
-/* check_dlines()
- *
- * inputs       -
- * outputs      -
- * side effects - all clients will be checked for dlines
- */
-void
-check_dlines(void)
-{
-	struct Client *client_p;
-	struct ConfItem *aconf;
-	dlink_node *ptr;
-	dlink_node *next_ptr;
-
-	DLINK_FOREACH_SAFE(ptr, next_ptr, lclient_list.head)
-	{
-		client_p = ptr->data;
-
-		if(IsMe(client_p))
-			continue;
-
-		if((aconf = find_dline((struct sockaddr *)&client_p->localClient->ip,client_p->localClient->ip.ss_family)) != NULL)
-		{
-			if(aconf->status & CONF_EXEMPTDLINE)
-				continue;
-
-			sendto_realops_flags(UMODE_ALL, L_ALL,
-					     "DLINE active for %s",
-					     get_client_name(client_p, HIDE_IP));
-
-			notify_banned_client(client_p, aconf, D_LINED);
-			continue;
-		}
-	}
-
-	/* dlines need to be checked against unknowns too */
-	DLINK_FOREACH_SAFE(ptr, next_ptr, unknown_list.head)
-	{
-		client_p = ptr->data;
-
-		if((aconf = find_dline((struct sockaddr *)&client_p->localClient->ip,client_p->localClient->ip.ss_family)) != NULL)
-		{
-			if(aconf->status & CONF_EXEMPTDLINE)
-				continue;
-
-			notify_banned_client(client_p, aconf, D_LINED);
-		}
-	}
-}
-
-/* check_xlines
- *
- * inputs       -
- * outputs      -
- * side effects - all clients will be checked for xlines
- */
-void
-check_xlines(void)
-{
-	struct Client *client_p;
-	struct ConfItem *aconf;
-	dlink_node *ptr;
-	dlink_node *next_ptr;
-
-	DLINK_FOREACH_SAFE(ptr, next_ptr, lclient_list.head)
-	{
-		client_p = ptr->data;
-
-		if(IsMe(client_p) || !IsPerson(client_p))
-			continue;
-
-		if((aconf = find_xline(client_p->info, 1)) != NULL)
-		{
-			if(IsExemptKline(client_p))
-			{
-				sendto_realops_flags(UMODE_ALL, L_ALL,
-						     "XLINE over-ruled for %s, client is kline_exempt",
-						     get_client_name(client_p, HIDE_IP));
-				continue;
-			}
-
-			sendto_realops_flags(UMODE_ALL, L_ALL, "XLINE active for %s",
-					     get_client_name(client_p, HIDE_IP));
-
-			(void) exit_client(client_p, client_p, &me, "Bad user info");
+			notify_banned_client(client_p, aconf, NOTIFY_BANNED_KLINE);
 			continue;
 		}
 	}

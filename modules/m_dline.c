@@ -59,6 +59,7 @@ DECLARE_MODULE_AV1(dline, NULL, NULL, dline_clist, NULL, NULL, "$Revision$");
 static int valid_comment(char *comment);
 static int flush_write(struct Client *, FILE *, char *, char *);
 static int remove_temp_dline(const char *);
+static void check_dlines(void);
 
 /* mo_dline()
  * 
@@ -461,3 +462,54 @@ remove_temp_dline(const char *host)
 
 	return NO;
 }
+
+/* check_dlines()
+ *
+ * inputs       -
+ * outputs      -
+ * side effects - all clients will be checked for dlines
+ */
+static void
+check_dlines(void)
+{
+	struct Client *client_p;
+	struct ConfItem *aconf;
+	dlink_node *ptr;
+	dlink_node *next_ptr;
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, lclient_list.head)
+	{
+		client_p = ptr->data;
+
+		if(IsMe(client_p))
+			continue;
+
+		if((aconf = find_dline((struct sockaddr *)&client_p->localClient->ip,client_p->localClient->ip.ss_family)) != NULL)
+		{
+			if(aconf->status & CONF_EXEMPTDLINE)
+				continue;
+
+			sendto_realops_flags(UMODE_ALL, L_ALL,
+					     "DLINE active for %s",
+					     get_client_name(client_p, HIDE_IP));
+
+			notify_banned_client(client_p, aconf, NOTIFY_BANNED_DLINE);
+			continue;
+		}
+	}
+
+	/* dlines need to be checked against unknowns too */
+	DLINK_FOREACH_SAFE(ptr, next_ptr, unknown_list.head)
+	{
+		client_p = ptr->data;
+
+		if((aconf = find_dline((struct sockaddr *)&client_p->localClient->ip,client_p->localClient->ip.ss_family)) != NULL)
+		{
+			if(aconf->status & CONF_EXEMPTDLINE)
+				continue;
+
+			notify_banned_client(client_p, aconf, NOTIFY_BANNED_DLINE);
+		}
+	}
+}
+

@@ -270,6 +270,46 @@ valid_xline(struct Client *source_p, const char *gecos,
 	return 1;
 }
 
+/* check_xlines
+ *
+ * inputs       -
+ * outputs      -
+ * side effects - all clients will be checked for xlines
+ */
+static void
+check_xlines(void)
+{
+	struct Client *client_p;
+	struct ConfItem *aconf;
+	dlink_node *ptr;
+	dlink_node *next_ptr;
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, lclient_list.head)
+	{
+		client_p = ptr->data;
+
+		if(IsMe(client_p) || !IsPerson(client_p))
+			continue;
+
+		if((aconf = find_xline(client_p->info, 1)) != NULL)
+		{
+			if(IsExemptKline(client_p))
+			{
+				sendto_realops_flags(UMODE_ALL, L_ALL,
+						     "XLINE over-ruled for %s, client is kline_exempt",
+						     get_client_name(client_p, HIDE_IP));
+				continue;
+			}
+
+			sendto_realops_flags(UMODE_ALL, L_ALL, "XLINE active for %s",
+					     get_client_name(client_p, HIDE_IP));
+
+			(void) exit_client(client_p, client_p, &me, "Bad user info");
+			continue;
+		}
+	}
+}
+
 void
 apply_xline(struct Client *source_p, const char *name, const char *reason,
 		int temp_time)

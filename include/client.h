@@ -315,12 +315,14 @@ struct exit_client_hook
 #define SHOW_IP 1
 #define MASK_IP 2
 
+#define NOTIFY_BANNED_DLINE	0
+#define NOTIFY_BANNED_GLINE	1
+#define NOTIFY_BANNED_KLINE	2
+
 extern void check_banned_lines(void);
 extern void check_klines_event(void *unused);
 extern void check_klines(void);
-extern void check_glines(void);
-extern void check_dlines(void);
-extern void check_xlines(void);
+void notify_banned_client(struct Client *client_p, struct ConfItem *aconf, int ban);
 
 extern const char *get_client_name(struct Client *client, int show_ip);
 extern const char *get_server_name(struct Client *client, int show_ip);
