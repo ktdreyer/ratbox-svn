@@ -280,14 +280,14 @@ static void oldParseOneLine(FILE *out,char* line)
   switch( conf_letter )
     {
     case 'A':case 'a': /* Name, e-mail address of administrator */
-      fprintf(out,"\tadministrator {\n");
+      fprintf(out,"administrator {\n");
       if(host_field)
-	fprintf(out,"\t\tname=\"%s\";\n", passwd_field);
+	fprintf(out,"\tname=\"%s\";\n", passwd_field);
       if(user_field)
-	fprintf(out,"\t\temail=\"%s\";\n", user_field);
+	fprintf(out,"\temail=\"%s\";\n", user_field);
       if(passwd_field)
-	fprintf(out,"\t\tdescription=\"%s\";\n", host_field);
-      fprintf(out,"\t};\n\n");
+	fprintf(out,"\tdescription=\"%s\";\n", host_field);
+      fprintf(out,"};\n\n");
       break;
 
     case 'c':
@@ -308,21 +308,21 @@ static void oldParseOneLine(FILE *out,char* line)
       break;
 
     case 'd':
-      fprintf(out,"\tacl_exception {\n");
+      fprintf(out,"acl_exception {\n");
       if(user_field)
-	fprintf(out,"\t\tip=\"%s\";\n", user_field);
+	fprintf(out,"\tip=\"%s\";\n", user_field);
       if(passwd_field)
-	fprintf(out,"\t\treason=\"%s\";\n", passwd_field);
-      fprintf(out,"\t};\n\n");
+	fprintf(out,"\treason=\"%s\";\n", passwd_field);
+      fprintf(out,"};\n\n");
       break;
 
     case 'D': /* Deny lines (immediate refusal) */
-      fprintf(out,"\tdeny {\n");
+      fprintf(out,"deny {\n");
       if(host_field)
-	fprintf(out,"\t\tip=\"%s\";\n", host_field);
+	fprintf(out,"\tip=\"%s\";\n", host_field);
       if(passwd_field)
-	fprintf(out,"\t\treason=\"%s\";\n", passwd_field);
-      fprintf(out,"\t};\n\n");
+	fprintf(out,"\treason=\"%s\";\n", passwd_field);
+      fprintf(out,"};\n\n");
       break;
 
     case 'H': /* Hub server line */
@@ -333,7 +333,7 @@ static void oldParseOneLine(FILE *out,char* line)
     /* We no longer have restricted connection in Hybrid 7 */
     case 'i': 
     case 'I': 
-      fprintf(out,"\tauth {\n");
+      fprintf(out,"auth {\n");
 
       spoof_field = (char *)NULL;
       client_allow = (char *)NULL;
@@ -346,7 +346,7 @@ static void oldParseOneLine(FILE *out,char* line)
 		{
 		  client_allow = ClientFlags(out,NULL,host_field);
 		  if(client_allow)
-		    fprintf(out,"\t\tip=%s;\n", client_allow );
+		    fprintf(out,"\tip=%s;\n", client_allow );
 		}
 	      else
 		spoof_field = host_field;
@@ -354,11 +354,11 @@ static void oldParseOneLine(FILE *out,char* line)
 	}
 
       if(passwd_field && *passwd_field)
-	fprintf(out,"\t\tpasswd=\"%s\";\n", passwd_field);	
+	fprintf(out,"\tpasswd=\"%s\";\n", passwd_field);	
 #if 0
       /* This part isn't needed at all */
       else
-	fprintf(out,"\t\tpasswd=\"*\";\n");	
+	fprintf(out,"\tpasswd=\"*\";\n");	
 #endif
 
       if(!client_allow && user_field)
@@ -366,23 +366,23 @@ static void oldParseOneLine(FILE *out,char* line)
 	  client_allow = ClientFlags(out,spoof_field,user_field);
 	  if(client_allow)
 	    {
-	      fprintf(out,"\t\tuser=\"%s\";\n", client_allow );
+	      fprintf(out,"\tuser=\"%s\";\n", client_allow );
 	    }
 	}
 
       if(class_field)
-	fprintf(out,"\t\tclass=\"%s\";\n", class_field);	
-      fprintf(out,"\t};\n\n");
+	fprintf(out,"\tclass=\"%s\";\n", class_field);	
+      fprintf(out,"};\n\n");
       break;
       
     case 'K': /* Kill user line on irc.conf           */
     case 'k':
-      fprintf(out,"\tkill {\n");
+      fprintf(out,"kill {\n");
       if(host_field)
-	fprintf(out,"\t\tuser=\"%s@%s\";\n", user_field,host_field);
+	fprintf(out,"\tuser=\"%s@%s\";\n", user_field,host_field);
       if(passwd_field)
-	fprintf(out,"\t\treason=\"%s\";\n", passwd_field);
-      fprintf(out,"\t};\n\n");
+	fprintf(out,"\treason=\"%s\";\n", passwd_field);
+      fprintf(out,"};\n\n");
       break;
 
     case 'L': /* guaranteed leaf server */
@@ -394,18 +394,18 @@ static void oldParseOneLine(FILE *out,char* line)
       /* and port number is the number of the port */
     case 'M':
     case 'm':
-      fprintf(out,"\tserverinfo {\n");
+      fprintf(out,"serverinfo {\n");
       if(host_field)
-	fprintf(out,"\t\tname=\"%s\";\n", host_field);
+	fprintf(out,"\tname=\"%s\";\n", host_field);
       if(passwd_field)
-	fprintf(out,"\t\tvhost=%s;\n", passwd_field);
+	fprintf(out,"\tvhost=%s;\n", passwd_field);
       if(user_field)
-	fprintf(out,"\t\tdescription=\"%s\";\n", user_field);
+	fprintf(out,"\tdescription=\"%s\";\n", user_field);
       if(port_field)
-	fprintf(out,"\t\thub=yes;\n");
+	fprintf(out,"\thub=yes;\n");
       else
-     	fprintf(out,"\t\thub=no;\n");
-      fprintf(out,"\t};\n\n");
+     	fprintf(out,"\thub=no;\n");
+      fprintf(out,"};\n\n");
       break;
 
     case 'n': 
@@ -450,81 +450,81 @@ static void oldParseOneLine(FILE *out,char* line)
     case 'o':
     case 'O':
       /* defaults */
-      fprintf(out,"\toperator {\n");
+      fprintf(out,"operator {\n");
       if(user_field)
-	fprintf(out,"\t\tname=\"%s\";\n", user_field);
+	fprintf(out,"\tname=\"%s\";\n", user_field);
       if(host_field)
 	{
-	  fprintf(out,"\t\tuser=\"%s\";\n", host_field);
+	  fprintf(out,"\tuser=\"%s\";\n", host_field);
 	}
       if(passwd_field)
-	fprintf(out,"\t\tpassword=\"%s\";\n", passwd_field);
+	fprintf(out,"\tpassword=\"%s\";\n", passwd_field);
       if(port_field)
 	OperPrivsFromString(out,port_field);
       if(class_field)
-	fprintf(out,"\t\tclass=\"%s\";\n", class_field);	
-      fprintf(out,"\t};\n\n");
+	fprintf(out,"\tclass=\"%s\";\n", class_field);	
+      fprintf(out,"};\n\n");
       break;
 
     case 'P': /* listen port line */
     case 'p':
-      fprintf(out,"\tlisten {\n");
+      fprintf(out,"listen {\n");
       /* What is the purpose of this field? */
       if(host_field)
-	fprintf(out,"\t\tname=\"%s\";\n", host_field);
+	fprintf(out,"\tname=\"%s\";\n", host_field);
       if(passwd_field)
-        fprintf(out,"\t\tip=\"%s\";\n", passwd_field);
+        fprintf(out,"\tip=\"%s\";\n", passwd_field);
       if(port_field)
-	fprintf(out,"\t\tport=%d;\n", atoi(port_field));
-      fprintf(out,"\t};\n\n");
+	fprintf(out,"\tport=%d;\n", atoi(port_field));
+      fprintf(out,"};\n\n");
       break;
 
     case 'Q': /* reserved nicks */
     case 'q': 
-      fprintf(out,"\tquarantine {\n");
+      fprintf(out,"quarantine {\n");
       if(host_field)
-	fprintf(out,"\t\tname=\"%s\";\n", host_field);
+	fprintf(out,"\tname=\"%s\";\n", host_field);
       if(passwd_field)
-	fprintf(out,"\t\treason=\"%s\";\n", passwd_field);
-      fprintf(out,"\t};\n\n");
+	fprintf(out,"\treason=\"%s\";\n", passwd_field);
+      fprintf(out,"};\n\n");
       break;
 
     case 'U': 
     case 'u': 
-      fprintf(out,"\tshared {\n");
+      fprintf(out,"shared {\n");
       if(host_field)
-	fprintf(out,"\t\tname=\"%s\";\n", host_field);
+	fprintf(out,"\tname=\"%s\";\n", host_field);
 #if 0
       if(passwd_field)
-	fprintf(out,"\t\treason=\"%s\";\n", passwd_field);
+	fprintf(out,"\treason=\"%s\";\n", passwd_field);
 #endif
-      fprintf(out,"\t};\n\n");
+      fprintf(out,"};\n\n");
       break;
 
     case 'X': /* rejected gecos */
     case 'x': 
-      fprintf(out,"\tgecos {\n");
+      fprintf(out,"gecos {\n");
       if(host_field)
-	fprintf(out,"\t\tname=\"%s\";\n", host_field);
+	fprintf(out,"\tname=\"%s\";\n", host_field);
       if(passwd_field)
-	fprintf(out,"\t\treason=\"%s\";\n", passwd_field);
+	fprintf(out,"\treason=\"%s\";\n", passwd_field);
       if(port_field)
-        fprintf(out,"\t\taction=reject;\n");
+        fprintf(out,"\taction=reject;\n");
       else
-        fprintf(out,"\t\taction=warn;\n");
-      fprintf(out,"\t};\n\n");
+        fprintf(out,"\taction=warn;\n");
+      fprintf(out,"};\n\n");
       break;
 
     case 'Y':
     case 'y':
-      fprintf(out,"\tclass {\n");
+      fprintf(out,"class {\n");
       if(host_field)
-	fprintf(out,"\t\tname=\"%s\";\n", host_field);
+	fprintf(out,"\tname=\"%s\";\n", host_field);
       if(passwd_field)
 	{
 	  int ping_time;
 	  ping_time = atoi(passwd_field);
-	  fprintf(out,"\t\tping_time=%d;\n", ping_time );
+	  fprintf(out,"\tping_time=%d;\n", ping_time );
 	}
       if(user_field)
 	{
@@ -534,18 +534,18 @@ static void oldParseOneLine(FILE *out,char* line)
           */
 	  int number_per_ip;
 	  number_per_ip = atoi(user_field);
-	  fprintf(out,"\t\tnumber_per_ip=%d;\n", number_per_ip );
+	  fprintf(out,"\tnumber_per_ip=%d;\n", number_per_ip );
 	}
       if(port_field)
 	{
 	  int max_number;
 	  max_number = atoi(port_field);
-	  fprintf(out,"\t\tmax_number=%d;\n", max_number );
+	  fprintf(out,"\tmax_number=%d;\n", max_number );
 	}
       if(class_field)
 	sendq = atoi(class_field);
-      fprintf(out,"\t\tsendq=%d;\n", sendq);
-      fprintf(out,"\t};\n\n");
+      fprintf(out,"\tsendq=%d;\n", sendq);
+      fprintf(out,"};\n\n");
       break;
       
     default:
@@ -569,36 +569,36 @@ static void PrintOutServers(FILE* out)
     {
       if(p->name && p->c_passwd && p->n_passwd && p->host)
 	{
-	  fprintf(out,"\tconnect {\n");
-	  fprintf(out,"\t\thost=\"%s\";\n", p->host);
-	  fprintf(out,"\t\tname=\"%s\";\n", p->name);
-	  fprintf(out,"\t\tsend_password=\"%s\";\n", p->c_passwd);
-	  fprintf(out,"\t\taccept_password=\"%s\";\n", p->n_passwd);
-	  fprintf(out,"\t\tport=%d;\n", p->port );
+	  fprintf(out,"connect {\n");
+	  fprintf(out,"\thost=\"%s\";\n", p->host);
+	  fprintf(out,"\tname=\"%s\";\n", p->name);
+	  fprintf(out,"\tsend_password=\"%s\";\n", p->c_passwd);
+	  fprintf(out,"\taccept_password=\"%s\";\n", p->n_passwd);
+	  fprintf(out,"\tport=%d;\n", p->port );
 
 #if 0
           /* ZIP links are gone */
 	  if(p->compressed)
-	    fprintf(out,"\t\tcompressed=yes;\n");
+	    fprintf(out,"\tcompressed=yes;\n");
 #endif
 
 	  if(p->lazylink)
-	    fprintf(out,"\t\tlazylink=yes;\n");
+	    fprintf(out,"\tlazylink=yes;\n");
 
 	  if(p->hub_mask)
 	    {
-	      fprintf(out,"\t\thub_mask=\"%s\";\n",p->hub_mask);
+	      fprintf(out,"\thub_mask=\"%s\";\n",p->hub_mask);
 	    }
 	  else
 	    {
 	      if(p->leaf_mask)
-		fprintf(out,"\t\tleaf_mask=\"%s\";\n",p->leaf_mask);
+		fprintf(out,"\tleaf_mask=\"%s\";\n",p->leaf_mask);
 	    }
 
 	  if(p->class)
-	    fprintf(out,"\t\tclass=\"%s\";\n", p->class );
+	    fprintf(out,"\tclass=\"%s\";\n", p->class );
 
-	  fprintf(out,"\t};\n\n");
+	  fprintf(out,"};\n\n");
 	}
     }
 }
@@ -739,67 +739,67 @@ static void OperPrivsFromString(FILE* out, char *privs)
     {
       if(*privs == 'O')                     /* allow global kill */
 	{
-	  fprintf(out,"\t\tglobal_kill=yes;\n");
+	  fprintf(out,"\tglobal_kill=yes;\n");
 	}
       else if(*privs == 'o')                /* disallow global kill */
 	{
-	  fprintf(out,"\t\tglobal_kill=no;\n");
+	  fprintf(out,"\tglobal_kill=no;\n");
 	}
       else if(*privs == 'U')                /* allow unkline */
 	{
-	  fprintf(out,"\t\tunkline=yes;\n");
+	  fprintf(out,"\tunkline=yes;\n");
 	}
       else if(*privs == 'u')                /* disallow unkline */
 	{
-	  fprintf(out,"\t\tunkline=no;\n");
+	  fprintf(out,"\tunkline=no;\n");
 	}
       else if(*privs == 'R')               /* allow remote squit/connect etc.*/
 	{
-	  fprintf(out,"\t\tremote=yes;\n");
+	  fprintf(out,"\tremote=yes;\n");
 	}
       else if(*privs == 'r')                /* disallow remote squit/connect etc.*/
 	{
-	  fprintf(out,"\t\tremote=no;\n");
+	  fprintf(out,"\tremote=no;\n");
 	}
       else if(*privs == 'N')                /* allow +n see nick changes */
 	{
-	  fprintf(out,"\t\tnick_changes=yes;\n");
+	  fprintf(out,"\tnick_changes=yes;\n");
 	}
       else if(*privs == 'n')                /* disallow +n see nick changes */
 	{
-	  fprintf(out,"\t\tnick_changes=no;\n");
+	  fprintf(out,"\tnick_changes=no;\n");
 	}
       else if(*privs == 'K')                /* allow kill and kline privs */
 	{
-	  fprintf(out,"\t\tkline=yes;\n");
+	  fprintf(out,"\tkline=yes;\n");
 	}
       else if(*privs == 'k')                /* disallow kill and kline privs */
 	{
-	  fprintf(out,"\t\tkline_kill=no;\n");
+	  fprintf(out,"\tkline_kill=no;\n");
 	}
       else if(*privs == 'G')                /* allow gline */
 	{
-	  fprintf(out,"\t\tgline=yes;\n");
+	  fprintf(out,"\tgline=yes;\n");
 	}
       else if(*privs == 'g')                /* disallow gline */
 	{
-	  fprintf(out,"\t\tgline=no;\n");
+	  fprintf(out,"\tgline=no;\n");
 	}
       else if(*privs == 'H')                /* allow rehash */
 	{
-	  fprintf(out,"\t\trehash=yes;\n");
+	  fprintf(out,"\trehash=yes;\n");
 	}
       else if(*privs == 'h')                /* disallow rehash */
 	{
-	  fprintf(out,"\t\trehash=no;\n");
+	  fprintf(out,"\trehash=no;\n");
 	}
       else if(*privs == 'D')
 	{
-	  fprintf(out,"\t\tdie=yes;\n");
+	  fprintf(out,"\tdie=yes;\n");
 	}
       else if(*privs == 'd')
 	{
-	  fprintf(out,"\t\tdie=no;\n");
+	  fprintf(out,"\tdie=no;\n");
  	}
       privs++;
     }
@@ -818,44 +818,44 @@ static char* ClientFlags(FILE *out, char* spoof, char *tmp)
         {
         case '=':
 	  if(spoof)
-	    fprintf(out,"\t\tspoof=\"%s\";\n",spoof);	  
+	    fprintf(out,"\tspoof=\"%s\";\n",spoof);	  
           break;
 	case '!':
 #if 0
           /* This is gone */
-	  fprintf(out,"\t\tlimit_ip;\n");
+	  fprintf(out,"\tlimit_ip;\n");
 #endif
 	  break;
         case '-':
-	  fprintf(out,"\t\tno_tilde=yes;\n");	  
+	  fprintf(out,"\tno_tilde=yes;\n");	  
           break;
         case '+':
-	  fprintf(out,"\t\tneed_ident=yes;\n");	  
+	  fprintf(out,"\tneed_ident=yes;\n");	  
           break;
         case '$':
 #if 0
           /* This is also gone */
-	  fprintf(out,"\t\thave_ident;\n");	  
+	  fprintf(out,"\thave_ident;\n");	  
 #endif
           break;
         case '%':
 #if 0
           /* As is this... */
-	  fprintf(out,"\t\tnomatch_ip;\n");	  
+	  fprintf(out,"\tnomatch_ip;\n");	  
 #endif
           break;
         case '^':        /* is exempt from k/g lines */
-	  fprintf(out,"\t\tkline_exempt=yes;\n");	  
+	  fprintf(out,"\tkline_exempt=yes;\n");	  
           break;
         case '&':        /* can run a bot */
           break;
         case '>':        /* can exceed max connects */
-	  fprintf(out,"\t\texceed_limit=yes;\n");	  
+	  fprintf(out,"\texceed_limit=yes;\n");	  
           break;
         case '<':        /* can idle */
 #if 0
           /* So's this... */
-	  fprintf(out,"\t\tcan_idle=yes;\n");	  
+	  fprintf(out,"\tcan_idle=yes;\n");	  
 #endif
           break;
         default:
