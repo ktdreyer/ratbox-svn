@@ -1545,7 +1545,10 @@ conf_call_set(struct TopConf *tc, char *item, conf_parm_t * value, int type)
 			break;
 		case CF_STRING:
 		case CF_QSTRING:
-			if(cf->cf_arg)
+			if(EmptyString(cp->v.string))
+				conf_report_error("Ignoring %s::%s -- empty string",
+						tc->tc_name, item);
+			else if(cf->cf_arg)
 				conf_set_generic_string(cp->v.string, cf->cf_len, cf->cf_arg);
 			else
 				cf->cf_func(cp->v.string);
