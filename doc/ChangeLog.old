@@ -1,3 +1,17 @@
+*** 20001103_7 by adrian
+
+
+Implementing comm_open(). This is designed to be a socket() and
+fd_open() wrapper which limits the number of possible open FDs to
+MASTER_MAX (for the time being - better suggestions please :)
+
+So now, you should be either using file_open() / fbopen(), or
+comm_open(), and *NOT* any other calls if you can avoid it.
+I haven't wrapped dup/dup2/pipe, since the ircd currently does not
+use them.
+
+
+
 *** 20001103_6 by adrian
 
 
