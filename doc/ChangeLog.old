@@ -1,3 +1,16 @@
+*** 20000123_1 by db
+- cleaned up some "bare" 512 defines. added new IRCD_BUFSIZE define
+- added better error recovery to parser, 
+- added better error reporting.
+- tentative new conf format mostly finished, will "warp" it a bit
+  more to match Kev's proposed format as possible, given undernet vs.
+  efnet differences..
+- need to handle ircd.conf form as the new format as default,
+  and fall back to old format as needed. i.e. kludge code still to 
+  be removed in source...
+
+
+
 *** 20000122_1 by db
 - more cleanup on new conf file parser..
   using "auth" instead of "client" as per Kev's document..
