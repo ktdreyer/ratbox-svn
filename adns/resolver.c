@@ -92,7 +92,7 @@ setup_signals(void)
         sigaction(SIGHUP, &act, 0);
 }
 
-static void report_error(char *errstr)
+static void report_error(const char *errstr)
 {
 	char buf[512];
 	sprintf(buf, "ERR %s: %s", errstr, strerror(errno)); 

@@ -135,13 +135,13 @@ lookup_ip(const char *addr, int aftype, DNSCB *callback, void *data)
 
 
 static void
-results_callback(const char *id, const char *status, const char *aftype, const char *results)
+results_callback(const char *callid, const char *status, const char *aftype, const char *results)
 {
 	struct dnsreq *req;
 	u_int16_t nid;
 	int st;
 	int aft;
-	nid = strtol(id, NULL, 16);
+	nid = strtol(callid, NULL, 16);
 	req = &querytable[nid];
 	st = atoi(status);
 	aft = atoi(aftype);
@@ -258,7 +258,7 @@ fork_resolver(void)
 	return;
 }
 
-void
+static void
 read_dns(int fd, void *unused)
 {
 	char buf[512];
@@ -302,11 +302,11 @@ read_dns(int fd, void *unused)
 }
 
 void 
-submit_dns(char type, int id, int aftype, const char *addr)
+submit_dns(char type, int nid, int aftype, const char *addr)
 {
 	char buf[512];
 	int res, len;
-	ircsnprintf(buf, sizeof(buf), "%c %x %d %s\n", type, id, aftype, addr);
+	ircsnprintf(buf, sizeof(buf), "%c %x %d %s\n", type, nid, aftype, addr);
 	len = strlen(buf);
 	res = send(dns_fd, buf, len, 0);
 	
