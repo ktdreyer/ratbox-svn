@@ -78,8 +78,6 @@ struct Channel
   int             received_number_of_privmsgs;
   int             flood_noticed;
 
-  unsigned long   serverMask;           /* Only used for Lazy Links */
-
   int             num_bed;              /* number of bans+exceptions+denies */
   time_t          channelts;
   char            chname[1];
