@@ -1619,7 +1619,7 @@ int              ncount = 0;
 static void read_conf(FBFILE* file)
 {
   struct ConfItem* aconf;
-  ccount = ncount = 0;
+  ccount = ncount = lineno = 0;
 
   class0 = find_class("default");       /* which one is the default class ? */
   yyparse(); /* wheee! */

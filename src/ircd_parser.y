@@ -1523,11 +1523,9 @@ general_oper_only_umodes: OPER_ONLY_UMODES
     ConfigFileEntry.oper_only_umodes = 0;
   }
   '='  umode_items ';'
-			  umode_item
 
 umode_items:	umode_items ',' umode_item |
   umode_item 
-
 
 umode_item:	T_BOTS 
   {
@@ -1552,10 +1550,6 @@ umode_item:	T_BOTS
               | T_NCHANGE
   {
     ConfigFileEntry.oper_only_umodes |= FLAGS_NCHANGE;
-  }
-              | OPERATOR
-  {
-    ConfigFileEntry.oper_only_umodes |= FLAGS_OPER;
   }
               | T_REJ
   {
