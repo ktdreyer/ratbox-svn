@@ -1,3 +1,7 @@
+*** 20010403_2 by androsyn
+Fixed what could be a potential bug with the adns code.
+
+
 *** 20010403_1 by androsyn
 Fixed adns /rehash core..
 
