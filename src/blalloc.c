@@ -171,7 +171,7 @@ void *BlockHeapAlloc (BlockHeap *bh)
        else
          {
            walker = bh->base;
-           walker->allocMap[0] = 1;
+           walker->allocMap[0] = 0x1L;
            walker->freeElems--;  bh->freeElems--;
            if(bh->base->elems == NULL)
              return((void *)NULL);
@@ -184,10 +184,10 @@ void *BlockHeapAlloc (BlockHeap *bh)
      {
        if (walker->freeElems > 0)
          {
-           mask = 1; ctr = 0; unit = 0;
+           mask = 0x1L; ctr = 0; unit = 0;
            while (unit < bh->numlongs)
              {
-               if ((mask == 1) && (walker->allocMap[unit] == (unsigned) ~0))
+               if ((mask == 0x1L) && (walker->allocMap[unit] == ~0))
                  {
                    /* Entire subunit is used, skip to next one. */
                    unit++; 
@@ -221,7 +221,7 @@ void *BlockHeapAlloc (BlockHeap *bh)
                ctr++;
                if (!mask)
                  {
-                   mask = 1;
+                   mask = 0x1L;
                    unit++;
                    ctr = 0;
                  }
@@ -229,8 +229,7 @@ void *BlockHeapAlloc (BlockHeap *bh)
          }     /* if */
      }        /* for */
 
-    /* return((void *) NULL);   If you get here, something bad happened ! */
-    return NULL;   /* If you have to cast NULL, you're doing something wrong */
+    return((void *) NULL);   /* If you get here, something bad happened ! */
 }
 
 
@@ -395,39 +394,40 @@ int BlockHeapDestroy(BlockHeap *bh)
    return 0;
 }
 
-/*
- * block_heap_count_memory - count memory used by heap
- * Description:                                                          
- *    Counts up memory used by heap, and memory allocated out of heap   
- * Parameters:                                                         
- *    bh (IN):  Pointer to the BlockHeap to be counted.               
- *    used (OUT): Pointer to int, total memory used by heap          
- *    allocated (OUT): Pointer to int, total memory allocated        
- * Returns:                                                        
- *   used                                                         
- *   allocated                                                   
- */
-void block_heap_count_memory(BlockHeap *bh, size_t* used, size_t* allocated)
+/* ************************************************************************ */
+/* FUNCTION DOCUMENTATION:                                                  */
+/*    BlockHeapCountMemory                                                  */
+/* Description:                                                             */
+/*    Counts up memory used by heap, and memory allocated out of heap       */
+/* Parameters:                                                              */
+/*    bh (IN):  Pointer to the BlockHeap to be counted.                     */
+/*    TotalUsed (IN): Pointer to int, total memory used by heap             */
+/*    TotalAllocated (IN): Pointer to int, total memory allocated           */
+/* Returns:                                                                 */
+/*   TotalUsed                                                              */
+/*   TotalAllocated                                                         */
+/* ************************************************************************ */
+
+void BlockHeapCountMemory(BlockHeap *bh,int *TotalUsed,int *TotalAllocated)
 {
   Block *walker;
 
-  *used = 0;
-  *allocated = 0;
+  *TotalUsed = 0;
+  *TotalAllocated = 0;
 
   if (bh == NULL)
     return;
 
-  *used      = sizeof(BlockHeap);
-  *allocated = sizeof(BlockHeap);
+  *TotalUsed = sizeof(BlockHeap);
+  *TotalAllocated = sizeof(BlockHeap);
 
   for (walker = bh->base; walker != NULL; walker = walker->next)
     {
-      *used += sizeof(Block);
-      *used += ((bh->elemSize * bh->elemsPerBlock) + bh->numlongs);
+      *TotalUsed += sizeof(Block);
+      *TotalUsed += ((bh->elemSize * bh->elemsPerBlock) + bh->numlongs);
 
-      *allocated = sizeof(Block);      
-      *allocated = ((bh->elemsPerBlock - walker->freeElems) * bh->elemSize);
+      *TotalAllocated = sizeof(Block);      
+      *TotalAllocated = ((bh->elemsPerBlock - walker->freeElems)
+                         * bh->elemSize);
     }
 }
-
-

@@ -28,7 +28,6 @@ SRCS = \
 	fileio.c \
 	flud.c \
 	hash.c \
-	ircdauth.c \
 	irc_string.c \
 	ircd.c \
 	ircd_signal.c \
@@ -42,14 +41,13 @@ SRCS = \
 	m_die.c \
 	m_error.c \
 	m_gline.c \
-	m_hash.c \
-	m_help.c \
-	m_kick.c \
 	m_htm.c \
 	m_info.c \
-	m_invite.c \
 	m_ison.c \
 	m_join.c \
+	m_help.c \
+	m_invite.c \
+	m_kick.c \
 	m_kill.c \
 	m_kline.c \
 	m_knock.c \
@@ -61,9 +59,8 @@ SRCS = \
 	m_message.c \
 	m_mode.c \
 	m_names.c \
-	m_nick.c \
-	m_oper.c \
 	m_operwall.c \
+	m_oper.c \
 	m_part.c \
 	m_pass.c \
 	m_ping.c \
@@ -78,10 +75,9 @@ SRCS = \
 	m_stats.c \
 	m_svinfo.c \
 	m_time.c \
-	m_trace.c \
 	m_topic.c \
+	m_trace.c \
 	m_unkline.c \
-	m_user.c \
 	m_userhost.c \
 	m_users.c \
 	m_version.c \
@@ -91,8 +87,8 @@ SRCS = \
 	match.c \
 	motd.c \
 	mtrie_conf.c \
-	numeric.c \
 	oratime.c \
+	numeric.c \
 	packet.c \
 	parse.c \
 	res.c \
@@ -140,27 +136,17 @@ SRCS = \
 #	m_die.o \
 #	m_error.o \
 #	m_gline.o \
-#	m_hash.o \
 #	m_help.o \
-#	m_kick.o \
 #	m_htm.o \
 #	m_info.o \
-#	m_invite.o \
-#	m_ison.o \
-#	m_join.o \
 #	m_kline.o \
-#	m_knock.o \
 #	m_links.o \
 #	m_list.o \
 #	m_locops.o \
 #	m_ltrace.o \
 #	m_lusers.o \
 #	m_mode.o \
-#	m_names.o \
-#	m_nick.o \
-#	m_oper.o \
 #	m_operwall.o \
-#	m_part.o \
 #	m_pass.o \
 #	m_ping.o \
 #	m_pong.o \
@@ -169,16 +155,12 @@ SRCS = \
 #	m_restart.o \
 #	m_server.o \
 #	m_set.o \
-#	m_sjoin.o \
 #	m_squit.o \
 #	m_stats.c \
 #	m_svinfo.o \
 #	m_time.o \
-#	m_topic.o \
 #	m_trace.o \
 #	m_unkline.o \
-#	m_user.o \
-#	m_userhost.o \
 #	m_users.o \
 #	m_version.o \
 #	m_wallops.o \
@@ -187,8 +169,8 @@ SRCS = \
 #	match.o \
 #	motd.o \
 #	mtrie_conf.o \
-#	numeric.o \
 #	oratime.o \
+#	numeric.o \
 #	packet.o \
 #	parse.o \
 #	res.o \
@@ -206,6 +188,7 @@ SRCS = \
 #	scache.o \
 #	send.o \
 #	sprintf_irc.o \
+#	support.o \
 #	whowas.o
 
 OBJS = ${SRCS:.c=.o}

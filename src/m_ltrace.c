@@ -34,7 +34,6 @@
 #include "s_serv.h"
 #include "send.h"
 
-#include <assert.h>
 #include <string.h>
 #include <time.h>
 
@@ -156,7 +155,7 @@ int     m_ltrace(struct Client *cptr,
 
 
   doall = (parv[1] && (parc > 1)) ? match(tname, me.name): TRUE;
-  wilds = !parv[1] || index(tname, '*') || index(tname, '?');
+  wilds = !parv[1] || strchr(tname, '*') || strchr(tname, '?');
   dow = wilds || doall;
   
   for (i = 0; i < MAXCONNECTIONS; i++)
@@ -211,10 +210,7 @@ int     m_ltrace(struct Client *cptr,
         case STAT_ME:
           break;
         case STAT_CLIENT:
-          /*
-           *  Well, most servers don't have a LOT of OPERs... 
-           * let's show them too
-           */
+          /* Well, most servers don't have a LOT of OPERs... let's show them too */
           if ((IsAnOper(sptr) &&
               (MyClient(sptr) || !(dow && IsInvisible(acptr))))
               || !dow || IsAnOper(acptr))

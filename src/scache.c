@@ -14,8 +14,6 @@
 #include <assert.h>
 #include <string.h>
 
-
-
 /*
  * ircd used to store full servernames in anUser as well as in the 
  * whowas info.  there can be some 40k such structures alive at any
@@ -89,25 +87,27 @@ const char* find_or_add(const char* name)
 
 /* Added so s_debug could check memory usage in here -Dianora */
 
-void count_scache(int* number_servers_cached, size_t* mem_servers_cached)
+void count_scache(int *number_servers_cached,u_long *mem_servers_cached)
 {
-  SCACHE* scache_ptr;
+  SCACHE *scache_ptr;
   int i;
-  int    count = 0;
-  size_t size = 0;
+
+  *number_servers_cached = 0;
+  *mem_servers_cached = 0;
 
   for(i = 0; i < SCACHE_HASH_SIZE ;i++)
     {
       scache_ptr = scache_hash[i];
       while(scache_ptr)
         {
-          ++count;
-          size += (strlen(scache_ptr->name) + 1 + sizeof(SCACHE*));
+          *number_servers_cached = *number_servers_cached + 1;
+          *mem_servers_cached = *mem_servers_cached +
+            (strlen(scache_ptr->name) +
+             sizeof(SCACHE *));
+
           scache_ptr = scache_ptr->next;
         }
     }
-  *number_servers_cached = count;
-  *mem_servers_cached    = size;
 }
 
 /* list all server names in scache very verbose */

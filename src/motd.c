@@ -183,7 +183,7 @@ int ReadMessageFile(MessageFile *MessageFileptr)
   char *p;
   FBFILE* file;
 
-  if( stat(MessageFileptr->fileName, &sb) < 0)
+  if( stat(MessageFileptr->fileName, &sb) < 0 )
   /* file doesn't exist oh oh */
   /* might consider printing error message to all opers */
     return -1;

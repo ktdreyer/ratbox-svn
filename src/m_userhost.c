@@ -105,7 +105,7 @@ int     m_userhost(struct Client *cptr,
   char  *p;            /* scratch end pointer */
   char  *cn;           /* current name */
   struct Client *acptr;
-  char response[5][NICKLEN+USERLEN+HOSTLEN+30];
+  char response[5][NICKLEN*2+CHANNELLEN+USERLEN+HOSTLEN+30];
   int i;               /* loop counter */
 
   if (parc < 2)

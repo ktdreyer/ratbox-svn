@@ -125,19 +125,19 @@ static int count_users_on_this_ip(IP_ENTRY *,struct Client *,const char *);
 static IP_ENTRY *find_or_add_ip(struct Client *);
 #endif
 
-/* general conf items struct SLink list root */
+/* general conf items link list root */
 struct ConfItem* ConfigItemList = NULL;
 
-/* conf xline struct SLink list root */
+/* conf xline link list root */
 struct ConfItem        *x_conf = ((struct ConfItem *)NULL);
 
 
 static void makeQlineEntry(aQlineItem *, struct ConfItem *, char *);
 
-/* conf qline struct SLink list root */
+/* conf qline link list root */
 aQlineItem         *q_conf = ((aQlineItem *)NULL);
 
-/* conf uline struct SLink list root */
+/* conf uline link list root */
 struct ConfItem        *u_conf = ((struct ConfItem *)NULL);
 
 /* keep track of .include files to hash in */
@@ -225,7 +225,7 @@ void free_conf(struct ConfItem* aconf)
   MyFree(aconf->passwd);
   MyFree(aconf->user);
   MyFree(aconf->name);
-  MyFree(aconf);
+  MyFree((char*) aconf);
 }
 
 /*
@@ -249,7 +249,7 @@ void det_confs_butmask(struct Client* cptr, int mask)
  * rewrote to use a struct -Dianora
  */
 static struct LinkReport {
-  unsigned int conf_type;
+  int conf_type;
   int rpl_stats;
   int conf_char;
 } report_array[] = {
@@ -278,8 +278,7 @@ void report_configured_links(struct Client* sptr, int mask)
         for (p = &report_array[0]; p->conf_type; p++)
           if (p->conf_type == tmp->status)
             break;
-        if (p->conf_type == 0)
-          return;
+        if(p->conf_type == 0)return;
 
         get_printable_conf(tmp, &name, &host, &pass, &user, &port);
 
@@ -387,13 +386,13 @@ int attach_Iline(struct Client* cptr, const char* username, char **preason)
   struct ConfItem* aconf;
   struct ConfItem* gkill_conf;
   struct ConfItem* tkline_conf;
-  char             non_ident[USERLEN + 1];
+  char       non_ident[USERLEN + 1];
 
   if (IsGotId(cptr))
     {
-      aconf = find_matching_mtrie_conf(cptr->host, cptr->username,
+      aconf = find_matching_mtrie_conf(cptr->host,cptr->username,
                                        ntohl(cptr->ip.s_addr));
-      if (aconf && !IsConfElined(aconf))
+      if(aconf && !IsConfElined(aconf))
         {
           if( (tkline_conf = find_tkline(cptr->host, cptr->username)) )
             aconf = tkline_conf;
@@ -402,11 +401,11 @@ int attach_Iline(struct Client* cptr, const char* username, char **preason)
   else
     {
       non_ident[0] = '~';
-      strncpy_irc(&non_ident[1], username, USERLEN - 1);
+      strncpy_irc(&non_ident[1],username, USERLEN - 1);
       non_ident[USERLEN] = '\0';
-      aconf = find_matching_mtrie_conf(cptr->host, non_ident,
+      aconf = find_matching_mtrie_conf(cptr->host,non_ident,
                                        ntohl(cptr->ip.s_addr));
-      if (aconf && !IsConfElined(aconf))
+      if(aconf && !IsConfElined(aconf))
         {
           if( (tkline_conf = find_tkline(cptr->host, non_ident)) )
             aconf = tkline_conf;
@@ -418,20 +417,20 @@ int attach_Iline(struct Client* cptr, const char* username, char **preason)
       if (aconf->status & CONF_CLIENT)
         {
 #ifdef GLINES
-          if ( (gkill_conf = find_gkill(cptr)) )
+          if ( !IsConfElined(aconf) && (gkill_conf = find_gkill(cptr)) )
             {
               *preason = gkill_conf->passwd;
               sendto_one(cptr, ":%s NOTICE %s :*** G-lined",
-                         me.name, cptr->name);
-              return -5;
+                           me.name,cptr->name);
+              return ( -5 );
             }
 #endif        /* GLINES */
 
-          if (IsConfDoIdentd(aconf))
+          if(IsConfDoIdentd(aconf))
             SetNeedId(cptr);
 
           /* Thanks for spoof idea amm */
-          if (IsConfDoSpoofIp(aconf))
+          if(IsConfDoSpoofIp(aconf))
             {
               /* abuse it, lose it. */
 #ifdef SPOOF_FREEFORM
@@ -441,7 +440,7 @@ int attach_Iline(struct Client* cptr, const char* username, char **preason)
 #else
               /* default to oper.server.name.tld */
               sendto_realops("%s spoofing: %s(%s) as oper.%s", cptr->name, 
-                             cptr->host, cptr->sockhost, me.name);
+                             cptr->host, inetntoa((char*) &cptr->ip), me.name);
               strcpy(cptr->host, "oper.");
               strncpy_irc(&cptr->host[5], me.name, HOSTLEN - 5);
 #endif
@@ -450,16 +449,16 @@ int attach_Iline(struct Client* cptr, const char* username, char **preason)
             }
 
 #ifdef LIMIT_UH
-          return attach_iline(cptr, aconf, username);
+          return(attach_iline(cptr, aconf, username));
 #else
-          return attach_iline(cptr, aconf);
+          return(attach_iline(cptr, aconf));
 #endif
 
         }
       else if(aconf->status & CONF_KILL)
         {
           *preason = aconf->passwd;
-          return -5;
+          return(-5);
         }
     }
 
@@ -473,7 +472,7 @@ int attach_Iline(struct Client* cptr, const char* username, char **preason)
  */
 
 #ifdef LIMIT_UH
-static int attach_iline(struct Client *cptr, struct ConfItem *aconf,const char *username)
+static int attach_iline(struct Client *cptr, struct ConfItem *aconf, const char *username)
 #else
 static int attach_iline(struct Client *cptr, struct ConfItem *aconf)
 #endif
@@ -521,7 +520,7 @@ static int attach_iline(struct Client *cptr, struct ConfItem *aconf)
     }
 #endif
 
-  return attach_conf(cptr, aconf);
+  return (attach_conf(cptr, aconf) );
 }
 
 /* link list of free IP_ENTRY's */
@@ -804,7 +803,7 @@ static int hash_ip(unsigned long ip)
 
 /* Added so s_debug could check memory usage in here -Dianora */
 /*
- * count_ip_hash - count memory for ip hash table
+ * count_ip_hash
  *
  * inputs        - pointer to counter of number of ips hashed 
  *               - pointer to memory used for ip hash
@@ -815,27 +814,26 @@ static int hash_ip(unsigned long ip)
  * used in the hash.
  */
 
-void count_ip_hash(int *number_ips_stored, size_t* mem_ips_stored)
+void count_ip_hash(int *number_ips_stored,u_long *mem_ips_stored)
 {
   IP_ENTRY *ip_hash_ptr;
   int i;
 
-  int    count = 0;
-  size_t size = 0;
+  *number_ips_stored = 0;
+  *mem_ips_stored = 0;
 
   for(i = 0; i < IP_HASH_SIZE ;i++)
     {
       ip_hash_ptr = ip_hash_table[i];
       while(ip_hash_ptr)
         {
-          ++count;
-          size += sizeof(IP_ENTRY);
+          *number_ips_stored = *number_ips_stored + 1;
+          *mem_ips_stored = *mem_ips_stored +
+             sizeof(IP_ENTRY);
 
           ip_hash_ptr = ip_hash_ptr->next;
         }
     }
-  *number_ips_stored = count;
-  *mem_ips_stored    = size;
 }
 
 
@@ -1247,7 +1245,7 @@ struct ConfItem *find_conf_ip(struct SLink* lp, char *ip, char *user,
 /*
  * find_conf_by_name - return a conf item that matches name and type
  */
-struct ConfItem* find_conf_by_name(const char* name, unsigned int status)
+struct ConfItem* find_conf_by_name(const char* name, int status)
 {
   struct ConfItem* conf;
   assert(0 != name);
@@ -1267,7 +1265,7 @@ struct ConfItem* find_conf_by_name(const char* name, unsigned int status)
 /*
  * find_conf_by_name - return a conf item that matches host and type
  */
-struct ConfItem* find_conf_by_host(const char* host, unsigned int status)
+struct ConfItem* find_conf_by_host(const char* host, int status)
 {
   struct ConfItem* conf;
   assert(0 != host);
@@ -1624,8 +1622,12 @@ int rehash_dump(struct Client *sptr)
 
   tmptr = localtime(&CurrentTime);
   strftime(timebuffer, MAX_DATE_STRING, "%Y%m%d%H%M", tmptr);
-  (void)sprintf(ircd_dump_file,"%s/ircd.conf.%s",
-                DPATH,timebuffer);
+  if (DPATH[strlen(DPATH)-1] == '/')
+     (void)sprintf(ircd_dump_file,"%sircd.conf.%s",
+                   DPATH,timebuffer);
+  else
+     (void)sprintf(ircd_dump_file,"%s/ircd.conf.%s", 
+		   DPATH, timebuffer);
   
   if ((out = fbopen(ircd_dump_file, "a")) == 0)
     {
@@ -1662,7 +1664,7 @@ int rehash_dump(struct Client *sptr)
       else if(aconf->status == CONF_OPERATOR)
         {
           (void)sprintf(result_buf,"O:%s@%s:%s:%s::%d\n",
-                        user,aconf->host,
+                        user,host,
                         pass,
                         name,
                         ClassType(class_ptr));
@@ -2112,7 +2114,6 @@ static void initconf(FBFILE* file, int use_include)
           /* NOTREACHED */
         }
 
-
       /* For Gersh
        * make sure H: lines don't have trailing spaces!
        * BUG: This code will fail if there is leading whitespace.
@@ -2136,7 +2137,7 @@ static void initconf(FBFILE* file, int use_include)
 	      if(ps || pt)
 		{
 		  sendto_realops("H: or L: line trailing whitespace [%s]",
-				 aconf->name);
+				 aconf->user);
 		  if(ps)*ps = '\0';
 		  if(pt)*pt = '\0';
 		}
@@ -2307,16 +2308,14 @@ static void initconf(FBFILE* file, int use_include)
 
           if( (p = strchr(aconf->host,'@')))
             {
-	      char *new_host;
-
+              char* x;
               aconf->flags |= CONF_FLAGS_DO_IDENTD;
-              *p = '\0';
-	      MyFree(aconf->user);
-	      DupString(aconf->user,aconf->host);
-              p++;
-              DupString(new_host,p);
+              *p++ = '\0';
+              MyFree(aconf->user);
+              DupString(aconf->user, aconf->host);
+              DupString(x, p);
               MyFree(aconf->host);
-              aconf->host = new_host;
+              aconf->host = x;
             }
 
            if( is_address(aconf->host,&ip_host,&ip_mask) )
@@ -2383,7 +2382,7 @@ static void initconf(FBFILE* file, int use_include)
         {
           dontadd = 1;
           MyFree(aconf->user);
-          aconf->user = (char *)NULL;
+          aconf->user = NULL;
           aconf->name = aconf->host;
           aconf->host = (char *)NULL;
           aconf->next = x_conf;
@@ -2395,8 +2394,6 @@ static void initconf(FBFILE* file, int use_include)
           MyFree(aconf->user);
           aconf->name = aconf->host;
           aconf->host = (char *)NULL;
-          if(!aconf->passwd)
-             DupString(aconf->passwd,"*");
           aconf->next = u_conf;
           u_conf = aconf;
         }
@@ -2409,10 +2406,10 @@ static void initconf(FBFILE* file, int use_include)
 #ifdef JUPE_CHANNEL
           if(aconf->name[0] == '#')
             {
-              aChannel *chptr;
+              struct Channel *chptr;
               int len;
 
-              if( (chptr = hash_find_channel(aconf->name, (aChannel *)NULL)) )
+              if( (chptr = hash_find_channel(aconf->name, (struct Channel *)NULL)) )
                 chptr->mode.mode |= MODE_JUPED;
               else
                 {
@@ -2421,8 +2418,8 @@ static void initconf(FBFILE* file, int use_include)
                    */
 
                   len = strlen(aconf->name);
-                  chptr = (aChannel*) MyMalloc(sizeof(aChannel) + len + 1);
-                  memset(chptr, 0, sizeof(aChannel));
+                  chptr = (struct Channel*) MyMalloc(sizeof(struct Channel) + len + 1);
+                  memset(chptr, 0, sizeof(struct Channel));
                   /*
                    * NOTE: strcpy ok since we already know the length
                    */
@@ -2452,8 +2449,8 @@ static void initconf(FBFILE* file, int use_include)
 
       if (!dontadd)
         {
-          collapse(aconf->host);
-          collapse(aconf->user);
+          (void)collapse(aconf->host);
+          (void)collapse(aconf->user);
           Debug((DEBUG_NOTICE,
                  "Read Init: (%d) (%s) (%s) (%s) (%d) (%d)",
                  aconf->status, aconf->host, aconf->passwd,
@@ -2544,6 +2541,7 @@ static void do_include_conf(void)
 /*
  * lookup_confhost - start DNS lookups of all hostnames in the conf
  * line and convert an IP addresses in a.b.c.d number for to IP#s.
+ *
  */
 static void lookup_confhost(struct ConfItem* aconf)
 {
@@ -2551,28 +2549,24 @@ static void lookup_confhost(struct ConfItem* aconf)
   unsigned long    ip;
   unsigned long    mask;
 
-  if (EmptyString(aconf->host) || EmptyString(aconf->name))
+  if (BadPtr(aconf->host) || BadPtr(aconf->name))
     {
       log(L_ERROR, "Host/server name error: (%s) (%s)",
-          (EmptyString(aconf->host)) ? "none" : aconf->host, 
-          (EmptyString(aconf->name)) ? "none" : aconf->name);
+          aconf->host, aconf->name);
       return;
     }
 
   /*
-   * Do name lookup now on hostnames given and store the
-   * ip numbers in conf structure.
-   */
+  ** Do name lookup now on hostnames given and store the
+  ** ip numbers in conf structure.
+  */
   if (is_address(aconf->host, &ip, &mask))
     {
       aconf->ipnum.s_addr = htonl(ip);
     }
   else if (0 != (dns_reply = conf_dns_lookup(aconf)))
     memcpy(&aconf->ipnum, dns_reply->hp->h_addr, sizeof(struct in_addr));
-  /*
-   * it is entirely possible to get here without having a valid ip
-   * address in aconf->ipnum since dns lookups are asynchronus
-   */
+  
 }
 
 /*
@@ -2684,8 +2678,8 @@ static struct ConfItem* find_tkline(const char* host, const char* user)
  * find_is_klined()
  *
  * inputs        - hostname
- *                - username
- *                - ip of possible "victim"
+ *               - username
+ *               - ip of possible "victim"
  * output        - matching struct ConfItem or NULL
  * side effects        -
  *
@@ -3250,8 +3244,27 @@ int m_testline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       given_name = parv[1];
       if(!(p = strchr(given_name,'@')))
         {
-          sendto_one(sptr, ":%s NOTICE %s :usage: user@host[,ip]",
+          ip = 0L;
+          if(is_address(given_name,&ip,&host_mask))
+            {
+              aconf = match_Dline(ip);
+              if( aconf )
+                {
+                  get_printable_conf(aconf, &name, &host, &pass, &user, &port);
+                  sendto_one(sptr, 
+                         ":%s NOTICE %s :D-line host [%s] pass [%s]",
+                         me.name, parv[0], 
+                         host,
+                         pass);
+                }
+              else
+                sendto_one(sptr, ":%s NOTICE %s :No aconf found",
+                         me.name, parv[0]);
+            }
+          else	  
+          sendto_one(sptr, ":%s NOTICE %s :usage: user@host|ip",
                      me.name, parv[0]);
+
           return 0;
         }
 
@@ -3305,7 +3318,7 @@ int m_testline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                    me.name, parv[0]);
     }
   else
-    sendto_one(sptr, ":%s NOTICE %s :usage: user@host,ip",
+    sendto_one(sptr, ":%s NOTICE %s :usage: user@host|ip",
                me.name, parv[0]);
   return 0;
 }
@@ -3377,6 +3390,9 @@ void read_conf_files(int cold)
   do_include_conf();
 
   /* ZZZ have to deal with single ircd.conf situations */
+  /* It would be better to check for NULL return from filename 
+   * or *filename == '\0'; and then just ignoring it 
+   */
 
 #ifdef KPATH
   filename = get_conf_name(KLINE_TYPE);

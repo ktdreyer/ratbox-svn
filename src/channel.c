@@ -39,7 +39,6 @@
 #include "channel.h"
 #include "client.h"
 #include "common.h"
-#include "flud.h"
 #include "hash.h"
 #include "irc_string.h"
 #include "ircd.h"
@@ -56,17 +55,18 @@
 
 #ifdef NEED_SPLITCODE
 
-int         server_was_split=YES;
-int         got_server_pong;
-time_t      server_split_time;
+static void check_still_split();
+int server_was_split=YES;
+int got_server_pong;
+time_t server_split_time;
 
 #if defined(PRESERVE_CHANNEL_ON_SPLIT) || defined(NO_JOIN_ON_SPLIT)
-struct Channel* empty_channel_list = NULL;
+struct Channel *empty_channel_list=(struct Channel*)NULL;
 void remove_empty_channels();
 #endif
 #endif
 
-struct Channel* GlobalChannelList = 0;
+struct Channel *GlobalChannelList = NullChn;
 
 static  int     add_banid (struct Client *, struct Channel *, char *);
 static  int     add_exceptid(struct Client *, struct Channel *, char *);
@@ -87,18 +87,18 @@ static int errsent(int,int *);
 static void change_chan_flag(struct Channel *, struct Client *, int );
 static void set_deopped(struct Client *,struct Channel *,int);
 
-const char* const PartFmt = ":%s PART %s";
+
 /*
  * some buffers for rebuilding channel/nick lists with ,'s
  */
-static char modebuf[MODEBUFLEN];
-static char modebuf2[MODEBUFLEN];
-static char parabuf[MODEBUFLEN];
-static char parabuf2[MODEBUFLEN];
+
+static  char    buf[BUFSIZE];
+static  char    modebuf[MODEBUFLEN], modebuf2[MODEBUFLEN];
+static  char    parabuf[MODEBUFLEN], parabuf2[MODEBUFLEN];
 
 
 /* 
- * return the length (>=0) of a chain of links.
+ * return the length (>=0) of a chain of struct SLinks.
  */
 static  int     list_length(struct SLink *lp)
 {
@@ -111,7 +111,7 @@ static  int     list_length(struct SLink *lp)
 
 /*
  *  Fixes a string so that the first white space found becomes an end of
- * string marker (`\-`).  returns the 'fixed' string or "*" if the string
+ * string marker (`\0`).  returns the 'fixed' string or "*" if the string
  * was NULL length or a NULL pointer.
  */
 static char* check_string(char* s)
@@ -574,10 +574,11 @@ static void del_matching_exception(struct Client *cptr,struct Channel *chptr)
  *
  * +e code from orabidoo
  */
-int is_banned(struct Client *cptr, struct Channel *chptr)
+
+int is_banned(struct Client *cptr,struct Channel *chptr)
 {
-  struct SLink *tmp;
-  struct SLink *t2;
+  register struct SLink *tmp;
+  register struct SLink *t2;
   char  s[NICKLEN+USERLEN+HOSTLEN+6];
   char  *s2;
 
@@ -620,7 +621,7 @@ int is_banned(struct Client *cptr, struct Channel *chptr)
  * adds a user to a channel by adding another link to the channels member
  * chain.
  */
-void add_user_to_channel(struct Channel *chptr, struct Client *who, int flags)
+void    add_user_to_channel(struct Channel *chptr, struct Client *who, int flags)
 {
   struct SLink *ptr;
 
@@ -883,7 +884,6 @@ static  void    send_mode_list(struct Client *cptr,
  */
 void send_channel_modes(struct Client *cptr, struct Channel *chptr)
 {
-  char buf[BUFSIZE];
   struct SLink  *l, *anop = NULL, *skip = NULL;
   int   n = 0;
   char  *t;
@@ -1016,10 +1016,10 @@ static  char    *fix_key(char *arg)
   u_char        *s, *t, c;
 
   for (s = t = (u_char *)arg; (c = *s); s++)
-    { 
+    {
       if (c != ':' && c > 0x20)
-      { 
-        c &= 0x7f;
+      {
+	c &= 0x7f;
         *t++ = c;
       }
     }
@@ -1036,7 +1036,7 @@ static  char    *fix_key_old(char *arg)
   u_char        *s, *t, c;
 
   for (s = t = (u_char *)arg; (c = *s); s++)
-    {
+    { 
       c &= 0x7f;
       if ((c != 0x0a) && (c != ':'))
         *t++ = c;
@@ -1351,11 +1351,11 @@ void set_channel_mode(struct Client *cptr,
           else
             {
               if (whatt == MODE_DEL)
-                { 
+                {
                   arg = check_string(*parv++);
                 }
               else
-                { 
+                {
                   if MyClient(sptr)
                     arg = fix_key(check_string(*parv++));
                   else
@@ -1437,13 +1437,16 @@ void set_channel_mode(struct Client *cptr,
           /*      opcnt++; */
 
           if (whatt == MODE_DEL)
-            *chptr->mode.key = '\0';
-          else {
-            /*
-             * chptr was zeroed
-             */
-            strncpy_irc(chptr->mode.key, arg, KEYLEN);
-          }
+            {
+              *chptr->mode.key = '\0';
+            }
+          else
+            {
+              /*
+               * chptr was zeroed
+               */
+              strncpy_irc(chptr->mode.key, arg, KEYLEN);
+            }
 
           break;
 
@@ -2260,7 +2263,7 @@ void set_channel_mode(struct Client *cptr,
   return;
 }
 
-int can_join(struct Client *sptr, struct Channel *chptr, char *key, int *flags)
+int     can_join(struct Client *sptr, struct Channel *chptr, char *key, int *flags)
 {
   struct SLink  *lp;
   int ban_or_exception;
@@ -2272,7 +2275,7 @@ int can_join(struct Client *sptr, struct Channel *chptr, char *key, int *flags)
              "User %s (%s@%s) is attemping to join locally juped channel %s",
                      sptr->name,
                      sptr->username, sptr->host,chptr->chname);
-      return (ERR_JUPEDCHAN);
+      return (ERR_BADCHANNAME);
     }
 #endif
 
@@ -2368,7 +2371,7 @@ struct Channel* get_channel(struct Client *cptr, char *chname, int flag)
   return chptr;
 }
 
-void add_invite(struct Client *cptr, struct Channel *chptr)
+void    add_invite(struct Client *cptr,struct Channel *chptr)
 {
   struct SLink  *inv, **tmp;
 
@@ -2507,7 +2510,7 @@ static  void    sub1_from_channel(struct Channel *chptr)
           free_fluders(NULL, chptr);
 #endif
           del_from_channel_hash_table(chptr->chname, chptr);
-          MyFree(chptr);
+          MyFree((char*) chptr);
           Count.chan--;
         }
     }
@@ -2521,6 +2524,7 @@ static  void    sub1_from_channel(struct Channel *chptr)
  * still need a bit of cleanup on the MODE -b stuff...
  * -Dianora
  */
+
 void clear_bans_exceptions_denies(struct Client *sptr, struct Channel *chptr)
 {
   static char modebuf[MODEBUFLEN];
@@ -2761,7 +2765,7 @@ static void free_bans_exceptions_denies(struct Channel *chptr)
  * -Dianora
  */
 
-void check_still_split()
+static void check_still_split()
 {
   if((server_split_time + SPLITDELAY) < CurrentTime)
     {
@@ -2811,7 +2815,8 @@ void remove_empty_channels()
   struct SLink  *obtmp;
   struct Channel *next_empty_channel;
 
-  for(;empty_channel_list; empty_channel_list = next_empty_channel )
+  for(;empty_channel_list;
+      empty_channel_list = next_empty_channel )
     {
       next_empty_channel = empty_channel_list->next_empty_channel;
 
@@ -2872,7 +2877,7 @@ void remove_empty_channels()
       if (empty_channel_list->prevch)
         empty_channel_list->prevch->nextch = empty_channel_list->nextch;
       else
-        GlobalChannelList = empty_channel_list->nextch;
+        channel = empty_channel_list->nextch;
       if (empty_channel_list->nextch)
         empty_channel_list->nextch->prevch = empty_channel_list->prevch;
       
@@ -2881,14 +2886,14 @@ void remove_empty_channels()
 #endif
       del_from_channel_hash_table(empty_channel_list->chname, 
                                         empty_channel_list);
-      MyFree(empty_channel_list);
-      empty_channel_list = 0;
+      MyFree((char*) empty_channel_list);
       Count.chan--;
     }
 }
 #endif
 
-int count_channels(struct Client *sptr)
+
+int     count_channels(struct Client *sptr)
 {
   struct Channel      *chptr;
   int   count = 0;
@@ -2898,106 +2903,5 @@ int count_channels(struct Client *sptr)
   return (count);
 }
 
-void send_user_joins(struct Client *cptr, struct Client *user)
-{
-  struct SLink*   lp;
-  struct Channel* chptr;
-  int             cnt = 0;
-  int             len = 0;
-  int             clen;
-  char*           mask;
-  char            buf[BUFSIZE];
-
-  *buf = ':';
-  strcpy(buf+1, user->name);
-  strcat(buf, " JOIN ");
-  len = strlen(user->name) + 7;
-
-  for (lp = user->user->channel; lp; lp = lp->next)
-    {
-      chptr = lp->value.chptr;
-      if (*chptr->chname == '&')
-        continue;
-      if ((mask = strchr(chptr->chname, ':')))
-        if (!match(++mask, cptr->name))
-          continue;
-      clen = strlen(chptr->chname);
-      if (clen > BUFSIZE - 7 - len)
-        {
-          if (cnt)
-            sendto_one(cptr, "%s", buf);
-          *buf = ':';
-          (void)strcpy(buf+1, user->name);
-          (void)strcat(buf, " JOIN ");
-          len = strlen(user->name) + 7;
-          cnt = 0;
-        }
-      (void)strcpy(buf + len, chptr->chname);
-      cnt++;
-      len += clen;
-      if (lp->next)
-        {
-          len++;
-          (void)strcat(buf, ",");
-        }
-    }
-  if (*buf && cnt)
-    sendto_one(cptr, "%s", buf);
-
-  return;
-}
-
-void sjoin_sendit(struct Client *cptr, struct Client *sptr,
-                  struct Channel *chptr, char *from)
-{
-  sendto_channel_butserv(chptr, sptr, ":%s MODE %s %s %s", from,
-                         chptr->chname, modebuf, parabuf);
-}
-
-/*
- * Only called from ircd.c if the clock is discovered to be running forwards
- * The clock can be running forwards for a number of reasons
- * the most likely one, being a reset of the system time.
- * in these cases, its a legit reset of the clock time, but all the channels
- * locally created now have a bogus channel timestamp
- * so, I scan all the current channels, looking for channels I locally
- * created... and reset their creation time...
- * I can only do this =before= I have joined any servers... 
- * Channels that existed =before= this server split from the rest of the net
- * will not have the locally_created flag set, and hence will not be
- * affected. 
- * Remember, the server will not link with a very bogus TS so all that
- * is necessary is to make sure any locally created channel TS's are fixed.
- *
- * -Dianora
- */
-
-void sync_channels(time_t delta)
-{
-  register      struct Channel        *chptr;
-  time_t newts;
-
-  for (chptr = GlobalChannelList; chptr; chptr = chptr->nextch)
-    {
-      if(chptr->locally_created)
-        {
-          newts = chptr->channelts + delta;
-          /*
-           * Leaving this sendto in can cause a lot of "noise"
-           * when it happens, and possibly contribute to the server
-           * lagging worse and worse... finally splitting it...
-           */
-
-          /*
-          sendto_realops("*** resetting TS on locally created %s from %d to %d",
-                         chptr->chname,chptr->channelts,
-                         newts);
-                         */
-
-          chptr->channelts = newts;
-        }
-    }
- 
-}
 
 

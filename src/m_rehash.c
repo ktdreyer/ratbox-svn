@@ -180,7 +180,7 @@ int m_rehash(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       else if(irccmp(parv[1],"HELP") == 0)
         {
           sendto_ops("%s is forcing re-reading of oper help file",parv[0]);
-          ReadMessageFile( &ConfigFileEntry.motd );
+          ReadMessageFile( &ConfigFileEntry.helpfile );
           found = YES;
         }
       else if(irccmp(parv[1],"dump") == 0)

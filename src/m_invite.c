@@ -23,6 +23,7 @@
  *   $Id$
  */
 #include "m_commands.h"
+#include "common.h"
 #include "channel.h"
 #include "client.h"
 #include "hash.h"
@@ -95,11 +96,14 @@
 **      parv[1] - user to invite
 **      parv[2] - channel number
 */
-int m_invite(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+int     m_invite(struct Client *cptr,
+                 struct Client *sptr,
+                 int parc,
+                 char *parv[])
 {
-  struct Client*  acptr;
-  struct Channel* chptr;
-  int             need_invite = 0;
+  struct Client *acptr;
+  struct Channel *chptr;
+  int need_invite=NO;
 
   if (parc < 3 || *parv[1] == '\0')
     {
@@ -169,7 +173,7 @@ int m_invite(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
   if (chptr && (chptr->mode.mode & MODE_INVITEONLY))
     {
-      need_invite = 1;
+      need_invite = YES;
 
       if (!is_chan_op(sptr, chptr))
         {
@@ -239,4 +243,3 @@ int m_invite(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                     parv[0], acptr->name, parv[2]);
   return 0;
 }
-

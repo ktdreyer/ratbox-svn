@@ -104,11 +104,13 @@
 ** Just some flood control added here, five minute delay between each
 ** KNOCK -Dianora
 **/
-int m_knock(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+int     m_knock(struct Client *cptr,
+               struct Client *sptr,
+               int parc,
+               char *parv[])
 {
-  struct Channel* chptr;
-  char* p;
-  char* name;
+  struct Channel      *chptr;
+  char  *p, *name;
 
   /* anti flooding code,
    * I did have this in parse.c with a table lookup
@@ -233,4 +235,3 @@ int m_knock(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   }
   return 0;
 }
-

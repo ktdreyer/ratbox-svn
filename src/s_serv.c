@@ -65,7 +65,9 @@ int MaxClientCount     = 1;
  */
 struct Capability captab[] = {
 /*  name        cap     */ 
+#ifdef ZIP_LINKS
   { "ZIP",      CAP_ZIP },
+#endif
   { "QS",       CAP_QS },
   { "EX",       CAP_EX },
   { "CHW",      CAP_CHW },
@@ -483,7 +485,7 @@ static void sendnick_TS(struct Client *cptr, struct Client *acptr)
 /*
  * show_capabilities - show current server capabilities
  *
- * inputs       - pointer to an aClient
+ * inputs       - pointer to an struct Client
  * output       - pointer to static string
  * side effects - build up string representing capabilities of server listed
  */
@@ -520,6 +522,7 @@ int server_estab(struct Client *cptr)
   int               split;
 
   assert(0 != cptr);
+  ClearAccess(cptr);
 
   inpath = get_client_name(cptr, TRUE); /* "refresh" inpath with host */
   split = irccmp(cptr->name, cptr->host);
@@ -609,6 +612,8 @@ int server_estab(struct Client *cptr)
         }
     }
   
+
+#ifdef ZIP_LINKS
   if (IsCapable(cptr, CAP_ZIP) && (c_conf->flags & CONF_FLAGS_ZIP_LINK))
     {
       if (zip_init(cptr) == -1)
@@ -622,6 +627,7 @@ int server_estab(struct Client *cptr)
     }
   else
     ClearCap(cptr, CAP_ZIP);
+#endif /* ZIP_LINKS */
 
   sendto_one(cptr,"SVINFO %d %d 0 :%lu", TS_CURRENT, TS_MIN, CurrentTime);
   
@@ -661,8 +667,8 @@ int server_estab(struct Client *cptr)
 
   nextping = CurrentTime;
   /* ircd-hybrid-6 can do TS links, and  zipped links*/
-  sendto_ops("Link with %s established: (%s)", inpath, 
-             show_capabilities(cptr));
+  sendto_ops("Link with %s established: (%s) link",
+             inpath,show_capabilities(cptr));
 
   add_to_client_hash_table(cptr->name, cptr);
   /* doesnt duplicate cptr->serv if allocated this struct already */
@@ -816,6 +822,7 @@ int server_estab(struct Client *cptr)
 
   cptr->flags2 &= ~FLAGS2_CBURST;
 
+#ifdef  ZIP_LINKS
   /*
   ** some stats about the connect burst,
   ** they are slightly incorrect because of cptr->zip->outbuf.
@@ -826,6 +833,7 @@ int server_estab(struct Client *cptr)
                 cptr->zip->out->total_in,cptr->zip->out->total_out,
                 (100.0*(float)cptr->zip->out->total_out) /
                 (float)cptr->zip->out->total_in);
+#endif /* ZIP_LINKS */
 
   /* Always send a PING after connect burst is done */
   sendto_one(cptr, "PING :%s", me.name);

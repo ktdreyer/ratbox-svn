@@ -23,8 +23,6 @@
  *   $Id$
  */
 
-#define _XOPEN_SOURCE
-
 #include "m_commands.h"
 #include "client.h"
 #include "fdlist.h"
@@ -106,15 +104,16 @@
 */
 int m_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
-  struct ConfItem* aconf;
-  char*            name;
-  char*            password;
-  char*            encr;
-  char*            operprivs;
-  static char      buf[BUFSIZE];
+  struct ConfItem *aconf;
+  char  *name, *password, *encr;
+#ifdef CRYPT_OPER_PASSWORD
+  extern        char *crypt();
+#endif /* CRYPT_OPER_PASSWORD */
+  char *operprivs;
+  static char buf[BUFSIZE];
 
-  name = parc > 1 ? parv[1] : NULL;
-  password = parc > 2 ? parv[2] : NULL;
+  name = parc > 1 ? parv[1] : (char *)NULL;
+  password = parc > 2 ? parv[2] : (char *)NULL;
 
   if (!IsServer(cptr) && (EmptyString(name) || EmptyString(password)))
     {
@@ -131,7 +130,8 @@ int m_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       Count.oper++;
       sendto_serv_butone(cptr, ":%s MODE %s :+o", parv[0], parv[0]);
       if (IsMe(cptr))
-        sendto_one(sptr, form_str(RPL_YOUREOPER), me.name, parv[0]);
+        sendto_one(sptr, form_str(RPL_YOUREOPER),
+                   me.name, parv[0]);
       return 0;
     }
   else if (IsAnOper(sptr))
@@ -144,7 +144,8 @@ int m_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         }
       return 0;
     }
-  if (!(aconf = find_conf_exact(name, sptr->username, sptr->host, CONF_OPS)) &&
+  if (!(aconf = find_conf_exact(name, sptr->username, sptr->host,
+                                CONF_OPS)) &&
       !(aconf = find_conf_exact(name, sptr->username,
                                 inetntoa((char *)&cptr->ip), CONF_OPS)))
     {
@@ -180,9 +181,9 @@ int m_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       if (aconf->status == CONF_LOCOP)
         {
           SetLocOp(sptr);
-          if (aconf->hold)
+          if((int)aconf->hold)
             {
-              sptr->umodes |= (aconf->hold & ALL_UMODES); 
+              sptr->umodes |= ((int)aconf->hold & ALL_UMODES); 
               sendto_one(sptr, ":%s NOTICE %s:*** Oper flags set from conf",
                          me.name,parv[0]);
             }
@@ -190,24 +191,14 @@ int m_oper(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
             {
               sptr->umodes |= (LOCOP_UMODES);
             }
-#if 0
-          /*
-           * XXX - BUG this trashes the clients port
-           *
-           * A local oper can't global kill ever, or do remote re-routes
-           * or glines. Make sure thats enforced here.
-           */
-          sptr->port &= 
-            ~(CONF_OPER_GLOBAL_KILL | CONF_OPER_REMOTE | CONF_OPER_GLINE);
-#endif
         }
       else
         {
           SetOper(sptr);
           if((int)aconf->hold)
             {
-              sptr->umodes |= (aconf->hold & ALL_UMODES); 
-              if (!IsSetOperN(sptr))
+              sptr->umodes |= ((int)aconf->hold & ALL_UMODES); 
+              if( !IsSetOperN(sptr) )
                 sptr->umodes &= ~FLAGS_NCHANGE;
               
               sendto_one(sptr, ":%s NOTICE %s:*** Oper flags set from conf",

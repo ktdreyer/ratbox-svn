@@ -125,7 +125,7 @@ int     get_con_freq(struct Class *clptr)
  * if no present entry is found, then create a new one and add it in
  * immediately after the first one (class 0).
  */
-void    add_class(int c_class,
+void    add_class(int class,
                   int ping,
                   int confreq,
                   int maxli,
@@ -133,10 +133,10 @@ void    add_class(int c_class,
 {
   struct Class *t, *p;
 
-  t = find_class(c_class);
-  if ((t == ClassList) && (c_class != 0))
+  t = find_class(class);
+  if ((t == ClassList) && (class != 0))
     {
-      p = make_class();
+      p = (struct Class *)make_class();
       p->next = t->next;
       t->next = p;
     }
@@ -144,8 +144,8 @@ void    add_class(int c_class,
     p = t;
   Debug((DEBUG_DEBUG,
          "Add Class %d: p %x t %x - cf: %d pf: %d ml: %d sq: %l",
-         c_class, p, t, confreq, ping, maxli, sendq));
-  ClassType(p) = c_class;
+         class, p, t, confreq, ping, maxli, sendq));
+  ClassType(p) = class;
   ConFreq(p) = confreq;
   PingFreq(p) = ping;
   MaxLinks(p) = maxli;
@@ -187,9 +187,9 @@ void    check_class()
     }
 }
 
-void initclass()
+void    initclass()
 {
-  ClassList = make_class();
+  ClassList = (struct Class *)make_class();
 
   ClassType(ClassList) = 0;
   ConFreq(ClassList) = CONNECTFREQUENCY;
@@ -210,10 +210,9 @@ void    report_classes(struct Client *sptr)
                MaxLinks(cltmp), MaxSendq(cltmp));
 }
 
-size_t get_sendq(struct Client *cptr)
+long    get_sendq(struct Client *cptr)
 {
-  int   sendq = MAXSENDQLENGTH;
-  int   retc = BAD_CLIENT_CLASS;
+  int   sendq = MAXSENDQLENGTH, retc = BAD_CLIENT_CLASS;
   struct SLink  *tmp;
   struct Class        *cl;
 

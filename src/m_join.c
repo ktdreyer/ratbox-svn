@@ -1,5 +1,5 @@
 /************************************************************************
- *   IRC - Internet Relay Chat, src/m_version.c
+ *   IRC - Internet Relay Chat, src/m_join.c
  *   Copyright (C) 1990 Jarkko Oikarinen and
  *                      University of Oulu, Computing Center
  *
@@ -22,6 +22,7 @@
  *
  *   $Id$
  */
+
 #include "m_commands.h"
 #include "channel.h"
 #include "client.h"
@@ -35,6 +36,8 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
+
 /*
  * m_functions execute protocol messages on this server:
  *
@@ -92,26 +95,27 @@
  *                      non-NULL pointers.
  */
 
+
 /*
 ** m_join
 **      parv[0] = sender prefix
 **      parv[1] = channel
 **      parv[2] = channel password (key)
 */
-int m_join(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+int     m_join(struct Client *cptr,
+               struct Client *sptr,
+               int parc,
+               char *parv[])
 {
-  static char     jbuf[BUFSIZE];
-  struct SLink*   lp;
-  struct Channel* chptr = 0;
-  char*           name;
-  char*           key = 0;
-  int             i;
-  int             flags = 0;
-  char*           p = 0;
-  char*           p2 = 0;
+  static char   jbuf[BUFSIZE];
+  struct SLink  *lp;
+  struct Channel *chptr = NULL;
+  char  *name, *key = NULL;
+  int   i, flags = 0;
 #ifdef NO_CHANOPS_WHEN_SPLIT
-  int             allow_op = 1;
+  int   allow_op=YES;
 #endif
+  char  *p = NULL, *p2 = NULL;
 #ifdef ANTI_SPAMBOT
   int   successful_join_count = 0; /* Number of channels successfully joined */
 #endif
@@ -222,7 +226,7 @@ int m_join(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
           while ((lp = sptr->user->channel))
             {
               chptr = lp->value.chptr;
-              sendto_channel_butserv(chptr, sptr, PartFmt,
+              sendto_channel_butserv(chptr, sptr, ":%s PART %s",
                                      parv[0], chptr->chname);
               remove_user_from_channel(sptr, chptr, 0);
             }
@@ -293,15 +297,12 @@ int m_join(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 #ifdef NO_CHANOPS_WHEN_SPLIT
           if((*name != '&') && !IsAnOper(sptr) && server_was_split)
             {
-              if(server_was_split)
-                {
-                  allow_op = 0;
+              allow_op = NO;
 
-                  if(!IsRestricted(sptr) && (flags & CHFL_CHANOP))
+              if(!IsRestricted(sptr) && (flags & CHFL_CHANOP))
                 sendto_one(sptr,":%s NOTICE %s :*** Notice -- Due to a network split, you can not obtain channel operator status in a new channel at this time.",
-                           me.name,
-                           sptr->name);
-                }
+                       me.name,
+                       sptr->name);
             }
 #endif
 
@@ -489,11 +490,7 @@ int m_join(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
             }
 
           del_invite(sptr, chptr);
-        /*  call m_names BEFORE spewing the topic, so people actually see
-        **  the topic, and stop whining.  --SuperTaz
-        */
-          parv[1] = name;
-          (void)m_names(cptr, sptr, 2, parv);
+
           if (chptr->topic[0] != '\0')
             {
               sendto_one(sptr, form_str(RPL_TOPIC), me.name,
@@ -505,6 +502,8 @@ int m_join(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                          chptr->topic_time);
 #endif
             }
+          parv[1] = name;
+          (void)m_names(cptr, sptr, 2, parv);
         }
     }
 

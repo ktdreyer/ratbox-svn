@@ -22,9 +22,11 @@
  *
  *   $Id$
  */
+
 #include "m_commands.h"
 #include "channel.h"
 #include "client.h"
+#include "common.h"   /* bleah */
 #include "hash.h"
 #include "irc_string.h"
 #include "ircd.h"
@@ -32,7 +34,10 @@
 #include "numeric.h"
 #include "send.h"
 
+#include <stdlib.h>
 #include <string.h>
+#include <assert.h>
+
 /*
  * m_functions execute protocol messages on this server:
  *
@@ -90,7 +95,6 @@
  *                      non-NULL pointers.
  */
 
-
 /************************************************************************
  * m_names() - Added by Jto 27 Apr 1989
  ************************************************************************/
@@ -110,7 +114,10 @@
 /* maximum names para to show to opers when abuse occurs */
 #define TRUNCATED_NAMES 20
 
-int m_names(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+int     m_names( struct Client *cptr,
+                 struct Client *sptr,
+                 int parc,
+                 char *parv[])
 { 
   struct Channel *chptr;
   struct Client *c2ptr;
@@ -164,7 +171,8 @@ int m_names(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                   *s = '\0';
                 }
               sendto_realops("POSSIBLE /names abuser %s [%s]",
-                             para, get_client_name(sptr, HIDE_IP));
+                             para,
+                             get_client_name(sptr,FALSE));
               sendto_one(sptr, form_str(ERR_TOOMANYTARGETS),
                          me.name, sptr->name, "NAMES");
               return 0;
@@ -309,4 +317,5 @@ int m_names(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   sendto_one(sptr, form_str(RPL_ENDOFNAMES), me.name, parv[0], "*");
   return(1);
 }
+
 

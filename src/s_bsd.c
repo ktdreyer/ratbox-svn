@@ -25,7 +25,6 @@
 #include "common.h"
 #include "config.h"
 #include "fdlist.h"
-#include "ircdauth.h"
 #include "irc_string.h"
 #include "ircd.h"
 #include "list.h"
@@ -54,7 +53,6 @@
 #include <sys/stat.h>
 #include <sys/socket.h>
 #include <sys/file.h>
-#define BSD_COMP          /* needed on Solaris for FIONBIO */
 #include <sys/ioctl.h>
 #include <sys/resource.h>
 #include <sys/param.h>    /* NOFILE */
@@ -64,8 +62,8 @@
  * Stuff for poll()
  */
 #ifdef USE_POLL
-#define CONNECTFAST
 #include <sys/poll.h>
+#define CONNECTFAST
 #endif
 
 #ifndef IN_LOOPBACKNET
@@ -131,8 +129,8 @@ static int get_sockerr(int fd)
 {
   int errtmp = errno;
 #ifdef SO_ERROR
-  int    err = 0;
-  size_t len = sizeof(err);
+  int err = 0;
+  int len = sizeof(err);
 
   if (-1 < fd && !getsockopt(fd, SOL_SOCKET, SO_ERROR, (char*) &err, &len)) {
     if (err)
@@ -187,23 +185,6 @@ static void connect_dns_callback(void* vptr, struct DNSReply* reply)
   }
   else
     sendto_ops("Connect to %s failed: host lookup", aconf->host);
-}
-
-/*
- * do_dns_async - called when the fd returned from init_resolver() has 
- * been selected for reading.
- */
-static void do_dns_async()
-{
-  int bytes = 0;
-  int packets = 0;
-
-  do {
-    get_res();
-    if (ioctl(ResolverFileDescriptor, FIONREAD, &bytes) == -1)
-      bytes = 0;
-    packets++;
-  }  while ((bytes > 0) && (packets < 10)); 
 }
 
 /*
@@ -291,42 +272,44 @@ int set_non_blocking(int fd)
  */
 int deliver_it(struct Client* cptr, const char* str, int len)
 {
-  int retval;
-
-  assert(0 != cptr);
-  assert(0 != str);
+  int   retval;
 
   retval = send(cptr->fd, str, len, 0);
   /*
-   * Convert WOULDBLOCK to a return of "0 bytes moved". This
-   * should occur only if socket was non-blocking. Note, that
-   * all is Ok, if the 'write' just returns '0' instead of an
-   * error and errno=EWOULDBLOCK.
-   *
-   */
-  if (retval < 0) {
-    if  (errno == EWOULDBLOCK || errno == EAGAIN) {
+  ** Convert WOULDBLOCK to a return of "0 bytes moved". This
+  ** should occur only if socket was non-blocking. Note, that
+  ** all is Ok, if the 'write' just returns '0' instead of an
+  ** error and errno=EWOULDBLOCK.
+  **
+  */
+  if (retval < 0 && (errno == EWOULDBLOCK || errno == EAGAIN ||
+                     errno == ENOBUFS))
+    {
       retval = 0;
       cptr->flags |= FLAGS_BLOCKED;
+      return(retval);  /* Just get out now... */
     }
-    return retval;  /* Just get out now... */
-  }
-  if (retval > 0) {
-    cptr->flags &= ~FLAGS_BLOCKED;
+  else if (retval > 0)
+    {
+      cptr->flags &= ~FLAGS_BLOCKED;
+    }
 
-    cptr->sendB += retval;
-    me.sendB    += retval;
-
-    if (cptr->sendB > 1023) {
-      cptr->sendK += (cptr->sendB >> 10);
-      cptr->sendB &= 0x03ff;        /* 2^10 = 1024, 3ff = 1023 */
+  if (retval > 0)
+    {
+      cptr->sendB += retval;
+      me.sendB += retval;
+      if (cptr->sendB > 1023)
+        {
+          cptr->sendK += (cptr->sendB >> 10);
+          cptr->sendB &= 0x03ff;        /* 2^10 = 1024, 3ff = 1023 */
+        }
+      else if (me.sendB > 1023)
+        {
+          me.sendK += (me.sendB >> 10);
+          me.sendB &= 0x03ff;
+        }
     }
-    else if (me.sendB > 1023) {
-      me.sendK += (me.sendB >> 10);
-      me.sendB &= 0x03ff;
-    }
-  }
-  return retval;
+  return(retval);
 }
 
 /*
@@ -343,13 +326,20 @@ int deliver_it(struct Client* cptr, const char* str, int len)
  * also updates reason if a K-line
  *
  */
-int check_client(struct Client *cptr, const char* username, char **reason)
+int check_client(struct Client *cptr,char *username,char **reason)
 {
-  int i = attach_Iline(cptr, username, reason);
+  static char     sockname[HOSTLEN + 1];
+  int             i;
+ 
+  ClearAccess(cptr);
 
-  if (0 != i)
-    log(L_INFO, "Access denied: %s[%s]", cptr->name, cptr->sockhost);
-  return i;
+  if ((i = attach_Iline(cptr, username, reason)))
+    {
+      log(L_INFO, "Access denied: %s[%s]", cptr->name, sockname);
+      return i;
+    }
+
+  return 0;
 }
 
 /*
@@ -624,6 +614,7 @@ int connect_server(struct ConfItem* aconf,
 void close_connection(struct Client *cptr)
 {
   struct ConfItem *aconf;
+  assert(0 != cptr);
 
   if (IsServer(cptr))
     {
@@ -686,13 +677,29 @@ void close_connection(struct Client *cptr)
   else
     ServerStats->is_ni++;
   
-  if (cptr->fd >= 0) {
+  if (cptr->dns_reply) {
+    --cptr->dns_reply->ref_count;
+    cptr->dns_reply = 0;
+  }
+  if (-1 < cptr->fd) {
     flush_connections(cptr);
     local[cptr->fd] = NULL;
     fdlist_delete(cptr->fd, FDL_ALL);
     close(cptr->fd);
     cptr->fd = -1;
   }
+
+#ifdef ZIP_LINKS
+    /*
+     * the connection might have zip data (even if
+     * FLAGS2_ZIP is not set)
+     */
+  if (IsServer(cptr))
+    zip_free(cptr);
+#endif
+  DBufClear(&cptr->sendQ);
+  DBufClear(&cptr->recvQ);
+  memset(cptr->passwd, 0, sizeof(cptr->passwd));
   /*
    * clean up extra sockets from P-lines which have been discarded.
    */
@@ -720,23 +727,11 @@ void close_connection(struct Client *cptr)
  */
 void add_connection(struct Listener* listener, int fd)
 {
-  struct Client*     new_client;
+  struct Client*           new_client;
   struct sockaddr_in addr;
-  size_t             len = sizeof(struct sockaddr_in);
+  int                len = sizeof(struct sockaddr_in);
 
   assert(0 != listener);
-
-#ifdef USE_IAUTH
-  if (iAuth.socket == NOSOCK)
-  {
-    send(fd,
-      "NOTICE AUTH :*** Ircd Authentication Server is temporarily down, please connect later\r\n",
-      87,
-      0);
-    close(fd);
-    return;
-  }
-#endif
 
   /* 
    * get the client socket name from the socket
@@ -770,7 +765,6 @@ void add_connection(struct Listener* listener, int fd)
     report_error(NONB_ERROR_MSG, get_client_name(new_client, TRUE), errno);
   if (!disable_sock_options(new_client->fd))
     report_error(OPT_ERROR_MSG, get_client_name(new_client, TRUE), errno);
-
   start_auth(new_client);
 }
 
@@ -798,7 +792,7 @@ static int parse_client_queued(struct Client* cptr)
         break;
       return dopacket(cptr, readBuf, dolen);
     }
-    dolen = dbuf_getmsg(&cptr->recvQ, cptr->buffer, BUFSIZE);
+    dolen = dbuf_getmsg(&cptr->recvQ, readBuf, READBUF_SIZE);
     /*
      * Devious looking...whats it do ? well..if a client
      * sends a *long* message without any CR or LF, then
@@ -808,13 +802,14 @@ static int parse_client_queued(struct Client* cptr)
      * -avalon
      */
     if (0 == dolen) {
-      if (DBufLength(&cptr->recvQ) < 510)
+      if (DBufLength(&cptr->recvQ) < 510) {
         cptr->flags |= FLAGS_NONL;
-      else
-        DBufClear(&cptr->recvQ);
+        break;
+      }
+      DBufClear(&cptr->recvQ);
       break;
     }
-    else if (CLIENT_EXITED == client_dopacket(cptr, dolen))
+    else if (CLIENT_EXITED == client_dopacket(cptr, readBuf, dolen))
       return CLIENT_EXITED;
   }
   return 1;
@@ -870,8 +865,10 @@ static int read_packet(struct Client *cptr)
    * worrying about the time of day or anything :)
    */
   if (PARSE_AS_SERVER(cptr)) {
-    if ((done = dopacket(cptr, readBuf, length)))
-      return done;
+    if (length > 0) {
+      if ((done = dopacket(cptr, readBuf, length)))
+        return done;
+    }
   }
   else {
     /*
@@ -882,7 +879,10 @@ static int read_packet(struct Client *cptr)
     if (!dbuf_put(&cptr->recvQ, readBuf, length))
       return exit_client(cptr, cptr, cptr, "dbuf_put fail");
     
-    if (IsPerson(cptr) && !IsAnOper(cptr) &&
+    if (IsPerson(cptr) &&
+#ifdef NO_OPER_FLOOD
+        !IsAnOper(cptr) &&
+#endif
         DBufLength(&cptr->recvQ) > CLIENT_FLOOD) {
       return exit_client(cptr, cptr, cptr, "Excess Flood");
     }
@@ -964,16 +964,6 @@ int read_message(time_t delay, unsigned char mask)        /* mika */
       FD_ZERO(read_set);
       FD_ZERO(write_set);
 
-		#ifdef USE_IAUTH
-      if (iAuth.socket != NOSOCK)
-      {
-      	if (IsIAuthConnect(iAuth))
-      		FD_SET(iAuth.socket, write_set);
-      	else
-        	FD_SET(iAuth.socket, read_set);
-      }
-    #endif
-
       for (auth = AuthPollList; auth; auth = auth->next) {
         assert(-1 < auth->fd);
         if (IsAuthConnect(auth))
@@ -981,7 +971,6 @@ int read_message(time_t delay, unsigned char mask)        /* mika */
         else /* if(IsAuthPending(auth)) */
           FD_SET(auth->fd, read_set);
       }
-
       for (listener = ListenerPollList; listener; listener = listener->next) {
         assert(-1 < listener->fd);
         FD_SET(listener->fd, read_set);
@@ -1003,8 +992,11 @@ int read_message(time_t delay, unsigned char mask)        /* mika */
                FD_SET(i, read_set);
             }
 
-          if (DBufLength(&cptr->sendQ) || IsConnecting(cptr) ||
-              ((cptr->flags2 & FLAGS2_ZIP) && (cptr->zip->outcount > 0)))
+          if (DBufLength(&cptr->sendQ) || IsConnecting(cptr)
+#ifdef ZIP_LINKS
+              || ((cptr->flags2 & FLAGS2_ZIP) && (cptr->zip->outcount > 0))
+#endif
+              )
             {
                FD_SET(i, write_set);
             }
@@ -1044,10 +1036,9 @@ int read_message(time_t delay, unsigned char mask)        /* mika */
 
   if (-1 < ResolverFileDescriptor && 
       FD_ISSET(ResolverFileDescriptor, read_set)) {
-    do_dns_async();
+    get_res();
     --nfds;
   }
-
   /*
    * Check the auth fd's
    */
@@ -1065,45 +1056,11 @@ int read_message(time_t delay, unsigned char mask)        /* mika */
         break;
     }
   }
-
   for (listener = ListenerPollList; listener; listener = listener->next) {
     assert(-1 < listener->fd);
     if (FD_ISSET(listener->fd, read_set))
       accept_connection(listener);
   }
-
-#ifdef USE_IAUTH
-  /*
-   * Check IAuth
-   */
-  if (iAuth.socket != NOSOCK)
-  {
-  	if (IsIAuthConnect(iAuth) && FD_ISSET(iAuth.socket, write_set))
-  	{
-  		/*FD_CLR(iAuth.socket, write_set);*/
-
-  		/*
-  		 * Complete the connection to the IAuth server
-  		 */
-  		if (!CompleteIAuthConnection())
-  		{
-  			close(iAuth.socket);
-  			iAuth.socket = NOSOCK;
-  		}
-  	}
-  	else if (FD_ISSET(iAuth.socket, read_set))
-    {
-      if (!ParseIAuth())
-      {
-        /*
-         * IAuth server closed the connection
-         */
-        close(iAuth.socket);
-        iAuth.socket = NOSOCK;
-      }
-    }
-  }
-#endif
 
   for (i = 0; i <= highest_fd; i++) {
     if (!(GlobalFDList[i] & mask) || !(cptr = local[i]))
@@ -1215,7 +1172,6 @@ int read_message(time_t delay, unsigned char mask)        /* mika */
                 pfd->events = 0;                \
         }
 
-
 int read_message(time_t delay, unsigned char mask)
 {
   struct Client*       cptr;
@@ -1252,7 +1208,6 @@ int read_message(time_t delay, unsigned char mask)
       PFD_SETR(ResolverFileDescriptor);
       res_pfd = pfd;
     }
-
     /*
      * set auth descriptors
      */
@@ -1264,14 +1219,28 @@ int read_message(time_t delay, unsigned char mask)
       else
         PFD_SETR(auth->fd);
     }
-
     /*
      * set listener descriptors
      */
     for (listener = ListenerPollList; listener; listener = listener->next) {
       assert(-1 < listener->fd);
+#ifdef CONNECTFAST
       listener->index = nbr_pfds;
       PFD_SETR(listener->fd);
+#else
+     /* 
+      * It is VERY bad if someone tries to send a lot
+      * of clones to the server though, as mbuf's can't
+      * be allocated quickly enough... - Comstud
+      */
+      listener->index = -1;
+      if (CurrentTime > (listener->last_accept + 2)) {
+        listener->index = nbr_pfds;
+        PFD_SETR(listener->fd);
+      }
+      else if (delay2 > 2)
+        delay2 = 2;
+#endif
     }
     /*
      * set client descriptors
@@ -1290,8 +1259,11 @@ int read_message(time_t delay, unsigned char mask)
       if (DBufLength(&cptr->recvQ) < 4088)
         PFD_SETR(i);
       
-      if (DBufLength(&cptr->sendQ) || IsConnecting(cptr) ||
-          ((cptr->flags2 & FLAGS2_ZIP) && (cptr->zip->outcount > 0)))
+      if (DBufLength(&cptr->sendQ) || IsConnecting(cptr)
+#ifdef ZIP_LINKS
+          || ((cptr->flags2 & FLAGS2_ZIP) && (cptr->zip->outcount > 0))
+#endif
+          )
         PFD_SETW(i);
     }
 
@@ -1318,10 +1290,9 @@ int read_message(time_t delay, unsigned char mask)
    * check resolver descriptor
    */
   if (res_pfd && (res_pfd->revents & (POLLREADFLAGS | POLLERRORS))) {
-    do_dns_async();
+    get_res();
     --nfds;
   }
-
   /*
    * check auth descriptors
    */
@@ -1340,7 +1311,6 @@ int read_message(time_t delay, unsigned char mask)
         break;
     }
   }
-
   /*
    * check listeners
    */

@@ -1,5 +1,5 @@
 /************************************************************************
- *   IRC - Internet Relay Chat, src/m_version.c
+ *   IRC - Internet Relay Chat, src/m_part.c
  *   Copyright (C) 1990 Jarkko Oikarinen and
  *                      University of Oulu, Computing Center
  *
@@ -25,10 +25,17 @@
 #include "m_commands.h"
 #include "channel.h"
 #include "client.h"
+#include "common.h"   /* bleah */
+#include "hash.h"
 #include "irc_string.h"
 #include "ircd.h"
+#include "list.h"
 #include "numeric.h"
 #include "send.h"
+
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
 
 /*
  * m_functions execute protocol messages on this server:
@@ -87,17 +94,18 @@
  *                      non-NULL pointers.
  */
 
-
 /*
 ** m_part
 **      parv[0] = sender prefix
 **      parv[1] = channel
 */
-int m_part(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+int     m_part(struct Client *cptr,
+               struct Client *sptr,
+               int parc,
+               char *parv[])
 {
-  struct Channel* chptr;
-  char*           p;
-  char*           name;
+  struct Channel *chptr;
+  char  *p, *name;
 
   if (parc < 2 || parv[1][0] == '\0')
     {
@@ -171,12 +179,11 @@ int m_part(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       **  Remove user from the old channel (if any)
       */
             
-      sendto_match_servs(chptr, cptr, PartFmt, parv[0], name);
+      sendto_match_servs(chptr, cptr, ":%s PART %s", parv[0], name);
             
-      sendto_channel_butserv(chptr, sptr, PartFmt, parv[0], name);
+      sendto_channel_butserv(chptr, sptr, ":%s PART %s", parv[0], name);
       remove_user_from_channel(sptr, chptr, 0);
       name = strtoken(&p, (char *)NULL, ",");
     }
   return 0;
 }
-

@@ -31,66 +31,11 @@
 #include "list.h"
 #include "numeric.h"
 #include "send.h"
+#include "common.h"
 
 #include <stdlib.h>
 #include <string.h>
-/*
- * m_functions execute protocol messages on this server:
- *
- *      cptr    is always NON-NULL, pointing to a *LOCAL* client
- *              structure (with an open socket connected!). This
- *              identifies the physical socket where the message
- *              originated (or which caused the m_function to be
- *              executed--some m_functions may call others...).
- *
- *      sptr    is the source of the message, defined by the
- *              prefix part of the message if present. If not
- *              or prefix not found, then sptr==cptr.
- *
- *              (!IsServer(cptr)) => (cptr == sptr), because
- *              prefixes are taken *only* from servers...
- *
- *              (IsServer(cptr))
- *                      (sptr == cptr) => the message didn't
- *                      have the prefix.
- *
- *                      (sptr != cptr && IsServer(sptr) means
- *                      the prefix specified servername. (?)
- *
- *                      (sptr != cptr && !IsServer(sptr) means
- *                      that message originated from a remote
- *                      user (not local).
- *
- *              combining
- *
- *              (!IsServer(sptr)) means that, sptr can safely
- *              taken as defining the target structure of the
- *              message in this server.
- *
- *      *Always* true (if 'parse' and others are working correct):
- *
- *      1)      sptr->from == cptr  (note: cptr->from == cptr)
- *
- *      2)      MyConnect(sptr) <=> sptr == cptr (e.g. sptr
- *              *cannot* be a local connection, unless it's
- *              actually cptr!). [MyConnect(x) should probably
- *              be defined as (x == x->from) --msa ]
- *
- *      parc    number of variable parameter strings (if zero,
- *              parv is allowed to be NULL)
- *
- *      parv    a NULL terminated list of parameter pointers,
- *
- *                      parv[0], sender (prefix string), if not present
- *                              this points to an empty string.
- *                      parv[1]...parv[parc-1]
- *                              pointers to additional parameters
- *                      parv[parc] == NULL, *always*
- *
- *              note:   it is guaranteed that parv[0]..parv[parc-1] are all
- *                      non-NULL pointers.
- */
-
+#include <assert.h>
 
 /*
  * m_sjoin
@@ -99,44 +44,38 @@
  * parv[2] - channel
  * parv[3] - modes + n arguments (key and/or limit)
  * parv[4+n] - flags+nick list (all in one parameter)
-
  * 
  * process a SJOIN, taking the TS's into account to either ignore the
  * incoming modes or undo the existing ones or merge them, and JOIN
  * all the specified users while sending JOIN/MODEs to non-TS servers
  * and to clients
  */
-int m_sjoin(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+
+
+
+int     m_sjoin(struct Client *cptr,
+                struct Client *sptr,
+                int parc,
+                char *parv[])
 {
-  struct Channel*     chptr = 0;
-  struct Client*      acptr;
-  time_t              newts;
-  time_t              oldts = 0;
-  time_t              tstosend;
-  static struct Mode  mode;
-  static struct Mode* oldmode;
-  struct SLink*       l;
-  int   args = 0;
-  int   haveops = 0;
-  int   keep_our_modes = 1;
-  int   keep_new_modes = 1;
-  int   doesop = 0;
-  int   what = 0;
-  int   pargs = 0;
-  int   fl;
-  int   people = 0;
-  int   isnew = 0;
+  struct Channel *chptr;
+  struct Client       *acptr;
+  time_t        newts;
+  time_t        oldts;
+  time_t        tstosend;
+  static        struct Mode mode, *oldmode;
+  struct SLink  *l;
+  int   args = 0, haveops = 0, keep_our_modes = 1, keep_new_modes = 1;
+  int   doesop = 0, what = 0, pargs = 0, fl, people = 0, isnew;
   /* loop unrolled this is now redundant */
   /*  int ip; */
-  char *s;
-  char *s0;
-  static char numeric[16];
-  static char sjbuf[BUFSIZE];
-  char        modebuf[MODEBUFLEN];
-  char        parabuf[MODEBUFLEN];
-  char  *mbuf = modebuf;
-  char  *t = sjbuf;
-  char  *p;
+  register      char *s, *s0;
+  static        char numeric[16], sjbuf[BUFSIZE];
+  char    modebuf[MODEBUFLEN];
+  char    parabuf[MODEBUFLEN];
+  char    *mbuf = modebuf;
+  char    *t = sjbuf;
+  char    *p;
 
   if (IsClient(sptr) || parc < 5)
     return 0;
@@ -222,7 +161,7 @@ int m_sjoin(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
    * -Dianora
    */
   
-  chptr->keep_their_modes = 1;
+  chptr->keep_their_modes = YES;
 
   /* locally created channels do not get created from SJOIN's
    * any SJOIN destroys the locally_created flag
@@ -230,7 +169,7 @@ int m_sjoin(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
    * -Dianora
    */
 
-  chptr->locally_created = 0;
+  chptr->locally_created = NO;
   oldts = chptr->channelts;
 
   /*
@@ -273,7 +212,7 @@ int m_sjoin(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   else if (newts < oldts)
     {
       if (doesop)
-        keep_our_modes = 0;
+        keep_our_modes = NO;
 
       clear_bans_exceptions_denies(sptr,chptr);
 
@@ -292,10 +231,10 @@ int m_sjoin(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     }
   else
     {
-      chptr->keep_their_modes = 0;
+      chptr->keep_their_modes = NO;
 
       if (haveops)
-        keep_new_modes = 0;
+        keep_new_modes = NO;
       if (doesop && !haveops)
         {
           chptr->channelts = tstosend = newts;
@@ -537,8 +476,9 @@ int m_sjoin(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
               if (pargs >= MAXMODEPARAMS)
                 {
                   *mbuf = '\0';
-                  sjoin_sendit(cptr, sptr, chptr,
-                               parv[0]);
+                  sendto_channel_butserv(chptr, sptr,
+                    ":%s MODE %s %s %s", parv[0],
+                    chptr->chname, modebuf, parabuf );
                   mbuf = modebuf;
                   *mbuf = parabuf[0] = '\0';
                   pargs = what = 0;
@@ -559,8 +499,9 @@ int m_sjoin(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
               if (pargs >= MAXMODEPARAMS)
                 {
                   *mbuf = '\0';
-                  sjoin_sendit(cptr, sptr, chptr,
-                               parv[0]);
+                  sendto_channel_butserv(chptr, sptr,
+                    ":%s MODE %s %s %s", parv[0],
+                    chptr->chname, modebuf, parabuf );
                   mbuf = modebuf;
                   *mbuf = parabuf[0] = '\0';
                   pargs = what = 0;
@@ -575,7 +516,9 @@ int m_sjoin(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   if (mbuf != modebuf)
     {
       *mbuf = '\0';
-      sjoin_sendit(cptr, sptr, chptr, parv[0]);
+      sendto_channel_butserv(chptr, sptr,
+        ":%s MODE %s %s %s", parv[0],
+        chptr->chname, modebuf, parabuf );
     }
 
   *modebuf = *parabuf = '\0';
@@ -643,7 +586,9 @@ int m_sjoin(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
           if (pargs >= MAXMODEPARAMS)
             {
               *mbuf = '\0';
-              sjoin_sendit(cptr, sptr, chptr, parv[0]);
+              sendto_channel_butserv(chptr, sptr,
+                ":%s MODE %s %s %s", parv[0],
+                chptr->chname, modebuf, parabuf );
               mbuf = modebuf;
               *mbuf++ = '+';
               parabuf[0] = '\0';
@@ -659,7 +604,9 @@ int m_sjoin(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
           if (pargs >= MAXMODEPARAMS)
             {
               *mbuf = '\0';
-              sjoin_sendit(cptr, sptr, chptr, parv[0]);
+              sendto_channel_butserv(chptr, sptr,
+                ":%s MODE %s %s %s", parv[0],
+                chptr->chname, modebuf, parabuf );
               mbuf = modebuf;
               *mbuf++ = '+';
               parabuf[0] = '\0';
@@ -670,7 +617,9 @@ int m_sjoin(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   
   *mbuf = '\0';
   if (pargs)
-    sjoin_sendit(cptr, sptr, chptr, parv[0]);
+    sendto_channel_butserv(chptr, sptr,
+      ":%s MODE %s %s %s", parv[0],
+      chptr->chname, modebuf, parabuf );
   if (people)
     {
       if (t[-1] == ' ')

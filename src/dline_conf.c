@@ -213,7 +213,7 @@ struct ConfItem *trim_Dlines(struct ConfItem *cl)
  * only K/I lines that are more specific than mask will be toasted.
  * -good
  */
-struct ConfItem *trim_ip_Klines(struct ConfItem *cl, unsigned int mask)
+struct ConfItem *trim_ip_Klines(struct ConfItem *cl, int mask)
 {
   struct ConfItem *temp;
   if (!cl) return NULL;
@@ -242,7 +242,7 @@ struct ConfItem *trim_ip_Klines(struct ConfItem *cl, unsigned int mask)
  * only K/I/E lines that are more specific than mask will be toasted.
  * -good
  */
-struct ConfItem *trim_ip_Elines(struct ConfItem *cl, unsigned int mask)
+struct ConfItem *trim_ip_Elines(struct ConfItem *cl, int mask)
 {
   struct ConfItem *temp;
   if (!cl) return NULL;
@@ -289,14 +289,16 @@ struct ip_subtree *destroy_ip_subtree(struct ip_subtree *head)
  * find_exception - match an IP against all unplaced d-line exceptions 
  * -good
  */
-struct ConfItem* find_exception(unsigned long ip)
+struct ConfItem *find_exception(unsigned long ip)
 {
-  struct ConfItem* scan;
+  struct ConfItem *scan=leftover;
   
-  for (scan = leftover; scan; scan = scan->next) {
-    if (scan->ip == (ip & scan->ip_mask))
-      break;
-  }
+  while (scan)
+    {
+      if (scan->ip == (ip & scan->ip_mask))
+        break;
+      scan=scan->next;
+    }
   return scan;
 }
 
@@ -375,6 +377,12 @@ void add_Dline(struct ConfItem *conf_ptr)
   struct ip_subtree *node;
 
   host_ip = conf_ptr->ip;
+
+  if( conf_ptr->ip_mask == 0L )
+    {
+      conf_ptr->ip_mask = 0xFFFFFFFFL;
+    }
+
   host_mask = conf_ptr->ip_mask;
 
   /* resolve ambiguities, duplicates, etc. */
@@ -398,7 +406,7 @@ void add_Dline(struct ConfItem *conf_ptr)
   /* remove any D's in the list */
   clist=trim_Dlines(clist);
   
-  /* add the Dline's aConfItem to the head of the conf list */
+  /* add the Dline's struct ConfItem to the head of the conf list */
 
   conf_ptr->next=clist;
   clist=conf_ptr;
@@ -414,7 +422,7 @@ void add_Dline(struct ConfItem *conf_ptr)
 
 /*
  * match_Dline - matches the specified IP against the D/d-line table
- * and returns the matching aConfItem, or NULL if no match was found.
+ * and returns the matching struct ConfItem, or NULL if no match was found.
  * -good
  */
 struct ConfItem *match_Dline(unsigned long ip)
@@ -437,12 +445,24 @@ struct ConfItem *match_Dline(unsigned long ip)
   for(scan=node->conf;scan;scan=scan->next)
     {
       if(!(scan->flags & CONF_FLAGS_E_LINED))
-        continue;
+         continue;
 
       if (scan->ip == (ip & scan->ip_mask))
         return (scan);   /* exception found */
     }
-  return node->conf;  /* no exceptions, return the D-line */
+  if( node->conf )
+    {
+      struct ConfItem *conf_ptr;
+      conf_ptr = node->conf;
+      if ( (conf_ptr->ip & conf_ptr->ip_mask) ==
+           (ip           & conf_ptr->ip_mask) )
+        {
+          return(conf_ptr);
+	}
+      else
+        return NULL;
+    }
+   return NULL;
 }
 
 /*
@@ -458,6 +478,12 @@ void add_ip_Kline(struct ConfItem *conf_ptr)
   struct ip_subtree *node;
 
   host_ip = conf_ptr->ip;
+
+  if( conf_ptr->ip_mask == 0L )
+    {
+      conf_ptr->ip_mask = 0xFFFFFFFFL;
+    }
+  
   host_mask = conf_ptr->ip_mask;
 
   /* resolve ambiguities, duplicates, etc. */
@@ -647,7 +673,7 @@ void add_ip_Iline(struct ConfItem *conf_ptr)
 
 /*
  * match_ip_Kline - matches the specified IP against the K/E/I-line table
- * and returns the matching aConfItem, or NULL if no match was found.
+ * and returns the matching struct ConfItem, or NULL if no match was found.
  * -good
  */
 struct ConfItem* match_ip_Kline(unsigned long ip, const char* name)

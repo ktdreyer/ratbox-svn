@@ -28,7 +28,7 @@
 #include "ircd.h"
 #include "list.h"
 #include "numeric.h"
-// #include "s_serv.h"
+/* #include "s_serv.h" */
 #include "send.h"
 #include "channel.h"
 #include "blalloc.h"

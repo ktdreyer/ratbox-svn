@@ -33,7 +33,6 @@
 #include "fdlist.h"              /* fdlist_add */
 #include "irc_string.h"
 #include "ircd.h"
-#include "ircdauth.h"
 #include "numeric.h"
 #include "res.h"
 #include "s_bsd.h"
@@ -87,12 +86,6 @@ typedef enum {
    send((c)->fd, HeaderMessages[(r)].message, HeaderMessages[(r)].length, 0)
 
 struct AuthRequest* AuthPollList = 0; /* GLOBAL - auth queries pending io */
-
-/*
- * Global - list of clients who have completed their authentication
- *          check, but must still complete their authorization checks
- */
-struct AuthRequest *AuthClientList = NULL;
 
 static struct AuthRequest* AuthIncompleteList = 0;
 
@@ -165,6 +158,8 @@ static void release_auth_client(struct Client* client)
 
   fdlist_add(client->fd, FDL_DEFAULT);
   add_client_to_list(client);
+  
+  SetAccess(client);
 }
  
 /*
@@ -187,8 +182,8 @@ static void auth_dns_callback(void* vptr, struct DNSReply* reply)
      * the ip#(s) for the socket is listed for the host.
      */
     for (i = 0; hp->h_addr_list[i]; ++i) {
-      if (0 == memcmp(hp->h_addr_list[i], (char*) &auth->client->ip,
-                      sizeof(struct in_addr)))
+      if (memcmp(hp->h_addr_list[i], (char*) &auth->client->ip,
+                      sizeof(struct in_addr)) == 0)
          break;
     }
     if (!hp->h_addr_list[i])
@@ -211,8 +206,7 @@ static void auth_dns_callback(void* vptr, struct DNSReply* reply)
   if (!IsDoingAuth(auth)) {
     release_auth_client(auth->client);
     unlink_auth_request(auth, &AuthIncompleteList);
-    link_auth_request(auth, &AuthClientList);
-    /*free_auth_request(auth);*/
+    free_auth_request(auth);
   }
 }
 
@@ -235,8 +229,7 @@ static void auth_error(struct AuthRequest* auth)
     link_auth_request(auth, &AuthIncompleteList);
   else {
     release_auth_client(auth->client);
-    link_auth_request(auth, &AuthClientList);
-    /*free_auth_request(auth);*/
+    free_auth_request(auth);
   }
 }
 
@@ -252,7 +245,7 @@ static int start_auth_query(struct AuthRequest* auth)
 {
   struct sockaddr_in sock;
   struct sockaddr_in localaddr;
-  size_t             locallen = sizeof(struct sockaddr_in);
+  int                locallen = sizeof(struct sockaddr_in);
   int                fd;
 
   if ((fd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
@@ -392,35 +385,6 @@ void start_auth(struct Client* client)
 
   auth = make_auth_request(client);
 
-#if 0
-  link_auth_request(auth, &AuthPollList);
-
-	/*
-	 *  Now we send the client's information to the IAuth
-	 * server. The syntax for an authentication request is:
-	 *
-	 *      DoAuth <id> <ip address>
-	 *        <id>         = unique id for this client so we
-	 *                       can re-locate the client when
-	 *                       the authentication completes.
-	 *
-	 *        <ip address> = client's ip address in long form.
-	 *
-	 *  The client's id will be the memory address of the
-	 * client structure. This is acceptable because as long
-	 * as the client exists, no other client can have the
-	 * same memory address, therefore each client will have
-	 * a unique id.
-	 */
-
-	SendIAuth("%s %p %u\n",
-		IAS_DOAUTH,
-		client,
-		(unsigned int) client->ip.s_addr);
-
-	/* IAuthQuery(client); */
-#endif /* 0 */
-
   query.vptr     = auth;
   query.callback = auth_dns_callback;
 
@@ -440,11 +404,7 @@ void start_auth(struct Client* client)
   else if (IsDNSPending(auth))
     link_auth_request(auth, &AuthIncompleteList);
   else {
-  #ifdef USE_IAUTH
-  	link_auth_request(auth, &AuthClientList);
-  #else
     free_auth_request(auth);
-  #endif
     release_auth_client(client);
   }
 }
@@ -475,11 +435,7 @@ void timeout_auth_queries(time_t now)
       auth->client->since = now;
       release_auth_client(auth->client);
       unlink_auth_request(auth, &AuthPollList);
-  #ifdef USE_IAUTH
-  	link_auth_request(auth, &AuthClientList);
-  #else
-    free_auth_request(auth);
-  #endif
+      free_auth_request(auth);
     }
   }
   for (auth = AuthIncompleteList; auth; auth = auth_next) {
@@ -492,11 +448,7 @@ void timeout_auth_queries(time_t now)
       auth->client->since = now;
       release_auth_client(auth->client);
       unlink_auth_request(auth, &AuthIncompleteList);
-  #ifdef USE_IAUTH
-  	link_auth_request(auth, &AuthClientList);
-  #else
-    free_auth_request(auth);
-  #endif
+      free_auth_request(auth);
     }
   }
 }
@@ -513,8 +465,8 @@ void send_auth_query(struct AuthRequest* auth)
   struct sockaddr_in us;
   struct sockaddr_in them;
   char            authbuf[32];
-  size_t          ulen = sizeof(struct sockaddr_in);
-  size_t          tlen = sizeof(struct sockaddr_in);
+  int             ulen = sizeof(struct sockaddr_in);
+  int             tlen = sizeof(struct sockaddr_in);
 
   if (getsockname(auth->client->fd, (struct sockaddr *)&us,   &ulen) ||
       getpeername(auth->client->fd, (struct sockaddr *)&them, &tlen)) {
@@ -529,6 +481,8 @@ void send_auth_query(struct AuthRequest* auth)
              (unsigned int) ntohs(us.sin_port));
 
   if (send(auth->fd, authbuf, strlen(authbuf), 0) == -1) {
+    if (EAGAIN == errno)
+      return;
     auth_error(auth);
     return;
   }
@@ -573,6 +527,9 @@ void read_auth_reply(struct AuthRequest* auth)
     }
   }
 
+  if ((len < 0) && (EAGAIN == errno))
+    return;
+
   close(auth->fd);
   auth->fd = -1;
   ClearAuth(auth);
@@ -592,44 +549,7 @@ void read_auth_reply(struct AuthRequest* auth)
     link_auth_request(auth, &AuthIncompleteList);
   else {
     release_auth_client(auth->client);
-  #ifdef USE_IAUTH
-  	link_auth_request(auth, &AuthClientList);
-  #else
     free_auth_request(auth);
-  #endif
   }
 }
 
-/*
-remove_auth_request()
- Remove request 'auth' from AuthClientList, and free it.
-There is no need to release auth->client since it has
-already been done
-*/
-
-void
-remove_auth_request(struct AuthRequest *auth)
-
-{
-	unlink_auth_request(auth, &AuthClientList);
-	free_auth_request(auth);
-} /* remove_auth_request() */
-
-/*
-FindAuthClient()
- Find the client matching 'id' in the AuthClientList. The
-id will match the memory address of the client structure.
-*/
-
-struct AuthRequest *
-FindAuthClient(long id)
-
-{
-	struct AuthRequest *auth;
-
-	auth = AuthClientList;
-	while (auth && !((void *) auth->client == (void *) id))
-		auth = auth->next;
-
-	return (auth);
-} /* FindAuthClient() */

@@ -34,7 +34,6 @@
 #include "s_serv.h"
 #include "send.h"
 
-#include <assert.h>
 #include <string.h>
 #include <time.h>
 
@@ -103,16 +102,12 @@
 */
 int m_trace(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
-  int            i;
-  struct Client* acptr = NULL;
-  struct Class*  cltmp;
-  char*          tname;
-  int            doall;
-  int            link_s[MAXCONNECTIONS];
-  int            link_u[MAXCONNECTIONS];
-  int            cnt = 0;
-  int            wilds;
-  int            dow;
+  int   i;
+  struct Client       *acptr = NULL;
+  struct Class        *cltmp;
+  char  *tname;
+  int   doall, link_s[MAXCONNECTIONS], link_u[MAXCONNECTIONS];
+  int   cnt = 0, wilds, dow;
 #ifdef PACE_TRACE
   static time_t last_trace=0L;
   static time_t last_used=0L;
@@ -169,8 +164,8 @@ int m_trace(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         }
 #endif
 
-      if (parv[1] && !index(parv[1],'.') && (index(parv[1], '*')
-          || index(parv[1], '?'))) /* bzzzt, no wildcard nicks for nonopers */
+      if (parv[1] && !strchr(parv[1],'.') && (strchr(parv[1], '*')
+          || strchr(parv[1], '?'))) /* bzzzt, no wildcard nicks for nonopers */
         {
           sendto_one(sptr, form_str(RPL_ENDOFTRACE),me.name,
                      parv[0], parv[1]);
@@ -238,29 +233,37 @@ int m_trace(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       return 0;
     }
 
-  memset(link_s, 0, sizeof(link_s));
-  memset(link_u, 0, sizeof(link_u));
+  memset((void *)link_s,0,sizeof(link_s));
+  memset((void *)link_u,0,sizeof(link_u));
 
   /*
    * Count up all the servers and clients in a downlink.
    */
-  if (doall) {
-    for (acptr = GlobalClientList; acptr; acptr = acptr->next) {
-      assert(MyConnect(acptr->from));
-      if (IsPerson(acptr)) {
+  if (doall)
+   {
+    for (acptr = GlobalClientList; acptr; acptr = acptr->next)
+     {
 #ifdef  SHOW_INVISIBLE_LUSERS
-        link_u[acptr->from->fd]++;
-#else
-        if (!IsInvisible(acptr) || IsAnOper(sptr))
+      if (IsPerson(acptr))
+        {
           link_u[acptr->from->fd]++;
+        }
+#else
+      if (IsPerson(acptr) &&
+        (!IsInvisible(acptr) || IsAnOper(sptr)))
+        {
+          link_u[acptr->from->fd]++;
+        }
 #endif
-      }
-      else {
-        if (IsServer(acptr))
-          link_s[acptr->from->fd]++;
-      }
-    }
-  }
+      else
+        {
+          if (IsServer(acptr))
+            {
+              link_s[acptr->from->fd]++;
+            }
+        }
+     }
+   }
   /* report all direct connections */
   for (i = 0; i <= highest_fd; i++)
     {

@@ -27,7 +27,6 @@
 #include "dline_conf.h"
 #include "fdlist.h"
 #include "hash.h"
-#include "ircdauth.h"
 #include "irc_string.h"
 #include "ircd_signal.h"
 #include "list.h"
@@ -66,6 +65,7 @@
 
 #ifdef SETUID_ROOT
 #include <sys/lock.h>
+#include <unistd.h>
 #endif /* SETUID_ROOT */
 
 /*
@@ -130,6 +130,7 @@ struct Client me;                     /* That's me */
 
 struct Client* GlobalClientList = 0; /* Pointer to beginning of Client list */
 /* client pointer lists -Dianora */ 
+struct Client *local_cptr_list = NULL;
 struct Client *oper_cptr_list  = NULL;
 struct Client *serv_cptr_list  = NULL;
 
@@ -160,6 +161,7 @@ time_t  nextping = 1;           /* same as above for check_pings() */
 int    LRV = LOADRECV;
 time_t LCF = LOADCFREQ;
 float currlife = 0.0;
+
 
 /*
  * get_vm_top - get the operating systems notion of the resident set size
@@ -322,7 +324,12 @@ static void parse_command_line(int argc, char* argv[])
       break;
     case 'v':
       printf("ircd %s\n\tzlib %s\n\tircd_dir: %s\n", version,
-              zlib_version, ConfigFileEntry.dpath);
+#ifndef ZIP_LINKS
+             "not used",
+#else
+              zlib_version,
+#endif
+              ConfigFileEntry.dpath);
       exit(0);
       break;   /* NOT REACHED */
     case 'x':
@@ -362,13 +369,12 @@ static time_t io_loop(time_t delay)
                  CurrentTime, lasttimeofday);
       report_error(to_send, me.name, 0);
     }
-  else if ((lasttimeofday + 60) < CurrentTime)
+  else if ((lasttimeofday + TS_MAX_DELTA) < CurrentTime)
     {
-      ircsprintf(to_send,
-                 "System clock was reset into the future - (%d+60 > %d)",
-                 CurrentTime, lasttimeofday);
-      report_error(to_send, me.name, 0);
-      sync_channels(CurrentTime - lasttimeofday);
+      log(L_ERROR, "Clock Failure (%d)", errno);
+      sendto_ops("Clock set back more than %d seconds, TS can be corrupted",
+        TS_MAX_DELTA);
+      restart("Clock Failure");
     }
 
   /*
@@ -718,6 +724,23 @@ int main(int argc, char *argv[])
     }
 #endif /*CHROOTDIR*/
 
+#ifdef  ZIP_LINKS
+  if (zlib_version[0] == '0')
+    {
+      fprintf(stderr, "zlib version 1.0 or higher required\n");
+      exit(1);
+    }
+  if (zlib_version[0] != ZLIB_VERSION[0])
+    {
+      fprintf(stderr, "incompatible zlib version\n");
+      exit(1);
+    }
+  if (strcmp(zlib_version, ZLIB_VERSION) != 0)
+    {
+      fprintf(stderr, "warning: different zlib version\n");
+    }
+#endif
+
   myargv = argv;
   umask(077);                /* better safe than sorry --SRB */
 
@@ -808,30 +831,13 @@ int main(int argc, char *argv[])
     strncpy_irc(me.name, aconf->host, HOSTLEN);
   strncpy_irc(me.host, aconf->host, HOSTLEN);
 
-#ifdef USE_IAUTH
-	/* bingo - hardcoded for now - will be changed later */
-	strcpy(iAuth.hostname, "127.0.0.1");
-	iAuth.port = 4444;
-
-	ConnectToIAuth();
-
-	if (iAuth.socket == NOSOCK)
-	{
-		fprintf(stderr, "Unable to connect to IAuth server\n");
-		exit (-1);
-	}
-#endif
-
+  me.fd = -1;
+  me.from = &me;
+  me.servptr = &me;
   SetMe(&me);
   make_server(&me);
-
-  me.fd         = -1;
-  me.local_flag = 1;
-  me.from       = &me;
-  me.servptr    = &me;
-  me.serv->up   = me.name;
-  me.lasttime   = me.since = me.firsttime = CurrentTime;
-
+  me.serv->up = me.name;
+  me.lasttime = me.since = me.firsttime = CurrentTime;
   add_to_client_hash_table(me.name, &me);
 
   check_class();

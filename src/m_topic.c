@@ -94,12 +94,13 @@
 **      parv[0] = sender prefix
 **      parv[1] = topic text
 */
-int m_topic(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
+int     m_topic(struct Client *cptr,
+                struct Client *sptr,
+                int parc,
+                char *parv[])
 {
-  struct Channel* chptr = 0;
-  char*  topic = 0;
-  char*  name;
-  char*  p = 0;
+  struct Channel *chptr = NullChn;
+  char  *topic = (char *)NULL, *name, *p = (char *)NULL;
   
   if (parc < 2)
     {
@@ -193,4 +194,3 @@ int m_topic(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
   return 0;
 }
-

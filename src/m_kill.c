@@ -184,12 +184,14 @@ int m_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       **        ...!operhost!oper
       **        ...!operhost!oper (comment)
       */
+      inpath = cptr->host;
       if (!BadPtr(path))
         {
-          ircsprintf(buf, "%s%s (%s)",
-                           cptr->name, IsOper(sptr) ? "" : "(L)", path);
+          ircsprintf(buf, "%s!%s%s (%s)",
+                     cptr->username, cptr->name,
+                     IsOper(sptr) ? "" : "(L)", path);
           path = buf;
-	  reason = path;
+          reason = path;
         }
       else
         path = cptr->name;
@@ -204,7 +206,6 @@ int m_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   ** Note: "acptr->name" is used instead of "user" because we may
   **     have changed the target because of the nickname change.
   */
-
   if (IsLocOp(sptr) && !MyConnect(acptr))
     {
       sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
@@ -217,17 +218,24 @@ int m_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     }
   else
     {
-      reason = strchr(parv[2],' ');
-      if(reason)
-        reason++;
+      if(IsAnOper(cptr))
+        {
+          reason = parv[2];
+        }
       else
-        reason = parv[2];
+        {
+          reason = strchr(parv[2], ' ');
+	  if(reason)
+	    reason++;
+	  else
+	    reason = parv[2];
+	}
     }
 
   if (IsAnOper(sptr)) /* send it normally */
     {
-      sendto_realops("Received KILL message for %s. From %s Path: %s!%s",
-                     acptr->name, parv[0], inpath, path);
+      sendto_realops("Received KILL message for %s. From %s Path: %s!%s", 
+               acptr->name, parv[0], inpath, path);
       /*
        * dilema here: we don't want non opers to see pathes which
        * contain real IP addresses.  But we do want opers to see them.
@@ -243,10 +251,10 @@ int m_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                      "Received KILL message for %s. From %s",
                      acptr->name, parv[0]);
 
-#if defined(SYSLOG_KILL)
+#if defined(USE_SYSLOG) && defined(SYSLOG_KILL)
   if (IsOper(sptr))
     log(L_INFO,"KILL From %s For %s Path %s!%s",
-        parv[0], acptr->name, inpath, path);
+                        parv[0], acptr->name, inpath, path);
 #endif
   /*
   ** And pass on the message to other servers. Note, that if KILL
@@ -273,6 +281,12 @@ int m_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   if (MyConnect(acptr))
     sendto_prefix_one(acptr, sptr,":%s KILL %s :%s",
                       parv[0], acptr->name, reason);
+
+  /* XXX old code showed too much */
+  /*
+    sendto_prefix_one(acptr, sptr,":%s KILL %s :%s!%s",
+                      parv[0], acptr->name, inpath, path);
+    */
 
   /*
   ** Set FLAGS_KILLED. This prevents exit_one_client from sending

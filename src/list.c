@@ -21,13 +21,13 @@
  *
  * $Id$
  */
-#include "list.h"
 #include "blalloc.h"
 #include "channel.h"
 #include "class.h"
 #include "client.h"
 #include "common.h"
 #include "irc_string.h"
+#include "list.h"
 #include "mtrie_conf.h"
 #include "numeric.h"
 #include "res.h"
@@ -47,14 +47,14 @@
  *
  */
 
-/* Number of Link's to pre-allocate at a time 
+/* Number of struct SLink's to pre-allocate at a time 
    for Efnet 1000 seems reasonable, 
    for smaller nets who knows? -Dianora
    */
 
 #define LINK_PREALLOCATE 1024
 
-/* Number of aClient structures to preallocate at a time
+/* Number of struct Client structures to preallocate at a time
    for Efnet 1024 is reasonable 
    for smaller nets who knows? -Dianora
    */
@@ -80,7 +80,7 @@ void initlists()
   /* Might want to bump up LINK_PREALLOCATE if FLUD is defined */
   free_Links = BlockHeapCreate((size_t)sizeof(struct SLink),LINK_PREALLOCATE);
 
-  /* anUser structs are used by both local aClients, and remote aClients */
+  /* struct User structs are used by both local struct Clients, and remote struct Clients */
 
   free_anUsers = BlockHeapCreate(sizeof(struct User),
                                  USERS_PREALLOCATE + MAXCONNECTIONS);
@@ -125,7 +125,7 @@ void outofmemory()
 */
 struct User* make_user(struct Client *cptr)
 {
-  struct User  *user;
+  struct User        *user;
 
   user = cptr->user;
   if (!user)
@@ -179,7 +179,7 @@ void _free_user(struct User* user, struct Client* cptr)
   if (--user->refcnt <= 0)
     {
       if (user->away)
-        MyFree(user->away);
+        MyFree((char *)user->away);
       /*
        * sanity check
        */
@@ -195,8 +195,8 @@ void _free_user(struct User* user, struct Client* cptr)
         {
           sendto_ops("list.c couldn't BlockHeapFree(free_anUsers,user) user = %lX", user );
           sendto_ops("Please report to the hybrid team! ircd-hybrid@the-project.org");
-#if defined(USE_SYSLOG) && defined(SYSLOG_BLOCK_ALLOCATOR)
-          syslog(LOG_DEBUG,"list.c couldn't BlockHeapFree(free_anUsers,user) user = %lX", (long unsigned int) user);
+#ifdef SYSLOG_BLOCK_ALLOCATOR 
+          log(L_DEBUG,"list.c couldn't BlockHeapFree(free_anUsers,user) user = %lX", (long unsigned int) user);
 #endif
         }
 
@@ -254,13 +254,13 @@ aClass *make_class()
 {
   aClass        *tmp;
 
-  tmp = (aClass *)MyMalloc(sizeof(struct Class));
+  tmp = (aClass *)MyMalloc(sizeof(aClass));
   return tmp;
 }
 
 void free_class(aClass *tmp)
 {
-  MyFree(tmp);
+  MyFree((char *)tmp);
 }
 
 /*
@@ -285,30 +285,33 @@ void block_garbage_collect()
 
 /*
  */
-void count_user_memory(size_t* user_memory_used,
-                       size_t* user_memory_allocated)
+void count_user_memory(int *user_memory_used,
+                       int *user_memory_allocated )
 {
-  block_heap_count_memory(free_anUsers, user_memory_used,
-                          user_memory_allocated);
+  BlockHeapCountMemory( free_anUsers,
+                        user_memory_used,
+                        user_memory_allocated);
 }
 
 /*
  */
-void count_links_memory(size_t* links_memory_used,
-                        size_t* links_memory_allocated)
+void count_links_memory(int *links_memory_used,
+                       int *links_memory_allocated )
 {
-  block_heap_count_memory(free_Links, links_memory_used,
-                          links_memory_allocated);
+  BlockHeapCountMemory( free_Links,
+                        links_memory_used,
+                        links_memory_allocated);
 }
 
 #ifdef FLUD
 /*
  */
-void count_flud_memory(size_t* flud_memory_used,
-                       size_t* flud_memory_allocated)
+void count_flud_memory(int *flud_memory_used,
+                       int *flud_memory_allocated )
 {
-  block_heap_count_memory(free_fludbots, flud_memory_used,
-                          flud_memory_allocated);
+  BlockHeapCountMemory( free_fludbots,
+                        flud_memory_used,
+                        flud_memory_allocated);
 }
 #endif
 
