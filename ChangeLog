@@ -1,3 +1,20 @@
+androsyn    2002/08/14 22:02:16 EDT	(20020815_1)
+
+  Modified files:
+    include              client.h config.h defaults.h ircd_defs.h 
+    src                  send.c 
+  Log:
+  Change CONFIG_H_LEVEL_7 to CONFIG_RATBOX_LEVEL_1
+  
+  Revision  Changes    Path
+  7.168     +1 -1      ircd-ratbox/include/client.h
+  7.146     +1 -2      ircd-ratbox/include/config.h
+  7.6       +1 -1      ircd-ratbox/include/defaults.h
+  7.32      +1 -1      ircd-ratbox/include/ircd_defs.h
+  7.215     +2 -22     ircd-ratbox/src/send.c
+
+
+
 androsyn    2002/08/14 21:54:47 EDT	(20020815_0)
 
   Modified files:
