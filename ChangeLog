@@ -1,3 +1,21 @@
+leeh        2004/02/23 18:38:51 EST	(20040223_3)
+
+  Modified files:
+    doc                  example.conf example.efnet.conf 
+    include              s_newconf.h 
+    src                  newconf.c s_user.c 
+  Log:
+  - added umodes=foo; to operator {}; so /oper can give specific umodes again
+  
+  Revision  Changes    Path
+  7.232     +7 -3      ircd-ratbox/doc/example.conf
+  7.67      +7 -0      ircd-ratbox/doc/example.efnet.conf
+  7.20      +1 -0      ircd-ratbox/include/s_newconf.h
+  7.129     +8 -0      ircd-ratbox/src/newconf.c
+  7.304     +4 -1      ircd-ratbox/src/s_user.c
+
+
+
 leeh        2004/02/23 11:14:06 EST	(20040223_2)
 
   Modified files:
