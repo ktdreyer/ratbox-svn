@@ -1,3 +1,22 @@
+androsyn    2002/08/10 05:54:03 EDT	(20020810_19)
+
+  Modified files:
+    include              client.h 
+    modules/core         m_server.c m_squit.c 
+    src                  client.c s_serv.c s_user.c 
+  Log:
+  Make lprev and lnext dlink_nodes.
+  
+  Revision  Changes    Path
+  7.160     +3 -9      ircd-ratbox/include/client.h
+  1.90      +2 -2      ircd-ratbox/modules/core/m_server.c
+  1.48      +12 -12    ircd-ratbox/modules/core/m_squit.c
+  7.301     +25 -48    ircd-ratbox/src/client.c
+  7.275     +2 -3      ircd-ratbox/src/s_serv.c
+  7.210     +2 -2      ircd-ratbox/src/s_user.c
+
+
+
 androsyn    2002/08/10 03:20:20 EDT	(20020810_18)
 
   Modified files:
