@@ -57,7 +57,11 @@ struct Listener* make_listener(int port, struct irc_inaddr *addr)
 
   listener->name        = me.name;
   listener->fd          = -1;
-  copy_s_addr(&IN_ADDR(listener->addr),PIN_ADDR(addr));
+/* jdc -- this breaks shit when addr is irc_inaddr but not in listener.h */
+/* copy_s_addr(&IN_ADDR(listener->addr),PIN_ADDR(addr)); */
+
+  copy_s_addr(IN_ADDR(listener->addr),PIN_ADDR(addr));
+
   listener->port        = port;
 
   listener->next = NULL;
@@ -204,7 +208,12 @@ static int inetport(struct Listener* listener)
 #else
   memset(&lsin, 0, sizeof(lsin));
   lsin.sin_family = AF_INET;
-  lsin.sin_addr   = listener->addr;
+
+  memcpy(&lsin.sin_addr, &listener->addr, sizeof(struct irc_inaddr));
+
+/* jdc -- this breaks shit when addr == irc_inaddr */
+/* lsin.sin_addr   = listener->addr; */
+
   lsin.sin_port   = htons(listener->port);
 #endif
 
@@ -244,7 +253,7 @@ static int inetport(struct Listener* listener)
 #ifdef IPV6
   if (!IN6_ARE_ADDR_EQUAL((struct in6_addr *)&listener->addr, &in6addr_any)) {
 #else
-  if (INADDR_ANY != listener->addr.s_addr) {
+  if (INADDR_ANY != listener->addr.sins.sin.s_addr) {
 #endif
     struct DNSQuery query;	
     query.callback = listener_dns_callback;
@@ -262,7 +271,15 @@ static struct Listener* find_listener(int port, struct irc_inaddr *addr)
   for (listener = ListenerPollList; listener; listener = listener->next)
   {
     
+    /* jdc -- this breaks shit when addr is irc_inaddr but not in listener.h */
+    /*
     if (port == listener->port && memcmp(PIN_ADDR(addr), IN_ADDR(listener->addr), sizeof(struct irc_inaddr)))
+    */
+    if ( (port == listener->port) &&
+         (!memcmp(&PIN_ADDR(addr),
+                 &IN_ADDR(listener->addr),
+                 sizeof(struct irc_inaddr)))
+       )
     {
       /* Try to return an open listener, otherwise reuse a closed one */
       if (listener->fd == -1)

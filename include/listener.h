@@ -43,7 +43,11 @@ struct Listener {
   int              active;             /* current state of listener */
   int              index;              /* index into poll array */
   time_t           last_accept;        /* last time listener accepted */
-  struct in_addr   addr;               /* virtual address or INADDR_ANY */
+/* jdc -- this seems to be incorrect in comparison to src/listener.c */
+/*
+  struct in_addr    addr;
+*/
+  struct irc_inaddr addr;              /* virtual address or INADDR_ANY */
   char             vhost[HOSTLEN + 1]; /* virtual name of listener */
 };
 
@@ -52,7 +56,7 @@ extern void        close_listener(struct Listener* listener);
 extern void        close_listeners(void);
 extern const char* get_listener_name(const struct Listener* listener);
 extern void        show_ports(struct Client* client);
-extern struct Listener* make_listener(int, struct in_addr);
+extern struct Listener* make_listener(int port, struct irc_inaddr *addr);
 extern void free_listener(struct Listener * );
 
 #endif /* INCLUDED_listener_h */
