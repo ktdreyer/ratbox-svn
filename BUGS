@@ -17,11 +17,7 @@
       server is connected to, the find_server will match, so the host-masked
       server will be dropped.
 
-3.  Issue with the HUB variable which can be changed at runtime.
-    - If you are a lazyleaf server, please dont change hub=yes; at runtime - 
-      this breaks stuff :)
-
-4.  Unconfirmed reports of /modunload coring on certain platforms.
+3.  Unconfirmed reports of /modunload coring on certain platforms.
     - There is an issue here with unloading a different module to that what
       is loaded.  For example, you have m_vanity.so as a loaded module, and
       you add 4 new commands to it, replace the module, then try to unload it.
@@ -43,17 +39,17 @@
       and then /modload the module.
       - Dont have multiple copies of the same module in your paths.
 
-5.  opers@server and user@server PRIVMSG/NOTICE broken
+4.  opers@server and user@server PRIVMSG/NOTICE broken
     - eg PRIVMSG opers@irc.monkie.org :test
       PRIVMSG stats@stats.monkie.org :help 
       - to be fixed in beta2
 
-6.  Problem with msgfmt command building custom msgs using gettext
+5.  Problem with msgfmt command building custom msgs using gettext
     - Please ensure you are using GNU gettext version 0.10.35.
       Other versions are untested, and some are known to be
       incompatable.
 
-7.  When linking servers, you may see warnings about servers being sent
+6.  When linking servers, you may see warnings about servers being sent
     403 numerics.  This is caused by the NOTICE AUTH :*** ... messages,
     and is normal.
 
