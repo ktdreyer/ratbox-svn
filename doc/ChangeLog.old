@@ -1,3 +1,20 @@
+leeh        2001/12/16 06:04:02 EST	(20011216_14)
+
+  Modified files:
+    modules              m_info.c m_motd.c m_version.c 
+  Log:
+  - removed a bogus MyClient in m_motd()
+  - allow remote versions, depending on serverhide
+  - ratelimit /version
+  - dont send 005 remotely - could cause client confusion?
+  
+  Revision  Changes    Path
+  1.48      +2 -2      ircd-hybrid-7/modules/m_info.c
+  1.25      +2 -3      ircd-hybrid-7/modules/m_motd.c
+  1.33      +22 -2     ircd-hybrid-7/modules/m_version.c
+
+
+
 androsyn    2001/12/16 05:15:20 EST	(20011216_13)
 
   Modified files:
