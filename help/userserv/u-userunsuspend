@@ -1,0 +1,3 @@
+userunsuspend <username>
+[ADMIN] Unsuspends the given usernames registration
+  <username>: Username to unsuspend

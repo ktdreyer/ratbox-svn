@@ -22,6 +22,8 @@ struct user_reg
 	dlink_list channels;
 };
 
+#define US_FLAGS_SUSPENDED	0x0001
+
 extern struct user_reg *find_user_reg(struct client *, const char *name);
 extern struct user_reg *find_user_reg_nick(struct client *, const char *name);
 

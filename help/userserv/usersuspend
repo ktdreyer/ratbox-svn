@@ -1,0 +1,3 @@
+USERSUSPEND <username>
+[ADMIN] Suspends the given usernames registration
+  <username>: Username to suspend
