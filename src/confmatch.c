@@ -127,12 +127,14 @@ get_mask_hash(const char *text)
 
 
 int
-parse_netmask(const char *address, struct irc_inaddr *addr, int *bits)
+parse_netmask(const char *hostname, struct irc_inaddr *addr, int *bits)
 {
 	char *p;
+	char address[HOSTLEN+1];
 	struct irc_inaddr laddr;
 	int lbits;
 
+	strlcpy(address, hostname, sizeof(address));
 	p = strchr(address, '/');
 
 	if(addr == NULL)
@@ -203,7 +205,6 @@ add_conf_by_address(const char *address, int type, const char *username, struct 
 			return;
 		}
 	}
-
 	add_conf_by_host(aconf);
 }
 
