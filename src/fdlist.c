@@ -30,6 +30,7 @@
 #include "s_bsd.h"   /* highest_fd */
 #include "send.h"
 #include "memory.h"
+#include "numeric.h"
 
 fde_t *fd_table = NULL;
 
@@ -157,10 +158,10 @@ fd_dump(struct Client *source_p)
       if (!fd_table[i].flags.open)
 	continue;
 
-      sendto_one(source_p, ":%s NOTICE %s :*** fd %d, desc '%s'", me.name,
-		 source_p->name, i, fd_table[i].desc);
+      sendto_one(source_p, ":%s %d %s :fd %-3d desc '%s'",
+                 me.name, RPL_STATSDEBUG, source_p->name,
+                 i, fd_table[i].desc);
     }
-  sendto_one(source_p, ":%s NOTICE %s :*** Finished", me.name, source_p->name);
 }
 
 /*

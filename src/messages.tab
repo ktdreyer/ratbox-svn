@@ -270,7 +270,7 @@ static  char *  replies[] = {
 /* 247 RPL_STATSXLINE, */       ":%s 247 %s X %s %s * * 0 0",
 
 /* 248 RPL_STATSULINE, */       ":%s 248 %s U %s %s",
-/* 249 */       NULL,
+/* 249 RPL_STATSDEBUG */       NULL,
 /* 250 RPL_STATSCONN, */
                 ":%s 250 %s :Highest connection count: %d (%d clients) (%d connections received)",
 /* 251 RPL_LUSERCLIENT, */
