@@ -98,9 +98,10 @@ void *_MyMalloc(size_t size, char *file, int line)
 
 void _MyFree(void *what, char *file, int line)
 {
-    assert(what != NULL);
-    memulog(what);
-    free(what - sizeof(MemoryEntry));
+    if(what != NULL) {
+    	memulog(what);
+    	free(what - sizeof(MemoryEntry));
+    }
 }
 
 void *_MyRealloc(void *what, size_t size, char *file, int line)
@@ -189,8 +190,8 @@ void *_MyRealloc(void *x, size_t y)
 
 void _MyFree(void *x)
 {
-     assert(x != NULL);
-     free((x));
+     if(x)
+     	free((x));
 }
 
 void _DupString(char **x, const char *y)
