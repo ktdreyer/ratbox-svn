@@ -1,3 +1,10 @@
+*** 20010605_2 by kreator
+- fixed -L order in IRCDLIBS that was causing this on systems containing
+  system libadns:
+  /home/kreator/work/cvs/ircd-hybrid-7/src/adns.c:56: undefined reference
+  to `adns__rereadconfig'
+
+
 *** 20010605_1 by kreator
 - add setup_corefile() that will rlimit corefilesize to system max
 
