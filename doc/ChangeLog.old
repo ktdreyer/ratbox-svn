@@ -1,3 +1,15 @@
+androsyn    2002/06/10 20:55:13 EDT	(20020611_2)
+
+  Modified files:
+    src                  s_user.c 
+  Log:
+  Missed a random_ping
+  
+  Revision  Changes    Path
+  7.198     +1 -1      ircd-hybrid-7/src/s_user.c
+
+
+
 androsyn    2002/06/10 20:00:11 EDT	(20020611_1)
 
   Modified files:
