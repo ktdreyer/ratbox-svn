@@ -1,3 +1,9 @@
+*** 20001213_7 by db
+- removed an obsolete line from the example.conf 
+- added s_gline.c that I forgot
+
+
+
 *** 20001213_6 by toot
 fixed some makefile stuff
 
