@@ -355,6 +355,13 @@ conf_set_log_fname_serverlog(void *data)
 }
 
 static void
+conf_set_log_fname_killlog(void *data)
+{
+	strlcpy(ConfigFileEntry.fname_killlog, data,
+		sizeof(ConfigFileEntry.fname_klinelog));
+}
+
+static void
 conf_set_log_fname_glinelog(void *data)
 {
 	strlcpy(ConfigFileEntry.fname_glinelog, data, sizeof(ConfigFileEntry.fname_glinelog));
@@ -2433,6 +2440,7 @@ newconf_init()
 	add_conf_item("log", "fname_operlog", CF_QSTRING, conf_set_log_fname_operlog);
 	add_conf_item("log", "fname_foperlog", CF_QSTRING, conf_set_log_fname_foperlog);
 	add_conf_item("log", "fname_serverlog", CF_QSTRING, conf_set_log_fname_serverlog);
+	add_conf_item("log", "fname_killlog", CF_QSTRING, conf_set_log_fname_killlog);
 	add_conf_item("log", "fname_glinelog", CF_QSTRING, conf_set_log_fname_glinelog);
 	add_conf_item("log", "fname_klinelog", CF_QSTRING, conf_set_log_fname_klinelog);
 	add_conf_item("log", "fname_operspylog", CF_QSTRING, conf_set_log_fname_operspylog);

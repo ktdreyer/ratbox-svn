@@ -46,6 +46,7 @@ static FBFILE *log_fuser;
 static FBFILE *log_oper;
 static FBFILE *log_foper;
 static FBFILE *log_server;
+static FBFILE *log_kill;
 static FBFILE *log_gline;
 static FBFILE *log_kline;
 static FBFILE *log_operspy;
@@ -65,6 +66,7 @@ static struct log_struct log_table[LAST_LOGFILE] =
 	{ ConfigFileEntry.fname_operlog,	&log_oper	},
 	{ ConfigFileEntry.fname_foperlog,	&log_foper	},
 	{ ConfigFileEntry.fname_serverlog,	&log_server	},
+	{ ConfigFileEntry.fname_killlog,	&log_kill	},
 	{ ConfigFileEntry.fname_klinelog,	&log_kline	},
 	{ ConfigFileEntry.fname_glinelog,	&log_gline	},
 	{ ConfigFileEntry.fname_operspylog,	&log_operspy	},

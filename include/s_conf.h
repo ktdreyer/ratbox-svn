@@ -175,6 +175,7 @@ struct config_file_entry
 	char fname_operlog[MAXPATHLEN];
 	char fname_foperlog[MAXPATHLEN];
 	char fname_serverlog[MAXPATHLEN];
+	char fname_killlog[MAXPATHLEN];
 	char fname_glinelog[MAXPATHLEN];
 	char fname_klinelog[MAXPATHLEN];
 	char fname_operspylog[MAXPATHLEN];
