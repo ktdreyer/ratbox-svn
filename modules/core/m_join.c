@@ -154,6 +154,14 @@ m_join(struct Client *client_p,
 	continue;
       }
 
+      if(ConfigServerHide.disable_local_channels &&
+        (*name == '&'))
+      {
+        sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
+	           me.name, source_p->name, name);
+        continue;
+      }
+
       /* check the length */
       if (strlen(name) > CHANNELLEN)
       {

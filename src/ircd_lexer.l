@@ -129,6 +129,7 @@ default_floodcount  { return DEFAULT_FLOODCOUNT; }
 deny		{ return DENY; }
 description	{ return DESCRIPTION; }
 die		{ return DIE; }
+disable_local_channels { return DISABLE_LOCAL_CHANNELS; }
 disable_remote_commands	{ return DISABLE_REMOTE_COMMANDS; }
 dot_in_ip6_addr { return DOT_IN_IP6_ADDR; }
 dots_in_ident   { return DOTS_IN_IDENT; }
