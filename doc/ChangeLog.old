@@ -1,3 +1,11 @@
+*** 20001014_8 by db
+- added code to remove chan from client cache, not used yet
+- added checks to ensure client doesn't join twice a subchan, not tested yet
+- corrected conflict introduced by me
+- added another macro for top level vchan detect
+
+
+
 *** 20001014_7 by toot
 . fixed typo in s_user.c
 . made RPL_WHOISADMIN numeric consistent with dalnet
