@@ -1,3 +1,7 @@
+*** 20010822_8 by leeh
+- removed +e and stuck gecos on the end of the +c notice
+
+
 *** 20010822_7 by leeh
 - added back the second buffer, this time it actually does something and
   is less complex
