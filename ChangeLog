@@ -1,3 +1,25 @@
+leeh        2004/08/13 13:26:08 EDT	(20040813_3)
+
+  Modified files:
+    include              channel.h 
+    modules              Makefile.in 
+    modules/core         channels.c 
+    src                  channel.c 
+  Removed files:
+    modules              m_names.c 
+  Log:
+  - merge m_names() into module channels.c
+  - merge channel_member_names() into module channels.c
+  
+  Revision  Changes    Path
+  7.158     +0 -3      ircd-ratbox/include/channel.h
+  1.107     +0 -1      ircd-ratbox/modules/Makefile.in
+  1.3       +225 -2    ircd-ratbox/modules/core/channels.c
+  1.80      +0 -193    ircd-ratbox/modules/m_names.c (dead)
+  7.424     +0 -82     ircd-ratbox/src/channel.c
+
+
+
 leeh        2004/08/12 23:58:12 EDT	(20040813_2)
 
   Modified files:
