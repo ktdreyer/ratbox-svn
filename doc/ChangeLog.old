@@ -1,3 +1,16 @@
+*** 20001128_11 by adrian
+
+
+Revoke FDLIST_BUSYCLIENT for the time being - we need to sort out
+how we place things in the fd lists, and we need to keep the flow
+of FD events at a steady rate.
+
+The trouble right now is that if we don't have any idle fd's being
+triggered, we end up waiting an entire second for their IO to
+complete. This is too long. :-)
+
+
+
 *** 20001128_10 by db
 - removed unused FLUD code
 
