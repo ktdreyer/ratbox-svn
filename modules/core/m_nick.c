@@ -158,9 +158,13 @@ static int mr_nick(struct Client *cptr, struct Client *sptr, int parc,
       return 0;
     }
     else
-      return(set_initial_nick(cptr, sptr, nick));
+      {
+        return(set_initial_nick(cptr, sptr, nick));
+      }
   else
-    sendto_one(sptr, form_str(ERR_NICKNAMEINUSE), me.name, "*", nick);
+   {
+     sendto_one(sptr, form_str(ERR_NICKNAMEINUSE), me.name, "*", nick);
+   }
 
   return 0; /* NICK message ignored */
 }

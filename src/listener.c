@@ -356,7 +356,7 @@ static void accept_connection(int pfd, void *data)
   static time_t      last_oper_notice = 0;
 
   struct irc_inaddr addr;
-  unsigned int		addrlen = sizeof(struct irc_inaddr);
+  socklen_t addrlen = sizeof(struct irc_inaddr);
   int                fd;
   struct Listener *  listener = data;
 

@@ -74,7 +74,7 @@ extern void  comm_connect_tcp(int, const char *, u_short,
 extern const char * comm_errstr(int status);
 extern int   comm_open(int family, int sock_type, int proto,
                  const char *note);
-extern int   comm_accept(int fd, struct sockaddr *pn, unsigned int *addrlen);
+extern int   comm_accept(int fd, struct sockaddr *pn, socklen_t *addrlen);
 
 /* These must be defined in the network IO loop code of your choice */
 extern void  comm_setselect(int fd, fdlist_t list, unsigned int type,

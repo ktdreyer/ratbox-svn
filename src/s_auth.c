@@ -289,7 +289,7 @@ static int start_auth_query(struct AuthRequest* auth)
 {
 /*  struct sockaddr_in sock; */
   struct irc_sockaddr localaddr;
-  unsigned int          locallen = sizeof(struct irc_sockaddr);
+  socklen_t locallen = sizeof(struct irc_sockaddr);
   int                fd;
 
   if ((fd = comm_open(DEF_FAM, SOCK_STREAM, 0, "ident")) == -1)
@@ -517,9 +517,9 @@ void auth_connect_callback(int fd, int error, void *data)
   struct AuthRequest *auth = data;
   struct sockaddr_in us;
   struct sockaddr_in them;
-  char            authbuf[32];
-  unsigned int       ulen = sizeof(struct sockaddr_in);
-  unsigned int       tlen = sizeof(struct sockaddr_in);
+  char authbuf[32];
+  socklen_t ulen = sizeof(struct sockaddr_in);
+  socklen_t tlen = sizeof(struct sockaddr_in);
 
   /* Check the error */
   if (error != COMM_OK)
