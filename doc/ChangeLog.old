@@ -1,3 +1,9 @@
+*** 20010810_1 by leeh
+- I agree with Hwy, we should block remote versions at all, mainly
+  because you know the first server to reply to the request, if its not
+  the target is a hub.. which would make hub hiding useless.. :)
+
+
 *** 20010807_2 by leeh
 - commited dabulldogs patch:
   slight idiot proofing.. will move the modules dir to modules-old, then
