@@ -1,3 +1,7 @@
+*** 19990901_5 by wnder
+Iauth headers
+
+
 *** 19990901_4 by wnder
 IAuth source files : as of right now IAuth accepts authentication
 queries of the form: DoAuth <ID> <ip address> and returns an
