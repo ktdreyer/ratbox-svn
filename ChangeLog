@@ -1,3 +1,26 @@
+leeh        2004/03/08 14:51:11 EST	(20040308_10)
+
+  Modified files:
+    .                    RELNOTES 
+    doc                  example.conf example.efnet.conf 
+                         whats-new.txt 
+    modules              m_trace.c 
+    src                  hostmask.c 
+  Log:
+  - updated the example configs, RELNOTES and whats-new.txt
+  - stop /trace printing unknowns to remote opers
+  - fixed checking of klines against spoofs
+  
+  Revision  Changes    Path
+  1.84      +4 -0      ircd-ratbox/RELNOTES
+  7.237     +8 -13     ircd-ratbox/doc/example.conf
+  7.72      +7 -10     ircd-ratbox/doc/example.efnet.conf
+  7.46      +0 -1      ircd-ratbox/doc/whats-new.txt
+  1.95      +9 -8      ircd-ratbox/modules/m_trace.c
+  7.94      +1 -1      ircd-ratbox/src/hostmask.c
+
+
+
 androsyn    2004/03/08 14:30:59 EST	(20040308_9)
 
   Modified files:
