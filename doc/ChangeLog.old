@@ -1,3 +1,7 @@
+*** 20010211_1 by a1kmm
+- Fixed adns to use My* memory functions.
+
+
 *** 20010210_13 by androsyn
 Fixed adns/ to use MyMalloc() instead of malloc()
 
