@@ -1,4 +1,4 @@
-/*  modules/m_encap.c
+/*  modules/m_operspy.c
  *  Copyright (C) 2003 ircd-ratbox development team
  *  Copyright (C) 2003 Lee Hardy <lee@leeh.co.uk>
  *
@@ -46,67 +46,58 @@
 #include "modules.h"
 #include "sprintf_irc.h"
 
-static int ms_encap(struct Client *client_p, struct Client *source_p,
-		     int parc, const char *parv[]);
+static int ms_operspy(struct Client *client_p, struct Client *source_p,
+		      int parc, const char *parv[]);
 
-struct Message encap_msgtab = {
-	"ENCAP", 0, 0, 0, MFLG_SLOW,
-	{mg_ignore, mg_ignore, {ms_encap, 3}, {ms_encap, 3}, mg_ignore}
+struct Message operspy_msgtab = {
+	"OPERSPY", 0, 0, 0, MFLG_ENCAP|MFLG_ENCAPONLY,
+	{mg_ignore, mg_ignore, {ms_operspy, 2}, {ms_operspy, 2}, mg_ignore}
 };
 
-mapi_clist_av1 encap_clist[] = { &encap_msgtab, NULL };
-DECLARE_MODULE_AV1(encap, NULL, NULL, encap_clist, NULL, NULL, "$Revision$");
+mapi_clist_av1 operspy_clist[] = { &operspy_msgtab, NULL };
+DECLARE_MODULE_AV1(operspy, NULL, NULL, operspy_clist, NULL, NULL, "$Revision$");
 
-/* ms_encap()
+/* ms_operspy()
  *
- * parv[1] - destination server
- * parv[2] - subcommand
- * parv[3] - parameters
+ * parv[1] - operspy command
+ * parv[2] - optional params
  */
 static int
-ms_encap(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
+ms_operspy(struct Client *client_p, struct Client *source_p,
+	   int parc, const char *parv[])
 {
-	char buffer[BUFSIZE];
+	static char buffer[BUFSIZE];
 	char *ptr;
 	int cur_len = 0;
-	int len;
-	int i;
+	int len, i;
 
-	ptr = buffer;
-	
-	for(i = 1; i < parc - 1; i++)
+	if(parc < 4)
 	{
-		len = strlen(parv[i]) + 1;
-
-		/* ugh, not even at the last parameter, just bail --fl */
-		if((size_t)(cur_len + len) >= sizeof(buffer))
-			return 0;
-
-		ircsnprintf(ptr, sizeof(buffer) - cur_len, "%s ", parv[i]);
-		cur_len += len;
-		ptr += len;
+		report_operspy(source_p, parv[1],
+			    parc < 3 ? NULL : parv[2]);
 	}
-
-	len = strlen(parv[i]);
-
-	/* if its a command without parameters, dont prepend a ':' */
-	if(parc == 3)
-		ircsnprintf(ptr, sizeof(buffer) - cur_len, "%s", parv[2]);
+	/* buffer all remaining into one param */
 	else
-		ircsnprintf(ptr, sizeof(buffer) - cur_len, ":%s", parv[parc-1]);
+	{
+		ptr = buffer;
+		cur_len = 0;
 
-	/* add a trailing \0 if it was too long */
-	if((cur_len + len) >= BUFSIZE)
-		buffer[BUFSIZE-1] = '\0';
+		for(i = 2; i < parc; i++)
+		{
+			len = strlen(parv[i]) + 1;
 
-	sendto_match_servs(source_p, parv[1], CAP_ENCAP, NOCAPS,
-			   "ENCAP %s", buffer);
+			if((size_t)(cur_len + len) >= sizeof(buffer))
+				return 0;
 
-	/* if it matches us, find a matching handler and call it */
-	if(match(parv[1], me.name))
-		handle_encap(client_p, source_p, parv[2], parc - 2, parv + 2);
+			ircsnprintf(ptr, sizeof(buffer) - cur_len, "%s ",
+				 parv[i]);
+			ptr += len;
+			cur_len += len;
+		}
+
+		report_operspy(source_p, parv[1], buffer);
+	}
 
 	return 0;
 }
-
 
