@@ -12,16 +12,12 @@ PREFACE
   what issues can come forth from attempting to use this newfangled
   technology, and how to properly get it "up and going."
 
-  We (the Hybrid team) found the biggest problems with OpenSSL to be
-  the following:
+  In the following sections, we hope to address this issue, so that
+  OpenSSL can be (hopefully) used on all systems where available.
 
-    1.  OpenSSL was outdated (version 0.9.5 or below).
-    2.  Multiple OpenSSL installations on the same machine.
-    3.  Oddities in stock OpenSSL installations.
-
-  In the following sections, we hope to address these issues individually
-  so that OpenSSL can be (hopefully) used on all systems where it's
-  been made available.
+  Other sections include more technical descriptions, such as issues
+  pertaining to ciphers (encryption methods/algorithms) and other
+  related information.
 
 
 OBTAINING OPENSSL
@@ -38,6 +34,47 @@ OBTAINING OPENSSL
 
   The present stable release of OpenSSL, as of the authoring of this
   document, is 0.9.6a.
+
+
+GETTING IT TO WORK
+==================
+  The "--enable-openssl" argument can be passed to configure to specify
+  that you wish to use OpenSSL.  If this argument is not specified,
+  configure will check for OpenSSL anyways.  Therefore, the following
+  two (2) examples are identical:
+
+    ./configure
+    ./configure --enable-openssl
+
+  OpenSSL support can be explicitly disabled by doing:
+
+    ./configure --disable-openssl
+
+  If needed, hybrid-7 will permit you to specify the base directory
+  where OpenSSL was installed:
+
+    ./configure --enable-openssl=/usr/local/openssl
+
+  For multiple versions of OpenSSL installed on the same system,
+  please read the "MULTIPLE OPENSSL INSTALLATIONS" section within
+  this document.
+
+  If no directory is specified, OpenSSL will check for the proper
+  installation tree in the following directories (by default), and
+  in this order:
+
+    /usr/local/ssl
+    /usr/pkg
+    /usr/local
+    /usr/local/openssl
+
+  Please make a note of this, as if you have multiple OpenSSL install-
+  ations, this will decide precedence.
+
+
+SERVER CONFIGURATION
+====================
+  To be done.
 
 
 OUTDATED OPENSSL
@@ -92,11 +129,6 @@ MULTIPLE OPENSSL INSTALLATIONS
   In the case of FreeBSD, you may either rebuild world (make buildworld)
   or use the OpenSSL version provided in /usr/ports/security/openssl.
 
-  If the above recommendations cannot be followed, hybrid-7 will permit
-  you to specify where OpenSSL was installed.
-
-  When using this method, it should be noted that the specified version
-  will be used regardless of any other versions installed on the system.
   For example, let's assume a Linux machine has two (2) copies of OpenSSL
   installed:
 
@@ -173,9 +205,6 @@ OPENSSL ODDITIES
 
   hybrid-7 will work with all of the above configurations.
 
-
-ULTIMATUM
-=========
   We recommend that administrators install OpenSSL using the "--openssldir"
   argument, rather than the "--prefix" argument.  The reason for this is
   purely cosmetical; it's nice to keep everything in one place, and keeps
@@ -187,7 +216,39 @@ ULTIMATUM
   Finally, please verify that your OpenSSL installation was installed
   properly, otherwise you will be unable to compile hybrid-7.
 
-  Thanks for listening, and good night.
+
+CIPHERS
+=======
+  Ciphers can be selected specifically in hybrid-7, per connect {}
+  block (using 'cipher_preference'), as well as a default cipher
+  method defined in general {} ('default_cipher_preference').  Please
+  consult doc/example.conf or doc/ircd.conf for more information.
+
+  hybrid-7 chooses and checks ciphers in the following order:
+
+    BF/256      -- Blowfish (256-bit)
+    BF/128      -- Blowfish (128-bit)
+    CAST/128    -- CAST (128-bit)
+    IDEA/128    -- IDEA (128-bit)
+    RC5.16/128  -- RC5 16 round (128-bit
+    RC5.12/128  -- RC5 12 round (128-bit)
+    RC5.8/128   -- RC5 8 round  (128-bit)
+    3DES/168    -- 3DES (168-bit)
+    DES/56      -- Standard DES (56-bit)
+
+  On most systems, Blowfish will be fastest and secure enough for most
+  general transmissions.  Use the "encspeed" (tools/encspeed) utility
+  provided with hybrid-7 to find out which cipher may be fastest on your
+  system.  And, naturally in some cases, you may want to pick a more
+  secure cipher depending upon the sensitivity of the data being
+  transmitted/received.
+
+  Some systems may lack the IDEA cipher (such is the case with FreeBSD).
+  The reason for this is simple: there are licensing issues regarding
+  the IDEA cipher, and (I believe?) export regulations.  Henceforth, it
+  cannot be provided with stock FreeBSD systems.  Other systems may
+  differ.
+
 
 
 END OF DOCUMENT
