@@ -1,3 +1,15 @@
+androsyn    2002/12/10 10:08:52 UTC	(20021210_6)
+
+  Modified files:
+    src                  confmatch.c 
+  Log:
+  Make parse_netmask actually understand the cidr length
+  
+  Revision  Changes    Path
+  7.2       +2 -0      ircd-ratbox/src/confmatch.c
+
+
+
 androsyn    2002/12/10 09:42:10 UTC	(20021210_5)
 
   Modified files:
