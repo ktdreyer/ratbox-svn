@@ -67,7 +67,7 @@ if test "$ac_cv_func_gettext" = "no" -a "$ac_cv_lib_intl_gettext" = "no"; then
         SAVEDLDFLAGS=$LDFLAGS
         SAVEDCFLAGS=$CFLAGS
 	LDFLAGS="$LDFLAGS -L/usr/local/lib"
-	CFLAGS="$CFLAGS -I/usr/local/include"
+	CPPFLAGS="$CPPFLAGS -I/usr/local/include"
 	AC_CHECK_LIB(intl, gettext,,LDFLAGS=$SAVEDLDFLAGS; CFLAG=$SAVEDCFLAGS)
 fi
 

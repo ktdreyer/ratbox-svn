@@ -1730,7 +1730,7 @@ echo "configure:1729: checking in /usr/local/lib " >&5
         SAVEDLDFLAGS=$LDFLAGS
         SAVEDCFLAGS=$CFLAGS
 	LDFLAGS="$LDFLAGS -L/usr/local/lib"
-	CFLAGS="$CFLAGS -I/usr/local/include"
+	CPPFLAGS="$CPPFLAGS -I/usr/local/include"
 	echo $ac_n "checking for gettext in -lintl""... $ac_c" 1>&6
 echo "configure:1736: checking for gettext in -lintl" >&5
 ac_lib_var=`echo intl'_'gettext | sed 'y%./+-%__p_%'`
