@@ -1,3 +1,7 @@
+*** 20010427_4 by habeeb
+Took out an #undef I missed in 20010424_6
+
+
 *** 20010427_3 by habeeb
 Switched channel_chanop_or_voice() around to return half ops before voice.
 
