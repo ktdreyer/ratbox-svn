@@ -374,10 +374,8 @@ sendto_realops("ZZZ Creating top_chptr for %s", (parv[2] + 1));
 	  /* XXX ZZZ vchan stuff */
 
 	  if( top_chptr )
-	    add_vchan_to_client_cache(sptr,top_chptr, chptr);
-
-	  if( top_chptr )
 	    {
+	      add_vchan_to_client_cache(sptr,top_chptr, chptr);
 	      sendto_channel_butserv(chptr, acptr, ":%s JOIN :%s",
 				     s, top_chptr->chname);
 	    }
@@ -477,10 +475,16 @@ sendto_realops("ZZZ Creating top_chptr for %s", (parv[2] + 1));
   return 0;
 }
 
-/* ZZZ inline this eventually */
+/*
+ * set_final_mode
+ *
+ * inputs	- pointer to mode to setup
+ *		- pointer to old mode
+ * output	- NONE
+ * side effects	- 
+ */
 
-void
-set_final_mode(struct Mode *mode,struct Mode *oldmode)
+void set_final_mode(struct Mode *mode,struct Mode *oldmode)
 {
   int what = 0;
   char numeric[16];
