@@ -1,3 +1,19 @@
+jmallett    2002/01/07 12:48:30 EST	(20020107_3)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+  Log:
+  Bring in my slightly redone PIC checks. Fixes GCC on SunOS problems with
+  the previous version of my changes here. Also include some notes about
+  what is being done for PIC checks.
+  
+  Revision  Changes    Path
+  7.107     +14 -5     ircd-hybrid-7/autoconf/configure.in
+  7.110     +210 -197  ircd-hybrid-7/configure
+
+
+
 db          2002/01/07 01:26:14 EST	(20020107_2)
 
   Modified files:
