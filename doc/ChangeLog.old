@@ -1,3 +1,9 @@
+*** 20010126_6 by androsyn
+Somebody thought it was funny to commit config.h with #define IPV6 1
+
+
+
+
 *** 20010126_5 by jdc
 'spoof_notice' variable added to auth {} blocks.  Enables/disables
 notification for when a client's host is changed via 'spoof'.
