@@ -363,11 +363,6 @@ free_server_conf(struct server_conf *server_p)
 
 	delete_adns_queries(server_p->dns_query);
 
-#ifdef HAVE_LIBCRYPTO
-	if(server_p->rsa_pubkey)
-		RSA_free(server_p->rsa_pubkey);
-#endif
-
 	MyFree(server_p->name);
 	MyFree(server_p->host);
 	MyFree(server_p->class_name);
