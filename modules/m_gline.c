@@ -683,13 +683,13 @@ log_gline(struct Client *source_p,
       return;
     }
 
-  ircsprintf(buffer, "\"%s\",\"%s\",\"%s %s\",\"%s\",%ld\n",
+  ircsprintf(buffer, "\"%s\",\"%s\",\"%s %s\",\"%s\",%lu\n",
 	     user,
 	     host,
 	     reason,
 	     timebuffer,
 	     oper_nick,
-	     CurrentTime);
+	     (unsigned long) CurrentTime);
 
   if (fbputs(buffer,out) == -1)
     {
