@@ -952,22 +952,21 @@ int user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       return 0;
     }
 
-/* XXX */
-#if 0
-  if (IsServer(sptr) || sptr != acptr || acptr->from != sptr->from)
+  /* Dont know why these were commented out.. put them back using new sendto() funcs */
+  if (IsServer(sptr))
     {
-      if (IsServer(cptr))
-        sendto_ops_butone(NULL, &me,
-			      ":%s WALLOPS :MODE for User %s From %s!%s",
-			      me.name, parv[1],
-			      get_client_name(cptr, HIDE_IP), sptr->name);
-      else
-        sendto_one(sptr, form_str(ERR_USERSDONTMATCH),
-                   me.name, parv[0]);
-      return 0;
+       sendto_realops_flags(FLAGS_ADMIN, "*** Mode for User %s from %s",
+                            parv[1], sptr->name);
+       return 0;
     }
-#endif
- 
+
+  if (sptr != acptr || acptr->from != sptr->from)
+    {
+       sendto_one(sptr, form_str(ERR_USERSDONTMATCH), me.name, parv[0]);
+       return 0;
+    }
+
+
   if (parc < 3)
     {
       m = buf;
