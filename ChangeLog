@@ -1,3 +1,16 @@
+leeh        2004/07/30 19:43:59 EDT	(20040730_11)
+
+  Modified files:
+    src                  newconf.c 
+  Log:
+  - move rest of newconf.c that needs it over to table form..
+  - fix a minor memleak when a listener {}; block doesnt end
+  
+  Revision  Changes    Path
+  7.163     +62 -45    ircd-ratbox/src/newconf.c
+
+
+
 leeh        2004/07/30 16:24:00 EDT	(20040730_10)
 
   Modified files:
