@@ -51,9 +51,12 @@ struct ConfItem *match_Dline(unsigned long ip)
 
 void clear_Dline_table(void)
 {
-	Destroy_Patricia(dline, NULL);
+	if(dline != NULL)
+		Destroy_Patricia(dline, NULL);
+	if(dline != NULL)
 	Destroy_Patricia(eline, NULL);
-	Destroy_Patricia(kline, NULL);
+	if(dline != NULL)
+		Destroy_Patricia(kline, NULL);
 	zap_Dlines();
 }
 struct ConfItem *match_ip_Kline(unsigned long ip, const char *name)
@@ -61,8 +64,15 @@ struct ConfItem *match_ip_Kline(unsigned long ip, const char *name)
 	patricia_node_t *node;
 	unsigned long nip = ntohl(ip);
 	node = match_string(kline, inetntoa((char *)&nip));
+	log(L_NOTICE, "ip_Kline node = %d\n", node);
 	if(node != NULL)
-		return(node->data);
+	{
+		if(match(node->data->user, name))
+		{
+			log(L_NOTICE, "ip_Kline: %s %s\n", node->data->user, name);
+			return(node->data);
+		}
+	}
 	return(NULL);
 }
 void report_ip_Klines(struct Client *sptr)
