@@ -187,6 +187,9 @@ Little things to be done given enough time and initiative -Hwy
 .  Fix topic bursting to LL servers (broke lately for some reason)
 .  Other places that the number formats were replaced with that damn %lu
 .  Fix TRACE on IPv6
+.  JOIN #channel,0 joins #channel0, #2,000 joins #20... STRANGE
+.  Unconfirmed reports of DNS lookups failing on the first connection to
+   a server, while working fine on subsequent connections.
 
 
 -- Rodder's list
@@ -226,6 +229,6 @@ Little things to be done given enough time and initiative -Hwy
   # For example, to make hayes.ims.alaska.edu present itself to the world as
   # *.alaska.edu, I would use a 2 (to strip off the first two parts).  If you
 
-  We'd have hostmask="*.alaska.edu";
+  We'd have fakename="*.alaska.edu";
 
 -->> fixed by AndoSyn

@@ -15,7 +15,6 @@ here they are:
 'I'     NO_DEFAULT_INVISIBLE
 'M'     IDLE_FROM_MSG
 'p'	CRYPT_OPER_PASSWORD
-'P'	CRYPT_LINK_PASSWORD
 'Y'	USE_SYSLOG
 
 'TS'    Supports TS

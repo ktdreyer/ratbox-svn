@@ -50,7 +50,7 @@ this can break certain clients.
 The old $*.server.mask and #*.host.mask no longer work.  The replacement is
 $$*.server.mask and $#*.host.mask.  This change removes a long standing "bug"
 in which a user can sit in a channel #*.fi and catch all messages directed
-at #*.fi users.
+at #*.fi users.  (NOTE:  this may change, it is still being debated)
 
 The infamous VChans are included as well.  There can be multiple channels with
 the same name, each has different "views" with different users.  When joining

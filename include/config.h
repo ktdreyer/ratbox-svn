@@ -220,14 +220,6 @@
  */
 #define CRYPT_OPER_PASSWORD
 
-/* CRYPT_LINK_PASSWORD - use crypted N-line passwords in the ircd.conf
- * If you want to store encrypted passwords in N-lines for server links,
- * define this.  For a C/N pair in your ircd.conf file, the password
- * need not be the same for both, as long as the opposite end has the
- * right password in the opposite line.
- */
-#undef  CRYPT_LINK_PASSWORD
-
 /* MAXSENDQLENGTH - Max amount of internal send buffering
  * Max amount of internal send buffering when socket is stuck (bytes)
  */

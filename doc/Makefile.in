@@ -24,6 +24,10 @@ localstatedir	= @localstatedir@
 moduledir	= @prefix@/modules
 automoduledir	= @prefix@/modules/autoload
 
+# Local to the etc Makefile
+mandir          = @prefix@/man8
+MANPAGES        = ircd.8
+
 CONFS		= example.conf opers.txt
 DEFAULTCONFS	= ircd.motd kline.conf
 
@@ -36,6 +40,11 @@ install-mkdirs:
 	-@if test ! -d $(sysconfdir); then \
 		echo "mkdir $(sysconfdir)"; \
 		mkdir $(sysconfdir); \
+	fi
+
+	-@if test ! -d $(mandir); then \
+		echo "mkdir $(mandir)"; \
+		mkdir $(mandir); \
 	fi
 
 install: install-mkdirs build
@@ -52,6 +61,13 @@ install: install-mkdirs build
 		if test ! -f $(sysconfdir)/$$i; then \
 			echo $(INSTALL_DATA) $$i $(sysconfdir); \
 			$(INSTALL_DATA) $$i $(sysconfdir); \
+		fi; \
+	done
+
+	@for i in $(MANPAGES); do \
+		if test ! -f $(mandir)/$$i; then \
+			echo $(INSTALL_DATA) $$i $(mandir); \
+			$(INSTALL_DATA) $$i $(mandir); \
 		fi; \
 	done
 
