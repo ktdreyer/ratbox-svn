@@ -1,3 +1,26 @@
+leeh        2004/01/10 20:27:18 EST	(20040111_2)
+
+  Modified files:
+    include              scommand.h stdinc.h 
+    src                  c_error.c c_message.c c_mode.c channel.c 
+                         client.c io.c scommand.c 
+  Log:
+  - make parv in the scommand handlers const, otherwise the hooks will have
+    issues
+  
+  Revision  Changes    Path
+  1.4       +2 -2      rserv/include/scommand.h
+  1.8       +10 -0     rserv/include/stdinc.h
+  1.5       +2 -2      rserv/src/c_error.c
+  1.13      +13 -7     rserv/src/c_message.c
+  1.10      +3 -3      rserv/src/c_mode.c
+  1.14      +17 -14    rserv/src/channel.c
+  1.14      +10 -10    rserv/src/client.c
+  1.18      +1 -1      rserv/src/io.c
+  1.13      +17 -17    rserv/src/scommand.c
+
+
+
 leeh        2004/01/10 20:12:13 EST	(20040111_1)
 
   Modified files:
