@@ -225,8 +225,8 @@ int ms_connect(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
   if (!(aconf = find_conf_by_name(parv[1], CONF_CONNECT_SERVER))) {
     if (!(aconf = find_conf_by_host(parv[1], CONF_CONNECT_SERVER))) {
       sendto_one(sptr,
-                 "NOTICE %s :Connect: Host %s not listed in ircd.conf",
-                 parv[0], parv[1]);
+                 ":%s NOTICE %s :Connect: Host %s not listed in ircd.conf",
+                 me.name, parv[0], parv[1]);
       return 0;
     }
   }
@@ -241,8 +241,8 @@ int ms_connect(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
     {
       if ((port = atoi(parv[2])) <= 0)
         {
-          sendto_one(sptr, "NOTICE %s :Connect: Illegal port number",
-                     parv[0]);
+          sendto_one(sptr, ":%s NOTICE %s :Connect: Illegal port number",
+                     me.name, parv[0]);
           return 0;
         }
     }
@@ -259,7 +259,7 @@ int ms_connect(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
 			  "Remote CONNECT %s %s from %s",
 			  parv[1], parv[2] ? parv[2] : "",
 			  get_client_name(sptr, MASK_IP));
-  sendto_serv_butone(cptr,
+  sendto_serv_butone(NULL,
 		     ":%s WALLOPS :Remote CONNECT %s %s from %s",
 		     me.name, parv[1], parv[2] ? parv[2] : "",
 		     get_client_name(sptr, MASK_IP));

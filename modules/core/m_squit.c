@@ -142,7 +142,7 @@ int ms_squit(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 				 found_squit->server_name,
 				 get_client_name(sptr,FALSE), comment);
 
-          sendto_serv_butone(cptr,
+          sendto_serv_butone(NULL,
 			     "Received SQUIT %s from %s (%s)",
 			     found_squit->server_name,
 			     get_client_name(sptr,FALSE),comment);
