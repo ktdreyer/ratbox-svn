@@ -1,3 +1,15 @@
+leeh        2002/07/21 20:40:43 EDT	(20020722_0)
+
+  Modified files:
+    modules              m_info.c 
+  Log:
+  - wrapped the "Compiled on" info in #ifndef EFNET
+  
+  Revision  Changes    Path
+  1.58      +3 -1      ircd-hybrid-7/modules/m_info.c
+
+
+
 leeh        2002/07/21 17:06:21 EDT	(20020721_7)
 
   Modified files:
