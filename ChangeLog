@@ -1,3 +1,15 @@
+androsyn    2004/03/12 10:24:22 EST	(20040312_0)
+
+  Modified files:
+    src                  s_user.c 
+  Log:
+  If dns fails, we need to shove a 0 on the front of ::1
+  
+  Revision  Changes    Path
+  7.308     +18 -2     ircd-ratbox/src/s_user.c
+
+
+
 leeh        2004/03/10 17:09:05 EST	(20040310_4)
 
   Modified files:
