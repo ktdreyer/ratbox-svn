@@ -1,3 +1,9 @@
+*** 20010423_1 by db
+- removed docs for code we have removed
+- hint. someone should write up a doc on how the hash kline code works. hint
+
+
+
 *** 20010422_1 by fl_
 - added back oper accountability for KILL's.. if the client we're killing
   is opered, we should tell them who sent the kill..
