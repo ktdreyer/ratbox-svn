@@ -1,3 +1,25 @@
+jmallett    2002/01/09 19:15:29 EST	(20020110_0)
+
+  Modified files:
+    .                    README.FIRST 
+  Added files:
+    .                    README.PLATFORMS 
+  Log:
+  Since supporting Hybrid on every platform someone would run it on is
+  important, add a document including people who want to take responsibility
+  for, as well as who to yell at when things blow up. Add myself
+  appropriately as the NetBSD and OpenBSD on SPARC with GCC person, as well
+  as Darwin on PPC with Apple's version of gcc, and TenDRA on FreeBSD/x86.
+  The BSD on SPARC stuff doesn't currently work because of GCC, but I'll
+  still take responsibility and try to help people with Hybrid on that pair
+  of platforms.
+  
+  Revision  Changes    Path
+  7.23      +3 -0      ircd-hybrid-7/README.FIRST
+  7.1       +17 -0     ircd-hybrid-7/README.PLATFORMS (new)
+
+
+
 jmallett    2002/01/09 18:58:08 EST	(20020109_10)
 
   Modified files:
