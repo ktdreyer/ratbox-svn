@@ -1498,7 +1498,6 @@ burst_all(struct Client *client_p)
   struct Channel*   chptr;
   struct Channel*   vchan; 
   dlink_node *ptr;
-  time_t StartBurst=CurrentTime;
 
   /* serial counter borrowed from send.c */
   current_serial++;
