@@ -1,3 +1,16 @@
+androsyn    2002/03/04 17:45:43 EST	(20020304_1)
+
+  Modified files:
+    src                  send.c 
+  Log:
+  Fixed the stupid bug in sendto_list_remote that cause us to send certain
+  messages back to the sender.
+  
+  Revision  Changes    Path
+  7.182     +2 -1      ircd-hybrid-7/src/send.c
+
+
+
 leeh        2002/03/04 16:30:00 EST	(20020304_0)
 
   Modified files:
