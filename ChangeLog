@@ -1,3 +1,20 @@
+leeh        2005/03/25 19:23:53 UTC	(20050325_3)
+
+  Modified files:
+    include              hostmask.h 
+    modules              m_stats.c 
+    src                  hostmask.c 
+  Log:
+  - duplicate find_conf_by_address() into find_auth()
+  - remove precedence checking when hunting for anything but auth
+  
+  Revision  Changes    Path
+  1.46      +2 -0      ircd-ratbox/include/hostmask.h
+  1.253     +8 -9      ircd-ratbox/modules/m_stats.c
+  7.115     +105 -9    ircd-ratbox/src/hostmask.c
+
+
+
 leeh        2005/03/25 15:42:21 UTC	(20050325_2)
 
   Modified files:
