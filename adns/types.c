@@ -350,7 +350,7 @@ static adns_status csp_addr(vbuf *vb, const adns_rr_addr *rrp) {
   switch (rrp->addr.sa.sa_family) {
   case AF_INET:
     CSP_ADDSTR("INET ");
-    ia= inet_ntoa(rrp->addr.inet.sin_addr); assert(ia);
+    ia= inetntoa((unsigned char *)&rrp->addr.inet.sin_addr); assert(ia);
     CSP_ADDSTR(ia);
     break;
 #ifdef IPV6
