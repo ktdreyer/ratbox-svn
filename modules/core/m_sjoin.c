@@ -364,7 +364,10 @@ static void ms_sjoin(struct Client *client_p,
 		      (unsigned long) tstosend,
 		      parv[2], modebuf, parabuf);
 
-  if (buflen >= (BUFSIZE - 5 - NICKLEN))
+  /* check we can fit a nick on the end, as well as \r\n\0 and a prefix "
+   * @+".
+   */
+  if (buflen >= (BUFSIZE - 6 - NICKLEN))
     {
       sendto_realops_flags(FLAGS_ALL, L_ALL,
 			   "Long SJOIN from server: %s(via %s) (ignored)",
