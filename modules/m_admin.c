@@ -36,7 +36,7 @@ void do_admin( struct Client *sptr );
 
 struct Message admin_msgtab = {
   MSG_ADMIN, 0, 0, MFLG_SLOW | MFLG_UNREG, 0, 
-  {mr_admin, m_admin, ms_admin, mo_admin}
+  {mr_admin, m_admin, ms_admin, ms_admin}
 };
 
 void
@@ -100,27 +100,6 @@ int m_admin(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   return 0;
 }
 
-/*
- * mo_admin - ADMIN command handler
- *      parv[0] = sender prefix
- *      parv[1] = servername
- */
-int mo_admin(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
-{
-  if (hunt_server(cptr,sptr,":%s ADMIN :%s",1,parc,parv) != HUNTED_ISME)
-    return 0;
-
-  do_admin( sptr );
-
-  if(ConfigFileEntry.hub)
-    sendto_one(sptr, ":%s NOTICE %s :Server is a HUB",
-                     me.name,sptr->name);
-  else
-    sendto_one(sptr, ":%s NOTICE %s :Server is a LEAF",
-                     me.name,sptr->name);
-
-  return 0;
-}
 
 /*
  * ms_admin - ADMIN command handler, used for OPERS as well
