@@ -1,3 +1,7 @@
+*** 20011006_1 by leeh
+- commented where the magic number 6 comes from 
+
+
 *** 20011005_3 by db
 - reformatted balloc.c to project standard format
 - added part of Lee's proposed m_sjoin.c patches. We are simply
