@@ -260,78 +260,52 @@ static int
 linebuf_copy_line(buf_head_t *bufhead, buf_line_t *bufline,
   char *data, int len)
 {
-  int cpylen = 0;	/* how many bytes we've copied */
+  int buflen = 0;		/* how many bytes copied to buf */
+  int buflen_allowed = 0;	/* how many bytes allowed to copy to buf */
+  int cpylen = len;             /* data remaining to be copied */
   char *ch = data;	/* Pointer to where we are in the read data */
   char *bufch = &bufline->buf[bufline->len];
   /* Start of where to put new data */
 
+  bufline->terminated = 0;	/* should be 0 to start with */
+
+  buflen_allowed = BUF_DATA_SIZE - bufline->len;
+  assert(buflen_allowed > 0);
+
   /* If its full or terminated, ignore it */
-  if ((bufline->len == BUF_DATA_SIZE) || (bufline->terminated == 1))
+  if ((buflen_allowed == 0) || (bufline->terminated == 1))
     return 0;
 
   /* Next, lets enter the copy loop */
-  for(;;)
+  while(len && buflen_allowed && (*ch != '\r') && (*ch != '\n'))
     {
-      /* Are we out of data? */
-      if (len == 0)
-	{
-	  /* Yes, so we mark this buffer as unterminated, and return */
-	  bufline->terminated = 0; /* XXX it should be anyway :) */
-	  break;
-        }
-
-      /* Are we out of space to PUT this ? */
-      if (bufline->len == BUF_DATA_SIZE)
-	{
-	 /*
-	  * ok, we CR/LF/NUL terminate, set overflow, and loop until the
-	  * next CRLF. We then skip that, and return.
-	  */
-          bufline->overflow = 1;
-          cpylen += linebuf_skip_crlf(ch, len);
-#if 0
-          linebuf_terminate_crlf(bufhead, bufline);
-#endif
-	  *bufch++ = '\r';
-	  *bufch++ = '\n';
-	  *bufch = '\0';
-	  bufhead->len += 4;
-	           
-	  /* NOTE: We're finishing, so ignore updating len */
-	  bufline->terminated = 1;
-	  break;
-	}
-
-      /* Is this a CR or LF? */
-      if ((*ch == '\r') || (*ch == '\n'))
-	{
-          /* Skip */
-          cpylen += linebuf_skip_crlf(ch, len);
-          /* Terminate the line */
-          linebuf_terminate_crlf(bufhead, bufline);
-          /* NOTE: We're finishing, so ignore updating len */
-          bufline->terminated = 1;
-          break;
-        }
-
-      /*
-       * phew! we can copy a byte. Do it, and update the counters.
-       * this definitely blows our register sets on most sane archs,
-       * but hey, someone can recode this later on if they want to.
-       */
-      *bufch = *ch; 
-      bufch++;
-      ch++;
-      cpylen++;
-      assert(len > 0);
-      len--;
-      bufline->len++;
-      bufhead->len++;
+      *bufch++ = *ch++; 
+      --cpylen;
+      --buflen_allowed;
     }
 
-  *bufch = '\0';
-  return cpylen;
+  buflen = BUF_DATA_SIZE - buflen_allowed;
+
+  /* Did we complete the line? */
+  if ((buflen_allowed == 0) || (*ch == '\r') || (*ch == '\n'))
+  {
+    bufhead->len = bufline->len = buflen + 1;
+    
+    cpylen -= linebuf_skip_crlf(ch, len);
+    *bufch = '\0';
+   
+    if (buflen_allowed == 0)
+      bufline->overflow = 1;
+    
+    bufline->terminated = 1;
+    return(len - cpylen);
+  }
+
+  bufhead->len = bufline->len = buflen;
+ 
+  return(len - cpylen);
 }
+
 
 
 /*
