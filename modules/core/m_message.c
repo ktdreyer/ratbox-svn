@@ -199,9 +199,9 @@ int     m_message(int p_or_n,
 	{
 	case ENTITY_CHANNEL:
 	  msg_channel(p_or_n,command,
-			  cptr,sptr,
-			  (struct Channel *)target_table[i].ptr,
-			  parv[2]);
+		      cptr,sptr,
+		      (struct Channel *)target_table[i].ptr,
+		      parv[2]);
 	  break;
 
 	case ENTITY_CHANOPS_ON_CHANNEL:
@@ -434,15 +434,21 @@ void msg_channel( int p_or_n, char *command,
       if (result == CAN_SEND_OPV)
 	{
 	  sendto_channel_butone(cptr, sptr, chptr,
-				":%s %s %s :%s",
-				sptr->name, command, channel_name, text);
+				":%s!%s@%s %s %s :%s",
+				sptr->name,
+				sptr->username,
+				sptr->host,
+				command, channel_name, text);
 	}
       else
 	{
 	  if(!flood_attack_channel(sptr, chptr,channel_name))
 	    sendto_channel_butone(cptr, sptr, chptr,
-				  ":%s %s %s :%s",
-				  sptr->name, command, channel_name, text);
+				  ":%s!%s@%s %s %s :%s",
+				  sptr->name,
+				  sptr->username,
+				  sptr->host,
+				  command, channel_name, text);
 	}
     }
   else
@@ -462,6 +468,7 @@ void msg_channel( int p_or_n, char *command,
  *		- pointer to cptr
  *		- pointer to sptr
  *		- pointer to channel
+ *		- flags
  *		- pointer to text to send
  * output	- NONE
  * side effects	- message given channel either chanop or voice
@@ -474,18 +481,18 @@ void msg_channel_flags( int p_or_n, char *command,
 			char *text)
 {
   struct Channel *vchan;
-  char *channel_name=NULL;
+  char *chname=NULL;
+
+  chname = chptr->chname;
 
   if (HasVchans(chptr))
     {
       if( (vchan = map_vchan(chptr,sptr)) )
 	{
-	  channel_name = chptr->chname;
+	  chname = chptr->chname;
 	  chptr = vchan;
 	}
     }
-  else
-    channel_name = chptr->chname;
 
   if(MyClient(sptr))
     {
@@ -494,10 +501,12 @@ void msg_channel_flags( int p_or_n, char *command,
 
       sendto_channel_local(ONLY_CHANOPS_VOICED,
 			   chptr,
-			   ":%s %s!@%s :%s",
+			   ":%s!%s@%s %s @%s :%s",
 			   sptr->name,
 			   sptr->username,
 			   sptr->host,
+			   command,
+			   chname,
 			   text);
     }
   /* XXX Will need code to remotely send... */
