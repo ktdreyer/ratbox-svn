@@ -1,3 +1,16 @@
+androsyn    2002/11/26 02:02:59 UTC	(20021126_0)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  Add a function called notify_banned_client().  This function does the
+  notification and exiting of banned clients that are already connected.
+  
+  Revision  Changes    Path
+  7.333     +60 -158   ircd-ratbox/src/client.c
+
+
+
 androsyn    2002/11/25 22:45:41 UTC	(20021125_12)
 
   Modified files:
