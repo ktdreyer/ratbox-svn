@@ -247,84 +247,79 @@ comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
         F->timeout = CurrentTime + timeout;
 }
  
-/*
- * Check all connections for new connections and input data that is to be
- * processed. Also check for connections with data queued and whether we can
- * write it out.
- */
-
-
-/*
- * comm_select_fdlist
- *
+/* int comm_select_fdlist(fdlist_t fdlist, time_t delay)
+ * Input: The list to select, the maximum time to delay on this list.
+ * Output: Returns -1 on error, 0 on success.
+ * Side-effects: Deregisters future interest in IO and calls the handlers
+ *               if an event occurs for an FD.
+ * Comments: Check all connections for new connections and input data
+ * that is to be processed. Also check for connections with data queued
+ * and whether we can write it out.
  * Called to do the new-style IO, courtesy of of squid (like most of this
  * new IO code). This routine handles the stuff we've hidden in
  * comm_setselect and fd_table[] and calls callbacks for IO ready
  * events.
  */
-
 int
 comm_select_fdlist(fdlist_t fdlist, time_t delay)
 {
-    int num;
-    int fd;
-    int ci;
-    PF *hdl;
-    pollfd_list_t *pf = &pollfd_lists[fdlist];
-
-    /* update current time */
-    set_time();
-
-    for (;;) {
-        /* XXX kill that +1 later ! -- adrian */
-        num = poll(pf->pollfds, pf->maxindex + 1, delay * 1000);
-        if (num >= 0)
-            break;
-        if (ignoreErrno(errno))
-            continue;
-        /* error! */
-        return -1;
-        /* NOTREACHED */
-    }
-
-    /* update current time again, eww.. */
-    if ((CurrentTime = time(0)) == -1) {
-        log(L_CRIT, "Clock Failure");
-        restart("Clock failed");
-    }   
-
-    if (num == 0)
-        return 0;
-
-    /* XXX we *could* optimise by falling out after doing num fds ... */
-    for (ci = 0; ci < pf->maxindex + 1; ci++) {
-        fde_t *F;
-	int revents;
-	if (((revents = pf->pollfds[ci].revents) == 0) ||
-	    (pf->pollfds[ci].fd) == -1)
-	    continue;
-        fd = pf->pollfds[ci].fd;
-        F = &fd_table[fd];
-	if (revents & (POLLRDNORM | POLLIN | POLLHUP | POLLERR)) {
-	    hdl = F->read_handler;
-	    poll_update_pollfds(fd, fdlist, POLLRDNORM, NULL);
-	    if (!hdl) {
-		/* XXX Eek! This is another bad place! */
-	    } else {
-		hdl(fd, F->read_data);
-            }
-	}
-	if (revents & (POLLWRNORM | POLLOUT | POLLHUP | POLLERR)) {
-	    hdl = F->write_handler;
-	    poll_update_pollfds(fd, fdlist, POLLWRNORM, NULL);
-	    if (!hdl) {
-		/* XXX Eek! This is another bad place! */
-	    } else {
-		hdl(fd, F->write_data);
-            }
-	}
-    }
-    return 0;
+ int num;
+ int fd;
+ int ci;
+ PF *hdl;
+ pollfd_list_t *pf = &pollfd_lists[fdlist];
+  
+ /* update current time */
+ set_time();
+  
+ for (;;)
+ {
+  /* XXX kill that +1 later ! -- adrian */
+  num = poll(pf->pollfds, pf->maxindex + 1, delay * 1000);
+  if (num >= 0)
+   break;
+  if (ignoreErrno(errno))
+   continue;
+  /* error! */
+  return -1;
+  /* NOTREACHED */
+ }
+  
+ /* update current time again, eww.. */
+ set_time();
+ 
+ if (num == 0)
+  return 0;
+ /* XXX we *could* optimise by falling out after doing num fds ... */
+ for (ci = 0; ci < pf->maxindex + 1; ci++)
+ {
+  fde_t *F;
+  int revents;
+  if (((revents = pf->pollfds[ci].revents) == 0) ||
+      (pf->pollfds[ci].fd) == -1)
+   continue;
+  fd = pf->pollfds[ci].fd;
+  F = &fd_table[fd];
+  if (revents & (POLLRDNORM | POLLIN | POLLHUP | POLLERR))
+  {
+   hdl = F->read_handler;
+   poll_update_pollfds(fd, fdlist, POLLRDNORM, NULL);
+   /* This shouldn't happen... */
+   assert(hdl);
+   if (hdl)
+    hdl(fd, F->read_data);
+  }
+  if (revents & (POLLWRNORM | POLLOUT | POLLHUP | POLLERR))
+  {
+   hdl = F->write_handler;
+   poll_update_pollfds(fd, fdlist, POLLWRNORM, NULL);
+   /* This shouldn't happen... */
+   assert(hdl);
+   if (hdl)
+    hdl(fd, F->write_data);
+  }
+ }
+ return 0;
 }
 
 /*

@@ -576,61 +576,63 @@ comm_checktimeouts(void *notused)
 }
 
 /*
- * comm_connect_tcp() - connect a given socket to a remote address
- *
- * Begin the process of connecting a socket to a remote host/port.
- * Pass a 'local' address to bind to, a remote host/port, and a callback
- * for completion.
- * This routine binds the socket locally if required, and then formulate
- * a DNS request.
+ * void comm_connect_tcp(int fd, const char *host, u_short port,
+ *                       struct sockaddr *clocal, int socklen,
+ *                       CNCB *callback, void *data, int aftype)
+ * Input: An fd to connect with, a host and port to connect to,
+ *        a local sockaddr to connect from + length(or NULL to use the
+ *        default), a callback, the data to pass into the callback, the
+ *        address family.
+ * Output: None.
+ * Side-effects: A non-blocking connection to the host is started, and
+ *               if necessary, set up for selection. The callback given
+ *               may be called now, or it may be called later.
  */
 void
-comm_connect_tcp(int fd, const char *host, u_short port, 
-    struct sockaddr *clocal, int socklen, CNCB *callback, void *data, int aftype)
+comm_connect_tcp(int fd, const char *host, u_short port,
+                 struct sockaddr *clocal, int socklen, CNCB *callback,
+                 void *data, int aftype)
 {
-    fd_table[fd].flags.called_connect = 1;
-    fd_table[fd].connect.callback = callback;
-    fd_table[fd].connect.data = data;
+ fd_table[fd].flags.called_connect = 1;
+ assert(callback);
+ fd_table[fd].connect.callback = callback;
+ fd_table[fd].connect.data = data;
 
-    S_FAM(fd_table[fd].connect.hostaddr) = DEF_FAM;
-    S_PORT(fd_table[fd].connect.hostaddr) = htons(port);
-    /*
-     * Note that we're using a passed sockaddr here. This is because
-     * generally you'll be bind()ing to a sockaddr grabbed from
-     * getsockname(), so this makes things easier.
-     * XXX If NULL is passed as local, we should later on bind() to the
-     * virtual host IP, for completeness.
-     *   -- adrian
-     */
-    if ((clocal != NULL) && (bind(fd, clocal, socklen) < 0))
-      { 
-        /* Failure, call the callback with COMM_ERR_BIND */
-        comm_connect_callback(fd, COMM_ERR_BIND);
-        /* ... and quit */
-        return;
-      }
-
-    /*
-     * Next, if we have been given an IP, get the addr and skip the
-     * DNS check (and head direct to comm_connect_tryconnect().
-     */
-    if(inetpton(DEF_FAM, host, S_ADDR(&fd_table[fd].connect.hostaddr)) <=0)
-      {
-        /* Send the DNS request, for the next level */
-        fd_table[fd].dns_query = MyMalloc(sizeof(struct DNSQuery));
-        fd_table[fd].dns_query->ptr = &fd_table[fd];
-        fd_table[fd].dns_query->callback = comm_connect_dns_callback;
-	adns_gethost(host, aftype, fd_table[fd].dns_query);
-      }
-    else
-      {
-        /* We have a valid IP, so we just call tryconnect */
-        /* Make sure we actually set the timeout here .. */
-        comm_settimeout(fd, 30, comm_connect_timeout, NULL);
-        comm_connect_tryconnect(fd, NULL);        
-      }
+ S_FAM(fd_table[fd].connect.hostaddr) = DEF_FAM;
+ S_PORT(fd_table[fd].connect.hostaddr) = htons(port);
+ /* Note that we're using a passed sockaddr here. This is because
+  * generally you'll be bind()ing to a sockaddr grabbed from
+  * getsockname(), so this makes things easier.
+  * XXX If NULL is passed as local, we should later on bind() to the
+  * virtual host IP, for completeness.
+  *   -- adrian
+  */
+ if ((clocal != NULL) && (bind(fd, clocal, socklen) < 0))
+ { 
+  /* Failure, call the callback with COMM_ERR_BIND */
+  comm_connect_callback(fd, COMM_ERR_BIND);
+  /* ... and quit */
+  return;
+ }
+  
+ /* Next, if we have been given an IP, get the addr and skip the
+  * DNS check (and head direct to comm_connect_tryconnect().
+  */
+ if (inetpton(DEF_FAM, host, S_ADDR(&fd_table[fd].connect.hostaddr)) <=0)
+ {
+  /* Send the DNS request, for the next level */
+  fd_table[fd].dns_query = MyMalloc(sizeof(struct DNSQuery));
+  fd_table[fd].dns_query->ptr = &fd_table[fd];
+  fd_table[fd].dns_query->callback = comm_connect_dns_callback;
+  adns_gethost(host, aftype, fd_table[fd].dns_query);
+ } else
+ {
+  /* We have a valid IP, so we just call tryconnect */
+  /* Make sure we actually set the timeout here .. */
+  comm_settimeout(fd, 30, comm_connect_timeout, NULL);
+  comm_connect_tryconnect(fd, NULL);        
+ }
 }
-
 
 /*
  * comm_connect_callback() - call the callback, and continue with life
@@ -638,20 +640,19 @@ comm_connect_tcp(int fd, const char *host, u_short port,
 static void
 comm_connect_callback(int fd, int status)
 {
-    CNCB *hdl;
-
-    /* Clear the connect flag + handler */
-    hdl = fd_table[fd].connect.callback;
-    fd_table[fd].connect.callback = NULL;
-    fd_table[fd].flags.called_connect = 0;
-
-    /* Clear the timeout handler */
-    comm_settimeout(fd, 0, NULL, NULL);
-
-    /* Call the handler */
-    hdl(fd, status, fd_table[fd].connect.data);
-
-    /* Finish! */
+ CNCB *hdl;
+  
+ /* Clear the connect flag + handler */
+ hdl = fd_table[fd].connect.callback;
+ assert(hdl);
+ fd_table[fd].connect.callback = NULL;
+ fd_table[fd].flags.called_connect = 0;
+  
+ /* Clear the timeout handler */
+ comm_settimeout(fd, 0, NULL, NULL);
+  
+ /* Call the handler */
+ hdl(fd, status, fd_table[fd].connect.data);
 }
 
 
@@ -725,44 +726,43 @@ comm_connect_dns_callback(void *vptr, adns_answer *reply)
 }
 
 
-/*
- * comm_connect_tryconnect() - called to attempt a connect()
- *
- * Attempt a connect(). If we get a non-fatal error, retry. If we get a fatal
- * error, callback with error. If we suceed, callback with OK.
+/* static void comm_connect_tryconnect(int fd, void *notused)
+ * Input: The fd, the handler data(unused).
+ * Output: None.
+ * Side-effects: Try and connect with pending connect data for the FD. If
+ *               we succeed or get a fatal error, call the callback.
+ *               Otherwise, it is still blocking or something, so register
+ *               to select for a write event on this FD.
  */
 static void
 comm_connect_tryconnect(int fd, void *notused)
 {
-  int retval;
-
-  /* Try the connect() */
-
-  retval = connect(fd, (struct sockaddr *) &SOCKADDR(fd_table[fd].connect.hostaddr), sizeof(struct irc_sockaddr));
-  /* Error? */
-  if (retval < 0)
-    {
-      /*
-       * If we get EISCONN, then we've already connect()ed the socket,
-       * which is a good thing.
-       *   -- adrian
-       */
-      if (errno == EISCONN)
-	comm_connect_callback(fd, COMM_OK);
-      else if (ignoreErrno(errno))
-	/* Ignore error? Reschedule */
-	comm_setselect(fd, FDLIST_SERVER, COMM_SELECT_WRITE,
-		       comm_connect_tryconnect, NULL, 0);
-      else
-	/* Error? Fail with COMM_ERR_CONNECT */
-	comm_connect_callback(fd, COMM_ERR_CONNECT);
-      return;
-    }
-
-    /* If we get here, we've suceeded, so call with COMM_OK */
-    comm_connect_callback(fd, COMM_OK);
+ int retval;
+  
+ /* Try the connect() */
+ retval = connect(fd, (struct sockaddr *) &SOCKADDR(fd_table[fd].connect.hostaddr), sizeof(struct irc_sockaddr));
+ /* Error? */
+ if (retval < 0)
+ {
+  /*
+   * If we get EISCONN, then we've already connect()ed the socket,
+   * which is a good thing.
+   *   -- adrian
+   */
+  if (errno == EISCONN)
+   comm_connect_callback(fd, COMM_OK);
+  else if (ignoreErrno(errno))
+   /* Ignore error? Reschedule */
+   comm_setselect(fd, FDLIST_SERVER, COMM_SELECT_WRITE,
+                  comm_connect_tryconnect, NULL, 0);
+  else
+   /* Error? Fail with COMM_ERR_CONNECT */
+   comm_connect_callback(fd, COMM_ERR_CONNECT);
+  return;
+ }
+ /* If we get here, we've suceeded, so call with COMM_OK */
+ comm_connect_callback(fd, COMM_OK);
 }
-
 
 /*
  * comm_error_str() - return an error string for the given error condition
