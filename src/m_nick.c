@@ -36,6 +36,7 @@
 #include "send.h"
 #include "list.h"
 #include "channel.h"
+#include "s_log.h"
 
 #include <stdlib.h>
 #include <string.h>

@@ -3563,6 +3563,7 @@ int conf_fbgets(char *buf,int max_size, FBFILE *fb)
   char* buff;
 
   buff = fbgets(buf,max_size,fb);
+
   if(!buff)
     return 0;
   else

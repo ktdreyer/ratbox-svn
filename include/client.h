@@ -270,6 +270,9 @@ struct Client
 #define IsUnknown(x)            ((x)->status == STAT_UNKNOWN)
 #define IsServer(x)             ((x)->status == STAT_SERVER)
 #define IsClient(x)             ((x)->status == STAT_CLIENT)
+#define IsAnyOper(x)		((x)->umodes & (FLAGS_OPER | FLAGS_LOCOP))
+#define IsGlobalOper(x)		((x)->umodes & FLAGS_OPER)
+#define IsLocalOper(x)		((x)->umodes & FLAGS_LOCOP)
 
 #define SetConnecting(x)        ((x)->status = STAT_CONNECTING)
 #define SetHandshake(x)         ((x)->status = STAT_HANDSHAKE)

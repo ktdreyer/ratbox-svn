@@ -72,6 +72,7 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
   char*           s;
   int             i;
   int             paramcount;
+  int             handle_idx = -1;	/* Handler index */
   char*           numeric = 0;
   struct Message* mptr;
   MessageHandler  handler = 0;
@@ -294,9 +295,10 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
 
   /* patch to avoid server flooding from unregistered connects */
   /* check allow_unregistered_use flag I've set up instead of function
-     comparing *yech* - Dianora */
+     comparing *yech* - Dianora
+     PART OF THIS PATCH IS NOW OBSCELETE BY HANDLER CODE BELOW - Pie-Man 07/24/2000  */
 
-  if (!IsRegistered(cptr)) /*  && !mptr->allow_unregistered_use ) */
+  if (!IsRegistered(cptr))
     {
       /* if its from a possible server connection
        * ignore it.. more than likely its a header thats sneaked through
@@ -304,13 +306,14 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
 
       if(IsHandshake(cptr) || IsConnecting(cptr) || IsServer(cptr))
         return -1;
-
+/*
       sendto_one(from,
                  ":%s %d %s %s :Register first.",
                  me.name, ERR_NOTREGISTERED,
                  from->name, ch);
-      return -1;
+      return -1;  */
     }
+
 
   /* Again, instead of function address comparing, see if
    * this function resets idle time as given from mptr
@@ -337,8 +340,29 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
       return -1;
 #endif
 
-  /* HACK */
-  handler = mptr->handlers[CLIENT_HANDLER];
+  /* Determine the class of this connection and assign it one of four handler types to
+      fit in with the handler table - Pie-Man 07/24/2000 */
+  switch (cptr->status)
+  { 
+     case STAT_CONNECTING:
+     case STAT_HANDSHAKE:
+     case STAT_ME:
+     case STAT_UNKNOWN:
+       handle_idx = UNREGISTERED_HANDLER;
+       break;
+     case STAT_SERVER:
+       handle_idx = SERVER_HANDLER;
+       break;
+     case STAT_CLIENT:
+       handle_idx = IsAnyOper(cptr) ? OPER_HANDLER : CLIENT_HANDLER;
+       break;
+     default:
+  /* Todo: An error should be logged here, unable to determine the class of connection.
+     Should never happen and something we need to fix if it does - Pie-Man */
+       return -1;
+  }
+
+  handler = mptr->handlers[handle_idx];
   return (*handler)(cptr, from, i, para);
 }
 
@@ -469,15 +493,15 @@ struct Message msgtab[] = {
     /* UNREG, CLIENT, SERVER, OPER */
     { m_unregistered, m_notice, ms_notice, mo_notice }
   },
-  {
+/*  {
     MSG_JOIN,
     0,
     MAXPARA,
     MFLG_SLOW | MFLG_UNREG,
-    0L,
+    0L, */
     /* UNREG, CLIENT, SERVER, OPER */
-    { m_unregistered, m_join, ms_join, m_join }
-  },
+/*    { m_unregistered, m_join, ms_join, m_join }
+  }, */
   {
     MSG_CBURST,
     0,
@@ -630,6 +654,14 @@ struct Message msgtab[] = {
     0,
     /* UNREG, CLIENT, SERVER, OPER */
     { m_user, m_registered, m_ignore, m_registered }
+  },
+  {
+    MSG_NICK,
+    0,
+    MAXPARA,
+    MFLG_SLOW,
+    0,
+    { m_nick, m_nick, m_nick, m_nick }
   },
   {
     MSG_AWAY,
