@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+#include <errno.h>
 #include "tools.h"
 #include "s_bsd.h"
 #include "s_conf.h"
@@ -182,14 +183,14 @@ read_packet(int fd, void *data)
    * dead_link() in send.c  
    * -Dianora
    */
-
+ 
   if(IsDead(client_p))return;
 
   if (length <= 0) {
-    /*
-     * We only get called when data is waiting,
-     * so EOF/any error is fatal.
-     */
+    if(errno == EAGAIN)
+      comm_setselect(client_p->fd, FDLIST_IDLECLIENT, COMM_SELECT_READ,
+      		read_packet, client_p, 0);
+      	
     error_exit_client(client_p, length);
     return;
   }
