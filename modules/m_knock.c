@@ -66,7 +66,7 @@ _moddeinit(void)
   mod_del_cmd(&knock_msgtab);
 }
 
-char *_version = "20001122";
+char *_version = "20010105";
 
 /* m_knock
 **    parv[0] = sender prefix
@@ -113,7 +113,7 @@ static int m_knock(struct Client *cptr,
     {
       sendto_one(sptr, ":%s NOTICE %s :*** Notice -- Wait %d seconds before another knock to %s",
                  me.name, sptr->name,
-                 (int)(ConfigFileEntry.knock_delay - CurrentTime - chptr->last_knock),
+                 (int)(ConfigFileEntry.knock_delay - (CurrentTime - chptr->last_knock)),
                  parv[1]);
       return 0;
     }

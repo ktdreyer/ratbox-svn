@@ -1421,7 +1421,10 @@ static void read_conf(FBFILE* file)
     ConfigFileEntry.maximum_links = MAXIMUM_LINKS_DEFAULT;
 
   if (!ConfigFileEntry.max_targets)
-	  ConfigFileEntry.max_targets = MAX_TARGETS_DEFAULT;
+    ConfigFileEntry.max_targets = MAX_TARGETS_DEFAULT;
+
+  if (!ConfigFileEntry.knock_delay)
+    ConfigFileEntry.knock_delay = 300;
   
   GlobalSetOptions.idletime = (ConfigFileEntry.idletime * 60);
   if (!ConfigFileEntry.links_delay)
