@@ -1,3 +1,27 @@
+leeh        2004/05/25 13:19:57 EDT	(20040525_5)
+
+  Modified files:
+    doc                  index.txt 
+  Removed files:
+    doc                  guidelines.txt kline.txt resv.txt 
+    doc/technical        cryptlink.txt whats-new-code.txt 
+  Log:
+  - remove some now useless documentation..
+    - resv/kline is better documented in /quote help
+    - we dont need documentation guidelines, as we never write any :P
+    - cryptlinks are gone
+    - whats-new-code is no longer relevant
+  
+  Revision  Changes    Path
+  1.2       +0 -36     ircd-ratbox/doc/guidelines.txt (dead)
+  1.20      +2 -8      ircd-ratbox/doc/index.txt
+  1.6       +0 -108    ircd-ratbox/doc/kline.txt (dead)
+  7.3       +0 -124    ircd-ratbox/doc/resv.txt (dead)
+  7.8       +0 -339    ircd-ratbox/doc/technical/cryptlink.txt (dead)
+  1.4       +0 -42     ircd-ratbox/doc/technical/whats-new-code.txt (dead)
+
+
+
 leeh        2004/05/25 13:06:08 EDT	(20040525_4)
 
   Added files:
