@@ -1,3 +1,7 @@
+*** 20010507_3 by androsyn
+Fixed various minor issues with autoconf...
+
+
 *** 20010507_2 by fl_
 - #if IPV6 -> #ifdef IPV6
 
