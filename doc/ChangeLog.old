@@ -1,3 +1,8 @@
+*** 20010103_4 by davidt
+- Oops, fixed my last commit message in ChangeLog.
+- Fixed m_join.c so it doesn't reveal who set the topic on +a channels.
+
+
 *** 20010103_3 by davidt
 - Fixed slight bug in lazylinks handling in m_topic.c
 - Now tell nonops the topic was set by me.name on +a channels.
