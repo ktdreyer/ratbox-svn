@@ -50,13 +50,13 @@
  * Contributed by James L. Davis
  */
 
-static dlink_list clientTable[U_MAX];
-static dlink_list channelTable[CH_MAX];
-static dlink_list idTable[U_MAX];
-static dlink_list resvTable[R_MAX];
-static dlink_list hostTable[HOST_MAX];
-static dlink_list xlineTable[R_MAX];
-static dlink_list helpTable[HELP_MAX];
+static dlink_list *clientTable;
+static dlink_list *channelTable;
+static dlink_list *idTable;
+static dlink_list *resvTable;
+static dlink_list *hostTable;
+static dlink_list *xlineTable;
+static dlink_list *helpTable;
 
 /* XXX move channel hash into channel.c or hash channel stuff in channel.c
  * into here eventually -db
@@ -118,13 +118,13 @@ hash_get_resv_table_size(void)
 void
 init_hash(void)
 {
-	memset(clientTable, 0, sizeof(dlink_list) * U_MAX);
-	memset(idTable, 0, sizeof(dlink_list) * U_MAX);
-	memset(channelTable, 0, sizeof(dlink_list) * CH_MAX);
-	memset(hostTable, 0, sizeof(dlink_list) * HOST_MAX);
-	memset(resvTable, 0, sizeof(dlink_list) * R_MAX);
-	memset(xlineTable, 0, sizeof(dlink_list) * R_MAX);
-	memset(helpTable, 0, sizeof(dlink_list) * HELP_MAX);
+	clientTable = MyMalloc(sizeof(dlink_list) * U_MAX);
+	idTable = MyMalloc(sizeof(dlink_list) * U_MAX);
+	channelTable = MyMalloc(sizeof(dlink_list) * CH_MAX);
+	hostTable = MyMalloc(sizeof(dlink_list) * HOST_MAX);
+	resvTable = MyMalloc(sizeof(dlink_list) * R_MAX);
+	xlineTable = MyMalloc(sizeof(dlink_list) * R_MAX);
+	helpTable = MyMalloc(sizeof(dlink_list) * HELP_MAX);
 }
 
 /* hash_nick()
