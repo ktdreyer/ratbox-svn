@@ -40,9 +40,9 @@
 #include "s_conf.h"
 
 
-static void mr_motd(struct Client *, struct Client *, int, const char **);
-static void m_motd(struct Client *, struct Client *, int, const char **);
-static void mo_motd(struct Client *, struct Client *, int, const char **);
+static int mr_motd(struct Client *, struct Client *, int, const char **);
+static int m_motd(struct Client *, struct Client *, int, const char **);
+static int mo_motd(struct Client *, struct Client *, int, const char **);
 
 static void motd_spy(struct Client *);
 
@@ -65,12 +65,14 @@ DECLARE_MODULE_AV1(NULL, NULL, motd_clist, NULL, NULL, "$Revision$");
  *
  * parv[0] = sender prefix
  */
-static void
+static int
 mr_motd(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	/* allow unregistered clients to see the motd, but exit them */
 	SendMessageFile(source_p, &ConfigFileEntry.motd);
 	exit_client(client_p, source_p, source_p, "Client Exit after MOTD");
+
+	return 0;
 }
 
 /*
@@ -78,7 +80,7 @@ mr_motd(struct Client *client_p, struct Client *source_p, int parc, const char *
 **      parv[0] = sender prefix
 **      parv[1] = servername
 */
-static void
+static int
 m_motd(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	static time_t last_used = 0;
@@ -87,7 +89,7 @@ m_motd(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	{
 		/* safe enough to give this on a local connect only */
 		sendto_one(source_p, form_str(RPL_LOAD2HI), me.name, source_p->name);
-		return;
+		return 0;
 	}
 	else
 		last_used = CurrentTime;
@@ -96,12 +98,14 @@ m_motd(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	if(!ConfigServerHide.disable_remote && !ConfigServerHide.hide_servers)
 	{
 		if(hunt_server(client_p, source_p, ":%s MOTD :%s", 1, parc, parv) != HUNTED_ISME)
-			return;
+			return 0;
 	}
 
 	motd_spy(source_p);
 
 	SendMessageFile(source_p, &ConfigFileEntry.motd);
+
+	return 0;
 }
 
 /*
@@ -109,18 +113,20 @@ m_motd(struct Client *client_p, struct Client *source_p, int parc, const char *p
 **      parv[0] = sender prefix
 **      parv[1] = servername
 */
-static void
+static int
 mo_motd(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	if(!IsClient(source_p))
-		return;
+		return 0;
 
 	if(hunt_server(client_p, source_p, ":%s MOTD :%s", 1, parc, parv) != HUNTED_ISME)
-		return;
+		return 0;
 
 	motd_spy(source_p);
 
 	SendMessageFile(source_p, &ConfigFileEntry.motd);
+
+	return 0;
 }
 
 /* motd_spy()

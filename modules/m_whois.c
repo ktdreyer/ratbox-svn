@@ -51,9 +51,9 @@ static int single_whois(struct Client *source_p, struct Client *target_p, int wi
 static void whois_person(struct Client *source_p, struct Client *target_p, int glob);
 static int global_whois(struct Client *source_p, char *nick, int wilds, int glob);
 
-static void m_whois(struct Client *, struct Client *, int, const char **);
-static void ms_whois(struct Client *, struct Client *, int, const char **);
-static void mo_whois(struct Client *, struct Client *, int, const char **);
+static int m_whois(struct Client *, struct Client *, int, const char **);
+static int ms_whois(struct Client *, struct Client *, int, const char **);
+static int mo_whois(struct Client *, struct Client *, int, const char **);
 
 struct Message whois_msgtab = {
 	"WHOIS", 0, 0, 0, 0, MFLG_SLOW, 0L,
@@ -77,7 +77,7 @@ DECLARE_MODULE_AV1(NULL, NULL, whois_clist, whois_hlist, NULL, "$Revision$");
 **      parv[0] = sender prefix
 **      parv[1] = nickname masklist
 */
-static void
+static int
 m_whois(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	static time_t last_used = 0;
@@ -85,7 +85,7 @@ m_whois(struct Client *client_p, struct Client *source_p, int parc, const char *
 	if(parc < 2 || EmptyString(parv[1]))
 	{
 		sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN), me.name, parv[0]);
-		return;
+		return 0;
 	}
 
 	if(parc > 2)
@@ -96,7 +96,7 @@ m_whois(struct Client *client_p, struct Client *source_p, int parc, const char *
 			if(MyClient(source_p))
 				sendto_one(source_p, form_str(RPL_LOAD2HI), me.name,
 					   source_p->name);
-			return;
+			return 0;
 		}
 		else
 			last_used = CurrentTime;
@@ -111,12 +111,14 @@ m_whois(struct Client *client_p, struct Client *source_p, int parc, const char *
 		if(hunt_server(client_p, source_p, ":%s WHOIS %s :%s", 1, parc, parv) !=
 		   HUNTED_ISME)
 		{
-			return;
+			return 0;
 		}
 		parv[1] = parv[2];
 
 	}
 	do_whois(client_p, source_p, parc, parv);
+
+	return 0;
 }
 
 /*
@@ -124,13 +126,13 @@ m_whois(struct Client *client_p, struct Client *source_p, int parc, const char *
 **      parv[0] = sender prefix
 **      parv[1] = nickname masklist
 */
-static void
+static int
 mo_whois(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	if(parc < 2 || EmptyString(parv[1]))
 	{
 		sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN), me.name, parv[0]);
-		return;
+		return 0;
 	}
 
 	if(parc > 2)
@@ -138,12 +140,14 @@ mo_whois(struct Client *client_p, struct Client *source_p, int parc, const char 
 		if(hunt_server(client_p, source_p, ":%s WHOIS %s :%s", 1, parc, parv) !=
 		   HUNTED_ISME)
 		{
-			return;
+			return 0;
 		}
 		parv[1] = parv[2];
 	}
 
 	do_whois(client_p, source_p, parc, parv);
+
+	return 0;
 }
 
 
@@ -446,22 +450,18 @@ whois_person(struct Client *source_p, struct Client *target_p, int glob)
 **      parv[0] = sender prefix
 **      parv[1] = nickname masklist
 */
-/* Be warned, this is heavily commented, as theres loads of possibilities
- * that can happen, and as people might not understand the code, I
- * stuck heavy comments in it.. it looks ugly.. but at least you
- * know what it does.. --fl_ */
-static void
+static int
 ms_whois(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	/* its a misconfigured server */
 	if(parc < 2 || EmptyString(parv[1]))
 	{
 		sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN), me.name, parv[0]);
-		return;
+		return 0;
 	}
 
 	if(!IsClient(source_p))
-		return;
+		return 0;
 
 	/* its a client doing a remote whois:
 	 * :parv[0] WHOIS parv[1] :parv[2]
@@ -478,7 +478,7 @@ ms_whois(struct Client *client_p, struct Client *source_p, int parc, const char 
 		if((target_p = find_client(parv[1])) == NULL)
 		{
 			sendto_one(source_p, form_str(ERR_NOSUCHSERVER), me.name, parv[0], parv[1]);
-			return;
+			return 0;
 		}
 
 		/* if parv[1] isnt my client, or me, someone else is supposed
@@ -487,7 +487,7 @@ ms_whois(struct Client *client_p, struct Client *source_p, int parc, const char 
 		if(!MyClient(target_p) && !IsMe(target_p))
 		{
 			sendto_one(target_p->from, ":%s WHOIS %s :%s", parv[0], parv[1], parv[2]);
-			return;
+			return 0;
 		}
 
 		/* ok, the target is either us, or a client on our server, so perform the whois
@@ -496,9 +496,9 @@ ms_whois(struct Client *client_p, struct Client *source_p, int parc, const char 
 		 */
 		parv[1] = parv[2];
 		do_whois(client_p, source_p, parc, parv);
-		return;
+		return 0;
 	}
 
 	/* shouldnt happen */
-	return;
+	return 0;
 }

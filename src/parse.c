@@ -858,13 +858,14 @@ do_numeric(char numeric[], struct Client *client_p, struct Client *source_p, int
  * output	-
  * side effects	- just returns a nastyogram to given user
  */
-void
+int
 m_not_oper(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	sendto_one(source_p, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
+	return 0;
 }
 
-void
+int
 m_unregistered(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	/* bit of a hack.
@@ -879,16 +880,19 @@ m_unregistered(struct Client *client_p, struct Client *source_p, int parc, const
 			   me.name, ERR_NOTREGISTERED, parv[0]);
 		client_p->localClient->number_of_nick_changes++;
 	}
+
+	return 0;
 }
 
-void
+int
 m_registered(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	sendto_one(client_p, form_str(ERR_ALREADYREGISTRED), me.name, parv[0]);
+	return 0;
 }
 
-void
+int
 m_ignore(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	return;
+	return 0;
 }

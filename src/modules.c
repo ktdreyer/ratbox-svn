@@ -77,11 +77,11 @@ int max_mods = MODS_INCREMENT;
 
 static dlink_list mod_paths;
 
-static void mo_modload(struct Client *, struct Client *, int, const char **);
-static void mo_modlist(struct Client *, struct Client *, int, const char **);
-static void mo_modreload(struct Client *, struct Client *, int, const char **);
-static void mo_modunload(struct Client *, struct Client *, int, const char **);
-static void mo_modrestart(struct Client *, struct Client *, int, const char **);
+static int mo_modload(struct Client *, struct Client *, int, const char **);
+static int mo_modlist(struct Client *, struct Client *, int, const char **);
+static int mo_modreload(struct Client *, struct Client *, int, const char **);
+static int mo_modunload(struct Client *, struct Client *, int, const char **);
+static int mo_modrestart(struct Client *, struct Client *, int, const char **);
 
 struct Message modload_msgtab = {
 	"MODLOAD", 0, 0, 2, 0, MFLG_SLOW, 0,
@@ -354,7 +354,7 @@ load_one_module(const char *path, int coremodule)
 
 
 /* load a module .. */
-static void
+static int
 mo_modload(struct Client *client_p, struct Client *source_p, int parc, const char **parv)
 {
 	char *m_bn;
@@ -362,7 +362,7 @@ mo_modload(struct Client *client_p, struct Client *source_p, int parc, const cha
 	if(!IsOperAdmin(source_p))
 	{
 		sendto_one(source_p, ":%s NOTICE %s :You have no A flag", me.name, parv[0]);
-		return;
+		return 0;
 	}
 
 	m_bn = irc_basename(parv[1]);
@@ -373,17 +373,19 @@ mo_modload(struct Client *client_p, struct Client *source_p, int parc, const cha
 			   ":%s NOTICE %s :Module %s is already loaded",
 			   me.name, source_p->name, m_bn);
 		MyFree(m_bn);
-		return;
+		return 0;
 	}
 
 	load_one_module(parv[1], 0);
 
 	MyFree(m_bn);
+
+	return 0;
 }
 
 
 /* unload a module .. */
-static void
+static int
 mo_modunload(struct Client *client_p, struct Client *source_p, int parc, const char **parv)
 {
 	char *m_bn;
@@ -392,7 +394,7 @@ mo_modunload(struct Client *client_p, struct Client *source_p, int parc, const c
 	if(!IsOperAdmin(source_p))
 	{
 		sendto_one(source_p, ":%s NOTICE %s :You have no A flag", me.name, parv[0]);
-		return;
+		return 0;
 	}
 
 	m_bn = irc_basename(parv[1]);
@@ -402,7 +404,7 @@ mo_modunload(struct Client *client_p, struct Client *source_p, int parc, const c
 		sendto_one(source_p,
 			   ":%s NOTICE %s :Module %s is not loaded", me.name, source_p->name, m_bn);
 		MyFree(m_bn);
-		return;
+		return 0;
 	}
 
 	if(modlist[modindex]->core == 1)
@@ -411,7 +413,7 @@ mo_modunload(struct Client *client_p, struct Client *source_p, int parc, const c
 			   ":%s NOTICE %s :Module %s is a core module and may not be unloaded",
 			   me.name, source_p->name, m_bn);
 		MyFree(m_bn);
-		return;
+		return 0;
 	}
 
 	if(unload_one_module(m_bn, 1) == -1)
@@ -420,10 +422,11 @@ mo_modunload(struct Client *client_p, struct Client *source_p, int parc, const c
 			   ":%s NOTICE %s :Module %s is not loaded", me.name, source_p->name, m_bn);
 	}
 	MyFree(m_bn);
+	return 0;
 }
 
 /* unload and load in one! */
-static void
+static int
 mo_modreload(struct Client *client_p, struct Client *source_p, int parc, const char **parv)
 {
 	char *m_bn;
@@ -433,7 +436,7 @@ mo_modreload(struct Client *client_p, struct Client *source_p, int parc, const c
 	if(!IsOperAdmin(source_p))
 	{
 		sendto_one(source_p, ":%s NOTICE %s :You have no A flag", me.name, parv[0]);
-		return;
+		return 0;
 	}
 
 	m_bn = irc_basename(parv[1]);
@@ -443,7 +446,7 @@ mo_modreload(struct Client *client_p, struct Client *source_p, int parc, const c
 		sendto_one(source_p,
 			   ":%s NOTICE %s :Module %s is not loaded", me.name, source_p->name, m_bn);
 		MyFree(m_bn);
-		return;
+		return 0;
 	}
 
 	check_core = modlist[modindex]->core;
@@ -453,7 +456,7 @@ mo_modreload(struct Client *client_p, struct Client *source_p, int parc, const c
 		sendto_one(source_p,
 			   ":%s NOTICE %s :Module %s is not loaded", me.name, source_p->name, m_bn);
 		MyFree(m_bn);
-		return;
+		return 0;
 	}
 
 	if((load_one_module(parv[1], check_core) == -1) && check_core)
@@ -465,10 +468,11 @@ mo_modreload(struct Client *client_p, struct Client *source_p, int parc, const c
 	}
 
 	MyFree(m_bn);
+	return 0;
 }
 
 /* list modules .. */
-static void
+static int
 mo_modlist(struct Client *client_p, struct Client *source_p, int parc, const char **parv)
 {
 	int i;
@@ -476,7 +480,7 @@ mo_modlist(struct Client *client_p, struct Client *source_p, int parc, const cha
 	if(!IsOperAdmin(source_p))
 	{
 		sendto_one(source_p, ":%s NOTICE %s :You have no A flag", me.name, parv[0]);
-		return;
+		return 0;
 	}
 
 	for (i = 0; i < num_mods; i++)
@@ -502,10 +506,11 @@ mo_modlist(struct Client *client_p, struct Client *source_p, int parc, const cha
 	}
 
 	sendto_one(source_p, form_str(RPL_ENDOFMODLIST), me.name, parv[0]);
+	return 0;
 }
 
 /* unload and reload all modules */
-static void
+static int
 mo_modrestart(struct Client *client_p, struct Client *source_p, int parc, const char **parv)
 {
 	int modnum;
@@ -513,7 +518,7 @@ mo_modrestart(struct Client *client_p, struct Client *source_p, int parc, const 
 	if(!IsOperAdmin(source_p))
 	{
 		sendto_one(source_p, ":%s NOTICE %s :You have no A flag", me.name, parv[0]);
-		return;
+		return 0;
 	}
 
 	sendto_one(source_p, ":%s NOTICE %s :Reloading all modules", me.name, parv[0]);
@@ -530,6 +535,7 @@ mo_modrestart(struct Client *client_p, struct Client *source_p, int parc, const 
 			     "Module Restart: %d modules unloaded, %d modules loaded",
 			     modnum, num_mods);
 	ilog(L_WARN, "Module Restart: %d modules unloaded, %d modules loaded", modnum, num_mods);
+	return 0;
 }
 
 #else /* STATIC_MODULES */

@@ -39,9 +39,9 @@
 
 static char *confopts(struct Client *source_p);
 
-static void m_version(struct Client *, struct Client *, int, const char **);
-static void ms_version(struct Client *, struct Client *, int, const char **);
-static void mo_version(struct Client *, struct Client *, int, const char **);
+static int m_version(struct Client *, struct Client *, int, const char **);
+static int ms_version(struct Client *, struct Client *, int, const char **);
+static int mo_version(struct Client *, struct Client *, int, const char **);
 
 struct Message version_msgtab = {
 	"VERSION", 0, 0, 0, 0, MFLG_SLOW, 0,
@@ -56,7 +56,7 @@ DECLARE_MODULE_AV1(NULL, NULL, version_clist, NULL, NULL, "$Revision$");
  *      parv[0] = sender prefix
  *      parv[1] = remote server
  */
-static void
+static int
 m_version(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	static time_t last_used = 0L;
@@ -67,7 +67,7 @@ m_version(struct Client *client_p, struct Client *source_p, int parc, const char
 		{
 			/* safe enough to give this on a local connect only */
 			sendto_one(source_p, form_str(RPL_LOAD2HI), me.name, parv[0]);
-			return;
+			return 0;
 		}
 		else
 		{
@@ -75,7 +75,7 @@ m_version(struct Client *client_p, struct Client *source_p, int parc, const char
 		}
 
 		if(hunt_server(client_p, source_p, ":%s VERSION :%s", 1, parc, parv) != HUNTED_ISME)
-			return;
+			return 0;
 	}
 
 	sendto_one(source_p, form_str(RPL_VERSION), me.name,
@@ -83,6 +83,8 @@ m_version(struct Client *client_p, struct Client *source_p, int parc, const char
 		   me.name, confopts(source_p), serveropts);
 
 	show_isupport(source_p);
+
+	return 0;
 }
 
 /*
@@ -90,19 +92,18 @@ m_version(struct Client *client_p, struct Client *source_p, int parc, const char
  *      parv[0] = sender prefix
  *      parv[1] = remote server
  */
-static void
+static int
 mo_version(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-
 	if(hunt_server(client_p, source_p, ":%s VERSION :%s", 1, parc, parv) != HUNTED_ISME)
-		return;
+		return 0;
 
 	sendto_one(source_p, form_str(RPL_VERSION), me.name, parv[0], ircd_version,
 		   serno, debugmode, me.name, confopts(source_p), serveropts);
 
 	show_isupport(source_p);
 
-	return;
+	return 0;
 }
 
 /*
@@ -110,7 +111,7 @@ mo_version(struct Client *client_p, struct Client *source_p, int parc, const cha
  *      parv[0] = sender prefix
  *      parv[1] = remote server
  */
-static void
+static int
 ms_version(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	if(hunt_server(client_p, source_p, ":%s VERSION :%s", 1, parc, parv) == HUNTED_ISME)
@@ -121,7 +122,7 @@ ms_version(struct Client *client_p, struct Client *source_p, int parc, const cha
 		show_isupport(source_p);
 	}
 
-	return;
+	return 0;
 }
 
 /* confopts()

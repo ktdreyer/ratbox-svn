@@ -40,7 +40,7 @@
 #include "parse.h"
 #include "modules.h"
 
-static void mo_die(struct Client *, struct Client *, int, const char **);
+static int mo_die(struct Client *, struct Client *, int, const char **);
 
 static struct Message die_msgtab = {
 	"DIE", 0, 0, 1, 0, MFLG_SLOW, 0,
@@ -53,7 +53,7 @@ DECLARE_MODULE_AV1(NULL, NULL, die_clist, NULL, NULL, "$Revision$");
 /*
  * mo_die - DIE command handler
  */
-static void
+static int
 mo_die(struct Client *client_p __unused, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Client *target_p;
@@ -62,14 +62,14 @@ mo_die(struct Client *client_p __unused, struct Client *source_p, int parc, cons
 	if(!IsOperDie(source_p))
 	{
 		sendto_one(source_p, ":%s NOTICE %s :You need die = yes;", me.name, parv[0]);
-		return;
+		return 0;
 	}
 
 	if(parc < 2 || EmptyString(parv[1]))
 	{
 		sendto_one(source_p, ":%s NOTICE %s :Need server name /die %s",
 			   me.name, source_p->name, me.name);
-		return;
+		return 0;
 	}
 	else
 	{
@@ -77,7 +77,7 @@ mo_die(struct Client *client_p __unused, struct Client *source_p, int parc, cons
 		{
 			sendto_one(source_p, ":%s NOTICE %s :Mismatch on /die %s",
 				   me.name, source_p->name, me.name);
-			return;
+			return 0;
 		}
 	}
 
@@ -110,4 +110,6 @@ mo_die(struct Client *client_p __unused, struct Client *source_p, int parc, cons
 	unlink(pidFileName);
 	exit(0);
 	/* NOT REACHED */
+
+	return 0;
 }

@@ -42,10 +42,10 @@
 #include "sprintf_irc.h"
 #include "cluster.h"
 
-static void mo_resv(struct Client *, struct Client *, int, const char **);
-static void ms_resv(struct Client *, struct Client *, int, const char **);
-static void mo_unresv(struct Client *, struct Client *, int, const char **);
-static void ms_unresv(struct Client *, struct Client *, int, const char **);
+static int mo_resv(struct Client *, struct Client *, int, const char **);
+static int ms_resv(struct Client *, struct Client *, int, const char **);
+static int mo_unresv(struct Client *, struct Client *, int, const char **);
+static int ms_unresv(struct Client *, struct Client *, int, const char **);
 
 static void parse_resv(struct Client *source_p, const char *name,
 			const char *reason, int cluster);
@@ -73,7 +73,7 @@ DECLARE_MODULE_AV1(NULL, NULL, resv_clist, NULL, NULL, "$Revision$");
  *      parv[1] = channel/nick to forbid
  *      parv[2] = reason
  */
-static void
+static int
 mo_resv(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	const char *reason;
@@ -87,7 +87,7 @@ mo_resv(struct Client *client_p, struct Client *source_p, int parc, const char *
 	{
 		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
 			   me.name, source_p->name, "RESV");
-		return;
+		return 0;
 	}
 
 	/* remote resv.. */
@@ -98,7 +98,7 @@ mo_resv(struct Client *client_p, struct Client *source_p, int parc, const char *
 				   parv[3], parv[1], reason);
 
 		if(match(parv[3], me.name) == 0)
-			return;
+			return 0;
 	}
 
 	else if(dlink_list_length(&cluster_list) > 0)
@@ -107,6 +107,8 @@ mo_resv(struct Client *client_p, struct Client *source_p, int parc, const char *
 	}
 
 	parse_resv(source_p, parv[1], reason, 0);
+
+	return 0;
 }
 
 /* ms_resv()
@@ -115,12 +117,12 @@ mo_resv(struct Client *client_p, struct Client *source_p, int parc, const char *
  *     parv[2] = channel/nick to forbid
  *     parv[3] = reason
  */
-static void
+static int
 ms_resv(struct Client *client_p, struct Client *source_p,
 	int parc, const char *parv[])
 {
 	if((parc != 4) || EmptyString(parv[3]))
-		return;
+		return 0;
 
 	/* parv[0]  parv[1]        parv[2]  parv[3]
 	 * oper     target server  resv     reason
@@ -130,10 +132,10 @@ ms_resv(struct Client *client_p, struct Client *source_p,
 			   parv[1], parv[2], parv[3]);
 
 	if(!match(parv[1], me.name))
-		return;
+		return 0;
 
 	if(!IsPerson(source_p))
-		return;
+		return 0;
 
 	if(find_cluster(source_p->user->server, CLUSTER_RESV))
 	{
@@ -144,6 +146,8 @@ ms_resv(struct Client *client_p, struct Client *source_p,
 	{
 		parse_resv(source_p, parv[2], parv[3], 0);
 	}
+
+	return 0;
 }
 
 /* parse_resv()
@@ -216,14 +220,14 @@ parse_resv(struct Client *source_p, const char *name,
  *     parv[0] = sender prefix
  *     parv[1] = channel/nick to unforbid
  */
-static void
+static int
 mo_unresv(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	if(EmptyString(parv[1]))
 	{
 		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
 			   me.name, source_p->name, "RESV");
-		return;
+		return 0;
 	}
 
 	if((parc == 4) && (irccmp(parv[2], "ON") == 0))
@@ -233,7 +237,7 @@ mo_unresv(struct Client *client_p, struct Client *source_p, int parc, const char
 				   parv[3], parv[1]);
 
 		if(match(parv[3], me.name) == 0)
-			return;
+			return 0;
 	}
 	else if(dlink_list_length(&cluster_list) > 0)
 	{
@@ -241,6 +245,7 @@ mo_unresv(struct Client *client_p, struct Client *source_p, int parc, const char
 	}
 
 	remove_resv(source_p, parv[1], 0);
+	return 0;
 }
 
 /* ms_unresv()
@@ -248,11 +253,11 @@ mo_unresv(struct Client *client_p, struct Client *source_p, int parc, const char
  *     parv[1] = target server
  *     parv[2] = resv to remove
  */
-static void
+static int
 ms_unresv(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	if((parc != 3) || EmptyString(parv[2]))
-		return;
+		return 0;
 
 	/* parv[0]  parv[1]        parv[2]
 	 * oper     target server  resv to remove
@@ -262,10 +267,10 @@ ms_unresv(struct Client *client_p, struct Client *source_p, int parc, const char
 			   parv[1], parv[2]);
 
 	if(!match(me.name, parv[1]))
-		return;
+		return 0;
 
 	if(!IsPerson(source_p))
-		return;
+		return 0;
 
 	if(find_cluster(source_p->user->server, CLUSTER_UNRESV))
 	{
@@ -276,6 +281,8 @@ ms_unresv(struct Client *client_p, struct Client *source_p, int parc, const char
 	{
 		remove_resv(source_p, parv[2], 0);
 	}
+
+	return 0;
 }
 
 /* remove_resv()

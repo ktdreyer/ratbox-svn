@@ -50,7 +50,7 @@ struct Message error_msgtab = {
  *      parv[0] = sender prefix
  *      parv[*] = parameters
  */
-void
+int
 m_error(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	const char *para;
@@ -80,9 +80,11 @@ m_error(struct Client *client_p, struct Client *source_p, int parc, const char *
 
 	if(MyClient(source_p))
 		exit_client(client_p, source_p, source_p, "ERROR");
+
+	return 0;
 }
 
-void
+int
 ms_error(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	const char *para;
@@ -99,4 +101,6 @@ ms_error(struct Client *client_p, struct Client *source_p, int parc, const char 
 		sendto_realops_flags(UMODE_ALL, L_ALL,
 				     "ERROR :from %s via %s -- %s",
 				     source_p->name, get_client_name(client_p, MASK_IP), para);
+
+	return 0;
 }

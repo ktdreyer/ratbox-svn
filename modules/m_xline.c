@@ -56,10 +56,10 @@
 #include "resv.h"
 #include "cluster.h"
 
-static void mo_xline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
-static void ms_xline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
-static void mo_unxline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
-static void ms_unxline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
+static int mo_xline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
+static int ms_xline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
+static int mo_unxline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
+static int ms_unxline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
 
 static int valid_xline(struct Client *, const char *, const char *, int warn);
 static void write_xline(struct Client *source_p, const char *gecos, 
@@ -87,7 +87,7 @@ DECLARE_MODULE_AV1(NULL, NULL, xline_clist, NULL, NULL, "$Revision$");
  * parv[2] - optional type/reason
  * parv[3] - reason
  */
-static void
+static int
 mo_xline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct xline *xconf;
@@ -99,7 +99,7 @@ mo_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	{
 		sendto_one(source_p, ":%s NOTICE %s :You need xline = yes;",
 			   me.name, source_p->name);
-		return;
+		return 0;
 	}
 
 	xconf = find_xline(parv[1]);
@@ -107,7 +107,7 @@ mo_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	{
 		sendto_one(source_p, ":%s NOTICE %s :[%s] already X-Lined by [%s] - %s",
 			   me.name, source_p->name, parv[1], xconf->gecos, xconf->reason);
-		return;
+		return 0;
 	}
 
 	/* XLINE <gecos> <type> ON <server> :<reason> */
@@ -124,7 +124,7 @@ mo_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 			/* as good a numeric as any other I suppose --fl */
 			sendto_one(source_p, form_str(ERR_NORECIPIENT),
 				   me.name, source_p->name, "XLINE");
-			return;
+			return 0;
 		}
 	}
 	
@@ -146,11 +146,11 @@ mo_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	{
 		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
 			   me.name, source_p->name, "XLINE");
-		return;
+		return 0;
 	}
 
 	if(!valid_xline(source_p, parv[1], reason, 1))
-		return;
+		return 0;
 	
 	if(target_server != NULL)
 	{
@@ -159,28 +159,30 @@ mo_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 				   target_server, parv[1], xtype, reason);
 
 		if(!match(target_server, me.name))
-			return;
+			return 0;
 	}
 	else if(dlink_list_length(&cluster_list) > 0)
 		cluster_xline(source_p, parv[1], xtype, reason);
 
 	write_xline(source_p, parv[1], reason, xtype);
+
+	return 0;
 }
 
 /* ms_xline()
  *
  * handles a remote xline
  */
-static void
+static int
 ms_xline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct xline *xconf;
 
 	if(parc != 5 || EmptyString(parv[4]))
-		return;
+		return 0;
 
 	if(!IsPerson(source_p))
-		return;
+		return 0;
 
 	/* parv[0]  parv[1]      parv[2]  parv[3]  parv[4]
 	 * oper     target serv  xline    type     reason
@@ -191,17 +193,17 @@ ms_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	/* destined for me? */
 	if(!match(parv[1], me.name))
-		return;
+		return 0;
 
 	/* first look to see if we're clustering with the server */
 	if(find_cluster(source_p->user->server, CLUSTER_XLINE))
 	{
 		if(!valid_xline(source_p, parv[2], parv[4], 0))
-			return;
+			return 0;
 
 		/* already xlined */
 		if((xconf = find_xline(parv[1])) != NULL)
-			return;
+			return 0;
 
 		write_xline(source_p, parv[2], parv[4], atoi(parv[3]));
 	}
@@ -210,7 +212,7 @@ ms_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	else if(find_shared(source_p->username, source_p->host, source_p->user->server, OPER_XLINE))
 	{
 		if(!valid_xline(source_p, parv[2], parv[4], 1))
-			return;
+			return 0;
 
 		/* already xlined */
 		if((xconf = find_xline(parv[1])) != NULL)
@@ -218,11 +220,13 @@ ms_xline(struct Client *client_p, struct Client *source_p, int parc, const char 
 			sendto_one(source_p, ":%s NOTICE %s :[%s] already X-Lined by [%s] - %s",
 				   me.name, source_p->name, parv[1], 
 				   xconf->gecos, xconf->reason);
-			return;
+			return 0;
 		}
 
 		write_xline(source_p, parv[2], parv[4], atoi(parv[3]));
 	}
+
+	return 0;
 }
 
 /* valid_xline()
@@ -320,38 +324,40 @@ write_xline(struct Client *source_p, const char *gecos,
  *
  * parv[1] - thing to unxline
  */
-static void
+static int
 mo_unxline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	if(!IsOperXline(source_p))
 	{
 		sendto_one(source_p, ":%s NOTICE %s :You need xline = yes;",
 			   me.name, source_p->name);
-		return;
+		return 0;
 	}
 
 	if(EmptyString(parv[1]))
 	{
 		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
 			   me.name, source_p->name, "UNXLINE");
-		return;
+		return 0;
 	}
 
 	remove_xline(source_p, parv[1], 1);
+
+	return 0;
 }
 
 /* ms_unxline()
  *
  * handles a remote unxline
  */
-static void
+static int
 ms_unxline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	if(parc != 3)
-		return;
+		return 0;
 
 	if(EmptyString(parv[2]))
-		return;
+		return 0;
 
 	/* parv[0]  parv[1]        parv[2]
 	 * oper     target server  gecos
@@ -361,10 +367,10 @@ ms_unxline(struct Client *client_p, struct Client *source_p, int parc, const cha
 			   parv[1], parv[2]);
 
 	if(!match(parv[1], me.name))
-		return;
+		return 0;
 
 	if(!IsPerson(source_p))
-		return;
+		return 0;
 
 	if(find_cluster(source_p->user->server, CLUSTER_UNXLINE))
 	{
@@ -374,6 +380,8 @@ ms_unxline(struct Client *client_p, struct Client *source_p, int parc, const cha
 	{
 		remove_xline(source_p, parv[2], 1);
 	}
+
+	return 0;
 }
 	
 /* remove_xline()

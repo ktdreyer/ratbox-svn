@@ -37,7 +37,7 @@
 #include "modules.h"
 #include <stdlib.h>
 
-static void ms_eob(struct Client *, struct Client *, int, const char **);
+static int ms_eob(struct Client *, struct Client *, int, const char **);
 
 struct Message eob_msgtab = {
 	"EOB", 0, 0, 0, 0, MFLG_SLOW | MFLG_UNREG, 0,
@@ -51,7 +51,7 @@ DECLARE_MODULE_AV1(NULL, NULL, eob_clist, NULL, NULL, "$Revision$");
  *      parv[0] = sender prefix   
  *      parv[1] = servername   
  */
-static void
+static int
 ms_eob(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	sendto_realops_flags(UMODE_ALL, L_ALL,
@@ -59,4 +59,5 @@ ms_eob(struct Client *client_p, struct Client *source_p, int parc, const char *p
 			     source_p->name, (signed int) (CurrentTime - source_p->firsttime));
 
 	SetEob(client_p);
+	return 0;
 }

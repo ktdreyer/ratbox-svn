@@ -34,7 +34,7 @@
 #include "parse.h"
 #include "modules.h"
 
-static void mr_capab(struct Client *, struct Client *, int, const char **);
+static int mr_capab(struct Client *, struct Client *, int, const char **);
 
 struct Message capab_msgtab = {
 	"CAPAB", 0, 0, 0, 0, MFLG_SLOW | MFLG_UNREG, 0,
@@ -50,7 +50,7 @@ DECLARE_MODULE_AV1(NULL, NULL, capab_clist, NULL, NULL, "$Revision$");
  *      parv[1] = space-separated list of capabilities
  *
  */
-static void
+static int
 mr_capab(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Capability *cap;
@@ -65,12 +65,12 @@ mr_capab(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	/* ummm, this shouldn't happen. Could argue this should be logged etc. */
 	if(client_p->localClient == NULL)
-		return;
+		return 0;
 
 	if(client_p->localClient->caps)
 	{
 		exit_client(client_p, client_p, client_p, "CAPAB received twice");
-		return;
+		return 0;
 	}
 	else
 		client_p->localClient->caps |= CAP_CAP;
@@ -108,7 +108,7 @@ mr_capab(struct Client *client_p, struct Client *source_p, int parc, const char 
 					/* cipher is still zero; we didn't find a matching entry. */
 					exit_client(client_p, client_p, client_p,
 						    "Cipher selected is not available here.");
-					return;
+					return 0;
 				}
 			}
 			else	/* normal capab */
@@ -123,4 +123,6 @@ mr_capab(struct Client *client_p, struct Client *source_p, int parc, const char 
 				}
 		}		/* for */
 	}			/* for */
+
+	return 0;
 }

@@ -43,8 +43,8 @@
 #include "modules.h"
 #include "packet.h"
 
-static void m_topic(struct Client *, struct Client *, int, const char **);
-static void ms_topic(struct Client *, struct Client *, int, const char **);
+static int m_topic(struct Client *, struct Client *, int, const char **);
+static int ms_topic(struct Client *, struct Client *, int, const char **);
 
 struct Message topic_msgtab = {
 	"TOPIC", 0, 0, 2, 0, MFLG_SLOW, 0,
@@ -60,7 +60,7 @@ DECLARE_MODULE_AV1(NULL, NULL, topic_clist, NULL, NULL, "$Revision$");
  *      parv[1] = channel name
  *	parv[2] = new topic, if setting topic
  */
-static void
+static int
 m_topic(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Channel *chptr = NULL;
@@ -70,7 +70,7 @@ m_topic(struct Client *client_p, struct Client *source_p, int parc, const char *
 	{
 		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
 			   me.name, parv[0], "TOPIC");
-		return;
+		return 0;
 	}
 
 	if((p = strchr(parv[1], ',')))
@@ -87,7 +87,7 @@ m_topic(struct Client *client_p, struct Client *source_p, int parc, const char *
 		{
 			sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
 				   me.name, parv[0], parv[1]);
-			return;
+			return 0;
 		}
 
 		/* setting topic */
@@ -97,7 +97,7 @@ m_topic(struct Client *client_p, struct Client *source_p, int parc, const char *
 			{
 				sendto_one(source_p, form_str(ERR_NOTONCHANNEL), me.name, parv[0],
 					   parv[1]);
-				return;
+				return 0;
 			}
 			if((chptr->mode.mode & MODE_TOPICLIMIT) == 0 || is_chan_op(chptr, source_p))
 			{
@@ -126,7 +126,7 @@ m_topic(struct Client *client_p, struct Client *source_p, int parc, const char *
 			{
 				sendto_one(source_p, form_str(ERR_NOTONCHANNEL), me.name, parv[0],
 					   parv[1]);
-				return;
+				return 0;
 			}
 			if(chptr->topic == NULL)
 				sendto_one(source_p, form_str(RPL_NOTOPIC),
@@ -146,6 +146,8 @@ m_topic(struct Client *client_p, struct Client *source_p, int parc, const char *
 	{
 		sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL), me.name, parv[0], parv[1]);
 	}
+
+	return 0;
 }
 
 /*
@@ -158,7 +160,7 @@ m_topic(struct Client *client_p, struct Client *source_p, int parc, const char *
  *
  * Let servers always set a topic
  */
-static void
+static int
 ms_topic(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Channel *chptr = NULL;
@@ -166,16 +168,16 @@ ms_topic(struct Client *client_p, struct Client *source_p, int parc, const char 
 	if(!IsServer(source_p))
 	{
 		m_topic(client_p, source_p, parc, parv);
-		return;
+		return 0;
 	}
 
 	if(parc < 5)
-		return;
+		return 0;
 
 	if(parv[1] && IsChannelName(parv[1]))
 	{
 		if((chptr = find_channel(parv[1])) == NULL)
-			return;
+			return 0;
 
 		set_channel_topic(chptr, parv[4], parv[2], atoi(parv[3]));
 
@@ -195,4 +197,6 @@ ms_topic(struct Client *client_p, struct Client *source_p, int parc, const char 
 					     parv[1], chptr->topic == NULL ? "" : chptr->topic);
 		}
 	}
+
+	return 0;
 }

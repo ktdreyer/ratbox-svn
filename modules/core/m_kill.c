@@ -44,8 +44,8 @@
 
 static char buf[BUFSIZE];
 
-static void ms_kill(struct Client *, struct Client *, int, const char **);
-static void mo_kill(struct Client *, struct Client *, int, const char **);
+static int ms_kill(struct Client *, struct Client *, int, const char **);
+static int mo_kill(struct Client *, struct Client *, int, const char **);
 static void relay_kill(struct Client *, struct Client *, struct Client *,
 		       const char *, const char *);
 
@@ -63,7 +63,7 @@ DECLARE_MODULE_AV1(NULL, NULL, kill_clist, NULL, NULL, "$Revision$");
 **      parv[1] = kill victim
 **      parv[2] = kill path
 */
-static void
+static int
 mo_kill(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Client *target_p;
@@ -76,7 +76,7 @@ mo_kill(struct Client *client_p, struct Client *source_p, int parc, const char *
 	if(!IsOperK(source_p))
 	{
 		sendto_one(source_p, ":%s NOTICE %s :You need kline = yes;", me.name, parv[0]);
-		return;
+		return 0;
 	}
 
 	if(!EmptyString(parv[2]))
@@ -100,7 +100,7 @@ mo_kill(struct Client *client_p, struct Client *source_p, int parc, const char *
 		if((target_p = get_history(user, (long) KILLCHASETIMELIMIT)) == NULL)
 		{
 			sendto_one(source_p, form_str(ERR_NOSUCHNICK), me.name, parv[0], user);
-			return;
+			return 0;
 		}
 		sendto_one(source_p, ":%s NOTICE %s :KILL changed from %s to %s",
 			   me.name, parv[0], user, target_p->name);
@@ -108,14 +108,14 @@ mo_kill(struct Client *client_p, struct Client *source_p, int parc, const char *
 	if(IsServer(target_p) || IsMe(target_p))
 	{
 		sendto_one(source_p, form_str(ERR_CANTKILLSERVER), me.name, parv[0]);
-		return;
+		return 0;
 	}
 
 	if(!MyConnect(target_p) && (!IsOperGlobalKill(source_p)))
 	{
 		sendto_one(source_p, ":%s NOTICE %s :Nick %s isnt on your server",
 			   me.name, parv[0], target_p->name);
-		return;
+		return 0;
 	}
 
 	if(MyConnect(target_p))
@@ -152,6 +152,8 @@ mo_kill(struct Client *client_p, struct Client *source_p, int parc, const char *
 	ircsprintf(buf, "Killed (%s (%s))", source_p->name, reason);
 
 	exit_client(client_p, target_p, source_p, buf);
+
+	return 0;
 }
 
 /*
@@ -160,7 +162,7 @@ mo_kill(struct Client *client_p, struct Client *source_p, int parc, const char *
  *      parv[1] = kill victim
  *      parv[2] = kill path and reason
  */
-static void
+static int
 ms_kill(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Client *target_p;
@@ -175,7 +177,7 @@ ms_kill(struct Client *client_p, struct Client *source_p, int parc, const char *
 	if(*parv[1] == '\0')
 	{
 		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), me.name, parv[0], "KILL");
-		return;
+		return 0;
 	}
 
 	user = parv[1];
@@ -214,7 +216,7 @@ ms_kill(struct Client *client_p, struct Client *source_p, int parc, const char *
 		if((*user == '.') || (!(target_p = get_history(user, (long) KILLCHASETIMELIMIT))))
 		{
 			sendto_one(source_p, form_str(ERR_NOSUCHNICK), me.name, parv[0], user);
-			return;
+			return 0;
 		}
 		sendto_one(source_p, ":%s NOTICE %s :KILL changed from %s to %s",
 			   me.name, parv[0], user, target_p->name);
@@ -224,7 +226,7 @@ ms_kill(struct Client *client_p, struct Client *source_p, int parc, const char *
 	if(IsServer(target_p) || IsMe(target_p))
 	{
 		sendto_one(source_p, form_str(ERR_CANTKILLSERVER), me.name, parv[0]);
-		return;
+		return 0;
 	}
 
 	if(MyConnect(target_p))
@@ -278,6 +280,8 @@ ms_kill(struct Client *client_p, struct Client *source_p, int parc, const char *
 		ircsprintf(buf, "Killed (%s %s)", source_p->name, reason);
 
 	exit_client(client_p, target_p, source_p, buf);
+
+	return 0;
 }
 
 static void

@@ -32,8 +32,8 @@
 
 #define USER_COL       50	/* display | Users: %d at col 50 */
 
-static void m_map(struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
-static void mo_map(struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
+static int m_map(struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
+static int mo_map(struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
 static void dump_map(struct Client *client_p, struct Client *root, char *pbuf);
 
 struct Message map_msgtab = {
@@ -49,29 +49,31 @@ static char buf[BUFSIZE];
 /* m_map
 **	parv[0] = sender prefix
 */
-static void
+static int
 m_map(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	if(ConfigFileEntry.map_oper_only || ConfigServerHide.flatten_links)
 	{
 		m_not_oper(client_p, source_p, parc, parv);
-		return;
+		return 0;
 	}
 
 	dump_map(client_p, &me, buf);
 	sendto_one(client_p, form_str(RPL_MAPEND), me.name, client_p->name);
-	return;
+	return 0;
 }
 
 /*
 ** mo_map
 **      parv[0] = sender prefix
 */
-static void
+static int
 mo_map(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	dump_map(client_p, &me, buf);
 	sendto_one(client_p, form_str(RPL_MAPEND), me.name, client_p->name);
+
+	return 0;
 }
 
 /*

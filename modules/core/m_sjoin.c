@@ -44,7 +44,7 @@
 #include "s_conf.h"
 
 
-static void ms_sjoin(struct Client *, struct Client *, int, const char **);
+static int ms_sjoin(struct Client *, struct Client *, int, const char **);
 
 struct Message sjoin_msgtab = {
 	"SJOIN", 0, 0, 0, 0, MFLG_SLOW, 0,
@@ -80,7 +80,7 @@ static void remove_a_mode(struct Channel *chptr,
 			  struct Client *source_p, dlink_list * list, char flag);
 
 
-static void
+static int
 ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Channel *chptr;
@@ -112,16 +112,16 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 	*sjbuf = '\0';
 
 	if(IsClient(source_p) || parc < 5 || EmptyString(parv[4]))
-		return;
+		return 0;
 
 	if(!IsChannelName(parv[2]))
-		return;
+		return 0;
 	if(!check_channel_name(parv[2]))
-		return;
+		return 0;
 
 	/* SJOIN's for local channels can't happen. */
 	if(*parv[2] == '&')
-		return;
+		return 0;
 
 	mbuf = modebuf;
 	*mbuf = '\0';
@@ -157,20 +157,20 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 			strlcpy(mode.key, parv[4 + args], sizeof(mode.key));
 			args++;
 			if(parc < 5 + args)
-				return;
+				return 0;
 			break;
 		case 'l':
 			mode.limit = atoi(parv[4 + args]);
 			args++;
 			if(parc < 5 + args)
-				return;
+				return 0;
 			break;
 		}
 
 	*parabuf = '\0';
 
 	if((chptr = get_or_create_channel(source_p, parv[2], &isnew)) == NULL)
-		return;		/* channel name too long? */
+		return 0;		/* channel name too long? */
 
 
 	oldts = chptr->channelts;
@@ -221,7 +221,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	/* remote is bursting a persistent channel to us, ignore it */
 	else if(chptr->users == 0 && !parv[4 + args][0])
-		return;
+		return 0;
 
 	/* It isnt a perm channel, do normal timestamp rules */
 	else if(newts == 0 || oldts == 0)
@@ -291,7 +291,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 		sendto_realops_flags(UMODE_ALL, L_ALL,
 				     "Long SJOIN from server: %s(via %s) (ignored)",
 				     source_p->name, client_p->name);
-		return;
+		return 0;
 	}
 
 	mbuf = modebuf;
@@ -472,7 +472,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 	}
 
 	if(!people)
-		return;
+		return 0;
 
 	/* relay the SJOIN to other servers */
 	DLINK_FOREACH(m, serv_list.head)
@@ -484,10 +484,12 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 		/* Its a blank sjoin, ugh */
 		if(!parv[4 + args][0])
-			return;
+			return 0;
 
 		sendto_one(target_p, "%s%s", buf, sjbuf);
 	}
+
+	return 0;
 }
 
 /*

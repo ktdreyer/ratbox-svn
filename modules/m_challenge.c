@@ -55,7 +55,7 @@ static int	challenge_load(void)
 DECLARE_MODULE_AV1(challenge_load, NULL, NULL, NULL, NULL, "$Revision$");
 #else
 
-static void m_challenge(struct Client *, struct Client *, int, const char **);
+static int m_challenge(struct Client *, struct Client *, int, const char **);
 void binary_to_hex(unsigned char *bin, char *hex, int length);
 
 /* We have openssl support, so include /CHALLENGE */
@@ -73,27 +73,27 @@ DECLARE_MODULE_AV1(NULL, NULL, challenge_clist, NULL, NULL, "$Revision$");
  * parv[1] = operator to challenge for, or +response
  *
  */
-static void
+static int
 m_challenge(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	char *challenge;
 	struct ConfItem *aconf, *oconf;
 	if(!(source_p->user) || !source_p->localClient)
-		return;
+		return 0;
 
 	/* if theyre an oper, reprint oper motd and ignore */
 	if(IsOper(source_p))
 	{
 		sendto_one(source_p, form_str(RPL_YOUREOPER), me.name, parv[0]);
 		SendMessageFile(source_p, &ConfigFileEntry.opermotd);
-		return;
+		return 0;
 	}
 
 	if(*parv[1] == '+')
 	{
 		/* Ignore it if we aren't expecting this... -A1kmm */
 		if(!source_p->user->response)
-			return;
+			return 0;
 
 		if(irccmp(source_p->user->response, ++parv[1]))
 		{
@@ -105,7 +105,7 @@ m_challenge(struct Client *client_p, struct Client *source_p, int parc, const ch
 						     "Failed OPER attempt by %s (%s@%s)",
 						     source_p->name, source_p->username,
 						     source_p->host);
-			return;
+			return 0;
 		}
 
 		if((aconf = find_conf_by_name(source_p->user->auth_oper, CONF_OPERATOR)) == NULL)
@@ -118,7 +118,7 @@ m_challenge(struct Client *client_p, struct Client *source_p, int parc, const ch
 						     "Failed CHALLENGE attempt - host mismatch by %s (%s@%s)",
 						     source_p->name, source_p->username,
 						     source_p->host);
-			return;
+			return 0;
 		}
 
 		oconf = source_p->localClient->att_conf;
@@ -134,7 +134,7 @@ m_challenge(struct Client *client_p, struct Client *source_p, int parc, const ch
 			log_foper(source_p, source_p->user->auth_oper);
 
 			attach_conf(source_p, oconf);
-			return;
+			return 0;
 		}
 
 		oper_up(source_p, aconf);
@@ -147,7 +147,7 @@ m_challenge(struct Client *client_p, struct Client *source_p, int parc, const ch
 		MyFree(source_p->user->auth_oper);
 		source_p->user->response = NULL;
 		source_p->user->auth_oper = NULL;
-		return;
+		return 0;
 	}
 
 	MyFree(source_p->user->response);
@@ -167,14 +167,14 @@ m_challenge(struct Client *client_p, struct Client *source_p, int parc, const ch
 			sendto_realops_flags(UMODE_ALL, L_ALL,
 					     "Failed CHALLENGE attempt - host mismatch by %s (%s@%s)",
 					     source_p->name, source_p->username, source_p->host);
-		return;
+		return 0;
 	}
 
 	if(!aconf->rsa_public_key)
 	{
 		sendto_one(source_p, ":%s NOTICE %s :I'm sorry, PK authentication "
 			   "is not enabled for your oper{} block.", me.name, parv[0]);
-		return;
+		return 0;
 	}
 
 	if(!generate_challenge(&challenge, &(source_p->user->response), aconf->rsa_public_key))
@@ -184,7 +184,7 @@ m_challenge(struct Client *client_p, struct Client *source_p, int parc, const ch
 
 	DupString(source_p->user->auth_oper, aconf->name);
 	MyFree(challenge);
-	return;
+	return 0;
 }
 
 #endif /* HAVE_LIBCRYPTO */

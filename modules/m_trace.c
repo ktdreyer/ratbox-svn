@@ -44,7 +44,7 @@
 #include "parse.h"
 #include "modules.h"
 
-static void m_trace(struct Client *, struct Client *, int, const char **);
+static int m_trace(struct Client *, struct Client *, int, const char **);
 
 static void trace_spy(struct Client *);
 
@@ -71,7 +71,7 @@ static int report_this_status(struct Client *source_p, struct Client *target_p, 
  *      parv[0] = sender prefix
  *      parv[1] = servername
  */
-static void
+static int
 m_trace(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Client *target_p = NULL;
@@ -83,7 +83,7 @@ m_trace(struct Client *client_p, struct Client *source_p, int parc, const char *
 	const char *looking_for = parv[0];
 
 	if(!IsClient(source_p))
-		return;
+		return 0;
 
 	if(parc > 1)
 		tname = parv[1];
@@ -98,14 +98,14 @@ m_trace(struct Client *client_p, struct Client *source_p, int parc, const char *
 			report_this_status(source_p, source_p, 0, 0, 0);
 
 		sendto_one(source_p, form_str(RPL_ENDOFTRACE), me.name, parv[0], tname);
-		return;
+		return 0;
 	}
 
 	if(parc > 2)
 	{
 		if(hunt_server(client_p, source_p, ":%s TRACE %s :%s", 2, parc, parv) !=
 		   HUNTED_ISME)
-			return;
+			return 0;
 	}
 
 
@@ -135,14 +135,14 @@ m_trace(struct Client *client_p, struct Client *source_p, int parc, const char *
 				sendto_one(source_p, form_str(RPL_TRACELINK), me.name,
 					   looking_for, ircd_version, debugmode, tname,
 					   "ac2ptr_is_NULL!!");
-			return;
+			return 0;
 		}
 
 	case HUNTED_ISME:
 		break;
 
 	default:
-		return;
+		return 0;
 	}
 
 	trace_spy(source_p);
@@ -162,7 +162,7 @@ m_trace(struct Client *client_p, struct Client *source_p, int parc, const char *
 			report_this_status(source_p, target_p, 0, 0, 0);
 
 		sendto_one(source_p, form_str(RPL_ENDOFTRACE), me.name, parv[0], tname);
-		return;
+		return 0;
 	}
 
 	memset((void *) link_s, 0, sizeof(link_s));
@@ -216,7 +216,7 @@ m_trace(struct Client *client_p, struct Client *source_p, int parc, const char *
 		}
 
 		sendto_one(source_p, form_str(RPL_ENDOFTRACE), me.name, parv[0], tname);
-		return;
+		return 0;
 	}
 
 	/* source_p is opered */
@@ -278,7 +278,7 @@ m_trace(struct Client *client_p, struct Client *source_p, int parc, const char *
 		 * trace
 		 */
 		sendto_one(source_p, form_str(RPL_ENDOFTRACE), me.name, parv[0], tname);
-		return;
+		return 0;
 	}
 
 	for (cltmp = ClassList; doall && cltmp; cltmp = cltmp->next)
@@ -289,6 +289,8 @@ m_trace(struct Client *client_p, struct Client *source_p, int parc, const char *
 	}
 
 	sendto_one(source_p, form_str(RPL_ENDOFTRACE), me.name, parv[0], tname);
+
+	return 0;
 }
 
 /*

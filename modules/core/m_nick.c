@@ -49,11 +49,11 @@
 #include "packet.h"
 
 
-static void mr_nick(struct Client *, struct Client *, int, const char **);
-static void m_nick(struct Client *, struct Client *, int, const char **);
-static void ms_nick(struct Client *, struct Client *, int, const char **);
+static int mr_nick(struct Client *, struct Client *, int, const char **);
+static int m_nick(struct Client *, struct Client *, int, const char **);
+static int ms_nick(struct Client *, struct Client *, int, const char **);
 
-static void ms_client(struct Client *, struct Client *, int, const char **);
+static int ms_client(struct Client *, struct Client *, int, const char **);
 
 static int nick_from_server(struct Client *, struct Client *, int, const char **, time_t, const char *);
 static int client_from_server(struct Client *, struct Client *, int, const char **, time_t, const char *);
@@ -91,7 +91,7 @@ DECLARE_MODULE_AV1(NULL, NULL, nick_clist, NULL, NULL, "$Revision$");
  *       parv[0] = sender prefix
  *       parv[1] = nickname
  */
-static void
+static int
 mr_nick(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Client *target_p;
@@ -102,7 +102,7 @@ mr_nick(struct Client *client_p, struct Client *source_p, int parc, const char *
 	{
 		sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN),
 			   me.name, EmptyString(parv[0]) ? "*" : parv[0]);
-		return;
+		return 0;
 	}
 
 	/* Terminate the nick at the first ~ */
@@ -114,7 +114,7 @@ mr_nick(struct Client *client_p, struct Client *source_p, int parc, const char *
 	{
 		sendto_one(source_p, form_str(ERR_ERRONEUSNICKNAME),
 			   me.name, EmptyString(parv[0]) ? "*" : parv[0], parv[1]);
-		return;
+		return 0;
 	}
 
 	/* copy the nick and terminate it */
@@ -125,7 +125,7 @@ mr_nick(struct Client *client_p, struct Client *source_p, int parc, const char *
 	{
 		sendto_one(source_p, form_str(ERR_ERRONEUSNICKNAME),
 			   me.name, EmptyString(parv[0]) ? "*" : parv[0], parv[1]);
-		return;
+		return 0;
 	}
 
 	/* check if the nick is resv'd */
@@ -133,23 +133,25 @@ mr_nick(struct Client *client_p, struct Client *source_p, int parc, const char *
 	{
 		sendto_one(source_p, form_str(ERR_UNAVAILRESOURCE),
 			   me.name, EmptyString(parv[0]) ? "*" : parv[0], nick);
-		return;
+		return 0;
 	}
 
 	if((target_p = find_client(nick)) == NULL)
 	{
 		set_initial_nick(client_p, source_p, nick);
-		return;
+		return 0;
 	}
 	else if(source_p == target_p)
 	{
 		strcpy(source_p->name, nick);
-		return;
+		return 0;
 	}
 	else
 	{
 		sendto_one(source_p, form_str(ERR_NICKNAMEINUSE), me.name, "*", nick);
 	}
+
+	return 0;
 }
 
 /*
@@ -158,7 +160,7 @@ mr_nick(struct Client *client_p, struct Client *source_p, int parc, const char *
  *     parv[0] = sender prefix
  *     parv[1] = nickname
  */
-static void
+static int
 m_nick(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	char nick[NICKLEN];
@@ -167,7 +169,7 @@ m_nick(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	if(parc < 2 || EmptyString(parv[1]))
 	{
 		sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN), me.name, parv[0]);
-		return;
+		return 0;
 	}
 
 	/* mark end of grace period, to prevent nickflooding */
@@ -181,13 +183,13 @@ m_nick(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	if(!clean_nick_name(nick))
 	{
 		sendto_one(source_p, form_str(ERR_ERRONEUSNICKNAME), me.name, parv[0], nick);
-		return;
+		return 0;
 	}
 
 	if(find_nick_resv(nick))
 	{
 		sendto_one(source_p, form_str(ERR_UNAVAILRESOURCE), me.name, parv[0], nick);
-		return;
+		return 0;
 	}
 
 	if((target_p = find_client(nick)))
@@ -202,14 +204,14 @@ m_nick(struct Client *client_p, struct Client *source_p, int parc, const char *p
 			if(strcmp(target_p->name, nick))
 			{
 				change_local_nick(client_p, source_p, nick);
-				return;
+				return 0;
 			}
 			else
 			{
 				/* client is doing :old NICK old
 				 * ignore it..
 				 */
-				return;
+				return 0;
 			}
 		}
 
@@ -224,20 +226,22 @@ m_nick(struct Client *client_p, struct Client *source_p, int parc, const char *p
 
 			exit_client(NULL, target_p, &me, "Overridden");
 			change_local_nick(client_p, source_p, nick);
-			return;
+			return 0;
 		}
 		else
 		{
 			sendto_one(source_p, form_str(ERR_NICKNAMEINUSE), me.name, parv[0], nick);
-			return;
+			return 0;
 		}
 
 	}
 	else
 	{
 		change_local_nick(client_p, source_p, nick);
-		return;
+		return 0;
 	}
+
+	return 0;
 }
 
 /*
@@ -259,7 +263,7 @@ m_nick(struct Client *client_p, struct Client *source_p, int parc, const char *p
  *    parv[7] = server
  *    parv[8] = ircname
  */
-static void
+static int
 ms_nick(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Client *target_p;
@@ -269,7 +273,7 @@ ms_nick(struct Client *client_p, struct Client *source_p, int parc, const char *
 	if(parc < 2 || EmptyString(parv[1]))
 	{
 		sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN), me.name, parv[0]);
-		return;
+		return 0;
 	}
 
 	/* parc == 3 on nickchange, parc == 9 on new nick */
@@ -292,7 +296,7 @@ ms_nick(struct Client *client_p, struct Client *source_p, int parc, const char *
 		     parc, client_p->name, tbuf);
 		exit_client(client_p, client_p, client_p,
 			    "Not enough arguments to server command.");
-		return;
+		return 0;
 	}
 
 	/* fix the length of the nick */
@@ -300,13 +304,13 @@ ms_nick(struct Client *client_p, struct Client *source_p, int parc, const char *
 
 	if(check_clean_nick(client_p, source_p, nick, parv[1],
 			    (parc == 9 ? parv[7] : (char *)source_p->user->server)))
-		return;
+		return 0;
 
 	if(parc == 9)
 	{
 		if(check_clean_user(client_p, nick, parv[5], parv[7]) ||
 		   check_clean_host(client_p, nick, parv[6], parv[7]))
-			return;
+			return 0;
 
 		/* check the length of the clients gecos */
 		if(strlen(parv[8]) > REALLEN)
@@ -333,7 +337,7 @@ ms_nick(struct Client *client_p, struct Client *source_p, int parc, const char *
 	if(!(target_p = find_client(nick)))
 	{
 		nick_from_server(client_p, source_p, parc, parv, newts, nick);
-		return;
+		return 0;
 	}
 
 	/* we're not living in the past anymore, an unknown client is local only. */
@@ -341,7 +345,7 @@ ms_nick(struct Client *client_p, struct Client *source_p, int parc, const char *
 	{
 		exit_client(NULL, target_p, &me, "Overridden");
 		nick_from_server(client_p, source_p, parc, parv, newts, nick);
-		return;
+		return 0;
 	}
 
 	if(target_p == source_p)
@@ -350,22 +354,22 @@ ms_nick(struct Client *client_p, struct Client *source_p, int parc, const char *
 		{
 			/* client changing case of nick */
 			nick_from_server(client_p, source_p, parc, parv, newts, nick);
-			return;
+			return 0;
 		}
 		else
 			/* client not changing nicks at all */
-			return;
+			return 0;
 	}
 
 	perform_nick_collides(source_p, client_p, target_p, parc, parv, newts, nick);
 
-
+	return 0;
 }
 
 /*
  * ms_client()
  */
-static void
+static int
 ms_client(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Client *target_p;
@@ -384,7 +388,7 @@ ms_client(struct Client *client_p, struct Client *source_p, int parc, const char
 	if(check_clean_nick(client_p, source_p, nick, parv[1], parv[7]) ||
 	   check_clean_user(client_p, nick, parv[5], parv[7]) ||
 	   check_clean_host(client_p, nick, parv[6], parv[7]))
-		return;
+		return 0;
 
 	/* check length of clients gecos */
 	if(strlen(name) > REALLEN)
@@ -414,13 +418,13 @@ ms_client(struct Client *client_p, struct Client *source_p, int parc, const char
 
 		target_p->flags |= FLAGS_KILLED;
 		exit_client(client_p, target_p, &me, "ID Collision");
-		return;
+		return 0;
 	}
 
 	if(!(target_p = find_client(nick)))
 	{
 		client_from_server(client_p, source_p, parc, parv, newts, nick);
-		return;
+		return 0;
 	}
 
 
@@ -428,10 +432,12 @@ ms_client(struct Client *client_p, struct Client *source_p, int parc, const char
 	{
 		exit_client(NULL, target_p, &me, "Overridden");
 		client_from_server(client_p, source_p, parc, parv, newts, nick);
-		return;
+		return 0;
 	}
 
 	perform_nick_collides(source_p, client_p, target_p, parc, parv, newts, nick);
+
+	return 0;
 }
 
 

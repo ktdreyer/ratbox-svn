@@ -42,7 +42,7 @@
 #include "s_conf.h"
 #include "packet.h"
 
-static void m_part(struct Client *, struct Client *, int, const char **);
+static int m_part(struct Client *, struct Client *, int, const char **);
 void check_spambot_warning(struct Client *source_p, const char *name);
 
 struct Message part_msgtab = {
@@ -63,7 +63,7 @@ static void part_one_client(struct Client *client_p,
 **      parv[1] = channel
 **      parv[2] = reason
 */
-static void
+static int
 m_part(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	char *p, *name;
@@ -73,7 +73,7 @@ m_part(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	if(EmptyString(parv[1]))
 	{
 		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), me.name, parv[0], "PART");
-		return;
+		return 0;
 	}
 
 	reason[0] = '\0';
@@ -92,7 +92,7 @@ m_part(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		part_one_client(client_p, source_p, name, reason);
 		name = strtoken(&p, NULL, ",");
 	}
-	return;
+	return 0;
 }
 
 /*

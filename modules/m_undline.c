@@ -45,7 +45,7 @@
 #include "s_serv.h"
 #include "cluster.h"
 
-static void mo_undline(struct Client *, struct Client *, int, const char **);
+static int mo_undline(struct Client *, struct Client *, int, const char **);
 
 struct Message undline_msgtab = {
 	"UNDLINE", 0, 0, 2, 0, MFLG_SLOW, 0,
@@ -63,7 +63,7 @@ static int remove_temp_dline(const char *);
  *      parv[0] = sender nick
  *      parv[1] = dline to remove
  */
-static void
+static int
 mo_undline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	FBFILE *in;
@@ -79,7 +79,7 @@ mo_undline(struct Client *client_p, struct Client *source_p, int parc, const cha
 	if(!IsOperUnkline(source_p))
 	{
 		sendto_one(source_p, ":%s NOTICE %s :You need unkline = yes;", me.name, parv[0]);
-		return;
+		return 0;
 	}
 
 	cidr = parv[1];
@@ -93,7 +93,7 @@ mo_undline(struct Client *client_p, struct Client *source_p, int parc, const cha
 				     "%s has removed the temporary D-Line for: [%s]",
 				     get_oper_name(source_p), cidr);
 		ilog(L_NOTICE, "%s removed temporary D-Line for [%s]", parv[0], cidr);
-		return;
+		return 0;
 	}
 
 	filename = get_conf_name(DLINE_TYPE);
@@ -101,7 +101,7 @@ mo_undline(struct Client *client_p, struct Client *source_p, int parc, const cha
 	if((in = fbopen(filename, "r")) == 0)
 	{
 		sendto_one(source_p, ":%s NOTICE %s :Cannot open %s", me.name, parv[0], filename);
-		return;
+		return 0;
 	}
 
 	oldumask = umask(0);
@@ -110,7 +110,7 @@ mo_undline(struct Client *client_p, struct Client *source_p, int parc, const cha
 		sendto_one(source_p, ":%s NOTICE %s :Cannot open %s", me.name, parv[0], temppath);
 		fbclose(in);
 		umask(oldumask);
-		return;
+		return 0;
 	}
 
 	umask(oldumask);
@@ -160,19 +160,21 @@ mo_undline(struct Client *client_p, struct Client *source_p, int parc, const cha
 	{
 		sendto_one(source_p,
 			   ":%s NOTICE %s :Couldn't write D-line file, aborted", me.name, parv[0]);
-		return;
+		return 0;
 	}
 
 	if(!pairme)
 	{
 		sendto_one(source_p, ":%s NOTICE %s :No D-Line for %s", me.name, parv[0], cidr);
-		return;
+		return 0;
 	}
 
 	sendto_one(source_p, ":%s NOTICE %s :D-Line for [%s] is removed", me.name, parv[0], cidr);
 	sendto_realops_flags(UMODE_ALL, L_ALL,
 			     "%s has removed the D-Line for: [%s]", get_oper_name(source_p), cidr);
 	ilog(L_NOTICE, "%s removed D-Line for [%s]", get_oper_name(source_p), cidr);
+
+	return 0;
 }
 
 /*

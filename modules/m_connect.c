@@ -42,8 +42,8 @@
 #include "modules.h"
 
 
-static void mo_connect(struct Client *, struct Client *, int, const char **);
-static void ms_connect(struct Client *, struct Client *, int, const char **);
+static int mo_connect(struct Client *, struct Client *, int, const char **);
+static int ms_connect(struct Client *, struct Client *, int, const char **);
 
 struct Message connect_msgtab = {
 	"CONNECT", 0, 0, 2, 0, MFLG_SLOW, 0,
@@ -64,7 +64,7 @@ DECLARE_MODULE_AV1(NULL, NULL, connect_clist, NULL, NULL, "$Revision$");
  *      parv[2] = port number
  *      parv[3] = remote server
  */
-static void
+static int
 mo_connect(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	int port;
@@ -77,25 +77,25 @@ mo_connect(struct Client *client_p, struct Client *source_p, int parc, const cha
 	if(MyConnect(source_p) && !IsOperRemote(source_p) && parc > 3)
 	{
 		sendto_one(source_p, ":%s NOTICE %s :You need remote = yes;", me.name, parv[0]);
-		return;
+		return 0;
 	}
 
 	if(hunt_server(client_p, source_p, ":%s CONNECT %s %s :%s", 3, parc, parv) != HUNTED_ISME)
 	{
-		return;
+		return 0;
 	}
 
 	if(EmptyString(parv[1]))
 	{
 		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), me.name, parv[0], "CONNECT");
-		return;
+		return 0;
 	}
 
 	if((target_p = find_server(parv[1])))
 	{
 		sendto_one(source_p, ":%s NOTICE %s :Connect: Server %s already exists from %s.",
 			   me.name, parv[0], parv[1], target_p->from->name);
-		return;
+		return 0;
 	}
 
 	/*
@@ -108,7 +108,7 @@ mo_connect(struct Client *client_p, struct Client *source_p, int parc, const cha
 			sendto_one(source_p,
 				   "NOTICE %s :Connect: Host %s not listed in ircd.conf",
 				   parv[0], parv[1]);
-			return;
+			return 0;
 		}
 	}
 	s_assert(0 != aconf);
@@ -123,14 +123,14 @@ mo_connect(struct Client *client_p, struct Client *source_p, int parc, const cha
 		if((port = atoi(parv[2])) <= 0)
 		{
 			sendto_one(source_p, "NOTICE %s :Connect: Illegal port number", parv[0]);
-			return;
+			return 0;
 		}
 	}
 	else if(port <= 0 && (port = PORTNUM) <= 0)
 	{
 		sendto_one(source_p, ":%s NOTICE %s :Connect: missing port number",
 			   me.name, parv[0]);
-		return;
+		return 0;
 	}
 	/*
 	 * Notify all operators about remote connect requests
@@ -166,6 +166,7 @@ mo_connect(struct Client *client_p, struct Client *source_p, int parc, const cha
 	 * destroyed
 	 */
 	aconf->port = tmpport;
+	return 0;
 }
 
 /*
@@ -179,7 +180,7 @@ mo_connect(struct Client *client_p, struct Client *source_p, int parc, const cha
  *      parv[2] = port number
  *      parv[3] = remote server
  */
-static void
+static int
 ms_connect(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	int port;
@@ -188,21 +189,19 @@ ms_connect(struct Client *client_p, struct Client *source_p, int parc, const cha
 	struct Client *target_p;
 
 	if(hunt_server(client_p, source_p, ":%s CONNECT %s %s :%s", 3, parc, parv) != HUNTED_ISME)
-	{
-		return;
-	}
+		return 0;
 
 	if(EmptyString(parv[1]))
 	{
 		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), me.name, parv[0], "CONNECT");
-		return;
+		return 0;
 	}
 
 	if((target_p = find_server(parv[1])))
 	{
 		sendto_one(source_p, ":%s NOTICE %s :Connect: Server %s %s %s.",
 			   me.name, parv[0], parv[1], "already exists from", target_p->from->name);
-		return;
+		return 0;
 	}
 
 	/*
@@ -215,7 +214,7 @@ ms_connect(struct Client *client_p, struct Client *source_p, int parc, const cha
 			sendto_one(source_p,
 				   ":%s NOTICE %s :Connect: Host %s not listed in ircd.conf",
 				   me.name, parv[0], parv[1]);
-			return;
+			return 0;
 		}
 	}
 	s_assert(0 != aconf);
@@ -236,14 +235,14 @@ ms_connect(struct Client *client_p, struct Client *source_p, int parc, const cha
 		{
 			sendto_one(source_p, ":%s NOTICE %s :Connect: Illegal port number",
 				   me.name, parv[0]);
-			return;
+			return 0;
 		}
 	}
 	else if(port <= 0 && (port = PORTNUM) <= 0)
 	{
 		sendto_one(source_p, ":%s NOTICE %s :Connect: missing port number",
 			   me.name, parv[0]);
-		return;
+		return 0;
 	}
 	/*
 	 * Notify all operators about remote connect requests
@@ -272,4 +271,5 @@ ms_connect(struct Client *client_p, struct Client *source_p, int parc, const cha
 	 * destroyed
 	 */
 	aconf->port = tmpport;
+	return 0;
 }

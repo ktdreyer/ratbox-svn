@@ -38,8 +38,8 @@
 #include "packet.h"
 #include "sprintf_irc.h"
 
-static void m_time(struct Client *, struct Client *, int, const char **);
-static void mo_time(struct Client *, struct Client *, int, const char **);
+static int m_time(struct Client *, struct Client *, int, const char **);
+static int mo_time(struct Client *, struct Client *, int, const char **);
 static char *date(void);
 
 struct Message time_msgtab = {
@@ -66,7 +66,7 @@ DECLARE_MODULE_AV1(NULL, NULL, time_clist, NULL, NULL, "$Revision$");
  *      parv[0] = sender prefix
  *      parv[1] = servername
  */
-static void
+static int
 m_time(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	/* this is not rate limited, so end the grace period */
@@ -77,10 +77,12 @@ m_time(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	if(!ConfigServerHide.disable_remote)
 	{
 		if(hunt_server(client_p, source_p, ":%s TIME :%s", 1, parc, parv) != HUNTED_ISME)
-			return;
+			return 0;
 	}
 
 	sendto_one(source_p, form_str(RPL_TIME), me.name, parv[0], me.name, date());
+
+	return 0;
 }
 
 /*
@@ -88,11 +90,13 @@ m_time(struct Client *client_p, struct Client *source_p, int parc, const char *p
  *      parv[0] = sender prefix
  *      parv[1] = servername
  */
-static void
+static int
 mo_time(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	if(hunt_server(client_p, source_p, ":%s TIME :%s", 1, parc, parv) == HUNTED_ISME)
 		sendto_one(source_p, form_str(RPL_TIME), me.name, parv[0], me.name, date());
+
+	return 0;
 }
 
 /* date()

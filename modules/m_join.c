@@ -45,8 +45,8 @@
 #include "sprintf_irc.h"
 #include "packet.h"
 
-static void m_join(struct Client *, struct Client *, int, const char **);
-static void ms_join(struct Client *, struct Client *, int, const char **);
+static int m_join(struct Client *, struct Client *, int, const char **);
+static int ms_join(struct Client *, struct Client *, int, const char **);
 
 struct Message join_msgtab = {
 	"JOIN", 0, 0, 2, 0, MFLG_SLOW, 0,
@@ -66,7 +66,7 @@ void check_spambot_warning(struct Client *source_p, const char *name);
  *      parv[1] = channel
  *      parv[2] = channel password (key)
  */
-static void
+static int
 m_join(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	static char jbuf[BUFSIZE];
@@ -82,7 +82,7 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	if(EmptyString(parv[1]))
 	{
 		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), me.name, parv[0], "JOIN");
-		return;
+		return 0;
 	}
 
 	jbuf[0] = '\0';
@@ -195,7 +195,7 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 			sendto_one(source_p, form_str(ERR_TOOMANYCHANNELS), me.name, parv[0], name);
 			if(successful_join_count)
 				source_p->localClient->last_join_time = CurrentTime;
-			return;
+			return 0;
 		}
 
 		if(flags == 0)	/* if channel doesn't exist, don't penalize */
@@ -302,6 +302,8 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		if(successful_join_count)
 			source_p->localClient->last_join_time = CurrentTime;
 	}
+
+	return 0;
 }
 
 /*
@@ -315,15 +317,14 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
  *		  here, the initial code is in to take an extra parameter
  *		  and use it for the TimeStamp on a new channel.
  */
-
-static void
+static int
 ms_join(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	const char *name;
 	int new_ts;
 
 	if(!(source_p->user))
-		return;
+		return 0;
 
 	name = parv[1];
 
@@ -343,6 +344,8 @@ ms_join(struct Client *client_p, struct Client *source_p, int parc, const char *
 				source_p->user->server);
 		}
 	}
+
+	return 0;
 }
 
 /*
@@ -355,7 +358,6 @@ ms_join(struct Client *client_p, struct Client *source_p, int parc, const char *
  *		  There is a bunch of evilness necessary here due to
  * 		  anti spambot code.
  */
-
 static void
 do_join_0(struct Client *client_p, struct Client *source_p)
 {

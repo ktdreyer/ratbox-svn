@@ -47,7 +47,7 @@
 static void names_all_visible_channels(struct Client *source_p);
 static void names_non_public_non_secret(struct Client *source_p);
 
-static void m_names(struct Client *, struct Client *, int, const char **);
+static int m_names(struct Client *, struct Client *, int, const char **);
 
 struct Message names_msgtab = {
 	"NAMES", 0, 0, 0, 0, MFLG_SLOW, 0,
@@ -67,7 +67,7 @@ DECLARE_MODULE_AV1(NULL, NULL, names_clist, NULL, NULL, "$Revision$");
 **      parv[1] = channel
 **      parv[2] = vkey
 */
-static void
+static int
 m_names(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Channel *ch2ptr = NULL;
@@ -84,7 +84,7 @@ m_names(struct Client *client_p, struct Client *source_p, int parc, const char *
 		{
 			sendto_one(source_p, form_str(ERR_BADCHANNAME),
 				   me.name, parv[0], (unsigned char *) p);
-			return;
+			return 0;
 		}
 
 		if((ch2ptr = find_channel(para)) != NULL)
@@ -98,6 +98,8 @@ m_names(struct Client *client_p, struct Client *source_p, int parc, const char *
 		names_non_public_non_secret(source_p);
 		sendto_one(source_p, form_str(RPL_ENDOFNAMES), me.name, parv[0], "*");
 	}
+
+	return 0;
 }
 
 /*
@@ -107,7 +109,6 @@ m_names(struct Client *client_p, struct Client *source_p, int parc, const char *
  * output       - none
  * side effects - lists all visible channels whee!
  */
-
 static void
 names_all_visible_channels(struct Client *source_p)
 {

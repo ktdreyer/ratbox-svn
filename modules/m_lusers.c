@@ -37,8 +37,8 @@
 #include "parse.h"
 #include "modules.h"
 
-static void m_lusers(struct Client *, struct Client *, int, const char **);
-static void ms_lusers(struct Client *, struct Client *, int, const char **);
+static int m_lusers(struct Client *, struct Client *, int, const char **);
+static int ms_lusers(struct Client *, struct Client *, int, const char **);
 
 struct Message lusers_msgtab = {
 	"LUSERS", 0, 0, 0, 0, MFLG_SLOW, 0,
@@ -57,7 +57,7 @@ DECLARE_MODULE_AV1(NULL, NULL, lusers_clist, NULL, NULL, "$Revision$");
  * 199970918 JRL hacked to ignore parv[1] completely and require parc > 3
  * to cause a force
  */
-static void
+static int
 m_lusers(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	static time_t last_used = 0;
@@ -68,17 +68,19 @@ m_lusers(struct Client *client_p, struct Client *source_p, int parc, const char 
 		{
 			/* safe enough to give this on a local connect only */
 			sendto_one(source_p, form_str(RPL_LOAD2HI), me.name, parv[0]);
-			return;
+			return 0;
 		}
 		else
 			last_used = CurrentTime;
 
 		if(hunt_server(client_p, source_p, ":%s LUSERS %s :%s", 2, parc, parv) !=
 			   HUNTED_ISME)
-			return;
+			return 0;
 	}
 
 	show_lusers(source_p);
+
+	return 0;
 }
 
 /*
@@ -90,7 +92,7 @@ m_lusers(struct Client *client_p, struct Client *source_p, int parc, const char 
  * 199970918 JRL hacked to ignore parv[1] completely and require parc > 3
  * to cause a force
  */
-static void
+static int
 ms_lusers(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	if(parc > 2)
@@ -98,10 +100,12 @@ ms_lusers(struct Client *client_p, struct Client *source_p, int parc, const char
 		if(hunt_server(client_p, source_p, ":%s LUSERS %s :%s", 2, parc, parv)
 		   != HUNTED_ISME)
 		{
-			return;
+			return 0;
 		}
 	}
 
 	if(IsClient(source_p))
 		show_lusers(source_p);
+
+	return 0;
 }

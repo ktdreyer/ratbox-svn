@@ -42,7 +42,7 @@
 #include "modules.h"
 #include "hostmask.h"
 
-static void mo_rehash(struct Client *, struct Client *, int, const char **);
+static int mo_rehash(struct Client *, struct Client *, int, const char **);
 
 struct Message rehash_msgtab = {
 	"REHASH", 0, 0, 0, 0, MFLG_SLOW, 0,
@@ -176,13 +176,13 @@ static struct hash_commands rehash_commands[] = {
  * mo_rehash - REHASH message handler
  *
  */
-static void
+static int
 mo_rehash(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	if(!IsOperRehash(source_p))
 	{
 		sendto_one(source_p, ":%s NOTICE %s :You need rehash = yes;", me.name, parv[0]);
-		return;
+		return 0;
 	}
 
 	if(parc > 1)
@@ -200,7 +200,7 @@ mo_rehash(struct Client *client_p, struct Client *source_p, int parc, const char
 				rehash_commands[x].handler(source_p);
 				ilog(L_NOTICE, "REHASH %s From %s[%s]", parv[1],
 				     get_oper_name(source_p), source_p->localClient->sockhost);
-				return;
+				return 0;
 			}
 		}
 
@@ -224,6 +224,8 @@ mo_rehash(struct Client *client_p, struct Client *source_p, int parc, const char
 		ilog(L_NOTICE, "REHASH From %s[%s]", get_oper_name(source_p),
 		     source_p->localClient->sockhost);
 		rehash(0);
-		return;
+		return 0;
 	}
+
+	return 0;
 }

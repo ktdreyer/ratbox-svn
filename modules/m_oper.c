@@ -49,9 +49,9 @@ static int match_oper_password(const char *password, struct ConfItem *aconf);
 
 extern char *crypt();
 
-static void m_oper(struct Client *, struct Client *, int, const char **);
-static void ms_oper(struct Client *, struct Client *, int, const char **);
-static void mo_oper(struct Client *, struct Client *, int, const char **);
+static int m_oper(struct Client *, struct Client *, int, const char **);
+static int ms_oper(struct Client *, struct Client *, int, const char **);
+static int mo_oper(struct Client *, struct Client *, int, const char **);
 
 
 struct Message oper_msgtab = {
@@ -68,7 +68,7 @@ DECLARE_MODULE_AV1(NULL, NULL, oper_clist, NULL, NULL, "$Revision$");
  *      parv[1] = oper name
  *      parv[2] = oper password
  */
-static void
+static int
 m_oper(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct ConfItem *aconf;
@@ -82,7 +82,7 @@ m_oper(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	if(EmptyString(password))
 	{
 		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), me.name, source_p->name, "OPER");
-		return;
+		return 0;
 	}
 
 	/* end the grace period */
@@ -101,7 +101,7 @@ m_oper(struct Client *client_p, struct Client *source_p, int parc, const char *p
 					     source_p->name, source_p->username, source_p->host);
 		}
 
-		return;
+		return 0;
 	}
 
 	if(match_oper_password(password, aconf))
@@ -120,7 +120,7 @@ m_oper(struct Client *client_p, struct Client *source_p, int parc, const char *p
 
 			log_foper(source_p, name);
 			attach_conf(source_p, oconf);
-			return;
+			return 0;
 		}
 
 		oper_up(source_p, aconf);
@@ -128,7 +128,7 @@ m_oper(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		ilog(L_TRACE, "OPER %s by %s!%s@%s",
 		     name, source_p->name, source_p->username, source_p->host);
 		log_oper(source_p, name);
-		return;
+		return 0;
 	}
 	else
 	{
@@ -142,6 +142,8 @@ m_oper(struct Client *client_p, struct Client *source_p, int parc, const char *p
 					     source_p->name, source_p->username, source_p->host);
 		}
 	}
+
+	return 0;
 }
 
 /*
@@ -150,12 +152,12 @@ m_oper(struct Client *client_p, struct Client *source_p, int parc, const char *p
 **      parv[1] = oper name
 **      parv[2] = oper password
 */
-static void
+static int
 mo_oper(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	sendto_one(source_p, form_str(RPL_YOUREOPER), me.name, parv[0]);
 	SendMessageFile(source_p, &ConfigFileEntry.opermotd);
-	return;
+	return 0;
 }
 
 /*
@@ -164,7 +166,7 @@ mo_oper(struct Client *client_p, struct Client *source_p, int parc, const char *
 **      parv[1] = oper name
 **      parv[2] = oper password
 */
-static void
+static int
 ms_oper(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	/* if message arrived from server, trust it, and set to oper */
@@ -177,6 +179,8 @@ ms_oper(struct Client *client_p, struct Client *source_p, int parc, const char *
 		Count.oper++;
 		sendto_server(client_p, NULL, NOCAPS, NOCAPS, ":%s MODE %s :+o", parv[0], parv[0]);
 	}
+
+	return 0;
 }
 
 /*
@@ -185,7 +189,6 @@ ms_oper(struct Client *client_p, struct Client *source_p, int parc, const char *
  * inputs       -
  * output       -
  */
-
 static struct ConfItem *
 find_password_aconf(const char *name, struct Client *source_p)
 {

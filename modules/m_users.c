@@ -36,8 +36,8 @@
 #include "parse.h"
 #include "modules.h"
 
-static void m_users(struct Client *, struct Client *, int, const char **);
-static void mo_users(struct Client *, struct Client *, int, const char **);
+static int m_users(struct Client *, struct Client *, int, const char **);
+static int mo_users(struct Client *, struct Client *, int, const char **);
 
 struct Message users_msgtab = {
 	"USERS", 0, 0, 0, 0, MFLG_SLOW, 0,
@@ -52,13 +52,13 @@ DECLARE_MODULE_AV1(NULL, NULL, users_clist, NULL, NULL, "$Revision$");
  *      parv[0] = sender prefix
  *      parv[1] = servername
  */
-static void
+static int
 m_users(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	if(!ConfigServerHide.disable_remote)
 	{
 		if(hunt_server(client_p, source_p, ":%s USERS :%s", 1, parc, parv) != HUNTED_ISME)
-			return;
+			return 0;
 	}
 
 	sendto_one(source_p, form_str(RPL_LOCALUSERS), me.name, parv[0],
@@ -67,6 +67,8 @@ m_users(struct Client *client_p, struct Client *source_p, int parc, const char *
 
 	sendto_one(source_p, form_str(RPL_GLOBALUSERS), me.name, parv[0],
 		   Count.total, Count.max_tot);
+
+	return 0;
 }
 
 /*
@@ -74,7 +76,7 @@ m_users(struct Client *client_p, struct Client *source_p, int parc, const char *
  *      parv[0] = sender prefix
  *      parv[1] = servername
  */
-static void
+static int
 mo_users(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	if(hunt_server(client_p, source_p, ":%s USERS :%s", 1, parc, parv) == HUNTED_ISME)
@@ -89,4 +91,6 @@ mo_users(struct Client *client_p, struct Client *source_p, int parc, const char 
 		sendto_one(source_p, form_str(RPL_GLOBALUSERS), me.name, parv[0],
 			   Count.total, Count.max_tot);
 	}
+
+	return 0;
 }

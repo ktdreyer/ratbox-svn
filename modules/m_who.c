@@ -43,7 +43,7 @@
 #include "modules.h"
 #include "packet.h"
 
-static void m_who(struct Client *, struct Client *, int, const char **);
+static int m_who(struct Client *, struct Client *, int, const char **);
 
 struct Message who_msgtab = {
 	"WHO", 0, 0, 2, 0, MFLG_SLOW, 0,
@@ -69,7 +69,7 @@ static void do_who(struct Client *source_p,
 **      parv[1] = nickname mask list
 **      parv[2] = additional selection flag, only 'o' for now.
 */
-static void
+static int
 m_who(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Client *target_p;
@@ -94,7 +94,7 @@ m_who(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 		if(*mask == '\0')
 		{
 			sendto_one(source_p, form_str(RPL_ENDOFWHO), me.name, parv[0], "*");
-			return;
+			return 0;
 		}
 	}
 	else
@@ -104,7 +104,7 @@ m_who(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 
 		who_global(source_p, mask, server_oper);
 		sendto_one(source_p, form_str(RPL_ENDOFWHO), me.name, parv[0], "*");
-		return;
+		return 0;
 	}
 
 	/* mask isn't NULL at this point. repeat after me... -db */
@@ -120,13 +120,13 @@ m_who(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 		if(!mychannel)
 		{
 			sendto_one(source_p, form_str(RPL_ENDOFWHO), me.name, parv[0], "*");
-			return;
+			return 0;
 		}
 
 		do_who_on_channel(source_p, mychannel, "*", NO, YES);
 
 		sendto_one(source_p, form_str(RPL_ENDOFWHO), me.name, parv[0], "*");
-		return;
+		return 0;
 	}
 
 	/* '/who #some_channel' */
@@ -145,7 +145,7 @@ m_who(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 				do_who_on_channel(source_p, chptr, chptr->chname, NO, NO);
 		}
 		sendto_one(source_p, form_str(RPL_ENDOFWHO), me.name, parv[0], mask);
-		return;
+		return 0;
 	}
 
 	/* '/who nick' */
@@ -191,7 +191,7 @@ m_who(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 		}
 
 		sendto_one(source_p, form_str(RPL_ENDOFWHO), me.name, parv[0], mask);
-		return;
+		return 0;
 	}
 
 	if(!IsFloodDone(source_p))
@@ -205,6 +205,8 @@ m_who(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 
 	/* Wasn't a nick, wasn't a channel, wasn't a '*' so ... */
 	sendto_one(source_p, form_str(RPL_ENDOFWHO), me.name, parv[0], mask);
+
+	return 0;
 }
 
 /* who_common_channel

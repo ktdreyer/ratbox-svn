@@ -46,7 +46,7 @@
 #include "parse.h"
 #include "modules.h"
 
-static void ms_encap(struct Client *client_p, struct Client *source_p,
+static int ms_encap(struct Client *client_p, struct Client *source_p,
 		     int parc, const char *parv[]);
 
 struct Message encap_msgtab = {
@@ -65,7 +65,7 @@ const char *_version = "$Revision$";
  * parv[2] - subcommand
  * parv[3] - parameters
  */
-void
+static int
 ms_encap(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	char buffer[BUFSIZE];
@@ -82,7 +82,7 @@ ms_encap(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 		/* ugh, not even at the last parameter, just bail --fl */
 		if((size_t)(cur_len + len) >= sizeof(buffer))
-			return;
+			return 0;
 
 		snprintf(ptr, sizeof(buffer) - cur_len, "%s ", parv[i]);
 		cur_len += len;
@@ -103,5 +103,6 @@ ms_encap(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	sendto_match_servs(source_p, parv[1], CAP_ENCAP,
 			   "ENCAP %s", buffer);
+	return 0;
 }
 

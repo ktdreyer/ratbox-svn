@@ -52,7 +52,7 @@
 #include "parse.h"
 #include "modules.h"
 
-static void m_etrace(struct Client *, struct Client *, int, const char **);
+static int m_etrace(struct Client *, struct Client *, int, const char **);
 
 struct Message etrace_msgtab = {
 	"ETRACE", 0, 0, 0, 0, MFLG_SLOW, 0,
@@ -67,7 +67,7 @@ DECLARE_MODULE_AV1(NULL, NULL, etrace_clist, NULL, NULL, "$Revision$");
  *      parv[0] = sender prefix
  *      parv[1] = servername
  */
-static void
+static int
 m_etrace(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Client *target_p;
@@ -76,7 +76,7 @@ m_etrace(struct Client *client_p, struct Client *source_p, int parc, const char 
 	const char *ip_ptr;
 
 	if(!IsClient(source_p))
-		return;
+		return 0;
 
 	/* report all direct connections */
 	DLINK_FOREACH(ptr, lclient_list.head)
@@ -104,5 +104,6 @@ m_etrace(struct Client *client_p, struct Client *source_p, int parc, const char 
 	}
 
 	sendto_one(source_p, form_str(RPL_ENDOFTRACE), me.name, parv[0], me.name);
+	return 0;
 }
 

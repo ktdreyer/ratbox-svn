@@ -35,7 +35,7 @@
 #include "parse.h"
 #include "modules.h"
 
-static void mr_pass(struct Client *, struct Client *, int, const char **);
+static int mr_pass(struct Client *, struct Client *, int, const char **);
 
 struct Message pass_msgtab = {
 	"PASS", 0, 0, 2, 0, MFLG_SLOW | MFLG_UNREG, 0,
@@ -54,7 +54,7 @@ DECLARE_MODULE_AV1(NULL, NULL, pass_clist, NULL, NULL, "$Revision$");
  *      parv[1] = password
  *      parv[2] = optional extra version information
  */
-static void
+static int
 mr_pass(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	const char *password = parv[1];
@@ -63,7 +63,7 @@ mr_pass(struct Client *client_p, struct Client *source_p, int parc, const char *
 	{
 		sendto_one(client_p, form_str(ERR_NEEDMOREPARAMS),
 			   me.name, EmptyString(parv[0]) ? "*" : parv[0], "PASS");
-		return;
+		return 0;
 	}
 
 	strlcpy(client_p->localClient->passwd, password, sizeof(client_p->localClient->passwd));
@@ -81,4 +81,6 @@ mr_pass(struct Client *client_p, struct Client *source_p, int parc, const char *
 		if(0 == irccmp(parv[2], "TS") && client_p->tsinfo == 0)
 			client_p->tsinfo = TS_DOESTS;
 	}
+
+	return 0;
 }

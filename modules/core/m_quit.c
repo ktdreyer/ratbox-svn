@@ -36,8 +36,8 @@
 #include "modules.h"
 #include "s_conf.h"
 
-static void m_quit(struct Client *, struct Client *, int, const char **);
-static void ms_quit(struct Client *, struct Client *, int, const char **);
+static int m_quit(struct Client *, struct Client *, int, const char **);
+static int ms_quit(struct Client *, struct Client *, int, const char **);
 
 struct Message quit_msgtab = {
 	"QUIT", 0, 0, 0, 0, MFLG_SLOW | MFLG_UNREG, 0,
@@ -52,7 +52,7 @@ DECLARE_MODULE_AV1(NULL, NULL, quit_clist, NULL, NULL, "$Revision$");
 **      parv[0] = sender prefix
 **      parv[1] = comment
 */
-static void
+static int
 m_quit(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	char *comment = LOCAL_COPY((parc > 1 && parv[1]) ? parv[1] : client_p->name);
@@ -77,10 +77,12 @@ m_quit(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	   (source_p->firsttime + ConfigFileEntry.anti_spam_exit_message_time) > CurrentTime)
 	{
 		exit_client(client_p, source_p, source_p, "Client Quit");
-		return;
+		return 0;
 	}
 
 	exit_client(client_p, source_p, source_p, comment);
+
+	return 0;
 }
 
 /*
@@ -88,7 +90,7 @@ m_quit(struct Client *client_p, struct Client *source_p, int parc, const char *p
 **      parv[0] = sender prefix
 **      parv[1] = comment
 */
-static void
+static int
 ms_quit(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	char *comment = LOCAL_COPY((parc > 1 && parv[1]) ? parv[1] : client_p->name);
@@ -98,4 +100,6 @@ ms_quit(struct Client *client_p, struct Client *source_p, int parc, const char *
 		comment[TOPICLEN] = '\0';
 
 	exit_client(client_p, source_p, source_p, comment);
+
+	return 0;
 }

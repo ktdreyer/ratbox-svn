@@ -44,8 +44,8 @@
 #include "linebuf.h"
 
 
-static void m_list(struct Client *, struct Client *, int, const char **);
-static void mo_list(struct Client *, struct Client *, int, const char **);
+static int m_list(struct Client *, struct Client *, int, const char **);
+static int mo_list(struct Client *, struct Client *, int, const char **);
 static int list_all_channels(struct Client *);
 static void list_one_channel(struct Client *, struct Channel *);
 
@@ -65,7 +65,7 @@ static int list_named_channel(struct Client *source_p, const char *name);
 **      parv[0] = sender prefix
 **      parv[1] = channel
 */
-static void
+static int
 m_list(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	static time_t last_used = 0L;
@@ -76,7 +76,7 @@ m_list(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	if(((last_used + ConfigFileEntry.pace_wait) > CurrentTime))
 	{
 		sendto_one(source_p, form_str(RPL_LOAD2HI), me.name, parv[0]);
-		return;
+		return 0;
 	}
 	else
 		last_used = CurrentTime;
@@ -91,6 +91,8 @@ m_list(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	{
 		list_named_channel(source_p, parv[1]);
 	}
+
+	return 0;
 }
 
 
@@ -99,10 +101,9 @@ m_list(struct Client *client_p, struct Client *source_p, int parc, const char *p
 **      parv[0] = sender prefix
 **      parv[1] = channel
 */
-static void
+static int
 mo_list(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-
 	/* If no arg, do all channels *whee*, else just one channel */
 	if(parc < 2 || EmptyString(parv[1]))
 	{
@@ -112,6 +113,8 @@ mo_list(struct Client *client_p, struct Client *source_p, int parc, const char *
 	{
 		list_named_channel(source_p, parv[1]);
 	}
+
+	return 0;
 }
 
 

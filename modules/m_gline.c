@@ -82,8 +82,8 @@ static int invalid_gline(struct Client *, const char *, const char *, const char
 
 static char *small_file_date(void);
 
-static void ms_gline(struct Client *, struct Client *, int, const char **);
-static void mo_gline(struct Client *, struct Client *, int, const char **);
+static int ms_gline(struct Client *, struct Client *, int, const char **);
+static int mo_gline(struct Client *, struct Client *, int, const char **);
 
 struct Message gline_msgtab = {
 	"GLINE", 0, 0, 3, 0, MFLG_SLOW, 0,
@@ -108,7 +108,7 @@ DECLARE_MODULE_AV1(NULL, NULL, gline_clist, NULL, NULL, "$Revision$");
  *
  */
 
-static void
+static int
 mo_gline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	const char *user = NULL;
@@ -122,7 +122,7 @@ mo_gline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	{
 		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
 			   me.name, parv[0], "GLINE");
-		return;
+		return 0;
 	}
 
 	if(ConfigFileEntry.glines)
@@ -131,7 +131,7 @@ mo_gline(struct Client *client_p, struct Client *source_p, int parc, const char 
 		{
 			sendto_one(source_p, ":%s NOTICE %s :You need gline = yes;", me.name,
 				   parv[0]);
-			return;
+			return 0;
 		}
 
 		if((host = strchr(parv[1], '@')) || *parv[1] == '*')
@@ -165,11 +165,11 @@ mo_gline(struct Client *client_p, struct Client *source_p, int parc, const char 
 		{
 			sendto_one(source_p, ":%s NOTICE %s :Can't G-Line a nick use user@host",
 				   me.name, parv[0]);
-			return;
+			return 0;
 		}
 
 		if(invalid_gline(source_p, user, host, parv[2]))
-			return;
+			return 0;
 
 		/* Not enough non-wild characters were found, assume they are trying to gline *@*. */
 		if(check_wild_gline(user, host))
@@ -178,7 +178,7 @@ mo_gline(struct Client *client_p, struct Client *source_p, int parc, const char 
 				sendto_one(source_p,
 					   ":%s NOTICE %s :Please include at least %d non-wildcard characters with the user@host",
 					   me.name, parv[0], ConfigFileEntry.min_nonwildcard);
-			return;
+			return 0;
 		}
 
 		reason = parv[2];
@@ -221,6 +221,7 @@ mo_gline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	{
 		sendto_one(source_p, ":%s NOTICE %s :GLINE disabled", me.name, parv[0]);
 	}
+	return 0;
 }
 
 /*
@@ -237,7 +238,7 @@ mo_gline(struct Client *client_p, struct Client *source_p, int parc, const char 
  * GLINES is not defined.
  */
 
-static void
+static int
 ms_gline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	/* These are needed for hyb6 compatibility.. if its ever removed we can
@@ -276,7 +277,7 @@ ms_gline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	}
 	/* none of the above */
 	else
-		return;
+		return 0;
 
 	/* Its plausible that the server and/or client dont actually exist,
 	 * and its faked, as the oper isnt sending the gline..
@@ -285,13 +286,13 @@ ms_gline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	if((acptr = find_server(oper_server)))
 	{
 		if((acptr = find_client(oper_nick)) == NULL)
-			return;
+			return 0;
 	}
 	else
-		return;
+		return 0;
 
 	if(invalid_gline(acptr, user, host, (char *) reason))
-		return;
+		return 0;
 
 	/* send in hyb-7 to compatable servers */
 	sendto_server(client_p, NULL, CAP_GLN, NOCAPS,
@@ -313,7 +314,7 @@ ms_gline(struct Client *client_p, struct Client *source_p, int parc, const char 
 					     "%s!%s@%s on %s is requesting a gline without %d non-wildcard characters for [%s@%s] [%s]",
 					     oper_nick, oper_user, oper_host, oper_server,
 					     ConfigFileEntry.min_nonwildcard, user, host, reason);
-			return;
+			return 0;
 		}
 
 		log_gline_request(oper_nick, oper_user, oper_host, oper_server, user, host, reason);
@@ -328,6 +329,7 @@ ms_gline(struct Client *client_p, struct Client *source_p, int parc, const char 
 				     oper_nick,
 				     oper_user, oper_host, oper_server, user, host, reason);
 	}
+	return 0;
 }
 
 /*

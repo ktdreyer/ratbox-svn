@@ -38,8 +38,8 @@
 #include "s_conf.h"
 #include "s_serv.h"
 
-static void m_ping(struct Client *, struct Client *, int, const char **);
-static void ms_ping(struct Client *, struct Client *, int, const char **);
+static int m_ping(struct Client *, struct Client *, int, const char **);
+static int ms_ping(struct Client *, struct Client *, int, const char **);
 
 struct Message ping_msgtab = {
 	"PING", 0, 0, 1, 0, MFLG_SLOW, 0,
@@ -55,7 +55,7 @@ DECLARE_MODULE_AV1(NULL, NULL, ping_clist, NULL, NULL, "$Revision$");
 **      parv[1] = origin
 **      parv[2] = destination
 */
-static void
+static int
 m_ping(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Client *target_p;
@@ -64,7 +64,7 @@ m_ping(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	if(parc < 2 || EmptyString(parv[1]))
 	{
 		sendto_one(source_p, form_str(ERR_NOORIGIN), me.name, parv[0]);
-		return;
+		return 0;
 	}
 
 	origin = parv[1];
@@ -74,7 +74,7 @@ m_ping(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	{
 		sendto_one(source_p, ":%s PONG %s :%s", me.name,
 			   (destination) ? destination : me.name, origin);
-		return;
+		return 0;
 	}
 
 	if(!EmptyString(destination) && irccmp(destination, me.name))
@@ -94,15 +94,17 @@ m_ping(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		{
 			sendto_one(source_p, form_str(ERR_NOSUCHSERVER),
 				   me.name, parv[0], destination);
-			return;
+			return 0;
 		}
 	}
 	else
 		sendto_one(source_p, ":%s PONG %s :%s", me.name,
 			   (destination) ? destination : me.name, origin);
+
+	return 0;
 }
 
-static void
+static int
 ms_ping(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Client *target_p;
@@ -111,7 +113,7 @@ ms_ping(struct Client *client_p, struct Client *source_p, int parc, const char *
 	if(parc < 2 || EmptyString(parv[1]))
 	{
 		sendto_one(source_p, form_str(ERR_NOORIGIN), me.name, parv[0]);
-		return;
+		return 0;
 	}
 
 /* origin == source_p->name, lets not even both wasting effort on it --fl_ */
@@ -126,10 +128,12 @@ ms_ping(struct Client *client_p, struct Client *source_p, int parc, const char *
 		{
 			sendto_one(source_p, form_str(ERR_NOSUCHSERVER),
 				   me.name, parv[0], destination);
-			return;
+			return 0;
 		}
 	}
 	else
 		sendto_one(source_p, ":%s PONG %s :%s", me.name,
 			   (destination) ? destination : me.name, origin);
+
+	return 0;
 }

@@ -39,7 +39,7 @@
 #include "packet.h"
 
 
-static void m_htm(struct Client *, struct Client *, int, const char **);
+static int m_htm(struct Client *, struct Client *, int, const char **);
 
 struct Message htm_msgtab = {
 	"HTM", 0, 0, 0, 0, MFLG_SLOW, 0,
@@ -52,8 +52,9 @@ DECLARE_MODULE_AV1(NULL, NULL, htm_clist, NULL, NULL, "$Revision$");
 ** m_htm
 **      parv[0] = sender prefix
 */
-static void
+static int
 m_htm(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	get_current_bandwidth(client_p, source_p);
+	return 0;
 }

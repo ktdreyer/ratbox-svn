@@ -56,9 +56,9 @@
 #include "s_newconf.h"
 #include "hash.h"
 
-static void m_stats (struct Client *, struct Client *, int, const char **);
-static void mo_stats (struct Client *, struct Client *, int, const char **);
-static void ms_stats (struct Client *, struct Client *, int, const char **);
+static int m_stats (struct Client *, struct Client *, int, const char **);
+static int mo_stats (struct Client *, struct Client *, int, const char **);
+static int ms_stats (struct Client *, struct Client *, int, const char **);
 
 struct Message stats_msgtab = {
 	"STATS", 0, 0, 2, 0, MFLG_SLOW, 0,
@@ -192,9 +192,8 @@ static struct StatsStruct stats_cmd_table[] = {
  * This will search the tables for the appropriate stats letter/command,
  * if found execute it.  
  */
-
-static void
-m_stats (struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
+static int
+m_stats(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	int i;
 	char statchar;
@@ -204,7 +203,7 @@ m_stats (struct Client *client_p, struct Client *source_p, int parc, const char 
 	{
 		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
 			   me.name, parv[0], "STATS");
-		return;
+		return 0;
 	}
 
 	/* Check the user is actually allowed to do /stats, and isnt flooding */
@@ -213,7 +212,7 @@ m_stats (struct Client *client_p, struct Client *source_p, int parc, const char 
 		/* safe enough to give this on a local connect only */
 		if(MyClient (source_p))
 			sendto_one (source_p, form_str (RPL_LOAD2HI), me.name, parv[0]);
-		return;
+		return 0;
 	}
 	else
 	{
@@ -225,7 +224,7 @@ m_stats (struct Client *client_p, struct Client *source_p, int parc, const char 
 	{
 		if(hunt_server (client_p, source_p, ":%s STATS %s :%s", 2, parc, parv) !=
 		   HUNTED_ISME)
-			return;
+			return 0;
 	}
 
 	statchar = parv[1][0];
@@ -255,6 +254,8 @@ m_stats (struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	if((statchar != 'L') && (statchar != 'l'))
 		stats_spy (source_p, statchar);
+
+	return 0;
 }
 
 /*
@@ -266,9 +267,8 @@ m_stats (struct Client *client_p, struct Client *source_p, int parc, const char 
  * This will search the tables for the appropriate stats letter,
  * if found execute it.  
  */
-
-static void
-mo_stats (struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
+static int
+mo_stats(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	int i;
 	char statchar;
@@ -277,11 +277,11 @@ mo_stats (struct Client *client_p, struct Client *source_p, int parc, const char
 	{
 		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
 			   me.name, parv[0], "STATS");
-		return;
+		return 0;
 	}
 
 	if(hunt_server (client_p, source_p, ":%s STATS %s :%s", 2, parc, parv) != HUNTED_ISME)
-		return;
+		return 0;
 
 	statchar = parv[1][0];
 
@@ -314,6 +314,8 @@ mo_stats (struct Client *client_p, struct Client *source_p, int parc, const char
 
 	if((statchar != 'L') && (statchar != 'l'))
 		stats_spy (source_p, statchar);
+
+	return 0;
 }
 
 /*
@@ -322,15 +324,16 @@ mo_stats (struct Client *client_p, struct Client *source_p, int parc, const char
  *      parv[1] = statistics selector (defaults to Message frequency)
  *      parv[2] = server name (current server defaulted, if omitted)
  */
-
-static void
-ms_stats (struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
+static int
+ms_stats(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	if(hunt_server (client_p, source_p, ":%s STATS %s :%s", 2, parc, parv) != HUNTED_ISME)
-		return;
+		return 0;
 
 	if(IsClient (source_p))
 		mo_stats (client_p, source_p, parc, parv);
+
+	return 0;
 }
 
 static void

@@ -39,8 +39,8 @@
 #include "parse.h"
 #include "modules.h"
 
-static void ms_squit(struct Client *, struct Client *, int, const char **);
-static void mo_squit(struct Client *, struct Client *, int, const char **);
+static int ms_squit(struct Client *, struct Client *, int, const char **);
+static int mo_squit(struct Client *, struct Client *, int, const char **);
 
 struct Message squit_msgtab = {
 	"SQUIT", 0, 0, 1, 0, MFLG_SLOW, 0,
@@ -66,7 +66,7 @@ static struct squit_parms *find_squit(struct Client *client_p,
  *      parv[1] = server name
  *      parv[2] = comment
  */
-static void
+static int
 mo_squit(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct squit_parms *found_squit;
@@ -75,13 +75,13 @@ mo_squit(struct Client *client_p, struct Client *source_p, int parc, const char 
 	if(!IsOperRemote(source_p))
 	{
 		sendto_one(source_p, ":%s NOTICE %s :You need remote = yes;", me.name, parv[0]);
-		return;
+		return 0;
 	}
 
 	if(parc < 2 || EmptyString(parv[1]))
 	{
 		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), me.name, parv[0], "SQUIT");
-		return;
+		return 0;
 	}
 
 	if((found_squit = find_squit(client_p, source_p, parv[1])))
@@ -97,12 +97,14 @@ mo_squit(struct Client *client_p, struct Client *source_p, int parc, const char 
 			     comment);
 		}
 		exit_client(client_p, found_squit->target_p, source_p, comment);
-		return;
+		return 0;
 	}
 	else
 	{
 		sendto_one(source_p, form_str(ERR_NOSUCHSERVER), me.name, parv[0], parv[1]);
 	}
+
+	return 0;
 }
 
 /*
@@ -111,7 +113,7 @@ mo_squit(struct Client *client_p, struct Client *source_p, int parc, const char 
  *      parv[1] = server name
  *      parv[2] = comment
  */
-static void
+static int
 ms_squit(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct squit_parms *found_squit;
@@ -120,7 +122,7 @@ ms_squit(struct Client *client_p, struct Client *source_p, int parc, const char 
 	if(parc < 2)
 	{
 		exit_client(client_p, client_p, source_p, comment);
-		return;
+		return 0;
 	}
 
 	if((found_squit = find_squit(client_p, source_p, parv[1])))
@@ -143,8 +145,10 @@ ms_squit(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 		}
 		exit_client(client_p, found_squit->target_p, source_p, comment);
-		return;
+		return 0;
 	}
+
+	return 0;
 }
 
 

@@ -40,9 +40,9 @@
 #include "hook.h"
 
 
-static void m_links(struct Client *, struct Client *, int, const char **);
-static void mo_links(struct Client *, struct Client *, int, const char **);
-static void ms_links(struct Client *, struct Client *, int, const char **);
+static int m_links(struct Client *, struct Client *, int, const char **);
+static int mo_links(struct Client *, struct Client *, int, const char **);
+static int ms_links(struct Client *, struct Client *, int, const char **);
 
 struct Message links_msgtab = {
 	"LINKS", 0, 0, 0, 0, MFLG_SLOW, 0,
@@ -68,14 +68,13 @@ DECLARE_MODULE_AV1(NULL, NULL, links_clist, NULL, NULL, "$Revision$");
  *      parv[1] = server to query 
  *      parv[2] = servername mask
  */
-
-static void
+static int
 m_links(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	if(!ConfigServerHide.flatten_links)
 	{
 		mo_links(client_p, source_p, parc, parv);
-		return;
+		return 0;
 	}
 
 	SendMessageFile(source_p, &ConfigFileEntry.linksfile);
@@ -88,9 +87,11 @@ m_links(struct Client *client_p, struct Client *source_p, int parc, const char *
 	sendto_one(source_p, form_str(RPL_LINKS), me.name, parv[0], me.name, me.name, 0, me.info);
 
 	sendto_one(source_p, form_str(RPL_ENDOFLINKS), me.name, parv[0], "*");
+
+	return 0;
 }
 
-static void
+static int
 mo_links(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	const char *mask = "";
@@ -107,7 +108,7 @@ mo_links(struct Client *client_p, struct Client *source_p, int parc, const char 
 		{
 			if(hunt_server(client_p, source_p, ":%s LINKS %s :%s", 1, parc, parv)
 			   != HUNTED_ISME)
-				return;
+				return 0;
 		}
 
 		mask = parv[2];
@@ -156,6 +157,8 @@ mo_links(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	sendto_one(source_p, form_str(RPL_ENDOFLINKS), me.name, parv[0],
 		   EmptyString(mask) ? "*" : mask);
+
+	return 0;
 }
 
 /*
@@ -167,12 +170,14 @@ mo_links(struct Client *client_p, struct Client *source_p, int parc, const char 
  *      parv[1] = server to query 
  *      parv[2] = servername mask
  */
-static void
+static int
 ms_links(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	if(hunt_server(client_p, source_p, ":%s LINKS %s :%s", 1, parc, parv) != HUNTED_ISME)
-		return;
+		return 0;
 
 	if(IsClient(source_p))
 		m_links(client_p, source_p, parc, parv);
+
+	return 0;
 }

@@ -45,7 +45,7 @@
 #include "modules.h"
 #include "s_serv.h"
 
-static void mo_ungline(struct Client *, struct Client *, int, const char **);
+static int mo_ungline(struct Client *, struct Client *, int, const char **);
 static int remove_temp_gline(const char *, const char *);
 
 struct Message ungline_msgtab = {
@@ -61,8 +61,7 @@ DECLARE_MODULE_AV1(NULL, NULL, ungline_clist, NULL, NULL, "$Revision$");
  *      parv[0] = sender nick
  *      parv[1] = gline to remove
  */
-
-static void
+static int
 mo_ungline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	const char *user;
@@ -73,13 +72,13 @@ mo_ungline(struct Client *client_p, struct Client *source_p, int parc, const cha
 	if(!ConfigFileEntry.glines)
 	{
 		sendto_one(source_p, ":%s NOTICE %s :UNGLINE disabled", me.name, parv[0]);
-		return;
+		return 0;
 	}
 
 	if(!IsOperUnkline(source_p) || !IsOperGline(source_p))
 	{
 		sendto_one(source_p, ":%s NOTICE %s :You need unkline = yes;", me.name, parv[0]);
-		return;
+		return 0;
 	}
 
 	if((host = strchr(h, '@')) || *h == '*')
@@ -100,7 +99,7 @@ mo_ungline(struct Client *client_p, struct Client *source_p, int parc, const cha
 	else
 	{
 		sendto_one(source_p, ":%s NOTICE %s :Invalid parameters", me.name, parv[0]);
-		return;
+		return 0;
 	}
 
 	if(remove_temp_gline(user, host))
@@ -118,6 +117,8 @@ mo_ungline(struct Client *client_p, struct Client *source_p, int parc, const cha
 		sendto_one(source_p, ":%s NOTICE %s :No G-Line for %s@%s",
 			   me.name, parv[0], user, host);
 	}
+
+	return 0;
 }
 
 

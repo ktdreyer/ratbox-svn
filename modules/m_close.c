@@ -37,7 +37,7 @@
 #include "parse.h"
 #include "modules.h"
 
-static void mo_close(struct Client *, struct Client *, int, const char **);
+static int mo_close(struct Client *, struct Client *, int, const char **);
 
 struct Message close_msgtab = {
 	"CLOSE", 0, 0, 0, 0, MFLG_SLOW, 0,
@@ -51,7 +51,7 @@ DECLARE_MODULE_AV1(NULL, NULL, close_clist, NULL, NULL, "$Revision$");
  * mo_close - CLOSE message handler
  *  - added by Darren Reed Jul 13 1992.
  */
-static void
+static int
 mo_close(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Client *target_p;
@@ -71,4 +71,5 @@ mo_close(struct Client *client_p, struct Client *source_p, int parc, const char 
 		closed++;
 	}
 	sendto_one(source_p, form_str(RPL_CLOSEEND), me.name, parv[0], closed);
+	return 0;
 }

@@ -43,7 +43,7 @@
 #include "modules.h"
 #include "packet.h"
 
-static void m_mode(struct Client *, struct Client *, int, const char **);
+static int m_mode(struct Client *, struct Client *, int, const char **);
 
 struct Message mode_msgtab = {
 	"MODE", 0, 0, 2, 0, MFLG_SLOW, 0,
@@ -58,7 +58,7 @@ DECLARE_MODULE_AV1(NULL, NULL, mode_clist, NULL, NULL, "$Revision$");
  * parv[0] - sender
  * parv[1] - channel
  */
-static void
+static int
 m_mode(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Channel *chptr = NULL;
@@ -71,7 +71,7 @@ m_mode(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	{
 		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
 			   me.name, parv[0], "MODE");
-		return;
+		return 0;
 	}
 
 	/* Now, try to find the channel in question */
@@ -79,14 +79,14 @@ m_mode(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	{
 		/* if here, it has to be a non-channel name */
 		user_mode(client_p, source_p, parc, parv);
-		return;
+		return 0;
 	}
 
 	if(!check_channel_name(parv[1]))
 	{
 		sendto_one(source_p, form_str(ERR_BADCHANNAME),
 			   me.name, parv[0], (unsigned char *) parv[1]);
-		return;
+		return 0;
 	}
 
 	chptr = find_channel(parv[1]);
@@ -94,7 +94,7 @@ m_mode(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	if(chptr == NULL)
 	{
 		sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL), me.name, parv[0], parv[1]);
-		return;
+		return 0;
 	}
 
 	/* Now known the channel exists */
@@ -115,12 +115,12 @@ m_mode(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		/* Finish the flood grace period... */
 		if(MyClient(source_p) && !IsFloodDone(source_p))
 		{
-			if((parc == 3) && (parv[2][0] == 'b') && (parv[2][1] == '\0'))
-				;
-			else
+			if(!((parc == 3) && (parv[2][0] == 'b') && (parv[2][1] == '\0')))
 				flood_endgrace(source_p);
 		}
 
 		set_channel_mode(client_p, source_p, chptr, parc - n, parv + n, chptr->chname);
 	}
+
+	return 0;
 }

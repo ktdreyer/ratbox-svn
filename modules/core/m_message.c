@@ -72,10 +72,10 @@ static int ntargets = 0;
 
 static int duplicate_ptr(void *);
 
-static void m_message(int, const char *, struct Client *, struct Client *, int, const char **);
+static int m_message(int, const char *, struct Client *, struct Client *, int, const char **);
 
-static void m_privmsg(struct Client *, struct Client *, int, const char **);
-static void m_notice(struct Client *, struct Client *, int, const char **);
+static int m_privmsg(struct Client *, struct Client *, int, const char **);
+static int m_notice(struct Client *, struct Client *, int, const char **);
 
 static void msg_channel(int p_or_n, const char *command,
 			struct Client *client_p,
@@ -129,22 +129,22 @@ DECLARE_MODULE_AV1(NULL, NULL, message_clist, NULL, NULL, "$Revision$");
 #define PRIVMSG 0
 #define NOTICE  1
 
-static void
+static int
 m_privmsg(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	/* servers have no reason to send privmsgs, yet sometimes there is cause
 	 * for a notice.. (for example remote kline replies) --fl_
 	 */
 	if(!IsPerson(source_p))
-		return;
+		return 0;
 
-	m_message(PRIVMSG, "PRIVMSG", client_p, source_p, parc, parv);
+	return m_message(PRIVMSG, "PRIVMSG", client_p, source_p, parc, parv);
 }
 
-static void
+static int
 m_notice(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	m_message(NOTICE, "NOTICE", client_p, source_p, parc, parv);
+	return m_message(NOTICE, "NOTICE", client_p, source_p, parc, parv);
 }
 
 /*
@@ -154,7 +154,7 @@ m_notice(struct Client *client_p, struct Client *source_p, int parc, const char 
  *		- pointer to source_p
  *		- pointer to channel
  */
-static void
+static int
 m_message(int p_or_n,
 	  const char *command,
 	  struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
@@ -166,14 +166,14 @@ m_message(int p_or_n,
 		if(p_or_n != NOTICE)
 			sendto_one(source_p, form_str(ERR_NORECIPIENT), me.name,
 				   source_p->name, command);
-		return;
+		return 0;
 	}
 
 	if(parc < 3 || EmptyString(parv[2]))
 	{
 		if(p_or_n != NOTICE)
 			sendto_one(source_p, form_str(ERR_NOTEXTTOSEND), me.name, source_p->name);
-		return;
+		return 0;
 	}
 
 	/* Finish the flood grace period if theyre not messaging themselves
@@ -185,7 +185,7 @@ m_message(int p_or_n,
 
 	if(build_target_list(p_or_n, command, client_p, source_p, parv[1], parv[2]) < 0)
 	{
-		return;
+		return 0;
 	}
 
 	for (i = 0; i < ntargets; i++)
@@ -209,6 +209,8 @@ m_message(int p_or_n,
 			break;
 		}
 	}
+
+	return 0;
 }
 
 /*

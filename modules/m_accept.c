@@ -38,7 +38,7 @@
 #include "sprintf_irc.h"
 #include "modules.h"
 
-static void m_accept(struct Client *, struct Client *, int, const char **);
+static int m_accept(struct Client *, struct Client *, int, const char **);
 static void build_nicklist(struct Client *, char *, char *, const char *);
 
 static void add_accept(struct Client *, struct Client *);
@@ -59,7 +59,7 @@ DECLARE_MODULE_AV1(NULL, NULL, accept_clist, NULL, NULL, "$Revision$");
  *      parv[0] = sender prefix
  *      parv[1] = servername
  */
-static void
+static int
 m_accept(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	char *nick;
@@ -73,13 +73,13 @@ m_accept(struct Client *client_p, struct Client *source_p, int parc, const char 
 	{
 		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
 			   me.name, parv[0], "ACCEPT");
-		return;
+		return 0;
 	}
 
 	if(*parv[1] == '*')
 	{
 		list_accepts(source_p);
-		return;
+		return 0;
 	}
 
 	build_nicklist(source_p, addbuf, delbuf, parv[1]);
@@ -131,7 +131,7 @@ m_accept(struct Client *client_p, struct Client *source_p, int parc, const char 
 		if(accept_num >= ConfigFileEntry.max_accept)
 		{
 			sendto_one(source_p, form_str(ERR_ACCEPTFULL), me.name, source_p->name);
-			return;
+			return 0;
 		}
 
 		/* why is this here? */
@@ -140,7 +140,7 @@ m_accept(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	}
 
-
+	return 0;
 }
 
 /*

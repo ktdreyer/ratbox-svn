@@ -37,8 +37,8 @@
 #include "parse.h"
 #include "modules.h"
 
-static void ms_wallops(struct Client *, struct Client *, int, const char **);
-static void mo_wallops(struct Client *, struct Client *, int, const char **);
+static int ms_wallops(struct Client *, struct Client *, int, const char **);
+static int mo_wallops(struct Client *, struct Client *, int, const char **);
 
 struct Message wallops_msgtab = {
 	"WALLOPS", 0, 0, 2, 0, MFLG_SLOW, 0,
@@ -53,7 +53,7 @@ DECLARE_MODULE_AV1(NULL, NULL, wallops_clist, NULL, NULL, "$Revision$");
  *      parv[0] = sender prefix
  *      parv[1] = message text
  */
-static void
+static int
 mo_wallops(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	const char *message;
@@ -63,11 +63,13 @@ mo_wallops(struct Client *client_p, struct Client *source_p, int parc, const cha
 	if(EmptyString(message))
 	{
 		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), me.name, parv[0], "WALLOPS");
-		return;
+		return 0;
 	}
 
 	sendto_wallops_flags(UMODE_OPERWALL, source_p, "OPERWALL - %s", message);
 	sendto_server(NULL, NULL, NOCAPS, NOCAPS, ":%s WALLOPS :%s", parv[0], message);
+
+	return 0;
 }
 
 /*
@@ -75,7 +77,7 @@ mo_wallops(struct Client *client_p, struct Client *source_p, int parc, const cha
  *      parv[0] = sender prefix
  *      parv[1] = message text
  */
-static void
+static int
 ms_wallops(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	const char *message;
@@ -85,7 +87,7 @@ ms_wallops(struct Client *client_p, struct Client *source_p, int parc, const cha
 	if(EmptyString(message))
 	{
 		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), me.name, parv[0], "WALLOPS");
-		return;
+		return 0;
 	}
 
 	if(IsClient(source_p))
@@ -94,4 +96,6 @@ ms_wallops(struct Client *client_p, struct Client *source_p, int parc, const cha
 		sendto_wallops_flags(UMODE_WALLOP, source_p, "%s", message);
 
 	sendto_server(client_p, NULL, NOCAPS, NOCAPS, ":%s WALLOPS :%s", parv[0], message);
+
+	return 0;
 }

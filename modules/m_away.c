@@ -39,7 +39,7 @@
 #include "packet.h"
 
 
-static void m_away(struct Client *, struct Client *, int, const char **);
+static int m_away(struct Client *, struct Client *, int, const char **);
 
 struct Message away_msgtab = {
 	"AWAY", 0, 0, 0, 0, MFLG_SLOW, 0,
@@ -65,7 +65,7 @@ DECLARE_MODULE_AV1(NULL, NULL, away_clist, NULL, NULL, "$Revision$");
 **      parv[0] = sender prefix
 **      parv[1] = away message
 */
-static void
+static int
 m_away(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	char *away;
@@ -75,7 +75,7 @@ m_away(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		flood_endgrace(source_p);
 
 	if(!IsClient(source_p))
-		return;
+		return 0;
 
 	away = source_p->user->away;
 
@@ -93,7 +93,7 @@ m_away(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		}
 		if(MyConnect(source_p))
 			sendto_one(source_p, form_str(RPL_UNAWAY), me.name, parv[0]);
-		return;
+		return 0;
 	}
 
 	/* Marking as away */
@@ -102,7 +102,7 @@ m_away(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	   (CurrentTime - source_p->user->last_away) < ConfigFileEntry.pace_wait)
 	{
 		sendto_one(source_p, form_str(RPL_LOAD2HI), me.name, parv[0]);
-		return;
+		return 0;
 	}
 
 	source_p->user->last_away = CurrentTime;
@@ -126,4 +126,6 @@ m_away(struct Client *client_p, struct Client *source_p, int parc, const char *p
 
 	if(MyConnect(source_p))
 		sendto_one(source_p, form_str(RPL_NOWAWAY), me.name, parv[0]);
+
+	return 0;
 }

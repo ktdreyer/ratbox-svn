@@ -71,7 +71,7 @@ static int bogus_host(char *host);
 static char *parse_cryptserv_args(struct Client *client_p,
 				  const char *parv[], int parc, char *info, char *key);
 
-static void mr_cryptlink(struct Client *, struct Client *, int, const char **);
+static int mr_cryptlink(struct Client *, struct Client *, int, const char **);
 static void cryptlink_serv(struct Client *, struct Client *, int, const char **);
 static void cryptlink_auth(struct Client *, struct Client *, int, const char **);
 
@@ -114,7 +114,7 @@ DECLARE_MODULE_AV1(NULL, NULL, cryptlink_clist, NULL, NULL, "$Revision$");
  *                          parv[2] == cipher (eg. BF/256)
  *                          parv[3] == keyphrase
  */
-static void
+static int
 mr_cryptlink(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	int i;
@@ -130,7 +130,7 @@ mr_cryptlink(struct Client *client_p, struct Client *source_p, int parc, const c
 			cryptlink_cmd_table[i].handler(client_p, source_p, parc, parv);
 		}
 	}
-	return;
+	return 0;
 }
 
 

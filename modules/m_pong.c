@@ -41,8 +41,8 @@
 #include "hash.h"
 #include "modules.h"
 
-static void mr_pong(struct Client *, struct Client *, int, const char **);
-static void ms_pong(struct Client *, struct Client *, int, const char **);
+static int mr_pong(struct Client *, struct Client *, int, const char **);
+static int ms_pong(struct Client *, struct Client *, int, const char **);
 
 struct Message pong_msgtab = {
 	"PONG", 0, 0, 1, 0, MFLG_SLOW | MFLG_UNREG, 0,
@@ -52,7 +52,7 @@ struct Message pong_msgtab = {
 mapi_clist_av1 pong_clist[] = { &pong_msgtab, NULL };
 DECLARE_MODULE_AV1(NULL, NULL, pong_clist, NULL, NULL, "$Revision$");
 
-static void
+static int
 ms_pong(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Client *target_p;
@@ -61,7 +61,7 @@ ms_pong(struct Client *client_p, struct Client *source_p, int parc, const char *
 	if(parc < 2 || EmptyString(parv[1]))
 	{
 		sendto_one(source_p, form_str(ERR_NOORIGIN), me.name, parv[0]);
-		return;
+		return 0;
 	}
 
 	origin = parv[1];
@@ -82,7 +82,7 @@ ms_pong(struct Client *client_p, struct Client *source_p, int parc, const char *
 		{
 			sendto_one(source_p, form_str(ERR_NOSUCHSERVER),
 				   me.name, parv[0], destination);
-			return;
+			return 0;
 		}
 	}
 
@@ -90,10 +90,10 @@ ms_pong(struct Client *client_p, struct Client *source_p, int parc, const char *
 	else
 		Debug((DEBUG_NOTICE, "PONG: %s %s", origin, destination ? destination : "*"));
 #endif
-	return;
+	return 0;
 }
 
-static void
+static int
 mr_pong(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	if(parc == 2 && !EmptyString(parv[1]))
@@ -116,7 +116,7 @@ mr_pong(struct Client *client_p, struct Client *source_p, int parc, const char *
 					sendto_one(source_p, form_str(ERR_WRONGPONG), me.name,
 						   source_p->name,
 						   source_p->localClient->random_ping);
-					return;
+					return 0;
 				}
 			}
 		}
@@ -126,4 +126,6 @@ mr_pong(struct Client *client_p, struct Client *source_p, int parc, const char *
 		sendto_one(source_p, form_str(ERR_NOORIGIN), me.name, parv[0]);
 
 	source_p->flags &= ~FLAGS_PINGSENT;
+
+	return 0;
 }

@@ -48,9 +48,9 @@ static void send_birthdate_online_time(struct Client *source_p);
 static void send_info_text(struct Client *source_p);
 static void info_spy(struct Client *);
 
-static void m_info(struct Client *, struct Client *, int, const char **);
-static void ms_info(struct Client *, struct Client *, int, const char **);
-static void mo_info(struct Client *, struct Client *, int, const char **);
+static int m_info(struct Client *, struct Client *, int, const char **);
+static int ms_info(struct Client *, struct Client *, int, const char **);
+static int mo_info(struct Client *, struct Client *, int, const char **);
 
 struct Message info_msgtab = {
 	"INFO", 0, 0, 0, 0, MFLG_SLOW, 0,
@@ -489,8 +489,7 @@ static struct InfoStruct info_table[] = {
 **  parv[0] = sender prefix
 **  parv[1] = servername
 */
-
-static void
+static int
 m_info(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	static time_t last_used = 0L;
@@ -499,7 +498,7 @@ m_info(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	{
 		/* safe enough to give this on a local connect only */
 		sendto_one(source_p, form_str(RPL_LOAD2HI), me.name, parv[0]);
-		return;
+		return 0;
 	}
 	else
 	{
@@ -510,7 +509,7 @@ m_info(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	{
 		if(hunt_server(client_p, source_p, ":%s INFO :%s", 1, parc, parv) != HUNTED_ISME)
 		{
-			return;
+			return 0;
 		}
 	}
 
@@ -520,15 +519,15 @@ m_info(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	send_birthdate_online_time(source_p);
 
 	sendto_one(source_p, form_str(RPL_ENDOFINFO), me.name, parv[0]);
-
-}				/* m_info() */
+	return 0;
+}
 
 /*
 ** mo_info
 **  parv[0] = sender prefix
 **  parv[1] = servername
 */
-static void
+static int
 mo_info(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	if(hunt_server(client_p, source_p, ":%s INFO :%s", 1, parc, parv) == HUNTED_ISME)
@@ -541,18 +540,20 @@ mo_info(struct Client *client_p, struct Client *source_p, int parc, const char *
 
 		sendto_one(source_p, form_str(RPL_ENDOFINFO), me.name, parv[0]);
 	}
-}				/* mo_info() */
+
+	return 0;
+}
 
 /*
 ** ms_info
 **  parv[0] = sender prefix
 **  parv[1] = servername
 */
-static void
+static int
 ms_info(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	if(!IsClient(source_p))
-		return;
+		return 0;
 
 	if(hunt_server(client_p, source_p, ":%s INFO :%s", 1, parc, parv) == HUNTED_ISME)
 	{
@@ -567,7 +568,9 @@ ms_info(struct Client *client_p, struct Client *source_p, int parc, const char *
 		send_birthdate_online_time(source_p);
 		sendto_one(source_p, form_str(RPL_ENDOFINFO), me.name, parv[0]);
 	}
-}				/* ms_info() */
+
+	return 0;
+}
 
 
 /*

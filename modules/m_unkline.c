@@ -46,8 +46,8 @@
 #include "s_serv.h"
 #include "cluster.h"
 
-static void mo_unkline(struct Client *, struct Client *, int, const char **);
-static void ms_unkline(struct Client *, struct Client *, int, const char **);
+static int mo_unkline(struct Client *, struct Client *, int, const char **);
+static int ms_unkline(struct Client *, struct Client *, int, const char **);
 
 struct Message unkline_msgtab = {
 	"UNKLINE", 0, 0, 2, 0, MFLG_SLOW, 0,
@@ -71,7 +71,7 @@ static int remove_temp_kline(const char *, const char *);
 *
 *
 */
-static void
+static int
 mo_unkline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	const char *user;
@@ -82,14 +82,14 @@ mo_unkline(struct Client *client_p, struct Client *source_p, int parc, const cha
 	if(!IsOperUnkline(source_p))
 	{
 		sendto_one(source_p, ":%s NOTICE %s :You need unkline = yes;", me.name, parv[0]);
-		return;
+		return 0;
 	}
 
 	if(parc < 2 || EmptyString(parv[1]))
 	{
 		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
 			   me.name, source_p->name, "UNKLINE");
-		return;
+		return 0;
 	}
 
 	if((host = strchr(h, '@')) || *h == '*')
@@ -110,7 +110,7 @@ mo_unkline(struct Client *client_p, struct Client *source_p, int parc, const cha
 	else
 	{
 		sendto_one(source_p, ":%s NOTICE %s :Invalid parameters", me.name, source_p->name);
-		return;
+		return 0;
 	}
 
 	/* possible remote kline.. */
@@ -120,7 +120,7 @@ mo_unkline(struct Client *client_p, struct Client *source_p, int parc, const cha
 				   "UNKLINE %s %s %s", parv[3], user, host);
 
 		if(match(parv[3], me.name) == 0)
-			return;
+			return 0;
 	}
 	else if(dlink_list_length(&cluster_list) > 0)
 	{
@@ -136,10 +136,12 @@ mo_unkline(struct Client *client_p, struct Client *source_p, int parc, const cha
 				     "%s has removed the temporary K-Line for: [%s@%s]",
 				     get_oper_name(source_p), user, host);
 		ilog(L_NOTICE, "%s removed temporary K-Line for [%s@%s]", parv[0], user, host);
-		return;
+		return 0;
 	}
 
 	remove_permkline_match(source_p, host, user, 0);
+
+	return 0;
 }
 
 /* ms_unkline()
@@ -151,14 +153,14 @@ mo_unkline(struct Client *client_p, struct Client *source_p, int parc, const cha
  * output	- none
  * side effects - kline is removed if matching shared {} is found.
  */
-static void
+static int
 ms_unkline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	const char *kuser;
 	const char *khost;
 
 	if(parc != 4)
-		return;
+		return 0;
 
 	/* parv[0]  parv[1]        parv[2]  parv[3]
 	 * oper     target server  user     host    */
@@ -169,10 +171,10 @@ ms_unkline(struct Client *client_p, struct Client *source_p, int parc, const cha
 	khost = parv[3];
 
 	if(!match(parv[1], me.name))
-		return;
+		return 0;
 
 	if(!IsPerson(source_p))
-		return;
+		return 0;
 
 	if(find_cluster(source_p->user->server, CLUSTER_UNKLINE))
 	{
@@ -183,7 +185,7 @@ ms_unkline(struct Client *client_p, struct Client *source_p, int parc, const cha
 					     get_oper_name(source_p), kuser, khost);
 			ilog(L_NOTICE, "%s removed temporary K-Line for [%s@%s]",
 			     source_p->name, kuser, khost);
-			return;
+			return 0;
 		}
 
 		remove_permkline_match(source_p, khost, kuser, 1);
@@ -203,11 +205,13 @@ ms_unkline(struct Client *client_p, struct Client *source_p, int parc, const cha
 
 			ilog(L_NOTICE, "%s removed temporary K-Line for [%s@%s]",
 			     source_p->name, kuser, khost);
-			return;
+			return 0;
 		}
 
 		remove_permkline_match(source_p, khost, kuser, 0);
 	}
+
+	return 0;
 }
 
 /* remove_permkline_match()

@@ -36,8 +36,8 @@
 #include "parse.h"
 #include "modules.h"
 
-static void mo_operwall(struct Client *, struct Client *, int, const char **);
-static void ms_operwall(struct Client *, struct Client *, int, const char **);
+static int mo_operwall(struct Client *, struct Client *, int, const char **);
+static int ms_operwall(struct Client *, struct Client *, int, const char **);
 
 struct Message operwall_msgtab = {
 	"OPERWALL", 0, 0, 2, 0, MFLG_SLOW, 0,
@@ -54,7 +54,7 @@ DECLARE_MODULE_AV1(NULL, NULL, operwall_clist, NULL, NULL, "$Revision$");
  *      parv[1] = message text
  */
 
-static void
+static int
 mo_operwall(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	const char *message = parv[1];
@@ -63,16 +63,18 @@ mo_operwall(struct Client *client_p, struct Client *source_p, int parc, const ch
 	{
 		sendto_one(source_p, ":%s NOTICE %s :You need operwall = yes;",
 			   me.name, source_p->name);
-		return;
+		return 0;
 	}
 	if(EmptyString(message))
 	{
 		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), me.name, parv[0], "OPERWALL");
-		return;
+		return 0;
 	}
 
 	sendto_server(NULL, NULL, NOCAPS, NOCAPS, ":%s OPERWALL :%s", parv[0], message);
 	sendto_wallops_flags(UMODE_OPERWALL, source_p, "OPERWALL - %s", message);
+
+	return 0;
 }
 
 /*
@@ -81,8 +83,7 @@ mo_operwall(struct Client *client_p, struct Client *source_p, int parc, const ch
  *      parv[0] = sender prefix
  *      parv[1] = message text
  */
-
-static void
+static int
 ms_operwall(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	const char *message = parv[1];
@@ -92,9 +93,11 @@ ms_operwall(struct Client *client_p, struct Client *source_p, int parc, const ch
 		if(MyClient(source_p))
 			sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
 				   me.name, parv[0], "OPERWALL");
-		return;
+		return 0;
 	}
 
 	sendto_server(client_p, NULL, NOCAPS, NOCAPS, ":%s OPERWALL :%s", parv[0], message);
 	sendto_wallops_flags(UMODE_OPERWALL, source_p, "OPERWALL - %s", message);
+
+	return 0;
 }

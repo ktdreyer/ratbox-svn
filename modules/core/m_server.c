@@ -46,8 +46,8 @@
 #include "modules.h"
 
 
-static void mr_server(struct Client *, struct Client *, int, const char **);
-static void ms_server(struct Client *, struct Client *, int, const char **);
+static int mr_server(struct Client *, struct Client *, int, const char **);
+static int ms_server(struct Client *, struct Client *, int, const char **);
 
 static int set_server_gecos(struct Client *, const char *);
 
@@ -69,7 +69,7 @@ struct Client *server_exists(const char *);
  *      parv[2] = serverinfo/hopcount
  *      parv[3] = serverinfo
  */
-static void
+static int
 mr_server(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	char info[REALLEN + 1];
@@ -81,7 +81,7 @@ mr_server(struct Client *client_p, struct Client *source_p, int parc, const char
 	{
 		sendto_one(client_p, "ERROR :No servername");
 		exit_client(client_p, client_p, client_p, "Wrong number of args");
-		return;
+		return 0;
 	}
 
 	name = parv[1];
@@ -98,13 +98,13 @@ mr_server(struct Client *client_p, struct Client *source_p, int parc, const char
 		sendto_realops_flags(UMODE_ALL, L_OPER, "Link %s dropped, non-TS server",
 				     get_client_name(client_p, MASK_IP));
 		exit_client(client_p, client_p, client_p, "Non-TS server");
-		return;
+		return 0;
 	}
 
 	if(bogus_host(name))
 	{
 		exit_client(client_p, client_p, client_p, "Bogus server name");
-		return;
+		return 0;
 	}
 
 	/* Now we just have to call check_server and everything should be
@@ -129,7 +129,7 @@ mr_server(struct Client *client_p, struct Client *source_p, int parc, const char
 		}
 
 		exit_client(client_p, client_p, client_p, "Invalid servername.");
-		return;
+		return 0;
 		/* NOT REACHED */
 		break;
 
@@ -146,7 +146,7 @@ mr_server(struct Client *client_p, struct Client *source_p, int parc, const char
 		     log_client_name(client_p, SHOW_IP));
 
 		exit_client(client_p, client_p, client_p, "Invalid password.");
-		return;
+		return 0;
 		/* NOT REACHED */
 		break;
 
@@ -163,7 +163,7 @@ mr_server(struct Client *client_p, struct Client *source_p, int parc, const char
 		     log_client_name(client_p, SHOW_IP));
 
 		exit_client(client_p, client_p, client_p, "Invalid host.");
-		return;
+		return 0;
 		/* NOT REACHED */
 		break;
 
@@ -179,7 +179,7 @@ mr_server(struct Client *client_p, struct Client *source_p, int parc, const char
 		     log_client_name(client_p, SHOW_IP));
 
 		exit_client(client_p, client_p, client_p, "Invalid servername.");
-		return;
+		return 0;
 		/* NOT REACHED */
 		break;
 	}
@@ -207,7 +207,7 @@ mr_server(struct Client *client_p, struct Client *source_p, int parc, const char
 
 		sendto_one(client_p, "ERROR :Server already exists.");
 		exit_client(client_p, client_p, client_p, "Server Exists");
-		return;
+		return 0;
 	}
 
 	/*
@@ -219,6 +219,8 @@ mr_server(struct Client *client_p, struct Client *source_p, int parc, const char
 	set_server_gecos(client_p, info);
 	client_p->hopcount = hop;
 	server_estab(client_p);
+
+	return 0;
 }
 
 /*
@@ -228,7 +230,7 @@ mr_server(struct Client *client_p, struct Client *source_p, int parc, const char
  *      parv[2] = serverinfo/hopcount
  *      parv[3] = serverinfo
  */
-static void
+static int
 ms_server(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	char info[REALLEN + 1];
@@ -244,12 +246,12 @@ ms_server(struct Client *client_p, struct Client *source_p, int parc, const char
 
 	/* Just to be sure -A1kmm. */
 	if(!IsServer(source_p))
-		return;
+		return 0;
 
 	if(parc < 4)
 	{
 		sendto_one(client_p, "ERROR :No servername");
-		return;
+		return 0;
 	}
 
 	name = parv[1];
@@ -280,7 +282,7 @@ ms_server(struct Client *client_p, struct Client *source_p, int parc, const char
 		 * server message(don't propagate or we will delink from whoever
 		 * we propagate to). -A1kmm */
 		if(irccmp(target_p->name, name) && target_p->from == client_p)
-			return;
+			return 0;
 
 		sendto_one(client_p, "ERROR :Server %s already exists", name);
 
@@ -292,7 +294,7 @@ ms_server(struct Client *client_p, struct Client *source_p, int parc, const char
 				     client_p->name, name);
 
 		exit_client(client_p, client_p, &me, "Server Exists");
-		return;
+		return 0;
 	}
 
 	/* 
@@ -314,7 +316,7 @@ ms_server(struct Client *client_p, struct Client *source_p, int parc, const char
 				     "Link %s cancelled: Server/nick collision on %s",
 				     get_client_name(client_p, MASK_IP), name);
 		exit_client(client_p, client_p, client_p, "Nick as Server");
-		return;
+		return 0;
 	}
 
 	/*
@@ -326,7 +328,7 @@ ms_server(struct Client *client_p, struct Client *source_p, int parc, const char
 	if(parc == 1 || EmptyString(info))
 	{
 		sendto_one(client_p, "ERROR :No server info specified for %s", name);
-		return;
+		return 0;
 	}
 
 	/*
@@ -390,7 +392,7 @@ ms_server(struct Client *client_p, struct Client *source_p, int parc, const char
 				     get_client_name(client_p, MASK_IP), name);
 
 		exit_client(NULL, client_p, &me, "No matching hub_mask.");
-		return;
+		return 0;
 	}
 
 	/* Check for the new server being leafed behind this HUB */
@@ -404,7 +406,7 @@ ms_server(struct Client *client_p, struct Client *source_p, int parc, const char
 				     "Link %s introduced leafed server %s.", client_p->name, name);
 
 		exit_client(NULL, client_p, &me, "Leafed Server.");
-		return;
+		return 0;
 	}
 
 
@@ -419,7 +421,7 @@ ms_server(struct Client *client_p, struct Client *source_p, int parc, const char
 				     client_p->name, name);
 
 		exit_client(NULL, client_p, &me, "Invalid servername introduced.");
-		return;
+		return 0;
 	}
 
 	target_p = make_client(client_p);
@@ -463,7 +465,7 @@ ms_server(struct Client *client_p, struct Client *source_p, int parc, const char
 					     "Lost N-line for %s on %s. Closing",
 					     get_client_name(client_p, MASK_IP), name);
 			exit_client(client_p, client_p, client_p, "Lost N line");
-			return;
+			return 0;
 		}
 		if(match(my_name_for_link(me.name, aconf), target_p->name))
 			continue;
@@ -476,6 +478,7 @@ ms_server(struct Client *client_p, struct Client *source_p, int parc, const char
 	sendto_realops_flags(UMODE_EXTERNAL, L_ALL,
 			     "Server %s being introduced by %s", target_p->name, source_p->name);
 
+	return 0;
 }
 
 /* set_server_gecos()

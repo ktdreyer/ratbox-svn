@@ -37,9 +37,9 @@
 #include "hook.h"
 #include "modules.h"
 
-static void m_admin(struct Client *, struct Client *, int, const char **);
-static void mr_admin(struct Client *, struct Client *, int, const char **);
-static void ms_admin(struct Client *, struct Client *, int, const char **);
+static int m_admin(struct Client *, struct Client *, int, const char **);
+static int mr_admin(struct Client *, struct Client *, int, const char **);
+static int ms_admin(struct Client *, struct Client *, int, const char **);
 static void do_admin(struct Client *source_p);
 
 static void admin_spy(struct Client *);
@@ -64,7 +64,7 @@ DECLARE_MODULE_AV1(NULL, NULL, admin_clist, admin_hlist, NULL, "$Revision$");
  *      parv[0] = sender prefix   
  *      parv[1] = servername   
  */
-static void
+static int
 mr_admin(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	static time_t last_used = 0L;
@@ -73,12 +73,14 @@ mr_admin(struct Client *client_p, struct Client *source_p, int parc, const char 
 	{
 		sendto_one(source_p, form_str(RPL_LOAD2HI), me.name,
 			   EmptyString(parv[0]) ? "*" : parv[0]);
-		return;
+		return 0;
 	}
 	else
 		last_used = CurrentTime;
 
 	do_admin(source_p);
+
+	return 0;
 }
 
 /*
@@ -86,7 +88,7 @@ mr_admin(struct Client *client_p, struct Client *source_p, int parc, const char 
  *      parv[0] = sender prefix
  *      parv[1] = servername
  */
-static void
+static int
 m_admin(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	static time_t last_used = 0L;
@@ -94,7 +96,7 @@ m_admin(struct Client *client_p, struct Client *source_p, int parc, const char *
 	if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
 	{
 		sendto_one(source_p, form_str(RPL_LOAD2HI), me.name, parv[0]);
-		return;
+		return 0;
 	}
 	else
 		last_used = CurrentTime;
@@ -102,10 +104,12 @@ m_admin(struct Client *client_p, struct Client *source_p, int parc, const char *
 	if(!ConfigServerHide.disable_remote)
 	{
 		if(hunt_server(client_p, source_p, ":%s ADMIN :%s", 1, parc, parv) != HUNTED_ISME)
-			return;
+			return 0;
 	}
 
 	do_admin(source_p);
+
+	return 0;
 }
 
 
@@ -114,14 +118,16 @@ m_admin(struct Client *client_p, struct Client *source_p, int parc, const char *
  *      parv[0] = sender prefix
  *      parv[1] = servername
  */
-static void
+static int
 ms_admin(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	if(hunt_server(client_p, source_p, ":%s ADMIN :%s", 1, parc, parv) != HUNTED_ISME)
-		return;
+		return 0;
 
 	if(IsClient(source_p))
 		do_admin(source_p);
+
+	return 0;
 }
 
 

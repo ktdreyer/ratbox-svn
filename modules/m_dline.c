@@ -47,7 +47,7 @@
 #include "parse.h"
 #include "modules.h"
 
-static void mo_dline(struct Client *, struct Client *, int, const char **);
+static int mo_dline(struct Client *, struct Client *, int, const char **);
 
 struct Message dline_msgtab = {
 	"DLINE", 0, 0, 2, 0, MFLG_SLOW, 0,
@@ -76,7 +76,7 @@ char host[HOSTLEN + 2];
  * side effects - D line is added
  *
  */
-static void
+static int
 mo_dline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	const char *dlhost;
@@ -95,7 +95,7 @@ mo_dline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	if(!IsOperK(source_p))
 	{
 		sendto_one(source_p, ":%s NOTICE %s :You need kline = yes;", me.name, parv[0]);
-		return;
+		return 0;
 	}
 
 	loc++;
@@ -103,7 +103,7 @@ mo_dline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	tdline_time = valid_tkline(source_p, parv[loc]);
 
 	if(tdline_time == -1)
-		return;
+		return 0;
 	else if(tdline_time)
 		loc++;
 
@@ -111,7 +111,7 @@ mo_dline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	{
 		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
 			   me.name, source_p->name, "DLINE");
-		return;
+		return 0;
 	}
 
 	dlhost = parv[loc];
@@ -120,15 +120,15 @@ mo_dline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	if(!parse_netmask(dlhost, NULL, &bits))
 	{
 		if(!(target_p = find_chasing(source_p, parv[loc], NULL)))
-			return;
+			return 0;
 
 		if(!target_p->user)
-			return;
+			return 0;
 		if(IsServer(target_p))
 		{
 			sendto_one(source_p,
 				   ":%s NOTICE %s :Can't DLINE a server silly", me.name, parv[0]);
-			return;
+			return 0;
 		}
 
 		if(!MyConnect(target_p))
@@ -136,7 +136,7 @@ mo_dline(struct Client *client_p, struct Client *source_p, int parc, const char 
 			sendto_one(source_p,
 				   ":%s NOTICE %s :Can't DLINE nick on another server",
 				   me.name, parv[0]);
-			return;
+			return 0;
 		}
 
 		if(IsExemptKline(target_p))
@@ -144,7 +144,7 @@ mo_dline(struct Client *client_p, struct Client *source_p, int parc, const char 
 			sendto_one(source_p,
 				   ":%s NOTICE %s :%s is E-lined", me.name, parv[0],
 				   target_p->name);
-			return;
+			return 0;
 		}
 
 
@@ -171,7 +171,7 @@ mo_dline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	if(parc >= loc + 1)	/* host :reason */
 	{
 		if(!valid_comment(parv[loc]))
-			return;
+			return 0;
 
 		if(*parv[loc])
 			reason = parv[loc];
@@ -189,7 +189,7 @@ mo_dline(struct Client *client_p, struct Client *source_p, int parc, const char 
 			sendto_one(source_p,
 				   ":%s NOTICE %s :For safety, bitmasks less than 8 require conf access.",
 				   me.name, parv[0]);
-			return;
+			return 0;
 		}
 	}
 	else
@@ -199,7 +199,7 @@ mo_dline(struct Client *client_p, struct Client *source_p, int parc, const char 
 			sendto_one(source_p,
 				   ":%s NOTICE %s :Dline bitmasks less than 24 are for admins only.",
 				   me.name, parv[0]);
-			return;
+			return 0;
 		}
 	}
 
@@ -226,7 +226,7 @@ mo_dline(struct Client *client_p, struct Client *source_p, int parc, const char 
 				sendto_one(source_p,
 					   ":%s NOTICE %s :[%s] already D-lined by [%s] - %s",
 					   me.name, parv[0], dlhost, aconf->host, creason);
-			return;
+			return 0;
 		}
 	}
 
@@ -285,6 +285,7 @@ mo_dline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	}
 
 	check_dlines();
+	return 0;
 }
 
 /*

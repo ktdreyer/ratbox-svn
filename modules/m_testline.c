@@ -41,7 +41,7 @@
 #include "modules.h"
 
 
-static void mo_testline(struct Client *, struct Client *, int, const char **);
+static int mo_testline(struct Client *, struct Client *, int, const char **);
 
 struct Message testline_msgtab = {
 	"TESTLINE", 0, 0, 0, 0, MFLG_SLOW, 0,
@@ -65,8 +65,7 @@ DECLARE_MODULE_AV1(NULL, NULL, testline_clist, NULL, NULL, "$Revision$");
  * i.e. /quote testline user@host,ip
  *
  */
-
-static void
+static int
 mo_testline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct ConfItem *aconf;
@@ -115,7 +114,7 @@ mo_testline(struct Client *client_p, struct Client *source_p, int parc, const ch
 				sendto_one(source_p, ":%s NOTICE %s :usage: user@host|ip",
 					   me.name, parv[0]);
 			}
-			return;
+			return 0;
 		}
 		*p = '\0';
 		p++;
@@ -162,4 +161,6 @@ mo_testline(struct Client *client_p, struct Client *source_p, int parc, const ch
 	}
 	else
 		sendto_one(source_p, ":%s NOTICE %s :usage: user@host|ip", me.name, parv[0]);
+
+	return 0;
 }

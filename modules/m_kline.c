@@ -50,8 +50,8 @@
 #include "cluster.h"
 #include "event.h"
 
-static void mo_kline(struct Client *, struct Client *, int, const char **);
-static void ms_kline(struct Client *, struct Client *, int, const char **);
+static int mo_kline(struct Client *, struct Client *, int, const char **);
+static int ms_kline(struct Client *, struct Client *, int, const char **);
 
 struct Message kline_msgtab = {
 	"KLINE", 0, 0, 2, 0, MFLG_SLOW, 0,
@@ -96,7 +96,7 @@ char host[HOSTLEN + 2];
  * side effects - k line is added
  *
  */
-static void
+static int
 mo_kline(struct Client *client_p, struct Client *source_p, int parc, const char **parv)
 {
 	const char *reason = "No Reason";
@@ -110,7 +110,7 @@ mo_kline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	{
 		sendto_one(source_p, ":%s NOTICE %s :You need kline = yes;",
 			   me.name, source_p->name);
-		return;
+		return 0;
 	}
 
 	parv++;
@@ -128,11 +128,11 @@ mo_kline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	{
 		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
 			   me.name, source_p->name, "KLINE");
-		return;
+		return 0;
 	}
 
 	if(find_user_host(source_p, *parv, user, host) == 0)
-		return;
+		return 0;
 
 	parc--;
 	parv++;
@@ -147,7 +147,7 @@ mo_kline(struct Client *client_p, struct Client *source_p, int parc, const char 
 			{
 				sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
 					   me.name, source_p->name, "KLINE");
-				return;
+				return 0;
 			}
 			target_server = *parv;
 			parc--;
@@ -162,7 +162,7 @@ mo_kline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	{
 		sendto_one(source_p,
 			   ":%s NOTICE %s :Invalid character in comment", me.name, source_p->name);
-		return;
+		return 0;
 	}
 
 	if(!valid_wild_card(user, host))
@@ -170,7 +170,7 @@ mo_kline(struct Client *client_p, struct Client *source_p, int parc, const char 
 		sendto_one(source_p,
 			   ":%s NOTICE %s :Please include at least %d non-wildcard characters with the user@host",
 			   me.name, source_p->name, ConfigFileEntry.min_nonwildcard);
-		return;
+		return 0;
 	}
 
 	if(!valid_comment(reason))
@@ -178,7 +178,7 @@ mo_kline(struct Client *client_p, struct Client *source_p, int parc, const char 
 		sendto_one(source_p,
 			   ":%s NOTICE %s :Invalid character '\"' in comment",
 			   me.name, source_p->name);
-		return;
+		return 0;
 	}
 
 	if(target_server != NULL)
@@ -189,7 +189,7 @@ mo_kline(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 		/* If we are sending it somewhere that doesnt include us, stop */
 		if(!match(target_server, me.name))
-			return;
+			return 0;
 	}
 	/* if we have cluster servers, send it to them.. */
 	else if(dlink_list_length(&cluster_list) > 0)
@@ -198,7 +198,7 @@ mo_kline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	}
 
 	if(already_placed_kline(source_p, user, host, tkline_time))
-		return;
+		return 0;
 
 	set_time();
 	current_date = smalldate();
@@ -241,6 +241,8 @@ mo_kline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	}
 	else
 		check_klines();
+
+	return 0;
 }
 
 /*
@@ -248,7 +250,7 @@ mo_kline(struct Client *client_p, struct Client *source_p, int parc, const char 
  *
  *
  */
-static void
+static int
 ms_kline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	const char *current_date;
@@ -261,7 +263,7 @@ ms_kline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	char *oper_reason;
 
 	if(parc != 6)
-		return;
+		return 0;
 
 	/* parv[0]  parv[1]        parv[2]      parv[3]  parv[4]  parv[5] */
 	/* oper     target_server  tkline_time  user     host     reason */
@@ -269,10 +271,10 @@ ms_kline(struct Client *client_p, struct Client *source_p, int parc, const char 
 			   "KLINE %s %s %s %s :%s", parv[1], parv[2], parv[3], parv[4], parv[5]);
 
 	if(!match(parv[1], me.name))
-		return;
+		return 0;
 
 	if(!IsPerson(source_p))
-		return;
+		return 0;
 
 	kuser = parv[3];
 	khost = parv[4];
@@ -282,7 +284,7 @@ ms_kline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	{
 		if(!valid_user_host(kuser, khost) || !valid_wild_card(kuser, khost) ||
 		   !valid_comment(kreason))
-			return;
+			return 0;
 
 		tkline_time = atoi(parv[2]);
 
@@ -316,7 +318,7 @@ ms_kline(struct Client *client_p, struct Client *source_p, int parc, const char 
 					     "*** %s!%s@%s on %s is requesting an Invalid K-Line for [%s@%s] [%s]",
 					     source_p->name, source_p->username, source_p->host,
 					     source_p->user->server, kuser, khost, kreason);
-			return;
+			return 0;
 		}
 
 		if(!valid_wild_card(kuser, khost))
@@ -327,11 +329,11 @@ ms_kline(struct Client *client_p, struct Client *source_p, int parc, const char 
 					     source_p->user->server,
 					     ConfigFileEntry.min_nonwildcard, kuser, khost,
 					     kreason);
-			return;
+			return 0;
 		}
 
 		if(!valid_comment(kreason))
-			return;
+			return 0;
 
 		tkline_time = atoi(parv[2]);
 
@@ -339,7 +341,7 @@ ms_kline(struct Client *client_p, struct Client *source_p, int parc, const char 
 		 * arrived, to avoid confusing opers - fl
 		 */
 		if(already_placed_kline(source_p, kuser, khost, tkline_time))
-			return;
+			return 0;
 
 		aconf = make_conf();
 
@@ -375,6 +377,8 @@ ms_kline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	}
 	else
 		check_klines();
+
+	return 0;
 }
 
 /*

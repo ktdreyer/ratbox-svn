@@ -47,7 +47,7 @@
 #include "modules.h"
 
 
-static void mo_set(struct Client *, struct Client *, int, const char **);
+static int mo_set(struct Client *, struct Client *, int, const char **);
 
 struct Message set_msgtab = {
 	"SET", 0, 0, 0, 0, MFLG_SLOW, 0,
@@ -517,7 +517,7 @@ quote_splitusers(struct Client *source_p, int newval)
  * mo_set - SET command handler
  * set options while running
  */
-static void
+static int
 mo_set(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	int newval;
@@ -595,7 +595,7 @@ mo_set(struct Client *client_p, struct Client *source_p, int parc, const char *p
 							   me.name, source_p->name,
 							   set_cmd_table[i].name);
 
-						return;
+						return 0;
 					}
 				}
 				else
@@ -607,7 +607,7 @@ mo_set(struct Client *client_p, struct Client *source_p, int parc, const char *p
 						set_cmd_table[i].handler(source_p, arg, newval);
 					else
 						set_cmd_table[i].handler(source_p, arg);
-					return;
+					return 0;
 				}
 				else
 				{
@@ -617,7 +617,7 @@ mo_set(struct Client *client_p, struct Client *source_p, int parc, const char *p
 						/* Just in case someone actually wants a
 						 * set function that takes no args.. *shrug* */
 						set_cmd_table[i].handler(source_p);
-					return;
+					return 0;
 				}
 			}
 		}
@@ -627,8 +627,10 @@ mo_set(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		 * found within set_cmd_table.
 		 */
 		sendto_one(source_p, ":%s NOTICE %s :Variable not found.", me.name, parv[0]);
-		return;
+		return 0;
 	}
 
 	list_quote_commands(source_p);
+
+	return 0;
 }

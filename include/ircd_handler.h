@@ -50,7 +50,7 @@ HandlerType;
  * int            parc   - parameter count
  * char*          parv[] - parameter vector
  */
-typedef void (*MessageHandler) (struct Client *, struct Client *, int, const char *[]);
+typedef int (*MessageHandler) (struct Client *, struct Client *, int, const char *[]);
 
 
 #endif /* INCLUDED_ircd_handler_h */

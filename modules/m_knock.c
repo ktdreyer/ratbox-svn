@@ -42,8 +42,8 @@
 #include "s_serv.h"
 
 
-static void m_knock(struct Client *, struct Client *, int, const char **);
-static void ms_knock(struct Client *, struct Client *, int, const char **);
+static int m_knock(struct Client *, struct Client *, int, const char **);
+static int ms_knock(struct Client *, struct Client *, int, const char **);
 
 static void parse_knock_local(struct Client *, struct Client *, int, const char **, const char *);
 static void parse_knock_remote(struct Client *, struct Client *, int, const char **);
@@ -74,12 +74,8 @@ DECLARE_MODULE_AV1(NULL, NULL, knock_clist, NULL, NULL, "$Revision$");
  *  key is forgotten, or the channel is full (INVITE can bypass each one
  *  of these conditions.  Concept by Dianora <db@db.net> and written by
  *  <anonymous>
- *
- *  This function is also used for LL servers forwarding knock requests they
- *  dont know about, for us to answer.
  */
-
-static void
+static int
 m_knock(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	char *sockhost = NULL;
@@ -88,18 +84,20 @@ m_knock(struct Client *client_p, struct Client *source_p, int parc, const char *
 	{
 		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
 			   me.name, parv[0], "KNOCK");
-		return;
+		return 0;
 	}
 
 	if((ConfigChannel.use_knock == 0) && MyClient(source_p))
 	{
 		sendto_one(source_p, form_str(ERR_KNOCKDISABLED), me.name, source_p->name);
-		return;
+		return 0;
 	}
 
 
 	if(IsClient(source_p))
 		parse_knock_local(client_p, source_p, parc, parv, sockhost);
+
+	return 0;
 }
 
 /* 
@@ -107,15 +105,16 @@ m_knock(struct Client *client_p, struct Client *source_p, int parc, const char *
  *	parv[0] = sender prefix
  *	parv[1] = channel
  */
-
-static void
+static int
 ms_knock(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	if(EmptyString(parv[1]))
-		return;
+		return 0;
 
 	if(IsClient(source_p))
 		parse_knock_remote(client_p, source_p, parc, parv);
+
+	return 0;
 }
 
 
@@ -131,7 +130,6 @@ ms_knock(struct Client *client_p, struct Client *source_p, int parc, const char 
  * side effects - sets name to name of base channel
  *                or sends failure message to source_p
  */
-
 static void
 parse_knock_local(struct Client *client_p,
 		  struct Client *source_p, int parc, const char *parv[], const char *sockhost)

@@ -43,12 +43,12 @@
 #include "modules.h"
 
 
-static void m_whowas(struct Client *, struct Client *, int, const char **);
-static void mo_whowas(struct Client *, struct Client *, int, const char **);
+static int m_whowas(struct Client *, struct Client *, int, const char **);
+static int mo_whowas(struct Client *, struct Client *, int, const char **);
 
 struct Message whowas_msgtab = {
 	"WHOWAS", 0, 0, 0, 0, MFLG_SLOW, 0L,
-	{m_unregistered, m_whowas, m_error, mo_whowas}
+	{m_unregistered, m_whowas, m_ignore, mo_whowas}
 };
 
 mapi_clist_av1 whowas_clist[] = { &whowas_msgtab, NULL };
@@ -62,7 +62,7 @@ static int whowas_do(struct Client *client_p, struct Client *source_p, int parc,
 **      parv[0] = sender prefix
 **      parv[1] = nickname queried
 */
-static void
+static int
 m_whowas(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	static time_t last_used = 0L;
@@ -70,13 +70,13 @@ m_whowas(struct Client *client_p, struct Client *source_p, int parc, const char 
 	if(parc < 2 || EmptyString(parv[1]))
 	{
 		sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN), me.name, parv[0]);
-		return;
+		return 0;
 	}
 
 	if((last_used + ConfigFileEntry.pace_wait_simple) > CurrentTime)
 	{
 		sendto_one(source_p, form_str(RPL_LOAD2HI), me.name, source_p->name);
-		return;
+		return 0;
 	}
 	else
 	{
@@ -84,18 +84,22 @@ m_whowas(struct Client *client_p, struct Client *source_p, int parc, const char 
 	}
 
 	whowas_do(client_p, source_p, parc, parv);
+
+	return 0;
 }
 
-static void
+static int
 mo_whowas(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	if(parc < 2)
 	{
 		sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN), me.name, parv[0]);
-		return;
+		return 0;
 	}
 
 	whowas_do(client_p, source_p, parc, parv);
+
+	return 0;
 }
 
 static int
