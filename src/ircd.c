@@ -638,6 +638,11 @@ int main(int argc, char *argv[])
   initclass();
   initwhowas();
   init_stats();
+
+  msgtab = malloc (sizeof (struct Message *));
+  msgtab[0] = malloc (sizeof (struct Message));
+  msgtab[0]->cmd = NULL;
+
   init_tree_parse(msgtab);      /* tree parse code (orabidoo) */
 
   initServerMask();

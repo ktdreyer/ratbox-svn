@@ -266,6 +266,7 @@ AC_OUTPUT(                   \
  iauth/Makefile              \
  iauth/source/Makefile       \
  src/Makefile                \
+ modules/Makefile            \
  tools/Makefile              \
  zlib/Makefile               \
 )

@@ -1,0 +1,108 @@
+# Generated automatically from Makefile.in by configure.
+#
+# Makefile.in for ircd/src
+#
+# $Id$
+#
+CC		= gcc
+RM		= /bin/rm
+LEX		= flex
+LEXLIB		= -lfl
+CFLAGS		= -g -O2
+
+MKDEP		= ${CC} -MM
+
+IRCDLIBS	= -ldescrypt  
+
+INCLUDES	= -I../include
+CPPFLAGS	= ${INCLUDES}  
+
+SRCS =                          \
+  m_admin.c \
+  m_away.c \
+  m_capab.c \
+  m_cburst.c \
+  m_challenge.c \
+  m_cjoin.c \
+  m_close.c \
+  m_connect.c \
+  m_die.c \
+  m_drop.c \
+  m_error.c \
+  m_gline.c \
+  m_hash.c \
+  m_help.c \
+  m_htm.c \
+  m_info.c \
+  m_invite.c \
+  m_ison.c \
+  m_join.c \
+  m_kick.c \
+  m_kill.c \
+  m_kline.c \
+  m_knock.c \
+  m_links.c \
+  m_list.c \
+  m_lljoin.c \
+  m_locops.c \
+  m_ltrace.c \
+  m_lusers.c \
+  m_mode.c \
+  m_names.c \
+  m_nick.c \
+  m_notice.c \
+  m_oper.c \
+  m_operwall.c \
+  m_part.c \
+  m_pass.c \
+  m_ping.c \
+  m_pong.c \
+  m_privmsg.c \
+  m_quit.c \
+  m_rehash.c \
+  m_restart.c \
+  m_server.c \
+  m_set.c \
+  m_sjoin.c \
+  m_squit.c \
+  m_stats.c \
+  m_svinfo.c \
+  m_time.c \
+  m_topic.c \
+  m_trace.c \
+  m_unkline.c \
+  m_user.c \
+  m_userhost.c \
+  m_users.c \
+  m_version.c \
+  m_wallops.c \
+  m_who.c \
+  m_whois.c \
+
+OBJS = ${SRCS:.c=.so}
+
+default:	all
+all: $(OBJS)
+
+install: all
+	@echo "Please do a make install from the top level directory"
+
+.SUFFIXES: .so
+
+.c.so:
+	${CC} -DPIC -fPIC -shared ${CFLAGS} $(CPPFLAGS) -c ${.IMPSRC} -o ${.TARGET}
+	$(CC) -fPIC -shared ${.TARGET} -o ${.TARGET}.tmp
+	mv ${.TARGET}.tmp ${.TARGET}
+
+.PHONY: depend clean distclean
+depend:
+	${MKDEP} ${CPPFLAGS} ${SRCS} > .depend
+
+clean:
+	${RM} -f *.so *~ 
+
+distclean: clean
+	${RM} -f Makefile
+
+include .depend
+

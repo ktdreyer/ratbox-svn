@@ -2276,8 +2276,10 @@ trap 'rm -fr `echo "\
  iauth/Makefile              \
  iauth/source/Makefile       \
  src/Makefile                \
+ modules/Makefile            \
  tools/Makefile              \
- include/setup.h" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
+ zlib/Makefile               \
+ include/setup.h zlib/setup.h" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
 EOF
 cat >> $CONFIG_STATUS <<EOF
 
@@ -2385,7 +2387,9 @@ CONFIG_FILES=\${CONFIG_FILES-"\
  iauth/Makefile              \
  iauth/source/Makefile       \
  src/Makefile                \
+ modules/Makefile            \
  tools/Makefile              \
+ zlib/Makefile               \
 "}
 EOF
 cat >> $CONFIG_STATUS <<\EOF
@@ -2467,7 +2471,7 @@ ac_eD='%g'
 if test "${CONFIG_HEADERS+set}" != set; then
 EOF
 cat >> $CONFIG_STATUS <<EOF
-  CONFIG_HEADERS="include/setup.h"
+  CONFIG_HEADERS="include/setup.h zlib/setup.h"
 EOF
 cat >> $CONFIG_STATUS <<\EOF
 fi

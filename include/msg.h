@@ -149,7 +149,7 @@ typedef struct MessageTree MESSAGE_TREE;
 
 #define MSG_TESTLINE "TESTLINE"
 
-extern struct Message msgtab[];
+extern struct Message **msgtab;
 
 #endif /* INCLUDED_msg_h */
 

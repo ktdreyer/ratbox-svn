@@ -61,6 +61,9 @@ static char buffer[1024];  /* ZZZ must this be so big? must it be here? */
 
 struct MessageTree* msg_tree_root;
 
+struct Message **msgtab = NULL;
+int num_msgs = 1;
+
 /*
  * parse a buffer.
  *
@@ -393,17 +396,14 @@ static int mcmp(struct Message *m1, struct Message *m2)
  */
 /* Initialize the msgtab parsing tree -orabidoo
  */
-void init_tree_parse(struct Message *mptr)
+void init_tree_parse(struct Message **mptr)
 {
-  int i;
-  struct Message *mpt = mptr;
+  struct Message *mpt = *mptr;
 
-  for (i=0; mpt->cmd; mpt++)
-    i++;
-  qsort((void *)mptr, i, sizeof(struct Message), 
+  qsort((void *)mptr, num_msgs - 1, sizeof(struct Message), 
                 (int (*)(const void *, const void *)) mcmp);
   msg_tree_root = (MESSAGE_TREE *)MyMalloc(sizeof(MESSAGE_TREE));
-  mpt = do_msg_tree(msg_tree_root, "", mptr);
+  mpt = do_msg_tree(msg_tree_root, "", *mptr);
 
   /*
    * this happens if one of the msgtab entries included characters
@@ -415,7 +415,6 @@ void init_tree_parse(struct Message *mptr)
       exit(1);
     }
 }
-
 /*  Recursively make a prefix tree out of the msgtab -orabidoo
  */
 static struct Message *do_msg_tree(MESSAGE_TREE *mtree, char *prefix,
@@ -483,6 +482,32 @@ static struct Message *do_msg_tree(MESSAGE_TREE *mtree, char *prefix,
     }
 }
 
+void
+mod_add_cmd(char *cmd, struct Message *msg)
+{
+  int i; 
+
+  for (i = 0; i < num_msgs && msgtab[i]->cmd; i++) {
+    if (!irccmp(msgtab[i]->cmd, cmd)) {
+      /* already in msgtab, so replace it */
+      msgtab[i] = msg;
+      init_tree_parse(msgtab);
+      return;
+    }
+  }
+
+  /* we always keep a spare NULL entry at the end .. */
+  msgtab = realloc(msgtab, num_msgs + 1);
+  free(msgtab[num_msgs]);
+  msgtab[num_msgs] = msg;
+  num_msgs++;
+  msgtab[num_msgs] = malloc(sizeof (struct Message));
+  msgtab[num_msgs]->cmd = NULL;
+
+  init_tree_parse(msgtab);
+}
+
+#if 0
 struct Message msgtab[] = {
   {MSG_PRIVMSG, 0, 1, MFLG_SLOW | MFLG_UNREG, 0L,
     /* UNREG, CLIENT, SERVER, OPER */
@@ -750,6 +775,7 @@ struct Message msgtab[] = {
   },
   { 0 }
 }; 
+#endif
 
 /*
  * tree_parse()

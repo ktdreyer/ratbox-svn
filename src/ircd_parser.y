@@ -169,6 +169,8 @@ int   class_sendq_var;
 %token  GLINES
 %token  GLINE_FILE
 %token  TOPIC_UH
+%token  MODULE
+%token  MODULES
 
 %%
 conf:   
@@ -188,9 +190,27 @@ conf_item:        admin_entry
                 | deny_entry
 		| general_entry
                 | gecos_entry
+                | modules_entry
                 | error ';'
                 | error '}'
         ;
+
+/***************************************************************************
+ *  section modules
+ ***************************************************************************/
+
+modules_entry:          MODULES
+  '{' modules_items '}' ';'
+
+modules_items:   modules_items modules_item |
+                    modules_item
+
+modules_item:    modules_module
+
+modules_module:  MODULE '=' QSTRING
+{
+  load_module (yylval.string);
+};
 
 /***************************************************************************
  *  section serverinfo

@@ -177,6 +177,8 @@ stats_p_notice	        { return STATS_P_NOTICE; }
 invite_plus_i_only      { return INVITE_PLUS_I_ONLY; }
 glines                  { return GLINES; }
 topic_uh                { return TOPIC_UH; }
+modules                 { return MODULES; }
+module                  { return MODULE; }
 .		        { return yytext[0]; }
 
 %%
