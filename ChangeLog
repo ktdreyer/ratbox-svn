@@ -1,3 +1,19 @@
+androsyn    2003/02/03 21:45:34 UTC	(20030203_1)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+    include              irc_string.h 
+  Log:
+  gcc-3.2 doesn't like -a
+  
+  Revision  Changes    Path
+  7.165     +1 -1      ircd-ratbox/autoconf/configure.in
+  7.172     +1 -1      ircd-ratbox/configure
+  7.47      +1 -1      ircd-ratbox/include/irc_string.h
+
+
+
 androsyn    2003/02/03 19:09:26 UTC	(20030203_0)
 
   Added files:
