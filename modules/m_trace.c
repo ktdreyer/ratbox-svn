@@ -52,7 +52,6 @@ struct Message trace_msgtab = {
 	"TRACE", 0, 0, 0, MFLG_SLOW,
 	{mg_unreg, {m_trace, 0}, {m_trace, 0}, mg_ignore, mg_ignore, {m_trace, 0}}
 };
-
 struct Message etrace_msgtab = {
 	"ETRACE", 0, 0, 0, MFLG_SLOW,
 	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, mg_ignore, {m_etrace, 0}}
@@ -71,6 +70,8 @@ DECLARE_MODULE_AV1(trace, NULL, NULL, trace_clist, trace_hlist, NULL, "$Revision
 static int report_this_status(struct Client *source_p, struct Client *target_p, int dow,
 			      int link_u_p, int link_u_s);
 
+static void do_etrace(struct Client *, int ipv4, int ipv6);
+static void do_etrace_full(struct Client *);
 
 /*
  * m_trace
@@ -462,37 +463,77 @@ trace_spy(struct Client *source_p, struct Client *target_p)
 static int
 m_etrace(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
+	if(parc > 1 && !EmptyString(parv[1]))
+	{
+		if(!irccmp(parv[1], "-full"))
+			do_etrace_full(source_p);
+#ifdef IPV6
+		else if(!irccmp(parv[1], "-v6"))
+			do_etrace(source_p, 0, 1);
+		else if(!irccmp(parv[1], "-v4"))
+			do_etrace(source_p, 1, 0);
+#endif
+		else
+			do_etrace(source_p, 1, 1);
+	}
+	else
+		do_etrace(source_p, 1, 1);
+
+	sendto_one_numeric(source_p, RPL_ENDOFTRACE, form_str(RPL_ENDOFTRACE), me.name);
+
+	return 0;
+}
+
+static void
+do_etrace(struct Client *source_p, int ipv4, int ipv6)
+{
 	struct Client *target_p;
 	dlink_node *ptr;
-	char ip[HOSTIPLEN];
-	const char *ip_ptr;
 
 	/* report all direct connections */
 	DLINK_FOREACH(ptr, lclient_list.head)
 	{
 		target_p = ptr->data;
 
-#ifdef HIDE_SPOOF_IPS
-		if(IsIPSpoof(target_p))
-		{
-			ip_ptr = "255.255.255.255";
-		}
-		else
+#ifdef IPV6
+		if((!ipv4 && target_p->localClient->ip.ss_family == AF_INET) ||
+		   (!ipv6 && target_p->localClient->ip.ss_family == AF_INET6))
+			continue;
 #endif
-		{
-			inetntop_sock((struct sockaddr *)&target_p->localClient->ip, ip, sizeof(ip));
-			ip_ptr = ip;
-		}
 
 		sendto_one(source_p, form_str(RPL_ETRACE),
 			   me.name, source_p->name, 
 			   IsOper(target_p) ? "Oper" : "User", 
 			   get_client_class(target_p),
 			   target_p->name, target_p->username, target_p->host,
-			   ip_ptr, target_p->info);
+#ifdef HIDE_SPOOF_IPS
+			   IsIPSpoof(target_p) ? "255.255.255.255" :
+#endif
+			    target_p->sockhost, target_p->info);
 	}
+}
 
-	sendto_one_numeric(source_p, RPL_ENDOFTRACE, form_str(RPL_ENDOFTRACE), me.name);
-	return 0;
+static void
+do_etrace_full(struct Client *source_p)
+{
+	struct Client *target_p;
+	dlink_node *ptr;
+
+	/* report all direct connections */
+	DLINK_FOREACH(ptr, lclient_list.head)
+	{
+		target_p = ptr->data;
+
+		sendto_one(source_p, form_str(RPL_ETRACE),
+			   me.name, source_p->name, 
+			   IsOper(target_p) ? "Oper" : "User", 
+			   get_client_class(target_p),
+			   target_p->name, target_p->username, target_p->host,
+#ifdef HIDE_SPOOF_IPS
+			   IsIPSpoof(target_p) ? "255.255.255.255" :
+#endif
+			    target_p->sockhost, 
+			    target_p->localClient->fullcaps, target_p->info);
+	}
 }
 

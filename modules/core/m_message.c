@@ -378,9 +378,10 @@ build_target_list(int p_or_n, const char *command, struct Client *client_p,
 		if(p_or_n != NOTICE)
 		{
 			if(IsDigit(*nick))
-				sendto_one(source_p, ":%s %d %s * :Target left IRC.",
-						get_id(&me, source_p), ERR_NOSUCHNICK,
-						get_id(source_p, source_p));
+				sendto_one(source_p, ":%s %d %s * :Target left IRC. "
+					"Failed to deliver: [%.20s]",
+					get_id(&me, source_p), ERR_NOSUCHNICK,
+					get_id(source_p, source_p), text);
 			else
 				sendto_one_numeric(source_p, ERR_NOSUCHNICK,
 						   form_str(ERR_NOSUCHNICK), nick);

@@ -100,6 +100,7 @@ static int remove_temp_gline(const char *, const char *);
 static int
 mo_gline(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
+	char *h = LOCAL_COPY(parv[1]);
 	const char *user = NULL;
 	char *host = NULL;	/* user and host of GLINE "victim" */
 	char *reason = NULL;	/* reason for "victims" demise */
@@ -120,17 +121,20 @@ mo_gline(struct Client *client_p, struct Client *source_p, int parc, const char 
 		return 0;
 	}
 
-	host = strchr(parv[1], '@');
-
 	/* specific user@host */
-	if(host != NULL)
+	if((host = strchr(h, '@')))
 	{
-		user = parv[1];
-		*(host++) = '\0';
+		*host++ = '\0';
 
-		/* gline for "@host", use *@host */
-		if(*user == '\0')
+		/* check for @host */
+		if(*h)
+			user = h;
+		else
 			user = splat;
+
+		/* check for user@ */
+		if(!*host)
+			host = splat;
 	}
 	/* just a host? */
 	else
@@ -145,7 +149,7 @@ mo_gline(struct Client *client_p, struct Client *source_p, int parc, const char 
 		}
 
 		user = splat;
-		host = LOCAL_COPY(parv[1]);
+		host = h;
 	}
 
 	reason = LOCAL_COPY(parv[2]);
@@ -727,25 +731,32 @@ remove_temp_gline(const char *user, const char *host)
 	dlink_node *ptr;
 	struct irc_sockaddr_storage addr, caddr;
 	int bits, cbits;
+	int mtype, gtype;
 
-	parse_netmask(host, (struct sockaddr *)&addr, &bits);
+	mtype = parse_netmask(host, (struct sockaddr *)&addr, &bits);
 
 	DLINK_FOREACH(ptr, glines.head)
 	{
 		aconf = ptr->data;
 
-		parse_netmask(aconf->host, (struct sockaddr *)&caddr, &cbits);
+		gtype = parse_netmask(aconf->host, (struct sockaddr *)&caddr, &cbits);
 
-		if(user && irccmp(user, aconf->user))
+		if(mtype != gtype || (user && irccmp(user, aconf->user)))
 			continue;
 
-		if(!irccmp(aconf->host, host) && bits == cbits &&
-		   comp_with_mask_sock((struct sockaddr *)&addr, (struct sockaddr *)&caddr, bits))
+		if(gtype == HM_HOST)
 		{
-			dlinkDelete(ptr, &glines);
-			delete_one_address_conf(aconf->host, aconf);
-			return YES;
+			if(irccmp(aconf->host, host))
+				continue;
 		}
+		else if(bits != cbits ||
+			!comp_with_mask_sock((struct sockaddr *)&addr, 
+					(struct sockaddr *)&caddr, bits))
+			continue;
+
+		dlinkDelete(ptr, &glines);
+		delete_one_address_conf(aconf->host, aconf);
+		return YES;
 	}
 
 	return NO;
