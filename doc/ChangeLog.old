@@ -1,3 +1,8 @@
+*** 20001220_21 by ryan
+write_log now is sure that logfile is not NULL and that the buffer
+isn't overflowed (sprintf -> snprintf)
+
+
 *** 20001220_20 by db
 - added sendto_realops on gline (flame)
 - capitalized "ping timeout" to "Ping timeout"
