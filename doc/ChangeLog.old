@@ -1,3 +1,7 @@
+*** 20010111_1 by a1kmm
+Improved memory debugging so it actually works.
+
+
 *** 20010110_5 by db
 - this removes the last remnant of bogus ban removal code..
   this should be done using another cleaner mechanism. blah.
