@@ -44,7 +44,8 @@
 #include <unistd.h>
 
 
-#define LOG_BUFSIZE 2048 
+/* some older syslogs would overflow at 2024 */
+#define LOG_BUFSIZE 2000
 
 #ifdef USE_LOGFILE
 static FBFILE* logFile;
