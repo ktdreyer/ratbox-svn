@@ -28,7 +28,6 @@
 #include "tools.h"
 #include "s_user.h"
 #include "channel.h"
-#include "channel_mode.h"
 #include "class.h"
 #include "client.h"
 #include "common.h"

@@ -31,7 +31,6 @@
 #include "client.h"
 #include "hash.h"
 #include "channel.h"
-#include "channel_mode.h"
 #include "hash.h"
 #include "ircd.h"
 #include "numeric.h"

@@ -28,7 +28,6 @@
 #include "tools.h"
 #include "handlers.h"
 #include "channel.h"
-#include "channel_mode.h"
 #include "client.h"
 #include "hash.h"
 #include "irc_string.h"
@@ -42,7 +41,6 @@
 #include "modules.h"
 #include "s_serv.h"
 #include "s_conf.h"
-
 
 static int ms_sjoin(struct Client *, struct Client *, int, const char **);
 

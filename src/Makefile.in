@@ -57,7 +57,6 @@ BASE_SRCS =                     \
   adns.c                        \
   balloc.c			\
   channel.c                     \
-  channel_mode.c		\
   class.c                       \
   client.c                      \
   cluster.c			\

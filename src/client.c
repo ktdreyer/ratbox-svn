@@ -29,7 +29,6 @@
 #include "tools.h"
 #include "client.h"
 #include "class.h"
-#include "channel_mode.h"
 #include "common.h"
 #include "event.h"
 #include "fdlist.h"

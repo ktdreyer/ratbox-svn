@@ -28,7 +28,6 @@
 
 #include "tools.h"
 #include "channel.h"
-#include "channel_mode.h"
 #include "client.h"
 #include "common.h"
 #include "hash.h"
@@ -60,7 +59,6 @@ static void send_mode_list(struct Client *client_p, char *chname, dlink_list * t
 static int check_banned(struct Channel *chptr, struct Client *who, char *s, char *s2);
 
 static char buf[BUFSIZE];
-static char modebuf[MODEBUFLEN], parabuf[MODEBUFLEN];
 
 /* 
  * init_channels
@@ -264,6 +262,8 @@ send_members(struct Channel *chptr, struct Client *client_p,
 void
 send_channel_modes(struct Client *client_p, struct Channel *chptr)
 {
+	static char modebuf[MODEBUFLEN], parabuf[MODEBUFLEN];
+
 	if(*chptr->chname != '#')
 		return;
 
@@ -924,5 +924,281 @@ set_channel_topic(struct Channel *chptr, const char *topic, const char *topic_in
 		if(chptr->topic != NULL)
 			free_topic(chptr);
 		chptr->topic_time = 0;
+	}
+}
+
+static int channel_capabs[] = { CAP_EX, CAP_IE, CAP_UID };
+#define NCHCAPS         (sizeof(channel_capabs)/sizeof(int))
+#define NCHCAP_COMBOS   (1 << NCHCAPS)
+
+static struct ChCapCombo chcap_combos[NCHCAP_COMBOS];
+
+/*
+ * channel_modes
+ * inputs       - pointer to channel
+ *              - pointer to client
+ *              - pointer to mode buf
+ *              - pointer to parameter buf
+ * output       - NONE
+ * side effects - write the "simple" list of channel modes for channel
+ * chptr onto buffer mbuf with the parameters in pbuf.
+ *
+ * NOTE: m_join.c uses this function and depends on the trailing spaces
+ *       in pbuf if there is a key or limit.
+ */
+void
+channel_modes(struct Channel *chptr, struct Client *client_p, char *mbuf, char *pbuf)
+{
+	int len;
+	*mbuf++ = '+';
+	*pbuf = '\0';
+
+	if(chptr->mode.mode & MODE_SECRET)
+		*mbuf++ = 's';
+	if(chptr->mode.mode & MODE_PRIVATE)
+		*mbuf++ = 'p';
+	if(chptr->mode.mode & MODE_MODERATED)
+		*mbuf++ = 'm';
+	if(chptr->mode.mode & MODE_TOPICLIMIT)
+		*mbuf++ = 't';
+	if(chptr->mode.mode & MODE_INVITEONLY)
+		*mbuf++ = 'i';
+	if(chptr->mode.mode & MODE_NOPRIVMSGS)
+		*mbuf++ = 'n';
+
+	if(chptr->mode.limit)
+	{
+		*mbuf++ = 'l';
+		if(IsMember(client_p, chptr) || IsServer(client_p))
+		{
+			len = ircsprintf(pbuf, "%d ", chptr->mode.limit);
+			pbuf += len;
+		}
+	}
+	if(*chptr->mode.key)
+	{
+		*mbuf++ = 'k';
+		if(IsMember(client_p, chptr) || IsServer(client_p))
+			ircsprintf(pbuf, "%s ", chptr->mode.key);
+	}
+
+	*mbuf++ = '\0';
+	return;
+}
+
+/* Now lets do some stuff to keep track of what combinations of
+ * servers exist...
+ * Note that the number of combinations doubles each time you add
+ * something to this list. Each one is only quick if no servers use that
+ * combination, but if the numbers get too high here MODE will get too
+ * slow. I suggest if you get more than 7 here, you consider getting rid
+ * of some and merging or something. If it wasn't for irc+cs we would
+ * probably not even need to bother about most of these, but unfortunately
+ * we do. -A1kmm
+ */
+
+/* void init_chcap_usage_counts(void)
+ *
+ * Inputs	- none
+ * Output	- none
+ * Side-effects	- Initialises the usage counts to zero. Fills in the
+ *                chcap_yes and chcap_no combination tables.
+ */
+void
+init_chcap_usage_counts(void)
+{
+	unsigned long m, c, y, n;
+
+	memset(chcap_combos, 0, sizeof(chcap_combos));
+
+	/* For every possible combination */
+	for (m = 0; m < NCHCAP_COMBOS; m++)
+	{
+		/* Check each capab */
+		for (c = y = n = 0; c < NCHCAPS; c++)
+		{
+			if((m & (1 << c)) == 0)
+				n |= channel_capabs[c];
+			else
+				y |= channel_capabs[c];
+		}
+		chcap_combos[m].cap_yes = y;
+		chcap_combos[m].cap_no = n;
+	}
+}
+
+/* void set_chcap_usage_counts(struct Client *serv_p)
+ * Input: serv_p; The client whose capabs to register.
+ * Output: none
+ * Side-effects: Increments the usage counts for the correct capab
+ *               combination.
+ */
+void
+set_chcap_usage_counts(struct Client *serv_p)
+{
+	int n;
+
+	for (n = 0; n < NCHCAP_COMBOS; n++)
+	{
+		if(((serv_p->localClient->caps & chcap_combos[n].cap_yes) ==
+		    chcap_combos[n].cap_yes) &&
+		   ((serv_p->localClient->caps & chcap_combos[n].cap_no) == 0))
+		{
+			chcap_combos[n].count++;
+			return;
+		}
+	}
+
+	/* This should be impossible -A1kmm. */
+	s_assert(0);
+}
+
+/* void set_chcap_usage_counts(struct Client *serv_p)
+ *
+ * Inputs	- serv_p; The client whose capabs to register.
+ * Output	- none
+ * Side-effects	- Decrements the usage counts for the correct capab
+ *                combination.
+ */
+void
+unset_chcap_usage_counts(struct Client *serv_p)
+{
+	int n;
+
+	for (n = 0; n < NCHCAP_COMBOS; n++)
+	{
+		if((serv_p->localClient->caps & chcap_combos[n].cap_yes) ==
+		   chcap_combos[n].cap_yes &&
+		   (serv_p->localClient->caps & chcap_combos[n].cap_no) == 0)
+		{
+			/* Hopefully capabs can't change dynamically or anything... */
+			s_assert(chcap_combos[n].count > 0);
+
+			if(chcap_combos[n].count > 0)
+				chcap_combos[n].count--;
+			return;
+		}
+	}
+
+	/* This should be impossible -A1kmm. */
+	s_assert(0);
+}
+
+/* void send_cap_mode_changes(struct Client *client_p,
+ *                        struct Client *source_p,
+ *                        struct Channel *chptr, int cap, int nocap)
+ * Input: The client sending(client_p), the source client(source_p),
+ *        the channel to send mode changes for(chptr)
+ * Output: None.
+ * Side-effects: Sends the appropriate mode changes to capable servers.
+ *
+ * Reverted back to my original design, except that we now keep a count
+ * of the number of servers which each combination as an optimisation, so
+ * the capabs combinations which are not needed are not worked out. -A1kmm
+ */
+void
+send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
+		      struct Channel *chptr, struct ChModeChange mode_changes[],
+		      int mode_count)
+{
+	static char modebuf[MODEBUFLEN];
+	static char parabuf[MODEBUFLEN];
+	int i, mbl, pbl, nc, mc;
+	const char *arg;
+	int dir;
+	int j;
+	int cap;
+	int nocap;
+
+	mc = 0;
+	nc = 0;
+	pbl = 0;
+	parabuf[0] = 0;
+	dir = MODE_QUERY;
+
+	/* Now send to servers... */
+	for (j = 0; j < NCHCAP_COMBOS; j++)
+	{
+		if(chcap_combos[j].count == 0)
+			continue;
+
+		cap = chcap_combos[j].cap_yes;
+		nocap = chcap_combos[j].cap_no;
+
+		if((cap & CAP_UID) && source_p->user && (source_p->user->id[0] == '.'))
+			mbl = ircsprintf(modebuf, ":%s MODE %s ", source_p->user->id, chptr->chname);
+		else
+			mbl = ircsprintf(modebuf, ":%s MODE %s ", source_p->name, chptr->chname);
+
+		/* loop the list of - modes we have */
+		for (i = 0; i < mode_count; i++)
+		{
+			/* if they dont support the cap we need, or they do support a cap they
+			 * cant have, then dont add it to the modebuf.. that way they wont see
+			 * the mode
+			 */
+			if((mode_changes[i].letter == 0) ||
+					((cap & mode_changes[i].caps) != mode_changes[i].caps)
+					|| ((nocap & mode_changes[i].nocaps) != mode_changes[i].nocaps))
+				continue;
+
+			arg = "";
+			if((cap & CAP_UID) && mode_changes[i].id)
+				arg = mode_changes[i].id;
+			if(!*arg)
+				arg = mode_changes[i].arg;
+
+			/* if we're creeping past the buf size, we need to send it and make
+			 * another line for the other modes
+			 * XXX - this could give away server topology with uids being
+			 * different lengths, but not much we can do, except possibly break
+			 * them as if they were the longest of the nick or uid at all times,
+			 * which even then won't work as we don't always know the uid -A1kmm.
+			 */
+			if((arg != NULL) && ((mc == MAXMODEPARAMS) ||
+						((strlen(arg) + mbl + pbl + 2) > BUFSIZE)))
+			{
+				if(nc != 0)
+					sendto_server(client_p, chptr, cap, nocap,
+							"%s %s", modebuf, parabuf);
+				nc = 0;
+				mc = 0;
+
+				if((cap & CAP_UID) && source_p->user && (source_p->user->id[0] == '.'))
+					mbl = ircsprintf(modebuf, ":%s MODE %s ",
+							source_p->user->id, chptr->chname);
+				else
+					mbl = ircsprintf(modebuf, ":%s MODE %s ",
+							source_p->name, chptr->chname);
+
+				pbl = 0;
+				parabuf[0] = 0;
+				dir = MODE_QUERY;
+			}
+
+			if(dir != mode_changes[i].dir)
+			{
+				modebuf[mbl++] = (mode_changes[i].dir == MODE_ADD) ? '+' : '-';
+				dir = mode_changes[i].dir;
+			}
+
+			modebuf[mbl++] = mode_changes[i].letter;
+			modebuf[mbl] = 0;
+			nc++;
+
+			if(arg != NULL)
+			{
+				pbl = strlcat(parabuf, arg, MODEBUFLEN);
+				parabuf[pbl++] = ' ';
+				parabuf[pbl] = '\0';
+				mc++;
+			}
+		}
+
+		if(pbl && parabuf[pbl - 1] == ' ')
+			parabuf[pbl - 1] = 0;
+
+		if(nc != 0)
+			sendto_server(client_p, chptr, cap, nocap, "%s %s", modebuf, parabuf);
 	}
 }

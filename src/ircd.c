@@ -31,7 +31,6 @@
 #include "tools.h"
 #include "ircd.h"
 #include "channel.h"
-#include "channel_mode.h"
 #include "class.h"
 #include "client.h"
 #include "common.h"
