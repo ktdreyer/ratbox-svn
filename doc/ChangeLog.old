@@ -1,3 +1,15 @@
+androsyn    2001/12/25 01:53:44 EST	(20011225_2)
+
+  Modified files:
+    .                    ChangeLog 
+  Log:
+  Fixed a bogus id tag in the Changelog :P
+  
+  Revision  Changes    Path
+  7.3236    +3 -3      ircd-hybrid-7/ChangeLog
+
+
+
 androsyn    2001/12/25 01:51:46 EST	(20011225_1)
 
   Modified files:
