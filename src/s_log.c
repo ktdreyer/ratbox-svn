@@ -204,11 +204,13 @@ void log_user_exit(struct Client *source_p)
   if (IsPerson(source_p))
     {
       log(L_INFO, "%s (%3ld:%02ld:%02ld): %s!%s@%s %ld/%ld\n",
-	  myctime(source_p->firsttime),
-	  on_for / 3600, (on_for % 3600)/60,
-	  on_for % 60, source_p->name,
-	  source_p->username, source_p->host,
-	  source_p->localClient->sendK, source_p->localClient->receiveK);
+	  myctime(source_p->firsttime), on_for / 3600,
+	  (on_for % 3600)/60, on_for % 60,
+	  source_p->name,
+	  source_p->username,
+	  source_p->host,
+	  source_p->localClient->sendK,
+	  source_p->localClient->receiveK);
     }
 
 #else
@@ -227,18 +229,18 @@ void log_user_exit(struct Client *source_p)
       {
 	if (user_log_fb == NULL)
 	  {
-		  if( ConfigFileEntry.fname_userlog && 
-			  (user_log_fb = fbopen(ConfigFileEntry.fname_userlog, "r")) != NULL )
+	    if( ConfigFileEntry.fname_userlog && 
+		(user_log_fb = fbopen(ConfigFileEntry.fname_userlog, "r")) != NULL )
 	      {
-			  fbclose(user_log_fb);
-			  user_log_fb = fbopen(ConfigFileEntry.fname_userlog, "a");
+		fbclose(user_log_fb);
+		user_log_fb = fbopen(ConfigFileEntry.fname_userlog, "a");
 	      }
 	  }
 
 	if( user_log_fb != NULL )
 	  {
 	    ircsprintf(linebuf,
-		       "%s (%lu:%lu:%lu): %s!%s@%s %u/%u\n",
+		       "%s (%3ld:%02ld:%02ld): %s!%s@%s %ld/%ld\n",
 		       myctime(source_p->firsttime), on_for / 3600,
 		       (on_for % 3600)/60, on_for % 60,
 		       source_p->name,
