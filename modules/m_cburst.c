@@ -105,14 +105,21 @@ int     ms_cburst(struct Client *cptr,
 #endif
 
   if( (chptr = hash_find_channel(name, NullChn)) == NULL)
+  {
+    if((!nick) || (nick && *nick!='!'))
     {
-      
       chptr = get_channel(sptr, name, CREATE);
-      chptr->channelts = (time_t)(-1); /* ! highest possible TS so its always
-					* over-ruled
-					*/
+      chptr->channelts = (time_t)(-1); /* ! highest possible TS so its always-                                          * over-ruled
+                                        */
       chptr->users_last = CurrentTime;
     }
+    else if(nick && *nick=='!')
+    {
+      sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL),
+                 me.name, nick+1, name);
+      return 0;
+    }
+  }
 
   if(IsCapable(cptr,CAP_LL))
     {

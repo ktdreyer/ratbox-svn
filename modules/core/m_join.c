@@ -158,6 +158,7 @@ int     m_join(struct Client *cptr,
           else
           {
             joining_vchan = 0;
+            root_chptr = chptr;
           }
           
 	  if (chptr->users == 0)
@@ -198,7 +199,10 @@ int     m_join(struct Client *cptr,
       check_spambot_warning(sptr, name);
 
       if(!chptr)        /* If I already have a chptr, no point doing this */
+      {
 	chptr = get_channel(sptr, name, CREATE);
+        root_chptr = chptr;
+      }
       
       if(chptr)
 	{
@@ -278,7 +282,7 @@ int     m_join(struct Client *cptr,
 			   sptr->name,
 			   sptr->username,
 			   sptr->host,
-			   name);
+			   root_chptr->chname);
       
       if( flags & CHFL_CHANOP )
 	{
@@ -288,7 +292,7 @@ int     m_join(struct Client *cptr,
 	  sendto_channel_local(ONLY_CHANOPS,chptr,
 			       ":%s MODE %s +nt",
 			       me.name,
-			       chptr->chname);
+			       root_chptr->chname);
 	  
 	  sendto_ll_channel_remote(chptr, cptr, sptr,
 				   ":%s MODE %s +nt",
@@ -301,18 +305,15 @@ int     m_join(struct Client *cptr,
       if (chptr->topic[0] != '\0')
 	{
 	  sendto_one(sptr, form_str(RPL_TOPIC), me.name,
-		     parv[0], name, chptr->topic);
+		     parv[0], root_chptr->chname, chptr->topic);
 	  
 	  sendto_one(sptr, form_str(RPL_TOPICWHOTIME),
-		     me.name, parv[0], name,
+		     me.name, parv[0], root_chptr->chname,
 		     chptr->topic_info,
 		     chptr->topic_time);
 	}
 
-      if (joining_vchan)
-        (void)channel_member_names(sptr, chptr, root_chptr->chname);
-      else
-        (void)channel_member_names(sptr, chptr, name);
+      (void)channel_member_names(sptr, chptr, root_chptr->chname);
       
       if(successful_join_count)
 	sptr->localClient->last_join_time = CurrentTime;

@@ -51,6 +51,7 @@ struct Channel* cjoin_channel(struct Channel *root,
 {
   char  vchan_name[CHANNELLEN];
   struct Channel * vchan_chptr;
+  int i;
   dlink_node *m;
 
   /* don't cjoin a vchan, only the top is allowed */
@@ -74,11 +75,6 @@ struct Channel* cjoin_channel(struct Channel *root,
   }
 
   /* "root" channel name exists, now create a new copy of it */
-  /* ZZZ XXX N.B.
-   * Following to be added
-   *
-   * 1. detect if channel already exist (remote chance)
-   */
 
   if (strlen(name) > CHANNELLEN-15)
   {
@@ -94,7 +90,22 @@ struct Channel* cjoin_channel(struct Channel *root,
     return NULL;
   }
 
-  ircsprintf( vchan_name, "##%s_%lu", name+1, CurrentTime );
+  /* Find an unused vchan name (##<chan>_<ts> format) */
+  i = CurrentTime;
+  do {
+    ircsprintf( vchan_name, "##%s_%lu", name+1, i );
+    vchan_chptr = hash_find_channel(vchan_name, NULL);
+    i++;
+
+    /* paranoid check to make sure we eventually give up */
+    if ( i > (CurrentTime+50) )
+    {
+      sendto_one(sptr, form_str(ERR_UNAVAILRESOURCE),
+                 me.name, sptr->name, name);
+      return NULL;
+    }
+  } while (vchan_chptr);
+  
   vchan_chptr = get_channel(sptr, vchan_name, CREATE);
 
   if( vchan_chptr == NULL )
