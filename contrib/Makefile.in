@@ -25,7 +25,8 @@ CPPFLAGS	= ${INCLUDES} @SSL_DEFINE@ @CPPFLAGS@
 SRCS =                          \
   m_clearchan.c			\
   m_jupe.c			\
-  m_hash.c
+  m_hash.c			\
+  m_nickinfo.c
 
 OBJS = ${SRCS:.c=.so}
 
