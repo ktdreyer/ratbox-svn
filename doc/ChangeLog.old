@@ -1,3 +1,10 @@
+*** 20010223_4 by wcampbel
+Xride submitted the Danish translation, set that up in the translations 
+Makefile.  Also documented in BUGS that you have to set the msglocale to
+standard before trying to update one in use, as it will occasionally dump
+core.
+
+
 *** 20010223_3 by fl_
 - we dont need mo_oper(), an !IsOper() check is better :)
 
