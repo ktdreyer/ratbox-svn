@@ -1,3 +1,8 @@
+*** 20011104_1 by wcampbel
+First three generated docs committed.  This means that they can no longer be
+edited directly.  INSTALL, doc/challenge.txt, and doc/server-version-info
+
+
 *** 20011103_2 by wcampbel
 Updated mkpasswd from the master site.
 
