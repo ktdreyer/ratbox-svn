@@ -1,3 +1,36 @@
+leeh        2003/07/21 12:33:21 EDT	(20030721_0)
+
+  Modified files:
+    help                 Makefile.in 
+    include              cache.h motd.h patchlevel.h s_conf.h 
+    modules              m_challenge.c m_help.c m_motd.c m_oper.c 
+                         m_rehash.c 
+    src                  cache.c ircd.c ircd_signal.c motd.c 
+                         s_user.c 
+  Log:
+  - fixed the help/Makefile to remove help-old
+  - moved the motd/omotd to struct cachefile
+  - I broke short motd :P
+  
+  Revision  Changes    Path
+  1.17      +5 -1      ircd-ratbox/help/Makefile.in
+  1.2       +11 -3     ircd-ratbox/include/cache.h
+  7.16      +0 -2      ircd-ratbox/include/motd.h
+  7.51      +1 -1      ircd-ratbox/include/patchlevel.h
+  7.246     +0 -2      ircd-ratbox/include/s_conf.h
+  1.57      +4 -3      ircd-ratbox/modules/m_challenge.c
+  1.60      +3 -10     ircd-ratbox/modules/m_help.c
+  1.45      +5 -7      ircd-ratbox/modules/m_motd.c
+  1.71      +3 -2      ircd-ratbox/modules/m_oper.c
+  1.69      +49 -41    ircd-ratbox/modules/m_rehash.c
+  1.2       +76 -3     ircd-ratbox/src/cache.c
+  7.301     +2 -6      ircd-ratbox/src/ircd.c
+  7.20      +2 -1      ircd-ratbox/src/ircd_signal.c
+  7.35      +5 -59     ircd-ratbox/src/motd.c
+  7.273     +5 -2      ircd-ratbox/src/s_user.c
+
+
+
 leeh        2003/07/19 11:48:15 EDT	(20030719_3)
 
   Added files:
