@@ -1,3 +1,19 @@
+leeh        2004/07/17 12:21:42 EDT	(20040717_2)
+
+  Modified files:
+    src                  hash.c newconf.c s_newconf.c 
+  Log:
+  - make hash functions use dlinkFindDestroy() for removal
+  - fix a memory leak with stacked user@hosts in oper {};
+  - fix a minor buffer overflow with oper privs
+  
+  Revision  Changes    Path
+  7.106     +3 -28     ircd-ratbox/src/hash.c
+  7.154     +1 -0      ircd-ratbox/src/newconf.c
+  7.45      +1 -1      ircd-ratbox/src/s_newconf.c
+
+
+
 androsyn    2004/07/17 10:58:24 EDT	(20040717_1)
 
   Modified files:
