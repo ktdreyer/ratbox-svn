@@ -1078,6 +1078,16 @@ int server_estab(struct Client *client_p)
   Count.server++;
   Count.myserver++;
 
+  add_server_to_list(client_p);
+  add_to_client_hash_table(client_p->name, client_p);
+  /* doesnt duplicate client_p->serv if allocated this struct already */
+  make_server(client_p);
+  client_p->serv->up = me.name;
+  /* add it to scache */
+  find_or_add(client_p->name);
+  client_p->firsttime = CurrentTime;
+  /* fixing eob timings.. -gnp */
+
   /* Show the real host/IP to admins */
   sendto_realops_flags(FLAGS_ALL, L_ADMIN,
 			"Link with %s established: (%s) link",
@@ -1090,16 +1100,6 @@ int server_estab(struct Client *client_p)
 
   ilog(L_NOTICE, "Link with %s established: (%s) link",
       inpath_ip, show_capabilities(client_p));
-
-  add_server_to_list(client_p);
-  add_to_client_hash_table(client_p->name, client_p);
-  /* doesnt duplicate client_p->serv if allocated this struct already */
-  make_server(client_p);
-  client_p->serv->up = me.name;
-  /* add it to scache */
-  find_or_add(client_p->name);
-  client_p->firsttime = CurrentTime;
-  /* fixing eob timings.. -gnp */
 
   client_p->serv->sconf = aconf;
   client_p->flags2 |= FLAGS2_CBURST;
