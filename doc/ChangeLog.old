@@ -1,3 +1,8 @@
+*** 20000103_2 by db
+- fixed a typo in ircd.c
+
+
+
 *** 20000103_1 by db
 - Folded in Perly's cleanup channel code. The idea is to remove
   channels from the lazylinks leaf server if no local members are on them
