@@ -1,3 +1,7 @@
+*** 20010125_4 by ejb
+- some fixes for ipv4
+
+
 *** 20010125_3 by ejb
 - fix to prevent coring on IPv4 connections.
 
