@@ -513,6 +513,7 @@ extern void check_dlines(void);
 extern void check_xlines(void);
 
 extern const char *get_client_name(struct Client *client, int show_ip);
+extern const char *get_server_name(struct Client *client, int show_ip);
 extern const char *log_client_name(struct Client *, int);
 extern void init_client(void);
 extern struct Client *make_client(struct Client *from);

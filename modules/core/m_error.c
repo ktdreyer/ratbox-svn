@@ -63,30 +63,22 @@ int
 m_error(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	const char *para;
-#ifndef HIDE_SERVERS_IPS
-	static int showip = HIDE_IP;
-#else
-	static int showip = MASK_IP;
-#endif
 
 	para = (parc > 1 && *parv[1] != '\0') ? parv[1] : "<>";
 
 	ilog(L_SERVER, "Received ERROR message from %s: %s", 
-	     log_client_name(source_p, SHOW_IP), para);
+		log_client_name(source_p, SHOW_IP), para);
 
-	if(IsAnyServer(client_p))
+	if(IsAnyServer(client_p) && ConfigFileEntry.hide_error_messages < 2)
 	{
-		if(ConfigFileEntry.hide_error_messages < 2)
-		{
-			sendto_realops_flags(UMODE_ALL, L_ADMIN,
-					     "ERROR :from %s -- %s",
-					     get_client_name(client_p, showip), para);
+		sendto_realops_flags(UMODE_ALL, L_ADMIN,
+				"ERROR :from %s -- %s",
+				get_server_name(client_p, HIDE_IP), para);
 
-			if(!ConfigFileEntry.hide_error_messages)
-				sendto_realops_flags(UMODE_ALL, L_OPER,
-						     "ERROR :from %s -- %s",
-						     get_client_name(client_p, showip), para);
-		}
+		if(!ConfigFileEntry.hide_error_messages)
+			sendto_realops_flags(UMODE_ALL, L_OPER,
+					"ERROR :from %s -- %s",
+					get_server_name(client_p, HIDE_IP), para);
 	}
 
 	exit_client(client_p, source_p, source_p, "ERROR");
@@ -98,11 +90,6 @@ static int
 ms_error(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	const char *para;
-#ifndef HIDE_SERVERS_IPS
-	static int showip = HIDE_IP;
-#else
-	static int showip = MASK_IP;
-#endif
 
 	para = (parc > 1 && *parv[1] != '\0') ? parv[1] : "<>";
 
@@ -115,24 +102,24 @@ ms_error(struct Client *client_p, struct Client *source_p, int parc, const char 
 	if(client_p == source_p)
 	{
 		sendto_realops_flags(UMODE_ALL, L_ADMIN, "ERROR :from %s -- %s",
-				     get_client_name(client_p, showip), para);
+				get_server_name(client_p, HIDE_IP), para);
 
 		if(!ConfigFileEntry.hide_error_messages)
 			sendto_realops_flags(UMODE_ALL, L_OPER, 
-					     "ERROR :from %s -- %s",
-					     get_client_name(client_p, showip), para);
+					"ERROR :from %s -- %s",
+				     	get_server_name(client_p, HIDE_IP), para);
 	}
 	else
 	{
 		sendto_realops_flags(UMODE_ALL, L_ADMIN, "ERROR :from %s via %s -- %s",
-				     source_p->name, 
-				     get_client_name(client_p, showip), para);
+				source_p->name, 
+				get_server_name(client_p, HIDE_IP), para);
 
 		if(!ConfigFileEntry.hide_error_messages)
 			sendto_realops_flags(UMODE_ALL, L_OPER,
-					     "ERROR :from %s via %s -- %s",
-					     source_p->name,
-					     get_client_name(client_p, showip), para);
+					"ERROR :from %s via %s -- %s",
+					source_p->name,
+					get_server_name(client_p, HIDE_IP), para);
 	}
 
 	return 0;

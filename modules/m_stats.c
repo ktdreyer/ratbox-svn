@@ -321,9 +321,11 @@ stats_connect(struct Client *source_p)
 		sendto_one_numeric(source_p, RPL_STATSCLINE, 
 				form_str(RPL_STATSCLINE),
 #ifndef HIDE_SERVERS_IPS
-				IsOperAdmin(source_p) ? server_p->host :
+				server_p->host,
+#else
+				"*@127.0.0.1", 
 #endif
-				"*@127.0.0.1", buf, server_p->name,
+				buf, server_p->name,
 				server_p->port, server_p->class_name);
 	}
 }
@@ -1135,20 +1137,17 @@ stats_servlinks (struct Client *source_p)
 		sendK += target_p->localClient->sendK;
 		receiveK += target_p->localClient->receiveK;
 
-		sendto_one (source_p, Sformat,
-			    get_id(&me, source_p), RPL_STATSLINKINFO, get_id(source_p, source_p),
-#ifndef HIDE_SERVERS_IPS
-			    IsOperAdmin (source_p) ? get_client_name (target_p, SHOW_IP) :
-#endif
-			    get_client_name (target_p, MASK_IP),
-			    (int) linebuf_len (&target_p->localClient->buf_sendq),
-			    (int) target_p->localClient->sendM,
-			    (int) target_p->localClient->sendK,
-			    (int) target_p->localClient->receiveM,
-			    (int) target_p->localClient->receiveK,
-			    CurrentTime - target_p->firsttime,
-			    (CurrentTime > target_p->since) ? (CurrentTime - target_p->since) : 0,
-			    IsOper (source_p) ? show_capabilities (target_p) : "TS");
+		sendto_one(source_p, Sformat,
+			get_id(&me, source_p), RPL_STATSLINKINFO, get_id(source_p, source_p),
+			get_server_name(target_p, SHOW_IP),
+			(int) linebuf_len (&target_p->localClient->buf_sendq),
+			(int) target_p->localClient->sendM,
+			(int) target_p->localClient->sendK,
+			(int) target_p->localClient->receiveM,
+			(int) target_p->localClient->receiveK,
+			CurrentTime - target_p->firsttime,
+			(CurrentTime > target_p->since) ? (CurrentTime - target_p->since) : 0,
+			IsOper (source_p) ? show_capabilities (target_p) : "TS");
 	}
 
 	sendto_one_numeric(source_p, RPL_STATSDEBUG,
@@ -1266,19 +1265,15 @@ stats_l_client(struct Client *source_p, struct Client *target_p,
 	if(IsAnyServer(target_p))
 	{
 		sendto_one_numeric(source_p, RPL_STATSDEBUG, Lformat,
-#ifndef HIDE_SERVERS_IPS
-				   IsOperAdmin(source_p) ? get_client_name(target_p, SHOW_IP) :
-#endif
-				   get_client_name(target_p, MASK_IP),
-				   (int) linebuf_len(&target_p->localClient->buf_sendq),
-				   (int) target_p->localClient->sendM,
-				   (int) target_p->localClient->sendK,
-				   (int) target_p->localClient->receiveM,
-				   (int) target_p->localClient->receiveK,
-				   CurrentTime - target_p->firsttime,
-				   (CurrentTime >
-				    target_p->since) ? (CurrentTime - target_p->since) : 0,
-				   IsOper(source_p) ? show_capabilities(target_p) : "-");
+				get_server_name(target_p, SHOW_IP),
+				(int) linebuf_len(&target_p->localClient->buf_sendq),
+				(int) target_p->localClient->sendM,
+				(int) target_p->localClient->sendK,
+				(int) target_p->localClient->receiveM,
+				(int) target_p->localClient->receiveK,
+				CurrentTime - target_p->firsttime,
+				(CurrentTime > target_p->since) ? (CurrentTime - target_p->since) : 0,
+				IsOper(source_p) ? show_capabilities(target_p) : "-");
 	}
 
 	else if(IsIPSpoof(target_p))

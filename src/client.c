@@ -902,10 +902,6 @@ get_client_name(struct Client *client, int showip)
 		if(!irccmp(client->name, client->host))
 			return client->name;
 
-#ifdef HIDE_SERVERS_IPS
-		if(IsAnyServer(client))
-			showip = MASK_IP;
-#endif
 #ifdef HIDE_SPOOF_IPS
 		if(showip == SHOW_IP && IsIPSpoof(client))
 			showip = MASK_IP;
@@ -936,6 +932,49 @@ get_client_name(struct Client *client, int showip)
 	return client->name;
 }
 
+const char *
+get_server_name(struct Client *target_p, int showip)
+{
+	static char nbuf[HOSTLEN * 2 + USERLEN + 5];
+
+	if(target_p == NULL)
+		return NULL;
+
+	if(!MyConnect(target_p) || !irccmp(target_p->name, target_p->host))
+		return target_p->name;
+
+#ifdef HIDE_SERVERS_IPS
+	if(EmptyString(target_p->name))
+	{
+		ircsnprintf(nbuf, sizeof(nbuf), "[%s@255.255.255.255]",
+				target_p->username);
+		return nbuf;
+	}
+	else
+		return target_p->name;
+#endif
+
+	switch (showip)
+	{
+		case SHOW_IP:
+			ircsnprintf(nbuf, sizeof(nbuf), "%s[%s@%s]",
+				target_p->name, target_p->username, 
+				target_p->sockhost);
+			break;
+
+		case MASK_IP:
+			ircsnprintf(nbuf, sizeof(nbuf), "%s[%s@255.255.255.255]",
+				target_p->name, target_p->username);
+
+		default:
+			ircsnprintf(nbuf, sizeof(nbuf), "%s[%s@%s]",
+				target_p->name, target_p->username,
+				target_p->host);
+	}
+
+	return nbuf;
+}
+	
 /* log_client_name()
  *
  * This version is the same as get_client_name, but doesnt contain the
@@ -2109,13 +2148,9 @@ error_exit_client(struct Client *client_p, int error)
 		else
 		{
 			report_error("Lost connection to %s: %d",
-#ifndef HIDE_SERVERS_IPS
-				     get_client_name(client_p, SHOW_IP),
-#else
-				     get_client_name(client_p, MASK_IP),
-#endif
-				     log_client_name(client_p, SHOW_IP),
-				     current_error);
+					get_server_name(client_p, SHOW_IP),
+					log_client_name(client_p, SHOW_IP),
+					current_error);
 			ilog(L_SERVER, "Lost connection to %s: %d",
 			     log_client_name(client_p, SHOW_IP), current_error);
 

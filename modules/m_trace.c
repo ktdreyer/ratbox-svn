@@ -154,8 +154,6 @@ m_trace(struct Client *client_p, struct Client *source_p, int parc, const char *
 	wilds = strchr(tname, '*') || strchr(tname, '?');
 	dow = wilds || doall;
 
-	set_time();
-
 	/* specific trace */
 	if(dow == 0)
 	{
@@ -342,32 +340,26 @@ report_this_status(struct Client *source_p, struct Client *target_p,
 		return 0;
 
 	inetntop_sock(&target_p->localClient->ip, ip, sizeof(ip));
-	name = get_client_name(target_p, HIDE_IP);
 	class_name = get_client_class(target_p);
 
-	set_time();
+	if(IsAnyServer(target_p))
+		name = get_server_name(target_p, HIDE_IP);
+	else
+		name = get_client_name(target_p, HIDE_IP);
 
 	switch (target_p->status)
 	{
 	case STAT_CONNECTING:
 		sendto_one_numeric(source_p, RPL_TRACECONNECTING,
-				   form_str(RPL_TRACECONNECTING), class_name,
-#ifndef HIDE_SERVERS_IPS
-				   IsOperAdmin(source_p) ? name :
-#endif
-				   target_p->name);
-
+				form_str(RPL_TRACECONNECTING),
+				class_name, name);
 		cnt++;
 		break;
 
 	case STAT_HANDSHAKE:
 		sendto_one_numeric(source_p, RPL_TRACEHANDSHAKE,
-				   form_str(RPL_TRACEHANDSHAKE), class_name,
-#ifndef HIDE_SERVERS_IPS
-				   IsOperAdmin(source_p) ? name :
-#endif
-				   target_p->name);
-
+				form_str(RPL_TRACEHANDSHAKE),
+				class_name, name);
 		cnt++;
 		break;
 
@@ -382,6 +374,7 @@ report_this_status(struct Client *source_p, struct Client *target_p,
 				   target_p->firsttime ? CurrentTime - target_p->firsttime : -1);
 		cnt++;
 		break;
+
 	case STAT_CLIENT:
 		/* Only opers see users if there is a wildcard
 		 * but anyone can see all the opers.
@@ -419,11 +412,7 @@ report_this_status(struct Client *source_p, struct Client *target_p,
 
 	case STAT_SERVER:
 		sendto_one_numeric(source_p, RPL_TRACESERVER, form_str(RPL_TRACESERVER),
-				   class_name, link_s_p, link_u_p,
-#ifndef HIDE_SERVERS_IPS
-				   IsOperAdmin(source_p) ? name :
-#endif
-				   target_p->name,
+				   class_name, link_s_p, link_u_p, name,
 				   *(target_p->serv->by) ? target_p->serv->by : "*", "*",
 				   me.name, CurrentTime - target_p->lasttime);
 		cnt++;

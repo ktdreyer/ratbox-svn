@@ -980,8 +980,6 @@ server_estab(struct Client *client_p)
 {
 	struct Client *target_p;
 	struct server_conf *server_p;
-	const char *inpath;
-	static char inpath_ip[HOSTLEN * 2 + USERLEN + 5];
 	char *host;
 	dlink_node *ptr;
 
@@ -990,8 +988,6 @@ server_estab(struct Client *client_p)
 		return -1;
 	ClearAccess(client_p);
 
-	strcpy(inpath_ip, get_client_name(client_p, SHOW_IP));
-	inpath = get_client_name(client_p, MASK_IP);	/* "refresh" inpath with host */
 	host = client_p->name;
 
 	if((server_p = client_p->localClient->att_sconf) == NULL)
@@ -1126,19 +1122,10 @@ server_estab(struct Client *client_p)
 	/* fixing eob timings.. -gnp */
 
 	/* Show the real host/IP to admins */
-	sendto_realops_flags(UMODE_ALL, L_ADMIN,
-			     "Link with %s established: (%s) link",
-#ifdef HIDE_SERVERS_IPS
-			     client_p->name,
-#else
-			     inpath_ip, 
-#endif
-			     show_capabilities(client_p));
-
-	/* Now show the masked hostname/IP to opers */
-	sendto_realops_flags(UMODE_ALL, L_OPER,
-			     "Link with %s established: (%s) link",
-			     inpath, show_capabilities(client_p));
+	sendto_realops_flags(UMODE_ALL, L_ALL,
+			"Link with %s established: (%s) link",
+			get_server_name(client_p, SHOW_IP),
+			show_capabilities(client_p));
 
 	ilog(L_SERVER, "Link with %s established: (%s) link",
 	     log_client_name(client_p, SHOW_IP), show_capabilities(client_p));
@@ -1419,25 +1406,17 @@ fork_server(struct Client *server)
 		if(!comm_set_nb(server->localClient->fd))
 		{
 			report_error(NONB_ERROR_MSG,
-#ifdef HIDE_SERVERS_IPS
-				     get_client_name(server, MASK_IP),
-#else
-				     get_client_name(server, SHOW_IP),
-#endif
-				     log_client_name(server, SHOW_IP),
-				     errno);
+					get_server_name(server, SHOW_IP),
+					log_client_name(server, SHOW_IP),
+					errno);
 		}
 
 		if(!comm_set_nb(server->localClient->ctrlfd))
 		{
 			report_error(NONB_ERROR_MSG,
-#ifdef HIDE_SERVERS_IPS
-				     get_client_name(server, MASK_IP),
-#else
-				     get_client_name(server, SHOW_IP),
-#endif
-				     log_client_name(server, SHOW_IP),
-				     errno);
+					get_server_name(server, SHOW_IP),
+					log_client_name(server, SHOW_IP),
+					errno);
 		}
 
 		fd_open(server->localClient->ctrlfd, FD_SOCKET, NULL);
@@ -1545,25 +1524,17 @@ serv_connect(struct server_conf *server_p, struct Client *by)
 	if(!comm_set_nb(client_p->localClient->fd))
 	{
 		report_error(NONB_ERROR_MSG,
-#ifdef HIDE_SERVERS_IPS
-			     get_client_name(client_p, MASK_IP),
-#else
-			     get_client_name(client_p, SHOW_IP),
-#endif
-			     log_client_name(client_p, SHOW_IP),
-			     errno);
+				get_server_name(client_p, SHOW_IP),
+				log_client_name(client_p, SHOW_IP),
+				errno);
 	}
 
 	if(!comm_set_buffers(client_p->localClient->fd, READBUF_SIZE))
 	{
 		report_error(SETBUF_ERROR_MSG,
-#ifdef HIDE_SERVERS_IPS
-			     get_client_name(client_p, MASK_IP),
-#else
-			     get_client_name(client_p, SHOW_IP),
-#endif
-			     log_client_name(client_p, SHOW_IP),
-			     errno);
+				get_server_name(client_p, SHOW_IP),
+				log_client_name(client_p, SHOW_IP),
+				errno);
 	}
 
 	/*
@@ -1691,16 +1662,16 @@ serv_connect_callback(int fd, int status, void *data)
 		/* Admins get to see any IP, mere opers don't *sigh*
 		 */
 #ifndef HIDE_SERVERS_IPS
-		sendto_realops_flags(UMODE_ALL, L_ADMIN,
+		sendto_realops_flags(UMODE_ALL, L_ALL,
 				     "Error connecting to %s[%s]: %s (%s)",
 				     client_p->name, client_p->host,
 				     comm_errstr(status), strerror(errno));
-		sendto_realops_flags(UMODE_ALL, L_OPER,
 #else
 		sendto_realops_flags(UMODE_ALL, L_ALL,
-#endif
 				     "Error connecting to %s: %s (%s)",
-				     client_p->name, comm_errstr(status), strerror(errno));
+				     client_p->name, comm_errstr(status),
+				     strerror(errno));
+#endif
 		exit_client(client_p, client_p, &me, comm_errstr(status));
 		return;
 	}
@@ -1709,15 +1680,8 @@ serv_connect_callback(int fd, int status, void *data)
 	/* Get the C/N lines */
 	if((server_p = client_p->localClient->att_sconf) == NULL)
 	{
-		sendto_realops_flags(UMODE_ALL, L_ADMIN, "Lost connect{} block for %s",
-#ifdef HIDE_SERVERS_IPS
-				     get_client_name(client_p, MASK_IP));
-#else
-				     get_client_name(client_p, HIDE_IP));
-#endif
-		sendto_realops_flags(UMODE_ALL, L_OPER,
-				     "Lost connect{} block for %s",
-				     get_client_name(client_p, MASK_IP));
+		sendto_realops_flags(UMODE_ALL, L_ALL, "Lost connect{} block for %s",
+				get_server_name(client_p, HIDE_IP));
 		exit_client(client_p, client_p, &me, "Lost connect{} block");
 		return;
 	}

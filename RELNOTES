@@ -12,6 +12,10 @@ it is important you read this file before upgrading.
 - fix servlink errors with high fds
 - fix typo in conf parser, "autocon" instead of "autoconn"
 - add a quick netwide EOB via PING/PONG
+- add challenge.pl, for irssi
+- fixed LOCOPS to go over ENCAP when no CAP_CLUSTER is available
+- fix core on passworded auth when user doesnt send a password
+- added hash statistics via stats B
 
 -- ircd-ratbox-2.0b5
 - AWAYLEN added to 005, shows maximum length of an away message.  Default is
