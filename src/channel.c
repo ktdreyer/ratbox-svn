@@ -1035,12 +1035,12 @@ pretty_mask(char *mask)
 
   if ((t = strchr(mask, '@')) != NULL)
     {
-      *t++ = 0;
+      *t++ = '\0';
       host = t;
 
       if ((t = strchr(mask, '!')) != NULL)
         {
-          *t++ = 0;
+          *t++ = '\0';
           user = t;
           nick = mask;
         }
@@ -1049,7 +1049,7 @@ pretty_mask(char *mask)
     }
   else if ((t = strchr(mask, '!')) != NULL)
     {
-      *t++ = 0;
+      *t++ = '\0';
       nick = mask;
       user = t;
     }
@@ -1058,9 +1058,9 @@ pretty_mask(char *mask)
   else
     nick = mask;
 
-  ircsprintf(mask_buf + mask_pos, "%s!%s@%s", nick, user, host);
+  mask_pos += ircsprintf(mask_buf + mask_pos, "%s!%s@%s", nick, user, host)
+								          + 1;
 
-  mask_pos = strlen(mask_buf) + 1;
   return mask_buf + old_mask_pos;
 }
 #else
