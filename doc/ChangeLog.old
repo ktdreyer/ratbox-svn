@@ -1,3 +1,12 @@
+*** 20010311_8 by davidt
+- Fix topic for vchans
+- Recommitting the following fixes:
+  * Tidied up TODO, it had a bunch of stuff in it that had already been done.
+  * Multiple ports are now allowed per listen{} block.
+    Note that host=""; lines must come before port=123; lines (they apply
+    to any port=...; lines following).
+
+
 *** 20010311_7 by fl_
 - This reverts the tree to its state on the 8th
 
