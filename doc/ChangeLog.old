@@ -1,3 +1,8 @@
+*** 20010109_8 by db
+- unnecessary loop removed for now
+
+
+
 *** 20010109_7 by toot
 removed old NULL_POINTER_NOT_ZERO #defines
 
