@@ -1,3 +1,7 @@
+*** 20011021_3 by davidt
+- Update Makefile.in - I used src/*.c, which missed this out. Oops.
+
+
 *** 20011021_2 by davidt
 - Some misc. fixes for bugs in channel_mode.c
   (-o+h was sent to clients as -o+h+o, +o on a +v'd client was sent
