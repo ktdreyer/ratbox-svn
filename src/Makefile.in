@@ -176,5 +176,5 @@ clean:
 distclean: clean
 	${RM} -f Makefile version.c.last
 
-include .depend
+@INCLUDE@ ".depend"
 

@@ -11,6 +11,9 @@ VERSION=7.0
 AC_SUBST(PACKAGE)
 AC_SUBST(VERSION)
 
+if test -z "$MAKE"; then
+	MAKE=make
+fi
 
 dnl Checks for programs.
 AC_PROG_CC
@@ -303,6 +306,25 @@ AC_PROG_GCC_TRADITIONAL
 dnl checl for openssl
 AC_CHECK_FUNC(openssl, ac_cv_func_openssl='yes',)
 
+AC_MSG_CHECKING(for how to include files in Makefile)
+cat >conftest <<__EOF__
+mytest:
+	@touch conftest.t
+.include "/dev/null"
+__EOF__
+
+rm -f conftest.t
+
+$MAKE -f conftest mytest 2>&1 >/dev/null
+if test -f conftest.t; then
+	AC_MSG_RESULT(.include)
+	INCLUDE=".include"
+else
+	AC_MSG_RESULT(include)
+	INCLUDE=include
+fi
+
+rm -f conftest conftest.f
 dnl check for poll() call
 AC_CHECK_FUNC(poll, ac_cv_func_poll='yes',)
 
@@ -375,6 +397,8 @@ if test "$ac_cv_ipv6" = "yes" ; then
 	AC_DEFINE(IPV6)
 	echo "Using IPv6 support"
 fi
+
+AC_SUBST(INCLUDE)
 
 AC_SUBST(SUBDIR_MESSAGES)
 
