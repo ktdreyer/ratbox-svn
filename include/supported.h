@@ -27,6 +27,7 @@
 
 #define FEATURES "KNOCK"\
                 " VCHANS" \
+                " WALLCHOPS" \
                 " MODES=%i" \
                 " MAXCHANNELS=%i" \
                 " MAXBANS=%i" \
