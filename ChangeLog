@@ -1,3 +1,15 @@
+androsyn    2004/07/19 15:49:00 EDT	(20040719_1)
+
+  Modified files:
+    src                  reject.c 
+  Log:
+  Fix issue with bitlens in reject cache...
+  
+  Revision  Changes    Path
+  1.23      +6 -1      ircd-ratbox/src/reject.c
+
+
+
 androsyn    2004/07/19 11:12:45 EDT	(20040719_0)
 
   Modified files:
