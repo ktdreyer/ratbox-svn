@@ -1,3 +1,17 @@
+androsyn    2002/05/16 09:57:28 EDT	(20020516_4)
+
+  Modified files:
+    src                  balloc.c 
+  Log:
+  This should make the failure case of BlockHeapAlloc() a bit more robust.  If
+  we end up with an out of memory condition, we attempt to garbage collect
+  the heap and see if that frees anything.
+  
+  Revision  Changes    Path
+  7.28      +10 -12    ircd-hybrid-7/src/balloc.c
+
+
+
 androsyn    2002/05/16 06:18:09 EDT	(20020516_3)
 
   Modified files:
