@@ -1,3 +1,7 @@
+*** 20010719_4 by wcampbel
+Fix my commit from before, nameser.h is needed on FreeBSD
+
+
 *** 20010719_3 by wcampbel
 Removed an include (arpa/nameser.h)
 This breaks Cygwin compiles, and appears to not be needed.
