@@ -190,7 +190,7 @@
  * this option is used unless you tell the system administrator beforehand
  * and obtain their permission to send messages to the system log files.
  */
-#define USE_SYSLOG
+#undef USE_SYSLOG
 
 #ifdef  USE_SYSLOG
 /* SYSLOG_KILL SYSLOG_SQUIT SYSLOG_CONNECT SYSLOG_USERS SYSLOG_OPER

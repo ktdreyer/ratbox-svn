@@ -122,36 +122,17 @@
 #define TS_WARN_DELTA_MIN     10
 #define TS_WARN_DELTA_DEFAULT 30
 
-/* FNAME_USERLOG and FNAME_OPERLOG - logs of local USERS and OPERS
- * Define this filename to maintain a list of persons who log
- * into this server. Logging will stop when the file does not exist.
- * Logging will be disable also if you do not define this.
- * FNAME_USERLOG just logs user connections, FNAME_OPERLOG logs every
- * successful use of /oper.  These are either full paths or files within DPATH.
- *
- * These need to be defined if you want to use SYSLOG logging, too.
- */
-#define FNAME_USERLOG ETCPATH "/users"
-#define FNAME_OPERLOG ETCPATH "/opers"
-
 /* NETWORK_NAME_DEFAULT and NETWORK_DESC_DEFAULT - these are used
  * instead of a servers name/description if you enable server hiding.
  */
 #define NETWORK_NAME_DEFAULT "EFnet"
 #define NETWORK_DESC_DEFAULT "Eris Free Network"
 
-/* RFC1035_ANAL
- * Defining this causes ircd to reject hostnames with non-compliant chars.
- * undef'ing it will allow hostnames with _ or / to connect
- */
-#define RFC1035_ANAL
-
 /*
- * OPER_UMODES LOCOP_UMODES - set these to be the initial umodes when OPER'ing
- * These can be over-ridden in ircd.conf file, with flags in last O field
+ * OPER_UMODES - set these to be the initial umodes when OPER'ing
+ * These can be over-ridden in the ircd.conf file.
  */
 #define OPER_UMODES   (FLAGS_OPER|FLAGS_WALLOP|FLAGS_SERVNOTICE|FLAGS_OPERWALL)
-#define LOCOP_UMODES   (FLAGS_LOCOP|FLAGS_WALLOP|FLAGS_SERVNOTICE)
 
 /* MAXIMUM LINKS - max links for class 0 if no Y: line configured
  *
@@ -180,7 +161,7 @@
  * a server is in class 0 (the default class if none is set).
  *
  */
-#define MAXIMUM_LINKS 1
+#define MAXIMUM_LINKS_DEFAULT 1
 
 /* CMDLINE_CONFIG - allow conf-file to be specified on command line
  * NOTE: defining CMDLINE_CONFIG and installing ircd SUID or SGID is a MAJOR
@@ -209,7 +190,7 @@
  * this option is used unless you tell the system administrator beforehand
  * and obtain their permission to send messages to the system log files.
  */
-#define USE_SYSLOG
+#undef USE_SYSLOG
 
 #ifdef  USE_SYSLOG
 /* SYSLOG_KILL SYSLOG_SQUIT SYSLOG_CONNECT SYSLOG_USERS SYSLOG_OPER
@@ -275,6 +256,12 @@
 /*   STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP  */
 
 /* You shouldn't change anything below this line, unless absolutely needed. */
+
+/* OPER_ONLY_UMODES - umodes that only opers can set */
+#define OPER_ONLY_UMODES (FLAGS_ADMIN|FLAGS_BOTS|FLAGS_CCONN|FLAGS_DEBUG| \
+						  FLAGS_FULL|FLAGS_SKILL|FLAGS_NCHANGE|FLAGS_OPER| \
+						  FLAGS_REJ|FLAGS_UNAUTH|FLAGS_SPY|FLAGS_EXTERNAL| \
+						  FLAGS_OPERWALL)
 
 /* INITIAL_DBUFS - how many dbufs to preallocate
  */
