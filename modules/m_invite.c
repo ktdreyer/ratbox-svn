@@ -76,6 +76,13 @@ int     m_invite(struct Client *cptr,
   char   *chname;
   int    chop;			/* Is channel op */
 
+  if (parc < 3 || *parv[1] == '\0')
+    {
+      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
+		 me.name, parv[0], "INVITE");
+      return -1;
+    }
+
   /* A little sanity test here */
   if(!sptr->user)
     return 0;

@@ -951,6 +951,15 @@ static int proc_answer(ResRQ* request, HEADER* header,
 #ifdef DEBUG
       Debug((DEBUG_INFO,"proc_answer: type:%d for:%s", type, hostbuf));
 #endif
+      /* XXX I'd rather just throw away the entire bogus thing
+       * but its possible its just a broken nameserver with still
+       * valid answers. But lets do some rudimentary logging for now...
+       */
+      current += rd_length;
+      log(L_ERROR, "res.c bogus type %d", type );
+#if 0
+      return 0;
+#endif
       break;
     }
   }
