@@ -1,3 +1,59 @@
+leeh        2003/08/21 18:14:07 EDT	(20030821_1)
+
+  Modified files:
+    contrib              m_force.c m_ltrace.c m_tburst.c 
+    doc                  example.conf example.efnet.conf 
+    include              s_conf.h 
+    modules              m_admin.c m_info.c m_invite.c m_ison.c 
+                         m_join.c m_links.c m_lusers.c m_motd.c 
+                         m_ping.c m_stats.c m_time.c m_topic.c 
+                         m_trace.c m_users.c m_version.c m_who.c 
+                         m_whois.c m_whowas.c 
+    modules/core         m_kill.c m_sjoin.c 
+    src                  client.c newconf.c parse.c s_conf.c 
+                         s_user.c 
+  Removed files:
+    doc                  serverhide.txt 
+  Log:
+  - removed hide_servers, disable_remote and disable_local_channels
+    from serverhide {}; - they werent really used anywhere..
+  
+  Revision  Changes    Path
+  1.22      +1 -15     ircd-ratbox/contrib/m_force.c
+  1.11      +1 -12     ircd-ratbox/contrib/m_ltrace.c
+  1.16      +2 -2      ircd-ratbox/contrib/m_tburst.c
+  7.221     +0 -15     ircd-ratbox/doc/example.conf
+  7.57      +0 -15     ircd-ratbox/doc/example.efnet.conf
+  7.5       +0 -167    ircd-ratbox/doc/serverhide.txt (dead)
+  7.252     +0 -3      ircd-ratbox/include/s_conf.h
+  1.89      +4 -13     ircd-ratbox/modules/core/m_kill.c
+  1.184     +5 -6      ircd-ratbox/modules/core/m_sjoin.c
+  1.53      +3 -6      ircd-ratbox/modules/m_admin.c
+  1.94      +3 -26     ircd-ratbox/modules/m_info.c
+  1.76      +5 -15     ircd-ratbox/modules/m_invite.c
+  1.47      +2 -4      ircd-ratbox/modules/m_ison.c
+  1.138     +3 -5      ircd-ratbox/modules/m_join.c
+  1.56      +4 -7      ircd-ratbox/modules/m_links.c
+  1.40      +2 -2      ircd-ratbox/modules/m_lusers.c
+  1.48      +3 -7      ircd-ratbox/modules/m_motd.c
+  1.49      +1 -8      ircd-ratbox/modules/m_ping.c
+  1.179     +8 -16     ircd-ratbox/modules/m_stats.c
+  1.42      +3 -7      ircd-ratbox/modules/m_time.c
+  1.83      +4 -16     ircd-ratbox/modules/m_topic.c
+  1.85      +1 -13     ircd-ratbox/modules/m_trace.c
+  1.40      +8 -18     ircd-ratbox/modules/m_users.c
+  1.60      +3 -5      ircd-ratbox/modules/m_version.c
+  1.102     +2 -4      ircd-ratbox/modules/m_who.c
+  1.128     +16 -53    ircd-ratbox/modules/m_whois.c
+  1.45      +5 -13     ircd-ratbox/modules/m_whowas.c
+  7.407     +0 -10     ircd-ratbox/src/client.c
+  7.107     +0 -23     ircd-ratbox/src/newconf.c
+  7.168     +3 -6      ircd-ratbox/src/parse.c
+  7.429     +0 -2      ircd-ratbox/src/s_conf.c
+  7.291     +16 -33    ircd-ratbox/src/s_user.c
+
+
+
 leeh        2003/08/21 12:07:30 EDT	(20030821_0)
 
   Modified files:
