@@ -320,10 +320,12 @@ io_loop(void)
   if (callbacks_called > 0)
    empty_cycles = 0;
   else if (empty_cycles++ > 10)
-   if(empty_cycles - 10 > 5000)
+  {
+    if(empty_cycles - 10 > 5000)
    	st = 5000;
-   else
+    else
    	st = empty_cycles;
+  }
   /* Do IO events */
   comm_select(st);
   
