@@ -1,3 +1,7 @@
+*** 20010816_7 by androsyn
+Yet another swing at this. This time we use memcpy().
+
+
 *** 20010816_6 by davidt
 - Of course, it didn't work, but this does.
 
