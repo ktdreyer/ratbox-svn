@@ -149,15 +149,14 @@ mod_clear_paths(void)
   struct module_path *pathst;
   dlink_node *node, *next;
 
-  next = mod_paths.head->next;
-  while((node = next))
-  {
-    next = node->next;
-    pathst = (struct module_path *)node->data;
-    dlinkDelete(node, &mod_paths);
-    MyFree(pathst);
-    MyFree(node);
-  }
+  for(node = mod_paths.head; node; next)
+    {
+      next = node->next;
+      pathst = (struct module_path *)node->data;
+      dlinkDelete(node, &mod_paths);
+      MyFree(pathst);
+      MyFree(node);
+    }
 }
 
 char *
@@ -182,10 +181,10 @@ findmodule_byname (char *name)
   int i;
 
   for (i = 0; i < num_mods; i++) 
-  {
-    if (!irccmp (modlist[i]->name, name))
-      return i;
-  }
+    {
+      if (!irccmp (modlist[i]->name, name))
+	return i;
+    }
   return -1;
 }
 
@@ -249,23 +248,23 @@ load_all_modules (int check)
   system_module_dir = opendir (MODPATH);
 
   if (system_module_dir == NULL)
-  {
-    log (L_WARN, "Could not load modules from %s: %s",
-         MODPATH, strerror (errno));
-    return;
-  }
+    {
+      log (L_WARN, "Could not load modules from %s: %s",
+	   MODPATH, strerror (errno));
+      return;
+    }
 
   while ((ldirent = readdir (system_module_dir)) != NULL)
-  {
-    if (ldirent->d_name [strlen (ldirent->d_name) - 3] == '.' &&
-        ldirent->d_name [strlen (ldirent->d_name) - 2] == 's' &&
-        ldirent->d_name [strlen (ldirent->d_name) - 1] == 'o')
     {
-      (void)sprintf (module_fq_name, "%s/%s",  MODPATH,
-                      ldirent->d_name);
-      (void)load_a_module (module_fq_name, check);
+      if (ldirent->d_name [strlen (ldirent->d_name) - 3] == '.' &&
+	  ldirent->d_name [strlen (ldirent->d_name) - 2] == 's' &&
+	  ldirent->d_name [strlen (ldirent->d_name) - 1] == 'o')
+	{
+	  (void)sprintf (module_fq_name, "%s/%s",  MODPATH,
+			 ldirent->d_name);
+	  (void)load_a_module (module_fq_name, check);
+	}
     }
-  }
 
   (void)closedir (system_module_dir);
 }
@@ -273,27 +272,27 @@ load_all_modules (int check)
 int
 load_one_module (char *path)
 {
-	char modpath[MAXPATHLEN];
-	dlink_node *pathst;
-	struct module_path *mpath;
+  char modpath[MAXPATHLEN];
+  dlink_node *pathst;
+  struct module_path *mpath;
 	
-	struct stat statbuf;
+  struct stat statbuf;
 
-	if (strchr(path, '/')) /* absolute path, try it */
-		return load_a_module(path, 1);
+  if (strchr(path, '/')) /* absolute path, try it */
+    return load_a_module(path, 1);
 
-	for (pathst = mod_paths.head; pathst; pathst = pathst->next)
-	{
-		mpath = (struct module_path *)pathst->data;
-		
-		sprintf(modpath, "%s/%s", mpath->path, path);
-		if (stat(modpath, &statbuf) == 0)
-			return load_a_module(modpath, 1);
-	}
+  for (pathst = mod_paths.head; pathst; pathst = pathst->next)
+    {
+      mpath = (struct module_path *)pathst->data;
+      
+      sprintf(modpath, "%s/%s", mpath->path, path);
+      if (stat(modpath, &statbuf) == 0)
+	return load_a_module(modpath, 1);
+    }
 	
-	sendto_realops_flags (FLAGS_ALL, "Cannot locate module %s", path);
-	log(L_WARN, "Cannot locate module %s", path);
-	return -1;
+  sendto_realops_flags (FLAGS_ALL, "Cannot locate module %s", path);
+  log(L_WARN, "Cannot locate module %s", path);
+  return -1;
 }
 		
 
