@@ -1,3 +1,15 @@
+androsyn    2003/02/08 18:19:27 UTC	(20030208_10)
+
+  Modified files:
+    src                  ircd.c 
+  Log:
+  Remove a few strncpy()'s that were sitting around still
+  
+  Revision  Changes    Path
+  7.278     +2 -3      ircd-ratbox/src/ircd.c
+
+
+
 ejb         2003/02/08 16:46:26 UTC	(20030208_9)
 
   Modified files:
