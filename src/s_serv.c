@@ -1365,6 +1365,7 @@ int fork_server(struct Client *server)
     /* set our fds as non blocking and close everything else */
     for(i = 0; i < HARD_FDLIMIT; i++)
     {
+      
       if ((i == slink_fds[0][0][0]) || (i == slink_fds[0][0][1]) ||
           (i == slink_fds[0][0][0]) || (i == slink_fds[1][0][1]) ||
           (i == server->fd)) {
@@ -1380,7 +1381,7 @@ int fork_server(struct Client *server)
       }
       else
       {
-#ifdef VMS
+#ifdef VMS || __CYGWIN__
         if (i > 2) /* don't close std* */
 #endif
           close(i);
