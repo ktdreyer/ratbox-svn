@@ -1,3 +1,7 @@
+*** 20010718_10 by androsyn
+Reflected the fact that the openssl related warnings are fixed.
+
+
 *** 20010718_9 by androsyn
 Changed char *version to char *ircd_version to prevent clash with openssl headers..
 
