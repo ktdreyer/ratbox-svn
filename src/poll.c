@@ -338,7 +338,7 @@ comm_select(time_t delay)
     comm_select_fdlist(FDLIST_SERVICE, 0);
     comm_select_fdlist(FDLIST_SERVER, 0);
     /* comm_select_fdlist(FDLIST_BUSYCLIENT, 0); */
-    comm_select_fdlist(FDLIST_IDLECLIENT, delay);
+    comm_select_fdlist(FDLIST_IDLECLIENT, 0);
     return 0;
 }
 #endif
