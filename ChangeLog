@@ -1,3 +1,15 @@
+leeh        2004/12/07 07:18:14 EST	(20041207_0)
+
+  Modified files:
+    modules              m_unreject.c 
+  Log:
+  - #include "hostmask.h" in m_unreject
+  
+  Revision  Changes    Path
+  1.2       +2 -1      ircd-ratbox/modules/m_unreject.c
+
+
+
 androsyn    2004/12/06 11:29:54 EST	(20041206_2)
 
   Modified files:
