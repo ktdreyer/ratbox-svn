@@ -88,15 +88,18 @@ m_join(struct Client *client_p,
        char *parv[])
 {
   struct Channel *chptr = NULL;
-  struct Channel *vchan_chptr = NULL;
   struct Channel *root_chptr = NULL;
   int joining_vchan = 0;
   char  *name, *key = NULL;
   char *vkey = NULL; /* !key for vchans */
   int   i, flags = 0;
-  char  *p = NULL, *p2 = NULL, *p3 = NULL, *pvc = NULL;
-  int   vc_ts;
+  char  *p = NULL, *p2 = NULL, *p3 = NULL;
   int   successful_join_count = 0; /* Number of channels successfully joined */
+#ifdef VCHANS
+  struct Channel *vchan_chptr = NULL;
+  char *pvc = NULL;
+  int   vc_ts;
+#endif
   
   if (*parv[1] == '\0')
     {
@@ -105,12 +108,15 @@ m_join(struct Client *client_p,
       return;
     }
 
+#ifdef VCHANS
   if (parc > 3)
     {
       key = strtoken(&p2, parv[3], ",");
       vkey = strtoken(&p3, parv[2], ",");
     }
-  else if (parc > 2)
+  else 
+#endif
+  if (parc > 2)
     {
       key = strtoken(&p2, parv[2], ",");
       vkey = key;
@@ -188,6 +194,7 @@ m_join(struct Client *client_p,
 	    continue;
 	  }
 
+#ifdef VCHANS
           /* Check if they want to join a subchan or something */
 	  vchan_chptr = select_vchan(chptr, source_p, vkey, name);
           
@@ -201,6 +208,7 @@ m_join(struct Client *client_p,
             chptr = vchan_chptr;
           }
           else
+#endif
           {
             joining_vchan = 0;
             root_chptr = chptr;
@@ -292,10 +300,12 @@ m_join(struct Client *client_p,
       
       add_user_to_channel(chptr, source_p, flags);
 
+#ifdef VCHANS
       if (joining_vchan)
 	{
 	  add_vchan_to_client_cache(source_p,root_chptr,chptr);
 	}
+#endif
 
       /*
       **  Set timestamp if appropriate, and propagate
@@ -311,7 +321,7 @@ m_join(struct Client *client_p,
            * Unfortunately, there's no way to pass
            * the fact that it is a vchan through SJOIN...
            */
-
+#ifdef VCHANS
           /* Prevent users creating a fake vchan */
           if (name[0] == '#' && name[1] == '#')
             {
@@ -333,6 +343,7 @@ m_join(struct Client *client_p,
                     chptr->channelts++;
                 }
             }
+#endif
                   
 	  sendto_server(client_p, source_p, chptr, NOCAPS, NOCAPS,
                         LL_ICLIENT,

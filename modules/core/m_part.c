@@ -137,6 +137,7 @@ static void part_one_client(struct Client *client_p,
       return;
     }
 
+#ifdef VCHANS
   if (IsVchan(chptr) || HasVchans(chptr))
     {
       if(HasVchans(chptr))
@@ -152,6 +153,7 @@ static void part_one_client(struct Client *client_p,
         }
     }
   else
+#endif
     bchan = chptr; /* not a vchan */
 
   if (!chptr || !bchan || !IsMember(source_p, chptr))

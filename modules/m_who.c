@@ -104,11 +104,13 @@ static void m_who(struct Client *client_p,
   char  *mask = parc > 1 ? parv[1] : NULL;
   dlink_node *lp;
   struct Channel *chptr=NULL;
-  struct Channel *vchan;
   struct Channel *mychannel = NULL;
   char  flags[NUMLISTS][2];
   int   server_oper = parc > 2 ? (*parv[2] == 'o' ): 0; /* Show OPERS only */
   int   member;
+#ifdef VCHANS
+  struct Channel *vchan;
+#endif
 
   /* See if mask is there, collapse it or return if not there */
 
@@ -145,6 +147,7 @@ static void m_who(struct Client *client_p,
           return;
         }
 
+#ifdef VCHANS
       if (HasVchans(mychannel))
 	{
 	  vchan = map_vchan(mychannel,source_p);
@@ -154,7 +157,9 @@ static void m_who(struct Client *client_p,
 	    do_who_on_channel(source_p,mychannel,"*",NO,YES);
 	}
       else
+#endif
 	do_who_on_channel(source_p, mychannel, "*", NO, YES);
+
       sendto_one(source_p, form_str(RPL_ENDOFWHO), me.name, parv[0], "*");
       return;
     }
@@ -169,6 +174,7 @@ static void m_who(struct Client *client_p,
       chptr = hash_find_channel(mask);
       if (chptr != NULL)
 	{
+#ifdef VCHANS
 	  if (HasVchans(chptr))
 	    {
 	      vchan = map_vchan(chptr,source_p);
@@ -185,6 +191,7 @@ static void m_who(struct Client *client_p,
 		}
 	    }
 	  else
+#endif
 	    {
 	      if ( IsMember(source_p, chptr) )
 		do_who_on_channel(source_p, chptr, chptr->chname, NO, YES);
@@ -201,9 +208,11 @@ static void m_who(struct Client *client_p,
   if (((target_p = find_client(mask)) != NULL) &&
       IsPerson(target_p) && (!server_oper || IsOper(target_p)))
     {
-      struct Channel *bchan;
       char *chname=NULL;
       int isinvis = 0;
+#ifdef VCHANS
+      struct Channel *bchan;
+#endif
 
       if(IsServer(client_p))
 	client_burst_if_needed(client_p,target_p);
@@ -225,12 +234,14 @@ static void m_who(struct Client *client_p,
 
       if (chptr != NULL)
 	{
+#ifdef VCHANS
 	  if (IsVchan(chptr))
 	    {
 	      bchan = find_bchan (chptr);
 	      if (bchan != NULL)
 		chname = bchan->chname;
 	    }
+#endif
 
 	  /* XXX globalize this inside m_who.c ? */
 	  /* jdc -- Check is_any_op() for +o > +h > +v priorities */

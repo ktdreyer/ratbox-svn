@@ -115,20 +115,22 @@ static void ms_sjoin(struct Client *client_p,
   int            fl;
   int            people = 0;
   int		 num_prefix=0;
-  int            vc_ts = 0;
   int            isnew;
   int		 buflen = 0;
   register       char *s, *nhops;
   static         char buf[2*BUFSIZE]; /* buffer for modes and prefix */
-#ifdef HALFOPS
-  static         char sjbuf_hops[BUFSIZE]; /* buffer with halfops as % */
-  register char  *hops;
-#endif
   static         char sjbuf_nhops[BUFSIZE]; /* buffer with halfops as @ */
   char           *p; /* pointer used making sjbuf */
   int hide_or_not;
   int i;
   dlink_node *m;
+#ifdef HALFOPS
+  static         char sjbuf_hops[BUFSIZE]; /* buffer with halfops as % */
+  register char  *hops;
+#endif
+#ifdef VCHANS
+  int            vc_ts = 0;
+#endif
 
   *buf = '\0';
 #ifdef HALFOPS
@@ -206,6 +208,7 @@ static void ms_sjoin(struct Client *client_p,
   /* XXX vchan cruft */
   /* vchans are encoded as "##mainchanname_timestamp" */
 
+#ifdef VCHANS
   if ( (parv[2][1] == '#') && (ConfigChannel.use_vchans) )
     {
       char *subp;
@@ -258,6 +261,7 @@ static void ms_sjoin(struct Client *client_p,
 	  *subp = '_';	/* fugly hack, restore '_' */
 	}
     }
+#endif
 
   oldts = chptr->channelts;
 
@@ -570,6 +574,7 @@ static void ms_sjoin(struct Client *client_p,
           add_user_to_channel(chptr, target_p, fl);
 	  /* XXX vchan stuff */
 
+#ifdef VCHANS
 	  if (top_chptr)
 	    {
 	      add_vchan_to_client_cache(target_p,top_chptr, chptr);
@@ -580,6 +585,7 @@ static void ms_sjoin(struct Client *client_p,
 				   top_chptr->chname);
 	    }
 	  else
+#endif
 	    {
 	      sendto_channel_local(ALL_MEMBERS,chptr, ":%s!%s@%s JOIN :%s",
 				   target_p->name,
@@ -886,8 +892,10 @@ static void remove_a_mode( int hide_or_not,
 
   chname = chptr->chname;
 
+#ifdef VCHANS
   if (IsVchan(chptr) && top_chptr)
     chname = top_chptr->chname;
+#endif
 
   ircsprintf(buf,":%s MODE %s ", me.name, chname);
 

@@ -372,13 +372,15 @@ static void whois_person(struct Client *source_p,struct Client *target_p, int gl
   dlink_node  *lp;
   struct Client *a2client_p;
   struct Channel *chptr;
-  struct Channel *bchan;
   int cur_len = 0;
   int mlen;
   char *t;
   int tlen;
   int reply_to_send = NO;
   struct hook_mfunc_data hd;
+#ifdef VCHANS
+  struct Channel *bchan;
+#endif
   
   a2client_p = find_server(target_p->user->server);
           
@@ -399,12 +401,14 @@ static void whois_person(struct Client *source_p,struct Client *target_p, int gl
       chptr = lp->data;
       chname = chptr->chname;
 
+#ifdef VCHANS
       if (IsVchan(chptr))
 	{
 	  bchan = find_bchan (chptr);
 	  if (bchan != NULL)
 	    chname = bchan->chname;
 	}
+#endif
 
       if (ShowChannel(source_p, chptr))
 	{

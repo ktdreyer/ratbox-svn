@@ -108,6 +108,7 @@ static void m_kick(struct Client *client_p,
       return;
     }
 
+#ifdef VCHANS
   if (HasVchans(chptr))
     {
       vchan = map_vchan(chptr,source_p);
@@ -116,6 +117,7 @@ static void m_kick(struct Client *client_p,
 	  chptr = vchan;
 	}
     }
+#endif
 
   if (!IsServer(source_p) && !is_any_op(chptr, source_p) ) 
     { 

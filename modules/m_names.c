@@ -87,19 +87,23 @@ static void m_names(struct Client *client_p,
                     int parc,
                     char *parv[])
 { 
-  struct Channel *vchan = NULL;
   struct Channel *ch2ptr = NULL;
   char *s;
   char *para = parc > 1 ? parv[1] : NULL;
+#ifdef VCHANS
+  struct Channel *vchan = NULL;
   char *vkey = NULL;
+#endif
 
   if (!BadPtr(para))
     {
       if( (s = strchr(para, ',')) )
         *s = '\0';
 
+#ifdef VCHANS
       if (parc > 2)
         vkey = parv[2];
+#endif
 
       if (!check_channel_name(para))
         { 
@@ -110,6 +114,7 @@ static void m_names(struct Client *client_p,
 
       if ((ch2ptr = hash_find_channel(para)) != NULL)
         {
+#ifdef VCHANS
           if (HasVchans(ch2ptr))
             {
               vchan = map_vchan(ch2ptr, source_p);
@@ -128,6 +133,7 @@ static void m_names(struct Client *client_p,
               channel_member_names(source_p, vchan, ch2ptr->chname, 1);
             }
           else
+#endif
             {
               channel_member_names(source_p, ch2ptr, ch2ptr->chname, 1);
             }
@@ -156,8 +162,10 @@ static void m_names(struct Client *client_p,
 static void names_all_visible_channels(struct Client *source_p)
 {
   struct Channel *chptr;
-  struct Channel *bchan;
   char *chname=NULL;
+#ifdef VCHANS
+  struct Channel *bchan;
+#endif
 
   /* 
    * First, do all visible channels (public and the one user self is)
@@ -165,6 +173,7 @@ static void names_all_visible_channels(struct Client *source_p)
 
   for (chptr = GlobalChannelList; chptr; chptr = chptr->nextch)
     {
+#ifdef VCHANS
       if (IsVchan(chptr))
         {
           bchan = find_bchan (chptr);
@@ -172,6 +181,7 @@ static void names_all_visible_channels(struct Client *source_p)
             chname = bchan->chname;
         }
       else
+#endif
         chname = chptr->chname;
 
       /* Find users on same channel (defined by chptr) */

@@ -1560,9 +1560,11 @@ burst_all(struct Client *client_p)
 {
   struct Client*    target_p;
   struct Channel*   chptr;
-  struct Channel*   vchan;
   struct hook_burst_channel hinfo; 
+#ifdef VCHANS
+  struct Channel*   vchan;
   dlink_node *ptr;
+#endif
 
   /* serial counter borrowed from send.c */
   current_serial++;
@@ -1572,9 +1574,11 @@ burst_all(struct Client *client_p)
       /* Don't send vchannels twice; vchannels will be
        * sent along as subchannels of the top channel
        */
-      
+
+#ifdef VCHANS
       if(IsVchan(chptr))
 	continue;
+#endif
 	  
       if(chptr->users != 0)
         {
@@ -1593,6 +1597,7 @@ burst_all(struct Client *client_p)
           hook_call_event("burst_channel", &hinfo);
         }
 
+#ifdef VCHANS
       if(IsVchanTop(chptr))
 	{
 	  for ( ptr = chptr->vchan_list.head; ptr;
@@ -1617,6 +1622,7 @@ burst_all(struct Client *client_p)
                 }
 	    }
 	}
+#endif
     }
 
   /*
@@ -1674,8 +1680,10 @@ cjoin_all(struct Client *client_p)
 void
 burst_channel(struct Client *client_p, struct Channel *chptr)
 {
+#ifdef VCHANS
   dlink_node        *ptr;
   struct Channel*   vchan;
+#endif
 
   burst_ll_members(client_p,&chptr->chanops);
 #ifdef REQUIRE_OANDV
@@ -1699,6 +1707,7 @@ burst_channel(struct Client *client_p, struct Channel *chptr)
 		 chptr->topic);
     }
 
+#ifdef VCHANS
   if(IsVchanTop(chptr))
     {
       for ( ptr = chptr->vchan_list.head; ptr; ptr = ptr->next)
@@ -1727,6 +1736,7 @@ burst_channel(struct Client *client_p, struct Channel *chptr)
 	    }
 	}
     }
+#endif
 }
 
 /*

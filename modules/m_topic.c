@@ -77,8 +77,11 @@ static void m_topic(struct Client *client_p,
                    int parc, char *parv[])
 {
   struct Channel *chptr = NULL;
-  struct Channel *root_chan, *vchan;
+  struct Channel *root_chan;
   char  *p = NULL;
+#ifdef VCHANS
+  struct Channel *vchan;
+#endif
   
   if ((p = strchr(parv[1],',')))
     *p = '\0';
@@ -112,6 +115,7 @@ static void m_topic(struct Client *client_p,
 
       root_chan = chptr;
 
+#ifdef VCHANS
       if (HasVchans(chptr))
 	{
 	  vchan = map_vchan(chptr,source_p);
@@ -120,6 +124,7 @@ static void m_topic(struct Client *client_p,
 	}
       else if (IsVchan(chptr))
         root_chan = RootChan(chptr);
+#endif
           
       /* setting topic */
       if (parc > 2)

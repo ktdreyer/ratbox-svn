@@ -73,12 +73,14 @@ static void m_mode(struct Client *client_p, struct Client *source_p,
               int parc, char *parv[])
 {
   struct Channel* chptr=NULL;
-  struct Channel* vchan;
   struct Channel* root;
   static char     modebuf[MODEBUFLEN];
   static char     parabuf[MODEBUFLEN];
   dlink_node	*ptr;
   int n = 2;
+#ifdef VCHANS
+  struct Channel* vchan;
+#endif
 
   /* Now, try to find the channel in question */
   if (!IsChanPrefix(parv[1][0]))
@@ -140,6 +142,7 @@ static void m_mode(struct Client *client_p, struct Client *source_p,
 
   root = chptr;
 
+#ifdef VCHANS
   if ((parc > 2) && parv[2][0] == '!')
     {
      struct Client *target_p;
@@ -181,6 +184,7 @@ static void m_mode(struct Client *client_p, struct Client *source_p,
            */
         }
     }
+#endif
 
   if (parc < n+1)
     {

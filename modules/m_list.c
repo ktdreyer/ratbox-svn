@@ -214,12 +214,14 @@ static int list_all_channels(struct Client *source_p)
  */
 static int list_named_channel(struct Client *source_p,char *name)
 {
-  char id_and_topic[TOPICLEN+NICKLEN+6]; /* <!!>, space and null */
-  dlink_node *ptr;
   struct Channel *chptr;
+  char id_and_topic[TOPICLEN+NICKLEN+6]; /* <!!>, space and null */
+  char *p;
+#ifdef VCHANS
+  dlink_node *ptr;
   struct Channel *root_chptr;
   struct Channel *tmpchptr;
-  char *p;
+#endif
 
   sendto_one(source_p, form_str(RPL_LISTSTART), me.name, source_p->name);
 
@@ -242,9 +244,11 @@ static int list_named_channel(struct Client *source_p,char *name)
       return 0;
     }
 
+#ifdef VCHANS
   if (HasVchans(chptr))
     ircsprintf(id_and_topic, "<!%s> %s", pick_vchan_id(chptr), chptr->topic);
   else
+#endif
     ircsprintf(id_and_topic, "%s", chptr->topic);
 
   if (ShowChannel(source_p, chptr))
@@ -252,7 +256,8 @@ static int list_named_channel(struct Client *source_p,char *name)
                chptr->chname, chptr->users, id_and_topic);
       
   /* Deal with subvchans */
-  
+ 
+#ifdef VCHANS
   for (ptr = chptr->vchan_list.head; ptr; ptr = ptr->next)
     {
       tmpchptr = ptr->data;
@@ -265,6 +270,7 @@ static int list_named_channel(struct Client *source_p,char *name)
                      root_chptr->chname, tmpchptr->users, id_and_topic);
         }
     }
+#endif
   
   sendto_one(source_p, form_str(RPL_LISTEND), me.name, source_p->name);
   return 0;
@@ -280,6 +286,7 @@ static int list_named_channel(struct Client *source_p,char *name)
  */
 static void list_one_channel(struct Client *source_p, struct Channel *chptr)
 {
+#ifdef VCHANS
   struct Channel *root_chptr;
   char  id_and_topic[TOPICLEN+NICKLEN+6]; /* <!!>, plus space and null */
 
@@ -301,6 +308,7 @@ static void list_one_channel(struct Client *source_p, struct Channel *chptr)
         }
     }
   else
+#endif
     {
       sendto_one(source_p, form_str(RPL_LIST), me.name, source_p->name,
                  chptr->chname, chptr->users, chptr->topic);

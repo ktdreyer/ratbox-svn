@@ -181,8 +181,11 @@ static void parse_knock_local(struct Client *client_p,
   /* We will cut at the first comma reached, however we will not *
    * process anything afterwards.                                */
 
-  struct Channel      *chptr,*vchan_chptr;
+  struct Channel *chptr;
   char *p, *name, *key;
+#ifdef VCHANS
+  struct Channel *vchan_chptr;
+#endif
 
   name = parv[1];
   key = (parc > 2) ? parv[2] : NULL;
@@ -216,6 +219,7 @@ static void parse_knock_local(struct Client *client_p,
     return;
   }
 
+#ifdef VCHANS
   if (IsVchanTop(chptr))
     {
       /* They specified a vchan basename */
@@ -261,6 +265,7 @@ static void parse_knock_local(struct Client *client_p,
       return;
     }
   else
+#endif
     {
       /* Normal channel, just be sure they aren't on it */
       if (IsMember(source_p, chptr))
@@ -332,8 +337,11 @@ static void parse_knock_remote(struct Client *client_p,
 			       struct Client *source_p,
 			       int parc, char *parv[])
 {
-  struct Channel *chptr,*vchan_chptr;
+  struct Channel *chptr;
   char *p, *name, *key;
+#ifdef VCHANS
+  struct Channel *vchan_chptr;
+#endif
 
   name = parv[1];
   key = (parc > 2) ? parv[2] : NULL;
@@ -344,6 +352,7 @@ static void parse_knock_remote(struct Client *client_p,
   if(!IsChannelName(name) || !(chptr = hash_find_channel(name)))
     return;
 
+#ifdef VCHANS
   if(IsVchanTop(chptr))
   {
     if(on_sub_vchan(chptr,source_p))
@@ -354,7 +363,11 @@ static void parse_knock_remote(struct Client *client_p,
     else
       return;
   }
-  else if(IsVchan(chptr) || IsMember(source_p, chptr))
+  else if(IsVchan(chptr))
+    return;
+#endif
+
+  if(IsMember(source_p, chptr))
     return;
   
   if(!((chptr->mode.mode & MODE_INVITEONLY) ||

@@ -448,12 +448,13 @@ msg_channel(int p_or_n, char *command,
 
   chname = RootChan(chptr)->chname;
 
+#ifdef VCHANS
   if (HasVchans(chptr))
     vchan = map_vchan(chptr, source_p);
-
+#endif
+  
   if (!vchan)
     vchan = chptr;
-
 
   if (MyClient(source_p))
   {
@@ -521,8 +522,10 @@ msg_channel_flags(int p_or_n, char *command, struct Client *client_p,
 
   chname = RootChan(chptr)->chname;
 
+#ifdef VCHANS
   if (HasVchans(chptr))
     vchan = map_vchan(chptr, source_p);
+#endif
 
   if (!vchan)
     vchan = chptr;

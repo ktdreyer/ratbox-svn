@@ -188,8 +188,10 @@ remove_user_from_channel(struct Channel *chptr, struct Client *who)
   dlink_node *next_ptr;
 
   /* last user in the channel.. set a vchan_id incase we need it */
+#ifdef VCHANS
   if (chptr->users == 1)
     ircsprintf(chptr->vchan_id, "!%s", who->name);
+#endif
 
   if ((ptr = find_user_link(&chptr->peons, who)))
     dlinkDelete(ptr, &chptr->peons);
@@ -254,8 +256,10 @@ remove_user_from_channel(struct Channel *chptr, struct Client *who)
 
   who->user->joined--;
 
+#ifdef VCHANS
   if (IsVchan(chptr))
     del_vchan_from_client_cache(who, chptr);
+#endif
 
   if (MyClient(who))
   {
@@ -536,6 +540,7 @@ cleanup_channels(void *unused)
   {
     next_chptr = chptr->nextch;
 
+#ifdef VCHANS
     if (IsVchan(chptr))
     {
       if (IsVchanTop(chptr))
@@ -560,6 +565,7 @@ cleanup_channels(void *unused)
       }
     }
     else
+#endif
     {
       if(chptr->users == 0)
       {
@@ -597,10 +603,13 @@ static void
 destroy_channel(struct Channel *chptr)
 {
   dlink_node *ptr;
-  struct Channel *root_chptr;
   dlink_node *m;
+#ifdef VCHANS
+  struct Channel *root_chptr;
+#endif
 
   /* Don't ever delete the top of a chain of vchans! */
+#ifdef VCHANS
   if (IsVchanTop(chptr))
     return;
 
@@ -612,6 +621,7 @@ destroy_channel(struct Channel *chptr)
     dlinkDelete(m, &root_chptr->vchan_list);
     free_dlink_node(m);
   }
+#endif
 
   /* Walk through all the dlink's pointing to members of this channel,
    * then walk through each client found from each dlink, removing
@@ -717,8 +727,10 @@ delete_members(struct Channel *chptr, dlink_list * list)
 
     who->user->joined--;
 
+#ifdef VCHANS
     if (IsVchan(chptr))
       del_vchan_from_client_cache(who, chptr);
+#endif
 
     /* remove reference to who from chptr */
     dlinkDelete(ptr, list);

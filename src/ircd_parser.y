@@ -2637,7 +2637,11 @@ channel_use_knock:   USE_KNOCK '=' TYES ';'
 
 
 channel_use_vchans: USE_VCHANS '=' TYES ';'
-  { ConfigChannel.use_vchans = 1; }
+  { 
+#ifdef VCHANS
+    ConfigChannel.use_vchans = 1;
+#endif
+  }
     |
     USE_VCHANS '=' TNO ';'
   { ConfigChannel.use_vchans = 0; };

@@ -41,6 +41,7 @@
 #include <string.h>
 #include <stdlib.h>
 
+#ifdef VCHANS
 static void vchan_show_ids(struct Client *source_p, struct Channel *chptr);
 
 /*
@@ -580,3 +581,5 @@ vchan_invites(struct Channel *chptr, struct Client *source_p)
 
   return NULL;
 }
+
+#endif

@@ -41,6 +41,8 @@
 struct Client;
 struct Channel;
 
+#ifdef VCHANS
+
 extern void	add_vchan_to_client_cache(struct Client *source_p,
 					  struct Channel *base_chan,
 					  struct Channel *vchan);
@@ -94,5 +96,10 @@ extern struct Channel* cjoin_channel(struct Channel *root,
 #define RootChan(chan) \
   (((chan)->root_chptr == 0) ? (chan) : ((chan)->root_chptr))
 
+#else
+
+#define RootChan(chan) (chan)
+
+#endif /* VCHANS */
 #endif  /* INCLUDED_vchannel_h */
 

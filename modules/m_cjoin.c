@@ -44,6 +44,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef VCHANS
+
 static void m_cjoin(struct Client*, struct Client*, int, char**);
 
 struct Message cjoin_msgtab = {
@@ -211,3 +213,5 @@ static void m_cjoin(struct Client *client_p,
   del_invite(vchan_chptr, source_p);
   channel_member_names(source_p, vchan_chptr, root_vchan->chname, 1);
 }
+
+#endif /* VCHANS */
