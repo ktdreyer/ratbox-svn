@@ -1,3 +1,143 @@
+ejb         2003/02/08 16:46:26 UTC	(20030208_9)
+
+  Modified files:
+    autoconf             configure.in 
+    include              channel_mode.h class.h client.h 
+                         handlers.h hash.h hook.h ircd_handler.h 
+                         md5.h modules.h resv.h s_conf.h s_log.h 
+                         s_newconf.h s_serv.h s_user.h send.h 
+                         stdinc.h tools.h whowas.h 
+    modules              m_accept.c m_admin.c m_away.c m_capab.c 
+                         m_challenge.c m_close.c m_connect.c 
+                         m_cryptlink.c m_dline.c m_eob.c m_gline.c 
+                         m_help.c m_htm.c m_info.c m_invite.c 
+                         m_ison.c m_join.c m_kline.c m_knock.c 
+                         m_links.c m_list.c m_locops.c m_lusers.c 
+                         m_map.c m_motd.c m_names.c m_oper.c 
+                         m_operwall.c m_pass.c m_ping.c m_pong.c 
+                         m_post.c m_rehash.c m_restart.c m_resv.c 
+                         m_set.c m_stats.c m_svinfo.c m_testline.c 
+                         m_time.c m_topic.c m_trace.c m_undline.c 
+                         m_ungline.c m_unkline.c m_user.c 
+                         m_userhost.c m_users.c m_version.c 
+                         m_wallops.c m_who.c m_whois.c m_whowas.c 
+                         m_xline.c 
+    modules/core         m_die.c m_kick.c m_kill.c m_message.c 
+                         m_mode.c m_nick.c m_part.c m_quit.c 
+                         m_server.c m_sjoin.c m_squit.c 
+    src                  channel_mode.c client.c dynlink.c hash.c 
+                         m_error.c md5.c modules.c parse.c resv.c 
+                         s_conf.c s_log.c s_newconf.c s_serv.c 
+                         s_user.c send.c whowas.c 
+  Log:
+  - first round of constification -- it's not quite done, but we should be
+    half way there.
+  
+  Revision  Changes    Path
+  7.168     +17 -6     ircd-ratbox/autoconf/configure.in
+  7.20      +1 -1      ircd-ratbox/include/channel_mode.h
+  7.18      +1 -1      ircd-ratbox/include/class.h
+  7.197     +2 -2      ircd-ratbox/include/client.h
+  7.44      +7 -7      ircd-ratbox/include/handlers.h
+  7.27      +2 -2      ircd-ratbox/include/hash.h
+  1.22      +3 -3      ircd-ratbox/include/hook.h
+  7.9       +1 -1      ircd-ratbox/include/ircd_handler.h
+  1.11      +2 -2      ircd-ratbox/include/md5.h
+  7.48      +5 -5      ircd-ratbox/include/modules.h
+  1.18      +1 -1      ircd-ratbox/include/resv.h
+  7.230     +1 -1      ircd-ratbox/include/s_conf.h
+  7.17      +2 -2      ircd-ratbox/include/s_log.h
+  7.2       +1 -1      ircd-ratbox/include/s_newconf.h
+  7.79      +1 -1      ircd-ratbox/include/s_serv.h
+  7.24      +7 -6      ircd-ratbox/include/s_user.h
+  7.70      +2 -2      ircd-ratbox/include/send.h
+  1.7       +23 -0     ircd-ratbox/include/stdinc.h
+  1.44      +1 -1      ircd-ratbox/include/tools.h
+  7.15      +1 -1      ircd-ratbox/include/whowas.h
+  1.32      +4 -4      ircd-ratbox/modules/core/m_die.c
+  1.61      +8 -8      ircd-ratbox/modules/core/m_kick.c
+  1.79      +20 -16    ircd-ratbox/modules/core/m_kill.c
+  1.122     +23 -22    ircd-ratbox/modules/core/m_message.c
+  1.66      +3 -3      ircd-ratbox/modules/core/m_mode.c
+  1.113     +44 -39    ircd-ratbox/modules/core/m_nick.c
+  1.73      +5 -4      ircd-ratbox/modules/core/m_part.c
+  1.36      +7 -7      ircd-ratbox/modules/core/m_quit.c
+  1.105     +15 -15    ircd-ratbox/modules/core/m_server.c
+  1.165     +9 -10     ircd-ratbox/modules/core/m_sjoin.c
+  1.63      +10 -10    ircd-ratbox/modules/core/m_squit.c
+  1.45      +7 -6      ircd-ratbox/modules/m_accept.c
+  1.46      +7 -7      ircd-ratbox/modules/m_admin.c
+  1.42      +5 -4      ircd-ratbox/modules/m_away.c
+  1.36      +6 -4      ircd-ratbox/modules/m_capab.c
+  1.51      +4 -4      ircd-ratbox/modules/m_challenge.c
+  1.33      +3 -3      ircd-ratbox/modules/m_close.c
+  1.52      +5 -5      ircd-ratbox/modules/m_connect.c
+  1.49      +11 -13    ircd-ratbox/modules/m_cryptlink.c
+  1.13      +7 -6      ircd-ratbox/modules/m_dline.c
+  1.40      +3 -3      ircd-ratbox/modules/m_eob.c
+  1.109     +14 -14    ircd-ratbox/modules/m_gline.c
+  1.45      +7 -7      ircd-ratbox/modules/m_help.c
+  1.12      +3 -3      ircd-ratbox/modules/m_htm.c
+  1.79      +7 -7      ircd-ratbox/modules/m_info.c
+  1.60      +3 -3      ircd-ratbox/modules/m_invite.c
+  1.41      +5 -4      ircd-ratbox/modules/m_ison.c
+  1.117     +8 -8      ircd-ratbox/modules/m_join.c
+  1.151     +12 -12    ircd-ratbox/modules/m_kline.c
+  1.70      +17 -17    ircd-ratbox/modules/m_knock.c
+  1.48      +7 -7      ircd-ratbox/modules/m_links.c
+  1.60      +12 -11    ircd-ratbox/modules/m_list.c
+  1.38      +5 -5      ircd-ratbox/modules/m_locops.c
+  1.33      +5 -5      ircd-ratbox/modules/m_lusers.c
+  1.23      +5 -5      ircd-ratbox/modules/m_map.c
+  1.40      +7 -7      ircd-ratbox/modules/m_motd.c
+  1.62      +9 -8      ircd-ratbox/modules/m_names.c
+  1.67      +11 -11    ircd-ratbox/modules/m_oper.c
+  1.43      +7 -7      ircd-ratbox/modules/m_operwall.c
+  1.33      +3 -3      ircd-ratbox/modules/m_pass.c
+  1.40      +7 -7      ircd-ratbox/modules/m_ping.c
+  1.38      +6 -6      ircd-ratbox/modules/m_pong.c
+  1.21      +3 -3      ircd-ratbox/modules/m_post.c
+  1.60      +3 -3      ircd-ratbox/modules/m_rehash.c
+  1.33      +3 -3      ircd-ratbox/modules/m_restart.c
+  1.31      +5 -5      ircd-ratbox/modules/m_resv.c
+  1.57      +5 -5      ircd-ratbox/modules/m_set.c
+  1.149     +20 -20    ircd-ratbox/modules/m_stats.c
+  1.44      +3 -3      ircd-ratbox/modules/m_svinfo.c
+  1.38      +4 -4      ircd-ratbox/modules/m_testline.c
+  1.36      +5 -5      ircd-ratbox/modules/m_time.c
+  1.71      +5 -5      ircd-ratbox/modules/m_topic.c
+  1.72      +5 -5      ircd-ratbox/modules/m_trace.c
+  1.11      +6 -6      ircd-ratbox/modules/m_undline.c
+  1.12      +10 -8     ircd-ratbox/modules/m_ungline.c
+  1.83      +19 -16    ircd-ratbox/modules/m_unkline.c
+  1.32      +3 -3      ircd-ratbox/modules/m_user.c
+  1.47      +3 -3      ircd-ratbox/modules/m_userhost.c
+  1.33      +5 -5      ircd-ratbox/modules/m_users.c
+  1.51      +7 -7      ircd-ratbox/modules/m_version.c
+  1.42      +7 -7      ircd-ratbox/modules/m_wallops.c
+  1.82      +9 -4      ircd-ratbox/modules/m_who.c
+  1.108     +10 -10    ircd-ratbox/modules/m_whois.c
+  1.37      +9 -8      ircd-ratbox/modules/m_whowas.c
+  1.20      +5 -5      ircd-ratbox/modules/m_xline.c
+  7.96      +42 -40    ircd-ratbox/src/channel_mode.c
+  7.366     +2 -2      ircd-ratbox/src/client.c
+  7.19      +2 -2      ircd-ratbox/src/dynlink.c
+  7.66      +13 -9     ircd-ratbox/src/hash.c
+  7.32      +2 -2      ircd-ratbox/src/m_error.c
+  1.19      +2 -2      ircd-ratbox/src/md5.c
+  7.125     +14 -14    ircd-ratbox/src/modules.c
+  7.153     +7 -7      ircd-ratbox/src/parse.c
+  7.27      +1 -1      ircd-ratbox/src/resv.c
+  7.397     +1 -1      ircd-ratbox/src/s_conf.c
+  7.51      +2 -2      ircd-ratbox/src/s_log.c
+  7.3       +1 -1      ircd-ratbox/src/s_newconf.c
+  7.322     +6 -2      ircd-ratbox/src/s_serv.c
+  7.255     +18 -15    ircd-ratbox/src/s_user.c
+  7.237     +1 -1      ircd-ratbox/src/send.c
+  7.26      +1 -1      ircd-ratbox/src/whowas.c
+
+
+
 androsyn    2003/02/08 12:20:23 UTC	(20030208_8)
 
   Modified files:
