@@ -1,3 +1,7 @@
+*** 20010718_8 by androsyn
+Fixed some issues with 64bit version and remove some drain bamage as well.
+
+
 *** 20010718_7 by androsyn
 Sorta fixed the warnings in rsa.c.  We need to figure out why we can't include
 pem.h.
