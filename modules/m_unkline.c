@@ -420,9 +420,9 @@ remove_temp_match_list(char *host, char *user, dlink_list *temp_list)
 	continue;
 
       if ((nm_t==HM_HOST && !irccmp(aconf->host, host)) ||
-	  (nm_t==HM_IPV4 && bits==cbits && match_ipv4(&addr, &caddr, bits))
+	  (nm_t==HM_IPV4 && bits==cbits && comp_with_mask(&IN_ADDR(addr), &IN_ADDR(caddr), bits))
 #ifdef IPV6
-	  || (nm_t==HM_IPV6 && bits==cbits && match_ipv6(&addr, &caddr, bits))
+	  || (nm_t==HM_IPV6 && bits==cbits && comp_with_mask(&IN_ADDR(addr), &IN_ADDR(caddr), bits))
 #endif
 	  )
 	{
