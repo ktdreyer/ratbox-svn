@@ -1,3 +1,7 @@
+*** 20010126_3 by androsyn
+Fixed compile error for IPv4.
+
+
 *** 20010126_2 by db
 - This fixes odd cores associated with accept code /quit and nick changes...
   ALL references to a client must be removed when it exits!
