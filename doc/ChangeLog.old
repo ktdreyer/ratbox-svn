@@ -1,3 +1,18 @@
+*** 20010223_1 by db
+- This appears to be stable under seans little "toy" test cloner.
+  I have moved the exit_client code outside of send.c and into parse.c
+  for now. Not sure if this is =quite= the right place but I'd like
+  to sleep tonight.
+
+  Anyway, a more optimum solution will be to fd_close in dead_socket() I think
+  and then mark the fd as -1 .. but I don't want to deal with it tonight.
+
+  Oh, I'm not sure if cptr after handle_command() in parse.c needs to be
+  checked as well.
+
+
+
+
 *** 20010222_8 by wcampbel
 Fix configure to properly find and set the @RANLIB@ variable.
 
