@@ -1,3 +1,22 @@
+db          2002/04/13 04:36:57 EDT	(20020413_0)
+
+  Modified files:
+    .                    Hybrid-team 
+    src                  channel_mode.c 
+  Log:
+  - <adx> +ov users are not shown on /names reply after joining a channel
+    <adx> if the channel is +a
+  
+  - also added adx to list of contributors
+  
+  approved by db
+  
+  Revision  Changes    Path
+  7.49      +1 -0      ircd-hybrid-7/Hybrid-team
+  7.27      +6 -0      ircd-hybrid-7/src/channel_mode.c
+
+
+
 db          2002/04/12 17:44:45 EDT	(20020412_1)
 
   Modified files:
