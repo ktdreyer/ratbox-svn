@@ -1,3 +1,25 @@
+androsyn    2002/08/14 13:59:22 EDT	(20020814_8)
+
+  Modified files:
+    include              client.h 
+    modules              m_cryptlink.c 
+    modules/core         m_server.c 
+    src                  .depend Makefile.in s_serv.c 
+                         sprintf_irc.c 
+  Log:
+  Change hidden_server to use a flag, re add sprintf_irc.c
+  
+  Revision  Changes    Path
+  7.166     +7 -5      ircd-ratbox/include/client.h
+  1.92      +3 -3      ircd-ratbox/modules/core/m_server.c
+  1.36      +3 -3      ircd-ratbox/modules/m_cryptlink.c
+  7.11      +4 -16     ircd-ratbox/src/.depend
+  7.116     +1 -1      ircd-ratbox/src/Makefile.in
+  7.284     +3 -3      ircd-ratbox/src/s_serv.c
+  7.17      +18 -4     ircd-ratbox/src/sprintf_irc.c
+
+
+
 androsyn    2002/08/14 13:53:34 EDT	(20020814_7)
 
   Removed files:
