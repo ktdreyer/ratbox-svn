@@ -1,3 +1,33 @@
+*** 20001220_2 by db
+- fixed convertconf to bring it in line with current conf file format
+  it does a reasonable first pass job, though you still might need to
+  tweak..
+
+- We were missing "shared" keyword in new conf file. This is vaguely worded
+  to allow us to support "shared klines" "shared locops" etc. should
+  we choose to do so... If I had time, I would extend it to allow
+  specification of remote user@host as well... and whether it applies
+  to klines/locops/unkline etc. shared resources...
+
+- provided I hear back from adrian after a successful conversion of
+  his conf file, I'm going to nuke most of the gook in oldparser.c
+  so it only deals with 'D' and 'K' lines.. I'll likely rename it as well
+  kdparser.c maybe..
+
+- parse.c has a bug. but its late for me, I'll look at it after some sleep
+  maybe is- and I can look at it together. The problem is simple...
+
+ISON nick1 nick2 nick3...... nick20
+
+all nicks at 15 to 20 should go into the last parv[]
+not be truncated... at a space. Otherwise we break ISON for sure, and
+likely other things...
+
+- Adrian can you move logs into /logs from /etc ? pretty please? ;)
+
+ 
+
+
 *** 20001220_1 by db
 - don't send on a nick change if the nick hasnt' been seen on a lazy
   link server...
