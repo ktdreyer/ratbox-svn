@@ -1,3 +1,15 @@
+androsyn    2004/12/27 13:30:19 EST	(20041227_0)
+
+  Modified files:
+    modules              m_watch.c 
+  Log:
+  return the configured max watch
+  
+  Revision  Changes    Path
+  1.2       +2 -2      ircd-ratbox/modules/m_watch.c
+
+
+
 leeh        2004/12/14 13:55:58 EST	(20041214_0)
 
   Modified files:
