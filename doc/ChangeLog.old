@@ -1,3 +1,7 @@
+*** 19990903_1 by tomh
+bug fix
+
+
 *** 19990902_8 by tomh
 rewrite dbuf.c
 
