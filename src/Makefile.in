@@ -73,7 +73,6 @@ BASE_SRCS =                     \
   kdparse.c			\
   linebuf.c                     \
   listener.c                    \
-  m_error.c                     \
   match.c                       \
   memory.c                      \
   modules.c                     \
