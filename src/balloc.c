@@ -426,6 +426,14 @@ BlockHeapAlloc(BlockHeap * bh)
 			if(new_node->data == NULL)
 				blockheap_fail("new_node->data is NULL and that shouldn't happen!!!");
 			memset(new_node->data, 0, bh->elemSize);
+#ifdef DEBUG_BALLOC
+			do
+			{
+				struct MemBlock *memblock = (void *) ((size_t) new_node->data - sizeof(MemBlock));
+				if(memblock->magic == BALLOC_FREE_MAGIC)
+					memblock->magic = BALLOC_MAGIC;
+			} while(0);
+#endif
 			return (new_node->data);
 		}
 	}
