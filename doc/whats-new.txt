@@ -1,4 +1,5 @@
-There have been quite a few changes in Hybrid 7 and this is a list of the main new features:
+There have been quite a few changes in Hybrid 7 and this is a list of the main 
+new features:
 
 The Config File has drastically changed.  It now however allows most of the
 options that were in config.h, to be changed with a /rehash.  
@@ -13,13 +14,17 @@ options that were in config.h, to be changed with a /rehash.
   startup value.  A side effect is CTCPs will be throttled for non-ops, but
   this cannot be helped.
 
+- Invite exemptions are included (channel mode +I).  This is similar to +e,
+  this is a nick!user@host mask of somebody who can join an invite-only (+i)
+  channel without having to be invited first.
+
 - Half Ops are added.  This gives a user most of the power of a chanop (@)
   but without the ability to take over the channel.  Half-ops can kick
   unopped users, voiced users, set channel modes including +v, but not kick
   ops, or deop ops.   This leads to greater security on channels.  This is
   the mode (+h) and is seen as % on the channel list.
 
-  NOTE:  Half ops are optional.
+  NOTE:  Half ops are optional and enabled by default.
 
 - Channel Op Hiding is now included as a channel mode.  By setting the
   mode +a when a user joins the channel, they will not see who is opped,
@@ -32,6 +37,8 @@ options that were in config.h, to be changed with a /rehash.
   showing them the real list of who is opped/halfopped/voiced to keep
   clients in sync.
 
+  NOTE: Anonymous ops are optional and disabled by default.
+  
 - The infamous VChans are included.  This allows multiple channels with the
   same name.  When joining a channel with vchans, a simple JOIN #channel
   will show a message saying which channels are available.  The user will
@@ -47,13 +54,21 @@ options that were in config.h, to be changed with a /rehash.
        use_vchans=no;        will stop vchans from being recognised on
                              this server
 
-- Channels that have existed for at least 30 minutes are now preserved for 30
-  minutes if they are empty or split.  If a channel was +i before a split, it
-  will remain that way for 30 minutes.  All bans will still exist, preventing
-  abusers from joining through a ban on splits.  A user that does successfully
-  join an empty preserved channel will have ops.  If it was split at the time,
-  the timestamp protocol will remove the newer side's ops.  These preserved
-  channels replace the old NO_CHANOPS_ON_SPLIT and NO_JOIN_ON_SPLIT options.
+  See doc/vchans.txt for more information.
+
+- Persistent channels are included.  With TS5 the only reason to enable
+  no_join_on_split is to prevent people gaining access to +ik channels on
+  a netsplit.  Persistent channels in combination with no_create_on_split
+  offer an alternative, by preserving a channel when it becomes empty, via
+  a split or the last user parting.  All of the channels modes and bans will be
+  kept for the time specified in the config file.  A user that does successfully
+  join an empty preserved channel will have ops and the channel timestamp will
+  be reset to the current time, so if there was a netsplit when the user joined
+  they will lose ops due to the rules of TS.
+
+  Persistent channels are configurable via:
+      persist_time = 30 minutes;   will persist channels for at least 30 mins.
+
 
 
 --------------
@@ -88,7 +103,9 @@ options that were in config.h, to be changed with a /rehash.
   to hide the IPs of servers, by only showing them to admins:
      (indicated by umode +a and admin=yes; in oper block)
 
-  It also limits certain stats commands to admin only.
+  It also limits certain stats commands to admin only.  IPs can still be
+  fully removed from all admins and opers by defining HIDE_SERVERS_IPS in
+  config.h.
 
 - The /notice $irc.server command has been renamed to /notice $$irc.server
 
@@ -131,7 +148,7 @@ options that were in config.h, to be changed with a /rehash.
 
 - LOCOPS have been moved away from the traditional +z usermode (operwall)
   and into their own usermode: +l.  This allows oper to ignore operwall,
-  but still listen to locops.  +l is set when /oper is sucessful
+  but still listen to locops.
 
 - Implemented local RESV.  This replaces:
      /mode #channel +j and Q: lines in hybrid-6.
@@ -181,14 +198,20 @@ options that were in config.h, to be changed with a /rehash.
   module into the ircd.  MODRELOAD will unload then load the module in one
   simple command.  All of these commands are documented in opers.txt and are
   restricted to admins only.  These commands are disabled when compiled with
-  static modules.
+  static modules.  If a module is to be upgraded it MUST be deleted first, as
+  otherwise some OSs can have problems and crash.
 
   Some of these modules are defined as 'core'.  That means they cannot be 
   unloaded, and may only be reloaded.  If the reload fails the ircd will exit.
 
 - HUB is now a runtime option.
 
-- Classes (formerly Y: lines) can now have names instead of numbers.
+- Classes (formerly Y: lines) can now be names instead of numbers.
+
+- IPv6 is now supported, enabled via ./configure --enable-ipv6
+
+- Connection throttling has been included.  This allows fast reconnecting bots
+  to be throttled.  Similar to ircu's implementation.
 
 - Hybrid now supports IRCnet-like redirection.  The redirserv and redirport
   options in an auth {} block will allow an admin to specify other servers
@@ -242,9 +265,8 @@ options that were in config.h, to be changed with a /rehash.
     IE      - Invite Exceptions - +I on channels - All nick!user@hosts listed in
               a +I are exempt from having to be invited to the channel before
               JOINing
-    EOB     - End of Burst - Servers with this enabled cannot issue burst
-              commands after it sends and receives an EOB command, thereby
-              preventing op hacking
+    EOB     - End of Burst - Marks the end of a servers burst.  Will be used in
+              future to help prevent mode hacking by servers.
     KLN     - Support remote K-lines
     GLN     - Support G-lines
     KNOCK   - Support propogated KNOCK
@@ -254,7 +276,7 @@ options that were in config.h, to be changed with a /rehash.
     AOPS    - Supports anonymous channel ops (channel mode +a)
     UID     - Unique user-ID support
     ZIP     - Ziplink (Link is compressed with zlib compression)
-    TBURST  - Not currently used
+    TBURST  - Supports topic bursting, a contrib/ module.
     PARA    - Controls propogation of INVITE notices for +p (paranoid) channels
     ENC:a   - Encrypted link, where 'a' is the cipher being used
 

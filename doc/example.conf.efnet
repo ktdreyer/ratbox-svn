@@ -30,8 +30,7 @@
  * Valid units of size:
  *        megabyte/mbyte/mb, kilobyte/kbyte/kb, byte
  *
- * Sizes and times may be singular or plural.  There is also a simple
- * arithmetic parser which understands +, -, *, / and () precedence.
+ * Sizes and times may be singular or plural.
  */ 
 
 /* NOTE:
@@ -647,7 +646,7 @@ general {
 	 * placed via the server.  klines hand placed are exempt from limits.
 	 * wildcard chars: '.' '*' '?' '@'
 	 */
-	min_nonwildcard = 9999;
+	min_nonwildcard = 4;
 
         /* max accept: maximum allowed /accept's for +g usermode */
         max_accept = 20;
@@ -768,9 +767,9 @@ general {
 	fname_foperlog = "logs/foperlog";
 
 	/* max targets: the maximum amount of targets in a single 
-	 * PRIVMSG/NOTICE.  set to 0 for unlimited targets.
+	 * PRIVMSG/NOTICE.  set to '999', NOT 0 to disable.
 	 */
-	max_targets = 4;
+	max_targets = 999;
 
 	/* client flood: maximum number of lines in a clients queue before
 	 * they are dropped for flooding.
