@@ -604,6 +604,8 @@ can_send(struct Channel *chptr, struct Client *source_p,
 		{
 			if(chptr->mode.mode & MODE_NOPRIVMSGS)
 				return CAN_SEND_NO;
+			else
+				return CAN_SEND_NONOP;
 		}
 	}
 
