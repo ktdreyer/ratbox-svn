@@ -168,7 +168,7 @@ void *dlsym(void *myModule, char *mySymbolName)
  */
 #if defined(HAVE_SHL_LOAD) && !defined(HAVE_DLOPEN)
 #define RTLD_LAZY BIND_DEFERRED
-#define #define RTLD_GLOBAL DYNAMIC_PATH
+#define RTLD_GLOBAL DYNAMIC_PATH
 #define dlopen(file,mode) (void *)shl_load((file), (mode), (long) 0)
 #define dlclose(handle) shl_unload((shl_t)(handle))
 #define dlsym(handle,name) hpux_dlsym(handle,name)
