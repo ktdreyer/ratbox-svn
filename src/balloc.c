@@ -78,7 +78,7 @@ static int newblock(BlockHeap * bh);
 /* HP-UX sucks */
 #ifdef MAP_ANONYMOUS
 #ifndef MAP_ANON
-#define MAP_ANONYMOUS MAP_ANON
+#define MAP_ANON MAP_ANONYMOUS
 #endif
 #endif
 
