@@ -1,3 +1,14 @@
+*** 20001205_3 by db
+- updated opers.txt for h7, its more or less right now
+- added new 'u' flag for opers, show unauth clients on that flag instead
+  of 'c' flag
+- moved 'u' flag to 'g' for CALLERID
+- upped flooding parms slightly some more... still set too low I think
+- changed DRONE_FLOOD etc. to plain FLOOD... This is generic anti
+  flooding code for the =recipient=
+
+
+
 *** 20001205_2 by db
 - cleaned up these functions, two arguments when 1 is quite enough
   this makes them consistent with other functions that only pass
