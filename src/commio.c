@@ -81,6 +81,28 @@ static PF comm_connect_timeout;
 static void comm_connect_dns_callback(void *vptr, adns_answer * reply);
 static PF comm_connect_tryconnect;
 
+/* 32bit solaris is kinda slow and stdio only supports fds < 256
+ * so we got to do this crap below.
+ * (BTW Fuck you Sun, I hate your guts and I hope you go bankrupt soon)
+ */
+#if defined (__SVR4) && defined (__sun) 
+static void comm_fd_hack(int *fd)
+{
+	int newfd;
+	if(*fd > 256 || *fd < 0)
+		return;
+	if((newfd = fcntl(*fd, F_DUPFD, 256)) != -1)
+	{
+		close(*fd);
+		*fd = newfd;
+	} 
+	return;
+}
+#else
+#define comm_fd_hack(fd) 
+#endif
+
+
 /* close_all_connections() can be used *before* the system come up! */
 
 void
@@ -550,6 +572,7 @@ comm_socket(int family, int sock_type, int proto, const char *note)
 	 * XXX !!! -- adrian
 	 */
 	fd = socket(family, sock_type, proto);
+	comm_fd_hack(&fd);
 	if(fd < 0)
 		return -1;	/* errno will be passed through, yay.. */
 
@@ -564,7 +587,7 @@ comm_socket(int family, int sock_type, int proto, const char *note)
 		if(setsockopt(fd, IPPROTO_IPV6, IPV6_V6ONLY, &off, sizeof(off)) == -1)
 		{
 			ilog(L_IOERROR,
-			     "comm_open: Could not set IPV6_V6ONLY option to 1 on FD %d: %s",
+			     "comm_socket: Could not set IPV6_V6ONLY option to 1 on FD %d: %s",
 			     fd, strerror(errno));
 			close(fd);
 			return -1;
@@ -608,6 +631,8 @@ comm_accept(int fd, struct sockaddr *pn, socklen_t *addrlen)
 	 * also does it. XXX -- adrian
 	 */
 	newfd = accept(fd, (struct sockaddr *) pn, addrlen);
+        comm_fd_hack(&newfd);
+                        
 	if(newfd < 0)
 		return -1;
 
