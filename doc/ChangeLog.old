@@ -1,3 +1,7 @@
+*** 19990815_4 by tomh
+removed FLAGS_CHKACCESS
+
+
 *** 19990815_3 by tomh
 more memory count bug fixes, fix SYSLOG_USERS bug
 
