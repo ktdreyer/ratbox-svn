@@ -825,8 +825,6 @@ majority_gline(struct Client *source_p,
 
               if(find_is_glined(host, user))
                 return NO;
-              if (find_conf_by_address(host, NULL, CONF_KILL, 0, user))
-               return NO;
 
               log_gline(source_p,gline_pending_ptr,
                         oper_nick,oper_user,oper_host,oper_server,
