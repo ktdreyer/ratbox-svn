@@ -23,6 +23,7 @@
 #include "client.h"
 #include "log.h"
 #include "service.h"
+#include "serno.h"
 
 #define IO_HOST	0
 #define IO_IP	1
@@ -312,8 +313,16 @@ connect_to_server(void *unused)
 	if(dlink_list_length(&conf_server_list) <= 0)
 		return;
 
+	/* use the head of the list as our server */
 	ptr = conf_server_list.head;
 	conf_p = ptr->data;
+
+	/* and move it to the tail if theres more than one */
+	if(dlink_list_length(&conf_server_list) > 1)
+	{
+		dlink_delete(ptr, &conf_server_list);
+		dlink_add_tail(conf_p, ptr, &conf_server_list);
+	}
 
 	slog("Connection to server %s activated", conf_p->name);
 
@@ -390,7 +399,8 @@ signon_client(struct connection_entry *conn_p)
 	conn_p->io_write = write_sendq;
 
 	/* ok, if connect() failed, this will cause an error.. */
-	sendto_connection(conn_p, "Welcome to ratbox-services.");
+	sendto_connection(conn_p, "Welcome to %s, version ratbox-services-%s",
+			  MYNAME, RSERV_VERSION);
 
 	if(conn_p->flags & CONN_DEAD)
 		return -1;

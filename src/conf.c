@@ -170,7 +170,7 @@ parse_connect(char *line)
 	else
 		server->port = port;
 
-	dlink_add_alloc(server, &conf_server_list);
+	dlink_add_tail_alloc(server, &conf_server_list);
 }
 
 static void

@@ -8,6 +8,7 @@
 #include "stdinc.h"
 #include "service.h"
 #include "client.h"
+#include "conf.h"
 #include "scommand.h"
 #include "c_init.h"
 #include "log.h"
@@ -44,27 +45,47 @@ c_message(struct client *client_p, char *parv[], int parc)
 
 			/* skip the 'chat' */
 			if((host = strchr(p, ' ')) == NULL)
+			{
+				sendto_server(":%s NOTICE %s :Invalid dcc parameters",
+						MYNAME, client_p->name);
 				return;
+			}
 
 			*host++ = '\0';
 
 			/* <host> <port>\001 */
 			if((cport = strchr(host, ' ')) == NULL)
+			{
+				sendto_server(":%s NOTICE %s :Invalid dcc parameters",
+						MYNAME, client_p->name);
 				return;
+			}
 
 			*cport++ = '\0';
 
 			/* another space? hmm. */
 			if(strchr(cport, ' ') != NULL)
+			{
+				sendto_server(":%s NOTICE %s :Invalid dcc parameters",
+						MYNAME, client_p->name);
 				return;
+			}
 
 			if((p = strchr(cport, '\001')) == NULL)
+			{
+				sendto_server(":%s NOTICE %s :Invalid dcc parameters",
+						MYNAME, client_p->name);
 				return;
+			}
 
 			*p = '\0';
 
 			if((port = atoi(cport)) <= 1024)
+			{
+				sendto_server(":%s NOTICE %s :Invalid dcc port",
+						MYNAME, client_p->name);
 				return;
+			}
 
 			connect_to_client(client_p->name, host, port);
 		}
