@@ -1,3 +1,10 @@
+*** 20010117_5 by davidt
+Fix /rehash of listen{}; blocks.
+We still keep old listeners around until all clients 'using' them quit.
+Currently s_user.c refers to localClient->listener, nothing else seems to
+need it.
+
+
 *** 20010117_4 by fl_
 - fixed a bug toyota found with +v not showing up in /names on anon chans
 
