@@ -1,3 +1,7 @@
+*** 20010502_9 by toot
+added WALLCHOPS to 005 numeric, as we support /notice @#channel
+
+
 *** 20010502_8 by toot
 updated PREFIX format in 005 numeric, and added CHANMODES=A,B,C,D
 see supported.h
