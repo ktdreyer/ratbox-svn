@@ -1,3 +1,18 @@
+androsyn    2002/02/04 00:17:32 EST	(20020204_2)
+
+  Modified files:
+    src                  channel.c client.c linebuf.c 
+  Log:
+  Some tweaks to the default block heap sizes.. The should reduce initial
+  memory consumption by a bit.
+  
+  Revision  Changes    Path
+  7.296     +1 -1      ircd-hybrid-7/src/channel.c
+  7.224     +1 -1      ircd-hybrid-7/src/client.c
+  7.76      +1 -1      ircd-hybrid-7/src/linebuf.c
+
+
+
 androsyn    2002/02/03 23:52:48 EST	(20020204_1)
 
   Modified files:
