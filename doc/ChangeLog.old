@@ -1,3 +1,21 @@
+leeh        2002/04/14 10:56:34 EDT	(20020414_5)
+
+  Modified files:
+    contrib              m_clearchan.c m_force.c m_ojoin.c 
+                         m_opme.c 
+    src                  client.c 
+  Log:
+  - fixed some headers and copyrights.
+  
+  Revision  Changes    Path
+  1.25      +3 -7      ircd-hybrid-7/contrib/m_clearchan.c
+  1.4       +2 -2      ircd-hybrid-7/contrib/m_force.c
+  1.5       +3 -8      ircd-hybrid-7/contrib/m_ojoin.c
+  1.20      +3 -8      ircd-hybrid-7/contrib/m_opme.c
+  7.248     +4 -7      ircd-hybrid-7/src/client.c
+
+
+
 leeh        2002/04/14 07:06:48 EDT	(20020414_4)
 
   Modified files:
