@@ -50,10 +50,7 @@
     the file is installed, you can SET MSGLOCALE back to the language that
     was just updated.
 
-6,  Multiple dlines on the same IP/subnet can be set.  They will all be
-    removed with one /undline however.
-
-7.  IAuthd is broken beyond belief.  It does not work at this time.  If this
+6.  IAuthd is broken beyond belief.  It does not work at this time.  If this
     bothers you, fix it for us.
 
 BUG REPORTS: If you run this code and encounter problems, you must report

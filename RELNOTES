@@ -1,15 +1,15 @@
--- ircd-hybrid-7beta17 RELNOTES
+-- ircd-hybrid-7beta18 RELNOTES
 
-o) updates to some of the contrib modules, allowing remote forcejoin/forcepart
-o) TCP resolver is no longer hardwired on
-o) abort_list fixes
-o) some memory tweaks to make ircd use less ram
-o) '[' is now not allowed in ident replies and will be stripped.
-o) fixes for anon-ops (+a) which should make it fully working.
-o) added a define for HIDE_SPOOF_IPS which will hide the IPs of a spoofed
-   user from everyone.
-o) temp-dline patch and remote-unkline patch have been merged into lmh.diff
-   please see README.LMH for more info
+o) fixed cores with lazylinks
+o) fixed lazylinks for remote PING
+o) fixed a problem exiting the wrong server when one with the same name
+   was introduced
+o) ircd.log will now close and reopen itself on SIGHUP/rehash
+o) fixed multi-message problems
+o) fixed issue of invisible users being shown in /who #channel
+o) fixed jupe module
+o) fixed bug allowing multiple dlines on same IP to be set
+o) fixed a vchannel issue with a misplaced ;
 
 --------------------------------------------------------------------------------
 

@@ -707,7 +707,7 @@ mo_dline(struct Client *client_p, struct Client *source_p,
       char *creason;
       (void)parse_netmask(dlhost, &daddr, NULL);
 
-      if (aconf = find_dline(&daddr, t)) 
+      if((aconf = find_dline(&daddr, t)) != NULL)
 	{
 	  creason = aconf->passwd ? aconf->passwd : "<No Reason>";
 	  if (IsConfExemptKline(aconf))
