@@ -625,18 +625,13 @@ static void update_client_exit_stats(struct Client* client_p)
 static void
 release_client_state(struct Client* client_p)
 {
-  if (client_p->user)
+  if (client_p->user != NULL)
     {
-      if (IsPerson(client_p))
-	{
-	  add_history(client_p,0);
-	  off_history(client_p);
-	}
       free_user(client_p->user, client_p); /* try this here */
     }
   if (client_p->serv)
     {
-      if (client_p->serv->user)
+      if (client_p->serv->user != NULL)
         free_user(client_p->serv->user, client_p);
       MyFree((char*) client_p->serv);
     }
@@ -1079,6 +1074,9 @@ static void exit_one_client(struct Client *client_p,
 
           /* Clean up allow lists */
           del_all_accepts(source_p);
+
+	  add_history(source_p, 0);
+	  off_history(source_p);
 
 	  if (HasID(source_p))
 	    del_from_id_hash_table(source_p->user->id, source_p);
@@ -1680,7 +1678,7 @@ int change_local_nick(struct Client *client_p, struct Client *source_p,
 				   nick);
       if (source_p->user)
 	{
-	  add_history(source_p,1);
+	  add_history(source_p, 1);
 	  
 	  /* Only hubs care about lazy link nicks not being sent on yet
 	   * lazylink leafs/leafs always send their nicks up to hub,
