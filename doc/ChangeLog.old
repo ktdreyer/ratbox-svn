@@ -1,3 +1,9 @@
+*** 19990817_1 by db
+- Hide path on kill from "victim"
+- Hide path on kill from oper to non opers
+
+
+
 *** 19990816_4 by tomh
 bug fix for reverse dns mismatch
 
