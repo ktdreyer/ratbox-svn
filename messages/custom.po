@@ -30,7 +30,7 @@ msgstr	""
 
 #: ../src/messages.tab:27
 #, c-format
-msgid	":%s 004 %s %s %s oiwszcerkfydnxbaug biklmnopstveIha bkloveIh"
+msgid	":%s 004 %s %s %s oiwszcerkfydnxbaugl biklmnopstveIha bkloveIh"
 msgstr	""
 
 #: ../src/messages.tab:28
