@@ -1,3 +1,7 @@
+*** 20010107_2 by fl_
+- removed a fixed bug from BUGS file..
+
+
 *** 20010107_1 by fl_
 - documented issues with modunload, that we cant realistically fix..
 
