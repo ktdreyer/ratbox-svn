@@ -1,3 +1,9 @@
+*** 20010204_15 by db
+- fixed core in hostmask.c add_conf() should check for NULL pointers
+- added initial IPV6 specific code
+
+
+
 *** 20010204_14 by androsyn
 Added hostname length checking. Report error if hostname is longer than
 HOSTLEN
