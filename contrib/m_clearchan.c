@@ -117,6 +117,13 @@ static void mo_clearchan(struct Client *client_p, struct Client *source_p,
       return;
     }
 
+  if(IsMember(source_p, chptr))
+    {
+      sendto_one(source_p, ":%s NOTICE %s :*** Please part %s before using CLEARCHAN",
+                 me.name, source_p->name, parv[1]);
+      return;
+    }
+
   if (!on_vchan)
     {
      sendto_wallops_flags(FLAGS_WALLOP, &me, 
