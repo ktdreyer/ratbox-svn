@@ -243,15 +243,16 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
 
   i = 1;
 
-  end = s;
-  while (*end++);
-  
   if (s)   /* redone by is, aug 2000 */
   {
       if (paramcount > MAXPARA)
 		  paramcount = MAXPARA;
-      
-      {
+
+	  end = s;
+	  while (*end++)
+		  ;
+  
+	  {
 		  char *longarg = NULL;
 		  char *ap;
 		  
