@@ -46,8 +46,7 @@ struct SetOptions
 
   int idletime;
 
-  int floodtime;
-  int floodcount;
+  int floodcount;	/* Number of messages in 1 second */
 
   int spam_num;
   int spam_time;

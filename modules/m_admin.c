@@ -145,7 +145,7 @@ int ms_admin(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
  * output	- none
  * side effects	- admin info is sent to client given
  */
-static void do_admin( struct Client *sptr )
+void do_admin( struct Client *sptr )
 {
   struct ConfItem *aconf;
 

@@ -92,7 +92,6 @@ static struct SetStruct set_cmd_table[] =
   { "AUTOCONN",		quote_autoconn,		1 },
   { "AUTOCONNALL",	quote_autoconnall,	0 },
   { "FLOODCOUNT",	quote_floodcount,	0 },
-  { "FLOODTIME",	quote_floodtime,	0 },
   { "IDLETIME",		quote_idletime,		0 },
   { "LOG",		quote_log,		0 },
   { "MAX",		quote_max,		0 },
@@ -107,22 +106,40 @@ static struct SetStruct set_cmd_table[] =
 
 /*
  * list_quote_commands() sends the client all the available commands.
- * This function should PROBABLY be re-written, as it pretty much
- * "floods" the user with all the commands on each individual line.
- * This isn't all that great, but, at least it's more dynamic...
+ * Four to a line for now.
  */
 int list_quote_commands(struct Client *sptr)
 {
   int i;
+  int j=0;
+  char *names[4];
 
   sendto_one(sptr, ":%s NOTICE %s :Available QUOTE SET commands:",
 		me.name, sptr->name);
 
+  names[0] = names[1] = names[2] = names[3] = "";
+
   for (i=0; set_cmd_table[i].handler; i++)
     {
-      sendto_one(sptr, ":%s NOTICE %s :%s",
-		 me.name, sptr->name, set_cmd_table[i].name);
+      names[j++] = set_cmd_table[i].name;
+
+      if(j > 3)
+	{
+	  sendto_one(sptr, ":%s NOTICE %s :%s %s %s %s",
+		     me.name, sptr->name,
+		     names[0], names[1], 
+		     names[2],names[3]);
+	  j = 0;
+	  names[0] = names[1] = names[2] = names[3] = "";
+	}
+
     }
+  if(j)
+    sendto_one(sptr, ":%s NOTICE %s :%s %s %s %s",
+	       me.name, sptr->name,
+	       names[0], names[1], 
+	       names[2],names[3]);
+
   return(0);
 }
 
@@ -138,14 +155,14 @@ int quote_autoconnall( struct Client *sptr, int newval)
 {
   if(newval >= 0)
     {
-      sendto_realops("%s has changed AUTOCONN ALL to %i",
+      sendto_realops("%s has changed AUTOCONNALL to %i",
 		     sptr->name, newval);
 
       GlobalSetOptions.autoconn = newval;
     }
   else 
     {
-      sendto_one(sptr, ":%s NOTICE %s :AUTOCONN ALL is currently %i",
+      sendto_one(sptr, ":%s NOTICE %s :AUTOCONNALL is currently %i",
 		 me.name, sptr->name, GlobalSetOptions.autoconn);
     }
   return(0);
@@ -165,33 +182,6 @@ int quote_floodcount( struct Client *sptr, int newval)
     {
       sendto_one(sptr, ":%s NOTICE %s :FLOODCOUNT is currently %i",
 		 me.name, sptr->name, GlobalSetOptions.floodcount);
-    }
-  return(0);
-}
-
-
-/* SET FLOODTIME */
-int quote_floodtime( struct Client *sptr, int newval )
-{
-
-  if(newval >= 0)
-    {
-      GlobalSetOptions.floodtime = newval;
-
-      if (GlobalSetOptions.floodtime == 0)
-	{
-	  sendto_realops("%s has disabled the ANTI_FLOOD code", sptr->name);
-	}
-      else
-	{
-	  sendto_realops("%s has changed FLOODTIME to %i", sptr->name, 
-			 GlobalSetOptions.floodtime);
-	}
-    }
-  else
-    {
-      sendto_one(sptr, ":%s NOTICE %s :FLOODTIME is currently %i",
-		 me.name, sptr->name, GlobalSetOptions.floodtime);
     }
   return(0);
 }

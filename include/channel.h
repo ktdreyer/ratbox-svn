@@ -74,6 +74,10 @@ struct Channel
   dlink_list      denylist;
   dlink_list      invexlist;
 
+  time_t          first_received_message_time;
+  int             received_number_of_privmsgs;
+  int             flood_noticed;
+
   int             num_bed;          /* number of bans+exceptions+denies */
   time_t          channelts;
   char            chname[1];

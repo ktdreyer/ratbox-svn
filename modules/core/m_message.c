@@ -52,7 +52,8 @@ int build_target_list(int p_or_n, char *command,
 		      char *nicks_channels, struct entity target_table[],
 		      char *text);
 
-int flood_attack(struct Client *sptr, struct Client *acptr);
+int flood_attack_client(struct Client *sptr, struct Client *acptr);
+int flood_attack_channel(struct Client *sptr, struct Channel *chptr);
 
 #define MAX_TARGETS 20
 
@@ -264,7 +265,8 @@ int build_target_list(int p_or_n,
 	{
 	  if( (chptr = hash_find_channel(nick, NullChn)) )
 	    {
-	      if( !duplicate_ptr(chptr, target_table, i) )
+	      if( !duplicate_ptr(chptr, target_table, i) &&
+		  !flood_attack_channel(sptr, chptr) )
 		{
 		  target_table[i].ptr = (void *)chptr;
 		  target_table[i++].type = ENTITY_CHANNEL;
@@ -316,7 +318,8 @@ int build_target_list(int p_or_n,
 
 	  if ( (chptr = hash_find_channel(nick+1, NullChn)) )
 	    {
-	      if( !duplicate_ptr(chptr, target_table,i))
+	      if( !duplicate_ptr(chptr, target_table,i) &&
+		  !flood_attack_channel(sptr, chptr) )
 		{
 		  target_table[i].ptr = (void *)chptr;
 		  target_table[i].type = ENTITY_CHANOPS_ON_CHANNEL;
@@ -346,8 +349,7 @@ int build_target_list(int p_or_n,
 
       if ( (acptr = find_person(nick, NULL)) )
 	{
-	  if( !duplicate_ptr(acptr, target_table, i) &&
-	      !flood_attack(sptr, acptr) )
+	  if( !duplicate_ptr(acptr, target_table, i) )
 	    {
 	      target_table[i].ptr = (void *)acptr;
 	      target_table[i].type = ENTITY_CLIENT;
@@ -526,7 +528,6 @@ void msg_client(int n_or_p, char *command,
     {
       if(IsSetCallerId(acptr))
 	{
-
 	  /* Here is the anti-flood bot/spambot bloat^H^H^H^H^Hcode -db */
 	  if(accept_message(sptr,acptr))
 	    {
@@ -547,64 +548,126 @@ void msg_client(int n_or_p, char *command,
 				    acptr->name, sptr->name);
 
 		  sendto_prefix_one(acptr, sptr,
-        ":%s NOTICE %s :*** Client %s [%s@%s] is messaging you and you are +g",
+      ":%s NOTICE %s :*** Client %s [%s@%s] is messaging you and you are +g",
 				    me.name, acptr->name,
 				    sptr->name, sptr->username,
 				    sptr->host );
 
 		  acptr->localClient->last_caller_id_time = CurrentTime;
+		  
 		}
+	      /* Only so opers can watch for floods */
+	      (void)flood_attack_client(sptr,acptr);
 	    }
 	}
       else
-	sendto_prefix_one(acptr, sptr, ":%s %s %s :%s",
-			  sptr->name, command, acptr->name, text);
+	{
+	  if(!flood_attack_client(sptr,acptr))
+	    sendto_prefix_one(acptr, sptr, ":%s %s %s :%s",
+			      sptr->name, command, acptr->name, text);
+	}
     }
   else
-    sendto_prefix_one(acptr, sptr, ":%s %s %s :%s",
-		      sptr->name, command, acptr->name, text);
+    if(!flood_attack_client(sptr,acptr))
+      sendto_prefix_one(acptr, sptr, ":%s %s %s :%s",
+			sptr->name, command, acptr->name, text);
   return;
 }
       
 /*
- * flood_attack
+ * flood_attack_client
  * inputs	- pointer to source Client 
  *		- pointer to target Client
  * output	- 1 if target is under flood attack
  * side effects	- check for flood attack on target acptr
  */
-
-int flood_attack(struct Client *sptr,struct Client *acptr)
+int flood_attack_client(struct Client *sptr,struct Client *acptr)
 {
-  if(GlobalSetOptions.floodtime &&
-     MyConnect(acptr) && IsClient(sptr) )
+  int delta;
+
+  if(GlobalSetOptions.floodcount && MyConnect(acptr) && IsClient(sptr))
     {
-      if((acptr->localClient->first_received_message_time+GlobalSetOptions.floodtime)
+      if((acptr->localClient->first_received_message_time+1)
 	 < CurrentTime)
 	{
-	  acptr->localClient->received_number_of_privmsgs=1;
-	  acptr->localClient->first_received_message_time = CurrentTime;
-	  acptr->localClient->flood_noticed = 0;
+	  delta = CurrentTime - acptr->localClient->first_received_message_time;
+	  acptr->localClient->received_number_of_privmsgs -= delta;
+	  if(acptr->localClient->received_number_of_privmsgs <= 0)
+	    {
+	      acptr->localClient->received_number_of_privmsgs = 0;
+	      acptr->localClient->first_received_message_time = CurrentTime;
+	      acptr->localClient->flood_noticed = 0;
+	    }
+	}
+
+      if((acptr->localClient->received_number_of_privmsgs > 
+	  GlobalSetOptions.floodcount) || acptr->localClient->flood_noticed)
+	{
+	  if(acptr->localClient->flood_noticed == 0)
+	    {
+	      sendto_realops_flags(FLAGS_BOTS,
+				   "Possible Flooder %s [%s@%s] on %s target: %s",
+				   sptr->name, sptr->username,
+				   sptr->host,
+				   sptr->user->server, acptr->name);
+	      acptr->localClient->flood_noticed = 1;
+	    }
+	  if(MyClient(sptr))
+	    sendto_one(sptr, ":%s NOTICE %s :*** Message to %s throttled due to flooding",
+		       me.name, sptr->name, acptr->name);
+	  return 1;
 	}
       else
+	acptr->localClient->received_number_of_privmsgs++;
+    }
+
+  return 0;
+}
+
+/*
+ * flood_attack_channel
+ * inputs	- pointer to source Client 
+ *		- pointer to target channel
+ * output	- 1 if target is under flood attack
+ * side effects	- check for flood attack on target chptr
+ */
+int flood_attack_channel(struct Client *sptr,struct Channel *chptr)
+{
+  int delta;
+
+  if(GlobalSetOptions.floodcount)
+    {
+      if((chptr->first_received_message_time+1) < CurrentTime)
 	{
-	  if(acptr->localClient->received_number_of_privmsgs > 
-	     GlobalSetOptions.floodcount)
+	  delta = CurrentTime - chptr->first_received_message_time;
+	  chptr->received_number_of_privmsgs -= delta;
+	  if(chptr->received_number_of_privmsgs <= 0)
 	    {
-	      if(acptr->localClient->flood_noticed == 0)
-		{
-		  sendto_realops_flags(FLAGS_BOTS,
-		       "Possible Flooder %s [%s@%s] on %s target: %s",
-				       sptr->name, sptr->username,
-				       sptr->host,
-				       sptr->user->server, acptr->name);
-		  acptr->localClient->flood_noticed = 1;
-		  return 1;
-		}
+	      chptr->received_number_of_privmsgs=0;
+	      chptr->first_received_message_time = CurrentTime;
+	      chptr->flood_noticed = 0;
 	    }
-	  else
-	    acptr->localClient->received_number_of_privmsgs++;
 	}
+
+      if((chptr->received_number_of_privmsgs > GlobalSetOptions.floodcount)
+	 || chptr->flood_noticed)
+	{
+	  if(chptr->flood_noticed == 0)
+	    {
+	      sendto_realops_flags(FLAGS_BOTS,
+				   "Possible Flooder %s [%s@%s] on %s target: %s",
+				   sptr->name, sptr->username,
+				   sptr->host,
+				   sptr->user->server, chptr->chname);
+	      chptr->flood_noticed = 1;
+	    }
+	  if(MyClient(sptr))
+	    sendto_one(sptr, ":%s NOTICE %s :*** Message to %s throttled due to flooding",
+		       me.name, sptr->name, chptr->chname);
+	  return 1;
+	}
+      else
+	chptr->received_number_of_privmsgs++;
     }
 
   return 0;

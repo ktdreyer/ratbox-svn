@@ -399,7 +399,6 @@ static void initialize_global_set_options(void)
   GlobalSetOptions.spam_time = MIN_JOIN_LEAVE_TIME;
   GlobalSetOptions.spam_num = MAX_JOIN_LEAVE_COUNT;
 
-  GlobalSetOptions.floodtime = DEFAULT_FLOOD_TIME;
   GlobalSetOptions.floodcount = DEFAULT_FLOOD_COUNT;
 
  /* End of global set options */
