@@ -156,7 +156,7 @@ void add_ip_Iline(struct ConfItem *conf_ptr)
 void report_ip_Ilines(struct Client *sptr)
 {
 	patricia_node_t *node;
-	char *name, *host, *pass, *user, *classname, conftype;
+	char *name, *host, *pass, *user, *classname;
 	int port;
 	PATRICIA_WALK(iline->head, node) 
 	{
