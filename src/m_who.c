@@ -320,7 +320,7 @@ static void who_global(struct Client *sptr,char *mask, int oper)
             showperson = YES;
         }
       if (!acptr->user->channel && !isinvis)
-        showperson = 1;
+        showperson = YES;
       if (showperson &&
           (!mask ||
            match(mask, acptr->name) ||
@@ -340,10 +340,12 @@ static void who_global(struct Client *sptr,char *mask, int oper)
 
 	  do_who(sptr, acptr, chname, lp);
 
-          if (!--maxmatches)
-            {
-              return;
-            }
+          if (maxmatches > 0)
+	    {
+	      --maxmatches;
+	      if( maxmatches == 0 )
+		return;
+	    }
         }
     }
 }
