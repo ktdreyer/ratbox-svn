@@ -1,3 +1,15 @@
+androsyn    2004/03/01 15:59:54 EST	(20040301_15)
+
+  Modified files:
+    src                  commio.c 
+  Log:
+  Fix identd checking on freebsd
+  
+  Revision  Changes    Path
+  1.7       +5 -3      ircd-ratbox/src/commio.c
+
+
+
 androsyn    2004/03/01 15:24:34 EST	(20040301_14)
 
   Modified files:
