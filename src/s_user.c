@@ -1043,7 +1043,7 @@ send_umode(struct Client *client_p, struct Client *source_p, int old, int sendma
  *
  * inputs	-
  * output	- NONE
- * side effects - Only send ubuf out to servers that know about this client
+ * side effects - 
  */
 void
 send_umode_out(struct Client *client_p, struct Client *source_p, int old)
@@ -1061,7 +1061,8 @@ send_umode_out(struct Client *client_p, struct Client *source_p, int old)
 		if((target_p != client_p) && (target_p != source_p) && (*buf))
 		{
 			sendto_one(target_p, ":%s MODE %s :%s",
-				   source_p->name, source_p->name, buf);
+				   get_id(source_p, target_p), 
+				   get_id(source_p, target_p), buf);
 		}
 	}
 
@@ -1087,8 +1088,7 @@ user_welcome(struct Client *source_p)
 
 	sendto_one(source_p, form_str(RPL_CREATED), me.name, source_p->name, creation);
 	sendto_one(source_p, form_str(RPL_MYINFO), me.name, source_p->name, me.name, ircd_version);
-	
-		
+
 	show_isupport(source_p);
 
 	show_lusers(source_p);

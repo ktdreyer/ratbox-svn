@@ -754,28 +754,26 @@ stats_operedup (struct Client *source_p)
 		{
 			aconf = target_p->localClient->att_conf;
 
-			sendto_one(source_p, ":%s %d %s p :[%c][%s] %s (%s@%s) Idle: %d",
-				   get_id(&me, source_p), RPL_STATSDEBUG,
-				   get_id(source_p, source_p),
-				   IsAdmin (target_p) ? 'A' : 'O',
-				   oper_privs_as_string (target_p, aconf->port),
-				   target_p->name, target_p->username, target_p->host,
-				   (int) (CurrentTime - target_p->user->last));
+			sendto_one_numeric(source_p, RPL_STATSDEBUG,
+					   "p :[%c][%s] %s (%s@%s) Idle: %d",
+					   IsAdmin (target_p) ? 'A' : 'O',
+					   oper_privs_as_string (target_p, aconf->port),
+					   target_p->name, target_p->username, target_p->host,
+					   (int) (CurrentTime - target_p->user->last));
 		}
 		else
 		{
-			sendto_one(source_p, ":%s %d %s p :[%c] %s (%s@%s) Idle: %d",
-				   get_id(&me, source_p), RPL_STATSDEBUG,
-				   get_id(source_p, source_p),
-				   IsAdmin (target_p) ? 'A' : 'O',
-				   target_p->name, target_p->username, target_p->host,
-				   (int) (CurrentTime - target_p->user->last));
+			sendto_one_numeric(source_p, RPL_STATSDEBUG,
+					   "p :[%c] %s (%s@%s) Idle: %d",
+					   IsAdmin (target_p) ? 'A' : 'O',
+					   target_p->name, target_p->username, target_p->host,
+					   (int) (CurrentTime - target_p->user->last));
 		}
 	}
 
-	sendto_one(source_p, ":%s %d %s p :%ld OPER(s)",
-		   get_id(&me, source_p), RPL_STATSDEBUG, 
-		   get_id(source_p, source_p), dlink_list_length (&oper_list));
+	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+			   "p :%ld OPER(s)",
+			   dlink_list_length (&oper_list));
 
 	stats_p_spy (source_p);
 }
@@ -850,33 +848,31 @@ stats_usage (struct Client *source_p)
 	rup = (CurrentTime - me.since) * hzz;
 	if(0 == rup)
 		rup = 1;
-
-	sendto_one(source_p,
-		   ":%s %d %s R :CPU Secs %d:%d User %d:%d System %d:%d",
-		   get_id(&me, source_p), RPL_STATSDEBUG, get_id(source_p, source_p),
-		   (int) (secs / 60), (int) (secs % 60),
-		   (int) (rus.ru_utime.tv_sec / 60),
-		   (int) (rus.ru_utime.tv_sec % 60),
-		   (int) (rus.ru_stime.tv_sec / 60), (int) (rus.ru_stime.tv_sec % 60));
-	sendto_one(source_p,
-		   ":%s %d %s R :RSS %ld ShMem %ld Data %ld Stack %ld",
-		   get_id(&me, source_p), RPL_STATSDEBUG, get_id(source_p, source_p),
-		   rus.ru_maxrss, (rus.ru_ixrss / rup), 
-		   (rus.ru_idrss / rup), (rus.ru_isrss / rup));
-	sendto_one(source_p, ":%s %d %s R :Swaps %d Reclaims %d Faults %d",
-		   get_id(&me, source_p), RPL_STATSDEBUG, get_id(source_p, source_p),
-		   (int) rus.ru_nswap, (int) rus.ru_minflt, (int) rus.ru_majflt);
-	sendto_one(source_p, ":%s %d %s R :Block in %d out %d",
-		   get_id(&me, source_p), RPL_STATSDEBUG, get_id(source_p, source_p),
-		   (int) rus.ru_inblock, (int) rus.ru_oublock);
-	sendto_one(source_p, ":%s %d %s R :Msg Rcv %d Send %d",
-		   get_id(&me, source_p), RPL_STATSDEBUG, get_id(source_p, source_p),
-		   (int) rus.ru_msgrcv, (int) rus.ru_msgsnd);
-	sendto_one(source_p,
-		   ":%s %d %s R :Signals %d Context Vol. %d Invol %d",
-		   get_id(&me, source_p), RPL_STATSDEBUG, get_id(source_p, source_p),
-		   (int) rus.ru_nsignals, (int) rus.ru_nvcsw, 
-		   (int) rus.ru_nivcsw);
+  
+	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+			   "R :CPU Secs %d:%d User %d:%d System %d:%d",
+			   (int) (secs / 60), (int) (secs % 60),
+			   (int) (rus.ru_utime.tv_sec / 60),
+			   (int) (rus.ru_utime.tv_sec % 60),
+			   (int) (rus.ru_stime.tv_sec / 60), 
+			   (int) (rus.ru_stime.tv_sec % 60));
+	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+			   "R :RSS %ld ShMem %ld Data %ld Stack %ld",
+			   rus.ru_maxrss, (rus.ru_ixrss / rup), 
+			   (rus.ru_idrss / rup), (rus.ru_isrss / rup));
+	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+			   "R :Swaps %d Reclaims %d Faults %d",
+			   (int) rus.ru_nswap, (int) rus.ru_minflt, (int) rus.ru_majflt);
+	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+			   "R :Block in %d out %d",
+			   (int) rus.ru_inblock, (int) rus.ru_oublock);
+	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+			   "R :Msg Rcv %d Send %d",
+			   (int) rus.ru_msgrcv, (int) rus.ru_msgsnd);
+	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+			   "R :Signals %d Context Vol. %d Invol %d",
+			   (int) rus.ru_nsignals, (int) rus.ru_nvcsw, 
+			   (int) rus.ru_nivcsw);
 #endif /* __VMS */
 }
 
@@ -983,19 +979,19 @@ stats_servers (struct Client *source_p)
 		minutes = (int) (seconds / 60);
 		seconds %= 60;
 
-		sendto_one (source_p, ":%s %d %s V :%s (%s!%s@%s) Idle: %d SendQ: %d "
-			    "Connected: %d day%s, %d:%02d:%02d",
-			    get_id(&me, source_p), RPL_STATSDEBUG, get_id(source_p, source_p),
-			    target_p->name,
-			    (target_p->serv->by[0] ? target_p->serv->by : "Remote."),
-			    "*", "*", (int) (CurrentTime - target_p->lasttime),
-			    (int) linebuf_len (&target_p->localClient->buf_sendq),
-			    days, (days == 1) ? "" : "s", hours, minutes, (int) seconds);
+		sendto_one_numeric(source_p, RPL_STATSDEBUG,
+				   "V :%s (%s!%s@%s) Idle: %d SendQ: %d "
+				   "Connected: %d day%s, %d:%02d:%02d",
+				   target_p->name,
+				   (target_p->serv->by[0] ? target_p->serv->by : "Remote."),
+				   "*", "*", (int) (CurrentTime - target_p->lasttime),
+				   (int) linebuf_len (&target_p->localClient->buf_sendq),
+				   days, (days == 1) ? "" : "s", hours, minutes, 
+				   (int) seconds);
 	}
 
-	sendto_one(source_p, ":%s %d %s V :%d Server(s)", 
-		   get_id(&me, source_p), RPL_STATSDEBUG, 
-		   get_id(source_p, source_p), j);
+	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+			   "V :%d Server(s)", j);
 }
 
 static void
@@ -1057,21 +1053,20 @@ stats_ziplinks (struct Client *source_p)
 			 */
 			struct ZipStats zipstats;
 			memcpy (&zipstats, &target_p->localClient->zipstats,
-				sizeof (struct ZipStats));
-			sendto_one(source_p,
-				    ":%s %d %s Z :ZipLinks stats for %s send[%.2f%% compression "
-				    "(%lu bytes data/%lu bytes wire)] recv[%.2f%% compression "
-				    "(%lu bytes data/%lu bytes wire)]",
-				    get_id(&me, source_p), RPL_STATSDEBUG, 
-				    get_id(source_p, source_p), target_p->name,
-				    zipstats.out_ratio, zipstats.out, zipstats.out_wire,
-				    zipstats.in_ratio, zipstats.in, zipstats.in_wire);
+				sizeof (struct ZipStats)); 
+			sendto_one_numeric(source_p, RPL_STATSDEBUG,
+					    "Z :ZipLinks stats for %s send[%.2f%% compression "
+					    "(%lu bytes data/%lu bytes wire)] recv[%.2f%% compression "
+					    "(%lu bytes data/%lu bytes wire)]",
+					    target_p->name,
+					    zipstats.out_ratio, zipstats.out, zipstats.out_wire,
+					    zipstats.in_ratio, zipstats.in, zipstats.in_wire);
 			sent_data++;
 		}
 	}
-	sendto_one(source_p, ":%s %d %s Z :%u ziplink(s)",
-		   get_id(&me, source_p), RPL_STATSDEBUG, 
-		   get_id(source_p, source_p), sent_data);
+
+	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+			   "Z :%u ziplink(s)", sent_data);
 }
 
 static void
@@ -1116,30 +1111,28 @@ stats_servlinks (struct Client *source_p)
 			    IsOper (source_p) ? show_capabilities (target_p) : "TS");
 	}
 
-	sendto_one(source_p, ":%s %d %s ? :%u total server(s)",
-		   get_id(&me, source_p), RPL_STATSDEBUG, 
-		   get_id(source_p, source_p), j);
+	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+			   "? :%u total server(s)", j);
 
-	sendto_one(source_p, ":%s %d %s ? :Sent total : %7.2f %s",
-		   get_id(&me, source_p), RPL_STATSDEBUG, 
-		   get_id(source_p, source_p), _GMKv (sendK), _GMKs (sendK));
-	sendto_one(source_p, ":%s %d %s ? :Recv total : %7.2f %s",
-		   get_id(&me, source_p), RPL_STATSDEBUG, 
-		   get_id(source_p, source_p), _GMKv (receiveK), _GMKs (receiveK));
+	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+			   "? :Sent total : %7.2f %s",
+			   _GMKv (sendK), _GMKs (sendK));
+	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+			   "? :Recv total : %7.2f %s",
+			   _GMKv (receiveK), _GMKs (receiveK));
 
 	uptime = (CurrentTime - me.since);
 
-	sendto_one(source_p, ":%s %d %s ? :Server send: %7.2f %s (%4.1f K/s)",
-		   get_id(&me, source_p), RPL_STATSDEBUG,
-		   get_id(source_p, source_p),
-		    _GMKv (me.localClient->sendK), _GMKs (me.localClient->sendK),
-		    (float) ((float) me.localClient->sendK / (float) uptime));
-	sendto_one(source_p, ":%s %d %s ? :Server recv: %7.2f %s (%4.1f K/s)",
-		   get_id(&me, source_p), RPL_STATSDEBUG,
-		   get_id(source_p, source_p),
-		   _GMKv (me.localClient->receiveK),
-		   _GMKs (me.localClient->receiveK),
-		   (float) ((float) me.localClient->receiveK / (float) uptime));
+	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+			   "? :Server send: %7.2f %s (%4.1f K/s)",
+			   _GMKv (me.localClient->sendK), 
+			   _GMKs (me.localClient->sendK),
+			   (float) ((float) me.localClient->sendK / (float) uptime));
+	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+			   "? :Server recv: %7.2f %s (%4.1f K/s)",
+			   _GMKv (me.localClient->receiveK),
+			   _GMKs (me.localClient->receiveK),
+			   (float) ((float) me.localClient->receiveK / (float) uptime));
 }
 
 static void
@@ -1232,64 +1225,58 @@ stats_l_client(struct Client *source_p, struct Client *target_p,
 {
 	if(IsAnyServer(target_p))
 	{
-		sendto_one(source_p, Lformat,
-			   get_id(&me, source_p), RPL_STATSDEBUG,
-			   get_id(source_p, source_p),
+		sendto_one_numeric(source_p, RPL_STATSDEBUG, Lformat,
 #ifndef HIDE_SERVERS_IPS
-			   IsOperAdmin(source_p) ? get_client_name(target_p, SHOW_IP) :
+				   IsOperAdmin(source_p) ? get_client_name(target_p, SHOW_IP) :
 #endif
-			   get_client_name(target_p, MASK_IP),
-			   (int) linebuf_len(&target_p->localClient->buf_sendq),
-			   (int) target_p->localClient->sendM,
-			   (int) target_p->localClient->sendK,
-			   (int) target_p->localClient->receiveM,
-			   (int) target_p->localClient->receiveK,
-			   CurrentTime - target_p->firsttime,
-			   (CurrentTime >
-			    target_p->since) ? (CurrentTime - target_p->since) : 0,
-			   IsOper(source_p) ? show_capabilities(target_p) : "-");
+				   get_client_name(target_p, MASK_IP),
+				   (int) linebuf_len(&target_p->localClient->buf_sendq),
+				   (int) target_p->localClient->sendM,
+				   (int) target_p->localClient->sendK,
+				   (int) target_p->localClient->receiveM,
+				   (int) target_p->localClient->receiveK,
+				   CurrentTime - target_p->firsttime,
+				   (CurrentTime >
+				    target_p->since) ? (CurrentTime - target_p->since) : 0,
+				   IsOper(source_p) ? show_capabilities(target_p) : "-");
 	}
 
 	else if(IsIPSpoof(target_p))
 	{
-		sendto_one(source_p, Lformat,
-			   get_id(&me, source_p), RPL_STATSDEBUG,
-			   get_id(source_p, source_p),
+		sendto_one_numeric(source_p, RPL_STATSDEBUG, Lformat,
 #ifndef HIDE_SPOOF_IPS
-			   IsOper(source_p) ?
-			   (IsUpper(statchar) ?
-			    get_client_name(target_p, SHOW_IP) :
-			    get_client_name(target_p, HIDE_IP)) :
+				   IsOper(source_p) ?
+				    (IsUpper(statchar) ?
+				     get_client_name(target_p, SHOW_IP) :
+				     get_client_name(target_p, HIDE_IP)) :
 #endif
-			   get_client_name(target_p, MASK_IP),
-			   (int) linebuf_len(&target_p->localClient->buf_sendq),
-			   (int) target_p->localClient->sendM,
-			   (int) target_p->localClient->sendK,
-			   (int) target_p->localClient->receiveM,
-			   (int) target_p->localClient->receiveK,
-			   CurrentTime - target_p->firsttime,
-			   (CurrentTime >
-			    target_p->since) ? (CurrentTime - target_p->since) : 0,
-			   "-");
+				    get_client_name(target_p, MASK_IP),
+				    (int) linebuf_len(&target_p->localClient->buf_sendq),
+				    (int) target_p->localClient->sendM,
+				    (int) target_p->localClient->sendK,
+				    (int) target_p->localClient->receiveM,
+				    (int) target_p->localClient->receiveK,
+				    CurrentTime - target_p->firsttime,
+				    (CurrentTime >
+				     target_p->since) ? (CurrentTime - target_p->since) : 0,
+				    "-");
 	}
 
 	else
 	{
-		sendto_one(source_p, Lformat,
-			   get_id(&me, source_p), RPL_STATSDEBUG,
-			   get_id(source_p, source_p),
-			   IsUpper(statchar) ?
-			   get_client_name(target_p, SHOW_IP) :
-			   get_client_name(target_p, HIDE_IP),
-			   (int) linebuf_len(&target_p->localClient->buf_sendq),
-			   (int) target_p->localClient->sendM,
-			   (int) target_p->localClient->sendK,
-			   (int) target_p->localClient->receiveM,
-			   (int) target_p->localClient->receiveK,
-			   CurrentTime - target_p->firsttime,
-			   (CurrentTime >
-			    target_p->since) ? (CurrentTime - target_p->since) : 0,
-			   "-");
+		sendto_one_numeric(source_p, RPL_STATSDEBUG, Lformat,
+				   IsUpper(statchar) ?
+				   get_client_name(target_p, SHOW_IP) :
+				   get_client_name(target_p, HIDE_IP),
+				   (int) linebuf_len(&target_p->localClient->buf_sendq),
+				   (int) target_p->localClient->sendM,
+				   (int) target_p->localClient->sendK,
+				   (int) target_p->localClient->receiveM,
+				   (int) target_p->localClient->receiveK,
+				   CurrentTime - target_p->firsttime,
+				   (CurrentTime >
+				    target_p->since) ? (CurrentTime - target_p->since) : 0,
+				   "-");
 	}
 }
 

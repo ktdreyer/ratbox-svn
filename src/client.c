@@ -1460,8 +1460,10 @@ exit_local_client(struct Client *client_p, struct Client *source_p, struct Clien
 
 	if((source_p->flags & FLAGS_KILLED) == 0)
 	{
-		sendto_server(client_p, NULL, NOCAPS, NOCAPS, ":%s QUIT :%s",
-			      source_p->name, comment)	;
+		sendto_server(client_p, NULL, CAP_TS6, NOCAPS,
+			      ":%s QUIT %s", use_id(source_p), comment);
+		sendto_server(client_p, NULL, NOCAPS, CAP_TS6,
+			      ":%s QUIT %s", source_p->name, comment);
 	}
 	exit_generic_client(client_p, source_p, from, comment);
 	return(CLIENT_EXITED);
@@ -1737,9 +1739,14 @@ change_local_nick(struct Client *client_p, struct Client *source_p, char *nick)
 		{
 			add_history(source_p, 1);
 
-			sendto_server(client_p, NULL, NOCAPS, NOCAPS,
-				      ":%s NICK %s :%lu", source_p->name,
-				      nick, (unsigned long) source_p->tsinfo);
+			sendto_server(client_p, NULL, CAP_TS6, NOCAPS,
+				      ":%s NICK %s :%lu",
+				      use_id(source_p), nick, 
+				      (unsigned long) source_p->tsinfo);
+			sendto_server(client_p, NULL, NOCAPS, CAP_TS6,
+				      ":%s NICK %s :%lu", 
+				      source_p->name, nick, 
+				      (unsigned long) source_p->tsinfo);
 		}
 	}
 	else

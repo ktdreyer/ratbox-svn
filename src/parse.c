@@ -558,28 +558,6 @@ report_messages(struct Client *source_p)
 	}
 }
 
-/* list_commands()
- *
- * inputs       - pointer to client to report to
- * outputs      -
- * side effects - client is shown list of commands
- */
-void
-list_commands(struct Client *source_p)
-{
-	struct MessageHash *ptr;
-	int i;
-
-	for (i = 0; i < MAX_MSG_HASH; i++)
-	{
-		for (ptr = msg_hash_table[i]; ptr; ptr = ptr->next)
-		{
-			sendto_one(source_p, ":%s NOTICE %s :%s",
-				   me.name, source_p->name, ptr->cmd);
-		}
-	}
-}
-
 /* cancel_clients()
  *
  * inputs	- client who sent us the message, client with fake
@@ -655,10 +633,12 @@ remove_unknown(struct Client *client_p, char *lsender, char *lbuffer)
 
 		sendto_one(client_p,
 			   ":%s SQUIT %s :(Unknown prefix (%s) from %s)",
-			   me.name, lsender, lbuffer, client_p->name);
+			   get_id(&me, client_p), lsender, 
+			   lbuffer, client_p->name);
 	}
 	else
-		sendto_one(client_p, ":%s KILL %s :%s (Unknown Client)", me.name, lsender, me.name);
+		sendto_one(client_p, ":%s KILL %s :%s (Unknown Client)", 
+			   get_id(&me, client_p), lsender, me.name);
 }
 
 
@@ -755,8 +735,9 @@ do_numeric(char numeric[], struct Client *client_p, struct Client *source_p, int
 		if(ConfigServerHide.hide_servers && MyClient(target_p) && !IsOper(target_p))
 			sendto_one(target_p, ":%s %s %s%s", me.name, numeric, parv[1], buffer);
 		else
-			sendto_one(target_p, ":%s %s %s%s", source_p->name,
-				   numeric, parv[1], buffer);
+			sendto_one(target_p, ":%s %s %s%s", 
+				   get_id(source_p, target_p), numeric, 
+				   get_id(target_p, target_p), buffer);
 		return;
 	}
 	else if((chptr = find_channel(parv[1])) != NULL)

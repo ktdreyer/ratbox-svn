@@ -213,8 +213,8 @@ ms_kill(struct Client *client_p, struct Client *source_p, int parc, const char *
 					   form_str(ERR_NOSUCHNICK), user);
 			return 0;
 		}
-		sendto_one(source_p, ":%s NOTICE %s :KILL changed from %s to %s",
-			   me.name, parv[0], user, target_p->name);
+		sendto_one_notice(source_p, ":KILL changed from %s to %s",
+				  user, target_p->name);
 		chasing = 1;
 	}
 
@@ -294,13 +294,12 @@ relay_kill(struct Client *one, struct Client *source_p,
 			continue;
 
 		if(MyClient(source_p))
-			sendto_one(client_p, ":%s KILL %s :%s!%s!%s!%s (%s)",
-				   source_p->name, get_id(target_p, client_p),
-				   me.name, source_p->host, source_p->username,
-				   source_p->name, reason);
+			sendto_one_prefix(client_p, source_p, "KILL", 
+					  ":%s!%s!%s!%s (%s)",
+					  me.name, source_p->host, source_p->username,
+					  source_p->name, reason);
 		else
-			sendto_one(client_p, ":%s KILL %s :%s %s",
-				   get_id(target_p, client_p),
-				   get_id(target_p, target_p), inpath, reason);
+			sendto_one_prefix(client_p, source_p, "KILL", 
+					  ":%s %s", inpath, reason);
 	}
 }

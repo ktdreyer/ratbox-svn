@@ -34,7 +34,5 @@ int check_reject(struct Client *);
 void add_reject(struct Client *);
 void flush_reject(struct Client *);
 
-extern unsigned long reject_count;
-
 #endif
 

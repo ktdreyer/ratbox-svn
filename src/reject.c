@@ -31,10 +31,10 @@
 #include "event.h"
 #include "tools.h"
 #include "reject.h"
+#include "s_stats.h"
 
 static patricia_tree_t *reject_tree;
 static dlink_list delay_exit;
-unsigned long reject_count;
 
 struct reject_data
 {
@@ -131,7 +131,7 @@ check_reject(struct Client *client_p)
 		rdata->time = CurrentTime;
 		if(rdata->count > ConfigFileEntry.reject_after_count)
 		{
-			reject_count++;
+			ServerStats->is_rej++;
 			dlinkAddAlloc(client_p, &delay_exit);
 			return 1;
 		}

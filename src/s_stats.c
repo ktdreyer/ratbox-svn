@@ -120,29 +120,38 @@ tstats(struct Client *source_p)
 		sp->is_ni++;
 	}
 
-	sendto_one(source_p, ":%s %d %s T :accepts %u refused %u",
-		   me.name, RPL_STATSDEBUG, source_p->name, sp->is_ac, sp->is_ref);
-	sendto_one(source_p, ":%s %d %s T :unknown commands %u prefixes %u",
-		   me.name, RPL_STATSDEBUG, source_p->name, sp->is_unco, sp->is_unpf);
-	sendto_one(source_p, ":%s %d %s T :nick collisions %u unknown closes %u",
-		   me.name, RPL_STATSDEBUG, source_p->name, sp->is_kill, sp->is_ni);
-	sendto_one(source_p, ":%s %d %s T :wrong direction %u empty %u",
-		   me.name, RPL_STATSDEBUG, source_p->name, sp->is_wrdi, sp->is_empt);
-	sendto_one(source_p, ":%s %d %s T :numerics seen %u", me.name,
-		   RPL_STATSDEBUG, source_p->name, sp->is_num);
-	sendto_one(source_p, ":%s %d %s T :auth successes %u fails %u",
-		   me.name, RPL_STATSDEBUG, source_p->name, sp->is_asuc, sp->is_abad);
-	sendto_one(source_p, ":%s %d %s T :Client Server", me.name, RPL_STATSDEBUG, source_p->name);
-	sendto_one(source_p, ":%s %d %s T :connected %u %u", me.name,
-		   RPL_STATSDEBUG, source_p->name, sp->is_cl, sp->is_sv);
-	sendto_one(source_p, ":%s %d %s T :bytes sent %d.%uK %d.%uK", me.name,
-		   RPL_STATSDEBUG, source_p->name, (int) sp->is_cks,
-		   sp->is_cbs, (int) sp->is_sks, sp->is_sbs);
-	sendto_one(source_p, ":%s %d %s T :bytes recv %d.%uK %d.%uK", me.name,
-		   RPL_STATSDEBUG, source_p->name, (int) sp->is_ckr,
-		   sp->is_cbr, (int) sp->is_skr, sp->is_sbr);
-	sendto_one(source_p, ":%s %d %s T :time connected %d %d", me.name,
-		   RPL_STATSDEBUG, source_p->name, (int) sp->is_cti, (int) sp->is_sti);
+	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+			   "T :accepts %u refused %u", sp->is_ac, sp->is_ref);
+	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+			   "T: rejected %u", sp->is_rej);
+	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+			   "T :unknown commands %u prefixes %u",
+			   sp->is_unco, sp->is_unpf);
+	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+			   "T :nick collisions %u unknown closes %u",
+			   sp->is_kill, sp->is_ni);
+	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+			   "T :wrong direction %u empty %u", 
+			   sp->is_wrdi, sp->is_empt);
+	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+			   "T :numerics seen %u", sp->is_num);
+	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+			   "T :auth successes %u fails %u",
+			   sp->is_asuc, sp->is_abad);
+	sendto_one_numeric(source_p, RPL_STATSDEBUG, "T :Client Server");
+	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+			   "T :connected %u %u", sp->is_cl, sp->is_sv);
+	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+			   "T :bytes sent %d.%uK %d.%uK",
+			   (int) sp->is_cks, sp->is_cbs, 
+			   (int) sp->is_sks, sp->is_sbs);
+	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+			   "T :bytes recv %d.%uK %d.%uK",
+			   (int) sp->is_ckr, sp->is_cbr, 
+			   (int) sp->is_skr, sp->is_sbr);
+	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+			   "T :time connected %d %d",
+			   (int) sp->is_cti, (int) sp->is_sti);
 }
 
 void
@@ -271,109 +280,114 @@ count_memory(struct Client *source_p)
 
 	count_linebuf_memory(&linebuf_count, &linebuf_memory_used);
 
-	sendto_one(source_p, ":%s %d %s z :Users %u(%lu) Invites %u(%lu)",
-		   me.name, RPL_STATSDEBUG, source_p->name,
-		   users_counted,
-		   (unsigned long) users_counted * sizeof(struct User),
-		   users_invited_count, (unsigned long) users_invited_count * sizeof(dlink_node));
+	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+			   "z :Users %u(%lu) Invites %u(%lu)",
+			   users_counted,
+			   (unsigned long) users_counted * sizeof(struct User),
+			   users_invited_count, 
+			   (unsigned long) users_invited_count * sizeof(dlink_node));
 
-	sendto_one(source_p, ":%s %d %s z :User channels %u(%lu) Aways %u(%d)",
-		   me.name, RPL_STATSDEBUG, source_p->name,
-		   user_channels,
-		   (unsigned long) user_channels * sizeof(dlink_node),
-		   aways_counted, (int) away_memory);
+	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+			   "z :User channels %u(%lu) Aways %u(%d)",
+			   user_channels,
+			   (unsigned long) user_channels * sizeof(dlink_node),
+			   aways_counted, (int) away_memory);
 
-	sendto_one(source_p, ":%s %d %s z :Attached confs %u(%lu)",
-		   me.name, RPL_STATSDEBUG, source_p->name,
-		   local_client_conf_count,
-		   (unsigned long) local_client_conf_count * sizeof(dlink_node));
+	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+			   "z :Attached confs %u(%lu)",
+			   local_client_conf_count,
+			   (unsigned long) local_client_conf_count * sizeof(dlink_node));
 
-	sendto_one(source_p, ":%s %d %s z :Conflines %u(%d)",
-		   me.name, RPL_STATSDEBUG, source_p->name, conf_count, (int) conf_memory);
+	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+			   "z :Conflines %u(%d)", conf_count, (int) conf_memory);
 
-	sendto_one(source_p, ":%s %d %s z :Classes %u(%lu)",
-		   me.name, RPL_STATSDEBUG, source_p->name,
-		   class_count, (unsigned long) class_count * sizeof(struct Class));
+	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+			   "z :Classes %u(%lu)",
+			   class_count, 
+			   (unsigned long) class_count * sizeof(struct Class));
 
-	sendto_one(source_p, ":%s %d %s z :Channels %u(%d)",
-		   me.name, RPL_STATSDEBUG, source_p->name, channel_count, (int) channel_memory);
+	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+			   "z :Channels %u(%d)",
+			   channel_count, (int) channel_memory);
 
-	sendto_one(source_p, ":%s %d %s z :Bans %u(%d)",
-		   me.name, RPL_STATSDEBUG, source_p->name, channel_bans, (int) channel_ban_memory);
+	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+			   "z :Bans %u(%d)",
+			   channel_bans, (int) channel_ban_memory);
 
-	sendto_one(source_p, ":%s %d %s z :Exceptions %u(%d)",
-		   me.name, RPL_STATSDEBUG, source_p->name,
-		   channel_except, (int) channel_except_memory);
+	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+			   "z :Exceptions %u(%d)",
+			   channel_except, (int) channel_except_memory);
 
-	sendto_one(source_p, ":%s %d %s z :Invex %u(%d)",
-		   me.name, RPL_STATSDEBUG, source_p->name,
-		   channel_invex, (int) channel_invex_memory);
+	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+			   "z :Invex %u(%d)",
+			   channel_invex, (int) channel_invex_memory);
 
-	sendto_one(source_p,
-		   ":%s %d %s z :Channel members %u(%lu) invite %u(%lu)",
-		   me.name, RPL_STATSDEBUG, source_p->name, channel_users,
-		   (unsigned long) channel_users * sizeof(dlink_node),
-		   channel_invites, (unsigned long) channel_invites * sizeof(dlink_node));
+	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+			   "z :Channel members %u(%lu) invite %u(%lu)",
+			   channel_users,
+			   (unsigned long) channel_users * sizeof(dlink_node),
+			   channel_invites, 
+			   (unsigned long) channel_invites * sizeof(dlink_node));
 
 	total_channel_memory = channel_memory +
 		channel_ban_memory +
 		channel_users * sizeof(dlink_node) + channel_invites * sizeof(dlink_node);
 
-	sendto_one(source_p, ":%s %d %s z :Whowas users %ld(%ld)",
-		   me.name, RPL_STATSDEBUG, source_p->name,
-		   (long)wwu, (long) (wwu * sizeof(struct User)));
+	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+			   "z :Whowas users %ld(%ld)",
+			   (long)wwu, (long) (wwu * sizeof(struct User)));
 
-	sendto_one(source_p, ":%s %d %s z :Whowas array %u(%d)",
-		   me.name, RPL_STATSDEBUG, source_p->name, NICKNAMEHISTORYLENGTH, (int) wwm);
+	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+			   "z :Whowas array %u(%d)",
+			   NICKNAMEHISTORYLENGTH, (int) wwm);
 
 	totww = wwu * sizeof(struct User) + wwm;
 
-	sendto_one(source_p, ":%s %d %s z :Hash: client %u(%ld) chan %u(%ld)",
-		   me.name, RPL_STATSDEBUG, source_p->name,
-		   U_MAX, (long)(U_MAX * sizeof(dlink_list)), 
-		   CH_MAX, (long)(CH_MAX * sizeof(dlink_list)));
+	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+			   "z :Hash: client %u(%ld) chan %u(%ld)",
+			   U_MAX, (long)(U_MAX * sizeof(dlink_list)), 
+			   CH_MAX, (long)(CH_MAX * sizeof(dlink_list)));
 
-	sendto_one(source_p, ":%s %d %s z :linebuf %ld(%ld)",
-		   me.name, RPL_STATSDEBUG, source_p->name,
-		   (long)linebuf_count, (long)linebuf_memory_used);
+	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+			   "z :linebuf %ld(%ld)",
+			   (long)linebuf_count, (long)linebuf_memory_used);
 
 	count_scache(&number_servers_cached, &mem_servers_cached);
 
-	sendto_one(source_p, ":%s %d %s z :scache %ld(%ld)",
-		   me.name, RPL_STATSDEBUG, source_p->name,
-		   (long)number_servers_cached, (long)mem_servers_cached);
+	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+			   "z :scache %ld(%ld)",
+			   (long)number_servers_cached, (long)mem_servers_cached);
 
-	sendto_one(source_p, ":%s %d %s z :rejected from cache %lu",
-		   me.name, RPL_STATSDEBUG, source_p->name, reject_count);
-
-	sendto_one(source_p, ":%s %d %s z :hostname hash %d(%ld)",
-		   me.name, RPL_STATSDEBUG, source_p->name,
-		   HOST_MAX, (long)HOST_MAX * sizeof(dlink_list));
+	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+			   "z :hostname hash %d(%ld)",
+			   HOST_MAX, (long)HOST_MAX * sizeof(dlink_list));
 
 	total_memory = totww + total_channel_memory + conf_memory +
 		class_count * sizeof(struct Class);
 
 	total_memory += mem_servers_cached;
-	sendto_one(source_p,
-		   ":%s %d %s z :Total: whowas %d channel %d conf %d", me.name,
-		   RPL_STATSDEBUG, source_p->name, (int) totww,
-		   (int) total_channel_memory, (int) conf_memory);
+	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+			   "z :Total: whowas %d channel %d conf %d", 
+			   (int) totww, (int) total_channel_memory, 
+			   (int) conf_memory);
 
 	count_local_client_memory(&local_client_count, &local_client_memory_used);
 	total_memory += local_client_memory_used;
-	sendto_one(source_p, ":%s %d %s z :Local client Memory in use: %ld(%ld)",
-		   me.name, RPL_STATSDEBUG, source_p->name,
-		   (long)local_client_count, (long)local_client_memory_used);
+
+	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+			   "z :Local client Memory in use: %ld(%ld)",
+			   (long)local_client_count, (long)local_client_memory_used);
 
 
 	count_remote_client_memory(&remote_client_count, &remote_client_memory_used);
 	total_memory += remote_client_memory_used;
-	sendto_one(source_p,
-		   ":%s %d %s z :Remote client Memory in use: %ld(%ld)", me.name,
-		   RPL_STATSDEBUG, source_p->name, (long)remote_client_count,
-		   (long)remote_client_memory_used);
 
-	sendto_one(source_p,
-		   ":%s %d %s z :TOTAL: %d Available:  Current max RSS: %lu",
-		   me.name, RPL_STATSDEBUG, source_p->name, (int) total_memory, get_maxrss());
+	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+			   "z :Remote client Memory in use: %ld(%ld)",
+			   (long)remote_client_count,
+			   (long)remote_client_memory_used);
+
+	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+			   "z :TOTAL: %d Available:  Current max RSS: %lu",
+			   (int) total_memory, get_maxrss());
 }

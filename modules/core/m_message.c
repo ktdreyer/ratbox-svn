@@ -531,16 +531,18 @@ msg_client(int p_or_n, const char *command,
 				/* check for accept, flag recipient incoming message */
 				if(p_or_n != NOTICE)
 				{
-					sendto_one(source_p, form_str(ERR_TARGUMODEG),
-						   me.name, source_p->name, target_p->name);
+					sendto_one_numeric(source_p, ERR_TARGUMODEG,
+							   form_str(ERR_TARGUMODEG),
+							   target_p->name);
 				}
 
 				if((target_p->localClient->last_caller_id_time +
 				    ConfigFileEntry.caller_id_wait) < CurrentTime)
 				{
 					if(p_or_n != NOTICE)
-						sendto_one(source_p, form_str(RPL_TARGNOTIFY),
-							   me.name, source_p->name, target_p->name);
+						sendto_one_numeric(source_p, RPL_TARGNOTIFY,
+								   form_str(RPL_TARGNOTIFY),
+								   target_p->name);
 
 					sendto_one(target_p, form_str(RPL_UMODEGMSG),
 						   me.name, target_p->name, source_p->name,
@@ -560,13 +562,13 @@ msg_client(int p_or_n, const char *command,
 			 * (to avoid flood warnings), lastly if theyre our client
 			 * and flooding    -- fl */
 			if(!MyClient(source_p) || IsOper(source_p) ||
-			   (MyClient(source_p) && !flood_attack_client(p_or_n, source_p, target_p)))
+			   !flood_attack_client(p_or_n, source_p, target_p))
 				sendto_anywhere(target_p, source_p, command,
 						":%s", text);
 		}
 	}
 	else if(!MyClient(source_p) || IsOper(source_p) ||
-		   (MyClient(source_p) && !flood_attack_client(p_or_n, source_p, target_p)))
+		!flood_attack_client(p_or_n, source_p, target_p))
 		sendto_anywhere(target_p, source_p, command, ":%s", text);
 
 	return;
@@ -738,7 +740,9 @@ handle_special(int p_or_n, const char *command, struct Client *client_p,
 		/* somewhere else.. */
 		if(!IsMe(target_p))
 		{
-			sendto_one(target_p, ":%s %s %s :%s", source_p->name, command, nick, text);
+			sendto_one(target_p, ":%s %s %s :%s", 
+				   get_id(source_p, target_p), 
+				   command, nick, text);
 			return;
 		}
 
@@ -774,7 +778,8 @@ handle_special(int p_or_n, const char *command, struct Client *client_p,
 						":%s", text);
 			else
 				sendto_one(source_p, form_str(ERR_TOOMANYTARGETS),
-					   me.name, source_p->name, nick);
+					   get_id(&me, source_p),
+					   get_id(source_p, source_p), nick);
 		}
 	}
 

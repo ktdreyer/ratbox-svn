@@ -224,23 +224,16 @@ static struct LinkReport
 	int rpl_stats;
 	int conf_char;
 }
+/* *INDENT-OFF* */
 report_array[] =
 {
-	{
-	CONF_SERVER, RPL_STATSCLINE, 'C'}
-	,
-	{
-	CONF_LEAF, RPL_STATSLLINE, 'L'}
-	,
-	{
-	CONF_OPERATOR, RPL_STATSOLINE, 'O'}
-	,
-	{
-	CONF_HUB, RPL_STATSHLINE, 'H'}
-	,
-	{
-	0, 0, '\0'}
+	{ CONF_SERVER,	 RPL_STATSCLINE, 'C'},
+	{ CONF_LEAF,	 RPL_STATSLLINE, 'L'},
+	{ CONF_OPERATOR, RPL_STATSOLINE, 'O'},
+	{ CONF_HUB,	 RPL_STATSHLINE, 'H'},
+	{ 0, 0, '\0'}
 };
+/* *INDENT-ON* */
 
 /*
  * report_configured_links
@@ -277,12 +270,10 @@ report_configured_links(struct Client *source_p, int mask)
 
 			if(mask & CONF_SERVER)
 			{
-				char c;
-				char buf[20];
+				static char buf[5];
 				char *s = buf;
 
 				buf[0] = '\0';
-				c = p->conf_char;
 
 				if(IsOper(source_p))
 				{
@@ -301,45 +292,28 @@ report_configured_links(struct Client *source_p, int mask)
 
 				/* Allow admins to see actual ips */
 				/* except if HIDE_SERVERS_IPS is defined */
+				sendto_one_numeric(source_p, p->rpl_stats,
+						   form_str(p->rpl_stats),
 #ifndef HIDE_SERVERS_IPS
-				if(IsOperAdmin(source_p))
-					sendto_one(source_p,
-						   form_str(p->rpl_stats),
-						   me.name, source_p->name,
-						   c, host, buf, name, port,
-						   classname,
-						   oper_flags_as_string((int) tmp->hold));
-				else
+						   IsOperAdmin(source_p) ? host :
 #endif
-					sendto_one(source_p,
-						   form_str(p->rpl_stats),
-						   me.name, source_p->name,
-						   c, "*@127.0.0.1", buf, name, port, classname);
+						   "*@127.0.0.1", buf, name, port,
+						   classname);
 
 			}
+			/* Don't allow non opers to see oper privs */
 			else if(mask & (CONF_OPERATOR))
-			{
-				/* Don't allow non opers to see oper privs */
-				if(IsOper(source_p))
-					sendto_one(source_p,
+				sendto_one_numeric(source_p, p->rpl_stats,
 						   form_str(p->rpl_stats),
-						   me.name, source_p->name,
-						   p->conf_char, user, host,
-						   name,
-						   oper_privs_as_string
-						   (NULL, port), classname,
-						   oper_flags_as_string((int) tmp->hold));
-				else
-					sendto_one(source_p,
-						   form_str(p->rpl_stats),
-						   me.name, source_p->name,
-						   p->conf_char, user, host,
-						   name, "0", classname, "");
-			}
+						   user, host, name,
+						   IsOper(source_p) ? 
+						    oper_privs_as_string(NULL, port) : "0", 
+						    classname);
 			else
-				sendto_one(source_p, form_str(p->rpl_stats),
-					   me.name, source_p->name,
-					   p->conf_char, host, name, port, classname);
+				sendto_one_numeric(source_p, p->rpl_stats,
+						   form_str(p->rpl_stats),
+						   p->conf_char, host, 
+						   name, port, classname);
 		}
 	}
 }
@@ -2046,8 +2020,8 @@ write_confitem(KlineType type, struct Client *source_p, char *user,
 			     source_p->name, user, host, reason, oper_reason);
 		}
 
-		sendto_one(source_p, ":%s NOTICE %s :Added K-Line [%s@%s]",
-			   me.name, source_p->name, user, host);
+		sendto_one_notice(source_p, ":Added K-Line [%s@%s]",
+				  user, host);
 	}
 	else if(type == DLINE_TYPE)
 	{
@@ -2080,9 +2054,8 @@ write_confitem(KlineType type, struct Client *source_p, char *user,
 				     get_oper_name(source_p), host, reason);
 		ilog(L_TRACE, "%s added RESV for [%s] [%s]", source_p->name, host, reason);
 
-		sendto_one(source_p,
-			   ":%s NOTICE %s :Added RESV for [%s] [%s]",
-			   me.name, source_p->name, host, reason);
+		sendto_one_notice(source_p, ":Added RESV for [%s] [%s]",
+				  host, reason);
 	}
 }
 

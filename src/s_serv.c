@@ -1321,7 +1321,7 @@ server_estab(struct Client *client_p)
 		sendto_one(client_p, ":%s EOB", get_id(&me, client_p));
 
 	/* Always send a PING after connect burst is done */
-	sendto_one(client_p, "PING :%s", me.name);
+	sendto_one(client_p, "PING :%s", get_id(&me, client_p));
 
 	return 0;
 }
@@ -1778,10 +1778,8 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
 				     "Server %s already present from %s",
 				     aconf->name, get_client_name(client_p, MASK_IP));
 		if(by && IsPerson(by) && !MyClient(by))
-			sendto_one(by,
-				   ":%s NOTICE %s :Server %s already present from %s",
-				   me.name, by->name, aconf->name,
-				   get_client_name(client_p, MASK_IP));
+			sendto_one_notice(by, ":Server %s already present from %s",
+					  aconf->name, get_client_name(client_p, MASK_IP));
 		return 0;
 	}
 
@@ -1845,9 +1843,8 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
 				     "Host %s is not enabled for connecting:no C/N-line",
 				     aconf->name);
 		if(by && IsPerson(by) && !MyClient(by))
-			sendto_one(by,
-				   ":%s NOTICE %s :Connect to host %s failed.",
-				   me.name, by->name, client_p->name);
+			sendto_one_notice(by, ":Connect to host %s failed.",
+					  client_p->name);
 		detach_conf(client_p);
 		free_client(client_p);
 		return 0;
