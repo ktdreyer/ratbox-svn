@@ -1,3 +1,12 @@
+*** 20001204_11 by db
+- class.c get_client_class returns a string class name now
+  It was trying to use a struct ConfItem as a class pointer. oops.
+  As conf's now have a pointer to the class name anyway, its easier
+  to pull it from the conf anyway. If its NULL, return 'default'
+  string for now.
+
+
+
 *** 20001204_10 by db
 - lost a 433 (nickname in use error) somewhere in the way,
   put it back in.. m_nick.c
