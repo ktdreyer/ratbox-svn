@@ -218,18 +218,13 @@ static void     query_name(const char* name,
                            int query_class, 
                            int query_type, 
                            struct ResRequest* request);
-static int      send_res_msg(const char* buf, int len, int count);
 static void     resend_query(struct ResRequest* request);
-static int      proc_answer(struct ResRequest* request, HEADER* header, 
-                                    char*, char *);
 static struct CacheEntry*  make_cache(struct ResRequest* request);
 static struct CacheEntry*  find_cache_name(const char* name);
 static struct CacheEntry*  find_cache_number(struct ResRequest* request, 
                                              const char* addr);
 static struct ResRequest*   find_id(int);
-static int    hash_number(const unsigned char *);
 static void   update_list(struct ResRequest *, struct CacheEntry *);
-static int    hash_name(const char* name);
 
 static  struct cacheinfo {
   int  ca_adds;
@@ -358,7 +353,7 @@ void restart_resolver(void)
  * add_local_domain - Add the domain to hostname, if it is missing
  * (as suggested by eps@TOASTER.SFSU.EDU)
  */
-void add_local_domain(char* hname, int size)
+void add_local_domain(char* hname, size_t size)
 {
   assert(0 != hname);
   /* 
@@ -546,7 +541,7 @@ void delete_resolver_queries(const void* vptr)
  * isnt present. Returns number of messages successfully sent to 
  * nameservers or -1 if no successful sends.
  */
-static int send_res_msg(const char* msg, int len, int rcount)
+static int send_res_msg(const u_char* msg, int len, int rcount)
 {
   int i;
   int sent = 0;
@@ -744,10 +739,10 @@ static void resend_query(struct ResRequest* request)
  * build a hostent struct in the passed request
  */
 static int proc_answer(struct ResRequest* request, HEADER* header,
-                       char* buf, char* eob)
+                       u_char* buf, u_char* eob)
 {
   char   hostbuf[HOSTLEN + 1]; /* working buffer */
-  char*  current;              /* current position in buf */
+  u_char* current;             /* current position in buf */
   char** alias;                /* alias list */
   char** addr;                 /* address list */
   char*  name;                 /* pointer to name string */
@@ -828,10 +823,10 @@ static int proc_answer(struct ResRequest* request, HEADER* header,
   /*
    * skip past queries
    */ 
-  for (; header->qdcount > 0; --header->qdcount) {
+  while (header->qdcount-- > 0) {
     if ((n = dn_skipname(current, eob)) < 0)
       break;
-    current += (size_t) n + QFIXEDSZ;
+    current += (n + QFIXEDSZ);
   }
   /*
    * process each answer sent to us blech.
@@ -969,18 +964,21 @@ static int proc_answer(struct ResRequest* request, HEADER* header,
  */
 void get_res(void)
 {
-  char               buf[sizeof(HEADER) + MAXPACKET];
+  u_char             buf[sizeof(HEADER) + MAXPACKET];
   HEADER*            header       = 0;
   struct ResRequest* request      = 0;
   struct CacheEntry* cp           = 0;
   int                rc           = 0;
   int                answer_count = 0;
-  int                len = sizeof(struct sockaddr_in);
+  size_t             len = sizeof(struct sockaddr_in);
   struct sockaddr_in sin;
 
   rc = recvfrom(ResolverFileDescriptor, buf, sizeof(buf), 0, 
                 (struct sockaddr*) &sin, &len);
-  if (rc <= sizeof(HEADER))
+  /*
+   * cast to int needed, sizeof returns size_t
+   */
+  if (rc <= (int) sizeof(HEADER))
     return;
   /*
    * convert DNS reply reader from Network byte order to CPU byte order.
@@ -1284,11 +1282,14 @@ static int hash_number(const unsigned char* ip)
 {
   /* could use loop but slower */
   unsigned int hashv;
-  assert(0 != ip);
-  hashv = *ip++;
-  hashv += hashv + *ip++;
-  hashv += hashv + *ip++;
-  hashv += hashv + *ip;
+  const u_char* p = (const u_char*) ip;
+
+  assert(0 != p);
+
+  hashv = *p++;
+  hashv += hashv + *p++;
+  hashv += hashv + *p++;
+  hashv += hashv + *p;
   hashv %= ARES_CACSIZE;
   return hashv;
 }
@@ -1299,10 +1300,12 @@ static int hash_number(const unsigned char* ip)
 static int hash_name(const char* name)
 {
   unsigned int hashv = 0;
+  const u_char* p = (const u_char*) name;
 
-  assert(0 != name);
-  for (; *name && *name != '.'; name++)
-    hashv += *name;
+  assert(0 != p);
+
+  for (; *p && *p != '.'; ++p)
+    hashv += *p;
   hashv %= ARES_CACSIZE;
   return hashv;
 }
@@ -1472,7 +1475,7 @@ static struct CacheEntry* find_cache_number(struct ResRequest* request, const ch
   int     i;
 
   assert(0 != addr);
-  hashv = hash_number((unsigned char*) addr);
+  hashv = hash_number(addr);
   cp = hashtable[hashv].num_list;
 
   for (; cp; cp = cp->hnum_next) {
