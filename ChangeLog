@@ -1,3 +1,15 @@
+androsyn    2002/12/10 20:43:01 UTC	(20021210_22)
+
+  Modified files:
+    src                  packet.c 
+  Log:
+  Add another MyConnect() check
+  
+  Revision  Changes    Path
+  7.108     +4 -3      ircd-ratbox/src/packet.c
+
+
+
 leeh        2002/12/10 20:00:17 UTC	(20021210_21)
 
   Modified files:
