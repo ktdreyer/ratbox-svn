@@ -97,9 +97,6 @@ static void part_one_client(struct Client *client_p, struct Client *source_p, ch
 static void channel_member_names(struct Channel *chptr, struct Client *client_p, int show_eon);
 static void names_global(struct Client *source_p);
 
-static char modebuf[MODEBUFLEN];
-static char parabuf[MODEBUFLEN];
-
 /*
  * m_join
  *      parv[0] = sender prefix
@@ -524,6 +521,7 @@ ms_join(struct Client *client_p, struct Client *source_p, int parc, const char *
 static int
 ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
+	static char modebuf[MODEBUFLEN];
 	static char buf_nick[BUFSIZE];
 	static char buf_uid[BUFSIZE];
 	static const char *para[MAXMODEPARAMS];
@@ -561,7 +559,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 	if(*parv[2] == '&')
 		return 0;
 
-	modebuf[0] = parabuf[0] = mode.key[0] = '\0';
+	modebuf[0] = mode.key[0] = '\0';
 	mode.mode = mode.limit = 0;
 
 	newts = atol(parv[1]);
@@ -682,7 +680,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	chptr->mode = mode;
 
-	*modebuf = *parabuf = '\0';
+	*modebuf = '\0';
 
 	mlen = ircsprintf(buf_nick, ":%s SJOIN %ld %s %s :",
 			  source_p->name, (long) chptr->channelts,
