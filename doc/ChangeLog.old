@@ -1,3 +1,16 @@
+*** 20010105_11 by db
+- fixed m_jupe.c so it will work without coring.
+
+- fixed a possible nasty core in client.c, its possible a client
+  will be on the unknown_list and be exited there, without being
+  on a linklist... it will promptly core the server. oops.
+  since it has no prev next pointers.
+
+- patched m_hash.c so it will compile. its not very useful ATM
+
+
+
+
 *** 20010105_10 by a1kmm
 Separate C/N structures no longer exist, only one with status CONF_SERVER.
 
