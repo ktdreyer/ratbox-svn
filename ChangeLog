@@ -1,3 +1,20 @@
+leeh        2004/07/27 23:00:30 EDT	(20040728_3)
+
+  Modified files:
+    include              s_gline.h 
+    modules              m_gline.c 
+    src                  s_gline.c 
+  Log:
+  - expanded add_gline() out into m_gline.c
+  - moved find_is_glined() s_gline.c -> find_existing_gline() m_gline.c
+  
+  Revision  Changes    Path
+  7.18      +0 -3      ircd-ratbox/include/s_gline.h
+  1.142     +22 -3     ircd-ratbox/modules/m_gline.c
+  1.42      +1 -40     ircd-ratbox/src/s_gline.c
+
+
+
 leeh        2004/07/27 22:42:28 EDT	(20040728_2)
 
   Modified files:
