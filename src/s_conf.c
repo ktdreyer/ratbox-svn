@@ -566,12 +566,14 @@ verify_access(struct Client* client_p, const char* username)
 	  /* Thanks for spoof idea amm */
 	  if (IsConfDoSpoofIp(aconf))
 	    {
+#ifndef HIDE_SPOOF_IPS
 	      if (IsConfSpoofNotice(aconf))
 		{
 		  sendto_realops_flags(FLAGS_ALL, L_ADMIN,
 				       "%s spoofing: %s as %s", client_p->name,
 				       client_p->host, aconf->name);
 		}
+#endif
 	      strlcpy(client_p->host, aconf->name, HOSTLEN);
 	      SetIPSpoof(client_p);
 	    }

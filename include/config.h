@@ -184,8 +184,8 @@
 
 /* HIDE_SPOOF_IPS
  *
- * If this is undefined, admins will be allowed to see a spoofed users IP
- * in /trace etc.  If this is defined, they will be shown a masked IP.
+ * If this is undefined, opers will be allowed to see the real IP of spoofed
+ * users in /trace etc.  If this is defined they will be shown a masked IP.
  */
 #undef HIDE_SPOOF_IPS
 
