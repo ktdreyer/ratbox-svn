@@ -142,14 +142,17 @@ add_user_to_channel(struct Channel *chptr, struct Client *who, int flags)
      }
   }
 
-  for(x = 0; add_loclist[x].list != NULL; x++)
+  if(MyClient(who))
   {
-     if(add_loclist[x].mode == flags)
-     {
+    for(x = 0; add_loclist[x].list != NULL; x++)
+    {
+      if(add_loclist[x].mode == flags)
+      {
         dlinkAddAlloc(who, add_loclist[x].list);
         ok++;
         break; 
-     }
+      }
+    }
   }
 
   if(flags & MODE_DEOPPED)
@@ -212,14 +215,12 @@ remove_user_from_channel(struct Channel *chptr, struct Client *who)
     for(x = 0; loclists[x] != NULL; x++)
     {
        dlinkFindDestroy(loclists[x], who);
-       break;
     }
   }
 
   for(x = 0; lists[x] != NULL; x++)
   {
      dlinkFindDestroy(lists[x], who);
-     break;
   }
 
   dlinkFindDestroy(&chptr->deopped, who);
