@@ -1,3 +1,7 @@
+*** 20010519_5 by davidt
+Remove duplicate 'modules' entry in SUBDIRS=
+
+
 *** 20010519_4 by a1kmm
 *sigh* yet another commit, we do check in sendnick_TS after all. Hopefully
 the last commit for this bug...
