@@ -1,3 +1,25 @@
+leeh        2004/03/15 10:27:45 EST	(20040315_0)
+
+  Modified files:
+    include              ircd_defs.h supported.h 
+    modules              m_away.c 
+    modules/core         m_kick.c m_part.c m_quit.c 
+    src                  client.c 
+  Log:
+  - moved length of away from TOPICLEN to AWAYLEN (90)
+  - moved length of kick/part/quit away from TOPICLEN to REASONLEN (120)
+  
+  Revision  Changes    Path
+  7.49      +3 -0      ircd-ratbox/include/ircd_defs.h
+  1.36      +1 -1      ircd-ratbox/include/supported.h
+  1.76      +3 -3      ircd-ratbox/modules/core/m_kick.c
+  1.90      +2 -2      ircd-ratbox/modules/core/m_part.c
+  1.45      +6 -6      ircd-ratbox/modules/core/m_quit.c
+  1.55      +3 -3      ircd-ratbox/modules/m_away.c
+  7.439     +1 -1      ircd-ratbox/src/client.c
+
+
+
 leeh        2004/03/12 12:03:55 EST	(20040312_3)
 
   Modified files:
