@@ -1178,7 +1178,8 @@ int server_estab(struct Client *client_p)
       fd_note(client_p->localClient->ctrlfd_r, "slink ctrl  (in): %s",
               client_p->name);
 #endif
-    }
+    } else
+        fd_note(client_p->fd, "Server: %s", client_p->name);
   /*
   ** Old sendto_serv_but_one() call removed because we now
   ** need to send different names to different servers
