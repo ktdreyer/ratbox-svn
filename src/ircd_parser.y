@@ -94,6 +94,7 @@ int   class_redirport_var;
 %token  EMAIL
 %token  ENCRYPTED
 %token  EXCEED_LIMIT
+%token	FAKENAME
 %token  FNAME_USERLOG
 %token  FNAME_OPERLOG
 %token  FNAME_FOPERLOG
@@ -1068,9 +1069,10 @@ connect_items:  connect_items connect_item |
                 connect_item
 
 connect_item:   connect_name | connect_host | connect_send_password |
-                connect_accept_password | connect_port | connect_aftype |
-                connect_lazylink | connect_hub_mask | connect_leaf_mask |
-                connect_class | connect_auto | connect_encrypted |
+                connect_accept_password | connect_port | connect_aftype | 
+ 		connect_fakename | connect_lazylink | connect_hub_mask | 
+		connect_leaf_mask | connect_class | connect_auto | 
+		connect_encrypted |
                 error
 
 connect_name:   NAME '=' QSTRING ';'
@@ -1117,6 +1119,12 @@ connect_aftype: 	AFTYPE '=' T_IPV4 ';'
     yy_aconf->aftype = AF_INET6;
 #endif
   };
+
+connect_fakename: FAKENAME '=' QSTRING ';'
+ {
+    MyFree(yy_aconf->fakename);
+    DupString(yy_aconf->fakename, yylval.string);
+ };
 
 connect_lazylink:       LAZYLINK '=' TYES ';'
   {
@@ -1193,6 +1201,7 @@ connect_class:  CLASS '=' QSTRING ';'
     MyFree(yy_aconf->className);
     DupString(yy_aconf->className, yylval.string);
   };
+
 
 /***************************************************************************
  *  section kill

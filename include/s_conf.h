@@ -66,6 +66,7 @@ struct ConfItem
   char*            spasswd;  /* Password to send. */
   char*            user;     /* user part of user@host */
   int              port;
+  char*		   fakename;   /* Mask name */
   time_t           hold;     /* Hold action until this time (calendar time) */
   char*		   className;   /* Name of class */
   struct Class*    c_class;     /* Class of connection */
