@@ -299,10 +299,11 @@ find_listener(struct sockaddr_storage *addr)
 				break;
 				
 			}
+#endif
+
 			default:
 				break;
 		}
-#endif
 	}
 	return last_closed;
 }

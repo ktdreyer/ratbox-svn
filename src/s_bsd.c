@@ -904,10 +904,10 @@ comm_accept(int fd, struct sockaddr_storage *pn)
  * If a sockaddr_storage is AF_INET6 but is a mapped IPv4
  * socket manged the sockaddr.
  */
+#ifndef mangle_mapped_sockaddr
 void
 mangle_mapped_sockaddr(struct sockaddr_storage *in)
 {
-#ifdef IPV6
 	struct sockaddr_in6 *in6 = (struct sockaddr_in6 *)in;								
 
 	if(in->ss_family == AF_INET)
@@ -922,7 +922,6 @@ mangle_mapped_sockaddr(struct sockaddr_storage *in)
 		in4.sin_addr.s_addr = ((uint32_t *)&in6->sin6_addr)[3];
 		memcpy(in, &in4, sizeof(struct sockaddr_in)); 		
 	}	
-#endif
 	return;
 }
-
+#endif

@@ -85,6 +85,7 @@
 #include <sys/param.h>
 #endif
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <arpa/inet.h>
 
 #ifdef HAVE_ERRNO_H

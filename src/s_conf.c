@@ -1000,9 +1000,10 @@ set_default_conf(void)
 
 	memset(&ServerInfo.ip, 0, sizeof(ServerInfo.ip));
 	ServerInfo.specific_ipv4_vhost = 0;
+#ifdef IPV6
 	memset(&ServerInfo.ip6, 0, sizeof(ServerInfo.ip6));
 	ServerInfo.specific_ipv6_vhost = 0;
-
+#endif
 	ServerInfo.max_clients = MAX_CLIENTS;	/* XXX - these don't seem to */
 	ServerInfo.max_buffer = MAX_BUFFER;	/*       actually do anything! */
 	/* Don't reset hub, as that will break lazylinks */

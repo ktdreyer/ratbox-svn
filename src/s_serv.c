@@ -941,6 +941,7 @@ server_estab(struct Client *client_p)
 
 	if(IsUnknown(client_p) && !IsConfCryptLink(aconf))
 	{
+		int opt = 1;
 		/*
 		 * jdc -- 1.  Use EmptyString(), not [0] index reference.
 		 *        2.  Check aconf->spasswd, not aconf->passwd.
@@ -959,7 +960,6 @@ server_estab(struct Client *client_p)
 				  | ((aconf->flags & CONF_FLAGS_COMPRESSED) ?
 				     CAP_ZIP_SUPPORTED : 0), 0);
 
-		opt = 1;
 		/* Turn on Nagle so we shove this packet out immediately otherwise we'll confuse the 
 		 * remote with compressed and uncompressed data arriving all at once
 		 */
