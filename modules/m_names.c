@@ -190,23 +190,12 @@ static void names_all_visible_channels(struct Client *source_p)
 	  channel_member_list(source_p,
                               chptr,
 			      &chptr->chanops,
-			      show_ops_flag,
-			      buf, mlen, &cur_len, &reply_to_send);
-
-	  channel_member_list(source_p,
-                              chptr,
 			      &chptr->voiced,
-			      show_voiced_flag,
-			      buf, mlen, &cur_len, &reply_to_send);
-
-	  channel_member_list(source_p,
-                              chptr,
 			      &chptr->halfops,
+			      &chptr->peons,
+			      show_ops_flag,
 			      show_voiced_flag,
-			      buf, mlen, &cur_len, &reply_to_send);
-
-	  channel_member_list(source_p, chptr, &chptr->peons,
-			      "",
+			      show_halfop_flag,
 			      buf, mlen, &cur_len, &reply_to_send);
 
 	  if (reply_to_send)

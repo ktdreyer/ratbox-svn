@@ -65,14 +65,16 @@ static void send_members(struct Client *client_p,
 			 dlink_list *list,
 			 char *op_flag );
 
-void channel_member_list(struct Client *source_p,
-                         struct Channel *chptr,
-			 dlink_list *list,
-			 char *show_flag,
-			 char *buf,
-			 int mlen,
-			 int *cur_len,
-			 int *reply_to_send);
+
+static void channel_member(struct Client *source_p,
+			   struct Client *who,
+			   struct Channel *chptr,
+			   int is_member,
+			   char *show_flag,
+			   char *lbuf,
+			   int mlen,
+			   int *cur_len,
+			   int *reply_to_send);
 
 static void delete_members(struct Channel *chptr, dlink_list *list);
 
@@ -2820,18 +2822,13 @@ void channel_member_names( struct Client *source_p,
         }
 
       channel_member_list(source_p, chptr,
-                          &chptr->chanops, show_ops_flag,  
-                          lbuf, mlen, &cur_len, &reply_to_send);
-
-      channel_member_list(source_p, chptr,
-                          &chptr->voiced, show_voiced_flag,
-                          lbuf, mlen, &cur_len, &reply_to_send);
-
-      channel_member_list(source_p, chptr,
-                          &chptr->halfops, show_halfops_flag,
-                          lbuf, mlen, &cur_len, &reply_to_send);
-
-      channel_member_list(source_p, chptr, &chptr->peons, "",
+                          &chptr->chanops,
+			  &chptr->voiced,
+			  &chptr->halfops,
+			  &chptr->peons,
+			  show_ops_flag,  
+			  show_voiced_flag,
+			  show_halfops_flag,
                           lbuf, mlen, &cur_len, &reply_to_send);
 
       if(reply_to_send)
@@ -2847,8 +2844,13 @@ void channel_member_names( struct Client *source_p,
  *
  * inputs	- pointer to client struct requesting names
  *              - pointer to channel
- *		- pointer to list on channel
- *		- pointer to show flag, i.e. what to show '@' etc.
+ *		- pointer to list of ops on channel
+ *		- pointer to list of voiced on channel
+ *		- pointer to list of halfops on channel
+ *		- pointer to list of peons on channel
+ *		- pointer to show flag for chanops, i.e. what to show '@' etc.
+ *		- pointer to show flag for voiced, i.e. what to show 'v' etc.
+ *		- pointer to show flag for halfops, i.e. what to show '+' etc.
  *		- buffer to use
  *		- minimum length
  *		- pointer to current length
@@ -2859,44 +2861,135 @@ void channel_member_names( struct Client *source_p,
 void
 channel_member_list(struct Client *source_p,
                     struct Channel *chptr,
-			 dlink_list *list,
-			 char *show_flag,
-			 char *lbuf,
-			 int mlen,
-			 int *cur_len,
-			 int *reply_to_send)
+		    dlink_list *chanops_list,
+		    dlink_list *voiced_list,
+		    dlink_list *halfops_list,
+		    dlink_list *peons_list,
+		    char *show_chanops_flag,
+		    char *show_voiced_flag,
+		    char *show_halfops_flag,
+		    char *lbuf,
+		    int mlen,
+		    int *cur_len,
+		    int *reply_to_send)
 {
-  dlink_node *ptr;
+  dlink_node *chanops_ptr;
+  dlink_node *voiced_ptr;
+  dlink_node *halfops_ptr;
+  dlink_node *peons_ptr;
   struct Client *who;
-  char *t;
+  int done=0;		/* flag when done */
+  int is_member;
+
+
+
+  chanops_ptr = chanops_list->head;
+  voiced_ptr  = voiced_list->head;
+  halfops_ptr = halfops_list->head;
+  peons_ptr   = peons_list->head;
+
+  is_member = IsMember(source_p, chptr);
+
+  while(done != 4)
+    {
+      done = 0;
+
+      if(chanops_ptr != NULL)
+	{
+	  who = chanops_ptr->data;
+	  channel_member( source_p, who, chptr, is_member, show_chanops_flag, lbuf, mlen, cur_len, reply_to_send);
+	  chanops_ptr = chanops_ptr->next;
+	}
+      else
+	{
+	  done++;
+	}
+
+      if(voiced_ptr != NULL)
+	{
+	  who = voiced_ptr->data;
+	  channel_member( source_p, who, chptr, is_member, show_voiced_flag, lbuf, mlen, cur_len, reply_to_send);
+	  voiced_ptr = voiced_ptr->next;
+	}
+      else
+	{
+	  done++;
+	}
+
+      if(halfops_ptr != NULL)
+	{
+	  who = halfops_ptr->data;
+	  channel_member( source_p, who, chptr, is_member, show_halfops_flag, lbuf, mlen, cur_len, reply_to_send);
+	  halfops_ptr = halfops_ptr->next;
+	}
+      else
+	{
+	  done++;
+	}
+
+      if(peons_ptr != NULL)
+	{
+	  who = peons_ptr->data;
+	  channel_member( source_p, who, chptr, is_member, "", lbuf, mlen, cur_len, reply_to_send);
+	  peons_ptr = peons_ptr->next;
+	}
+      else
+	{
+	  done++;
+	}
+    }
+}
+
+/*
+ * channel_member
+ *
+ * inputs	- pointer to source to report to
+ *		- who to report
+ *		- is who a member of the channel or not?
+ *		- what flag to show '@' 'v' '+' ''
+ *		- buffer
+ *		- mlen
+ *		- current length
+ *		- whether to send 
+ * output	- NONE
+ * side effects	- NONE
+ */
+static void channel_member(struct Client *source_p,
+			   struct Client *who,
+			   struct Channel *chptr,
+			   int is_member,
+			   char *show_flag,
+			   char *lbuf,
+			   int mlen,
+			   int *cur_len,
+			   int *reply_to_send)
+{
   int tlen;
+  char *t;
+
+  if( who == NULL )return; /* EEK shouldn't happen */
+
+  if( IsInvisible(who) && !is_member)
+    return;
 
   t = lbuf + *cur_len;
+  tlen = strlen(t);
+  *cur_len += tlen;
+  t += tlen;
+  *reply_to_send = YES;
 
-  for (ptr = list->head; ptr; ptr = ptr->next)
+  if(who == source_p && is_voiced(chptr, who)
+     && chptr->mode.mode & MODE_HIDEOPS)
+    ircsprintf(t, "+%s ", who->name);
+  else
+    ircsprintf(t, "%s%s ", show_flag, who->name);
+
+  if ((*cur_len + NICKLEN) > (BUFSIZE - 3))
     {
-      who = ptr->data;
-
-      /* skip +invis peeps if requestee is not a member */
-      if (IsInvisible(who) && !IsMember(source_p, chptr))
-        continue;
-
-      if(who == source_p && is_voiced(chptr, who) && chptr->mode.mode & MODE_HIDEOPS)
-        ircsprintf(t, "+%s ", who->name);
-      else
-        ircsprintf(t, "%s%s ", show_flag, who->name);
-      tlen = strlen(t);
-      *cur_len += tlen;
-      t += tlen;
-      *reply_to_send = YES;
-
-      if ((*cur_len + NICKLEN) > (BUFSIZE - 3))
-	{
-	  sendto_one(source_p, "%s", lbuf);
-	  *reply_to_send = NO;
-	  *cur_len = mlen;
-	  t = lbuf + mlen;
-	}
+      sendto_one(source_p, "%s", lbuf);
+      *reply_to_send = NO;
+      *cur_len = mlen;
+      t = lbuf + mlen;
     }
 }
 
