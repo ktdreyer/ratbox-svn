@@ -54,8 +54,8 @@ static void ReplaceQuotes(char *out, char *in);
 static void oldParseOneLine(FILE *out, char *in);
 static void PrintOutServers(FILE *out);
 static void PairUpServers(struct ConnectPair* );
-static void AddHubOrLeaf(int type,char* name,char* host);
-static void OperPrivsFromString(FILE* , char* );
+static void AddHubOrLeaf(int type,const char* name,const char* host);
+static void OperPrivsFromString(FILE* , const char* );
 
 int main(int argc,char *argv[])
 {
@@ -255,11 +255,11 @@ static void oldParseOneLine(FILE *out,char* line)
 {
   char conf_letter;
   char* tmp;
-  char* user_field=(char *)NULL;
-  char* passwd_field=(char *)NULL;
-  char* host_field=(char *)NULL;
-  char* port_field=(char *)NULL;
-  char* class_field=(char *)NULL;
+  const char* user_field=(char *)NULL;
+  const char* passwd_field=(char *)NULL;
+  const char* host_field=(char *)NULL;
+  const char* port_field=(char *)NULL;
+  const char* class_field=(char *)NULL;
   struct ConnectPair* pair;
   int sendq = 0;
   int restricted;
@@ -648,7 +648,7 @@ static void PairUpServers(struct ConnectPair* pair)
  * Out		- none
  * Side Effects	- Pair up hub or leaf with connect configuration
  */
-static void AddHubOrLeaf(int type,char* name,char* host)
+static void AddHubOrLeaf(int type,const char* name,const char* host)
 {
   struct ConnectPair* p;
   struct ConnectPair* pair;
@@ -726,7 +726,7 @@ static char *getfield(char *newline)
  * side effects -
  */
 
-static void OperPrivsFromString(FILE* out, char *privs)
+static void OperPrivsFromString(FILE* out, const char *privs)
 {
   while(*privs)
     {

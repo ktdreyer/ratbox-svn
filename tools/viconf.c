@@ -26,13 +26,13 @@
 #include <sys/wait.h>
 #endif
 
-static int LockedFile(char *filename);
+static int LockedFile(const char *filename);
 static char lockpath[PATH_MAX + 1];
 
 
 int main(int argc, char *argv[])
 {
-  char *ed, *p, *filename = CPATH;
+  const char *ed, *p, *filename = CPATH;
 
   if( chdir(DPATH) < 0 )
     {
@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
 
 
 static int
-LockedFile(char *filename)
+LockedFile(const char *filename)
 
 {
 

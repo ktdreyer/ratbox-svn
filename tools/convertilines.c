@@ -254,11 +254,11 @@ static void oldParseOneLine(FILE *out,char* line)
 {
   char conf_letter;
   char* tmp;
-  char* host_field=(char *)NULL;
-  char* passwd_field=(char *)NULL;
-  char* user_field=(char *)NULL;
-  char* port_field = NULL;
-  char* classconf_field = NULL;
+  const char* host_field=(char *)NULL;
+  const char* passwd_field=(char *)NULL;
+  const char* user_field=(char *)NULL;
+  const char* port_field = NULL;
+  const char* classconf_field = NULL;
   int class_field = 0;
 
   tmp = getfield(line);
@@ -510,7 +510,7 @@ static int match(struct AuthBlock *ptr, struct AuthBlock *acptr)
        (ptr->gline_exempt == acptr->gline_exempt) &&
        (ptr->no_tilde == acptr->no_tilde))
     {
-	char *p1, *p2;
+	const char *p1, *p2;
 	
 	/* check the spoofs match.. */
 	if(ptr->spoof)

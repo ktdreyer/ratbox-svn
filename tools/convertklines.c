@@ -194,10 +194,10 @@ static void parse(FILE *outkline, FILE *outdline, char* line)
 {
   char conf_letter;
   char *tmp;
-  char *user_field = NULL;
-  char *passwd_field = NULL;
-  char *host_field = NULL;
-  char *operpasswd_field = NULL;
+  const char *user_field = NULL;
+  const char *passwd_field = NULL;
+  const char *host_field = NULL;
+  const char *operpasswd_field = NULL;
 
   tmp = getfield(line);
 
