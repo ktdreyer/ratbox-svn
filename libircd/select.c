@@ -47,7 +47,6 @@
 #include "s_serv.h"
 #include "s_stats.h"
 #include "send.h"
-#include "s_debug.h"
 #include "s_bsd.h"
 #include "memory.h"
 
@@ -132,9 +131,6 @@ comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
 	s_assert(fd >= 0);
 	s_assert(F->flags.open);
 
-#ifdef NOTYET
-	debug(5, 5) ("commSetSelect: FD %d type %d, %s\n", fd, type, handler ? "SET" : "CLEAR");
-#endif
 	if(type & COMM_SELECT_READ)
 	{
 		F->read_handler = handler;

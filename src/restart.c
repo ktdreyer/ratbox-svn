@@ -31,12 +31,9 @@
 #include "fdlist.h"
 #include "ircd.h"
 #include "send.h"
-#include "s_debug.h"
 #include "s_log.h"
 #include "client.h"		/* for FLAGS_ALL */
 #include "memory.h"
-
-
 
 /* external var */
 extern char **myargv;

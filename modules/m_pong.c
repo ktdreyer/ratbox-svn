@@ -35,7 +35,6 @@
 #include "send.h"
 #include "channel.h"
 #include "irc_string.h"
-#include "s_debug.h"
 #include "msg.h"
 #include "parse.h"
 #include "hash.h"
@@ -86,10 +85,6 @@ ms_pong(struct Client *client_p, struct Client *source_p, int parc, const char *
 		}
 	}
 
-#ifdef  DEBUGMODE
-	else
-		Debug((DEBUG_NOTICE, "PONG: %s %s", origin, destination ? destination : "*"));
-#endif
 	return 0;
 }
 

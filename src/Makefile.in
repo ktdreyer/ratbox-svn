@@ -98,7 +98,6 @@ BASE_SRCS =                     \
   s_bsd_epoll.c			\
   s_conf.c                      \
   s_newconf.c                   \
-  s_debug.c                     \
   s_gline.c                     \
   s_log.c                       \
   s_serv.c                      \

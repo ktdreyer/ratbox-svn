@@ -60,12 +60,6 @@ Info MyInformation[] = {
 	{"CPATH", "NONE", 0, "Path to Main Configuration File"},
 #endif /* CPATH */
 
-#ifdef DEBUGMODE
-	{"DEBUGMODE", "ON", 0, "Support for debugging mode"},
-#else
-	{"DEBUGMODE", "OFF", 0, "Support for debugging mode"},
-#endif /* DEBUGMODE */
-
 #ifdef DPATH
 	{"DPATH", DPATH, 0, "Directory Containing Configuration Files"},
 #else

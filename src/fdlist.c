@@ -93,15 +93,9 @@ fd_open(int fd, unsigned int type, const char *desc)
 
 	if(F->flags.open)
 	{
-#ifdef NOTYET
-		debug(51, 1) ("WARNING: Closing open FD %4d\n", fd);
-#endif
 		fd_close(fd);
 	}
 	s_assert(!F->flags.open);
-#ifdef NOTYET
-	debug(51, 3) ("fd_open FD %d %s\n", fd, desc);
-#endif
 	F->fd = fd;
 	F->type = type;
 	F->flags.open = 1;
@@ -133,9 +127,6 @@ fd_close(int fd)
 		s_assert(F->read_handler == NULL);
 		s_assert(F->write_handler == NULL);
 	}
-#ifdef NOTYET
-	debug(51, 3) ("fd_close FD %d %s\n", fd, F->desc);
-#endif
 	comm_setselect(fd, FDLIST_NONE, COMM_SELECT_WRITE | COMM_SELECT_READ, NULL, NULL, 0);
 
 	F->flags.open = 0;

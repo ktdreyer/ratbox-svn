@@ -134,11 +134,11 @@ m_trace(struct Client *client_p, struct Client *source_p, int parc, const char *
 			{
 				if(ac2ptr)
 					sendto_one(source_p, form_str(RPL_TRACELINK), me.name,
-						   looking_for, ircd_version, debugmode, tname,
+						   looking_for, ircd_version, tname,
 						   ac2ptr->from->name);
 				else
 					sendto_one(source_p, form_str(RPL_TRACELINK), me.name,
-						   looking_for, ircd_version, debugmode, tname,
+						   looking_for, ircd_version, tname,
 						   "ac2ptr_is_NULL!!");
 			}
 

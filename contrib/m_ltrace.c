@@ -129,10 +129,10 @@ static void m_ltrace(struct Client *client_p, struct Client *source_p,
         }
         if (ac2ptr)
           sendto_one(source_p, form_str(RPL_TRACELINK), me.name, looking_for,
-                     ircd_version, debugmode, tname, ac2ptr->from->name);
+                     ircd_version, tname, ac2ptr->from->name);
         else
           sendto_one(source_p, form_str(RPL_TRACELINK), me.name, looking_for,
-                     ircd_version, debugmode, tname, "ac2ptr_is_NULL!!");
+                     ircd_version, tname, "ac2ptr_is_NULL!!");
         return;
       }
     case HUNTED_ISME:

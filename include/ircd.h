@@ -64,9 +64,6 @@ struct Counter
 
 extern struct SetOptions GlobalSetOptions;	/* defined in ircd.c */
 
-extern const char *debugmode;
-extern int debuglevel;
-extern int debugtty;
 extern const char *creation;
 extern const char *generation;
 extern const char *platform;
@@ -75,7 +72,6 @@ extern const char *serno;
 extern const char *ircd_version;
 extern const char *logFileName;
 extern const char *pidFileName;
-extern const char serveropts[];
 extern int cold_start;
 extern int dorehash;
 extern int doremotd;

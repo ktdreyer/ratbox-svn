@@ -31,7 +31,6 @@
 #include "ircd.h"
 #include "numeric.h"
 #include "send.h"
-#include "s_debug.h"
 #include "msg.h"
 #include "memory.h"
 #include "s_log.h"
@@ -40,7 +39,6 @@ struct Message error_msgtab = {
 	"ERROR", 0, 0, 1, 0, MFLG_SLOW | MFLG_UNREG, 0,
 	{m_error, m_ignore, ms_error, m_ignore}
 };
-
 
 /*
  * Note: At least at protocol level ERROR has only one parameter,

@@ -55,7 +55,6 @@
 #include "scache.h"
 #include "send.h"
 #include "client.h"
-#include "s_debug.h"
 #include "memory.h"
 #include "channel.h"		/* chcap_usage_counts stuff... */
 #include "hook.h"
@@ -418,8 +417,6 @@ try_connections(void *unused)
 	struct Class *cltmp;
 	struct ConfItem *con_conf = NULL;
 
-	Debug((DEBUG_NOTICE, "Connection check at: %s", myctime(CurrentTime)));
-
 	for (aconf = ConfigItemList; aconf; aconf = aconf->next)
 	{
 		/*
@@ -507,7 +504,6 @@ try_connections(void *unused)
 			serv_connect(con_conf, 0);
 		}
 	}
-	Debug((DEBUG_NOTICE, "Next connection check : %s", myctime(next)));
 }
 
 int

@@ -36,7 +36,6 @@
 #include "s_conf.h"
 #include "send.h"
 #include "irc_string.h"
-#include "s_debug.h"
 #include "memory.h"
 #include "patricia.h"
 
@@ -88,8 +87,6 @@ get_conf_ping(struct ConfItem *aconf)
 {
 	if((aconf) && ClassPtr(aconf))
 		return (ConfPingFreq(aconf));
-
-	Debug((DEBUG_DEBUG, "No Ping For %s", (aconf) ? aconf->name : "*No Conf*"));
 
 	return (BAD_PING);
 }
@@ -148,7 +145,6 @@ get_client_ping(struct Client *target_p)
 	if(ping <= 0)
 		ping = DEFAULT_PINGFREQUENCY;
 
-	Debug((DEBUG_DEBUG, "Client %s Ping %d", target_p->name, ping));
 	return (ping);
 }
 
@@ -243,8 +239,6 @@ check_class()
 	struct Class *cltmp;
 	dlink_node *ptr;
 	dlink_node *next_ptr;
-
-	Debug((DEBUG_DEBUG, "Class check:"));
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, class_list.head)
 	{

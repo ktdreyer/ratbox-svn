@@ -52,7 +52,6 @@
 #include "s_auth.h"
 #include "s_bsd.h"
 #include "s_conf.h"
-#include "s_debug.h"
 #include "s_log.h"
 #include "s_serv.h"		/* try_connections */
 #include "s_stats.h"
@@ -111,8 +110,6 @@ const char *pidFileName = PPATH;
 char **myargv;
 int dorehash = 0;
 int doremotd = 0;
-int debuglevel = -1;		/* Server debug level */
-const char *debugmode = "";	/*  -"-    -"-   -"-  */
 time_t nextconnect = 1;		/* time for next try_connections call */
 int kline_queued = 0;
 int server_state_foreground = 0;

@@ -243,12 +243,6 @@
  */
 #define HARD_FDLIMIT_    MAX_CLIENTS + MAX_BUFFER + 20
 
-/* DEBUGMODE is used mostly for internal development, it is likely
- * to make your client server very sluggish.
- * You usually shouldn't need this. -Dianora
-*/
-#undef  DEBUGMODE		/* define DEBUGMODE to enable debugging mode. */
-
 #define CONFIG_RATBOX_LEVEL_2
 
 #include "defaults.h"

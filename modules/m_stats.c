@@ -42,7 +42,6 @@
 #include "fdlist.h"		/* PF and friends */
 #include "s_bsd.h"		/* highest_fd */
 #include "s_conf.h"		/* ConfItem, report_configured_links */
-#include "s_debug.h"		/* send_usage */
 #include "s_serv.h"		/* hunt_server */
 #include "s_stats.h"		/* tstats */
 #include "s_user.h"		/* show_opers */

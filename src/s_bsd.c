@@ -47,7 +47,6 @@
 #include "s_serv.h"
 #include "s_stats.h"
 #include "send.h"
-#include "s_debug.h"
 #include "reject.h"
 #include "memory.h"
 
@@ -406,8 +405,6 @@ error_exit_client(struct Client *client_p, int error)
 	char errmsg[255];
 	int current_error = get_sockerr(client_p->localClient->fd);
 
-	Debug((DEBUG_ERROR, "READ ERROR: fd = %d %d %d",
-	       client_p->localClient->fd, current_error, error));
 	if(IsServer(client_p) || IsHandshake(client_p))
 	{
 		int connected = CurrentTime - client_p->firsttime;

@@ -38,7 +38,6 @@
 #include "s_log.h"
 #include "s_stats.h"
 #include "send.h"
-#include "s_debug.h"
 #include "msg.h"
 #include "s_conf.h"
 #include "memory.h"
@@ -132,8 +131,6 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
 	char *numeric = 0;
 	struct Message *mptr;
 
-	Debug((DEBUG_DEBUG, "Parsing %s:", pbuffer));
-
 	s_assert(MyConnect(client_p));
 	s_assert(client_p->localClient->fd >= 0);
 	if(IsDeadorAborted(client_p))
@@ -184,13 +181,8 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
 			 */
 			if(from == NULL)
 			{
-				Debug((DEBUG_ERROR,
-				       "Unknown prefix (%s)(%s) from (%s)",
-				       sender, pbuffer, client_p->name));
 				ServerStats->is_unpf++;
-
 				remove_unknown(client_p, sender, pbuffer);
-
 				return;
 			}
 
@@ -199,9 +191,6 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
 			if(from->from != client_p)
 			{
 				ServerStats->is_wrdi++;
-				Debug((DEBUG_ERROR,
-				       "Message (%s) coming from (%s)", pbuffer, client_p->name));
-
 				cancel_clients(client_p, from, pbuffer);
 				return;
 			}
@@ -213,7 +202,6 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
 	if(*ch == '\0')
 	{
 		ServerStats->is_empt++;
-		Debug((DEBUG_NOTICE, "Empty message from host %s:%s", client_p->name, from->name));
 		return;
 	}
 
@@ -266,8 +254,6 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
 					sendto_one(from,
 						   ":%s %d %s %s :Unknown command",
 						   me.name, ERR_UNKNOWNCOMMAND, from->name, ch);
-				Debug((DEBUG_ERROR, "Unknown (%s) from %s",
-				       ch, get_client_name(client_p, HIDE_IP)));
 			}
 			ServerStats->is_unco++;
 			return;

@@ -64,13 +64,6 @@ error HARD_FDLIMIT_ undefined
 #define MAX_JOIN_LEAVE_COUNT  25
 #define OPER_SPAM_COUNTDOWN   5
 #define JOIN_LEAVE_COUNT_EXPIRE_TIME 120
-#if defined(DEBUGMODE) || defined(DNS_DEBUG)
-#  define Debug(x) debug x
-#  define LOGFILE LPATH
-#else
-#  define Debug(x) ;
-#  define LOGFILE "/dev/null"
-#endif
 #define MIN_SPAM_NUM 5
 #define MIN_SPAM_TIME 60
 #define CONFIG_RATBOX_LEVEL_1

@@ -79,9 +79,9 @@ m_version(struct Client *client_p, struct Client *source_p, int parc, const char
 			return 0;
 	}
 
-	sendto_one(source_p, form_str(RPL_VERSION), me.name,
-		   parv[0], ircd_version, serno, debugmode,
-		   me.name, confopts(source_p), serveropts);
+	sendto_one(source_p, form_str(RPL_VERSION),
+		   me.name, parv[0], ircd_version, serno,
+		   me.name, confopts(source_p), TS_CURRENT);
 
 	show_isupport(source_p);
 
@@ -99,8 +99,9 @@ mo_version(struct Client *client_p, struct Client *source_p, int parc, const cha
 	if(hunt_server(client_p, source_p, ":%s VERSION :%s", 1, parc, parv) != HUNTED_ISME)
 		return 0;
 
-	sendto_one(source_p, form_str(RPL_VERSION), me.name, parv[0], ircd_version,
-		   serno, debugmode, me.name, confopts(source_p), serveropts);
+	sendto_one(source_p, form_str(RPL_VERSION),
+		   me.name, parv[0], ircd_version, serno, 
+		   me.name, confopts(source_p), TS_CURRENT);
 
 	show_isupport(source_p);
 
@@ -117,9 +118,9 @@ ms_version(struct Client *client_p, struct Client *source_p, int parc, const cha
 {
 	if(hunt_server(client_p, source_p, ":%s VERSION :%s", 1, parc, parv) == HUNTED_ISME)
 	{
-		sendto_one(source_p, form_str(RPL_VERSION), me.name,
-			   parv[0], ircd_version, serno, debugmode,
-			   me.name, confopts(source_p), serveropts);
+		sendto_one(source_p, form_str(RPL_VERSION),
+			   me.name, parv[0], ircd_version, serno,
+			   me.name, confopts(source_p), TS_CURRENT);
 		show_isupport(source_p);
 	}
 
@@ -139,10 +140,6 @@ confopts(struct Client *source_p)
 
 	result[0] = '\0';
 	p = result;
-
-#ifdef DEBUGMODE
-	*p++ = 'D';
-#endif
 
 	if(ConfigChannel.use_except)
 		*p++ = 'e';

@@ -53,7 +53,6 @@
 #include "s_serv.h"
 #include "s_stats.h"
 #include "send.h"
-#include "s_debug.h"
 #include "s_bsd.h"
 #include "memory.h"
 

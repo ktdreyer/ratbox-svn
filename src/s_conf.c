@@ -49,7 +49,6 @@
 #include "s_log.h"
 #include "send.h"
 #include "s_gline.h"
-#include "s_debug.h"
 #include "fileio.h"
 #include "memory.h"
 #include "balloc.h"

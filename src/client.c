@@ -46,7 +46,6 @@
 #include "s_serv.h"
 #include "send.h"
 #include "whowas.h"
-#include "s_debug.h"
 #include "s_user.h"
 #include "linebuf.h"
 #include "hash.h"

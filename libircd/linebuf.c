@@ -670,7 +670,7 @@ linebuf_flush(int fd, buf_head_t * bufhead)
 }
 
 /*
- * count linebufs for s_debug
+ * count linebufs for stats z
  */
 
 void

@@ -36,7 +36,6 @@
 #include "ircd.h"
 #include "numeric.h"
 #include "send.h"
-#include "s_debug.h"
 #include "fdlist.h"
 #include "fileio.h"
 #include "memory.h"
@@ -378,12 +377,6 @@ del_from_id_hash(const char *id, struct Client *client_p)
 			return;
 		}
 	}
-
-	Debug((DEBUG_ERROR, "%#x !in tab %s[%s] %#x %#x %#x %d %d %#x",
-	       client_p, client_p->name,
-	       client_p->from ? client_p->from->host : "??host",
-	       client_p->from, client_p->next, client_p->prev,
-	       client_p->localClient->fd, client_p->status, client_p->user));
 }
 
 /* del_from_client_hash()
@@ -418,11 +411,7 @@ del_from_client_hash(const char *name, struct Client *client_p)
 		}
 	}
 
-	Debug((DEBUG_ERROR, "%#x !in tab %s[%s] %#x %#x %#x %d %d %#x",
-	       client_p, client_p->name,
-	       client_p->from ? client_p->from->host : "??host",
-	       client_p->from, client_p->next, client_p->prev,
-	       client_p->localClient->fd, client_p->status, client_p->user));
+	s_assert(0);
 }
 
 /* del_from_channel_hash()
