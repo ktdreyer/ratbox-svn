@@ -1,3 +1,9 @@
+*** 20001128_7 by db
+- fixed m_message to work properly. i.e. oper $# messages work
+  NO_SUCH_NICK now work properly
+
+
+
 *** 20001128_6 by davidt
 Fixed broken build
 
