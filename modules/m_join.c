@@ -245,6 +245,7 @@ int     m_join(struct Client *cptr,
       /*
       **  Set timestamp if appropriate, and propagate
       */
+
       if (flags & CHFL_CHANOP)
 	{
 	  chptr->channelts = CurrentTime;
@@ -255,6 +256,17 @@ int     m_join(struct Client *cptr,
 				   chptr->chname,
 				   parv[0]);
 	}
+#if 0
+      /*
+       * This is broken.  We check if sptr has CAP_HOPS, instead
+       * of the server.  Plus, if the server doesn't support
+       * HOPS we should send halfops as ops -- we are the users server,
+       * so we will do the correct permision checks.
+       * There is no way flags can include CHFL_HALFOP anyway,
+       * so this code isn't needed anyway
+       *
+       * -davidt
+       */
       else if ((flags & CHFL_HALFOP) && (IsCapable(sptr,CAP_HOPS)))
 	{
 	  chptr->channelts = CurrentTime;
@@ -265,6 +277,7 @@ int     m_join(struct Client *cptr,
 				   chptr->chname,
 				   parv[0]);
 	}
+#endif
       else
 	{
 	  sendto_ll_channel_remote(chptr, cptr, sptr,
@@ -306,11 +319,22 @@ int     m_join(struct Client *cptr,
 	{
 	  sendto_one(sptr, form_str(RPL_TOPIC), me.name,
 		     parv[0], root_chptr->chname, chptr->topic);
-	  
-	  sendto_one(sptr, form_str(RPL_TOPICWHOTIME),
-		     me.name, parv[0], root_chptr->chname,
-		     chptr->topic_info,
-		     chptr->topic_time);
+
+          if (!(chptr->mode.mode & MODE_HIDEOPS) ||
+              (flags & CHFL_CHANOP) || (flags & CHFL_HALFOP))
+            {
+              sendto_one(sptr, form_str(RPL_TOPICWHOTIME),
+                         me.name, parv[0], root_chptr->chname,
+                         chptr->topic_info,
+                         chptr->topic_time);
+            }
+          else /* Hide from nonops */
+            {
+               sendto_one(sptr, form_str(RPL_TOPICWHOTIME),
+                         me.name, parv[0], root_chptr->chname,
+                         me.name,
+                         chptr->topic_time);
+            }
 	}
 
       (void)channel_member_names(sptr, chptr, root_chptr->chname);
