@@ -1,3 +1,7 @@
+*** 20001214_2 by toot
+cleaned some PATH stuff a bit
+
+
 *** 20001214_1 by db
 - removed find_class(0) from m_kline.c was never used, no one ever
   referred to the class on a kline, BLOAT gone.
