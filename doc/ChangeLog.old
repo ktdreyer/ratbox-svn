@@ -1,3 +1,24 @@
+*** 20001031_2 by adrian
+
+
+Initial timeout fd stuff. There is no code that uses it yet, but its there
+and running for when I (am about to) do.
+
+The idea is that you register a callback to be called after a given time
+period has elapsed. This is good for things like checking ping returns,
+where you set the timeout period on the fd to be 2*ping, and when you get
+a PONG you reset the timeout period. If the socket ever times out, you
+get a ping timeout.
+
+Its also going to be used for the up-coming non-blocking connect() code,
+where a socket timeout kicks in to prevent a connect() taking too long
+to run.
+
+Once check_pings() has been split up, this and the poll/select/etc loop should
+be the only two places that walking the entire fd_table[] array is allowed.
+
+
+
 *** 20001031_1 by adrian
 
 
