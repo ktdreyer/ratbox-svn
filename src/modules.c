@@ -33,6 +33,10 @@
 #include <errno.h>
 #include <dirent.h>
 
+#ifdef VMS
+# define _XOPEN_SOURCE
+#endif
+
 #include <limits.h>
 #include <unistd.h>
 #include <sys/types.h>
