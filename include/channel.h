@@ -180,7 +180,5 @@ struct Ban          /* also used for exceptions -orabidoo */
 void do_channel_integrity_check(void);
 #endif
 
-int allocate_topic(struct Channel *);
-void free_topic(struct Channel *);
-
+void set_channel_topic(struct Channel *chptr, const char *topic, const char *topic_info, time_t topicts); 
 #endif  /* INCLUDED_channel_h */

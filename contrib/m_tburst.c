@@ -124,10 +124,7 @@ static void ms_tburst(struct Client *client_p, struct Client *source_p,
 static void set_topic(struct Client *source_p, struct Channel *chptr, 
 		      time_t newtopicts, char *topicwho, char *topic)
 {
-  strlcpy(chptr->topic, topic, TOPICLEN);
-  strlcpy(chptr->topic_info, topicwho, USERHOST_REPLYLEN);
-
-  chptr->topic_time = newtopicts;
+  set_channel_topic(chptr, topic, topicwho, newtopicts);
 
   sendto_channel_local(ALL_MEMBERS, chptr, ":%s TOPIC %s :%s",
 		       ConfigServerHide.hide_servers ? me.name : source_p->name,
