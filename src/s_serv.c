@@ -60,7 +60,6 @@
 #include "memory.h"
 #include "channel.h"		/* chcap_usage_counts stuff... */
 #include "hook.h"
-
 extern char *crypt();
 
 #define MIN_CONN_FREQ 300
@@ -422,8 +421,7 @@ hunt_server(struct Client *client_p, struct Client *source_p,
 	int wilds;
 	dlink_node *ptr;
 	const char *old __unused = parv[server];
-	char *new = LOCAL_COPY(parv[server]);
-	parv[server] = new;
+	char *new;
 
 	/*
 	 * Assume it's me, if no server
@@ -431,6 +429,10 @@ hunt_server(struct Client *client_p, struct Client *source_p,
 	if(parc <= server || EmptyString(parv[server]) ||
 	   match(me.name, parv[server]) || match(parv[server], me.name))
 		return (HUNTED_ISME);
+	
+	new = LOCAL_COPY(parv[server]);
+	parv[server] = new;
+
 	/*
 	 * These are to pickup matches that would cause the following
 	 * message to go in the wrong direction while doing quick fast
