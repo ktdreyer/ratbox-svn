@@ -308,30 +308,3 @@ static void remove_a_mode( int hide_or_not,
     }
 }
 
-
-/*
- * free_channel_list
- *
- * inputs       - pointer to dlink_list
- * output       - NONE
- * side effects -
- */
-static void free_channel_list(dlink_list *list)
-{
-  dlink_node *ptr;
-  dlink_node *next_ptr;
-  struct Ban *actualBan;
-
-  for (ptr = list->head; ptr; ptr = next_ptr)
-    {
-      next_ptr = ptr->next;
-
-      actualBan = ptr->data;
-      MyFree(actualBan->banstr);
-      MyFree(actualBan->who);
-      BlockHeapFree(ban_heap, actualBan);
-
-      free_dlink_node(ptr);
-    }
-}
-
