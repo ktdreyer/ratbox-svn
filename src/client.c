@@ -1394,6 +1394,13 @@ const char* comment         /* Reason for the exit */
 	  strcat(comment1, source_p->name);
 	}
 
+      if (!refresh_user_links)
+      {
+        refresh_user_links = 1;
+	eventAdd("write_links_file", write_links_file, NULL,
+	         ConfigServerHide.links_delay, 0);
+      }
+
       remove_dependents(client_p, source_p, from, comment, comment1);
 
       if (source_p->servptr == &me)

@@ -250,6 +250,8 @@ extern struct EncCapability CipherTable[];
 extern int MaxClientCount;     /* GLOBAL - highest number of clients */
 extern int MaxConnectionCount; /* GLOBAL - highest number of connections */
 
+extern int refresh_user_links;
+
 /*
  * return values for hunt_server() 
  */
@@ -267,6 +269,7 @@ extern int         hunt_server(struct Client* client_pt,
 extern const char* my_name_for_link(const char* name, struct ConfItem* conf);
 extern void        send_capabilities(struct Client*, struct ConfItem* conf,
                                      int, int);
+extern void	   write_links_file(void*);				     
 extern int         server_estab(struct Client* client_p);
 extern void        set_autoconn(struct Client *,char *,char *,int);
 extern const char* show_capabilities(struct Client* client);

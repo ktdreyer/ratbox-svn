@@ -83,6 +83,7 @@ extern char *crypt();
 
 int MaxConnectionCount = 1;
 int MaxClientCount     = 1;
+int refresh_user_links = 0;
 
 struct Client *uplink=NULL;
 
@@ -343,6 +344,86 @@ void remove_server_from_list(struct Client *client_p)
   }    
   return; 
 }
+
+/*
+ * write_links_file
+ */
+void write_links_file(void* notused)
+{
+  MessageFileLine *next_mptr = 0;
+  MessageFileLine *mptr = 0;
+  MessageFileLine *currentMessageLine = 0;
+  MessageFileLine *newMessageLine = 0;
+  MessageFile *MessageFileptr;
+  struct Client *target_p;
+  char *p;
+  FBFILE* file;
+  char buff[512];
+  dlink_node *ptr;
+
+  refresh_user_links = 0;
+
+  MessageFileptr = &ConfigFileEntry.linksfile;
+
+  if ((file = fbopen(MessageFileptr->fileName, "w")) == 0)
+    return;
+
+  for( mptr = MessageFileptr->contentsOfFile; mptr; mptr = next_mptr)
+    {
+      next_mptr = mptr->next;
+      MyFree(mptr);
+    }
+  MessageFileptr->contentsOfFile = NULL;
+  currentMessageLine = NULL;
+
+  for (ptr = global_serv_list.head; ptr; ptr = ptr->next)
+  {
+    target_p = ptr->data;
+
+    /* skip ourselves, we send ourselves in /links */
+    if(IsMe(target_p))
+      continue;
+
+    /* skip hidden servers */
+    if(target_p->hidden_server && ConfigServerHide.allow_hidden)
+      continue;
+
+    if(target_p->info[0])
+      p = target_p->info;
+    else
+      p = "(Unknown Location)";
+
+    newMessageLine = (MessageFileLine*) MyMalloc(sizeof(MessageFileLine));
+
+    /* Attempt to format the file in such a way it follows the usual links output
+     * ie  "servername uplink :hops info"
+     * Mostly for aesthetic reasons - makes it look pretty in mIRC ;)
+     * - madmax
+     */
+
+    ircsprintf(newMessageLine->line,"%s %s :1 %s",
+               target_p->name, me.name, p);
+    newMessageLine->next = (MessageFileLine *)NULL;
+
+    if (MessageFileptr->contentsOfFile)
+    {
+      if (currentMessageLine)
+        currentMessageLine->next = newMessageLine;
+        currentMessageLine = newMessageLine;
+      }
+      else
+      {
+        MessageFileptr->contentsOfFile = newMessageLine;
+        currentMessageLine = newMessageLine;
+      }
+
+      ircsprintf(buff, "%s %s :1 %s\n", target_p->name, me.name, p);
+      fbputs(buff, file);
+    }
+
+  fbclose(file);
+}
+
   
 /*
  * hunt_server - Do the basic thing in delivering the message (command)
@@ -1083,8 +1164,9 @@ int server_estab(struct Client *client_p)
              | ((aconf->flags & CONF_FLAGS_COMPRESSED) ? CAP_ZIP_SUPPORTED : 0),
              0);
 
-      sendto_one(client_p, "SERVER %s 1 :%s",
+      sendto_one(client_p, "SERVER %s 1 :%s%s",
                  my_name_for_link(me.name, aconf), 
+		 ConfigServerHide.hidden ? "(H) " : "",
                  (me.info[0]) ? (me.info) : "IRCers United");
     }
 
@@ -1199,6 +1281,14 @@ int server_estab(struct Client *client_p)
 #endif
     } else
         fd_note(client_p->fd, "Server: %s", client_p->name);
+
+  if (!refresh_user_links)
+  {
+    refresh_user_links = 1;
+    eventAdd("write_links_file", write_links_file, NULL,
+             ConfigServerHide.links_delay, 0);
+  }
+
   /*
   ** Old sendto_serv_but_one() call removed because we now
   ** need to send different names to different servers
@@ -1214,7 +1304,9 @@ int server_estab(struct Client *client_p)
       if ((aconf = target_p->serv->sconf) &&
           match(my_name_for_link(me.name, aconf), client_p->name))
         continue;
-      sendto_one(target_p,":%s SERVER %s 2 :%s", me.name, client_p->name,
+      sendto_one(target_p,":%s SERVER %s 2 :%s%s", 
+                 me.name, client_p->name,
+		 client_p->hidden_server ? "(H) " : "",
                  client_p->info);
     }
 
@@ -1247,8 +1339,11 @@ int server_estab(struct Client *client_p)
         {
           if (match(my_name_for_link(me.name, aconf), target_p->name))
             continue;
-          sendto_one(client_p, ":%s SERVER %s %d :%s", target_p->serv->up,
-                     target_p->name, target_p->hopcount+1, target_p->info);
+          sendto_one(client_p, ":%s SERVER %s %d :%s%s", 
+	             target_p->serv->up,
+                     target_p->name, target_p->hopcount+1, 
+		     target_p->hidden_server ? "(H) " : "",
+		     target_p->info);
         }
     }
   
@@ -2221,8 +2316,10 @@ serv_connect_callback(int fd, int status, void *data)
              | (ServerInfo.hub ? CAP_HUB : 0),
              0);
 
-    sendto_one(client_p, "SERVER %s 1 :%s",
-      my_name_for_link(me.name, aconf), me.info);
+    sendto_one(client_p, "SERVER %s 1 :%s%s",
+               my_name_for_link(me.name, aconf), 
+	       ConfigServerHide.hidden ? "(H) " : "", 
+	       me.info);
 
     /* 
      * If we've been marked dead because a send failed, just exit

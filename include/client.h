@@ -158,6 +158,7 @@ struct Client
 
   int               slink_pid;  /* pid of servlink process if any */
   int               hopcount;   /* number of servers to this 0 = local */
+  int		    hidden_server;
   unsigned short    status;     /* Client type */
   unsigned char     handler;    /* Handler index */
   char              eob;	/* server eob has been received */

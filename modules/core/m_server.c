@@ -48,6 +48,9 @@
 
 static void mr_server(struct Client*, struct Client*, int, char **);
 static void ms_server(struct Client*, struct Client*, int, char **);
+
+static int set_server_gecos(struct Client *, char *);
+
 struct Message server_msgtab = {
   "SERVER", 0, 3, 0, MFLG_SLOW | MFLG_UNREG, 0,
   {mr_server, m_registered, ms_server, m_registered}
@@ -71,10 +74,6 @@ char *_version = "20001122";
 char *parse_server_args(char *parv[], int parc, char *info, int *hop);
 int bogus_host(char *host);
 struct Client *server_exists(char *);
-void write_links_file(void*);
-
-
-static int       refresh_user_links=0;
 
 /*
  * mr_server - SERVER message handler
@@ -223,8 +222,9 @@ static void mr_server(struct Client *client_p, struct Client *source_p,
    * if we are connecting (Handshake), we already have the name from the
    * C:line in client_p->name
    */
+
   strncpy_irc(client_p->name, name, HOSTLEN);
-  strncpy_irc(client_p->info, info[0] ? info : me.name, REALLEN);
+  set_server_gecos(client_p, info);
   client_p->hopcount = hop;
 
   server_estab(client_p);
@@ -456,7 +456,8 @@ static void ms_server(struct Client *client_p, struct Client *source_p,
   make_server(target_p);
   target_p->hopcount = hop;
   strncpy_irc(target_p->name, name, HOSTLEN);
-  strncpy_irc(target_p->info, info, REALLEN);
+  set_server_gecos(target_p, info);
+
   target_p->serv->up = find_or_add(parv[0]);
   target_p->servptr = source_p;
 
@@ -495,9 +496,10 @@ static void ms_server(struct Client *client_p, struct Client *source_p,
       if (match(my_name_for_link(me.name, aconf), target_p->name))
 	continue;
 
-      sendto_one(bclient_p, ":%s SERVER %s %d :%s",
-		 parv[0], target_p->name, hop + 1, target_p->info);
-                         
+      sendto_one(bclient_p, ":%s SERVER %s %d :%s%s",
+		 parv[0], target_p->name, hop + 1,
+		 target_p->hidden_server ? "(H) " : "",
+		 target_p->info);
     }
       
   sendto_realops_flags(FLAGS_EXTERNAL, L_ALL,
@@ -512,87 +514,77 @@ static void ms_server(struct Client *client_p, struct Client *source_p,
     }
 }
 
-/*
- * write_links_file
+/* set_server_gecos()
  *
- * 
+ * input	- pointer to client
+ * output	- none
+ * side effects - servers gecos field is set
  */
-void write_links_file(void* notused)
+int set_server_gecos(struct Client *client_p, char *info)
 {
-  MessageFileLine *next_mptr = 0;
-  MessageFileLine *mptr = 0;
-  MessageFileLine *currentMessageLine = 0;
-  MessageFileLine *newMessageLine = 0;
-  MessageFile *MessageFileptr;
-  struct Client *target_p;
-  char *p;
-  FBFILE* file;
-  char buff[512];
-  dlink_node *ptr;
-
-  refresh_user_links = 0;
-
-  MessageFileptr = &ConfigFileEntry.linksfile;
-
-  if ((file = fbopen(MessageFileptr->fileName, "w")) == 0)
-    return;
-
-  for( mptr = MessageFileptr->contentsOfFile; mptr; mptr = next_mptr)
-    {
-      next_mptr = mptr->next;
-      MyFree(mptr);
-    }
-  MessageFileptr->contentsOfFile = NULL;
-  currentMessageLine = NULL;
-
-  for (ptr = global_serv_list.head; ptr; ptr = ptr->next) 
+  /* check the info for [IP] */
+  if(info[0])
   {
-    target_p = ptr->data;
-
-    /* skip ourselves, we send ourselves in /links */
-    if(IsMe(target_p))
-      continue;
+    char *p;
+    char *s;
+    char *t;
+    
+    s = info;
+    
+    /* we should only check the first word for an ip */
+    if((p = strchr(s, ' ')))
+      *p = '\0';
       
-    if(target_p->info[0])
+    /* check for a ] which would symbolise an [IP] */
+    if((t = strchr(s, ']')))
     {
-      if( (p = strchr(target_p->info,']')) )
-        p += 2; /* skip the nasty [IP] part */
+      /* set s to after the first space */
+      if(p)
+        s = ++p;
       else
-        p = target_p->info;
+        s = NULL;
+    }
+    /* no ], put the space back */
+    else if(p)
+      *p = ' ';
+
+    /* p may have been set to a trailing space, so check s exists and that
+     * it isnt \0 */
+    if(s && (*s != '\0'))
+    {
+      /* a space? if not (H) could be the last part of info.. */
+      if((p = strchr(s, ' ')))
+        *p = '\0';
+      
+      /* check for (H) which is a hidden server */
+      if(!strcmp(s, "(H)"))
+      {
+        client_p->hidden_server = 1;
+
+        /* if there was no space.. theres nothing to set info to */
+        if(p)
+	  s = ++p;
+	else
+	  s = NULL;
+      }
+      else if(p)
+        *p = ' ';
+      
+      /* if there was a trailing space, s could point to \0, so check */
+      if(s && (*s != '\0'))
+        strncpy_irc(client_p->info, s, REALLEN);
+      else
+        strncpy_irc(client_p->info, "(Unknown Location)", REALLEN);
     }
     else
-      p = "(Unknown Location)";
+      strncpy_irc(client_p->info, "(Unknown Location)", REALLEN);
+  }
+  else
+    strncpy_irc(client_p->info, "(Unknown Location)", REALLEN);
 
-    newMessageLine = (MessageFileLine*) MyMalloc(sizeof(MessageFileLine));
-
-    /* Attempt to format the file in such a way it follows the usual links output
-     * ie  "servername uplink :hops info"
-     * Mostly for aesthetic reasons - makes it look pretty in mIRC ;)
-     * - madmax
-     */
-    
-    ircsprintf(newMessageLine->line,"%s %s :1 %s",
-               target_p->name, me.name, p);
-    newMessageLine->next = (MessageFileLine *)NULL;
-
-    if (MessageFileptr->contentsOfFile)
-    {
-      if (currentMessageLine)
-        currentMessageLine->next = newMessageLine;
-        currentMessageLine = newMessageLine;
-      }
-      else
-      {
-        MessageFileptr->contentsOfFile = newMessageLine;
-        currentMessageLine = newMessageLine;
-      }
-      
-      ircsprintf(buff, "%s %s :1 %s\n", target_p->name, me.name, p);
-      fbputs(buff, file);
-    }
-    
-  fbclose(file);
+  return 1;
 }
+
 
 /*
  * parse_server_args
