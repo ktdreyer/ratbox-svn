@@ -542,7 +542,8 @@ comm_checktimeouts(void *notused)
     PF *hdl;
     void *data;
 
-    for (fd = 0; fd <= highest_fd; fd++) {
+    for (fd = 0; fd <= highest_fd; fd++)
+      {
         if (!fd_table[fd].flags.open)
             continue;
         if (fd_table[fd].flags.closing)
@@ -551,23 +552,25 @@ comm_checktimeouts(void *notused)
         /* check flush functions */
         if (fd_table[fd].flush_handler &&
             fd_table[fd].flush_timeout > 0 && fd_table[fd].flush_timeout 
-            < CurrentTime) {
+            < CurrentTime)
+	  {
             hdl = fd_table[fd].flush_handler;
             data = fd_table[fd].flush_data;
             comm_setflush(fd, 0, NULL, NULL);
             hdl(fd, data);
-        }
+	  }
 
         /* check timeouts */
         if (fd_table[fd].timeout_handler &&
-            fd_table[fd].timeout > 0 && fd_table[fd].timeout < CurrentTime) {
+            fd_table[fd].timeout > 0 && fd_table[fd].timeout < CurrentTime)
+	  {
             /* Call timeout handler */
             hdl = fd_table[fd].timeout_handler;
             data = fd_table[fd].timeout_data;
             comm_settimeout(fd, 0, NULL, NULL);
             hdl(fd, fd_table[fd].timeout_data);           
-        }
-    }
+	  }
+      }
     /* .. next .. */
     eventAdd("comm_checktimeouts", comm_checktimeouts, NULL, 1, 0);
 }
@@ -599,30 +602,33 @@ comm_connect_tcp(int fd, const char *host, u_short port,
      * virtual host IP, for completeness.
      *   -- adrian
      */
-    if ((clocal != NULL) && (bind(fd, clocal, socklen) < 0)) { 
+    if ((clocal != NULL) && (bind(fd, clocal, socklen) < 0))
+      { 
         /* Failure, call the callback with COMM_ERR_BIND */
         comm_connect_callback(fd, COMM_ERR_BIND);
         /* ... and quit */
         return;
-    }
+      }
 
     /*
      * Next, if we have been given an IP, get the addr and skip the
      * DNS check (and head direct to comm_connect_tryconnect().
      */
     if(inetpton(DEF_FAM, host, S_ADDR(&fd_table[fd].connect.hostaddr)) <=0)
-    {
+      {
         /* Send the DNS request, for the next level */
         fd_table[fd].dns_query = MyMalloc(sizeof(struct DNSQuery));
         fd_table[fd].dns_query->ptr = &fd_table[fd];
         fd_table[fd].dns_query->callback = comm_connect_dns_callback;
 	adns_gethost(host, aftype, fd_table[fd].dns_query);
-    } else {
+      }
+    else
+      {
         /* We have a valid IP, so we just call tryconnect */
         /* Make sure we actually set the timeout here .. */
         comm_settimeout(fd, 30, comm_connect_timeout, NULL);
         comm_connect_tryconnect(fd, NULL);        
-    }
+      }
 }
 
 
@@ -674,10 +680,10 @@ comm_connect_dns_callback(void *vptr, adns_answer *reply)
     fde_t *F = vptr;
 
     if(!reply)
-    {
-       comm_connect_callback(F->fd, COMM_ERR_DNS);
-       return;
-    }
+      {
+	comm_connect_callback(F->fd, COMM_ERR_DNS);
+	return;
+      }
     
     if (reply->status != adns_s_ok)
       {
@@ -698,18 +704,20 @@ comm_connect_dns_callback(void *vptr, adns_answer *reply)
      *     -- adrian
      */
 #ifdef IPV6
-    if(reply->rrs.addr->addr.sa.sa_family == AF_INET6) {
+    if(reply->rrs.addr->addr.sa.sa_family == AF_INET6)
+      {
 	copy_s_addr(S_ADDR(F->connect.hostaddr), reply->rrs.addr->addr.inet6.sin6_addr.s6_addr);
-    } 
-    else {
+      } 
+    else
+      {
 	/* IPv4 mapped address */
 	/* This is lazy... */
     	memset(&F->connect.hostaddr.sins.sin6.sin6_addr.s6_addr, 0x0000, 10); 
 	memset(&F->connect.hostaddr.sins.sin6.sin6_addr.s6_addr[10], 0xffff, 2);
 	memcpy(&F->connect.hostaddr.sins.sin6.sin6_addr.s6_addr[12], &reply->rrs.addr->addr.inet.sin_addr.s_addr, 4);
-    }
+      }
 #else
-	F->connect.hostaddr.sins.sin.sin_addr.s_addr = reply->rrs.addr->addr.inet.sin_addr.s_addr;
+    F->connect.hostaddr.sins.sin.sin_addr.s_addr = reply->rrs.addr->addr.inet.sin_addr.s_addr;
 #endif
     /* Now, call the tryconnect() routine to try a connect() */
     MyFree(reply); 
@@ -726,28 +734,29 @@ comm_connect_dns_callback(void *vptr, adns_answer *reply)
 static void
 comm_connect_tryconnect(int fd, void *notused)
 {
-    int retval;
+  int retval;
 
-    /* Try the connect() */
+  /* Try the connect() */
 
-    retval = connect(fd, (struct sockaddr *) &SOCKADDR(fd_table[fd].connect.hostaddr), sizeof(struct irc_sockaddr));
-    /* Error? */
-    if (retval < 0) {
-        /*
-         * If we get EISCONN, then we've already connect()ed the socket,
-         * which is a good thing.
-         *   -- adrian
-         */
-        if (errno == EISCONN)
-            comm_connect_callback(fd, COMM_OK);
-        else if (ignoreErrno(errno))
-            /* Ignore error? Reschedule */
-            comm_setselect(fd, FDLIST_SERVER, COMM_SELECT_WRITE,
-              comm_connect_tryconnect, NULL, 0);
-        else
-            /* Error? Fail with COMM_ERR_CONNECT */
-            comm_connect_callback(fd, COMM_ERR_CONNECT);
-        return;
+  retval = connect(fd, (struct sockaddr *) &SOCKADDR(fd_table[fd].connect.hostaddr), sizeof(struct irc_sockaddr));
+  /* Error? */
+  if (retval < 0)
+    {
+      /*
+       * If we get EISCONN, then we've already connect()ed the socket,
+       * which is a good thing.
+       *   -- adrian
+       */
+      if (errno == EISCONN)
+	comm_connect_callback(fd, COMM_OK);
+      else if (ignoreErrno(errno))
+	/* Ignore error? Reschedule */
+	comm_setselect(fd, FDLIST_SERVER, COMM_SELECT_WRITE,
+		       comm_connect_tryconnect, NULL, 0);
+      else
+	/* Error? Fail with COMM_ERR_CONNECT */
+	comm_connect_callback(fd, COMM_ERR_CONNECT);
+      return;
     }
 
     /* If we get here, we've suceeded, so call with COMM_OK */
@@ -777,33 +786,35 @@ comm_errstr(int error)
 int
 comm_open(int family, int sock_type, int proto, const char *note)
 {
-    int fd;
-    /* First, make sure we aren't going to run out of file descriptors */
-    if (number_fd >= MASTER_MAX) {
-	errno = ENFILE;
-	return -1;
+  int fd;
+  /* First, make sure we aren't going to run out of file descriptors */
+  if (number_fd >= MASTER_MAX)
+    {
+      errno = ENFILE;
+      return -1;
     }
 
-    /*
-     * Next, we try to open the socket. We *should* drop the reserved FD
-     * limit if/when we get an error, but we can deal with that later.
-     * XXX !!! -- adrian
-     */
-    fd = socket(family, sock_type, proto);
-    if (fd < 0)
-        return -1; /* errno will be passed through, yay.. */
+  /*
+   * Next, we try to open the socket. We *should* drop the reserved FD
+   * limit if/when we get an error, but we can deal with that later.
+   * XXX !!! -- adrian
+   */
+  fd = socket(family, sock_type, proto);
+  if (fd < 0)
+    return -1; /* errno will be passed through, yay.. */
 
-    /* Set the socket non-blocking, and other wonderful bits */
-    if (!set_non_blocking(fd)) {
-        log(L_CRIT, "comm_open: Couldn't set FD %d non blocking!", fd);
-        close(fd);
-        return -1;
+  /* Set the socket non-blocking, and other wonderful bits */
+  if (!set_non_blocking(fd))
+    {
+      log(L_CRIT, "comm_open: Couldn't set FD %d non blocking!", fd);
+      close(fd);
+      return -1;
     }
 
-    /* Next, update things in our fd tracking */
-    fd_open(fd, FD_SOCKET, note);
+  /* Next, update things in our fd tracking */
+  fd_open(fd, FD_SOCKET, note);
 
-    return fd;
+  return fd;
 }
 
 
@@ -816,32 +827,34 @@ comm_open(int family, int sock_type, int proto, const char *note)
 int
 comm_accept(int fd, struct irc_sockaddr *pn)
 {
-    int newfd;
-    socklen_t addrlen = sizeof(struct irc_sockaddr);
-    if (number_fd >= MASTER_MAX) {
-	errno = ENFILE;
-	return -1;
+  int newfd;
+  socklen_t addrlen = sizeof(struct irc_sockaddr);
+  if (number_fd >= MASTER_MAX)
+    {
+      errno = ENFILE;
+      return -1;
     }
 
-    /*
-     * Next, do the accept(). if we get an error, we should drop the
-     * reserved fd limit, but we can deal with that when comm_open()
-     * also does it. XXX -- adrian
-     */
-    newfd = accept(fd, (struct sockaddr *)&PSOCKADDR(pn), &addrlen);
-    if (newfd < 0)
-        return -1;
+  /*
+   * Next, do the accept(). if we get an error, we should drop the
+   * reserved fd limit, but we can deal with that when comm_open()
+   * also does it. XXX -- adrian
+   */
+  newfd = accept(fd, (struct sockaddr *)&PSOCKADDR(pn), &addrlen);
+  if (newfd < 0)
+    return -1;
 
-    /* Set the socket non-blocking, and other wonderful bits */
-    if (!set_non_blocking(newfd)) {
-        log(L_CRIT, "comm_accept: Couldn't set FD %d non blocking!", newfd);
-        close(newfd);
-        return -1;
+  /* Set the socket non-blocking, and other wonderful bits */
+  if (!set_non_blocking(newfd))
+    {
+      log(L_CRIT, "comm_accept: Couldn't set FD %d non blocking!", newfd);
+      close(newfd);
+      return -1;
     }
 
-    /* Next, tag the FD as an incoming connection */
-    fd_open(newfd, FD_SOCKET, "Incoming connection");
+  /* Next, tag the FD as an incoming connection */
+  fd_open(newfd, FD_SOCKET, "Incoming connection");
 
-    /* .. and return */
-    return newfd;
+  /* .. and return */
+  return newfd;
 }

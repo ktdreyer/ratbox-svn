@@ -82,17 +82,6 @@ void init_client_heap(void)
 }
 
 /*
- * clean_client_heap
- *
- * inputs	- NONE
- * output	- NONE
- * side effects	- 
- */
-void clean_client_heap(void)
-{
-}
-
-/*
  * make_client - create a new Client struct and set it to initial state.
  *
  *      from == NULL,   create local client (a client connected
@@ -109,10 +98,6 @@ struct Client* make_client(struct Client* from)
   dlink_node *m;
 
   client_p = (struct Client *)MyMalloc(sizeof(struct Client));
-  if (client_p == NULL)
-    outofmemory();
-
-  memset(client_p, 0, sizeof(struct Client));
       
   if (from == NULL)
     {
@@ -120,7 +105,6 @@ struct Client* make_client(struct Client* from)
       client_p->since = client_p->lasttime = client_p->firsttime = CurrentTime;
 
       localClient = (struct LocalUser *)MyMalloc(sizeof(struct LocalUser));
-      memset(localClient, 0, sizeof(struct LocalUser));
 
       if (localClient == NULL)
         outofmemory();

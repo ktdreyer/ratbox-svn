@@ -43,54 +43,54 @@
 
 typedef struct _MemEntry
 {
- size_t size;
- time_t ts;
- char file[50];
- int line;
- struct _MemEntry *next, *last;
- /* Data follows... */
+  size_t size;
+  time_t ts;
+  char file[50];
+  int line;
+  struct _MemEntry *next, *last;
+  /* Data follows... */
 } MemoryEntry;
 MemoryEntry *first_mem_entry = NULL;
 
 void*
 _MyMalloc(size_t length, char *file, int line)
 {
- MemoryEntry *mem_entry;
- mem_entry = malloc(sizeof(MemoryEntry)+length);
- if (!mem_entry)
-   outofmemory();
- else
-   memset(mem_entry, 0, length+sizeof(MemoryEntry));
- mem_entry->size = length;
- mem_entry->ts = CurrentTime;
- if (line > 0)
-   strncpy_irc(mem_entry->file, file, 50)[49] = 0;
- else
-   *mem_entry->file = 0;
- mem_entry->line = line;
- mem_entry->next = first_mem_entry;
- if (first_mem_entry)
-   first_mem_entry->last = mem_entry;
- first_mem_entry = mem_entry;
- return DATA(mem_entry);
+  MemoryEntry *mem_entry;
+  mem_entry = malloc(sizeof(MemoryEntry)+length);
+  if (!mem_entry)
+    outofmemory();
+  else
+    memset(mem_entry, 0, length+sizeof(MemoryEntry));
+  mem_entry->size = length;
+  mem_entry->ts = CurrentTime;
+  if (line > 0)
+    strncpy_irc(mem_entry->file, file, 50)[49] = 0;
+  else
+    *mem_entry->file = 0;
+  mem_entry->line = line;
+  mem_entry->next = first_mem_entry;
+  if (first_mem_entry)
+    first_mem_entry->last = mem_entry;
+  first_mem_entry = mem_entry;
+  return DATA(mem_entry);
 }
 
 void
 _MyFree(void *what, char *file, int line)
 {
- MemoryEntry *mme;
- if (!what)
-   return;
- mme = (MemoryEntry*)((char *)what - sizeof(MemoryEntry));
- if (mme->last)
-   mme->last->next = mme->next;
- else
-   first_mem_entry = mme->next;
- if (mme->next)
-   mme->next->last = mme->last;
+  MemoryEntry *mme;
+  if (!what)
+    return;
+  mme = (MemoryEntry*)((char *)what - sizeof(MemoryEntry));
+  if (mme->last)
+    mme->last->next = mme->next;
+  else
+    first_mem_entry = mme->next;
+  if (mme->next)
+    mme->next->last = mme->last;
 
 #ifndef NDEBUG
- mem_frob(mme, mme->size+sizeof(MemoryEntry));
+  mem_frob(mme, mme->size+sizeof(MemoryEntry));
 #endif
 
  free(mme);
@@ -99,27 +99,27 @@ _MyFree(void *what, char *file, int line)
 void*
 _MyRealloc(void *what, size_t size, char *file, int line)
 {
- MemoryEntry *mme;
- if (!what)
-   return _MyMalloc(size, file, line);
- if (!size)
-   {
-    _MyFree(what, file, line);
-    return NULL;
-   }
- mme = (MemoryEntry*)((char *)what - sizeof(MemoryEntry));
- mme = realloc(mme, size+sizeof(MemoryEntry));
- mme->size = size;
- mme->next->last = mme;
- mme->last->next = mme; 
- return DATA(mme);
+  MemoryEntry *mme;
+  if (!what)
+    return _MyMalloc(size, file, line);
+  if (!size)
+    {
+      _MyFree(what, file, line);
+      return NULL;
+    }
+  mme = (MemoryEntry*)((char *)what - sizeof(MemoryEntry));
+  mme = realloc(mme, size+sizeof(MemoryEntry));
+  mme->size = size;
+  mme->next->last = mme;
+  mme->last->next = mme; 
+  return DATA(mme);
 }
 
 void
 _DupString(char **x, const char *y, char *file, int line)
 {
- *x = _MyMalloc(strlen(y)+1, file, line);
- strcpy(*x, y);
+  *x = _MyMalloc(strlen(y)+1, file, line);
+  strcpy(*x, y);
 }
 
 void ReportAllocated(struct Client*);
@@ -128,17 +128,17 @@ void ReportBlockHeap(struct Client*);
 void
 ReportAllocated(struct Client *client_p)
 {
- MemoryEntry *mme;
- sendto_one(client_p, ":%s NOTICE %s :*** -- Memory Allocation Report",
-   me.name, client_p->name);
- for (mme = first_mem_entry; mme; mme=mme->next)
-   sendto_one(client_p,
-     ":%s NOTICE %s :*** -- %u bytes allocated for %lus at %s:%d",
-     me.name, client_p->name, mme->size, CurrentTime-mme->ts, mme->file,
-     mme->line);
- sendto_one(client_p, ":%s NOTICE %s :*** -- End Memory Allocation Report",
-   me.name, client_p->name);
- ReportBlockHeap(client_p);
+  MemoryEntry *mme;
+  sendto_one(client_p, ":%s NOTICE %s :*** -- Memory Allocation Report",
+	     me.name, client_p->name);
+  for (mme = first_mem_entry; mme; mme=mme->next)
+    sendto_one(client_p,
+	       ":%s NOTICE %s :*** -- %u bytes allocated for %lus at %s:%d",
+	       me.name, client_p->name, mme->size, CurrentTime-mme->ts, mme->file,
+	       mme->line);
+  sendto_one(client_p, ":%s NOTICE %s :*** -- End Memory Allocation Report",
+	     me.name, client_p->name);
+  ReportBlockHeap(client_p);
 }
 #else /* MEMDEBUG */
 /*
@@ -148,7 +148,7 @@ void*
 _MyMalloc(size_t size)
 {
   void* ret = malloc(size);
-  if (!ret)
+  if (ret == NULL)
     outofmemory();
   else
     memset(ret, 0, size);
