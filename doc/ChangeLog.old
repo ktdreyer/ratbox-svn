@@ -1,3 +1,10 @@
+*** 20001103_4 by adrian
+
+
+local[] is already defined in s_bsd.c, so there is no reason to have
+it defined in the poll and kqueue modules.
+
+
 *** 20001103_3 by adrian
 
 Call init_netio() earlier than anything which could
