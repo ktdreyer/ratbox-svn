@@ -1,3 +1,20 @@
+androsyn    2002/04/04 08:24:19 EST	(20020404_0)
+
+  Modified files:
+    .                    BUGS INSTALL 
+    src                  s_bsd_select.c 
+  Log:
+  Updated INSTALL to reflect the nicklen, maxclients changes.  BUGS to reflect
+  that IAuthd is broken beyond repair, in case somebody comes asking.
+  s_bsd_select.c to force an #error if HARD_FDLIMIT_ > FD_SETSIZE.
+  
+  Revision  Changes    Path
+  7.47      +3 -0      ircd-hybrid-7/BUGS
+  7.27      +17 -6     ircd-hybrid-7/INSTALL
+  7.23      +3 -0      ircd-hybrid-7/src/s_bsd_select.c
+
+
+
 androsyn    2002/04/03 11:10:24 EST	(20020403_4)
 
   Modified files:
