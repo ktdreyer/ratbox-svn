@@ -1,3 +1,20 @@
+leeh        2003/06/30 17:29:04 EDT	(20030630_9)
+
+  Modified files:
+    include              channel.h s_serv.h 
+    src                  channel.c s_serv.c 
+  Log:
+  - reworked the burst loops, so we loop inside the bursting function
+    instead of looping elsewhere and calling a burst function each time
+  
+  Revision  Changes    Path
+  7.145     +1 -1      ircd-ratbox/include/channel.h
+  7.81      +0 -1      ircd-ratbox/include/s_serv.h
+  7.386     +55 -42    ircd-ratbox/src/channel.c
+  7.337     +44 -79    ircd-ratbox/src/s_serv.c
+
+
+
 leeh        2003/06/30 17:12:23 EDT	(20030630_8)
 
   Modified files:
