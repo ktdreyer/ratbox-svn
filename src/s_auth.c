@@ -391,18 +391,17 @@ start_auth(struct Client *client)
 		if(auth->client->localClient->ip.ss_family == AF_INET6
 		   && ConfigFileEntry.fallback_to_ip6_int == 1 && auth->ip6_int == 0)
 		{
-			struct Client *client = auth->client;
 			auth->ip6_int = 1;
 			SetDNSPending(auth);
 			if(adns_getaddr(&client->localClient->ip, client->localClient->ip.ss_family, &auth->dns_query, 1))
 			{
 				ClearDNSPending(auth);
-				sendheader(auth->client, REPORT_FAIL_DNS);
+				sendheader(client, REPORT_FAIL_DNS);
 			} else
 				return;
 		} else
 #endif
-		sendheader(auth->client, REPORT_FAIL_DNS);
+		sendheader(client, REPORT_FAIL_DNS);
 	} else 
 		SetDNSPending(auth);
 
