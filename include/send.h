@@ -42,6 +42,7 @@ extern  void sendto_channel_local(int type,
 #define NON_CHANOPS  1
 #define ONLY_CHANOPS_VOICED 2
 #define ONLY_CHANOPS 3
+#define NON_HALFOPS 4
 
 extern  void sendto_channel_remote(struct Channel *, struct Client *cptr, 
 				   const char *, ...);
@@ -50,8 +51,6 @@ extern  void sendto_ll_channel_remote(struct Channel *, struct Client *cptr,
 				      const char *, ...);
 extern  void sendto_match_cap_servs(struct Channel *, struct Client *, 
                                     int, const char *, ...);
-extern	void sendto_match_noncap_servs(struct Channel *, struct Client *,
-				       int, const char *, ...);
 extern  void sendto_match_butone(struct Client *, struct Client *, 
                                  char *, int, const char *, ...);
 

@@ -2328,17 +2328,6 @@ void set_channel_mode(struct Client *cptr,
       sendto_match_cap_servs(chptr, cptr, CAP_HOPS, ":%s MODE %s %s %s",
 			     sptr->name, chptr->chname,
 			     modebuf_hops, parabuf_hops);
-
-      tmpc = modebuf_hops;
-      while (*tmpc && *tmpc != ' ') {
-       if (*tmpc == 'h') *tmpc = 'o';
-       ++tmpc;
-      }
-
-      sendto_match_noncap_servs(chptr, cptr, CAP_HOPS, ":%s MODE %s %s %s",
-				 sptr->name, chptr->chname,
-				 modebuf_hops, parabuf_hops);
-
     }	
 
   return;
