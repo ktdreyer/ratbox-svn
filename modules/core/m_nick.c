@@ -81,14 +81,10 @@ static int mr_nick(struct Client *cptr, struct Client *sptr, int parc,
                    char *parv[])
 {
   struct   Client *acptr, *ucptr;
-  char     nickbuf[NICKLEN + 2];
-  char*    nick;
+  char     nick[NICKLEN + 2];
   char*    s;
   dlink_node *ptr;
   
-
-  nickbuf[0] = '!';
-  nick = nickbuf+1;
 
   if (parc < 2)
     {
@@ -144,7 +140,7 @@ static int mr_nick(struct Client *cptr, struct Client *sptr, int parc,
       {
         ucptr = ptr->data;
 
-        if( !strcmp(nickbuf, ucptr->name) )
+        if( !strcmp(nick, ucptr->llname) )
         {
           /* We're already waiting for a reply about this nick
            * for someone else. */
@@ -152,12 +148,13 @@ static int mr_nick(struct Client *cptr, struct Client *sptr, int parc,
           return 0;
         }
       }
-      /* Set their nick to "!nick" so we can find them later */
-      strcpy(sptr->name, nickbuf);
+      /* Set their llname so we can find them later */
+      strcpy(sptr->llname, nick);
 
-      /* Ask the hub about "nick" */
-      sendto_one(uplink, ":%s NBURST %s %s %s", me.name, nick,
-                 nick, nickbuf);
+      /* Ask the hub about their requested name */
+      sendto_one(uplink, ":%s NBURST %s %s !%s", me.name, nick,
+                 nick, nick);
+      /* wait for LLNICK... */
       return 0;
     }
     else
@@ -754,7 +751,7 @@ nick_from_server(struct Client *cptr, struct Client *sptr, int parc,
               sptr->umodes |= flag & SEND_UMODES;
               m++;
             }
-          
+
           return do_remote_user(nick, cptr, sptr, parv[5], parv[6],
 				parv[7], parv[8], NULL);
         }

@@ -144,6 +144,11 @@ struct Client
    * client->name is the unique name for a client nick or host
    */
   char              name[HOSTLEN + 1]; 
+  /*
+   * client->llname is used to store the clients requested nick
+   * temporarily for new connections.
+   */
+  char              llname[NICKLEN + 1];
   /* 
    * client->username is the username from ident or the USER message, 
    * If the client is idented the USER message is ignored, otherwise 

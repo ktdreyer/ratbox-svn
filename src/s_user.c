@@ -809,7 +809,8 @@ int do_local_user(char* nick, struct Client* cptr, struct Client* sptr,
 
   strncpy_irc(sptr->info, realname, REALLEN);
   
-  if (sptr->name[0]) /* NICK already received, now I have USER... */
+  if (sptr->name[0])
+    /* NICK already received, now I have USER... */
     return register_local_user(cptr, sptr, sptr->name, username);
   else
     {

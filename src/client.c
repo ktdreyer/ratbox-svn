@@ -1750,6 +1750,9 @@ set_initial_nick(struct Client *cptr, struct Client *sptr,
   strncat(nickbuf, nick, NICKLEN);
   fd_note(cptr->fd, nickbuf);
 
+  /* They have the nick they want now.. */
+  *cptr->llname = '\0';
+
   return 0;
 }
 

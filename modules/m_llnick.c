@@ -101,13 +101,14 @@ static int  ms_llnick(struct Client *cptr,
 
   if (new)
   {
+    nick_old++; /* skip '!' */
     /* New user -- find them */
     for( ptr = unknown_list.head; ptr; ptr = ptr->next )
     {
-      if( !strcmp(nick_old, ((struct Client *)ptr->data)->name) )
+      if( !strcmp(nick_old, ((struct Client *)ptr->data)->llname) )
       {
         acptr = ptr->data;
-        *acptr->name = '\0'; /* unset their peudo-nick */
+        *acptr->llname = '\0'; /* unset their temp-nick */
         break;
       }
     }
