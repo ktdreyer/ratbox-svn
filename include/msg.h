@@ -227,9 +227,6 @@ struct Message msgtab[] = {
   { MSG_NAMES,   m_names,    0, MAXPARA, 1, 0, 0, 0L },
   { MSG_USERHOST,m_userhost, 0, 1,       1, 0, 0, 0L },
   { MSG_TRACE,   m_trace,    0, MAXPARA, 1, 0, 0, 0L },
-#ifdef LTRACE
-  { MSG_LTRACE,  m_ltrace,   0, MAXPARA, 1, 0, 0, 0L },
-#endif /* LTRACE */
   { MSG_PASS,    m_pass,     0, MAXPARA, 1, 1, 0, 0L },
   { MSG_LUSERS,  m_lusers,   0, MAXPARA, 1, 0, 0, 0L },
   { MSG_TIME,    m_time,     0, MAXPARA, 1, 0, 0, 0L },

@@ -188,7 +188,7 @@ int m_trace(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     {
       const char* name;
       const char* ip;
-      int         c_class;
+      const char* class_name;
 
       acptr = hash_find_client(tname,(struct Client *)NULL);
       if(!acptr || !IsPerson(acptr)) 
@@ -202,12 +202,12 @@ int m_trace(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       name = get_client_name(acptr, FALSE);
       ip = inetntoa((char*) &acptr->ip);
 
-      c_class = get_client_class(acptr);
+      class_name = get_client_class(acptr);
 
       if (IsAnOper(acptr))
         {
           sendto_one(sptr, form_str(RPL_TRACEOPERATOR),
-                     me.name, parv[0], c_class,
+                     me.name, parv[0], class_name,
                      name, 
                      IsAnOper(sptr)?ip:(IsIPHidden(acptr)?"127.0.0.1":ip),
                      now - acptr->lasttime,
@@ -216,7 +216,7 @@ int m_trace(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       else
         {
           sendto_one(sptr,form_str(RPL_TRACEUSER),
-                     me.name, parv[0], c_class,
+                     me.name, parv[0], class_name,
                      name, 
                      IsAnOper(sptr)?ip:(IsIPHidden(acptr)?"127.0.0.1":ip),
                      now - acptr->lasttime,
@@ -269,7 +269,7 @@ int m_trace(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     {
       const char* name;
       const char* ip;
-      int         c_class;
+      const char* class_name;
       
       if (!(acptr = local[i])) /* Local Connection? */
         continue;
@@ -284,18 +284,18 @@ int m_trace(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       name = get_client_name(acptr, FALSE);
       ip = inetntoa((const char*) &acptr->ip);
 
-      c_class = get_client_class(acptr);
+      class_name = get_client_class(acptr);
       
       switch(acptr->status)
         {
         case STAT_CONNECTING:
           sendto_one(sptr, form_str(RPL_TRACECONNECTING), me.name,
-                     parv[0], c_class, name);
+                     parv[0], class_name, name);
           cnt++;
           break;
         case STAT_HANDSHAKE:
           sendto_one(sptr, form_str(RPL_TRACEHANDSHAKE), me.name,
-                     parv[0], c_class, name);
+                     parv[0], class_name, name);
           cnt++;
           break;
         case STAT_ME:
@@ -303,7 +303,7 @@ int m_trace(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         case STAT_UNKNOWN:
 /* added time -Taner */
           sendto_one(sptr, form_str(RPL_TRACEUNKNOWN),
-                     me.name, parv[0], c_class, name, ip,
+                     me.name, parv[0], class_name, name, ip,
                      acptr->firsttime ? CurrentTime - acptr->firsttime : -1);
           cnt++;
           break;
@@ -319,13 +319,13 @@ int m_trace(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                 sendto_one(sptr,
                            form_str(RPL_TRACEOPERATOR),
                            me.name,
-                           parv[0], c_class,
+                           parv[0], class_name,
                            name, IsAnOper(sptr)?ip:(IsIPHidden(acptr)?"127.0.0.1":ip),
                            now - acptr->lasttime,
                            (acptr->user)?(now - acptr->user->last):0);
               else
                 sendto_one(sptr,form_str(RPL_TRACEUSER),
-                           me.name, parv[0], c_class,
+                           me.name, parv[0], class_name,
                            name,
                            IsAnOper(sptr)?ip:(IsIPHidden(acptr)?"127.0.0.1":ip),
                            now - acptr->lasttime,
@@ -334,17 +334,8 @@ int m_trace(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
             }
           break;
         case STAT_SERVER:
-#if 0
-          if (acptr->serv->user)
             sendto_one(sptr, form_str(RPL_TRACESERVER),
-                       me.name, parv[0], c_class, link_s[i],
-                       link_u[i], name, acptr->serv->by,
-                       acptr->serv->user->username,
-                       acptr->serv->user->host, now - acptr->lasttime);
-          else
-#endif
-            sendto_one(sptr, form_str(RPL_TRACESERVER),
-                       me.name, parv[0], c_class, link_s[i],
+                       me.name, parv[0], class_name, link_s[i],
                        link_u[i], name, *(acptr->serv->by) ?
                        acptr->serv->by : "*", "*",
                        me.name, now - acptr->lasttime);
@@ -382,7 +373,7 @@ int m_trace(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   for (cltmp = ClassList; doall && cltmp; cltmp = cltmp->next)
     if (Links(cltmp) > 0)
       sendto_one(sptr, form_str(RPL_TRACECLASS), me.name,
-                 parv[0], ClassType(cltmp), Links(cltmp));
+                 parv[0], ClassName(cltmp), Links(cltmp));
   sendto_one(sptr, form_str(RPL_ENDOFTRACE),me.name, parv[0],tname);
   return 0;
 }

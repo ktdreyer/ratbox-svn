@@ -49,20 +49,8 @@ struct Class *make_class()
 
 void free_class(struct Class *tmp)
 {
-  MyFree(tmp->class_name);
+  MyFree(tmp->className);
   MyFree((char *)tmp);
-}
-
-int     get_conf_class(struct ConfItem *aconf)
-{
-  if ((aconf) && ClassPtr(aconf))
-    return (ConfClassType(aconf));
-
-  Debug((DEBUG_DEBUG,"No Class For %s",
-         (aconf) ? aconf->name : "*No Conf*"));
-
-  return (BAD_CONF_CLASS);
-
 }
 
 static  int     get_conf_ping(struct ConfItem *aconf)
@@ -76,11 +64,11 @@ static  int     get_conf_ping(struct ConfItem *aconf)
   return (BAD_PING);
 }
 
-int     get_client_class(struct Client *acptr)
+const char*     get_client_class(struct Client *acptr)
 {
   struct SLink  *tmp;
   struct Class        *cl;
-  int   retc = BAD_CLIENT_CLASS;
+  const char*   retc = (const char *)NULL;
 
   if (acptr && !IsMe(acptr)  && (acptr->confs))
     for (tmp = acptr->confs; tmp; tmp = tmp->next)
@@ -88,11 +76,11 @@ int     get_client_class(struct Client *acptr)
         if (!tmp->value.aconf ||
             !(cl = ClassPtr(tmp->value.aconf)))
           continue;
-        if (ClassType(cl) > retc)
-          retc = ClassType(cl);
+        if (ClassName(cl))
+          retc = ClassName(cl);
       }
 
-  Debug((DEBUG_DEBUG,"Returning Class %d For %s",retc,acptr->name));
+  Debug((DEBUG_DEBUG,"Returning Class %s For %s",retc,acptr->name));
 
   return (retc);
 }
@@ -145,7 +133,7 @@ int     get_con_freq(struct Class *clptr)
  * if no present entry is found, then create a new one and add it in
  * immediately after the first one (class 0).
  */
-void    add_class(int class,
+void    add_class(char *classname,
                   int ping,
                   int confreq,
                   int maxli,
@@ -153,8 +141,11 @@ void    add_class(int class,
 {
   struct Class *t, *p;
 
-  t = find_class(class);
-  if ((t == ClassList) && (class != 0))
+  if(!classname)
+    return;
+
+  t = find_class(classname);
+  if (t == ClassList)
     {
       p = (struct Class *)make_class();
       p->next = t->next;
@@ -163,9 +154,10 @@ void    add_class(int class,
   else
     p = t;
   Debug((DEBUG_DEBUG,
-         "Add Class %d: p %x t %x - cf: %d pf: %d ml: %d sq: %l",
-         class, p, t, confreq, ping, maxli, sendq));
-  ClassType(p) = class;
+         "Add Class %s: p %x t %x - cf: %d pf: %d ml: %d sq: %l",
+         classname, p, t, confreq, ping, maxli, sendq));
+  if(classname)
+    DupString(ClassName(p),classname);
   ConFreq(p) = confreq;
   PingFreq(p) = ping;
   MaxLinks(p) = maxli;
@@ -174,12 +166,15 @@ void    add_class(int class,
     Links(p) = 0;
 }
 
-struct Class  *find_class(int cclass)
+struct Class  *find_class(char* classname)
 {
   struct Class *cltmp;
-  
+
+  if(!classname)
+    return NULL;
+
   for (cltmp = ClassList; cltmp; cltmp = cltmp->next)
-    if (ClassType(cltmp) == cclass)
+    if (!strcmp(ClassName(cltmp),classname))
       return cltmp;
   return ClassList;
 }
@@ -193,8 +188,8 @@ void    check_class()
   for (cltmp2 = cltmp = ClassList; cltmp; cltmp = cltmp2->next)
     {
       Debug((DEBUG_DEBUG,
-             "Class %d : CF: %d PF: %d ML: %d LI: %d SQ: %ld",
-             ClassType(cltmp), ConFreq(cltmp), PingFreq(cltmp),
+             "ClassName %s Class %d : CF: %d PF: %d ML: %d LI: %d SQ: %ld",
+             ClassName(cltmp),ClassType(cltmp), ConFreq(cltmp), PingFreq(cltmp),
              MaxLinks(cltmp), Links(cltmp), MaxSendq(cltmp)));
       if (MaxLinks(cltmp) < 0)
         {
@@ -212,6 +207,7 @@ void    initclass()
   ClassList = (struct Class *)make_class();
 
   ClassType(ClassList) = 0;
+  DupString(ClassName(ClassList),"0");
   ConFreq(ClassList) = CONNECTFREQUENCY;
   PingFreq(ClassList) = PINGFREQUENCY;
   MaxLinks(ClassList) = MAXIMUM_LINKS;
@@ -226,7 +222,7 @@ void    report_classes(struct Client *sptr)
 
   for (cltmp = ClassList; cltmp; cltmp = cltmp->next)
     sendto_one(sptr, form_str(RPL_STATSYLINE), me.name, sptr->name,
-               'Y', ClassType(cltmp), PingFreq(cltmp), ConFreq(cltmp),
+               'Y', ClassName(cltmp), PingFreq(cltmp), ConFreq(cltmp),
                MaxLinks(cltmp), MaxSendq(cltmp));
 }
 

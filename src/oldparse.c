@@ -94,7 +94,8 @@ void oldParseOneLine(char* line,struct ConfItem* aconf,
     {
     case 'A':case 'a': /* Name, e-mail address of administrator */
       aconf->status = CONF_ADMIN;
-      conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
+      conf_add_fields(aconf,host_field,pass_field,user_field,
+		      port_field,class_field);
       conf_add_conf(aconf);
       break;
 
@@ -106,28 +107,32 @@ void oldParseOneLine(char* line,struct ConfItem* aconf,
       aconf->status = CONF_CONNECT_SERVER;
       ++*pccount;
       aconf->flags |= CONF_FLAGS_ALLOW_AUTO_CONN;
-      conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
-      aconf = conf_add_server(aconf,class_field,*pncount,*pccount);
+      conf_add_fields(aconf,host_field,pass_field,user_field,
+		      port_field,class_field);
+      aconf = conf_add_server(aconf,*pncount,*pccount);
       conf_add_conf(aconf);
       break;
 
     case 'd':
       aconf->status = CONF_DLINE;
       aconf->flags = CONF_FLAGS_E_LINED;
-      conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
+      conf_add_fields(aconf,host_field,pass_field,user_field,
+		      port_field,class_field);
       conf_add_d_line(aconf);
       break;
 
     case 'D': /* Deny lines (immediate refusal) */
       aconf->status = CONF_DLINE;
-      conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
+      conf_add_fields(aconf,host_field,pass_field,user_field,
+		      port_field,class_field);
       conf_add_d_line(aconf);
       break;
 
     case 'H': /* Hub server line */
     case 'h':
       aconf->status = CONF_HUB;
-      conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
+      conf_add_fields(aconf,host_field,pass_field,user_field,
+		      port_field,class_field);
       conf_add_hub_or_leaf(aconf);
       conf_add_conf(aconf);
       break;
@@ -156,20 +161,25 @@ void oldParseOneLine(char* line,struct ConfItem* aconf,
 	  DupString(aconf->user, user_field);
 	}
 
-      conf_add_i_line(aconf,class_field);
+      if(class_field)
+	DupString(aconf->className, class_field);
+
+      conf_add_i_line(aconf);
       break;
       
     case 'K': /* Kill user line on irc.conf           */
     case 'k':
       aconf->status = CONF_KILL;
-      conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
+      conf_add_fields(aconf,host_field,pass_field,user_field,
+		      port_field,class_field);
       conf_add_k_line(aconf);
       break;
 
     case 'L': /* guaranteed leaf server */
     case 'l':
       aconf->status = CONF_LEAF;
-      conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
+      conf_add_fields(aconf,host_field,pass_field,user_field,
+		      port_field,class_field);
       conf_add_hub_or_leaf(aconf);
       conf_add_conf(aconf);
       break;
@@ -179,7 +189,8 @@ void oldParseOneLine(char* line,struct ConfItem* aconf,
     case 'M':
     case 'm':
       aconf->status = CONF_ME;
-      conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
+      conf_add_fields(aconf,host_field,pass_field,user_field,
+		      port_field,class_field);
       conf_add_me(aconf);
       ConfigFileEntry.hub = 0;
       if(port_field)
@@ -198,8 +209,9 @@ void oldParseOneLine(char* line,struct ConfItem* aconf,
       /* but which tries to connect ME        */
       aconf->status = CONF_NOCONNECT_SERVER;
       ++*pncount;
-      conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
-      aconf = conf_add_server(aconf,class_field,*pncount,*pccount);
+      conf_add_fields(aconf,host_field,pass_field,user_field,
+		      port_field,class_field);
+      aconf = conf_add_server(aconf,*pncount,*pccount);
       conf_add_conf(aconf);
       break;
 
@@ -207,7 +219,8 @@ void oldParseOneLine(char* line,struct ConfItem* aconf,
       /* password and host where connection is  */
     case 'O':
       aconf->status = CONF_OPERATOR;
-      conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
+      conf_add_fields(aconf,host_field,pass_field,user_field,
+		      port_field,class_field);
       /* defaults */
       aconf->port = 
 	CONF_OPER_GLOBAL_KILL|CONF_OPER_REMOTE|CONF_OPER_UNKLINE|
@@ -216,27 +229,29 @@ void oldParseOneLine(char* line,struct ConfItem* aconf,
 	aconf->port = oper_privs_from_string(aconf->port,port_field);
       if ((tmp = getfield(NULL)) != NULL)
 	aconf->hold = oper_flags_from_string(tmp);
-      aconf = conf_add_o_line(aconf,class_field);
+      aconf = conf_add_o_line(aconf);
       conf_add_conf(aconf);
       break;
 
       /* Local Operator, (limited privs --SRB) */
     case 'o':
       aconf->status = CONF_LOCOP;
-      conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
+      conf_add_fields(aconf,host_field,pass_field,user_field,
+		      port_field,class_field);
       aconf->port = CONF_OPER_UNKLINE|CONF_OPER_K;
       if(port_field)
 	aconf->port = oper_privs_from_string(aconf->port,port_field);
       if ((tmp = getfield(NULL)) != NULL)
 	aconf->hold = oper_flags_from_string(tmp);
-      aconf = conf_add_o_line(aconf,class_field);
+      aconf = conf_add_o_line(aconf);
       conf_add_conf(aconf);
       break;
 
     case 'P': /* listen port line */
     case 'p':
       aconf->status = CONF_LISTEN_PORT;
-      conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
+      conf_add_fields(aconf,host_field,pass_field,user_field,
+		      port_field,class_field);
       conf_add_port(aconf);
       conf_add_conf(aconf);
       break;
@@ -244,28 +259,32 @@ void oldParseOneLine(char* line,struct ConfItem* aconf,
     case 'Q': /* reserved nicks */
     case 'q': 
       aconf->status = CONF_QUARANTINED_NICK;
-      conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
+      conf_add_fields(aconf,host_field,pass_field,user_field,
+		      port_field,class_field);
       conf_add_q_line(aconf);
       break;
 
     case 'U': /* Uphost, ie. host where client reading */
     case 'u': /* this should connect.                  */
       aconf->status = CONF_ULINE;
-      conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
+      conf_add_fields(aconf,host_field,pass_field,user_field,
+		      port_field,class_field);
       conf_add_u_line(aconf);
       break;
 
     case 'X': /* rejected gecos */
     case 'x': 
       aconf->status = CONF_XLINE;
-      conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
+      conf_add_fields(aconf,host_field,pass_field,user_field,
+		      port_field,class_field);
       conf_add_x_line(aconf);
       break;
 
     case 'Y':
     case 'y':
       aconf->status = CONF_CLASS;
-      conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
+      conf_add_fields(aconf,host_field,pass_field,user_field,
+		      port_field,class_field);
       if(class_field)
 	sendq = atoi(class_field);
       conf_add_class(aconf,sendq);

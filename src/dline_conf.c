@@ -786,7 +786,7 @@ void zap_Dlines()
 void walk_the_dlines(struct Client *sptr, struct ip_subtree *tree)
 {
   struct ConfItem *scan;
-  char *name, *host, *pass, *user;
+  char *name, *host, *pass, *user, *classname;
   int port;
   char c;               /* D,d or K */
 
@@ -806,7 +806,7 @@ void walk_the_dlines(struct Client *sptr, struct ip_subtree *tree)
         c = 'd';
       /* print Dline */
 
-      get_printable_conf(scan, &name, &host, &pass, &user, &port);
+      get_printable_conf(scan, &name, &host, &pass, &user, &port, &classname);
 
       sendto_one(sptr, form_str(RPL_STATSDLINE), me.name,
                  sptr->name, c, host, pass);
@@ -829,7 +829,7 @@ void walk_the_ip_Klines(struct Client *sptr, struct ip_subtree *tree,
                         char conftype, int MASK)
 {
   struct ConfItem *scan;
-  char *name, *host, *pass, *user;
+  char *name, *host, *pass, *user, *classname;
   int port;
 
   if (!tree) return;
@@ -842,7 +842,7 @@ void walk_the_ip_Klines(struct Client *sptr, struct ip_subtree *tree,
       if(!(scan->status & MASK))
         continue;
 
-      get_printable_conf(scan, &name, &host, &pass, &user, &port);
+      get_printable_conf(scan, &name, &host, &pass, &user, &port, &classname);
 
       if(scan->status & CONF_KILL)
         {
@@ -862,7 +862,7 @@ void walk_the_ip_Klines(struct Client *sptr, struct ip_subtree *tree,
                      show_iline_prefix(sptr,scan,user),
                      host,
                      port,
-                     get_conf_class(scan));
+                     classname);
         }
     }
   walk_the_ip_Klines(sptr, tree->right, conftype, MASK);

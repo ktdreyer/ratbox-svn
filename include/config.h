@@ -585,18 +585,6 @@
  * on UMich.Edu hosts.
  */
 #define SEND_FAKE_KILL_TO_CLIENT
- 
-/*
- * Limited Trace - Reports only link and oper traces even when O:line is
- * active.
- *
- * Displays only Oper, Serv, Link, and Class reports even if the O-line is
- * active.  Useful for just showing pertinent info of a specific server. 
- * Note however that if the target server is not running this option then
- * you will still receive a normal trace output.  Defining this will remove
- * "STATS p" funtionality since the two are basically redundant.
- */
-#define LTRACE
 
 /*
  * LWALLOPS - Like wallops but only local.

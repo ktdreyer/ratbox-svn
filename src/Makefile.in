@@ -72,7 +72,6 @@ SRCS =                          \
   m_list.c                      \
   m_lljoin.c                    \
   m_locops.c                    \
-  m_ltrace.c                    \
   m_lusers.c                    \
   m_mode.c                      \
   m_names.c                     \

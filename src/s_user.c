@@ -732,7 +732,7 @@ int register_user(struct Client *cptr, struct Client *sptr,
 #endif /* USE_IAUTH */
 
       sendto_realops_flags(FLAGS_CCONN,
-                         "Client connecting: %s (%s@%s) [%s] {%d}",
+                         "Client connecting: %s (%s@%s) [%s] {%s}",
                          nick, sptr->username, sptr->host,
                          inetntoa((char *)&sptr->ip),
                          get_client_class(sptr));

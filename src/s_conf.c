@@ -224,7 +224,7 @@ void free_conf(struct ConfItem* aconf)
   MyFree(aconf->passwd);
   MyFree(aconf->user);
   MyFree(aconf->name);
-  MyFree(aconf->class_name);
+  MyFree(aconf->className);
   MyFree((char*) aconf);
 }
 
@@ -270,6 +270,7 @@ void report_configured_links(struct Client* sptr, int mask)
   char*              pass;
   char*              user;
   char*              name;
+  char*		     classname;
   int                port;
 
   for (tmp = ConfigItemList; tmp; tmp = tmp->next) {
@@ -280,7 +281,7 @@ void report_configured_links(struct Client* sptr, int mask)
             break;
         if(p->conf_type == 0)return;
 
-        get_printable_conf(tmp, &name, &host, &pass, &user, &port);
+        get_printable_conf(tmp, &name, &host, &pass, &user, &port,&classname);
 
         if(mask & (CONF_CONNECT_SERVER|CONF_NOCONNECT_SERVER))
           {
@@ -299,7 +300,7 @@ void report_configured_links(struct Client* sptr, int mask)
                          host,
                          name,
                          port,
-                         get_conf_class(tmp),
+                         classname,
                          oper_flags_as_string((int)tmp->hold));
             else
               sendto_one(sptr, form_str(p->rpl_stats), me.name,
@@ -307,7 +308,7 @@ void report_configured_links(struct Client* sptr, int mask)
                          "*@127.0.0.1",
                          name,
                          port,
-                         get_conf_class(tmp));
+                         classname);
 
           }
         else if(mask & (CONF_OPERATOR|CONF_LOCOP))
@@ -319,21 +320,21 @@ void report_configured_links(struct Client* sptr, int mask)
                          p->conf_char,
                          user, host, name,
                          oper_privs_as_string((struct Client *)NULL,port),
-                         get_conf_class(tmp),
+                         classname,
                          oper_flags_as_string((int)tmp->hold));
             else
               sendto_one(sptr, form_str(p->rpl_stats), me.name,
                          sptr->name, p->conf_char,
                          user, host, name,
                          "0",
-                         get_conf_class(tmp),
+                         classname,
                          "");
           }
         else
           sendto_one(sptr, form_str(p->rpl_stats), me.name,
                      sptr->name, p->conf_char,
                      host, name, port,
-                     get_conf_class(tmp));
+                     classname);
       }
   }
 }
@@ -355,6 +356,7 @@ void report_specials(struct Client* sptr, int flags, int numeric)
   char*            host;
   char*            pass;
   char*            user;
+  char*       classname;
   int              port;
 
   if (flags & CONF_XLINE)
@@ -366,7 +368,7 @@ void report_specials(struct Client* sptr, int flags, int numeric)
   for (aconf = this_conf; aconf; aconf = aconf->next)
     if (aconf->status & flags)
       {
-        get_printable_conf(aconf, &name, &host, &pass, &user, &port);
+        get_printable_conf(aconf, &name, &host, &pass, &user, &port, &classname);
 
         sendto_one(sptr, form_str(numeric),
                    me.name,
@@ -1447,6 +1449,7 @@ void report_qlines(struct Client *sptr)
   char *user;
   char *pass;
   char *name;
+  char *classname;
   int port;
 
   for (qp = q_conf; qp; qp = qp->next)
@@ -1458,7 +1461,7 @@ void report_qlines(struct Client *sptr)
 
       for (aconf=qp->confList;aconf;aconf = aconf->next)
         {
-          get_printable_conf(aconf, &name, &host, &pass, &user, &port);
+          get_printable_conf(aconf, &name, &host, &pass, &user, &port,&classname);
           
           sendto_one(sptr, form_str(RPL_STATSQLINE),
                      me.name, sptr->name, name, pass, user, host);
@@ -1620,6 +1623,7 @@ int rehash_dump(struct Client *sptr)
   char *pass;
   char *user;
   char *name;
+  char *classname;
   int  port;
 
   tmptr = localtime(&CurrentTime);
@@ -1644,7 +1648,7 @@ int rehash_dump(struct Client *sptr)
   for(aconf = ConfigItemList; aconf; aconf = aconf->next)
     {
       struct Class* class_ptr = ClassPtr(aconf);
-      get_printable_conf(aconf, &name, &host, &pass, &user, & port );
+      get_printable_conf(aconf, &name, &host, &pass, &user, &port, &classname );
 
       if(aconf->status == CONF_CONNECT_SERVER)
         {
@@ -1745,7 +1749,7 @@ static void initconf(FBFILE* file)
   int              ncount = 0;
   struct ConfItem* aconf;
 
-  class0 = find_class(0);       /* which one is class 0 ? */
+  class0 = find_class("0");       /* which one is class 0 ? */
   aconf = NULL;
 
   while (fbgets(line, sizeof(line), file))
@@ -2567,7 +2571,7 @@ int m_testline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   struct ConfItem *aconf;
   unsigned long ip;
   unsigned long host_mask;
-  char *host, *pass, *user, *name, *given_host, *given_name, *p;
+  char *host, *pass, *user, *name, *classname, *given_host, *given_name, *p;
   int port;
 
   if (!MyClient(sptr) || !IsAnOper(sptr))
@@ -2587,7 +2591,7 @@ int m_testline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
               aconf = match_Dline(ip);
               if( aconf )
                 {
-                  get_printable_conf(aconf, &name, &host, &pass, &user, &port);
+                  get_printable_conf(aconf, &name, &host, &pass, &user, &port,&classname);
                   sendto_one(sptr, 
                          ":%s NOTICE %s :D-line host [%s] pass [%s]",
                          me.name, parv[0], 
@@ -2615,7 +2619,7 @@ int m_testline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
       if(aconf)
         {
-          get_printable_conf(aconf, &name, &host, &pass, &user, &port);
+          get_printable_conf(aconf, &name, &host, &pass, &user, &port,&classname);
       
           if(aconf->status & CONF_KILL) 
             {
@@ -2636,7 +2640,7 @@ int m_testline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                          user,
                          host,
                          port,
-                         get_conf_class(aconf));
+                         classname);
 
               aconf = find_tkline(given_host,given_name);
               if(aconf)
@@ -2666,9 +2670,9 @@ int m_testline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
  *
  * inputs        - struct ConfItem
  *
- * output        - name 
+ * output         - name 
  *                - host
- *                 - pass
+ *                - pass
  *                - user
  *                - port
  *
@@ -2679,14 +2683,16 @@ int m_testline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
  */
 
 void get_printable_conf(struct ConfItem *aconf, char **name, char **host,
-                           char **pass, char **user,int *port)
+                           char **pass, char **user,int *port,char **classname)
 {
   static  char        null[] = "<NULL>";
+  static  char        zero[] = "0";
 
   *name = BadPtr(aconf->name) ? null : aconf->name;
   *host = BadPtr(aconf->host) ? null : aconf->host;
   *pass = BadPtr(aconf->passwd) ? null : aconf->passwd;
   *user = BadPtr(aconf->user) ? null : aconf->user;
+  *classname = BadPtr(aconf->className) ? zero : aconf->className;
   *port = (int)aconf->port;
 }
 
@@ -3070,16 +3076,14 @@ void conf_add_class(struct ConfItem *aconf,int sendq)
 {
   /*
   ** If conf line is a class definition, create a class entry
-  ** for it and make the conf_line illegal and delete it.
-  ** Negative class numbers are not accepted.
   */
     /*
     ** associate each conf line with a class by using a pointer
     ** to the correct class record. -avalon
     */
-  if (atoi(aconf->host) > -1)
+  if (aconf->host)
     {
-      add_class(atoi(aconf->host), atoi(aconf->passwd),
+      add_class(aconf->host, atoi(aconf->passwd),
 		atoi(aconf->user), aconf->port,
 		sendq );
     }
@@ -3110,29 +3114,34 @@ void conf_add_port(struct ConfItem *aconf)
  * side effects - Add a class pointer to a conf 
  */
 
-void conf_add_class_to_conf(struct ConfItem *aconf,char *class_field)
+void conf_add_class_to_conf(struct ConfItem *aconf)
 {
-  int classToFind;
-
-  if(class_field)
-    classToFind = atoi(class_field);
-  else
+  if(!aconf->className)
     {
       sendto_realops("Warning *** Missing class field");
+      DupString(aconf->className,"0");
       ClassPtr(aconf) = class0;
       return;
     }
 
-  ClassPtr(aconf) = find_class(classToFind);
+  ClassPtr(aconf) = find_class(aconf->className);
 
-  if(classToFind && (ClassPtr(aconf) == class0))
+  if(ClassPtr(aconf) == class0)
     {
-      sendto_realops("Warning *** Defaulting to class 0 for missing class %d",
-	     classToFind);
+      sendto_realops("Warning *** Defaulting to class 0 for missing class \"%s\"",
+	     aconf->className);
+      MyFree(aconf->className);
+      DupString(aconf->className,"0");
+      return;
     }
 
   if (ConfMaxLinks(aconf) < 0)
-    ClassPtr(aconf) = find_class(0);
+    {
+      ClassPtr(aconf) = find_class(0);
+      MyFree(aconf->className);
+      DupString(aconf->className,"0");
+      return;
+    }
 }
 
 /*
@@ -3142,11 +3151,11 @@ void conf_add_class_to_conf(struct ConfItem *aconf,char *class_field)
  * side effects - Add an I line
  */
 
-void conf_add_i_line(struct ConfItem *aconf,char *class_field)
+void conf_add_i_line(struct ConfItem *aconf)
 {
   struct ConfItem *bconf;
 
-  conf_add_class_to_conf(aconf,class_field);          
+  conf_add_class_to_conf(aconf);
 
   if ((bconf = find_conf_entry(aconf, aconf->status)))
     {
@@ -3253,10 +3262,9 @@ void conf_add_i_line(struct ConfItem *aconf,char *class_field)
  */
 
 struct ConfItem *conf_add_server(struct ConfItem *aconf,
-                                        char* class_field,
                                         int ncount, int ccount )
 {
-  conf_add_class_to_conf(aconf,class_field);
+  conf_add_class_to_conf(aconf);
 
   if (ncount > MAXCONFLINKS || ccount > MAXCONFLINKS ||
       !aconf->host || !aconf->user)
@@ -3290,9 +3298,9 @@ struct ConfItem *conf_add_server(struct ConfItem *aconf,
  * side effects - Add an o/O line
  */
 
-struct ConfItem *conf_add_o_line(struct ConfItem *aconf,char *class_field)
+struct ConfItem *conf_add_o_line(struct ConfItem *aconf)
 {
-  conf_add_class_to_conf(aconf,class_field);
+  conf_add_class_to_conf(aconf);
 
   if(SplitUserHost(aconf) < 0)
     {
@@ -3492,6 +3500,7 @@ void conf_add_q_line(struct ConfItem *aconf)
  *		- pointer to pass_field
  *              - pointer to user_field
  *              - pointer to port_field
+ *		- pointer to class_field
  * output       - NONE
  * side effects - update host/pass/user/port fields of given aconf
  */
@@ -3500,7 +3509,8 @@ void conf_add_fields(struct ConfItem *aconf,
                                char *host_field,
                                char *pass_field,
                                char *user_field,
-                               char *port_field)
+                               char *port_field,
+		     	       char *class_field)
 {
   if(host_field)
     DupString(aconf->host, host_field);
@@ -3510,6 +3520,8 @@ void conf_add_fields(struct ConfItem *aconf,
     DupString(aconf->user, user_field);
   if(port_field)
     aconf->port = atoi(port_field);
+  if(class_field)
+    DupString(aconf->className, class_field);
 }
 
 void yyerror(char *msg)

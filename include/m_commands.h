@@ -80,9 +80,6 @@ extern int m_connect(struct Client *,struct Client *,int,char **);
 extern int m_oper(struct Client *,struct Client *,int,char **);
 extern int m_pass(struct Client *,struct Client *,int,char **);
 extern int m_trace(struct Client *,struct Client *,int,char **);
-#ifdef LTRACE
-extern int m_ltrace(struct Client *,struct Client *,int,char **);
-#endif /* LTRACE */
 extern int m_time(struct Client *,struct Client *,int, char **);
 extern int m_names(struct Client *,struct Client *,int,char **);
 

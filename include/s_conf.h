@@ -24,6 +24,12 @@
  * $Id$
  *
  * $Log$
+ * Revision 7.10  2000/01/17 03:21:24  db
+ * - bunch of changes in order to have class names not numbers. *sigh*
+ *   I toyed with the idea of keeping class #'s and having class_names
+ *   to class #' mapping somewhere, but thats just getting silly.. sooo....
+ *   Here we are...
+ *
  * Revision 7.9  2000/01/16 22:16:46  db
  * - checkpoint with operator section mostly working...
  *   class code has to be rewritten still
@@ -259,7 +265,7 @@ struct ConfItem
   char*            user;     /* user part of user@host */
   int              port;
   time_t           hold;     /* Hold action until this time (calendar time) */
-  char*		   class_name;   /* Name of class */
+  char*		   className;   /* Name of class */
   struct Class*    c_class;     /* Class of connection */
   int              dns_pending; /* 1 if dns query pending, 0 otherwise */
 };
@@ -446,7 +452,7 @@ extern struct ConfItem* find_is_klined(const char* host,
 extern char* show_iline_prefix(struct Client *,struct ConfItem *,char *);
 extern void get_printable_conf(struct ConfItem *,
                                     char **, char **, char **,
-                                    char **, int *);
+                                    char **, int *,char **);
 extern void report_configured_links(struct Client* cptr, int mask);
 extern void report_specials(struct Client* sptr, int flags, int numeric);
 extern void report_qlines(struct Client* cptr);
@@ -475,11 +481,11 @@ extern  int     is_address(char *,unsigned long *,unsigned long *);
 extern  int     rehash (struct Client *, struct Client *, int);
 
 /* BLAH, pity I extern'ed all these. later will do better -db */
-extern struct ConfItem* conf_add_server(struct ConfItem *,char *,int ,int );
-extern struct ConfItem* conf_add_o_line(struct ConfItem *,char *);
+extern struct ConfItem* conf_add_server(struct ConfItem *,int ,int );
+extern struct ConfItem* conf_add_o_line(struct ConfItem *);
 extern void conf_add_port(struct ConfItem *);
-extern void conf_add_class_to_conf(struct ConfItem *,char *);
-extern void conf_add_i_line(struct ConfItem *,char *);
+extern void conf_add_class_to_conf(struct ConfItem *);
+extern void conf_add_i_line(struct ConfItem *);
 extern void conf_add_me(struct ConfItem *);
 extern void conf_add_hub_or_leaf(struct ConfItem *);
 extern void conf_add_class(struct ConfItem *,int );
@@ -488,7 +494,7 @@ extern void conf_add_d_line(struct ConfItem *);
 extern void conf_add_x_line(struct ConfItem *);
 extern void conf_add_u_line(struct ConfItem *);
 extern void conf_add_q_line(struct ConfItem *);
-extern void conf_add_fields(struct ConfItem*, char*, char *, char*, char *);
+extern void conf_add_fields(struct ConfItem*, char*, char *, char*, char *,char *);
 extern void conf_add_conf(struct ConfItem *);
 extern void oldParseOneLine(char* ,struct ConfItem*,int*,int*);
 
