@@ -313,14 +313,14 @@ static int report_this_status(struct Client *source_p, struct Client *target_p,
     case STAT_CONNECTING:
       sendto_one(source_p, form_str(RPL_TRACECONNECTING), me.name,
                  source_p->name, class_name, 
-		 IsSetOperAdmin(source_p) ? name : target_p->name);
+		 IsOperAdmin(source_p) ? name : target_p->name);
 		   
       cnt++;
       break;
     case STAT_HANDSHAKE:
       sendto_one(source_p, form_str(RPL_TRACEHANDSHAKE), me.name,
                  source_p->name, class_name, 
-                 IsSetOperAdmin(source_p) ? name : target_p->name);
+                 IsOperAdmin(source_p) ? name : target_p->name);
 		   
       cnt++;
       break;
@@ -347,7 +347,7 @@ static int report_this_status(struct Client *source_p, struct Client *target_p,
                        me.name,
                        source_p->name, class_name,
 		       name,
-                       IsSetOperAdmin(source_p) ? ip : "255.255.255.255",
+                       IsOperAdmin(source_p) ? ip : "255.255.255.255",
                        now - target_p->lasttime,
                        (target_p->user)?(now - target_p->user->last):0);
 	  else if (IsOper(target_p))
@@ -369,7 +369,7 @@ static int report_this_status(struct Client *source_p, struct Client *target_p,
 	}
       break;
     case STAT_SERVER:
-    name = IsSetOperAdmin(source_p) ? get_client_name(target_p, HIDE_IP):get_client_name(target_p, MASK_IP);
+    name = IsOperAdmin(source_p) ? get_client_name(target_p, HIDE_IP):get_client_name(target_p, MASK_IP);
 
       sendto_one(source_p, form_str(RPL_TRACESERVER),
 		 me.name, source_p->name, class_name, link_s_p,

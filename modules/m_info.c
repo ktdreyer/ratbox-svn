@@ -673,7 +673,7 @@ static void send_conf_options(struct Client *source_p)
   */
 
   /* jdc -- Only send compile information to admins. */
-  if (IsSetOperAdmin(source_p))
+  if (IsOperAdmin(source_p))
   {
     sendto_one(source_p,
 	":%s %d %s :Compiled on [%s]",

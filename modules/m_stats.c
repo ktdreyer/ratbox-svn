@@ -270,7 +270,7 @@ static void mo_stats(struct Client *client_p, struct Client *source_p,
     if (stats_cmd_table[i].letter == statchar)
     {
       /* The stats table says what privs are needed, so check --fl_ */
-      if(stats_cmd_table[i].need_admin && !IsSetOperAdmin(source_p))
+      if(stats_cmd_table[i].need_admin && !IsOperAdmin(source_p))
       {
         sendto_one(source_p, form_str(ERR_NOPRIVILEGES),me.name,source_p->name);
         break;
@@ -698,7 +698,7 @@ static void stats_servlinks(struct Client *client_p)
 
     sendto_one(client_p, Sformat, me.name, RPL_STATSLINKINFO,
                client_p->name, 
-               IsSetOperAdmin(client_p) ? get_client_name(target_p, SHOW_IP)
+               IsOperAdmin(client_p) ? get_client_name(target_p, SHOW_IP)
 	       : get_client_name(target_p, MASK_IP),
                (int)linebuf_len(&target_p->localClient->buf_sendq),
                (int)target_p->localClient->sendM,
@@ -821,7 +821,7 @@ static void stats_L_list(struct Client *source_p,char *name, int doall, int wild
       /* This basically shows ips for our opers if its not a server/admin, or
        * its one of our admins.  */
       if(MyClient(source_p) && IsOper(source_p) && 
-        (IsSetOperAdmin(source_p) || 
+        (IsOperAdmin(source_p) || 
 	(!IsServer(target_p) && !IsAdmin(target_p) && 
 	 !IsHandshake(target_p) && !IsConnecting(target_p))))
 	{

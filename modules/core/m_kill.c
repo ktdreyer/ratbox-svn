@@ -83,14 +83,11 @@ static void mo_kill(struct Client *client_p, struct Client *source_p,
   user = parv[1];
   reason = parv[2]; /* Either defined or NULL (parc >= 2!!) */
 
-/* jdc -- we lack macro IsSetOperGlobalKill, and global_kill in conf. */
-/*
-  if (!IsSetOperGlobalKill(source_p))
+  if (!IsOperGlobalKill(source_p))
     {
       sendto_one(source_p,":%s NOTICE %s :You need global_kill = yes;",me.name,parv[0]);
       return;
     }
-*/
 
   if (!BadPtr(reason))
     {

@@ -125,7 +125,7 @@ void show_ports(struct Client* source_p)
                  source_p->name,
                  'P',
                  listener->port,
-                 IsSetOperAdmin(source_p) ? listener->name : me.name,
+                 IsOperAdmin(source_p) ? listener->name : me.name,
                  listener->ref_count,
                  (listener->active)?"active":"disabled");
     }

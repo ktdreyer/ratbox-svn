@@ -135,7 +135,7 @@ static void mo_kline(struct Client *client_p,
   time_t tkline_time=0;
   time_t cur_time;
 
-  if (!IsSetOperK(source_p))
+  if (!IsOperK(source_p))
     {
       sendto_one(source_p,":%s NOTICE %s :You need kline = yes;",
 		 me.name,source_p->name);
@@ -578,7 +578,7 @@ static void mo_dline(struct Client *client_p, struct Client *source_p,
   const char* current_date;
   time_t cur_time;
 
-  if(!IsSetOperK(source_p))
+  if(!IsOperK(source_p))
     {
       sendto_one(source_p,":%s NOTICE %s :You need kline = yes;",me.name,parv[0]);
       return;
@@ -679,7 +679,7 @@ static void mo_dline(struct Client *client_p, struct Client *source_p,
     reason = "No reason";
 
 
-  if(IsSetOperAdmin(source_p))
+  if(IsOperAdmin(source_p))
     {
       if (bits < 8)
 	{

@@ -1042,14 +1042,14 @@ int user_mode(struct Client *client_p, struct Client *source_p, int parc, char *
   if(badflag)
     sendto_one(source_p, form_str(ERR_UMODEUNKNOWNFLAG), me.name, parv[0]);
 
-  if ((source_p->umodes & FLAGS_NCHANGE) && !IsSetOperN(source_p))
+  if ((source_p->umodes & FLAGS_NCHANGE) && !IsOperN(source_p))
     {
       sendto_one(source_p,":%s NOTICE %s :*** You need oper and N flag for +n",
                  me.name,parv[0]);
       source_p->umodes &= ~FLAGS_NCHANGE; /* only tcm's really need this */
     }
 
-  if (MyConnect(source_p) && (source_p->umodes & FLAGS_ADMIN) && !IsSetOperAdmin(source_p))
+  if (MyConnect(source_p) && (source_p->umodes & FLAGS_ADMIN) && !IsOperAdmin(source_p))
     {
       sendto_one(source_p,":%s NOTICE %s :*** You need oper and A flag for +a",
                  me.name, parv[0]);
@@ -1293,7 +1293,7 @@ int oper_up( struct Client *source_p,
   if((int)aconf->hold)
     {
       source_p->umodes |= ((int)aconf->hold & ALL_UMODES); 
-      if( !IsSetOperN(source_p) )
+      if( !IsOperN(source_p) )
 	source_p->umodes &= ~FLAGS_NCHANGE;
       
       sendto_one(source_p, ":%s NOTICE %s :*** Oper flags set from conf",
@@ -1332,7 +1332,7 @@ int oper_up( struct Client *source_p,
   else
     operprivs = "";
 
-  if (IsSetOperAdmin(source_p))
+  if (IsOperAdmin(source_p))
     source_p->umodes |= FLAGS_ADMIN;
 
   sendto_realops_flags(FLAGS_ALL, L_ALL,

@@ -153,7 +153,7 @@ static void mo_gline(struct Client *client_p,
 
   if (ConfigFileEntry.glines)
     {
-      if (!IsSetOperGline(source_p))
+      if (!IsOperGline(source_p))
 	{
 	  sendto_one(source_p,":%s NOTICE %s :You need gline = yes;",me.name,parv[0]);
 	  return;

@@ -105,7 +105,7 @@ static void mo_unkline (struct Client *client_p,struct Client *source_p,
 
   ircsprintf(temppath, "%s.tmp", ConfigFileEntry.klinefile);
   
-  if (!IsSetOperUnkline(source_p))
+  if (!IsOperUnkline(source_p))
     {
       sendto_one(source_p,":%s NOTICE %s :You need unkline = yes;",me.name,parv[0]);
       return;
@@ -343,7 +343,7 @@ mo_undline (struct Client *client_p, struct Client *source_p,
 
   ircsprintf(temppath, "%s.tmp", ConfigFileEntry.dlinefile);
 
-  if (!IsSetOperUnkline(source_p))
+  if (!IsOperUnkline(source_p))
     {
       sendto_one(source_p,":%s NOTICE %s :You need unkline = yes;",me.name,
 		 parv[0]);
@@ -467,7 +467,7 @@ static void mo_ungline(struct Client *client_p, struct Client *source_p,
       return;
     }
 
-  if (!IsSetOperUnkline(source_p) || !IsSetOperGline(source_p))
+  if (!IsOperUnkline(source_p) || !IsOperGline(source_p))
     {
       sendto_one(source_p,":%s NOTICE %s :You need unkline = yes;",
                  me.name,parv[0]);
