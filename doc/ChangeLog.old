@@ -1,3 +1,10 @@
+*** 20001206_13 by db
+- reverted previous m_kline.c change in favour of...
+- letting s_conf.c figure out if the oper placing the kline is remote oper
+  or not, and logging it appropriately.
+
+
+
 *** 20001206_12 by db
 - cleaned up m_server.c some more. ugh. it was horrid
 
