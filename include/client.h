@@ -114,7 +114,6 @@ struct Client
 {
 	dlink_node node;
 	dlink_node lnode;
-
 	struct User *user;	/* ...defined, if this is a User */
 	struct Server *serv;	/* ...defined, if this is a server */
 	struct Client *servptr;	/* Points to server this Client is on */
@@ -170,6 +169,7 @@ struct Client
 
 struct LocalUser
 {
+	dlink_node tnode;	/* This is the node for the local list type the client is on*/
 	/*
 	 * The following fields are allocated only for local clients
 	 * (directly connected to *this* server with a socket.
@@ -345,8 +345,7 @@ struct LocalUser
 /* housekeeping flags */
 
 #define FLAGS_PINGSENT     0x0001	/* Unreplied ping sent */
-#define FLAGS_DEADSOCKET   0x0002	/* Local socket is dead--Exiting soon */
-#define FLAGS_KILLED       0x0004	/* Prevents "QUIT" from being sent for this */
+#define FLAGS_DEADLOCAL   0x0002	/* Local socket is dead--Exiting soon */
 #define FLAGS_CLOSING      0x0020	/* set when closing to suppress errors */
 #define FLAGS_CHKACCESS    0x0040	/* ok to check clients access if set */
 #define FLAGS_GOTID        0x0080	/* successful ident lookup achieved */
@@ -455,6 +454,8 @@ struct LocalUser
 #define ClearEob(x)		((x)->flags &= ~FLAGS_EOB)
 #define SetEob(x)		((x)->flags |= FLAGS_EOB)
 #define HasSentEob(x)		((x)->flags & FLAGS_EOB)
+#define IsDead(x)           	((x)->flags &  FLAGS_DEADLOCAL)
+#define SetDead(x)          	((x)->flags |= FLAGS_DEADLOCAL)
 
 
 /* oper flags */

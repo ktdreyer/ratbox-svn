@@ -1168,6 +1168,8 @@ static int
 exit_remote_client(struct Client *client_p, struct Client *source_p, struct Client *from,
 		   const char *comment)
 {
+	if(IsDeadLocal(source_p))
+		return -1;
 	if(source_p->servptr && source_p->servptr->serv)
 	{
 		dlinkDelete(&source_p->lnode, &source_p->servptr->serv->users);
@@ -1186,6 +1188,7 @@ static int
 exit_unknown_client(struct Client *client_p, struct Client *source_p, struct Client *from,
 		  const char *comment)
 {
+	SetDeadLocal(source_p);
 	delete_adns_queries(source_p->localClient->dns_query);
 	delete_identd_queries(source_p);
 	client_flush_input(source_p);
@@ -1217,6 +1220,9 @@ exit_remote_server(struct Client *client_p, struct Client *source_p, struct Clie
 {
 	static char comment1[(HOSTLEN*2)+2];
 	struct Client *target_p;
+	if(IsDeadLocal(source_p))
+		return -1;
+	
 	if(ConfigServerHide.hide_servers)
 	{
 		ircsprintf(comment1, "%s *.split", me.name);
@@ -1261,6 +1267,8 @@ exit_local_server(struct Client *client_p, struct Client *source_p, struct Clien
 {
 	static char comment1[(HOSTLEN*2)+2];
 	unsigned int sendk, recvk;
+	
+	SetDeadLocal(source_p);
 
 	dlinkDelete(&source_p->localClient->tnode, &serv_list);
 	remove_server_from_list(source_p);
@@ -1335,9 +1343,12 @@ static int
 exit_local_client(struct Client *client_p, struct Client *source_p, struct Client *from,
 		  const char *comment)
 {
+	
 	assert(IsPerson(source_p));
 	client_flush_input(source_p);
 	Count.local--;
+	SetDeadLocal(source_p);
+	
 	dlinkDelete(&source_p->localClient->tnode, &lclient_list);
 	if(IsOper(source_p))
 		dlinkFindDestroy(&oper_list, source_p);
@@ -1400,6 +1411,8 @@ exit_client(struct Client *client_p,	/* The local client originating the
 	    const char *comment	/* Reason for the exit */
 	)
 {
+	if(IsDeadLocal(source_p))
+		return -1;
 	if(MyConnect(source_p))
 	{
 		/* Local clients of various types */
@@ -1409,7 +1422,8 @@ exit_client(struct Client *client_p,	/* The local client originating the
 			return exit_unknown_client(client_p, source_p, from, comment);
 		if(IsServer(source_p))
 			return exit_local_server(client_p, source_p, from, comment);
-	} else
+	} 
+	else 
 	{
 		/* Remotes */
 		if(IsPerson(source_p))
