@@ -1,3 +1,23 @@
+androsyn    2003/01/21 01:33:42 UTC	(20030121_3)
+
+  Modified files:
+    .                    configure 
+    autoconf             acconfig.h configure.in 
+    include              ircd_defs.h s_conf.h setup.h.in 
+  Log:
+  Add a check for struct sockaddr_storage and add an alternate if it doesn't
+  exist
+  
+  Revision  Changes    Path
+  7.27      +2 -0      ircd-ratbox/autoconf/acconfig.h
+  7.164     +18 -0     ircd-ratbox/autoconf/configure.in
+  7.171     +172 -130  ircd-ratbox/configure
+  7.37      +13 -10    ircd-ratbox/include/ircd_defs.h
+  7.228     +6 -2      ircd-ratbox/include/s_conf.h
+  7.64      +3 -0      ircd-ratbox/include/setup.h.in
+
+
+
 androsyn    2003/01/21 00:28:37 UTC	(20030121_2)
 
   Modified files:
