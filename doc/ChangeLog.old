@@ -1,3 +1,8 @@
+*** 20000104_5 by db
+- fixed DEBUG error in s_conf.c
+
+
+
 *** 20000104_4 by db
 - also report how many malloc()'ed dbufs there were max
 
