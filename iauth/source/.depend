@@ -1,0 +1,12 @@
+auth.o: auth.c ../include/headers.h ../include/auth.h \
+ ../include/conf.h ../include/iauth.h ../include/sock.h \
+ ../include/setup.h
+conf.o: conf.c ../include/headers.h ../include/auth.h \
+ ../include/conf.h ../include/iauth.h ../include/sock.h \
+ ../include/setup.h
+iauth.o: iauth.c ../include/headers.h ../include/auth.h \
+ ../include/conf.h ../include/iauth.h ../include/sock.h \
+ ../include/setup.h
+sock.o: sock.c ../include/headers.h ../include/auth.h \
+ ../include/conf.h ../include/iauth.h ../include/sock.h \
+ ../include/setup.h
