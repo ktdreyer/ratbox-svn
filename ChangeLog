@@ -1,3 +1,20 @@
+leeh        2004/06/13 21:58:53 EDT	(20040614_0)
+
+  Modified files:
+    src                  ircd.c 
+  Log:
+  - try an autoconnect on startup.
+    there was a nice logical comment in ircd.c, apparently trying an autoconn
+    after a restart is a bad idea because itll cause nick collides.
+  
+    so instead we wait so more clients can connect and more collisions can
+    happen?!  someone needs a cluestick.
+  
+  Revision  Changes    Path
+  7.340     +5 -0      ircd-ratbox/src/ircd.c
+
+
+
 leeh        2004/06/06 21:01:48 EDT	(20040607_1)
 
   Modified files:
