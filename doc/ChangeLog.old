@@ -1,3 +1,7 @@
+*** 20010530_1 by ejb
+- removed negative number support in the yacc grammar for now.
+
+
 *** 20010529_11 by ejb
 - VMS-style ircd/foo getopt support (only on VMS, not Unix).
 
