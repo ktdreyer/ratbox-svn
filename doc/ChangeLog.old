@@ -1,3 +1,9 @@
+*** 20010512_4 by db
+- tidied up vchan_show_ids
+- don't show <secret> twice
+
+
+
 *** 20010512_3 by toot
 put PREFIX's in the correct order, in 005 numeric.
 
