@@ -321,13 +321,6 @@ void close_connection(struct Client *client_p)
   else
     ServerStats->is_ni++;
   
-#if 0
-  if (client_p->localClient->dns_reply)
-    {
-      --client_p->localClient->dns_reply->ref_count;
-      client_p->localClient->dns_reply = 0;
-    }
-#endif
   if (-1 < client_p->fd)
     {
       /* attempt to flush any pending dbufs. Evil, but .. -- adrian */

@@ -225,10 +225,7 @@ static int inetport(struct Listener* listener)
 
   /* Listen completion events are READ events .. */
 
-
-  comm_setselect(fd, FDLIST_SERVICE, COMM_SELECT_READ, accept_connection,
-    listener, 0);
-
+   accept_connection(fd, listener);
   return 1;
 }
 

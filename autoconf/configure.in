@@ -552,15 +552,15 @@ if test "$SELECT_TYPE" != "kqueue" ; then
                 SELECT_TYPE="devpoll"
                 AC_DEFINE(HAVE_DEVPOLL)
                 AC_DEFINE(USE_DEVPOLL)
+	elif test "$ac_cv_func_rtsigio" = "yes" ; then
+		SELECT_TYPE="sigio"
+		AC_DEFINE(USE_SIGIO)
 	elif test "$ac_cv_func_poll" = "yes" ; then
                 SELECT_TYPE="poll"
                 AC_DEFINE(USE_POLL)
 	elif test "$ac_cv_func_select" = "yes" ; then
                 SELECT_TYPE="select"
                 AC_DEFINE(USE_SELECT)
-	elif test "$ac_cv_func_rtsigio" = "yes" ; then
-		SELECT_TYPE="sigio"
-		AC_DEFINE(USE_SIGIO)
         else
                 echo "Eep!  Can't find kqueue, devpoll, poll _or_ select!"
                 echo "I'll try select and hope for the best."
