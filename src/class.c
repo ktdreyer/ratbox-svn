@@ -53,13 +53,20 @@ make_class(void)
 
   tmp = (struct Class *)MyMalloc(sizeof(struct Class));
   memset(tmp, 0, sizeof(struct Class));
+#ifdef IPV6
+  tmp->ip_limits = New_Patricia(128);
+#else
+  tmp->ip_limits = New_Patricia(32);
+#endif
   return tmp;
 }
 
 void free_class(struct Class *tmp)
 {
+  Destroy_Patricia(tmp->ip_limits);
   MyFree(tmp->class_name);
   MyFree((char *)tmp);
+  
 }
 
 /*

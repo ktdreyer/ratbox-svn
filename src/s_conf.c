@@ -53,6 +53,7 @@
 #include "fileio.h"
 #include "memory.h"
 #include "balloc.h"
+#include "patricia.h"
 #include "cluster.h"
 
 struct config_server_hide ConfigServerHide;
@@ -701,6 +702,7 @@ verify_access(struct Client* client_p, const char* username)
 	      return(NOT_AUTHORIZED);
             }
 
+	  
 	  if (IsConfDoIdentd(aconf))
 	    SetNeedId(client_p);
 	  if (IsConfRestricted(aconf))
@@ -746,6 +748,69 @@ verify_access(struct Client* client_p, const char* username)
  return(NOT_AUTHORIZED);
 }
 
+
+/*
+ * add_ip_limit
+ * 
+ * Returns 1 if successful 0 if not
+ *
+ * This checks if the user has exceed the limits for their class
+ * unless of course they are exempt..
+ */
+
+static int
+add_ip_limit(struct Client *client_p, struct ConfItem *aconf)
+{
+  patricia_node_t *pnode;
+  
+  /* If the limits are 0 don't do anything.. */
+  if(ConfCidrAmount(aconf) == 0 || ConfCidrBitlen(aconf) == 0)
+    return -1;
+  
+  pnode = match_ip(ConfIpLimits(aconf), (void *)&IN_ADDR(client_p->localClient->ip));
+  
+  if(pnode == NULL)
+    pnode = make_and_lookup_ip(ConfIpLimits(aconf), DEF_FAM, &IN_ADDR(client_p->localClient->ip), ConfCidrBitlen(aconf));
+  
+  assert(pnode != NULL);
+
+  if(pnode != NULL)
+  {
+    if(((unsigned long)pnode->data) >= ConfCidrAmount(aconf) && !IsConfExemptLimits(aconf))
+    {
+      /* This should only happen if the limits are set to 0 */
+      if((unsigned long)pnode->data == 0)
+      {
+         patricia_remove(ConfIpLimits(aconf), pnode);
+      }
+      return(0);
+    }
+    ((unsigned long)pnode->data)++;
+  }
+  return 1;
+}
+
+static void
+remove_ip_limit(struct Client *client_p, struct ConfItem *aconf)
+{
+  patricia_node_t *pnode;
+  
+  /* If the limits are 0 don't do anything.. */
+  if(ConfCidrAmount(aconf) == 0 || ConfCidrBitlen(aconf) == 0)
+    return;
+
+  pnode = match_ip(ConfIpLimits(aconf), (void *)&IN_ADDR(client_p->localClient->ip));
+  if(pnode == NULL)
+    return;
+  
+  ((unsigned long)pnode->data)--; 
+  if(((unsigned long)pnode->data) == 0)
+  {
+    patricia_remove(ConfIpLimits(aconf), pnode);
+  }
+
+}
+
 /*
  * attach_iline
  *
@@ -764,11 +829,19 @@ int attach_iline(struct Client *client_p, struct ConfItem *aconf)
   int ident_count = 0;
   int unidented = 0;
 
+  
+  if(!add_ip_limit(client_p, aconf))
+  {
+    return(TOO_MANY_LOCAL);
+  }
+
+  
   if(IsConfExemptLimits(aconf))
     return(attach_conf(client_p, aconf));
 
   if(*client_p->username == '~')
     unidented = 1;
+
 
   /* find_hostname() returns the head of the list to search */
   DLINK_FOREACH(ptr, find_hostname(client_p->host))
@@ -790,7 +863,7 @@ int attach_iline(struct Client *client_p, struct ConfItem *aconf)
     }
     else if(irccmp(target_p->username, client_p->username) == 0)
       ident_count++;
-
+    
     if(ConfMaxLocal(aconf) && local_count >= ConfMaxLocal(aconf))
       return(TOO_MANY_LOCAL);
     else if(ConfMaxGlobal(aconf) && global_count >= ConfMaxGlobal(aconf))
@@ -798,6 +871,7 @@ int attach_iline(struct Client *client_p, struct ConfItem *aconf)
     else if(ConfMaxIdent(aconf) && ident_count >= ConfMaxIdent(aconf))
       return(TOO_MANY_IDENT);
   }
+  
 
   return(attach_conf(client_p, aconf));
 }
@@ -816,11 +890,14 @@ detach_conf(struct Client* client_p)
   struct ConfItem *aconf;
 
   aconf = client_p->localClient->att_conf;
-
+  
+  
   if(aconf != NULL)
   {
     if(ClassPtr(aconf))
     {
+      remove_ip_limit(client_p, aconf);
+
       if (aconf->status & CONF_CLIENT_MASK)
       {
         if (ConfCurrUsers(aconf) > 0)
@@ -832,6 +909,7 @@ detach_conf(struct Client* client_p)
         free_class(ClassPtr(aconf));
         ClassPtr(aconf) = NULL;
       }
+ 
     }
 
     aconf->clients--;

@@ -30,6 +30,9 @@
 struct ConfItem;
 struct Client;
 
+
+struct _patricia_tree_t;
+
 struct Class
 {
   struct Class *next;
@@ -42,6 +45,10 @@ struct Class
   int con_freq;
   int ping_freq;
   int total;
+  struct _patricia_tree_t *ip_limits;
+  int cidr_bitlen;
+  int cidr_amount;
+  
 };
 
 struct Class *ClassList;
@@ -55,7 +62,9 @@ struct Class *ClassList;
 #define PingFreq(x)     ((x)->ping_freq)
 #define MaxSendq(x)     ((x)->max_sendq)
 #define CurrUsers(x)    ((x)->total)
-
+#define IpLimits(x)     ((x)->ip_limits)
+#define CidrBitlen(x)   ((x)->cidr_bitlen)
+#define CidrAmount(x)	((x)->cidr_amount)
 #define ClassPtr(x)      ((x)->c_class)
 
 #define ConfClassName(x) (ClassPtr(x)->class_name)
@@ -67,6 +76,9 @@ struct Class *ClassList;
 #define ConfPingFreq(x)  (ClassPtr(x)->ping_freq)
 #define ConfMaxSendq(x)  (ClassPtr(x)->max_sendq)
 #define ConfCurrUsers(x) (ClassPtr(x)->total)
+#define ConfIpLimits(x) (ClassPtr(x)->ip_limits)
+#define ConfCidrAmount(x) (ClassPtr(x)->cidr_amount)
+#define ConfCidrBitlen(x) (ClassPtr(x)->cidr_bitlen)
 
 void add_class(struct Class *);
 

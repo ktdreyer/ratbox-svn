@@ -72,6 +72,7 @@
 #include "ircd_getopt.h"
 #include "balloc.h"
 #include "newconf.h"
+#include "patricia.h"
 
 
 /*
@@ -702,6 +703,7 @@ int main(int argc, char *argv[])
   init_log(logFileName);
   initBlockHeap();
   init_dlink_nodes();
+  init_patricia();
   newconf_init();
   initialize_message_files();
   linebuf_init();       /* set up some linebuf stuff to control paging */

@@ -420,6 +420,7 @@ extern void conf_add_fields(struct ConfItem*, const char*, const char *, const c
 extern void conf_add_conf(struct ConfItem *);
 extern void flush_expired_ips(void *);
 
+
 /* XXX consider moving these into kdparse.h */
 extern void parse_k_file(FBFILE *fb);
 extern void parse_d_file(FBFILE *fb);

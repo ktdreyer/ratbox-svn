@@ -860,10 +860,30 @@ static void	conf_set_class_ping_time(void *data)
 	yy_class->ping_freq = *(unsigned int*)data;
 }
 
+static void	conf_set_class_cidr_bitlen(void *data)
+{
+#ifdef IPV6
+	unsigned int maxsize = 128;
+#else
+	unsigned int maxsize = 32;
+#endif
+	if(*(unsigned int *)data > maxsize)
+		conf_report_error("class::cidr_bitlen argument exceeds maxsize (%d > %d) - ignoring."
+				   *(unsigned int *)data, maxsize);
+	else		                                
+		yy_class->cidr_bitlen = *(unsigned int *)data;
+
+}
+static void	conf_set_class_cidr_amount(void *data)
+{
+	yy_class->cidr_amount = *(unsigned int *)data;
+}
+
 static void	conf_set_class_number_per_ip(void *data)
 {
 	yy_class->max_local = *(unsigned int *)data;
 }
+
 
 static void	conf_set_class_number_per_ip_global(void *data)
 {
@@ -2535,6 +2555,8 @@ void	newconf_init()
 	add_top_conf("class", conf_begin_class, conf_end_class);
 	add_conf_item("class", "name", CF_QSTRING, conf_set_class_name);
 	add_conf_item("class", "ping_time", CF_TIME, conf_set_class_ping_time);
+	add_conf_item("class", "cidr_bitlen", CF_INT, conf_set_class_cidr_bitlen);
+	add_conf_item("class", "cidr_amount", CF_INT, conf_set_class_cidr_amount);
 	add_conf_item("class", "number_per_ip", CF_INT, conf_set_class_number_per_ip);
 	add_conf_item("class", "number_per_ip_global", CF_INT,
 			conf_set_class_number_per_ip_global);

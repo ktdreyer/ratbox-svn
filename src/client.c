@@ -56,7 +56,6 @@
 #include "balloc.h"
 #include "listener.h"
 
-
 static void check_pings_list(dlink_list *list);
 static void check_unknowns_list(dlink_list *list);
 static void free_exited_clients(void *unused);
@@ -923,7 +922,7 @@ static void exit_one_client(struct Client *client_p,
   struct Client* target_p;
   dlink_node *lp;
   dlink_node *next_lp;
-
+  
   if (IsServer(source_p))
     {
       if (source_p->servptr && source_p->servptr->serv)
@@ -1032,8 +1031,8 @@ static void exit_one_client(struct Client *client_p,
 	  del_from_id_hash_table(source_p->user->id, source_p);
 
         del_from_hostname_hash_table(source_p->host, source_p);
+        
   
-        /* again, this is all that is needed */
     }
   
   /* 
