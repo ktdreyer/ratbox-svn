@@ -1,3 +1,17 @@
+db          2002/04/12 17:44:45 EDT	(20020412_1)
+
+  Modified files:
+    src                  channel_mode.c 
+  Log:
+  - Corrected one off error in mode handling code, found by adx
+  
+  approved -db
+  
+  Revision  Changes    Path
+  7.26      +4 -4      ircd-hybrid-7/src/channel_mode.c
+
+
+
 androsyn    2002/04/11 21:05:07 EDT	(20020412_0)
 
   Modified files:
