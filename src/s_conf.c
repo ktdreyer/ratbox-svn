@@ -837,22 +837,22 @@ validate_conf(void)
  *
  * inputs	- pointer to inaddr
  *		- int type ipv4 or ipv6
- * output	- BANNED or accepted
+ * output	- ban info or NULL
  * side effects	- none
  */
-int
+struct ConfItem *
 conf_connect_allowed(struct sockaddr *addr, int aftype)
 {
 	struct ConfItem *aconf = find_dline(addr, aftype);
 
 	/* DLINE exempt also gets you out of static limits/pacing... */
 	if(aconf && (aconf->status & CONF_EXEMPTDLINE))
-		return (0);
+		return NULL;
 
 	if(aconf != NULL)
-		return (BANNED_CLIENT);
+		return aconf;
 
-	return 0;
+	return NULL;
 }
 
 /* add_temp_kline()

@@ -492,9 +492,10 @@ accept_connection(int pfd, void *data)
 	struct irc_sockaddr_storage sai;
 	socklen_t addrlen = sizeof(sai);
 	int fd;
-	int pe;
 	struct Listener *listener = data;
-
+    struct ConfItem *aconf;
+    char buf[BUFSIZE];
+    
 	s_assert(listener != NULL);
 	if(listener == NULL)
 		return;
@@ -549,11 +550,23 @@ accept_connection(int pfd, void *data)
 
 	/* Do an initial check we aren't connecting too fast or with too many
 	 * from this IP... */
-	if((pe = conf_connect_allowed((struct sockaddr *)&sai, sai.ss_family)) != 0)
+	if((aconf = conf_connect_allowed((struct sockaddr *)&sai, sai.ss_family)) != NULL)
 	{
 		ServerStats->is_ref++;
 
-		write(fd, DLINE_WARNING, sizeof(DLINE_WARNING) - 1);
+        if(ConfigFileEntry.kline_with_reason)
+        {
+            if (ircsnprintf(buf, sizeof(buf), "ERROR :*** Banned: %s\r\n", aconf->passwd) >= (sizeof(buf)-1))
+            {
+                buf[sizeof(buf) - 3] = '\r';
+                buf[sizeof(buf) - 2] = '\n';
+                buf[sizeof(buf) - 1] = '\0';
+            }
+        }
+        else
+           ircsprintf(buf, "ERROR :You have been D-lined.\r\n");
+        
+        write(fd, buf, strlen(buf));
 		fd_close(fd);
 
 		/* Re-register a new IO request for the next accept .. */
