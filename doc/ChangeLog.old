@@ -1,3 +1,7 @@
+*** 20010904_1 by leeh
+- changed the strcat()'s for the config info to pointers..
+
+
 *** 20010902_1 by wcampbel
 Updated the BUGS list a wee bit
 
