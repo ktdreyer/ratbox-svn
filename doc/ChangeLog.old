@@ -1,3 +1,15 @@
+androsyn    2002/07/29 20:47:30 EDT	(20020730_1)
+
+  Modified files:
+    src                  channel_mode.c 
+  Log:
+  The declaration on dir probably shouldn't be wrapped in #ifdef HALFOPS
+  
+  Revision  Changes    Path
+  7.51      +0 -2      ircd-hybrid-7/src/channel_mode.c
+
+
+
 greg        2002/07/29 20:31:46 EDT	(20020730_0)
 
   Modified files:
