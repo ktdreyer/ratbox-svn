@@ -35,9 +35,6 @@ static BlockHeap *patricia_heap;
 #define NODE_HEAP_COUNT		1024
 #define PATRICIA_HEAP_COUNT	128
 
-#define PATRICIA_DEBUG 1
-#define NOTYET 1
-
 void
 init_patricia (void)
 {
