@@ -2672,7 +2672,7 @@ void WriteKlineOrDline( KlineType type,
 	       sptr->name, sptr->username, sptr->host,
 	       host, reason);
   
-  if ( (fbputs(buffer,out) == NULL) )
+  if (fbputs(buffer,out) == -1)
     {
       sendto_realops_flags(FLAGS_ALL,"*** Problem writing to %s",filename);
       fbclose(out);
@@ -2692,7 +2692,7 @@ void WriteKlineOrDline( KlineType type,
                current_date);
 
 
-  if ( (fbputs(buffer,out) == NULL) )
+  if (fbputs(buffer,out) == -1)
     {
       sendto_realops_flags(FLAGS_ALL,"*** Problem writing to %s",filename);
       fbclose(out);
