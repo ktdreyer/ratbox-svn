@@ -1,3 +1,9 @@
+*** 20001221_16 by db
+- removed local opers, its obsolete with oper flags besides
+  users can probe which server an oper is on...
+
+
+
 *** 20001221_15 by wcampbel
 Removed global from example.conf as local opers no longer exist.
 Added a "What's New" document giving a brief overview of the new Hybrid 
