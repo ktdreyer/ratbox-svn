@@ -12,7 +12,7 @@ server, with some optimisations for the IO patterns an ircd will have.
 
 
 
-Socket operations
+Filedescriptor IO
 -----------------
 
 Filedescriptor IO is initiated using comm_setselect(). comm_setselect()
@@ -63,12 +63,37 @@ read_callback(int fd, void *data)
 
 
 
+
+Socket timeouts
+---------------
+
+A "socket timeout" is a callback registered to be called when a certain
+amount of time has elapsed. Think of it as an event, but against a FD.
+
+A good example of socket timeouts is in the comm_connect_tcp() code.
+When the connect() begins, comm_settimeout() is called to call
+comm_connect_timeout() if the timeout occurs. Once the connect() completes,
+comm_settimeout() is called with a timeout of 0 and callback of NULL 
+to deregister the timeout. If the timeout occurs, comm_connect_timeout()
+is called and the connection attempt is aborted.
+
+
+
+
+Functions
+---------
+
 comm_open() - a socket() wrapper, enforcing fd limitations and tagging the
   file descriptor with a note
+
 comm_accept() - an accept() wrapper, enforcing fd limitations and tagging
   the file descriptor with a note
+
 comm_connect_tcp() - attempt an async connect(). Handles DNS lookups if
   required, and will call the given callback at completion or error
+
+comm_settimeout() - set a callback to be called after a given time period.
+  This is good to implement things like PING checks and connect() timeouts.
 
 Notes:
 
@@ -78,19 +103,3 @@ Notes:
 * comm_connect_tcp() is your best friend. :-)
 * *ALL* network sockets should be non-blocking. If your OS doesn't support
   non-blocking sockets, you shouldn't be here.
-
-
-
-Filedescriptor lists
---------------------
-
-The filedescriptor list is managed through the routines in fdlist.c .
-These include:
-
-fd_open() - tag an FD as "open" and active
-fd_close() - tag an FD as "closed" and close() the filedescriptor
-fd_note() - update the filedescriptor tag
-
-You can get the current list of open filedescriptors through /stats F as
-an oper.
-
