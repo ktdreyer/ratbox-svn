@@ -20,6 +20,20 @@
 
 #include "headers.h"
 
+static void SetupSignals();
+
+/*
+SetupSignals()
+ Set up signal handlers
+*/
+
+static void
+SetupSignals()
+
+{
+	signal(SIGPIPE, SIG_IGN);
+} /* SetupSignals() */
+
 int
 main()
 
@@ -62,6 +76,9 @@ main()
 
 	fprintf(stderr, "IAuth loaded\n");
 
+	/* Initialize signals */
+	SetupSignals();
+
 	/* Initialize listening ports */
 	InitListenPorts();
 
@@ -71,6 +88,6 @@ main()
 	 */
 	while (1)
 	{
-		AcceptAuthRequests();
+		CheckConnections();
 	}
 } /* main() */

@@ -20,358 +20,100 @@
 
 #include "headers.h"
 
-extern AuthPort *PortList;
+static struct AuthRequest *CreateAuthRequest();
+static void FreeAuthRequest(struct AuthRequest *request);
+static void LinkAuthRequest(struct AuthRequest *request, struct AuthRequest **list);
+static void UnlinkAuthRequest(struct AuthRequest *request, struct AuthRequest **list);
 
-static int ReadData(int sockfd);
-static void ProcessData(int sockfd, int paramc, char **paramv);
-static int EstablishConnection(AuthPort *portptr);
-static void AddServer(Server *sptr);
-static void DelServer(Server *sptr);
+static int BeginIdentQuery(struct AuthRequest *auth);
+static char *GetValidIdent(char *buf);
+
+static void CompleteAuthRequest(struct AuthRequest *auth);
 
 /*
- * List of all connected ircd servers
+ * List of pending authentication queries
  */
-Server *ServerList = NULL;
+struct AuthRequest *AuthPollList = NULL;
 
 /*
- * List of authentication queries
+ * List of incomplete authentication queries
  */
-struct AuthRequest *AuthList = NULL;
-
-static void StartAuth(int sockfd, int parc, char **parv);
-
-static struct AuthCommandTable
-{
-	char *name; /* name of command */
-	void (* func)(); /* function to call */
-} AuthCommands[] = {
-	{ "DoAuth", StartAuth },
-
-	{ 0, 0 }
-};
+struct AuthRequest *AuthIncompleteList = NULL;
 
 /*
-AcceptAuthRequests()
- Enter a select() loop waiting for socket activity from one
-of our ircd connections. Once we receive a request, process
-it.
+StartAuth()
+ Begin the authentication process
+
+ parv[0] = "DoAuth"
+ parv[1] = Client ID
+ parv[2] = Client IP Address in unsigned int format
+ parv[3] = Client's remote port
+ parv[4] = Server's local port
 */
 
 void
-AcceptAuthRequests()
+StartAuth(int sockfd, int parc, char **parv)
 
 {
-	int activefds; /* result obtained from select() */
-	fd_set readfds,
-	       writefds;
-	struct timeval TimeOut;
-	AuthPort *portptr;
-	Server *sptr,
-	       *tmp;
+	struct AuthRequest *auth;
 
-	for (;;)
-	{
-		TimeOut.tv_sec = 1;
-		TimeOut.tv_usec = 0;
+	if (parc < 5)
+		return; /* paranoia */
 
-		FD_ZERO(&readfds);
-		FD_ZERO(&writefds);
+	auth = CreateAuthRequest();
 
-		/*
-		 * Check all of our listen ports
-		 */
-		for (portptr = PortList; portptr; portptr = portptr->next)
-			if (portptr->sockfd != NOSOCK)
-				FD_SET(portptr->sockfd, &readfds);
-
-		/*
-		 * Check all of our server connections
-		 */
-		for (sptr = ServerList; sptr; sptr = sptr->next)
-			FD_SET(sptr->sockfd, &readfds);
-
-		activefds = select(FD_SETSIZE, &readfds, &writefds, 0, &TimeOut);
-
-		if (activefds > 0)
-		{
-			/* we got something */
-
-			for (sptr = ServerList; sptr; sptr = sptr->next)
-			{
-				if (FD_ISSET(sptr->sockfd, &readfds))
-				{
-					fprintf(stderr, "socket [%d] is ready\n", sptr->sockfd);
-					if (!ReadData(sptr->sockfd))
-					{
-						/*
-						 * Connection has been closed
-						 */
-
-						close(sptr->sockfd);
-
-						tmp = sptr->prev;
-
-						DelServer(sptr);
-
-						if (!tmp)
-							break;
-						else
-							sptr = tmp;
-
-						continue;
-					}
-				}
-			}
-
-			for (portptr = PortList; portptr; portptr = portptr->next)
-			{
-				if (portptr->sockfd == NOSOCK)
-					continue;
-
-				if (FD_ISSET(portptr->sockfd, &readfds))
-				{
-					/*
-					 * We have received a new connection, possibly
-					 * from an ircd - accept it
-					 */
-					if (!EstablishConnection(portptr))
-						continue;
-				}
-			}
-		}
-		else if ((activefds == (-1)) && (errno != EINTR))
-		{
-			/*
-			 * Not good - the connection was closed
-			 */
-		}
-	} /* for (;;) */
-} /* AcceptAuthRequests() */
-
-/*
-ReadData()
- Read and parse any incoming data from sockfd
-
-Return: 0 if unsuccessful
-        1 if successful
-        2 if the socket is ok, but there's no data to be read
-*/
-
-static int
-ReadData(int sockfd)
-
-{
-	int length; /* number of bytes we read */
-	char buffer[BUFSIZE + 1];
-	register char *ch;
-	char *paramv[MAXPARAMS + 1];
-	int paramc;
-
-	length = recv(sockfd, buffer, sizeof(buffer) - 1, 0);
-
-	if ((length == (-1)) &&
-			((errno == EWOULDBLOCK) || (errno == EAGAIN)))
-		return 2; /* no data to read */
-
-	if (length <= 0)
-	{
-		/*
-		 * Connection closed
-		 */
-	#ifdef bingo
-		log(L_ERROR, "IAuth: Read error from server: %s",
-			strerror(errno));
-	#endif
-		return 0;
-	}
-
-	buffer[length] = '\0';
-
-	fprintf(stderr, "%s", buffer);
-
-	ch = buffer;
+	auth->ip.s_addr = (unsigned int) atol(parv[2]);
 
 	/*
-	 * The following routine works something like this:
-	 * We receive a line from the ircd process, but we
-	 * wish to break it up by inserting NULLs where
-	 * there are spaces, and keeping pointers to the
-	 * beginning of each "word". paramv[] will be
-	 * our array of pointers and paramc will be the
-	 * number of parameters we have in paramv[].
+	 * If the DNS query fails, we will use the client's
+	 * ip address
+	 * bingo - the dns routine should do this when it fails
 	 */
+	strcpy(auth->hostname, inet_ntoa(auth->ip));
 
-	paramc = 0;
-	paramv[paramc++] = buffer;
-
-	while (*ch)
+	if (strlen(parv[1]) > IDLEN)
 	{
-		register char tmp;
-
-		tmp = *ch;
-
-		if ((tmp == '\n') || (tmp == '\r'))
-		{
-			/*
-			 * We've reached the end of our line - process it
-			 */
-
-			*ch = '\0';
-
-			if (paramc)
-				ProcessData(sockfd, paramc, paramv);
-
-			break;
-		}
-		else
-		{
-			if (tmp == ' ')
-			{
-				*ch++ = '\0';
-				paramv[paramc++] = ch;
-			}
-		}
-
 		/*
-		 * Advance ch to the next letter in buffer[]
+		 * This should never happen, but just to be paranoid,
+		 * cancel the auth request
 		 */
-		++ch;
-	} /* while (*ch) */
+		tosock(auth->serverfd,
+			"DoneAuth %s ~ %s\n",
+			parv[1],
+			auth->hostname);
 
-	return 1;
-} /* ReadData() */
-
-/*
-ProcessData()
- Inputs: sockfd - socket we read data from
-         paramc - number of parameters in paramv[]
-         paramv - array of pointers to individual parameters
-                  sent by the parent ircd process
-
- Purpose: Process the data contained in paramv[] and call
-          the corresponding function to handle it
-
- Return: none
-*/
-
-static void
-ProcessData(int sockfd, int paramc, char **paramv)
-
-{
-	struct AuthCommandTable *cmdptr;
-
-	for (cmdptr = AuthCommands; cmdptr->name; cmdptr++)
-	{
-		if (!strcasecmp(paramv[0], cmdptr->name))
-		{
-			/*
-			 * Call the corresponding function
-			 */
-			(*cmdptr->func)(sockfd, paramc, paramv);
-			break;
-		}
-	}
-} /* ProcessData() */
-
-/*
-EstablishConnection()
- Accept the new connection which has occured on portptr->port -
-most likely from an ircd connection
-*/
-
-static int
-EstablishConnection(AuthPort *portptr)
-
-{
-	struct sockaddr_in ClientAddr;
-	int clientlen;
-	Server *newconn;
-
-	assert(portptr != 0);
-
-	fprintf(stderr, "Got connection\n");
-
-	newconn = (Server *) malloc(sizeof(Server));
-
-	clientlen = sizeof(ClientAddr);
-	newconn->sockfd = accept(portptr->sockfd, (struct sockaddr *) &ClientAddr, &clientlen);
-
-	if (newconn->sockfd < 0)
-	{
-	#ifdef bingo
-		log(L_ERROR, "EstablishConnection(): Error accepting connection: %s",
-			strerror(errno));
-	#endif
-		free(newconn);
-		return 0;
+		FreeAuthRequest(auth);
+		return;
 	}
 
-	if (!SetNonBlocking(newconn->sockfd))
-	{
-	#ifdef bingo
-		log(L_ERROR, "EstablishConnection(): Unable to set socket [%d] non-blocking",
-			newconn->sockfd);
-	#endif
-		free(newconn);
-		return 0;
-	}
+	strcpy(auth->clientid, parv[1]);
+	auth->remoteport = (unsigned int) atoi(parv[3]);
+	auth->localport = (unsigned int) atoi(parv[4]);
+
+	auth->serverfd = sockfd;
 
 	/*
-	 * All of newconn's fields have been filled in, just add it
-	 * to the list
+	 * Begin ident query
 	 */
-	AddServer(newconn);
-
-	return 1;
-} /* EstablishConnection() */
-
-/*
-AddServer()
- Insert 'sptr' into the beginning of ServerList;
-*/
-
-static void
-AddServer(Server *sptr)
-
-{
-	assert(sptr != 0);
-
-	sptr->prev = NULL;
-	sptr->next = ServerList;
-	if (sptr->next)
-		sptr->next->prev = sptr;
-	ServerList = sptr;
-} /* AddServer() */
-
-/*
-DelServer()
- Delete 'sptr' from ServerList
-*/
-
-static void
-DelServer(Server *sptr)
-
-{
-	assert(sptr != 0);
-
-	if (sptr->next)
-		sptr->next->prev = sptr->prev;
-	if (sptr->prev)
-		sptr->prev->next = sptr->next;
+	if (BeginIdentQuery(auth))
+		LinkAuthRequest(auth, &AuthPollList);
+	else if (IsDNSPending(auth))
+		LinkAuthRequest(auth, &AuthIncompleteList);
 	else
-		ServerList = sptr->next;
-
-	free(sptr);
-} /* DelServer() */
+	{
+		CompleteAuthRequest(auth);
+		FreeAuthRequest(auth);
+	}
+} /* StartAuth() */
 
 /*
-CreateAuth()
+CreateAuthRequest()
  Allocate a new AuthRequest structure and return a pointer
 to it.
 */
 
 static struct AuthRequest *
-CreateAuth()
+CreateAuthRequest()
 
 {
 	struct AuthRequest *request;
@@ -384,15 +126,62 @@ CreateAuth()
 	request->timeout = time(NULL) + CONNECTTIMEOUT;
 
 	return (request);
-} /* CreateAuth() */
+} /* CreateAuthRequest() */
 
 /*
-RequestIdent()
- Begin an ident query for the given auth structure
+FreeAuthRequest()
+ Free the given auth request
 */
 
 static void
-RequestIdent(struct AuthRequest *auth)
+FreeAuthRequest(struct AuthRequest *request)
+
+{
+	free(request);
+} /* FreeAuthRequest() */
+
+/*
+LinkAuthRequest()
+ Link auth request to the specified list
+*/
+
+static void
+LinkAuthRequest(struct AuthRequest *request, struct AuthRequest **list)
+
+{
+	request->prev = NULL;
+	request->next = *list;
+
+	if (*list)
+		(*list)->prev = request;
+	*list = request;
+} /* LinkAuthRequest() */
+
+/*
+UnlinkAuthRequest()
+ Remove auth request from the specified list
+*/
+
+static void
+UnlinkAuthRequest(struct AuthRequest *request, struct AuthRequest **list)
+
+{
+	if (request->next)
+		request->next->prev = request->prev;
+
+	if (request->prev)
+		request->prev->next = request->next;
+	else
+		*list = request->next;
+} /* UnlinkAuthRequest() */
+
+/*
+BeginIdentQuery()
+ Begin an ident query for the given auth structure
+*/
+
+static int
+BeginIdentQuery(struct AuthRequest *auth)
 
 {
 	struct sockaddr_in remoteaddr,
@@ -406,56 +195,298 @@ RequestIdent(struct AuthRequest *auth)
 	{
 	#ifdef bingo
 		log(L_ERROR,
-			"RequestIdent(): Unable to open stream socket: %s",
+			"BeginIdentQuery(): Unable to open stream socket: %s",
 			strerror(errno));
 	#endif
-		auth->flags |= AM_ID_FAILED;
-		return;
+		return 0;
 	}
 
 	if (!SetNonBlocking(fd))
 	{
 	#ifdef bingo
-		log("RequestIdent(): Unable to set socket [%d] non-blocking",
-			auth->identfd);
+		log("BeginIdentQuery(): Unable to set socket [%d] non-blocking",
+			fd);
 	#endif
 		close(fd);
-		auth->flags |= AM_ID_FAILED;
-		return;
+		return 0;
 	}
 
 	length = sizeof(struct sockaddr_in);
-} /* RequestIdent() */
+	memset((void *) &localaddr, 0, length);
+
+	localaddr.sin_port = htons(0);
+
+	if (bind(fd, (struct sockaddr *) &localaddr, sizeof(localaddr)) < 0)
+	{
+	#ifdef bingo
+		log("BeginIdentQuery(): Unable to bind socket [%d]: %s",
+			fd,
+			strerror(errno));
+	#endif
+		close(fd);
+		return 0;
+	}
+
+	memcpy(&remoteaddr.sin_addr, &auth->ip, sizeof(struct in_addr));
+
+	remoteaddr.sin_port = htons(113);
+	remoteaddr.sin_family = AF_INET;
+
+	/*
+	 * Now, attempt the connection
+	 */
+	if ((connect(fd, (struct sockaddr *) &remoteaddr, sizeof(remoteaddr)) == (-1)) &&
+			(errno != EINPROGRESS))
+	{
+	#ifdef bingo
+		log("BeginIdentQuery(): Unable to connect to ident port of %s: %s",
+			inet_ntoa(auth->ip),
+			strerror(errno));
+	#endif
+		close(fd);
+		return 0;
+	}
+
+	auth->identfd = fd;
+
+	SetIdentConnect(auth);
+
+	return 1;
+} /* BeginIdentQuery() */
 
 /*
-StartAuth()
- Begin the authentication process
-
- parv[0] = "DoAuth"
- parv[1] = Client ID
- parv[2] = Client IP Address
+IdentError()
+ An error has occured during the ident process - cleanup
 */
 
 static void
-StartAuth(int sockfd, int parc, char **parv)
+IdentError(struct AuthRequest *auth)
 
 {
-	struct AuthRequest *auth;
+	assert(auth != 0);
 
-	auth = CreateAuth();
-	auth->serverfd = sockfd;
-	strcpy(auth->clientid, parv[1]);
+	close(auth->identfd);
+	auth->identfd = NOSOCK;
 
-#if 0
-	/*
-	 * Begin ident query
-	 */
-	RequestIdent(auth);
-#endif
+	ClearAuth(auth);
 
-	tosock(auth->serverfd,
-		"DoneAuth %s %s %s\n",
-		auth->clientid,
-		"unknown",
-		parv[2]);
-} /* StartAuth() */
+	UnlinkAuthRequest(auth, &AuthPollList);
+
+	if (IsDNSPending(auth))
+		LinkAuthRequest(auth, &AuthIncompleteList);
+	else
+	{
+		CompleteAuthRequest(auth);
+		FreeAuthRequest(auth);
+	}
+} /* IdentError() */
+
+/*
+SendIdentQuery()
+ Send an ident query to the auth client
+*/
+
+void
+SendIdentQuery(struct AuthRequest *auth)
+
+{
+	char authbuf[32];
+
+	assert(auth != 0);
+
+	sprintf(authbuf, "%u , %u\r\n",
+		auth->remoteport,
+		auth->localport);
+
+	if (send(auth->identfd, authbuf, strlen(authbuf), 0) == (-1))
+	{
+	#ifdef bingo
+		log("SendIdentQuery(): Error sending ident request: %s",
+			strerror(errno));
+	#endif
+		IdentError(auth);
+		return;
+	}
+
+	ClearIdentConnect(auth);
+	SetIdentPending(auth);
+} /* SendIdentQuery() */
+
+/*
+ReadIdentReply()
+ Read a client's ident reply. We only give it one shot - if
+the reply is not valid, fail the authentication.
+*/
+
+void
+ReadIdentReply(struct AuthRequest *auth)
+
+{
+	char buf[ID_BUFSIZE + 1];
+	int len;
+	char *s = NULL,
+	     *t;
+	int count;
+
+	len = recv(auth->identfd, buf, ID_BUFSIZE, 0);
+
+	if (len > 0)
+	{
+		buf[len] = '\0';
+
+		if ((s = GetValidIdent(buf)))
+		{
+			t = auth->username;
+			for (count = USERLEN; *s && count; s++)
+			{
+				if (*s == '@')
+					break;
+
+				if ( !isspace(*s) && *s != ':' )
+				{
+					*t++ = *s;
+					--count;
+				}
+			}
+			*t = '\0';
+		}
+	}
+
+	close(auth->identfd);
+	auth->identfd = NOSOCK;
+	ClearAuth(auth);
+  
+	if (!s)
+		strcpy(auth->username, "unknown");
+
+	UnlinkAuthRequest(auth, &AuthPollList);
+
+	if (IsDNSPending(auth))
+		LinkAuthRequest(auth, &AuthIncompleteList);
+	else
+	{
+		CompleteAuthRequest(auth);
+		FreeAuthRequest(auth);
+	}
+} /* ReadIdentReply() */
+
+/*
+ * GetValidIdent - parse ident query reply from identd server
+ * 
+ * Inputs        - pointer to ident buf
+ * Output        - NULL if no valid ident found, otherwise pointer to name
+ * Side effects        -
+ */
+
+static char *
+GetValidIdent(char *buf)
+
+{
+  int   remp = 0;
+  int   locp = 0;
+  char* colon1Ptr;
+  char* colon2Ptr;
+  char* colon3Ptr;
+  char* commaPtr;
+  char* remotePortString;
+
+  /* All this to get rid of a sscanf() fun. */
+  remotePortString = buf;
+  
+  colon1Ptr = strchr(remotePortString,':');
+  if(!colon1Ptr)
+    return 0;
+
+  *colon1Ptr = '\0';
+  colon1Ptr++;
+  colon2Ptr = strchr(colon1Ptr,':');
+  if(!colon2Ptr)
+    return 0;
+
+  *colon2Ptr = '\0';
+  colon2Ptr++;
+  commaPtr = strchr(remotePortString, ',');
+
+  if(!commaPtr)
+    return 0;
+
+  *commaPtr = '\0';
+  commaPtr++;
+
+  remp = atoi(remotePortString);
+  if(!remp)
+    return 0;
+              
+  locp = atoi(commaPtr);
+  if(!locp)
+    return 0;
+
+  /* look for USERID bordered by first pair of colons */
+  if(!strstr(colon1Ptr, "USERID"))
+    return 0;
+
+  colon3Ptr = strchr(colon2Ptr,':');
+  if(!colon3Ptr)
+    return 0;
+  
+  *colon3Ptr = '\0';
+  colon3Ptr++;
+  return(colon3Ptr);
+} /* GetValidIdent() */
+
+/*
+CompleteAuthRequest()
+ We've completed ident and dns authentication for this client.
+Now we must determine if the client passes the other checks, and
+if so, tell the client's server the client is acceptable. This
+is done as follows:
+
+    DoneAuth <ID> <username> <hostname>
+
+    <ID>           - unique ID for the client
+    <username>     - Client's username (ident reply)
+    <hostname>     - Client's hostname
+
+ If, however, the client fails one of the checks, a reply
+will be given to the client's server of the form:
+
+    BadAuth <ID> :<Reason>
+
+    <ID>           - unique ID for the client
+    <Reason>       - Reason the client failed authentication
+*/
+
+static void
+CompleteAuthRequest(struct AuthRequest *auth)
+
+{
+	int badauth = 0;
+	char buf[BUFSIZE],
+	     reason[BUFSIZE];
+
+	*reason = '\0';
+
+	if (badauth)
+	{
+		sprintf(buf, "BadAuth %s :%s\n",
+			auth->clientid,
+			reason);
+	}
+	else
+	{
+		/*
+		 * If the ident query failed, make their username "~",
+		 * which will tell the ircd server to use the given
+		 * ident in the USER statement.
+		 */
+		if (!*auth->username)
+			strcpy(auth->username, "~");
+
+		sprintf(buf, "DoneAuth %s %s %s\n",
+			auth->clientid,
+			auth->username,
+			auth->hostname);
+	}
+
+	send(auth->serverfd, buf, strlen(buf), 0);
+} /* CompleteAuthRequest() */

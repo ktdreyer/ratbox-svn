@@ -20,8 +20,6 @@
 
 #include "headers.h"
 
-extern AuthPort *PortList;
-
 /*
 LoadConfig()
  Load configuration file 'filename'

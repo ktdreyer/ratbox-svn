@@ -15,6 +15,8 @@
 #include <errno.h>
 #include <string.h>
 #include <stdarg.h>
+#include <ctype.h>
+#include <signal.h>
 
 /*
  * Socket headers
@@ -24,6 +26,7 @@
 #include <sys/un.h>
 #include <netinet/in.h>
 #include <fcntl.h>
+#include <arpa/inet.h>
 
 /*
  * IAuth headers
