@@ -81,9 +81,9 @@ static  int     get_conf_ping(struct ConfItem *aconf)
  */
 const char*     get_client_class(struct Client *target_p)
 {
-  dlink_node    *ptr;
+  dlink_node *ptr;
   struct ConfItem *aconf;
-  const char*   retc = (const char *)NULL;
+  const char* retc = "unknown";
 
   if (target_p && !IsMe(target_p)  && (target_p->localClient->confs.head))
     for (ptr = target_p->localClient->confs.head; ptr; ptr = ptr->next)
