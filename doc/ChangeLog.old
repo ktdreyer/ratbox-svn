@@ -1,3 +1,7 @@
+*** 20010202_15 by a1kmm
+- More secure encryption of private keys that genkey/respond uses.
+
+
 *** 20010202_14 by davidt
 Uhm.  I tested this... and it worked.. but this code couldn't work.. uhm. oops.
 
