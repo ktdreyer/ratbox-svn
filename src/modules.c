@@ -86,7 +86,7 @@ mod_add_path(char *path)
 
 	
 static char *
-basename(char *path)
+irc_basename(char *path)
 {
   char *mod_basename = MyMalloc (strlen (path) + 1);
   char *s;
@@ -240,7 +240,7 @@ load_one_module (char *path)
   char realpath[MAXPATHLEN];
   struct module_path *pathst;
 
-  mod_basename = basename(path);
+  mod_basename = irc_basename(path);
   
   if (strchr(path, '/')) {
 	  /* absolute pathname, try it */
