@@ -1,3 +1,8 @@
+*** 20010212_5 by db
+- make it compile at least for now
+
+
+
 *** 20010212_4 by androsyn
 Free allocated memory from adns. Dumb bugs..
 
