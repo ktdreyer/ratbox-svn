@@ -152,7 +152,4 @@ extern void collect_zipstats(void *unused);
 
 extern int serv_connect(struct server_conf *, struct Client *);
 
-extern void start_io(struct Client *server);
-extern int fork_server(struct Client *client_p);
-
 #endif /* INCLUDED_s_serv_h */
