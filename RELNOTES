@@ -4,13 +4,23 @@
 - PRIVMSG was not giving ERR_NOSUCHNICK for non-existant chans/users
 - speed improvements to stats k
 - stats g fixed to show the real user@ portion of the gline
-- RPL_ISUPPORTV (105) will now be given on /version so its easier
-  for client coders.
 - +beI modes will be dropped on persistent channels when someone joins,
   other modes will be burst to prevent desync.
 - fixed a bug allowing opped users to op themselves
 - the redundant mode code (what stopped multiple +o etc) has been 
   removed
+- stats g/G have been split up.
+  stats g will now show pending glines
+  stats G will now show triggered glines
+- fixed a problem with double RPL_TOPICWHO being sent
+- the conf has been updated:
+
+  - instead of class { name="users"; ... }; use
+    class "users" { ... };
+  - instead of operator { name="myoper"; ... }; use
+    operator "myoper" { ... };
+  - instead of connect { name="irc.x.com"; ... }; use
+    connect "irc.x.com" { ... };
 
 -- ircd-ratbox-1.0-rc2
 - fixed a bug with internal channel structures that could core the ircd

@@ -801,19 +801,19 @@ find_user_host(struct Client *source_p,
         {
           *(hostp++) = '\0';                       /* short and squat */
 	  if (*user_host_or_nick)
-            strlcpy(luser,user_host_or_nick,USERLEN); /* here is my user */
+            strlcpy(luser, user_host_or_nick, USERLEN+1); /* here is my user */
 	  else
-	    strcpy(luser,"*");
+	    strcpy(luser, "*");
 	  if (*hostp)
-            strlcpy(lhost,hostp,HOSTLEN);             /* here is my host */
+            strlcpy(lhost, hostp, HOSTLEN+1);             /* here is my host */
 	  else
-	    strcpy(lhost,"*");
+	    strcpy(lhost, "*");
         }
       else
         {
           luser[0] = '*';             /* no @ found, assume its *@somehost */
           luser[1] = '\0';	  
-          strlcpy(lhost,user_host_or_nick,HOSTLEN);
+          strlcpy(lhost, user_host_or_nick, HOSTLEN+1);
         }
 
       return 1;
