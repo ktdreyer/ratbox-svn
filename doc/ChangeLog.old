@@ -1,3 +1,7 @@
+*** 20010519_3 by a1kmm
+- Made client_burst_if_needed check the target actually is a client :)
+
+
 *** 20010519_2 by a1kmm
 - Had second thoughts about my last commit - now we burst the client sending
   the message if necessary. Also changed all of the functions. Note however
