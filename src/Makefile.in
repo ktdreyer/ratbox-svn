@@ -17,7 +17,6 @@ MKDEP		= ${CC} -MM
 MV		= @MV@
 RM		= @RM@
 YACC		= @YACC@
-YFLAGS		= -d
 prefix		= @prefix@
 exec_prefix	= @exec_prefix@
 exec_suffix	= @exec_suffix@
@@ -46,7 +45,7 @@ y.tab.o:	y.tab.c ircd_parser.y
 
 # Note GNU bison uses <file>.tab.c not y.tab.c
 y.tab.c:	ircd_parser.y
-	${YACC} ircd_parser.y
+	${YACC} -d ircd_parser.y
 
 lex.yy.o:	lex.yy.c ircd_lexer.l
 	${CC} -g -I ../include -c lex.yy.c
