@@ -1,3 +1,15 @@
+leeh        2004/05/25 12:42:43 EDT	(20040525_2)
+
+  Modified files:
+    modules              m_resv.c 
+  Log:
+  - tidy up remove_temp_resv() a bit
+  
+  Revision  Changes    Path
+  1.59      +11 -10    ircd-ratbox/modules/m_resv.c
+
+
+
 leeh        2004/05/25 12:39:35 EDT	(20040525_1)
 
   Modified files:
