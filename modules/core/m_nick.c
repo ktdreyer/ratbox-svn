@@ -143,7 +143,7 @@ static void mr_nick(struct Client *client_p, struct Client *source_p,
   }
 
   /* check if the nick is resv'd */
-  if(is_resvd(nick))
+  if(find_nick_resv(nick))
   {
     sendto_one(source_p, form_str(ERR_UNAVAILRESOURCE),
                me.name, BadPtr(parv[0]) ? "*" : parv[0], nick);
@@ -200,7 +200,7 @@ static void mr_nick(struct Client *client_p, struct Client *source_p,
     return;
   }
 
-  if(is_resvd(nick))
+  if(find_nick_resv(nick))
   {
     sendto_one(source_p, form_str(ERR_UNAVAILRESOURCE),
                me.name, parv[0], nick);

@@ -163,6 +163,7 @@ struct config_file_entry
   char *klinefile;
   char *dlinefile;
   char *xlinefile;
+  char *resvfile;
 
   char *glinefile;
 
@@ -373,7 +374,8 @@ typedef enum {
   CONF_TYPE,
   KLINE_TYPE,
   DLINE_TYPE,
-  XLINE_TYPE
+  XLINE_TYPE,
+  RESV_TYPE
 } KlineType;
 
 extern void write_confitem(KlineType, struct Client *, char *, char *,
@@ -407,6 +409,7 @@ extern void flush_expired_ips(void *);
 extern void parse_k_file(FBFILE *fb);
 extern void parse_d_file(FBFILE *fb);
 extern void parse_x_file(FBFILE *fb);
+extern void parse_resv_file(FBFILE *);
 extern char *getfield(char *newline);
 
 extern char *get_oper_name(struct Client *client_p);

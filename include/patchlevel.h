@@ -23,5 +23,5 @@
  */
 
 #ifndef PATCHLEVEL
-#define PATCHLEVEL   "ircd-ratbox-1.0rc2"
+#define PATCHLEVEL   "ircd-ratbox-1.0rc3"
 #endif

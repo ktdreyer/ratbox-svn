@@ -39,7 +39,7 @@
 
 struct Client;
 struct Channel;
-struct ResvChannel;
+struct ResvEntry;
 
 struct HashEntry
 {
@@ -79,10 +79,10 @@ void del_from_hostname_hash_table(const char *, struct Client *);
 void add_to_hostname_hash_table(const char *, struct Client *);
 
 extern void add_to_resv_hash_table(const char *name,
-                                   struct ResvChannel *resv_p);
+                                   struct ResvEntry *resv_p);
 extern void del_from_resv_hash_table(const char *name,
-                                     struct ResvChannel *resv_p);
-extern struct ResvChannel *hash_find_resv(const char *name);
+                                     struct ResvEntry *resv_p);
+extern struct ResvEntry *hash_find_resv(const char *name);
 
 #endif  /* INCLUDED_hash_h */
 

@@ -30,6 +30,7 @@
 #include "client.h"
 #include "irc_string.h"
 #include "memory.h"
+#include "resv.h"
 
 /*
  * parse_k_file
@@ -141,6 +142,36 @@ parse_x_file(FBFILE *file)
     aconf->status = CONF_XLINE;
     conf_add_fields(aconf, host_field, reason_field, "", port_field, NULL);
     conf_add_x_conf(aconf);
+  }
+}
+
+void
+parse_resv_file(FBFILE *file)
+{
+  struct ConfItem *aconf;
+  char *reason_field;
+  char *host_field;
+  char line[BUFSIZE];
+  char *p;
+
+  while(fbgets(line, sizeof(line), file))
+  {
+    if((p = strchr(line, '\n')))
+      *p = '\0';
+
+    if((*line == '\0') || (line[0] == '#'))
+      continue;
+
+    if((host_field = getfield(line)) == NULL)
+      continue;
+
+    if((reason_field = getfield(NULL)) == NULL)
+      continue;
+
+    if(IsChannelName(host_field))
+      create_resv(host_field, reason_field, RESV_CHANNEL);
+    else if(clean_resv_nick(host_field))
+      create_resv(host_field, reason_field, RESV_NICK);
   }
 }
 

@@ -25,30 +25,20 @@
 #ifndef INCLUDED_resv_h
 #define INCLUDED_resv_h
 
-/* allows resv *nicknick* etc */
-#define RESVNICKLEN NICKLEN*2
+#define RESV_CHANNEL    0x0001
+#define RESV_NICK       0x0002
 
-struct ResvChannel
+struct ResvEntry
 {
-  /* +1 for \0 */
-  char	name[CHANNELLEN + 1];
-  char	*reason;
-  int	conf;
-};
-
-struct ResvNick
-{
-  struct ResvNick *next;
-  struct ResvNick *prev;
-
-  char	name[RESVNICKLEN+1];
-  char	*reason;
-  int	conf;
+  char *name;
+  char *reason;
+  int flags;
 };
 
 extern dlink_list resv_channel_list;
 extern dlink_list resv_nick_list;
 
+#if 0
 extern struct ResvChannel *create_channel_resv(char *, char *, int);
 extern struct ResvNick *create_nick_resv(char *, char *, int);
 
@@ -56,10 +46,16 @@ extern int delete_channel_resv(struct ResvChannel *);
 extern int delete_nick_resv(struct ResvNick *);
 
 extern void clear_conf_resv();
+#endif
+
+extern struct ResvEntry *create_resv(char *, char *, int);
+
+extern int delete_resv(struct ResvEntry *);
+extern void clear_resv(void);
 
 extern int find_channel_resv(char *);
-extern struct ResvNick *find_nick_resv(char *);
-extern int is_resvd(char *);
+extern int find_nick_resv(char *);
+extern struct ResvEntry *get_nick_resv(char *);
 
 extern void report_resv(struct Client *);
 

@@ -72,47 +72,7 @@
  */
 #define MAX_BUFFER      60
 
-#ifdef VMS
-/* *PATH - directory locations and filenames for VMS.
- *
- * Non VMS systems see below.
- *
- * IRCD_PREFIX = prefix for all directories,
- * DPATH       = root directory of installation,
- * BINPATH     = directory for binary files,
- * ETCPATH     = directory for configuration files,
- * LOGPATH     = directory for logfiles,
- * MODPATH     = directory for autoloaded modules (disabled in VMS),
- * MSGPATH     = directory for gettext message files (disabled in VMS).
- */
-
-/* IRCD_PREFIX not needed in VMS -larne */
-/*#define IRCD_PREFIX     "IRCD$BASEDIR:"*/
-#define DPATH           "IRCD$BASEDIR:"
-#define BINPATH         "IRCD$BINDIR:"
-#define ETCPATH         "IRCD$CONFDIR:"
-#define LOGPATH         "IRCD$LOGDIR:"
-
-#undef  MODPATH
-#undef  AUTOMODPATH
-#undef  MSGPATH
-
-#define SPATH   BINPATH "IRCD.EXE"              /* server executable */
-#define SLPATH  BINPATH "SERVLINK.EXE"          /* servlink executable */
-#define CPATH   ETCPATH "IRCD.CONF"             /* config file */
-#define KPATH   ETCPATH "KLINE.CONF"            /* kline file */
-#define DLPATH  ETCPATH "DLINE.CONF"            /* dline file */
-#define XPATH	ETCPATH "XLINE.CONF"		/* xline file */
-#define GPATH   LOGPATH "GLINE.LOG"             /* gline logfile */
-#define RPATH   ETCPATH "IRCD.RSA"              /* RSA private key file */
-#define MPATH   ETCPATH "IRCD.MOTD"             /* MOTD filename */
-#define LPATH   LOGPATH "IRCD.LOG"              /* logfile */
-#define PPATH   ETCPATH "IRCD.PID"              /* pid file */
-#define HPATH   ETCPATH "OPERS.TXT"             /* oper help file */
-#define UHPATH  ETCPATH "USERS.TXT"             /* user help file */
-#define OPATH   ETCPATH "OPERS.MOTD"            /* oper MOTD file */
-#define LIPATH  ETCPATH "LINKS.TXT"             /* cached LINKS file */
-#else /* VMS */
+#ifndef VMS
 /* 
  * Directory paths and filenames for UNIX systems.
  * IRCD_PREFIX is set using ./configure --prefix, see INSTALL.
@@ -144,19 +104,64 @@
 #define HPATH  IRCD_PREFIX "/help/opers"
 
 /* files */
-#define SPATH   BINPATH "/ircd"                 /* ircd executable */
-#define SLPATH  BINPATH "/servlink"             /* servlink executable */
-#define CPATH   ETCPATH "/ircd.conf"            /* ircd.conf file */
-#define KPATH   ETCPATH "/kline.conf"           /* kline file */
-#define DLPATH  ETCPATH "/dline.conf"           /* dline file */
-#define XPATH	ETCPATH "/xline.conf"		/* xline file */
-#define GPATH   LOGPATH "/gline.log"            /* gline logfile */
-#define RPATH   ETCPATH "/ircd.rsa"             /* ircd rsa private keyfile */
-#define MPATH   ETCPATH "/ircd.motd"            /* MOTD file */
-#define LPATH   LOGPATH "/ircd.log"             /* ircd logfile */
-#define PPATH   ETCPATH "/ircd.pid"             /* pid file */
-#define OPATH   ETCPATH "/opers.motd"           /* oper MOTD file */
-#define LIPATH  ETCPATH "/links.txt"            /* cached links file */
+#define SPATH    BINPATH "/ircd"                 /* ircd executable */
+#define SLPATH   BINPATH "/servlink"             /* servlink executable */
+#define CPATH    ETCPATH "/ircd.conf"            /* ircd.conf file */
+#define KPATH    ETCPATH "/kline.conf"           /* kline file */
+#define DLPATH   ETCPATH "/dline.conf"           /* dline file */
+#define XPATH	 ETCPATH "/xline.conf"		 /* xline file */
+#define RESVPATH ETCPATH "/resv.conf"            /* resv file */
+#define GPATH    LOGPATH "/gline.log"            /* gline logfile */
+#define RPATH    ETCPATH "/ircd.rsa"             /* ircd rsa private keyfile */
+#define MPATH    ETCPATH "/ircd.motd"            /* MOTD file */
+#define LPATH    LOGPATH "/ircd.log"             /* ircd logfile */
+#define PPATH    ETCPATH "/ircd.pid"             /* pid file */
+#define OPATH    ETCPATH "/opers.motd"           /* oper MOTD file */
+#define LIPATH   ETCPATH "/links.txt"            /* cached links file */
+
+#else /* !VMS */
+
+/* *PATH - directory locations and filenames for VMS.
+ *
+ * Non VMS systems see below.
+ *
+ * IRCD_PREFIX = prefix for all directories,
+ * DPATH       = root directory of installation,
+ * BINPATH     = directory for binary files,
+ * ETCPATH     = directory for configuration files,
+ * LOGPATH     = directory for logfiles,
+ * MODPATH     = directory for autoloaded modules (disabled in VMS),
+ * MSGPATH     = directory for gettext message files (disabled in VMS).
+ */
+
+/* IRCD_PREFIX not needed in VMS -larne */
+/*#define IRCD_PREFIX     "IRCD$BASEDIR:"*/
+#define DPATH           "IRCD$BASEDIR:"
+#define BINPATH         "IRCD$BINDIR:"
+#define ETCPATH         "IRCD$CONFDIR:"
+#define LOGPATH         "IRCD$LOGDIR:"
+
+#undef  MODPATH
+#undef  AUTOMODPATH
+#undef  MSGPATH
+
+#define SPATH    BINPATH "IRCD.EXE"              /* server executable */
+#define SLPATH   BINPATH "SERVLINK.EXE"          /* servlink executable */
+#define CPATH    ETCPATH "IRCD.CONF"             /* config file */
+#define KPATH    ETCPATH "KLINE.CONF"            /* kline file */
+#define DLPATH   ETCPATH "DLINE.CONF"            /* dline file */
+#define XPATH	 ETCPATH "XLINE.CONF"		 /* xline file */
+#define RESVPATH ETCPATH "RESV.CONF"             /* resv file */
+#define GPATH    LOGPATH "GLINE.LOG"             /* gline logfile */
+#define RPATH    ETCPATH "IRCD.RSA"              /* RSA private key file */
+#define MPATH    ETCPATH "IRCD.MOTD"             /* MOTD filename */
+#define LPATH    LOGPATH "IRCD.LOG"              /* logfile */
+#define PPATH    ETCPATH "IRCD.PID"              /* pid file */
+#define HPATH    ETCPATH "OPERS.TXT"             /* oper help file */
+#define UHPATH   ETCPATH "USERS.TXT"             /* user help file */
+#define OPATH    ETCPATH "OPERS.MOTD"            /* oper MOTD file */
+#define LIPATH   ETCPATH "LINKS.TXT"             /* cached LINKS file */
+
 #endif /* !VMS */
 
 /* WANT_GETTEXT - toggle gettext support.

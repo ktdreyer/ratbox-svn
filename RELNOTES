@@ -1,5 +1,11 @@
 -- ircd-ratbox-1.0 RELNOTES 
 
+-- ircd-ratbox-1.0-rc4
+- RESVs are now written to a file and will be kept through a restart.
+  By default they are written to IRCD_PREFIX/etc/resv.conf which 
+  means if you have ircd.conf style resv {}; in this file it must
+  be renamed.
+
 -- ircd-ratbox-1.0-rc3
 - PRIVMSG was not giving ERR_NOSUCHNICK for non-existant chans/users
 - speed improvements to stats k

@@ -1557,9 +1557,9 @@ void	conf_set_resv_channel(void *data)
 	if(IsChannelName((char*) data))
 	{
 		if(resv_reason)
-			create_channel_resv(data, resv_reason, 1);
+			create_resv(data, resv_reason, RESV_CHANNEL);
 		else
-			create_channel_resv(data, "No Reason", 1);
+			create_resv(data, "No Reason", RESV_CHANNEL);
 	}
 	else
 	{
@@ -1578,9 +1578,9 @@ void	conf_set_resv_nick(void *data)
 	if(clean_resv_nick(data))
 	{
 		if(resv_reason)
-			create_nick_resv(data, resv_reason, 1);
+			create_resv(data, resv_reason, RESV_NICK);
 		else
-			create_nick_resv(data, "No Reason", 1);
+			create_resv(data, "No Reason", RESV_NICK);
 	}
 	else
 	{

@@ -36,6 +36,7 @@
 #include "s_conf.h"
 #include "resv.h"
 #include "hash.h"
+#include "s_log.h"
 
 static void mo_resv(struct Client *, struct Client *, int, char **);
 static void mo_unresv(struct Client *, struct Client *, int, char **);
@@ -73,20 +74,20 @@ const char *_version = "$Revision$";
  *      parv[0] = sender prefix
  *      parv[1] = channel/nick to forbid
  */
-
 static void mo_resv(struct Client *client_p, struct Client *source_p,
                     int parc, char *parv[])
 {
-  if(BadPtr(parv[1]))
+  /* XXX - error? */
+  if(BadPtr(parv[1]) || BadPtr(parv[2]))
     return;
 
   if(IsChannelName(parv[1]))
   {
-    struct ResvChannel *resv_p;
+    struct ResvEntry *resv_p;
     
-    resv_p = create_channel_resv(parv[1], parv[2], 0);
+    resv_p = create_resv(parv[1], parv[2], RESV_CHANNEL);
   
-    if(!(resv_p))
+    if(resv_p == NULL)
     {
       sendto_one(source_p,
                  ":%s NOTICE %s :A RESV has already been placed on channel: %s",
@@ -94,20 +95,14 @@ static void mo_resv(struct Client *client_p, struct Client *source_p,
       return;
     }
     
-    sendto_one(source_p,
-               ":%s NOTICE %s :A local RESV has been placed on channel: %s [%s]",
-               me.name, source_p->name, resv_p->name, resv_p->reason);
-	       
-    sendto_realops_flags(UMODE_ALL, L_ALL,
-                         "%s has placed a local RESV on channel: %s [%s]",
-             	         get_oper_name(source_p),
-		         resv_p->name, resv_p->reason);
+    write_confitem(RESV_TYPE, source_p, NULL, resv_p->name, resv_p->reason,
+                   NULL, NULL, 0);
   }
   else if(clean_resv_nick(parv[1]))
   {
-    struct ResvNick *resv_p;
+    struct ResvEntry *resv_p;
 
-    if((strchr(parv[1], '*') || strchr(parv[1], '?')) && !IsAdmin(source_p))
+    if(!IsAdmin(source_p) && (strchr(parv[1], '*') || strchr(parv[1], '?')))
     {
       sendto_one(source_p,
                  ":%s NOTICE %s :You must be an admin to perform a wildcard RESV",
@@ -115,9 +110,9 @@ static void mo_resv(struct Client *client_p, struct Client *source_p,
       return;
     }
 
-    resv_p = create_nick_resv(parv[1], parv[2], 0);
+    resv_p = create_resv(parv[1], parv[2], RESV_NICK);
 
-    if(!(resv_p))
+    if(resv_p == NULL)
     {
       sendto_one(source_p,
                  ":%s NOTICE %s :A RESV has already been placed on nick: %s",
@@ -125,15 +120,8 @@ static void mo_resv(struct Client *client_p, struct Client *source_p,
       return;
     }
 
-    sendto_one(source_p,
-               ":%s NOTICE %s :A local RESV has been placed on nick: %s [%s]",
-	       me.name, source_p->name,
-	       resv_p->name, resv_p->reason);
-
-    sendto_realops_flags(UMODE_ALL, L_ALL,
-                         "%s has placed a local RESV on nick: %s [%s]",
-			 get_oper_name(source_p),
-			 resv_p->name, resv_p->reason);
+    write_confitem(RESV_TYPE, source_p, NULL, resv_p->name, resv_p->reason,
+                    NULL, NULL, 0);
   }			 
   else
     sendto_one(source_p, 
@@ -146,76 +134,113 @@ static void mo_resv(struct Client *client_p, struct Client *source_p,
  *     parv[0] = sender prefix
  *     parv[1] = channel/nick to unforbid
  */
-
 static void mo_unresv(struct Client *client_p, struct Client *source_p,
                       int parc, char *parv[])
 {
-  if(IsChannelName(parv[1]))
-  {
-    struct ResvChannel *resv_p;
-    
-    resv_p = hash_find_resv(parv[1]);
+  FBFILE *in, *out;
+  char buf[BUFSIZE];
+  char buff[BUFSIZE];
+  char temppath[BUFSIZE];
+  const char *filename;
+  mode_t oldumask;
+  char *p;
+  int error_on_write = 0;
+  int found_resv = 0;
 
-    if(resv_p == NULL)
+  /* XXX - error */
+  if(BadPtr(parv[1]))
+    return;
+
+  ircsprintf(temppath, "%s.tmp", ConfigFileEntry.resvfile);
+  filename = get_conf_name(RESV_TYPE);
+
+  if((in = fbopen(filename, "r")) == NULL)
+  {
+    sendto_one(source_p, ":%s NOTICE %s :Cannot open %s",
+               me.name, source_p->name, filename);
+    return;
+  }
+
+  oldumask = umask(0);
+
+  if((out = fbopen(temppath, "w")) == NULL)
+  {
+    sendto_one(source_p, ":%s NOTICE %s :Cannot open %s",
+               me.name, source_p->name, temppath);
+    fbclose(in);
+    umask(oldumask);
+    return;
+  }
+
+  umask(oldumask);
+
+  while(fbgets(buf, sizeof(buf), in))
+  {
+    char *resv_name;
+
+    if(error_on_write)
     {
-      sendto_one(source_p, 
-                 ":%s NOTICE %s :A RESV does not exist for channel: %s",
-	         me.name, source_p->name, parv[1]);
-      return;
+      if(temppath != NULL)
+        (void) unlink(temppath);
+
+      break;
     }
-    else if(resv_p->conf)
+
+    strlcpy(buff, buf, sizeof(buff));
+
+    if((p = strchr(buff, '\n')) != NULL)
+      *p = '\0';
+
+    if((*buff == '\0') || (*buff == '#'))
     {
-      sendto_one(source_p,
-         ":%s NOTICE %s :The RESV for channel: %s is in the config file and must be removed by hand.",
-                 me.name, source_p->name, parv[1]);
-      return;	       
+      error_on_write = (fbputs(buf, out) < 0) ? YES : NO;
+      continue;
     }
-    /* otherwise, delete it */
+
+    if((resv_name = getfield(buff)) == NULL)
+    {
+      error_on_write = (fbputs(buf, out) < 0) ? YES : NO;
+      continue;
+    }
+
+    if(irccmp(resv_name, parv[1]) == 0)
+    {
+      found_resv++;
+    }
     else
     {
-      delete_channel_resv(resv_p);
-
-      sendto_one(source_p,
-                 ":%s NOTICE %s :The local RESV has been removed on channel: %s",
-  	         me.name, source_p->name, parv[1]);
-		 
-      sendto_realops_flags(UMODE_ALL, L_ALL,
-                           "%s has removed the local RESV for channel: %s",
-	  		   get_oper_name(source_p), parv[1]);
-	      
+      error_on_write = (fbputs(buf, out) < 0) ? YES : NO;
     }
   }
-  else if(clean_resv_nick(parv[1]))
+
+  fbclose(in);
+  fbclose(out);
+
+  if(!error_on_write)
   {
-    struct ResvNick *resv_p;
-
-    if((resv_p = find_nick_resv(parv[1])) == NULL)
-    {
-      sendto_one(source_p,
-                 ":%s NOTICE %s :A RESV does not exist for nick: %s",
-		 me.name, source_p->name, parv[1]);
-      return;
-    }
-
-    else if(resv_p->conf)
-    {
-      sendto_one(source_p,
-         ":%s NOTICE %s :The RESV for nick: %s is in the config file and must be removed by hand.",
-	         me.name, source_p->name, parv[1]);
-      return;
-    }
-
-    else
-    {
-      delete_nick_resv(resv_p);
-
-      sendto_one(source_p,
-                 ":%s NOTICE %s :The local RESV has been removed on nick: %s",
-		 me.name, source_p->name, parv[1]);
-
-      sendto_realops_flags(UMODE_ALL, L_ALL,
-                           "%s has removed the local RESV for nick: %s",
-			   get_oper_name(source_p), parv[1]);
-    }
+    (void) rename(temppath, filename);
+    rehash(0);
   }
+  else
+  {
+    sendto_one(source_p,
+               ":%s NOTICE %s :Couldn't write temp resv file, aborted",
+               me.name, source_p->name);
+    return;
+  }
+
+  if(!found_resv)
+  {
+    sendto_one(source_p, ":%s NOTICE %s :No RESV for %s",
+               me.name, source_p->name, parv[1]);
+    return;
+  }
+
+  sendto_one(source_p, ":%s NOTICE %s :RESV for [%s] is removed",
+             me.name, source_p->name, parv[1]);
+  sendto_realops_flags(UMODE_ALL, L_ALL,
+                       "%s has removed the RESV for: [%s]",
+                       get_oper_name(source_p), parv[1]);
+  ilog(L_NOTICE, "%s has removed the RESV for [%s]",
+       get_oper_name(source_p), parv[1]);
 }

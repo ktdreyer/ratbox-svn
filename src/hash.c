@@ -306,7 +306,7 @@ add_to_hostname_hash_table(const char *hostname, struct Client *client_p)
  * add_to_resv_hash_table
  */
 void
-add_to_resv_hash_table(const char *name, struct ResvChannel *resv_p)
+add_to_resv_hash_table(const char *name, struct ResvEntry *resv_p)
 {
   unsigned int hashv;
 
@@ -472,17 +472,17 @@ del_from_hostname_hash_table(const char *hostname, struct Client *client_p)
  * del_from_resv_hash_table()
  */
 void 
-del_from_resv_hash_table(const char *name, struct ResvChannel *rptr)
+del_from_resv_hash_table(const char *name, struct ResvEntry *resv_p)
 {
-  struct ResvChannel *r2ptr;
+  struct ResvEntry *r2ptr;
   dlink_node *ptr;
   dlink_node *tempptr;
   unsigned int hashv;
 
   assert(name != NULL);
-  assert(rptr != NULL);
+  assert(resv_p != NULL);
 
-  if(name == NULL || rptr == NULL)
+  if(name == NULL || resv_p == NULL)
     return;
     
   hashv = hash_resv_channel(name);
@@ -491,7 +491,7 @@ del_from_resv_hash_table(const char *name, struct ResvChannel *rptr)
   {
     r2ptr = ptr->data;
     
-    if(rptr == r2ptr)
+    if(resv_p == r2ptr)
     {
       dlinkDestroy(ptr, &resvTable[hashv].list);
 
@@ -773,10 +773,10 @@ get_or_create_channel(struct Client *client_p, char *chname, int *isnew)
 /*
  * hash_find_resv()
  */
-struct ResvChannel *
+struct ResvEntry *
 hash_find_resv(const char *name)
 {
-  struct ResvChannel *rptr;
+  struct ResvEntry *resv_p;
   dlink_node *ptr;
   unsigned int hashv;
 
@@ -788,11 +788,11 @@ hash_find_resv(const char *name)
 
   DLINK_FOREACH(ptr, resvTable[hashv].list.head)
   {
-    rptr = ptr->data;
+    resv_p = ptr->data;
 
-    if(irccmp(name, rptr->name) == 0)
+    if(irccmp(name, resv_p->name) == 0)
     {
-      return rptr;
+      return resv_p;
     }
   }
 

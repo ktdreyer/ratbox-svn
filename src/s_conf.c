@@ -2005,6 +2005,7 @@ read_conf_files(int cold)
   FBFILE *file;
   const char *filename, *kfilename, *dfilename; /* kline or conf filename */
   const char *xfilename;
+  const char *resvfilename;
 
   conf_fbfile_in = NULL;
 
@@ -2105,6 +2106,25 @@ read_conf_files(int cold)
       fbclose(file);
     }
   }
+
+  resvfilename = get_conf_name(RESV_TYPE);
+  if(irccmp(filename, resvfilename))
+  {
+    if((file = fbopen(resvfilename, "r")) == NULL)
+    {
+      if(cold)
+        ilog(L_ERROR, "Failed reading xline file %s", resvfilename);
+      else
+        sendto_realops_flags(UMODE_ALL, L_ALL,
+                             "Can't open %s file resvs could be missing!",
+                             resvfilename);
+    }
+    else
+    {
+      parse_resv_file(file);
+      fbclose(file);
+    }
+  }
 }
 
 /*
@@ -2190,7 +2210,7 @@ void clear_out_old_conf(void)
 #endif
 
   /* clean out old resvs from the conf */
-  clear_conf_resv();
+  clear_resv();
 
   /* clean out AdminInfo */
   MyFree(AdminInfo.name);
@@ -2298,6 +2318,13 @@ write_confitem(KlineType type, struct Client *source_p, char *user, char *host,
     sendto_one(source_p, ":%s NOTICE %s :Added X-line for [%s] [%s]",
                me.name, source_p->name, host, reason);
   }
+  else if(type == RESV_TYPE)
+  {
+    sendto_realops_flags(UMODE_ALL, L_ALL, "%s added RESV for [%s] [%s]",
+                         get_oper_name(source_p), host, reason);
+    sendto_one(source_p, ":%s NOTICE %s :Added RESV for [%s] [%s]",
+               me.name, source_p->name, host, reason);
+  }
 
   if ((out = fbopen(filename, "a")) == NULL)
   {
@@ -2325,6 +2352,11 @@ write_confitem(KlineType type, struct Client *source_p, char *user, char *host,
     ircsprintf(buffer, "\"%s\",\"%d\",\"%s\",\"%s\",%lu\n",
                host, xtype, reason, get_oper_name(source_p), CurrentTime);
   }
+  else if(type == RESV_TYPE)
+  {
+    ircsprintf(buffer, "\"%s\",\"%s\",\"%s\",%lu\n",
+               host, reason, get_oper_name(source_p), CurrentTime);
+  }
 
   if (fbputs(buffer, out) == -1)
   {
@@ -2351,6 +2383,11 @@ write_confitem(KlineType type, struct Client *source_p, char *user, char *host,
     ilog(L_TRACE, "%s added X-line for [%s] [%s]",
          source_p->name, host, reason);
   }
+  else if(type == RESV_TYPE)
+  {
+    ilog(L_TRACE, "%s added RESV for [%s] [%s]",
+         source_p->name, host, reason);
+  }
 }
 
 /* get_conf_name
@@ -2373,6 +2410,10 @@ get_conf_name(KlineType type)
   else if(type == XLINE_TYPE)
   {
     return(ConfigFileEntry.xlinefile);
+  }
+  else if(type == RESV_TYPE)
+  {
+    return(ConfigFileEntry.resvfile);
   }
 
   return ConfigFileEntry.klinefile;

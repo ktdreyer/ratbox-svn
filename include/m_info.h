@@ -79,6 +79,12 @@ Info MyInformation[] = {
   { "DLPATH", "NONE", 0, "Path to D-line File" },
 #endif /* DLPATH */
 
+#ifdef RESVPATH
+  { "RESVPATH", RESVPATH, 0, "Path to resv file" },
+#else
+  { "RESVPATH", "NONE", 0, "Path to resv file" },
+#endif
+  
   { "HARD_FDLIMIT_", "", HARD_FDLIMIT_, "Maximum Number of File Descriptors Available" },
 
 #ifdef HPATH
