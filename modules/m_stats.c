@@ -30,10 +30,10 @@
 #include "irc_string.h"  /* strncpy_irc */
 #include "ircd.h"        /* me */
 #include "listener.h"    /* show_ports */
+#include "s_gline.h"
 #include "ircd_handler.h"
 #include "msg.h"         /* Message */
 #include "hostmask.h"  /* report_mtrie_conf_links */
-#include "s_gline.h"     /* report_glines */
 #include "numeric.h"     /* ERR_xxx */
 #include "scache.h"      /* list_scache */
 #include "send.h"        /* sendto_one */
@@ -380,7 +380,75 @@ static void stats_fd(struct Client *client_p)
 static void stats_glines(struct Client *client_p)
 {
   if(ConfigFileEntry.glines)
-    report_glines(client_p);
+  {
+    dlink_node *pending_node;
+    dlink_node *gline_node;
+    struct gline_pending *glp_ptr;
+    struct ConfItem *kill_ptr;
+    char timebuffer[MAX_DATE_STRING];
+    struct tm *tmptr;
+    char *host;
+    char *name;
+    char *reason;
+
+    if (dlink_list_length(&pending_glines) > 0)
+      sendto_one(client_p, ":%s NOTICE %s :Pending G-lines",
+                 me.name, client_p->name);
+
+    for(pending_node = pending_glines.head; pending_node; 
+        pending_node = pending_node->next)
+    {
+      glp_ptr = pending_node->data;
+      tmptr = localtime(&glp_ptr->time_request1);
+      strftime(timebuffer, MAX_DATE_STRING, "%Y/%m/%d %H:%M:%S", tmptr);
+
+      sendto_one(client_p,
+         ":%s NOTICE %s :1) %s!%s@%s on %s requested gline at %s for %s@%s [%s]",
+	         me.name, client_p->name, glp_ptr->oper_nick1,
+		 glp_ptr->oper_user1, glp_ptr->oper_host1,
+		 glp_ptr->oper_server1, timebuffer,
+		 glp_ptr->user, glp_ptr->host, glp_ptr->reason1);
+
+      if(glp_ptr->oper_nick2[0])
+      {
+        tmptr = localtime(&glp_ptr->time_request2);
+	strftime(timebuffer, MAX_DATE_STRING, "%Y/%m/%d %H:%M:%S", tmptr);
+	sendto_one(client_p,
+	    ":%s NOTICE %s :2) %s!%s@%s on %s requested gline at %s for %s@%s [%s]",
+	           me.name, client_p->name, glp_ptr->oper_nick2,
+		   glp_ptr->oper_user2, glp_ptr->oper_host2,
+		   glp_ptr->oper_server2, timebuffer,
+		   glp_ptr->user, glp_ptr->host, glp_ptr->reason2);
+      }
+    }
+
+    if (dlink_list_length(&pending_glines) > 0)
+      sendto_one(client_p, ":%s NOTICE %s :End of Pending G-lines",
+                 me.name, client_p->name);
+
+    for(gline_node = glines.head; gline_node; gline_node = gline_node->next)
+    {
+      kill_ptr = gline_node->data;
+
+      if(kill_ptr->host)
+        host = kill_ptr->host;
+      else
+        host = "*";
+
+      if(kill_ptr->name)
+        name = kill_ptr->name;
+      else
+        name = "*";
+
+      if(kill_ptr->passwd)
+        reason = kill_ptr->passwd;
+      else
+        reason = "No Reason";
+
+      sendto_one(client_p, form_str(RPL_STATSKLINE), me.name,
+                 client_p->name, 'G', host, name, reason);
+    }
+  }
   else
     sendto_one(client_p, ":%s NOTICE %s :This server does not support G-Lines",
                me.name, client_p->name); 
@@ -395,7 +463,8 @@ static void stats_auth(struct Client *client_p)
 {
   /* Oper only, if unopered, return ERR_NOPRIVS */
   if((ConfigFileEntry.stats_i_oper_only == 2) && !IsOper(client_p))
-    sendto_one(client_p, form_str(ERR_NOPRIVILEGES),me.name,client_p->name);
+    sendto_one(client_p, form_str(ERR_NOPRIVILEGES),
+               me.name, client_p->name);
 
   /* If unopered, Only return matching auth blocks */
   else if((ConfigFileEntry.stats_i_oper_only == 1) && !IsOper(client_p))
@@ -410,7 +479,8 @@ static void stats_tklines(struct Client *client_p)
 {
   /* Oper only, if unopered, return ERR_NOPRIVS */
   if((ConfigFileEntry.stats_k_oper_only == 2) && !IsOper(client_p))
-    sendto_one(client_p, form_str(ERR_NOPRIVILEGES),me.name,client_p->name);
+    sendto_one(client_p, form_str(ERR_NOPRIVILEGES),
+               me.name, client_p->name);
 
   /* If unopered, Only return matching klines */
   else if((ConfigFileEntry.stats_k_oper_only == 1) && !IsOper(client_p))
@@ -425,7 +495,8 @@ static void stats_klines(struct Client *client_p)
 {
   /* Oper only, if unopered, return ERR_NOPRIVS */
   if((ConfigFileEntry.stats_k_oper_only == 2) && !IsOper(client_p))
-    sendto_one(client_p, form_str(ERR_NOPRIVILEGES),me.name,client_p->name);
+    sendto_one(client_p, form_str(ERR_NOPRIVILEGES),
+               me.name, client_p->name);
 
   /* If unopered, Only return matching klines */
   else if((ConfigFileEntry.stats_k_oper_only == 1) && !IsOper(client_p))
@@ -534,9 +605,8 @@ static void stats_ziplinks(struct Client *client_p)
       sent_data++;
     }
   }
-  sendto_one(client_p, ":%s %d %s :%u ziplink%s",
-             me.name, RPL_STATSDEBUG, client_p->name, sent_data,
-             (sent_data==1)?"":"s");
+  sendto_one(client_p, ":%s %d %s :%u ziplink(s)",
+             me.name, RPL_STATSDEBUG, client_p->name, sent_data);
 }
 
 static void stats_servlinks(struct Client *client_p)

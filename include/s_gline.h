@@ -37,7 +37,6 @@ struct ConfItem;
 
 extern struct ConfItem* find_gkill(struct Client* client, char *);
 extern struct ConfItem* find_is_glined(const char* host, const char* name);
-extern void   report_glines(struct Client *); 
 extern int    remove_gline_match(const char *user, const char *host);
 extern void   cleanup_glines(void *notused);
 extern void   add_gline(struct ConfItem *);
@@ -72,5 +71,6 @@ typedef struct gline_pending
 #define CLEANUP_GLINES_TIME  300
 
 dlink_list pending_glines;
+extern dlink_list glines;
 
 #endif
