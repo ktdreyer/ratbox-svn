@@ -23,6 +23,8 @@
 
 #include <assert.h>
 
+#include "setup.h"
+
 #ifdef USE_GETTEXT
 #include <libintl.h>
 #endif

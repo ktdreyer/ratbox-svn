@@ -34,6 +34,8 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+#include "setup.h"
+
 #if defined(HAVE_GETOPT_H)
 #include <getopt.h>
 #endif /* HAVE_GETOPT_H */
@@ -77,7 +79,6 @@
 #include "s_stats.h"
 #include "scache.h"
 #include "send.h"
-#include "setup.h"
 #include "whowas.h"
 #include "modules.h"
 #include "memory.h"
