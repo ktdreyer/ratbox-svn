@@ -1,3 +1,8 @@
+*** 20010105_19 by toot
+don't show the local user count if it's just lies, cause of shide
+skip it instead
+
+
 *** 20010105_18 by toot
 it's okay to show the Total server count with shide on
 
