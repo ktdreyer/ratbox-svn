@@ -1,3 +1,16 @@
+leeh        2003/06/25 08:41:21 UTC	(20030625_1)
+
+  Modified files:
+    modules              m_names.c m_who.c 
+  Log:
+  - wrapped the rate limiting checks in !IsOper()
+  
+  Revision  Changes    Path
+  1.71      +10 -7     ircd-ratbox/modules/m_names.c
+  1.96      +16 -22    ircd-ratbox/modules/m_who.c
+
+
+
 leeh        2003/06/25 08:37:08 UTC	(20030625_0)
 
   Modified files:
