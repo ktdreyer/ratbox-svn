@@ -53,7 +53,7 @@
 #include "resv.h"  /* report_resv */
 
 #include <string.h>
-
+#include <time.h>
 static void m_stats(struct Client*, struct Client*, int, char**);
 static void mo_stats(struct Client*, struct Client*, int, char**);
 static void ms_stats(struct Client*, struct Client*, int, char**);
