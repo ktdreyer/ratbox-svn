@@ -1,3 +1,19 @@
+leeh        2004/01/20 06:05:20 EST	(20040120_1)
+
+  Modified files:
+    src                  Makefile.in lexer.l parser.y 
+  Log:
+  - patch via Hwy:
+    - Always rebuild the binary when 'make' is run.
+    - Added two missing headers that caused compilation to fail on FreeBSD.
+  
+  Revision  Changes    Path
+  1.18      +3 -0      rserv/src/Makefile.in
+  1.2       +1 -0      rserv/src/lexer.l
+  1.2       +1 -0      rserv/src/parser.y
+
+
+
 leeh        2004/01/20 06:02:28 EST	(20040120_0)
 
   Modified files:
