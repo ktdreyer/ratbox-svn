@@ -1,3 +1,15 @@
+leeh        2004/04/21 10:19:27 EDT	(20040421_2)
+
+  Modified files:
+    modules              m_who.c 
+  Log:
+  - *violently beats androsyn with a \n after an '}'*
+  
+  Revision  Changes    Path
+  1.112     +3 -2      ircd-ratbox/modules/m_who.c
+
+
+
 leeh        2004/04/21 10:16:09 EDT	(20040421_1)
 
   Modified files:
