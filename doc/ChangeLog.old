@@ -1,3 +1,15 @@
+androsyn    2002/05/24 21:55:22 EDT	(20020525_9)
+
+  Modified files:
+    src                  ircd_lexer.l 
+  Log:
+  Replace index() with strchr()
+  
+  Revision  Changes    Path
+  1.139     +3 -3      ircd-hybrid-7/src/ircd_lexer.l
+
+
+
 androsyn    2002/05/24 21:42:56 EDT	(20020525_8)
 
   Modified files:
