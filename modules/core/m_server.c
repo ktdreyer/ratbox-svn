@@ -84,7 +84,6 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   char*            host;
   struct Client*   acptr;
   struct Client*   bcptr;
-  struct ConfItem *aconf;
   int              hop;
 
   if ( (host = parse_server_args(parv, parc, info, &hop)) == NULL )
@@ -92,43 +91,47 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       sendto_one(cptr,"ERROR :No servername");
       return 0;
     }
+  /* 
+   * Reject a direct nonTS server connection if we're TS_ONLY -orabidoo
+   */
+  if (!DoesTS(cptr))
+    {
+      sendto_realops_flags(FLAGS_ALL,"Link %s dropped, non-TS server",
+			   get_client_name(cptr, TRUE));
+      return exit_client(cptr, cptr, cptr, "Non-TS server");
+    }
 
   if (bogus_host(host))
     return exit_client(cptr, cptr, cptr, "Bogus server name");
 
-  /* 
-   * *WHEN* can it be that "cptr != sptr" ????? --msa
-   * When SERVER command (like now) has prefix. -avalon
-   * 
-   */
-  if ((aconf = find_conf_by_name(host, CONF_NOCONNECT_SERVER)) == NULL)
+  /* Now we just have to call check_server and everything should be
+   * check for us... -A1kmm. */
+  switch (check_server(host, cptr))
     {
+     case -1:
       if (ConfigFileEntry.warn_no_nline)
-	sendto_realops_flags(FLAGS_ALL,"Link %s Server %s dropped, no "
-	             "connect block.",
-			     get_client_name(cptr, TRUE), host);
-      return exit_client(cptr, cptr, cptr, "No connect block.");
+        {
+         sendto_realops_flags(FLAGS_ALL,
+           "Unauthorised server connection attempt from %s: No entry for "
+           "servername %s.", get_client_name(cptr, TRUE));
+        }
+      return exit_client(cptr, cptr, cptr,
+                "Invalid servername/host/password.");
+     case -2:
+      sendto_realops_flags(FLAGS_ALL,
+        "Unauthorised server connection attempt from %s: Bad password "
+        "for server %s.", get_client_name(cptr, TRUE));
+      return exit_client(cptr, cptr, cptr,
+                 "Invalid servername/host/password.");
+      break;
+     case -3:
+      sendto_realops_flags(FLAGS_ALL,
+        "Unauthorised server connection attempt from %s: Invalid host "
+        "for server %s.", get_client_name(cptr, TRUE));
+      return exit_client(cptr, cptr, cptr,
+                 "Invalid servername/host/password.");
     }
-
-  /* XXX B0RKED leave until beta-2 */
-#if 0
-  /* We have to do this to prevent recently connected servers being
-   * dropped by kiddies below by a dormat unregistered connection...
-   * Also stops probes to find out which servers are connected.
-   * -A1kmm
-   */
-  if ( !match(aconf->host, cptr->host) &&
-       memcmp((void*)&aconf->ipnum, (void*)&cptr->localClient->ip,
-              sizeof(struct in_addr))
-     )
-   {
-    sendto_realops_flags(FLAGS_ALL, "Link %s Server %s dropped, invalid "
-                 "hostname.",
-                 get_client_name(cptr, TRUE), host);
-    return exit_client(cptr, cptr, cptr, "Invalid host.");
-   }
-#endif
-  
+    
   if ((acptr = find_server(host)))
     {
       /*
@@ -171,41 +174,20 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       exit_client(bcptr, bcptr, &me, "Server Exists");
     }
 
-/* We shouldn't have a problem here, we call check_host above... -A1kmm */
-#if 0
-  if ( strchr(host,'.') == NULL )
+  if (ConfigFileEntry.hub)
     {
-      /*
-       * Server trying to use the same name as a person. Would
-       * cause a fair bit of confusion. Enough to make it hellish
-       * for a while and servers to send stuff to the wrong place.
-       */
-      sendto_one(cptr,"ERROR :Nickname %s already exists!", host);
-      sendto_realops_flags(FLAGS_ALL,
-			   "Link %s cancelled: Server/nick collision on %s",
-			   get_client_name(cptr,FALSE), host);
-      log(L_NOTICE, "Link %s cancelled: Server/nick collision on %s",
-          get_client_name(cptr,FALSE), host);
-      return exit_client(cptr, cptr, cptr, "Nick as Server");
-    }
-#endif
-
-  if (!IsUnknown(cptr) && !IsHandshake(cptr))
-    return 0;
-  /*
-   * A local link that is still in undefined state wants
-   * to be a SERVER, or we have gotten here as a result of a connect
-   * Check if this is allowed and change status accordingly...
-   */
-
-  /* 
-   * Reject a direct nonTS server connection if we're TS_ONLY -orabidoo
-   */
-  if (!DoesTS(cptr))
-    {
-      sendto_realops_flags(FLAGS_ALL,"Link %s dropped, non-TS server",
-			   get_client_name(cptr, TRUE));
-      return exit_client(cptr, cptr, cptr, "Non-TS server");
+      if (IsCapable(cptr, CAP_LL) && IsCapable(cptr,CAP_HUB))
+        ClearCap(cptr,CAP_LL);
+      else
+        {
+         cptr->localClient->serverMask = nextFreeMask();
+          if (!cptr->localClient->serverMask)
+            {
+             sendto_realops_flags(FLAGS_ALL, "serverMask is full!");
+             /* try and negotiate a non LL connect */
+             ClearCap(cptr,CAP_LL);
+            }
+        }
     }
 
   /*
@@ -216,14 +198,8 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   strncpy_irc(cptr->info, info[0] ? info : me.name, REALLEN);
   cptr->hopcount = hop;
 
-  if (check_server(cptr))
-    return server_estab(cptr);
-
-  ++ServerStats->is_ref;
-  sendto_realops_flags(FLAGS_ALL,
-      "Unauthorised attempt from %s to connect as server %s.",
-		       get_client_host(cptr), cptr->name);
-  return exit_client(cptr, cptr, cptr, "No connect block.");
+  /* if (check_server(cptr)) */
+  return server_estab(cptr);
 }
 
 /*
@@ -266,7 +242,11 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
        * Rather than KILL the link which introduced it, KILL the
        * youngest of the two links. -avalon
        */
-
+      /* It is behind a host-masked server. Completely ignore the
+       * server message(don't propagate or we will delink from whoever
+       * we propagate to). -A1kmm */
+      if (irccmp(acptr->name, host) && acptr->from==cptr)
+        return 0;
       if (acptr->from == NULL)
 	{
 	  sendto_realops_flags(FLAGS_ALL,

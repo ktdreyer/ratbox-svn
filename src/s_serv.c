@@ -96,7 +96,7 @@ struct Capability captab[] = {
   { 0,   0 }
 };
 
-static unsigned long nextFreeMask();
+unsigned long nextFreeMask();
 static unsigned long freeMask;
 static void server_burst(struct Client *cptr);
 static void burst_all(struct Client *cptr);
@@ -343,6 +343,57 @@ finish:
       TRY_CONNECTIONS_TIME, 0);
 }
 
+int check_server(const char *name, struct Client* cptr)
+{
+  struct ConfItem *aconf, *cline=NULL, *nline=NULL;
+  int i = -1, h = 0;
+  assert(0 != cptr);
+  if (!(cptr->localClient->passwd))
+    return -2;
+  for (aconf = ConfigItemList; aconf; aconf = aconf->next)
+    {
+     if (!(aconf->status & CONF_CONNECT_SERVER ||
+           aconf->status & CONF_NOCONNECT_SERVER ||
+           aconf->status & CONF_HUB ||
+           aconf->status & CONF_LEAF)
+        )
+       continue;
+     if (!match(name, aconf->name))
+       continue;
+     if (aconf->status & CONF_HUB || aconf->status & CONF_LEAF)
+       {
+        if (aconf->status & CONF_HUB)
+          h++;
+        attach_conf(cptr, aconf);
+        continue;
+       }
+     i = -3;
+     if (!(match(aconf->host, cptr->host) ||
+         cptr->localClient->ip.s_addr == aconf->ipnum.s_addr))
+       continue;
+     if (aconf->status & CONF_NOCONNECT_SERVER &&
+         strcmp(aconf->passwd, cptr->localClient->passwd))
+       return -2;
+     if (aconf->status & CONF_CONNECT_SERVER)
+       cline = aconf;
+     if (aconf->status & CONF_NOCONNECT_SERVER)
+       nline = aconf;
+     if (cline && nline)
+       break;
+    }
+  if (!cline || !nline)
+    return i;
+  attach_conf(cptr, cline);
+  attach_conf(cptr, nline);
+  if (!(nline->flags & CONF_FLAGS_LAZY_LINK))
+    ClearCap(cptr, CAP_LL);
+  if (!h)
+    ClearCap(cptr, CAP_HUB);
+  if (cline->ipnum.s_addr == INADDR_NONE)
+    cline->ipnum.s_addr = cptr->localClient->ip.s_addr;
+  return 0;
+}
+
 /*
  * check_server - check access for a server given its name 
  * (passed in cptr struct). Must check for all C/N lines which have a 
@@ -353,6 +404,7 @@ finish:
  *  0 = Access denied
  *  1 = Success
  */
+#if 0
 int check_server(struct Client* cptr)
 {
   dlink_list *lp;
@@ -486,9 +538,9 @@ int check_server(struct Client* cptr)
     c_conf->ipnum.s_addr = cptr->localClient->ip.s_addr;
 
   Debug((DEBUG_DNS,"sv_cl: access ok: [%s]", cptr->host));
-
   return 1;
 }
+#endif
 
 /*
  * send_capabilities
@@ -1342,7 +1394,7 @@ void initServerMask(void)
  * output	- unsigned long next unused mask for use in LL
  * side effects	-
  */
-static unsigned long nextFreeMask()
+unsigned long nextFreeMask()
 {
   int i;
   unsigned long mask;

@@ -114,7 +114,7 @@ extern int MaxConnectionCount; /* GLOBAL - highest number of connections */
 #define HUNTED_PASS     1       /* if message passed onwards successfully */
 
 
-extern int         check_server(struct Client* server);
+extern int         check_server(const char* name, struct Client* server);
 extern int         hunt_server(struct Client* cptr, struct Client* sptr,
                                char* command, int server, 
                                int parc, char** parv);
@@ -130,6 +130,7 @@ extern void        initServerMask(void);
 extern void        burst_channel(struct Client *cptr, struct Channel *chptr);
 extern void	   sendnick_TS(struct Client*, struct Client* );
 extern int         serv_connect(struct ConfItem *, struct Client *);
+extern unsigned long nextFreeMask(void);
 
 extern struct Client *uplink; /* NON NULL if leaf and is this servers uplink */
 

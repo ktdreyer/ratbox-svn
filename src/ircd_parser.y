@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <string.h>
+#include "ircd.h"
 #include "tools.h"
 #include "s_conf.h"
 #include "s_log.h"
