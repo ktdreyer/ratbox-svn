@@ -78,25 +78,36 @@ static const char *last_event_ran = NULL;
 void
 eventAdd(const char *name, EVH * func, void *arg, time_t when, int weight)
 {
-  struct ev_entry *event = (struct ev_entry *)MyMalloc(sizeof(struct ev_entry));
-  struct ev_entry **E;
-  event->func = func;
-  event->arg = arg;
-  event->name = name;
-  event->when = CurrentTime + when;
-  event->weight = weight;
-  event->id = run_id;
-#if SQUID
-  debug(41, 7) ("eventAdd: Adding '%s', in %f seconds\n", name, when);
-#endif
+  struct ev_entry *new_event = (struct ev_entry *)MyMalloc(sizeof(struct ev_entry));
+  struct ev_entry *cur_event;
+  struct ev_entry *last_event=NULL;
+
+  new_event->func = func;
+  new_event->arg = arg;
+  new_event->name = name;
+  new_event->when = CurrentTime + when;
+  new_event->weight = weight;
+  new_event->id = run_id;
+
   /* Insert after the last event with the same or earlier time */
-  for (E = &tasks; *E; E = &(*E)->next)
+
+  for (cur_event = tasks; cur_event; cur_event = cur_event->next)
     {
-      if ((*E)->when > event->when)
-        break;
+      if (cur_event->when > new_event->when)
+        {
+          new_event->next = last_event->next;
+          last_event->next = new_event;
+          return;
+        }
+      last_event = cur_event;
     }
-  event->next = *E;
-  *E = event;
+  if (last_event == NULL)
+    tasks = new_event;
+  else
+    {
+      new_event->next = last_event->next;
+      last_event->next = new_event;
+    }
 }
 
 /* same as eventAdd but adds a random offset within +-1/3 of delta_ish */
@@ -118,21 +129,28 @@ eventAddIsh(const char *name, EVH * func, void *arg, time_t delta_ish, int weigh
 void
 eventDelete(EVH * func, void *arg)
 {
-  struct ev_entry **E;
   struct ev_entry *event;
-  for (E = &tasks; (event = *E) != NULL; E = &(*E)->next)
+  struct ev_entry *last_event = NULL;
+
+  for (event = tasks; event; event = event->next)
     {
-      if (event->func != func)
-        continue;
-      if (event->arg != arg)
-        continue;
-      *E = event->next;
-      MyFree(event);
-      return;
+      if ((event->func == func) && (event->arg == arg))
+        {
+          if (last_event != NULL)
+            {
+              last_event->next = event->next;
+              MyFree(event);
+              return;          
+            }
+          else
+            {
+              tasks = event->next;
+              MyFree(event);
+              return;
+            }
+        }
+      last_event = event;
     }
-#ifdef SQUID
-  debug_trap("eventDelete: event not found");
-#endif
 }
 
 void
@@ -147,9 +165,7 @@ eventRun(void)
   if (tasks->when > CurrentTime)
     return;
   run_id++;
-#ifdef SQUID
-  debug(41, 5) ("eventRun: RUN ID %d\n", run_id);
-#endif
+
   while ((event = tasks))
     {
       int valid = 1;
@@ -169,10 +185,6 @@ eventRun(void)
           weight += event->weight;
           /* XXX assumes ->name is static memory! */
           last_event_ran = event->name;
-#ifdef SQUID
-          debug(41, 5) ("eventRun: Running '%s', id %d\n",
-                event->name, event->id);
-#endif
           func(arg);
         }
       MyFree(event);
@@ -192,29 +204,6 @@ eventInit(void)
 {
  
 }
-
-#if SQUID
-static void
-eventDump(StoreEntry * sentry)
-{
-  struct ev_entry *e = tasks;
-  if (last_event_ran)
-    storeAppendPrintf(sentry, "Last event to run: %s\n\n", last_event_ran);
-  storeAppendPrintf(sentry, "%s\t%s\t%s\t%s\n",
-      "Operation",
-      "Next Execution",
-      "Weight",
-      "Callback Valid?");
-  while (e != NULL)
-    {
-      storeAppendPrintf(sentry, "%s\t%f seconds\t%d\t%s\n",
-                        e->name, e->when - CurrentTime, e->weight,
-                        e->arg ? cbdataValid(e->arg) ? "yes" : "no" : "N/A");
-
-      e = e->next;
-    }
-}
-#endif
 
 void
 eventFreeMemory(void)
@@ -240,7 +229,6 @@ eventFind(EVH * func, void *arg)
   return 0;
 }
 
-#ifndef SQUID
 int
 show_events(struct Client *source_p)
 {
@@ -265,7 +253,6 @@ show_events(struct Client *source_p)
   sendto_one(source_p,":%s NOTICE %s :*** Finished",me.name,source_p->name);
   return 0;
 }
-#endif
 
 /* void set_back_events(time_t by)
  * Input: Time to set back events by.
@@ -275,10 +262,10 @@ show_events(struct Client *source_p)
 void
 set_back_events(time_t by)
 {
- struct ev_entry *e;
- for (e = tasks; e; e=e->next)
-  if (e->when > by)
-   e->when -= by;
-  else
-   e->when = 0;
+  struct ev_entry *e;
+  for (e = tasks; e; e=e->next)
+    if (e->when > by)
+      e->when -= by;
+    else
+      e->when = 0;
 }
