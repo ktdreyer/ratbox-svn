@@ -174,7 +174,7 @@ static void mo_trace(struct Client *client_p, struct Client *source_p,
           sendto_one(source_p, form_str(RPL_TRACEOPERATOR),
                      me.name, parv[0], class_name,
                      name, 
-                     IsOper(source_p)?ipaddr:(IsIPHidden(target_p)?"127.0.0.1":ipaddr),
+                     MyOper(source_p)?ipaddr:(IsIPHidden(target_p)?"127.0.0.1":ipaddr),
                      now - target_p->lasttime,
                      (target_p->user)?(now - target_p->user->last):0);
         }
@@ -183,7 +183,7 @@ static void mo_trace(struct Client *client_p, struct Client *source_p,
           sendto_one(source_p,form_str(RPL_TRACEUSER),
                      me.name, parv[0], class_name,
                      name, 
-                     IsOper(source_p)?ipaddr:(IsIPHidden(target_p)?"127.0.0.1":ipaddr),
+                     MyOper(source_p)?ipaddr:(IsIPHidden(target_p)?"127.0.0.1":ipaddr),
                      now - target_p->lasttime,
                      (target_p->user)?(now - target_p->user->last):0);
         }
@@ -373,14 +373,14 @@ static int report_this_status(struct Client *source_p, struct Client *target_p,
 		       form_str(RPL_TRACEOPERATOR),
 		       me.name,
 		       source_p->name, class_name,
-		       name, IsOper(source_p)?ip:(IsIPHidden(target_p)?"127.0.0.1":ip),
+		       name, MyOper(source_p)?ip:(IsIPHidden(target_p)?"127.0.0.1":ip),
 		       now - target_p->lasttime,
 		       (target_p->user)?(now - target_p->user->last):0);
 	  else
 	    sendto_one(source_p,form_str(RPL_TRACEUSER),
 		       me.name, source_p->name, class_name,
 		       name,
-		       IsOper(source_p)?ip:(IsIPHidden(target_p)?"127.0.0.1":ip),
+		       MyOper(source_p)?ip:(IsIPHidden(target_p)?"127.0.0.1":ip),
 		       now - target_p->lasttime,
 		       (target_p->user)?(now - target_p->user->last):0);
 	  cnt++;
