@@ -275,8 +275,14 @@ extern const char* form_str(int);
 
 #define ERR_USERNOTONSERV    504
 
+#define ERR_HELPNOTFOUND     524
+
 #define RPL_MODLIST          702
 #define RPL_ENDOFMODLIST     703
+
+#define RPL_HELPSTART        704
+#define RPL_HELPTXT          705
+#define RPL_ENDOFHELP        706
 
 #define ERR_LAST_ERR_MSG     999
 

@@ -821,6 +821,11 @@ msgstr	":%s 503 %s :Mensaje no puede ser entregado a %s"
 msgid	":%s 504 %s %s :User is not on this server"
 msgstr	":%s 504 %s %s :Usuario no esta en este servidor"
 
+#: ../src/messages.tab:555
+#, c-format
+msgid  ":%s 524 %s %s :Help not found"
+msgstr  ""
+
 #: ../src/messages.tab:702
 #, c-format
 msgid   ":%s 702 %s %s 0x%x %s"
@@ -829,6 +834,21 @@ msgstr  ""
 #: ../src/messages.tab:703
 #, c-format
 msgid   ":%s 703 %s :End of /MODLIST."
+msgstr  ""
+
+#: ../src/messages.tab:735
+#, c-format
+msgid   ":%s 704 %s %s :%s"
+msgstr  ""
+
+#: ../src/messages.tab:736
+#, c-format
+msgid   ":%s 705 %s %s :%s"
+msgstr  ""
+
+#: ../src/messages.tab:737
+#, c-format
+msgid   ":%s 706 %s %s :End of /HELP."
 msgstr  ""
 
 #: ../../src/messages.tab:536
