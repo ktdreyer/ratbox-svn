@@ -1,3 +1,16 @@
+leeh        2002/04/30 13:43:20 EDT	(20020430_8)
+
+  Modified files:
+    src                  channel_mode.c 
+  Log:
+  - when +eI are disabled, send RPL_ENDOF(EXCEPT|INVITE)LIST so a client
+    doesnt stall.
+  
+  Revision  Changes    Path
+  7.34      +22 -0     ircd-hybrid-7/src/channel_mode.c
+
+
+
 leeh        2002/04/30 13:21:25 EDT	(20020430_7)
 
   Modified files:
